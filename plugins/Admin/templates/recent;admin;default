@@ -52,11 +52,11 @@ __template__
 			%]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[%
 			comm.cid %]</A></td>
 		<td align="left"><A HREF="[% constants.rootdir
-			%]/users.pl?op=userinfo&amp;userfield_flag=ipid&amp;userfield=[%
+			%]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[%
 			comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</A></td>
 		<td align="left"> &nbsp; [% comm.nickname | strip_literal %] (<A HREF="[%
 			constants.rootdir
-			%]/users.pl?op=userinfo&amp;userfield_flag=uid&amp;&userfield=[%
+			%]/users.pl?op=userinfo&amp;uid=[%
 			comm.uid | strip_attribute %]">[% comm.uid %]</A>) &nbsp; </td>
 		<td align="right">[% comm.score %]</td>
 		<td align="right">[% comm.sum_val %]</td>
