@@ -3826,7 +3826,8 @@ sub checkForOpenProxy {
 	local $_proxy_port = undef;
 	sub _cfop_callback {
 		my($data, $response, $protocol) = @_;
-		if ($response->is_success()) {
+		if ($response->is_success()
+			&& $response->content() =~ /\bok\b/) {
 			# We got one success;  the IP is a proxy;
 			# we can quit listening on any of the
 			# other ports that may have connected,
