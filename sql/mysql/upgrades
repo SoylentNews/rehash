@@ -1503,7 +1503,7 @@ ALTER TABLE stories ADD body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL, ADD w
 # If your main DB is running MySQL 4.x, you can use this line.
 UPDATE stories,story_text SET body_length=length(bodytext) WHERE stories.sid=story_text.sid;
 # If your main DB is running MySQL 3.x, you must use these lines.
-SELECT CONCAT("UPDATE stories SET body_length=", length(bodytext), " WHERE sid='", sid, "';") INTO OUTFILE "/tmp/storieslength" FROM story_text;
+SELECT CONCAT("UPDATE stories SET body_length=", length(bodytext), " WHERE sid='", sid, "';") INTO OUTFILE "/tmp/storieslength" FROM story_text WHERE length(bodytext) > 0;
 SOURCE "/tmp/storieslength";
 # And now that that's done... honestly, something should go here to set word_count
 
