@@ -2447,3 +2447,5 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', '
 
 # End of T_2_5_0_16, Start of T_2_5_0_17 - 2004/07/26
 
+INSERT INTO vars (name, value, description) VALUES ('submission_default_skid', '0', 'Skid you would like selected by default for submissions, 0 or empty string for none');
+INSERT INTO vars (name, value, description) VALUES ('submission_force_default', '0', 'Force selection of default skid for all submissions, takes away menu of options');
