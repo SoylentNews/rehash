@@ -476,9 +476,9 @@ EOT
 
   	print <<EOT;
 	<P><B>Password</B> Enter new passwd twice to change it.
-		(must be 6-20 chars long)<BR>
-		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">
-		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20" MAXLENGTH="20"><P>
+		(must be 6-12 chars long)<BR>
+		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="12" MAXLENGTH="12">
+		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="12" MAXLENGTH="12"><P>
 
 </TD></TR></TABLE><P>
 
@@ -989,8 +989,8 @@ EOT3
 	<P><B>Nick:</B> (maximum 20 characters long)<BR>
 	<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="$I{F}{unickname}"><BR>
 
-	<B>Password:</B> (6-20 characters long)<BR>
-	<INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20"><BR>
+	<B>Password:</B> (6-12 characters long)<BR>
+	<INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="12" MAXLENGTH="12"><BR>
 
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="userlogin">
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="mailpasswd">
