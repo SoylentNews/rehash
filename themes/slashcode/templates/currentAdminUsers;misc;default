@@ -15,7 +15,7 @@ en_US
 __name__
 currentAdminUsers
 __template__
-<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
+<table border="0" cellpadding="2" cellspacing="0">
 
 [% FOREACH author = ids %]
 	[% id         = author.0;
@@ -24,19 +24,24 @@ __template__
 	   uid        = author.3;
 	%]
 
-	<TR><TD BGCOLOR="[% user.bg.3 %]">
-		<A HREF="[% constants.rootdir %]/~[% id | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" 
-		SIZE="2"><B>[% id %]</B></FONT></A>
-	</TD><TD BGCOLOR="[% user.bg.2 %]">
-		<FONT COLOR="[% user.fg.1 %]" SIZE="2">[% lastsecs %]
+	<tr><td bgcolor="[% user.bg.3 %]">
+		<a href="[% constants.rootdir %]/~[% id | fixparam %]/"><font color="[% user.fg.3 %]" 
+		size="2"><B>[% id %]</B></font></a>
+	</td><td bgcolor="[% user.bg.2 %]">
+		<font color="[% user.fg.1 %]" size="2">[% lastsecs %]
 		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;[% lasttitle %]
 		[% END %]
-		</FONT>&nbsp;
-	</TD></TR>
+		</font>&nbsp;
+	</td></tr>
 
 [% END %]
-
-</TABLE>
+	[% IF constants.cur_performance_stats_disp %]
+	<tr>
+	<td bgcolor="[% user.bg.3 %]" valign="top"><font color="[% user.fg.3 %]" size="2">Performance</font></td>
+	<td bgcolor="[% user.bg.2 %]" valign="top">[% PROCESS performance_stats %]</td>
+	</tr>
+	[% END %]
+</table>
 
 __seclev__
 10000
