@@ -1726,6 +1726,8 @@ sub getHeadFootPages {
 
 	return [] unless $headfoot eq 'header' || $headfoot eq 'footer';
 
+	$section ||= 'default'; # default to default
+
 	my $list = $self->sqlSelectAll(
 		'page',
 		'templates',
