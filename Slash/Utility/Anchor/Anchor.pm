@@ -41,6 +41,7 @@ use vars qw($VERSION @EXPORT);
 	redirect
 	ssiHead
 	ssiFoot
+	prepAds
 	getAd
 );
 
