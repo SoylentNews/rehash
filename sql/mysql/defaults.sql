@@ -954,6 +954,7 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','
 INSERT INTO vars (name, value, description) VALUES ('submit_show_weight', '0', 'Display optional weight field in submission admin.');
 INSERT INTO vars (name, value, description) VALUES ('subnet_karma_comments_needed','5','Number of comments needed before subnet karma is used for disallowing posting');
 INSERT INTO vars (name, value, description) VALUES ('subnet_karma_post_limit_range','-5|-9|-10|-999999','range of subnet karma to block posting at -5|-9|-10|-999999 blocks anonymous posting at -5 to -9 subnet karma, and all posting from -10 to -999999 subnet karma');
+INSERT INTO vars (name, value, description) VALUES ('task_timespec_freshenup', '* * * * *', 'Custom timespec (in cron style) for the freshenup task. Add more task_timespec_ vars if you want to override other task timespecs.');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_request','0','Special boolean to cache templates only for a single request');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_size','0','Number of templates to store in cache (0 = unlimited)');
 INSERT INTO vars (name, value, description) VALUES ('template_post_chomp','0','Chomp whitespace after directives (0 = no, 1 = yes, 2 = collapse; 0 or 2 recommended)');

@@ -384,7 +384,8 @@ EOT
 	for my $file (sort keys %task) {
 		(my $file_nopl = $file) =~ s/\.pl$//;
 		my $varname = "task_timespec_$file_nopl";
-		next unless $constants->{$varname};
+		next unless $constants->{$varname}
+			&& $constants->{$varname} ne $task{$file}{timespec};
 		$task{$file}{timespec} = $constants->{$varname};
 		push @adjusted, "$file ($task{$file}{timespec})";
 	}

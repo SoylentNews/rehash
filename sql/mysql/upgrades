@@ -2646,4 +2646,5 @@ CREATE TABLE remarks (
 	INDEX time (time)
 ) TYPE=InnoDB;
 
+INSERT INTO vars (name, value, description) VALUES ('task_timespec_freshenup', '* * * * *', 'Custom timespec (in cron style) for the freshenup task. Add more task_timespec_ vars if you want to override other task timespecs.');
 
