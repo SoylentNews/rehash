@@ -34,11 +34,11 @@ Sorry, anonymous posting has been turned off. Please
 
 [% # OPEN PROXY.
 CASE "open proxy" %]
-Sorry, but according to our tests, you are trying to post anonymously
-from an open HTTP proxy.  Please close the proxy or ask your sysadmin
+Sorry, but according to our tests, you are trying to post [% IF !constants.comments_portscan==2 %]anonymously [% END %]
+from an open HTTP proxy.  Please close the proxy or ask your sysadmin or ISP 
 to do so, because open proxies are used to spam web boards like this
-one. If you really can't close it and still want to post, you'll have to
-<A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
+one. [% IF constants.comments_portscan!=2 %]If you really can't close it and still want to post, you'll have to
+<A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.[% END %]
 <p>If you have questions, mention that your proxy is at
 <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
 
