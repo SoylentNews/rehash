@@ -268,7 +268,7 @@ sub findStory {
 	#
 	# Changed sorting of story sids by time instead of sid.  This prevents
 	# only dated stories from showing up when there were > 1000 
-        # sids that were created prior to 2000 
+	# sids that were created prior to 2000 
 	#
 	# Added support for more correct left join method.  Also added vars
 	# so you can choose to lose left join method or change the limit on
@@ -277,7 +277,6 @@ sub findStory {
 	# Tweak to your site size and performance needs
 	#
 	#-- Vroom 2003/12/08
-	
 
 	if ($form->{tid}) {
 		my @tids;
@@ -287,14 +286,16 @@ sub findStory {
 			push @tids, $form->{tid};
 		}
 		my $string = join(',', @{$self->sqlQuote(\@tids)});
-		if($constants->{topic_search_use_join}){
+		if ($constants->{topic_search_use_join}) {
 			$tables.= " LEFT JOIN story_topics ON stories.sid = story_topics.sid ";
 			$where .= " AND story_topics.id IS NOT NULL";
-			$where .= " AND story_topics.tid in($string)";
+			$where .= " AND story_topics.tid IN ($string)";
 			$other = "GROUP by sid $other";
-		} else{
+		} else {
 			my $topic_search_sid_limit = $constants->{topic_search_sid_limit} || 1000;
-			my $sids = $self->sqlSelectColArrayref('story_topics.sid', 'story_topics, stories', 
+			my $sids = $self->sqlSelectColArrayref(
+				'story_topics.sid',
+				'story_topics, stories', 
 				"story_topics.sid = stories.sid AND story_topics.tid IN ($string)",
 				"ORDER BY time DESC LIMIT $topic_search_sid_limit");
 			if ($sids && @$sids) {
@@ -313,7 +314,7 @@ sub findStory {
 }
 
 ################################################################################
-# DEad code at the moment -Brian
+# Dead code at the moment -Brian
 sub findRetrieveSite {
 #	my($self, $query, $start, $limit, $sort) = @_;
 #	$query = $self->sqlQuote($query);
@@ -579,12 +580,16 @@ sub _score {
 			next unless $c;
 			push @cols, $c;
 		}
-		return "0" if !@terms or !@cols;
+		return "0" if !@terms || !@cols;
 		my $terms = join(",", @terms);
-		if($method eq "scour" and $constants->{scour_search_modify}){
-			my @scour = map {$_ = "($method($_, $terms))"} @cols;
+		if ($method eq "scour") {
+			# This is a fix to do separate SCOUR()s on each
+			# column;  it only applies if your mysqld is set
+			# up to use Brian's special function.
+			my @scour = map { $_ = "($method($_, $terms))" } @cols;
 			my $scour = join " + ", @scour;
-			$scour = "( $scour / ". scalar @scour .")" if @scour > 1;
+			my $n_scour = scalar(@scour);
+			$scour = "( ( $scour ) / $n_scour )" if $n_scour > 1;
 			return $scour;
 		}
 		return "($method($col, $terms))";
