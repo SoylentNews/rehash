@@ -1283,7 +1283,7 @@ my $slashTags = {
 	'user'     => \&_slashUser,
 	'link'     => \&_slashLink,
 	'break'    => \&_slashPageBreak,
-	'file'    => \&_slashFile,
+	'file'     => \&_slashFile,
 	'comment'  => \&_slashComment,
 	'journal'  => \&_slashJournal,
 };
@@ -1435,7 +1435,7 @@ sub _slashImage {
 		id    => $token->[1]{id},
 		title => $token->[1]{title},
 	}, { Return => 1 });
-	$content ||= getData('SLASH-UKNOWN-IMAGE');
+	$content ||= getData('SLASH-UNKNOWN-IMAGE');
 
 	$$newtext =~ s/\Q$token->[3]\E/$content/;
 }
@@ -1450,7 +1450,7 @@ sub _slashStory {
 		sid	=> $token->[1]{story},
 		title	=> $token->[1]{title},
 	});
-	$content ||= getData('SLASH-UKNOWN-STORY');
+	$content ||= getData('SLASH-UNKNOWN-STORY');
 
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 }
@@ -1462,7 +1462,7 @@ sub _slashUser {
 		uid      => $token->[1]{uid},
 		nickname => $token->[1]{nickname}, 
 	}, { Return => 1 });
-	$content ||= getData('SLASH-UKNOWN-USER');
+	$content ||= getData('SLASH-UNKNOWN-USER');
 
 	$$newtext =~ s/\Q$token->[3]\E/$content/;
 }
@@ -1477,9 +1477,9 @@ sub _slashFile {
 	my $content = slashDisplay('fileLink', {
 		id    => $id,
 		title => $title,
-		text => $text,
+		text  => $text,
 	}, { Return => 1 });
-	$content ||= getData('SLASH-UKNOWN-FILE');
+	$content ||= getData('SLASH-UNKNOWN-FILE');
 
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 }
@@ -1497,7 +1497,7 @@ sub _slashLink {
 			text  => $text,
 		}, { Return => 1 });
 	}
-	$content ||= getData('SLASH-UKNOWN-LINK');
+	$content ||= getData('SLASH-UNKNOWN-LINK');
 
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 }
