@@ -2420,3 +2420,5 @@ DELETE FROM templates WHERE name = 'skinindexd' AND skin != 'default';
 ALTER TABLE skins ADD COLUMN submittable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL AFTER issue;
 UPDATE skins SET submittable='no' WHERE name='search';
 
+
+# End of T_2_5_0_9, Start of T_2_5_0_10 - 2004/07/16
