@@ -557,10 +557,9 @@ INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the 
 
 # Need a CPAN install of Date::Calc and XML::Simple!
 
-# End of T_2_3_0_36
+# End of T_2_3_0_36, Start of T_2_3_0_37
 
 # FOUNDRIES TEST SITE LAST UPDATED HERE
-# SLASHDOT LAST UPDATED HERE
 
 # from foundries integrations
 ALTER TABLE string_param MODIFY COLUMN code varchar(128) NOT NULL;
@@ -580,3 +579,7 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 # USEPERL LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_37
+
