@@ -1,0 +1,93 @@
+#!/usr/bin/perl -w
+# run this document through perl to check its syntax
+use Pod::Checker;
+podchecker(\*DATA);
+
+## If you read this file _as_is_, just ignore the funny characters you see.
+## It is written in the POD format (see `man perlpod`) which is specially
+## designed to be readable as is.
+
+__END__
+
+=head1 NAME
+
+NewsVac Design Document
+
+=head1 SYNOPSIS
+
+NewsVac is a plugin for Slash that:
+
+=over 4
+
+=item *
+
+Mines web sites for news
+
+=item *
+
+Automatically submits news that matches keywords
+
+=back
+
+
+=head1 DESCRIPTION
+
+NewsVac is a powerful and complex system.  It has several components.
+
+=head2 URLs
+
+The URL tables store all the URLs, whether they are URLs to be mined for stories, or they are the story URLs themselves.
+
+=head2 Miners
+
+Miners take URLs assigned to them and mine them, looking for story URLs.
+
+=head2 Nuggets
+
+Nuggets are special URLs that contain the URL, title, slug, and source of a mined URL.  The source is where the data came from (such as "OSDN"); the slug is some additional text apart from the title (like introtext).
+
+=head2 Parsers
+
+Parsers operate in turn on specific types of data.  There are currently three parsers.
+
+=over 4
+
+=item parse_miner
+
+This parser is used by the URLs returned by the miners.  It parses the incoming data (using various regexes to trim the page, and to find multiple stories on the page), and creates nuggets.
+
+=item parse_nugget
+
+This parser takes the nuggets and creates data (???) to be passed to the next parser.
+
+=item parse_plaintext
+
+This parser takes the stories and pulls out the text, to later be matched against keywords, and submitted.
+
+=back
+
+=head2 Spiders
+
+Spiders control the whole flow of processing, executing the miners and calling each parser in order.
+
+=head2 Keywords
+
+Keywords are words, grouped together by tags, to be used to weigh against stories parsed by parse_plaintext.  robosubmit() goes through and matches the stories against the keywords, and if the story meets a certain threshold, submits it to the submission bin.
+
+
+=head1 CHANGES
+
+$Log$
+Revision 1.1  2002/09/04 17:07:09  pudge
+Describe basic outline of NewsVac structure.
+
+
+
+=head1 AUTHOR
+
+This document is being maintained by Chris Nandor E<lt>pudge@osdn.comE<gt>, with aid from Jamie McCarthy, Cliff Wood, and Robin Miller.
+
+
+=head1 VERSION
+
+$Id$
