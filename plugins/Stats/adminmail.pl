@@ -21,6 +21,7 @@ $task{$me}{code} = sub {
 		$stats = getObject('Slash::Stats');
 		$backupdb = $slashdb;
 	}
+	my $statsSave = getObject('Slash::Stats');
 
 	unless($stats) {
 		slashdLog('No database to run adminmail against');
@@ -55,12 +56,12 @@ $task{$me}{code} = sub {
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
-	$stats->createStatDaily($yesterday, "total", $count->{total});
-	$stats->createStatDaily($yesterday, "unique", $count->{unique});
-	$stats->createStatDaily($yesterday, "unique_users", $count->{unique_users});
-	$stats->createStatDaily($yesterday, "comments", $comments);
-	$stats->createStatDaily($yesterday, "homepage", $count->{index}{index});
-	$stats->createStatDaily($yesterday, "journals", $count->{journals});
+	$statsSave->createStatDaily($yesterday, "total", $count->{total});
+	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
+	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
+	$statsSave->createStatDaily($yesterday, "comments", $comments);
+	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
+	$statsSave->createStatDaily($yesterday, "journals", $count->{journals});
 	my @numbers = (
 		$count->{total},
 		$count->{unique},
@@ -110,7 +111,7 @@ EOT
 
 	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
 		$email .= "\t   $_=$count->{index}{$_}\n";
-		$stats->createStatDaily($yesterday, "index_$_", $count->{index}{$_});
+		$statsSave->createStatDaily($yesterday, "index_$_", $count->{index}{$_});
 	}
 
 	$email .= "\n-----------------------\n";
