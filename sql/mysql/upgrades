@@ -1157,8 +1157,6 @@ ALTER TABLE comments ADD karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL;
 
 # End of T_2_3_0_68, Start of T_2_3_0_69
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('comment_startword_workaround','1','Should breakHtml() insert kludgy HTML to work around an MSIE bug?');
 
 # New Zoo stuff, run rebuildPeople after you install the latest code and apply these changes -Brian
@@ -1192,4 +1190,8 @@ INSERT INTO vars (name, value, description) VALUES ('message_last_deferred','','
 # SLASHCODE LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('comments_mod_totals_exact','1','Show exact moderation counts?');
+
+# End of T_2_3_0_69, Start of T_2_3_0_70
+
+# SLASHDOT LAST UPDATED HERE
 
