@@ -31,9 +31,10 @@ Meta Moderation
 and try again.</P>
 
 [% CASE 'thanks' %]
-Your moderations have been meta moderated.  Thanks for participating.
-You may want to go back <A HREF="[% constants.rootdir %]/">home</A> or perhaps
-to <A HREF="[% constants.rootdir %]/users.pl">your user page</A>.
+Thanks for meta-moderating some of Slashdot's many moderations. This gives our
+moderators feedback and helps the whole system work!
+<p>You probably want to go
+<A HREF="[% constants.rootdir %]/">home</A> now.
 
 [% END %]
 

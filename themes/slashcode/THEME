@@ -169,7 +169,6 @@ template=templates/maintable_tr_end;misc;default
 template=templates/maintable_td;misc;default
 template=templates/maintable_end;misc;default
 template=templates/messages;users;default
-template=templates/metaModerate;metamod;default
 template=templates/mid_tab;misc;default
 template=templates/miniAdminMenu;users;default
 template=templates/modCommentLog;misc;default
