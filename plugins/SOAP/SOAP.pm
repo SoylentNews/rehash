@@ -9,7 +9,7 @@ use strict;
 use Slash;
 use Slash::Utility;
 
-use vars qw($VERSION);
+use vars qw( $VERSION $ERROR );
 use base 'Exporter';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
