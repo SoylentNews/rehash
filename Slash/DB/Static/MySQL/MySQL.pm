@@ -60,9 +60,9 @@ sub sqlShowSlaveStatus {
 sub getBackendStories {
 	my($self, $options) = @_;
 
-	my $topic = $options->{topic} || getCurrentStatic('mainpage_nexus_tid');
+	my $topic = $options->{topic} || 0;
 
-	my $select = "stories.stoid, sid, title, stories.tid, primaryskid, time, dept, stories.uid,
+	my $select = "stories.stoid, sid, title, time, dept, stories.uid,
 		commentcount, hitparade, introtext, bodytext";
 
 	my $from = "stories, story_text";
@@ -72,11 +72,13 @@ sub getBackendStories {
 
 	my %image = ( );
 	my $topic_hr = $self->getTopicTree($topic);
-	$from .= ", story_topics_rendered";
-	$where .= " AND stories.stoid = story_topics_rendered.stoid
-		AND story_topics_rendered.tid=$topic";
-	for my $key (qw( image width height )) {
-		$image{$key} = $topic_hr->{$key};
+	if ($topic) {
+		$from .= ", story_topics_rendered";
+		$where .= " AND stories.stoid = story_topics_rendered.stoid
+			AND story_topics_rendered.tid=$topic";
+		for my $key (qw( image width height )) {
+			$image{$key} = $topic_hr->{$key};
+		}
 	}
 
 	my $other = "ORDER BY time DESC LIMIT 10";
@@ -570,13 +572,13 @@ sub decayTokens {
 sub getDailyMail {
 	my($self, $user) = @_;
 
-	my $columns = "stories.sid, title, stories.primaryskid,
+	my $columns = "stories.sid, stories.title, stories.primaryskid,
 		users.nickname,
 		stories.tid, stories.time, stories.dept,
 		story_text.introtext, story_text.bodytext ";
 	my $tables = "stories, story_text, users, story_topics_rendered";
 	my $where = "time < NOW() AND TO_DAYS(NOW())-TO_DAYS(time)=1 ";
-	$where .= "AND users.uid=stories.uid AND stories.stoid=story_text.stoid AND story_topics_rendered.stoid = stories.stoid ";
+	$where .= "AND users.uid=stories.uid AND stories.sid=story_text.sid AND story_topics_rendered.stoid = stories.stoid ";
 
 	# XXXSECTIONTOPICS - The 'sectioncollapse' bit now means:
 	# 0 - only want stories in the mainpage nexus mail
@@ -598,9 +600,8 @@ sub getDailyMail {
 		if $user->{extid};
 	$where .= "AND stories.uid not in ($user->{exaid}) "
 		if $user->{exaid};
-# XXXSKIN !!!!
-#	$where .= "AND section not in ($user->{exsect}) "
-#		if $user->{exsect};
+	$where .= "AND section not in ($user->{exsect}) "
+		if $user->{exsect};
 
 	my $other = " ORDER BY stories.time DESC";
 
@@ -704,9 +705,8 @@ sub getTop10Comments {
 	) {
 		my $comment = $self->sqlSelectArrayRef(
 			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason",
-			"comments, stories, story_text, users",
+			"comments, stories, users",
 			"cid=$cids->[$num_top10_comments]->[0]
-				AND stories.stoid = story_text.stoid
 				AND users.uid=comments.uid
                                 AND comments.sid=stories.discussion");
 		push @$comments, $comment if $comment;
@@ -739,7 +739,7 @@ sub randomBlock {
 	my($self) = @_;
 	my $c = $self->sqlSelectMany("bid,title,url,block",
 		"blocks",
-		"skin='mainpage' AND portal=1 AND ordernum < 0");
+		"section='index' AND portal=1 AND ordernum < 0");
 
 	my $A = $c->fetchall_arrayref;
 	$c->finish;
@@ -2240,6 +2240,22 @@ sub getFirstUIDCreatedDaysBack {
 		"created_at $between_str");
 }
 
+sub getLastUIDCreatedBeforeDaysBack {
+	my($self, $num_days, $yesterday) = @_;
+	$yesterday = substr($yesterday, 0, 10);
+	my $where = '';
+	if ($where) {
+		$where = "created_at < DATE_SUB('$yesterday 00:00',INTERVAL $num_days DAY)";
+	} else {
+		$where = "created_at < '$yesterday 00:00'";
+	}
+	return $self->sqlSelect(
+		"MAX(uid)",
+		"users_info",
+		$where);
+}
+
+
 ########################################################
 # Returns the uid/nicks of a random sample of users created
 # since yesterday.
@@ -2247,9 +2263,9 @@ sub getRandUsersCreatedYest {
 	my($self, $num, $yesterday) = @_;
 	$num ||= 10;
 
-	my $min_uid = $self->getFirstUIDCreatedDaysBack(1, $yesterday);
+	my $min_uid = $self->getLastUIDCreatedBeforeDaysBack(0, $yesterday);
 	return [ ] unless $min_uid;
-	my $max_uid = $self->getFirstUIDCreatedDaysBack(0, $yesterday);
+	my $max_uid = $self->getFirstUIDCreatedDaysBack(-1, $yesterday);
 	if ($max_uid) {
 		$max_uid--;
 	} else {
@@ -2259,7 +2275,7 @@ sub getRandUsersCreatedYest {
 	my $users_ar = $self->sqlSelectAllHashrefArray(
 		"uid, nickname, realemail",
 		"users",
-		"uid BETWEEN $min_uid AND $max_uid",
+		"uid BETWEEN $min_uid + 1 AND $max_uid",
 		"ORDER BY RAND() LIMIT $num");
 	return [ ] unless $users_ar && @$users_ar;
 	@$users_ar = sort { $a->{uid} <=> $b->{uid} } @$users_ar;
@@ -2274,14 +2290,14 @@ sub getTopRecentRealemailDomains {
 	my $daysback = $options->{daysback} || 7;
 	my $num = $options->{num_wanted} || 10;
 
-	my $min_uid = $self->getFirstUIDCreatedDaysBack($daysback, $yesterday);
+	my $min_uid = $self->getLastUIDCreatedBeforeDaysBack($daysback, $yesterday);
 	my $newaccounts = $self->sqlSelect('max(uid)','users') - $min_uid;
 	my $newnicks = {};
 	return [ ] unless $min_uid;
 	my $domains = $self->sqlSelectAllHashrefArray(
 		"initdomain, COUNT(*) AS c",
 		"users_info",
-		"uid >= $min_uid",
+		"uid > $min_uid",
 		"GROUP BY initdomain ORDER BY c DESC, initdomain LIMIT $num");
 
 	foreach my $domain (@$domains) {
