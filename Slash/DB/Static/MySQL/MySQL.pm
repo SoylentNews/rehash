@@ -619,6 +619,9 @@ sub getTop10Comments {
                 last if $max_score <= $min_score;
 	}
 
+	# if for any reason we don't get any comments, return now
+	return [] if scalar(@$cids) == 0;
+
 	foreach (@$cids) {
 		# Of our prospective hot comments, find the overall time
 		# it took to moderate em up. Faster == hotter
