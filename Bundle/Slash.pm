@@ -47,6 +47,8 @@ HTML::FormatText        - ditto
 
 HTML::TokeParser
 
+HTML::ElementTable	- required by HTML::CalendarMonth
+
 HTML::CalendarMonth	- used for Events plugin
 
 Mail::Sendmail
@@ -65,6 +67,8 @@ Date::Parse		- TimeDate
 
 Date::Manip             - Still needed, but only in utils/
 
+Bit::Vector		- required by Date::Calc
+
 Date::Calc		- Use sparingly, only when necessary
 
 Time::ParseDate         - Time-modules; Needed for Schedule::Cron
@@ -72,6 +76,8 @@ Time::ParseDate         - Time-modules; Needed for Schedule::Cron
 Schedule::Cron
 
 XML::Parser
+
+Test::Manifest		- required by XML::RSS
 
 XML::RSS
 
