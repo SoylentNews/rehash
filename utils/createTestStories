@@ -64,6 +64,7 @@ $constants = getCurrentStatic();
 		$title =~ s/\b(\w)/\U$1/g if rand(1) < 0.4;
 	        my $introtext = make_werds(20 + rand 40 + rand 50, 0.3);
 		$introtext .= typical_remark() if rand(1) < 0.05;
+		$introtext = slashizeLinks($introtext);
 	        my $bodytext = '';
 		if (rand(1) < 0.1) {
 			$bodytext = make_werds(20 + (rand 30) * (rand 50), 0.1);
@@ -71,6 +72,7 @@ $constants = getCurrentStatic();
 				$1 . ((rand(1) < 0.2) ? "<P>" : "")
 			}xge;
 		}
+		$bodytext = slashizeLinks($bodytext);
 		my $dept = lc make_werds(2+rand 6);
 		$dept =~ s/<[^>]+>//g;
 		$dept =~ s/\s+/-/g;
