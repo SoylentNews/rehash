@@ -16,21 +16,6 @@ use base 'Slash::DB::Utility';
 # FRY: And where would a giant nerd be? THE LIBRARY!
 
 #################################################################
-sub SelectDataBases {
-	my $search_db_user = getCurrentStatic('search_db_user');
-	my($slashdb, $searchDB);
-	if ($search_db_user) {
-		$slashdb  = getObject('Slash::DB', $search_db_user);
-		$searchDB = getObject('Slash::Search', $search_db_user);
-	} else {
-		$slashdb  = getCurrentDB();
-		$searchDB = Slash::Search->new(getCurrentVirtualUser());
-	}
-
-	return($slashdb, $searchDB);
-}
-
-#################################################################
 sub new {
 	my($class, $user) = @_;
 	my $self = {};

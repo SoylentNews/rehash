@@ -2656,69 +2656,78 @@ sub getDBs {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $cache = getCurrentCache();
+	my $dbs_cache_time = 5; # this was 10, let's try 5
 
-	my %databases;
-	if ($cache->{'dbs'} && (($_getDBs_cached_nextcheck || 0) > time)) {
-		%databases = %{ $cache->{'dbs'} };
-#		print STDERR gmtime() . " $$ getDBs returning cache"
-#			. " time='" . time . "'"
-#			. " nextcheck in " . ($_getDBs_cached_nextcheck - time) . " secs\n";
-		return \%databases;
-	}
-
-	my $old = {};
-	my $dbs_revive_seconds = $constants->{dbs_revive_seconds} || 30;
-	if ($cache->{'dbs'}) {
-		for my $v (values %{$cache->{'dbs'}}) {
-			for my $db (@$v) {
-				unless (defined $old->{$db->{id}}) {
-					$old->{$db->{id}} = $db->{isalive} eq 'no'
-						? 0
-						: $db->{_weight_factor};
-				}
-			}
-		}
+	if ($cache->{dbs} && (($_getDBs_cached_nextcheck || 0) > time)) {
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print STDERR scalar(gmtime) . " $$ returning cached: " . Dumper($cache->{dbs});
+		return \%{ $cache->{dbs} };
 	}
 
 	my $dbs = $self->sqlSelectAllHashref('id', '*', 'dbs');
 
-	# rearrange to list by "type"
-	for (keys %$dbs) {
-		my $db = $dbs->{$_};
-		$databases{$db->{type}} ||= [];
+	# If the DB was down previously, over how long a period does it
+	# get brought back up to speed?
+	my $dbs_revive_seconds = $constants->{dbs_revive_seconds} || 30;
 
-		my $weight = $db->{weight};
-		$weight = 1 if !$weight || $weight < 1;
-		$db->{_weight_factor} = 1;
+	# Calculate the real weight for each DB and write it into its
+	# hashref.
+	for my $dbid (keys %$dbs) {
+		my $db = $dbs->{$dbid};
 
-		# we don't need it in the hash more than once if it is down ...
+		my $weight_start = $db->{weight};
+		$weight_start = 1 if !$weight_start || $weight_start < 1;
+
+		# If we had cached data for this, then even though it expired,
+		# pull in the _last_seen_dead field.  We'll overwrite it if
+		# necessary and write it back into the cache in a moment.
+		if ($cache->{dbs} && $cache->{dbs}{$dbid}) {
+#print STDERR scalar(gmtime) . " $$ dbid=$dbid lsd=" . ($cache->{dbs}{$dbid}{_last_seen_dead} || 0) . "\n";
+			$db->{_last_seen_dead} = $cache->{dbs}{$dbid}{_last_seen_dead} || 0;
+		}
+		# Now calculate the factor for the DB being dead or alive,
+		# which will always be a number between 0 and 1.
+		my $weight_alive_factor = 1;
 		if ($db->{isalive} ne 'yes') {
-			$weight = 1;
-			$db->{_weight_factor} = 0;
-
-		# if DB was down in previous cache, slowly bring it back in
-		} elsif (keys %$old) {
-			$db->{_weight_factor} =  defined($old->{$db->{id}}) ? $old->{$db->{id}} : 1;
-			$db->{_weight_factor} += (10 / $dbs_revive_seconds)
-				if $db->{_weight_factor} < 1;
-			$db->{_weight_factor} = 1 if $db->{_weight_factor} > 1;
-			$weight = int($weight * $db->{_weight_factor} + 1);
+			$weight_alive_factor = 0;
+			$db->{_last_seen_dead} = time;
+#print STDERR scalar(gmtime) . " $$ dbid=$dbid dead, lsd set to $db->{_last_seen_dead}\n";
+		} else {
+			# This DB is alive.
+			my $time_alive = time - ($db->{_last_seen_dead} || 0);
+#print STDERR scalar(gmtime) . " $$ dbid=$dbid alive, time_alive=$time_alive, revive=$dbs_revive_seconds\n";
+			if ($time_alive < $dbs_revive_seconds) {
+				# This DB was not alive recently, so
+				# bring its weight_alive_factor back up
+				# to the normal level over a period of
+				# $dbs_revive_seconds seconds.
+				$weight_alive_factor = $time_alive / $dbs_revive_seconds;
+			}
 		}
 
-		# XXX Don't do weight this way.
-		push @{$databases{$db->{type}}}, ($db) x $weight;
+		# We square the weight_alive_factor because that eases the
+		# DB back up to speed, starting it slow when its caches
+		# are empty and accelerating once they've had a chance to
+		# fill.
+		$db->{weight_final} = $weight_start
+			* $weight_alive_factor ** 2
+			* $db->{weight_adjust};
+#printf STDERR scalar(gmtime) . " $$ dbid=$dbid weights: %.3f %.3f %.3f %.3f\n", $weight_start, $weight_alive_factor**2, $db->{weight_adjust}, $db->{weight_final};
 	}
 
-	# The amount of time to cache this has to be hardcoded,
-	# since we obviously aren't able to get it from the DB
-	# at this level.  Adjust to taste.  Assuming you have an
-	# angel script, this should be roughly similar to how
-	# often that angel runs.
-	$_getDBs_cached_nextcheck = time + 10;
-	$cache->{'dbs'} = \%databases;
-#	print STDERR gmtime() . " $$ getDBs setting cache\n";
+	# The amount of time to cache this has to be hardcoded, since
+	# we obviously aren't able to get it from the DB at this level.
+	# This could be adjusted, but it should be on the same order as
+	# how often the balance_readers task runs (which right now is
+	# hardcoded to 5 seconds).
+	$_getDBs_cached_nextcheck = time + $dbs_cache_time;
 
-	return \%databases;
+	# Cache it.
+	$cache->{dbs} = \%{ $dbs };
+#print STDERR gmtime() . " $$ getDBs setting cache: " . Dumper($dbs);
+
+	return $dbs;
 }
 
 #################################################################
@@ -2727,10 +2736,53 @@ sub getDBs {
 sub getDB {
 	my($self, $db_type) = @_;
 
-	my $dbs = $self->getDBs;
-	my @found = grep { $_->{isalive} eq 'yes' } @{$dbs->{$db_type}};
+	my $dbs = $self->getDBs();
 
-	return $found[rand @found]{virtual_user};
+	# Get a list of all usable dbids with this type.
+	my @dbids_usable =
+		sort { $a <=> $b }
+		grep {    $dbs->{$_}{type} eq $db_type
+		       && $dbs->{$_}{weight_final} > 0 }
+		keys %$dbs;
+#print STDERR scalar(gmtime) . " $$ dbids_usable for type '$db_type': '@dbids_usable'\n";
+
+	# If there is exactly zero or one DB that's usable, this is easy.
+	my $n_usable = scalar @dbids_usable;
+	if ($n_usable == 0) {
+		return undef;
+	} elsif ($n_usable == 1) {
+		return $dbs->{$dbids_usable[0]}{virtual_user};
+	}
+
+	# Add up the total weight of all usable DBs.
+	my $weight_total = 0;
+	for my $dbid (@dbids_usable) {
+#printf STDERR "dbid=$dbid weight_final=$dbs->{$dbid}{weight_final}\n";
+		$weight_total += $dbs->{$dbid}{weight_final};
+	}
+
+	# Do the random pick.
+	my $x = rand(1) * $weight_total;
+#printf STDERR "weight_total=%.3f x=%.3f\n", $weight_total, $x;
+
+	# Iterate through the usable dbids until we get to the one that
+	# was chosen.  Actually, we don't include the last one in our
+	# checking;  if we get to the last one, we return it.  This is
+	# probably about a nanosecond faster, but more importantly, in
+	# case of a logic error or weird floating-point roundoff thing,
+	# it does something reasonable.
+	for my $i (0 .. $n_usable-2) {
+		my $dbid = $dbids_usable[$i];
+		$x -= $dbs->{$dbid}{weight_total};
+		if ($x <= 0) {
+#print STDERR "returning $i of $n_usable, dbid=$dbid\n";
+			return $dbs->{$dbid}{virtual_user};
+		}
+	}
+	# It wasn't any of the others, and we know all the choices are
+	# good, so it must be the last one.
+#print STDERR "returning last option, dbid=$dbids_usable[-1]\n";
+	return $dbs->{ $dbids_usable[-1] }{virtual_user};
 }
 
 } # end closure surrounding getDBs and getDB
@@ -10343,6 +10395,7 @@ sub applyStoryRenderHashref {
 
 ########################################################
 # Get chosen topics for a story in hashref form
+# XXX This is a good candidate for memcached caching
 sub getStoryTopicsChosen {
 	my($self, $stoid) = @_;
 	return $self->sqlSelectAllKeyValue(
@@ -10353,6 +10406,7 @@ sub getStoryTopicsChosen {
 
 ########################################################
 # Get rendered topics for a story in hashref form
+# XXX This is a good candidate for memcached caching
 sub getStoryTopicsRendered {
 	my($self, $stoid) = @_;
 	return $self->sqlSelectColArrayref(

@@ -36,10 +36,11 @@ sub main {
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
 	my $gSkin     = getCurrentSkin();
+	my $slashdb   = getCurrentDB();
+	my $searchDB  = getObject('Slash::Search', { db_type => 'search' });
+
 	# Backwards compatibility, we now favor tid over topic 
 	$form->{tid} ||= $form->{topic};
-
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
 
 	# Set some defaults
 	$form->{query}		||= '';

@@ -2761,3 +2761,7 @@ ALTER TABLE submissions ADD INDEX emaildomain (emaildomain);
 
 INSERT INTO vars (name, value, description) VALUES ('submission_count_days','60','Number of days back to count submissions made by the same UID or domain');
 
+ALTER TABLE dbs ADD COLUMN weight_adjust float UNSIGNED NOT NULL DEFAULT 1.0;
+
+DELETE FROM vars WHERE name='search_db_user';
+

@@ -27,7 +27,8 @@ sub findComments {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -45,7 +46,8 @@ sub findUsers {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -63,7 +65,8 @@ sub findStory {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -81,7 +84,8 @@ sub findJournalEntry {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -99,7 +103,8 @@ sub findPollQuestion {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -117,7 +122,8 @@ sub findSubmission {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -135,7 +141,8 @@ sub findRSS {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;

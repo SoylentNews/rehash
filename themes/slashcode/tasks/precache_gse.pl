@@ -35,15 +35,17 @@ $task{$me}{code} = sub {
 	my %virtual_users = ( );
 	my $dbs = $slashdb->getDBs();
 	if ($constants->{index_gse_backup_prob} < 1 && $dbs->{writer}) {
-		my @writer = @{ $dbs->{writer} };
-		$virtual_users{$writer[0]{virtual_user}} = 1
-			if $writer[0]{isalive} eq 'yes';
+		my $writer_id = (keys %{$dbs->{writer}})[0];
+		my $vu = $dbs->{writer}{$writer_id}{virtual_user};
+		$virtual_users{$vu} = 1
+			if $dbs->{writer}{$writer_id}{weight_total} > 0;
 	}
 	if ($constants->{index_gse_backup_prob} > 0 && $dbs->{reader}) {
-		my @readers = @{ $dbs->{reader} };
-		for my $reader (@readers) {
-			$virtual_users{$reader->{virtual_user}} = 1
-				if $reader->{isalive} eq 'yes';
+		my @reader_ids = keys %{$dbs->{writer}};
+		for my $reader_id (@reader_ids) {
+			my $vu = $dbs->{reader}{$reader_id}{virtual_user};
+			$virtual_users{$vu} = 1
+				if $dbs->{reader}{$reader_id}{weight_total} > 0;
 		}
 	}
 	my @virtual_users = sort keys %virtual_users;

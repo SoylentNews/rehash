@@ -325,6 +325,7 @@ CREATE TABLE dbs (
 	isalive enum("no","yes") DEFAULT "no" NOT NULL,
 	type enum("writer","reader","log","search", "log_slave","querylog") DEFAULT "reader" NOT NULL,
 	weight tinyint UNSIGNED NOT NULL DEFAULT 1,
+	weight_adjust float UNSIGNED NOT NULL DEFAULT 1.0,
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
