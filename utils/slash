@@ -33,6 +33,7 @@ WHICH_AWK=`which awk`;
 
 # if you use sudo, create a file called mysudo in $DATADIR, containing
 # your sudo line, like "sudo -u slashdot"
+# or "sudo -u foo --shell='/bin/sh'"
 MYSUDO=`cat $DATADIR/mysudo 2>/dev/null`
 
 # This prolly ain't 100% accurate, but it should be good enough.
@@ -61,7 +62,7 @@ start_slashd () {
 	elif [ "$OS" = "FreeBSD" ] ; then
 		TZ=GMT su $USERNAME -c "$SLASHD $VIRTUAL_USER_NAME" &
 	elif [ "$OS" = "Linux" ] ; then 
-		su - $USERNAME -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
+		su - $USERNAME --shell="/bin/sh" -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
 	else
 		su - $USERNAME -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
 	fi
