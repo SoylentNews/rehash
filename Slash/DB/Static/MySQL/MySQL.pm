@@ -2631,10 +2631,14 @@ sub getAccesslogPPS {
 	while ($retries-- > 0) {
 		my $lookback_id = $max_id - $rowsback;
 		$lookback_id = 1 if $lookback_id < 1;
+		# We don't count images, and we only count rss hits if
+		# they are dynamic.
 		my($count, $time) = $self->sqlSelect(
 			"COUNT(*), UNIX_TIMESTAMP(MAX(ts)) - UNIX_TIMESTAMP(MIN(ts))",
 			"accesslog",
-			"id >= $lookback_id AND op != 'image'");
+			"id >= $lookback_id
+			 AND op != 'image'
+			 AND (op != 'rss' OR static = 'no')");
 		if (!$count || $count < 10) {
 			# Very small count;  site is almost unused.
 			$pps = "slow";
