@@ -2078,6 +2078,9 @@ sub getCommentsByGeneric {
 	$options ||= {};
 	$min ||= 0;
 	my $limit = " LIMIT $min, $num " if $num;
+	my $force_index = "";
+	$force_index = " FORCE INDEX(uid_date) " if $options->{force_index};
+	
 	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
 		if $options->{limit_days};
 	$where_clause .= " AND cid >= $options->{cid_at_or_after} " if $options->{cid_at_or_after};
@@ -2085,7 +2088,7 @@ sub getCommentsByGeneric {
 	my $sort_dir = $options->{sort_dir} || "DESC";
 
 	my $comments = $self->sqlSelectAllHashrefArray(
-		'*', 'comments', $where_clause,
+		'*', "comments $force_index", $where_clause,
 		"ORDER BY $sort_field $sort_dir $limit");
 
 	return $comments;
@@ -2094,6 +2097,9 @@ sub getCommentsByGeneric {
 #################################################################
 sub getCommentsByUID {
 	my($self, $uid, $num, $min, $options) = @_;
+	my $constants = getCurrentStatic();
+	$options ||= {};
+	$options->{force_index} = 1 if $constants->{user_comments_force_index};
 	return $self->getCommentsByGeneric("uid=$uid", $num, $min, $options);
 }
 
