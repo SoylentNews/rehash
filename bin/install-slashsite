@@ -183,19 +183,20 @@ print "Theme selected: $theme\n";
 my $plugins = $install->getPluginList($PREFIX);
 my @plugins = ( );
 my @default_plugins = ( );
-for my $key (sort keys %$plugins) {
+my @all_plugins = sort keys %$plugins;
+for my $key (@all_plugins) {
 	if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
 		push @default_plugins, $key;
 	}
 }
 if ($opts{'P'}) {
-	@plugins = grep { exists $plugins->{$_} }
+	@plugins = grep { exists $plugins->{$_} or /^(ALL|DEFAULT)$/ }
 		split /\s*,\s*/, $opts{'P'};
 	push @plugins, @default_plugins if @default_plugins;
 } else {
 	my %order_to_name = ( );
 	print "\nPlease select which plugins you would like ('*' marks default).\n";
-	for my $key (sort keys %$plugins) {
+	for my $key (@all_plugins) {
 		my $c = " ";
 		if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
 			$c = "*";
@@ -215,7 +216,7 @@ if ($opts{'P'}) {
 				split /,/, $select;
 			last;
 		} elsif ($select eq 'a') {
-			@plugins = map { $plugins->{$_}{name} } sort keys %$plugins;
+			@plugins = map { $plugins->{$_}{name} } @all_plugins;
 			last;
 		}
 	}
@@ -224,6 +225,24 @@ if ($opts{'P'}) {
 {
 	# Eliminate duplicates.
 	my %temp_plugins = map { $_ => 1 } @plugins;
+	if ($temp_plugins{DEFAULT}) {
+		# Special feature, if the user asks for the plugin
+		# named "DEFAULT" (presumably with the -P option),
+		# they get whatever the theme's default is.
+		for my $key (@default_plugins) {
+			$temp_plugins{$key} = 1;
+		}
+		delete $temp_plugins{DEFAULT};
+	}
+	if ($temp_plugins{ALL}) {
+		# Special feature, if the user asks for the plugin
+		# named "ALL" (presumably with the -P option),
+		# they get all of them.
+		for my $key (@all_plugins) {
+			$temp_plugins{$key} = 1;
+		}
+		delete $temp_plugins{ALL};
+	}
 	@plugins = sort keys %temp_plugins;
 }
 # Zero out the list of plugins
@@ -585,6 +604,7 @@ Site options:
 	-R	Reuse hostname as site name (boolean)
 	-L	Install files in htdocs/ and tasks/ using symlinks [y/n]
 	-P	Comma-separated list of plugin names$sample_plugins
+			("ALL"/"DEFAULT" avoid prompt, do what you'd expect)
 
 User options:
 	-a	Admin name
