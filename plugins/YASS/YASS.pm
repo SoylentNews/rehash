@@ -55,7 +55,7 @@ sub getActive {
 		"story_param.sid as sid, story_param.value as url, title", 
 		"story_param, stories", 
 		"story_param.sid IN ($in_list) AND story_param.name = 'url' AND stories.sid = story_param.sid",
-		"ORDER BY title DESC");
+		"ORDER BY title ASC");
 
 	return $all;
 }
