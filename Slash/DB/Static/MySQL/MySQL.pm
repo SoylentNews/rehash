@@ -53,6 +53,20 @@ sub sqlShowSlaveStatus {
 	return $statlist;
 }
 
+sub showQueryCount {
+	my ($self) = @_;
+	$self->sqlConnect();
+	my $sth = $self->{_dbh}->prepare("SHOW STATUS");
+	$sth->execute();
+	my $q;
+	while (my ($key, $val) = $sth->fetchrow()) {
+		$q = $val, last if $key eq "Questions";
+	}
+	$sth->finish();
+	return $q;
+
+}
+
 ########################################################
 # For rss, rdf etc feeds, basically used by tasks.
 # Ultimately this should be subsumed into

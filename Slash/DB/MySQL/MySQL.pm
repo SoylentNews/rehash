@@ -2300,6 +2300,11 @@ sub getDB {
 
 } # end closure surrounding getDBs and getDB
 
+sub getDBVirtualUsers {
+	my ($self) = @_;
+	return $self->sqlSelectColArrayref('virtual_user', 'dbs')
+}
+
 #################################################################
 # get list of DBs, never cache
 # (do caching in getSlashConf)
