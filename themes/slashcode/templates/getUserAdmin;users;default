@@ -143,11 +143,13 @@ __template__
 				<TD>[% accesslist.estimated_users %]</TD>
 			</TR>
 			[% END %]
+			[% IF useredit.uid %]
 			<TR>
 				<TD WIDTH="100"><B>Tokens</B></TD>
 				<TD ALIGN="LEFT"><INPUT TYPE="TEXT" NAME="tokens" SIZE="6" VALUE="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
 				<B>Latest M2 Info:</B> <INPUT TYPE="TEXT" NAME="m2info" VALUE="[% useredit.m2info | strip_attribute %]"></TD>
 			</TR>
+			[% END %]
 
 [% IF all_acls %]
 			<TR>
