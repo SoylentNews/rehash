@@ -5401,7 +5401,8 @@ sub getRecentComments {
 	my $end_cid = $max_cid - $startat;
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"comments.sid AS sid, comments.cid AS cid,
-		 date, ipid, subnetid, subject,
+		 date, comments.ipid AS ipid,
+		 comments.subnetid AS subnetid, subject,
 		 comments.uid AS uid, points AS score,
 		 lastmod, comments.reason AS reason,
 		 users.nickname AS nickname,
