@@ -104,12 +104,14 @@ sub main {
 		my $content = get_content($_->[1]);
 
 		# make all relative links absolute to the site's root
-		my $uri = URI->new_abs($_->[0], $constants->{absolutedir});
+		my $uri = URI->new_abs($_->[0], $constants->{absolutedir} . $ENV{REQUEST_URI});
 
 		# http://foo -> http://foo/
 		$uri->path('/') if ! length $uri->path;
 
-		if (length $content && length $uri) {
+		# need both to have data, and we don't want them if they
+		# are the same as each other
+		if (length $content && length $uri && $content ne $uri) {
 			# don't duplicate URLs
 			my $test = join($;, $uri, lc $content);
 			if (!scalar(grep { $test eq join($;, $_->[0], lc $_->[1]) } @story_links)) {
