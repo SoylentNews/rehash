@@ -128,6 +128,7 @@ CREATE TABLE comments (
 DROP TABLE IF EXISTS content_filters;
 CREATE TABLE content_filters (
   filter_id int(4) NOT NULL auto_increment,
+  form varchar(20) DEFAULT '' NOT NULL,
   regex varchar(100) DEFAULT '' NOT NULL,
   modifier varchar(5) DEFAULT '' NOT NULL,
   field varchar(20) DEFAULT '' NOT NULL,
@@ -137,6 +138,7 @@ CREATE TABLE content_filters (
   err_message varchar(150) DEFAULT '',
   maximum_length int(10) DEFAULT '0' NOT NULL,
   PRIMARY KEY (filter_id),
+  KEY form (form),
   KEY regex (regex),
   KEY field_key (field)
 );

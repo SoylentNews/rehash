@@ -1188,12 +1188,20 @@ sub listFilters {
 	my($header, $footer);
 
 	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
+
+	# temporary
+	# $form->{form} ||= 'comments';
 
 	my $title = getTitle('listFilters-title');
 	my $filter_ref = $slashdb->getContentFilters();
 
+	my $form_list = $slashdb->getDescriptions('forms');
+	my $form_select = createSelect('form', $form_list, $form->{form},1);
+
 	slashDisplay('listFilters', { 
 		title		=> $title, 
+		form_select	=> $form_select,	
 		filter_ref	=> $filter_ref 
 	});
 }
