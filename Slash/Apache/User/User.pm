@@ -63,7 +63,7 @@ sub handler {
 	
 	my $hostname = $r->header_in('host');
 
-	$r->err_header_out('X-Powered-By' => "Slash $Slash::VERSION");
+	$r->header_out('X-Powered-By' => "Slash $Slash::VERSION");
 	random($r);
 
 	# let pass unless / or .pl
