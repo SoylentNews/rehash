@@ -3784,7 +3784,7 @@ EOT
 			email		=> $_->{miner},
 			uid		=> $constants->{anonymous_coward_uid},
 			name		=> $_->{name},
-			story		=> $_->{story} || '-', # need story text
+			story		=> $_->{story},
 			subj		=> $_->{subj},
 			tid		=> $constants->{newsvac_topic},
 			section		=> $constants->{newsvac_section},
