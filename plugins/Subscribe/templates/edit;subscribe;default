@@ -74,6 +74,9 @@ and so far [% hits_bought %] have been used up
 	contribution very much.
 [% END %]
 
+<p>(Note: we use Greenwich Mean Time to decide where "today" begins
+and ends.)
+
 [% IF can_buy %]
 
 	<FORM ACTION="[% env.script_name %]">
