@@ -20,7 +20,6 @@ sub main {
 		list		=> \&listArticle,
 		preview		=> \&editArticle,
 		edit		=> \&editArticle,
-		get		=> \&getArticle,
 		display		=> \&displayArticle,
 		save		=> \&saveArticle,
 		remove		=> \&removeArticle,
@@ -34,7 +33,6 @@ sub main {
 
 	my %safe = (
 		list		=> 1,
-		get		=> 1,
 		display		=> 1,
 		top		=> 1,
 		friends		=> 1,
@@ -147,7 +145,7 @@ sub displayRSS {
 			$rss->add_item(
 				title		=> xmlencode($article->[2]),
 				description	=> xmlencode("$nickname wrote: " . strip_mode($article->[1], $article->[4])),
-				'link'		=> xmlencode_plain("$constants->{absolutedir}/journal.pl?op=get&id=$article->[3]"),
+				'link'		=> xmlencode_plain("$constants->{absolutedir}/journal.pl?op=display&uid=$uid&id=$article->[3]"),
 		);
 	}
 	return $rss->as_string;
@@ -371,18 +369,6 @@ sub editArticle {
 	});
 }
 
-sub getArticle {
-	my($form, $journal, $constants) = @_;
-	my $slashdb = getCurrentDB();
-	my $article = $journal->get($form->{id});
-	my $theme = $slashdb->getUser($article->{uid}, 'journal-theme');
-	$theme ||= $constants->{journal_default_theme};
-	slashDisplay($theme, {
-		articles	=> [{ day => $article->{date}, article => [ $article ] }],
-		uid		=> $article->{uid},
-		back		=> -1,
-		forward		=> 0,
-	});
-}
-
+createEnvironment();
 main();
+1;

@@ -354,7 +354,7 @@ sub formatDate {
 
 #========================================================================
 
-=head2 timeCalc(DATE [, FORMAT])
+=head2 timeCalc(DATE [, FORMAT, OFFSET])
 
 Format time strings using user's format preference.
 
@@ -371,6 +371,11 @@ Raw date from database.
 =item FORMAT
 
 Optional format to override user's format.
+
+=item OFFSET
+
+Optional positive or negative integer for offset seconds from GMT,
+to override user's offset.
 
 =back
 

@@ -1,3 +1,21 @@
+slash-2.0.0-pre3, 2001.04.25
+----------------------------
+
+*	Fixed syntax error in journal.pl, removed unused getArticle()
+	method
+
+*	Fixed bad method calls in Slash::DB::Static::MySQL
+
+*	Fixed broken bulk mail calls in dailyStuff
+
+*	Fixed colors not displaying after save in color editor
+
+*	Fixed story list times in admin.pl
+
+*	Added Even More upgrade information to INSTALL, regarding
+	what templates to add/delete with each version
+
+
 slash-2.0.0-pre2, 2001.04.24
 ----------------------------
 

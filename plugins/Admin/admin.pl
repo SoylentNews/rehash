@@ -647,7 +647,7 @@ sub colorEdit {
 	my $colorblock;
 	$form->{color_block} ||= 'colors';
 
-	if ($form->{colorpreview}) {
+	if ($form->{colorpreview} || $form->{colorsave}) {
 		$colorblock_clean = $colorblock =
 			join ',', @{$form}{qw[fg0 fg1 fg2 fg3 fg4 bg0 bg1 bg2 bg3 bg4]};
 
