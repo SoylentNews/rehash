@@ -1495,8 +1495,8 @@ sub undoModeration {
 
 	for my $mod (@$removed) {
 		$mod->{val} =~ s/^(\d)/+$1/;  # put "+" in front if necessary
-		use Slash::Messages;
-		Slash::Messages::send_mod_msg({
+		$messages = getObject('Slash::Messages');
+		$messages->send_mod_msg({
 			type	=> 'unmod_msg',
 			sid	=> $sid,
 			cid	=> $mod->{cid},

@@ -996,9 +996,7 @@ sub messagedLog {
 # could use it
 
 sub send_mod_msg {
-	my($mod) = @_;
-
-	my $messages	= getObject('Slash::Messages') or return;
+	my($self, $mod) = @_;
 
 	my $constants	= getCurrentStatic();
 	my $slashdb	= getCurrentDB();
@@ -1012,7 +1010,7 @@ sub send_mod_msg {
 	my $comment	= $mod->{comment} || $slashdb->getComment($cid);
 
 	my $comm	= $slashdb->getCommentReply($sid, $cid);
-	my $users	= $messages->checkMessageCodes(
+	my $users	= $self->checkMessageCodes(
 		MSG_CODE_COMMENT_MODERATE, [$comment->{uid}]
 	);
 
@@ -1048,7 +1046,7 @@ sub send_mod_msg {
 			},
 			reasons		=> $slashdb->getReasons(),
 		};
-		$messages->create($users->[0],
+		$self->create($users->[0],
 			MSG_CODE_COMMENT_MODERATE, $data, 0, '', 'collective'
 		);
 	}
