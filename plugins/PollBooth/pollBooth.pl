@@ -117,6 +117,7 @@ sub link_story_to_poll {
 	}
 	
 	# clear current story.qid
+	# XXX this needs to call setStory_delete_memcached
 	$slashdb->sqlUpdate("stories", { qid=>"" }, "sid = ".$slashdb->sqlQuote($form->{sid}));
 
 	slashDisplay('linkstory', {
@@ -147,6 +148,7 @@ sub detachpoll {
 		my $where = "sid=".$slashdb->sqlQuote($sid)." AND qid=".$slashdb->sqlQuote($qid);
 		my $count=$slashdb->sqlCount("stories",$where);
 		print STDERR "count $count\n";
+		# XXX this needs to call setStory_delete_memcached
 		if($count){
 			$slashdb->sqlUpdate("stories",{ qid => "" } , $where); 
 		} elsif ( $form->{force} ){
