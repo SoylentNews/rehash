@@ -13,8 +13,8 @@ sub main {
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
-	my $section = $slashdb->getSection($form->{section});
 
+	my $section = $slashdb->getSection($form->{section});
 	my $list    = $slashdb->getAuthorDescription();
 
 	header("$constants->{sitename}: Authors", $section->{section});

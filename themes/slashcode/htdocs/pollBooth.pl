@@ -159,10 +159,10 @@ sub savepoll {
 			});
 		} elsif ($poll->{discussion}) {
 			# Yep, this is lazy -Brian
-			$slashdb->setDiscussion($poll->{discussion}, { 
-				title => $form->{question}, 
-				topic => $form->{topic} 
-				});
+			$slashdb->setDiscussion($poll->{discussion}, {
+				title => $form->{question},
+				topic => $form->{topic}
+			});
 		}
 		# if it already has a discussion (so $discussion is not set),
 		# or discussion ID is unchanged, don't bother setting
