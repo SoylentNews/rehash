@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl -w
 
 use strict;
-use LWP::Simple;
+use LWP::UserAgent;
 
 use vars qw( %task $me );
 
@@ -47,8 +47,10 @@ $task{$me}{code} = sub {
 	}
 	my $sites = $yass->getActive();
 	my $junk;
+	my $ua = LWP::UserAgent->new();
 	for (@$sites) {
-		if(is_success(getstore($_->{url} . $constants->{yass_extra}, $junk))) {
+		my $response = $ua->get($_->{url} . $constants->{yass_extra});
+		if($response->is_success) {
 			$yass->success($_->{id});
 			print "active\t$_->{url}\n";
 		} else {
