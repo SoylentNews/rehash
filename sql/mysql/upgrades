@@ -511,10 +511,7 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');
 
-# USEPERL LAST UPDATED HERE
 ALTER TABLE sections DROP isolate;
-
-# For plugins/Stats (ignore if you're not using that plugin):
 
 # For Sections
 INSERT INTO vars (name, value, description) VALUES ('db_slave_lag_ignore',10000000,'Bytes of lag between master and slave DB to ignore');
@@ -524,5 +521,7 @@ INSERT INTO string_param (type, code, name) VALUES ('section_types','collected',
 
 SELECT concat("UPDATE sections SET qid=", value," WHERE section='index';") INTO OUTFILE "/tmp/qidproblem" from vars WHERE name="currentqid";
 source /tmp/qidproblem;
+
 # SLASHCODE LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
+# USEPERL LAST UPDATED HERE
