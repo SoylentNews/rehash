@@ -484,9 +484,7 @@ sub saveArticle {
 		return 0;
 	}
 
-	unless ($ws) {
-		return 0 unless _validFormkey();
-	}
+	return 0 unless _validFormkey($ws ? qw(max_post_check interval_check) : ());
 
 	if ($form->{id}) {
 		my %update;
@@ -662,10 +660,11 @@ sub editArticle {
 }
 
 sub _validFormkey {
+	my(@checks) = @_ ? @_ : qw(max_post_check interval_check formkey_check);
 	my $error;
 	# this is a hack, think more on it, OK for now -- pudge
 	Slash::Utility::Anchor::getSectionColors();
-	for (qw(max_post_check interval_check formkey_check)) {
+	for (@checks) {
 		last if formkeyHandler($_, 0, 0, \$error);
 	}
 
@@ -734,6 +733,7 @@ sub add_entry {
 
 	no strict 'refs';
 	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
+	$slashdb->createFormkey('journal');
 	my $id = $saveArticle->($journal, $constants, $user, $form, $slashdb, 1);
 	return $id;
 }
