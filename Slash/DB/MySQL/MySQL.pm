@@ -1408,8 +1408,6 @@ sub _writeAccessLogCache {
 	while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
 		$self->sqlInsert('accesslog', $hr, { delayed => 1 });
 	}
-	$self->{_dbh}->commit;
-	$self->{_dbh}{AutoCommit} = 1;
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
@@ -2058,8 +2056,6 @@ sub createUser {
 		created_ipid		=> getCurrentUser('ipid'),
 	});
 
-	$self->{_dbh}->commit;
-	$self->{_dbh}->{AutoCommit} = 1;
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
@@ -5294,8 +5290,6 @@ sub setCommentForMod {
 		assn_order => [ "-points", "-pointsmax" ]
 	});
 
-	$self->{_dbh}->commit;
-	$self->{_dbh}->{AutoCommit} = 1;
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
@@ -6163,8 +6157,6 @@ sub createStory {
 		goto error;
 	}
 
-	$self->{_dbh}->commit;
-	$self->{_dbh}{AutoCommit} = 1;
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
@@ -6240,8 +6232,6 @@ sub updateStory {
 		$self->setSection($data->{section}, { writestatus => 'dirty' });
 	}
 
-	$self->{_dbh}->commit;
-	$self->{_dbh}{AutoCommit} = 1;
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");

@@ -398,14 +398,17 @@ sub _querylog_writecache {
 	my($self) = @_;
 	return unless ref($self->{_querylog}{cache})
 		&& @{$self->{_querylog}{cache}};
-	my $dbh = $self->{_querylog}{db}{_dbh};
-	return unless $dbh;
-	$dbh->{AutoCommit} = 0;
+	my $qdb = $self->{_querylog}{db};
+	return unless $qdb;
+#	$qdbh->{AutoCommit} = 0;
+	$qdb->sqlDo("SET AUTOCOMMIT=0");
 	while (my $sql = shift @{$self->{_querylog}{cache}}) {
-		$dbh->do($sql);
+		$qdb->sqlDo($sql);
 	}
-	$dbh->commit;
-	$dbh->{AutoCommit} = 1;
+	$qdb->sqlDo("COMMIT");
+	$qdb->sqlDo("SET AUTOCOMMIT=1");
+#	$qdbh->commit;
+#	$qdbh->{AutoCommit} = 1;
 }
 
 ########################################################

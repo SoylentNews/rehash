@@ -1685,13 +1685,16 @@ sub deleteStoryAll {
 	my($self, $sid) = @_;
 	my $sid_q = $self->sqlQuote($sid);
 
-	$self->{_dbh}{AutoCommit} = 0;
+#	$self->{_dbh}{AutoCommit} = 0;
+	$self->sqlDo("SET AUTOCOMMIT=0");
 	my $discussion_id = $self->sqlSelect('id', 'discussions', "sid = $sid_q");
 	$self->sqlDelete("stories", "sid=$sid_q");
 	$self->sqlDelete("story_text", "sid=$sid_q");
 	$self->deleteDiscussion($discussion_id) if $discussion_id;
-	$self->{_dbh}->commit;
-	$self->{_dbh}{AutoCommit} = 1;
+#	$self->{_dbh}->commit;
+#	$self->{_dbh}{AutoCommit} = 1;
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 }
 
 ########################################################
