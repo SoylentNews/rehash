@@ -1479,7 +1479,7 @@ sub prepareUser {
 
 	if ($uri =~ m[^/$]) {
 		$user->{currentPage} = 'index';
-	} elsif ($uri =~ m{(?:/|\b)([^/]+)\.pl$}) {
+	} elsif ($uri =~ m{\b([^/]+)\.pl\b}) {
 		$user->{currentPage} = $1;
 	} else {
 		$user->{currentPage} = 'misc';
