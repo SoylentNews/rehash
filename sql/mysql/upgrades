@@ -2116,3 +2116,6 @@ CREATE TABLE slashd_errnotes (
         INDEX taskname_ts (taskname, ts)
 ) TYPE=InnoDB;
 
+# Change for plugins/HumanConf (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('hc_possible_fonts', '', 'Possible fonts to use (space-separated, empty for the default)');
+
