@@ -1,0 +1,22 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+friendsview
+__template__
+[% FOR article = articles %]
+	<LI><A HREF="[% constants.rootdir %]/~[% article.nickname | fixparam %]/journal/[% article.id %]">[% article.description %]</A> - <A HREF="[% constants.rootdir %]/~[% article.nickname | fixparam %]">[% article.nickname %]</A>
+[% END %]
+__seclev__
+10000
