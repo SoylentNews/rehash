@@ -2159,3 +2159,7 @@ INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href
 
 UPDATE vars SET description='Show HTML comments before and after template? (see Slash::Display) 0=no 1=yes unless Nocomm 2=ALWAYS (debugging only!)' WHERE name='template_show_comments';
 
+
+INSERT INTO vars (name, value, description) VALUES ('store_com_page1_min_cid_for_user_com_cnt',1000,"Caches the minimum cid shown on a user's first page of comments shown if their commentcount is >= this val. This can speed up future queries.  Set to 0 to disable this.");
+
+INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_size', 24, "Number of submissions shown per page on a user page.  Set to 0 to show all");
