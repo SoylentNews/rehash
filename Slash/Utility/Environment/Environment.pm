@@ -1804,7 +1804,7 @@ sub writeLog {
 }
 
 sub createLog {
-	my($uri, $dat) = @_;
+	my($uri, $dat, $status) = @_;
 	my $constants = getCurrentStatic();
 	my $log_user = $constants->{log_db_user} || $constants->{backup_db_user} || "";
 	my $logdb;
@@ -1816,7 +1816,20 @@ sub createLog {
 
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
 
-	if ($uri =~ '^/palm') {
+	if ($status == 302 ) {
+		# See mod_relocate -Brian
+		if ($uri =~ /\.relo$/) {
+			my $apr = Apache::Request->new(Apache->request);
+			$dat = $apr->param('_URL');
+			$uri = 'relocate';
+		} else  {
+			$dat = $uri;
+			$uri = 'relocate-undef';
+		}
+	} elsif ($status == 404 ) {
+		$dat = $uri;
+		$uri = 'not found';
+	} elsif ($uri =~ '^/palm') {
 		($dat = $ENV{REQUEST_URI}) =~ s|\.shtml$||;
 		$uri = 'palm';
 	} elsif ($uri eq '/') {
@@ -1851,9 +1864,9 @@ sub createLog {
 		$dat = $uri if $uri =~ $page;	
 		$uri =~ s|^/?(\w+)/?.*|$1|;
 	}
-	$logdb->createAccessLog($uri, $dat);
+	$logdb->createAccessLog($uri, $dat, $status);
 	if (getCurrentUser('is_admin')) {
-		$logdb->createAccessLogAdmin($uri, $dat);
+		$logdb->createAccessLogAdmin($uri, $dat, $status);
 	}
 
 }

@@ -1322,7 +1322,7 @@ sub setContentFilter {
 ########################################################
 # This creates an entry in the accesslog
 sub createAccessLog {
-	my($self, $op, $dat) = @_;
+	my($self, $op, $dat, $status) = @_;
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
@@ -1384,6 +1384,7 @@ sub createAccessLog {
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
 		secure		=> Slash::Apache::ConnectionIsSecure(),
 		referer		=> $ENV{HTTP_REFERER},
+		status		=> $status,
 	};
 	if ($constants->{accesslog_insert_cachesize} && !$user->{is_admin}) {
 		# Save up multiple accesslog inserts until we can do them all at once.
