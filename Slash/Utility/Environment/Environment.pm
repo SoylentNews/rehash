@@ -1816,7 +1816,7 @@ sub createLog {
 
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
 
-	if ($status == 302 ) {
+	if ($status == 302) {
 		# See mod_relocate -Brian
 		if ($uri =~ /\.relo$/) {
 			my $apr = Apache::Request->new(Apache->request);
@@ -1826,10 +1826,10 @@ sub createLog {
 			$dat = $uri;
 			$uri = 'relocate-undef';
 		}
-	} elsif ($status == 404 ) {
+	} elsif ($status == 404) {
 		$dat = $uri;
 		$uri = 'not found';
-	} elsif ($uri =~ '^/palm') {
+	} elsif ($uri =~ /^\/palm/) {
 		($dat = $ENV{REQUEST_URI}) =~ s|\.shtml$||;
 		$uri = 'palm';
 	} elsif ($uri eq '/') {
