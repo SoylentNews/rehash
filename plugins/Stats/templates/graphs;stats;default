@@ -47,17 +47,33 @@ SWITCH gtitle;
 
   # Main Report
   CASE 'Pages';
+  extra_pages = [];
+  CALL extra_pages.splice(0, 0, constants.op_extras_countdaily);
+  
+  page_plugin = Slash.getObject('Slash::Page');
+  IF page_plugin;
+  	extra_pages.push("page");
+  END;
+
+  all_pages = ['total','index_page', 'comments_page', 'article_page'];
+  section_pages = ['index_page', 'comments_page', 'article_page'];
+  
+  FOREACH cur_page = extra_pages;
+	all_pages.push("${cur_page}_page");
+	section_pages.push("${cur_page}_page");
+  END;
+
   IF (form.stats_section && form.stats_section != 'all');
       PROCESS make_graph
          showtotal => 1,
          section   => form.stats_section,
          type      => 'areastacked',
-         statdata  => ['index_page', 'comments_page', 'article_page'];
+         statdata  => section_pages;
   ELSE;
       PROCESS make_graph
          section   => 'all',
          type      => 'areastackedindex',
-         statdata  => ['total', 'index_page', 'comments_page', 'article_page'];
+         statdata  => all_pages;
   END;
 
   CASE 'Hits';
