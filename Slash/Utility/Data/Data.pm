@@ -912,7 +912,9 @@ sub breakHtml {
 			|	\S		# or an ordinary char
 			)
 		){$mwl}			# $mwl non-HTML-tag chars in a row
-	)}{$1<nobr> <wbr></nobr>}gsx;
+	)}{
+		substr($1, 0, -1) . "<nobr>" . substr($1, -1) . "<wbr></nobr> "
+	}gsex;
 
 	# Just to be tidy, if we appended that word break at the very end
 	# of the text, eliminate it.
