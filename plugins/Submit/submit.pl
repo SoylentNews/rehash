@@ -229,7 +229,6 @@ sub previewForm {
 		}
 	}
 
-
 	slashDisplay('previewForm', {
 		submission	=> $sub,
 		submitter	=> $sub->{uid},

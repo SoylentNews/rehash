@@ -229,17 +229,17 @@ INSERT INTO skin_colors VALUES (2, 'bg_3', '660000');
 INSERT INTO skin_colors VALUES (2, 'bg_4', 'BBBBBB');
 INSERT INTO skin_colors VALUES (2, 'bg_5', 'DDDDDD');
 INSERT INTO skin_colors VALUES (3, 'fg_0', 'FFFFFF');
-INSERT INTO skin_colors VALUES (3, 'fg_1', '000000');
-INSERT INTO skin_colors VALUES (3, 'fg_2', '000000');
-INSERT INTO skin_colors VALUES (3, 'fg_3', 'FFFFFF');
-INSERT INTO skin_colors VALUES (3, 'fg_4', 'CCCCCC');
-INSERT INTO skin_colors VALUES (3, 'fg_5', '000000');
-INSERT INTO skin_colors VALUES (3, 'bg_0', '000000');
+INSERT INTO skin_colors VALUES (3, 'fg_1', '222222');
+INSERT INTO skin_colors VALUES (3, 'fg_2', '111111');
+INSERT INTO skin_colors VALUES (3, 'fg_3', 'DDDDDD');
+INSERT INTO skin_colors VALUES (3, 'fg_4', '999999');
+INSERT INTO skin_colors VALUES (3, 'fg_5', '111111');
+INSERT INTO skin_colors VALUES (3, 'bg_0', 'DDDDDD');
 INSERT INTO skin_colors VALUES (3, 'bg_1', 'FFFFFF');
-INSERT INTO skin_colors VALUES (3, 'bg_2', 'CCCCCC');
-INSERT INTO skin_colors VALUES (3, 'bg_3', '006666');
-INSERT INTO skin_colors VALUES (3, 'bg_4', 'CCCCCC');
-INSERT INTO skin_colors VALUES (3, 'bg_5', 'FFFFFF');
+INSERT INTO skin_colors VALUES (3, 'bg_2', 'DDDDDD');
+INSERT INTO skin_colors VALUES (3, 'bg_3', '660000');
+INSERT INTO skin_colors VALUES (3, 'bg_4', 'BBBBBB');
+INSERT INTO skin_colors VALUES (3, 'bg_5', 'DDDDDD');
 
 #
 # Dumping data for table 'stories'
