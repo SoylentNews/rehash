@@ -155,7 +155,7 @@ sub slashDisplay {
 	return unless $name;
 
 	my $constants = getCurrentStatic();
-	my $slashdb   = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
 	my $user      = getCurrentUser();
 
 	# save for later (local() seems not to work ... ?)
@@ -194,7 +194,7 @@ sub slashDisplay {
 		# it is cached the performance hit is generally light,
 		# and this is the only good way to get the actual name,
 		# page, section, we bite the bullet and do it
-		my $tempdata = $slashdb->getTemplateByName($name, [qw(tpid page section)]);
+		my $tempdata = $reader->getTemplateByName($name, [qw(tpid page section)]);
 		$TEMPNAME = "ID $tempdata->{tpid}, " .
 			"$name;$tempdata->{page};$tempdata->{section}";
 	}

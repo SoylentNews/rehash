@@ -76,9 +76,9 @@ sub fetch {
 	# if regular scalar, get proper template ID ("name") from DB
 	} else {
 		print STDERR "fetch text : $text\n" if $DEBUG > 1;
-		my $slashdb = getCurrentDB();
+		my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
 
-		my $temp = $slashdb->getTemplateByName($text, [qw(tpid page section)]);
+		my $temp = $reader->getTemplateByName($text, [qw(tpid page section)]);
 		$compname = "$text;$temp->{page};$temp->{section}"
 			if $self->{COMPILE_DIR};
 		$name = $temp->{tpid};
@@ -124,9 +124,9 @@ sub _load {
 	print STDERR "_load(@_[1 .. $#_])\n" if $DEBUG;
 
 	if (! defined $text) {
-		my $slashdb = getCurrentDB();
+		my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
 		# in arrayref so we also get _modtime
-		my $temp = $slashdb->getTemplate($name, ['template']);
+		my $temp = $reader->getTemplate($name, ['template']);
 		$text = $temp->{template};
 		$time = $temp->{_modtime};
 	}
@@ -157,8 +157,8 @@ sub _refresh {
 	# compare load time with current _modtime from API to see if
 	# its modified and we need to reload it
 	if ($slot->[ DATA ]{modtime}) {
-		my $slashdb = getCurrentDB();
-		my $temp = $slashdb->getTemplate($slot->[ NAME ], ['tpid']);
+		my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
+		my $temp = $reader->getTemplate($slot->[ NAME ], ['tpid']);
 
 		if ($slot->[ DATA ]{modtime} < $temp->{_modtime}) {
 			print STDERR "refreshing cache file ", $slot->[ NAME ], "\n"
