@@ -848,6 +848,8 @@ Fry:What kind of bozos would start a Bender protest group?
 Fry:I can burp the alphabet.  A, B, D ... no, wait ...
 Fry:Why use my own legs like an idiot when I can use a Chickenwalker?
 Fry:Hooray, we don't have to do anything!
+Fry:Prepare to be thought at!
+Fry:I did it!  And it's all thanks to the books at my local library.
 EOT
 
 1;
