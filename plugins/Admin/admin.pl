@@ -1030,9 +1030,9 @@ sub getRelated {
 sub otherLinks {
 	my($aid, $tid, $uid) = @_;
 
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $topics = $slashdb->getTopics();
+	my $topics = $reader->getTopics();
 	my @tids = ( $tid );
 	if (ref($tid) && ref($tid) eq 'ARRAY') {
 		@tids = ( @$tid );
