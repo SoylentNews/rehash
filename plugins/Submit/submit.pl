@@ -168,17 +168,12 @@ sub previewStory {
 sub yourPendingSubmissions {
 	my($constants, $slashdb, $user, $form) = @_;
 
-	my $summary;
 	return if $user->{is_anon};
 
-	if (my $submissions = $slashdb->getSubmissionsPending()) {
-		for my $submission (@$submissions) {
-			$summary->{$submission->[4]}++;
-		}
+	if (my $submissions = $slashdb->getSubmissionsByUID($user->{uid}, "", { limit_days => 365 })) {
 		slashDisplay('yourPendingSubs', {
 			submissions	=> $submissions,
 			width		=> '100%',
-			summary		=> $summary,
 		});
 	}
 }
