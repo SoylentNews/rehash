@@ -27,3 +27,4 @@ CREATE TABLE people_nthdegree (
 	INDEX (uid),
 	INDEX (friend)
 ) TYPE = Innodb;
+

@@ -453,13 +453,17 @@ sub linkStory {
 	my $section = $slashdb->getSection($story_link->{section});
 	my $url = $section->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
 
-	return _hard_linkStory($story_link, $mode, $threshold, $dynamic, $url)
+	my $tids = $slashdb->getStoryTopicsJustTids($story_link->{sid}); 
+	my $tid_string = join('&amp;tid=', @$tids);
+
+	return _hard_linkStory($story_link, $mode, $threshold, $dynamic, $url, $tid_string)
 		if $constants->{comments_hardcoded} && !$user->{light};
 
 	return slashDisplay('linkStory', {
 		mode		=> $mode,
 		threshold	=> $threshold,
 		tid		=> $story_link->{tid},
+		tid_string		=> $tid_string,
 		sid		=> $story_link->{sid},
 		section		=> $story_link->{section},
 		url		=> $url,
@@ -1157,18 +1161,19 @@ sub lockTest {
 ########################################################
 # this sucks, but it is here for now
 sub _hard_linkStory {
-	my($story_link, $mode, $threshold, $dynamic, $url, $url_flag) = @_;
+	my($story_link, $mode, $threshold, $dynamic, $url, $tid_string) = @_;
 	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
 
 	if ($dynamic) {
 	    my $link = qq[<A HREF="$url/article.pl?sid=$story_link->{sid}];
 	    $link .= "&amp;mode=$mode" if $mode;
-	    $link .= "&amp;tid=$story_link->{tid}" if $story_link->{tid};
+	    $link .= "&amp;tid=$tid_string" if $tid_string;
 	    $link .= "&amp;threshold=$threshold" if defined($threshold);
 	    $link .= qq[">$story_link->{link}</A>];
 	    return $link;
 	} else {
-	    return qq[<A HREF="$url/$story_link->{section}/$story_link->{sid}.shtml?tid=$story_link->{tid}">$story_link->{link}</A>];
+	    return qq[<A HREF="$url/$story_link->{section}/$story_link->{sid}.shtml?tid=$tid_string">$story_link->{link}</A>];
 	}
 }
 

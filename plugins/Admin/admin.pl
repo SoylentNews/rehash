@@ -1086,6 +1086,7 @@ sub editStory {
 		}
 	}
 
+	my @stid;
 	my($extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $topic, $storycontent, $locktest,
 		$sections, $topic_select, $section_select, $author_select,
@@ -1097,7 +1098,9 @@ sub editStory {
 		('','','','');
 	my($multi_topics, $story_topics);
 	my $page = 'index';
-	my $section = $user->{section} || $form->{section};
+	# If the user is a section only admin, we do that, if they have filled out a form we do that but 
+	# if none of these apply we just do defaultsection -Brian
+	my $section = $user->{section} || $form->{section} || $constants->{defaultsection};
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
@@ -1111,7 +1114,7 @@ sub editStory {
 		$form->{section} ||= $constants->{defaultsection};
 		my $SECT = $slashdb->getSection($form->{section});
 		$extracolumns = $slashdb->getSectionExtras($storyref->{section}) || [ ];
-		# Did you know we actually have  var that should set this? -Brian
+		# Did you know we actually have a var that should set this? -Brian
 		$storyref->{writestatus}   = "dirty";
 		$storyref->{displaystatus} = $form->{displaystatus} || $SECT->{defaultdisplaystatus};
 		$storyref->{commentstatus} = $form->{commentstatus} || $SECT->{defaultcommentstatus};
@@ -1173,6 +1176,13 @@ sub editStory {
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
+		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
+			for(@{$form->{_multi}{stid}}) {
+				push @stid, $_ if $_;
+			}
+		} else {
+			push @stid, $form->{stid} if $form->{stid};
+		}
 
 	} elsif (defined $sid) { # Loading an existing SID
 		my $tmp = $user->{currentSection};
@@ -1186,9 +1196,11 @@ sub editStory {
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 		$subid = $storyref->{subid};
-
+		my $temp_stid = $slashdb->getStoryTopics($sid);
+		delete $temp_stid->{$storyref->{tid}};
+		@stid = keys %$temp_stid;
 	} else { # New Story
-		my $SECT = $slashdb->getSection($section || $constants->{defaultsection});
+		my $SECT = $slashdb->getSection($section);
 		$extracolumns		    = $slashdb->getSectionExtras($SECT->{section}) || [ ];
 		$storyref->{displaystatus}  = $SECT->{defaultdisplaystatus};
 		$storyref->{commentstatus}  = $SECT->{defaultcommentstatus};
@@ -1210,41 +1222,35 @@ sub editStory {
 	$sections = $slashdb->getDescriptions('sections');
 
 
-	if ($constants->{multitopics_enabled}) {
-		$multi_topics = $slashdb->getDescriptions(
-	    		'topics_section', 
-			$storyref->{section}
-		);
-		$story_topics = $slashdb->getStoryTopics($storyref->{sid});
-		$story_topics->{$storyref->{tid}} ||= 1 ; 
-	}
+	$multi_topics = $slashdb->getDescriptions(
+		'topics_section', 
+		$storyref->{section}
+	);
+	$story_topics = $slashdb->getStoryTopics($storyref->{sid});
+	$story_topics->{$storyref->{tid}} ||= 1 ; 
 
-	# Topic list is sorted alpha, by VALUE. These calls to createSelect
-	# should really be moved to the templates at some point.
-	# - Cliff
-	if ($constants->{use_alt_topic}) {
-		$topic_select = createSelect('tid',
-			$slashdb->getDescriptions(
-				'topics_section_type', 
-				$section, 
-				$constants->{use_alt_topic}
-			),
-			$storyref->{tid}, 1, 0, 1
-		);
-	} else {
-		if ($section) {
-	    		$topic_select = createSelect('tid',
-	    			$slashdb->getDescriptions(
-					'topics_section', 
-					$section
-				),
-	    			$storyref->{tid}, 1, 0, 1
-	    		);
-		} else {
-	    		$topic_select = createSelect('tid',
-	    			$slashdb->getDescriptions('topics'),
-	    			$storyref->{tid}, 1, 0, 1
-	    		);
+	my $topic_values = $slashdb->getDescriptions('topics_section', $section);
+	$topic_select = createSelect('tid',
+		$topic_values,
+		$storyref->{tid}, 1, 0, 1
+	);
+	my @topic_select_sec;
+	if ($section) {
+		for (@stid) {
+			my %$current_hash = %$topic_values;
+			$current_hash->{0} = "$current_hash->{$_} (Delete)";
+			push @topic_select_sec, createSelect('stid',
+				$current_hash,
+				$_, 1, 0, 1
+			);
+		}
+		if (@stid < 2) {
+			my %$current_hash = %$topic_values;
+			$current_hash->{0} = "Add Topic";
+			push @topic_select_sec, createSelect('stid',
+				$current_hash,
+				0, 1, 0, 1
+			);
 		}
 	}
 
@@ -1347,6 +1353,7 @@ sub editStory {
 		multi_topics		=> $multi_topics,
 		story_topics		=> $story_topics,
 		similar_stories		=> $similar_stories,
+		topic_select_sec	=> \@topic_select_sec,
 	});
 }
 
@@ -1561,6 +1568,7 @@ sub updateStory {
 	my $tid_ref;
 	my $default_set = 0;
 	my $topic = $form->{tid};
+	my $stopic = $form->{stid};
 
 	$form->{dept} =~ s/ /-/g;
 
@@ -1574,23 +1582,33 @@ sub updateStory {
 		? $slashdb->getTime()
 		: $form->{'time'};
 
-	if ($constants->{use_alt_topic} && $constants->{enable_index_topic} && $constants->{organise_stories}) {
-		$topic = $form->{$constants->{organise_stories}};
+	for my $k (keys %$form) {
+		if ($k =~ /^tid_(.*)$/) {
+			push @$tid_ref, $1;
+		}
 	}
 
-	if ($constants->{multitopics_enabled}) {
-		for my $k (keys %$form) {
-			if ($k =~ /^tid_(.*)$/) {
-				push @$tid_ref, $1;
-			}
+	# Take all secondary topics and shove them into the array for the story
+	if (ref($form->{_multi}{stid}) eq 'ARRAY') {
+		for (@{$form->{_multi}{stid}}) {
+			push @$tid_ref, $_ if $_;
 		}
-		for (@{$tid_ref}) {
-			$default_set++ if $topic && $_ eq $topic;
-		}
-		push @$tid_ref, $topic if !$default_set;
-
-		$slashdb->setStoryTopics($form->{sid}, $tid_ref);
+	} else {
+		push @$tid_ref, $form->{stid} if $form->{stid};
 	}
+
+	# Make sure the primary topic is saved with the topics for the story
+	for (@{$tid_ref}) {
+		$default_set++ if $topic && $_ eq $topic;
+	}
+	push @$tid_ref, $topic if !$default_set;
+	my %temp_hash;
+	for (@$tid_ref) {
+		$temp_hash{$_} = 1;
+	}
+	@$tid_ref = keys %temp_hash;
+
+	$slashdb->setStoryTopics($form->{sid}, $tid_ref);
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});
@@ -1788,10 +1806,6 @@ sub saveStory {
 		? $slashdb->getTime()
 		: $form->{'time'};
 
-	if ($constants->{use_alt_topic} && $constants->{enable_index_topic} && $constants->{organise_stories}) {
-		$topic = $form->{$constants->{organise_stories}};
-	}
-
 	# used to just pass $form to createStory, which is not
 	# a good idea because you end up getting form values 
 	# such as op and apache_request saved into story_param
@@ -1821,22 +1835,6 @@ sub saveStory {
 	}
 	my $sid = $slashdb->createStory($data);
 
-	# we can use multiple values in forms now, we don't
-	# need to keep using this idiom -- pudge
-	if ($constants->{multitopics_enabled}) {
-		for my $k (keys %$form) {
-		    if ($k =~ /tid_(.*)/) {
-			push @$tid_ref, $1;
-		    }
-		}
-		for (@{$tid_ref}) {
-			$default_set++ if $_ eq $topic;
-		}
-		push @$tid_ref, $topic if !$default_set;
-	
-		$slashdb->setStoryTopics($sid, $tid_ref);
-	}
-
 	if ($sid) {
 		my $section = $slashdb->getSection($form->{section});
 		my $rootdir = $section->{rootdir} || $constants->{rootdir};
@@ -1858,6 +1856,28 @@ sub saveStory {
 			errorLog("could not create discussion for story '$sid'");
 		}
 		$data->{discussion} = $id;
+		# Take all secondary topics and shove them into the array for the story
+		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
+			for (@{$form->{_multi}{stid}}) {
+				push @$tid_ref, $_ if $_;
+			}
+		} else {
+			push @$tid_ref, $form->{stid} if $form->{stid};
+		}
+
+		# Make sure the primary topic is saved with the topics for the story
+		for (@{$tid_ref}) {
+			$default_set++ if $topic && $_ eq $topic;
+		}
+		push @$tid_ref, $topic if !$default_set;
+		my %temp_hash;
+		for (@$tid_ref) {
+			$temp_hash{$_} = 1;
+		}
+		@$tid_ref = keys %temp_hash;
+
+		$slashdb->setStoryTopics($sid, $tid_ref);
+
 		slashHook('admin_save_story_success', { story => $data });
 	} else {
 		slashHook('admin_save_story_failed', { story => $data });

@@ -61,7 +61,7 @@ __template__
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
 	[% END %]
 
-	[% IF topics && !constants.multitopics_enabled;
+	[% IF topics && !constants.multitopics_display;
 		Slash.createSelect("tid", topics, form.tid, 1, 0, 1);
 	END %]
 
@@ -75,7 +75,7 @@ __template__
 
 	[% Slash.createSelect("sort", sort, form.sort, 1) %]
 
-	[% IF constants.multitopics_enabled;
+	[% IF constants.multitopics_display;
 		"<P>\n";
 		INCLUDE topicsearch;
 	END %]

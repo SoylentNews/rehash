@@ -13,7 +13,7 @@ en_US
 __name__
 editStory
 __template__
-<FORM ACTION="[% env.script_name %]" METHOD="POST" enctype="multipart/form-data">
+<FORM ACTION="/admin.pl" METHOD="POST" enctype="multipart/form-data">
 [% IF form.subid %]
 	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid | strip_attribute %]">
 [% END %]
@@ -111,10 +111,6 @@ __template__
 		<FONT COLOR="[% user.fg.3 %]">
 		[% PROCESS editbuttons %]
 
-		[% IF topic_select %]
-			[% topic_select %]
-		[% END %]
-
 		[% UNLESS user.section %]
 			[% section_select %]
 		[% END %]
@@ -132,6 +128,20 @@ __template__
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter | strip_attribute %]">
 		</FONT></TD>
 	</TR>
+	<TR>
+		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
+		<B>Topics</B> </FONT></TD>
+		<TD BGCOLOR="[% user.bg.3 %]">
+		<FONT COLOR="[% user.fg.3 %]">
+		[% IF topic_select %]
+			[% topic_select %]
+		[% END %]
+		[% FOREACH select=topic_select_sec %]
+			[% select %]
+		[% END %]
+		</FONT></TD>
+	</TR>
+
 	<TR>
 		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
 		<B>Title</B> </FONT></TD>
@@ -230,22 +240,6 @@ storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; 
 </TABLE>
 <BR>
 
-[% IF constants.multitopics_enabled %]
-<TABLE>
-	<TR>
-		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
-		<B>Story Topics:</B>
-		</FONT></TD>
-		<TD BGCOLOR="[% user.bg.2 %]">
-	[% FOREACH topic = multi_topics.sort %]
-		[% name = "tid_$topic" %]
-		<INPUT TYPE="checkbox" NAME="[% name %]" VALUE="[% multi_topics.$topic %]" [% IF story_topics.$topic || form.$name %] CHECKED [% END %]>[% multi_topics.$topic %]<BR>
-	[% END %]
-		</TD>
-	</TR>
-</TABLE>
-<BR>
-[% END %]
 
 [% PROCESS editbuttons %]
 

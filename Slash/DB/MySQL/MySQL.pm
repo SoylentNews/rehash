@@ -5791,7 +5791,16 @@ sub getSectionTopicType {
 ########################################################
 sub getTopics {
 	my $answer = _genericGetsCache('topics', 'tid', '', @_);
+
 	return $answer;
+}
+
+########################################################
+sub getStoryTopicsJustTids {
+	my($self, $sid) = @_;
+	my $answer = $self->sqlSelectColArrayref('tid', 'story_topics', "sid = " . $self->sqlQuote($sid));
+
+	return  $answer;
 }
 
 ########################################################
