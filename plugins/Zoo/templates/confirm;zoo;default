@@ -27,6 +27,9 @@ __template__
 			<TD>
 				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %]CHECKED[% END %]> 
 			</TD>
+			<TD>
+				&nbsp;&nbsp;<INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
+			</TD>
 		</TR>
 	</TABLE>
 [% ELSE %]
