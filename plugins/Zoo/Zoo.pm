@@ -277,9 +277,9 @@ sub rebuildUser {
 		$data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
 		for (@$data) {
 			if ($_->{type} eq 'friend') {
-				$people->{FOF()}{$_->{person}}{$_->{friend}} = 1;
+				$people->{FOF()}{$_->{person}}{$_->{uid}} = 1;
 			} elsif ($_->{type} eq 'foe') {
-				$people->{EOF()}{$_->{person}}{$_->{friend}} = 1;
+				$people->{EOF()}{$_->{person}}{$_->{uid}} = 1;
 			}
 		}
 	}
