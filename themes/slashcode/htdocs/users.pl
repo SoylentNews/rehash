@@ -2320,6 +2320,18 @@ sub saveComm {
 		textarea_cols		=> ($form->{textarea_cols} != $constants->{textarea_cols}
 						? $form->{textarea_cols} : undef),
 	};
+	
+	# set our default values for the items where an empty-string won't do 
+	my $defaults = {
+		posttype        => 2,
+		highlightthresh => 4,
+		maxcommentsize  => 4096,
+		reparent        => 1,
+		commentlimit    => 100,
+		commentspill    => 50,
+		mode            => 'thread'
+	};
+	$defaults = { mode => undef, commentspill=> undef};
 
 	my @reasons = ( );
 	my $reasons = $slashdb->getReasons();
@@ -2339,8 +2351,8 @@ sub saveComm {
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
 		$users_comments_table->{"people_bonus_$_"} = ($answer == 0) ? '' : $answer;
 	}
-
 	getOtherUserParams($users_comments_table);
+	setToDefaults($users_comments_table, {}, $defaults) if $form->{restore_defaults};
 	$slashdb->setUser($uid, $users_comments_table);
 
 	editComm({ uid => $uid, note => $note });
@@ -2415,6 +2427,11 @@ sub saveHome {
 		sectioncollapse	=> ($form->{sectioncollapse} ? 1 : 0),
 	};
 
+	my $defaults = {
+		maxstories 	=> 30,
+		tzcode     	=> "EST"
+	};
+
 	if (defined $form->{tzcode} && defined $form->{tzformat}) {
 		$users_index_table->{tzcode} = $form->{tzcode};
 		$users_index_table->{dfid}   = $form->{tzformat};
@@ -2442,6 +2459,7 @@ sub saveHome {
 	}
 
 	getOtherUserParams($users_index_table);
+	setToDefaults($users_index_table, {}, $defaults) if $form->{restore_defaults};
 	$slashdb->setUser($uid, $users_index_table);
 
 	editHome({ uid => $uid, note => $note });
@@ -2860,6 +2878,23 @@ sub getOtherUserParams {
 	}
 }
 
+###############################################################
+# This modifies a hashref to default values -- if nothing
+# else we assume the empty string which clears items in the
+# user_param table 
+#
+# takes 3 hashrefs currently
+# $data     - hashref to change to defaults
+# $skip     - hashref of keys to skip modifying
+# $defaults - hashref of defaults to set to something other 
+#             than the empty string
+sub setToDefaults {
+	my ($data, $skip, $defaults) = @_;
+	foreach my $key (keys %$data) {
+		next if $skip->{$key};
+		$data->{$key} = exists $defaults->{$key} ? $defaults->{$key} : "";
+ 	}
+}
 #################################################################
 
 createEnvironment();
