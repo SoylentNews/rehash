@@ -1,0 +1,5 @@
+name=SOAP
+description="SOAP API for Plugins"
+mysql_schema=mysql_schema.sql
+mysql_dump=mysql_dump.sql
+htdoc=soap.pl

@@ -1,0 +1,9 @@
+MANIFEST			This list of files
+Makefile.PL
+PLUGIN
+SOAP.pm
+Test.pm
+example_client.pl
+mysql_dump.sql
+mysql_schema.sql
+soap.pl
