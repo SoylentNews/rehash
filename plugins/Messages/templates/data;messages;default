@@ -11,6 +11,7 @@ en_US
 __name__
 data
 __template__
+[% USE date %]
 [% SWITCH value %]
 
 [% CASE 'header' %]
@@ -44,10 +45,10 @@ Not allowed to send mail; send_mail variable is false
 Error sending to '[% addr %]' for user [% uid %]: [% error %]
 
 [% CASE 'newsletter subject' %]
-Daily Stories
+Stories for [% date.format(date.now, '%G-%m-%d') %]
 
 [% CASE 'headlines subject' %]
-Daily Headlines
+Headlines for [% date.format(date.now, '%G-%m-%d') %]
 
 [% CASE 'unknown mode' %]
 Unknown delivery mode '[% mode %]' for user [% uid %]
