@@ -13,7 +13,7 @@ en_US
 __name__
 searchform
 __template__
-[% USE Slash %]
+<table width="100%" cellpadding="3" cellspacing="0" border="0"><tr><td bgcolor="[% user.colors.bg_2 %]">
 
 [% IF tref.image %]
 	<IMG SRC="[% constants.imagedir %]/topics/[% tref.image %]"
@@ -25,6 +25,11 @@ __template__
 <FORM ACTION="[% gSkin.rootdir %]/search.pl" METHOD="GET">
 	<br>
 	<INPUT TYPE="TEXT" SIZE="40" NAME="query" VALUE="[% form.query %]">
+	[% IF authors %]
+		[% Slash.createSelect("author", authors, form.author, 1, 0, 1) %]
+	[% END %]
+	[% Slash.createSelect("sort", sort, form.sort, 1) %]
+
 	<INPUT TYPE="SUBMIT" VALUE="Search"><BR>
 
 	<INPUT TYPE="RADIO" NAME="op" VALUE="stories"[% IF op == 'stories' %] CHECKED[% END %]> Stories
@@ -48,10 +53,6 @@ __template__
 	<INPUT TYPE="CHECKBOX" NAME="journal_only" VALUE="1"[% IF form.journal_only == '1' %] CHECKED[% END %]> Users with Journals
 	[% END %]
 
-	[% IF authors %]
-		[% Slash.createSelect("author", authors, form.author, 1, 0, 1) %]
-	[% END %]
-
 	[% IF submission_notes %]
 		[% Slash.createSelect("note", submission_notes, form.note, 1, 0, 1) %]
 	[% END %]
@@ -61,26 +62,83 @@ __template__
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
 	[% END %]
 
-	[% IF topics && !constants.multitopics_display;
+	[%# IF topics && !constants.multitopics_display;
 		Slash.createSelect("tid", topics, form.tid, 1, 0, 1);
 	END %]
 
-	[% IF sections;
+	[%# IF sections;
 		Slash.createSelect("section", sections, form.section, 1, 0, 1);
 	END %]
 
-	[% IF subsections;
+	[%# IF subsections;
 		Slash.createSelect("subsection", subsections, form.subsection, 1, 0, 1);
 	END %]
 
-	[% Slash.createSelect("sort", sort, form.sort, 1) %]
-
-	[% IF constants.multitopics_display;
+	[%# IF constants.multitopics_display;
 		"<P>\n";
 		INCLUDE topicsearch;
 	END %]
 	<P>
 </FORM>
+
+</td></tr><tr><td bgcolor="[% user.colors.bg_2 %]">
+[%
+   skins = Slash.db.getSkins;
+   this_skin = 0;
+   IF form.tid;
+      this_skin = Slash.db.getSkidFromNexus(form.tid) || 0;
+   END;
+
+   listnames = {};
+   IF this_skin;
+      topics = Slash.db.getTopicTree();
+      topic_children = Slash.db.getAllChildrenTids(form.tid);
+      FOREACH t = topic_children;
+         listnames.${topics.$t.textname} = t;
+      END;
+   
+   ELSE;
+      FOREACH s = skins.keys;
+         skinname = skins.$s.name;
+         NEXT IF s == constants.mainpage_skid || skinname == "tacohell" || skinname == "radio" || skinname == "features" || skinname == "awards" || skinname == "polls" || skinname == "search";
+         listnames.${skins.$s.title} = skins.$s.nexus;
+      END;
+   END;
+
+   listcount = listnames.size / 3;
+   listex = listnames.size mod 3;
+   i = 0;
+%]
+<b><a href="[% gSkin.rootdir %]/search.pl">[% constants.sitename %]</a>
+[% IF this_skin %]
+:: <a href="[% gSkin.rootdir %]/search.pl?tid=[% form.tid %]">[% skins.${this_skin}.title %]</a>
+[% END; IF listnames.size %]
+Topics</b>
+[% END %]
+</td></tr><tr><td bgcolor="[% user.colors.bg_2 %]">
+
+[% IF listnames.size %]
+<table cellpadding="10" width="100%">
+<tr><td valign="top">
+<font size="-1">
+<ul>
+[% FOREACH s = listnames.keys.sort -%]
+<li><a href="[% gSkin.rootdir %]/search.pl?tid=[% listnames.$s %]">[% s %]</a></li>
+[%- i = i + 1;
+    IF i == listcount.int || i == 0;
+       IF i == listcount.int && listex;
+          listext = listex = 1;
+          i = -1;
+          NEXT;
+       END;
+%]</ul></td>
+<td valign="top">
+<font size="-1">
+<ul>[% END; END %]
+</td></tr>
+</table></td></tr></table>
+[% END %]
+
 
 __seclev__
 100
