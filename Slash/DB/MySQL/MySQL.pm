@@ -723,9 +723,9 @@ sub getMetamodsForUserRaw {
 				IF(
 					id BETWEEN $min_old and $max_old,
 					POW((id-$min_old)/$old_range, $waitpow),
-					POW((id-$min_mid)/$mid_range, $waitpow) + 2
+					POW((id-$min_mid)/$mid_range, $waitpow) + 0.9
 				),
-				POW((id-$min_new)/$new_range, $waitpow) + 4
+				POW((id-$min_new)/$new_range, $waitpow) + 1.8
 			 )
 			 + RAND()
 			 AS rank",
