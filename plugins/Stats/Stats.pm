@@ -78,6 +78,38 @@ sub countModeratorLog {
 }
 
 ########################################################
+sub getCommentsByDistinctIPID {
+	my($self, $yesterday) = @_;
+
+	my $used = $self->sqlSelectColArrayref(
+		'ipid', 'comments', 
+		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",'',{distinct => 1}
+	);
+}
+
+########################################################
+sub countSubmissionsByDay {
+	my($self, $yesterday) = @_;
+
+	my $used = $self->sqlCount(
+		'comments', 
+		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'"
+	);
+}
+
+########################################################
+sub countSubmissionsByCommentIPID {
+	my($self, $yesterday, $ipids) = @_;
+	return unless @$ipids;
+	my $in_list = join(",", @$ipids);
+
+	my $used = $self->sqlCount(
+		'comments', 
+		"(date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59') AND ipid IN ($in_list)"
+	);
+}
+
+########################################################
 sub countModeratorLogHour {
 	my($self, $yesterday) = @_;
 
@@ -114,22 +146,6 @@ sub countCommentsDaily {
 	);
 
 	return $comments; 
-}
-
-########################################################
-sub updateStamps {
-	my($self) = @_;
-	my $columns = "uid";
-	my $tables = "accesslog";
-	my $where = "to_days(now())-to_days(ts)=1 AND uid > 0";
-	my $other = "GROUP BY uid";
-
-	my $E = $self->sqlSelectAll($columns, $tables, $where, $other);
-
-	for (@{$E}) {
-		my $uid = $_->[0];
-		$self->setUser($uid, {-lastaccess=>'now()'});
-	}
 }
 
 ########################################################

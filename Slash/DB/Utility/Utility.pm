@@ -263,9 +263,11 @@ sub sqlSelectMany {
 }
 
 ########################################################
+# $options is a hash, add optional pieces here.
 sub sqlSelect {
-	my($self, $select, $from, $where, $other) = @_;
-	my $sql = "SELECT $select ";
+	my($self, $select, $from, $where, $other, $options) = @_;
+	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
+	my $sql = "SELECT $distinct $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
@@ -355,9 +357,10 @@ sub sqlSelectHashref {
 
 ########################################################
 sub sqlSelectColArrayref {
-	my($self, $select, $from, $where, $other) = @_;
+	my($self, $select, $from, $where, $other, $options) = @_;
+	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
 
-	my $sql = "SELECT $select ";
+	my $sql = "SELECT $distinct $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;

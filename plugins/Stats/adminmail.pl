@@ -74,6 +74,9 @@ EOT
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 	my $used = $stats->countModeratorLog($yesterday);
 	my $modlog_hr = $stats->countModeratorLogHour($yesterday);
+	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID($yesterday);
+	my $submissions = $stats->countSubmissionsByDay($yesterday);
+	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($yesterday, $distinct_comment_ipids);
 	my $modlog_total = $modlog_hr->{1}{count} + $modlog_hr->{-1}{count};
 
 	my $comments = $stats->countCommentsDaily($yesterday);
@@ -84,6 +87,7 @@ EOT
 	$statsSave->createStatDaily($yesterday, "comments", $comments);
 	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
 	$statsSave->createStatDaily($yesterday, "journals", $count->{journals});
+	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
 	my @numbers = (
 		$count->{total},
 		$count->{unique},
@@ -104,6 +108,10 @@ EOT
 			($modlog_total ? $modlog_hr->{1}{count}*100
 						/$modlog_total         : 0),
 		$comments,
+		scalar(@$distinct_comment_ipids),
+		$submissions,
+		($submissions ? $submissions_comments_match*100
+									             /$submissions         : 0),
 		$sdTotalHits,
 		$count->{index}{index},
 		$count->{journals},
@@ -111,24 +119,27 @@ EOT
 	my $email = sprintf(<<"EOT", @numbers);
 $constants->{sitename} Stats for yesterday
 
-     total: %8d
-    unique: %8d
-     users: %8d
+        total: %8d
+       unique: %8d
+        users: %8d
 $admin_clearpass_warning
- accesslog: %8d rows total
-  formkeys: %8d rows total
-    modlog: %8d rows total
-metamodlog: %8d rows total (%.1fx modlog)
-mod points: %8d in pool
-used total: %8d yesterday (%.1f%% of pool, %.1f%% of comments)
-   used -1: %8d yesterday (%.1f%%)
-   used +1: %8d yesterday (%.1f%%)
-  comments: %8d posted yesterday
+    accesslog: %8d rows total
+     formkeys: %8d rows total
+       modlog: %8d rows total
+   metamodlog: %8d rows total (%.1fx modlog)
+   mod points: %8d in pool
+   used total: %8d yesterday (%.1f%% of pool, %.1f%% of comments)
+      used -1: %8d yesterday (%.1f%%)
+      used +1: %8d yesterday (%.1f%%)
+     comments: %8d posted yesterday
+uniq comments: %8d distinct IPIDS posted comments today
+  submissions: %8d submissions
+ sub/comments: %8.1f%% of the submissions came from comment posters
 
-total hits: %8d
-  homepage: %8d
-  journals: %8d
-   indexes
+   total hits: %8d
+     homepage: %8d
+     journals: %8d
+      indexes
 EOT
 
 	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
