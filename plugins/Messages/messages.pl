@@ -8,15 +8,13 @@
 # so i document it here.  yay for me!
 
 use strict;
-use Slash 2.001;	# require Slash 2.1
+use Slash 2.003;	# require Slash 2.3.x
+use Slash::Constants qw(:web :messages);
 use Slash::Display;
 use Slash::Utility;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-
-use constant ALLOWED	=> 0;
-use constant FUNCTION	=> 1;
 
 sub main {
 	my $messages  = getObject('Slash::Messages');
@@ -65,8 +63,11 @@ sub display_prefs {
 			if $user->{seclev} < $coderef->{seclev};
 	}
 
+	my $prefs = $messages->getPrefs($user->{uid});
+
 	header(getData('header'));
 	slashDisplay('display_prefs', {
+		prefs		=> $prefs,
 		note		=> $note,
 		messagecodes	=> $messagecodes,
 		deliverymodes	=> $deliverymodes,
@@ -78,19 +79,18 @@ sub save_prefs {
 	my($messages, $constants, $user, $form) = @_;
 
 	my %params;
-	$params{'deliverymodes'} = fixint($form->{'deliverymodes'});
 
 	my $messagecodes = $messages->getDescriptions('messagecodes');
 	for my $code (keys %$messagecodes) {
 		my $coderef = $messages->getMessageCode($code);
-		next if $user->{seclev} < $coderef->{seclev};
-
-		my $key = 'messagecodes_' . $code;
-		$params{$key} = $form->{$key} ? 1 : 0;
+		if ($user->{seclev} < $coderef->{seclev} || !exists($form->{"deliverymodes_$code"})) {
+			$params{$code} = MSG_MODE_NONE;
+		} else {
+			$params{$code} = fixint($form->{"deliverymodes_$code"});
+		}
 	}
 
-	$messages->setUser($user->{uid}, \%params);
-	@{$user}{keys %params} = values %params;
+	$messages->setPrefs($user->{uid}, \%params);
 
 	display_prefs(@_, getData('prefs saved'));
 }
@@ -163,6 +163,3 @@ createEnvironment();
 main();
 
 1;
-
-#deliverymodes
-

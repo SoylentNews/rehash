@@ -2,6 +2,7 @@ INSERT INTO code_param (type, code, name) VALUES ('deliverymodes', -1, 'No Messa
 INSERT INTO code_param (type, code, name) VALUES ('deliverymodes', 0, 'E-mail');
 INSERT INTO code_param (type, code, name) VALUES ('deliverymodes', 1, 'Web');
 
+# modes is comma-separated list of allowed delivery modes ('' is "all")
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (-2, 'Registration Mail', 1, '0');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (-1, 'Unknown Message', 1, '0');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (0, 'Daily Newsletter', 1, '0');

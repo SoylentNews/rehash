@@ -12,7 +12,7 @@ Slash::Messages - Send messages for Slash
 
 =head1 SYNOPSIS
 
-	# basic example of usage
+	my $messages = getObject("Slash::Messages");
 
 =head1 DESCRIPTION
 
@@ -22,6 +22,7 @@ LONG DESCRIPTION.
 
 use strict;
 use Slash::DB;
+use Slash::Constants qw(:messages);
 use Slash::Utility;
 use Storable qw(freeze thaw);
 
@@ -68,6 +69,40 @@ sub getMessageCode {
 	return $codeBank->{$code};
 }
 
+sub getPrefs {
+	my($self, $uid, $code) = @_;
+	my $table = $self->{_prefs_table};
+	my $cols  = $self->{_prefs_cols};
+	my $prime = $self->{_prefs_prime1};
+	my $where = $prime . '=' . $self->sqlQuote($uid);
+
+	if ($code) {
+		$prime .= $self->{_prefs_prime2} . '=' . $self->sqlQuote($code);
+	}
+
+	my $data = {};
+	for (@{ $self->sqlSelectAll($cols, $table, $where) }) {
+		$data->{$_->[0]} = $_->[1];
+	}
+	return $data;
+}
+
+sub setPrefs {
+	my($self, $uid, $prefs) = @_;
+	my $table = $self->{_prefs_table};
+	my $cols  = $self->{_prefs_cols};
+	my $prime = $self->{_prefs_prime1};
+	my $where = $prime . '=' . $self->sqlQuote($uid);
+
+	for my $code (keys %$prefs) {
+		$self->sqlReplace($table, {
+			uid	=> $uid,
+			code	=> $code,
+			mode	=> $prefs->{$code},
+		});
+	}
+}
+
 sub init {
 	my($self, @args) = @_;
 
@@ -75,20 +110,25 @@ sub init {
 	my $plugins = $slashdb->getDescriptions('plugins');
 	return unless $plugins->{'Messages'};
 
-	$self->{_drop_table} = 'message_drop';
-	$self->{_drop_cols}  = 'id,user,code,message,fuser,altto,date';
-	$self->{_drop_prime} = 'id';
-	$self->{_drop_store} = 'message';
+	$self->{_drop_table}	= 'message_drop';
+	$self->{_drop_cols}	= 'id,user,code,message,fuser,altto,date';
+	$self->{_drop_prime}	= 'id';
+	$self->{_drop_store}	= 'message';
 
-	$self->{_web_table}  = 'message_web, message_web_text';
-	$self->{_web_table1} = 'message_web';
-	$self->{_web_table2} = 'message_web_text';
-	$self->{_web_cols}   = 'message_web.id,user,code,message,fuser,readed,date,subject';
-	$self->{_web_prime}  = 'message_web.id=message_web_text.id AND message_web.id';
-	$self->{_web_prime1} = 'id';
-	$self->{_web_prime2} = 'id';
+	$self->{_web_table}	= 'message_web, message_web_text';
+	$self->{_web_table1}	= 'message_web';
+	$self->{_web_table2}	= 'message_web_text';
+	$self->{_web_cols}	= 'message_web.id,user,code,message,fuser,readed,date,subject';
+	$self->{_web_prime}	= 'message_web.id=message_web_text.id AND message_web.id';
+	$self->{_web_prime1}	= 'id';
+	$self->{_web_prime2}	= 'id';
 
-	$self->{_log_table}  = 'message_log';
+	$self->{_prefs_table}	= 'users_messages';
+	$self->{_prefs_cols}	= 'users_messages.code,users_messages.mode';
+	$self->{_prefs_prime1}	= 'uid';
+	$self->{_prefs_prime2}	= 'code';
+
+	$self->{_log_table}	= 'message_log';
 	1;
 }
 
@@ -307,12 +347,22 @@ sub _delete_all {
 sub _getMailingUsers {
 	my($self, $code) = @_;
 	return unless $code =~ /^-?\d+$/;
+	my $mode  = MSG_MODE_EMAIL;
 	my $cols  = "nickname,users.uid,realemail";
-	my $table = "users,users_comments,users_info,users_param";
-	my $where = "users.uid=users_comments.uid AND users.uid=users_info.uid AND " .
-		"users.uid=users_param.uid AND users_param.name='messagecodes_$code' AND " .
-		"users_param.value=1 AND " .
-		"realemail != ''";
+	my $table = "users,users_comments,users_info,users_messages";
+	my $where = <<SQL;
+users.uid=users_comments.uid AND users.uid=users_info.uid AND users.uid=users_messages.uid
+    AND users_messages.code=$code
+    AND users_messages.mode=$mode
+    AND realemail != ''
+SQL
+
+# 	my $cols  = "nickname,users.uid,realemail";
+# 	my $table = "users,users_comments,users_info,users_param";
+# 	my $where = "users.uid=users_comments.uid AND users.uid=users_info.uid AND " .
+# 		"users.uid=users_param.uid AND users_param.name='messagecodes_$code' AND " .
+# 		"users_param.value=1 AND " .
+# 		"realemail != ''";
 
 	my $users = $self->sqlSelectAll($cols, $table, $where);
 	return $users;
@@ -321,14 +371,19 @@ sub _getMailingUsers {
 sub _getMessageUsers {
 	my($self, $code, $seclev) = @_;
 	return unless $code =~ /^-?\d+$/;
-	my $cols  = "u.uid";
-	my $table = "users as u, users_param AS up1, users_param AS up2";
-	my $where = "u.uid=up1.uid AND u.uid=up2.uid
-		AND  up1.name = 'deliverymodes'      AND up1.value >= 0
-		AND  up2.name = 'messagecodes_$code' AND up2.value  = 1";
+	my $cols  = "users_messages.uid";
+	my $table = "users_messages";
+	my $where = "users_messages.code=$code AND users_messages.mode >= 0";
+
+# 	my $cols  = "u.uid";
+# 	my $table = "users as u, users_param AS up1, users_param AS up2";
+# 	my $where = "u.uid=up1.uid AND u.uid=up2.uid
+# 		AND  up1.name = 'deliverymodes'      AND up1.value >= 0
+# 		AND  up2.name = 'messagecodes_$code' AND up2.value  = 1";
 
 	if ($seclev && $seclev =~ /^-?\d+$/) {
-		$where .= " AND u.seclev >= $seclev";
+		$table .= ",users";
+		$where .= " AND users.uid = users_messages.uid AND seclev >= $seclev";
 	}
 
 	my $users  = $self->sqlSelectArrayRef($cols, $table, $where);

@@ -4,10 +4,10 @@
 
 use strict;
 
+use Slash 2.003;	# require Slash 2.3.x
+use Slash::Constants qw(:messages);
 use Slash::DB;
 use Slash::Utility;
-
-use constant MSG_CODE_M2 => 2;
 
 use vars qw( %task $me );
 

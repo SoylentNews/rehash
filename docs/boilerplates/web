@@ -8,7 +8,8 @@
 # so i document it here.  yay for me!
 
 use strict;
-use Slash;
+use Slash 2.003;	# require Slash 2.3.x
+use Slash::Constants qw(:web);
 use Slash::Display;
 use Slash::Utility;
 use vars qw($VERSION);
@@ -18,9 +19,6 @@ use vars qw($VERSION);
 
 # this is an example main().  feel free to use what you think
 # works best for your program, just make it readable and clean.
-
-use constant ALLOWED	=> 0;
-use constant FUNCTION	=> 1;
 
 sub main {
 	my $slashdb   = getCurrentDB();

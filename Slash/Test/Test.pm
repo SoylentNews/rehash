@@ -27,8 +27,9 @@ Slash::Test - Command-line Slash testing
 =head1 DESCRIPTION
 
 Will export everything from Slash, Slash::Utility, Slash::Display,
-Slash::XML, and Data::Dumper into the current namespace.  Will export $user,
-$form, $constants, and $slashdb as global variables into the current namespace.
+Slash::Constants, Slash::XML, and Data::Dumper into the current namespace.
+Will export $user, $form, $constants, and $slashdb as global variables into
+the current namespace.
 
 So use it one of three ways (use the default Virtual User,
 or pass it in via the import list, or pass in with slashTest()), and then
@@ -43,6 +44,7 @@ Virtual User you use most.
 
 BEGIN { $ENV{TZ} = 'GMT' }
 use Slash;
+use Slash::Constants ':all';
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
@@ -54,6 +56,7 @@ use vars qw($VERSION @EXPORT $vuser);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT = (
 	@Slash::EXPORT,
+	@Slash::Constants::EXPORT_OK,
 	@Slash::Display::EXPORT,
 	@Slash::Utility::EXPORT,
 	@Slash::XML::EXPORT,

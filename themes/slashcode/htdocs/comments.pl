@@ -5,14 +5,11 @@
 # $Id$
 
 use strict;
-#use Date::Manip;  # is this needed?  -- pudge
 use HTML::Entities;
-use Slash;
+use Slash 2.003;	# require Slash 2.3.x
+use Slash::Constants qw(:messages);
 use Slash::Display;
 use Slash::Utility;
-
-use constant MSG_CODE_COMMENT_MODERATE	=> 3;
-use constant MSG_CODE_COMMENT_REPLY	=> 4;
 
 ##################################################################
 sub main {

@@ -4618,8 +4618,8 @@ sub setUser {
 		if ($_->[0] eq "acl") {
 			$self->sqlReplace('users_acl', {
 				uid	=> $uid,
-				name	=> $_->[1]->{name},
-				value	=> $_->[1]->{value},
+				name	=> $_->[1]{name},
+				value	=> $_->[1]{value},
 			});
 		} else {
 			$self->sqlReplace('users_param', {

@@ -1,0 +1,50 @@
+#!perl -w
+use Slash::Test shift;
+
+my $friends = $slashdb->sqlSelectAll("uid,friend", "journal_friends");
+for my $id (@$friends) {
+	$slashdb->sqlReplace("people", {
+		uid	=> $id->[0],
+		person	=> $id->[1],
+		type	=> "friend",
+	});
+}
+
+
+my $prefs = $slashdb->sqlSelectAll(<<COLS, <<TABLES, <<WHERE);
+upd.uid, upd.value, up0.value, up1.value, up2.value,
+up3.value, up4.value, up5.value, up6.value
+COLS
+users_param as upd, users_param as up0, users_param as up1, users_param as up2,
+users_param as up3, users_param as up4, users_param as up5, users_param as up6
+TABLES
+upd.uid=up0.uid AND upd.uid=up1.uid AND upd.uid=up2.uid AND upd.uid=up3.uid AND
+upd.uid=up4.uid AND upd.uid=up5.uid AND upd.uid=up6.uid AND
+upd.name="deliverymodes"  AND up0.name="messagecodes_0" AND
+up1.name="messagecodes_1" AND up2.name="messagecodes_2" AND
+up3.name="messagecodes_3" AND up4.name="messagecodes_0" AND 
+up5.name="messagecodes_5" AND up6.name="messagecodes_0"
+WHERE
+
+for my $user (@$prefs) {
+	my $uid   = $user->[0];
+	my $mode  = $user->[1];
+
+	my @codes = map { $_ ? $mode : -1 } @{$user}[2..8];
+
+	if ($mode == 1) {
+		for (0, 1, 6) {
+			$codes[$_] = 0;
+		}
+	}
+
+	for (my $i = 0; $i < @codes; $i++) {
+		$slashdb->sqlReplace("users_messages", {
+			uid	=> $uid,
+			code	=> $i,
+			mode	=> $codes[$i],
+		});
+	}
+}
+
+__END__

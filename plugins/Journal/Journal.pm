@@ -8,21 +8,16 @@ package Slash::Journal;
 use strict;
 use DBIx::Password;
 use Slash;
+use Slash::Constants qw(:messages);
 use Slash::Utility;
 use Slash::DB::Utility;
 
-use vars qw($VERSION @EXPORT);
+use vars qw($VERSION);
 use base 'Exporter';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-
-@EXPORT = qw(
-	MSG_CODE_JOURNAL_FRIEND
-);
-
-use constant MSG_CODE_JOURNAL_FRIEND => 5;
 
 # On a side note, I am not sure if I liked the way I named the methods either.
 # -Brian
@@ -162,12 +157,18 @@ sub message_friends {
 	my($self) = @_;
 	my $code  = MSG_CODE_JOURNAL_FRIEND;
 	my $uid   = $ENV{SLASH_USER};
-	my $cols  = "jf.uid";
-	my $table = "people AS jf, users_param AS up1, users_param AS up2";
-	my $where = "jf.person=$uid AND type='friend'
-		AND  jf.uid=up1.uid AND jf.uid=up2.uid
-		AND  up1.name = 'deliverymodes'      AND up1.value >= 0
-		AND  up2.name = 'messagecodes_$code' AND up2.value  = 1";
+	my $cols  = "pp.uid";
+	my $table = "people AS pp, users_messages as um";
+	my $where = <<SQL;
+    pp.person = $uid AND pp.type = 'friend' AND pp.uid = um.uid 
+AND um.code = $code  AND um.mode >= 0
+SQL
+
+# 	my $table = "people AS jf, users_param AS up1, users_param AS up2";
+# 	my $where = "jf.person=$uid AND type='friend'
+# 		AND  jf.uid=up1.uid AND jf.uid=up2.uid
+# 		AND  up1.name = 'deliverymodes'      AND up1.value >= 0
+# 		AND  up2.name = 'messagecodes_$code' AND up2.value  = 1";
 
 	my $friends  = $self->sqlSelectColArrayref($cols, $table, $where);
 	return $friends;

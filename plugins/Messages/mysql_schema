@@ -50,3 +50,14 @@ CREATE TABLE message_log (
         mode    INT(11) NOT NULL,
         date    TIMESTAMP NOT NULL
 );
+
+DROP TABLE IF EXISTS users_messages;
+CREATE TABLE users_messages (
+        id      INT(11) NOT NULL auto_increment,
+        uid     INT(11) NOT NULL,
+        code    INT(11) NOT NULL,
+        mode    TINYINT NOT NULL,
+        FOREIGN KEY (uid) REFERENCES users(uid),
+        UNIQUE code_key (uid,code),
+        PRIMARY KEY (id)
+);

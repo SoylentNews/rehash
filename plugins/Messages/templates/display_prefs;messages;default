@@ -18,50 +18,54 @@ __template__
 [% Slash.createMenu("users") %]
 [% Slash.createMenu("messages") %]
 [% PROCESS titlebar title => "Message Preferences", width => "100%" %]
+[% nomode = Slash.MSG_MODE_NONE %]
 
 <P><B>[% note %]</B></P>
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 <TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
-	<TR><TD WIDTH="200" VALIGN="TOP">
-[% mailcount = 0;
-   FOR code = messagecodes.sort;
-      # this is not so bad, it is cached, but could be improved
-      mcode = messages.getMessageCode(code);
-      IF mcode.modes == 0;
-         mailonly = 1;
-         mailcount = mailcount + 1;
-      ELSE;
-         mailonly = 0;
-      END;
-%]
-<INPUT TYPE="checkbox" NAME="messagecodes_[% code %]" VALUE="1"[%
-   key = "messagecodes_$code";
-   user.$key ? " CHECKED" : ""
-%]> [% messagecodes.$code; " *" IF mailonly %]<BR>[% END %]
-	</TD><TD VALIGN="TOP">
-		<B>Message Types</B> <BR>
-Check off each message type you would like to receive.
-[% IF mailcount %]
-<P>The items marked with "*" cannot be sent to your web mailbox, but
-instead will be sent via email if selected.
-[% END %]
-	</TD></TR>	<TR><TD WIDTH="200" VALIGN="MIDDLE">
-[% Slash.createSelect('deliverymodes', deliverymodes, user.deliverymodes, 1, 1) %]
-	</TD><TD VALIGN="TOP">
-		<B>Delivery Mode</B> <BR>
-Currently, your options for receiving messages is either via email, or via the web interface.
-If you don't have your email address registered with the system, you will receive
-messages via the web, regardless of how your preference is set here.  Daily headlines
-and newsletter will only be sent via email.  Messages delivered via the web will be kept in
-the system for only <B>[% constants.message_web_expire || 31 %] days</B>, whether they
+<TR><TD></TD><TD></TD><TD ROWSPAN="[% messagecodes.keys.size %]">
+
+For each message type, select how you would like to receive it
+(or select [% messagecodes.$nomode %] to not receive it at all).
+
+<P>Currently, your options for receiving messages are either via e-mail,
+or via the web interface.  If you don't have your e-mail address registered
+with the system, you will receive messages via the web, regardless of how
+your preference is set here.  Some messages can only be sent via e-mail.
+Messages delivered via the web will be kept in the system for only
+<B>[% constants.message_web_expire || 31 %] days</B>, whether they
 have been read or not.  After [% constants.message_web_expire || 31 %] days, they
 <B>will be deleted</B>.
-	</TD></TR>
-	<TR><TD COLSPAN="2">
+
+</TD></TR>
+[%
+   FOR code = messagecodes.sort;
+      moderef = { $nomode => deliverymodes.$nomode };
+
+      # this is not so bad, it is cached, but could be improved perhaps
+      mcode = messages.getMessageCode(code);
+      IF mcode.modes.length;
+         modes = mcode.modes.split(",");
+      ELSE;
+         modes = deliverymodes.keys;
+      END;
+
+      FOR mode = modes;
+         moderef.$mode = deliverymodes.$mode;
+      END;
+%]
+<TR>
+   <TD><B>[% messagecodes.$code %]</B></TD>
+   <TD>[% Slash.createSelect("deliverymodes_$code", moderef, prefs.$code, 1, 1) %]</TD>
+</TR>
+[%- END %]
+
+	<TR><TD COLSPAN="2" ALIGN="RIGHT">
 		<INPUT TYPE="hidden" NAME="op" VALUE="save_prefs">
 		<INPUT TYPE="submit" VALUE="Save Prefs">
 	</TD></TR>
+
 </TABLE>
 </FORM>
 __seclev__

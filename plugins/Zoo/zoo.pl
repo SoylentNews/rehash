@@ -5,7 +5,8 @@
 # $Id$
 
 use strict;
-use Slash 2.001;	# require Slash 2.1
+use Slash 2.003;	# require Slash 2.3.x
+use Slash::Constants qw(:web);
 use Slash::Display;
 use Slash::Utility;
 use Slash::Zoo;
@@ -13,9 +14,6 @@ use Slash::XML;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-
-use constant ALLOWED	=> 0;
-use constant FUNCTION	=> 1;
 
 sub main {
 	my $zoo   = getObject('Slash::Zoo');

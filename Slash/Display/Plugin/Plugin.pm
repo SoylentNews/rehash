@@ -21,7 +21,8 @@ Slash::Display::Plugin - Template Toolkit plugin for Slash
 
 Call available exported functions from Slash and Slash::Utility
 from within your template.  Also call methods from Slash::DB
-with the C<db> method.  Invoke with C<[% USE Slash %]>.
+with the C<db> method.  Constants from Slash::Constants are
+available.  Invoke with C<[% USE Slash %]>.
 
 C<[% Slash.version %]> gives the version of Slash.
 C<[% Slash.VERSION %]> (note case) gives the version
@@ -32,6 +33,7 @@ of this Slash Template plugin.
 use strict;
 use vars qw($VERSION $AUTOLOAD);
 use Slash ();
+use Slash::Constants ();
 use Slash::Utility ();
 use base qw(Template::Plugin);
 
@@ -49,6 +51,13 @@ sub _populate {
 		@subs{@{"${pkg}::EXPORT"}} =
 			map { *{"${pkg}::$_"}{CODE} } @{"${pkg}::EXPORT"};
 	}
+
+	# all constants in EXPORT_OK
+	for my $pkg (qw(Slash::Constants)) {
+		@subs{@{"${pkg}::EXPORT_OK"}} =
+			map { *{"${pkg}::$_"}{CODE} } @{"${pkg}::EXPORT_OK"};
+	}
+
 	$subs{version} = sub { Slash->VERSION };
 }
 

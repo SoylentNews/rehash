@@ -5,17 +5,14 @@
 # $Id$
 
 use strict;
-use Slash 2.001;	# require Slash 2.1
+use Slash 2.003;	# require Slash 2.3.x
+use Slash::Constants qw(:messages :web);
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-
-use constant ALLOWED	=> 0;
-use constant FUNCTION	=> 1;
-use constant MSG_CODE_JOURNAL_FRIEND => 5;
 
 sub main {
 	my $journal   = getObject('Slash::Journal');

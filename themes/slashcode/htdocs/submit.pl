@@ -5,13 +5,12 @@
 # $Id$
 
 use strict;
-use Slash;
+use Slash 2.003;	# require Slash 2.3.x
+use Slash::Constants qw(:messages);
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
 use URI;
-
-use constant MSG_CODE_NEW_SUBMISSION => 6;
 
 #################################################################
 sub main {
@@ -435,7 +434,7 @@ sub saveSub {
 	# $slashdb->formSuccess($form->{formkey}, 0, length($form->{subj}));
 
 	# fix getMessageUsers before enabling again -- pudge
-	my $messages = 0; #getObject('Slash::Messages');
+	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);
 
