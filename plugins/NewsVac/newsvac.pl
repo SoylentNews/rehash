@@ -86,14 +86,14 @@ sub listMiners {
 sub editMiner {
 	my ($slashdb, $form, $user, $udbt, $miner_id, $force) = @_;
 
-        $miner_id ||= $form->{miner_id};
-        my $name = $udbt->id_to_minername($miner_id);
+	$miner_id ||= $form->{miner_id};
+	my $name = $udbt->id_to_minername($miner_id);
 
 	# This is a mess. Convert it to use a hashref.
-       	my $miner = $udbt->getMiner($miner_id);
+	my $miner = $udbt->getMiner($miner_id);
 
-      	$miner->{last_edit} =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
-        $miner->{last_edit} = timeCalc("$1-$2-$3 $4:$5:$6");
+	$miner->{last_edit} =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
+	$miner->{last_edit} = timeCalc("$1-$2-$3 $4:$5:$6");
         
         # Remove the (?i) and instead set the checkbox appropriately.
 	# This begs to be made into a loop.
@@ -181,31 +181,30 @@ sub updateMiner {
 	my ($slashdb, $form, $user, $udbt) = @_;
 	my $miner_id = $form->{miner_id} || 0;
 
-        if ($form->{op} eq 'newminer') {
+	if ($form->{op} eq 'newminer') {
 		# Get miner name from the form, or set an appropriate default.
-        	my $name = $form->{newname} ||
-			   'miner' . time . int(rand(900)+100);
-        	$name = substr($name, 0, 20);
-        	$name =~ s/\W+//g;
+		my $name = $form->{newname} ||
+	 'miner' . time . int(rand(900)+100);
+		$name = substr($name, 0, 20);
+		$name =~ s/\W+//g;
 		$miner_id = $udbt->minername_to_id($name);
 		if ($miner_id) {
 			print getData('miner_already_exists', {
 				name => $name 
 			});
 		} else {
-        		$udbt->add_miner_and_urls(
-	        		$name, $user->{nickname},
-        			'', '', '', '',
-        			'', '',
-        			''
-	        	);
-        		$miner_id = $udbt->minername_to_id($name);
+			$udbt->add_miner_and_urls(
+				$name, $user->{nickname},
+				'', '', '', '',
+				'', '',
+				''
+			);
+			$miner_id = $udbt->minername_to_id($name);
 			slashDisplay('updateMiner');
 		}
-	        editMiner(@_, $miner_id);
-
-        } elsif ($form->{updateminer}) {
-        	my $name = $udbt->id_to_minername($miner_id);
+		editMiner(@_, $miner_id);
+	} elsif ($form->{updateminer}) {
+		my $name = $udbt->id_to_minername($miner_id);
 
 		my(%update_fields);
 		my(@field_names) = qw(
@@ -227,12 +226,12 @@ sub updateMiner {
 		}) if $udbt->{debug} > 0;
 
        		# Prepend the "(?i)" unless this field is marked case_sensitive.
-        	for my $field (grep /_(text|regex)$/, keys %{$form}) {
-        		$form->{$field} = "(?i)$form->{$field}"
-				if $form->{$field} and !$form->{"${field}_cs"};
-        	}
-        	$form->{last_edit_aid} = $user->{nickname};
-        	for (@field_names) { 
+		for my $field (grep /_(text|regex)$/, keys %{$form}) {
+			$form->{$field} = "(?i)$form->{$field}"
+					if $form->{$field} and !$form->{"${field}_cs"};
+		}
+		$form->{last_edit_aid} = $user->{nickname};
+		for (@field_names) { 
 			$update_fields{$_} = $form->{$_} if exists $form->{$_};
 		}
 		$udbt->setMiner($miner_id, \%update_fields);
@@ -246,13 +245,13 @@ EOT
 
                 editMiner(@_, $miner_id, $form->{forceupdate});
 
-        } elsif ($form->{deleteminer}) {
-        	my $miner_id = $miner_id;
-        	my $name = $udbt->id_to_minername($miner_id);
-	        my $urls_ar = $udbt->getMinerURLs($miner_id);
+	} elsif ($form->{deleteminer}) {
+		my $miner_id = $miner_id;
+		my $name = $udbt->id_to_minername($miner_id);
+		my $urls_ar = $udbt->getMinerURLs($miner_id);
 
-	        if (@{$urls_ar}) {
-	        	# This should probably just say "Are you sure?" and then
+		if (@{$urls_ar}) {
+			# This should probably just say "Are you sure?" and then
 			# the "delete2" action should zero out all the URLs that 
 			# use it. For now, just forbid this.
 			slashDisplay('updateMiner', {
@@ -261,17 +260,17 @@ EOT
 				url_ar	=> $urls_ar 
 			});
 
-	        	editMiner(@_,$miner_id);
-	        } else {
+			editMiner(@_,$miner_id);
+		} else {
 			$udbt->delMiner($miner_id);
 			slashDisplay('updateMiner', {
 				name	=> $name, 
 				miner_id=> $miner_id
 			});
 
-	                listMiners();
-	        }
-        }
+			listMiners();
+		}
+	}
 }
 
 ##################################################################
@@ -298,11 +297,11 @@ sub listUrls {
 sub processUrls {
 	my ($slashdb, $form, $user, $udbt, $url_ids) = @_;
 
-        my @url_ids = split / /, $url_ids;
-        my $start_time = Time::HiRes::time();
-        $udbt->process_url_ids({}, @url_ids);
+	my @url_ids = split / /, $url_ids;
+	my $start_time = Time::HiRes::time();
+	$udbt->process_url_ids({}, @url_ids);
 	my $ids = @url_ids;
-        my $duration = int((Time::HiRes::time() - $start_time)*1000+0.5)/1000;
+	my $duration = int((Time::HiRes::time() - $start_time)*1000+0.5)/1000;
 
 	slashDisplay('processUrls', { ids => $ids, duration => $duration });
 	listUrls(@_);
@@ -453,9 +452,9 @@ sub editUrl {
 	my($new_url, $titlebar_type);
         $urlid ||= $form->{url_id};
 
-        if ($urlid eq "new") {
-        	$new_url = $form->{newurl};
-        	$new_url = $udbt->canonical($new_url);
+	if ($urlid eq "new") {
+		$new_url = $form->{newurl};
+		$new_url = $udbt->canonical($new_url);
 		$urlid = $udbt->url_to_id($new_url);
 
 		$titlebar_type = 'added';
@@ -465,14 +464,14 @@ sub editUrl {
 			$udbt->correlate_miner_to_urls('none', $new_url)
 				if $urlid;
 			$titlebar_type = 'existing';
-	        } 
+		} 
 	} else {
 		$titlebar_type = 'editing';
 	}
 
 	my ($url_id, $url, $title, $miner_id, $last_attempt, $last_success,
 	    $status_code, $reason_phrase, $message_body_length) =
-	$udbt->getURLData($urlid);
+				$udbt->getURLData($urlid);
 
 	my $miner_name;
 	$miner_name = $udbt->id_to_minername($miner_id) if $miner_id;
@@ -503,7 +502,7 @@ sub editUrl {
 sub updateUrl {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
-        if ($form->{deleteurl}) {
+	if ($form->{deleteurl}) {
 	
 		my $url_id = $form->{url_id};
 		my $url = $udbt->id_to_url($url_id);
@@ -511,7 +510,7 @@ sub updateUrl {
 		
 		slashDisplay('updateUrl', { url_id => $url_id, url => $url });	
 		
-        } elsif ($form->{requesturl}) {
+	} elsif ($form->{requesturl}) {
 
 		my $url_id = $form->{url_id};
 		my $url = $udbt->id_to_url($url_id);
@@ -536,7 +535,7 @@ sub updateUrl {
 
 		editUrl(@_,$url_id);
 
-        } else { 
+	} else { 
 		my $miner_name = $form->{miner_name};
 		my $miner_id = $udbt->minername_to_id($form->{miner_name});
 		my $url_id = $form->{url_id};
@@ -578,17 +577,17 @@ sub editSpider {
 	my ($slashdb, $form, $user, $udbt, $spider_id) = @_;
         ($spider_id ||= $form->{spider_id}) =~ s/\D//g;
 
-       	my($name, $last_edit, $last_edit_aid, $conditions, $group_0_selects,
+	my($name, $last_edit, $last_edit_aid, $conditions, $group_0_selects,
 	   $commands) = $udbt->getSpider($spider_id);
 
 	$conditions	=~ s{^\s+}{}gm;	$conditions 	=~ s{\s+$}{}gm;
 	$group_0_selects=~ s{^\s+}{}gm;	$group_0_selects=~ s{\s+$}{}gm;
 	$commands 	=~ s{^\s+}{}gm;	$commands 	=~ s{\s+$}{}gm;
 
-      	my ($yyyy, $mon, $dd, $hh, $min, $ss) = 
+	my ($yyyy, $mon, $dd, $hh, $min, $ss) = 
 		$last_edit =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
 
-        $last_edit = timeCalc("$yyyy-$mon-$dd $hh:$min:$ss");
+	$last_edit = timeCalc("$yyyy-$mon-$dd $hh:$min:$ss");
         
 	slashDisplay('editSpider', {
 		spider_id	=> $spider_id,
@@ -605,9 +604,9 @@ sub editSpider {
 sub updateSpider {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
-        if ($form->{updatespider}) {
-        	my $spider_id = $form->{spider_id};
-        	my %set_clause;
+	if ($form->{updatespider}) {
+		my $spider_id = $form->{spider_id};
+		my %set_clause;
 
         	$form->{last_edit_aid} = $user->{nickname};
 		$set_clause{$_} = $form->{$_} for qw(
@@ -622,18 +621,18 @@ sub updateSpider {
 
 		slashDisplay('updateSpider');
                 editSpider(@_, $spider_id);
-        } elsif ($form->{runspider}) {
-        	my $spider_id = $form->{spider_id};
-        	my $spider_name = $udbt->getSpiderName($spider_id);
+	} elsif ($form->{runspider}) {
+		my $spider_id = $form->{spider_id};
+		my $spider_name = $udbt->getSpiderName($spider_id);
 
-        	if ($spider_name) {
-        		$udbt->{debug} = 1;
-	        	$udbt->spider_by_name($spider_name);
-        		$udbt->{debug} = 0;
-	        }
+		if ($spider_name) {
+			$udbt->{debug} = 1;
+			$udbt->spider_by_name($spider_name);
+			$udbt->{debug} = 0;
+		}
 		slashDisplay('updateSpider', { spider_name => $spider_name });
-                editSpider(@_,$spider_id);
-        }
+				editSpider(@_,$spider_id);
+		}
 }
 
 
