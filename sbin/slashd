@@ -526,8 +526,11 @@ sub main {
 				next;  # task not reinserted into $event_ary
 			} elsif ($pid == 0) {
 				$pids{$$} = [$basename, $fork];
-				tie *STDERR, 'Slash::Tie::STDERR';
-				$slashdb->sqlConnect(2); # rebuild connection
+
+				if ($fork == SLASHD_NOWAIT) {
+					tie *STDERR, 'Slash::Tie::STDERR';
+					$slashdb->sqlConnect(2); # rebuild connection
+				}
 
 				if (verbosity() >= 2) {
 					slashdLog("$basename begin ($$)");
