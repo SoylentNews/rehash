@@ -158,3 +158,9 @@ CREATE TABLE submission_param (
 	UNIQUE submission_key (subid,name),
 	PRIMARY KEY (param_id)
 ) TYPE = myisam;
+
+# This is the multi section topic stuff for Foundries
+INSERT INTO code_param (type, code, name) VALUES ('section_topic_types',1,'default');
+ALTER TABLE section_topics ADD COLUMN type smallint UNSIGNED NOT NULL;
+UPDATE section_topics SET type=1;
+

@@ -474,6 +474,7 @@ DROP TABLE IF EXISTS section_topics;
 CREATE TABLE section_topics (
 	section varchar(30) NOT NULL,
 	tid smallint UNSIGNED NOT NULL,
+	type smallint UNSIGNED NOT NULL,
 	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (tid) REFERENCES topics(tid),
 	PRIMARY KEY (section,tid)
