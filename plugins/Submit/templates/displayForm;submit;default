@@ -61,13 +61,6 @@ reject the story.</P>
 [% PROCESS formLabel value => "Subject", comment => "Be Descriptive, Clear and Simple!" %]
 <INPUT TYPE="text" NAME="subj" VALUE="[% form.subj %]" SIZE="50">
 
-[% FOREACH extra = extras %]
-	[% IF submission.${extra.1} %]
-		[% PROCESS formLabel value => "[% extra.1 %]", comment => "" %]
-		<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% extra.1 %]">
-	[% END %]
-[$ END %]
-
 <BR><FONT SIZE="2">
 (bad subjects='Check This Out!' or 'An Article'.
 We get many submissions each day, and if yours isn't clear, it will
