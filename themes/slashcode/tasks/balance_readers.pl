@@ -276,6 +276,7 @@ sub get_sql_type_from_state {
 		|| $state eq 'Locked'
 		|| $state eq 'preparing'
 		|| $state eq 'removing tmp table'
+		|| $state eq 'rename result table'
 		|| $state eq 'query end'
 		|| $state eq 'end'
 	) {
