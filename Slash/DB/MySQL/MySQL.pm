@@ -2783,9 +2783,10 @@ sub getAuthorNames {
 # data from the cache? Or is it just as fast to grab it from
 # the database?
 sub getStoryByTime {
-	my($self, $sign, $story, $section) = @_;
+	my($self, $sign, $story, $section, $limit) = @_;
 	my($where);
 	my $user = getCurrentUser();
+	$limit ||= '1';
 
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 	if ($section->{isolate}) {
@@ -2804,7 +2805,30 @@ sub getStoryByTime {
 			'title, sid, section',
 			'stories',
 			"time $sign '$time' AND writestatus != 'delete' AND time < now() $where",
-			"ORDER BY time $order LIMIT 1"
+			"ORDER BY time $order LIMIT $limit"
+	);
+
+	return $returnable;
+}
+
+##################################################################
+# admin.pl only
+sub getStoryByTimeAdmin {
+	my($self, $sign, $story, $limit) = @_;
+	my($where);
+	my $user = getCurrentUser();
+	$limit ||= '1';
+
+	my $order = $sign eq '<' ? 'DESC' : 'ASC';
+
+	$where .= "   AND sid != '$story->{'sid'}'";
+
+	my $time = $story->{'time'};
+	my $returnable = $self->sqlSelectAllHashrefArray(
+			'title, sid, time',
+			'stories',
+			"time $sign '$time' AND writestatus != 'delete' $where",
+			"ORDER BY time $order LIMIT $limit"
 	);
 
 	return $returnable;
@@ -5119,27 +5143,6 @@ sub _genericGets {
 sub getStories {
 	my $answer = _genericGets('stories', 'sid', 'story_param', @_);
 	return $answer;
-}
-
-########################################################
-# this is.. yes.
-sub getNewestThree {
-	my ($self) = @_;
-	my $sth = $self->{_dbh}->prepare("SELECT sid from stories ORDER BY time DESC LIMIT 3");
-	$sth->execute;
-	my $sids = $sth->fetchall_arrayref;
-	return $sids;
-
-}
-
-########################################################
-# ok, yeah, I know
-sub getNextThree {
-	my ($self,$sid_time) = @_;
-	my $sth = $self->{_dbh}->prepare("SELECT sid from stories WHERE time > '$sid_time' ORDER BY time ASC LIMIT 3");
-	$sth->execute;
-	my $sids = $sth->fetchall_arrayref;
-	return $sids;
 }
 
 ########################################################

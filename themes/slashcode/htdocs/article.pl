@@ -17,7 +17,6 @@ sub main {
 	my $form      = getCurrentForm();
 
 	my $story;
-	my $authorbox;
 
 	#Yeah, I am being lazy and paranoid  -Brian
 	if (!($user->{author} or $user->{is_admin}) and !$slashdb->checkStoryViewable($form->{sid})) {
@@ -47,27 +46,9 @@ sub main {
 		};
 		header($links, $story->{section});
 
-		if ($user->{seclev} >= 100) {
-			my $newestthree = $slashdb->getBlock('newestthree','block'); 
-			my $nextthree = $slashdb->getNextThree($story->{time});
-			my $nextstories = {};
-
-			for (@$nextthree) {
-				my $tmpstory = $slashdb->getStory($_->[0], ['title', 'uid', 'time']);
-				my $author = $slashdb->getUser($tmpstory->{uid},'nickname');
-				$nextstories->{$_->[0]}{author} = $slashdb->getUser($tmpstory->{uid},'nickname');
-				$nextstories->{$_->[0]}{title} = $tmpstory->{title};
-				$nextstories->{$_->[0]}{time} = $tmpstory->{time};
-			}
-
-			my $nextblock = slashDisplay('three', { stories => $nextstories}, { Return => 1, Page => 'misc', Section => 'default'});
-			$authorbox = $newestthree . $nextblock;
-		}
-
 		my $pollbooth = pollbooth($story->{sid}, 1);
 		slashDisplay('display', {
 			poll			=> $pollbooth,
-			authorbox 		=> $user->{is_admin} ? $authorbox : '',
 			section			=> $SECT,
 			section_block		=> $slashdb->getBlock($SECT->{section}),
 			show_poll		=> $pollbooth ? 1 : 0,
