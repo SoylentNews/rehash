@@ -4553,15 +4553,14 @@ sub getBanList {
 	my $expire_time = $constants->{banlist_expire};
 	$expire_time += int(rand(60)) if $expire_time;
 	_genericCacheRefresh($self, 'banlist', $expire_time);
-	my $banlist_ref = $self->{_banlist_cache} ||= {};
 	$banlist_ref = $self->{_banlist_cache} ||= {};
 
-	if (!keys %$banlist_ref && $mcd) {
+	if ($refresh) {
+		%$banlist_ref = ();
+	} elsif (!keys %$banlist_ref && $mcd && !$refresh) {
 		$banlist_ref = $mcd->get($mcdkey);
 		return $banlist_ref if $banlist_ref;
 	}
-
-	%$banlist_ref = () if $refresh;
 
 	if (!keys %$banlist_ref) {
 		if ($debug) {
