@@ -658,6 +658,7 @@ sub convert_tokens_to_points {
 	# + and - instead of using absolute values. - Jamie 2002/08/08
 
 	for my $uid (@$uids) {
+		next unless $uid;
 		my $rows = $self->setUser($uid, {
 			-lastgranted	=> 'NOW()',
 			-tokens		=> "tokens - $tokentrade",

@@ -53,7 +53,7 @@ sub give_out_points {
 
 	moderatordLog(getData('moderatord_log_header'));
 
-	my $read_db = $slashdb;
+	my $read_db = undef;
 
 	# If a backup DB is defined, we use that one.
 	my $backup_user = $constants->{backup_db_user} || '';
@@ -75,15 +75,14 @@ sub give_out_points {
 		give_out_tokens($newcomments, $constants, $slashdb, $read_db);
 		my $granted = $slashdb->convert_tokens_to_points();
 
-		my %g_msg = (
-			0 => 'moderatord_tokennotgrantmsg',
-			1 => 'moderatord_tokengrantmsg',
-		);
-		for my $uid (keys %$granted) {
-			my $g = $granted->{$uid};
-			my $logline = getData($g_msg{$g}, { uid => $uid });
-			moderatordLog($logline);
-		}
+		my @gr_0 = sort { $a <=> $b }
+			grep { $granted->{$_} == 0 }
+			keys %$granted;
+		my @gr_1 = sort { $a <=> $b }
+			grep { $granted->{$_} == 1 }
+			keys %$granted;
+		slashdLog("Not giving points to " . scalar(@gr_0) . " users: '@gr_0'");
+		slashdLog("Giving points to " . scalar(@gr_1) . " users: '@gr_1'");
 	}
 
 	moderatordLog(getData('moderatord_log_footer'));
@@ -103,7 +102,7 @@ sub get_backup_db {
 	my $sleep_time = $constants->{moderatord_catchup_sleep};
 
 	while ($count--) {
-		$read_db = new Slash::DB($backup_user);
+		$read_db = getObject('Slash::DB', $backup_user);
 		if (!$read_db) {
 			moderatordLog("Cannot open read DB: '$backup_user'");
 			return undef;
