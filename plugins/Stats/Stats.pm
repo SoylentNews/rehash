@@ -155,23 +155,23 @@ sub countCommentsDaily {
 sub countDailyComments {
 	my($self, $yesterday) = @_;
 	$self->sqlSelect("count(*)", "accesslog",
-		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59' GROUP BY op");
+		"op='comments' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
 }
 
 ########################################################
 sub countDailyArticles {
 	my($self, $yesterday) = @_;
 	$self->sqlSelect("count(*)", "accesslog",
-		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
-	 'GROUP BY op');
+		"op='articles' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+	 '');
 }
 
 ########################################################
 sub countDailyCommentsByDistinctIPID {
 	my($self, $yesterday) = @_;
 	$self->sqlSelect("count(*)", "accesslog",
-		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'", 
-		'GROUP BY op',
+		"op='comments' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'", 
+		'',
 		{distinct => 1});
 }
 
@@ -179,8 +179,8 @@ sub countDailyCommentsByDistinctIPID {
 sub countDailyArticlesByDistinctIPID {
 	my($self, $yesterday) = @_;
 	$self->sqlSelect("count(*)", "accesslog",
-		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
-		'GROUP BY op',
+		"op='articles' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		'',
 		{distinct => 1});
 }
 
@@ -205,7 +205,7 @@ sub countDaily {
 	$c->finish;
 
 	$returnable{'journals'}  = $self->sqlSelect("count(*)", "accesslog",
-		"op='journal' AND to_days(now()) - to_days(ts)=1 GROUP BY op");
+		"op='journal' AND to_days(now()) - to_days(ts)=1 ");
 
 	$c = $self->sqlSelectMany("dat,count(*)", "accesslog",
 		"to_days(now()) - to_days(ts)=1 AND
