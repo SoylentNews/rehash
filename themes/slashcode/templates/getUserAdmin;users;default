@@ -203,7 +203,7 @@ __template__
 [% ELSE %]
 					Pages "Bought" (Used): [% useredit.hits_bought %],
 					Bought Today: [% useredit.hits_bought_today %],
-					Paid For: [% useredit.hits_paidfor %]</TD>
+					Paid For: [% useredit.hits_paidfor %]<BR><BR></TD>
 [% END %]
 			</TR>
 [% IF useredit.subscribe_payments.size %]
@@ -211,12 +211,17 @@ __template__
 				<TD WIDTH="100">&nbsp;</TD>
 				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]">
 				<TR>
+					<TD colspan="8"><B>Subscriptions for User</B></TD>
+				</TR>
+				<TR>
 					<TH>&nbsp;Date&nbsp;</TH>
 					<TH>&nbsp;Email&nbsp;</TH>
 					<TH>&nbsp;$&nbsp;</TH>
 					<TH>&nbsp;Pages&nbsp;</TH>
 					<TH>&nbsp;Method&nbsp;</TH>
 					<TH>&nbsp;TransID&nbsp;</TH>
+					<TH>&nbsp;PurchUID&nbsp;</TH>
+					<TH>&nbsp;Type&nbsp;</TH>
 				</TR>
 [% FOREACH sp = useredit.subscribe_payments %]
 				<TR>
@@ -226,11 +231,51 @@ __template__
 					<TD>&nbsp;[% sp.3 %]&nbsp;</TD>
 					<TD>&nbsp;[% sp.4 %]&nbsp;</TD>
 					<TD>&nbsp;[% sp.5 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.6 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.7 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.8 %]&nbsp;</TD>
 				</TR>
 [% END %]
 				</TABLE></TD>
 			</TR>
 [% END %]
+
+
+
+[% IF useredit.subscribe_purchases.size %]
+			<TR>
+				<TD WIDTH="100">&nbsp;</TD>
+				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]">
+				<TR>
+					<TD colspan="8"><B>Subscriptions Given By User</B></TD>
+				</TR>
+				<TR>
+					<TH>&nbsp;Date&nbsp;</TH>
+					<TH>&nbsp;Email&nbsp;</TH>
+					<TH>&nbsp;$&nbsp;</TH>
+					<TH>&nbsp;Pages&nbsp;</TH>
+					<TH>&nbsp;Method&nbsp;</TH>
+					<TH>&nbsp;TransID&nbsp;</TH>
+					<TH>&nbsp;Recipient UID&nbsp;</TH>
+					<TH>&nbsp;Type&nbsp;</TH>
+				</TR>
+[% FOREACH sp = useredit.subscribe_purchases %]
+				<TR>
+					<TD>&nbsp;[% sp.0 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.1 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.2 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.3 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.4 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.5 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.6 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.7 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.8 %]&nbsp;</TD>
+				</TR>
+[% END %]
+				</TABLE></TD>
+			</TR>
+[% END %]
+
 [% END %]
 			<TR>
 				<TD WIDTH="100"><B>Tokens</B></TD>
