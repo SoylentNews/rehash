@@ -1382,8 +1382,6 @@ Optional separate "From" address instead of "mailfrom" constant.
 Optional, set to "bulk" for "bulk" precedence.  Not standard,
 but widely supported.
 
-=item
-
 =back
 
 =item Return value

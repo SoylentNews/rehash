@@ -104,12 +104,16 @@ docs/INSTALL.html
 docs/INSTALL.pod
 docs/README.html
 docs/README.pod
+docs/boilerplates/command-line
+docs/boilerplates/module
+docs/boilerplates/web
 docs/slasherd_bender.fig
 docs/slasherd_bender.pdf
 docs/slasherd_bender.ps
 docs/slasherd_main.fig
 docs/slasherd_main.pdf
 docs/slasherd_main.ps
+docs/slashstyle.pod
 docs/slashtables_bender.pod
 docs/slashtables_main.txt
 httpd/slash.conf
@@ -182,7 +186,7 @@ plugins/Search/PLUGIN
 plugins/Search/Search.pm
 plugins/Search/search.pl
 plugins/Search/templates/commentsearch;search;default
-plugins/Search/templates/linksearch;search;default
+plugins/Search/templates/pagination;search;default
 plugins/Search/templates/searchform;search;default
 plugins/Search/templates/storysearch;search;default
 plugins/Search/templates/usersearch;search;default

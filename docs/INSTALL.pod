@@ -78,7 +78,9 @@ Use template-tool to dump your templates into an empty directory.
 
 	% mkdir templates
 	% cd templates
-	% template-tool -u VIRTUAL_USER -d ./
+	% template-tool -u VIRTUAL_USER -d
+
+(Defaults to current directory.)
 
 =item Compare
 
@@ -86,7 +88,9 @@ Use template-check to compare installed templates in
 /usr/local/slash/themes/slashcode/ and /usr/local/slash/plugins/ against
 the templates that have been dumped.
 
-	% template-check -u VIRTUAL_USER ./
+	% template-check -u VIRTUAL_USER
+
+(Defaults to current directory.)
 
 This will use diff to show you the differences.  You can either go
 into the templates with a text editor (in another window) and change

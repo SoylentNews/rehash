@@ -16,6 +16,9 @@ slash-2.0.0-pre2, 2001.04.24
 
 *	Fix Slash::Apache::IndexHandler
 
+*	Added sqlTransaction* functions as placeholders for transaction
+	support, which, for now, do table locking for MySQL
+
 *	Various fixes in Slash::DB::MySQL, including proper saving
 	of description for vars, creation of stories in newstories
 	table, some time calculations

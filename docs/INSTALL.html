@@ -13,6 +13,13 @@
 
 	<LI><A HREF="#name">NAME</A></LI>
 	<LI><A HREF="#synopsis">SYNOPSIS</A></LI>
+	<LI><A HREF="#upgrading">UPGRADING</A>
+	<UL>
+
+		<LI><A HREF="#slash_2.0.x___slash_2.0.y">Slash 2.0.x -&gt; Slash 2.0.y</A></LI>
+		<LI><A HREF="#slash_1.0___slash_2.0">Slash 1.0 -&gt; Slash 2.0</A></LI>
+	</UL></LI>
+
 	<LI><A HREF="#installation">INSTALLATION</A>
 	<UL>
 
@@ -36,12 +43,6 @@
 		<LI><A HREF="#hardware">Hardware</A></LI>
 	</UL></LI>
 
-	<LI><A HREF="#upgrading">UPGRADING</A>
-	<UL>
-
-		<LI><A HREF="#slash_1.0___slash_2.0">Slash 1.0 -&gt; Slash 2.0</A></LI>
-	</UL></LI>
-
 	<LI><A HREF="#version">VERSION</A></LI>
 </UL>
 <!-- INDEX END -->
@@ -54,7 +55,7 @@
 <HR>
 <H1><A NAME="synopsis">SYNOPSIS</A></H1>
 <P>This document describes how to install Slash 1.1.x / 2.0.x
-(code-named ``bender'').  For instructions on installation
+(code-named "bender").  For instructions on installation
 of previous versions of Slash, see the INSTALL document
 included with those distributions.</P>
 <P>These instructions have only been tested on Linux. Installation under
@@ -69,11 +70,94 @@ Slashdot FTP site.</P>
         <A HREF="http://sourceforge.net/projects/slashcode/">http://sourceforge.net/projects/slashcode/</A>
         <A HREF="ftp://ftp.slashdot.org//pub/slash/">ftp://ftp.slashdot.org//pub/slash/</A></PRE>
 <P>The CVS repository (http://cvs.slashcode.com/) is tagged with version
-numbers, so to get release 1.0.3, use tag ``v1_0_3_0''.  The last number
+numbers, so to get release 1.0.3, use tag "v1_0_3_0".  The last number
 (in this case a zero) will be incremented during development
-(``v1_0_3_1'', ``v1_0_3_2'', etc.) until the next release.</P>
+("v1_0_3_1", "v1_0_3_2", etc.) until the next release.</P>
 <P>The software and hardware requirements are listed at the end of the
 document, because we know you want to get right into the installation.</P>
+<P>
+<HR>
+<H1><A NAME="upgrading">UPGRADING</A></H1>
+<P>
+<H2><A NAME="slash_2.0.x___slash_2.0.y">Slash 2.0.x -&gt; Slash 2.0.y</A></H2>
+<P>Read all of this section before doing any of it.</P>
+<P>The first thing to do is to, as per the instructions below under
+INSTALLATION, unpack the latest distribution and run make and make
+install with the proper arguments.</P>
+<DL>
+<DT><STRONG><A NAME="item_Overwriting_Changes">Overwriting Changes</A></STRONG><BR>
+<DD>
+This process will overwrite any customizations of your installed
+modules, or customizations of the installed scripts in
+/usr/local/slash/themes/ and /usr/local/slash/plugins/ (for themes
+and plugins that come with Slash).  If you ran install-slashsite
+with the default option of using symlinks, and made customizations
+to the originals instead of breaking the symlink and copying the file
+over, then this will overwrite your changes.
+<P>If you did modify the original instead of a copy, then break the
+symlink, copy over the original (as modified), and then continue.
+The original will be copied over by the new version, and your modified
+copy will remain intact.</P>
+<P></P>
+<DT><STRONG><A NAME="item_Templates">Templates</A></STRONG><BR>
+<DD>
+With every update, there are changes to templates.  But most people
+will modify their templates.  A relatively simple way to see what
+has changed is to use template-tool and template-check.  This
+procedure should help most users deal with the integration of new
+templates into an existing site (it will only work with the slashcode
+theme, but a simple modification to the code of template-check
+can fix that).
+<DL>
+<DT><STRONG><A NAME="item_Dump">Dump</A></STRONG><BR>
+<DD>
+Use template-tool to dump your templates into an empty directory.
+<PRE>
+        % mkdir templates
+        % cd templates
+        % template-tool -u VIRTUAL_USER -d</PRE>
+<P>(Defaults to current directory.)</P>
+<DT><STRONG><A NAME="item_Compare">Compare</A></STRONG><BR>
+<DD>
+Use template-check to compare installed templates in
+/usr/local/slash/themes/slashcode/ and /usr/local/slash/plugins/ against
+the templates that have been dumped.
+<PRE>
+        % template-check -u VIRTUAL_USER</PRE>
+<P>(Defaults to current directory.)</P>
+<P>This will use diff to show you the differences.  You can either go
+into the templates with a text editor (in another window) and change
+the dumped ones by hand, edit them by hand in the Template Editor
+via the web browser, or take a note of every template you want to
+copy over your existing template.</P>
+<P>After each directory of templates is done, hit "q" to continue to
+the next plugin/theme.</P>
+<P></P>
+<DT><STRONG><A NAME="item_Sync">Sync</A></STRONG><BR>
+<DD>
+If you made changes by hand via the web, you are done.  Otherwise, take
+the list of templates to update, and pass the full filenames to
+template-tool (this will either be the templates you modified by hand
+in the dump directory, or the unmodified ones in the installation
+directories). You might need to put each filename in quotes because of
+the ";" character in the filenames.  This will overwrite your existing
+template with the new template.
+<PRE>
+        % template-tool -u VIRTUAL_USER -s LIST</PRE>
+<P></P></DL>
+<DT><STRONG><A NAME="item_Data">Data</A></STRONG><BR>
+<DD>
+Currently, there are no differences in the schema or the database data
+between versions of Slash 2.0.
+<P></P></DL>
+<P>
+<H2><A NAME="slash_1.0___slash_2.0">Slash 1.0 -&gt; Slash 2.0</A></H2>
+<P>Please read the complete documentation of <EM>utils/slash1toslash2</EM>.
+It is a program that will convert your database from Slash 1.0
+to a new Slash 2.0 database.  The program documentation (which can
+be read with <EM>perldoc</EM>) details exactly what process it follows
+to do the conversion, so you can attempt to do it by hand if you
+prefer.</P>
 <P>
 <HR>
 <H1><A NAME="installation">INSTALLATION</A></H1>
@@ -443,17 +527,6 @@ NFS server (dual PIII/600, 2GB RAM, 2 x 9GB hard drive), and one
 database server (quad Xeon/550, 2GB RAM, 6 x 9GB hard drive).  However,
 this is certainly overkill for most sites (and possibly even overkill
 for Slashdot).</P>
-<P>
-<HR>
-<H1><A NAME="upgrading">UPGRADING</A></H1>
-<P>
-<H2><A NAME="slash_1.0___slash_2.0">Slash 1.0 -&gt; Slash 2.0</A></H2>
-<P>Please read the complete documentation of <EM>utils/slash1toslash2</EM>.
-It is a program that will convert your database from Slash 1.0
-to a new Slash 2.0 database.  The program documentation (which can
-be read with <EM>perldoc</EM>) details exactly what process it follows
-to do the conversion, so you can attempt to do it by hand if you
-prefer.</P>
 <P>
 <HR>
 <H1><A NAME="version">VERSION</A></H1>
