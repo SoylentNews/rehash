@@ -1338,7 +1338,7 @@ sub dispStory {
 		topic	=> $topic,
 		author	=> $author,
 		full	=> $full,
-#		stid	=> $other->{stid},
+		stid	=> $other->{stid},
 		topics	=> $other->{topics_chosen},
 		topiclist => $other->{topiclist},
 		magic	=> $other->{magic},
