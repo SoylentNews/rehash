@@ -3503,7 +3503,7 @@ sub getStoriesBySubmitter {
 	$limit = 'LIMIT ' . $limit if $limit;
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'sid,title,time',
-		'stories', "submitter='$id' AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty') and displaystatus >= 0' ",
+		'stories', "submitter='$id' AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty') and displaystatus >= 0 ",
 		"ORDER by time DESC $limit");
 	return $answer;
 }
