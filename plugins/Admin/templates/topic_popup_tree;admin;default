@@ -557,18 +557,18 @@ __template__
 
 <script language="javascript">slashtopics_load_names();</script>
 
-Weight: <select name="slashtopics_main_weights" size=1 onchange="slashtopics_change_weight()">
-<option value="4">4 - Mainpage (priority)</option>
-<option value="3">3 - Mainpage</option>
-<option value="2">2 - Sectional (priority)</option>
-<option value="1">1 - Sectional</option>
+<select name="slashtopics_main_weights" size=1 onchange="slashtopics_change_weight()">
+<option value="4">4 - Mainpageworthy (priority)</option>
+<option value="3">3 - Mainpageworthy</option>
+<option value="2">2 - Sectionworthy (priority)</option>
+<option value="1">1 - Sectionworthy</option>
 <option value="0">0 - Ignore Topic</option>
 </select>
+<input type="button" value="Add Topic"  onmouseup="slashtopics_show()">
+<input type="button" value="Remove Topic"   onmouseup="slashtopics_remove()">
 <br>
 <input type="button" value="Never Display"  onmouseup="slashtopics_never_display()">
 <input type="button" value="Revert Weights" onmouseup="slashtopics_revert_weights()">
-<input type="button" value="Choose Topics"  onmouseup="slashtopics_show()">
-<input type="button" value="Remove Topic"   onmouseup="slashtopics_remove()">
 
 __seclev__
 10000
