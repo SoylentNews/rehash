@@ -1391,8 +1391,7 @@ sub setSection {
 ########################################################
 sub createSection {
 	my($self, $hash) = @_;
-	_genericSet('sections', 'section', '', @_);
-	$self->sqlInsert('topics', $hash);
+	$self->sqlInsert('sections', $hash);
 }
 
 ########################################################
