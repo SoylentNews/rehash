@@ -45,7 +45,11 @@ sub main {
 	$form->{'sort'}		||= 1;
 	# this makes it so *no* results get returned, so i changed it back
 	#$form->{section}	||= $constants->{section}; # Set to our current section if section is not passed in
-	$form->{section}	||= '';
+
+	# if we're on a sectional page, default to that section unless another
+	# is specified. If someone needs to search on all sections, they
+	# shouldn't be in one.				--Pater
+	$form->{section}	||= $user->{currentSection} || '';
 	# This next line could be removed -Brian
 	$form->{section}	= '' if $form->{section} eq 'index';
 	$form->{threshold}	= getCurrentUser('threshold') if !defined($form->{threshold});
