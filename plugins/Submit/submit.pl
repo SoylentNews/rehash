@@ -271,8 +271,9 @@ sub submissionEd {
 		$strs[0] .= '...' if length($sub->{subj}) > 35;
 		$sub->{strs} = \@strs;
 
-		$sub->{ssection} = $sub->{section} ne $constants->{defaultsection}
-			? "&section=$sub->{section}" : '';
+		$sub->{ssection} =
+			$sub->{section} ne $constants->{defaultsection} ?
+				"&section=$sub->{section}" : '';
 		$sub->{stitle}  = '&title=' . fixparam($sub->{subj});
 		$sub->{section} = ucfirst($sub->{section})
 			unless $user->{is_admin};
@@ -310,12 +311,9 @@ sub displayRSS {
 	$submissions = $slashdb->getSubmissionForUser();
 
 	for (@$submissions) {
-		my($subid, $subj, $time, $tid, $note, $email, $name,
-		   $section, $comment, $uid, $karma, $weight) = @$_;
-
 		# title should be cleaned up
 		push(@items, {
-			title	=> $subj,
+			title	=> $_->{subj},
 			'link'	=> "$constants->{absolutedir}/submit.pl?op=viewsub&subid=$subid",
 		});
 	}
