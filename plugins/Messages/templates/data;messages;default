@@ -45,10 +45,10 @@ Not allowed to send mail; send_mail variable is false
 Error sending to '[% addr %]' for user [% uid %]: [% error %]
 
 [% CASE 'newsletter subject' %]
-Stories for [% date.format(date.now, '%G-%m-%d') %]
+Stories for [% date.format(date.now, '%Y-%m-%d') %]
 
 [% CASE 'headlines subject' %]
-Headlines for [% date.format(date.now, '%G-%m-%d') %]
+Headlines for [% date.format(date.now, '%Y-%m-%d') %]
 
 [% CASE 'unknown mode' %]
 Unknown delivery mode '[% mode %]' for user [% uid %]
