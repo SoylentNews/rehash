@@ -40,7 +40,7 @@ __template__
 	<tr>
 		<td align="right">[% sub.spid %]</td>
 		<td align="left"><A HREF="[% constants.rootdir
-			%]/~[% user.nickname | fixparam %]">[%
+			%]/~[% sub.nickname | fixparam %]">[%
 			sub.nickname | strip_literal %] ([% sub.uid %])</A></td>
 		<td align="left">[% sub.email | strip_literal %]</td>
 		<td align="left">[% sub.ts | strip_literal %]</td>
