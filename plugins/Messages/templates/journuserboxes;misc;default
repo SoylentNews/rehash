@@ -15,12 +15,14 @@ __template__
 
 </TD>
 
+<TD>&nbsp;</TD>
+
 <TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
 </TR>
 
 <TR>
 
-<TD COLSPAN="3" VALIGN="TOP">
+<TD COLSPAN="4" VALIGN="TOP">
 
 __seclev__
 500
