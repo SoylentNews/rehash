@@ -19,12 +19,13 @@ __name__
 listpolls
 __template__
 [% PROCESS titlebar %]
-
+[% skins = Slash.db.getSkins %]
 <TABLE width="99%">
 	<TR>
 		<TD VALIGN="TOP" ALIGN="LEFT">
 			[% FOREACH question = questions %]
-				<A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.
+				<A HREF="[% skins.${question.8}.rootdir || gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.
+				
 				[% IF user.is_admin %]
 					[% SWITCH question.5 %]
 					[% CASE 'story' %]

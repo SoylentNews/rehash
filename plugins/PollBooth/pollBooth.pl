@@ -230,10 +230,13 @@ sub editpoll {
 		$question->{sid} = $form->{override_sid} if $form->{override_sid};
 		
 		if ($question->{sid}) {
-			$story_ref = $reader->sqlSelectHashref("sid,qid,time,primaryskid,tid,displaystatus",
+			$story_ref = $reader->sqlSelectHashref("sid,qid,time,primaryskid,tid",
 				"stories",
 				"sid=" . $reader->sqlQuote($question->{sid})
 			);
+			
+			$story_ref->{displaystatus} = $reader->_displaystatus($story_ref->{stoid}) if $story_ref;
+
 			if ($story_ref) {
 				$question->{'date'}		= $story_ref->{'time'};
 				$question->{topic}		= $story_ref->{'tid'};
@@ -369,7 +372,7 @@ sub savepoll {
 	if ($constants->{poll_discussions}) {
 		my $poll = $slashdb->getPollQuestion($qid);
 		my $discussion;
-		if ($poll->{sid}) {
+		if ($form->{sid}) {
 			# if sid lookup fails, then $discussion is empty,
 			# and the poll's discussion is not set
 			$discussion = $slashdb->getStory(
@@ -498,11 +501,23 @@ sub deletepolls {
 
 #################################################################
 sub listpolls {
-	my($form) = @_;
+	my($form, $slashdb, $constants) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $min = $form->{min} || 0;
 	my $type = $form->{type};
 	my $questions = $reader->getPollQuestionList($min, { type => $type });
+	my $gSkin = getCurrentSkin();
+	my $opts = ();
+	$opts->{type} = $form->{type};
+	$opts->{section} = $gSkin->{skid};
+
+	my $section = $gSkin->{name};
+	if ($gSkin->{skid} == $constants->{mainpage_skid}) {
+		$opts->{section} = '';
+	}
+
+	my $questions = $reader->getPollQuestionList($min, $opts);
+
 	my $sitename = getCurrentStatic('sitename');
 
 	# Just me, but shouldn't title be in the template?
