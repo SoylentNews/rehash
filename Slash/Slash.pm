@@ -412,6 +412,12 @@ sub _can_mod {
 	my($comment) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+
+	# set time_unixepoch to current time if we aren't passed a
+	# comment this is the case for the check for the moderate button
+	# on the article page 
+
+	$comment->{time_unixepoch} = time unless $comment;
 	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0)
 		unless $comment->{time_unixepoch};
 	return
@@ -425,12 +431,12 @@ sub _can_mod {
 		    && $comment->{lastmod} != $user->{uid}
 		    && $comment->{ipid} ne $user->{ipid}
 		    && (!$constants->{mod_same_subnet_forbid}
-			|| $comment->{subnetid} ne $user->{subnetid} )
+		    	|| $comment->{subnetid} ne $user->{subnetid} )
 		    && (!$user->{state}{discussion_archived}
 			|| $constants->{comments_moddable_archived})
-		    && $comment->{time_unixepoch} >= time() - 3600*
+		    && ($comment->{time_unixepoch} >= time() - 3600*
 			($constants->{comments_moddable_hours}
-			|| 24*$constants->{archive_delay})
+			|| 24*$constants->{archive_delay}))
 		) || (
 		       $constants->{authors_unlimited}
 		    && $user->{seclev} >= $constants->{authors_unlimited}
@@ -580,6 +586,7 @@ sub printComments {
 	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested') ? $comments->{$cidorpid}{totalvisiblekids} : $cc;
 
 	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
+	
 	my $comment_html = slashDisplay('printCommComments', {
 		can_moderate	=> _can_mod($comment),
 		comment		=> $comment,
@@ -1388,8 +1395,8 @@ The 'getOlderStories' template block.
 =cut
 
 sub getOlderStories {
-	my($stories, $section) = @_;
-	my($count, $newstories, $today, $stuff);
+	my($stories, $section, $stuff) = @_;
+	my($count, $newstories, $today);
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -1413,13 +1420,20 @@ sub getOlderStories {
 	}
 
 	my $yesterday;
+	# week prior to yesterday (oldest story we'll get back when we do
+	# a getStoriesEssentials for yesterday's issue)
+	my $week_ago;
 	if ($form->{issue}) {
 		my($y, $m, $d) = $form->{issue} =~ /^(\d\d\d\d)(\d\d)(\d\d)$/;
 		$yesterday = timeCalc(scalar localtime(
 			timelocal(0, 0, 12, $d, $m - 1, $y - 1900) - 86400
 		), '%Y%m%d');
+		$week_ago = timeCalc(scalar localtime(
+			timelocal(0, 0, 12, $d, $m - 1, $y - 1900) - 86400 * 8 
+		), '%Y%m%d');
 	} else {
 		$yesterday = $reader->getDay(1);
+		$week_ago = $reader->getDay(8);
 	}
 
 	$form->{start} ||= 0;
@@ -1434,7 +1448,10 @@ sub getOlderStories {
 		section		=> $section,
 		cur_time	=> time,
 		yesterday	=> $yesterday,
-		start		=> int($artcount/3) + $form->{start},
+		week_ago	=> $week_ago,
+		start		=> int($artcount/3) + $form->{start},	
+		first_date	=> $stuff->{first_date},
+		last_date	=> $stuff->{last_date}
 	}, 1);
 }
 
