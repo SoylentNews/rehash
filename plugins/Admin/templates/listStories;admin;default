@@ -61,7 +61,7 @@ END %]
 
 		<TD ALIGN="RIGHT">
 		<FONT SIZE="2">
-		[<A HREF="[% constants.rootdir %]/admin.p?op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
+		[<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
 		</FONT>
 
 		</TD>
