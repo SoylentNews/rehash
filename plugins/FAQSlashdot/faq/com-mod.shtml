@@ -127,21 +127,19 @@ highest rated of comments, some will want to eliminate anonymous posts,
 and others will want to read every last drip of data, from the First Posts!
 to the spam. The system we've created here will make that happen. Or at
 least, it sure will try...
+
 <p><b>Goals</b>
 <ul>
-<li>
-1.Promote quality, discourage crap.</li>
+<li> Promote quality, discourage crap.</li>
 
-<li>
-2.Make Slashdot as readable as possible for as many people as possible.</li>
+<li> Make Slashdot as readable as possible for as many people as possible.</li>
 
-<li>
-3.Do not require a huge amount of time from any single moderator.</li>
+<li> Do not require a huge amount of time from any single moderator.</li>
 
-<li>
-4.Do not allow a single moderator a "reign of terror."</li>
+<li> Do not allow a single moderator a "reign of terror."</li>
 </ul>
-On the whole, we think the moderation system works really well, but often
+
+<p>On the whole, we think the moderation system works really well, but often
 people disagree. Their disagreement usually stems from different expectations.
 They see a bunch of moderations countering each other. They see a comment
 moderated blatantly wrong. A 'Troll' flagged 'Off topic' (or vice versa)
@@ -354,14 +352,15 @@ Bad, Neutral, Positive, Good, and Excellent.&quot; If a comment you post is mode
 up, your karma will rise. Consequently, if you post a comment that has been moderated 
 down, your karma will fall. 
 <p>In addition to moderation, other things factor into karma as well. You
-can get some karma by <a href="editorial.shtml#ed100">submitting a story
-</a>that
+can get some karma by <a href="editorial.shtml#ed100">submitting a story</a>
+that
 we decide to post. Also, <a href="metamod.shtml">metamoderation</a> can
 cause your karma to change. This encourages good moderators, and ideally
 removes moderator access from bad ones.
+<p>Note that being moderated Funny doesn't help your karma. You have to be
+smart, not just a smart-ass.
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i><br>
-<i><font size=-1>Updated by: <a href="mailto:robo@slashdot.org">Robo</a></font></i><br>
-  <i><font size=-1>Last Modified: 7/15/02</font></i> <br>
+  <i><font size=-1>Last Modified: 6/03/03</font></i> <br>
   <a name="cm703"></a> 
 <h2> What does "Good", "Bad" etc. Karma Mean?</h2>
 <p>Karma is the sum of your activity on Slashdot.  This means posting, 
@@ -423,7 +422,7 @@ board.
 <p>Secondly, users with better karma are given a bonus point which can sometimes 
   increase your <a href="com-mod.shtml#cm703">karma level</a>. Logged-in users normally post comments with a score 
   of 1, but the theory is that if a user earns higher karma, they may post with 
-  a score of 2. Essentially its a reward for being a good participant on Slashdot, 
+  a score of 2. Essentially it's a reward for being a good participant on Slashdot, 
   or a punishment for being a bad one. Users with very low karma might lose the 
   +1 associated with being a logged-in user. Extremely bad users might even be 
   penalized to a -1. 
