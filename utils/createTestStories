@@ -22,6 +22,7 @@ use Date::Manip qw( UnixDate ParseDateString );
 use Slash;
 use Slash::Utility;
 use Benchmark;
+use Slash::Relocate;
 
 use vars qw( $slashdb $werder $constants );
 
@@ -104,6 +105,13 @@ $constants = getCurrentStatic();
 
 # This logic is not quite right -Brian
 		my $sid = $slashdb->createStory($story);
+		my $reloDB = getObject("Slash::Relocate");
+		if ($reloDB) {
+			$slashdb->setStory($sid, { 
+				introtext => $reloDB->href2SlashTag($introtext, $sid),
+				bodytext => $reloDB->href2SlashTag($bodytext, $sid),
+			});
+		}
 		if ($sid) {
 			my $id = $slashdb->createDiscussion( {
 				title => $story->{title},

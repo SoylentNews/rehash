@@ -2328,7 +2328,7 @@ sub saveColorBlock {
 ########################################################
 sub getSectionBlock {
 	my($self, $section) = @_;
-	my $block = $self->sqlSelectAll("section,bid,ordernum,title,portal,url,rdf,retrieve",
+	my $block = $self->sqlSelectAllHashrefArray("section,bid,ordernum,title,portal,url,rdf,retrieve",
 		"blocks", "section=" . $self->sqlQuote($section),
 		"ORDER by ordernum"
 	);

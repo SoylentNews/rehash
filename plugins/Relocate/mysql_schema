@@ -1,7 +1,7 @@
 #
 # Table structure for table 'links'
 #
-
+DROP TABLE IF EXISTS links;
 CREATE TABLE links (
 	id CHAR(32) DEFAULT '' NOT NULL,
 	url TEXT DEFAULT '' NOT NULL,
@@ -15,6 +15,7 @@ CREATE TABLE links (
 # Table structure for table 'links_sid'
 #
 
+DROP TABLE IF EXISTS links_for_stories;
 CREATE TABLE links_for_stories (
 	id char(32) DEFAULT '' NOT NULL,
 	sid CHAR(16) NOT NULL,
