@@ -183,9 +183,9 @@ sub _munge_line {
 	my($line, $mldhr) = @_;
 	chomp($line);
 	return "" if $line =~ /^\s*\#/;
-	$line =~ s{www\.example\.com}	{$mldhr->{hostname}}g;
-	$line =~ s{admin\@example\.com}	{$mldhr->{email}}g;
-	$line =~ s{/usr/local/slash}	{$mldhr->{slash_prefix}}g;
+	$line =~ s{(www\.)?example\.com}	{$mldhr->{hostname}}g;
+	$line =~ s{admin\@example\.com}		{$mldhr->{email}}g;
+	$line =~ s{/usr/local/slash}		{$mldhr->{slash_prefix}}g;
 	$line;
 };
 
