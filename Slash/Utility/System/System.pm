@@ -109,7 +109,7 @@ sub sendEmail {
 
 	# print errors under slashdb only if high level
 	# of verbosity -- pudge
-	my $log_error = defined &verbosity ? verbosity() >= 3 : 1;
+	my $log_error = defined &main::verbosity ? main::verbosity() >= 3 : 1;
 
 	unless (Email::Valid->rfc822($addr)) {
 		errorLog("Can't send mail '$subject' to $addr: Invalid address")
