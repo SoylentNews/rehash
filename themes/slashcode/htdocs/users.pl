@@ -2535,7 +2535,7 @@ sub saveHome {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
-	my $uid;
+	my($uid, $error);
 
 	if ($user->{is_admin}) {
 		$uid = $form->{uid} || $user->{uid} ;
@@ -2605,6 +2605,7 @@ sub saveHome {
 	my $tree = $slashdb->getTopicTree();
 	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
 	my(@story_always_topic, @story_always_author, @story_always_nexus);
+	my($story_topic_all,    $story_author_all,    $story_nexus_all);
 	# Topics are either present (value=2) or absent (value=0).  If absent,
 	# push them onto the never list.  Otherwise, do nothing.  (There's no
 	# way to have an "always" topic, at the moment.)  If the hidden
@@ -2617,6 +2618,7 @@ sub saveHome {
 			keys %$tree
 		) {
 			my $key = "topictid$tid";
+			$story_topic_all++;
 			if (!$form->{$key}) {		push @story_never_topic, $tid	}
 		}
 	}
@@ -2625,6 +2627,7 @@ sub saveHome {
 	# (There's no way to have an "always" author, at the moment.)
 	for my $aid (sort { $a <=> $b } keys %$author_hr) {
 		my $key = "aid$aid";
+		$story_author_all++;
 		if (!$form->{$key}) {			push @story_never_author, $aid	}
 	}
 	# Nexuses can have value 0, 2 or 3.  0 means the never list,
@@ -2637,6 +2640,7 @@ sub saveHome {
 	) {
 		my $key = "nexustid$tid";
 		next unless $tid && $tree->{$tid} && $tree->{$tid}{nexus};
+		$story_nexus_all++;
 		   if (!$form->{$key}) {		push @story_never_nexus, $tid	}
 		elsif ($form->{$key} == 3) {		push @story_always_nexus, $tid	}
 	}
@@ -2696,39 +2700,53 @@ sub saveHome {
 	$user_edits_table->{mylinks} = strip_html($form->{mylinks} || '');
 	$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
 
-	# If a user is unwilling to moderate, we should cancel all points, lest
-	# they be preserved when they shouldn't be.
-	if (!isAnon($uid) && !$form->{willing}) {
-		$slashdb->setUser($uid, { points => 0 });
+	$error = 1;
+	# must select at least 1/4 of nexuses, topics, authors
+	if      ( scalar(@story_never_author) > ($story_author_all * 3/4) ) {
+		$note = getError('editHome_too_many_disabled');
+	} elsif ( scalar(@story_never_nexus) > ($story_nexus_all * 3/4) ) {
+		$note = getError('editHome_too_many_disabled');
+	} elsif ( scalar(@story_never_topic) > ($story_topic_all * 3/4) ) {
+		$note = getError('editHome_too_many_disabled');
+	} else {
+		$error = 0;
 	}
 
-	getOtherUserParams($user_edits_table);
-	if ($form->{restore_defaults}) {
-		setToDefaults($user_edits_table, {}, {
-			maxstories	=> 30,
-			tzcode		=> "EST",
-			# XXX shouldn't this reset ALL the defaults,
-			# not just these two?
-		});
-	}
-	if ($form->{restore_slashbox_defaults}) {
-		setToDefaults($user_edits_table, {
-			'story_never_topic' => 1,
-			'story_never_author' => 1,
-			'story_never_nexus' => 1,
-			'story_always_topic' => 1,
-			'story_always_author' => 1,
-			'story_always_nexus' => 1,
-			'maxstories' => 1,
-			'noboxes' => 1,
-			'light' => 1,
-			'noicons' => 1,
-			'willing' => 1
-		}, { slashboxes => "" });
+	unless ($error) {
+		# If a user is unwilling to moderate, we should cancel all points, lest
+		# they be preserved when they shouldn't be.
+		if (!isAnon($uid) && !$form->{willing}) {
+			$slashdb->setUser($uid, { points => 0 });
+		}
+
+		getOtherUserParams($user_edits_table);
+		if ($form->{restore_defaults}) {
+			setToDefaults($user_edits_table, {}, {
+				maxstories	=> 30,
+				tzcode		=> "EST",
+				# XXX shouldn't this reset ALL the defaults,
+				# not just these two?
+			});
+		}
+		if ($form->{restore_slashbox_defaults}) {
+			setToDefaults($user_edits_table, {
+				'story_never_topic' => 1,
+				'story_never_author' => 1,
+				'story_never_nexus' => 1,
+				'story_always_topic' => 1,
+				'story_always_author' => 1,
+				'story_always_nexus' => 1,
+				'maxstories' => 1,
+				'noboxes' => 1,
+				'light' => 1,
+				'noicons' => 1,
+				'willing' => 1
+			}, { slashboxes => "" });
 	}
 
 #print scalar(localtime) . " uet: " . Dumper($user_edits_table);
-	$slashdb->setUser($uid, $user_edits_table);
+		$slashdb->setUser($uid, $user_edits_table);
+	}
 
 	editHome({ uid => $uid, note => $note });
 }
