@@ -527,7 +527,8 @@ EOT
 
 EOT
 
-		print qq!<P>$user writes <I>"$I{F}{story}"</I></P>!;
+		my $story = stripByMode($I{F}{story}, 'html');
+		print qq!<P>$user writes <I>"$story"</I></P>!;
 	}
 
 	print formLabel("The Scoop",
@@ -578,7 +579,7 @@ sub saveSub {
 			email	=> $I{F}{email},
 			uid	=> $I{U}{uid},
 			name	=> $I{F}{from},
-			story	=> $I{F}{story},
+			story	=> stripByMode($I{F}{story}, 'html'),
 			-'time'	=> 'now()',
 			subid	=> $subid,
 			subj	=> $I{F}{subj},

@@ -1231,6 +1231,7 @@ sub stripByMode {
 #		$str =~ s/'/&#39;/g;	# ' should be OK if we use
 					# " consistently
 
+	# probably 'html'
 	} else {
 		$str = stripBadHtml($str);
 		$str = breakHtml($str) unless $no_white_fix;
@@ -1258,7 +1259,7 @@ sub stripBadHtml  {
 		my($comment, $mwl) = @_;
 		my($new, $l, $c, $in_tag, $this_tag, $cwl);
 
-		$mwl = $mwl || 65;
+		$mwl = $mwl || 50;
 		$l = length($comment);
 
 		%is_break_tag = map { uc, 1 } qw(HR BR LI P OL UL BLOCKQUOTE DIV)
