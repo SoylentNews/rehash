@@ -1048,7 +1048,8 @@ sub approveTag {
 
 		my $tree = HTML::TreeBuilder->new_from_content("<$wholetag>");
 		my($elem) = $tree->look_down(_tag => 'body')->content_list;
-		return "" unless $elem;
+		# look_down() can return a string for some kinds of bogus data
+		return "" unless $elem && ref($elem) eq 'HTML::Element';
 		my @attr_order =
 			sort { $allowed{uc $a}{ord} <=> $allowed{uc $b}{ord} }
 			grep { !/^_/ && exists $allowed{uc $_} }
