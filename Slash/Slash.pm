@@ -776,7 +776,15 @@ sub dispStory {
 	my $slashdb      = getCurrentDB();
 	my $constants    = getCurrentStatic();
 	my $form_section = getCurrentForm('section');
-	my $template_name = $other->{story_template} ? $other->{story_template} : 'dispStory';
+	my $template_name = $other->{story_template} ? 
+		$other->{story_template} : 'dispStory';
+
+	# Might this logic be better off in the template? It's sole purpose
+	# is aesthetics.
+	$other->{magic} = (!$full && (index($story->{title}, ':') == -1) &&
+			  ($story->{section} ne $constants->{defaultsection} &&
+			   $story->{section} ne $form_section))
+	if !exists $other->{magic};
 
 	my $section = $slashdb->getSection($story->{section});
 
@@ -788,10 +796,8 @@ sub dispStory {
 		topic	=> $topic,
 		author	=> $author,
 		full	=> $full,
-		magic	=> (!$full && (index($story->{title}, ':') == -1)
-			&& ($story->{section} ne $constants->{defaultsection})
-			&& ($story->{section} ne $form_section)),
-		width	=> $constants->{titlebar_width}
+		magic	=> $other->{magic},
+		width	=> $constants->{titlebar_width},
 	);
 
 	return slashDisplay($template_name, \%data, 1);
@@ -821,7 +827,7 @@ introtext portion.
 =item OTHER 
 
 hash containing other parameters such as 
-alternate template name 
+alternate template name, or titlebar magic.
 
 =back
 
@@ -887,18 +893,18 @@ Get older stories for older stories box.
 
 =item STORIES
 
-Array ref of the "essentials" of the stories to display, gotten from
+Array ref of the "essentials" of the stories to display, retrieved from
 getStoriesEssentials.
 
 =item SECTION
 
-Hashref of section data.
+Section name or Hashref of section data.
 
 =back
 
 =item Return value
 
-The older stories.
+The older stories, formatted.
 
 =item Dependencies
 
@@ -1117,6 +1123,10 @@ sub _hard_dispComment {
 			</TD></TR>
 EOT
 
+	# Do not display comment navigation and reply links if we are in 
+	# archive mode or if we are in metamod. Nicknames are always equal to
+	# '-' in metamod. This logic is extremely old and could probably be
+	# better formulated.
 	if ($user->{mode} ne 'archive' and $comment->{nickname} ne "-") {
 		my $reply = (linkComment({
 			sid	=> $comment->{sid},
