@@ -8704,7 +8704,9 @@ sub getSkins {
 		if ($constants->{use_https_for_absolutedir_secure}) {
 			$rootdir_uri->scheme('https');
 			$skins_ref->{$skid}{absolutedir_secure} = $rootdir_uri->as_string;
-			$skins_ref->{$skid}{rootdir} =~ s{/+$}{};
+			$skins_ref->{$skid}{absolutedir_secure} =~ s{/+$}{};
+		} else {
+			$skins_ref->{$skid}{absolutedir_secure} = $skins_ref->{$skid}{absolutedir};
 		}
 	}
 
