@@ -793,7 +793,7 @@ sub moderatorCommentLog {
 	my $asc_desc = $type eq 'cid' ? 'ASC' : 'DESC';
 	my $limit = $type eq 'cid' ? 0 : 100;
 	my $both_mods = (($type =~ /ipid/) || ($type =~ /subnetid/) || ($type =~ /global/)) ? 1 : 0;
-	my $skip_ip_disp  = 0;
+	my $skip_ip_disp = 0;
 	if ($type =~ /^b(ip|subnet)id$/) {
 		$skip_ip_disp = 1;
 	} elsif ($type =~ /^(ip|subnet)id$/) {
@@ -872,7 +872,7 @@ sub moderatorCommentLog {
 	}
 
 	my $this_user;
-	$this_user = $slashdb->getUser($value) if $type eq "uid";	
+	$this_user = $slashdb->getUser($value) if $type eq "uid";
 
 	my $data = {
 		type		=> $type,
