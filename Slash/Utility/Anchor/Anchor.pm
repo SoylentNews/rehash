@@ -552,7 +552,7 @@ EOT
 		# we need the ad wrapped in a fancybox
 		if (defined $user->{state}{ad}{$num}
 			&& $user->{state}{ad}{$num} !~ /^<!--/) {
-			return fancybox($constants->{fancyboxwidth}, 'Advertisement', $user->{state}{ad}{$num}, 1, 1);
+			return fancybox($constants->{fancyboxwidth}, 'Advertisement', "<CENTER>" . $user->{state}{ad}{$num} . "</CENTER>", 1, 1);
 		} else { return ""; }
 	} else {
 		return $user->{state}{ad}{$num} || "";
