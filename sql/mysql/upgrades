@@ -1963,3 +1963,7 @@ INSERT INTO vars (name, value, description) VALUES ('archive_limit','500','maxim
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_125, Start of T_2_3_0_126 - 2003/12/02
+
+# Change for plugins/Relocate (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('relocate_keep_count', 1, 'Keep count of click-thrus in the links_for_stories.count column');
+

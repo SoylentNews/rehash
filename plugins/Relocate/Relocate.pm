@@ -65,8 +65,16 @@ sub create {
 }
 
 sub getStoriesForLinks {
-	my ($self) = @_;
+	my($self) = @_;
 	$self->sqlSelectAllHashrefArray('*', 'links_for_stories', '', "ORDER BY sid");
+}
+
+sub increment_count {
+	my($self, $id) = @_;
+	my $id_q = $self->sqlQuote($id);
+	$self->sqlUpdate("links_for_stories", {
+		-count	=> "count + 1",
+	}, "id = $id_q");
 }
 
 #========================================================================
