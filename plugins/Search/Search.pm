@@ -158,13 +158,13 @@ sub findStory {
 	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $columns;
-	$columns .= "title, stories.stoid AS stoid, "; 
-	$columns .= "time, commentcount, stories.primaryskid AS skid,";
-	$columns .= "introtext ";
-	$columns .= ", TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
+	$columns .= "title, stories.stoid AS stoid, sid, "; 
+	$columns .= "time, commentcount, stories.primaryskid AS skid, ";
+	$columns .= "introtext, ";
+	$columns .= "TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
 		if $form->{query};
 
-	my $tables = "stories,story_text";
+	my $tables = "stories, story_text";
 
 	my $other;
 	$other .= " HAVING score > 0 "
@@ -259,12 +259,11 @@ sub findStory {
 	
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
-	# fetch all the topics
+
+	# Don't return just one topic id in tid, make it an arrayref
+	# to all topic ids -- in the preferred order.
 	for my $story (@$stories) {
-		$story->{tid} = $self->sqlSelectColArrayref(
-			'tid', 'story_topics_rendered',
-			'sid=' . $self->sqlQuote($story->{stoid})
-		);
+		$story->{tid} = $self->getTopiclistForStory($story->{stoid});
 	}
 
 	return $stories;
