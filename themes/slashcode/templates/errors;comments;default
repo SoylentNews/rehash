@@ -58,7 +58,9 @@ Please <A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.
 
 [% # POST ANON OPTION DISABLED.
 CASE "postanon_option_disabled" %]
-Anonymous posting is not available to your user.  
+Anonymous posting is not available to your user.  If you've checked post-anonymously in your
+user settings you will have to go <a href="[% gSkin.rootdir %]/users.pl?op=editComm">turn that option off</a> until your posting
+history improves and that option becomes available again.
 
 [% # NO BODY.
 CASE "no body" %]

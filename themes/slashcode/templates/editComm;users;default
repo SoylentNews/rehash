@@ -253,7 +253,7 @@ __template__
 		<INPUT TYPE="checkbox" NAME="nosubscriberbonus"[% sb_check %]>
 [% END %]
 
-[% IF constants.allow_anonymous && user.karma > -1 %]
+[% IF constants.allow_anonymous && (user.karma > -1 || p_check) %]
 		<P><B>Post Anonymously</B>
 		<INPUT TYPE="hidden" NAME="postanon_present" VALUE="1">
 		<INPUT TYPE="checkbox" NAME="postanon"[% p_check %]>
