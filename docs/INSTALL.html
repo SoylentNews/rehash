@@ -29,9 +29,10 @@
 		<LI><A HREF="#Upgrade_0_9_2_0_9_3">Upgrade 0.9.2 -> 0.9.3</A>
 		<LI><A HREF="#Upgrade_0_9_3_0_9_4">Upgrade 0.9.3 -> 0.9.4</A>
 		<LI><A HREF="#Upgrade_0_9_4_0_9_5">Upgrade 0.9.4 -> 0.9.5</A>
-		<LI><A HREF="#Upgrade_0_9_5_1_0_0">Upgrade 0.9.5 -> 1.0.0 </A>
-		<LI><A HREF="#Upgrade_1_0_0_1_0_0_1">Upgrade 1.0.0 -> 1.0.0.1 </A>
-		<LI><A HREF="#Upgrade_1_0_0_1_1_0_2">Upgrade 1.0.0.1 -> 1.0.2 </A>
+		<LI><A HREF="#Upgrade_0_9_5_1_0_0">Upgrade 0.9.5 -> 1.0.0</A>
+		<LI><A HREF="#Upgrade_1_0_0_1_0_0_1">Upgrade 1.0.0 -> 1.0.0.1</A>
+		<LI><A HREF="#Upgrade_1_0_0_1_1_0_2">Upgrade 1.0.0.1 -> 1.0.2</A>
+		<LI><A HREF="#Upgrade_1_0_2_1_0_3">Upgrade 1.0.2 -> 1.0.3</A>
 	</UL>
 
 	<LI><A HREF="#AUTHOR">AUTHOR</A>
@@ -545,7 +546,6 @@ change the password for slash in mysql:
 create table, so it's up to you to modify those privileges to something
 more restrictive if you feel uncomfortable with these settings. We'd
 suggest you don't let other users on the database have access to this user.
-  
 
 
 <P>
@@ -760,7 +760,7 @@ Start apache.
 </A></STRONG>
 Copy the slashd startup script from the Slash source directory (i.e.
 <EM>/home/slash/utils</EM>) slashd into the init.d directory (<EM>/etc/init.d</EM>
-on Debian). Chown it to the slash user (i.e., <CODE>chown slash:slash /etc/init.d/slashd</CODE>) and then chmod it u+s and g+s (i.e., <CODE>chmod u+s /etc/init.d/slashd</CODE>, 
+on Debian). Chown it to the slash user (i.e., <CODE>chown slash:slash /etc/init.d/slashd</CODE>) and then chmod it u+s and g+s (i.e., <CODE>chmod u+s /etc/init.d/slashd</CODE>,
 <CODE>chmod g+s /etc/init.d/slashd</CODE>) Create all the links to this file for the various run levels. Note: this
 script is a startup script, and is not the same script as the
 <EM>slashd</EM> in the same directory as <EM>Slash.pm</EM>.
@@ -1165,23 +1165,31 @@ or whatever.
 
 <P>
 <HR>
-<H2><A NAME="Upgrade_0_9_5_1_0_0_Just_run_">Upgrade 0.9.5 -> 1.0.0 
+<H2><A NAME="Upgrade_0_9_5_1_0_0_Just_run_">Upgrade 0.9.5 -> 1.0.0
 Just run the script update_db-1.0.0.sql in the <EM>sql/updates/1.0.0/</EM> directory, and
-make sure you have the latest code.  
+make sure you have the latest code.
 
 </A></H2>
 <P>
 <HR>
-<H2><A NAME="Upgrade_1_0_0_1_0_0_1_Just_ru">Upgrade 1.0.0 -> 1.0.0.1 
+<H2><A NAME="Upgrade_1_0_0_1_0_0_1_Just_ru">Upgrade 1.0.0 -> 1.0.0.1
 Just run the script update_db-1.0.0.1.sql in the <EM>sql/updates/1.0.0.1/</EM>
-directory, and make sure you have the latest code.  
+directory, and make sure you have the latest code.
 
 </A></H2>
 <P>
 <HR>
-<H2><A NAME="Upgrade_1_0_0_1_1_0_2_Just_ru">Upgrade 1.0.0.1 -> 1.0.2 
+<H2><A NAME="Upgrade_1_0_0_1_1_0_2_Just_ru">Upgrade 1.0.0.1 -> 1.0.2
 Just run the script update_db-1.0.2.sql in the <EM>sql/updates/1.0.2/</EM>
-directory, and make sure you have the latest code.  
+directory, and make sure you have the latest code.
+
+</A></H2>
+<P>
+<HR>
+<H2><A NAME="Upgrade_1_0_2_1_0_3_Just_run_">Upgrade 1.0.2 -> 1.0.3
+Just run the script formkeys.sql in the <EM>sql/updates/1.0.2/</EM>
+directory, and make sure you have the latest code.  Note that the
+commentkey table is no longer used; feel free to delete if you want to.
 
 </A></H2>
 <P>

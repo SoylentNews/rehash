@@ -70,7 +70,7 @@ slash-1.0.3, 2000.05.16
 	header include files)
 
 *	Try to catch bad points values for posts in
-	Slash::selectComments()
+	Slash::selectComments() and comments.pl
 
 *	Set a threshhold of how deep comments can nest on a page;
 	the default is 7, but can be set with the max_depth parameter

@@ -559,17 +559,22 @@ INSTALLATION AND SETUP
     blocks data changed. Examine the script and CHANGES and determine if you
     want to run the script, or whatever.
 
-  Upgrade 0.9.5 -> 1.0.0 
+  Upgrade 0.9.5 -> 1.0.0
 Just run the script update_db-1.0.0.sql in the sql/updates/1.0.0/ directory, and
 make sure you have the latest code.
 
-  Upgrade 1.0.0 -> 1.0.0.1 
+  Upgrade 1.0.0 -> 1.0.0.1
 Just run the script update_db-1.0.0.1.sql in the sql/updates/1.0.0.1/
 directory, and make sure you have the latest code.
 
-  Upgrade 1.0.0.1 -> 1.0.2 
+  Upgrade 1.0.0.1 -> 1.0.2
 Just run the script update_db-1.0.2.sql in the sql/updates/1.0.2/
 directory, and make sure you have the latest code.
+
+  Upgrade 1.0.2 -> 1.0.3
+Just run the script formkeys.sql in the sql/updates/1.0.2/
+directory, and make sure you have the latest code.  Note that the
+commentkey table is no longer used; feel free to delete if you want to.
 
 AUTHOR
     Patrick Galbraith and Chris Nandor. Last Modified May 16, 2000.

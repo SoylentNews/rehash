@@ -307,7 +307,7 @@ drop and create table, so it's up to you to modify those privileges to
 something more restrictive if you feel uncomfortable with these
 settings. We'd suggest you don't let other users on the database have
 access to this user.
-  
+
 
 =item 8.
 
@@ -447,11 +447,11 @@ Start apache.
 
 Copy the slashd startup script from the Slash source directory (i.e.
 F</home/slash/utils>) slashd into the init.d directory (F</etc/init.d>
-on Debian).  Chown it to the slash user 
+on Debian).  Chown it to the slash user
 (i.e., C<chown slash:slash /etc/init.d/slashd>) and then
-chmod it u+s and g+s (i.e., C<chmod u+s /etc/init.d/slashd>, 
+chmod it u+s and g+s (i.e., C<chmod u+s /etc/init.d/slashd>,
 C<chmod g+s /etc/init.d/slashd>)
-Create all the links to this file for the various run levels. 
+Create all the links to this file for the various run levels.
 Note: this script is a startup script, and is not the same script as the
 F<slashd> in the same directory as F<Slash.pm>.
 
@@ -650,7 +650,7 @@ fixes to some of the blocks:
 
 	mysql -uslash -pslashpass < blocks_fix.sql
 
-Keep note of any errors you might see.  On a new 0.9.3 distribution, 
+Keep note of any errors you might see.  On a new 0.9.3 distribution,
 untouched, unmodified data, this worked without incident.
 
 =item 5.
@@ -687,17 +687,22 @@ F<blocks_update.sql> should only be run by people who want some of their
 blocks data changed.  Examine the script and CHANGES and determine if you
 want to run the script, or whatever.
 
-=head2 Upgrade 0.9.5 -> 1.0.0 
+=head2 Upgrade 0.9.5 -> 1.0.0
 Just run the script update_db-1.0.0.sql in the F<sql/updates/1.0.0/> directory, and
-make sure you have the latest code.  
+make sure you have the latest code.
 
-=head2 Upgrade 1.0.0 -> 1.0.0.1 
+=head2 Upgrade 1.0.0 -> 1.0.0.1
 Just run the script update_db-1.0.0.1.sql in the F<sql/updates/1.0.0.1/>
-directory, and make sure you have the latest code.  
+directory, and make sure you have the latest code.
 
-=head2 Upgrade 1.0.0.1 -> 1.0.2 
+=head2 Upgrade 1.0.0.1 -> 1.0.2
 Just run the script update_db-1.0.2.sql in the F<sql/updates/1.0.2/>
-directory, and make sure you have the latest code.  
+directory, and make sure you have the latest code.
+
+=head2 Upgrade 1.0.2 -> 1.0.3
+Just run the script formkeys.sql in the F<sql/updates/1.0.2/>
+directory, and make sure you have the latest code.  Note that the
+commentkey table is no longer used; feel free to delete if you want to.
 
 =head1 AUTHOR
 
