@@ -48,7 +48,7 @@ use Slash::Utility::System;
 use Template 2.06;
 
 use base 'Exporter';
-use vars qw($VERSION @EXPORT @EXPORT_OK $CONTEXT);
+use vars qw($VERSION @EXPORT @EXPORT_OK $CONTEXT %FILTERS);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(slashDisplay);
@@ -295,23 +295,24 @@ my $strip_mode = sub {
 # However, it's better if you have a specific style 
 # for a template and you don't want your tags running
 # up against each other.		- Cliff 8/1/01
-my $filters = Template::Filters->new({
-	FILTERS => {
-		fixparam	=> \&fixparam,
-		fixurl		=> \&fixurl,
-		fudgeurl	=> \&fudgeurl,
-		strip_anchor	=> \&strip_anchor,
-		strip_attribute	=> \&strip_attribute,
-		strip_code	=> \&strip_code,
-		strip_extrans	=> \&strip_extrans,
-		strip_html	=> \&strip_html,
-		strip_literal	=> \&strip_literal,
-		strip_nohtml	=> \&strip_nohtml,
-		strip_notags	=> \&strip_notags,
-		strip_plaintext	=> \&strip_plaintext,
-		strip_mode	=> [ $strip_mode, 1 ]
-	}
-});
+%FILTERS = (
+	fixparam	=> \&fixparam,
+	fixurl		=> \&fixurl,
+	fudgeurl	=> \&fudgeurl,
+	strip_anchor	=> \&strip_anchor,
+	strip_attribute	=> \&strip_attribute,
+	strip_code	=> \&strip_code,
+	strip_extrans	=> \&strip_extrans,
+	strip_html	=> \&strip_html,
+	strip_literal	=> \&strip_literal,
+	strip_nohtml	=> \&strip_nohtml,
+	strip_notags	=> \&strip_notags,
+	strip_plaintext	=> \&strip_plaintext,
+	strip_mode	=> [ $strip_mode, 1 ],
+	%FILTERS
+);
+
+my $filters = Template::Filters->new({ FILTERS => \%FILTERS });
 
 sub get_template {
 	my($cfg1, $cfg2, $VirtualUser) = @_;
