@@ -11,7 +11,6 @@ use Slash::Utility;
 
 #################################################################
 sub main {
-	my $slashdb = getCurrentDB();
 	my $form    = getCurrentForm();
 	my $user    = getCurrentUser();
 
@@ -72,24 +71,24 @@ sub hierarchy {
 
 #################################################################
 sub topTopics {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
-	my $section = $slashdb->getSection();
+	my $section = $reader->getSection();
 
 	my(@topics, $topics);
-	$topics = $slashdb->getTopNewsstoryTopics($form->{all});
+	$topics = $reader->getTopNewsstoryTopics($form->{all});
 
 	for (@$topics) {
 		my $top = $topics[@topics] = {};
 		@{$top}{qw(tid alttext image width height cnt)} = @$_;
-		$top->{count} = $slashdb->countStory($top->{tid});
+		$top->{count} = $reader->countStory($top->{tid});
 
 		my $limit = $top->{cnt} > 10
 			? 10 : $top->{cnt} < 3 || $form->{all}
 			? 3 : $top->{cnt};
 
-		my $stories = $slashdb->getStoriesEssentials(
+		my $stories = $reader->getStoriesEssentials(
 			$limit, $section->{section}, $top->{tid});
 		$top->{stories} = getOlderStories($stories, $section);
 		if ($top->{image} =~ /^\w+\.\w+$/) {
@@ -109,15 +108,15 @@ sub topTopics {
 
 #################################################################
 sub listTopics {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 
-	my $topics = $slashdb->getTopics();
+	my $topics = $reader->getTopics();
 	
 	if ($form->{section}) {
 		my %new_topics;
-		my $ids = $slashdb->getDescriptions('topics_section', $form->{section});
+		my $ids = $reader->getDescriptions('topics_section', $form->{section});
 		for (keys %$topics) {
 			$new_topics{$_} = $topics->{$_}
 				if ($ids->{$_});	

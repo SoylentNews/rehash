@@ -45,7 +45,7 @@ sub main {
 	}
 
 	if ($story) {
-		my $SECT = $slashdb->getSection($story->{section});
+		my $SECT = $reader->getSection($story->{section});
 		# This should be a getData call for title
 		my $title = "$constants->{sitename} | $story->{title}";
 
@@ -88,7 +88,7 @@ sub main {
 		slashDisplay('display', {
 			poll			=> $pollbooth,
 			section			=> $SECT,
-			section_block		=> $slashdb->getBlock($SECT->{section}),
+			section_block		=> $reader->getBlock($SECT->{section}),
 			show_poll		=> $pollbooth ? 1 : 0,
 			story			=> $story,
 			authortext		=> $authortext,

@@ -10,7 +10,6 @@ use Slash::Display;
 use Slash::Utility;
 
 sub main {
-	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
@@ -39,7 +38,7 @@ sub main {
 		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME}), return if $c;
 	}
 
-	$section = $slashdb->getSection($form->{section});
+	$section = $reader->getSection($form->{section});
 
 	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
@@ -74,7 +73,7 @@ sub main {
 	my $StandardBlocks = displayStandardBlocks($section, $stories);
 
 	slashDisplay('index', {
-		metamod_elig	=> scalar $slashdb->metamodEligible($user),
+		metamod_elig	=> scalar $reader->metamodEligible($user),
 		stories		=> $Stories,
 		boxes		=> $StandardBlocks,
 	});
@@ -146,7 +145,7 @@ sub rmBid {
 #################################################################
 sub displayStandardBlocks {
 	my($section, $older_stories_essentials) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $cache = getCurrentCache();
@@ -154,7 +153,7 @@ sub displayStandardBlocks {
 	return if $user->{noboxes};
 
 	my(@boxes, $return, $boxcache);
-	my($boxBank, $sectionBoxes) = $slashdb->getPortalsCommon();
+	my($boxBank, $sectionBoxes) = $reader->getPortalsCommon();
 	my $getblocks = $section->{section} || 'index';
 
 	# two variants of box cache: one for index with portalmap,
@@ -228,7 +227,7 @@ sub displayStandardBlocks {
 		# this could grab from the cache in the future, perhaps ... ?
 		} elsif ($bid eq 'rand' || $bid eq 'srandblock') {
 			# don't use cached title/bid/url from getPortalsCommon
-			my $data = $slashdb->getBlock($bid, [qw(title block bid url)]);
+			my $data = $reader->getBlock($bid, [qw(title block bid url)]);
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
 				@{$data}{qw(title block bid url)}
@@ -238,7 +237,7 @@ sub displayStandardBlocks {
 			$return .= $boxcache->{$bid} ||= portalbox(
 				$constants->{fancyboxwidth},
 				$boxBank->{$bid}{title},
-				$slashdb->getBlock($bid, 'block'),
+				$reader->getBlock($bid, 'block'),
 				$boxBank->{$bid}{bid},
 				$boxBank->{$bid}{url}
 			);
@@ -252,7 +251,7 @@ sub displayStandardBlocks {
 # pass it how many, and what.
 sub displayStories {
 	my($stories) = @_;
-	my $slashdb   = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
@@ -329,7 +328,7 @@ sub displayStories {
 		}
 
 		if ($thissection ne $constants->{defaultsection} && !$form->{section}) {
-			my($section) = $slashdb->getSection($thissection);
+			my($section) = $reader->getSection($thissection);
 			push @links, getData('seclink', {
 				name	=> $thissection,
 				section	=> $section
