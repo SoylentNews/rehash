@@ -1030,7 +1030,7 @@ sub approveTag {
 	# Build the hash of approved tags.
 	my $approvedtags = getCurrentStatic("approvedtags");
 	my %approved =
-		map { (uc($_), 1) }
+		map  { (uc($_), 1)   }
 		grep { $_ ne 'ECODE' }
 		@$approvedtags;
 
@@ -1047,14 +1047,14 @@ sub approveTag {
 	# These tags go through a secondary, fancier approval process.
 	# Note that approvedtags overrides what is/isn't allowed here.
 	# (At some point we should put this hash into a var, maybe
-	# like "a:href_RU img:src_RU,width,height,alt,longdesc"?
+	# like "a:href_RU img:src_RU,width,height,alt,longdesc_U"?
 	my %attr = (
 		A =>	{ HREF =>	{ req => 1, url => 1 } },
 		IMG =>	{ SRC =>	{ req => 1, url => 1 },
 			  WIDTH =>	{},
 			  HEIGHT =>	{},
 			  ALT =>	{},
-			  LONGDESC =>	{} },
+			  LONGDESC =>	{ url => 1 } },
 	);
 	if ($slash) {
 
@@ -1067,17 +1067,14 @@ sub approveTag {
 
 		my %allowed = %{$attr{$t_uc}};
 		my %required =
-			map { $_, $allowed{$_} }
+			map  { $_, $allowed{$_}  }
 			grep { $allowed{$_}{req} }
-			keys %allowed;
-		# Deconstruct and reconstruct the tag.
-		$wholetag =~ s/^\Q$taglead\E//;
-		# XXX This \S below is wrong -- can't handle ALT tags with
-		# spaces in them, for example.  There's got to be some
-		# CPAN module that will do this properly for us, right?
-		# - Jamie 2002/06/20
-		my @attr_order = $wholetag =~ /\s+(\w+)\s*= \S+ /gx;
-		my %attr_data  = $wholetag =~ /\s+(\w+)\s*=(\S+)/gx;
+			keys   %allowed;
+
+		my $tree = HTML::TreeBuilder->new_from_content("<$wholetag>");
+		my($elem) = $tree->look_down(_tag => 'body')->content_list;
+		my @attr_order = grep !/^_/, $elem->all_attr_names;
+		my %attr_data  = map { ($_, $elem->attr($_)) } @attr_order;
 		my $num_req_found = 0;
 #use Data::Dumper;
 #print STDERR "rebuilding: t_uc '$t_uc' wholetag '$wholetag' attr_order '@attr_order' attr_data " . Dumper(\%attr_data);
@@ -1088,8 +1085,7 @@ sub approveTag {
 			my $data = $attr_data{$a};
 			$data = fudgeurl($data) if $allowed{$a_uc}{url};
 			next unless $data;
-			$data = qq{"$data"} if $data !~ /^(["'])[^\1]*\1$/;
-			$wholetag .= " $a_uc=$data";
+			$wholetag .= qq{ $a_uc="$data"};
 			++$num_req_found if $required{$a_uc};
 #print STDERR "attr added: '$a_uc' '$data' num_req_found '$num_req_found'\n";
 		}
