@@ -2441,8 +2441,6 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', '
 
 # End of T_2_5_0_15, Start of T_2_5_0_16 - 2004/07/22
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_16, Start of T_2_5_0_17 - 2004/07/26
 
 INSERT INTO vars (name, value, description) VALUES ('submission_default_skid', '0', 'Skid you would like selected by default for submissions, 0 or empty string for none');
@@ -2455,3 +2453,7 @@ INSERT INTO vars (name, value, description) VALUES ('submission_force_default', 
 ALTER TABLE dbs ADD COLUMN weight tinyint UNSIGNED NOT NULL DEFAULT 1;
 INSERT INTO vars (name, value, description) VALUES ('debughash_getSkins','','false = no debugging; default regex = ^\d+$');
 INSERT INTO vars (name, value, description) VALUES ('debughash_getTopicTree','','false = no debugging; default regex = ^\d+$');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_18, Start of T_2_5_0_19 - 2004/08/03
