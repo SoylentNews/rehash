@@ -508,6 +508,13 @@ sub printComments {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 
+        if ($constants->{clampe_stats}) {
+                my $fname = catfile('clampe', $user->{ipid});
+		my $sc = defined $form->{'savechanges'} ? 1 : 0;
+                my $savelog = "IPID: $user->{ipid} UID: $user->{uid} Thresh: $user->{threshold} Dispmode: $user->{mode} Sort: $user->{commentsort} SaveChanges: $sc";
+                doClampeLog($fname, [$savelog]);
+         }
+
 	if (!$discussion || !$discussion->{id}) {
 		print getData('no_such_sid', {}, '');
 		return 0;
