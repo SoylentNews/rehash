@@ -1,4 +1,8 @@
 #!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2003 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
 
 use strict;
 use Slash::Constants qw( :messages :slashd );
@@ -266,7 +270,7 @@ EOT
 		$statsSave->createStatDaily("${op}_ipids", $uniq);
 		$statsSave->createStatDaily("${op}_bytes", $bytes);
 		$statsSave->createStatDaily("${op}_page", $pages);
-		if($op eq "article"){
+		if ($op eq "article") {
 			my $avg = $stats->getAverageHitsPerStoryOnDay($yesterday, $pages);
 			$statsSave->createStatDaily("avg_hits_per_story", $avg);
 		}
@@ -334,7 +338,7 @@ EOT
 		$statsSave->createStatDaily("users", $users, { section => $section });
 		$statsSave->createStatDaily("users_subscriber", $users_subscriber, { section => $section });
 			
-		foreach my $d(@cc_days){
+		foreach my $d (@cc_days) {
 			my $avg_comments = $stats->getAverageCommentCountPerStoryOnDay($d, { section => $section}) || 0;
 			$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
 							{ section   => $section, overwrite => 1, day => $d });
@@ -357,7 +361,7 @@ EOT
 			$statsSave->createStatDaily("${op}_page", $pages, { section => $section});
 			$statsSave->createStatDaily("${op}_user", $users, { section => $section});
 
-			if($op eq "article"){
+			if ($op eq "article") {
 				my $avg = $stats->getAverageHitsPerStoryOnDay($yesterday, $pages, { section => $section });
 				$statsSave->createStatDaily("avg_hits_per_story", $avg, { section => $section });
 			}
@@ -383,7 +387,7 @@ EOT
 		push(@{$data{sections}}, $temp);
 	}
 
-	foreach my $d(@cc_days){
+	foreach my $d (@cc_days) {
 		my $avg_comments= $stats->getAverageCommentCountPerStoryOnDay($d) || 0;
 		$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
 						{ overwrite => 1, day => $d });
