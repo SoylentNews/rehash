@@ -143,7 +143,7 @@ sub main {
 		},
 		recent		=> {
 			function	=> \&displayRecent,
-			seclev		=> 500,
+			seclev		=> 100,
 			adminmenu	=> 'security',
 			tab_selected	=> 'recent',
 		},
