@@ -58,7 +58,7 @@ __template__
 [% END %]
 
 	<tr>
-		<td><b>Nickname</b></td>
+		<td><b>Nickname:</b></td>
 		<td><input type="TEXT" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
 		</td>
 	</tr>
