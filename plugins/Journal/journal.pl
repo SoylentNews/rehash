@@ -606,12 +606,12 @@ sub saveArticle {
 				template_name	=> 'messagenew',
 				subject		=> { template_name => 'messagenew_subj' },
 				journal		=> {
-				description	=> $description,
-				article		=> $form->{article},
-				posttype	=> $form->{posttype},
-				id		=> $id,
-				uid		=> $user->{uid},
-				nickname	=> $user->{nickname},
+					description	=> $description,
+					article		=> $form->{article},
+					posttype	=> $form->{posttype},
+					id		=> $id,
+					uid		=> $user->{uid},
+					nickname	=> $user->{nickname},
 				}
 			};
 			for (@$friends) {
