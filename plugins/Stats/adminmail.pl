@@ -70,8 +70,11 @@ EOT
 
 	my $mod_points = $stats->getPoints;
 	my @yesttime = localtime(time-86400);
+	my @weekagotime = localtime(time-86400*7);
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
+	my $weekago = sprintf "%4d-%02d-%02d", 
+		$weekagotime[5] + 1900, $weekagotime[4] + 1, $weekagotime[3];
 	my $used = $stats->countModeratorLog($yesterday);
 	my $modlog_hr = $stats->countModeratorLogHour($yesterday);
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID($yesterday);
@@ -96,12 +99,12 @@ EOT
 	my $uniq_rss_users = $stats->countDailyByOPDistinctIPID('rss', $yesterday);
 	my $rss_page_views = $stats->countDailyByOP('rss',$yesterday);
 
-	my $admin_mods = $stats->getAdminModsInfo($yesterday);
+	my $admin_mods = $stats->getAdminModsInfo($yesterday, $weekago);
 	my $admin_mods_text = "";
 	my($num_admin_mods, $num_mods) = (0, 0);
 	if ($admin_mods) {
 		for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
-			$admin_mods_text .= sprintf("%13.13s: %26s %-35s\n",
+			$admin_mods_text .= sprintf("%13.13s: %26s %-48s\n",
 				$nickname,
 				$admin_mods->{$nickname}{m1_text},
 				$admin_mods->{$nickname}{m2_text}

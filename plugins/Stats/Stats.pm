@@ -91,7 +91,7 @@ sub getCommentsByDistinctIPID {
 
 ########################################################
 sub getAdminModsInfo {
-	my($self, $yesterday) = @_;
+	my($self, $yesterday, $weekago) = @_;
 
 	# First get the count of upmods and downmods performed by each admin.
 	my $m1_uid_val_hr = $self->sqlSelectAllHashref(
@@ -116,6 +116,16 @@ sub getAdminModsInfo {
 
 	# If nothing for either, no data to return.
 	return { } if !%$m1_uid_val_hr && !%$m2_uid_val_hr;
+
+	my $m2_uid_val_wk_hr = $self->sqlSelectAllHashref(
+		[qw( uid val )],
+		"users.uid AS uid, metamodlog.val AS val, users.nickname AS nickname, COUNT(*) AS count",
+		"metamodlog, moderatorlog, users",
+		"users.seclev > 1 AND moderatorlog.uid=users.uid
+		 AND metamodlog.mmid=moderatorlog.id
+		 AND metamodlog.ts BETWEEN '$weekago 00:00' AND '$yesterday 23:59:59'",
+		"GROUP BY users.uid, metamodlog.val"
+	);
 
 	# For comparison, get the same stats for all users on the site and
 	# add them in as a phony admin user that sorts itself alphabetically
@@ -192,6 +202,16 @@ sub getAdminModsInfo {
 			$nfair, $nunfair);
 		if ($nfair+$nunfair >= 20) { # this number is pretty arbitrary
 			$hr->{$nickname}{m2_text} .= sprintf(" (%6.2f%% un)",
+				$percent);
+		}
+		# Also calculate overall-week percentage.
+		my $nfair_wk   = $m2_uid_val_wk_hr->{$uid} {1}{count} || 0;
+		my $nunfair_wk = $m2_uid_val_wk_hr->{$uid}{-1}{count} || 0;
+		$percent = ($nfair_wk+$nunfair_wk > 0)
+			? $nunfair_wk*100/($nfair_wk+$nunfair_wk)
+			: 0;
+		if ($nfair_wk+$nunfair_wk >= 20) { # again, pretty arbitrary
+			$hr->{$nickname}{m2_text} .= sprintf(" (wk: %6.2f%%)",
 				$percent);
 		}
 		$hr->{$nickname}{m2_fair} = $nfair;
@@ -298,6 +318,7 @@ sub countDaily {
 		"accesslog",
 		"TO_DAYS(NOW()) - TO_DAYS(ts)=1"
 	);
+	$min_day_id ||= 1; $max_day_id ||= 1;
 	my $yesterday_clause = "(id BETWEEN $min_day_id AND $max_day_id)";
 
 	# For counting the total, we used to just do a COUNT(*) with the
