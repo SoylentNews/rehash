@@ -791,8 +791,22 @@ sub getMetamodsForUserRaw {
 	my $getmods_loops = 0;
 	my @ids = ( );
 	my $mod_hr;
-	
-	GETMODS: while ($num_needed > 0 && ++$getmods_loops <= 3) {
+
+	my $num_oldzone_needed = 0;
+	my $oldzone = $self->getVar('m2_oldzone', 'value', 1);
+	if ($oldzone) {
+		$num_oldzone_needed = int(
+			$num_needed *
+			($constants->{m2_oldest_zone_percentile}
+				* $constants->{m2_oldest_zone_mult})/100
+			+ rand()
+		);
+		# just a sanity check...
+		$num_oldzone_needed = $num_needed if $num_oldzone_needed > $num_needed;
+	}
+	my $num_normal_needed = $num_needed - $num_oldzone_needed;
+
+	GETMODS: while ($num_needed > 0 && ++$getmods_loops <= 4) {
 		my $limit = $num_needed*2+10; # get more, hope it's enough
 		my $already_id_clause = "";
 		$already_id_clause  = " AND  id NOT IN ($already_id_list)"
@@ -800,6 +814,11 @@ sub getMetamodsForUserRaw {
 		my $already_cid_clause = "";
 		$already_cid_clause = " AND cid NOT IN ($already_cid_list)"
 			if $already_cid_list;
+		my $only_old_clause = "";
+		if ($num_oldzone_needed) {
+			# We need older mods.
+			$only_old_clause = " AND id <= $oldzone";
+		}
 		$mod_hr = { };
 		$mod_hr = $reader->sqlSelectAllHashref(
 			"id",
@@ -811,10 +830,21 @@ sub getMetamodsForUserRaw {
 			 AND reason IN ($m2able_reasons)
 			 AND active=1
 			 AND ts < DATE_SUB(NOW(), INTERVAL $m2_wait_hours HOUR)
-			 $already_id_clause $already_cid_clause",
+			 $already_id_clause $already_cid_clause $only_old_clause",
 			"ORDER BY rank LIMIT $limit"
 		);
-		last GETMODS if !$mod_hr || !scalar(keys %$mod_hr);
+		if (!$mod_hr || !scalar(keys %$mod_hr)) {
+			# OK, we didn't get any.  If we were looking
+			# just for old, then forget it and move on.
+			# Otherwise, give up completely.
+			if ($num_oldzone_needed) {
+				$num_needed += $num_oldzone_needed;
+				$num_oldzone_needed = 0;
+				next GETMODS;
+			} else {
+				last GETMODS;
+			}
+		}
 
 		# Exclude any moderations this user has already metamodded.
 		my $mod_ids = join ",", keys %$mod_hr;
@@ -839,14 +869,20 @@ sub getMetamodsForUserRaw {
 			push @new_ids, $id;
 			$already_cids_hr->{$cid} = 1;
 		}
-		$#new_ids = $num_needed-1 if $#new_ids > $num_needed-1;
+		if ($num_oldzone_needed) {
+			$#new_ids = $num_oldzone_needed-1 if $#new_ids > $num_oldzone_needed-1;
+			$num_oldzone_needed -= scalar(@new_ids);
+		} else {
+			$#new_ids = $num_normal_needed-1 if $#new_ids > $num_normal_needed-1;
+			$num_normal_needed -= scalar(@new_ids);
+		}
 		push @ids, @new_ids;
 		$num_needed -= scalar(@new_ids);
 	}
-	if ($getmods_loops > 3) {
+	if ($getmods_loops > 4) {
 		print STDERR "GETMODS looped the max number of times,"
 			. " returning '@ids' for uid '$uid'"
-			. " num_needed '$num_needed'"
+			. " num_needed '$num_needed' num_oldzone_needed '$num_oldzone_needed' num_normal_needed '$num_normal_needed'"
 			. " (maybe out of mods to M2?)"
 			. " already_had: " . Dumper($already_have_hr);
 	}

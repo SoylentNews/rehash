@@ -35,6 +35,7 @@ $task{$me}{code} = sub {
 	give_out_points($virtual_user, $constants, $slashdb, $user);
 	reconcile_m2($virtual_user, $constants, $slashdb, $user);
 	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
+	mark_m2_oldzone($virtual_user, $constants, $slashdb, $user);
 	adjust_m2_freq($virtual_user, $constants, $slashdb, $user) if $constants->{adjust_m2_freq};
 	return ;
 };
@@ -55,12 +56,11 @@ sub update_modlog_ids {
 		if $days_back_cushion < ($constants->{m2_min_daysbackcushion} || 2);
 	$days_back -= $days_back_cushion;
 
-	 my $reasons = $reader->getReasons();
-         my $m2able_reasons = join(",",
-                sort grep { $reasons->{$_}{m2able} }
-                keys %$reasons);
-         return if !$m2able_reasons;
-
+	my $reasons = $reader->getReasons();
+	my $m2able_reasons = join(",",
+	       sort grep { $reasons->{$_}{m2able} }
+	       keys %$reasons);
+	return if !$m2able_reasons;
 
 	# XXX I'm considering adding a 'WHERE m2status=0' clause to the
 	# MIN/MAX selects below.  This might help choose mods more
@@ -626,6 +626,69 @@ sub reconcile_stats {
 	$statsSave->updateStatDaily(
 		"m2_${reason_name}_${nfair}_${nunfair}",
 		"value + 1");
+}
+
+############################################################
+
+sub mark_m2_oldzone {
+	my($virtual_user, $constants, $slashdb, $user) = @_;
+
+	my $reasons = $slashdb->getReasons();
+        my $m2able_reasons = join(",",
+               sort grep { $reasons->{$_}{m2able} }
+               keys %$reasons);
+        return if !$m2able_reasons;
+	my $archive_delay_mod =
+		   $constants->{archive_delay_mod}
+		|| $constants->{archive_delay}
+		|| 14;
+	my $m2_oldest_wanted = $constants->{m2_oldest_wanted}
+		|| int($archive_delay_mod * 0.9);
+
+	my $need_m2_clause = "active=1 AND m2status=0 AND reason IN ($m2able_reasons)";
+	my $m2_oldest_id = $slashdb->sqlSelect("MIN(id)",
+		"moderatorlog", $need_m2_clause);
+	if (!$m2_oldest_id) {
+		# If there's nothing to M2, we're good.
+		$slashdb->setVar('m2_oldzone', 0);
+		return ;
+	}
+
+	my $oldest_time_days = $slashdb->sqlSelect(
+		"( UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(ts) ) / 86400",
+		"moderatorlog",
+		"id=$m2_oldest_id");
+	if ($oldest_time_days < $m2_oldest_wanted) {
+		# If the oldest unM2'd mod is younger than
+		# the limit set in the m2_oldest_wanted var,
+		# we're good.
+		$slashdb->setVar('m2_oldzone', 0);
+                return ;
+	}
+
+	# OK, the oldest mods are too old.  We're going to call
+	# the "oldzone" the nth percentile:  everything older
+	# than the oldest n% of mods.  Find the id of that mod
+	# and write it.  A percentile of 2 gives us overhead
+	# of about a factor of 10 on Slashdot without having to
+	# worry about running out past the "oldzone" before the
+	# next run of run_moderatord.
+	my $percentile = $constants->{m2_oldest_zone_percentile} || 2;
+	my $modlog_size = $slashdb->sqlCount("moderatorlog", $need_m2_clause);
+	my $oldzone_size = int($modlog_size * $percentile / 100 + 0.5);
+	if (!$oldzone_size) {
+		# We probably shouldn't get here except on a site which
+		# has _very_ little moderation... but if we do, then
+		# we're good.
+		$slashdb->setVar('m2_oldzone', 0);
+		return ;
+        }
+	my $oldzone_id = $slashdb->sqlSelect(
+		"id",
+		"moderatorlog",
+		"$need_m2_clause",
+		"ORDER BY id LIMIT $oldzone_size, 1");
+	$slashdb->setVar('m2_oldzone', $oldzone_id);
 }
 
 ############################################################
