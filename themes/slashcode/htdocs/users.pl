@@ -1094,7 +1094,8 @@ sub showInfo {
 	my $cid_list = [ keys %$cids_seen ];
 	my $cids_to_mods = {};
 	if ($admin_flag and $constants->{show_mods_with_comments}) {
-		my $comment_mods = $reader->getModeratorCommentLog("DESC", $constants->{mod_limit_with_comments}, "cidin", $cid_list);
+		my $comment_mods = $reader->getModeratorCommentLog("DESC",
+			$constants->{mod_limit_with_comments}, "cidin", $cid_list);
 	
 		# Loop through mods and group them by the sid they're attached to
 		while (my $mod = shift @$comment_mods) {
