@@ -2161,12 +2161,12 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_si
 
 # End of T_2_3_0_141, Start of T_2_3_0_142 - 2004/03/09
 
-# SLASHDOT LAST UPDATED HERE
-
 # SLASHCLUSTER LAST UPDATED HERE
 
 # Changes for plugins/Hof (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('hof_do_not_count', '', 'Do not list stories with these (space-separated) sids in hof.pl');
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_142, Start of T_2_3_0_143 - 2004/03/10
 
