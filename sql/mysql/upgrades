@@ -2333,3 +2333,5 @@ INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index',
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_155, Start of T_2_3_0_156 - 2004/05/25
+
+INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
