@@ -272,6 +272,7 @@ themes/slashcode/templates/deleted_cids;comments;default
 themes/slashcode/templates/discuss_list;comments;default
 themes/slashcode/templates/dispComment;misc;default
 themes/slashcode/templates/dispComment;misc;light
+themes/slashcode/templates/dispLinkComment;misc;default
 themes/slashcode/templates/dispStory;misc;default
 themes/slashcode/templates/dispStory;misc;light
 themes/slashcode/templates/dispTheComments;metamod;default
