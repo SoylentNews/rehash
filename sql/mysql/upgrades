@@ -1151,9 +1151,6 @@ INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_max_new','0','A
 
 INSERT INTO vars (name, value, description) VALUES ('lastlookmemory','3600','Amount of time the uid last looked-at will be remembered/displayed');
 
-
-# USEPERL LAST UPDATED HERE
-
 ALTER TABLE comments ADD karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL;
 
 # End of T_2_3_0_67, Start of T_2_3_0_68
@@ -1165,9 +1162,9 @@ ALTER TABLE comments ADD karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('comment_startword_workaround','1','Should breakHtml() insert kludgy HTML to work around an MSIE bug?');
 
 # New Zoo stuff, run rebuildPeople after you install the latest code and apply these changes -Brian
-ALTER TABLE people drop	fof;
+ALTER TABLE people drop fof;
 ALTER TABLE people drop eof;
-ALTER TABLE people add	last_update timestamp;
+ALTER TABLE people add  last_update timestamp;
 
 DROP TABLE IF EXISTS people_nthdegree;
 CREATE TABLE people_nthdegree (
@@ -1191,3 +1188,5 @@ INSERT INTO vars (name, value, description) VALUES ('mod_karma_bonus_max_downmod
 
 ALTER TABLE message_drop ADD COLUMN send ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('message_last_deferred','','The last date that deferred messages were sent');
+
+# USEPERL LAST UPDATED HERE
