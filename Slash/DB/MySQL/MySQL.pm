@@ -2715,12 +2715,13 @@ sub deleteSubmission {
 		# the logic below should always check $t.
 		next unless /^(\w+)_(\d+)$/;
 		my($t, $n) = ($1, $2);
-		if ($t eq "note" || $t eq "comment" || $t eq "section") {
+		if ($t eq "note" || $t eq "comment" || $t eq "skid") {
 			$form->{"note_$n"} = "" if $form->{"note_$n"} eq " ";
 			if ($form->{$_}) {
 				my %sub = (
-					note	=> $form->{"note_$n"},
-					comment	=> $form->{"comment_$n"},
+					note		=> $form->{"note_$n"},
+					comment		=> $form->{"comment_$n"},
+					primaryskid	=> $form->{"skid_$n"}
 				);
 
 				if (!$sub{note}) {
@@ -6588,7 +6589,7 @@ sub setSubmissionsMerge {
 }
 
 ########################################################
-# What an ugly method
+# 
 sub getSubmissionForUser {
 	my($self) = @_;
 
@@ -6611,28 +6612,9 @@ sub getSubmissionForUser {
 
 	push @where, 'tid=' . $self->sqlQuote($form->{tid}) if $form->{tid};
 
-	# What was here before was a bug since you could end up in a
-	# section that was different then what the form was passing in (the
-	# result was something like WHERE section="foo" AND section="bar").
-	# Look in CVS for the previous code. Now, this what we are doing. If
-	# form.section is passed in we override anything about the section
-	# and display what the user asked for. The exception is for a
-	# section admin. In that case user.section is all they should see
-	# and is all that we let them see. Now, if the user is not a
-	# section admin and form.section is not set we make a call to
-	# getSection() which will pass us back whatever section we are
-	# in. Now in the case of a site with an "index" section that is
-	# a collected section that has no members, aka Slashdot, we will
-	# return everything for every section. Otherwise we return just
-	# sections from the collection.  In a contained section we just
-	# return what is in that section (say like "science" on Slashdot).
-	# Mail me about questions. -Brian
-	my $SECT = $self->getSection($user->{section} || $form->{section});
-	if ($SECT->{type} eq 'collected') {
-		push @where, "section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
-			if $SECT->{contained} && @{$SECT->{contained}};
-	} else {
-		push @where, "section = " . $self->sqlQuote($SECT->{section});
+	if ($form->{skin}) {
+		my $skin = $self->getSkin($form->{skin});
+		push @where, "primaryskid = $skin->{skid}";
 	}
 
 	my $submissions = $self->sqlSelectAllHashrefArray(

@@ -19,7 +19,7 @@ __template__
 [% FOREACH sub = submissions %]
 	<TR><TD>[% sub.note | strip_nohtml %]</TD>
 
-	<TD>[% sub.section %]</TD><TD>
+	<TD>[% sub.skin.ucfirst %]</TD><TD>
 	[% IF constants.submiss_ts %]
 		[% sub.time %]&nbsp;
 	[% END %]

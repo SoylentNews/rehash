@@ -131,6 +131,7 @@ __template__
 				IF searchobj;
 
 					type = constants.enable_discussion_topic || 'topic_2';
+					# XXXSKIN - i don't know what this is but it is broken because topics_section_type does not exist
 					forum_topics = Slash.db.getDescriptions('topics_section_type', form.section, type); 
 
 					FOR t = forum_topics.keys; 

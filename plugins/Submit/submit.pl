@@ -31,8 +31,6 @@ sub main {
 		return if $success;
 	}
 
-	my $section = $form->{section};
-
 	# this really should not be done now, but later, it causes
 	# a lot of problems, but it causes a LOT of problems
 	# when moved elsewhere and we get double-encoding!
@@ -137,7 +135,7 @@ sub main {
 }
 
 #################################################################
-# update the notes and sections fields but don't delete anything.
+# update the notes and skin fields but don't delete anything.
 sub updateSubmissions {
 	my($constants, $slashdb, $user, $form) = @_;
 	$slashdb->deleteSubmission({ nodelete => 1 });
@@ -155,13 +153,13 @@ sub deleteSubmissions {
 sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
 	yourPendingSubmissions(@_);
-	displayForm($user->{nickname}, $user->{fakeemail}, $form->{section}, getData('defaulthead'));
+	displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
 }
 
 #################################################################
 sub previewStory {
 	my($constants, $slashdb, $user, $form) = @_;
-	displayForm($form->{name}, $form->{email}, $form->{section}, getData('previewhead'));
+	displayForm($form->{name}, $form->{email}, $form->{skin}, getData('previewhead'));
 }
 
 #################################################################
@@ -264,7 +262,6 @@ sub mergeSubmissions {
 
 #################################################################
 sub submissionEd {
-	# mmmm, code comments in here sure would be nice
 	my($constants, $slashdb, $user, $form, $title) = @_;
 	my($def_skin, $cur_skin, $def_note, $cur_note,
 		$skins, @skins, @notes,
@@ -274,7 +271,7 @@ sub submissionEd {
 
 	$def_skin = getData('defaultskin');
 	$def_note = getData('defaultnote');
-	$cur_skin = $form->{skid} || $def_skin;
+	$cur_skin = $form->{skin} || $def_skin;
 	$cur_note = $form->{note} || $def_note;
 	$skins    = $slashdb->getSubmissionsSkins;
 
@@ -307,11 +304,11 @@ sub submissionEd {
 			keys %all_notes;
 
 	slashDisplay('subEdTable', {
-		cur_section	=> $cur_skin,
+		cur_skin	=> $cur_skin,
 		cur_note	=> $cur_note,
-		def_section	=> $def_skin,
+		def_skin	=> $def_skin,
 		def_note	=> $def_note,
-		sections	=> \@skins,
+		skins		=> \@skins,
 		notes		=> \@notes,
 		sn		=> \%sn,
 		title		=> $title || ('Submissions ' . ($user->{is_admin} ? 'Admin' : 'List')),
@@ -319,7 +316,7 @@ sub submissionEd {
 	});
 
 	my($submissions, %selection);
-	$submissions = $slashdb->getSubmissionForUser();
+	$submissions = $slashdb->getSubmissionForUser;
 
 	for my $sub (@$submissions) {
 		$sub->{name}  =~ s/<(.*)>//g;
@@ -334,12 +331,13 @@ sub submissionEd {
 		$strs[0] .= '...' if length($sub->{subj}) > 35;
 		$sub->{strs} = \@strs;
 
-		$sub->{ssection} =
-			$sub->{section} ne $constants->{defaultsection} ?
-				"&section=$sub->{section}" : '';
-		$sub->{stitle}  = '&title=' . fixparam($sub->{subj});
-		$sub->{section} = ucfirst($sub->{section})
-			unless $user->{is_admin};
+		my $skin = $slashdb->getSkin($sub->{primaryskid});
+
+		$sub->{sskin}  =
+			$sub->{primaryskid} ne $constants->{mainpage_skid} ?
+				"&skin=$skin->{name}" : '';
+		$sub->{stitle} = '&title=' . fixparam($sub->{subj});
+		$sub->{skin}   = $skin->{name};
 	}
 
 	%selection = map { ($_, $_) }
@@ -395,7 +393,7 @@ sub displayRSS {
 
 #################################################################
 sub displayForm {
-	my($username, $fakeemail, $section, $title, $error_message) = @_;
+	my($username, $fakeemail, $skin, $title, $error_message) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
@@ -502,7 +500,7 @@ sub saveSub {
 	if (length($form->{subj}) < 2) {
 		titlebar('100%', getData('error'));
 		my $error_message = getData('badsubject');
-		displayForm($form->{name}, $form->{email}, $form->{section}, '', '', $error_message);
+		displayForm($form->{name}, $form->{email}, $form->{skin}, '', '', $error_message);
 		return(0);
 	}
 
@@ -512,13 +510,13 @@ sub saveSub {
 		next unless $keys_to_check{$_};
 		# run through filters
 		if (! filterOk('submissions', $_, $form->{$_}, \$message)) {
-			displayForm($form->{name}, $form->{email}, $form->{section}, '', '', $message);
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', '', $message);
 			return(0);
 		}
 		# run through compress test
 		if (! compressOk($form->{$_})) {
 			my $err = getData('compresserror');
-			displayForm($form->{name}, $form->{email}, $form->{section}, '', '');
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', '');
 			return(0);
 		}
 	}
@@ -563,8 +561,9 @@ sub saveSub {
 			submission	=> $submission,
 		};
 		for (@$users) {
-			my $user_section = $slashdb->getUser($_,'section');
-			next if ($user_section && $user_section ne $submission->{section});
+# XXXSKIN - no "section" restriction
+#			my $user_section = $slashdb->getUser($_, 'section');
+#			next if ($user_section && $user_section ne $submission->{section});
 			$messages->create($_, MSG_CODE_NEW_SUBMISSION, $data);
 		}
 	}

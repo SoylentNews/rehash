@@ -86,7 +86,7 @@ be deleted.)</FONT>
 
 [% PROCESS formLabel value => "Section and Topic", comment => "" %]
 
-[% Slash.createSelect('skid', skin_values, 0, 1) %]
+[% Slash.createSelect('skid', skin_values, 0, 1, 0, 1) %]
 [% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
 
 <BR><FONT SIZE="2">(In general, submit to Main Page)</FONT>

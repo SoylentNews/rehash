@@ -189,6 +189,7 @@ __template__
 			[% pulldown = extra.1 %]
 			<TD BGCOLOR="[% user.colors.bg_2 %]">
 			[% pulldown_section = form.section || user.section || storyref.section %]
+			[%# XXXSKIN - i don't know what this is but it is broken because topics_section_type does not exist %]
 			[% Slash.createSelect(pulldown, Slash.db.getDescriptions('topics_section_type', pulldown_section, pulldown), storyref.$pulldown, 1, 1) %]
 		[% END %]
 		</TD>

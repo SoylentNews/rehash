@@ -43,7 +43,7 @@ TITLE="[% topic.textname %]"></A>
 <P>[% subtext %]</P>
 
 [% IF admin_flag %]
-	[ <A HREF="[% env.script_name %]?op=Delete&amp;subid=[% subid %]&amp;section=[% form.table_section | strip_attribute %]&amp;note=[% form.table_note | strip_attribute %]">Delete Submission</A> ]<BR>
+	[ <A HREF="[% env.script_name %]?op=Delete&amp;subid=[% subid %]&amp;skin=[% form.table_skin | strip_attribute %]&amp;note=[% form.table_note | strip_attribute %]">Delete Submission</A> ]<BR>
 
 	<FORM ACTION="[% gSkin.rootdir %]/admin.pl" METHOD="POST">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
@@ -60,13 +60,15 @@ TITLE="[% topic.textname %]"></A>
 			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} | strip_attribute %]" SIZE="50">
 		[% ELSIF extra.2 == 'list' %]
 			[% pulldown = "$extra.3:$extra.1" %]
-			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), submission.${extra.1}, 1, 1) %]
+			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), submission.${extra.1}, 1, 1) %]
 		[% ELSE %]
 			[% type = extra.1 %]
-			[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), submission.$type, 1, 1) %]
+			[%# XXXSKIN - i don't know what this is but it is broken because topics_section_type does not exist %]
+			[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', skin, type), submission.$type, 1, 1) %]
 		[% END %]
 	[% END %]
 		<BR>
+	[% Slash.createSelect('skid', Slash.db.getDescriptions('skins'), submission.primaryskid, 1, 0, 1) %]
 	[% Slash.createSelect('tid', Slash.db.getDescriptions('non_nexus_topics'), submission.tid, 1, 0, 1) %]
 
 		<INPUT TYPE="submit" NAME="op" VALUE="preview"><BR>
