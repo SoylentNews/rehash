@@ -46,7 +46,7 @@ IF !useredit.is_anon;
 
 	# First box:  general user info
 
-	title = FILTER strip_literal; useredit.nickname; END;
+	title = useredit.nickname | strip_literal;
 	title = title _ " ($useredit.uid)";
 	contents = BLOCK;
 		'<A HREF="'; constants.rootdir; '/~';
@@ -79,17 +79,75 @@ IF !useredit.is_anon;
 				'(email not shown publicly)';
 			END;
 		END;
-                IF useredit.homepage;
-                        '<BR><A HREF="';
+
+		IF useredit.homepage;
+			'<BR><A HREF="';
 			useredit.homepage | strip_attribute; '">';
-                        Slash.ellipsify(useredit.homepage); '</A>';
-                END;
+			Slash.ellipsify(useredit.homepage); '</A>';
+		END;
+
 		IF user.uid == useredit.uid OR user.is_admin;
 			'<BR>Karma: ';
 			PROCESS karma karma=useredit.karma is_admin=useredit.is_admin;
 		END;
+
+		IF useredit.aim;
+			'<BR><B>AOL IM:</B> ';
+			useredit.aim | strip_literal;
+			'(<B><A HREF="aim:addbuddy?screenname=';
+			useredit.aim | strip_attribute;
+			'">Add Buddy</A>, ';
+			'<A HREF="aim:goim?screenname=';
+			useredit.aim | atrip_attribute;
+			'&amp;message=Greetings!">Send Message</A></B>)';
+		END;
+
+		IF useredit.yahoo;
+			'<BR><B>Yahoo! ID:</B> ';
+			'<A HREF="http://profiles.yahoo.com/';
+			useredit.yahoo | atrip_attribute;
+			'">';
+			useredit.yahoo | strip_literal;
+			'</A> (<B><A HREF="http://edit.yahoo.com/config/set_buddygrp?';
+			'.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=';
+			useredit.yahoo | strip_attribute;
+			'">Add User</A>, ';
+			'<A HREF="http://edit.yahoo.com/config/send_webmesg?.target=';
+			useredit.yahoo | strip_attribute;
+			'">Send Message</A></B>)';
+		END;
+
+		IF useredit.icq;
+			'<BR><B>ICQ UIN: </B>';
+			'<IMG SRC="http://web.icq.com/whitepages/online?icq=';
+			useredit.icq | strip_attribute;
+			'&amp;img=5" height="18" width="18">';
+			useredit.icq | strip_literal;
+			' (<B><A HREF="http://wwp.icq.com/scripts/search.dll?to=';
+			useredit.icq | strip_attribute;
+			'">Add User</A>, ';
+			'<A HREF="http://wwp.icq.com/scripts/contact.dll?msgto=';
+			useredit.icq | strip_attribute;
+			'">Send Message</A></B>)';
+		END;
+
+		IF useredit.jabber;
+			'<BR><B>Jabber:</B> ';
+			useredit.jabber | strip_literal;
+		END;
+
+		IF useredit.calendar_url;
+			'<BR><B>Public Calendar:</B> ';
+			'<A HREF="webcal://';
+			useredit.calendar_url | strip_attribute;
+			'">Subscribe</A>, <A HREF="http://';
+			useredit.calendar_url | strip_attribute;
+			'">Download</A>';
+		END;
+
                 IF useredit.bio;
-                        '<BR>'; useredit.bio;
+                        '<BR><HR NOSHADE SIZE="1">';
+			useredit.bio;
                 END;
 	END;
 	PROCESS fancybox
@@ -108,6 +166,7 @@ IF !useredit.is_anon;
 have moderator access
 [% IF user.is_admin %](because you're an admin)[% END %]
 and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %].
+[% IF user.points > 0 %]
 Welcome to those of you just joining: <B>please</B>
 read the <A HREF="[% constants.rootdir %]/moderation.shtml">moderator guidelines</A>
 for instructions.
@@ -116,6 +175,7 @@ for instructions.
 <BR>&middot; Browse at -1 to keep an eye out for abuses.
 <BR>&middot; <A HREF="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</A>
 URLs showing abuse (the cid link please!).
+[% END %]
 		[% END;
 		PROCESS fancybox
 			title		= title

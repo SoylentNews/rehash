@@ -49,43 +49,11 @@ change your password, or just click pretty widgets to kill time.
 [% admin_block %]
 [% END %]
 
-<BR>
-[% IF useredit.homepage %]
-<A HREF="[% useredit.homepage %]">[% useredit.homepage | strip_literal %]</A><BR>
-[% END; IF useredit.fakeemail %]
-<A HREF="mailto:[% useredit.fakeemail | fixparam %]">[% useredit.fakeemail | strip_literal %]</A><BR>
-[% END; IF useredit.journal_last_entry_date.search('[1-9]') %]
+<P>
+[% IF useredit.journal_last_entry_date.search('[1-9]') %]
 <A HREF="[% constants.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">
 Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A>
 [ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
-<BR>
-[% END %]
-
-<P>
-
-[% IF useredit.aim %]
- <B>AOL IM</B> : 
- [% useredit.aim | strip_literal %] (<B><A HREF="aim:addbuddy?screenname=[% useredit.aim | strip_attribute %]">Add Buddy</A>, <A HREF="aim:goim?screenname=[% useredit.aim | strip_attribute %]&amp;message=Greetings!.+How+is+it+going?">Send Message</A></B>)<BR>
-[% END %]
-
-[% IF useredit.yahoo %]
- <B>Yahoo! ID</B> : 
- <A HREF="http://profiles.yahoo.com/[% useredit.yahoo | strip_attribute %]">[% useredit.yahoo | strip_literal %]</A> (<B><A HREF="http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=[% useredit.yahoo | strip_attribute %]">Add User</a>, <A HREF="http://edit.yahoo.com/config/send_webmesg?.target=[% useredit.yahoo | strip_attribute %]">Send Message</A></B>) <BR>
-[% END %]
-
-[% IF useredit.icq %]
- <B>ICQ UIN</B> : 
- <IMG SRC="http://web.icq.com/whitepages/online?icq=[% useredit.icq | strip_attribute %]&amp;img=5" height='18' width='18'> [% useredit.icq | strip_literal %] (<B><A HREF="http://wwp.icq.com/scripts/search.dll?to=[% useredit.icq | strip_attribute %]">Add User</a>, <A HREF="http://wwp.icq.com/scripts/contact.dll?msgto=[% useredit.icq | strip_attribute %]">Send Message</a></b>)<BR>
-[% END %]
-
-[% IF useredit.jabber %]
- <B>Jabber</B> : 
- [% useredit.jabber | strip_literal %]<BR>
-[% END %]
-
-[% IF useredit.calendar_url %]
- <B>Public Calendar</B> : 
- <A HREF="webcal://[% useredit.calendar_url | strip_attribute %]">Subscribe</A> <A HREF="http://[% useredit.calendar_url | strip_attribute %]">Download</A><BR>
 [% END %]
 
 </TD>
