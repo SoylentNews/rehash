@@ -991,7 +991,7 @@ sub showInfo {
 
 	# Grab the nicks of the uids we have, we're going to be adding them
 	# into the struct.
-	my @users_extra_cols_wanted     = qw( nickname );
+	my @users_extra_cols_wanted       = qw( nickname );
 	my @discussions_extra_cols_wanted = qw( type );
 	my $uid_hr = { };
 	my $sid_hr = { };
