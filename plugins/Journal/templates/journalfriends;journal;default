@@ -21,8 +21,9 @@ __template__
 	width => "90%"
 %]
 
-[% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
-<INPUT TYPE="hidden" NAME="op" VALUE="delete">[% END %]
+[% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/zoo.pl">
+<INPUT TYPE="hidden" NAME="op" VALUE="delete">
+<INPUT TYPE="hidden" NAME="type" VALUE="friend">[% END %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 [% FOREACH friend = friends %]
     <TR><TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/">[% friend.0 %]</A></TD>

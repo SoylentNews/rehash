@@ -128,7 +128,7 @@ sub friends {
 	$friends = $self->sqlSelectAll(
 		'u.nickname, j.person, MAX(jo.id) as id',
 		'journals as jo, people as j, users as u',
-		"j.uid = $uid AND j.person = u.uid AND j.person = jo.uid AND type='friend'",
+		"j.uid = $uid AND j.person = u.uid AND j.person = jo.uid AND type='friend' AND u.journal_last_entry_date IS NOT NULL ",
 		'GROUP BY u.nickname'
 	);
 	return [] unless @$friends;
@@ -173,29 +173,6 @@ SQL
 	return $friends;
 }
 
-sub add {
-	my($self, $uid, $friend) = @_;
-	$self->sqlDo("INSERT INTO people (uid,person,type) VALUES ($uid, $friend, 'friend')");
-}
-
-sub is_friend {
-	my($self, $friend) = @_;
-	my $uid   = $ENV{SLASH_USER};
-	return 0 unless $uid && $friend;
-	my $cols  = "jf.uid";
-	my $table = "people AS jf";
-	my $where = "jf.uid=$uid AND jf.person=$friend AND type='friend'";
-
-	my $is_friend = $self->sqlSelect($cols, $table, $where);
-	return $is_friend;
-}
-
-sub delete {
-	my($self, $friend) = @_;
-	my $uid = $ENV{SLASH_USER};
-	$self->sqlDo("DELETE FROM people WHERE uid=$uid AND person=$friend AND type='friend'");
-}
-
 sub top {
 	my($self, $limit) = @_;
 	$limit ||= getCurrentStatic('journal_top') || 10;
@@ -213,12 +190,14 @@ sub top {
 
 sub topFriends {
 	# this should only return users who have journal entries -- pudge
+	# Does now, notice the not null -Brian
 	my($self, $limit) = @_;
 	$limit ||= getCurrentStatic('journal_top') || 10;
 	my $sql;
 	$sql .= " SELECT count(person) as c, nickname, person ";
 	$sql .= " FROM people, users ";
 	$sql .= " WHERE person=users.uid AND type=\"friend\" ";
+	$sql .= " AND users.journal_last_entry_date IS NOT NULL ";
 	$sql .= " GROUP BY nickname ";
 	$sql .= " ORDER BY c DESC ";
 	$self->sqlConnect;

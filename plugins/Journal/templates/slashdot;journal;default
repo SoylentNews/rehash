@@ -27,9 +27,9 @@ __template__
 <A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</A> |
 <A HREF="[% constants.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</A> |
 [% END; IF is_friend %]
-<A HREF="[% constants.rootdir %]/journal.pl?op=deletemeta&amp;uid=[% uid %]">Remove Friend</A>
+<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]&type=friend">Remove Friend</A>
 [% ELSE %]
-<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% uid %]">Add Friend</A>
+<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&type=friend">Add Friend</A>
 [% END %]
 [% IF diatribe.discussion %]
 | <A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>

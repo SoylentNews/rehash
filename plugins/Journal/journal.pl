@@ -37,15 +37,11 @@ sub main {
 	my %ops = (
 		edit		=> [ !$user->{is_anon},	\&editArticle		],
 		removemeta	=> [ !$user->{is_anon},	\&articleMeta		],
-		addmeta		=> [ !$user->{is_anon},	\&friendMeta		],
-		deletemeta	=> [ !$user->{is_anon},	\&friendMeta		],
 
 		preview		=> [ $user_ok,		\&editArticle		],
 		save		=> [ $user_ok,		\&saveArticle		], # formkey
 		remove		=> [ $user_ok,		\&removeArticle		],
 		setprefs	=> [ $user_ok,		\&setPrefs		],
-		add		=> [ $user_ok,		\&addFriend		], # formkey?
-		'delete'	=> [ $user_ok,		\&deleteFriend		],
 
 		list		=> [ 1,			\&listArticle		],
 		display		=> [ 1,			\&displayArticle	],
@@ -98,6 +94,9 @@ sub displayTop {
 
 sub displayFriends {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
+
+	redirect("$constants->{rootdir}/search.pl?op=journals") 
+		if $user->{is_anon};
 
 	_printHead("mainhead");
 
@@ -242,8 +241,8 @@ sub displayArticle {
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
 	my $articles = $journal->getsByUid($uid, $start,
-		$constants->{journal_default_display} + 1, $form->{id}
-	);
+			$constants->{journal_default_display} + 1, $form->{id}
+		);
 
 	unless ($articles && @$articles) {
 		print getData('noentries_found');
@@ -299,11 +298,12 @@ sub displayArticle {
 	my $theme = $slashdb->getUser($uid, 'journal_theme');
 	$theme ||= $constants->{journal_default_theme};
 
+	my $zoo   = getObject('Slash::Zoo');
 	slashDisplay($theme, {
 		articles	=> \@sorted_articles,
 		uid		=> $uid,
 		nickname	=> $nickname,
-		is_friend	=> $journal->is_friend($uid),
+		is_friend	=> $zoo->isFriend($user->{uid}, $uid),
 		back		=> $back,
 		forward		=> $forward,
 	});
@@ -472,39 +472,6 @@ sub removeArticle {
 	listArticle(@_);
 }
 
-sub friendMeta {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
-
-	if ($form->{uid}) {
-		my $friend = $slashdb->getUser($form->{uid});
-		_printHead("mainhead");
-		slashDisplay('meta', { friend => $friend });
-	} else {
-		displayFriends(@_);
-	}
-}
-
-sub addFriend {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
-
-	$journal->add($user->{uid}, $form->{uid}) if $form->{uid};
-	displayFriends(@_);
-}
-
-sub deleteFriend {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
-
-	if ($form->{delete}) {
-		$journal->delete($form->{delete});
-	} else {
-		for my $uid (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
-			$journal->delete($uid);
-		}
-	}
-
-	displayFriends(@_);
-}
-
 sub editArticle {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
 	# This is where we figure out what is happening
@@ -548,10 +515,11 @@ sub editArticle {
 
 		my $theme = $user->{'journal_theme'};
 		$theme ||= $constants->{journal_default_theme};
+		my $zoo   = getObject('Slash::Zoo');
 		slashDisplay($theme, {
 			articles	=> [{ day => $article->{date}, article => [ $disp_article ] }],
 			uid		=> $article->{uid} || $user->{uid},
-			is_friend	=> $journal->is_friend($article->{uid}),
+			is_friend	=> $zoo->isFriend($user->{uid}, $article->{uid}),
 			back		=> -1,
 			forward		=> 0,
 			nickname	=> $user->{nickname},
