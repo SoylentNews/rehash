@@ -11,9 +11,12 @@ Paypal button to subscribe to this site.
 	paypal_no_shipping		1=no ship address reqd
 	paypal_return			URL on successful subscribe
 	paypal_cancel_return		URL on cancelled subscribe
+
 	
 * gift	hashref passed if handling a gift subscription.  Should contain values
-        for keys uid, and puid (uid of user receiving subscription, uid of purchaser) 
+        for keys uid, and puid (uid of user receiving subscription, uid of purchaser)
+
+* from  string user wants included in e-mail message 
 
 __title__
 
@@ -32,6 +35,8 @@ __template__
 <input type="hidden" name="item_name" value="[% constants.paypal_num_pages %]-Page Gift Subscription to [% constants.sitename %] for UID [% gift.uid %]">
 <input type="hidden" name="item_number" value="[% gift.uid %]">
 <input type="hidden" name="custom" value="[% gift.puid %]">
+<input type="hidden" name="on0" value="From">
+<input type="hidden" name="os0" value="[% from | strip_attribute %]">
 [% ELSE %]
 <input type="hidden" name="item_name" value="[% constants.paypal_num_pages %]-Page Subscription to [% constants.sitename %]">
 <input type="hidden" name="item_number" value="[% user.uid %]">

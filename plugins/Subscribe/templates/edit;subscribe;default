@@ -33,6 +33,12 @@ __template__
 		<CENTER><TABLE BORDER=0 CELLPADDING=3>
 		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="user"> Buy Pages for [% user.nickname %]</TD></TR>
 		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <INPUT TYPE="text" name="uid" size="6"></TD></TR>
+
+		<TR><TD><BR>
+			For gift subscriptions only:<BR>
+			Who do you want the recipient to be told the gift is from?<BR>
+			<INPUT TYPE="text" name="from" size="15" maxlength="30"> (30 character limit, defaults to your username if nothing is entered)
+		<TD></TR>
 		<TR><TD><INPUT TYPE="hidden" name="op" value="confirm"><INPUT TYPE="submit" value="Continue and choose payment type"></TD></TR>
 		</TABLE></CENTER>
 	</FORM>

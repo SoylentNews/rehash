@@ -7,6 +7,7 @@ choose payment type when gift subscriptions are allowed
 * type     - subscription type (gift or user)
 * uid      - uid of user to buy the subscription for (defaults to current user)
 * sub_user - user hashref for the recipient of a gift subscription 
+* from     - string for how gift-giver wants notification e-mail signed
 
 __title__
 Useless title to template
@@ -40,8 +41,8 @@ __template__
 			If this is correct select your payment type below:
 			[% gift.uid = uid; gift.puid = user.uid %]
 			<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
-			<TD>[% PROCESS paypalbut gift = gift; %]</TD>
-			<TD>[% PROCESS ccbut gift = gift; %]</TD>
+			<TD>[% PROCESS paypalbut gift = gift from = from %]</TD>
+			<TD>[% PROCESS ccbut gift = gift from = from %]</TD>
 			</TR></TABLE></CENTER>
 		[% ELSE %]
 			<P>No user was found for the UID ([% uid %]) you specified.  Please <A HREF="[% constants.rootdir %]/subscribe.pl">go back</A> and correct this to continue.

@@ -16,7 +16,7 @@ __template__
 [% receiving_user.nickname %],
 
 This message is to inform you of a gift subscription to [% constants.sitename %]. 
-The subscription was purchased on your behalf by [% purchasing_user.nickname %] ([% purchasing_user.uid %]).
+The subscription was purchased on your behalf by [% IF from %][% from %][% ELSE %][% purchasing_user.nickname %] ([% purchasing_user.uid %])[% END %].
 
 Subscription Details:
 - [% pages %] Page Gift Subscription to [% constants.sitename %]

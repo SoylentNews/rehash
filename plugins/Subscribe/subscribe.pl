@@ -220,7 +220,7 @@ sub makepayment {
 			"-hits_paidfor" => "hits_paidfor + $num_pages"
 		});
 		print "<p>makepayment: Payment confirmed\n";
-		send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{pages})
+		send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{pages}, $form->{from})
 			if $payment->{payment_type} eq "gift";
 	} else {
 		use Data::Dumper;
@@ -278,12 +278,13 @@ sub confirm {
 	slashDisplay("confirm", {
 		type     => $type,
 		uid      => $uid,
-		sub_user => $sub_user
+		sub_user => $sub_user,
+		from 	 => $form->{from}
 	});
 }
 
 sub send_gift_msg {
-	my ($uid, $puid, $pages) = @_;
+	my ($uid, $puid, $pages, $from) = @_;
 	
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
@@ -294,7 +295,8 @@ sub send_gift_msg {
 	my $message = slashDisplay('gift_msg', {
 			receiving_user  => $receiving_user,
 			purchasing_user => $purchasing_user,
-			pages 		=> $pages	
+			pages 		=> $pages,
+			from		=> $from	
 		}, { Return => 1, Nocomm => 1 } );
 	my $title = "Gift subscription to $constants->{sitename}\n";
 	doEmail($uid, $title, $message);
