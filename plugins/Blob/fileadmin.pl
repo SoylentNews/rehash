@@ -7,30 +7,29 @@ use Slash::Blob;
 use Slash::Utility;
 
 sub main {
-
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
-	my $blobdb   = getObject('Slash::Blob');
+	my $blobdb    = getObject('Slash::Blob');
 
 	my $ops = {
-		listFilesForStories    => {
+		listFilesForStories	=> {
 			function => \&listFilesForStories,
 		},
-		editBySid    => {
+		editBySid   		=> {
 			function => \&editBySid,
 		},
-		listAll    => {
+		listAll			=> {
 			function => \&listAll,
 		},
-		editFile    => {
+		editFile		=> {
 			function => \&editFile,
 		},
-		addFileForStory    => {
+		addFileForStory		=> {
 			function => \&addFileForStory,
 		},
-		deleteFilesForStory    => {
+		deleteFilesForStory	=> {
 			function => \&deleteFilesForStory,
 		},
 	};
@@ -38,8 +37,10 @@ sub main {
 
 	my $op = $form->{op};
 	$op = exists $ops->{$op} 
-	?  $op 
-		: $form->{sid} ? 'editBySid' : 'listFilesForStories';
+		? $op 
+		: $form->{sid}
+			? 'editBySid'
+			: 'listFilesForStories';
 
 # admin.pl is not for regular users
 	unless ($user->{is_admin}) {
@@ -56,35 +57,35 @@ sub main {
 
 ##################################################################
 sub listFilesForStories { 
-	my ($slashdb,$constants,$user,$form,$blobdb) = @_;
+	my($slashdb, $constants, $user, $form ,$blobdb) = @_;
 
 	my $files = $blobdb->getFilesForStories();
 
 	slashDisplay('liststories', {
-			files	=> $files,
-			});
+		files	=> $files,
+	});
 
 
 }
 
 ##################################################################
 sub editBySid { 
-	my ($slashdb,$constants,$user,$form,$blobdb) = @_;
+	my($slashdb, $constants, $user, $form, $blobdb) = @_;
 	return unless $form->{sid};
 
 	my $files = $blobdb->getFilesForStory($form->{sid});
 
 	slashDisplay('listsid', {
-			files	=> $files,
-			sid	=> $form->{sid},
-			});
+		files	=> $files,
+		sid	=> $form->{sid},
+	});
 
 
 }
 
 ##################################################################
 sub addFileForStory {
-	my ($slashdb,$constants,$user,$form,$blobdb) = @_;
+	my($slashdb, $constants, $user, $form, $blobdb) = @_;
 
 	if ($form->{file_content}) {
 		my $data;
@@ -93,18 +94,18 @@ sub addFileForStory {
 			if ($upload) {
 				my $temp_body;
 				my $fh = $upload->fh;
-				while (<$fh>) {
-					$data .= $_;
-				}
+				local $/;
+				$data = $fh;
 			}
 		}
+
 		my $content = {
-			seclev => $form->{seclev},
-			filename => $form->{file_content},
-			content_type => $form->{content_type},
-			data => $data,
-			sid => $form->{sid},
-			description => $form->{description},
+			seclev		=> $form->{seclev},
+			filename	=> $form->{file_content},
+			content_type	=> $form->{content_type},
+			data		=> $data,
+			sid		=> $form->{sid},
+			description	=> $form->{description},
 		};
 
 		$blobdb->createFileForStory($content);
