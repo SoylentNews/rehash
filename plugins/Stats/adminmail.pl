@@ -31,9 +31,14 @@ $task{$me}{code} = sub {
 		$backupdb = $slashdb;
 	}
 
-	my $logdb = getObject('Slash::Stats',
-		$constants->{log_db_user} || $constants->{backup_db_user},
-		{ day => $yesterday, create => 1 } );
+	my $logdb = getObject('Slash::Stats', {
+		virtual_user	=> $constants->{log_db_user} || $constants->{backup_db_user},
+		nocache		=> 1,
+	}, {
+		day		=> $yesterday,
+		create		=> 1
+	});
+
 	unless ($logdb) {
 		slashdLog('No database to run adminmail against');
 		return;
