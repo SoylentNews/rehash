@@ -1166,55 +1166,62 @@ sub getDailyScoreTotal {
 }
 
 
+########################################################
 sub getTopBadPasswordsByUID{
 	my($self, $options) = @_;
 	my $limit = $options->{limit} || 10;
 	my $day = $self->{_day};
-	$day =~s/-//g;
+	$day =~ s/-//g;
 	my $min = $options->{min};
 	my $other = "group by uid ";
 	$other .= " having count(*) >= $options->{min}" if $min;
 	$other .= "  order by count desc limit $limit";
-	my $ar = $self->sqlSelectAllHashrefArray("nickname, users.uid as uid, count(*) as count",
-						"badpasswords,users",
-						"ts like '$day%' and users.uid = badpasswords.uid",
-						$other);
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"nickname, users.uid as uid, count(*) as count",
+		"badpasswords,users",
+		"ts like '$day%' and users.uid = badpasswords.uid",
+		$other
+	);
 	return $ar;
 }
 
+########################################################
 sub getTopBadPasswordsByIP{
 	my($self, $options) = @_;
 	my $limit = $options->{limit} || 10;
 	my $min = $options->{min};
 	my $day = $self->{_day};
-	$day =~s/-//g;
+	$day =~ s/-//g;
 	my $other = "group by ip";
 	$other .= " having count(*) >= $options->{min}" if $min;
 	$other .= "  order by count desc limit $limit";
-	my $ar = $self->sqlSelectAllHashrefArray("ip, count(*) as count",
-						"badpasswords",
-						"ts like '$day%'",
-						$other);
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"ip, count(*) as count",
+		"badpasswords",
+		"ts like '$day%'",
+		$other
+	);
 	return $ar;
 }
 
+########################################################
 sub getTopBadPasswordsBySubnet{
 	my($self, $options) = @_;
 	my $limit = $options->{limit} || 10;
 	my $min = $options->{min};
 	my $day = $self->{_day};
-	$day =~s/-//g;
+	$day =~ s/-//g;
 	my $other = "group by subnet";
 	$other .= " having count(*) >= $options->{min}" if $min;
 	$other .= "  order by count desc limit $limit";
-	my $ar = $self->sqlSelectAllHashrefArray("subnet, count(*) as count",
-						"badpasswords",
-						"ts like '$day%'",
-						$other);
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"subnet, count(*) as count",
+		"badpasswords",
+		"ts like '$day%'",
+		$other
+	);
 	return $ar;
 }
-
-########################################################
 
 ########################################################
 # Note, we are carrying the misspelling of "referrer" over from

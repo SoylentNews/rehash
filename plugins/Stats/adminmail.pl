@@ -131,27 +131,36 @@ EOT
 	# the top N offenders above the threshold or all offenders above the defined threshold.
 	# Right now we show up to 10 but only if they're above the designated thresholds 
 
-        my $bp_ip = $stats->getTopBadPasswordsByIP( { limit => 10, min => $constants->{bad_password_warn_ip} || 0 });
-        my $bp_subnet = $stats->getTopBadPasswordsBySubnet( { limit => 10, min => $constants->{bad_password_warn_subnet} || 0 });
-        my $bp_uid = $stats->getTopBadPasswordsByUID( { limit => 10, min => $constants->{bad_password_warn_uid} || 0 });
+	my $bp_ip     = $stats->getTopBadPasswordsByIP(
+		{ limit => 10, min => $constants->{bad_password_warn_ip}     || 0 });
+	my $bp_subnet = $stats->getTopBadPasswordsBySubnet(
+		{ limit => 10, min => $constants->{bad_password_warn_subnet} || 0 });
+	my $bp_uid    = $stats->getTopBadPasswordsByUID(
+		{ limit => 10, min => $constants->{bad_password_warn_uid}    || 0 });
 	my $bp_warning;
-	
-	if(@$bp_ip or @$bp_subnet or @$bp_uid){
+
+	if (@$bp_ip or @$bp_subnet or @$bp_uid) {
 		$bp_warning .= "Bad password attempts\n\n";
-		if(@$bp_uid){
-			$bp_warning .="UID      Username                         Attempts\n";
-			$bp_warning .= sprintf ("%-8s %-32s   %6s\n",$_->{uid},$_->{nickname},$_->{count}) foreach @$bp_uid;
+		if (@$bp_uid) {
+			$bp_warning .= "UID      Username                         Attempts\n";
+			$bp_warning .= sprintf("%-8s %-32s   %6s\n",
+				$_->{uid}, $_->{nickname}, $_->{count}
+			) foreach @$bp_uid;
 			$bp_warning .= "\n";
 		}
-		if(@$bp_ip){
-			$bp_warning .="IP               Attempts\n";
-			$bp_warning .= sprintf ("%-15s  %8s\n",$_->{ip},$_->{count}) foreach @$bp_ip;
-			$bp_warning .="\n";
+		if (@$bp_ip) {
+			$bp_warning .= "IP               Attempts\n";
+			$bp_warning .= sprintf("%-15s  %8s\n",
+				$_->{ip}, $_->{count}
+			) foreach @$bp_ip;
+			$bp_warning .= "\n";
 		}
-		if(@$bp_subnet){
-			$bp_warning .="Subnet           Attempts\n";
-			$bp_warning .= sprintf ("%-15s  %8s\n",$_->{subnet},$_->{count}) foreach @$bp_subnet;
-			$bp_warning .="\n";
+		if (@$bp_subnet) {
+			$bp_warning .= "Subnet           Attempts\n";
+			$bp_warning .= sprintf("%-15s  %8s\n",
+				$_->{subnet}, $_->{count}
+			) foreach @$bp_subnet;
+			$bp_warning .= "\n";
 		}
 	}
 	$data{bad_password_warning} = $bp_warning;
