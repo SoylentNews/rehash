@@ -1372,6 +1372,74 @@ sub getNexusChildrenTids {
 }
 
 ########################################################
+# Returns a boolean indicating whether it would be safe to add
+# a new topic with parent and child tids as specified.  "Safe"
+# means there would be no loops;  if false is returned, the
+# topic must not be added because it would introduce loops.
+# Works for any combination of parent/child tids including
+# none of either or both (in which case it's always safe).
+sub wouldBeSafeToAddTopic {
+	my($self, $parent_tids_ar, $child_tids_ar) = @_;
+	return 1 if !$parent_tids_ar || !$child_tids_ar
+		|| !@$parent_tids_ar || !@$child_tids_ar;
+	my %all_new_parents = ( );
+	for my $parent (@$parent_tids_ar) {
+		$all_new_parents{$parent} = 1;
+		my @new_parents = $self->getAllParentsTids($parent);
+		for my $gparent (@new_parents) {
+			$all_new_parents{$gparent} = 1;
+		}
+	}
+	my %all_new_children = ( );
+	for my $child (@$child_tids_ar) {
+		$all_new_children{$child} = 1;
+		my @new_children = $self->getAllChildrenTids($child);
+		for my $gchild (@new_children) {
+			$all_new_children{$gchild} = 1;
+		}
+	}
+	# If the intersection of all the new parents and all the new
+	# children contains at least one topic, then it's unsafe.
+	for my $child (keys %all_new_children) {
+		return 0 if $all_new_parents{$child};
+	}
+	# Otherwise, it's safe.
+	return 1;
+}
+
+########################################################
+# Returns a boolean indicating whether it would be safe to add
+# a parent<->child link between two topics (i.e. add a row to
+# the topic_parents table).  "Safe" means there would be no
+# loops;  if false is returned, the link must not be added
+# because it would introduce loops.
+sub wouldBeSafeToAddTopicLink {
+	my($self, $parent_tid, $child_tid) = @_;
+
+	my %all_parents = ( $parent_tid, 1 );
+	my @new_parents = $self->getAllParentsTids($parent_tid);
+	for my $parent (@new_parents) {
+		$all_parents{$parent} = 1;
+	}
+
+	my %all_children = ( $child_tid, 1 );
+	my @new_children = $self->getAllChildrenTids($child_tid);
+	for my $child (@new_children) {
+		$all_children{$child} = 1;
+	}
+
+	# If there are any topics which are both a child of the
+	# child and a parent of the parent (or if the child and
+	# parent are already parent and child!) then there's a
+	# loop.
+	for my $tid (keys %all_children) {
+		return 0 if $all_parents{$tid};
+	}
+	# Otherwise, it's safe.
+	return 1;
+}
+
+########################################################
 sub deleteRelatedLink {
 	my($self, $id) = @_;
 
@@ -3132,7 +3200,7 @@ sub saveTopic {
 	}
 
 	my %dirty_topics;
-	##### check for recursives?
+	##### XXXSECTIONTOPICS check for recursives
 	for my $x (qw(parent child)) {
 		my %relations;
 		my $name = $x . '_topic';
