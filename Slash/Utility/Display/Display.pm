@@ -1263,7 +1263,7 @@ sub cleanSlashTags {
 	return unless $text;
 
 	my $tag_re = join '|', sort keys %$slashTags;
-	$text =~ s#<slash-($tag_re)#<SLASH TYPE="\L$1\E"#gis;
+	$text =~ s#<SLASH-($tag_re)#<SLASH TYPE="\L$1\E"#gis;
 	my $newtext = $text;
 	my $tokens = Slash::Custom::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
@@ -1449,9 +1449,12 @@ sub _slashImage {
 		my $data = $blob->get($token->[1]{id});
 		if ($data && $data->{data}) {
 			my($w, $h) = imgsize(\$data->{data});
-			$token->[1]{width}  = $w if $w && !defined $token->[1]{width};
-			$token->[1]{height} = $h if $h && !defined $token->[1]{height};
+			$token->[1]{width}  = $w if $w && !$token->[1]{width};
+			$token->[1]{height} = $h if $h && !$token->[1]{height};
 		}
+	}
+	if (!$token->[1]{width} || !$token->[1]{height}) {
+		print STDERR scalar(localtime) . " _slashImage width or height unknown for image blob id '$token->[1]{id}', resulting HTML page may be non-optimal\n";
 	}
 
 	my $content = slashDisplay('imageLink', {
