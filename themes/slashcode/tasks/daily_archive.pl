@@ -2,6 +2,7 @@
 
 use strict;
 
+use Fcntl;
 use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
@@ -20,8 +21,8 @@ $task{$me}{timespec} = '7 7 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
-	my($vuser, $consts, $slashdb, $user) = @_;
-	my(@rc);
+	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my $basedir = $constants->{basedir};
 
 	slashdLog('Updating User Logins Begin');
 	$slashdb->updateStamps();
@@ -40,13 +41,14 @@ $task{$me}{code} = sub {
 	# Mark discussions as archived.
 	$slashdb->updateArchivedDiscussions();
 	# Archive stories.
-	my $limit = $consts->{task_options}{archive_limit} || 500;
-	my $dir   = $consts->{task_options}{archive_dir}   || 'ASC';
+	my $limit = $constants->{task_options}{archive_limit} || 500;
+	my $dir   = $constants->{task_options}{archive_dir}   || 'ASC';
 	my $astories = $slashdb->getArchiveList($limit, $dir);
 	if ($astories && @{$astories}) {
 		slashdLog('Daily Archival Begin');
-		@rc = archiveStories($vuser,$consts,$slashdb,$user,$astories);
-		slashdLog("Daily Archival End ($rc[0] articles in $rc[1]s)");
+		my @count = archiveStories($virtual_user, $constants,
+			$slashdb, $user, $astories);
+		slashdLog("Daily Archival End ($count[0] articles in $count[1]s)");
 	}
 
 	slashdLog('Begin Daily Comment Recycle');
@@ -54,80 +56,115 @@ $task{$me}{code} = sub {
 	slashdLog("End Daily Comment Recycle ($msg recycled)");
 };
 
-
 sub archiveStories {
 	my($virtual_user, $constants, $slashdb, $user, $to_archive) = @_;
 	# Story archival.
 	my $starttime = Time::HiRes::time();
 
+	my $vu = "virtual_user=$virtual_user";
+	if ($constants->{backup_db_user}
+		&& ($virtual_user ne $constants->{backup_db_user})
+		&& $constants->{archive_use_backup_db}) {
+		$vu = "virtual_user=$constants->{backup_db_user}";
+	}
+	
 	my $totalChangedStories = 0;
 	for (@{$to_archive}) {
 		my($sid, $title, $section) = @{$_};
 
 		slashdLog("Archiving $sid") if verbosity() >= 2;
 		$totalChangedStories++;
-		my $args = "ssi=yes sid='$sid' mode=archive"; 
 
-		# Use backup database handle only if told to and if it is 
-		# different than the current virtual user.
-		my $vu;
-		$vu .= "virtual_user=$constants->{backup_db_user}"
-			if $constants->{backup_db_user} &&
-			   ($virtual_user ne $constants->{backup_db_user}) &&
-			   $constants->{archive_use_backup_db};
-		$vu ||= "virtual_user=$virtual_user";
-		$args .= " $vu"; 
+                # We need to pull some data from a file that article.pl will
+		# write to.  But first it needs us to create the file and
+		# tell it where it will be.
+		my($cchp_file, $cchp_param) = _make_cchp_file();
 
-		my @rc;
+		my $args = "$vu ssi=yes sid='$sid' mode=archive$cchp_param"; 
+		my($filename, $logmsg);
 		if ($section) {
-			$args .= " section=$section";
+			$filename = "$constants->{basedir}/$section/$sid.shtml";
+			$logmsg = "$me archived $section:$sid ($title)";
+			$args .= " section='$section'";
 			makeDir($constants->{basedir}, $section, $sid);
-			# Note the change in prog2file() invocation.
-			@rc = prog2file(
-				"$constants->{basedir}/article.pl",
-				"$constants->{basedir}/$section/$sid.shtml", {
-					args =>		$args,
-					verbosity =>	verbosity(),
-					handle_err =>	1
-			});
-			if (verbosity() >= 2) {
-				my $log="$me archived $section:$sid ($title)";
-				slashdLog($log);
-				slashdLog("Error channel:\n$rc[1]")
-					if verbosity() >= 3;
-			}
 		} else {
-			# Note the change in prog2file() invocation.
-			@rc = prog2file(
-				"$constants->{basedir}/article.pl",
-				"$constants->{basedir}/$sid.shtml", {
-					args =>		$args,
-					verbosity =>	verbosity(),
-					handle_err =>	1
-			});
-			if (verbosity() >= 2) {
-				slashdLog("$me archived $sid ($title)");
-				slashdLog("Error channel:\n$rc[1]")
-					if verbosity() >= 3;
-			}
+			$filename = "$constants->{basedir}/$sid.shtml";
+			$logmsg = "$me archived $sid ($title)";
 		}
-
-		# Now we extract what we need from the error channel.
-		slashdLog("$me *** Update data not in error channel: '@rc'")
-			unless $rc[1] =~ /count (\d+), hitparade (.+)$/m;
-
-		my $cc = $1 || 0;
-		my $hp = $2 || 0;
-		$slashdb->setStory($sid, { 
-			writestatus  => 'archived',
-			commentcount => $cc,
-			hitparade    => $hp,
+		prog2file(
+			"$constants->{basedir}/article.pl",
+			$filename, {
+				args =>		$args,
+				verbosity =>	verbosity(),
+				handle_err =>	1
 		});
+		slashdLog($logmsg);
+
+		# Now we extract what we need from the file we created
+		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file);
+		if (defined($cc)) {
+			# all is well, data was found
+			$slashdb->setStory($sid, {
+				writestatus  => 'archived',
+				commentcount => $cc,
+				hitparade    => $hp,
+			});
+		}
 	}
 	my $duration = sprintf("%.2f", Time::HiRes::time() - $starttime);
 	
 	return ($totalChangedStories, $duration);
 };
+
+sub _make_cchp_file {
+	my $constants = getCurrentStatic();
+	my $logdir = $constants->{logdir};
+	my $cchp_prefix = catfile($logdir, "cchp.");
+	my $cchp_fh = undef;
+	my $cchp_suffix;
+	my($cchp_file, $cchp_param) = ("", "");
+	while (!$cchp_fh) {
+		$cchp_file = File::Temp::mktemp("${cchp_prefix}XXXXXXXX");
+		($cchp_suffix) = $cchp_file =~ /^\Q$cchp_prefix\E(.+)$/;
+		$cchp_param = " cchp='$cchp_suffix'";
+		if (!sysopen($cchp_fh, $cchp_file,
+			O_WRONLY | O_EXCL | O_CREAT, # we must create it
+			0600 # this must be 0600 for mild security reasons
+		)) {
+			$cchp_fh = undef; # just to be sure we repeat
+			warn "could not create '$cchp_file', $!, retrying";
+			Time::HiRes::sleep(0.2);
+		}
+	}
+	close $cchp_fh;
+	return ($cchp_file, $cchp_param);
+}
+
+sub _read_and_unlink_cchp_file {
+	my($cchp_file) = @_;
+	my $constants = getCurrentStatic();
+	my($cc, $hp) = (undef, undef);
+	my $default_hp = join(",", ("0") x
+		($constants->{maxscore}-$constants->{minscore}+1));
+	($cc, $hp) = (0, $default_hp);
+
+	# Now we extract what we need from the file we created
+	if (!open(my $cchp_fh, "<", $cchp_file)) {
+		warn "cannot open $cchp_file for reading, $!";
+	} else {
+		my $cchp = <$cchp_fh>;
+		close $cchp_fh;
+		if ($cchp && (($cc, $hp) = $cchp =~
+			/count (\d+), hitparade (.+)$/m)) {
+		} else {
+			slashdLog("Commentcount/hitparade data was not"
+				. " retrieved, reason unknown"
+				. " (cchp: '$cchp')");
+		}
+	}
+	unlink $cchp_file;
+	return($cc, $hp);
+}
 
 1;
 

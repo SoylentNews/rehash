@@ -157,8 +157,9 @@ sub getArchiveList {
 	# to disk. This is accomplished by the archive.pl task.
 	my $returnable = $self->sqlSelectAll(
 		'sid, title, section', 'stories',
-		"to_days(now()) - to_days(time) > $days_to_archive AND
-		(writestatus='ok' OR writestatus='dirty')",
+		"to_days(now()) - to_days(time) > $days_to_archive
+		AND (writestatus='ok' OR writestatus='dirty')
+		AND displaystatus > -1",
 		"ORDER BY time $dir LIMIT $limit"
 	);
 
@@ -889,19 +890,17 @@ sub getStoriesWithFlag {
 	$sqlorder = "ORDER BY time $order ";
 	$sqlorder .= "LIMIT $limit" if $limit;
 
-	# if writestatus is delete, we want ALL the candidates,
-	# not just the ones that are displaying -- pudge
-	my $displaywhere = $writestatus eq 'delete' ? ''
-		: 'AND displaystatus > -1';
-
 	# Currently only used by two tasks and we do NOT want stories
 	# that are marked as "Never Display". If this changes, 
 	# another method will be required. If such is created, I would
 	# suggest getAllStoriesWithFlag() as the method name. We ALSO
 	# don't want to mess with stories that haven't been displayed
-	# yet!
-	#
-	# - Cliff 14-Oct-2001
+	# yet!  - Cliff 14-Oct-2001
+	# But if writestatus is delete, we want ALL the candidates,
+	# not just the ones that are displaying -- pudge
+	my $displaywhere = $writestatus eq 'delete' ? ''
+		: 'AND displaystatus > -1';
+
 	my $returnable = $self->sqlSelectAll(
 		"sid,title,section",
 		"stories", 

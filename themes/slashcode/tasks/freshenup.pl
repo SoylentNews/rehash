@@ -18,6 +18,7 @@ $task{$me}{on_startup} = 1;
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my $basedir = $constants->{basedir};
 	my %updates;
 
 	my $x = 0;
@@ -47,8 +48,6 @@ $task{$me}{code} = sub {
 	}
 	my $totalChangedStories = 0;
 	my $vu = "virtual_user=$virtual_user";
-	my $default_hp = join(",", ("0") x
-		($constants->{maxscore}-$constants->{minscore}+1));
 
 	for (@$stories) {
 
@@ -60,73 +59,39 @@ $task{$me}{code} = sub {
 		# We need to pull some data from a file that article.pl will
 		# write to.  But first it needs us to create the file and
 		# tell it where it will be.
-		my $logdir = $constants->{logdir};
-		my $basedir = $constants->{basedir};
-		my $cchp_prefix = catfile($logdir, "cchp.");
-		my $cchp_fh = undef;
-		my($cchp_file, $cchp_suffix, $cchp_param);
-		while (!$cchp_fh) {
-			$cchp_file = File::Temp::mktemp("${cchp_prefix}XXXXXXXX");
-			($cchp_suffix) = $cchp_file =~ /^\Q$cchp_prefix\E(.+)$/;
-			$cchp_param = " cchp='$cchp_suffix'";
-			if (!sysopen($cchp_fh, $cchp_file,
-				O_WRONLY | O_EXCL | O_CREAT, # we must create it
-				0600 # this must be 0600 for mild security reasons
-			)) {
-				$cchp_fh = undef; # just to be sure we repeat
-				warn "could not create '$cchp_file', $!, retrying";
-				Time::HiRes::sleep(0.2);
-			}
-		}
-		close $cchp_fh;
+		my($cchp_file, $cchp_param) = _make_cchp_file();
+
+		# Now call prog2file().
 		my $args = "$vu ssi=yes sid='$sid'$cchp_param";
+		my($filename, $logmsg);
 		if ($section) {
-			makeDir($constants->{basedir}, $section, $sid);
-			prog2file(
-				"$constants->{basedir}/article.pl",
-				"$constants->{basedir}/$section/$sid.shtml", {
-					args =>		"$args section='$section'",
-					verbosity =>	verbosity(),
-					handle_err =>	1
-			});
-			slashdLog("$me updated $section:$sid ($title)")
-				if verbosity() >= 2;
+			$filename = "$basedir/$section/$sid.shtml";
+			$args .= " section='$section'";
+			$logmsg = "$me updated $section:$sid ($title)";
+			makeDir($basedir, $section, $sid);
 		} else {
-			prog2file(
-				"$constants->{basedir}/article.pl",
-				"$constants->{basedir}/$sid.shtml", {
-					args =>		$args,
-					verbosity =>	verbosity(),
-					handle_err =>	1
-			});
-			slashdLog("$me updated $sid ($title)")
-				if verbosity() >= 2;
+			$filename = "$basedir/$sid.shtml";
+			$logmsg = "$me updated $sid ($title)";
 		}
+		prog2file(
+			"$basedir/article.pl",
+			$filename, {
+				args =>		$args,
+				verbosity =>	verbosity(),
+				handle_err =>	1
+		});
+		slashdLog($logmsg) if verbosity() >= 2;
 
 		# Now we extract what we need from the file we created
-		if (!open($cchp_fh, "<", $cchp_file)) {
-			warn "cannot open $cchp_file for reading, $!";
-			$cchp_param = "";
-		} else {
-			my $cchp = <$cchp_fh>;
-			close $cchp_fh;
-			my($cc, $hp) = (0, $default_hp);
-			if ($cchp && (($cc, $hp) = $cchp =~
-				/count (\d+), hitparade (.+)$/m)) {
-				# all is well, data was found
-				$slashdb->setStory($sid, { 
-					writestatus  => 'ok',
-					commentcount => $cc,
-					hitparade    => $hp,
-				});
-			} else {
-				slashdLog("Commentcount/hitparade data was not"
-					. " retrieved, reason unknown"
-					. " (cchp: '$cchp')");
-			}
+		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file);
+		if (defined($cc)) {
+			# all is well, data was found
+			$slashdb->setStory($sid, { 
+				writestatus  => 'ok',
+				commentcount => $cc,
+				hitparade    => $hp,
+			});
 		}
-		unlink $cchp_file;
-
 	}
 
 	my $w  = $slashdb->getVar('writestatus', 'value');
@@ -138,8 +103,8 @@ $task{$me}{code} = sub {
 		my($base) = split(/\./, $constants->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
 		prog2file(
-			"$constants->{basedir}/$constants->{index_handler}", 
-			"$constants->{basedir}/$base.shtml", {
+			"$basedir/$constants->{index_handler}", 
+			"$basedir/$base.shtml", {
 				args =>		$args,
 				verbosity =>	verbosity(),
 				handle_err =>	0
@@ -154,8 +119,8 @@ $task{$me}{code} = sub {
 			|| $constants->{index_handler};
 		my($base) = split(/\./, $index_handler);
 		prog2file(
-			"$constants->{basedir}/$index_handler", 
-			"$constants->{basedir}/$key/$base.shtml", {
+			"$basedir/$index_handler", 
+			"$basedir/$key/$base.shtml", {
 				args =>		"$args section='$key'",
 				verbosity =>	verbosity(),
 				handle_err =>	0
@@ -166,5 +131,55 @@ $task{$me}{code} = sub {
 	return $totalChangedStories ?
 		"totalChangedStories $totalChangedStories" : '';
 };
+
+sub _make_cchp_file {
+	my $constants = getCurrentStatic();
+	my $logdir = $constants->{logdir};
+	my $cchp_prefix = catfile($logdir, "cchp.");
+	my $cchp_fh = undef;
+	my $cchp_suffix;
+	my($cchp_file, $cchp_param) = ("", "");
+	while (!$cchp_fh) {
+		$cchp_file = File::Temp::mktemp("${cchp_prefix}XXXXXXXX");
+		($cchp_suffix) = $cchp_file =~ /^\Q$cchp_prefix\E(.+)$/;
+		$cchp_param = " cchp='$cchp_suffix'";
+		if (!sysopen($cchp_fh, $cchp_file,
+			O_WRONLY | O_EXCL | O_CREAT, # we must create it
+			0600 # this must be 0600 for mild security reasons
+		)) {
+			$cchp_fh = undef; # just to be sure we repeat
+			warn "could not create '$cchp_file', $!, retrying";
+			Time::HiRes::sleep(0.2);
+		}
+	}
+	close $cchp_fh;
+	return ($cchp_file, $cchp_param);
+}
+
+sub _read_and_unlink_cchp_file {
+	my($cchp_file) = @_;
+	my $constants = getCurrentStatic();
+	my($cc, $hp) = (undef, undef);
+	my $default_hp = join(",", ("0") x
+		($constants->{maxscore}-$constants->{minscore}+1));
+	($cc, $hp) = (0, $default_hp);
+
+	# Now we extract what we need from the file we created
+	if (!open(my $cchp_fh, "<", $cchp_file)) {
+		warn "cannot open $cchp_file for reading, $!";
+	} else {
+		my $cchp = <$cchp_fh>;
+		close $cchp_fh;
+		if ($cchp && (($cc, $hp) = $cchp =~
+			/count (\d+), hitparade (.+)$/m)) {
+		} else {
+			slashdLog("Commentcount/hitparade data was not"
+				. " retrieved, reason unknown"
+				. " (cchp: '$cchp')");
+		}
+	}
+	unlink $cchp_file;
+	return($cc, $hp);
+}
 
 1;
