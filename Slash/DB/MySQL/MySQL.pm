@@ -5472,7 +5472,6 @@ sub getStoryByTime {
 		$key .= "|$topic";
 	}
 
-	$where .= " AND story_topics_rendered.stoid = stories.stoid";
 	$key .= "|$time" if $key;
 
 	return $cache->{$key} if $key && defined $cache->{$key};
@@ -5481,7 +5480,9 @@ sub getStoryByTime {
 		'stories.stoid, sid, title, stories.tid',
 		'stories, story_text, story_topics_rendered',
 
-		"'$time' > DATE_SUB(NOW(), INTERVAL $bytime_delay DAY)
+		"stories.stoid = story_text.stoid
+		 AND stories.stoid = story_topics_rendered.stoid
+		 AND '$time' > DATE_SUB(NOW(), INTERVAL $bytime_delay DAY)
 		 AND time $sign '$time'
 		 AND time < NOW()
 		 AND in_trash = 'no'
