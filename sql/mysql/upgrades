@@ -1823,8 +1823,6 @@ INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 7, '1024K');
 
 INSERT INTO vars (name, value, description) VALUES ('defaultbytelimit', 5, 'The default setting for comment bytelimit');
 
-# USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_112, Start of T_2_3_0_113 - 2003/08/06
 
 UPDATE users_comments SET mode='thread' WHERE mode IS NULL OR mode NOT IN ('flat', 'nested', 'nocomment', 'thread');
@@ -1841,3 +1839,5 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 #   AddType text/html;charset=iso-8859-1 .shtml
 # -- pudge
 REPLACE INTO vars (name, value, description) VALUES ('content_type_webpage','text/html; charset=iso-8859-1','The Content-Type header for webpages');
+
+# USEPERL LAST UPDATED HERE
