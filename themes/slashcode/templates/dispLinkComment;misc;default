@@ -26,14 +26,8 @@ __template__
 		}) %][% END %]
 
 		[% IF user.mode == 'parents' && !form.pid%]
-			|
-			[% Slash.linkComment({
-			sid	=> sid,
-			cid	=> cid,
-			pid	=> cid,
-			subject => 'View this thread',
-			subject_only => 1,
-		}) %][% END %]
+			| <a href="[% constants.rootdir %]comments.pl?sid=[% sid %]&amp;threshold=[% user.threshold %]&amp;commentsort=[% user.commentsort %]&amp;mode=[% user.mode %]&amp;cid=[% cid %]&amp;pid=[% cid %]">View this thread</a>
+		[% END %]
 
 		[% IF !(user.state.discussion_archived) && (original_pid || can_mod || user.is_admin) %] | [% END %]
 
