@@ -1187,7 +1187,7 @@ sub submitComment {
 		}) if ! $form->{newdiscussion};
 		undoModeration($id);
 		printComments($discussion, $maxCid, $maxCid,
-			{ force_read_from_master => 1 }
+			{ force_read_from_master => 1, just_submitted => 1 }
 		) if !$form->{newdiscussion};
 
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);

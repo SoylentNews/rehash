@@ -85,10 +85,14 @@ sub selectComments {
 		time - 3600 * $constants->{comment_cache_max_hours};
 
 	my $thisComment;
+	my $gcfu_opt = {
+		cache_read_only	=> $cache_read_only,
+		one_cid_only	=> $options->{one_cid_only},
+	};
 	if ($options->{force_read_from_master}) {
-		$thisComment = $slashdb->getCommentsForUser($header->{id}, $cid, $cache_read_only);
+		$thisComment = $slashdb->getCommentsForUser($header->{id}, $cid, $gcfu_opt);
 	} else {
-		$thisComment = $reader->getCommentsForUser($header->{id}, $cid, $cache_read_only);
+		$thisComment = $reader->getCommentsForUser($header->{id}, $cid, $gcfu_opt);
 	}
 
 	if (!$thisComment) {
@@ -167,10 +171,11 @@ sub selectComments {
 	}
 
 	# Now that we know all the point scores, we pull out the comment
-	# text that we might possibly need.
-	my @cids_over_thresh;
+	# text that we might possibly need.  Note that we exclude cid 0
+	# which stores other data.
+	my @cids_over_thresh = grep { $_ } keys %$comments;
 	if ($user->{threshold} <= $min) {
-		@cids_over_thresh = keys %$comments;
+		# Do nothing; we need them all.
 	} else {
 		if ($user->{is_anon}) {
 			# Only load comment text for comments scored at or
@@ -180,7 +185,7 @@ sub selectComments {
 				$comments->{$_}{points} >= $user->{threshold}
 				||
 				$_ == $cid
-			} keys %$comments;
+			} @cids_over_thresh;
 		} else {
 			# Load comments text for those, plus any comments
 			# posted by us no matter what their score or cid.
@@ -190,7 +195,7 @@ sub selectComments {
 				$comments->{$_}{uid} == $user->{uid}
 				||
 				$_ == $cid
-			} keys %$comments;
+			} @cids_over_thresh;
 		}
 	}
 	my $comment_text_hr = $slashdb->getCommentTextOld(\@cids_over_thresh);
@@ -503,7 +508,6 @@ and 'printCommComments' template blocks.
 sub printComments {
 	my($discussion, $pid, $cid, $options) = @_;
 	my $user = getCurrentUser();
-	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
@@ -520,9 +524,13 @@ sub printComments {
 	my $lvl = 0;
 
 	# Get the Comments
-	my($comments, $count) = selectComments($discussion, $cidorpid,
-		{ force_read_from_master => $options->{force_read_from_master} }
+	my $sco = { force_read_from_master => $options->{force_read_from_master} || 0 };
+	$sco->{one_cid_only} = 1 if $cidorpid && (
+		   $user->{mode} eq 'flat'
+		|| $user->{mode} eq 'nocomment'
+		|| $options->{just_submitted}
 	);
+	my($comments, $count) = selectComments($discussion, $cidorpid, $sco);
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
 		# No such comment in this discussion.
@@ -580,8 +588,8 @@ sub printComments {
 		$comment = $comments->{$cid};
 		if (my $sibs = $comments->{$comment->{pid}}{kids}) {
 			for (my $x = 0; $x < @$sibs; $x++) {
-			($next, $previous) = ($sibs->[$x+1], $sibs->[$x-1])
-			  if $sibs->[$x] == $cid;
+				($next, $previous) = ($sibs->[$x+1], $sibs->[$x-1])
+					if $sibs->[$x] == $cid;
 			}
 		}
 
