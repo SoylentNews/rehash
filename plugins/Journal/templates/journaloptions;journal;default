@@ -24,10 +24,11 @@ __template__
 [%- END %]
 
 	<TR VALIGN="TOP"><TD>
-		[% PROCESS formLabel value => "Comments", comment => "Select default for new entries" %]
-		[% jds = Slash.db.getDescriptions("commentcodes") %]
-		[% def_jd = user.journal_discuss || constants.defaultcommentmode %]
-		[% Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
+		[% PROCESS formLabel value => "Comments", comment => "Select default for new entries";
+ 		   jdcodename = (user.is_subscriber || user.is_admin) ? 'commentcodes_extended' : 'commentcodes';
+		   jds = Slash.db.getDescriptions(jdcodename);
+		   def_jd = user.journal_discuss || constants.defaultcommentmode;
+		   Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
 	</TD></TR>
 </TABLE>
 <INPUT TYPE="submit" NAME="submit" VALUE="change">

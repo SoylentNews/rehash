@@ -131,10 +131,10 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='displaycodes_sectional'") },
 
 	'commentcodes'
-		=> sub { my $user = getCurrentUser(); 
-			my $where = " OR type='commentcodes_extended'" if $user->{is_admin} || $user->{is_subscriber};
-			$_[0]->sqlSelectMany('code,name', 'string_param', "type='commentcodes'" . $where) 
-		},
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='commentcodes'") },
+
+	'commentcodes_extended'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='commentcodes' OR type='commentcodes_extended'") },
 
 	'skins'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins') },
@@ -8597,7 +8597,7 @@ sub createStory {
 			my $storyskin = $self->getSkin($constants->{mainpage_skid});
 			$rootdir = $storyskin->{rootdir};
 		}
-		my $comment_codes = $self->getDescriptions("commentcodes");
+		my $comment_codes = $self->getDescriptions('commentcodes_extended');
 
 		my $discussion = {
 			title		=> $story->{title},
@@ -8690,7 +8690,7 @@ sub updateStory {
 	}
 
 	if (!$error) {
-		my $comment_codes = $self->getDescriptions("commentcodes");
+		my $comment_codes = $self->getDescriptions('commentcodes_extended');
 		my $rootdir = $self->getSkin($data->{primaryskid})->{rootdir};
 		my $topiclist = $self->getTopiclistFromChosen($data->{topics_chosen});
 #use Data::Dumper; print STDERR "MySQL.pm updateStory topiclist '@$topiclist' topics_chosen: " . Dumper($data->{topics_chosen});

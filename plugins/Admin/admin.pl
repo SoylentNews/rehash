@@ -1507,7 +1507,7 @@ sub editStory {
 
 	my $display_codes = $user->{section} ? 'displaycodes_sectional' : 'displaycodes';
 
-	$description = $slashdb->getDescriptions('commentcodes');
+	$description = $slashdb->getDescriptions('commentcodes_extended');
 	$commentstatus_select = createSelect('commentstatus', $description, $storyref->{commentstatus}, 1);
 
 	$fixquotes_check	= $constants->{markup_checked_attribute} if $form->{fixquotes};
