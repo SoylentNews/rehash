@@ -2488,7 +2488,6 @@ sub _link_to_slashlink {
 		my $any_host = "(?:"
 			. join("|", sort keys %all_urls)
 			. ")";
-#print STDERR "link_to_slashlink abs '$abs' any_host '$any_host'\n";
 		# All possible URLs' arguments, soon to be attributes
 		# in the new tag (thus "urla").	Values are the name
 		# of the script ("sn") and expressions that can pull
@@ -2509,7 +2508,6 @@ sub _link_to_slashlink {
 				  sid => qr{\bsid=(\d+)},
 				  cid => qr{\bcid=(\d+)} },
 		);
-#use Data::Dumper; print STDERR Dumper(\%urla);
 	}
 	# Get a reference to the URL argument hash for this
 	# virtual user, thus "urlavu".
@@ -2563,7 +2561,6 @@ sub _link_to_slashlink {
 			. q{>};
 	}
 
-#print STDERR "_link_to_slashlink end '$url'\n";
 	# Return either the new $retval we just made, or just send the
 	# original text back.
 	return $retval;
