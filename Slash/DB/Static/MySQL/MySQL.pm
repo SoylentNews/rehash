@@ -78,22 +78,15 @@ sub getBackendStories {
 
 	my $topic = $options->{topic} || getCurrentStatic('mainpage_nexus_tid');
 
-	my $select = "stories.stoid, sid, title, stories.tid, primaryskid, time, dept, stories.uid,
-		commentcount, hitparade, introtext, bodytext";
+	my $select = "stories.stoid AS stoid, sid, title, stories.tid AS tid, primaryskid, time,
+		dept, stories.uid AS uid, commentcount, hitparade, introtext, bodytext";
 
-	my $from = "stories, story_text";
+	my $from = "stories, story_text, story_topics_rendered";
 
 	my $where = "stories.stoid = story_text.stoid
-		AND time < NOW() AND in_trash = 'no'";
-
-	my %image = ( );
-	my $topic_hr = $self->getTopicTree($topic);
-	$from .= ", story_topics_rendered";
-	$where .= " AND stories.stoid = story_topics_rendered.stoid
+		AND time < NOW() AND in_trash = 'no'
+		AND stories.stoid = story_topics_rendered.stoid
 		AND story_topics_rendered.tid=$topic";
-	for my $key (qw( image width height )) {
-		$image{$key} = $topic_hr->{$key};
-	}
 
 	my $other = "ORDER BY time DESC LIMIT 10";
 
@@ -107,7 +100,11 @@ sub getBackendStories {
 	for my $story (@$returnable) {
 		# XXXSECTIONTOPICS need to set $story->{alttext}
 		# to something, here - the main topic, I guess
-		$story->{image} = { %image };
+		$story->{section} = $self->getSkin($story->{primaryskid})->{name};
+		my $topic_hr = $self->getTopicTree($story->{tid});
+		for my $key (qw( image width height )) {
+			$story->{image}{$key} = $topic_hr->{$key};
+		}
 	}
 
 	return $returnable;

@@ -101,7 +101,7 @@ EOT
 		<department>$str[1]</department>
 		<topic>$story->{tid}</topic>
 		<comments>$story->{commentcount}</comments>
-		<section>$name</section>
+		<section>$story->{section}</section>
 		<image>$story->{image}{image}</image>
 	</story>
 
