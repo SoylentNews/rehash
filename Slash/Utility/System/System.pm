@@ -321,6 +321,7 @@ sub prog2file {
 
 	# Two ways of handling data from child programs yet we maintain
 	# backwards compatibility.
+	# Need an alarm() around these.
 	if (! $handle_err) {
 		$data = `$exec`;
 	} else {
