@@ -3,6 +3,7 @@ description="Stats system"
 htdoc=stats.pl
 mysql_dump=mysql_dump
 mysql_schema=mysql_schema
+requiresplugin=Blob
 task=adminmail.pl
 task=stats_graphs_delete.pl
 template=templates/data;adminmail;default
