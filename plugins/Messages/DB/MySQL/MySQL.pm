@@ -137,11 +137,12 @@ sub init {
 }
 
 sub log {
-	my($self, $msg, $mode) = @_;
+	my($self, $msg, $mode, $count) = @_;
+	$count = 1 if !$count || $count < 1;
 	my $table = $self->{_log_table};
 	$msg->{user} ||= {};
 
-	$self->sqlInsert($table, {
+	my %data = (
 		id	=> $msg->{id},
 		user	=> (ref($msg->{user})
 				? ($msg->{user}{uid} || 0)
@@ -153,7 +154,10 @@ sub log {
 			   ),
 		code	=> $msg->{code},
 		mode	=> $mode,
-	}, { delayed => 1 });
+	);
+
+	$self->sqlInsert($table, \%data, { delayed => 1 })
+		for 1 .. $count;
 }
 
 sub _create_web {

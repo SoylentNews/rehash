@@ -558,7 +558,7 @@ sub bulksend {
 	my $subject = $self->callTemplate('msg_email_subj', $msg);
 
 	if (bulkEmail($addrs, $subject, $content)) {
-		$self->log($msg, MSG_MODE_EMAIL);
+		$self->log($msg, MSG_MODE_EMAIL, scalar @$addrs);
 		return 1;
 	} else {
 		messagedLog(getData("send mail error", {
