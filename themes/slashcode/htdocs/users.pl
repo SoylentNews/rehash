@@ -2114,6 +2114,8 @@ sub saveComm {
 	# Take care of the lists
 	# Enforce Ranges for variables that need it
 	$form->{commentlimit} = 0 if $form->{commentlimit} < 1;
+	my $cl_max = $constants->{comment_commentlimit} || 0;
+	$form->{commentlimit} = $cl_max if $cl_max > 0 and $form->{commentlimit} > $cl_max;
 	$form->{commentspill} = 0 if $form->{commentspill} < 1;
 
 	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};

@@ -1217,3 +1217,7 @@ INSERT INTO vars (name, value, description) VALUES ('prepuser_backup_prob','0','
 
 # SLASHDOT LAST UPDATED HERE
 
+# Doesn't have to be 250, pick whatever for your own site.
+INSERT INTO vars (name, value, description) VALUES ('comment_commentlimit','250','Max commentlimit users can set');
+UPDATE users_info SET commentlimit=250 WHERE commentlimit > 250;
+
