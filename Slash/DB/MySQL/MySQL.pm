@@ -3858,6 +3858,8 @@ EOT
 ########################################################
 # This makes me nervous... we grab, and they get
 # deleted? I may move the delete to the setQuickies();
+# 
+# (That would make sense to me too. - Jamie)
 sub getQuickies {
 	my($self) = @_;
 # This is doing nothing (unless I am just missing the point). We grab

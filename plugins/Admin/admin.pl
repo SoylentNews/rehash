@@ -1419,6 +1419,7 @@ sub saveStory {
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
+		subid		=> $form->{subid},
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
