@@ -331,27 +331,34 @@ sub countCommentsDaily {
 }
 ########################################################
 sub countBytesByPage {
-	my($self, $op, $yesterday) = @_;
+	my($self, $op, $yesterday, $options) = @_;
 	my $where = "op='$op' AND "
 		if $op;
+	$where .= "section='$options->{section}' AND "
+		if $options->{section};
 	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	$self->sqlSelect("sum(bytes)", "accesslog", $where);
 }
 
 ########################################################
 sub countUsersByPage {
-	my($self, $op, $yesterday) = @_;
+	my($self, $op, $yesterday, $options) = @_;
+	my $where = "op='$op' AND "
 	my $where = "op='$op' AND "
 		if $op;
+	$where .= "section='$options->{section}' AND "
+		if $options->{section};
 	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
-	$self->sqlSelect("sum(bytes)", "accesslog", $where);
+	$self->sqlSelect("count(DISTINCT uid)", "accesslog", $where);
 }
 
 ########################################################
 sub countDailyByPage {
-	my($self, $op, $yesterday) = @_;
+	my($self, $op, $yesterday, $options) = @_;
 	my $where = "op='$op' AND "
 		if $op;
+	$where .= "section='$options->{section}' AND "
+		if $options->{section};
 	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	$self->sqlSelect("count(*)", "accesslog", $where);
 }
@@ -359,9 +366,11 @@ sub countDailyByPage {
 ########################################################
 sub countDailyByPageDistinctIPID {
 	# This is so lame, and so not ANSI SQL -Brian
-	my($self, $op, $yesterday) = @_;
+	my($self, $op, $yesterday, $options) = @_;
 	my $where = "op='$op' AND "
 		if $op;
+	$where .= "section='$options->{section}' AND "
+		if $options->{section};
 	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog", $where);
 }
