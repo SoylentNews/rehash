@@ -1447,13 +1447,17 @@ sub prepareUser {
 	# All sorts of checks on user data.  The story_{never,always} checks
 	# are important because that data is fed directly into SQL queries
 	# without being quoted.
-	$user->{story_never_topic}	= _testExStrNumeric($user->{story_never_topic}) if $user->{story_never_topic};
-	$user->{story_never_author}	= _testExStrNumeric($user->{story_never_author}) if $user->{story_never_author};
-	$user->{story_never_nexus}	= _testExStrNumeric($user->{story_never_nexus}) if $user->{story_never_nexus};
-	$user->{story_always_topic}	= _testExStrNumeric($user->{story_always_topic}) if $user->{story_always_topic};
-	$user->{story_always_author}	= _testExStrNumeric($user->{story_always_author}) if $user->{story_always_author};
-	$user->{story_always_nexus}	= _testExStrNumeric($user->{story_always_nexus}) if $user->{story_never_nexus};
-	$user->{slashboxes}		= _testExStr($user->{slashboxes}) if $user->{slashboxes};
+	for my $field (qw(
+		story_never_topic	story_never_author	story_never_nexus
+		story_always_topic	story_always_author	story_always_nexus
+	)) {
+		if ($user->{$field}) {
+			$user->{$field} = _testExStrNumeric($user->{$field}, 1);
+		}
+	}
+	if ($user->{slashboxes}) {
+		$user->{slashboxes} = _testExStr($user->{slashboxes});
+	}
 	$user->{points}		= 0 unless $user->{willing}; # No points if you dont want 'em
 	$user->{domaintags}	= 2 if !defined($user->{domaintags}) || $user->{domaintags} !~ /^\d+$/;
 
@@ -1719,23 +1723,25 @@ sub filter_params {
 		}
 	}
 
-	for my $key (keys %form) {
-		if ($key eq '_multi') {
-			for my $key (keys %{$form{_multi}}) {
+	for my $formkey (keys %form) {
+		if ($formkey eq '_multi') {
+			# This is the placeholder we just created
+			# a moment ago.
+			for my $multikey (keys %{$form{_multi}}) {
 				my @data;
-				for my $data (@{$form{_multi}{$key}}) {
-					push @data, filter_param($key, $data);
+				for my $data (@{$form{_multi}{$multikey}}) {
+					push @data, filter_param($multikey, $data);
 				}
-				$form{_multi}{$key} = \@data;
+				$form{_multi}{$multikey} = \@data;
 			}			
-		} elsif (ref($form{$key}) eq 'ARRAY') {
+		} elsif (ref($form{$formkey}) eq 'ARRAY') {
 			my @data;
-			for my $data (@{$form{$key}}) {
-				push @data, filter_param($key, $data);
+			for my $data (@{$form{$formkey}}) {
+				push @data, filter_param($formkey, $data);
 			}
-			$form{$key} = \@data;
+			$form{$formkey} = \@data;
 		} else {
-			$form{$key} = filter_param($key, $form{$key});
+			$form{$formkey} = filter_param($formkey, $form{$formkey});
 		}
 	}
 
@@ -1770,7 +1776,7 @@ sub filter_param {
 
 ########################################################
 sub _testExStrNumeric {
-	my($str) = @_;
+	my($str, $do_sort) = @_;
 	return "" if !$str;
 	my @n = split ',', $str;
 
@@ -1781,15 +1787,20 @@ sub _testExStrNumeric {
 	# Verify the data is numeric (no empty strings).
 	@n = grep /^\d+$/, @n;
 
-	return join ",", sort @n;
+	# Sort if necessary.
+	@n = sort { $a <=> $b } @n if $do_sort;
+
+	return join ",", @n;
 }
 
 ########################################################
 sub _testExStr {
-	my($str) = @_;
+	my($str, $do_sort) = @_;
 	return "" if !$str;
 	my @n = split ',', $str;
-	return join ",", sort @n;
+	# Sort if necessary.
+	@n = sort @n if $do_sort;
+	return join ",", @n;
 }
 
 ########################################################
