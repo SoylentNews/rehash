@@ -110,7 +110,9 @@ sub header {
 	unless ($form->{ssi}) {
 		my $r = Apache->request;
 
-		$r->content_type($constants->{content_type_webpage} || 'text/html');
+		$r->content_type($constants->{content_type_webpage}
+			|| $options->{content_type}
+			|| 'text/html');
 
 		# Caching used to be Cache-Control: private but that doesn't
 		# seem to be correct; let's hope switching to no-cache
