@@ -222,7 +222,7 @@ sub end_log {
 		push @log, " (${duration}s";
 	}
 
-	if ($forktype != SLASHD_NOWAIT) {
+#	if ($forktype != SLASHD_NOWAIT) {
 		push @log, ($secs_until < $secs)
 			? "; $next_task "
 				. -$secs_until
@@ -230,7 +230,7 @@ sub end_log {
 			: verbosity() >= 2
 				? "; $next_task in ${secs_until}s"
 				: ();
-	}
+#	}
 
 	if ($forktype != SLASHD_LOG_NEXT_TASK) {
 		push @log, ")$summary";
