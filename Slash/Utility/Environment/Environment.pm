@@ -2083,6 +2083,7 @@ sub getObject {
 			$vuser = $data->{virtual_user};
 
 		} else {
+			# this really isn't used and is not well-tested anymore -- pudge
 			my $classes = getCurrentStatic('classes');
 
 			# try passed db first, then db for given class
