@@ -688,14 +688,14 @@ Below, the main software components needed are listed.  The
 recommended version is noted, along with the earliest version
 that has been tested (or is expected) to work.  The earliest
 versions are not necessarily supported, but should work.
-perl 5.005_03 is supported, but MySQL 3.22 is not.
+perl 5.6.0 is supported, but MySQL 3.22 is not.
 
 
 =over 4
 
 =item perl
 
-Version 5.6.1 (5.005_03). [NOTE: perl 5.6.0 may have some problems.
+Version 5.6.1 (5.6.0). [NOTE: perl 5.6.0 may have some problems.
 5.6.1 is recommended.]
 
 	http://www.cpan.org/
@@ -901,10 +901,13 @@ themselves even though it isn't strictly speaking necessary.
 If you suspect overactive testing, C<force install Foo::Bar> for
 the offending module and then try C<install Bundle::Slash> again.
 
-We list perl 5.005_03 as supported, but 5.6.1 is recommended.
+We list perl 5.6.0 as supported, but 5.6.1 is recommended.
 If you're having CPAN installation troubles, upgrading to the
 latest version will make life easier. Note that you'll want to
 recompile mod_perl/Apache after upgrading perl.
+
+We believe everything works fine with perl 5.8.0, but have not
+run production sites on it ourselves.
 
 =item *
 
