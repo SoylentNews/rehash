@@ -16,36 +16,57 @@ en_US
 __name__
 hierarchy
 __template__
-[% PROCESS titlebar %]
-<TABLE ALIGN="LEFT" VALIGN="TOP">
-[% FOREACH topic_stuff = topics %]
-	<TR>
-		<TD ALIGN="LEFT">
-			[% topic = topic_stuff.parent %]
-			<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-				SRC="[% topic.imageclean %]"
-				ALT="[% topic.alttext %]" WIDTH="[% topic.width %]"
-				HEIGHT="[% topic.height %]" BORDER="0">[% IF user.is_admin %]</A>
-				<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]"
-				>[% END %]<BR>[% topic.alttext %]</A>
-		</TD>
-		<TD ALIGN="LEFT">
-			[% IF topic_stuff.child %]
-				[% FOREACH topic = topic_stuff.child %]
-					<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-						SRC="[% topic.imageclean %]"
-						ALT="[% topic.alttext %]" WIDTH="[% topic.width %]"
-						HEIGHT="[% topic.height %]" BORDER="0">[% IF user.is_admin %]</A>
-						<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]"
-						>[% END %]<BR>[% topic.alttext %]</A><BR>
+[% PROCESS titlebar title="Hierarchy of Topics" %]
+<BR>
+<UL>
+[% FOREACH topic = topics %]
+	[% IF user.is_admin %]
+		<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
+	[% ELSE %]
+		[% topic.alttext %]
+	[% END %]
+	<BR>
+	[% IF topic.child %]
+		<UL>
+			[% FOREACH topic = topic.child %]
+				<LI>
+					[% IF user.is_admin %]
+						<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
+					[% ELSE %]
+						[% topic.alttext %]
+					[% END %]
+				</LI>
+				[% IF topic.child %]
+					<UL>
+						[% FOREACH topic = topic.child %]
+							<LI>
+								[% IF user.is_admin %]
+									<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
+								[% ELSE %]
+									[% topic.alttext %]
+								[% END %]
+							</LI>
+							[% IF topic.child %]
+								<UL>
+									[% FOREACH topic = topic.child %]
+										<LI>
+											[% IF user.is_admin %]
+												<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
+											[% ELSE %]
+												[% topic.alttext %]
+											[% END %]
+										</LI>
+									[% END %]
+								</UL>
+							[% END %]
+						[% END %]
+					</UL>
 				[% END %]
-			[% ELSE %]
-				&nbsp;
 			[% END %]
-		</TD>
-	</TR>
+		</UL>
+	[% END %]
 [% END %]
-</TABLE>
+</UL>
 
 __seclev__
 10000
