@@ -265,7 +265,7 @@ EOT
 
 		}
 	}
-	my $email = sprintf(<<"EOT", @numbers,@gift_numbers);
+	my $email = sprintf(<<"EOT", @numbers, @gift_numbers);
 $constants->{sitename} Subscriber Info for $yesterday
 $report_link
 $monthly_stats
