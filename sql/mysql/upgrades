@@ -2081,3 +2081,8 @@ UPDATE comments SET pointsmax=points;
 ALTER TABLE users_info ADD COLUMN initdomain VARCHAR(30) DEFAULT '' NOT NULL AFTER user_expiry_comm, ADD COLUMN created_ipid VARCHAR(32) DEFAULT '' NOT NULL AFTER initdomain;
 ALTER TABLE users_info ADD INDEX initdomain (initdomain), ADD INDEX created_ipid (created_ipid);
 
+# If you want correct values for your existing users' column
+# users_info.initdomain, try running this quick script
+# (replace virtusername with your DBIx::Password user):
+# perl -MSlash::Test=virtusername -e 'my $arr = $reader_db->sqlSelectAll("uid, realemail", "users"); for my $ar (@$arr) { next unless $ar->[1]; $d=fullhost_to_domain($ar->[1]); push @{$du{$d}}, $ar->[0] } undef $arr; while (($k, $v) = each %du) { $in = join(",", @$v); $slashdb->sqlUpdate("users_info", { initdomain => $k }, "uid IN ($in)"); sleep(0.1) if scalar(@$v) > 100 }'
+
