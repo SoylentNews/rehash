@@ -695,7 +695,6 @@ INSERT INTO vars (name, value, description) VALUES ('people_max_subscriber','400
 
 INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Additional multiplier for M2s performed on duplicate mods (leave 0 to disable)');
 
-# SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_43, Start of T_2_3_0_44
 
@@ -744,3 +743,4 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes o
 
 INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
 
+# SLASHCODE LAST UPDATED HERE
