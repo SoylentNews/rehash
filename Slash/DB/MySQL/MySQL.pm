@@ -3553,7 +3553,10 @@ sub metamodEligible {
 
 	# Easy tests the user can fail to be ineligible to metamod.
 	return 0 if $user->{is_anon} || !$user->{willing} || $user->{karma} < 0;
-	return 1 if $user->{is_admin};
+	# Technically I believe the next bit should always be right under the doctrine that
+	# an admin should be able to to anything but maybe the cat ate a plant tonight
+  # and thus Jim Jones really did it with the monkey wrench in the blue room -Brian
+	#return 1 if $user->{is_admin};
 
 	# Not eligible if metamodded too recently.
 	my $constants = getCurrentStatic();

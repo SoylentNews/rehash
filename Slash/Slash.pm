@@ -1271,42 +1271,42 @@ EOT
 	if ($user->{mode} ne 'archive'
 		&& $user->{mode} ne 'metamod'
 		&& $comment->{nickname} ne "-") { # this last test probably useless
+		my @link;
 
-		my $reply = (linkComment({
+		push @link, (linkComment({
 			sid	=> $comment->{sid},
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-		}) . " | ") unless $user->{state}{discussion_archived};
+		})) unless $user->{state}{discussion_archived};
 
-		my $parent = linkComment({
+		push @link, linkComment({
 			sid	=> $comment->{sid},
 			cid	=> $comment->{pid},
 			pid	=> $comment->{pid},
 			subject	=> 'Parent',
 			subject_only => 1,
-		}, 1);
-		my $mod_select = '';
-		if ($can_mod) {
-			$mod_select = " | "
-				. createSelect("reason_$comment->{cid}",
-					$reasons, '', 1, 1);
-		}
+		}, 1) if $comment->{pid};
 
-		my $deletion = qq? | <INPUT TYPE="CHECKBOX" NAME="del_$comment->{cid}">?
-			if $user->{is_admin}
-				&& ($constants->{comments_moddable_archived}
-					|| !$user->{state}{discussion_archived});
+		push @link, createSelect("reason_$comment->{cid}",
+			$reasons, '', 1, 1) if $can_mod;
 
-		$return .= <<EOT;
-			<TR><TD>
-				<FONT SIZE="2">
-				[ $reply$parent$mod_select$deletion ]
-				</FONT>
-			</TD></TR>
-			<TR><TD>
+		push @link, qq|<INPUT TYPE="CHECKBOX" NAME="del_$comment->{cid}">|
+			if $user->{is_admin};
+
+		my $link = join(" | ", @link);
+
+		if (@link) {
+			$return .= <<EOT;
+				<TR><TD>
+					<FONT SIZE="2">
+					[ $link ]
+					</FONT>
+				</TD></TR>
+				<TR><TD>
 EOT
+		}
 
 	}
 	return $return;
