@@ -379,6 +379,7 @@ sub displayForm {
 		username	=> $form->{name} || $username,
 		fakeemail	=> processSub($fakeemail, $known),
 		section		=> $form->{section} || $section || $constants->{defaultsection},
+		uid	=> $user->{uid},
 		topic		=> $topic,
 		width		=> '100%',
 		title		=> $title,
