@@ -372,9 +372,12 @@ sub rss_story {
 		if $story->{title};
 	if ($story->{sid}) {
 		if ($story->{primaryskid}) {
-			my $rootdir = $reader->getSkin($story->{primaryskid})->{absolutedir};
+			my $dir = url2abs(
+				$reader->getSkin($story->{primaryskid})->{rootdir},
+				$channel->{'link'}
+			);
 			$encoded_item->{'link'} = $self->encode(
-                                _tag_link("$rootdir/article.pl?sid=$story->{sid}"),
+                                _tag_link("$dir/article.pl?sid=$story->{sid}"),
                                 'link'
                         );
 		} else {
