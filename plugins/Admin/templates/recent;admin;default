@@ -21,7 +21,7 @@ __template__
 
 [% IF !startat; startat = 0; END;
    IF startat > 0;
-	next_startat = startat - 30;
+	next_startat = startat - 100;
 	IF next_startat < 0; next_startat = 0; END; %]
 	<form action="[% constants.rootdir %]/admin.pl" method="GET">
 	<input type="hidden" name="op" value="recent">
@@ -35,7 +35,7 @@ __template__
 	<input type="submit" value="&lt;&lt; Next Comments">
 	</form>
 [% END %]
-
+<form action="[% constants.rootdir %]/admin.pl" method="post">
 <table>
 	<tr>
 		<th>sid</th>
@@ -77,13 +77,21 @@ __template__
 		<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
 		<td align="left">[% comm.subject_vis | strip_literal %]</td>
 	</tr>
+	<tr>
+		<td colspan="3" valign="top">[% Slash.createSelect("reason_${comm.sid}_${comm.cid}",
+constants.reasons, '', 1, 1) %]</td>
+		<td colspan="7" align="left">[% Slash.balanceTags(Slash.chopEntity(comm.comment,120)) %]</td>
+	</tr>
 	[% END %]
 
 </table>
 
-[% prev_startat = startat + 30; %]
+[% prev_startat = startat + 100; %]
+<input type="hidden" name="op" value="moderate_recent">
+<input type="submit" name="submit" value="Moderate">
+<input type="hidden" name="startat" value="[% startat | strip_attribute %]">
+</form>
 <form action="[% constants.rootdir %]/admin.pl" method="GET">
-<input type="hidden" name="op" value="recent">
 [% IF min.defined %]
 	<input type="hidden" name="min" value="[% min | strip_attribute %]">
 [% END %]
@@ -92,6 +100,7 @@ __template__
 [% END %]
 <input type="hidden" name="startat" value="[% prev_startat | strip_attribute %]">
 <input type="submit" value="Prev Comments &gt;&gt;">
+<input type="hidden" name="op" value="recent">
 </form>
 
 __seclev__
