@@ -403,7 +403,6 @@ sub findSubmission {
 	} else {
 		$other .= " ORDER BY subid DESC";
 	}
-
 	# The big old searching WHERE clause, fear it
 	my $key = " MATCH (subj,story) AGAINST ($query) ";
 	my $where = " 1 = 1 ";
@@ -414,6 +413,8 @@ sub findSubmission {
 		if $form->{tid};
 	$where .= " AND note=" . $self->sqlQuote($form->{note})
 		if $form->{note};
+	$where .= " AND section=" . $self->sqlQuote($form->{section})
+		if $form->{section};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
