@@ -120,8 +120,13 @@ install: slash plugins
 	# directories into $(SLASH_PREFIX) from their checked-out CVS trees. We
 	# should try to check for this in the future and behave accordingly.
 	#
+	# OpenBSD needs "-R" here instead of "-rv".  Its manpage notes:
+	# Historic versions of the cp utility had a -r option.  This implementation
+	# supports that option; however, its use is strongly discouraged, as it
+	# does not correctly copy special files, symbolic links or FIFOs. 
+	#
 	(cd plugins; make clean) 
-	$(CP) -rv plugins/* $(SLASH_PREFIX)/plugins/
+	$(CP) -rv plugins/* $(SLASH_PREFIX)/plugins
 	# Now all other themes
 	$(CP) -rv themes/* $(SLASH_PREFIX)/themes
 	
