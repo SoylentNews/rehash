@@ -6985,6 +6985,7 @@ sub getSlashConf {
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
 		charrefs_good_entity =>		[qw( amp lt gt euro )],
 		charrefs_good_numeric =>	[ ],
+		cur_performance_stat_ops =>	[ ],
 		lonetags =>			[qw( P LI BR IMG DT DD)],
 		fixhrefs =>			[ ],
 		hc_possible_fonts =>		[ ],
