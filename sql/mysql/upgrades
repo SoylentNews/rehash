@@ -1105,3 +1105,5 @@ INSERT INTO vars (name, value, description) VALUES ('stats_sfnet_groupids','4421
 # Change for plugins/Stats (ignore if not using that plugin)
 UPDATE stats_daily SET name='mod_token_conversion_point' WHERE name='token_conversion_point';
 
+ALTER TABLE accesslog_admin ADD COLUMN secure TINYINT UNSIGNED DEFAULT 0 NOT NULL;
+
