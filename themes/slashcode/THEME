@@ -95,6 +95,7 @@ task=tasks/refresh_section_metakeywords.pl
 task=tasks/rss_submit.pl
 task=tasks/run_moderatord.pl
 task=tasks/run_portald.pl
+task=tasks/set_cids.pl
 task=tasks/set_recent_topics.pl
 task=tasks/spamarmor.pl
 template=templates/admin;menu;default
