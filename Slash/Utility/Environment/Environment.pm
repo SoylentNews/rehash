@@ -1686,13 +1686,13 @@ Hashref of cleaned-up data.
 	# special few
 	my %special = (
 		logtoken	=> sub { $_[0] = '' unless
-					 $_[0] =~ m|^\d+::[A-Za-z0-9]{22}$|	},
+					 $_[0] =~ m|^\d+::[A-Za-z0-9]{22}$|		},
 		sid		=> sub { $_[0] = '' unless
-					 $_[0] =~ regexSid()			},
-		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g		},
+					 $_[0] =~ Slash::Utility::Data::regexSid()	},
+		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g			},
 		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
-			        	 $_[0] =~ s|\s+| |g;			},
-		colorblock	=> sub { $_[0] =~ s|[^\w#,]+||g			},
+			        	 $_[0] =~ s|\s+| |g;				},
+		colorblock	=> sub { $_[0] =~ s|[^\w#,]+||g				},
 	);
 
 
