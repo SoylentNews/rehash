@@ -148,7 +148,7 @@ sub friends {
 	}
 
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -216,7 +216,7 @@ sub fof {
 	}
 
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -284,7 +284,7 @@ sub enof {
 	}
 
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -347,7 +347,7 @@ sub foes {
 	}
 
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -410,7 +410,7 @@ sub fans {
 	}
 
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -472,7 +472,7 @@ sub freaks {
 	}
 
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -535,7 +535,7 @@ sub all {
 	}
 
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -631,7 +631,7 @@ sub check {
 
 	my $nickname = $slashdb->getUser($uid, 'nickname');
 	my $user_change = { };
-	if ($uid != $user->{uid} && !isAnon($uid)) {
+	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;

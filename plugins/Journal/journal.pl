@@ -343,7 +343,8 @@ sub displayArticle {
 	if ($form->{uid} || $form->{nick}) {
 		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
 		$nickname	= $slashdb->getUser($uid, 'nickname');
-		if ($uid && $uid != $user->{uid} && !isAnon($uid)) {
+		if ($uid && $uid != $user->{uid}
+			&& !isAnon($uid) && !$user->{is_anon}) {
 			# Store the fact that this user last looked at that user.
 			# For maximal convenience in stalking.
 			$user_change->{lastlookuid} = $uid;
