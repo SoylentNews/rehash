@@ -1030,7 +1030,7 @@ sub editStory {
 			my $temp_body;
 			$form->{bodytext} = '';
 			my $fh = $upload->fh;
-			while(<$fh>) {
+			while (<$fh>) {
 				$form->{bodytext} .= $_;
 			}
 		}
@@ -1214,9 +1214,9 @@ sub editStory {
 	$shortcuts_check	= 'CHECKED' if $form->{shortcuts};
 
 	$slashdb->setSession($user->{uid}, {
-		lasttitle => $storyref->{title},
-		last_sid  => $sid,
-		last_subid=> '',
+		lasttitle	=> $storyref->{title},
+		last_sid	=> $sid,
+		last_subid	=> '',
 	});
 
 	my $ispell_comments = {
