@@ -263,6 +263,17 @@ EOT
 	my $daily_total = $logdb->countDailyByPage('', {
 		no_op => $constants->{op_exclude_from_countdaily},
 	});
+
+	my $anon_daily_total = $logdb->countDailyByPage('', {
+		no_op     => $constants->{op_exclude_from_countdaily},
+		user_type => "anonymous"
+	});
+
+	my $logged_in_daily_total = $logdb->countDailyByPage('', {
+		no_op     => $constants->{op_exclude_from_countdaily},
+		user_type => "logged-in"
+	});
+	
 	$sdTotalHits = $sdTotalHits + $daily_total;
 	# Need to figure in the main section plus what the handler is.
 	# This doesn't work for the other sites... -Brian
@@ -273,6 +284,8 @@ EOT
 
 	my $unique_users = $logdb->countUsersByPage();
 	my $unique_ips = $logdb->countDailyByPageDistinctIPID();
+	my $anon_ips = $logdb->countDailyByPageDistinctIPID("", { user_type => 'anonymous'});
+	my $logged_in_ips = $logdb->countDailyByPageDistinctIPID("", { user_type => 'logged-in'});
 
 	my $grand_total = $logdb->countDailyByPage('');
 	$data{grand_total} =  sprintf("%8d", $grand_total);
@@ -429,6 +442,19 @@ EOT
 		my $avg_comments= $stats->getAverageCommentCountPerStoryOnDay($d) || 0;
 		$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
 						{ overwrite => 1, day => $d });
+
+		my $stories = $stats->getStoryHitsForDay($d);
+		my %topic_hits;
+		foreach my $st (@$stories){
+			my $topics = $slashdb->getStoryTopics($st->{sid}, 2);
+			foreach my $tid (keys %$topics){
+				$topic_hits{$tid."_".$topics->{$tid}} += $st->{hits};
+			}
+		}
+		foreach my $key (keys %topic_hits){
+			$statsSave->createStatDaily("topichits_$key", $topic_hits{$key}, { overwrite => 1, day => $d });
+		}
+
 	}
 	
 	foreach my $day (@ah_days){
@@ -494,6 +520,8 @@ EOT
 	}
 
 	$statsSave->createStatDaily("total", $daily_total);
+	$statsSave->createStatDaily("anon_total", $anon_daily_total);
+	$statsSave->createStatDaily("logged_in_total", $logged_in_daily_total);
 	$statsSave->createStatDaily("total_static", $total_static);
 	$statsSave->createStatDaily("total_subscriber", $total_subscriber);
 	$statsSave->createStatDaily("total_secure", $total_secure);
@@ -502,6 +530,8 @@ EOT
 	$statsSave->createStatDaily("total_bytes", $total_bytes);
 	$statsSave->createStatDaily("grand_total_bytes", $grand_total_bytes);
 	$statsSave->createStatDaily("unique", $unique_ips);
+	$statsSave->createStatDaily("anon_unique", $anon_ips);
+	$statsSave->createStatDaily("logged_in_unique", $logged_in_ips);
 	$statsSave->createStatDaily("unique_users", $unique_users);
 	$statsSave->createStatDaily("users_subscriber", $unique_users_subscriber);
 	$statsSave->createStatDaily("comments", $comments);
@@ -698,6 +728,34 @@ EOT
 		- $slashdb->getNumNewUsersSinceDaysback(0);
 	$statsSave->createStatDaily('users_created', $new_users_yest);
 	$data{rand_users_yest} = $slashdb->getRandUsersCreatedYest(12);
+
+
+
+	my $relocate = getObject('Slash::Relocate');
+
+	if($relocate){
+		my $rls = $logdb->getRelocatedLinksSummary();
+		my $sum = $stats->getRelocatedLinkHitsByType($rls);
+		my $total;
+		foreach my $type (keys %$sum){
+			my $label = $type eq "" ? "relocate_other" : "relocate_$type";
+			$statsSave->createStatDaily($label, $sum->{$type});
+			$total += $sum->{$type};
+		}
+		$statsSave->createStatDaily("relocate_all", $total);
+	}
+	
+	my $subscribe = getObject('Slash::Subscribe');
+	
+	if($subscribe){
+		my $rswh =   $stats->getSubscribersWithRecentHits();
+		my $sub_cr = $logdb->getSubscriberCrawlers($rswh);
+		my $sub_report;
+		foreach my $sub (@$sub_cr){
+			$sub_report .= sprintf("%6d %s\n", $sub->{cnt}, ($slashdb->getUser($sub->{uid}, 'nickname') || $sub->{uid})); 
+	 	}
+		$data{crawling_subscribers} = $sub_report if $sub_report; 
+	}
 
 	my $email = slashDisplay('display', \%data, {
 		Return => 1, Page => 'adminmail', Nocomm => 1

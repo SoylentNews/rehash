@@ -408,6 +408,13 @@ sub getErrorStatuses {
 }
 
 ########################################################
+sub getStoryHitsForDay {
+	my ($self, $day, $options) = @_;
+	my $sids = $self->sqlSelectAllHashrefArray("sid,hits","stories","day_published=".$self->sqlQuote($day));
+	return $sids;
+}
+
+########################################################
 sub getDaysOfUnarchivedStories {
 	my($self, $options) = @_;
 	my $max_days = $options->{max_days} || 180;
@@ -890,6 +897,7 @@ sub countUsersByPage {
 ########################################################
 sub countDailyByPage {
 	my($self, $op, $options) = @_;
+	my $constants = getCurrentStatic();
 	$options ||= {};
 
 	my $where = "1=1 ";
@@ -899,6 +907,8 @@ sub countDailyByPage {
 		if $options->{section};
 	$where .= " AND static='$options->{static}'"
 		if $options->{static};
+	$where .=" AND uid = $constants->{anonymous_coward_uid} " if $options->{user_type} eq "anonymous";
+	$where .=" AND uid != $constants->{anonymous_coward_uid} " if $options->{user_type} eq "logged-in";
 
 	# The "no_op" option can take either a scalar for one op to exclude,
 	# or an arrayref of multiple ops to exclude.
@@ -916,11 +926,15 @@ sub countDailyByPage {
 sub countDailyByPageDistinctIPID {
 	# This is so lame, and so not ANSI SQL -Brian
 	my($self, $op, $options) = @_;
+	my $constants = getCurrentStatic();
+	
 	my $where = "1=1 ";
 	$where .= "AND op='$op' "
 		if $op;
 	$where .= " AND section='$options->{section}' "
 		if $options->{section};
+	$where .=" AND uid = $constants->{anonymous_coward_uid} " if $options->{user_type} eq "anonymous";
+	$where .=" AND uid != $constants->{anonymous_coward_uid} " if $options->{user_type} eq "logged-in";
 	$self->sqlSelect("COUNT(DISTINCT host_addr)", "accesslog_temp", $where);
 }
 
@@ -1309,6 +1323,48 @@ sub countSfNetIssues {
 		$hr->{$tracker}{total} = $total;
 	}
 	return $hr;
+}
+
+#######################################################
+
+sub getRelocatedLinksSummary {
+	my ($self) = @_;
+	return $self->sqlSelectAllHashrefArray("query_string, count(query_string) as cnt","accesslog_temp_errors","op='relocate-undef' AND dat = '/relocate.pl'",
+		"GROUP by query_string order by cnt desc");
+}
+
+########################################################
+#  expects arrayref returned by getRelocatedLinksSummary
+
+sub getRelocatedLinkHitsByType {
+	my ($self,$ls) = @_;
+	my $summary;
+	foreach my $l(@$ls){
+		my ($id) = $l->{query_string} =~/id=([^&]*)/;
+		my $type = $self->sqlSelect("stats_type","links","id=".$self->sqlQuote($id));
+		$summary->{$type} += $l->{cnt}; 
+	}
+	return $summary;
+}
+
+########################################################
+
+sub getSubscribersWithRecentHits {
+	my ($self) = @_;
+	return $self->sqlSelectColArrayref("uid", "users_hits", "hits_paidfor > hits_bought and lastclick >= date_sub(now(), interval 3 day)", "order by uid");
+}
+
+########################################################
+
+sub getSubscriberCrawlers {
+	my ($self,$uids) = @_;
+	return [] unless @$uids;
+	my $uid_list = join(',',@$uids);
+	return $self->sqlSelectAllHashrefArray("uid, count(*) as cnt", "accesslog_temp", 
+						"uid in ($uid_list) and op='users' and query_string like '\%min_comment\%'",
+						" group by uid having cnt >= 5 order by cnt desc limit 10");
+
+
 }
 
 ########################################################

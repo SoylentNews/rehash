@@ -164,7 +164,13 @@ Page           Status              Count
         END;
 END %]
 -----------------------
+[% IF crawling_subscribers %]
+Possible Subscriber Comment Crawlers
 
+Count  Nickname
+[% crawling_subscribers %]
+
+[% END %]
 __seclev__
 100
 __version__

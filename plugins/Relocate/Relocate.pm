@@ -48,6 +48,7 @@ sub create {
 				id => $id,
 				-last_seen => 'now()',
 				url => $values->{url},
+				stats_type => $values->{stats_type}
 				});
 	}
 

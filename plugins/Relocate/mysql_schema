@@ -14,6 +14,7 @@ CREATE TABLE links (
 	url TEXT DEFAULT '' NOT NULL,
 	last_seen DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	is_alive enum('yes','no') DEFAULT 'yes' NOT NULL,
+	stats_type VARCHAR(24),
 	INDEX url_index (url(200)),
 	PRIMARY KEY (id)
 ) TYPE = MyISAM;
