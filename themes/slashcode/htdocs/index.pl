@@ -83,7 +83,7 @@ my $start_time = Time::HiRes::time;
 	# Slashdot, normalized such that the median request takes 1 second.
 	# Times listed are elapsed time from the previous markpoint.
 
-	my $gse_hr = { tids => $gSkin->{nexus} };
+	my $gse_hr = { tid => $gSkin->{nexus} };
 	$gse_hr->{limit} = $user->{maxstories} if !$user->{is_anon} && $user->{maxstories};
 	$stories = $reader->getStoriesEssentials($gse_hr);
 
