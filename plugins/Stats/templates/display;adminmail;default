@@ -28,10 +28,11 @@ gstatic total:        -          -    [% grand_total_static %]
 [% END %]
         posts: [% distinct_comment_posters_uids %]   [% IPIDS %]
      comments: [% comments_uids %]   [% comments_ipids %]   [% comments_page %] ([% comments_bytes %])
-        index:        -          -   [% homepage %]
+        index: [% index_uids %]   [% index_ipids %]   [% index_page %]
      articles: [% article_uids %]   [% article_ipids %]   [% article_page %] ([% article_bytes %])
        search: [% search_uids %]   [% search_ipids %]   [% search_page %] ([% search_bytes %])
      journals: [% journal_uids %]   [% journal_ipids %]   [% journal_page %] ([% journal_bytes %])
+        users: [% users_uids %]   [% users_ipids %]   [% users_page %] ([% users_bytes %])
          palm: [% palm_uids %]   [% palm_ipids %]   [% palm_page %] ([% palm_bytes %])
           rss: [% rss_uids %]   [% rss_ipids %]   [% rss_page %] ([% rss_bytes %])
     accesslog: [% accesslog %] rows total

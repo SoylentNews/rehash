@@ -33,7 +33,7 @@ $task{$me}{code} = sub {
 	}
 
 	my $logdb = getObject('Slash::Stats', {
-		virtual_user	=> $constants->{log_db_user} || $constants->{backup_db_user},
+		db_type	=> 'log_slave',
 		nocache		=> 1,
 	}, {
 		day		=> $yesterday,
@@ -168,7 +168,7 @@ EOT
 	$sdTotalHits = $sdTotalHits + $daily_total;
 	# Need to figure in the main section plus what the handler is.
 	# This doesn't work for the other sites... -Brian
-	my $homepage = $logdb->countDailyByPage('', {
+	my $homepage = $logdb->countDailyByPage('index', {
 		section => 'index',
 		no_op   => $constants->{op_exclude_from_countdaily},
 	});
@@ -187,7 +187,7 @@ EOT
 	$data{total_static} = $total_static;
 	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
 	my $total_secure = $stats->countDailySecure();
-	for my $op (qw|index article search comments palm journal rss page|) {
+	for my $op (qw|index article search comments palm journal rss page users|) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
 		my $pages = $logdb->countDailyByPage($op);
 		my $bytes = $logdb->countBytesByPage($op);
