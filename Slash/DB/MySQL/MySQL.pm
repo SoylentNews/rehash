@@ -596,6 +596,7 @@ my %anonymize = ( ); # gets set inside the function
 sub _convertModsToComments {
 	my($self, @mods) = @_;
 	my $constants = getCurrentStatic();
+	my $mainpage_skid = $constants->{mainpage_skid};
 
 	return { } unless scalar(@mods);
 
@@ -653,6 +654,7 @@ sub _convertModsToComments {
 			$val = $anonymize{$key} if exists $anonymize{$key};
 			$mod_hr->{$key} = $val;
 		}
+		$com_hr->{primaryskid} ||= $mainpage_skid;
 		my $rootdir = $self->getSkin($com_hr->{primaryskid})->{rootdir};
 		if ($mod_hr->{discussions_sid}) {
 			# This is a comment posted to a story discussion, so
@@ -6997,6 +6999,8 @@ sub getStoriesEssentials {
 	$min_stoid = 0 if @$tid > 1 || $tid->[0] != $mp_tid;
 	# If the $limit + $limit_extra + $offset is too large, it's not.
 	$min_stoid = 0 if $limit_overly_large;
+	# If we're in issue mode, nope.
+	$min_stoid = 0 if $issue;
 	# And of course, if we're being asked to calculate a new one,
 	# ignore the old one.
 	$min_stoid = 0 if $return_min_stoid_only;
@@ -8575,6 +8579,9 @@ sub getStoriesData {
 			sort 
 			grep { !exists $retval->{$_} }
 			@$stoids;
+		if (!@stoids_needed) {
+			print STDERR scalar(localtime) . " $$ logic error no stoids_needed, stoids '@$stoids'\n";
+		}
 		$stoid_clause = "stoid IN ("
 			. join(",", @stoids_needed)
 			. ")";
