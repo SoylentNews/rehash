@@ -668,7 +668,6 @@ INSERT INTO users_comments VALUES (3,0,'html',1,4,4096,0,0,0,1,0,100,50,0,0,'thr
 INSERT INTO users_comments VALUES (2,0,'html',1,4,4096,0,0,0,1,0,100,50,0,0,'thread',0);
 INSERT INTO users_comments VALUES (1,0,'html',1,4,4096,0,0,0,1,0,100,50,0,0,'thread',0);
 INSERT INTO users_comments VALUES (6,0,'html',1,4,4096,0,0,0,1,0,100,50,0,0,'thread',0);
-INSERT INTO users_comments VALUES (7,0,'html',1,4,4096,0,0,0,1,0,100,50,0,0,'thread',0);
 
 #
 # Dumping data for table 'users_index'
@@ -681,7 +680,6 @@ INSERT INTO users_index VALUES (-1,'','','','',30,0);
 INSERT INTO users_index VALUES (1,'','','','',30,0);
 INSERT INTO users_index VALUES (5,NULL,NULL,NULL,NULL,30,0);
 INSERT INTO users_index VALUES (6,NULL,NULL,NULL,NULL,30,0);
-INSERT INTO users_index VALUES (7,NULL,NULL,NULL,NULL,30,0);
 
 #
 # Dumping data for table 'users_info'
@@ -694,7 +692,6 @@ INSERT INTO users_info VALUES (3,0,NULL,NULL,0,'0000-00-00',0,0,0,'0000-00-00','
 INSERT INTO users_info VALUES (2,0,NULL,NULL,0,'0000-00-00',0,0,0,'0000-00-00','2000-01-28',0);
 INSERT INTO users_info VALUES (1,0,NULL,NULL,0,'0000-00-00',3,0,4,'0000-00-00','2000-01-25',0);
 INSERT INTO users_info VALUES (6,0,NULL,NULL,0,'0000-00-00',0,0,0,'0000-00-00','2000-01-25',0);
-INSERT INTO users_info VALUES (7,0,NULL,NULL,0,'0000-00-00',0,0,0,'0000-00-00','0000-00-00',0);
 
 #
 # Dumping data for table 'users_key'
@@ -712,7 +709,6 @@ INSERT INTO users_prefs VALUES (3,1,0,'edt',0,0,'');
 INSERT INTO users_prefs VALUES (2,1,0,'edt',0,0,'');
 INSERT INTO users_prefs VALUES (1,1,0,'edt',0,0,'');
 INSERT INTO users_prefs VALUES (6,1,0,'edt',0,0,'');
-INSERT INTO users_prefs VALUES (7,1,0,'edt',0,0,'');
 
 #
 # Dumping data for table 'vars'
