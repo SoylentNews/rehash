@@ -43,7 +43,8 @@ __template__
 [% ELSE %]
 		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
 [% END %]
-		<B>Session Login</B> [% session %]<BR>
+		<B>Cookie expiration</B> [% session %]<BR>
+		<B>Cookie location</B> [% clocation %]<BR>
 [% IF !admin_flag %]
 		[% IF got_oldpass %]
 			<INPUT TYPE="HIDDEN" NAME="oldpass" VALUE="[% form.oldpass | strip_attribute %]">	

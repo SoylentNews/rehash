@@ -71,7 +71,11 @@ __template__
 	<TR>
 		<TD><B>Password:</B> (6-20 characters long)</TD>
 		<TD><INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20">
-		<INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in"></TD>
+		</TD>
+	</TR>
+	<TR>
+		<TD><INPUT TYPE="CHECKBOX" NAME="login_temp" VALUE="yes"> Public Terminal</TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in"></TD>
 	</TR>
 	[% IF msg1 %]
 	<TR>

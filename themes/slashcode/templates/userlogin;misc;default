@@ -20,6 +20,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% FILTER strip_urlattr; return_url ? return_url : "/"; END %]">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="userlogin">
 <INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20"><BR>
+<INPUT TYPE="CHECKBOX" NAME="login_temp" VALUE="yes"> Public Terminal<BR>
 <INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in">
 </FORM>
 

@@ -77,6 +77,7 @@ __template__
 
 	</TD></TR><TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Password' %]</TD><TD>
 		<INPUT TYPE="PASSWORD" NAME="upasswd">
+		<INPUT TYPE="CHECKBOX" NAME="login_temp" VALUE="yes"> Public Terminal
 
 	</TD></TR>
 [% ELSE;

@@ -128,6 +128,9 @@ my %descriptions = (
 	'session_login'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='session_login'") },
 
+	'cookie_location'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='cookie_location'") },
+
 	'sortorder'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='sortorder'") },
 
@@ -1540,7 +1543,7 @@ sub deleteUser {
 ########################################################
 # Get user info from the users table.
 sub getUserAuthenticate {
-	my($self, $uid_try, $passwd, $kind) = @_;
+	my($self, $uid_try, $passwd, $kind, $temp_ok) = @_;
 	my($newpass, $cookpasswd);
 
 	return undef unless $uid_try && $passwd;
@@ -1554,14 +1557,14 @@ sub getUserAuthenticate {
 	my($UID, $PASSWD, $NEWPASSWD) = (0, 1, 2);
 	$kind ||= $EITHER;
 
-	# RECHECK LOGIC!!  -- pudge
-
 	my $uid_try_q = $self->sqlQuote($uid_try);
 	my $uid_verified = 0;
 
 	if ($kind == $LOGTOKEN || $kind == $EITHER) {
 		# get existing logtoken, if exists
-		if ($passwd eq $self->getLogToken($uid_try)) {
+		if ($passwd eq $self->getLogToken($uid_try) || (
+			$temp_ok && $passwd eq $self->getLogToken($uid_try, 0, 1)
+		)) {
 			$uid_verified = $uid_try;
 			$cookpasswd = $passwd;
 		}
@@ -1720,17 +1723,53 @@ sub getNewPasswd {
 }
 
 ########################################################
+# get proper cookie location
+sub _getLogTokenCookieLocation {
+	my($self, $uid) = @_;
+	my $user = getCurrentUser();
+
+	my $temp_str = $user->{state}{login_temp} || 'no';
+
+	my $cookie_location = $temp_str eq 'yes'
+		? 'classbid'
+		: $self->getUser($uid, 'cookie_location');
+	my $locationid = get_ipids('', '', $cookie_location);
+	return($locationid, $temp_str);
+}
+
+########################################################
 # Get a logtoken from the DB, or create a new one
 sub getLogToken {
-	my($self, $uid, $new) = @_;
-	my($ipid, $subnetid, $classbid) = get_ipids();
+	my($self, $uid, $new, $force_temp) = @_;
+
 	my $uid_q = $self->sqlQuote($uid);
+
+	# set the temp value for login_temp, if forced
+	my $user = getCurrentUser();
+	my $temp = $user->{state}{login_temp};
+	$user->{state}{login_temp} = 'yes' if $temp eq 'no' && $force_temp;
+
+	my($locationid, $temp_str) = $self->_getLogTokenCookieLocation($uid);
+
+	my $where = "uid=$uid_q AND " .
+	            "locationid='$locationid' AND " .
+	            "temp='$temp_str'";
+
 	my $value = $self->sqlSelect(
 		'value', 'users_logtokens',
-		"uid=$uid_q AND " .
-		"locationid='$classbid' AND ".
-		"expires >= NOW()"
+		$where . ' AND expires >= NOW()'
 	);
+
+	# reset the temp value for login_temp, if forced
+	$user->{state}{login_temp} = 'no' if $temp eq 'no' && $force_temp && !$value;
+
+	# bump expiration for temp logins
+	if ($value && $temp_str eq 'yes') {
+		my $minutes = getCurrentStatic('login_temp_minutes');
+		$self->sqlUpdate('users_logtokens', {
+			-expires 	=> "DATE_ADD(NOW(), INTERVAL $minutes MINUTE)"
+		}, $where);
+	}
 
 	# if $new, then create a new value if none exists
 	$value ||= $self->setLogToken($uid) if $new;
@@ -1739,22 +1778,31 @@ sub getLogToken {
 }
 
 ########################################################
-# Make a new logtoken, save it in the DB, and return it.
+# Make a new logtoken, save it in the DB, and return it 
 sub setLogToken {
 	my($self, $uid) = @_;
+
 	my $logtoken = createLogToken();
-	my($ipid, $subnetid, $classbid) = get_ipids();
+	my($locationid, $temp_str) = $self->_getLogTokenCookieLocation($uid);
+
+	my $interval = '1 YEAR';
+	if ($temp_str eq 'yes') {
+		my $minutes = getCurrentStatic('login_temp_minutes');
+		$interval = "$minutes MINUTE";
+	}
+
 	$self->sqlReplace('users_logtokens', {
 		uid		=> $uid,
 		value		=> $logtoken,
-		locationid	=> $classbid,
-		-expires 	=> 'DATE_ADD(NOW(), INTERVAL 1 YEAR)'
+		locationid	=> $locationid,
+		temp		=> $temp_str,
+		-expires 	=> "DATE_ADD(NOW(), INTERVAL $interval)"
 	});
 	return $logtoken;
 }
 
 ########################################################
-# Make a new logtoken, save it in the DB, and return it.
+# Delete logtoken(s)
 sub deleteLogToken {
 	my($self, $uid, $all) = @_;
 
@@ -1762,8 +1810,8 @@ sub deleteLogToken {
 	my $where = "uid=$uid_q";
 
 	if (!$all) {
-		my($ipid, $subnetid, $classbid) = get_ipids();
-		$where .= " AND locationid='$classbid'";
+		my($locationid, $temp_str) = $self->_getLogTokenCookieLocation($uid);
+		$where .= " AND locationid='$locationid' AND temp='$temp_str'";
 	}
 
 	$self->sqlDelete('users_logtokens', $where);
@@ -6163,6 +6211,9 @@ sub getSlashConf {
 		   || ($conf{m2_consensus}-1)/2 != int(($conf{m2_consensus}-1)/2);
 	$conf{nick_chars}	||= q{ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*'(),-};
 	$conf{nick_maxlen}	||= 20;
+	$conf{login_temp_minutes} ||= 10;
+	$conf{login_temp_minutes} =~ s/\D//;
+	$conf{login_temp_minutes} = 10 unless length $conf{login_temp_minutes};
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {

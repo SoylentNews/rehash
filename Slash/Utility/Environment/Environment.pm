@@ -1111,6 +1111,9 @@ sub setCookie {
 	# lines, and uncomment the one right above "bake"
 	if (!$val) {
 		$cookie->expires('-1y');  # delete
+	} elsif ($session && $session > 1) {
+		my $minutes = $constants->{login_temp_minutes};
+		$cookie->expires("+${minutes}m");
 	} elsif (!$session) {
 		$cookie->expires('+1y');
 	}
@@ -1349,7 +1352,10 @@ sub prepareUser {
 #========================================================================
 
 sub get_ipids {
-	my($hostip, $no_md5) = @_;
+	my($hostip, $no_md5, $locationid) = @_;
+
+	$locationid = 'classbid' if @_ > 2 && !$locationid;
+
 	if (!$hostip && $ENV{GATEWAY_INTERFACE}) {
 		my $r = Apache->request;
 		$hostip = $r->connection->remote_ip;
@@ -1362,6 +1368,14 @@ sub get_ipids {
 	$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
 	(my $classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
 	$classbid = $no_md5 ? $classbid : md5_hex($classbid);
+
+	if ($locationid) {
+		return $locationid eq 'classbid' ? $classbid
+		     : $locationid eq 'subnetid' ? $subnetid
+		     : $locationid eq 'ipid'     ? $ipid
+		     : '';
+	}
+
 	return($ipid, $subnetid, $classbid);
 }
 

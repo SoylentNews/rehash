@@ -1548,6 +1548,12 @@ sub changePasswd {
 	my $session = $slashdb->getDescriptions('session_login');
 	my $session_select = createSelect('session_login', $session, $user_edit->{session_login}, 1);
 
+	my $clocation = $slashdb->getDescriptions('cookie_location');
+	my @clocation_order = grep { exists $clocation->{$_} } qw(none classbid subnetid ipid);
+	my $clocation_select = createSelect('cookie_location', $clocation,
+		$user_edit->{cookie_location}, 1, 0, \@clocation_order
+	);
+
 	my $got_oldpass = 0;
 	if ($form->{oldpass}) {
 		my $return_uid = $slashdb->getUserAuthenticate($id, $form->{oldpass}, 1);
@@ -1559,6 +1565,7 @@ sub changePasswd {
 		admin_flag		=> $suadmin_flag,
 		title			=> $title,
 		session 		=> $session_select,
+		clocation 		=> $clocation_select,
 		admin_block		=> $admin_block,
 		got_oldpass		=> $got_oldpass
 	});
@@ -2045,16 +2052,10 @@ sub savePasswd {
 	if (! $error_flag) {
 		$user_edits_table->{passwd} = $form->{pass1} if $form->{pass1};
 		$user_edits_table->{session_login} = $form->{session_login};
+		$user_edits_table->{cookie_location} = $form->{cookie_location};
 
 		# changed pass, so delete all logtokens
 		$slashdb->deleteLogToken($form->{uid}, 1);
-
-		# only set cookie if user is current user
-		if ($form->{uid} eq $user->{uid}) {
-			my $value  = $slashdb->getLogToken($form->{uid}, 1);
-			my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($form->{uid}, 1));
-			setCookie('user', $cookie, $user_edits_table->{session_login});
-		}
 
 		if ($user->{admin_clearpass}
 			&& !$user->{state}{admin_clearpass_thisclick}) {
@@ -2070,6 +2071,13 @@ sub savePasswd {
 		$$note .= getMessage('saveuser_passchanged_msg',
 			{ nick => $user_edit->{nickname}, uid => $user_edit->{uid} },
 		0, 1) if $note;
+
+		# only set cookie if user is current user
+		if ($form->{uid} eq $user->{uid}) {
+			my $value  = $slashdb->getLogToken($form->{uid}, 1);
+			my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($form->{uid}, 1));
+			setCookie('user', $cookie, $user_edits_table->{session_login});
+		}
 	}
 
 	return $error_flag;
