@@ -83,9 +83,87 @@ sub create {
 		$self->sqlDo("UPDATE $self->{'_table'} SET reference_count=(reference_count +1) WHERE id = '$found'");
 	} else {
 		$values->{$prime} = $id;
-		$self->sqlInsert($table, $values);
-		# XXX that sqlInsert should be checked for error, and if
-		# it failed, return false
+
+		# if the size of the data is greater than the size of the max
+		# packet MySQL can accept, let's set it higher before saving the
+		# data -- pudge
+
+		my $len = length $values->{data};
+		my $var = 'max_allowed_packet';
+		my $value;
+
+		my $base = 1024**2;  # 1MB
+		if ($len > $base) {
+			$value = $self->sqlGetVar($var);
+			my $needed = $len + $base;
+
+			if ($value < $needed) {
+				return unless $self->sqlSetVar($var, $needed*2);
+				my $check = $self->sqlGetVar($var);
+				if ($check < $needed) {
+					errorLog("Value of $var is $check, should be $needed\n");
+					return undef;
+				}
+
+				# easily turn off for testing
+				my $do_chunk = 1;
+				my($size, $data);
+
+				# chunking will be used here because 1. on old
+				# 3.x client lib, you cannot set the max packet size
+				# larger, and 2. sometimes the MySQL server "goes
+				# away" with a lot of data anyway.  although in such
+				# cases, we have trouble *getting* the data back,
+				# but this is a problem for another day. -- pudge
+				if ($do_chunk) {
+					# smarter?
+					$size = $base >= $value ? $base/2 : $base; 
+					$data = $values->{data};
+					$values->{data} = substr($data, 0, $size, '');
+				}
+
+				$self->sqlInsert($table, $values) or return undef;
+
+				if ($do_chunk) {
+					while (length $data) {
+						my $chunk = $self->sqlQuote(substr($data, 0, $size, ''));
+						my $ok = $self->sqlUpdate($table, {
+								-data => "CONCAT(data, $chunk)"
+							}, $where
+						);
+
+						if (!$ok) { # abort
+							$self->sqlDelete($table, $where);
+							return undef;
+						}
+					}
+				}
+
+				# the new value is only session-specific anyway,
+				# but set it back for good measure
+				$self->sqlSetVar($var, $value);
+
+			} else {
+				undef $value;
+			}
+		}
+
+		# true $value means we already saved the data
+		unless ($value) {
+			$self->sqlInsert($table, $values) or return undef;
+		}
+
+		# verify we saved what we think we did
+		# (note: even when we cannot retrieve all the data we saved,
+		# the MD5() check still works, so the data is all there; maybe
+		# some other MySQL setting about getting large amounts of data
+		# is giving us problems in the tests -- pudge
+		my $md5 = $self->sqlSelect('MD5(data)', $table, $where);
+		unless ($md5 eq $id) {
+			errorLog("md5:$md5 != id:$id\n");
+			$self->sqlDelete($table, $where);
+			return undef;
+		}
 	}
 
 	return $found || $id ;
@@ -150,9 +228,8 @@ sub createFileForStory {
 		data		=> $values->{data},
 	};
 
-	my $id = $self->create($content);
-	# XXX that $id should be checked for errors, and if it is false,
-	# this method should return false as well
+	my $id = $self->create($content) or return undef;
+
 	my $content_type = $self->get($id, 'content_type');
 
 	my $file_content = {

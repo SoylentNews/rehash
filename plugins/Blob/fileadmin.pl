@@ -106,7 +106,7 @@ sub addFileForStory {
 				local $/;
 				$data = <$fh>;
 			}
-			$form->{file_content} =~ s|^.+?([^/:\\]+)$|$1|;
+			$form->{file_content} =~ s|^.*?([^/:\\]+)$|$1|;
 		}
 
 		my $content = {
@@ -118,10 +118,13 @@ sub addFileForStory {
 			description	=> $form->{description},
 		};
 
-		$blobdb->createFileForStory($content);
-		# XXX The above method should have its return code checked;
-		# if false, we should emit an error string (to STDOUT,
-		# since header() is already called)
+		unless ($blobdb->createFileForStory($content)) {
+			print "<p><b>File not saved, check logs for errors</b><br>";
+			printf "Filename: %s, description: %s, data size: %dK</p>",
+				strip_literal($form->{file_content}),
+				strip_literal($form->{description}),
+				length($data) / 1024;
+		}
 	}
 
 	if ($form->{delete}) {
