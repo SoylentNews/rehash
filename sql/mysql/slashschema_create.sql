@@ -892,7 +892,7 @@ CREATE TABLE templates (
 DROP TABLE IF EXISTS topics;
 CREATE TABLE topics (
 	tid smallint UNSIGNED NOT NULL auto_increment,
-	parent_topic smallint UNSIGNED,
+	parent_topic smallint UNSIGNED DEFAULT 0 NOT NULL,
 	name char(20) NOT NULL,
 	image varchar(100),
 	alttext char(40),
