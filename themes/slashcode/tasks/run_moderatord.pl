@@ -90,7 +90,7 @@ sub give_out_points {
 
 	moderatordLog(getData('moderatord_log_header'));
 
-	my $backup_db = getObject('Slash::DB', 'reader');
+	my $backup_db = getObject('Slash::DB', { db_type => 'reader' });
 	my $log_db = getObject('Slash::DB', 'log_slave');
 
 	my $newcomments = get_num_new_comments($constants, $slashdb);
