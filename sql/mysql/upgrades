@@ -1804,8 +1804,8 @@ ALTER TABLE journals CHANGE COLUMN tid tid SMALLINT UNSIGNED NOT NULL;
 # plugins/Events (ignore if not using that plugin)
 ALTER TABLE event_dates CHANGE COLUMN sid sid varchar(16) NOT NULL DEFAULT '', ADD INDEX sid (sid);
 
-# USEPERL LAST UPDATED HERE
-
-
+# should be '1' for Slashdot ....
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset','0','Convert high-bit characters to character references, which are then filtered by approveCharrefs or encode_html_amp (works only with Latin-1 for now)');
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset_convert','0','Convert some of high-bit chars to ASCII representations instead (see draconian_charset)');
+
+# USEPERL LAST UPDATED HERE
