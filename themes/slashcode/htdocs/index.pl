@@ -60,7 +60,7 @@ sub main {
 
 	eval $execme;
 
-	print "\n<H1>Error:$@</H1>\n" if $@;
+	print "\n<H1>Error in 'index' block: $@</H1>\n" if $@;
 
 	footer();
 

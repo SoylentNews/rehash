@@ -70,7 +70,54 @@ slash-1.0.6, 2000.06.xx
 	on fast servers will cause a huge load on MySQL which then
 	flakes out the httpds. Will be analysing this to see if a
 	solution can be found.
-	
+
+*	More counts added for M2, now in addition to counting the number of
+	times a user is voted fair or unfair, we also count the times a user VOTES
+	fair or unfair. The last pair of numbers can be used to determine if 
+	your Slash metamoderation system is being abused. (This adds 2 new columns
+	to users_info: m2fairvotes and m2unfairvotes)
+
+*	Changes to the moderation system, these can be summed up by 
+	describing the following new variables added to slashdotrc.pl:
+
+		m2_maxunfair: Float from 0 to 1. This number determines the percentage
+                      of unfair votes that indicates abuse. The user performing
+                      M2 will quietly be assessed a karma penalty and their 
+                      votes will be ignored if their percentage of unfair
+                      votes equals or exceeds this value.
+					
+		m2_toomanyunfair: Float from 0 to 1. This number determines the
+                          percentage of unfair votes that indicates POSSIBLE
+                          abuse of the system. If the percentage of unfair
+                          votes exceeds this value then these votes are
+                          ignored. No penalty is assessed.
+
+		m2_mincheck: Integer. Number of comments which have to be voted on
+                     before the above checks are performed.
+
+		m2_comments: Number of comment moderations to be displayed in a single
+                     M2 session.
+
+		m2_bonus: Amount of karma to be awarded upon completion of M2.
+
+		m2_penalty: Amount of karma to be subtracted if M2 is abused.
+
+		m2_maxbonus: Karma maximum from M2. If a user's karma exceeds this
+                     value, then said user receives no further bonus
+                     for his participation.
+
+*	Added the 'flag' column in metamodlog. This indicates how an M2 session 
+	was treated and is a good way to check for possible M2 problems. Currently
+	flag can be the following values:
+        0 - No detected problems with M2.
+        1 - Questionable M2. Votes ignored.
+        2 - Abuse of M2. Votes ignored and UID penalized.
+
+*	Renamed slashdotrc.pl variables:
+        'goodkarma_limit' is now 'goodkarma'
+        'badkarma_limit' is now 'badkarma'
+
+*	User's ID (UID) added to comment headers.
 
 
 slash-1.0.5, 2000.06.13

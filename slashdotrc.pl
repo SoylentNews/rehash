@@ -74,11 +74,16 @@ my %my_conf = (
 
 # The following variables can be used to tweak your Slash Moderation
 	authors_unlimited	=> 1,   # authors have unlimited moderation
+	m2_comments	=> 10,		# Number of comments for meta-moderation.
+	m2_maxunfair	=> 0.5,		# Minimum % of unfairs for M2 penalty.
+	m2_toomanyunfair => 0.3,	# Minimum % of unfairs for which M2 is ignored.
+	m2_bonus	=> '+1', 	# Bonus for participating in meta-moderation.
+	m2_penalty	=> '-1',	# Penalty for misuse of meta-moderation.
 	comment_minscore	=> -1,	# Minimum score for a specific comment.
 	comment_maxscore	=> 5,	# Maximum score for a specific comment.
-	goodkarma_limit		=> 25,	# Users get bonus points for posts if karma above this value
-	badkarma_limit		=> -10,	# Users get penalized for posts if karma is below this value
-	metamod_sum		=> 3,   # sum of moderations 1 for release
+	goodkarma		=> 25,	# Users get bonus points for posts if karma above this value
+	badkarma		=> -10,	# Users get penalized for posts if karma is below this value
+	metamod_sum		=> 3,   # sum of moderations 1 for release (deprecated)
 	maxtokens		=> 40,	# Token threshold that must be hit to get any points
 	tokensperpoint		=> 8,	# Number of tokens per point
 	maxpoints		=> 5,	# The maximum number of points any moderator can have
@@ -135,6 +140,8 @@ $my_conf{basedir}	= $my_conf{datadir} . "/public_html";
 $my_conf{imagedir}	= "$my_conf{rootdir}/images";
 $my_conf{rdfimg}	= "$my_conf{imagedir}/topics/topicslash.gif";
 $my_conf{cookiepath}	= URI->new($my_conf{rootdir})->path . '/';
+$my_conf{m2_mincheck} 	= int $my_conf{m2_comments} / 3;
+$my_conf{m2_maxbonus}   = int $my_conf{m2_goodkarma} / 2;
 
 # who to send daily stats reports to (email => subject)
 $my_conf{stats_reports} = {

@@ -319,7 +319,7 @@ EOT
 
 	my $checked = $I{F}{nobonus} ? ' CHECKED' : '';
 	print qq!\t\t<INPUT TYPE="CHECKBOX"$checked NAME="nobonus"> No Score +1 Bonus\n!
-		if $I{U}{karma} > 25 and $I{U}{uid} > 0;
+		if $I{U}{karma} > $I{goodkarma} and $I{U}{uid} > 0;
 
         if ($I{allow_anonymous}) {
 	    $checked = $I{F}{postanon} ? ' CHECKED' : '';
@@ -650,8 +650,8 @@ sub submitComment {
 
 	if($I{U}{uid} > 0 && !$I{F}{postanon} ) {
 		$pts = $I{U}{defaultpoints};
-		$pts-- if $I{U}{karma} < $I{badkarma_limit};
-		$pts++ if $I{U}{karma} > $I{goodkarma_limit} and !$I{F}{nobonus};
+		$pts-- if $I{U}{karma} < $I{badkarma};
+		$pts++ if $I{U}{karma} > $I{goodkarma} and !$I{F}{nobonus};
 		# Enforce proper ranges on comment points.
 		$pts = $I{comment_minscore} if $pts < $I{comment_minscore};
 		$pts = $I{comment_maxscore} if $pts > $I{comment_maxscore};

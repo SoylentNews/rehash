@@ -843,7 +843,7 @@ EOT
 
 		if (@available_images) {
 			print qq|<SELECT name="image">|;
-			qq|<OPTION value="">Select an image</OPTION>| if $I{F}{topicnew};
+			print qq|<OPTION value="">Select an image</OPTION>| if $I{F}{topicnew};
 			for(@available_images) {
 				my ($selected);
 				$selected = "SELECTED" if ($_ eq $image);

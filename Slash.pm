@@ -1382,6 +1382,9 @@ sub fixint {
 	return $int;
 }
 
+########################################################
+	
+
 ###############################################################################
 # Look and Feel Functions Follow this Point
 
@@ -1723,22 +1726,24 @@ sub selectComments {
 		$C->{pid} = 0 if $I{U}{commentsort} > 3; # Ignore Threads
 
 		$C->{points}++ if length($C->{comment}) > $I{U}{clbig}
-			&& $C->{points} < 5 && $I{U}{clbig} != 0;
+			&& $C->{points} < $I{comment_maxscore} && $I{U}{clbig} != 0;
 
 		$C->{points}-- if length($C->{comment}) < $I{U}{clsmall}
-			&& $C->{points} > -1 && $I{U}{clsmall};
+			&& $C->{points} > $I{comment_minscore} && $I{U}{clsmall};
 
 		# fix points in case they are out of bounds
-		$C->{points} = $C->{points} < -1 ? -1 : $C->{points} > 5 ? 5 : $C->{points};
+		$C->{points} = $I{comment_minscore}
+			if $C->{points} < $I{comment_minscore};
+		$C->{points} = $I{comment_maxscore}
+			if $C->{points} > $I{comment_maxscore};
 
 		my $tmpkids = $comments->[$C->{cid}]{kids};
 		my $tmpvkids = $comments->[$C->{cid}]{visiblekids};
 		$comments->[$C->{cid}] = $C;
 		$comments->[$C->{cid}]{kids} = $tmpkids;
 		$comments->[$C->{cid}]{visiblekids} = $tmpvkids;
-
 		push @{$comments->[$C->{pid}]{kids}}, $C->{cid};
-		$comments->[0]{totals}[$C->{points} + 1]++;
+		$comments->[0]{totals}[$C->{points} + -($I{comment_minscore})]++;
 		$comments->[$C->{pid}]{visiblekids}++
 			if $C->{points} >= $I{U}{threshold};
 
@@ -1846,7 +1851,7 @@ sub selectThreshold  {
 	my($counts) = @_;
 
 	my $s = qq!<SELECT NAME="threshold">\n!;
-	foreach my $x (-1..5) {
+	foreach my $x ($I{comment_minscore}..$I{comment_maxscore}) {
 		my $select = ' SELECTED' if $x == $I{U}{threshold};
 		$s .= qq!\t<OPTION VALUE="$x"$select>$x: $counts->[$x+1] comments\n!;
 	}
@@ -2207,7 +2212,7 @@ sub displayThread {
 		print qq!\n<TR><TD BGCOLOR="$I{bg}[2]">\n! if $cagedkids;
 		print qq!<LI><FONT SIZE="${\( $I{fontbase} + 2 )}"><B> !,
 			linkComment({
-				sid => $sid, threshold => -1, pid => $pid,
+				sid => $sid, threshold => $I{comment_minscore}, pid => $pid,
 				subject => "$hidden repl" . ($hidden > 1 ? 'ies' : 'y')
 			}) . ' beneath your current threshold.</B></FONT>';
 		print "\n\t</TD></TR>\n" if $cagedkids;
@@ -2228,8 +2233,8 @@ sub dispComment  {
 EOT
 
 	(my $nickname  = $C->{nickname}) =~ s/ /+/g;
-	my $userinfo = <<EOT unless $C->{nickname} eq $I{anon_name};
-(<A HREF="$I{rootdir}/users.pl?op=userinfo&nick=$nickname">User Info</A>)
+	my $userinfo = <<EOT if $C->{uid} > 0;
+(<A HREF="$I{rootdir}/users.pl?op=userinfo&nick=$nickname">User #$C->{uid} Info</A>)
 EOT
 
 	my $userurl = qq!<A HREF="$C->{homepage}">$C->{homepage}</A><BR>!
