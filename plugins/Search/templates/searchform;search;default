@@ -13,7 +13,7 @@ en_US
 __name__
 searchform
 __template__
-<table width="100%" cellpadding="3" cellspacing="0" border="0"><tr><td bgcolor="[% user.colors.bg_2 %]">
+<table width="100%" cellpadding="3" cellspacing="0" border="0"><tr><td>
 
 [% IF tref.image %]
 	<IMG SRC="[% constants.imagedir %]/topics/[% tref.image %]"
@@ -24,6 +24,7 @@ __template__
 
 <FORM ACTION="[% gSkin.rootdir %]/search.pl" METHOD="GET">
 	<br>
+	<input type="hidden" name="tid" value="[% form.tid %]">
 	<INPUT TYPE="TEXT" SIZE="40" NAME="query" VALUE="[% form.query %]">
 	[% IF authors %]
 		[% Slash.createSelect("author", authors, form.author, 1, 0, 1) %]
@@ -81,41 +82,32 @@ __template__
 	<P>
 </FORM>
 
-</td></tr><tr><td bgcolor="[% user.colors.bg_2 %]">
+</td></tr><tr><td>
 [%
-   skins = Slash.db.getSkins;
-   this_skin = 0;
-   IF form.tid;
-      this_skin = Slash.db.getSkidFromNexus(form.tid) || 0;
-   END;
+   topics = Slash.db.getTopicTree();
 
    listnames = {};
-   IF this_skin;
-      topics = Slash.db.getTopicTree();
+   IF form.tid;
       topic_children = Slash.db.getAllChildrenTids(form.tid);
-      FOREACH t = topic_children;
-         listnames.${topics.$t.textname} = t;
-      END;
-   
    ELSE;
-      FOREACH s = skins.keys;
-         skinname = skins.$s.name;
-         NEXT IF s == constants.mainpage_skid || skinname == "tacohell" || skinname == "radio" || skinname == "features" || skinname == "awards" || skinname == "polls" || skinname == "search";
-         listnames.${skins.$s.title} = skins.$s.nexus;
-      END;
+      topic_children = topics.${constants.mainpage_nexus_tid}.children;
    END;
 
+   FOREACH t = topic_children;
+      listnames.${topics.$t.textname} = t;
+   END;
+   
    listcount = listnames.size / 3;
    listex = listnames.size mod 3;
    i = 0;
 %]
 <b><a href="[% gSkin.rootdir %]/search.pl">[% constants.sitename %]</a>
-[% IF this_skin %]
-:: <a href="[% gSkin.rootdir %]/search.pl?tid=[% form.tid %]">[% skins.${this_skin}.title %]</a>
+[% IF form.tid %]
+:: <a href="[% gSkin.rootdir %]/search.pl?tid=[% form.tid %]">[% topics.${form.tid}.textname %]</a>
 [% END; IF listnames.size %]
 Topics</b>
 [% END %]
-</td></tr><tr><td bgcolor="[% user.colors.bg_2 %]">
+</td></tr><tr><td>
 
 [% IF listnames.size %]
 <table cellpadding="10" width="100%">
