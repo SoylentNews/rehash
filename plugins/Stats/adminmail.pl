@@ -443,6 +443,7 @@ sub getM2Text {
 	my $width_histo = $width-$prefix_len;
 	$width_histo = 5 if $width_histo < 5;
 	my $mult = $width_histo/$max_day_count;
+	$mult = 1 if $mult > 1;
 	my $per = sprintf("%.0f", 1/$mult);
 	my $text = "Moderations and their M2 counts (each char represents $per mods):\n";
 
