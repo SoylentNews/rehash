@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2004 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
 # Slash::Email - web script
 # 
 # Email a Slash site story to a friend!
-# (c) OSDN 2002
+# (c) OSTG 2002
 
 use strict;
 use Slash 2.003;	# require Slash 2.3.x

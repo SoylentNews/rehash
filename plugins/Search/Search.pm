@@ -1,5 +1,5 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2004 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -200,7 +200,7 @@ sub findStory {
 	# one select to pull out *all* sids with the topic(s) in question,
 	# and then not join on story_topics, just use a "sid IN" clause.
 	# The problem is that, for large topics, this may be very many sids;
-	# on OSDN sites, we're seeing some topics with 4,000 to 13,000
+	# on OSTG sites, we're seeing some topics with 4,000 to 13,000
 	# stories in them.  That makes the SELECT too large to be efficient.
 	# So I'm fixing this in a not very good way:  limiting the number
 	# of stories we search, on any search that includes a topic

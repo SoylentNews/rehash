@@ -1,5 +1,5 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2004 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -36,7 +36,7 @@ sub handler {
 	my $reader_user = $slashdb->getDB('reader');
 
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
-	$reader->sqlConnect();
+	$reader->sqlConnect;
 
 	my $is_rss = $r->uri =~ m{(
 		\.(?:xml|rss|rdf)$
@@ -47,12 +47,11 @@ sub handler {
 	my $is_palm = $r->uri =~ /^\/palm/;
 
 	# check for ban
-	my $banlist = $reader->getBanList();
+	my $banlist = $reader->getBanList;
 	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
 		# Send a special "you are banned" page if the user is
 		# hitting RSS.
-print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . $r->uri . " returning FORBIDDEN for ipid '$banlist->{$cur_ipid}'\n";
-		return _send_rss($r, 'ban') if $is_rss;
+		return _send_rss($r, 'ban', $cur_ipid) if $is_rss;
 		# Send our usual "you are banned" page, whether the user
 		# is on palm or not.  It's mostly text so palm users
 		# should not have a problem with it.
@@ -66,13 +65,13 @@ print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . 
 	}
 
 	# check for RSS abuse
-	my $rsslist = $reader->getNorssList();
+	my $rsslist = $reader->getNorssList;
 	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnet})) {
 		return _send_rss($r, 'abuse', $cur_ipid);
 	}
 
 	# check for Palm abuse
-	my $palmlist = $reader->getNopalmList();
+	my $palmlist = $reader->getNopalmList;
 	if ($is_palm && ($palmlist->{$cur_ipid} || $palmlist->{$cur_subnet})) {
 		$r->custom_response(FORBIDDEN,
 			slashDisplay('bannedtext_palm',
@@ -108,7 +107,7 @@ sub _get_rss_msg {
 	$type ||= 'abuse';
 	$ipid ||= '(unknown)';
 
-	return $RSS{$type} if exists $RSS{$type};
+	return $RSS{$type}{$ipid} if exists $RSS{$type}{$ipid};
 
 	# template puts data in $items
 	my $items = [];
@@ -118,7 +117,7 @@ sub _get_rss_msg {
 		ipid	=> $ipid,
 	}, { Return => 1 });
 
-	return $RSS{$type} = xmlDisplay(rss => {
+	return $RSS{$type}{$ipid} = xmlDisplay(rss => {
 		rdfitemdesc	=> 1,
 		items		=> $items,
 	}, { Return => 1 } );

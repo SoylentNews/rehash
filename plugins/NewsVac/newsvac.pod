@@ -149,7 +149,7 @@ Miners take URLs assigned to them and mine them, looking for stories, and creati
 
 =head2 Nuggets
 
-Nuggets are special URLs that contain the URL, title, slug, and source of a mined URL.  The source is where the data came from (such as "OSDN"); the slug is some additional text apart from the title (like introtext).
+Nuggets are special URLs that contain the URL, title, slug, and source of a mined URL.  The source is where the data came from (such as "OSTG"); the slug is some additional text apart from the title (like introtext).
 
 
 =head2 Parsers
@@ -303,6 +303,9 @@ Consider adding a counter to the URLs in the database, so we can see if a URL ha
 =head1 CHANGES
 
   $Log$
+  Revision 1.8  2005/03/11 19:58:11  pudge
+  Update 2005, OSTG, etc.
+
   Revision 1.7  2002/10/21 15:11:35  pudge
   Digest in base64 not handled properly (was 16 chars, needed to be 22); screw it, go to hex, and increase column to 32.
 
@@ -335,7 +338,7 @@ Consider adding a counter to the URLs in the database, so we can see if a URL ha
 
 =head1 AUTHOR
 
-This document is being maintained by Chris Nandor E<lt>pudge@osdn.comE<gt>, with aid from Jamie McCarthy, Cliff Wood, Brian Aker, and Robin Miller.
+This document is being maintained by Chris Nandor E<lt>pudge@ostg.comE<gt>, with aid from Jamie McCarthy, Cliff Wood, Brian Aker, and Robin Miller.
 
 
 =head1 VERSION
