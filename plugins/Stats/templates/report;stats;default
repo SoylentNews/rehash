@@ -166,6 +166,10 @@ youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% st
 </PRE>
 
 [%
+   PROCESS make_graph gtitle => 'Scores',
+      type  => 'areastackedindex',
+      stats => ['comments_score_5', 'comments_score_4', 'comments_score_3', 'comments_score_2', 'comments_score_1', 'comments_score_0', 'comments_score_-1'];
+
    END;
 
    CASE 'subscribe';
