@@ -1064,9 +1064,8 @@ sub editStory {
 
 	my($sid, $storylinks);
 	# Added validation of sid -Brian
-	if ($form->{op} eq 'edit') {
-		$sid = $slashdb->getStory($form->{sid}, 'sid')
-			if ($form->{sid});
+	if ($form->{op} eq 'edit' && $form->{sid}) {
+		$sid = $slashdb->getStory($form->{sid}, 'sid');
 	}
 	# Basically, we upload the bodytext if we realize a name has been passed in -Brian
 	if ($form->{bodytext_file}) {
@@ -1092,7 +1091,7 @@ sub editStory {
 		('','','','');
 	my($multi_topics, $story_topics);
 	my $page = 'index';
-	my $section = $user->{section} ? $user->{section} : $form->{section};
+	my $section = $user->{section} || $form->{section};
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
@@ -1183,7 +1182,6 @@ sub editStory {
 		$subid = $storyref->{subid};
 
 	} else { # New Story
-		my $section = $user->{section} || $form->{section};
 		my $SECT = $slashdb->getSection($section || $constants->{defaultsection});
 		$extracolumns		    = $slashdb->getSectionExtras($SECT->{section}) || [ ];
 		$storyref->{displaystatus}  = $SECT->{defaultdisplaystatus};
