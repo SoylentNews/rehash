@@ -349,7 +349,7 @@ EOT
 	my $total_secure = $logdb->countDailySecure();
 
 	for my $op (@PAGES) {
-		my $summary = $logdb->getSummaryStats({ op => $op, no_op => $constants->{op_exclude_from_countdaily} });
+		my $summary = $logdb->getSummaryStats({ op => $op });
 		my $uniq  = $summary->{cnt};
 		my $pages = $summary->{pages};
 		my $bytes = $summary->{bytes};
@@ -424,7 +424,7 @@ EOT
 	for my $skid (sort keys %$skins) {
 		my $temp = {};
 		$temp->{skin_name} = $skins->{$skid};
-		my $summary = $logdb->getSummaryStats({ skid => $skid });
+		my $summary = $logdb->getSummaryStats({ skid => $skid, no_op => $constants->{op_exclude_from_countdaily} });
 		my $uniq = $summary->{cnt}	|| 0;
 		my $pages = $summary->{pages}	|| 0;
 		my $bytes = $summary->{bytes}	|| 0;

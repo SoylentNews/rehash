@@ -920,7 +920,7 @@ sub countCommentsDaily {
 
 
 sub getSummaryStats {
-	my ($self, $options);
+	my ($self, $options) = @_;
 	my @where;
 	
 	my $no_op = $options->{no_op} || [ ];
@@ -930,11 +930,11 @@ sub getSummaryStats {
 		push @where,  "op NOT IN ($op_not_in)";
 	}
 
-	push @where, "op = ".$self->sqlSqlQuote($options->{op}) if $options->{op};
-	push @where, "skid = ".$self->sqlSqlQuote($options->{skid}) if $options->{skid};
+	push @where, "op = ".$self->sqlQuote($options->{op}) if $options->{op};
+	push @where, "skid = ".$self->sqlQuote($options->{skid}) if $options->{skid};
 
 	my $where = join ' AND ', @where;
-	$self->sqlSelectHashrf("COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) as uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp", $where);
+	$self->sqlSelectHashref("COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) as uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp", $where);
 }
 
 
