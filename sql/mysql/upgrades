@@ -2284,6 +2284,8 @@ INSERT INTO vars (name, value, description) VALUES ('m2_wait_hours','12','Number
 
 UPDATE menus SET value='[% constants.rootdir %]/my/password' WHERE menu='users' AND label='Password';
 
+### everyone should run install-plugin to install the Login theme
+
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_152, Start of T_2_3_0_153 - 2004/05/04

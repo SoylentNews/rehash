@@ -256,6 +256,7 @@ misc=misc/spamarmors
 plugin=Admin
 plugin=FAQ
 plugin=Journal
+plugin=Login
 plugin=Hof
 plugin=Messages
 plugin=PollBooth
