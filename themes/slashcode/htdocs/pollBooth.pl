@@ -40,11 +40,6 @@ sub main {
 
 	header("$I{sitename} Poll", $I{F}{section});
 
-	if ($I{F}{qid} eq "gradschool") {
-		footer();
-		return;
-	}
-
 	if ($I{U}{aseclev} > 99) { 
 		print qq!<FONT SIZE="2">[ <A HREF="$ENV{SCRIPT_NAME}?op=edit">New Poll</A> ]!;
 	}
