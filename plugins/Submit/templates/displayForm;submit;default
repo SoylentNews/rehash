@@ -80,9 +80,14 @@ reject the story.</P>
 We get many submissions each day, and if yours isn't clear, it will
 be deleted.)</FONT>
 
-[% PROCESS formLabel value => "Section and Topic", comment => "" %]
-
-[% Slash.createSelect('primaryskid', skin_values, form.primaryskid, 1, 0, 1) %]
+[% section_topic_title = constants.submission_force_default ? "Topic" : "Section and Topic" %]
+[% PROCESS formLabel value => section_topic_title, comment => "" %]
+[% primaryskid_val = form.primaryskid.defined ? form.primaryskid : constants.submission_default_skid %]
+[% IF constants.submission_force_default %]
+	<INPUT TYPE="HIDDEN" NAME="primaryskid" value="[% constants.submission_default_skid %]">
+[% ELSE %]
+	[% Slash.createSelect('primaryskid', skin_values, primaryskid,_val 1, 0, 1) %]
+[% END %]
 [% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
 
 <BR><FONT SIZE="2">(In general, submit to [% skins.${constants.mainpage_skid}.title || 'the main section' %])</FONT>

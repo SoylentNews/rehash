@@ -441,8 +441,8 @@ sub displayForm {
 		$topic_values = $current_hash;
 	}
 
-	$form->{primaryskid} ||= 0;
-	unless ($form->{tid}) {
+	$form->{primaryskid} ||= $constants->{submission_default_skid} || 0;
+	unless ($form->{primaryskid}) {
 		my $current_hash = { %$skin_values };
 		$current_hash->{0} = "Select Section";
 		$skin_values = $current_hash;
@@ -459,7 +459,7 @@ sub displayForm {
 		$fakeemail = strip_attribute($user->{fakeemail});
 	}
 
-	my $nexus_id = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
+	my $nexus_id = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{submission_default_skid} || $constants->{mainpage_skid});
 
 	my $extracolumns = $slashdb->getNexusExtras($nexus_id) || [ ];
 
@@ -491,7 +491,6 @@ sub displayForm {
 		skins		=> $skins,
 	});
 }
-
 #################################################################
 sub saveSub {
 	my($constants, $slashdb, $user, $form) = @_;
