@@ -764,6 +764,8 @@ sub getMetamodsForUserRaw {
 	my $consensus = $constants->{m2_consensus};
 	my $waitpow = $constants->{m2_consensus_waitpow} || 1;
 
+	my $if_smoother = $constants->{m2_if_smoother} || 5;	
+
 	my $days_back = $constants->{archive_delay_mod};
 	my $days_back_cushion = int($days_back/10);
 	$days_back_cushion = $constants->{m2_min_daysbackcushion} || 2
@@ -861,7 +863,7 @@ EOT
 		$mod_hr = $reader->sqlSelectAllHashref(
 			"id",
 			"id, cid,
-			 m2count + m2needed * $if_expr + RAND() AS rank",
+			 (m2count/m2needed) * $if_smoother + $if_smoother * $if_expr + RAND() AS rank",
 			"moderatorlog",
 			"uid != $uid_q AND cuid != $uid_q
 			 AND m2status=0
@@ -1080,6 +1082,36 @@ sub getMetamodsForMods {
 	}
 	return $mods_to_m2s;
 }
+########################################################
+
+sub getMetamodlogForUser {
+	my ($self, $uid, $limit) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	my $limit_clause = $limit ? " LIMIT $limit" : "";
+	my $m2s = $self->sqlSelectAllHashrefArray(
+			"metamodlog.id, metamodlog.mmid, metamodlog.ts, metamodlog.val, metamodlog.active, 
+			 comments.subject, comments.cid, comments.sid,  
+			 moderatorlog.m2status, moderatorlog.reason, moderatorlog.val as modval",
+			"metamodlog, moderatorlog, comments",
+			"metamodlog.mmid = moderatorlog.id AND comments.cid = moderatorlog.cid AND metamodlog.uid = $uid_q ",
+			"GROUP BY moderatorlog.cid, moderatorlog.reason ORDER BY moderatorlog.ts desc"
+		  );
+	my @m2_ids;
+	foreach my $m (@$m2s) {
+		push @m2_ids, $m->{mmid};	
+	}
+	
+	my $m2_fair = $self->getMetamodCountsForModsByType("fair", \@m2_ids);
+	my $m2_unfair = $self->getMetamodCountsForModsByType("unfair", \@m2_ids);
+
+	foreach my $m (@$m2s) {
+		$m->{m2fair}   = $m2_fair->{$m->{mmid}}{count} || 0;
+		$m->{m2unfair} = $m2_unfair->{$m->{mmid}}->{count} || 0;
+	}
+	
+	return $m2s;
+}
+
 
 ########################################################
 sub getModeratorLogID {
@@ -5716,12 +5748,13 @@ sub setCommentForMod {
 	$hr->{points_after} = $hr->{points_before} + $val;
 
 	my $karma_val;
+	my $karma_change = $reasons->{$newreason}{karma};
 	if (!$constants->{mod_down_karmacoststyle}) {
-		$karma_val = $val;
+		$karma_val = $karma_change;
 	} elsif ($val < 0) {
-		$karma_val = ($hr->{points_before}+$val) - $hr->{points_max};
+		$karma_val = ($hr->{points_before}+$karma_change) - $hr->{points_max};
 	} else {
-		$karma_val = $val;
+		$karma_val = $karma_change;
 	}
 	
 	if ($karma_val < 0
@@ -6465,6 +6498,24 @@ sub calcModval {
 	$modval;
 }
 
+sub getNetIDKarma {
+	my ($self, $type, $id ) = @_;
+	my ($count, $karma);
+	if ($type eq "ipid") {
+		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","ipid='$id'");
+		return wantarray ? ($karma, $count) : $karma;
+	} elsif ($type eq "subnetid") {
+		 ($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","subnetid='$id'");
+		return wantarray ? ($karma, $count) : $karma;
+	} else {
+		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","ipid='$id'");
+		return wantarray ? ($karma, $count) : $karma if $count;
+
+		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","subnetid='$id'");
+		return wantarray ? ($karma, $count) : $karma;
+	}
+}
+
 ########################################################
 ########################################################
 # (And now a word from CmdrTaco)
@@ -6900,6 +6951,7 @@ sub getSlashConf {
 		stats_sfnet_groupids =>		[ 4421 ],
 		submit_categories =>		[ ],
 		sections_recenttopics =>        [ ],
+		subnet_karma_post_limit_range => [ ]
 	);
 	my %conf_fixup_hashes = (
 		# var name			# default hash of keys/values
