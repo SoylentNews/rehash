@@ -682,6 +682,7 @@ INSERT INTO vars (name, value, description) VALUES ('content_type_webpage','text
 INSERT INTO vars (name, value, description) VALUES ('cookiedomain','','Domain for cookie to be active (normally leave blank)');
 INSERT INTO vars (name, value, description) VALUES ('cookiepath','/','Path on server for cookie to be active');
 INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the secure flag in cookies if SSL is on?');
+INSERT INTO vars (name, value, description) VALUES ('counthits_lastmaxid','1','Last accesslog id scanned by counthits task');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
 INSERT INTO vars (name, value, description) VALUES ('daily_attime','00:00:00','Time of day to run dailyStuff (in TZ daily_tz; 00:00:00-23:59:59)');
 INSERT INTO vars (name, value, description) VALUES ('daily_last','2000-01-01 01:01:01','Last time dailyStuff was run (GMT)');
