@@ -305,7 +305,7 @@ sub check {
 
 	_printHead("mainhead");
 	if ($form->{uid}) {
-		if ($zoo->count() > $constants->{people_max}) {
+		if ($zoo->count($form->{uid}) > $constants->{people_max}) {
 			print getData("over_socialized");
 			return 0;
 		}
