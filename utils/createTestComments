@@ -48,6 +48,7 @@ usage('Invalid number of comments')
 	if $opts{num_comments} !~ /^\d+$/ || $opts{num_comments} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 $werder = new Silly::Werder;

@@ -37,6 +37,7 @@ usage('Invalid number of users')
 	if $opts{num_users} !~ /^\d+$/ || $opts{num_users} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 $werder = new Silly::Werder;

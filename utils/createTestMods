@@ -41,6 +41,7 @@ usage('Invalid number of moderations')
 	if $opts{num_mods} !~ /^\d+$/ || $opts{num_mods} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 

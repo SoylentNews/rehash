@@ -29,6 +29,7 @@ usage('Invalid number of meta-moderations')
 	if $opts{num_closed} !~ /^\d+$/ || $opts{num_mods} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 my $reasons = $slashdb->getReasons();

@@ -39,6 +39,7 @@ usage('Invalid number of submissions')
 	if $opts{num_subs} !~ /^\d+$/ || $opts{num_subs} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $werder = new Silly::Werder;
 $werder->set_syllables_num(2, 6);
