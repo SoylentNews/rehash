@@ -110,9 +110,9 @@ EOT
 		my $people = $stats->countDailyMessagesByUID($_, $yesterday);
 		my $uses = $stats->countDailyMessagesByCode($_, $yesterday);
 		my $mode = $stats->countDailyMessagesByMode($_, $yesterday);
-		$temp{"people"}  = sprintf("%8d", $people);
-		$temp{"uses"} = sprintf("%8d", $uses);
-		$temp{"mode"} = sprintf("%8d", $mode);
+		$temp->{"people"}  = sprintf("%8d", $people);
+		$temp->{"uses"} = sprintf("%8d", $uses);
+		$temp->{"mode"} = sprintf("%8d", $mode);
 		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people);
 		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses);
 		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode);
