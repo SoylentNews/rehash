@@ -636,12 +636,15 @@ sub countUsersByPage {
 ########################################################
 sub countDailyByPage {
 	my($self, $op, $options) = @_;
+	$options ||= {};
 
 	my $where = "1=1 ";
 	$where .= " AND op='$op'"
 		if $op;
 	$where .= " AND section='$options->{section}'"
 		if $options->{section};
+	$where .= " AND static='$options->{static}'"
+		if $options->{static};
 
 	# The "no_op" option can take either a scalar for one op to exclude,
 	# or an arrayref of multiple ops to exclude.

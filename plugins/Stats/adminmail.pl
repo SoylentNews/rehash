@@ -160,8 +160,15 @@ EOT
 		oldest => $oldest_to_show
 	});
 
-	my $grand_total = $stats->countDailyByPage('', );
+	my $grand_total = $stats->countDailyByPage('');
 	$data{grand_total} = $grand_total;
+	my $grand_total_static = $stats->countDailyByPage('',{ static => 'yes' } );
+	$data{grand_total_static} = $grand_total_static;
+	my $total_static = $stats->countDailyByPage('', {
+		static => 'yes',
+		no_op => $constants->{op_exclude_from_countdaily}
+	} );
+	$data{total_static} = $grand_total_static;
 	for (qw|index article search comments palm journal rss|) {
 		my $uniq = $stats->countDailyByPageDistinctIPID($_);
 		my $pages = $stats->countDailyByPage($_);
@@ -250,7 +257,9 @@ EOT
 	});
 
 	$statsSave->createStatDaily("total", $count->{total});
+	$statsSave->createStatDaily("total_static", $total_static);
 	$statsSave->createStatDaily("grand_total", $grand_total);
+	$statsSave->createStatDaily("grand_total_static", $grand_total_static);
 	$statsSave->createStatDaily("total_bytes", $total_bytes);
 	$statsSave->createStatDaily("unique", $count->{unique});
 	$statsSave->createStatDaily("unique_users", $count->{unique_users});
