@@ -2154,6 +2154,8 @@ sub createUser {
 	my($self, $matchname, $email, $newuser) = @_;
 	return unless $matchname && $email && $newuser;
 
+	$email =~ s/\s//g; # strip whitespace from emails
+
 	return if ($self->sqlSelect(
 		"uid", "users",
 		"matchname=" . $self->sqlQuote($matchname)
