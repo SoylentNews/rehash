@@ -152,6 +152,12 @@ sub savepoll {
 				topic	=> $form->{topic},
 				url	=> "$constants->{rootdir}/pollBooth.pl?qid=$qid&aid=-1",
 			});
+		} elsif ($poll->{discussion}) {
+			# Yep, this is lazy -Brian
+			$slashdb->setDiscussion($poll->{discussion}, { 
+				title => $form->{question}, 
+				topic => $form->{topic} 
+				});
 		}
 		# if it already has a discussion (so $discussion is not set),
 		# or discussion ID is unchanged, don't bother setting
