@@ -2942,6 +2942,20 @@ sub checkMaxPosts {
 		}
 	}
 
+	if ($formname eq 'comments') {
+		my $user = getCurrentUser();
+		if (!isAnon($user)) {
+			my($num_comm, $sum_mods) = getNumCommPostedByUID();
+			if ($sum_mods > 0) {
+				$maxposts += $sum_mods;
+			} elsif ($sum_mods < 0) {
+				my $min = int($maxposts/2);
+				$maxposts += $sum_mods;
+				$maxposts = $min if $maxposts < $min;
+			}
+		}
+	}
+
 	my $where = $self->_whereFormkey();
 	$where .= " AND submit_ts >= $formkey_earliest";
 	$where .= " AND formname = '$formname'",
