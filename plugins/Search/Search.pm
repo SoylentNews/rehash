@@ -496,8 +496,9 @@ sub findDiscussion {
 		if $form->{section};
 	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
 		if $form->{uid};
-	$where .= " AND approved = $form->{approved}"
-		if $form->{approved};
+	$where .= " AND approved = " . $self->sqlQuote($form->{approved})
+		if defined($form->{approved})
+			&& $constants->{discussion_approval};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
 #	print STDERR "select $columns from $tables where $where $other\n";

@@ -1254,7 +1254,8 @@ Hashref of cleaned-up data.
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
-		artcount bseclev buymore cid clbig clsmall
+		approved artcount bseclev
+		buymore cid clbig clsmall
 		commentlimit commentsort commentspill
 		commentstatus del displaystatus
 		filter_id hbtm height highlightthresh
@@ -1651,8 +1652,8 @@ sub createEnvironment {
 	my $form = getCurrentForm();
 
 	# If this is a sectional site, we need to set our hostname if one exists.
-	my $hostname = $slashdb->getSection($form->{section}, 'hostname');
-	createCurrentHostname($hostname) if $hostname;
+	my $hostname = $slashdb->getSection($form->{section}, 'hostname') || "";
+	createCurrentHostname($hostname);
 
 	# We assume that the user for scripts is the anonymous user
 	createCurrentDB($slashdb);
