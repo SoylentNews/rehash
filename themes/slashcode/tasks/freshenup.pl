@@ -149,7 +149,7 @@ $task{$me}{code} = sub {
 		$do_all ? 'all_dirty' : 'mainpage_dirty',
 		'DESC',
 		$max_stories
-	) if $task_exit_flag;
+	) if !$task_exit_flag;
 
 	my $bailed = 0;
 	my $totalChangedStories = 0;
