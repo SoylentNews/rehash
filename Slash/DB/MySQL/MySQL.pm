@@ -871,7 +871,6 @@ sub getTemplateList {
 ########################################################
 sub getModeratorCommentLog {
 	my($self, $asc_desc, $limit, $type, $value) = @_;
-
 	$asc_desc ||= 'ASC';
 	$asc_desc = uc $asc_desc;
 	$asc_desc = 'ASC' if $asc_desc ne 'DESC';
@@ -882,7 +881,7 @@ sub getModeratorCommentLog {
 		$limit = "";
 	}
 
-	my $select_extra = (($type =~ /ipid/) || ($type =~ /subnetid/)) ? ", comments.uid as uid2, comments.ipid as ipid2" : "";
+	my $select_extra = (($type =~ /ipid/) || ($type =~ /subnetid/) || ($type =~ /global/)) ? ", comments.uid as uid2, comments.ipid as ipid2" : "";
 
 	my $vq = $self->sqlQuote($value);
 	my $where_clause = "";
@@ -894,7 +893,8 @@ sub getModeratorCommentLog {
 	elsif ($type eq 'subnetid') {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'ipid') {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"	}
+	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"	}      elsif ($type eq 'global'){	$where_clause = "1=1 "
+ }
 	return [ ] unless $where_clause;
 
 	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
@@ -3986,17 +3986,19 @@ sub getAccessListInfo {
 
 	my $info = undef;
 	for my $where (@$where_ary) {
-		$ref = $self->sqlSelectAll("reason, ts, adminuid", 'accesslist', $where);
+		$ref = $self->sqlSelectAll("reason, ts, adminuid, estimated_users", 'accesslist', $where);
 		for my $row (@$ref) {
 			$info ||= { };
 			if (!exists($info->{reason}) || $info->{reason} eq '') {
 				$info->{reason}	= $row->[0];
 				$info->{ts}	= $row->[1];
 				$info->{adminuid} = $row->[2];
+				$info->{estimated_users} = $row->[3];
 			} elsif ($info->{reason} ne $row->[0]) {
 				$info->{reason}	= 'multiple';
 				$info->{ts}	= 'multiple';
 				$info->{adminuid} = 0;
+				$info->{estimated_users} = $row->[3];
 				# At this point we're done, since the
 				# reason and time can't change anymore,
 				# so short-circuit out of the loop.
@@ -5655,6 +5657,21 @@ sub getSubmissionForUser {
 	return $submissions;
 }
 
+
+########################################################
+
+sub calcTrollPoint {
+	my ($self, $type, $good_behavior) = @_;
+	my $constants = getCurrentStatic();
+	$good_behavior ||= 0;
+	my $trollpoint =0;
+	
+	$trollpoint = -abs($constants->{istroll_downmods_ip}) - $good_behavior if $type eq "ipid";
+	$trollpoint = -abs($constants->{istroll_downmods_subnet}) - $good_behavior if $type eq "subnetid";
+	$trollpoint = -abs($constants->{istroll_downmods_user}) - $good_behavior if $type eq "uid";
+
+	return $trollpoint;
+}
 ########################################################
 sub calcModval {
 	my($self, $where_clause, $halflife, $minicache) = @_;
@@ -5776,13 +5793,13 @@ sub getIsTroll {
 	my $minicache = { };
 
 	# Check for modval by IPID.
-	$trollpoint = -abs($constants->{istroll_downmods_ip}) - $good_behavior;
+	$trollpoint = $self->calcTrollPoint("ipid", $good_behavior);
 	$modval = $self->calcModval("ipid = '$user->{ipid}'",
 		$ipid_hoursback, $minicache);
 	return 1 if $modval <= $trollpoint;
 
 	# Check for modval by subnet.
-	$trollpoint = -abs($constants->{istroll_downmods_subnet}) - $good_behavior;
+	$trollpoint = $self->calcTrollPoint("subnetid", $good_behavior);
 	$modval = $self->calcModval("subnetid = '$user->{subnetid}'",
 		$ipid_hoursback, $minicache);
 	return 1 if $modval <= $trollpoint;
@@ -5792,7 +5809,7 @@ sub getIsTroll {
 	return 0 if $user->{is_anon};
 
 	# Check for modval by user ID.
-	$trollpoint = -abs($constants->{istroll_downmods_user}) - $good_behavior;
+	$trollpoint = $self->calcTrollPoint("uid",$good_behavior);
 	$modval = $self->calcModval("comments.uid = $user->{uid}", $uid_hoursback);
 	return 1 if $modval <= $trollpoint;
 

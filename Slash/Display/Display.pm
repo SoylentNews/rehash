@@ -515,6 +515,9 @@ my %scalar_ops = (
 	'lc'		=> sub { lc $_[0] },
 	'ucfirst'	=> sub { ucfirst $_[0] },
 	'lcfirst'	=> sub { lcfirst $_[0] },
+	'gt'		=> sub { $_[0] gt $_[1] },
+	'lt'		=> sub { $_[0] lt $_[1] },
+	'cmp'		=> sub { $_[0] cmp $_[1] },
 	'substr'        => sub {
 		if (@_ == 2) {
 			substr($_[0], $_[1]);
