@@ -18,6 +18,7 @@ my %tzs = (
 
 	'WET'	=> ['WEST', ''],
 	'BST'	=> ['WEST', ''],
+	'WES'	=> ['WEST', ''],
 	'WEST'	=> ['WEST', ''],
 
 	'CET'	=> ['CEST', ''],
@@ -29,12 +30,14 @@ my %tzs = (
 	'MES'	=> ['CEST', ''],
 	'SST'	=> ['CEST', ''],
 	'FST'	=> ['CEST', ''],
+	'CES'	=> ['CEST', ''],
 	'CEST'	=> ['CEST', ''],
 # Israel does not have the same timezone change as Eastern Europe
 	'ISS'	=> ['EEST', 'off'],
 	'EET'	=> ['EEST', ''],
 
 	'IDT'	=> ['EEST', 'on'],
+	'EES'	=> ['EEST', ''],
 	'EEST'	=> ['EEST', ''],
 	'BT'	=> ['BT', ''],
 	'IT'	=> ['IT', ''],
@@ -69,7 +72,7 @@ my %tzs = (
 	'NZT'	=> ['NZST', ''],
 	'NZS'	=> ['NZST', ''],
 
-	'IDLE'	=> ['IDLE', ''],
+	'ID2'	=> ['IDLE', ''],
 	'NZD'	=> ['NZST', ''],
 
 	'WAT'	=> ['WAT', ''],
@@ -91,11 +94,15 @@ my %tzs = (
 	'PST'	=> ['PST', ''],
 	'HDT'	=> ['HAST', ''],
 	'YST'	=> ['AKST', ''],
+	'AKST'	=> ['AKST', ''],
+	'AKDT'	=> ['AKST', ''],
 	'HST'	=> ['HAST', ''],
 	'CAT'	=> ['HAST', ''],
 	'AHS'	=> ['HAST', ''],
 	'NT'	=> ['NT', ''],
 	'IDL'	=> ['IDLW', ''],
+
+	''	=> ['EST', ''],
 );
 
 my $dbh = $slashdb->{_dbh};
