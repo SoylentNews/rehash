@@ -1,4 +1,4 @@
-slash-1.0.7, 2000.07.xx
+slash-1.0.7, 2000.07.12
 -----------------------
 
 *	Poll booth now checks to insure answers are in range before
@@ -12,7 +12,8 @@ slash-1.0.7, 2000.07.xx
 *	Added fixparam() function (same as fixurl($foo, 1)) and
 	cleaned up fixurl() to better handle stuff
 
-* 	Slash now checks story dates for validity before saves and updates.
+* 	Slash now checks story dates for validity before saves and
+	updates
 
 
 slash-1.0.6, 2000.07.10
