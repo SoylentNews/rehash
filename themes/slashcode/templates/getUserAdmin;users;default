@@ -81,6 +81,7 @@ __template__
 		
 				[%- ELSIF field == 'md5id' -%]
 				<INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id %]">
+				<INPUT TYPE="HIDDEN" NAME="fieldname" VALUE="[% form.fieldname | strip_attribute %]">
 		
 				[%- ELSIF field == 'subnetid' -%]
 				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid %]">
