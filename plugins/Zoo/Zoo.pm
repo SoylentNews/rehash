@@ -266,8 +266,8 @@ SQL
 
 sub getZooUsersForProcessing {
 	my($self, $time) = @_;
-	my $people = $self->sqlSelectAll('uid', 'people', "last_update > '$time' ");
-	my $people2 = $self->sqlSelectAll('uid', 'people_nthdegree', "last_update > '$time' ");
+	my $people = $self->sqlSelectAll('DISTINCT uid', 'people', "last_update > '$time' ");
+	my $people2 = $self->sqlSelectAll('DISTINCT uid', 'people_nthdegree', "last_update > '$time' ");
 
 	my %people = ( );
 
