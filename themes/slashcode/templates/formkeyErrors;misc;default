@@ -44,7 +44,9 @@ and try again.
 
 [%# Why can't these all just be genericized?  this is supposed to
   # be easy to use. I shouldn't have to create a new entry for
-  # every single form that uses formkeys.  %]
+  # every single form that uses formkeys.  
+  # Uh, because you might want a different message for each form. 
+  # Got a problem with that? Huh? Huh? ;) %]
 
 [% CASE "comments_maxposts" %]
 [% PROCESS titlebar width="95%" title="Maximum Comments Exceeded!" %]

@@ -43,6 +43,12 @@ END %]
 	<TR BGCOLOR="[% bgcolor %]" ALT="[% story.displaystatus %]">
 		<TD ALIGN="RIGHT">
 
+[% IF constants.feature_story_enabled && story.feature_story_flag %] 
+	[% featured = "(Feature Story)"; %]
+[% ELSE %]
+	[% featured = ''; %]
+[% END %]
+
 [% IF story.canedit %]
 		[<A HREF="[% env.script_name %]?title=[% story.tbtitle %]&op=edit&sid=[% story.sid %]">[% story.x %]</A>]
 [% ELSE %]
@@ -51,7 +57,7 @@ END %]
 
 		</TD>
 		<TD><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
-		[% story.title %]&nbsp;</A>
+		[% story.title %]&nbsp;</A> [% featured %]
 		</TD>
 		<TD><FONT SIZE="2"><B>[% story.aid %]</B></FONT></TD>
 		<TD><FONT SIZE="2">[% story.topic.substr(0, 5) %]</FONT></TD>

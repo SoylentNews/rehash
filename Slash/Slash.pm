@@ -696,7 +696,7 @@ sub dispComment {
 
 #========================================================================
 
-=head2 dispStory(STORY, AUTHOR, TOPIC, FULL)
+=head2 dispStory(STORY, AUTHOR, TOPIC, FULL, OTHER)
 
 Display a story.
 
@@ -723,6 +723,10 @@ Hashref of data about the story's topic.
 Boolean for show full story, or just the
 introtext portion.
 
+=item OTHER
+
+Hash with parameters such as alternate template.
+
 =back
 
 =item Return value
@@ -739,11 +743,11 @@ The 'dispStory' template block.
 
 
 sub dispStory {
-	my($story, $author, $topic, $full) = @_;
+	my($story, $author, $topic, $full, $other) = @_;
 	my $slashdb      = getCurrentDB();
 	my $constants    = getCurrentStatic();
 	my $form_section = getCurrentForm('section');
-
+	my $template_name = $other->{story_template} ? $other->{story_template} : 'dispStory';
 
 	my $section = $slashdb->getSection($story->{section});
 
@@ -761,12 +765,12 @@ sub dispStory {
 		width	=> $constants->{titlebar_width}
 	);
 
-	return slashDisplay('dispStory', \%data, 1);
+	return slashDisplay($template_name, \%data, 1);
 }
 
 #========================================================================
 
-=head2 displayStory(SID, FULL)
+=head2 displayStory(SID, FULL, OTHER)
 
 Display a story by SID (frontend to C<dispStory>).
 
@@ -785,6 +789,11 @@ Story ID to display.
 Boolean for show full story, or just the
 introtext portion.
 
+=item OTHER 
+
+hash containing other parameters such as 
+alternate template name 
+
 =back
 
 =item Return value
@@ -798,7 +807,7 @@ hashref of author data, and hashref of topic data.
 
 sub displayStory {
 	# caller is the pagename of the calling script
-	my($sid, $full) = @_;	# , $caller  no longer needed?  -- pudge
+	my($sid, $full, $other) = @_;	# , $caller  no longer needed?  -- pudge
 
 	my $slashdb = getCurrentDB();
 	my $story = $slashdb->getStory($sid);
@@ -830,7 +839,7 @@ sub displayStory {
 	# that Slash uses.
 	#$slashdb->setSectionExtra($full, $story);
 
-	my $return = dispStory($story, $author, $topic, $full);
+	my $return = dispStory($story, $author, $topic, $full, $other);
 	return($return, $story, $author, $topic);
 }
 

@@ -901,9 +901,9 @@ sub editStory {
 		$sections, $topic_select, $section_select, $author_select,
 		$extracolumns, $displaystatus_select, $commentstatus_select, $description);
 	my $extracolref = {};
-	my($fixquotes_check, $autonode_check, 
-		$fastforward_check, $shortcuts_check) =
-		qw(off off off off);
+	my ($fixquotes_check, $autonode_check, 
+		$fastforward_check, $shortcuts_check, $feature_story_check) =
+		('','','','','');
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
@@ -1007,10 +1007,12 @@ sub editStory {
 	$description = $slashdb->getDescriptions('commentcodes');
 	$commentstatus_select = createSelect('commentstatus', $description, $storyref->{commentstatus}, 1);
 
-	$fixquotes_check	= 'on' if $form->{fixquotes};
-	$autonode_check		= 'on' if $form->{autonode};
-	$fastforward_check	= 'on' if $form->{fastforward};
-	$shortcuts_check	= 'on' if $form->{shortcuts};
+	$fixquotes_check	= 'CHECKED' if $form->{fixquotes};
+	$autonode_check		= 'CHECKED' if $form->{autonode};
+	$fastforward_check	= 'CHECKED' if $form->{fastforward};
+	$shortcuts_check	= 'CHECKED' if $form->{shortcuts};
+	# $feature_story_check	= 'CHECKED' if $form->{feature_story};
+	$feature_story_check	= 'CHECKED' if $slashdb->isFeatureStory($storyref->{section}, $storyref->{sid});
 
 	$slashdb->setSession($user->{uid}, { lasttitle => $storyref->{title} });
 
@@ -1047,6 +1049,7 @@ sub editStory {
 		autonode_check		=> $autonode_check,
 		fastforward_check	=> $fastforward_check,
 		shortcuts_check		=> $shortcuts_check,
+		feature_story_check	=> $feature_story_check,
 		user			=> $user,
 		authoredit_flag		=> $authoredit_flag,
 		ispell_comments		=> $ispell_comments,
@@ -1152,6 +1155,7 @@ sub listStories {
 			$canedit = 1;
 		}
 
+		my $feature_story_flag = $slashdb->isFeatureStory($section,$sid) ? 1 : 0; 
 		$storylistref->[$i] = {
 			'x'		=> $i + $first_story + 1,
 			hits		=> $hits,
@@ -1166,6 +1170,7 @@ sub listStories {
 			td		=> $td,
 			td2		=> $td2,
 			writestatus	=> $writestatus,
+			feature_story_flag	=> $feature_story_flag,
 			displaystatus	=> $displaystatus,
 			tbtitle		=> $tbtitle,
 		};
@@ -1274,8 +1279,18 @@ sub updateStory {
 
 	$form->{aid} = $slashdb->getStory($form->{sid}, 'aid', 1)
 		unless $form->{aid};
+
 	$form->{relatedtext} = getRelated("$form->{title} $form->{bodytext} $form->{introtext}")
 		. otherLinks($slashdb->getAuthor($form->{uid}, 'nickname'), $form->{tid}, $form->{uid});
+
+	if ($constants->{feature_story_enabled}) {
+		if ($form->{feature_story}) {
+		    $slashdb->setFeatureStory($form->{section}, $form->{sid});
+	
+		} elsif ($slashdb->isFeatureStory($form->{section}, $form->{sid})) {
+			$slashdb->setFeatureStory($form->{section});
+	        }
+	}
 
 	$slashdb->updateStory();
 	titlebar('100%', getTitle('updateStory-title'));
@@ -1303,7 +1318,18 @@ sub saveStory {
 		"$form->{title} $form->{bodytext} $form->{introtext}"
 	) . otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
 
+
 	my $sid = $slashdb->createStory($form);
+
+	if ($constants->{feature_story_enabled}) {
+		if ($form->{feature_story}) {
+		    $slashdb->setFeatureStory($form->{section}, $sid);
+	
+		} elsif ($slashdb->isFeatureStory($form->{section}, $sid)) {
+			$slashdb->setFeatureStory($form->{section});
+	        }
+	}
+
 	if ($sid) {
 		my $id = $slashdb->createDiscussion( {
 			title	=> $form->{title},

@@ -609,6 +609,23 @@ sub getSectionExtras {
 }
 
 ########################################################
+sub setFeatureStory {
+	my ($self, $section, $sid) = @_;
+
+	$self->sqlUpdate('sections', { feature_story => $sid }, 
+				"section = '$section'"
+	);
+}
+    
+########################################################
+sub isFeatureStory {
+	my ($self, $section, $sid) = @_;
+
+	my($rows) = $self->sqlSelect('count(*)', 'sections', "feature_story = '$sid' AND section = '$section'");
+
+	return($rows);
+}
+########################################################
 sub getContentFilters {
 	my($self, $formname, $field) = @_;
 
@@ -3090,7 +3107,7 @@ sub setCommentCleanup {
 	$where .= " > $constants->{comment_minscore}" if $val < 0;
 	$where .= " < $constants->{comment_maxscore}" if $val > 0;
 	$where .= " AND lastmod<>$user->{uid}"
-		unless $user->{seclev} >= 100 && $constants->{authors_unlimited};
+	unless $user->{seclev} >= 100 && $constants->{authors_unlimited};
 
 	return $self->sqlUpdate("comments", $update, $where);
 }
@@ -3648,8 +3665,14 @@ sub countStoriesBySubmitter {
 ########################################################
 # Be nice if we could control more of what this 
 # returns -Brian
+# ok, I extended it to take an sid so I could get 
+# just one particlar story (getStory doesn't cut it)
+# since I don't want the story text but what 
+# this method gives for the feature story) -Patrick
+# ..and an exclude sid for excluding and sid should feature
+# stories be enabled
 sub getStoriesEssentials {
-	my($self, $limit, $section, $tid) = @_;
+	my($self, $limit, $section, $tid, $misc) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
@@ -3673,6 +3696,8 @@ sub getStoriesEssentials {
 	}
 
 	$where .= "AND tid='$tid' " if $tid;
+	$where .= "AND sid = '$misc->{sid}' " if $misc->{sid};
+	$where .= "AND sid != '$misc->{exclude_sid}' " if $misc->{exclude_sid};
 
 	# User Config Vars
 	$where .= "AND tid not in ($user->{extid}) "
@@ -4092,9 +4117,11 @@ sub updateStory {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 
-	my $time = ($form->{fastforward} eq 'on')
+	my $time = ($form->{fastforward})
 		? $self->getTime()
 		: $form->{'time'};
+
+
 
 	$self->sqlUpdate('discussions', {
 		sid	=> $form->{sid},
@@ -4310,7 +4337,7 @@ sub getDay {
 
 ##################################################################
 sub getStoryList {
-	my($self, $first_story, $num_stories) = @_;
+	my ($self, $first_story, $num_stories) = @_;
 	$first_story ||= 0;
 	$num_stories ||= 40;
 

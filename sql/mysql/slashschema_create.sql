@@ -425,8 +425,10 @@ CREATE TABLE sections (
 	isolate tinyint DEFAULT '0' NOT NULL,
 	issue tinyint DEFAULT '0' NOT NULL,
 	extras mediumint DEFAULT '0',
+	feature_story char(16) NOT NULL,
 	KEY (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
+	FOREIGN KEY (feature_story) REFERENCES stories(sid),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 

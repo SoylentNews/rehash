@@ -50,9 +50,25 @@ sub main {
 	my $limit = $section->{section} eq 'index' ?
 	    $user->{maxstories} : $section->{artcount};
 
-	my $stories = $slashdb->getStoriesEssentials(
+	my ($stories, $feature, $Feature, $other);
+
+	if ($constants->{feature_story_enabled} && $section->{feature_story}) {
+	    # ok, I extended it to take an sid so I could get just one particlar story
+	    $other->{sid} = $section->{feature_story};
+	    $feature = $slashdb->getStoriesEssentials(1,$section->{section},'', $other);
+	    $other->{sid} = '';
+	    # this is the 'feature_story' flag in displayStories
+	    $feature->[0][9] = 1;
+	    $Feature = displayStories($feature,1);
+
+	    $other->{exclude_sid} = $section->{feature_story};
+	}
+
+	$stories = $slashdb->getStoriesEssentials(
 		$limit, 
-		($form->{section} ne 'index') ? $form->{section} : ''
+		($form->{section} ne 'index') ? $form->{section} : '',
+		'',
+		$other,
 	);
 
 	my $Stories = displayStories($stories);
@@ -61,6 +77,7 @@ sub main {
 	slashDisplay('index', {
 		is_moderator	=> scalar $slashdb->checkForMetaModerator($user),
 		stories		=> $Stories,
+		feature		=> $Feature,
 		boxes		=> $StandardBlocks,
 	});
 
@@ -219,7 +236,7 @@ sub displayStandardBlocks {
 #################################################################
 # pass it how many, and what.
 sub displayStories {
-	my($stories) = @_;
+	my($stories, $feature) = @_;
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
@@ -233,10 +250,12 @@ sub displayStories {
 	# Stuff block later (simulate the old cursor-based
 	# method)
 	while ($_ = shift @{$stories}) {
-		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid) = @{$_};
+		my ($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid, $feature) = @{$_};
 		my @links;
 		my @threshComments = split m/,/, $hp;  # posts in each threshold
-		my($storytext, $story) = displayStory($sid);
+		my $other;
+		$other->{story_template} = 'dispFeature' if $feature;
+		my ($storytext, $story) = displayStory($sid,'',$other);
 
 		$return .= $storytext;
 
@@ -306,7 +325,8 @@ sub displayStories {
 
 		push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
 
-		$return .= slashDisplay('storylink', {
+		my $link_template = $feature ? 'feature_storylink' : 'storylink';
+		$return .= slashDisplay($link_template, {
 			links	=> \@links,
 		}, { Return => 1});
 

@@ -116,9 +116,13 @@ __template__
 		[% commentstatus_select %]
 		<INPUT TYPE="TEXT" NAME="time" VALUE="[% storyref.time %]" size="16"><BR>
 
-		[ <INPUT TYPE="checkbox" NAME="fixquotes" VALUE="[% fixquotes_check %]">fixquotes
-		| <INPUT TYPE="checkbox" NAME="autonode" VALUE="[% autonode_check %]">autonode
-		| <INPUT TYPE="checkbox" NAME="shortcuts" VALUE="[% shortcuts_check %]">story shortcuts
+		[ <INPUT TYPE="checkbox" NAME="fixquotes" [% fixquotes_check %]>fixquotes
+		| <INPUT TYPE="checkbox" NAME="autonode" [% autonode_check %]>autonode
+		| <INPUT TYPE="checkbox" NAME="shortcuts" [% shortcuts_check %]>story shortcuts
+
+	[% IF constants.feature_story_enabled %]
+		| <INPUT TYPE="checkbox" NAME="feature_story" [% feature_story_check %]>feature story
+	[% END %]
 
 		[% IF sid %]
 		| <INPUT TYPE="checkbox" NAME="fastforward" VALUE="[% fastforward_check %]">fastforward
