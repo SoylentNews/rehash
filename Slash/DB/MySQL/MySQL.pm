@@ -2425,7 +2425,7 @@ sub isPollOpen {
 #####################################################
 sub hasPollActivated{
 	my($self, $qid) = @_;
-	return $self->sqlCount("pollquestions", "qid='$qid' and date <= now()");
+	return $self->sqlCount("pollquestions", "qid='$qid' and date <= now() and polltype!='nodisplay'");
 }
 
 
@@ -2565,6 +2565,7 @@ sub getPollQuestionList {
 	my($self, $offset, $other) = @_;
 	my($where);
 	$offset = 0 if $offset !~ /^\d+$/;
+	my $admin = getCurrentUser('is_admin');
 
 	# $others->{section} takes precidence over $others->{exclude_section}. Both
 	# keys are mutually exclusive and should not be used in the same call.
@@ -2590,11 +2591,11 @@ sub getPollQuestionList {
 		if $other->{section};
 	$where .= sprintf ' AND section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
-	$where .= " AND date <= NOW() ";
+	$where .= " AND date <= NOW() " unless $admin;
 
 
 	my $questions = $self->sqlSelectAll(
-		'qid, question, date, voters, commentcount',
+		'qid, question, date, voters, commentcount, polltype, date>now() as future',
 		'pollquestions,discussions',
 		$where,
 		"ORDER BY date DESC LIMIT $offset,20"
