@@ -851,7 +851,7 @@ sub _printHead {
 	if ($user->{currentPage} eq 'misc') {
 		local $Slash::Utility::MAX_ERROR_LOG_LEVEL = 0;
 		use Data::Dumper;
-		errorLog(sprintf("currentPageBusted: %s\n", Dumper($user, getCurrentForm(), \%ENV)));
+		errorLog(sprintf("currentPageBusted: %s\n", Dumper([$user, getCurrentForm(), \%ENV])));
 	}
 
 	slashDisplay("journalhead", $data);
