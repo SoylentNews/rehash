@@ -282,6 +282,7 @@ sub setRandomIPID {
 
 	srand($user->{uid} + (time % 5));
 	my $uid10 = $user->{uid} % 10;
+	$uid10 = int(rand(7)) if $user->{uid} == $constants->{anonymous_coward_uid};
 	my $quad3;
 	my $fourth;
 	if ($uid10 < rand(10)) {
