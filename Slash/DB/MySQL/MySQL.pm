@@ -1343,14 +1343,18 @@ sub deleteRelatedLink {
 
 ########################################################
 sub getNexusExtras {
-	my($self, $tid) = @_;
+	my($self, $tid, $options) = @_;
 	return [ ] unless $tid;
-
+	$options ||= {};
+	
+	my $content_type = $options->{content_type} || "story";
+	my $content_type_q = $self->sqlQuote($content_type);
+	
 	my $tid_q = $self->sqlQuote($tid);
 	my $answer = $self->sqlSelectAll(
 		'extras_textname, extras_keyword, type',
 		'topic_nexus_extras', 
-		"tid = $tid_q"
+		"tid = $tid_q AND content_type = $content_type_q "
 	);
 
 	return $answer;
@@ -1371,14 +1375,16 @@ sub getNexuslistFromChosen {
 # returned.  If 2 or more nexuses have the same extras_keyword,
 # that keyword should only be returned once.
 sub getNexusExtrasForChosen {
-	my($self, $chosen_hr) = @_;
+	my($self, $chosen_hr, $options) = @_;
 	return [ ] unless $chosen_hr;
+	$options ||= {};
+	$options->{content_type} ||= "story";
 
 	my $nexuses = $self->getNexuslistFromChosen($chosen_hr);
 	my $seen_extras = {};
 	my $extras = [ ];
 	for my $nexusid (@$nexuses) {
-		my $ex_ar = $self->getNexusExtras($nexusid);
+		my $ex_ar = $self->getNexusExtras($nexusid, $options);
 		foreach my $extra (@$ex_ar) {
 			unless ($seen_extras->{$extra->[1]}) {
 				push @$extras, $extra;
