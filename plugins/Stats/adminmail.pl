@@ -442,6 +442,11 @@ EOT
 		}
 	}
 
+	my $accesslist_counts = $stats->getAccesslistCounts();
+	for my $key (keys %$accesslist_counts) {
+		$statsSave->createStatDaily("accesslist_$key", $accesslist_counts->{$key});
+	}
+
 	$data{total} = sprintf("%8d", $daily_total);
 	$data{total_bytes} = sprintf("%0.1f MB",$total_bytes/(1024*1024));
 	$data{grand_total_bytes} = sprintf("%0.1f MB",$grand_total_bytes/(1024*1024));

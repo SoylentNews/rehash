@@ -87,6 +87,18 @@ sub new {
 
 
 ########################################################
+sub getAccesslistCounts {
+	my($self) = @_;
+	my $hr = { };
+	for my $key (qw( ban nopost nosubmit norss proxy trusted )) {
+		$hr->{$key} = $self->sqlCount('accesslist',
+			"now_$key = 'yes'") || 0;
+	}
+	$hr->{all} = $self->sqlCount('accesslist') || 0;
+	return $hr;
+}
+
+########################################################
 sub getPointsInPool {
 	my($self) = @_;
 	return $self->sqlSelect('SUM(points)', 'users_comments');
