@@ -138,8 +138,9 @@ sub main {
 			stories			=> \%stories,
 		});
 
-		# Still not happy with this logic -Brian
+		my $called_pc = 0;
 		if ($story->{discussion}) {
+			# Still not happy with this logic -Brian
 			my $discussion = $reader->getDiscussion($story->{discussion});
 			$discussion->{is_future} = $story->{is_future};
 			if ($constants->{tids_in_urls}) {
@@ -151,11 +152,27 @@ sub main {
 			}
 			# If no comments ever have existed and commentstatus is disabled,
 			# just skip the display of the comment header bar -Brian
-			printComments($discussion)
-				if $discussion && ! (
-					   !$discussion->{commentcount}
-					&&  $discussion->{commentstatus} eq 'disabled'
-				);
+			if ($discussion && ! (
+				   !$discussion->{commentcount}
+				&&  $discussion->{commentstatus} eq 'disabled'
+			)) {
+				printComments($discussion);
+				$called_pc = 1;
+			}
+		}
+		if (!$called_pc && $form->{ssi} eq 'yes' && $form->{cchp}) {
+			# This is a real hack, we're kind of skipping down
+			# two levels of code.  But the cchp printing is an
+			# important optimization;  we avoid having to do
+			# multiple expensive comment selects.  One problem
+			# is that if there's no discussion with a story,
+			# printComments() doesn't get called, which means
+			# selectComments() doesn't get called, which means
+			# the cchp file won't be written.  If article.pl
+			# is being called by slashd, and we need to write
+			# that file, then here's where we print an empty
+			# file that will satisfy slashd. - Jamie
+			Slash::_print_cchp({ sid => "dummy" });
 		}
 	} else {
 		header('Error', $form->{section}) or return;
