@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$Bundle::Slash::VERSION = '1.0.4';
+$Bundle::Slash::VERSION = '1.0.6';
 
 1;
 
@@ -48,5 +48,10 @@ required for it.
 
 IPC::Shareable no longer required for IPC, since we are no longer doing
 IPC.
+
+If CPAN starts downloading "perl-5.6.0" or somesuch, ctrl-C it, exit
+the CPAN shell, and start it again.  The latest CPAN.pm version does not
+have this problem, but older ones do, and you may have an older one
+installed.
 
 =cut
