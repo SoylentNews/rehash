@@ -470,8 +470,12 @@ EOT
 		my $maximum_length	= $_->[8];
 		my $isTrollish		= 0;
 		my $text_to_test	= decode_entities($I{F}{$field});
+		# convert to spaces - easier to run through filters
 		$text_to_test		=~ s/\xA0/ /g;
 		$text_to_test		=~ s/\<br\>/\n/gi;
+                $text_to_test           =~ s/\<p\>/ /ig;
+                $text_to_test           =~ s/\<\/p\>/ /ig;
+                $text_to_test           =~ s/\&nbsp\;/ /ig;    
 		
 		next if ($minimum_length && length($text_to_test) < $minimum_length);
 		next if ($maximum_length && length($text_to_test) > $maximum_length);
@@ -535,18 +539,24 @@ EOT
 		.1 => [400,1000000],
 	};
 
+	# replace with spaces, easier to run compress test on
+	my $compress_comment = $I{F}{postercomment};
+        $compress_comment =~ s/<br><br>/\n/ig;
+        $compress_comment =~ s/<p>/\s/ig;
+        $compress_comment =~ s/\&nbsp\;/\s/ig;  
+
 	# Ok, one list ditch effort to skew out the trolls!
-	if (length($I{F}{postercomment}) >= 10) {
+	if (length($compress_comment) >= 10) {
 		for (keys %$limits) {
 			# DEBUG
 			# print "ratio $_ lower $limits->{$_}->[0] upper $limits->{$_}->[1]<br>\n";
 			# if it's within lower to upper
-			if (length($I{F}{postercomment}) >= $limits->{$_}->[0]
-				&& length($I{F}{postercomment}) <= $limits->{$_}->[1]) {
+			if (length($compress_comment) >= $limits->{$_}->[0]
+				&& length($compress_comment) <= $limits->{$_}->[1]) {
 
 				# if is >= the ratio, then it's most likely a troll comment
-				if ((length(compress($I{F}{postercomment})) /
-					length($I{F}{postercomment})) <= $_) {
+				if ((length(compress($compress_comment)) /
+					length($compress_comment)) <= $_) {
 
 					editComment() and return unless $preview;
 					# blammo luser
