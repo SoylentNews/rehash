@@ -60,7 +60,7 @@ sub main {
 	);
 
 	my $title = getData('head', { section => $section });
-	header($title, $section->{section});
+	header($title, $section->{section}) or return;
 
 	# We may, in this listing, have a story from the Mysterious Future.
 	# If so, there are three possibilities:

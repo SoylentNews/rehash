@@ -107,7 +107,7 @@ sub main {
 	header(
 		getData('header', { tbtitle => $tbtitle } ),
 		'', $data
-	);
+	) or return;
 
 	if ($user->{seclev} < 100) {
 		if ($ops->{$op}{checks}) {

@@ -42,7 +42,7 @@ sub main {
 		$op = 'default';
 	}
 
-	header(getData('header'));	# from data;SCRIPTNAME;default
+	header(getData('header')) or return;	# from data;SCRIPTNAME;default
 
 	# dispatch of op
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form);

@@ -84,7 +84,7 @@ sub main {
 
 	(my $adm, $user->{is_admin}) = ($user->{is_admin}, 0);
 
-	header($sect_title, 'print');
+	header($sect_title, 'print') or return;
 	$user->{is_admin} = $adm;
 
 	# To print the links, we extract all <A..> tags from the introtext and 

@@ -73,7 +73,7 @@ sub main {
 				author	=> $story->{uid},
 			},
 		};
-		header($links, $story->{section});
+		header($links, $story->{section}) or return;
 
 		# Can't do this before getStoryByTime because
 		# $story->{time} is passed to an SQL request.
@@ -110,7 +110,7 @@ sub main {
 				);
 		}
 	} else {
-		header('Error', $form->{section});
+		header('Error', $form->{section}) or return;
 		my $message;
 		if ($future_err) {
 			$message = getData('article_nosubscription');

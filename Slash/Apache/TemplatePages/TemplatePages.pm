@@ -26,8 +26,8 @@ sub handler {
 	my $section = getCurrentForm('section');
 	my $title = $slashdb->getTemplateByName('body', 'title', 1, $page, $section);
 	if ($title) {
-		my $display = slashDisplay('body','', { Page => $page, Section => $section, Return => 1 });
-		header($title, $section);
+		header($title, $section) or return;
+		my $display = slashDisplay('body', '', { Page => $page, Section => $section, Return => 1 });
 		$r->print($display);
 		footer();
 	} else {

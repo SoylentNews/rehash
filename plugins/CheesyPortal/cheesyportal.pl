@@ -16,7 +16,7 @@ sub main {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
-	header(getData('head'));
+	header(getData('head')) or return;
 
 	my @portals;
 	my $portals = $slashdb->getPortals();

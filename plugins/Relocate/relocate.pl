@@ -19,7 +19,7 @@ sub main {
 		my $constants = getCurrentStatic();
 		redirect("$constants->{rootdir}/404.pl");
 	} elsif ($link->{is_alive} eq 'no') {
-		header("D'Oh"); # Needs to be templated -Brian
+		header("D'Oh") or return; # Needs to be templated -Brian
 		printDeadPage($link);
 		footer();
 	} else {

@@ -185,7 +185,7 @@ sub main {
 		adminmenu => $ops->{$op}{adminmenu} || 'admin',
 		tab_selected => $ops->{$op}{tab_selected},
 	};
-	header("backSlash$time_remark$tbtitle", '', $data);
+	header("backSlash$time_remark$tbtitle", '', $data) or return;
 	# admin menu is printed from within the 'header' template
 
 	# it'd be nice to have a legit retval

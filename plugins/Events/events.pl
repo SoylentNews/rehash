@@ -44,15 +44,14 @@ sub main {
 			items	=> \@items
 		});
 	} else {
+		header($time) or return;
 		if (@$stories) {
-			header($time);
 			slashDisplay('events', {
 				title 		=> $time,
 				events 		=> $stories,
 				'date'  	=> $date,
 			});
 		} else {
-			header($time);
 			# There was no data;events;default template, so the
 			# getData call below would fail;  I added one with
 			# a generic string for that datum.  If anyone wants

@@ -18,7 +18,7 @@ sub main {
 	my $op = getCurrentForm('op');
 	my $section = $slashdb->getSection($form->{section});
 
-	header(getData('header'), $section->{section});
+	header(getData('header'), $section->{section}) or return;
 
 	if (!$constants->{allow_moderation}) {
 		print getData('no_moderation');

@@ -138,6 +138,7 @@ sub header {
 # 		}
 
 		$r->send_http_header;
+		return if $r->header_only;
 	}
 
 	$user->{currentSection} = $section || $constants->{section};

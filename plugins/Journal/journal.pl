@@ -99,6 +99,10 @@ sub main {
 		}
 	} else {
 		$ops{$op}[FUNCTION]->($journal, $constants, $user, $form, $reader);
+		my $r;
+		if ($r = Apache->request) {
+			return if $r->header_only;
+		}
 		footer();
 	}
 }
@@ -107,7 +111,7 @@ sub displayTop {
 	my($journal, $constants, $user, $form, $reader) = @_;
 	my $journals;
 
-	_printHead("mainhead");
+	_printHead("mainhead") or return;
 
 	# this should probably be in a separate template, so the site admins
 	# can select the order themselves -- pudge
@@ -135,7 +139,7 @@ sub displayFriends {
 	redirect("$constants->{rootdir}/search.pl?op=journals") 
 		if $user->{is_anon};
 
-	_printHead("mainhead");
+	_printHead("mainhead") or return;
 
 	my $zoo = getObject('Slash::Zoo');
 	my $friends = $zoo->getFriendsWithJournals;
@@ -152,7 +156,7 @@ sub searchUsers {
 	my($journal, $constants, $user, $form, $reader) = @_;
 
 	if (!$form->{nickname}) {
-		_printHead("mainhead");
+		_printHead("mainhead") or return;
 		slashDisplay('searchusers');
 		return;
 	}
@@ -171,7 +175,7 @@ sub searchUsers {
 	}
 
 	# print the lovely headers
-	_printHead("mainhead");
+	_printHead("mainhead") or return;
 
 	# if false or empty ref, no users
 	if (!$results || (ref($results) eq 'ARRAY' && @$results < 1)) {
@@ -282,7 +286,7 @@ sub displayArticleFriends {
 		$uid		= $user->{uid};
 	}
 
-	_printHead("friendhead", { nickname => $nickname, uid => $uid });
+	_printHead("friendhead", { nickname => $nickname, uid => $uid }) or return;
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
@@ -376,7 +380,7 @@ sub displayArticle {
 		return displayFriends(@_);
 	}
 
-	_printHead("userhead", $head_data, 1);
+	_printHead("userhead", $head_data, 1) or return;
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
@@ -476,7 +480,7 @@ sub editPrefs {
 
 	my $nickname	= $user->{nickname};
 	my $uid		= $user->{uid};
-	_printHead("userhead", { nickname => $nickname, uid => $uid, menutype => 'prefs' });
+	_printHead("userhead", { nickname => $nickname, uid => $uid, menutype => 'prefs' }) or return;
 
 	my $theme	= _checkTheme($user->{'journal_theme'});
 	my $themes	= $journal->themes;
@@ -521,7 +525,7 @@ sub listArticle {
 
 	_printHead("userhead",
 		{ nickname => $nickname, uid => $form->{uid} || $user->{uid} },
-		1);
+		1) or return;
 
 	if (@$list) {
 		slashDisplay('journallist', {
@@ -545,7 +549,7 @@ sub saveArticle {
 
 	unless ($description ne "" && $form->{article} ne "") {
 		unless ($ws) {
-			_printHead("mainhead");
+			_printHead("mainhead") or return;
 			print getData('no_desc_or_article');
 			editArticle(@_, 1);
 		}
@@ -599,7 +603,7 @@ sub saveArticle {
 
 		unless ($id) {
 			unless ($ws) {
-				_printHead("mainhead");
+				_printHead("mainhead") or return;
 				print getData('create_failed');
 			}
 			return 0;
@@ -651,7 +655,7 @@ sub articleMeta {
 
 	if ($form->{id}) {
 		my $article = $journal->get($form->{id});
-		_printHead("mainhead");
+		_printHead("mainhead") or return;
 		slashDisplay('meta', { article => $article });
 	} else {
 		listArticle(@_);
@@ -674,7 +678,9 @@ sub editArticle {
 	my $article = {};
 	my $posttype;
 
-	_printHead("mainhead") unless $nohead;
+	unless ($nohead) {
+		_printHead("mainhead") or return;
+	}
 
 	$article = $journal->get($form->{id}) if $form->{id};
 	if ($form->{state}) {
@@ -737,7 +743,7 @@ sub _validFormkey {
 	}
 
 	if ($error) {
-		_printHead("mainhead");
+		_printHead("mainhead") or return;
 		print $error;
 		return 0;
 	} else {
@@ -758,7 +764,7 @@ sub _printHead {
 			nickname	=> $data->{nickname}
 		}
 	};
-	header($links);
+	header($links) or return;
 
 	$data->{menutype} ||= 'users';
 	$data->{width} = '100%';

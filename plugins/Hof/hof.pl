@@ -14,7 +14,7 @@ sub main {
 	my $form	= getCurrentForm();
 	my $constants	= getCurrentStatic();
 
-	header(getData('head'));
+	header(getData('head')) or return;
 
 	my $hofDB = getObject('Slash::Hof', { db_type => 'reader' });
 

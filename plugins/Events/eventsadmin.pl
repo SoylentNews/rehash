@@ -44,7 +44,7 @@ sub main {
 					redirect("$rootdir/users.pl");
 					return;
 	}
-	header();
+	header() or return;
 	print createMenu('events');
 
 	$ops->{$op}{function}->($slashdb, $constants, $user, $form, $events);

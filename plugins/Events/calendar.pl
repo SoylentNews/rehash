@@ -17,8 +17,9 @@ sub main {
 	my $form      = getCurrentForm();
 	my $events   = getObject('Slash::Events');
 
-	header() 
-		unless $form->{plain};
+	unless ($form->{plain}) {
+		header() or return;
+	}
 	# Using HTML::AsSubs
 	my $cal = HTML::CalendarMonth->new( month => 01, year => 2002 );
 	$cal->item($cal->year, $cal->month)->attr(bgcolor => 'wheat');
@@ -31,8 +32,9 @@ sub main {
 	}
 	print $cal->as_HTML;
 
-	footer()
-		unless $form->{plain};
+	unless ($form->{plain}) {
+		footer();
+	}
 }
 
 createEnvironment();

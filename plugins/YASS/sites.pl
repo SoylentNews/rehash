@@ -62,7 +62,7 @@ sub main {
 #		$r->status(200);
 	} else {
 
-		header("$constants->{sitename} Sites");
+		header("$constants->{sitename} Sites") or return;
 
 		slashDisplay('index', {
 			new_sites => $yass->getActive(15),

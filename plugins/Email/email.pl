@@ -92,7 +92,7 @@ sub main {
 		$op = $default;
 	}
 
-	header(getData('header'));
+	header(getData('header')) or return;
 
 	# Instantiate necessary plugins.
 	my %Plugins = (

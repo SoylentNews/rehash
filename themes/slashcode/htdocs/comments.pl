@@ -180,7 +180,7 @@ sub main {
 
 	$form->{pid} ||= "0";
 
-	header($discussion ? $discussion->{'title'} : 'Comments', $section);
+	header($discussion ? $discussion->{'title'} : 'Comments', $section) or return;
 
 	if ($user->{is_anon} && length($form->{upasswd}) > 1) {
 		print getError('login error');

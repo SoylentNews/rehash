@@ -62,7 +62,7 @@ sub main {
 		$form->{op} = $op = 'default';
 	}
 
-	header("vacSlash $user->{tzcode} $user->{offset}");
+	header("vacSlash $user->{tzcode} $user->{offset}") or return;
 
 	if ($allowed) {
 		$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $newsvac);

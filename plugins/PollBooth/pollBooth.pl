@@ -59,7 +59,7 @@ sub main {
 #		}
 #	}
 #
-	header(getData('title'), $form->{section}, { tab_selected => 'poll'});
+	header(getData('title'), $form->{section}, { tab_selected => 'poll'}) or return;
 
 	$ops{$op}->($form, $slashdb, $constants);
 

@@ -105,7 +105,7 @@ sub main {
 		}
 	}
 	if ($error_flag) {
-		header();
+		header() or return;
 		print $note;
 		footer();
 		return;
@@ -124,8 +124,11 @@ sub main {
 	}
 
 	$ops->{$op}->{function}->($zoo, $constants, $user, $form, $slashdb);
-	footer()
-		unless ($form->{content_type} eq 'rss');
+	my $r;
+	if ($r = Apache->request) {
+		return if $r->header_only;
+	}
+	footer() unless $form->{content_type} eq 'rss';
 }
 
 sub list {
@@ -133,6 +136,7 @@ sub list {
 	# This was never linked to, but basically we send people to search who try to just hit the blank URL
 	# -Brian
 	redirect("$constants->{rootdir}/search.pl?op=users");
+	return 1;
 }
 
 sub friends {
@@ -170,7 +174,7 @@ sub friends {
 				uid => $uid,
 				tab_selected_1	=> 'me',
 				tab_selected_2	=> 'friends'
-			});
+			}) or return;
 			$implied = FRIEND;
 		} else {
 			_printHead("friendshead", {
@@ -178,7 +182,7 @@ sub friends {
 				uid => $uid,
 				tab_selected_1	=> 'otheruser',
 				tab_selected_2	=> 'friends'
-			});
+			}) or return;
 		}
 		
 		if (@$friends) {
@@ -200,7 +204,9 @@ sub friends {
 	# Store the new user we're looking at, if any.
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
-	}       
+	}
+
+	return 1;
 }
 
 sub fof {
@@ -238,7 +244,7 @@ sub fof {
 				uid => $uid,
 				tab_selected_1	=> 'me',
 				tab_selected_2	=> 'friends'
-			});
+			}) or return;
 			$implied = FOF;
 		} else {
 			_printHead("friendsoffriendshead", {
@@ -246,7 +252,7 @@ sub fof {
 				uid => $uid,
 				tab_selected_1	=> 'otheruser',
 				tab_selected_2	=> 'friends'
-			});
+			}) or return;
 		}
 		
 		if (@$friends) {
@@ -269,6 +275,8 @@ sub fof {
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
 	}       
+
+	return 1;
 }
 
 sub enof {
@@ -306,7 +314,7 @@ sub enof {
 				uid => $uid,
 				tab_selected_1	=> 'me',
 				tab_selected_2	=> 'friends',
-			});
+			}) or return;
 			$implied = EOF;
 		} else {
 			_printHead("friendsenemieshead", {
@@ -314,7 +322,7 @@ sub enof {
 				uid => $uid,
 				tab_selected_1	=> 'otheruser',
 				tab_selected_2	=> 'friends',
-			});
+			}) or return;
 		}
 		
 		if (@$friends) {
@@ -331,7 +339,9 @@ sub enof {
 	# Store the new user we're looking at, if any.
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
-	}       
+	}
+
+	return 1;
 }
 
 sub foes {
@@ -369,7 +379,7 @@ sub foes {
 				uid => $uid,
 				tab_selected_1	=> 'me',
 				tab_selected_2	=> 'foes',
-			});
+			}) or return;
 			$implied = FOE;
 		} else {
 			_printHead("foeshead", {
@@ -377,7 +387,7 @@ sub foes {
 				uid => $uid,
 				tab_selected_1	=> 'otheruser',
 				tab_selected_2	=> 'foes',
-			});
+			}) or return;
 		}
 		
 		if (@$foes) {
@@ -394,7 +404,9 @@ sub foes {
 	# Store the new user we're looking at, if any.
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
-	}       
+	}
+
+	return 1;
 }
 
 sub fans {
@@ -432,7 +444,7 @@ sub fans {
 				uid => $uid,
 				tab_selected_1	=> 'me',
 				tab_selected_2	=> 'fans',
-			});
+			}) or return;
 			$implied = FAN;
 		} else {
 			_printHead("fanshead", {
@@ -440,7 +452,7 @@ sub fans {
 				uid => $uid,
 				tab_selected_1	=> 'otheruser',
 				tab_selected_2	=> 'fans',
-			});
+			}) or return;
 		}
 		if (@$fans) {
 			slashDisplay('plainlist', { people => $fans, editable => $editable, implied => $implied, nickname => $nick });
@@ -456,7 +468,9 @@ sub fans {
 	# Store the new user we're looking at, if any.
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
-	}       
+	}
+
+	return 1;
 }
 
 sub freaks {
@@ -494,7 +508,7 @@ sub freaks {
 				uid => $uid,
 				tab_selected_1	=> 'me',
 				tab_selected_2	=> 'freaks',
-			});
+			}) or return;
 			$implied = FREAK;
 			
 		} else {
@@ -503,7 +517,7 @@ sub freaks {
 				uid => $uid,
 				tab_selected_1	=> 'otheruser',
 				tab_selected_2	=> 'freaks',
-			});
+			}) or return;
 		}
 		if (@$freaks) {
 			slashDisplay('plainlist', { people => $freaks, editable => $editable, implied => $implied, nickname => $nick });
@@ -519,7 +533,9 @@ sub freaks {
 	# Store the new user we're looking at, if any.
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
-	}       
+	}
+
+	return 1;
 }
 
 sub all {
@@ -555,13 +571,13 @@ sub all {
 				nickname => $nick,
 				uid => $uid,
 				tab_selected_1	=> 'me',
-			});
+			}) or return;
 		} else {
 			_printHead("yourhead", { # this doesn't look right to me - Jamie
 				nickname => $nick,
 				uid => $uid,
 				tab_selected_1	=> 'otheruser',
-			});
+			}) or return;
 		}
 		if (@$people) {
 			slashDisplay('plainlist', { people => $people, editable => $editable, nickname => $nick });
@@ -577,20 +593,22 @@ sub all {
 	# Store the new user we're looking at, if any.
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
-	}       
+	}
+
+	return 1;
 }
 
 sub action {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
 	if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
-		_printHead("mainhead", { nickname => $user->{nick}, uid => $user->{uid} });
+		_printHead("mainhead", { nickname => $user->{nick}, uid => $user->{uid} }) or return;
 		print getData("no_go");
-		return;
+		return 1;
 	} else {
 		if (testSocialized($zoo, $constants, $user) && ($form->{type} ne 'neutral' || $form->{op} eq 'delete' )) {
 			print getData("no_go");
-			return 0;
+			return 1;
 		}
 
 		my @uids;
@@ -642,11 +660,11 @@ sub action {
 	# This is just to make sure the next view gets it right
 	if ($form->{type} eq 'foe') {
 		redirect("$constants->{rootdir}/my/foes/");
-		return;
 	} else {
 		redirect("$constants->{rootdir}/my/friends/");
-		return;
 	}
+
+	return 1;
 }
 
 sub check {
@@ -661,9 +679,9 @@ sub check {
                 Slash::Utility::Anchor::getSectionColors();
 
 		my $title = getData("no_uid");
-		header($title);
+		header($title) or return;
 		print $title;
-		return;
+		return 1;
 	}
 
 	my $user_change = { };
@@ -680,10 +698,10 @@ sub check {
 		uid		=> $uid,
 		tab_selected_1	=> ($uid == $user->{uid} ? 'me' : 'otheruser'),
 		tab_selected_2	=> 'relation'
-	});
+	}) or return;
 	if ($uid == $user->{uid} || $uid == $constants->{anonymous_coward_uid}  ) {
 		print getData("no_go");
-		return 0;
+		return 1;
 	}
 
 #	my (%mutual, @mutual);
@@ -726,7 +744,9 @@ sub check {
 	# Store the new user we're looking at, if any.
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
-	}       
+	}
+
+	return 1;
 }
 
 sub _printHead {
@@ -743,7 +763,7 @@ sub _printHead {
 	$data->{useredit} = $useredit;
 	my $title = getData($head, $data);
 	$data->{title} = $title;
-	header($title);
+	header($title) or return;
 	$data->{tab_selected_1} ||= 'me';
 	slashDisplay("zoohead", $data);
 }

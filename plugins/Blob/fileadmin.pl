@@ -56,7 +56,7 @@ sub main {
 		return;
 	}
 
-	header();
+	header() or return;
 
 	$ops->{$op}{function}->($slashdb, $constants, $user, $form, $blobdb);
 

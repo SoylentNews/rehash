@@ -55,7 +55,7 @@ sub main {
 		# "pause" is special, it does a 302 redirect so we need
 		# to not output any HTML.  Everything else gets this,
 		# header and menu.
-		header("subscribe");
+		header("subscribe") or return;
 		print createMenu('users', {
 			style =>	'tabbed',
 			justify =>	'right',

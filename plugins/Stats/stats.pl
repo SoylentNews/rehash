@@ -54,7 +54,7 @@ sub main {
 	# from data;SCRIPTNAME;default
 	#getData('head')
 	unless ($op eq 'graph' || $op eq 'csv') {
-		header('', '', { admin => 1, adminmenu => 'info', tab_selected => 'stats' } );
+		header('', '', { admin => 1, adminmenu => 'info', tab_selected => 'stats' } ) or return;
 		print createMenu('stats');
 	}
 
@@ -158,6 +158,7 @@ sub csv {
 	$r->header_out('Content-Disposition', "attachment; filename=$filename.csv");
 	$r->status(200);
 	$r->send_http_header;
+	return 1 if $r->header_only;
 	$r->rflush;
 	$r->print($content);
 	$r->status(200);
@@ -198,6 +199,7 @@ sub graph {
 	$r->header_out('Pragma', 'no-cache');
 	$r->status(200);
 	$r->send_http_header;
+	return 1 if $r->header_only;
 	$r->rflush;
 	$r->print($content);
 	$r->status(200);

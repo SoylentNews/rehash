@@ -396,15 +396,17 @@ sub main {
 	# three ops that (may) end up routing into showInfo(), which
 	# needs to do some stuff before it calls header(), so for
 	# those three, don't bother.
+	my $header;
 	if ($op !~ /^(userinfo|display|saveuseradmin|admin)$/) {
 		my $data = {
 			adminmenu => $ops->{$op}{adminmenu} || 'admin',
 			tab_selected => $ops->{$op}{tab_selected},
 		};
-		header(getMessage('user_header'), '', $data);
+		header(getMessage('user_header'), '', $data) or return;
 		# This is a hardcoded position, bad idea and should be fixed -Brian
 		# Yeah, we should pull this into a template somewhere...
 		print getMessage('note', { note => $errornote }) if defined $errornote;
+		$header = 1;
 	}
 
 	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
@@ -463,11 +465,14 @@ sub main {
 	errorLog("users.pl error_flag '$error_flag'") if $error_flag;
 
 	# call the method
-	my $retval = $ops->{$op}{function}->({
+	my $retval;
+	$retval = $ops->{$op}{function}->({
 		op		=> $op,
 		tab_selected_1	=> $ops->{$op}{tab_selected_1} || "",
 		note		=> $errornote,
 	}) if !$error_flag;
+
+	return if !$header && !$retval;
 
 	if ($op eq 'mailpasswd' && $retval) {
 		$ops->{$op}{update_formkey} = 0;
@@ -930,7 +935,7 @@ sub showInfo {
 
 	# Can't get user data for the anonymous user.
 	if ($fieldkey eq 'uid' && isAnon($uid)) {
-		header(getMessage('user_header'));
+		header(getMessage('user_header')) or return;
 		return displayForm();
 	}
 
@@ -949,7 +954,7 @@ sub showInfo {
 	# showInfo's header information is delayed until here, because
 	# the target user's info is not available until here.
 	vislenify($requested_user);
-	header(getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey }));
+	header(getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey })) or return;
 	# This is a hardcoded position, bad idea and should be fixed -Brian
 	# Yeah, we should pull this into a template somewhere...
 	print getMessage('note', { note => $hr->{note} }) if defined $hr->{note};
@@ -1126,7 +1131,7 @@ sub showInfo {
 	} else {
 		if (! $requested_user->{uid}) {
 			print getError('userinfo_idnf_err', { id => $id, fieldkey => $fieldkey});
-			return;
+			return 1;
 		}
 
 		$karma_flag = 1 if $admin_flag;
@@ -1353,7 +1358,7 @@ sub adminDispatch {
 
 	if ($op eq 'authoredit') {
 		# editUser() does not call header(), so we DO need to.
-		header(getMessage('user_header'), '', {});
+		header(getMessage('user_header'), '', {}) or return;
 		editUser($hr);
 
 	} elsif ($form->{saveuseradmin}) {
@@ -1367,7 +1372,7 @@ sub adminDispatch {
 
 	} elsif ($form->{userfield}) {
 		# none of these calls header(), so we DO need to.
-		header(getMessage('user_header'), '', {});
+		header(getMessage('user_header'), '', {}) or return;
 		if ($form->{edituser}) {
 			editUser($hr);
 

@@ -119,7 +119,7 @@ sub edit_message {
 
 EOT
 
-	header(getData('header'));
+	header(getData('header')) or return;
 	# print edit screen
 	slashDisplay(\$template, {error_message => $error_message});
 	footer();
@@ -174,7 +174,7 @@ sub send_message {
 	}, $user->{uid});
 
 
-	header();
+	header() or return;
 	footer();	
 
 	# print success screen
@@ -197,7 +197,7 @@ sub display_prefs {
 	my $prefs = $messages->getPrefs($uid);
 	my $userm = $slashdb->getUser($uid); # so we can modify a different user other than ourself
 
-	header(getData('header'));
+	header(getData('header')) or return;
 	print createMenu('users', {
 		style =>	'tabbed',
 		justify =>	'right',
@@ -258,7 +258,7 @@ sub list_messages {
 	my $messagecodes = $messages->getDescriptions('messagecodes');
 	my $message_list = $messages->getWebByUID();
 
-	header(getData('header'));
+	header(getData('header')) or return;
 # Spank me, this won't be here for long (aka Pater's cleanup will remove it) -Brian
 	print createMenu('users', {
 		style =>	'tabbed',
@@ -295,14 +295,14 @@ sub display_message {
 		if ($message->{message} =~ /^<URL:(\S+)>$/) {
 			redirect($1);
 		} else {
-			header(getData('header'));
+			header(getData('header')) or return;
 			slashDisplay('display', {
 				message		=> $message,
 			});
 			footer();
 		}
 	} else {
-		header(getData('header'));
+		header(getData('header')) or return;
 		print getData('message not found', {
 			id		=> $form->{id},
 		});

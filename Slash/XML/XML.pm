@@ -115,6 +115,7 @@ sub xmlDisplay {
 		$r->content_type('text/xml');
 		$r->status(200);
 		$r->send_http_header;
+		return 1 if $r->header_only;
 		$r->rflush;
 		$r->print($content);
 		$r->status(200);
