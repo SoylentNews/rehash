@@ -3,6 +3,11 @@ slash-1.0.8, 2000.07.xx
 
 *	Fixed pollBooth not displaying comments (T Caleb Fauver)
 
+*	Fixed admin.pl messing up some story text (T Caleb Fauver)
+
+*	Remove <rss> tag in RDF file / slashd for now (address
+	more fully in bender)
+
 
 slash-1.0.7, 2000.07.12
 -----------------------

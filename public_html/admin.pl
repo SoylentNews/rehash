@@ -1221,8 +1221,8 @@ EOT
 	my @extracolumns = sqlSelectColumns($S->{section})
 		if sqlTableExists($S->{section});
 
-	$S->{introtext} = stripByMode($S->{introtext}, 'literal');
-	$S->{bodytext} = stripByMode($S->{bodytext}, 'literal');
+	my $introtext = stripByMode($S->{introtext}, 'literal');
+	my $bodytext  = stripByMode($S->{bodytext}, 'literal');
 	my $SECT = getSection($S->{section});
 
 	print '<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">';
@@ -1278,7 +1278,7 @@ EOT
 	print <<EOT;
 </FONT></TD></TR></TABLE>
 <BR>Intro Copy<BR>
-	<TEXTAREA WRAP="VIRTUAL" NAME="introtext" COLS="70" ROWS="10">$S->{introtext}</TEXTAREA><BR>
+	<TEXTAREA WRAP="VIRTUAL" NAME="introtext" COLS="70" ROWS="10">$introtext</TEXTAREA><BR>
 EOT
 
 	if (@extracolumns) {
@@ -1313,7 +1313,7 @@ EOT
 	print <<EOT;
 
 Extended Copy<BR>
-	<TEXTAREA NAME="bodytext" COLS="70" WRAP="VIRTUAL" ROWS="10">$S->{bodytext}</TEXTAREA><BR>
+	<TEXTAREA NAME="bodytext" COLS="70" WRAP="VIRTUAL" ROWS="10">$bodytext</TEXTAREA><BR>
 Import Image (don't even both trying this yet :)<BR>
 	<INPUT TYPE="file" NAME="importme"><BR>
 
