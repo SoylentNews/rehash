@@ -1,0 +1,181 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+graphs
+__template__
+[% 
+
+form.stats_days = form.stats_days || 1;
+
+mygraphs = [
+	'Pages',
+	'Hits',
+	'Comments',
+	'Users',
+	'Page Bytes',
+	'Total Bytes',
+	'Section Pages',
+	'Section Bytes',
+	'Message Types',
+	'Scores',
+	'Total Comments',
+	'Total Moderations',
+	'Total Metamoderations',
+];
+
+
+SWITCH gtitle;
+
+  # Main Report
+  CASE 'Pages';
+  IF (form.stats_section && form.stats_section != 'all');
+      PROCESS make_graph
+         section  => form.stats_section,
+         type     => 'areastacked',
+         statdata => ['index_page', 'comments_page', 'article_page'];
+  ELSE;
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'areastackedindex',
+         statdata => ['total', 'index_page', 'comments_page', 'article_page'];
+  END;
+
+  CASE 'Hits';
+  IF (form.stats_section && form.stats_section != 'all');
+      PROCESS make_graph
+         section  => form.stats_section,
+         type     => 'areastacked',
+         statdata => ['rss_page', 'palm_page'];
+  ELSE;
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'areastackedindex',
+         statdata => ['grand_total', 'rss_page', 'palm_page'];
+  END;
+
+  CASE 'Comments';
+      PROCESS make_graph
+         section  => form.stats_section || 'all',
+         type     => 'area',
+         statdata => ['comments'];
+
+  CASE 'Users';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'areapercentage',
+         statdata => ['unique', 'unique_users'];
+
+  CASE 'Page Bytes';
+  IF (form.stats_section && form.stats_section != 'all');
+      PROCESS make_graph
+         section  => form.stats_section,
+         type     => 'areastacked',
+         statdata => ['index_bytes', 'article_bytes', 'comments_bytes'];
+  ELSE;
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'areastackedindex',
+         statdata => ['total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes'];
+  END;
+
+  CASE 'Total Bytes';
+  IF (form.stats_section && form.stats_section != 'all');
+      PROCESS make_graph
+         section  => form.stats_section,
+         type     => 'areastacked',
+         statdata => ['rss_bytes', 'palm_bytes'];
+  ELSE;
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'areastackedindex',
+         statdata => ['grand_total_bytes', 'rss_bytes', 'palm_bytes'];
+  END;
+
+  CASE 'Section Pages';
+      sections = Slash.db.getDescriptions('sections');
+      sect_page = [];
+      FOREACH section = sections.keys.sort;
+         sect_page.push(['page', section]);
+      END;
+      PROCESS make_graph
+         type     => 'lines',
+         statdata => sect_page;
+
+  CASE 'Section Bytes';
+      sections = Slash.db.getDescriptions('sections');
+      sect_byte = [];
+      FOREACH section = sections.keys.sort;
+         sect_byte.push(['bytes', section]);
+      END;
+      PROCESS make_graph
+         type     => 'lines',
+         statdata => sect_byte;
+
+
+  # Messages Report
+  CASE 'Message Types';
+      stats = Slash.getObject('Slash::Stats');
+      section => 'all';
+
+      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_key = stats_data_big.keys.sort.0;
+      stats_data = stats_data_big.${stats_data_key};
+
+      messages = Slash.getObject('Slash::Messages');
+      codes = messages.getDescriptions("messagecodes");
+      modes = messages.getDescriptions("deliverymodes");
+
+      statdata = [];
+      FOR code = codes.keys.nsort;
+         # skip essentially unused modes 6, 8, 11 for Slashdot
+         NEXT IF code == 6 || code == 8 || code == 11;
+         statdata.push(["msg_$code", "", codes.$code]);
+      END;
+
+      PROCESS make_graph
+         type    => 'line'; 
+
+
+  # Moderation Report
+  CASE 'Comment Scores';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'areastackedindex',
+         statdata => ['comments_score_5', 'comments_score_4', 'comments_score_3', 'comments_score_2', 'comments_score_1', 'comments_score_0', 'comments_score_-1'];
+
+  CASE 'Total Comments';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'area',
+         statdata => ['comments'];
+
+  CASE 'Total Moderations';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'area',
+         statdata => ['m1_up_total', 'm1_down_total'];
+
+  CASE 'Total Metamoderations';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'area',
+         statdata => ['m2_fair_total', 'm2_unfair_total'];
+
+
+  CASE;
+      "";
+
+END %]
+
+__seclev__
+1000
+__version__
+$Id$
