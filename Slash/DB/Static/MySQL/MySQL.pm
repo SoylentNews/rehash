@@ -568,35 +568,55 @@ sub getMailingList {
 sub getTop10Comments {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
-	my $archive_delay = $constants->{archive_delay} || 14;
-	$archive_delay = 365 if $archive_delay > 365;
+
 	my($min_points, $max_points) =
 		($constants->{minpoints}, $constants->{maxpoints});
 
 	my $num_wanted = $constants->{top10comm_num} || 10;
 
-	my $comments;
+	my($cids, $comments);
 	my $num_top10_comments = 0;
+
 	while (1) {
-		# Select the latest comments with high scores.  If we
-		# can't get 10 of them, our standards are too high;
-		# lower our minimum score requirement and re-SELECT.
-		my $c = $self->sqlSelectMany(
+                # Select the latest comments with high scores.  If we
+                # can't get 10 of them, our standards are too high;
+                # lower our minimum score requirement and re-SELECT.
+		$cids = $self->sqlSelectAll(
+			'cid',
+			'comments',
+			"date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+				AND points >= $max_points",
+			'ORDER BY date DESC');
+
+		$num_top10_comments = scalar(@$cids);
+		last if $num_top10_comments >= $num_wanted;
+                # Didn't get $num_wanted... try again with lower standards.
+                --$max_points;
+                # If this is as low as we can get... take what we have.
+                last if $max_points <= $min_points;
+	}
+
+	foreach (@$cids) {
+		# Of our prospective hot comments, find the overall time
+		# it took to moderate em up. Faster == hotter
+		$_->[1] = $self->sqlSelect(
+			'UNIX_TIMESTAMP(MAX(ts)) - UNIX_TIMESTAMP(MIN(ts))',
+			'moderatorlog',
+			"cid=$_->[0]");
+	}
+
+	@$cids = sort { $a->[1] <=> $b->[1] } @$cids;
+	$num_top10_comments = 0;
+
+	while ($num_top10_comments < $num_wanted) {
+		my $comment = $self->sqlSelectArrayRef(
 			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason",
 			"comments, stories, users",
-			"stories.time >= DATE_SUB(NOW(), INTERVAL $archive_delay DAY)
-				AND comments.points >= $max_points
+			"cid=$cids->[$num_top10_comments]->[0]
 				AND users.uid=comments.uid
-				AND comments.sid=stories.discussion",
-			"ORDER BY date DESC LIMIT $num_wanted");
-		$comments = $c->fetchall_arrayref;
-		$c->finish;
-		$num_top10_comments = scalar(@$comments);
-		last if $num_top10_comments >= $num_wanted;
-		# Didn't get $num_wanted... try again with lower standards.
-		--$max_points;
-		# If this is as low as we can get... take what we have.
-		last if $max_points <= $min_points;
+                                AND comments.sid=stories.discussion");
+		push @$comments, $comment;
+		++$num_top10_comments;
 	}
 
 	formatDate($comments, 4, 4);
