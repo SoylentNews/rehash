@@ -36,6 +36,7 @@ a_count=0; a_down=0;
 unanimous=0; unresolved=0;
 a_m2_down=0; a_m2_up=0; a_m2_count=0; a_m2_unfair_votes=0;
 moddable_items=0;
+prev_com = {};
 %]
 [% total_mods_shown=0; %]
 [% IF commentcount > 0 %]
@@ -84,16 +85,7 @@ moddable_items=0;
 	</TR>
 	[% n = min_comment %]
 	[% prev_comm_sid = 0; total_replies=0; total_karma=0; total_score=0; shown_comments=0 %]
-	[% FOREACH comment = commentstruct; %]
-		[% IF comment.type == 'poll';
-			label = 'Poll: ';
-		ELSIF comment.type == 'journal';
-			label = 'Journal Discussion: ';
-		ELSE;
-			label = '';
-		END;
-		label = label _ comment.disc_title;
-		
+	[% FOREACH comment = commentstruct;  
 		n = n + 1;
 		shown_comments = shown_comments + 1;
 		total_replies = comment.replies + total_replies;
@@ -110,7 +102,7 @@ moddable_items=0;
 		reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
 		%]
 		
-		[% IF prev_comm_sid && prev_comm_sid != comment.sid %][% PROCESS attached_to_row comment = comment label = label colspan=total_cols %] [% END %]
+		[% IF prev_comm_sid && prev_comm_sid != comment.sid %][% PROCESS attached_to_row the_comment = prev_com colspan=total_cols %] [% END %]
 		[%-
 		'<TR>';
 		IF type == "netid";
@@ -177,10 +169,11 @@ moddable_items=0;
  </tr>
 			[%- END -%]
 		[%- END -%]
+		[%- prev_com = comment -%]
 		[%-  prev_comm_sid = comment.sid; -%]
 		[%- END -%]
 		[% IF shown_comments > 0 %]
-				[%- PROCESS attached_to_row comment = commentstruct.${commentstruct.size} label = label colspan=total_cols -%]
+				[%- PROCESS attached_to_row the_comment = commentstruct.last colspan=total_cols -%]
 				[%-
 					avg_score = total_score / shown_comments FILTER format('%2.1f');
 					reason_most = ""; reason_most_hits = -1;
@@ -208,7 +201,12 @@ moddable_items=0;
 					"<TR><TD "; IF type=="netid"; 'COLSPAN="2"'; END; ">";
 					IF commentcount > n && (user.seclev > constants.comments_more_seclev
 						|| (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
-				 	<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A>
+						[% IF type == "user" %]
+						 	<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A>
+						[% ELSIF type == "netid" %]
+						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% fieldname %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A><P>
+	
+						[% END %]
 					[% END %]
 					</TD>
 <TD></TD><TD></TD>
@@ -220,8 +218,13 @@ moddable_items=0;
 					[% END %]</TD>
 					</TR>	
 		[%- ELSIF n==0 and commentcount> 0 -%]
-			<TR><TD>No comments in selected time period. <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;no_time_restriction=1">Go to latest comments...</A>
-</TD></TR>
+			<TR><TD>No comments in selected time period. 
+				[% IF type=="user" %]
+					<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;no_time_restriction=1">Go to latest comments...</A>
+				[% ELSIF type=="netid" %]
+						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% fieldname %]&amp;min_comment=[% n %]&amp;no_time_restriction=1">Go to latest comments...</A><P>
+				[% END %]
+			</TD></TR>
 		[%- ELSIF n>0 and commentcount> 0  -%]
 			<TR><TD>No more comments</TD></TR>
 		[%- ELSIF commentcount== 0 -%]
@@ -241,8 +244,16 @@ moddable_items=0;
  END %]
 
 
-[% BLOCK attached_to_row %]
-	<TR><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% comment.url %]">[% label %]</A></FONT></TD></TR>
+[% BLOCK attached_to_row;
+	IF the_comment.type == 'poll';
+		the_label = 'Poll: ';
+	ELSIF the_comment.type == 'journal';
+		the_label = 'Journal Discussion: ';
+	ELSE;
+		the_label = '';
+	END;
+	the_label = the_label _ the_comment.disc_title; %]
+	<TR><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% the_comment.url %]">[% the_label %]</A></FONT></TD></TR>
 [% END %]
 
 [% BLOCK nick_and_uid;
@@ -297,6 +308,8 @@ pct = "n/a";
 		text;
 	END %]
 [% END %]
+
+
 
 __seclev__
 10000
