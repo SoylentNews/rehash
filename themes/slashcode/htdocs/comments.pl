@@ -1469,7 +1469,7 @@ sub moderate {
 	}
 
 	if (!dbAvailable("write_comments")) {
-		print getError("comments_db_down");
+		print getError("comment_db_down");
 		return;
 	}
 
