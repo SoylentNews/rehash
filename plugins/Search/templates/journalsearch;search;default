@@ -13,7 +13,7 @@ journalsearch
 __template__
 [% USE Slash %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-	[% FOREACH journal=journals %]
+	[% FOREACH journal=entries %]
 		<TR>
 		[% IF journal.4 %]
 			<TD VALIGN="TOP">
