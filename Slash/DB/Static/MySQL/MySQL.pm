@@ -1724,7 +1724,7 @@ sub getSectionsDirty {
 sub getHeadFootPages {
 	my($self, $section, $headfoot) = @_;
 
-	return () unless $headfoot eq 'header' || $headfoot eq 'footer';
+	return [] unless $headfoot eq 'header' || $headfoot eq 'footer';
 
 	my $list = $self->sqlSelectAll(
 		'page',
