@@ -146,7 +146,7 @@ sub previewForm {
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
 	$introtext =~  s{(?<!"|=|>)(http|ftp|gopher|telnet)://(.*?)(\W\s)?[\s]}
-			{<A HREF="$1://$2">link</A> }gi;
+			{<A HREF="$1://$2">$1://$2</A> }gi;
 	$introtext =~ s/\s+$//;
 	$introtext = qq!<I>"$introtext"</I>! if $name;
 
