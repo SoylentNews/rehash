@@ -1308,8 +1308,6 @@ sub editStory {
 
 	my $display_check;
 
-#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "editStory form: " . Dumper($form);
-
 	# Editing a story that has yet to go into the DB...
 	# basically previewing. -Brian 
 	# I've never understood why we check *this* field to make
