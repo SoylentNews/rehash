@@ -680,11 +680,16 @@ sub editArticle {
 	my $article = {};
 	my $posttype;
 
+	$article = $journal->get($form->{id}) if $form->{id};
+	# you go now!
+	if ($article->{uid} && $article->{uid} != $user->{uid}) {
+		return displayFriends(@_);
+	}
+
 	unless ($nohead) {
 		_printHead("mainhead") or return;
 	}
 
-	$article = $journal->get($form->{id}) if $form->{id};
 	if ($form->{state}) {
 		$article->{date}	||= localtime;
 		$article->{article}	= $form->{article};
