@@ -36,6 +36,7 @@ __template__
 			- <A HREF="[% constants.rootdir %]/my/journal">Journal</A><BR>
 			- <A HREF="[% constants.rootdir %]/my/messages">Messages</A><BR>
 			- <A HREF="[% constants.rootdir %]/my/misc">Misc</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/amigos">Amigos</A><BR>
 			<br>
 			- <A HREF="[% constants.rootdir %]/my/friends">Friends</A><BR>
 			- <A HREF="[% constants.rootdir %]/my/foes">Foes</A><BR>

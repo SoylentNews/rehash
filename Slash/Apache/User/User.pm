@@ -446,7 +446,7 @@ sub userdir_handler {
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
 
-		} elsif ($op eq 'friendview') {
+		} elsif ($op eq 'amigos') {
 			$r->args("op=friendview&nick=$nick&uid=$uid");
 			$r->uri('/journal.pl');
 			$r->filename($constants->{basedir} . '/journal.pl');
