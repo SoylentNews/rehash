@@ -848,8 +848,6 @@ sub _printHead {
 		$data->{useredit} = $useredit;
 	}
 
-	local $user->{currentPage} = 'misc';
-
 	if ($user->{currentPage} eq 'misc') {
 		local $Slash::Utility::MAX_ERROR_LOG_LEVEL = 0;
 		use Data::Dumper;
