@@ -47,7 +47,7 @@ __template__
 		<TR VALIGN="TOP">
 			<TD ALIGN="RIGHT" COLSPAN="2"><FONT SIZE="1">
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
+					<A HREF="[% constants.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
