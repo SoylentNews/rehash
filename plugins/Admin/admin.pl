@@ -1671,7 +1671,7 @@ sub updateStory {
 	my $rendered;
 	{
 		local $user->{currentSection} = "index";
-		$rendered =  displayStory($form->{sid},'', { get_cacheable => 1});
+		$rendered =  displayStory($form->{sid}, '', { get_cacheable => 1 });
 	}
 	my $data = {
 		uid		=> $form->{uid},
@@ -1894,7 +1894,7 @@ sub saveStory {
 	my $sid = $slashdb->createStory($data);
 	{
 		local $user->{currentSection} = "index";
-		$slashdb->setStory($sid, { rendered => displayStory($sid,'', { get_cacheable => 1})});
+		$slashdb->setStory($sid, { rendered => displayStory($sid, '', { get_cacheable => 1 }) });
 	}
 
 	if ($sid) {
