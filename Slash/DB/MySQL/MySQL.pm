@@ -3633,7 +3633,7 @@ sub setAccessList {
 sub checkIsProxy {
 	my($self, $ipid);
 
-	$rows = $self->sqlSelect('count(*)', 'accesslist', "ipid='$ipid' AND isproxy='yes'";
+	my $rows = $self->sqlSelect('COUNT(*)', 'accesslist', "ipid='$ipid' AND isproxy='yes'");
 	$rows ||= 0;
 
 	return $rows ? 'yes' : 'no';
@@ -3647,7 +3647,7 @@ sub setIsProxy {
 		$isproxy = $isproxy ? 'yes' : 'no';
 	}
 
-	$rows = $self->sqlSelect('count(*)', 'accesslist', "ipid='$ipid'";
+	my $rows = $self->sqlSelect('COUNT(*)', 'accesslist', "ipid='$ipid'");
         $rows ||= 0;
 
 	if ($rows > 0) {
