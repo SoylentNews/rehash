@@ -75,6 +75,7 @@ __template__
 	<TR>
 		<TD><B>Section</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="10" NAME="section" VALUE="[% blockref.section %]"></TD>
+		<TD COLSPAN="2">[% sections = Slash.db.getDescriptions('sections-all'); Slash.createSelect("section", sections, blockred.section, 1, 0, 1) %]</TD>
 	</TR>
 	<TR>
 		<TD><B>Ordernum</B></TD>

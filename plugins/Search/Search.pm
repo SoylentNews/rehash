@@ -68,6 +68,7 @@ sub findComments {
 	# select comment ID, comment Title, Author, Email, link to comment
 	# and SID, article title, type and a link to the article
 	my $query = $self->sqlQuote($form->{query});
+	my $constants = getCurrentStatic();
 	my $columns;
 	$columns .= "discussions.section as section, discussions.url as url, discussions.uid as author_uid,";
 	$columns .= "discussions.title as title, pid, subject, ts, date, comments.uid as uid, ";
@@ -95,12 +96,21 @@ sub findComments {
 	$where .= "     AND points >= " .  $self->sqlQuote($form->{threshold})
 			if defined($form->{threshold});
 
+	my $slashdb = getCurrentDB();
+	my $section = $slashdb->getSection(); 
 	if ($form->{section}) {
-		$where .= " AND discussions.section = '$form->{section}'"
-# Bad code, kills Slashdot's Search database -Brian
-#	} else {
-#		$tables .= ", sections";
-#		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+		if ($form->{section} ne $constants->{section}) {
+			return;
+		} else {
+			$where .= " AND discussions.section = '$form->{section}'"
+		}
+	} else {
+		if ($section->{type} eq 'collected') {
+			$where .= " AND discussions.section IN ('" . join("','", @{$section->{contained}}) . "')" 
+				if (@{$section->{contained}});
+		} else {
+			$where .= " AND discussions.section = '$section->{section}'"
+		}
 	}
 
 	my $other;
@@ -245,13 +255,6 @@ sub findStory {
 	$where .= " AND stories.sid = story_text.sid AND $key" 
 		if $form->{query};
 
-	if ($form->{section}) { 
-		my $section = $self->sqlQuote($form->{section});
-		$where .= " AND ((displaystatus = 0 and $section = '')";
-		$where .= " OR (section = $section AND displaystatus != -1))";
-	} else {
-		$where .= " AND displaystatus != -1";
-	}
 	$where .= " AND time < now() AND stories.writestatus != 'delete' ";
 	$where .= " AND stories.uid=" . $self->sqlQuote($form->{author})
 		if $form->{author};
@@ -259,11 +262,23 @@ sub findStory {
 		if $form->{submitter};
 	$where .= " AND stories.subsection=" . $self->sqlQuote($form->{subsection})
 		if $form->{subsection};
+	$where .= " AND displaystatus != -1";
+
+	my $slashdb = getCurrentDB();
+	my $section = $slashdb->getSection(); 
 	if ($form->{section}) {
-		$where .= " AND stories.section = '$form->{section}'"
+		if ($form->{section} ne $constants->{section}) {
+			return;
+		} else {
+			$where .= " AND stories.section = '$form->{section}'"
+		}
 	} else {
-		$tables .= ", sections";
-		$where .= " AND sections.section = stories.section AND sections.isolate != 1 ";
+		if ($section->{type} eq 'collected') {
+			$where .= " AND stories.section IN ('" . join("','", @{$section->{contained}}) . "')" 
+				if (@{$section->{contained}});
+		} else {
+			$where .= " AND stories.section = '$section->{section}'"
+		}
 	}
 
 	if ($constants->{multitopics_enabled} && $form->{selected_topics}) {

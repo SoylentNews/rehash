@@ -488,11 +488,11 @@ CREATE TABLE sections (
 DROP TABLE IF EXISTS sections_contained;
 CREATE TABLE sections_contained (
 	id SMALLINT UNSIGNED NOT NULL auto_increment,
-	container SMALLINT UNSIGNED,
-	section SMALLINT UNSIGNED,
+	container varchar(30) NOT NULL,
+	section varchar(30) NOT NULL,
 	UNIQUE (container,section),
-	FOREIGN KEY (container) REFERENCES sections(id),
-	FOREIGN KEY (section) REFERENCES sections(id),
+	FOREIGN KEY (container) REFERENCES sections(section),
+	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 

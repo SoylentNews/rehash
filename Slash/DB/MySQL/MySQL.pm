@@ -5288,12 +5288,13 @@ sub setSubmission {
 
 ########################################################
 sub getSection {
-	my($self, $section) = @_;
+	my($self, $section, $value) = @_;
 	$section ||= getCurrentStatic('section');
 	my $answer = _genericGet({
-		table		=> 'sections',
-		table_prime	=> 'section',
-		arguments	=> \@_,
+		table => 'sections',
+		table_prime => 'section',
+		arguments => [($self, $section, $value)],
+		col_table => { label => 'contained', table => 'sections_contained', table_index => 'container', key => 'section'},
 	});
 	return $answer;
 }
@@ -5718,6 +5719,7 @@ sub _genericGet {
 	my $table = $passed->{'table'};
 	my $table_prime = $passed->{'table_prime'} || 'id';
 	my $param_table = $passed->{'param_table'};
+	my $col_table = $passed->{'col_table'};
 	my($self, $id, $val) = @{$passed->{'arguments'}};
 	my($answer, $type);
 	my $id_db = $self->sqlQuote($id);
@@ -5760,6 +5762,8 @@ sub _genericGet {
 			for (@$append) {
 				$answer->{$_->[0]} = $_->[1];
 			}
+			$answer->{$col_table->{label}} = $self->sqlSelectColArrayref($col_table->{key}, $col_table->{table}, "$col_table->{table_index}=$id_db")  
+				if $col_table;
 		}
 	} else {
 	# Without Param table
@@ -5770,6 +5774,8 @@ sub _genericGet {
 			($answer) = $self->sqlSelect($val, $table, "$table_prime=$id_db");
 		} else {
 			$answer = $self->sqlSelectHashref('*', $table, "$table_prime=$id_db");
+			$answer->{$col_table->{label}} = $self->sqlSelectColArrayref($col_table->{key}, $col_table->{table}, "$col_table->{table_index}=$id_db")  
+				if $col_table;
 		}
 	}
 
