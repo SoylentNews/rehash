@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS people;
+CREATE TABLE people (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	person MEDIUMINT UNSIGNED NOT NULL,
+	type enum("friend","foe") NOT NULL,
+	UNIQUE degree_of_seperation (uid,person,type),
+	PRIMARY KEY (id)
+);
