@@ -105,6 +105,7 @@ sub addFileForStory {
 				local $/;
 				$data = <$fh>;
 			}
+			$form->{file_content} =~ s|^.+?([^/:\\]+)$|$1|;
 		}
 
 		my $content = {

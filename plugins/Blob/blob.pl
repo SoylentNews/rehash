@@ -30,7 +30,7 @@ sub main {
 	my $r = Apache->request;
 	$r->content_type($data->{content_type});
 	$r->header_out('Cache-Control', 'private');
-	$r->header_out('Content-Disposition', "attachment; filename=$data->{filename}")
+	$r->header_out('Content-Disposition', "filename=$data->{filename}")
 		if $data->{filename};
 	$r->status(200);
 	$r->send_http_header;
