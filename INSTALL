@@ -2,17 +2,17 @@ NAME
     INSTALL - Slash Installation
 
 SYNOPSIS
-    This document describes how to install Slash 1.1.x / 2.0.x (code-named
-    "bender"). For instructions on installation of previous versions of
-    Slash, see the INSTALL document included with those distributions.
+    This document describes how to install Slash 2.0 (code-named "bender").
+    For instructions on installation of previous versions of Slash, see the
+    INSTALL document included with those distributions.
 
     These instructions have only been tested on Linux. Installation under
     BSD and other Unix OSes should work similarly. We've had reports of the
     1.0.x version of Slash running on Windows, but have done no testing and
     have no further information.
 
-    PostgreSQL support in Slash 1.1.x is currently alpha-quality, while
-    MySQL support is beta-quality.
+    PostgreSQL support in Slash 2.0 is currently alpha-quality, while MySQL
+    support is beta-quality.
 
     Slash can always be downloaded from SourceForge, and from the Slashdot
     FTP site.
@@ -101,23 +101,40 @@ UPGRADING
                     % template-tool -u VIRTUAL_USER -s LIST
 
     Data
-        Currently, there are no differences in the schema or the database
-        data between versions of Slash 2.0.
+        Currently, there are no differences in the schema between versions
+        of Slash 2.0. There are a few data differences.
 
-    Listed below are additions/deletions of templates from version to
-    version. Feel free to delete (or not) ones that are no longer used, but
-    please do add to your site templates that have been added to the
-    distribution. Add or delete, for your site, all the changes from your
-    current version up through the version you're upgrading to.
+        Slash 2.0.0-pre1 -> Slash-2.0.0 release
+            Journal Data
+                In the vars table, "journal_default_display" is set to "0".
+                It should default to "10".
 
-    Slash 2.0.0-pre2
-        Added
-            plugins/Journal/templates/pagination;journal;default
-            plugins/Journal/templates/pagination;search;default
-            themes/slashcode/templates/dispLinkComment;misc;default
-        Deleted
-            plugins/Journal/templates/journalitem;journal;default
-            plugins/Search/templates/linksearch;search;default
+                Also, "journal_user_count" is no longer in use and may be
+                deleted.
+
+                See plugins/Journal/dump.
+
+            Search Data
+                "search_default_display" should be defined in the vars
+                table, with a default of "30".
+
+                See plugins/Search/dump.
+
+    Templates
+        Listed below are additions/deletions of templates from version to
+        version. Feel free to delete (or not) ones that are no longer used,
+        but please do add to your site templates that have been added to the
+        distribution. Add or delete, for your site, all the changes from
+        your current version up through the version you're upgrading to.
+
+        Slash 2.0.0-pre2 -> Slash 2.0.0
+            Added
+                plugins/Journal/templates/pagination;journal;default
+                plugins/Search/templates/pagination;search;default
+                themes/slashcode/templates/dispLinkComment;misc;default
+            Deleted
+                plugins/Journal/templates/journalitem;journal;default
+                plugins/Search/templates/linksearch;search;default
 
   Slash 1.0 -> Slash 2.0
 
@@ -303,7 +320,8 @@ INSTALLATION
         $SLASH_PREFIX/sites/sitename/sitename.conf more than once, or if
         this file shares contents with directives in httpd.conf, that your
         Slash site WILL break. The directives in $SLASH_PREFIX/slash.conf
-        should be run only ONCE in any any site context.
+        should be run only ONCE in any any site context. Read through
+        $SLASH_PREFIX/slash.conf to make sure it all looks proper.
 
     6.  Install your Slash site.
 
@@ -318,6 +336,8 @@ INSTALLATION
         file will be created at $SLASH_PREFIX/$SITENAME/$SITENAME.conf. You
         can put its contents unto your httpd.conf, or you can just "Include"
         it in your httpd.conf.
+
+        Read the message printed at the end of running install_slashsite.
 
     7.  Start it up.
 

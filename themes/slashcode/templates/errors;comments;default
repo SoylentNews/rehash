@@ -21,7 +21,7 @@ __template__
 
 # LOGIN ERROR.
 CASE "login error" %]
-<P><B>Login for "[% form.nickname %]" has failed</B>. Please try again. [% form.op %]<BR><P>
+<P><B>Login for "[% form.unickname %]" has failed</B>. Please try again. [% form.op %]<BR><P>
 [%
 
 # NO ANONYMOUS POSTING.

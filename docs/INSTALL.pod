@@ -187,6 +187,8 @@ through the version you're upgrading to.
 
 =back
 
+=back
+
 =head2 Slash 1.0 -E<gt> Slash 2.0
 
 Please read the complete documentation of F<utils/slash1toslash2>.

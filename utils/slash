@@ -68,6 +68,8 @@ case "$1" in
 				su - $USERNAME "-c 'TZ=GMT $SLASHD $SERVER_NAME'" &
 			elif [ "$OS" = "Linux" ] ; then 
 				su - $USERNAME -c "TZ=GMT $SLASHD $SERVER_NAME" &
+			else
+				su - $USERNAME -c "TZ=GMT $SLASHD $SERVER_NAME" &
 			fi
 			echo $! > $RUNNING_PID/slashd.$SERVER_NAME.pid 
 			echo "ok PID = $! "

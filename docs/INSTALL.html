@@ -54,7 +54,7 @@
 <P>
 <HR>
 <H1><A NAME="synopsis">SYNOPSIS</A></H1>
-<P>This document describes how to install Slash 1.1.x / 2.0.x
+<P>This document describes how to install Slash 2.0
 (code-named "bender").  For instructions on installation
 of previous versions of Slash, see the INSTALL document
 included with those distributions.</P>
@@ -62,7 +62,7 @@ included with those distributions.</P>
 BSD and other Unix OSes should work similarly. We've had reports of the
 1.0.x version of Slash running on Windows, but have done no testing and
 have no further information.</P>
-<P>PostgreSQL support in Slash 1.1.x is currently alpha-quality,
+<P>PostgreSQL support in Slash 2.0 is currently alpha-quality,
 while MySQL support is beta-quality.</P>
 <P>Slash can always be downloaded from SourceForge, and from the
 Slashdot FTP site.</P>
@@ -148,16 +148,35 @@ template with the new template.
 <P></P></DL>
 <DT><STRONG><A NAME="item_Data">Data</A></STRONG><BR>
 <DD>
-Currently, there are no differences in the schema or the database data
-between versions of Slash 2.0.
+Currently, there are no differences in the schema between versions of Slash 2.0.
+There are a few data differences.
+<DL>
+<DT><STRONG><A NAME="item_Slash">Slash 2.0.0-pre1 -&gt; Slash-2.0.0 release</A></STRONG><BR>
+<DD>
+<DL>
+<DT><STRONG><A NAME="item_Journal_Data">Journal Data</A></STRONG><BR>
+<DD>
+In the vars table, "journal_default_display" is set to "0".  It should default
+to "10".
+<P>Also, "journal_user_count" is no longer in use and may be deleted.</P>
+<P>See <EM>plugins/Journal/dump</EM>.</P>
+<P></P>
+<DT><STRONG><A NAME="item_Search_Data">Search Data</A></STRONG><BR>
+<DD>
+"search_default_display" should be defined in the vars table, with a default
+of "30".
+<P>See <EM>plugins/Search/dump</EM>.</P>
 <P></P></DL>
-<P>Listed below are additions/deletions of templates from version to version.
+</DL>
+<DT><STRONG>Templates</STRONG><BR>
+<DD>
+Listed below are additions/deletions of templates from version to version.
 Feel free to delete (or not) ones that are no longer used, but please do
 add to your site templates that have been added to the distribution.  Add
 or delete, for your site, all the changes from your current version up
-through the version you're upgrading to.</P>
+through the version you're upgrading to.
 <DL>
-<DT><STRONG><A NAME="item_Slash_2%2E0%2E0%2Dpre2">Slash 2.0.0-pre2</A></STRONG><BR>
+<DT><STRONG>Slash 2.0.0-pre2 -&gt; Slash 2.0.0</STRONG><BR>
 <DD>
 <DL>
 <DT><STRONG><A NAME="item_Added">Added</A></STRONG><BR>
@@ -165,7 +184,7 @@ through the version you're upgrading to.</P>
 <DL>
 <DT><STRONG><A NAME="item_plugins%2FJournal%2Ftemplates%2Fpagination%3Bjourn">plugins/Journal/templates/pagination;journal;default</A></STRONG><BR>
 <DD>
-<DT><STRONG><A NAME="item_plugins%2FJournal%2Ftemplates%2Fpagination%3Bsearc">plugins/Journal/templates/pagination;search;default</A></STRONG><BR>
+<DT><STRONG><A NAME="item_plugins%2FSearch%2Ftemplates%2Fpagination%3Bsearch">plugins/Search/templates/pagination;search;default</A></STRONG><BR>
 <DD>
 <DT><STRONG><A NAME="item_themes%2Fslashcode%2Ftemplates%2FdispLinkComment%3">themes/slashcode/templates/dispLinkComment;misc;default</A></STRONG><BR>
 <DD>
@@ -351,7 +370,8 @@ or <EM>$SLASH_PREFIX/sites/sitename/sitename.conf</EM> more than once,
 or if this file shares contents with directives in httpd.conf,
 that your Slash site WILL break. The directives in
 <EM>$SLASH_PREFIX/slash.conf</EM> should be run only ONCE in any any
-site context.</P>
+site context.  Read through <EM>$SLASH_PREFIX/slash.conf</EM> to make
+sure it all looks proper.</P>
 <P></P>
 <LI>
 <STRONG>Install your Slash site.</STRONG>
@@ -365,6 +385,7 @@ Answer the questions.  When done, another configuration
 file will be created at <EM>$SLASH_PREFIX/$SITENAME/$SITENAME.conf</EM>.
 You can put its contents unto your httpd.conf, or you can just <CODE>Include</CODE>
 it in your httpd.conf.</P>
+<P>Read the message printed at the end of running install_slashsite.</P>
 <P></P>
 <LI>
 <STRONG>Start it up.</STRONG>
