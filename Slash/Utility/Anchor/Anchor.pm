@@ -395,6 +395,36 @@ sub prepAds {
 				# enable cases 7,8,9 (but 8,9 eliminated above)
 			|| $ENV{SCRIPT_NAME} =~ m{/(\w+)/slashhead\.inc$}
 		);
+	my $section = "(n/a)";
+	if ($constants->{ad_messaging_sections}
+		&& ref($constants->{ad_messaging_sections} eq 'HASH'
+		&& %{$constants->{ad_messaging_sections}})
+	) {
+		my $form = getCurrentForm();
+		my $slashdb;
+		if ($form->{sid} && ($slashdb = getCurrentDB())) {
+			if ($form->{sid} !~ /^\d+$/) {
+				my $story = $slashdb->getStory($form->{sid});
+				$section = $story->{section};
+			} else {
+				my $discussion = $slashdb->getDiscussion($form->{sid});
+				$section = $discussion->{section};
+			}
+		}
+		$use_messaging = $constants->{ad_messaging_sections}{$section} ? 1 : 0;
+	}
+	if ($constants->{ad_debug}) {
+		print STDERR join(" ",
+			"use_messaging '$use_messaging'",
+			"adless '$adless' num '$ad_messaging_num'",
+			"banlength '" . length($ENV{"AD_BANNER_$ad_messaging_num"}) . "'",
+			"prob '$ad_messaging_prob'",
+			"section '$section'",
+			"ad_m_s{section} '$constants->{ad_messaging_sections}{$section}'",
+			"SCRIPT_NAME '$ENV{SCRIPT_NAME}'",
+			"REQUEST_URI '$ENV{REQUEST_URI}'\n"
+		);
+	}
 
 	# If it is desirable to only display messaging ads on article.pl
 	# stories that have bodytext, here would be the place to do that
