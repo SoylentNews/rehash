@@ -1552,7 +1552,7 @@ sub footer {
 	if ($I{U}{aseclev}) {
 		$motd .= currentAdminUsers();
 	} else {
-		$motd .= blockCache('motd') . "<TD>&nbsp;</TD>";
+		$motd .= blockCache('motd');
 	}
 
 	my $vertmenu = blockCache('mainmenu');
@@ -1882,8 +1882,7 @@ EOT
 		<FONT COLOR="$I{fg}[3]" SIZE="${\( $I{fontbase} + 2 )}">
 EOT
 	
-		print blockCache('commentswarning'),
-			"<BR>( Beta is only a state of mind )</FONT></FORM></TD></TR>";
+		print blockCache('commentswarning'), "</FONT></FORM></TD></TR>";
 
 		if ($I{U}{mode} eq 'nocomment') {
 			print "</TABLE>";

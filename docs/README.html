@@ -1,10 +1,11 @@
-<HTML>
-<HEAD>
-<TITLE>README - Slashdot Readme</TITLE>
-<LINK REV="made" HREF="mailto:patrick.galbraith@andover.net">
-</HEAD>
+    <HTML> 
+	<HEAD> 
+	    <TITLE>README - Slashdot Readme
 
-<BODY>
+</TITLE> 
+	</HEAD>
+
+	<BODY>
 
 <!-- INDEX BEGIN -->
 
@@ -26,52 +27,73 @@
 
 <HR>
 <P>
-<H1><A NAME="NAME">NAME</A></H1>
-<P>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
 README - Slashdot Readme
+
+
+<P>
 
 <P>
 <HR>
-<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
-<P>
-This is the README file for Slash, release 1.0.3. Please read all
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+This is the README file for Slash, release 1.0.4. Please read all
 documentation carefully. The various documents explain the database schema,
 the various fields in the database, and some of the reasoning behind the
 design of the schema, installation and setup.
 
+
 <P>
+
 Please see <EM>INSTALL</EM> for database upgrade instructions. Code upgrading is simple: use the new
 code in the new distribution, and make sure that you have the new values
 and configurations in your copies of
 <EM>slashdotrc.pl</EM> and <EM>httpd.conf</EM>. If you neglect to upgrade these last two, your site likely will not work.
 
+
 <P>
+
 Also, double-check every line of <EM>CHANGES</EM> to see if anything has changed to affect your site (like a change from
 Mail::Sender to Mail::Sendmail, for example).
 
+
 <P>
+
 <STRONG>Note</STRONG>: This page looks best in a browser (the HTML version of it is in the <EM>docs/</EM> directory). You can print it out, but some of the ASCII illustrations may
 get munged in printing, but the directions will certainly appear good
 enough to read.
 
+
 <P>
+
 We have a preliminary Getting Started document at
 <EM>public_html/getting_started.shtml</EM>. If this is your first time with Slash, or you have questions or problems
 getting started, look here first.
 
+
 <P>
+
 See the Slash web site, with support, docs, latest downloads, FAQs, and
 more, at &amp;lt;URL:http://slashcode.com/&amp;gt;.
 
+
 <P>
-This release is tagged in CVS as v1_0_3_1. See the SourceForge site at <A
+
+This release is tagged in CVS as v1_0_4_0. See the SourceForge site at <A
 HREF="http://sourceforge.net/project/?group_id=4421">http://sourceforge.net/project/?group_id=4421</A>
 for CVS, bug reporting, patch submissions, and downloads.
 
+
+<P>
+
 <P>
 <HR>
-<H2><A NAME="What_is_Slash_">What is Slash?</A></H2>
-<P>
+<H2><A NAME="What_is_Slash_">What is Slash?
+
+</A></H2>
 Maybe this is a dumb question, but why not get this answered? Slash is a
 database-driven news and message board, using mod_perl and MySQL. It has
 been programmed, more so recently, to use persistance for a good deal of
@@ -82,10 +104,14 @@ want. This can mostly be done via data. Slash is a database beast in the
 true sense. The Slash code is distributed under the GNU General Public
 License (see <EM>COPYING</EM>).
 
+
+<P>
+
 <P>
 <HR>
-<H2><A NAME="Hardware_Software">Hardware/Software</A></H2>
-<P>
+<H2><A NAME="Hardware_Software">Hardware/Software
+
+</A></H2>
 The live Slashdot used five separate servers for its high hit count. This
 is not a target number for all Slash sites. You can run all of Slash on one
 server, or throw it on 20 servers. The more load you want it to handle, the
@@ -96,45 +122,77 @@ Whatever runs Apache/mod_perl and MySQL will run Slash. Slash does have
 some MySQL-specific SQL statements contained within, but it's not entirely
 impossible to run it on another RDBMS with some modifications.
 
+
+<P>
+
 <P>
 <HR>
-<H2><A NAME="Documentation">Documentation</A></H2>
-<P>
+<H2><A NAME="Documentation">Documentation
+
+</A></H2>
 Please read the various documents that come with the Slash code (in
 <EM>docs/</EM>). There's a lot of information that can give you a better idea of what the
 code does, how to install the code, and other information on the database
 schema.
 
-<DL>
-<DT><STRONG><A NAME="item_README">README</A></STRONG><DD>
+
 <P>
+
+<DL>
+<DT><STRONG><A NAME="item_README">README
+
+</A></STRONG><DD>
 this document (POD, HTML and plaintext)
 
-<DT><STRONG><A NAME="item_INSTALL">INSTALL</A></STRONG><DD>
+
 <P>
+
+<DT><STRONG><A NAME="item_INSTALL">INSTALL
+
+</A></STRONG><DD>
 how to install (POD, HTML and plaintext)
 
-<DT><STRONG><A NAME="item_slasherd">slasherd.fig</A></STRONG><DD>
+
 <P>
+
+<DT><STRONG><A NAME="item_slasherd">slasherd.fig
+
+</A></STRONG><DD>
 the ERD diagram of the Slash database schema (use xfig to read it)
 
-<DT><STRONG><A NAME="item_slashtables">slashtables.html/sdw/ps</A></STRONG><DD>
+
 <P>
+
+<DT><STRONG><A NAME="item_slashtables">slashtables.html/sdw/ps
+
+</A></STRONG><DD>
 a description of all the tables and columns of the database schema (HTML,
 StarOffice, and PostScript)
+
+
+<P>
 
 </DL>
 <P>
 <HR>
-<H2><A NAME="Installation">Installation</A></H2>
-<P>
+<H2><A NAME="Installation">Installation
+
+</A></H2>
 See <EM>INSTALL</EM>.
+
+
+<P>
 
 <P>
 <HR>
-<H1><A NAME="AUTHOR">AUTHOR</A></H1>
-<P>
-Patrick Galbraith and Chris Nandor. Last Modified May 18, 2000.
-</BODY>
+<H1><A NAME="AUTHOR">AUTHOR
 
-</HTML>
+</A></H1>
+Patrick Galbraith and Chris Nandor. Last Modified May 31, 2000.
+
+<P>
+
+</DL>
+    </BODY>
+
+    </HTML>

@@ -1,5 +1,26 @@
-slash-1.0.4, 2000.0x.xx
+slash-1.0.4, 2000.05.31
 -----------------------
+
+*	Fixed nickname matching in mailPassword() in users.pl
+	to match case indepently
+
+*	Set user's points to 0 in users.pl if they are unwilling
+	to moderate
+
+*	Fixed pollBooth.pl to not allow voting by anonymous users
+	if allow_anonymous is false
+	
+*	Removed extra TD tags after motd in Slash::footer()
+
+*	Removed spurious text after commentswarning in
+	Slash::printComments()
+	
+*	Moved code to load Slash.pm to the end of slashd, so
+	subroutines could be put in slashdotrc.pl to override
+	subroutines in slashd
+
+*	Made index.shtml update every interval in slashd, instead
+	of only when writestatus = 1
 
 *	Removed empty columns from grid in submit.pl
 

@@ -27,7 +27,6 @@
 use sigtrap;
 use strict;
 use vars '%I';
-use Slash;
 use Carp;
 use File::Basename;
 use File::Path;
@@ -35,12 +34,7 @@ use LWP::UserAgent;
 use HTTP::Request;
 use URI::Escape;
 
-*I = getSlashConf();
 my $totalChangedStories = 1;
-
-mkpath "$I{datadir}/logs/", 0, 0755;
-open STDERR, ">> $I{datadir}/logs/slashd.log"
-	or die "Can't open STDERR to $I{datadir}/logs/slashd.log: $!";
 
 sub END { Carp::cluck("why am I here?") }
 
@@ -603,11 +597,11 @@ sub freshenup {
 
 	my($w) = getvar("writestatus");
 
-	if ($updates{articles} ne "" || $w ne "0") {
+#	if ($updates{articles} ne "" || $w ne "0") {
 		setvar("writestatus", "0");
 		prog2file("$I{basedir}/index.pl ssi=yes", "$I{basedir}/index.shtml");
 		# prog2file("$I{basedir}/index.pl ssi=yes\\\&mode=flat","$I{basedir}/index_F.shtml");
-	}
+#	}
 
 	foreach my $key (keys %updates) {
 		next unless $key;
@@ -674,44 +668,57 @@ EOT
 	$I{dbh}->do("UNLOCK TABLES");
 }
 
-slashdPid();
-slashdLog("Starting up Slashd with pid $$");
+main();
 
-my $last = my $modlast = 0;
-while (1) {
-	freshenup();
-	if ((time - $last) > 60 * 60 ) { # Every Hour
-		slashdLog("Doing Hourly Update");
-		nukeBlockCache();
-		newfooter();
-		setheadertopics();
-		openBackend();
+sub main {
+	require Slash;
+	Slash->import;
+	*I = getSlashConf();
 
-#		getSlicesTable() if $I{run_ads};
+	open STDERR, ">> $I{datadir}/logs/slashd.log"
+		or die "Can't open STDERR to $I{datadir}/logs/slashd.log: $!";
 
-		system("$I{datadir}/portald &");
-		sleep(60 * 2);
+	slashdPid();
+	slashdLog("Starting up Slashd with pid $$");
 
-		my($today) = sqlSelect("to_days(now())");
-		my($yesterday) = getvars("today");
+	my $last = my $modlast = 0;
+	while (1) {
+		freshenup();
+		if ((time - $last) > 60 * 60 ) { # Every Hour
+			slashdLog("Doing Hourly Update");
+			nukeBlockCache();
+			newfooter();
+			setheadertopics();
+			openBackend();
 
-		if ($today ne $yesterday) {
+#			getSlicesTable() if $I{run_ads};
+
 			newmotd();
-			setvar("today", $today);
-			slashdLog("It's Tomorrow: Run Slashd daily Voodoo");
-			system("$I{datadir}/dailyStuff &");
-		}
-		$last = time;
+			system("$I{datadir}/portald &");
+			sleep(60 * 2);
 
-	} elsif ((time - $modlast) > (60 * 60 * 2)) { # Every 2 Hours
-		slashdLog("Running Moderatord");
-		system("$I{datadir}/moderatord");
-		prog2file("$I{basedir}/hof.pl ssi=yes", "$I{basedir}/hof.shtml");
-		prog2file("$I{basedir}/topics.pl ssi=yes", "$I{basedir}/topics.shtml");
-		prog2file("$I{basedir}/cheesyportal.pl ssi=yes",
-			  "$I{basedir}/cheesyportal.shtml");
-		$modlast = time;
+			my($today) = sqlSelect("to_days(now())");
+			my($yesterday) = getvars("today");
+
+			if ($today ne $yesterday) {
+				setvar("today", $today);
+				slashdLog("It's Tomorrow: Run Slashd daily Voodoo");
+				system("$I{datadir}/dailyStuff &");
+			}
+			$last = time;
+
+		} elsif ((time - $modlast) > (60 * 60 * 2)) { # Every 2 Hours
+			slashdLog("Running Moderatord");
+			system("$I{datadir}/moderatord");
+			prog2file("$I{basedir}/hof.pl ssi=yes", "$I{basedir}/hof.shtml");
+			prog2file("$I{basedir}/topics.pl ssi=yes", "$I{basedir}/topics.shtml");
+			prog2file("$I{basedir}/cheesyportal.pl ssi=yes",
+				"$I{basedir}/cheesyportal.shtml");
+			$modlast = time;
+		}
+
+		sleep(60 * $I{updatemin}); # Sleep for 5 minutes
 	}
-	sleep(60 * $I{updatemin}); # Sleep for 5 minutes
 }
+
 __END__

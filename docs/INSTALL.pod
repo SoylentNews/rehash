@@ -386,6 +386,14 @@ and install apache for you:
 
 This will install both mod_perl and apache.
 
+B<You MUST install mod_perl and Apache as directed here>.  OK, that is
+not strictly true, but it is mostly true.  If you already have mod_perl
+installed, chances are it is not configured properly to work with Slash
+and you must rebuild it.  If you are using the provided httpd.conf file
+from the slash distribution, and Apache is giving you errors, chances
+are mod_perl is not installed correctly, and you need to build it from
+scratch.
+
 =item 11.
 
 Install the listed perl modules in the order listed in L<"Perl
@@ -452,7 +460,8 @@ file, since it is subject to change significantly from one release to
 the next.
 
 If your web server is inside a firewall, you may wish to set the
-basedomain variable to "", so all links will be relative to F</>.
+rootdir variable to "" (it is below the other variables, toward the
+bottom), so all links will be relative to F</>.
 
 If you are doing virtual hosting for multple Slash sites, see the
 instructions at the bottom of F<slashdotrc.pl> and the sample

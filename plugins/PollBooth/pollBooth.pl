@@ -164,7 +164,10 @@ sub savepoll {
 sub vote {
 	my($qid, $aid) =@_;
 	my $notes = "Displaying poll results $aid";
-	if ($aid > 0) {
+	if ($I{U}{uid} == -1 && ! $I{allow_anonymous}) {
+		$notes = "You may not vote anonymously.  " .
+		    qq[Please <A HREF="$I{rootdir}/users.pl">log in</A>.];
+	} elsif ($aid > 0) {
 		my($id) = sqlSelect("id","pollvoters",
 			"qid=" . $I{dbh}->quote($qid)." AND 
 			 id="  . $I{dbh}->quote($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR}) . " AND
