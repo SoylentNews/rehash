@@ -403,7 +403,7 @@ EOT
 	$$subj =~ s/\(Score(.*)//i;
 	$$subj =~ s/Score:(.*)//i;
 
-	unless (defined($$comm = balance_tags($$comm, 1))) {
+	unless (defined($$comm = balanceTags($$comm, 1))) {
 		editComment() and return unless $preview;
 		print <<EOT;
 You can only post nested lists and blockquotes four levels deep.
