@@ -17,6 +17,11 @@ sub main {
 		users => \&userSearch,
 		stories => \&storySearch
 	);
+	my %ops_rss = (
+		comments => \&commentSearchRSS,
+		users => \&userSearchRSS,
+		stories => \&storySearchRSS
+	);
 
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
@@ -33,27 +38,40 @@ sub main {
 	# get rid of bad characters
 	$form->{query} =~ s/[^A-Z0-9'. ]//gi;
 
-	header("$constants->{sitename}: Search $form->{query}", $form->{section});
-	titlebar("99%", "Searching $form->{query}");
+	if ($form->{content_type} eq 'rss') {
+		my $r = Apache->request;
+		$r->header_out('Cache-Control', 'private');
+		$r->content_type('text/xml');
+		$r->status(200);
+		$r->send_http_header;
+		$r->rflush;
+		if($ops_rss{$form->{op}}) {
+			$ops_rss{$form->{op}}->($form, $constants);
+		} else {
+			$ops_rss{'stories'}->($form, $constants);
+		}
+		$r->status(200);
+	} else {
+		header("$constants->{sitename}: Search $form->{query}", $form->{section});
+		titlebar("99%", "Searching $form->{query}");
 
-	$form->{op} ||= 'stories';
-	my $authors = _authors();
-	slashDisplay('searchform', {
-		section => getSection($form->{section}),
-		tref =>$slashdb->getTopic($form->{topic}),
-		op => $form->{op},
-		authors => $authors
-	});
+		$form->{op} ||= 'stories';
+		my $authors = _authors();
+		slashDisplay('searchform', {
+			section => getSection($form->{section}),
+			tref =>$slashdb->getTopic($form->{topic}),
+			op => $form->{op},
+			authors => $authors
+		});
 
-	#searchForm($form);
-
-	if($ops{$form->{op}}) {
-		$ops{$form->{op}}->($form, $constants);
-	} 
+		if($ops{$form->{op}}) {
+			$ops{$form->{op}}->($form, $constants);
+		} 
+		footer();	
+	}
 
 	writeLog($form->{query})
 		if $form->{op} =~ /^(?:comments|stories|users)$/;
-	footer();	
 }
 
 
@@ -195,6 +213,113 @@ sub storySearch {
 		args		=> _buildargs($form),
 		start => $start,
 	});
+}
+
+#################################################################
+sub commentSearchRSS {
+	my ($form, $constants) = @_;
+	my $slashdb = getCurrentDB();
+	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
+
+	my $start = fixint($form->{start}) || 0;
+	my $comments = $searchDB->findComments($form, $start, 15);
+
+	my $rss = XML::RSS->new(
+		version		=> '1.0',
+		encoding	=> $constants->{rdfencoding},
+	);
+
+	$rss->channel(
+		title	=> xmlencode($constants->{sitename} . ' Search'),
+		'link'	=> xmlencode($constants->{absolutedir} . '/search.pl'),
+		description	=> xmlencode($constants->{sitename} . ' Search'),
+	);
+
+	$rss->image(
+		title	=> xmlencode($constants->{sitename}),
+		url	=> xmlencode($constants->{rdfimg}),
+		'link'	=> $constants->{absolutedir} . '/',
+	);
+
+	for my $entry (@$comments) {
+			my $time = timeCalc($entry->[8]);
+			$rss->add_item(
+				title	=> xmlencode("$entry->[5] ($time)"),
+				'link'	=> ($constants->{absolutedir} . "/comments.pl?sid=entry->[1]&amp;pid=entry->[4]#entry->[10]"),
+			);
+	}
+	return $rss->as_string;
+}
+
+#################################################################
+sub userSearchRSS {
+	my ($form, $constants) = @_;
+	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
+
+	my $start = fixint($form->{start}) || 0;
+	my $users = $searchDB->findUsers($form, $start, 15);
+
+	my $rss = XML::RSS->new(
+		version		=> '1.0',
+		encoding	=> $constants->{rdfencoding},
+	);
+
+	$rss->channel(
+		title	=> xmlencode($constants->{sitename} . ' Search'),
+		'link'	=> xmlencode($constants->{absolutedir} . '/search.pl'),
+		description	=> xmlencode($constants->{sitename} . ' Search'),
+	);
+
+	$rss->image(
+		title	=> xmlencode($constants->{sitename}),
+		url	=> xmlencode($constants->{rdfimg}),
+		'link'	=> $constants->{absolutedir} . '/',
+	);
+
+	for my $entry (@$users) {
+			my $time = timeCalc($entry->[3]);
+			$rss->add_item(
+				title	=> xmlencode("$entry->[0]"),
+				'link'	=> xmlencode($constants->{absolutedir} . '/users.pl?nick=' . $entry->[0]),
+			);
+	}
+	return $rss->as_string;
+
+}
+
+#################################################################
+sub storySearchRSS {
+	my ($form, $constants) = @_;
+	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
+
+	my $start = fixint($form->{start}) || 0;
+	my $stories = $searchDB->findStory($form, $start, 15);
+
+	my $rss = XML::RSS->new(
+		version		=> '1.0',
+		encoding	=> $constants->{rdfencoding},
+	);
+
+	$rss->channel(
+		title	=> xmlencode($constants->{sitename} . ' Search'),
+		'link'	=> xmlencode($constants->{absolutedir} . '/search.pl'),
+		description	=> xmlencode($constants->{sitename} . ' Search'),
+	);
+
+	$rss->image(
+		title	=> xmlencode($constants->{sitename}),
+		url	=> xmlencode($constants->{rdfimg}),
+		'link'	=> $constants->{absolutedir} . '/',
+	);
+
+	for my $entry (@$stories) {
+			my $time = timeCalc($entry->[3]);
+			$rss->add_item(
+				title	=> xmlencode("$entry->[1] ($time)"),
+				'link'	=> xmlencode($constants->{absolutedir} . '/article.pl?sid=' . $entry->[2]),
+			);
+	}
+	return $rss->as_string;
 }
 
 #################################################################

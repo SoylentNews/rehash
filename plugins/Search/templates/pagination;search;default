@@ -13,14 +13,14 @@ pagination
 __template__
 	[% back = back || 0;
 	   IF (back > -1) || forward %]
-				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&start=[% forward %]">&lt;Next [% constants.search_default_display %] matches</A>
+				[% IF (back > -1) %]
+					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&start=[% back %]">&lt;Last [% constants.search_default_display %] matches</A>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
-				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&start=[% back %]">Last [% constants.search_default_display %] matches&gt;</A>
+				[% IF forward %]
+					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&start=[% forward %]">Next [% constants.search_default_display %] matches&gt;</A>
 				[% END %]
 	[% END %]
 __seclev__
