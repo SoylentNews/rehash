@@ -1136,9 +1136,11 @@ A random value based on alphanumeric characters
 {
 	my @chars = (0..9, 'A'..'Z', 'a'..'z');
 	sub getAnonId {
-		my $str;
-		$str = '-1-' unless $_[0];
-		$str .= join('', map { $chars[rand @chars] }  0 .. 9);
+		my($noprefix, $count) = @_;
+		$count ||= 10;
+		my $str = "";
+		$str = '-1-' unless $noprefix;
+		$str .= join('', map { $chars[rand @chars] } 1 .. $count);
 		return $str;
 	}
 }
