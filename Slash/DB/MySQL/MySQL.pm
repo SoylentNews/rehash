@@ -5412,7 +5412,7 @@ sub getSections {
 	my $answer = _genericGetsCache('sections', 'section', '', @_);
 
 	my $rootdir = getCurrentStatic('rootdir');
-	for my $section (%$answer) {
+	for my $section (keys %$answer) {
 		# add rootdir, form figured dynamically -- pudge
 		$answer->{$section}{rootdir} = set_rootdir(
 			$answer->{$section}{url}, $rootdir
