@@ -32,8 +32,15 @@ $task{$me}{code} = sub {
 	# other two times, we just update the top three stories and
 	# the front page, skipping sectional stuff and other stories.
 	my $do_all = ($info->{invocation_num} % 3 == 1) || 0;
+
+	# If run with runtask, you can specify some options on the comand
+	# line, e.g. to chew through writing .shtml files to disk for up
+	# to five minutes:
+	# runtask -u slashusername -o run_all=1,timeout_shtml=300 freshenup
 	$do_all = 1 
 		if $constants->{task_options}{run_all};
+	my $timeout_render = 30;
+	my $timeout_shtml = $constants->{task_options}{timeout_shtml} || 90;
 
 	my $max_stories = defined($constants->{freshenup_max_stories})
 		? $constants->{freshenup_max_stories}
@@ -70,7 +77,7 @@ $task{$me}{code} = sub {
 	STORIES_RENDER: for my $sid (@$stories) {
 
 		# Don't run forever...
-		if (time > $start_time + 30) {
+		if (time > $start_time + $timeout_render) {
 			slashdLog("Aborting stories at render, too much elapsed time");
 			last STORIES_RENDER;
 		}
@@ -114,7 +121,7 @@ $task{$me}{code} = sub {
 		# Since this task is run every minute, quitting after
 		# 90 seconds of work should mean we only stomp on the
 		# one invocation following.
-		if (time > $start_time + 90) {
+		if (time > $start_time + $timeout_shtml) {
 			slashdLog("Aborting stories at freshen, too much elapsed time");
 			last STORIES_FRESHEN;
 		}
