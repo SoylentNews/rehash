@@ -112,7 +112,7 @@ sub _authors {
 sub _topics {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $topics = $reader->getDescriptions('topics');
+	my $topics = $reader->getDescriptions('topics-searchable');
 	my %newtopics = %$topics;
 	$newtopics{''} = getData('all_topics');
 
@@ -131,10 +131,9 @@ sub _sort {
 sub _skins {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $skins = $reader->getDescriptions('skins');
+	my $skins = $reader->getDescriptions('skins-searchable');
 	my %newskins = %$skins;
 	$newskins{''} = getData('all_sections');  # keep Sections name for public
-	delete $newskins{'polls'};
 
 	return \%newskins;
 }
