@@ -85,10 +85,11 @@ sub archiveStories {
 			# Note the change in prog2file() invocation.
 			@rc = prog2file(
 				"$constants->{basedir}/article.pl",
-				$args,
-				"$constants->{basedir}/$section/$sid.shtml",
-				verbosity(), 1
-			);
+				"$constants->{basedir}/$section/$sid.shtml", {
+					args =>		$args,
+					verbosity =>	verbosity(),
+					handle_err =>	1
+			});
 			if (verbosity() >= 2) {
 				my $log="$me archived $section:$sid ($title)";
 				slashdLog($log);
@@ -99,10 +100,11 @@ sub archiveStories {
 			# Note the change in prog2file() invocation.
 			@rc = prog2file(
 				"$constants->{basedir}/article.pl",
-				$args,
-				"$constants->{basedir}/$sid.shtml",
-				verbosity(), 1
-			);
+				"$constants->{basedir}/$sid.shtml", {
+					args =>		$args,
+					verbosity =>	verbosity(),
+					handle_err =>	1
+			});
 			if (verbosity() >= 2) {
 				slashdLog("$me archived $sid ($title)");
 				slashdLog("Error channel:\n$rc[1]")

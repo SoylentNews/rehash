@@ -296,22 +296,28 @@ sub doLog {
 # name is specified.
 # 
 # Extended: If you are looking for specific data to be returned from the
-# program called, prog2file will return a scalar with all data returned from
-# STDERR
+# program called, prog2file will return a scalar with all data returned
+# from STDERR
 #
-# Of course the params are beginning to get out of hand, but were necessary
-# for the move from slashd/runtask.
+# The API was changed on 2002/06/01 to have the options be modular.
+# - Jamie
 
 sub prog2file {
-	my($command, $arguments, $f, $verbosity, $handle_err) = @_;
+	my($command, $filename, $options) = @_;
+	# was: ($comment, $arguments, $f, $verbosity, $handle_err) = @_;
 	return 0 unless -e $command and -r _ and -x _;
-	$verbosity ||= 0;
-	$handle_err ||= 0;
+	my $arguments = $options->{args} || "";
+	$arguments = join(" ", @$arguments)
+		if ref($arguments) && ref($arguments) eq 'ARRAY';
+	$arguments = " $arguments" if $arguments;
+	my $verbosity = $options->{verbosity} || 0;
+	my $handle_err = $options->{handle_err} || 0;
+
+	my $exec = "$command$arguments";
 	my $success = 0;
 	my $err_str = "";
-
-	my $exec = "$command $arguments";
-	my($data, $err);
+	my $data = undef;
+	my $stderr_text = "";
 
 	# Two ways of handling data from child programs yet we maintain
 	# backwards compatibility.
@@ -320,13 +326,13 @@ sub prog2file {
 	} else {
 		my($errfh, $errfile) = tempfile();
 		$data = `$exec 2>$errfile`;
-		$err = join '', <$errfh>;
+		$stderr_text = join '', <$errfh>;
 		close $errfh;
 		unlink $errfile;
 	}
 	my $bytes = length $data;
 
-	my $dir = dirname($f);
+	my $dir = dirname($filename);
 	my @created = mkpath($dir, 0, 0775) unless -e $dir;
 	if (!-e $dir or !-d _ or !-w _) {
 		$err_str .= " mkpath($dir) failed '"
@@ -336,8 +342,8 @@ sub prog2file {
 		$err_str .= " no data";
 	} else {
 		my $fh = gensym();
-		if (!open $fh, "> $f\0") {
-			$err_str .= " could not write to '$f': '$!'";
+		if (!open $fh, "> $filename\0") {
+			$err_str .= " could not write to '$filename': '$!'";
 		} else {
 			print $fh $data;
 			close $fh;
@@ -351,7 +357,7 @@ sub prog2file {
 	$success_str =~ s/\s+/ /g; chomp $success_str;
 
 	if ($verbosity >= 2) {
-		my $logdata = join(" ", $command_base, $arguments, "bytes=$bytes$success_str");
+		my $logdata = "$command_base$arguments bytes=$bytes$success_str";
 		if (defined &main::slashdLog) {
 			main::slashdLog($logdata);
 		} else {
@@ -362,7 +368,7 @@ sub prog2file {
 	# Old way.
 	return $success if ! $handle_err;
 	# New way.
-	return($success, $err);
+	return($success, $stderr_text);
 }
 
 

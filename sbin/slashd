@@ -43,6 +43,7 @@ use vars qw(
 	%task $me
 	$event_ar
 	$cron
+	$am_child
 );
 
 my $virtual_user = $ARGV[0];
@@ -64,12 +65,13 @@ exit 0;
 # The standard log command.
 
 sub slashdLog {
+	my(@args) = @_;
 	if ($pids{$$} && $pids{$$}{forktype} == SLASHD_NOWAIT) {
 		# prepend script name if we are a child that is forked nowait
-		$_[0] =~ s/^$pids{$$}{taskname}\s*//;
-		$_[0] = "[$pids{$$}{taskname}] $_[0]";
+		$args[0] =~ s/^$pids{$$}{taskname}\s*//;
+		$args[0] = "[$pids{$$}{taskname}] $args[0]";
 	}
-	doLog('slashd', \@_);
+	doLog('slashd', \@args);
 }
 
 # log children ending
@@ -80,12 +82,16 @@ sub slashdLog {
 # trigger in the C library." - Camel3, p. 416, and see also p. 413.
 sub REAPER {
 	return unless %pids;
-#my @pid_checklist = sort { $a <=> $b } keys %pids;
-#slashdLog("REAPER in parent $$ begin: "
-#	. scalar(keys %pids) . " child(ren) potentially need reaping: @pid_checklist"
-#);
+	if (verbosity() >= 4) {
+		my @pid_checklist = sort { $a <=> $b } keys %pids;
+		slashdLog("REAPER in parent $$ begin: "
+			. scalar(keys %pids) . " child(ren) potentially need reaping: @pid_checklist"
+		);
+	}
 	while (my $pid = waitpid(-1, WNOHANG)) {
-#slashdLog("REAPER in parent $$ found reaped pid $pid");
+		if (verbosity() >= 4) {
+			slashdLog("REAPER in parent $$ found reaped pid $pid");
+		}
 		last if $pid < 1;
 		next if !exists $pids{$pid};
 		my $status = $? >> 8;
@@ -101,11 +107,13 @@ sub REAPER {
 		}
 		insert_task_event($taskname, 0);
 	}
-#@pid_checklist = sort { $a <=> $b } keys %pids;
-#slashdLog("REAPER in parent $$ done for now: "
-#	. scalar(keys %pids) . " child(ren) potentially need reaping"
-#	. (%pids ? ": @pid_checklist" : "")
-#);
+	if (verbosity() >= 4) {
+		my @pid_checklist = sort { $a <=> $b } keys %pids;
+		slashdLog("REAPER in parent $$ done for now: "
+			. scalar(keys %pids) . " child(ren) potentially need reaping"
+			. (%pids ? ": @pid_checklist" : "")
+		);
+	}
 }
 
 # Log a warning and die.  Since slashd is meant to keep running
@@ -222,15 +230,16 @@ sub end_log {
 		push @log, " (${duration}s";
 	}
 
-#	if ($forktype != SLASHD_NOWAIT) {
+	if (!$am_child) {
+		# The child doesn't know what the next task is.
 		push @log, ($secs_until < $secs)
 			? "; $next_task "
 				. -$secs_until
 				. "s late"
 			: verbosity() >= 2
 				? "; $next_task in ${secs_until}s"
-				: ();
-#	}
+			: ();
+	}
 
 	if ($forktype != SLASHD_LOG_NEXT_TASK) {
 		push @log, ")$summary";
@@ -417,7 +426,9 @@ EOT
 sub insert_task_event {
 	my($file, $immediate) = @_;
 	my $event_hr = { };
-#slashdLog("insert_task_event called: '$file' '$immediate'");
+	if (verbosity() >= 4) {
+		slashdLog("insert_task_event called: '$file' '$immediate'");
+	}
 
 	# Convert the existing array into a hash.
 	for my $file_num (0..$#$event_ar) {
@@ -500,6 +511,7 @@ sub main {
 
 	# Initialize the scheduling stuff.
 
+	$am_child = 0;
 	init_cron();
 	process_tasks();
 	init_event_ar();
@@ -511,7 +523,9 @@ sub main {
 		# for debugging only!!   slashdLog("SIGCHLD called in $$")
 	};
 	MAINLOOP: while (1) {
-#slashdLog("Beginning MAINLOOP");
+		if (verbosity() >= 4) {
+			slashdLog("Beginning MAINLOOP");
+		}
 
 		# The task which needs to execute next is at the front of
 		# the event array.  Shift it off here;  it will be
@@ -577,18 +591,26 @@ sub main {
 				if ($forktype == SLASHD_NOWAIT) {
 					# log when next task is running
 					end_log($basename, 0, "", SLASHD_LOG_NEXT_TASK);
-#slashdLog("Parent $$: sleep for 2 seconds after fork()");
+					if (verbosity() >= 4) {
+						slashdLog("Parent $$: sleep for 2 seconds after fork()");
+					}
 					sleep 2;
-#slashdLog("Parent $$: slept for 2 seconds after fork()");
+					if (verbosity() >= 4) {
+						slashdLog("Parent $$: slept for 2 seconds after fork()");
+					}
 				} elsif ($forktype == SLASHD_WAIT) {
-#slashdLog("Parent $$: sleep and wait after fork()");
+					if (verbosity() >= 4) {
+						slashdLog("Parent $$: sleep and wait after fork()");
+					}
 					# wait for REAPER to reap and delete
 					# this hash field
 					while (exists $pids{$pid}) {
 						REAPER();
 						sleep 1;
 					}
-#slashdLog("Parent $$: slept and waited after fork()");
+					if (verbosity() >= 4) {
+						slashdLog("Parent $$: slept and waited after fork()");
+					}
 				} else {
 					slashdLog("unexpected value of \$forktype: $forktype");
 					next MAINLOOP;
@@ -600,7 +622,10 @@ sub main {
 				# Child here.
 				####################
 
-#slashdLog("Child $$ [$me]: sleep for 2 seconds after fork()");
+				if (verbosity() >= 4) {
+					slashdLog("Child $$ [$me]: sleep for 2 seconds after fork()");
+				}
+				$am_child = 1;
 				# In doLogPid we set a handler for these that
 				# deletes the slashd.pid file;  children
 				# don't have the right to do that.
@@ -627,7 +652,9 @@ sub main {
 				sleep 2;
 				slashdLog("$basename begin ($$)")
 					if verbosity() >= 2;
-#slashdLog("Child $$: slept for 2 seconds after fork()");
+				if (verbosity() >= 4) {
+					slashdLog("Child $$: slept for 2 seconds after fork()");
+				}
 				$summary = $subref->($virtual_user,
 					$constants, $slashdb, $user);
 				my $end_time = Time::HiRes::time;
@@ -646,7 +673,9 @@ sub main {
 					duration	=> $duration,
 					in_progress	=> 0,
 				});
-#slashdLog("Child $$ exits here");
+				if (verbosity() >= 4) {
+					slashdLog("Child $$ exits here");
+				}
 				# Child must not drop out of this "if".
 				exit;
 
@@ -662,7 +691,9 @@ sub main {
 		}
 
 		# Sleep for at least a few seconds between tasks.
-#slashdLog("Ending MAINLOOP");
+		if (verbosity() >= 4) {
+			slashdLog("Ending MAINLOOP");
+		}
 		sleep 2;
 
 	}

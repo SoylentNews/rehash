@@ -10,7 +10,7 @@ use vars qw( %task $me );
 # GMT if you installed everything correctly.  So 6:07 AM GMT is a good
 # sort of midnightish time for the Western Hemisphere.  Adjust for
 # your audience and admins.
-$task{$me}{timespec} = '7 6 * * *';
+$task{$me}{timespec} = '27 6 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{'fork'} = 1;			# If allowed, fork this task from 
 $task{$me}{code} = sub {

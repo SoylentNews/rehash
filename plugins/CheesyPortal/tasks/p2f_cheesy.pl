@@ -15,9 +15,9 @@ $task{$me}{code} = sub {
 	for my $name (qw( cheesyportal )) {
 		prog2file(
 			"$bd/$name.pl", 
-			"ssi=yes virtual_user=$virtual_user", 
-			"$bd/$name.shtml"
-		);
+			"$bd/$name.shtml", {
+				args => "ssi=yes virtual_user=$virtual_user", 
+		});
 	}
 
 };

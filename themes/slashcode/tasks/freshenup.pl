@@ -79,23 +79,26 @@ $task{$me}{code} = sub {
 			}
 		}
 		close $cchp_fh;
+		my $args = "$vu ssi=yes sid='$sid'$cchp_param";
 		if ($section) {
 			makeDir($constants->{basedir}, $section, $sid);
 			prog2file(
 				"$constants->{basedir}/article.pl",
-				"$vu ssi=yes sid='$sid' section='$section'$cchp_param",
-				"$constants->{basedir}/$section/$sid.shtml",
-				verbosity(), 1
-			);
+				"$constants->{basedir}/$section/$sid.shtml", {
+					args =>		"$args section='$section'",
+					verbosity =>	verbosity(),
+					handle_err =>	1
+			});
 			slashdLog("$me updated $section:$sid ($title)")
 				if verbosity() >= 2;
 		} else {
 			prog2file(
 				"$constants->{basedir}/article.pl",
-				"$vu ssi=yes sid='$sid'$cchp_param",
-				"$constants->{basedir}/$sid.shtml",
-				verbosity(), 1
-			);
+				"$constants->{basedir}/$sid.shtml", {
+					args =>		$args,
+					verbosity =>	verbosity(),
+					handle_err =>	1
+			});
 			slashdLog("$me updated $sid ($title)")
 				if verbosity() >= 2;
 		}
@@ -130,15 +133,17 @@ $task{$me}{code} = sub {
 	my $dirty_sections = $slashdb->getSectionsDirty();
 	for my $cleanme (@$dirty_sections) { $updates{$cleanme} = 1 }
 
+	my $args = "$vu ssi=yes";
 	if ($updates{$constants->{defaultsection}} ne "" || $w ne "ok") {
 		my($base) = split(/\./, $constants->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
 		prog2file(
 			"$constants->{basedir}/$constants->{index_handler}", 
-			"$vu ssi=yes", 
-			"$constants->{basedir}/$base.shtml",
-			verbosity()
-		);
+			"$constants->{basedir}/$base.shtml", {
+				args =>		$args,
+				verbosity =>	verbosity(),
+				handle_err =>	0
+		});
 	}
 
 	for my $key (keys %updates) {
@@ -150,10 +155,11 @@ $task{$me}{code} = sub {
 		my($base) = split(/\./, $index_handler);
 		prog2file(
 			"$constants->{basedir}/$index_handler", 
-			"$vu ssi=yes section=$key",
-			"$constants->{basedir}/$key/$base.shtml",
-			verbosity()
-		);
+			"$constants->{basedir}/$key/$base.shtml", {
+				args =>		"$args section='$key'",
+				verbosity =>	verbosity(),
+				handle_err =>	0
+		});
 		$slashdb->setSection($key, { writestatus => 'ok' });
 	}
 
