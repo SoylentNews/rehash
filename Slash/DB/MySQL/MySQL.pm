@@ -6711,7 +6711,10 @@ sub getStoryByTime {
 
 	if (!$topic && !$section) {
 		# XXXSECTIONTOPICS this is almost right, but not quite
-		$where .= " AND story_topics_rendered.tid NOT IN ($user->{story_never_topic})" if $user->{story_never_topic};
+
+#		# story_never_topic is not implemented yet
+#		$where .= " AND story_topics_rendered.tid NOT IN ($user->{story_never_topic})" if $user->{story_never_topic};
+
 		$where .= " AND uid NOT IN ($user->{story_never_author})" if $user->{story_never_author};
 		# don't cache if user has own prefs -- pudge
 		$key = $user->{story_never_topic}
