@@ -876,7 +876,10 @@ sub getModeratorCommentLog {
 
 	my $vq = $self->sqlQuote($value);
 	my $where_clause = "";
-	   if ($type eq 'uid') {	$where_clause = "moderatorlog.uid=$vq      AND comments.uid=users.uid"		}
+	my $ipid_table = "moderatorlog";
+	   if ($type eq 'uid') {	$where_clause = "moderatorlog.uid=$vq      AND comments.uid=users.uid";
+					$ipid_table = "comments";
+					}
 	elsif ($type eq 'cid') {	$where_clause = "moderatorlog.cid=$vq      AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'cuid') {	$where_clause = "moderatorlog.cuid=$vq     AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'subnetid') {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"	}
@@ -890,7 +893,7 @@ sub getModeratorCommentLog {
 				 comments.points AS score,
 				 users.uid AS uid,
 				 users.nickname AS nickname,
-				 moderatorlog.ipid AS ipid,
+				 $ipid_table.ipid AS ipid,
 				 moderatorlog.val AS val,
 				 moderatorlog.reason AS reason,
 				 moderatorlog.ts AS ts,
