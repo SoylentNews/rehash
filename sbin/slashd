@@ -459,14 +459,18 @@ sub insert_task_event {
 sub wait_until {
 	my($until_time) = @_;
 	while ((my $cur_time = db_time()) < $until_time) {
+slashdLog(sprintf "Beginning sleep: %s < %s", map { scalar localtime } $cur_time, $until_time);
 		my $sleep_duration = $until_time - $cur_time;
 		if ($sleep_duration < 1) {
 			$sleep_duration = 1;
 		} elsif ($sleep_duration > 600) {
 			$sleep_duration -= 30;
 		}
+slashdLog(sprintf "Sleep for %s seconds", $sleep_duration);
 		sleep $sleep_duration;
+slashdLog(sprintf "Slept for %s seconds", db_time() - $cur_time);
 	}
+slashdLog(sprintf "Finishing sleep: %s >= %s", map { scalar localtime } db_time(), $until_time);
 }
 
 sub main {
@@ -495,7 +499,7 @@ sub main {
 	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
 
 	while (1) {
-
+slashdLog("Beginning while(1) loop");
 		# The task which needs to execute next is at the front of
 		# the event array.
 		my($task_filename, $until_time) = @{ shift @$event_ary };
@@ -560,10 +564,14 @@ sub main {
 					# log when next task is running
 					end_log($basename, 0, 0, $event_ary,
 						SLASHD_LOG_NEXT_TASK);
+slashdLog("Sleep for 2 seconds after fork()");
 					sleep 2;
+slashdLog("Slept for 2 seconds after fork()");
 				} elsif ($fork == SLASHD_WAIT) {
 					# wait for REAPER
+slashdLog("Sleep and wait after fork()");
 					sleep 1 until $pids{$pid}[2];
+slashdLog("Slept and waited after fork()");
 					delete $pids{$pid};
 				} else {
 					slashdLog("unknown error in fork");
@@ -609,9 +617,12 @@ sub main {
 			in_progress	=> 0,
 		});
 
+slashdLog("exit here for forked processes ($$)");
 		exit if defined $fork;
 		# Sleep for at least a few seconds between tasks.
+slashdLog("Ending while(1) loop 1");
 		sleep 2;
+slashdLog("Ending while(1) loop 2");
 
 	}
 }
