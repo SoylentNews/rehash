@@ -155,7 +155,7 @@ sub displayStories {
 	# 	return $self->displayStoryList($stories, $other)
 	# - Cliff
 	while (my $story = shift @{$stories}) {
-		my($sid, $section, $time, $title) = @{$_}{qw(sid section time title)}; #[0, 1, 2, 9];
+		my($sid, $section, $time, $title) = @{$story}{qw(sid section time title)}; #[0, 1, 2, 9];
 		my $atstorytime;
 
 		if ($other->{titles_only}) {
