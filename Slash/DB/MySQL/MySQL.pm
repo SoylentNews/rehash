@@ -4544,9 +4544,9 @@ sub getBanList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
 	my $debug = $constants->{debug_db_cache};
-#	my $mcd = $self->getMCD();
-#	my $mcdkey = "$self->{_mcd_keyprefix}:al:ban" if $mcd;
-#	my $banlist_ref;
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:al:ban" if $mcd;
+	my $banlist_ref;
 
 	# Randomize the expire time a bit;  it's not good for the DB
 	# to have every process re-ask for this at the exact same time.
@@ -4554,12 +4554,12 @@ sub getBanList {
 	$expire_time += int(rand(60)) if $expire_time;
 	_genericCacheRefresh($self, 'banlist', $expire_time);
 	my $banlist_ref = $self->{_banlist_cache} ||= {};
-#	$banlist_ref = $self->{_banlist_cache} ||= {};
-#
-#	if (!keys %$banlist_ref && $mcd) {
-#		$banlist_ref = $mcd->get($mcdkey);
-#		return $banlist_ref if $banlist_ref;
-#	}
+	$banlist_ref = $self->{_banlist_cache} ||= {};
+
+	if (!keys %$banlist_ref && $mcd) {
+		$banlist_ref = $mcd->get($mcdkey);
+		return $banlist_ref if $banlist_ref;
+	}
 
 	%$banlist_ref = () if $refresh;
 
@@ -4584,9 +4584,9 @@ sub getBanList {
 		$banlist_ref->{_junk_placeholder} = 1;
 		$self->{_banlist_cache_time} = time() if !$self->{_banlist_cache_time};
 
-#		if ($mcd) {
-#			$mcd->set($mcdkey, $banlist_ref, $constants->{banlist_expire} || 900);
-#		}
+		if ($mcd) {
+			$mcd->set($mcdkey, $banlist_ref, $constants->{banlist_expire} || 900);
+		}
 	}
 
 	if ($debug) {
@@ -7360,26 +7360,28 @@ sub updateStory {
 
 }
 
-#sub _getSlashConf_rawvars {
-#	my($self) = @_;
-#	my $mcd = $self->getMCD();
-#	my $mcdkey;
-#	my $got_from_memcached = 0;
-#	my $vars_hr;
-#	if ($mcd) {
-#		$mcdkey = "$self->{_mcd_keyprefix}:vars";
-#		if ($vars_hr = $mcd->get($mcdkey)) {
-#			$got_from_memcached = 1;
-#		}
-#	}
-#	$vars_hr ||= $self->sqlSelectAllKeyValue('name, value', 'vars');
-#	if ($mcd && !$got_from_memcached) {
-#		# Cache this for about 10 minutes.
-#		my $expire_time = $vars_hr->{story_expire} || 600;
-#		$mcd->set($mcdkey, $vars_hr, $expire_time);
-#	}
-#	return $vars_hr;
-#}
+sub _getSlashConf_rawvars {
+	my($self) = @_;
+	my $vu = $self->{virtual_user};
+	return undef unless $vu;
+	my $mcd = $self->getMCD({ no_getcurrentstatic => 1 });
+	my $mcdkey;
+	my $got_from_memcached = 0;
+	my $vars_hr;
+	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:vars";
+		if ($vars_hr = $mcd->get($mcdkey)) {
+			$got_from_memcached = 1;
+		}
+	}
+	$vars_hr ||= $self->sqlSelectAllKeyValue('name, value', 'vars');
+	if ($mcd && !$got_from_memcached) {
+		# Cache this for about 10 minutes.
+		my $expire_time = $vars_hr->{story_expire} || 600;
+		$mcd->set($mcdkey, $vars_hr, $expire_time);
+	}
+	return $vars_hr;
+}
 
 ########################################################
 # Now, the idea is to not cache here, since we actually
@@ -7388,17 +7390,11 @@ sub updateStory {
 sub getSlashConf {
 	my($self) = @_;
 
-#	# Get the raw vars data (possibly from a memcached cache).
-#
-#	my $vars_hr = $self->_getSlashConf_rawvars();
-#	return if !defined $vars_hr;
-#	my %conf = %$vars_hr;
+	# Get the raw vars data (possibly from a memcached cache).
 
-	# get all the data, yo! However make sure we can return if any DB
-	# errors occur.
-	my $confdata = $self->sqlSelectAll('name, value', 'vars');
-	return if !defined $confdata;
-	my %conf = map { $_->[0], $_->[1] } @{$confdata};
+	my $vars_hr = $self->_getSlashConf_rawvars();
+	return if !defined $vars_hr;
+	my %conf = %$vars_hr;
 
 	# Now start adding and tweaking the data for various reasons:
 	# convenience, fixing bad data, etc.
@@ -7619,14 +7615,29 @@ sub getSlashConf {
 # It would be best to write a Slash::MemCached class, preferably as
 # a plugin, but let's just do this for now.
 sub getMCD {
-	my($self) = @_;
+	my($self, $options) = @_;
 
 	# If we already created it for this object, or if we tried to
 	# create it and failed and assigned it 0, return that.
 	return $self->{_mcd} if defined($self->{_mcd});
 
 	# If we aren't using memcached, return false.
-	my $constants = getCurrentStatic();
+	my $constants;
+	if ($options->{no_getcurrentstatic}) {
+		# If our caller needs getMCD because it's going to
+		# set up vars, we can't rely on getCurrentStatic.
+		# So get the vars we need directly.
+		my @needed = qw( memcached memcached_debug
+			memcached_keyprefix memcached_servers
+			sitename );
+		my $in_clause = join ",", map { $self->sqlQuote($_) } @needed;
+		$constants = $self->sqlSelectKeyValue(
+			"name, value",
+			"vars",
+			"name IN ($in_clause)");
+	} else {
+		$constants = getCurrentStatic();
+	}
 	return 0 if !$constants->{memcached} || !$constants->{memcached_servers};
 
 	# OK, let's try memcached.  The memcached_servers var is in the format
