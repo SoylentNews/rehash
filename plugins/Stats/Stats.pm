@@ -791,7 +791,7 @@ sub countDailySubscribers {
 sub getDurationByStaticOpHour {
 	my($self, $options) = @_;
 
-	my @ops = qw( index article comments users rss );
+	my @ops = qw( index article comments metamod users rss );
 	@ops = @{$options->{ops}} if $options->{ops} && @{$options->{ops}};
 	my $ops = join(", ", map { $self->sqlQuote($_) } @ops);
 
