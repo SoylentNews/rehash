@@ -218,7 +218,6 @@ ALTER TABLE subscribe_payments ADD COLUMN method VARCHAR(6) AFTER transaction_id
 
 ALTER TABLE comments DROP index countreplies;
 ALTER TABLE comments ADD KEY countreplies (pid,sid);
-# LINUX.COM
 # Not read just yet but I am leaving it here as a note -Brian
 ALTER TABLE blocks ADD autosubmit enum("no","yes") DEFAULT 'no' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('rss_store','0','Should we be saving incomming submissions for rss');
@@ -258,3 +257,4 @@ CREATE TABLE rss_raw (
 ) TYPE = myisam;
 
 # SLASHCODE/USEPERL
+# LINUX.COM
