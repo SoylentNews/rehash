@@ -54,9 +54,11 @@ sub handler {
 
 	my $cfg = Apache::ModuleConfig->get($r);
 	my $dbcfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-	my $constants = $dbcfg->{constants};
+	my $constants = getCurrentStatic();
 	my $slashdb = $dbcfg->{slashdb};
 	my $apr = Apache::Request->new($r);
+	
+	my $hostname = $r->header_in('host');
 
 	$r->err_header_out('X-Powered-By' => "Slash $Slash::VERSION");
 	random($r);
@@ -92,7 +94,6 @@ sub handler {
 	$params{query_apache} = $apr;
 	my $form = filter_params(%params);
 	$form->{query_apache} = $apr;
-
 	@{$form}{keys  %{$constants->{form_override}}} =
 		values %{$constants->{form_override}};
 	my $cookies = Apache::Cookie->fetch;

@@ -23,9 +23,24 @@ my @directives = (
 	args_how		=> 'TAKE2',
 	req_overrive => 'ACCESS_CONF'
 	},
+	{ name			=> 'SlashSetVarHost',
+	errmsg			=> 'Takes a key, a value, and a hostname that will override the var values in the DB for a specific hostname',
+	args_how		=> 'TAKE3',
+	req_overrive => 'ACCESS_CONF'
+	},
+	{ name			=> 'SlashSetFormHost',
+	errmsg			=> 'Takes a key, a value, and a hostname that will be applied to each form object for a specific hostname',
+	args_how		=> 'TAKE3',
+	req_overrive => 'ACCESS_CONF'
+	},
 	{ name			=> 'SlashCompileTemplates',
 	errmsg			=> 'Turn precompiling templates on or off',
 	args_how		=> 'FLAG',
+	req_overrive => 'ACCESS_CONF'
+	},
+	{ name			=> 'SlashSectionHost',
+	errmsg			=> 'Associate a host with a given section name',
+	args_how		=> 'TAKE2',
 	req_overrive => 'ACCESS_CONF'
 	}
 );
