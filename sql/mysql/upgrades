@@ -586,7 +586,6 @@ ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
 ALTER TABLE metamodlog ADD INDEX mmid (mmid);
 
-# USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_39
@@ -668,4 +667,4 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, '
 INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',	0, 0,  1, 0.5);
 
 # SLASHCODE LAST UPDATED HERE
-
+# USEPERL LAST UPDATED HERE
