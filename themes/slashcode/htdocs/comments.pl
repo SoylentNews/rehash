@@ -749,8 +749,8 @@ sub editComment {
 		$form->{postersubj} = "Re:$form->{postersubj}";
 	}
 
-        my $gotmodwarning;
-        $gotmodwarning=1 if (($error_message eq getError("moderations to be lost")) or $form->{gotmodwarning});
+	my $gotmodwarning;
+	$gotmodwarning = 1 if (($error_message eq getError("moderations to be lost")) || $form->{gotmodwarning});
 	slashDisplay('edit_comment', {
 		error_message 	=> $error_message,
 		label		=> $label,
@@ -758,7 +758,7 @@ sub editComment {
 		indextype	=> $form->{indextype},
 		preview		=> $preview,
 		reply		=> $reply,
-                gotmodwarning   => $gotmodwarning
+		gotmodwarning	=> $gotmodwarning
 	});
 }
 
@@ -951,11 +951,11 @@ sub validateComment {
 			last;
 		}
 	}
-        if($constants->{allow_moderation} && $slashdb->sqlCount("moderatorlog","cuid=$user->{uid} and sid=$form->{sid}") && !$form->{gotmodwarning}){
-		$$error_message=getError("moderations to be lost");
-		$form_success=0;
+	if ($constants->{allow_moderation} && $slashdb->sqlCount("moderatorlog", "cuid=$user->{uid} and sid=$form->{sid}") && !$form->{gotmodwarning}) {
+		$$error_message = getError("moderations to be lost");
+		$form_success = 0;
 		return; 
-        }
+	}
 
 	$$error_message ||= '';
 	# Return false if error condition...
