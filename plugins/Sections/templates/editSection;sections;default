@@ -8,7 +8,8 @@ Edit a section
 * qid = poll to assign to section
 * isolate = boolean for isolate mode
 * issue = boolean for issue mode
-* blocks = arrayref of hashref of blocks for section (we should also pass in template for this section at some point ...)
+* blocks = arrayref of hashref of blocks for section (we should also pass in
+	   template for this section at some point ...)
 __title__
 
 __page__
@@ -18,95 +19,232 @@ en_US
 __name__
 editSection
 __template__
-	[
-		<A HREF="[% constants.rootdir %]/admin.pl?section=[% section
-		%]">Stories</A> |
-		<A HREF="[% constants.rootdir %]/submit.pl?section=[% section
-		%]&op=list">Submissions</A> |
-		<A HREF="[% constants.rootdir %]/index.pl?section=[% section
-		%]">Preview</A>
-	]
-	<TABLE><TR><TD VALIGN="TOP">
+[
+<A HREF="[% constants.rootdir %]/admin.pl?section=[% section
+-%]">Stories</A> |
+<A HREF="[% constants.rootdir %]/submit.pl?section=[% section
+-%]&op=list">Submissions</A> |
+<A HREF="[% constants.rootdir %]/index.pl?section=[% section %]">Preview</A> 
+]
+
+[% # Conditions for subsection delete confirmation. If true, show subform.
+IF form.DEL_subsection && !form.confirm;
+	key = "del_subsection_${form.DEL_subsection}" -%]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
-	[% PROCESS formLabel
-		value => "Section name"
-		comment => "must be unique" %]
-	<INPUT TYPE="TEXT" NAME="section" VALUE="[% section | strip_attribute
-	%]"><BR><BR>
-	[% PROCESS formLabel
-		value => "Article Count"
-		comment => "how many articles to display on section index" %]
+<B>Subsection action</B>: [% form.$key %]?
+<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% 
+form.section | strip_attribute -%]">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="editsection">
+<INPUT TYPE="HIDDEN" NAME="action" VALUE="[% form.$key %]">
+<INPUT TYPE="HIDDEN" NAME="DEL_subsection" VALUE="[% 
+form.DEL_subsection | strip_attribute -%]">
+&nbsp;&nbsp;<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
+&nbsp;<INPUT TYPE="SUBMIT" NAME="nonconfirm" VALUE="No">
+</FORM>
+<BR><BR>
+[% END -%]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<TABLE><TR><TD VALIGN="TOP">
+[% PROCESS formLabel 
+	value 	=> "Section name"
+	comment => "must be unique" %]
+	<INPUT TYPE="TEXT" NAME="section" VALUE="[% section | strip_attribute 
+	-%]"><BR><BR>
+
+[% PROCESS formLabel
+	value="Article Count"
+	comment="how many articles to display on section index" %]
 	<INPUT TYPE="TEXT" NAME="artcount" SIZE="4" VALUE="[% 
-	this_section.artcount %]"> 1/3rd of these will display intro text,
+	this_section.artcount -%]"> 1/3rd of these will display intro text, 
 	2/3rds just headers<BR><BR>
 
-	[% PROCESS formLabel
-		value => "Title"
-		comment => "be descriptive" %]
-	<BR><INPUT TYPE="TEXT" NAME="title" SIZE="30" VALUE="[% this_section.title %]"><BR>
-
-	[% PROCESS formLabel 
-		value => "Polls for this section"
-		comment => "" %]
+[% PROCESS formLabel value="Title" comment="be descriptive" %]
+	<INPUT TYPE="TEXT" NAME="title" SIZE="30" VALUE="[% 
+	this_section.title -%]"><BR>
+	
+[% IF qid.length -%]
+	[% PROCESS formLabel value="Polls for this section" comment="" %]
 	[% qid %]
-	[% PROCESS formLabel 
-		value => "Isolate mode"
-		comment => "" %]
-	[% isolate %]
-	[% PROCESS formLabel 
-		value => "Issue mode"
-		comment => "" %]
-	[% issue %]
-	[% PROCESS formLabel
-		value => "URL"
-		comment => "if the section has its own url" %]
-	<BR><INPUT TYPE="TEXT" NAME="url" SIZE="30" VALUE="[% this_section.url %]"><BR>
-	[% PROCESS formLabel 
-		value => "Hostname"
-		comment => "hostname we should match against" %]
-	<BR><INPUT TYPE="TEXT" NAME="hostname" SIZE="30" VALUE="[% this_section.hostname %]"><BR>
-	[% PROCESS formLabel 
-		value => "Cookiedomain"
-		comment => "if the section requires that you give out a special cookie" %]
-	<BR><INPUT TYPE="TEXT" NAME="cookiedomain" SIZE="30" VALUE="[% this_section.cookiedomain %]"><BR>
-	[% PROCESS formLabel 
-		value => "Index Handler"
-		comment => "the script that acts as / queries" %]
-	<BR><INPUT TYPE="TEXT" NAME="index_handler" SIZE="30" VALUE="[% this_section.index_handler %]"><BR>
+[% END -%]
 
-[% IF blocks;
+[% PROCESS formLabel value="Isolate mode" comment="" %]
+	[% isolate %]
+[% PROCESS formLabel value="Issue mode" comment="" %]
+	[% issue %]
+	<P>
+
+[% PROCESS formLabel value="URL" comment="if the section has its own url" -%]
+	<INPUT TYPE="TEXT" NAME="url" SIZE="30" VALUE="[% 
+	this_section.url -%]"><BR>
+
+[% PROCESS formLabel 
+	value	= "Hostname"
+	comment = "Hostname we should match against" -%]
+	<INPUT TYPE="TEXT" NAME="hostname" SIZE="30" VALUE="[% 
+	this_section.hostname -%]"><BR>
+
+[% PROCESS formLabel 
+	value => "Cookiedomain"
+	comment => "if the section requires that you give out a special cookie"
+-%]
+	<BR><INPUT TYPE="TEXT" NAME="cookiedomain" SIZE="30" VALUE="[%
+	this_section.cookiedomain -%]"><BR>
+
+[% PROCESS formLabel 
+	value => "Index Handler"
+	comment => "the script that acts as / queries" -%]
+	<BR><INPUT TYPE="TEXT" NAME="index_handler" SIZE="30" VALUE="[%
+	this_section.index_handler -%]"><BR>
+
+[% IF blocks.size;
 	PROCESS formLabel 
-		value => "Edit Section slashboxes" 
+		value 	=> "Edit Section slashboxes" 
 		comment => "blocks" %]
 	<TABLE BORDER="1">
-	[% FOREACH block = blocks -%]
+	
+	[%- bc=0; FOREACH block = blocks -%]
+		[% IF bc div 3 == 0; IF bc; "</TR>"; END; "<TR>\n"; END; 
+		   bc = bc + 1 -%]
+		<TD><LI><B><A HREF="[% constants.rootdir
+		-%]/admin.pl?op=blocked&bid=[% block.bid %]">[% 
+		block.title -%]</A></B>
+		<A HREF="[% block.url %]">[% block.url 
+		-%]</A>[% ' (default)'
+		IF block.ordernum && block.ordernum > 0 -%]</TD>
+	[%- END -%]
+
+	</TABLE><BR>
+[% END -%]
+
+
+<INPUT TYPE="HIDDEN" NAME="subsections" VALUE="[% subsections.join(',') %]">
+[%	INCLUDE titlebar 
+		title=>"Subsections"
+		width=>"99%" -%]
+<TABLE BORDER=0 WIDTH="70%">
+<TR>
+	<TD COLSPAN=3>
+		<TABLE BORDER=0 WIDTH="100%">
 		<TR>
-			<TD>
-			<B><A HREF="[% constants.rootdir
-			%]/admin.pl?op=blocks&amp;blocked1=1&amp;bid1=[% block.bid %]">[% block.title %]</A></B>
-			<A HREF="[% block.url %]">[% block.url %]</A>[% 
-			' (default)' IF block.ordernum > 0 %]</TD>
+		<TD WIDTH=75%">
+			Enter name of new subsection:
+			<INPUT TYPE="TEXT" NAME="new_subsection" VALUE="">
+		</TD><TD>
+			<INPUT TYPE="SUBMIT" VALUE="Add Subsection">
+		</TD>
 		</TR>
-	[% END %]
-	</TABLE>
-[% END %]
+		</TABLE>
+		<BR><BR>
+	</TD>
+</TR>
+[% IF subsections.size -%]
+<TR>
+	<TH BGCOLOR="[% user.bg.2 %]">Subsection</TH>
+	<TH BGCOLOR="[% user.bg.2 %]">Article Count</TH>
+	<TH BGCOLOR="[% user.bg.2 %]">Remove Subsection</TH>
+</TR>
+[% END -%]
+[% FOR ss=subsections -%]
+<TR ALIGN="CENTER">
+	<TD WIDTH="33%">
+		<INPUT TYPE="TEXT" NAME="subsection_title_[% ss.id 
+		-%]" VALUE="[% ss.title %]">
+	</TD>
+	<TD>
+		<INPUT TYPE="TEXT" NAME="subsection_artcount_[% ss.id 
+		-%]" VALUE="[% ss.artcount %]" SIZE=4>
+	</TD>
+	<TD>
+		<INPUT TYPE="SUBMIT" NAME="del_subsection_[% ss.id 
+		-%]" VALUE="Remove [% ss.title %]">
+	</TD>
+</TR>
+[% END -%]
+</TABLE>
+<BR><BR>
+
+[%
+IF form.addextra; extras.push(['','']); END;
+IF extras.size;
+	INCLUDE titlebar 
+		title=>"Extra Story Fields", 
+		width=>"99%";
+	id = 1;
+"	<TABLE BORDER=0 WIDTH=\"40%\">\n";
+	FOR e=extras -%]
+[%	UNLESS loop.first -%]
+	<TR>
+		<TD BGCOLOR="[% user.bg.0 %]" COLSPAN="4">
+			[% INCLUDE spacer%]
+		</TD>
+	</TR><TR>
+		<TD BGCOLOR="[% user.bg.3 %]" COLSPAN="4">
+			[% INCLUDE spacer%]
+		</TD>
+	</TR><TR>
+		<TD BGCOLOR="[% user.bg.0 %]" COLSPAN="4">
+			[% INCLUDE spacer%]
+		</TD>
+	</TR>
+[%	END -%]
+	<TR>
+		<TD>
+		[% PROCESS formLabel value=>"Field Name:" comment='' %]
+		<INPUT TYPE="TEXT" NAME="extraname_[% id %]" VALUE="[% e.1
+		%]"></TD>
+		
+		<TD>
+		[% PROCESS formLabel value=>"Field Text:" %]
+		<INPUT TYPE="TEXT" NAME="extraval_[% id %]" VALUE="[% e.0
+		-%]">[%- nbsp='&nbsp;'; nbsp.repeat(4) -%]</TD>
+		
+		<TD>
+		[% PROCESS formLabel value="Field&nbsp;Type:" %]
+		[%
+			Slash.createSelect(
+				"extratype_$id", 
+				extra_types, 
+				e.type, 
+				1
+		   	)
+		-%]</TD>
+
+		<TD VALIGN="BOTTOM" ALIGN="RIGHT">
+		<INPUT TYPE="CHECKBOX" NAME="extradel_[% id %]">&nbsp;Del?</TD>
+	</TR>
+		[%- id = id + 1;
+	END -%]
+	</TABLE>&nbsp;<INPUT TYPE="SUBMIT" NAME="addextra" VALUE="add extra">
+	<P>
+[% ELSE -%]
+
+	<BR><INPUT TYPE="SUBMIT" NAME="addextra" VALUE="add extra">
+[% END -%]
 
 	<BR><INPUT TYPE="SUBMIT" NAME="savesection" VALUE="save section">
 	<BR><INPUT TYPE="SUBMIT" NAME="addsection" VALUE="add section">
 	<BR><INPUT TYPE="SUBMIT" NAME="deletesection" VALUE="delete section">
 </FORM>
 </TD>
+[% IF topics.keys.size -%]
 <TD VALIGN="TOP">
-	[% PROCESS formLabel
-		value => "Topics"
-		comment => "topics assigned to this section" %]
+	[%- PROCESS formLabel
+		value 	=> "Topics"
+		comment => "topics assigned to this section" -%]
+
 	<UL>
-	[% FOREACH tid = topics.keys -%]
-		<LI><A HREF="[%
-		constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% tid %]">[% topics.$tid %]</A></LI>
-	[% END -%]
+
+	[%- FOREACH tid = topic_order -%]
+		<LI><A HREF="[% constants.rootdir
+		%]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid
+		%]</A></LI>
+
+	[%- END -%]
+
 	</UL>
 </TD>
+[% END -%]
 </TR>
 </TABLE>
 

@@ -390,10 +390,20 @@ perl function C<substr>.
 	[% myscalar.substr(2)    # all but first two characters %]
 	[% myscalar.substr(2, 1) # third character %]
 
-Additional list ops include C<rand>, which returns a random element
-from the given list.
+Additional list ops include C<rand>, C<lowval>, C<highval>, C<remove>.
+
+C<rand> returns a random value from the list.
 
 	[% mylist.rand %]  # return single random element from mylist
+
+C<lowval>, and C<highval> do exacly what they sound like, they return the 
+lowest or the highest value in the list.
+
+C<remove> returns the list with all entries matching the given parameter,
+removed.
+
+	[% b = (0, 1, 0, 2, 0, 3, 0, 5);
+	   b.remove(0).join(',') %]		# Outputs: "1,2,3,5"
 
 =head2 Additional Filters
 
@@ -439,6 +449,18 @@ my %list_ops = (
 		my $list = $_[0];
 		my($minval) = sort { $a <=> $b } @$list;
 		return $minval;
+	},
+
+	'inlist'	=> sub {
+		my($list, $searchval) = @_;
+		
+		return inList($list, $searchval);
+	},
+
+	'remove'	=> sub {
+		my($list, $remove_val) = @_;
+
+		return [ delFromList($list, $remove_val) ];
 	},
 );
 

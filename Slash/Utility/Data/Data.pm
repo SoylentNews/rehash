@@ -49,6 +49,7 @@ use vars qw($VERSION @EXPORT);
 	changePassword
 	chopEntity
 	countWords
+	delFromList
 	encryptPassword
 	fixHref
 	fixint
@@ -58,6 +59,7 @@ use vars qw($VERSION @EXPORT);
 	formatDate
 	getArmoredEmail
 	html2text
+	inList
 	root2abs
 	strip_anchor
 	strip_attribute
@@ -1891,6 +1893,7 @@ sub countWords {
 	my($body) = @_;
 
 	# Sanity check.
+	$body = ${$body} if ref $body eq 'SCALAR';
 	return 0 if ref $body;
 
 	# Get rid of nasty print artifacts that may screw up counts.
@@ -1909,6 +1912,89 @@ sub countWords {
 	# so I think this is close enough. ;)
 	# - Cliff
 	return scalar @words / 2;
+}
+
+=head2 inList(list, value)
+
+Returns TRUE or FALSE depending on if a given value is in an array.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item @$list
+
+A reference to the list in question.
+
+=item $value
+
+The value you wish to search for.
+
+=back
+
+=item Return value
+
+The position in the list of the first occurance of $value or undef if $value is not in
+the list.
+
+=back
+
+=cut
+
+
+sub inList {
+	my($list, $value) = @_;
+
+	my $c = 0;
+	for (@{$list}) {
+		return $c if $_ eq $value;
+		$c++;
+	}
+	return;
+}
+
+=head2 delFromList(list, value)
+
+Returns list with all instances of a given value removed.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item @$list
+
+A reference to the array we wish to modify.
+
+=item $value
+
+the value to remove.
+
+=back
+
+=item Return value
+
+A list which is a copy of @$list with all instances of $value, removed.
+
+=back
+
+=cut
+
+
+sub delFromList {
+	my($list, $value) = @_;
+
+	my(@newlist) = ();
+	for (@{$list}) {
+		next if $_ eq $value;
+		
+		push @newlist, $_;
+	}
+
+	return @newlist;
 }
 
 

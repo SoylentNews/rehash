@@ -49,6 +49,13 @@ __template__
 [% CASE 'savehead' %]
 	Saving [% form.section | strip_nohtml %] Section
 
+[% CASE 'subsection_added' %]
+	Subsection '[% form.new_subsection %]' added.<BR><BR>
+
+[% CASE 'subsection_removed' %]
+	Operation "[% form.action %]" completed.<BR>
+	Subsection #[% form.DEL_subsection %] removed.<BR><BR>
+
 [% END %]
 
 __seclev__

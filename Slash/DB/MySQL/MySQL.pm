@@ -184,6 +184,9 @@ my %descriptions = (
 	'journal_discuss'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='journal_discuss'") },
 
+	'section_extra_types'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='extra_types'") },
+
 );
 
 ########################################################
@@ -1520,6 +1523,35 @@ sub createSection {
 	my($self, $hash) = @_;
 
 	$self->sqlInsert('sections', $hash);
+}
+
+########################################################
+
+sub createSubSection {
+	my($self, $section, $subsection, $artcount) = @_;
+
+	$self->sqlInsert('subsections', {
+		title	=> $subsection,
+		section	=> $section,
+		artcount=> $artcount || 0,
+	});
+}
+
+########################################################
+
+sub removeSubSection {
+	my($self, $section, $subsection) = @_;
+
+	my $where;
+	if ($subsection =~ /^\d+$/) {
+		$where = 'id=' . $self->sqlQuote($subsection);
+	} else {
+		$where = sprintf 'name=%s AND title=%s',
+			$self->sqlQuote($section),
+			$self->sqlQuote($subsection);
+	}
+
+	$self->sqlDelete('subsections', $where);
 }
 
 ########################################################
@@ -5066,6 +5098,20 @@ sub getSections {
 ########################################################
 sub getSubSections {
 	my $answer = _genericGetsCache('subsections', 'id', '', @_);
+	return $answer;
+}
+
+########################################################
+
+sub getSubSectionsBySection {
+	my($self, $section) = @_;
+
+	my $answer = $self->sqlSelectAllHashrefArray(
+		'*',
+		'subsections',
+		'section=' . $self->sqlQuote($section)
+	);
+
 	return $answer;
 }
 

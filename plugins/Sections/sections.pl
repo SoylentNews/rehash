@@ -23,23 +23,70 @@ sub main {
 		return;
 	}
 
+	# Loop thru %$form once, at this time, and pull out all the necessary
+	# elements, rather than pulling from it multiple times, later.
 	$form->{section_extras} = [];
-	for (grep { /^extraname_\d+/ } keys %{$form}) {
-		next unless /^extraname_(\d+)$/;
-		next if !($1 && !$form->{"extradel_$1"});
-		$form->{"extraname_$1"} =~ s/\s//g;
-		next if !$form->{"extraname_$1"};
+	for (keys %{$form}) {
+	SWITCH: {
 
-		push @{$form->{section_extras}}, [
-			# Field label
-			$form->{"extraval_$1"} || $form->{"extraname_$1"},
-			# Field name
-			$form->{"extraname_$1"}
-		];
-	}
+		/^extraname_(\d+)/ && do {
+			last SWITCH if !($1 && !$form->{"extradel_$1"});
+			$form->{"extraname_$1"} =~ s/\s//g;
+			last SWITCH if !$form->{"extraname_$1"};
+
+			push @{$form->{section_extras}}, [
+				# Field label
+				$form->{"extraval_$1"} ||
+				$form->{"extraname_$1"},
+
+				# Field name
+				$form->{"extraname_$1"}
+			];
+			
+			last SWITCH;
+		};
+
+		($_ eq 'new_subsection') && !$form->{savesection} && do {
+			$op = 'editsection';
+			last SWITCH if !$form->{new_subsection};
+
+			# Set up parameters for call to 
+			# Slash::DB::createSubSection
+			$form->{'NEW_subsection'} = [
+				$form->{section},
+				$form->{new_subsection},
+				0
+			];
+
+			last SWITCH;
+		};
+
+		/^del_subsection_(\d+)/ && do {
+			$form->{'DEL_subsection'} = $1;
+			$op = 'editsection';
+			
+			last SWITCH;
+		};
+
+		# This handles form fields like:
+		# 	subsection_title_*, subsection_artcount_*
+		/^subsection_title_(\d+)/ && do {
+			$form->{'SUBSECTIONS'} = {} 
+				unless $form->{'SUBSECTIONS'};
+			$form->{'SUBSECTIONS'}{$1} = {
+				title => $form->{"subsection_title_$1"},
+				artcount => $form->{"subsection_artcount_$1"},
+			};
+
+			last SWITCH;
+		}
+	}}
+
 
 	header(getData('head'), 'admin');
 
+	# Next up for dispatch hash conversion!
+	#
 	if ($op eq 'rmsub' && $seclev >= 100) {  # huh?
 
 	} elsif ($form->{addsection}) {
@@ -50,7 +97,10 @@ sub main {
 		delSection($form->{section});
 		listSections($user);
 
-	} elsif ($op eq 'editsection' || $form->{editsection} || $form->{addextra}) {
+	} elsif ($op eq 'editsection' ||
+		 $form->{editsection} || 
+		 $form->{addextra}) {
+
 		saveSection($form->{section}) 
 			if $form->{addextra} && @{$form->{section_extras}};
 		titlebar('100%', getData('edithead'));
@@ -135,16 +185,30 @@ sub editSection {
 		}
 	}
 
-	my $qid = createSelect('qid', $slashdb->getPollQuestions(),
-		$this_section->{qid}, 1);
-	my $isolate = createSelect(
-		'isolate', 
+	# Create a new subsection if we've been told to.
+	if ($form->{'NEW_subsection'}) {
+		$slashdb->createSubSection(@{$form->{'NEW_subsection'}});
+		print getData('subsection_added');
+	}
+
+	# Delete a subsection if the proper conditions are met.
+	if ($form->{'confirm'} && $form->{'DEL_subsection'}) {
+		$slashdb->removeSubSection($section, $form->{'DEL_subsection'});
+		print getData('subsection_removed');
+	}
+
+	my $qid = $this_section->{qid} ? 
+		createSelect('qid', 
+			$slashdb->getPollQuestions(),
+			$this_section->{qid},
+			1
+		) : '';
+	my $isolate = createSelect('isolate', 
 		$slashdb->getDescriptions('isolatemodes'),
 		$this_section->{isolate}, 
 		1
 	);
-	my $issue = createSelect(
-		'issue', 
+	my $issue = createSelect('issue', 
 		$slashdb->getDescriptions('issuemodes'),
 		$this_section->{issue}, 
 		1
@@ -153,7 +217,12 @@ sub editSection {
 	my $extras = $form->{section_extras};
 	$extras = $slashdb->getSectionExtras($form->{section})
 		unless @{$extras};
+	my $extra_types = $slashdb->getDescriptions('section_extra_types');
 
+	# Get list of subsections.
+	my $subsections = $slashdb->getSubSectionsBySection($section);
+	
+	my $topics = $slashdb->getDescriptions('topics_section', $section);
 	slashDisplay('editSection', {
 		section		=> $section,
 		this_section	=> $this_section,
@@ -161,10 +230,13 @@ sub editSection {
 		isolate		=> $isolate,
 		issue		=> $issue,
 		blocks		=> \@blocks,
-		topics		=> $slashdb->getDescriptions(
-			'topics_section', $section
-		),
+		topics		=> $topics,
+		topic_order	=> [
+			sort { $topics->{$a} cmp $topics->{$b} } keys %{$topics}
+		],
 		extras		=> $extras,
+		extra_types	=> $extra_types,
+		subsections	=> $subsections,
 	});
 }
 
@@ -222,9 +294,15 @@ sub saveSection {
 			section => $section
 		});
 	} 
+
+	# Set section extras.
 	$slashdb->setSectionExtras($section, $form->{section_extras}) 
 		if @{$form->{section_extras}};
-	
+
+	# Set subsections.
+	for (keys %{$form->{'SUBSECTIONS'}}) {
+		$slashdb->setSubSection($_, $form->{'SUBSECTIONS'}{$_})
+	};
 }
 
 #################################################################
