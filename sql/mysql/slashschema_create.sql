@@ -529,7 +529,7 @@ CREATE TABLE stories (
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (tid) REFERENCES topics(tid),
 	FOREIGN KEY (section) REFERENCES sections(section),
-	INDEX frontpage (time, displaystatus, writestatus),
+	INDEX frontpage (displaystatus, writestatus,section),
 	INDEX time (time), /* time > now() shows that this is still valuable, even with frontpage -Brian */
 	INDEX submitter (submitter),
 	INDEX published (day_published)
