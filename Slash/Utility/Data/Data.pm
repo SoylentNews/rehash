@@ -564,7 +564,7 @@ See C<stripByMode> for details.
 
 sub strip_mode {
 	my($string, $mode, @args) = @_;
-	return if !$mode || $mode < 1;	# user-supplied modes > 0
+	return if !$mode || $mode < 1 || $mode > 4;	# user-supplied modes are 1-4
 	return stripByMode($string, $mode, @args);
 }
 
@@ -617,8 +617,21 @@ C<approveTag> function.
 sub stripBadHtml {
 	my($str) = @_;
 
-	# not staying here, just for now
-	$str =~ s|<LITERAL>(.*?)</LITERAL>|'<P>' . strip_code($1) . '</P>'|egis;
+	## deal with special ECODE tag (Embedded Code).  This tag allows
+	## embedding the Code postmode in plain or HTML modes.  It may be
+	## of the form:
+	##    <ECODE>literal text</ECODE>
+	## or, for the case where "</ECODE>" is needed in the text:
+	##    <ECODE END="SOMETAG">literal text</SOMETAG>
+	## -- pudge
+
+	# first pass to deal with lack of /END="\w+"/
+	my $ecode = 'literal|ecode';  # "LITERAL" is old name
+	$str =~ s[<\s* ($ecode) \s*> (.*?) <\s* /\1 \s*>]
+		 [<$1 END="$1">$2</$1>]xsig;
+	# second pass to convert to code
+	$str =~ s[<\s* (?:$ecode) \s+ END="(\w+)" \s*> (.*?) <\s* /\1 \s*>]
+		 ['<P>' . strip_code($2) . '</P>']xegis;
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
@@ -1754,7 +1767,7 @@ sub fixint {
 # Count words in a given scalar will strip HTML tags
 # before counts are made.
 sub countWords {
-	my ($body) = @_;
+	my($body) = @_;
 
 	# Sanity check.
 	return 0 if ref $body;
@@ -1769,10 +1782,10 @@ sub countWords {
 	# count words in $body.
 	my(@words) = ($body =~ /\b/g);
 
-	# Since we count boundaries, each word has two boundaries, so 
-	# we divide by two to get our count. This results in values 
-	# *close* to the return from a 'wc -w' on $body (within 1) 
-	# so I think this is close enough. ;) 
+	# Since we count boundaries, each word has two boundaries, so
+	# we divide by two to get our count. This results in values
+	# *close* to the return from a 'wc -w' on $body (within 1)
+	# so I think this is close enough. ;)
 	# - Cliff
 	return scalar @words / 2;
 }
