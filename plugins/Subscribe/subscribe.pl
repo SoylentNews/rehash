@@ -207,13 +207,12 @@ sub makepayment {
 		$payment->{payment_net} = $payment->{payment_gross};
 	}
 	$payment->{puid} ||= $payment->{uid};
-	$payment->{payment_type} =  $payment->{puid} == $payment->{uid} ? "user" : "gift" ;
-
+	$payment->{payment_type} = ($payment->{puid} == $payment->{uid})
+		? "user" : "gift";
 
 	my $subscribe = getObject('Slash::Subscribe');
 	my $num_pages = $subscribe->convertDollarsToPages($payment->{payment_gross});
 	$payment->{pages} = $num_pages;
-	
 
 	my $rows = $subscribe->insertPayment($payment);
 	if ($rows == 1) {
@@ -221,7 +220,8 @@ sub makepayment {
 			"-hits_paidfor" => "hits_paidfor + $num_pages"
 		});
 		print "<p>makepayment: Payment confirmed\n";
-		send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{pages}) if $payment->{payment_type} eq "gift";
+		send_gift_msg($payment->{uid}, $payment->{puid}, $payment->{pages})
+			if $payment->{payment_type} eq "gift";
 	} else {
 		use Data::Dumper;
 		my $warning = "DEBUG: Payment accepted but record "
@@ -291,11 +291,11 @@ sub send_gift_msg {
 	my $receiving_user  = $slashdb->getUser($uid);
 	my $purchasing_user = $slashdb->getUser($puid);
 
-	my $message = slashDisplay('gift_msg',{
-				receiving_user  => $receiving_user,
-				purchasing_user => $purchasing_user,
-				pages 		=> $pages	
-				} , { Return => 1, Nocomm => 1 });
+	my $message = slashDisplay('gift_msg', {
+			receiving_user  => $receiving_user,
+			purchasing_user => $purchasing_user,
+			pages 		=> $pages	
+		}, { Return => 1, Nocomm => 1 } );
 	my $title = "Gift subscription to $constants->{sitename}\n";
 	doEmail($uid, $title, $message);
 }

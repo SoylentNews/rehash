@@ -172,17 +172,18 @@ $task{$me}{code} = sub {
 		# article
 
 		my @old_sect = $slashdb->getPrevSectionsForSid($sid);
-		if(@old_sect){
-			foreach my $old_sect (@old_sect) {
+		if (@old_sect) {
+			for my $old_sect (@old_sect) {
 				next if $old_sect eq $section;
-				my $url = $constants->{rootdir}."/$section/$sid.shtml";
+				my $url = "$constants->{rootdir}/$section/$sid.shtml";
 				my $fn = "$basedir/$old_sect/$sid.shtml";
-				if(-e $fn){
+				if (-e $fn) {
 					my $fh = gensym();
-					if(!open($fh, ">", $fn)){
+					if (!open($fh, ">", $fn)) {
 						warn("Couldn't open file: $fn for writing");
 					} else {
-						print $fh slashDisplay("articlemoved", { url=> $url },{ Return => 1 } );
+						print $fh slashDisplay("articlemoved", { url => $url },
+							{ Return => 1 } );
 						close $fh;
 					}
 				}

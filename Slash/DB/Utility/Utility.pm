@@ -806,7 +806,7 @@ sub sqlErrorLog {
 	my($self, $sql) = @_;
 	my $error = $self->sqlError || 'no error string';
 
-	my @return = ("DB=$self->{virtual_user}", $error);
+	my @return = ("DB='$self->{virtual_user}'", "hostinfo='$self->{_dbh}->{mysql_hostinfo}'", $error);
 	push @return, $sql if $sql;
 	errorLog(join ' -- ', @return);
 }

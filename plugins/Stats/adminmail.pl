@@ -79,7 +79,6 @@ $task{$me}{code} = sub {
 	}
 	
 	
-	
 	# let's do the errors
 	$data{not_found} = $logdb->countByStatus("404");
 	$statsSave->createStatDaily("not_found", $data{not_found});
@@ -433,7 +432,8 @@ EOT
 	}
 	
 	foreach my $day (@ah_days){
-		my $avg = $stats->sqlSelect("value", "stats_daily", "day='$day' and section='all' and name='avg_comments_per_story'");
+		my $avg = $stats->sqlSelect("value", "stats_daily",
+			"day='$day' AND section='all' AND name='avg_comments_per_story'");
 		push @{$data{avg_comments_per_story}}, sprintf("%12.1f", $avg);
 	}
 

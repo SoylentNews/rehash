@@ -5920,9 +5920,14 @@ sub updateStory {
 	$data->{body_length} = length($data->{bodytext});
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 
-	my $prev_section = $self->sqlSelect("section","stories","sid=".$self->sqlQuote($sid));
-	my $old_section_param = $self->sqlSelect("value","story_param","sid=".$self->sqlQuote($sid)." and name ='old_shtml_sections'");
-	if($prev_section and $prev_section ne $data->{section}){
+	my $sid_q = $self->sqlQuote($sid);
+	my $prev_section = $self->sqlSelect(
+		"section", "stories",
+		"sid=$sid_q");
+	my $old_section_param = $self->sqlSelect(
+		"value", "story_param",
+		"sid=$sid_q AND name = 'old_shtml_sections'");
+	if ($prev_section && $prev_section ne $data->{section}) {
 		$old_section_param .= "$prev_section,";
 		$data->{old_shtml_sections} = $old_section_param;
 	}
@@ -7283,12 +7288,14 @@ sub setUser {
 				$self->sqlDelete("users_acl", "acl IN ($string)");
 			}
 			if (@add) {
+				# Doing all the inserts at once is cheaper than
+				# separate calls to sqlInsert().
 				my $string;
 				for my $acl (@add) {
 					my $qacl = $self->sqlQuote($acl);
 					$string .= qq| ($uid, $qacl),|
 				}
-				chop($string);
+				chop($string); # remove trailing comma
 				$self->sqlDo("INSERT IGNORE INTO users_acl (uid, acl) VALUES $string");
 			}
 		} else {

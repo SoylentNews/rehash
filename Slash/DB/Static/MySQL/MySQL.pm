@@ -1529,9 +1529,13 @@ sub refreshUncommonStoryWords {
 # files and redirect to new
 
 sub getPrevSectionsForSid {
-	my ($self,$sid) = @_;
-	my $old_sect = $self->sqlSelect("value","story_param","name='old_shtml_sections' and sid=".$self->sqlQuote($sid));
-	my @old_sect = grep{ $_ } split(/,/,$old_sect);
+	my($self, $sid) = @_;
+	my $sid_q = $self->sqlQuote($sid);
+	my $old_sect = $self->sqlSelect(
+		"value",
+		"story_param",
+		"name='old_shtml_sections' AND sid=$sid_q");
+	my @old_sect = grep { $_ } split(/,/, $old_sect);
 	return @old_sect;
 }
 
@@ -1542,8 +1546,11 @@ sub getPrevSectionsForSid {
 # have been cleaned up
  
 sub clearPrevSectionsForSid {
-	my ($self,$sid) = @_;
-	$self->sqlDelete("story_param","name='old_shtml_sections' and sid=".$self->sqlQuote($sid));
+	my($self, $sid) = @_;
+	my $sid_q = $self->sqlQuote($sid);
+	$self->sqlDelete(
+		"story_param",
+		"name='old_shtml_sections' AND sid=$sid_q");
 }
 
 ########################################################

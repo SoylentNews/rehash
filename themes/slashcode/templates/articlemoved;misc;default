@@ -17,7 +17,7 @@ __seclev__
 __template__
 <HTML>
 <HEAD>
-<META HTTP-EQUIV="refresh" content="3;URL=[% url %]">
+<META HTTP-EQUIV="refresh" content="1;URL=[% url %]">
 <TITLE>Page has moved</TITLE>
 </HEAD>
 <BODY>

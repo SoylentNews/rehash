@@ -256,7 +256,7 @@ sub convertPagesToDollars {
 #	memo		(optional) subscriber's memo
 #	payment_type    (optional) defaults to "user" 
 #                                  other options are "gift"  or "grant"
-#       puid            (optional) purchaser uid for gifts or grants this
+#       puid		(optional) purchaser uid for gifts or grants this
 #				   will be different than the uid.  If
 #				   none is provided it defaults to uid
 
@@ -336,9 +336,13 @@ sub getSubscriptionsPurchasedByUser {
 	my($self, $puid,$options) = @_;
 	my $slashdb = getCurrentDB();
 	my $restrict;
-	if($options->{only_types}){
-		if(ref $options->{only_types} eq "ARRAY"){
-			$restrict.=" AND payment_type in(". join(',', map { $slashdb->sqlQuote($_)} @{$options->{only_types}}).")";
+	if ($options->{only_types}) {
+		if (ref($options->{only_types}) eq "ARRAY") {
+			$restrict .= " AND payment_type IN ("
+				. join(',', map { $slashdb->sqlQuote($_) }
+					@{$options->{only_types}}
+				)
+				. ")";
 		} 
 	}
 	my $puid_q = $slashdb->sqlQuote($puid);
