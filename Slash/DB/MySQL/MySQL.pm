@@ -1361,7 +1361,7 @@ sub createAccessLog {
 	$hostip = md5_hex($hostip);
 	my $subnetid = getCurrentUser('subnetid') || $hostip;
 
-	if ($op eq 'index' && $dat =~ /^([^\/]*)\/.*?$/) {
+	if ($op eq 'index' && $dat =~ m|^([^/]*)/|) {
 		$section = $1;
 	}
 
@@ -2407,7 +2407,6 @@ sub saveTopic {
 		image		=> $image,
 		width		=> $topic->{width},
 		height		=> $topic->{height},
-		series		=> $topic->{series} ? 1 : 0,
 	};
 
 	my $data2 = {
@@ -2415,6 +2414,7 @@ sub saveTopic {
 		default_image	=> $imgid,
 		alttext		=> $topic->{alttext},
 		parent_topic	=> $topic->{parent_topic},
+		series		=> $topic->{series} ? 1 : 0,
 	};
 
 
