@@ -990,7 +990,8 @@ sub displayThread {
 	if ($user->{mode} eq 'flat'
 		|| $user->{mode} eq 'archive'
 		|| $user->{mode} eq 'metamod'
-		|| $user->{mode} eq 'parents') {
+		|| $user->{mode} eq 'parents'
+		|| $user->{mode} eq 'child') {
 		$indent = 0;
 		$full = 1;
 	} elsif ($user->{mode} eq 'nested') {
