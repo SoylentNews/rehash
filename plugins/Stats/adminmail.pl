@@ -772,11 +772,11 @@ EOT
 	my $late_modders 		= $stats->getTopModdersNearArchive({limit => 5});
 	my $early_inactive_modders      = $stats->getTopEarlyInactiveDownmodders({limit => 5 });
 	foreach my $mod (@$late_modders){
-		$data{late_modders_report} .= sprintf("%-6d %-20s %5d",$mod->{uid}, $mod->{nickname}, $mod->{count});
+		$data{late_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
 	}
 
 	foreach my $mod (@$early_inactive_modders){
-		$data{early_inactive_modders_report} .= sprintf("%-6d %-20s %5d",$mod->{uid}, $mod->{nickname}, $mod->{count});
+		$data{early_inactive_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
 	}
 
 	my $email = slashDisplay('display', \%data, {
