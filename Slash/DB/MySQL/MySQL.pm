@@ -1009,7 +1009,7 @@ sub getModeratorCommentLog {
 		 moderatorlog.active AS active,
 		 moderatorlog.m2status AS m2status,
 		 moderatorlog.id AS id,
-		 moderatorlog.points_orig AS points_orig, 
+		 moderatorlog.points_orig AS points_orig 
 		 $select_extra",
 		"moderatorlog, users, comments",
 		"$where_clause
