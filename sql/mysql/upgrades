@@ -64,6 +64,6 @@ CREATE TABLE story_topics (
   FOREIGN KEY (tid) REFERENCES topics(tid),
   PRIMARY KEY  (id),
   INDEX sid (sid),
-  INDEX tid (tid),
+  INDEX tid (tid)
 ) TYPE=MyISAM;
 
