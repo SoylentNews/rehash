@@ -30,10 +30,10 @@ __template__
 	Welcome back [% nick %] ([% uid %])
 
 [% CASE 'userInfo_user_title' %]
-	User Info for [% nick %] ([% uid %])
+	User Info for [% nick %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'user_netID_user_title' %]
-	User Info for [% md5id_vis %] ([% id %])
+	User Info for [% md5id_vis %]([% id %]) [% PROCESS zoo_icons person=id implied="" %]
 
 [% CASE 'editUser_title' %]
 	Editing [% user_edit.nickname %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]

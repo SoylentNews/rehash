@@ -27,8 +27,6 @@ userInfo
 __template__
 [% USE Slash %]
 [% PROCESS titlebar width="95%" %]
-[% PROCESS zoo_icons person=useredit.uid %]
-
 [% IF form.formkey %]
         <!-- INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]" -->
 [% END %]
