@@ -876,6 +876,7 @@ sub countDailyByPageDistinctIPID {
 ########################################################
 sub countDailyStoriesAccess {
 	my($self) = @_;
+	my $qlid = $self->_querylog_start('SELECT', 'accesslog_temp');
 	my $c = $self->sqlSelectMany("dat, COUNT(*), op", "accesslog_temp",
 		"op='article'",
 		"GROUP BY dat");
@@ -885,6 +886,7 @@ sub countDailyStoriesAccess {
 		$articles{$sid} = $cnt;
 	}
 	$c->finish;
+	$self->_querylog_finish($qlid);
 	return \%articles;
 }
 
