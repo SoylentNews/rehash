@@ -152,7 +152,7 @@ sub findRecords {
 		$records = $oldsearch->findSubmission(\%terms, $start, $max, $sort);
 	}
 
-	$self->prepResults($results, $records, $total, $matches, $start, $max);
+	$self->prepResults($results, $records, [$total, $matches, $start, $max]);
 	return $results;
 }
 
@@ -171,7 +171,7 @@ sub testSearch {
 	my $max		= $opts->{records_max} || 26;
 
 	$records = [ @{$records}[$start .. ($start + $max)] ];
-	$searchDB->prepResults($results, $records, $total, $matches, $start, $max);
+	$searchDB->prepResults($results, $records, [$total, $matches, $start, $max]);
 
 	my %return;
 	$return{results}   = $results;
