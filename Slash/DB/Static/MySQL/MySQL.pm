@@ -208,12 +208,15 @@ sub getArchiveList {
 	# That replaces "displaystatus > -1" - Jamie 2005/04
 	my $returnable = $self->sqlSelectAll(
 		'stories.stoid, sid, title',
-		'stories, story_text, story_topics_rendered',
+		'stories LEFT JOIN story_param
+		ON stories.stoid = story_param.stoid AND story_param.name="neverdisplay",
+		story_text, story_topics_rendered',
 		"stories.stoid=story_text.stoid
 		 AND stories.stoid = story_topics_rendered.stoid
 		 AND TO_DAYS(NOW()) - TO_DAYS(time) > $days_to_archive
 		 AND is_archived = 'no'
-		 AND story_topics_rendered.tid IN ($nexus_clause)",
+		 AND story_topics_rendered.tid IN ($nexus_clause)
+		 AND name IS NULL",
 		"GROUP BY stoid ORDER BY time $dir LIMIT $limit"
 	);
 

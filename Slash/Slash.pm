@@ -910,6 +910,8 @@ sub moderatorCommentLog {
 		@$mods = sort {
 			$a->{reason} <=> $b->{reason}
 				||
+			$b->{active} <=> $a->{active}
+				||
 			$a->{m2_identity} cmp $b->{m2_identity}
 		} @$mods;
 	}
