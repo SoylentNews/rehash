@@ -645,7 +645,10 @@ sub getTop10Comments {
 	@$cids = sort { $a->[1] <=> $b->[1] } @$cids;
 	$num_top10_comments = 0;
 
-	while ($num_top10_comments < $num_wanted) {
+	while (@$cids
+		&& @{$cids->[$num_top10_comments]}
+		&& $num_top10_comments < $num_wanted
+	) {
 		my $comment = $self->sqlSelectArrayRef(
 			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason",
 			"comments, stories, users",
