@@ -1271,7 +1271,7 @@ Hashref of cleaned-up data.
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
-		formkey hcanswer mode section type
+		formkey hcanswer mode op section type
 	);
 
 	# regexes to match dynamically generated numeric fields
@@ -1284,8 +1284,6 @@ Hashref of cleaned-up data.
 		query	=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
 			         $_[0] =~ s|\s+| |g;		},
 	);
-	# add more specials
-#	$special{qid} = $special{sid};
 
 
 sub filter_params {
