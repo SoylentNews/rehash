@@ -630,14 +630,13 @@ INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Nu
 # LINUX.COM LAST UPDATED HERE
 
 DELETE FROM vars WHERE name IN ('badreasons', 'm2_bonus', 'm2_consensus_trigger', 'm2_dissension_penalty', 'm2_maxunfair', 'm2_mincheck', 'm2_minority_trigger', 'm2_modlog_cycles', 'm2_modlog_pos', 'm2_penalty', 'm2_reward_pool', 'm2_toomanyunfair', 'reasons', 'token_retention');
-INSERT INTO vars (name, value, description) VALUES ('m2_comments','10','Number of comments for meta-moderation - if more than about 15, doublecheck that users_info.mods_saved is large enough');
-INSERT INTO vars (name, value, description) VALUES ('m2_consensus', '7', 'Number of M2 votes per M1 before it is reconciled by consensus - if not odd, will be forced to next highest odd number');
 INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitmult', '1', 'How long should old M2-needing mods wait for the fresh blood?');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences','0.00=0,+2,-100,-1|0.15=-5,+1,-40,-1|0.30=-1,+0.5,-20,0|0.35=0,0,-10,0|0.49=0,0,-4,0|0.60=0,0,+1,0|0.70=0,0,+2,0|0.80=+0.01,-2,+3,0|0.90=+0.02,-5,+4,0|1.00=+0.05,0,+5,+0.5','Rewards and penalties for M2ers and moderator, up to the given amount of fairness (0.0-1.0): numbers are 1, tokens to fair-voters, 2, tokens to unfair-voters, 3, tokens to moderator, and 4, karma to moderator');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
 UPDATE vars SET name='m2_maxbonus_karma' WHERE name='m2_maxbonus';
-
+UPDATE vars SET description='Number of comments for meta-moderation - if more than about 15, doublecheck that users_info.mods_saved is large enough' WHERE name='m2_comments';
+UPDATE vars SET description='Number of M2 votes per M1 before it is reconciled by consensus - if not odd, will be forced to next highest odd number' WHERE name='m2_consensus';
 
 ALTER TABLE moderatorlog ADD COLUMN m2status TINYINT DEFAULT '0' NOT NULL;
 ALTER TABLE metamodlog DROP COLUMN flag;
@@ -669,3 +668,4 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, '
 INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',	0, 0,  1, 0.5);
 
 # SLASHCODE LAST UPDATED HERE
+
