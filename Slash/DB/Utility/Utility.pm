@@ -286,6 +286,45 @@ sub getLastInsertId {
 	return $id;
 }
 
+
+#######################################################
+# set a system variable if necessary.  this will only be
+# good for the current session.  don't forget to set it
+# back anyway.
+sub sqlSetVar {
+	my($self, $var, $value) = @_;
+	return if $ENV{GATEWAY_INTERFACE} && !getCurrentUser('is_admin');
+
+	# can't use sqlQuote for this, can't be quoted
+	$var =~ s/\W+//;   # just in case
+	$value =~ s/\D+//; # ditto (any non-numeric vars we might adjust?)
+
+	$self->sqlDo("SET $var = $value");
+}
+
+#######################################################
+# get the value of a named system variable
+sub sqlGetVar {
+	my($self, $var) = @_;
+
+	# to mirror what we do in sqlSetVar
+	$var =~ s/\W+//;
+
+	my $sql = "SHOW VARIABLES LIKE '$var'";
+	my $sth = $self->{_dbh}->prepare($sql);
+
+	if (!$sth->execute) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
+
+	my($name, $value) = $sth->fetchrow;
+	$sth->finish;
+	return $value;
+}
+
+
 ########################################################
 # The SQL query logging methods
 #
