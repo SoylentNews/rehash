@@ -155,12 +155,15 @@ sub header {
 	#	$adhtml = getAd(1);
 	# }
 
+	# figure out which admin menu to display and which
+	# tab to highlight
+	$data->{adminmenu} = $options->{adminmenu} || 'admin';
+	$data->{page} = $options->{page} if $options->{page};
+
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
-		$data->{adminmenu} = $options->{adminmenu};
 		slashDisplay('header-admin', $data);
 	} else {
-		$data->{adminmenu} = $options->{adminmenu} || 'admin';
 		slashDisplay('header', $data);
 	}
 
