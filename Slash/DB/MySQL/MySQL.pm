@@ -4946,7 +4946,7 @@ sub createDiscussion {
 	# commentcount and flags set to defaults
 
 	# Either create the discussion or bail with a "0"
-	unless($self->sqlInsert('discussions', $discussion)) {
+	unless ($self->sqlInsert('discussions', $discussion)) {
 		return 0;
 	}
 
