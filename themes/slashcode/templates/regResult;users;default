@@ -41,7 +41,7 @@ been emailed to the email address associated with your user account.
 
 <!-- Begin entry form for registration data. -->
 
-<FORM ACTION="[% constants.rootdir %]/users.pl" METHOD=POST>
+<FORM ACTION="[% gSkin.rootdir %]/users.pl" METHOD=POST>
 <INPUT TYPE=HIDDEN NAME="op" VALUE="validateuser">
 Registration ID: &nbsp;
 <INPUT TYPE=TEXT NAME="id" VALUE="" SIZE=32>

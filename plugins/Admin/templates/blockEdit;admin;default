@@ -180,9 +180,9 @@ __template__
 [% IF blockref.description %]
 	<TR>
 		<TD COLSPAN="3">
-		<TABLE BORDER="2" CELLPADDING="4" CELLSPACING="0" BGCOLOR="[% user.fg.1 %]" WIDTH="80%">
+		<TABLE BORDER="2" CELLPADDING="4" CELLSPACING="0" BGCOLOR="[% user.colors.fg_1 %]" WIDTH="80%">
 			<TR>
-				<TD BGCOLOR="[% user.bg.2 %]"><BR><B>Block ID: [% bid %]</B><BR>
+				<TD BGCOLOR="[% user.colors.bg_2 %]"><BR><B>Block ID: [% bid %]</B><BR>
 				<P>[% blockref.description %]</P><BR>
 				</TD>
 			</TR>
@@ -194,8 +194,8 @@ __template__
 
 </TABLE>
 </FORM>
-<B><A HREF="[% constants.rootdir %]/sections.pl?section=[% sectionbid %]&amp;op=editsection">[% sectionbid %]</A></B>
-(<A HREF="[% constants.rootdir %]/users.pl?op=previewbox&amp;bid=[% bid %]">preview</A>)
+<B><A HREF="[% gSkin.rootdir %]/sections.pl?section=[% sectionbid %]&amp;op=editsection">[% sectionbid %]</A></B>
+(<A HREF="[% gSkin.rootdir %]/users.pl?op=previewbox&amp;bid=[% bid %]">preview</A>)
 
 
 

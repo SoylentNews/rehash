@@ -13,7 +13,7 @@ colorEdit
 __template__
 [% IF form.colorpreview %]
 <br>
-<a href="[% constants.rootdir %]/index.pl?colorblock=[% colorblock_clean %]">
+<a href="[% gSkin.rootdir %]/index.pl?colorblock=[% colorblock_clean %]">
 <p><b>Click here to see the site in these colors!</a></b>
 (Hit the <b>"back"</b> button to get back to this page.)</p>
 [% END %]

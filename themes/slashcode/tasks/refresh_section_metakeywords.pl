@@ -18,67 +18,81 @@ $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{on_startup} = 1;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
-	my $sections = $slashdb->getSections();
-	my $sect = "";
-	my $tmpl = "";
+
+	my $skins = $slashdb->getSkins;
+	my $skin = '';
+	my $tmpl = '';
 	my %topics_index;
-	my $stories_per_section = 10;
-	my $topics_per_section = 10;
-	$tmpl .= "[% SWITCH user.currentSection %]\n";
-	foreach my $s (sort keys %$sections) {
-		$sect .= " $s";
+	my $stories_per_skin = 10;
+	my $topics_per_skin = 10;
+
+	$tmpl .= "[% SWITCH gSkin.name %]\n";
+	foreach my $s (sort keys %$skins) {
+		$skin .= " $skins->{$s}{name}";
 		my $stories_ref = $slashdb->sqlSelectColArrayref(
-			"sid",
+			"stoid",
 			"stories",
-			"time < NOW() AND section='$s'",
-			"ORDER BY time DESC LIMIT $stories_per_section");
+			"time < NOW() AND primaryskid='$s'",
+			"ORDER BY time DESC LIMIT $stories_per_skin");
+
 		if (@$stories_ref) {
-			my $sid_str = join ',', map{$_="'$_'"} @$stories_ref;
+			my $stoid_str = join ',', @$stories_ref;
 			my $tid_ref = $slashdb->sqlSelectColArrayref(
 				"tid",
-				"story_topics",
-				"sid IN ($sid_str)",
-				"LIMIT $topics_per_section",
-				{ distinct => 1 } );
+				"story_topics_rendered",
+				"stoid IN ($stoid_str)",
+				"LIMIT $topics_per_skin",
+				{ distinct => 1 }
+			);
 			if (@$tid_ref){
 				my $tid_str = join ',', @$tid_ref;
 				my $topic_ref = $slashdb->sqlSelectColArrayref(
-					"alttext",
+					"textname",
 					"topics",
 					"tid IN ($tid_str)",
-					"LIMIT $topics_per_section",
-					{ distinct => 1 } );
-				$tmpl .= "[% CASE '$s' %]\n";
-				$tmpl .= " $sections->{$s}->{title} section: stories related to "; 	
-				my $topics_str = join(', ', @$topic_ref);	
+					"LIMIT $topics_per_skin",
+					{ distinct => 1 }
+				);
+				$tmpl .= "[% CASE '$skins->{$s}{name}' %]\n";
+				$tmpl .= " $skins->{$s}{title} section: stories related to ";
+				my $topics_str = join(', ', @$topic_ref);
 				$topics_str =~ s/,([^,]*)$/, and$1/;
 				$tmpl .= $topics_str.".\n";
 				$topics_index{$_}++ for @$topic_ref;
-			} 
-		}       
+			}
+		}
 	}
-	$tmpl .= "[% CASE 'index' %]\n";
+
+=pod
+
+	# XXXSKIN - i believe mainpage should be taken care of above, but
+	# i am not entirely sure that it is taken care of properly, given
+	# various weights and all ...
+	$tmpl .= "[% CASE 'mainpage' %]\n";
 	$tmpl .= " Main page: stories related to ";
+	my($topics_count) = sort { $a <=> $b } scalar(keys %topics_index), $topics_per_skin;
 	my $topics_str .=  join(', ',
-			(sort
-				{$topics_index{$b} <=> $topics_index{$a}}
-				keys %topics_index
-			)[0..($topics_per_section-1)]
-		);
+		(sort
+			{$topics_index{$b} <=> $topics_index{$a}}
+			keys %topics_index
+		)[0 .. ($topics_count - 1)]
+	);
 	$topics_str =~ s/,([^,]*)$/, and$1/;
 	$tmpl .= $topics_str.".\n";
+=cut
+
 	$tmpl .= "[% END %]\n";
 
-	# If it exists, we update it, if not, we create it.  The final "1" arg
-	# means to ignore errors.
-	my $tpid = $slashdb->getTemplateByName(
-		'metakeywordsd', 'tpid', 0, '', '', 1
-	);
+	# If it exists, we update it; if not, we create it
+	my $tpid = $slashdb->getTemplateByName('metakeywordsd', {
+		values		=> 'tpid',
+		ignore_errors	=> 1,
+	});
 
-	my(%template) = ( 
-		name => 'metakeywordsd',
-		tpid => $tpid, 
-		template => $tmpl,
+	my %template = (
+		name		=> 'metakeywordsd',
+		tpid		=> $tpid, 
+		template	=> $tmpl,
 	);
 	if ($tpid) {
 		$slashdb->setTemplate($tpid, \%template);
@@ -86,7 +100,7 @@ $task{$me}{code} = sub {
 		$slashdb->createTemplate(\%template);
 	}
 
-	return "section meta-keywords refreshed: $sect ";
+	return "skin meta-keywords refreshed: $skin ";
 };
 
 1;

@@ -18,7 +18,7 @@ __template__
 [% PROCESS titlebar width => (barwidth || "100%") %]
 </TD></TR>
 [% FOR pair = pairs %]
-<TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="top">
+<TR><TD BGCOLOR="[% user.colors.bg_2 %]" VALIGN="top">
 <B>[% pair.label %]</B>
 </TD><TD>
 [% pair.value %]

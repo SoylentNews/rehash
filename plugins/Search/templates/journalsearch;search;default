@@ -13,11 +13,11 @@ journalsearch
 __template__
 [% USE Slash %]
 [% FOREACH journal=entries %]
-	<B><A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</A></B><BR>
+	<B><A HREF="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</A></B><BR>
 	<FONT SIZE="-1">On [% Slash.timeCalc(journal.date) %]</FONT><BR>
 	[% journal.article %]<BR>
 	<FONT SIZE="-1">
-	Author: <A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname %]</A>
+	Author: <A HREF="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname %]</A>
 	[% IF journal.score %]<BR>
 	Score: ([% journal.score %])
 	[% END %]

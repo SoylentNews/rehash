@@ -41,7 +41,7 @@ __template__
 
 	<tr valign="top">
 		<td align=right>
-		<A HREF="[% constants.rootdir
+		<A HREF="[% gSkin.rootdir
 		-%]/newsvac.pl?op=editurl&url_id=[% hashref.url_id %]">[% 
 		hashref.url_id -%]</a>
 		</td>

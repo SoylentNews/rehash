@@ -18,7 +18,7 @@ __template__
 [% FOREACH item = people %]
     <TR>
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</A>
+		<A HREF="[% gSkin.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</A>
 	</TD>
 	<TD VALIGN="TOP">
 		[% PROCESS zoo_icons person=item.0 %]

@@ -19,11 +19,10 @@ __template__
 		<TD><B>Author</B></TD>
 		<TD><B>Topic</B></TD>
 
-			[% UNLESS user.section || form.section %]
-		<TD><B>Section</B></TD>
+			[% UNLESS form.section %]
+		<TD><B>Skin</B></TD>
 			[% END %]
 
-		<TD><B>Subsection</B></TD>
 		<TD><B>Hits</B></TD>
 		<TD><B>Comments</B></TD>
 		<TD><B>Date</B></TD>
@@ -38,11 +37,11 @@ FOREACH story = storylistref %]
 	storiestoday = storiestoday > 1 ? storiestoday : '';
 %]
 	<TR>
-		<TD ALIGN="RIGHT" BGCOLOR="[% user.bg.2 %]">
+		<TD ALIGN="RIGHT" BGCOLOR="[% user.colors.bg_2 %]">
 			<FONT SIZE="2">[% storiestoday %]</FONT>
 		</TD>
-		<TD COLSPAN="7" ALIGN="right" BGCOLOR="[% user.bg.3 %]">
-			<FONT COLOR="[% user.fg.3 %]" SIZE="2">[% story.td %]</FONT>
+		<TD COLSPAN="7" ALIGN="right" BGCOLOR="[% user.colors.bg_3 %]">
+			<FONT COLOR="[% user.colors.fg_3 %]" SIZE="2">[% story.td %]</FONT>
 		</TD>
 	</TR>
 [%	storiestoday = 0;
@@ -54,7 +53,7 @@ END;
 	bgcolor = '#FFFFFF';
 	IF story.displaystatus > 0;
 		bgcolor = '#CCCCCC';
-	ELSIF story.writestatus == 'delete' || story.displaystatus < 0;
+	ELSIF story.in_trash == 'yes' || story.displaystatus < 0;
 		bgcolor = '#999999';
 END %]
 
@@ -62,38 +61,25 @@ END %]
 
 		<TD ALIGN="RIGHT">
 		<FONT SIZE="2">
-		[<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
+		[<A HREF="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
 		</FONT>
 
 		</TD>
 		<TD>
 		<FONT SIZE="2">
-		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
-		[% IF story.writestatus == 'delete' %]<S>[% END; story.title; IF story.writestatus == 'delete' %]</S>[% END %]&nbsp;</A>
+		<A HREF="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
+		[% IF story.in_trash == 'yes' %]<S>[% END; story.title; IF story.in_trash == 'yes' %]</S>[% END %]&nbsp;</A>
 		</FONT>
 		</TD>
 		<TD><FONT SIZE="2"><B>[% story.aid %]</B></FONT></TD>
 
 		<TD><FONT SIZE="2">[% story.topic.substr(0, 5) %]</FONT></TD>
 
-	[% UNLESS user.section || form.section %]
+	[% UNLESS form.section %]
 		<TD>
 		<FONT SIZE="2">
-		<A HREF="[% env.script_name %]?section=[% story.section %]">
-		[% story.section.substr(0, 5) %]</A>
-		</FONT>
-		</TD>
-	[% END %]
-	[% IF constants.enable_index_topic %]
-		<TD>
-		<FONT SIZE="2">
-		<!-- subsection [% story.subsection %] -->
-		[% IF story.subsection ; subsection_name = Slash.db.getSubSection(story.subsection,'title'); %]
-		[% subsection_name %] ([% story.subsection %])
-			[% ELSE ;%]
-		n/a
-			[% END;
-		%]
+		<A HREF="[% env.script_name %]?section=[% story.skinname %]">
+		[% story.skinname.substr(0, 5) %]</A>
 		</FONT>
 		</TD>
 	[% END %]

@@ -23,11 +23,17 @@ sub handler {
 	my $slashdb = getCurrentDB();
 	my $page = $r->uri;
 	$page =~ s|^/(.*)\.tmpl$|$1|;
-	my $section = getCurrentForm('section');
-	my $title = $slashdb->getTemplateByName('body', 'title', 1, $page, $section);
+	my $skin = getCurrentSkin('name');
+	my $title = $slashdb->getTemplateByName('body', {
+		values          => 'title',
+		cache_flag      => 1,
+		page            => $page,
+		skin            => $skin
+	});
+	# XXXSKIN - header() not yet ported
 	if ($title) {
-		header($title, $section) or return;
-		my $display = slashDisplay('body', '', { Page => $page, Section => $section, Return => 1 });
+		header($title, $skin) or return;
+		my $display = slashDisplay('body', '', { Page => $page, Skin => $skin, Return => 1 });
 		print $display;
 		footer();
 	} else {

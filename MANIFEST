@@ -460,7 +460,7 @@ themes/slashcode/templates/regResult;users;default
 themes/slashcode/templates/rereg_mail;messages;default
 themes/slashcode/templates/saveSub;submit;default
 themes/slashcode/templates/savepoll;pollBooth;default
-themes/slashcode/templates/sectionindexd;misc;default
+themes/slashcode/templates/skinindexd;misc;default
 themes/slashcode/templates/sectionisolate;misc;default
 themes/slashcode/templates/select;misc;default
 themes/slashcode/templates/selectThreshLabel;misc;default

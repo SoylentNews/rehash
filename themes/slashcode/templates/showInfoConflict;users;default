@@ -21,9 +21,9 @@ showInfoConflict
 __template__
 [% PROCESS titlebar width="80%" title="UID/nickname conflict" %]
 <P>There is are two users on this system, one using [% id %] as a user ID:<BR>
-<B><A HREF="[% constants.rootdir %]/users.pl?op=[% op %]&amp;uid=[% id %]&amp;userfield=[% id %]">UID [% id %] nickname [% nick %]</A></B><BR>
+<B><A HREF="[% gSkin.rootdir %]/users.pl?op=[% op %]&amp;uid=[% id %]&amp;userfield=[% id %]">UID [% id %] nickname [% nick %]</A></B><BR>
 And the other using [% id %] as a nickname:<BR>
-<B><A HREF="[% constants.rootdir %]/users.pl?op=[% op %]&amp;uid=[% conflict_id %]&amp;userfield=[% conflict_id %]">UID [% conflict_id %] nickname [% id %]</A></B><BR>
+<B><A HREF="[% gSkin.rootdir %]/users.pl?op=[% op %]&amp;uid=[% conflict_id %]&amp;userfield=[% conflict_id %]">UID [% conflict_id %] nickname [% id %]</A></B><BR>
 Select whichever you're looking for.</P>
 
 __seclev__

@@ -116,8 +116,9 @@ use vars qw($VERSION @EXPORT);
 sub nickFix {
 	my($nick) = @_;
 	my $constants = getCurrentStatic();
+	my $nc = $constants->{nick_chars} || join("", 'a' .. 'z');
 	$nick =~ s/\s+/ /g;
-	$nick =~ s/[^$constants->{nick_chars}]+//g;
+	$nick =~ s/[^$nc]+//g;
 	$nick = substr($nick, 0, $constants->{nick_maxlen});
 	return $nick;
 }
@@ -231,9 +232,9 @@ sub root2abs {
 	my $user = getCurrentUser();
 
 	if ($user->{state}{ssl}) {
-		return getCurrentStatic('absolutedir_secure');
+		return getCurrentSkin('absolutedir_secure');
 	} else {
-		return getCurrentStatic('absolutedir');
+		return getCurrentSkin('absolutedir');
 	}
 }
 
@@ -329,15 +330,16 @@ sub cleanRedirectUrl {
 	my($redirect) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 
 	# We absolutize the return-to URL to our domain just to
 	# be sure nobody can use the site as a redirection service.
 	# We decide whether to use the secure homepage or not
 	# based on whether the current page is secure.
 	my $base = root2abs();
-	my $clean = URI->new_abs($redirect || $constants->{rootdir}, $base);
+	my $clean = URI->new_abs($redirect || $gSkin->{rootdir}, $base);
 
-	my @site_domain = split m/\./, $constants->{basedomain};
+	my @site_domain = split m/\./, $gSkin->{basedomain};
 	my $site_domain = join '.', @site_domain[-2, -1];
 	$site_domain =~ s/:.+$//;	# strip port, if available
 
@@ -350,7 +352,7 @@ sub cleanRedirectUrl {
 	} else {
 		# Bogus, it goes to another site.  op=userlogin is not a
 		# URL redirection service, sorry.
-		$clean = url2abs($constants->{rootdir});
+		$clean = url2abs($gSkin->{rootdir});
 	}
 
 	return $clean;
@@ -1465,7 +1467,8 @@ sub fixHref {  # I don't like this.  we need to change it. -- pudge
 		}
 	}
 
-	my $rootdir = getCurrentStatic('rootdir');
+	my $gSkin = getCurrentSkin();
+	my $rootdir = $gSkin->{rootdir};
 	if ($rel_url =~ /^www\.\w+/) {
 		# errnum 1
 		$abs_url = "http://$rel_url";
@@ -2009,8 +2012,8 @@ sub html2text {
 	my($html, $col) = @_;
 	my($text, $tree, $form, $refs);
 
-	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
+	my $gSkin     = getCurrentSkin();
 
 	$col ||= 74;
 
@@ -2024,7 +2027,7 @@ sub html2text {
 	$text = $form->format($tree);
 	1 while chomp($text);
 
-	return $text, $refs->get_refs($constants->{absolutedir});
+	return $text, $refs->get_refs($gSkin->{absolutedir});
 }
 
 sub HTML::FormatText::AddRefs::new {
@@ -2322,26 +2325,24 @@ sub _slashlink_to_link {
 	my($sl, $options) = @_;
 	my $ssi = getCurrentForm('ssi') || 0;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $constants = getCurrentStatic();
-	my $root = $constants->{rootdir};
 	my %attr = $sl =~ / (\w+)="([^"]+)"/g;
 	# We should probably de-strip-attribute the values of %attr
 	# here, but it really doesn't matter.
 
 	# Load up special values and delete them from the attribute list.
 	my $sn = delete $attr{sn} || "";
-	my $sect = delete $attr{sect} || "";
-	my $section = $sect ? $reader->getSection($sect) : {};
-	my $sect_root = $section->{rootdir} || $root;
+	my $skin_name = delete $attr{sect} || "";
+	my $skin = $skin_name ? $reader->getSkin($skin_name) : {};
+	my $skin_root = $skin->{rootdir};
 	if ($options && $options->{absolute}) {
-		$sect_root = URI->new_abs($sect_root, $options->{absolute})
+		$skin_root = URI->new_abs($skin_root, $options->{absolute})
 			->as_string;
 	}
 	my $frag = delete $attr{frag} || "";
 	# Generate the return value.
 	my $retval = q{<A HREF="};
 	if ($sn eq 'comments') {
-		$retval .= qq{$sect_root/comments.pl?};
+		$retval .= qq{$skin_root/comments.pl?};
 		$retval .= join("&",
 			map { qq{$_=$attr{$_}} }
 			sort keys %attr);
@@ -2351,12 +2352,12 @@ sub _slashlink_to_link {
 		# outputting for a dynamic page, or a static one.
 		# This is the main reason for doing slashlinks at all!
 		if ($ssi) {
-			$retval .= qq{$sect_root/};
-			$retval .= qq{$sect/$attr{sid}.shtml};
+			$retval .= qq{$skin_root/};
+			$retval .= qq{$skin_name/$attr{sid}.shtml};
 			$retval .= qq{?tid=$attr{tid}} if $attr{tid};
 			$retval .= qq{#$frag} if $frag;
 		} else {
-			$retval .= qq{$sect_root/article.pl?};
+			$retval .= qq{$skin_root/article.pl?};
 			$retval .= join("&",
 				map { qq{$_=$attr{$_}} }
 				sort keys %attr);
@@ -2476,7 +2477,7 @@ sub fullhost_to_domain {
 
 sub _url_to_domain_tag {
 	my($href, $link, $body) = @_;
-	my $absolutedir = getCurrentStatic('absolutedir');
+	my $absolutedir = getCurrentSkin('absolutedir');
 	my $uri = URI->new_abs($link, $absolutedir);
 	my $uri_str = $uri->as_string;
 
@@ -2587,23 +2588,27 @@ sub _link_to_slashlink {
 	my($pre, $url, $post) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $virtual_user = getCurrentVirtualUser();
 	my $retval = "$pre$url$post";
-	my $abs = $constants->{absolutedir};
+	my $abs = $gSkin->{absolutedir};
 #print STDERR "_link_to_slashlink begin '$url'\n";
 
 	if (!defined($urla{$virtual_user})) {
-		# URLs may show up in any section, which means when absolutized
+		# URLs may show up in any skins, which means when absolutized
 		# their host may be either the main one or a sectional one.
 		# We have to allow for any of those possibilities.
-		my $sections = $reader->getSections();
-		my @sect_urls = grep { $_ }
-			map { $sections->{$_}{rootdir} }
-			sort keys %$sections;
+		my $skins = $reader->getSkins();
+		my @skin_urls = grep { $_ }
+			map { $skins->{$_}{rootdir} }
+			sort keys %$skins;
 		my %all_urls = ( );
-		for my $url ($abs, @sect_urls) {
+		for my $url ($abs, @skin_urls) {
 			my $new_url = URI->new($url);
 			# Remove the scheme to make it relative (schemeless).
+			# XXXSECTIONTOPICS hey, skin urls should already be schemeless, test this
+			# XXXSKIN - no, urls are not schemeless, rootdirs are
+			# (and they are generated, at this point, from urls)
 			$new_url->scheme(undef);
 			my $new_url_q = quotemeta($new_url->as_string);
 			$all_urls{"(?:https?:)?$new_url"} = 1;
@@ -2636,6 +2641,7 @@ sub _link_to_slashlink {
 	# virtual user, thus "urlavu".
 	my $urlavu = $urla{$virtual_user};
 
+use Data::Dumper; print STDERR "_link_to_slashlink vu '$virtual_user' gskid '$gSkin->{skid}' url, abs: " . Dumper([$url, $abs]);
 	my $canon_url = URI->new_abs($url, $abs)->canonical;
 	my $frag = $canon_url->fragment() || "";
 
@@ -2658,14 +2664,16 @@ sub _link_to_slashlink {
 		# Section and topic attributes get thrown in too.
 		if ($attr{sn} eq 'comments') {
 			# sid is actually a discussion id!
+			# XXXSECTIONTOPICS
 			$attr{sect} = $reader->getDiscussion(
-				$attr{sid}, 'section');
+				$attr{sid}, 'primaryskid');
 			$attr{tid} = $reader->getDiscussion(
 				$attr{sid}, 'topic');
 		} else {
 			# sid is a story id
+			# XXXSECTIONTOPICS
 			$attr{sect} = $reader->getStory( 
-				$attr{sid}, 'section', 1);
+				$attr{sid}, 'primaryskid', 1);
 			$attr{tid} = $reader->getStory(
 				$attr{sid}, 'tid', 1);
 		}
@@ -3099,6 +3107,7 @@ sub countWords {
 sub findWords {
 	my($args_hr) = @_;
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $use_stemming = $constants->{stem_uncommon_words};
 	my $language = $constants->{rdflanguage} || "EN-US";
 	$language = uc($language);
@@ -3132,7 +3141,7 @@ sub findWords {
 			([^"<>]+)
 		}gxi;
 		foreach my $url (@urls_ahref, @urls_imgsrc) {
-			my $uri = URI->new_abs($url, $constants->{absolutedir})
+			my $uri = URI->new_abs($url, $gSkin->{absolutedir})
 				->canonical;
 			$url = $uri->as_string;
 			# Tiny URLs don't count.
@@ -3290,13 +3299,15 @@ sub grepn {
 	return;
 }
 
-#========================================================================
-# Removed from openbackend
+##################################################################
 sub sitename2filename {
 	my($section) = @_;
 	my $filename = '';
 
-	if ($section ne 'light') {
+	# XXXSKIN - hardcode 'index' for the sake of RSS feeds
+	if ($section eq 'mainpage') {
+		$filename = 'index';
+	} elsif ($section ne 'light') {
 		$filename = $section || lc getCurrentStatic('sitename');
 	} else {
 		$filename = lc getCurrentStatic('sitename');

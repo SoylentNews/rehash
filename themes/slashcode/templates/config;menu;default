@@ -16,17 +16,17 @@ __name__
 config
 __template__
 [% tabs = [
-	{ link = "$constants.rootdir/admin.pl",			label = "Stories",	sel_label = "stories" },
-	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Topics",	sel_label = "topics" },
-	{ link = "$constants.rootdir/admin.pl?op=blocks",	label = "Blocks",	sel_label = "blocks" },
-	{ link = "$constants.rootdir/admin.pl?op=colors",	label = "Colors",	sel_label = "colors" },
-	{ link = "$constants.rootdir/admin.pl?op=listfilters",	label = "Filters",	sel_label = "filters" },
-	{ link = "$constants.rootdir/sections.pl?op=list",	label = "Sections",	sel_label = "sections" },
-	{ link = "$constants.rootdir/admin.pl?op=templates",	label = "Templates",	sel_label = "templates" },
-	{ link = "$constants.rootdir/admin.pl?op=vars",		label = "Vars",		sel_label = "vars" },
-	{ link = "$constants.rootdir/admin.pl?op=acls",		label = "ACLs",		sel_label = "acls" },
-	{ link = "$constants.rootdir/stats.pl",			label = "Info",		sel_label = "stats" },
-	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Security",	sel_label = "security" },
+	{ link = "$gSkin.rootdir/admin.pl",			label = "Stories",	sel_label = "stories" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",	label = "Topics",	sel_label = "topics" },
+	{ link = "$gSkin.rootdir/admin.pl?op=blocks",	label = "Blocks",	sel_label = "blocks" },
+	{ link = "$gSkin.rootdir/admin.pl?op=colors",	label = "Colors",	sel_label = "colors" },
+	{ link = "$gSkin.rootdir/admin.pl?op=listfilters",	label = "Filters",	sel_label = "filters" },
+	{ link = "$gSkin.rootdir/sections.pl?op=list",	label = "Sections",	sel_label = "sections" },
+	{ link = "$gSkin.rootdir/admin.pl?op=templates",	label = "Templates",	sel_label = "templates" },
+	{ link = "$gSkin.rootdir/admin.pl?op=vars",		label = "Vars",		sel_label = "vars" },
+	{ link = "$gSkin.rootdir/admin.pl?op=acls",		label = "ACLs",		sel_label = "acls" },
+	{ link = "$gSkin.rootdir/stats.pl",			label = "Info",		sel_label = "stats" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent",	label = "Security",	sel_label = "security" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]
 

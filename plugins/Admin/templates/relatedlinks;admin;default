@@ -19,7 +19,7 @@ __template__
 <a href="http://www.redhat.com">Red Hat</a>
 <a href="http://www.wired.com">Wired</a>
 <a href="http://www.netscape.com">Netscape</a>
-<a href="[% constants.rootdir %]">[% constants.sitename %]</a>
+<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
 <a href="http://CmdrTaco.net">Rob Malda</a>
 <a href="http://CmdrTaco.net">Rob Malda</a>
 <a href="http://www.apple.com">Apple</a>

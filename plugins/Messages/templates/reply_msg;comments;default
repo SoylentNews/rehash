@@ -16,9 +16,9 @@ __template__
 
 <P>
 [% reply.nickname %] has posted a comment,
-<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
+<B><A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
 %]">[% reply.subject %]</A></B>, in reply to your comment,
-<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% parent.sid %]&amp;cid=[% parent.cid
+<B><A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% parent.sid %]&amp;cid=[% parent.cid
 %]">[% parent.subject %]</A></B>, attached to
 <B><A HREF="[% discussion.url %]">[% discussion.title %]</A></B>.
 </P>

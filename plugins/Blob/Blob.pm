@@ -91,30 +91,55 @@ sub create {
 
 sub delete {
 	my($self, $sig) = @_;
-
-	$self->sqlDo("UPDATE $self->{'_table'} SET reference_count=(reference_count -1) WHERE id = '$sig'");
+	my $sig_q = $self->sqlQuote($sig);
+	return $self->sqlUpdate(
+		$self->{_table},
+		{ -reference_count => "reference_count - 1" },
+		"id = $sig_q");
 }
 
 sub clean {
 	my($self, $sig) = @_;
-
-	$self->sqlDo("DELETE FROM $self->{'_table'} WHERE reference_count < 1");
+	return $self->sqlDelete($self->{_table}, "reference_count < 1");
 }
 
 sub getFilesForStories {
 	my($self) = @_;
-	$self->sqlSelectAllHashrefArray('*', 'story_files', '', "ORDER BY sid,description");
+	$self->sqlSelectAllHashrefArray('*', 'story_files', '', "ORDER BY stoid,description");
 }
 
 sub getFilesForStory {
-	my($self, $sid) = @_;
-	return unless $sid;
-	$self->sqlSelectAllHashrefArray('*', 'story_files', "sid=" . $self->sqlQuote($sid), "ORDER BY description");
+	my($self, $id) = @_;
+	return unless $id;
+
+	# Grandfather in an old-style sid.
+	my $stoid;
+	my $id_style = $self->_storyidstyle($id);
+	if ($id_style eq 'stoid') {
+		$stoid = $id;
+	} else {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		$stoid = $reader->getStory($id, 'stoid', 1);
+		return 0 unless $stoid;
+	}
+
+	$self->sqlSelectAllHashrefArray('*', 'story_files',
+		"stoid=$stoid",
+		"ORDER BY description");
 }
 
 sub createFileForStory {
 	my($self, $values) = @_;
-	return unless $values->{sid} && $values->{data};
+	return unless $values->{data}
+		&& ($values->{sid} || $values->{stoid});
+
+	# Grandfather in an old-style sid.
+	if (!$values->{stoid}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $stoid = $reader->getStory($values->{sid}, 'stoid', 1);
+		return unless $stoid;
+		$values->{stoid} = $stoid;
+	}
 
 	my $content = {
 		seclev		=> $values->{seclev},
@@ -127,10 +152,10 @@ sub createFileForStory {
 	my $content_type = $self->get($id, 'content_type');
 
 	my $file_content = {
-		sid         => $values->{sid},
-		description => $values->{description} || $values->{filename} || $content_type,
-		isimage     => ($content_type =~ /^image/) ? 'yes': 'no',
-		file_id     => $id,
+		stoid		=> $values->{stoid},
+		description	=> $values->{description} || $values->{filename} || $content_type,
+		isimage		=> ($content_type =~ /^image/) ? 'yes': 'no',
+		file_id		=> $id,
 	};
 	$self->sqlInsert('story_files', $file_content);
 
@@ -139,17 +164,27 @@ sub createFileForStory {
 
 sub deleteStoryFile {
 	my($self, $id) = @_;
-	my $file_id = $self->sqlSelect("file_id", "story_files", "id =" . $self->sqlQuote($id));
+	my $id_q = $self->sqlQuote($id);
+	my $file_id = $self->sqlSelect("file_id",
+		"story_files",
+		"id = $id_q");
+	return undef if !$file_id;
 	$self->delete($file_id);
-	$self->sqlDelete("story_files", "id=" . $self->sqlQuote($id));
+	return $self->sqlDelete("story_files", "id=$id_q");
 }
 
+sub _storyidstyle {
+	my($self, $id) = @_;
+	if ($id =~ /^\d+$/) {
+		return "stoid";
+	}
+	return "sid";
+}
 
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
 }
-
 
 1;
 

@@ -29,12 +29,12 @@ __template__
 	<INPUT TYPE="TEXT" NAME="question" VALUE="[% question.question %]" SIZE="40">
 	<INPUT TYPE="TEXT" NAME="voters" VALUE="[% question.voters %]" SIZE="5"><BR>
 	[% PROCESS formLabel value => "Poll Section" comment => "what section this will be visible in" %]
-	[% sections = Slash.db.getDescriptions('sections-all') %]
+	[% skins = Slash.db.getDescriptions('skins') %]
 	[% IF story %]
-		[% sections.${question.section} %] *<BR>
-		<INPUT TYPE="hidden" name="section" value="[% question.section %]">
+		[% skins.${question.primaryskid}.title %] *<BR>
+		<INPUT TYPE="hidden" name="primaryskid" value="[% question.primaryskid %]">
 	[% ELSE %]
-		[% Slash.createSelect('section', sections, question.section, 1) %]
+		[% Slash.createSelect('skid', skins, question.primaryskid, 1) %]
 	[% END %]
 	[% PROCESS formLabel value => "Poll Topic" comment => "" %]
 	[% DEFAULT question.topic=constants.discussion_default_topic %]
@@ -71,7 +71,7 @@ Story Related Display - Poll is displayed on the specified story's page<BR>
 	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
 
 [% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear on the story's page" %]
-        <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20" >[% IF question.sid %]<A HREF="[% constants.rootdir %]/article.pl?sid=[% question.sid %]">Related story</A> [% END %] [% IF question.sid && story && qid %]| <A HREF="[% constants.rootdir %]/pollBooth.pl?op=detach&amp;sid=[% question.sid | fixparam %]&amp;qid=[% qid %]">Detach Poll from Story</A>[% END %]<BR>
+        <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20" >[% IF question.sid %]<A HREF="[% gSkin.rootdir %]/article.pl?sid=[% question.sid %]">Related story</A> [% END %] [% IF question.sid && story && qid %]| <A HREF="[% gSkin.rootdir %]/pollBooth.pl?op=detach&amp;sid=[% question.sid | fixparam %]&amp;qid=[% qid %]">Detach Poll from Story</A>[% END %]<BR>
 	<font size="2">(time, section, topic, and polltype will be set based on related story's settings)</font><BR>
 	[% IF story %]
 		*<font size="2">These values set from related story</font><BR>

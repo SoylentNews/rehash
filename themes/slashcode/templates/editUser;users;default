@@ -22,13 +22,13 @@ editUser
 __template__
 [% PROCESS prefs_titlebar tab_selected='user' %]
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]"><TR><TD>
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.colors.bg_5 %]"><TR><TD>
 
 [% note %]
 
 [% IF constants.offer_insecure_login_link %]
 You can automatically log in by clicking
-<A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A>
+<A HREF="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A>
 and Bookmarking the resulting page. This is totally insecure, but very convenient.
 [% END %]
 <BR>

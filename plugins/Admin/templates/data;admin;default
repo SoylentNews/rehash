@@ -59,7 +59,7 @@ Saved [% form.thisname %]<BR>
 	<P><B>This block, [% bid %], already exists! <BR>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</P>
 
 [% CASE 'templateSave-exists-message' %]
-	<P><B>This template, [% name %], TPID [% tpid %], already exists! <BR>Hit the "back" button, and try another bid (loo
+	<P><B>This template, [% name %], TPID [% tpid %], already exists!
 
 [% CASE 'blockSave-inserted-message' %]
 	Inserted [% bid %]<BR>
@@ -101,9 +101,9 @@ Saved [% form.thisname %]<BR>
 [% CASE 'clearpass-warning' %]
 	<BLOCKQUOTE><P ALIGN="CENTER"><B>**&nbsp;Your admin password has been sent
 	in the clear. Please return to
-	<A HREF="[% constants.absolutedir_secure %]">the secure site</A>
+	<A HREF="[% gSkin.absolutedir_secure %]">the secure site</A>
 	and then
-	<A HREF="[% constants.absolutedir_secure %]/my/password">change
+	<A HREF="[% gSkin.absolutedir_secure %]/my/password">change
 	your password</A>
 	immediately! If you have additional problems, please contact the
 	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">site admin</a>.[%
@@ -123,7 +123,7 @@ CASE "not enough points" %]
 
 [% CASE "moderate_recent_message" %]
 	<P>Return to the set of
-	<A HREF="[% constants.rootdir %]/admin.pl?op=recent&amp;startat=[% startat %]">recent comments</A>
+	<A HREF="[% gSkin.rootdir %]/admin.pl?op=recent&amp;startat=[% startat %]">recent comments</A>
 	you were just moderating.</P>
 
 [% CASE "moderate_recent_message_returnto" %]

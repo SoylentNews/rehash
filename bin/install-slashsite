@@ -365,8 +365,8 @@ while (<$dump>) {
 	next unless /^INSERT/;
 	chomp;
 	s/;$//;
-	s/www\.example\.com/$hostname/g;
-	s/admin\@example\.com/$email/g;
+	s/\badmin\@example\.com\b/$email/g;
+	s/\bwww\.example\.com\b/$hostname/g;
 	s|/usr/local/slash|$SLASH_PREFIX|g;
 	if ($driver eq 'oracle') {
 		# With this we can almost use the MySQL dump verbatim

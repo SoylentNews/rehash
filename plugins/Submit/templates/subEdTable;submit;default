@@ -23,7 +23,7 @@ subEdTable
 __template__
 [% PROCESS titlebar %]
 
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3" BGCOLOR="[% user.bg.2 %]">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3" BGCOLOR="[% user.colors.bg_2 %]">
 <TR ALIGN="RIGHT"><TD></TD>
 
 [% # print section headers %]
@@ -47,7 +47,7 @@ __template__
 		[% s = section.0;
 		   n = note.0;
 		   count = sn.$s.$n || 0;
-		   bgcolor = " BGCOLOR=\"$user.bg.1\"" IF n == cur_note && s == cur_section;
+		   bgcolor = " BGCOLOR=\"$user.colors.bg_1\"" IF n == cur_note && s == cur_section;
 		%]
 	<TD[% bgcolor %]><A HREF="[% constants.real_rootdir %]/submit.pl?section=[% section.1 %]&amp;op=list&amp;note=[% note.1 %]">[% count %]</A>&nbsp;</TD>
 		[% IF section.0 == def_section %]

@@ -45,7 +45,7 @@ __template__
 			<TD>[% PROCESS ccbut gift = gift from = from %]</TD>
 			</TR></TABLE></CENTER>
 		[% ELSE %]
-			<P>No user was found for the UID ([% uid %]) you specified.  Please <A HREF="[% constants.rootdir %]/subscribe.pl">go back</A> and correct this to continue.
+			<P>No user was found for the UID ([% uid %]) you specified.  Please <A HREF="[% gSkin.rootdir %]/subscribe.pl">go back</A> and correct this to continue.
 		
 		[% END %]
 	[% END %]

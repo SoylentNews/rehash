@@ -16,7 +16,7 @@ __template__
 
 <P><A HREF="[% PROCESS rsslink %]">RSS</A>
 
-<FORM METHOD="GET" ACTION="[% constants.rootdir %]/search.pl">
+<FORM METHOD="GET" ACTION="[% gSkin.rootdir %]/search.pl">
   <INPUT TYPE="TEXT" NAME="query" VALUE="" SIZE="20">
   <INPUT TYPE="submit" VALUE="Search [% constants.sitename %]">
 </FORM>

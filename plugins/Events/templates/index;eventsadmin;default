@@ -18,13 +18,13 @@ __template__
 	<TR>
 		<TD>
 			[% event.begin %] - [% event.end %]
-			<A HREF="[% constants.rootdir %]/eventsadmin.pl?op=delete&amp;id=[% event.id %]">[delete]</A>
+			<A HREF="[% gSkin.rootdir %]/eventsadmin.pl?op=delete&amp;id=[% event.id %]">[delete]</A>
 		</TD>
 	</TR>
 [% END %]
 </TABLE>
 <P>
-<FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/eventsadmin.pl" METHOD="POST">
 		Begin Date: 
 		<INPUT TYPE="TEXT" NAME="begin" VALUE="[% Slash.db.getTime() %]">
 		<BR>
@@ -35,7 +35,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="add">
 <INPUT TYPE="SUBMIT" VALUE="Save">
 <BR>
-<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</A>
+<A HREF="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</A>
 </FORM>
 __seclev__
 100

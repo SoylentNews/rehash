@@ -14,16 +14,17 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 	my $blob = getObject("Slash::Blob", { db_type => 'reader' });
 	
 	unless ($form->{id}) {
-		redirect("$constants->{rootdir}/404.pl");
+		redirect("$gSkin->{rootdir}/404.pl");
 		return;
 	}
 	
 	my $data = $blob->get($form->{id});
 	if (!$data || $user->{seclev} < $data->{seclev}) {
-		redirect("$constants->{rootdir}/404.pl");
+		redirect("$gSkin->{rootdir}/404.pl");
 		return;
 	}
 

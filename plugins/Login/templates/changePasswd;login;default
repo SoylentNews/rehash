@@ -19,7 +19,7 @@ END; note %]</h2>
 [% title = "Change password for $user.nickname ($user.uid)" %]
 [% PROCESS prefs_titlebar tab_selected='password' %]
 
-<table align="CENTER" width="100%" bgcolor="[% user.bg.5 %]">
+<table align="CENTER" width="100%" bgcolor="[% user.colors.bg_5 %]">
 	<tr>
 		<td>
 [% IF constants.offer_insecure_login_link -%]
@@ -44,7 +44,7 @@ END; note %]</h2>
    clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_location, 1, 0, clocation_order);
 -%]
 
-		My <b><a href="[% constants.rootdir %]/faq/accounts.shtml#ac1200">login session</a></b> [% session_sel %] and [% clocation_sel %]
+		My <b><a href="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</a></b> [% session_sel %] and [% clocation_sel %]
 
 		<p>Note: changing your password or login cookie preferences will disable all
 		other cookies for this account, requiring all other browsers using this account

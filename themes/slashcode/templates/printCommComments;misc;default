@@ -28,7 +28,7 @@ __template__
 [% moderate_button = (can_moderate && user.mode != 'archive' && ( !user.state.discussion_archived || constants.comments_moddable_archived)) %]
 
 [% IF moderate_form %]
-	<FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
+	<FORM ACTION="[% gSkin.rootdir %]/comments.pl" METHOD="POST">
 	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
 	<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
 	<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">
@@ -38,7 +38,7 @@ __template__
 [% IF cid %]
 	[% Slash.dispComment(comment) %]
 	</TD></TR>
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER">
+	<TR><TD BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER">
 
 	[% IF previous %]
 		&lt;&lt;[% Slash.linkComment(previous, 1) %]
@@ -80,7 +80,7 @@ __template__
 	[% IF moderate_button %]
 		<TR><TD>
 			<P>Have you read the
-			<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
+			<A HREF="[% gSkin.rootdir %]/moderation.shtml">Moderator Guidelines</A>
 			yet?
 			<INPUT TYPE="HIDDEN" NAME="op" VALUE="moderate">
 			<INPUT TYPE="SUBMIT" VALUE="moderate">

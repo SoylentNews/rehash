@@ -221,10 +221,13 @@ true/false if operation is successful.
 sub selectTopic {
 	my($label, $default, $section, $return) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	# XXXSKIN defaultsection should likely be mainpage_skid, but
+	# what of defaulttopic?
 	$section ||= getCurrentStatic('defaultsection');
 	$default ||= getCurrentStatic('defaulttopic');
 
-	my $topics = $reader->getDescriptions('topics_section', $section);
+	# XXXSKIN this doesn't work to return topics by skin/section
+	my $topics = $reader->getDescriptions('non_nexus_topics', $section);
 
 	createSelect($label, $topics, $default, $return, 0, 1);
 }
@@ -251,8 +254,7 @@ Default topic for the list.
 
 =item SECT
 
-Hashref for current section.  If SECT->{isolate} is true,
-list is not created, but hidden value is returned instead.
+Hashref for current section.
 
 =item RETURN
 
@@ -269,10 +271,6 @@ Boolean for including "All Topics" item.
 If RETURN is true, the text of the list is returned.
 Otherwise, list is just printed, and returns
 true/false if operation is successful.
-
-=item Dependencies
-
-The 'sectionisolate' template block.
 
 =back
 
@@ -417,8 +415,9 @@ sub linkStory {
 	my $reader    = $other->{reader} || getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = $other->{constants} || getCurrentStatic();
 	my $user      = $other->{user} || getCurrentUser();
+	my $gSkin     = getCurrentSkin();
 
-	my($url, $script, $title, $section, %params);
+	my($url, $script, $title, %params);
 	$script = 'article.pl';
 	$params{sid} = $story_link->{sid};
 	$params{mode} = $story_link->{mode} || $user->{mode};
@@ -455,13 +454,13 @@ sub linkStory {
 	# We need to make sure we always get the right link -Brian
 	$story_link->{'link'} = $reader->getStory($story_link->{sid}, 'title') if $story_link->{'link'} eq '';
 	$title       = $story_link->{'link'};
-	$section     = $story_link->{section} ||= $reader->getStory($story_link->{sid}, 'section');
+	$story_link->{skin} ||= $story_link->{section} || $reader->getStory($story_link->{sid}, 'primaryskid');
 	if ($constants->{tids_in_urls}) {
-		$params{tid} = $reader->getStoryTopicsJustTids($story_link->{sid});
+		$params{tid} = $reader->getTopiclistForStory($story_link->{sid});
 	}
 
-	my $SECT = $reader->getSection($story_link->{section});
-	$url = $SECT->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
+	my $skin = $reader->getSkin($story_link->{skin});
+	$url = $skin->{rootdir} || $constants->{real_rootdir} || $gSkin->{rootdir};
 
 	if ($dynamic) {
 		$url .= '/' . $script . '?';
@@ -474,7 +473,12 @@ sub linkStory {
 		}
 		chop $url;
 	} else {
-		$url .= '/' . $section . '/' . $story_link->{sid} . '.shtml';
+		# XXXSKIN - hardcode 'articles' so /articles/foo.shtml links stay same as now
+		# we don't NEED to do this ... 404.pl can redirect appropriately if necessary,
+		# but we would need to `mv articles mainpage`, or ln -s, and it just seems better
+		# to me to keep the same URL scheme if possible
+		my $skinname = $skin->{name} eq 'mainpage' ? 'articles' : $skin->{name};
+		$url .= '/' . $skinname . '/' . $story_link->{sid} . '.shtml';
 		# manually add the tid(s), if wanted
 		if ($constants->{tids_in_urls} && $params{tid}) {
 			$url .= '?';
@@ -544,15 +548,21 @@ The 'pollbooth' template block.
 =back
 
 =cut
+#XXXSKIN getCurrentSkin doesn't seem to be returning anything
+# on portald runs.  It defaults to mainpage skid if nothing
+# is returned.  However perhaps getCurrentSkin needs more
+# attention
 
 sub pollbooth {
 	my($qid, $no_table, $center, $returnto) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
-	my $sect = $reader->getSection();
-
+	my $gSkin = getCurrentSkin();
 	# This special qid means to use the current (sitewide) poll.
-	$qid = $sect->{qid} if $qid eq '_currentqid';
+	if ($qid eq "_currentqid") {
+		$qid = $reader->getCurrentQidForSkid($gSkin->{skid});
+	}
+	
 	# If no qid (or no sitewide poll), short-circuit out.
 	return '' if $qid eq '';
 
@@ -575,7 +585,6 @@ sub pollbooth {
 		can_vote	=> $can_vote,
 		voters		=> $poll->{pollq}{voters},
 		comments	=> $n_comments,
-		sect		=> $sect->{section},
 		returnto	=> $returnto,
 	}, 1);
 }
@@ -1046,6 +1055,7 @@ sub createMenu {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 
 	# The style of menu desired.  While we're "evolving" the way we do
 	# menus, createMenu() handles several different styles.
@@ -1074,7 +1084,7 @@ sub createMenu {
 		my $nick_fix = fixparam($ll_nick);
 		my $nick_attribute = strip_attribute($ll_nick);
 		push @$menu_items, {
-			value =>	"$constants->{rootdir}/~$nick_fix",
+			value =>	"$gSkin->{rootdir}/~$nick_fix",
 			label =>	"~$nick_attribute ($user->{lastlookuid})",
 			sel_label =>	"otheruser",
 			menuorder =>	99999,
@@ -1136,7 +1146,10 @@ sub createMenu {
 		# with that name is available (or $menu;misc;default,
 		# or $menu;menu;light or whatever the fallbacks are)
 		# then punt and go with "users;menu;default".
-		my $nm = $reader->getTemplateByName($menu, 0, 0, "menu", "", 1);
+		my $nm = $reader->getTemplateByName($menu, {
+			page            => 'menu',
+			ignore_errors   => 1
+		});
 		$menu = "users" unless $nm->{page} eq "menu";
 		if (@$items) {
 			$menu_text .= slashDisplay($menu,
@@ -1211,12 +1224,13 @@ sub _hard_linkComment {
 	my($comment, $printcomment, $date) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 
 	my $subject = $comment->{color}
 	? qq|<FONT COLOR="$comment->{color}">$comment->{subject}</FONT>|
 		: $comment->{subject};
 
-	my $display = qq|<A HREF="$constants->{rootdir}/comments.pl?sid=$comment->{sid}|;
+	my $display = qq|<A HREF="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}|;
 	$display .= "&amp;op=$comment->{op}" if $comment->{op};
 # $comment->{threshold}? Hmm. I'm not sure what it
 # means for a comment to have a threshold. If it's 0,

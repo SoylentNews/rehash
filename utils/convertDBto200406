@@ -1,0 +1,945 @@
+#!/usr/bin/perl -w
+
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2004 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This script converts a Slash DB from old-style (pre-June 2004)
+# to new-style (June 2004), commonly called the "section-topics"
+# rewrite.
+
+# Running this script outputs the SQL necessary to do this.
+# Suggest you pipe it to a file and read it over, then shut down
+# slashd and apache, and run it.  Then 'make install' the new
+# version of the code.  Then start apache/slashd back up.
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Data::Dumper;
+use Slash;
+use Slash::Utility;
+
+use vars qw( $slashdb
+        $old_topics_hr $old_topic_images_hr $old_sections_hr
+        $old_colorblocks_hr $old_section_extras_hr
+        $old_subsections_hr $old_section_subsections_ar
+        $old_section_topics_ar
+        %topics %skins %nexuses %subsections );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+$Data::Dumper::Sortkeys = 1;
+
+my (%opts, %family_tree);
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:', \%opts);
+usage() if $opts{h};
+die "Username required" unless $opts{u};
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+
+$old_topics_hr =              $slashdb->sqlSelectAllHashref("tid", "*", "topics");
+$old_topic_images_hr =        $slashdb->sqlSelectAllHashref("id", "*", "topic_images");
+$old_sections_hr =            $slashdb->sqlSelectAllHashref("section", "*", "sections");
+$old_colorblocks_hr =         $slashdb->sqlSelectAllHashref("bid", "*", "blocks", "type='color'");
+$old_section_extras_hr =      $slashdb->sqlSelectAllHashref("param_id", "*", "section_extras");
+$old_subsections_hr =         $slashdb->sqlSelectAllHashref("id", "*", "subsections");
+$old_section_subsections_ar = $slashdb->sqlSelectAll("*", "section_subsections");
+$old_section_topics_ar =      $slashdb->sqlSelectAll("*", "section_topics");
+
+%skins = ( );
+
+
+
+
+
+
+
+
+
+#
+# Output something about what we're doing
+#
+
+my $now = scalar(gmtime);
+print <<EOT;
+# SQL commands to convert Slash DB from pre-June 2004 to
+# June 2004 code.  Generated at $now
+# for virtual user $opts{u}
+#
+# Your first step needs to be a mysqldump of your database.
+# Then check this output for warnings, doublecheck these
+# commands manually, note especially the comment at "STOP"
+# (see below), then execute them, then do a 'make install'
+# (see end).
+
+EOT
+
+# Output warning about sections_contained
+
+my $sections_contained_count = $slashdb->sqlCount("sections_contained");
+if ($sections_contained_count > 0) {
+        print "# You have data in sections_contained; this script will not\n";
+        print "# interpret it correctly.  Look it over manually.\n";
+        print "\n";
+}
+
+#
+# Convert topics, keeping tids the same
+# Copy images into place
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS topics_new;
+CREATE TABLE topics_new (
+        tid SMALLINT UNSIGNED NOT NULL DEFAULT 0 AUTO_INCREMENT,
+        keyword VARCHAR(20) NOT NULL,
+        textname VARCHAR(80) NOT NULL,
+        series ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
+        image VARCHAR(100) NOT NULL,
+        width SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+        height SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+        PRIMARY KEY (tid)
+) TYPE=InnoDB;
+EOT
+
+sub output_insert_topics_new {
+        my($tid) = @_;
+	$old_topics_hr->{$tid}{image} = ''  if !defined($old_topics_hr->{$tid}{image});
+	$old_topics_hr->{$tid}{width} = ''  if !defined($old_topics_hr->{$tid}{width});
+	$old_topics_hr->{$tid}{height} = '' if !defined($old_topics_hr->{$tid}{height});
+        print "INSERT INTO topics_new (tid, keyword, textname, series, image, width, height) VALUES (";
+        print join ", ", map { $slashdb->sqlQuote($old_topics_hr->{$tid}{$_}) }
+                qw( tid name alttext series image width height );
+        print ");\n";
+}
+
+for my $tid (sort { $a <=> $b } keys %$old_topics_hr) {
+        $old_topics_hr->{$tid}{series} = $old_topics_hr->{$tid}{series} ? "yes" : "no";
+        $old_topics_hr->{$tid}{image} =  $old_topic_images_hr->{ $old_topics_hr->{$tid}{default_image} }{image};
+        $old_topics_hr->{$tid}{width} =  $old_topic_images_hr->{ $old_topics_hr->{$tid}{default_image} }{width};
+        $old_topics_hr->{$tid}{height} = $old_topic_images_hr->{ $old_topics_hr->{$tid}{default_image} }{height};
+        output_insert_topics_new($tid);
+        $topics{$tid} = 1;
+}
+
+#
+# Convert topics.parent_topics into topic_parents, min_weight 1
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS topic_parents_new;
+CREATE TABLE topic_parents_new (
+        tid SMALLINT UNSIGNED NOT NULL,
+        parent_tid SMALLINT UNSIGNED NOT NULL,
+        min_weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+        UNIQUE child_and_parent (tid, parent_tid),
+        INDEX parent_tid (parent_tid)
+) TYPE=InnoDB;
+EOT
+
+my %parents = ( );
+for my $tid (keys %$old_topics_hr) {
+        # In the old schema, parent_topic of 0 means no parent
+        next if $old_topics_hr->{$tid}{parent_topic} == 0;
+        $parents{$tid}{ $old_topics_hr->{$tid}{parent_topic} } = 1;
+}
+for my $tid (sort { $a <=> $b } keys %parents) {
+        for my $pid (sort { $a <=> $b } keys %{$parents{$tid}}) {
+                print "INSERT INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
+                print "$tid, $pid, 1";
+                print ");\n";
+        }
+}
+
+#
+# Every section is a new nexus topic and skin.  "index" and
+# "articles" get conflated.
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS topic_nexus_new;
+CREATE TABLE topic_nexus_new (
+        tid SMALLINT UNSIGNED NOT NULL,
+        current_qid MEDIUMINT UNSIGNED DEFAULT NULL,
+        PRIMARY KEY (tid)
+) TYPE=InnoDB;
+DROP TABLE IF EXISTS topic_nexus_dirty_new;
+CREATE TABLE topic_nexus_dirty_new (
+	tid SMALLINT UNSIGNED NOT NULL,
+	PRIMARY KEY (tid)
+) TYPE=InnoDB;
+INSERT INTO topic_nexus_dirty_new SELECT tid FROM topic_nexus_new;
+
+EOT
+
+print <<EOT;
+DROP TABLE IF EXISTS skins_new;
+CREATE TABLE skins_new (
+        skid SMALLINT UNSIGNED NOT NULL DEFAULT 0 AUTO_INCREMENT,
+        nexus SMALLINT UNSIGNED NOT NULL,
+        min_weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+        artcount_min MEDIUMINT UNSIGNED DEFAULT '10' NOT NULL,
+        artcount_max MEDIUMINT UNSIGNED DEFAULT '30' NOT NULL,
+        name VARCHAR(30) NOT NULL,
+        title VARCHAR(64) DEFAULT '' NOT NULL,
+        issue ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
+        url VARCHAR(255) DEFAULT '' NOT NULL,
+        hostname VARCHAR(128) DEFAULT '' NOT NULL,
+        cookiedomain VARCHAR(128) DEFAULT '' NOT NULL,
+        index_handler VARCHAR(30) DEFAULT 'index.pl' NOT NULL,
+        max_rewrite_secs MEDIUMINT UNSIGNED DEFAULT '3600' NOT NULL,
+        last_rewrite TIMESTAMP NOT NULL,
+        PRIMARY KEY (skid),
+        UNIQUE name (name)
+) TYPE=InnoDB;
+EOT
+
+sub getNextTid {
+        my $i = 1;
+        while ($old_topics_hr->{$i}) {
+                ++$i;
+        }
+        return $i;
+}
+
+sub getNextSkid {
+        my $i = 1;
+        while ($skins{$i}) {
+                ++$i;
+        }
+        return $i;
+}
+
+sub output_insert_skins_new {
+        my($skid) = @_;
+        print "INSERT INTO skins_new (skid, nexus, min_weight, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (";
+        print join ", ", map { $slashdb->sqlQuote($skins{$skid}{$_}) }
+                qw( skid nexus min_weight artcount_min artcount_max name title
+                    issue url hostname cookiedomain index_handler
+                    max_rewrite_secs last_rewrite );
+        print ");\n";
+}
+
+$old_sections_hr->{mainpage} = $old_sections_hr->{index} || $old_sections_hr->{articles};
+my %mpfirst = ( mainpage => 1 );
+my @old_sections = grep !/^(index|articles)$/,
+        sort {
+                ($mpfirst{$b} || 0) <=> ($mpfirst{$a} || 0)
+                ||
+                $a cmp $b
+        } keys %$old_sections_hr;
+%nexuses = ( );
+for my $section (@old_sections) {
+        my $next_tid = getNextTid();
+        $old_topics_hr->{$next_tid} = {
+                tid             => $next_tid,
+                name            => $section,
+                alttext         => $old_sections_hr->{$section}{title},
+                series          => 'no',
+                image           => '',
+                width           => 0,
+                height          => 0,
+        };
+        $nexuses{$section} = $next_tid;
+        output_insert_topics_new($next_tid);
+        $topics{$next_tid} = 1;
+        print "INSERT INTO topic_nexus_new (tid, current_qid) VALUES (";
+        print "$next_tid, NULL";
+        print ");\n";
+        my $next_skid = getNextSkid();
+        $skins{$next_skid} = {
+                skid            => $next_skid,
+                nexus           => $next_tid,
+                min_weight      => $section eq 'mainpage' ? 3 : 1,
+                artcount_min    => int($old_sections_hr->{$section}{artcount}/3),
+                artcount_max    => $old_sections_hr->{$section}{artcount},
+                name            => $section,
+                title           => $old_sections_hr->{$section}{title},
+                issue           => 'no', # XXXSECTIONTOPICS is this right?
+                url             => $old_sections_hr->{$section}{url},
+                hostname        => $old_sections_hr->{$section}{hostname},
+                cookiedomain    => $old_sections_hr->{$section}{cookiedomain},
+                index_handler   => $old_sections_hr->{$section}{index_handler},
+                max_rewrite_secs => $old_sections_hr->{$section}{rewrite},
+                last_rewrite    => $old_sections_hr->{$section}{last_update},
+        };
+        output_insert_skins_new($next_skid);
+        if ($section eq 'mainpage') {
+		print "DELETE FROM vars WHERE name IN ('mainpage_nexus_tid', 'mainpage_skid');\n";
+                print "INSERT INTO vars (name, value) VALUES (";
+                print "'mainpage_nexus_tid', $next_tid";
+                print ");\n";
+                print "INSERT INTO vars (name, value) VALUES (";
+                print "'mainpage_skid', $next_skid";
+                print ");\n";
+        }
+}
+
+#
+# Convert color blocks
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS skin_colors_new;
+CREATE TABLE skin_colors_new (
+        skid SMALLINT UNSIGNED NOT NULL,
+        name VARCHAR(24) NOT NULL,
+        hexcolor CHAR(6) NOT NULL,
+        UNIQUE skid_name (skid, name)
+) TYPE=InnoDB;
+EOT
+
+sub getSkidFromName {
+        my($name) = @_;
+        for my $skid (keys %skins) {
+                return $skid if $skins{$skid}{name} eq $name;
+        }
+        return 0;
+}
+
+for my $bid (sort { $a cmp $b } keys %$old_colorblocks_hr) {
+        my $skinname = $bid;
+        $skinname = 'mainpage' if $skinname eq 'colors';
+        $skinname =~ s/_colors$//;
+        my $skid = getSkidFromName($skinname);
+        if (!$skid) {
+                warn "no section/skin for color block '$skinname', skipping";
+                next;
+        }
+        my $cstr = $old_colorblocks_hr->{$bid}{block};
+        my @hexcolors = map { s/\#//; $_ } split ',', $cstr;
+        my $max = scalar(@hexcolors)/2 - 1;
+        my %colors = ( );
+        for my $i (0..$max) { $colors{"fg_$i"} = shift @hexcolors }
+        for my $i (0..$max) { $colors{"bg_$i"} = shift @hexcolors }
+        print "# skin_colors for section '$skinname'\n";
+        for my $key (sort keys %colors) {
+                print "INSERT INTO skin_colors_new (skid, name, hexcolor) VALUES (";
+                print "$skid, '$key', '$colors{$key}'";
+                print ");\n";
+        }
+}
+
+#
+# The section_extras table becomes topic_nexus_extras
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS topic_nexus_extras_new;
+CREATE TABLE topic_nexus_extras_new (
+        extras_id MEDIUMINT UNSIGNED NOT NULL,
+        tid SMALLINT UNSIGNED NOT NULL,
+        extras_keyword VARCHAR(100) NOT NULL,
+        extras_textname VARCHAR(100) NOT NULL,
+        type ENUM('text', 'list'),
+        PRIMARY KEY (extras_id),
+        UNIQUE tid_keyword (tid, extras_keyword)
+) TYPE=InnoDB;
+EOT
+
+my $count = 0;
+for my $param_id (sort { $a <=> $b } keys %$old_section_extras_hr) {
+        if ($old_section_extras_hr->{$param_id}{type} !~ /^(text|list)$/) {
+                warn "section_extras.type of '$old_section_extras_hr->{$param_id}{type}' no longer supported";
+                next;
+        }
+        my $skid = getSkidFromName($old_section_extras_hr->{$param_id}{section});
+        if (!$skid) {
+                warn "section_extras section not found: '$old_section_extras_hr->{$param_id}{section}', skipping";
+                next;
+        }
+        my $tid = $skins{$skid}{nexus};
+        $old_section_extras_hr->{$param_id}{tid} = $tid;
+        print "INSERT INTO topic_nexus_extras_new (extras_id, tid, extras_keyword, extras_textname, type) VALUES (";
+        ++$count; print "$count, ";
+        print join ", ", map { $slashdb->sqlQuote($old_section_extras_hr->{$param_id}{$_}) }
+                qw( tid value name type );
+        print ");\n";
+}
+
+#
+# The subsections table becomes topic/nexus/skins, with new tids
+# (but skins aren't automatically created for these)
+#
+
+print "\n";
+
+sub getUniqueNexusName {
+        my($name) = @_;
+        my $append = "";
+        while (exists $nexuses{"$name$append"}) {
+                $append ||= 0;
+                ++$append;
+        }
+        return "$name$append";
+        
+}
+
+%subsections = ( );
+
+for my $id (sort { $a <=> $b } keys %$old_subsections_hr) {
+        my $next_tid = getNextTid();
+        my $nexusname = getUniqueNexusName($old_subsections_hr->{$id}{title});
+        $old_topics_hr->{$next_tid} = {
+                tid             => $next_tid,
+                keyword         => $nexusname,
+                textname        => $old_subsections_hr->{$id}{alttext},
+                series          => 'no',
+                image           => '',
+                width           => 0,
+                height          => 0,
+        };
+        $nexuses{$nexusname} = $next_tid;
+        print "# Nexus for the '$old_subsections_hr->{$id}{title}' subsection\n";
+        output_insert_topics_new($next_tid);
+        print "INSERT INTO topic_nexus_new (tid, current_qid) VALUES (";
+        print "$next_tid, NULL";
+        print ");\n";
+        $topics{$next_tid} = 1;
+        $subsections{$id} = $next_tid;
+}
+
+#
+# The section_subsections table turns into topic_parents binding sections
+# and subsections.  min_weight 1 unless the parent section is mainpage.
+#
+
+print "\n";
+
+for my $duple (@$old_section_subsections_ar) {
+        my($section, $subsection) = @$duple;
+        $section = 'mainpage' if $section =~ /^(articles|index)$/;
+        my $parent_skid = getSkidFromName($section);
+        if (!$parent_skid || !$section || !$subsection) {
+                warn "missing data somehow in section_subsections: '$section' '$parent_skid' '$subsection'\n";
+                next;
+        }
+        my $parent_nexus = $skins{$parent_skid}{nexus};
+        my $child_nexus = $subsections{$subsection};
+        my $min_weight = $section eq 'mainpage' ? 3 : 1;
+        print "INSERT INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
+        print "$child_nexus, $parent_nexus, $min_weight";
+        print ");\n";
+        $parents{$child_nexus}{$parent_nexus} ||= $min_weight;
+}
+
+#
+# The section_topics table turns into topic_parents binding sections and
+# topics.  min_weight 1 unless the parent section is mainpage.
+# Note, I am ignoring 'type' -- this really seems NEVER to have been used.
+#
+
+print <<EOT;
+
+##########
+# These are the inserts from the section_topics table.  Check them.
+EOT
+
+for my $duple (@$old_section_topics_ar) {
+        my($section, $child_tid) = @$duple;
+        $section = 'mainpage' if $section =~ /^(articles|index)$/;
+        my $parent_skid = getSkidFromName($section);
+        if (!$parent_skid || !$section) {
+                warn "missing data somehow in section_topics: '$section' '$parent_skid' '$child_tid'\n";
+                next;
+        }
+        my $parent_nexus = $skins{$parent_skid}{nexus};
+        my $min_weight = $section eq 'mainpage' ? 3 : 1;
+        print "INSERT IGNORE INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
+        print "$child_tid, $parent_nexus, $min_weight";
+        print ");\n";
+        $parents{$child_tid}{$parent_nexus} ||= $min_weight;
+}
+
+print <<EOT;
+##########
+EOT
+
+#
+# Any topic with no parents is assigned to 'mainpage', min_weight 3
+#
+
+my $mainpage_skid = getSkidFromName('mainpage');
+my $mainpage_nexus = $skins{$mainpage_skid}{nexus};
+my @lonely_topics =
+        sort { $a <=> $b }
+	grep { $_ != $mainpage_nexus && !exists $parents{$_} }
+	keys %topics;
+print <<EOT;
+
+##########
+# Topics with no parents, arbitrarily assigned to 'mainpage' --
+# you might want to check this.  Topics and nexuses that are
+# meant to stand alone, you will want to remove.
+EOT
+
+for my $tid (@lonely_topics) {
+        print "INSERT INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
+        print "$tid, $mainpage_nexus, 3";
+        print ");\n";
+        $parents{$tid}{$mainpage_nexus} = 3;
+}
+
+print <<EOT;
+##########
+EOT
+
+#
+# Convert blocks
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS blocks_new;
+CREATE TABLE blocks_new (
+        bid varchar(30) DEFAULT '' NOT NULL,
+        block text,
+        seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
+        type ENUM('static','portald') DEFAULT 'static' NOT NULL,
+        description text,
+        skin varchar(30) NOT NULL,
+        ordernum tinyint DEFAULT '0',
+        title varchar(128) NOT NULL,
+        portal tinyint NOT NULL DEFAULT '0',
+        url varchar(128),
+        rdf varchar(255),
+        retrieve tinyint NOT NULL DEFAULT '0',
+        last_update timestamp NOT NULL,
+        rss_template varchar(30),
+        items smallint NOT NULL DEFAULT '0', 
+        autosubmit ENUM('no','yes') DEFAULT 'no' NOT NULL,
+        rss_cookie varchar(255),
+        all_skins tinyint NOT NULL DEFAULT '0',
+        PRIMARY KEY (bid),
+        KEY type (type),
+        KEY skin (skin)
+) TYPE=InnoDB;
+INSERT INTO blocks_new ( bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve, last_update, rss_template, items, autosubmit, rss_cookie, all_skins ) SELECT bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve, last_update, rss_template, items, autosubmit, rss_cookie, all_sections FROM blocks WHERE type != 'color';
+UPDATE blocks_new SET skin='mainpage' WHERE skin IN ('index', 'articles');
+EOT
+
+#
+# Convert templates
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS templates_new;
+CREATE TABLE templates_new (
+        tpid mediumint UNSIGNED NOT NULL auto_increment,
+        name varchar(30) NOT NULL,
+        page varchar(20) DEFAULT 'misc' NOT NULL,
+        skin varchar(30) DEFAULT 'default' NOT NULL,
+        lang char(5) DEFAULT 'en_US' NOT NULL,
+        template text,
+        seclev mediumint UNSIGNED NOT NULL,
+        description text,
+        title VARCHAR(128),
+        last_update timestamp NOT NULL,
+        PRIMARY KEY (tpid),
+        UNIQUE true_template (name,page,skin,lang)
+) TYPE=InnoDB;
+INSERT INTO templates_new ( tpid, name, page, skin, lang, template, seclev, description, title, last_update ) SELECT tpid, name, page, section, lang, template, seclev, description, title, last_update FROM templates;
+EOT
+
+#
+# Convert submissions
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS submissions_new;
+CREATE TABLE submissions_new (
+        subid mediumint UNSIGNED NOT NULL auto_increment,
+        email varchar(255) DEFAULT '' NOT NULL,
+        name varchar(50) NOT NULL,
+        time datetime NOT NULL,
+        subj varchar(50) NOT NULL,
+        story text NOT NULL,
+        tid smallint NOT NULL,
+        note varchar(30) DEFAULT '' NOT NULL,
+        section varchar(30) DEFAULT '' NOT NULL,
+        primaryskid SMALLINT UNSIGNED,
+        comment varchar(255) NOT NULL,
+        uid mediumint UNSIGNED NOT NULL,
+        ipid char(32) DEFAULT '' NOT NULL,
+        subnetid char(32) DEFAULT '' NOT NULL,
+        del tinyint DEFAULT '0' NOT NULL,
+        weight float DEFAULT '0' NOT NULL,
+        signature varchar(32) NOT NULL,
+        PRIMARY KEY (subid),
+        UNIQUE signature (signature),
+        INDEX del (del),
+        INDEX uid (uid),
+        KEY ipid (ipid),
+        KEY subnetid (subnetid)
+) TYPE=InnoDB;
+INSERT INTO submissions_new ( subid, email, name, time, subj, story, tid, note, section, primaryskid, comment, uid, ipid, subnetid, del, weight, signature ) SELECT subid, email, name, time, subj, story, tid, note, section, $mainpage_skid, comment, uid, ipid, subnetid, del, weight, signature FROM submissions;
+EOT
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE submissions_new SET primaryskid=$skid WHERE section=$section_q;\n";
+}
+print "ALTER TABLE submissions_new DROP COLUMN section;\n";
+
+#
+# Convert discussions
+#
+
+print <<EOT;
+
+DROP TABLE IF EXISTS discussions_new;
+CREATE TABLE discussions_new (
+        id mediumint UNSIGNED NOT NULL auto_increment,
+        stoid mediumint UNSIGNED DEFAULT '0' NOT NULL,
+        sid char(16) DEFAULT '' NOT NULL,
+        title varchar(128) NOT NULL,
+        url varchar(255) NOT NULL,
+        topic smallint UNSIGNED NOT NULL,
+        ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+        type ENUM("open","recycle","archived") DEFAULT 'open' NOT NULL,
+        uid mediumint UNSIGNED NOT NULL,
+        commentcount smallint UNSIGNED DEFAULT '0' NOT NULL,
+        flags ENUM("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
+        primaryskid SMALLINT UNSIGNED,
+        section varchar(30) NOT NULL,
+        last_update timestamp NOT NULL,
+        approved tinyint UNSIGNED DEFAULT 0 NOT NULL,
+        commentstatus ENUM('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof') DEFAULT 'enabled' NOT NULL,
+        KEY (stoid),
+        KEY (sid),
+        KEY (topic),
+        KEY (primaryskid,ts),
+        INDEX (type,uid,ts),
+        PRIMARY KEY (id)
+) TYPE=InnoDB;
+INSERT INTO discussions_new ( id, stoid, sid, title, url, topic, ts, type, uid, commentcount, flags, primaryskid, section, last_update, approved, commentstatus ) SELECT id, 0, sid, title, url, topic, ts, type, uid, commentcount, flags, 1, section, last_update, approved, commentstatus FROM discussions;
+EOT
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE discussions_new SET primaryskid=$skid WHERE section=$section_q;\n";
+}
+print "ALTER TABLE discussions_new DROP COLUMN section;\n";
+
+#
+# Convert stories
+#
+
+print <<EOT;
+DROP TABLE IF EXISTS stories_new;
+CREATE TABLE stories_new (
+        stoid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        sid CHAR(16) NOT NULL,
+        uid MEDIUMINT UNSIGNED NOT NULL,
+        title VARCHAR(100) DEFAULT '' NOT NULL,
+        dept VARCHAR(100),
+        time DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+        hits MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
+        section VARCHAR(30) DEFAULT '' NOT NULL,
+        displaystatus TINYINT DEFAULT '0' NOT NULL,
+        discussion MEDIUMINT UNSIGNED,
+        primaryskid SMALLINT UNSIGNED,
+        tid SMALLINT UNSIGNED,
+        submitter MEDIUMINT UNSIGNED NOT NULL,
+        commentcount SMALLINT UNSIGNED DEFAULT '0' NOT NULL,
+        hitparade VARCHAR(64) DEFAULT '0,0,0,0,0,0,0' NOT NULL,
+        writestatus ENUM("ok","delete","dirty","archived") DEFAULT 'ok' NOT NULL,
+        is_archived ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
+        in_trash ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
+        day_published DATE DEFAULT '0000-00-00' NOT NULL,
+        qid MEDIUMINT UNSIGNED DEFAULT NULL,
+        subsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
+        last_update TIMESTAMP NOT NULL,
+        body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+        word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+        PRIMARY KEY (stoid),
+        UNIQUE sid (sid),
+        INDEX uid (uid),
+        INDEX is_archived (is_archived),
+        INDEX time (time),
+        INDEX submitter (submitter),
+        INDEX day_published (day_published),
+        INDEX skidtid (primaryskid, tid)
+) TYPE=InnoDB;
+INSERT INTO stories_new (sid, uid, title, dept, time, hits, section, displaystatus, discussion, primaryskid, tid, submitter, commentcount, hitparade, writestatus, is_archived, in_trash, day_published, qid, subsection, last_update, body_length, word_count) SELECT sid, uid, title, dept, time, hits, section, displaystatus, discussion, 1, tid, submitter, commentcount, hitparade, writestatus, IF(writestatus='archived', 'yes', 'no'), IF(writestatus='delete', 'yes', 'no'), day_published, qid, subsection, last_update, body_length, word_count FROM stories ORDER BY time, sid;
+UPDATE discussions_new, stories_new SET discussions_new.stoid=stories_new.stoid WHERE discussions_new.sid=stories_new.sid;
+DROP TABLE IF EXISTS story_dirty_new;
+CREATE TABLE story_dirty_new (
+        stoid MEDIUMINT UNSIGNED NOT NULL,
+        PRIMARY KEY (stoid)
+) TYPE=InnoDB;
+INSERT INTO story_dirty_new (stoid) SELECT stoid FROM stories_new WHERE writestatus='dirty';
+DROP TABLE IF EXISTS story_param_new;
+CREATE TABLE story_param_new (
+        param_id mediumint UNSIGNED NOT NULL auto_increment,
+        stoid MEDIUMINT UNSIGNED NOT NULL,
+        name varchar(32) DEFAULT '' NOT NULL,
+        value text DEFAULT '' NOT NULL,
+        UNIQUE story_key (stoid,name),
+        PRIMARY KEY (param_id)
+) TYPE=InnoDB;
+INSERT INTO story_param_new (stoid, name, value) SELECT stories_new.stoid, story_param.name, story_param.value FROM stories_new, story_param WHERE stories_new.sid=story_param.sid ORDER BY stories_new.stoid, name;
+DROP TABLE IF EXISTS story_text_new;
+CREATE TABLE story_text_new (
+        stoid MEDIUMINT UNSIGNED NOT NULL,
+        title VARCHAR(100) DEFAULT '' NOT NULL,
+        introtext text,
+        bodytext text,
+        relatedtext text,
+        rendered text,
+        PRIMARY KEY (stoid)
+) TYPE=MyISAM;
+INSERT INTO story_text_new (stoid, title, introtext, bodytext, relatedtext, rendered) SELECT stories_new.stoid, stories_new.title, introtext, bodytext, relatedtext, rendered FROM stories_new, story_text WHERE stories_new.sid=story_text.sid;
+# ALTER TABLE stories_new DROP COLUMN writestatus;
+DROP TABLE IF EXISTS story_topics_chosen_new;
+CREATE TABLE story_topics_chosen_new (
+        stoid MEDIUMINT UNSIGNED NOT NULL,
+        tid SMALLINT(5) UNSIGNED NOT NULL,
+        weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+        UNIQUE story_topic (stoid, tid),
+        INDEX tid (tid)
+) TYPE=InnoDB;
+DROP TABLE IF EXISTS story_topics_rendered_new;
+CREATE TABLE story_topics_rendered_new (
+	stoid MEDIUMINT UNSIGNED NOT NULL,
+	tid SMALLINT(5) UNSIGNED NOT NULL,
+	weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+	UNIQUE story_topic (stoid, tid),
+	INDEX tid (tid)
+) TYPE=InnoDB;
+EOT
+
+print "INSERT  INTO story_topics_chosen_new (stoid, tid, weight) SELECT stories_new.stoid, story_topics.tid, 1 FROM stories_new, story_topics WHERE stories_new.sid=story_topics.sid AND is_parent='no' AND displaystatus=1;\n";
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        my $nexus_tid = $skins{$skid}{nexus};
+        print "REPLACE INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $nexus_tid, 2 FROM stories_new WHERE displaystatus=1 AND section=$section_q;\n";
+}
+print "INSERT  INTO story_topics_chosen_new (stoid, tid, weight) SELECT stories_new.stoid, story_topics.tid, 3 FROM stories_new, story_topics WHERE stories_new.sid=story_topics.sid AND is_parent='no' AND displaystatus=0;\n";
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        my $nexus_tid = $skins{$skid}{nexus};
+        print "REPLACE INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $nexus_tid, 4 FROM stories_new WHERE displaystatus=0 AND section=$section_q;\n";
+}
+print "REPLACE INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, tid, 4 FROM stories_new WHERE displaystatus=0;\n";
+
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE stories_new SET primaryskid=$skid WHERE section=$section_q;\n";
+}
+
+for my $subsection (sort { $a <=> $b } keys %subsections) {
+        my $subsection_q = $slashdb->sqlQuote($subsection);
+        my $tid_q = $slashdb->sqlQuote($subsections{$subsection});
+        print "INSERT INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $tid_q, 1 FROM stories_new WHERE subsection=$subsection_q AND displaystatus=0;\n";
+        print "INSERT INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $tid_q, 3 FROM stories_new WHERE subsection=$subsection_q AND displaystatus=1;\n";
+}
+
+print <<EOT;
+ALTER TABLE stories_new DROP COLUMN section, DROP COLUMN subsection, DROP COLUMN title, DROP COLUMN displaystatus;
+# keeping writestatus around for error checking
+# ALTER TABLE stories_new DROP COLUMN writestatus;
+EOT
+
+#
+# Convert accesslog_admin and accesslog
+#
+
+print <<EOT;
+
+# If you have these tables on separate databases, of course,
+# apply these commands appropriately.
+
+DROP TABLE IF EXISTS accesslog_admin_new;
+CREATE TABLE accesslog_admin_new (
+        id int UNSIGNED NOT NULL auto_increment,
+        host_addr char(15)  DEFAULT '' NOT NULL,
+        op varchar(254),
+        dat varchar(254),
+        uid mediumint UNSIGNED NOT NULL,
+        ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+        query_string varchar(50),
+        user_agent varchar(50),
+        section varchar(30) DEFAULT 'index' NOT NULL,
+        skid SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
+        bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
+        form MEDIUMBLOB NOT NULL,
+        secure tinyint DEFAULT 0 NOT NULL,
+        status smallint UNSIGNED DEFAULT 200 NOT NULL,
+        INDEX host_addr (host_addr),
+        INDEX ts (ts),
+        PRIMARY KEY (id)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS accesslog_new; 
+CREATE TABLE accesslog_new (
+        id int UNSIGNED NOT NULL auto_increment,
+        host_addr char(32)      DEFAULT '' NOT NULL,
+        subnetid char(32)       DEFAULT '' NOT NULL,
+        op varchar(254),
+        dat varchar(254),
+        uid mediumint UNSIGNED NOT NULL,
+        ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+        query_string varchar(50),
+        user_agent varchar(50),
+        section varchar(30) DEFAULT 'index' NOT NULL,
+        skid SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
+        bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
+        duration FLOAT DEFAULT 0.0 NOT NULL,
+        local_addr VARCHAR(16) DEFAULT '' NOT NULL,
+        static enum("yes","no") DEFAULT "yes",
+        secure tinyint DEFAULT 0 NOT NULL,
+        referer varchar(254),
+        status smallint UNSIGNED DEFAULT 200 NOT NULL,
+        INDEX host_addr_part (host_addr(16)),
+        INDEX op_part (op(12), skid),
+        INDEX ts (ts),
+        PRIMARY KEY (id)
+) TYPE=InnoDB;
+
+# Our first step is to eliminate unnecessary data from accesslog,
+# to make this go more smoothly.  If you have a large accesslog
+# table and are OK with missing a stats report for a day or so,
+# just delete everything from it -- this will go a lot faster!
+
+DELETE FROM accesslog WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > 1;
+# DELETE FROM accesslog;
+
+INSERT INTO accesslog_admin_new ( id, host_addr, op, dat, uid, ts, query_string, user_agent, section, bytes, form, secure, status ) SELECT id, host_addr, op, dat, uid, ts, query_string, user_agent, section, bytes, form, secure, status FROM accesslog_admin;
+EOT
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE accesslog_admin_new SET skid=$skid WHERE section=$section_q;\n";
+}
+print "ALTER TABLE accesslog_admin_new DROP COLUMN section;\n";
+
+print <<EOT;
+
+INSERT INTO accesslog_new ( id, host_addr, subnetid, op, dat, uid, ts, query_string, user_agent, section, bytes, duration, local_addr, secure, referer, status ) SELECT id, host_addr, subnetid, op, dat, uid, ts, query_string, user_agent, section, bytes, duration, local_addr, secure, referer, status FROM accesslog;
+EOT
+# XXXSECTIONTOPICS this could be smarter... the INSERT-SELECT could
+# use a massive IF() to set skid in one pass instead of using
+# multiple passes here...
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE accesslog_new SET skid=$skid WHERE section=$section_q;\n";
+}
+print "ALTER TABLE accesslog_new DROP COLUMN section;\n";
+
+#
+# Convert stats_daily
+#
+
+print <<EOT;
+DROP TABLE IF EXISTS stats_daily_new; 
+CREATE TABLE stats_daily_new (
+    id int UNSIGNED NOT NULL auto_increment,
+    section varchar(30) DEFAULT 'index' NOT NULL,
+    skid SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+    day date NOT NULL,
+    name varchar(32) DEFAULT '' NOT NULL,
+    value FLOAT DEFAULT 0 NOT NULL,
+    INDEX name_day (name,day),
+    PRIMARY KEY (id)
+) TYPE = InnoDB;
+INSERT INTO stats_daily_new ( id, section, skid, day, name, value ) SELECT id, section, 1, day, name, value FROM stats_daily;
+EOT
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE stats_daily_new SET skid=$skid WHERE section=$section_q;\n";
+}
+#print "ALTER TABLE stats_daily_new DROP COLUMN section;\n";
+#print "ALTER TABLE stats_daily_new ADD UNIQUE skid_day_name (skid,day,name), ADD UNIQUE day_key_pair (day,name,skid);\n";
+
+#
+# Convert menus
+#
+
+print <<EOT;
+DROP TABLE IF EXISTS menus_new;
+CREATE TABLE menus_new (
+        id mediumint(5) UNSIGNED NOT NULL auto_increment,
+        menu varchar(20) DEFAULT '' NOT NULL,
+        label varchar(255) DEFAULT '' NOT NULL,
+        sel_label varchar(32) NOT NULL DEFAULT '',
+        value text,
+        seclev mediumint UNSIGNED NOT NULL,
+        showanon tinyint DEFAULT '0' NOT NULL,
+        menuorder mediumint(5),
+        PRIMARY KEY (id),
+        KEY page_labels (menu,label),
+        UNIQUE page_labels_un (menu,label)
+) TYPE=InnoDB;
+INSERT INTO menus_new SELECT * FROM menus;
+UPDATE menus_new SET label='[% gSkin.rootdir %]/stats.pl?op=report' WHERE menu='stats' AND label='Reports';
+UPDATE menus_new SET label='[% gSkin.rootdir %]/stats.pl?op=list&amp;type=graphs' WHERE menu='stats' AND label='Graphs';
+UPDATE menus_new SET label='[% gSkin.rootdir %]/stats.pl?op=list' WHERE menu='stats' AND label='Dumps';
+EOT
+
+#
+# Convert story_files
+#
+
+print <<EOT;
+DROP TABLE IF EXISTS story_files_new;
+CREATE TABLE story_files_new (
+        id INT(5) NOT NULL AUTO_INCREMENT,
+	sid varchar(16) NOT NULL default '',
+        stoid MEDIUMINT UNSIGNED NOT NULL DEFAULT '',
+        description VARCHAR(80) NOT NULL DEFAULT '',
+        file_id VARCHAR(32) NOT NULL DEFAULT '',
+        isimage ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
+        PRIMARY KEY (id),
+        INDEX stoid (stoid),
+        INDEX file_id (file_id)
+) TYPE = InnoDB;
+INSERT INTO story_files_new ( id, sid, stoid, description, file_id, isimage ) SELECT id, sid, 1, description, file_id, isimage FROM story_files;
+UPDATE story_files_new, stories_new SET story_files_new.stoid=stories_new.stoid WHERE story_files_new.sid=stories_new.sid;
+ALTER TABLE story_files_new DROP COLUMN sid;
+EOT
+
+
+
+
+
+
+#
+# Output a nice warning
+#
+
+print <<EOT;
+
+#         ===     STOP     ===
+
+# The steps above created new tables.  The steps below modify your
+# existing tables in place.  Only proceed if you are ready.
+
+# All done.  Look over the above SQL, execute it into your DB, and
+# check for errors.  If you're certain it's right, then doublecheck
+# that you have a valid mysqldump of your existing DB, then:
+
+# ALTER TABLE sections DROP FOREIGN KEY etc.
+
+# RENAME TABLES accesslog TO accesslog_old, accesslog_admin TO accesslog_admin_old, blocks TO blocks_old, discussions TO discussions_old, stories TO stories_old, story_param TO story_param_old, story_text TO story_text_old, story_topics TO story_topics_old, submissions TO submissions_old, templates TO templates_old, topics TO topics_old, topic_images TO topic_images_old, stats_daily TO stats_daily_old, menus TO menus_old, story_files TO story_files_old;
+# RENAME TABLES accesslog_admin_new TO accesslog_admin, accesslog_new TO accesslog, blocks_new TO blocks, discussions_new TO discussions, skin_colors_new TO skin_colors, skins_new TO skins, stories_new TO stories, story_dirty_new TO story_dirty, story_param_new TO story_param, story_text_new TO story_text, story_topics_chosen_new TO story_topics_chosen, story_topics_rendered_new TO story_topics_rendered, submissions_new TO submissions, templates_new TO templates, topic_nexus_extras_new TO topic_nexus_extras, topic_nexus_new TO topic_nexus, topic_nexus_dirty_new TO topic_nexus_dirty, topic_parents_new TO topic_parents, topics_new TO topics, stats_daily_new TO stats_daily, menus_new TO menus, story_files_new TO story_files;
+
+# ALTER TABLE skins ADD FOREIGN KEY etc.
+
+# Then 'make install' the June 2004 code.
+
+# Then run utils/convertDBto200406_render to convert story_topics_chosen
+# to story_topics_rendered.
+
+# Once you're REALLY happy with everything, DROP TABLE *_old
+
+EOT
+

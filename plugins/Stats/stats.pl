@@ -20,6 +20,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $gSkin     = getCurrentSkin();
 
 	# we can make a separate reader and writer, but we need to write, so
 	# for now ... writer
@@ -47,7 +48,7 @@ sub main {
 	}
 
 	if (!$ops{$op}[ALLOWED]) {
-		redirect("$constants->{rootdir}/users.pl");
+		redirect("$gSkin->{rootdir}/users.pl");
 		return;
 	}
 
@@ -255,7 +256,7 @@ sub _set_legend {
 sub _get_sections {
 	my $slashdb = getCurrentDB();
 	# don't modify the data, copy it
-	my %sections = %{$slashdb->getDescriptions('sections-all')};
+	my %sections = %{$slashdb->getDescriptions('skins')};
 	$sections{all} = 'All';
 	return \%sections;
 }

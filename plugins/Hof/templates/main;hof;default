@@ -43,19 +43,19 @@ by [% item.4 %]<BR>
 
 <P>[% PROCESS titlebar title => 'Most Active Submitters' %]
 [% FOREACH item = activesub %]
-<B>[% item.0 %]</B> <A HREF="[% constants.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</A><BR>
+<B>[% item.0 %]</B> <A HREF="[% gSkin.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</A><BR>
 [% END %]</P>
 
 <P>[% PROCESS titlebar title => 'Most Active Poll Topics' %]
 [% FOREACH item = activep %]
-<B>[% item.0 %]</B> <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% item.2 %]">[% item.1 %]</A><BR>
+<B>[% item.0 %]</B> <A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% item.2 %]">[% item.1 %]</A><BR>
 [% END %]</P>
 
 [% IF topcomments.size > 0 %]
 <P>[% PROCESS titlebar title => 'Top 10 Comments' %]
 [% FOREACH top = topcomments %]
 <B>[% top.score %]</B>
-	<A HREF="[% constants.rootdir %]/comments.pl?sid=[% top.sid %]&amp;pid=[% top.pid %]#[% top.cid %]">[% top.subj %]</A>
+	<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% top.sid %]&amp;pid=[% top.pid %]#[% top.cid %]">[% top.subj %]</A>
 	by <A HREF="mailto:[% top.fakeemail | fixparam %]">[% top.nickname %]</A> on [% top.cdate %]<BR>
 
 	<FONT SIZE="2">attached to [% storylinks = Slash.linkStory({ link => top.title, section => top.section, sid => top.sid }) %]

@@ -20,7 +20,7 @@ __template__
 [% USE Slash %][% UNLESS (total < user.commentlimit) || (user.commentlimit < 1) %]
 	[% pages = total / user.commentlimit %]
 
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER"><FONT SIZE="2">
+	<TR><TD BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER"><FONT SIZE="2">
 	[% FOREACH p = [0 .. pages] %]
 		[% start = user.commentlimit * p %]
 		[% IF p != 0 %] | [% END %]

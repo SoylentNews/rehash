@@ -11,7 +11,7 @@ en_US
 __name__
 journaloptions
 __template__
-<FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST" ENCTYPE="application/x-www-form-urlencoded">
+<FORM ACTION="[% gSkin.rootdir %]/journal.pl" METHOD="POST" ENCTYPE="application/x-www-form-urlencoded">
 <INPUT TYPE="hidden" NAME="op" VALUE="setprefs">
 [% USE Slash %]
 <TABLE>

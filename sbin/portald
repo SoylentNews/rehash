@@ -32,9 +32,11 @@ use Slash::Utility;
 use Slash::Display;
 
 my $virtual_user = $ARGV[0];
+setCurrentSkin(determineCurrentSkin());
 createEnvironment($ARGV[0]);
 my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
+my $gSkin = getCurrentSkin();
 my $totalChangedStories = 1;
 
 my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
@@ -76,12 +78,12 @@ sub getTop10Comments {
 		my($sid, $title, $cid, $subj, $d, $nickname, $points, $reason) = @$_;
 		$block .= <<EOT;
 
-&middot; <B><A HREF="$constants->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</A>
+&middot; <B><A HREF="$gSkin->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</A>
 	($points points, $reasons->{$reason}{name})
 	by $nickname</B>
 	on $d
 	<FONT SIZE="1">attached to
-	<A HREF="$constants->{rootdir}/article.pl?sid=$sid">$title</A></FONT><BR>
+	<A HREF="$gSkin->{rootdir}/article.pl?sid=$sid">$title</A></FONT><BR>
 EOT
 	}
 	setblock("top10comments", $block);
@@ -167,7 +169,7 @@ sub getRDF {
 	} else {
 		my $str;
 		my $i = 0;
-		my $bd_regex = qr{\Q$constants->{basedomain}};
+		my $bd_regex = qr{\Q$gSkin->{basedomain}};
 		for my $item (@{$rss->{items}}) {
 			# hopefully this xmldecode() will break nothing
 			for (keys %{$item}) {

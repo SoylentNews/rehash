@@ -13,7 +13,7 @@ listKeywords
 __template__
 [% INCLUDE titlebar width="100%", title="List Keywords" -%]
 
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="listkeywords">
 Select Tag: 
 [% Slash.createSelect('keyword_tag', valid_tags, form.keyword_tag, 1) -%]
@@ -23,18 +23,18 @@ Select Tag:
 
 [% IF form.keyword_tag && keywords.size -%]
 <TABLE BORDER=0>
-<TR BGCOLOR="[% user.bg.3 %]">
-	<TH><FONT COLOR="[% user.fg.0 %]">ID</FONT></TH>
-	<TH><FONT COLOR="[% user.fg.0 %]">Tag</FONT></TH>
-	<TH><FONT COLOR="[% user.fg.0 %]">Reg Ex.</FONT></TH>
-	<TH><FONT COLOR="[% user.fg.0 %]">Weight</FONT></TH>
+<TR BGCOLOR="[% user.colors.bg_3 %]">
+	<TH><FONT COLOR="[% user.colors.fg_0 %]">ID</FONT></TH>
+	<TH><FONT COLOR="[% user.colors.fg_0 %]">Tag</FONT></TH>
+	<TH><FONT COLOR="[% user.colors.fg_0 %]">Reg Ex.</FONT></TH>
+	<TH><FONT COLOR="[% user.colors.fg_0 %]">Weight</FONT></TH>
 </TR>
 [% FOR k=keywords;
 	# Insure that the regex is printable.
 	k.regex = k.regex.replace('&','&amp;');
 	k.regex = k.regex.replace(' ', '&nbsp;') -%]
 <TR>
-	<TD><A HREF="[% constants.rootdir 
+	<TD><A HREF="[% gSkin.rootdir 
 	-%]/newsvac.pl?op=editkeyword&keyword_id=[% k.id %]">[% k.id %]</A>
 	</TD>
 	<TD>[% k.tag %]</TD>
@@ -45,7 +45,7 @@ Select Tag:
 </TABLE>
 [% END -%]
 
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="addkeyword">
 <INPUT TYPE="SUBMIT" VALUE="Add Keyword using Tag">:&nbsp;&nbsp;
 <INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="" SIZE=10>

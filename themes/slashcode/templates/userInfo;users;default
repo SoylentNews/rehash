@@ -42,7 +42,7 @@ up top there, where you can customize [% constants.sitename %],
 change your password, or just click pretty widgets to kill time.
 
 [% IF ! useredit.registered %]
-<P>This account is currently expired. Please <A HREF="[% constants.rootdir %]/users.pl?op=validateuser">re-register</A> at your earliest opportunity.<BR><P>
+<P>This account is currently expired. Please <A HREF="[% gSkin.rootdir %]/users.pl?op=validateuser">re-register</A> at your earliest opportunity.<BR><P>
 [% END %]
 
 <P>[% PROCESS horiz_rule %]</P>
@@ -55,7 +55,7 @@ change your password, or just click pretty widgets to kill time.
 
 [% IF lastjournal %]
 <P>Last journal entry:
-<B><A HREF="[% constants.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">[%
+<B><A HREF="[% gSkin.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">[%
 lastjournal.description | strip_notags %]</A></B>,
 [% Slash.timeCalc(useredit.journal_last_entry_date) %]
 ([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])

@@ -16,6 +16,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 
 	my $error_flag = 0;
 	my $postflag = $user->{state}{post};
@@ -41,51 +42,12 @@ sub main {
 			formname		=> 'discussions',
 			checks			=> ($form->{sid} || $user->{is_anon}) ? [] : ['generate_formkey'],
 		},
-		'index'			=> {
-			function		=> \&commentIndex,
-			seclev			=> 0,
-			formname 		=> 'discussions',
-			checks			=> ($form->{sid} || $user->{is_anon}) ? [] : ['generate_formkey'],
-		},
-		creator_index			=> {
-			function		=> \&commentIndexCreator,
-			seclev			=> 0,
-			formname 		=> 'discussions',
-			checks			=> ['generate_formkey'],
-		},
-		personal_index			=> {
-			function		=> \&commentIndexPersonal,
-			seclev			=> 1,
-			formname 		=> 'discussions',
-			checks			=> ['generate_formkey'],
-		},
-		user_created_index			=> {
-			function		=> \&commentIndexUserCreated,
-			seclev			=> 0,
-			formname 		=> 'discussions',
-			checks			=> ['generate_formkey'],
-		},
 		moderate		=> {
 			function		=> \&moderate,
 			seclev			=> 1,
 			post			=> 1,
 			formname		=> 'moderate',
 			checks			=> ['generate_formkey'],	
-		},
-		create_discussion	=> {
-			function		=> \&createDiscussion,
-			seclev			=> 1,
-			post			=> 1,
-			formname 		=> 'discussions',
-			checks			=> 
-			[ qw ( max_post_check valid_check interval_check 
-				formkey_check regen_formkey ) ],
-		},
-		delete_forum		=> {
-			function		=> \&deleteForum,
-			seclev			=> 1000,
-			formname		=> 'discussions',
-			checks			=> ['generate_formkey'],
 		},
 		reply			=> {
 			function		=> \&editComment,
@@ -124,8 +86,17 @@ sub main {
 			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check formkey_check ) ],
 		},
 	};
-	$ops->{default} = $ops->{display} ;
-	
+	$ops->{default} = $ops->{display};
+
+	# no user-submitted discussions any longer, except in journals
+	# newdiscussion is used to denote that we are creating a new discussion;
+	# we need to eventually remove references to it throughout the code, but
+	# for now, we just delete it so it can't be used -- pudge
+	delete $form->{newdiscussion};
+	if ($op =~ /^(?:creator_index|personal_index|user_created_index|index|create_discussion|delete_forum)/) {
+		redirect($gSkin->{rootdir} . '/journal.pl');
+	}
+
 	# This is here to save a function call, even though the
 	# function can handle the situation itself
 	my ($discussion, $section);
@@ -137,7 +108,7 @@ sub main {
 			$discussion = $slashdb->getDiscussionBySid($form->{sid});
 			$section = $discussion->{section};
 			if ($constants->{tids_in_urls}) {
-				my $tids = $slashdb->getStoryTopicsJustTids($form->{sid}); 
+				my $tids = $slashdb->getTopiclistForStory($form->{sid}); 
 				my $tid_string = join('&amp;tid=', @$tids);
 				$user->{state}{tid} = $tid_string;
 			}
@@ -163,6 +134,7 @@ sub main {
 				if (!$constants->{subscribe} || !$user->{is_subscriber}) {
 					$future_err = 1;
 					$null_it_out = 1;
+					#XXXSECTIONTOPICS verify checkStoryViewable is still correct 
 				} elsif (!$slashdb->checkStoryViewable($discussion->{sid})) {
 					# If a discussion is in the future, it can only be
 					# viewed if it's attached to a story (not a journal
@@ -175,6 +147,7 @@ sub main {
 					$future_err = 1;
 					$null_it_out = 1;
 				}
+				#XXXSECTIONTOPICS verify checkStoryViewable is still correct 
 			} elsif ($discussion->{sid} && !$slashdb->checkStoryViewable($discussion->{sid})) {
 				# Probably a Never Display'd story.
 				$null_it_out = 1;
@@ -384,385 +357,11 @@ sub displayComments {
 		printComments($discussion, $form->{cid}, $form->{cid});
 	} elsif ($form->{sid}) {
 		printComments($discussion, $form->{pid});
-	} elsif ($constants->{ubb_like_forums}) {
-		commentIndexUserCreated(@_);
 	} else {
-		commentIndex(@_);
+		print getData('try_journals');
 	}
 }
 
-
-##################################################################
-# Index of recent discussions: Used if comments.pl is called w/ no
-# parameters
-sub commentIndex {
-	my($form, $slashdb, $user, $constants, $error_message) = @_;
-
-	my $label = getData('label');
-
-	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
-	if ($form->{all}) {
-		titlebar("100%", getData('all_discussions'));
-		my $start = $form->{start} || 0;
-		my $discussions = $searchdb->findDiscussion({ section => $form->section }, $start,
-			$constants->{discussion_display_limit} + 1, $constants->{discussion_sort_order}
-		);
-		if ($discussions && @$discussions) {
-			my $forward;
-			if (@$discussions == $constants->{discussion_display_limit} + 1) {
-				pop @$discussions;
-				$forward = $start + $constants->{discussion_display_limit};
-			} else {
-				$forward = 0;
-			}
-
-			# if there are less than discussion_display_limit remaning,
-			# just set it to 0
-			my $back;
-			if ($start > 0) {
-				$back = $start - $constants->{discussion_display_limit};
-				$back = $back > 0 ? $back : 0;
-			} else {
-				$back = -1;
-			}
-
-			slashDisplay('discuss_list', {
-				discussions	=> $discussions,
-				error_message	=> $error_message,
-				label		=> $label,
-				forward		=> $forward,
-				args		=> _buildargs($form),
-				start		=> $start,
-				back		=> $back,
-			});
-		} else {
-			print getData('nodiscussions');
-			slashDisplay('discreate', {
-				topic => $constants->{discussion_default_topic},
-				label => $label,
-			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
-		}
-	} else {
-		titlebar("100%", getData('active_discussions'));
-		my $start = $form->{start} || 0;
-		my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'open' },
-			$start, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order}
-		);
-		if ($discussions && @$discussions) {
-			my $forward;
-			if (@$discussions == $constants->{discussion_display_limit} + 1) {
-				pop @$discussions;
-				$forward = $start + $constants->{discussion_display_limit};
-			} else {
-				$forward = 0;
-			}
-
-			# if there are less than discussion_display_limit remaning,
-			# just set it to 0
-			my $back;
-			if ($start > 0) {
-				$back = $start - $constants->{discussion_display_limit};
-				$back = $back > 0 ? $back : 0;
-			} else {
-				$back = -1;
-			}
-
-			slashDisplay('discuss_list', {
-				discussions	=> $discussions,
-				error_message	=> $error_message,
-				label		=> $label,
-				forward		=> $forward,
-				args		=> _buildargs($form),
-				start		=> $start,
-				back		=> $back,
-			});
-		} else {
-			print getData('nodiscussions');
-			slashDisplay('discreate', {
-				topic => $constants->{discussion_default_topic},
-				label	=> $label,
-			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
-		}
-	}
-}
-
-##################################################################
-# Index of recent discussions: Used if comments.pl is called w/ no
-# parameters
-sub commentIndexUserCreated {
-	my($form, $slashdb, $user, $constants, $error_message) = @_;
-	my $label = getData('label');
-
-	# titlebar("100%", getData('user_discussions'));
-	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
-	my $start    = $form->{start} || 0;
-	my $hashref  = {};
-	my $sections;
-	$hashref->{section}  = $form->{section} if $form->{section};
-	$hashref->{tid}      = $form->{tid} if $form->{tid};
-	$hashref->{type}     = 'recycle'; 
-	$hashref->{approved} = '1'; 
-
-	my $discussions = $searchdb->findDiscussion(
-		$hashref, 
-		$constants->{discussion_display_limit} + 1, 
-		$start, $constants->{discussion_sort_order});
-
-	my $section_select;	
-	if ($constants->{ubb_like_forums}) {
-		$sections = $slashdb->getDescriptions('forums');
-		$section_select = createSelect('section', $sections, $form->{section}, 1);
-		for (my $i=0; $i < @$discussions; $i++) {
-			$discussions->[$i]{comment} = $slashdb->getForumDescription($discussions->[$i]{id});
-			$discussions->[$i]{num_parents} = $slashdb->getForumParents($discussions->[$i]{id});
-			$discussions->[$i]{last_comment} = $slashdb->getForumLastPostHashref($discussions->[$i]{id});
-		}
-	}
-
-	if ($discussions && @$discussions) {
-		my $forward;
-		if (@$discussions == $constants->{discussion_display_limit} + 1) {
-			pop @$discussions;
-			$forward = $start + $constants->{discussion_display_limit};
-		} else {
-			$forward = 0;
-		}
-
-		# if there are less than discussion_display_limit remaning,
-		# just set it to 0
-		my $back;
-		if ($start > 0) {
-			$back = $start - $constants->{discussion_display_limit};
-			$back = $back > 0 ? $back : 0;
-		} else {
-			$back = -1;
-		}
-
-# REMOVE ?
-
-#		$title .= ": " . $slashdb->getTopic($form->{tid},'alttext') . " ($form->{tid})" if $form->{tid};
-
-		slashDisplay('udiscuss_list', {
-			discussions	=> $discussions,
-			error_message	=> $error_message,
-			title 		=> getData('user_discussions'),
-			'label'		=> $label,
-			forward		=> $forward,
-			args		=> _buildargs($form),
-			start		=> $start,
-			back		=> $back,
-			sections	=> $sections,
-			section_select  => $section_select,
-		});
-	} else {
-		print getData('nodiscussions');
-		slashDisplay('edit_comment', {
-			newdiscussion	=> 1,
-			label		=> $label,
-			section_select  => $section_select,
-		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
-	}
-}
-
-##################################################################
-# Index of recent discussions: Used if comments.pl is called w/ no
-# parameters
-sub commentIndexCreator {
-	my($form, $slashdb, $user, $constants, $error_message) = @_;
-
-	my $label = getData('label');
-	my($uid, $nickname);
-	if ($form->{uid} or $form->{nick}) {
-		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nickname	= $slashdb->getUser($uid, 'nickname');
-	} else {
-		$uid		= $user->{uid};
-		$nickname	= $user->{nickname};
-	}
-
-	if (isAnon($uid)) {
-		return displayComments(@_);
-	}
-	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
-
-	titlebar("100%", getData('user_discussion', { name => $nickname}));
-	my $start = $form->{start} || 0;
-	my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'recycle', uid => $uid },
-		$start, $constants->{discussion_display_limit} + 1, $constants->{discussion_sort_order}
-	);
-	if ($discussions && @$discussions) {
-		my $forward;
-		if (@$discussions == $constants->{discussion_display_limit} + 1) {
-			pop @$discussions;
-			$forward = $start + $constants->{discussion_display_limit};
-		} else {
-			$forward = 0;
-		}
-
-		# if there are less than discussion_display_limit remaning,
-		# just set it to 0
-		my $back;
-		if ($start > 0) {
-			$back = $start - $constants->{discussion_display_limit};
-			$back = $back > 0 ? $back : 0;
-		} else {
-			$back = -1;
-		}
-
-		slashDisplay('discuss_list', {
-			discussions	=> $discussions,
-			indextype	=> 'creator',
-			error_message	=> $error_message,
-			'label'		=> $label,
-			forward		=> $forward,
-			args		=> _buildargs($form),
-			start		=> $start,
-			suppress_create	=> 1,
-			back		=> $back,
-		});
-	} else {
-		print getData('users_no_discussions');
-	}
-}
-
-##################################################################
-# Index of recent discussions: Used if comments.pl is called w/ no
-# parameters
-sub commentIndexPersonal {
-	my($form, $slashdb, $user, $constants, $error_message) = @_;
-
-	my $label = getData('label');
-
-	titlebar("100%", getData('user_discussion', { name => $user->{nickname}}));
-	my $start = $form->{start} || 0;
-	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
-	my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'recycle', uid => $user->{uid} },
-		$start, $constants->{discussion_display_limit} + 1, $constants->{discussion_sort_order}
-	);
-	if ($discussions && @$discussions) {
-		my $forward;
-		if (@$discussions == $constants->{discussion_display_limit} + 1) {
-			pop @$discussions;
-			$forward = $start + $constants->{discussion_display_limit};
-		} else {
-			$forward = 0;
-		}
-
-		# if there are less than discussion_display_limit remaning,
-		# just set it to 0
-		my $back;
-		if ($start > 0) {
-			$back = $start - $constants->{discussion_display_limit};
-			$back = $back > 0 ? $back : 0;
-		} else {
-			$back = -1;
-		}
-
-		slashDisplay('discuss_list', {
-			discussions	=> $discussions,
-			indextype	=> 'personal', 
-			error_message	=> $error_message,
-			'label'		=> $label,
-			forward		=> $forward,
-			args		=> _buildargs($form),
-			start		=> $start,
-			suppress_create	=> 1,
-			back		=> $back,
-		});
-	} else {
-		print getData('users_no_discussions');
-	}
-}
-
-##################################################################
-# for ubb_like_forums
-sub deleteForum {
-	my($form, $slashdb, $user, $constants, $error_message) = @_;
-
-	$slashdb->deleteDiscussion($form->{sid}) if $constants->{ubb_like_forums};
-	commentIndexUserCreated(@_);
-
-	return;
-}
-
-##################################################################
-# This is where all of the real discussion creation occurs 
-# Returns the discussion id of the created discussion
-# -Brian
-sub _createDiscussion {
-	my($form, $slashdb, $user, $constants) = @_;
-	my $id;
-
-	if ($user->{seclev} >= $constants->{discussion_create_seclev} || $user->{is_admin}) {
-		# if form.url is empty, try the referrer.  if it
-		# matches comments.pl without any query string,
-		# then (later, down below) set url to point to discussion
-		# itself.
-		# this only catches URLs without query string ...
-		# we don't want to override prefs too easily.  this
-		# can be modified to become more inclusive later,
-		# if needed.  -- pudge
-		my $newurl	   = $form->{url}
-			? $form->{url}
-			: $ENV{HTTP_REFERER} =~ m|\Q$constants->{rootdir}/comments.pl\E$|
-				? ""
-				: $ENV{HTTP_REFERER};
-		$form->{url}	   = fudgeurl($newurl);
-		# $form->{title}	= strip_notags($form->{title});
-		$form->{title}	   = strip_notags($form->{postersubj});
-		$form->{topic}   ||= $constants->{defaulttopic};
-		$form->{section} ||= $constants->{defaultsection};
-
-
-		# for now, use the postersubj filters; problem is,
-		# the error messages can come out a bit funny.
-		# oh well.  -- pudge
-		my($error, $err_message);
-		if (! filterOk('comments', 'postersubj', $form->{title}, \$err_message)) {
-			$error = getError('filter message', {
-				err_message	=> $err_message
-			});
-		} elsif (! compressOk('comments', 'postersubj', $form->{title})) {
-			$error = getError('compress filter', {
-				ratio	=> 'postersubj',
-			});
-		} else {
-			# BTW we are not setting section since at this point we wouldn't
-			# trust users to set it correctly -Brian
-			$id = $slashdb->createDiscussion({
-				title	=> $form->{title},
-				topic	=> $form->{topic},
-				section => $form->{section},
-				url	=> $form->{url} || 1,
-				type	=> "recycle"
-			});
-
-			# fix URL to point to discussion if no referrer
-			if (!$form->{url}) {
-				$newurl = $constants->{rootdir} . "/comments.pl?sid=$id";
-				$slashdb->setDiscussion($id, { url => $newurl });
-			}
-		}
-	} else {
-		slashDisplay('newdiscussion', {
-			error => getError('seclevtoolow'),
-		});
-	}
-
-	return $id;
-}
-
-##################################################################
-# Yep, I changed the l33t method of adding discussions.
-# "The Slash job, keeping trolls on their toes"
-# -Brian
-sub createDiscussion {
-	my($form, $slashdb, $user, $constants) = @_;
-
-	my $label = getData('label');
-	my $id = _createDiscussion($form, $slashdb, $user, $constants);
-	commentIndex(@_);
-}
 
 ##################################################################
 # Welcome to one of the ancient beast functions.  The comment editor

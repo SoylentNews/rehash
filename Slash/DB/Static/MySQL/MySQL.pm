@@ -4,12 +4,13 @@
 # $Id$
 
 package Slash::DB::Static::MySQL;
-#####################################################################
-#
-# Note, this is where all of the ugly red headed step children go.
-# This does not exist, these are not the methods you are looking for.
-#
-#####################################################################
+
+# This package contains "static" methods for MySQL, which in this
+# context means methods which are not needed by Apache.  If Apache
+# doesn't need their code, keeping it out saves a bit of RAM.
+# So what should go in here are the methods which are only needed
+# by the backend.
+
 use strict;
 use Slash::Utility;
 use Digest::MD5 'md5_hex';
@@ -53,58 +54,46 @@ sub sqlShowSlaveStatus {
 }
 
 ########################################################
-# for slashd
-# This method is used in a pretty wasteful way
+# For rss, rdf etc feeds, basically used by tasks.
+# Ultimately this should be subsumed into
+# getStoriesEssentials since they serve the same purpose.
 sub getBackendStories {
-	my($self, $section, $topic) = @_;
-	# right now it is only topic OR section, because i am lazy;
-	# section overrides topic -- pudge
-	# Fixed it so that it now pays attention to both. --Brian
+	my($self, $options) = @_;
 
-	my $select;
-	$select .= "stories.sid, stories.title, time, dept, stories.uid,";
-	$select .= "alttext, commentcount, hitparade,";
-	$select .= "stories.section as section, introtext,";
-	$select .= "bodytext, topics.tid as tid";
-	my $from = "stories, story_text, topics";
+	my $topic = $options->{topic} || 0;
 
-	my $where;
-	$where .= "stories.sid = story_text.sid";
-	$where .= " AND stories.tid=topics.tid";
-	$where .= " AND time < NOW()";
-	$where .= " AND stories.writestatus != 'delete'";
+	my $select = "stories.stoid, sid, title, time, dept, stories.uid,
+		commentcount, hitparade, introtext, bodytext";
 
-	if ($section) {
-		my $SECT = $self->getSection($section);
-		if ($SECT->{type} eq 'collected') {
-			$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
-				if $SECT->{contained} && @{$SECT->{contained}};
-			$where .= " AND displaystatus = 0 ";
-		} else {
-			$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
-			$where .= " AND displaystatus >= 0 ";
+	my $from = "stories, story_text";
+
+	my $where = "stories.stoid = story_text.stoid
+		AND time < NOW() AND in_trash = 'no'";
+
+	my %image = ( );
+	my $topic_hr = $self->getTopicTree($topic);
+	if ($topic) {
+		$from .= ", story_topics_rendered";
+		$where .= " AND stories.stoid = story_topics_rendered.stoid
+			AND story_topics_rendered.tid=$topic";
+		for my $key (qw( image width height )) {
+			$image{$key} = $topic_hr->{$key};
 		}
 	}
-
-	$where .= " AND stories.tid=$topic "
-		if ($topic);
-
-	# And finally.... -Brian
-	if (!$section && !$topic) {
-		$where .= " AND displaystatus = 0 ";
-	}
-	
 
 	my $other = "ORDER BY time DESC LIMIT 10";
 
 	my $returnable = $self->sqlSelectAllHashrefArray($select, $from, $where, $other);
 
-	my $topics = $self->getTopics;
+	# Load up the image field for each story with a hashref
+	# containing this one topic's image data;  this is not
+	# that useful and it's a bit silly to repeat the data
+	# 10 times, but this makes this method's return value
+	# compatible with what it was before 2004/05. - Jamie
 	for my $story (@$returnable) {
-		my $image = $self->getTopicImageBySection(
-			$topics->{$story->{tid}}, $story->{section}
-		);
-		$story->{image} = $image->{image}; 
+		# XXXSECTIONTOPICS need to set $story->{alttext}
+		# to something, here - the main topic, I guess
+		$story->{image} = { %image };
 	}
 
 	return $returnable;
@@ -128,8 +117,11 @@ sub insertErrnoteLog {
 
 ########################################################
 # For slashd
-sub getNewStoryTopic {
-	my($self, $section) = @_;
+# This is for set_recent_topics.pl which updates the template
+# for the "five recent topics" icons across the top of skin
+# index pages.
+sub getNewStoryTopics {
+	my($self, $skin_name) = @_;
 
 	my $constants = getCurrentStatic();
 	my $needed = $constants->{recent_topic_img_count} || 5;
@@ -141,26 +133,21 @@ sub getNewStoryTopic {
 	# work for all sites except those that post tons of duplicate
 	# topic stories.
 	$needed = $needed * 3 + 5;
-	my $clause;	
-	if ($section) {
-		$clause = "stories.section = '$section' AND displaystatus != 1";
-	} else {
-		$clause = 'displaystatus = 0';
-	}
+	my $skin = $self->getSkin($skin_name);
+	my $nexus_tid = $skin->{nexus};
 	my $ar = $self->sqlSelectAllHashrefArray(
-		"alttext, stories.tid AS tid",
-		"stories, topics",
-		"stories.tid=topics.tid AND $clause
-		 AND writestatus != 'delete' AND time < NOW()",
+		"stories.tid",
+		"stories, story_topics_rendered",
+		"stories.stoid=story_topics_rendered.stoid
+		 AND story_topics_rendered.tid=$nexus_tid
+		 AND in_trash = 'no' AND time < NOW()",
 		"ORDER BY time DESC LIMIT $needed"
 	);
 
 	my $topics = $self->getTopics;
 	for my $topic (@$ar) {
-		my $image = $self->getTopicImageBySection(
-			$topics->{$topic->{tid}}
-		);
-		@{$topic}{qw(image width height)} = @{$image}{qw(image width height)};
+		@{ $topic                   }{qw(alttext image width height)} =
+		@{ $topics->{$topic->{tid}} }{qw(alttext image width height)};
 	}
 
 	return $ar;
@@ -186,7 +173,7 @@ sub updateArchivedDiscussions {
 
 
 ########################################################
-# For dailystuff
+# For daily_archive.pl
 sub getArchiveList {
 	my($self, $limit, $dir) = @_;
 	$limit ||= 1;
@@ -195,15 +182,25 @@ sub getArchiveList {
 	my $days_to_archive = getCurrentStatic('archive_delay');
 	return 0 unless $days_to_archive;
 
+	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
+	my $nexuses = $self->getNexusChildrenTids($mp_tid);
+	my $nexus_clause = join ',', @$nexuses, $mp_tid;
+	
 	# Close associated story so that final archival .shtml is written
 	# to disk. This is accomplished by the archive.pl task.
+	# XXXSECTIONTOPICS - We need to get the list of all nexuses,
+	# and not archive any stories that don't belong to them
+	# (which is the new equivalent of the old "never display").
+	# That replaces "displaystatus > -1" - Jamie 2005/04
 	my $returnable = $self->sqlSelectAll(
-		'sid, title, section',
-		'stories',
-		"TO_DAYS(NOW()) - TO_DAYS(time) > $days_to_archive
-		 AND (writestatus='ok' OR writestatus='dirty')
-		 AND displaystatus > -1",
-		"ORDER BY time $dir LIMIT $limit"
+		'stories.stoid, sid, title',
+		'stories, story_text, story_topics_rendered',
+		"stories.stoid=story_text.stoid
+		 AND stories.stoid = story_topics_rendered.stoid
+		 AND TO_DAYS(NOW()) - TO_DAYS(time) > $days_to_archive
+		 AND is_archived = 'no'
+		 AND story_topics_rendered.tid IN ($nexus_clause)",
+		"GROUP BY stoid ORDER BY time $dir LIMIT $limit"
 	);
 
 	return $returnable;
@@ -575,21 +572,31 @@ sub decayTokens {
 sub getDailyMail {
 	my($self, $user) = @_;
 
-	my $columns = "stories.sid, stories.title, stories.section,
+	my $columns = "stories.sid, stories.title, stories.primaryskid,
 		users.nickname,
 		stories.tid, stories.time, stories.dept,
-		story_text.introtext, story_text.bodytext";
-	my $tables = "stories, story_text, users";
+		story_text.introtext, story_text.bodytext ";
+	my $tables = "stories, story_text, users, story_topics_rendered";
 	my $where = "time < NOW() AND TO_DAYS(NOW())-TO_DAYS(time)=1 ";
-	$where .= "AND users.uid=stories.uid AND stories.sid=story_text.sid ";
+	$where .= "AND users.uid=stories.uid AND stories.sid=story_text.sid AND story_topics_rendered.stoid = stories.stoid ";
 
+	# XXXSECTIONTOPICS - The 'sectioncollapse' bit now means:
+	# 0 - only want stories in the mainpage nexus mail
+	# 1 - want all stories in the mainpage nexus, or any
+	# other nexuses linked to it, mailed
+	# We should probably have a MySQL.pm method that gets the
+	# list of all nexuses linked to the mainpage nexus
+	# I'll work on that - 
+	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
+	my $nexuses = $self->getNexusChildrenTids($mp_tid);
+	my $nexus_clause = join ',', @$nexuses, $mp_tid;
 	if ($user->{sectioncollapse}) {
-		$where .= "AND stories.displaystatus>=0 ";
+		$where .= "AND story_topics_rendered.tid = $mp_tid ";
 	} else {
-		$where .= "AND stories.displaystatus=0 ";
+		$where .= "AND story_topics_rendered.tid in ($nexus_clause) ";
 	}
 
-	$where .= "AND tid not in ($user->{extid}) "
+	$where .= "AND story_topics_rendered.tid not in ($user->{extid}) "
 		if $user->{extid};
 	$where .= "AND stories.uid not in ($user->{exaid}) "
 		if $user->{exaid};
@@ -764,9 +771,68 @@ sub getSitesRDF {
 }
 
 ########################################################
-sub getSectionInfo {
+# XXXSECTIONTOPICS - This is broken, I'm working on it - Jamie
+sub getSkinInfo {
 	my($self) = @_;
-	$self->sqlConnect();
+	$self->sqlConnect;
+
+	my $tree  = $self->getTopicTree;
+	my $skins = $self->getSkins;
+	my $rootdir = getCurrentSkin('rootdir');
+	# in case one child nexus has more than one parent nexus,
+	# cache the data in %children so we don't need to fetch it all
+	# more than once
+	my(%children, %index);
+	for my $tid (keys %$tree) {
+		next unless $tree->{$tid}{nexus} && $tree->{$tid}{skid} && $tree->{$tid}{child};
+
+		my $skinname = $skins->{ $tree->{$tid}{skid} }{name};
+		$index{$skinname} = { };
+		for my $child_tid (keys %{$tree->{$tid}{child}}) {
+			next unless $tree->{$child_tid}{nexus} && $tree->{$child_tid}{skid};
+			if ($children{$child_tid}) {
+				push @{$index{$skinname}{$child_tid}}, $children{$child_tid};
+				next;
+			}
+
+			my %child_data;
+			# copy, don't mess up cache
+			@child_data{keys %{$tree->{$child_tid}}} = values %{$tree->{$child_tid}};
+
+			$child_data{skin}    = $skins->{ $tree->{$child_tid}{skid} };
+			$child_data{rootdir} = set_rootdir($child_data{url}, $rootdir);
+
+			@child_data{qw(month monthname day)} = $self->sqlSelect(
+				'MONTH(time), MONTHNAME(time), DAYOFMONTH(time)',
+				'stories, story_topics_rendered',
+				'stories.stoid=story_topics_rendered.stoid AND ' .
+				"tid='$child_tid' AND in_trash = 'no' AND time < NOW()"
+			);
+
+			$child_data{count} = $self->sqlCount(
+				'stories, stories_topics_chosen',
+				'stories.stoid=story_topics_rendered.stoid AND ' .
+				"tid='$child_tid' AND in_trash = 'no' AND time < NOW() AND " .
+				'TO_DAYS(NOW()) - TO_DAYS(time) <= 2'
+			) || 0;
+
+			$child_data{count_sectional} = $self->sqlCount(
+				'stories, story_topics_rendered AS str1 LEFT JOIN story_topics_rendered AS str2 ON stories.stoid=str2.stoid',
+				'stories.stoid=str1.stoid AND str2.stoid IS NULL AND ' .
+				"tid='$child_tid' AND in_trash = 'no' AND time < NOW() AND " .
+				'TO_DAYS(NOW()) - TO_DAYS(time) <= 2'
+			);
+
+			$children{$child_tid} = \%child_data;
+			push @{$index{$skinname}{$child_tid}}, $children{$child_tid};
+		}
+	}
+
+	return \%index;
+
+	
+=pod
+
 	my $defaultsection = getCurrentStatic('defaultsection');
 	# Make more sense to make this a getDescriptions call -Brian
 	my $sections = $self->sqlSelectAllHashrefArray(
@@ -803,7 +869,7 @@ EOT
 
 	}
 
-	my $rootdir = getCurrentStatic('rootdir');
+	my $rootdir = getCurrentSkin('rootdir');
 	for my $section (@$sections) {
 		# add rootdir, form figured dynamically -- pudge
 		$section->{rootdir} = set_rootdir(
@@ -812,6 +878,9 @@ EOT
 	}
 
 	return $sections;
+
+=cut
+
 }
 
 ########################################################
@@ -1689,15 +1758,20 @@ sub getMetaModerations {
 # We have an index on just 1 char of story_text.rendered, and
 # its only purpose is to make this select into a lookup instead
 # of a table scan.
+# XXXSECTIONTOPICS - This is broken, I'm fixing - Jamie
 sub getStoriesNeedingRender {
 	my($self, $limit) = @_;
 	$limit ||= 10;
+	
+	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
+	
 	my $returnable = $self->sqlSelectColArrayref(
-		"stories.sid",
-		"stories, story_text", 
-		"stories.sid = story_text.sid
-		 AND rendered IS NULL
-		 AND displaystatus = 0",
+		"stories.stoid",
+		"stories, story_text, story_topics_rendered", 
+		"stories.stoid = story_text.stoid
+		 AND stories.stoid = story_topics_rendered.stoid 
+		 AND story_topics_rendered.tid = $mp_tid
+		 AND rendered IS NULL",
 		"ORDER BY time DESC LIMIT $limit"
 	);
 	return $returnable;
@@ -1706,9 +1780,11 @@ sub getStoriesNeedingRender {
 ########################################################
 # For freshenup.pl,archive.pl
 #
+#XXXSECTIONTOPICS - This is broken, I'm fixing - Jamie
+# displaystatus stuff still needs reworking here
 sub getStoriesWithFlag {
 	my($self, $purpose, $order, $limit) = @_;
-	
+
 	my $order_clause = " ORDER BY time $order";
 	my $limit_clause = "";
 	$limit_clause = " LIMIT $limit" if $limit;
@@ -1721,34 +1797,52 @@ sub getStoriesWithFlag {
 	# yet!  - Cliff 14-Oct-2001
 	# But if writestatus is delete, we want ALL the candidates,
 	# not just the ones that are displaying -- pudge
-	my $writestatus_clause;
-	my $displaystatus_clause;
+	my $returnable = [ ];
+	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	if ($purpose eq 'delete') {
-		# We want everything that needs to be deleted.
-		$writestatus_clause = " AND writestatus = 'delete'";
-		$displaystatus_clause = "";
+		# Find all stories in the past that are in the trash.
+		$returnable = $self->sqlSelectAllHashrefArray(
+			"stories.stoid, sid, primaryskid, title, time",
+			"stories, story_text",
+			"time < NOW()
+			 AND stories.stoid = story_text.stoid
+			 AND in_trash = 'yes'",
+			"$order_clause$limit_clause");
 	} elsif ($purpose eq 'mainpage_dirty') {
-		# We only want mainpage stories that are dirty.
-		$writestatus_clause = " AND writestatus = 'dirty'";
-		$displaystatus_clause = " AND displaystatus = 0";
+		# Find all stories in the past that are dirty and have
+		# been rendered into the mainpage nexus tid.
+		$returnable = $self->sqlSelectAllHashrefArray(
+			"stories.stoid, sid, primaryskid, title, time",
+			"stories, story_text, story_topics_rendered
+			 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
+			"time < NOW()
+			 AND stories.stoid = story_text.stoid
+			 AND story_dirty.stoid IS NOT NULL
+			 AND stories.stoid = story_topics_rendered.stoid
+			 AND story_topics_rendered.tid = '$mp_tid'",
+			"$order_clause$limit_clause");
 	} elsif ($purpose eq 'all_dirty') {
-		# We are updating stories that are dirty, don't
-		# want ND'd stories, do want sectional as well as
-		# mainpage stories.
-		$writestatus_clause = " AND writestatus = 'dirty'";
-		$displaystatus_clause = " AND displaystatus > -1";
-	} else {
-		# Invalid purpose.
-		return [ ];
+		# Find all stories in the past that are dirty and have
+		# been rendered into ANY tid (thus excluding "ND"
+		# stories which don't have any nexus tids)..
+		$returnable = $self->sqlSelectAllHashrefArray(
+			"stories.stoid, sid, primaryskid, title, time",
+			"stories, story_text, story_topics_rendered
+			 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
+			"time < NOW()
+			 AND stories.stoid = story_text.stoid
+			 AND story_dirty.stoid IS NOT NULL
+			 AND stories.stoid = story_topics_rendered.stoid",
+			"GROUP BY stories.stoid $order_clause$limit_clause");
+		# Now we walk the list and eliminate any stories that
+		# aren't viewable.  Viewable may not be exactly the
+		# same as simply having one or more nexus tids, so the
+		# select may not have excluded all the right ones.
+		for my $story (@$returnable) {
+			$story->{killme} = 1 if !$self->checkStoryViewable($story->{sid});
+		}
+		$returnable = [ grep { !$_->{killme} } @$returnable ];
 	}
-
-	my $returnable = $self->sqlSelectAllHashrefArray(
-		"sid, title, section, time, displaystatus",
-		"stories", 
-		"time < NOW()
-		$writestatus_clause	$displaystatus_clause
-		$order_clause		$limit_clause"
-	);
 
 	return $returnable;
 }
@@ -1864,7 +1958,7 @@ sub refreshUncommonStoryWords {
 	my $arr = $self->sqlSelectAll(
 		"title, introtext, bodytext",
 		"story_text, stories",
-		"stories.sid = story_text.sid
+		"stories.stoid = story_text.stoid
 		 AND stories.time >= DATE_SUB(NOW(), INTERVAL $n_days DAY)"
 	);
 	my %common_words = map { ($_, 1) } split " ",
@@ -1922,12 +2016,11 @@ sub refreshUncommonStoryWords {
 # files and redirect to new
 
 sub getPrevSectionsForSid {
-	my($self, $sid) = @_;
-	my $sid_q = $self->sqlQuote($sid);
+	my($self, $stoid) = @_;
 	my $old_sect = $self->sqlSelect(
 		"value",
 		"story_param",
-		"name='old_shtml_sections' AND sid=$sid_q");
+		"name='old_shtml_sections' AND stoid=$stoid");
 	my @old_sect = grep { $_ } split(/,/, $old_sect);
 	return @old_sect;
 }
@@ -1939,11 +2032,10 @@ sub getPrevSectionsForSid {
 # have been cleaned up
  
 sub clearPrevSectionsForSid {
-	my($self, $sid) = @_;
-	my $sid_q = $self->sqlQuote($sid);
+	my($self, $stoid) = @_;
 	$self->sqlDelete(
 		"story_param",
-		"name='old_shtml_sections' AND sid=$sid_q");
+		"name='old_shtml_sections' AND stoid=$stoid");
 }
 
 ########################################################
@@ -2074,10 +2166,11 @@ sub countPollQuestion {
 
 sub setCurrentSectionPolls {
         my($self) = @_;
-        my $section_polls = $self->sqlSelectAllHashrefArray("section,max(date) as date", "pollquestions", "date<=NOW() and polltype='section'", "group by section"); 
+        my $section_polls = $self->sqlSelectAllHashrefArray("primaryskid,max(date) as date", "pollquestions", "date<=NOW() and polltype='section'", "group by primaryskid"); 
 	foreach my $p (@$section_polls) {
-                my $poll = $self->sqlSelectHashref("qid,section", "pollquestions", "section='$p->{section}' and date='$p->{date}'");
-                $self->setSection($poll->{section}, { qid => $poll->{qid} });
+                my $poll = $self->sqlSelectHashref("qid,primaryskid", "pollquestions", "primaryskid='$p->{primaryskid}' and date='$p->{date}'");
+		my $nexus_id = $self->getNexusFromSkid($p->{primaryskid});
+		$self->setNexusCurrentQid($nexus_id, $poll->{qid});
         }
 }
 
@@ -2209,26 +2302,34 @@ sub getTopRecentRealemailDomains {
 }
 
 ########################################################
-#freshenup
-sub getSectionsDirty {
+# freshenup
+sub getSkinsDirty {
 	my($self) = @_;
-
-	$self->sqlSelectColArrayref('section', 'sections', '(writestatus = "dirty") OR ((UNIX_TIMESTAMP(last_update) + rewrite) <  UNIX_TIMESTAMP(now()) )');
+	my $skin_ids = $self->sqlSelectColArrayref(
+		'DISTINCT skid', 'skins, topic_nexus_dirty',
+		'skins.nexus = topic_nexus_dirty.tid
+		 OR skins.last_rewrite < DATE_SUB(NOW(), INTERVAL max_rewrite_secs SECOND)');
+	my $skins = $self->getSkins();
+	my $ret_hr = { };
+	for my $id (@$skin_ids) {
+		$ret_hr->{$id} = { %{$skins->{$id}} };
+	}
+	return $ret_hr;
 }
 
 ########################################################
 # for new_headfoot.pl
 sub getHeadFootPages {
-	my($self, $section, $headfoot) = @_;
+	my($self, $skin, $headfoot) = @_;
 
 	return [] unless $headfoot eq 'header' || $headfoot eq 'footer';
 
-	$section ||= 'default'; # default to default
+	$skin ||= 'default'; # default to default
 
 	my $list = $self->sqlSelectAll(
 		'page',
 		'templates',
-		"section = '$section' AND name='$headfoot' AND page != 'misc'");
+		"skin = '$skin' AND name='$headfoot' AND page != 'misc'");
 	push @$list, [qw( misc )];
 
 	return $list;

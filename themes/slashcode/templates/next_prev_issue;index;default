@@ -26,22 +26,22 @@ __template__
 
 [%- IF today < tomorrow;     # issue is today
 linkrel.prev.title = "Yesterday's News";
-linkrel.prev.url = "${constants.rootdir}/index.pl?issue=$yesterday" -%]
-<a href="[% constants.rootdir %]/index.pl?issue=[% yesterday %]">Yesterday's News</a>
+linkrel.prev.url = "${gSkin.rootdir}/index.pl?issue=$yesterday" -%]
+<a href="[% gSkin.rootdir %]/index.pl?issue=[% yesterday %]">Yesterday's News</a>
 [%- ELSE;
 linkrel.next.title = "Today's News";
-linkrel.next.url = "${constants.rootdir}/" -%]
-<a href="[% constants.rootdir %]/">Today's News</a>[% mydelim %]
+linkrel.next.url = "${gSkin.rootdir}/" -%]
+<a href="[% gSkin.rootdir %]/">Today's News</a>[% mydelim %]
 [%- IF today > tomorrow; # issue is older than yesterday
 datestr = Slash.timeCalc(tomorrow, myformat, 0);
 linkrel.next.title = datestr;
-linkrel.next.url = "${constants.rootdir}/index.pl?issue=$tomorrow" -%]
-<a href="[% constants.rootdir %]/index.pl?issue=[% tomorrow %]">[% datestr %]</a>[% mydelim %]
+linkrel.next.url = "${gSkin.rootdir}/index.pl?issue=$tomorrow" -%]
+<a href="[% gSkin.rootdir %]/index.pl?issue=[% tomorrow %]">[% datestr %]</a>[% mydelim %]
 [%- END;
 datestr = Slash.timeCalc(yesterday, myformat, 0);
 linkrel.prev.title = datestr;
-linkrel.prev.url = "${constants.rootdir}/index.pl?issue=$yesterday" -%]
-<a href="[% constants.rootdir %]/index.pl?issue=[% yesterday %]">[% datestr %]</a>
+linkrel.prev.url = "${gSkin.rootdir}/index.pl?issue=$yesterday" -%]
+<a href="[% gSkin.rootdir %]/index.pl?issue=[% yesterday %]">[% datestr %]</a>
 [%- END -%]
 
 [% IF older_stories %]

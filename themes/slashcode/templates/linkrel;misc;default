@@ -24,21 +24,20 @@ __template__
    linkrels.push(tmp) %]
 
 [% tmp = BLOCK -%]
-<LINK REL="search"    TITLE="Search [% constants.sitename | strip_attribute %]" HREF="[% constants.rootdir %]/search.pl">
+<LINK REL="search"    TITLE="Search [% constants.sitename | strip_attribute %]" HREF="[% gSkin.rootdir %]/search.pl">
 [%- END;
    linkrels.push(tmp) %]
 
 
 
 [% tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/[% Slash.sitename2filename(constants.real_section) %].rss" TYPE="application/rss+xml">
+<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/index.rss" TYPE="application/rss+xml">
 [%- END;
    linkrels.push(tmp) %]
 
-[% SECT = Slash.db.getSection(user.currentSection);
-   IF constants.real_section != SECT.section;
+[% IF gSkin.name != 'mainpage';
 	tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] ([% SECT.title | strip_attribute %]) RSS" HREF="[% constants.rootdir %]/[% Slash.sitename2filename(SECT.section) %].rss" TYPE="application/rss+xml">
+<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] ([% gSkin.title | strip_attribute %]) RSS" HREF="[% gSkin.rootdir %]/[% Slash.sitename2filename(gSkin.name) %].rss" TYPE="application/rss+xml">
 	[%- END;
    linkrels.push(tmp);
 END %]
@@ -47,7 +46,7 @@ END %]
 
 [% IF link.section;
 	tmp = BLOCK;
-	myurl = link.section.rootdir || "${constants.rootdir}/${link.section.section}" -%]
+	myurl = link.section.rootdir || "${gSkin.rootdir}/${link.section.section}" -%]
 <LINK REL="parent"    TITLE="[% link.section.title | strip_attribute %]" HREF="[% myurl %]/">
 	[%- END;
    linkrels.push(tmp);
@@ -67,24 +66,24 @@ END %]
 
 ELSIF env.script_name.search('article\.pl');
 	IF link.prev; tmp = BLOCK -%]
-<LINK REL="prev"      TITLE="[% link.prev.title | strip_attribute %]" HREF="[% constants.rootdir %]/article.pl?sid=[% link.prev.sid %]">
+<LINK REL="prev"      TITLE="[% link.prev.title | strip_attribute %]" HREF="[% gSkin.rootdir %]/article.pl?sid=[% link.prev.sid %]">
 	[%- END; linkrels.push(tmp); END;
 	    IF link.next; tmp = BLOCK -%]
-<LINK REL="next"      TITLE="[% link.next.title | strip_attribute %]" HREF="[% constants.rootdir %]/article.pl?sid=[% link.next.sid %]">
+<LINK REL="next"      TITLE="[% link.next.title | strip_attribute %]" HREF="[% gSkin.rootdir %]/article.pl?sid=[% link.next.sid %]">
 	[%- END; linkrels.push(tmp); END;
 	    # author is uid
 	    IF link.author; tmp = BLOCK -%]
-<LINK REL="author"    HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% link.author %]">
+<LINK REL="author"    HREF="[% gSkin.rootdir %]/search.pl?op=stories&amp;author=[% link.author %]">
 	[%- END; linkrels.push(tmp); END;
 	    IF constants.plugin.Print; tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="Print Article" HREF="[% constants.rootdir %]/print.pl?sid=[% story.sid %]">
+<LINK REL="alternate" TITLE="Print Article" HREF="[% gSkin.rootdir %]/print.pl?sid=[% story.sid %]">
 	[%- END; linkrels.push(tmp); END;
 
 
 
 ELSIF env.script_name.search('journal\.pl');
 	IF link.uid && link.nickname; tmp = BLOCK -%]
-<LINK REL="author"    TITLE="[% link.nickname | strip_attribute %]" HREF="[% constants.rootdir %]/~[% link.nickname | fixparam %]/">
+<LINK REL="author"    TITLE="[% link.nickname | strip_attribute %]" HREF="[% gSkin.rootdir %]/~[% link.nickname | fixparam %]/">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
 <LINK REL="alternate" TITLE="Journal of [% link.nickname | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=display&amp;uid=[% link.uid %]&amp;content_type=rss" TYPE="application/rss+xml">
 	[%- END; linkrels.push(tmp); END;
@@ -105,7 +104,7 @@ ELSIF env.script_name.search('journal\.pl');
 
 ELSE; # default author link, where author is a nickname
 	    IF link.author; tmp = BLOCK -%]
-<LINK REL="author"    TITLE="[% link.author | strip_attribute %]" HREF="[% constants.rootdir %]/~[% link.author | fixparam %]/">
+<LINK REL="author"    TITLE="[% link.author | strip_attribute %]" HREF="[% gSkin.rootdir %]/~[% link.author | fixparam %]/">
 	[%- END; linkrels.push(tmp); END;
 
 END %]

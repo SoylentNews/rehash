@@ -187,10 +187,9 @@ sub previewForm {
 	my $sub = $slashdb->getSubmission($form->{subid});
 
 	my $topic = $slashdb->getTopic($sub->{tid});
-	$topic->{image} = "$constants->{imagedir}/topics/$topic->{image}"
-                if $topic->{image} =~ /^\w+\.\w+$/;
-
-	my $extracolumns = $slashdb->getSectionExtras($sub->{section}) || [ ];
+	
+	my $nexus_id = $slashdb->getNexusFromSkid($sub->{primaryskid} || $constants->{mainpage_skid});
+	my $extracolumns = $slashdb->getNexusExtras($nexus_id) || [ ];
 	vislenify($sub); # add $sub->{ipid_vis}
 
 	my $email_known = "";
@@ -241,8 +240,6 @@ sub previewForm {
 		admin_flag 	=> $admin_flag,
 		extras 		=> $extracolumns,
 		lockTest	=> lockTest($sub->{subj}),
-		section		=> $form->{section} ||
-				   $constants->{defaultsection},
 		similar_stories	=> $similar_stories,
 	});
 }
@@ -270,44 +267,40 @@ sub mergeSubmissions {
 sub submissionEd {
 	# mmmm, code comments in here sure would be nice
 	my($constants, $slashdb, $user, $form, $title) = @_;
-	my($def_section, $cur_section, $def_note, $cur_note,
-		$sections, @sections, @notes,
-		%all_sections, %all_notes, %sn);
+	my($def_skin, $cur_skin, $def_note, $cur_note,
+		$skins, @skins, @notes,
+		%all_skins, %all_notes, %sn);
 
 	$form->{del} = 0 if $user->{is_admin};
 
-	$def_section	= getData('defaultsection');
+	$def_skin	= getData('defaultskin');
 	$def_note	= getData('defaultnote');
-	if ($user->{section} && !$form->{section}) {
-		$cur_section = $user->{section};
-	} else {
-		$cur_section = $form->{section} || $def_section;
-	}
+	$cur_skin = $form->{skid} || $def_skin;
 	$cur_note	= $form->{note} || $def_note;
-	$sections = $slashdb->getSubmissionsSections;
+	$skins = $slashdb->getSubmissionsSkins;
 
-	for (@$sections) {
-		my($section, $note, $cnt) = @$_;
-		$all_sections{$section} = 1;
+	for (@$skins) {
+		my($skin, $note, $cnt) = @$_;
+		$all_skins{$skin} = 1;
 		$note ||= $def_note;
 		$all_notes{$note} = 1;
-		$sn{$section}{$note} = $cnt;
+		$sn{$skin}{$note} = $cnt;
 	}
 
 	for my $note_str (keys %all_notes) {
-		$sn{$def_section}{$note_str} = 0;
-		for (grep { $_ ne $def_section } keys %sn) {
-			$sn{$def_section}{$note_str} += $sn{$_}{$note_str};
+		$sn{$def_skin}{$note_str} = 0;
+		for (grep { $_ ne $def_skin } keys %sn) {
+			$sn{$def_skin}{$note_str} += $sn{$_}{$note_str};
 		}
 	}
 
-	$all_sections{$def_section} = 1;
+	$all_skins{$def_skin} = 1;
 
 	# self documentation, right?
-	@sections =	map  { [$_->[0], ($_->[0] eq $def_section ? '' : $_->[0])] }
+	@skins =	map  { [$_->[0], ($_->[0] eq $def_skin ? '' : $_->[0])] }
 			sort { $a->[1] cmp $b->[1] }
-			map  { [$_, ($_ eq $def_section ? '' : $_)] }
-			keys %all_sections;
+			map  { [$_, ($_ eq $def_skin ? '' : $_)] }
+			keys %all_skins;
 
 	@notes =	map  { [$_->[0], ($_->[0] eq $def_note ? '' : $_->[0])] }
 			sort { $a->[1] cmp $b->[1] }
@@ -315,11 +308,11 @@ sub submissionEd {
 			keys %all_notes;
 
 	slashDisplay('subEdTable', {
-		cur_section	=> $cur_section,
+		cur_section	=> $cur_skin,
 		cur_note	=> $cur_note,
-		def_section	=> $def_section,
+		def_section	=> $def_skin,
 		def_note	=> $def_note,
-		sections	=> \@sections,
+		sections	=> \@skins,
 		notes		=> \@notes,
 		sn		=> \%sn,
 		title		=> $title || ('Submissions ' . ($user->{is_admin} ? 'Admin' : 'List')),
@@ -378,6 +371,7 @@ sub submissionEd {
 #################################################################
 sub displayRSS {
 	my($slashdb, $constants, $user, $form) = @_;
+	my $gSkin = getCurrentSkin();
 	my($submissions, @items);
 	$submissions = $slashdb->getSubmissionForUser();
 
@@ -385,14 +379,14 @@ sub displayRSS {
 		# title should be cleaned up
 		push(@items, {
 			title	=> $_->{subj},
-			'link'	=> "$constants->{absolutedir}/submit.pl?op=viewsub&subid=$_->{subid}",
+			'link'	=> "$gSkin->{absolutedir}/submit.pl?op=viewsub&subid=$_->{subid}",
 		});
 	}
 
 	xmlDisplay('rss', {
 		channel	=> {
 			title	=> "$constants->{sitename} Submissions",
-			'link'	=> "$constants->{absolutedir}/submit.pl?op=list",
+			'link'	=> "$gSkin->{absolutedir}/submit.pl?op=list",
 		},
 		image	=> 1,
 		items	=> \@items,
@@ -440,12 +434,21 @@ sub displayForm {
 	}
 
 
-	my $topic_values = $slashdb->getDescriptions('topics_section', $section);
+	my $topic_values = $slashdb->getDescriptions('non_nexus_topics');
+	my $skin_values = $slashdb->getDescriptions('skins');
+
 	$form->{tid} ||= 0;
 	unless ($form->{tid}) {
 		my $current_hash = { %$topic_values };
 		$current_hash->{0} = "Select Topic";
 		$topic_values = $current_hash;
+	}
+
+	$form->{skid} ||= 0;
+	unless ($form->{tid}) {
+		my $current_hash = { %$skin_values };
+		$current_hash->{0} = "Select Section";
+		$skin_values = $current_hash;
 	}
 
 
@@ -459,8 +462,10 @@ sub displayForm {
 		# we assume this is like if form.email is passed in
 		$fakeemail = strip_attribute($user->{fakeemail});
 	}
-	my $extracolumns = $slashdb->getSectionExtras($form->{section}
-		|| $section || $constants->{defaultsection}) || [ ];
+
+	my $nexus_id = $slashdb->getNexusFromSkid($form->{skid} || $constants->{mainpage_skid});
+
+	my $extracolumns = $slashdb->getNexusExtras($nexus_id) || [ ];
 
 	my $fixedstory;
 	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
@@ -480,13 +485,13 @@ sub displayForm {
 		savestory	=> $form->{story} && $form->{subj} && $form->{tid},
 		username	=> $form->{name} || $username,
 		fakeemail	=> processSub($fakeemail, $known),
-		section		=> $form->{section} || $section || $constants->{defaultsection},
 		uid		=> $user->{uid},
 		extras 		=> $extracolumns,
 		topic		=> $topic,
 		width		=> '100%',
 		title		=> $title,
 		topic_values	=> $topic_values,
+		skin_values	=> $skin_values,
 	});
 }
 
@@ -538,9 +543,10 @@ sub saveSub {
 		story	=> $form->{story},
 		subj	=> $form->{subj},
 		tid	=> $form->{tid},
-		section	=> $form->{section}
+		skid	=> $form->{skid}
 	};
-	my $extras = $slashdb->getSectionExtras($submission->{section});
+	my $nexus = $slashdb->getNexusFromSkid($form->{skid} || $constants->{mainpage_skid});
+	my $extras = $slashdb->getNexusExtras($nexus) || [];
 	if ($extras && @$extras) {
 		for (@$extras) {
 			my $key = $_->[1];

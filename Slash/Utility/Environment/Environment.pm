@@ -47,6 +47,7 @@ use vars qw($VERSION @EXPORT);
 	createCurrentVirtualUser
 
 	setCurrentForm
+	setCurrentSkin
 	setCurrentUser
 
 	getCurrentAnonymousCoward
@@ -54,6 +55,7 @@ use vars qw($VERSION @EXPORT);
 	getCurrentDB
 	getCurrentForm
 	getCurrentMenu
+	getCurrentSkin
 	getCurrentStatic
 	getCurrentUser
 	getCurrentVirtualUser
@@ -83,6 +85,9 @@ use vars qw($VERSION @EXPORT);
 	createLog
 	errorLog
 	writeLog
+
+	determineCurrentSkin
+
 );
 
 use constant DST_HR  => 0;
@@ -94,7 +99,8 @@ use constant DST_MON => 3;
 # set methods when not running under mod_perl
 my($static_user, $static_form, $static_constants, $static_site_constants, 
 	$static_db, $static_anonymous_coward, $static_cookie,
-	$static_virtual_user, $static_objects, $static_cache, $static_hostname);
+	$static_virtual_user, $static_objects, $static_cache, $static_hostname,
+	$static_skin);
 
 # FRY: I don't regret this.  But I both rue and lament it.
 
@@ -263,19 +269,13 @@ sub getCurrentUser {
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-		$user = $cfg->{'user'} ||= {};
+		$user = $cfg->{user} ||= {};
 	} else {
-		$user = $static_user   ||= {};
+		$user = $static_user ||= {};
 	}
 
-	# i think we want to test defined($foo), not just $foo, right?
-	if ($value) {
-		return defined($user->{$value})
-			? $user->{$value}
-			: undef;
-	} else {
-		return $user;
-	}
+	return $user->{$value} if defined $value;
+	return $user;
 }
 
 #========================================================================
@@ -445,13 +445,7 @@ sub getCurrentForm {
 		$form = $static_form;
 	}
 
-	if ($value) {
-		return defined($form->{$value})
-			? $form->{$value}
-			: undef;
-	} else {
-		return $form;
-	}
+	return defined $value ? $form->{$value} : $form;
 }
 
 #========================================================================
@@ -534,13 +528,7 @@ sub getCurrentCookie {
 		$cookie = $static_cookie;
 	}
 
-	if ($value) {
-		return defined($cookie->{$value})
-			? $cookie->{$value}
-			: undef;
-	} else {
-		return $cookie;
-	}
+	return defined $value ? $cookie->{$value} : $cookie;
 }
 
 #========================================================================
@@ -585,6 +573,100 @@ sub createCurrentCookie {
 
 #========================================================================
 
+=head2 getCurrentSkin([MEMBER])
+
+Returns the current skin.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item MEMBER
+
+A member (field) from the skin record.
+
+=back
+
+=item Return value
+
+A hash reference with the skin information is returned unless MEMBER is
+passed. If MEMBER is passed in then only its value will be returned.
+
+=back
+
+=cut
+
+sub getCurrentSkin {
+	my($value) = @_;
+
+	my $current_skin;
+	if ($ENV{GATEWAY_INTERFACE}) {
+		my $r = Apache->request;
+		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+		$current_skin = $cfg->{skin}  ||= {};
+	} else {
+		$current_skin = $static_skin  ||= {};
+	}
+
+	return defined $value ? $current_skin->{$value} : $current_skin;
+}
+
+#========================================================================
+
+=head2 setCurrentSkin(HASH)
+
+Set up the $current_skin global, which will be returned by
+getCurrentSkin(), for both static scripts and under Apache.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item ID
+
+Numeric ID (skins.skid) or name (skins.name).
+
+=back
+
+=item Return value
+
+Returns no value.
+
+=back
+
+=cut
+
+sub setCurrentSkin {
+	my($id) = @_;
+	my $slashdb = getCurrentDB();
+	my $gSkin = $slashdb->getSkin($id);
+# We used to put the current section into $form->{currentSection}.
+# But that doesn't seem to have a purpose.  So don't bother doing
+# it now with skin.
+#	my $form = getCurrentForm();
+#	$form->{skin} = $gSkin->{name};
+#use Data::Dumper; errorLog("setCurrentSkin called id '$id' gSkin: " . Dumper($gSkin));
+
+	my $ref;
+	if ($ENV{GATEWAY_INTERFACE}) {
+		my $r = Apache->request;
+		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+		$ref = $cfg->{skin} ||= {};
+	} else {
+		$ref = $static_skin ||= {};
+	}
+ 
+	# we want to retain any references to $gSkin that are already
+	# in existence
+	@{$ref}{keys %$gSkin} = values %$gSkin;
+}
+
+#========================================================================
+
 =head2 getCurrentStatic([MEMBER])
 
 Returns the current static variables (or variable).
@@ -612,32 +694,41 @@ MEMBER is passed in then only its value will be returned.
 
 sub getCurrentStatic {
 	my($value) = @_;
+
+	# This is for testing and debugging.  Some values of data
+	# were moved from $constants into $current_skin, and anything that
+	# used to call getCurrentStatic('foo') now needs to call
+	# getCurrentSkin('foo').  Throw an error on those values:
+	for my $badval (qw(
+		absolutedir rootdir cookiedomain defaulttopic
+		defaultdisplaystatus defaultcommentstatus
+		basedomain index_handler absolutedir_secure
+		defaultsubsection defaultsection static_section
+	)) {
+		next unless $value eq $badval;
+		errorLog("getCurrentStatic('$value') called - should call getCurrentSkin");
+		last;
+	}
+
 	my $constants;
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+# XXXSKIN - this should probably go away, along with SlashSectionHost,
+# SlashSetFormHost, and SlashSetVarHost in Slash::Apache, except ...
 		my $hostname = $r->header_in('host');
 		$hostname =~ s/:\d+$//;
 		if ($const_cfg->{'site_constants'}{$hostname}) { 
 			$constants = $const_cfg->{site_constants}{$hostname};
 		} else {
+# XXXSKIN - ... this would be the one line to keep
 			$constants = $const_cfg->{'constants'};
 		}
 	} else {
-		if ($static_site_constants->{$static_hostname}) {
-			$constants = $static_site_constants->{$static_hostname};
-		} else {
-			$constants = $static_constants;
-		}
+		$constants = $static_constants;
 	}
 
-	if ($value) {
-		return defined($constants->{$value})
-			? $constants->{$value}
-			: undef;
-	} else {
-		return $constants;
-	}
+	return defined $value ? $constants->{$value} : $constants;
 }
 
 #========================================================================
@@ -677,6 +768,8 @@ sub createCurrentStatic {
 =head2 createCurrentHostname(HOSTNAME)
 
 Allows you to set a host so that constants will behave properly.
+This is used as a key into %$static_site_constants so that a single
+Apache process can serve multiple Slash sites.
 
 =over 4
 
@@ -732,25 +825,19 @@ the AC info will be returned.
 sub getCurrentAnonymousCoward {
 	my($value) = @_;
 
+	my $ref;
 	if ($ENV{GATEWAY_INTERFACE}) {
 		my $r = Apache->request;
-		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-		return undef if !$const_cfg || !$const_cfg->{anonymous_coward};
-		if ($value) {
-			return $const_cfg->{anonymous_coward}{$value};
-		} else {
-			my %coward = %{$const_cfg->{anonymous_coward}};
-			return \%coward;
-		}
+		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache') or return;
+		$ref = $const_cfg->{anonymous_coward};
 	} else {
-		return undef if !$static_anonymous_coward;
-		if ($value) {
-			return $static_anonymous_coward->{$value};
-		} else {
-			my %coward = %{$static_anonymous_coward};
-			return \%coward;
-		}
+		$ref = $static_anonymous_coward;
 	}
+
+	return undef unless $ref && ref $ref;
+	return $ref->{$value} if defined $value;
+	my %coward = %$ref;
+	return \%coward;
 }
 
 #========================================================================
@@ -1148,11 +1235,12 @@ sub setCookie {
 
 	my $r = Apache->request;
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 
 	# We need to actually determine domain from preferences,
 	# not from the server, so the site admin can specify
 	# special preferences if they want to. -- pudge
-	my $cookiedomain = $constants->{cookiedomain};
+	my $cookiedomain = $gSkin->{cookiedomain};
 	my $cookiepath   = $constants->{cookiepath};
 
 	# note that domain is not a *host*, it is a *domain*,
@@ -1482,6 +1570,9 @@ Hashref of cleaned-up data.
 {
 	my %multivalue = map {($_ => 1)} qw(
 		section_multiple
+		slashtopics_main_select
+		slashtopics_main_select_weights
+		slashtopics_main_select_ids
 	);
 
 	# fields that are numeric only
@@ -1491,7 +1582,7 @@ Hashref of cleaned-up data.
 		commentlimit commentsort commentspill
 		del displaystatus
 		filter_id hbtm height highlightthresh
-		isolate issue last maillist max
+		issue last maillist max
 		maxcommentsize maximum_length maxstories
 		min min_comment minimum_length minimum_match next
 		nobonus_present
@@ -1503,8 +1594,9 @@ Hashref of cleaned-up data.
 		thresh_count thresh_secs thresh_hps
 		uid uthreshold voters width
 		textarea_rows textarea_cols tokens
-		subid stid tpid tid qid aid pagenum
+		s subid stid stoid tpid tid qid aid pagenum
 		url_id spider_id miner_id keyword_id
+		slashtopics_main_select slashtopics_main_select_weights
 	);
 
 	# fields that have ONLY a-zA-Z0-9_
@@ -1524,6 +1616,7 @@ Hashref of cleaned-up data.
 		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g		},
 		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
 			        	 $_[0] =~ s|\s+| |g;			},
+		colorblock	=> sub { $_[0] =~ s|[^\w#,]+||g			},
 	);
 
 
@@ -2144,6 +2237,10 @@ sub createLog {
 Places data into the request records notes table. The two keys
 it uses are SLASH_LOG_OPERATION and SLASH_LOG_DATA.
 
+This does NOT create the current skin, which all scripts are
+expected to set themselves with setCurrentSkin().  For doing
+so, the function determineCurrentSkin() may be helpful.
+
 =over 4
 
 =item Parameters
@@ -2184,46 +2281,88 @@ sub createEnvironment {
 
 	my $slashdb = Slash::DB->new($virtual_user);
 	my $constants = $slashdb->getSlashConf();
-	my $site_constants;
-	my $sections = $slashdb->getSections();
-	for (values %$sections) {
-		if ($_->{hostname} && $_->{url}) {
-			my $new_cfg;
-			for (keys %{$constants}) {
-				$new_cfg->{$_} = $constants->{$_}
-					unless $_ eq 'form_override';
-			}
-			# Must not just copy the form_override info
-			$new_cfg->{form_override} = {}; 
-			$new_cfg->{absolutedir} = $_->{url};
-			$new_cfg->{rootdir} = $_->{url};
-			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
-			$new_cfg->{defaultsubsection} = $_->{defaultsubsection} if $_->{defaultsubsection};
-			$new_cfg->{defaulttopic} = $_->{defaulttopic} if $_->{defaulttopic};
-			$new_cfg->{defaultdisplaystatus} = $_->{defaultdisplaystatus} if $_->{defaultdisplaystatus};
-			$new_cfg->{defaultcommentstatus} = $_->{defaultcommentstatus} if $_->{defaultcommentstatus};
-			$new_cfg->{defaultsection} = $_->{defaultsection} || $_->{section};
-			$new_cfg->{section} = $_->{section};
-			$new_cfg->{basedomain} = $_->{hostname};
-			$new_cfg->{static_section} = $_->{section};
-			$new_cfg->{index_handler} = $_->{index_handler};
-			$site_constants->{$_->{hostname}} = $new_cfg;
-		}
-	}
-	my $form = getCurrentForm();
 
-	# If this is a sectional site, we need to set our hostname if one exists.
-	my $hostname = $slashdb->getSection($form->{section}, 'hostname') || "";
-	createCurrentHostname($hostname);
+	########################################
+	# Skip the nonsense that used to be here.  Previously we
+	# were copying the whole set of constants, and then putting
+	# sectional data into it as well, for each section that had
+	# a hostname defined.  First of all, of course, sections
+	# have become skins so the data can be found in getSkin().
+	# But also, we're not doing this stuff with separate sets of
+	# constants for each hostname.  Because the skin-specific
+	# data is split off into getSkin()'s hashref, we only need
+	# one set of data for $constants.  These fields were moved
+	# from constants to skins:
+	# absolutedir, rootdir, cookiedomain, defaulttopic,
+	# defaultdisplaystatus, defaultcommentstatus,
+	# basedomain, index_handler, and though I'm not sure
+	# it was ever used, absolutedir_secure.
+	# These fields are gone because they are now obviated:
+	# defaultsubsection, defaultsection, static_section.
+	########################################
+
+	my $form = getCurrentForm();
 
 	# We assume that the user for scripts is the anonymous user
 	createCurrentDB($slashdb);
-	createCurrentStatic($constants, $site_constants);
+	createCurrentStatic($constants);
 
 	$ENV{SLASH_USER} = $constants->{anonymous_coward_uid};
 	my $user = prepareUser($constants->{anonymous_coward_uid}, $form, $0);
 	createCurrentUser($user);
 	createCurrentAnonymousCoward($user);
+}
+
+#========================================================================
+
+=head2 determineCurrentSkin
+
+Returns what the skid of the current skin "should" be.  If we are in
+an Apache request, this is done by examining the URL, principally the
+hostname but perhaps also the path and the form.  If not, this is done
+by examining the form (which was passed on the command line).
+
+Just a placeholder for now, this will be written later.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item Return value
+
+Numeric skid of the current skin.
+
+=back
+
+=cut
+
+sub determineCurrentSkin {
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $skin;
+
+	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
+		my $hostname = $r->header_in('host');
+		$hostname =~ s/:\d+$//;
+ 
+		my $skins = $reader->getSkins;
+		($skin) = grep { lc $skins->{$_}{hostname} eq lc $hostname }
+			sort { $a <=> $b } keys %$skins;
+
+		if (!$skin) {
+			$skin = getCurrentStatic('mainpage_skid');
+			errorLog("determineCurrentSkin called but no skin found for $hostname\n");
+		}
+	} else {
+		my $form = getCurrentForm();
+		$skin   = $reader->getSkidFromName($form->{section}) if $form->{section};
+		$skin ||= $reader->getSkidFromNexus(getCurrentStatic('mainpage_skid'));
+	}
+ 
+	# this should never happen
+	errorLog("determineCurrentSkin called but no skin found") if !$skin;
+	return $skin;
 }
 
 #========================================================================
@@ -2330,7 +2469,8 @@ EOT
 }
 
 ######################################################################
-# Quick intro -Brian
+# This needs to move into a Slash::Cache along with the code from
+# Slash::DB::MySQL, 
 sub getCurrentCache {
 	my($value) = @_;
 	my $cache;
@@ -2342,14 +2482,7 @@ sub getCurrentCache {
 		$cache = $static_cache   ||= {};
 	}
 
-	# i think we want to test defined($foo), not just $foo, right?
-	if ($value) {
-		return defined($cache->{$value})
-			? $cache->{$value}
-			: undef;
-	} else {
-		return $cache;
-	}
+	return defined $value ? $cache->{$value} : $cache;
 }
 
 1;

@@ -21,8 +21,8 @@ __template__
 
 [% IF submission.comment && admin_flag %]
 <P>Submission Notes:
-<TABLE WIDTH="95%"><TR><TD BGCOLOR="[% user.bg.2 %]">
-	<FONT SIZE="-1" COLOR="[% user.fg.2 %]">[% submission.comment | strip_literal %]</FONT>
+<TABLE WIDTH="95%"><TR><TD BGCOLOR="[% user.colors.bg_2 %]">
+	<FONT SIZE="-1" COLOR="[% user.colors.fg_2 %]">[% submission.comment | strip_literal %]</FONT>
 </TD></TR></TABLE>
 [% END %]
 [% IF submission.sid %]
@@ -30,24 +30,24 @@ __template__
 [% END %]
 
 [% PROCESS titlebar width="100%" title=submission.subj %]
-[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-SRC="[% constants.imagedir %]/topics/[% image.image %]"
-WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
+<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
+SRC="[% constants.imagedir %]/topics/[% topic.image %]"
+WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
 ALIGN="RIGHT" HSPACE="20" VSPACE="10"
-ALT="[% topic.alttext %]"
-TITLE="[% topic.alttext %]"></A>
+ALT="[% topic.textname %]"
+TITLE="[% topic.textname %]"></A>
 [% submission_state = Slash.db.getDescriptions('submission-state') %]
 [% del = submission.del; submission_state.$del %] submission by <B>[% submission.name %] <A HREF="[% submission.email %]">[% submission.email %]</A></B>
-	at [% submission.time %] [% IF admin_flag %]<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</A>[% END %]
+	at [% submission.time %] [% IF admin_flag %]<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</A>[% END %]
 
 <P>[% subtext %]</P>
 
 [% IF admin_flag %]
 	[ <A HREF="[% env.script_name %]?op=Delete&amp;subid=[% subid %]&amp;section=[% form.table_section | strip_attribute %]&amp;note=[% form.table_note | strip_attribute %]">Delete Submission</A> ]<BR>
 
-	<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST">
+	<FORM ACTION="[% gSkin.rootdir %]/admin.pl" METHOD="POST">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
+		<INPUT TYPE="HIDDEN" NAME="topic_source" VALUE="submission">
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter %]">
 		<BR>title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50" MAXLENGTH="50">
 		<BR>[% lockTest %]
@@ -67,8 +67,8 @@ TITLE="[% topic.alttext %]"></A>
 		[% END %]
 	[% END %]
 		<BR>
-	[% Slash.selectTopic('tid', submission.tid, section, 1) %]
-	[% Slash.selectSection('section', section, 0, 1) %]
+	[% Slash.createSelect('skid', Slash.db.getDescriptions('skins'), submission.primaryskid , 1) %]
+	[% Slash.createSelect('tid', Slash.db.getDescriptions('non_nexus_topics'), submission.tid, 0, 1) %]
 
 		<INPUT TYPE="submit" NAME="op" VALUE="preview"><BR>
 		<BR>Intro Copy<BR>
@@ -88,7 +88,7 @@ TITLE="[% topic.alttext %]"></A>
 					"<I>ND</I>";
 				END; %]</TD>
 			<TD ALIGN="RIGHT" VALIGN="TOP">[% story.weight %]</TD>
-			<TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
+			<TD VALIGN="TOP"><A HREF="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
 			[% story.title %]</A></TD>
 			<TD VALIGN="TOP">[% Slash.timeCalc(story.time) %]</TD>
 			<TD VALIGN="TOP">

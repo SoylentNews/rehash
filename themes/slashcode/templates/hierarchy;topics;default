@@ -5,8 +5,8 @@ List all the current topics
 
 * title = passed to titlebar
 * width = passed to titlebar
-* topic_admin = boolean for whether current user is admin
-* topics = hashref of current topics
+* topic_tree =  tree of topics
+* nexuses = array of ids which are nexuses
 __title__
 
 __page__
@@ -17,70 +17,30 @@ __name__
 hierarchy
 __template__
 [% PROCESS titlebar title="Hierarchy of Topics" %]
-<BR>
-<UL>
-[% FOREACH topic = topics %]
+<br>
+<ul>
+[% FOREACH nexus = nexuses %]
+	[% PROCESS topic_children tree = topic_tree tid = nexus depth = 0 %]
+[% END %]
+</ul>
+
+[% BLOCK topic_children %]
+	<li>
 	[% IF user.is_admin %]
-		<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
+		<a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% tree.$tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
 	[% ELSE %]
-		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
+		<a href="[% gSkin.rootdir %]/search.pl?topic=[% tree.$tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
 	[% END %]
-	<BR>
-	[% IF topic.child %]
-		<UL>
-			[% FOREACH topic = topic.child %]
-				<LI>
-					[% IF user.is_admin %]
-						<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
-					[% ELSE %]
-						<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
-					[% END %]
-				</LI>
-				[% IF topic.child %]
-					<UL>
-						[% FOREACH topic = topic.child %]
-							<LI>
-								[% IF user.is_admin %]
-									<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
-								[% ELSE %]
-									<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
-								[% END %]
-							</LI>
-							[% IF topic.child %]
-								<UL>
-									[% FOREACH topic = topic.child %]
-										<LI>
-											[% IF user.is_admin %]
-												<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
-											[% ELSE %]
-												<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
-											[% END %]
-										</LI>
-									[% END %]
-									[% IF topic.child %]
-										<UL>
-											[% FOREACH topic = topic.child %]
-												<LI>
-													[% IF user.is_admin %]
-														<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
-													[% ELSE %]
-														<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
-													[% END %]
-												</LI>
-											[% END %]
-										</UL>
-									[% END %]
-								</UL>
-							[% END %]
-						[% END %]
-					</UL>
-				[% END %]
-			[% END %]
-		</UL>
+	</li>
+	
+	[% IF tree.$tid.children && tree.$tid.children.size > 0 %]
+		<ul>
+		[% FOREACH child_id = tree.$tid.children %]
+			[% PROCESS topic_children tree = tree tid = child_id depth = depth + 1 %]
+		[% END %]
+		</ul>
 	[% END %]
 [% END %]
-</UL>
-
 __seclev__
 10000
 __version__

@@ -15,7 +15,7 @@ __name__
 portalboxtitle
 __template__
 [% IF url && not user.light;
-	title = "<FONT COLOR=\"$user.fg.0\">$title</FONT>";
+	title = "<FONT COLOR=\"$user.colors.fg_0\">$title</FONT>";
 END %]
 [% IF url;
 	title = "<A HREF=\"$url\">$title</A>";

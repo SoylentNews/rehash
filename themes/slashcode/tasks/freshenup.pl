@@ -21,12 +21,12 @@ $task{$me}{timespec_panic_2} = '';
 $task{$me}{on_startup} = 1;
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
-	my($virtual_user, $constants, $slashdb, $user, $info) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 	my $start_time = time;
 	my $basedir = $constants->{basedir};
 	my $vu = "virtual_user=$virtual_user";
 	my $args = "$vu ssi=yes";
-	my %updates;
+	my %dirty_skins = ( );
 
 	# Every third invocation, we do a big chunk of work.  But the
 	# other two times, we just update the top three stories and
@@ -57,7 +57,7 @@ $task{$me}{code} = sub {
 		);
 		for my $story (@$deletable) {
 			$x++;
-			$updates{$story->{section}} = 1;
+			$dirty_skins{$story->{primaryskid}} = 1;
 			$slashdb->deleteStoryAll($story->{sid});
 			slashdLog("Deleting $story->{sid} ($story->{title})")
 				if verbosity() >= 1;
@@ -73,7 +73,7 @@ $task{$me}{code} = sub {
 	$stories = $slashdb->getStoriesNeedingRender(
 		$do_all ? 10 : 3
 	);
-	STORIES_RENDER: for my $sid (@$stories) {
+	STORIES_RENDER: for my $stoid (@$stories) {
 
 		# Don't run forever...
 		if (time > $start_time + $timeout_render) {
@@ -83,6 +83,7 @@ $task{$me}{code} = sub {
 
 		my $rendered;
 		{
+			# XXXSKIN - not sure what to do here yet ...
 			local $user->{currentSection} = "index";
 			local $user->{noicons} = "";
 			local $user->{light} = "";
@@ -90,11 +91,12 @@ $task{$me}{code} = sub {
 			# ugly hack, but for now, needed: without it, when an
 			# editor edits in foo.sitename.com, saved stories get
 			# rendered with that section
-			Slash::Utility::Anchor::getSectionColors();
+			Slash::Utility::Anchor::getSkinColors();
 
-			$rendered = displayStory($sid, '', { get_cacheable => 1 });
+			$rendered = displayStory($stoid,
+				'', { get_cacheable => 1 });
 		}
-		$slashdb->setStory($sid, {
+		$slashdb->setStory($stoid, {
 			rendered =>	$rendered,
 			writestatus =>	'dirty',
 		});
@@ -125,15 +127,26 @@ $task{$me}{code} = sub {
 			last STORIES_FRESHEN;
 		}
 
-		my($sid, $title, $section, $displaystatus) =
-			@{$story}{qw( sid title section displaystatus )};
+		my($sid, $title, $skid) =
+			@{$story}{qw( sid title primaryskid )};
+		my $skinname = '';
+		$skinname = $slashdb->getSkin($skid)->{name} if $skid;
+
+		my $mp_tid = $constants->{mainpage_nexus_tid};
+		my $viewable_anywhere = $slashdb->checkStoryViewable($story->{stoid}, $mp_tid);
+		my $mainpaged = $slashdb->checkStoryInNexus($story->{stoid}, $mp_tid);
+		my $displaystatus = -1;
+		$displaystatus = 1 if $viewable_anywhere;
+		$displaystatus = 0 if $mainpaged;
+		slashdLog("Displaystatus $displaystatus for sid '$sid'");
+
 		slashdLog("Updating $sid") if verbosity() >= 3;
-		$updates{$section} = 1;
+		$dirty_skins{$skid} = 1;
 		if ($displaystatus == 0) {
 			# If this story goes on the mainpage, its being
 			# dirty means the main page is dirty too,
 			# regardless of which section the story is in.
-			$updates{$constants->{defaultsection}} = 1;
+			$dirty_skins{$constants->{mainpage_skid}} = 1;
 		}
 		$totalChangedStories++;
 
@@ -145,11 +158,13 @@ $task{$me}{code} = sub {
 		# Now call prog2file().
 		$args = "$vu ssi=yes sid='$sid'$cchp_param";
 		my($filename, $logmsg);
-		if ($section) {
-			$filename = "$basedir/$section/$sid.shtml";
-			$args .= " section='$section'";
-			$logmsg = "$me updated $section:$sid ($title)";
-			makeDir($basedir, $section, $sid);
+		if ($skid) {
+			# XXXSKIN - more hardcoding (see Slash::Utility::Display)
+			my $this_skinname = $skinname eq 'mainpage' ? 'articles' : $skinname;
+			$filename = "$basedir/$this_skinname/$sid.shtml";
+			$args .= " section='$skinname'";
+			$logmsg = "$me updated $skinname:$sid ($title)";
+			makeDir($basedir, $this_skinname, $sid);
 		} else {
 			$filename = "$basedir/$sid.shtml";
 			$logmsg = "$me updated $sid ($title)";
@@ -180,8 +195,8 @@ $task{$me}{code} = sub {
 		my @old_sect = $slashdb->getPrevSectionsForSid($sid);
 		if (@old_sect) {
 			for my $old_sect (@old_sect) {
-				next if $old_sect eq $section;
-				my $url = "$constants->{rootdir}/$section/$sid.shtml";
+				next if $old_sect eq $skinname;
+				my $url = "$gSkin->{rootdir}/$skinname/$sid.shtml";
 				my $fn = "$basedir/$old_sect/$sid.shtml";
 				if (-e $fn) {
 					my $fh = gensym();
@@ -206,9 +221,9 @@ $task{$me}{code} = sub {
 				commentcount => $cc,
 				hitparade    => $hp,
 			});
+			$logmsg .= " setStory retval is '$set_ok'" if !$set_ok;
 		}
 		if (!$set_ok) {
-			$logmsg .= " setStory retval is '$set_ok'";
 			$do_log ||= (verbosity() >= 1);
 		}
 
@@ -217,7 +232,7 @@ $task{$me}{code} = sub {
 
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
 
-	my($base) = split(/\./, $constants->{index_handler});
+	my($base) = split(/\./, $gSkin->{index_handler});
 
 	# Does the homepage need to be freshened whether we think it's
 	# necessary or not?
@@ -234,54 +249,54 @@ $task{$me}{code} = sub {
 	# to keep track of it.  This may also affect whether we think we
 	# have to write the homepage out.
 	my $top_sid = $slashdb->getVar('top_sid', 'value', 1);
-	my $stories_ess = $slashdb->getStoriesEssentials(1);
+	my $stories_ess = $slashdb->getStoriesEssentials({ limit => 1, limit_extra => 0 });
 	my $new_top_sid = $stories_ess->[0]{sid};
 	if ($new_top_sid ne $top_sid) {
 		$w = 'notok';
 		$slashdb->setVar('top_sid', $new_top_sid);
 	}
 
-	my $dirty_sections;
+	my $skins = $slashdb->getSkins();
+	my $dirty_skins = [ ];
 	if ($constants->{task_options}{run_all}) {
-		my $sections = $slashdb->getDescriptions('sections-all');
-		for (keys %$sections) {
-			push @$dirty_sections, $_;
-		}
+		$dirty_skins = [ keys %{ $skins                    } ];
 	} else {
-		$dirty_sections = $slashdb->getSectionsDirty();
+		$dirty_skins = [ keys %{ $slashdb->getSkinsDirty() } ];
 	}
-	for my $cleanme (@$dirty_sections) { $updates{$cleanme} = 1 }
+	for my $cleanme (@$dirty_skins) { $dirty_skins{$cleanme} = 1 }
 
 	$args = "$vu ssi=yes";
-	if ($updates{$constants->{defaultsection}} ne "" || $w ne "ok") {
-		my($base) = split(/\./, $constants->{index_handler});
+	if ($dirty_skins{$constants->{mainpage_skid}} ne "" || $w ne "ok") {
+		my($base) = split(/\./, $gSkin->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
 		prog2file(
-			"$basedir/$constants->{index_handler}", 
+			"$basedir/$gSkin->{index_handler}", 
 			"$basedir/$base.shtml", {
-				args =>		"$args section='$constants->{section}'",
+				args =>		"$args section='$gSkin->{name}'",
 				verbosity =>	verbosity(),
 				handle_err =>	0
 		});
 	}
 
 	if ($do_all) {
-		for my $key (keys %updates) {
-			my $section = $slashdb->getSection($key);
-			createCurrentHostname($section->{hostname});
+		for my $key (keys %dirty_skins) {
 			next unless $key;
-			my $index_handler = $section->{index_handler}
-				|| $constants->{index_handler};
+			my $skin = $slashdb->getSkin($key);
+			createCurrentHostname($skin->{hostname});
+			my $index_handler = $skin->{index_handler}
+				|| $gSkin->{index_handler};
 			next if $index_handler eq 'IGNORE';
 			my($base) = split(/\./, $index_handler);
+			# XXXSKIN - more hardcoding (see Slash::Utility::Display)
+			my $skinname = $skin->{name} eq 'mainpage' ? 'articles' : $skin->{name};
 			prog2file(
 				"$basedir/$index_handler", 
-				"$basedir/$key/$base.shtml", {
-					args =>		"$args section='$key'",
+				"$basedir/$skinname/$base.shtml", {
+					args =>		"$args section='$skin->{name}'",
 					verbosity =>	verbosity(),
 					handle_err =>	0
 			});
-			$slashdb->setSection($key, { writestatus => 'ok' });
+			$slashdb->markSkinClean($key);
 		}
 	}
 

@@ -2,8 +2,8 @@
 # $Id$
 #
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Events','[% constants.rootdir %]/eventsadmin.pl?op=list',10000,19);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('events','List Events','[% constants.rootdir %]/eventsadmin.pl?op=list',0,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Events','[% gSkin.rootdir %]/eventsadmin.pl?op=list',10000,19);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('events','List Events','[% gSkin.rootdir %]/eventsadmin.pl?op=list',0,1);
 
 INSERT INTO code_param (type, name, code) VALUES ('months','January', 1);
 INSERT INTO code_param (type, name, code) VALUES ('months','February', 2);

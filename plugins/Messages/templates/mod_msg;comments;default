@@ -20,9 +20,9 @@ __template__
 [% IF msg.mode == 1 %]
 
 <P>
-<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]"
+<B><A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]"
 >[% comment.subject %]</A></B>, posted to
-<B><A HREF="[% constants.rootdir %][% discussion.realurl %]">[% discussion.title %]</A></B>, has been moderated
+<B><A HREF="[% gSkin.rootdir %][% discussion.realurl %]">[% discussion.title %]</A></B>, has been moderated
 <B>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</B>.
 </P>
 

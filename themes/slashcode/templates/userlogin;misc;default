@@ -14,7 +14,7 @@ __name__
 userlogin
 __template__
 [%# we log in via main ("real") rootdir, return to current rootdir %]
-[% IF !return_url; return_url = constants.rootdir _ '/'; END %]
+[% IF !return_url; return_url = gSkin.rootdir _ '/'; END %]
 <form action="[% constants.real_rootdir %]/login.pl" method="POST">
 <b>Nickname:</b><br>
 <input type="TEXT" name="unickname" size="20" value=""><br>

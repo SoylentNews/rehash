@@ -23,7 +23,7 @@ __template__
    IF startat > 0;
 	next_startat = startat - 100;
 	IF next_startat < 0; next_startat = 0; END; %]
-	<form action="[% constants.rootdir %]/admin.pl" method="GET">
+	<form action="[% gSkin.rootdir %]/admin.pl" method="GET">
 	<input type="hidden" name="op" value="recent">
 	[% IF min.defined %]
 		<input type="hidden" name="min" value="[% min | strip_attribute %]">
@@ -36,8 +36,8 @@ __template__
 	<input type="submit" value="&lt;&lt; Next Comments">
 	</form>
 [% END %]
-<form action="[% constants.rootdir %]/admin.pl" method="post">
-[% IF form.sid %]<A HREF="[% constants.rootdir %]/admin.pl?op=recent">View recent comments for all discussions</A><BR> [% END %]
+<form action="[% gSkin.rootdir %]/admin.pl" method="post">
+[% IF form.sid %]<A HREF="[% gSkin.rootdir %]/admin.pl?op=recent">View recent comments for all discussions</A><BR> [% END %]
 <table>
 	<tr>
 		<th>sid</th>
@@ -56,18 +56,18 @@ __template__
 
 	[% FOREACH comm = recent_comments %]
 	<tr>
-		<td align="right"><A HREF="[% constants.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</A></td>
-		<td align="right"><A HREF="[% constants.rootdir
+		<td align="right"><A HREF="[% gSkin.rootdir %]/admin.pl?op=recent&amp;sid=[% comm.sid %]">[% comm.sid %]</A></td>
+		<td align="right"><A HREF="[% gSkin.rootdir
 			%]/comments.pl?sid=[% comm.sid | strip_attribute
 			%]&amp;cid=[% comm.cid | strip_attribute
 			%]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[%
 			comm.cid %]</A></td>
-		<td align="left"><A HREF="[% constants.rootdir
+		<td align="left"><A HREF="[% gSkin.rootdir
 			%]/users.pl?op=userinfo&amp;fieldname=ipid&amp;userfield=[%
 			comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</A></td>
 		<td align="left"> &nbsp; [% comm.nickname | strip_literal %] ([%
 			IF comm.uid != constants.anonymous_coward_uid %]<A HREF="[%
-			constants.rootdir
+			gSkin.rootdir
 			%]/users.pl?op=userinfo&amp;uid=[%
 			comm.uid | strip_attribute %]">[% END %][% comm.uid %][%
 			IF comm.uid != constants.anonymous_coward_uid %]</A>[%
@@ -93,7 +93,7 @@ constants.reasons, '', 1, 1) %]</td>
 <input type="submit" name="submit" value="Moderate">
 <input type="hidden" name="startat" value="[% startat | strip_attribute %]">
 </form>
-<form action="[% constants.rootdir %]/admin.pl" method="GET">
+<form action="[% gSkin.rootdir %]/admin.pl" method="GET">
 [% IF min.defined %]
 	<input type="hidden" name="min" value="[% min | strip_attribute %]">
 [% END %]

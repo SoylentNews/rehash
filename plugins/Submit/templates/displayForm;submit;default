@@ -75,7 +75,7 @@ reject the story.</P>
 		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), form.${extra.1}, 1, 1) %]	
 	[% ELSE %]
 		[% type = extra.1 %]
-		[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), form.$type, 1, 1) %]	
+		[% Slash.createSelect(type, Slash.db.getDescriptions('topics'), form.$type, 1, 1) %]	
 	[% END %]
 [% END %]
 
@@ -84,19 +84,18 @@ reject the story.</P>
 We get many submissions each day, and if yours isn't clear, it will
 be deleted.)</FONT>
 
-[% PROCESS formLabel value => "Topic and Section", comment => "" %]
+[% PROCESS formLabel value => "Section and Topic", comment => "" %]
 
+[% Slash.createSelect('skid', skin_values, 0, 1) %]
 [% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
-[% Slash.selectSection('section', section, 0, 1) %]
 
-<BR><FONT SIZE="2">(Almost everything should go under Articles)</FONT>
+<BR><FONT SIZE="2">(In general, submit to Main Page)</FONT>
 
 [% IF savestory %]
 <P>[% PROCESS titlebar width => "100%", title => form.subj %]
-[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALIGN="RIGHT" BORDER="0"
+<IMG SRC="[% constants.imagedir %]/topics/[% topic.image %]" ALIGN="RIGHT" BORDER="0"
 	ALT="[% topic.alttext %]" HSPACE="30" VSPACE="10"
-	WIDTH="[% image.width %]" HEIGHT="[% image.height %]">
+	WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]">
 
 <P>[% subtext %]</P>
 [% END %]

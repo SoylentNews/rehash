@@ -24,10 +24,10 @@ __template__
 <P>
 
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-	<TR BGCOLOR="[% user.bg.3 %]">
+	<TR BGCOLOR="[% user.colors.bg_3 %]">
 		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD>
 	</TR>
-	<TR BGCOLOR="[% user.bg.1 %]">
+	<TR BGCOLOR="[% user.colors.bg_1 %]">
 		<TD ALIGN="LEFT"><IMG SRC="[% constants.imagedir %]/660000.gif" WIDTH="1" HEIGHT="60" ALT=""></TD>
 		<TD WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
@@ -44,21 +44,21 @@ __template__
 		</TD>
 		<TD ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/660000.gif" WIDTH="1" HEIGHT="60" ALT=""></TD>
 	</TR>
-	<TR BGCOLOR="[% user.bg.3 %]">
+	<TR BGCOLOR="[% user.colors.bg_3 %]">
 		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD>
 	</TR>
 </TABLE>
 
 
 <CENTER>
-	<FONT SIZE=2 COLOR="[% user.bg.3 %]"> [
-		<A HREF="[% constants.rootdir %]/">home</A> |
-		<A HREF="[% constants.rootdir %]/submit.pl">contribute story</A> |
-		<A HREF="[% constants.rootdir %]/search.pl">older articles</A> |
-		<A HREF="[% constants.rootdir %]/pollBooth.pl">past polls</A> |
-		<A HREF="[% constants.rootdir %]/faq.shtml">faq</A> |
-		<A HREF="[% constants.rootdir %]/authors.pl">authors</A> |
-		<A HREF="[% constants.rootdir %]/users.pl">preferences</A> |
+	<FONT SIZE=2 COLOR="[% user.colors.bg_3 %]"> [
+		<A HREF="[% gSkin.rootdir %]/">home</A> |
+		<A HREF="[% gSkin.rootdir %]/submit.pl">contribute story</A> |
+		<A HREF="[% gSkin.rootdir %]/search.pl">older articles</A> |
+		<A HREF="[% gSkin.rootdir %]/pollBooth.pl">past polls</A> |
+		<A HREF="[% gSkin.rootdir %]/faq.shtml">faq</A> |
+		<A HREF="[% gSkin.rootdir %]/authors.pl">authors</A> |
+		<A HREF="[% gSkin.rootdir %]/users.pl">preferences</A> |
 		<A HREF="[% PROCESS rsslink %]"><IMG SRC="[% constants.imagedir %]/rssicon.gif" WIDTH="36" HEIGHT="14" ALT="RSS feed"></A> ]
 	</FONT>
 </CENTER>

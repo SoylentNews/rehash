@@ -51,6 +51,8 @@ createEnvironment($virtual_user);
 my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
 my $user = getCurrentUser();
+setCurrentSkin(determineCurrentSkin());
+my $gSkin = getCurrentSkin();
 my %pids = ( );
 
 main();
@@ -267,7 +269,8 @@ sub process_tasks {
 
 	# "require" all the task files -- each will put its info into
 	# $task{"filename.pl"}
-	my %success = my %failure = ( );
+	my %success = ( );
+	my %failure = ( );
 	my $dir = catdir($constants->{datadir}, "tasks");
 	if (!-e $dir or !-d _ or !-r _) {
 		slashdLogDie(<<EOT);
@@ -901,7 +904,7 @@ sub do_child {
 	}
 	srand;
 	my $summary = $subref->($virtual_user, $constants, $slashdb, $user,
-		$info);
+		$info, $gSkin);
 
 	my $end_time = Time::HiRes::time;
 	my $duration = sprintf("%.2f", $end_time - $start_time);

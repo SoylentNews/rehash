@@ -52,7 +52,7 @@ sub main {
 	};
 
 	if ($user->{is_anon} && $op !~ /^(paypal|makepayment)$/) {
-		my $rootdir = getCurrentStatic('rootdir');
+		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
 	}
@@ -234,8 +234,9 @@ sub makepayment {
 # page where they will see their new subscription options.
 sub pause {
 	my($form, $slashdb, $user, $constants) = @_;
+	my $gSkin = getCurrentSkin();
 	sleep 5;
-	redirect("$constants->{rootdir}/subscribe.pl");
+	redirect("$gSkin->{rootdir}/subscribe.pl");
 }
 
 sub grant {

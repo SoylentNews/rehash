@@ -30,17 +30,16 @@ __template__
 					<B><FONT FACE="[% constants.mainfontface %]" SIZE="1">[% diatribe.description %]</FONT></B>
 					<P>
 					[% diatribe.article %]
-					[% image = Slash.db.getTopicImageBySection(diatribe.topic, constants.section) %]
-					<A HREF="[% constants.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]"
-						><IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" WIDTH="[% image.width %]"
-							HEIGHT="[% image.height %]" BORDER="0" ALIGN="RIGHT"
+					<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]"
+						><IMG SRC="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" WIDTH="[% diatribe.topic.width %]"
+							HEIGHT="[% diatribe.topic.height %]" BORDER="0" ALIGN="RIGHT"
 							HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.alttext %]"></A>
 				</DIV>
 			</TD>
 		</TR>
 		[% IF diatribe.discussion && !show_discussion %]
 			<TR><TD VALIGN="RIGHT">
-				<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</A>
+				<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</A>
 			</TD></TR>
 		[% END %]
 		[% END %]
@@ -50,7 +49,7 @@ __template__
 
 	[% IF !user.is_anon && uid && uid != user.uid %]
 		<TR VALIGN="TOP"><TD ALIGN="RIGHT" BGCOLOR="#E0E0E0">
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Make a friend</A>
+			<A HREF="[% gSkin.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Make a friend</A>
 		</TD></TR>
 	[% END %]
 </TABLE>

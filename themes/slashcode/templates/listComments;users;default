@@ -39,7 +39,7 @@ moddable_items=0;
 prev_com = {};
 thread_toggle = 0;
 thread_col_1 = "DDDDDD";
-thread_col_2 = user.bg.2;
+thread_col_2 = user.colors.bg_2;
 %]
 [% total_mods_shown=0; %]
 [% IF commentcount > 0 %]
@@ -61,7 +61,7 @@ thread_col_2 = user.bg.2;
 			commenttitle = commenttitle _ " comments for last $comment_time days ";
 		END %]
 	[% IF commentstruct.size > 0 and admin_flag %]
-		<FORM METHOD="POST" ACTION="[% constants.rootdir %]/admin.pl">
+		<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/admin.pl">
 		<INPUT TYPE="hidden" NAME="op" VALUE="moderate_recent">
 		[%	
 			returnto_base = PROCESS base_url;
@@ -77,22 +77,22 @@ thread_col_2 = user.bg.2;
 		   	self_url = PROCESS base_url;
 		   	url_tail = PROCESS state_url override = { show_m1s => show_m1s_op};
 		   	self_url = self_url  _ url_tail;
-		   	extra = "<TD width=\"14\" bgcolor=\"" _ user.bg.3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  ALT=\"\" WIDTH=\"14\" HEIGHT=\"14\" BORDER=0></A></TD>";
+		   	extra = "<TD width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  ALT=\"\" WIDTH=\"14\" HEIGHT=\"14\" BORDER=0></A></TD>";
 		   END;
 		%]
 		[% PROCESS titlebar width="100%" title = commenttitle td_extra = extra -%]
 		[% td_extra = "" %]
 	[% END %]
-	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.bg.2 %]">
-	<TR bgcolor="[% user.bg.3 %]">
-		[% IF type=="netid"; total_cols = total_cols + 1; %]<TH align=left><FONT color="[% user.fg.3 %]" size=-1>User</FONT></TH>[% END %]
-		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Subject</Font>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1> / Moderator</FONT>[% END %]</TH>
-		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Datestamp</FONT></TH>
+	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
+	<TR bgcolor="[% user.colors.bg_3 %]">
+		[% IF type=="netid"; total_cols = total_cols + 1; %]<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>User</FONT></TH>[% END %]
+		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Subject</Font>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1> / Moderator</FONT>[% END %]</TH>
+		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Datestamp</FONT></TH>
 		<TH align=left>[% IF admin_flag and constants.show_mods_with_comments %]<Font color="[% light_text_color %]" size=-1>M2</FONT>[% END %]</TH>
-		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Replies</FONT></TH>
+		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Replies</FONT></TH>
 		<TH align=left>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1>CK</FONT>[% END %]</TH>
 		<TH align=left>[% IF admin_flag %]<FONT color="[% light_text_color %]" size=-1>IPID</FONT>[% END %]</TH>
-		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Score</FONT></TH>
+		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Score</FONT></TH>
 	</TR>
 	[% n = min_comment %]
 	[% prev_comm_sid = 0; total_replies=0; total_karma=0; total_score=0; shown_comments=0 %]
@@ -128,7 +128,7 @@ thread_col_2 = user.bg.2;
 		'<TD VALIGN="TOP">';
 			IF min_comment > 0; '<B>'; n; '</B> '; END;
 			'<A HREF="';
-				constants.rootdir;
+				gSkin.rootdir;
 				'/comments.pl?sid='; comment.sid;
 				'&amp;cid='; comment.cid;
 			'">';
@@ -229,7 +229,7 @@ thread_col_2 = user.bg.2;
 					</TR>
 					<TR><TD colspan="[% total_cols %]" align="center">
 						<font size=-1>Logged in users can choose whether or not they'd like comments shown grouped by discussion on their 
-						[% IF !user.is_anon %]<A HREF="[% constants.rootdir %]/users.pl?op=editcomm">[% END %]comment settings page[% IF !user.is_anon %]</A><BR>[% END %]
+						[% IF !user.is_anon %]<A HREF="[% gSkin.rootdir %]/users.pl?op=editcomm">[% END %]comment settings page[% IF !user.is_anon %]</A><BR>[% END %]
 						[% IF constants.subscribe and !user.is_subscriber %]<BR>Subscribers can view entire comment history for all users[% END %]					 
 						</font> 
 					</TD></TR>
@@ -257,7 +257,7 @@ thread_col_2 = user.bg.2;
 	nickname | strip_literal;
 	IF uid != constants.anonymous_coward_uid;
 		' (<A HREF="';
-		constants.rootdir;
+		gSkin.rootdir;
 		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
 		uid;
 		'">';
@@ -267,7 +267,7 @@ thread_col_2 = user.bg.2;
 END %]
 
 [% BLOCK link_ipid %]
-<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
 [% END %]
 
 [% BLOCK make_m2_string; 
@@ -297,7 +297,7 @@ END %]
 [% END %]
 
 [% BLOCK base_url %]
-	[% base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;fieldname=";
+	[% base_url = gSkin.rootdir _ "/users.pl?op=userinfo&amp;fieldname=";
 	IF type == "user";
 		base_url = "/users.pl?op=userinfo&amp;uid=" _ useredit.uid;
 	ELSE; 

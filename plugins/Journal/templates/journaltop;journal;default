@@ -29,7 +29,7 @@ END %]
 
 [% PROCESS titlebar width => "100%" %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-  <TR BGCOLOR="[% user.bg.2 %]">
+  <TR BGCOLOR="[% user.colors.bg_2 %]">
     <TD VALIGN="TOP" WIDTH="40%"><B>User</B></TD>
     <TD VALIGN="TOP" WIDTH="20%"><B>[% col2 %]</B></TD>
     <TD VALIGN="TOP" WIDTH="40%"><B>Last Updated</B></TD>
@@ -37,7 +37,7 @@ END %]
 
 [% FOREACH journal = journals %]
   <TR>
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% journal.1 | fixparam %]/journal/">[% journal.1 | strip_literal %]</A></TD>
+    <TD VALIGN="TOP"><A HREF="[% gSkin.rootdir %]/~[% journal.1 | fixparam %]/journal/">[% journal.1 | strip_literal %]</A></TD>
     <TD VALIGN="TOP">[% journal.0 %]</TD>
     <TD VALIGN="TOP"><EM>[% Slash.timeCalc(journal.3) %]</EM></TD>
   </TR>

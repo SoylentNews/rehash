@@ -20,13 +20,13 @@ __template__
 [% END %]
 [% subs = Slash.db.getSubmissionCount() %]
 [% tabs = [
-	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
-	{ link = "$constants.rootdir/admin.pl?op=edit",		label = "New",			sel_label = "new" },
-	{ link = "$constants.rootdir/submit.pl?op=list",	label = "$subs&nbsp;Submissions", sel_label = "submissions" },
-	{ link = "$constants.rootdir/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
-	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "topics" },
-	{ link = "$constants.rootdir/stats.pl",			label = "Info",			sel_label = "stats" },
-	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "recent" },
+	{ link = "$gSkin.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
+	{ link = "$gSkin.rootdir/admin.pl?op=edit",		label = "New",			sel_label = "new" },
+	{ link = "$gSkin.rootdir/submit.pl?op=list",	label = "$subs&nbsp;Submissions", sel_label = "submissions" },
+	{ link = "$gSkin.rootdir/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "topics" },
+	{ link = "$gSkin.rootdir/stats.pl",			label = "Info",			sel_label = "stats" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "recent" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; lightfontcolor=lightfontcolor || "" %]
 __seclev__

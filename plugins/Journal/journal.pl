@@ -20,6 +20,7 @@ sub main {
 	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $gSkin     = getCurrentSkin();
 
 	if ($constants->{journal_soap_enabled}) {
 		my $r = Apache->request;
@@ -76,6 +77,7 @@ sub main {
 	# journal.pl waits until it's inside the op's subroutine to print
 	# its header.  Headers are bottlenecked through _printHead.
 
+	# XXXSECTIONTOPICS might want to check if these calls are still necessary after section topics is complete
 	# this is a hack, think more on it, OK for now -- pudge
 	# I think this needs to be part of cramming all possible
 	# user init code into getUser(). Saving a few nanoseconds
@@ -85,7 +87,7 @@ sub main {
 	# and that determines color.  we could set the color in the
 	# user init code, and then change it later in header() only
 	# if section is defined, perhaps. -- pudge
-	Slash::Utility::Anchor::getSectionColors();
+	Slash::Utility::Anchor::getSkinColors();
 
 	my $op = $form->{'op'};
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
@@ -95,12 +97,12 @@ sub main {
 	# hijack RSS feeds
 	if ($form->{content_type} eq 'rss') {
 		if ($op eq 'top' && $top_ok) {
-			displayTopRSS($journal, $constants, $user, $form, $reader);
+			displayTopRSS($journal, $constants, $user, $form, $reader, $gSkin);
 		} else {
-			displayRSS($journal, $constants, $user, $form, $reader);
+			displayRSS($journal, $constants, $user, $form, $reader, $gSkin);
 		}
 	} else {
-		$ops{$op}[FUNCTION]->($journal, $constants, $user, $form, $reader);
+		$ops{$op}[FUNCTION]->($journal, $constants, $user, $form, $reader, $gSkin);
 		my $r;
 		if ($r = Apache->request) {
 			return if $r->header_only;
@@ -136,9 +138,9 @@ sub displayTop {
 }
 
 sub displayFriends {
-	my($journal, $constants, $user, $form, $reader) = @_;
+	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
 
-	redirect("$constants->{rootdir}/search.pl?op=journals") 
+	redirect("$gSkin->{rootdir}/search.pl?op=journals") 
 		if $user->{is_anon};
 
 	_validFormkey('generate_formkey') or return;
@@ -201,7 +203,7 @@ sub searchUsers {
 }
 
 sub displayRSS {
-	my($journal, $constants, $user, $form, $reader) = @_;
+	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
 
 	$user		= $reader->getUser($form->{uid}, ['nickname', 'fakeemail']) if $form->{uid};
 	my $uid		= $form->{uid} || $user->{uid};
@@ -216,7 +218,7 @@ sub displayRSS {
 			},
 			title		=> $article->[2],
 			description	=> strip_mode($article->[1], $article->[4]),
-			'link'		=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]"
+			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]"
 		};
 	}
 
@@ -226,7 +228,7 @@ sub displayRSS {
 		channel => {
 			title		=> "$constants->{sitename} Journals",
 			description	=> "${nickname}'s Journal",
-			'link'		=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/",
+			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/",
 			creator		=> $usertext,
 		},
 		image	=> 1,
@@ -235,7 +237,7 @@ sub displayRSS {
 }
 
 sub displayTopRSS {
-	my($journal, $constants, $user, $form, $reader) = @_;
+	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
 
 	my $journals;
 	my $type;
@@ -262,7 +264,7 @@ sub displayTopRSS {
 
 		push @items, {
 			title	=> $title,
-			'link'	=> "$constants->{absolutedir}/~" . fixparam($entry->[1]) . "/journal/"
+			'link'	=> "$gSkin->{absolutedir}/~" . fixparam($entry->[1]) . "/journal/"
 		};
 	}
 
@@ -270,7 +272,7 @@ sub displayTopRSS {
 		channel => {
 			title		=> "$constants->{sitename} Journals",
 			description	=> "Top $constants->{journal_top} Journals",
-			'link'		=> "$constants->{absolutedir}/journal.pl?op=top",
+			'link'		=> "$gSkin->{absolutedir}/journal.pl?op=top",
 		},
 		image	=> 1,
 		items	=> \@items
@@ -548,7 +550,7 @@ sub listArticle {
 }
 
 sub saveArticle {
-	my($journal, $constants, $user, $form, $reader, $ws) = @_;
+	my($journal, $constants, $user, $form, $reader, $gSkin, $ws) = @_;
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
 	my $description = strip_notags($form->{description});
 
@@ -577,13 +579,12 @@ sub saveArticle {
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
-			my $rootdir = $constants->{real_rootdir};
+			my $rootdir = $gSkin->{rootdir};
 			if ($form->{comments_on}) {
 				$description = $article->{description};
 				$form->{tid} = $article->{tid};
 			}
 			my $did = $slashdb->createDiscussion({
-				section	=> $constants->{real_section}, # for now, journals should be section-agnostic
 				title	=> $description,
 				topic	=> $form->{tid},
 				commentstatus	=> $form->{journal_discuss},
@@ -621,9 +622,8 @@ sub saveArticle {
 		}
 
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled') {
-			my $rootdir = $constants->{'rootdir'};
+			my $rootdir = $gSkin->{rootdir};
 			my $did = $slashdb->createDiscussion({
-				section	=> $constants->{real_section}, # for now, journals should be section-agnostic
 				title	=> $description,
 				topic	=> $form->{tid},
 				commentstatus	=> $form->{journal_discuss},
@@ -685,7 +685,7 @@ sub removeArticle {
 }
 
 sub editArticle {
-	my($journal, $constants, $user, $form, $reader, $nohead) = @_;
+	my($journal, $constants, $user, $form, $reader, $gSkin, $nohead) = @_;
 	# This is where we figure out what is happening
 	my $article = {};
 	my $posttype;
@@ -832,6 +832,7 @@ sub modify_entry {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $slashdb   = getCurrentDB();
+	my $gSkin     = getCurrentSkin();
 
 	$id =~ s/\D+//g;
 
@@ -847,7 +848,7 @@ sub modify_entry {
 
 	no strict 'refs';
 	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
-	my $newid = $saveArticle->($journal, $constants, $user, $entry, $slashdb, 1);
+	my $newid = $saveArticle->($journal, $constants, $user, $entry, $slashdb, $gSkin, 1);
 	return $newid == $id ? $id : undef;
 }
 
@@ -857,6 +858,7 @@ sub add_entry {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $slashdb   = getCurrentDB();
+	my $gSkin     = getCurrentSkin();
 
 	return if $user->{is_anon};
 
@@ -871,7 +873,7 @@ sub add_entry {
 	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
 	$slashdb->createFormkey('journal');
 	my $reader = getObject('Slash::DB', { db_type => 'reader' }); # We need it for the eventual display
-	my $id = $saveArticle->($journal, $constants, $user, $form, $reader, 1);
+	my $id = $saveArticle->($journal, $constants, $user, $form, $reader, $gSkin, 1);
 	return $id;
 }
 
@@ -892,6 +894,7 @@ sub get_entry {
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
 	my $slashdb   = getCurrentDB();
+	my $gSkin     = getCurrentSkin();
 
 	$id =~ s/\D+//g;
 
@@ -899,9 +902,9 @@ sub get_entry {
 	return unless $entry->{id};
 
 	$entry->{nickname} = $slashdb->getUser($entry->{uid}, 'nickname');
-	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($entry->{nickname}) . "/journal/$entry->{id}";
+	$entry->{url} = "$gSkin->{absolutedir}/~" . fixparam($entry->{nickname}) . "/journal/$entry->{id}";
 	$entry->{discussion_id} = delete $entry->{'discussion'};
-	$entry->{discussion_url} = "$constants->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
+	$entry->{discussion_url} = "$gSkin->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
 		if $entry->{discussion_id};
 	$entry->{body} = delete $entry->{article};
 	$entry->{subject} = delete $entry->{description};
@@ -914,6 +917,7 @@ sub get_entries {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $slashdb   = getCurrentDB();
+	my $gSkin     = getCurrentSkin();
 
 	$uid =~ s/\D+//g;
 	$num =~ s/\D+//g;
@@ -929,7 +933,7 @@ sub get_entries {
 	for my $article (@$articles) {
 		push @items, {
 			subject	=> $article->[2],
-			url	=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]",
+			url	=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]",
 			id	=> $article->[3],
 		};
 	}

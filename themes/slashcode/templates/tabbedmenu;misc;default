@@ -25,13 +25,13 @@ __template__
 [% IF color != 'white'; color = 'colored'; END %]
 [% IF color == 'colored';
 	details = {
-		bg_line_color		=> user.bg.5,
+		bg_line_color		=> user.colors.bg_5,
 		lt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
 		lt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
-		bg_tab_sel		=> 'BGCOLOR="' _ user.bg.3 _ '"',
-		bg_tab_unsel		=> 'BGCOLOR="' _ user.bg.2 _ '"',
-		fg_tab_sel_color	=> user.fg.3,
-		fg_tab_unsel_color	=> user.fg.2,
+		bg_tab_sel		=> 'BGCOLOR="' _ user.colors.bg_3 _ '"',
+		bg_tab_unsel		=> 'BGCOLOR="' _ user.colors.bg_2 _ '"',
+		fg_tab_sel_color	=> user.colors.fg_3,
+		fg_tab_unsel_color	=> user.colors.fg_2,
 		lt_sel_rt_unsel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
 		lt_unsel_rt_unsel	=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
 		lt_unsel_rt_sel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
@@ -40,13 +40,13 @@ __template__
 	};
 ELSE;
 	details = {
-		bg_line_color		=> user.bg.3,
+		bg_line_color		=> user.colors.bg_3,
 		lt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
 		lt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
-		bg_tab_sel		=> 'BGCOLOR="' _ user.bg.5 _ '"',
-		bg_tab_unsel		=> 'BGCOLOR="' _ user.bg.2 _ '"',
-		fg_tab_sel_color	=> user.fg.5,
-		fg_tab_unsel_color	=> user.fg.2,
+		bg_tab_sel		=> 'BGCOLOR="' _ user.colors.bg_5 _ '"',
+		bg_tab_unsel		=> 'BGCOLOR="' _ user.colors.bg_2 _ '"',
+		fg_tab_sel_color	=> user.colors.fg_5,
+		fg_tab_unsel_color	=> user.colors.fg_2,
 		lt_sel_rt_unsel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
 		lt_unsel_rt_unsel	=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
 		lt_unsel_rt_sel		=> 'SRC="' _ constants.imagedir _ '/pix.gif" WIDTH="1" HEIGHT="1" ALT=""',
@@ -56,7 +56,7 @@ ELSE;
 END %]
 <NOBR>
 <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0">
-	<TR BGCOLOR="[% user.bg.4 %]">
+	<TR BGCOLOR="[% user.colors.bg_4 %]">
 [% FOREACH tab = tabs;
 	IF loop.first;
 		tabtmpl = "start_tab";
@@ -73,7 +73,7 @@ END %]
 	</TR>
 </TABLE>
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-	<TR BGCOLOR="[% user.bg.4 %]">
+	<TR BGCOLOR="[% user.colors.bg_4 %]">
 		<TD><IMG SRC="[% constants.imagedir %]/pix.gif" [% details.lt_corner_sel %]></TD>
         </TR>
 </TABLE>

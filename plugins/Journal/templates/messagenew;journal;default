@@ -13,7 +13,7 @@ messagenew
 __template__
 [% IF msg.mode == 1 %]
 
-<URL:[% constants.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]>
+<URL:[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]>
 
 [% ELSE %]
 

@@ -21,8 +21,6 @@ sub main {
 
 	if ($form->{op} eq 'hierarchy') {
 		hierarchy();
-	} elsif ($form->{op} eq 'toptopics') {
-		topTopics();
 	} else {
 		listTopics();
 	}
@@ -35,80 +33,17 @@ sub hierarchy {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
-	my $section = $slashdb->getSection();
-
-	my(@topics, %parents);
-	my $topics = $slashdb->getTopics(1); # Don't cache
-
-	for my $topic (values %$topics) {
-		if ($topic->{parent_topic}) {
-			push(@{$parents{$topic->{parent_topic}}{child}}, $topic);
-		}
-		my $children = $parents{$topic->{tid}}{child};
-		$parents{$topic->{tid}} = $topic;
-		$parents{$topic->{tid}}{child} = $children;
-	}
+	my $topic_tree = $slashdb->getTopicTree();
 	
-	for my $parent (values %parents) {
-		# We remove children that have no children. No Welfare state for us! 
-		if ($parent->{child}) {
-			my @children = sort({ $a->{alttext} cmp $b->{alttext} } @{$parent->{child}});
-			$parent->{child} = \@children;
-		}
-		next if $parent->{parent_topic};
-		push @topics, $parent;
+	my @nexuses;
+
+	foreach my $tid (sort {$topic_tree->{$a}{textname} cmp $topic_tree->{$b}{textname}} keys %$topic_tree) {
+		push @nexuses, $tid if $topic_tree->{$tid}{nexus};
 	}
-	@topics = sort({ $a->{alttext} cmp $b->{alttext} } @topics);
 
 	slashDisplay('hierarchy', {
-		topics		=> \@topics,
-	});
-}
-
-#################################################################
-sub topTopics {
-	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
-	my $constants = getCurrentStatic();
-	my $form      = getCurrentForm();
-	my $user      = getCurrentUser();
-
-	my $section   = $user->{currentSection};
-	$section ||= $constants->{section};
-	my $limit = $form->{limit}
-		? $form->{limit}
-		: $form->{all}
-			? 0
-			: -1;  # use default
-	my $topics;
-	if ($section ne "polls") { 
-		$topics = $reader->getTopNewsstoryTopics($limit, $section);
-	} else {
-		$topics = $reader->getTopPollTopics($limit, $section);
-	}
-
-
-	for my $topic (@$topics) {
-		my $limit = $topic->{count} > 10
-			? 10
-			: $topic->{count} < 3 || $form->{all}
-				? 3
-				: $topic->{count};
-
-		if ($section ne "polls") {
-			my $stories = $reader->getStoriesEssentials($limit, $section, $topic->{tid});
-			$#{$stories} = $limit - 1;
-			$topic->{stories} = $stories;
-		} else {
-			my $polls = $reader->getPollQuestionList(0, { limit => $limit, topic => $topic->{tid} });
- 			$topic->{polls} = $polls;
-		}
-	}
-
-	slashDisplay('topTopics', {
-		title		=> 'Recent Topics',
-		width		=> '90%',
-		topics		=> $topics,
-		currtime	=> timeCalc(scalar localtime),
+		topic_tree	=> $topic_tree,
+		nexuses		=> \@nexuses
 	});
 }
 

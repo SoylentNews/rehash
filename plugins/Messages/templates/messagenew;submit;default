@@ -15,7 +15,7 @@ __template__
 
 <P>
 [% submission.name %] has submitted a new story,
-<B><A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% submission.subid %]&amp;title=[%
+<B><A HREF="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% submission.subid %]&amp;title=[%
 submission.subj | fixparam %]">[% submission.subj | strip_literal %]</A></B>.
 </P>
 

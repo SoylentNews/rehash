@@ -40,8 +40,6 @@ INSERT INTO code_param (type, code, name) VALUES ('discussiontypes',2,'Read Only
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes',0,'Always Display');
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes',1,'Only Display Within Section');
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes',-1,'Never Display');
-INSERT INTO code_param (type, code, name) VALUES ('isolatemodes',0,'Part of Site');
-INSERT INTO code_param (type, code, name) VALUES ('isolatemodes',1,'Standalone');
 INSERT INTO code_param (type, code, name) VALUES ('issuemodes',0,'Neither');
 INSERT INTO code_param (type, code, name) VALUES ('issuemodes',1,'Article Based');
 INSERT INTO code_param (type, code, name) VALUES ('issuemodes',2,'Issue Based');
@@ -74,7 +72,6 @@ INSERT INTO code_param (type, code, name) VALUES ('postmodes',1,'Plain Old Text'
 INSERT INTO code_param (type, code, name) VALUES ('postmodes',2,'HTML Formatted');
 INSERT INTO code_param (type, code, name) VALUES ('postmodes',3,'Extrans (html tags to text)');
 INSERT INTO code_param (type, code, name) VALUES ('postmodes',4,'Code');
-INSERT INTO code_param (type, code, name) VALUES ('section_topic_types',1,'default');
 INSERT INTO code_param (type, code, name) VALUES ('extra_types', 1, 'text');
 INSERT INTO code_param (type, code, name) VALUES ('extra_types', 2, 'list');
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 0, '128K');
@@ -211,17 +208,6 @@ INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES
 
 
 #
-# Dumping data for table 'sections'
-#
-INSERT INTO sections (section, artcount, title, qid, issue, type) VALUES ('index',15,'Index','',0,'collected');
-
-
-#
-# Dumping data for table 'section_topics'
-#
-
-
-#
 # Dumping data for table 'sessions'
 #
 
@@ -260,15 +246,12 @@ INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','no_
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','none','Everywhere');
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','classbid','My Subnet');
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','ipid','My IP Address');
-INSERT INTO string_param (type, code, name) VALUES ('section_topic_type','topic_1','Default');
 INSERT INTO string_param (type, code, name) VALUES ('yes_no','yes','yes');
 INSERT INTO string_param (type, code, name) VALUES ('yes_no','no','no');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','','Unclassified');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','Hold');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
-INSERT INTO string_param (type, code, name) VALUES ('section_types','contained','Contained Section');
-INSERT INTO string_param (type, code, name) VALUES ('section_types','collected','Collection of Sections');
 
 -- ISO Country Names and Abbreviations (ISO 3166)
 -- http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html
@@ -824,6 +807,8 @@ INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.co
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_hours','48','Mailing a password only allowed mailpass_max_num times per account per this many hours');
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_num','2','Mailing a password only allowed this many times per account per mainpass_max_hours hours');
 INSERT INTO vars (name, value, description) VALUES ('mainfontface','verdana,helvetica,arial','Fonts');
+INSERT INTO vars (name, value, description) VALUES ('mainpage_skid','1','ID of the skin considered "mainpage", the front page, what used to be meant by "always display"');
+INSERT INTO vars (name, value, description) VALUES ('mainpage_nexus_tid','1','Topic ID of the nexus considered "mainpage", the front page, what used to be meant by "always display" -- this should be determinable from mainpage_skid but for now it is a separate var');
 INSERT INTO vars (name, value, description) VALUES ('max_comments_allowed','30','maximum number of posts per day allowed');
 INSERT INTO vars (name, value, description) VALUES ('max_comments_unusedfk','10','How many unused formkeys are permitted');
 INSERT INTO vars (name, value, description) VALUES ('max_depth','7','max depth for nesting of comments');

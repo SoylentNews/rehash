@@ -16,7 +16,7 @@ __template__
 <H2 ALIGN="CENTER">[% period %] Report for [% constants.sitename %]</H2>
 
 <P ALIGN="CENTER">
-<A HREF="[% constants.rootdir %]/stats.pl?[% env.query_string | replace('op=table', 'op=csv') %]"
+<A HREF="[% gSkin.rootdir %]/stats.pl?[% env.query_string | replace('op=table', 'op=csv') %]"
 >Download CSV data for spreadsheet</A>
 </P>
 

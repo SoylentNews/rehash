@@ -48,7 +48,7 @@ __template__
 		[
 			<A HREF="[% env.script_name %]?qid=[% qid | fixparam %]">Voting Booth</A> |
 			<A HREF="[% env.script_name %]">Other Polls</A> |
-			<A HREF="[% constants.rootdir %]/">Back Home</A>
+			<A HREF="[% gSkin.rootdir %]/">Back Home</A>
 		]
 	</TD></TR><TR><TD COLSPAN="2">
 <P>

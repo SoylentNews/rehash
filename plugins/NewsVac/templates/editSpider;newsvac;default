@@ -12,7 +12,7 @@ __name__
 editSpider
 __template__
 [% USE date %]
-<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
+<FORM action="[% gSkin.rootdir %]/newsvac.pl" method="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
 <INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
 

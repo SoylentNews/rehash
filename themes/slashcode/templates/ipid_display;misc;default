@@ -14,10 +14,10 @@ ipid_display
 __template__
 <BR><FONT FACE="[% constants.mainfontface %]" SIZE=1>IPID:
 <A HREF="[%
-constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
+gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
 data.ipid %]&amp;fieldname=ipid">[% data.ipid_vis %]</A>&nbsp;&nbsp;SubnetID:
 <A HREF="[%
-constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
+gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
 data.subnetid %]&amp;fieldname=subnetid">[% data.subnetid_vis %]</A></FONT>
 
 __seclev__

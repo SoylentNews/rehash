@@ -684,6 +684,44 @@ sub sqlSelectAllHashrefArray {
 }
 
 ########################################################
+# sqlSelectAllKeyValue - this function returns the entire
+# set of rows in a hashref, where the keys are the first
+# column requested and the values are the second.
+# (Name collisions are the caller's problem)
+#
+# inputs:
+# select - exactly 2 columns to select
+# from - tables
+# where - where clause
+# other - limit, asc ...
+#
+# returns:
+# hashref, keys first column, values the second
+sub sqlSelectAllKeyValue {
+	my($self, $select, $from, $where, $other) = @_;
+
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+
+	my $qlid = $self->_querylog_start("SELECT", $from);
+	my $H = $self->{_dbh}->selectall_arrayref($sql);
+	unless ($H) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
+	$self->_querylog_finish($qlid);
+
+	my $hashref = { };
+	for my $duple (@$H) {
+		$hashref->{$duple->[0]} = $duple->[1];
+	}
+	return $hashref;
+}
+
+########################################################
 sub sqlUpdate {
 	my($self, $table, $data, $where, $options) = @_;
 

@@ -15,25 +15,30 @@ $task{$me}{timespec} = '13,43 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
-	my($virtual_user, $constants, $slashdb, $user, $info) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 
 	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $stories = $backupdb->getBackendStories();
+	my $stories = $backupdb->getBackendStories;
 	if ($stories && @$stories) {
 		newxml(@_, undef, $stories);
 		newrdf(@_, undef, $stories);
-		#newwml(@_, undef, $stories);
 		newrss(@_, undef, $stories);
 	}
 
-	my $sections = $backupdb->getDescriptions('sections-all');
-	for my $section (keys %$sections) {
-		$stories = $backupdb->getBackendStories($section);
+	# XXXSECTIONTOPICS need to remove this sections-all reference
+	# (replace with getSkins() loop)
+	# my $sections = $backupdb->getDescriptions('sections-all');
+	my $skins = $slashdb->getSkins();
+	# for my $section (keys %$sections) {
+	for my $skid (keys %$skins) {
+		my $name = $skins->{$skid}{name};
+		my $nexus = $skins->{$skid}{nexus};
+		$stories = $backupdb->getBackendStories({ topic => $nexus });
 		if ($stories && @$stories) {
-			newxml(@_, $section, $stories);
-			newrdf(@_, $section, $stories);
-			newrss(@_, $section, $stories);
+			newxml(@_, $name, $stories);
+			newrdf(@_, $name, $stories);
+			newrss(@_, $name, $stories);
 		}
 	}
 
@@ -65,14 +70,15 @@ sub save2file {
 }
 
 sub _do_rss {
-	my($virtual_user, $constants, $backupdb, $user, $info,
-		$section, $stories, $version) = @_;
+	my($virtual_user, $constants, $backupdb, $user, $info, $gSkin,
+		$name, $stories, $version) = @_;
 
-	my $file    = sitename2filename($section);
-	my $SECT    = $backupdb->getSection($section);
-	my $link    = ($SECT->{url}  || $constants->{absolutedir}) . '/';
+	my $file    = sitename2filename($name);
+	my $skin = {};
+	$skin    = $backupdb->getSkin($name) if $name;
+	my $link    = ($skin->{url}  || $gSkin->{absolutedir}) . '/';
 	my $title   = $constants->{sitename};
-	$title = "$title: $SECT->{title}" if $SECT->{title} ne 'Index';
+	$title = "$title: $skin->{title}" if $skin->{skid} != $constants->{mainpage_skid};
 
 	my $rss = xmlDisplay('rss', {
 		channel		=> {
@@ -87,76 +93,35 @@ sub _do_rss {
 
 	my $ext = $version == 0.9 ? 'rdf' : 'rss';
 	save2file("$constants->{basedir}/$file.$ext", $rss);
-
 }
 
 sub newrdf { _do_rss(@_, "0.9") } # RSS 0.9
 sub newrss { _do_rss(@_, "1.0") } # RSS 1.0
 
-sub newwml {
-	my($virtual_user, $constants, $backupdb, $user, $info,
-		$section, $stories) = @_;
-
-	my $x = <<EOT;
-<?xml version="1.0"?>
-<!DOCTYPE wml PUBLIC "-//PHONE.COM//DTD WML 1.1//EN" "http://www.phone.com/dtd/wml11.dtd" >
-<wml>
-                        <head><meta http-equiv="Cache-Control" content="max-age=3600" forua="true"/></head>
-<!--  Dev  -->
-
-<!-- TOC -->
-<card title="$constants->{sitename}" id="$constants->{sitename}">
-<do label="Home" type="options">
-<go href="/index.wml"/>
-</do>
-<p align="left"><b>$constants->{sitename}</b>
-<select>
-EOT
-
-	my $z = 0;
-	my $body;
-	for my $sect (@$stories) {
-		$x .= qq|<option title="View" onpick="/wml.pl?sid=$sect->{sid}">| .
-			xmlencode(strip_notags($sect->{title})) .
-			"</option>\n";
-		$z++;
-	}
-
-	$x .= <<EOT;
-</select>
-</p>
-</card>
-</wml>
-EOT
-
-	my $file = sitename2filename($section);
-	save2file("$constants->{basedir}/$file.wml", $x);
-}
-
 sub newxml {
-	my($virtual_user, $constants, $backupdb, $user, $info,
-		$section, $stories) = @_;
+	my($virtual_user, $constants, $backupdb, $user, $info, $gSkin,
+		$name, $stories) = @_;
 
 	my $x = <<EOT;
 <?xml version="1.0"?><backslash
-xmlns:backslash="$constants->{absolutedir}/backslash.dtd">
+xmlns:backslash="$gSkin->{absolutedir}/backslash.dtd">
 
 EOT
 
-	for my $sect (@$stories) {
-		my @str = (xmlencode($sect->{title}), xmlencode($sect->{dept}));
-		my $author = $backupdb->getAuthor($sect->{uid}, 'nickname');
+	for my $story (@$stories) {
+		my @str = (xmlencode($story->{title}), xmlencode($story->{dept}));
+		my $author = $backupdb->getAuthor($story->{uid}, 'nickname');
 		$x.= <<EOT;
 	<story>
 		<title>$str[0]</title>
-		<url>$constants->{absolutedir}/article.pl?sid=$sect->{sid}</url>
-		<time>$sect->{'time'}</time>
+		<url>$gSkin->{absolutedir}/article.pl?sid=$story->{sid}</url>
+		<time>$story->{'time'}</time>
 		<author>$author</author>
 		<department>$str[1]</department>
-		<topic>$sect->{tid}</topic>
-		<comments>$sect->{commentcount}</comments>
-		<section>$sect->{section}</section>
-		<image>$sect->{image}</image>
+		<topic>$story->{tid}</topic>
+		<comments>$story->{commentcount}</comments>
+		<section>$name</section>
+		<image>$story->{image}</image>
 	</story>
 
 EOT
@@ -164,7 +129,7 @@ EOT
 
 	$x .= "</backslash>\n";
 
-	my $file = sitename2filename($section);
+	my $file = sitename2filename($name);
 	save2file("$constants->{basedir}/$file.xml", $x);
 }
 

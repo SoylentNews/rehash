@@ -15,7 +15,7 @@ miniAdminMenu
 __template__
 <FORM ACTION="[% env.script_name %]">
 	<FONT SIZE="1"> [
-		<A HREF="[% constants.rootdir %]/admin.pl">Admin</A> |
+		<A HREF="[% gSkin.rootdir %]/admin.pl">Admin</A> |
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="suedituser">
 		<INPUT TYPE="TEXT" NAME="name" VALUE="[% form.nick | strip_attribute %]">
 		<INPUT TYPE="SUBMIT" VALUE="Edit">

@@ -11,10 +11,9 @@ en_US
 __name__
 pollsearch
 __template__
-[% USE Slash %]
-[% FOREACH poll=polls %]
-	[% section_url = Slash.db.getSection(poll.section, 'url') %]
-	[% link = section_url ? section_url : constants.rootdir %]
+[% FOREACH poll = polls %]
+	[% skin = Slash.db.getSkin(poll.skin) %]
+	[% link = skin.url ? skin.url : gSkin.rootdir %]
 	<B><A HREF="[% link %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</A></B><BR>
 	<FONT SIZE="-1">
 	On [% Slash.timeCalc(poll.date) %]<BR>

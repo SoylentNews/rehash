@@ -25,7 +25,6 @@ my @list = qw |
 	commentmodes
 	threshcodes
 	postmodes
-	isolatemodes
 	issuemodes
 	vars
 	topics

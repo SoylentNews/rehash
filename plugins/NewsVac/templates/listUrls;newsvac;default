@@ -13,7 +13,7 @@ listUrls
 __template__
 [% INCLUDE titlebar width="100%" title="List of urls" -%]
 
-<form action="[% constants.rootdir %]/newsvac.pl" method="GET">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="GET">
 <input type="hidden" name="op" value="listurls">
 <table>
         <TR>
@@ -22,7 +22,7 @@ __template__
         </TR>
 </table>
 </form>
-<form action="[% constants.rootdir %]/newsvac.pl" method="GET">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="GET">
 <input type="hidden" name="op" value="processurls">
 <table>
         <TR>
@@ -32,7 +32,7 @@ __template__
 </table>
 </form>
 <form enctype="multipart/form-data" action="[% 
-constants.rootdir %]/newsvac.pl" method="POST">
+gSkin.rootdir %]/newsvac.pl" method="POST">
 <input type="hidden" name="op" value="newurl">
 <table>
         <tr>
@@ -82,14 +82,14 @@ constants.rootdir %]/newsvac.pl" method="POST">
 			END
 		-%]
         <TR>
-                <td><A HREF="[% constants.rootdir 
+                <td><A HREF="[% gSkin.rootdir 
 		-%]/newsvac.pl?op=editurl&url_id=[% u.url_id %]">[% u.url_id
 		-%]</a></td>
                 <td>[% success %]</td>
                 <td>[% u.last_success_formatted.replace(' ', '&nbsp;') %]</td>
                 <td>[% u.message_body_length %]</td>
                 <td>[% u.referencing %]</td>
-                <td><a href="[% constants.rootdir
+                <td><a href="[% gSkin.rootdir
 		-%]/newsvac.pl?op=editminer&miner_id=[% u.miner_id %]">[%
 		u.name -%]</a></td>
                 <td><a href="[% u.url %]" target="_blank">[% u.url %]</a></td>

@@ -151,9 +151,9 @@ sub sendEmail {
 
 { my($localhost);
 sub messageID {
-	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 
-	my $host = $constants->{basedomain};
+	my $host = $gSkin->{basedomain};
 	if (!$localhost) {
 		chomp($localhost = `hostname`);
 		$localhost ||= '';

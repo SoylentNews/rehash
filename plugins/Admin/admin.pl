@@ -13,12 +13,14 @@ use Slash;
 use Slash::Display;
 use Slash::Hook;
 use Slash::Utility;
+use Slash::Admin::PopupTree;
 
 sub main {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $postflag = $user->{state}{post};
 	# lc just in case
 	my $op = lc($form->{op});
@@ -111,11 +113,7 @@ sub main {
 			tab_selected	=> 'site',
 		},
 
-		templates 	=> { 	# templatedelete_confirm,templatesection,
-					# templatedelete_cancel,
-					# templatepage,templateed,templatedelete,
-					# templatenew,templatesave,
-
+		templates 	=> {
 			function 	=> \&templateEdit,
 			seclev		=> 500,
 			adminmenu	=> 'config',
@@ -182,7 +180,7 @@ sub main {
 
 	# admin.pl is not for regular users
 	if ($user->{seclev} < 100) {
-		redirect("$constants->{rootdir}/users.pl");
+		redirect("$gSkin->{rootdir}/users.pl");
 		return;
 	}
 	# non suadmin users can't perform suadmin ops
@@ -219,7 +217,7 @@ sub main {
 	# admin menu is printed from within the 'header' template
 
 	# it'd be nice to have a legit retval
-	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
+	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $gSkin);
 
 	# Display who is logged in right now.
 	footer();
@@ -308,7 +306,7 @@ sub aclEdit {
 
 ##################################################################
 sub aclSave {
-	my($form, $slashdb, $user, $constants, $all_acls_hr) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin, $all_acls_hr) = @_;
 
 	return unless $form->{thisname};
 
@@ -354,30 +352,31 @@ sub pageEdit {
 sub templateEdit {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my($seclev, $tpid, $page, $section);
+	my($seclev, $tpid, $page, $skin);
 	my $seclev_flag = 1;
 
 	my($title, $templateref, $template_select, $page_select,
-		$section_select, $savepage_select, $savesection_select);
+		$skin_select, $savepage_select, $saveskin_select);
 
 	my($templatedelete_flag, $templateedit_flag, $templateform_flag) = (0, 0, 0);
 	my $pagehashref = {};
 	$title = getTitle('templateEdit-title', {}, 1);
 	#Just to punish those section only admins! -Brian
-	$form->{section} = $user->{section} if $user->{section};
+	# XXXSKIN jamie? -- pudge
+	# $form->{section} = $user->{section} if $user->{section};
 
-	if ($form->{templatenew} || $form->{templatepage} || $form->{templatesection} || $form->{templatepageandsection} || $form->{templatesearch}) {
-		$tpid    = '';
-		$page    = $form->{page};
-		$section = $form->{section};
+	if ($form->{templatenew} || $form->{templatepage} || $form->{templateskin} || $form->{templatepageandskin} || $form->{templatesearch}) {
+		$tpid = '';
+		$page = $form->{page};
+		$skin = $form->{skin};
 
 	} elsif ($form->{templatesave} || $form->{templatesavedef}) {
-		$page    = $form->{newP} ? $form->{newpage}    : $form->{savepage};
-		$section = $form->{newS} ? $form->{newsection} : $form->{savesection};
-	
+		$page = $form->{newP} ? $form->{newpage} : $form->{savepage};
+		$skin = $form->{newS} ? $form->{newskin} : $form->{saveskin};
+
 		my $templateref = $slashdb->getTemplate($form->{thistpid}, '', 1);
 		if ($templateref->{seclev} <= $user->{seclev}) {
-			templateSave($form->{thistpid}, $form->{name}, $page, $section);
+			templateSave($form->{thistpid}, $form->{name}, $page, $skin);
 		} else {
 			print getData('seclev-message', { name => $form->{name}, tpid => $form->{thistpid} });
 		}
@@ -394,13 +393,13 @@ sub templateEdit {
 		}
 
 	} else {
-		$tpid    = $form->{tpid};
-		$page    = $form->{page};
-		$section = $form->{section};
+		$tpid = $form->{tpid};
+		$page = $form->{page};
+		$skin = $form->{skin};
 	}
 
-	$page    ||= 'misc';
-	$section ||= 'default';
+	$page ||= 'misc';
+	$skin ||= 'default';
 
 	$templateref = $slashdb->getTemplate($tpid, '', 1) if $tpid;
 
@@ -411,36 +410,36 @@ sub templateEdit {
 	} else {
 		my $templates = {};
 
-		my $getpage    = $page    eq 'All' ? '' : $page;
-		my $getsection = $section eq 'All' ? '' : $section;
+		my $getpage = $page eq 'All' ? '' : $page;
+		my $getskin = $skin eq 'All' ? '' : $skin;
 
-		unless ($form->{templatesection} || $form->{templatepage} || $form->{templatepageandsection} || $form->{templatesearch}) {
+		unless ($form->{templateskin} || $form->{templatepage} || $form->{templatepageandskin} || $form->{templatesearch}) {
 			$form->{ $form->{templatelastselect} } = 1;
 		}
 
-		if ($form->{templatesection}) {
-			$getpage    = '';
-			$form->{templatelastselect} = 'templatesection';
+		if ($form->{templateskin}) {
+			$getpage = '';
+			$form->{templatelastselect} = 'templateskin';
 		} elsif ($form->{templatepage}) {
-			$getsection = '';
+			$getskin = '';
 			$form->{templatelastselect} = 'templatepage';
 		}
 
 		if ($form->{templatesearch}) {
-			$getsection = $getpage = '';
+			$getskin = $getpage = '';
 			$form->{templatelastselect} = 'templatesearch';
 			$templates = $slashdb->getTemplateListByText($form->{'templatesearchtext'});
 		} else {
-			$templates = $slashdb->getTemplateList($getsection, $getpage);
+			$templates = $slashdb->getTemplateList($getskin, $getpage);
 		}
 
-		my $pages    = $slashdb->getDescriptions('pages', $page, 1);
-		my $sections = $slashdb->getDescriptions('templatesections', $section, 1);
+		my $pages = $slashdb->getDescriptions('pages', $page, 1);
+		my $skins = $slashdb->getDescriptions('templateskins', $skin, 1);
 
-		$pages->{All}        = 'All';
-		$pages->{misc}       = 'misc';
-		$sections->{All}     = 'All';
-		$sections->{default} = 'default';
+		$pages->{All}     = 'All';
+		$pages->{misc}    = 'misc';
+		$skins->{All}     = 'All';
+		$skins->{default} = 'default';
 
 		# put these in alpha order by label, and add tpid to label
 		my @ordered;
@@ -449,11 +448,11 @@ sub templateEdit {
 			$templates->{$_} = $templates->{$_} . " ($_)";
 		}
 
-		$template_select    = createSelect('tpid',        $templates, $tpid,    1, 0, \@ordered);
-		$page_select        = createSelect('page',        $pages,     $page,    1);
-		$savepage_select    = createSelect('savepage',    $pages,     $templateref->{page}    || $form->{page}, 1);
-		$section_select     = createSelect('section',     $sections,  $section, 1);
-		$savesection_select = createSelect('savesection', $sections,  $templateref->{section} || $form->{section}, 1);
+		$template_select = createSelect('tpid',     $templates, $tpid, 1, 0, \@ordered);
+		$page_select     = createSelect('page',     $pages,     $page, 1);
+		$savepage_select = createSelect('savepage', $pages,     $templateref->{page} || $form->{page}, 1);
+		$skin_select     = createSelect('skin',     $skins,     $skin, 1);
+		$saveskin_select = createSelect('saveskin', $skins,     $templateref->{skin} || $form->{skin}, 1);
 	}
 
 	if (!$form->{templatenew} && $tpid && $templateref->{tpid}) {
@@ -473,14 +472,14 @@ sub templateEdit {
 		templateform_flag	=> $templateform_flag,
 		page_select		=> $page_select,
 		savepage_select		=> $savepage_select,
-		section_select		=> $section_select,
-		savesection_select	=> $savesection_select,
+		skin_select		=> $skin_select,
+		saveskin_select		=> $saveskin_select,
 	});
 }
 
 ##################################################################
 sub templateSave {
-	my($tpid, $name, $page, $section) = @_;
+	my($tpid, $name, $page, $skin) = @_;
 
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -494,12 +493,17 @@ sub templateSave {
 	}
 
 	my $id = $slashdb->getTemplate($tpid, '', 1);
-	my $temp = $slashdb->getTemplateByName($name, [ 'section', 'page', 'name', 'tpid', 'seclev' ], 1 , $page, $section);
+	my $temp = $slashdb->getTemplateByName($name, {
+		values		=> [ 'skin', 'page', 'name', 'tpid', 'seclev' ],
+		cache_flag	=> 1,
+		page		=> $page,
+		skin		=> $skin,
+	});
 
 	return if $temp->{seclev} > $user->{seclev};
 	my $exists = 0;
 	$exists = 1 if ($name eq $temp->{name} &&
-			$section eq $temp->{section} &&
+			$skin eq $temp->{skin} &&
 			$page eq $temp->{page});
 
 	if ($form->{save_new}) {
@@ -515,13 +519,12 @@ sub templateSave {
 				description	=> $form->{description},
 				seclev          => $form->{seclev},
 				page		=> $page,
-				section		=> $section
+				skin		=> $skin
 			});
 
 			print getData('templateSave-inserted-message', { tpid => $tpid , name => $name});
 		}
 	} else {
-
 		$slashdb->setTemplate($tpid, {
 			name		=> $name,
 			template 	=> $form->{template},
@@ -529,7 +532,7 @@ sub templateSave {
 			title		=> $form->{title},
 			seclev		=> $form->{seclev},
 			page		=> $page,
-			section		=> $section
+			skin		=> $skin
 		});
 		print getData('templateSave-saved-message', { tpid => $tpid, name => $name });
 	}
@@ -590,7 +593,12 @@ sub blockEdit {
 
 	$blockref->{rss_template} ||= $constants->{default_rss_template} || 'default';
 	my $rss_select = createSelect('rss_template', $rss_ref, $blockref->{rss_template}, 1);	
-	my $template_ref = $slashdb->getTemplateByName($blockref->{rss_template}, [ 'template' ], 1 , 'portald', $blockref->{section});
+	my $template_ref = $slashdb->getTemplateByName($blockref->{rss_template}, {
+		values		=> [ 'template' ],
+		cache_flag	=> 1,
+		page		=> 'portald',
+		skin		=> $blockref->{skin}  # XXXSKIN - blocks table not ported yet
+	});
 	my $rss_template_code = $template_ref->{template}; 
 
 	if ($form->{blockdelete} || $form->{blockdelete1} || $form->{blockdelete2}) {
@@ -835,7 +843,7 @@ sub topicEdit {
 	if ($user->{section} && $user->{seclev} <= 9000) {
 		$sections->{$user->{section}} = $slashdb->getSection($user->{section}, 'title', '', 1);
 	} else {
-		$sections = $slashdb->getDescriptions('sections-contained', '', 1);
+		$sections = $slashdb->getDescriptions('skins', '', 1);
 	}
 
 	my $section_topics_arref = $slashdb->getSectionTopicType($form->{nexttid});
@@ -858,8 +866,6 @@ sub topicEdit {
 	if (!$form->{topicdelete}) {
 		if (!$form->{topicnew} && $form->{nexttid}) {
 			$topic = $slashdb->getTopic($form->{nexttid}, 0, 1);
-			my $topic_image = $slashdb->getTopicImage($topic->{default_image}, 0, 1);
-			%$topic = (%$topic_image, %$topic) if ref $topic_image;
 		} else {
 			$topic = {};
 		}
@@ -951,7 +957,7 @@ sub importImage {
 	# Check for a file upload
 	my $section = $_[0];
 
-	my $rootdir = getCurrentStatic('rootdir');
+	my $rootdir = getCurrentSkin('rootdir');
 
 	my $filename = getCurrentForm('importme');
 	my $tf = getsiddir() . $filename;
@@ -981,7 +987,7 @@ sub importFile {
 	# Check for a file upload
 	my $section = $_[0];
 
-	my $rootdir = getCurrentStatic('rootdir');
+	my $rootdir = getCurrentSkin('rootdir');
 
 	my $filename = getCurrentForm('importme');
 	my $tf = getsiddir() . $filename;
@@ -1202,13 +1208,16 @@ sub get_slashd_box {
 ##################################################################
 # Story Editing
 sub editStory {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $gSkin) = @_;
 
-	my($sid, $storylinks);
-	# Added validation of sid -Brian
-	if ($form->{op} eq 'edit' && $form->{sid}) {
-		$sid = $slashdb->getStory($form->{sid}, 'sid', 1);
+	my($stoid, $sid, $storylinks);
+
+	# Here we validate stoid
+	if ($form->{op} eq 'edit') {
+		$stoid = $slashdb->getStory($form->{stoid} || $form->{sid},
+			'stoid', 1);
 	}
+
 	# Basically, we upload the bodytext if we realize a name has been passed in -Brian
 	if ($form->{bodytext_file}) {
 		my $upload = $form->{query_apache}->upload;
@@ -1224,11 +1233,9 @@ sub editStory {
 
 	$slashdb->setCommonStoryWords();
 
-	my @stid;
 	my($extracolumn_flag) = (0, 0);
-	my($storyref, $story, $author, $topic, $storycontent, $locktest,
-		$sections, $topic_select, $section_select, $author_select,
-		$extracolumns, $displaystatus_select, $commentstatus_select, 
+	my($storyref, $story, $author, $storycontent, $locktest,
+		$extracolumns, $commentstatus_select, 
 		$subid, $description);
 	my $extracolref = {};
 	my($fixquotes_check, $autonode_check, 
@@ -1241,30 +1248,34 @@ sub editStory {
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
-	my $newarticle = 1 if (!$sid && !$form->{sid});
+	my $newarticle = 1 if !$stoid && !$form->{stoid} && !$form->{sid};
+
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "editStory form: " . Dumper($form);
 
 	# Editing a story that has yet to go into the DB...
 	# basically previewing. -Brian 
 	if ($form->{title}) {
 
-		# Section authors get forced into their section.  If not,
-		# we see what section has been set to.  If this fails,
-		# we grab the defaultsection for a new story.  -Brian
-		$form->{section} = $user->{section} if $user->{section};
-		$form->{section} ||= $constants->{defaultsection};
-		my $SECT = $slashdb->getSection($form->{section});
-		$extracolumns = $slashdb->getSectionExtras($storyref->{section}) || [ ];
-		# Did you know we actually have a var that should set this? -Brian
-		$storyref->{writestatus}   = "dirty";
-		$storyref->{displaystatus} = $form->{displaystatus} || $SECT->{defaultdisplaystatus};
-		$storyref->{commentstatus} = $form->{commentstatus} || $SECT->{defaultcommentstatus};
-		$storyref->{subsection}	   = $form->{subsection} || $SECT->{defaultsubsection};
-		$storyref->{section}	   = $form->{section} || $SECT->{defaultsection};
+		my $storyskin = $gSkin;
+		$storyskin = $slashdb->getSkin($form->{skin}) if $form->{skin};
+
+		$storyref->{is_dirty}      = 1;
+		$storyref->{commentstatus} = $form->{commentstatus};
 
 		$storyref->{uid} ||= $user->{uid};
 		$storyref->{dept} =~ s/[-\s]+/-/g;
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
+
+		my($chosen_hr, $chosen_names_hr) = extractChosenFromForm($form);
+		$storyref->{topics_chosen} = $chosen_hr;
+		$storyref->{topics_chosen_names} = $chosen_names_hr;
+		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
+		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
+		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
+			{ skid => $storyref->{primaryskid} });
+
+		$extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr);
 
 		for my $field (qw( introtext bodytext )) {
 			$storyref->{$field} = $slashdb->autoUrl(
@@ -1277,74 +1288,86 @@ sub editStory {
 				$storyref->{$field});
 		}
 
-		#$topic = $slashdb->getTopic($storyref->{tid});
 		$form->{uid} ||= $user->{uid};
-		#$author = $slashdb->getAuthor($form->{uid});
 		$subid = $form->{subid};
 		$sid = $form->{sid};
 
-		$storyref->{'time'} = findTheTime();
+		$storyref->{topics_chosen} = $chosen_hr;
+		$storyref->{topics_chosen_names} = $chosen_names_hr;
+		$storyref->{topics_rendered} = $rendered_hr;
+		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
+		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
+			{ skid => $storyref->{primaryskid} });
 
-		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
-			@stid = grep { $_ } @{$form->{_multi}{stid}};
-		} elsif ($form->{stid}) {
-			@stid = $form->{stid};
-		}
+		
+		$storyref->{'time'} = findTheTime();
 
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 
-	} elsif (defined $sid) { # Loading an existing SID
+	} elsif ($stoid) { # Loading an existing SID
 
-		my $tmp = $user->{currentSection};
-		$user->{currentSection} = $slashdb->getStory($sid, 'section', 1);
 		$user->{state}{editing} = 1;
-		$storyref = $slashdb->getStory($sid, '', 1);
-		
-		$storyref->{writestatus} = 'dirty';
+		$storyref = $slashdb->getStory($stoid, '', 1);
+		my $tmp = $user->{currentSkin} || $gSkin->{textname};
+		$user->{currentSkin} = $storyref->{skin}{name};
+
+		$sid = $storyref->{sid};
+		$storyref->{is_dirty} = 1;
 		$storyref->{commentstatus} = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
-		$extracolumns = $slashdb->getSectionExtras($user->{currentSection}) || [ ];
-		$user->{currentSection} = $tmp;
+		$user->{currentSkin} = $tmp;
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 		$subid = $storyref->{subid};
 
-		# Remove the original topic id.  Why don't we do this above,
-		# when we're previewing?
-		@stid = grep { $_ != $storyref->{tid} }
-			@{ $slashdb->getStoryTopicsJustTids($sid, { no_parents => 1 }) };
+		my $chosen_hr = $slashdb->getStoryTopicsChosen($stoid);
+		$storyref->{topics_chosen} = $chosen_hr;
+		$storyref->{topics_chosen_names} = { };
+		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
+		$storyref->{topics_rendered} = $rendered_hr;
+		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
+		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
+			{ skid => $storyref->{primaryskid} });
+		$extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr);
 
 		for my $field (qw( introtext bodytext )) {
 			$storyref->{$field} = parseSlashizedLinks(
 				$storyref->{$field});
 		}
 
-
 	} else { # New Story
 
+		# XXXSECTIONTOPIC this kinda works now, but it should be rewritten
 		my $SECT = $slashdb->getSection($section);
-		$extracolumns		    = $slashdb->getSectionExtras($SECT->{section}) || [ ];
-		$storyref->{displaystatus}  = $SECT->{defaultdisplaystatus};
-		$storyref->{commentstatus}  = $SECT->{defaultcommentstatus};
-		$storyref->{tid}            = $form->{tid} || $SECT->{defaulttopic};
-		$storyref->{section}	    = $SECT->{section};
-		$storyref->{subsection}	    = $SECT->{defaultsubsection};
+		$extracolumns			= $slashdb->getNexusExtras($gSkin->{nexus});
+		$storyref->{commentstatus}	= $gSkin->{defaultcommentstatus};
+		$storyref->{primaryskid}	= $gSkin->{skid};
+		$storyref->{tid}		= $form->{tid} || $gSkin->{defaulttopic};
 
 		$storyref->{'time'} = $slashdb->getTime;
 		$storyref->{uid} = $user->{uid};
-		$storyref->{writestatus} = "dirty";
-		$subid = $form->{subid};
+
+		$storyref->{topics_chosen} = { };
+		$storyref->{topics_chosen_names} = { };
+		$storyref->{topics_rendered} = { };
+		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered({ });
+		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen({},
+			{ skid => $storyref->{primaryskid} });
+
+		$storyref->{is_dirty} = 1;
 
 	}
 
 	if ($storyref->{title}) {
+		my $oldskin = $gSkin->{skid};
+		setCurrentSkin($storyref->{primaryskid});
 		my $reloDB = getObject("Slash::Relocate");
 		my %story_copy = %$storyref;
 		if ($reloDB) {
-			$story_copy{introtext} = $reloDB->href2SlashTag($story_copy{introtext}, $sid);
-			$story_copy{bodytext} = $reloDB->href2SlashTag($story_copy{bodytext}, $sid);
+			$story_copy{introtext} = $reloDB->href2SlashTag($story_copy{introtext}, $stoid);
+			$story_copy{bodytext} = $reloDB->href2SlashTag($story_copy{bodytext}, $stoid);
 		}
 
 		for my $field (qw( introtext bodytext )) {
@@ -1362,7 +1385,7 @@ sub editStory {
 		# Get the related text.
 		$storyref->{relatedtext} = getRelated(
 			"$story_copy{title} $story_copy{introtext} $story_copy{bodytext}",
-			\@stid
+			$storyref->{topic}
 		) . otherLinks(
 			$slashdb->getAuthor($storyref->{uid}, 'nickname'),
 			$storyref->{tid}, 
@@ -1377,9 +1400,14 @@ sub editStory {
 			if $storyref->{relatedtext} && $storyref->{relatedtext} =~ /^\s*<li>/;
 
 		my $author  = $slashdb->getAuthor($storyref->{uid});
-		my $topic   = $slashdb->getTopic($storyref->{tid});
+		my $topiclist = $slashdb->getTopiclistFromChosen($storyref->{topics_chosen});
+		my $topic   = $slashdb->getTopic($topiclist->[0]);
 		my $preview = $form->{op} eq "preview" ? 1 : 0;
-		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full', { stid => \@stid, preview => $preview });
+		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full',
+			{ topics_chosen => $storyref->{topics_chosen},
+			  topiclist => $topiclist,
+			  preview => $preview });
+		setCurrentSkin($oldskin);
 	}
 
 	for (@{$extracolumns}) {
@@ -1387,40 +1415,10 @@ sub editStory {
 		$storyref->{$key} = $form->{$key} || $storyref->{$key};
 	}
 
-	$storyref->{section} ||= $section;
-	$sections = $slashdb->getDescriptions('sections');
-
-	my $topic_values = $slashdb->getDescriptions('topics_section', $storyref->{section});
-	$topic_select = createSelect('tid',
-		$topic_values,
-		$storyref->{tid}, 1, 0, 1
-	);
-	my @topic_select_sec;
-	for (@stid) {
-		my $current_hash = { %$topic_values };
-		$current_hash->{0} = "$current_hash->{$_} (Delete)";
-		push @topic_select_sec, createSelect('stid',
-			$current_hash,
-			$_, 1, 0, 1
-		);
-	}
-	if (@stid < 2) {
-		my $current_hash = { %$topic_values };
-		$current_hash->{0} = "Add Topic";
-		push @topic_select_sec, createSelect('stid',
-			$current_hash,
-			0, 1, 0, 1
-		);
-	}
-
-	$section_select = selectSection('section', $storyref->{section}, $sections, 1) unless $user->{section};
+	my $topic_select = Slash::Admin::PopupTree::getPopupTree($storyref->{topics_chosen}, $storyref->{topics_chosen_names});
 
 	my $authors = $slashdb->getDescriptions('authors', '', 1);
-	$author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
-
-	my $subsections = $slashdb->getDescriptions('section_subsection', $storyref->{section}, 1);
-	my $subsection_select = createSelect('subsection', $subsections, $storyref->{subsection}, 1)
-		if $subsections;
+	my $author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
 
 	$storyref->{dept} =~ s/ /-/gi;
 
@@ -1428,10 +1426,6 @@ sub editStory {
 
 	my $display_codes = $user->{section} ? 'displaycodes_sectional' : 'displaycodes';
 
-	unless ($user->{section}) {
-		$description = $slashdb->getDescriptions($display_codes);
-		$displaystatus_select = createSelect('displaystatus', $description, $storyref->{displaystatus}, 1);
-	}
 	$description = $slashdb->getDescriptions('commentcodes');
 	$commentstatus_select = createSelect('commentstatus', $description, $storyref->{commentstatus}, 1);
 
@@ -1491,13 +1485,13 @@ sub editStory {
 		my $files = $blobdb->getFilesForStory($sid);
 		$attached_files = slashDisplay('attached_files', { files => $files }, { Return => 1});
 	}
-	
 
 	# We probably should just pass the raw data instead of the formatted
 	# <SELECT> into this template and let the template deal with the
 	# HTML, here. Formatting these elements outside of the template
 	# just defeats the purpose!	-- Cliff 2002-08-07
 	slashDisplay('editStory', {
+		stoid			=> $stoid,
 		storyref 		=> $storyref,
 		story			=> $story,
 		storycontent		=> $storycontent,
@@ -1507,22 +1501,39 @@ sub editStory {
 		slashdtext		=> $slashdtext,
 		newarticle		=> $newarticle,
 		topic_select		=> $topic_select,
-		section_select		=> $section_select,
 		author_select		=> $author_select,
 		locktest		=> $locktest,
-		displaystatus_select	=> $displaystatus_select,
 		commentstatus_select	=> $commentstatus_select,
 		fixquotes_check		=> $fixquotes_check,
 		autonode_check		=> $autonode_check,
 		fastforward_check	=> $fastforward_check,
 		shortcuts_check		=> $shortcuts_check,
-		subsection_select	=> $subsection_select,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
 		similar_stories		=> $similar_stories,
-		topic_select_sec	=> \@topic_select_sec,
 		attached_files		=> $attached_files,
 	});
+}
+
+##################################################################
+sub extractChosenFromForm {
+	my($form) = @_;
+	my $slashdb = getCurrentDB();
+	my $chosen_hr = { };
+	my $chosen_names_hr = { };
+	if (defined $form->{topic_source} && $form->{topic_source} eq "submission" && $form->{subid}) {
+		$chosen_hr->{$form->{tid}} = 1;
+		my $chosen_topic = $slashdb->getTopic($form->{tid});
+		$chosen_names_hr->{$form->{tid}} = $chosen_topic->{textname} if $chosen_topic and $chosen_topic->{tid};
+	} else {
+		for my $i (0..$#{$form->{slashtopics_main_select}}) {
+			$chosen_hr->{$form->{slashtopics_main_select}[$i]}
+				= $form->{slashtopics_main_select_weights}[$i];
+			$chosen_names_hr->{$form->{slashtopics_main_select}[$i]}
+				= $form->{slashtopics_main_select_ids}[$i];
+		}
+	}
+	return($chosen_hr, $chosen_names_hr);
 }
 
 ##################################################################
@@ -1563,8 +1574,7 @@ sub get_ispell_comments {
 			if !-e $ispell or !-f _ or !-r _ or !-x _;
 	}
 
-	# That last "1" means to ignore errors
-	my $ok = $slashdb->getTemplateByName('ispellok', '', 1, '', '', 1);
+	my $ok = $slashdb->getTemplateByName('ispellok', { cache_flag => 1, ignore_errors => 1 });
 	$ok = $ok ? ($ok->{template} || "") : "";
 	$ok =~ s/\s+/\n/g;
 
@@ -1607,45 +1617,27 @@ sub listStories {
 	my $storylistref = [];
 
 	if ($form->{op} eq 'delete') {
-		rmStory($form->{sid});
-		titlebar('100%', getTitle('rmStory-title', {sid => $form->{sid}}));
+		rmStory($form->{stoid} || $form->{sid});
+		titlebar('100%', getTitle('rmStory-title',
+			{ sid => $form->{stoid} || $form->{sid} } ));
 	} else {
 		titlebar('100%', getTitle('listStories-title'));
 	}
 
-	my $i = $first_story || 0 ;
-	for (@$storylist) {
-		my($hits, $comments, $sid, $title, $aid, $time_plain, $topic,
-			$subsection, $section,
-			$displaystatus, $writestatus) = @$_;
-		my $time = timeCalc($time_plain, '%H:%M', 0);
-		my $td   = timeCalc($time_plain, '%A %B %d', 0);
-		my $td2  = timeCalc($time_plain, '%m/%d', 0);
-
-		$title = substr($title, 0, 50) . '...' if (length $title > 55);
-		my $tbtitle = fixparam($title);
-
-		push (@$storylistref, {
-			'x'		=> ++$i,
-			hits		=> $hits,
-			comments	=> $comments,
-			sid		=> $sid,
-			title		=> $title,
-			aid		=> $slashdb->getAuthor($aid, 'nickname'),
-			'time'		=> $time,
-			topic		=> $topic,
-			section		=> $section,
-			subsection	=> $subsection,
-			td		=> $td,
-			td2		=> $td2,
-			writestatus	=> $writestatus,
-			displaystatus	=> $displaystatus,
-			tbtitle		=> $tbtitle,
-		});
+	my $i = $first_story || 0;
+	for my $story (@$storylist) {
+		my $time_plain   = $story->{'time'};
+		$story->{'time'} = timeCalc($time_plain, '%H:%M', 0);
+		$story->{td}     = timeCalc($time_plain, '%A %B %d', 0);
+		$story->{td2}    = timeCalc($time_plain, '%m/%d', 0);
+		$story->{aid}    = $slashdb->getAuthor($story->{uid}, 'nickname');
+		$story->{x}	 = ++$i;
+		$story->{title}  = substr($story->{title}, 0, 50) . '...' if (length $story->{title} > 55);
+		$story->{tbtitle} = fixparam($story->{title});
 	}
 
 	slashDisplay('listStories', {
-		storylistref	=> $storylistref,
+		storylistref	=> $storylist,
 		'x'		=> $i + $first_story,
 		left		=> $count - ($i + $first_story),
 	});
@@ -1653,12 +1645,9 @@ sub listStories {
 
 ##################################################################
 sub rmStory {
-	my($sid) = @_;
-
+	my($id) = @_;
 	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-
-	$slashdb->deleteStory($sid);
+	$slashdb->deleteStory($id);
 }
 
 ##################################################################
@@ -1742,16 +1731,11 @@ sub updateStory {
 	$form->{aid} = $slashdb->getStory($form->{sid}, 'aid', 1)
 		unless $form->{aid};
 
-	my @stid = ( );
-	if (ref($form->{_multi}{stid}) eq 'ARRAY') {
-		@stid = grep { $_ } @{$form->{_multi}{stid}};
-	} elsif ($form->{stid}) {
-		@stid = $form->{stid};
-	}
+	my($chosen_hr) = extractChosenFromForm($form);
+#use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
 
 	my $time = findTheTime();
 
-	$slashdb->setStoryTopics($form->{sid}, createStoryTopicData($slashdb, $form));
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});
@@ -1790,17 +1774,13 @@ sub updateStory {
 		uid		=> $form->{uid},
 		sid		=> $form->{sid},
 		title		=> $form->{title},
-		section		=> $form->{section},
-		tid		=> $topic,
+		topics_chosen	=> $chosen_hr,
 		dept		=> $form->{dept},
 		'time'		=> $time,
-		displaystatus	=> $form->{displaystatus},
 		commentstatus	=> $form->{commentstatus},
-		writestatus	=> $form->{writestatus},
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
-		subsection	=> $form->{subsection},
 		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
 
@@ -1808,14 +1788,20 @@ sub updateStory {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
 
-	my $extras = $slashdb->getSectionExtras($data->{section});
-	if ($extras && @$extras) {
-		for (@$extras) {
-			my $key = $_->[1];
+#print STDERR "admin.pl before render data: " . Dumper($data);
+	my $rendered_hr = $slashdb->renderTopics($chosen_hr);
+	$data->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
+	my $extracolumns = $slashdb->getNexusExtras(
+		$slashdb->getNexusFromSkid($data->{primaryskid}) );
+#print STDERR "admin.pl extracolumns '@$extracolumns'\n";
+	if ($extracolumns && @$extracolumns) {
+		for my $ex_ar (@$extracolumns) {
+			my $key = $ex_ar->[1];
 			$data->{$key} = $form->{$key};
 		}
 	}
 
+#print STDERR "admin.pl before updateStory data: " . Dumper($data);
 	if (!$slashdb->updateStory($form->{sid}, $data)) {
 		titlebar('100%', getTitle('story_update_failed'));
 		editStory(@_);
@@ -1886,7 +1872,7 @@ sub moderate {
 	foreach my $s (keys %$was_touched) {
 		if ($was_touched->{$s}) {
 			my $story_sid = $slashdb->getStorySidFromDiscussion($sid);
-			$slashdb->setStory($story_sid, { writestatus => 'dirty' }) if $story_sid;
+			$slashdb->setStory($story_sid, { is_dirty => 1 }) if $story_sid;
 		}
 	}
 	my $startat = $form->{startat} || 0;
@@ -2060,25 +2046,12 @@ sub saveStory {
 
 	my $edituser = $slashdb->getUser($form->{uid});
 	my $tid_ref;
-	my $topic = $form->{tid};
 	my $default_set = 0;
 
-	# In the previous form of this, a section only
-	# editor could assign a story to a different user
-	# and bypass their own restrictions for what section
-	# they could post to. -Brian
-	$form->{displaystatus} ||= 1 if ($user->{section} || $edituser->{section});
-	if ($user->{section} || $edituser->{section}) {
-		$form->{section} = $user->{section} ? $user->{section} : $edituser->{section};
-	}
 	$form->{dept} =~ s/ /-/g;
 
-	my @stid = ( );
-	if (ref($form->{_multi}{stid}) eq 'ARRAY') {
-		@stid = grep { $_ } @{$form->{_multi}{stid}};
-	} elsif ($form->{stid}) {
-		@stid = $form->{stid};
-	}
+	my($chosen_hr) = extractChosenFromForm($form);
+
 	my $story_text = "$form->{title} $form->{bodytext} $form->{introtext}";
 	$form->{relatedtext} = getRelated($story_text, $form->{tid})
 		. otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
@@ -2107,16 +2080,13 @@ sub saveStory {
 		title		=> $form->{title},
 		section		=> $form->{section},
 		submitter	=> $form->{submitter},
-		tid		=> $topic,
+		topics_chosen	=> $chosen_hr,
 		dept		=> $form->{dept},
 		'time'		=> $time,
-		displaystatus	=> $form->{displaystatus},
-		writestatus	=> $form->{writestatus},
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		subid		=> $form->{subid},
-		subsection	=> $form->{subsection},
 		commentstatus	=> $form->{commentstatus},
 		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
@@ -2125,25 +2095,19 @@ sub saveStory {
 		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
 	}
 
-	my $extras = $slashdb->getSectionExtras($data->{section});
-	if ($extras && @$extras) {
-		for (@$extras) {
-			my $key = $_->[1];
-			$data->{$key} = $form->{$key};
-		}
+	my $extras = $slashdb->getNexusExtrasForChosen($chosen_hr);
+	for my $extra_ar (@$extras) {
+		my($textname, $keyword, $type) = @$extra_ar;
+		# type 'list' not really supported
+		next unless $type eq 'text';
+		$data->{$keyword} = $form->{$keyword};
 	}
+
 	my $sid = $slashdb->createStory($data);
 
 	if ($sid) {
 		slashHook('admin_save_story_success', { story => $data });
 		titlebar('100%', getTitle('saveStory-title'));
-
-		# if the story isn't section-only, and the editor isn't
-		# restricted to one section (or edituser), clear out
-		# $form->{section} and display the storylist normally
-		# --Pater
-		$form->{section} = '' if $form->{displaystatus} != 1
-			&& !($user->{section} || $edituser->{section});
 
 		listStories(@_);
 	} else {

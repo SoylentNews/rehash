@@ -44,19 +44,19 @@ sub createStatDaily {
 	$options ||= {};
 	my $day = $options->{day} || $self->{_day};
 
-	my $section = $options->{section} || 'all';
+	my $skid = $options->{skid} || 0;
 	my $insert = {
 		'day'	=> $day,
 		'name'	=> $name,
 		'value'	=> $value,
 	};
-	$insert->{section} = $section;
+	$insert->{skid} = $skid;
 
 	my $overwrite = $self->{_overwrite} || $options->{overwrite};
 	if ($overwrite) {
 		my $where = "day=" . $self->sqlQuote($day)
 			. " AND name=" . $self->sqlQuote($name);
-		$where .= " AND section=" . $self->sqlQuote($section);
+		$where .= " AND skid=" . $self->sqlQuote($skid);
 #		$self->{_dbh}{AutoCommit} = 0;
 		$self->sqlDo("SET AUTOCOMMIT=0");
 		$self->sqlDelete('stats_daily', $where);
@@ -78,8 +78,8 @@ sub updateStatDaily {
 
 	my $where = "day = " . $self->sqlQuote($self->{_day});
 	$where .= " AND name = " . $self->sqlQuote($name);
-	my $section = $options->{section} || 'all';
-	$where .= " AND section = " . $self->sqlQuote($section);
+	my $skid = $options->{skid} || 0;
+	$where .= " AND skid = " . $self->sqlQuote($skid);
 
 	return $self->sqlUpdate('stats_daily', {
 		-value =>	$update_clause,

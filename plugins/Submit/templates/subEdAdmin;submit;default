@@ -72,8 +72,6 @@ BLOCK sub_display -%]
 	<TR><TD><NOBR>
 		<FONT SIZE="1"><INPUT TYPE="text" NAME="comment_[% sub.subid | strip_attribute %]" VALUE="[% sub.comment | strip_attribute %]" SIZE="20">
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
-		[% Slash.selectSection("section_$sub.subid", sub.section, 0, 1) %]
-
 		[%# this is called del_ for legacy reasons, but is also use for merging %]
 		</FONT><INPUT TYPE="CHECKBOX" NAME="del_[% sub.subid %]">
 	</NOBR></TD><TD>

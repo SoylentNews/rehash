@@ -13,7 +13,7 @@ display
 __template__
 [% constants.sitename %] Moderation Stats for [% day %]
 
-[% constants.absolutedir_secure %]/stats.pl?op=report&report=mod&stats_days=7
+[% gSkin.absolutedir_secure %]/stats.pl?op=report&report=mod&stats_days=7
 
      comments: [% comments %] posted yesterday
    modlog all: [% modlog %] rows (not counting [% modlog_inactive_percent %]% inactive)
@@ -34,7 +34,7 @@ youngest elig: uid [% youngest_modelig_uid %], created on [% youngest_modelig_cr
 [% IF reverse_mods %]
 REVERSE MODS:
 [%	FOREACH rm = reverse_mods;
-rm.score; "  "; constants.absolutedir_secure %]/~[% rm.nickname | fixparam %] ([% rm.muid %]):  tokens [% rm.tokens %], karma [% rm.karma %][% IF rm.isrecent; " *"; END %]
+rm.score; "  "; gSkin.absolutedir_secure %]/~[% rm.nickname | fixparam %] ([% rm.muid %]):  tokens [% rm.tokens %], karma [% rm.karma %][% IF rm.isrecent; " *"; END %]
 [%	END %]
 [% END %]
 [% IF repeat_mods;
@@ -45,7 +45,7 @@ REPEAT [% dirword %]MODS:
 [%			FOREACH orguid = repeat_mods.$dir.keys.nsort;
 				FOREACH destuid = repeat_mods.$dir.$orguid.keys.nsort;
 					hr = repeat_mods.$dir.$orguid.$destuid;
-constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])[% IF hr.isrecent; " *"; END %]
+gSkin.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])[% IF hr.isrecent; " *"; END %]
 [%				END;
 			END;
 		END;

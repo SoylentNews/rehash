@@ -32,7 +32,7 @@ main();
 
 sub main {
 	my $sids = $slashdb->sqlSelectColArrayref('sid', 'stories');
-	Slash::Utility::Anchor::getSectionColors();
+	Slash::Utility::Anchor::getSkinColors();
 
 	print "Updating " .  scalar(@$sids) ." \n";
 	for my $sid (@$sids) {

@@ -17,7 +17,7 @@ __template__
 [% FOREACH event=dates %]
 	<TR>
 		<TD>
-			<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% storytitle %]</A>
+			<A HREF="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% storytitle %]</A>
 		</TD>
 		<TD>
 			[% IF event.begin == event.end %] 
@@ -27,7 +27,7 @@ __template__
 			[% END %]
 		</TD>
 		<TD>
-			<A HREF="[% constants.rootdir %]/eventsadmin.pl?op=delete&amp;sid=[% sid %]&amp;id=[% event.id %]">[delete]</A>
+			<A HREF="[% gSkin.rootdir %]/eventsadmin.pl?op=delete&amp;sid=[% sid %]&amp;id=[% event.id %]">[delete]</A>
 		</TD>
 	</TR>
 [% END %]
@@ -35,7 +35,7 @@ __template__
 <BR>
 [% PROCESS titlebar title="Add Event to \"$storytitle, sid $sid\"" width="100%" %]
 <P>
-<FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/eventsadmin.pl" METHOD="POST">
 		Begin Date: 
 	<SELECT NAME="beginday">
 		[% FOREACH i = days %]
@@ -62,7 +62,7 @@ Year [% Slash.createSelect("endyear", years, selectedref.endyear, 1, 1) %]&nbsp;
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="add">
 <INPUT TYPE="SUBMIT" VALUE="Save">
 <BR>
-<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</A>
+<A HREF="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</A>
 </FORM>
 __seclev__
 100

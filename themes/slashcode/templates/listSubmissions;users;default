@@ -25,19 +25,19 @@ approved = 0;
 count = 0;
 bg_toggle = 0;
 bg_col_1 = "DDDDDD";
-bg_col_2 = user.bg.2;
+bg_col_2 = user.colors.bg_2;
 cur_time = Slash.db.getTime();
 %]
 [% admin_link_user = admin_flag && !useredit.uid && !useredit.nickname %]
 [% admin_link_ipid = admin_flag && !useredit.ipid %]
 [% IF submissions.size > 0 %]
 	[% PROCESS titlebar width="100%" title = title -%]
-	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.bg.2 %]">
-		<TR bgcolor="[% user.bg.3 %]">
-			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.fg.3 %]">Title</FONT></TH>
+	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
+		<TR bgcolor="[% user.colors.bg_3 %]">
+			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.colors.fg_3 %]">Title</FONT></TH>
 			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_link_user %]User[% END %]</FONT></TH>
 			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_link_ipid %]IPID[% END %]</FONT></TH>
-			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.fg.3 %]">Datestamp</FONT></TH>
+			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.colors.fg_3 %]">Datestamp</FONT></TH>
 			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_flag %]State[% END %]</FONT></TH>
 		</TR>
 		[% FOREACH sub = submissions %]
@@ -48,9 +48,9 @@ cur_time = Slash.db.getTime();
 			[% bg_toggle = !bg_toggle %]
 			<TD>
 				[%- IF link_sid -%]
-					<A HREF="[% constants.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</A>
+					<A HREF="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</A>
 				[%- ELSIF link_subid -%]
-					<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A>
+					<A HREF="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A>
 				[%- ELSE -%]
 					[% sub.subj %]
 				[%- END -%]
@@ -88,7 +88,7 @@ cur_time = Slash.db.getTime();
 	nickname | strip_literal;
 	IF uid != constants.anonymous_coward_uid;
 		' (<A HREF="';
-		constants.rootdir;
+		gSkin.rootdir;
 		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
 		uid;
 		'">';
@@ -98,7 +98,7 @@ cur_time = Slash.db.getTime();
 END %]
 
 [% BLOCK link_ipid %]
-<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
 [% END %]
 __seclev__
 10000

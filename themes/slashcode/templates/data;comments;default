@@ -63,7 +63,7 @@ __template__
 
 [% CASE 'no_discreate_msg' %]
 	[% returnme.data_constant = 1 %] 
-	You either aren't <a href="[% constants.rootdir %]/users.pl">logged in</a>
+	You either aren't <a href="[% gSkin.rootdir %]/users.pl">logged in</a>
 	or don't have sufficient privileges to submit a [% label %].
 
 [% CASE 'metamoderate_message' %]
@@ -81,6 +81,15 @@ __template__
 
 [% CASE 'deletecid' %]
 	Delete form.cid
+
+[% CASE 'try_journals' %]
+	No discussion or comments found for this request.
+	To create your own discussion, please use
+	<a href="[% gSkin.rootdir %]/journal.pl">journals</a>.
+	[% IF user.is_anon %]
+	    (You must be <a href="[% gSkin.rootdir %]/login.pl">logged in</a>
+	    to create a journal entry.)
+	[% END %]
 
 [% END %]
 

@@ -30,7 +30,7 @@ CASE "login error" %]
 [% # NO ANONYMOUS POSTING.
 CASE "no anonymous posting" %]
 Sorry, anonymous posting has been turned off. Please
-<A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
+<A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.
 
 [% # OPEN PROXY.
 CASE "open proxy" %]
@@ -38,7 +38,7 @@ Sorry, but according to our tests, you are trying to post [% IF !constants.comme
 from an open HTTP proxy.  Please close the proxy or ask your sysadmin or ISP 
 to do so, because open proxies are used to spam web boards like this
 one. [% IF constants.comments_portscan!=2 %]If you really can't close it and still want to post, you'll have to
-<A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.[% END %]
+<A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.[% END %]
 <p>If you have questions, mention that your proxy is at
 <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
 
@@ -54,7 +54,7 @@ You've already posted something in this discussion<BR>
 [% # ANONYMOUS DISALLOWED.
 CASE "anonymous disallowed" %]
 Sorry, anonymous posting has been turned off.
-Please <A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
+Please <A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.
 
 [% # POST ANON OPTION DISABLED.
 CASE "postanon_option_disabled" %]
@@ -227,7 +227,7 @@ have indicated you don't want comments pages ad-free, or you have
 set your daily limit of ad-free pages to lower than
 the default [% constants.subscribe_hits_btmd %].
 Any of these three possible issues can be resolved at
-<A HREF="[% constants.rootdir %]/subscribe.pl">your subscription page</A>.<P>
+<A HREF="[% gSkin.rootdir %]/subscribe.pl">your subscription page</A>.<P>
 
 [% CASE "moderations to be lost" %]
 [% PROCESS titlebar width="100%" title="You've Already Moderated this Discussion" %]

@@ -14,7 +14,7 @@ en_US
 __name__
 formLabel
 __template__
-<P><FONT COLOR="[% user.bg.3 %]"><B>[% value %]</B></FONT>
+<P><FONT COLOR="[% user.colors.bg_3 %]"><B>[% value %]</B></FONT>
 [% IF comment %]
 ([% comment %])
 [% END %]

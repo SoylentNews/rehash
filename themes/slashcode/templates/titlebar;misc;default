@@ -20,15 +20,15 @@ titlebar
 __template__
 <TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	<TR VALIGN="TOP">
-		<TD BGCOLOR="[% user.bg.3 %]"><IMG SRC="[% constants.imagedir %]/cl.gif" WIDTH="7" HEIGHT="10" ALT=""><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.3 %]" WIDTH="100%">
+		<TD BGCOLOR="[% user.colors.bg_3 %]"><IMG SRC="[% constants.imagedir %]/cl.gif" WIDTH="7" HEIGHT="10" ALT=""><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
+		<TD BGCOLOR="[% user.colors.bg_3 %]" WIDTH="100%">
 		<TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 			<TR>
-				<TD BGCOLOR="[% user.bg.3 %]"><FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]"><B>[% title %]</B></FONT></TD>
+				<TD BGCOLOR="[% user.colors.bg_3 %]"><FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.colors.fg_0 %]"><B>[% title %]</B></FONT></TD>
 			</TR>
 		</TABLE>
 		</TD>
-		<TD BGCOLOR="[% user.bg.3 %]" ALIGN="right"><IMG SRC="[% constants.imagedir %]/cr.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
+		<TD BGCOLOR="[% user.colors.bg_3 %]" ALIGN="right"><IMG SRC="[% constants.imagedir %]/cr.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
 		[% td_extra %]
 	</TR>
 </TABLE>

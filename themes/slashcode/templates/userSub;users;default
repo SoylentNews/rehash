@@ -27,7 +27,7 @@ __template__
 [% n = 0 %]
 [% FOREACH story = stories %]
 	[% n = n + 1 %]
-		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
+		<A HREF="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
 [% END %]
 
 __seclev__

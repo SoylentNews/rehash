@@ -17,9 +17,9 @@ __name__
 otherLinks
 __template__
 [% FOR tid = tids %]
-&middot; <A HREF="[% constants.rootdir %]/search.pl?topic=[% tid | fixparam %]">More [% topics.$tid.alttext %] stories</A><BR>
+&middot; <A HREF="[% gSkin.rootdir %]/search.pl?topic=[% tid | fixparam %]">More [% topics.$tid.alttext %] stories</A><BR>
 [% END %]
-&middot; <A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid | fixparam %]">Also by [% aid %]</A>
+&middot; <A HREF="[% gSkin.rootdir %]/search.pl?op=stories&amp;author=[% uid | fixparam %]">Also by [% aid %]</A>
 __seclev__
 500
 __version__

@@ -28,8 +28,8 @@ __template__
 					[% END;
 				%]
 
-				<small><b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b><br>
-				<b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_50=What%27s+New">What's old?</a> ]</b>  
+				<small><b>[ <a HREF="[% gSkin.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b><br>
+				<b>[ <a HREF="[% gSkin.rootdir %]/search.pl?query=&section=[% form.section %]&topic_50=What%27s+New">What's old?</a> ]</b>  
 				</small>
 				<!-- end whats new -->
 
@@ -61,8 +61,8 @@ __template__
 				%]
 
 
-				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_49=News">Older news</a> ]</b><br> 
-				<b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b>
+				<small><b>[ <a HREF="[% gSkin.rootdir %]/search.pl?query=&section=[% form.section %]&topic_49=News">Older news</a> ]</b><br> 
+				<b>[ <a HREF="[% gSkin.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b>
 				</small>
 				<!-- end of news -->
 
@@ -86,13 +86,13 @@ __template__
 
 						FOREACH event=myevents; %]
 				
-				<small><b><A HREF="[% constants.rootdir %]/article.pl?sid=[% event.sid %]">
+				<small><b><A HREF="[% gSkin.rootdir %]/article.pl?sid=[% event.sid %]">
 				[% event.title %]</A></b><br>
 				[% event.begin %] - [% event.end %]</small><p>
 						[% END;
 					END;
 				%]
-				<small><b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest an event</a> ]</b></small> 
+				<small><b>[ <a HREF="[% gSkin.rootdir %]/submit.pl?section=[% form.section %]">Suggest an event</a> ]</b></small> 
 				<! -- end calendar -->
 				
 				<!-- begin past features -->
@@ -108,7 +108,7 @@ __template__
 					[% END;
 				%]
 		
-				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_52=Past+Features">Older features</a> ]</b></small>
+				<small><b>[ <a HREF="[% gSkin.rootdir %]/search.pl?query=&section=[% form.section %]&topic_52=Past+Features">Older features</a> ]</b></small>
 				<!-- end pastfeatures -->
 				
 				<!-- guided opinion -->	
@@ -120,7 +120,7 @@ __template__
 				[% story.widget %]
 					[% END;
 				%]
-				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=opinions&section=[% form.section %]&topic_51=Guided+Opinion">Past opinions</a> ]</b></small> 
+				<small><b>[ <a HREF="[% gSkin.rootdir %]/search.pl?query=opinions&section=[% form.section %]&topic_51=Guided+Opinion">Past opinions</a> ]</b></small> 
 				<!-- end guided opinion -->
 	
 				<!-- begin new forum -->
@@ -143,7 +143,7 @@ __template__
 						
 						IF discussions; %]
 				<small>
-				<b><a href="[% constants.rootdir %]/comments.pl?op=user_created_index&amp;tid=[% t %]&amp;section=[% form.section %]&amp;type=recycle">[% forum_topics.$t %]</a> Total: ([%
+				<b><a href="[% gSkin.rootdir %]/comments.pl?op=user_created_index&amp;tid=[% t %]&amp;section=[% form.section %]&amp;type=recycle">[% forum_topics.$t %]</a> Total: ([%
 				total_discussions %])</b>
 				</small>
 				<ul>
@@ -151,7 +151,7 @@ __template__
 					<li>
 					<small>
 					<b>
-					<A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">
+					<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">
 								[% IF discussion.title.defined && discussion.title.length %]
 					[% discussion.title %]
 								[% ELSE %]

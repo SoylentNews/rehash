@@ -576,7 +576,7 @@ Deletion of this spider has been cancelled.
 Spider '[% spider_name %]' deleted.
 
 [% CASE "update_spider_confirmdelete" -%]
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
 <INPUT TYPE="HIDDEN" NAME="deletespider" value="1">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
@@ -603,7 +603,7 @@ Add operation cancelled, no tag given!
 Deletion of this keyword has been cancelled.
 
 [% CASE "deleteKeyword_confirm" -%]
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% form.keyword_id %]">
 <INPUT TYPE="HIDDEN" NAME="keyword_tag" VALUE="[% 
 form.keyword_tag | strip_html -%]">

@@ -148,24 +148,6 @@ sub findRSS {
 	return $answers;
 }
 
-####################################################################################
-sub findDiscussion {
-	my($self, $query, $options) = @_;
-	$options->{query} = $query;
-
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
-	my $constants = getCurrentStatic();
-
-	my $answers;
-	if ($constants->{panic} >= 1 or $constants->{search_google}) {
-		return;
-	} else {
-		$answers = $searchDB->findDiscussion($options, 0, MAX_NUM);
-	}
-
-	return $answers;
-}
-
 #################################################################
 sub DESTROY {
 }

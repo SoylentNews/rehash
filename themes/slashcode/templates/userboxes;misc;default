@@ -29,7 +29,7 @@ IF user.is_anon;
 	IF form.sid;
 		contents = BLOCK %]
 			[% PROCESS userlogin
-				return_url = "$constants.rootdir/article.pl?sid=$form.sid" %]
+				return_url = "$gSkin.rootdir/article.pl?sid=$form.sid" %]
 		[% END;
 	ELSE;
 		contents = BLOCK %]
@@ -47,7 +47,7 @@ IF !useredit.is_anon;
 	title = useredit.nickname | strip_literal;
 	title = title _ " ($useredit.uid)";
 	contents = BLOCK;
-		'<A HREF="'; constants.rootdir; '/~';
+		'<A HREF="'; gSkin.rootdir; '/~';
 			useredit.nickname | strip_paramattr; '/">';
                         useredit.nickname; '</A> ';
 		IF user.uid != useredit.uid;
@@ -168,7 +168,7 @@ IF !useredit.is_anon;
 	IF user.points || user.is_admin;
 		title = "Moderation";
 		contents = BLOCK %]
-<A HREF="[% constants.rootdir %]/~[% user.nickname | fixparam %]/">You</A>
+<A HREF="[% gSkin.rootdir %]/~[% user.nickname | fixparam %]/">You</A>
 have moderator access
 [% IF user.is_admin %](because you're an admin)[% END %]
 and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %]
@@ -179,7 +179,7 @@ and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %]
 	Slash.timeCalc(user.lastgranted, "%Y-%m-%d", hours); %])[% END %].
 [% IF user.points > 0 %]
 Welcome to those of you just joining: <B>please</B>
-read the <A HREF="[% constants.rootdir %]/moderation.shtml">moderator guidelines</A>
+read the <A HREF="[% gSkin.rootdir %]/moderation.shtml">moderator guidelines</A>
 for instructions.
 <P>&middot; You can't post &amp; moderate the same discussion.
 <BR>&middot; Concentrate on promoting more than demoting.

@@ -20,18 +20,19 @@ CREATE TABLE links (
 ) TYPE = MyISAM;
 
 #
-# Table structure for table 'links_sid'
+# Table structure for table 'links_for_stories'
 #
 
 DROP TABLE IF EXISTS links_for_stories;
 CREATE TABLE links_for_stories (
+	stoid MEDIUMINT UNSIGNED NOT NULL,
 	id char(32) DEFAULT '' NOT NULL,
-	sid CHAR(16) NOT NULL,
 	count INT DEFAULT 0 NOT NULL,
-	INDEX sid (sid),
-	PRIMARY KEY (id,sid)
+	PRIMARY KEY (id,stoid),
+	INDEX stoid (stoid)
 ) TYPE = InnoDB;
 
+#ALTER TABLE links_for_stories ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
 #ALTER TABLE links_for_stories ADD FOREIGN KEY (sid) REFERENCES stories(sid);
 #ALTER TABLE links_for_stories ADD FOREIGN KEY (id) REFERENCES links(id);
 

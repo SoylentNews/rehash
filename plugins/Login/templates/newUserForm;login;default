@@ -24,7 +24,7 @@ __template__
 %]
 
 <form action="[% constants.real_rootdir %]/login.pl" method="POST">
-<table align="CENTER" width="95%" bgcolor="[% user.bg.2 %]">
+<table align="CENTER" width="95%" bgcolor="[% user.colors.bg_2 %]">
 [% PROCESS formkey_tag %]
 	<tr>
 		<td><p>(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space,

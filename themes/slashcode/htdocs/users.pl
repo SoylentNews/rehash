@@ -17,6 +17,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $gSkin = getCurrentSkin();
 	my $formname = $0;
 	$formname =~ s/.*\/(\w+)\.pl/$1/;
 
@@ -314,9 +315,9 @@ sub main {
 		redirect(cleanRedirectUrl($form->{returnto}));
 		return;
 
-	# this will only redirect if it is a section-based rootdir, and
-	# NOT an isolated section (which has the same rootdir as real_rootdir)
-	} elsif ($op eq 'userclose' && $constants->{rootdir} ne $constants->{real_rootdir}) {
+	# this will only redirect if it is a section-based rootdir with
+	# its rootdir different from real_rootdir
+	} elsif ($op eq 'userclose' && $gSkin->{rootdir} ne $constants->{real_rootdir}) {
 		redirect($constants->{real_rootdir} . '/login.pl?op=userclose');
 		return;
 
@@ -563,7 +564,7 @@ sub newUser {
 			}
 		}
 		my $uid;
-		my $rootdir = getCurrentStatic('rootdir', 'value');
+		my $rootdir = getCurrentSkin('rootdir');
 
 		$uid = $slashdb->createUser(
 			$matchname, $form->{email}, $form->{newusernick}
@@ -1527,7 +1528,7 @@ sub tildeEd {
 		$tidref->{$tid}{alttext} = $alttext;
 	}
 
-	my $sections = $reader->getDescriptions('sections-contained');
+	my $sections = $reader->getDescriptions('skins');
 	while (my($section, $title) = each %$sections) {
 		next if !$section;
 		$sectionref->{$section}{checked} =
@@ -2167,6 +2168,7 @@ sub saveUser {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $plugins = $slashdb->getDescriptions('plugins');
 	my $uid;
 	my $user_editfield_flag;
@@ -2238,7 +2240,7 @@ sub saveUser {
 	my $homepage = $form->{homepage};
 	$homepage = '' if $homepage eq 'http://';
 	$homepage = fudgeurl($homepage);
-	$homepage = URI->new_abs($homepage, $constants->{absolutedir})
+	$homepage = URI->new_abs($homepage, $gSkin->{absolutedir})
 			->canonical
 			->as_string if $homepage ne '';
 	$homepage = substr($homepage, 0, 100) if $homepage ne '';
@@ -2248,7 +2250,7 @@ sub saveUser {
 		# fudgeurl() doesn't like webcal; will remove later anyway
 		$calendar_url =~ s/^webcal/http/i;
 		$calendar_url = fudgeurl($calendar_url);
-		$calendar_url = URI->new_abs($calendar_url, $constants->{absolutedir})
+		$calendar_url = URI->new_abs($calendar_url, $gSkin->{absolutedir})
 			->canonical
 			->as_string if $calendar_url ne '';
 
@@ -2853,7 +2855,7 @@ sub getUserAdmin {
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my $accesslist;
-	my $sectionref = $reader->getDescriptions('sections-contained');
+	my $sectionref = $reader->getDescriptions('skins');
 	$sectionref->{''} = getData('all_sections');
 
 	$field ||= 'uid';

@@ -21,7 +21,7 @@ __name__
 linkStory
 __template__
 [%# define site_url just in case url is not passed to template %]
-[% site_url = url ? url : constants.rootdir %] 
+[% site_url = url ? url : gSkin.rootdir %] 
 [% IF dynamic %]
 <A HREF="[% site_url %]/article.pl?sid=[% sid %][% IF mode %]&amp;mode=[% mode %][% END %][% IF tid_string %]&amp;tid=[% tid_string %][% END %][% IF threshold %]&amp;threshold=[% threshold %][% END %]" TITLE="[% title | strip_attribute %]">[% text %]</A>
 [% ELSE %]

@@ -45,11 +45,11 @@ show_uid_totals = (type == "uid" && (this_user.totalmods || this_user.downmods |
 
 bg_toggle = 0;
 bg_col_1 = "DDDDDD";
-bg_col_2 = user.bg.2;
+bg_col_2 = user.colors.bg_2;
 %]
 [% IF mods.size > 0  || show_uid_totals %]
 	[% IF user.is_admin and need_m2_form %]
-	<FORM  METHOD="POST" ACTION="[% constants.rootdir %]/comments.pl">
+	<FORM  METHOD="POST" ACTION="[% gSkin.rootdir %]/comments.pl">
 	[% END %]
 	[% IF meta_mod_only %]
 		<INPUT TYPE="HIDDEN" name="meta_mod_only" value="1">
@@ -61,30 +61,30 @@ bg_col_2 = user.bg.2;
 		   self_url = PROCESS base_url_mod;
 		   url_tail = PROCESS state_url_mod override = { show_m2s => show_m2s_op};
 		   self_url = self_url  _ url_tail;
-		   extra = "<TD width=\"14\" bgcolor=\"" _ user.bg.3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m2s ? "/contract.gif" : "/expand.gif") _ "\"  ALT=\"\" WIDTH=\"14\" HEIGHT=\"14\" BORDER=0></A></TD>";
+		   extra = "<TD width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m2s ? "/contract.gif" : "/expand.gif") _ "\"  ALT=\"\" WIDTH=\"14\" HEIGHT=\"14\" BORDER=0></A></TD>";
 		%]
 		<TR><TD ALIGN="CENTER">[% PROCESS titlebar width="100%" title=title td_extra = extra %]</TD></TR>
 	[% END %]
 	<TR><TD ALIGN="CENTER">
-	<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
-	<tr BGCOLOR="[% user.bg.3 %]">
-        	<th align=left><font COLOR="[% user.fg.3 %]" size=-1> Datestamp </font></th>
-		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> Was </font></th>
-		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> Now </font></th>
-		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> Val </font></th>
-		<th align=left><font COLOR="[% user.fg.3 %]" size=-1> Reason <font color=AAAAAA> / Metamod</font> </font></th>
-		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> M2 </font></th>
+	<TABLE BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
+	<tr BGCOLOR="[% user.colors.bg_3 %]">
+        	<th align=left><font COLOR="[% user.colors.fg_3 %]" size=-1> Datestamp </font></th>
+		<th align=right><font COLOR="[% user.colors.fg_3 %]" size=-1> Was </font></th>
+		<th align=right><font COLOR="[% user.colors.fg_3 %]" size=-1> Now </font></th>
+		<th align=right><font COLOR="[% user.colors.fg_3 %]" size=-1> Val </font></th>
+		<th align=left><font COLOR="[% user.colors.fg_3 %]" size=-1> Reason <font color=AAAAAA> / Metamod</font> </font></th>
+		<th align=right><font COLOR="[% user.colors.fg_3 %]" size=-1> M2 </font></th>
 		[% IF mod_to_from == "from"; total_cols = total_cols + 2; %]
 			[% IF skip_ip_disp == 1 and both_mods; total_cols = total_cols - 1; ELSE %]
-			<th align=left><font COLOR="[% user.fg.3 %]" size=-1>IPID </font></th>
+			<th align=left><font COLOR="[% user.colors.fg_3 %]" size=-1>IPID </font></th>
 			[% END %]
-			<th align="LEFT"><font COLOR="[% user.fg.3 %]" size=-1>Moderator</font></th>
+			<th align="LEFT"><font COLOR="[% user.colors.fg_3 %]" size=-1>Moderator</font></th>
 		[% END %]
 		[% IF mod_to_from == "to" || both_mods; total_cols = total_cols + 2; %]
 			[% IF both_mods and skip_ip_disp ==2; total_cols = total_cols - 1; ELSE  %]
-			<th align=left><font COLOR="[% user.fg.3 %]" size=-1>IPID </font></th>
+			<th align=left><font COLOR="[% user.colors.fg_3 %]" size=-1>IPID </font></th>
 			[% END %]
-			<th align=left><font COLOR="[% user.fg.3 %]" size=-1>Moderatee<font color=AAAAAA> / Metamoderator</font></font></th>
+			<th align=left><font COLOR="[% user.colors.fg_3 %]" size=-1>Moderatee<font color=AAAAAA> / Metamoderator</font></font></th>
 		[% END %]
 	</tr>
 		[% hr_shown = 0; 
@@ -109,7 +109,7 @@ bg_col_2 = user.bg.2;
 	<TR bgcolor="[% bg_toggle ? bg_col_1 : bg_col_2 %]">
 		<TD ALIGN="LEFT">
 			[% IF show_cid %]
-			<A HREF="[% constants.rootdir %]/comments.pl?sid=[%
+			<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[%
 			moderation.sid %]&amp;cid=[% moderation.cid %]">[%
 			moderation.ts.substr(5,-3) %]</A>
 			[% ELSE %]
@@ -203,7 +203,7 @@ bg_col_2 = user.bg.2;
 </TD></TR>
 [% IF user.is_admin and (need_m2_form || need_m2_button )%]
 	[% IF need_m2_button %]
-		<TR bgcolor="[% user.bg.2 %]"><TD colspan="[% total_cols %]" align="right">
+		<TR bgcolor="[% user.colors.bg_2 %]"><TD colspan="[% total_cols %]" align="right">
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="moderate">
 		<INPUT TYPE="submit" name="submit" value="MetaModerate">
 		</TD></TR>
@@ -246,12 +246,12 @@ END;
 
 IF num_modifiers > 0 %]
 
-<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="300">
+<TABLE BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="300">
 
-	<TR BGCOLOR="[% user.bg.3 %]">
-		<TH ALIGN="LEFT"><FONT COLOR="[% user.fg.3 %]">Starting Score:&nbsp;&nbsp;&nbsp;</FONT></TH>
-		<TH COLSPAN="2" ALIGN="RIGHT"><FONT COLOR="[% user.fg.3 %]">[% modifier_hr.score_start || 0 %]</FONT></TH>
-		<TH ALIGN="LEFT"><FONT COLOR="[% user.fg.3 %]">&nbsp;point[% IF modifier_hr.score_start != 1 %]s[% END %]</FONT></TH>
+	<TR BGCOLOR="[% user.colors.bg_3 %]">
+		<TH ALIGN="LEFT"><FONT COLOR="[% user.colors.fg_3 %]">Starting Score:&nbsp;&nbsp;&nbsp;</FONT></TH>
+		<TH COLSPAN="2" ALIGN="RIGHT"><FONT COLOR="[% user.colors.fg_3 %]">[% modifier_hr.score_start || 0 %]</FONT></TH>
+		<TH ALIGN="LEFT"><FONT COLOR="[% user.colors.fg_3 %]">&nbsp;point[% IF modifier_hr.score_start != 1 %]s[% END %]</FONT></TH>
 	</TR>
 
 [% FOREACH modifier = modifiers %]
@@ -305,14 +305,14 @@ END %]
 [% END %]
 
 [% BLOCK link_ipid %]
-<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
 [% END %] 
 
 [% BLOCK nick_and_uid;
 	nickname | strip_literal;
 	IF uid != constants.anonymous_coward_uid;
 		' (<A HREF="';
-	constants.rootdir;
+	gSkin.rootdir;
 		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
 		uid;
 		'">';
@@ -335,13 +335,13 @@ END %]
 [% END %]
 
 [% BLOCK base_url_mod %]
-	[% base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;fieldname=";
+	[% base_url = gSkin.rootdir _ "/users.pl?op=userinfo&amp;fieldname=";
 	IF type == "uid" or type == "cuid";
-		base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;uid=" _ value;
+		base_url = gSkin.rootdir _ "/users.pl?op=userinfo&amp;uid=" _ value;
 	ELSIF type =="cid";
-		base_url = constants.rootdir _ "/comments.pl?sid=${mods.0.sid}&amp;pid=${mods.0.pid}&amp;cid=${mods.0.cid}";
+		base_url = gSkin.rootdir _ "/comments.pl?sid=${mods.0.sid}&amp;pid=${mods.0.pid}&amp;cid=${mods.0.cid}";
 	ELSIF type =="global";
-		base_url = constants.rootdir _ "/admin.pl?op=recent_mods";
+		base_url = gSkin.rootdir _ "/admin.pl?op=recent_mods";
 	ELSE; 
 		fp_fieldname = BLOCK; form.fieldname | fixparam; END;
 		base_url = base_url _ fp_fieldname _ "&amp;userfield=" _ value;

@@ -13,7 +13,7 @@ meta
 __template__
 [% name = "del_$article.id" %]
 [% PROCESS titlebar width => "100%" title = "Deleting Article" %]
-<FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/journal.pl" METHOD="POST">
 <INPUT TYPE="hidden" NAME="op" VALUE="remove">
 <INPUT TYPE="hidden" NAME="[% name %]" VALUE="1">
 <P>Alright, before we do this thing, I just want to really make

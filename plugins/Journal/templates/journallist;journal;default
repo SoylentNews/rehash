@@ -23,7 +23,7 @@ __template__
 [%# PROCESS titlebar title => "$nickname's Journal Entries", width => "100%" %]
 <P>
 
-[% IF showopts %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
+[% IF showopts %]<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/journal.pl">
 <INPUT TYPE="hidden" NAME="op" VALUE="remove">[% END %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
   <TR>
@@ -32,10 +32,10 @@ __template__
   </TR>
 [% FOREACH article = articles %]
   <TR>
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]"><B>[% article.2 %]</B></A></TD>
+    <TD VALIGN="TOP"><A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]"><B>[% article.2 %]</B></A></TD>
     <TD VALIGN="TOP"><EM>[% Slash.timeCalc(article.1) %]</EM></TD>
 [%- IF showopts %]
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</A></TD>
+    <TD VALIGN="TOP"><A HREF="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</A></TD>
     <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% article.0 %]" VALUE="1"></TD>
 [%- END %]
   </TR>

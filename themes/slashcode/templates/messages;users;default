@@ -45,11 +45,11 @@ __template__
 	<B>passwd</B>=mailed to [% form.email | strip_literal %]<BR>
 	[% IF suadmin_flag %]
 		<P>Now you can edit the newly created user  
-		<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% uid %]">
+		<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% uid %]">
 		[% form.newusernick %], UID [% uid %]</A></P>
 	[% ELSE %]
 	<P>Once you receive your password, you can
-	<A HREF="[% constants.rootdir %]/users.pl">log in and set your account up.</A>
+	<A HREF="[% gSkin.rootdir %]/users.pl">log in and set your account up.</A>
 	[% END %]
 
 [% CASE 'reset_acct_msg' %]
@@ -57,7 +57,7 @@ This message has been sent to to verify your registration and the associated ema
 
 Your password has been set to: [% newpasswd %].  Go to the URL below to log in:
 
-<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
+<[% gSkin.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
 
 Make sure you then CHANGE YOUR PASSWORD!
 
@@ -70,7 +70,7 @@ administrator ([% constants.adminmail %]).
 Your new password is [% newpasswd %].  Your old password will still work until
 this password is used.  Go to the URL below to log in:
 
-<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
+<[% gSkin.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
 
 Make sure you then CHANGE YOUR PASSWORD!
 
@@ -98,7 +98,7 @@ up top there, where you can customize [% constants.sitename %],
 change your password, or just click pretty widgets to kill time.
 
 [% CASE 'tilded_customize_msg' %]
-<TABLE WIDTH="100%" BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0">
+<TABLE WIDTH="100%" BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER" BORDER="0">
 	<TR><TD>
 	<P>Look ma, I'm configurable!
 	<B>Important:</B> If you leave these all unchecked, it means you

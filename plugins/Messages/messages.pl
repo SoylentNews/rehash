@@ -74,7 +74,7 @@ sub edit_message {
 [% IF error_message %][% error_message %][% END %]
 <!-- end error message -->
 
-<FORM ACTION="[% constants.rootdir %]/messages.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/messages.pl" METHOD="POST">
 	<INPUT TYPE="HIDDEN" NAME="op" VALUE="send_message">
 [% IF form.formkey %]
 	<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">

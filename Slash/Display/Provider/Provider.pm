@@ -78,8 +78,8 @@ sub fetch {
 		print STDERR "fetch text : $text\n" if $DEBUG > 1;
 		my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
 
-		my $temp = $reader->getTemplateByName($text, [qw(tpid page section)]);
-		$compname = "$text;$temp->{page};$temp->{section}"
+		my $temp = $reader->getTemplateByName($text, [qw(tpid page skin)]);
+		$compname = "$text;$temp->{page};$temp->{skin}"
 			if $self->{COMPILE_DIR};
 		$name = $temp->{tpid};
 		undef $text;
@@ -252,12 +252,14 @@ my $anon = Slash::getCurrentAnonymousCoward();
 my $user = Slash::getCurrentUser();
 my $form = Slash::getCurrentForm();
 my $constants = Slash::getCurrentStatic();
+my $gSkin = Slash::getCurrentSkin();
 
 $stash->set('Slash', $context->plugin('Slash'));
 $stash->set('anon', $anon);
 $stash->set('user', $user);
 $stash->set('form', $form);
 $stash->set('constants', $constants);
+$stash->set('gSkin', $gSkin);
 $stash->set('env', { map { (lc, $ENV{$_}) } keys %ENV });
 EOF
 

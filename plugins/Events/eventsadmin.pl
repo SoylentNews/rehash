@@ -14,7 +14,8 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
-	my $events   = getObject('Slash::Events');
+	my $gSkin     = getCurrentSkin();
+	my $events    = getObject('Slash::Events');
 
 	my $ops = {
 		edit     => {
@@ -41,14 +42,14 @@ sub main {
 
 # eventsadmin.pl is not for regular users
 	unless ($user->{is_admin}) {
-		my $rootdir = getCurrentStatic('rootdir');
+		my $rootdir = getCurrentSkin('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
 	}
 	header() or return;
 	print createMenu('events');
 
-	$ops->{$op}{function}->($slashdb, $constants, $user, $form, $events);
+	$ops->{$op}{function}->($slashdb, $constants, $user, $form, $events, $gSkin);
 
 	footer();
 }
@@ -105,7 +106,7 @@ sub editEvent {
 
 ##################################################################
 sub listEvents { 
-	my ($slashdb,$constants,$user,$form,$events) = @_;
+	my($slashdb, $constants, $user, $form, $events, $gSkin) = @_;
 
 	# I really hate all this ugly select code
 	if ($form->{beginmonth} && $form->{beginyear} && $form->{beginday}) {
@@ -136,14 +137,14 @@ sub listEvents {
 		for my $entry (@$stories) {
 			push @items, {
 				title	=> $entry->[1],
-				'link'	=> ($constants->{absolutedir} . "/article.pl?sid=$entry->[0])"),
+				'link'	=> ($gSkin->{absolutedir} . "/article.pl?sid=$entry->[0])"),
 			};
 		}
 
 		xmlDisplay(rss => {
 			channel => {
 				title		=> "$constants->{sitename} events",
-				'link'		=> "$constants->{absolutedir}/",
+				'link'		=> "$gSkin->{absolutedir}/",
 			},
 			image	=> 1,
 			items	=> \@items

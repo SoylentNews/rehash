@@ -13,7 +13,7 @@ __template__
 [% IF metamods.size > 0 %]
 	[%
 		bg_col_1 = "DDDDDD";
-		bg_col_2 = user.bg.2;
+		bg_col_2 = user.colors.bg_2;
 		bg_toggle = 0;
 		total_m2s = 0;
 		done_m2s = 0;
@@ -30,21 +30,21 @@ __template__
 		   self_url = PROCESS base_url_m2 value=the_user.uid;
 		   url_tail = PROCESS state_url_m2 override = { m2_listing => m2_listing_op };
 		   self_url = self_url  _ url_tail;
-		   extra = "<td width=\"14\" bgcolor=\"" _ user.bg.3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" bordeR=0></a></td>";
+		   extra = "<td width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" bordeR=0></a></td>";
 		%]
 		<tr><td align="center">[% PROCESS titlebar width="100%" title=title td_extra = extra %]</td></tr>
 	[% END %]
 	<tr><td align="center">
 	<table cellspacing="0" cellpadding="2" width="100%">
-	<tr bgcolor="[% user.bg.3 %]">
-		<th align="left"><font size="-1" color="[% user.fg.3 %]">Date</font></th>
-		<th align="left"><font size="-1" color="[% user.fg.3 %]">Comment</font></th>
-		<th align="left"><font size="-1" color="[% user.fg.3 %]">Mod</font></th>
-		<th align="left"><font size="-1" color="[% user.fg.3 %]">Vote</font></th>
-		<th align="left"><font size="-1" color="[% user.fg.3 %]">M2</font></th>
-		<th align="center"><font size="-1" color="[% user.fg.3 %]">Unan</font></th>
-		<th align="center"><font size="-1" color="[% user.fg.3 %]">Off</font></th>
-		<th align="center"><font size="-1" color="[% user.fg.3 %]">LD</font></th>
+	<tr bgcolor="[% user.colors.bg_3 %]">
+		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Date</font></th>
+		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Comment</font></th>
+		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Mod</font></th>
+		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Vote</font></th>
+		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">M2</font></th>
+		<th align="center"><font size="-1" color="[% user.colors.fg_3 %]">Unan</font></th>
+		<th align="center"><font size="-1" color="[% user.colors.fg_3 %]">Off</font></th>
+		<th align="center"><font size="-1" color="[% user.colors.fg_3 %]">LD</font></th>
 	</tr>
 	[% FOREACH m2 = metamods %]
 	[%
@@ -83,7 +83,7 @@ __template__
 	<TR BGCOLOR="[% bg_toggle ? bg_col_1 : bg_col_2 %]">
 		[% bg_toggle = !bg_toggle %]
 		<td><font size="-1">[% Slash.timeCalc(m2.ts) %]</font></td>
-		<td><a href="[% constants.rootdir %]/comments.pl?sid=[% m2.sid %]&amp;cid=[% m2.cid %]">[% m2.subject %]</a></td>
+		<td><a href="[% gSkin.rootdir %]/comments.pl?sid=[% m2.sid %]&amp;cid=[% m2.cid %]">[% m2.subject %]</a></td>
 		<td>[% IF m2.modval > 0 %]+[% ELSIF m2.modval < 0 %]-[% END %][% m2.modval %] [% reasons.${m2.reason}.name %]</td>
 		<td>[% IF m2.val>0 %]Fair[% ELSE %]Unfair[% END %]</td>
 		[% IF !reasons.${m2.reason}.m2able;
@@ -105,9 +105,9 @@ __template__
 	[% END %]
 	[% END %]
 	[% IF m2_listing %]
-	<tr bgcolor="[% user.bg.2 %]"><TD COLSPAN="8">[% PROCESS horiz_rule %]</td></tr>
+	<tr bgcolor="[% user.colors.bg_2 %]"><TD COLSPAN="8">[% PROCESS horiz_rule %]</td></tr>
 	[% END %]
-	<tr bgcolor="[% user.bg.2 %]"><td colspan="2"><font size="-1" ><B>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></font></td>
+	<tr bgcolor="[% user.colors.bg_2 %]"><td colspan="2"><font size="-1" ><B>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></font></td>
 	<td colspan="3"><font size="-1"><b>
 		Unfair Votes: [% unfair_m2s %]
 		([% Slash.getData('percentage', { sum => unfair_m2s, count => total_m2s}, 'misc') %]) 
@@ -132,7 +132,7 @@ __template__
 [% END %]
 
 [% BLOCK base_url_m2; 
-	base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;uid=" _ value;
+	base_url = gSkin.rootdir _ "/users.pl?op=userinfo&amp;uid=" _ value;
 	base_url;
 END %]
 [% BLOCK state_url_m2;

@@ -24,7 +24,7 @@ mistake...well, you should have used the 'Preview' button!<P>
 [% IF metamod_elig %]
 For [% constants.sitename %]'s moderation system to function properly,
 we need as many users as possible to
-<A HREF="[% constants.rootdir %]/metamod.pl">Meta-Moderate</A>.
+<A HREF="[% gSkin.rootdir %]/metamod.pl">Meta-Moderate</A>.
 You are currently eligible... why not hop over and help?
 [% END %]
 
@@ -36,7 +36,7 @@ You are currently eligible... why not hop over and help?
 		&& (messagecodes.4 && !prefs.4.defined) %]
 		If you'd like to be notified when your comments are
 		moderated and/or replied-to, please visit the
-		<A HREF="[% constants.rootdir %]/my/messages">Message
+		<A HREF="[% gSkin.rootdir %]/my/messages">Message
 		Preferences page</a>.
 	[% END %]
 [% END %]

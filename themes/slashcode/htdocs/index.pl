@@ -18,7 +18,7 @@ my $start_time = Time::HiRes::time;
 	my $form      = getCurrentForm();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my($stories, $Stories, $section);
+	my($stories, $Stories); # could this be MORE confusing please? kthx
 	if ($form->{op} eq 'userlogin' && !$user->{is_anon}
 			# Any login attempt, successful or not, gets
 			# redirected to the homepage, to avoid keeping
@@ -55,18 +55,24 @@ my $start_time = Time::HiRes::time;
 		redirect($ENV{SCRIPT_NAME});
 	}
 
-	$section = $reader->getSection($form->{section});
+	my $skin_name = $form->{section};
+	my $skid = $skin_name
+		? $reader->getSkidFromName($skin_name)
+		: determineCurrentSkin();
+	setCurrentSkin($skid);
+	my $gSkin = getCurrentSkin();
+	$skin_name = $gSkin->{name};
 
 	# Decide what our limit is going to be.
 	my $limit;
 	if ($form->{issue}) {
 		if ($user->{is_anon}) {
-			$limit = $section->{artcount} * 7;
+			$limit = $gSkin->{artcount_max} * 3;
 		} else {
 			$limit = $user->{maxstories} * 7;
 		}
-	} elsif ($user->{is_anon} && $section->{type} ne 'collected') {
-		$limit = $section->{artcount};
+	} elsif ($user->{is_anon}) {
+		$limit = $gSkin->{artcount_max};
 	} else {
 		$limit = $user->{maxstories};
 	}
@@ -77,10 +83,9 @@ my $start_time = Time::HiRes::time;
 	# Slashdot, normalized such that the median request takes 1 second.
 	# Times listed are elapsed time from the previous markpoint.
 
-	$stories = $reader->getStoriesEssentials(
-		$limit, $form->{section},
-		'',
-	);
+	my $gse_hr = { tids => $gSkin->{nexus} };
+	$gse_hr->{limit} = $user->{maxstories} if !$user->{is_anon} && $user->{maxstories};
+	$stories = $reader->getStoriesEssentials($gse_hr);
 
 	# We may, in this listing, have a story from the Mysterious Future.
 	# If so, there are three possibilities:
@@ -107,12 +112,12 @@ my $start_time = Time::HiRes::time;
 	# TIMING MARKPOINT
 	# Median 0.145 seconds, 90th percentile 0.222 seconds
 
-	return do_rss($reader, $constants, $user, $form, $stories, $section) if $rss;
+	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss;
 
-	# See comment in plugins/Journal/journal.pl for its call of
-	# getSectionColors() as well.
-	$user->{currentSection} = $section->{section};
-	Slash::Utility::Anchor::getSectionColors();
+#	# See comment in plugins/Journal/journal.pl for its call of
+#	# getSkinColors() as well.
+#	$user->{currentSection} = $section->{section};
+	Slash::Utility::Anchor::getSkinColors();
 
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
@@ -131,15 +136,15 @@ my $start_time = Time::HiRes::time;
 		$last_date  =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
 	}
 
-	my $StandardBlocks = displayStandardBlocks($section, $stories,
+	my $StandardBlocks = displayStandardBlocks($gSkin, $stories,
 		{ first_date => $first_date, last_date => $last_date }
 	);
 
 	# TIMING MARKPOINT
 	# Median 0.235 seconds, 90th percentile 0.513 seconds
 
-	my $title = getData('head', { section => $section });
-	header({ title => $title, link => $linkrel }, $section->{section}) or return;
+	my $title = getData('head', { skin => $skin_name });
+	header({ title => $title, link => $linkrel }) or return;
 
 	# TIMING MARKPOINT
 	# Median 0.090 seconds, 90th percentile 0.145 seconds
@@ -156,16 +161,16 @@ my $start_time = Time::HiRes::time;
 
 	footer();
 
-	writeLog($form->{section});
+	writeLog($skin_name);
 
 	# TIMING MARKPOINT
 	# Median 0.037 seconds, 90th percentile 0.059 seconds
-
 }
 
 
 sub do_rss {
-	my($reader, $constants, $user, $form, $stories, $section) = @_;
+	my($reader, $constants, $user, $form, $stories, $skin_name) = @_;
+	my $gSkin = getCurrentSkin();
 	my @rss_stories;
 	for (@$stories) {
 		my $story = $reader->getStory($_->{sid});
@@ -176,8 +181,8 @@ sub do_rss {
 		push @rss_stories, { story => $story };
 	}
 
-	my $title = getData('rsshead', { section => $section });
-	my $name = lc($constants->{basedomain}) . '.rss';
+	my $title = getData('rsshead', { skin => $skin_name });
+	my $name = lc($gSkin->{basedomain}) . '.rss';
 
 	xmlDisplay('rss', {
 		channel	=> {
@@ -192,7 +197,7 @@ sub do_rss {
 		filename		=> $name,
 	});
 
-	writeLog($form->{section});
+	writeLog($skin_name);
 	return;
 }
 
@@ -257,27 +262,28 @@ sub rmBid {
 
 #################################################################
 sub displayStandardBlocks {
-	my($section, $older_stories_essentials, $other) = @_;
+	my($skin, $older_stories_essentials, $other) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $cache = getCurrentCache();
+	my $gSkin = getCurrentSkin();
 
 	return if $user->{noboxes};
 
 	my(@boxes, $return, $boxcache);
-	my($boxBank, $sectionBoxes) = $reader->getPortalsCommon();
-	my $getblocks = $section->{section} || 'index';
+	my($boxBank, $skinBoxes) = $reader->getPortalsCommon();
+	my $getblocks = $skin->{skid} || $constants->{mainpage_skid};
 
 	# two variants of box cache: one for index with portalmap,
 	# the other for any other section, or without portalmap
 
-	if ($user->{exboxes} && ($getblocks eq 'index' || $constants->{slashbox_sections})) {
+	if ($user->{exboxes} && ($getblocks == $constants->{mainpage_skid} || $constants->{slashbox_sections})) {
 		@boxes = getUserBoxes();
 		$boxcache = $cache->{slashboxes}{index_map}{$user->{light}} ||= {};
 	} else {
-		@boxes = @{$sectionBoxes->{$getblocks}}
-			if ref $sectionBoxes->{$getblocks};
+		@boxes = @{$skinBoxes->{$getblocks}}
+			if ref $skinBoxes->{$getblocks};
 		$boxcache = $cache->{slashboxes}{$getblocks}{$user->{light}} ||= {};
 	}
 
@@ -296,7 +302,7 @@ sub displayStandardBlocks {
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
 				getData('morehead'),
-				getOlderStories($older_stories_essentials, $section,
+				getOlderStories($older_stories_essentials, $skin,
 					{ first_date => $other->{first_date}, last_date => $other->{last_date} }),
 				$bid,
 				'',
@@ -340,7 +346,7 @@ sub displayStandardBlocks {
 					getData('friends_journal_head'),
 					slashDisplay('friendsview', { articles => $articles}, { Return => 1 }),
 					$bid,
-					"$constants->{rootdir}/my/journal/friends",
+					"$gSkin->{rootdir}/my/journal/friends",
 					$getblocks
 				);
 			}
@@ -377,6 +383,7 @@ sub displayStories {
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
+	my $gSkin     = getCurrentSkin();
 	my $ls_other  = { user => $user, reader => $reader, constants => $constants };
 	my($today, $x) = ('', 0);
 	my $cnt = int($user->{maxstories} / 3);
@@ -431,7 +438,7 @@ sub displayStories {
 			'link'	=> $msg->{readmore},
 			sid	=> $story->{sid},
 			tid	=> $story->{tid},
-			section	=> $story->{section}
+			skin	=> $story->{section}
 		}, "", $ls_other);
 
 		my $link;
@@ -487,16 +494,16 @@ sub displayStories {
 			if ($SECT->{rootdir}) {
 				$url = $SECT->{rootdir} . '/';
 			} elsif ($user->{is_anon}) {
-				$url = $constants->{rootdir} . '/' . $story->{section} . '/';
+				$url = $gSkin->{rootdir} . '/' . $story->{section} . '/';
 			} else {
-				$url = $constants->{rootdir} . '/index.pl?section=' . $story->{section};
+				$url = $gSkin->{rootdir} . '/index.pl?section=' . $story->{section};
 			}
 
 			push @links, [ $url, $SECT->{hostname} || $SECT->{title} ];
 		}
 
 		if ($user->{seclev} >= 100) {
-			push @links, [ "$constants->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", getData('edit') ];
+			push @links, [ "$gSkin->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", getData('edit') ];
 		}
 
 		# I added sid so that you could set up replies from the front page -Brian

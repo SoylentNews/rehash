@@ -13,7 +13,7 @@ editMiner
 __template__
 [% INCLUDE titlebar width="100%" title="Editing miner $miner.name" -%]
 
-<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
+<FORM action="[% gSkin.rootdir %]/newsvac.pl" method="POST">
 
 <table border="0">
         <tr valign=top>
@@ -240,7 +240,7 @@ the other to avoid confusion!</b>
 
 [%	FOREACH url = url_ar -%]
 	<br>[% url.0 %]<b>
-	<a href="[% constants.rootdir %]/newsvac.pl?op=editurl&url_id=[% url.0 
+	<a href="[% gSkin.rootdir %]/newsvac.pl?op=editurl&url_id=[% url.0 
 	-%]" target="_new">[% url.1 %]</a></b>
 [%	END -%]
 

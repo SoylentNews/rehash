@@ -17,15 +17,15 @@ security
 __template__
 
 [% tabs = [
-	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
-	{ link = "$constants.rootdir/admin.pl?op=recent_mods",	label = "Mods",			sel_label = "recent_mods" },
-	{ link = "$constants.rootdir/admin.pl?op=recent_requests", label = "Reqs",              sel_label = "requests" },
-	{ link = "$constants.rootdir/admin.pl?op=recent",       label = "Posting",              sel_label = "recent" },
-	{ link = "$constants.rootdir/users.pl?op=topabusers",   label = "Abusers",              sel_label = "abusers" },
-	{ link = "$constants.rootdir/users.pl?op=listreadonly", label = "Read&nbsp;Only",       sel_label = "readonly" },
-	{ link = "$constants.rootdir/users.pl?op=listbanned",   label = "Banned",               sel_label = "banned" },
-	{ link = "$constants.rootdir/stats.pl",       		label = "Info",         	sel_label = "stats" },
-	{ link = "$constants.rootdir/admin.pl?op=topics",       label = "Config",               sel_label = "config" },
+	{ link = "$gSkin.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent_mods",	label = "Mods",			sel_label = "recent_mods" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent_requests", label = "Reqs",              sel_label = "requests" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent",       label = "Posting",              sel_label = "recent" },
+	{ link = "$gSkin.rootdir/users.pl?op=topabusers",   label = "Abusers",              sel_label = "abusers" },
+	{ link = "$gSkin.rootdir/users.pl?op=listreadonly", label = "Read&nbsp;Only",       sel_label = "readonly" },
+	{ link = "$gSkin.rootdir/users.pl?op=listbanned",   label = "Banned",               sel_label = "banned" },
+	{ link = "$gSkin.rootdir/stats.pl",       		label = "Info",         	sel_label = "stats" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",       label = "Config",               sel_label = "config" },
 
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]

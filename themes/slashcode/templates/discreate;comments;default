@@ -12,7 +12,7 @@ __name__
 discreate
 __template__
 [% begin = BLOCK %]
-<FORM METHOD="POST" ACTION="[% constants.rootdir %]/comments.pl" ENCTYPE="application/x-www-form-urlencoded">
+<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/comments.pl" ENCTYPE="application/x-www-form-urlencoded">
 [% PROCESS formkey_tag %]
 <INPUT TYPE="hidden" NAME="op" VALUE="create_discussion">
 [% END %]

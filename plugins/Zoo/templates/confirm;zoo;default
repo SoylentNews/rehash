@@ -12,17 +12,17 @@ __name__
 confirm
 __template__
 [% USE Slash %]
-<FORM ACTION="[% constants.rootdir %]/zoo.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/zoo.pl" METHOD="POST">
 <P>
 [% IF over_socialized %]
 	You have over [% IF user.is_subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] friends and foes at the moment. This puts you over our limit of[% IF constants.subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] relationships that we allow. At this point you may only remove relationships with users. <br>
 	[% IF constants.subscriber && constants.people_max_subscriber && !user.is_subscriber %]
-		If you would like to up your limit to [% constants.people_max_subscriber %] you might want to consider <A HREF="[% constants.rootdir %]/subscribe.pl">subscribing</A>. 
+		If you would like to up your limit to [% constants.people_max_subscriber %] you might want to consider <A HREF="[% gSkin.rootdir %]/subscribe.pl">subscribing</A>. 
 	[% END %]
 	<TABLE>
 		<TR>
 			<TD>
-				So do you want to remove your relationship with <B><A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B>? 
+				So do you want to remove your relationship with <B><A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B>? 
 			</TD>
 			<TD>
 				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %] CHECKED[% END %]> 
@@ -53,31 +53,31 @@ __template__
 <B>Important Stuff:</B>
 <LI> Your relationships are public information, and visible to other [% constants.sitename %] readers.
 <LI> Updates to friends and foes are cached and may take a few minutes to take effect.
-<LI> Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">what these icons mean</A>
-or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">where you change their values?</A>
+<LI> Curious <A HREF="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2200">what these icons mean</A>
+or <A HREF="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2200">where you change their values?</A>
 <P>
-<FONT COLOR="[% user.bg.3 %]" size="+1"><B>Your Friends who ...</B></FONT><br>
+<FONT COLOR="[% user.colors.bg_3 %]" size="+1"><B>Your Friends who ...</B></FONT><br>
 <TABLE WIDTH="100%">
 	<TR>
 		<TD>
-			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Friend</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
-			&nbsp;<A HREF="[% constants.rootdir %]/my/comments">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</A>
+			<P><FONT COLOR="[% user.colors.bg_3 %]"><B>Consider <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Friend</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
+			&nbsp;<A HREF="[% gSkin.rootdir %]/my/comments">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</A>
 		</TD>
 		<TD>
-			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Foe</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
-			&nbsp;<A HREF="[% constants.rootdir %]/my/comments">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</A>
+			<P><FONT COLOR="[% user.colors.bg_3 %]"><B>Consider <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Foe</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
+			&nbsp;<A HREF="[% gSkin.rootdir %]/my/comments">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</A>
 		</TD>
 	</TR>
 	<TR>
 		<TD VALIGN="top">
 		[% FOREACH geek = mutual.${Slash.FOF} %]
-			<A HREF="[% constants.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</A>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.FOF %]<BR>
+			<A HREF="[% gSkin.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</A>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.FOF %]<BR>
 		[% END %]
 		&nbsp;
 		</TD>
 		<TD VALIGN="top">
 		[% FOREACH geek = mutual.${Slash.EOF} %]
-			<A HREF="[% constants.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</A>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.EOF %]<BR>
+			<A HREF="[% gSkin.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</A>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.EOF %]<BR>
 		[% END %]
 		&nbsp;
 		</TD>

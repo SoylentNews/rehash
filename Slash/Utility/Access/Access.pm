@@ -762,7 +762,8 @@ sub isDiscussionOpen {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $people = $slashdb->getUser($discussion->{uid}, 'people');
-	if ($discussion->{commentstatus} eq 'friends_only' || $discussion->{commentstatus} eq 'friends_fof_only') {
+	if ($discussion->{commentstatus} eq 'friends_only'
+		|| $discussion->{commentstatus} eq 'friends_fof_only') {
 		my $orig = $discussion->{type};
 		$discussion->{type} = 'archived';
 		if ($people) {

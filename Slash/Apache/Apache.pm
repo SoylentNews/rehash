@@ -42,7 +42,7 @@ sub SlashVirtualUser ($$$) {
 	createCurrentVirtualUser($cfg->{VirtualUser} = $user);
 	createCurrentDB		($cfg->{slashdb} = Slash::DB->new($user));
 	createCurrentStatic	($cfg->{constants} = $cfg->{slashdb}->getSlashConf());
-	$cfg->{constants}{section} = 'index'; # This is in here till I finish up some work -Brian
+#	$cfg->{constants}{section} = 'index'; # This is in here till I finish up some work -Brian
 
 	# placeholders ... store extra placeholders in DB?  :)
 	for (qw[user form themes template cookie objects cache site_constants]) {
@@ -68,35 +68,26 @@ sub SlashVirtualUser ($$$) {
 	createCurrentUser($anonymous_coward);
 
 	$cfg->{menus} = $cfg->{slashdb}->getMenus();
-	my $sections = $cfg->{slashdb}->getSections();
-	for (values %$sections) {
-		if ($_->{hostname} && $_->{url}) {
-			my $new_cfg;
-			for (keys %{$cfg->{constants}}) {
-				$new_cfg->{$_} = $cfg->{constants}{$_}
-					unless $_ eq 'form_override';
-			}
-			# Must not just copy the form_override info
-			$new_cfg->{form_override} = {}; 
-			$new_cfg->{absolutedir} = $_->{url};
-			$new_cfg->{absolutedir_secure} = set_rootdir($_->{url}, $cfg->{constants}{absolutedir_secure});
-			$new_cfg->{rootdir} = set_rootdir($_->{url}, $cfg->{constants}{rootdir});
-			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
-			$new_cfg->{defaultsubsection} = $_->{defaultsubsection} if $_->{defaultsubsection};
-			$new_cfg->{defaulttopic} = $_->{defaulttopic} if $_->{defaulttopic};
-			$new_cfg->{defaultdisplaystatus} = $_->{defaultdisplaystatus} if $_->{defaultdisplaystatus};
-			$new_cfg->{defaultcommentstatus} = $_->{defaultcommentstatus} if $_->{defaultcommentstatus};
-			$new_cfg->{defaultsection} = $_->{defaultsection} || $_->{section};
-			$new_cfg->{section} = $_->{section};
-			$new_cfg->{basedomain} = $_->{hostname};
-			$new_cfg->{static_section} = $_->{section};
-			$new_cfg->{index_handler} = $_->{index_handler};
 
-# Should no longer be needed -Brian
-			#$new_cfg->{form_override}{section} = $_->{section};
-			$cfg->{site_constants}{$_->{hostname}} = $new_cfg;
-		}
-	}
+	########################################
+	# Skip the nonsense that used to be here.  Previously we
+	# were copying the whole set of constants, and then putting
+	# sectional data into it as well, for each section that had
+	# a hostname defined.  First of all, of course, sections
+	# have become skins so the data can be found in getSkin().
+	# But also, we're not doing this stuff with separate sets of
+	# constants for each hostname.  Because the skin-specific
+	# data is split off into getSkin()'s hashref, we only need
+	# one set of data for $constants.  These fields were moved
+	# from constants to skins:
+	# absolutedir, rootdir, cookiedomain, defaulttopic,
+	# defaultdisplaystatus, defaultcommentstatus,
+	# basedomain, index_handler, and though I'm not sure
+	# it was ever used, absolutedir_secure.
+	# These fields are gone because they are now obviated:
+	# defaultsubsection, defaultsection, static_section.
+	########################################
+
 	$cfg->{slashdb}->{_dbh}->disconnect if $cfg->{slashdb}->{_dbh};
 }
 
@@ -208,14 +199,17 @@ sub SlashCompileTemplates ($$$) {
 	# then be compiled; now, we will get errors in
 	# the error log for templates that don't check
 	# the input values; that can't easily be helped
-	for my $t (keys %$templates) {
-		my($name, $page, $section) = split /$;/, $t;
-		slashDisplay($name, 0, {
-			Page	=> $page,
-			Section	=> $section,
-			Return	=> 1,
-			Nocomm	=> 1
-		});
+	for my $name (sort keys %$templates) {
+		for my $page (sort keys %{$templates->{$name}}) {
+			for my $skin (sort keys %{$templates->{$name}{$page}}) {
+				slashDisplay($name, 0, {
+					Page	=> $page,
+					Skin	=> $skin,
+					Return	=> 1,
+					Nocomm	=> 1
+				});
+			}
+		}
 	}
 
 	# Pudge, any reason we still need this Begin/Done debug log? - Jamie
@@ -316,11 +310,12 @@ sub IndexHandler {
 
 	return DECLINED unless $r->is_main;
 	my $constants = getCurrentStatic();
+	my $gSkin     = getCurrentSkin();
 	my $uri = $r->uri;
 	my $is_user = $r->header_in('Cookie') =~ $USER_MATCH;
 
-	if ($constants->{rootdir}) {
-		my $path = URI->new($constants->{rootdir})->path;
+	if ($gSkin->{rootdir}) {
+		my $path = URI->new($gSkin->{rootdir})->path;
 		$uri =~ s/^\Q$path//;
 	}
 
@@ -330,13 +325,13 @@ sub IndexHandler {
 	# my $dbon = $slashdb->sqlConnect(); 
 	my $dbon = dbAvailable();
 
-	if ($uri eq '/' && $constants->{index_handler} ne 'IGNORE') {
+	if ($uri eq '/' && $gSkin->{index_handler} ne 'IGNORE') {
 		my $basedir = $constants->{basedir};
 
 		# $USER_MATCH defined above
 		if ($dbon && $is_user) {
-			$r->uri("/$constants->{index_handler}");
-			$r->filename("$basedir/$constants->{index_handler}");
+			$r->uri("/$gSkin->{index_handler}");
+			$r->filename("$basedir/$gSkin->{index_handler}");
 			return OK;
 		} elsif (!$dbon) {
 			# no db (you may wish to symlink index.shtml to your real
@@ -348,7 +343,7 @@ sub IndexHandler {
 	
 			# consider using File::Basename::basename() here
 			# for more robustness, if it ever matters -- pudge
-			my($base) = split(/\./, $constants->{index_handler});
+			my($base) = split(/\./, $gSkin->{index_handler});
 			$base = $constants->{index_handler_noanon}
 				if $constants->{index_noanon};
 
@@ -376,7 +371,7 @@ sub IndexHandler {
 		my $slashdb = getCurrentDB();
 		my $section = $slashdb->getSection($key);
 		my $index_handler = $section->{index_handler}
-			|| $constants->{index_handler};
+			|| $gSkin->{index_handler};
 		if ($section && $section->{id} && $index_handler ne 'IGNORE') {
 			my $basedir = $constants->{basedir};
 
@@ -429,7 +424,7 @@ sub IndexHandler {
 	# * referrer exists AND is external to our site
 	if ($constants->{referrer_external_static_redirect} && !$is_user && $uri eq '/article.pl') {
 		my $referrer = $r->header_in("Referer");
-		my $referrer_domain = $constants->{referrer_domain} || $constants->{basedomain};
+		my $referrer_domain = $constants->{referrer_domain} || $gSkin->{basedomain};
 		my $the_request = $r->the_request;
 		if ($referrer
 			&& $referrer !~ m{^(?:https?:)?(?://)?(?:[\w-.]+\.)?$referrer_domain(?:/|$)}

@@ -12,7 +12,7 @@ Prints a pollbooth
 * can_vote = can this user still vote?
 * voters = number of voters
 * comments = number of comments
-* sect = section
+* primaryskid = primaryskid
 * returnto = Optional URL to return to once vote is registered.
 
 
@@ -40,20 +40,20 @@ __template__
 	[% END %]
 
 	<P><EM>[% IF has_voted %](You've already voted.)[% ELSIF !poll_open %](Poll is closed.)[% END %]</EM><BR>
-	[ <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-	<A HREF="[% constants.rootdir %]/pollBooth.pl?"><B>Polls</B></A> ] <BR>
+	[ <A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
+	<A HREF="[% gSkin.rootdir %]/pollBooth.pl?"><B>Polls</B></A> ] <BR>
 	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
 
 [% ELSE %]
 
-	<FORM ACTION="[% constants.rootdir %]/pollBooth.pl">
+	<FORM ACTION="[% gSkin.rootdir %]/pollBooth.pl">
 		[%- IF returnto -%]
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="vote_return">
 		<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% returnto | strip_attribute %]">
 		[%- END -%]
 		<INPUT TYPE="hidden" NAME="qid" VALUE="[% qid | strip_attribute %]">
-		[% IF user.currentSection %]
-		<INPUT TYPE="hidden" NAME="section" VALUE="[% user.currentSection | strip_attribute %]">
+		[% IF user.currentSkin %]
+		<INPUT TYPE="hidden" NAME="section" VALUE="[% user.currentSkin | strip_attribute %]">
 		[% END %]
 	<B>[% question %]</B>
 
@@ -63,8 +63,8 @@ __template__
 	[% END %]
 
 	<BR><INPUT TYPE="submit" VALUE="Vote">
-	[ <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-	<A HREF="[% constants.rootdir %]/pollBooth.pl"><B>Polls</B></A> ] <BR>
+	[ <A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
+	<A HREF="[% gSkin.rootdir %]/pollBooth.pl"><B>Polls</B></A> ] <BR>
 	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
 	</FORM>
 

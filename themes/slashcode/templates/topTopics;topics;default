@@ -20,15 +20,14 @@ __template__
 <TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="3">
 [% FOREACH topic = topics %]
 	<TR><TD ALIGN="RIGHT" VALIGN="TOP>
-		<FONT SIZE="6" COLOR="[% user.bg.3 %]">[% topic.alttext %]</FONT>
+		<FONT SIZE="6" COLOR="[% user.colors.bg_3 %]">[% topic.alttext %]</FONT>
 		<BR>( [% topic.count %] )
-		[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-			SRC="[% constants.imagedir %]/topics/[% image.image %]"
+		<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
+			SRC="[% constants.imagedir %]/topics/[% topic.image %]"
 			BORDER="0" ALT="[% topic.alttext %]" ALIGN="RIGHT" VALIGN="TOP"
-			HSPACE="0" VSPACE="10" WIDTH="[% image.width %]"
-			HEIGHT="[% image.height %]"></A>
-	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
+			HSPACE="0" VSPACE="10" WIDTH="[% topic.width %]"
+			HEIGHT="[% topic.height %]"></A>
+	</TD><TD BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP">
 	[% FOREACH story = topic.stories %]
 		[% IF story.sid %]
 			[% storylinks = Slash.linkStory({
@@ -45,7 +44,7 @@ __template__
 		[% END %]
 	[% END %]
 	[% FOREACH question = topic.polls %]
-                                <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [%
+                                <A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [%
  Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.<BR>
 	[% END %]
 	</TD></TR>

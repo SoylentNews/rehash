@@ -21,15 +21,15 @@ __template__
 	width => "100%"
 %]
 
-[% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/zoo.pl">
+[% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/zoo.pl">
 [% PROCESS formkey_tag %]
 <INPUT TYPE="hidden" NAME="op" VALUE="delete">
 <INPUT TYPE="hidden" NAME="type" VALUE="friend">[% END %]
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 [% FOREACH friend = friends %]
-    <TR><TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/">[% friend.0 %]</A></TD>
+    <TR><TD VALIGN="TOP"><A HREF="[% gSkin.rootdir %]/~[% friend.0 | fixparam %]/">[% friend.0 %]</A></TD>
 [% IF friend.2 %]
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/journal/"><B>[% friend.3 %]</B></A></TD>
+    <TD VALIGN="TOP"><A HREF="[% gSkin.rootdir %]/~[% friend.0 | fixparam %]/journal/"><B>[% friend.3 %]</B></A></TD>
     <TD VALIGN="TOP"><EM>[% Slash.timeCalc(friend.2) %]</EM></TD>
 [% ELSE %]
     <TD VALIGN="TOP">&nbsp;</TD>

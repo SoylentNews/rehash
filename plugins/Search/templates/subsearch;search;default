@@ -12,14 +12,18 @@ __name__
 subsearch
 __template__
 <P>
-[% FOREACH entry=entries %]
-		<B><A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</A></B><BR>
+[% FOREACH entry = entries %]
+		<B><A HREF="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</A></B><BR>
 		<FONT SIZE="-1">On [% Slash.timeCalc(entry.time) %]</FONT><BR>
 		[% entry.story %]<BR>
 		<FONT SIZE="-1">
 		[% submission_state = Slash.db.getDescriptions('submission-state') %]
-		[% section = Slash.db.getSection(entry.section); topic = Slash.db.getTopic(entry.tid) %]
-		[% IF section.section == constants.real_section %]<A HREF="[% constants.real_rootdir %]/submit.pl?op=list">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : constants.rootdir %]/submit.pl?section=[% entry.section %]&amp;op=list">[% section.title %]</A>[% END %] &gt; <A HREF="[% constants.rootdir %]/search.pl?tid=[% entry.tid %]&amp;op=submissions">[% topic.alttext %]</A><BR>
+		[% skin = Slash.db.getSkin(entry.skid) %]
+		Section: [% IF skin.name == 'mainpage' %]<A HREF="[% constants.real_rootdir %]/submit.pl?op=list">Main</A>[% ELSE %]<A HREF="[% skin.url ? skin.url : gSkin.rootdir %]/submit.pl?section=[% entry.skin %]&amp;op=list">[% skin.title %]</A>[% END %] &gt;
+		[% FOREACH tid = entry.tid %]
+			[% topic = Slash.db.getTopic(tid) %]
+			<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</A>[% ",&nbsp;" UNLESS loop.last %]
+		[% END %]<BR>
 		State: [% del = entry.del; submission_state.$del %]<BR>
 		[% IF entry.note %]
 		Note: [% entry.note %]<BR>

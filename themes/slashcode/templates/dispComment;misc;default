@@ -25,13 +25,13 @@ __template__
 	<TR><TD>
 	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 		<TR VALIGN="TOP">
-			<TD BGCOLOR="[% user.bg.3 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
-			<TD BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD>
-				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]"><A NAME="[% cid %]"><B>[% subject %]</B></A>
+			<TD BGCOLOR="[% user.colors.bg_3 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
+			<TD BGCOLOR="[% user.colors.bg_3 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD>
+				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.colors.fg_0 %]"><A NAME="[% cid %]"><B>[% subject %]</B></A>
 [% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
 </FONT>
 			</TD></TR></TABLE></TD>
-			<TD BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
+			<TD BGCOLOR="[% user.colors.bg_3 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
 		</TR>
 
 		<TR>
@@ -44,7 +44,7 @@ __template__
 [% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
 [% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
 on [% Slash.timeCalc(time) %]
-[% IF sid && cid %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>[% END %]
+[% IF sid && cid %] (<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>[% END %]
 
 [% has_homepage = homepage && homepage.length > 8;
    has_journal = journal_last_entry_date.search('[1-9]');
@@ -71,7 +71,7 @@ on [% Slash.timeCalc(time) %]
 		<TR><TD BGCOLOR="#006666" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
 		<TR>
 			<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-			<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+			<TD BGCOLOR="[% user.colors.bg_1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.colors.bg_1 %]">
 [% comment %]
 [% UNLESS user.nosigs %]
 	<BR>[% sig %]
@@ -90,7 +90,7 @@ on [% Slash.timeCalc(time) %]
 			</TD></TR></TABLE></TD>
 			<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		</TR>
-		<TR><TD BGCOLOR="[% user.bg.3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
+		<TR><TD BGCOLOR="[% user.colors.bg_3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
 	</TABLE>
 	</TD></TR>
 

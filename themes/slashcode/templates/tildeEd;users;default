@@ -28,12 +28,12 @@ __template__
 [% PROCESS titlebar title=title width="100%" %]
 
 <TABLE WIDTH="95%" BORDER="0" CELLPADDING="3" CELLSPACING="3" ALIGN="CENTER">
-	<TR BGCOLOR="[% user.bg.3 %]">
-		<TH><FONT COLOR="[% user.fg.3 %]">Authors</FONT></TH>
-		<TH><FONT COLOR="[% user.fg.3 %]">Topics</FONT></TH>
-		<TH><FONT COLOR="[% user.fg.3 %]">Sections</FONT></TH>
+	<TR BGCOLOR="[% user.colors.bg_3 %]">
+		<TH><FONT COLOR="[% user.colors.fg_3 %]">Authors</FONT></TH>
+		<TH><FONT COLOR="[% user.colors.fg_3 %]">Topics</FONT></TH>
+		<TH><FONT COLOR="[% user.colors.fg_3 %]">Sections</FONT></TH>
 	</TR>
-	<TR BGCOLOR="[% user.bg.2 %]">
+	<TR BGCOLOR="[% user.colors.bg_2 %]">
 		<TD VALIGN="TOP">
 
 [% FOREACH aid = aid_order %]

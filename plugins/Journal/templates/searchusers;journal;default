@@ -12,7 +12,7 @@ __name__
 searchusers
 __template__
 [% begin = BLOCK %]
-<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl" ENCTYPE="application/x-www-form-urlencoded">
+<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/journal.pl" ENCTYPE="application/x-www-form-urlencoded">
 <INPUT TYPE="hidden" NAME="op" VALUE="searchusers">
 [% END %]
 

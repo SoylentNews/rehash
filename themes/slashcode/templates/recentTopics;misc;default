@@ -14,12 +14,12 @@ recentTopics
 __instructions__
 placeholder
 __template__
-	<TD><A HREF="[% constants.rootdir %]/search.pl?topic=news"><IMG
+	<TD><A HREF="[% gSkin.rootdir %]/search.pl?topic=news"><IMG
 		SRC="[% constants.imagedir %]/topics/topicnews.gif"
 		WIDTH="34" HEIGHT="44"
 		BORDER="0" ALT="News"></A>
 	</TD>
-	<TD><A HREF="[% constants.rootdir %]/search.pl?topic=slashdot"><IMG
+	<TD><A HREF="[% gSkin.rootdir %]/search.pl?topic=slashdot"><IMG
 		SRC="[% constants.imagedir %]/topics/topicslashdot.gif"
 		WIDTH="100" HEIGHT="34"
 		BORDER="0" ALT="Slashdot"></A>

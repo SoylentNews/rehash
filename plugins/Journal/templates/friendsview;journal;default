@@ -16,25 +16,24 @@ __template__
 <TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 [% FOREACH diatribe = articles %]
 	[% topic = diatribe.topic %]
-	[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 	<TR><TD>
 		[% PROCESS titlebar title => diatribe.description, width => "90%" %]
 		<TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0"> <TR>
-			<TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
-				<B>Posted by <A HREF="[% constants.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/">[% diatribe.nickname %]</A> [% user.aton %]
-				<I>[% Slash.timeCalc(diatribe.date) %]</I> (<A HREF="[% constants.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</A>)
+			<TD BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP">
+				<B>Posted by <A HREF="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/">[% diatribe.nickname %]</A> [% user.aton %]
+				<I>[% Slash.timeCalc(diatribe.date) %]</I> (<A HREF="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</A>)
 			</TD>
-			<TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP" ALIGN="RIGHT">
+			<TD BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP" ALIGN="RIGHT">
 				&nbsp;
 				[% IF diatribe.discussion %]
-					<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>
+					<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>
 				[% END %]
 			</TD>
 		</TR>
 		<TR>
 			<TD COLSPAN="2">
 			[%# at some point, this needs to be linked to the topic lookup by discussion %]
-			<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]" ALIGN="RIGHT">
+			<IMG SRC="[% constants.imagedir %]/topics/[% topic.image %]" ALT="[% topic.alttext %]" WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" ALIGN="RIGHT">
 			[% diatribe.article %]
 			</TD>
 		</TR>
@@ -48,13 +47,13 @@ __template__
 		<TR VALIGN="TOP">
 			<TD ALIGN="RIGHT" COLSPAN="2"><FONT SIZE="1">
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
+					<A HREF="[% gSkin.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
+					<A HREF="[% gSkin.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
 				[% END %]
 			</FONT></TD>
 		</TR>

@@ -106,7 +106,7 @@ Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="100%" title="User already exists" %]
 	The nickname [% nick %] or another similar to it has already been taken. 
-	<A HREF="[% constants.rootdir %]/login.pl?op=newuserform">Please try another choice</A>.<BR>
+	<A HREF="[% gSkin.rootdir %]/login.pl?op=newuserform">Please try another choice</A>.<BR>
 
 [% CASE 'checklist_err' %]
 [% PROCESS titlebar width="100%" title="Too many options" %]
@@ -152,12 +152,12 @@ Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]
 [% CASE 'email_invalid' %]
 	Sorry! The email address "[% form.realemail | strip_literal %]" is
 	either a null string or a malformed email address. Please 
-	<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">re-enter your
+	<A HREF="[% gSkin.rootdir %]/users.pl?op=newuserform">re-enter your
 	email address</A>, again.
 
 [% CASE 'email_do_not_match' %]
 	Sorry! The email addresses you've entered do not match.  Please go back and
-	carefully  <A HREF="[% constants.rootdir %]/users.pl?op=newuserform">re-enter
+	carefully  <A HREF="[% gSkin.rootdir %]/users.pl?op=newuserform">re-enter
 	your email address information</A>, again.
 
 [% CASE 'sig_too_long_err' %]

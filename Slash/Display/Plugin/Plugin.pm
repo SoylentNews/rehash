@@ -30,7 +30,7 @@ of this Slash Template plugin.
 
 C<[% Slash.Display %]> provides access to C<slashDisplay()>.  Use
 this B<sparingly>, only when you need to pass in certain options
-(such as setting Section or Page).  In the general case, use
+(such as setting Skin or Page).  In the general case, use
 C<PROCESS> in the template, or C<INCLUDE> if necessary.
 This method will always set C<Return>, so you may assign its
 result to a variable, or call it by itself to have its result

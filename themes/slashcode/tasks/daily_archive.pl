@@ -89,8 +89,9 @@ sub archiveStories {
 	
 	my $totalTriedStories = 0;
 	my $totalChangedStories = 0;
-	for (@{$to_archive}) {
-		my($sid, $title, $section) = @{$_};
+	for my $story (@$to_archive) {
+		# XXXSECTIONTOPICS - now $section is NOT set here - Jamie
+		my($stoid, $sid, $title, $section) = @$story;
 
 		slashdLog("Archiving $sid") if verbosity() >= 2;
 		$totalTriedStories++;
@@ -125,7 +126,7 @@ sub archiveStories {
 		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file);
 		if (defined($cc)) {
 			# all is well, data was found
-			$slashdb->setStory($sid, {
+			$slashdb->setStory($stoid, {
 				writestatus  => 'archived',
 				commentcount => $cc,
 				hitparade    => $hp,

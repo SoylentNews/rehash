@@ -35,7 +35,7 @@ END;
 
 -%]
 
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatekeyword">
 <INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% keyword_id %]">
 
@@ -53,7 +53,7 @@ END;
 <INPUT TYPE="SUBMIT" NAME="deletekeyword" VALUE="Delete Keyword">
 </FORM>
 <P>
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="addkeyword">
 <INPUT TYPE="SUBMIT" VALUE="Add Keyword using Tag">:&nbsp;&nbsp;
 <INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="" SIZE=10>

@@ -22,7 +22,7 @@ __template__
 		<TD ALIGN="RIGHT">([% acls.$acl.size %])</TD>
 		<TD>
 		[% FOREACH uid = acls.$acl.nsort %]
-			<A HREF="[% constants.rootdir %]/users.pl?uid=[% uid | strip_attribute %]">[% uid %]</A>
+			<A HREF="[% gSkin.rootdir %]/users.pl?uid=[% uid | strip_attribute %]">[% uid %]</A>
 		[% END %]
 		</TD>
 	</TR>

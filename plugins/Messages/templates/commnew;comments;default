@@ -16,7 +16,7 @@ __template__
 
 <P>
 [% reply.nickname %] has posted a new comment on [% constants.sitename %],
-<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
+<B><A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
 %]">[% reply.subject %]</A></B>, attached to
 <B><A HREF="[% discussion.url %]">[% discussion.title %]</A></B>.
 </P>

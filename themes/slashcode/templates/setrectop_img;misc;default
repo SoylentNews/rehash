@@ -15,7 +15,7 @@ setrectop_img
 __template__
 [% USE Slash %]
 
-<TD><A HREF="[% constants.rootdir %]/search.pl?topic=[% id %]"><IMG
+<TD><A HREF="[% gSkin.rootdir %]/search.pl?topic=[% id %]"><IMG
                 SRC="[% image %]"
                 WIDTH="[% width %]" HEIGHT="[% height %]"
                 BORDER="0" ALT="[% alttext %]" TITLE="[% alttext %]"></A>

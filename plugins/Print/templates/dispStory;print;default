@@ -20,7 +20,7 @@ __seclev__
 10000
 __template__
 [% UNLESS form.nohtml;
-	topic = "<A HREF=\"$constants.absolutedir/search.pl?topic=$topic.tid\">$topic.alttext</A>";
+	topic = "<A HREF=\"$gSkin.absolutedir/search.pl?topic=$topic.tid\">$topic.alttext</A>";
 ELSE;
 	topic = topic.alttext;
 END -%]
@@ -34,7 +34,7 @@ END -%]
 <TR><TD COLSPAN="2" NOWRAP>from the <EM>[% story.dept %]</EM> dept.</TD></TR>
 [% END -%]
 </TABLE>
-<SMALL>[% constants.absolutedir -%]/article.pl?sid=[% story.sid %]</SMALL>
+<SMALL>[% gSkin.absolutedir -%]/article.pl?sid=[% story.sid %]</SMALL>
 
 <P>[% Slash.parseSlashizedLinks(story.introtext) %]</P>
 [% IF story.bodytext -%]

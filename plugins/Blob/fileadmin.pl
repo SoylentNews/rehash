@@ -19,6 +19,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $gSkin     = getCurrentSkin();
 	my $blobdb    = getObject('Slash::Blob');
 
 	my $ops = {
@@ -52,7 +53,7 @@ sub main {
 
 	# admin.pl is not for regular users
 	unless ($user->{is_admin}) {
-		redirect("$constants->{rootdir}/");
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 

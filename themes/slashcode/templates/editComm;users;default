@@ -39,7 +39,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="savecomm">
 <INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user_edit.uid %]">
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.colors.bg_5 %]">
 	<TR>
 		<TD VALIGN=MIDDLE>
         	<P><B>Email Display</B>
@@ -96,7 +96,7 @@ __template__
 		Anonymous posts start at 0, logged in posts start
 		at 1.  Moderators add and subtract points according to
 		the <A 
-		HREF="[% constants.rootdir %]/moderation.shtml">Guidelines</A>)
+		HREF="[% gSkin.rootdir %]/moderation.shtml">Guidelines</A>)
 
 		<P><B>Highlight Threshold</B>
 

@@ -87,6 +87,7 @@ sub daily_generateDailyMailees {
 
 sub daily_generateDailyMail {
 	my($mailing, $user, $constants, $slashdb) = @_;
+	my $gSkin = getCurrentSkin();
 
 	my $stories;
 	# get data if not gotten yet
@@ -114,8 +115,8 @@ sub daily_generateDailyMail {
 	}
 
 	my $absolutedir = $user->{is_admin}
-		? $constants->{absolutedir_secure}
-		: $constants->{absolutedir};
+		? $gSkin->{absolutedir_secure}
+		: $gSkin->{absolutedir};
 
 	return slashDisplay($mailing,
 		{ stories => $stories, urlize => \&daily_urlize, absolutedir => $absolutedir },

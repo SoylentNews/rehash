@@ -256,7 +256,7 @@ ALTER TABLE sections ADD COLUMN index_handler varchar(30) DEFAULT "index.pl" NOT
 ALTER TABLE sections ADD COLUMN writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL;
 
 #slashd_log table
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slashd','[% constants.rootdir %]/admin.pl?op=slashd',500,17);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slashd','[% gSkin.rootdir %]/admin.pl?op=slashd',500,17);
 
 # Note this is different than what Brian committed Wednesday morning;
 # were any sites updated with that?
@@ -543,7 +543,7 @@ source /tmp/qidproblem;
 
 
 # For plugins/Admin (ignore if you're not using that plugin):
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Recent','[% constants.rootdir %]/admin.pl?op=recent',500,18);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Recent','[% gSkin.rootdir %]/admin.pl?op=recent',500,18);
 
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', -1,'Don\'t Display');
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', 1,'Display');
@@ -721,10 +721,10 @@ UPDATE section_topics SET type = 'topic_3' where type = 3;
 UPDATE section_topics SET type = 'topic_4' where type = 4;
 
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% gSkin.rootdir %]/my/foes',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% gSkin.rootdir %]/my/freaks',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% gSkin.rootdir %]/my/friends/friends',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% gSkin.rootdir %]/my/friends/foes',1,1);
 
 DELETE FROM vars WHERE name='m2_consensus_waitmult';
 INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitpow', '0.8', 'Positive real number, 0.2 to 5 is sensible. Between 0 and 1, older mods are chosen for M2 preferentially. Greater than 1, newer');
@@ -732,12 +732,12 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitpow', '0.8
 # End of T_2_3_0_45, Start of T_2_3_0_46
 
 # One more time!
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% constants.rootdir %]/my/friends',1,1);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans',1,2);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes',1,3);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks',1,4);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,5);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,6);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% gSkin.rootdir %]/my/friends',1,1);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% gSkin.rootdir %]/my/fans',1,2);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% gSkin.rootdir %]/my/foes',1,3);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% gSkin.rootdir %]/my/freaks',1,4);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% gSkin.rootdir %]/my/friends/friends',1,5);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% gSkin.rootdir %]/my/friends/foes',1,6);
 
 # For plugins/Zoo (ignore if you're not using that plugin)
 # Run the script "plugins/Zoo/rebuildPeople"
@@ -756,7 +756,7 @@ ALTER TABLE accesslog ADD INDEX op_part (op(12), section);
 
 INSERT INTO vars (name, value, description) VALUES ('mod_unm2able_token_cost','1','What is the token cost of performing an un-M2able mod?');
 
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friend\'s Journals','[% constants.rootdir %]/journal.pl?op=friends',0,5);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friend\'s Journals','[% gSkin.rootdir %]/journal.pl?op=friends',0,5);
 DELETE FROM menus WHERE menu="journal" AND label="Friends";
 DELETE FROM menus WHERE menu="zoo";
 
@@ -781,7 +781,7 @@ UPDATE menus SET menu='adv-admin', menuorder=9 WHERE label='Site' AND menu='admi
 UPDATE menus SET menuorder=9 WHERE label='Slashd' AND menu='admin';
 UPDATE menus SET menuorder=10 WHERE label='Recent' AND menu='admin';
 
-REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Advanced', '[% constants.rootdir %]/topics.pl', 500, 11);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Advanced', '[% gSkin.rootdir %]/topics.pl', 500, 11);
 
 # none of these existed for me previously, so no rows were updated -- pudge
 # That's fine. Only sites that updated in a brief window would have these -- jamie
@@ -814,17 +814,17 @@ DELETE FROM vars WHERE name='stir';
 
 # split the 2 admin menus into 3
 # adv-admin is now config
-UPDATE menus SET label='Config', value='[% constants.rootdir %]/admin.pl?op=topics' WHERE label='Advanced';
+UPDATE menus SET label='Config', value='[% gSkin.rootdir %]/admin.pl?op=topics' WHERE label='Advanced';
 UPDATE menus SET menu='info' WHERE label='Site' AND menu='adv-admin';
 UPDATE menus SET menu='config' WHERE menu='adv-admin';
 UPDATE menus SET menu='info' WHERE label='Recent';
 UPDATE menus SET menu='info' WHERE label='Slashd';
 
-REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Info', '[% constants.rootdir %]/admin.pl?op=recent', 500, 12);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Normal', '[% constants.rootdir %]/admin.pl', 500, 9);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Info', '[% constants.rootdir %]/admin.pl?op=recent', 500, 10);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Normal', '[% constants.rootdir %]/admin.pl', 500, 12);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Config', '[% constants.rootdir %]/admin.pl?op=topics', 500, 13);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Info', '[% gSkin.rootdir %]/admin.pl?op=recent', 500, 12);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Normal', '[% gSkin.rootdir %]/admin.pl', 500, 9);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Info', '[% gSkin.rootdir %]/admin.pl?op=recent', 500, 10);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Normal', '[% gSkin.rootdir %]/admin.pl', 500, 12);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Config', '[% gSkin.rootdir %]/admin.pl?op=topics', 500, 13);
 INSERT INTO vars (name, value, description) VALUES ('content_type_webpage','text/html','The Content-Type field for webpages');
 
 # This needs to be set for all OSDN sites, and we should make sure that sites are using the right DB. -Brian
@@ -1040,7 +1040,7 @@ ALTER TABLE sections DROP extras;
 DELETE FROM templates WHERE section="admin";
 
 # Change for plugins/Journal (ignore if not using that plugin)
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Edit Preferences','[% constants.rootdir %]/journal.pl?op=editprefs',1,4);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Edit Preferences','[% gSkin.rootdir %]/journal.pl?op=editprefs',1,4);
 
 # End of T_2_3_0_59, Start of T_2_3_0_60
 
@@ -1491,11 +1491,11 @@ INSERT INTO vars (name, value, description) VALUES ('subscribe_future_plug','0',
 
 # End of T_2_3_0_93, Start of T_2_3_0_94 - 2003/05/08
 
-INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Stats','Stats','[% constants.rootdir %]/stats.pl',1,2);
+INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Stats','Stats','[% gSkin.rootdir %]/stats.pl',1,2);
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Reports', '[% constants.rootdir %]/stats.pl?op=report', 1, 1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Graphs',  '[% constants.rootdir %]/stats.pl?op=list&amp;type=graphs', 1, 2);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Dumps',   '[% constants.rootdir %]/stats.pl?op=list', 1, 3);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Reports', '[% gSkin.rootdir %]/stats.pl?op=report', 1, 1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Graphs',  '[% gSkin.rootdir %]/stats.pl?op=list&amp;type=graphs', 1, 2);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Dumps',   '[% gSkin.rootdir %]/stats.pl?op=list', 1, 3);
 
 # Change for plugins/Subscribe (ignore if not using that plugin)
 ALTER TABLE subscribe_payments ADD COLUMN memo VARCHAR(255) NOT NULL AFTER method;
@@ -1719,7 +1719,7 @@ ALTER TABLE people TYPE=InnoDB;
 # End of T_2_3_0_103, Start of T_2_3_0_104 - 2003/07/01
 
 DELETE FROM menus WHERE menu="topics" AND label="Recent Topics";
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'topics','Topic Hierarchy','','[% constants.rootdir %]/topics.pl?op=hierarchy ',0,1,1);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'topics','Topic Hierarchy','','[% gSkin.rootdir %]/topics.pl?op=hierarchy ',0,1,1);
 
 # End of T_2_3_0_104, Start of T_2_3_0_105 - 2003/07/09
 
@@ -2190,15 +2190,15 @@ DELETE from vars where name = "submissions_listing_page_size";
 INSERT INTO vars (name, value, description) VALUES ('submissions_accepted_only_page_size', 20, "Number of submissions shown per page when only accepted submissions are shown.  Set to 0 to show all");
 INSERT INTO vars (name, value, description) VALUES ('submissions_all_page_size', 40, "Number of submissions shown per page on a user page when all submission statuses are shown.  Set to 0 to show all");
 
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Stories','stories','[% constants.rootdir %]/admin.pl',100,0,1);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Mods','recent_mods','[% constants.rootdir %]/admin.pl?op=recent_mods',500,0,2);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Reqs','requests','[% constants.rootdir %]/admin.pl?op=recent_requests',500,0,3);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Posting','recent','[% constants.rootdir %]/admin.pl?op=recent',500,0,4);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Abusers','abusers','[% constants.rootdir %]/users.pl?op=topabusers',100,0,5);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Read&nbsp;Only','readonly','[% constants.rootdir %]/users.pl?op=listreadonly',100,0,6);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Banned','banned','[% constants.rootdir %]/users.pl?op=listbanned',100,0,7);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Info','stats','[% constants.rootdir %]/stats.pl',100,0,8);
-INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Config','config','[% constants.rootdir %]/admin.pl?op=topics',10000,0,9);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Stories','stories','[% gSkin.rootdir %]/admin.pl',100,0,1);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Mods','recent_mods','[% gSkin.rootdir %]/admin.pl?op=recent_mods',500,0,2);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Reqs','requests','[% gSkin.rootdir %]/admin.pl?op=recent_requests',500,0,3);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Posting','recent','[% gSkin.rootdir %]/admin.pl?op=recent',500,0,4);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Abusers','abusers','[% gSkin.rootdir %]/users.pl?op=topabusers',100,0,5);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Read&nbsp;Only','readonly','[% gSkin.rootdir %]/users.pl?op=listreadonly',100,0,6);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Banned','banned','[% gSkin.rootdir %]/users.pl?op=listbanned',100,0,7);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Info','stats','[% gSkin.rootdir %]/stats.pl',100,0,8);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Config','config','[% gSkin.rootdir %]/admin.pl?op=topics',10000,0,9);
 
 # End of T_2_3_0_144, Start of T_2_3_0_145 - 2004/03/23
 
@@ -2282,7 +2282,7 @@ INSERT INTO vars (name, value, description) VALUES ('hc_image_format','jpeg','Fo
 
 INSERT INTO vars (name, value, description) VALUES ('m2_wait_hours','12','Number of hours to wait before a mod is available for m2');
 
-UPDATE menus SET value='[% constants.rootdir %]/my/password' WHERE menu='users' AND label='Password';
+UPDATE menus SET value='[% gSkin.rootdir %]/my/password' WHERE menu='users' AND label='Password';
 
 ### everyone should run install-plugin to install the Login theme
 

@@ -13,7 +13,7 @@ listMiners
 __template__
 [% INCLUDE titlebar width="100%" title="List of miners" %]
 
-<FORM action="[% constants.rootdir %]/newsvac.pl" method="GET">
+<FORM action="[% gSkin.rootdir %]/newsvac.pl" method="GET">
 <TABLE>
 	<TR>
 		<TD><input type="submit" value="Create a new miner named:">
@@ -58,7 +58,7 @@ __template__
 		%]</font></b>
 [%	END -%]
 	<TR [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %]> 
-                <td><A HREF="[% constants.rootdir
+                <td><A HREF="[% gSkin.rootdir
 		-%]/newsvac.pl?op=editminer&miner_id=[% 
 		m.miner_id %]">[% m.name %]</A>&nbsp;</td>
 		<td align=right>&nbsp;[% url_number %]&nbsp;</td> 
@@ -97,7 +97,7 @@ __template__
 	%]</font></b>
 [% END %]
 <TR [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %] ALIGN="LEFT"> 
-	<td><A HREF="[% constants.rootdir %]/newsvac.pl?op=editminer&miner_id=[% 
+	<td><A HREF="[% gSkin.rootdir %]/newsvac.pl?op=editminer&miner_id=[% 
 	m.miner_id -%]">[% m.name %]</A>&nbsp;</td>
 	<td align=center>&nbsp;[% m.owner_aid %]&nbsp;</td>
 	<td align=center>&nbsp;[% m.last_edit_aid %]&nbsp;</td>
@@ -110,7 +110,7 @@ __template__
 [% END -%]
 
 </FORM>
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <TABLE>
 	<TR>
 		<TD><input type="submit" value="Create a new miner named:">

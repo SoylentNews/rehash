@@ -27,20 +27,19 @@
 # Dumping data for table 'blocks'
 #
 
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('articles_more','',1000,'static',NULL,'articles',5,'Articles',0,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('colors','#FFFFFF,#222222,#111111,#DDDDDD,#999999,#111111,#DDDDDD,#FFFFFF,#DDDDDD,#660000,#BBBBBB,#DDDDDD',1000,'color','<P>This is a comma delimited list of colors that are split by comma and \r\nassigned to two arrays: $user->{fg} and $user->{bg}. <BR>The first half of these colors go into $user->{fg} and the last half go into $user->{bg}.</P>','index',0,'colors',0,'','',0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('features','<!-- begin features block -->\r\nThis is a place where you can put linkage to important stories\r\nthat you have on your site.\r\nYou can edit this space easily by just logging into backSlash, clicking\r\n\'Config\' and then \'Blocks\' from the admin menu, and editing the block named \'features\'.\r\n<!-- end features block -->\r\n\r\n',500,'static',NULL,'index',1,'features',1,'index.pl?section=features',NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('features_more','',1000,'static',NULL,'features',5,'more',0,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('features_qlinks','<!-- begin quicklinks block -->\n<A HREF=\"http://newsforge.com/\">Newsforge</A><BR>\n<A HREF=\"http://lists.slashdot.org/mailman/listinfo.cgi\">Slash Mailing lists</A><BR>\n<A HREF=\"http://www.slashcode.com/\">Slashcode.com</A><BR>\n<A HREF=\"http://slashdot.org/\">Slashdot</A><BR>\n<A HREF=\"http://osdn.com/\">OSDN</A><BR>\n<A HREF=\"http://CmdrTaco.net/\">CmdrTaco.net</A><BR>\n<A HREF=\"http://www.cowboyneal.org/\">Cowboyneal.org</A><BR>\n<A HREF=\"http://pudge.net/\">Pudge.Net</A><BR>\n<A HREF=\"http://tangent.org/\">TangentOrg</A><BR>\n<A HREF=\"http://thinkgeek.com/\">ThinkGeek</A><BR>\n\n<!-- end quicklinks block -->',500,'static',NULL,'features',7,'Quick Links',0,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('index_more','',1000,'static',NULL,'index',5,'Older Stuff',1,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('index_qlinks','<!-- begin quicklinks block -->\r\n\r\nYou should put some links here to other sites that your users might enjoy.\r\n\r\n<!-- end quicklinks block -->\r\n\r\n',10000,'static',NULL,'index',7,'Quick Links',1,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('mysite','By editing the section called \"User Space\" on the user\r\npreferences page, you can cause this space to be filled\r\nwith some HTML code. Personal URLs?  Your Credit Card\r\nNumbers and Social Security numbers?  Well, maybe you\r\nbetter stick to URLs.\r\n',10000,'static',NULL,'index',-10,'User Space',1,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('poll','<FORM ACTION=\"//www.example.com/pollBooth.pl\">\r\n	<INPUT TYPE=\"hidden\" NAME=\"qid\" VALUE=\"1\"\r\n<B>Are you happy?</B>\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"1\">No\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"2\">Yes\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"3\">thorazine\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"4\">apathy\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"5\">manic depressive\r\n<BR><INPUT TYPE=\"submit\" VALUE=\"Vote\"> [ <A HREF=\"//www.example.com/pollBooth.pl?qid=1&aid=-1\"><B>Results</B></A> | <A HREF=\"//www.example.com/pollBooth.pl?\"><B>Polls</B></A>  ] <BR>\r\nComments:<B>0</B> | Votes:<B>43</B>\r\n</FORM>\r\n',1000,'portald',NULL,'index',2,'Poll',1,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('top10comments','',500,'portald','','index',0,'10 Hot Comments',1,'',NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve, all_sections) VALUES ('userlogin','',1000,'static','','index',4,'Login',1,NULL,NULL,0,1);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('newestthree','<!-- newestthree -->',100,'static','','',0,'Newest Three',1,NULL,NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('recenttopics','none yet',500,'static','Recent Topics','index',0,'Recent Topics',1,'',NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('friends_journal','',1,'portald','This adds a box where all of your friend\'s latest journal entries will be displayed.','index',5,'Friend\'s Journal Entries',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('articles_more','',1000,'static',NULL,'articles',5,'Articles',0,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('features','<!-- begin features block -->\r\nThis is a place where you can put linkage to important stories\r\nthat you have on your site.\r\nYou can edit this space easily by just logging into backSlash, clicking\r\n\'Config\' and then \'Blocks\' from the admin menu, and editing the block named \'features\'.\r\n<!-- end features block -->\r\n\r\n',500,'static',NULL,'mainpage',1,'features',1,'index.pl?section=features',NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('features_more','',1000,'static',NULL,'features',5,'more',0,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('features_qlinks','<!-- begin quicklinks block -->\n<A HREF=\"http://newsforge.com/\">Newsforge</A><BR>\n<A HREF=\"http://lists.slashdot.org/mailman/listinfo.cgi\">Slash Mailing lists</A><BR>\n<A HREF=\"http://www.slashcode.com/\">Slashcode.com</A><BR>\n<A HREF=\"http://slashdot.org/\">Slashdot</A><BR>\n<A HREF=\"http://osdn.com/\">OSDN</A><BR>\n<A HREF=\"http://CmdrTaco.net/\">CmdrTaco.net</A><BR>\n<A HREF=\"http://www.cowboyneal.org/\">Cowboyneal.org</A><BR>\n<A HREF=\"http://pudge.net/\">Pudge.Net</A><BR>\n<A HREF=\"http://tangent.org/\">TangentOrg</A><BR>\n<A HREF=\"http://thinkgeek.com/\">ThinkGeek</A><BR>\n\n<!-- end quicklinks block -->',500,'static',NULL,'features',7,'Quick Links',0,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('index_more','',1000,'static',NULL,'mainpage',5,'Older Stuff',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('index_qlinks','<!-- begin quicklinks block -->\r\n\r\nYou should put some links here to other sites that your users might enjoy.\r\n\r\n<!-- end quicklinks block -->\r\n\r\n',10000,'static',NULL,'mainpage',7,'Quick Links',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('mysite','By editing the section called \"User Space\" on the user\r\npreferences page, you can cause this space to be filled\r\nwith some HTML code. Personal URLs?  Your Credit Card\r\nNumbers and Social Security numbers?  Well, maybe you\r\nbetter stick to URLs.\r\n',10000,'static',NULL,'mainpage',-10,'User Space',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('poll','<FORM ACTION=\"//www.example.com/pollBooth.pl\">\r\n	<INPUT TYPE=\"hidden\" NAME=\"qid\" VALUE=\"1\"\r\n<B>Are you happy?</B>\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"1\">No\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"2\">Yes\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"3\">thorazine\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"4\">apathy\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"5\">manic depressive\r\n<BR><INPUT TYPE=\"submit\" VALUE=\"Vote\"> [ <A HREF=\"//www.example.com/pollBooth.pl?qid=1&aid=-1\"><B>Results</B></A> | <A HREF=\"//www.example.com/pollBooth.pl?\"><B>Polls</B></A>  ] <BR>\r\nComments:<B>0</B> | Votes:<B>43</B>\r\n</FORM>\r\n',1000,'portald',NULL,'mainpage',2,'Poll',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('top10comments','',500,'portald','','mainpage',0,'10 Hot Comments',1,'',NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve, all_skins) VALUES ('userlogin','',1000,'static','','mainpage',4,'Login',1,NULL,NULL,0,1);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('newestthree','<!-- newestthree -->',100,'static','','',0,'Newest Three',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('recenttopics','none yet',500,'static','Recent Topics','mainpage',0,'Recent Topics',1,'',NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('friends_journal','',1,'portald','This adds a box where all of your friend\'s latest journal entries will be displayed.','mainpage',5,'Friend\'s Journal Entries',1,NULL,NULL,0);
 
 
 #
@@ -101,10 +100,10 @@ INSERT INTO content_filters (regex, form, modifier, field, ratio, minimum_match,
 # Dumping data for table 'discussions'
 #
 
-INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flags, section) VALUES (1, '00/01/25/1430236','You\'ve Installed Slash!','//www.example.com/article.pl?sid=00/01/25/1430236','2000-01-25 14:30:36',1,2,1,'dirty', 'articles');
-INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flags, section) VALUES (2, '00/01/25/1236215','Now What?','//www.example.com/article.pl?sid=00/01/25/1236215','2000-01-25 17:36:15',1,2,0,'dirty', 'articles');
-INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flags, section) VALUES (3, '','What flavor of ice cream?','//www.example.com/pollBooth.pl?section=&qid=1&aid=-1','2000-01-25 17:36:15',1,2,0,'dirty', 'articles');
-INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flags, section) VALUES (4, '','Are you happy?','//www.example.com/pollBooth.pl?section=&qid=2&aid=-1','2000-01-25 17:36:15',1,2,0,'dirty', 'articles');
+INSERT INTO discussions (id, stoid, sid, title, url, ts, topic, uid, commentcount, flags, primaryskid) VALUES (1, 1, '00/01/25/1430236','You\'ve Installed Slash!','//www.example.com/article.pl?sid=00/01/25/1430236','2000-01-25 14:30:36',1,2,1,'dirty', 1);
+INSERT INTO discussions (id, stoid, sid, title, url, ts, topic, uid, commentcount, flags, primaryskid) VALUES (2, 2, '00/01/25/1236215','Now What?','//www.example.com/article.pl?sid=00/01/25/1236215','2000-01-25 17:36:15',1,2,0,'dirty', 1);
+INSERT INTO discussions (id, stoid, sid, title, url, ts, topic, uid, commentcount, flags, primaryskid) VALUES (3, 0, '','What flavor of ice cream?','//www.example.com/pollBooth.pl?section=&qid=1&aid=-1','2000-01-25 17:36:15',1,2,0,'dirty', 1);
+INSERT INTO discussions (id, stoid, sid, title, url, ts, topic, uid, commentcount, flags, primaryskid) VALUES (4, 0, '','Are you happy?','//www.example.com/pollBooth.pl?section=&qid=2&aid=-1','2000-01-25 17:36:15',1,2,0,'dirty', 1);
 
 #
 # Dumping data for table 'formkeys'
@@ -185,28 +184,6 @@ INSERT INTO related_links (keyword, name, link) VALUES ('macperl','MacPerl','htt
 INSERT INTO related_links (keyword, name, link) VALUES ('perl','Perl','http://use.perl.org/');
 
 #
-# Dumping data for table 'sections'
-#
-
-REPLACE INTO sections (section, artcount, title, issue, type, qid) VALUES ('index',30,'Index',0,'collected', 1);
-INSERT INTO sections (section, artcount, title, issue) VALUES ('articles',30,'Articles',0);
-INSERT INTO sections (section, artcount, title, issue, qid) VALUES ('features',21,'Features',1,2);
-
-#
-# Dumping data for table 'section_topics'
-#
-
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 1, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('index', 1, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 2, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('index', 2, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 3, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('index', 3, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 4, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('index', 4, 'topic_1');
-INSERT INTO section_topics (section, tid, type) VALUES ('features', 1, 'topic_1');
-
-#
 # Dumping data for table 'sessions'
 #
 
@@ -215,40 +192,92 @@ INSERT INTO section_topics (section, tid, type) VALUES ('features', 1, 'topic_1'
 # Dumping data for table 'site_info'
 #
 
+#
+# Dumping data for table 'skins'
+#
+
+INSERT INTO skins (skid, nexus, min_weight, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (1,1,1,10,30,'mainpage','Main Page','no','','www.example.com','','index.pl',3600,20040511133653);
+INSERT INTO skins (skid, nexus, min_weight, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (2,2,1,7,21,'features','Features','no','','features.example.com','','index.pl',3600,20040110235000);
+
+#
+# Dumping data for table 'skin_colors'
+#
+
+INSERT INTO skin_colors VALUES (1, 'fg_0', 'FFFFFF');
+INSERT INTO skin_colors VALUES (1, 'fg_1', '222222');
+INSERT INTO skin_colors VALUES (1, 'fg_2', '111111');
+INSERT INTO skin_colors VALUES (1, 'fg_3', 'DDDDDD');
+INSERT INTO skin_colors VALUES (1, 'fg_4', '999999');
+INSERT INTO skin_colors VALUES (1, 'fg_5', '111111');
+INSERT INTO skin_colors VALUES (1, 'bg_0', 'DDDDDD');
+INSERT INTO skin_colors VALUES (1, 'bg_1', 'FFFFFF');
+INSERT INTO skin_colors VALUES (1, 'bg_2', 'DDDDDD');
+INSERT INTO skin_colors VALUES (1, 'bg_3', '660000');
+INSERT INTO skin_colors VALUES (1, 'bg_4', 'BBBBBB');
+INSERT INTO skin_colors VALUES (1, 'bg_5', 'DDDDDD');
+INSERT INTO skin_colors VALUES (2, 'fg_0', 'FFFFFF');
+INSERT INTO skin_colors VALUES (2, 'fg_1', '222222');
+INSERT INTO skin_colors VALUES (2, 'fg_2', '111111');
+INSERT INTO skin_colors VALUES (2, 'fg_3', 'DDDDDD');
+INSERT INTO skin_colors VALUES (2, 'fg_4', '999999');
+INSERT INTO skin_colors VALUES (2, 'fg_5', '111111');
+INSERT INTO skin_colors VALUES (2, 'bg_0', 'DDDDDD');
+INSERT INTO skin_colors VALUES (2, 'bg_1', 'FFFFFF');
+INSERT INTO skin_colors VALUES (2, 'bg_2', 'DDDDDD');
+INSERT INTO skin_colors VALUES (2, 'bg_3', '660000');
+INSERT INTO skin_colors VALUES (2, 'bg_4', 'BBBBBB');
+INSERT INTO skin_colors VALUES (2, 'bg_5', 'DDDDDD');
 
 #
 # Dumping data for table 'stories'
 #
 
-INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1430236',4,2,'You\'ve Installed Slash!','congratulations-dude','2000-08-28 20:47:46',0,'articles',0,1,2, 'dirty', 2);
-INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1236215',4,2,'Now What?','where-do-you-go-from-here','2000-01-25 08:32:02',0,'articles',0,2,2, 'dirty', NULL);
-
+INSERT INTO stories (stoid, sid, uid, dept, time, hits, primaryskid, discussion, tid, submitter, qid) VALUES (1, '00/01/25/1430236',2,'congratulations-dude','2000-01-25 20:47:46',0,1,1,1,2,2);
+INSERT INTO stories (stoid, sid, uid, dept, time, hits, primaryskid, discussion, tid, submitter, qid) VALUES (2, '00/01/25/1436215',2,'where-do-you-go-from-here','2000-01-25 21:00:00',0,1,2,1,2,NULL);
 
 #
 # Dumping data for table 'story_text'
 #
 
-INSERT INTO story_text (sid, introtext, bodytext, relatedtext) VALUES ('00/01/25/1236215','You should play around with the admin stuff.  Configure things to\r\nyour tastes.  You should also edit the variables (in the admin menu) to define things like your websites name and slogan.  You should also donate some money to the <A href=http://www.fsf.org>FSF</A> and <A href=http://slashdot.org>Read Slashdot</A>.\r\n','','<LI><A href=http://www.fsf.org>FSF</A></LI>\n<LI><A href=http://slashdot.org>Read Slashdot</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?topic=slash\">More on Slash</A></LI>\r\n<LI><A HREF=\"//www.example.com/search.pl?author=God\">Also by God</A></LI>');
-INSERT INTO story_text (sid, introtext, bodytext, relatedtext) VALUES ('00/01/25/1430236','So it took some doing (hopefully not too much), and it looks like you\'ve got Slash installed and ready to rock.  You can now use <A href="/admin.pl">backSlash</A>, the Slash Code Administration tool, if you are logged in as the admin user you set up during installation.  And you might wanna start posting some stories too.','','<LI><A href=/admin.pl>backSlash</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?topic=slash\">More on Slash</A></LI>\r\n<LI><A HREF=\"//www.example.com/search.pl?author=God\">Also by God</A></LI>');
+INSERT INTO story_text (stoid, title, introtext, bodytext, relatedtext) VALUES ('1','You\'ve Installed Slash!','You should play around with the admin stuff.  Configure things to\r\nyour tastes.  You should also edit the variables (in the admin menu) to define things like your websites name and slogan.  You should also donate some money to the <A href=http://www.fsf.org>FSF</A> and <A href=http://slashdot.org>Read Slashdot</A>.\r\n','','<LI><A href=http://www.fsf.org>FSF</A></LI>\n<LI><A href=http://slashdot.org>Read Slashdot</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?topic=slash\">More on Slash</A></LI>\r\n<LI><A HREF=\"//www.example.com/search.pl?author=God\">Also by God</A></LI>');
+INSERT INTO story_text (stoid, title, introtext, bodytext, relatedtext) VALUES ('2','Now What?','So it took some doing (hopefully not too much), and it looks like you\'ve got Slash installed and ready to rock.  You can now use <A href="/admin.pl">backSlash</A>, the Slash Code Administration tool, if you are logged in as the admin user you set up during installation.  And you might wanna start posting some stories too.','','<LI><A href=/admin.pl>backSlash</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?topic=slash\">More on Slash</A></LI>\r\n<LI><A HREF=\"//www.example.com/search.pl?author=God\">Also by God</A></LI>');
+
+#
+# Dumping data for table 'story_dirty'
+#
+
+INSERT INTO story_dirty (stoid) VALUES (1);
+INSERT INTO story_dirty (stoid) VALUES (2);
 
 #
 # Dumping data for table 'story_param'
 #
-INSERT INTO story_param (sid, name, value) VALUES ('00/01/25/1430236', 'qid', '2');
 
+INSERT INTO story_param (stoid, name, value) VALUES (1, 'qid', '2');
 
 #
-# dumping data from table 'story_topics'
+# dumping data from table 'story_topics_chosen'
 #
 
-INSERT INTO story_topics (sid,tid) VALUES ('00/01/25/1430236',4);
-INSERT INTO story_topics (sid,tid) VALUES ('00/01/25/1236215',4);
+INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (1,4,3);
+INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (2,4,3);
+
+#
+# dumping data from table 'story_topics_rendered'
+#
+
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,1,3);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,1,3);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,2,3);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,2,3);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,4,3);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,4,3);
 
 #
 # Dumping data for table 'submissions'
 #
 
-INSERT INTO submissions (subid, email, name, time, subj, story, tid, section, uid, del, ipid, subnetid) VALUES ('','somewhere@somewhere.com','PostMyStory','2000-01-25 15:25:08','This is the Submissions Area','This is where you read the submissions that your readers send you.  From here you can delete them (click the checkboxes and hit update) or attach little notes to them and flag them to be put on hold, or saved for quickies (all of these things are helpful when you have several people working on the backend at the same time).\r\n\r\n<P>Most of the time you\'ll just want to click on the title of the submission, and then either preview/post it, or delete it. ',4,'articles',2,0,'2','8f2e0eec531acf0e836f6770d7990857');
+#INSERT INTO submissions (subid, email, name, time, subj, story, tid, section, uid, del, ipid, subnetid) VALUES ('','somewhere@somewhere.com','PostMyStory','2000-01-25 15:25:08','This is the Submissions Area','This is where you read the submissions that your readers send you.  From here you can delete them (click the checkboxes and hit update) or attach little notes to them and flag them to be put on hold, or saved for quickies (all of these things are helpful when you have several people working on the backend at the same time).\r\n\r\n<P>Most of the time you\'ll just want to click on the title of the submission, and then either preview/post it, or delete it. ',4,'articles',2,0,'2','8f2e0eec531acf0e836f6770d7990857');
 
 #
 # Dumping data for table 'templates'
@@ -258,17 +287,37 @@ INSERT INTO submissions (subid, email, name, time, subj, story, tid, section, ui
 #
 # Dumping data for table 'topics'
 #
-INSERT INTO topic_images (id, name, image, width, height) VALUES (1,'news', 'topicnews.gif',34,44);
-INSERT INTO topic_images (id, name, image, width, height) VALUES (2,'linux', 'topiclinux.gif',60,70);
-INSERT INTO topic_images (id, name, image, width, height) VALUES (3,'slashdot', 'topicslashdot.gif',100,34);
-INSERT INTO topic_images (id, name, image, width, height) VALUES (4,'slash', 'topicslash.gif',81,36);
-INSERT INTO topic_images (id, name, image, width, height) VALUES (5,'programming', 'topicprogramming.gif',80,48);
 
-INSERT INTO topics (tid, name, alttext, default_image) VALUES (1,'news', 'News', 1);
-INSERT INTO topics (tid, name, alttext, default_image) VALUES (2,'linux', 'Linux', 2);
-INSERT INTO topics (tid, name, alttext, default_image) VALUES (3,'slashdot', 'Slashdot', 3);
-INSERT INTO topics (tid, name, alttext, default_image) VALUES (4,'slash', 'Slash', 4);
-INSERT INTO topics (tid, name, alttext, default_image) VALUES (5,'programming', 'Programming', 5);
+INSERT INTO topics VALUES (1,'mainpage', 'Main Page', 'no', '', 0, 0);
+INSERT INTO topics VALUES (2,'features','Features', 'no', '', 0, 0);
+INSERT INTO topics VALUES (4,'slash', 'Slash', 'no', 'topicslash.gif',81,36);
+INSERT INTO topics VALUES (5,'programming', 'Programming', 'no', 'topicprogramming.gif',80,48);
+INSERT INTO topics VALUES (6,'news', 'News', 'no', 'topicnews.gif',34,44);
+INSERT INTO topics VALUES (7,'linux', 'Linux', 'no', 'topiclinux.gif',60,70);
+INSERT INTO topics VALUES (8,'slashdot', 'Slashdot', 'no', 'topicslashdot.gif',100,34);
+
+#
+# Dumping data for table 'topic_nexus'
+#
+
+INSERT INTO topic_nexus VALUES (1, NULL);
+INSERT INTO topic_nexus VALUES (2, NULL);
+
+#
+# Dumping data for table 'topic_parents'
+#
+
+INSERT INTO topic_parents VALUES (2,1,3);
+INSERT INTO topic_parents VALUES (4,1,3);
+INSERT INTO topic_parents VALUES (5,1,3);
+INSERT INTO topic_parents VALUES (6,1,3);
+INSERT INTO topic_parents VALUES (7,1,3);
+INSERT INTO topic_parents VALUES (8,1,3);
+INSERT INTO topic_parents VALUES (4,2,1);
+INSERT INTO topic_parents VALUES (5,2,1);
+INSERT INTO topic_parents VALUES (6,2,1);
+INSERT INTO topic_parents VALUES (7,2,1);
+INSERT INTO topic_parents VALUES (8,2,1);
 
 #
 # Dumping data for table 'tzcodes'

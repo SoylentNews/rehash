@@ -41,6 +41,7 @@ usage('Invalid number of stories')
 	if $opts{num_stories} !~ /^\d+$/ || $opts{num_stories} < 0;
 
 createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
 $werder = new Silly::Werder;
 $werder->set_syllables_num(2, 6);
@@ -53,7 +54,7 @@ $constants = getCurrentStatic();
 	my $max_uid = $slashdb->countUsers({ max => 1});
 	my $min_uid = $slashdb->sqlSelect("MIN(uid)", "users");
 
-	my $rootdir = getCurrentStatic("rootdir");
+	my $rootdir = getCurrentSkin('rootdir');
  
 	my $t0 = new Benchmark;
 	my $count = $opts{num_stories};
@@ -87,39 +88,43 @@ $constants = getCurrentStatic();
 			"%Y-%m-%d %H-%M-%S");
 
 		# 40% of stories have 1 topic ID, 60% have 2
-		my $tid = getRandomTopicID();
-		my $stid = rand(1) < 0.4 ? 0 : getRandomTopicID();
+		my @topics;
+		push @topics,  getRandomTopicID();
+		push @topics, getRandomTopicID() if rand(1) < 0.6;
 
-		my $section = getRandomSection();
-		my $displaystatus = 0;
-		if ($section =~ /^(articles|index)$/) {
-			if (rand(1) < 0.1) {
-				$displaystatus = -1;
+		my $topics = {};
+		%$topics = map { $_ => 0 } @topics;
+
+		if (rand (1) < 0.7) {
+			# run in the section for each topic
+			foreach (@topics) {
+				$topics->{$_} = 1;
 			}
-		} elsif (rand(1) < 0.7) {
-			$displaystatus = 1;
-		} elsif (rand(1) < 0.1) {
-			$displaystatus = -1;
-		}
-
+		} elsif (rand(1) < 0.8) {
+			my $m_tid = $topics[rand @topics];
+			# elevate to mainpage from one tid / sectional from any others
+			foreach (@topics) {
+				$topics->{$_} = $_ == $m_tid ? 4 : 1;
+			}
+		} 
+	
+		my $commentstatus = rand(1) < .95 ? "enabled" : "disabled";
+		
 		my $story = {
 			subid		=> '',
 			uid		=> $author,
-			tid		=> $tid,
-			stid		=> $stid,
 			dept		=> $dept,
 			'time'		=> $time,
 			title		=> $title,
-			section		=> $section,
-			displaystatus	=> $displaystatus,
+			topics_chosen	=> $topics,
 			submitter	=> $submitter,
 			introtext	=> $introtext,
 			bodytext	=> $bodytext,
 			rendered	=> undef,
+			commentstatus   => $commentstatus
 		};
 
 		my $sid = $slashdb->createStory($story);
-		$slashdb->setStoryTopics($story->{sid}, createStoryTopicData($slashdb, $story));
 		my $reloDB = getObject("Slash::Relocate");
 		if ($reloDB && $sid) {
 			$slashdb->setStory($sid, { 
@@ -180,26 +185,6 @@ sub getRandomTopicID {
 	my @tids = map { $_->[0] } @$tids;
         my $rand_tid = @tids[ rand @tids ];
         return $rand_tid;
-}
-
-sub getRandomSection {
-	# Yes, inefficient.  I do not care.
-	my $sections = $slashdb->sqlSelectAll(
-		"section, hostname",
-		"sections",
-		"type='contained' AND index_handler='index.pl'");
-	my @sections = ( );
-	for my $sect (@$sections) {
-		push @sections, $sect->[0];
-		if (!$sect->[1]) {
-			# Sections with no hostname are probably 'articles'
-			# and are more likely to be chosen.
-			for (1..8) {
-				push @sections, $sect->[0];
-			}
-		}
-	}
-	return $sections[rand @sections];
 }
 
 sub getRandomUserID {

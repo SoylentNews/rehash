@@ -13,16 +13,16 @@ header-admin
 __template__
 [% INCLUDE linkrel %]
 </HEAD>
-<BODY BGCOLOR="[% user.bg.1 %]" LINK="[% user.bg.3 %]" VLINK="[% user.bg.3 %]" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0">
+<BODY BGCOLOR="[% user.colors.bg_1 %]" LINK="[% user.colors.bg_3 %]" VLINK="[% user.colors.bg_3 %]" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0">
 
-<TABLE WIDTH="100%" ALIGN="CENTER" CELLPADDING="0" CELLSPACING="0" BORDER="0" BGCOLOR="[% user.bg.5 %]">
+<TABLE WIDTH="100%" ALIGN="CENTER" CELLPADDING="0" CELLSPACING="0" BORDER="0" BGCOLOR="[% user.colors.bg_5 %]">
 	<TR>
-		<TD VALIGN="BOTTOM" BGCOLOR="[% user.bg.3 %]">[% Slash.createMenu(adminmenu, { color => 'white', lightfontcolor => user.fg.3 } ) %]</TD>
-		<TD VALIGN="TOP" BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT">
-		<A HREF="[% constants.real_rootdir %]"><FONT COLOR="[% user.fg.3 %]">[% constants.sitename %]</FONT></A>&nbsp;
+		<TD VALIGN="BOTTOM" BGCOLOR="[% user.colors.bg_3 %]">[% Slash.createMenu(adminmenu, { color => 'white', lightfontcolor => user.colors.fg_3 } ) %]</TD>
+		<TD VALIGN="TOP" BGCOLOR="[% user.colors.bg_3 %]" ALIGN="RIGHT">
+		<A HREF="[% constants.real_rootdir %]"><FONT COLOR="[% user.colors.fg_3 %]">[% constants.sitename %]</FONT></A>&nbsp;
 		</TD>
 	</TR>
-	<TR><TD VALIGN="TOP" COLSPAN="2"><FONT COLOR="[% user.fg.1 %]">
+	<TR><TD VALIGN="TOP" COLSPAN="2"><FONT COLOR="[% user.colors.fg_1 %]">
 
 __seclev__
 10000

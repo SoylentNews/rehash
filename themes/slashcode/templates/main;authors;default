@@ -25,10 +25,10 @@ authors here, along with the number of articles that they
 have posted.</P>
 [% FOREACH uid = list %]
 	[% IF uid.0 > 0 %]
-		<font size="+2"><B><A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid.1 %]">[% uid.0 %]</A>
+		<font size="+2"><B><A HREF="[% gSkin.rootdir %]/search.pl?op=stories&amp;author=[% uid.1 %]">[% uid.0 %]</A>
 		<A HREF="[% uid.3 %]">[% uid.2 %]</A></B></font>
 		[% IF admin %]
-			[<A HREF="[% constants.rootdir %]/users.pl?uid=[% uid.1 %]">edit</A>]
+			[<A HREF="[% gSkin.rootdir %]/users.pl?uid=[% uid.1 %]">edit</A>]
 		[% END %]
 		<P>[% uid.4 %]</P>
 	[% END %]

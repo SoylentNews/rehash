@@ -23,9 +23,8 @@ __template__
 			<INPUT TYPE="SUBMIT" NAME="topiced" VALUE="Select topic"><BR>
 
 			[% IF topic.tid %]
-				[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 				[% PROCESS formLabel value => "Image as seen", comment => "" %]
-				<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]">
+				<IMG SRC="[% constants.imagedir %]/topics/[% topic.image %]" ALT="[% topic.alttext %]" WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]">
 			[% END %]
 
 			<BR><INPUT TYPE="HIDDEN" NAME="tid" VALUE="[% topic.tid %]"><BR>
@@ -59,30 +58,6 @@ __template__
 			<INPUT TYPE="SUBMIT" NAME="topicnew" VALUE="Create new topic">
 			<INPUT TYPE="SUBMIT" NAME="topicsave" VALUE="Save Topic">
 			<INPUT TYPE="SUBMIT" NAME="topicdelete" VALUE="Delete Topic">
-		</TD>
-		<TD VALIGN="TOP">
-		[% PROCESS formLabel value => "Sections and topic types", comment => "select which sections a topic belongs to and which types a topic is listed as" %]
-		[% types = Slash.db.getDescriptions('genericstring','section_topic_type') %]
-		<TABLE>
-			<TR>
-				<TD><B>section</B></TD>
-				[% FOREACH type=types %]
-				<TD><B>[% type.value %]</B></TD>
-				[% END %]
-			</TR>
-		[% FOREACH section = sectionref.keys %]
-			<TR>
-				<TD>
-				[% sectionref.$section.title %]&nbsp;
-				</TD>
-			[% FOREACH type=types %]
-				<TD>
-				<INPUT TYPE="CHECKBOX" NAME="exsect|[% section %]|[% type.key %]"[% sectionref.$section.${type.key}.checked %]><BR>
-				</TD>
-			[% END %]
-			</TR>
-		[% END %]
-		</TABLE>
 		</TD>
 		</FORM>
 	</TR>

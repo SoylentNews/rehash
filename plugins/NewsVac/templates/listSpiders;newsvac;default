@@ -16,7 +16,7 @@ __template__
 [% INCLUDE titlebar width="100%" title="List of spiders" %]
 
 <!-- begin list spiders section -->
-<form action="[% constants.rootdir %]/newsvac.pl" method="GET">
+<form action="[% gSkin.rootdir %]/newsvac.pl" method="GET">
 
 <table>
         <TR>
@@ -29,7 +29,7 @@ __template__
 </table>
 </form>
 
-<form enctype="multipart/form-data" action="[% constants.rootdir 
+<form enctype="multipart/form-data" action="[% gSkin.rootdir 
 -%]/newsvac.pl" method="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
 <table>
@@ -63,7 +63,7 @@ __template__
 	[% FOREACH hashref = arrayref -%]
         <TR>
                 <td align=right>
-		<A HREF="[% constants.rootdir 
+		<A HREF="[% gSkin.rootdir 
 		-%]/newsvac.pl?op=editspider&spider_id=[% hashref.spider_id 
 		-%]">[% hashref.spider_id %]</a>
 		</td>

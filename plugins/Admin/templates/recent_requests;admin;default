@@ -19,7 +19,7 @@ __template__
 [% PROCESS titlebar title="Recent Requests" width='100%' %]
 
 	<BR><TABLE BORDER=0 CELLSPACING="0" CELLPADDING="0">
-<FORM ACTION="[% constants.rootdir %]/admin.pl?op=recent_requests" method="GET">
+<FORM ACTION="[% gSkin.rootdir %]/admin.pl?op=recent_requests" method="GET">
 <INPUT TYPE="hidden" NAME="op" VALUE="recent_requests">
 	<TR><TD>Min ID</TD><TD><INPUT TYPE="text" NAME="min_id" VALUE="[% min_id %]" SIZE="15"></TD></TR>
 	<TR><TD>Max ID</TD><TD>[% max_id %]</TD></TR>
@@ -61,7 +61,7 @@ __template__
 				<TD ALIGN="RIGHT">&nbsp;[% row.secs %]&nbsp;</TD>
 				<TD ALIGN="RIGHT">&nbsp;[% row.hps %]&nbsp;</TD>
 				<TD ALIGN="LEFT">&nbsp;[% row.op %]&nbsp;</TD>
-				<TD>&nbsp;<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% row.ipid | strip_attribute %]&amp;fieldname=ipid">[% row.ipid_vis %]</A>&nbsp;</TD>
+				<TD>&nbsp;<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% row.ipid | strip_attribute %]&amp;fieldname=ipid">[% row.ipid_vis %]</A>&nbsp;</TD>
 				<TD>&nbsp;[% row.mints.substr(5) %]&nbsp;</TD>
 				<TD>&nbsp;[% row.maxts.substr(5) %]&nbsp;</TD>
 			</TR>

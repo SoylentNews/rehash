@@ -16,7 +16,7 @@ Until it's back up, you may wish to search
 [% constants.sitename %] through Google:<br>
 <FORM METHOD="GET" ACTION="http://www.google.com/search">
 <INPUT TYPE="TEXT" NAME="query" VALUE="[% form.query | strip_attribute %]" SIZE="20">
-<INPUT TYPE="HIDDEN" NAME="as_sitesearch" VALUE="[% constants.basedomain %]">
+<INPUT TYPE="HIDDEN" NAME="as_sitesearch" VALUE="[% gSkin.basedomain %]">
 <INPUT TYPE="SUBMIT" VALUE="Google [% constants.sitename %]">
 </FORM>
 </blockquote><p>

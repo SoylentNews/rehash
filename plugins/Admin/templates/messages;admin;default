@@ -45,7 +45,7 @@ Saved [% form.thisname %]<BR>
 	<P><B>This block, [% bid %], already exists! <BR>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</P>
 
 [% CASE 'templateSave-exists-message' %]
-	<P><B>This template, [% name %], tpid [% tpid %], already exists! <BR>Hit the "back" button, and try another bid (loo
+	<P><B>This template, [% name %], tpid [% tpid %], already exists!
 
 [% CASE 'blockSave-inserted-message' %]
 	Inserted [% bid %]<BR>

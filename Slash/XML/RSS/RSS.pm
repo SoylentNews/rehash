@@ -146,6 +146,7 @@ sub create {
 	return unless exists $param->{items};
 
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 
 	my $version  = $param->{version} && $param->{version} =~ /^\d+\.?\d*$/
 		? $param->{version}
@@ -169,8 +170,8 @@ sub create {
 
 	my $absolutedir = defined &Slash::Apache::ConnectionIsSSL
 	                  && Slash::Apache::ConnectionIsSSL()
-		? $constants->{absolutedir_secure}
-		: $constants->{absolutedir};
+		? $gSkin->{absolutedir_secure}
+		: $gSkin->{absolutedir};
 
 	# set defaults
 	my %channel = (

@@ -5,13 +5,13 @@
 DROP TABLE IF EXISTS stats_daily; 
 CREATE TABLE stats_daily (
     id int UNSIGNED NOT NULL auto_increment,
-    section varchar(30) DEFAULT 'index' NOT NULL,
+    skid SMALLINT UNSIGNED NOT NULL DEFAULT '0',
     day date NOT NULL,
     name varchar(32) DEFAULT '' NOT NULL,
     value FLOAT DEFAULT 0 NOT NULL,
-    UNIQUE day_key_pair (day,name,section),
+    UNIQUE day_key_pair (day,name,skid),
     INDEX name_day (name,day),
-    UNIQUE section_day_name (section,day,name),
+    UNIQUE skid_day_name (skid,day,name),
     PRIMARY KEY (id)
 ) TYPE = InnoDB;
 

@@ -12,15 +12,15 @@ __name__
 editbuttons
 __template__
 [% IF newarticle %]
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
+<input type="SUBMIT" name="op" value="save"    onclick="slashtopics_submit()">
 [% END %]
 
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview">
+<input type="SUBMIT" name="op" value="preview" onclick="slashtopics_submit()">
 
 [% IF ! newarticle %]
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="update">
+<input type="SUBMIT" name="op" value="update"  onclick="slashtopics_submit()">
 [%- IF user.seclev >= 10000 %]
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="delete">
+<input type="SUBMIT" name="op" value="delete"  onclick="slashtopics_submit()">
 [%- END -%]
 [% END %]
 

@@ -51,6 +51,8 @@ HTML::ElementTable	- required by HTML::CalendarMonth
 
 HTML::CalendarMonth	- used for Events plugin
 
+HTML::PopupTreeSelect   - topic selection on admin.pl
+
 Mail::Sendmail
 
 Mail::Address

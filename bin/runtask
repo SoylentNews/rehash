@@ -26,7 +26,7 @@ use Slash::Utility;
 
 use vars qw(
 	%opts %task $me $task_name $hard_verbosity
-	$virtual_user $constants $slashdb $user $dir
+	$virtual_user $constants $slashdb $user $dir $gSkin
 );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -284,6 +284,8 @@ sub main {
 	$constants = getCurrentStatic();
 	$slashdb = getCurrentDB();
 	$user = getCurrentUser();
+	setCurrentSkin(determineCurrentSkin());
+	$gSkin = getCurrentSkin();
 	$dir = "$constants->{datadir}/tasks";
 
 	# List what tasks are available
@@ -323,7 +325,7 @@ sub main {
 
 	my $start_time = Time::HiRes::time;
 	# runtask doesn't fork, there wouldn't be much point
-	my $rc = $subref->($virtual_user, $constants, $slashdb, $user, {});
+	my $rc = $subref->($virtual_user, $constants, $slashdb, $user, {}, $gSkin);
 	if (verbosity() >= 2) {
 		my $duration = sprintf("%.2f", Time::HiRes::time - $start_time);
 		slashdLog("$task_name end: $rc (ran in ${duration}s)");

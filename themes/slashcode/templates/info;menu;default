@@ -17,15 +17,15 @@ info
 __template__
 
 [% tabs = [
-	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
-	{ link = "$constants.rootdir/stats.pl",			label = "Stats",		sel_label = "stats" },
-	{ link = "$constants.rootdir/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
-	{ link = "$constants.rootdir/admin.pl?op=recent_subs",	label = "Subs",			sel_label = "subs" },
-	{ link = "$constants.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
-	{ link = "$constants.rootdir/admin.pl?op=recent_webheads", label = "Webheads",		sel_label = "webheads" },
-	{ link = "$constants.rootdir/admin.pl?op=mcd_stats",	label = "Memcached",		sel_label = "mcdstats" },
-	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "security" },
-	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
+	{ link = "$gSkin.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
+	{ link = "$gSkin.rootdir/stats.pl",			label = "Stats",		sel_label = "stats" },
+	{ link = "$gSkin.rootdir/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent_subs",	label = "Subs",			sel_label = "subs" },
+	{ link = "$gSkin.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent_webheads", label = "Webheads",		sel_label = "webheads" },
+	{ link = "$gSkin.rootdir/admin.pl?op=mcd_stats",	label = "Memcached",		sel_label = "mcdstats" },
+	{ link = "$gSkin.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "security" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]
 

@@ -23,15 +23,15 @@ __template__
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="2">
 
-	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
-		<FONT SIZE="2" COLOR="[% user.fg.3 %]">
+	<TR><TD BGCOLOR="[% user.colors.bg_3 %]" ALIGN="CENTER">
+		<FONT SIZE="2" COLOR="[% user.colors.fg_3 %]">
 [% IF title %]
-		<A HREF="[% link %]"><FONT COLOR="[% user.fg.3 %]">[% title %]</FONT></A>
+		<A HREF="[% link %]"><FONT COLOR="[% user.colors.fg_3 %]">[% title %]</FONT></A>
 [% ELSE %]
 	[% Slash.linkComment({
 		sid	=> sid,
 		pid	=> pid,
-		color	=> user.fg.3,
+		color	=> user.colors.fg_3,
 		subject	=> 'Top',
 		subject_only => 1,
 	}) %]
@@ -40,27 +40,27 @@ __template__
 	|
 
 [% IF user.is_anon %]
-		<A HREF="[% constants.rootdir %]/users.pl">
-			<FONT COLOR="[% user.fg.3 %]">Log in/Create an Account</FONT>
+		<A HREF="[% gSkin.rootdir %]/users.pl">
+			<FONT COLOR="[% user.colors.fg_3 %]">Log in/Create an Account</FONT>
 		</A>
 [% ELSE %]
-		<A HREF="[% constants.rootdir %]/my/comments">
-			<FONT COLOR="[% user.fg.3 %]">Preferences</FONT>
+		<A HREF="[% gSkin.rootdir %]/my/comments">
+			<FONT COLOR="[% user.colors.fg_3 %]">Preferences</FONT>
 		</A>
 [% END %]
 
 		| [% Slash.linkComment({
 			sid	=> sid,
 			pid	=> 0,
-			color	=> user.fg.3,
+			color	=> user.colors.fg_3,
 			subject	=> 'Top',
 			subject_only => 1,
 		}) %]
 
 [% IF user.points %]
 		| <B>[% user.points %]</B>
-		<A HREF="[% constants.rootdir %]/moderation.shtml">
-		<FONT COLOR="[% user.fg.3 %]">moderator</FONT></A>
+		<A HREF="[% gSkin.rootdir %]/moderation.shtml">
+		<FONT COLOR="[% user.colors.fg_3 %]">moderator</FONT></A>
 		point[% user.points == 1 ? '' : 's' %]
 [% END %]
 
@@ -76,12 +76,12 @@ __template__
 		| Starting at #[% form.startat %]
 [% END %]
 
-		| <A HREF="[% constants.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">
-<FONT COLOR="[% user.fg.3 %]">Search Discussion</FONT></A></FONT>
+		| <A HREF="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">
+<FONT COLOR="[% user.colors.fg_3 %]">Search Discussion</FONT></A></FONT>
 	</TD></TR>
 
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER">
-		<FORM ACTION="[% constants.rootdir %]/comments.pl">
+	<TR><TD BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER">
+		<FORM ACTION="[% gSkin.rootdir %]/comments.pl">
 		<FONT SIZE="2">
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
 		[% IF cid %]<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">[% END %]
@@ -106,8 +106,8 @@ __template__
 		</FONT>
 		</FORM>
 	</TD></TR>
-	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
-		<FONT COLOR="[% user.fg.3 %]" SIZE="1">
+	<TR><TD BGCOLOR="[% user.colors.bg_3 %]" ALIGN="CENTER">
+		<FONT COLOR="[% user.colors.fg_3 %]" SIZE="1">
 <B>The Fine Print:</B>
 The following comments are owned by whoever posted them.
 We are not responsible for them in any way.

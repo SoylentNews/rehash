@@ -24,10 +24,10 @@ can also use the form below to select the poll qid you like to attach the story 
 	[% FOREACH question = questions %]
 	<TR>
 		<TD VALIGN="TOP" ALIGN="LEFT">
-				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A>
+				<A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A>
 		</TD>
 		<TD>
-			<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]&amp;op=edit&amp;override_sid=[% sid | fixparam %]">Attach poll to story</A>
+			<A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]&amp;op=edit&amp;override_sid=[% sid | fixparam %]">Attach poll to story</A>
 		</TD>
 	</TR>
 	[% END %]

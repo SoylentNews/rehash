@@ -107,6 +107,7 @@ Whatever templates are passed in.
 
 sub create {
 	my($self, $uid, $type, $data, $fid, $altto, $send) = @_;
+	my $gSkin = getCurrentSkin();
 	my $message;
 
 	# must not contain non-numeric
@@ -150,7 +151,7 @@ sub create {
 		$data->{_PAGE}    = delete($data->{template_page})
 			|| $user->{currentPage};
 		$data->{_SECTION} = delete($data->{template_section})
-			|| $user->{currentSection};
+			|| $gSkin->{name};
 
 		# set subject
 		if (exists $data->{subject} && ref($data->{subject}) eq 'HASH') {
@@ -166,7 +167,7 @@ sub create {
 			$data->{subject}{_PAGE}    = delete($data->{subject}{template_page})
 				|| $data->{_PAGE}    || $user->{currentPage};
 			$data->{subject}{_SECTION} = delete($data->{subject}{template_section})
-				|| $data->{_SECTION} || $user->{currentSection};
+				|| $data->{_SECTION} || $gSkin->{name};
 		}
 
 		$data->{_templates}{email}{content}	||= 'msg_email';
@@ -887,6 +888,7 @@ sub callTemplate {
 	my($self, $data, $msg) = @_;
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $gSkin     = getCurrentSkin();
 	my $name;
 
 	if (ref($data) eq 'HASH' && exists $data->{_NAME}) {
@@ -921,8 +923,8 @@ sub callTemplate {
 			: 0;
 
 	$data->{absolutedir} = $seclev && $seclev >= 100
-		? $constants->{absolutedir_secure}
-		: $constants->{absolutedir};
+		? $gSkin->{absolutedir_secure}
+		: $gSkin->{absolutedir};
 
 	my $new = slashDisplay($name, { %$data, msg => $msg }, $opt);
 	return $new;

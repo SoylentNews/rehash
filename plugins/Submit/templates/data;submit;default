@@ -84,6 +84,10 @@ __template__
 	[% returnme.data_constant = 1 %]
 	All Sections
 
+[% CASE 'defaultskin' %]
+	[% returnme.data_constant = 1 %]
+	All Sections
+
 [% CASE 'defaultnote' %]
 	[% returnme.data_constant = 1 %]
 	Unclassified

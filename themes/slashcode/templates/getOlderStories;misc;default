@@ -36,14 +36,14 @@ __template__
 		this_today = day;
 		IF !section or section.section == 'index' %]
 			<P><B>[% IF cur_time && story.secs && cur_time-story.secs > 7*86400
-				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
+				%]<FONT SIZE="4"><A HREF="[% gSkin.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
 				>[% story.month %] [% story.day %]</A></FONT>[%
 			ELSE
-				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
+				%]<FONT SIZE="4"><A HREF="[% gSkin.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
 				>[% story.day_of_week %]</A></FONT> [% story.month %] [% story.day %][%
 			END %]</B></P>
 		[% ELSIF section.issue && section.issue > 1 %]
-			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&amp;issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
+			<P><B><FONT SIZE="4"><A HREF="[% gSkin.rootdir %]/index.pl?section=[% section.section %]&amp;issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
 				>[% story.day_of_week %]</A></FONT> [% story.month %] [% story.day %]</B></P>
 		[% ELSE %]
 			<P><B><FONT SIZE="4">[% story.day_of_week %]</FONT> [% story.month %] [% story.day %]</B></P>
@@ -56,12 +56,12 @@ __template__
 [% END %]
 
 [% IF !section or section.section == 'index' %]
-<P ALIGN="RIGHT"><B><A HREF="[% constants.rootdir %]/search.pl?start=[% start %]">Older Articles</A></B>
+<P ALIGN="RIGHT"><B><A HREF="[% gSkin.rootdir %]/search.pl?start=[% start %]">Older Articles</A></B>
 <BR><B>[% PROCESS next_prev_issue older_stories = 1 %]</B>
 [% ELSIF section.issue %]
 <P ALIGN="RIGHT">
 	[% IF section.issue == 1 || section.issue == 3 %]
-<BR><B><A HREF="[% constants.rootdir %]/search.pl?section=[% section.section %]&amp;start=[% start %]"
+<BR><B><A HREF="[% gSkin.rootdir %]/search.pl?section=[% section.section %]&amp;start=[% start %]"
 >Older Articles</A></B>
 	[% END %]
 	[% IF (section.issue == 2 || section.issue == 3) and first_date >= yesterday and last_date <= yesterday %]

@@ -17,6 +17,7 @@ yourPendingSubs
 __template__
 [% USE Slash %]
 [% topics = Slash.db.getTopics(); # sigh %]
+[% skins = Slash.db.getSkins(); %]
 [% PROCESS titlebar title = "Your recent submissions" %]
 
 <P>Here are your recent submissions to [% constants.sitename %],
@@ -28,8 +29,8 @@ and their status within the system:</P>
 [% FOREACH submission = submissions %]
 	[%	time    = submission.time
 		subj    = submission.subj
-		section = submission.section
-		topic   = topics.${submission.tid}.name
+		section = skins.${submission.primaryskid}.title
+		topic   = topics.${submission.tid}.textname
 		del     = submission.del
 	%]
 

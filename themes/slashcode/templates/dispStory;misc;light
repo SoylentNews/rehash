@@ -13,23 +13,24 @@ dispStory
 __template__
 
 [% IF magic;
-	IF section.rootdir;
-		title = "<A HREF=\"$section.rootdir/\">";
+	thisskin = Slash.db.getSkin(story.primaryskid);
+	IF thisskin.rootdir;
+		title = "<A HREF=\"$thisskin.rootdir/\">";
 	ELSE;
 		IF user.is_anon;
-			title = "<A HREF=\"$constants.rootdir/$story.section/\">";
+			title = "<A HREF=\"$gSkin.rootdir/$thisskin.name/\">";
 		ELSE;
-			title = "<A HREF=\"$constants.rootdir/index.pl?section=$story.section\">";
+			title = "<A HREF=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
 		END;
 	END;
-	title = "$title$section.title</A>: $story.title";
+	title = "$title$thisskin.title</A>: $story.title";
 ELSE;
 	title = story.title;
 END %]
 
 [% PROCESS titlebar future=story.is_future %]
 
-<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A> | 
+<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A> | 
 <B>Posted by [% author.nickname %] [% story.atstorytime %]</B><BR>
 
 [% IF constants.use_dept && story.dept %]
@@ -40,7 +41,7 @@ END %]
 
 [% story.introtext %]
 
-[% IF full && user.is_admin && !preview %]<P><A HREF="[% constants.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]
+[% IF full && user.is_admin && !preview %]<P><A HREF="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]
 
 [% IF full && (story.bodytext || story.books_publisher) %]
 

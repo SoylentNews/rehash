@@ -115,26 +115,26 @@ comments in it which will confuse your readers;  HTML tags
 built from several templates may have HTML comments "inside"
 them, breaking your HTML syntax;  etc.
 
-=item Section
+=item Skin
 
-Each template is assigned to a section.  This section may be
-a section defined as a site section, or some arbitrary section
-name.  By default, the section that is used is whatever section
+Each template is assigned to a skin.  This skin may be
+a skin defined as a site skin, or some arbitrary skin
+name.  By default, the skin that is used is whatever skin
 the user is in, but it can be overridden by setting this parameter.
-If a template in the current section is not found, it defaults
-to section "default".
+If a template in the current skin is not found, it defaults
+to skin "default".
 
-Section will also default first to "light" if the user is in light
+Skin will also default first to "light" if the user is in light
 mode (and fall back to "default," again, if no template for the
-"light" section exists).
+"light" skin exists).
 
-A Section value of "NONE" will cause no section to be defined, so
+A Skin value of "NONE" will cause no skin to be defined, so
 "default" will be used.
 
 =item Page
 
-Similarly to sections, each template is assigned to a page.
-This section may be a page defined in the site, or some arbitrary
+Similarly to skins, each template is assigned to a page.
+This page may be a page defined in the site, or some arbitrary
 page name.  By default, the page that is used is whatever page
 the user is on (such as "users" for "users.pl"), but it can be
 overridden by setting this parameter.  If a template in the current
@@ -168,13 +168,13 @@ sub slashDisplay {
 	my $reader    = getObject('Slash::DB', { db_type => 'reader' }); 
 	my $user      = getCurrentUser();
 
-	my($origSection, $origPage, $tempdata);
+	my($origSkin, $origPage, $tempdata);
 	unless (ref($name) eq 'HASH') {
 		$name = slashDisplayName($name, $data, $opt);
 	}
 
-	($name, $data, $opt, $origSection, $origPage, $tempdata) = @{$name}{qw(
-		name data opt origSection origPage tempdata
+	($name, $data, $opt, $origSkin, $origPage, $tempdata) = @{$name}{qw(
+		name data opt origSkin origPage tempdata
 	)};
 
 	local $TEMPNAME = 'anon';
@@ -182,10 +182,10 @@ sub slashDisplay {
 		# we don't want to have to call this here, but because
 		# it is cached the performance hit is generally light,
 		# and this is the only good way to get the actual name,
-		# page, section, we bite the bullet and do it
-		$tempdata ||= $reader->getTemplateByName($name, [qw(tpid page section)]);
+		# page, skin, we bite the bullet and do it
+		$tempdata ||= $reader->getTemplateByName($name, [qw(tpid page skin)]);
 		$TEMPNAME = "ID $tempdata->{tpid}, " .
-			"$name;$tempdata->{page};$tempdata->{section}";
+			"$name;$tempdata->{page};$tempdata->{skin}";
 	}
 
 	# copy parent data structure so it is not modified,
@@ -227,7 +227,7 @@ sub slashDisplay {
 	}
 
 	# restore our original values
-	$user->{currentSection}	= $origSection;
+	$user->{currentSkin}	= $origSkin;
 	$user->{currentPage}	= $origPage;
 
 	return $opt->{Return} ? $out : $ret;
@@ -242,9 +242,10 @@ sub slashDisplayName {
 	my $constants = getCurrentStatic();
 	my $reader    = getObject('Slash::DB', { db_type => 'reader' }); 
 	my $user      = getCurrentUser();
+	my $gSkin     = getCurrentSkin();
 
 	# save for later (local() seems not to work ... ?)
-	my $origSection = $user->{currentSection};
+	my $origSkin = $user->{currentSkin} || $gSkin->{name};
 	my $origPage = $user->{currentPage};
 
 	# allow slashDisplay(NAME, DATA, RETURN) syntax
@@ -252,19 +253,13 @@ sub slashDisplayName {
 		$opt = $opt == 1 ? { Return => 1 } : {};
 	}
 
-	if ($opt->{Section} && $opt->{Section} eq 'NONE') {
-		$user->{currentSection} = 'default';
-	# admin and light are special cases
-	} elsif ($user->{currentSection} eq 'admin') {
-		# This should never happen, far as I know.  "admin" is
-		# not used as a fake section for some months now, it's
-		# just a page. - Jamie 2004/03/05
-print STDERR scalar(localtime) . " slashDisplayName setting currentSection to 'admin', won't set to '" . (defined($opt->{Section}) ? $opt->{Section} : "undef") . "'\n";
-		$user->{currentSection} = 'admin';
+	if ($opt->{Skin} && $opt->{Skin} eq 'NONE') {
+		$user->{currentSkin} = 'default';
+	# light is a special case
 	} elsif ($user->{light}) {
-		$user->{currentSection} = 'light';
-	} elsif ($opt->{Section}) {
-		$user->{currentSection} = $opt->{Section};
+		$user->{currentSkin} = 'light';
+	} elsif ($opt->{Skin}) {
+		$user->{currentSkin} = $opt->{Skin};
 	}
 
 	if ($opt->{Page} && $opt->{Page} eq 'NONE') {
@@ -273,19 +268,19 @@ print STDERR scalar(localtime) . " slashDisplayName setting currentSection to 'a
 		$user->{currentPage} = $opt->{Page};
 	}
 
-	for (qw[currentSection currentPage]) {
+	for (qw[currentSkin currentPage]) {
 		$user->{$_} = defined $user->{$_} ? $user->{$_} : '';
 	}
 
 	my $tempdata;
-	$tempdata = $reader->getTemplateByName($name, [qw(tpid page section)])
+	$tempdata = $reader->getTemplateByName($name, [qw(tpid page skin)])
 		if $opt->{GetName};
 
 	return {
 		name        => $name,
 		data        => $data,
 		opt         => $opt,
-		origSection => $origSection,
+		origSkin    => $origSkin,
 		origPage    => $origPage,
 		tempdata    => $tempdata,
 	};

@@ -53,8 +53,8 @@ __template__
 [%- END %]
 
 <P>
-<A HREF="[% constants.rootdir %]/stats.pl?op=table[% statstring %]"
-><IMG SRC="[% constants.rootdir %]/stats.pl?op=graph[% statstring %]"></A>
+<A HREF="[% gSkin.rootdir %]/stats.pl?op=table[% statstring %]"
+><IMG SRC="[% gSkin.rootdir %]/stats.pl?op=graph[% statstring %]"></A>
 </P>
 __seclev__
 1000

@@ -9,13 +9,13 @@ template editor
 * templatedelete_flag = whether to display the template delete form or not
 * tpid = template ID
 * templateref = hash ref containing template specifics
-* section_select = form select containing sections
+* skin_select = form select containing skins
 * page_select = form select contain pages
 * template_select = form select containing templates
 * templateform_flag = display template form or not
 * templateedit_flag = editing a template or not
 * savepage_select = form select containing pages, this is used to determine page of template
-* savesection_select = form select containing sections, used to determine section
+* saveskin_select = form select containing skins, used to determine skin
 
 __title__
 template editor template
@@ -54,15 +54,15 @@ __template__
 		<TD COLSPAN="2"><INPUT TYPE="SUBMIT" VALUE="Search for text" NAME="templatesearch"></TD>
 	</TR>
 	<TR>
-		<TD>[% PROCESS formLabel value => "Section" %]</TD>
-		<TD>[% section_select %]</TD>
-		<TD COLSPAN="2"><INPUT TYPE="SUBMIT" VALUE="Select section" NAME="templatesection"></TD>
+		<TD>[% PROCESS formLabel value => "Skin" %]</TD>
+		<TD>[% skin_select %]</TD>
+		<TD COLSPAN="2"><INPUT TYPE="SUBMIT" VALUE="Select skin" NAME="templateskin"></TD>
 	</TR>
 	<TR>
 		<TD>[% PROCESS formLabel value => "Page" %]</TD>
 		<TD>[% page_select %]</TD>
 		<TD><INPUT TYPE="SUBMIT" VALUE="Select page" NAME="templatepage"></TD>
-		<TD><INPUT TYPE="SUBMIT" VALUE="Select page and section" NAME="templatepageandsection"></TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Select page and skin" NAME="templatepageandskin"></TD>
 	</TR>
 	<TR>
 		<TD>[% PROCESS formLabel value => "Templates" %]</TD>
@@ -84,10 +84,10 @@ __template__
 	[% IF templateref.description %]
 	<TR>
 		<TD COLSPAN="3">
-		<TABLE BORDER="2" CELLPADDING="4" CELLSPACING="0" BGCOLOR="[% user.fg.1 %]" WIDTH="80%">
+		<TABLE BORDER="2" CELLPADDING="4" CELLSPACING="0" BGCOLOR="[% user.colors.fg_1 %]" WIDTH="80%">
 			<TR>
-				<TD BGCOLOR="[% user.bg.2 %]"><BR><B>Template ID: [% tpid %],
-					[% templateref.name %], [% templateref.page %], [% templateref.section %]</B><BR>
+				<TD BGCOLOR="[% user.colors.bg_2 %]"><BR><B>Template ID: [% tpid %],
+					[% templateref.name %], [% templateref.page %], [% templateref.skin %]</B><BR>
 				<P>[% FILTER strip_extrans %][% templateref.description %][% END %]</P><BR>
 				</TD>
 			</TR>
@@ -98,13 +98,13 @@ __template__
 	[% END %]
 
 	<TR>
-		<TD>[% PROCESS formLabel value => "Save template in section" %]</TD>
-		<TD>[% savesection_select %]</TD>
+		<TD>[% PROCESS formLabel value => "Save template in skin" %]</TD>
+		<TD>[% saveskin_select %]</TD>
 	</TR>
 
 	<TR>
-		<TD>[% PROCESS formLabel value => "Template section", comment => 'new template section <INPUT TYPE="checkbox" NAME="newS">' %]</TD>
-		<TD><INPUT TYPE="TEXT" NAME="newsection" VALUE="[% form.section %]"></TD>
+		<TD>[% PROCESS formLabel value => "Template skin", comment => 'new template skin <INPUT TYPE="checkbox" NAME="newS">' %]</TD>
+		<TD><INPUT TYPE="TEXT" NAME="newskin" VALUE="[% form.skin %]"></TD>
 	</TR>
 	
 	<TR>	

@@ -19,9 +19,9 @@ __name__
 editSection
 __template__
 [
-<A HREF="[% constants.rootdir %]/admin.pl?section=[% section %]">Stories</A> |
-<A HREF="[% constants.rootdir %]/submit.pl?section=[% section %]&op=list">Submissions</A> |
-<A HREF="[% constants.rootdir %]/index.pl?section=[% section %]">Preview</A> 
+<A HREF="[% gSkin.rootdir %]/admin.pl?section=[% section %]">Stories</A> |
+<A HREF="[% gSkin.rootdir %]/submit.pl?section=[% section %]&op=list">Submissions</A> |
+<A HREF="[% gSkin.rootdir %]/index.pl?section=[% section %]">Preview</A> 
 ]
 
 [% # Conditions for subsection delete confirmation. If true, show subform.
@@ -84,7 +84,7 @@ key = "del_subsection_${form.DEL_subsection}" %]
 					[% PROCESS formLabel value 	=> "Edit Section slashboxes" comment => "blocks" %]
 					[% FOREACH block = blocks %]
 						<LI>
-						<B><A HREF="[% constants.rootdir %]/admin.pl?op=blocks&bid=[% block.bid %]">[% block.title %]</A></B>
+						<B><A HREF="[% gSkin.rootdir %]/admin.pl?op=blocks&bid=[% block.bid %]">[% block.title %]</A></B>
 						<A HREF="[% block.url %]">[% block.url %]</A>
 						[% IF block.ordernum && block.ordernum > 0 %]
 							[% ' (default)' %]
@@ -115,9 +115,9 @@ key = "del_subsection_${form.DEL_subsection}" %]
 					</TR>
 					[% IF subsections.size %]
 					<TR>
-						<TH BGCOLOR="[% user.bg.2 %]">Subsection</TH>
-						<TH BGCOLOR="[% user.bg.2 %]">Article Count</TH>
-						<TH BGCOLOR="[% user.bg.2 %]">Remove Subsection</TH>
+						<TH BGCOLOR="[% user.colors.bg_2 %]">Subsection</TH>
+						<TH BGCOLOR="[% user.colors.bg_2 %]">Article Count</TH>
+						<TH BGCOLOR="[% user.colors.bg_2 %]">Remove Subsection</TH>
 					</TR>
 					[% END %]
 					[% FOR ss=subsections %]
@@ -141,15 +141,15 @@ key = "del_subsection_${form.DEL_subsection}" %]
 					[% FOR e=extras %]
 					[%	UNLESS loop.first %]
 					<TR>
-						<TD BGCOLOR="[% user.bg.0 %]" COLSPAN="4">
+						<TD BGCOLOR="[% user.colors.bg_0 %]" COLSPAN="4">
 							[% INCLUDE spacer %]
 						</TD>
 						</TR><TR>
-						<TD BGCOLOR="[% user.bg.3 %]" COLSPAN="4">
+						<TD BGCOLOR="[% user.colors.bg_3 %]" COLSPAN="4">
 							[% INCLUDE spacer %]
 						</TD>
 						</TR><TR>
-						<TD BGCOLOR="[% user.bg.0 %]" COLSPAN="4">
+						<TD BGCOLOR="[% user.colors.bg_0 %]" COLSPAN="4">
 							[% INCLUDE spacer %]
 						</TD>
 					</TR>
@@ -191,7 +191,7 @@ key = "del_subsection_${form.DEL_subsection}" %]
 				<UL>
 					[% FOREACH tid = topics.sort %]
 					<LI>
-					<A HREF="[% constants.rootdir %]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid %]</A>
+					<A HREF="[% gSkin.rootdir %]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid %]</A>
 					</LI>
 					[% END %]
 

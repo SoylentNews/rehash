@@ -34,7 +34,7 @@ u.1.substr(0,35) -%]...[% ELSE %][% u.1 %][% END %]</a></LI>
 <p>If you really want to delete it, edit each URL to stop using it.
 [% 	ELSE;
 		IF need_confirm -%]
-<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="miner_id" VALUE="[% miner_id %]">
 <INPUT TYPE="HIDDEN" NAME="deleteminer" value=1>
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updateminer">

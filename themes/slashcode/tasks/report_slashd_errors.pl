@@ -21,8 +21,8 @@ $task{$me}{code} = sub {
 	$data{errors} = $slashdb->sqlSelectAllHashref('taskname',
 		'COUNT(ts) AS num, taskname, line, errnote, moreinfo',
 		'slashd_errnotes',
-		"ts BETWEEN '$lastrun' AND '$now',
-		'GROUP BY taskname");
+		"ts BETWEEN '$lastrun' AND '$now'",
+		'GROUP BY taskname');
 
 	my $messages = getObject('Slash::Messages');
 	

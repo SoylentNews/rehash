@@ -14,7 +14,8 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
-	my $events   = getObject('Slash::Events');
+	my $gSkin     = getCurrentSkin();
+	my $events    = getObject('Slash::Events');
 
 	$form->{date} ||= timeCalc(0, '%Y-%m-%d', 0);
 
@@ -33,14 +34,14 @@ sub main {
 		for my $entry (@$stories) {
 			push @items, {
 				title	=> $entry->[1],
-				'link'	=> ($constants->{absolutedir} . "/article.pl?sid=$entry->[0])"),
+				'link'	=> ($gSkin->{absolutedir} . "/article.pl?sid=$entry->[0])"),
 			};
 		}
 
 		xmlDisplay(rss => {
 			channel => {
 				title		=> "$constants->{sitename} events for nick's $time",
-				'link'		=> "$constants->{absolutedir}/",
+				'link'		=> "$gSkin->{absolutedir}/",
 			},
 			image	=> 1,
 			items	=> \@items

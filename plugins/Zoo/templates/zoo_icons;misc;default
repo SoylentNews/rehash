@@ -19,31 +19,31 @@ __template__
 [% USE Slash %]
 [% IF user.uid != person && person && !user.is_anon %]
 	[% IF !user.people.${Slash.FRIEND}.$person && !user.people.${Slash.FOE}.$person && !user.people.${Slash.FAN}.$person && !user.people.${Slash.FREAK}.$person && !user.people.${Slash.FOF}.$person && !user.people.${Slash.EOF}.$person %]
-		<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]&amp;type=friend"><IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral" TITLE="Neutral"></A>
+		<A HREF="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]&amp;type=friend"><IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral" TITLE="Neutral"></A>
 	[% ELSE %]
 		[% IF user.people.${Slash.FRIEND}.$person && implied != Slash.FRIEND %]
 			[% IF bonus && user.people_bonus_friend; zootitle = "Friend ($user.people_bonus_friend)"; ELSE; zootitle = "Friend"; END; %]
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
+			<A HREF="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
 		[% END %]
 		[% IF user.people.${Slash.FOE}.$person && implied != Slash.FOE %]
 			[% IF bonus && user.people_bonus_foe; zootitle = "Foe ($user.people_bonus_foe)"; ELSE; zootitle = "Foe"; END; %]
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
+			<A HREF="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
 		[% END %]
 		[% IF user.people.${Slash.FAN}.$person && implied != Slash.FAN %]
 			[% IF bonus && user.people_bonus_fan; zootitle = "Fan ($user.people_bonus_fan)"; ELSE; zootitle = "Fan"; END; %]
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/fan.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
+			<A HREF="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/fan.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
 		[% END %]
 		[% IF user.people.${Slash.FREAK}.$person && implied != Slash.FREAK %]
 			[% IF bonus && user.people_bonus_freak; zootitle = "Freak ($user.people_bonus_freak)"; ELSE; zootitle = "Freak"; END; %]
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/freak.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
+			<A HREF="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/freak.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
 		[% END %]
 		[% IF user.people.${Slash.FOF}.$person && implied != Slash.FOF %]
 			[% IF bonus && user.people_bonus_freak; zootitle = "Friend of Friend ($user.people_bonus_fof)"; ELSE; zootitle = "Friend of Friend"; END; %]
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
+			<A HREF="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
 		[% END %]
 		[% IF user.people.${Slash.EOF}.$person && implied != Slash.EOF %]
 			[% IF bonus && user.people_bonus_freak; zootitle = "Foe of Friend ($user.people_bonus_eof)"; ELSE; zootitle = "Foe of Friend"; END; %]
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
+			<A HREF="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="[% zootitle %]" TITLE="[% zootitle %]"></A>
 		[% END %]
 	[% END %]
 [% END %]

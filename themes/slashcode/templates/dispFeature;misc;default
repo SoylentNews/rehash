@@ -21,12 +21,17 @@ __name__
 dispFeature
 __template__
 [% IF magic;
-	IF user.is_anon;
-		title = "<A HREF=\"$constants.rootdir/$story.section/\">";
+	thisskin = Slash.db.getSkin(story.primaryskid);
+	IF thisskin.rootdir;
+		title = "<A HREF=\"$thisskin.rootdir/\">";
 	ELSE;
-		title = "<A HREF=\"$constants.rootdir/index.pl?section=$story.section\">";
+		IF user.is_anon;
+			title = "<A HREF=\"$gSkin.rootdir/$thisskin.name/\">";
+		ELSE;
+			title = "<A HREF=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
+		END;
 	END;
-	title = "$title<FONT COLOR=\"$user.fg.3\">$section.title</FONT></A>: $story.title";
+	title = "$title<FONT COLOR=\"$user.colors.fg_3\">$thisskin.title</FONT></A>: $story.title";
 ELSE;
 	title = story.title;
 END %]
@@ -51,10 +56,10 @@ END %]
 	<TR><TD BGCOLOR="#006666" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
 	<TR>
 		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
-				[% IF user.noicons %][ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
-				[% ELSE %]<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"
+		<TD BGCOLOR="[% user.colors.bg_1 %]" WIDTH="100%">
+			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.colors.bg_1 %]">
+				[% IF user.noicons %][ <A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
+				[% ELSE %]<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"
 					><IMG SRC="[% topic.image %]" WIDTH="[% topic.width %]"
 						HEIGHT="[% topic.height %]" BORDER="0" ALIGN="RIGHT"
 						HSPACE="20" VSPACE="10" ALT="[% topic.alttext %]"></A>
@@ -64,7 +69,7 @@ END %]
 		</TD>
 		<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 	</TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
+	<TR BGCOLOR="[% user.colors.bg_3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
 	</TABLE>
 
 
@@ -73,17 +78,17 @@ END %]
 <BR>
 
 <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
+	<TR BGCOLOR="[% user.colors.bg_3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
 	<TR>
 		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+		<TD BGCOLOR="[% user.colors.bg_1 %]" WIDTH="100%">
+			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.colors.bg_1 %]">
 				[% story.bodytext %]
 			</TD></TR></TABLE>
 		</TD>
 		<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 	</TR>
-	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
+	<TR BGCOLOR="[% user.colors.bg_3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
 </TABLE>
 
 [% END %]

@@ -51,7 +51,7 @@ CASE 'mail_result';
 [% storylinks = Slash.linkStory({ link => "the story", sid => form.sid }) %]
 Story mailed successfully.  Return to
 <A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</A>
-or to <A HREF="[% constants.rootdir %]/">the home page</A>.
+or to <A HREF="[% gSkin.rootdir %]/">the home page</A>.
 	[%- ELSE;
 "An error occured while attempting to mail the story.  Please check that
 the email address is valid.  If you believe this error is due to a
@@ -60,7 +60,7 @@ bug, please send email to $constants.adminmail";
 
 CASE 'formkeyError';
 	linkop = 'email_send' ? 'email_form' : 'optout_form'; -%]
-	<P>Please return back to the <A HREF="[% constants.rootdir
+	<P>Please return back to the <A HREF="[% gSkin.rootdir
 	-%]/email.pl?op=[% linkop %]">originating form</A> and try again.
 	<!-- op=[% operation %], check=[% check %] -->
 	[%

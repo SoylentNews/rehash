@@ -23,7 +23,7 @@ use Slash;
 use Slash::Utility;
 use Benchmark;
 
-use vars qw( $slashdb $werder $constants );
+use vars qw( $slashdb $werder $constants $gSkin );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -43,6 +43,7 @@ $slashdb = getCurrentDB();
 $werder = new Silly::Werder;
 $werder->set_syllables_num(2, 6);
 $constants = getCurrentStatic();
+$gSkin = getCurrentSkin();
 
 my $user;
 if (exists $opts{'U'}) {
@@ -64,7 +65,7 @@ if (exists $opts{'U'}) {
 	$min_weight ||= 0;
 	$max_weight ||= 99;
 
-	my $rootdir = $constants->{rootdir};
+	my $rootdir = $gSkin->{rootdir};
  
 	my $t0 = new Benchmark;
 	my $count = $opts{num_subs};

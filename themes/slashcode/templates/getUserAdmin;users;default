@@ -25,7 +25,7 @@ __template__
 	<TR>
 		<TD>
 		[% PROCESS titlebar width="100%" title="User Admin" %]
-		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]" WIDTH="100%">
+		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.colors.bg_2 %]" WIDTH="100%">
 			<FORM ACTION="[% env.script_name %]" METHOD="POST">
 			<TR>
 			[% PROCESS formkey_tag %]
@@ -105,7 +105,7 @@ __template__
 				<td valign="top"><b>Proxy Info</b></td>
 				<td>
 					[% IF proxy_check.available %]
-						<a href="[% constants.rootdir %]/users.pl?userfield=[% form.userfield | fixparam %]&amp;check_proxy=1"><font size="-1">Test [% form.userfield %] for open proxy</font></a> 
+						<a href="[% gSkin.rootdir %]/users.pl?userfield=[% form.userfield | fixparam %]&amp;check_proxy=1"><font size="-1">Test [% form.userfield %] for open proxy</font></a> 
 						[% IF proxy_check.results.defined %]
 							<font size="-1"><b>
 							Test Results:
@@ -171,15 +171,15 @@ __template__
 					<TD>
 					[% IF useredit.subscribe_payments.size or useredit.subscribe_purchases.size%]
 					<TABLE CELLSPACING="0">
-						<TR bgcolor="[% user.bg.3 %]">
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Date</FONT></TH>
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Email</FONT></TH>
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>&nbsp;</FONT></TH>
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Pages</FONT></TH>
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Method</FONT></TH>
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>TransID</FONT></TH>
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>PUID</FONT></TH>
-							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Type</FONT></TH>
+						<TR bgcolor="[% user.colors.bg_3 %]">
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>Date</FONT></TH>
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>Email</FONT></TH>
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>&nbsp;</FONT></TH>
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>Pages</FONT></TH>
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>Method</FONT></TH>
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>TransID</FONT></TH>
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>PUID</FONT></TH>
+							<TH><FONT COLOR="[% user.colors.fg_3 %]" SIZE=-1>Type</FONT></TH>
 						</TR>
 						[% FOREACH sp = useredit.subscribe_payments %]
 						<TR bgcolor="eeeeee">
@@ -235,13 +235,13 @@ __template__
 				<TR><TD VALIGN=TOP><B>Activity</B></TD>
 				<TD>
 				[% IF uidstruct %]
-					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
-						<TR BGCOLOR="[% user.bg.3 %]">
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>UID</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Nickname</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Com</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Sub</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Mod</B></FONT></TD>
+					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.colors.bg_2 %]">
+						<TR BGCOLOR="[% user.colors.bg_3 %]">
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>UID</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Nickname</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Com</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Sub</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Mod</B></FONT></TD>
 						</TR>
 					[% FOREACH tmpuid = uidstruct.keys %]
 						<TR bgcolor="eeeeee">
@@ -257,14 +257,14 @@ __template__
 				
 		
 				[% IF ipstruct %]
-					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
-						<TR BGCOLOR="[% user.bg.3 %]">
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>IPID</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>#</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Date(s)</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Com</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Sub</B></FONT></TD>
-							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Mod</B></FONT></TD>
+					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.colors.bg_2 %]">
+						<TR BGCOLOR="[% user.colors.bg_3 %]">
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>IPID</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>#</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Date(s)</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Com</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Sub</B></FONT></TD>
+							<TD><FONT COLOR="[% user.colors.fg_0 %]" SIZE=-1><B>Mod</B></FONT></TD>
 						</TR>
 					[% FOREACH tmpip = ipstruct_order %]
 						<TR bgcolor="eeeeee">
@@ -297,7 +297,7 @@ __template__
 		[% IF useredit.uid %]
 		<tr>
 		<td><B>Verify Account</B></td><td>
-		 <form action="[% constants.rootdir %]/users.pl" method="post">
+		 <form action="[% gSkin.rootdir %]/users.pl" method="post">
 		 <input type="hidden" name="uid" value="[% useredit.uid %]">
 		 <input type="hidden" name="op" value="force_acct_verify">
 		 <input type="submit" value="Force User to Verify Account">

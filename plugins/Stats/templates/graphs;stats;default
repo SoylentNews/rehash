@@ -144,7 +144,7 @@ SWITCH gtitle;
   END;
 
   CASE 'Section Pages';
-      avail_sections = Slash.db.getDescriptions('sections');
+      avail_sections = Slash.db.getDescriptions('skins');
       sect_page = [];
       FOREACH section = avail_sections.keys.sort;
          sect_page.push(['page', section]);
@@ -154,7 +154,7 @@ SWITCH gtitle;
          statdata  => sect_page;
 
   CASE 'Section Bytes';
-      avail_sections = Slash.db.getDescriptions('sections');
+      avail_sections = Slash.db.getDescriptions('skins');
       sect_byte = [];
       FOREACH section = avail_sections.keys.sort;
          sect_byte.push(['bytes', section]);

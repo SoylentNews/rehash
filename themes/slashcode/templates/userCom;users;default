@@ -35,7 +35,7 @@ __template__
 			ELSE;
 			label    = comment.disc_title;
 		END %]
-		<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
+		<BR><B>[% n %]</B> <A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
 		[% comment.subject %]</A> posted on [% Slash.timeCalc(comment.date) %]
 	(Score:[% comment.points %][% IF comment.replies %] Replies: [% comment.replies %][% END %])
 		<FONT SIZE="2">
@@ -43,7 +43,7 @@ __template__
 		</FONT>
 	[% END %]
 	[% IF (user.seclev > constants.comments_more_seclev || (comments_more_seclev == 2 && user.is_subscriber)) && commentcount > n %]
-		<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | fixparam %]&amp;min_comment=[% n %]"     >More Comments...</A>
+		<P><A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | fixparam %]&amp;min_comment=[% n %]"     >More Comments...</A>
 	[% END %]
 [% ELSE %]
 	[% title = useredit.nickname | strip_literal %]

@@ -12,13 +12,13 @@ sub main {
 	my $yass   = getObject('Slash::YASS');
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
+	my $gSkin = getCurrentSkin();
 
-
-	if($form->{'content_type'} eq 'rss') {
+	if ($form->{'content_type'} eq 'rss') {
 		return xmlDisplay('rss', {
 				channel => {
 				title   => "$constants->{sitename} links",
-				'link'  => "$constants->{absolutedir}/sites.pl?content_type=rss",
+				'link'  => "$gSkin->{absolutedir}/sites.pl?content_type=rss",
 			},
 			items   => $yass->getActive(15),
 		});

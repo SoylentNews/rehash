@@ -9,7 +9,7 @@ use vars qw( %task $me );
 $task{$me}{timespec} = '8 6 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, this can wait
 $task{$me}{code} = sub {
-	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 
 	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 	my $sub_static = getObject("Slash::Subscribe::Static", { db_type => 'reader' });
@@ -223,7 +223,7 @@ $task{$me}{code} = sub {
 
 	my($report_link, $monthly_stats) = ("", "");
 	if ($constants->{plugin}{Stats}) {
-		$report_link = "\n$constants->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
+		$report_link = "\n$gSkin->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
 		if ($statsSave and my $stats = getObject('Slash::Stats')) {
 
 			# For a series of stats, calculate the last 30 days'

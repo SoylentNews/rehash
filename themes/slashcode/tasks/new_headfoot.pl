@@ -14,52 +14,50 @@ use vars qw( %task $me );
 $task{$me}{timespec} = '3,33 * * * *';
 $task{$me}{on_startup} = 1;
 $task{$me}{code} = sub {
-	my($virtual_user, $constants, $slashdb, $user, $info) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 
-	sectionHeaders(@_, "");
-	my $sections = $slashdb->getSections();
-	for (keys %$sections) {
-		my($section) = $sections->{$_}{section};
-		mkpath "$constants->{basedir}/$section", 0, 0755;
-		sectionHeaders(@_, $sections->{$_});
+	skinHeaders(@_, "");
+	my $skins = $slashdb->getSkins;
+	for my $skid (keys %$skins) {
+		mkpath "$constants->{basedir}/$skins->{$skid}{name}", 0, 0755;
+		skinHeaders(@_, $skins->{$skid});
 	}
 
 	return ;
 };
 
-sub sectionHeaders {
-	my($virtual_user, $constants, $slashdb, $user, $info, $sections) = @_;
-	my $section = $sections->{section}
-		if $sections;
+sub skinHeaders {
+	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin, $skin) = @_;
 
-	createCurrentHostname($sections->{hostname})
-		if $sections;
+	my($skinname);
+	if ($skin) {
+		$skinname = $skin->{name};
+		createCurrentHostname($skin->{hostname});
+	}
 
 	my $form = getCurrentForm();
 
 	setCurrentForm('ssi', 1);
-	my $fh = gensym();
-
-	my $head_pages = $slashdb->getHeadFootPages($section, 'header');
+	my $head_pages = $slashdb->getHeadFootPages($skinname, 'header');
 
 	foreach (@$head_pages) {
 		my $file;
 
 		if ($_->[0] eq 'misc') {
-			$file = "$constants->{basedir}/$section/slashhead.inc";
+			$file = "$constants->{basedir}/$skinname/slashhead.inc";
 		} else {
-			$file = "$constants->{basedir}/$section/slashhead-$_->[0].inc";
+			$file = "$constants->{basedir}/$skinname/slashhead-$_->[0].inc";
 		}
 
-		open $fh, ">$file" or die "Can't open $file : $!";
-		my $header = header("", $section, { noheader => 1, Return => 1, Page => $_->[0] });
+		open my $fh, ">$file" or die "Can't open $file : $!";
+		my $header = header("", $skinname, { noheader => 1, Return => 1, Page => $_->[0] });
 		print $fh $header;
 		close $fh;
 	}
 
 	setCurrentForm('ssi', 0);
-	open $fh, ">$constants->{basedir}/$section/slashfoot.inc"
-		or die "Can't open $constants->{basedir}/$section/slashfoot.inc: $!";
+	open my $fh, ">$constants->{basedir}/$skinname/slashfoot.inc"
+		or die "Can't open $constants->{basedir}/$skinname/slashfoot.inc: $!";
 	my $footer = footer({ Return => 1 });
 	print $fh $footer;
 	close $fh;

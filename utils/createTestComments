@@ -181,7 +181,7 @@ $werder = new Silly::Werder;
 		my $cid = $slashdb->createComment($clean_comment);
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
-		$slashdb->setStory($sid, { writestatus => 'dirty' }) if $sid;
+		$slashdb->setStory($sid, { is_dirty => 1 }) if $sid;
 	        $family_tree{$cid} = $pid if ! $opts{T};
 		$deep_tree{$cid} = $deep_tree{$pid}+1 if $opts{t};
 	        print <<EOT;
@@ -207,7 +207,7 @@ sub getRandomSid {
 		$story_table,
 		"discussion > 0
 		 AND $ds_clause
-		 AND writestatus != 'archived'
+		 AND is_archived = 'no'
 		 AND time < NOW()",
 		"ORDER BY time DESC");
 	my @sids = map { $_->[0] } @$sids;

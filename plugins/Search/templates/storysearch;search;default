@@ -12,8 +12,9 @@ __name__
 storysearch
 __template__
 [% FOREACH story=stories %]
-	[% storylinks = Slash.linkStory({
-		section	=> story.section,
+	[% skin = Slash.db.getSkin(story.skid);
+	   storylinks = Slash.linkStory({
+		section	=> skin.name,
 		tid	=> story.tid,
 		sid	=> story.sid,
 		'link'	=> story.title
@@ -24,13 +25,11 @@ __template__
 	<FONT SIZE="-1">On [% Slash.timeCalc(story.time, '%B %o, %Y') %] with [% story.commentcount %] comments</FONT><BR>
 	[% story.introtext %] <BR>
 	<FONT SIZE="-1">
-		[% section = Slash.db.getSection(story.section); tids = Slash.db.getStoryTopicsJustTids(story.sid); topic = Slash.db.getTopic(story.tid) %]
-		Section: [% IF section.section == constants.real_section %]<A HREF="[% constants.real_rootdir %]/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "$constants.rootdir/search.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="[% constants.rootdir %]/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A>
-		[% FOREACH tid = tids %]
-			[% IF tid == story.tid; NEXT; END %]
+		Section: [% IF skin.name == 'mainpage' %]<A HREF="[% constants.real_rootdir %]/">Main</A>[% ELSE %]<A HREF="[% skin.url ? skin.url : "$gSkin.rootdir/search.pl?section=$skin.name" %]">[% skin.title %]</A>[% END %] &gt;
+		[% FOREACH tid = story.tid %]
 			[% topic = Slash.db.getTopic(tid) %]
-			,&nbsp<A HREF="[% constants.rootdir %]/search.pl?tid=[% tid %]">[% topic.alttext %]</A>
-		[% END %] 
+			<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</A>[% ",&nbsp;" UNLESS loop.last %]
+		[% END %]
 		<BR>
 		[% IF story.score %]
 			Score: [% story.score %] <br>

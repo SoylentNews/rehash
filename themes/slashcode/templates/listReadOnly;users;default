@@ -17,18 +17,18 @@ __template__
 <P><B>Read Only List:</B></P>
 <TABLE BORDER="0" CELLPADDING="0">
         <TR>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>Time Stamp</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>uid</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>Reason</B></TD>
+                <TD BGCOLOR="[% user.colors.fg_4 %]"><B>Time Stamp</B></TD>
+                <TD BGCOLOR="[% user.colors.fg_4 %]"><B>uid</B></TD>
+                <TD BGCOLOR="[% user.colors.fg_4 %]"><B>IPID</B></TD>
+                <TD BGCOLOR="[% user.colors.fg_4 %]"><B>SubnetID</B></TD>
+                <TD BGCOLOR="[% user.colors.fg_4 %]"><B>Reason</B></TD>
         </TR>
                 [% FOREACH readonly = readonlylist %]
         <TR>
                 <TD>[% readonly.ts %]</TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.uid %]">[% readonly.uid %]</A></TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.ipid %]">[% readonly.ipid %]</A></TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.subnetid %]">[% readonly.subnetid %]</A></TD>
+                <TD><A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.uid %]">[% readonly.uid %]</A></TD>
+                <TD><A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.ipid %]">[% readonly.ipid %]</A></TD>
+                <TD><A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.subnetid %]">[% readonly.subnetid %]</A></TD>
                 <TD>[% readonly.reason %]</TD>
         </TR>
                 [% END %]

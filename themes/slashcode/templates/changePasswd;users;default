@@ -23,12 +23,12 @@ __template__
 
 [% admin_block %]
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.colors.bg_5 %]">
 	<TR>
 		<TD>
 [% IF constants.offer_insecure_login_link %]
 		<P>You can automatically log in by clicking
-		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
+		 <A HREF="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
 		This is totally insecure, but very convenient.
 		</P>
 [% END %]
@@ -43,7 +43,7 @@ __template__
 [% ELSE %]
 		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
 [% END %]
-		My <A HREF="[% constants.rootdir %]/faq/accounts.shtml#ac1200">login session</A> [% session %] and [% clocation %]
+		My <A HREF="[% gSkin.rootdir %]/faq/accounts.shtml#ac1200">login session</A> [% session %] and [% clocation %]
 
 		<P>
 

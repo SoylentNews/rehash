@@ -46,7 +46,7 @@ __template__
 	[% PROCESS titlebar width="100%" title="Post Comment" %]
 [% END %]
 
-<FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
+<FORM ACTION="[% gSkin.rootdir %]/comments.pl" METHOD="POST">
 
 	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid || sid %]">
 	<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% form.pid %]">
@@ -67,11 +67,11 @@ __template__
 [% userlink = '' %]
 [% IF user.is_anon %]
 <!-- anon login code -->
-	[% userlink = "<A HREF=\"${constants.rootdir}/users.pl\">Create an Account</A>" %]
+	[% userlink = "<A HREF=\"${gSkin.rootdir}/users.pl\">Create an Account</A>" %]
 	<TR><TD> </TD><TD>
 		You are not logged in.  You can log in now using the
 		convenient form below, or
-		<A HREF="[% constants.rootdir %]/users.pl">Create an Account</A>,
+		<A HREF="[% gSkin.rootdir %]/users.pl">Create an Account</A>,
 		or post as <B>[% user.nickname %]</B>.
 	</TD></TR>
 	<INPUT TYPE="HIDDEN" NAME="rlogin" VALUE="1">
@@ -85,11 +85,11 @@ __template__
 
 	</TD></TR>
 [% ELSE;
-	userlink = "<A HREF=\"${constants.rootdir}/login.pl?op=userclose\">Log Out</A>";
+	userlink = "<A HREF=\"${gSkin.rootdir}/login.pl?op=userclose\">Log Out</A>";
 END %]
 	[% UNLESS hide_name %]
 	<TR><TD WIDTH="130" ALIGN="RIGHT">[% PROCESS formLabel value => 'Name' %]</TD><TD WIDTH="500">
-		<A HREF="[% constants.rootdir %]/users.pl">[% user.nickname %]</A> [ [% userlink %] ]</TD></TR>
+		<A HREF="[% gSkin.rootdir %]/users.pl">[% user.nickname %]</A> [ [% userlink %] ]</TD></TR>
 	[% END %]
 [% IF user.fakeemail %]
 	[% UNLESS hide_email %]
@@ -140,7 +140,7 @@ END %]
 			"Score: 0 (Logged-in users start at Score: 1)."
 		]%]
 		<BR>[% anon_messages.rand %]
-		<B><A HREF="[% constants.rootdir %]/users.pl">Create an Account!</A>
+		<B><A HREF="[% gSkin.rootdir %]/users.pl">Create an Account!</A>
 		[% END %]
 	</TD></TR>
 
@@ -196,7 +196,7 @@ IF do_br %]<BR>[% END %]
 [% END %]
 
 	</TD></TR><TR>
-		<TD VALIGN="TOP" ALIGN="RIGHT"><font color="[% user.bg.3 %]"><B>Allowed HTML</B></font></TD><TD><FONT SIZE="1">
+		<TD VALIGN="TOP" ALIGN="RIGHT"><font color="[% user.colors.bg_3 %]"><B>Allowed HTML</B></font></TD><TD><FONT SIZE="1">
 			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
 		[% IF constants.approvedtags.grep("ECODE").0 %]
 			(Use "ECODE" instead of "PRE" or "CODE".)
@@ -204,7 +204,7 @@ IF do_br %]<BR>[% END %]
 		</FONT>
 	</TD></TR>
 	<TR>
-		<TD VALIGN="TOP" ALIGN="RIGHT"><font color="[% user.bg.3 %]"><B>Important Stuff</B></font></TD>
+		<TD VALIGN="TOP" ALIGN="RIGHT"><font color="[% user.colors.bg_3 %]"><B>Important Stuff</B></font></TD>
 		<TD><P>
 			<LI>Please try to keep posts on topic.
 		<LI>Try to reply to other people's comments instead of starting new threads.
@@ -216,8 +216,8 @@ IF do_br %]<BR>[% END %]
 		threshold on the User Preferences Page)
 		[% IF user.is_anon %]
 			<LI>If you want replies to your comments sent to you, consider
-			<A HREF="[% constants.rootdir %]/my/">logging in</A> or
-			<A HREF="[% constants.rootdir %]/login.pl?op=newuserform">creating
+			<A HREF="[% gSkin.rootdir %]/my/">logging in</A> or
+			<A HREF="[% gSkin.rootdir %]/login.pl?op=newuserform">creating
 			an account</A>.
 		[% END %]
 

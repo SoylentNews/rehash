@@ -29,7 +29,7 @@ __template__
 		Payment options include PayPal and credit-card.
 		<P>Recipients of gift subscriptions will be notified of your purchase through email.
 	
-		<FORM METHOD="POST" ACTION="[% constants.rootdir %]/subscribe.pl">
+		<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/subscribe.pl">
 		<CENTER><TABLE BORDER=0 CELLPADDING=3>
 		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="user"> Buy Pages for [% user.nickname %]</TD></TR>
 		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <INPUT TYPE="text" name="uid" size="6"></TD></TR>
@@ -145,7 +145,7 @@ ends. Your day may vary.)
 	<TR><TD>&nbsp;</TD><TD COLSPAN="2" VALIGN="top" ALIGN="left"
 	>&nbsp;Set "No Ads" anywhere, and you'll get ads disabled for
 	free on other pages too.
-	(<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss1400">More
+	(<A HREF="[% gSkin.rootdir %]/faq/subscriptions.shtml#ss1400">More
 	info</A>.)</TD></TR>
 
 	</TABLE>
@@ -171,7 +171,7 @@ ends. Your day may vary.)
 	<BR>Note that setting this value between 1 and
 	[% constants.subscribe_hits_btmd - 1 %]
 	will disable some
-	<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss1600">plums</A>.
+	<A HREF="[% gSkin.rootdir %]/faq/subscriptions.shtml#ss1600">plums</A>.
 	[% END %]
 
 [% END %]
@@ -184,7 +184,7 @@ ends. Your day may vary.)
 
 [% END %]
 [% IF user.is_admin %]
-	<FORM METHOD="POST" ACTION="[% constants.rootdir %]/subscribe.pl">
+	<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/subscribe.pl">
 	<P>You're an admin so feel free to grant free pages to deserving users.<BR>
 	<TABLE>
 	<TR><TD>Number of pages:</TD><TD><INPUT TYPE="TEXT" NAME="pages" VALUE="0" SIZE="6"></TD></TR>
@@ -200,9 +200,9 @@ ends. Your day may vary.)
 or other subscription-related issues, please contact
 <A HREF="mailto:[% constants.subscribe_email %]">[% constants.subscribe_email %]</A>.
 If your question is about your daily headlines email, you can edit that at
-<A HREF="[% constants.rootdir %]/my/messages">[% constants.absolutedir %]/my/messages</A>.
+<A HREF="[% gSkin.rootdir %]/my/messages">[% gSkin.absolutedir %]/my/messages</A>.
 For a list of subscriber-only benefits, see
-<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss1600">the FAQ</a>.
+<A HREF="[% gSkin.rootdir %]/faq/subscriptions.shtml#ss1600">the FAQ</a>.
 
 __seclev__
 10000

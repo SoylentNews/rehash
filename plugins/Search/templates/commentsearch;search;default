@@ -15,7 +15,7 @@ __template__
 <P>This search covers only subjects of comments that are posted.<P>
 [% FOREACH comment=comments %]
 	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
-	<B><A HREF="[% constants.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</A></B>
+	<B><A HREF="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</A></B>
 
 	by <A HREF="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.date) %]<BR>
 	<FONT SIZE="-1">

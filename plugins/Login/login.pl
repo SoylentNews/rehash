@@ -385,7 +385,7 @@ sub _validFormkey {
 		$options->{no_hc} = 1;
 	}
 
-	Slash::Utility::Anchor::getSectionColors();
+	Slash::Utility::Anchor::getSkinColors();
 
 	my $error;
 	for (@checks) {
