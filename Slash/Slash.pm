@@ -526,10 +526,14 @@ sub printComments {
 	# Get the Comments
 	my $sco = { force_read_from_master => $options->{force_read_from_master} || 0 };
 	$sco->{one_cid_only} = 1 if $cidorpid && (
-		   $user->{mode} eq 'flat'
-		|| $user->{mode} eq 'nocomment'
+		   $user->{mode} eq 'nocomment'
+		|| ( $user->{mode} eq 'flat' && $user->{commentsort} > 3 )
 		|| $options->{just_submitted}
 	);
+	# For now, until we are able to pull hitparade into discussions so we can
+	# read it here, don't use the one_cid_only optimization feature.
+	$sco->{one_cid_only} = 0;
+
 	my($comments, $count) = selectComments($discussion, $cidorpid, $sco);
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
