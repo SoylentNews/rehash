@@ -170,6 +170,8 @@ sub getRDF {
 	eval { $rss->parse($d) };
 
 	if ($@) {
+		my $err = $@;
+		$err =~ s/\n/ /;
 		portaldLog("$bid did not parse properly:$@");
 		return;
 	} else {
