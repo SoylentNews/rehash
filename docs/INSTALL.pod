@@ -1244,6 +1244,14 @@ directions, and it still doesn't work, stop in IRC #slash on
 irc.slashcode.com and ask your question. Someone there may know
 the answer.
 
+If you are trying to install Slash from someone else's package,
+maybe a BSD package, or an RPM that someone built, or by a Debian
+apt-get command -- good luck to you, we hope it goes well, we love
+packages, they're great when they work.  But if installation
+fails, complain to the package maintainers, not us.  For those
+who download our tarball and follow our instructions carefully,
+installation should go smoothly.
+
 =head1 UNINSTALLING
 
 If you want to uninstall a site, there are two steps you must
