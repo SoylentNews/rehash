@@ -23,8 +23,8 @@ __template__
 <INPUT TYPE="hidden" NAME="op" VALUE="recent_requests">
 	<TR><TD>Min ID</TD><TD><INPUT TYPE="text" NAME="min_id" VALUE="[% min_id %]" SIZE="15"></TD></TR>
 	<TR><TD>Max ID</TD><TD>[% max_id %]</TD></TR>
-	<TR><TD>ID Time</TD><TD>[% min_id_ts %]</TD></TR>
-	<TR><TD>Current Time&nbsp;</TD><TD>[% Slash.db.getTime %]</TD></TR>
+	<TR><TD>Min ID Time</TD><TD>[% min_id_ts %]</TD></TR>
+	<TR><TD>Current&nbsp;Time&nbsp;</TD><TD>[% Slash.db.getTime %]</TD></TR>
 	<TR><TD>Hits&nbsp;Threshold&nbsp;</TD><TD><INPUT TYPE="text"
 		NAME="thresh_count" VALUE="[% thresh_count | strip_attribute %]" SIZE="8"></TD></TR>
 	<TR><TD>Secs&nbsp;Threshold&nbsp;</TD><TD><INPUT TYPE="text"
@@ -33,18 +33,23 @@ __template__
 		NAME="thresh_hps" VALUE="[% thresh_hps | strip_attribute %]" SIZE="8"></TD></TR>
 	<TR><TD>&nbsp;</TD><TD><INPUT TYPE="SUBMIT" NAME="none" VALUE="Reload"></TD></TR>
 	</TABLE>
-	<BR><FONT SIZE="-1"><B>Min ID</B> represents the position in the
-	accesslog we start looking; <B>Min ID Time</B> is the timestamp
-	of that id. If you blank the entry it will update to the current
-	MAX(id) value minus 10,000. Each of the thresholds must be met
-	for an IPID/Page pair to make it onto the list below.  E.g., if
-	secs is 30 and the first and last click for an IPID/Page pair,
-	since the Min ID, occurred within 30 seconds, the pair will not
-	be listed no matter how many clicks occurred in that time.
+	<BR><FONT SIZE="-1"><B>Caution:</B> type in too small of a
+	<B>Min ID</B> and you can hang the (backup) DB for many seconds.
+	<B>Min ID</B> represents the position in the accesslog we start
+	looking; <B>Min ID Time</B> is the timestamp of that id.
+	If you blank the entry it will update to the current MAX(id)
+	value minus 10,000.
+	Each of the thresholds must be met for an IPID/Page pair to make
+	it onto the list below.
+	E.g., if secs is 30 and the first and last click for an IPID/Page
+	pair, since the Min ID, occurred within 30 seconds, the pair will
+	not be listed no matter how many clicks occurred in that time.
 	(Probably best to keep two of the three thresholds low, and
 	fiddle with either Hits or Hits/Sec, and pull back Min ID if
 	it looks like that will help.)</FONT>
-	<BR><BR>
+[% IF data.size %]
+	<P><FONT SIZE="-1">This data took [% select_secs %] seconds to retrieve:</FONT>
+	<BR>
 	<TABLE>
 		<TR>
 			<TH>&nbsp;Count&nbsp;</TH>
@@ -67,6 +72,11 @@ __template__
 			</TR>
 		[% END %]
 	</TABLE>
+[% ELSE %]
+	<P><FONT SIZE="-1">No matches over threshold. Select took
+	[% select_secs %] to run.</FONT>
+[% END %]
+	
 </FORM>
 
 __seclev__

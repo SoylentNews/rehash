@@ -129,6 +129,13 @@ __template__
 				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="expired" [% checked.expired %]>&nbsp;</TD>
 			</TR>
 			<TR>
+				<TD WIDTH="100"><B>Hits<B></TD>
+				<TD ALIGN="LEFT">Last access:
+				[% IF useredit.lastaccess == '0000-00-00 00:00:00'; "never";
+				ELSE; useredit.lastaccess; END %]
+				</TD>
+			</TR>
+			<TR>
 				<TD WIDTH="100"><B>Moderation</B></TD>
 				<TD ALIGN="LEFT">Fair: [% useredit.m2fair %], Unfair: [% useredit.m2unfair %] [% IF useredit.m2unfairpercent %]([% useredit.m2unfairpercent %]%)[% END %]</TD>
 			</TR>
@@ -136,10 +143,37 @@ __template__
 				<TD WIDTH="100">&nbsp;</TD>
 				<TD ALIGN="LEFT">Spent: [% useredit.totalmods %], Stirred: [% useredit.stirred %] [% IF useredit.stirredpercent %]([% useredit.stirredpercent %]%)[% END %]</TD>
 			</TR>
-[% IF constants.subscribe %]
+[% IF useredit.points > 0 %]
 			<TR>
 				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT">Subscriber pages - "Bought" (Used): [% useredit.hits_bought %], Bought Today: [% useredit.hits_bought_today %], Paid For: [% useredit.hits_paidfor %]</TD>
+				<TD ALIGN="LEFT">Currently has [% useredit.points %] mod points</TD>
+			</TR>
+[% END %]
+			<TR>
+				<TD WIDTH="100">&nbsp;</TD>
+				<TD ALIGN="LEFT">Last granted mod points:
+				[% IF useredit.lastgranted == '0000-00-00 00:00:00'; "never";
+				ELSE; useredit.lastgranted; END %]
+				</TD>
+			</TR>
+			<TR>
+				<TD WIDTH="100">&nbsp;</TD>
+				<TD ALIGN="LEFT">Last M2'd:
+				[% IF useredit.lastmm == '0000-00-00 00:00:00'; "never";
+				ELSE; useredit.lastmm; END %]
+				</TD>
+			</TR>
+[% IF constants.subscribe %]
+			<TR>
+				<TD WIDTH="100"><B>Subscription</B></TD>
+				<TD ALIGN="LEFT">
+[% IF useredit.hits_bought+useredit.hits_bought_today+useredit.hits_paidfor == 0 AND useredit.subscribe_payments.size == 0 %]
+					<I>none</I>
+[% ELSE %]
+					Pages "Bought" (Used): [% useredit.hits_bought %],
+					Bought Today: [% useredit.hits_bought_today %],
+					Paid For: [% useredit.hits_paidfor %]</TD>
+[% END %]
 			</TR>
 [% IF useredit.subscribe_payments.size %]
 			<TR>
