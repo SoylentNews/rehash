@@ -96,6 +96,10 @@ my %descriptions = (
 
 	'non_nexus_topics'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL") },
+	
+	'non_nexus_topics-storypickable'
+		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL AND storypickable='yes'") },
+
 
 	'nexus_topics'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics, topic_nexus', 'topic_nexus.tid=topics.tid') },
@@ -132,9 +136,21 @@ my %descriptions = (
 
 	'skins-submittable'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "submittable='yes'") },
+		
+	'skins-searchable'
+		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "searchable='yes'") },
+		
+	'skins-storypickable'
+		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "storypickable='yes'") },
 	
 	'topics-submittable'
 		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "submittable='yes'") },
+		
+	'topics-searchable'
+		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "searchable='yes'") },
+		
+	'topics-storypickable'
+		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "storypickable='yes'") },
 
 	'static_block'
 		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type != 'portald'") },
@@ -1187,6 +1203,8 @@ sub getTopicTree {
 	for my $tid (keys %$topics) {
 		$tree_ref->{$tid} = $topics->{$tid};
 		$tree_ref->{$tid}{submittable} = $topics->{$tid}{submittable} eq "yes" ? 1 : 0;
+		$tree_ref->{$tid}{searchable} = $topics->{$tid}{searchable} eq "yes" ? 1 : 0;
+		$tree_ref->{$tid}{storypickable} = $topics->{$tid}{storypickable} eq "yes" ? 1 : 0;
 	}
 	for my $tid (keys %$topic_nexus) {
 		$tree_ref->{$tid}{nexus} = 1;
@@ -3287,6 +3305,8 @@ sub saveTopic {
 
 	my $image = $topic->{image2} || $topic->{image};
 	my $submittable = $topic->{submittable} || 'no';
+	my $searchable  = $topic->{searchable}  || 'no';
+	my $storypickable  = $topic->{storypickable} || 'no';
 
 	my $data = {
 		keyword		=> $topic->{keyword},
@@ -3296,6 +3316,8 @@ sub saveTopic {
 		width		=> $topic->{width} || '',
 		height		=> $topic->{height} || '',
 		submittable	=> $submittable eq 'no' ? 'no' : 'yes',
+		searchable	=> $searchable eq 'no' ? 'no' : 'yes',
+		storypickable	=> $storypickable eq 'no' ? 'no' : 'yes',
 	};
 
 	if ($rows == 0) {
