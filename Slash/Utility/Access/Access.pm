@@ -772,6 +772,8 @@ sub isDiscussionOpen {
 				$discussion->{commentstatus} eq 'friends_fof_only'
 					&&
 				$people->{FOF()}{$user->{uid}}
+					&&
+				!$people->{FOE()}{$user->{uid}}
 				)
 			);
 		}
