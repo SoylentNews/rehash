@@ -15,7 +15,7 @@ mod_footer
 __template__
 </UL>
 [% IF metamod_elig %]
-<BR>For [% constants.sitename %]'s moderation system to properly function,
+<BR>For [% constants.sitename %]'s moderation system to function properly,
 we need as many users as possible to
 <A HREF="[% constants.rootdir %]/metamod.pl">Meta-Moderate</A>.
 You are currently eligible... why not hop over and help? Meta-moderating well

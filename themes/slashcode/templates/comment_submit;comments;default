@@ -22,7 +22,7 @@ Comment Submitted. There will be a delay before the comment becomes part
 of the static page.  What you submitted appears below.  If there is a
 mistake...well, you should have used the 'Preview' button!<P>
 [% IF metamod_elig %]
-For [% constants.sitename %]'s moderation system to properly function,
+For [% constants.sitename %]'s moderation system to function properly,
 we need as many users as possible to
 <A HREF="[% constants.rootdir %]/metamod.pl">Meta-Moderate</A>.
 You are currently eligible... why not hop over and help?
