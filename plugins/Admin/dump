@@ -14,6 +14,7 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Vars'
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','[% USE Slash %][% Slash.db.getSubmissionCount() %] Submissions','[% constants.rootdir %]/submit.pl?op=list',100,7);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Site','[% constants.rootdir %]/admin.pl?op=siteinfo',10000,16);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slashd','[% constants.rootdir %]/admin.pl?op=slashd',500,17);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Recent','[% constants.rootdir %]/admin.pl?op=recent',500,18);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Help','[% constants.rootdir %]/slashguide.shtml',1,17);
 INSERT INTO vars (name, value, description) VALUES ('ispell', 'ispell', 'Location of ispell binary or empty string to turn off');
 INSERT INTO vars (name, value, description) VALUES ('similarstorydays', '30', 'Number of days to look back for uncommon words when determining similar stories');
