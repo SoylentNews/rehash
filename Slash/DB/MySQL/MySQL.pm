@@ -4032,13 +4032,16 @@ sub checkForOpenProxy {
 # the mods done to them) in list context.
 sub getNumCommPostedAnonByIPID {
 	my($self, $ipid, $hours, $start_cid) = @_;
+	my $constants = getCurrentStatic();
 	$ipid = $self->sqlQuote($ipid);
 	$hours ||= 24;
 	my $cid_clause = $start_cid ? " AND cid >= $start_cid" : "";
 	my $ac_uid = $self->sqlQuote(getCurrentStatic("anonymous_coward_uid"));
+	my $table_extras = "";
+	$table_extras .= " IGNORE INDEX(uid_date)" if $constants->{ignore_uid_date_index};
 	my $ar = $self->sqlSelectArrayRef(
 		"COUNT(*) AS count, SUM(pointsorig-points) AS sum",
-		"comments",
+		"comments $table_extras",
 		"ipid=$ipid
 		 AND uid=$ac_uid
 		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)
