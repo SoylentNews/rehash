@@ -891,7 +891,7 @@ sub moderatorCommentLog {
 		&& $constants->{m2_multicount}
 		&& $options->{show_m2s}){
 		foreach my $m (@$mods){
-			my $key;
+			my $key="";
 			foreach my $m2 (@{$mods_to_m2s->{$m->{id}}}) {
 				$key.="$m2->{uid} $m2->{val},";
 			}
