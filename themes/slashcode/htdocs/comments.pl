@@ -1135,7 +1135,7 @@ sub submitComment {
 		$pts = $maxScore if $pts > $maxScore;
 		$karma_bonus = 1 if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
 			&& !$form->{nobonus};
-		$subscriber_bonus = 1 if $pts >= 1 && $user->{is_subscriber}
+		$subscriber_bonus = 1 if $user->{is_subscriber}
 			&& $form->{nosubscriberbonus} ne 'on';
 	}
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
