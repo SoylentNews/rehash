@@ -847,10 +847,13 @@ sub getTemplateList {
 	my $where = "seclev <= " . getCurrentUser('seclev');
 	$where .= " AND section = '$section'" if $section;
 	$where .= " AND page = '$page'" if $page;
-	my $templates =	$self->sqlSelectMany('tpid,name', 'templates', $where); 
-	while (my($tpid, $name) = $templates->fetchrow) {
+	
+	my $qlid = $self->_querylog_start("SELECT", "templates");
+	my $sth = $self->sqlSelectMany('tpid,name', 'templates', $where); 
+	while (my($tpid, $name) = $sth->fetchrow) {
 		$templatelist->{$tpid} = $name;
 	}
+	$self->_querylog_finish($qlid);
 
 	return $templatelist;
 }
@@ -884,24 +887,27 @@ sub getModeratorCommentLog {
 	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"	}
 	return [ ] unless $where_clause;
 
-	my $comments = $self->sqlSelectMany("comments.sid AS sid,
-				 comments.cid AS cid,
-				 comments.points AS score,
-				 users.uid AS uid,
-				 users.nickname AS nickname,
-				 $ipid_table.ipid AS ipid,
-				 moderatorlog.val AS val,
-				 moderatorlog.reason AS reason,
-				 moderatorlog.ts AS ts,
-				 moderatorlog.active AS active
-				 $select_extra",
-				"moderatorlog, users, comments",
-				"$where_clause
-				 AND moderatorlog.cid=comments.cid",
-				"ORDER BY ts $asc_desc $limit"
+	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
+	my $sth = $self->sqlSelectMany("comments.sid AS sid,
+		 comments.cid AS cid,
+		 comments.points AS score,
+		 users.uid AS uid,
+		 users.nickname AS nickname,
+		 $ipid_table.ipid AS ipid,
+		 moderatorlog.val AS val,
+		 moderatorlog.reason AS reason,
+		 moderatorlog.ts AS ts,
+		 moderatorlog.active AS active
+		 $select_extra",
+		"moderatorlog, users, comments",
+		"$where_clause
+		 AND moderatorlog.cid=comments.cid",
+		"ORDER BY ts $asc_desc $limit"
 	);
 	my(@comments, $comment);
-	push @comments, $comment while ($comment = $comments->fetchrow_hashref);
+	push @comments, $comment while ($comment = $sth->fetchrow_hashref);
+	$self->_querylog_finish($qlid);
+
 	return \@comments;
 }
 
@@ -919,6 +925,10 @@ sub getModeratorLogID {
 sub undoModeration {
 	my($self, $uid, $sid) = @_;
 	my $constants = getCurrentStatic();
+
+	# querylog isn't going to work for this sqlSelectMany, since
+	# we do multiple other queries while the cursor runs over the
+	# rows it returns.  So don't bother doing the _querylog_start.
 
 	# SID here really refers to discussions.id, NOT stories.sid
 	my $cursor = $self->sqlSelectMany("cid,val,active,cuid,reason",
@@ -992,14 +1002,14 @@ sub deleteSectionTopicsByTopic {
 	# not fun  at 12:19 AM
 	$type ||= 0;
 
-	$self->sqlDo("DELETE FROM section_topics WHERE tid=$tid");
+	$self->sqlDelete("section_topics", "tid=$tid");
 }
 
 ########################################################
 sub deleteRelatedLink {
 	my($self, $id) = @_;
 
-	$self->sqlDo("DELETE FROM related_links WHERE id=$id");
+	$self->sqlDelete("related_links", "id=$id");
 }
 
 ########################################################
@@ -1007,7 +1017,11 @@ sub createSectionTopic {
 	my($self, $section, $tid, $type) = @_;
 	$type ||= 'topic_1'; # ! is the default type
 
-	$self->sqlDo("INSERT INTO section_topics (section, tid, type) VALUES ('$section',$tid, '$type')");
+	$self->sqlInsert("section_topics", {
+		section =>	$section,
+		tid =>		$tid,
+		type =>		$type,
+	});
 }
 
 ########################################################
@@ -1030,9 +1044,8 @@ sub setSectionExtras {
 	my($self, $section, $extras) = @_;
 	return unless $section;
 
-	$self->sqlDo('DELETE FROM section_extras
-			WHERE section=' . $self->sqlQuote($section)
-	);
+	my $section_q = $self->sqlQuote($section);
+	$self->sqlDelete("section_extras", "section=$section_q");
 	
 	for (@{$extras}) {
 		$self->sqlInsert('section_extras', {
@@ -1074,10 +1087,12 @@ sub createPollVoter {
 		uid	=> $ENV{SLASH_USER}
 	});
 
-	$self->sqlDo("UPDATE pollquestions SET voters=voters+1
-		WHERE qid=$qid_quoted");
-	$self->sqlDo("UPDATE pollanswers SET votes=votes+1
-		WHERE qid=$qid_quoted AND aid=$aid_quoted");
+	$self->sqlUpdate("pollquestions", {
+			-voters =>	'voters+1',
+		}, "qid=$qid_quoted");
+	$self->sqlUpdate("pollanswers", {
+			-votes =>	'votes+1',
+		}, "qid=$qid_quoted AND aid=$aid_quoted");
 }
 
 ########################################################
@@ -1141,7 +1156,7 @@ sub getStoryDiscussions {
 }
 
 #################################################################
-# Less then 2, ince 2 would be a read only discussion
+# Less then 2, since 2 would be a read only discussion
 sub getDiscussions {
 	my($self, $section, $limit, $start) = @_;
 	$limit ||= 50; # Sanity check in case var is gone
@@ -1157,7 +1172,8 @@ sub getDiscussions {
 		$where .= " AND sections.section = discussions.section ";
 	}
 
-	my $discussion = $self->sqlSelectAll("discussions.id, discussions.title, discussions.url",
+	my $discussion = $self->sqlSelectAll(
+		"discussions.id, discussions.title, discussions.url",
 		$tables,
 		$where,
 		"ORDER BY ts DESC LIMIT $start, $limit"
@@ -1167,7 +1183,7 @@ sub getDiscussions {
 }
 
 #################################################################
-# Less then 2, ince 2 would be a read only discussion
+# Less then 2, since 2 would be a read only discussion
 sub getDiscussionsByCreator {
 	my($self, $section, $uid, $limit, $start) = @_;
 	return unless $uid;
@@ -1232,8 +1248,9 @@ sub getSessionInstance {
 	my $session_out = '';
 
 	if ($session_in) {
-		# CHANGE DATE_ FUNCTION
-		$self->sqlDo("DELETE from sessions WHERE now() > DATE_ADD(lasttime, INTERVAL $admin_timeout MINUTE)");
+		$self->sqlDelete("sessions",
+			"NOW() > DATE_ADD(lasttime, INTERVAL $admin_timeout MINUTE)"
+		);
 
 		my $session_in_q = $self->sqlQuote($session_in);
 
@@ -1244,8 +1261,8 @@ sub getSessionInstance {
 		);
 
 		if ($uid) {
-			$self->sqlDo("DELETE from sessions WHERE uid = '$uid' AND " .
-				"session != $session_in_q"
+			$self->sqlDelete("sessions",
+				"uid = '$uid' AND session != $session_in_q"
 			);
 			$self->sqlUpdate('sessions',
 				{ -lasttime => 'now()' },
@@ -1265,11 +1282,15 @@ sub getSessionInstance {
 		# Why not have sessions have UID be unique and use 
 		# sqlReplace() here? Minor quibble, just curious.
 		# - Cliff
-		$self->sqlDo("DELETE FROM sessions WHERE uid=$uid");
-
-		$self->sqlInsert('sessions', { -uid => $uid,
-			-logintime	=> 'now()',
-			-lasttime	=> 'now()',
+		# We need the ID that was inserted, and I don't think
+		# LAST_INSERT_ID() works for a REPLACE, or at least
+		# it isn't documented that way. - Jamie
+		# http://www.mysql.com/doc/en/mysql_insert_id.html
+		$self->sqlDelete("sessions", "uid=$uid");
+		$self->sqlInsert('sessions', {
+			-uid		=> $uid,
+			-logintime	=> 'NOW()',
+			-lasttime	=> 'NOW()',
 			lasttitle	=> $title,
 			last_sid	=> $last_sid,
 			last_subid	=> $last_subid
@@ -1380,7 +1401,7 @@ sub createAccessLog {
 			while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
 				$self->sqlInsert('accesslog', $hr, { delayed => 1 });
 			}
-			$self->sqlDo("commit");
+			$self->sqlDo("COMMIT");
 			$self->sqlDo("SET AUTOCOMMIT=1");
 		}
 	} else {
@@ -1451,11 +1472,16 @@ sub getDescriptions {
 	my $descref = $altdescs->{$codetype} || $descriptions{$codetype};
 	return $codeBank_hash_ref unless $descref;
 
+	# I don't really feel like editing the entire %descriptions hash to
+	# list each table with each codetype, so for now at least, I'm just
+	# lumping all them together.
+	my $qlid = $self->_querylog_start('SELECT', 'descriptions');
 	my $sth = $descref->(@_);
 	while (my($id, $desc) = $sth->fetchrow) {
 		$codeBank_hash_ref->{$id} = $desc;
 	}
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 
 	$self->{$cache} = $codeBank_hash_ref if getCurrentStatic('cache_enabled');
 	return $codeBank_hash_ref;
@@ -1479,7 +1505,8 @@ sub deleteUser {
 		sig		=> '',
 		seclev		=> 0
 	});
-	$self->sqlDo("DELETE FROM users_param WHERE uid=$uid");
+	my $rows = $self->sqlDelete("users_param", "uid=$uid");
+	return $rows;
 }
 
 ########################################################
@@ -1867,7 +1894,7 @@ sub deleteComment {
 	}
 	my $total_rows = 0;
 	for my $table (@comment_tables) {
-		$total_rows += $self->sqlDo("DELETE FROM $table WHERE cid=$cid");
+		$total_rows += $self->sqlDelete($table, "cid=$cid");
 	}
 	$self->deleteModeratorlog({ cid => $cid });
 	if ($total_rows != scalar(@comment_tables)) {
@@ -2125,7 +2152,7 @@ sub deleteSession {
 	return unless $uid;
 	$uid = defined($uid) || getCurrentUser('uid');
 	if (defined $uid) {
-		$self->sqlDo("DELETE FROM sessions WHERE uid=$uid");
+		$self->sqlDelete("sessions", "uid=$uid");
 	}
 }
 
@@ -2133,57 +2160,64 @@ sub deleteSession {
 sub deleteDiscussion {
 	my($self, $did) = @_;
 
-	$self->sqlDo("DELETE FROM discussions WHERE id=$did");
+	$self->sqlDelete("discussions", "id=$did");
 	my $comment_ids = $self->sqlSelectAll('cid', 'comments', "sid=$did");
-	$self->sqlDo("DELETE FROM comments WHERE sid=$did");
-	$self->sqlDo("DELETE FROM comment_text WHERE cid IN ("
+	$self->sqlDelete("comments", "sid=$did");
+	$self->sqlDelete("comment_text",
+		  "cid IN ("
 		. join(",", map { $_->[0] } @$comment_ids)
-		. ")") if @$comment_ids;
+		. ")"
+	) if @$comment_ids;
 	$self->deleteModeratorlog({ sid => $did });
 }
 
 ########################################################
 sub deleteAuthor {
 	my($self, $uid) = @_;
-	$self->sqlDo("DELETE FROM sessions WHERE uid=$uid");
+	$self->sqlDelete("sessions", "uid=$uid");
 }
 
 ########################################################
 sub deleteTopic {
 	my($self, $tid) = @_;
-	$self->sqlDo('DELETE from topics WHERE tid=' . $self->sqlQuote($tid));
+	my $tid_q = $self->sqlQuote($tid);
+	$self->sqlDelete("topics", "tid=$tid_q");
 }
 
 ########################################################
 sub revertBlock {
 	my($self, $bid) = @_;
-	my $db_bid = $self->sqlQuote($bid);
-	my $block = $self->{_dbh}->selectrow_array("SELECT block from backup_blocks WHERE bid=$db_bid");
-	$self->sqlDo("update blocks set block = $block where bid = $db_bid");
+	my $bid_q = $self->sqlQuote($bid);
+	my $block = $self->sqlSelect("block", "backup_blocks", "bid=bid_q");
+	$self->sqlUpdate("blocks", { block => $block }, "bid = $bid_q");
 }
 
 ########################################################
 sub deleteBlock {
 	my($self, $bid) = @_;
-	$self->sqlDo('DELETE FROM blocks WHERE bid =' . $self->sqlQuote($bid));
+	my $bid_q = $self->sqlQuote($bid);
+	$self->sqlDelete("blocks", "bid = $bid_q");
 }
 
 ########################################################
 sub deleteTemplate {
 	my($self, $tpid) = @_;
-	$self->sqlDo('DELETE FROM templates WHERE tpid=' . $self->sqlQuote($tpid));
+	my $tpid_q = $self->sqlQuote($tpid);
+	$self->sqlDelete("templates", "tpid = $tpid_q");
 }
 
 ########################################################
 sub deleteSection {
 	my($self, $section) = @_;
-	$self->sqlDo("DELETE from sections WHERE section='$section'");
+	my $section_q = $self->sqlQuote($section);
+	$self->sqlDelete("sections", "section=$section_q");
 }
 
 ########################################################
 sub deleteContentFilter {
 	my($self, $id) = @_;
-	$self->sqlDo("DELETE from content_filters WHERE filter_id = $id");
+	my $id_q = $self->sqlQuote($id);
+	$self->sqlDelete("content_filters", "filter_id=$id_q");
 }
 
 ########################################################
@@ -4016,13 +4050,16 @@ sub getPortalsCommon {
 	return($self->{_boxes}, $self->{_sectionBoxes}) if keys %{$self->{_boxes}};
 	$self->{_boxes} = {};
 	$self->{_sectionBoxes} = {};
+
+	my $sections = $self->getDescriptions('sections-all');
+
+	my $qlid = $self->_querylog_start("SELECT", "blocks");
 	my $sth = $self->sqlSelectMany(
 			'bid,title,url,section,portal,ordernum,all_sections',
 			'blocks',
 			'',
 			'ORDER BY ordernum ASC'
 	);
-	my $sections = $self->getDescriptions('sections-all');
 	# We could get rid of tmp at some point
 	my %tmp;
 	while (my $SB = $sth->fetchrow_hashref) {
@@ -4038,6 +4075,7 @@ sub getPortalsCommon {
 	}
 	$self->{_sectionBoxes} = \%tmp;
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 
 	return($self->{_boxes}, $self->{_sectionBoxes});
 }
@@ -4923,6 +4961,7 @@ sub getStoriesEssentials {
 	}
 
 	my(@stories, @story_ids, @discussion_ids, $count);
+	my $qlid = $self->_querylog_start("SELECT", "stories");
 	my $cursor = $self->sqlSelectMany($columns, 'stories', $where, $other)
 		or
 	errorLog(<<EOT);
@@ -4942,6 +4981,7 @@ EOT
 		last if ++$count >= $limit;
 	}
 	$cursor->finish;
+	$self->_querylog_finish($qlid);
 
 	return \@stories;
 }
@@ -6114,6 +6154,7 @@ sub getAdmins {
 	}
 
 	$self->{$table_cache} = {};
+	my $qlid = $self->_querylog_start("SELECT", "users, users_info");
 	my $sth = $self->sqlSelectMany(
 		'users.uid,nickname,fakeemail,homepage,bio',
 		'users,users_info',
@@ -6125,6 +6166,7 @@ sub getAdmins {
 
 	$self->{$table_cache_full} = 1;
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 	$self->{$table_cache_time} = time();
 
 	my %return = %{$self->{$table_cache}};
@@ -7385,7 +7427,11 @@ sub sqlReplace {
 
 	my $sql = "REPLACE INTO $table ($names) VALUES($values)\n";
 	$self->sqlConnect();
-	return $self->sqlDo($sql) or errorLog($sql);
+	my $qlid = $self->_querylog_start('REPLACE', $table);
+	my $rows = $self->sqlDo($sql);
+	$self->_querylog_finish($qlid);
+	errorLog($sql) if !$rows;
+	return $rows;
 }
 
 ##################################################################
@@ -7492,7 +7538,7 @@ sub DESTROY {
 		$self->sqlDo("SET AUTOCOMMIT=1");
 	}
 
-	$self->SUPER::DESTROY; # up up up
+	$self->SUPER::DESTROY; # up up up up up up
 }
 
 

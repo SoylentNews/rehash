@@ -474,7 +474,6 @@ my %scalar_ops = (
 	'lc'		=> sub { lc $_[0] },
 	'ucfirst'	=> sub { ucfirst $_[0] },
 	'lcfirst'	=> sub { lcfirst $_[0] },
-
 	'substr'        => sub {
 		if (@_ == 2) {
 			substr($_[0], $_[1]);
@@ -483,6 +482,10 @@ my %scalar_ops = (
 		} else {
 			return $_[0];
 		}
+	},
+	'rand'		=> sub {
+		my $maxval = $_[0] || 1;
+		return rand($maxval);
 	},
 );
 

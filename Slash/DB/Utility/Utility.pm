@@ -9,6 +9,7 @@ use strict;
 use Config '%Config';
 use Slash::Utility;
 use DBIx::Password;
+use Time::HiRes;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -44,6 +45,8 @@ sub new {
 			$self->{_wheresql} = $where;
 		}
 	}
+
+	$self->{_querylog} = { };
 
 	return $self;
 }
@@ -101,6 +104,7 @@ sub gets {
 
 	my $where = $self->{_wheresql};
 
+	my $qlid = $self->_querylog_start('SELECT', $table);
 	if (ref($val) eq 'ARRAY') {
 		my $values = join ',', @$val;
 		$sth = $self->sqlSelectMany($values, $table, $where);
@@ -114,6 +118,7 @@ sub gets {
 		$return{ $row->{$prime} } = $row;
 	}
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 
 	return \%return;
 }
@@ -127,7 +132,9 @@ sub list {
 
 	$val ||= $prime;
 	$self->sqlConnect();
+	my $qlid = $self->_querylog_start('SELECT', $table);
 	my $list = $self->{_dbh}->selectcol_arrayref("SELECT $val FROM $table");
+	$self->_querylog_finish($qlid);
 
 	return $list;
 }
@@ -172,7 +179,10 @@ sub delete {
 		$where = "$prime=$id_db";
 	}
 
-	$self->sqlDo("DELETE FROM $table WHERE $where");
+	my $qlid = $self->_querylog_start('DELETE', $table);
+	my $rows = $self->sqlDo("DELETE FROM $table WHERE $where");
+	$self->_querylog_finish($qlid);
+	return $rows;
 }
 
 ##################################################################
@@ -193,8 +203,10 @@ sub exists {
 	my $sql = "SELECT count(*) FROM $table WHERE $where";
 	# we just need one stinkin value to see if this exists
 	$self->sqlConnect();
+	my $qlid = $self->_querylog_start('DELETE', $table);
 	my $count = $self->{_dbh}->selectrow_array($sql);
-	return $count;  # count
+	$self->_querylog_finish($qlid);
+	return $count;
 }
 
 ########################################################
@@ -241,15 +253,134 @@ sub sqlConnect {
 }
 
 #######################################################
-# Wrapper to get the latest ID from the database
+# Wrapper to get the latest ID from the database.
+# If query logging may be on, this is only guaranteed to work if you
+# use sqlInsert().  E.g., sqlDo("INSERT...") may fail.
 sub getLastInsertId {
+	my($self, $options) = @_;
+
+	# If we just did an ordinary INSERT and the querylog is in,
+	# the DB's LAST_INSERT_ID value will refer to the id column
+	# of the querylog table.  But the real LAST_INSERT_ID we're
+	# looking for has been stored by _querylog_start and that's
+	# what we're going to return.
+	if ($self->{_querylog}{enabled} && !$options->{ignore_querylog}) {
+		return $self->{_querylog}{lastinsertid};
+	}
+
+	# We're not going to go through sqlSelect() because that will
+	# involve querylog code;  we'll fetch this value here.
+	my $sql = "SELECT LAST_INSERT_ID()";
+	$self->sqlConnect;
+	my $sth = $self->{_dbh}->prepare($sql);
+	if (!$sth->execute) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
+	my($id) = $sth->fetchrow;
+	$sth->finish;
+	return $id;
+}
+
+########################################################
+# The SQL query logging methods
+#
+# SQL query logging is enabled by the presence of a file (and disabled
+# by removal of that file).  
+########################################################
+
+sub _querylog_enabled {
 	my($self) = @_;
-	return $self->sqlSelect('LAST_INSERT_ID()');
+
+	return $self->{_querylog}{enabled}
+		if defined $self->{_querylog}{enabled}
+			&& $self->{_querylog}{next_check_time} > time;
+
+	# Need to (re)calculate whether it is enabled.  Note that this
+	# location is hardcoded!  We can't call getCurrentStatic() at
+	# this level, so we can't use $constants->{datadir}.  It would
+	# be better to put this into /u/l/s/site/sitename but, same
+	# problem.
+	my $was_enabled = $self->{_querylog}{enabled} || 0;
+	my $is_enabled = -e "/usr/local/slash/querylog";
+	my $user;
+	if ($is_enabled) {
+		$user = getCurrentUser();
+		$is_enabled = 0 unless $user && $user->{state};
+	}
+	if ($is_enabled) {
+		my $siteid = getCurrentStatic('siteid');
+		$siteid =~ s/\./_2e/g;
+		$self->{_querylog}{apache_prefix} = "Apache::ROOT${siteid}::";
+	}
+	$self->{_querylog}{enabled} = $is_enabled;
+	$self->{_querylog}{qlid} = 0;
+	$self->{_querylog}{next_check_time} = time
+		+ ($is_enabled && $was_enabled ? 60 : 5)
+		+ int(rand(5));
+	
+	# Set up the querylog db object as necessary (the current
+	# DB object has-a separate DB object inside it).
+	if (!$is_enabled) {
+		$self->{_querylog}{db} = undef;
+	} else {
+		$self->{_querylog}{db} ||=
+			$user->{state}{dbs}{querylog}
+				? getObject('Slash::DB', { db_type => 'querylog' })
+				: $self;
+	}
+	return $is_enabled;
+}
+
+sub _querylog_start {
+	my $self = shift;
+	return 0 unless $self->_querylog_enabled();
+	$self->{_querylog}{type} = shift;
+	$self->{_querylog}{tables} = shift || "";
+	$self->{_querylog}{options} = shift || { };
+	$self->{_querylog}{lastinsertid} = 0;
+
+	$self->{_querylog}{tables} =~ s/\W+/ /g;
+	($self->{_querylog}{package} , $self->{_querylog}{line} ) = (caller(1))[0, 2];
+	($self->{_querylog}{package1}, $self->{_querylog}{line1}) = (caller(2))[0, 2];
+	$self->{_querylog}{package}  =~ s/^\Q$self->{_querylog}{apache_prefix}//;
+	$self->{_querylog}{package1} =~ s/^\Q$self->{_querylog}{apache_prefix}//;
+	$self->{_querylog}{start_time} = Time::HiRes::time;
+
+	return ++$self->{_querylog}{qlid};
+}
+
+sub _querylog_finish {
+	my($self, $id) = @_;
+	return unless
+		   $id
+		&& $id == $self->{_querylog}{qlid}
+		&& $self->_querylog_enabled();
+
+	# If the code might need the LAST_INSERT_ID() result from an INSERT,
+	# preserve it.
+	if ($self->{_querylog}{type} eq 'INSERT') {
+		$self->{_querylog}{lastinsertid} = $self->getLastInsertId({ ignore_querylog => 1 });
+	}
+
+	my $elapsed = sprintf("%.6f",
+		Time::HiRes::time - $self->{_querylog}{start_time});
+
+	# Smart thing here would be to save up 5-10 of these and insert them
+	# all at once with prepare and the ? format.  We'd want a DESTROY
+	# handler that writes anything left.
+	$self->{_querylog}{db}{_dbh}->do("INSERT INTO querylog VALUES"
+		. " (NULL, '$self->{_querylog}{type}', '$self->{_querylog}{tables}', NULL,"
+		. " '$self->{_querylog}{package}' , '$self->{_querylog}{line}' ,"
+		. " '$self->{_querylog}{package1}', '$self->{_querylog}{line1}',"
+		. " $elapsed)");
 }
 
 ########################################################
 # Useful SQL Wrapper Functions
 ########################################################
+
 sub sqlSelectMany {
 	my($self, $select, $from, $where, $other, $options) = @_;
 
@@ -282,6 +413,7 @@ sub sqlSelect {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
+	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
 		$self->sqlErrorLog($sql);
@@ -290,6 +422,8 @@ sub sqlSelect {
 	}
 	my @r = $sth->fetchrow;
 	$sth->finish;
+
+	$self->_querylog_finish($qlid);
 
 	if (wantarray()) {
 		return @r;
@@ -307,6 +441,7 @@ sub sqlSelectArrayRef {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
+	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
 		$self->sqlErrorLog($sql);
@@ -315,6 +450,7 @@ sub sqlSelectArrayRef {
 	}
 	my $r = $sth->fetchrow_arrayref;
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 	return $r;
 }
 
@@ -339,7 +475,9 @@ sub sqlCount {
 
 	# we just need one stinkin value - count
 	$self->sqlConnect();
+	my $qlid = $self->_querylog_start("SELECT", $table);
 	my $count = $self->{_dbh}->selectrow_array($sql);
+	$self->_querylog_finish($qlid);
 
 	return $count;  # count
 }
@@ -355,6 +493,7 @@ sub sqlSelectHashref {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
+	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
 
 	unless ($sth->execute) {
@@ -364,6 +503,7 @@ sub sqlSelectHashref {
 	}
 	my $H = $sth->fetchrow_hashref;
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 	return $H;
 }
 
@@ -378,6 +518,7 @@ sub sqlSelectColArrayref {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
+	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
 
 	my $array = $self->{_dbh}->selectcol_arrayref($sth);
@@ -386,6 +527,7 @@ sub sqlSelectColArrayref {
 		$self->sqlConnect;
 		return;
 	}
+	$self->_querylog_finish($qlid);
 
 	return $array;
 }
@@ -414,12 +556,14 @@ sub sqlSelectAll {
 
 	$self->sqlConnect();
 
+	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $H = $self->{_dbh}->selectall_arrayref($sql);
 	unless ($H) {
 		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
 		return;
 	}
+	$self->_querylog_finish($qlid);
 	return $H;
 }
 
@@ -451,6 +595,7 @@ sub sqlSelectAllHashref {
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
+	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
 	my $returnable = { };
 	while (my $row = $sth->fetchrow_hashref) {
@@ -461,6 +606,7 @@ sub sqlSelectAllHashref {
 		%$reference = %$row;
 	}
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 
 	return $returnable;
 }
@@ -485,12 +631,14 @@ sub sqlSelectAllHashrefArray {
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
+	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
 	my @returnable;
 	while (my $row = $sth->fetchrow_hashref) {
 		push @returnable, $row;
 	}
 	$sth->finish;
+	$self->_querylog_finish($qlid);
 
 	return \@returnable;
 }
@@ -507,8 +655,6 @@ sub sqlUpdate {
 
 	my @data_fields = ( );
 	my $order_hr = { };
-	if ($options && (!ref($options) || ref($options) ne 'ARRAY')) {
-	}
 	if ($options && $options->{assn_order}) {
 		# Reorder the data fields into the order given.  Any
 		# fields not specified in the assn_order arrayref
@@ -542,8 +688,9 @@ sub sqlUpdate {
 	}
 	chop $sql; # lose the terminal ","
 	$sql .= "\nWHERE $where\n";
+	my $qlid = $self->_querylog_start("UPDATE", $table);
 	my $rows = $self->sqlDo($sql);
-	# print STDERR "SQL: $sql\n";
+	$self->_querylog_finish($qlid);
 	return $rows;
 }
 
@@ -554,8 +701,9 @@ sub sqlDelete {
 	my $sql = "DELETE FROM $table";
 	$sql .= " WHERE $where" if $where;
 	$sql .= " LIMIT $limit" if $limit;
+	my $qlid = $self->_querylog_start("DELETE", $table);
 	my $rows = $self->sqlDo($sql);
-	# print STDERR "SQL: $sql\n";
+	$self->_querylog_finish($qlid);
 	return $rows;
 }
 
@@ -565,6 +713,7 @@ sub sqlInsert {
 	my($names, $values);
 	# oddly enough, this hack seems to work for all DBs -- pudge
 	# Its an ANSI sql comment I believe -Brian
+	# Hmmmmm... we can trust getCurrentStatic here? - Jamie
 	my $delayed = ($options->{delayed} && !getCurrentStatic('delayed_inserts_off'))
 		? " /*! DELAYED */" : "";
 	my $ignore = $options->{ignore} ? " /*! IGNORE */" : "";
@@ -583,7 +732,10 @@ sub sqlInsert {
 	chop($values);
 
 	my $sql = "INSERT $ignore $delayed INTO $table ($names) VALUES($values)\n";
-	return $self->sqlDo($sql);
+	my $qlid = $self->_querylog_start("INSERT", $table);
+	my $rows = $self->sqlDo($sql);
+	$self->_querylog_finish($qlid);
+	return $rows;
 }
 
 #################################################################

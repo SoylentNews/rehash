@@ -7,7 +7,7 @@ CREATE TABLE humanconf (
 	PRIMARY KEY(hcid),
 	KEY hcpid (hcpid),
 	UNIQUE formkey (formkey)
-) TYPE=MYISAM;
+) TYPE = InnoDB;
 
 DROP TABLE IF EXISTS humanconf_pool;
 CREATE TABLE humanconf_pool (
@@ -22,7 +22,7 @@ CREATE TABLE humanconf_pool (
 	PRIMARY KEY (hcpid),
 	KEY answer (answer),
 	KEY lastused (lastused)
-) TYPE=MYISAM;
+) TYPE = InnoDB;
 
 # If you rewrite HumanConf to store your data in the DB rather than
 # on a static webserver, you might want a table something like this.
@@ -34,7 +34,7 @@ CREATE TABLE humanconf_pool (
 #	hcpid		MEDIUMINT UNSIGNED NOT NULL,
 #	data		BLOB NOT NULL,
 #	PRIMARY KEY(hcpid)
-#) TYPE=MYISAM;
+#) TYPE = InnoDB;
 
 DROP TABLE IF EXISTS humanconf_questions;
 CREATE TABLE humanconf_questions (
@@ -43,5 +43,5 @@ CREATE TABLE humanconf_questions (
 	urlprefix	CHAR(255) NOT NULL,
 	question	TEXT NOT NULL,
 	PRIMARY KEY(hcqid)
-) TYPE=MYISAM;
+) TYPE = InnoDB;
 

@@ -1,21 +1,24 @@
+# As of July 2003 we don't have any reason I can see to ever want
+# to search all message blobs in the system, so we don't need a
+# FULLTEXT index, so InnoDB is fine. - Jamie
 DROP TABLE IF EXISTS message_drop;
 CREATE TABLE message_drop (
         id      INT(11) NOT NULL auto_increment,
-        user    INT(11) NOT NULL,
-        fuser   INT(11) DEFAULT '0' NOT NULL,
+        user    MEDIUMINT(8) UNSIGNED NOT NULL,
+        fuser   MEDIUMINT(8) UNSIGNED NOT NULL,
         code    INT(11) DEFAULT '-1' NOT NULL,
         date    TIMESTAMP NOT NULL,
         altto   VARCHAR(50) DEFAULT '' NOT NULL,
         send    ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL,
         message BLOB DEFAULT '' NOT NULL,
         PRIMARY KEY (id)
-);
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS message_web;
 CREATE TABLE message_web (
         id      INT(11) NOT NULL,
-        user    INT(11) NOT NULL,
-        fuser   INT(11) DEFAULT '0' NOT NULL,
+        user    MEDIUMINT(8) UNSIGNED NOT NULL,
+        fuser   MEDIUMINT(8) UNSIGNED NOT NULL,
         code    INT(11) DEFAULT '-1' NOT NULL,
         updated TIMESTAMP NOT NULL,
         readed  TINYINT(1) DEFAULT '0' NOT NULL,
@@ -23,15 +26,18 @@ CREATE TABLE message_web (
         KEY (fuser),
         KEY (user),
         PRIMARY KEY (id)
-);
+) TYPE=InnoDB;
 
+# As of July 2003 we don't have any reason I can see to ever want
+# to search all message blobs in the system, so we don't need a
+# FULLTEXT index, so InnoDB is fine. - Jamie
 DROP TABLE IF EXISTS message_web_text;
 CREATE TABLE message_web_text (
         id      INT(11) NOT NULL,
         subject BLOB DEFAULT '' NOT NULL,
         message BLOB DEFAULT '' NOT NULL,
         PRIMARY KEY (id)
-);
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS message_codes;
 CREATE TABLE message_codes (
@@ -42,25 +48,30 @@ CREATE TABLE message_codes (
         send      ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL,
         subscribe TINYINT(1) DEFAULT '0' NOT NULL,
         PRIMARY KEY (code)
-);
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS message_log;
 CREATE TABLE message_log (
-        id      INT(11) DEFAULT '0' NOT NULL,
-        user    INT(11) NOT NULL,
-        fuser   INT(11) DEFAULT '0' NOT NULL,
+        id      INT(11) NOT NULL,
+        user    MEDIUMINT(8) UNSIGNED NOT NULL,
+        fuser   MEDIUMINT(8) UNSIGNED NOT NULL,
         code    INT(11) DEFAULT '-1' NOT NULL,
         mode    INT(11) NOT NULL,
         date    TIMESTAMP NOT NULL
-);
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS users_messages;
 CREATE TABLE users_messages (
         id      INT(11) NOT NULL auto_increment,
-        uid     INT(11) NOT NULL,
+        uid     MEDIUMINT(8) UNSIGNED NOT NULL,
         code    INT(11) NOT NULL,
         mode    TINYINT NOT NULL,
-        FOREIGN KEY (uid) REFERENCES users(uid),
         UNIQUE code_key (uid,code),
-        PRIMARY KEY (id)
-);
+	PRIMARY KEY(id)
+) TYPE=InnoDB;
+
+# Commented out because target table is necessarily MyISAM,
+# and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM
+# border as of this writing (July 2003).
+# ALTER TABLE users_messages ADD FOREIGN KEY (uid) REFERENCES users(uid);
+

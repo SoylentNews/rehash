@@ -135,7 +135,6 @@ DROP TABLE IF EXISTS backup_blocks;
 CREATE TABLE backup_blocks (
 	bid varchar(30) DEFAULT '' NOT NULL,
 	block text,
-	FOREIGN KEY (bid) REFERENCES blocks(bid),
 	PRIMARY KEY (bid)
 ) TYPE=InnoDB;
 
@@ -163,7 +162,6 @@ CREATE TABLE blocks (
 	autosubmit ENUM("no","yes") DEFAULT 'no' NOT NULL,
 	rss_cookie varchar(255),
 	all_sections tinyint NOT NULL DEFAULT '0',
-	FOREIGN KEY (rss_template) REFERENCES templates(name),
 	PRIMARY KEY (bid),
 	KEY type (type),
 	KEY section (section)
@@ -247,7 +245,6 @@ DROP TABLE IF EXISTS comment_text;
 CREATE TABLE comment_text (
 	cid mediumint UNSIGNED NOT NULL,
 	comment text NOT NULL,
-	FOREIGN KEY (cid) REFERENCES comments(cid),
 	PRIMARY KEY (cid)
 ) TYPE=MyISAM;
 
@@ -293,7 +290,7 @@ CREATE TABLE dbs (
 	id mediumint UNSIGNED NOT NULL auto_increment,
 	virtual_user varchar(100) NOT NULL,
 	isalive enum("no","yes") DEFAULT "no" NOT NULL,
-	type enum("writer","reader","log","search", "log_slave") DEFAULT "reader" NOT NULL,
+	type enum("writer","reader","log","search", "log_slave","querylog") DEFAULT "reader" NOT NULL,
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
@@ -318,9 +315,7 @@ CREATE TABLE discussions (
 	approved tinyint UNSIGNED DEFAULT 0 NOT NULL,
 	commentstatus ENUM('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof') DEFAULT 'enabled' NOT NULL, /* Default is that we allow anyone to write */
 	KEY (sid),
-	FOREIGN KEY (sid) REFERENCES stories(sid),
-	FOREIGN KEY (uid) REFERENCES users(uid),
-	FOREIGN KEY (topic) REFERENCES topics(tid),
+	KEY (topic),
 	INDEX (type,uid,ts),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
@@ -363,7 +358,6 @@ CREATE TABLE formkeys (
 	submit_ts int UNSIGNED DEFAULT '0' NOT NULL,
 	content_length smallint UNSIGNED DEFAULT '0' NOT NULL,
 	PRIMARY KEY (formkey),
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	KEY formname (formname),
 	KEY uid (uid),
 	KEY ipid (ipid),
@@ -414,7 +408,7 @@ CREATE TABLE menus (
 DROP TABLE IF EXISTS metamodlog;
 CREATE TABLE metamodlog (
 	id mediumint UNSIGNED NOT NULL AUTO_INCREMENT,
-	mmid mediumint DEFAULT '0' NOT NULL,
+	mmid int UNSIGNED DEFAULT '0' NOT NULL,
 	uid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	val tinyint  DEFAULT '0' NOT NULL,
 	ts datetime,
@@ -422,8 +416,6 @@ CREATE TABLE metamodlog (
 	INDEX byuser (uid),
 	INDEX mmid (mmid),
 	PRIMARY KEY (id),
-	FOREIGN KEY (uid) REFERENCES users(uid),
-	FOREIGN KEY (mmid) REFERENCES moderatorlog(id)
 ) TYPE=InnoDB;
 
 #
@@ -501,7 +493,6 @@ CREATE TABLE pollanswers (
 	aid mediumint NOT NULL,
 	answer char(255),
 	votes mediumint,
-	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (qid,aid)
 ) TYPE=InnoDB;
 
@@ -521,9 +512,6 @@ CREATE TABLE pollquestions (
 	section varchar(30) NOT NULL,
 	autopoll ENUM("no","yes") DEFAULT 'no' NOT NULL,
 	flags ENUM("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
-	FOREIGN KEY (section) REFERENCES sections(section),
-	FOREIGN KEY (discussion) REFERENCES discussions(id),
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (qid)
 ) TYPE=MyISAM;
 
@@ -537,10 +525,29 @@ CREATE TABLE pollvoters (
 	id char(35) NOT NULL,
 	time datetime,
 	uid mediumint UNSIGNED NOT NULL,
-	FOREIGN KEY (uid) REFERENCES users(uid),
-	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	KEY qid (qid,id,uid)
 ) TYPE=InnoDB;
+
+#
+# Table structure for table 'querylog'
+#
+
+DROP TABLE IF EXISTS querylog;
+CREATE TABLE querylog (
+	id int UNSIGNED NOT NULL auto_increment,
+	type enum('SELECT','INSERT','UPDATE','DELETE','REPLACE') NOT NULL DEFAULT 'SELECT',
+	thetables varchar(40) NOT NULL DEFAULT '',
+	ts timestamp NOT NULL,
+	package varchar(24) NOT NULL DEFAULT '',
+	line mediumint UNSIGNED NOT NULL DEFAULT '0',
+	package1 varchar(24) NOT NULL DEFAULT '',
+	line1 mediumint UNSIGNED NOT NULL DEFAULT '0',
+	duration float NOT NULL DEFAULT '0',
+	PRIMARY KEY (id),
+	KEY caller (package, line),
+	KEY ts (ts),
+	KEY type (type)
+} TYPE=InnoDB;
 
 #
 # Table structure for table 'rss_raw'
@@ -560,8 +567,6 @@ CREATE TABLE rss_raw (
 	created datetime, 
 	processed ENUM("no","yes") DEFAULT 'no' NOT NULL,
 	UNIQUE uber_signature (link_signature, title_signature, description_signature),
-	FOREIGN KEY (subid) REFERENCES submissions(subid),
-	FOREIGN KEY (bid) REFERENCES blocks(bid),
 	PRIMARY KEY (id),
 	KEY processed (processed)
 ) TYPE=InnoDB;
@@ -603,11 +608,9 @@ CREATE TABLE sections (
 	defaultcommentstatus ENUM('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof') DEFAULT 'enabled' NOT NULL, /* Default is that we allow anyone to write */
 	defaulttopic TINYINT DEFAULT '1' NOT NULL,
 	defaultsection VARCHAR(30),  /* Only set in collected sections */
-	defaultsubsection SMALLINT UNSIGNED,
-	last_update timestamp,
+	defaultsubsection SMALLINT UNSIGNED NOT NULL,
+	last_update timestamp DEFAULT '20000101000000' NOT NULL,
 	UNIQUE (section),
-	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
-	FOREIGN KEY (subsection) REFERENCES subsections(id),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
@@ -621,8 +624,6 @@ CREATE TABLE sections_contained (
 	container varchar(30) NOT NULL,
 	section varchar(30) NOT NULL,
 	UNIQUE (container,section),
-	FOREIGN KEY (container) REFERENCES sections(section),
-	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
@@ -637,7 +638,6 @@ CREATE TABLE section_extras (
 	name varchar(100) NOT NULL,
 	value varchar(100) NOT NULL,
 	type ENUM("text","list","topics") DEFAULT 'text' NOT NULL,
-	FOREIGN KEY (section) REFERENCES sections(section),
 	UNIQUE extra (section,name),
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
@@ -650,8 +650,6 @@ DROP TABLE IF EXISTS section_subsections;
 CREATE TABLE section_subsections (
 	section varchar(30) NOT NULL,
 	subsection smallint UNSIGNED NOT NULL,
-	FOREIGN KEY (section) REFERENCES sections(section),
-	FOREIGN KEY (subsection) REFERENCES subsections(subsection),
 	PRIMARY KEY (section,subsection)
 ) TYPE=InnoDB;
 
@@ -665,8 +663,6 @@ CREATE TABLE section_topics (
 	section varchar(30) NOT NULL,
 	tid smallint UNSIGNED NOT NULL,
 	type varchar(16) NOT NULL DEFAULT 'topic_1',
-	FOREIGN KEY (section) REFERENCES sections(section),
-	FOREIGN KEY (tid) REFERENCES topics(tid),
 	PRIMARY KEY (section,type,tid)
 ) TYPE=InnoDB;
 
@@ -698,7 +694,6 @@ CREATE TABLE subsections (
 	artcount mediumint DEFAULT '30' NOT NULL,
 	alttext varchar(40) NOT NULL,
 	UNIQUE code_key (title),
-	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
@@ -716,8 +711,6 @@ CREATE TABLE sessions (
 	last_subid mediumint UNSIGNED,
 	last_sid varchar(16),
 	INDEX (uid),
-	FOREIGN KEY (uid) REFERENCES users(uid),
-	FOREIGN KEY (last_subid) REFERENCES submissions(subid),
 	PRIMARY KEY (session)
 ) TYPE=InnoDB;
 
@@ -784,11 +777,6 @@ CREATE TABLE stories (
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (sid),
-	FOREIGN KEY (uid) REFERENCES users(uid),
-	FOREIGN KEY (tid) REFERENCES topics(tid),
-	FOREIGN KEY (section) REFERENCES sections(section),
-	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
-	FOREIGN KEY (subsection) REFERENCES subsections(id),
 	INDEX frontpage (displaystatus, writestatus,section),
 	INDEX time (time), /* time > now() shows that this is still valuable, even with frontpage -Brian */
 	INDEX submitter (submitter),
@@ -806,7 +794,6 @@ CREATE TABLE story_text (
 	bodytext text,
 	relatedtext text,
 	rendered text,
-	FOREIGN KEY (sid) REFERENCES stories(sid),
 	PRIMARY KEY (sid),
 ) TYPE=MyISAM;
 
@@ -834,8 +821,6 @@ CREATE TABLE story_topics (
   sid varchar(16) NOT NULL default '',
   tid smallint(5) unsigned default NULL,
   is_parent ENUM("yes","no") DEFAULT 'no' NOT NULL,
-  FOREIGN KEY (sid) REFERENCES stories(sid),
-  FOREIGN KEY (tid) REFERENCES topics(tid),
   PRIMARY KEY (id),
   INDEX tid (tid),
   INDEX sid (sid)
@@ -879,14 +864,12 @@ CREATE TABLE submissions (
 	signature varchar(32) NOT NULL,
 	PRIMARY KEY (subid),
 	UNIQUE signature (signature),
-	FOREIGN KEY (tid) REFERENCES topics(tid),
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	INDEX (del,section,note),
 	INDEX (uid),
 	KEY subid (section,subid),
 	KEY ipid (ipid),
 	KEY subnetid (subnetid)
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'submission_param'
@@ -927,7 +910,7 @@ CREATE TABLE templates (
 
 DROP TABLE IF EXISTS topics;
 CREATE TABLE topics (
-	tid smallint UNSIGNED NOT NULL auto_increment,
+	tid smallint UNSIGNED NOT NULL DEFAULT 0 auto_increment,
 	parent_topic smallint UNSIGNED DEFAULT 0 NOT NULL,
 	name char(20) NOT NULL,
 	alttext char(40),
@@ -999,7 +982,7 @@ CREATE TABLE users (
 	KEY chk4user (realemail,nickname),
 	KEY chk4matchname (matchname),
 	KEY author_lookup (author)
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'users_acl'
@@ -1012,7 +995,6 @@ CREATE TABLE users_acl (
 	acl varchar(32) NOT NULL,
 	UNIQUE uid_key (uid,acl),
 	KEY uid (uid),
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
@@ -1040,7 +1022,6 @@ CREATE TABLE users_comments (
 	noscores tinyint DEFAULT '0' NOT NULL,
 	mode varchar(10) DEFAULT 'thread',
 	threshold tinyint DEFAULT '0',
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
 ) TYPE=InnoDB;
 
@@ -1079,7 +1060,6 @@ CREATE TABLE users_index (
 	exboxes varchar(255),
 	maxstories tinyint UNSIGNED DEFAULT '30' NOT NULL,
 	noboxes tinyint DEFAULT '0' NOT NULL,
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
 ) TYPE=InnoDB;
 
@@ -1118,7 +1098,6 @@ CREATE TABLE users_info (
 	user_expiry_comm smallint UNSIGNED DEFAULT '1' NOT NULL,
 	created_at datetime DEFAULT '0000-00-00 00:00' NOT NULL,
 	people MEDIUMBLOB,
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
 ) TYPE=InnoDB;
 
@@ -1134,7 +1113,6 @@ CREATE TABLE users_param (
 	value text DEFAULT '' NOT NULL,
 	UNIQUE uid_key (uid,name),
 	KEY (uid),
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
 
@@ -1152,7 +1130,6 @@ CREATE TABLE users_prefs (
 	light tinyint DEFAULT '0' NOT NULL,
 	mylinks varchar(255) DEFAULT '' NOT NULL,
 	lang char(5) DEFAULT 'en_US' NOT NULL,
-	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
 ) TYPE=InnoDB;
 
@@ -1167,4 +1144,62 @@ CREATE TABLE vars (
 	description varchar(255),
 	PRIMARY KEY (name)
 ) TYPE=InnoDB;
+
+ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
+ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
+ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
+ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);
+ALTER TABLE pollquestions ADD FOREIGN KEY (section) REFERENCES sections(section);
+ALTER TABLE pollquestions ADD FOREIGN KEY (discussion) REFERENCES discussions(id);
+ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+ALTER TABLE sections_contained ADD FOREIGN KEY (container) REFERENCES sections(section);
+ALTER TABLE section_extras ADD FOREIGN KEY (section) REFERENCES sections(section);
+ALTER TABLE section_subsections ADD FOREIGN KEY (section) REFERENCES sections(section);
+ALTER TABLE section_topics ADD FOREIGN KEY (section) REFERENCES sections(section);
+ALTER TABLE stories ADD FOREIGN KEY (uid) REFERENCES users(uid);
+ALTER TABLE stories ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+ALTER TABLE stories ADD FOREIGN KEY (section) REFERENCES sections(section);
+ALTER TABLE stories ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
+ALTER TABLE stories ADD FOREIGN KEY (subsection) REFERENCES subsections(id);
+ALTER TABLE story_text ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+ALTER TABLE story_topics ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+ALTER TABLE submissions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+
+# Commented-out foreign keys are ones which currently cannot be used
+# because they refer to a primary key which is NOT NULL AUTO_INCREMENT
+# and the child's key either has a default value which would be invalid
+# for an auto_increment field, typically NOT NULL DEFAULT '0'.  Or,
+# in some cases, the primary key is e.g. VARCHAR(20) NOT NULL and the
+# child's key will be VARCHAR(20).  The possibility of NULLs negates
+# the ability to add a foreign key.  <-- That's my current theory,
+# but it doesn't explain why discussions.topic SMALLINT UNSIGNED NOT NULL
+# DEFAULT '0' is able to be foreign-keyed to topics.tid SMALLINT UNSIGNED
+# NOT NULL AUTO_INCREMENT.
+
+#ALTER TABLE blocks ADD FOREIGN KEY (rss_template) REFERENCES templates(name);
+#ALTER TABLE discussions ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+#ALTER TABLE discussions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE formkeys ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE metamodlog ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE pollanswers ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
+#ALTER TABLE pollvoters ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE pollvoters ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
+#ALTER TABLE rss_raw ADD FOREIGN KEY (subid) REFERENCES submissions(subid);
+#ALTER TABLE rss_raw ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
+#ALTER TABLE sections ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
+#ALTER TABLE sections ADD FOREIGN KEY (subsection) REFERENCES subsections(id);
+#ALTER TABLE sections_contained ADD FOREIGN KEY (section) REFERENCES sections(section);
+#ALTER TABLE section_subsections ADD FOREIGN KEY (subsection) REFERENCES subsections(subsection);
+#ALTER TABLE section_topics ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+#ALTER TABLE subsections ADD FOREIGN KEY (section) REFERENCES sections(section);
+#ALTER TABLE sessions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE sessions ADD FOREIGN KEY (last_subid) REFERENCES submissions(subid);
+#ALTER TABLE story_topics ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+#ALTER TABLE submissions ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+#ALTER TABLE users_acl ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE users_comments ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE users_index ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE users_info ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE users_param ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE users_prefs ADD FOREIGN KEY (uid) REFERENCES users(uid);
 

@@ -17,7 +17,7 @@ CREATE TABLE subscribe_payments (
 	KEY(uid),
 	KEY(ts),
 	UNIQUE(transaction_id)
-) TYPE=MYISAM;
+) TYPE = InnoDB;
 
 ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;
 

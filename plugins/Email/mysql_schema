@@ -6,8 +6,9 @@ CREATE TABLE email_optout (
 	subnetid 	char(32) DEFAULT '' NOT NULL,
 	added		datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE  email (email),
+	UNIQUE email (email),
 	KEY ipid (ipid),
 	KEY subnetid (subnetid),
 	KEY date_added (added)
-) TYPE = myisam;
+) TYPE = InnoDB;
+

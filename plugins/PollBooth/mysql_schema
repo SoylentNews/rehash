@@ -4,8 +4,14 @@ CREATE TABLE auto_poll (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
 	section varchar(30) NOT NULL,
 	qid mediumint UNSIGNED,
-	FOREIGN KEY (section) REFERENCES sections(section),
-	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
+
+# Doesn't work, unsure why.
+# ALTER TABLE auto_poll ADD FOREIGN KEY (section) REFERENCES sections(section);
+
+# Commented out because target table is necessarily MyISAM,
+# and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM
+# border as of this writing (July 2003).
+# ALTER TABLE auto_poll ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
 

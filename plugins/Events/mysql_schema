@@ -1,11 +1,16 @@
 DROP TABLE IF EXISTS event_dates;
 CREATE TABLE event_dates (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-	sid char(16) NOT NULL,
+	sid varchar(16) NOT NULL DEFAULT '',
 	begin DATE NOT NULL,
 	end DATE NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (sid) REFERENCES stories(sid),
+	INDEX sid (sid),
 	INDEX uidarticle (id,sid)
+) TYPE=InnoDB;
 
-);
+# Commented out because target table is necessarily MyISAM,
+# and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM
+# border as of this writing (July 2003).
+# ALTER TABLE event_dates ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+

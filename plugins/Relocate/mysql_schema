@@ -1,6 +1,9 @@
 #
 # Table structure for table 'links'
+# The url_index really should be an MD5, the way the NewsVac
+# plugin does it. - Jamie 2003/07/07
 #
+
 DROP TABLE IF EXISTS links;
 CREATE TABLE links (
 	id CHAR(32) DEFAULT '' NOT NULL,
@@ -9,7 +12,7 @@ CREATE TABLE links (
 	is_alive enum('yes','no') DEFAULT 'yes' NOT NULL,
 	INDEX url_index (url(200)),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE = MyISAM;
 
 #
 # Table structure for table 'links_sid'
@@ -20,9 +23,10 @@ CREATE TABLE links_for_stories (
 	id char(32) DEFAULT '' NOT NULL,
 	sid CHAR(16) NOT NULL,
 	count INT DEFAULT 0 NOT NULL,
-	FOREIGN KEY (sid) REFERENCES stories(sid),
-	FOREIGN KEY (id) REFERENCES links(id),
 	INDEX sid (sid),
 	PRIMARY KEY (id,sid)
-) TYPE = myisam;
+) TYPE = InnoDB;
+
+ALTER TABLE links_for_stories ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+ALTER TABLE links_for_stories ADD FOREIGN KEY (id) REFERENCES links(id);
 

@@ -8,7 +8,12 @@ CREATE TABLE yass_sites (
 	touched datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	failures MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	bid char(32) NOT NULL,
-	FOREIGN KEY (sid) REFERENCES stories(sid),
 	UNIQUE sidurl (sid, url),
 	PRIMARY KEY (id)
-);
+) TYPE = InnoDB;
+
+# Commented out because target table is necessarily MyISAM,
+# and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM
+# border as of this writing (July 2003).
+# ALTER TABLE yass_sites ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+

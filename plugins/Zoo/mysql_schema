@@ -9,11 +9,15 @@ CREATE TABLE people (
 	eof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0,
 	UNIQUE degree_of_separation (uid,person),
 	INDEX (person),
-	FOREIGN KEY (uid) REFERENCES users(uid),
-	FOREIGN KEY (person) REFERENCES users(uid),
 	PRIMARY KEY (id)
 );
 
-ALTER TABLE users_info ADD people_status ENUM ("ok","dirty") DEFAULT "ok" NOT NULL;
-ALTER TABLE users_info ADD index people_status(people_status);
+ALTER TABLE users_info ADD COLUMN people_status ENUM ("ok","dirty") DEFAULT "ok" NOT NULL;
+ALTER TABLE users_info ADD INDEX people_status(people_status);
+
+# Commented out because target table is necessarily MyISAM,
+# and MySQL FOREIGN KEY does not work across the InnoDB-MyISAM
+# border as of this writing (July 2003).
+# ALTER TABLE people ADD FOREIGN KEY (uid) REFERENCES users(uid);
+# ALTER TABLE people ADD FOREIGN KEY (person) REFERENCES users(uid);
 

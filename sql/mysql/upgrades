@@ -1689,7 +1689,6 @@ ALTER TABLE url_plaintext TYPE=InnoDB;
 ALTER TABLE auto_poll TYPE=InnoDB;
 
 # plugins/Relocate (ignore if not using that plugin)
-ALTER TABLE links TYPE=InnoDB;
 ALTER TABLE links_for_stories TYPE=InnoDB;
 
 # plugins/Stats (ignore if not using that plugin)
@@ -1714,6 +1713,8 @@ ALTER TABLE people TYPE=InnoDB;
 
 DELETE FROM menus WHERE menu="topics" AND label="Recent Topics";
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'topics','Topic Hierarchy','','[% constants.rootdir %]/topics.pl?op=hierarchy ',0,1,1);
+
+# End of T_2_3_0_104, Start of T_2_3_0_105 - 2003/07/09
 
 # DEVCHANNEL LAST UPDATED HERE
 
@@ -1745,6 +1746,8 @@ INSERT INTO vars (name, value, description) VALUES ('memcached_debug','0','Turn 
 INSERT INTO vars (name, value, description) VALUES ('memcached_keyprefix','x','Unique, short (1-2 chars probably) prefix to distinguish this site from the other sites sharing memcaches');
 INSERT INTO vars (name, value, description) VALUES ('memcached_servers','127.0.0.1:11211','Space-sep list of servers for memcached in host:port format; to weight a server append =n');
 
+# End of T_2_3_0_105, Start of T_2_3_0_106 - 2003/07/15
+
 # USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_107, Start of T_2_3_0_108 - 2003/07/15
@@ -1754,4 +1757,51 @@ INSERT INTO vars (name, value, description) VALUES ('counthits_lastmaxid','1','L
 # End of T_2_3_0_108, Start of T_2_3_0_109 - 2003/07/17
 
 # SLASHDOT LAST UPDATED HERE
+
+ALTER TABLE dbs CHANGE type type ENUM("writer","reader","log","search","log_slave","querylog") DEFAULT "reader" NOT NULL;
+
+# If you want to do your querylogging to a separate DB, create an entry
+# in the DBIx/Password.pm file, drop a row for it into the dbs table,
+# and do the CREATE TABLE on that DB.
+# INSERT INTO dbs (virtual_user, isalive, type) VALUES ('queryloguser', 'yes', 'querylog');
+DROP TABLE IF EXISTS querylog;
+CREATE TABLE querylog (
+	id int UNSIGNED NOT NULL auto_increment,
+	type enum('SELECT','INSERT','UPDATE','DELETE','REPLACE') NOT NULL DEFAULT 'SELECT',
+	thetables varchar(40) NOT NULL DEFAULT '',
+	ts timestamp NOT NULL,
+	package varchar(24) NOT NULL DEFAULT '',
+	line mediumint UNSIGNED NOT NULL DEFAULT '0',
+	package1 varchar(24) NOT NULL DEFAULT '',
+	line1 mediumint UNSIGNED NOT NULL DEFAULT '0',
+	duration float NOT NULL DEFAULT '0',
+	PRIMARY KEY (id),
+	KEY caller (package, line),
+	KEY ts (ts),
+	KEY type (type)
+) TYPE=InnoDB;
+
+UPDATE sections SET last_update='20000101000000' WHERE last_update IS NULL;
+ALTER TABLE sections CHANGE COLUMN last_update last_update TIMESTAMP DEFAULT '20000101000000' NOT NULL;
+UPDATE sections SET defaultsubsection='0' WHERE defaultsubsection IS NULL;
+ALTER TABLE sections CHANGE COLUMN defaultsubsection defaultsubsection SMALLINT UNSIGNED DEFAULT '0' NOT NULL;
+
+ALTER TABLE discussions ADD INDEX topic (topic);
+ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
+
+ALTER TABLE metamodlog CHANGE COLUMN mmid mmid INT UNSIGNED DEFAULT '0' NOT NULL;
+ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);
+
+# plugins/Messages (ignore if not using that plugin)
+ALTER TABLE message_drop CHANGE COLUMN user user MEDIUMINT UNSIGNED NOT NULL, CHANGE COLUMN fuser fuser MEDIUMINT UNSIGNED NOT NULL;
+ALTER TABLE message_log  CHANGE COLUMN user user MEDIUMINT UNSIGNED NOT NULL, CHANGE COLUMN fuser fuser MEDIUMINT UNSIGNED NOT NULL;
+ALTER TABLE message_web  CHANGE COLUMN user user MEDIUMINT UNSIGNED NOT NULL, CHANGE COLUMN fuser fuser MEDIUMINT UNSIGNED NOT NULL;
+ALTER TABLE users_messages CHANGE COLUMN uid uid MEDIUMINT UNSIGNED NOT NULL;
+ALTER TABLE users_messages ADD FOREIGN KEY (uid) REFERENCES users(uid);
+
+# plugins/Journal (ignore if not using that plugin)
+ALTER TABLE journals CHANGE COLUMN tid tid SMALLINT UNSIGNED NOT NULL;
+
+# plugins/Events (ignore if not using that plugin)
+ALTER TABLE event_dates CHANGE COLUMN sid sid varchar(16) NOT NULL DEFAULT '', ADD INDEX sid (sid);
 

@@ -6,11 +6,11 @@ CREATE TABLE journals (
 	description VARCHAR(80) NOT NULL,
 	posttype TINYINT DEFAULT '2' NOT NULL,
 	discussion MEDIUMINT  UNSIGNED,
-	tid MEDIUMINT UNSIGNED NOT NULL,
+	tid SMALLINT UNSIGNED NOT NULL,
 	PRIMARY KEY (id),
 	KEY uidarticle (uid),
-	FOREIGN KEY (tid) REFERENCES topics(tid),
-	KEY IDandUID (id,uid)
+	KEY IDandUID (id,uid),
+	KEY tid (tid)
 );
 
 DROP TABLE IF EXISTS journals_text;
@@ -27,3 +27,6 @@ CREATE TABLE journal_themes (
 	UNIQUE name(name),
 	PRIMARY KEY (id)
 );
+
+ALTER TABLE journals ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+
