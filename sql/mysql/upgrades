@@ -2308,8 +2308,6 @@ INSERT INTO vars (name, value, description) VALUES ('m2_oldest_zone_percentile',
 INSERT INTO vars (name, value, description) VALUES ('m2_oldest_zone_mult', '2', 'How many times the normal amount of M2s are applied to the oldest un-M2d mods?');
 INSERT INTO vars (name, value, description) VALUES ('m2_oldzone', '0', 'Starting id (youngest) of the old-zone of moderations that still require M2 (the oldest certain percentile)');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -2325,6 +2323,8 @@ ALTER TABLE comments ADD INDEX uid_date (uid,date);
 
 # Switching this on may help performance on large sites.  Don't turn on until you've created the uid_date index
 INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index', '0', 'Give user comments query hint to use specific index?');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_155, Start of T_2_3_0_156 - 2004/05/25
 
