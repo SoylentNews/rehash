@@ -696,8 +696,8 @@ sub getSkinColors {
 		my $colors = {};
 		for (my $i=0; $i < $n_colors/2; $i++) {
 			my $j = $i + $n_colors/2;
-			$colors->{fg_$i} = $tempcolors[$i];
-			$colors->{bg_$i} = $tempcolors[$j];
+			$colors->{"fg_$i"} = $tempcolors[$i];
+			$colors->{"bg_$i"} = $tempcolors[$j];
 		}
 		$user->{colors} = $colors;
 		return 1;
