@@ -1507,3 +1507,6 @@ SELECT CONCAT("UPDATE stories SET body_length=", length(bodytext), " WHERE sid='
 SOURCE "/tmp/storieslength";
 # And now that that's done... honestly, something should go here to set word_count
 
+INSERT INTO vars (name, value, description) VALUES ('cache_enabled_template','1','If set, then template caching is still active even if var cache_enabled is turned off.');
+INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
+

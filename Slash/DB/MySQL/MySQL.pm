@@ -3444,6 +3444,7 @@ sub getNetIDStruct {
 sub getBanList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
+	my $debug = $constants->{debug_db_cache};
 	
 	_genericCacheRefresh($self, 'banlist', $constants->{banlist_expire});
 	my $banlist_ref = $self->{_banlist_cache} ||= {};
@@ -3451,6 +3452,9 @@ sub getBanList {
 	%$banlist_ref = () if $refresh;
 
 	if (!keys %$banlist_ref) {
+		if ($debug) {
+			print STDERR scalar(gmtime) . " gBL pid $$ (re)fetching Ban data\n";
+		}
 		my $list = $self->sqlSelectAll(
 			"ipid, subnetid, uid",
 			"accesslist",
@@ -3469,6 +3473,12 @@ sub getBanList {
 		$self->{_banlist_cache_time} = time() if !$self->{_banlist_cache_time};
 	}
 
+	if ($debug) {
+		my $time = time;
+		my $diff = $time - $self->{_banlist_cache_time};
+		print STDERR scalar(gmtime) . " pid $$ gBL time='$time' diff='$diff' self->_banlist_cache_time='$self->{_banlist_cache_time}' self->{_banlist_cache} keys: " . scalar(keys %{$self->{_banlist_cache}}) . "\n";
+	}
+
 	return $banlist_ref;
 }
 
@@ -3476,6 +3486,7 @@ sub getBanList {
 sub getNorssList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
+	my $debug = $constants->{debug_db_cache};
 	
 	_genericCacheRefresh($self, 'norsslist', $constants->{banlist_expire});
 	my $norsslist_ref = $self->{_norsslist_cache} ||= {};
@@ -3483,6 +3494,9 @@ sub getNorssList {
 	%$norsslist_ref = () if $refresh;
 
 	if (!keys %$norsslist_ref) {
+		if ($debug) {
+			print STDERR scalar(gmtime) . " gNL pid $$ (re)fetching Norss data\n";
+		}
 		my $list = $self->sqlSelectAll(
 			"ipid, subnetid, uid",
 			"accesslist",
@@ -3498,7 +3512,13 @@ sub getNorssList {
 		# indicate whether the cache is fresh, besides checking its
 		# number of keys at the top of this "if")
 		$norsslist_ref->{_junk_placeholder} = 1;
-		$self->{_banlist_cache_time} = time() if !$self->{_banlist_cache_time};
+		$self->{_norsslist_cache_time} = time() if !$self->{_norsslist_cache_time};
+	}
+	
+	if ($debug) {
+		my $time = time;
+		my $diff = $time - $self->{_norsslist_cache_time};
+		print STDERR scalar(gmtime) . " pid $$ gNL time='$time' diff='$diff' self->_norsslist_cache_time='$self->{_norsslist_cache_time}' self->{_norsslist_cache} keys: " . scalar(keys %{$self->{_norsslist_cache}}) . "\n";
 	}
 
 	return $norsslist_ref;
@@ -6113,7 +6133,8 @@ sub getTemplateByName {
 
 	#First, we get the cache
 	$self->{$table_cache_id} =
-		$constants->{'cache_enabled'} && $self->{$table_cache_id}
+		($constants->{cache_enabled} || $constants->{cache_enabled_template})
+			&& $self->{$table_cache_id}
 		? $self->{$table_cache_id} : getTemplateNameCache($self);
 
 	#Now, lets determine what we are after
@@ -6755,22 +6776,37 @@ sub _genericSet {
 # manner :)
 sub _genericCacheRefresh {
 	my($self, $table, $expiration) = @_;
-#print STDERR "_genericCacheRefresh($table,$expiration)\n";
-	return unless $expiration;
+	my $debug = getCurrentStatic('debug_db_cache');
+	if (!$expiration) {
+		if ($debug) {
+			print STDERR scalar(gmtime) . " pid $$ _gCR table='$table' expiration false (never expire), no refresh\n";
+		}
+		return;
+	}
 	my $table_cache = '_' . $table . '_cache';
 	my $table_cache_time = '_' . $table . '_cache_time';
 	my $table_cache_full = '_' . $table . '_cache_full';
-#print STDERR "_genericCacheRefresh($table,$expiration) s->{tct}='" . (defined($self->{$table_cache_time}) ? $self->{$table_cache_time} : "undef") . "'\n";
-	return unless $self->{$table_cache_time};
+	if (!$self->{$table_cache_time}) {
+		if ($debug) {
+			print STDERR scalar(gmtime) . " pid $$ _gCR table='$table' expiration='$expiration'"
+				. " self->$table_cache_time false, no refresh\n";
+		}
+		return;
+	}
 	my $time = time();
 	my $diff = $time - $self->{$table_cache_time};
 
-#print STDERR "_genericCacheRefresh($table,$expiration) TIME:$diff:$expiration:$time:$self->{$table_cache_time}\n";
 	if ($diff > $expiration) {
-#print STDERR "_genericCacheRefresh setting '$table_cache' to empty\n";
+		if ($debug) {
+			print STDERR scalar(gmtime) . " pid $$ _gCR EXPIRING table='$table' expiration='$expiration'"
+				. " time='$time' diff='$diff' self->${table}_cache_time='$self->{$table_cache_time}'\n";
+		}
 		$self->{$table_cache} = {};
 		$self->{$table_cache_time} = 0;
 		$self->{$table_cache_full} = 0;
+	} elsif ($debug) {
+		print STDERR scalar(gmtime) . " pid $$ _gCR NOT_EXPIRING table='$table' expiration='$expiration'"
+			. " time='$time' diff='$diff' self->${table}_cache_time='$self->{$table_cache_time}'\n";
 	}
 }
 
