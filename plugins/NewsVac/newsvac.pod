@@ -117,6 +117,8 @@ The run_spider task will also run when you specify in the task.
 
 The spider will first mine all the URLs, then convert the nuggets created by the miners into URLs, then fetch each URL and strip it, and will then match each URL against the keywords.  Ones that match high enough to hit the minimum score (default is 10.0) will be submitted as stories.
 
+[There is also the garbage collection task, and I don't know what it does.  I need to better figure out how garbae collection, the URLs added by test miners, and the run_spider all play nicely together. ???]
+
 
 =head2 Submissions
 
@@ -297,6 +299,9 @@ Related: perhaps make I<topical> RSS feeds for Slash sites, not just sectional R
 =head1 CHANGES
 
   $Log$
+  Revision 1.6  2002/10/03 19:36:54  pudge
+  Added note about garbage collection.In previous commit, also updated TODO list.
+
   Revision 1.5  2002/10/03 19:05:31  pudge
   Added large section about newsvac process
 
