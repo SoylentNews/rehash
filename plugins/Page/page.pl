@@ -24,11 +24,17 @@ sub main {
 		return;
 	}
 
-	my $section = $slashdb->getSection($form->{section});
+	my $skin_name = $form->{section};
+	my $skid = $skin_name
+		? $slashdb->getSkidFromName($skin_name)
+		: determineCurrentSkin();
+	setCurrentSkin($skid);
+	my $gSkin = getCurrentSkin();
+	$skin_name = $gSkin->{name};
 
-	my $title = getData('head', { section => $section->{section} });
-	header($title, $section->{section}) or return;
-	slashDisplay('index', { 'index' => $index, section => $section->{section} });
+	my $title = getData('head', { section => $skin_name });
+	header($title, $skin_name) or return;
+	slashDisplay('index', { 'index' => $index, section => $skin_name });
 
 	footer();
 
