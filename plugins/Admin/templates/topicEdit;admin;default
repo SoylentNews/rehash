@@ -57,25 +57,30 @@ __template__
 
 	<p />
 	[% IF topic_param.size %]
-	<b>Current Topic Params</b>
-	<p>
-	<TABLE>
+	[% PROCESS formLabel value => "Current Topic Parameters" %]
+	<table>
 	[% FOREACH tp = topic_param %]
-		<TR><TD>[% tp.name %]:</TD><TD> <INPUT TYPE="TEXT" NAME="tp_cur_[% tp.name %]" VALUE="[% tp.value | strip_attribute %]" SIZE="50"></TD></TR>
+		<tr><td>[% tp.name %]:</td><td> <input type="TEXT" name="tp_cur_[% tp.name %]" value="[% tp.value | strip_attribute %]" size="50"></td></tr>
 	[% END %]
-	</TABLE>
+	</table>
 	[% END %]
-	</p>
-	<b>New Topic Params:</b>
-	<p>
-	<TABLE>
-	[% FOREACH number = [1..5] %]
-	<TR><TD><b>Name</b></TD><TD> <INPUT TYPE="TEXT" NAME="tpname_new_[% number %]" SIZE="32" MAXLENGTH="32"> <b>Value</b> <INPUT TYPE="TEXT" NAME="tpvalue_new_[% number %]" SIZE="50"</TD></TR>
-	[% END %]
-	</TABLE>
 	</p>
 
-	[% PROCESS formLabel value => "Replacement Topic", comment => "if deleting the topic, select a topic to replace it with ... this is irreversible!", nobreak => 0 %]
+	[% PROCESS formLabel value => "Custom Topic Parameters" %]
+	<table>
+	<tr><th>Name</th><th>Value</th></tr>
+	[% FOREACH number = [1..2] %]
+	<tr><td><input type="TEXT" name="tpname_new_[% number %]" size="22" maxlength="32"></td><td><input type="TEXT" name="tpvalue_new_[% number %]" size="60"</td></tr>
+	[% END %]
+	</table>
+	</p>
+
+	<input type="SUBMIT" name="topicnew" value="Create New Topic">
+	<input type="SUBMIT" name="topicsave" value="Save Topic" onclick="stc_submit()">
+
+	<hr>
+
+	[% PROCESS formLabel value => "Delete & Reparent", comment => "irreversibly delete this topic, and reparent its children" %]
 	[% Slash.createSelect('replacementtid', topic_desc, '', 1, 0, 1) %]
 	<input type="SUBMIT" name="topicdelete" value="Delete Topic">
 
