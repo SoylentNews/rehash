@@ -105,6 +105,8 @@ Template		- Template Toolkit
 
 LWP::Parallel
 
+Lingua::Stem
+
 
 =head1 DESCRIPTION
 
