@@ -63,7 +63,7 @@ $task{$me}{code} = sub {
 		for my $story (@$deletable) {
 			$x++;
 			$dirty_skins{$story->{primaryskid}} = 1;
-			$slashdb->deleteStoryAll($story->{sid});
+			$slashdb->deleteStoryAll($story->{stoid});
 			slashdLog("Deleting $story->{sid} ($story->{title})")
 				if verbosity() >= 1;
 		}
