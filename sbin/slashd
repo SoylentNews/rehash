@@ -20,6 +20,7 @@
 
 use strict;
 use Carp;
+use Errno;
 use File::Basename;
 use File::Path;
 use File::Spec::Functions;
@@ -38,14 +39,18 @@ use Slash::Constants ':slashd';
 use Slash::Display;
 use Slash::Utility;
 
-use vars qw( %task $me );
+use vars qw(
+	%task $me
+	$event_ar
+	$cron
+);
 
 my $virtual_user = $ARGV[0];
 createEnvironment($virtual_user);
 my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
 my $user = getCurrentUser();
-my %pids;
+my %pids = ( );
 
 main();
 exit 0;
@@ -59,38 +64,48 @@ exit 0;
 # The standard log command.
 
 sub slashdLog {
-	# prepend script name if fork == 1
-	if (exists $pids{$$} && $pids{$$}[1] == SLASHD_NOWAIT && $_[0] !~ /^$pids{$$}[0]/) {
-		doLog('slashd', \@_, 0, "[$pids{$$}[0]]");
-	} else {
-		doLog('slashd', \@_);
+	if ($pids{$$} && $pids{$$}{forktype} == SLASHD_NOWAIT) {
+		# prepend script name if we are a child that is forked nowait
+		$_[0] =~ s/^$pids{$$}{taskname}\s*//;
+		$_[0] = "[$pids{$$}{taskname}] $_[0]";
 	}
+	doLog('slashd', \@_);
 }
 
 # log children ending
+# We're polling this reaper function, instead of calling it from within
+# a $SIG{CHLD} handler.  "if you're running in a loop, just arrange to
+# call the reaper every so often.  This is the best approach because it
+# isn't subject to the occasional core dump that signals can sometimes
+# trigger in the C library." - Camel3, p. 416, and see also p. 413.
 sub REAPER {
+	return unless %pids;
+#my @pid_checklist = sort { $a <=> $b } keys %pids;
+#slashdLog("REAPER in parent $$ begin: "
+#	. scalar(keys %pids) . " child(ren) potentially need reaping: @pid_checklist"
+#);
 	while (my $pid = waitpid(-1, WNOHANG)) {
-		last if $pid < 1 || !exists $pids{$pid};
-
-		if ($pids{$pid}[1] == SLASHD_NOWAIT) {
-			if (verbosity() >= 2) {
-				slashdLog("$pids{$pid}[0] reaped ($pid)");
-			}
-			delete $pids{$pid};
-		} elsif ($pids{$pid}[1] == SLASHD_WAIT) {
-			$pids{$pid}[2] = 1; # mark as reaped
-		}
-
+#slashdLog("REAPER in parent $$ found reaped pid $pid");
+		last if $pid < 1;
+		next if !exists $pids{$pid};
 		my $status = $? >> 8;
 		my $signal = $? & 127;
+		my $taskname = $pids{$pid}{taskname};
+		slashdLog("$taskname reaped ($pid)") if verbosity() >= 3;
+		delete $pids{$pid};
 		if ($status || $signal) {
 			slashdLog(sprintf
-				"$pids{$pid}[0] exited oddly (status %d; signal %d)",
-				$status, $signal
+				"%s odd exit (status %d, signal %d)",
+				$taskname, $status, $signal
 			);
 		}
+		insert_task_event($taskname, 0);
 	}
-	$SIG{CHLD} = \&REAPER;
+#@pid_checklist = sort { $a <=> $b } keys %pids;
+#slashdLog("REAPER in parent $$ done for now: "
+#	. scalar(keys %pids) . " child(ren) potentially need reaping"
+#	. (%pids ? ": @pid_checklist" : "")
+#);
 }
 
 # Log a warning and die.  Since slashd is meant to keep running
@@ -102,16 +117,6 @@ sub slashdLogDie {
 	slashdLog($err);
 	die $err;
 }
-
-# prog2file executes a command (as the unix user specified in your
-# /usr/local/slash/slash.sites file, of course, since that's how
-# slashd should be running) and puts its output into a file whose
-# name is specified.
-# 
-# Extended: If you are looking for specific data to be returned from the
-# program called, prog2file will return a scalar with all data returned from
-# STDERR
-
 
 # What time does the database think it is?  Our tasks are synched to
 # that time, which may be different from the time that the machine
@@ -128,7 +133,6 @@ sub db_time {
 	my $my_time = time;
 	if (!$last_db_time_confirm
 		or $my_time > $last_db_time_confirm + 600) {
-#		my $db_time = UnixDate(ParseDate($slashdb->getTime()), "%s");
 		my $db_time = timeCalc($slashdb->getTime(), "%s", 0);
 		$last_db_time_offset = $db_time - $my_time;
 		$last_db_time_confirm = $my_time;
@@ -166,7 +170,6 @@ sub verbosity {
 
 { my $last_static_update = $^T;
 sub update_static {
-	my($cron) = @_;
 	my $my_time = time;
 	my $changed = 0;
 	if (!$last_static_update
@@ -177,7 +180,7 @@ sub update_static {
 		$last_static_update = $my_time;
 		if ($old_panic != $constants->{panic}) {
 			slashdLog("'panic' was $old_panic, is $constants->{panic}");
-			init_event_ary($cron);
+			init_event_ar();
 			$changed = 1;
 		}
 	}
@@ -190,54 +193,52 @@ sub slashdLogInit {
 
 sub init_cron {
 	sub null_dispatcher { die "null_dispatcher called, there's a bug" }
-	my $cron = Schedule::Cron->new(\&null_dispatcher);
-	return $cron;
+	$cron = Schedule::Cron->new(\&null_dispatcher);
 }
 
 sub end_log {
-	my($basename, $duration, $summary, $event_ary, $fork) = @_;
-	my @log;
-	if (verbosity() >= 1) {
-		# secs_until can be negative;  that just means we're
-		# behind and will execute the next task immediately to
-		# try to catch up.
-		my $secs_until = $event_ary->[0][1] - db_time();
-		my $next_task = basename($event_ary->[0][0]);
-		my $secs = verbosity() >= 2 ? 0 : -30;
+	my($basename, $duration, $summary, $forktype) = @_;
+	return if verbosity() < 1;
+	my @log = ( );
 
-		if ($fork == SLASHD_LOG_NEXT_TASK) {
-			push @log, "$basename forked";
-		} else {
-			push @log, "$basename end";
-		}
+	# secs_until can be negative;  that just means we're
+	# behind and will execute the next task immediately to
+	# try to catch up.
+	my $secs_until = $event_ar->[0][1] - db_time();
+	my $next_task = basename($event_ar->[0][0]);
+	my $secs = verbosity() >= 2 ? 0 : -30;
 
-		if ($fork == SLASHD_WAIT) {
-			push @log, " ($$)";
-		}
+	if ($forktype == SLASHD_LOG_NEXT_TASK) {
+		push @log, "$basename forked";
+	} else {
+		push @log, "$basename end";
+	}
 
-		if ($fork != SLASHD_LOG_NEXT_TASK) {
-			push @log, " (${duration}s";
-		}
+	if ($forktype == SLASHD_WAIT) {
+		push @log, " ($$)";
+	}
 
-		if ($fork != SLASHD_NOWAIT) {
-			push @log, ($secs_until < $secs)
-				? "; $next_task "
-					. -$secs_until
-					. "s late"
-				: verbosity() >= 2
-					? "; $next_task in ${secs_until}s"
-					: ();
-		}
+	if ($forktype != SLASHD_LOG_NEXT_TASK) {
+		push @log, " (${duration}s";
+	}
 
-		if ($fork != SLASHD_LOG_NEXT_TASK) {
-			push @log, ")$summary";
-		}
+	if ($forktype != SLASHD_NOWAIT) {
+		push @log, ($secs_until < $secs)
+			? "; $next_task "
+				. -$secs_until
+				. "s late"
+			: verbosity() >= 2
+				? "; $next_task in ${secs_until}s"
+				: ();
+	}
+
+	if ($forktype != SLASHD_LOG_NEXT_TASK) {
+		push @log, ")$summary";
 	}
 	slashdLog(join "", @log) if @log;
 }
 
 sub process_tasks {
-	my($cron) = @_;
 	%task = ( );
 
 	# "require" all the task files -- each will put its info into
@@ -347,29 +348,26 @@ EOT
 # Create an initial array of events with their next-scheduled
 # execution times.
 
-sub init_event_ary {
-	my($cron) = @_;
-	my $event_ary_ref = [ ];
+sub init_event_ar {
+	$event_ar = [ ];
 	for my $file (sort keys %task) {
 		my $immediate = $task{$file}{on_startup} ? 1 : 0;
-		insert_task_event($event_ary_ref, $cron, $file, $immediate);
+		insert_task_event($file, $immediate);
 	}
 	if (verbosity() >= 2) {
-		my $first_task = basename($event_ary_ref->[0][0]);
-		my $secs_until = $event_ary_ref->[0][1] - db_time();
+		my $first_task = basename($event_ar->[0][0]);
+		my $secs_until = $event_ar->[0][1] - db_time();
 		slashdLog("first task will be $first_task in $secs_until secs");
 	}
-	$event_ary_ref;
 }
 
 # Given a task's filename, returns the next time at which that task will
-# run.  The optional second argument is a hashref in which the current
-# database time is cached (to avoid doing SELECT NOW() a bunch of times in
-# rapid succession) and where the next execution time and its file are
-# stored (in case the caller cares, which sometimes it does).
+# run.  The optional third argument is a hashref in which the current
+# database time is cached and where the next execution time and its file
+# are stored (in case the caller cares).
 
 sub calc_next_execution_time {
-	my($cron, $file, $hr) = @_;
+	my($file, $hr) = @_;
 	$hr = { } if !$hr;
 	$hr->{db_time} = db_time();
 	my $timespec = $task{$file}{timespec};
@@ -417,12 +415,13 @@ EOT
 # happen to work if the task is already on the list for some reason.
 
 sub insert_task_event {
-	my($event_ary_ref, $cron, $file, $immediate) = @_;
+	my($file, $immediate) = @_;
 	my $event_hr = { };
+#slashdLog("insert_task_event called: '$file' '$immediate'");
 
 	# Convert the existing array into a hash.
-	for my $file_num (0..$#$event_ary_ref) {
-		my($file, $until_time) = @{$event_ary_ref->[$file_num]};
+	for my $file_num (0..$#$event_ar) {
+		my($file, $until_time) = @{$event_ar->[$file_num]};
 		$event_hr->{$file}{until_time} = $until_time;
 	}
 
@@ -431,19 +430,19 @@ sub insert_task_event {
 	if ($immediate and $constants->{panic} < 1) {
 		$next_time = db_time();
 	} else {
-		$next_time = calc_next_execution_time($cron, $file);
+		$next_time = calc_next_execution_time($file);
 	}
 	$event_hr->{$file}{until_time} = $next_time;
 
 	# Rebuild the array in the proper order.
-	@$event_ary_ref = ( );
+	$event_ar = [ ];
 	my @files = sort {
 		$event_hr->{$a}{until_time} <=> $event_hr->{$b}{until_time}
 		||
 		$a cmp $b
 	} keys %$event_hr;
 	for my $file (@files) {
-		push @$event_ary_ref, [ $file, $event_hr->{$file}{until_time} ];
+		push @$event_ar, [ $file, $event_hr->{$file}{until_time} ];
 		(my $file_nopl = $file) =~ s/\.pl//;
 		my @u = gmtime($event_hr->{$file}{until_time});
 		my $options = {
@@ -458,19 +457,30 @@ sub insert_task_event {
 
 sub wait_until {
 	my($until_time) = @_;
+	my $max_sleep;
 	while ((my $cur_time = db_time()) < $until_time) {
-slashdLog(sprintf "Beginning sleep: %s < %s", map { scalar localtime } $cur_time, $until_time);
-		my $sleep_duration = $until_time - $cur_time;
-		if ($sleep_duration < 1) {
-			$sleep_duration = 1;
-		} elsif ($sleep_duration > 600) {
-			$sleep_duration -= 30;
+		# If there are children waiting to be reaped, we loop
+		# frequently to poll REAPER to look for them to die.
+		# If not, there's no need to hit it frequently.
+		$max_sleep = (%pids ? 2 : 300);
+		my $sleep_total = $until_time - $cur_time;
+		if ($sleep_total < 1) {
+			$sleep_total = 1;
+		} elsif ($sleep_total > $max_sleep) {
+			$sleep_total = $max_sleep;
 		}
-slashdLog(sprintf "Sleep for %s seconds", $sleep_duration);
-		sleep $sleep_duration;
-slashdLog(sprintf "Slept for %s seconds", db_time() - $cur_time);
+		slashdLog(sprintf "Beginning reap-and-sleep-for-%s-secs: %s < %s",
+			$sleep_total,
+			scalar(localtime($cur_time)),
+			scalar(localtime($until_time)))
+			if verbosity() >= 3;
+		REAPER();
+		sleep $sleep_total;
 	}
-slashdLog(sprintf "Finishing sleep: %s >= %s", map { scalar localtime } db_time(), $until_time);
+	slashdLog(sprintf "Finishing sleep: %s >= %s",
+		scalar(localtime(db_time())),
+		scalar(localtime($until_time)))
+		if verbosity() >= 3;
 }
 
 sub main {
@@ -487,43 +497,48 @@ sub main {
 			"slashd with the init script?"
 		));
 	}
-	$SIG{CHLD} = \&REAPER;
 
 	# Initialize the scheduling stuff.
 
-	my $cron = init_cron();
-	process_tasks($cron);
-	my $event_ary = init_event_ary($cron);
+	init_cron();
+	process_tasks();
+	init_event_ar();
 
 	# Here's the main event loop, which never returns (slashd is
 	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
 
-	while (1) {
-slashdLog("Beginning while(1) loop");
+	$SIG{CHLD} = sub {
+		# for debugging only!!   slashdLog("SIGCHLD called in $$")
+	};
+	MAINLOOP: while (1) {
+#slashdLog("Beginning MAINLOOP");
+
 		# The task which needs to execute next is at the front of
-		# the event array.
-		my($task_filename, $until_time) = @{ shift @$event_ary };
+		# the event array.  Shift it off here;  it will be
+		# inserted back into the queue when it is reaped.
+		my($task_filename, $until_time) = @{ shift @$event_ar };
 		my $basename = basename($task_filename);
 		(my $basename_nopl = $basename) =~ s/\.pl$//;
 
 		# Get its information and wait until it's ready.
 		my $subref = $task{$task_filename}{code};
-		my $fork = $task{$task_filename}{fork};
-		$fork ||= SLASHD_WAIT
-			if $constants->{fork_all_tasks};
-		$fork = undef unless defined($fork) &&
-			($fork == SLASHD_WAIT || $fork == SLASHD_NOWAIT);
-		$fork = SLASHD_WAIT unless defined $fork;
+		my $forktype = SLASHD_WAIT; # the default
+		$forktype = SLASHD_NOWAIT
+			if !$constants->{fork_all_tasks}
+				&& $task{$task_filename}{fork} == SLASHD_NOWAIT;
+
+		# wait_until calls REAPER() periodically.
 		wait_until($until_time);
 
 		# Recheck the vars table to reload $constants if necessary.
 		# If it changed, this may alter our execution schedule, so
 		# repeat the loop from the top.
-		if (update_static($cron)) {
-			next;
+		if (update_static()) {
+			next MAINLOOP;
 		}
 
 		# Execute it.
+
 		$slashdb->setSlashdStatus($basename_nopl, {
 			in_progress	=> 1,
 			task		=> $basename_nopl,
@@ -531,100 +546,124 @@ slashdLog("Beginning while(1) loop");
 		my $summary = "";
 		my $start_time = Time::HiRes::time;
 
-		if (defined $fork) {
-			local $me = $basename;
+		REAPER();
 
-			# kill the dbh, we have too many problems
-			# if it sticks around during a fork -- pudge
-			$slashdb->{_dbh}->disconnect;
-			undef $slashdb->{_dbh};
+		local $me = $basename;
 
+		# kill the dbh, we have too many problems
+		# if it sticks around during a fork -- pudge
+		$slashdb->{_dbh}->disconnect;
+		undef $slashdb->{_dbh};
+
+		FORK: {
 			my $pid = fork();
 
-			# get a new dbh in both parent and child
+			# Parent and child now separately reconnect.
 			$slashdb->sqlConnect();
 
-			if (!defined $pid) {
-				slashdLog("error: cannot Cannot fork '$me': $!");
-				next;  # task not reinserted into $event_ary
-			} elsif ($pid == 0) {
-				$pids{$$} = [$basename, $fork];
+			if ($pid) {
 
-				tie *STDERR, 'Slash::Tie::STDERR'
-					if $fork == SLASHD_NOWAIT;
-				$SIG{TERM} = $SIG{INT} = undef;
+				####################
+				# Parent here.
+				####################
 
-				if (verbosity() >= 2) {
-					slashdLog("$basename begin ($$)");
+				# some later call to REAPER will
+				# reap and delete this hash field
+				$pids{$pid} = {
+					taskname => $basename,
+					forktype => $forktype,
+					dead => 0,
+				};
+				if ($forktype == SLASHD_NOWAIT) {
+					# log when next task is running
+					end_log($basename, 0, "", SLASHD_LOG_NEXT_TASK);
+#slashdLog("Parent $$: sleep for 2 seconds after fork()");
+					sleep 2;
+#slashdLog("Parent $$: slept for 2 seconds after fork()");
+				} elsif ($forktype == SLASHD_WAIT) {
+#slashdLog("Parent $$: sleep and wait after fork()");
+					# wait for REAPER to reap and delete
+					# this hash field
+					while (exists $pids{$pid}) {
+						REAPER();
+						sleep 1;
+					}
+#slashdLog("Parent $$: slept and waited after fork()");
+				} else {
+					slashdLog("unexpected value of \$forktype: $forktype");
+					next MAINLOOP;
 				}
+
+			} elsif (defined $pid) {
+
+				####################
+				# Child here.
+				####################
+
+#slashdLog("Child $$ [$me]: sleep for 2 seconds after fork()");
+				# In doLogPid we set a handler for these that
+				# deletes the slashd.pid file;  children
+				# don't have the right to do that.
+				$SIG{TERM} = $SIG{INT} = 'DEFAULT';
+				# Children may use system(), backticks, or
+				# open() pipes, all of which end up invoking
+				# CHLD handlers.  Don't call the parent's
+				# CHLD handler -- whatever it may be, it's
+				# inappropriate for the child.  The default
+				# action for SIGCHLD is to ignore it.
+				$SIG{CHLD} = 'DEFAULT';
+
+				$pids{$$} = {
+					taskname => $basename,
+					forktype => $forktype
+				};
+				tie *STDERR, 'Slash::Tie::STDERR'
+					if $forktype == SLASHD_NOWAIT;
+				# Give the parent a chance to get into its
+				# REAPER loop.  This shouldn't be necessary
+				# now that the parent is not using $SIG{CHLD}
+				# to handle reaping child processes, but it
+				# still isn't a bad idea.
+				sleep 2;
+				slashdLog("$basename begin ($$)")
+					if verbosity() >= 2;
+#slashdLog("Child $$: slept for 2 seconds after fork()");
 				$summary = $subref->($virtual_user,
 					$constants, $slashdb, $user);
+				my $end_time = Time::HiRes::time;
+				my $duration = sprintf("%.2f", $end_time - $start_time);
+
+				# If desired, log that it's done (to disk logfile and
+				# into the DB).
+				$summary = "" if !$summary;
+				$summary =~ s/\s+/ /g; chomp $summary;
+				$summary = ": $summary" if $summary;
+				end_log($basename, $duration, $summary, $forktype);
+				(my $summary_trim = $summary) =~ s/^:\s*//;
+				$slashdb->setSlashdStatus($basename_nopl, {
+					-last_completed	=> "NOW()",
+					summary		=> $summary_trim,
+					duration	=> $duration,
+					in_progress	=> 0,
+				});
+#slashdLog("Child $$ exits here");
+				# Child must not drop out of this "if".
+				exit;
+
+			} elsif ($!{EAGAIN}) {
+				# Recoverable fork error.
+				sleep 1;
+				redo FORK;
 			} else {
-				$pids{$pid} = [$basename, $fork];
-
-				if ($fork == SLASHD_NOWAIT) {
-					# log when next task is running
-					end_log($basename, 0, 0, $event_ary,
-						SLASHD_LOG_NEXT_TASK);
-slashdLog("Sleep for 2 seconds after fork()");
-					sleep 2;
-slashdLog("Slept for 2 seconds after fork()");
-				} elsif ($fork == SLASHD_WAIT) {
-					# wait for REAPER
-slashdLog("Sleep and wait after fork()");
-					sleep 1 until $pids{$pid}[2];
-slashdLog("Slept and waited after fork()");
-					delete $pids{$pid};
-				} else {
-					slashdLog("unknown error in fork");
-					next;
-				}
-
-				# we need to do something to prevent
-				# a task from running if a copy is still
-				# running -- pudge
-				insert_task_event($event_ary, $cron,
-					$task_filename, 0);
-				next;
+				# "Weird fork error," says Camel3 p. 715.
+				slashdLog("Error: cannot fork '$me': $!");
+				next MAINLOOP;
 			}
-		} else {
-			local $me = $basename;
-			if (verbosity() >= 2) {
-				slashdLog("$basename begin");
-			}
-			$summary = $subref->($virtual_user,
-				$constants, $slashdb, $user);
 		}
 
-		my $end_time = Time::HiRes::time;
-		my $duration = sprintf("%.2f", $end_time - $start_time);
-
-		# The task we just executed will repeat eventually;  find
-		# out when and reinsert it into the event array.
-		insert_task_event($event_ary, $cron, $task_filename, 0)
-			unless defined $fork;
-
-		# If desired, log that it's done (and what the next is).
-		$summary = "" if !$summary;
-		$summary =~ s/\s+/ /g; chomp $summary;
-		$summary = ": $summary" if $summary;
-
-		end_log($basename, $duration, $summary, $event_ary, $fork);
-
-		(my $summary_trim = $summary) =~ s/^:\s*//;
-		$slashdb->setSlashdStatus($basename_nopl, {
-			-last_completed	=> "NOW()",
-			summary		=> $summary_trim,
-			duration	=> $duration,
-			in_progress	=> 0,
-		});
-
-slashdLog("exit here for forked processes ($$)");
-		exit if defined $fork;
 		# Sleep for at least a few seconds between tasks.
-slashdLog("Ending while(1) loop 1");
+#slashdLog("Ending MAINLOOP");
 		sleep 2;
-slashdLog("Ending while(1) loop 2");
 
 	}
 }
