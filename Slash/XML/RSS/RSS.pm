@@ -446,9 +446,13 @@ sub rss_item_description {
 		if ($self->{rdfitemdesc} != 1) {
 			if (length($desc) > $self->{rdfitemdesc}) {
 				$desc = substr($desc, 0, $self->{rdfitemdesc});
-				$desc =~ s/\S+$//;
+				$desc =~ s/[\w'-]+$//;  # don't trim in middle of word
+				if ($self->{rdfitemdesc_html}) {
+					$desc =~ s/<[^>]*$//;
+					$desc = balanceTags($desc);
+				}
+				$desc =~ s/\s+$//;
 				$desc .= '...';
-				$desc = balanceTags($desc) if $self->{rdfitemdesc_html};
 			}
 		}
 
