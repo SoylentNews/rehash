@@ -874,6 +874,7 @@ sub getModeratorCommentLog {
 	my $sth = $self->sqlSelectMany(
 		"comments.sid AS sid,
 		 comments.cid AS cid,
+		 comments.pid AS pid,
 		 comments.points AS score,
 		 users.uid AS uid,
 		 users.nickname AS nickname,
@@ -1902,6 +1903,7 @@ sub getCommentsByGeneric {
 	my $limit = " LIMIT $min, $num " if $num;
 	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
 		if $options->{limit_days};
+	$where_clause .= " AND cid >= $options->{cid_at_or_after} " if $options->{cid_at_or_after};
 	my $sort_field = $options->{sort_field} || "date";
 	my $sort_dir = $options->{sort_dir} || "DESC";
 
@@ -1936,8 +1938,11 @@ sub getCommentsBySubnetID {
 # fraction of a second, but this "OR" is a table scan.
 sub getCommentsByIPIDOrSubnetID {
 	my($self, $id, $num, $min, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $where = "(ipid='$id' OR subnetid='$id') ";
+	$where .= " AND cid >= $constants->{comments_forgetip_min_cid} " if $constants->{comments_forgetip_mincid};
 	return $self->getCommentsByGeneric(
-		"ipid='$id' OR subnetid='$id'", $num, $min, $options);
+               $where, $num, $min, $options);
 }
 
 
@@ -4563,57 +4568,65 @@ sub getPortalsCommon {
 ##################################################################
 # Heaps are not optimized for count; use main comments table
 sub countCommentsByGeneric {
-	my($self, $where_clause) = @_;
-	return $self->sqlCount('comments', $where_clause);
+	my($self, $where_clause, $options) = @_;
+	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
+		if $options->{limit_days};
+	return $self->sqlCount('comments', $where_clause, $options);
 }
 
 ##################################################################
 sub countCommentsBySid {
-	my($self, $sid) = @_;
+	my($self, $sid, $options) = @_;
 	return 0 if !$sid;
-	return $self->countCommentsByGeneric("sid=$sid");
+	return $self->countCommentsByGeneric("sid=$sid", $options);
 }
 
 ##################################################################
 sub countCommentsByUID {
-	my($self, $uid) = @_;
+	my($self, $uid, $options) = @_;
 	return 0 if !$uid;
-	return $self->countCommentsByGeneric("uid=$uid");
+	return $self->countCommentsByGeneric("uid=$uid", $options);
 }
 
 ##################################################################
 sub countCommentsBySubnetID {
-	my($self, $subnetid) = @_;
+	my($self, $subnetid, $options) = @_;
 	return 0 if !$subnetid;
-	return $self->countCommentsByGeneric("subnetid='$subnetid'");
+	return $self->countCommentsByGeneric("subnetid='$subnetid'", $options);
 }
 
 ##################################################################
 sub countCommentsByIPID {
-	my($self, $ipid) = @_;
+	my($self, $ipid, $options) = @_;
 	return 0 if !$ipid;
-	return $self->countCommentsByGeneric("ipid='$ipid'");
+	use Data::Dumper;
+	print STDERR ($options);
+	return $self->countCommentsByGeneric("ipid='$ipid'", $options);
 }
 
 ##################################################################
 sub countCommentsByIPIDOrSubnetID {
-	my($self, $id) = @_;
+	my($self, $id, $options) = @_;
 	return 0 if !$id;
-	return $self->countCommentsByGeneric("ipid='$id' OR subnetid='$id'");
+	my $ipid_cnt = $self->countCommentsByGeneric("ipid='$id'", $options);
+	return wantarray ? ($ipid_cnt, "ipid") : $ipid_cnt if $ipid_cnt;
+
+	my $subnet_cnt = $self->countCommentsByGeneric("subnetid='$id'", $options);
+	return wantarray ? ($subnet_cnt, "subnetid") : $subnet_cnt;
 }
 
 ##################################################################
 sub countCommentsBySidUID {
-	my($self, $sid, $uid) = @_;
+	my($self, $sid, $uid, $options) = @_;
 	return 0 if !$sid or !$uid;
-	return $self->countCommentsByGeneric("sid=$sid AND uid=$uid");
+	return $self->countCommentsByGeneric("sid=$sid AND uid=$uid", $options);
 }
 
 ##################################################################
 sub countCommentsBySidPid {
-	my($self, $sid, $pid) = @_;
+	my($self, $sid, $pid, $options) = @_;
 	return 0 if !$sid or !$pid;
-	return $self->countCommentsByGeneric("sid=$sid AND pid=$pid");
+	return $self->countCommentsByGeneric("sid=$sid AND pid=$pid", $options);
 }
 
 ##################################################################
@@ -5598,11 +5611,30 @@ sub getSubmissionsByNetID {
 	}
 
 	my $answer = $self->sqlSelectAllHashrefArray(
-		'uid,name,subid,subj,time',
+		'uid,name,subid,ipid,subj,time,del',
 		'submissions', $where,
 		"ORDER BY time DESC $limit");
 
 	return $answer;
+}
+
+########################################################
+sub getSubmissionsByUID {
+        my($self, $id, $limit) = @_;
+	$limit=" LIMIT $limit " if $limit;
+	my $answer = $self->sqlSelectAllHashrefArray(
+		'uid,name,subid,ipid,subj,time,del',
+		'submissions', "uid=$id",
+		"ORDER BY time DESC $limit");
+	return $answer;
+}
+
+########################################################
+sub countSubmissionsByUID {
+	my($self, $id) = @_;
+
+	my $count = $self->sqlCount('submissions', "uid='$id'");
+	return $count;
 }
 
 ########################################################
