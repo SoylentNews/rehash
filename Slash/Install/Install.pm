@@ -289,16 +289,14 @@ sub _install {
 			# I hope no one tries to embed spaces in their
 			# theme/plugin... heh!
 			# Yes, this should actually be specific, and not
-			# take shorcuts.  What is it trying to do? -- pudge
+			# take shortcuts.  What is it trying to do? -- pudge
 			my($oldfilename, $dir) = split;
 			my $filename = $oldfilename;
 			$filename =~ s/^.*\/(.*)$/$1/;
 			$dir =~ s/\s*$// if $dir;
 			# Allow third parameter as relative directory
 			# for 'htdoc=' or 'image=' lines.
-			if ($dir &&
-			    ($section eq 'htdoc' || $section eq 'image'))
-			{
+			if ($dir && $section =~ /^(htdoc|image)$/) {
 				if ($dir !~ m{^topics/}) {
 					$dir =~ s{^([^/])}{/$1};
 					$dir =~ s{/$}{};
