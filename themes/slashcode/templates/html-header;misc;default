@@ -17,7 +17,7 @@ __template__
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML><HEAD><TITLE>[% title | strip_notags %]</TITLE>
 [% IF meta_desc %]
-<META NAME="DESCRIPTION" CONTENT="[% meta_desc %]">
+<META NAME="DESCRIPTION" CONTENT="[% meta_desc | strip_attribute %]">
 [% END %]
 __seclev__
 10000
