@@ -556,7 +556,7 @@ sub createDiscussion {
 	my $label = getData('label');
 
 	if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
-		# if form.url is empty, try the REFERER.  if it
+		# if form.url is empty, try the referrer.  if it
 		# matches comments.pl without any query string,
 		# then (later, down below) set url to point to discussion
 		# itself.
@@ -595,7 +595,7 @@ sub createDiscussion {
 				type	=> "recycle"
 			});
 
-			# fix URL to point to discussion if no referer
+			# fix URL to point to discussion if no referrer
 			if (!$form->{url}) {
 				$newurl = $constants->{rootdir} . "/comments.pl?sid=$id";
 				$slashdb->setDiscussion($id, { url => $newurl });
