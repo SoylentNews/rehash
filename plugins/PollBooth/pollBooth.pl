@@ -150,7 +150,7 @@ sub savepoll {
 			$discussion = $slashdb->createDiscussion({
 				title	=> $form->{question},
 				topic	=> $form->{topic},
-				url	=> "$constants->{rootdir}/pollBooth.pl?op=vote&qid=$qid",
+				url	=> "$constants->{rootdir}/pollBooth.pl?qid=$qid&aid=-1",
 			});
 		}
 		# if it already has a discussion (so $discussion is not set),
