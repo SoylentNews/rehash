@@ -1249,3 +1249,4 @@ ALTER TABLE users_info ADD people_status ENUM ("ok","dirty") DEFAULT "ok" NOT NU
 ALTER TABLE users_info ADD index people_status(people_status);
 DROP TABLE  people_nthdegree;
 ALTER TABLE people DROP last_update;
+ALTER TABLE accesslog ADD status mediumint UNSIGNED DEFAULT 200 NOT NULL;

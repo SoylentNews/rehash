@@ -90,6 +90,7 @@ CREATE TABLE accesslog_admin (
 	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
 	form MEDIUMBLOB NOT NULL,
 	secure tinyint DEFAULT 0 NOT NULL,
+	status mediumint UNSIGNED DEFAULT 200 NOT NULL,
 	INDEX host_addr (host_addr),
 	INDEX ts (ts),
 	PRIMARY KEY (id)
