@@ -257,7 +257,7 @@ sub intervalString {
 sub formkeyHandler {
 	# ok, I know we don't like refs, but I don't wanna rewrite the 
 	# whole damned system
-	my ($formkey_op, $formname, $formkey, $message_ref) = @_;
+	my($formkey_op, $formname, $formkey, $message_ref) = @_;
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();

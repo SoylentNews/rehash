@@ -357,7 +357,7 @@ sub userdir_handler {
 		my $slashdb = getCurrentDB();
 		my $uid = $slashdb->getUserUID($nick);
 		$nick = fixparam($nick);	# make safe to pass back to script
-		
+
 		# maybe we should refactor this code a bit ...
 		# have a hash that points op to args and script name -- pudge
 		# e.g.:
@@ -373,7 +373,7 @@ sub userdir_handler {
 			$r->args("op=no_user");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
-			return OK;
+
 		} elsif ($op eq 'journal') {
 			$r->args("op=display&nick=$nick&uid=$uid");
 			$r->uri('/journal.pl');
@@ -423,8 +423,8 @@ sub userdir_handler {
 			$r->args("nick=$nick&uid=$uid");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
-
 		}
+
 		return OK;
 	}
 

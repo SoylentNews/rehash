@@ -513,7 +513,7 @@ sub showSubmissions {
 	my($uid, $nickname);
 
 	if ($form->{uid} or $form->{nick}) {
-		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$uid		= $form->{uid} || $slashdb->getUserUID($form->{nick});
 		$nickname	= $slashdb->getUser($uid, 'nickname');
 	} else {
 		$nickname	= $user->{nickname};
@@ -546,7 +546,7 @@ sub showComments {
 	my($uid, $nickname);
 
 	if ($form->{uid} or $form->{nick}) {
-		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$uid		= $form->{uid} || $slashdb->getUserUID($form->{nick});
 		$nickname	= $slashdb->getUser($uid, 'nickname');
 	} else {
 		$nickname	= $user->{nickname};
@@ -669,7 +669,7 @@ sub showInfo {
 		}
 
 	} elsif ($user->{is_admin}) {
-		$id ||= $form->{userfield} ? $form->{userfield} : $user->{uid};
+		$id ||= $form->{userfield} || $user->{uid};
 		if ($id =~ /^\d+$/) {
 			$fieldkey = 'uid';
 			$requested_user = $slashdb->getUser($id);
@@ -1275,24 +1275,21 @@ sub editComm {
 		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
 
 	my %reason_select;
-	my @range;
-	for(-6..6) {
-		push @range, $_;
-	}
+	my @range = (-6 .. 6);
 	for (@reasons) {
 		my $key = "reason_alter_$_";
 		$reason_select{$_} = createSelect($key, \@range, 
-																			($user_edit->{$key} ? $user_edit->{$key} : 0), 
-																			1,1);
+			$user_edit->{$key} || 0, 1, 1
+		);
 	}
 
 	my %people_select;
-	my @people =  qw| friend foe anonymous|;
+	my @people =  qw(friend foe anonymous);
 	for (@people) {
 		my $key = "people_bonus_$_";
 		$people_select{$_} = createSelect($key, \@range, 
-																			($user_edit->{$key} ? $user_edit->{$key} : 0), 
-																			1,1);
+			$user_edit->{$key} || 0, 1, 1
+		);
 	}
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
@@ -1346,9 +1343,9 @@ sub editComm {
 		uthreshold_select	=> $uthreshold_select,
 		posttype_select		=> $posttype_select,
 		reasons			=> \@reasons,
-		reason_select			=> \%reason_select,
+		reason_select		=> \%reason_select,
 		people			=> \@people,
-		people_select			=> \%people_select,
+		people_select		=> \%people_select,
 	});
 }
 
@@ -1478,7 +1475,7 @@ sub savePasswd {
 	my $user_edits_table = {};
 
 	if ($user->{is_admin}) {
-		$uid = $form->{uid} ? $form->{uid} : $user->{uid};
+		$uid = $form->{uid} || $user->{uid};
 	} else {
 		$uid = ($user->{uid} == $form->{uid}) ? $form->{uid} : $user->{uid};
 	}
@@ -1663,7 +1660,7 @@ sub saveComm {
 	my($uid, $user_fakeemail);
 
 	if ($user->{is_admin}) {
-		$uid = $form->{uid} ? $form->{uid} : $user->{uid};
+		$uid = $form->{uid} || $user->{uid};
 	} else {
 		$uid = ($user->{uid} == $form->{uid}) ?
 			$form->{uid} : $user->{uid};
@@ -1724,8 +1721,7 @@ sub saveComm {
 
 	for (@reasons) {
 		my $answer = $form->{"reason_alter_$_"};
-		$answer  = 0
-			if $answer !~ /^[\-+]?\d+$/;
+		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
 # I need to change this to be so that the score
 # would never be great then Max + their
 # score just to make it look pretty.
@@ -1742,8 +1738,7 @@ sub saveComm {
 
 	for (qw| friend foe anonymous |) {
 		my $answer = $form->{"people_bonus_$_"};
-		$answer  = 0
-			if $answer !~ /^[\-+]?\d+$/;
+		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
 # I need to change this to be so that the score
 # would never be great then Max + their
 # score just to make it look pretty.
@@ -1773,7 +1768,7 @@ sub saveHome {
 	my($extid, $exaid, $exsect) = '';
 
 	if ($user->{is_admin}) {
-		$uid = $form->{uid} ? $form->{uid} : $user->{uid} ;
+		$uid = $form->{uid} || $user->{uid} ;
 	} else {
 		$uid = ($user->{uid} == $form->{uid}) ?
 			$form->{uid} : $user->{uid};

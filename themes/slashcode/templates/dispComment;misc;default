@@ -45,8 +45,8 @@ __template__
 [% IF homepage && homepage.length > 8 %] | <A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
 [% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
 <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
-</FONT>
 [% END %]
+</FONT>
 [% END %]
 [% UNLESS user.is_anon || is_anon || uid == user.uid %]
 &nbsp;&nbsp; 

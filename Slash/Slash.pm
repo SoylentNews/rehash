@@ -86,7 +86,7 @@ sub selectComments {
 		$cid, 
 		$cache_read_only
 	);
-	
+
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# is in the index of the hash (based on its cid).
