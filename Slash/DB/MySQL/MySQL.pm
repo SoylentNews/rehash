@@ -924,7 +924,9 @@ sub getModeratorCommentLog {
 		 moderatorlog.val AS val,
 		 moderatorlog.reason AS reason,
 		 moderatorlog.ts AS ts,
-		 moderatorlog.active AS active
+		 moderatorlog.active AS active,
+		 moderatorlog.m2status AS m2status,
+		 moderatorlog.id AS id
 		 $select_extra",
 		"moderatorlog, users, comments",
 		"$where_clause
@@ -932,11 +934,35 @@ sub getModeratorCommentLog {
 		 $time_clause",
 		"ORDER BY ts $asc_desc $limit"
 	);
-	my(@comments, $comment);
-	push @comments, $comment while ($comment = $sth->fetchrow_hashref);
+	my(@comments, $comment,@ml_ids);
+	while($comment = $sth->fetchrow_hashref){
+		push @ml_ids, $comment->{id};
+		push @comments, $comment;
+	}
 	$self->_querylog_finish($qlid);
-
+	my $m2_fair = $self->getMetamodCountsForModsByType("fair",\@ml_ids);
+	my $m2_unfair = $self->getMetamodCountsForModsByType("unfair",\@ml_ids);
+	foreach my $c(@comments){
+		$c->{m2fair} =   $m2_fair->{$c->{id}}->{count} || 0;
+		$c->{m2unfair} = $m2_unfair->{$c->{id}}->{count} || 0;
+	}
 	return \@comments;
+}
+
+sub getMetamodCountsForModsByType {
+	my ($self, $type, $ids) = @_;
+	my $id_str = join ',', @$ids;
+	return {} unless @$ids;
+	my ($cols,$where);
+	$cols = "mmid, count(*) as count";
+	$where = "mmid in ($id_str)";
+	if($type eq "fair"){
+		$where .= " AND val > 0 ";
+	} elsif($type eq "unfair"){
+		$where .= " AND val < 0 ";
+	}
+ 	my $modcounts = $self->sqlSelectAllHashref('mmid', $cols ,'metamodlog', $where, 'group by mmid');
+	return $modcounts;	
 }
 
 ########################################################
@@ -6268,11 +6294,11 @@ sub getSlashConf {
 		# --------			# -------------------
 						# See <http://www.iana.org/assignments/uri-schemes>
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
-		approvedtags =>			[qw( B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV ECODE )],
-		approvedtags_break =>		[qw( P LI OL UL BR BLOCKQUOTE DIV HR )],
+		approvedtags =>			[qw( B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV ECODE DL DT DD)],
+		approvedtags_break =>		[qw( P LI OL UL BR BLOCKQUOTE DIV HR DL DT DD)],
 		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
-		lonetags =>			[qw( P LI BR IMG )],
+		lonetags =>			[qw( P LI BR IMG DT DD)],
 		fixhrefs =>			[ ],
 		lonetags =>			[ ],
 		op_exclude_from_countdaily =>   [qw( rss )],
@@ -6746,12 +6772,43 @@ sub getStory {
 	# just set the value to expire at a particular time because (1) that
 	# would involve converting the story's timestamp to unix epoch, and
 	# (2) we can't expire individual stories, we'd have to expire the
-	# whole story cache, and that would not be good for performance.
+	# whole story cache, and that would not be good for performance.	
 	if ($self->{$table_cache}{$id}{is_future}) {
 		delete $self->{$table_cache}{$id};
 	}
 	# Now return what we need to return.
 	return $retval;
+}
+########################################################
+sub setCommonStoryWords {
+	my ($self) = @_;
+	my $form      = getCurrentForm();
+	my $constants = getCurrentStatic();
+	my $words;
+	
+	if (ref($form->{_multi}{set_common_word}) eq 'ARRAY') {
+		$words = $form->{_multi}{set_common_word};
+	} elsif ($form->{set_common_word}) {
+		$words = $form->{set_common_word};
+	}
+	if($words){
+		my %common_words = map { $_ => 1 } split " ", ($self->getVar('common_story_words', 'value', 1) || "");
+
+		if(ref $words eq "ARRAY"){
+			$common_words{$_} = 1 foreach @$words;
+		} else {
+			$common_words{$words} = 1;
+		}
+
+		# assuming our storage limits are the same as for uncommon words
+		my $maxlen = $constants->{uncommonstorywords_maxlen} || 65000; 
+		
+		my $common_words = substr(join(" ", keys %common_words), 0, $maxlen);
+		if (length($common_words) == $maxlen) {
+			$common_words =~ s/\s+\S+\Z//;
+		}
+		$self->setVar("common_story_words", $common_words);
+	}
 }
 
 ########################################################
@@ -6780,6 +6837,9 @@ sub getSimilarStories {
 	# need to concern ourselves with looking for).
 	my @recent_uncommon_words = split " ",
 		($self->getVar("uncommonstorywords", "value") || "");
+	my %common_words = map { $_ => 1 } split " ", ($self->getVar("common_story_words", "value", 1) || "");
+	@recent_uncommon_words = grep {!$common_words{$_}} @recent_uncommon_words;
+	
 	# If we don't (yet) know the list of uncommon words, return now.
 	return [ ] unless @recent_uncommon_words;
 	# Find the intersection of this story and recent stories.
