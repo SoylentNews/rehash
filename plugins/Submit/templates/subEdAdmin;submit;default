@@ -59,6 +59,7 @@ __template__
 
 <P>
 
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="Update">
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="Delete">
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="Merge">
 

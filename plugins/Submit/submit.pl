@@ -78,6 +78,10 @@ sub main {
 			seclev		=> $constants->{submiss_view} ? 0 : 100,
 			function	=> \&previewForm,
 		},
+		update		=> {
+			seclev		=> 100,
+			function	=> \&updateSubmissions,
+		},
 		delete		=> {
 			seclev		=> 100,
 			function	=> \&deleteSubmissions,
@@ -130,6 +134,14 @@ sub main {
 	}
 
 	footer();
+}
+
+#################################################################
+# update the notes and sections fields but don't delete anything.
+sub updateSubmissions {
+	my($constants, $slashdb, $user, $form) = @_;
+	$slashdb->deleteSubmission(0, 1);
+	submissionEd(@_);
 }
 
 #################################################################
