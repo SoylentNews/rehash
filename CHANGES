@@ -1,4 +1,4 @@
-slash-1.0.9, 2000.09.xx
+slash-1.0.9, 2000.09.30
 -----------------------
 
 *	Slash now counts the number of times a user is moderated
@@ -16,6 +16,9 @@ slash-1.0.9, 2000.09.xx
 
 *	Change passwd text in users.pl from 20 max chars to 12
 
+* 	Removed default admin users from default db dump, which can be
+	now created with a new script in sql/adminuser_create.pl (due 
+	to hack on slashdot)
 
 slash-1.0.8, 2000.08.18
 -----------------------
@@ -1066,3 +1069,4 @@ slash-0.9.1, 2000.01.28
 		Run mysqld in GMT
 
 *	Added INSTALL.debian (Bernard)
+

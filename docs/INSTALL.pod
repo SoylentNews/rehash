@@ -520,12 +520,18 @@ start>).
 
 Log into the server administration.
 
+Run the script C<sql/adminuser_create.pl>. This
+will create the default admin user account that you will use
+to log in. This script will ask you the name you want to use
+as your site's admin user, and then ask you a password to use
+for this user. Use a good password, you don't want it to be 
+something guessable. 
+
 	http://whateveryoursiteiscalled.com/admin.pl
 
-The admin user/password is God/pete (you'll need to change this).
-
-This page allows you to approve submissions to be run as stories, add
-new stories, edit stories, edit the blocks of html, code, and
+This page allows you to edit your admin user accounts settings,
+create new admin users, approve submissions to be run as stories, 
+add new stories, edit stories, edit the blocks of html, code, and
 variables that control the look and feel of the site.
 
 The system has 7 users:

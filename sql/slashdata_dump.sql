@@ -11,11 +11,7 @@
 #
 # Dumping data for table 'authors'
 #
-
-INSERT INTO authors VALUES ('author2','test author 2','http://www.example.com','author2@example.com','test quote','test copy','change',10000,'','',0,'author2');
-INSERT INTO authors VALUES ('author1','test author','http://www.example.com','author1@example.com','test quote','test copy','change',10000,'','',0,'author1');
-INSERT INTO authors VALUES ('God','God','mailto:god@god.gov','god@god.gov','','','pete',10000,'','',0,'god');
-INSERT INTO authors VALUES ('','All Authors',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL);
+# use adminuser_create.pl to create this set of data for your site
 
 #
 # Dumping data for table 'blocks'
