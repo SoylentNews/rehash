@@ -556,6 +556,7 @@ sub _getList {
 
 		for (@info) {
 			next if /^#/;
+			next if /^\s*$/;
 			my($key, $val) = split(/=/, $_, 2);
 			$key = lc $key;
 			if ($key =~ /^(
