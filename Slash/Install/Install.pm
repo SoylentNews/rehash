@@ -345,16 +345,18 @@ sub _install {
 		for (@{$hash->{'template'}}) {
 			my $id;
 			my $template = $self->readTemplateFile("$hash->{'dir'}/$_");
+			if (!$template) {
+			    warn "Template file $hash->{'dir'}/$_ could not be opened: $!\n";
+			    next;
+			}
 			my $key = "$template->{name};$template->{page};$template->{section}";
 			if ($hash->{'no-template'} && ref($hash->{'no-template'}) eq 'ARRAY') {
 				next if (grep { $key eq $_ }  @{$hash->{'no-template'}} );
 			}
-			if ($template and ($id = $self->{slashdb}->existsTemplate($template))) {
+			if ($id = $self->{slashdb}->existsTemplate($template)) {
 				$self->{slashdb}->setTemplate($id, $template);
-			} elsif ($template) {
-				$self->{slashdb}->createTemplate($template);
 			} else {
-				warn "Can't open template file $_: $!";
+				$self->{slashdb}->createTemplate($template);
 			}
 		}
 	}
