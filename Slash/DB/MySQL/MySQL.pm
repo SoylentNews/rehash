@@ -2862,7 +2862,8 @@ sub setAccessList {
 	my $constants = getCurrentStatic();
 	my $rows;
 
-	my $where = "/* setAccessList $column WHERE clause */";
+	my $where = "";
+#	$where .= "/* setAccessList $column WHERE clause */ ";
 
 	if ($user_check) {
 		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
