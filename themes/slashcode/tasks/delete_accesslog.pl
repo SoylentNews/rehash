@@ -30,7 +30,8 @@ $task{$me}{code} = sub {
 	label:
 	while ($rows = $logdb->sqlDo("DELETE FROM accesslog WHERE id < $id LIMIT 100000")) {
 		$total += $rows;
-		slashdLog("delete_accesslog: Deleted thus far " ($total/100000) . " x 10^5 rows " . localtime());
+		my $div = $total/100000;
+		slashdLog("delete_accesslog: Deleted thus far $div x 10^5 rows " . localtime());
 		last if $rows eq "0E0";
 	}
 
