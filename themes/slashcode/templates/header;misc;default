@@ -57,11 +57,15 @@ in this block -->
 &nbsp;
 
 <TABLE WIDTH="99%" ALIGN="CENTER" CELLPADDING="0" CELLSPACING="0" BORDER="0">
-	<TR><TD VALIGN="TOP" ROWSPAN="5" WIDTH="100">
+[% PROCESS maintable_tr %]
+[% PROCESS maintable_td valign="TOP" rowspan="5" width="100" %]
 		[% text = INCLUDE mainmenu; Slash.fancybox('120', "Navigation", text, '', 1) %]
 		<br>
 		[% text = INCLUDE organisation; Slash.fancybox('120', constants.sitename, text, '', 1) %]
-	</TD><TD>&nbsp;</TD><TD VALIGN="TOP" ALIGN="LEFT" WIDTH="100%"><FONT COLOR="[% user.fg.1 %]">
+	</TD>
+	[% PROCESS maintable_td %]&nbsp;</TD>
+	[% PROCESS maintable_td valign="TOP" align="LEFT" width="100%" %]
+<FONT COLOR="[% user.fg.1 %]">
 [% IF user.is_admin %]
 	<P>[% Slash.createMenu(adminmenu) %]</P>
 [% END %]

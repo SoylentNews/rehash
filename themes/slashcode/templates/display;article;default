@@ -33,7 +33,10 @@ IF form.refresh %]
 [% p = BLOCK; PROCESS nextStory s=prev; END %]
 [% IF p %] &lt;&nbsp; [% p %][% END %]
 [% IF n %] [% IF p %] | [% END %][% n %] &nbsp;&gt; [% END %]
-<P>&nbsp;</TD><TD>&nbsp;</TD><TD WIDTH="[% constants.fancyboxwidth + 10 %]" ALIGN="RIGHT" VALIGN="TOP">
+<P>&nbsp;</TD>
+
+[% PROCESS maintable_td %]&nbsp;</TD>
+[% PROCESS maintable_td width=(constants.fancyboxwidth + 10) align="RIGHT" valign="TOP" %]
 
 [% PROCESS userboxes;
 
@@ -58,7 +61,10 @@ IF section_block.block;
 		center		= 1;
 END %]
 
-</TD></TR><TR><TD COLSPAN="4">
+</TD></TR>
+
+[% PROCESS maintable_tr %]
+[% PROCESS maintable_td colspan="4" %]
 
 [% BLOCK nextStory;
 	IF !s;

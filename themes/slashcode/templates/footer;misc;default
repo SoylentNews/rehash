@@ -15,7 +15,11 @@ footer
 __template__
 [% USE Slash %]
 
-</TD></TR></TABLE><P>
+</TD>
+
+[% PROCESS maintable_end %]
+
+<P>
 
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	<TR BGCOLOR="[% user.bg.3 %]">
