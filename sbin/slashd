@@ -759,7 +759,7 @@ sub do_child {
 		-last_completed	=> "NOW()",
 		summary		=> $summary_trim,
 		duration	=> $duration,
-		-in_progress	=> 'in_progress-1',
+		-in_progress	=> 'GREATEST(in_progress-1, 0)',
 	});
 
 	if (verbosity() >= 4) {
