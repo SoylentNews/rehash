@@ -101,24 +101,26 @@ EOT
 
 	my $sections =  $slashdb->getSections();
 	for my $section (keys %$sections) {
+		my $index = $constants->{defaultsection} eq $section ? 1 : 0;
 		my $temp = {};
 		$temp->{section_name} = $section;
-		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section });
-		my $pages = $stats->countDailyByPage('' ,$yesterday, { section => $section });
-		my $bytes = $stats->countBytesByPage('' ,$yesterday, { section => $section });
-		my $users = $stats->countUsersByPage('' ,$yesterday, { section => $section });
+		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section, 'index' => $index  });
+		my $pages = $stats->countDailyByPage('' ,$yesterday, { section => $section, 'index' => $index  });
+		my $bytes = $stats->countBytesByPage('' ,$yesterday, { section => $section, 'index' => $index  });
+		my $users = $stats->countUsersByPage('' ,$yesterday, { section => $section, 'index' => $index  });
 		$temp->{ipids}  = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
 		$temp->{users} = sprintf("%8d", $users);
 		$statsSave->createStatDaily($yesterday, "section_${section}_ipids", $uniq);
-		$statsSave->createStatDaily($yesterday, "section_${section}_bytes", $$bytes);
+		$statsSave->createStatDaily($yesterday, "section_${section}_bytes", $bytes);
 		$statsSave->createStatDaily($yesterday, "section_${section}_page", $pages);
+
 		for (qw| article search comments palm journal rss|) {
-			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section });
-			my $pages = $stats->countDailyByPage($_ ,$yesterday, { section => $section });
-			my $bytes = $stats->countBytesByPage($_ ,$yesterday, { section => $section });
-			my $users = $stats->countUsersByPage($_ ,$yesterday, { section => $section });
+			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section, 'index' => $index  });
+			my $pages = $stats->countDailyByPage($_ ,$yesterday, { section => $section, 'index' => $index  });
+			my $bytes = $stats->countBytesByPage($_ ,$yesterday, { section => $section, 'index' => $index  });
+			my $users = $stats->countUsersByPage($_ ,$yesterday, { section => $section, 'index' => $index  });
 			$temp->{$_}{ipids}  = sprintf("%8d", $uniq);
 			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
