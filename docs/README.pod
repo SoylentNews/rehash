@@ -192,7 +192,7 @@ http://sf.net/projects/slashcode/
 The information below applies to everything in this distribution,
 except where noted.
 
-Copyright 1997-2003 by Open Source Development Network.
+Copyright 1997-2004 by Open Source Development Network.
 
 	http://www.osdn.com/
 

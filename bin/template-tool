@@ -2,7 +2,7 @@
 #	my($db_name, $db_page, $db_section) = split $;, $key;
 #
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2004 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -664,7 +664,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2004 by Open Source Development Network. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT
