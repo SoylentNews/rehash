@@ -790,6 +790,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_freq','86400','In second
 INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus_karma','12','Usually about half of goodkarma');
 INSERT INTO vars (name, value, description) VALUES ('m2_min_daysbackcushion','2','The minimum days-back cushion');
 INSERT INTO vars (name, value, description) VALUES ('m2_mintokens','0','The min M2 tokens');
+INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Additional multiplier for M2s performed on duplicate mods (leave 0 to disable)');
 INSERT INTO vars (name, value, description) VALUES ('m2_range_offset','0.9','Offset for M2 assignment ranges');
 INSERT INTO vars (name, value, description) VALUES ('m2_userpercentage','0.9','UID must be below this percentage of the total userbase to metamoderate');
 INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.com','All mail addressed from the site looks like it is coming from here');
