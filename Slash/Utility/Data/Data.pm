@@ -863,10 +863,10 @@ sub breakHtml {
 	my $break_tag = join '|', @$approvedtags_break;
 	$break_tag = qr{(?:$break_tag)}i;
 
-#	# This is the regex that finds a char that, at the start of
-#	# a word, will trigger Microsoft's bug.  It's already been
-#	# set up for us, it just needs a shorter name.
-#	my $nswcr = $constants->{comment_nonstartwordchars_regex};
+	# This is the regex that finds a char that, at the start of
+	# a word, will trigger Microsoft's bug.  It's already been
+	# set up for us, it just needs a shorter name.
+	my $nswcr = $constants->{comment_nonstartwordchars_regex};
 
 	# And we also need a regex that will find an HTML entity or
 	# character references, excluding ones that would break words:
@@ -897,6 +897,10 @@ sub breakHtml {
 		\s+		# first whitespace
 	}{$1\x00}gsx;		# and replace the space with NUL
 
+	# Put the <wbr> in front of attempts to exploit MSIE's
+	# half-braindead adherance to Unicode char breaking.
+	$text =~ s{$nswcr}{<nobr> <wbr></nobr>$2$3}gs;
+
 	# Break up overlong words, treating entities/character references
 	# as single characters and ignoring HTML tags.
 	$text =~ s{(
@@ -910,19 +914,12 @@ sub breakHtml {
 		){$mwl}			# $mwl non-HTML-tag chars in a row
 	)}{$1<nobr> <wbr></nobr>}gsx;
 
+	# Just to be tidy, if we appended that word break at the very end
+	# of the text, eliminate it.
+	$text =~ s{<nobr> <wbr></nobr>\s*$}{};
+
 	# Change the NULs back to whitespace.
 	$text =~ s{\x00}{ }g;
-
-#	# If one of our spaces landed before an IE bug character, drop in
-#	# an nbsp to work around the IE bug.  This mildly affects rendering
-#	# for non-IE readers (grumble), but prevents getting around the
-#	# filter by evenly spacing bug characters every $mwl characters.
-#	# This could be done less-intrusively (the nbsp doesn't need to
-#	# appear in every case, only when it's at exactly the boundary of
-#	# the mwl), but the algorithm would be too complicated to
-#	# implement in a regex, at least practically speaking, and
-#	# walking through the string is also fairly complex.
-#	$text =~ s{$nswcr}{$1&nbsp;$2$3}gs;
 
 	return $text;
 }

@@ -480,9 +480,7 @@ INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|
 # For plugins/Stats (ignore if you're not using that plugin):
 INSERT INTO vars (name, value, description) VALUES ('mod_stats','1','Include stats on moderation in the daily admin mail?');
 
-# SLASHDOT LAST UPDATED HERE
-
-# End of R_2_3_0_30
+# End of R_2_3_0_30, Start of T_2_3_0_31
 
 DROP TABLE IF EXISTS sections_contained;
 CREATE TABLE sections_contained (
@@ -501,5 +499,5 @@ ALTER TABLE sections ADD last_update timestamp;
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, 0);
 
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
 
-DELETE FROM vars WHERE name='comment_nonstartwordchars';
