@@ -672,6 +672,7 @@ sub submitComment {
 	# with other comment's pid
 	if ($I{F}{pid} >= $maxCid || $I{F}{pid} < 0) {
 		print "Don't you have anything better to do with your life?";
+		$I{dbh}->do("UNLOCK TABLES");
 		return;
 	}
 
