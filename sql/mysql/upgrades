@@ -2224,7 +2224,7 @@ CREATE TABLE open_proxies (
 
 # End of T_2_3_0_145, Start of T_2_3_0_146 - 2004/03/24
 
-# End of T_2_3_0_146, Start of T_2_3_0_147 - 2004/03/24
+# End of T_2_3_0_146, Start of T_2_3_0_147 - 2004/03/25
 
 UPDATE vars SET name='comments_portscan', description='Scan incoming IPs for open proxy ports? 0=never, 1=anon posting only, 2=all posting' WHERE name='comments_portscan_anon_for_proxy';
 
@@ -2247,9 +2247,9 @@ INSERT INTO vars (name, value, description) VALUES ('mailpasswd_portscan', '0', 
 
 INSERT INTO vars (name, value, description) VALUES ('newuser_portscan', '0', 'If true, when creating a new user account is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid account creation if successful');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 ALTER TABLE open_proxies ADD COLUMN xff VARCHAR(15) DEFAULT NULL;
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_147, Start of T_2_3_0_148 - 2004/03/30
 
