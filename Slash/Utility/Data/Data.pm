@@ -712,6 +712,21 @@ sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 
 #========================================================================
 
+=head2 strip_paramattr(STRING [, NO_WHITESPACE_FIX])
+
+=head2 strip_urlattr(STRING [, NO_WHITESPACE_FIX])
+
+Wrappers for strip_attribute(fixparam($param), $no_whitespace_fix) and
+strip_attribute(fudgeurl($url), $no_whitespace_fix).
+
+=cut
+
+sub strip_paramattr	{ strip_attribute(fixparam($_[0]), $_[1]) }
+sub strip_urlattr	{ strip_attribute(fudgeurl($_[0]), $_[1]) }
+
+
+#========================================================================
+
 =head2 stripBadHtml(STRING)
 
 Private function.  Strips out "bad" HTML by removing unbalanced HTML
