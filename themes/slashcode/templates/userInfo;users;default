@@ -90,10 +90,12 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 
 </TD>
 
+<TD>&nbsp;</TD>
+
 <TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
 </TR>
 
-<TR><TD VALIGN="TOP" COLSPAN="2">
+<TR><TD VALIGN="TOP" COLSPAN="4">
 
 [% IF commentcount > 0 %]
 	[% commenttitle =
