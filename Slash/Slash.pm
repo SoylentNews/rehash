@@ -81,7 +81,7 @@ sub selectComments {
 	# When we pull comment text from the DB, we only want to cache it if
 	# there's a good chance we'll use it again.
 	my $cache_read_only = 0;
-	$cache_read_only = 1 if $header->{writestatus} eq 'archived';
+	$cache_read_only = 1 if $header->{type} eq 'archived';
 	$cache_read_only = 1 if timeCalc($header->{ts}, '%s') <
 		time - 3600 * $constants->{comment_cache_max_hours};
 
