@@ -772,7 +772,7 @@ sub submitComment {
 	if($I{U}{uid} > 0 && !$I{F}{postanon} ) {
 		$pts = $I{U}{defaultpoints};
 		$pts-- if $I{U}{karma} < -10;
-		$pts++ if $I{U}{karma} > 25 and !$I{F}{nobonus}
+		$pts++ if $I{U}{karma} > 25 and !$I{F}{nobonus};
 		# Enforce proper ranges on comment points.
 		$pts = -1 if $pts < -1;
 		$pts = 5 if $pts > 5;
