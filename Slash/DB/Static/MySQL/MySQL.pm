@@ -1664,6 +1664,17 @@ sub countPollQuestion {
 }
 
 ########################################################
+
+sub setCurrentSectionPolls{
+        my($self)=@_;
+        my $section_polls=$self->sqlSelectAllHashrefArray("section,max(date) as date","pollquestions","date<=NOW() and polltype='section'","group by section"); 
+	foreach my $p(@$section_polls){
+                my $poll=$self->sqlSelectHashref("qid,section","pollquestions","section='$p->{section}' and date='$p->{date}'");
+                $self->setSection($poll->{section}, { qid => $poll->{qid} });
+        }
+}
+
+########################################################
 sub createSlashdStatus {
 	my($self, $taskname) = @_;
 	$self->sqlInsert(
