@@ -983,7 +983,7 @@ sub factorEligibleModerators {
 	}
 
 	# If the caller wanted to keep stats, prep some stats.
-	if ($info_hr && %$info_hr) {
+	if ($info_hr) {
 		$info_hr->{factor_lowest} = 1;
 		$info_hr->{factor_highest} = 1;
 	}
