@@ -84,14 +84,14 @@ sub href2SlashTag {
 					my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
 					my $href = strip_attribute($token->[1]->{href});
 					my $title = strip_attribute($token->[1]->{title});
-					$text =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
+					$text =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 				} else {
 					my $url = $self->get($token->[1]->{id}, 'url');
 					next if $url eq $token->[1]->{href};
 					my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
 					my $href = strip_attribute($token->[1]->{href});
 					my $title = strip_attribute($token->[1]->{title});
-					$text =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
+					$text =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 				}
 			# New links to convert!!!!
 			} else {
@@ -105,16 +105,9 @@ sub href2SlashTag {
 				my $data = $tokens->get_text("/a");
 				my $href = strip_attribute($token->[1]->{href});
 				my $title = strip_attribute($token->[1]->{title});
-				$text =~ s#$token->[3]$data</a>#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">$data</SLASH>#gis;
+				$text =~ s#\Q$token->[3]$data</a>\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">$data</SLASH>#is;
 			}
 		}
-		# Let's make sure someone hasn't updated
-#		while (my $token = $tokens->get_tag("slash")) {
-#			return unless $token->[1]->{href};
-#			my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
-#			my $data = $tokens->get_text("/a");
-#			$text =~ s#$token->[3]$data</a>#<SLASH href="$link" id="$link">$data</SLASH>#gis;
-#		}
 	}
 
 	return $text;

@@ -1337,7 +1337,7 @@ sub _cleanSlashUser {
 	$uid = strip_attribute($uid);
 	$nickname = strip_attribute($nickname);
 	my $content = qq|<slash nickname="$nickname" uid="$uid" type="user">|;
-	$$newtext =~ s#$token->[3]#$content#is;
+	$$newtext =~ s#\Q$token->[3]\E#$content#is;
 }
 
 sub _cleanSlashStory {
@@ -1359,9 +1359,9 @@ sub _cleanSlashStory {
 
 	my $content = qq|<SLASH STORY="$sid" TITLE="$title" TYPE="STORY">$text</SLASH>|;
 	if ($token->[1]{text}) {
-		$$newtext =~ s#$token->[3]#$content#is;
+		$$newtext =~ s#\Q$token->[3]\E#$content#is;
 	} else {
-		$$newtext =~ s#$token->[3]$text</SLASH>#$content#is;
+		$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 	}
 }
 
@@ -1373,13 +1373,13 @@ sub _cleanSlashLink {
 		my $link  = $relocateDB->create({ url => $token->[1]{href} });
 		my $href  = strip_attribute($token->[1]{href});
 		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
+		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 	} else {
 		my $url   = $relocateDB->get($token->[1]{id}, 'url');
 		my $link  = $relocateDB->create({ url => $token->[1]{href} });
 		my $href  = strip_attribute($token->[1]{href});
 		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
+		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 	}
 }
 
@@ -1404,7 +1404,7 @@ sub processSlashTags {
 		} else {
 			my $content = getData('SLASH-UNKNOWN-TAG', { tag => $token->[0] });
 			print STDERR "BAD TAG $token->[0]:$type\n";
-			$newtext =~ s/$token->[3]/$content/;
+			$newtext =~ s/\Q$token->[3]\E/$content/;
 		}
 	}
 
@@ -1432,7 +1432,7 @@ sub _slashImage {
 	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-IMAGE');
 
-	$$newtext =~ s/$token->[3]/$content/;
+	$$newtext =~ s/\Q$token->[3]\E/$content/;
 }
 
 sub _slashStory {
@@ -1447,7 +1447,7 @@ sub _slashStory {
 	});
 	$content ||= getData('SLASH-UKNOWN-STORY');
 
-	$$newtext =~ s#$token->[3]$text</SLASH>#$content#is;
+	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 }
 
 sub _slashUser {
@@ -1459,7 +1459,7 @@ sub _slashUser {
 	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-USER');
 
-	$$newtext =~ s/$token->[3]/$content/;
+	$$newtext =~ s/\Q$token->[3]\E/$content/;
 }
 
 sub _slashFile {
@@ -1471,7 +1471,7 @@ sub _slashFile {
 	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-FILE');
 
-	$$newtext =~ s/$token->[3]/$content/;
+	$$newtext =~ s/\Q$token->[3]\E/$content/;
 }
 
 sub _slashLink {
@@ -1489,7 +1489,7 @@ sub _slashLink {
 	}
 	$content ||= getData('SLASH-UKNOWN-LINK');
 
-	$$newtext =~ s#$token->[3]$text</SLASH>#$content#is;
+	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 }
 
 sub _slashPageBreak {
@@ -1535,7 +1535,7 @@ sub _slashSlash {
 		$content ||= getData('SLASH-UKNOWN-STORY');
 	} # More of these type can go here.
 
-	$$newtext =~ s#$token->[3]$data</SLASH>#$content#is;
+	$$newtext =~ s#\Q$token->[3]$data</SLASH>\E#$content#is;
 }
 
 1;

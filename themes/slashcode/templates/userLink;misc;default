@@ -15,7 +15,7 @@ en_US
 __name__
 userLink
 __template__
-<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% nickname | strip_literal %] ([% uid %])</A>
+<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]" TITLE="[% nickname |  strip_attribute %]">[% nickname | strip_literal %] ([% uid %])</A>
 [% IF !user.is_anon %][% PROCESS zoo_icons person=uid bonus=bonus %][% END %]
 __seclev__
 10000
