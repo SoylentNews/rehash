@@ -179,7 +179,7 @@ sub give_out_tokens {
 	my $stirredpoints = $slashdb->stirPool();
 	$num_tokens += $stirredpoints * $tokperpt;
 
-	if ($stirredpoints && my $statsSave = getObject('Slash::Stats::Writer')) {
+	if ($stirredpoints and my $statsSave = getObject('Slash::Stats::Writer')) {
 		$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
 		# Unfortunately, we reverse-engineer how many tokens
 		# were lost in the stirring.
