@@ -4601,7 +4601,7 @@ sub getSubmissionsByNetID {
 	}
 
         my $answer = $self->sqlSelectAllHashrefArray(
-                'subid,title,time',
+                'uid,name,subid,subj,time',
                 'submissions', $where,
 		"ORDER BY time DESC $limit");
 
