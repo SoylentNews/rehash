@@ -322,5 +322,5 @@ ALTER TABLE stories ADD last_update timestamp;
 # USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
-# End of T_2_3_0_23
+# End of R_2_3_0_23, Start of T_2_3_0_24
 
