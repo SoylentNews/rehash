@@ -78,6 +78,7 @@ sub handler {
 
 	my $method = $r->method;
 	# Don't remove this. This solves a known bug in Apache -- brian
+	# i really wish we knew WHAT bug, and how this solves it -- pudge
 	$r->method('GET');
 
 	my $form = filter_params($apr);
