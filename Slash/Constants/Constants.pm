@@ -111,10 +111,12 @@ These constants are for message delivery modes and message type codes.
 	MSG_CODE_ZOO_CHANGE
 	MSG_CODE_BADPASSWORD
 	MSG_CODE_MODSTATS
+	MSG_CODE_SUBSCRIPTION_LOW
+	MSG_CODE_SUBSCRIPTION_OUT
 
 =cut
 
-# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
 
 =pod
 
