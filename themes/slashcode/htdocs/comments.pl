@@ -716,13 +716,18 @@ sub submitComment {
 			-totalcomments => 'totalcomments+1',
 		});
 
-		my $messages = getObject('Slash::Messages') if $form->{pid};
-		if ($form->{pid} && $messages) {
+		my($messages, $reply, @users);
+		if ($form->{pid} || $discussion->{url} =~ /\bjournal\.pl\b/ || $constants->{commentnew_msg}) {
+			$messages = getObject('Slash::Messages');
+			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
+		}
+
+		# reply to comment
+		if ($messages && $form->{pid}) {
 			my $parent = $slashdb->getCommentReply($form->{sid}, $form->{pid});
 			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
 			if (@$users) {
-				my $reply	= $slashdb->getCommentReply($form->{sid}, $maxCid);
-				my $data    = {
+				my $data  = {
 					template_name	=> 'reply_msg',
 					subject		=> { template_name => 'reply_msg_subj' },
 					reply		=> $reply,
@@ -731,9 +736,44 @@ sub submitComment {
 				};
 
 				$messages->create($users->[0], MSG_CODE_COMMENT_REPLY, $data);
+				push @users, $users->[0];
+			}
+		}
+
+		# reply to journal
+		if ($messages && $discussion->{url} =~ /\bjournal\.pl\b/) {
+			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
+			if (@$users && !grep { $users->[0] == $_ } @users) {
+				my $data  = {
+					template_name	=> 'journal_reply_msg',
+					subject		=> { template_name => 'journal_reply_msg_subj' },
+					reply		=> $reply,
+					discussion	=> $discussion,
+				};
+
+				$messages->create($users->[0], MSG_CODE_JOURNAL_REPLY, $data);
+				push @users, $users->[0];
+			}
+		}
+
+		# comment posted
+		if ($messages && $constants->{commentnew_msg}) {
+			my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
+
+			for my $usera (@$users) {
+				next if grep { $usera == $_ } @users;
+				my $data  = {
+					template_name	=> 'commentnew',
+					subject		=> { template_name => 'commentnew_subj' },
+					reply		=> $reply,
+					discussion	=> $discussion,
+				};
+				$messages->create($usera, MSG_CODE_NEW_COMMENT, $data);
+				push @users, $usera;
 			}
 		}
 	}
+
 	return(1);
 }
 
