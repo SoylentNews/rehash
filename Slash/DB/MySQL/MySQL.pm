@@ -8192,6 +8192,7 @@ sub getTemplateByName {
 	}               
 
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	_genericCacheRefresh($self, 'templates', $constants->{block_expire});
 
 	my $table_cache      = '_templates_cache';
@@ -8214,7 +8215,8 @@ sub getTemplateByName {
 		$page ||= 'misc';
 	}
 	unless ($skin) {
-		$skin = getCurrentSkin('name');
+		$skin = "light" if $user->{light};
+		$skin ||= getCurrentSkin('name');
 		$skin ||= 'default';
 	}
 
