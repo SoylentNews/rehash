@@ -200,7 +200,6 @@ template=templates/topAbusers;users;default
 template=templates/listReadOnly;users;default
 template=templates/listBanned;users;default
 template=templates/three;misc;default
-
 misc=misc/spamarmors
 plugin=Admin
 plugin=Messages
@@ -208,3 +207,4 @@ plugin=Search
 plugin=Journal
 plugin=Hof
 plugin=PubKey
+plugin=Zoo

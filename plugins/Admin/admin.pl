@@ -667,6 +667,7 @@ sub topicEdit {
 
 	# this should be a preference at some point, image
 	# extensions ... -- pudge
+	# and case insensitive :)  -Brian
 	$available_images = { map { ($_, $_) } grep /\.(?:gif|jpe?g|png)$/, readdir DIR };
 
 	closedir(DIR);

@@ -4616,9 +4616,12 @@ sub setUser {
 		$self->sqlUpdate($table, \%minihash, 'uid=' . $uid, 1);
 	}
 	# What is worse, a select+update or a replace?
-	# I should look into that.
+	# I should look into that. (REPLACE is faster) -Brian
 	for (@param)  {
-		if ($_->[0] eq "acl") {
+		if ($_->[1] eq "") {
+			$self->sqlDelete('users_param', 
+				"uid = $uid AND name = " . $self->sqlQuote($_->[0]));
+		} elsif ($_->[0] eq "acl") {
 			$self->sqlReplace('users_acl', {
 				uid	=> $uid,
 				name	=> $_->[1]{name},

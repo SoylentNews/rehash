@@ -85,6 +85,7 @@ sub selectComments {
 		$cid, 
 		$cache_read_only
 	);
+
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# is in the index of the hash (based on its cid).
@@ -103,6 +104,12 @@ sub selectComments {
 
 		# If the user is AC and we think AC's suck
 		$C->{points} = -1 if ($user->{anon_comments} && isAnon($C->{uid}));
+
+		# Adjust reasons. Do we need a reason?
+		# Are you threatening me?
+		my $reason =  $constants->{reasons}[$C->{reason}];
+		$C->{points} = $user->{"reason_alter_$reason"} 
+				if ($user->{"reason_alter_$reason"});
 
 		# fix points in case they are out of bounds
 		$C->{points} = $min if $C->{points} < $min;

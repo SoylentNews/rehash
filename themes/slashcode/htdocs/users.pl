@@ -1111,9 +1111,14 @@ sub editComm {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 	my $user_edit = {};
 	my($formats, $commentmodes_select, $commentsort_select, $title,
 		$uthreshold_select, $highlightthresh_select, $posttype_select);
+
+	my @reasons = ( );
+	@reasons = @{$constants->{reasons}}
+		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
 
 	my $admin_block = '';
 	my $fieldkey;
@@ -1184,6 +1189,7 @@ sub editComm {
 		highlightthresh_select	=> $highlightthresh_select,
 		uthreshold_select	=> $uthreshold_select,
 		posttype_select		=> $posttype_select,
+		reasons		=> \@reasons,
 	});
 }
 
@@ -1494,6 +1500,7 @@ sub saveComm {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
 	my($uid, $user_fakeemail);
 
 	if ($user->{is_admin}) {
@@ -1548,6 +1555,23 @@ sub saveComm {
 		anon_comments	=> ($form->{anon_comments} ? 1 : 0),
 		sigdash		=> ($form->{sigdash} ? 1 : 0),
 	};
+
+	my($min, $max) = ($constants->{comment_minscore}, 
+			  $constants->{comment_maxscore});
+	my @reasons = ();
+	@reasons = @{$constants->{reasons}}
+		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
+
+	for (@reasons) {
+		my $answer = $form->{"reason_alter_$_"};
+		$answer  = 0
+			if $answer !~ /^\d+$/;
+		$answer  = $constants->{comment_minscore}
+			if $answer < $min;
+		$answer  = $constants->{comment_maxscore}
+			if $answer > $max;
+		$users_comments_table->{"reason_alter_$_"} = ($answer == 0) ? '' : $answer;
+	}
 
 	# Update users with the $users_comments_table hash ref
 	$slashdb->setUser($uid, $users_comments_table);

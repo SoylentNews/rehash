@@ -107,6 +107,23 @@ __template__
 		<P><B>Signature Dash</B> (Prefix everyone's signature with "--" to make
 		it blazingly obvious where comment ends and sig begins)
 		<INPUT TYPE="CHECKBOX" NAME="sigdash"[% d_check %]>
+		
+		<P><B>Reason Bonus</B> (assign a bonus to different moderation reasons)<br>
+		<TABLE>
+			[% FOREACH reason = reasons %]
+			<TR>
+			<TD>
+				&nbsp; &nbsp; &nbsp;
+			</TD>
+			<TD>
+				[% reason %]
+			</TD>
+			<TD>
+				[% key="reason_alter_$reason" %]<INPUT TYPE="TEXT" NAME="reason_alter_[% reason %]" SIZE="6" VALUE="[% IF user_edit.$key %][% user_edit.$key %][% ELSE %]0[% END %]"> 
+			</TD>
+			</TR>
+			[% END %]
+		</TABLE>
 
 		<P><B>Limit</B> only display this many comments.
 		For best results, set this to a low number and sort by score.<BR>

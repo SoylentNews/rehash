@@ -497,10 +497,24 @@ sub sqlUpdate {
 }
 
 ########################################################
+sub sqlDelete {
+	my($self, $table, $where) = @_;
+	return unless $table;
+	my $sql = "DELETE FROM $table";
+	$sql .= " WHERE $where\n"
+		if $where;
+	$self->sqlConnect();
+	my $rows = $self->sqlDo($sql);
+	# print STDERR "SQL: $sql\n";
+	return $rows;
+}
+
+########################################################
 sub sqlInsert {
 	my($self, $table, $data, $delayed) = @_;
 	my($names, $values);
 	# oddly enough, this hack seems to work for all DBs -- pudge
+	# Its an ANSI sql comment I believe -Brian
 	$delayed = $delayed ? " /*! DELAYED */" : "";
 
 	foreach (keys %$data) {
