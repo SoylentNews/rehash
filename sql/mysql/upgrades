@@ -950,7 +950,6 @@ UPDATE menus SET label=CONCAT('~', label, ' ([% user.uid %])') WHERE menu='users
 # End of T_2_3_0_52, Start of T_2_3_0_53
 
 # USEPERL LAST UPDATED HERE
-# SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE moderatorlog ADD COLUMN spent tinyint DEFAULT '1' NOT NULL AFTER active;
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_entity','zwnj|zwj|lrm|rlm','Entities that approveCharref should always delete');
@@ -982,3 +981,4 @@ UPDATE tzcodes SET tz = 'EET' WHERE tz = 'EEST';
 UPDATE users_prefs SET tzcode = 'WET' WHERE tzcode = 'WEST';
 UPDATE users_prefs SET tzcode = 'CET' WHERE tzcode = 'CEST';
 UPDATE users_prefs SET tzcode = 'EET' WHERE tzcode = 'EEST';
+# SLASHCODE LAST UPDATED HERE
