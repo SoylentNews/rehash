@@ -29,6 +29,7 @@ use XML::RSS;
 
 use Slash;
 use Slash::Utility;
+use Slash::Display;
 
 my $virtual_user = $ARGV[0];
 createEnvironment($ARGV[0]);
@@ -41,6 +42,12 @@ if ($constants->{backup_db_user}) {
 	$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
 } else {
 	$backupdb = $slashdb;
+}
+
+################################################################################
+# really tired of deleting the thing if portald pukes ;)
+sub END {
+    doLogExit('portald');
 }
 
 ################################################################################
@@ -136,8 +143,11 @@ sub getRDF {
 
 	my($bid, $url, $other) = @_;
 	my $rss = new XML::RSS;
+	my $template_name ||= $slashdb->getBlock($bid, 'rss_template');
+	# $template_name ||= $constants->{default_rss_template};
 
 	my $d = geturl($url);
+
 	if (!$d) {
 		portaldLog("failed to get $bid: $@");
 		return;
@@ -151,11 +161,16 @@ sub getRDF {
 		return;
 	} else {
 		my $str;
-		foreach my $item (@{$rss->{items}}) {
+		for my $item (@{$rss->{items}}) {
 			# hopefully this xmldecode() will break nothing
-			my($link, $title) = map { xmldecode($_) } @{$item}{'link', 'title'};
-			$str .= qq!<LI><A HREF="$link">$title</A></LI>\n!;
+
+			   # "<a href=\"[% item.link %]\">([% item.description %]) [% item.title %]</a>\n"; 
+			for(keys %{$item}) {
+			    $item->{$_} = xmldecode($item->{$_});
+			}
+			$str .= slashDisplay($template_name, { item => $item }, { Nocomm => 1, Return => 1, Page => 'portald' });
 		}
+
 		setblock($bid, "$str$other");
 		return 1;
 	}
@@ -214,7 +229,7 @@ for (@{$RDFlist}) {
 getTop10Comments();
 getSlashdotPoll();
 getUptime();
-setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
+# setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
 
 foreach (keys %savedBlocks) {
 	# NOT backupdb!

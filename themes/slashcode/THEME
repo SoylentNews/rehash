@@ -84,6 +84,7 @@ template=templates/data;pollBooth;default
 template=templates/data;sections;default
 template=templates/data;topics;default
 template=templates/data;users;default
+template=templates/default;portald;default
 template=templates/delSectCancel;sections;default
 template=templates/delSectConfirm;sections;default
 template=templates/delSection;sections;default

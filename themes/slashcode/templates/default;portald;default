@@ -1,0 +1,16 @@
+__section__
+default
+__description__
+default rss template for slash system
+__title__
+default rss template
+__page__
+portald
+__lang__
+en_US
+__name__
+default
+__template__
+<LI><A HREF="[% item.link %]">[% item.title %]</A></LI>
+__seclev__
+10000

@@ -90,11 +90,27 @@ __template__
 	</TR>
 	<TR>
 		<TD><B>URL</B></TD>
-		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="url" VALUE="[% blockref.url %]"></TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="url" VALUE="[% blockref.url %]"><BR></TD>
 	</TR>
 	<TR>
 		<TD><B>RDF</B></TD>
-		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE="[% blockref.rdf %]"></TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE="[% blockref.rdf %]"><BR></TD>
+	</TR>
+	<TR>
+		<TD><B>RSS Template</B></TD>
+		<TD COLSPAN="2">[% rss_select %]</TD>
+		
+	</TR>
+	<TR>
+		<TD>&nbsp;</TD>
+		<TD ALIGN="left" COLSPAN="2">
+		<TABLE BORDER="1">
+			<TR>
+				<TD><CODE> [% rss_template_code | strip_literal %] </CODE></TD>
+			</TR>
+		</TABLE>
+		<BR>
+		</TD>
 	</TR>
 
 	[% IF blockedit_flag %]

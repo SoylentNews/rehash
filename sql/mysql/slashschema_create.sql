@@ -113,6 +113,8 @@ CREATE TABLE blocks (
 	rdf varchar(255),
 	retrieve tinyint NOT NULL DEFAULT '0',
 	last_update timestamp,
+	rss_template varchar(30),
+	FOREIGN KEY (rss_template) REFERENCES templates(name),
 	PRIMARY KEY (bid),
 	KEY type (type),
 	KEY section (section)

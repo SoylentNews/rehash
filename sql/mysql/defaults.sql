@@ -382,6 +382,7 @@ INSERT INTO vars (name, value, description) VALUES ('defaultcommentstatus','0','
 INSERT INTO vars (name, value, description) VALUES ('defaultdisplaystatus','0','Default display status ...');
 INSERT INTO vars (name, value, description) VALUES ('defaultsection','articles','Default section to display');
 INSERT INTO vars (name, value, description) VALUES ('defaulttopic','1','Default topic to use');
+INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
 INSERT INTO vars (name, value, description) VALUES ('delete_old_stories', '0', 'Delete stories and discussions that are older than the archive delay.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_archive','15','Number of days till discussions are set to read only.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_create_seclev','1','Seclev required to create discussions (yes, this could be an ACL in the future).');
