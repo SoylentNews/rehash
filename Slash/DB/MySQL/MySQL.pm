@@ -4110,7 +4110,7 @@ sub getSubmissionForUser {
 		if $form->{section};
 	
 	my $submissions = $self->sqlSelectAllHashrefArray(
-		'submissions.*',
+		'submissions.*, karma',
 		'submissions,users_info',
 		join(' AND ', @where),
 		'ORDER BY time'

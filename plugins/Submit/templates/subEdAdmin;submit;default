@@ -73,7 +73,7 @@ BLOCK sub_display -%]
 		[% IF constants.submit_show_weight %]([% sub.weight %])[% END %]
 	</TD><TD><FONT SIZE="2">[% sub.strs.1 %]
 	[% UNLESS sub.is_anon %]
-		([% sub.karma or 0 %])
+		([% sub.karma || 0 %])
 	[% END %]
 		<BR>[% sub.strs.2 %]</FONT></TD></TR>
 [% END %]
