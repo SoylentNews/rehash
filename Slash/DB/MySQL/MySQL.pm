@@ -3028,8 +3028,6 @@ sub saveTopic {
 				$self->sqlDo("SET AUTOCOMMIT=1");
 				errorLog("$DBI::errstr");
 				# only try a few times before giving up
-				# Don't we want to return false on failure? - Jamie
-				# i copied it from createComment ... but you're right i think -- pudge
 				return 0 if ++$tries > 5;
 				goto RETRY;
 			}
@@ -3061,7 +3059,11 @@ sub saveTopic {
 	if ($topic->{_multi}{parent_topic} && ref($topic->{_multi}{parent_topic}) eq 'ARRAY') {
 		@parents = grep { $_ } @{$topic->{_multi}{parent_topic}};
 	} elsif ($topic->{parent_topic}) {
-		push @parents, $topic->{parent_topic};
+		if (ref($topic->{parent_topic}) eq 'ARRAY') {
+			@parents = grep { $_ } @{$topic->{parent_topic}};
+		} else {
+			@parents = ($topic->{parent_topic});
+		}
 	}
 	my $parent_str = join ',', @parents;
 
@@ -3070,11 +3072,11 @@ sub saveTopic {
 		$self->sqlInsert('topic_parents', {
 			tid		=> $tid,
 			parent_tid	=> $parent
-		});
+		}, { ignore => 1 });
 	}
 
 	if ($topic->{nexus}) {
-		$self->sqlInsert('topic_nexus', { tid => $tid });
+		$self->sqlInsert('topic_nexus', { tid => $tid }, { ignore => 1 });
 	} else {
 		$self->sqlDelete('topic_nexus', "tid=$tid");
 	}
@@ -9469,6 +9471,19 @@ sub getTopiclistForStory {
 
 	my $chosen_hr = $options->{topics_chosen} || $self->getStoryTopicsChosen($stoid);
 	return $self->getTopiclistFromChosen($chosen_hr, $options);
+}
+
+########################################################
+# returns the tid of the *first instance* of a keyword,
+# as keyword is not unique, so be careful
+sub getTidByKeyword {
+	my($self, $name) = @_;
+
+	return $self->sqlSelect(
+		'tid', 'topics',
+		'keyword = '. $self->sqlQuote($name),
+		'ORDER BY tid'
+	) || 0;
 }
 
 ########################################################
