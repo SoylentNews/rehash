@@ -374,12 +374,7 @@ sub createComment {
 
 	my $searchtoo = getObject('Slash::SearchToo');
 	if ($searchtoo) {
-		$searchtoo->addRecords(comments =>
-			$searchtoo->prepRecord(comments => {
-				cid     => $cid,
-				comment => $comment_text
-			})
-		);
+		$searchtoo->storeRecords(comments => $cid, { add => 1 });
 	}
 
 	return $cid;
