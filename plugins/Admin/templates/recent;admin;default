@@ -73,7 +73,7 @@ __template__
 		<td align="right">[% comm.score %]</td>
 		<td align="right">[% comm.sum_val %]</td>
 		<td align="right">[% comm.num_mods %]</td>
-		<td align="left">[% constants.reasons.${comm.reason} %]</td>
+		<td align="left">[% constants.reasons.${comm.reason}.name %]</td>
 		<td align="center">&nbsp;[% comm.date %]&nbsp;</td>
 		<td align="left">[% comm.subject_vis | strip_literal %]</td>
 	</tr>

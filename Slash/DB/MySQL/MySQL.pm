@@ -4542,26 +4542,6 @@ sub getCommentsForUser {
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where);
 
 	my $archive = $cache_read_only;
-#	my $cids = [];
-#	for my $comment (@$comments) {
-#		$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
-#		push @$cids, $comment->{cid};# if $comment->{points} >= $user->{threshold};
-#	}
-
-	# We have a list of all the cids in @$comments.  Get the texts of
-	# all these comments, all at once.
-	# XXX This algorithm could be (significantly?) sped up for users
-	# with hardthresh=0 (most of them) by only getting the text of
-	# comments we're going to be displaying.  As it is now, if you
-	# display a thread with threshold=5, it (above) SELECTs all the
-	# comments you _won't_ see just so it can count them -- and (here)
-	# grabs their full text as well.  Wasteful.  We could probably
-	# just refuse to push $comment (above) when
-	# ($comment->{points} < $user->{threshold}). - Jamie
-	# That has side effects and doesn't do that much good anyway,
-	# see SF bug 452558. - Jamie
-	# OK, now we're not getting the comment texts here, we'll get
-	# them later. - Jamie 2003/03/20
 
 	return $comments;
 }
