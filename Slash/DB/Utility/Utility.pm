@@ -498,11 +498,11 @@ sub sqlUpdate {
 
 ########################################################
 sub sqlDelete {
-	my($self, $table, $where) = @_;
+	my($self, $table, $where, $limit) = @_;
 	return unless $table;
 	my $sql = "DELETE FROM $table";
-	$sql .= " WHERE $where\n"
-		if $where;
+	$sql .= " WHERE $where" if $where;
+	$sql .= " LIMIT $limit" if $limit;
 	$self->sqlConnect();
 	my $rows = $self->sqlDo($sql);
 	# print STDERR "SQL: $sql\n";
