@@ -14,8 +14,11 @@ __template__
 <div id="[% name %]-outer" class="hpts-outer">
   <div class="hpts-title" id="[% name %]-title">[% title %]</div>
   <div class="hpts-inner">
-[% thisname = []; thisparent = [];
+[% thisname = []; thisparent = []; thisseen = {};
    FOREACH leaf = loop;
+     IF thisseen.${leaf.value};  # don't open again if seen again
+       leaf.open = 0;
+     END;
      UNLESS leaf.end_block;
        thisname.push(leaf.label) %]
 <div nowrap>
@@ -35,6 +38,7 @@ __template__
 [%-    ELSE;
          CALL thisname.pop();
        END;
+       thisseen.${leaf.value} = 1;
      ELSE;
        CALL thisparent.pop();
        CALL thisname.pop()
