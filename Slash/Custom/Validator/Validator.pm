@@ -45,7 +45,7 @@ use warnings;
 #                            redirect
 #                           ); # 2.81 for XHTML, and import redirect() function.
 
-use CGI::Carp            qw(carp croak fatalsToBrowser);
+#use CGI::Carp            qw(carp croak fatalsToBrowser);
 use Config::General      qw();
 use File::Spec           qw();
 use HTML::Parser    3.25 qw(); # Need 3.25 for $p->ignore_elements.
