@@ -2144,3 +2144,6 @@ INSERT INTO vars (name, value, description) VALUES ('mod_limit_with_comments', '
 
 INSERT INTO vars (name, value, description) VALUES ('show_m2s_with_mods', '1', 'Show metamods intertwined with mods?');
 INSERT INTO vars (name, value, description) VALUES ('m2_limit_with_mods', '', 'Maximum number of metamods to show intertwined with a group of mods (Empty string for no limit)');
+
+INSERT INTO vars (name, value, description) VALUES ('anchortags_bridge_breaks', '0', 'Are <A> tags allowed to stretch across breaking tags (defined in approvedtags_break)?');
+
