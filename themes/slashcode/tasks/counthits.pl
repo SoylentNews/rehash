@@ -73,7 +73,7 @@ $task{$me}{code} = sub {
 		);
 		$total_hits += $sid_count{$sid};
 		_update_timehash("update");
-		Time::HiRes::sleep(0.1);
+		Time::HiRes::sleep(0.02);
 		_update_timehash("sleep");
 	}
 
