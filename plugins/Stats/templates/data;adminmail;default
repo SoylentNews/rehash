@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+adminmail
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'email subject' %]
+[% constants.sitename %] Stats for [% day %]
+
+[% CASE 'db lagged' %]
+The [% slave_name %] database is lagged behind the master by [% bytes %] bytes.
+
+[% END %]
+__seclev__
+500

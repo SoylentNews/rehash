@@ -16,7 +16,7 @@ __template__
         total: [% total %] ([% total_bytes %])
        unique: [% unique %]
         users: [% users %]
-[% admin_clearpass_warning %]
+[% admin_clearpass_warning %][% backup_lag %]
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
 [% IF constants.mod_stats -%]

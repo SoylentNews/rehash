@@ -101,7 +101,7 @@ EOT
 
 	my $sections =  $slashdb->getSections();
 	$sections->{index} = 'index';
-	for my $section (sort(keys %$sections)) {
+	for my $section (sort keys %$sections) {
 		my $index = $constants->{defaultsection} eq $section ? 1 : 0;
 		my $temp = {};
 		$temp->{section_name} = $section;
@@ -215,7 +215,10 @@ EOT
 #	}
 
 	my @lazy;
-	for my $key (sort { $count->{'articles'}{$b} <=> $count->{'articles'}{$a} } keys %{$count->{'articles'}}) {
+	for my $key (sort
+		{ ($count->{articles}{$b} || 0) <=> ($count->{articles}{$a} || 0) }
+		keys %{$count->{articles}}
+	) {
 		my $value = $count->{'articles'}{$key};
 
  		my $story = $backupdb->getStory($key, ['title', 'uid']);
@@ -233,14 +236,31 @@ EOT
 	$data{admin_mods_text} = $admin_mods_text;
 	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
 
-	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail', Nocomm => 1 });
+	$data{backup_lag} = "";
+	for my $slave_name (qw( backup search )) {
+		my $virtuser = $constants->{"${slave_name}_db_user"};
+		next unless $virtuser;
+		my $bytes = $stats->getSlaveDBLagCount($virtuser);
+		if ($bytes > ($constants->{db_slave_lag_ignore} || 10000000)) {
+			$data{backup_lag} .= "\n" . getData('db lagged', {
+				slave_name =>	$slave_name,
+				bytes =>	$bytes,
+			}, 'adminmail') . "\n";
+		}
+	}
+
+	my $email = slashDisplay('display', \%data, {
+		Return => 1, Page => 'adminmail', Nocomm => 1
+	});
 #print "\n$email\n";
 
 	# Send a message to the site admin.
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		$data{template_name} = 'display';
-		$data{subject} = { template_name => 'subj' };
+		$data{subject} = getData('email subject', {
+			day =>	$data{day}
+		}, 'adminmail');
 		$data{template_page} = 'adminmail';
 		my $message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
 		for (@$message_users) {
@@ -248,7 +268,7 @@ EOT
 		}
 	}
 	for (@{$constants->{stats_reports}}) {
-		sendEmail($_, "$constants->{sitename} Stats Report", $email, 'bulk');
+		sendEmail($_, $data{subject}, $email, 'bulk');
 	}
 	slashdLog('Send Admin Mail End');
 

@@ -78,6 +78,31 @@ sub countModeratorLog {
 }
 
 ########################################################
+# Note, we have to use $slashdb here instead of $self.
+sub getSlaveDBLagCount {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
+	my $bdu = $constants->{backup_db_user};
+	return 0 if !$bdu || $bdu eq getCurrentVirtualUser();
+	my $backupdb = getObject('Slash::DB', $constants->{backup_db_user});
+	# This is a large number and sufficiently noticeable that it should
+	# alert people that something is wrong.  Namely, the backup DB is
+	# not available.
+	return 2**32 if !$backupdb;
+
+	my $master = ($slashdb ->{_dbh}->selectall_arrayref("SHOW MASTER STATUS"))->[0];
+	my $slave  = ($backupdb->{_dbh}->selectall_arrayref("SHOW SLAVE  STATUS"))->[0];
+	my($master_file) = $master->[0] =~ /\.(\d+)$/;
+	my($slave_file)  = $slave ->[0] =~ /\.(\d+)$/;
+	my $count = 2**32*($master_file - $slave_file)
+		+ $master->[1] - $slave->[1];
+	$count = 0 if $count < 0;
+	$count = 2**32 if $count > 2**32;
+	return $count;
+}
+
+########################################################
 sub getCommentsByDistinctIPID {
 	my($self, $yesterday) = @_;
 
