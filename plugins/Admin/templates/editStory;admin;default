@@ -110,7 +110,10 @@ __template__
 		<TD BGCOLOR="[% user.bg.3 %]">
 		<FONT COLOR="[% user.fg.3 %]">
 		[% PROCESS editbuttons %]
+
+		[% IF topic_select %]
 		[% topic_select %]
+		[% END %]
 
 		[% UNLESS user.section %]
 			[% section_select %]
@@ -151,6 +154,7 @@ __template__
 	<TR>
 		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
 		[% # yeah, I know... %]
+		<!-- extra.2 [% extra.2 %] -->
 		<B>[% extra.0 %]</B> </FONT></TD>
 		[% IF extra.2 == 'text' %]
 		<TD BGCOLOR="[% user.bg.2 %]">
@@ -161,9 +165,11 @@ __template__
 		[% pulldown = "$extra.3:$extra.1" %]
 		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), storyref.${extra.1}, 1, 1) %]	
 		[% ELSE %]
+		[% pulldown = extra.1 %]
 		<TD BGCOLOR="[% user.bg.2 %]">
-		[% type = extra.1 %]
-		[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), storyref.$type, 1, 1) %]	
+		[% pulldown_section = form.section || user.section || storyref.section %]
+		<!-- pulldown [% pulldown %] pulldown section [% pulldown_section %] -->
+		[% Slash.createSelect(pulldown, Slash.db.getDescriptions('topics_section_type', pulldown_section, pulldown), storyref.$pulldown, 1, 1) %]	
 		[% END %]
 		</TD>
 	</TR>
@@ -174,9 +180,9 @@ __template__
 		<TD BGCOLOR="[% user.bg.2 %]"><FONT COLOR="[% user.fg.2 %]">
 		[% locktest %]
 
-		[% UNLESS user.section %]
+		[% # UNLESS user.section %]
 		[% displaystatus_select %]
-		[% END %]
+		[% # END %]
 
 		[% commentstatus_select %]
 		<INPUT TYPE="TEXT" NAME="time" VALUE="[% storyref.time %]" size="16"><BR>
@@ -230,8 +236,9 @@ storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; 
 		<B>Story Topics:</B>
 		</FONT></TD>
 		<TD BGCOLOR="[% user.bg.2 %]">
-	[% FOREACH topic = multi_topics.keys %]
-		<INPUT TYPE="checkbox" NAME="tid_[% topic %]" VALUE="[% multi_topics.$topic %]" [% IF story_topics.$topic %] CHECKED [% END %]>[% multi_topics.$topic %]<BR>
+	[% FOREACH topic = multi_topics.sort %]
+		[% name = "tid_$topic" %]
+		<INPUT TYPE="checkbox" NAME="[% name %]" VALUE="[% multi_topics.$topic %]" [% IF story_topics.$topic || form.$name %] CHECKED [% END %]>[% multi_topics.$topic %]<BR>
 	[% END %]
 		</TD>
 	</TR>
@@ -244,4 +251,4 @@ storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; 
 </FORM>
 
 __seclev__
-500
+10000

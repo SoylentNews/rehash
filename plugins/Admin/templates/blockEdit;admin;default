@@ -36,6 +36,7 @@ __template__
 </UL>
 </P>
 <TABLE>
+[% IF block_select1 %]
 	<TR>
 		<TD><B>Static and Color Blocks</B></TD><TD>
 		[% block_select1 %]
@@ -43,7 +44,10 @@ __template__
 		</TD>
 		<TD><INPUT TYPE="SUBMIT" VALUE="Edit Block" NAME="blocked1"></TD>
 		<TD><INPUT TYPE="SUBMIT" VALUE="Delete Block" NAME="blockdelete1"></TD>
+		
 	</TR>
+[% END %]
+[% IF block_select2 %]
 	<TR>
 		<TD><B>Portald Blocks</B></TD>
 		<TD>
@@ -52,6 +56,7 @@ __template__
 		<TD><INPUT TYPE="SUBMIT" VALUE="Edit Block" NAME="blocked2"></TD>
 		<TD><INPUT TYPE="SUBMIT" VALUE="Delete Block" NAME="blockdelete2"></TD>
 	</TR>
+[% END %]
 </TABLE>
 [% END %]
 
@@ -80,6 +85,7 @@ __template__
 		<TD><B>Ordernum</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="3" NAME="ordernum" VALUE="[% blockref.ordernum %]"></TD>
 	</TR>
+	[% IF blockref.type == 'portald' %]
 	<TR>
 		<TD><B>Portal - check if this is a slashbox.</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="portal" [% portal_checked %]></TD>
@@ -120,6 +126,7 @@ __template__
 		<TD><B>Max RSS Items</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="5" NAME="items" VALUE="[% blockref.items %]"><BR></TD>
 	</TR>
+	[% END %] 
 
 	[% IF blockedit_flag %]
 		<INPUT TYPE="HIDDEN" NAME="save_existing" VALUE="1">
