@@ -5385,9 +5385,8 @@ sub getSection {
 
 	if (ref $answer) {
 		# add rootdir, form figured dynamically -- pudge
-		my $constants = getCurrentStatic();
-		$answer->{rootdir} = set_rootdir($answer->{url},
-			getCurrentStatic('rootdir')
+		$answer->{rootdir} = set_rootdir(
+			$answer->{url}, getCurrentStatic('rootdir')
 		);
 	}
 
@@ -5406,6 +5405,15 @@ sub getSubSection {
 ########################################################
 sub getSections {
 	my $answer = _genericGetsCache('sections', 'section', '', @_);
+
+	my $rootdir = getCurrentStatic('rootdir');
+	for my $section (%$answer) {
+		# add rootdir, form figured dynamically -- pudge
+		$answer->{$section}{rootdir} = set_rootdir(
+			$answer->{$section}{url}, $rootdir
+		);
+	}
+
 	return $answer;
 }
 

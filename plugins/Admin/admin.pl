@@ -1653,8 +1653,8 @@ sub saveStory {
 	}
 
 	if ($sid) {
-		my $rootdir = $slashdb->getSection($form->{section}, 'url')
-			|| $constants->{rootdir};
+		my $section = $slashdb->getSection($form->{section});
+		my $rootdir = $section->{rootdir} || $constants->{rootdir};
 
 		my $id = $slashdb->createDiscussion( {
 			title	=> $form->{title},

@@ -1855,8 +1855,8 @@ sub _slashlink_to_link {
 	# Load up special values and delete them from the attribute list.
 	my $sn = delete $attr{sn} || "";
 	my $sect = delete $attr{sect} || "";
-	my $sect_root = ($sect ? $slashdb->getSection($sect, "url") : "")
-		|| $root;
+	my $section = $sect ? $slashdb->getSection($sect) : {};
+	my $sect_root = $section->{rootdir} || $root;
 	my $frag = delete $attr{frag} || "";
 	# Generate the return value.
 	my $retval = q{<A HREF="};
