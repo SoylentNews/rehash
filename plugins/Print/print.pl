@@ -91,17 +91,32 @@ sub main {
 	# Before this was a regexp against the related text, but pudge 
 	# convinced me that was an insane way to do it so we're doing it this
 	# way, instead.
+
+	# we should put this in Slash::Utility::Data and port the getRelated()
+	# routine in admin.pl to use it instead -- pudge
 	my @story_links;
 	my $tree = new HTML::TreeBuilder;
-        $tree->parse($story->{introtext} . $story->{bodytext});
-        $tree->eof;
-        my $links = $tree->extract_links('a');  # get "A" tags only
+	$tree->parse(parseSlashizedLinks($story->{introtext} . $story->{bodytext}));
+	$tree->eof;
+	my $links = $tree->extract_links('a');  # get "A" tags only
 
-        for (@{$links}) {
-                my $content = get_content($_->[1]);
-		my $url = URI->new_abs($_->[0], $constants->{absolutedir});
-                push @story_links, [$url, $content] if $content;
-        }
+	for (@{$links}) {
+		my $content = get_content($_->[1]);
+
+		# make all relative links absolute to the site's root
+		my $uri = URI->new_abs($_->[0], $constants->{absolutedir});
+
+		# http://foo -> http://foo/
+		$uri->path('/') if ! length $uri->path;
+
+		if (length $content && length $uri) {
+			# don't duplicate URLs
+			my $test = join($;, $uri, lc $content);
+			if (!scalar(grep { $test eq join($;, $_->[0], lc $_->[1]) } @story_links)) {
+				push @story_links, [$uri, $content];
+			}
+		}
+	}
 
 	# This was the insane part, which won't work for everything.
 	#
