@@ -182,6 +182,12 @@ sub handler {
 				? "$constants->{rootdir}/users.pl?op=changepasswd" .
 					# XXX This "note" field is ignored now...
 					# right?  - Jamie 2002/09/17
+					# YYY I made it so it is just a silly code,
+					# so it can be picked up by the form, and
+					# actual text is not passed in.
+					# For now, the code is just this text; later,
+					# I can change it to something else.
+					# -- pudge
 				  "&note=Please+change+your+password+now!&oldpass=" . fixparam($form->{upasswd})
 				: $form->{returnto}
 					? $form->{returnto}
