@@ -1308,6 +1308,38 @@ sub getM2Consequences {
 	return $retval;
 }
 
+sub getModResolutionSummaryForUser {
+	my ($self, $uid, $limit) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	my $limit_str = "";
+	$limit_str = "LIMIT $limit" if $limit;
+	my ($fair, $unfair, $fairvotes, $unfairvotes) = (0,0,0,0);
+	
+	my $reasons = $self->getReasons();
+	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
+	my $reasons_m2able = join(",", @reasons_m2able);
+	
+	return {} unless @reasons_m2able;
+	my $reason_str = " AND reason IN ($reasons_m2able)";
+	
+	my $mod_ids = $self->sqlSelectColArrayref("id", "moderatorlog",
+			"uid=$uid_q AND active=1 AND m2status=2 $reason_str",
+			"ORDER BY id desc $limit_str");
+
+	foreach my $mod (@$mod_ids){
+		my $m2_ar = $self->getMetaModerations($mod);
+		
+		my $nunfair = scalar(grep { $_->{active} && $_->{val} == -1 } @$m2_ar);
+		my $nfair   = scalar(grep { $_->{active} && $_->{val} ==  1 } @$m2_ar);
+
+		$unfair++ if $nunfair > $nfair;
+		$fair++ if $nfair > $nunfair;
+		$fairvotes += $nfair;
+		$unfairvotes += $nunfair;
+	}
+	return { fair => $fair, unfair => $unfair, fairvotes => $fairvotes, unfairvotes => $unfairvotes };
+}
+
 sub _csq_repeats {
 	my($self, $mod_hr) = @_;
 	# Count the number of moderations performed by this user
