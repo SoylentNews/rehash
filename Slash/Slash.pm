@@ -1431,7 +1431,7 @@ sub displayStory {
 		if ($full) {
 			$story->{bodytext} = parseSlashizedLinks($story->{bodytext});
 			$story->{bodytext} = processSlashTags($story->{bodytext}, { break => 1 });
-			$options->{stid} = $reader->getTopiclistForStory($story->{sid});
+			$options->{topiclist} = $reader->getTopiclistForStory($story->{sid});
 			# if a secondary page, put bodytext where introtext would normally go
 			# maybe this is not the right thing, but is what we are doing for now;
 			# let me know if you have another idea -- pudge
