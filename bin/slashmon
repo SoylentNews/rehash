@@ -47,7 +47,7 @@ sub init {
 	version() if $opts{v};
 
 	$weed_out_images = $opts{i} ? 1 : 0;
-	$virtuser = $opts{u} || 'slashdot';
+	$virtuser = $opts{u} || 'slash';
 	$width = $opts{w} || 106;
 	$height = $opts{r} || 20;
 	$sleep = $opts{s} || 10;
@@ -407,7 +407,7 @@ Main options:
 	-i	Accesslog may contain images; do a SELECT from it to
 		weed them out when counting pages
 
-	-u	Virtual user (default "slashdot")
+	-u	Virtual user (default "slash")
 	-w	Width max in columns (default 76)
 	-r	Height max in (r)ows (default 20)
 	-s	Sleep time (default 10)
