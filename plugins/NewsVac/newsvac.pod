@@ -31,6 +31,104 @@ Automatically submits news that matches keywords
 
 The practical objective of NewsVac is to have an average of 120 NewsVac submissions per day, with half being postable stories, and that it takes less than an hour per day (half hour in the morning, half hour late afternoon) of an editor's time per day.  Of course, any improvement on the percentage of postable stories and decrease in time taken is good.
 
+There are many steps in the NewsVac process.  See below for descriptions of terms.
+
+=head2 Add URLs
+
+Select URLs to be mined, and add them via the "URLs" page in the NewsVac interface (at newsvac.pl).  This page shows the URL's ID, the last successful mine of the URL, how many bytes it was, how many stories were mined from it, etc.
+
+Click on the ID to edit/view the URL information, including the stories successfully mined from it, if any.  Click the URL to go to the URL.  Click the miner name to edit/view the miner.
+
+By default, new URLs have the miner "none" assigned.  Type in a new or existing miner name (a miner is created if one does not exist by thatname).
+
+
+=head2 Edit Miners
+
+This is the difficult part.  The essential procedure is that, for each URL assigned to that miner, the miner will fetch its data, strip out undesirable portions of the data with regexes (optional), and then loop over the remaining data with a regular expression designed to identify and pull out the data for each story.
+
+First, the boring part.  There are several text fields for trimming the data, to match up all combinations of plain text/regex, pre/post data, and "stories" page (the initial URL, with all the stories) and "story" page (the individual pages with single stories on them).  That's eight fields, if you're counting.
+
+If you use the text field, then that text will be used exactly, either from the beginning of the data up to the first instance of that text (pre) or from that text to the end of the data (post).  For regex, it is the same, except that the regex will be used as a regular expression, instead of as literal text.
+
+And the same principles apply for both the stories page, and story page.
+
+After the stories page has been trimmed, the data is looped over with the extraction regex.  The regex will, on each match, place the captured text into the specified vars.  So for this set of vars, and extraction regex:
+
+	url title slug
+	<a\ href="([^"]*)">
+		([^<]*)
+	</a>
+	<br>
+	([^<]*)
+
+The first captured data will be the story's URL, the second its title, and the third its slug.  Also optional is a source field.
+
+Finally, there is a field for tweak code.  You may use this to modify the URL, or to specify the source, or to cancel a given item.  Examples:
+
+	$cancel = 1 if $count > 10;
+	$source = "Slashdot.org" unless $source;
+	$url .= "?print=1";
+
+If you specify an B<RSS> URL (one that matches /(rss|xml|rdf)$/ in either content-type or URL), then all the trimming, extraction regex, and vars are skipped.  The tweak code is still executed.  The RSS link element becomes the url, the title is the title, the description is the slug, and the channel's title is the source.  That simple.
+
+B<Caveats>
+
+=over 4
+
+=item *
+
+The story regexes do not get assigned directly to a story URL; they are assigned here to the miners.  It is possible that a story URL will have been mined by two separate miners; in that case, the most recently executed miner's story regexes will be used.
+
+=item *
+
+Similarly, because story regexes are assigned to a miner, you will not have one miner for all RSS sites, unless you want them to share the story regexes.
+
+=item *
+
+The extraction regex uses the /x modifier, so whitespace is ignored.  Specify a space character explicitly with [ ] or a backslash (as above), and a newline with \n.
+
+=back
+
+
+=head2 Testing Miners
+
+Each time you save the miner, it will test itself and display the results, including what data was stripped, what URLs are found, and, finally, what story URLs/titles/slugs/sources were matched.  These URLs are fed into and saved in the database.  (For now ... I am not sure what side effects this has ... ?).
+
+
+=head2 Adding Keywords
+
+The keyword screen is simple.  Select a tag, or add one.  Add a keyword to the tag and give it a relative score.  Note that the weighting is done such that repeated use of the same word gives it less of a score each time, and the keywords themselves are regexes (and are case-sensitive).  The tags merely serve to group together similar topics of keywords.
+
+
+=head2 Editing Spiders
+
+Spiders are somewhat complex, but the editing screen is simple.  You select under what conditions the miner will run, which miners to select, and then which commands to execute.
+
+
+=head2 Running Spiders
+
+Spiders can only run one at a time, and can take hours to run, for a lot of miners and URLs.  To run all miners from the command line, you may do this:
+
+	/usr/local/slash/bin/runtask -u VIRTUAL_USER -ospiders=allminers run_spider
+
+The run_spider task will also run when you specify in the task.
+
+[Something about spider time specifications that I don't understand yet. ???]
+
+The spider will first mine all the URLs, then convert the nuggets created by the miners into URLs, then fetch each URL and strip it, and will then match each URL against the keywords.  Ones that match high enough to hit the minimum score (default is 10.0) will be submitted as stories.
+
+
+=head2 Submissions
+
+The submission screen will have a horizonal rule below the user-submitted submissions, and below that rule is the NewsVac'd submissions.  Each submission will have a title, followed by the keyword tags it matched, and the score.  To the right of that is the source and the miner name.
+
+Clicking on the submission shows the slug and some additional extracted text that matched the keywords.  In text fields are the url of the article, and in url_title is the source.  These can be used later to automatically populate something on the article page. [???]
+
+
+=head2 Display
+
+???
+
 
 =head1 DESCRIPTION
 
@@ -156,27 +254,23 @@ Relative priorities from 1-10 are in parentheses.  All of these should get done,
 
 =item *
 
-Add ability to "mine" RSS.  Shouldn't be difficult to add; just add a new parse code, which will be called for certain content types.  The trick will be making sure that the content type is correct.  (5)
+Add ability to "mine" RSS.  Shouldn't be difficult to add; just add a new parse code, which will be called for certain content types.  The trick will be making sure that the content type is correct.  (COMPLETE)
 
 =item *
 
-Trim actual story (plaintext) so we don't match all of page, just the story.  Likely, this will happen in parse_plaintext; the trick is knowing how to trim each individual story, either having generic regexes (not likely) or specific ones per site, like with miners.  But while miners have regexes attached to them, these things don't have any such reasonable relationship.  I can attach the regex to the miner and climb the tree back up, and pick the first miner that matches, or the most recent one.  (9)
+Trim actual story (plaintext) so we don't match all of page, just the story.  Likely, this will happen in parse_plaintext; the trick is knowing how to trim each individual story, either having generic regexes (not likely) or specific ones per site, like with miners.  But while miners have regexes attached to them, these things don't have any such reasonable relationship.  I can attach the regex to the miner and climb the tree back up, and pick the first miner that matches, or the most recent one.  (COMPLETE)
 
 =item *
 
-Similar to above, also get first paragraph of story. (8)
+Similar to above, also get first paragraph of story.  (6)
 
 =item *
 
-Only check for new stories, since last spider, not all new stories.  Also, possibly improve code to not get duplicates: often, titles slightly change, and so do URLs.  Perhaps match site name + paragraphs/title?  Find degree of matching?  Consider using code from admin.pl (which I don't think will work, since it is has many many false positives, which is fine for human editors, but this must be automated; but perhaps it can be fine-tuned to be better for automation).  Check garbage collection, efficiency of table (index help?).  (6)
+Refine how NewsVac submissions are displayed in the submissions bin.  Probably sufficient to make sure submissions are flagged as being from NewsVac, and then displayed separately, perhaps with a horizontal line below user-submitted stories.  No need to sort by weight, but have a cutoff for the total score, of course.  (COMPLETE)
 
 =item *
 
-Refine how NewsVac submissions are displayed in the submissions bin.  Probably sufficient to make sure submissions are flagged as being from NewsVac, and then displayed separately, perhaps with a horizontal line below user-submitted stories.  No need to sort by weight, but have a cutoff for the total score, of course.  (7)
-
-=item *
-
-Allow different keyword sets to apply to different URLs.  Assigned to miners, or spiders? (5)
+Allow different keyword sets to apply to different URLs.  Assigned to miners, or spiders?  (5)
 
 =item *
 
@@ -184,11 +278,15 @@ Abstract out robosubmitting, allow for possibly emailing results, not just creat
 
 =item *
 
-Test miners from the interface, somehow.  I get the impression this is already working, though, at least to some degree.  I don't quite understand what happens when a URL/miner is added/edited; something is going out and fetching URLs, but I don't know what parsers are being called, what is being put into the DB, etc. (8)
+Abstract out weighting.  (3)
 
 =item *
 
-When submitting stories, properly populate the URL and Parent URL fields in section_extras (or any other fields they decide on). (8)
+Test miners from the interface, somehow.  I get the impression this is already working, though, at least to some degree.  I don't quite understand what happens when a URL/miner is added/edited; something is going out and fetching URLs, but I don't know what parsers are being called, what is being put into the DB, etc.  (8 [IN PROGRESS])
+
+=item *
+
+When submitting stories, properly populate the URL and Parent URL fields in section_extras (or any other fields they decide on).  Need to get "source" working in more miners.  (8 [IN PROGRESS])
 
 =item *
 
@@ -198,24 +296,27 @@ Related: perhaps make I<topical> RSS feeds for Slash sites, not just sectional R
 
 =head1 CHANGES
 
-$Log$
-Revision 1.4  2002/09/19 19:27:09  pudge
-Major cleanup, bugfixes, etc.  Not for the faint of heart.
+  $Log$
+  Revision 1.5  2002/10/03 19:05:31  pudge
+  Added large section about newsvac process
 
-Revision 1.3  2002/09/06 20:17:04  pudge
-Added brief objective.
-Added more information about miners, nuggets, spidering; checking for
-  duplicates; display in submissions bin.
-Added to TODO: testing miners from interface; populating URL and URL
-  Parent (section_extra) fields; topical RSS feeds.
+  Revision 1.4  2002/09/19 19:27:09  pudge
+  Major cleanup, bugfixes, etc.  Not for the faint of heart.
 
-Revision 1.2  2002/09/04 20:29:58  pudge
-Added more information about spiders.
-Added basic information about the purpose of each DB table.
-Added TODO list.
+  Revision 1.3  2002/09/06 20:17:04  pudge
+  Added brief objective.
+  Added more information about miners, nuggets, spidering; checking for
+    duplicates; display in submissions bin.
+  Added to TODO: testing miners from interface; populating URL and URL
+    Parent (section_extra) fields; topical RSS feeds.
 
-Revision 1.1  2002/09/04 17:07:09  pudge
-Describe basic outline of NewsVac structure.
+  Revision 1.2  2002/09/04 20:29:58  pudge
+  Added more information about spiders.
+  Added basic information about the purpose of each DB table.
+  Added TODO list.
+
+  Revision 1.1  2002/09/04 17:07:09  pudge
+  Describe basic outline of NewsVac structure.
 
 
 
