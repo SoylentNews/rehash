@@ -7393,6 +7393,8 @@ sub getStoriesEssentials {
 	# If we're not looking just at the mainpage tid, it's not (yet --
 	# maybe later we'll have multiple min_stoids).
 	$min_stoid = 0 if @$tid > 1 || $tid->[0] != $mp_tid;
+	# If we're excluding nexuses, topics, authors, or stories, it's not.
+	$min_stoid = 0 if @$tid_x || @$uid_x || @$stoid_x;
 	# If the $limit + $limit_extra + $offset is too large, it's not.
 	$min_stoid = 0 if $limit_overly_large;
 	# If we're in issue mode, and it's an issue more than 3 days old,
@@ -7564,10 +7566,16 @@ print STDERR "gSE $$ one SELECT, min_stoid=$min_stoid\n";
 		# Need both tables.
 		$tables = "stories, story_topics_rendered";
 
-		# XXXSECTIONTOPICS if $tid_x is defined, this needs to do a
-		# LEFT JOIN on another copy of story_topics_rendered and
-		# eliminate any stoids which have a corresponding row with
-		# an unwanted tid.
+		if (@$tid_x) {
+			# If we are excluding any topics, then add a LEFT JOIN
+			# against another copy of story_topics_rendered and
+			# allow only stories which don't fall into it.
+			my $tid_x_str = join(",", @$tid_x);
+			$tables .= " LEFT JOIN story_topics_rendered AS strx"
+				. " ON stories.stoid=strx.stoid"
+				. " AND strx.tid IN ($tid_x_str)";
+			push @stories_where, "strx.stoid IS NULL";
+		}
 
 		# If we'd done multiple SELECTs, this logic would have been
 		# done on the story_topics_rendered table;  as it is, these
