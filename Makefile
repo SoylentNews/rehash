@@ -20,6 +20,7 @@ RM = rm -f
 SUFFIX = .gz
 COMPRESS = gzip --best
 TAR  = tar
+SED  = sed
 TARFLAGS = cvf
 PREOP = @$(NOOP)
 POSTOP = @$(NOOP)
@@ -43,10 +44,10 @@ THEMEFILES = `find themes -name CVS -prune -o -name [a-zA-z]\*.pl -print`
 PLUGINFILES = `find plugins -name CVS -prune -o -name [a-zA-Z]\*.pl -print`
 
 # What do we use to invoke perl?
-REPLACEWITH = `$(PERL) -MConfig -e 'print $$Config{startperl}' | sed 's/@/\\@/g'`
+REPLACEWITH = `$(PERL) -MConfig -e 'print quotemeta($$Config{startperl})' | sed 's/@/\\@/g'`
 
 # Scripts that need special treatment for $(SLASH_PREFIX)
-PREFIX_REPLACE_FILES = utils/slash httpd/slash.conf bin/runtask
+PREFIX_REPLACE_FILES = utils/slash httpd/slash.conf
 
 # Used by the RPM build.
 BUILDROOT=/var/tmp/slash-buildroot
@@ -68,6 +69,14 @@ slash:
 		echo " - Performing an RPM build"; \
 		(cd Slash; $(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); make install UNINST=1); \
 	fi
+
+doit:
+	(replacewith=$(REPLACEWITH); \
+	 replace=1; \
+	 if [ $$replace ]; then \
+		$(PERL) -i -pe "s/\#\!\/usr\/bin\/perl/$$replacewith/ if $$. == 1" /usr/local/slash/bin/runtask; \
+	 fi; \
+	head /usr/local/slash/bin/runtask)
 
 plugins: 
 	@echo "=== INSTALLING SLASH PLUGINS ==="
@@ -92,11 +101,14 @@ all: install
 install: slash plugins
 
 	# Create all necessary directories.
-	$(INSTALL) -d $(SLASH_PREFIX)/bin/ $(SLASH_PREFIX)/sbin \
-		$(SLASH_PREFIX)/sql/ $(SLASH_PREFIX)/sql/mysql/ $(SLASH_PREFIX)/sql/oracle/ $(SLASH_PREFIX)/sql/postgresql \
-		$(SLASH_PREFIX)/themes/ $(SLASH_PREFIX)/themes/slashcode/htdocs/ $(SLASH_PREFIX)/themes/slashcode/sql/ \
-		$(SLASH_PREFIX)/themes/slashcode/sql/mysql $(SLASH_PREFIX)/themes/slashcode/sql/oracle $(SLASH_PREFIX)/themes/slashcode/sql/postgresql \
-		$(SLASH_PREFIX)/themes/slashcode/backup $(SLASH_PREFIX)/themes/slashcode/logs/ $(SLASH_PREFIX)/plugins/ $(SLASH_PREFIX)/httpd/
+	$(INSTALL) -d \
+		$(SLASH_PREFIX)/bin/ \
+		$(SLASH_PREFIX)/sbin \
+		$(SLASH_PREFIX)/sql/ \
+		$(SLASH_PREFIX)/sql/mysql/ \
+		$(SLASH_PREFIX)/sql/oracle/ \
+		$(SLASH_PREFIX)/sql/postgresql \
+		$(SLASH_PREFIX)/httpd/
 
 	# Quick hack to avoid the need for "cp -ruv" which breaks under FreeBSD
 	# is to just copy the directories now. We may end up copying over a file
@@ -132,19 +144,12 @@ install: slash plugins
 	 	replace=0; \
 	 fi; \
 	 for f in $$binfiles $$sbinfiles $$themefiles $$pluginfiles; do \
+		echo "Installing '$$f' in $(SLASH_PREFIX)/$$d $$replacestr"; \
+		$(INSTALL) -d $(SLASH_PREFIX)/$$d; \
 	 	if [ $$replace ]; then \
 			b=`echo $$f | $(PERL) -MFile::Basename -e 'print basename(<STDIN>)'`; \
 			d=`echo $$f | $(PERL) -MFile::Basename -e 'print dirname(<STDIN>)'`; \
-			$(PERL) -i.bak -pe "s@#!/usr/bin/perl@$$replacewith@ if $$. == 1" $$f; \
-		fi; \
-		echo "Installing '$$f' in $(SLASH_PREFIX)/$$d $$replacestr"; \
-		$(INSTALL) -d $(SLASH_PREFIX)/$$d; \
-		$(INSTALL) $$f $(SLASH_PREFIX)/$$d/$$b; \
-		if [ -f "$$f.bak" ]; then \
-			if [ -f $$f ]; then \
-				rm $$f; \
-			fi; \
-			mv $$f.bak $$f; \
+			cat $$f | $(SED) -e "1s/\#\!\/usr\/bin\/perl/$$replacewith/" > $(SLASH_PREFIX)/$$d/$$b; \
 		fi; \
 	done)
 
@@ -193,9 +198,6 @@ install: slash plugins
 				$(CP) httpd/slash.conf $(SLASH_PREFIX)/httpd/slash.conf; \
 			fi;							\
 			$(CP) httpd/slash.conf $(SLASH_PREFIX)/httpd/slash.conf.def; \
-			;;							\
-		*)								\
-			$(INSTALL) $$a $(SLASH_PREFIX)/$$a				\
 			;;							\
 		esac;								\
 		if [ $$replace ]; then						\
