@@ -2383,3 +2383,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('admin_story_lookahea
 
 # End of T_2_5_0_5, Start of T_2_5_0_6 - 2004/07/08
 
+UPDATE IGNORE blocks SET bid='mainpage_more' WHERE bid LIKE '%more' AND skin='mainpage' AND ordernum > -1;
+DELETE FROM blocks WHERE bid LIKE '%more' AND skin='mainpage' AND bid != 'mainpage_more';
+

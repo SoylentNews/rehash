@@ -526,6 +526,8 @@ CREATE TABLE blocks_new (
 ) TYPE=InnoDB;
 INSERT INTO blocks_new ( bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve, last_update, rss_template, items, autosubmit, rss_cookie, all_skins ) SELECT bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve, last_update, rss_template, items, autosubmit, rss_cookie, all_sections FROM blocks WHERE type != 'color';
 UPDATE blocks_new SET skin='mainpage' WHERE skin IN ('index', 'articles');
+UPDATE IGNORE blocks SET bid='mainpage_more' WHERE bid LIKE '%more' AND skin='mainpage' AND ordernum > -1;
+DELETE FROM blocks WHERE bid LIKE '%more' AND skin='mainpage' AND bid != 'mainpage_more';
 EOT
 
 #
