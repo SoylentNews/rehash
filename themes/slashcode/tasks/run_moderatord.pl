@@ -171,17 +171,20 @@ sub give_out_tokens {
 
 	my $needed = 0;
 
+	my $tokperpt = $constants->{tokensperpoint} || 8;
+	my $maxpoints = $constants->{maxpoints} || 5;
+
 	my $num_tokens = $comments * $constants->{tokenspercomment};
 	$statsSave->addStatDaily("mod_tokens_gain_clicks_random", $num_tokens);
 	my $stirredpoints = $slashdb->stirPool();
-	$num_tokens += $stirredpoints * $constants->{tokensperpoint};
+	$num_tokens += $stirredpoints * $tokperpt;
 
-	if ($stirredpoints and my $statsSave = getObject('Slash::Stats::Writer')) {
+	if ($stirredpoints && my $statsSave = getObject('Slash::Stats::Writer')) {
 		$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
 		# Unfortunately, we reverse-engineer how many tokens
 		# were lost in the stirring.
 		$statsSave->addStatDaily("mod_tokens_lost_stirred", $stirredpoints * ($constants->{mod_stir_token_cost}||0));
-		$statsSave->addStatDaily("mod_tokens_gain_clicks_stirred", $stirredpoints * ($constants->{tokensperpoint}||0));
+		$statsSave->addStatDaily("mod_tokens_gain_clicks_stirred", $num_tokens);
 	}
 
 	# fetchEligibleModerators() returns a list of uids sorted in the
@@ -254,7 +257,7 @@ sub give_out_tokens {
 	$statsSave->addStatDaily("mod_tokens_gain_clicks", $n_update_uids);
 
 	# We need to return the number of users we should give points to.
-	return int($n_update_uids / $constants->{tokensperpoint});
+	return int($n_update_uids / ($tokperpt*$maxpoints));
 }
 
 ############################################################
