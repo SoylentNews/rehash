@@ -39,6 +39,7 @@ use Slash::Constants qw(:strip);
 use Slash::Utility::Environment;
 use URI;
 use XML::Parser;
+use Lingua::Stem;
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -3062,6 +3063,14 @@ sub countWords {
 sub findWords {
 	my($args_hr) = @_;
 	my $constants = getCurrentStatic();
+	my $use_stemming = $constants->{stem_uncommon_words};
+	my $language = $constants->{rdflanguage} || "EN-US";
+	$language = uc($language);
+	my $stemmer = Lingua::Stem->new(-locale => $language);
+	$stemmer->stem_caching({ -level => 2 });
+	my $text_return_hr = {};
+	my @word_stems;
+
 
 	# Return a hashref;  keys are the words, values are hashrefs
 	# with the number of times they appear and so on.
@@ -3132,13 +3141,37 @@ sub findWords {
 			# Ignore *all* words less than 3 chars.
 			next if length($word) < 3;
 			my $ww = $weight_factor * ($cap ? 1.3 : 1);
-			$wordcount->{lc $word}{weight} += $ww;
+			my $log_word = $word;
+			if ($use_stemming) {
+				# For performance reasons we don't want to stem story text for all 
+				# stories we are comparing to in getSimilarStories.
+				# Instead we make sure the stems we save are substrings of the word
+				# anchored at the beginning
+				#
+				# A breakdown of stem/word comparisons based on /usr/dict/words
+				# 70%    $stem eq $word
+				# 93%    $stem is a substring of $word anchored at the beginning
+				# 100%   $stem w/o its last letter is a substring of $word anchored at the beginning
+				#
+				# For now use the stem only if it a substring of the word anchored at the beginning
+				# otherwise use the complete word.  That way we can do a pattern match to check against
+				# older stories rather than stemming them for comparison
+				
+
+				my $stems = $stemmer->stem($word);
+				$log_word = $stems->[0];
+				$log_word = $word if $word!~/^\Q$log_word\E/i;
+				push @word_stems, $log_word;
+			}
+
+			$wordcount->{lc $log_word}{weight} += $ww;
 		}
-		my %uniquewords = map { ( lc($_), 1 ) } @words;
+		my %uniquewords = map { ( lc($_), 1 ) } $use_stemming ? @word_stems: @words;
 		for my $word (keys %uniquewords) {
 			$wordcount->{$word}{count}++;
 		}
 	}
+	$stemmer->clear_stem_cache();
 
 	return $wordcount;
 }
