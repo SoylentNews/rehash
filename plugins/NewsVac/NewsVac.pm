@@ -3780,6 +3780,7 @@ EOT
 			weight		=> $_->{weight},
 		});
 		$self->setSubmission($subid, {
+			separate	=> 1,
 			keywords	=> $_->{keywords},
 			url		=> $_->{url},
 			url_title	=> $_->{url_title},

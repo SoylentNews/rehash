@@ -35,20 +35,19 @@ __template__
 	<TR><TD COLSPAN=4 ALIGN="CENTER"><HR NOSHADE></TD></TR>
 [% END -%]
 
-[% nvcount = 0 %]
+[% separatecount = 0 %]
 [% FOREACH sub = submissions -%]
-	[%# there should be a better way to identify a NV submission %]
-	[% IF sub.section != 'newsvac';
+	[% IF !sub.separate;
 		PROCESS sub_display;
 	ELSE;
-		nvcount = nvcount + 1;
+		separatecount = separatecount + 1;
 	END %]
 [% END %]
 
-[% IF nvcount %]
+[% IF separatecount %]
 	<TR><TD COLSPAN="4"><HR></TD></TR>
 	[% FOREACH sub = submissions -%]
-		[% IF sub.section == 'newsvac';
+		[% IF sub.separate;
 			PROCESS sub_display;
 		END %]
 	[% END %]
@@ -84,10 +83,10 @@ BLOCK sub_display -%]
 		<A HREF="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.ssection | strip_attribute %]"
 		>[% sub.strs.0 %]&nbsp;</A>
 		[% IF constants.submit_show_weight %]
-			[% subfull = Slash.db.getSubmission(sub.subid) %]
-			[% IF subfull.keywords %]<BR><FONT SIZE="2">[% subfull.keywords %] [% END %]
+			[% IF sub.keywords %]<BR><FONT SIZE="2">[% sub.keywords %] [% END %]
 			[% IF sub.weight %] ([% sub.weight %])[% END %]
-			[% IF subfull.keywords %]</FONT>[% END %]
+			[% IF sub.url %] <B><A HREF="[% sub.url | strip_attribute %]">L</A></B>[% END %]
+			[% IF sub.keywords %]</FONT>[% END %]
 		[% END %]
 	</TD><TD><FONT SIZE="2">[% sub.strs.1 %]
 	[% UNLESS sub.is_anon %]
