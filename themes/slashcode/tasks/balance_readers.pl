@@ -64,6 +64,7 @@ sub sleep_until {
 	}
 }
 
+# This should be in Static/MySQL.pm
 { # cheap closure cache
 my $reader_dbid;
 sub get_reader_dbid {
@@ -78,6 +79,7 @@ sub get_reader_dbid {
 }
 } # end closure
 
+# This should be in Static/MySQL.pm
 sub get_readers {
 	my $slashdb = getCurrentDB();
 	my $readers = { };
@@ -95,6 +97,7 @@ sub check_readers {
 	my $reader_info = { };
 
 	# Weed out readers that are isalive='no'
+	# This should be in Static/MySQL.pm
 	my $vu_hr = $slashdb->sqlSelectAllHashref(
 		"virtual_user",
 		"virtual_user, IF(isalive='yes',1,0) AS isalive, weight, weight_adjust",
@@ -428,6 +431,7 @@ sub set_reader_weight_adjust {
 	my $reduce_max = $constants->{dbs_reader_weight_reduce_max}*$delay/60;
 	my $increase_max = $constants->{dbs_reader_weight_increase_max}*$delay/60;
 
+	# This should be in Static/MySQL.pm
 	$slashdb->sqlUpdate("dbs",
 		{ -weight_adjust	=> "GREATEST(0, weight_adjust-$reduce_max,
 						LEAST(1, weight_adjust+$increase_max,

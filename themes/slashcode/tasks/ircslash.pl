@@ -18,7 +18,6 @@ use vars qw(
 	$has_proc_processtable
 	$irc	$conn	$nick	$channel
 	$remarks_active	$next_remark_id	$next_handle_remarks	$hushed
-	$next_check_slashd
 	%stoid	$clean_exit_flag
 	$parent_pid
 );
@@ -59,29 +58,8 @@ $task{$me}{code} = sub {
 			$next_handle_remarks = time() + $remark_delay;
 			handle_remarks();
 		}
-		if (!$clean_exit_flag && time() >= $next_check_slashd) {
-			$next_check_slashd = time() + 20;
-			my($not_ok, $response) = check_slashd();
-			if ($not_ok) {
-				# Parent slashd process seems to be gone.  Maybe
-				# it just got killed and sent us the SIGUSR1 and
-				# our $task_exit_flag is already set.  Pause a
-				# moment and check that.
-				sleep 1;
-				if ($task_exit_flag) {
-					# OK, forget this warning, just exit
-					# normally.
-					$not_ok = 0;
-				}
-			}
-			if ($not_ok) {
-				# Parent slashd process is gone, that's not good,
-				# but the channel doesn't need to hear about it
-				# every 20 seconds.
-				$next_check_slashd = time() + 30 * 60;
-				$conn->privmsg($channel, getIRCData('slashd_parent_gone'));
-			}
-		}
+		possible_check_slashd();
+		possible_check_dbs();
 	}
 
 	ircshutdown();
@@ -433,6 +411,37 @@ sub cmd_slashd {
 	slashdLog("slashd: $result, cmd from $info->{event}{nick}");
 }
 
+{ # closure
+# first checks come after 1 minute, so we are sure we joined the
+# IRC channel OK.
+my $next_check_slashd = $^T + 60;
+sub possible_check_slashd {
+	if (!$task_exit_flag && time() >= $next_check_slashd) {
+		$next_check_slashd = time() + 20;
+		my($not_ok, $response) = check_slashd();
+		if ($not_ok) {
+			# Parent slashd process seems to be gone.  Maybe
+			# it just got killed and sent us the SIGUSR1 and
+			# our $task_exit_flag is already set.  Pause a
+			# moment and check that.
+			sleep 1;
+			if ($task_exit_flag) {
+				# OK, forget this warning, just exit
+				# normally.
+				$not_ok = 0;
+			}
+		}
+		if ($not_ok) {
+			# Parent slashd process is gone, that's not good,
+			# but the channel doesn't need to hear about it
+			# every 20 seconds.
+			$next_check_slashd = time() + 30 * 60;
+			$conn->privmsg($channel, getIRCData('slashd_parent_gone'));
+		}
+	}
+}
+} # end closure
+
 sub check_slashd {
 	my $parent_pid_str = "";
 	if (!$has_proc_processtable) {
@@ -462,8 +471,10 @@ sub cmd_dbs {
 	if (%$dbs_data) {
 		for my $dbid (keys %$dbs_data) {
 			$dbs_data->{$dbid}{virtual_user} = $dbs->{$dbid}{virtual_user};
-			$dbs_data->{$dbid}{lag} = sprintf("%.1f", $dbs_data->{$dbid}{lag} || 0);
-			$dbs_data->{$dbid}{bog} = sprintf("%.1f", $dbs_data->{$dbid}{bog} || 0);
+			$dbs_data->{$dbid}{lag} = defined($dbs_data->{$dbid}{lag})
+				? sprintf("%4.1f", $dbs_data->{$dbid}{lag} || 0)
+				: "?";
+			$dbs_data->{$dbid}{bog} = sprintf("%4.1f", $dbs_data->{$dbid}{bog} || 0);
 		}
 		my @dbids =
 			sort { $dbs->{$a}{virtual_user} cmp $dbs->{$b}{virtual_user} }
@@ -472,8 +483,94 @@ sub cmd_dbs {
 	} else {
 		$response = getIRCData('dbs_nodata');
 	}
-	$self->privmsg($channel, $response);
+	chomp $response;
+	my @responses = split /\n/, $response;
+	for my $r (@responses) {
+		sleep 1;
+		$conn->privmsg($channel, $r);
+	}
 }
+
+{ # closure
+# first checks come after 1 minute, so we are sure we joined the
+# IRC channel OK.
+my $next_check_dbs = $^T + 60;
+my $next_report_bad_dbs = $^T + 60;
+sub possible_check_dbs {
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	if (!$task_exit_flag && time() >= $next_check_dbs) {
+		$next_check_dbs = time() + 20;
+		my $dbs = $slashdb->getDBs();
+		my $dbs_data = $slashdb->getDBsReaderStatus(60);
+		my $ok = 1;
+		for my $dbid (keys %$dbs_data) {
+			$ok = 0 if !$dbs_data->{$dbid}{was_alive}
+				|| !$dbs_data->{$dbid}{was_reachable}
+				|| !$dbs_data->{$dbid}{was_running};
+			$ok = 0 if $dbs_data->{$dbid}{lag} > ($constants->{ircslash_dbalert_lagthresh} || 30);
+			$ok = 0 if $dbs_data->{$dbid}{bog} > ($constants->{ircslash_dbalert_bogthresh} || 30);
+		}
+		# "Great" means good enough to clear out a previously
+		# reported alert.
+		my $great = 1;
+		for my $dbid (keys %$dbs_data) {
+			$great = 0 if !$dbs_data->{$dbid}{was_alive}
+				|| !$dbs_data->{$dbid}{was_reachable}
+				|| !$dbs_data->{$dbid}{was_running};
+			$great = 0 if $dbs_data->{$dbid}{lag} > ($constants->{ircslash_dbalert_lagthresh} || 30)/2;
+			$great = 0 if $dbs_data->{$dbid}{bog} > ($constants->{ircslash_dbalert_bogthresh} || 30)/2;
+		}
+		if (!$ok) {
+			# There's something about the DBs that we
+			# should tell the IRC channel.
+			sleep 1;
+			if ($task_exit_flag) {
+				# OK, forget this alert, just exit
+				# normally.
+				$ok = 1;
+			}
+		}
+		if ($great) {
+			# The DBs are fine, so reset the next-report time.
+			if ($next_report_bad_dbs) {
+				# They were previously reported as bad,
+				# so now give an all-clear.
+				my $all_clear = getIRCData('dbalert_allclear');
+				$conn->privmsg($channel, $all_clear);
+
+			}
+			$next_report_bad_dbs = 0;
+		}
+		if (!$ok) {
+			# One or more DBs are wonky, that's not good,
+			# but the channel doesn't need to hear about it
+			# every 20 seconds.
+			if (time() >= $next_report_bad_dbs) {
+				$next_report_bad_dbs = time() + 10 * 60;
+				for my $dbid (keys %$dbs_data) {
+					$dbs_data->{$dbid}{virtual_user} = $dbs->{$dbid}{virtual_user};
+					$dbs_data->{$dbid}{lag} = defined($dbs_data->{$dbid}{lag})
+						? sprintf("%4.1f", $dbs_data->{$dbid}{lag} || 0)
+						: "?";
+					$dbs_data->{$dbid}{bog} = sprintf("%4.1f", $dbs_data->{$dbid}{bog} || 0);
+				}
+				my @dbids =
+					sort { $dbs->{$a}{virtual_user} cmp $dbs->{$b}{virtual_user} }
+					keys %$dbs_data;
+				my $response = getIRCData('dbs_response', { dbids => \@dbids, dbs => $dbs_data });
+				chomp $response;
+				my @responses = split /\n/, $response;
+				$conn->privmsg($channel, getIRCData('dbalert_prefix'));
+				for my $r (@responses) {
+					sleep 1;
+					$conn->privmsg($channel, $r);
+				}
+			}
+		}
+	}
+}
+} # end closure
 
 ############################################################
 

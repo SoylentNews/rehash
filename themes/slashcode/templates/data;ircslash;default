@@ -64,12 +64,20 @@ __template__
 
 [% CASE 'dbs_response' %]
 	[% FOREACH dbid = dbids;
-		dbs.$dbid.virtual_user;
-		" alive="; dbs.$dbid.was_alive;
-		" lag="; dbs.$dbid.lag;
-		" bog="; dbs.$dbid.bog;
-		UNLESS loop.last(); " -- "; END;
+		"lag "; dbs.$dbid.lag;
+		" bog "; dbs.$dbid.bog;
+		IF !dbs.$dbid.was_alive;	" DEAD!";
+		ELSIF !dbs.$dbid.was_reachable;	" UNREACHABLE!";
+		ELSIF !dbs.$dbid.was_running;	" STOPPED!";	END;
+		" - "; dbs.$dbid.virtual_user;
+		"\n";
 	END %]
+
+[% CASE 'dbalert_prefix' %]
+	Alert - one or more reader DBs are in trouble:
+
+[% CASE 'dbalert_allclear' %]
+	The DBs are much better now. Yay!
 
 [% CASE 'dbs_nodata' %]
 	Error: no dbs_readerstatus data found within the last minute.

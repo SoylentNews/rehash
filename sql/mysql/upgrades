@@ -2813,3 +2813,6 @@ DELETE FROM vars where name in
 
 # End of T_2_5_0_41, Start of T_2_5_0_42 - 2004/12/07
 
+INSERT INTO vars (name, value, description) VALUES ('ircslash_dbalert_bogthresh','30','Alert the IRC channel when DB query bog exceeds this value, in seconds, for the last minute average');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_dbalert_lagthresh','30','Alert the IRC channel when DB replication lag exceeds this value, in seconds, for the last minute average');
+

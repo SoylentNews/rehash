@@ -223,7 +223,6 @@ sub getArchiveList {
 	return $returnable;
 }
 
-
 ########################################################
 # For balance_readers.pl
 sub deleteOldDBReaderStatus {
@@ -241,6 +240,8 @@ sub getDBsReaderStatus {
 		"dbid",
 		"dbid,
 		 MIN(IF(was_alive='yes',1,0)) AS was_alive,
+		 MIN(IF(was_reachable='yes',1,0)) AS was_reachable,
+		 MIN(IF(was_running='yes',1,0)) AS was_running,
 		 AVG(slave_lag_secs) AS lag,
 		 AVG(query_bog_secs) AS bog",
 		"dbs_readerstatus",
