@@ -124,13 +124,17 @@ These constants are used to define different constants in the people system.
 	FRIEND
 	FOE
 	FOF
+	EOF
 
 =cut
 
 my @people = qw(
 	FRIEND
 	FOE
+	FAN
+	FREAK
 	FOF
+	EOF
 );
 
 @EXPORT_OK = (@messages, @web, @strip, @people);
@@ -181,8 +185,11 @@ BEGIN {
 
 	# people
 	use constant FRIEND	=> 1;
+	use constant FREAK	=> 1;
+	use constant FAN	=> 1;
 	use constant FOE	=> 2;
 	use constant FOF	=> 3;
+	use constant EOF	=> 4;
 }
 
 1;
