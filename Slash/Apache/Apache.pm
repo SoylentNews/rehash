@@ -448,7 +448,7 @@ sub IndexHandler {
 		}
 	}
 
-	if (!$dbon && $uri !~ /\.(?:shtml|jpg|gif|png)$/) {
+	if (!$dbon && $uri !~ /\.(?:shtml|html|jpg|gif|png|rss|rdf|xml|txt|css)$/) {
 		# if db is off we don't necessarily have access to constants
 		# this means we change the URI and return DECLINED which lets
 		# Apache do the URI to filename translation
