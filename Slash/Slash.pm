@@ -1452,7 +1452,7 @@ sub _hard_dispComment {
 		my $nick_param = fixparam($comment->{nickname});
 		$user_nick_to_display = qq{<A HREF="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</A>};
 		if ($constants->{plugin}{Subscribe} && $constants->{subscribe}
-			&& $comment->{subscriber_bonus}) {
+			&& $comment->{subscriber_bonus} eq 'yes') {
 			if ($constants->{plugin}{FAQSlashdot}) {
 				$user_nick_to_display .= qq{ <A HREF="/faq/com-mod.shtml#cm2600">*</A>};
 			} else {

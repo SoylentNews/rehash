@@ -42,7 +42,7 @@ __template__
 
 <FONT FACE="[% constants.mainfontface %]" SIZE="1">by
 [% IF !is_anon %]<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
-[% IF subscriber_bonus; " *"; END %]
+[% IF !is_anon && subscriber_bonus == "yes"; " *"; END %]
 [% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
 [% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
 on [% Slash.timeCalc(time) %]

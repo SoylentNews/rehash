@@ -1011,6 +1011,10 @@ sub previewForm {
 		$sig = "--<BR>$sig";
 	}
 
+	my $subscriber_bonus = 0;
+	$subscriber_bonus = 1
+		if $user->{is_subscriber} && $form->{nosubscriberbonus} ne 'on';
+
 	my $preview = {
 		nickname	=> $form->{postanon}
 					? getCurrentAnonymousCoward('nickname')
@@ -1024,6 +1028,7 @@ sub previewForm {
 		subject		=> $tempSubject,
 		comment		=> $tempComment,
 		sig		=> $sig,
+		subscriber_bonus => $subscriber_bonus,
 	};
 
 	my $tm = $user->{mode};
@@ -1136,7 +1141,7 @@ sub submitComment {
 		$karma_bonus = 1 if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
 			&& !$form->{nobonus};
 		$subscriber_bonus = 1 if $pts >= 1 && $user->{is_subscriber}
-			&& !$form->{nosubscriberbonus};
+			&& $form->{nosubscriberbonus} ne 'on';
 	}
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
 	unless ($user->{is_admin} || $form->{newdiscussion}) {
