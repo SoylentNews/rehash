@@ -453,7 +453,7 @@ sub createModeratorLog {
 }
 
 sub getBaseM2Needed {
-	my ($self, $cid, $reason, $options) = @_;
+	my($self, $cid, $reason, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $consensus;
 	if ($constants->{m2_use_sliding_consensus}) {
