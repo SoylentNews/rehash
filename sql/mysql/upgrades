@@ -2747,8 +2747,6 @@ INSERT INTO vars (name, value, description) VALUES ('dbs_reader_expire_secs', 86
 
 INSERT INTO vars (name, value, description) VALUES ('mod_token_assignment_delay', '2', 'Pause in seconds between batches of assigning token changes');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_37, Start of T_2_5_0_38 - 2004/11/16
 
 ALTER TABLE submissions ADD COLUMN emaildomain varchar(255) DEFAULT '' NOT NULL AFTER email;
@@ -2785,5 +2783,6 @@ INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_increase_
 
 ALTER TABLE submissions ADD INDEX time_emaildomain (time, emaildomain);
 
-# End of T_2_5_0_39, Start of T_2_5_0_40 - 2004/11/24
+# SLASHDOT LAST UPDATED HERE
 
+# End of T_2_5_0_39, Start of T_2_5_0_40 - 2004/11/24
