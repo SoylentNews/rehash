@@ -65,7 +65,11 @@ $task{$me}{code} = sub {
 	my $mpt = $constants->{mainpage_nexus_tid} || 1;
 
 	# Tell GraphViz what it needs to know.
-	for my $tid (keys %$tree) {
+	my @tids_to_draw =
+		sort { $a <=> $b }
+		grep { $_ < 10000 }
+		keys %$tree;
+	for my $tid (@tids_to_draw) {
 		my $topic = $tree->{$tid};
 		my $color;
 		if ($tid == $mpt) {
@@ -80,7 +84,11 @@ $task{$me}{code} = sub {
 			style => "filled",
 			shape => $shape,
 		);
-		for my $ctid ( @{$topic->{children}} ) {
+		my @children_to_include =
+			sort { $a <=> $b }
+			grep { $_ < 10000 }
+			@{$topic->{children}};
+		for my $ctid ( @children_to_include ) {
 			$g->add_edge($tid, $ctid,
 				style => $topic->{child}{$ctid} >= 30 ? "dashed" : "solid",
 				color => $hsv[ ($tid+$ctid) % @hsv ],
