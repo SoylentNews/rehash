@@ -230,13 +230,13 @@ sub _get_web_by_uid {
 
 sub _get_web_count_by_uid {
 	my($self, $uid) = @_;
-	my $table = $self->{_web_table1};
+	my $table = $self->{_web_table};
 	my $cols  = "readed";
-	my $prime = "user";
 
-	my $id_db = $self->sqlQuote($uid || $ENV{SLASH_USER});
+	my $uid_db = $self->sqlQuote($uid || $ENV{SLASH_USER});
 	my $data = $self->sqlSelectAll(
-		$cols, $table, "$prime=$id_db",
+		$cols, $table, "user=$uid_db AND " .
+		"$self->{_web_table1}.$self->{_web_prime1} = $self->{_web_table2}.$self->{_web_prime2}",
 	);
 
 	my $read = grep { $_->[0] } @$data;
@@ -262,7 +262,7 @@ sub _get {
 }
 
 sub _gets {
-	my($self, $count, $delete) = @_;
+	my($self, $count) = @_;
 	my $table = $self->{_drop_table};
 	my $cols  = $self->{_drop_cols};
 
