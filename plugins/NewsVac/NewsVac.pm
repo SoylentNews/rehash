@@ -269,25 +269,35 @@ sub getNVDescriptions {
 
 =head2 timing(cmd [, duration])
 
-Foooooooo.
+Records timing data for the timing dump. Times are organized by "commands".
 
 =over 4
 
 =item Parameters
 
-None.
+=over 4
+
+=item $cmd
+
+String containing command associated with the duration.
+
+=item $duration
+
+Number representing the duration of the given command.
+
+=back
 
 =item Return value
 
-n/a
+Number of times the given duration has been recorded for the given command.
 
 =item Side effects
 
-n/a
+Modifies the 'timing_data' data member of this class.
 
 =item Dependencies
 
-n/a
+None.
 
 =back
 
@@ -299,23 +309,23 @@ sub timing {
 	$self->{timing_data}{$cmd}{total} += $duration;
     
 # 	Let's replace this with something a bit more concise.
-#
-#    if ($duration < 0.055) {
-#	$duration = int($duration*100+0.5)/100;
-#    } elsif ($duration < 0.55) {
-#	$duration = int($duration*10+0.5)/10;
-#    } elsif ($duration < 5.5) {
-#	$duration = int($duration+0.5);
-#    } else {
-#	$duration = int($duration+5);
-#    }
+
+    if ($duration < 0.055) {
+	$duration = int($duration*100+0.5)/100;
+    } elsif ($duration < 0.55) {
+	$duration = int($duration*10+0.5)/10;
+    } elsif ($duration < 5.5) {
+	$duration = int($duration+0.5);
+    } else {
+	$duration = int($duration+5);
+    }
 
 	# Round to an extra significant digit for small numbers and to the 
 	# nearest 5 for larger values. See helper function round() for how
 	# it all works.
-	my $sig = 1;
-	$sig++ if $duration >= 5.5;
-	$duration = round($duration, $sig);
+#	my $sig = 1;
+#	$sig++ if $duration >= 5.5;
+#	$duration = round($duration, $sig);
 
 	$self->{timing_data}{$cmd}{$duration}++;
 }
@@ -324,7 +334,7 @@ sub timing {
 
 =head2 timing_clear( )
 
-Foooooooo.
+Clears the stored timing data.
 
 =over 4
 
@@ -336,14 +346,18 @@ Foooooooo.
 
 =back
 
-
 =item Return value
 
+An empty hash. Technically, this return value is useless, but it indicates the
+current state of the 'timing_data' member of this class.
 
 =item Side effects
 
+Clears the stored data in the 'timing_data' member of this class.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -360,25 +374,25 @@ sub timing_clear {
 
 =head2 timing_dump( )
 
-Foooooooo.
+Outputs stored times to the correct log file. See C<Slash::NewsVac::errLog>.
 
 =over 4
 
 =item Parameters
 
-=over 4
-
-=item
-
-=back
+None.
 
 =item Return value
 
+None. See C<Slash::NewsVac::timing_clear>.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -426,7 +440,7 @@ sub timing_dump {
 
 =head2 canonical(url)
 
-Foooooooo.
+Converts the given URL into its canonical form.
 
 =over 4
 
@@ -434,17 +448,23 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $url
+
+String containing URL to be canonicalized.
 
 =back
 
 =item Return value
 
+The URL in its canonicalized form.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -464,7 +484,8 @@ sub canonical {
 
 =head2 add_url(url)
 
-Foooooooo.
+Adds URL and URL metadata into the NewsVac database. URLs using the "javascript" or
+"mailto" scheme/protocol will not be added.
 
 =over 4
 
@@ -472,17 +493,23 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $url
+
+URL to add.
 
 =back
 
 =item Return value
 
+None.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -581,9 +608,9 @@ EOT
 
 ############################################################
 
-=head2 foo( [, ])
+=head2 url_to_id(url)
 
-Foooooooo.
+Converts a URL to it's associated ID.
 
 =over 4
 
@@ -591,17 +618,23 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $url
+
+String containing URL we wish to search on.
 
 =back
 
 =item Return value
 
+The ID of the URL, if it exists in the NewsVac database.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -621,9 +654,10 @@ sub url_to_id {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 urls_to_ids(urls)
+
+Converts a list of URLs to their associated IDs in the NewsVac database.
 
 =over 4
 
@@ -631,17 +665,23 @@ Foooooooo.
 
 =over 4
 
-=item
+=item @urls
+
+A list of URLs to be converted.
 
 =back
 
 =item Return value
 
+A list of IDs representing the converted list of URLs.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -672,9 +712,10 @@ sub urls_to_ids {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 id_to_url(url_id)
+
+Converts a URL ID to its URL form.
 
 =over 4
 
@@ -682,17 +723,21 @@ Foooooooo.
 
 =over 4
 
-=item
+=item Numeric ID of URL to convert.
 
 =back
 
 =item Return value
 
+String of URL associated with the given ID.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None
 
 =back
 
@@ -710,9 +755,10 @@ sub id_to_url {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 ids_to_urls(urls)
+
+Converts a list of IDs to URLs. This is the list form of id_to_url().
 
 =over 4
 
@@ -720,17 +766,23 @@ Foooooooo.
 
 =over 4
 
-=item
+=item @urls
+
+List of URL IDs to convert.
 
 =back
 
 =item Return value
 
+List containing the converted URL IDs.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -764,9 +816,11 @@ sub ids_to_urls {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 add_urls_return_ids(urls)
+
+Add a list of URLs to the NewsVac database and return the
+corresponding URL IDs to the caller.
 
 =over 4
 
@@ -774,17 +828,27 @@ Foooooooo.
 
 =over 4
 
-=item
+=item @urls
+
+List of URLs to add.
 
 =back
 
 =item Return value
 
+List of URL IDs corresponding to the URLs added. For example, given:
+
+	@url_ids = add_urls_return_ids(@urls);
+
+$url[1] is the URL and $url_ids[1] is its corresponding URL ID #.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -801,13 +865,15 @@ sub add_urls_return_ids {
 			url_digest	=> $digest{$_},
 		}, 'IGNORE'); 
 	}
+
    	$self->urls_to_ids(@urls);
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 add_rels_mark_valid(rels)
+
+Adds relationships to the NewsVac database and markes them as VALID.
 
 =over 4
 
@@ -815,17 +881,27 @@ Foooooooo.
 
 =over 4
 
-=item
+=item @rels
+
+List of relationships to add to the NewsVac database, each element of the list
+should be an array reference containing the following data:
+
+	[ from_url_id, to_url_id, parse_code, type, first_verified ]
 
 =back
 
 =item Return value
 
+Nothing useful. Return value is the result of the last Slash::DB::sqlUpdate command
+which is the one that sets all relationships as valid.
 
 =item Side effects
 
+Alters the 'rel' table based on given input.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -857,9 +933,10 @@ sub add_rels_mark_valid {
 }
 
 ############################################################
-=head2 foo( [, ])
+=head2 add_rel(from_url_id, to_url_id, parse_code, type, first_verified)
 
-Foooooooo.
+Add a relationship to the NewsVac database. This is the singular equivalent of
+C<add_rels_mark_valid()> and may be deprecated in the future.
 
 =over 4
 
@@ -867,15 +944,25 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $from_url_id
+
+=item $to_url_id
+
+=item $parse_code
+
+=item $type
+
+=item $first_verified
 
 =back
 
 =item Return value
 
+None.
 
 =item Side effects
 
+Adds a record to the 'rel' table and marks it as VALID.
 
 =item Dependencies
 
@@ -916,6 +1003,7 @@ sub add_rel {
 }
 
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -977,9 +1065,10 @@ sub rels_to_ids {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 id_to_rel(rel_id)
+
+Obtains the relationship from the NewsVac database associated with the given ID.
 
 =over 4
 
@@ -987,17 +1076,25 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $rel_id
+
+Numeric value representing the ID of the relationship in question.
 
 =back
 
 =item Return value
 
+An array reference containing relationship data. The form of the returned array is:
+
+	[ from_url_id, to_url_id, tagname, tagattr ]
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -1226,9 +1323,12 @@ sub id_to_minername {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 delete_url_ids(id_list)
+
+Delete the URL IDs from the NewsVac database. Rows that reference a URN which is 
+unassociated with a miner will NOT be deleted from the 'url_info' table, but will be 
+from all other tables.
 
 =over 4
 
@@ -1236,26 +1336,38 @@ Foooooooo.
 
 =over 4
 
-=item
+=item @id_list
+Entire parameter list represents IDs to be deleted from the database.
 
 =back
 
 =item Return value
 
+None.
 
 =item Side effects
 
+May delete rows from the following tables:
+	'nugget_sub'
+	'rel'
+	'url_analysis'
+	'url_content'
+	'url_info'
+	'url_message_body'
+	'url_plaintext'
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
 
 sub delete_url_ids {
-	my($self) = @_;
+	my($self, @id_list) = @_;
 
-	my $id_list = sprintf '(%s)', join(',', @_[1..$#_]);
+	my $id_list = sprintf '(%s)', join(',', @id_list);
 
 	$self->sqlDo("DELETE FROM url_content      WHERE url_id IN $id_list");
     	$self->sqlDo("DELETE FROM url_message_body WHERE url_id IN $id_list");
@@ -1281,9 +1393,10 @@ EOT
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 delete_rel_ids(ids)
+
+Deletes relationships from the NewsVac database given a list of relationship IDs.
 
 =over 4
 
@@ -1291,26 +1404,32 @@ Foooooooo.
 
 =over 4
 
-=item
+=item @ids
+
+List containing relationship IDs that are to be deleted.
 
 =back
 
 =item Return value
 
+None.
 
 =item Side effects
 
+Deletes matching rows from the 'rel' table.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
 
 sub delete_rel_ids {
-	my($self) = @_;
+	my($self, @ids) = @_;
 
-	my $id_list = sprintf '(%s)', join(',', @_[1..$#_]);
+	my $id_list = sprintf '(%s)', join(',', @ids);
 	$self->sqlDo("DELETE FROM rel WHERE rel_id IN $id_list");
 
 	$self->errLog(getData('delete_rel_ids', {
@@ -3038,9 +3157,9 @@ sub parse_nugget {
 
 ############################################################
 
-=head2 foo( [, ])
+=head2 spider_by_name(name)
 
-Foooooooo.
+Executes the spider of a given name, if it exists.
 
 =over 4
 
@@ -3048,19 +3167,28 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $name
+
+String containing name of spider to execute.
 
 =back
 
 =item Return value
 
+None.
 
 =item Side effects
 
+All NewsVac tables will be modified by this routine assuming that this spider
+exists. URL relationships will be recomputed and all stored content, reanalyzed.
 
 =item Dependencies
 
+None.
+
 =back
+
+None.
 
 =cut
 
@@ -3266,9 +3394,9 @@ sub spider {
 
 ############################################################
 
-=head2 foo( [, ])
+=head2 spider_init(conditions_ref, group_0_wheres_ref)
 
-Foooooooo.
+Initializes a spider before it is run.
 
 =over 4
 
@@ -3276,17 +3404,23 @@ Foooooooo.
 
 =over 4
 
-=item
+=item conditions_ref
+
+=item group_0_wheres_ref
 
 =back
 
 =item Return value
 
+None.
 
 =item Side effects
 
+Modifies the class variable 'sd', which I assume means "spider data".
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -3710,9 +3844,9 @@ EOT
 }
 
 ############################################################
-=head2 foo( [, ])
+=head2 load_keywords(kw_ref, keys_ref, m_regex_ref, m_regex_enc_ref)
 
-Foooooooo.
+Loads keywords from the NewsVac database into various data structures.
 
 =over 4
 
@@ -3720,30 +3854,55 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $kw_ref
+
+Hash reference containing keyword representation. Data is organized in the hash
+as follows:
+
+	regex => [ weight, tag, id ]
+
+=item $keys_ref
+
+List of keys from $kw_ref in a special sort order: numerically by weight, then by
+length of key, then by string sort of key.
+
+=item $m_regex_ref
+
+Scalar which, upon return, will contain a reference to a string containing the
+master regular expression formed from the keywords table.
+
+=item $m_regex_enc_ref
+
+The value of $m_regex_ref with all spaces encoded to '%20'
 
 =back
 
 =item Return value
 
+Nothing useful. Returned is the result of the last regular expression of this 
+routine.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub load_keywords {
 	my ($self, $kw_ref, $keys_ref, $m_regex_ref, $m_regex_enc_ref) = @_;
 
 	my $cursor = $self->sqlSelectMany(
-		'regex,weight,tag', 'newsvac_keywords'
+		'id,regex,weight,tag', 'newsvac_keywords'
 	);
 
-	while (my ($regex, $weight, $tag) = $cursor->fetchrow) {
-		$kw_ref->{$regex} = [$weight, $tag];
+	while (my ($id, $regex, $weight, $tag) = $cursor->fetchrow) {
+		$kw_ref->{$regex} = [$weight, $tag, $id];
 	}
 
 	@{$keys_ref} = sort {
@@ -3757,6 +3916,7 @@ sub load_keywords {
 }
 
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -3794,9 +3954,10 @@ sub source_name {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 check_regex(regex [, flags])
+
+Checks a given regex for errors.
 
 =over 4
 
@@ -3804,21 +3965,34 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $regex
+
+String containing a regular expression.
+
+=item $flags
+
+String containing flag modifiers for the given regular expression.
 
 =back
 
 =item Return value
 
+If no errors on regular expression, no value is returned. If there is an error, 
+then the return value contains the error message obtained when the regular expression
+was checked.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub check_regex {
 	my ($self, $regex, $flags) = @_;
 
@@ -3839,6 +4013,7 @@ sub check_regex {
 }
 
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -3864,6 +4039,7 @@ Foooooooo.
 =back
 
 =cut
+
 sub getWeekCounts {
 	my($self) = @_;
 	my($results, $returnable);
@@ -3884,6 +4060,7 @@ sub getWeekCounts {
 }
 
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -3909,6 +4086,7 @@ Foooooooo.
 =back
 
 =cut
+
 sub getDayCounts {
 	my($self) = @_;
 	my(@days) = (1,3,7);
@@ -4000,9 +4178,10 @@ EOT
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getMiner(miner_id)
+
+Gets all data associated with a NewsVac miner.
 
 =over 4
 
@@ -4010,21 +4189,28 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $miner_id
+
+Numeric ID for the miner in question.
 
 =back
 
 =item Return value
 
+Hash ref containing data from the 'miner' table if the associated ID exists.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getMiner {
 	my($self, $miner_id) = @_;
 
@@ -4036,9 +4222,10 @@ sub getMiner {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getMinerURLs(miner_id)
+
+Gets all URLs associated with a given NewsVac miner.
 
 =over 4
 
@@ -4046,21 +4233,34 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $miner_id
+
+Numeric ID of the miner in question.
 
 =back
 
 =item Return value
 
+List of array references, each array reference containing:
+
+	[ url_id, url ]
+	
+Where $url_id is the ID of a given URL
+	and
+$url is the string containing the complete URL.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getMinerURLs {
 	my($self, $miner_id) = @_;
 
@@ -4076,9 +4276,9 @@ sub getMinerURLs {
 
 ############################################################
 
-=head2 foo( [, ])
+=head2 setMiner(miner_id, data)
 
-Foooooooo.
+Sets the data for a given miner.
 
 =over 4
 
@@ -4086,17 +4286,27 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $miner_id
+
+Numeric ID associated with the miner to update.
+
+=item $data
+
+Hash reference containing the update data.
 
 =back
 
 =item Return value
 
+Result of Slash::DB::sqlUpdate() command.
 
 =item Side effects
 
+Modifies the 'miner' table.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -4250,9 +4460,9 @@ sub deleteURL {
 
 ############################################################
 
-=head2 foo( [, ])
+=head2 getUrlList([match, owner, start, limit])
 
-Foooooooo.
+Gets the list of URLs associated with any defined miner over the entire NewsVac database.
 
 =over 4
 
@@ -4260,21 +4470,84 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $match
+
+Optional. Substring to match against in URLs.
+
+=item $owner
+
+Optional. Limit returned values to URLs associated with miners owned by a given
+NewsVac admin. Note that this uses the author NAME, not the Author ID. This may
+be changed at a later date.
+
+=item $start
+
+Optional. Number of records to offset before start of result set. Default is 0. 
+
+=item $limit
+
+Optional. Limits the number of results returned. Default is 500. Maximum allowed value
+is 9,999.
 
 =back
 
 =item Return value
 
+Returns a list of hash references representing URL data associated with a miner. 
+Data returned for each array element is as follows:
+
+=over 4
+
+=item url_id
+
+ID of URL
+
+=item url
+
+String containing complete URL
+
+=item is_success
+
+Was the last request made to this URL successful?
+
+=item last_success
+
+Date of last successful connection to this URL.
+
+=item last_success_formatted
+
+Formatted value of above date according to current user preferences.
+
+=item miner_id
+
+Miner associated with this URL.
+
+=item name
+
+Name of miner associated with this URL.
+
+=item message_body_length
+
+Length of the content data available at this URL upon last successful connection.
+
+=item referencing
+
+Number of relationships associated with this URL.
+
+=back
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getUrlList {
 	my($self, $match, $owner, $start, $limit) = @_;
 
@@ -4323,9 +4596,10 @@ sub getUrlList {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getMinerURLIds(miner_id)
+
+Obtains the list of URL IDs associated with a given miner.
 
 =over 4
 
@@ -4333,21 +4607,28 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $miner_id
+
+Numeric value containing the ID of the miner in question.
 
 =back
 
 =item Return value
 
+Array containing the list of URL IDs associated with the given miner.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getMinerURLIds {
 	my($self, $miner_id) = @_;
 
@@ -4361,9 +4642,10 @@ sub getMinerURLIds {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getMinerRegexps(miner_id)
+
+Obtains the regular expressions associated with a given NewsVac Miner.
 
 =over 4
 
@@ -4371,21 +4653,33 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $miner_id
+
+Numeric value containing the ID of the miner in question.
 
 =back
 
 =item Return value
 
+Hash reference containing the following keys:
+
+	pre_stories_text
+	pre_stories_regex
+	post_stories_text
+	post_stories_regex
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getMinerRegexps {
 	my($self, $miner_id) = @_;
 
@@ -4399,9 +4693,10 @@ sub getMinerRegexps {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getURLRelationships(url_id[, max_results])
+
+Obtains URL relationship data associated with a given NewsVac URL ID.
 
 =over 4
 
@@ -4409,21 +4704,40 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $url_id
+
+Numeric ID associated with the URL in question.
+
+=item $max_results
+
+Number limiting the size of the result set.
 
 =back
 
 =item Return value
 
+An array of hash references representing relationship data. Each element of the
+array being one relationship. The following keys should be defined in each
+array element:
+
+	url_id
+	url
+	title
+	last_attempt
+	last_success
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getURLRelationships {
 	my($self, $url_ids, $max_results) = @_;
 	@{$url_ids} = grep { /^\d+$/ } @{$url_ids};
@@ -4452,9 +4766,10 @@ sub getURLRelationships {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getURLData(url_id)
+
+Obtains all relevant data associated with a given URL ID.
 
 =over 4
 
@@ -4462,21 +4777,36 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $url_id
+
+Numeric value representing the ID of the URL in question.
 
 =back
 
 =item Return value
 
+Depending on context, either an array containing the URL data or a Hash reference.
+If this routine is called in list context the return value will be of the following form:
+
+	(url_id, url, title, miner_id, last_attempt, last_success, status_code,
+	 reason_phrase, size of URL content [message body size])
+
+If called in a scalar contect, the return value is a hashref which uses the above
+names as keys for the specific fields, be aware that the key name for the last value
+above is "message_body".
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getURLData {
 	my($self, $url_id) = @_;
 	my $returnable;
@@ -4501,9 +4831,10 @@ EOT
 }
 
 ############################################################
-=head2 foo( [, ])
+=head2 getURLRelationCount(url_id)
 
-Foooooooo.
+Obtain the number of relationships in the NewsVac URL Database associated with a 
+given URL ID.
 
 =over 4
 
@@ -4511,21 +4842,28 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $url_id
+
+ID associated with the URL whose relationship count we wish to determine.
 
 =back
 
 =item Return value
 
+Number representing the number of relationships for the given URL ID.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getURLRelationCount {
 	my($self, $url_id) = @_;
 
@@ -4542,31 +4880,36 @@ sub getURLRelationCount {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getURLCounts( )
+
+Obtain the following information from the NewsVac URL database: the number of total
+URLs, and the number of URLs that ARE NOT associated with any miner.
 
 =over 4
 
 =item Parameters
 
-=over 4
-
-=item
-
-=back
+None.
 
 =item Return value
 
+List containing the requested values:
+
+	(number of URLs, number of URLs with no miner)
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getURLCounts {
 	my($self) = @_;
 
@@ -4579,9 +4922,10 @@ sub getURLCounts {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getURLBody(url_id)
+
+Retrieves the content associated with a given NewsVac URL ID.
 
 =over 4
 
@@ -4589,21 +4933,29 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $url_body
+
+Numeric ID of the URL one wishes to retrieve a body for.
 
 =back
 
 =item Return value
 
+The message body associated with the given URL ID. Be careful, sometimes this value
+can be very large as the entire content of the webpage will be returned in this scalar!
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getURLBody {
 	my($self, $url_id) = @_;
 
@@ -4620,9 +4972,10 @@ sub getURLBody {
 
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getSpiderList([match])
+
+Obtains the list of spiders currently defined in the NewsVac database.
 
 =over 4
 
@@ -4630,21 +4983,29 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $match
+
+If present, forces the returned list to only return spiders matching the substring
+given in this variable.
 
 =back
 
 =item Return value
 
+An array of has references, each hash representing spider data.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getSpiderList {
 	my($self, $match) = @_;
 
@@ -4672,9 +5033,10 @@ sub getSpiderList {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getSpider(spider_id)
+
+Obtains the data for a NewsVac spider given its ID.
 
 =over 4
 
@@ -4682,21 +5044,35 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $spider_id
+
+Numeric value containing ID of spider in question.
 
 =back
 
 =item Return value
 
+Depending on context, will return either an array or a hash reference.
+
+For the array context, the following is returned:
+
+	(name, last_edit, last_edit_aid, conditions, group_0_selects, commands)
+
+For the scalar context, a hash reference is returned with key value pairs corresponding
+to the list above.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getSpider {
 	my($self, $spider_id) = @_;
 	my $returnable;
@@ -4767,9 +5143,11 @@ Update's the data for a given spider in the NewsVac database.
 =over 4
 
 =item $spider_id
+
 ID associated with the spider to update.
 
 =item %$data
+
 Hashref of hasrefs containing the timespec data. Each element of the hashref 
 is arranged as follows:
 
@@ -4819,7 +5197,7 @@ sub setSpiderTimespecs {
 			$self->sqlInsert('spider_timespec', {
 				name 		=> $timespecs->{$_}{name},
 				timespec	=> $timespecs->{$_}{timespec},
-				-last_run	=> 'now()',
+				-last_run	=> 'unix_timestamp()',
 			});
 		} else {
 			$self->sqlReplace('spider_timespec', {
@@ -4870,7 +5248,8 @@ sub getSpiderTimespecs {
 	my $returnable = $self->sqlSelectAllHashrefArray(
 		'*',
 		'spider_timespec',
-		'name=' . $self->sqlQuote($spider_name)
+		'name=' . $self->sqlQuote($spider_name),
+		'order by timespec_id'
 	);
 
 	return $returnable;
@@ -4881,7 +5260,7 @@ sub getSpiderTimespecs {
 
 =head2 getSpiderName(spider_id)
 
-Foooooooo.
+Get's the name associated with a given NewsVac Spider ID.
 
 =over 4
 
@@ -4919,6 +5298,8 @@ sub getSpiderName {
 
 	return $returnable;
 }
+
+
 
 ############################################################
 =head2 sqlInsert($table, $data, [, $extra])

@@ -53,8 +53,12 @@ __template__
 </table>
 
 [% 
-DEFAULT timespecs=[];
-IF form.addtimespec; timespecs.push({ timespec_id=>0 }); END;
+# We perform the check on 'timespec_0_err' here in case a previous form 
+# attempted to add a timespec, but used "Save" rather than "Add Timespec" 
+# to submit the form. 
+DEFAULT timespecs=[]; 
+errkey = "timespec_0_err";
+IF form.addtimespec || form.$errkey; timespecs.push({ timespec_id=>0 }); END;
 IF timespecs.size -%]
 <P>
 [% INCLUDE titlebar width="75%" title="Time Specifications" %]

@@ -1,9 +1,11 @@
-DROP TABLE IF EXISTS keyword;
-CREATE TABLE keyword (
+DROP TABLE IF EXISTS newsvac_keywords;
+CREATE TABLE newsvac_keywords (
+  id SMALLINT UNSIGNED NOT NULL auto_increment,
   regex char(255) DEFAULT '' NOT NULL,
   weight float(10,2),
   tag char(20),
-  PRIMARY KEY (regex)
+  PRIMARY KEY (id),
+  UNIQUE regex (regex)
 );
 
 DROP TABLE IF EXISTS robosubmitlock;
