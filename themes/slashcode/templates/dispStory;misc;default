@@ -37,7 +37,7 @@ END %]
 
 [% PROCESS titlebar %]
 
-	<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
+	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
 		<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		<TD BGCOLOR="#E6E6E6" WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>

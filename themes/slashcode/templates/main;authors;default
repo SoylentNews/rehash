@@ -25,15 +25,15 @@ authors here, along with the number of articles that they
 have posted.</P>
 [% FOREACH uid = list %]
 	[% IF uid.0 > 0 %]
-		<H2><B><A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid.1 %]">[% uid.0 %]</A></B>
-		<A HREF="[% uid.3 %]">[% uid.2 %]</A></H2>
+		<font size="+2"><B><A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid.1 %]">[% uid.0 %]</A>
+		(<A HREF="[% uid.3 %]">[% uid.2 %]</A>)</font>
 		[% IF admin %]
-			<A HREF="[% constants.rootdir %]/users.pl?uid=[% uid.1 %]">edit</A>
+			[<A HREF="[% constants.rootdir %]/users.pl?uid=[% uid.1 %]">edit</A>]
 		[% END %]
+		<P>[% uid.4 %]
 	[% END %]
-[% uid.4 %]
 [% END %]
-<P><BR><FONT SIZE="2"><CENTER>generated on [% time %]</CENTER></FONT><BR>
+<P><BR><FONT SIZE="2"><CENTER>Generated on [% time %].</CENTER></FONT><BR>
 
 __seclev__
 10000

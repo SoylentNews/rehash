@@ -13,7 +13,7 @@ en_US
 __name__
 storylink
 __template__
-	<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
+	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
 		<TD BACKGROUND="[% constants.imagedir %]/wl_cccccc.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#CCCCCC">
