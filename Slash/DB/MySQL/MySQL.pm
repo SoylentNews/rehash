@@ -2795,7 +2795,7 @@ sub _genericSet {
 		# need for a fully sql92 database.
 		# transactions baby, transactions... -Brian
 		for (@param)  {
-			$self->sqlReplace($param_table, { $table_prime => $self->sqlQuote($id), name => $_->[0], value => $_->[1]});
+			$self->sqlReplace($param_table, { $table_prime => $id, name => $_->[0], value => $_->[1]});
 		}
 	} else {
 		$self->sqlUpdate($table, $value, $table_prime . '=' . $self->{_dbh}->quote($id));
