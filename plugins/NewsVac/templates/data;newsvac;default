@@ -541,11 +541,11 @@ form owner_id: 		[% form.owner_aid %]
 [% before %]<b>[% excerpt %]</b>[% after %]
 
 [% CASE "formatted_excerpt" -%]
-[% slug %]"</i>
+[% slug %][%# "</i>
 
 
 <p>
-<i>"[% excerpts.join(' ... ') %]
+<i>"% excerpts.join(' ... ') #%]
 
 [% CASE "update_miner_nonedelete" -%]
 Miner 'none' is a placeholder and can not be deleted!
