@@ -184,7 +184,7 @@ sub previewForm {
 		submitter	=> $sub->{uid},
 		subid		=> $form->{subid},
 		admin_flag 	=> $admin_flag,
-		extras 	=> $extracolumns,
+		extras 		=> $extracolumns,
 		lockTest	=> lockTest($sub->{subj}),
 		section		=> $form->{section} ||
 				   $constants->{defaultsection},
@@ -214,9 +214,9 @@ sub submissionEd {
 	$def_section	= getData('defaultsection');
 	$def_note	= getData('defaultnote');
 	if ($user->{section} && !$form->{section}) {
-		$cur_section	= $user->{section};
+		$cur_section = $user->{section};
 	} else {
-		$cur_section	= $form->{section} || $def_section;
+		$cur_section = $form->{section} || $def_section;
 	}
 	$cur_note	= $form->{note} || $def_note;
 	$sections = $slashdb->getSubmissionsSections();
@@ -389,7 +389,8 @@ sub displayForm {
 		# we assume this is like if form.email is passed in
 		$fakeemail = strip_attribute($user->{fakeemail});
 	}
-	my $extracolumns = $slashdb->getSectionExtras($form->{section} || $section || $constants->{defaultsection}) || [ ];
+	my $extracolumns = $slashdb->getSectionExtras($form->{section}
+		|| $section || $constants->{defaultsection}) || [ ];
 
 	slashDisplay('displayForm', {
 		fixedstory	=> strip_html(url2html($form->{story})),
@@ -398,7 +399,7 @@ sub displayForm {
 		fakeemail	=> processSub($fakeemail, $known),
 		section		=> $form->{section} || $section || $constants->{defaultsection},
 		uid		=> $user->{uid},
-		extras 	=> $extracolumns,
+		extras 		=> $extracolumns,
 		topic		=> $topic,
 		width		=> '100%',
 		title		=> $title,

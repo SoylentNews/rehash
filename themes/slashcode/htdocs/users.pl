@@ -1830,7 +1830,7 @@ sub saveComm {
 		posttype	=> $form->{posttype},
 		threshold	=> $form->{uthreshold},
 		nosigs		=> ($form->{nosigs}     ? 1 : 0),
-		no_spell		=> ($form->{no_spell}     ? 1 : 0),
+		no_spell	=> ($form->{no_spell}   ? 1 : 0),
 		reparent	=> ($form->{reparent}   ? 1 : 0),
 		noscores	=> ($form->{noscores}   ? 1 : 0),
 		hardthresh	=> ($form->{hardthresh} ? 1 : 0),
