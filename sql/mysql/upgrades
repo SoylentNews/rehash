@@ -2187,8 +2187,6 @@ INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Info','stats','[% constants.rootdir %]/stats.pl',100,0,8);
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Config','config','[% constants.rootdir %]/admin.pl?op=topics',10000,0,9);
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_144, Start of T_2_3_0_145 - 2004/03/23
 
 ALTER TABLE users_info ADD COLUMN csq_bonuses FLOAT NOT NULL DEFAULT '0';
@@ -2235,6 +2233,8 @@ INSERT INTO vars (name, value, description) VALUES ('m2_use_sliding_consensus', 
 INSERT INTO vars (name, value, description) VALUES ('mailpasswd_portscan', '0', 'If true, when sending a password is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid mailing if successful');
 
 INSERT INTO vars (name, value, description) VALUES ('newuser_portscan', '0', 'If true, when creating a new user account is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid account creation if successful');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_146, Start of T_2_3_0_147 - 2004/03/30
 
