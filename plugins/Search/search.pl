@@ -106,7 +106,7 @@ sub commentSearch {
 	my $slashdb = getCurrentDB();
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $start = fixint($form->{start}) || 0;
+	my $start = $form->{start} || 0;
 	my $comments = $searchDB->findComments($form, $start, $constants->{search_default_display} + 1);
 
 	# check for extra articles ... we request one more than we need
@@ -144,7 +144,7 @@ sub userSearch {
 	my ($form, $constants) = @_;
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $start = fixint($form->{start}) || 0;
+	my $start = $form->{start} || 0;
 	my $users = $searchDB->findUsers($form, $start, $constants->{search_default_display} + 1);
 
 	# check for extra articles ... we request one more than we need
@@ -181,7 +181,7 @@ sub storySearch {
 	my ($form, $constants) = @_;
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $start = fixint($form->{start}) || 0;
+	my $start = $form->{start} || 0;
 	my $stories = $searchDB->findStory($form, $start, $constants->{search_default_display} + 1);
 
 	# check for extra articles ... we request one more than we need
@@ -220,7 +220,7 @@ sub commentSearchRSS {
 	my $slashdb = getCurrentDB();
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $start = fixint($form->{start}) || 0;
+	my $start = $form->{start} || 0;
 	my $comments = $searchDB->findComments($form, $start, 15);
 
 	my $rss = XML::RSS->new(
@@ -255,7 +255,7 @@ sub userSearchRSS {
 	my ($form, $constants) = @_;
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $start = fixint($form->{start}) || 0;
+	my $start = $form->{start} || 0;
 	my $users = $searchDB->findUsers($form, $start, 15);
 
 	my $rss = XML::RSS->new(
@@ -291,7 +291,7 @@ sub storySearchRSS {
 	my ($form, $constants) = @_;
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $start = fixint($form->{start}) || 0;
+	my $start = $form->{start} || 0;
 	my $stories = $searchDB->findStory($form, $start, 15);
 
 	my $rss = XML::RSS->new(
