@@ -54,12 +54,12 @@ sub new {
 		if (getCurrentStatic('adminmail_check_replication')) {
 			my $wait_sec = 600;
 			my $num_try = 0;
-			my $max_tries = 12;
+			my $max_tries = 48;
 			
 			my $caught_up = 0;
 			while (!$caught_up) {
 				my $max_id = $self->sqlSelect("MAX(id)", "accesslog");
-				$caught_up = $self->sqlCount("accesslog", "id=$max_id AND ts>='$today\000000'");
+				$caught_up = $self->sqlCount("accesslog", "id=$max_id AND ts>='$today" . "000000'");
 				$num_try++;
 				if (!$caught_up) {
 					if ($num_try < $max_tries) {
