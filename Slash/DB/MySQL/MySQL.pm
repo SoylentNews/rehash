@@ -617,7 +617,7 @@ sub getSectionExtras {
 	my $answer = $self->sqlSelectAll(
 		'name,value,type,section', 
 		'section_extras', 
-		'section ='. $self->sqlQuote($section)
+		'section = '. $self->sqlQuote($section)
 	);
 
 	return $answer;
@@ -4229,7 +4229,7 @@ sub getSlashConf {
 	# This allows you to do stuff like constant.plugin.Zoo in a template and know that the plugin is installed -Brian
 	my $plugindata = $self->sqlSelectColArrayref('value', 'site_info', "name='plugin'");
 	for (@$plugindata) {
-		$conf{plugin}->{$_} = 1;
+		$conf{plugin}{$_} = 1;
 	}
 
 	# the rest of this function is where is where we fix up
@@ -4241,6 +4241,7 @@ sub getSlashConf {
 	$conf{basedir}		||= "$conf{datadir}/public_html";
 	$conf{imagedir}		||= "$conf{rootdir}/images";
 	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";
+	$conf{index_handler}	||= 'index.pl';
 	$conf{cookiepath}	||= URI->new($conf{rootdir})->path . '/';
 	$conf{maxkarma}		= 999  unless defined $conf{maxkarma};
 	$conf{minkarma}		= -999 unless defined $conf{minkarma};
@@ -5727,7 +5728,6 @@ sub sqlShowStatus {
 
 	return $status;
 }
-
 
 ########################################################
 # Get a unique string for an admin session
