@@ -1174,44 +1174,44 @@ Rendered story
 =cut
 
 sub displayStory {
-	my($sid, $full, $other) = @_;	
+	my($sid, $full, $options) = @_;	
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	my $cache = getCurrentCache();
-
+	my $form = getCurrentForm();
+	
+	my $return;
+	my $story = $reader->getStory($sid, "", $options->{get_cacheable});
 	# Sites without an "index" section will never use this, which is probably ok.
-#	if (!$user->{no_icons} && $constants->{section} eq 'index' && $cache{$constants->{section}, $sid}) {
-#		$story->{atstorytime} = $user->{aton} . " " . timeCalc($story->{'time'});
-#	}
-	my $story = $reader->getStory($sid, '', $other->{force_cache});
-	my $author = $reader->getAuthor($story->{uid},
-		['nickname', 'fakeemail', 'homepage']);
-	my $topic = $reader->getTopic($story->{tid});
-
-	# convert the time of the story (this is database format)
-	# and convert it to the user's prefered format
-	# based on their preferences
-
-	$story->{storytime} = timeCalc($story->{'time'});
-	if ($story->{is_future} && !($user->{author} || $user->{is_admin})) {
-		$story->{atstorytime} = $constants->{subscribe_future_name};
+	if (!$user->{no_icons} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable}) {
+		$return = $story->{rendered};
 	} else {
-		$story->{atstorytime} = $user->{aton} . " " . timeCalc($story->{'time'});
+		my $author = $reader->getAuthor($story->{uid},
+				['nickname', 'fakeemail', 'homepage']);
+		my $topic = $reader->getTopic($story->{tid});
+		$story->{atstorytime} = "__TIME_TAG__";
+
+		$story->{introtext} = parseSlashizedLinks($story->{introtext});
+		$story->{introtext} = processSlashTags($story->{introtext}, {});
+		if ($full) {
+			$story->{bodytext} = parseSlashizedLinks($story->{bodytext});
+			$story->{bodytext} = processSlashTags($story->{bodytext}, {});
+			$options->{stid} = $reader->getStoryTopicsJustTids($story->{sid});
+		}
+
+		$return = dispStory($story, $author, $topic, $full, $options);
 	}
 
-	$story->{introtext} = parseSlashizedLinks($story->{introtext});
-	$story->{introtext} = processSlashTags($story->{introtext}, {});
-	if ($full) {
-		$story->{bodytext} = parseSlashizedLinks($story->{bodytext});
-		$story->{bodytext} = processSlashTags($story->{bodytext}, {});
-		$other->{stid} = $reader->getStoryTopicsJustTids($story->{sid});
+	my $storytime = timeCalc($story->{'time'});
+	my $atstorytime;
+	if ($story->{is_future} && !($user->{author} || $user->{is_admin})) {
+		$atstorytime = $constants->{subscribe_future_name};
+	} else {
+		$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'});
 	}
+	$return =~ s/\Q__TIME_TAG__\E/$atstorytime/ unless $options->{get_cacheable};
 
-	my $return = dispStory($story, $author, $topic, $full, $other);
-
-	#$story->{introtext} =~ s/__TIME_TAG__/$story->{atstorytime}/g;# = $user->{aton} . " " . timeCalc($story->{'time'});
 	return $return;
 }
 

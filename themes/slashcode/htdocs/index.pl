@@ -72,29 +72,10 @@ sub main {
 	# 3) This user is not a subscriber, and non-subscribers are not
 	#    to be made aware of this story's existence, so ignore it.
 	my $future_plug = 0;
-	if (!$user->{is_anon} && $user->{is_subscriber} && $constants->{subscribe_future_secs} > 0) {
-	# So the deal is that story is no longer an array and position 3,5,7 were never used in dispStory in the first place :)
-	# The only problem I see is if there were more future stories then the user had positions for on the frontpage,
-	# this would cause stories to get shoved into older stories were they would become corrupted.
-	# Which really won't harm anything at all :) -Brian
-#		for my $story (@$stories) {
-#			if ($story->[10]) {
-#				$story->[3] =
-#					$story->[5] =
-#					$story->[7] = $constants->{subscribe_future_name};
-#			}
-#		}
-	} elsif (scalar grep { $_->{is_future} } @$stories) {
-		# There are future stories but we don't get to read them.
-		# Wipe them so we don't see them:
-		@$stories = grep { !$_->{is_future} } @$stories;
-		# Now, if the user is permitted to know about future
-		# stories, set the var so we'll tell them in the template.
-		if (!$user->{is_anon}
-			&& !$user->{is_subscriber}
-			&& $constants->{subscribe_future_plug}) {
-			$future_plug = 1;
-		}
+
+	# Just check the first story since they are in order -Brian
+	if ($stories->[0]{is_future} && !$user->{is_subscriber} && $constants->{subscribe_future_plug}) {
+		$future_plug = 1;
 	}
 
 	# displayStories() pops stories off the front of the @$stories array.
@@ -307,6 +288,7 @@ sub displayStories {
 	my $story;
 	while ($story = shift @{$stories}) {
 		my($tmpreturn, $other, @links);
+		next if (($story->{is_future} && !$user->{is_subscriber}) || ($story->{is_future} && $constants->{subscribe_future_secs} < 1)) ;
 		my @threshComments = split m/,/, $story->{hitparade};  # posts in each threshold
 
 		my $storytext = displayStory($story->{sid}, '', $other);

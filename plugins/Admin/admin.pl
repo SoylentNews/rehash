@@ -976,7 +976,6 @@ sub getRelated {
 			. join("|", map { "\Q$_" } @tids)
 		. ")"
 		. "(?!\\d)";
-use Data::Dumper; print STDERR "getRelated tid_regex '$tid_regex' for tid " . Dumper($tid);
 
 	if ($rl) {
 		my @matchkeys =
@@ -1669,6 +1668,11 @@ sub updateStory {
 	$form->{introtext} = cleanSlashTags($form->{introtext});
 	$form->{bodytext} = cleanSlashTags($form->{bodytext});
 
+	my $rendered;
+	{
+		local $user->{currentSection} = "index";
+		$rendered =  displayStory($form->{sid},'', { get_cacheable => 1});
+	}
 	my $data = {
 		uid		=> $form->{uid},
 		sid		=> $form->{sid},
@@ -1684,6 +1688,7 @@ sub updateStory {
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		subsection	=> $form->{subsection},
+		rendered        => $rendered,
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
@@ -1887,6 +1892,10 @@ sub saveStory {
 		}
 	}
 	my $sid = $slashdb->createStory($data);
+	{
+		local $user->{currentSection} = "index";
+		$slashdb->setStory($sid, { rendered => displayStory($sid,'', { get_cacheable => 1})});
+	}
 
 	if ($sid) {
 		slashHook('admin_save_story_success', { story => $data });

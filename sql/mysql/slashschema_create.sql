@@ -787,6 +787,7 @@ CREATE TABLE story_text (
 	introtext text,
 	bodytext text,
 	relatedtext text,
+	rendered text,
 	FOREIGN KEY (sid) REFERENCES stories(sid),
 	PRIMARY KEY (sid)
 ) TYPE = myisam;

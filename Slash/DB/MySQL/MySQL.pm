@@ -4619,7 +4619,9 @@ sub getCommentsForUser {
 # - Jamie 2003/04
 sub getCommentText {
 	my($self, $cid) = @_;
+	return unless $cid;
 	if (ref $cid) {
+		return unless scalar(@$cid);
 		if (ref $cid ne "ARRAY") {
 			errorLog("_getCommentText called with ref to non-array: $cid");
 			return { };
@@ -6304,10 +6306,12 @@ sub getTopicImageBySection {
 # Brian, make this cache -Brian
 sub getStoryTopicsJustTids {
 	my($self, $sid, $options) = @_;
+	return $self->{_story_topics}{$sid} if $self->{_story_topics}{$sid} && !$options->{no_parents};
 	my $where = "1=1";
 	$where .= " AND is_parent = 'no'" if $options->{no_parents};
 	$where .= " AND sid = " . $self->sqlQuote($sid);
 	my $answer = $self->sqlSelectColArrayref('tid', 'story_topics', $where);
+	$self->{_story_topics}{$sid} = $answer;
 
 	return  $answer;
 }
