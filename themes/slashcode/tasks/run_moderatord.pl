@@ -282,7 +282,7 @@ sub reconcile_m2 {
 	# hashrefs with values title, url, subject, vote, reason).
 	my %m2_results = ( );
 
-	# We load the optional plugin object here.
+	# We load the optional plugin objects here.
 	my $messages = getObject('Slash::Messages');
 	my $statsSave = getObject('Slash::Stats::Writer');
 

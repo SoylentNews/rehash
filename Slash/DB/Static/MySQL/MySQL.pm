@@ -1322,13 +1322,76 @@ sub getModsNeedingReconcile {
 	$limit = "LIMIT $batchsize" if $batchsize;
 
 	my $mods_ar = $self->sqlSelectAllHashrefArray(
-		'*',
-		'moderatorlog',
-		'm2status=1',
+		'moderatorlog.id AS id, moderatorlog.ipid AS ipid,
+			moderatorlog.subnetid AS subnetid,
+			moderatorlog.uid AS uid, val,
+			moderatorlog.sid AS sid,
+			moderatorlog.ts AS ts,
+			moderatorlog.cid AS cid, cuid,
+			moderatorlog.reason AS reason,
+			active, spent, m2count, m2status,
+			points_orig,
+		 comments.pid AS comment_pid,
+		 UNIX_TIMESTAMP(comments.date) AS comment_unixts,
+		 UNIX_TIMESTAMP(discussions.ts) AS discussion_unixts,
+		 discussions.commentcount AS discussion_commentcount',
+		'moderatorlog,comments,discussions',
+		'm2status=1
+			AND moderatorlog.cid = comments.cid
+			AND moderatorlog.sid = discussions.id',
 		"ORDER BY id $limit",
 	);
 
+	# Now get some extra data about each discussion and the
+	# moderated comments in question.  We want the percentile
+	# of each comment in its discussion, and also the time
+	# in seconds between discussion opening and the comment
+	# being posted.
+	if ($mods_ar && @$mods_ar) {
+		my %disc_ids = map { ($_->{sid}, 1) } @$mods_ar;
+		my %sid_cids = ( );
+		my $sid_in_clause = "sid IN (" . join(", ", keys %disc_ids) . ")";
+		my $cid_ar = $self->sqlSelectAll(
+			"sid, cid",
+			"comments",
+			$sid_in_clause,
+			"ORDER BY sid, cid");
+		for my $ar (@$cid_ar) {
+			my($sid, $cid) = @$ar;
+			push @{$sid_cids{$sid}}, $cid;
+		}
+		for my $mod (@$mods_ar) {
+			# Generate the cid_percentile, where 0 is the
+			# first comment in the discussion, and 100 is
+			# the last comment (posted so far).
+			my($sid, $cid) = ($mod->{sid}, $mod->{cid});
+			my $cidlist_ar = $sid_cids{$sid};
+			if (scalar(@$cidlist_ar < 10)) {
+				$mod->{cid_percentile} = undef;
+			} else {
+				$mod->{cid_percentile} = _find_percentile(
+					$cid, $cidlist_ar);
+			}
+			# Generate the number of seconds between
+			# discussion opening and the comment being
+			# posted.
+			$mod->{secs_before_post} = $mod->{comment_unixts}
+				- $mod->{discussion_unixts};
+		}
+	}
+
 	return $mods_ar;
+}
+
+sub _find_percentile {
+	my($item, $list) = @_;
+	my $n = $#$list;
+	return undef if $n < 1;
+	my $i = $n;
+	for (0..$n-1) {
+		$i = $_, last if $item <= $list->[$_];
+	}
+	return sprintf("%.1f", 100*($i/$n));
 }
 
 ########################################################
@@ -1528,7 +1591,8 @@ sub refreshUncommonStoryWords {
 		"stories.sid = story_text.sid
 		 AND stories.time >= DATE_SUB(NOW(), INTERVAL $n_days DAY)"
 	);
-	my %common_words = map {$_ => 1} split " ", ($constants->{common_story_words} || "");
+	my %common_words = map { ($_, 1) } split " ",
+		($self->getVar('common_story_words', 'value', 1) || "");
 	my @weights = (
 		$constants->{uncommon_weight_title} || 8,
 		$constants->{uncommon_weight_introtext} || 1,
