@@ -5294,7 +5294,7 @@ sub getSection {
 		table		=> 'sections',
 		table_prime	=> 'section',
 		arguments	=> [($self, $section, $value)],
-		col_table 	> { label => 'contained', table => 'sections_contained', table_index => 'container', key => 'section'},
+		col_table 	=> { label => 'contained', table => 'sections_contained', table_index => 'container', key => 'section'},
 	});
 	return $answer;
 }

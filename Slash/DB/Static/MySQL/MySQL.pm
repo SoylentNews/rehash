@@ -1218,7 +1218,7 @@ sub createSlashdStatus {
 sub getSectionsDirty {
 	my($self) = @_;
 
-	$self->sqlSelectColArrayref('section', 'sections', 'writestatus = "dirty"');
+	$self->sqlSelectColArrayref('section', 'sections', '(writestatus = "dirty") OR ((UNIX_TIMESTAMP(last_update) + rewrite) <  UNIX_TIMESTAMP(now()) )');
 }
 
 1;

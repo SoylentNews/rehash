@@ -464,7 +464,7 @@ DROP TABLE IF EXISTS sections;
 CREATE TABLE sections (
 	id smallint UNSIGNED NOT NULL auto_increment,
 	section varchar(30) NOT NULL,
-	artcount mediumint DEFAULT '30' NOT NULL,
+	artcount mediumint UNSIGNED DEFAULT '30' NOT NULL,
 	title varchar(64),
 	qid mediumint,
 	isolate tinyint DEFAULT '0' NOT NULL,
@@ -476,6 +476,9 @@ CREATE TABLE sections (
 	index_handler varchar(30) DEFAULT "index.pl" NOT NULL,
 	writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL,
 	type ENUM("contained", "collected") DEFAULT 'contained' NOT NULL,
+	rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL,
+	last_update timestamp,
+	title varchar(64),
 	KEY (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (id)

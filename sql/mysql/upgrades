@@ -487,3 +487,5 @@ CREATE TABLE sections_contained (
 	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
+ALTER TABLE sections ADD rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL;
+ALTER TABLE sections ADD last_update timestamp;
