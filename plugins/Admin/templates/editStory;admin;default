@@ -136,7 +136,7 @@ __template__
 		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
 		[% # yeah, I know... %]
 		<B>[% extra.0 %]</B> </FONT></TD>
-		[% IF extra.2 == text %]
+		[% IF extra.2 == 'text' %]
 		<TD BGCOLOR="[% user.bg.2 %]">
 		<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% storyref.${extra.1} | strip_attribute %]" SIZE="50">
 		[% ELSE %]
