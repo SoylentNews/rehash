@@ -79,8 +79,10 @@ sub handler {
 			&& Slash::Apache::ConnectionIsSSL() ) {
 			# Accessing non-dynamic URL on SSL webserver; redirect
 			# to the non-SSL URL.
+			my $newloc = $uri . "?" . $r->args;
 			$r->err_header_out(Location =>
-				URI->new_abs($uri, $constants->{absolutedir}));
+				URI->new_abs($newloc,
+					$constants->{absolutedir}) );
 			return REDIRECT;
 		}
 		return OK;
@@ -201,8 +203,9 @@ sub handler {
 		) ) {                             
 		# User is not an admin but is trying to connect to an admin-only
 		# webserver.  Redirect them to the non-SSL URL.
+		my $newloc = $uri . "?" . $r->args;
 		$r->err_header_out(Location =>
-			URI->new_abs($uri, $constants->{absolutedir}));
+			URI->new_abs($newloc, $constants->{absolutedir}));
 		return REDIRECT;
 	}
 	createCurrentCookie($cookies);
