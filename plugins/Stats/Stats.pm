@@ -44,7 +44,9 @@ sub new {
 		? $options->{day}
 		: sprintf("%4d-%02d-%02d", $yest_lt[5] + 1900, $yest_lt[4] + 1, $yest_lt[3]);
 
+	my $count = 0;
 	if ($options->{create}) {
+		# Why not just truncate? If we did we would never pick up schema changes -Brian
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
 		my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
 		$sth->execute();
@@ -55,6 +57,13 @@ sub new {
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid(uid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX section(section)");
 		$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' FOR UPDATE");
+		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp"))) {
+			for (1..4) {
+				sleep 5;
+				$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' FOR UPDATE");
+				return $self if $self->sqlSelect("count(id)", "accesslog_temp");
+			}
+		}
 	}
 
 	return $self;

@@ -126,7 +126,7 @@ sub _set_legend {
 sub _get_sections {
 	my $slashdb = getCurrentDB();
 	# don't modify the data, copy it
-	my %sections = %{$slashdb->getDescriptions('sections')};
+	my %sections = %{$slashdb->getDescriptions('sections-all')};
 	$sections{all} = 'All';
 	return \%sections;
 }
