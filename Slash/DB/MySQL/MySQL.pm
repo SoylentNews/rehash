@@ -1747,6 +1747,7 @@ sub savePollQuestion {
 			question	=> $poll->{question},
 			voters		=> $poll->{voters},
 			topic		=> $poll->{topic},
+			section		=> $poll->{section},
 			sid		=> $poll->{sid},
 			-date		=>'now()'
 		}, "qid	= $qid_quoted");
@@ -1755,6 +1756,7 @@ sub savePollQuestion {
 			question	=> $poll->{question},
 			voters		=> $poll->{voters},
 			topic		=> $poll->{topic},
+			section		=> $poll->{section},
 			sid		=> $poll->{sid},
 			uid		=> getCurrentUser('uid'),
 			-date		=>'now()'
@@ -3022,7 +3024,7 @@ sub getModeratorLogRandom {
 ########################################################
 sub countUsers {
 	my($self) = @_;
-	my($users) = $self->sqlSelect("count(*)", "users_count");
+	my($users) = $self->sqlCount('users_count');
 	return $users;
 }
 
@@ -4304,7 +4306,7 @@ sub _saveExtras {
 
 	# Update main-page write status if saved story is marked 
 	# "Always Display" or "Never Display".
-	$self->setVar('writestatus', 'dirty') if $story->{writestatus} < 1;
+	$self->setVar('writestatus', 'dirty') if $story->{displaystatus} < 1;
 
 	my $extras = $self->getSectionExtras($story->{section});
 	return unless $extras;
