@@ -366,7 +366,7 @@ sub _install {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "Failed on :$statement:\n";
+			print "=== ($hash->{name}) Failed on :$statement:\n";
 		}
 	}
 	@sql = ();
@@ -439,7 +439,7 @@ sub _install {
 		next unless $_;
 		s/;$//;
 		unless ($self->sqlDo($_)) {
-			print "Failed on :$_:\n";
+			print "=== ($hash->{name}) Failed on :$_:\n";
 		}
 	}
 	@sql = ();
