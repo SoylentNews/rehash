@@ -548,13 +548,18 @@ sub saveArticle {
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
 	my $description = strip_notags($form->{description});
 
-	unless ($description ne "" && $form->{article} ne "") {
-		unless ($ws) {
-			_printHead("mainhead") or return;
-			print getData('no_desc_or_article');
-			editArticle(@_, 1);
+	# from comments.pl
+	for ($description, $form->{article}) {
+		my $d = decode_entities($_);
+		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
+		if ($d !~ /\S/) {		# require SOME non-whitespace
+			unless ($ws) {
+				_printHead("mainhead") or return;
+				print getData('no_desc_or_article');
+				editArticle(@_, 1);
+			}
+			return 0;
 		}
-		return 0;
 	}
 
 	return 0 unless _validFormkey($ws ? qw(max_post_check interval_check) : ());
