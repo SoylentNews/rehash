@@ -318,7 +318,7 @@ sub IndexHandler {
 	if ($uri =~ m|^/(\w+)/$|) {
 		my $key = $1;
 		my $slashdb = getCurrentDB();
-		my $section = $slashdb->getSection($key);
+		my $section = $slashdb->getSection($key, 'id');
 		if ($section) {
 			my $basedir = $constants->{basedir};
 			my $index_handler = $section->{index_handler}
