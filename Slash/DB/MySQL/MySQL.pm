@@ -1380,9 +1380,15 @@ sub createAccessLogAdmin {
 	my($self, $op, $dat) = @_;
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
+	my $user = getCurrentUser();
 	my $r = Apache->request;
 
-	my $uid = $ENV{SLASH_USER};
+	# $ENV{SLASH_USER} wasn't working, was giving us some failed inserts
+	# with uid NULL. For details, do a
+	# grep -A1 'cannot be null' /var/log/banjo.slashdot.org_error_log
+	# on the SSL server. - Jamie 2002/12/24
+	# my $uid = $ENV{SLASH_USER};
+	my $uid = $user->{uid};
 	my $section = $constants->{section};
 	# The following two are special cases
 	if ($op eq 'index' || $op eq 'article') {
