@@ -99,7 +99,7 @@ END %]
 		<TR>
 			<TD ALIGN="RIGHT">Topic: </TD>
 			<TD>
-				[% Slash.selectTopic('topic', topic, section, 1) %]
+				[% Slash.selectTopic('topic', form.topic, section, 1) %]
 			</TD>
 		</TR>
 		<TR>
