@@ -1809,3 +1809,13 @@ INSERT INTO vars (name, value, description) VALUES ('draconian_charset','0','Con
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset_convert','0','Convert some of high-bit chars to ASCII representations instead (see draconian_charset)');
 
 # USEPERL LAST UPDATED HERE
+
+# selection choices for comment bytelimits
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 0, '128K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 1, '256K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 2, '384K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 3, '512K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 4, '640K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 5, '768K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 6, '896K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 7, '1024K');
