@@ -31,8 +31,8 @@ Meta Moderation
 and try again.</P>
 
 [% CASE 'thanks' %]
-Thanks for meta-moderating some of Slashdot's many moderations. This gives our
-moderators feedback and helps the whole system work!
+Thanks for meta-moderating some of [% constants.sitename %]'s many moderations.
+This gives our moderators feedback and helps the whole system work!
 <p>You probably want to go
 <A HREF="[% constants.rootdir %]/">home</A> now.
 
