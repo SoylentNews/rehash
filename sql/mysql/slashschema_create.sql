@@ -1154,13 +1154,13 @@ CREATE TABLE users_hits (
 DROP TABLE IF EXISTS users_index;
 CREATE TABLE users_index (
 	uid mediumint UNSIGNED NOT NULL,
-	story_never_topic text,
-	story_never_author varchar(255),
-	story_never_nexus varchar(255),
-	story_always_topic text,
-	story_always_author varchar(255),
-	story_always_nexus varchar(255),
-	exboxes varchar(255),
+	story_never_topic text DEFAULT '' NOT NULL,
+	story_never_author varchar(255) DEFAULT '' NOT NULL,
+	story_never_nexus varchar(255) DEFAULT '' NOT NULL,
+	story_always_topic text DEFAULT '' NOT NULL,
+	story_always_author varchar(255) DEFAULT '' NOT NULL,
+	story_always_nexus varchar(255) DEFAULT '' NOT NULL,
+	slashboxes text DEFAULT '' NOT NULL,
 	maxstories tinyint UNSIGNED DEFAULT '30' NOT NULL,
 	noboxes tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)

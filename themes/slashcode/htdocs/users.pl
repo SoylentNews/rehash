@@ -469,22 +469,19 @@ sub main {
 
 #################################################################
 sub checkList {
-	my $string = shift;
-        my $len = shift; 
+	my($string, $len) = @_;
 	my $constants = getCurrentStatic();
-	# what is this supposed to be for? -- pudge
-	$string = substr($string, 0, -1);
 
 	$string =~ s/[^\w,-]//g;
-	my @e = split m/,/, $string;
-	$string = sprintf "'%s'", join "','", @e;
-	$len ||= $constants->{checklist_length} || 255;
+	my @items = split /,/, $string;
+	$string = join ",", @items;
 
+	$len ||= $constants->{checklist_length} || 255;
 	if (length($string) > $len) {
 		print getError('checklist_err');
 		$string = substr($string, 0, $len);
-		$string =~ s/,'??\w*?$//g;
-	} elsif (length($string) < 3) {
+		$string =~ s/,?\w*$//g;
+	} elsif (length($string) < 1) {
 		$string = '';
 	}
 
@@ -1579,23 +1576,26 @@ sub tildeEd {
 	my $section_descref = { };
 	my $box_order;
 	my $sections_description = $reader->getSectionBlocks();
-	my $user_exbox_hr = { };
+	my $slashboxes_hr = { };
+	my $slashboxes_textlist = $user_edit->{slashboxes};
+	if (!$slashboxes_textlist) {
+		# Use the default.
+		my($boxes, $skinBoxes) = $reader->getPortalsCommon();
+		$slashboxes_textlist = join ",", @{$skinBoxes->{$constants->{mainpage_skid}}};
+	}
 	for my $bid (
 		map { /^'?([^']+)'?$/; $1 }
 		split /,/,
-		($user_edit->{exboxes} || "")
+		$slashboxes_textlist
 	) {
-		$user_exbox_hr->{$bid} = 1;
+		$slashboxes_hr->{$bid} = 1;
 	}
-	for my $ary (sort { lc $b->[1] cmp lc $a->[1]} @$sections_description) {
+	for my $ary (sort { lc $a->[1] cmp lc $b->[1]} @$sections_description) {
 		my($bid, $title, $boldflag) = @$ary;
-		unshift(@$box_order, $bid);
-		$section_descref->{$bid}{checked} = $user_exbox_hr->{$bid}
-			?  ' CHECKED'
+		push @$box_order, $bid;
+		$section_descref->{$bid}{checked} = $slashboxes_hr->{$bid}
+			? ' CHECKED'
 			: '';
-		$section_descref->{$bid}{boldflag} = $boldflag > 0
-			? 1
-			: 0;
 		$title =~ s/<(.*?)>//g;
 		$section_descref->{$bid}{title} = $title;
 	}
@@ -1822,7 +1822,6 @@ sub editHome {
 	my $b_check = $user_edit->{noboxes}		? ' CHECKED' : '';
 	my $i_check = $user_edit->{noicons}		? ' CHECKED' : '';
 	my $w_check = $user_edit->{willing}		? ' CHECKED' : '';
-	my $s_check = $user_edit->{sectioncollapse}	? ' CHECKED' : '';
 
 	my $tilde_ed = tildeEd($user_edit);
 
@@ -1835,7 +1834,6 @@ sub editHome {
 		b_check			=> $b_check,
 		i_check			=> $i_check,
 		w_check			=> $w_check,
-		s_check			=> $s_check,
 		tilde_ed		=> $tilde_ed,
 		note			=> $note,
 	});
@@ -2518,7 +2516,6 @@ sub saveHome {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $uid;
-	my($extid, $exaid, $exsect) = '';
 
 	if ($user->{is_admin}) {
 		$uid = $form->{uid} || $user->{uid} ;
@@ -2540,48 +2537,107 @@ sub saveHome {
 		print $cookiemsg;
 	}
 
-	my $exboxes = $edit_user->{exboxes};
-
-	$exboxes =~ s/'//g;
-	my @b = split m/,/, $exboxes;
-
-	foreach (@b) {
-		$_ = '' unless $form->{"exboxes_$_"};
-	}
-
-	$exboxes = sprintf "'%s',", join "','", @b;
-	$exboxes =~ s/'',//g;
-
-	for my $k (keys %{$form}) {
-		if ($k =~ /^extid_(.*)/)	{ $extid  .= "'$1'," }
-		if ($k =~ /^exaid_(.*)/)	{ $exaid  .= "'$1'," }
-		if ($k =~ /^exsect_(.*)/)	{ $exsect .= "'$1'," }
-		if ($k =~ /^exboxes_(.*)/) {
-			# Only Append a box if it doesn't exist
-			my $box = $1;
-			$exboxes .= "'$box'," unless $exboxes =~ /'$box'/;
+	# Using the existing list of slashboxes and the set of
+	# what's checked and not, build up the new list.
+	# (New arrivals go at the end.)
+	my $slashboxes = $edit_user->{slashboxes};
+	# Only go through all this if the user clicked save,
+	# not "Restore Slashbox Defaults"!
+	my $default_slashboxes_textlist = join ",",
+		@{$skinBoxes->{$constants->{mainpage_skid}}};
+	if (!$form->{restore_slashbox_defaults}) {
+		my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
+		$slashboxes = $default_slashboxes_textlist if !$slashboxes;
+		my @slashboxes = split /,/, $slashboxes;
+		my %slashboxes = ( );
+		for my $i (0..$#slashboxes) {
+			$slashboxes{$slashboxes[$i]} = $i;
 		}
+		# Add new boxes in.
+		for my $key (sort grep /^showbox_/, keys %$form) {
+			my($bid) = $key =~ /^showbox_(\w+)$/;
+			next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/;
+			if (!$slashboxes{$bid}) {
+				$slashboxes{$bid} = 999; # put it at the end
+			}
+		}
+		# Remove any boxes that weren't checked.
+		for my $bid (@slashboxes) {
+			delete $slashboxes{$bid} unless $form->{"showbox_$bid"};
+		}
+		@slashboxes = sort {
+			$slashboxes{$a} <=> $slashboxes{$b}
+			||
+			$a cmp $b
+		} keys %slashboxes;
+		# This probably should be a var (and appear in tilded_customize_msg)
+		$#slashboxes = 19 if $#slashboxes > 19;
+		$slashboxes = join ",", @slashboxes;
+	}
+	# If we're right back to the default, that means the
+	# empty string.
+	if ($slashboxes eq $default_slashboxes_textlist) {
+		$slashboxes = "";
 	}
 
-	$form->{maxstories} = 66 if $form->{maxstories} > 66;
-	$form->{maxstories} = 1 if $form->{maxstories} < 1;
+	# Set the story_never and story_always fields.
+	my $author_hr = $slashdb->getDescriptions('all-authors');
+	my $tree = $slashdb->getTopicTree();
+	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
+	my(@story_always_topic, @story_always_author, @story_always_nexus);
+	for my $key (sort grep /^topictid\d+$/, keys %$form) {
+		my($tid) = $key =~ /^topictid(\d+)$/;
+		next unless $tid && $tree->{$tid} && !$tree->{$tid}{nexus};
+		   if (!$form->{$key}) {		push @story_never_topic, $tid	}
+		elsif ($form->{$key} == 3) {		push @story_always_topic, $tid }
+	}
+	for my $key (sort grep /^aid\d+$/, keys %$form) {
+		my($aid) = $key =~ /^aid(\d+)$/;
+		next unless $aid && $author_hr->{$aid};
+		   if (!$form->{$key}) {		push @story_never_author, $aid	}
+		elsif ($form->{$key} == 3) {		push @story_always_author, $aid }
+	}
+	for my $key (sort grep /^nexustid\d+$/, keys %$form) {
+		my($tid) = $key =~ /^nexustid(\d+)$/;
+		next unless $tid && $tree->{$tid} && $tree->{$tid}{nexus};
+		   if (!$form->{$key}) {		push @story_never_nexus, $tid	}
+		elsif ($form->{$key} == 3) {		push @story_always_nexus, $tid }
+	}
+	# Sanity check.
+	$#story_never_topic   = 299 if $#story_never_topic   > 299;
+	$#story_never_author  = 299 if $#story_never_author  > 299;
+	$#story_never_nexus   = 299 if $#story_never_nexus   > 299;
+	$#story_always_topic  = 299 if $#story_always_topic  > 299;
+	$#story_always_author = 299 if $#story_always_author > 299;
+	$#story_always_nexus  = 299 if $#story_always_nexus  > 299;
+	my $story_never_topic   = join ",", @story_never_topic;
+	$story_never_topic = ($constants->{subscribe} && $user->{is_subscriber})
+		? checkList($story_never_topic, 1024)
+		: checkList($story_never_topic);
+	my $story_never_author  = checkList(join ",", @story_never_author);
+	my $story_never_nexus   = checkList(join ",", @story_never_nexus);
+	my $story_always_topic  = checkList(join ",", @story_always_topic);
+	$story_always_topic = ($constants->{subscribe} && $user->{is_subscriber})
+		? checkList($story_always_topic, 1024)
+		: checkList($story_always_topic);
+	my $story_always_author = checkList(join ",", @story_always_author);
+	my $story_always_nexus  = checkList(join ",", @story_always_nexus);
 
 	my $user_edits_table = {
-		extid		=> ($constants->{subscribe} && $user->{is_subscriber}) ? checkList($extid,1024) : checkList($extid),
-		exaid		=> checkList($exaid),
-		exsect		=> checkList($exsect),
-		exboxes		=> checkList($exboxes),
-		maxstories	=> $form->{maxstories},
+		story_never_topic	=> $story_never_topic,
+		story_never_author	=> $story_never_author,
+		story_never_nexus	=> $story_never_nexus,
+		story_always_topic	=> $story_always_topic,
+		story_always_author	=> $story_always_author,
+		story_always_nexus	=> $story_always_nexus,
+
+		slashboxes	=> checkList($slashboxes, 1024),
+
+		maxstories	=> 30, # XXXSKIN fix this later
 		noboxes		=> ($form->{noboxes} ? 1 : 0),
 		light		=> ($form->{light} ? 1 : 0),
 		noicons		=> ($form->{noicons} ? 1 : 0),
 		willing		=> ($form->{willing} ? 1 : 0),
-		sectioncollapse	=> ($form->{sectioncollapse} ? 1 : 0),
-	};
-
-	my $defaults = {
-		maxstories 	=> 30,
-		tzcode     	=> "EST"
 	};
 
 	if (defined $form->{tzcode} && defined $form->{tzformat}) {
@@ -2609,19 +2665,16 @@ sub saveHome {
 	}
 
 	getOtherUserParams($user_edits_table);
-	setToDefaults($user_edits_table, {}, $defaults) if $form->{restore_defaults};
-	if ($form->{restore_exbox_defaults}) {
-		my $exboxdef = "'";
-		my($boxBank, $skinBoxes) = $slashdb->getPortalsCommon();
-
-		$exboxdef .= join "','", @{$skinBoxes->{$constants->{mainpage_skid}}};
-		$exboxdef .= "'";
-
-		my $default_boxes = {
-			exboxes		=> $exboxdef,
-		};
-		
-		setToDefaults($user_edits_table, {}, $default_boxes);
+	if ($form->{restore_defaults}) {
+		setToDefaults($user_edits_table, {}, {
+			maxstories	=> 30,
+			tzcode		=> "EST",
+			# XXX shouldn't this reset ALL the defaults,
+			# not just these two?
+		});
+	}
+	if ($form->{restore_slashbox_defaults}) {
+		setToDefaults($user_edits_table, {}, { slashboxes => "" });
 	}
 
 	$slashdb->setUser($uid, $user_edits_table);
@@ -3121,6 +3174,7 @@ sub setToDefaults {
 		$data->{$key} = exists $defaults->{$key} ? $defaults->{$key} : "";
  	}
 }
+
 #################################################################
 sub getCommentListing {
 	my ($type, $value,

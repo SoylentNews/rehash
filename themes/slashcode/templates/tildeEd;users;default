@@ -1,7 +1,8 @@
 __section__
 default
 __description__
-Edit all those checkboxes for authors, topics, nexuses, slashboxes
+Edit all those menus and checkboxes for authors, topics,
+sections (nexuses), and slashboxes.
 
 * title = passed to top titlebar
 * tilded_customize_msg = any text to display under that titlebar
@@ -55,6 +56,11 @@ you from seeing it on the homepage. So use "Never" carefully.
 <p>
 
 [% story023_data = Slash.db.getDescriptions('story023') %]
+
+[%-	######################
+	# Authors and Sections
+	######################
+-%]
 
 <TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
 	<TR>
@@ -127,6 +133,12 @@ WHILE i <= max_row						-%]
 
 </TABLE>
 <BR>
+
+[%-	######################
+	# Topics
+	######################
+-%]
+
 <TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
 	<TR BGCOLOR="[% user.colors.bg_3 %]">
 		<TH COLSPAN="6"><FONT COLOR="[% user.colors.fg_3 %]">Topics</FONT></TH>
@@ -134,55 +146,66 @@ WHILE i <= max_row						-%]
 
 	<TR><TD COLSPAN="6"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="100" HEIGHT="3"></TD></TR>
 
-[% FOREACH topictid = topictid_order %]
-	[% IF loop.index % 3 == 0 %]
+[% FOREACH topictid = topictid_order -%]
+	[%- IF loop.index % 3 == 0 -%]
 		<TR BGCOLOR="[% user.colors.bg_2 %]">
-	[% END %]
+	[%- END -%]
 		<TD VALIGN="TOP" ALIGN="RIGHT">
-	[%	topicref.$topictid | strip_literal	%]
+	[%-	topicref.$topictid | strip_literal	-%]
 		&nbsp;</TD><TD VALIGN="TOP" ALIGN="LEFT">
-	[%	optionname = "topictid" _ topictid;
+	[%-	optionname = "topictid" _ topictid;
 		Slash.createSelect(
 			optionname,
 			story023_data,
 			story023_default.topic.$topictid,
-			1, 1);					%]
+			1, 1);					-%]
 		</TD>
-	[% IF loop.index % 3 == 2 %]
+	[%- IF loop.index % 3 == 2 -%]
 		</TR>
 	[% END %]
-[% END %]
+[%- END -%]
 [% remaining_cells = 2 - (topictid_order.max % 3);
    WHILE remaining_cells;
-   	remaining_cells = remaining_cells - 1; %]
+   	remaining_cells = remaining_cells - 1; -%]
 	<TD>&nbsp;</TD><TD>&nbsp;</TD>
-[% END %]
+[%- END -%]
 
 	</TR>
 </TABLE>
 
 <p>
 
+[%-	######################
+	# Slashboxes
+	######################
+-%]
+
 [% PROCESS titlebar width='100%' title=customize_title %]
-[%- col_max_size = box_order.size / 3; col_size = 0 -%]
-<TABLE BGCOLOR="[% user.colors.bg_2 %]"><TR><TD VALIGN="TOP">
-[% FOREACH bid = box_order %]
-		<INPUT TYPE="CHECKBOX" NAME="exboxes_[% bid %]"[% section_descref.$bid.checked %]>
-		<A HREF="[% env.script_name %]?op=previewbox&amp;bid=[% bid %]">
 
-	[% IF bid == 'srandblock' %]
-		Semi-Random Box
-	[% ELSE %]
-		[% section_descref.$bid.title or bid %]
-	[% END %]
-
-	 	</A><BR>
-
-	[%- col_size = col_size + 1; IF col_size > col_max_size; -%]
-		</TD><TD VALIGN="TOP">
-	[%- col_size = 0; END -%]
-[% END %]
-</TD></TR><TABLE>
+<TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
+[% FOREACH bid = box_order -%]
+	[%- IF loop.index % 3 == 0 -%]
+		<TR BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP" ALIGN="LEFT">
+	[%- END -%]
+		<TD><INPUT TYPE="CHECKBOX" NAME="showbox_[% bid | strip_paramattr %]"[% section_descref.$bid.checked %]>
+		<A HREF="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
+		[% IF bid == 'srandblock' %]
+			Semi-Random Box
+		[% ELSE %]
+			[% section_descref.$bid.title || bid %]
+		[% END %]
+		</A></TD>
+	[%- IF loop.index % 3 == 2 -%]
+		</TR>
+	[% END -%]
+[%- END -%]
+[%- remaining_cells = 2 - (box_order.max % 3);
+   WHILE remaining_cells;
+   	remaining_cells = remaining_cells - 1; -%]
+	<TD>&nbsp;</TD>
+[%- END -%]
+	</TR>
+</TABLE>
 
 [% tilded_customize_msg %]
 [% tilded_box_msg %]

@@ -2568,7 +2568,7 @@ DELETE FROM vars WHERE name='uncommonstorywords';
 # and maybe make them both params? that can probably wait
 # then just edit users.pl and tildeEd templates.
 
-ALTER TABLE users_index CHANGE COLUMN extid story_never_topic TEXT NOT NULL DEFAULT '', CHANGE COLUMN exaid story_never_author VARCHAR(255) NOT NULL DEFAULT '', CHANGE COLUMN exsect story_never_nexus VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_always_topic TEXT NOT NULL DEFAULT '', ADD COLUMN story_always_author VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_always_nexus VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE users_index CHANGE COLUMN extid story_never_topic TEXT NOT NULL DEFAULT '', CHANGE COLUMN exaid story_never_author VARCHAR(255) NOT NULL DEFAULT '', CHANGE COLUMN exsect story_never_nexus VARCHAR(255) NOT NULL DEFAULT '', CHANGE COLUMN exboxes slashboxes TEXT NOT NULL DEFAULT '', ADD COLUMN story_always_topic TEXT NOT NULL DEFAULT '', ADD COLUMN story_always_author VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_always_nexus VARCHAR(255) NOT NULL DEFAULT '';
 
 INSERT INTO string_param (type, code, name) VALUES ('story023','0','Never');
 INSERT INTO string_param (type, code, name) VALUES ('story023','2','Often');
