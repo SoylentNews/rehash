@@ -4593,8 +4593,7 @@ sub setUser {
 	}
 
 	# Power to the People
-	if (exists $hashref->{people}) {
-		# get rid of newpasswd if defined in DB
+	if ($hashref->{people}) {
 		$hashref->{people} = freeze $hashref->{people};
 	}
 
