@@ -269,7 +269,7 @@ EOT
 			for my $hour (keys %{$static_op_hour->{$is_static}{$op}}) {
 				my $prefix = "duration_";
 				$prefix .= $is_static eq 'yes' ? 'st_' : 'dy_';
-				$prefix .= "${op}_${hour}_";
+				$prefix .= sprintf("%s_%02d_", $op, $hour);
 				my $this_hr = $static_op_hour->{$is_static}{$op}{$hour};
 				my @dur_keys =
 					grep /^dur_(mean|stddev|ile_\d+)$/,

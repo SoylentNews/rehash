@@ -826,7 +826,7 @@ sub getDurationByStaticOpHour {
 		"GROUP BY static, op, hour, dur_round"
 	);
 
-	_calc_percentiles($hr, $ile_hr, 3);
+	_calc_percentiles($hr, $ile_hr);
 
 	return $hr;
 }
@@ -866,13 +866,37 @@ sub getDurationByStaticLocaladdr {
 		"GROUP BY static, local_addr, dur_round"
 	);
 
-	_calc_percentiles($hr, $ile_hr, 2);
+#use Data::Dumper; print Dumper $ile_hr;
+
+	_calc_percentiles($hr, $ile_hr);
 
 	return $hr;
 }
 
+sub _walk_keys {
+	my($hr) = @_;
+	my @hr_keys = keys %$hr;
+	if (!exists $hr->{$hr_keys[0]}{dur_round}) {
+		# We need to recurse down at least one more
+		# level.  Keep track of where we are.
+		my @results = ( );
+		for my $key (sort @hr_keys) {
+			my @sub_results = _walk_keys($hr->{$key});
+			for my $sub_r (@sub_results) {
+				unshift @$sub_r, $key;
+			}
+			push @results, @sub_results;
+		}
+		return @results;
+	} else {
+		# This hashref's keys hold the data we want.
+		# We don't want to return that data.
+		return [ ];
+	}
+}
+
 sub _calc_percentiles {
-	my($main_hr, $ile_hr, $key_depth, $percentiles) = @_;
+	my($main_hr, $ile_hr, $percentiles) = @_;
 
 	# List of percentiles we want.  The expensive part is doing this
 	# at all, so we might as well grab more than just the median!
@@ -882,27 +906,14 @@ sub _calc_percentiles {
 	# Go through a somewhat convoluted process to walk the keys of the
 	# hashrefs, given that we have a scalar numeric that tells us how
 	# deep those keys go.  Essentially we're doing an any-depth version
-	# of "for $i {for $j {for $k ... } }"
-	my $keys = [ ];
-	my $keyset = [ ];
-	ADD_KEYS: while (1) {
-		while (scalar(@$keyset) < $key_depth) {
-			my $ile_hr_entry = $ile_hr;
-			for my $key (@$keyset) {
-				$ile_hr_entry = $ile_hr_entry->{$key};
-			}
-			my $next_key = each %$ile_hr_entry;
-			if (defined $next_key) {
-				push @$keyset, $next_key;
-			} else {
-				pop @$keyset;
-				last ADD_KEYS if !@$keyset;
-			}
-		}
-		push @$keys, [ @$keyset ];
-		pop @$keyset;
-	}
-	while (my $keyset = shift @$keys) {
+	# of "for $i {for $j {for $k ... } }".
+	my @keysets = _walk_keys($ile_hr);
+	while (my $keyset = shift @keysets) {
+
+		# Each keyset is an arrayref that lists the keys needed
+		# to walk down into $main_hr and $ile_hr to get to a
+		# set of data that we want.  Use it to walk the hashrefs
+		# $main_hr_entry and $ile_hr_entry down to that data.
 
 		my $main_hr_entry = $main_hr;
 		my $ile_hr_entry = $ile_hr;
@@ -910,6 +921,9 @@ sub _calc_percentiles {
 			$main_hr_entry = $main_hr_entry->{$key};
 			$ile_hr_entry = $ile_hr_entry->{$key};
 		}
+
+#print "main_hr_entry for keyset '@$keyset': " . Dumper($main_hr_entry);
+#print "ile_hr_entry for keyset '@$keyset': " . Dumper($ile_hr_entry);
 
 		my $cur_count = 0;
 		my $total_count = $main_hr_entry->{c};
