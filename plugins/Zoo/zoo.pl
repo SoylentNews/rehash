@@ -662,18 +662,20 @@ sub check {
 	my (%mutual, @mutual);
 	if ($user->{people}{FOF()}{$uid}) {
 		for my $person (keys %{$user->{people}{FOF()}{$uid}}) {
+			next unless $person;
 			push @{$mutual{FOF()}}, $person;
 			push @mutual, $person;
 		}
 	}
 	if ($user->{people}{EOF()}{$uid}) {
 		for my $person (keys %{$user->{people}{EOF()}{$uid}}) {
+			next unless $person;
 			push @{$mutual{EOF()}}, $person;
 			push @mutual, $person;
 		}
 	}
 	my $uids_2_nicknames = $slashdb->getUsersNicknamesByUID(\@mutual)
-		if @mutual;
+		if scalar(@mutual);
 
 	my $type = $user->{people}{FOE()}{$uid} ? 'foe': ($user->{people}{FRIEND()}{$uid}? 'friend' :'neutral');
 	slashDisplay('confirm', { 
