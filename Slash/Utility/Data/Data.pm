@@ -2605,7 +2605,7 @@ sub findWords {
 
 	# Return a hashref;  keys are the words, values are hashrefs
 	# with the number of times they appear and so on.
-	my $wordcount = { };
+	my $wordcount = $args_hr->{output_hr} || { };
 
 	for my $key (keys %$args_hr) {
 

@@ -1424,9 +1424,16 @@ sub refreshUncommonStoryWords {
 	);
 	my $word_hr = { };
 	for my $ar (@$arr) {
-		findWords($ar->[0], $weights[0], $word_hr) if $ar->[0]; # title
-		findWords($ar->[1], $weights[1], $word_hr) if $ar->[1]; # introtext
-		findWords($ar->[2], $weights[2], $word_hr) if $ar->[2]; # bodytext
+		my $data = {
+			output_hr	=> $word_hr,
+			title		=> { text => $ar->[0],
+					     weight => $constants->{uncommon_weight_title}	|| 8.0 },
+			introtext	=> { text => $ar->[1],
+					     weight => $constants->{uncommon_weight_introtext}	|| 2.0 },
+			bodytext	=> { text => $ar->[2],
+					     weight => $constants->{uncommon_weight_bodytext}	|| 1.0 },
+		};
+		findWords($data);
 	}
 
 	# The only words that count as uncommon are the ones that appear in
