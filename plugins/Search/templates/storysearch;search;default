@@ -24,7 +24,7 @@ __template__
 	[% story.introtext %] <BR>
 	<FONT SIZE="-1">
 		[% section = Slash.db.getSection(story.section); topic = Slash.db.getTopic(story.tid) %]
-		Section: [% IF section.section == constants.defaultsection %]<A HREF="/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "/index.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A><BR>
+		Section: [% IF section.section == constants.defaultsection %]<A HREF="/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "/search.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A><BR>
 		[% IF story.score %]
 			Score: [% story.score %] <br>
 		[% END %] 
