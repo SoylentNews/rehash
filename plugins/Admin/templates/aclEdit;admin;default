@@ -1,0 +1,46 @@
+__section__
+default
+__description__
+* acls = hashref of acls, keys = acl names, values = arrayrefs of uids
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+aclEdit
+__template__
+
+<P>Existing ACLs and users that have their permissions:
+
+<P><TABLE CELLSPACING=2 BORDER=0>
+[% FOREACH acl = acls.keys %]
+	<TR>
+		<TD>[% acl | strip_nohtml %]</TD>
+		<TD ALIGN="RIGHT">([% acls.$acl.size %])</TD>
+		<TD>
+		[% FOREACH uid = acls.$acl.nsort %]
+			<A HREF="[% constants.rootdir %]/users.pl?uid=[% uid | strip_attribute %]">[% uid %]</A>
+		[% END %]
+		</TD>
+	</TR>
+[% END %]
+</TABLE>
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="acls">
+	<P>Enter name of new ACL category to create:
+	<INPUT TYPE="TEXT" NAME="thisname" VALUE="">
+	<INPUT TYPE="SUBMIT" NAME="aclsave" VALUE="Create">
+	<BR>(It will be assigned to you, for starters, after which you will
+	be able to assign it to other users by editing them in users.pl.
+	To delete a category, simply remove it from all users.)
+	<BR>Recognized ACL category: <tt>alwaysmodpoints</tt>
+</FORM>
+
+__seclev__
+500
+__version__
+$Id$
