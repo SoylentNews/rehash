@@ -55,7 +55,7 @@ TITLE="[% topic.alttext %]"></A>
 
 [% IF admin_flag %]
 	[ <A HREF="[% env.script_name %]?op=Update&amp;subid=[% subid %]">Delete Submission</A> ]<BR>
-
+[% IF submission.del = 0 %]
 	<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter %]">
@@ -87,6 +87,7 @@ TITLE="[% topic.alttext %]"></A>
 >[% subtext | strip_literal %]</TEXTAREA><BR>
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview"><BR>
 	</FORM>
+[% END %]
 [% END %]
 
 __seclev__
