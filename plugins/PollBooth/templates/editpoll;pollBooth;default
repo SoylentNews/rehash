@@ -40,7 +40,7 @@ __template__
 	<INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20">
 	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
 	[% PROCESS formLabel value => "SlashBox Poll" comment => "if checked, this will be the poll used in slashboxes for the selected section" %]
-	<INPUT TYPE="CHECKBOX" NAME="currentqid"[% checked %]> <br>
+	<INPUT TYPE="CHECKBOX" NAME="currentqid" [% IF checked %]CHECKED[% END %]> <br>
 
 	<INPUT TYPE="SUBMIT" VALUE="Save">
 	<INPUT TYPE="HIDDEN" NAME="op" VALUE="save">

@@ -594,3 +594,6 @@ ALTER TABLE metamodlog ADD INDEX mmid (mmid);
 
 # End of T_2_3_0_39
 
+# This should have been this all along -Brian
+ALTER TABLE sections DROP INDEX section;
+ALTER TABLE sections ADD UNIQUE section (section);

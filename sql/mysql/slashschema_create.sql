@@ -477,7 +477,7 @@ CREATE TABLE sections (
 	type ENUM("contained", "collected") DEFAULT 'contained' NOT NULL,
 	rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL,
 	last_update timestamp,
-	KEY (section),
+	UNIQUE (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (id)
 ) TYPE = myisam;

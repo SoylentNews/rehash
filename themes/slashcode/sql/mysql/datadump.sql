@@ -155,8 +155,8 @@ INSERT INTO pollanswers (qid, aid, answer, votes) VALUES (2,5,'manic depressive'
 # Dumping data for table 'pollquestions'
 #
 
-INSERT INTO pollquestions (qid, question, voters, date, discussion, uid) VALUES (1, 'What flavor of ice cream?', 5, '2000-01-16 19:11:10', 3, 2);
-INSERT INTO pollquestions (qid, question, voters, date, discussion, uid) VALUES (2, 'Are you happy?', 7, '2000-01-19 16:23:00', 4, 2);
+INSERT INTO pollquestions (qid, question, voters, date, discussion, uid, section) VALUES (1, 'What flavor of ice cream?', 5, '2000-01-16 19:11:10', 3, 2, 'index');
+INSERT INTO pollquestions (qid, question, voters, date, discussion, uid, section) VALUES (2, 'Are you happy?', 7, '2000-01-19 16:23:00', 4, 2, 'features');
 
 #
 # Dumping data for table 'pollvoters'
@@ -189,7 +189,7 @@ INSERT INTO related_links (keyword, name, link) VALUES ('perl','Perl','http://us
 # Dumping data for table 'sections'
 #
 
-INSERT INTO sections (section, artcount, title, issue, extras, type, qid) VALUES ('index',30,'Index',0,0,'collected', 1);
+REPLACE INTO sections (section, artcount, title, issue, extras, type, qid) VALUES ('index',30,'Index',0,0,'collected', 1);
 INSERT INTO sections (section, artcount, title, issue, extras) VALUES ('articles',30,'Articles',0,0);
 INSERT INTO sections (section, artcount, title, issue, extras, qid) VALUES ('features',21,'Features',1,0,2);
 

@@ -2006,6 +2006,10 @@ sub savePollQuestion {
 				WHERE qid=$qid_quoted AND aid=$x");
 		}
 	}
+	# Go on and unset any reference to the qid in sections, if it 
+	# needs to exist the next statement will correct this. -Brian
+	$self->sqlUpdate('sections', { qid => ''}, " qid = $poll->{qid} ")	
+		if ($poll->{qid});
 	if ($poll->{qid} && $poll->{currentqid}) {
 		$self->setSection($poll->{section}, { qid => $poll->{qid} });
 	}
@@ -4774,6 +4778,15 @@ sub getStoryList {
 	my $list = $cursor->fetchall_arrayref;
 
 	return($count, $list);
+}
+
+##################################################################
+# This will screw with an autopoll -Brian
+sub getSidForQID {
+	my($self, $qid) = @_;
+	return $self->sqlSelect("sid", "stories",
+				"qid=" . $self->sqlQuote($qid),
+				"ORDER BY time DESC");
 }
 
 ##################################################################
