@@ -1199,10 +1199,10 @@ sub sqlConnect {
 
 ########################################################
 sub stripByMode {
-	my $str = shift;
-	my $fmode = shift || 'nohtml';
+	my($str, $fmode, $no_white_fix) = @_;
+	$fmode ||= 'nohtml';
 
-	$str =~ s/(\S{90})/$1 /g;
+	$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
 	if ($fmode eq 'literal' || $fmode eq 'exttrans' || $fmode eq 'attribute') {
 		# Encode all HTML tags
 		$str =~ s/&/&amp;/g;

@@ -3,7 +3,9 @@ slash-1.0.8, 2000.07.xx
 
 *	Fixed pollBooth not displaying comments (T Caleb Fauver)
 
-*	Fixed admin.pl messing up some story text (T Caleb Fauver)
+*	Fixed admin.pl messing up some story text, added a new parameter
+	to Slash::stripByMode so the "extra whitespace" won't be added
+	if $no_white_fix is true (T Caleb Fauver)
 
 *	Remove <rss> tag in RDF file / slashd for now (address
 	more fully in bender)
