@@ -849,11 +849,12 @@ sub showInfo {
 	my($mod_flag, $karma_flag, $n) = (0, 0, 0);
 
 	if ($admin_flag
-		&& (defined($form->{show_m2s}) || defined($form->{show_m1s}))
-	) {
+		&& (defined($form->{show_m2s}) || defined($form->{show_m1s}) || defined($form->{m2_listing})))
+	 {
 		my $update_hr = {};
 		$update_hr->{m2_with_mod} = $form->{show_m2s} if defined $form->{show_m2s};
 		$update_hr->{mod_with_comm} = $form->{show_m1s} if defined $form->{show_m1s};
+		$update_hr->{show_m2_listing} = $form->{m2_listing} if defined $form->{m2_listing};
 		$slashdb->setUser($user->{uid}, $update_hr);
 	}
 
@@ -1228,6 +1229,8 @@ sub showInfo {
 		my $subcount = $reader->countSubmissionsByUID($uid);
 	
 		my $submissions = $reader->getSubmissionsByUID($uid, $sub_limit, $sub_options);
+		my $metamods;
+		$metamods = $reader->getMetamodlogForUser($uid, 30) if $admin_flag;
 
 		slashDisplay('userInfo', {
 			title			=> $title,
@@ -1248,7 +1251,8 @@ sub showInfo {
 			cids_to_mods		=> $cids_to_mods,
 			comment_time		=> $comment_time,
 			submissions		=> $submissions,
-			subcount		=> $subcount
+			subcount		=> $subcount,
+			metamods		=> $metamods
 		});
 	}
 
