@@ -58,6 +58,7 @@ use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
 use Data::Dumper;
+use Storable qw(freeze thaw);
 
 use strict;
 use base 'Exporter';
@@ -71,6 +72,7 @@ use vars qw($VERSION @EXPORT);
 	@Slash::Utility::EXPORT,
 	@Slash::XML::EXPORT,
 	@Data::Dumper::EXPORT,
+	qw(freeze thaw),
 	'slashTest',
 	'Display',
 );
@@ -136,6 +138,11 @@ sub slashTest {
 	$::user      = getCurrentUser();
 	$::anon      = getCurrentAnonymousCoward();
 	$::form      = getCurrentForm();
+
+	$::reader_db	= getObject('Slash::DB', { db_type => 'reader' });
+	$::writer_db	= getObject('Slash::DB', { db_type => 'writer' });
+	$::log_db	= getObject('Slash::DB', { db_type => 'log'    });
+	$::search_db	= getObject('Slash::DB', { db_type => 'search' });
 
 	# auto-create plugin variables ... bwahahaha
 	my $plugins = $::slashdb->getDescriptions('plugins');
