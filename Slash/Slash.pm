@@ -339,6 +339,8 @@ sub _print_cchp {
 		)) {
 			warn "_print_cchp cannot open '$filename', $!\n";
 		} else {
+			$count ||= 0;
+			$hp_str ||= '0';
 			print $fh "count $count, hitparade $hp_str\n";
 			close $fh;
 		}
