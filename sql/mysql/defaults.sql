@@ -434,6 +434,7 @@ INSERT INTO vars (name, value, description) VALUES ('down_moderations','-6','num
 INSERT INTO vars (name, value, description) VALUES ('enable_index_topic','','set this to the value in string param for index topic \(something like "topic_4"\)');
 INSERT INTO vars (name, value, description) VALUES ('fancyboxwidth','200','What size should the boxes be in?');
 INSERT INTO vars (name, value, description) VALUES ('feature_story_enabled','0','Simple Boolean to determine if homepage prints feature story');
+INSERT INTO vars (name, value, description) VALUES ('fork_all_tasks', '1', 'This forces all tasks to fork even if they are not marked to do so. This saves memory with slashd but assumes that all of your tasks can be safetly forked.');
 INSERT INTO vars (name, value, description) VALUES ('formkey_timeframe','14400','The time frame that we check for a formkey');
 INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100','Maximum number of article.shtml files to write at a time in freshenup.pl');
 INSERT INTO vars (name, value, description) VALUES ('get_titles','0','get the story titles');
