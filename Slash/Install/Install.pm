@@ -208,6 +208,7 @@ sub _install {
 		image		=> ["htdocs/images",		0],
 		image_award	=> ["htdocs/images/awards",	0],
 		image_banner	=> ["htdocs/images/banners",	0],
+		image_faq	=> ["htdocs/images/faq",	0],
 		topic		=> ["htdocs/images/topics",	0],
 		task		=> ["tasks",			1],
 		misc		=> ["misc",			1],
