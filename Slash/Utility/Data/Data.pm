@@ -1012,36 +1012,96 @@ in HREFs through C<fudgeurl>.
 =cut
 
 sub approveTag {
-	my($tag) = @_;
+	my($wholetag) = @_;
+#print STDERR "BEGIN <$wholetag>\n";
 
-	$tag =~ s/^\s*?(.*)\s*?$/$1/; # trim leading and trailing spaces
-	$tag =~ s/\bstyle\s*=(.*)$//is; # go away please
+	$wholetag =~ s/^\s*?(.*)\s*?$/$1/; # trim leading and trailing spaces
+	$wholetag =~ s/\bstyle\s*=(.*)$//is; # go away please
 
 	# Take care of URL:foo and other HREFs
 	# Using /s means that the entire variable is treated as a single line
 	# which means \n will not fool it into stopping processing.  fudgeurl()
 	# knows how to handle multi-line URLs (it removes whitespace).
-	if ($tag =~ /^URL:(.+)$/is) {
+	if ($wholetag =~ /^URL:(.+)$/is) {
 		my $url = fudgeurl($1);
 		return qq!<A HREF="$url">$url</A>!;
-	} elsif ($tag =~ /href\s*=\s*(.+)$/is) {
-		my $url_raw = $1;
-		# Try to get a little closer to the URL we want, and in
-		# particular, don't strip '<a href="foo" target="bar">'
-		# to the URL 'footarget=bar'.
-		$url_raw = $1 if $url_raw =~ /^"([^"]+)"/;
-		$url_raw =~ s/\s+target=.+//;
-		my $url = fudgeurl($url_raw);
-		return qq!<A HREF="$url">!;
 	}
 
-	# Validate all other tags
-	my $approvedtags = getCurrentStatic('approvedtags');
-	$tag =~ s|^(/?\w+)|\U$1|;
-	# ECODE is an exception, to be handled elsewhere
-	foreach my $goodtag (grep !/^ECODE$/, @$approvedtags) {
-		return "<$tag>" if $tag =~ /^$goodtag$/ || $tag =~ m|^/$goodtag$|;
+	# Build the hash of approved tags.
+	my $approvedtags = getCurrentStatic("approvedtags");
+	my %approved =
+		map { (uc($_), 1) }
+		grep { $_ ne 'ECODE' }
+		@$approvedtags;
+
+	# We can do some checks at this point.  $t is the tag minus its
+	# properties, e.g. for "<A HREF=foo>", $t will be "A".
+	my($taglead, $slash, $t) = $wholetag =~ m{^(\s*(/?)\s*(\w+))};
+	my $t_uc = uc $t;
+	if (!$approved{$t_uc}) {
+#print STDERR "not approved, cancelling: t_uc '$t_uc' wholetag '$wholetag'\n";
+		return "";
 	}
+
+	# Some tags allow attributes, or require attributes to be useful.
+	# These tags go through a secondary, fancier approval process.
+	# Note that approvedtags overrides what is/isn't allowed here.
+	# (At some point we should put this hash into a var, maybe
+	# like "a:href_RU img:src_RU,width,height,alt,longdesc"?
+	my %attr = (
+		A =>	{ HREF =>	{ req => 1, url => 1 } },
+		IMG =>	{ SRC =>	{ req => 1, url => 1 },
+			  WIDTH =>	{},
+			  HEIGHT =>	{},
+			  ALT =>	{},
+			  LONGDESC =>	{} },
+	);
+	if ($slash) {
+
+		# Close-tags ("</A>") never get attributes.
+		$wholetag = "/$t";
+
+	} elsif ($attr{$t_uc}) {
+
+		# This is a tag with attributes, verify them.
+
+		my %allowed = %{$attr{$t_uc}};
+		my %required =
+			map { $_, $allowed{$_} }
+			grep { $allowed{$_}{req} }
+			keys %allowed;
+		# Deconstruct and reconstruct the tag.
+		$wholetag =~ s/^\Q$taglead\E//;
+		# XXX This \S below is wrong -- can't handle ALT tags with
+		# spaces in them, for example.  There's got to be some
+		# CPAN module that will do this properly for us, right?
+		# - Jamie 2002/06/20
+		my @attr_order = $wholetag =~ /\s+(\w+)\s*= \S+ /gx;
+		my %attr_data  = $wholetag =~ /\s+(\w+)\s*=(\S+)/gx;
+		my $num_req_found = 0;
+#use Data::Dumper;
+#print STDERR "rebuilding: t_uc '$t_uc' wholetag '$wholetag' attr_order '@attr_order' attr_data " . Dumper(\%attr_data);
+		$wholetag = "$t_uc";
+		for my $a (@attr_order) {
+			my $a_uc = uc $a;
+			next unless $allowed{$a_uc};
+			my $data = $attr_data{$a};
+			$data = fudgeurl($data) if $allowed{$a_uc}{url};
+			next unless $data;
+			$data = qq{"$data"} if $data !~ /^(["'])[^\1]*\1$/;
+			$wholetag .= " $a_uc=$data";
+			++$num_req_found if $required{$a_uc};
+#print STDERR "attr added: '$a_uc' '$data' num_req_found '$num_req_found'\n";
+		}
+		# If the required attributes were not all present, the whole
+		# tag is invalid.
+		return "" unless $num_req_found == scalar(keys %required);
+
+	}
+
+	# If we made it here, the tag is valid.
+#print STDERR "END <$wholetag>\n";
+	return "<$wholetag>";
 }
 
 #========================================================================
@@ -1486,7 +1546,7 @@ sub balanceTags {
 		$match = join '|', grep !/^ECODE$/,
 			@{$constants->{approvedtags}};
 	} else {
-		$constants->{lonetags} = [qw(P LI BR)];
+		$constants->{lonetags} = [qw(P LI BR IMG)];
 		$match = join '|', grep !/^(?:P|LI|BR|ECODE)$/,
 			@{$constants->{approvedtags}};
 	}
