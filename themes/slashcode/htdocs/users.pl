@@ -1146,7 +1146,7 @@ sub tildeEd {
 	my $aids = $slashdb->getDescriptions('all-authors'); #$slashdb->getAuthorNames();
 	my $n = 0;
 
-	@$aid_order = sort { lc %$aids->{$a}{nickname} cmp lc %$aids->{$b}{nickname} } keys %$aids;
+	@$aid_order = sort { lc $aids->{$a} cmp lc $aids->{$b} } keys %$aids;
 
 	for my $aid (keys %$aids) { #(@$aids) {
 		$aidref->{$aid}{checked}  = ($exaid =~ /'\Q$aid\E'/) ? ' CHECKED' : '';
@@ -1155,7 +1155,7 @@ sub tildeEd {
 
 	my $topics = $slashdb->getDescriptions('topics');
 
-	@$tid_order = sort { lc %$topics->{$a}{alttext} cmp lc %$topics->{$b}{alttext} } keys %$topics;
+	@$tid_order = sort { lc $topics->{$a} cmp lc $topics->{$b} } keys %$topics;
 
 	while (my($tid, $alttext) = each %$topics) {
 		$tidref->{$tid}{checked} = ($extid =~ /'\Q$tid\E'/) ?
