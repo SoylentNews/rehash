@@ -41,7 +41,8 @@ sub main {
 							# anyone with this seclev
 							# to change their own seclev
 			formname	=> $formname,
-			checks		=> [],
+			# just in case we need it for something else, we have it ...
+			checks		=> [ qw (generate_formkey) ],
 		},
 		userlogin	=>  {
 			function	=> \&showInfo,
