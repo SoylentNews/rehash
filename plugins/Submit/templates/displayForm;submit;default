@@ -38,7 +38,9 @@ __template__
 	<A HREF="[% env.script_name %]?op=list">View Current Pending Submissions</A>
 </B></P>
 [% END %]
-
+[% IF form.op AND !save_story %]
+<B>(You must preview once, provide a subject, some text, and a topic before you can submit</B>
+[% END %]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 [% IF form.formkey %]
 <INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
@@ -80,16 +82,43 @@ reject the story.</P>
 We get many submissions each day, and if yours isn't clear, it will
 be deleted.)</FONT>
 
-[% section_topic_title = constants.submission_force_default ? "Topic" : "Section and Topic" %]
-[% PROCESS formLabel value => section_topic_title, comment => "" %]
-[% primaryskid_val = form.primaryskid.defined ? form.primaryskid : constants.submission_default_skid %]
-[% IF constants.submission_force_default %]
-	<INPUT TYPE="HIDDEN" NAME="primaryskid" value="[% constants.submission_default_skid %]">
-[% ELSE %]
-	[% Slash.createSelect('primaryskid', skin_values, primaryskid,_val 1, 0, 1) %]
-[% END %]
-[% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
+[% hide_section_select = 0; hide_topic_select = 0 %]
 
+[% 
+primaryskid_val = form.primaryskid.defined ? form.primaryskid : constants.submission_default_skid;
+IF constants.submission_force_default || (form.primaryskid && form.hss);
+	hide_section_select = 1;
+END %]
+
+[% IF form.hts && form.tid;
+	hide_topic_select = 1;
+END %]
+
+[% section_topic_title = "" %]
+[% IF hide_section_select && !hide_topic_select;
+	section_topic_title = "Select Topic";
+ELSIF !hide_section_select && hide_topic_select;
+	section_topic_title = "Select Section";
+ELSIF !hide_section_select && !hide_topic_select;
+	section_topic_title = "Select Section And Topic";
+END %]
+
+
+[% IF section_topic_title; PROCESS formLabel value => section_topic_title, comment => ""; END %]
+
+
+
+[% IF hide_section_select %]
+	<INPUT TYPE="HIDDEN" NAME="primaryskid" value="[% constants.submission_default_skid | strip_attribute %]">
+[% ELSE %]
+	[% Slash.createSelect('primaryskid', skin_values, primaryskid_val 1, 0, 1) %]
+[% END %]
+
+[% IF hide_topic_select %]
+	<INPUT TYPE="HIDDEN" NAME="tid" value="[% form.tid | strip_attribute %]">
+[% ELSE %]
+[% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
+[% END %]
 <BR><FONT SIZE="2">(In general, submit to [% skins.${constants.mainpage_skid}.title || 'the main section' %])</FONT>
 
 [% IF savestory %]
