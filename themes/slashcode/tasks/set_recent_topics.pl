@@ -1,5 +1,9 @@
 #!/usr/bin/perl -w
 
+# This task (and its associated templates and other changes)
+# was rewritten almost in its entirety, by Shane Zatezalo
+# <shane at lottadot dot com>, May 2002.
+
 use strict;
 use File::Spec;
 
