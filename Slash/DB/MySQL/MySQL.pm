@@ -3101,7 +3101,7 @@ sub getAccessListInfo {
 		} elsif ($user_check->{subnetid}) {
 			$where = "WHERE subnetid = '$user_check->{subnetid}'";
 		} else {
-			return "";
+			return {};
 		}
 	} else {
 		$user_check = $self->getCurrentUser();
