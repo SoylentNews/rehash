@@ -393,7 +393,9 @@ CREATE TABLE moderatorlog (
 	PRIMARY KEY (id),
 	KEY sid (sid,cid),
 	KEY sid_2 (sid,uid,cid),
-	KEY cid (cid)
+	KEY cid (cid),
+	KEY ipid (ipid),
+	KEY subnetid (subnetid)
 ) TYPE = myisam;
 
 #

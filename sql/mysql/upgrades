@@ -1023,3 +1023,5 @@ ALTER TABLE moderatorlog ADD COLUMN subnetid char(32) DEFAULT '' NOT NULL AFTER 
 ALTER TABLE modreasons ADD COLUMN unfairname varchar(32) DEFAULT '' NOT NULL;
 UPDATE modreasons SET unfairname='Unfunny' WHERE name='Funny';
 
+ALTER TABLE moderatorlog ADD INDEX ipid (ipid), ADD INDEX subnetid (subnetid);
+
