@@ -51,6 +51,7 @@ CREATE TABLE message_codes (
         modes     VARCHAR(32) DEFAULT '' NOT NULL,
         send      ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL,
         subscribe TINYINT(1) DEFAULT '0' NOT NULL,
+        acl       VARCHAR(32) DEFAULT '' NOT NULL,
         PRIMARY KEY (code)
 ) TYPE=InnoDB;
 
