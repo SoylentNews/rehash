@@ -77,6 +77,14 @@ INSERT INTO code_param (type, code, name) VALUES ('postmodes',4,'Code');
 INSERT INTO code_param (type, code, name) VALUES ('section_topic_types',1,'default');
 INSERT INTO code_param (type, code, name) VALUES ('extra_types', 1, 'text');
 INSERT INTO code_param (type, code, name) VALUES ('extra_types', 2, 'list');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 0, '128K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 1, '256K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 2, '384K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 3, '512K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 4, '640K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 5, '768K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 6, '896K');
+INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 7, '1024K');
 
 #
 # Dumping data for table 'commentmodes'
@@ -714,6 +722,8 @@ INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');
 INSERT INTO vars (name, value, description) VALUES ('default_maxcommentsize','4096','Default user pref value, if you change the schema default for users_comments.maxcommentsize, change this too');
 INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
+INSERT INTO vars (name, value, description) VALUES ('defaultbytelimit', 5, 'The 
+default setting for comment bytelimit');
 INSERT INTO vars (name, value, description) VALUES ('defaultcommentstatus','0','default code for article comments- normally 0=posting allowed');
 INSERT INTO vars (name, value, description) VALUES ('defaultdisplaystatus','0','Default display status ...');
 INSERT INTO vars (name, value, description) VALUES ('defaultsection','articles','Default section to display');
