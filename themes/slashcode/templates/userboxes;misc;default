@@ -119,20 +119,6 @@ IF !useredit.is_anon;
 			'">Send Message</A></B>)';
 		END;
 
-		IF useredit.icq;
-			'<BR><B>ICQ UIN: </B>';
-			'<IMG SRC="http://web.icq.com/whitepages/online?icq=';
-			useredit.icq | strip_attribute;
-			'&amp;img=5" height="18" width="18">';
-			useredit.icq | strip_literal;
-			' (<B><A HREF="http://wwp.icq.com/scripts/search.dll?to=';
-			useredit.icq | strip_attribute;
-			'">Add User</A>, ';
-			'<A HREF="http://wwp.icq.com/scripts/contact.dll?msgto=';
-			useredit.icq | strip_attribute;
-			'">Send Message</A></B>)';
-		END;
-
 		IF useredit.jabber;
 			'<BR><B>Jabber:</B> ';
 			useredit.jabber | strip_literal;
