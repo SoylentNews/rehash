@@ -30,7 +30,7 @@ $task{$me}{code} = sub {
 	if (%$new_subscriptions_hr) {
 		$transaction_list = sprintf(
 			"%7s %3s %6s %6s %6s %5s %6s %-20s\n", qw(
-			 uid kma $gros $net  total  used  today nickname )
+			 uid kma $gros $net  today  used  total nickname )
 		);
 		for my $spid (sort { $a <=> $b } keys %$new_subscriptions_hr) {
 			my $spid_hr = $new_subscriptions_hr->{$spid};
@@ -41,7 +41,7 @@ $task{$me}{code} = sub {
 				"%7d %3d %6.2f %6.2f %6d %5d %6d %-20s\n",
 				@{$spid_hr}{qw(
 					uid karma payment_gross payment_net
-					hits_paidfor hits_bought pages nickname
+					pages hits_bought hits_paidfor nickname
 				)}
 			);
 		}
