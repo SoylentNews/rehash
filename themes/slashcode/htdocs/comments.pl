@@ -1224,13 +1224,19 @@ sub moderateCid {
 
 		# Adjust comment posters karma and moderation stats.
 		if ($comment->{uid} != $constants->{anonymous_coward_uid}) {
-			my $cuser = $slashdb->getUser($comment->{uid});
+			my $cuser = $slashdb->getUser($comment->{uid}, [ qw| downmods upmods karma | ]);
 			my $newkarma = $cuser->{karma} + $val;
 			$cuser->{downmods}++ if $val < 0;
 			$cuser->{upmods}++ if $val > 0;
-			$cuser->{karma} = $newkarma 
-				if $newkarma <= $constants->{maxkarma} &&
-				   $newkarma >= $constants->{minkarma};
+			if ($val < 0) {
+				$cuser->{karma} = $newkarma; 
+			} else {
+				$cuser->{karma} = $newkarma 
+						if $newkarma <= $constants->{maxkarma};
+			}
+			$cuser->{karma} = $constants->{minkarma} 
+					if $newkarma < $constants->{minkarma};
+
 			$slashdb->setUser($comment->{uid}, {
 				karma		=> $cuser->{karma},
 				upmods		=> $cuser->{upmods},
