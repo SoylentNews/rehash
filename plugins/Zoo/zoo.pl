@@ -367,7 +367,8 @@ sub all {
 		$nick = $user->{nick};
 	}
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $people = $zoo->getAll($uid);
+	#my $people = $zoo->getAll($uid);
+	my $people = $zoo->getRelationships($uid);
 
 	if ($form->{content_type} eq 'rss') {
 		_rss($people, $nick, 'people');
@@ -378,7 +379,7 @@ sub all {
 			_printHead("yourhead",{ nickname => $nick });
 		}
 		if (@$people) {
-			slashDisplay('alllist', { people => $people, editable => $editable });
+			slashDisplay('plainlist', { people => $people, editable => $editable });
 		} else {
 			if ($editable) {
 				print getData('yournoall');

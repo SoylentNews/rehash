@@ -43,8 +43,14 @@ sub getRelationships {
 	my $slashdb = getCurrentDB();
 	my $people = $slashdb->getUser($uid, 'people');
 	my @people;
-	for (keys %{$people->{$type}}) {
-		push @people, $_;
+	if ($type) {
+		@people = keys %{$people->{$type}};
+	} else {
+		for my $type (keys %$people) {
+			for (keys %{$people->{$type}}) {
+				push @people, $_;
+			}
+		}
 	}
 	return [qw()] unless @people;
 	
