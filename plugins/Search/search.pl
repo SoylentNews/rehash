@@ -73,7 +73,7 @@ sub main {
 	} else {
 		# Yep, these are hardcoded, and someday this should change... -Brian 
 		my $text = strip_notags($form->{query});
-		header("$constants->{sitename}: Search  $text") or return;
+		header("$constants->{sitename}: Search '$text'") or return;
 		titlebar("100%", getData('search_result', { text => $text }));
 		$form->{op} = 'stories' unless exists $ops{$form->{op}};
 

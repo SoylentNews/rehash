@@ -263,7 +263,7 @@ sub findStory {
 	# Don't return just one topic id in tid, make it an arrayref
 	# to all topic ids -- in the preferred order.
 	for my $story (@$stories) {
-		$story->{tid} = $self->getTopiclistForStory($story->{stoid});
+		$story->{tid} = $reader->getTopiclistForStory($story->{stoid});
 	}
 
 	return $stories;
