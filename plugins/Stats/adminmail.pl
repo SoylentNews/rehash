@@ -182,12 +182,11 @@ EOT
 		$data{"${_}_page"} = sprintf("%8d", $pages);
 		# Section is problematic in this definition, going to store
 		# the data in "all" till this is resolved. -Brian
+		$statsSave->createStatDaily("${_}_uids", $uids);
 		$statsSave->createStatDaily("${_}_ipids", $uniq);
 		$statsSave->createStatDaily("${_}_bytes", $bytes);
 		$statsSave->createStatDaily("${_}_page", $pages);
 	}
-
-	$statsSave->createStatDaily("distinct_comment_posters", $distinct_comment_posters_uids);
 
 # Not yet
 #	my $codes = $stats->getMessageCodes();
@@ -225,6 +224,7 @@ EOT
 		$statsSave->createStatDaily("ipids", $uniq, { section => $section });
 		$statsSave->createStatDaily("bytes", $bytes, { section => $section } );
 		$statsSave->createStatDaily("page", $pages, { section => $section });
+		$statsSave->createStatDaily("users", $users, { section => $section });
 
 		for (qw| index article search comments palm rss|) {
 			my $uniq = $stats->countDailyByPageDistinctIPID($_,  { section => $section  });
@@ -300,7 +300,7 @@ EOT
 	$statsSave->createStatDaily("unique_users", $count->{unique_users});
 	$statsSave->createStatDaily("comments", $comments);
 	$statsSave->createStatDaily("homepage", $count->{index}{index});
-	$statsSave->createStatDaily("distinct_comment_ipids", $distinct_comment_ipids);
+	$statsSave->createStatDaily("distinct_comment_ipids", scalar(@$distinct_comment_ipids));
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
 	$statsSave->createStatDaily("consensus", $consensus);
 	$statsSave->createStatDaily("mod_points_pool", $mod_points_pool);
@@ -376,6 +376,10 @@ EOT
 	$data{submissions} = sprintf("%8d", $submissions);
 	$data{sub_comments} = sprintf("%8.1f", ($submissions ? $submissions_comments_match*100/$submissions : 0));
 	$data{total_hits} = sprintf("%8d", $sdTotalHits);
+
+	$statsSave->createStatDaily("sub_comments", $data{sub_comments});
+	$statsSave->createStatDaily("total_hits", $sdTotalHits);
+
 	$data{homepage} = sprintf("%8d", $count->{index}{index});
 	$data{day} = $yesterday ;
 	$data{distinct_comment_posters_uids} = sprintf("%8d", $distinct_comment_posters_uids);
