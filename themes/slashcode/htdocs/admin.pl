@@ -26,6 +26,7 @@
 use strict;
 use lib '../';
 use vars '%I';
+use Date::Manip;
 use Image::Size;
 use Slash;
 
@@ -1117,13 +1118,15 @@ EOT
 ##################################################################
 # Story Editing
 sub editstory {
-	my($sid) = @_;
+	my($sid, $msg) = @_;
 	my($S, $A, $T);
 
 	foreach (keys %{$I{F}}) { $S->{$_} = $I{F}{$_} }
 
 	my $newarticle = 1 if !$sid && !$I{F}{sid};
-	
+
+	print "$msg" if (defined($msg));
+
 	print <<EOT;
 
 <!-- begin editstory -->
@@ -1580,6 +1583,12 @@ sub saveExtras {
 
 ##################################################################
 sub updateStory {
+	# Check for valid date first.
+	if (! ParseDate($I{F}{'time'})) {
+		editstory('', "Invalid date entered: '$I{F}{time}'");
+		return;
+	}
+
 	# Some users can only post to a fixed section
 	if ($I{U}{asection}) {
 		$I{F}{section} = $I{U}{asection};
@@ -1631,6 +1640,12 @@ sub updateStory {
 
 ##################################################################
 sub saveStory {
+	# Check for valid date first.
+	if (! ParseDate($I{F}{'time'})) {
+		editstory('', "Invalid date entered: '$I{F}{time}'");
+		return;
+	}
+
 	$I{F}{sid} = getsid();
 	$I{F}{displaystatus} ||= '1' if $I{U}{asection};
 	$I{F}{section} = $I{U}{asection} if $I{U}{asection};

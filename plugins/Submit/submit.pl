@@ -35,7 +35,6 @@ sub main {
 	getSlash();
 
 	my $id = getFormkeyId($I{U}{uid});
-
 	my($section, $op, $seclev, $aid) = (
 		$I{F}{section}, $I{F}{op}, $I{U}{aseclev}, $I{U}{aid}
 	);
@@ -411,10 +410,13 @@ USER
 
 		$karma = $uid > -1 && defined $karma ? " ($karma)" : "";
 
+		# @strs is for DISPLAY purposes, nothing more.
 		my @strs = (substr($subj, 0, 35), substr($name, 0, 20), substr($email, 0, 20));
-		# Adds proper section for form editor.
-		my $sec = $section ne $I{defaultsection} ? "&section=$section" : "";
-		my $stitle = '&title=' . fixparam($subj);
+		$strs[0] .= '...' if length($subj) > 35;
+
+		# Adds proper section and title for form editor.
+		my $sec = $section ne $I{defaultsection} ? "&section=$section" : '';
+		my $stitle = '&title=' . fixurl($subj, 1);
 		$stitle =~ s/%/%%/g; # for sprintf
 
 		printf(($admin ? <<ADMIN : <<USER), @strs);
