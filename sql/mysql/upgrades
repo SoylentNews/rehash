@@ -1382,7 +1382,9 @@ CREATE TABLE story_files (
 
 # End of T_2_3_0_79, Start of T_2_3_0_80
 
+ALTER TABLE dbs CHANGE type type ENUM("writer","reader","log","search","log_slave") DEFAULT "reader" NOT NULL;
+
 # SLASHDOT LAST UPDATED HERE
 
-ALTER TABLE dbs CHANGE type type enum("writer","reader","log","search", "log_slave") DEFAULT "reader" NOT NULL;
+ALTER TABLE classes CHANGE db_type db_type ENUM("writer","reader","log","search","log_slave") DEFAULT "writer" NOT NULL, CHANGE fallback fallback ENUM("writer","reader","log","search","log_slave") DEFAULT NULL;
 
