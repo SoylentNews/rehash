@@ -18,7 +18,11 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'header' %]
-	[% constants.sitename %] Submissions[% tbtitle %]
+	[% IF tbtitle %]
+		[% tbtitle %]: [% constants.sitename %] Submission
+	[% ELSE %]
+		[% constants.sitename %] Submissions
+	[% END %]
 
 [% CASE 'updatehead' %]
 	[% IF subids.size > 0 %]

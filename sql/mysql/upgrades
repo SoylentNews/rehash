@@ -840,3 +840,16 @@ INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method
 
 # LINUX.COM LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+
+# End of T_2_3_0_51, Start of T_2_3_0_52
+
+ALTER TABLE menus ADD COLUMN sel_label VARCHAR(32) NOT NULL DEFAULT '' AFTER label, ADD COLUMN showanon TINYINT DEFAULT '0' NOT NULL AFTER seclev;
+UPDATE menus SET showanon=1 WHERE seclev=0;
+UPDATE menus SET sel_label=label;
+DELETE FROM menus WHERE menu='users';
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Info', 'info', '/users.pl?op=userinfo', 1, 10, 0);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 20, 0);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl', 1, 30, 0);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 40, 0);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 50, 0);
+

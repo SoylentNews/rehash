@@ -521,7 +521,7 @@ sub commentIndexCreator {
 			forward		=> $forward,
 			args		=> _buildargs($form),
 			start		=> $start,
-			supress_create	=> 1,
+			suppress_create	=> 1,
 			back		=> $back,
 		});
 	} else {
@@ -568,7 +568,7 @@ sub commentIndexPersonal {
 			forward		=> $forward,
 			args		=> _buildargs($form),
 			start		=> $start,
-			supress_create	=> 1,
+			suppress_create	=> 1,
 			back		=> $back,
 		});
 	} else {

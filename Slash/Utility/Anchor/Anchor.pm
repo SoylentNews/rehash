@@ -158,7 +158,9 @@ sub header {
 	# figure out which admin menu to display and which
 	# tab to highlight
 	$data->{adminmenu} = $options->{adminmenu} || 'admin';
-	$data->{page} = $options->{page} if $options->{page};
+	# Should we also pass thru {page} here or is that outdated?
+#print STDERR "header(options->page) defined: '$options->{page}' for title '$data->{title}'\n" if defined($options->{page});
+	$data->{tab_selected} = $options->{tab_selected} if $options->{tab_selected};
 
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;

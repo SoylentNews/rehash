@@ -10,6 +10,8 @@ __lang__
 en_US
 __name__
 motd
+__instructions__
+placeholder
 __template__
 I'm not a robot like you. I don't like having disks crammed into me... unless they're Oreos, and then only in the mouth.
 		-- Fry

@@ -14,17 +14,20 @@ en_US
 __name__
 start_tab
 __template__
-[% IF selected %]
+[% IF justify == 'right' %]
+	<TD VALIGN="TOP" BGCOLOR="[% user.bg.3 %]" WIDTH=100%>&nbsp;</TD>
+[% END %]
+[% IF tab_is_selected %]
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_ggo.gif"></TD>
-	<TD BACKGROUND="[% constants.imagedir %]/menu_bgo.gif" BGCOLOR="[% user.bg.1 %]">&nbsp;<A HREF="[% constants.rootdir %][% link %]/"><B><FONT COLOR="#000000">[% label %]</FONT></B></A>&nbsp;</TD>
+	<TD BACKGROUND="[% constants.imagedir %]/menu_bgo.gif" BGCOLOR="[% user.bg.1 %]">&nbsp;<A HREF="[% link %]"><B><FONT COLOR="#000000">[% label %]</FONT></B></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_gox.gif"></TD>
-[% ELSIF next %]
+[% ELSIF next_tab_is_selected %]
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_ggx.gif"></TD>
-	<TD BACKGROUND="[% constants.imagedir %]/menu_bgx.gif">&nbsp;<A HREF="[% constants.rootdir %][% link %]/"><FONT COLOR="#000000">[% label %]</FONT></A>&nbsp;</TD>
+	<TD BACKGROUND="[% constants.imagedir %]/menu_bgx.gif">&nbsp;<A HREF="[% link %]"><FONT COLOR="#000000">[% label %]</FONT></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_gxo.gif"></TD>
 [% ELSE %]
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_ggx.gif"></TD>
-	<TD BACKGROUND="[% constants.imagedir %]/menu_bgx.gif">&nbsp;<A HREF="[% constants.rootdir %][% link %]/"><FONT COLOR="#000000">[% label %]</FONT></A>&nbsp;</TD>
+	<TD BACKGROUND="[% constants.imagedir %]/menu_bgx.gif">&nbsp;<A HREF="[% link %]"><FONT COLOR="#000000">[% label %]</FONT></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_gxx.gif"></TD>
 [% END %]
 __seclev__

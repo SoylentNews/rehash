@@ -14,23 +14,21 @@ en_US
 __name__
 admin
 __template__
-<NOBR>
-<TABLE VALIGN="MIDDLE" WIDTH="100%" CELLPADDING="0" CELLSPACING="0">
-	<TR BGCOLOR="[% user.bg.2 %]">
-		[% IF constants.panic %]
-		<TD><P ALIGN="CENTER"><B>**&nbsp;PANIC&nbsp;LEVEL&nbsp;[% constants.panic %]&nbsp;**</B></P></TD>
-		[% END %]
-	[% PROCESS start_tab link="/" label="Home" selected=( page == 'home' ) next=( page == 'stories' ) %]
-	[% PROCESS mid_tab link="/admin.pl" label="Stories" selected=( page == 'stories' ) next=( page == 'new' ) %]
-	[% PROCESS mid_tab link="/admin.pl?op=edit" label="New" selected=( page == 'new' ) next=( page == 'submissions' ) %]
-	[% subs = Slash.db.getSubmissionCount() %]
-	[% PROCESS mid_tab link="/submit.pl?op=list" label="$subs&nbsp;Submissions" selected=( page == 'submissions' ) next=( page == 'poll' ) %]
-	[% PROCESS mid_tab link="/pollBooth.pl?op=edit" label="Poll" selected=( page == 'poll' ) next=( page == 'config' ) %]
-	[% PROCESS mid_tab link="/admin.pl?op=topics" label="Config" selected=( page == 'config' ) next=( page == 'info' ) %]
-	[% PROCESS mid_tab link="/admin.pl?op=recent" label="Info" selected=( page == 'info' ) next=( page == 'help' ) %]
-	[% PROCESS end_tab link="/getting_started.shtml" label="Help" selected=( page == 'help' ) %]
-	</TR>
-</TABLE>
-</NOBR>
+[% IF constants.panic %]
+	<TD><P ALIGN="CENTER"><B>**&nbsp;PANIC&nbsp;LEVEL&nbsp;[%
+	constants.panic %]&nbsp;**</B></P></TD>
+[% END %]
+[% subs = Slash.db.getSubmissionCount() %]
+[% tabs = [
+	{ link = "/",				label = "Home",			sel_label = "home" },
+	{ link = "/admin.pl",			label = "Stories",		sel_label = "stories" },
+	{ link = "/admin.pl?op=edit",		label = "New",			sel_label = "new" },
+	{ link = "/submit.pl?op=list",		label = "$subs&nbsp;Submissions", sel_label = "submissions" },
+	{ link = "/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
+	{ link = "/admin.pl?op=topics",		label = "Config",		sel_label = "topics" },
+	{ link = "/admin.pl?op=recent",		label = "Info",			sel_label = "recent" },
+	{ link = "/getting_started.shtml",	label = "Help",			sel_label = "help" },
+];
+PROCESS tabbedmenu tabs=tabs selected=page; %]
 __seclev__
 10000

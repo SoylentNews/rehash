@@ -3,8 +3,8 @@ default
 __description__
 Prints the bar above each story, containing the actual title of the story.
 
-* width = width of widget
-* title = text for title
+* selected = label of selected tab
+
 __title__
 
 __page__
@@ -14,41 +14,54 @@ en_US
 __name__
 user_titlebar
 __template__
-[% IF user.uid == uid && !user.is_anon %]
-	[% stuff = "$user.nickname (This is you!)"  %]
-	[% url_nick = user.nickname | fixparam %]
-	[% PROCESS titlebar title=stuff width="100%" %]
-[% ELSE %]
-	[% url_nick = nickname | fixparam %]
-	[% x = PROCESS zoo_icons person=uid implied=""; stuff = "<A HREF=\"/~$url_nick/\"><FONT COLOR=\"#FFFFFF\">$nickname ($uid)</FONT></A> " _ x  %]
-	[% PROCESS titlebar title=stuff width="100%" %]
-[% END %]
-<NOBR>
-<TABLE WIDTH="100%" valign="MIDDLE" CELLPADDING="0" CELLSPACING="0">
-	<TR BGCOLOR="[% user.bg.2 %]">
-		[% IF user.uid == uid %]
-			[% PROCESS start_tab link="/~$url_nick" label="Info" selected=( page == 'info' ) next=( page == 'messages' ) %]
-			[% PROCESS mid_tab link="/my/inbox" label="Messages" selected=( page == 'messages' ) next=( page == 'journal' ) %]
-			[% PROCESS mid_tab link="/my/journal" label="Journal" selected=( page == 'journal' ) next=( page == 'friends' ) %]
-			[% PROCESS mid_tab link="/my/friends" label="Friends" selected=( page == 'friends' ) next=( page == 'fans' ) %]
-			[% PROCESS mid_tab link="/my/fans" label="Fans" selected=( page == 'fans' ) next=( page == 'foes' ) %]
-			[% PROCESS mid_tab link="/my/foes" label="Foes" selected=( page == 'foes' ) next=( page == 'freaks' ) %]
-			[% PROCESS end_tab link="/my/freaks" label="Freaks" selected=( page == 'freaks' ) %]
-		[% ELSE %]
-			[% IF !user.is_anon  %]
-				[% PROCESS start_tab link="/~$url_nick" label="Info" selected=( page == 'info' ) next=( page == 'relation' ) %]
-				[% PROCESS mid_tab link="/zoo.pl?op=check&uid=$uid" label="Relation" selected=( page == 'relation' ) next=( page == 'journal' ) %]
-			[% ELSE %]
-				[% PROCESS start_tab link="/~$url_nick" label="Info" selected=( page == 'info' ) next=( page == 'journal' ) %]
-			[% END %]
-			[% PROCESS mid_tab link="/~$url_nick/journal" label="Journal" selected=( page == 'journal' ) next=( page == 'friends' ) %]
-			[% PROCESS mid_tab link="/~$url_nick/friends" label="Friends" selected=( page == 'friends' ) next=( page == 'fans' ) %]
-			[% PROCESS mid_tab link="/~$url_nick/fans" label="Fans" selected=( page == 'fans' ) next=( page == 'foes' ) %]
-			[% PROCESS mid_tab link="/~$url_nick/foes" label="Foes" selected=( page == 'foes' ) next=( page == 'freaks' ) %]
-			[% PROCESS end_tab link="/~$url_nick/freaks" label="Freaks" selected=( page == 'freaks' ) %]
-		[% END %]
-	</TR>
-</TABLE>
-</NOBR>
+<!-- user_titlebar selected=[% selected %] -->
+
+[% IF user.uid == uid && !user.is_anon;
+	title = "$user.nickname (This is you!)";
+	url_nick = user.nickname | fixparam;
+	PROCESS titlebar title=title width="100%";
+ELSE;
+	url_nick = useredit.nickname | fixparam;
+	zi = PROCESS zoo_icons person=uid implied="";
+	title = "<A HREF=\"/~$url_nick/\"><FONT COLOR=\"#FFFFFF\">"
+		_ useredit.nickname _ " ($uid)</FONT></A> "
+		_ zi;
+	PROCESS titlebar title=title width="100%";
+END %]
+
+[% tabs = [ ];
+IF user.uid == uid;
+	tabs = [
+		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "/my/inbox",		label = "Messages",	sel_label = "messages" },
+		{ link = "/my/journal",		label = "Journal",	sel_label = "journal" },
+		{ link = "/my/friends",		label = "Friends",	sel_label = "friends" },
+		{ link = "/my/fans",		label = "Fans",		sel_label = "fans" },
+		{ link = "/my/foes",		label = "Foes",		sel_label = "foes" },
+		{ link = "/my/freaks",		label = "Freaks",	sel_label = "freaks" },
+	];
+ELSIF user.is_anon;
+	tabs = [
+		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
+	];
+ELSE;
+	tabs = [
+		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "/zoo.pl?op=check&uid=$uid", label = "Relation", sel_label = "relation" },
+		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
+	];
+END;
+
+PROCESS tabbedmenu tabs=tabs selected=selected %]
+
 __seclev__
 10000

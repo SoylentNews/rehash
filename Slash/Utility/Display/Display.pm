@@ -983,40 +983,85 @@ template blocks for menus, along with all the data in the
 =cut
 
 sub createMenu {
-	my($menu) = @_;
+	my($menu, $options) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	my $menu_items = getCurrentMenu($menu) or return;
-	my $items = [];
 
+	# The style of menu desired.  While we're "evolving" the way we do
+	# menus, createMenu() handles several different styles.
+	my $style = $options->{style};
+	$style = 'oldstyle' unless $style =~ /^tabbed$/;
+
+	# Get the list of menu items from the "menus" table.  Then add in
+	# any special ones passed in.
+	my $menu_items = getCurrentMenu($menu);
+	if (!$menu_items || !@$menu_items) {
+		return "<!-- createMenu($menu, $style), no items -->\n"; # DEBUG
+	}
+	if ($options->{extra_items} && @{$options->{extra_items}}) {
+		push @$menu_items, @{$options->{extra_items}};
+	}
+
+	# Now convert each item in the list into a hashref that can
+	# be passed to the appropriate template.  The different
+	# styles of templates each take a slightly different format
+	# of data, and createMenu() is the front-end that makes sure
+	# they get what they expect.
+	my $items = [];
 	for my $item (sort { $a->{menuorder} <=> $b->{menuorder} } @$menu_items) {
-		next unless $user->{seclev} >= $item->{seclev};
+
+		# Only use items that the user can see.
+		next if $item->{seclev} && $user->{seclev} < $item->{seclev};
+		next if !$item->{showanon} && $user->{is_anon};
 
 		my $opts = { Return => 1, Nocomm => 1 };
-		my $value = $item->{value} && slashDisplay(\$item->{value}, 0, $opts);
-		my $label = $item->{label} && slashDisplay(\$item->{label}, 0, $opts);
+		my $data = { };
+		$data->{value} = $item->{value} && slashDisplay(\$item->{value}, 0, $opts);
+		$data->{label} = $item->{label} && slashDisplay(\$item->{label}, 0, $opts);
+		if ($style eq 'tabbed') {
+			# Tabbed menus don't display menu items with no
+			# links on them.
+			next unless $data->{value};
+			# Reconfigure data for what the tabbedmenu
+			# template expects.
+			$data->{sel_label} = lc $data->{label};
+			$data->{sel_label} =~ s/\s+//g;
+			$data->{label} =~ s/ +/&nbsp;/g;
+			$data->{link} = $data->{value};
+		}
 
-		push @$items, {
-			value => $value,
-			label => $label,
-		};
+		push @$items, $data;
 	}
 
-	# default to "users" menu template
-	my $nm = $slashdb->getTemplateByName($menu, 0, 0, "menu", "", 1);
-	$menu = "users" unless $nm->{page} eq "menu";
+	my $menu_text = "";
+	$menu_text .= "<!-- createMenu($menu, $style) -->\n"; # DEBUG
 
-	if (@$items) {
-		return slashDisplay($menu, {
-			items	=> $items
-		}, {
-			Return	=> 1,
-			Page	=> 'menu'
-		});
-	} else {
-		return;
+	if ($style eq 'tabbed') {
+		# All menus in the tabbed style use the same template.
+		$menu_text .= slashDisplay("tabbedmenu",
+		 	{ tabs =>		$items,
+			  justify =>		$options->{justify} || 'left',
+			  tab_selected =>	$options->{tab_selected},	},
+			{ Return => 1, Page => 'menu' });
+	} elsif ($style eq 'oldstyle') {
+		# Oldstyle menus each hit a different template,
+		# "$menu;menu;default" -- so the $menu input refers
+		# not only to the column "menu" in table "menus" but
+		# also to which template to look up.  If no template
+		# with that name is available (or $menu;misc;default,
+		# or $menu;menu;light or whatever the fallbacks are)
+		# then punt and go with "users;menu;default".
+		my $nm = $slashdb->getTemplateByName($menu, 0, 0, "menu", "", 1);
+		$menu = "users" unless $nm->{page} eq "menu";
+		if (@$items) {
+			$menu_text .= slashDisplay($menu,
+				{ items =>	$items },
+				{ Return => 1, Page => 'menu' });
+		}
 	}
+
+	return $menu_text;
 }
 
 ########################################################

@@ -493,10 +493,15 @@ sub check {
 
 sub _printHead {
 	my($head, $data) = @_;
+	my $slashdb = getCurrentDB();
+	my $useredit = $data->{uid}
+		? $slashdb->getUser($data->{uid})
+		: getCurrentUser();
 	my $title = getData($head, $data);
 	header($title);
 	# Store the title and pass it on to the page -Brian
 	$data->{title} = $title;
+	$data->{useredit} = $useredit;
 	slashDisplay("zoohead", $data);
 }
 

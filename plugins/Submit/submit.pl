@@ -45,10 +45,7 @@ sub main {
 
 	# Show submission title on browser's titlebar.
 	my($tbtitle) = $form->{title};
-	if ($tbtitle) {
-		$tbtitle =~ s/^"?(.+?)"?$/"$1"/;
-		$tbtitle = "- $tbtitle";
-	}
+	$tbtitle =~ s/^"?(.+?)"?$/$1/ if $tbtitle;
 
 	my $ops = {
 		# initial form, no formkey needed due to 'preview' requirement
@@ -101,9 +98,11 @@ sub main {
 		! $ops->{$op}{function}
 	);
 
+	my $data = { admin => 1 };
+	$data->{tab_selected} = 'submissions' if $op eq 'list';
 	header(
 		getData('header', { tbtitle => $tbtitle } ),
-		'', { admin => 1 }
+		'', $data
 	);
 
 	if ($user->{seclev} < 100) {

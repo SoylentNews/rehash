@@ -24,10 +24,6 @@ __template__
 <H2>[% n %]</H2>
 	[% END %]
 
-[% CASE 'userinfo_nicknf_err' %]
-[% PROCESS titlebar width="95%" title="Nickname not found" %]
-	[% nick %] not found.
-
 [% CASE 'userinfo_idnf_err' %]
 	<BR><B>The 
 	[% fieldkey == 'uid' ? ' UID ' : ' nickname ' %]

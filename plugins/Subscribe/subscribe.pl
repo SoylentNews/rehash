@@ -52,6 +52,11 @@ sub main {
 	$op = 'default' unless $ops->{$op};
 
 	header("subscribe") unless $op eq 'pause';
+	print createMenu('users', {
+                style =>	'tabbed',
+		justify =>	'right',
+		tab_selected =>	'subscription',
+	});
 
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
 

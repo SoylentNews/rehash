@@ -4,7 +4,6 @@ __description__
 Display user's info
 
 * title = passed to titlebar
-* nick = nickname
 * useredit = hashref of info of the user being viewed
 * points = available moderation points
 * commentstruct = arrayref of comments
@@ -14,7 +13,6 @@ Display user's info
 * admin_block = admin stuff
 * admin_flag = boolean for whether to display admin stuff
 * fieldkey = the field key used to decide what we're looking at
-
 
 __title__
 
@@ -26,7 +24,7 @@ __name__
 userInfo
 __template__
 [% USE Slash %]
-[% PROCESS user_titlebar page='info' width="95%" %]
+[% PROCESS user_titlebar selected='info' width="95%" %]
 [% IF form.formkey %]
         <!-- INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]" -->
 [% END %]
@@ -41,7 +39,8 @@ change your password, or just click pretty widgets to kill time.
 
 [% IF mod_flag %]
 <P>You're a moderator with [% points %] point[% user.points == 1 ? '' : 's' %]
-[%- IF points && lastgranted %](expire after [% lastgranted %])[% END %]. Please read the
+[%- IF points && useredit.points_expire %] (expire after [% useredit.points_expire %])[% END %].
+Please read the
 <A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
 before you do any moderation.<BR><P>
 [% END %]
@@ -63,7 +62,7 @@ before you do any moderation.<BR><P>
 [% END; IF useredit.fakeemail %]
 <A HREF="mailto:[% useredit.fakeemail | fixparam %]">[% useredit.fakeemail | strip_literal %]</A><BR>
 [% END; IF useredit.journal_last_entry_date.search('[1-9]') %]
-<A HREF="[% constants.rootdir %]/~[% nick_plain | fixparam %]/journal/">
+<A HREF="[% constants.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">
 Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A>
 [ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
 <BR>
@@ -92,7 +91,7 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
  <BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<P>
 [% END %]
 
-<BR><B>[% nick %] has posted [% commentcount %]
+<BR><B>[% useredit.nickname %] has posted [% commentcount %]
 comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
 [% IF commentcount > 1 %]
 [% IF commentcount > commentstruct.size %]Below find
@@ -120,7 +119,7 @@ comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
 [% END %]
 
 [% IF admin_flag && commentcount > n %] 
-<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% nick_plain | fixparam %]&amp;min_comment=[% n %]"
+<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]"
 >More Comments...</A><P>
 [% END %]
 

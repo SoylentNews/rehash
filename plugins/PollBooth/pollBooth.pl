@@ -58,9 +58,9 @@ sub main {
 
 	if ($form->{qid}) {
 		my $section = $slashdb->getPollQuestion($form->{qid}, 'section');
-		header(getData('title'), $section);
+		header(getData('title'), $section, { tab_selected => 'poll'});
 	} else {
-		header(getData('title'), $form->{section});
+		header(getData('title'), $form->{section}, { tab_selected => 'poll'});
 	}
 
 	$ops{$op}->($form, $slashdb, $constants);

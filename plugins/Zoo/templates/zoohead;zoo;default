@@ -12,7 +12,8 @@ __name__
 zoohead
 __template__
 [% USE Slash %]
-[% PROCESS user_titlebar width => "100%" %]
+<!-- zoohead page=[% page %] -->
+[% PROCESS user_titlebar selected=page %]
 [% UNLESS page == 'relation' %]
 	[% IF uid == user.uid && !user.is_anon %]
 		<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">

@@ -29,7 +29,7 @@ sub main {
 			function	=> \&displaySlashd,
 			seclev		=> 500,
 			adminmenu	=> 'info',
-			page		=> 'slashd',
+			tab_selected	=> 'slashd',
 		},
 		edit_keyword	=> {
 			function	=> \&editKeyword,
@@ -50,6 +50,7 @@ sub main {
 		default		=> {
 			function	=> \&listStories,
 			seclev		=> 100,
+			tab_selected	=> 'stories',
 		},
 		'delete'		=> {
 			function 	=> \&listStories,
@@ -62,16 +63,15 @@ sub main {
 		edit		=> {
 			function 	=> \&editStory,
 			seclev		=> 100,
+			tab_selected	=> 'new',
 		},
 		blocks 		=> {	# blockdelete_cancel,blockdelete_confirm,
 					# blockdelete1,blockdelete2,blocksave,
 					# blockrevert,blocksavedef,blockdelete,blocknew,
-
 			function 	=> \&blockEdit,
-
 			seclev		=> 500,
 			adminmenu	=> 'config',
-			page		=> 'blocks',
+			tab_selected	=> 'blocks',
 		},
 		colors 		=> {	# colored,colorpreview,colorsave,colorrevert,
 					# colororig,colorsavedef,
@@ -79,13 +79,13 @@ sub main {
 			function 	=> \&colorEdit,
 			seclev		=> 10000,
 			adminmenu	=> 'config',
-			page		=> 'colors',
+			tab_selected	=> 'colors',
 		},
 		listfilters 	=> {
 			function 	=> \&listFilters, # listfilters
 			seclev		=> 100,
 			adminmenu	=> 'config',
-			page		=> 'filters',
+			tab_selected	=> 'filters',
 		},
 		editfilter	=> {
 			function 	=> \&editFilter, # newfilter,updatefilter,deletefilter,
@@ -96,7 +96,7 @@ sub main {
 			function 	=> \&siteInfo,
 			seclev		=> 10000,
 			adminmenu	=> 'info',
-			page		=> 'site',
+			tab_selected	=> 'site',
 		},
 
 		templates 	=> { 	# templatedelete_confirm,templatesection,
@@ -107,7 +107,7 @@ sub main {
 			function 	=> \&templateEdit,
 			seclev		=> 500,
 			adminmenu	=> 'config',
-			page		=> 'templates',
+			tab_selected	=> 'templates',
 		},
 
 		topics 		=> {	# topiced,topicnew,topicsave,topicdelete
@@ -115,20 +115,20 @@ sub main {
 			function 	=>  \&topicEdit,
 			seclev		=> 10000,
 			adminmenu	=> 'config',
-			page		=> 'topics',
+			tab_selected	=> 'topics',
 		},
 		vars 		=> {	# varsave, varedit
 
 			function 	=> \&varEdit,
 			seclev		=> 10000,
 			adminmenu	=> 'config',
-			page		=> 'vars',
+			tab_selected	=> 'vars',
 		},
 		recent		=> {
 			function	=> \&displayRecent,
 			seclev		=> 500,
 			adminmenu	=> 'info',
-			page		=> 'recent',
+			tab_selected	=> 'recent',
 		},
 	};
 
@@ -163,7 +163,12 @@ sub main {
 		? " $gmt_ts"
 		: " $local_ts $user->{tzcode} = $gmt_ts GMT";
 	# "backSlash" needs to be in a template or something -- pudge
-	header("backSlash$time_remark$tbtitle", '', { admin => 1, adminmenu => $ops->{$op}{adminmenu} || 'admin', page => $ops->{$op}{page} });
+	my $data = {
+		admin => 1,
+		adminmenu => $ops->{$op}{adminmenu} || 'admin',
+		tab_selected => $ops->{$op}{tab_selected},
+	};
+	header("backSlash$time_remark$tbtitle", '', $data);
 	# admin menu is printed from within the 'header' template
 
 	# it'd be nice to have a legit retval

@@ -187,6 +187,7 @@ template=templates/setrectop_txt;misc;default
 template=templates/ssihead;misc;default
 template=templates/storylink;index;default
 template=templates/storylink;index;light
+template=templates/tabbedmenu;misc;default
 template=templates/tildeEd;users;default
 template=templates/titlebar;misc;default
 template=templates/titlebar;misc;light

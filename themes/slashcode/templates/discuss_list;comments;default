@@ -6,7 +6,7 @@ Slash, this list is printed when comments.pl executed with no
 arguments.
 
 * discussions = arrayref of arrayrefs of discussions (sid = 0, title=1, url=2)
-* supress_create = if it has value then the create is not displayed even if the user has enough of a seclev
+* suppress_create = if it has value then the create is not displayed even if the user has enough of a seclev
 __title__
 
 __page__
@@ -35,7 +35,7 @@ IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]<
 
 <P>
 
-[% IF user.seclev >= constants.discussion_create_seclev && !supress_create;
+[% IF user.seclev >= constants.discussion_create_seclev && !suppress_create;
     # PROCESS discreate topic=constants.discussion_default_topic label=label; 
     PROCESS edit_comment indextype=indextype newdiscussion=1 topic=constants.discussion_default_topic label=label; 
 ELSIF user.seclev < constants.discussion_create_seclev;

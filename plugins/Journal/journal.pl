@@ -247,7 +247,7 @@ sub displayArticleFriends {
 	my @collection;
 	my $zoo   = getObject('Slash::Zoo');
 
-	if ($form->{uid} or $form->{nick}) {
+	if ($form->{uid} || $form->{nick}) {
 		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
 		$nickname	= $slashdb->getUser($uid, 'nickname');
 	} else {
@@ -322,7 +322,7 @@ sub displayArticle {
 	my($date, $forward, $back, @sorted_articles, $nickname, $uid, $discussion);
 	my $collection = {};
 
-	if ($form->{uid} or $form->{nick}) {
+	if ($form->{uid} || $form->{nick}) {
 		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
 		$nickname	= $slashdb->getUser($uid, 'nickname');
 	} else {
@@ -685,7 +685,12 @@ sub _printHead {
 	my $title = getData($head, $data);
 	header($title);
 	if ($new_header) {
-		$data->{page} = 'journal';
+		$data->{selected} = 'journal';
+		my $slashdb = getCurrentDB();
+		my $useredit = $data->{uid}
+			? $slashdb->getUser($data->{uid})
+			: getCurrentUser();
+		$data->{useredit} = $useredit;
 		print createMenu("users");
 		slashDisplay("user_titlebar", $data);
 		print createMenu("journal");

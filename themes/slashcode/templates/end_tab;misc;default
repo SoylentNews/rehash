@@ -14,13 +14,14 @@ en_US
 __name__
 end_tab
 __template__
-[% IF selected %]
-	<TD BACKGROUND="[% constants.imagedir %]/menu_bgo.gif" BGCOLOR="[% user.bg.1 %]">&nbsp;<A HREF="[% constants.rootdir %][% link %]"><B><FONT COLOR="#000000">[% label %]</FONT></B></A>&nbsp;</TD>
+[% IF tab_is_selected %]
+	<TD BACKGROUND="[% constants.imagedir %]/menu_bgo.gif" BGCOLOR="[% user.bg.1 %]">&nbsp;<A HREF="[% link %]"><B><FONT COLOR="#000000">[% label %]</FONT></B></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_gog.gif"></TD>
-	<TD BGCOLOR="[% user.bg.3 %]" WIDTH=100%>&nbsp;</TD>
 [% ELSE %]
-	<TD BACKGROUND="[% constants.imagedir %]/menu_bgx.gif">&nbsp;<A HREF="[% constants.rootdir %][% link %]"><FONT COLOR="#000000">[% label %]</FONT></A>&nbsp;</TD>
+	<TD BACKGROUND="[% constants.imagedir %]/menu_bgx.gif">&nbsp;<A HREF="[% link %]"><FONT COLOR="#000000">[% label %]</FONT></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_gxg.gif"></TD>
+[% END %]
+[% IF justify != 'right' %]
 	<TD VALIGN="TOP" BGCOLOR="[% user.bg.3 %]" WIDTH=100%>&nbsp;</TD>
 [% END %]
 __seclev__

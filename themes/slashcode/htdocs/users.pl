@@ -33,10 +33,6 @@ sub main {
 	# you've just saved.
 	my $savepass_flag = $op eq 'savepasswd' ? 1 : 0 ;
 
-	# my $note = [ split /\n+/, $form->{note} ] if defined $form->{note};
-
-	my $note;
-
 	my $ops = {
 		admin		=>  {
 			function 	=> \&adminDispatch,
@@ -66,6 +62,7 @@ sub main {
 			seclev		=> $constants->{users_show_info_seclev},
 			formname	=> $formname,
 			checks		=> [],
+			tab_selected	=> 'info',
 		},
 		usersubmissions	=>  {
 			function	=> \&showSubmissions,
@@ -91,9 +88,9 @@ sub main {
 			seclev		=> 1,
 			post		=> 1,
 			formname	=> $formname,
-			checks		=>
-			[ qw (max_post_check valid_check
-				formkey_check regen_formkey) ],
+			checks		=> [ qw (max_post_check valid_check
+						formkey_check regen_formkey) ],
+			tab_selected	=> 'password',
 		},
 		saveuseradmin	=> {
 			function	=> \&saveUserAdmin,
@@ -107,34 +104,32 @@ sub main {
 			seclev		=> 1,
 			post		=> 1,
 			formname	=> $formname,
-			checks		=>
-			[ qw (valid_check
-				formkey_check regen_formkey) ],
+			checks		=> [ qw (valid_check
+						formkey_check regen_formkey) ],
 		},
 		savecomm	=> {
 			function	=> \&saveComm,
 			seclev		=> 1,
 			post		=> 1,
 			formname	=> $formname,
-			checks		=>
-			[ qw (valid_check
-				formkey_check regen_formkey) ],
+			checks		=> [ qw (valid_check
+						formkey_check regen_formkey) ],
 		},
 		saveuser	=> {
 			function	=> \&saveUser,
 			seclev		=> 1,
 			post		=> 1,
 			formname	=> $formname,
-			checks		=>
-			[ qw (valid_check
-				formkey_check regen_formkey) ],
+			checks		=> [ qw (valid_check
+						formkey_check regen_formkey) ],
 		},
 		changepasswd	=> {
 			function	=> \&changePasswd,
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> $savepass_flag ? [] :
-			[ qw (generate_formkey) ],
+						[ qw (generate_formkey) ],
+			tab_selected	=> 'password',
 		},
 		editmiscopts	=> {
 			function	=> \&editMiscOpts,
@@ -165,23 +160,20 @@ sub main {
 			function	=> \&editHome,
 			seclev		=> 1,
 			formname	=> $formname,
-			checks		=>
-			[ qw (generate_formkey) ],
+			checks		=> [ qw (generate_formkey) ],
 		},
 		editcomm	=> {
 			function	=> \&editComm,
 			seclev		=> 1,
 			formname	=> $formname,
-			checks		=>
-			[ qw (generate_formkey) ],
+			checks		=> [ qw (generate_formkey) ],
 		},
 		newuser		=> {
 			function	=> \&newUser,
 			seclev		=> 0,
 			formname	=> "${formname}/nu",
-			checks		=>
-			[ qw (max_post_check valid_check
-				formkey_check regen_formkey) ],
+			checks		=> [ qw (max_post_check valid_check
+						formkey_check regen_formkey) ],
 		},
 		newuseradmin	=> {
 			function	=> \&newUserForm,
@@ -199,9 +191,8 @@ sub main {
 			function	=> \&mailPasswd,
 			seclev		=> 0,
 			formname	=> "${formname}/mp",
-			checks		=>
-			[ qw (max_post_check valid_check
-				interval_check formkey_check ) ],
+			checks		=> [ qw (max_post_check valid_check
+						interval_check formkey_check ) ],
 		},
 		validateuser	=> {
 			function	=> \&validateUser,
@@ -219,22 +210,21 @@ sub main {
 			function	=> \&displayForm,
 			seclev		=> 0,
 			formname	=> "${formname}/nu",
-			checks		=>
-			[ qw (max_post_check generate_formkey) ],
+			checks		=> [ qw (max_post_check
+						generate_formkey) ],
 		},
 		mailpasswdform 	=> {
 			function	=> \&displayForm,
 			seclev		=> 0,
 			formname	=> "${formname}/mp",
-			checks		=>
-			[ qw (max_post_check generate_formkey) ],
+			checks		=> [ qw (max_post_check
+						generate_formkey) ],
 		},
 		displayform	=> {
 			function	=> \&displayForm,
 			seclev		=> 0,
 			formname	=> $formname,
-			checks		=>
-			[ qw (generate_formkey) ],
+			checks		=> [ qw (generate_formkey) ],
 		},
 		listreadonly => {
 			function	=> \&listReadOnly,
@@ -269,8 +259,9 @@ sub main {
 	} ;
 	$ops->{default} = $ops->{displayform};
 
+	my $errornote = "";
 	if ($form->{op} && ! defined $ops->{$op}) {
-		$note .= getError('bad_op', { op => $form->{op}}, 0, 1);
+		$errornote .= getError('bad_op', { op => $form->{op}}, 0, 1);
 		$op = $user->{is_anon} ? 'userlogin' : 'userinfo'; 
 	}
 
@@ -335,15 +326,15 @@ sub main {
 		if ($user->{seclev} < 100) {
 			for my $check (@{$ops->{savepasswd}{checks}}) {
 				# the only way to save the error message is to pass by ref
-				# $note and add the message to note (you can't print it out
-				#  before header is called)
-				$error_flag = formkeyHandler($check, $formname, $formkey, \$note);
+				# $errornote and add the message to note (you can't print
+				# it out before header is called)
+				$error_flag = formkeyHandler($check, $formname, $formkey, \$errornote);
 				last if $error_flag;
 			}
 		}
 
 		if (! $error_flag) {
-			$error_flag = savePasswd({ noteref => \$note }) ;
+			$error_flag = savePasswd({ noteref => \$errornote }) ;
 		}
 		# change op to edituser and let fall through;
 		# we need to have savePasswd set the cookie before
@@ -357,8 +348,12 @@ sub main {
 
 	header(getMessage('user_header'));
 # This is a hardcoded position, bad idea and should be fixed -Brian
-	print getMessage('note', { note => $note }) if defined $note;
-	print createMenu($formname) if ! $user->{is_anon};
+	print getMessage('note', { note => $errornote }) if defined $errornote;
+	print createMenu($formname, {
+		style =>	'tabbed',
+		justify =>	'right',
+		tab_selected =>	$ops->{$op}{tab_selected} || "",
+	});
 
 	$op = 'userinfo' if (! $form->{op} && ($form->{uid} || $form->{nick}));
 	$op ||= $user->{is_anon} ? 'userlogin' : 'userinfo';
@@ -963,12 +958,11 @@ sub showInfo {
 		if (! $requested_user->{uid}) {
 			
 			print getError('userinfo_idnf_err', { id => $id, fieldkey => $fieldkey});
-			# print getError('userinfo_nicknf_err', { nick => $nick });
 			return;
 		}
 
 		$karma_flag = 1 if $admin_flag;
-		my $nick_plain = $nick ||= $requested_user->{nickname};
+		$requested_user->{nick_plain} = $nick ||= $requested_user->{nickname};
 		$nick = strip_literal($nick);
 
 		if ($requested_user->{uid} == $user->{uid}) {
@@ -982,10 +976,11 @@ sub showInfo {
 				$mod_flag = 1;
 				$lastgranted = $slashdb->getUser($uid, 'lastgranted');
 				if ($lastgranted) {
-					$lastgranted = timeCalc(
-						UnixDate(DateCalc($lastgranted,
-							'+ ' . ($constants->{stir}+1) . ' days'
-						), "%C"), '%Y-%m-%d'
+					my $hours = $constants->{mod_stir_hours}
+						|| $constants->{stir}*24;
+					$requested_user->{points_expire} = timeCalc(
+						UnixDate(DateCalc($lastgranted, "+ $hours hours"),
+							"%C"), '%Y-%m-%d'
 					);
 				}
 			}
@@ -998,13 +993,9 @@ sub showInfo {
 
 		slashDisplay('userInfo', {
 			title			=> $title,
-			nick_plain		=> $nick_plain,
-			nick			=> $nick,
-			nickname		=> $nick,
 			uid			=> $uid,
 			useredit		=> $requested_user,
 			points			=> $points,
-			lastgranted		=> $lastgranted,
 			commentstruct		=> $commentstruct || [],
 			commentcount		=> $commentcount,
 			min_comment		=> $min_comment,
