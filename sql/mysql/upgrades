@@ -1495,8 +1495,6 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Dump
 # Change for plugins/Subscribe (ignore if not using that plugin)
 ALTER TABLE subscribe_payments ADD COLUMN memo VARCHAR(255) NOT NULL AFTER method;
 
-# USEPERL LAST UPDATED HERE
-
 ALTER TABLE stories ADD body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL, ADD word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL;
 # You must pick one of the following two options.  Actually, running them
 # both won't hurt anything, but just pick one or the other, OK?
@@ -1504,7 +1502,7 @@ ALTER TABLE stories ADD body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL, ADD w
 UPDATE stories,story_text SET body_length=length(bodytext) WHERE stories.sid=story_text.sid;
 # If your main DB is running MySQL 3.x, you must use these lines.
 SELECT CONCAT("UPDATE stories SET body_length=", length(bodytext), " WHERE sid='", sid, "';") INTO OUTFILE "/tmp/storieslength" FROM story_text WHERE length(bodytext) > 0;
-SOURCE "/tmp/storieslength";
+SOURCE /tmp/storieslength;
 # And now that that's done... honestly, something should go here to set word_count
 
 INSERT INTO vars (name, value, description) VALUES ('cache_enabled_template','1','If set, then template caching is still active even if var cache_enabled is turned off.');
@@ -1516,3 +1514,4 @@ ALTER TABLE accesslist ADD INDEX now_nopalm (now_nopalm);
 # This table has never been used for anything.
 DROP TABLE IF EXISTS rss_raw;
 
+# USEPERL LAST UPDATED HERE
