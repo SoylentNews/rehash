@@ -1270,6 +1270,35 @@ sub getNexusTids {
 }
 
 ########################################################
+# Starting with $start_tid, which may or may not be a nexus,
+# walk down all its child topics and return their tids.
+# Note that the original tid, $start_tid, is not itself returned.
+sub getAllChildrenTids {
+	my($self, $start_tid) = @_;
+	my $tree = $self->getTopicTree();
+	my %all_children = ( );
+	my @cur_children = ( $start_tid );
+	my %grandchildren;
+	while (@cur_children) {
+		%grandchildren = ( );
+		for my $child (@cur_children) {
+			# This topic is a nexus, and a child of the
+			# start nexus.  Note it so it gets returned.
+			$all_children{$child} = 1;
+			# Now walk through all its children, marking
+			# nexuses as grandchildren that must be
+			# walked through on the next pass.
+			for my $gchild (keys %{$tree->{$child}{child}}) {
+				$grandchildren{$gchild} = 1;
+			}
+		}
+		@cur_children = keys %grandchildren;
+	}
+	delete $all_children{$start_tid};
+	return sort { $a <=> $b } keys %all_children;
+}
+
+########################################################
 # Starting with $start_tid, a nexus ID, walk down all its child nexuses
 # and return their tids.  Note that the original tid, $start_tid, is
 # not itself returned.

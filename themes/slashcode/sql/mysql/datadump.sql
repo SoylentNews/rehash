@@ -196,8 +196,9 @@ INSERT INTO related_links (keyword, name, link) VALUES ('perl','Perl','http://us
 # Dumping data for table 'skins'
 #
 
-INSERT INTO skins (skid, nexus, min_weight, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (1,1,1,10,30,'mainpage','Main Page','no','','www.example.com','','index.pl',3600,20040511133653);
-INSERT INTO skins (skid, nexus, min_weight, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (2,2,1,7,21,'features','Features','no','','features.example.com','','index.pl',3600,20040110235000);
+INSERT INTO skins (skid, nexus, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (1,1,10,30,'mainpage','Main Page','no','','www.example.com','','index.pl',3600,20040511133653);
+INSERT INTO skins (skid, nexus, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (2,2,7,21,'features','Features','no','','features.example.com','','index.pl',3600,20040110235000);
+INSERT INTO skins (skid, nexus, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (3,3,7,21,'opensource','Open Source','no','','opensource.example.com','','index.pl',3600,20040110235000);
 
 #
 # Dumping data for table 'skin_colors'
@@ -227,6 +228,18 @@ INSERT INTO skin_colors VALUES (2, 'bg_2', 'DDDDDD');
 INSERT INTO skin_colors VALUES (2, 'bg_3', '660000');
 INSERT INTO skin_colors VALUES (2, 'bg_4', 'BBBBBB');
 INSERT INTO skin_colors VALUES (2, 'bg_5', 'DDDDDD');
+INSERT INTO skin_colors VALUES (3, 'fg_0', 'FFFFFF');
+INSERT INTO skin_colors VALUES (3, 'fg_1', '000000');
+INSERT INTO skin_colors VALUES (3, 'fg_2', '000000');
+INSERT INTO skin_colors VALUES (3, 'fg_3', 'FFFFFF');
+INSERT INTO skin_colors VALUES (3, 'fg_4', 'CCCCCC');
+INSERT INTO skin_colors VALUES (3, 'fg_5', '000000');
+INSERT INTO skin_colors VALUES (3, 'bg_0', '000000');
+INSERT INTO skin_colors VALUES (3, 'bg_1', 'FFFFFF');
+INSERT INTO skin_colors VALUES (3, 'bg_2', 'CCCCCC');
+INSERT INTO skin_colors VALUES (3, 'bg_3', '006666');
+INSERT INTO skin_colors VALUES (3, 'bg_4', 'CCCCCC');
+INSERT INTO skin_colors VALUES (3, 'bg_5', 'FFFFFF');
 
 #
 # Dumping data for table 'stories'
@@ -290,6 +303,7 @@ INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,4,3);
 
 INSERT INTO topics VALUES (1,'mainpage', 'Main Page', 'no', '', 0, 0);
 INSERT INTO topics VALUES (2,'features','Features', 'no', '', 0, 0);
+INSERT INTO topics VALUES (3,'opensource','Open Source', 'no', '', 0, 0);
 INSERT INTO topics VALUES (4,'slash', 'Slash', 'no', 'topicslash.gif',81,36);
 INSERT INTO topics VALUES (5,'programming', 'Programming', 'no', 'topicprogramming.gif',80,48);
 INSERT INTO topics VALUES (6,'news', 'News', 'no', 'topicnews.gif',34,44);
@@ -302,22 +316,21 @@ INSERT INTO topics VALUES (8,'slashdot', 'Slashdot', 'no', 'topicslashdot.gif',1
 
 INSERT INTO topic_nexus VALUES (1, NULL);
 INSERT INTO topic_nexus VALUES (2, NULL);
+INSERT INTO topic_nexus VALUES (3, NULL);
 
 #
 # Dumping data for table 'topic_parents'
 #
 
 INSERT INTO topic_parents VALUES (2,1,3);
+INSERT INTO topic_parents VALUES (3,1,3);
 INSERT INTO topic_parents VALUES (4,1,3);
 INSERT INTO topic_parents VALUES (5,1,3);
 INSERT INTO topic_parents VALUES (6,1,3);
 INSERT INTO topic_parents VALUES (7,1,3);
 INSERT INTO topic_parents VALUES (8,1,3);
-INSERT INTO topic_parents VALUES (4,2,1);
-INSERT INTO topic_parents VALUES (5,2,1);
-INSERT INTO topic_parents VALUES (6,2,1);
-INSERT INTO topic_parents VALUES (7,2,1);
-INSERT INTO topic_parents VALUES (8,2,1);
+INSERT INTO topic_parents VALUES (4,3,1);
+INSERT INTO topic_parents VALUES (7,3,1);
 
 #
 # Dumping data for table 'tzcodes'
