@@ -68,8 +68,7 @@ sub newUser {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
 	if (my $error =	_validFormkey(qw(max_post_check valid_check formkey_check), 1)) {
-		newUserForm(@_, $error);
-		return;
+		return newUserForm(@_, $error);
 	}
 
 	my $plugins = $slashdb->getDescriptions('plugins');
@@ -189,8 +188,7 @@ sub mailPasswd {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
 	if (my $error =	_validFormkey(qw(max_post_check valid_check interval_check formkey_check), 1)) {
-		mailPasswdForm(@_, $error);
-		return;
+		return mailPasswdForm(@_, $error);
 	}
 
 	my $error = 0;
@@ -401,7 +399,8 @@ sub _validFormkey {
 		} else {
 			header() or return;
 			print $error;
-			return 0;
+			footer();
+			return;
 		}
 	} else {
 		if (!$options->{no_hc}) {
