@@ -296,8 +296,8 @@ sub displayStories {
 	# get some of our constant messages but do it just once instead
 	# of for every story
 	my $msg;
-	$msg->{readmore}=getData('readmore');
-	if($constants->{body_bytes}){
+	$msg->{readmore} = getData('readmore');
+	if ($constants->{body_bytes}){
 		$msg->{bytes} = getData('bytes');
 	} else {
 		$msg->{words} = getData('words');
