@@ -86,6 +86,7 @@ $constants = getCurrentStatic();
 			"epoch ".get_time($opts{t})),
 			"%Y-%m-%d %H-%M-%S");
 		my $tid = getRandomTopicID();
+		my $stid = getRandomTopicID();
 		my $section = getRandomSection();
 		my $displaystatus = 0;
 		if ($section =~ /^(articles|index)$/) {
@@ -102,6 +103,7 @@ $constants = getCurrentStatic();
 			subid		=> '',
 			uid		=> $author,
 			tid		=> $tid,
+			stid		=> $stid,
 			dept		=> $dept,
 			'time'		=> $time,
 			title		=> $title,
@@ -115,6 +117,7 @@ $constants = getCurrentStatic();
 
 # This logic is not quite right -Brian
 		my $sid = $slashdb->createStory($story);
+		$slashdb->setStoryTopics($story->{sid}, createStoryTopicData($self, $story);
 		my $reloDB = getObject("Slash::Relocate");
 		if ($reloDB && $sid) {
 			$slashdb->setStory($sid, { 
