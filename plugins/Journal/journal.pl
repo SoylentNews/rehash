@@ -838,12 +838,22 @@ sub _printHead {
 	$data->{width} = '100%';
 	$data->{title} = $title;
 
+	my $user = getCurrentUser();
+
 	if ($edit_the_uid) {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $useredit = $data->{uid}
 			? $reader->getUser($data->{uid})
-			: getCurrentUser();
+			: $user;
 		$data->{useredit} = $useredit;
+	}
+
+	local $user->{currentPage} = 'misc';
+
+	if ($user->{currentPage} eq 'misc') {
+		local $Slash::Utility::MAX_ERROR_LOG_LEVEL = 0;
+		use Data::Dumper;
+		errorLog(sprintf("currentPageBusted: %s\n", Dumper($user, getCurrentForm(), \%ENV)));
 	}
 
 	slashDisplay("journalhead", $data);
