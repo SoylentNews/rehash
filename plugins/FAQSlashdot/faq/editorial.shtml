@@ -1,0 +1,294 @@
+<!--#include virtual="/slashhead.inc"-->
+<table>
+<tr>
+<td><a href="faq-meta.shtml">Previous Section</a></td>
+
+<td><a href="UI.shtml">Next section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+
+<hr>
+<h2>
+Editorial</h2>
+<a NAME="ed100"></a>
+<h2>
+How do I submit stories to Slashdot?</h2>
+You can submit a story by using the <a href="/submit.pl">Submissions Bin</a>.
+When you submit a story, please remember to include appropriate links.
+Also, you'll have a better chance of getting our attention if you use a
+clear and specific subject line.
+<p>Before you submit a story, <b>please</b> take a minute to make sure
+it's not a duplicate of a story we've posted already. Check the <a href="/">main
+Slashdot page</a> and make sure it hasn't already been posted. If it's
+not breaking news, you might also run a <a href="/search.pl">search</a>
+to see if it's something that might have been posted on a previous day.
+Roughly ten percent of all our story submissions are duplicates of stories
+we've already posted.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/19/00</font></i>
+<br><a NAME="ed105"></a>
+<h2>
+Can I submit a story anonymously?</h2>
+Yes. And furthermore, anonymous submission will not increase or decrease
+the chances that we'll select it. (We do, however, reserve the right to
+refer to you as an Anonymous Coward, and mock you mercilessly.)
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/19/00</font></i>
+<br><a NAME="ed150"></a>
+<h2>
+How do I Ask Slashdot?</h2>
+Ask Slashdot is maintained by <a href="mailto:cliff@slashdot.org">Cliff</a>.
+We prefer that you submit questions through <a href="http://slashdot.org/submit.pl">the
+submissions form</a>, selecting the section "Ask Slashdot" so we know to
+route the question to Cliff.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/29/00</font></i>
+<br><a NAME="ed200"></a>
+<h2>
+Why didn't you post my story?</h2>
+This is a tough one.
+<p>Slashdot gets hundreds of submissions every day. Every day our authors
+go through these submissions, and try to select the most interesting, timely,
+and relevant ones to post to the homepage. There are probably as many reasons
+for stories to get rejected as there are stories, but here are some of
+the more common ones:
+<ul>
+<li>
+Badly worded subjects</li>
+
+<li>
+Broken or missing URLs</li>
+
+<li>
+Confusing or hysterical sounding writeup</li>
+
+<li>
+It might be an old story</li>
+
+<li>
+It might just be a busy day and we've already posted enough stories</li>
+
+<li>
+Someone already submitted your story</li>
+
+<li>
+Your story just might not be interesting!</li>
+</ul>
+This last one requires a little explanation: if you submit a story, and
+we don't select it because we think it's not particularly interesting,
+we're not making a judgment about you as a human being. Deciding the interest
+level of a story is a very subjective thing, and we have to take into account
+not only the intrinsic interest of the story itself, but what else is happening
+that day. On a day when lots of things are happening, we reject some very
+good stories. But on a day when nothing interesting is happening, we may
+post something not really as cool.
+<p>The <b>bottom line</b> is that we have to select stories with an eye
+towards whatever is going to make Slashdot be what it is for that particular
+day. (If you want a slightly fuller explanation of this idea, read about
+<a href="editorial.shtml#ed900">The Omelette</a>.)
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/19/00</font></i>
+<br><a NAME="ed220"></a>
+<h2>
+Why hasn't my story been accepted or rejected yet?</h2>
+Usually stories are examined within a few hours of their submission. Sometimes,
+however (and usually with stories that are submitted as Ask Slashdot or
+chosen as potential quickies), it might be weeks before it closes. Usually
+these things aren't time dependent... the answer won't change if the question
+is posed tomorrow or in a week, and since Ask Slashdot gets 5x more submissions
+then we use, there's some delay there. So be patient. You can <a href="mailto:cliff@slashdot.org">mail
+Cliff</a> if you have a specific question about an Ask Slashdot.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/29/00</font></i>
+<br><a NAME="ed230"></a>
+<h2>
+Why do some stories show up in the index, but not on the homepage?</h2>
+Slashdot has too many submissions to post them all, but many submissions
+are worth posting for folks specifically interested in them. We post many
+stories in the sub sections that don't appear on the homepage. Examples
+are <a href="http://slashdot.org/askslashdot">Ask Slashdot</a>, <a href="http://slashdot.org/yro">Your
+Rights Online</a>, and <a href="http://slashdot.org/apache">Apache</a>.
+Each of these sections has a smaller, more devoted group of readers with
+a more specific interest in these subjects.
+<p>These sections are listed on the left hand side of Slashdot, along with
+the date they were last updated, and the number of stories that appeared
+within that section on that day.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/29/00</font></i>
+<br><a NAME="ed240"></a>
+<h2>
+My story submission was "accepted"; how come I never saw it?</h2>
+Usually it's because of <a href="editorial.shtml#ed230">this</a>, but sometimes
+you just need to be patient. Many stories are accepted, but not posted
+for a few hours (for a variety of reasons: to give existing stories some
+time to be read and commented on, or to have a second author give a second
+opinion on some detail).
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/29/00</font></i>
+<br><a NAME="ed250"></a>
+<h2>
+Sometimes I see duplicate stories on Slashdot. What's up with that?</h2>
+These are just mistakes on the part of the staff. They happen. We have
+posted over ten thousand stories in our history. The occasional duplicate
+is inevitable.
+<p>If you see a duplicate, you can mail the story's author. If the story
+is still quiet, we may pull it down. However, once the comments are rolling
+in, we often leave the story up so that the discussion can continue.
+<p>Some people have suggested that there might be a software solution to
+this problem. If you think you've got one, visit <a href="http://slashcode.com">the
+Slashcode site</a> and submit a diff. As long as it isn't a performance
+hit, I'd consider using it. (Be aware however that the trick of searching
+for duplicate URLs isn't as helpful as you might think, since the same
+story can appear in multiple locations.)
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/28/00</font></i>
+<br><a NAME="ed300"></a>
+<h2>
+I submitted that a month ago!</h2>
+A lot of times, we don't use a particular story on a particular day, but
+at some later point, someone else submits it, and it ends up getting used.
+We have 4 to 6 guys working together to post things on Slashdot. What one
+of us finds stupid, the others might find interesting. Or it just might
+be the rest of the stuff that's going on that day. There are a variety
+of factors: the personality of the post, the quality of the submission,
+or even the quantity of stories already posted when your submission entered
+the queue.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/8/00</font></i>
+<br><a NAME="ed400"></a>
+<h2>
+Someone else got credit for a story I submitted!</h2>
+As a whole we think we do a good job, but sometimes we make mistakes. We're
+always sorry when we do, but considering the thousands of weekly submissions,
+we think we're definitely coming out ahead.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/8/00</font></i>
+<br><a NAME="ed500"></a>
+<h2>
+I want to write an editorial. What should I do?</h2>
+Before you get carried away, <a href="mailto:malda@slashdot.org">mail me</a>
+a synopsis of your idea (put the text 'Proposed Feature' in the subject).
+That way I can tell you if it is something we would consider posting before
+you bother to write the whole thing.
+<p>And, hey - even if we're not interested in it, there's always a chance
+someone else will be. If we say "no thanks," you might want to query some
+of the other websites before you drop the idea.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/8/00</font></i>
+<br><a NAME="ed501"></a>
+<h2>
+I want to write a book review. What should I do?</h2>
+Make sure the book hasn't been reviewed before, or at least anytime lately.
+Also, be sure to read our <a href="http://slashdot.org/book.review.guidelines.shtml">book
+review guidelines</a> so you know what we're looking for. When you're ready
+to submit it, you can do so on our <a href="http://slashdot.org/submit.pl">submissions
+page</a>. When submitting your book review, you can help us out by marking
+it for the "Book Reviews" section, so that it gets sorted into the proper
+channels. (and increases the chances of it getting posted) Any questions
+about the process? You can email <a href="mailto:timothy@slashdot.org">timothy</a>
+with them, and he'll help you out.
+<p><i><font size=-1>Answered by: <a href="mailto:pater@slashdot.org">CowboyNeal</a></font></i>
+<br><i><font size=-1>Last Modified: 2/22/01</font></i>
+<br><a NAME="ed600"></a>
+<h2>
+Why is your grammar/spelling so bad?</h2>
+We're more interested in getting the stories out quickly than we are in
+making sure every post passes the white glove test. These days we have
+a copy editor who catches most of the spelling and grammar mistakes, but
+things do sometimes slip through.
+<p>If you see a mistake in a story, email the author. We'll get it fixed
+pronto.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/8/00</font></i>
+<br><a NAME="ed700"></a>
+<h2>
+Why did you post story X?</h2>
+Slashdot is many things to many people. Some people think it's a Linux
+site. To others, it's a geek hangout. I've always worked very hard to make
+sure that Slashdot matches up with my interests and the interests of my
+authors. We think we're pretty typical Slashdot readers... but that does
+mean that occasionally one of us might post something that you think is
+inappropriate. You might be interested in my <a href="editorial.shtml#ed900">Omelette
+rant</a>.
+<p>Personally, I have a pet peeve when people post comments saying things
+like "That's not News For Nerds!" and "That's not Stuff that Matters!"
+Slashdot has been running for almost 5 years, and over that time, I have
+always been the final decision maker on what ends up on the homepage. It
+turns out that a lot of people agree with me: Linux, Legos, Penguins, Sci
+(both real and fiction). If you've been reading Slashdot, you know what
+the subjects commonly are, but we might deviate occasionally. It's just
+more fun that way. Variety Is The Spice Of Life and all that, right? We've
+been running Slashdot for a long time, and if we occasionally want to post
+something that someone doesn't think is right for Slashdot, well, we're
+the ones who get to make the call. It's the mix of stories that makes Slashdot
+the fun place that it is.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/26/00</font></i>
+<br><a NAME="ed750"></a>
+<h2>
+How do you verify the accuracy of Slashdot stories?</h2>
+We don't. You do. :) If something seems outrageous, we might look for some
+corroboration, but as a rule, we regard this as the responsibility of the
+submitter and the audience. This is why it's important to read comments.
+You might find something that refutes, or supports, the story in the main.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/28/00</font></i>
+<br><a NAME="ed850"></a>
+<h2>
+Slashdot seems to be very U.S.-centric. Do you have any plans to be more
+international in your scope?</h2>
+Slashdot <i>is</i> U.S.-centric. We readily admit this, and really don't
+see it as a problem. Slashdot is run by Americans, after all, and the <i>vast</i>
+majority of our readership is in the U.S. We're certainly not opposed to
+doing more international stories, but we don't have any formal plans for
+making that happen. All we can really tell you is that if you're outside
+the U.S. and you have news,&nbsp;<link>submit it, and if it looks interesting,
+we'll post it.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/28/00</font></i>
+<br><a NAME="ed860"></a>
+<h2>
+Would you be interested in creating mirror sites in other languages and
+have people translate articles? Different articles for different sites?</h2>
+There are some sites like this already. For example, there's a <a href="http://www.barrapunto.com">Spanish
+site</a>, and a Portuguese one. These sites aren't run by us, however.
+We have discussed the possibility of international mirrors, but we haven't
+made any decisions yet.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/28/00</font></i>
+<br><a NAME="ed900"></a>
+<h2>
+"The Omelette"</h2>
+Let me try to give you an analogy for Slashdot's homepage. It's like an
+omelette: it's a combination of sausage and ham and tomatoes and eggs and
+more. Over the years, we've figured out what ingredients are best on Slashdot.
+The ultimate goal is, of course, to create an omelette that I enjoy eating:
+by 8pm, I want to see a dozen interesting stories on Slashdot. I hope you
+enjoy them too. I believe that we've grown in size because we share a lot
+of common interests with our readers. But that doesn't mean that I'm gonna
+mix an omelette with all sausages, or someday throw away the tomatoes because
+the green peppers are really fresh.
+<p>There are many components to the Slashdot Omelette. Stories about Linux.
+Tech stories. Science. Legos. Book Reviews. Yes, even Jon Katz. By mixing
+and matching these things each and every day, we bring you what I call
+Slashdot. On some days it definitely is better than others, but overall
+we think it's a tasty little treat and we hope you enjoy eating as much
+as we enjoy cooking it.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/14/00</font></i>
+<p>
+<hr>
+<table>
+<tr>
+<td><a href="faq-meta.shtml">Previous Section</a></td>
+
+<td><a href="UI.shtml">Next section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+<!--#include virtual="/slashfoot.inc"-->
+</body>
+</html>

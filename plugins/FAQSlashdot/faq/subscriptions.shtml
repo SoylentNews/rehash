@@ -1,0 +1,228 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.73 [en] (Win98; U) [Netscape]">
+<!--#include virtual="/slashhead.inc"-->
+</head>
+<body>
+&nbsp;
+<table>
+<tr width="100%">
+<td><a href="friends.shtml">Previous section</a></td>
+
+<td><a href="slashmeta.shtml">Next section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+
+<hr>
+<br><a NAME="ss100"></a>
+<h2> Why does Slashdot have subscriptions?</h2>
+<p>Read <a href="http://slashdot.org/article.pl?sid=02/03/01/1352200&mode=nocomment&tid=124">CmdrTaco's 
+  story</a> to learn why Slashdot implemented a subscription system. </p>
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/03/02</font></i><br>
+</p>
+<p>
+  <a NAME="ss200"></a> 
+<h2> Where / How can I purchase a subscription to slashdot?</h2>
+<a href="http://slashdot.org/users.pl">Login</a> and go to the <a href="http://slashdot.org/subscribe.pl">subscriptions page</a>. 
+Click on the paypal or credit-card link, and follow the instructions.
+<p> If you don't have an account to log in to, you'll have to <a href="/users.pl?op=newuserform">create 
+  one</a>. 
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i>
+<br>
+  <i><font size=-1>Last Modified: 04/15/02</font></i> <br>
+  <a NAME="ss300"></a>
+<h2> How much does a subscription cost?</h2>
+Currently Slashdot is offering 1000 ad free pages for $5. As it stands, you have 
+some flexibility as to where you want to spend your ad free pages. You can decide 
+to use them on <b>comments, articles, or the homepage</b>. 
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i>
+<br>
+  <i><font size=-1>Last Modified: 03/03/02</font></i> <br>
+  <a NAME="ss400"></a>
+<h2>Paypal? Why Paypal?</h2>
+<p>It's a simple solution and a lot of Slashdot users already have Paypal accounts.
+  If you prefer to use a credit card, go right ahead. </p>
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 04/15/02</font></i> <br>
+  <a NAME="ss500"></a> </p>
+<h2> I have an idea for a feature for subscription users.</h2>
+<p>&quot;<i>We are doing our best to learn from the mistakes made by other sites 
+  that have started charging for subscriptions. We won't create subscriber only 
+  features that cost more to maintain than they generate.</i>&quot; -- CmdrTaco<br>
+<p>&nbsp;
+<p>Check out the <a href="suggestions.shtml">suggestions</a> page. 
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/03/02</font></i> <br>
+  <a NAME="ss700"></a>
+
+  <h2> Do I have to subscribe?</h2>
+  
+<p>Of course not. Subscriptions are voluntary. Right now, subscriptions serve 
+  one purpose: getting rid of ads. If you don't care about seeing ads, don't subscribe. 
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i> 
+    <br>
+    <i><font size=-1>Last Modified: 03/03/02</font></i> <br>
+    <a NAME="ss800"></a> 
+  <h2> How do I see how many pages I've used up on my subscription?</h2>
+  Logged in, go back to the <a href="http://slashdot.org/subscribe.pl">subscription 
+  page</a>. It should show you how many pages you have paid for and how many pages 
+  you have used. 
+  <p><i><font size=-1>Answered by: <a href="mailto:Robo@slashdot.org">Robo</a></font></i> 
+    <br>
+    <i><font size=-1>Last Modified: 03/03/02</font></i> <br>
+  <p><a name="ss900"></a> 
+  <h2> I'm helping Slashdot by posting comments. Why are you charging people who 
+    help you? </h2>
+  <p> </p>
+  We're glad you're posting, and we're spending a lot of effort to make this the 
+  best discussion forum around.<br>
+  <br>
+  When you subscribe, the default setting is for posting comments (as well as 
+  reading just comments) to not count as part of your subscription. You can change 
+  this if you want, but we recognize that most frequent readers, including our 
+  prolific comment posters, will prefer to see ads on those pages and keep them 
+  cost-free.<br>
+  <br>
+  When you drop a few bucks in our guitar case, we hope one of the main benefits 
+  you get is the warm fuzzy feeling from helping to keep us writing open-source 
+  code and maintaining the site.<br>
+  <p><i><font size=-1>Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i> 
+    <br>
+    <i><font size=-1>Last Modified: 03/03/02</font></i> 
+  <p><a name="ss1000"></a> 
+  <h2> I paid for a subscription and ads are still popping up!</h2>
+  <p> Please, <b>don't freak out</b>. </p>
+  
+<p>Here are a few common reasons why you are seeing ads after you've have paid 
+  for them: 
+<ul>
+  <li>Make sure you're logged in!!</li>
+  <li>You may have exceeded the daily amount of ads you've set to suppress. See 
+    <a href="subscriptions.shtml#ss1500">How can I control how many ads I suppress 
+    daily?</a></li>
+  <li>Check the <a href="http://slashdot.org/subscribe.pl">subscriptions</a> page 
+    and make sure that you have &quot;No Ads&quot; turned on where you don't want 
+    ads to show up. </li>
+  <li>Slashdot pages that are <i>static</i>, like the faq, always serve ads.</li>
+  <li>If you're looking at a subsection of Slashdot like <a href="http://apple.slashdot.org">apple.slashdot.org</a>, 
+    make sure that you login. If you want subsections of slashdot to remember 
+    you, you'll have to initially login to one of the subsections. </li>
+  <li>We could be experiencing technical difficulties and we've turned on a static 
+    front page.</li>
+</ul>
+  
+<p><b>If you are a subscriber and saw an ad, it will not count against your subscription.</b> 
+  If you are <em>sure</em> that pages on which you are seeing ads are incrementing 
+  your "used up" count on <a href="/subscribe.pl">subscribe.pl</a>, that's a serious 
+  bug -- please <a href="http://sourceforge.net/tracker/?func=add&group_id=4421&atid=104421">let 
+  us know</a> immediately (Category: Other, Group: Slashdot). 
+<p><i><font size=-1>Answered by: <a href="mailto:Robo@slashdot.org">Robo</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/03/02</font></i> <br>
+<p><a name="ss1100"></a>
+<p><br>
+<p> 
+<h2>Will non-subscribers receive fewer Slashdot features than subscribers?</h2>
+<p>Subscribers will get access to new features as we think them up. Currently 
+  the only advantage they have is access to Slashdot without banner ads. We will 
+  not be removing features from non-subscribers. <b>Things you have on Slashdot now 
+  will not be taken away from you.</b> But there will eventually be new and exciting 
+  rewards for subscribers.</p>
+<p></p>
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/06/02</font></i> </p>
+<h2><a name="ss1300"></a> </h2>
+<h2>When subscribed, will re-loading a comments page count as another page towards 
+  the 1000?</h2>
+<p>You are given the option to count comments or not. The choice is yours.<br>
+</p>
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/06/02</font></i> </p>
+<p><a name="ss1400"></a> 
+<h2>In general, what pages count towards my subscription base?</h2>
+<p>There are currently three types of pages that Slashdot generates for subscribers.<br>
+</p>
+
+<ul>
+  <li><b>Static:</b> <a href="http://slashdot.org/faq/">The FAQ</a> / <a href="http://slashdot.org/code.shtml">code</a> 
+    / <a href="http://slashdot.org/about.shtml">about</a> / <a href="http://slashdot.org/hof.shtml">hof</a> 
+    / and so on. These pages are plain old text. There is no smarts in them to 
+    decide if you get an ad or not. This is for performance reasons. It just doesn't 
+    make sense to run scripts on those pages. So you'll see banner ads on them, 
+    but they won't affect your subscription. 
+    <p> 
+  </li>
+  <li><b>The Main Pages</b>: <a href="http://slashdot.org/">The homepage</a>, articles, 
+    and comments. These pages are configured in your subscription settings. You 
+    can choose which page types to see ads on. By default, a subscriber has ads 
+    suppressed on the index and article pages, but comments are left with ads 
+    on. This is because it's really easy to casually load dozens of comments pages. </li><p>
+  <li><b>The lesser pages</b>: There are a variety of other pages on Slashdot 
+    that are dynamic, but are less loaded than The Main Pages. For example, <a href="http://slashdot.org/users.pl">Users</a> 
+    (for example editing your preferences) <a href="http://slashdot.org/submit.pl">Submissions</a> 
+    (Submitting a story) <a href="http://slashdot.org/journal.pl">Journals</a> 
+    (I think you can figure that out yourself) and <a href="http://slashdot.org/subscribe.pl">Subscriptions</a> 
+    (Well, Duh!). If you are a subscriber, and are set to suppress ads on one 
+    of the Main Pages, then we suppress ads on these pages without decrementing 
+    your page bank. In other words, buy the ads on the homepage or articles, and 
+    <b>you get Journals, Submissions, Users, and so forth for free</b>. 
+    <p></p>
+    </ul>
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/06/02</font></i> </p>
+<p><a name="ss1500"></a> 
+<h2>How can I control how many ads I suppress daily?</h2>
+<p>Edit your <a href="http://slashdot.org/subscribe.pl">subscription preferences</a>. 
+  Currently, subscribers default ad suppression is 10 ads per day. You can increase 
+  or decrease your ad suppression to fit your needs. Just remember, the higher 
+  your ad suppression, the faster you'll go through your subscription. </p>
+  <p>To suppress all ads, <b>set your limit to 0</b> and remember 
+  to make sure that you have &quot;No Ads&quot; selected for <b>all</b> three 
+  options. </p>
+<p><i><font size=-1>Answered by: <a href="mailto:Robo@slashdot.org">Robo</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/19/02</font></i> </p>
+<p><a name="ss1600"></a> 
+<h2>Besides ad-free pages, are there any advantages to being a subscriber?</h2>
+<p>We're adding some "plums" for subscribers, yes. Here's the official list:
+<ul>
+<li>You get a "More Comments" link on
+<a href="/users.pl?op=userinfo">your user page</a>
+and on
+<a href="/~CmdrTaco/">other users' pages</a>.
+Going through comment history might be a bit DB-intensive but we trust
+subscribers not to abuse the privilege.
+<li>You can add up to 400
+<a href="/my/friends/">friends</a>
+and
+<a href="/my/foes/">foes</a>,
+instead of being limited to 200.
+</ul>
+<p>If you have any questions, please email
+<a href="mailto:subscriptions@slashdot.org">subscriptions@slashdot.org</a>.
+<p><i><font size=-1>Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 01/07/03</font></i> </p>
+<p>
+<p>&nbsp; 
+<hr>
+  <table>
+    <tr width="100%"> 
+      <td><a href="friends.shtml">Previous section</a></td>
+      <td><a href="slashmeta.shtml">Next section</a></td>
+      <td><a href="index.shtml">Index</a></td>
+    </tr>
+  </table>
+  <!--#include virtual="/slashfoot.inc"-->
+</body>

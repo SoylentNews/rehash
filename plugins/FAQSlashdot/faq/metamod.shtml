@@ -1,0 +1,209 @@
+<!--#include virtual="/slashhead.inc"-->
+<TABLE>
+	<TR width="100%">
+		<TD><A HREF="com-mod.shtml">Previous Section</A>
+		<TD><A HREF="accounts.shtml">Next section</A>
+		<TD><A HREF="index.shtml">Index</A>
+	</TR>
+</TABLE>
+<HR><BR>
+
+
+<A NAME="mm100">
+<H2>What do "M1" and "M2" mean?</H2>
+
+	<P>M1 and M2 are Slashdot shorthand for "moderation" and 
+	"metamoderation," respectively. We also use these with 
+	suffixes For example, if you see the term "M2ed," it 
+	means "metamoderated." Likewise, the term "M1er" means 
+	"Moderator."
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by:<A HREF="mailto:loonxtall@hotmail.com">Loon</A>  <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+
+	
+<A NAME="mm200">
+<H2>What is metamoderation?</H2>
+
+	<P>Metamoderation is a second layer of moderation. It seeks to 
+	address the issue of unfair moderators by letting "metamoderators"
+	(any logged-in Slashdotter) "rate the rating" of ten randomly selected
+	comment posts. The metamoderator decides if the moderator's rating was
+	fair, unfair, or neither. 
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+<A NAME="mm300">
+<H2>Why was metamoderation started?</H2>
+
+	<P>Metamoderation began as an experiment to see if the primary
+	moderation system (M1) was actually working. Now, it helps us to 
+	remove bad moderators from the M1 eligibility pool.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+<A NAME="mm350">
+<H2>Who can M2?</H2>
+
+	<P>In order to be a metamoderator, your account has to be one of the 
+	oldest 90% of accounts on the system. This means that once you've 
+	created your account, you'll have to wait for anywhere from a few weeks 
+	to a month or two, depending on the rate at which new accounts are being
+	created.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:joe@nigiri.org">Joe</A> <BR>
+	Last Modified: 10/29/00 <BR>
+	</SMALL></I>
+
+<A NAME="mm400">
+<H2>How can I metamoderate?</H2>
+
+	<P>If you're eligible, and you're logged in, you can meta-moderate. You
+	should see a link at the top of the main page that says "Have you Meta
+	Moderated Today?" Click that link, and you should be taken to the M2
+	page.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 10/29/00 <BR>
+	</SMALL></I>
+
+	
+<A NAME="mm500">
+<H2>How often can I M2?</H2>
+
+	<P>Once per day, GMT.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+	
+<A NAME="mm600">
+<H2>How does M2 affect the moderator's karma?</H2>
+
+	<P>This is a fairly complicated thing. Depending on some randomness, 
+	the moderator's karma and a couple of other factors, a particular
+	instance of meta-moderation may or may not change a moderator's karma
+	score.
+	
+	<P>(We realize that's not much of an answer. If you're really, <I>
+	really</I> interested, <A HREF="http://slashcode.com">read the
+	code</A>.)
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+
+<A NAME="mm700">
+<H2>How often do moderations appear for M2?</H2>
+
+	<P>As many times as possible during the 14 days between when it is 
+	posted, and when the story is archived.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+<A NAME="mm800">
+<H2>Why are there duplicate comments?</H2>
+
+	<P>Remember, M2 rates the moderations, not the comments. If
+	the same comment was moderated more than once, it may appear
+	several times to a meta-moderator in order to rate the different
+	moderations that have been applied to it.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+
+<A NAME="mm900">
+<H2>Why isn't there a link to M2 on my index.pl?</H2>
+
+	<P>There seems to be a bug in the Slashcode that prevents the
+	appearance of the M2 link if you've never M2ed.  It will also not
+	appear if you aren't logged in.  To meta-moderate, log in and head to
+	<A  HREF="/metamod.pl">/metamod.pl</A>  After that, the link should 
+	appear on the top of your index page.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+<A NAME="mm1000"> <H2>How should I M2 if the moderator called it "Insightful"
+and I think it should be "Informative"?</H2>
+	
+	<P>This comes under the general category of "don't sweat the small 
+	stuff." "Interesting" and "Insightful" will have the same effect
+	on the comment, and the difference between the two is basically just
+	a judgment call. Rate the moderation "Fair," and move on.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+
+
+<A NAME="mm1100">
+<H2>Can I post to stories I'm M2ing?</H2>	
+
+	<P>Yes.  <A HREF="com-mod.shtml#cm600">The posting restriction only
+	applies to M1</A>.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I>
+	
+<A NAME="mm1200"><H2>Does M2 affect my karma?</H2>
+
+	Maybe.  If you have relatively little karma, there is a possibility of 
+	getting some karma for your efforts.  However you won't be able to get 
+	enough karma to get the +1 <A HREF="com-mod.shtml#cm800">[See Related]</A>.
+	That can only be earned by posting comments and getting moderated up. 
+	This is to encourage people to M2, but not let them abuse it.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/12/00 <BR>
+	</SMALL></I> 
+
+<BR><HR>
+<TABLE>
+	<TR width="100%">
+		<TD><A HREF="com-mod.shtml">Previous Section</A>
+		<TD><A HREF="accounts.shtml">Next section</A>
+		<TD><A HREF="index.shtml">Index</A>
+	</TR>
+</TABLE>
+
+<!--#include virtual="/slashfoot.inc"-->

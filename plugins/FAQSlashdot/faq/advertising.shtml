@@ -1,0 +1,91 @@
+<!--#include virtual="/slashhead.inc"-->
+<TABLE>
+	<TR width="100%">
+		<TD><A HREF="tech.shtml">Previous Section</A>
+		<TD><A HREF="suggestions.shtml">Next section</A>
+		<TD><A HREF="index.shtml">Index</A>
+	</TR>
+</TABLE>
+<HR><BR>
+
+
+
+<A NAME="ad100">
+<H2>Can I advertise on Slashdot? </H2>
+
+	
+	<P>Yes! You too can have banner ads at the top of Slashdot. Impress
+	your friends! Terrify your competitors!
+	
+	<P>Visit the <A HREF="/advertising.shtml">Advertising</A> page to learn 
+	how. 
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/14/00 <BR>
+	</SMALL></I> 
+
+
+<A NAME="ad400">
+<H2>What is AdFu?</H2> 
+
+	<P><A HREF="http://www.adfu.com">AdFu</A> was written in mod_perl by <A
+	HREF="http://www.blockstackers.com">BSI</A> to be a flexible system for
+	serving banner ads for Slashdot and  <A
+	HREF="http://www.everything2.com">Everything</A>. However, Slashdot
+	isn't using it anymore (<A HREF="advertising.shtml#ad500">See below
+	</A>). 
+	
+	<P>It's far from perfect, but you're welcome to download the code and
+	try it out for yourself on your own website.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/14/00 <BR>
+	</SMALL></I> 
+
+
+<A NAME="ad500">
+<H2>Why aren't you using AdFu any more?</H2>
+
+	<P>I liked AdFu, but Andover wanted to use a consistent system across
+	their whole network, and they were more comfortable using their own
+	system. Since it isn't my job to administer the ad server, I didn't
+	care. AdFu continues to serve banner ads for several other sites, such
+	as <A HREF="http://www.everything2.com">Everything2</A>.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/14/00 <BR>
+	</SMALL></I> 
+
+
+<A NAME="ad600">
+<H2>A banner ad is screwing up my browser!</H2>
+
+	<P>Email <A HREF="mailto:hemos@slashdot.org">Hemos</A> and complain.  We
+	have a pretty strict set of rules about what is allowed in a Slashdot
+	banner ad, but occasionally an ad slips by unnoticed that breaks these
+	rules. If you see a 50k banner or one that is launching Java or
+	something, let us know and we'll take it down.  Our goal is to make our
+	readers happy first and foremost.  
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/14/00 <BR>
+	</SMALL></I> 
+
+<BR><HR>
+<TABLE>
+	<TR width="100%">
+		<TD><A HREF="tech.shtml">Previous Section</A>
+		<TD><A HREF="suggestions.shtml">Next section</A>
+		<TD><A HREF="index.shtml">Index</A>
+	</TR>
+</TABLE>
+
+<!--#include virtual="/slashfoot.inc"-->

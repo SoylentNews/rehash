@@ -1,0 +1,784 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.73 [en] (Win98; U) [Netscape]">
+<!--#include virtual="/slashhead.inc"-->
+</head>
+<body>
+&nbsp;
+<table>
+<tr width="100%">
+<td><a href="UI.shtml">Previous section</a></td>
+
+<td><a href="metamod.shtml">Next section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+
+<hr>
+<br><a NAME="cm100"></a>
+<h2>
+What's up with flat/threaded/nested comments?</h2>
+These are just different ways of displaying what can be a rather long list
+of comments. Here's the rundown:
+<ul>
+<li>
+Flat mode displays all the comments in one gigantic list, without showing
+anything in the way of relationships between comments.</li>
+
+<p><a href="http://images.slashdot.org/faq/screen_flat.gif"><img SRC="http://images.slashdot.org/faq/scaled_screen_flat.gif" ALT="Flat Mode" width=245 height=198></a>
+<br>&nbsp;
+<li>
+Threaded shows a hierarchy of responses, with replies as links to new pages.</li>
+
+<p><a href="http://images.slashdot.org/faq/screen_threaded.gif"><img SRC="http://images.slashdot.org/faq/scaled_screen_threaded.gif" ALT="Threaded Mode" width=245 height=109></a>
+<br>&nbsp;
+<li>
+Nested displays the same hierarchy of responses, but displays all of the
+comments. (This can be a bitch of a page to render on weaker platforms
+and in longer discussions.)</li>
+
+<p><a href="http://images.slashdot.org/faq/screen_nested.gif"><img SRC="http://images.slashdot.org/faq/scaled_screen_nested.gif" ALT="Nested Mode" width=245 height=198></a></ul>
+<i><font size=-1>Updated by: <a href="mailto:robo@slashdot.org">Robo</a></font></i>
+<br><i><font size=-1>Last Modified: 01/02/02</font></i>
+<br><a NAME="cm150"></a>
+<h2>
+Will you delete my comment?</h2>
+No.  We believe that discussions in Slashdot are like discussions in real 
+life- you can't change what you say, you only can attempt to clarify by 
+saying more.  In other words, you can't delete a comment that you've
+posted, you only can post a reply to yourself and attempt to clarify
+what you've said.<p>
+In short, you should think twice before you click that 'Save' button because 
+once you hit it, we aren't going to let you Undo it.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 3/28/02</font></i>
+<br><a NAME="cm200"></a>
+<h2>
+Why did my comment get deleted?</h2>
+The only time we ever delete comments is if the comment contains malformed
+HTML that is somehow causing Slashdot to fail to display properly. Comments
+are not deleted on the basis of content. At this point, however, it shouldn't
+be a big worry. The comment engine is reasonably bulletproof, and it's
+pretty tough to post a comment that breaks Netscape.
+<p>If you posted a comment and you don't see it now, it may have been moderated
+down below your threshold (see <a href="com-mod.shtml#cm600">below</a>).
+If you set your threshold to -1, you should be able to see it again.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm300"></a>
+<h2>
+Why did it take so long for my comment to appear?</h2>
+If the system told you that your comment got submitted, it'll show up.
+Because of the way data gets cached in our system, it could take as much
+as ten or fifteen minutes (although it doesn't usually take that long).
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm400"></a>
+<h2>
+What's up with "First Post" comments?</h2>
+"First Post" comments are one of those odd little memetic hiccups that
+come out of nowhere and run amok. Basically, people with altogether far
+too much spare time sit and reload Slashdot, hoping that they will get
+the "First Post" in a discussion. This is one of those things that the
+moderation system was designed to clean up, and for the most part, it works.
+"First Post" comments usually get moderated down as off-topic almost instantly.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm500"></a>
+<h2>
+It seems like the quality of comment posts is declining. Are you doing
+anything about it?</h2>
+We have a moderation system.
+<p>One of the unfortunate side-effects of the increasing popularity of
+Slashdot is that the number of trolls, flame-warriors and all-around lamers
+increases as well, and it only takes a relatively small number of them
+to make a lot of noise. Keeping this noise to a minimum is one of the primary
+goals of the moderation system (which is explained in detail <a href="com-mod.shtml#cm600">elsewhere</a>
+in this FAQ).
+<p>Since this system is essentially an experiment in trying to solve the
+problems inherent in mass communication, one would expect its success to
+be variable, and indeed, this is the case. Some days it works great, and
+some days it doesn't.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm510"></a>
+<h2>
+Moderation seems restrictive. Is it really necessary?</h2>
+In short, yes.
+<p>As you might have noticed, Slashdot gets a lot of comments. Thousands
+a day. Tens of thousands a month. At any given time, the database holds
+50,000+ comments. A single story might have a thousand replies- and let's
+be realistic: Not all of the comments are that great. In fact, some are
+down right terrible, but others are truly gems.
+<p>The moderation system is designed to sort the gems and the crap from
+the steady stream of information that flows through the pipe. And wherever
+possible, it tries to make the readers of the site take on the responsibility.
+<p>The goal is that each reader will be able to <a href="com-mod.shtml#cm610">read
+Slashdot at a level that they find appropriate</a>. The impatient can read
+nothing at all but the original stories. Some will only want to read the
+highest rated of comments, some will want to eliminate anonymous posts,
+and others will want to read every last drip of data, from the First Posts!
+to the spam. The system we've created here will make that happen. Or at
+least, it sure will try...
+<p><b>Goals</b>
+<ul>
+<li>
+1.Promote quality, discourage crap.</li>
+
+<li>
+2.Make Slashdot as readable as possible for as many people as possible.</li>
+
+<li>
+3.Do not require a huge amount of time from any single moderator.</li>
+
+<li>
+4.Do not allow a single moderator a "reign of terror."</li>
+</ul>
+On the whole, we think the moderation system works really well, but often
+people disagree. Their disagreement usually stems from different expectations.
+They see a bunch of moderations countering each other. They see a comment
+moderated blatantly wrong. A 'Troll' flagged 'Off topic' (or vice versa)
+and feel that the system is flawed.
+<p>Of course it is flawed! It's built upon the efforts of diverse human
+beings volunteering their time to help! Some humans are selfish and destructive.
+Others work hard and fair. It's my opinion that the sum of all their efforts
+is pretty damn good.
+<p>Read Slashdot at a threshold of 3 and behold the quality of the comments
+you read. Certainly you aren't reading a wild and freewheeling discussion
+anymore, but you <i>are</i> reading many valid points from many intelligent
+people. I am actually pretty amazed.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/26/00</font></i>
+<br><a NAME="cm515"></a>
+<h2>
+Most of the trolls and useless stuff comes from "Anonymous Coward" posters.
+Have you thought about eliminating anonymous posting?</h2>
+We've thought about it. We think the ability to post anonymously is important.
+Sometimes people have important information they want to post, but are
+afraid to do it if they can be linked to it. Anonymous Coward posting will
+continue to exist for the foreseeable future.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/21/00</font></i>
+<br><a NAME="cm516"></a>
+<h2>
+Doesn't this open posting policy ever get you into trouble?</h2>
+Yes, and we've got a ton of legal correspondence to prove it. We regard
+this as a risk of doing what we do.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 10/21/00</font></i> <br>
+  <a NAME="cm517"></a> 
+<h2>Why am I receiving the message &quot;You can't post to this page.&quot;?</h2>
+You're reading Slashdot from behind a web proxy that allows connections from any 
+host. This functionality has been abused. Therefore, comments are not allowed 
+to be posted from this address until the proxy is better secured. <b>Please notify 
+your Proxy Admin. </b><br>
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 08/05/02</font></i> <br>
+  <a name="cm520"></a> 
+<h2>
+How did the moderation system develop?</h2>
+In order to understand the system, it might help to understand how we got
+there. It wasn't random, it was trial and error and progression. I'm constantly
+tweaking and changing, trying to squeeze more out. Trying to make a more
+efficient, more fair system.
+<p><b>Before Moderation</b>
+<p>In the beginning, Slashdot was small. We got dozens of posts each day,
+and it was good. The signal was high, the noise was low. Moderation was
+unnecessary because we were nobody. It was a different world then. Each
+day we grew, adding more and more users, and increasing the number of comments
+submitted. As this happened, many users discovered new and annoying ways
+to abuse the system. The authors had but one option: Delete annoying comments.
+But as the system grew, we knew that we would never be able to keep up.
+We were outnumbered.
+<p><b>Hand Picked Few</b>
+<p>So, I picked people to help. Just a few. 25 or so at the end. They were
+given the simple ability to add or subtract points to comments. The primary
+function of these brave souls was to weed out spam and First Post and flame
+bait. Plus, when they found smart stuff, to bring it out.
+<p>The system worked pretty well, but as Slashdot continued to grow, it
+was obvious that these 25 people wouldn't be enough to keep up with the
+thousands of posts we were getting each day. It was obvious that we needed
+more.
+<p><b>400 Lucky Winners</b>
+<p>So we picked more the only way we could. Using the actions of the original
+25 moderators, we picked 400 more. We picked the 400 people who had posted
+good comments: comments that had been flagged as the cream of Slashdot.
+Immediately several dozen of these new moderators had their access revoked
+for being abusive, but they settled down.
+<p>At this time I began to experiment with ways of restricting the power
+of moderators to prevent abuses. 25 people are easy to keep an eye on,
+but 400 is another matter. I knew that someday I would have even less control
+since I intended to eventually give access to even more people. While moderators
+still added and subtracted points, the number of points they were given
+dropped from hundreds to dozens.
+<p>As time went on, I began working on the next phase: mass moderation.
+I learned a lot from having so many moderators. I learned that I needed
+to limit the power of each person to prevent a single rogue from spoiling
+it for everyone. And then we took the next step.
+<p><b>Today: Most Anyone</b>
+<p>Today any regular Slashdot reader is probably eligible to become a moderator.
+A variety of factors weigh into it, but if you are logged in when you browse
+Slashdot comments, you might occasionally be granted moderator access.
+Don't worry about it. Just keep reading this document and learn what to
+do about it!
+<p><b>Who</b>
+<p>It's probably the most difficult part of the process: who is allowed
+to moderate. On one hand, many people say "Everyone," but I've chosen to
+avoid that path because the potential for abuse is so great. Instead, I've
+set up a few simple rules for determining who is eligible to moderate.
+<ul>
+  <li> <b>Logged In User</b> If the system can't keep track, it won't work, so 
+    you gotta log in. Sorry if you're paranoid, but this system demands a certain 
+    level of accountability.</li>
+  <br>
+  &nbsp; 
+  <li> <b>Regular Slashdot Readers</b> The scripts track average accesses from 
+    each logged-in user. It then selects eligible users who read an average number 
+    of times. The homepage doesn't count either. It then picks users from the 
+    middle of the pack- no obsessive compulsive reloaders, and nobody who just 
+    happened to read an article this week.</li>
+  <br>
+  &nbsp; 
+  <li> <b>Long Time Readers</b> The system throws out the newest few thousand 
+    accounts. This prevents people from creating new accounts to simply get moderator 
+    access, but more importantly, means that newbies will have to be part of the 
+    community for a few weeks before they gain access to the controls to a system 
+    they don't understand.</li>
+  <br>
+  &nbsp; 
+  <li> <b>Willing to Serve</b> If you don't want to moderate, just visit your 
+    user preferences, and set yourself as "Unwilling."</li>
+  <br>
+  &nbsp; 
+  <li> <b>Positive Contributors</b> Slashdot tracks your <a href="com-mod.shtml#cm700">"karma."</a> 
+    If you have Positive, Good, or Excellent karma, this means you have posted 
+    more good comments than bad, and are eligible to moderate. This weeds out 
+    spam accounts.</li>
+</ul>
+The end result is a pool of eligible users that represent (hopefully) average, 
+positive Slashdot contributors. Occasionally (well, every 30 minutes actually), 
+the system checks the number of comments that have been posted, and gives a proportionate 
+number of eligible users "tokens." When any user acquires a certain number of 
+tokens, he or she becomes a moderator. This means that you'll need to be eligible 
+for many of these slices in order to actually gain access. It all works to make 
+sure that everyone takes turns, and nobody can abuse the system, and that only 
+"regular" readers become moderators (as opposed to some random newbie ;) 
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm600"></a>
+<h2>
+How does moderation work?</h2>
+When moderators are given access, they are given a number of points of
+influence to play with. Each comment they moderate deducts a point. When
+they run out of points, they are done serving until next time it is their
+turn.
+<p>Moderation takes place by selecting an adjective from a drop down list
+that appears next to comments containing descriptive words like "Flamebait"
+or "Informative." Bad words will reduce the comment's score by a single
+point, and good words increase a comment's score by a single point. All
+comments are scored on an absolute scale from -1 to 5. Logged-in users
+start at 1 (although this can vary from 0 to 2 based on their <a href="com-mod.shtml#cm700">karma</a>)
+and anonymous users start at 0.
+<p><a href="com-mod.shtml#cm1800">Moderators can not participate in the
+same discussion as both a moderator and a poster</a>. This is to prevent
+abuses, and while it is one of the more controversial aspects of the system,
+I'm sticking to it. There are enough lurkers that moderate that, if you
+want to post, feel free.
+<p>Moderation points <a href="com-mod.shtml#cm1200">expire after 3 days</a>
+if they are left unused. You then go back into the pool and might someday
+be given access again.
+<p>Concentrate more on promoting than on demoting. The real goal here is
+to find the juicy good stuff and let others read it. Do not promote personal
+agendas. Do not let your opinions factor in. Try to be impartial about
+this. Simply disagreeing with a comment is not a valid reason to mark it
+down. Likewise, agreeing with a comment is not a valid reason to mark it
+up. The goal here is to share ideas. To sift through the haystack and find
+needles. And to keep the children who like to spam Slashdot in check.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/19/00</font></i>
+<br><a NAME="cm605"></a>
+<h2>
+Do editors moderate?</h2>
+The Slashdot Editors have unlimited mod points, and we have no problem
+using them.&nbsp; These moderations represent approximately 8% of all moderation,
+and according to Meta Moderation, the fairness of these comments is statistically
+indistinguishable from the moderation of non admin users (92-93% of moderations
+are ruled 'Fair'). You can argue that this is somehow inherently unfair,
+but one of the goals of Slashdot is to produce readable content for a variety
+of readers with a variety of reading habits, and this process improves discussions
+for the vast majority of Slashdot Readers, so it will stay this way.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 1/24/02</font></i>
+<br><a NAME="cm610"></a>
+<h2>
+What are thresholds?</h2>
+Your "threshold" is the minimum score that a comment needs to have if it
+is to be displayed to you. Comments are scored from -1 to 5, and you can
+set your threshold at any score within that range. So, for example, if
+you set your threshold at 2, only comments with scores of 2 or above would
+be displayed. Setting your threshold at -1 will display all comments. 0
+is almost all comments. 1 filters out most Anonymous Cowards, and so on.
+Higher threshold settings reduce the number of comments you see, but (in
+theory, anyway) the quality of the posts you do see increases.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm700"></a>
+<h2>
+What is karma?</h2>
+Your karma is a reference that primarily represents how your comments have been 
+moderated in the past. Karma is structured on the following scale &quot;Terrible, 
+Bad, Neutral, Positive, Good, and Excellent.&quot; If a comment you post is moderated 
+up, your karma will rise. Consequently, if you post a comment that has been moderated 
+down, your karma will fall. 
+<p>In addition to moderation, other things factor into karma as well. You
+can get some karma by <a href="editorial.shtml#ed100">submitting a story
+</a>that
+we decide to post. Also, <a href="metamod.shtml">metamoderation</a> can
+cause your karma to change. This encourages good moderators, and ideally
+removes moderator access from bad ones.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i><br>
+<i><font size=-1>Updated by: <a href="mailto:robo@slashdot.org">Robo</a></font></i><br>
+  <i><font size=-1>Last Modified: 7/15/02</font></i> <br>
+  <a name="cm703"></a> 
+<h2> What does "Good", "Bad" etc. Karma Mean?</h2>
+<p>Karma is the sum of your activity on Slashdot.  This means posting, 
+moderation, story submissions.  It's just an integer in a database.  The 
+tiers are Terrible, Bad, Neutral, Positive, Good, and Excellent.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 7/12/02</font></i> <br>
+  <a name="cm706"></a> 
+<h2> Karma used to be a number, now it is a word, this sucks!</h2>
+<p>People like to treat their Slashdot Karma like some sort of video game, 
+with a numeric integer representing their score in the game.  People who do 
+this simply are missing the point.  The text label is one way we've decided 
+to emphasize the point that karma doesn't matter.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br><i><font size=-1>Last Modified: 7/12/02</font></i> <br>
+
+<p><a NAME="cm710"></a> 
+<h2>
+Is there a limit to how much karma you can accumulate?</h2>
+Yes. Karma is now capped at &quot;Excellent&quot; 
+This was done to keep 
+people from running up insane karma scores, and then being immune from moderation. 
+Despite some theories to the contrary, the karma cap applies to every account. 
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 1/24/02</font></i>
+<br><a NAME="cm720"></a>
+<h2>
+It seems unfair that I can't get any more karma than that even if I earn
+it.</h2>
+Karma is used to remove risky users from the moderator pool, and to assign
+a bonus point to users who have contributed positively to Slashdot in the
+past. It is not your IQ, dick length/cup size, value as a human being,
+or a score in a video game. It does not determine your worth as a Slashdot
+reader. It does not cure cancer or grant you a seat on the secret spaceship
+that will be traveling to Mars when the Krulls return to destroy the planet
+in 2012. Karma fluctuates dramatically as users post, moderate, and meta-moderate.
+Don't let it bother you. It's just a number in the database.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/19/00</font></i>
+<br><a NAME="cm750"></a>
+<h2>
+Why didn't I get karma for a Quickie or a Slashback story?</h2>
+This is a shortcoming in the code that we haven't solved yet. Essentially, the 
+system can easily track a submitter of a story and grant them karma, but Quickies 
+and Slashback each operate differently. A dozen or more people might contribute 
+directly to any one of those stories. The system doesn't really have any internal 
+record to handle sorting out the karma distribution. Besides that, we currently 
+grant karma points for an accepted homepage story. 
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br>
+  <i><font size=-1>Last Modified: 7/15/02</font></i> <br>
+  <a NAME="cm800"></a>
+<h2>
+What is karma good for?</h2>
+Karma is used to determine who moderates and who doesn't. Extremely bad
+karma usually indicates a user account that is being used to spam the discussion
+board.
+<p>Secondly, users with better karma are given a bonus point which can sometimes 
+  increase your <a href="com-mod.shtml#cm703">karma level</a>. Logged-in users normally post comments with a score 
+  of 1, but the theory is that if a user earns higher karma, they may post with 
+  a score of 2. Essentially its a reward for being a good participant on Slashdot, 
+  or a punishment for being a bad one. Users with very low karma might lose the 
+  +1 associated with being a logged-in user. Extremely bad users might even be 
+  penalized to a -1. 
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br>
+  <i><font size=-1>Last Modified: 7/15/02</font></i> <br>
+  <a NAME="cm900"></a>
+<h2>
+Why is my karma not what I expect?</h2>
+If you've been moderating or posting, your karma will likely fluctuate
+a little as you are moderated or metamoderate. Don't worry about it; this
+is normal. Please remember that this is just a number in a database that
+helps us determine who gets selected as a moderator. It doesn't determine
+your IQ or your value as a human being. It's simply not a big deal.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm950"></a>
+<h2> My Karma: How low can it go?</h2>
+<p>The lowest your karma can go is &quot;Terrible.&quot; Check out "<a href="com-mod.shtml#cm703">What 
+  does &quot;Good&quot;, &quot;Bad&quot; etc. Karma Mean?</a>&quot; if you want 
+  to learn more about how the karma reference are tiered.</p>
+<p> Once you get really low, you start posting at -1, and the moderators are less 
+  likely to see your posts, so it's hard to lose any more karma. </p>
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br>
+  <i><font size=-1>Last Modified: 7/15/02</font></i> <br>
+  <a NAME="cm1000"></a>
+<h2>
+Whenever I use my +1 Bonus, I get moderated down and lose Karma!</h2>
+As a good poster, you earned a bonus: you are allowed to speak slightly "louder" 
+then other people. In most cases, this is because you've earned it. But with that 
+right comes a responsibility - you have to justify that bonus score. The louder 
+you speak, the more likely you are to be moderated down, unless you're sufficiently 
+interesting to prompt the moderators to let you keep your bonus score. This is 
+how the system is designed to work: you can't just rack up karma, and then post 
+nonsense. 
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm1150"></a>
+<h2>
+I'm not getting the Karma I deserve (or Unfairly Losing it!) for posts
+once I get near the Karma Ceiling!</h2>
+You're right.&nbsp; But please keep in mind that once you are &quot;Excellent&quot;, that's as high as you can go.  
+You have your bonus point already.&nbsp; What 
+more do you want?&nbsp; Karma by its very nature fluctuates fairly dramatically, 
+and the karma ceiling does tend to cause some ripples in that fluctuation at the 
+top end of the scale... but they are only small ripples, and they are normal.&nbsp;&nbsp; 
+They really don't matter at all.&nbsp; Its not punishment, its just the normal 
+flow of things. 
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br>
+  <i><font size=-1>Last Modified: 9/19/02</font></i> <br>
+  <a NAME="cm1100"></a>
+<h2>
+I just got moderator access. What do I do?</h2>
+Moderate! Read comments (preferably at a low threshold) and when you see
+comments that are very insightful, or perhaps just plain off topic, select
+that option from the drop down list. When you are done, hit the 'Moderate'
+button. That's it!
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm1200"></a>
+<h2>
+Why can't I moderate any more?</h2>
+You either used up your moderator points, or they expired. Moderation is
+like jury duty. You never know when you're gonna have to do it, and when
+you get it, you only do it for a little bit. Once those points are gone,
+you're done.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm1250"></a>
+<h2>
+Why don't you give moderators unlimited moderator access to 5 stories instead
+of giving them just 5 points?</h2>
+It's a good question. Moderators' primary complaint is that they are often
+crippled by the tiny amount of points they have, and the overwhelming amount
+of comments that need moderation. If a good moderator could moderate all
+the comments in a given story, certainly that would be a great improvement.
+<p>The problem is that a single bad moderator could wreak havoc across
+those same 5 stories. By limiting the number of moderation points to 5,
+any single moderator can only do so much damage. Sure they can only do
+so much *good* too, but that's the trade-off. I'd rather see a hundred
+comments unmoderated then see a hundred comments moderated badly by some
+jerk with an axe to grind.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/26/00</font></i>
+<br><a NAME="cm1300"></a>
+<h2>
+I found a comment that was unfairly moderated!</h2>
+Most of the time we've found that, for every moderator out there pushing
+an agenda, there are a dozen good moderators making sure that everyone
+is getting a fair say. However, to the extent that there may be problems
+with unfair moderation, we have come up with a system of <a href="metamod.shtml">meta-moderation</a>
+(moderating the moderation) to address this.
+<p><i><font size=-1>Answered by: <a href="mailto:loonxtall@hotmail.com">Loon</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm1320"></a>
+<h2>
+What about separating the rating (+1,-1) from the qualifier (off-topic,
+informative)? Often a post may be flamebait, but of excellent quality nevertheless.</h2>
+While this may be true in some cases, its limited applicability doesn't
+justify complicating the moderators' user interface. Also, there's too
+much potential for abuse.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/26/00</font></i>
+<br><a NAME="cm1400"></a>
+<h2>
+Is this censorship?</h2>
+I don't think so. Nothing is deleted: if you want to read the raw, uncut
+Slashdot, simply set your threshold to -1 and go crazy! This system is
+simply a method for us to try to work together to categorize the thousands
+of comments that are posted each day in such a way that we can benefit
+from the wisdom contained in the discussions. It's in there! It just takes
+some work to find it.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 6/12/00</font></i>
+  <br>
+  <a NAME="cm1500"></a> 
+<h2>
+I found a comment Rated -2 or 6!</h2>
+This is a bug that followed us around for some time, but we're pretty sure
+it's fixed. If you happen upon a comment that is moderated outside the
+allowed -1 to 5 range, please let <a href="mailto:cliff@slashdot.org">Cliff</a>
+know (send him the full URL to the comment, including the CID). But we're
+pretty sure this bug is officially squashed.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/19/00</font></i>
+<br><a NAME="cm1600"></a>
+<h2>
+What is a good comment? A bad comment?</h2>
+A good comment says something interesting or insightful. It has a link
+to a relevant piece of information that will add something to the discussion.
+It might not be Shakespeare, but it's not Beavis and Butthead. It's not
+off topic or flamey. It doesn't call someone names. It doesn't personally
+attack someone because of a disagreement of opinion.
+<p>Some of my favorite "bad" or off-topic comments are things like "Slashdot
+sucks!" and "This isn't news for nerds!" and "Moderate this XXX!" Any of
+these may be true, but they're probably off topic!
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm1700"></a>
+<h2>
+3 days is not enough time to moderate!</h2>
+I disagree. The 3 day limit exists to help push the system along. If users
+were allowed to hang on to their points, they could save them for a discussion
+within which they wanted to push an agenda. It's all right if points go
+unused- points are free, and there are always hundreds of users with more
+points who can fill in.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm1800"></a>
+<h2>
+If I Post in a Discussion I moderated, Why Don't I get My Points Back?</h2>
+This is intentional. If you could retrieve your points, you could abuse
+the system very easily. Here is an example:
+<ol>
+<li>
+Naughty Bob moderates 5 comments in a discussion. He uses up his points.</li>
+
+<li>
+Naughty Bob waits 2 days, and then posts a message to that discussion.</li>
+
+<li>
+Naughty Bob gets his 5 moderator points back!</li>
+
+<li>
+GOTO 1</li>
+</ol>
+If Naughty Bob was out pushing an agenda, he could keep his 5 points indefinitely,
+saving them to push discussions around. By taking his points away, he is
+unable to do that. Now Naughty Bob has to wait until the next time he gets
+points.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="cm1900"></a>
+<h2>
+How can I improve my karma?</h2>
+What follows was originally a story submission by <a href="mailto:dkh2@po.cwru.edu">dkh2</a>.
+It seemed to me that it would better serve readers here:
+<p><b>10 Tips for Improving Your Karma:</b>
+<ul>
+<li>
+<b>Post Intelligently:</b> Interesting, insightful, thought provoking comments
+are rated higher on a fairly consistent basis.</li>
+
+<br>&nbsp;
+<li>
+<b>Post Calmly:</b> Nobody likes a flame war. In fact, more times than
+not the flamer gets burned much more than their target."Flame Bait" is
+hit quickly and consistently with "-1" by moderators. As the bumper sticker
+says... "Don't be a dick."</li>
+
+<br>&nbsp;
+<li>
+<b>If You Can't Be Deep, Be Funny:</b> If you don't have something truly
+developing to the topic, some humor is welcome. Humor is lacking in our
+lives and will continue to be promoted. Remember though, what rips your
+sides out may be completely inane to somebody else.</li>
+
+<br>&nbsp;
+<li>
+<b>Post Early:</b> If an article has over a certain number of posts on
+it already, yours is less likely to be moderated. This is less likely both
+statistically (there are more to choose from) and due to positioning (as
+a moderator I have to actually find your post waaay at the end of a long
+list.)</li>
+
+<br>&nbsp;
+<li>
+<b>Post Often:</b> If you only post once a month you can expect your karma
+to remain low. Also, lively discussion in an open forum is what makes Slashdot
+really "Rock the Casbah."</li>
+
+<br>&nbsp;
+<li>
+<b>Stay On Topic:</b> Off topic posts are slapped quickly and consistently
+with "-1" by moderators.</li>
+
+<br>&nbsp;
+<li>
+<b>Be Original:</b> Avoid being redundant and just repeating what has already
+been said. <i>Smirk.</i> Yes, being moderated as "redundant" is worth "-1"
+to your post and your karma. Especially to be avoided are the "what he
+said" and "me too" posts.</li>
+
+<br>&nbsp;
+<li>
+<b>Read It Before You Post:</b> Does it say what you really want it to
+say? Check your own spelling and grammar. Occasionally, a perfectly beneficial
+post is passed over by moderators because of this completely irrelevant-to-content
+feature. This is also a good approach to checking yourself for what you're
+really saying. Can't tell you the number of times I've stopped myself from
+saying the opposite of what I meant by checking my own spelling and grammar.</li>
+
+<br>&nbsp;
+<li>
+<b>Log In As a Registered User:</b> I know, this sounds obvious but, "Anonymous
+Coward" does not have a karma rating. You can't reap the perceived benefits
+of your own accidental brilliance if you post anonymously. Have pride in
+your work and take credit for it.</li>
+
+<br>&nbsp;
+<li>
+<b>Read Slashdot Regularly:</b> You can't possibly contribute to the discussion
+if you're not in the room. Come to the party and play.</li>
+
+<br>&nbsp;</ul>
+<i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/12/00</font></i>
+<br><a NAME="1910"></a>
+<h2>
+Lots of early posts that "seem" to be informative/insightful and get mod-ed
+up when they really shouldn't be. If the author sounds confident, people
+seem to just give him points. By the time an actual informative post makes
+it in, it's too late to go back. How could you accommodate this in the
+moderation system?</h2>
+Moderators are human beings, and human beings make mistakes. Still, moderators
+should try to be as thorough as they can. If there's a link in the comment,
+moderators should check it. If there are facts in the comment that a moderator
+knows to be wrong, he or she should take that into account. If the moderator
+doesn't know if the facts in a comment are correct or not, maybe the moderator
+should skip that comment.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 10/19/00</font></i>
+<br><a NAME="cm2000"></a>
+<h2>
+What sorts of anti-troll filters exist?</h2>
+A handful of filters have been put into place to try to make sure that
+people don't abuse the system. The most important is that the same person
+can't post more than once every 120 seconds.
+Also, if a single user is moderated down several times in a short time
+frame, a temporary ban will be imposed on that user... a cooling off period
+if you will. It lasts for 72 hours, or more for users who have posted a ton.
+<p>The <i>vast</i> majority of you will never encounter any of these troll
+filters. If you do encounter one unfairly, let us know so we can fix it.
+This stuff is fairly beta code, so there are bound to be problems.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 1/27/02</font></i>
+<br><a NAME="cm2050"></a>
+<h2>
+What about comments copy-and-pasted from other sources?</h2>
+If someone copies text from elsewhere and doesn't mention that it's
+copied or name the source, it's plagiarism. Moderate it Redundant, or
+feel free to alert moderators by posting a link (perhaps anonymously).
+<p><i><font size=-1>Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i>
+<br><i><font size=-1>Last Modified: 1/17/03</font></i>
+<br><a NAME="cm2100"></a>
+<h2>
+Why can't I search or filter archived stories?</h2>
+Why can't you? What are you talking about, you can! Go to the <a href="http://slashdot.org">front
+page</a> and scroll all the way to the bottom. There's your search button.
+You can search for anything you'd like in the Slashdot database, stories,
+comments, users, polls, and even journal entries. Filtering is a little
+tricky, you can filter <i>for</i> authors, topics, or sections, but not
+filter <i>out</i> authors, topics, or sections. Occasionally our search
+feature gets bogged down when many users are accessing it. In this case
+we recommend using <a href="http://google.com">google</a>. Google likes
+to cache Slashdot stories and is reasonably accurate.
+<p><i><font size=-1>Answered by: <a href="mailto:robo@slashdot.org">Robo</a></font></i>
+<br><i><font size=-1>Last Modified: 12/17/01</font></i>
+<br><a NAME="cm2200"></a>
+<h2>
+What is this&nbsp;<img SRC="http://images.slashdot.org/neutral.gif" > ?</h2>
+In a story where a <i>user</i> posts a comment, you'll see one of seven images next to the comment defining the poster's relationship to you:
+<p>Friend&nbsp;<img SRC="http://images.slashdot.org/friend.gif" ALT="friend" > 
+<p>Fan&nbsp;<img SRC="http://images.slashdot.org/fan.gif" ALT="fan" >
+<p>Neutral&nbsp;<img SRC="http://images.slashdot.org/neutral.gif" ALT="neutral" >
+<p>Foe&nbsp;<img SRC="http://images.slashdot.org/foe.gif" ALT="foe" >
+<p>Freak&nbsp;<img SRC="http://images.slashdot.org/freak.gif" ALT="freak" >
+<p>Friend of Friend&nbsp;<img SRC="http://images.slashdot.org/fof.gif" ALT="Friend of Friend">
+<p>Enemy of Friend&nbsp;<img src="http://images.slashdot.org/eof.gif" ALT="Enemy of Friend">
+<p>For more information about "Friends" check out <a href="friends.shtml">Friends
+and Journals</a>
+<p><i><font size=-1>Updated by: <a href="mailto:robo@slashdot.org">Robo</a></font></i>
+<br><i><font size=-1>Last Modified: 01/02/02</font></i>
+<br><a NAME="cm2300"></a>
+<h2>
+What are post modes?</h2>
+Comment posting modes are not related to <a href="#cm100">comment viewing modes</a>.
+Instead, they determine how the text that you enter for a comment is interpreted
+and thus how it will be displayed to the reader.  There are four post modes:
+<UL>
+<LI><B>HTML Formatted</B>: You determine the formatting, using allowed HTML
+tags and entities.</LI>
+<LI><B>Plain Old Text</B>: Same as "HTML Formatted", except that &lt;BR&gt;
+is automatically inserted for newlines, and other whitespace is converted
+to non-breaking spaces in a more-or-less intelligent way.</LI>
+<LI><B>Extrans</B>: Same as "Plain Old Text", except that &amp; and &lt;
+and &gt; are converted to entities (no HTML markup allowed).</LI>
+<LI><B>Code</B>: Same as "Extrans", but a monospace font is used, and a
+best attempt is made at performing proper indentation.</LI>
+</UL>
+<P>In addition, there is an extra "tag" you can use called <TT>ECODE</TT>.
+This functions like the "Code" post mode, but may be inlined in "HTML
+Formatted" and "Plain Old Text" posts, and the entire block is indented.
+(Getting really fancy: if you wish to use the text <TT>&lt;/ECODE&gt;</TT> inside the
+<TT>ECODE</TT> tag, you may instead use <TT>&lt;ECODE
+END="SOMETAG"&gt;...&lt;/SOMETAG&gt;</TT> instead of
+<TT>&lt;ECODE&gt;...&lt;/ECODE&gt;</TT>.)</P>
+<P>You may set your default post mode on the
+<A href="http://slashdot.org/users.pl?op=editcomm">Comments preferences</A>
+page.
+<p><i><font size=-1>Updated by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 07/16/02</font></i> <br>
+  <a name="cm2000"></a> 
+<h2> A comment I posted shows a different score on my user page than in the <br>
+  comments page.</h2>
+Your user page displays the comments' "Natural" score.  That is the base
+score that all users share for any given comment.  This number includes
+things like moderations up and down, default posting bonus, and so forth.
+However, that same comment, when displayed in the context of a discussion,
+reflects the bonuses or penalties associated with any number of user
+preferences.  These options are
+<A href="http://slashdot.org/users.pl?op=editcomm">all configurable</A>, and
+include settings like the small comment penalty, the long comment bonus,
+and any reason modifiers you may have defined.
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 7/15/02</font></i> 
+<p>
+<hr>
+<table>
+<tr width="100%">
+<td><a href="UI.shtml">Previous section</a></td>
+
+<td><a href="metamod.shtml">Next section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+<!--#include virtual="/slashfoot.inc"-->
+</body>
+</html>

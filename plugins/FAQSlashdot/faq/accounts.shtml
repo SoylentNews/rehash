@@ -1,0 +1,215 @@
+<!--#include virtual="/slashhead.inc"-->
+<TABLE>
+	<TR width="100%">
+		<TD><A HREF="metamod.shtml">Previous section</A>
+		<TD><A HREF="friends.shtml">Next section</A>
+		<TD><A HREF="index.shtml">Index</A>
+	</TR>
+</TABLE>
+<HR><BR>
+
+<A NAME="ac100"></a>
+<H2>Can I change my nickname?</H2> 
+
+	<P>You can't. Sorry. It's just too prone to abuse. You can't delete
+	your own comments.  You can't change your name. There are no exceptions
+	to this.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:Samzenpus@slashdot.org">Samzenpus</A> <BR>
+	Last Modified: 12/19/01 <BR>
+	</SMALL></I>
+
+<A NAME="ac105"></a>
+<H2>How do I change my password?</H2>
+
+	<P>Go to the <A HREF="http://slashdot.org/users.pl?op=edituser">User Info Editing Page</A> while you are logged in and use the form provided there.<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:pater@slashdot.org">CowboyNeal</A> <BR>
+        Last Modified: 1/10/01 <BR>
+        </SMALL></I>
+	 
+<A NAME="ac200"></a>
+<H2>How can I delete my account?</H2> 
+
+	<P>You can't. The system needs to keep track of the users, so accounts
+	are permanent. Don't sweat leaving unused accounts hanging around. It
+	doesn't hurt anything.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/13/00 <BR>
+	</SMALL></I> 
+
+<A NAME="ac300"></a>
+<H2>I forgot/can't get my password!</H2> 
+
+	You should be able to get it from <A HREF=/users.pl>the user
+	login page</A>.  Just type in your nickname and hit 'mailpasswd' and
+	your password will be whisked off to your email address.  If, however, this
+	doesn't seem to be working, email <A
+	HREF=mailto:passwords@slashdot.org>passwords@slashdot.org</A> for help.
+	
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:pater@slashdot.org">CowboyNeal</A> <BR>
+	Last Modified: 3/4/02 <BR>
+	</SMALL></I> 
+	
+	
+
+<A NAME="ac400"></a>
+<H2>I'm having trouble logging in.</H2> 
+
+	<P>Make sure you have cookies turned on. If you don't, it won't work.
+	Also make sure that the date and time on your computer is correct.
+	In an handful of cases, the problem could be related to  a problem
+	with a proxy server, but this is very unlikely. If you've turned
+	cookies on and tried again to log in, and it still doesn't work, drop
+	<A HREF=mailto:pater@slashdot.org>CowboyNeal</A> a note and he'll try
+	to help you.
+
+	
+<P>Really, though, the system works for thousands of people every day, so the 
+  problem is most likely on your end ;) <BR>
+  <BR>
+  <I><SMALL> Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+  Last Modified: 6/13/00 <br>
+  </SMALL></I> 
+<p><a name="ac450"></a> 
+<h2>I'm having trouble logging into Slashdot Sections (Like Apple, YRO, or BSD)</h2>
+<p>You can be logged into slashdot while you view any of the subsections. All 
+  you need to do is hit any of the sections, and log in. Logging into one of them 
+  logs you into all. But you need to log into at least one section <i>seperate</i> 
+  from logging into <a href="http://slashdot.org">http://slashdot.org</a>. 
+<p>Yeah, we know this is confusing, but we didn't write the RFC for cookies. Sorry 
+  for the inconvenience.<br>
+  <br>
+  <i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
+  Last Modified: 3/30/02 </small></i>
+<P><I><SMALL><BR>
+  </SMALL></I> <A NAME="ac500"></a> 
+<H2>I don't want to accept a cookie!</H2> 
+
+
+	<P>A lot of people are paranoid about cookies, and not without reason,
+	but the simple fact is that this is how you create persistence
+	in a stateless protocol. I've heard all the arguments and all the 
+	debates on the subject, and this is how we're doing it.
+	
+	<P>If you don't want to use cookies, you don't have to. You can still
+	post (either anonymously, or by entering your password each time you
+	submit a comment) but you will not be able to use all of the advanced
+	features of Slashdot (story filtering, customized Slashboxes, user
+	preferences etc.). If your paranoia requires you not to use cookies, 
+	this is the sacrifice you'll have to make.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/13/00 <BR>
+	</SMALL></I> 
+	
+<A NAME="ac600"></a>
+<H2>Someone is posting under a false identity, or an account designed to look like someone else</H2>
+
+	<P>There are many accounts in the system that were created for
+	malicious purposes. There are dozens of variations on names like
+	'CmdrTaco' and 'Hemos' as well as heads of many corporations, writers,
+	etc.  We don't tamper with existing accounts though, so there's nothing
+	we   can do about it.  Over the last few years, numerous restrictions
+	have been placed on accounts to make this difficult (for example the
+	system won't let you create an account named 'CmdrTaco' because there
+	already is one listed) but that doesn't prevent any of the hundreds
+	of existing ninnies from doing what ninnies do.
+
+	<P>In most cases, these folks are caught by <A
+	HREF="com-mod.shtml#cm600">moderation</A>, and they eventually get <A
+	HREF="com-mod.shtml#cm700">karma</A> that is low enough to make it
+	obvious that they are impostors.
+
+	<BR><BR>
+	<I><SMALL>
+	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+	Last Modified: 6/19/00 <BR>
+	</SMALL></I> 
+
+<A NAME="ac700"></a>
+<H2>Why do I keep getting randomly logged out?</H2>
+
+	
+<P>You might need to log in to both 'foo.slashdot.org' and 'slashdot.org'. Because 
+  of how cookies work, if you log into the latter first, you might find yourself 
+  logged out of the former. Or vice versa. Once you log into both,
+  you'll be fine. Yes, this is annoying. No we can't fix it. We don't write 
+  the RFCs.<BR>
+  <BR>
+  <I><SMALL> Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+  Last Modified: 7/08/02<BR>
+  </SMALL></I> <A NAME="ac800"></a> 
+<H2>Do you ban people from Slashdot?</H2>
+
+	
+<P>Occassionally we <a href="accounts.shtml#ac900">ban IPs</a> who are abusing 
+  our servers in some way. If this happens, please read <a href="accounts.shtml#ac1000">How do I get an IP Unbanned</a>. 
+  These bans exist to prevent Denial of Service attacks that either overburden 
+  our servers, or flood the forums. 
+<p> The moderation system has a variety of limits in it as well, but these bans 
+  are temporary and exist more as a rate limiter to make sure that people stay 
+  on topic, and everyone gets a chance to speak. You can learn more about the 
+  moderation system by reading <a href="com-mod.shtml">Comments and Moderation</a>.<BR>
+  <BR>
+  <I><SMALL> Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
+  Last Modified: 03/26/02<BR>
+  </SMALL></I> <A NAME="ac900"></a> 
+<h2>Why is my IP banned?</h2>
+<p>&middot; Perhaps you are running some sort of program that loaded thousands of 
+Slashdot Pages.  We have limited resources here and are fairly protective of 
+them.  We need to make sure that everyone shares.  If your IP loads thousands 
+of pages in a day, you will likely be banned.  Please note that many proxy 
+servers load large quantities of pages, but we can usually distinguish 
+between proxy servers being used by humans, and IPs running software that is 
+hammering our servers.<p>
+&middot; Your IP might have been used to perform some sort of denial of service 
+attack against Slashdot.  These range from simple programs that just load a 
+lot of pages, to programs that attempt to coordinate an avalanche of posts
+in the forums (often through misconfigured "Open Relay" proxy servers).<p>
+&middot; You might be using a proxy server that is also being used by another person 
+  who did something from the above list. You should have your <b>proxy server 
+  administrator</b> <a href="mailto:banned@slashdot.org">contact us</a>.<p>
+&middot; Your IP might have been used to post comments designed to break 
+web browser rendering. <br>
+  <br>
+  <i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
+  Last Modified: 7/02/02<br><!-- if you modify this answer, edit Slash/Apache/Banlist.pm too -->
+  </small></i> <a name="ac1000"></a> 
+  <h2>How do I get an IP Unbanned?</h2>
+  <p>Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a>. Make 
+    sure to include the IP in question, and any other pertinent information. If 
+    you are connecting through a proxy server, you might need to have your proxy 
+    server's admin contact us instead of you. <br>
+    <br>
+    <i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
+    Last Modified: 3/26/02<br><!-- if you modify this answer, edit Slash/Apache/Banlist.pm too -->
+    </small></i> <a name="ac1100"></a>
+    <h2>Why is someone else's User Name appearing on my User Page's Menu?</h2>
+    <p>This is not a bug.  This is a feature!  That name is the last user page
+    (besides your own ;) that you have visited.  This is useful when you
+    want to hop around between your user info, and someone else's: to
+    compare friends and foes for example.  Your account has not been
+    hacked, this is totally by design. <br>
+    <br>
+    <i><small> Answered by: <A href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
+    Last Modified: 1/06/03<br>
+  <P><BR>
+  <HR>
+  <TABLE>
+    <TR width="100%"> 
+      <TD><A HREF="metamod.shtml">Previous section</A> 
+      <TD><A HREF="friends.shtml">Next section</A> 
+      <TD><A HREF="index.shtml">Index</A> 
+    </TR>
+  </TABLE>
+  <!--#include virtual="/slashfoot.inc"-->

@@ -1,0 +1,63 @@
+<!--#include virtual="/slashhead.inc"-->
+<table>
+<tr>
+<td><a href="editorial.shtml">Previous section</a></td>
+
+<td><a href="com-mod.shtml">Next section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+
+<hr>
+<br><a NAME="ui100"></a>
+<h2>
+I want a Slashbox that does X</h2>
+The policy for Slashboxes is as follows:
+<ol>
+<li>
+The remote site gives us permission.</li>
+
+<li>
+The remote site provides an RDF file for us to parse (here is <a href="/slashdot.rdf">our
+rdf</a> if you want an example).</li>
+
+<li>
+We decide that it belongs on Slashdot.</li>
+</ol>
+Currently the grand Slashbox poobah is <a href="mailto:pater@slashdot.org">CowboyNeal</a>.
+Email him a URL to the RDF, as well as a technical contact, and we'll consider
+your addition to the roster.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/14/00</font></i>
+<br><a NAME="ui200"></a>
+<h2>
+What is this little [?] I see in stories?</h2>
+It designates a glossary style link to <a href="http://www.everything2.com">Everything2</a>.
+We use these to link things like acronyms or names when we think that they
+might be obscure enough that someone else might need some clarification.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 6/14/00</font></i>
+<br><a NAME="ui300"></a>
+<h2>
+How can I see old stories?</h2>
+Slashdot has archived stories going back pretty much to the beginning of
+the site. You can access them by hitting the "older stuff" link on the
+main page or by searching for them in the database by using the search
+form at the bottom of the front page.
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 12/17/01</font></i>
+<p>
+<hr>
+<table>
+<tr>
+<td><a href="editorial.shtml">Previous section</a></td>
+
+<td><a href="com-mod.shtml">Next section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+<!--#include virtual="/slashfoot.inc"-->
+</body>
+</html>
