@@ -1130,3 +1130,6 @@ ALTER TABLE accesslog ADD static enum("yes","no") DEFAULT "yes";
 ALTER TABLE accesslog ADD referer varchar(254);
 
 # USEPERL LAST UPDATED HERE
+
+ALTER TABLE moderatorlog ADD INDEX m2stat_act (m2status, active);
+

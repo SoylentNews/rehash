@@ -422,7 +422,8 @@ CREATE TABLE moderatorlog (
 	KEY ipid (ipid),
 	KEY subnetid (subnetid),
 	KEY uid (uid),
-	KEY cuid (cuid)
+	KEY cuid (cuid),
+	KEY m2stat_act (m2status,active)
 ) TYPE = myisam;
 
 #
