@@ -488,10 +488,10 @@ sub linkStory {
 	}
 
 	if ($render) {
-		my $rendered = '<A HREF="' . $url . '"';
+		my $rendered = '<A HREF="' . strip_attribute($url) . '"';
 		$rendered .= ' TITLE="' . strip_attribute($story_link->{title}) . '"'
 			if $story_link->{title} ne '';
-		$rendered .= '>' . $title . '</A>';
+		$rendered .= '>' . strip_html($title) . '</A>';
 		return $rendered;
 	} else {
 		return [$url, $title, $story_link->{title}];
