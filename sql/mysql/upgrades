@@ -975,7 +975,10 @@ INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8',
 
 # SLASHDOT LAST UPDATED HERE
 
-# oops
-UPDATE tzcodes SET dst_tz = 'WEDT' WHERE tz = 'WEST';
-UPDATE tzcodes SET dst_tz = 'CEDT' WHERE tz = 'CEST';
-UPDATE tzcodes SET dst_tz = 'EEDT' WHERE tz = 'EEST';
+# oops: make sure you restart httpds after this
+UPDATE tzcodes SET tz = 'WET' WHERE tz = 'WEST';
+UPDATE tzcodes SET tz = 'CET' WHERE tz = 'CEST';
+UPDATE tzcodes SET tz = 'EET' WHERE tz = 'EEST';
+UPDATE users_prefs SET tzcode = 'WET' WHERE tzcode = 'WEST';
+UPDATE users_prefs SET tzcode = 'CET' WHERE tzcode = 'CEST';
+UPDATE users_prefs SET tzcode = 'EET' WHERE tzcode = 'EEST';
