@@ -1824,7 +1824,6 @@ EOT
 					[ $link ]
 					</FONT>
 				</TD></TR>
-				<TR><TD>
 EOT
 		}
 
