@@ -195,7 +195,7 @@ sub _buildargs {
 	my($form) = @_;
 	my $uri;
 
-	for (qw[threshold query author op topic tid section]) {
+	for (qw[threshold query author op topic tid section sort]) {
 		my $x = "";
 		$x =  $form->{$_} if defined $form->{$_} && $x eq "";
 		$x =~ s/ /+/g;
