@@ -76,14 +76,18 @@ ELSE;
 	];
 	IF plugins.Zoo; tabs.push(
 		{ link = "/zoo.pl?op=check&uid=$uid", label = "Relation", sel_label = "relation" },
-	); tabs.push(
+	); END;
+	IF plugins.Journal; tabs.push(
 		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
-	); tabs.push(
+	); END;
+	IF plugins.Zoo; tabs.push(
 		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
 	); tabs.push(
 		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
 	); tabs.push(
 		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+	); tabs.push(
+		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
 	); END;
 END;
 

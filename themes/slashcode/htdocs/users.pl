@@ -391,16 +391,6 @@ sub main {
 		$op = $user->{is_anon} ? 'default' : 'userinfo';
 	}
 
-	# Print the top tabbed menu.  The op is responsible for printing
-	# its own titlebar (and, usually, second-level tabbed menu).
-print "\n<!-- users.pl main() op='$op' ts1='$ops->{$op}{tab_selected_1}' -->\n";
-	print createMenu($formname, {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	$ops->{$op}{tab_selected_1} || "",
-	});
-
 	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
 
                 my $done = 0;
@@ -455,7 +445,11 @@ print "\n<!-- users.pl main() op='$op' ts1='$ops->{$op}{tab_selected_1}' -->\n";
 	errorLog("users.pl error_flag '$error_flag'") if $error_flag;
 
 	# call the method
-	my $retval = $ops->{$op}{function}->({ op => $op }) if ! $error_flag;
+	my $retval = $ops->{$op}{function}->({
+		op		=> $op,
+		tab_selected_1	=> $ops->{$op}{tab_selected_1} || ""
+	}) if !$error_flag;
+
 	if ($op eq 'mailpasswd' && $retval) {
 		$ops->{$op}{update_formkey} = 0;
 	}
@@ -610,6 +604,13 @@ sub mailPasswd {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
+
 	if (! $uid) {
 		if ($form->{unickname} =~ /\@/) {
 			$uid = $slashdb->getUserEmail($form->{unickname});
@@ -650,11 +651,19 @@ sub mailPasswd {
 
 #################################################################
 sub showSubmissions {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my($uid, $nickname);
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	if ($form->{uid} or $form->{nick}) {
 		$uid		= $form->{uid} || $slashdb->getUserUID($form->{nick});
@@ -681,12 +690,20 @@ sub showSubmissions {
 
 #################################################################
 sub showComments {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $commentstruct = [];
 	my($uid, $nickname);
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	if ($form->{uid} or $form->{nick}) {
 		$uid		= $form->{uid} || $slashdb->getUserUID($form->{nick});
@@ -866,7 +883,16 @@ sub showInfo {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
+		$hr->{tab_selected_1} = 'otheruser';
 	}
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my $comments_wanted = $user->{show_comments_num}
 		|| $constants->{user_comment_display_default};
@@ -1063,6 +1089,7 @@ sub showInfo {
 
 #####################################################################
 sub validateUser {
+	my($hr) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -1073,6 +1100,13 @@ sub validateUser {
 		displayForm();
 		return;
 	}
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	# Since we are here, if the minimum values for the comment trigger and
 	# the day trigger are -1, then they should be reset to 1.
@@ -1155,30 +1189,31 @@ sub adminDispatch {
 	my $op = $hr->{op} || $form->{op};
 
 	if ($op eq 'authoredit') {
-		editUser({ uid => $form->{authoruid} });
+		$hr->{uid} = $form->{authoruid};
+		editUser($hr);
 
 	} elsif ($form->{saveuseradmin}) {
-		saveUserAdmin();
+		saveUserAdmin($hr);
 
 	} elsif ($form->{userinfo}) {
-		showInfo();
+		showInfo($hr);
 
 	} elsif ($form->{userfield}) {
 		if ($form->{edituser}) {
-			editUser();
+			editUser($hr);
 
 		} elsif ($form->{edithome}) {
-			editHome();
+			editHome($hr);
 
 		} elsif ($form->{editcomm}) {
-			editComm();
+			editComm($hr);
 
 		} elsif ($form->{changepasswd}) {
-			changePasswd();
+			changePasswd($hr);
 		}
 
 	} else {
-		showInfo();
+		showInfo($hr);
 	}
 }
 
@@ -1264,10 +1299,18 @@ sub tildeEd {
 
 #################################################################
 sub changePasswd {
+	my($hr) = @_;
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my $user_edit = {};
 	my $title;
@@ -1307,10 +1350,37 @@ sub changePasswd {
 }
 
 #################################################################
+#sub _editUser_get_target_user {
+#	my($hr) = @_;
+#	my $slashdb = getCurrentDB();
+#	my $user = getCurrentUser();
+#	my $form = getCurrentForm();
+#	my $id = $hr->{uid} || '';
+#	my $user_edit;
+#	if ($form->{userfield}) {
+#		$id = $form->{userfield};
+#		my $uid = $id;
+#		if ($id !~ /^\d+$/) {
+#			$uid = $slashdb->getUserUID($id);
+#		}
+#		$user_edit = $slashdb->getUser($uid);
+#	} else {
+#		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
+#	}
+#	return $user_edit;
+#}
+
 sub editUser {
 	my($hr) = @_;
 	my $id = $hr->{uid} || '';
 	my $note = $hr->{note} || '';
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -1337,6 +1407,7 @@ sub editUser {
 		$fieldkey = 'uid';
 		$id = $user_edit->{uid};
 	}
+use Data::Dumper; print STDERR "users.pl editUser() id '$id' fieldkey '$fieldkey' hr: " . Dumper($hr);
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 
 	$admin_block = getUserAdmin($id, $fieldkey, 1, 1) if $admin_flag;
@@ -1368,6 +1439,13 @@ sub editHome {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my($formats, $title, $tzformat_select);
 	my $user_edit = {};
@@ -1442,6 +1520,13 @@ sub editComm {
 
 	my $admin_block = '';
 	my $fieldkey;
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my $admin_flag = $user->{is_admin} ? 1 : 0;
 
@@ -1561,10 +1646,18 @@ sub editComm {
 
 #################################################################
 sub saveUserAdmin {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my($user_edits_table, $user_edit) = ({}, {});
 	my $save_success = 0;
@@ -1782,6 +1875,7 @@ sub savePasswd {
 
 #################################################################
 sub saveUser {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
@@ -1789,6 +1883,13 @@ sub saveUser {
 	my $plugins = $slashdb->getDescriptions('plugins');
 	my $uid;
 	my $user_editfield_flag;
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	$uid = $user->{is_admin} && $form->{uid} ? $form->{uid} : $user->{uid};
 	my $user_edit = $slashdb->getUser($uid);
@@ -1918,11 +2019,19 @@ sub saveUser {
 
 #################################################################
 sub saveComm {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my($uid, $user_fakeemail);
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	if ($user->{is_admin}) {
 		$uid = $form->{uid} || $user->{uid};
@@ -2021,11 +2130,19 @@ sub saveComm {
 
 #################################################################
 sub saveHome {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $uid;
 	my($extid, $exaid, $exsect) = '';
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	if ($user->{is_admin}) {
 		$uid = $form->{uid} || $user->{uid} ;
@@ -2137,6 +2254,13 @@ sub editMiscOpts {
 
 	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
 
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
+
 	my $edit_user = $slashdb->getUser($user->{uid});
 	my $title = getTitle('editMiscOpts_title');
 
@@ -2157,12 +2281,20 @@ sub editMiscOpts {
 #################################################################
 #
 sub saveMiscOpts {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 
 	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my $edit_user = $slashdb->getUser($user->{uid});
 	my %opts_ok_hash = ( );
@@ -2248,6 +2380,13 @@ sub displayForm {
 	my $constants = getCurrentStatic();
 
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0;
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 
 	my $op = $hr->{op} || $form->{op} || 'displayform';
 

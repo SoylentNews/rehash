@@ -1,6 +1,9 @@
 __section__
 default
 __description__
+* title
+* tab_selected_1
+* tab_selected_2
 
 __title__
 
@@ -14,11 +17,12 @@ __template__
 [% USE Slash %]
 <!-- zoohead page=[% page %] -->
 [% Slash.createMenu("users", {
-	tab_selected => "me",
+	tab_selected => tab_selected_1,
 	style => "tabbed",
-	justify => "right"
+	justify => "right",
+	color => "colored",
 }) %]
-[% PROCESS user_titlebar tab_selected=tab_selected %]
+[% PROCESS user_titlebar title=title tab_selected=tab_selected_2 %]
 [% UNLESS page == 'relation' %]
 	[% IF uid == user.uid && !user.is_anon %]
 		<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
