@@ -1468,12 +1468,10 @@ sub saveStory {
 			errorLog("could not create discussion for story '$sid'");
 		}
 		$data->{discussion} = $id;
-		slashHook('admin::storySave::save_success', 
-							[$constants, $slashdb, $user, $form], 
+		slashHook('admin_save_story_success', 
 							{ story => $data });
 	} else {
-		slashHook('admin::storySave::save_failure', 
-							[$constants, $slashdb, $user, $form], 
+		slashHook('admin_save_story_failed', 
 							{ story -> $data });
 		titlebar('100%', getData('story_creation_failed'));
 		listStories(@_);

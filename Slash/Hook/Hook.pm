@@ -21,20 +21,20 @@ use vars qw($VERSION @EXPORT);
 
 
 sub slashHook {
-	my($param, $luggage, $options) = @_;
-	# Why call these instead of taking them out of luggage?
-	# This allows the calling code to modify those values.
-	# -Brian
-	my $section = getCurrentForm('section');
+	my($param, $options) = @_;
 	my $slashdb = getCurrentDB();
 
 	my $hooks = $slashdb->getHooksByParam($param);
 	for my $hook (@$hooks) {
 		eval "require $hook->{class}";
-		if(eval "$hook->{class}->can('$hook->{subroutine}')") {
-			unless (eval "$hook->{class}::$hook->{subroutine}(\$luggage, \$options)") {
-				errorLog("Failed executing hook ($param) - $hook->{class}::$hook->{subroutine}");
-				print STDERR  ("$hook->{class}::$hook->{subroutine}(\$luggage, \$options)\n");
+		my $code;
+		{
+			no strict 'refs';
+			$code = \&{ $hook->{class} . '::' . $hook->{subroutine} };
+		}
+		if (defined (&$code)) {
+			unless ($code->($options)) {
+					errorLog("Failed executing hook ($param) - $hook->{class}::$hook->{subroutine}");
 			}
 		} else {
 			errorLog("Failed trying to do hook ($param) - $hook->{class}::$hook->{subroutine}");
