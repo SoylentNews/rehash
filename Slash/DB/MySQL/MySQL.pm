@@ -6390,7 +6390,7 @@ sub getStoryList {
 		push @where, "stories.section = " . $self->sqlQuote($SECT->{section});
 	}
 	push @where, "time < DATE_ADD(NOW(), INTERVAL 72 HOUR) "
-		if $form->{section} eq "" and !$constants->{show_all_future_stories_admin};
+		if $form->{section} eq '' && !$constants->{show_all_future_stories_admin};
 	my $other = "ORDER BY time DESC LIMIT $first_story, $num_stories";
 
 	$where = join ' AND ', @where;
