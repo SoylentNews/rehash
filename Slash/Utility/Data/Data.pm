@@ -38,7 +38,7 @@ use Safe;
 use Slash::Constants qw(:strip);
 use Slash::Utility::Environment;
 use URI;
-use URI::Find;
+#use URI::Find 0.15;
 use XML::Parser;
 use Lingua::Stem;
 
@@ -1109,7 +1109,6 @@ my %mode_actions = (
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
 			approveCharrefs
-			url2html
 			breakHtml_ifwhitefix
 			whitespace_tagify
 			newline_indent			)],
@@ -1124,7 +1123,6 @@ my %mode_actions = (
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
 			approveCharrefs
-			url2html
 			breakHtml_ifwhitefix		)],
 	CODE, [qw(
 			newline_to_local
@@ -1366,13 +1364,13 @@ sub processCustomTags {
 			my $newlen = 25;  # length('<BLOCKQUOTE></BLOCKQUOTE>')
 			my $close = $end ? $close_1 : $close_2;
 
-			my $ok = $str =~ s[^ (.{$pos}) $close][
-				my $code = strip_code($3);
+			my $substr = substr($str, $pos);
+			if ($substr =~ m/^$close/si) {
+				my $code = strip_code($2);
 				$newlen += length($code);
-				$1 . "<BLOCKQUOTE>$code</BLOCKQUOTE>";
-			]xsie;
-
-			pos($str) = $pos + $newlen if $ok;
+				substr($str, $pos, $newlen) = "<blockquote>$code</blockquote>";
+				pos($str) = $pos + $newlen;
+			}
 		}
 	}
 
@@ -1427,8 +1425,7 @@ sub breakHtml {
 
 	# These are tags that "break" a word;
 	# a<P>b</P> breaks words, y<B>z</B> does not
-	my $approvedtags_break = $constants->{'approvedtags_break'}
-		|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV DL)];
+	my $approvedtags_break = $constants->{'approvedtags_break'} || [];
 	my $break_tag = join '|', @$approvedtags_break;
 	$break_tag = qr{(?:$break_tag)}i;
 
@@ -1683,7 +1680,7 @@ sub approveTag {
 	# knows how to handle multi-line URLs (it removes whitespace).
 	if ($wholetag =~ /^URL:(.+)$/is) {
 		my $url = fudgeurl($1);
-		return qq!<A HREF="$url">$url</A>!;
+		return qq!<a href="$url">$url</a>!;
 	}
 
 	# Build the hash of approved tags.
@@ -1717,7 +1714,7 @@ sub approveTag {
 	#		  HEIGHT =>	{ ord => 4                     },
 	#		  LONGDESC =>	{ ord => 5,           url => 1 }, },
 	# }
-	# this is decoded in Slash/DB/MySQL.pm geSlashConf
+	# this is decoded in Slash/DB/MySQL.pm getSlashConf
 
 	my $attr = getCurrentStatic("approvedtags_attr") || {};
 
@@ -1892,7 +1889,7 @@ The escaped data.
 
 sub fixparam {
 	my($url) = @_;
-	$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/oge;
+	$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/og;
 	return $url;
 }
 
@@ -1924,11 +1921,19 @@ The escaped data.
 
 =cut
 
+{
+# [] is only allowed for IPV6 (see RFC 2732), and we don't use IPV6 ...
+# in theory others could still create links to them, but we would need
+# better heuristics for it, in another place in the code
+(my $allowed = $URI::uric) =~ s/[\[\]]//g;
+# add '#' to allowed characters, since it is often included
+$allowed .= '#';
 sub fixurl {
 	my($url) = @_;
-	# add '#' to allowed characters, since it is often included
-	$url =~ s/([^$URI::uric#])/$URI::Escape::escapes{$1}/oge;
+	$url =~ s/([^$allowed])/$URI::Escape::escapes{$1}/og;
+	$url =~ s/%(?![a-fA-F0-9]{2})/%25/g;
 	return $url;
+}
 }
 
 #========================================================================
@@ -1959,13 +1964,8 @@ The escaped data.
 
 =cut
 
-{
-# Use a closure so we only have to generate the regex once.
-my $scheme_regex = "";
 sub fudgeurl {
 	my($url) = @_;
-
-	my $constants = getCurrentStatic();
 
 	### should we just escape spaces, quotes, apostrophes, and <> instead
 	### of removing them? -- pudge
@@ -1984,10 +1984,7 @@ sub fudgeurl {
 	# run it through the grungy URL miscellaneous-"fixer"
 	$url = fixHref($url) || $url;
 
-	if (!$scheme_regex) {
-		$scheme_regex = join("|", map { lc } @{$constants->{approved_url_schemes}});
-		$scheme_regex = qr{^(?:$scheme_regex)$};
-	}
+	my $scheme_regex = _get_scheme_regex();
 
 	my $uri = new URI $url;
 	my $scheme = undef;
@@ -2015,12 +2012,13 @@ sub fudgeurl {
 		my($from_site) = urlFromSite($uri->as_string);
 		$uri->scheme('http') unless $from_site;
 	}
+
 	if (!$uri) {
 
 		# Nothing we can do with it; manipulate the probably-bogus
 		# $url at the end of this function and return it.
 
-	} elsif ($scheme && $scheme !~ $scheme_regex) {
+	} elsif ($scheme && $scheme !~ /^$scheme_regex$/) {
 
 		$url =~ s/^$scheme://i;
 		$url =~ tr/A-Za-z0-9-//cd; # allow only a few chars, for security
@@ -2060,7 +2058,24 @@ sub fudgeurl {
 				$uri->authority($authority);
 			}
 		}
+
+		if ($scheme eq 'mailto') {
+			if (my $query = $uri->query) {
+				$query =~ s/@/%40/g;
+				$uri->query($query);
+			}
+		}
+
 		$url = $uri->canonical->as_string;
+
+		if ($url =~ /#/) {
+			# no # is OK, unless ...
+			$url =~ s/#/%23/g;
+			if ($scheme =~ /^https?$/) {
+				# HTTP, in which case the first # is OK
+				$url =~ s/%23/#/;
+			}
+		}
 	}
 
 	# These entities can crash browsers and don't belong in URLs.
@@ -2070,6 +2085,14 @@ sub fudgeurl {
 	$decoded_url =~ s{ &(\#?[a-zA-Z0-9]+);? } { approveCharref($1) }gex;
 	return $decoded_url =~ /^[\s\w]*script\b/i ? undef : $url;
 }
+
+sub _get_scheme_regex {
+	my $constants = getCurrentStatic();
+	if (! $constants->{approved_url_schemes_regex}) {
+		$constants->{approved_url_schemes_regex} = join("|", map { lc } @{$constants->{approved_url_schemes}});
+		$constants->{approved_url_schemes_regex} = qr{(?:$constants->{approved_url_schemes_regex})};
+	}
+	return $constants->{approved_url_schemes_regex};
 }
 
 #========================================================================
@@ -2109,13 +2132,14 @@ sub chopEntity {
 
 
 
+=pod
 {
 @Slash::Utility::Data::URI::Find::ISA = 'URI::Find';
 sub Slash::Utility::Data::URI::Find::uri_re {
 	my $self = shift;
 	# ignore URLs beginning with " (i.e., the ones
 	# already inside tags)
-	return '(?<!["a-zA-Z])' . $self->URI::Find::uri_re;
+	return '(?<!["\'a-zA-Z=>])' . $self->URI::Find::uri_re;
 }
 
 my $finder = Slash::Utility::Data::URI::Find->new(sub {
@@ -2132,17 +2156,29 @@ my $finder = Slash::Utility::Data::URI::Find->new(sub {
 	}
 	return qq|<a href="$nuri">$nuri</a>$extra|;
 });
+=cut
 
 sub url2html {
 	my($text) = @_;
-	# find() changes strict, but does not change it back,
-	# so we save and restore value on our own
-#	my $old = URI::URL::strict;
+
+	my $scheme_regex = _get_scheme_regex();
+
+	# we know this can break real URLs, but probably will
+	# preserve real URLs more often than it will break them
+	$text =~  s{(?<!['"=>])((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
+		my $url   = $1;
+		my $extra = '';
+		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
+		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
+		qq[<a href="$url">$url</a>$extra];
+	}ogie;
+
 #	$finder->find(\$text);
-#	URI::URL::strict($old);
+
 	return $text;
 }
-}
+
+#}
 
 
 sub noFollow {
@@ -2268,7 +2304,7 @@ no limit.
 
 =item Return value
 
-The balances HTML.
+The balanced HTML.
 
 =item Dependencies
 
