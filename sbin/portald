@@ -180,12 +180,20 @@ sub getRDF {
 			for (keys %{$item}) {
 				$item->{$_} = xmldecode($item->{$_});
 			}
+
+			# filter URL like the rest
+			my $link = fudgeurl($item->{link});
+			next unless $link;
+
 			# convert links to sections of our own site
 			# into a non-scheme-specific format
-			my $uri = URI->new($item->{link});
-			my $auth = $uri->authority();
-			$uri->scheme(undef) if $auth =~ /\b$bd_regex\Z/;
-			$item->{link} = $uri->as_string;
+			my $uri = URI->new($link);
+			if ($uri->can('authority')) {
+				$uri->scheme(undef) if $uri->authority =~ /\b$bd_regex\Z/;
+			}
+
+			$item->{link} = $uri->as_string or next;
+
 			# this is if you want a nice numbering 
 			# layout in your block <ol> works, but 
 			# is ugly
