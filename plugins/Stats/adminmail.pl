@@ -336,6 +336,7 @@ EOT
 		extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
 	}) if $recent_subscriber_uidlist;
 	my $total_secure = $logdb->countDailySecure();
+	# XXX This loop needs to be flattened.
 	for my $op (@PAGES) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
 		my $pages = $logdb->countDailyByPage($op);
@@ -626,9 +627,10 @@ EOT
 	$statsSave->createStatDaily("youngest_modelig_uid", sprintf("%d", $youngest_modelig_uid));
 	$statsSave->createStatDaily("youngest_modelig_created", sprintf("%11s", $youngest_modelig_created));
 
-	foreach my $i ($constants->{comment_minscore}..$constants->{comment_maxscore}) {
-		$statsSave->createStatDaily("comments_score_$i",
-			$stats->getDailyScoreTotal($i));
+	my $scores = [ $constants->{comment_minscore} .. $constants->{comment_maxscore} ];
+	my $scores_hr = $stats->getDailyScoreTotals($scores);
+	for my $i (sort { $a <=> $b } keys %$scores_hr) {
+		$statsSave->createStatDaily("comments_score_$i", $scores_hr->{$i}{c});
 	}
 
 	for my $nickname (keys %$admin_mods) {
