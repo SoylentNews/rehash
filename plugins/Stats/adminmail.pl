@@ -471,7 +471,6 @@ sub getM2Text {
 	sub valsort { ($b eq 'X' ? 999 : $b eq '_' ? -999 : $b) <=> ($a eq 'X' ? 999 : $a eq '_' ? -999 : $a) }
 	for my $day (@days) {
 		my $day_display = substr($day, 5); # e.g. '01-01'
-		my $non = $mmr->{$day}{non}{c};
 		$text .= "$day_display: ";
 		for my $m2c (sort valsort keys %{$mmr->{$day}}) {
 			my $c = $mmr->{$day}{$m2c}{c};
