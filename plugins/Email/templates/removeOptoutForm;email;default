@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+Renders the form which admins can use to remove an address from the
+opt-out list for Slash::Email.
+
+	* No extra parameters
+__title__
+Email Remove Opt-Out Form
+__page__
+email
+__lang__
+en_US
+__name__
+removeOptoutForm
+__seclev__
+5000
+__template__
+
+[% INCLUDE titlebar 
+	width="99%"
+	title="Remove an Email Address from Opt-out List" -%]
+
+<FORM ACTION="[% constants.rootdir %]/email.pl" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="optoutrem">
+
+Enter email address to be removed from the opt-out list:<BR>
+<INPUT TYPE="TEXT" NAME="email" SIZE=50>
+<BR><BR>
+<INPUT TYPE="SUBMIT" VALUE="Remove from Opt-out List">
+</FORM>
+

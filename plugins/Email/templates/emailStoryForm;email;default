@@ -1,0 +1,51 @@
+__section__
+default
+__description__
+Renders the form which users will use to enter email address (and, optionally)
+story ID.
+
+	* (optional) story - Hashref containing pre-selected story data.
+
+__title__
+Email Story Form
+__page__
+email
+__lang__
+en_US
+__name__
+emailStoryForm
+__seclev__
+5000
+__template__
+
+[% INCLUDE titlebar 
+	width="99%"
+	title="Email a Story" -%]
+
+<FORM ACTION="[% constants.rootdir %]/email.pl" METHOD="POST">
+[% IF form.formkey -%]
+<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END -%]
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="email_send">
+[% IF form.sid -%]
+<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid | strip_attribute %]">
+[% END -%]
+
+[% UNLESS form.sid -%]
+Enter story ID to mail: 
+<INPUT TYPE="TEXT" NAME="sid" SIZE=16>
+<BR><BR>
+[% ELSE -%]
+Selected story:
+<BLOCKQUOTE>
+<LI><I>[% story.title %]</I> &nbsp;<SMALL>[% Slash.timeCalc(story.time) %],
+&nbsp; ([% story.sid %])</SMALL>
+</BLOCKQUOTE>
+[% END -%]
+
+Enter email address to send story to: 
+<INPUT TYPE="TEXT" NAME="email" SIZE=50>
+<BR><BR>
+<INPUT TYPE="SUBMIT" VALUE="Send Email">
+</FORM>
+

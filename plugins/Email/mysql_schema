@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS email_optout;
+CREATE TABLE email_optout (
+	id		mediumint UNSIGNED NOT NULL auto_increment,
+	email		varchar(50) DEFAULT '' NOT NULL, 
+	ipid		char(32) DEFAULT '' NOT NULL,
+	subnetid 	char(32) DEFAULT '' NOT NULL,
+	added		datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE  email (email),
+	KEY ipid (ipid),
+	KEY subnetid (subnetid),
+	KEY date_added (added)
+) TYPE = myisam;

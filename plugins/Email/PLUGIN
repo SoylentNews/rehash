@@ -1,0 +1,18 @@
+name=Email
+description="Allows users to email text versions of articles to someone else."
+
+htdoc=email.pl
+
+mysql_schema=mysql_schema
+
+mysql_dump=mysql_dump
+
+template=templates/data;email;default
+template=templates/dispStory;email;default
+template=templates/emailOptoutForm;email;default
+template=templates/emailStoryForm;email;default
+template=templaets/optout_confirm;email;default
+template=templates/removeOptoutForm;email;default
+template=templates/sponsor;email;default
+
+image=images/email.gif

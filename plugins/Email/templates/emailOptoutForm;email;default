@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+Renders the form which users will use to opt-out of further emailings from
+Slash::Email.
+
+	* No extra parameters
+__title__
+Email Opt-Out Form
+__page__
+email
+__lang__
+en_US
+__name__
+emailOptoutForm
+__seclev__
+5000
+__template__
+
+[% INCLUDE titlebar 
+	width="99%"
+	title="Opt-Out of Story Emailings from $constants.sitename" -%]
+
+<FORM ACTION="[% constants.rootdir %]/email.pl" METHOD="POST">
+[% IF form.formkey -%]
+<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END -%]
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="optout_save">
+
+Enter email address to be removed from further story emailings:<BR>
+<INPUT TYPE="TEXT" NAME="email" SIZE=50>
+<BR><BR>
+<INPUT TYPE="SUBMIT" VALUE"="Opt Out">
+</FORM>
+
