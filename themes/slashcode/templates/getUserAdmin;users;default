@@ -19,28 +19,22 @@ __name__
 getUserAdmin
 __template__
 
-<TABLE BORDER="0">
+<TABLE BORDER="0" WIDTH="100%">
 	<TR>
 		<TD>
-		[% PROCESS titlebar width="100%" title="User Admin" %]
 		[% IF userinfo_flag %]
-		
-		<P>[ <B><A HREF="[% constants.rootdir %]/users.pl?op=topabusers">Top Abusers</A></B> | 
-		<B><A HREF="[% constants.rootdir %]/users.pl?op=listreadonly">Read Only List</A></B> |
-		<B><A HREF="[% constants.rootdir %]/users.pl?op=listbanned">Banned List</A></B> ]</P>
-		
+		<P>[ <B><A HREF="[% constants.rootdir %]/users.pl?op=topabusers">Top Abusers</A></B> | <B><A HREF="[% constants.rootdir %]/users.pl?op=listreadonly">Read Only List</A></B> | <B><A HREF="[% constants.rootdir %]/users.pl?op=listbanned">Banned List</A></B> ]</P>
 			[% IF uidstruct %]
 		<BR>
-		
-		<TABLE BORDER="0">
-			<TR>
-				<TD><B>UIDs used by this address id:</B></TD>
+		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="#CCCCCC">
+			<TR BGCOLOR="#006666">
+				<TD><FONT COLOR="#FFFFFF"><B>UID</B></FONT></TD>
+				<TD><FONT COLOR="#FFFFFF"><B>Nickname</B></FONT></TD>
 			</TR>
 				[% FOREACH tmpuid = uidstruct.keys %]
 			<TR>
-				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpuid %]"
-				>[% tmpuid %] &nbsp; [% uidstruct.$tmpuid %]</A>	
-				</TD>
+				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpuid %]">[% tmpuid %]</A></TD>
+				<TD>[% uidstruct.$tmpuid %]</TD>
 			</TR>
 				[% END %]
 		</TABLE>
@@ -48,154 +42,112 @@ __template__
 		
 			[% IF iplist %]
 		<BR>
-		<TABLE BORDER="0">
-			<TR>
-				<TD><B>IPIDs used by this user:</B></TD>
+		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="#CCCCCC">
+			<TR BGCOLOR="#006666">
+				<TD><FONT COLOR="#FFFFFF"><B>IPID</B></FONT></TD>
+				<TD><FONT COLOR="#FFFFFF"><B>#</B></FONT></TD>
+				<TD><FONT COLOR="#FFFFFF"><B>Date(s)</B></FONT></TD>
 			</TR>
 				[% FOREACH tmpip = iplist %]
 			<TR>
-				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip.0 %]&amp;fieldname=ipid"
-				>[% tmpip.4 %]</A> ([% tmpip.3 %], [% tmpip.1;
-				IF tmpip.1 != tmpip.2 %] to [% tmpip.2; END %])
-				</TD>
+				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip.0 %]&amp;fieldname=ipid">[% tmpip.4 %]</A></TD>
+
+				<TD>[% tmpip.3 %]</TD>
+				<TD>[% tmpip.1; IF tmpip.1 != tmpip.2 %] to [% tmpip.2; END %]</TD>
 			</TR>
 				[% END %]
 		</TABLE>
 			[% END %]
 		
 		[% END %]
-		
-		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0">
+		[% PROCESS titlebar width="100%" title="User Admin" %]
+		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="#CCCCCC" WIDTH="100%">
 			<FORM ACTION="[% env.script_name %]" METHOD="POST">
 			<TR>
 		[% IF form.formkey %]
 			        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey | strip_attribute %]">
 		[% END %]
 				<INPUT TYPE="HIDDEN" NAME="op" VALUE="admin">
-
 				[%- IF field == 'uid' -%]
 				<INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid | strip_attribute %]">
-		
 				[%- ELSIF field == 'ipid' -%]
 				<INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid | strip_attribute %]">
-		
 				[%- ELSIF field == 'md5id' -%]
 				<INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id | strip_attribute %]">
 				<INPUT TYPE="HIDDEN" NAME="fieldname" VALUE="[% form.fieldname | strip_attribute %]">
-		
 				[%- ELSIF field == 'subnetid' -%]
 				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid | strip_attribute %]">
 				[%- END -%]
 
-				<TD VALIGN="MIDDLE">
-					<B>UID/NetID/Nickname:</B> 
-					<INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]">
-				</TD>
-				<TD VALIGN="MIDDLE">
-				<TABLE>
-					<TR>
-						<TD><INPUT TYPE="SUBMIT" NAME="userinfo" VALUE="User Info"></TD>
-						<TD><INPUT TYPE="SUBMIT" NAME="edituser" VALUE="Edit User"></TD> 
-						<TD><INPUT TYPE="SUBMIT" NAME="changepasswd" VALUE="Change Password"></TD>
-					</TR>
-					<TR>
-						<TD><INPUT TYPE="SUBMIT" NAME="edithome" VALUE="Customise Homepage"></TD>
-						<TD><INPUT TYPE="SUBMIT" NAME="editcomm" VALUE="Customise Comments"></TD>
-					</TR>
-				</TABLE>
+				<TD VALIGN="MIDDLE"><B>User</B></TD>
+				<TD><INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]">
+					<INPUT TYPE="SUBMIT" NAME="userinfo" VALUE="Info">
+					<INPUT TYPE="SUBMIT" NAME="edituser" VALUE="Edit">
+					<INPUT TYPE="SUBMIT" NAME="changepasswd" VALUE="Password">
+					<INPUT TYPE="SUBMIT" NAME="edithome" VALUE="Homepage">
+					<INPUT TYPE="SUBMIT" NAME="editcomm" VALUE="Comments">
 				</TD>
 			</TR>
-		
 		[% IF userinfo_flag %]
-			<TR>
-				<TD COLSPAN=3 HEIGHT=10>&nbsp;</TD>
-			</TR>
-		
-		
 			[% IF authoredit_flag && seclev_field && ! useredit.nonuid  %]
 				[% IF user.seclev >= 10000 %]
 			<TR>
 				<TD><B>Seclev</B></TD>
-				<TD COLSPAN="4">
-				<INPUT TYPE="TEXT" NAME="seclev" SIZE="7" value="[% useredit.seclev | strip_attribute %]"></TD>
-				<TD>&nbsp;</TD>
+				<TD><INPUT TYPE="TEXT" NAME="seclev" SIZE="7" value="[% useredit.seclev | strip_attribute %]"></TD>
 			</TR>
 			<TR>
-				<TD COLSPAN=3 HEIGHT=10></TD>
-			</TR>
-			<TR>
-				<TD><B>Author flag (user is an author)</B></TD>
-				<TD COLSPAN="4"><INPUT TYPE="checkbox" NAME="author" [% useredit.author %]></TD>
-				<TD>&nbsp;</TD>
+				<TD><B>Author</B></TD>
+				<TD><INPUT TYPE="checkbox" NAME="author" [% useredit.author %]></TD>
 			</TR>
 				[% END %]
-		
 			<TR>
-				<TD COLSPAN=3 HEIGHT=10></TD>
-			</TR>
-			<TR>
-				<TD><B>Section</B></TD><TD>[% section_select %]</TD>
+				<TD><B>Section</B></TD>
+				<TD>[% section_select %]</TD>
+                        </TR>
 			[% END %]
+			<TR>
+				<TD><B>Default points</B></TD>
+				<TD>[% thresh_select %]</TD>
 			</TR>
 			<TR>
-				<TD><B>Default points (threshcode)</B></TD><TD>[% thresh_select %]</TD><TD>&nbsp;</TD>
+				<TD COLSPAN="2"><B>Restrictions</B></TD>
 			</TR>
 			<TR>
-				<TD COLSPAN=3 HEIGHT=10></TD>
+				<TD ALIGN="RIGHT" WIDTH="100">Comments</TD>
+				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_comments" [% readonly.comments | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" NAME="comments_ro_reason" VALUE="[% readonly_reasons.comments | strip_attribute %]"></TD>
 			</TR>
 			<TR>
-				<TD COLSPAN="3"><B>Read-only</B></TD>
+				<TD ALIGN="RIGHT" WIDTH="100">Submissions</TD>
+				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_submit" [% readonly.submit | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" NAME="submit_ro_reason" VALUE="[% readonly_reasons.submit | strip_attribute %]"></TD>
 			</TR>
 			<TR>
-				<TD WIDTH="100">Comments</TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_comments" [% readonly.comments | strip_attribute %]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="comments_ro_reason" VALUE="[% readonly_reasons.comments | strip_attribute %]"></TD>
+				<TD ALIGN="RIGHT" WIDTH="100"><B>Banned</B></TD>
+				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;<INPUT TYPE="TEXT" NAME="banned_reason" VALUE="[% banned_reason | strip_attribute %]">&nbsp;</TD>
 			</TR>
-			<TR>
-				<TD WIDTH="100">Submissions</TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_submit" [% readonly.submit | strip_attribute %]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="submit_ro_reason" VALUE="[% readonly_reasons.submit | strip_attribute %]"></TD>
-			</TR>
-			<TR>
-				<TD COLSPAN=3 HEIGHT=10></TD>
-			</TR>
-			<TR>
-				<TD COLSPAN="3"><B>Banned</B></TD>
-			</TR>
-			<TR>
-				<TD WIDTH="100">Banned from [% constants.sitename %]</TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="banned_reason" VALUE="[% banned_reason | strip_attribute %]"></TD>
-			</TR>
-
 			[% IF ! useredit.nonuid %]
 			<TR>
-				<TD WIDTH="100"><B>Expire User</B></TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="expired" [% checked.expired %]>&nbsp;</TD>
-				<TD>&nbsp;</TD> 
+				<TD ALIGN="RIGHT" WIDTH="100"><B>Expired</B></TD>
+				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="expired" [% checked.expired %]>&nbsp;</TD>
 			</TR>
 			<TR>
-				<TD WIDTH="100"><B>Moderation:</B></TD>
-				<TD ALIGN="LEFT" WIDTH="100">Fair: [% useredit.m2fair %], Unfair: [% useredit.m2unfair %]
-				[% IF useredit.m2unfairpercent %]([% useredit.m2unfairpercent %]%)[% END %]
+				<TD WIDTH="100"><B>Moderation</B></TD>
+				<TD ALIGN="LEFT">Fair: [% useredit.m2fair %], Unfair: [% useredit.m2unfair %] [% IF useredit.m2unfairpercent %]([% useredit.m2unfairpercent %]%)[% END %]</TD>
 			</TR>
 			<TR>
 				<TD WIDTH="100"><B>Tokens</B></TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="TEXT" NAME="tokens" SIZE="6" VALUE="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
+				<TD ALIGN="LEFT"><INPUT TYPE="TEXT" NAME="tokens" SIZE="6" VALUE="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
 				<B>Latest M2 Info:</B> <INPUT TYPE="TEXT" NAME="m2info" VALUE="[% useredit.m2info | strip_attribute %]"></TD>
-			</TR>
-			<TR>
-				<TD COLSPAN=3 HEIGHT=10></TD>
 			</TR>
 			[% END %]
 			<TR>
-				<TD COLSPAN=3 HEIGHT=10>
-				Save Admin: <INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save Admin">
-				</TD>
+				<TD COLSPAN="2" HEIGHT="10"></TD>
 			</TR>
-		[% END %]
+			<TR>
+				<TD COLSPAN="2" HEIGHT="10"><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% useredit.nickname %]"></TD>
+			</TR>
 			</FORM>
 		</TABLE>
+		[% END %]
 		</TD>
 	</TR>
 </TABLE>
