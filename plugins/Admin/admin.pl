@@ -1653,12 +1653,13 @@ sub extractChosenFromForm {
 	}
 
 	# save the user's topic popup settings
-	if (exists $form->{st_saved_tree}) {
+	if (exists $form->{st_saved_tree} || exists $form->{st_tree_pref}) {
 		my $user = getCurrentUser();
-		$user->{st_saved_tree} = $form->{st_saved_tree};
-		$slashdb->setUser($user->{uid}, {
-			st_saved_tree	=> $form->{st_saved_tree}
-		});
+		my %tmp;
+		for (qw(st_saved_tree st_tree_pref)) {
+			$user->{$_} = $tmp{$_} = $form->{$_} if exists $form->{$_};
+		}
+		$slashdb->setUser($user->{uid}, \%tmp);
 	}
 
 	return($chosen_hr, $chosen_names_hr, $chosenc_hr, $chosenc_names_hr);

@@ -52,6 +52,7 @@ __template__
   <div class="hpts-bbar" nowrap>
     <input class="hpts-button" type="button" value="Add Topic"    onclick="[% name %]_ok()">
     <input class="hpts-button" type="button" value="Close Window" onclick="[% name %]_cancel()">
+    <input class="hpts-button" type="button" value="Index"        onclick="[% name %]_switch('', 'ab')">
   </div>
   <div style="text-align: center">
     <img name="[% name %]_main_img">
@@ -60,7 +61,7 @@ __template__
 
 <!-- address book style -->
 <div id="[% name %]-ab-outer" class="hpts-outer">
-  <div class="hpts-title" id="[% name %]-title">Select Topics - AB</div>
+  <div class="hpts-title" id="[% name %]-title">Select Topics</div>
   <div class="hpts-inner">
 
 <table><tr><td><p>
@@ -68,7 +69,7 @@ __template__
 <input width="30" type="button" value="Search" onmouseup="[% name %]_search('ab')">
 <font size="-2"><br>
 [%- FOREACH letter = ['A' .. 'Z'] %]
-<a href="javascript:[% name %]_search('ab','[% letter %]')">[% letter %]</a>
+<a href="#" onclick="return [% name %]_search('ab','[% letter %]');">[% letter %]</a>
 [%- END %]
 <br></font>
 </p><p>
@@ -82,6 +83,7 @@ __template__
   <div class="hpts-bbar" nowrap>
     <input class="hpts-button" type="button" value="Add Topic"    onclick="[% name %]_ok('ab')">
     <input class="hpts-button" type="button" value="Close Window" onclick="[% name %]_cancel('ab')">
+    <input class="hpts-button" type="button" value="Tree"         onclick="[% name %]_switch('ab', '')">
   </div>
   <div style="text-align: center">
     <img name="[% name %]_ab_main_img">

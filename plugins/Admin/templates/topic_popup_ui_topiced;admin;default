@@ -11,7 +11,6 @@ en_US
 __name__
 topic_popup_ui_topiced
 __template__
-[% USE Dumper; Dumper.dump(stid, stcid) | stderr %]
 [% names = name; stpid = stid %]
 [% IF include_css %]
 <link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
@@ -66,18 +65,19 @@ __template__
 [% END %]
 </tr><tr><td align="center" bgcolor="#cccccc" colspan="[% names.size %]">
 [% name = names.0 %]
-<input type="hidden" value="" name="[% name %]_saved_tree">
+<input type="button" value="Choose Topics"      onmouseup="[% name %]_show('[% user.st_tree_pref %]')" name="[% name %]_topic_toggle">
+<input type="button" value="Collapse All"       onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+[% mykey = name _ "_tree_pref" -%]
+<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
+[% mykey = name _ "_saved_tree" -%]
+<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
 
 <script language="javascript">
 	[% name %]_load_names();
-	[% mykey = name _ "_saved_tree" %]
 	var list = new Array ([% user.$mykey %]);
 	[% name %]_reset_saved_tree(list);
 </script>
 
-<input type="button" value="Choose Topics"      onmouseup="[% name %]_show()" name="[% name %]_topic_toggle">
-<input type="button" value="Choose Topics - AB" onmouseup="[% name %]_show('ab')" name="[% name %]_ab_topic_toggle">
-<input type="button" value="Collapse All"       onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
 </td></tr></table>
 
 __seclev__

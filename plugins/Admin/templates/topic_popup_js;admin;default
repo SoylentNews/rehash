@@ -119,9 +119,15 @@ function [% name %]_search(type, searchstring) {
 	for (var i = 0; i <= [% name %]_max_id; i++) {
 		var obj = document.getElementById("[% name %]-fullname-" + i);
 		if (obj) {
-			var j = 0;
-			var myname = obj.value.substr(obj.value.lastIndexOf(' :: ') + 4);
+			var k = obj.value.lastIndexOf(' :: ');
+			var myname = '';
+			if (k < 0) {
+				myname = obj.value;
+			} else {
+				myname = obj.value.substr(k + 4);
+			}
 
+			var j = 0;
 			if (!searchstring) {
 				j = 1;
 			} else {
@@ -333,7 +339,8 @@ function [% name %]_show(type) {
 	var x = 2;
 	// x = (x > 2 ? x : 2);
 	// var y = Math.floor(hpts_mouseY - ([% IF height %][% height %]/5 * 4[% ELSE %]100[% END %]));
-	var y = Math.floor(hpts_mouseY - 100);
+	// var y = Math.floor(hpts_mouseY - 100);
+	var y = Math.floor(window.pageYOffset + 20);
 	y = (y > 2 ? y : 2);
 
 	obj.style.right = x + "px";
@@ -363,14 +370,21 @@ function [% name %]_show(type) {
 	}
 [%- END %]
 
-	var mybutton  = document.[% form_field_form %][iname + "_topic_toggle"];
+	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
+	mybutton.value = "Close Window";
 	if (type) {
 		mybutton.onmouseup = new Function ('[% name %]_close("' + type + '")');
-		mybutton.value = "Close Window - " + type.toUpperCase();
 	} else {
 		mybutton.onmouseup = function () { [% name %]_close() };
-		mybutton.value = "Close Window";
 	}
+
+	var mytree = document.[% form_field_form %].[% name %]_tree_pref;
+	mytree.value = type;
+}
+
+function [% name %]_switch(type_a, type_b) {
+	[% name %]_close(type_a);
+	[% name %]_show(type_b);
 }
 
 function [% name %]_cancel(type) {
@@ -414,13 +428,12 @@ function [% name %]_close(type) {
 	}
 [%- END %]
 
-	var mybutton  = document.[% form_field_form %][iname + "_topic_toggle"];
+	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
+	mybutton.value = "Choose Topics";
 	if (type) {
 		mybutton.onmouseup = new Function ('[% name %]_show("' + type + '")');
-		mybutton.value = "Choose Topics - " + type.toUpperCase();
 	} else {
 		mybutton.onmouseup = function () { [% name %]_show() };
-		mybutton.value = "Choose Topics";
 	}
 }
 
