@@ -793,6 +793,12 @@ sub moderatorCommentLog {
 	my $asc_desc = $type eq 'cid' ? 'ASC' : 'DESC';
 	my $limit = $type eq 'cid' ? 0 : 100;
 	my $both_mods = (($type =~ /ipid/) || ($type =~ /subnetid/) || ($type =~ /global/)) ? 1 : 0;
+	my $skip_ip_disp  = 0;
+	if( $type=~/^b(ip|subnet)id$/ ){
+		$skip_ip_disp = 1;
+	} elsif ( $type =~/^(ip|subnet)id$/){
+		$skip_ip_disp = 2;
+	}
 	my $gmcl_opts = {};
 	$gmcl_opts->{hours_back} = $options->{hours_back} if $options->{hours_back};
 
@@ -865,6 +871,9 @@ sub moderatorCommentLog {
 		($points, $modifier_hr) = _get_points($comment, $user, $min, $max, $max_uid, $reasons);
 	}
 
+	my $this_user;
+	$this_user = $slashdb->getUser($value) if $type eq "uid";	
+
 	my $data = {
 		type		=> $type,
 		mod_admin	=> $mod_admin, 
@@ -879,7 +888,9 @@ sub moderatorCommentLog {
 		show_modder	=> $show_modder,
 		mod_to_from	=> $mod_to_from,
 		both_mods	=> $both_mods,
-		timestamp_hr	=> $timestamp_hr
+		timestamp_hr	=> $timestamp_hr,
+		skip_ip_disp    => $skip_ip_disp,
+		this_user	=> $this_user
 	};
 	slashDisplay('modCommentLog', $data, { Return => 1, Nocomm => 1 });
 }
