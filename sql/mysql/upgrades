@@ -1911,3 +1911,6 @@ INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_comtext',
 
 # USEPERL LAST UPDATED HERE
 
+# if using Slash::Blob
+ALTER TABLE blobs ADD COLUMN filename VARCHAR(80) DEFAULT "" NOT NULL AFTER content_type;
+

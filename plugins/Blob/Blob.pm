@@ -18,6 +18,7 @@ use base 'Slash::DB::Utility';
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # Mime/Type hash (couldn't find a module that I liked that would do this -Brian
+# there are plenty of other methods out there, this needs to be replaced -- pudge
 my %mimetypes = (
 	jpeg => 'image/jpeg',
 	jpg  => 'image/jpeg',
@@ -67,11 +68,9 @@ sub create {
 	$values->{seclev} ||= 0;
 	# Couldn't find a module that did this
 	if (!$values->{content_type} && $values->{filename}) {
-		my $filename = lc($values->{filename});
-		$filename =~ s/.*\.(.*)$/$1/g;
-		$values->{content_type} = $mimetypes{$filename};
+		(my $ext = lc $values->{filename}) =~ s/^.*\.([^.]+)$/$1/s;
+		$values->{content_type} = $mimetypes{$ext};
 	}
-	delete($values->{filename});
 	$values->{content_type} ||= 'application/octet-stream';
 
 	my $id = md5_hex($values->{data});
