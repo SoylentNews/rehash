@@ -74,20 +74,20 @@ sub main {
 			},
 		};
 		
-		my $topics=$reader->getStoryTopics($form->{sid},1);
-		my @topic_desc=values %$topics;
+		my $topics = $reader->getStoryTopics($form->{sid}, 1);
+		my @topic_desc = values %$topics;
 		my $a;
-		if(@topic_desc==1){
-			$a="@topic_desc";
-		} elsif(@topic_desc==2){
-			$a=join(' and ',@topic_desc);
-		} elsif(@topic_desc > 2){
-			my $last=pop @topic_desc;
-			$a=join(', ',@topic_desc).", and $last";
+		if (@topic_desc == 1) {
+			$a = $topic_desc[0];
+		} elsif (@topic_desc == 2){
+			$a = join(' and ', @topic_desc);
+		} elsif (@topic_desc > 2) {
+			my $last = pop @topic_desc;
+			$a = join(', ', @topic_desc) . ", and $last";
 		}
 		my $meta_desc = "$story->{title}--article related to $a.";
 
-		header($links, $story->{section}, {meta_desc=>$meta_desc}) or return;
+		header($links, $story->{section}, { meta_desc => $meta_desc }) or return;
 
 		# Can't do this before getStoryByTime because
 		# $story->{time} is passed to an SQL request.
