@@ -96,11 +96,23 @@ Otherwise, returns true/false for success/failure.
 sub xmlDisplay {
 	my($type, $param, $opt) = @_;
 
-	my $class = "Slash::XML::\U$type";
-	my $file  = "Slash/XML/\U$type\E.pm";
+	my($class, $file);
+	for my $try (uc($type), $type) {
+		$class = "Slash::XML::$try";
+		$file  = "Slash/XML/$try.pm";
 
-	# fix this to check can('create')
-	if (!exists($INC{$file}) && !eval("require $class")) {
+		if (!exists($INC{$file}) && !eval("require $class")) {
+			next;
+		} elsif (exists($INC{$file}) && !$class->can('create')) {
+			delete $INC{$file};
+			next;
+		} else {
+			last;
+		}
+	}
+
+	# didn't work
+	if (!exists($INC{$file})) {
 		errorLog($@);
 		return;
 	}
