@@ -343,4 +343,5 @@ INSERT INTO vars (name, value, description) VALUES ('uncommonstoryword_thresh', 
 # ln -s /usr/local/slash/plugins/Admin/refresh_uncommon.pl /usr/local/slash/site/sitename/tasks/
 
 # Added for Pat for discussions -Brian
-ALTER TABLE discussions approved tinyint UNSIGNED DEFAULT 0 NOT NULL;
+ALTER TABLE discussions ADD approved tinyint UNSIGNED DEFAULT 0 NOT NULL;
+INSERT INTO vars (name, value, description) VALUES ('discussion_approval', '0', 'If this is set to 1, set all user created discussions when created to 0 so that they must be approved');

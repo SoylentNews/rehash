@@ -423,6 +423,7 @@ INSERT INTO vars (name, value, description) VALUES ('defaultdisplaystatus','0','
 INSERT INTO vars (name, value, description) VALUES ('defaultsection','articles','Default section to display');
 INSERT INTO vars (name, value, description) VALUES ('defaulttopic','1','Default topic to use');
 INSERT INTO vars (name, value, description) VALUES ('delete_old_stories', '0', 'Delete stories and discussions that are older than the archive delay.');
+INSERT INTO vars (name, value, description) VALUES ('discussion_approval', '0', 'If this is set to 1, set all user created discussions when created to 0 so that they must be approved');
 INSERT INTO vars (name, value, description) VALUES ('discussion_create_seclev','1','Seclev required to create discussions (yes, this could be an ACL in the future).');
 INSERT INTO vars (name, value, description) VALUES ('discussion_default_topic', '1', 'Default topic of user-created discussions.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_display_limit', '30', 'Number of default discussions to list.');
