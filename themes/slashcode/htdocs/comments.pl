@@ -441,10 +441,6 @@ sub commentIndexUserCreated {
 			$back = -1;
 		}
 
-		my $title = getData('user_discussions');
-
-		$title .= ": " . $slashdb->getTopic($form->{tid}, 'alttext') . " ($form->{tid})" if $form->{tid};
-	
 		slashDisplay('udiscuss_list', {
 			discussions	=> $discussions,
 			'label'		=> $label,
