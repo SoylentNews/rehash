@@ -205,9 +205,9 @@ sub searchUsers {
 sub displayRSS {
 	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
 
-	$user		= $reader->getUser($form->{uid}, ['nickname', 'fakeemail']) if $form->{uid};
+	my $juser	= $form->{uid} ? $reader->getUser($form->{uid}, ['nickname', 'fakeemail']) : $user;
 	my $uid		= $form->{uid} || $user->{uid};
-	my $nickname	= $user->{nickname};
+	my $nickname	= $juser->{nickname};
 	my $tree	= $reader->getTopicTree;
 
 	my $articles = $journal->getsByUid($uid, 0, 15);
@@ -226,7 +226,7 @@ sub displayRSS {
 		};
 	}
 
-	$usertext .= " <$user->{fakeemail}>" if $user->{fakeemail};
+	$usertext .= " <$juser->{fakeemail}>" if $juser->{fakeemail};
 
 	my $rss_html = $constants->{journal_rdfitemdesc_html} && (
 		$user->{is_admin}
@@ -238,7 +238,7 @@ sub displayRSS {
 
 	xmlDisplay(rss => {
 		channel => {
-			title		=> "$constants->{sitename} Journals",
+			title		=> "${nickname}'s $constants->{sitename} Journal",
 			description	=> "${nickname}'s Journal",
 			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/",
 			creator		=> $usertext,

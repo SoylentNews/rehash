@@ -222,7 +222,11 @@ sub handler {
 			# only allow this for certain pages/ops etc.
 			# and that page must doublecheck for permissions etc., still,
 			# redirecting user back to a main page upon failure
-			if ($constants->{rss_allow_index} && $form->{content_type} eq 'rss' && $uri =~ m{^/index\.pl$}) {
+			if (
+				($constants->{rss_allow_index} && $form->{content_type} eq 'rss' && $uri =~ m{^/index\.pl$})
+					||
+				($constants->{journal_rdfitemdesc_html} && $form->{content_type} eq 'rss' && $uri =~ m{^/journal\.pl$})
+			) {
 				$logtoken = $form->{logtoken};
 			} else {
 				delete $form->{logtoken};

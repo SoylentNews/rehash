@@ -2702,10 +2702,6 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_year',
 ALTER TABLE users_info ADD INDEX tokens (tokens);
 ALTER TABLE users_comments ADD INDEX points (points);
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_35, Start of T_2_5_0_36 - 2004/11/03
 
 ### DEFINE THESE!!
@@ -2723,5 +2719,7 @@ UPDATE pollquestions SET discussion=0 WHERE discussion IS NULL;
 ALTER TABLE pollquestions CHANGE COLUMN discussion discussion mediumint UNSIGNED NOT NULL, ADD INDEX uid (uid), ADD INDEX discussion (discussion);
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_36, Start of T_2_5_0_37 - 2004/11/08
