@@ -1587,6 +1587,8 @@ sub createAccessLog {
 
 	$user ||= {};
 	$user->{state} ||= {};
+	
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	if ($op eq 'image' && $constants->{accesslog_imageregex}) {
 		return if $constants->{accesslog_imageregex} eq 'NONE';
@@ -1618,7 +1620,7 @@ sub createAccessLog {
 
 	if ( $op eq 'index' && $dat =~ m|^([^/]*)| ) {
 		my $firstword = $1;
-		if ($self->getSkidFromName($firstword)) {
+		if ($reader->getSkidFromName($firstword)) {
 			$skin_name = $firstword;
 		}
 	}
@@ -1627,7 +1629,7 @@ sub createAccessLog {
 		$dat = $2;
 		$op = 'article';
 		my $firstword = $1;
-		if ($self->getSkidFromName($firstword)) {
+		if ($reader->getSkidFromName($firstword)) {
 			$skin_name = $firstword;
 		}
 	}
@@ -1644,7 +1646,7 @@ sub createAccessLog {
 		( unpack_sockaddr_in($r->connection()->local_addr()) )[1]
 	);
 	$status ||= $r->status;
-	my $skid = $self->getSkidFromName($skin_name);
+	my $skid = $reader->getSkidFromName($skin_name);
 	my $insert = {
 		host_addr	=> $ipid,
 		subnetid	=> $subnetid,
