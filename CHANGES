@@ -1,14 +1,16 @@
 slash-1.0.5, 2000.06.xx
 -----------------------
 
-*	Section articles that appear on main page will now have the section
-	part of the titles as a link to that section's index.
+*	Section articles that appear on main page will now have the
+	section part of the titles as a link to that section's index
 
-*	Now shows author comments while viewing the submission as opposed to
-	trying to scroll through the small input box in the submissions list.
+*	Now shows author comments while viewing the submission as
+	opposed to trying to scroll through the small input box in the
+	submissions list
 
-*	Fixed bug in comments.pl::commentIndex() which would display stories
-	that were 'Never Display' or that had not yet gone 'live'.
+*	Fixed bug in comments.pl::commentIndex() which would display
+	stories that were 'Never Display' or that had not yet gone
+	'live'
 
 *	Added some fixes for Slash::reparentComments()
 
@@ -98,6 +100,17 @@ slash-1.0.5, 2000.06.xx
 
 *	Changed formkey to be by uid for logged in users, IP address
 	for everyone else
+
+*	Base deletions of newstories in dailyStuff on archive_delay
+
+*	Do stripByMode() of sig in users.pl after getting first 160
+	chars of sig, fitting into schema
+
+*	Fixed up slashhead image and WIDTH of slashhead.gif and
+	slashslogan.gif (Nathan Vonnahme)
+
+*	Fixed passing of "html_query=" parameter in search.pl for next
+	matches instea of "query_" (Michael Sims)
 
 *	Plenty of minor code cleanups
 
