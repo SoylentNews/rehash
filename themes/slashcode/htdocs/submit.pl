@@ -33,14 +33,14 @@ sub main {
 
 	my $section = $form->{section};
 
-        # this really should not be done now, but later, it causes
-        # a lot of problems, but it causes a LOT of problems
-        # when moved elsewhere and we get double-encoding!
-        # so leave it here until you really know what you
-        # are doing -- pudge
-        $form->{from}   = strip_attribute($form->{from})  if $form->{from};
-        $form->{subj}   = strip_attribute($form->{subj})  if $form->{subj};
-        $form->{email}  = strip_attribute($form->{email}) if $form->{email};
+	# this really should not be done now, but later, it causes
+	# a lot of problems, but it causes a LOT of problems
+	# when moved elsewhere and we get double-encoding!
+	# so leave it here until you really know what you
+	# are doing -- pudge
+	$form->{from}   = strip_attribute($form->{from})  if $form->{from};
+	$form->{subj}   = strip_attribute($form->{subj})  if $form->{subj};
+	$form->{email}  = strip_attribute($form->{email}) if $form->{email};
 
 	# Show submission title on browser's titlebar.
 	my($tbtitle) = $form->{title};
