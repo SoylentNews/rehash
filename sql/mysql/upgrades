@@ -2502,8 +2502,6 @@ ALTER TABLE topic_nexus_extras MODIFY COLUMN extras_id MEDIUMINT UNSIGNED NOT NU
 
 INSERT INTO vars (name, value, description) VALUES ('topic_popup_open', '1', 'Expand all topics by default, or not');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_22, Start of T_2_5_0_23 - 2004/08/31
 
 INSERT INTO vars (name, value, description) VALUES ('gse_table_join_row_cutoff', '1000', 'Number of stoids below which getStoriesEssentials performs 2 separate selects and above which it performs a JOIN');
@@ -2529,6 +2527,10 @@ ALTER TABLE story_topics_rendered DROP COLUMN weight;
 DROP TABLE IF EXISTS story_render_dirty;
 CREATE TABLE story_render_dirty (
         stoid MEDIUMINT UNSIGNED NOT NULL,
-	PRIMARY KEY (stoid)
+        PRIMARY KEY (stoid)
 ) TYPE=InnoDB;
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_26, Start of T_2_5_0_27 - 2004/09/14
 
