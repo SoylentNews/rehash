@@ -136,6 +136,7 @@ __template__
 				<INPUT TYPE="checkbox" NAME="accesslist_norss" [% accesslist.norss | strip_attribute %]>&nbsp;No&nbsp;RSS &nbsp;
 				[% IF field == 'ipid' || field == 'md5id' %]
 					<INPUT TYPE="checkbox" NAME="accesslist_proxy" [% accesslist.proxy | strip_attribute %]>&nbsp;Proxy &nbsp;
+					<INPUT TYPE="checkbox" NAME="accesslist_trusted" [% accesslist.trusted | strip_attribute %]>&nbsp;Trusted &nbsp;
 				[% END %]
 				[% IF !useredit.nonuid %]
 					<!-- INPUT TYPE="checkbox" NAME="accesslist_expired" [% accesslist.expired | strip_attribute %]&nbsp;Expired &nbsp; -->

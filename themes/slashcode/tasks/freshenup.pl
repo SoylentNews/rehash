@@ -114,7 +114,7 @@ $task{$me}{code} = sub {
 		slashdLog($logmsg) if verbosity() >= 2;
 
 		# Now we extract what we need from the file we created
-		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file);
+		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file, $cchp_param);
 		if (defined($cc)) {
 			# all is well, data was found
 			$slashdb->setStory($sid, { 
@@ -204,13 +204,14 @@ sub _make_cchp_file {
 }
 
 sub _read_and_unlink_cchp_file {
-	my($cchp_file) = @_;
+	my($cchp_file, $cchp_param) = @_;
 	my $constants = getCurrentStatic();
 	my($cc, $hp) = (undef, undef);
 	my $default_hp = join(",", ("0") x
 		($constants->{maxscore}-$constants->{minscore}+1));
 
 	# Now we extract what we need from the file we created
+	sleep 3;
 	if (!open(my $cchp_fh, "<", $cchp_file)) {
 		warn "cannot open $cchp_file for reading, $!";
 	} else {
@@ -221,7 +222,9 @@ sub _read_and_unlink_cchp_file {
 		} else {
 			slashdLog("Commentcount/hitparade data was not"
 				. " retrieved, reason unknown"
-				. " (cchp: '$cchp')");
+				. " (cchp: '$cchp' for param '$cchp_param' file '$cchp_file' exists '"
+				. (-e $cchp_file) . "' len '"
+				. (-s $cchp_file) . "')");
 			($cc, $hp) = (undef, undef);
 		}
 	}

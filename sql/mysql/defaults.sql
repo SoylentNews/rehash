@@ -832,7 +832,7 @@ INSERT INTO vars (name, value, description) VALUES ('sitename','Slash Site','Nam
 INSERT INTO vars (name, value, description) VALUES ('siteowner','slash','What user this runs as');
 INSERT INTO vars (name, value, description) VALUES ('sitepublisher','Me','The entity that publishes the site');
 INSERT INTO vars (name, value, description) VALUES ('slashbox_sections','0','Allow used-selected slashboxes in sections');
-INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0','Whether or not to turn on the "What''s Playing" Slashbox.');
+INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0','Whether or not to turn on the "What\'s Playing" Slashbox.');
 INSERT INTO vars (name, value, description) VALUES ('slashd_verbosity','2','How much information slashd (and runtask) should write to slashd.log: 0-3, 3 can be a lot');
 INSERT INTO vars (name, value, description) VALUES ('slashdir','/usr/local/slash','Directory where Slash was installed');
 INSERT INTO vars (name, value, description) VALUES ('slogan','Slash Site','Slogan of the site');

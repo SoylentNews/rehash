@@ -782,7 +782,7 @@ EOT
 					+ $twice_range_offset			)
 EOT
 	}
-	GETMODS: while ($num_needed > 0 && ++$getmods_loops <= 5) {
+	GETMODS: while ($num_needed > 0 && ++$getmods_loops <= 3) {
 		my $limit = $num_needed*2+10; # get more, hope it's enough
 		my $already_id_clause = "";
 		$already_id_clause  = " AND  id NOT IN ($already_id_list)"
@@ -3164,7 +3164,7 @@ sub checkReadOnly {
 	# We munge access_type directly into the SQL so make SURE it is
 	# one of the supported columns.
 	$access_type = 'nopost' if !$access_type
-		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy)$/;
+		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy|trusted)$/;
 
 	$user_check ||= getCurrentUser();
 	my $constants = getCurrentStatic();
@@ -3496,7 +3496,7 @@ sub getAccessList {
 	my $max = $min + 100;
 
 	$access_type = 'nopost' if !$access_type
-		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy)$/;
+		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy|trusted)$/;
 	$self->sqlSelectAllHashrefArray(
 		'*',
 		'accesslist',
@@ -3568,7 +3568,7 @@ sub _get_insert_and_where_accesslist {
 sub getAccessListInfo {
 	my($self, $access_type, $user_check) = @_;
 	$access_type = 'nopost' if !$access_type
-		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy)$/;
+		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy|trusted)$/;
 
 	my $constants = getCurrentStatic();
 	my $ref = {};
@@ -3621,7 +3621,7 @@ sub changeAccessList {
 	# We have existing columns.  Pull out the union of the "yes"
 	# columns, change that by the $now_here and $now_gone we were
 	# passed, and write it back.
-	my @cols = map { /^now_(\w+)$/; $1 } grep { /^now_/ } @{$ar->[0]};
+	my @cols = map { /^now_(\w+)$/; $1 } grep { /^now_/ } keys %{$ar->[0]};
 	my %new_now = ( );
 	for my $col (@cols) {
 		$new_now{$col} = 'no';
@@ -3632,8 +3632,9 @@ sub changeAccessList {
 		}
 	}
 	for my $col (@$now_here) { $new_now{$col} = 'yes' }
-	for my $col (@$now_gone) { $new_now{$col} = 'no'  }
-	return $self->setAccessList($user_check, [ keys %new_now ], $reason);
+	for my $col (@$now_gone) { delete $new_now{$col}  }
+	my @new_now = grep { $new_now{$_} eq 'yes' } keys %new_now;
+	return $self->setAccessList($user_check, \@new_now, $reason);
 }
 
 ##################################################################
@@ -3660,7 +3661,7 @@ sub setAccessList {
 	my $update_hr = { -ts => "NOW()" };
 	my %new_now_hash = map { ($_, 1) } @$new_now;
 	my @assn_order = ( );
-	for my $col (qw( ban nopost nosubmit norss proxy )) {
+	for my $col (qw( ban nopost nosubmit norss proxy trusted )) {
 		$update_hr->{"-was_$col"} = "now_$col";
 		push @assn_order, "-was_$col";
 		$update_hr->{"now_$col"} = $new_now_hash{$col} ? "yes" : "no";
@@ -3702,9 +3703,20 @@ sub setAccessList {
 sub checkIsProxy {
 	my($self, $ipid) = @_;
 
+	my $ipid_q = $self->sqlQuote($ipid);
 	my $rows = $self->sqlCount("accesslist",
-		"ipid='$ipid' AND now_proxy = 'yes'");
-	$rows ||= 0;
+		"ipid=$ipid_q AND now_proxy = 'yes'") || 0;
+
+	return $rows ? 'yes' : 'no';
+}
+
+#################################################################
+sub checkIsTrusted {
+	my($self, $ipid) = @_;
+
+	my $ipid_q = $self->sqlQuote($ipid);
+	my $rows = $self->sqlCount("accesslist",
+		"ipid=$ipid_q AND now_trusted = 'yes'") || 0;
 
 	return $rows ? 'yes' : 'no';
 }

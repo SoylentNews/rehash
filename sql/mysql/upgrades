@@ -1400,9 +1400,14 @@ ALTER TABLE accesslist ADD COLUMN adminuid mediumint(8) unsigned NOT NULL defaul
 # End of T_2_3_0_81, Start of T_2_3_0_82
 # End of T_2_3_0_82, Start of T_2_3_0_83
 
-# SLASHDOT LAST UPDATED HERE
+# End of T_2_3_0_83, Start of T_2_3_0_84
 
 # SLASHCODE LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
 
 # the 'what's playing' slashbox
-INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0','Whether or not to turn on the "What''s Playing" Slashbox.');
+INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0','Whether or not to turn on the "What\'s Playing" Slashbox.');
+
+ALTER TABLE accesslist ADD COLUMN now_trusted ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER now_proxy, ADD COLUMN was_trusted ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER was_proxy;
+ALTER TABLE accesslist ADD INDEX now_trusted (now_trusted);
+

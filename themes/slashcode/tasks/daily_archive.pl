@@ -168,7 +168,9 @@ sub _read_and_unlink_cchp_file {
 		} else {
 			slashdLog("Commentcount/hitparade data was not"
 				. " retrieved, reason unknown"
-				. " (cchp: '$cchp')");
+				. " (cchp: '$cchp' for file '$cchp_file' exists '"
+				. (-e $cchp_file) . "' len '"
+				. (-s $cchp_file) . "')");
 			($cc, $hp) = (undef, undef);
 		}
 	}
