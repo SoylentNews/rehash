@@ -4176,11 +4176,10 @@ sub getNetIDStruct {
 }
 
 ########################################################
-
 sub getSubnetFromIPID {
-	my ($self, $ipid) = @_;
+	my($self, $ipid) = @_;
 	my $ipid_q = $self->sqlQuote($ipid);
-	my ($subnet) = $self->sqlSelect("subnetid", "comments", "ipid = $ipid_q AND subnetid IS NOT NULL and subnetid!=''", "LIMIT 1");
+	my($subnet) = $self->sqlSelect("subnetid", "comments", "ipid = $ipid_q AND subnetid IS NOT NULL and subnetid!=''", "LIMIT 1");
 	return $subnet;
 }
 
@@ -4226,14 +4225,15 @@ sub getBanList {
 	return $banlist_ref;
 }
 
+########################################################
 sub getNetIDPostingRestrictions {
-	my ($self, $type, $value) = @_;
+	my($self, $type, $value) = @_;
 	my $constants = getCurrentStatic();
 	my $restrictions = { no_anon => 0, no_post => 0 };
 	if ($type eq "subnetid") {
 		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed};
-		my ($subnet_karma, $subnet_post_cnt) = $self->getNetIDKarma("subnetid", $value);
-		my ($sub_anon_max, $sub_anon_min, $sub_all_max, $sub_all_min ) = @{$constants->{subnet_karma_post_limit_range}};
+		my($subnet_karma, $subnet_post_cnt) = $self->getNetIDKarma("subnetid", $value);
+		my($sub_anon_max, $sub_anon_min, $sub_all_max, $sub_all_min ) = @{$constants->{subnet_karma_post_limit_range}};
 		if ($subnet_post_cnt >= $subnet_karma_comments_needed) {
 			if ($subnet_karma >= $sub_anon_min && $subnet_karma <= $sub_anon_max) {
 				$restrictions->{no_anon} = 1;

@@ -1309,11 +1309,11 @@ sub getM2Consequences {
 }
 
 sub getModResolutionSummaryForUser {
-	my ($self, $uid, $limit) = @_;
+	my($self, $uid, $limit) = @_;
 	my $uid_q = $self->sqlQuote($uid);
 	my $limit_str = "";
 	$limit_str = "LIMIT $limit" if $limit;
-	my ($fair, $unfair, $fairvotes, $unfairvotes) = (0,0,0,0);
+	my($fair, $unfair, $fairvotes, $unfairvotes) = (0,0,0,0);
 	
 	my $reasons = $self->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
