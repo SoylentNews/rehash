@@ -415,8 +415,7 @@ sub printComments {
 	# Should I index or just display normally?
 	my $cc = 0;
 	$cc = $comments->{$cidorpid}{visiblekids}
-		if $cidorpid
-			&& $comments->{$cidorpid}
+		if $comments->{$cidorpid}
 			&& $comments->{$cidorpid}{visiblekids};
 
 	$lvl++ if $user->{mode} ne 'flat' && $user->{mode} ne 'archive'
@@ -459,6 +458,7 @@ sub printComments {
 		$previous = $comments->{$previous} if $previous;
 	}
 
+	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $cc);
 	slashDisplay('printCommComments', {
 		can_moderate	=> _can_mod($comment),
 		comment		=> $comment,
@@ -469,7 +469,7 @@ sub printComments {
 		cid		=> $cid,
 		pid		=> $pid,
 		cc		=> $cc,
-		lcp		=> linkCommentPages($discussion->{id}, $pid, $cid, $cc),
+		lcp		=> $lcp,
 		lvl		=> $lvl,
 	});
 }
