@@ -4031,16 +4031,18 @@ sub checkForOpenProxy {
 # called in scalar context, or a list of (number of comments, sum of
 # the mods done to them) in list context.
 sub getNumCommPostedAnonByIPID {
-	my($self, $ipid, $hours) = @_;
+	my($self, $ipid, $hours, $start_cid) = @_;
 	$ipid = $self->sqlQuote($ipid);
 	$hours ||= 24;
+	$start_cid ||= 0;
 	my $ac_uid = $self->sqlQuote(getCurrentStatic("anonymous_coward_uid"));
 	my $ar = $self->sqlSelectArrayRef(
 		"COUNT(*) AS count, SUM(pointsorig-points) AS sum",
 		"comments",
 		"ipid=$ipid
 		 AND uid=$ac_uid
-		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)"
+		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)
+		 AND cid >= $start_cid"
 	);
 	my($num_comm, $sum_mods) = @$ar;
 	$sum_mods ||= 0;
@@ -4056,14 +4058,16 @@ sub getNumCommPostedAnonByIPID {
 # called in scalar context, or a list of (number of comments, sum of
 # the mods done to them) in list context.
 sub getNumCommPostedByUID {
-	my($self, $uid, $hours) = @_;
+	my($self, $uid, $hours, $start_cid) = @_;
 	$uid = $self->sqlQuote($uid);
 	$hours ||= 24;
+	$start_cid ||= 0;
 	my $ar = $self->sqlSelectArrayRef(
 		"COUNT(*) AS count, SUM(points-pointsorig) AS sum",
 		"comments",
 		"uid=$uid
-		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)"
+		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)
+		 AND cid >= $start_cid"
 	);
 	my($num_comm, $sum_mods) = @$ar
 		if ref($ar) eq 'ARRAY';
