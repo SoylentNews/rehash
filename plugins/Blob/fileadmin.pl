@@ -95,7 +95,7 @@ sub addFileForStory {
 				my $temp_body;
 				my $fh = $upload->fh;
 				local $/;
-				$data = $fh;
+				$data = <$fh>;
 			}
 		}
 
