@@ -1032,3 +1032,4 @@ UPDATE sections SET defaultsection='articles' WHERE section='index';
 ALTER TABLE sections DROP extras;
 
 # USEPERL LAST UPDATED HERE
+DELETE FROM templates WHERE section="admin";
