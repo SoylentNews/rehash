@@ -54,7 +54,7 @@ use vars qw($VERSION @EXPORT);
 
 #========================================================================
 
-=head2 header([TITLE, SECTION, STATUS])
+=head2 header([DATA, SECTION, STATUS])
 
 Prints the header for the document.
 
@@ -64,10 +64,11 @@ Prints the header for the document.
 
 =over 4
 
-=item TITLE
+=item DATA
 
-The title for the HTML document.  The HTML header won't
-print without this.
+If a plain scalar, the title for the HTML document.  The HTML header won't
+print without this.  You can also pass in a hashref, with "title" as one
+key, and any other variables you want passed to the header template.
 
 =item SECTION
 
@@ -97,18 +98,14 @@ The 'html-header' and 'header' template blocks.
 =cut
 
 sub header {
-	my($title, $section, $options) = @_;
+	my($data, $section, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
 	my $adhtml = '';
-	if (ref($title)) {
-		$title->{title} ||= '';
-	} else {
-		$title ||= '';
-		$title = { title => $title };
-	}
+	$data = { title => $data } unless ref($data) eq 'HASH';
+	$data->{title} = strip_notags($data->{title} || '');
 
 	unless ($form->{ssi}) {
 		my $r = Apache->request;
@@ -141,10 +138,8 @@ sub header {
 	$user->{currentSection} = $section || $constants->{section};
 	getSectionColors();
 
-	$title->{title} =~ s/<(.*?)>//g;
-
-	# This is ALWAYS displayed. Let the template handle $title.
-	slashDisplay('html-header', { title => $title->{title} }, { Nocomm => 1 })
+	# This is ALWAYS displayed. Let the template handle title.
+	slashDisplay('html-header', { title => $data->{title} }, { Nocomm => 1 })
 		unless $options->{noheader};
 
 	# ssi = 1 IS NOT THE SAME as ssi = 'yes'
@@ -160,11 +155,12 @@ sub header {
 
 	# pass section - otherwise, static pages will get 'index' as the section 
 	# PMG 7/12/02
+	$data->{section} = $section;
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
-		slashDisplay('header-admin', { title => $title, section => $section});
+		slashDisplay('header-admin', $data);
 	} else {
-		slashDisplay('header', { title => $title, section => $section} );
+		slashDisplay('header', $data);
 	}
 
 	if ($constants->{admin_check_clearpass}
