@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journaledit
+__template__
+[% USE Slash %]
+<TABLE>
+	<TR VALIGN="TOP">
+		<TD COLSPAN=2>
+			<FORM action=/journal.pl method=post ENCTYPE="application/x-www-form-urlencoded">
+				<INPUT TYPE="hidden" NAME="id" VALUE="[% article.id %]">
+				<INPUT TYPE="hidden" NAME="state" VALUE="editing">
+				<INPUT TYPE="hidden" NAME="preview" VALUE="active">
+				<input type=text name=description value="[% FILTER strip_attribute; article.description; END %]"><p>
+				<P>
+					<textarea name=article cols=60 rows=20>[% FILTER strip_literal; article.article; END %]</textarea>
+				</P>
+				<INPUT TYPE="submit" NAME="op" value="preview">
+				[% IF form.preview %]
+					<input  type=submit name=op value="save">
+				[% END %]
+				[% format_select %]
+			</FORM>
+		<TD VALIGN="TOP" ALIGN="RIGHT">
+			Allowed HTML: 
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+		<FONT SIZE="1">
+			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+		</FONT>
+		</TD>
+	</TR>
+</TABLE>
+__seclev__
+100

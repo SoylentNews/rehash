@@ -1,0 +1,30 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+usersearch
+__template__
+[% USE Slash %]
+[% IF users %]
+	[% FOREACH user=users %]
+		<A HREF="[% constants.rootdir %]/users.pl?nick=[% user.1 %]">[% user.1 %]</A> &nbsp;
+		[% IF user.0 %]
+			([% user.2 %]) email: <A HREF="mailto:[% user.0 %]">[% user.0 %]</A> <BR>
+		[% ELSE %]
+			([% user.2 %])<BR>
+		[% END %]
+	[% END %]
+[% ELSE %]
+	No Matches Found for your query
+[% END %]
+<P>
+
+__seclev__
+100

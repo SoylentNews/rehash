@@ -1,0 +1,116 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+colorEdit
+__template__
+[% IF form.colorpreview %]
+<br>
+<a href="[% constants.rootdir %]/index.pl?colorblock=[% colorblock_clean %]">
+<p><b>Click here to see the site in these colors!</a></b>
+(Hit the <b>"back"</b> button to get back to this page.)</p>
+[% END %]
+
+<P>You may need to reload the page a couple of times to see a
+change in the color scheme. <BR>
+If you can restart the webserver, that's the quickest way to
+see your changes.</P>
+
+[% INCLUDE titlebar %]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<P>Shown are the site colors. If you make a change to any one of them,
+you will need to restart the webserver for the change(s) to show up.</P>
+<P>Note: make sure you use a valid color value, or the color will not
+work properly.</P>
+
+Select the color block to edit:
+
+[% color_select %]
+
+<INPUT TYPE="submit" name="colored" value="Edit Colors">
+
+[% IF form.color_block %]
+
+<TABLE BORDER="0">
+	<TR>
+		<TD>Foreground color 0</TD>
+		 <TD><INPUT TYPE="TEXT" WIDTH="12" NAME="fg0" VALUE="[% colors.0 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.0 %]">Foreground color 0</FONT></TD>
+		<TD BGCOLOR="[% colors.0 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Foreground color 1</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="fg1" VALUE="[% colors.1 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.1 %]">Foreground color 1 </FONT></TD>
+		<TD BGCOLOR="[% colors.1 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Foreground color 2</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="fg2" VALUE="[% colors.2 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.2 %]">Foreground color 2 </FONT></TD>
+		<TD BGCOLOR="[% colors.2 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Foreground color 3</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="fg3" VALUE="[% colors.3 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.3 %]">Foreground color 3 </FONT></TD>
+		<TD BGCOLOR="[% colors.3 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Foreground color 4</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="fg4" VALUE="[% colors.4 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.4 %]">Foreground color 4</FONT></TD>
+		<TD BGCOLOR="[% colors.4 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Background color 0</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg0" VALUE="[% colors.5 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.5 %]">Background color 0 </FONT></TD>
+		<TD BGCOLOR="[% colors.5 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Background color 1</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg1" VALUE="[% colors.6 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.6 %]">Background color 1 </FONT></TD>
+		<TD BGCOLOR="[% colors.6 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Background color 2</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg2" VALUE="[% colors.7 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.7 %]">Background color 2 </FONT></TD>
+		<TD BGCOLOR="[% colors.7 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Background color 3</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg3" VALUE="[% colors.8 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.8 %]">Background color 3 </FONT></TD>
+		<TD BGCOLOR="[% colors.8 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD>Background color 4</TD>
+		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg4" VALUE="[% colors.9 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.9 %]">Background color 4 </FONT></TD>
+		<TD BGCOLOR="[% colors.9 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD><INPUT TYPE="SUBMIT" NAME="colorpreview" VALUE="Preview"></TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="colorsave" VALUE="Save Colors"></TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="colorrevert" VALUE="Revert to saved"></TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="colororig" VALUE="Revert to default">
+		<BR><INPUT TYPE="SUBMIT" NAME="colorsavedef" VALUE="Save as default">
+		(Make sure this is what you want!)
+		</TD>
+	</TR>
+</TABLE>
+</FORM>
+[% END %]
+__seclev__
+500

@@ -1,0 +1,58 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+generic
+__template__
+[% USE Slash %]
+<TABLE BORDER="0" BGCOLOR="[% user.bg.3 %]" WIDTH="100%">
+	<TR>
+		<TD>
+			[% FOREACH article = articles %]
+			<TABLE WIDTH="100%" BGCOLOR="[% user.bg.0 %]" BORDER="0" CELLPADDING="5" CELLSPACING="0">
+				<TR VALIGN="TOP">
+					<TD align="RIGHT" BGCOLOR="[% user.bg.3 %]">
+						<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
+							<BOLD>[% Slash.timeCalc(article.day,"%A %B %d, %y") %]</BOLD>
+						</FONT>
+					</TD>
+				</TR>
+				[% FOREACH diatribe = article.article %]
+					<TR VALIGN="TOP">
+						<TD align="LEFT">
+							<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.2 %]">
+								[% Slash.timeCalc(article.date, "%I:%M %p") %] -  [% diatribe.description %]
+							</FONT>
+							<BR>
+						</TD>
+					</TR>
+					<TR VALIGN="TOP">
+						<TD>
+							<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.2 %]">
+								[% diatribe.article %]
+							</FONT>
+						</TD>
+					</TR>
+				[% END %]
+			</TABLE>
+			[% END %]
+			[% IF uid %]
+			<TR VALIGN="TOP" BGCOLOR="[% user.bg.0 %]">
+				<TD ALIGN="RIGHT" BGCOLOR="[% user.bg.0 %]" >
+					<A HREF="[% url %]?op=add&uid=[% uid %]">Add user to friend's list</A>
+				</TD>
+			</TR>
+			[% END %]
+		</TD>
+	</TR>
+</TABLE>
+
+__seclev__
+100

@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+A template with logic to return the various messages in admin.pl, used
+by the subroutine getMessages in admin.pl
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+relatedlinks
+__template__
+<a href="http://www.intel.com">Intel</a>
+<a href="http://www.linux.com">Linux</a>
+<a href="http://www.lycos.com">Lycos</a>
+<a href="http://www.redhat.com">Red Hat</a>
+<a href="http://www.redhat.com">Red Hat</a>
+<a href="http://www.wired.com">Wired</a>
+<a href="http://www.netscape.com">Netscape</a>
+<a href="[% constants.rootdir %]">[% constants.sitename %]</a>
+<a href="http://CmdrTaco.net">Rob Malda</a>
+<a href="http://CmdrTaco.net">Rob Malda</a>
+<a href="http://www.apple.com">Apple</a>
+<a href="http://www.debian.org">Debian</a>
+<a href="http://www.zdnet.com">ZDNet</a>
+<a href="http://www.news.com">News.com</a>
+<a href="http://www.cnn.com">CNN</a>
+
+__seclev__
+10000

@@ -1,0 +1,15 @@
+name=Journal
+description="Journal system for users"
+mysql_schema=mysql_schema
+mysql_dump=dump
+htdoc=journal.pl
+template=templates/generic;journal;default
+template=templates/bluebox;journal;default
+template=templates/greypage;journal;default
+template=templates/journal;menu;default
+template=templates/journaledit;journal;default
+template=templates/journalentry;journal;default
+template=templates/journalfriends;journal;default
+template=templates/journalitem;journal;default
+template=templates/journallist;journal;default
+template=templates/journaltop;journal;default

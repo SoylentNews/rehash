@@ -1,0 +1,167 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+blockEdit
+__template__
+[% INCLUDE titlebar %]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+
+[% IF blockdelete_flag %]
+
+<INPUT TYPE="HIDDEN" NAME="deletebid" VALUE="[% bid %]">
+<TABLE BORDER="0">
+	<TR>
+		<TD><B>Do you really want to delete Block [% bid %]?</B></TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Cancel Delete of [% bid %]" NAME="blockdelete_cancel"></TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Really Delete [% bid %]!" NAME="blockdelete_confirm"></TD>
+	</TR>
+</TABLE>
+
+[% ELSE %]
+
+<P>Select a block to edit.
+<UL>
+	<LI>You can only edit static blocks.</LI>
+	<LI>Blocks that are portald type blocks are written by portald</LI>
+</UL>
+</P>
+<TABLE>
+	<TR>
+		<TD><B>Static Blocks</B></TD><TD>
+		[% block_select1 %]
+
+		</TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Edit Block" NAME="blocked1"></TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Delete Block" NAME="blockdelete1"></TD>
+	</TR>
+	<TR>
+		<TD><B>Portald Blocks</B></TD>
+		<TD>
+		[% block_select2 %]
+		</TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Edit Block" NAME="blocked2"></TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Delete Block" NAME="blockdelete2"></TD>
+	</TR>
+</TABLE>
+[% END %]
+
+[% IF blockform_flag %]
+<TABLE BORDER="0">
+	<TR>
+		<TD><B>Block ID</B></TD>
+		<TD><INPUT TYPE="TEXT" NAME="thisbid" VALUE="[% bid %]"></TD>
+	</TR>
+	<TR>
+		<TD><B>Title</B></TD>
+		<TD COLSPAN="2">
+<INPUT TYPE="TEXT" SIZE="70" NAME="title" VALUE="[% FILTER strip_attribute %][% blockref.title %][% END %]"></TD>
+	</TR>
+	<TR>
+	<TD><B>Seclev</B></TD><TD><INPUT TYPE="TEXT" NAME="bseclev" VALUE="[% blockref.seclev %]" SIZE="6"></TD>
+	</TR>
+	<TR>
+		<TD><B>Type</B></TD><TD><INPUT TYPE="TEXT" NAME="type" VALUE="[% blockref.type %]" SIZE="10"></TD>
+	</TR>
+	<TR>
+		<TD><B>Section</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="10" NAME="section" VALUE="[% blockref.section %]"></TD>
+	</TR>
+	<TR>
+		<TD><B>Ordernum</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="3" NAME="ordernum" VALUE="[% blockref.ordernum %]"></TD>
+	</TR>
+	<TR>
+		<TD><B>Portal - check if this is a slashbox.</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="portal" [% portal_checked %]></TD>
+	</TR>
+	<TR>
+		<TD><B>Retrieve</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="retrieve" [% retrieve_checked %]></TD>
+	</TR>
+	<TR>
+		<TD><B>URL</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="url" VALUE="[% blockref.url %]"></TD>
+	</TR>
+	<TR>
+		<TD><B>RDF</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE="[% blockref.rdf %]"></TD>
+	</TR>
+
+	[% IF blockedit_flag %]
+		<INPUT TYPE="HIDDEN" NAME="save_existing" VALUE="1">
+	[% ELSE %]
+		<INPUT TYPE="HIDDEN" NAME="save_new" VALUE="1">
+	[% END %]
+
+	<TR>
+		<TD VALIGN="TOP"><B>Description</B></TD>
+		<TD ALIGN="left" COLSPAN="2">
+		<TEXTAREA ROWS="6" COLS="70" NAME="description">[% FILTER strip_literal; blockref.description; END %]</TEXTAREA>
+		</TD>
+	</TR>
+	<TR>
+		<TD VALIGN="TOP"><B>Block</B><BR>
+		<P>
+			<INPUT TYPE="SUBMIT" VALUE="Save Block" NAME="blocksave"><BR>
+			<INPUT TYPE="SUBMIT" NAME="blockrevert" VALUE="Revert to default">
+			<BR><INPUT TYPE="SUBMIT" NAME="blocksavedef" VALUE="Save as default">
+			(Make sure this is what you want!)
+		</P>
+		</TD>
+		<TD ALIGN="left" COLSPAN="2">
+
+		<TEXTAREA ROWS="15" COLS="100" NAME="block">[% FILTER strip_literal; blockref.block; END %]</TEXTAREA>
+		</TD>
+	</TR>
+[% END %]
+
+[% IF form.blockdelete_cancel %]
+	<TR>
+		<TD COLSPAN="3">
+		<INPUT TYPE="SUBMIT" VALUE="Delete Block" NAME="blockdelete"></P>
+		</TD>
+	</TR>
+[% END %]
+
+[% IF ! form.blocknew %]
+	<TR>
+		<TD COLSPAN="3">
+		<INPUT TYPE="SUBMIT" VALUE="Create a new block" NAME="blocknew"></P>
+		</TD>
+	</TR>
+[% END %]
+
+
+[% IF blockref.description %]
+	<TR>
+		<TD COLSPAN="3">
+		<TABLE BORDER="2" CELLPADDING="4" CELLSPACING="0" BGCOLOR="[% user.fg.1 %]" WIDTH="80%">
+			<TR>
+				<TD BGCOLOR="[% user.bg.2 %]"><BR><B>Block ID: [% bid %]</B><BR>
+				<P>[% blockref.description %]</P><BR>
+				</TD>
+			</TR>
+		</TABLE>
+		<BR>
+		</TD>
+	</TR>
+[% END %]
+
+</TABLE>
+</FORM>
+<B><A HREF="[% constants.rootdir %]/sections.pl?section=[% sectionbid %]&op=editsection">[% sectionbid %]</A></B>
+(<A HREF="[% constants.rootdir %]/users.pl?op=preview&bid=[% bid %]">preview</A>)
+
+
+
+__seclev__
+500

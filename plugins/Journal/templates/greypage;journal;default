@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+greypage
+__template__
+[% USE Slash %]
+<TABLE>
+		[% FOREACH article = articles %]
+		<TR>
+			<TD align="LEFT" bgcolor="#C0C0C0" colspan="2"><font face="Arial,Helvetica" size="+1" color="#000000"><b>[% Slash.timeCalc(article.day,"%A %B %d, %Y") %]</b></font></td>
+		</TR>
+			[% FOREACH diatribe = article.article %]
+			<TR valign="TOP">
+				<TD align="RIGHT" bgcolor="#E0E0E0" nowrap="NOWRAP"><font face="Arial,Helvetica" size="-1" color="#000000"><i>[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</i></font></TD>
+				<TD><div style="text-align:left">[% diatribe.description %]<P>[% diatribe.article %]</div></TD>
+			</TR>
+			[% END %]
+		[% END %]
+		[% IF uid %]
+			<TR VALIGN="TOP">
+				<TD ALIGN="RIGHT" BGCOLOR="#E0E0E0" ><A HREF="[% url %]?op=add&uid=[% uid %]">Make a friend</A></TD>
+			</TR>
+		[% END %]
+	</TD></TR>
+</TABLE>
+
+__seclev__
+100

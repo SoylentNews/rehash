@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journallist
+__template__
+[% USE Slash %]
+<TABLE>
+	[% UNLESS user.is_anon %]
+		<FORM action=/journal.pl?op=list method=post>
+			<TR VALIGN="TOP">
+				<SELECT NAME="theme">
+					[% FOREACH theme = themes %]
+						[% selected = theme == default ? 'SELECTED' : '' %]
+						<OPTION VALUE="[% theme %]" [% selected %]>[% theme %]</OPTION>
+					[% END %]
+				</SELECT>
+				<INPUT  TYPE=submit NAME=submit VALUE=change>
+			</TR>
+		<FORM>
+	[% END %]
+[% x = 0 %]
+	[% FOREACH article = articles %]
+		[% IF x % 2 %]
+			[% color = "#dcdcdc" %]
+		[% ELSE %]
+			[% color = "#ffffff" %]
+		[% END %]
+		<TR VALIGN="TOP" bgcolor="[% color %]">
+			<TD>[% article.1 %]</TD>
+			<TD><A HREF="[% url %]?op=edit&id=[% article.0 %]">[% article.2 %]</A></TD>
+			[% UNLESS user.is_anon %]
+				<TD><A HREF="[% url %]?op=remove&id=[% article.0 %]">[delete]</A></TD>
+			[% END %]
+			[% x = x + 1 %]
+		</TR>
+	[% END %]
+</TABLE>
+
+__seclev__
+100

@@ -1,0 +1,58 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journaltop
+__template__
+[% USE Slash %]
+<TABLE BORDER="0" BGCOLOR="[% user.bg.3 %]" WIDTH="100%">
+	<TR>
+		<TD>
+			<TABLE WIDTH="100%" BGCOLOR="[% user.bg.0 %]" BORDER="0" CELLPADDING="5" CELLSPACING="0">
+				<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">
+					<TD align="LEFT" BGCOLOR="[% user.bg.3 %]">
+						<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
+							<BOLD>Users</BOLD>
+						</FONT>
+					</TD>
+					<TD align="LEFT" BGCOLOR="[% user.bg.3 %]">
+						<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
+							<BOLD>Entries</BOLD>
+						</FONT>
+					</TD>
+					<TD align="LEFT" BGCOLOR="[% user.bg.3 %]">
+						<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
+							<BOLD>Last Updated</BOLD>
+						</FONT>
+					</TD>
+				</TR>
+				<TR VALIGN="TOP">
+					<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.2 %]">
+						[% FOREACH journal = journals %]
+							<TR>
+								<TD>
+									<A HREF="[% url %]?op=display&uid=[% journal.2 %]">[% journal.1 %]</A>
+								</TD>
+								<TD>
+									[% journal.0 %]
+								</TD>
+								<TD>
+									[% Slash.timeCalc(journal.3) %] &nbsp;
+								</TD>
+							</TR>
+						[% END %]
+					</FONT>
+				</TR>
+			</TABLE>
+		</TD>
+	</TR>
+</TABLE>
+__seclev__
+100

@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+storysearch
+__template__
+[% USE Slash %]
+[% IF stories %]
+	[% x = 0 %]
+	[% FOREACH story=stories %]
+		[% x + form.min %] 
+		[% Slash.linkStory({
+			section	=> story.5,
+			sid	=> story.2,
+			'link'	=> story.1
+		}) 
+		%]
+		by [% story.0 %] with [% story.4 %] comments <FONT SIZE="2">on [% Slash.timeCalc(story.3) %]</FONT><BR>
+	[% x = x + 1 %]
+	[% END %]
+[% ELSE %]
+	No Matches Found for your query
+[% END %]
+<P>
+
+__seclev__
+100

@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journalitem
+__template__
+[% USE Slash %]
+<TABLE BORDER="0" BGCOLOR="#000000" WIDTH="100%">
+	<TR><TD>
+		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" BORDER="0" CELLPADDING="5" CELLSPACING="0">
+			<TR VALIGN="TOP">
+			<TD align="RIGHT" BGCOLOR="#336699"><BOLD>[% date %]</BOLD></TD>
+			</TR>
+			<TR VALIGN="TOP">
+			<TD align="LEFT"> [% Slash.timeCalc(date, "%I:%M %p") %] [% description %]<br></TD>
+			</TR>
+			<TR VALIGN="TOP">
+			<TD>
+			[% article %]
+			</TD>
+			</TR>
+		</TABLE>
+	</TD></TR>
+</TABLE>
+
+__seclev__
+100

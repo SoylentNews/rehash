@@ -1,0 +1,61 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+listFilters
+__template__
+[% INCLUDE titlebar %]
+
+<FORM ENCTYPE="multipart/form-data" action="[% env.script_name %]" method="POST">
+<TABLE>
+	<TR>
+		<TD><INPUT TYPE="submit" NAME="newfilter" VALUE="Create a new filter"></TD>
+	</TR>
+</TABLE>
+<TABLE BORDER="0">
+	<TR>
+		<TD COLSPAN="9">&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD><B> Filter id <B></TD>
+		<TD><B> Regex <B></TD>
+		<TD><B> Modifier <B></TD>
+		<TD><B> Field <B></TD>
+		<TD><B> Ratio <B></TD>
+		<TD><B> Minimum match <B></TD>
+		<TD><B> Minimum length <B></TD>
+		<TD><B> Maximum length <B></TD>
+		<TD><B> Error message <B></TD>
+	</TR>
+
+[% FOREACH i = filter_ref %]
+<TR>
+		<TD>[<A HREF="[% env.script_name %]?editfilter=1&filter_id=[% i.0 %]">[% i.0 %]</A>]</TD>
+		<TD><FONT FACE="courier" size="+1">[% i.1 %]</FONT></TD>
+		<TD> [% i.2 %] </TD>
+		<TD> [% i.3 %] </TD>
+		<TD> [% i.4 %] </TD>
+		<TD> [% i.5 %] </TD>
+		<TD> [% i.6 %] </TD>
+		<TD> [% i.8 %] </TD>
+		<TD> [% i.7 %] </TD>
+	</TR>
+[% END %]
+
+</TABLE>
+<TABLE>
+	<TR>
+		<TD><INPUT TYPE="submit" NAME="newfilter" VALUE="Create a new filter"></TD>
+	</TR>
+</TABLE>
+</FORM>
+
+__seclev__
+500
