@@ -2818,3 +2818,11 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_dbalert_lagthresh'
 
 # End of T_2_5_0_42, Start of T_2_5_0_43 - 2004/12/14
 
+INSERT INTO vars (name, value, description) VALUES ('dbsparklines_disp','0','Display dbsparklines in the currentAdminUsers box?');
+INSERT INTO vars (name, value, description) VALUES ('dbsparklines_height',40,'Pixel height of sparkline graphs');
+INSERT INTO vars (name, value, description) VALUES ('dbsparklines_pngsuffix',FLOOR(RAND()*900000000+100000000),'Random number to make it hard for unauthorized users to read these PNGs without permission');
+INSERT INTO vars (name, value, description) VALUES ('dbsparklines_secsback',30*60,'How many seconds to look back for the sparklines');
+INSERT INTO vars (name, value, description) VALUES ('dbsparklines_width',150,'Pixel width of sparkline graphs');
+INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymax',20,'Max bog value (clip higher values to this)');
+INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymin',-20,'Min lag value (clip lower values to this) - should be negative');
+

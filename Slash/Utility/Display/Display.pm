@@ -629,12 +629,10 @@ The 'currentAdminUsers' template block.
 =cut
 
 sub currentAdminUsers {
-	my $html_to_display;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
-# 	my $now = UnixDate(ParseDate($slashdb->getTime()), "%s");
 	my $now = timeCalc($slashdb->getTime(), "%s", 0);
 	my $aids = $slashdb->currentAdmin();
 	for my $data (@$aids) {
@@ -642,7 +640,7 @@ sub currentAdminUsers {
 		if ($usernick eq $user->{nickname}) {
 			$usertime = "-";
 		} else {
-			$usertime = $now - timeCalc($usertime, "%s", 0); # UnixDate(ParseDate($usertime), "%s");
+			$usertime = $now - timeCalc($usertime, "%s", 0);
 			if ($usertime <= 99) {
 				$usertime .= "s";
 			} elsif ($usertime <= 3600) {
@@ -655,9 +653,12 @@ sub currentAdminUsers {
 		@$data = ($usernick, $usertime, $lasttitle, $uid);
 	}
 
+	my @reader_vus = $slashdb->getDBVUsForType("reader");
+
 	return slashDisplay('currentAdminUsers', {
 		ids		=> $aids,
 		can_edit_admins	=> $user->{seclev} > 10000,
+		reader_vus	=> \@reader_vus,
 	}, 1);
 }
 
