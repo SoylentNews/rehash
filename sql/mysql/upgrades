@@ -2779,8 +2779,6 @@ INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_increase_
 
 ALTER TABLE submissions ADD INDEX time_emaildomain (time, emaildomain);
 
-# SLASHDOT LAST UPDATED HERE
-
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_39, Start of T_2_5_0_40 - 2004/11/24
@@ -2808,5 +2806,7 @@ DELETE FROM vars where name in
 "prepuser_backup_prob", "selectcomm_backup_prob", "siteowner", "submissions_listing_page_size", "subnet_karma_comments_needed", "test", "today", "zoo_process_limit", "zoo_timer");
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_40, Start of T_2_5_0_41 - 2004/11/30
