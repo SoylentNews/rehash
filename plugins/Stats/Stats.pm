@@ -471,6 +471,59 @@ sub countCommentsByDistinctIPIDPerAnon {
 }
 
 ########################################################
+sub countCommentsByDiscussionType {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+
+	my $return_hr = { };
+
+	# First count comments posted to polls.
+	if ($constants->{plugin}{PollBooth}) {
+		$return_hr->{polls} = $self->sqlSelect(
+			"COUNT(*), IF(pollquestions.discussion IS NULL, 'no', 'yes') AS ispoll",
+			"comments, discussions
+				LEFT JOIN pollquestions ON discussions.id=pollquestions.discussion",
+			"comments.date $self->{_day_between_clause}
+				AND comments.sid=discussions.id",
+			"GROUP BY ispoll HAVING ispoll='yes'"
+		) || 0;
+	} else {
+		$return_hr->{polls} = 0;
+	}
+
+	# Now comments posted to journals.
+	if ($constants->{plugin}{Journal}) {
+		$return_hr->{journals} = $self->sqlSelect(
+			"COUNT(*), IF(journals.discussion IS NULL, 'no', 'yes') AS isjournal",
+			"comments, discussions
+				LEFT JOIN journals ON discussions.id=journals.discussion",
+			"comments.date $self->{_day_between_clause}
+				AND comments.sid=discussions.id",
+			"GROUP BY isjournal HAVING isjournal='yes'"
+		) || 0;
+	} else {
+		$return_hr->{journals} = 0;
+	}
+
+	# Don't forget comments posted to stories.
+	$return_hr->{stories} = $self->sqlSelect(
+		"COUNT(*), IF(stories.discussion IS NULL, 'no', 'yes') AS isstory",
+		"comments, discussions
+			LEFT JOIN stories ON discussions.id=stories.discussion",
+		"comments.date $self->{_day_between_clause}
+			AND comments.sid=discussions.id",
+		"GROUP BY isstory HAVING isstory='yes'"
+	) || 0;
+
+	# Whatever's left must be user-created discussions.
+	my $total = $self->sqlCount("comments", "date $self->{_day_between_clause}");
+	$return_hr->{user} = $total -
+		( $return_hr->{polls} + $return_hr->{journals} + $return_hr->{stories} );
+
+	return $return_hr;
+}
+
+########################################################
 sub getCommentsByDistinctUIDPosters {
 	my($self, $options) = @_;
 

@@ -176,6 +176,7 @@ EOT
 	   $distinct_comment_ipids_loggedinonly,
 	   $distinct_comment_ipids_anonandloggedin) = $stats->countCommentsByDistinctIPIDPerAnon();
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
+	my $comments_discussiontype_hr = $stats->countCommentsByDiscussionType();
 	my $submissions = $stats->countSubmissionsByDay();
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($distinct_comment_ipids);
 	my $modlog_count_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
@@ -413,6 +414,9 @@ EOT
 	$statsSave->createStatDaily("distinct_comment_ipids_loggedinonly", $distinct_comment_ipids_loggedinonly);
 	$statsSave->createStatDaily("distinct_comment_ipids_anonandloggedin", $distinct_comment_ipids_anonandloggedin);
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
+	for my $type (sort keys %$comments_discussiontype_hr) {
+		$statsSave->createStatDaily("comments_discussiontype_$type", $comments_discussiontype_hr->{$type});
+	}
 	$statsSave->createStatDaily("consensus", $consensus);
 	$statsSave->createStatDaily("modlogs", $modlogs);
 	$statsSave->createStatDaily("modlog_inactive_percent", $modlog_inactive_percent);
