@@ -204,7 +204,7 @@ sub makepayment {
 		print "<p>Payment confirmed\n";
 	} else {
 		use Data::Dumper;
-		my $warning = "WARNING: Payment accepted but record "
+		my $warning = "DEBUG: Payment accepted but record "
 			. "not added to database! rows='$rows'\n"
 			. Dumper($payment);
 		print STDERR $warning;
