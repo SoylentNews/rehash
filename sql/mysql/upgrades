@@ -2330,8 +2330,6 @@ INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index',
 
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -2341,6 +2339,12 @@ INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1'
 ######################################################################
 
 # End of T_2_3_0_157, Start of T_2_5_0_1 - 2004/07/01
+
+# End of T_2_5_0_1, Start of T_2_5_0_2 - 2004/07/02
+
+# End of T_2_5_0_2, Start of T_2_5_0_3 - 2004/07/02
+
+# End of T_2_5_0_3, Start of T_2_5_0_4 - 2004/07/02
 
 # You want to run utils/convertDBto200406 here, then follow its
 # instructions, read its output.  Shut your site down and execute
@@ -2367,3 +2371,7 @@ INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('in
 
 
 UPDATE menus SET label = '[% user.nickname | strip_literal %]\'s Journal' WHERE label = '[% user.nickname %]\'s Journal' AND menu = 'journal';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_4, Start of T_2_5_0_5 - 2004/07/06
