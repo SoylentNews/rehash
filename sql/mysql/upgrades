@@ -363,9 +363,7 @@ INSERT INTO code_param (type, code, name) VALUES ('months',10,'October');
 INSERT INTO code_param (type, code, name) VALUES ('months',11,'November');
 INSERT INTO code_param (type, code, name) VALUES ('months',12,'December');
 
-# SLASHDOT LAST UPDATED HERE
-
-# End of R_2_3_0_25
+# End of R_2_3_0_25, start of T_2_3_0_26
 
 DELETE FROM sections WHERE title='All Sections' OR section='';
 
@@ -376,3 +374,6 @@ select concat("UPDATE discussions SET commentcount=", count(cid), " WHERE id=", 
 source /tmp/dis;
 select concat("UPDATE stories SET commentcount=", discussions.commentcount, " WHERE discussion=", id, ";") INTO OUTFILE "/tmp/dis2" from discussions;
 source /tmp/dis2;
+
+# SLASHDOT LAST UPDATED HERE
+
