@@ -226,7 +226,7 @@ thread_col_2 = user.bg.2;
 					</TR>
 					<TR><TD colspan="[% total_cols %]" align="center"><font size=-1>
 						<font size=-1>Logged in users can choose whether or not they'd like comments shown grouped by discussion on their 
-						[% IF !user.is_anon %]<A HREF="[% constants.rootdir %]/users.pl?op=editcomm&amp;userfield=[% user.uid %]&amp;fieldname=uid">[% END %]comment settings page[% IF !user.is_anon %]</A><BR>[% END %]
+						[% IF !user.is_anon %]<A HREF="[% constants.rootdir %]/users.pl?op=editcomm">[% END %]comment settings page[% IF !user.is_anon %]</A><BR>[% END %]
 						[% IF constants.subscribe and !user.is_subscriber %]<BR>Subscribers can view entire comment history for all users[% END %]					 
 						</font> 
 					</TD></TR>

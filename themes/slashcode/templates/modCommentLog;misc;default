@@ -285,7 +285,9 @@ IF num_modifiers > 0 %]
 	</TR>
 	[% END;
 END %]
-
+	[% IF mod_admin %]
+	<TR><TD><B>Comment Karma:</B></TD><TD>&nbsp;</TD><TD ALIGN="RIGHT"><B>[% mods.0.karma %]</B></TD><TD></TD></TR>
+	[% END %]
 </TABLE>
 
 [% END %]
