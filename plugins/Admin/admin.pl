@@ -1693,7 +1693,7 @@ sub displayRecent {
 sub displayRecentRequests {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my $admindb = getObject("Slash::Admin", $constants->{backup_db_user} || $constants->{log_db_user} );
+	my $admindb = getObject("Slash::Admin", $constants->{backup_db_user} || $constants->{log_db_user});
 	my $id = $form->{id};
 	my $ts = $form->{ts};
 	$id ||= $admindb->getAccesslogMaxID()

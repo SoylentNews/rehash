@@ -76,7 +76,7 @@ sub getsByUids {
 	# the DB *really* should be smart enough to pick up on that, but no.
 	# At least, not in MySQL 3.23.49a.
 
-	if($options->{titles_only}) {
+	if ($options->{titles_only}) {
 		my $where = "users.uid IN ($list) AND users.uid=journals.uid";
 
 		$answer = $self->sqlSelectAllHashrefArray(

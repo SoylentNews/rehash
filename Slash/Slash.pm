@@ -461,7 +461,7 @@ sub printComments {
 		lvl		=> $lvl,
 	});
 
-	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment'; 
+	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
 	my($comment, $next, $previous);
 	if ($cid) {

@@ -55,7 +55,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 	follow the enclosed instructions to re-register)</SMALL><BR>
 	<INPUT TYPE="TEXT" NAME="realemail" VALUE="[% useredit.realemail | strip_attribute %]" SIZE="40"><BR>
 <BR>
-	<B>Homepage</B> (optional:you must enter a fully qualified URL!)<BR>
+	<B>Homepage</B> (optional: you must enter a fully qualified URL)<BR>
 		<INPUT TYPE="TEXT" NAME="homepage" VALUE="[% useredit.homepage | strip_attribute %]" SIZE="60"><BR>
 	<B>AOL IM</B> (optional)<BR>
 		<INPUT TYPE="TEXT" NAME="aim" VALUE="[% useredit.aim | strip_attribute %]" SIZE="60"><BR>
@@ -65,7 +65,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 		<INPUT TYPE="TEXT" NAME="yahoo" VALUE="[% useredit.yahoo | strip_attribute %]" SIZE="60"><BR>
 	<B>Jabber</B> (optional)<BR>
 		<INPUT TYPE="TEXT" NAME="jabber" VALUE="[% useredit.jabber | strip_attribute %]" SIZE="60"><BR>
-	<B>Public Calendar</B> (optional:you must enter a fully qualified URL to a webcal:// entry!)<BR>
+	<B>Public Calendar</B> (optional: you must enter a fully qualified URL, for an ical calendar)<BR>
 		<INPUT TYPE="TEXT" NAME="calendar_url" VALUE="[% useredit.calendar_url | strip_attribute %]" SIZE="60"><BR>
 
 	<P><B>Sig</B> (appended to the end of comments you post, 120 chars)<BR>

@@ -278,6 +278,7 @@ sub getModM2Ratios {
 	return $hr;
 }
 
+########################################################
 sub getModReverses {
 	my($self, $options) = @_;
 
@@ -730,6 +731,7 @@ sub countDaily {
 	return \%returnable;
 }
 
+########################################################
 sub countSfNetIssues {
 	my($self, $group_id) = @_;
 	my $constants = getCurrentStatic();
