@@ -93,7 +93,7 @@ sub countFoes {
 
 sub count {
 	my($self, $uid) = @_;
-	$self->sqlCount('people', "uid = $uid AND type != NULL");
+	$self->sqlCount('people', "uid = $uid AND type is not NULL");
 }
 
 sub _get {

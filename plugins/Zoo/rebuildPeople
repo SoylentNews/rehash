@@ -33,7 +33,10 @@ $slashdb->sqlDo("DELETE FROM people_log");
 $slashdb->sqlDo("UPDATE people SET eof=0 AND fof=0");
 my $entries = $slashdb->sqlSelectAll('uid, person, type', 'people');
 
+my $num = @$entries;
+my $x = 0;
 for (@$entries) {
+	print "NUM " . ($x++) . " for $num \n";
 	if ($_->[2] eq 'friend') {
 		$zoo->setFriend($_->[0], $_->[1]);
 	} elsif ($_->[2] eq 'foe') {

@@ -13,13 +13,12 @@ use Slash::Utility;
 sub main {
 	my $slashdb = getCurrentDB();
 	my $form    = getCurrentForm();
-	my $section = $slashdb->getSection();
 
 	header(getData('head'));
 	print createMenu('topics');
 
 	if ($form->{op} eq 'toptopics') {
-		topTopics($section);
+		topTopics();
 	} else {
 		listTopics();
 	}
@@ -29,12 +28,10 @@ sub main {
 
 #################################################################
 sub topTopics {
-	my($section) = @_;
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
-
-	$section->{issue} = 0;  # should this be local() ?  -- pudge
+	my $section = $slashdb->getSection();
 
 	my(@topics, $topics);
 	$topics = $slashdb->getTopNewsstoryTopics($form->{all});
