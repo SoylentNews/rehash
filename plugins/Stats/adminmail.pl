@@ -154,7 +154,7 @@ $admin_clearpass_warning
      comments: %8d posted yesterday
         IPIDS: %8d distinct IPIDS posted comments
              : %8d distinct IPIDS used comments
-						 : %8d distinct IPIDS used articles
+             : %8d distinct IPIDS used articles
              : %8d distinct IPIDS used palm pages
     pageviews: %8d for comments
              : %8d for articles
