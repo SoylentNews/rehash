@@ -265,7 +265,9 @@ sub getRDF {
 		$d =~ s/&(?!(?:[a-zA-Z0-9]+|#\d+);)/&amp;/g; #s/&/&amp;/g;
 		$p->parse($d) or portaldLog("$bid did not parse properly");
 		setblock($bid, "$str$other");
-	}
+	};
+
+	portaldLog("Error getting $_[0]: $@") if $@;
 }
 
 #################################################################
