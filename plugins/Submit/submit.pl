@@ -137,8 +137,9 @@ sub previewForm {
 
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
-	$introtext =~  s{(?!"|=)(.|\n|^)(http|ftp|gopher|telnet)://(.*?)(\W\s)?[\s]}
-			{<A HREF="$2://$3"> link <\/A> }gi;
+	$introtext =~  s{(?<!"|=|>)(http|ftp|gopher|telnet)://(.*?)(\W\s)?[\s]}
+			{<A HREF="$1://$2">link</A> }gi;
+	$introtext =~ s/\s+$//;
 	$introtext = qq!<I>"$introtext"</I>! if $name;
 
 	if ($email) {
@@ -440,8 +441,8 @@ sub displayForm {
 	my $formkey_earliest = time() - $I{formkey_timeframe};
 
 	if(! checkTimesPosted("submissions",$I{max_submissions_allowed},$id,$formkey_earliest)) {
-		my $max_posts_warn =<<EOT;
-<br><b>Warning! you've exceeded max allowed submissions for the day : $I{max_submissions_allowed}</b><br>	
+		my $max_posts_warn = <<EOT;
+<P><B>Warning! you've exceeded max allowed submissions for the day : $I{max_submissions_allowed}</B></P>
 EOT
 		errorMessage($max_posts_warn);
 	}
