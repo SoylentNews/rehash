@@ -180,7 +180,7 @@ sub deleteOldFromPool {
 				"humanconf_pool",
 				"hcpid IN ($hcpids_list)"
 			);
-			if ($new_delrows != scalar(keys %$pool_hr)) {
+			if ($new_delrows != $remaining_to_delete) {
 				warn "HumanConf warning: deleted number"
 					. " of rows '$new_delrows'"
 					. " not equal to attempted number to delete"
