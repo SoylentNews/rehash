@@ -10205,8 +10205,9 @@ sub getTemplateByName {
 				push @caller_info, "$c[0] line $c[2]";
 				last if scalar(@caller_info) >= 3;
 			}
-			errorLog("Failed template lookup on '$name;$page\[misc\];$skin\[default\]'"
-				. ", callers: " . join(", ", @caller_info));
+			errorLog("Failed template lookup on '$name;$page\[misc\];$skin\[default\]'" .
+				", keys: " . scalar(keys %{$self->{$table_cache_id}}) .
+				", callers: " . join(", ", @caller_info));
 		}
 		return ;
 	}
