@@ -3080,12 +3080,14 @@ sub getAbuses {
 }
 
 ##################################################################
-sub getAccessListReason {
+# returns a hashref with reason and datetime fields
+sub getAccessListInfo {
 	my($self, $formname, $column, $user_check) = @_;
 
 	my $constants = getCurrentStatic();
 	my $ref = {};
-	my($reason,$where) = ('','');
+	my $aclinfo = {};
+	my $where = '';
 
 	if ($user_check) {
 		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
@@ -3111,18 +3113,22 @@ sub getAccessListReason {
 	}
 	
 
-	$ref = $self->sqlSelectAll("reason", "accesslist $where");
+	$ref = $self->sqlSelectAll("reason, ts", "accesslist $where");
+	$aclinfo->{reason} = '';
 
 	for (@$ref) {
-		if ($reason eq '') {
-			$reason = $_->[0];
-		} elsif ($reason ne $_->[0]) {
-			$reason = 'multiple';
-			return($reason);
+		if ($aclinfo->{reason} eq '') {
+			$aclinfo->{reason}   = $_->[0];
+			$aclinfo->{datetime} = $_->[1];
+		} elsif ($aclinfo->{reason} ne $_->[0]) {
+			$aclinfo->{reason}   = 'multiple';
+			$aclinfo->{datetime} = 'multiple';
+
+			return $aclinfo;
 		}
 	}
 
-	return($reason);
+	return $aclinfo;
 }
 
 ##################################################################

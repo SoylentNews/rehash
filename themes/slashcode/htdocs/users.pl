@@ -1557,10 +1557,11 @@ sub saveUserAdmin {
 	}
 
 	for my $formname ('comments', 'submit') {
-		my $existing_reason =
-			$slashdb->getAccessListReason(
+		my $aclinfo =
+			$slashdb->getAccessListInfo(
 				$formname, 'readonly', $user_edit
 			);
+		my $existing_reason = $aclinfo->{reason};
 		my $is_readonly_now =
 			$slashdb->checkReadOnly($formname, $user_edit) ? 1 : 0;
 
@@ -2306,7 +2307,7 @@ sub getUserAdmin {
 	my($user_edit, $user_editfield, $uidlist, $iplist, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
-	my($banned, $banned_reason);
+	my($banned, $banned_reason, $banned_time);
 	my $sectionref = $slashdb->getDescriptions('sections-contained');
 	$sectionref->{''} = getData('all_sections');
 
@@ -2368,16 +2369,19 @@ sub getUserAdmin {
 			{ $form->{fieldname} => $user_edit->{md5id} } : 
 			$user_edit;
 
-		$readonly_reasons->{$formname} =
-			$slashdb->getAccessListReason(
-				$formname, 'readonly', $user_chk
-			) if $readonly->{$formname};
+		if ($readonly->{$formname}) {
+			my $aclinfo = $slashdb->getAccessListInfo(
+                                	$formname, 'readonly', $user_chk);
+			$readonly_reasons->{$formname} = $aclinfo->{reason};
+		}
 	}
 	
 	my $banref = $slashdb->getBanList(1);
 
 	$banned = $banref->{$id} ? ' CHECKED' : '';
-	$banned_reason = $slashdb->getAccessListReason('', 'isbanned', $user_edit);
+	my $aclinfo = $slashdb->getAccessListInfo('', 'isbanned', $user_edit);
+	$banned_reason = $aclinfo->{reason};
+	$banned_time = $aclinfo->{datetime};
 
 	for (@$uidlist) {
 		$uidstruct->{$_->[0]} = $slashdb->getUser($_->[0], 'nickname');
@@ -2404,6 +2408,7 @@ sub getUserAdmin {
 		useredit		=> $user_edit,
 		banned 			=> $banned,
 		banned_reason		=> $banned_reason,
+		banned_time		=> $banned_time,
 		userinfo_flag		=> $user_editinfo_flag,
 		userfield		=> $user_editfield,
 		iplist			=> $iplist,
