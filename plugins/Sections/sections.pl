@@ -23,6 +23,18 @@ sub main {
 		return;
 	}
 
+	$form->{section_extras} = [];
+	for (grep { /^extraname_\d+/ } keys %{$form}) {
+		next unless /^extraname_(\d+)$/;
+		next if !($1 && !$form->{"extradel_$1"});
+		$form->{"extraname_$1"} =~ s/\s//g;
+		next if !$form->{"extraname_$1"};
+
+		push @{$form->{section_extras}},
+			[$form->{"extraname_$1"},
+			 $form->{"extraval_$1"} || $form->{"extraname_$1"}]
+	}
+
 	header(getData('head'), 'admin');
 
 	if ($op eq 'rmsub' && $seclev >= 100) {  # huh?
@@ -35,8 +47,11 @@ sub main {
 		delSection($form->{section});
 		listSections($user);
 
-	} elsif ($op eq 'editsection' ||
-		 $form->{editsection} || $form->{addextra}) {
+	} elsif ($op eq 'editsection' || $form->{editsection} ||
+		 $form->{addextra})
+	{
+		saveSection($form->{section}) 
+			if $form->{addextra} && @{$form->{section_extras}};
 		titlebar('100%', getData('edithead'));
 		editSection($form->{section});
 
@@ -113,20 +128,30 @@ sub editSection {
 
 		for (@$blocks) {
 			my $block = $blocks[@blocks] = {};
-			@{$block}{qw(section bid ordernum title portal url)} = @$_;
+			@{$block}{qw(section bid ordernum title portal url)} =
+				@$_;
 			$block->{title} =~ s/<(.*?)>//g;
-
 		}
 	}
 
 	my $qid = createSelect('qid', $slashdb->getPollQuestions(),
 		$this_section->{qid}, 1);
-	my $isolate = createSelect('isolate', $slashdb->getDescriptions('isolatemodes'),
-		$this_section->{isolate}, 1);
-	my $issue = createSelect('issue', $slashdb->getDescriptions('issuemodes'),
-		$this_section->{issue}, 1);
+	my $isolate = createSelect(
+		'isolate', 
+		$slashdb->getDescriptions('isolatemodes'),
+		$this_section->{isolate}, 
+		1
+	);
+	my $issue = createSelect(
+		'issue', 
+		$slashdb->getDescriptions('issuemodes'),
+		$this_section->{issue}, 
+		1
+	);
 
-	my @extras = $slashdb->getSectionExtras();
+	my $extras = $form->{section_extras};
+	$extras = $slashdb->getSectionExtras($form->{section})
+		unless @{$extras};
 
 	slashDisplay('editSection', {
 		section		=> $section,
@@ -138,7 +163,7 @@ sub editSection {
 		topics		=> $slashdb->getDescriptions(
 			'topics_section', $section
 		),
-		extras		=> \@extras,
+		extras		=> $extras,
 	});
 }
 
@@ -153,20 +178,14 @@ sub saveSection {
 	# dashes should be allowed.
 	$section =~ s/[^A-Za-z0-9\-]//g;
 
-	my(@extras);
-	for (grep { /^extraname_(\d+)/ } keys %{$form}) {
-		$form->{"extraname_$1"} =~ s/\s//g;
-		next if !$form->{"extraname_$1"};
+	# Before we insert, give some reasonable defaults.
+	$form->{url} 	  ||= '';
+	$form->{hostname} ||= '';
 
-		push @extras,
-			[$form->{"extraname_$1"},
-			 $form->{"extraval_$1"} || $form->{"extraname_$1"}]
-		unless $form->{"extradel_$1"};
-	}
-
+	my($return);
 	my $found = $slashdb->getSection($form->{section}, 'section', 1);
 	if ($found) {
-		my $return = $slashdb->setSection($form->{section}, {
+		$return = $slashdb->setSection($form->{section}, {
 			qid		=> $form->{qid},
 			title		=> $form->{title},
 			issue		=> $form->{issue},
@@ -175,13 +194,8 @@ sub saveSection {
 			url		=> $form->{url},
 			hostname	=> $form->{hostname},
 		});
-		if ($return) {
-			print getData('update', { section => $section });
-		} else {
-			print getData('failed', { section => $section });
-		}
 	} else {
-		my $return = $slashdb->createSection({
+		$return = $slashdb->createSection({
 			section		=> $form->{section},
 			qid		=> $form->{qid},
 			title		=> $form->{title},
@@ -191,13 +205,11 @@ sub saveSection {
 			url		=> $form->{url},
 			hostname	=> $form->{hostname},
 		});
-		if ($return) {
-			print getData('insert', { section => $section });
-		} else {
-			print getData('failed', { section => $section });
-		}
 	} 
-	$slashdb->setSectionExtras($section, \@extras) if @extras;
+	$slashdb->setSectionExtras($section, $form->{section_extras}) 
+		if $return && @{$form->{section_extras}};
+	
+	print getData($return ? 'insert' : 'failed', { section => $section });
 }
 
 #################################################################
