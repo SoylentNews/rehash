@@ -2,6 +2,8 @@
 
 use strict;
 
+use Slash::Constants ':slashd';
+
 use vars qw( %task $me );
 
 $task{$me}{timespec} = '12 * * * *';

@@ -3,6 +3,7 @@
 use strict;
 use Slash;
 use File::Path;
+use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 

@@ -2,6 +2,8 @@
 
 use strict;
 
+use Slash::Constants ':slashd';
+
 use vars qw( %task $me );
 
 # Remember that timespec goes by the database's time, which should be
@@ -10,6 +12,7 @@ use vars qw( %task $me );
 # your audience and admins.
 $task{$me}{timespec} = '0 2 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
+$task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 
 	my($virtual_user, $constants, $slashdb, $user) = @_;

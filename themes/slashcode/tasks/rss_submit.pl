@@ -1,8 +1,9 @@
 #!/usr/bin/perl -w
 
-use File::Path;
-
 use strict;
+
+use File::Path;
+use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 
@@ -12,6 +13,7 @@ $task{$me}{timespec} = '1-59/3 * * * *';
 $task{$me}{timespec_panic_1} = '1-59/10 * * * *';
 $task{$me}{timespec_panic_2} = '';
 $task{$me}{on_startup} = 1;
+$task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my %updates;

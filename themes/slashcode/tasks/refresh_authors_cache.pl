@@ -2,6 +2,8 @@
 
 use strict;
 
+use Slash::Constants ':slashd';
+
 use vars qw( %task $me );
 
 # Remember that timespec goes by the database's time, which should be

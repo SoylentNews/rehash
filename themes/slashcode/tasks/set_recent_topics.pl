@@ -6,6 +6,7 @@
 
 use strict;
 use File::Spec;
+use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 

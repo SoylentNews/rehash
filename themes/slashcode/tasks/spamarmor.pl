@@ -11,11 +11,13 @@ use Slash;
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
+use Slash::Constants ':slashd';
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 $task{$me}{timespec} = '30 0 * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
+$task{$me}{fork} = SLASHD_NOWAIT;
 
 # Handles rotation of fakeemail address of all users.
 $task{$me}{code} = sub {

@@ -5,11 +5,13 @@
 use strict;
 use Slash;
 use Slash::XML;
+use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 
 $task{$me}{timespec} = '13,43 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
+$task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 

@@ -11,6 +11,7 @@ use Slash;
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
+use Slash::Constants ':slashd';
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
