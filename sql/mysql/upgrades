@@ -2263,3 +2263,6 @@ ALTER TABLE comments ADD COLUMN disp_mod_orig TINYINT NOT NULL DEFAULT 0 AFTER k
 ALTER TABLE moderatorlog ADD COLUMN mod_disp_mod TINYINT NOT NULL DEFAULT 0;
 
 INSERT INTO vars (name, value, description) VALUES ('m2_inherit', '0', 'Set to true if you would like to inherit m2s from previous mods with the same cid-reason');
+
+ALTER TABLE users_info ADD COLUMN up_fair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER m2fair, ADD COLUMN down_fair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER up_fair, ADD COLUMN up_unfair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER m2unfair, ADD COLUMN down_unfair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER up_unfair, ADD COLUMN m2voted_up_fair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER m2fairvotes, ADD COLUMN m2voted_down_fair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER m2voted_up_fair, ADD COLUMN m2voted_up_unfair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER m2unfairvotes, ADD COLUMN m2voted_down_unfair MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL AFTER m2voted_up_unfair, ADD COLUMN m2voted_lonedissent mediumint UNSIGNED DEFAULT '0' NOT NULL AFTER m2voted_down_unfair, ADD COLUMN m2voted_majority mediumint UNSIGNED DEFAULT '0' NOT NULL AFTER m2voted_lonedissent;
+

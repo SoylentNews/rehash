@@ -990,7 +990,7 @@ sub getMetamodCountsForModsByType {
 	} elsif ($type eq "unfair") {
 		$where .= " AND val < 0 ";
 	}
- 	my $modcounts = $self->sqlSelectAllHashref('mmid',
+	my $modcounts = $self->sqlSelectAllHashref('mmid',
 		$cols,
 		'metamodlog',
 		$where,
@@ -5398,15 +5398,28 @@ sub createMetaMod {
 		delete $m2s->{$mmid} if !$mods_saved{$mmid} && !$m2_user->{is_admin};
 		$saved_mods_encountered++ if $mods_saved{$mmid};
 	}
+	return if !keys %$m2s;
 
 	# If we are allowed to multiply these M2's to apply to other
 	# mods, go ahead.  multiMetaMod changes $m2s in place.  Note
 	# that we first screened %$m2s to allow only what was saved for
 	# this user;  having made sure they are not trying to fake an
 	# M2 of something disallowed, now we can multiply them out to
-	# possibly affect more.
+	# possibly affect more.  Note that we save the original list --
+	# when we tally how many metamods this user has done, we only
+	# count their intentions, not the results.
+	my %m2s_orig = ( map { $_, 1 } keys %$m2s );
 	if ($multi_max) {
 		$self->multiMetaMod($m2_user, $m2s, $multi_max);
+	}
+
+	# We need to know whether the M1 IDs are for moderations
+	# that were up or down.
+	my $m1_list = join(",", keys %$m2s);
+	my $m2s_vals = $self->sqlSelectAllHashref("id", "id, val",
+		"moderatorlog", "id IN ($m1_list)");
+	for my $m1id (keys %$m2s_vals) {
+		$m2s->{$m1id}{val} = $m2s_vals->{$m1id}{val};
 	}
 
 	# Whatever happens below, as soon as we get here, this user has
@@ -5429,7 +5442,8 @@ sub createMetaMod {
 			return ;
 		}
 	}
-	my($voted_fair, $voted_unfair) = (0, 0);
+	my($voted_up_fair, $voted_down_fair, $voted_up_unfair, $voted_down_unfair)
+		= (0, 0, 0, 0);
 	for my $mmid (keys %$m2s) {
 		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
 		my $is_fair = $m2s->{$mmid}{is_fair};
@@ -5457,8 +5471,19 @@ sub createMetaMod {
 
 		$rows += 0; # if no error, returns 0E0 (true!), we want a numeric answer
 		my $ui_hr = { };
-		if ($is_fair)	{ ++$voted_fair;   $ui_hr->{-m2fair}   = "m2fair+1" }
-		else		{ ++$voted_unfair; $ui_hr->{-m2unfair} = "m2unfair+1" }
+		     if ($is_fair  && $m2s->{$mmid}{val} > 0) {
+			++$voted_up_fair if $m2s_orig{$mmid};
+			$ui_hr->{up_fair}	= "up_fair+1"
+		} elsif ($is_fair  && $m2s->{$mmid}{val} < 0) {
+			++$voted_down_fair if $m2s_orig{$mmid};
+			$ui_hr->{down_fair}	= "down_fair+1"
+		} elsif (!$is_fair && $m2s->{$mmid}{val} > 0) {
+			++$voted_up_unfair if $m2s_orig{$mmid};
+			$ui_hr->{up_unfair}	= "up_unfair+1"
+		} elsif (!$is_fair && $m2s->{$mmid}{val} < 0) {
+			++$voted_down_unfair if $m2s_orig{$mmid};
+			$ui_hr->{down_unfair}	= "down_unfair+1"
+		}
 		$self->sqlUpdate("users_info", $ui_hr, "uid=$mod_uid");
 		if ($rows) {
 			# If a row was successfully updated, insert a row
@@ -5489,10 +5514,13 @@ sub createMetaMod {
 		$self->setUser_delete_memcached($mod_uid);
 	}
 
+	my $voted = $voted_up_fair || $voted_down_fair || $voted_up_unfair || $voted_down_unfair;
 	$self->sqlUpdate("users_info", {
-		-m2fairvotes	=> "m2fairvotes+$voted_fair",
-		-m2unfairvotes	=> "m2unfairvotes+$voted_unfair",
-	}, "uid=$m2_user->{uid}") if $voted_fair || $voted_unfair;
+		-m2voted_up_fair	=> "m2voted_up_fair	+ $voted_up_fair",
+		-m2voted_down_fair	=> "m2voted_down_fair	+ $voted_down_fair",
+		-m2voted_up_unfair	=> "m2voted_up_unfair	+ $voted_up_unfair",
+		-m2voted_down_unfair	=> "m2voted_down_unfair	+ $voted_down_unfair",
+	}, "uid=$m2_user->{uid}") if $voted;
 	$self->setUser_delete_memcached($m2_user->{uid});
 }
 
