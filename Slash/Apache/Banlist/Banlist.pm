@@ -29,8 +29,6 @@ sub handler {
 	Apache->request($r);
 	my $hostip = $r->connection->remote_ip;
 
-print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . $r->uri . "\n";
-
 	my($cur_ip, $cur_subnet) = get_ipids($hostip, 1);
 	my($cur_ipid, $cur_subnetid) = get_ipids($hostip);
 
