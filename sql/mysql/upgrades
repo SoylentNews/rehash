@@ -2514,13 +2514,13 @@ INSERT INTO vars (name, value, description) VALUES ('gse_table_join_row_cutoff',
 
 ALTER TABLE topic_nexus_extras ADD COLUMN content_type ENUM("story","comment") NOT NULL DEFAULT 'story';
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_24, Start of T_2_5_0_25 - 2004/09/03
 
 INSERT INTO vars (name, value, description) VALUES ('gse_skip_count_if_no_min_stoid', '0', 'If no min_stoid is available, skip counting the s_t_r rows and go straight to the one-table select? Rule of thumb, set this to true for sites with many stories (say, over 10,000)');
 
 ALTER TABLE topic_nexus_extras MODIFY COLUMN type ENUM('text', 'list') NOT NULL DEFAULT 'text';
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_25, Start of T_2_5_0_26 - 2004/09/09
 
