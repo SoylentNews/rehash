@@ -206,13 +206,13 @@ sub bulkEmail {
 		'Message-Id'			=> messageID(),
 	);
 	my $return = $bulk->bulkmail;
-	$bulk->disconnect;
 
 	# end logging
 	for my $fh ($goodfile, $badfile, $errfile) {
 		printf $fh "Ending bulkmail   '%s': %s\n\n",
 			$subject, scalar localtime;
-		close $fh;
+		# will close when $bulk goes anyway anyway
+		#close $fh;
 	}
 
 	return $return;
