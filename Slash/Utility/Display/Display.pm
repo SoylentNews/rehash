@@ -464,7 +464,7 @@ sub linkStory {
 		}
 		chop $url;
 	} else {
-		$url .= $section . '/' . $story_link->{sid} . '.shtml';
+		$url .= '/' . $section . '/' . $story_link->{sid} . '.shtml';
 		# manually add the tid for now
 		if ($params{tid}) {
 			if (ref $params{tid} eq 'ARRAY') {
