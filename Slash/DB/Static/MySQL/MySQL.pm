@@ -787,9 +787,8 @@ sub getSkinInfo {
 		next unless $tree->{$tid}{nexus} && $tree->{$tid}{skid} && $tree->{$tid}{child};
 
 		my $skinname = $skins->{ $tree->{$tid}{skid} }{name};
-		$index{$skinname} = { };
 		my $mp_tid = $constants->{mainpage_nexus_tid};
-		for my $child_tid (keys %{$tree->{$tid}{child}}) {
+		for my $child_tid (sort { lc $tree->{$a}{textname} cmp lc $tree->{$b}{textname} } keys %{$tree->{$tid}{child}}) {
 			next unless $tree->{$child_tid}{nexus} && $tree->{$child_tid}{skid};
 			if ($children{$child_tid}) {
 				push @{$index{$skinname}{$child_tid}}, $children{$child_tid};
@@ -808,7 +807,8 @@ sub getSkinInfo {
 				'MONTH(time), MONTHNAME(time), DAYOFMONTH(time)',
 				'stories, story_topics_rendered',
 				"stories.stoid=story_topics_rendered.stoid AND
-				 story_topics_rendered.tid='$child_tid' AND in_trash = 'no' AND time < NOW()"
+				 story_topics_rendered.tid='$child_tid' AND in_trash = 'no' AND time < NOW()
+				 ORDER BY time DESC LIMIT 1"
 			);
 
 			$child_data{count} = $self->sqlCount(
@@ -829,63 +829,11 @@ sub getSkinInfo {
 			);
 
 			$children{$child_tid} = \%child_data;
-			push @{$index{$skinname}{$child_tid}}, $children{$child_tid};
+			push @{$index{$skinname}}, $children{$child_tid};
 		}
 	}
 
 	return \%index;
-
-	
-=pod
-
-	my $defaultsection = getCurrentStatic('defaultsection');
-	# Make more sense to make this a getDescriptions call -Brian
-	my $sections = $self->sqlSelectAllHashrefArray(
-		"section, url",
-		"sections",
-		"type='contained' AND section != '$defaultsection' ",
-		"ORDER BY section"
-	);
-
-	for (@{$sections}) {
-		@{%{$_}}{qw(month monthname day)} =
-			$self->{_dbh}->selectrow_array(<<EOT);
-SELECT MONTH(time), MONTHNAME(time), DAYOFMONTH(time)
-FROM stories
-WHERE section='$_->{section}' AND time < NOW() AND displaystatus > -1
-ORDER BY time DESC LIMIT 1
-EOT
-
-		$_->{count} =
-			$self->{_dbh}->selectrow_array(<<EOT);
-SELECT COUNT(*) FROM stories
-WHERE section='$_->{section}'
-	AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2 AND time < NOW()
-	AND displaystatus > -1
-EOT
-
-		$_->{count_sectional} =
-			$self->{_dbh}->selectrow_array(<<EOT);
-SELECT COUNT(*) FROM stories
-WHERE section='$_->{section}'
-	AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2 AND time < NOW()
-	AND displaystatus > 0
-EOT
-
-	}
-
-	my $rootdir = getCurrentSkin('rootdir');
-	for my $section (@$sections) {
-		# add rootdir, form figured dynamically -- pudge
-		$section->{rootdir} = set_rootdir(
-			$section->{url}, $rootdir
-		);
-	}
-
-	return $sections;
-
-=cut
-
 }
 
 ########################################################
