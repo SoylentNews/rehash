@@ -30,7 +30,11 @@ sub main {
 			seclev		=> 1,
 		},
 		paypal		=> {
-			function	=> \&paypal,
+			function	=> \&makepayment,
+			seclev		=> 1,
+		},
+		makepayment	=> {
+			function	=> \&makepayment,
 			seclev		=> 1,
 		},
 		pause		=> {
@@ -39,7 +43,7 @@ sub main {
 		},
 	};
 
-	if ($user->{is_anon} && $op ne 'paypal') {
+	if ($user->{is_anon} && $op !~ /^(paypal|makepayment)$/) {
 		my $rootdir = getCurrentStatic('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
@@ -153,13 +157,13 @@ sub save {
 	1;
 }
 
-sub paypal {
+sub makepayment {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	if (!$form->{secretword}
 		|| $form->{secretword} ne $constants->{subscribe_secretword}) {
 		sleep 5; # easy way to help defeat brute-force attacks
-		print "<p>Paypal rejected, wrong secretword\n";
+		print "<p>Payment rejected, wrong secretword\n";
 	}
 
 	my @keys = qw( uid email payment_gross payment_net transaction_id data );
@@ -179,19 +183,19 @@ sub paypal {
 		$slashdb->setUser($payment->{uid}, {
 			"-hits_paidfor" => "hits_paidfor + $num_pages"
 		});
-		print "<p>Paypal confirmed\n";
+		print "<p>Payment confirmed\n";
 	} else {
 		use Data::Dumper;
-		my $warning = "WARNING: Paypal payment accepted but record "
+		my $warning = "WARNING: Payment accepted but record "
 			. "not added to database! rows='$rows'\n"
 			. Dumper($payment);
 		print STDERR $warning;
-		print "<p>Paypal transaction ID already recorded or other error, "
+		print "<p>Payment transaction ID already recorded or other error, "
 			. "not added to database! rows='$rows'\n";
 	}
 }
 
-# Wait a moment for Paypal's instant payment notification to take place
+# Wait a moment for an instant payment notification to take place
 # "behind the scenes," then redirect the user to the main subscribe.pl
 # page where they will see their new subscription options.
 sub pause {
