@@ -178,20 +178,28 @@ sub reproduceAgents {
 			"daid = $daid_q AND alive='yes'");
 		# If that update failed, the agent either doesn't exist or
 		# is dead.
-		next unless $updated;
+		if (!$updated) {
+			print STDERR "could not update parent food/2: $daid_q (@$daids)\n";
+			next;
+		}
 
 		# Grab a copy of the agent, with half the food now, and insert
 		# it again.  We delete its agent id and let the database pick
-		# a unique new one, and we reset its born tick to the most
-		# recent tick count.
+		# a unique new one, we clear its memory, and we reset
+		# its born tick to the most recent tick count.
 		my $agent_hr = $self->sqlSelectHashref(
-			"*",
-			"dilemma_agents",
-			"daid=$daid_q");
+			"*", "dilemma_agents", "daid=$daid_q");
 		delete $agent_hr->{daid};
+		$agent_hr->{memory} = "";
 		$agent_hr->{born} = $last_tick;
 		my $success = $self->sqlInsert("dilemma_agents", $agent_hr);
-		$species_births_hr->{$agent_hr->{dsid}}++ if $success;
+		if ($success) {
+			$species_births_hr->{$agent_hr->{dsid}}++;
+		} else {
+			use Data::Dumper;
+			$Data::Dumper::Sortkeys = 1;
+			print STDERR "could not insert child: " . Dumper($agent_hr);
+		}
 	}
 	return $species_births_hr;
 }
@@ -252,7 +260,7 @@ sub doTickHousekeeping {
 		"dilemma_agents",
 		"food >= $birth_food_q");
 	my $species_births_hr = $self->reproduceAgents($fat_daids);
-##print STDERR "species_births_hr: " . Dumper($species_births_hr);
+print STDERR "species_births_hr: " . Dumper($species_births_hr);
 	# Update the species stats for the births.
 	for my $dsid (keys %$species_births_hr) {
 		my $dsid_q = $self->sqlQuote($dsid);
