@@ -1526,19 +1526,17 @@ sub createSection {
 }
 
 ########################################################
-
 sub createSubSection {
 	my($self, $section, $subsection, $artcount) = @_;
 
 	$self->sqlInsert('subsections', {
-		title	=> $subsection,
-		section	=> $section,
-		artcount=> $artcount || 0,
+		title		=> $subsection,
+		section		=> $section,
+		artcount	=> $artcount || 0,
 	});
 }
 
 ########################################################
-
 sub removeSubSection {
 	my($self, $section, $subsection) = @_;
 
@@ -4421,8 +4419,8 @@ sub getSlashConf {
 	$conf{textarea_rows}	||= 10;
 	$conf{textarea_cols}	||= 50;
 	$conf{allow_deletions}  ||= 1;
-	$conf{authors_unlimited} = 100 if !$conf{authors_unlimited}
-		|| $conf{authors_unlimited} == 1;
+	$conf{authors_unlimited} = 100 if ( (! defined $conf{authors_unlimited})
+		|| ($conf{authors_unlimited} == 1) );
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {
@@ -5102,7 +5100,6 @@ sub getSubSections {
 }
 
 ########################################################
-
 sub getSubSectionsBySection {
 	my($self, $section) = @_;
 
