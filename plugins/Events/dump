@@ -1,0 +1,18 @@
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Events','[% constants.rootdir %]/eventsadmin.pl?op=list',10000,19);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('events','List Events','[% constants.rootdir %]/eventsadmin.pl?op=list',0,1);
+
+INSERT INTO code_param (type, name, code) VALUES ('months','January', 1);
+INSERT INTO code_param (type, name, code) VALUES ('months','February', 2);
+INSERT INTO code_param (type, name, code) VALUES ('months','March', 3);
+INSERT INTO code_param (type, name, code) VALUES ('months','April', 4);
+INSERT INTO code_param (type, name, code) VALUES ('months','May', 5);
+INSERT INTO code_param (type, name, code) VALUES ('months','June', 6);
+INSERT INTO code_param (type, name, code) VALUES ('months','July', 7);
+INSERT INTO code_param (type, name, code) VALUES ('months','August', 8);
+INSERT INTO code_param (type, name, code) VALUES ('months','September', 9);
+INSERT INTO code_param (type, name, code) VALUES ('months','October', 10);
+INSERT INTO code_param (type, name, code) VALUES ('months','November', 11);
+INSERT INTO code_param (type, name, code) VALUES ('months','December', 12);
+INSERT INTO code_param (type, name, code) VALUES ('years','2001', 1);
+INSERT INTO code_param (type, name, code) VALUES ('years','2002', 2);
+INSERT INTO code_param (type, name, code) VALUES ('years','2003', 3);

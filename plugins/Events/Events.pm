@@ -77,14 +77,40 @@ sub deleteDates {
 sub getEventsByDay {
 	my ($self, $date, $limit) = @_;
 
+	my $user = getCurrentUser();
+	my $section;
+	$section ||= $user->{section};
 	my $where = "((to_days('$date') >= to_days(begin)) AND (to_days('$date') <= to_days(end)))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
-	$where .= " AND BeginDate < now "
-		if $limit;
+	$where .= " AND stories.section = '$section'" if $section;
 	my $order = "ORDER BY tid";
 	$order .= " LIMIT $limit "
 		if $limit;
 	my $events = $self->sqlSelectAll(
 		"stories.sid,title,'',topics.tid,alttext",
+		"stories, event_dates, topics",
+		$where,
+		$order
+		);
+	
+	return $events;
+}
+
+sub getEvents {
+	my ($self, $date, $limit, $section, $topic)  = @_;
+
+	my $user = getCurrentUser();
+	$section ||= $user->{section};
+	my $where = "(to_days('$date') <= to_days(begin)) AND stories.sid = event_dates.sid";
+	$where .= " AND topics.tid = stories.tid";
+
+	$where .= " AND stories.tid = $topic" if $topic;
+	$where .= " AND stories.section = '$section'" if $section;
+
+	my $order = "ORDER BY tid";
+	$order .= " LIMIT $limit "
+		if $limit;
+	my $events = $self->sqlSelectAll(
+		"stories.sid,title,time,begin,end,section,topics.tid,alttext",
 		"stories, event_dates, topics",
 		$where,
 		$order

@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+"sid,title,dept,topics.tid,alttext"
+__title__
+
+__page__
+eventsadmin
+__lang__
+en_US
+__name__
+listevents
+__template__
+[% USE Slash %]
+[% PROCESS titlebar title="List Events" width="100%" %]
+<TABLE>
+	<TR>
+		<TD>Event</TD><TD>Entered</TD><TD>Dates</TD><TD>Section</TD><TD>Topic</TD>
+	</TR>
+[% FOREACH event=events %]
+	<TR>
+		<TD><A HREF="[% constants.rootdir %]/eventsadmin.pl?op=edit&amp;sid=[% event.0 %]">[% event.1 %]</A>&nbsp;</TD>
+		<TD>[% event.2 %]&nbsp;</TD>
+		<TD>[% event.3 %] - [% event.4 %]&nbsp;</TD>
+		<TD>[% event.5 %]&nbsp;</TD>
+		<TD>[% event.7 %] ([% event.6 %])&nbsp;</TD>
+	</TR>
+[% END %]
+</TABLE>
+[% INCLUDE titlebar width="100%" title="Select Date" %]
+<FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
+Day 
+<SELECT NAME="day">
+[% FOREACH i = days %]
+	
+	<OPTION VALUE="[% i %]" [% IF i == day_selected %]SELECTED[% END %]>[% i %]
+[% END %]
+</SELECT>
+Month [% Slash.createSelect("month", months, month_selected, 1, 1) %]&nbsp;
+Year [% Slash.createSelect("year", years, year_selected, 1, 1) %]&nbsp;
+&nbsp;
+<INPUT NAME="op" VALUE="List" TYPE="SUBMIT">
+</FORM>
+__seclev__
+100
