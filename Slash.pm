@@ -1192,31 +1192,25 @@ sub sqlConnect {
 	# return \$dbh;
 }
 
-###############################################################################
-#
-# Some Random Dave Code for HTML validation
-# (pretty much the last legacy of daveCode[tm] by demaagd@imagegroup.com
-#
-
 ########################################################
 sub stripByMode {
 	my($str, $fmode, $no_white_fix) = @_;
 	$fmode ||= 'nohtml';
+	$no_white_fix = defined($no_white_fix) ? $no_white_fix : $fmode eq 'literal';
 
-	# ASCII only ?
-#	$str =~ s/[^\011\040\033-176]/sprintf '&#%d;', ord $1/ge;
-
+	# insert whitespace into long words, convert <>& to HTML entities
 	if ($fmode eq 'literal' || $fmode eq 'exttrans' || $fmode eq 'attribute' || $fmode eq 'code') {
-		$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
+		$str = breakHtml($str) unless $no_white_fix;
 		# Encode all HTML tags
 		$str =~ s/&/&amp;/g;
 		$str =~ s/</&lt;/g;
 		$str =~ s/>/&gt;/g;
 	}
 
-	# this "if" block part of patch from Ben Tilly
+	# convert regular text to HTML-ized text, insert P, etc.
 	if ($fmode eq 'plaintext' || $fmode eq 'exttrans' || $fmode eq 'code') {
-		$str = stripBadHtml($str, $no_white_fix);
+		$str = stripBadHtml($str);
+		$str = breakHtml($str) unless $no_white_fix;
 		$str =~ s/\n/<BR>/gi;  # pp breaks
 		$str =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
 		# Preserve leading indents
@@ -1224,19 +1218,22 @@ sub stripByMode {
 		$str =~ s/<BR>\n?( +)/"<BR>\n" . ("&nbsp; " x length($1))/ieg;
 		$str = '<CODE>' . $str . '</CODE>' if $fmode eq 'code';
 
+	# strip out all HTML
 	} elsif ($fmode eq 'nohtml') {
 		$str =~ s/<.*?>//g;
 		$str =~ s/<//g;
 		$str =~ s/>//g;
-		$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
+		$str = breakHtml($str) unless $no_white_fix;
 
+	# convert HTML attribute to allowed text (just convert ")
 	} elsif ($fmode eq 'attribute') {
 		$str =~ s/"/&#34;/g;
 #		$str =~ s/'/&#39;/g;	# ' should be OK if we use
 					# " consistently
 
 	} else {
-		$str = stripBadHtml($str, $no_white_fix);
+		$str = stripBadHtml($str);
+		$str = breakHtml($str) unless $no_white_fix;
 	}
 
 	return $str;
@@ -1244,16 +1241,45 @@ sub stripByMode {
 
 ########################################################
 sub stripBadHtml  {
-	my($str, $no_white_fix) = @_;
+	my($str) = @_;
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
-
-	$str =~ s/></> </g;
-
-	$str =~ s/([^<>\s]{90})/$1 /g unless $no_white_fix;
+	$str =~ s/> </> $1/g;
 
 	return $str;
+}
+
+########################################################
+{
+	my %is_break_tag;
+
+	sub breakHtml {
+		my($comment, $mwl) = @_;
+		my($new, $l, $c, $in_tag, $this_tag, $cwl);
+
+		$mwl = $mwl || 80;
+		$l = length($comment);
+
+		%is_break_tag = map { uc, 1 } qw(HR BR LI P OL UL BLOCKQUOTE DIV)
+			unless scalar keys %is_break_tag;
+
+		for (my $i = 0; $i < $l; $new .= $c, ++$i) {
+			$c = substr($comment, $i, 1);
+			if ($c eq '<')		{ $in_tag = 1 }
+			elsif ($c eq '>')	{
+				$in_tag = 0;
+				$this_tag =~ s{^/?(\S+).*}{\U$1};
+				$cwl = 0 if $is_break_tag{$this_tag};
+				$this_tag = '';
+			}
+			elsif ($in_tag)		{ $this_tag .= $c }
+			elsif ($c =~ /\s/)	{ $cwl = 0 }
+			elsif (++$cwl > $mwl)	{ $new .= ' '; $cwl = 1 }
+		}
+
+		return $new;
+	}
 }
 
 ########################################################

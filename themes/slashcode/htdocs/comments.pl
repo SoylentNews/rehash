@@ -631,9 +631,7 @@ EOT
 ##################################################################
 # Saves the Comment
 sub submitComment {
-	$I{F}{postersubj} = stripByMode(
-		$I{F}{postersubj}, 'nohtml', $I{U}{aseclev}, ''
-	);
+	$I{F}{postersubj} = stripByMode($I{F}{postersubj}, 'nohtml');
 	$I{F}{postercomment} = stripByMode($I{F}{postercomment}, $I{F}{posttype});
 
 	($I{F}{postercomment}, $I{F}{postersubj}) =
