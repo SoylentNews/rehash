@@ -382,9 +382,14 @@ EOT
 sub delete_templates {
 	my($templatelist) = @_;
 	my $list = join(" ", keys(%$templatelist));
-	print "are you sure you want to delete templates tpid(s) $list ? y/Y ";
+	
+	print "are you sure you want to delete the following templates:\n\n";
+	printf "%s\t%s;%s;%s\n",
+		@{$templatelist->{$_}}{qw(tpid name page section)}
+	for keys %{$templatelist};
+	print "\nDelete these templates? [Y/n]";
+	
 	chomp(my $answer = <STDIN>);
-
 	if ($answer =~ /^[Yy]$/) {
 		for my $template (keys %$templatelist) {
 			$slashdb->deleteTemplate($template);
