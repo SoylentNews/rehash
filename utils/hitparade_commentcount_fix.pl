@@ -41,7 +41,7 @@ $task{$PROGNAME}{code} = sub {
 	for (keys %$hitparade) {
 		my $discussion = $hitparade->{$_};
 		my $sid = $sid2discussion->{$_};
-		# Ok, its a hack, move along, this is not the code you are looking for -Brian
+		# Ok, it's a hack, move along, this is not the code you are looking for -Brian
 		my $string = join (",",
 				map { $discussion->{$_} || 0 }
 				($constants->{comment_minscore} .. $constants->{comment_maxscore})

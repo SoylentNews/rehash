@@ -103,7 +103,7 @@ that will keep each Slashdot box synchronized with a hot-spare box, so
 in case a box suddenly dies it will automatically be replaced with a hot-spare
 box -- kind of a RAID-for-servers solution (imagine... a Beowulf cluster
 of these? <i>rimshot</i>) Yes, it'll also be released as open source when
-its functional.
+it's functional.
 <p><b>Security Measures</b>
 <p>The Matrix sits behind a firewalling BSD box and an Arrowpoint Load
 balancer. Each filters certain kinds of attacks and frees up the httpd

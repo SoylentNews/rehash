@@ -121,7 +121,7 @@ sub editpoll {
 		$checked = ($slashdb->getSection($question->{section}, 'qid', 1) == $qid) ? 1 : 0;
 		my $poll_open = $slashdb->isPollOpen($qid);
 
-		# Just use the DB method, its too messed up to rebuild the logic
+		# Just use the DB method, it's too messed up to rebuild the logic
 		# here -Brian
 		my $poll = $slashdb->getPoll($qid);
 		my $raw_pollbooth = slashDisplay('pollbooth', {

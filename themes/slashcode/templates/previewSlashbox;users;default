@@ -23,7 +23,7 @@ labeled "[% block.title | strip_literal %]".  If you select it from the
 <A HREF="[% constants.rootdir %]/users.pl?op=edithome">Preferences Page</A>,
 you will have that little block added to the right hand side of your
 <A HREF="[% constants.rootdir %]/index.pl">Custom [% constants.sitename %]</A> page.
-Exciting?  Not really, but its a great way to waste time.
+Exciting?  Not really, but it's a great way to waste time.
 
 [% IF is_editable %]
 	<P>Edit <A HREF="[% constants.rootdir %]/admin.pl?op=blocks&amp;bid=[% form.bid %]">[% form.bid %]</A>

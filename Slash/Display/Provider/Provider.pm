@@ -155,7 +155,7 @@ sub _refresh {
 	print STDERR "_refresh([ @$slot ])\n" if $DEBUG;
 
 	# compare load time with current _modtime from API to see if
-	# its modified and we need to reload it
+	# it's modified and we need to reload it
 	if ($slot->[ DATA ]{modtime}) {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
 		my $temp = $reader->getTemplate($slot->[ NAME ], ['tpid']);
