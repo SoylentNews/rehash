@@ -52,6 +52,12 @@ Some of your past moderations have been meta-moderated by other
 [%- END %]
 [% END %]
 [%- END -%]
+[% IF (m2_summary.fair + m2_summary.unfair) > 0;
+	"Summary of your recent moderation: " ;
+	Slash.getData("percentage", { sum => m2_summary.fair, count => (m2_summary.fair + m2_summary.unfair )}, "misc");
+	" Fair";
+	IF msg.mode == 1; "<P>"; END;
+END %]
 [%
 	msg1 = '';
 	msg2 = '';

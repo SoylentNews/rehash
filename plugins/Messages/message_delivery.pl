@@ -100,7 +100,7 @@ $task{$me}{code} = sub {
 			];
 
 			$msg->{message} = $message;
-			$msg->{subject} = $type;
+			$msg->{subject} = $type unless $msg->{use_subject_for_collected};
 			$msg->{date}    = $date;
 			push @$msgs, $msg;
 		}
