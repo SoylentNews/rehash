@@ -1,0 +1,2 @@
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% constants.rootdir %]/my/friends/',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans/',1,1);

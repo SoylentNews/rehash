@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+Displays friends.
+
+* friends = arrayref of friends (nickname, uid, last entry time, last entry description, last entry id)
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+plainlist
+__template__
+[% USE Slash %]
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+[% FOREACH friend = friends %]
+    <TR>
+	<TD VALIGN="TOP">
+		<A HREF="[% constants.rootdir %]/~[% friend.1 | fixparam %]/">[% friend.1 %]</A>
+	</TD>
+	<TD VALIGN="TOP">
+		<A HREF="[% constants.rootdir %]/~[% friend.1 | fixparam %]/friends/">friends</A>
+	</TD>
+	[% IF friend.2 %]
+		<TD VALIGN="TOP">
+			<A HREF="[% constants.rootdir %]/~[% friend.1 | fixparam %]/journal/"><B><EM> Last Journal enty [% Slash.timeCalc(friend.2) %]</EM></A>
+		</TD>
+	[% ELSE %]
+		<TD VALIGN="TOP">&nbsp;</TD>
+	[% END %]
+
+	[% IF editable %]
+		<TD VALIGN="TOP">
+		[% IF form.op == "fans" %]
+				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% friend.0 %]">Add Friend</A>
+		[% ELSIF form.op == "friends" %]
+				<A HREF="[% constants.rootdir %]/journal.pl?op=deletemeta&amp;delete=[% friend.0 %]">Remove Friend</A>
+		[% END %]
+		</TD>
+	[% END %]
+</TR>
+[% END %]
+</TABLE>
+<BR><BR>
+__seclev__
+100

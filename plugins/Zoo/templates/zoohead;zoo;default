@@ -1,0 +1,19 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+zoohead
+__template__
+[% USE Slash %]
+[% Slash.createMenu("zoo") %]
+[% PROCESS titlebar width => "100%" %]
+
+__seclev__
+500

@@ -1,0 +1,7 @@
+name=Zoo
+description="Friend and Foe system"
+mysql_schema=mysql_schema
+htdoc=zoo.pl
+template=templates/data;zoo;default
+template=templates/plainlist;zoo;default
+template=templates/zoohead;zoo;default

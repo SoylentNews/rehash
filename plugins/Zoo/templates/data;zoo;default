@@ -1,0 +1,38 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'mainhead' %]
+	[% constants.sitename %] Friend/Foe System
+
+[% CASE 'nofriends' %]
+	[% nickname %] is all alone in the world.
+
+[% CASE 'nofans' %]
+	[% nickname %]  is either loved by all or just invisible.
+
+[% CASE 'friendshead' %]
+	Friends of [% nickname %]
+
+[% CASE 'fanshead' %]
+	Fans of [% nickname %]
+
+[% END %]
+
+__seclev__
+10000
