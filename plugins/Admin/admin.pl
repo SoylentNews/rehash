@@ -1311,7 +1311,8 @@ sub listStories {
 	}
 
 	for (@$storylist) {
-		my($hits, $comments, $sid, $title, $aid, $time_plain, $topic, $section,
+		my($hits, $comments, $sid, $title, $aid, $time_plain, $topic,
+			$subsection, $section,
 			$displaystatus, $writestatus) = @$_;
 		my $time = timeCalc($time_plain, '%H:%M', 0);
 		my $td   = timeCalc($time_plain, '%A %B %d', 0);
