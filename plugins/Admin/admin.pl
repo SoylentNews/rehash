@@ -173,7 +173,7 @@ sub varEdit {
 	my $vars_select = createSelect('name', $vars, $name, 1);
 
 	if ($name) {
-		$varsref = $slashdb->getVar($name);
+		$varsref = $slashdb->getVar($name,'',1);
 	}
 
 	slashDisplay('varEdit', {
@@ -188,7 +188,7 @@ sub varSave {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	if ($form->{thisname}) {
-		my $value = $slashdb->getVar($form->{thisname});
+		my $value = $slashdb->getVar($form->{thisname},'',1);
 		if ($value) {
 			$slashdb->setVar($form->{thisname}, {
 				value		=> $form->{value},

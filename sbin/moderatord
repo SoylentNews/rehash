@@ -106,8 +106,8 @@ if ($constants->{backup_db_user}) {
 	moderatordLog("Using replicated database => '$rusr'");
 }
 
-my $tc = $slashdb->getVar('totalComments', 'value');
-my $lc = $slashdb->getVar('lastComments', 'value');
+my $tc = $slashdb->getVar('totalComments', 'value', 1);
+my $lc = $slashdb->getVar('lastComments', 'value', 1);
 
 # Maybe we should think about adding in a minimum
 # value here which would affect the minimum # of

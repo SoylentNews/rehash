@@ -123,7 +123,7 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	my $w = $slashdb->getVar('writestatus', 'value');
+	my $w = $slashdb->getVar('writestatus', 'value', 1);
 	my $dirty_sections = $slashdb->getSectionsDirty();
 	for my $cleanme (@$dirty_sections) { $updates{$cleanme} = 1 }
 

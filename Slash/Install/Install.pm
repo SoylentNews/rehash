@@ -519,7 +519,7 @@ sub _getList {
 			if ($key =~ /^(
 				htdoc | htdoc_code | htdoc_faq | 
 				image | image_award | image_banner | image_faq |
-				no-template | task | template | sbin | misc | topic
+				no-template | include_theme | task | template | sbin | misc | topic
 			)s?$/x) {
 				push @{$hash{$dir}{$1}}, $val;
 			} elsif ($key =~ /^(

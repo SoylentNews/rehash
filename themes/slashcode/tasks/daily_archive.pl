@@ -29,7 +29,7 @@ $task{$me}{code} = sub {
 	slashdLog('Updating User Logins End');
 
 	slashdLog('Update Total Counts Begin');
-	my $totalHits = $slashdb->getVar("totalhits");
+	my $totalHits = $slashdb->getVar("totalhits", '', 1);
 	my $count = $slashdb->countAccesslogDaily();
 	$slashdb->setVar("totalhits", $totalHits);
 	slashdLog('Update Total Counts End');

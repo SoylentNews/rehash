@@ -40,7 +40,7 @@ $task{$me}{code} = sub {
 	# these are 404s
 	delete $count->{'index.html'};
 
-	my $sdTotalHits = $stats->getVar('totalhits', 'value');
+	my $sdTotalHits = $stats->getVar('totalhits', 'value', 1);
 	$sdTotalHits = $sdTotalHits + $count->{'total'};
 
 	my $admin_clearpass_warning = '';

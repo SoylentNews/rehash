@@ -5452,7 +5452,7 @@ sub getModeratorLog {
 
 ########################################################
 sub getVar {
-	my $answer = _genericGet({
+	my $answer = _genericGetCache({
 		table		=> 'vars',
 		table_prime	=> 'name',
 		arguments	=> \@_,

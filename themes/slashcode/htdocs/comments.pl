@@ -1058,7 +1058,7 @@ sub submitComment {
 		undoModeration($form->{sid});
 		printComments($discussion, $maxCid, $maxCid);
 
-		my $tc = $slashdb->getVar('totalComments', 'value');
+		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
 
 		# This is for stories. If a sid is only a number
