@@ -405,8 +405,6 @@ sub displayForm {
 
 
 	my $topic = $slashdb->getTopic($form->{tid});
-	$topic->{imageclean} = $topic->{image};
-	$topic->{imageclean} = "$constants->{imagedir}/topics/$topic->{imageclean}" if $topic->{imageclean} =~ /^\w+\.\w+$/;
 
 	my $known = "";
 	if ($form->{email}) {

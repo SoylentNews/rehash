@@ -41,9 +41,10 @@ __template__
 [% END %]
 
 [% PROCESS titlebar width="100%" title=submission.subj %]
+[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-SRC="[% topic.image %]"
-WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
+SRC="[% constants.imagedir %]/topics/[% image.image %]"
+WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
 ALIGN="RIGHT" HSPACE="20" VSPACE="10"
 ALT="[% topic.alttext %]"
 TITLE="[% topic.alttext %]"></A>

@@ -14,7 +14,7 @@ sub main {
 	my $form    = getCurrentForm();
 	my $user    = getCurrentUser();
 
-	header(getData('head'));
+	header(getData('head'), $form->{section});
 	
 	print createMenu('topics');
 

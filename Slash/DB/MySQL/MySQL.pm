@@ -5287,13 +5287,13 @@ sub createStory {
 	my $rootdir = $section->{rootdir} || $constants->{rootdir};
 
 	my $id = $self->createDiscussion( {
-		title		=> $story->{title},
-		section		=> $story->{section},
-		topic		=> $story->{tid},
-		url		=> "$rootdir/article.pl?sid=$story->{sid}&tid=$story->{topic}",
-		sid		=> $story->{sid},
-		commentstatus	=> $story->{commentstatus},
-		ts		=> $story->{'time'}
+		title	=> $story->{title},
+		section	=> $story->{section},
+		topic	=> $story->{tid},
+		url	=> "$rootdir/article.pl?sid=$story->{sid}&tid=$story->{topic}",
+		sid	=> $story->{sid},
+		commentstatus	=> $story->{commentstatus} || 'enabled',
+		ts	=> $story->{'time'}
 	});
 	unless ($id) {
 		print STDERR "Failed to create discussion for story\n";
