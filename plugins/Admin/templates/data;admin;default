@@ -93,6 +93,18 @@ Saved [% form.thisname %]<BR>
 [% CASE 'topicDelete-message' %]
 	<B>Deleted [% tid %]!</B><BR>
 
+[% CASE 'clearpass-warning' %]
+	<BLOCKQUOTE><P ALIGN="CENTER"><B>**&nbsp;Your admin password has been sent
+	in the clear. Please return to
+	<A HREF="[% constants.absolutedir_secure %]">the secure site</A>
+	and then
+	<A HREF="[% constants.absolutedir_secure %]/users.pl?op=changepasswd">change
+	your password</A>
+	immediately! If you have additional problems, please contact the
+	<A HREF="[% constants.siteadmin %]">site admin</a>.[%
+	IF moreinfo %] More info: "[% moreinfo | strip_literal %]".[%
+	END %]&nbsp;**</B></P></BLOCKQUOTE>
+
 [% END %]
 
 __seclev__

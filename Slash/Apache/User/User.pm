@@ -75,6 +75,14 @@ sub handler {
 		createCurrentUser();
 		createCurrentForm();
 		createCurrentCookie();
+		if (!$constants->{allow_nonadmin_ssl}
+			&& Slash::Apache::ConnectionIsSSL() ) {                             
+			# Accessing non-dynamic URL on SSL webserver; redirect
+			# to the non-SSL URL.
+			$r->err_header_out(Location =>
+				URI->new_abs($uri, $constants->{absolutedir}));
+			return REDIRECT;
+		}
 		return OK;
 	}
 
@@ -183,7 +191,17 @@ sub handler {
 	srand(time ^ ($$ + ($$ << 15))) unless $srand_called;
 	$srand_called ||= 1;
 
-	createCurrentUser(prepareUser($uid, $form, $uri, $cookies, $method));
+	my $user = prepareUser($uid, $form, $uri, $cookies, $method);
+	createCurrentUser($user);
+	if ( ($user->{seclev} <= 1 && !$user->{state}{lostprivs})
+		&& !$constants->{allow_nonadmin_ssl}
+		&& Slash::Apache::ConnectionIsSSL() ) {                             
+		# User is not an admin but is trying to connect to an admin-only
+		# webserver.  Redirect them to the non-SSL URL.
+		$r->err_header_out(Location =>
+			URI->new_abs($uri, $constants->{absolutedir}));
+		return REDIRECT;
+	}
 	createCurrentForm($form);
 	createCurrentCookie($cookies);
 	createEnv($r) if $cfg->{env};

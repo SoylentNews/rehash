@@ -1517,6 +1517,15 @@ sub savePasswd {
 			setCookie('user', $pass, $user_edits_table->{session_login});
 		}
 
+		if ($user->{admin_clearpass}
+			&& !$user->{state}{admin_clearpass_thisclick}) {
+			# User is an admin who sent their password in the clear
+			# some time ago; now that it's been changed, we'll forget
+			# about that incident, unless this click was sent in the
+			# clear as well.
+			$user_edits_table->{admin_clearpass} = '';
+		}
+
 		$slashdb->setUser($uid, $user_edits_table) ;
 		$$note .= getMessage('saveuser_passchanged_msg',
 			{ nick => $user_edit->{nickname}, uid => $user_edit->{uid} },

@@ -1159,6 +1159,18 @@ sub prepareUser {
 			$sid = $slashdb->getSessionInstance($uid);
 		}
 		setCookie('session', $sid) if $sid;
+		if ($constants->{admin_check_clearpass}
+			&& !Slash::Apache::ConnectionIsSecure()) {
+			$user->{state}{admin_clearpass_thisclick} = 1;
+		}
+	}
+	if ($user->{seclev} > 1
+		&& $constants->{admin_clearpass_disable}
+		&& ($user->{state}{admin_clearpass_thisclick} || $user->{admin_clearpass})) {
+		# User temporarily loses their admin privileges until they
+		# change their password.
+		$user->{seclev} = 1;
+		$user->{state}{lostprivs} = 1;
 	}
 
 	return $user;

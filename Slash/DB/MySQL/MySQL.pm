@@ -4150,6 +4150,7 @@ sub getSlashConf {
 	# any bad or missing data in the vars table
 	$conf{rootdir}		||= "//$conf{basedomain}";
 	$conf{absolutedir}	||= "http://$conf{basedomain}";
+	$conf{absolutedir_secure} ||= "https://$conf{basedomain}";
 	$conf{basedir}		||= "$conf{datadir}/public_html";
 	$conf{imagedir}		||= "$conf{rootdir}/images";
 	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";

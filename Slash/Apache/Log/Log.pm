@@ -67,6 +67,13 @@ sub UserLog {
 			}
 		}
 	}
+	if ($constants->{admin_check_clearpass}
+		&&  $user->{state}{admin_clearpass_thisclick}
+		&& !$user->{admin_clearpass}) {
+		# This could be any value as long as it's true.
+		$user_update->{admin_clearpass} = join(" ",
+			$r->connection->remote_ip, scalar(gmtime));
+	}
 	$slashdb->setUser($user->{uid}, $user_update) if $user_update;
 
 	return OK;

@@ -159,6 +159,24 @@ sub header {
 	slashDisplay('header', $title);
 
 	print createMenu('admin') if $user->{is_admin};
+	if ($constants->{admin_check_clearpass}
+		&& ($user->{state}{admin_clearpass_thisclick} || $user->{admin_clearpass})
+	) {
+		if ($user->{currentPage} eq 'users'
+			&& $form->{op} eq 'savepasswd') {
+			# The user is trying to save a new password with this
+			# very click. They may or may not succeed. Their admin
+			# privs for this click were already taken away in
+			# prepareUser() but just in case the savepasswd
+			# succeeded, don't print the warning message this time.
+		} else {
+			print slashDisplay('data',
+				{ value => 'clearpass-warning',
+				  moreinfo => $user->{admin_clearpass} },
+				{ Return => 1, Nocomm => 1, Page => 'admin' }
+			);
+		}
+	}
 }
 
 #========================================================================

@@ -38,8 +38,30 @@ $task{$me}{code} = sub {
 	delete $count->{'index.html'};
 
 	my $sdTotalHits = $stats->getVar('totalhits', 'value');
-
 	$sdTotalHits = $sdTotalHits + $count->{'total'};
+
+	my $admin_clearpass_warning = '';
+	if ($constants->{admin_check_clearpass}) {
+		my $clear_admins = $stats->getAdminsClearpass();
+		if ($clear_admins and keys %$clear_admins) {
+			for my $admin (sort keys %$clear_admins) {
+				$admin_clearpass_warning .=
+					"$admin $clear_admins->{$admin}{value}\n";
+			}
+		}
+		if ($admin_clearpass_warning) {
+			$admin_clearpass_warning = <<EOT;
+
+
+WARNING: The following admins accessed the site with their passwords,
+in cookies, sent in the clear.  They have been told to change their
+passwords but have not, as of the generation of this email.  They
+need to do so immediately.
+
+$admin_clearpass_warning
+EOT
+		}
+	}
 
 	my $accesslog_rows = $stats->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
@@ -92,7 +114,7 @@ $constants->{sitename} Stats for yesterday
      total: %8d
     unique: %8d
      users: %8d
-  
+$admin_clearpass_warning
  accesslog: %8d rows total
   formkeys: %8d rows total
     modlog: %8d rows total

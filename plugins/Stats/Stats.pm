@@ -53,6 +53,21 @@ sub getPoints {
 }
 
 ########################################################
+sub getAdminsClearpass {
+	my($self) = @_;
+	return $self->sqlSelectAllHashref(
+		"nickname",
+		"nickname, value",
+		"users, users_param",
+		"users.uid = users_param.uid
+			AND users.seclev > 1
+			AND users_param.name='admin_clearpass'
+			AND users_param.value",
+		"LIMIT 999"
+	);
+}
+
+########################################################
 sub countModeratorLog {
 	my($self, $yesterday) = @_;
 
