@@ -99,7 +99,8 @@ my %descriptions = (
 
 	'section_subsection'
 		=> sub { $_[0]->sqlSelectMany('id,title', 'subsections', "section='$_[2]'") },
-
+	'section_subsection_names'
+		=> sub { $_[0]->sqlSelectMany('title,id', 'subsections', "section='$_[2]'") },
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
 
@@ -112,6 +113,8 @@ my %descriptions = (
 	'displaycodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='displaycodes'") },
 
+	'displaycodes_sectional'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='displaycodes_sectional'") },
 	'commentcodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='commentcodes'") },
 
@@ -839,7 +842,7 @@ sub getDiscussionsByCreator {
 
 #################################################################
 sub getDiscussionsUserCreated {
-	my($self, $section, $limit, $start, $all) = @_;
+	my($self, $section, $limit, $start, $all, $order_by_activity) = @_;
 
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
@@ -2965,10 +2968,12 @@ sub getPoll {
 
 ##################################################################
 sub getSubmissionsSections {
-	my($self) = @_;
+	my($self, $section) = @_;
 	my $del = getCurrentForm('del');
 
-	my $hash = $self->sqlSelectAll("section,note,count(*)", "submissions WHERE del=$del GROUP BY section,note");
+	my $section_clause = $section? " AND section = '$section' " : ''; 
+
+	my $hash = $self->sqlSelectAll("section,note,count(*)", "submissions WHERE del=$del $section_clause GROUP BY section,note");
 
 	return $hash;
 }
@@ -4034,12 +4039,17 @@ EOT
 		# because we'd want three different representations, we
 		# just get it once in position 3 and then drop it into
 		# its traditional other locations in the array.
+		# annoying time format breaks timeCalc in the 
+		# storyTitleOnly template for the index page plugin
+		# I just need the raw time that's in the db
+		$data->[8] = $data->[3];
 		$data = [
 			@$data[0..4], 
 			$data->[3], 
 			$data->[5], 
 			$data->[3], 
-			$data->[6] 
+			$data->[6], 
+			$data->[3], 
 		];
 		formatDate([$data], 3, 3, '%A %B %d %I %M %p');
 		formatDate([$data], 5, 5, '%Y%m%d'); # %Q
@@ -4677,7 +4687,7 @@ sub getStoryList {
 
 	# CHANGE DATE_ FUNCTIONS
 	my $columns = 'hits, stories.commentcount as commentcount, stories.sid, stories.title, stories.uid, '
-		. 'time, name, stories.section, displaystatus, stories.writestatus';
+		. 'time, name, stories.subsection,stories.section, displaystatus, stories.writestatus';
 	my $tables = "stories, discussions, topics";
 	my $where = "stories.tid=topics.tid AND stories.discussion=discussions.id";
 	$where .= " AND stories.section='$user->{section}'" if $user->{section};
