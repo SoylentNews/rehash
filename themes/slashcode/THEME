@@ -165,7 +165,6 @@ template=templates/mainmenu;misc;default
 template=templates/messages;users;default
 template=templates/metaModerate;metamod;default
 template=templates/mid_tab;misc;default
-template=templates/mid_tab;misc;light
 template=templates/miniAdminMenu;users;default
 template=templates/modCommentLog;misc;default
 template=templates/mod_footer;comments;default
