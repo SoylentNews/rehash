@@ -89,31 +89,27 @@ sub getSlaveDBLagCount {
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 	my $bdu = $constants->{backup_db_user};
+	# If there *is* no backup DB, it's not lagged.
 	return 0 if !$bdu || $bdu eq getCurrentVirtualUser();
-	my $backupdb = getObject('Slash::DB', $constants->{backup_db_user});
-	# This is a large number and sufficiently noticeable that it should
-	# alert people that something is wrong.  Namely, the backup DB is
-	# not available.
-	return 2**32 if !$backupdb;
 
-	# Use these methods instead, duh!
-	# perl -MSlash::Test=foobar -le 'print Dumper($slashdb->sqlShowMasterStatus())'
-	# $VAR1 = [
-	# 	  {
-	# 	    'Position' => '468524929',
-	# 	    'Binlog_do_db' => '',
-	# 	    'Binlog_ignore_db' => '',
-	# 	    'File' => 'cpu92-bin.246'
-	# 	  }
-	# 	];
-	my $master = ($slashdb ->{_dbh}->selectall_arrayref("SHOW MASTER STATUS"))->[0];
-	my $slave  = ($backupdb->{_dbh}->selectall_arrayref("SHOW SLAVE  STATUS"))->[0];
-	my($master_file) = $master->[0] =~ /\.(\d+)$/;
-	my($slave_file)  = $slave ->[0] =~ /\.(\d+)$/;
-	my $count = 2**32*($master_file - $slave_file)
-		+ $master->[1] - $slave->[1];
+	my $backupdb = getObject('Slash::DB', $bdu);
+	# If there is supposed to be a backup DB but we can't contact it,
+	# return a large number that is sufficiently noticeable that it
+	# should alert people that something is wrong.
+	return 2**30 if !$backupdb;
+
+	# Get the actual lag count.  Assume that each file is 2**30
+	# (a billion) bytes (should this be a var?).  Yes, the same
+	# data is called "File" vs. "Log_File", "Position" vs. "Pos",
+	# depending on whether it's on the master or slave side.
+	my $master = ($slashdb ->sqlShowMasterStatus())->[0];
+	my $slave  = ($backupdb->sqlShowSlaveStatus())->[0];
+	my($master_file_num) = $master->{File}     =~ /\.(\d+)$/;
+	my($slave_file_num)  = $slave ->{Log_File} =~ /\.(\d+)$/;
+	my $count = 2**30 * ($master_file_num - $slave_file_num)
+		+ $master->{Position} - $slave->{Pos};
 	$count = 0 if $count < 0;
-	$count = 2**32 if $count > 2**32;
+	$count = 2**30 if $count > 2**30;
 	return $count;
 }
 
@@ -121,15 +117,18 @@ sub getSlaveDBLagCount {
 sub getCommentsByDistinctIPID {
 	my($self, $yesterday, $options) = @_;
 
-	my $section_where = $options->{section} ? 
-		" AND discussions.sid = comments.pid AND discussions.section = '$options->{section}'" : '';
+	my $section_where = "";
+	$section_where .= " AND discussions.id = comments.sid
+			    AND discussions.section = '$options->{section}'"
+		if $options->{section};
 
 	my $tables = 'comments';
-	$tables .= ",discussions" if $options->{section};
+	$tables .= ", discussions" if $options->{section};
 
 	my $used = $self->sqlSelectColArrayref(
 		'ipid', $tables, 
-		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59' $section_where",
+		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
+		 $section_where",
 		'',
 		{ distinct => 1 }
 	);
@@ -364,24 +363,31 @@ sub countCommentsDaily {
 	my($self, $yesterday, $options) = @_;
 
 	my $tables = 'comments';
-	$tables .= ",submissions" if $options->{section};
-	my $section_where = $options->{section} ? " AND discussions.sid = comments.pid AND discussions.section = '$options->{section}'" : '';
+	$tables .= ", submissions" if $options->{section};
+
+	my $section_where = "";
+	$section_where .= " AND discussions.id = comments.sid
+			    AND discussions.section = '$options->{section}'"
+		if $options->{section};
 	
 	# Count comments posted yesterday... using a primary key,
 	# if it'll save us a table scan.  On Slashdot this cuts the
 	# query time from about 12 seconds to about 0.8 seconds.
-	my $max_cid = $self->sqlSelect("MAX(comments.cid)", $tables, $section_where);
+	my $max_cid = $self->sqlSelect("MAX(comments.cid)", $tables);
 	my $cid_limit_clause = "";
 	if ($max_cid > 300_000) {
-		# No site can get more than 100K comments a day.
-		# It is decided.  :)
+		# No site can get more than 100K comments a day in
+		# all its sections combined.  It is decided.  :)
 		$cid_limit_clause = "cid > " . ($max_cid-100_000)
 			. " AND ";
 	}
+
 	my $comments = $self->sqlSelect(
 		"COUNT(*)",
 		"comments",
-		"$cid_limit_clause date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59' $section_where"
+		"$cid_limit_clause
+		 date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
+		 $section_where"
 	);
 
 	return $comments; 
@@ -411,13 +417,15 @@ sub countUsersByPage {
 ########################################################
 sub countDailyByPage {
 	my($self, $op, $yesterday, $options) = @_;
-	my $where = "op='$op' AND "
+
+	my $where = "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
+	$where .= " AND op='$op'"
 		if $op;
-	$where .= "section='$options->{section}' AND "
+	$where .= " AND section='$options->{section}'"
 		if $options->{section};
-	$where .= "op !='$options->{no_op}' AND "
+	$where .= " AND op !='$options->{no_op}'"
 		if $options->{no_op} && !$op;
-	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
+
 	$self->sqlSelect("count(*)", "accesslog", $where);
 }
 
@@ -439,7 +447,9 @@ sub countDaily {
 	my %returnable;
 
 	my $constants = getCurrentStatic();
-	my $section_where = $options->{section} ? " AND section = '$options->{section}'" : '';
+	my $section_where = $options->{section}
+		? " AND section = '$options->{section}'"
+		: '';
 
 	my($min_day_id, $max_day_id) = $self->sqlSelect(
 		"MIN(id), MAX(id)",
