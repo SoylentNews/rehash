@@ -100,26 +100,18 @@ change your password, or just click pretty widgets to kill time.
 [% CASE 'tilded_customize_msg' %]
 <TABLE WIDTH="100%" BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER" BORDER="0">
 	<TR><TD>
-	<P>Look ma, I'm configurable!
-	<B>Important:</B> If you leave these all unchecked, it means you
-	want the <I>default</I> selection of boxes.  If you start selecting
-	boxes, remember to set <B>all</B> of them that you want because the
-	default selection will be <B>ignored</B>.  Default entries are bolded.
+	<P><B>Note</B> that you can only choose a dozen or so boxes!
 
-	<P><B>User Space</B> (check 'user space' below and whatever
-	you place here will appear your custom [% constants.sitename %])<BR>
-	<TEXTAREA NAME="mylinks" rows=5 COLS="60" WRAP="VIRTUAL">[% userspace | strip_literal %]</TEXTAREA>
-	<P><MULTICOL COLS="3">
+	<BR>If you choose 
+	'<B>User Space</B>' above, the contents of this box will be inside:
+
+	<BR><TEXTAREA NAME="mylinks" rows=8 COLS="40" WRAP="VIRTUAL">[% userspace | strip_literal %]</TEXTAREA>
 
 [% CASE 'tilded_box_msg' %]
-	</MULTICOL><P>
-	If you have reasonable suggestions for boxes that can be added
-	here, or a problem with one of the boxes already here,
-	email <A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.
+	<P>If you find a problem, or have a reasonable suggestion
+	for new RSS feeds, please contact
+	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.
 
-	<P>The preferred format is the Netscape RDF format that is
-	rapidly becoming the de facto format for exchanging headlines
-	between sites.
 	<P></TD></TR></TABLE>
 
 [% CASE 'saveuser_email_msg' %]
