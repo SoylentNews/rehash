@@ -3287,25 +3287,29 @@ sub getNumCommPostedByUID {
 }
 
 ##################################################################
+# This method could stand to be more efficient.  Instead of doing a
+# separate getUser($uid, 'nickname') for each uid, those could be
+# one query. - Jamie 2003/04/11
 sub getUIDStruct {
 	my($self, $column, $id) = @_;
 
 	my $uidstruct;
-	my $where = '';
+	my $where = [ ];
 	$id = md5_hex($id) if length($id) != 32;
 	if ($column eq 'md5id') {
-		# Avoid this when possible, the OR makes the query slow.
-		$where = "ipid = '$id' OR subnetid = '$id'";
+		$where = [( "ipid = '$id'", "subnetid = '$id'" )];
 	} elsif ($column =~ /^(ipid|subnetid)$/) {
-		$where = "$column = '$id'";
+		$where = [( "$column = '$id'" )];
 	} else {
 		return [ ];
 	}
 
-	my $uidlist = $self->sqlSelectAll("DISTINCT uid ", "comments", $where);
+	my $uidlist;
+	$uidlist = [ ];
+	for my $w (@$where) {
+		push @$uidlist, @{$self->sqlSelectAll("DISTINCT uid", "comments", $w)};
+	}
 
-	# XXX This could be more efficient, but this method is only called
-	# by admin hits, so it's not crucial. - Jamie 2003/03/22
 	for (@$uidlist) {
 		my $uid;
 		$uid->{nickname} = $self->getUser($_->[0], 'nickname');
@@ -3313,7 +3317,10 @@ sub getUIDStruct {
 		$uidstruct->{$_->[0]} = $uid;
 	}
 
-	$uidlist = $self->sqlSelectAll("DISTINCT uid ", "submissions", $where);
+	$uidlist = [ ];
+	for my $w (@$where) {
+		push @$uidlist, @{$self->sqlSelectAll("DISTINCT uid", "submissions", $w)};
+	}
 
 	for (@$uidlist) {
 		if (exists $uidstruct->{$_->[0]}) {
@@ -3326,7 +3333,10 @@ sub getUIDStruct {
 		}
 	}
 
-	$uidlist = $self->sqlSelectAll("DISTINCT uid ", "moderatorlog", $where);
+	$uidlist = [ ];
+	for my $w (@$where) {
+		push @$uidlist, @{$self->sqlSelectAll("DISTINCT uid", "moderatorlog", $w)};
+	}
 
 	for (@$uidlist) {
 		if (exists $uidstruct->{$_->[0]}) {

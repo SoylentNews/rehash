@@ -1574,11 +1574,14 @@ sub editUser {
 
 	$title = getTitle('editUser_title', { user_edit => $user_edit});
 
+	my $editkey = "";
+	$editkey = editKey($user_edit->{uid}) if $fieldkey eq 'uid' && $plugins->{PubKey};
+
 	slashDisplay('editUser', {
 		useredit 		=> $user_edit,
 		admin_flag		=> $admin_flag,
 		title			=> $title,
-		editkey 		=> $plugins->{'PubKey'} ? editKey($user_edit->{uid}) : '',
+		editkey 		=> $editkey,
 		admin_block		=> $admin_block,
 		note			=> $note,
 	});
