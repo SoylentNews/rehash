@@ -63,7 +63,7 @@ sub findComments {
 	# select comment ID, comment Title, Author, Email, link to comment
 	# and SID, article title, type and a link to the article
 	my $sql;
-	my $limit = " LIMIT $start, $limit" if $limit;
+	$limit = " LIMIT $start, $limit" if $limit;
 
 	my $key = $self->_keysearch($form->{query}, ['subject', 'comment']);
 
@@ -97,16 +97,18 @@ sub findUsers {
 	# userSearch REALLY doesn't need to be ordered by keyword since you
 	# only care if the substring is found.
 	my $sql;
-	my $limit = " LIMIT $start, $limit" if $limit;
+	$limit = " LIMIT $start, $limit" if $limit;
 
 	$sql .= 'SELECT fakeemail,nickname,uid ';
 	$sql .= ' FROM users ';
 	$sql .= ' WHERE seclev > 0 ';
 	my $x = 0;
-	for my $user (@$users_to_ignore) {
-		$sql .= ' AND ' if $x != 0;
-		$sql .= " nickname != " .  $self->{_dbh}->quote($user);
-		$x++;
+	if($users_to_ignore) {
+		for my $user (@$users_to_ignore) {
+			$sql .= ' AND ' if $x != 0;
+			$sql .= " nickname != " .  $self->{_dbh}->quote($user);
+			$x++;
+		}
 	}
 
 	if ($form->{query}) {
@@ -129,7 +131,7 @@ sub findUsers {
 sub findStory {
 	my($self, $form, $start, $limit) = @_;
 	my $sql;
-	my $limit = " LIMIT $start, $limit" if $limit;
+	$limit = " LIMIT $start, $limit" if $limit;
 	my $key = $self->_keysearch($form->{query}, ['title', 'introtext']);
 
 	$sql .= "SELECT nickname,title,sid, time, commentcount,section ";
