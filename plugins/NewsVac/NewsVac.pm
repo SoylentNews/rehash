@@ -52,6 +52,7 @@ use strict;
 use vars qw($VERSION @EXPORT);
 
 use Slash 2.003;	# require Slash 2.3
+use 5.006;		# requires some 5.6-specific stuff, like our()
 
 use Fcntl;
 use File::Path;
@@ -69,6 +70,7 @@ use HTML::Entities;
 use HTML::LinkExtor;
 use URI::Escape;
 use HTTP::Cookies;
+use XML::RSS;
 
 use Slash::Display;
 use Slash::Utility;
@@ -172,6 +174,10 @@ sub Reset {
 
 	# Parser Class initialization.
 	$self->{hp} = $hp_class->new(%{$self->{hp_options}});
+
+	# we shouldn't ever have a problem with ignoring these;
+	# they come through as plain text if we don't ignore them
+	$self->{hp}->ignore_elements(qw(script style));
 }
 
 ############################################################
@@ -2499,9 +2505,7 @@ sub trim_body {
 		$the_reg = $pre_regex;
 	}
 	if ($the_reg) {
-		# What the hell are THESE for? The sole purpose, as I see it, is to
-		# break any pre regexp entered!
-		$the_reg =~ s{^(\(\?i\))?(.*)}{$1\\A[\\000-\\377]*$2};
+		$the_reg =~ s{^(\(\?i\))?(.*)}{$1\\A[\\000-\\377]*?$2};
 		$self->errLog(getData('trim_body_thereg', {
 			the_reg => $the_reg,
 			miner_id=> $miner_id,
@@ -2526,8 +2530,6 @@ sub trim_body {
 		$the_reg = $post_regex;
 	}
 	if ($the_reg) {
-		# What the hell are THESE for? The sole purpose, as I see it, is to
-		# break any post regexp entered!
 		$the_reg .= "[\\000-\\377]*\\Z";
 		$self->errLog(getData('trim_body_thereg', {
 			the_reg	=> $the_reg,
@@ -2617,87 +2619,122 @@ sub parse_miner {
 		miner_id=> $info_ref->{miner_id},
 	})) if !$message_body;
 
-	$self->trim_body(
-		$info_ref->{miner_id},
-		\$message_body,
-		$hr->{pre_stories_text},
-		$hr->{pre_stories_regex},
-		$hr->{post_stories_text},
-		$hr->{post_stories_regex}
-	);
-
 	my @extraction_keys		= qw( url title source slug body );
 	my $extraction_key_regex	= '^(' . join('|', @extraction_keys) . ')$';
 	my @extract_vars		= grep /$extraction_key_regex/,
 					  split / /, $hr->{extract_vars};
 	my $extract_regex		= $hr->{extract_regex};
 	my $tweak_code			= $hr->{tweak_code} || '';
+	my($count, $url, $title, $source, $slug, $body, $key, %nugget) = (0);
 
-	if (!$extract_regex) {
-		$self->errLog(getData('parse_miner_noregex', {
-			hr	=> $hr,
-		})) if $self->{debug} > -1;
+	if ($content_ref->{content_type} =~ /xml|rss|rdf/i || $info_ref->{url} =~ /(?:rss|rdf|xml)$/i) {
+		my $rss = new XML::RSS;
+		(my $data = $message_body) =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g;
+		eval { $rss->parse($data) };
 
-		return {
-			is_success	=> 0,
-			n_nuggets 	=> 0,
-			miner_id 	=> $info_ref->{miner_id}
-		};
-	}
-
-	my %nugget;
-	my $regex_err = $self->check_regex($extract_regex, 'x');
-	if ($regex_err) {
-		$self->errLog(getData('parse_miner_regexerr', {
-			error	=> $regex_err,
-			miner_id=> $info_ref->{miner_id},
-			url	=> $url_orig,
-			url_id	=> $url_id,
-		})) if $self->{debug} > -1;
-
-		return {
-			is_success => 0,
-			n_nuggets => 0,
-			miner_id => $info_ref->{miner_id}
-		};
-	}
-
-	$self->errLog(getData('parse_miner_minerdata', {
-		extraction_key_regex 	=> $extraction_key_regex,
-		body_length		=> length($message_body),
-		extract_vars 		=> \@extract_vars,
-		extract_regex 		=> $extract_regex,
-		tweak_code 		=> $tweak_code,
-		base_url 		=> $base_url,
-	})) if $self->{debug} > 1;
-
-	$message_body =~ s{\s+}{ }g;
-	$self->errLog(getData('parse_miner_bodystats', {
-		message_body => $message_body,
-	})) if $self->{debug} > 1;
-	my($count, $url, $title, $source, $slug, $body, $key) = (0);
-	while ($message_body =~ /$extract_regex/gx) {
-		my %extractions;
-		for (my $i = 0; $i < @extract_vars; ++$i) {
-			# note: $1 eq substr($message_body, $-[1], $+[1] - $-[1])
-			# and   $2 eq substr($message_body, $-[2], $+[2] - $-[2])
-			# etc.
-			my $str = substr($message_body, $-[$i+1], $+[$i+1] - $-[$i+1]);
-			$extractions{$extract_vars[$i]} = $str if length $str;
+		if ($@) {
+			$self->errLog($@) if $self->{debug} > -1;
+			return {
+				is_success	=> 0,
+				n_nuggets	=> 0,
+				miner_id	=> $info_ref->{miner_id}
+			};
 		}
 
-		next unless $extractions{url} || $extractions{body};
-		++$count;
-		$key = join "\n", (
-			$count,
-			$extractions{url},
-			$extractions{title},
-			$extractions{source},
-			$extractions{slug},
-			$extractions{body}
+		for my $item (@{$rss->{items}}) {
+			for (keys %{$item}) {
+			    $item->{$_} = xmldecode($item->{$_});
+			}
+			next unless $item->{'link'};
+			++$count;
+			$key = join "\n", (
+				$count,
+				$item->{'link'},
+				$item->{title},
+				$rss->{channel}{title},
+				$item->{description},
+				""
+			);
+			$nugget{$key}++;
+		}
+
+	} else {
+
+		$self->trim_body(
+			$info_ref->{miner_id},
+			\$message_body,
+			$hr->{pre_stories_text},
+			$hr->{pre_stories_regex},
+			$hr->{post_stories_text},
+			$hr->{post_stories_regex}
 		);
-		$nugget{$key}++;
+
+
+		if (!$extract_regex) {
+			$self->errLog(getData('parse_miner_noregex', {
+				hr	=> $hr,
+			})) if $self->{debug} > -1;
+
+			return {
+				is_success	=> 0,
+				n_nuggets 	=> 0,
+				miner_id 	=> $info_ref->{miner_id}
+			};
+		}
+
+		my $regex_err = $self->check_regex($extract_regex, 'x');
+		if ($regex_err) {
+			$self->errLog(getData('parse_miner_regexerr', {
+				error	=> $regex_err,
+				miner_id=> $info_ref->{miner_id},
+				url	=> $url_orig,
+				url_id	=> $url_id,
+			})) if $self->{debug} > -1;
+
+			return {
+				is_success => 0,
+				n_nuggets => 0,
+				miner_id => $info_ref->{miner_id}
+			};
+		}
+
+		$self->errLog(getData('parse_miner_minerdata', {
+			extraction_key_regex 	=> $extraction_key_regex,
+			body_length		=> length($message_body),
+			extract_vars 		=> \@extract_vars,
+			extract_regex 		=> $extract_regex,
+			tweak_code 		=> $tweak_code,
+			base_url 		=> $base_url,
+		})) if $self->{debug} > 1;
+
+		$message_body =~ s{\s+}{ }g;
+		$self->errLog(getData('parse_miner_bodystats', {
+			message_body => $message_body,
+		})) if $self->{debug} > 1;
+		while ($message_body =~ /$extract_regex/gx) {
+			my %extractions;
+			for (my $i = 0; $i < @extract_vars; ++$i) {
+				# note: $1 eq substr($message_body, $-[1], $+[1] - $-[1])
+				# and   $2 eq substr($message_body, $-[2], $+[2] - $-[2])
+				# etc.
+				my $str = substr($message_body, $-[$i+1], $+[$i+1] - $-[$i+1]);
+				$extractions{$extract_vars[$i]} = $str if length $str;
+			}
+
+			next unless $extractions{url} || $extractions{body};
+			++$count;
+			$key = join "\n", (
+				$count,
+				$extractions{url},
+				$extractions{title},
+				$extractions{source},
+				$extractions{slug},
+				$extractions{body}
+			);
+			$nugget{$key}++;
+		}
 	}
+
 
 	# If the hash is empty, time to bail, but the success flag is still
 	# set.
@@ -2759,18 +2796,22 @@ sub parse_miner {
 	})) if $self->{debug} > 1;
 
 	if ($tweak_code) {
-		for (@nugget_keys) {
-			my $cancel = 0;
-			($count, $url, $title, $source, $slug, $body) = split "\n", $_;
+		for my $key (@nugget_keys) {
+			our $cancel = 0;
+			# make lexical globals so we can share them with
+			# our safe compartment
+			our($count, $url, $title, $source, $slug, $body) = split "\n", $key;
 			my $seen_url = defined($seen_url{$url}) ? 1 : 0;
 
 			my $cpt = new Safe;
 			$cpt->permit(qw(:base_core :base_mem :base_loop));
+			$cpt->share(qw($cancel $count $url $title $source $slug $body));
 			$cpt->reval($tweak_code);
 
-			delete $nugget{$_};
+			delete $nugget{$key};
 			if (!$cancel) {
-				$nugget{$_}++;
+				$key = join "\n", $count, $url, $title, $source, $slug, $body;
+				$nugget{$key}++;
 				$seen_url{$url} = 1;
 			}
 		}
@@ -3602,10 +3643,12 @@ EOT
 
 		my $nugget_info = $self->nugget_url_to_info($nugget_url);
 		$plaintext =~ s{\s+}{ }g;
-		$sub[$i]{subj} = $nugget_info->{title} || $title;
-		$sub[$i]{name} = $nugget_info->{source} || '';
-		$sub[$i]{miner} = $miner_name || '';
+		$sub[$i]{subj}          = $nugget_info->{title} || $title;
+		$sub[$i]{name}          = $nugget_info->{source} || '';
+		$sub[$i]{miner}         = $miner_name || '';
 		$sub[$i]{nugget_url_id} = $nugget_url_id;
+		$sub[$i]{url_title}     = $nugget_info->{source} || '';
+		$sub[$i]{url}           = $nugget_info->{url} || '';
 
 		# Find what keywords match, and for each one that does, record
 		# how many times it does (and some other nice info)
@@ -3720,7 +3763,7 @@ EOT
 	}
 
 	for (@sub) {
-		if (!$_->{weight}) {
+		if ($_->{weight} < ($constants->{newsvac_min_weight} || 10)) {
 			$submitworthy{$_->{nugget_url_id}} = 0;
 			next;
 		}
@@ -3738,6 +3781,8 @@ EOT
 		});
 		$self->setSubmission($subid, {
 			keywords	=> $_->{keywords},
+			url		=> $_->{url},
+			url_title	=> $_->{url_title},
 		});
 
 		$submitworthy{$_->{nugget_url_id}} = 1;

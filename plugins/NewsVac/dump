@@ -40,4 +40,6 @@ INSERT into sections (section, artcount, title, issue, extras) VALUES ('newsvac'
 INSERT INTO vars (name, value, description) VALUES ('newsvac_topic', 1, 'Default topic for NewsVac items that have been robo-submitted');
 INSERT INTO vars (name, value, description) VALUES ('newsvac_section', 'newsvac', 'Default section for NewsVac items that have been robo-submitted');
 INSERT INTO vars (name, value, description) VALUES ('newsvac_admin_seclev', 1000, 'Minimum security level a user must have to be considered a NewsVac admin.');
+INSERT INTO vars (name, value, description) VALUES ('newsvac_min_weight', 10, 'Minimum weight to submit a story.');
 INSERT INTO vars (name, value, description) VALUES ('slashd_max_spiders','1','Maximum number of spiders to run in any given call to the run_spider.pl task. To disable set this value to 0. Warning: Disabling this limit will cause ALL SPIDERS that are stale to be executed the next time the run_spider task is executed. This may cause a lot of tasks to back up depending on your spidering set.');
+UPDATE vars SET value = 1 WHERE name = 'submit_show_weight';

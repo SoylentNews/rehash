@@ -11,9 +11,6 @@ en_US
 __name__
 header
 __template__
-[% # header %]
-<!-- begin newsvacadmin header -->
-
 </HEAD>
 <BODY BGCOLOR="[% user.bg.1 %]" LINK="[% user.bg.3 %]" VLINK="[% user.bg.3 %]" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0">
 
@@ -25,7 +22,8 @@ __template__
 	</TR>
 	<TR>
 		<TD VALIGN="TOP"><FONT COLOR="#000000">
-		[% Slash.createMenu('newsvac') -%]
-<!-- end newsvacadmin header -->
+		[% Slash.createMenu('admin') %]
+		[% Slash.createMenu('newsvac') %]
+
 __seclev__
 100
