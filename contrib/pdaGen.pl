@@ -31,9 +31,15 @@
 #  $Id$
 ###############################################################################
 
-=head1
+=head1 NAME
 
 pdaGen.pl
+
+=head1 SYNOPSIS
+
+	$HOME/contrib/pdaGen.pl
+
+=head1 DESCRIPTION
 
 pdaGen.pl is a simple script that get 3 days worth of stories, and the top
 ten comments for each story, and then prints out various pages that are
@@ -44,19 +50,21 @@ This isn't the framework for how I want to do things in the future for slashcode
 and portables. I would really like to make it so that slashcode can print out
 whatever format a site operator would like to use.
 
+This script is unfinished and may not even work properly.  It gets the last
+three days of stories, which may not be right for your site.  But if you
+are up to it, you can play with this.
+
 =over
 
-=head2
+=head2 PREREQUISITES
 
-prerequisites:
-
-make sure you've created /home/slash/public_html/palm directory, and get all the 
-images (particularly the topics) and convert them (you can use mogrify) to 45x45 size, 
-and put them in /home/slash/public_html/images/palm (with the same directory structure 
-for public_html/images).
+Get all the images (particularly the topics) and convert them (you can use mogrify)
+to 45x45 size, and put them in F<$HOME/public_html/images/palm>
+(with the same directory structure as F<$HOME/public_html/images>).
 
 =cut
 
+use lib '..';
 use strict;
 use vars '%I';
 use File::Path;
@@ -69,10 +77,14 @@ $I{pda_mainpage} = $I{pda_url} . "/headlines_1.shtml";
 $I{pda_oldmainpage} = $I{pda_url} . "/older_headlines_1.shtml";
 # this is when this was first run
 
-=head2
+mkpath "$I{basedir}$I{pda_url}", 0, 0755;
+symlink "$I{basedir}$I{pda_mainpage}", "$I{basedir}$I{pda_url}/index.html";
+symlink "$I{basedir}$I{pda_mainpage}", "$I{basedir}$I{pda_url}/index.shtml";
+
+=pod
 
 $I{pda_startdate} is the day that you first run this script. 
-This isn't how I want to do things, but it works for now
+This isn't how I want to do things, but it works for now.
 
 =cut
 
@@ -110,9 +122,11 @@ sub pageHeader {
 
 ##############################################################
 
-=head2
+=pod
 
-sub cleanContent :makes sure there's nothing that we want to 
+=head2 SUBROUTINES
+
+sub cleanContent : makes sure there's nothing that we want to 
 throw off palm viewing
 
 =cut
@@ -138,9 +152,9 @@ sub cleanContent {
 
 ##############################################################
 
-=head2
+=pod
 
-sub getContent : this subroutine gets all the data into one big 
+sub getContent : gets all the data into one big 
 data structure for later processing
 
 =cut
@@ -189,12 +203,11 @@ sub getContent {
 
 ##############################################################
 
-=head2
+=pod
 
-sub printMainPage : this subroutine is for printing the main
-page, 1000 bytes for each page. How ever many stories are, 
-this will print out enough pages until it prints out all the
-stories in the stories data structure
+sub printMainPage : prints the main
+page, 1000 bytes for each page; prints out enough pages to
+print all the stories in the data structure
 
 =cut
 
@@ -293,12 +306,12 @@ sub printMainPage {
 
 ##############################################################
 
-=head2
+=pod
 
-sub printOlderIndex : this subroutine gets all the story sids prior
-to the last three days but after 3 days before pda stories were 
-created on the system, this way, it only needs to link to pages
-that have already been created.
+sub printOlderIndex : gets all the story sids prior
+to the last three days, but after three days before pda stories were 
+created on the system; this way, it only needs to link to pages
+that have already been created
 
 =cut
 
@@ -352,12 +365,12 @@ sub printOlderIndex {
 }
 ##############################################################
 
-=head2
+=pod
 
-sub printArticles : this subroutine prints out each article
+sub printArticles : prints out each article
 in the stories data structure, and only prints out 1000 bytes
 per page, meaning that it will print out continuation pages
-if necessary.
+if necessary
 
 =cut
 
@@ -457,9 +470,9 @@ sub printArticles {
 
 =head2
 
-sub printArticleComments : this subroutine prints out all the 
-comments for each story. It only prints out 1000 bytes of each
-comment, and prints how many ever pages for each comment are 
+sub printArticleComments : prints out all the 
+comments for each story, 1000 bytes of each
+comment, and the pages for each comment 
 required to print out all the comments
 
 =cut
