@@ -289,6 +289,7 @@ sub addPool {
 
 	my $html = "";
 	if ($question == 1) {
+		my $constants = getCurrentStatic();
 		if (!open(my $fh, ">$full_filename")) {
 			warn "HumanConf warning: addPool could not create"
 				. " '$full_filename', '$!'";
