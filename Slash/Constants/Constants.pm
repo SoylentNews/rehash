@@ -7,8 +7,7 @@ package Slash::Constants;
 
 =head1 NAME
 
-Slash::Constants - SHORT DESCRIPTION for Slash
-
+Slash::Constants - Constants for Slash
 
 =head1 SYNOPSIS
 
@@ -28,10 +27,57 @@ The constants below are grouped by tag.
 
 use strict;
 use base 'Exporter';
-use vars qw($VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS %CONSTANTS);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT	   = qw();
+
+constants();
+@EXPORT		= qw();
+@EXPORT_OK	= map { keys %{$CONSTANTS{$_}} } keys %CONSTANTS;
+%EXPORT_TAGS	= (
+	all	=> [@EXPORT_OK],
+	map { ($_, [keys %{$CONSTANTS{$_}}]) } keys %CONSTANTS
+);
+
+
+sub constants {
+	my($group, @syms, @nums);
+
+	while (<DATA>) {
+		if (/^=head2 (\w+)$/ || /^__END__$/) {
+			if ($group && @syms && @nums) {
+				@{$CONSTANTS{$group}}{@syms} = @nums;
+			}
+
+			$group = $1;
+			@syms = @nums = ();
+			last if /^__END__$/;
+
+		} elsif (/^\t(\w+)$/) {
+			push @syms, $1;
+
+		} elsif (/^# ([\d -]+)$/) {
+			push @nums, split ' ', $1;
+		}
+	}
+
+	for my $g (keys %CONSTANTS) {
+		for my $s (keys %{$CONSTANTS{$g}}) {
+			eval "use constant $s => $CONSTANTS{$g}{$s}";
+		}
+	}
+}
+
+1;
+
+# we dynamically assign the constants as formatted below.  the grouping
+# tag is after "=head2", the symbols are after "\t", and the numeric
+# values are listed after "#".  the format is very strict, including
+# leading and trailing whitespace, so add things carefully, and check
+# that you've got it right.  see the regexes in constants() if you
+# are not sure what's being matched.  -- pudge
+
+__DATA__
 
 =head2 messages
 
@@ -42,6 +88,12 @@ These constants are for message delivery modes and message type codes.
 	MSG_MODE_EMAIL
 	MSG_MODE_WEB
 
+=cut
+
+# -2 -1 0 1
+
+=pod
+
 	MSG_CODE_REGISTRATION
 	MSG_CODE_UNKNOWN
 	MSG_CODE_NEWSLETTER
@@ -53,27 +105,11 @@ These constants are for message delivery modes and message type codes.
 	MSG_CODE_NEW_SUBMISSION
 	MSG_CODE_JOURNAL_REPLY
 	MSG_CODE_NEW_COMMENT
+	MSG_CODE_INTERUSER
 
 =cut
 
-my @messages = qw(
-	MSG_MODE_NOCODE
-	MSG_MODE_NONE
-	MSG_MODE_EMAIL
-	MSG_MODE_WEB
-
-	MSG_CODE_REGISTRATION
-	MSG_CODE_UNKNOWN
-	MSG_CODE_NEWSLETTER
-	MSG_CODE_HEADLINES
-	MSG_CODE_M2
-	MSG_CODE_COMMENT_MODERATE
-	MSG_CODE_COMMENT_REPLY
-	MSG_CODE_JOURNAL_FRIEND
-	MSG_CODE_NEW_SUBMISSION
-	MSG_CODE_JOURNAL_REPLY
-	MSG_CODE_NEW_COMMENT
-);
+# -2 -1 0 1 2 3 4 5 6 7 8 9
 
 =head2 web
 
@@ -84,10 +120,7 @@ These constants are used for web programs, for the op hashes.
 
 =cut
 
-my @web = qw(
-	ALLOWED
-	FUNCTION
-);
+# 0 1
 
 =head2 strip
 
@@ -105,17 +138,7 @@ These constants are used to define the modes passed to stripByMode().
 
 =cut
 
-my @strip = qw(
-	NOTAGS
-	ATTRIBUTE
-	LITERAL
-	NOHTML
-	PLAINTEXT
-	HTML
-	EXTRANS
-	CODE
-	ANCHOR
-);
+# -3 -2 -1 0 1 2 3 4 5
 
 =head2 people
 
@@ -130,71 +153,7 @@ These constants are used to define different constants in the people system.
 
 =cut
 
-my @people = qw(
-	FRIEND
-	FREAK
-	FAN
-	FOE
-	FOF
-	EOF
-);
-
-@EXPORT_OK = (@messages, @web, @strip, @people);
-
-%EXPORT_TAGS = (
-	all		=> [@EXPORT_OK],
-	messages	=> [@messages],
-	web		=> [@web],
-	strip		=> [@strip],
-	people		=> [@people],
-);
-
-BEGIN {
-	# messages
-	use constant MSG_MODE_NOCODE 		=> -2;
-	use constant MSG_MODE_NONE   		=> -1;
-	use constant MSG_MODE_EMAIL  		=>  0;
-	use constant MSG_MODE_WEB    		=>  1;
-
-	use constant MSG_CODE_REGISTRATION	=> -2;
-	use constant MSG_CODE_UNKNOWN		=> -1;
-	use constant MSG_CODE_NEWSLETTER	=>  0;
-	use constant MSG_CODE_HEADLINES		=>  1;
-	use constant MSG_CODE_M2		=>  2;
-	use constant MSG_CODE_COMMENT_MODERATE	=>  3;
-	use constant MSG_CODE_COMMENT_REPLY	=>  4;
-	use constant MSG_CODE_JOURNAL_FRIEND	=>  5;
-	use constant MSG_CODE_NEW_SUBMISSION	=>  6;
-	use constant MSG_CODE_JOURNAL_REPLY	=>  7;
-	use constant MSG_CODE_NEW_COMMENT	=>  8;
-
-
-	# web
-	use constant ALLOWED	=> 0;
-	use constant FUNCTION	=> 1;
-
-
-	# strip
-	use constant NOTAGS	=> -3;
-	use constant ATTRIBUTE	=> -2;
-	use constant LITERAL	=> -1;
-	use constant NOHTML	=> 0;
-	use constant PLAINTEXT	=> 1;
-	use constant HTML	=> 2;
-	use constant EXTRANS	=> 3;
-	use constant CODE	=> 4;
-	use constant ANCHOR	=> 5;
-
-	# people
-	use constant FRIEND	=> 1;
-	use constant FREAK	=> 1;
-	use constant FAN	=> 1;
-	use constant FOE	=> 2;
-	use constant FOF	=> 3;
-	use constant EOF	=> 4;
-}
-
-1;
+# 1 1 1 2 3 4
 
 __END__
 
