@@ -1718,8 +1718,6 @@ ALTER TABLE people TYPE=InnoDB;
 DELETE FROM menus WHERE menu="topics" AND label="Recent Topics";
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'topics','Topic Hierarchy','','[% constants.rootdir %]/topics.pl?op=hierarchy ',0,1,1);
 
-# USEPERL LAST UPDATED HERE
-
 # DEVCHANNEL LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('no_prerendered_stories','0','Turn off use of prerendered stories in display');
@@ -1749,4 +1747,5 @@ INSERT INTO vars (name, value, description) VALUES ('memcached','0','Use memcach
 INSERT INTO vars (name, value, description) VALUES ('memcached_debug','0','Turn on debugging for memcached?');
 INSERT INTO vars (name, value, description) VALUES ('memcached_servers','127.0.0.1:11211','Space-sep list of servers for memcached in host:port format; to weight a server append =n');
 
+# USEPERL LAST UPDATED HERE
 
