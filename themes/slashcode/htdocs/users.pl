@@ -389,7 +389,7 @@ sub main {
 	if ($op ne 'userinfo' && $op ne 'display') {
 		my $data = {
 			adminmenu => $ops->{$op}{adminmenu} || 'admin',
-			tab_selected => $ops->{op}{tab_selected},
+			tab_selected => $ops->{$op}{tab_selected},
 		};
 		header(getMessage('user_header'), '', $data);
 		# This is a hardcoded position, bad idea and should be fixed -Brian
