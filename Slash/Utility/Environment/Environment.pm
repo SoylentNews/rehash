@@ -1594,6 +1594,7 @@ Hashref of cleaned-up data.
 		s subid stid stoid tpid tid qid aid pagenum
 		url_id spider_id miner_id keyword_id
 		st_main_select st_main_select_weights
+		parent_topic
 	);
 
 	# fields that have ONLY a-zA-Z0-9_

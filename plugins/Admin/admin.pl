@@ -833,49 +833,22 @@ sub topicEdit {
 
 	my($imageseen_flag, $images_flag) = (0, 0);
 
-	local *DIR;
-	opendir(DIR, "$basedir/images/topics");
-
+	opendir(my($dh), "$basedir/images/topics");
 	# this should be a preference at some point, image
 	# extensions ... -- pudge
 	# and case insensitive :)  -Brian
-	$available_images = { map { ($_, $_) } grep /\.(?:gif|jpe?g|png)$/, readdir DIR };
-
-	closedir(DIR);
+	$available_images = { map { ($_, $_) } grep /\.(?:gif|jpe?g|png)$/, readdir $dh };
+	closedir $dh;
 
 	$topics_select = createSelect('nexttid', 
-		$slashdb->getDescriptions('topics_all', $user->{section}, 1),
+		$slashdb->getDescriptions('topics', '', 1),
 		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 
-		1, 
-		0, 
-		1);
-	my $sections = {};
-	if ($user->{section} && $user->{seclev} <= 9000) {
-		$sections->{$user->{section}} = $slashdb->getSection($user->{section}, 'title', '', 1);
-	} else {
-		$sections = $slashdb->getDescriptions('skins', '', 1);
-	}
-
-	my $section_topics_arref = $slashdb->getSectionTopicType($form->{nexttid});
-	my $section_topics_hashref = {};
-
-	for (@$section_topics_arref) {
-		$section_topics_hashref->{$_->[0]}{$_->[1]} = 1;
-	}
-	my $types = $slashdb->getDescriptions('genericstring', 'section_topic_type');
-	my $sectionref;
-
-	while (my($section, $title) = each %$sections) {
-		$sectionref->{$section}{checked} = ($section_topics_hashref->{$section}) ? ' CHECKED' : '';
-		$sectionref->{$section}{title} = $title;
-		for my $type (keys %$types) {
-			$sectionref->{$section}{$type}{checked} = ($section_topics_hashref->{$section}{$type}) ? ' CHECKED' : '';
-		} 
-	}
+		1, 0, 1
+	);
 
 	if (!$form->{topicdelete}) {
 		if (!$form->{topicnew} && $form->{nexttid}) {
-			$topic = $slashdb->getTopic($form->{nexttid}, 0, 1);
+			$topic = $slashdb->getTopicTree($form->{nexttid}, { no_cache => 1 });
 		} else {
 			$topic = {};
 		}
@@ -896,18 +869,6 @@ sub topicEdit {
 		$image2 = $image;
 	}
 
-	my $parent_topic_values = $slashdb->getDescriptions('topics_all');
-	$topic->{parent_topic} ||= 0;
-	if ($topic->{parent_topic}) {
-		my $current_hash = { %$parent_topic_values };
-		$current_hash->{0} = "$current_hash->{$_} (Delete)";
-		$parent_topic_values = $current_hash;
-	} else {
-		my $current_hash = { %$parent_topic_values };
-		$current_hash->{0} = "Add Parent Topic";
-		$parent_topic_values = $current_hash;
-	}
-
 	my $topicname = $topic->{name} || '';
 	slashDisplay('topicEdit', {
 		title			=> getTitle('editTopic-title', { tname => $topicname }),
@@ -917,8 +878,6 @@ sub topicEdit {
 		topic			=> $topic,
 		topics_select		=> $topics_select,
 		image_select		=> $image_select,
-		sectionref		=> $sectionref,
-		parent_topic_values	=> $parent_topic_values,
 	});
 }
 
@@ -931,8 +890,7 @@ sub topicDelete {
 
 	$tid ||= $form->{tid};
 
-	$slashdb->deleteTopic($tid);
-	$slashdb->deleteSectionTopicsByTopic($form->{tid}, $form->{type});
+	$slashdb->deleteTopic($tid, $form->{replacementtid});
 	$form->{tid} = '';
 }
 
@@ -946,18 +904,6 @@ sub topicSave {
 	}
 
 	$form->{tid} = $slashdb->saveTopic($form);
-
-	# The next few lines need to be wrapped in a transaction -Brian
-	$slashdb->deleteSectionTopicsByTopic($form->{tid}, $form->{type});
-	for my $element1 (keys %$form) {
-		if ($element1 =~ /^exsect/) {
-			# I picked | because sections, types can have _ in them -Brian
-			my ($junk, $sect, $type) = split(/\|/, $element1);
-			$slashdb->createSectionTopic($sect, $form->{tid}, $type);
-		}
-
-	}
-
 	$form->{nexttid} = $form->{tid};
 }
 

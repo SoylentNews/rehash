@@ -12,56 +12,62 @@ __name__
 topicEdit
 __template__
 [% PROCESS titlebar width='100%' %]
-<TABLE>
-	<TR>
-		<FORM ACTION="[% env.script_name %]" METHOD="POST">
-		<INPUT TYPE="HIDDEN" NAME="op" VALUE="topics">
-		<TD VALIGN="TOP">
+<table>
+	<tr>
+		<form action="[% env.script_name %]" method="POST">
+		<input type="HIDDEN" name="op" value="topics">
+		<td valign="TOP">
 			[% PROCESS formLabel value => "Select a topic" comment => "hit the create button if you wish to create a new topic" %]
 			[% topics_select %]
 
-			<INPUT TYPE="SUBMIT" NAME="topiced" VALUE="Select topic"><BR>
+			<input type="SUBMIT" name="topiced" value="Select topic"><br>
 
 			[% IF topic.tid %]
 				[% PROCESS formLabel value => "Image as seen", comment => "" %]
-				<IMG SRC="[% constants.imagedir %]/topics/[% topic.image %]" ALT="[% topic.alttext %]" WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]">
+				<img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]">
 			[% END %]
 
-			<BR><INPUT TYPE="HIDDEN" NAME="tid" VALUE="[% topic.tid %]"><BR>
+			<br><input type="HIDDEN" name="tid" value="[% topic.tid %]"><br>
 			[% PROCESS formLabel value => "Short Name" comment => "used in admin interface" %]
-			<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute %][% topic.name %][% END %]">
+			<input type="TEXT" name="keyword" value="[% FILTER strip_attribute %][% topic.keyword %][% END %]">
 			[% PROCESS formLabel value => "Alt Text", comment => "" %]
-			<INPUT TYPE="TEXT" NAME="alttext" VALUE="[% FILTER strip_attribute %][% topic.alttext %][% END %]">
+			<input type="TEXT" name="textname" value="[% FILTER strip_attribute %][% topic.textname %][% END %]">
 			[% PROCESS formLabel value => "Parent Topic", comment => "" %]
-			[% Slash.createSelect('parent_topic', parent_topic_values, topic.parent_topic, 1, 0, 1)%]	
+			[% Slash.createSelect('parent_topic', Slash.db.getDescriptions('topics'), topic.parent, 1, 0, 1, 1)%]	
 
-			[% PROCESS formLabel value => "Is a Series", comment => "Denotes a group of stories in a series, and this topic must be selected first for each story in the series" %]
-			<INPUT TYPE="checkbox" NAME="series" VALUE="1"[% topic.series ? ' CHECKED' : '' %]>
+			[% PROCESS formLabel value => "Is a Series", comment => "denotes a group of stories in a series, and this topic must be selected first for each story in the series" %]
+			<input type="checkbox" name="series" value="yes"[% topic.series == 'yes' ? ' checked' : '' %]>
+
+			[% PROCESS formLabel value => "Is a Nexus", comment => "denotes this topic is also a nexus" %]
+			<input type="checkbox" name="nexus" value="1"[% topic.nexus ? ' checked' : '' %]>
 
 			[% PROCESS formLabel value => "Dimensions", comment => "leave blank to determine automatically" %]
-			Width: <INPUT TYPE="TEXT" NAME="width" VALUE="[% topic.width %]" SIZE="4">
-			Height: <INPUT TYPE="TEXT" NAME="height" VALUE="[% topic.height %]" SIZE="4">
+			Width: <input type="TEXT" name="width" value="[% topic.width %]" size="4">
+			Height: <input type="TEXT" name="height" value="[% topic.height %]" size="4">
 
 			[% IF images_flag %]
 				[% PROCESS formLabel value => "Image", comment => "if you enter a value in the Image URL field below, the image pulldown will be ignored" %]
 				[% image_select %]
-				<BR>Image URL:
-				<INPUT TYPE="TEXT" LENGTH="40" NAME="image2" VALUE="[% image2 %]">
+				<br>Image URL:
+				<input type="TEXT" length="40" name="image2" value="[% image2 %]">
 
 			[% ELSE %]
 				[% PROCESS formLabel value => "No images were found in the topic images directory", comment => "" %]
-				([% constants.basedir %]/images/topics).<BR>
-				<INPUT TYPE="TEXT" NAME="image" VALUE="[% image %]">
+				([% constants.basedir %]/images/topics).<br>
+				<input type="TEXT" name="image" value="[% image %]">
 
 			[% END %]
-			<P>
-			<INPUT TYPE="SUBMIT" NAME="topicnew" VALUE="Create new topic">
-			<INPUT TYPE="SUBMIT" NAME="topicsave" VALUE="Save Topic">
-			<INPUT TYPE="SUBMIT" NAME="topicdelete" VALUE="Delete Topic">
-		</TD>
-		</FORM>
-	</TR>
-</TABLE>
+			<p>
+			[% PROCESS formLabel value => "Replacement Topic", comment => "if deleting the topic, select a topic to replace it with ... this is irreversible!" %]
+			[% Slash.createSelect('replacementtid', Slash.db.getDescriptions('topics'), '', 1, 0, 1)%]	
+			<p>
+			<input type="SUBMIT" name="topicnew" value="Create new topic">
+			<input type="SUBMIT" name="topicsave" value="Save Topic">
+			<input type="SUBMIT" name="topicdelete" value="Delete Topic">
+		</td>
+		</form>
+	</tr>
+</table>
 
 __seclev__
 500

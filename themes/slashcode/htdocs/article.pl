@@ -72,7 +72,7 @@ sub main {
 				$SECT->{type} eq 'contained';
 			$use_series  = $story->{tid}     if 
 				$constants->{use_prev_next_link_series} &&
-				$reader->getTopic($story->{tid})->{series};
+				$reader->getTopic($story->{tid})->{series} eq 'yes';
 
 			$stories{'prev'}   = $reader->getStoryByTime('<', $story);
 			$stories{'next'}   = $reader->getStoryByTime('>', $story)
