@@ -27,7 +27,7 @@ __template__
 <P>Hit the PayPal link below to subscribe to [% constants.sitename %].
 You will be able to purchase banner-ad-free pages.
 Currently, payment is only through PayPal.
-(<A HREF="[% constants.rootdir %]/faq/subscribe.shtml#ss400">Why PayPal?</A>)
+(<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss400">Why PayPal?</A>)
 
 <CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
 <TD>[% PROCESS paypalbut %]</TD>
@@ -122,7 +122,7 @@ and so far [% hits_bought %] have been used up
 	<TR><TD>&nbsp;</TD><TD COLSPAN="2" VALIGN="top" ALIGN="left"
 	>&nbsp;Set "No Ads" anywhere, and you'll get ads disabled for
 	free on other pages too.
-	(<A HREF="[% constants.rootdir %]/faq/subscribe.shtml#ss1400">More
+	(<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss1400">More
 	info</A>.)</TD></TR>
 
 	</TABLE>
