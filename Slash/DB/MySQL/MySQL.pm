@@ -3277,6 +3277,7 @@ sub deleteSubmission {
 	$options = {} unless ref $options;
 	$options->{nodelete} = $nodelete if defined $nodelete;
 
+	# This might need some cleaning up if nothing is using it.
 	if ($form->{subid} && !$options->{nodelete}) {
 		$self->sqlUpdate("submissions", { del => 1 },
 			"subid=" . $self->sqlQuote($form->{subid})
