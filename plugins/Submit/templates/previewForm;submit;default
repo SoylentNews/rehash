@@ -41,6 +41,11 @@ TITLE="[% topic.textname %]"></A>
 <P>[% subtext %]</P>
 
 [% IF admin_flag -%]
+	<FORM ACTION="[% gSkin.rootdir %]/submit.pl" METHOD="POST">
+	<INPUT TYPE="HIDDEN" NAME="op" VALUE="changesubmission">
+	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
+	<TABLE WIDTH="99%" ALIGN="LEFT" BGCOLOR="[% user.colors.bg_2 %]">
+	<TR><TD>
 [% IF submission.uid != constants.anonymous_coward_uid || submission.emaildomain -%]
 	<p>In the last [% constants.submission_count_days -%] days, there
 	[%- IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
@@ -70,11 +75,8 @@ TITLE="[% topic.textname %]"></A>
 	[%- END -%]
 	.</p>
 [%- END %]
-	<FORM ACTION="[% gSkin.rootdir %]/submit.pl" METHOD="POST">
-	<INPUT TYPE="HIDDEN" NAME="op" VALUE="changesubmission">
-	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
 
-	<TABLE WIDTH="99%" ALIGN="LEFT" BGCOLOR="[% user.colors.bg_1 %]">
+	</TD></TR>
 	<TR><TD>
 [% submission_state = Slash.db.getDescriptions('submission-state'); del = submission.del -%]
 [% submission_state.$del %] submission by <B>[% submission.name %]
