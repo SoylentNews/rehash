@@ -281,7 +281,13 @@ sub doLogExit {
 
 sub doLog {
 	my($fname, $msg, $stdout, $sname) = @_;
-	chomp(my @msg = @$msg);
+	my @msg;
+	if (ref($msg) && ref($msg) eq 'ARRAY') {
+		@msg = @$msg;
+	} else {
+		@msg = ( $msg );
+	}
+	chomp(@msg);
 
 	$sname    ||= '';
 	$sname     .= ' ' if $sname;
