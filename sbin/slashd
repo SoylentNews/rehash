@@ -240,9 +240,9 @@ EOT
 	}
 
 	# Log success and failure, and if no successes, abort with die()
-
-	for(keys %success) {
-		$slashdb->createSlashdStatus($_);
+	for my $task (keys %success) {
+		$task =~ s/\.pl$//;
+		$slashdb->createSlashdStatus($task);
 	}
 	slashdLog(
 		"processed $dir; "
@@ -375,6 +375,16 @@ sub insert_task_event {
 	} keys %$event_hr;
 	for my $file (@files) {
 		push @$event_ary_ref, [ $file, $event_hr->{$file}{until_time} ];
+		my $file_nopl = $file;
+		$file_nopl =~ s/\.pl//;
+		my @u = gmtime($event_hr->{$file}{until_time});
+		my $options = {
+			next_begin => sprintf("%4d-%02d-%02d %02d:%02d:%02d",
+				$u[5]+1900, $u[4]+1, $u[3],
+				$u[2], $u[1], $u[0]
+			)
+		};
+		$slashdb->setSlashdStatus($file_nopl, $options);
 	}
 }
 
@@ -396,7 +406,6 @@ sub main {
 	# Initialize logging and all the low-level stuff.
 
 	slashdLogInit();
-	$slashdb->deleteSlashdStatus();
 	slashdLog("Starting up Slashd (verbosity " . verbosity()
 		. ") with pid $$");
 	if ($ENV{TZ} ne 'GMT') {
@@ -422,6 +431,7 @@ sub main {
 		# the event array.
 		my($task_filename, $until_time) = @{ shift @$event_ary };
 		my $basename = basename($task_filename);
+		my $basename_nopl = $basename; $basename_nopl =~ s/\.pl$//;
 
 		# Get its information and wait until it's ready.
 		my $subref = $task{$task_filename}{code};
@@ -439,6 +449,10 @@ sub main {
 		if (verbosity() >= 2) {
 			slashdLog("$basename begin");
 		}
+		$slashdb->setSlashdStatus($basename_nopl, {
+			in_progress	=> 1,
+			task		=> $basename_nopl,
+		});
 		my $summary = "";
 		my $start_time = Time::HiRes::time;
 		# We need another option for non-blocking stuff so we can ditch the other daemons
@@ -446,9 +460,12 @@ sub main {
 			local $me = $basename;
 			slashdLog("Beginning fork()");
 			my $pid = fork();
-			if($pid == 0 ) {
+			if ($pid == 0) {
 				$summary = &$subref($virtual_user,
 					$constants, $slashdb, $user);
+				# Sadly, at this point there is no easy way to
+				# get $summary back from this child to the
+				# parent process for logging.
 				exit;
 			}
 			waitpid($pid, 0);
@@ -459,6 +476,7 @@ sub main {
 				$constants, $slashdb, $user);
 		}
 		my $end_time = Time::HiRes::time;
+		my $duration = sprintf("%.2f", $end_time - $start_time);
 
 		# The task we just executed will repeat eventually;  find
 		# out when and reinsert it into the event array.
@@ -474,8 +492,6 @@ sub main {
 		# try to catch up.
 		if (verbosity() >= 2) {
 			my $next_task = basename($event_ary->[0][0]);
-			my $duration = sprintf("%.2f", $end_time - $start_time);
-			$slashdb->setSlashdStatus($basename, {time_took => $duration});
 			slashdLog(join("",
 				"$basename end (${duration}s",
 				(($secs_until < 0)
@@ -486,7 +502,6 @@ sub main {
 				")$summary"));
 		} elsif (verbosity() >= 1) {
 			my $next_task = basename($event_ary->[0][0]);
-			my $duration = sprintf("%.2f", $end_time - $start_time);
 			slashdLog(join("",
 				"$basename end (${duration}s",
 				(($secs_until < -30)
@@ -496,6 +511,14 @@ sub main {
 					: ""),
 				")$summary"));
 		}
+		my $summary_trim = $summary;
+		$summary_trim =~ s/^:\s*//;
+		$slashdb->setSlashdStatus($basename_nopl, {
+			-last_completed	=> "NOW()",
+			summary		=> $summary_trim,
+			duration	=> $duration,
+			in_progress	=> 0,
+		});
 
 		# Sleep for at least a few seconds between tasks.
 		sleep 2;

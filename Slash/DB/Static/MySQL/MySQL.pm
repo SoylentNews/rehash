@@ -1024,26 +1024,32 @@ sub countAccesslogDaily {
 sub getSlashdStatus {
 	my($self) = @_;
 	my $answer = _genericGet('slashd_status', 'task', '', @_);
+	$answer->{last_completed_hhmm} =
+		substr($answer->{last_completed}, 11, 5)
+		if defined($answer->{last_completed});
+	$answer->{next_begin_hhmm} =
+		substr($answer->{next_begin}, 11, 5)
+		if defined($answer->{next_begin});
 	return $answer;
-}
-########################################################
-sub deleteSlashdStatus {
-	my($self) = @_;
-
-	$self->sqlDo("DELETE FROM slashd_status");
 }
 
 ########################################################
 sub setSlashdStatus {
-	my($self, $key, $options) = @_;
-	$self->sqlUpdate('slashd_status', $options, "task = '$key'");
+	my($self, $taskname, $options) = @_;
+	return $self->sqlUpdate(
+		"slashd_status",
+		$options,
+		"task=" . $self->sqlQuote($taskname)
+	);
 }
 
 ########################################################
 sub createSlashdStatus {
-	my($self, $value) = @_;
-
-	$self->sqlDo("INSERT INTO slashd_status (task) VALUES ('$value')");
+	my($self, $taskname) = @_;
+	return $self->sqlInsert(
+		"slashd_status",
+		{ task => $taskname },
+		{ ignore => 1 } );
 }
 
 ########################################################

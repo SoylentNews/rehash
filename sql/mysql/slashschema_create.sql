@@ -513,9 +513,12 @@ CREATE TABLE site_info (
 
 DROP TABLE IF EXISTS slashd_status;
 CREATE TABLE slashd_status (
-	task varchar(50) NOT NULL,
-	time_took float(6,2) DEFAULT '0.00' NOT NULL,
-	last_update timestamp, 
+	task VARCHAR(50) NOT NULL,
+	next_begin DATETIME,
+	in_progress TINYINT NOT NULL DEFAULT '0',
+	last_completed DATETIME,
+	summary VARCHAR(255) NOT NULL DEFAULT '',
+	duration float(6,2) DEFAULT '0.00' NOT NULL,
 	PRIMARY KEY (task)
 ) TYPE = myisam;
 

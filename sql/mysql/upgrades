@@ -177,14 +177,23 @@ ALTER TABLE sections ADD COLUMN	writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT 
 
 #slashd_log table
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slashd','[% constants.rootdir %]/admin.pl?op=slashd',500,17);
+
+# Note this is different than what Brian committed Wednesday morning;
+# were any sites updated with that?
 DROP TABLE IF EXISTS slashd_status;
 CREATE TABLE slashd_status (
-	task varchar(50) NOT NULL,
-	time_took float(6,2) DEFAULT '0.00' NOT NULL,
-	last_update timestamp, 
-	PRIMARY KEY (task)
-) TYPE = myisam;
+	task varchar(50) NOT NULL default '',
+	next_begin DATETIME,
+	in_progress TINYINT NOT NULL DEFAULT '0',
+	last_completed DATETIME,
+	summary VARCHAR(255) NOT NULL DEFAULT '',
+	duration float(6,2) DEFAULT '0.00' NOT NULL,
+	PRIMARY KEY  (task)
+) TYPE=MyISAM;
+
+# Remember pollBooth is now a plugin!
 
 # Unique changes for Pat
 ALTER TABLE section_topics DROP PRIMARY KEY;
 ALTER TABLE section_topics ADD PRIMARY KEY (section,type,tid);
+

@@ -4473,9 +4473,40 @@ sub getPollVotesMax {
 }
 
 ##################################################################
+sub getSlashdStatus {
+        my($self) = @_;
+	my $answer = _genericGet('slashd_status', 'task', '', @_);
+	$answer->{last_completed_hhmm} =
+		substr($answer->{last_completed}, 11, 5)
+		if defined($answer->{last_completed});
+	$answer->{next_begin_hhmm} =
+		substr($answer->{next_begin}, 11, 5)
+		if defined($answer->{next_begin});
+	$answer->{summary_trim} =
+		substr($answer->{summary}, 0, 30)
+		if $answer->{summary};
+	return $answer;
+}
+
+##################################################################
 sub getSlashdStatuses {
 	my($self) = @_;
-	my $answer = $self->sqlSelectAll('task,time_took,last_update', 'slashd_status');
+	my $answer = $self->sqlSelectAllHashref(
+		"task",
+		"*",
+		"slashd_status",
+	);
+	for my $task (keys %$answer) {
+		$answer->{$task}{last_completed_hhmm} =
+			substr($answer->{$task}{last_completed}, 11, 5)
+			if defined($answer->{$task}{last_completed});
+		$answer->{$task}{next_begin_hhmm} =
+			substr($answer->{$task}{next_begin}, 11, 5)
+			if defined($answer->{$task}{next_begin});
+		$answer->{$task}{summary_trim} =
+			substr($answer->{$task}{summary}, 0, 30)
+			if $answer->{$task}{summary};
+	}
 	return $answer;
 }
 

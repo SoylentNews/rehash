@@ -894,6 +894,57 @@ sub otherLinks {
 	}, { Return => 1, Nocomm => 1 });
 }
 
+sub get_slashd_box {
+	my $slashdb = getCurrentDB();
+	my $sldst = $slashdb->getSlashdStatuses();
+	# Yes, this really is the easiest way to do this.
+	# Yes, it is quite complicated.
+	# Sorry.  - Jamie
+	my @tasks_next = reverse (
+		map {				# Build an array of
+			$sldst->{$_}
+		} grep {			# the defined elements of
+			defined($_)
+		} ( (				# the first 3 elements of
+			sort {			# a sort of
+				$sldst->{$a}{next_begin} cmp $sldst->{$b}{next_begin}
+			} grep {		# the defined elements of
+				defined($sldst->{$_}{next_begin})
+				&& !$sldst->{$_}{in_progress}
+			} keys %$sldst		# the hash keys.
+		)[0..2] )
+	);
+	my @tasks_inprogress = (
+		map {				# Build an array of
+			$sldst->{$_}
+		} sort {			# a sort of
+			$sldst->{$a}{task} cmp $sldst->{$b}{task}
+		} grep {			# the in-progress elements of
+			$sldst->{$_}{in_progress}
+		} keys %$sldst			# the hash keys.
+	);
+	my @tasks_last = reverse (
+		map {				# Build an array of
+			$sldst->{$_}
+		} grep {			# the defined elements of
+			defined($_)
+		} ( (				# the last 3 elements of
+			sort {			# a sort of
+				$sldst->{$a}{last_completed} cmp $sldst->{$b}{last_completed}
+			} grep {		# the defined elements of
+				defined($sldst->{$_}{last_completed})
+				&& !$sldst->{$_}{in_progress}
+			} keys %$sldst		# the hash keys.
+		)[-3..-1] )
+	);
+	my $text = slashDisplay('slashd_box', {
+		tasks_next              => \@tasks_next,
+		tasks_inprogress        => \@tasks_inprogress,
+		tasks_last              => \@tasks_last,
+	}, , { Return => 1 });
+	return $text;
+}
+
 ##################################################################
 # Story Editing
 sub editStory {
@@ -1048,10 +1099,12 @@ sub editStory {
 	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
 
 	my $authortext = slashDisplay('futurestorybox', {
-					past => $past,
-					present => $storyref,
-					future => $future,
-				}, { Return => 1 });
+		past => $past,
+		present => $storyref,
+		future => $future,
+	}, { Return => 1 });
+
+	my $slashdtext = get_slashd_box();
 
 	slashDisplay('editStory', {
 		storyref 		=> $storyref,
@@ -1059,6 +1112,7 @@ sub editStory {
 		storycontent		=> $storycontent,
 		sid			=> $sid,
 		authortext 		=> $authortext,
+		slashdtext		=> $slashdtext,
 		newarticle		=> $newarticle,
 		topic_select		=> $topic_select,
 		section_select		=> $section_select,
@@ -1384,7 +1438,7 @@ sub updateStory {
 sub displaySlashd {
 	my($form, $slashdb, $user, $constants) = @_;
 	slashDisplay('slashd_status', {
-		tasks		=> $slashdb->getSlashdStatuses(),
+		tasks => $slashdb->getSlashdStatuses(),
 	});
 }
 

@@ -48,6 +48,10 @@ __template__
 			title = "Story Admin"
 			contents = authortext
 		%]
+		[% PROCESS fancybox
+			title = "Slashd Status"
+			contents = slashdtext
+		%]
 
 		</TD>
 	</TR>
@@ -78,6 +82,10 @@ __template__
 		[% PROCESS fancybox
 			title = "Story Admin"
 			contents = authortext
+		%]
+		[% PROCESS fancybox
+			title = "Slashd Status"
+			contents = slashdtext
 		%]
 
 		</TD>
