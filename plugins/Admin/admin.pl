@@ -145,19 +145,19 @@ sub main {
 		recent		=> {
 			function	=> \&displayRecent,
 			seclev		=> 500,
-			adminmenu	=> 'info',
+			adminmenu	=> 'security',
 			tab_selected	=> 'recent',
 		},
 		recent_mods		=> {
 			function	=> \&displayRecentMods,
 			seclev		=> 500,
-			adminmenu	=> 'info',
+			adminmenu	=> 'security',
 			tab_selected	=> 'recent_mods',
 		},
 		recent_requests		=> {
 			function	=> \&displayRecentRequests,
 			seclev		=> 500,
-			adminmenu	=> 'info',
+			adminmenu	=> 'security',
 			tab_selected	=> 'requests',
 		},
 		recent_subs		=> {
