@@ -922,6 +922,7 @@ sub showInfo {
 		color =>	'colored',
 		tab_selected =>	$hr->{tab_selected_1} || "",
 	});
+	
 
 	my $comments_wanted = $user->{show_comments_num}
 		|| $constants->{user_comment_display_default};
@@ -930,6 +931,19 @@ sub showInfo {
 		|| $constants->{comments_more_seclev} == 2 && $user->{is_subscriber};
 
 	my($netid, $netid_vis) = ('', '');
+
+	my $comment_search_options={};
+	my $comment_time;
+	if($admin_flag){
+		if(!$min_comment and !$form->{no_time_restriction}){
+			$comment_time = $constants->{admin_comment_display_days};
+			$comment_search_options->{limit_days}= $comment_time;
+			$comments_wanted = $constants->{admin_daysback_commentlimit};
+		} else {
+			$comments_wanted = $constants->{admin_comment_subsequent_pagesize};
+		}
+	}
+
 	if ($requested_user->{nonuid}) {
 		$requested_user->{fg} = $user->{fg};
 		$requested_user->{bg} = $user->{bg};
@@ -959,12 +973,12 @@ sub showInfo {
 				$commentcount = $reader->countCommentsByIPID(
 					$netid, $comments_wanted, $min_comment);
 				$comments = $reader->getCommentsByIPID(
-					$netid, $comments_wanted, $min_comment);
+					$netid, $comments_wanted, $min_comment, $comment_search_options);
 			} elsif ($form->{fieldname} eq 'subnetid') {
 				$commentcount = $reader->countCommentsBySubnetID(
 					$netid, $comments_wanted, $min_comment);
 				$comments = $reader->getCommentsBySubnetID(
-					$netid, $comments_wanted, $min_comment);
+					$netid, $comments_wanted, $min_comment, $comment_search_options);
 			} else {
 				delete $form->{fieldname};
 			}
@@ -974,8 +988,7 @@ sub showInfo {
 			$commentcount = $reader->countCommentsByIPIDOrSubnetID(
 				$netid, $comments_wanted, $min_comment);
 			$comments = $reader->getCommentsByIPIDOrSubnetID(
-				$netid, $comments_wanted, $min_comment
-			);
+				$netid, $comments_wanted, $min_comment, $comment_search_options);
 		}
 
 	} else {
@@ -984,8 +997,7 @@ sub showInfo {
 		$commentcount =
 			$reader->countCommentsByUID($requested_user->{uid});
 		$comments = $reader->getCommentsByUID(
-			$requested_user->{uid}, $comments_wanted, $min_comment
-		) if $commentcount;
+			$requested_user->{uid}, $comments_wanted, $min_comment, $comment_search_options) if $commentcount;
 		$netid = $requested_user->{uid};
 	}
 
@@ -1020,7 +1032,9 @@ sub showInfo {
 		
 	}
 
+	my $cids_seen = {};
 	for my $comment (@$comments) {
+		$cids_seen->{$comment->{cid}}++;
 		my $type;
 		# This works since $sid is numeric.
 		my $replies = $reader->countCommentsBySidPid($comment->{sid}, $comment->{cid});
@@ -1075,8 +1089,19 @@ sub showInfo {
 		}
 		push @$commentstruct, $data;
 	}
+	# Sort so the chosen group of comments is sorted by discussion
+	@$commentstruct = sort {$b->{sid} <=> $a->{sid}} @$commentstruct;
 
-
+	my $cid_list = [ keys %$cids_seen ];
+	my $cids_to_mods={};
+	if($admin_flag and $constants->{show_mods_with_comments}){
+		my $comment_mods = $reader->getModeratorCommentLog("DESC", $constants->{mod_limit_with_comments}, "cidin", $cid_list);
+	
+		# Loop through mods and group them by the sid they're attached to
+		while(my $mod = shift @$comment_mods){
+			push @{$cids_to_mods->{$mod->{cid}}}, $mod;
+		}
+	} 
 
 	my $storycount =
 		$reader->countStoriesBySubmitter($requested_user->{uid})
@@ -1109,7 +1134,9 @@ sub showInfo {
 			reasons			=> $reader->getReasons(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
-			hr_hours_back		=> $ipid_hoursback
+			hr_hours_back		=> $ipid_hoursback,
+			cids_to_mods		=> $cids_to_mods,
+			comment_time		=> $comment_time
 		});
 
 	} else {
@@ -1155,6 +1182,8 @@ sub showInfo {
 			reasons			=> $reader->getReasons(),
 			lastjournal		=> $lastjournal,
 			hr_hours_back		=> $ipid_hoursback,
+			cids_to_mods		=> $cids_to_mods,
+			comment_time		=> $comment_time
 		});
 	}
 
