@@ -40,7 +40,7 @@ message_count.unread %] new message[% message_count.unread == 1 ? "" : "s";
 %]<A HREF="[% constants.rootdir %]/messages.pl?op=list">[%
 	END;
 message_count.read %] old message[% message_count.read == 1 ? "" : "s";
-	IF message_count.unread
+	IF message_count.read
 %]</A>[%
 	END
 %]</B>.<BR>
