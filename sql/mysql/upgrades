@@ -138,7 +138,11 @@ CREATE TABLE hooks (
 
 ALTER TABLE stories ADD COLUMN qid MEDIUMINT UNSIGNED DEFAULT NULL;
 
-perl -MSlash::Test=virtusername -le '$qs = $slashdb->sqlSelectAllHashrefArray("pollquestions.qid AS qid, pollquestions.sid AS sid", "pollquestions, stories", "pollquestions.sid=stories.sid"); for my $hr (@$qs) { my($q,$s) = ($hr->{qid}, $hr->{sid}); my $sq=$slashdb->sqlQuote($s); print "$q -> $s"; $slashdb->sqlUpdate("stories", { qid => $q }, "sid=$sq") or die "\tFAILED" }'
+# Same as below
+#perl -MSlash::Test=virtusername -le '$qs = $slashdb->sqlSelectAllHashrefArray("pollquestions.qid AS qid, pollquestions.sid AS sid", "pollquestions, stories", "pollquestions.sid=stories.sid"); for my $hr (@$qs) { my($q,$s) = ($hr->{qid}, $hr->{sid}); my $sq=$slashdb->sqlQuote($s); print "$q -> $s"; $slashdb->sqlUpdate("stories", { qid => $q }, "sid=$sq") or die "\tFAILED" }'
+# I have never tried to do a "source" from a file but I suspect it will work -Brian
+select CONCAT('UPDATE stories SET qid=',qid,' WHERE sid="',sid,'";') into outfile "/tmp/pollquestions.sql" from pollquestions;
+source /tmp/pollquestions.sql
 
 # (and, once we're convinced everything works)
 ALTER TABLE pollquestions DROP COLUMN sid;
