@@ -76,9 +76,9 @@ sub getTop10Comments {
 		my($sid, $title, $cid, $subj, $d, $nickname, $points) = @$_;
 		$block .= <<EOT;
 
-<LI><B><A HREF="$constants->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</A>
+&middot; <B><A HREF="$constants->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</A>
 	($points points) by $nickname</B> on $d <FONT SIZE="1">attached to
-	<A HREF="$constants->{rootdir}/article.pl?sid=$sid">$title</A></FONT>
+	<A HREF="$constants->{rootdir}/article.pl?sid=$sid">$title</A></FONT><BR>
 EOT
 	}
 	setblock("top10comments", $block);

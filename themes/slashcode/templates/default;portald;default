@@ -11,6 +11,6 @@ en_US
 __name__
 default
 __template__
-<LI><A HREF="[% item.link | strip_attribute %]">[% item.title | strip_notags %]</A></LI>
+&middot; <A HREF="[% item.link | strip_attribute %]">[% item.title | strip_notags %]</A><BR>
 __seclev__
 10000
