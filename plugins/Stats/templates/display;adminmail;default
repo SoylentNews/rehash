@@ -27,26 +27,36 @@ gstatic total:        -          -   [% grand_total_static %]
 [% IF constants.subscribe %]sbscrbr total:        -          -   [% total_subscriber %]
 [% END %]
         posts: [% distinct_comment_posters_uids %]   [% IPIDS %]
+[% IF comments_page > 0 -%]
      comments: [% comments_uids %]   [% comments_ipids %]   [% comments_page %] ([% comments_bytes %])
+[% END -%]
 [% IF index_page > 0 -%]
         index: [% index_uids %]   [% index_ipids %]   [% index_page %]
 [% END -%]
 [% IF page_page > 0 -%]
          page: [% page_uids %]   [% page_ipids %]   [% page_page %]
 [% END -%]
+[% IF article_page > 0 -%]
      articles: [% article_uids %]   [% article_ipids %]   [% article_page %] ([% article_bytes %])
+[% END -%]
+[% IF search_page > 0 -%]
        search: [% search_uids %]   [% search_ipids %]   [% search_page %] ([% search_bytes %])
+[% END -%]
 [% IF journal_page > 0 -%]
      journals: [% journal_uids %]   [% journal_ipids %]   [% journal_page %] ([% journal_bytes %])
 [% END -%]
+[% IF users__page > 0 -%]
         users: [% users_uids %]   [% users_ipids %]   [% users_page %] ([% users_bytes %])
+[% END -%]
 [% IF palm_page > 0 -%]
          palm: [% palm_uids %]   [% palm_ipids %]   [% palm_page %] ([% palm_bytes %])
 [% END -%]
 [% IF rss_ipids > 0 -%]
           rss: [% rss_uids %]   [% rss_ipids %]   [% rss_page %] ([% rss_bytes %])
 [% END -%]
+[% IF other_page > 0 -%]
         other: [% other_uids %]   [% other_ipids %]   [% other_page %] ([% other_bytes %])
+[% END -%]
 
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total

@@ -6284,8 +6284,11 @@ sub getTopics {
 
 ########################################################
 sub getStoryTopicsJustTids {
-	my($self, $sid) = @_;
-	my $answer = $self->sqlSelectColArrayref('tid', 'story_topics', "sid = " . $self->sqlQuote($sid));
+	my($self, $sid, $options) = @_;
+	my $where = "1=1";
+	$where .= " AND is_parent = 'no'" if $options->{no_parents};
+	$where .= " AND sid = " . $self->sqlQuote($sid);
+	my $answer = $self->sqlSelectColArrayref('tid', 'story_topics', $where);
 
 	return  $answer;
 }
@@ -6331,8 +6334,8 @@ sub setStoryTopics {
 
 	$self->sqlDo("DELETE from story_topics where sid = '$sid'");
 
-	for (@{$topic_ref}) {
-	    $self->sqlInsert("story_topics", { sid => $sid, tid => $_ });
+	for my $key (keys %{$topic_ref}) {
+	    $self->sqlInsert("story_topics", { sid => $sid, tid => $key, is_parent  => $topic_ref->{$key} });
 	}
 }
 

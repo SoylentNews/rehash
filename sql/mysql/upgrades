@@ -1415,3 +1415,6 @@ ALTER TABLE accesslist ADD INDEX now_trusted (now_trusted);
 
 # SLASHDOT LAST UPDATED HERE
 
+ALTER TABLE story_topics ADD is_parent ENUM("yes","no") DEFAULT 'no' NOT NULL;
+# Currently all stories will be this case
+UPDATE story_topics SET is_parent="no";

@@ -1114,7 +1114,6 @@ sub editStory {
 	my($fixquotes_check, $autonode_check, 
 		$fastforward_check, $shortcuts_check) =
 		('','','','');
-	my($multi_topics, $story_topics);
 	my $page = 'index';
 	# If the user is a section only admin, we do that, if they have filled out a form we do that but 
 	# if none of these apply we just do defaultsection -Brian
@@ -1140,14 +1139,6 @@ sub editStory {
 		$storyref->{section}	   = $form->{section} || $SECT->{defaultsection};
 
 		$storyref->{uid} ||= $user->{uid};
-		#$storyref->{section} = $form->{section};
-
-#		$storyref->{writestatus} = $form->{writestatus}
-#			if exists $form->{writestatus};
-#		$storyref->{displaystatus} = $form->{displaystatus}
-#			if exists $form->{displaystatus};
-#		$storyref->{commentstatus} = $form->{commentstatus}
-#			if exists $form->{commentstatus};
 		$storyref->{dept} =~ s/[-\s]+/-/g;
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
@@ -1177,8 +1168,6 @@ sub editStory {
 
 		my $tmp = $user->{currentSection};
 		$user->{currentSection} = $storyref->{section};
-
-	#	$storycontent = dispStory($storyref, $author, $topic, 'Full');
 
 		$user->{currentSection} = $tmp;
 		$storyref->{relatedtext} =
@@ -1216,9 +1205,8 @@ sub editStory {
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 		$subid = $storyref->{subid};
-		my $temp_stid = $slashdb->getStoryTopics($sid);
-		delete $temp_stid->{$storyref->{tid}};
-		@stid = keys %$temp_stid;
+		# Remove the original
+		@stid = grep(!/^$storyref->{tid}$/, @{$slashdb->getStoryTopicsJustTids($sid, { no_parents => 1 })});
 	} else { # New Story
 		my $SECT = $slashdb->getSection($section);
 		$extracolumns		    = $slashdb->getSectionExtras($SECT->{section}) || [ ];
@@ -1249,7 +1237,7 @@ sub editStory {
 		$story_copy{bodytext} = processSlashTags($story_copy{bodytext}, {});
 		my $author = $slashdb->getAuthor($storyref->{uid});
 		my $topic = $slashdb->getTopic($storyref->{tid});
-		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full');
+		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full', { stid => \@stid });
 	}
 
 	for (@{$extracolumns}) {
@@ -1259,14 +1247,6 @@ sub editStory {
 
 	$storyref->{section} ||= $section;
 	$sections = $slashdb->getDescriptions('sections');
-
-	$multi_topics = $slashdb->getDescriptions(
-		'topics_section', 
-		$storyref->{section}
-	);
-
-	$story_topics = $slashdb->getStoryTopics($storyref->{sid});
-	$story_topics->{$storyref->{tid}} ||= 1 ; 
 
 	my $topic_values = $slashdb->getDescriptions('topics_section', $storyref->{section});
 	$topic_select = createSelect('tid',
@@ -1395,8 +1375,6 @@ sub editStory {
 		subsection_select	=> $subsection_select,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
-		multi_topics		=> $multi_topics,
-		story_topics		=> $story_topics,
 		similar_stories		=> $similar_stories,
 		topic_select_sec	=> \@topic_select_sec,
 		attached_files		=> $attached_files,
@@ -1628,33 +1606,7 @@ sub updateStory {
 		? $slashdb->getTime()
 		: $form->{'time'};
 
-	for my $k (keys %$form) {
-		if ($k =~ /^tid_(.*)$/) {
-			push @$tid_ref, $1;
-		}
-	}
-
-	# Take all secondary topics and shove them into the array for the story
-	if (ref($form->{_multi}{stid}) eq 'ARRAY') {
-		for (@{$form->{_multi}{stid}}) {
-			push @$tid_ref, $_ if $_;
-		}
-	} else {
-		push @$tid_ref, $form->{stid} if $form->{stid};
-	}
-
-	# Make sure the primary topic is saved with the topics for the story
-	for (@{$tid_ref}) {
-		$default_set++ if $topic && $_ eq $topic;
-	}
-	push @$tid_ref, $topic if !$default_set;
-	my %temp_hash;
-	for (@$tid_ref) {
-		$temp_hash{$_} = 1;
-	}
-	@$tid_ref = keys %temp_hash;
-
-	$slashdb->setStoryTopics($form->{sid}, $tid_ref);
+	$slashdb->setStoryTopics($form->{sid}, _createStoryTopicData($slashdb, $form));
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});
@@ -1911,26 +1863,7 @@ sub saveStory {
 		}
 		$data->{discussion} = $id;
 		# Take all secondary topics and shove them into the array for the story
-		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
-			for (@{$form->{_multi}{stid}}) {
-				push @$tid_ref, $_ if $_;
-			}
-		} else {
-			push @$tid_ref, $form->{stid} if $form->{stid};
-		}
-
-		# Make sure the primary topic is saved with the topics for the story
-		for (@{$tid_ref}) {
-			$default_set++ if $topic && $_ eq $topic;
-		}
-		push @$tid_ref, $topic if !$default_set;
-		my %temp_hash;
-		for (@$tid_ref) {
-			$temp_hash{$_} = 1;
-		}
-		@$tid_ref = keys %temp_hash;
-
-		$slashdb->setStoryTopics($sid, $tid_ref);
+		$slashdb->setStoryTopics($form->{sid}, _createStoryTopicData($slashdb, $form));
 
 		slashHook('admin_save_story_success', { story => $data });
 	} else {
@@ -1954,9 +1887,35 @@ sub getTitle {
 }
 
 ##################################################################
-sub getLinks {
-# huh? who did this?
-# "getLinks" appears nowhere else in the codebase - Jamie 2002/01/09
+sub _createStoryTopicData {
+	my ($slashdb, $form) = @_;	
+	# Probably should not be changing stid
+	my @tids;
+	if ($form->{_multi}{stid} eq 'ARRAY') {
+		for (@{$form->{_multi}{stid}}) {
+			push @tids, $_;
+		}
+	}
+	push @tids, $form->{stid} if $form->{stid};
+	push @tids, $form->{tid} if $form->{tid};
+	my @original = @tids;
+	my $loop_protection = 0;
+	for my $tid (@tids) {
+		my $new_tid = $slashdb->sqlSelect("parent_topic", "topics", "tid = $tid");
+		push @tids, $new_tid if $new_tid && grep(!/$new_tid/,@tids);
+		#This is here to kill some runaway logic loop
+		$loop_protection++;
+		last if $loop_protection > 30;
+	}
+
+	my %tid_ref;
+	for my $tid (@tids) {
+		# Jump to the next tid if it is zero
+		next unless $tid;
+		$tid_ref{$tid} =  scalar(grep(/^$tid$/,@original))  ? 'no' : 'yes' ;
+	}
+
+	return \%tid_ref;
 }
 
 createEnvironment();

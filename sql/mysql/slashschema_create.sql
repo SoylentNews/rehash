@@ -810,6 +810,7 @@ CREATE TABLE story_topics (
   id int(5) NOT NULL auto_increment,
   sid varchar(16) NOT NULL default '',
   tid smallint(5) unsigned default NULL,
+  is_parent ENUM("yes","no") DEFAULT 'no' NOT NULL,
   FOREIGN KEY (sid) REFERENCES stories(sid),
   FOREIGN KEY (tid) REFERENCES topics(tid),
   PRIMARY KEY (id),

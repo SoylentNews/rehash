@@ -1132,6 +1132,7 @@ sub dispStory {
 		topic	=> $topic,
 		author	=> $author,
 		full	=> $full,
+		stid	=> $other->{stid},
 		magic	=> $other->{magic},
 		width	=> $constants->{titlebar_width},
 	);
@@ -1215,6 +1216,7 @@ sub displayStory {
 	if ($full) {
 		$story->{bodytext} = parseSlashizedLinks($story->{bodytext});
 		$story->{bodytext} = processSlashTags($story->{bodytext}, {});
+		$other->{stid} = $reader->getStoryTopicsJustTids($story->{sid});
 	}
 
 	my $return = dispStory($story, $author, $topic, $full, $other);

@@ -171,9 +171,6 @@ sub displayStories {
 			$storystruct->[$i]{widget} = $storycontent;
 		} else {
 			my $storyref = $self->prepareStory($sid);
-			$storyref->{other_topics} = 
-				$self->getStoryTopics($sid, 2);
-
 			my $storycontent = '';
 			$storycontent .= $self->getStoryContent($storyref);
 			$storycontent .= $self->getLinksContent(
