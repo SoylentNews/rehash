@@ -30,10 +30,13 @@ $task{$me}{code} = sub {
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 
-	# By setting overwrite to 1, we delete any stats which may have
+	my $overwrite = 0;
+	$overwrite = 1 if $constants->{task_options}{overwrite};
+
+	# If overwrite is set to 1, we delete any stats which may have
 	# been written by an earlier run of this task.
 	my $statsSave = getObject('Slash::Stats::Writer',
-		{ nocache => 1 }, { day => $yesterday, overwrite => 1 });
+		{ nocache => 1 }, { day => $yesterday, overwrite => $overwrite });
 
 	my $stats = getObject('Slash::Stats', { db_type => 'reader' });
 	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
@@ -213,6 +216,10 @@ EOT
 	$recent_subscriber_uidlist = join(", ", @$recent_subscribers)
 		if $recent_subscribers && @$recent_subscribers;
 	my $total_subscriber = $logdb->countDailySubscribers($recent_subscribers);
+	my $unique_users_subscriber = 0;
+	$unique_users_subscriber = $logdb->countUsersByPage('', {
+		extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
+	}) if $recent_subscriber_uidlist;
 	my $total_secure = $logdb->countDailySecure();
 	for my $op (@PAGES) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
@@ -396,6 +403,7 @@ EOT
 	$statsSave->createStatDaily("grand_total_bytes", $grand_total_bytes);
 	$statsSave->createStatDaily("unique", $unique_ips);
 	$statsSave->createStatDaily("unique_users", $unique_users);
+	$statsSave->createStatDaily("users_subscriber", $unique_users_subscriber);
 	$statsSave->createStatDaily("comments", $comments);
 	$statsSave->createStatDaily("homepage", $homepage);
 	$statsSave->createStatDaily("distinct_comment_ipids", scalar(@$distinct_comment_ipids));
