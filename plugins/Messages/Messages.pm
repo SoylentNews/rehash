@@ -570,8 +570,9 @@ sub getWebByUID {
 	my($self, $uid) = @_;
 	$uid ||= $ENV{SLASH_USER};
 
+	my $msguser = $self->getUser($uid);
 	my $msgs = $self->_get_web_by_uid($uid) or return 0;
-	$self->render($_, 1) for @$msgs;
+	$self->render($_, 1, $msguser) for @$msgs;
 	return $msgs;
 }
 
@@ -640,7 +641,14 @@ sub gets {
 	my($self, $count, $extra) = @_;
 
 	my $msgs = $self->_gets($count, $extra) or return 0;
-	$self->render($_) for @$msgs;
+
+	my %users;  # cache
+	for my $msg (@$msgs) {
+		my $uid = $msg->{user};
+		$users{$uid} ||= $self->getUser($uid);
+		$self->render($msg, 0, $users{$uid});
+	}
+
 	return $msgs;
 }
 
@@ -733,7 +741,7 @@ sub delete {
 
 #========================================================================
 
-=head2 render(MESSAGE [, NOTEMPLATE])
+=head2 render(MESSAGE [, NOTEMPLATE, MSG_USER])
 
 Given message data from the database, renders the message by filling
 in the user's information from the database, getting the description
@@ -762,6 +770,10 @@ getWeb() and getWebByUID() methods, the templates have already been
 rendered and stored in the messages_web table, so the templates
 should not be processed.
 
+=item MSG_USER
+
+A complete user from getUser, so we don't call getUser on our own (optimization).
+
 =back
 
 =item Return value
@@ -774,11 +786,18 @@ The hashref containing the rendered message data.
 
 
 sub render {
-	my($self, $msg, $notemplate) = @_;
+	my($self, $msg, $notemplate, $msguser) = @_;
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
+	my $user = getCurrentUser();
 
-	$msg->{user}		= $msg->{user}  ? $slashdb->getUser($msg->{user})  : { uid => 0 };
+	# use supplied user if possible, else see if we can use current user
+	$msg->{user} = $msguser || ($msg->{user}
+		? $msg->{user} == $user->{uid}
+			? $user
+			: $slashdb->getUser($msg->{user})
+		: { uid => 0 }
+	);
 	$msg->{user}{prefs}	= $self->getPrefs($msg->{user}{uid} || $constants->{anonymous_coward_uid});
 	$msg->{fuser}		= $msg->{fuser} ? $slashdb->getUser($msg->{fuser}) : 0;
 	$msg->{type}		= $self->getDescription('messagecodes', $msg->{code});
