@@ -2766,7 +2766,7 @@ sub getUserAdmin {
 		$user_edit->{subscribe_payments} =
 			$subscribe->getSubscriptionsForUser($user_edit->{uid});
 		$user_edit->{subscribe_purchases} =
-			$subscribe->getSubscriptionsPurchasedByUser($user_edit->{uid});
+			$subscribe->getSubscriptionsPurchasedByUser($user_edit->{uid},{ only_types => [ "grant", "gift" ] });
 	}
 
 	my $all_acls = $reader->getAllACLs();
