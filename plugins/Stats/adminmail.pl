@@ -344,6 +344,7 @@ EOT
 		extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
 	}) if $recent_subscriber_uidlist;
 	my $total_secure = $logdb->countDailySecure();
+
 	slashdLog("Page Summary Stats Begin");
 	my $page_summary_stats = $logdb->getPageSummaryStats({ ops => [@PAGES] });
 	slashdLog("Page Summary Stats End");
@@ -425,17 +426,17 @@ EOT
 	slashdLog("Other Section Summary Stats End");
 	
 	slashdLog("Section Page Summary Stats Begin");
-	my $section_page_summary_stats = $logdb->getSectionPageSummaryStats({ op => [@PAGES] });
+	my $section_page_summary_stats = $logdb->getSectionPageSummaryStats({ ops => [@PAGES] });
 	slashdLog("Section Page Summary Stats End");
 	
 	
 	for my $skid (sort keys %$skins) {
 		my $temp = {};
 		$temp->{skin_name} = $skins->{$skid};
-		my $uniq = $section_summary_stats->{$skid}{cnt};
-		my $pages = $section_summary_stats->{$skid}{pages};
-		my $bytes = $section_summary_stats->{$skid}{bytes};
-		my $users = $section_summary_stats->{$skid}{uids};
+		my $uniq = $section_summary_stats->{$skid}{cnt}		|| 0;
+		my $pages = $section_summary_stats->{$skid}{pages}	|| 0;
+		my $bytes = $section_summary_stats->{$skid}{bytes}	|| 0;
+		my $users = $section_summary_stats->{$skid}{uids}	|| 0;
 		my $users_subscriber = 0;
 		$users_subscriber = $logdb->countUsersByPage('', {
 			skid			=> $skid,
@@ -458,10 +459,10 @@ EOT
 		}
 
 		for my $op (@PAGES) {
-			my $uniq = $section_page_summary_stats->{$skid}{$op}{cnt};
-			my $pages = $section_page_summary_stats->{$skid}{$op}{pages};
-			my $bytes = $section_page_summary_stats->{$skid}{$op}{bytes};
-			my $users = $section_page_summary_stats->{$skid}{$op}{users};
+			my $uniq = $section_page_summary_stats->{$skid}{$op}{cnt}	|| 0;
+			my $pages = $section_page_summary_stats->{$skid}{$op}{pages}	|| 0;
+			my $bytes = $section_page_summary_stats->{$skid}{$op}{bytes}	|| 0;
+			my $users = $section_page_summary_stats->{$skid}{$op}{users}	|| 0;
 			$temp->{$op}{label} = sprintf("%8s", $op);
 			$temp->{$op}{ipids} = sprintf("%8u", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
@@ -480,10 +481,10 @@ EOT
 		#Other not recorded
 		{
 			
-			my $uniq = $other_section_summary_stats->{$skid}{cnt};
-			my $pages = $other_section_summary_stats->{$skid}{pages};
-			my $bytes = $other_section_summary_stats->{$skid}{bytes};
-			my $uids = $other_section_summary_stats->{$skid}{uids};
+			my $uniq = $other_section_summary_stats->{$skid}{cnt}		|| 0;
+			my $pages = $other_section_summary_stats->{$skid}{pages}	|| 0;
+			my $bytes = $other_section_summary_stats->{$skid}{bytes}	|| 0;
+			my $uids = $other_section_summary_stats->{$skid}{uids}		|| 0;
 			my $op = 'other';
 			$temp->{$op}{ipids} = sprintf("%8u", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
@@ -495,12 +496,12 @@ EOT
 			$statsSave->createStatDaily("${op}_user", $users, { skid => $skid});
 		}
 
-		$statsSave->createStatDaily( "page_from_rss", $stats_from_rss->{$skid}->{cnt}, {skid => $skid});
-		$statsSave->createStatDaily( "uid_from_rss", $stats_from_rss->{$skid}->{uids}, {skid => $skid});
-		$statsSave->createStatDaily( "ipid_from_rss", $stats_from_rss->{$skid}->{ipids}, {skid => $skid});
-		$temp->{page_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}->{cnt});
-		$temp->{uid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}->{uids});
-		$temp->{ipid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}->{ipids});
+		$statsSave->createStatDaily( "page_from_rss", $stats_from_rss->{$skid}{cnt}, {skid => $skid});
+		$statsSave->createStatDaily( "uid_from_rss", $stats_from_rss->{$skid}{uids}, {skid => $skid});
+		$statsSave->createStatDaily( "ipid_from_rss", $stats_from_rss->{$skid}{ipids}, {skid => $skid});
+		$temp->{page_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{cnt});
+		$temp->{uid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{uids});
+		$temp->{ipid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{ipids});
 
 		push(@{$data{skins}}, $temp);
 	}
