@@ -142,6 +142,8 @@ sub previewForm {
 		sqlSelect("subid,email,name,subj,tid,story,time,comment",
 		"submissions", "subid=$subid_dbi");
 
+	$introtext = processSub($email, $name, $introtext);
+
 	if ($comment && $admin) {
 		# This probably should be a block.
 		print <<EOT;
@@ -500,8 +502,9 @@ EOT
 
 EOT
 
-		my $story = processSub($fakeemail, $user, $I{F}{story});
-		print stripByMode($story, 'html');
+		print processSub($fakeemail, $user,
+			stripByMode(url2html($I{F}{story}), 'html')
+		);
 	}
 
 	print formLabel("The Scoop",
@@ -547,13 +550,12 @@ sub saveSub {
 		my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 
 		my $subid = "$hour$min$sec.$mon$mday$year";
-		$I{F}{story} = processSub($I{F}{from}, $I{F}{email}, $I{F}{story});
 
 		sqlInsert("submissions", {
 			email	=> $I{F}{email},
 			uid	=> $I{U}{uid},
 			name	=> $I{F}{from},
-			story	=> stripByMode($I{F}{story}, 'html'),
+			story	=> stripByMode(url2html($I{F}{story}), 'html'),
 			-'time'	=> 'now()',
 			subid	=> $subid,
 			subj	=> $I{F}{subj},
@@ -568,20 +570,7 @@ sub saveSub {
 #################################################################
 sub processSub {
 	my($email, $name, $introtext) = @_;
-	$introtext =~ s/\n\n/\n<P>/gi;
-	$introtext .= " ";
 
-	# this is kinda experimental ... esp. the $extra line
-	# we know it can break real URLs, but probably will preserve
-	# real URLs more often than it will break them
-	$introtext =~  s{(?<!["=>])(http|ftp|gopher|telnet)://([$URI::uric#]+)}{
-		my($proto, $url) = ($1, $2);
-		my $extra = '';
-		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
-		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
-		qq[<A HREF="$proto://$url">$proto://$url</A>$extra];
-	}ogie;
-	$introtext =~ s/\s+$//;
 	$introtext = qq!<I>"$introtext"</I>! if $name;
 
 	if ($email) {
@@ -599,6 +588,26 @@ sub processSub {
 
 	}
 
+	return $introtext;
+}
+
+#################################################################
+sub url2html {
+	my($introtext) = @_;
+	$introtext =~ s/\n\n/\n<P>/gi;
+	$introtext .= " ";
+
+	# this is kinda experimental ... esp. the $extra line
+	# we know it can break real URLs, but probably will preserve
+	# real URLs more often than it will break them
+	$introtext =~  s{(?<!["=>])(http|ftp|gopher|telnet)://([$URI::uric#]+)}{
+		my($proto, $url) = ($1, $2);
+		my $extra = '';
+		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
+		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
+		qq[<A HREF="$proto://$url">$proto://$url</A>$extra];
+	}ogie;
+	$introtext =~ s/\s+$//;
 	return $introtext;
 }
 
