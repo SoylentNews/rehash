@@ -1000,7 +1000,10 @@ print <<EOT;
 
 # Then run utils/convertDBto200406_render to convert story_topics_chosen
 # to story_topics_rendered.
-
+#
+# To compare number of stories in each section pre and post conversion run utils/compareSecPrePost200406
+# This will help verify you have your topic tree set up in a sensible manner
+#
 # Once you're REALLY happy with everything, DROP TABLE *_old
 
 EOT
