@@ -51,6 +51,7 @@ my %drivers = (
 
 unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 	print "You did not supply a valid DBIx::Password virtual name.\n";
+	usage() if $opts{'h'};
 	exit;
 }
 
@@ -548,7 +549,13 @@ sub usage {
 	# Generate a sample list of plugins which just happens to be
 	# the default list for the first theme.
 	my $sample_plugins = '';
-	my $install = Slash::Install->new('slash') unless $install;
+	if (!$install) {
+		my $usercheck = $opts{u} || 'slash';
+		if (DBIx::Password::checkVirtualUser($usercheck)) {
+			eval { $install = Slash::Install->new($usercheck) };
+		}
+		$install = undef if !$install or ref $install ne 'Slash::Install';
+	}
 	if ($install) {
 		my $plugins = $install->getPluginList($PREFIX);
 		my $themes = $install->getThemeList($PREFIX);
