@@ -265,6 +265,7 @@ sub get_sql_type_from_state {
 		|| $state =~ /Searching rows for update/
 		|| $state =~ /Sending data/
 		|| $state =~ /System lock/
+		|| $state =~ /^copy to/
 		|| $state =~ /^updat(e|ing)/i
 		|| $state =~ /waiting for binlog update/
 		|| $state eq 'init'
