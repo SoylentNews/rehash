@@ -1356,7 +1356,7 @@ sub fixurl {
 	$url =~ s/[" ]//g;
 	$url =~ s/^'(.+?)'$/$1/g;
 	# encode all non-safe, non-reserved characters
-	$url =~ s/([^\w.+!*'(),;?:@=&a-zA-Z0-9\$\/-])/sprintf "%%%02X", ord $1/ge;
+	$url =~ s/([^\w.+!*'(),;?:@=&\$\/%#-])/sprintf "%%%02X", ord $1/ge;
 	$url = fixHref($url) || $url;
 	my $decoded_url = decode_entities($url);
 	return $decoded_url =~ s|^\s*\w+script\b.*$||i ? undef : $url;
