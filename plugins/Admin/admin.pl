@@ -457,7 +457,7 @@ sub blockEdit {
 
 	$blockref->{rss_template} ||= $constants->{default_rss_template};
 	my $rss_select = createSelect('rss_template', $rss_ref, $blockref->{rss_template}, 1);	
-	my $template_ref = $slashdb->getTemplateByName($blockref->{rss_template}, [ 'template' ], 1 , 'portald', 'default');
+	my $template_ref = $slashdb->getTemplateByName($blockref->{rss_template}, [ 'template' ], 1 , 'portald', $blockref->{section});
 	my $rss_template_code = $template_ref->{template}; 
 
 	if ($form->{blockdelete} || $form->{blockdelete1} || $form->{blockdelete2}) {
@@ -900,7 +900,7 @@ sub editStory {
 	}
 
 	my($authoredit_flag, $extracolumn_flag) = (0, 0);
-	my($storyref, $story, $author, $topic, $storycontent, $storybox, $locktest,
+	my($storyref, $story, $author, $topic, $storycontent, $locktest,
 		$sections, $topic_select, $section_select, $author_select,
 		$extracolumns, $displaystatus_select, $commentstatus_select, $description);
 	my $extracolref = {};
@@ -908,6 +908,8 @@ sub editStory {
 		$fastforward_check, $shortcuts_check, $feature_story_check) =
 		('','','','','');
 	my($multi_topics, $story_topics);
+	my $page = 'index';
+	my $section = $user->{section} ? $user->{section} : '';
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
@@ -961,10 +963,10 @@ sub editStory {
 		$storyref->{relatedtext} = getRelated("$storyref->{title} $storyref->{bodytext} $storyref->{introtext}")
 			. otherLinks($slashdb->getAuthor($storyref->{uid}, 'nickname'), $storyref->{tid}, $storyref->{uid});
 
-		$storybox = fancybox($constants->{fancyboxwidth}, 'Related Links', $storyref->{relatedtext}, 0, 1);
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
+		$feature_story_check	= 'CHECKED' if ($slashdb->getSection($storyref->{section}, 'feature_story') eq $storyref->{sid} && $storyref->{sid} ne '');
 
 	} elsif (defined $sid) { # Loading an existing SID
 		my $tmp = $user->{currentSection};
@@ -972,17 +974,17 @@ sub editStory {
 		($story, $storyref, $author, $topic) = displayStory($sid, 'Full');
 		$extracolumns = $slashdb->getSectionExtras($user->{currentSection}) || [ ];
 		$user->{currentSection} = $tmp;
-		$storybox = fancybox($constants->{fancyboxwidth}, 'Related Links', $storyref->{relatedtext}, 0, 1);
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
+		$feature_story_check	= 'CHECKED' if ($slashdb->getSection($storyref->{section}, 'feature_story') eq $storyref->{sid} && $storyref->{sid} ne '');
 
 	} else { # New Story
-		$extracolumns = $slashdb->getSectionExtras($storyref->{section}) || [ ];
-		$storyref->{displaystatus} =	$slashdb->getVar('defaultdisplaystatus', 'value');
-		$storyref->{commentstatus} =	$slashdb->getVar('defaultcommentstatus', 'value');
-		$storyref->{tid} =		$slashdb->getVar('defaulttopic', 'value');
-		$storyref->{section} =		$slashdb->getVar('defaultsection', 'value');
+		$extracolumns		    = $slashdb->getSectionExtras($storyref->{section}) || [ ];
+		$storyref->{displaystatus}  = $slashdb->getVar('defaultdisplaystatus', 'value');
+		$storyref->{commentstatus}  = $slashdb->getVar('defaultcommentstatus', 'value');
+		$storyref->{tid}	    = $slashdb->getVar('defaulttopic', 'value');
+		$storyref->{section}	    = $user->{section} ? $user->{section} : $slashdb->getVar('defaultsection', 'value');
 
 		$storyref->{'time'} = $slashdb->getTime();
 		$storyref->{uid} = $user->{uid};
@@ -1028,8 +1030,6 @@ sub editStory {
 	$autonode_check		= 'CHECKED' if $form->{autonode};
 	$fastforward_check	= 'CHECKED' if $form->{fastforward};
 	$shortcuts_check	= 'CHECKED' if $form->{shortcuts};
-	# $feature_story_check	= 'CHECKED' if $form->{feature_story};
-	$feature_story_check	= 'CHECKED' if ($slashdb->getSection($storyref->{section}, 'feature_story') eq $storyref->{sid});
 
 	$slashdb->setSession($user->{uid}, { lasttitle => $storyref->{title} });
 
@@ -1047,14 +1047,12 @@ sub editStory {
 					future => $future,
 				}, { Return => 1 });
 
-	my $authorbox = fancybox($constants->{fancyboxwidth}, 'Story Admin', $authortext, 0, 1);
 	slashDisplay('editStory', {
 		storyref 		=> $storyref,
 		story			=> $story,
 		storycontent		=> $storycontent,
-		storybox		=> $storybox,
 		sid			=> $sid,
-		authorbox 		=> $authorbox,
+		authortext 		=> $authortext,
 		newarticle		=> $newarticle,
 		topic_select		=> $topic_select,
 		section_select		=> $section_select,
@@ -1293,6 +1291,7 @@ sub updateStory {
 
 	my $tid_ref;
 	my $default_set = 0;
+
 	# Some users can only post to a fixed section
 	if (my $section = getCurrentUser('section')) {
 		$form->{section} = $section;
@@ -1310,10 +1309,14 @@ sub updateStory {
 	if ($constants->{feature_story_enabled}) {
 		if ($form->{feature_story}) {
 			$slashdb->setSection($form->{section}, { feature_story => $form->{sid} });
-		} elsif ($slashdb->getSection($form->{section}, 'sid') eq $form->{sid}) {
+		} elsif ($slashdb->getSection($form->{section}, 'feature_story') eq $form->{sid}) {
 			$slashdb->setSection($form->{section}, { feature_story => '' });
 		}
 	}
+
+	my $time = ($form->{fastforward})
+		? $slashdb->getTime()
+		: $form->{'time'};
 
 	if ($constants->{multitopics_enabled}) {
 		for my $k (keys %$form) {
@@ -1322,14 +1325,50 @@ sub updateStory {
 		    }
 		}
 		for (@{$tid_ref}) {
-		    $default_set++ if $_ eq $form->{tid};
+		    $default_set++ if ($_ eq $form->{tid} && $form->{tid});
 		}
 		push @$tid_ref, $form->{tid} if !$default_set;
 	
 		$slashdb->setStoryTopics($form->{sid}, $tid_ref);
 	}
 
-	$slashdb->updateStory($form);
+	my $data = {
+		uid	=> $form->{uid},
+		sid	=> $form->{sid},
+		title	=> $form->{title},
+		section	=> $form->{section},
+		tid		=> $form->{tid},
+		dept		=> $form->{dept},
+		'time'		=> $time,
+		displaystatus	=> $form->{displaystatus},
+		commentstatus	=> $form->{commentstatus},
+		writestatus	=> $form->{writestatus},
+		bodytext	=> $form->{bodytext},
+		introtext	=> $form->{introtext},
+		relatedtext	=> $form->{relatedtext},
+	};
+	my $extras = $slashdb->getSectionExtras($data->{section});
+	if ($extras && @$extras) {
+	    for (@$extras) {
+		my $key = $_->[1];
+		$data->{$key} = $form->{$key}
+		if $form->{$key};
+	    }
+	}
+
+	$slashdb->setStory($form->{sid}, $data);
+	my $dis_data = {
+		sid	=> $data->{sid},
+		title	=> $data->{title},
+		section	=> $data->{section},
+		url	=> "$constants->{rootdir}/article.pl?sid=$data->{sid}",
+		ts	=> $data->{'time'},
+		topic	=> $data->{tid},
+	};
+
+
+	$slashdb->setDiscussionBySid($data->{sid}, $dis_data);
+	$slashdb->setVar('writestatus', 'dirty') if $data->{displaystatus} < 1;
 	titlebar('100%', getTitle('updateStory-title'));
 	# make sure you pass it the goods
 	listStories(@_);
@@ -1357,12 +1396,42 @@ sub saveStory {
 		"$form->{title} $form->{bodytext} $form->{introtext}"
 	) . otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
 
-	my $sid = $slashdb->createStory($form);
+	my $time = ($form->{fastforward})
+		? $slashdb->getTime()
+		: $form->{'time'};
+
+	# used to just pass $form to createStory, which is not
+	# a good idea because you end up getting form values 
+	# such as op and apache_request saved into story_param
+	my $data = {
+		uid	=> $form->{uid},
+		sid	=> $form->{sid},
+		title	=> $form->{title},
+		section	=> $form->{section},
+		tid		=> $form->{tid},
+		dept		=> $form->{dept},
+		'time'		=> $time,
+		displaystatus	=> $form->{displaystatus},
+		commentstatus	=> $form->{commentstatus},
+		writestatus	=> $form->{writestatus},
+		bodytext	=> $form->{bodytext},
+		introtext	=> $form->{introtext},
+		relatedtext	=> $form->{relatedtext},
+	};
+	my $extras = $slashdb->getSectionExtras($data->{section});
+	if ($extras && @$extras) {
+	    for (@$extras) {
+		my $key = $_->[1];
+		$data->{$key} = $form->{$key}
+		if $form->{$key};
+	    }
+	}
+	my $sid = $slashdb->createStory($data);
 
 	if ($constants->{feature_story_enabled}) {
 		if ($form->{feature_story}) {
 			$slashdb->setSection($form->{section}, { feature_story => $sid });
-		} elsif ($slashdb->getSection($form->{section}, 'sid') eq  $sid) {
+		} elsif ($slashdb->getSection($form->{section}, 'feature_story') eq  $sid) {
 			$slashdb->setSection($form->{section}, { feature_story => '' });
 		}
 	}

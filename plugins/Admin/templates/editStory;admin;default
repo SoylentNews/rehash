@@ -13,7 +13,16 @@ en_US
 __name__
 editStory
 __template__
+[%
+        section = form.section;
+        IF ! section;
+                section  = user.section;
+        END;
+%]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
+[% IF section %]
+<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% section %]">
+[% END %]
 
 [% IF form.title %]
 
@@ -27,10 +36,18 @@ __template__
 			[% storycontent %]
 		</TD>
 
-		<TD WIDTH="220">
-		[% storybox %]
+		<TD>
+		
+		<BR>
+		[% INCLUDE titlebar width="100%" TITLE="Related Links" %]
+		[% storyref.relatedtext %] 
 		<INPUT TYPE="HIDDEN" NAME="relatedtext" VALUE="[% relatedtext | strip_attribute %]">
-		 [% authorbox %]
+		
+		<BR>
+		<BR>
+		[% INCLUDE titlebar width="100%" TITLE="Story Admin" %]
+		[% authortext %]
+		<BR>
 		</TD>
 	</TR>
 </TABLE>
@@ -42,10 +59,25 @@ __template__
 		<TD>
 		[% story %]
 		</TD>
-		<TD WIDTH="220">
-		[% storybox %]
+		<TD>
+		[% 
+			IF Slash.getObject('Slash::Events'); %]
+		[% INCLUDE titlebar width="100%" title="Set an Event for this Story" %]		
+		<A HREF="[% constants.rootidir %]/eventsadmin.pl?op=edit&amp;sid=[% sid %]">Make Event</A>
+			[% END;
+		%]
+
+		<BR>
+		<BR>
+		[% INCLUDE titlebar width="100%" title="Related Links" %]
+		[% storyref.relatedtext %] 
+
 		<INPUT TYPE="HIDDEN" NAME="relatedtext" VALUE="[% relatedtext | strip_attribute %]">
-		 [% authorbox %]
+		<BR>
+		<BR>
+		[% INCLUDE titlebar width="100%" title="Story Admin" %]
+		[% authortext %]
+		<BR>
 		</TD>
 	</TR>
 </TABLE>
@@ -62,6 +94,7 @@ __template__
 		[% UNLESS user.section %]
 		[% section_select %]
 		[% END %]
+
 
 		<INPUT TYPE="HIDDEN" NAME="writestatus" VALUE="[% storyref.writestatus %]">
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter %]">
@@ -99,9 +132,17 @@ __template__
 	[% FOR extra = extras %]
 	<TR>
 		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
+		[% # yeah, I know... %]
 		<B>[% extra.0 %]</B> </FONT></TD>
+		[% IF extra.2 == text %]
 		<TD BGCOLOR="[% user.bg.2 %]">
 		<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% storyref.${extra.1} | strip_attribute %]" SIZE="50">
+		[% ELSE %]
+		<TD BGCOLOR="[% user.bg.2 %]">
+		[% # section:value %]
+		[% pulldown = "$extra.3:$extra.1" %]
+		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), storyref.${extra.1}, 1, 1) %]	
+		[% END %]
 		</TD>
 	</TR>
 	[% END %]

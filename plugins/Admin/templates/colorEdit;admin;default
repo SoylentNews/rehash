@@ -23,7 +23,7 @@ change in the color scheme. <BR>
 If you can restart the webserver, that's the quickest way to
 see your changes.</P>
 
-[% PROCESS titlebar %]
+[% PROCESS titlebar width="100%" %]
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 <INPUT TYPE="hidden" name="op" value="colors">

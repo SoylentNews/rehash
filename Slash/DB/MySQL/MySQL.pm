@@ -28,6 +28,9 @@ my %descriptions = (
 	'generic'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='$_[2]'") },
 
+	'genericstring'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='$_[2]'") },
+
 	'statuscodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='statuscodes'") },
 
@@ -610,9 +613,9 @@ sub getSectionExtras {
 	return unless $section;
 
 	my $answer = $self->sqlSelectAll(
-		'name,value', 
+		'name,value,type,section', 
 		'section_extras', 
-		'section=' . $self->sqlQuote($section)
+		'section ='. $self->sqlQuote($section)
 	);
 
 	return $answer;
@@ -778,7 +781,7 @@ sub getDiscussionsUserCreated {
 		unless $all;
 
 	if ($section) {
-		$where .= " AND discussions.section = '$section'"
+		$where .= " AND discussions.section = '$section'";
 	} else {
 		$tables .= ", sections";
 		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
@@ -1968,6 +1971,7 @@ sub setStory {
 	}
 
 	for (@param)  {
+		print STDERR "saving param name $_->[0] value $_->[1] into $param_table\n";
 		$self->sqlReplace($param_table, {
 			sid	=> $sid,
 			name	=> $_->[0],
@@ -4029,9 +4033,11 @@ sub createDiscussion {
 	$discussion->{uid} ||= getCurrentUser('uid');
 	# commentcount and flags set to defaults
 
+	print STDERR "getting ready to create discussion \n";
 	$self->sqlInsert('discussions', $discussion);
 
 	my $discussion_id = $self->getLastInsertId();
+	print STDERR "inserted discussion $discussion_id\n";
 
 	return $discussion_id;
 }
@@ -4039,7 +4045,11 @@ sub createDiscussion {
 ########################################################
 sub createStory {
 	my($self, $story) = @_;
+
+	my $constants = getCurrentStatic();
+
 	$story ||= getCurrentForm();
+
 	# Create a sid
 	my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 	$year = $year % 100;
@@ -4080,32 +4090,13 @@ sub createStory {
 			if ($isolate);
 	}
 
-	my $data = {
-		sid		=> $sid,
-		uid		=> $story->{uid},
-		tid		=> $story->{tid},
-		dept		=> $story->{dept},
-		'time'		=> $story->{'time'},
-		day_published	=> $story->{'time'},
-		title		=> $story->{title},
-		section		=> $story->{section},
-		displaystatus	=> $story->{displaystatus},
-		commentstatus	=> $story->{commentstatus},
-		submitter	=> $story->{submitter} ?
-			$story->{submitter} : $story->{uid},
-		writestatus	=> 'dirty',
-	};
+	$story->{submitter}	= $story->{submitter} ?
+		$story->{submitter} : $story->{uid};
+	$story->{writestatus}	= 'dirty',
 
-	my $text = {
-		sid		=> $sid,
-		bodytext	=> $story->{bodytext},
-		introtext	=> $story->{introtext},
-		relatedtext	=> $story->{relatedtext},
-	};
-
-	$self->sqlInsert('stories', $data);
-	$self->sqlInsert('story_text', $text);
-	$self->_saveExtras($story);
+	$self->sqlInsert('stories', { sid => $story->{sid}});
+	$self->sqlInsert('story_text', { sid => $story->{sid}});
+	$self->setStory($story->{sid}, $story);
 
 	return $sid;
 }
@@ -4126,17 +4117,22 @@ sub updateStory {
 			if ($isolate);
 	}
 
-	$self->sqlUpdate('discussions', {
+	my $data = {
 		sid	=> $story->{sid},
 		title	=> $story->{title},
 		section	=> $story->{section},
 		url	=> "$constants->{rootdir}/article.pl?sid=$story->{sid}",
 		ts	=> $time,
 		topic	=> $story->{tid},
-	}, 'sid = ' . $self->sqlQuote($story->{sid}));
+	};
 
 
-	$self->sqlUpdate('stories', {
+	$self->sqlUpdate('discussions', $data, 
+	'sid = ' . $self->sqlQuote($story->{sid}));
+
+	$data = {};
+
+	$data = {
 		uid		=> $story->{uid},
 		tid		=> $story->{tid},
 		dept		=> $story->{dept},
@@ -4147,7 +4143,10 @@ sub updateStory {
 		displaystatus	=> $story->{displaystatus},
 		commentstatus	=> $story->{commentstatus},
 		writestatus	=> $story->{writestatus},
-	}, 'sid=' . $self->sqlQuote($story->{sid}));
+	};
+
+	$self->sqlUpdate('stories', $data, 
+	'sid=' . $self->sqlQuote($story->{sid}));
 
 	$self->sqlUpdate('story_text', {
 		bodytext	=> $story->{bodytext},

@@ -16,7 +16,6 @@ __template__
 [% FOREACH story = future %]
 	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M", 0) %] <br>
 [% END %]
-<HR noshade width="100%" size="1" color="#FFFFFF">
 [% FOREACH story = past %]
 	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M", 0) %] <br>
 [% END %]
