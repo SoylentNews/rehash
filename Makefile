@@ -105,8 +105,22 @@ install: slash plugins
 
 	# Create all necessary directories.
 	install -d $(SLASH_PREFIX)/bin/ $(SLASH_PREFIX)/sbin $(SLASH_PREFIX)/sql/ $(SLASH_PREFIX)/sql/mysql/ $(SLASH_PREFIX)/sql/postgresql $(SLASH_PREFIX)/themes/ $(SLASH_PREFIX)/themes/slashcode/htdocs/ $(SLASH_PREFIX)/themes/slashcode/sql/ $(SLASH_PREFIX)/themes/slashcode/sql/postgresql $(SLASH_PREFIX)/themes/slashcode/sql/mysql $(SLASH_PREFIX)/themes/slashcode/backup $(SLASH_PREFIX)/themes/slashcode/logs/ $(SLASH_PREFIX)/plugins/ $(SLASH_PREFIX)/httpd/
+
+	# Quick hack to avoid the need for "cp -ruv" which breaks under FreeBSD
+	# is to just copy the directories now. We may end up copying over a file
+	# in the next step that we copy now. To fix this, a major portion of this
+	# section of the Makefile would need to be rewritten to do this sanely
+	# and there just isn't the time for that right now.
+	#
+	# Install the plugins...(will also install kruft like CVS/ and blib/
+	# directories if they are around. Maybe a smarter copying procedure
+	# is called for, here?)
+	(cd plugins; make clean) 
+	$(CP) -rv plugins/* $(SLASH_PREFIX)/plugins/
+	# Now all other themes
+	$(CP) -rv themes/* $(SLASH_PREFIX)/themes
 	
-	# Insure we use the proper perl interpreter and prefix in all scripts that 
+	# Insure we use the proper Perl interpreter and prefix in all scripts that 
 	# we install. Note the use of Perl as opposed to dirname(1) and basename(1)
 	# which may or may not exist on any given system.
 	(replacewith=$(REPLACEWITH); \
@@ -136,16 +150,6 @@ install: slash plugins
 
 	$(CP) sql/mysql/slashschema_create.sql $(SLASH_PREFIX)/sql/mysql/schema.sql
 	$(CP) sql/postgresql/slashschema_create.sql $(SLASH_PREFIX)/sql/postgresql/schema.sql
-
-	# Note the use of -u in the copy commands below. We don't want to
-	# overwrite any of the perl scritps we've already modified and put
-	# into place!
-
-	# Now for the plugins.
-	(cd plugins; make clean) 
-	$(CP) -ruv plugins/* $(SLASH_PREFIX)/plugins/
-	# Now all other themes
-	$(CP) -ruv themes/* $(SLASH_PREFIX)/themes
 
 	# This needs BSD support (and Solaris)...
 	# ... and the $(SLASH_PREFIX) section is a really ugly hack, too.
@@ -196,6 +200,8 @@ install: slash plugins
 	 		mv $$a.bak $$a;	 					\
 		fi;								\
 	done)
+	# Remove any kruft thay may be installed which shouldn't be.
+	-find $(SLASH_PREFIX) -name CVS -type d -exec rm -rf {} \; 2> /dev/null
 
 	touch $(SLASH_PREFIX)/slash.sites
 	chown $(USER):$(GROUP) $(SLASH_PREFIX)
