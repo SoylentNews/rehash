@@ -1,0 +1,82 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Slash::Constants ':people';
+
+use vars qw( $slashdb $werder $constants $junk );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:v', \%opts);
+usage() if $opts{'h'};
+$opts{'u'} ||= 'slash';
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+
+my $users = $slashdb->sqlSelectColArrayref('uid', 'people');
+
+for my $uid (@$users) {
+	my $people;
+	my $friends = $slashdb->sqlSelectColArrayref('person', 'people', "type='friend' AND uid = $uid");
+	my $foes = $slashdb->sqlSelectColArrayref('person', 'people', "type='foe' AND uid = $uid");
+	for (@$friends) {
+		$people->{$_} = FRIEND;
+		print "ADDING $_\n";
+	}
+	for (@$foes) {
+		$people->{$_} = FOE;
+		print "ADDING $_\n";
+	}
+	$slashdb->setUser($uid, { people => $people });
+	
+}
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#users]
+
+This rebuilds the people table for the Zoo system.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
