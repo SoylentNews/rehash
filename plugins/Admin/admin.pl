@@ -141,7 +141,7 @@ sub main {
 		: " $local_ts $user->{tzcode} = $gmt_ts GMT";
 	# "backSlash" needs to be in a template or something -- pudge
 	header("backSlash$time_remark$tbtitle", 'admin');
-	# admin menu is printed by header(), like always
+	# admin menu is printed from within the 'header' template
 
 	# it'd be nice to have a legit retval
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
@@ -1075,6 +1075,7 @@ sub editStory {
 		my $tmp = $user->{currentSection};
 		$user->{currentSection} = $slashdb->getStory($sid, 'section', 1);
 		($story, $storyref, $author, $topic) = displayStory($sid, 'Full');
+		$storyref->{writestatus} = 'dirty';
 		$extracolumns = $slashdb->getSectionExtras($user->{currentSection}) || [ ];
 		$user->{currentSection} = $tmp;
 		# Get wordcounts
@@ -1148,7 +1149,10 @@ sub editStory {
 	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
 
 	my $num_sim = $constants->{similarstorynumshow} || 5;
+use Time::HiRes; my $start_time = Time::HiRes::time;
 	my $similar_stories = $slashdb->getSimilarStories($storyref, $num_sim);
+my $duration = Time::HiRes::time - $start_time;
+printf STDERR "getSimilarStories duration: %0.3f\n", $duration;
 	# Truncate that data to a reasonable size for display.
 	if ($similar_stories && @$similar_stories) {
 		for my $sim (@$similar_stories) {
