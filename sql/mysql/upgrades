@@ -2820,8 +2820,6 @@ INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymin',-20,'Min
 
 # SLASHCLUSTER LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_45, Start of T_2_5_0_46 - 2005/01/18
 
 # Your site almost certainly is using 6-hex-digit colors in the hexcolor
@@ -2844,6 +2842,8 @@ ALTER TABLE users MODIFY sig varchar(200);
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_linethick', '2', 'For question 1 (images), thickness of the lines that are drawn to confuse OCR');
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_46, Start of T_2_5_0_47 - 2005/02/02
 
