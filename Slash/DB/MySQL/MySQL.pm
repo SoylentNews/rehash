@@ -477,7 +477,7 @@ sub getMetamodsForUser {
 			"moderatorlog",
 			"id IN ($mods_saved) AND active=1 AND m2status = 0"
 		);
-		@mods_saved = grep /^\d+$/, split ",", @$mods_not_done;
+		@mods_saved = grep /^\d+$/, @$mods_not_done;
 	}
 
 	# If we need more, get more.
@@ -1706,6 +1706,7 @@ sub deleteModeratorlog {
 	if ($opts->{cid}) {
 		$where = 'cid=' . $self->sqlQuote($opts->{cid});
 	} elsif ($opts->{sid}) {
+		# XXX This will not work. - Jamie 2002/09/02
 		$where = 'sid=' . $self->sqlQuote($opts->{sid});
 	} else {
 		return;
