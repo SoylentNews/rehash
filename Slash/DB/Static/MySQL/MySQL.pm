@@ -304,6 +304,15 @@ sub _deleteThread {
 
 ########################################################
 # For daily_forget.pl
+sub forgetUsersLogtokens {
+	my($self) = @_;
+
+	return $self->sqlDelete("users_logtokens",
+		"DATE_ADD(expires, INTERVAL 1 MONTH) < NOW()");
+}
+
+########################################################
+# For daily_forget.pl
 sub forgetCommentIPs {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
