@@ -1,0 +1,103 @@
+#!/usr/bin/perl -w 
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2004 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This script compares number of stories per section/skin from before
+# and after section topics conversion.  Only works if you keep your
+# stories_old table around to compare to
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Data::Dumper;
+use Slash;
+use Slash::Utility;
+
+use vars qw( $slashdb $sections_all $skins_all $overall_summary $sections_year $skins_year $year_summary);
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+$Data::Dumper::Sortkeys = 1;
+
+my (%opts, %family_tree);
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:', \%opts);
+usage() if $opts{h};
+die "Username required" unless $opts{u};
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+
+$sections_all = $slashdb->sqlSelectAllHashref(
+		"section", 
+		"section, COUNT(*) as cnt", 
+		"stories_old", 
+		"displaystatus > -1 ", 
+		"GROUP BY section"
+);
+
+$skins_all = $slashdb->sqlSelectAllHashref(
+		"name", 
+		"skins.name, COUNT(DISTINCT stoid) as cnt", 
+		"skins,story_topics_rendered,topic_nexus", 
+		"story_topics_rendered.tid=topic_nexus.tid AND skins.nexus = story_topics_rendered.tid", 
+		"GROUP BY skins.name"
+);
+
+$sections_all->{mainpage}{cnt} = $slashdb->sqlCount("stories_old", "displaystatus=0");
+
+$overall_summary->{$_}{old} = $sections_all->{$_}{cnt} foreach keys %$sections_all;
+$overall_summary->{$_}{new} = $skins_all->{$_}{cnt} foreach keys %$skins_all;
+
+print "\nSummary of number of stories in sections/skins before and after conversion\n\n";
+print "Section               Before  After\n";
+print "-" x 40, "\n";
+foreach (sort keys %$overall_summary) {
+	printf ("%20s  %6d %6d\n", $_, $overall_summary->{$_}{old}, $overall_summary->{$_}{new});
+}
+print "-" x 40, "\n";
+
+
+$sections_year = $slashdb->sqlSelectAllHashref(
+		[qw(year section)], 
+		"section, COUNT(*) as cnt, SUBSTRING(time,1,4) as year", 
+		"stories_old", 
+		"displaystatus > -1 ", "
+		GROUP BY substring(time,1,4),section"
+);
+
+$skins_year = $slashdb->sqlSelectAllHashref(
+		[ qw(year name) ], 
+		"skins.name, COUNT(DISTINCT stories.stoid) as cnt, SUBSTRING(time,1,4) as year", 
+		"stories,skins,story_topics_rendered,topic_nexus", 
+		"story_topics_rendered.tid=topic_nexus.tid AND skins.nexus = story_topics_rendered.tid 
+		AND stories.stoid=story_topics_rendered.stoid", 
+		"GROUP BY substring(time,1,4), skins.name"
+);
+
+foreach my $year (keys %$sections_year) {
+	$sections_year->{$year}{mainpage}{cnt} = $slashdb->sqlCount("stories_old","time like '$year%' AND displaystatus=0");
+	foreach my $sec (keys %{$sections_year->{$year}}){
+		$year_summary->{$year}{$sec}{old} = $sections_year->{$year}{$sec}{cnt};	
+	}
+}
+
+foreach my $year (keys %$skins_year) {
+	foreach my $sec (keys %{$skins_year->{$year}}){
+		$year_summary->{$year}{$sec}{new} = $skins_year->{$year}{$sec}{cnt};	
+	}
+}
+
+print "\n\n\nBreakdown By Year\n\n";
+foreach my $year (sort keys %$year_summary) {
+	print "$year\n";
+	print "Section               Before  After\n";
+	print "-" x 40, "\n";
+	foreach (sort keys %{$year_summary->{$year}}) {
+		printf ("%20s  %6d %6d\n", $_, $year_summary->{$year}{$_}{old}, $year_summary->{$year}{$_}{new});
+	}
+	print "-" x 40, "\n";
+	print "\n";
+}
