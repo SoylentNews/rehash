@@ -109,13 +109,19 @@ ELSE;
 		storytitle = storytitle _ 'y';
 	END;
 END; %]
+<TABLE cellpadding="0" cellspacing="0" width="100%" bgcolor="[% user.bg.2 %]">
+<TR><TD>
 [% PROCESS titlebar width = "100%" title = storytitle %]
-<P>
+</TD></TR>
+<TR><TD>
+<TABLE CELLPADDING="4"><TR><TD>
 [% n = 0 %]
 [% FOREACH story = stories %]
         [% n = n + 1 %]
                 <A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
 [% END %]
+</TD></TR></TABLE>
+</TD></TR></TABLE>
 [% END %]
 
 __seclev__
