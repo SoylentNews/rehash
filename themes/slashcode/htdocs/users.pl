@@ -476,7 +476,11 @@ sub newUserForm {
 	my $user = getCurrentUser();
 	my $suadmin_flag = $user->{seclev} >= 10000;
 	my $title = getTitle('newUserForm_title');
-	slashDisplay('newUserForm', { title => $title, suadmin_flag => $suadmin_flag })
+
+	slashDisplay('newUserForm', {
+		title 		=> $title, 
+		suadmin_flag 	=> $suadmin_flag,
+	});
 }
 
 #################################################################
@@ -492,22 +496,27 @@ sub newUser {
 	$form->{newusernick} = fixNickname($form->{newusernick});
 	(my $matchname = lc $form->{newusernick}) =~ s/[^a-zA-Z0-9]//g;
 
-	if (!$form->{email} || $form->{email} !~ /\@/ || $slashdb->existsEmail($form->{email})) {
+	if (!$form->{email} || $form->{email} !~ /\@/) {
+		print getError('email_invalid', 0, 1);
+		return;
+	} elsif ($slashdb->existsEmail($form->{email})) {
 		print getError('emailexists_err', 0, 1);
 		return;
-
 	} elsif ($matchname ne '' && $form->{newusernick} ne '') {
 		my $uid;
 		my $rootdir = getCurrentStatic('rootdir', 'value');
 
-		if ($uid = $slashdb->createUser($matchname, $form->{email}, $form->{newusernick})) {
+		$uid = $slashdb->createUser(
+			$matchname, $form->{email}, $form->{newusernick}
+		);
+		if ($uid) {
 			my $data = {};
 			getOtherUserParams($data);
 			$slashdb->setUser($uid, $data) if keys %$data;
-
 			$title = getTitle('newUser_title');
 
-			$form->{pubkey} = $plugins->{'PubKey'} ? strip_nohtml($form->{pubkey}, 1) : '';
+			$form->{pubkey} = $plugins->{'Pubkey'} ?
+				strip_nohtml($form->{pubkey}, 1) : '';
 			print getMessage('newuser_msg', { 
 				suadmin_flag	=> $suadmin_flag, 
 				title		=> $title, 
@@ -519,13 +528,17 @@ sub newUser {
 			return;
 		} else {
 			$slashdb->resetFormkey($form->{formkey});	
-			print getError('duplicate_user', { nick => $form->{usernick} });
+			print getError('duplicate_user', { 
+				nick => $form->{newusernick},
+			});
 			return;
 		}
 
 	} else {
-		print getError('duplicate_user', { nick => $form->{usernick} });
-			return;
+		print getError('duplicate_user', { 
+			nick => $form->{newusernick},
+		});
+		return;
 	}
 }
 
@@ -832,6 +845,8 @@ sub showInfo {
 					$netid, $comments_wanted, $min_comment);
 				$comments = $slashdb->getCommentsBySubnetID(
 					$netid, $comments_wanted, $min_comment);
+			} else {
+				delete $form->{fieldname};
 			}
 		}
 		if (!defined($comments)) {
@@ -1504,16 +1519,21 @@ sub saveUserAdmin {
 
 	} elsif ($form->{md5id}) {
 		$user_editfield_flag = 'md5id';
-		($id, $user_edit->{ipid}, $user_edit->{subnetid})  
-			= ($form->{md5id}, $form->{md5id}, $form->{md5id});
+		#($id, $user_edit->{ipid}, $user_edit->{subnetid})
+		($id, $user_edit->{$form->{fieldname}})
+			= ($form->{md5id}, $form->{md5id});
 
 	} else { # a bit redundant, I know
 		$user_edit = $user;
 	}
 
 	for my $formname ('comments', 'submit') {
-		my $existing_reason = $slashdb->getAccessListReason($formname, 'readonly', $user_edit);
-		my $is_readonly_now = $slashdb->checkReadOnly($formname, $user_edit) ? 1 : 0;
+		my $existing_reason =
+			$slashdb->getAccessListReason(
+				$formname, 'readonly', $user_edit
+			);
+		my $is_readonly_now =
+			$slashdb->checkReadOnly($formname, $user_edit) ? 1 : 0;
 
 		my $keyname = "readonly_" . $formname;
 		my $reason_keyname = $formname . "_ro_reason";
@@ -1521,13 +1541,30 @@ sub saveUserAdmin {
 		$form->{$reason_keyname} ||= '';
 
 		if ($form->{$keyname} != $is_readonly_now) {
-			if ("$existing_reason" ne "$form->{$reason_keyname}") {
-				$slashdb->setAccessList($formname, $user_edit, $form->{$keyname}, 'readonly', $form->{$reason_keyname});
+			if ($existing_reason ne $form->{$reason_keyname}) {
+				$slashdb->setAccessList(
+					$formname, 
+					$user_edit, 
+					$form->{$keyname}, 
+					'readonly', 
+					$form->{$reason_keyname}
+				);
 			} else {
-				$slashdb->setAccessList($formname, $user_edit, $form->{$keyname}, 'readonly');
+				$slashdb->setAccessList(
+					$formname, 
+					$user_edit, 
+					$form->{$keyname}, 
+					'readonly'
+				);
 			}
-		} elsif ("$existing_reason" ne "$form->{$reason_keyname}") {
-			$slashdb->setAccessList($formname, $user_edit, $form->{$keyname}, 'readonly', $form->{$reason_keyname});
+		} elsif ($existing_reason ne $form->{$reason_keyname}) {
+			$slashdb->setAccessList(
+				$formname, 
+				$user_edit, 
+				$form->{$keyname}, 
+				'readonly', 
+				$form->{$reason_keyname}
+			);
 		}
 
 		# $note .= getError('saveuseradmin_notsaved', { field => $user_editfield_flag, id => $id });
@@ -2278,8 +2315,19 @@ sub getUserAdmin {
 	}
 
 	for my $formname ('comments', 'submit') {
-		$readonly->{$formname} = $slashdb->checkReadOnly($formname, $user_edit) ? ' CHECKED' : '';
-		$readonly_reasons->{$formname} = $slashdb->getAccessListReason($formname, 'readonly', $user_edit) if $readonly->{$formname};
+		$readonly->{$formname} =
+			$slashdb->checkReadOnly($formname, $user_edit) ? 
+				' CHECKED' : '';
+
+		# This is WACKY, but it should fix the problem.
+		my $user_chk = $user_edit->{md5id} ? 
+			{ $form->{fieldname} => $user_edit->{md5id} } : 
+			$user_edit;
+
+		$readonly_reasons->{$formname} =
+			$slashdb->getAccessListReason(
+				$formname, 'readonly', $user_chk
+			) if $readonly->{$formname};
 	}
 	
 	my $banref = $slashdb->getBanList(1);
