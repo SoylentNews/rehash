@@ -74,7 +74,7 @@ END %]
 </TABLE>
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	<TR BGCOLOR="[% user.bg.4 %]">
-		<TD><IMG [% details.lt_corner_sel %]></TD>
+		<TD><IMG SRC="[% constants.imagedir %]/pix.gif" [% details.lt_corner_sel %]></TD>
         </TR>
 </TABLE>
 </NOBR>
