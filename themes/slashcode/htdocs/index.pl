@@ -68,23 +68,23 @@ my $start_time = Time::HiRes::time;
 # right now we need all the edge we can get.  Hopefully we can get this 
 # back on soon. - Jamie 2004/07/17
 #	my $user_maxstories = $user->{maxstories};
-	my $user_maxstories = getCurrentAnonymousCoward("maxstories");
+#	my $user_maxstories = getCurrentAnonymousCoward("maxstories");
 
-	# Decide what our limit is going to be.
+	# Decide what our issue is going to be.
 	my $limit;
 	my $issue = $form->{issue} || "";
 	$issue = "" if $issue !~ /^\d{8}$/;
-	if ($issue) {
-		if ($user->{is_anon}) {
-			$limit = $gSkin->{artcount_max} * 3;
-		} else {
-			$limit = $user_maxstories * 7;
-		}
-	} elsif ($user->{is_anon}) {
-		$limit = $gSkin->{artcount_max};
-	} else {
-		$limit = $user_maxstories;
-	}
+#	if ($issue) {
+#		if ($user->{is_anon}) {
+#			$limit = $gSkin->{artcount_max} * 3;
+#		} else {
+#			$limit = $user_maxstories * 7;
+#		}
+#	} elsif ($user->{is_anon}) {
+#		$limit = $gSkin->{artcount_max};
+#	} else {
+#		$limit = $user_maxstories;
+#	}
 
 	# TIMING START
 	# From here to the "TIMING END", the bulk of the work in index.pl is
@@ -93,7 +93,8 @@ my $start_time = Time::HiRes::time;
 	# Times listed are elapsed time from the previous markpoint.
 
 	my $gse_hr = { tid => $gSkin->{nexus} };
-	$gse_hr->{limit} = $user_maxstories if $user_maxstories;
+# For now, all users get the same number of maxstories.
+#	$gse_hr->{limit} = $user_maxstories if $user_maxstories;
 	$gse_hr->{issue} = $issue if $issue;
 	$gse_hr->{sectioncollapse} = $user->{sectioncollapse} if $user->{sectioncollapse};
 	if (rand(1) < $constants->{index_gse_backup_prob}) {

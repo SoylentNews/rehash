@@ -2432,6 +2432,7 @@ sub setVar {
 			value		=> $value
 		}, "name=$name_q");
 	}
+	$self->setVar_delete_memcached();
 	return $retval;
 }
 
@@ -3195,7 +3196,7 @@ sub savePollQuestion {
 	$stoid = $self->getStoidFromSidOrStoid($poll->{sid}) if $poll->{sid};
 	my $sid_quoted = "";
 	$sid_quoted = $self->sqlQuote($poll->{sid}) if $poll->{sid};
-	$self->setStory_delete_memcached([ $stoid ]) if $stoid;
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]) if $stoid;
 
 	# get hash of fields to update based on the linked story
 	my $data = $self->getPollUpdateHashFromStory($poll->{sid}, {
@@ -3240,7 +3241,7 @@ sub savePollQuestion {
 			qid		=> $poll->{qid}
 		}, "sid = $sid_quoted") if $sid_quoted;
 	}
-	$self->setStory_delete_memcached([ $stoid ]) if $stoid;
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]) if $stoid;
 
 	# Loop through 1..8 and insert/update if defined
 	for (my $x = 1; $x < 9; $x++) {
@@ -3432,8 +3433,13 @@ sub markStoryClean {
 sub markStoryDirty {
 	my($self, $id) = @_;
 	my $stoid = $self->getStoidFromSidOrStoid($id);
-	$self->setStory_delete_memcached([ $stoid ]);
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 	$self->sqlInsert('story_dirty', { stoid => $stoid }, { ignore => 1 });
+
+	my $rendered_hr = $self->getStoryTopicsRendered($stoid);
+	return unless $rendered_hr;
+	my $tids = [ keys %$rendered_hr ];
+	$self->setStory_delete_memcached_by_tid($tids);
 }
 
 ########################################################
@@ -3461,7 +3467,7 @@ sub setStory {
 
 	# Delete the memcached entry before doing this, because
 	# whatever is there now is invalid.
-	$self->setStory_delete_memcached([ $stoid ]);
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 
 	# We modify data before we're done.  Make a copy.
 	my %h = %$hashref;
@@ -3554,13 +3560,13 @@ sub setStory {
 	# Delete the memcached entry after having done that,
 	# to make sure nothing incorrect was set while we were
 	# in the middle of updating the DB.
-	$self->setStory_delete_memcached([ $stoid ]);
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 
 	return $ok;
 }
 
 ########################################################
-sub setStory_delete_memcached {
+sub setStory_delete_memcached_by_stoid {
 	my($self, $stoid_list) = @_;
 	my $mcd = $self->getMCD();
 	return unless $mcd;
@@ -3575,6 +3581,27 @@ sub setStory_delete_memcached {
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ setS_deletemcd deleted '$mcdkey$stoid'\n";
 		}
+	}
+}
+
+sub setStory_delete_memcached_by_tid {
+	my($self, $tid_list) = @_;
+	my $mcd = $self->getMCD();
+	return 0 unless $mcd && $tid_list && @$tid_list;
+
+	my $constants = getCurrentStatic();
+	my $mins_ahead = $constants->{gse_precache_mins_ahead} + 1; # plus one to be sure
+	my $the_time = time;
+	my $the_minute = $the_time - $the_time % 60;
+
+	for my $i (0..$mins_ahead-1) {
+		for my $tid (@$tid_list) {
+			my $mcdkey = "$self->{_mcd_keyprefix}:gse:$tid:$the_minute";
+			# The "3" means "don't accept new writes to this key
+			# for 3 seconds."
+			$mcd->delete($mcdkey, 3);
+		}
+		$the_minute += 60;
 	}
 }
 
@@ -5933,7 +5960,7 @@ sub createMetaMod {
 			-lastmm =>	'NOW()',
 			mods_saved =>	'',
 		}, "uid=$m2_user->{uid} AND mods_saved != ''");
-		$self->setUser_delete_memcached($m2_user->{uid});
+		$self->setUser_delete_memcached_by_stoid($m2_user->{uid});
 		if (!$rows) {
 			# The update failed, presumably because the user clicked
 			# the MetaMod button multiple times quickly to try to get
@@ -6584,6 +6611,7 @@ sub _stories_time_clauses {
 	my $must_be_subscriber =	$options->{must_be_subscriber}	|| 0;
 	my $column_name =		$options->{column_name}		|| "time";
 	my $exact_now =			$options->{exact_now}		|| 0;
+	my $the_time =			$options->{the_time}		|| time;
 	my $fake_secs_ahead =		$options->{fake_secs_ahead}	|| 0;
 
 	my($is_future_column, $where);
@@ -6608,7 +6636,7 @@ sub _stories_time_clauses {
 	my $now = $exact_now ? 'NOW()'
 		: $self->sqlQuote( time2str(
 			'%Y-%m-%d %H:%M:00',
-			time + $fake_secs_ahead,
+			$the_time + $fake_secs_ahead,
 			'GMT') );
 
 	if ($future) {
@@ -6627,172 +6655,374 @@ sub _stories_time_clauses {
 }
 
 ########################################################
-# This method may overwrite $options if it wants.
+# This method searches the stories table in reverse chronological
+# order, finding stories which match particular criteria (primarily:
+# being in the right nexus(es)) and returns "essentials" about them
+# (which is almost everything except story_text columns).
+#
+# This method's input is its $options hashref, which may be
+# overwritten before it exits.  All options are optional
+# (duh) and reasonable defaults will be used.  Legal keys
+# and their values are as follows.
+# These arguments are integers:
+#	offset		Skip the first n stories
+#	limit		Number of stories wanted for their primary
+#			use (like the central column of index.pl)
+#	limit_extra	Number of stories wanted for their
+#			secondary use (like the Older Stories box)
+#	fake_secs_ahead	Seconds into the future to pretend it is now
+#			(used to precache this query for speed, not
+#			useful for returning actual data for a user).
+#	future_secs	Seconds into the future that this user is
+#			authorized to look.  0 means not authorized,
+#			but undef or missing means to use the default
+#			for subscribers (ends up being var
+#			'subscribe_future_secs').
+#	issue		If present, must be in yyyymmdd format;
+#			the latest story returned cannot be after the
+#			end of that day in the user's timezone (nor
+#			earlier than a week before).
+# The following six arguments can be either a scalar int or
+# an arrayref of zero or more ints:
+#	tid		A story must be in at least one of these
+#			topics (usually but not necessarily nexuses)
+#			to be returned.  Default: mainpage nexus.
+#	tid_exclude	A story must NOT be in any of these topics.
+#	uid		A story must be posted by one of these users.
+#	uid_exclude	A story must NOT be posted by any of these users.
+#	stoid		A story must have one of these stoids.
+#	stoid_exclude	A story must NOT have one of these stoids.
+# These arguments are boolean:
+#	sectioncollapse	If true, this method expands the tid argument
+#			to include not only the nexus(es) given, but
+#			all nexuses (if any) under them.
+#	return_min_stoid_only	If true, doesn't return all the story
+#				data, just the MIN(stoid) of the data
+#				that WOULD have been returned.  Used
+#				to set an optimization var, not useful
+#				for returning actual data for a user.
+#
+# The method's output is an arrayref of hashrefs, each one representing
+# a story, sorted into reverse chronological order.
+#
+# memcached plays a subtle role here.  There are many options that are
+# passed in, but most commonly this method is called for a single nexus
+# and all the other options default (not section-collapsed, not issue,
+# nothing excluded, etc).  We cache the final results (all stories
+# returned) in that case.  The reason we do not cache with many (any)
+# options is that any change to any story necessitates invalidating all
+# memcached data that might now or might previously have referenced
+# that story.  There is no way to delete all memcached keys that match
+# a regex or prefix (and this is by design:  it will never have this
+# capability), so by keeping only 1-2 keys for each tid, instead of
+# keeping a key for every possibly option, we make that deletion
+# tractable and even easy.
+#
+# There are only two elements to a memcached gSE key:  the tid of the
+# single topic that all the stories are rendered into, and the unix
+# timestamp of the 0th second of the first minute that the story data
+# is valid for.  That key is set to expire shortly after the minute is
+# over, so any key will really be used only for 60 seconds and then
+# ignored until it is purged by memcached's reclamation.  Another way
+# to do this would be to only set the data once it is valid, i.e. to
+# never set it until its minute has arrived.  But thanks to the
+# set_gse_min_stoid task, we are precaching the results of this method
+# in both the MySQL query cache and in memcached;  but those results
+# must not be accessed until their time has arrived.
+#
+# So: the memcached key is:
+# 	$keyprefix:gse:$tid:$unix_timestamp_minute_start
+# and its value is the same data returned by this method:  an arrayref
+# of hashrefs, one per story.
+
 sub getStoriesEssentials {
 	my($self, $options) = @_;
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
+
+	my $mcd = $self->getMCD();
+	my $min_stoid = $constants->{gse_min_stoid} || 0;
 	my $mp_tid = $constants->{mainpage_nexus_tid};
-	my $can_restrict_by_min_stoid = 1;
-#use Data::Dumper;
-#print STDERR "gSE gSkin: " . Dumper($gSkin);
+	my $memcached_expire = 600; # this is kinda arbitrary, yes
 
-	# Here, limit is how many we want "for the main display"
-	# and limit_extra is how many we want "spillover into the
-	# Older Stuff column."  Those are just rough concepts.
-	# Of course the caller can use the returned data however
-	# it wants, this is just a convenient way to think of it.
-	
+	# Canonicalize all arguments passed in.  First the scalars.
 	my $offset = $options->{offset} || 0;
-	$offset = 0 unless $offset =~ /^\d+$/;
-	$can_restrict_by_min_stoid = 0 if $offset;
-
 	my $limit = $options->{limit} || $gSkin->{artcount_max};
-	$limit += $options->{limit_extra}
-		|| int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
-#print STDERR "gSE limit '$limit' oplim '$options->{limit}' acmax '$gSkin->{artcount_max}' oplimex '$options->{limit_extra}' acmin '$gSkin->{artcount_min}'\n";
-	$can_restrict_by_min_stoid = 0 if $limit > 100
-		|| $options->{limit}       > $gSkin->{artcount_max}
-		|| $options->{limit_extra} > $gSkin->{artcount_max};
-
-	# If we're about to be asked to restrict the selection to
-	# just one tid, the mainpage, and sectioncollapse is turned
-	# on, then what's actually wanted is all tids that are
-	# children of the mainpage.  Fake that into place.
-	my $want_mainpage_children = 0;
-	if ($options->{sectioncollapse} && $options->{tid}) {
-		if (ref($options->{tid}) eq 'ARRAY') {
-			if (scalar(@{$options->{tid}}) == 1
-				&& $options->{tid}[0] == $mp_tid) {
-				$want_mainpage_children = 1;
-			}
-		} else {
-			if ($options->{tid} == $mp_tid) {
-				$want_mainpage_children = 1;
-			}
-		}
-	}
-	if ($want_mainpage_children) {
-		my $nexuses = $self->getNexusChildrenTids($mp_tid);
-		unshift @$nexuses, $mp_tid;
-		$options->{tid} = $nexuses;
-	}
-
-	# This is just used by tasks/precache_gse.pl.
+	my $limit_extra = defined($options->{limit_extra})
+		? $options->{limit_extra}
+		: int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
 	my $fake_secs_ahead = $options->{fake_secs_ahead} || 0;
+	my $future_secs = defined($options->{future_secs})
+		? $options->{future_secs}
+		: undef;
+	my $issue = $options->{issue} && $options->{issue} =~ /^\d{8}$/
+		? $options->{issue}
+		: "";
+	my $sectioncollapse = $options->{sectioncollapse} || 0;
+	my $return_min_stoid_only = $options->{return_min_stoid_only} || 0;
 
-	# Restrict the selection to include or exclude based on
-	# up to three types of data.  The data fed to this loop
-	# tells it which table to look in, which column in the
-	# table to use, and which option name in $options to use.
-	my @restrictions = ( );
-	for my $key (qw(
-		story_topics_rendered.tid	story_topics_rendered.tid_exclude
-		stories.stoid			stories.stoid_exclude
-		stories.uid			stories.uid_exclude
-	)) {
-		my($table, $col, $optname) = $key =~ /^(\w+)\.((\w+)(?:_exclude)?)$/;
-		my $not = $key =~ /_exclude$/ ? "NOT" : "";
-#print STDERR "gSE key '$key' table '$table' col '$col' optname '$optname' not '$not'\n";
-		next unless $options->{$optname};
-		my $opt_ar = ref($options->{$optname})
-			?   $options->{$optname}
-			: [ $options->{$optname} ];
-		push @restrictions, "$table.$col $not IN (" . join(", ", @$opt_ar) . ")";
+	# Now set some secondary variables.
+	my $the_time = time + $fake_secs_ahead;
+	my $the_minute = $the_time - $the_time % 60;
+	my $lim_sum = $limit + $limit_extra + $offset;
+	my $min_stoid_margin = $gSkin->{artcount_max}
+		+ int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
+	my $limit_overly_large = $lim_sum > $min_stoid_margin * 3 + 10 ? 1 : 0;
+#print STDERR "gSE $$ min_stoid A '$min_stoid' lim_sum '$lim_sum' min_stoid_margin '$min_stoid_margin'\n";
 
-		# These restrictions may affect whether the
-		# gse_min_stoid var can be used to limit our query.
-		# If we've already given up on using it, no need to
-		# check again.
-		next if !$can_restrict_by_min_stoid;
-		# If we're doing any kind of restriction other than
-		# limiting to precisely one tid which is the
-		# mainpage_nexus_tid, then give up on using it.
-		if ($optname ne 'tid' || $not) {
-			$can_restrict_by_min_stoid = 0;
-		} else {
-			if (ref($options->{tid}) eq 'ARRAY') {
-				if (scalar(@{$options->{tid}}) > 1
-					|| $options->{tid}[0] != $mp_tid) {
-					$can_restrict_by_min_stoid = 0;
-				}
-			} else {
-				if ($options->{tid} != $mp_tid) {
-					$can_restrict_by_min_stoid = 0;
-				}
-			}
-		}
+	# Now canonicalize the scalar-or-arrayrefs.  This returns an arrayref
+	# of the zero or more values that need to be included in the WHERE
+	# clause.  Note that the excluded-values are calculated first, and
+	# those are passed in to the included-values because exclusion takes
+	# priority and will remove items from the latter.
+	my $tid_x =   $self->_gse_canonicalize($options->{tid_exclude});
+	my $tid =     $self->_gse_canonicalize($options->{tid},		$tid_x, $mp_tid);
+	my $uid_x =   $self->_gse_canonicalize($options->{uid_exclude});
+	my $uid =     $self->_gse_canonicalize($options->{uid},		$uid_x);
+	my $stoid_x = $self->_gse_canonicalize($options->{stoid_exclude});
+	my $stoid =   $self->_gse_canonicalize($options->{stoid},	$stoid_x);
+
+	# $tid always contains at least one topic since it defaults to
+	# $mp_tid.  But in the weird case where the caller has passed in
+	# exactly the same list of topics for both tid and tid_exclude,
+	# they cancel out.  In that case, $tid will be empty and no
+	# data can possibly be returned.  Handle that pathological case
+	# now, so the rest of this method can assume that there is at
+	# least one topic in $tid.
+	return [ ] if !@$tid;
+
+	# We now have enough information to determine whether memcached may
+	# have all the data we're looking for.  Try it!  (Calculate the
+	# mcdkey now because, even if we can't read from the cache, we may
+	# be able to write into it later.)
+	my $mcdkey;
+	$mcdkey = "$self->{_mcd_keyprefix}:gse:$tid->[0]:$the_minute" if $mcd;
+	my $try_mcd = ($mcd
+		&& scalar(@$tid) == 1
+		&& $offset == 0
+		&& !defined($options->{limit})
+		&& !defined($options->{limit_extra})
+		&& $fake_secs_ahead == 0
+		&& !defined($future_secs)
+		&& !$issue && !$sectioncollapse && !$return_min_stoid_only
+		&& !@$uid && !@$uid_x
+		&& !@$stoid && !@$stoid_x
+	);
+	if ($try_mcd) {
+
+		my $data = $mcd->get($mcdkey);
+#print STDERR "gSE $$ mcdkey '$mcdkey' data element count '" . ($data ? scalar(@$data) : "n/a") . "'\n";
+		return $data if $data;
 	}
-	my $restrict_clause = join(" AND ", @restrictions);
-#print STDERR "gSE restrict_clause '$restrict_clause' can_restrict_by_min_stoid '$can_restrict_by_min_stoid'\n";
 
-	my $future_secs = defined($options->{future_secs}) ? $options->{future_secs} : undef;
+	# Nope, memcached is not going to help us.  Keep going.
+
+	# Now, if sectioncollapse is set, expand the tid to include all of
+	# its nexus children.
+	$tid = $self->_gse_sectioncollapse($tid) if $sectioncollapse;
+
+	# Figure out whether min_stoid is usable.
+	# If we're not looking just at the mainpage tid, it's not (yet --
+	# maybe later we'll have multiple min_stoids).
+	$min_stoid = 0 if @$tid > 1 || $tid->[0] != $mp_tid;
+	# If the $limit + $limit_extra + $offset is too large, it's not.
+	$min_stoid = 0 if $limit_overly_large;
+	# And of course, if we're being asked to calculate a new one,
+	# ignore the old one.
+	$min_stoid = 0 if $return_min_stoid_only;
+#print STDERR "gSE $$ min_stoid B '$min_stoid' tid '@$tid' overly '$limit_overly_large' rmso '$return_min_stoid_only'\n";
+
+	# Build the WHERE clauses necessary and do the first select(s),
+	# on story_topics_rendered.
+	# There will always be at least one tid, since it defaults
+	# to the mainpage_nexus_tid.  First, get all the stoids
+	# that match that (those) tid(s).
+	my @tid_in = ( );
+	push @tid_in, "tid IN (" . join(",", @$tid) . ")";
+	push @tid_in, "stoid >= '$min_stoid'" if $min_stoid;
+	my $tid_in_where = join(" AND ", @tid_in);
+
+	# XXX What we should do at this point is a COUNT(*) on how
+	# many rows in story_topics_rendered will match.  If that
+	# value is larger than some var, we should do a JOIN on
+	# stories,story_topics_rendered -- the old way -- instead
+	# of pulling a lot of stoids over the network and then
+	# sending them back as part of the next query.  Yes, the
+	# 2-table JOIN is costly, but since we LIMIT the number of
+	# rows that are ultimately returned, at a certain point,
+	# especially if the query cache hit rate is high, it must
+	# become more efficient to let the DB do the work of
+	# finding those rows entirely internally.
+
+	my $stoids_ar = $self->sqlSelectColArrayref(
+			"DISTINCT stoid",
+			"story_topics_rendered",
+			$tid_in_where);
+#print STDERR "gSE $$ stoids_ar returned: '@$stoids_ar' t_i_w '$tid_in_where' tid '@$tid'\n";
+	# Now, if necessary, do another select to eliminate any
+	# stoids with tids that are unwanted.
+	if (@$stoids_ar && @$tid_x) {
+		my @tid_left_out = ( );
+		push @tid_left_out, "tid IN (" . join(",", @$tid_x) . ")";
+		push @tid_left_out, "stoid >= '$min_stoid'" if $min_stoid;
+		my $tid_left_out_where = join(" AND ", @tid_left_out);
+		my $stoids_x_ar = $self->sqlSelectColArrayref(
+			"DISTINCT stoid",
+			"story_topics_rendered",
+			$tid_left_out_where);
+		# Remove the stoids just found from the ones
+		# found a moment ago.
+		my %stoids_x_hash = ( map { ($_, 1) } @$stoids_x_ar );
+		@$stoids_ar = grep { !$stoids_x_hash{$_} } @$stoids_ar;
+	}
+
+	# Now we have the list of stoids that point to the rows that we
+	# should _consider_ for the stories table.  We haven't narrowed it
+	# down all the way yet.  First thing we can do is check $stoid and
+	# $stoid_x to possibly narrow the list directly.  After that, for
+	# example, if the caller wants only stories posted by a certain
+	# uid, the story_topics_rendered table has no way of knowing which
+	# those are;  we'll add in those limitations when we do the SQL
+	# select on the stories table later.
+	if (@$stoid) {
+		my %stoid_hash = ( map { ($_, 1) } @$stoid );
+		@$stoids_ar = grep {  $stoid_hash{$_}   } @$stoids_ar;
+	} elsif (@$stoid_x) {
+		my %stoid_x_hash = ( map { ($_, 1) } @$stoid_x );
+		@$stoids_ar = grep { !$stoid_x_hash{$_} } @$stoids_ar;
+	}
+
+	# Now we sort the list of stoids, to make sure a random reordering
+	# does not invalidate the MySQL query cache.
+	@$stoids_ar = sort { $a <=> $b } @$stoids_ar;
+
+	# This is the standard utility function that returns the SQL
+	# needed to add both to the columns to select, and to the
+	# where clause, to properly limit story selection by time.
 	my($column_time, $where_time) = $self->_stories_time_clauses({
-		try_future => 1,
-		future_secs => $future_secs,
-		must_be_subscriber => 0,
-		fake_secs_ahead => $fake_secs_ahead,
+		try_future =>		1,
+		future_secs =>		$future_secs,
+		must_be_subscriber =>	0,
+		the_time =>		$the_time,
+		fake_secs_ahead =>	$fake_secs_ahead,
 	});
-	my $columns;
-	if ($options->{return_min_stoid_only}) {
-		$columns = "stories.stoid";
-		$can_restrict_by_min_stoid = 0;
-	} else {
-		$columns = "stories.stoid, sid, time, commentcount, hitparade,"
-			. " primaryskid, body_length, word_count, discussion, $column_time";
+
+	# Now we're ready to construct the query that we'll use.  First,
+	# determine which columns are needed.
+	my $columns = "stoid";
+	if (!$return_min_stoid_only) {
+		$columns .= ", sid, time, commentcount, hitparade,"
+			. " primaryskid, body_length, word_count, "
+			. " discussion, $column_time";
 	}
-	my $tables = "stories, story_topics_rendered";
-	my $other = "GROUP BY stories.stoid ORDER BY time DESC LIMIT $offset, $limit";
-#print STDERR "gSE r_m_s_o '$options->{return_min_stoid_only}' other '$other' columns '$columns'\n";
 
-	my $where = "stories.stoid = story_topics_rendered.stoid AND in_trash = 'no' AND $where_time";
-	$where .= " AND ($restrict_clause)" if $restrict_clause;
+	# We're only looking at one table, which makes this part easy.
+	my $table = "stories";
 
-	my $issue = $options->{issue} || "";
-	$issue = "" if $issue !~ /^\d{8}$/;
-	my $issue_clause = "";
+	# Always return results in descending order, but if the caller
+	# is just looking for the min_stoid, skip straight to that row
+	# so we don't return too much.
+	my $other = "ORDER BY time DESC";
+	if ($return_min_stoid_only) {
+		# In this case, we offset to the end of the list
+		# and then just select a row count of 1.
+		$other .= " LIMIT " . ($limit + $limit_extra + $offset) . ", 1";
+	} else {
+		$other .= " LIMIT $offset, " . ($limit + $limit_extra);
+	}
+
+	# And now the hard part.  The WHERE clause has to limit our
+	# results very carefully, by time (possibly in two ways), and
+	# by the other criteria that have been given).
+	my @stories_where = ( );
+	push @stories_where, "in_trash = 'no' AND $where_time";
+	push @stories_where, "stoid IN (" . join(",", @$stoids_ar) . ")";
+
+#print STDERR "gSE $$ stoids_ar, stoid, stoid_x, uid, uid_x: " . Dumper([ $stoids_ar, $stoid, $stoid_x, $uid, $uid_x ]);
+	if (@$uid) {
+		push @stories_where, "uid IN ("       . join(",", @$uid)     . ")";
+	} elsif (@$uid_x) {
+		push @stories_where, "uid NOT IN ("   . join(",", @$uid_x)   . ")";
+	}
 	if ($issue) {
 		my $issue_lookback_days = $constants->{issue_lookback_days} || 7;
 		my $issue_oldest =   timeCalc("${issue}000000", "%Y-%m-%d %T",
 			- $user->{off_set} - 84600*$issue_lookback_days);
 		my $issue_youngest = timeCalc("${issue}235959", "%Y-%m-%d %T",
 			- $user->{off_set});
-		$issue_clause = "time BETWEEN '$issue_oldest' AND '$issue_youngest'";
-		$can_restrict_by_min_stoid = 0;
+		push @stories_where, "time BETWEEN '$issue_oldest' AND '$issue_youngest'";
 	}
-	$where .= " AND $issue_clause" if $issue_clause;
 
-	# Use the min_stoid value, if available and appropriate
-	# to use, to dramatically optimize performance on this query.
-	my $min_stoid = $constants->{gse_min_stoid} || 0;
-	$min_stoid = 0 if !$can_restrict_by_min_stoid;
-	if ($min_stoid) {
-		$where .= " AND stories.stoid >= '$min_stoid' ";
-	}
-#print STDERR "gSE final where: '$where'\n";
+	my $where = join(" AND ", @stories_where);
 
-	my @stories = ( );
-	my $qlid = $self->_querylog_start("SELECT", $tables);
-	my $cursor = $self->sqlSelectMany($columns, $tables, $where, $other);
-	while (my $story = $cursor->fetchrow_hashref) {
-		push @stories, $story;
-		last if @stories >= $limit;
-	}
-	$cursor->finish;
-	$self->_querylog_finish($qlid);
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $table, $where, $other);
 
 	if ($options->{return_min_stoid_only}) {
-		my $min = $stories[0]{stoid} || 0;
-		return 0 if !$min;
-		for my $story (@stories) {
-			$min = $story->{stoid} if $story->{stoid} < $min;
-		}
-		return $min;
+		return $stories->[0]{stoid} || 0;
 	}
 
-	return \@stories;
+	# If we tried and failed to get this data from memcached, now it
+	# can be written.  But it's only valid for the duration of the
+	# current minute!
+	if ($try_mcd) {
+		my $expire_time = ($the_minute + 60) - time;
+		if ($expire_time > 0) {
+			# We kludge in a few extra seconds so a system
+			# that's slow, or overloaded, or whose clocks
+			# are not all set identically, has no chance of
+			# a massive load spike at the end of each
+			# minute.
+			$expire_time += 3;
+			$mcd->set($mcdkey, $stories, $expire_time);
+#print STDERR "gSE $$ mcd->set mcdkey '$mcdkey' story count '" . scalar(@$stories) . "' expire_time '$expire_time'\n";
+		}
+	}
+
+	return $stories;
+}
+
+sub _gse_canonicalize {
+	my($self, $optvalue, $exclude_ar, $mp_tid) = @_;
+	my $retval = $optvalue;
+	if (defined($retval)) {
+		$retval = [ $retval ] if !ref($retval);
+	} else {
+		$retval = [ ];
+	}
+	if ($mp_tid && (
+		   !@$retval
+		|| scalar(@$retval) == 1 && !$retval->[0]
+	)) {
+		# Only use the replacement mp_tid if it was passed in,
+		# and if the option value was false, or an arrayref
+		# with either zero elements or a single element that's
+		# false.
+		$retval = [ $mp_tid ];
+	}
+	if (@$retval && $exclude_ar && @$exclude_ar) {
+		my %exclude = map { ($_, 1) } @$exclude_ar;
+		$retval = [ grep { !$exclude{$_} } @$retval ];
+	}
+	# Exclude any undef or 0 values in the arrayref.
+	$retval = [ grep { $_ } @$retval ];
+#my $od = Dumper($optvalue); $od =~ s/\s+/ /g;
+#my $rd = Dumper($retval); $rd =~ s/\s+/ /g;
+#print STDERR "gse_can $$ optvalue '$od' mp_tid '$mp_tid' retval '$rd'\n";
+	return $retval;
+}
+
+sub _gse_sectioncollapse {
+	my($self, $opt_ar) = @_;
+	my %nexuses = map { ($_, 1) } @$opt_ar;
+	for my $tid (@$opt_ar) {
+		for my $new (@{ $self->getNexusChildrenTids($tid) }) {
+			$nexuses{$new} = 1;
+		}
+	}
+	my @all = sort { $a <=> $b } keys %nexuses;
+	return \@all;
 }
 
 ########################################################
@@ -7384,8 +7614,8 @@ sub _getSlashConf_rawvars {
 	}
 	$vars_hr ||= $self->sqlSelectAllKeyValue('name, value', 'vars');
 	if ($mcd && !$got_from_memcached) {
-		# Cache this for about 10 minutes.
-		my $expire_time = $vars_hr->{story_expire} || 600;
+		# Cache this for about 3 minutes.   should be a var.
+		my $expire_time = 180;
 		$mcd->set($mcdkey, $vars_hr, $expire_time);
 	}
 	return $vars_hr;
@@ -8099,7 +8329,6 @@ sub getStory {
 	my $mcd;
 	my $got_it_from_db = 0;
 	my $got_it_from_memcached = 0;
-	my $use_memcached = 0;
 #print STDERR "getStory $$ A id=$id is_in_local_cache=$is_in_local_cache use_local_cache=$use_local_cache force_cache_freshen=$force_cache_freshen\n";
 	if (!$use_local_cache) {
 		$mcd = $self->getMCD();
@@ -8775,7 +9004,7 @@ sub getStoryTopicsRendered {
 sub setStoryRenderedFromChosen {
 	my($self, $stoid, $chosen_hr, $info) = @_;
 
-	$self->setStory_delete_memcached([ $stoid ]);
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 	$chosen_hr ||= $self->getStoryTopicsChosen($stoid);
 	my $rendered_hr = $self->renderTopics($chosen_hr);
 	my $primaryskid = $self->getPrimarySkidFromRendered($rendered_hr);
@@ -8793,7 +9022,10 @@ sub setStoryRenderedFromChosen {
 			}
 		}
 	}
-	$self->setStory_delete_memcached([ $stoid ]);
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
+
+	my $rendered_tids = [ keys %$rendered_hr ];
+	$self->setStory_delete_memcached_by_tid($rendered_tids);
 
 	return($primaryskid, $tids);
 }
@@ -8980,7 +9212,7 @@ sub setStoryTopicsChosen {
 	# the same time.  We really should wrap the delete-insert
 	# as a single COMMIT.  Not that it matters much.  - Jamie
 
-	$self->setStory_delete_memcached([ $stoid ]);
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 	$self->sqlDelete("story_topics_chosen", "stoid = $stoid");
 	for my $key (sort { $a <=> $b } keys %{$topic_ref}) {
 		unless ($self->sqlInsert("story_topics_chosen", 
@@ -8990,7 +9222,7 @@ sub setStoryTopicsChosen {
 			return 0;
 		}
 	}
-	$self->setStory_delete_memcached([ $stoid ]);
+	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 
 	return 1;
 }
@@ -9328,6 +9560,19 @@ sub setUser {
 	$self->setUser_delete_memcached($uid) if $mcd_need_delete;
 
 	return $rows;
+}
+
+sub setVar_delete_memcached {
+	my($self) = @_;
+	my $mcd = $self->getMCD();
+	return unless $mcd;
+	my $mcdkey = "$self->{_mcd_keyprefix}:vars";
+	$mcd->delete($mcdkey);
+	my $constants = getCurrentStatic();
+	my $mcddebug = $constants->{memcached_debug};
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ setV_deletemcd deleted\n";
+	}
 }
 
 sub setUser_delete_memcached {

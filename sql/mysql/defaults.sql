@@ -743,6 +743,7 @@ INSERT INTO vars (name, value, description) VALUES ('freshenup_small_cc','30','H
 INSERT INTO vars (name, value, description) VALUES ('freshen_homepage_min_minutes','60','Number of minutes between updating the main index.shtml homepage (if 0, disabled, only updates when freshenup.pl believes it is required)');
 INSERT INTO vars (name, value, description) VALUES ('get_titles','0','get the story titles');
 INSERT INTO vars (name, value, description) VALUES ('goodkarma','25','Users get bonus points for posts if karma above this value');
+INSERT INTO vars (name, value, description) VALUES ('gse_precache_mins_ahead','2','How many minutes ahead to precache getStoriesEssentials data in the query cache and memcached?');
 INSERT INTO vars (name, value, description) VALUES ('http_proxy','','http://proxy.www.example.com');
 INSERT INTO vars (name, value, description) VALUES ('id_md5_vislength','5','Num chars to display for ipid/subnetid (0 for all)');
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
@@ -923,6 +924,8 @@ INSERT INTO vars (name, value, description) VALUES ('story_expire','600','Defaul
 INSERT INTO vars (name, value, description) VALUES ('submiss_ts','1','print timestamp in submissions view');
 INSERT INTO vars (name, value, description) VALUES ('submiss_view','1','allow users to view submissions queue');
 INSERT INTO vars (name, value, description) VALUES ('submission_bonus','3','Bonus given to user if submission is used');
+INSERT INTO vars (name, value, description) VALUES ('submission_default_skid', '0', 'Skid you would like selected by default for submissions, 0 or empty string for none');
+INSERT INTO vars (name, value, description) VALUES ('submission_force_default', '0', 'Force selection of default skid for all submissions, takes away menu of options');
 INSERT INTO vars (name, value, description) VALUES ('submissions_speed_limit','300','How fast they can submit');
 INSERT INTO vars (name, value, description) VALUES ('submit_domains_invalid', 'example.com', 'space separated list of domains that are not valid for submitting stories');
 INSERT INTO vars (name, value, description) VALUES ('submit_categories','Back','Extra submissions categories');

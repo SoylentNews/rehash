@@ -53,25 +53,25 @@ $task{$me}{code} = sub {
 	# one with Collapse Sections and one without.  Look ahead
 	# 45 seconds because that is guaranteed to cross the next
 	# minute boundary.  And if there's time, precache the
-	# next upcoming minute too.
+	# next upcoming minute too -- and if gse_precache_mins_ahead
+	# is set to 3 or more, keep going.
+	my $mins_ahead = $constants->{gse_precache_mins_ahead} || 2;
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $default_maxstories = getCurrentAnonymousCoward("maxstories");
-	my @gse_hrs = (
+	my @gse_1min = (
+		{ fake_secs_ahead =>  45,
+		  tid => $mp_tid		},
 		{ fake_secs_ahead =>  45,
 		  tid => $mp_tid,
-		  limit => $default_maxstories	},
-		{ fake_secs_ahead =>  45,
-		  tid => $mp_tid,
-		  limit => $default_maxstories,
-		  sectioncollapse => 1		},
-		{ fake_secs_ahead => 105,
-		  tid => $mp_tid,
-		  limit => $default_maxstories	},
-		{ fake_secs_ahead => 105,
-		  tid => $mp_tid,
-		  limit => $default_maxstories,
 		  sectioncollapse => 1		},
 	);
+	my @gse_hrs = ( );
+	for my $i (0..$mins_ahead-1) {
+		push @gse_hrs, @gse_1min;
+		for my $hr (@gse_1min) {
+			$hr->{fake_secs_ahead} += 60;
+		}
+	}
 
 	# Sleep until :10 after the top of the minute.
 	my $time = time;
