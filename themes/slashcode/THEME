@@ -160,7 +160,6 @@ template=templates/sectionindexd;misc;default
 template=templates/select;misc;default
 template=templates/selectThreshLabel;misc;default
 template=templates/sendPasswdForm;users;default
-template=templates/ssifoot;misc;default
 template=templates/ssihead;misc;default
 template=templates/storylink;index;default
 template=templates/feature_storylink;index;default
