@@ -51,26 +51,26 @@ $task{$me}{code} = sub {
 
 	# We'll try precaching two queries for each virtual user,
 	# one with Collapse Sections and one without.  Look ahead
-	# 30 seconds because that is guaranteed to cross the next
+	# 40 seconds because that is guaranteed to cross the next
 	# minute boundary.
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $default_maxstories = getCurrentAnonymousCoward("maxstories");
 	my @gse_hrs = (
-		{ fake_secs_ahead => 30,
+		{ fake_secs_ahead => 40,
 		  tid => $mp_tid,
 		  limit => $default_maxstories	},
-		{ fake_secs_ahead => 30,
+		{ fake_secs_ahead => 40,
 		  tid => $mp_tid,
 		  limit => $default_maxstories,
 		  sectioncollapse => 1		},
 	);
 
-	# Sleep until :45 after the top of the minute.
+	# Sleep until :30 after the top of the minute.
 	my $time = time;
 	my $now_secs = $time % 60;
-	return "started too late" if $now_secs > 50;
-	sleep 45 - $now_secs if $now_secs < 45;
-	my $max_time = time - $now_secs + 57;
+	return "started too late" if $now_secs > 40;
+	sleep 30 - $now_secs if $now_secs < 30;
+	my $max_time = time - $now_secs + 55;
 
 	# Make each gSE query to each virtual user.
 	for my $vu (@virtual_users) {
