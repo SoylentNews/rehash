@@ -80,6 +80,7 @@ $task{$me}{code} = sub {
 	
 	
 	# let's do the errors
+	slashdLog("Counting Error Pages Begin");
 	$data{not_found} = $logdb->countByStatus("404");
 	$statsSave->createStatDaily("not_found", $data{not_found});
 	$data{status_202} = $logdb->countByStatus("202");
@@ -94,6 +95,7 @@ $task{$me}{code} = sub {
 		$data{errors}{$type->{op}} = $type->{count};
 		$statsSave->createStatDaily("error_$type->{op}}", $type->{count});
 	}
+	slashdLog("Counting Error Pages End");
 
 	my $articles = $logdb->countDailyStoriesAccess();
 
@@ -158,6 +160,7 @@ EOT
 	}
 	$data{bad_password_warning} = $bp_warning;
 
+	slashdLog("Moderation Stats Begin");
 	my $comments = $stats->countCommentsDaily();
 	my $accesslog_rows = $logdb->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
@@ -254,7 +257,9 @@ EOT
 	my $m2_text = getM2Text($stats->getModM2Ratios(), {
 		oldest => $oldest_to_show
 	});
+	slashdLog("Moderation Stats End");
 
+	slashdLog("Page Counting Begin");
 	my $sdTotalHits = $backupdb->getVar('totalhits', 'value', 1);
 	my $daily_total = $logdb->countDailyByPage('', {
 		no_op => $constants->{op_exclude_from_countdaily},
@@ -340,6 +345,7 @@ EOT
 		$statsSave->createStatDaily("other_bytes", $bytes);
 		$statsSave->createStatDaily("other_page", $pages);
 	}
+	slashdLog("Page Counting End");
 
 # Not yet
 #	my $codes = $stats->getMessageCodes();
@@ -357,6 +363,7 @@ EOT
 #		push(@{$data{messages}}, $temp);
 #	}
 
+	slashdLog("Sectional Stats Begin");
 	my $sections =  $slashdb->getDescriptions('sections-all');
 	$sections->{index} = 'index';
 	for my $section (sort keys %$sections) {
@@ -433,7 +440,9 @@ EOT
 
 		push(@{$data{sections}}, $temp);
 	}
+	slashdLog("Sectional Stats End");
 
+	slashdLog("Story Comment Counts Begin");
 	foreach my $d (@$cc_days) {
 		my $avg_comments= $stats->getAverageCommentCountPerStoryOnDay($d) || 0;
 		$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
@@ -458,7 +467,7 @@ EOT
 			"day='$day' AND section='all' AND name='avg_comments_per_story'");
 		push @{$data{avg_comments_per_story}}, sprintf("%12.1f", $avg);
 	}
-
+	slashdLog("Story Comment Counts End");
 
 
 	my $total_bytes = $logdb->countBytesByPage('', {
@@ -474,6 +483,7 @@ EOT
 	});
 	$mod_data{reverse_mods} = $stats->getReverseMods();
 
+	slashdLog("Duration Stats Begin");
 	my $static_op_hour = $logdb->getDurationByStaticOpHour({});
 	for my $is_static (keys %$static_op_hour) {
 		for my $op (keys %{$static_op_hour->{$is_static}}) {
@@ -514,6 +524,7 @@ EOT
 			}
 		}
 	}
+	slashdLog("Duration Stats End");
 
 	$statsSave->createStatDaily("total", $daily_total);
 	$statsSave->createStatDaily("anon_total", $anon_daily_total);
@@ -690,6 +701,7 @@ EOT
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{tailslash} = $logdb->getTailslash();
 
+	slashdLog("Random Stats Begin");
 	$data{backup_lag} = "";
 	for my $slave_name (qw( backup search )) {
 		my $virtuser = $constants->{"${slave_name}_db_user"};
@@ -779,6 +791,7 @@ EOT
 			$statsSave->createStatDaily("msg_${code}", $msg_codes{$code});
 		}
 	}
+	slashdLog("Random Stats End");
 
 	# Send a message to the site admin.
 	if ($messages) {
