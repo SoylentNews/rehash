@@ -194,6 +194,8 @@ sub handler {
 	$srand_called ||= 1;
 
 	my $user = prepareUser($uid, $form, $uri, $cookies, $method);
+	# "_dynamic_page" or any hash key name beginning with _ or .
+	# cannot be accessed from templates -- pudge
 	$user->{state}{_dynamic_page} = 1;
 	createCurrentUser($user);
 	createCurrentForm($form);
