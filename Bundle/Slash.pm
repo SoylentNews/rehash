@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$Bundle::Slash::VERSION = '2.30';
+$Bundle::Slash::VERSION = '2.31';
 
 1;
 
@@ -40,6 +40,10 @@ HTML::Element           - For doing HTML-to-text
 Font::AFM               - ditto
 
 HTML::FormatText        - ditto
+
+HTML::TokeParser
+
+HTML::CalendarMonth	- used for Events plugin
 
 XML::Parser
 
@@ -92,8 +96,5 @@ Schedule::Cron
 
 mod_perl must be installed by hand, because of the special configuration
 required for it.
-
-You might want to do C<force install Net::Cmd> to start the process,
-until libnet tests are fixed.
 
 =cut
