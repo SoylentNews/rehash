@@ -1211,7 +1211,8 @@ sub displayStory {
 
 	# There are many cases when we'd not want to return the pre-rendered text
 	# from the DB.
-	if (	   $story->{rendered} && !$options->{get_cacheable}
+	if (	   !$constants->{no_prerendered_stories}
+		&& $story->{rendered} && !$options->{get_cacheable}
 		&& !$form->{light} && !$user->{light}
 		&& (!$form->{ssi} || $form->{ssi} ne 'yes')
 		&& !$user->{noicons}
