@@ -280,7 +280,7 @@ for my $section (@old_sections) {
                 print ");\n";
         }
 }
-print "UPDATE skins SET submittable='no' WHERE name='search';\n";
+print "UPDATE skins_new SET submittable='no' WHERE name='search';\n";
 
 #
 # Convert color blocks
