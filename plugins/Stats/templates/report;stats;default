@@ -176,6 +176,7 @@ youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% st
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data = stats_data_big.${stats_data_key};
 %]
+<PRE>
    Monthly Stats (Average Per Day)
    -------------------------------
             Users   Pages   Payments
@@ -184,15 +185,16 @@ Renew:      [% flts2(stats_data.subscribe_renew_users_last30) %]   [% ints2(stat
 [%- total_users = stats_data.subscribe_new_users_last30 + stats_data.subscribe_renew_users_last30;
     total_pages = stats_data.subscribe_new_pages_last30 + stats_data.subscribe_renew_pages_last30;
     total_pays  = stats_data.subscribe_new_payments_last30 + stats_data.subscribe_renew_payments_last30; -%]
-Total:      [% flts2(total_users) %]   [% flts2(total_pages) %]   \$[% dlrs(total_pays) %]
-Used up:            [% ints2(stats_data.subscribe_hits_bought_last30) %]   \$[% dlrs(stats_data.subscribe_dollars_bought_last30) %]
+Total:      [% flts2(total_users) %]   [% flts2(total_pages) %]   $[% dlrs(total_pays) %]
+Used up:            [% ints2(stats_data.subscribe_hits_bought_last30) %]   $[% dlrs(stats_data.subscribe_dollars_bought_last30) %]
 Ran out:    [% flts2(stats_data.subscribe_runout_last30) %]
 
 current subscribers: [% ints3(stats_data.subscribers_current) %]
 [%- former_subs = stats_data.subscribers_total - stats_data.subscribers_current; -%]
  former subscribers: [% ints3(former_subs) %]     
   total subscribers: [% ints3(stats_data.subscribers_total) %]    
-  new subscriptions: [% ints3(stats_data.subscribe_new_users) %] 
+  new subscriptions: [% ints3(stats_data.subscribe_new_users) %]
+</PRE> 
 [%
    END;
 END %]
