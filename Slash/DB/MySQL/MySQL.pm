@@ -1344,8 +1344,10 @@ sub createAccessLog {
 	$hostip = md5_hex($hostip);
 	my $subnetid = getCurrentUser('subnetid') || $hostip;
 
-	if ($dat =~ /.*(\d{2}\/\d{2}\/\d{2}\/\d{4,7}).*/) {
-		$dat = $1;
+	if ($dat =~ /(.*)\/(\d{2}\/\d{2}\/\d{2}\/\d{4,7}).*/) {
+		$section = $1;
+		$dat = $2;
+		$op = 'article';
 #		$self->sqlUpdate('stories', { -hits => 'hits+1' },
 #			'sid=' . $self->sqlQuote($dat)
 #		);
