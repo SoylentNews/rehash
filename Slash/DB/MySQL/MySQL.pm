@@ -3065,7 +3065,8 @@ sub createTemplate {
 		}
 	}
 	$self->sqlInsert('templates', $hash);
-	return $self->sqlSelect('LAST_INSERT_ID()');
+	my($tpid) = $self->sqlSelect('LAST_INSERT_ID()');
+	return $tpid;
 }
 
 ########################################################

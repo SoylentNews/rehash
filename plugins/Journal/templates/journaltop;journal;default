@@ -15,6 +15,20 @@ __template__
 <TABLE BORDER="0" BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TR><TD>
 	<TABLE WIDTH="100%" BGCOLOR="[% user.bg.0 %]" BORDER="0" CELLPADDING="5" CELLSPACING="0">
 		<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">
+			<TD COLSPAN=3 ALIGN="LEFT" BGCOLOR="[% user.bg.3 %]">
+				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
+					[% IF title == 'top' %]
+						<B>Top Posters By Number of Entries</B>
+					[% ELSIF title == 'recent' %]
+						<B>Top Recent Posters</B>
+					[% ELSIF title == 'friend' %]
+						<B>Top Posters By Friends</B>
+					[% ELSE %]
+						&nbsp;
+					[ END]
+				</FONT>
+			</TD>
+		<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">
 			<TD ALIGN="LEFT" BGCOLOR="[% user.bg.3 %]">
 				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
 					<B>Users</B>

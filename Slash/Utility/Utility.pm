@@ -52,6 +52,7 @@ use vars qw($VERSION @ISA @EXPORT);
 	createCurrentForm
 	createCurrentStatic
 	createCurrentUser
+	createCurrentVirtualUser
 	createEnvironment
 	eatUserCookie
 	encryptPassword
@@ -67,9 +68,9 @@ use vars qw($VERSION @ISA @EXPORT);
 	getCurrentDB
 	getCurrentForm
 	getCurrentMenu
-	getCurrentVirtualUser
 	getCurrentStatic
 	getCurrentUser
+	getCurrentVirtualUser
 	getFormkey
 	isAnon
 	prepareUser
@@ -87,10 +88,10 @@ use vars qw($VERSION @ISA @EXPORT);
 	strip_nohtml
 	strip_plaintext
 	timeCalc
-	writeLog
 	url2abs
-	xmlencode
+	writeLog
 	xmldecode
+	xmlencode
 );
 
 # LEELA: We're going to deliver this crate like professionals.
@@ -383,14 +384,15 @@ The 'atonish' and 'aton' template blocks.
 
 sub timeCalc {
 	# raw mysql date of story
-	my($date, $format) = @_;
+	my($date, $format, $off_set) = @_;
 	my $user = getCurrentUser();
 	my(@dateformats, $err);
 
+	$off_set = $user->{off_set} unless defined $off_set;
+
 	# find out the user's time based on personal offset
 	# in seconds
-	$date = DateCalc($date, "$user->{off_set} SECONDS", \$err)
-		if $user->{off_set};
+	$date = DateCalc($date, "$off_set SECONDS", \$err) if $off_set;
 
 	# convert the raw date to pretty formatted date
 	$date = UnixDate($date, $format || $user->{'format'});
