@@ -4026,26 +4026,26 @@ sub getStoriesEssentials {
 		} else {
 			$where .= " AND displaystatus = 0 ";
 		}
+		$where .= " AND section not in ($user->{exsect}) "
+			if $user->{exsect};
 	} else {
 		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
 		$where .= " AND displaystatus >= 0 ";
 	}
 
-	$where .= "AND tid='$tid' " if $tid;
-	$where .= "AND sid = '$misc->{sid}' " if $misc->{sid};
-	$where .= "AND sid != '$misc->{exclude_sid}' " if $misc->{exclude_sid};
-	$where .= "AND subsection=$misc->{subsection}" if $misc->{subsection};
+	$where .= " AND tid='$tid' " if $tid;
+	$where .= " AND sid = '$misc->{sid}' " if $misc->{sid};
+	$where .= " AND sid != '$misc->{exclude_sid}' " if $misc->{exclude_sid};
+	$where .= " AND subsection=$misc->{subsection} " if $misc->{subsection};
 
 	# User Config Vars
-	$where .= "AND tid not in ($user->{extid}) "
+	$where .= " AND tid not in ($user->{extid}) "
 		if $user->{extid};
-	$where .= "AND stories.uid not in ($user->{exaid}) "
+	$where .= " AND stories.uid not in ($user->{exaid}) "
 		if $user->{exaid};
-	$where .= "AND section not in ($user->{exsect}) "
-		if $user->{exsect} && !$section;
 
 	# Order
-	my $other = "ORDER BY time DESC ";
+	my $other = " ORDER BY time DESC ";
 
 	# Since stories may potentially have thousands of rows, we
 	# cannot simply select the whole table and cursor through it, it might
