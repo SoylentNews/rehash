@@ -1214,7 +1214,7 @@ sub prepareUser {
 			$user = $reader->getUser($constants->{anonymous_coward_uid});
 		}
 		$user->{is_anon} = 1;
-
+		$user->{state} = {};
 	} else {
 		$user = $reader->getUser($uid);
 		$user->{is_anon} = 0;
