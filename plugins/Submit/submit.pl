@@ -554,9 +554,9 @@ sub displayForm {
 
 	my $fixedstory;
 	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
-		$fixedstory = strip_plaintext(url2html_old($form->{story}));
+		$fixedstory = strip_plaintext($form->{story});
 	} else {
-		$fixedstory = strip_html(url2html_old($form->{story}));
+		$fixedstory = strip_html($form->{story});
 
 		# some submitters like to add whitespace before and
 		# after their introtext. This is never wanted. --Pater
@@ -612,9 +612,9 @@ sub saveSub {
 	}
 
 	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
-		$form->{story} = strip_plaintext(url2html_old($form->{story}));
+		$form->{story} = strip_plaintext($form->{story});
 	} else {
-		$form->{story} = strip_html(url2html_old($form->{story}));
+		$form->{story} = strip_html($form->{story});
 	}
 	$form->{story} = balanceTags($form->{story});
 

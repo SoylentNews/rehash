@@ -1109,6 +1109,7 @@ my %mode_actions = (
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
 			approveCharrefs
+			url2html
 			breakHtml_ifwhitefix
 			whitespace_tagify
 			newline_indent			)],
@@ -1123,6 +1124,7 @@ my %mode_actions = (
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
 			approveCharrefs
+			url2html
 			breakHtml_ifwhitefix		)],
 	CODE, [qw(
 			newline_to_local
