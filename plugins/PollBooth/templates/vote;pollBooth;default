@@ -51,7 +51,7 @@ __template__
 			<A HREF="[% gSkin.rootdir %]/">Back Home</A>
 		]
 	</TD></TR><TR><TD COLSPAN="2">
-<P>
+<P><UL>
 	<LI>Don't complain about lack of options. You've got to pick a few
 	when you do multiple choice.  Those are the breaks.
 
@@ -61,7 +61,7 @@ __template__
 	<LI>This whole thing is wildly inaccurate.  Rounding errors,
 	ballot stuffers, dynamic IPs, firewalls.  If you're using these
 	numbers to do anything important, you're insane.
-</P>
+</UL></P>
 	</TD></TR>
 </TABLE></CENTER>
 
