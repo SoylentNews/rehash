@@ -1,5 +1,6 @@
 # robots.txt for Slash site
 # $Id$
+
 User-Agent: *
 Disallow: /metamod.pl
 Disallow: /users.pl
@@ -9,4 +10,3 @@ Disallow: metamod.pl
 Disallow: users.pl
 Disallow: pubkey.pl
 Disallow: zoo.pl
-Allow: /
