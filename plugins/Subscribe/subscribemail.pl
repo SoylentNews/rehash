@@ -16,13 +16,18 @@ $task{$me}{code} = sub {
 	} else {
 		$backupdb = $slashdb;
 	}
-	my $subscribe = getObject("Slash::Subscribe");
+	my $sub_static = getObject("Slash::Subscribe::Static");
 
 	slashdLog('Send Subscribe Mail Begin');
 
-	my $num_total_subscribers = $slashdb->sqlCount('users_hits', 'hits_paidfor > 0');
-	my $num_current_subscribers = $slashdb->sqlCount('users_hits', 'hits_paidfor > hits_bought');
-	my $new_subscriptions_hr = $subscribe->getSubscriberList();
+	# The below should be in a Static module.
+
+	my $num_total_subscribers = $sub_static->countTotalSubs();
+	my $num_current_subscribers = $sub_static->countCurrentSubs();
+	my $num_total_renewing_subscribers = $sub_static->countTotalRenewingSubs();
+	my $num_current_renewing_subscribers = $sub_static->countCurrentRenewingSubs();
+
+	my $new_subscriptions_hr = $sub_static->getSubscriberList();
 	my $num_new_subscriptions = scalar(keys %$new_subscriptions_hr);
 
 	my $subscribers_hr = { };
@@ -129,8 +134,11 @@ $task{$me}{code} = sub {
 
 	my @numbers = (
 		$num_current_subscribers,
+		$num_current_renewing_subscribers,
 		$num_total_subscribers - $num_current_subscribers,
+		$num_total_renewing_subscribers - $num_current_renewing_subscribers,
 		$num_total_subscribers,
+		$num_total_renewing_subscribers,
 		$num_new_subscriptions,
 	);
 
@@ -165,12 +173,17 @@ EOT
 $constants->{sitename} Subscriber Info for yesterday
 $report_link
 $monthly_stats
+
    Today
    -----
-current subscribers: %8d
- former subscribers: %8d
-  total subscribers: %8d
-today subscriptions: %8d
+current subscribers: %6d
+  of which renewing:      %6d
+ former subscribers: %6d
+  of which renewing:      %6d
+  total subscribers: %6d
+  of which renewing:      %6d
+
+today subscriptions: %6d
 
 $transaction_list
 EOT
