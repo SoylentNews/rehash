@@ -435,11 +435,8 @@ source /tmp/dis;
 select concat("UPDATE stories SET commentcount=", discussions.commentcount, " WHERE discussion=", id, ";") INTO OUTFILE "/tmp/dis2" from discussions;
 source /tmp/dis2;
 
-# OSDN LAST UPDATED HERE
 
 ALTER TABLE pollanswers CHANGE COLUMN qid qid MEDIUMINT UNSIGNED NOT NULL;
-
-# USEPERL LAST UPDATED HERE
 
 ALTER TABLE formkeys CHANGE COLUMN formname formname varchar(32) DEFAULT '' NOT NULL;
 
@@ -447,8 +444,6 @@ ALTER TABLE formkeys CHANGE COLUMN formname formname varchar(32) DEFAULT '' NOT 
 
 ALTER TABLE vars CHANGE COLUMN name name varchar(48) DEFAULT '' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Tags that don\'t need to be closed');
-
-# OSDNTEST LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
@@ -467,7 +462,6 @@ ALTER TABLE blocks ADD all_sections tinyint NOT NULL DEFAULT '0';
 UPDATE blocks SET all_sections=1 WHERE section="all_sections";
 UPDATE blocks SET section="index" WHERE section="all_sections";
 
-# SLASHCODE LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('draconian_charrefs','0','Enable strictest-possible rules for disallowing HTML entities/character references?');
 
@@ -477,7 +471,11 @@ INSERT INTO vars (name, value, description) VALUES ('draconian_charrefs','0','En
 # Forgot this one a little while ago I think.
 INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|http|gopher|mailto|news|nntp|telnet|wais|https','Schemes that can be used in comment links without being stripped of bogus chars');
 
+# USEPERL LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_29
 
+# OSDNTEST LAST UPDATED HERE
+# OSDN LAST UPDATED HERE
