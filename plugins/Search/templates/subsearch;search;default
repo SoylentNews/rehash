@@ -11,7 +11,7 @@ en_US
 __name__
 subsearch
 __template__
-[% USE Slash %]
+<P>
 [% x = start ? start : 1 %]
 [% FOREACH entry=entries %]
 	[% IF entry.score %]
@@ -25,6 +25,7 @@ __template__
 	<P>
 [% x = x + 1 %]
 [% END %]
+<P>
 [% PROCESS pagination %]
 <P>
 
