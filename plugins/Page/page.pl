@@ -28,7 +28,7 @@ sub main {
 
 	my $title = getData('head', { section => $section });
 	header($title, $section->{section});
-	slashDisplay('index', { index => $index});
+	slashDisplay('index', { section => $section->{section}, index => $index});
 
 	footer();
 

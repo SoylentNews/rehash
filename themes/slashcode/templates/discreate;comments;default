@@ -11,7 +11,11 @@ en_US
 __name__
 discreate
 __template__
-[% USE Slash %]
+<p><hr size="1" noshade>
+<a name="create_thread"></a>
+<p align="center"><br>
+<b><font color="#999999">::::</font>&nbsp;&nbsp;Create a Thread in this Forum&nbsp;&nbsp;<font color="#999999">::::</font>&nbsp;</b></p>
+<p>
 [% begin = BLOCK %]
 <FORM METHOD="POST" ACTION="[% constants.rootdir %]/comments.pl" ENCTYPE="application/x-www-form-urlencoded">
 <INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
@@ -20,10 +24,6 @@ __template__
 
 [% val1 = BLOCK %]
 <INPUT TYPE="text" NAME="title" SIZE=60>
-[% END %]
-[% val2 = BLOCK %]
-<INPUT TYPE="text" NAME="url" SIZE=60>
-<BR><FONT SIZE="-1">(if a form element needs some help, stick it here)</FONT>
 [% END %]
 
 [% val3 = BLOCK %]
@@ -40,13 +40,11 @@ __template__
 
 <INPUT TYPE="submit" NAME="submit" VALUE="Submit">
 [% END %]
-[% PROCESS formbox
-    title => "Create a $label.ufirst",
+[% PROCESS formbox_comments
     begin => begin,
     end   => '</FORM>',
     pairs => [
-        { label => "Name this $label", value => val1 },
-        { label => "Optional referring URL", value => val2 },
+        { label => "Name this $label thread", value => val1 },
         { label => "Pick a Topic", value => val3 },
     ]
 %]

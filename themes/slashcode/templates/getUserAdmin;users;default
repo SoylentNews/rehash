@@ -113,6 +113,7 @@ __template__
 		
 		
 			[% IF authoredit_flag && seclev_field && ! useredit.nonuid  %]
+				[% IF user.seclev >= 10000 %]
 			<TR>
 				<TD><B>Seclev</B></TD>
 				<TD COLSPAN="4">
@@ -127,13 +128,14 @@ __template__
 				<TD COLSPAN="4"><INPUT TYPE="checkbox" NAME="author" [% useredit.author %]></TD>
 				<TD>&nbsp;</TD>
 			</TR>
-			[% END %]
+				[% END %]
 		
 			<TR>
 				<TD COLSPAN=3 HEIGHT=10></TD>
 			</TR>
 			<TR>
 				<TD><B>Section</B></TD><TD>[% section_select %]</TD>
+			[% END %]
 			</TR>
 			<TR>
 				<TD><B>Default points (threshcode)</B></TD><TD>[% thresh_select %]</TD><TD>&nbsp;</TD>

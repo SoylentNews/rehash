@@ -477,7 +477,7 @@ sub findDiscussion {
 	my $other;
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC";
-	} elsif ($form->{query} && $sort == 3) {
+	} elsif ($sort == 3) {
 		$other = " ORDER BY last_update DESC";
 	} else {
 		$other = " ORDER BY ts DESC";
@@ -492,10 +492,15 @@ sub findDiscussion {
 		if $form->{type};
 	$where .= " AND topic=" . $self->sqlQuote($form->{tid})
 		if $form->{tid};
+	$where .= " AND section=" . $self->sqlQuote($form->{section})
+		if $form->{section};
 	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
 		if $form->{uid};
+	$where .= " AND approved = $form->{approved}"
+		if $form->{approved};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
+	print STDERR "select $columns from $tables where $where $other\n";
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $stories;

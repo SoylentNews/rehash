@@ -303,7 +303,7 @@ DROP TABLE IF EXISTS menus;
 CREATE TABLE menus (
 	id mediumint(5) UNSIGNED NOT NULL auto_increment,
 	menu varchar(20) DEFAULT '' NOT NULL,
-	label varchar(200) DEFAULT '' NOT NULL,
+	label varchar(255) DEFAULT '' NOT NULL,
 	value text,
 	seclev mediumint UNSIGNED NOT NULL,
 	menuorder mediumint(5),
@@ -431,7 +431,7 @@ CREATE TABLE rss_raw (
 	description_signature char(32) DEFAULT '' NOT NULL,
 	link varchar(255) NOT NULL,
 	title varchar(255) NOT NULL,
-	description varchar(255) NOT NULL,
+	description text,
 	subid mediumint UNSIGNED,
 	bid varchar(30),
 	created datetime, 
@@ -507,7 +507,7 @@ CREATE TABLE section_extras (
 	section varchar(30) NOT NULL,
 	name varchar(100) NOT NULL,
 	value varchar(100) NOT NULL,
-	type enum("text","list") DEFAULT 'text' NOT NULL,
+	type enum("text","list", "topics") DEFAULT 'text' NOT NULL,
 	FOREIGN KEY (section) REFERENCES sections(section),
 	UNIQUE extra (section,name),
 	PRIMARY KEY (param_id)

@@ -98,14 +98,14 @@ sub main {
 		preview			=> {
 			function		=> \&editComment,
 			seclev			=> 0,
-			formname 		=> 'comments',
+			formname 		=> $form->{new_discussion} ? 'discussions' : 'comments',
 			checks			=> 
 			[ qw ( update_formkeyid max_post_check ) ], 
 		},
 		post 			=> {
 			function		=> \&editComment,
 			seclev			=> 0,
-			formname 		=> 'comments',
+			formname 		=> $form->{new_discussion} ? 'discussions' : 'comments',
 			checks			=> 
 			[ qw ( update_formkeyid max_post_check generate_formkey	) ],
 		},
@@ -113,12 +113,12 @@ sub main {
 			function		=> \&submitComment,
 			seclev			=> 0,
 			post			=> 1,
-			formname 		=> 'comments',
+			formname 		=> $form->{new_discussion} ? 'discussions' : 'comments',
 			checks			=> 
-			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check 
-				formkey_check ) ],
+			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check formkey_check ) ],
 		},
 	};
+			# checks			=> $form->{new_discussion} ? [] : 
 	$ops->{default} = $ops->{display} ;
 	
 	# This is here to save a function call, even though the
@@ -415,7 +415,14 @@ sub commentIndexUserCreated {
 	titlebar("90%", getData('user_discussions'));
 	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
 	my $start = $form->{start} || 0;
-	my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'recycle' }, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
+	my $hashref = {};
+	$hashref->{section} = $form->{section} if $form->{section};
+	$hashref->{tid} = $form->{tid} if $form->{tid};
+	$hashref->{type} = 'recycle'; 
+	$hashref->{approved} = '1'; 
+
+	my $discussions = $searchdb->findDiscussion($hashref, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
+
 	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
@@ -435,6 +442,10 @@ sub commentIndexUserCreated {
 			$back = -1;
 		}
 
+		my $title = getData('user_discussions');
+
+		$title .= ": " . $slashdb->getTopic($form->{tid},'alttext') . " ($form->{tid})" if $form->{tid};
+	
 		slashDisplay('udiscuss_list', {
 			discussions	=> $discussions,
 			'label'		=> $label,
@@ -445,8 +456,9 @@ sub commentIndexUserCreated {
 		});
 	} else {
 		print getData('nodiscussions');
-		slashDisplay('discreate', {
+		slashDisplay('edit_comment', {
 			topic => $constants->{discussion_default_topic},
+			new_discussion => 1,
 			label => $label,
 		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
@@ -579,7 +591,8 @@ sub createDiscussion {
 				? ""
 				: $ENV{HTTP_REFERER};
 		$form->{url}	= fudgeurl($newurl);
-		$form->{title}	= strip_notags($form->{title});
+		# $form->{title}	= strip_notags($form->{title});
+		$form->{title}	= strip_notags($form->{postersubj});
 
 
 		# for now, use the postersubj filters; problem is,
@@ -622,6 +635,7 @@ sub createDiscussion {
 		my $newform = {
 			sid	=> $id,
 			pid	=> 0, 
+			label		=> $label,
 			title	=> $form->{title},
 			formkey => $form->{formkey},
 		};
@@ -650,6 +664,7 @@ sub editComment {
 
 	my $preview;
 	my $error_flag = 0;
+	my $label = getData('label');
 
 	# Get the comment we may be responding to. Remember to turn off
 	# moderation elements for this instance of the comment.
@@ -676,11 +691,12 @@ sub editComment {
 		$form->{postersubj} = "Re:$form->{postersubj}";
 	}
 
-	my $formats = $slashdb->getDescriptions('postmodes');
+# trying to do this in the template
+#	my $formats = $slashdb->getDescriptions('postmodes');
 
-	my $format_select = $form->{posttype}
-		? createSelect('posttype', $formats, $form->{posttype}, 1)
-		: createSelect('posttype', $formats, $user->{posttype}, 1);
+#	my $format_select = $form->{posttype}
+#		? createSelect('posttype', $formats, $form->{posttype}, 1)
+#		: createSelect('posttype', $formats, $user->{posttype}, 1);
 
 	if ($form->{op} =~ /^reply$/i) {
 		$form->{nobonus}  = $user->{nobonus};
@@ -689,7 +705,8 @@ sub editComment {
 
 	slashDisplay('edit_comment', {
 		error_message 	=> $error_message,
-		format_select	=> $format_select,
+		label		=> $label,
+		# format_select	=> $format_select,
 		preview		=> $preview,
 		reply		=> $reply,
 	});
@@ -783,10 +800,12 @@ sub validateComment {
 
 	$$subj =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
 
+	print STDERR "comm $$comm subj $$subj\n";
 	for ($$comm, $$subj) {
 		my $d = decode_entities($_);
 		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
 		if ($d !~ /\w/) {		# require SOME non-whitespace
+			print STDERR "d $d no body\n";
 			$$error_message = getError('no body');
 			return;
 		}
@@ -899,6 +918,7 @@ sub previewForm {
 	my $constants = getCurrentStatic();
 
 	$user->{sig} = "" if $form->{postanon};
+	my $label = getData('label');
 
 	my $tempSubject = strip_notags($form->{postersubj});
 	my $tempComment = $form->{postercomment};
@@ -948,8 +968,13 @@ sub previewForm {
 	my $tm = $user->{mode};
 	$user->{mode} = 'archive';
 	my $previewForm;
-	if ($tempSubject && $tempComment) {
+	if ($form->{new_discussion} && $user->{seclev} < $constants->{discussion_create_seclev}) { 
+		$previewForm = slashDisplay('newdiscussion', {
+			error => getError('seclevtoolow'),
+		});
+	} elsif ($tempSubject && $tempComment) {
 		$previewForm = slashDisplay('preview_comm', {
+			label	=> $label,
 			preview => $preview,
 		}, 1);
 	}
@@ -964,6 +989,10 @@ sub previewForm {
 # story id.
 sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
+
+	my $id;
+	my $label = getData('label');
+
 	if ($discussion->{type} eq 'archived') {
 		print getData('archive_error');
 		return;
@@ -992,12 +1021,37 @@ sub submitComment {
 
 	$tempComment = addDomainTags($tempComment);
 
+	if ($form->{new_discussion} && $user->{seclev} >= $constants->{discussion_new_seclev} ) {
+
+		my $newurl	= $form->{url} ? $form->{url}
+			: $ENV{HTTP_REFERER} =~ m|\Q$constants->{rootdir}/comments.pl\E$|
+				? ""
+				: $ENV{HTTP_REFERER};
+		$form->{url}	= fudgeurl($newurl);
+
+		$id = $slashdb->createDiscussion({
+			title	=> $tempSubject,
+			topic	=> $form->{topic},
+			url	=> $form->{url} || 1,
+			type	=> "recycle"
+		});
+
+		# fix URL to point to discussion if no referrer
+		if (!$form->{url}) {
+			$newurl = $constants->{rootdir} . "/comments.pl?sid=$id";
+			$slashdb->setDiscussion($id, { url => $newurl });
+		}
+	}
+	$id ||= $form->{sid};
+
 #	# Slash is not a file exchange system
 #	# still working on this...stay tuned for real commit
 #	# (maybe in 2.x... sigh)
 #	$tempComment = distressBinaries($tempComment);
 
-	titlebar("95%", getData('submitted_comment'));
+	unless ($form->{new_discussion}) {
+		titlebar("95%", getData('submitted_comment'));
+	}
 
 	my $pts = 0;
 
@@ -1015,7 +1069,7 @@ sub submitComment {
 	}
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
 	unless ($user->{is_admin}) {
-		unless ($slashdb->checkDiscussionPostable($form->{sid})) {
+		unless ($slashdb->checkDiscussionPostable($id)) {
 			print getError('submission error');
 			return(0);
 		}
@@ -1024,7 +1078,7 @@ sub submitComment {
 	my $clean_comment = {
 		subject		=> $tempSubject,
 		comment		=> $tempComment,
-		sid		=> $form->{sid} , 
+		sid		=> $id , 
 		pid		=> $form->{pid} ,
 		ipid		=> $user->{ipid},
 		subnetid	=> $user->{subnetid},
@@ -1055,7 +1109,7 @@ sub submitComment {
 		return(0);
 	} else {
 		slashDisplay('comment_submit');
-		undoModeration($form->{sid});
+		undoModeration($id);
 		printComments($discussion, $maxCid, $maxCid);
 
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
@@ -1082,7 +1136,7 @@ sub submitComment {
 
 		# reply to comment
 		if ($messages && $form->{pid}) {
-			my $parent = $slashdb->getCommentReply($form->{sid}, $form->{pid});
+			my $parent = $slashdb->getCommentReply($id, $form->{pid});
 			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
 			if (_send_comment_msg($users->[0], \%users, $pts)) {
 				my $data  = {
@@ -1128,6 +1182,24 @@ sub submitComment {
 				next if $users{$usera};
 				$messages->create($usera, MSG_CODE_NEW_COMMENT, $data);
 				$users{$usera}++;
+			}
+		}
+		if ($form->{new_discussion}) {
+			if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
+				slashDisplay('newdiscussion', { 
+					error 		=> $error_message, 
+					'label'		=> $label,
+					id 		=> $id,
+				});
+			} else {
+				slashDisplay('newdiscussion', {
+					error => getError('seclevtoolow'),
+				});
+			}
+			if ($form->{udiscuss}) {
+				commentIndexUserCreated(@_);
+			} else {
+				commentIndex(@_);
 			}
 		}
 	}
