@@ -210,7 +210,6 @@ sub prepareStory {
 	$storyref->{authorref} = $self->getAuthor($storyref->{uid});
 
 	$storyref->{topicref} = $self->getTopic($storyref->{tid});
-	$storyref->{topicref}{image} = "$constants->{imagedir}/topics/$storyref->{topicref}{image}" if $storyref->{topicref}{image} =~ /^\w+\.\w+$/; 
 
 	$storyref->{sectionref} = $self->getSection($storyref->{section});
 
