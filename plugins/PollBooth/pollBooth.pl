@@ -100,6 +100,7 @@ sub default {
 	}
 }
 
+#################################################################
 sub link_story_to_poll {
 	my($form, $slashdb, $constants) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -127,6 +128,7 @@ sub link_story_to_poll {
 		sid		=> $sid
 	});
 }
+
 #################################################################
 sub detachpoll {
 	my($form, $slashdb, $constants) = @_;
@@ -171,7 +173,6 @@ sub editpoll {
 	my $qid  = $form->{'qid'};
 	my $user = getCurrentUser();
 	my $warning;
-	
 
 	unless ($user->{'is_admin'}) {
 		default(@_);
@@ -188,14 +189,17 @@ sub editpoll {
 			"stories",
 			"sid=" . $reader->sqlQuote($form->{sid})
 		) if $form->{sid};
+
 		$warning->{invalid_sid} = 1 if $form->{sid} and !$story_ref;
-		if($form->{sid}){
-			if($form->{qid}){
+
+		if ($form->{sid}) {
+			if ($form->{qid}) {
 				$warning->{attached_to_other} = 1 if $slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0 and qid != ".$slashdb->sqlQuote($form->{qid}));
 			} else {
-				$warning->{attached_to_other} =1 if $slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0");
+				$warning->{attached_to_other} = 1 if $slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0");
 			}
 		}
+
 		if ($story_ref) {
 			$question->{'date'}	= $story_ref->{'time'};
 			$question->{topic}	= $story_ref->{'tid'};
@@ -206,7 +210,7 @@ sub editpoll {
 		$question->{polltype} ||= "section";
  
 		my $disp_answers;
-		for my $n (1..8){
+		for my $n (1..8) {
 			$answers->[$n-1] = [ $form->{"aid$n"}, $form->{"votes$n"} ];
 			$disp_answers->[$n-1] = {
 				aid	=> $n,
@@ -216,8 +220,7 @@ sub editpoll {
 		}
 	
 		$question->{sid} = $form->{sid};
-		$checked=$form->{currentqid};
-
+		$checked = $form->{currentqid};
 
 		my $raw_pollbooth = slashDisplay('pollbooth', {
 			qid		=> -1,
@@ -339,21 +342,21 @@ sub savepoll {
 			return;
 		}
 	}
-	if($form->{sid}){
-		if($form->{qid}){
-			if($slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0 and qid != ".$slashdb->sqlQuote($form->{qid}))){
+	if ($form->{sid}) {
+		if ($form->{qid}) {
+			if ($slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0 and qid != ".$slashdb->sqlQuote($form->{qid}))) {
 				print getData('attached_to_other');
 				editpoll(@_);
 				return;
 			}
 		} else {
-			if($slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0")){
+			if ($slashdb->sqlCount("stories","sid=".$slashdb->sqlQuote($form->{sid})." AND qid > 0")) {
 				print getData('attached_to_other');
 				editpoll(@_);
 				return;
 			}
 		}
-		if(!$slashdb->sqlCount("stories","sid = ".$slashdb->sqlQuote($form->{sid}))){
+		if (!$slashdb->sqlCount("stories","sid = ".$slashdb->sqlQuote($form->{sid}))) {
 			print getData("invalid_sid");
 			editpoll(@_);
 			return;
@@ -513,13 +516,11 @@ sub listpolls {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $min = $form->{min} || 0;
 	my $type = $form->{type};
-	my $questions = $reader->getPollQuestionList($min,{ type => $type });
+	my $questions = $reader->getPollQuestionList($min, { type => $type });
 	my $sitename = getCurrentStatic('sitename');
 
 	# Just me, but shouldn't title be in the template?
 	# yes
-	
-	
 	slashDisplay('listpolls', {
 		questions	=> $questions,
 		startat		=> $min + @$questions,
