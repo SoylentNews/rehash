@@ -146,7 +146,7 @@ sub getRDF {
 	my $template_name ||= $slashdb->getBlock($bid, 'rss_template');
 	my $items ||= $slashdb->getBlock($bid, 'items');
 	$items ||= $constants->{max_items};
-	# $template_name ||= $constants->{default_rss_template};
+	$template_name ||= $constants->{default_rss_template};
 
 	my $d = geturl($url);
 
