@@ -7465,7 +7465,7 @@ sub _getUser_do_selects {
 	# WHERE users.uid=123 AND users_blurb.uid=123 AND so on.
 	# Note if we're being asked to get only params, we skip this.
 	my $answer = { };
-	$answer = $self->sqlSelectHashref($select, $from, $where) if $select;
+	$answer = $self->sqlSelectHashref($select, $from, $where) if $select && $from && $where;
 
 	# Now get the params and the ACLs.  In the special case
 	# where we are being asked to get "all" params (not an
@@ -7484,7 +7484,7 @@ sub _getUser_do_selects {
 			$answer->{acl}{$acl} = 1;
 		}
 	} elsif (ref($params) eq 'ARRAY' && @$params) {
-		my $param_list = join(",", @$params);
+		my $param_list = join(",", map { $self->sqlQuote($_) } @$params);
 		$param_ar = $self->sqlSelectAllHashrefArray(
 			"name, value",
 			"users_param",
@@ -7598,12 +7598,14 @@ sub _getUser_get_select_from_where {
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ gU_gsfw cache name '$cache_name' cache: " . Dumper($self->{$cache_name});
 		}
+		my $cols_main_needed_sorted = [ ];
 		for my $col (@$cols_needed_sorted) {
 			if ($mcddebug > 1) {
 				print STDERR scalar(gmtime) . " $$ gU_gsfw col '$col' table '$self->{$cache_name}{$col}'\n";
 			}
 			if (my $table_name = $self->{$cache_name}{$col}) {
 				$need_table{$table_name} = 1;
+				push @$cols_main_needed_sorted, $col;
 			} else {
 				push @$params_needed, $col;
 			}
@@ -7612,7 +7614,7 @@ sub _getUser_get_select_from_where {
 
 		# Determine the FROM clause (comma-separated tables) and the
 		# WHERE clause (AND users_foo.uid=) to pull data from the DB.
-		my $select_clause = join(",", grep { $_ ne 'uid' } @$cols_needed_sorted);
+		my $select_clause = join(",", grep { $_ ne 'uid' } @$cols_main_needed_sorted);
 		my $from_clause = join(",", @$tables_needed);
 
 		$gsfwcache{$gsfwcachekey} = {
@@ -7708,7 +7710,7 @@ sub _getUser_get_table_data {
 		$hr->{cols_needed_ar} =		$cols_needed;
 		$hr->{cols_needed_hr} =		{ map { $_, $self->{$cache_name}{$_} }
 						      @$cols_needed };
-		$hr->{params_needed} =		$params_needed;
+		$hr->{params_needed} =		$table_hr->{params_needed};
 		$hr->{select_clause} =		$table_hr->{select_clause};
 		$hr->{from_clause} =		$table_hr->{from_clause};
 		$hr->{need_db} =		$need_db;
