@@ -59,7 +59,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 		<INPUT TYPE="TEXT" NAME="homepage" VALUE="[% useredit.homepage | strip_attribute %]" SIZE="60"><BR>
 	[%- IF admin_flag && constants.slashbox_whatsplaying -%]
 	<B>What I'm Playing</B><BR>
-	<SMALL>(optional: a pipe ("|") separated list of games you're currently enthralled with. This'll be used for the "What We're Playing" Slashbox, and linking the titles somewhere is encouraged.)</SMALL><BR>
+	<SMALL>(optional: a pipe ("|") separated list of games you're currently enthralled with. This'll be used for the "What We're Playing" Slashbox.)</SMALL><BR>
 		<INPUT TYPE="TEXT" NAME="playing" VALUE="[% useredit.playing | strip_attribute %]" SIZE="60"><BR>
 	[%- END - %]
 	<B>AOL IM</B> (optional)<BR>
