@@ -318,9 +318,6 @@ sub ssiFoot {
 ########################################################
 sub prepAds {
 
-	$ENV{AD_BANNER_1} = q{<font size="+2" color="#ffcccc">this is ad banner 1</font>};
-	$ENV{AD_BANNER_6} = q{<font size="+2" color="#ffcccc">this is ad banner 6</font>};
-
 print STDERR "prepAds $$ SCRIPT_NAME '$ENV{SCRIPT_NAME}'"
 	. " AD_BANNER_1 '$ENV{AD_BANNER_1}' AD_BANNER_6 '$ENV{AD_BANNER_6}'\n";
 
