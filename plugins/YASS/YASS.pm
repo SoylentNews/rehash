@@ -47,7 +47,7 @@ sub getActive {
 			"story_param.sid as sid, story_param.url as url, title", 
 			"story_param, stories", 
 			"name = 'active' AND value = 'yes' AND stories.sid = story_param.sid",
-			"ORDER BY date DESC LIMIT $limit");
+			"ORDER BY date DESC DESC LIMIT $limit");
 	}
 
 	return $all;
