@@ -60,9 +60,9 @@ sub sqlShowSlaveStatus {
 sub getBackendStories {
 	my($self, $options) = @_;
 
-	my $topic = $options->{topic} || 0;
+	my $topic = $options->{topic} || getCurrentStatic('mainpage_nexus_tid');
 
-	my $select = "stories.stoid, sid, title, time, dept, stories.uid,
+	my $select = "stories.stoid, sid, title, stories.tid, primaryskid, time, dept, stories.uid,
 		commentcount, hitparade, introtext, bodytext";
 
 	my $from = "stories, story_text";
@@ -72,13 +72,11 @@ sub getBackendStories {
 
 	my %image = ( );
 	my $topic_hr = $self->getTopicTree($topic);
-	if ($topic) {
-		$from .= ", story_topics_rendered";
-		$where .= " AND stories.stoid = story_topics_rendered.stoid
-			AND story_topics_rendered.tid=$topic";
-		for my $key (qw( image width height )) {
-			$image{$key} = $topic_hr->{$key};
-		}
+	$from .= ", story_topics_rendered";
+	$where .= " AND stories.stoid = story_topics_rendered.stoid
+		AND story_topics_rendered.tid=$topic";
+	for my $key (qw( image width height )) {
+		$image{$key} = $topic_hr->{$key};
 	}
 
 	my $other = "ORDER BY time DESC LIMIT 10";
@@ -572,13 +570,13 @@ sub decayTokens {
 sub getDailyMail {
 	my($self, $user) = @_;
 
-	my $columns = "stories.sid, stories.title, stories.primaryskid,
+	my $columns = "stories.sid, title, stories.primaryskid,
 		users.nickname,
 		stories.tid, stories.time, stories.dept,
 		story_text.introtext, story_text.bodytext ";
 	my $tables = "stories, story_text, users, story_topics_rendered";
 	my $where = "time < NOW() AND TO_DAYS(NOW())-TO_DAYS(time)=1 ";
-	$where .= "AND users.uid=stories.uid AND stories.sid=story_text.sid AND story_topics_rendered.stoid = stories.stoid ";
+	$where .= "AND users.uid=stories.uid AND stories.stoid=story_text.stoid AND story_topics_rendered.stoid = stories.stoid ";
 
 	# XXXSECTIONTOPICS - The 'sectioncollapse' bit now means:
 	# 0 - only want stories in the mainpage nexus mail
@@ -600,8 +598,9 @@ sub getDailyMail {
 		if $user->{extid};
 	$where .= "AND stories.uid not in ($user->{exaid}) "
 		if $user->{exaid};
-	$where .= "AND section not in ($user->{exsect}) "
-		if $user->{exsect};
+# XXXSKIN !!!!
+#	$where .= "AND section not in ($user->{exsect}) "
+#		if $user->{exsect};
 
 	my $other = " ORDER BY stories.time DESC";
 
@@ -705,8 +704,9 @@ sub getTop10Comments {
 	) {
 		my $comment = $self->sqlSelectArrayRef(
 			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason",
-			"comments, stories, users",
+			"comments, stories, story_text, users",
 			"cid=$cids->[$num_top10_comments]->[0]
+				AND stories.stoid = story_text.stoid
 				AND users.uid=comments.uid
                                 AND comments.sid=stories.discussion");
 		push @$comments, $comment if $comment;
@@ -739,7 +739,7 @@ sub randomBlock {
 	my($self) = @_;
 	my $c = $self->sqlSelectMany("bid,title,url,block",
 		"blocks",
-		"section='index' AND portal=1 AND ordernum < 0");
+		"skin='mainpage' AND portal=1 AND ordernum < 0");
 
 	my $A = $c->fetchall_arrayref;
 	$c->finish;

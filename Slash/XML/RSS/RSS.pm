@@ -364,9 +364,9 @@ sub rss_story {
 	# delete it so it won't be processed later
 	my $story = delete $item->{story};
 	my $constants = getCurrentStatic();
-	my $slashdb   = getCurrentDB();
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $topics = $slashdb->getTopics();
+	my $topics = $reader->getTopics();
 
 	$encoded_item->{title}  = $self->encode($story->{title})
 		if $story->{title};
@@ -379,23 +379,25 @@ sub rss_story {
 	}
 
 	if ($version >= 1.0) {
-		my $slashdb   = getCurrentDB();
-
 		$encoded_item->{dc}{date}    = $self->encode($self->date2iso8601($story->{'time'}))
 			if $story->{'time'};
-		$encoded_item->{dc}{subject} = $self->encode($topics->{$story->{tid}}{name})
+		$encoded_item->{dc}{subject} = $self->encode($topics->{$story->{tid}}{keyword})
 			if $story->{tid};
-		$encoded_item->{dc}{creator} = $self->encode($slashdb->getUser($story->{uid}, 'nickname'))
+		$encoded_item->{dc}{creator} = $self->encode($reader->getUser($story->{uid}, 'nickname'))
 			if $story->{uid};
 
-		$encoded_item->{slash}{section}    = $self->encode($story->{section})
-			if $story->{section};
 		$encoded_item->{slash}{comments}   = $self->encode($story->{commentcount})
 			if $story->{commentcount};
 		$encoded_item->{slash}{hitparade}  = $self->encode($story->{hitparade})
 			if $story->{hitparade};
 		$encoded_item->{slash}{department} = $self->encode($story->{dept})
 			if $story->{dept} && $constants->{use_dept};
+
+		if ($story->{primaryskid}) {
+			$encoded_item->{slash}{section} = $self->encode(
+				$reader->getSkin($story->{primaryskid})->{name}
+			);
+		}
 	}
 
 	return $encoded_item;

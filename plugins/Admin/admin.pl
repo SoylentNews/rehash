@@ -554,7 +554,8 @@ sub blockEdit {
 
 	my($bid);
 	# Control for section editors when editing blocks -Brian
-	$form->{section} = $user->{section} if $user->{section};
+# XXXSKIN - ???
+#	$form->{section} = $user->{section} if $user->{section};
 
 	if ($form->{blocksave} || $form->{blocksavedef}) {
 		blockSave($form->{thisbid});
@@ -579,7 +580,7 @@ sub blockEdit {
 		print getData('blockDelete-message', { bid => $form->{deletebid} });
 	}
 
-	my($blockref, $saveflag, $block_select, $retrieve_checked, $all_sections_checked,
+	my($blockref, $saveflag, $block_select, $retrieve_checked, $all_skins_checked,
 		$portal_checked, $block_select1, $block_select2);
 	my($blockedit_flag, $blockdelete_flag, $blockform_flag) = (0, 0, 0);
 	$blockref = {};
@@ -606,13 +607,14 @@ sub blockEdit {
 	} else {
 		# get the static blocks
 		my($static_blocks, $portal_blocks);
-		if ($user->{section}) {
-			$static_blocks = $slashdb->getDescriptions('static_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
-			$portal_blocks = $slashdb->getDescriptions('portald_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
-		} else {
+# XXXSKIN - ???
+#		if ($user->{section}) {
+#			$static_blocks = $slashdb->getDescriptions('static_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
+#			$portal_blocks = $slashdb->getDescriptions('portald_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
+#		} else {
 			$static_blocks = $slashdb->getDescriptions('static_block', $user->{seclev}, 1);
 			$portal_blocks = $slashdb->getDescriptions('portald_block', $user->{seclev}, 1);
-		}
+#		}
 		$block_select1 = createSelect('bid1', $static_blocks, $bid, 1);
 
 		$block_select2 = createSelect('bid2', $portal_blocks, $bid, 1);
@@ -632,7 +634,7 @@ sub blockEdit {
 			$blockedit_flag = 1;
 			$blockref->{ordernum} = "NA" if $blockref->{ordernum} eq '';
 			$retrieve_checked = "CHECKED" if $blockref->{retrieve} == 1;
-			$all_sections_checked = "CHECKED" if $blockref->{all_sections} == 1;
+			$all_skins_checked = "CHECKED" if $blockref->{all_skins} == 1;
 			$portal_checked = "CHECKED" if $blockref->{portal} == 1;
 		}
 	}
@@ -653,7 +655,7 @@ sub blockEdit {
 		blockform_flag		=> $blockform_flag,
 		portal_checked		=> $portal_checked,
 		retrieve_checked	=> $retrieve_checked,
-		all_sections_checked	=> $all_sections_checked,
+		all_skins_checked	=> $all_skins_checked,
 		blocktype_select	=> $blocktype_select,
 		sectionbid		=> $sectionbid,
 		autosubmit_select	=> $autosubmit_select,

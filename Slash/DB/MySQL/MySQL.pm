@@ -2910,9 +2910,9 @@ sub saveBlock {
 			rdf		=> $form->{rdf},
 			rss_template	=> $form->{rss_template},
 			items		=> $form->{items},
-			section		=> $form->{section},
+			skin		=> $form->{skin},
 			retrieve	=> $form->{retrieve},
-			all_sections	=> $form->{all_sections},
+			all_skins	=> $form->{all_skins},
 			autosubmit	=> $form->{autosubmit},
 			portal		=> $form->{portal},
 		}, 'bid=' . $self->sqlQuote($bid));
@@ -2931,11 +2931,11 @@ sub saveBlock {
 			rdf		=> $form->{rdf},
 			rss_template	=> $form->{rss_template},
 			items		=> $form->{items},
-			section		=> $form->{section},
+			skin		=> $form->{skin},
 			retrieve	=> $form->{retrieve},
 			portal		=> $form->{portal},
 			autosubmit	=> $form->{autosubmit},
-			all_sections	=> $form->{all_sections},
+			all_skins	=> $form->{all_skins},
 		}, 'bid=' . $self->sqlQuote($bid));
 	}
 

@@ -78,16 +78,16 @@ __template__
 		<TD><B>Type</B></TD><TD>[% blocktype_select %]</TD>
 	</TR>
 	<TR>
-		<TD><B>Section</B></TD>
-		<TD COLSPAN="2">[% sections = Slash.db.getDescriptions('sections-all'); Slash.createSelect("section", sections, blockref.section, 1, 0, 1) %]</TD>
+		<TD><B>Skin</B></TD>
+		<TD COLSPAN="2">[% skins = Slash.db.getDescriptions('skins-all'); Slash.createSelect("skin", skins, blockref.skin, 1, 0, 1) %]</TD>
 	</TR>
 	<TR>
 		<TD><B>Ordernum</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="3" NAME="ordernum" VALUE="[% blockref.ordernum %]"></TD>
 	</TR>
 	<TR>
-		<TD><B>All Sections</B></TD>
-		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="all_sections" [% all_sections_checked %]></TD>
+		<TD><B>All Skins</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="all_skins" [% all_skins_checked %]></TD>
 	</TR>
 	[% IF blockref.type == 'portald' %]
 	<TR>

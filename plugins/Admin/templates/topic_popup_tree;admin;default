@@ -564,11 +564,11 @@ __template__
 <option value="1">1 - Sectionworthy</option>
 <option value="0">0 - Ignore Topic</option>
 </select>
-<input type="button" value="Choose Topics"  onmouseup="slashtopics_show()">
-<input type="button" value="Remove Topic"   onmouseup="slashtopics_remove()">
 <br>
 <input type="button" value="Never Display"  onmouseup="slashtopics_never_display()">
 <input type="button" value="Revert Weights" onmouseup="slashtopics_revert_weights()">
+<input type="button" value="Choose Topics"  onmouseup="slashtopics_show()">
+<input type="button" value="Remove Topic"   onmouseup="slashtopics_remove()">
 
 __seclev__
 10000
