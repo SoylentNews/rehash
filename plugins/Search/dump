@@ -1,1 +1,0 @@
-INSERT INTO vars (name, value, description) VALUES ('search_default_display', '30', 'Defualt number of entries to display on Search page');

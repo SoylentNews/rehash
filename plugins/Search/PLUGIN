@@ -1,9 +1,0 @@
-name=Search
-htdoc=search.pl
-mysql_dump=dump
-description=Slash Search is the default search engine for Slash.
-template=templates/commentsearch;search;default
-template=templates/linksearch;search;default
-template=templates/searchform;search;default
-template=templates/storysearch;search;default
-template=templates/usersearch;search;default
