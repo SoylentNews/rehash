@@ -2151,12 +2151,14 @@ sub setDiscussionDelCount {
 # of someone wanting to delete a submission that is
 # not part in the form
 sub deleteSubmission {
-	my($self, $subid) = @_;
+	my($self, $subid, $nodelete) = @_;
 	my $uid = getCurrentUser('uid');
 	my $form = getCurrentForm();
 	my @subid;
 
-	if ($form->{subid}) {
+	$nodelete ||= 0;
+
+	if ($form->{subid} && !$nodelete) {
 		$self->sqlUpdate("submissions", { del => 1 },
 			"subid=" . $self->sqlQuote($form->{subid})
 		);
@@ -2202,7 +2204,7 @@ sub deleteSubmission {
 				$self->sqlUpdate("submissions", \%sub,
 					"subid=" . $self->sqlQuote($n));
 			}
-		} elsif ($t eq 'del') {
+		} elsif ($t eq 'del' && !$nodelete) {
 			$self->sqlUpdate("submissions", { del => 1 },
 				'subid=' . $self->sqlQuote($n));
 			$self->setUser($uid,
