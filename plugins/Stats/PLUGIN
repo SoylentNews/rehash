@@ -1,0 +1,4 @@
+name=Stats
+description="Stats system"
+mysql_schema=mysql_schema
+task=adminmail.pl

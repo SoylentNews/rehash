@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS stats_daily; 
+CREATE TABLE stats_daily (
+	id int UNSIGNED NOT NULL auto_increment,
+	day date NOT NULL,
+	UNIQUE (day),
+	PRIMARY KEY (id)
+) TYPE = myisam;
