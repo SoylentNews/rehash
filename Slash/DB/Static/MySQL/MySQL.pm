@@ -1753,12 +1753,11 @@ sub getStoriesWithFlag {
 	my $returnable = [ ];
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	if ($purpose eq 'delete') {
-		# Find all stories in the past that are in the trash.
+		# Find all stories that are in the trash.
 		$returnable = $self->sqlSelectAllHashrefArray(
 			"stories.stoid, sid, primaryskid, title, time",
 			"stories, story_text",
-			"time < NOW()
-			 AND stories.stoid = story_text.stoid
+			"stories.stoid = story_text.stoid
 			 AND in_trash = 'yes'",
 			"$order_clause$limit_clause");
 	} elsif ($purpose eq 'mainpage_dirty') {

@@ -41,9 +41,6 @@ Topic Lister
 [% CASE 'editTopic-title' %]
 Topics Editor [% IF tname %]([% tname %])[% END %]
 
-[% CASE 'rmStory-title' %]
-[% sid %]  will probably be deleted in 60 seconds.
-
 [% CASE 'updateFilter-new-title' %]
 New filter# [% filter_id %].
 
@@ -75,7 +72,8 @@ Site Color Editor
 new topic
 
 [% CASE 'rmStory-title' %]
-[% sid %] will probably be deleted in 60 seconds.
+[% sid %] will be deleted in a minute or two. If you didn't mean to delete it,
+<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">click here quick!</a>
 
 [% CASE 'listFilters-title' %]
 List of comment filters
