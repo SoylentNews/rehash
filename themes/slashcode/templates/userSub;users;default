@@ -23,20 +23,19 @@ __template__
 [% PROCESS titlebar width="95%" title=title %]
 
 <P>
-[% param_name = nick | fixparam %]
 [
-<A HREF="[% constants.rootdir %]/~[% param_name %]/friends/">Friends</A> 
+<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/friends/">Friends</A> 
  | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/fans/">Fans</A>
-[% UNLESS nickmatch_flag || user.is_anon %] | <A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% useredit.uid %]">Befriend [% nick_plain %]</A>[% END %]
+<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/fans/">Fans</A>
+[% UNLESS nickmatch_flag || user.is_anon %] | <A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% uid %]">Befriend [% nick %]</A>[% END %]
  | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/comments/">Comments</A>
+<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/comments/">Comments</A>
  | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/submissions/">Submissions</A>
+<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/submissions/">Submissions</A>
  | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/pubkey/">Pubkey</A>
+<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/pubkey/">Pubkey</A>
  | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/journal/">Journal</A>
+<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/journal/">Journal</A>
 ]
 </P>
 
