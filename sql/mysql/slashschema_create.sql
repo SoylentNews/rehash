@@ -851,7 +851,7 @@ CREATE TABLE story_topics_chosen (
 	tid SMALLINT(5) UNSIGNED NOT NULL,
 	weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
 	UNIQUE story_topic (stoid, tid),
-	INDEX tid (tid)
+	INDEX tid_stoid (tid, stoid)
 ) TYPE=InnoDB;
 
 #
@@ -864,7 +864,7 @@ CREATE TABLE story_topics_rendered (
 	tid SMALLINT(5) UNSIGNED NOT NULL,
 	weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
 	UNIQUE story_topic (stoid, tid),
-	INDEX tid (tid)
+	INDEX tid_stoid (tid, stoid)
 ) TYPE=InnoDB;
 
 #

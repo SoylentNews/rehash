@@ -2457,3 +2457,7 @@ INSERT INTO vars (name, value, description) VALUES ('debughash_getTopicTree','',
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_5_0_18, Start of T_2_5_0_19 - 2004/08/03
+
+ALTER TABLE story_topics_chosen ADD INDEX tid_stoid (tid, stoid), DROP INDEX tid;
+ALTER TABLE story_topics_rendered ADD INDEX tid_stoid (tid, stoid), DROP INDEX tid;
+
