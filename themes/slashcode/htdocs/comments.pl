@@ -153,6 +153,12 @@ sub main {
 				if (!$constants->{subscribe} || !$user->{is_subscriber}) {
 					$future_err = 1;
 					$null_it_out = 1;
+				} elsif (!$slashdb->checkStoryViewable($discussion->{sid})) {
+					# If a discussion is in the future, it can only be
+					# viewed if it's attached to a story (not a journal
+					# etc.) and if that story is viewable.
+					$future_err = 1;
+					$null_it_out = 1;
 				} else {
 					my $subscribe = getObject("Slash::Subscribe");
 					if (!$subscribe || !$subscribe->plummyPage()) {

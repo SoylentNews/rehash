@@ -62,7 +62,7 @@ sub main {
 		if ($story->[10]) {
 			$story->[3] =
 				$story->[5] =
-				$story->[7] = $constants->{subscriber_future_name};
+				$story->[7] = $constants->{subscribe_future_name};
 		}
 	}
 

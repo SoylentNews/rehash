@@ -4786,7 +4786,11 @@ sub _stories_time_clauses {
 
 	if ($future) {
 		$is_future_column = "IF($column_name < NOW(), 0, 1) AS is_future";
-		$where = "$column_name < DATE_ADD(NOW(), INTERVAL $secs SECOND)";
+		if ($secs) {
+			$where = "$column_name < DATE_ADD(NOW(), INTERVAL $secs SECOND)";
+		} else {
+			$where = "$column_name < NOW()";
+		}
 	} else {
 		$is_future_column = '0 AS is_future';
 		$where = "$column_name < NOW()";

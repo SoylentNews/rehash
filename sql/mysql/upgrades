@@ -1305,7 +1305,6 @@ CREATE TABLE stats_graphs_index (
 
 INSERT INTO vars (name, value, description) VALUES ('adminmail_last_run','2003-02-20','day adminmail last ran');
 
-# SLASHDOT LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_75, Start of T_2_3_0_76
@@ -1319,4 +1318,9 @@ ALTER TABLE stats_daily ADD INDEX name_day (name,day);
 ALTER TABLE stats_daily CHANGE COLUMN name name VARCHAR(48);
 UPDATE stats_daily SET name='mod_points_lost_spent_plus_1_percent'  WHERE name='mod_points_lost_spent_plus_1_per';
 UPDATE stats_daily SET name='mod_points_lost_spent_minus_1_percent' WHERE name='mod_points_lost_spent_minus_1_pe';
+
+# End of T_2_3_0_76, Start of T_2_3_0_77
+# End of T_2_3_0_77, Start of T_2_3_0_78
+
+# SLASHDOT LAST UPDATED HERE
 
