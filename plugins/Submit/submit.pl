@@ -42,8 +42,14 @@ sub main {
 	$form->{name}   = strip_nohtml($form->{name})     if $form->{name};
 
 	# Show submission title on browser's titlebar.
-	my($tbtitle) = $form->{title};
-	$tbtitle =~ s/^"?(.+?)"?$/$1/ if $tbtitle;
+	my($tbtitle);
+	if ($form->{subid}) {
+		$tbtitle = $slashdb->getSubmission($form->{subid}, [ 'subj' ]);
+		$tbtitle = $tbtitle->{subj} if $tbtitle;
+		$tbtitle =~ s/^"?(.+?)"?$/$1/ if $tbtitle;
+	}
+	# Passing title by param now unnecessary.
+	#my($tbtitle) = $form->{title};
 
 	my $ops = {
 		# initial form, no formkey needed due to 'preview' requirement
@@ -88,6 +94,10 @@ sub main {
 			seclev		=> 100,
 			function	=> \&mergeSubmissions,
 		},
+		changesubmission	=> {
+			seclev		=> 100,
+			function	=> \&changeSubmission,
+		},
 	};
 
 	$ops->{default} = $ops->{blankform};
@@ -125,13 +135,46 @@ sub main {
 	}
 
 	# call the method
-	$success = $ops->{$op}{function}->($constants, $slashdb, $user, $form) if ! $error_flag;
+	$success = $ops->{$op}{function}->($constants, $slashdb, $user, $form)
+		if ! $error_flag;
 
 	if ($ops->{$op}{update_formkey} && $success && ! $error_flag) {
 		my $updated = $slashdb->updateFormkey($formkey, $form->{tid}, length($form->{story}));
 	}
 
 	footer();
+}
+
+#################################################################
+# Update note, comment and skin with the option to delete based
+# on extra form elements in the submission view.
+sub changeSubmission {
+	my($constants, $slashdb, $user, $form) = @_;
+	my($gSkin, $subid) = (getCurrentSkin(), $form->{subid});
+	my($option, $title);
+		
+	if (!$subid) {
+		submissionEd(@_);
+	} else {
+		$option->{nodelete} = 1 unless $form->{"del_$form->{subid}"};
+
+		# Must remove subid from $form when updating submission data
+		# since Slash::DB::MySQL::deleteSubmission() will make extra
+		# queries to the database if it exists.
+		delete $form->{subid};
+		my @subids = $slashdb->deleteSubmission($option);
+		# Restore subid for proper functioning of the next page view.
+		$form->{subid} = $subid;
+		if (@subids) {
+			$title = getData('updatehead', { subids => \@subids });
+			submissionEd(@_, $title);
+		} else {
+			# Behavior here was unspecified. I chose this route, 
+			# although returning to submissionEd() would simplify
+			# things.		- Cliff
+			previewForm(@_);
+		}
+	}
 }
 
 #################################################################
@@ -174,6 +217,22 @@ sub yourPendingSubmissions {
 			width		=> '100%',
 		});
 	}
+}
+
+#################################################################
+sub getSubmissionSelections {
+	my($constants) = @_;
+
+	# Terminology mismatch..."selections" is legacy but the data is 
+	# for submissions.note -- time for a nomenclature adjustment?
+	# - Cliff
+	my %selections = map { ($_, $_) }
+		(qw(Hold Quik), '',	# '' is special
+		(ref $constants->{submit_categories}
+			? @{$constants->{submit_categories}} : ())
+	);
+
+	return \%selections;
 }
 
 #################################################################
@@ -260,7 +319,8 @@ sub previewForm {
 		num_from_uid			=> $num_from_uid,
 		num_with_emaildomain 		=> $num_with_emaildomain,
 		accepted_from_uid 	  	=> $accepted_from_uid,
-		accepted_from_emaildomain 	=> $accepted_from_emaildomain
+		accepted_from_emaildomain 	=> $accepted_from_emaildomain,
+		note_options			=> getSubmissionSelections($constants),
 	});
 }
 
@@ -338,7 +398,7 @@ sub submissionEd {
 		width		=> '100%',
 	});
 
-	my($submissions, %selection);
+	my($submissions);
 	$submissions = $slashdb->getSubmissionForUser;
 
 	for my $sub (@$submissions) {
@@ -359,15 +419,9 @@ sub submissionEd {
 		$sub->{sskin}  =
 			$sub->{primaryskid} ne $constants->{mainpage_skid} ?
 				"&skin=$skin->{name}" : '';
-		$sub->{stitle} = '&title=' . fixparam($sub->{subj});
+		
 		$sub->{skin}   = $skin->{name};
 	}
-
-	%selection = map { ($_, $_) }
-		(qw(Hold Quik), '',	# '' is special
-		(ref $constants->{submit_categories}
-			? @{$constants->{submit_categories}} : ())
-	);
 
 	# Do we provide a submission list based on a custom sort?
 	my @weighted;
@@ -383,7 +437,7 @@ sub submissionEd {
 	my $template = $user->{is_admin} ? 'Admin' : 'User';
 	slashDisplay('subEd' . $template, {
 		submissions	=> $submissions,
-		selection	=> \%selection,
+		selection	=> getSubmissionSelections($constants),
 		weighted	=> \@weighted,
 	});
 }
