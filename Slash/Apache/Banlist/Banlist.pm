@@ -29,7 +29,7 @@ sub handler {
 	my $cur_ipid = md5_hex($cur_ip);
 	my $cur_subnet = $cur_ip;
 	$cur_subnet =~ s/^(\d+\.\d+\.\d+)\.\d+$/$1.0/;
-	$cur_subnet = md5_hex($cur_subnet);
+	my $cur_subnetid = md5_hex($cur_subnet);
 
 	my $slashdb = getCurrentDB();
 	my $reader_user = $slashdb->getDB('reader');
@@ -45,7 +45,7 @@ sub handler {
 
 	# check for ban
 	my $banlist = $reader->getBanList();
-	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnet}) {
+	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
 		return _send_rss($r, 'ban') if $is_rss;
 
 		$r->custom_response(FORBIDDEN,
@@ -60,7 +60,7 @@ sub handler {
 	# check for RSS abuse
 	my $rsslist = $reader->getNorssList();
 	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnet})) {
-		return _send_rss($r, 'abuse');
+		return _send_rss($r, 'abuse', $cur_ipid);
 	}
 
 	return OK;
@@ -68,11 +68,11 @@ sub handler {
 
 
 sub _send_rss {
-	my($r, $type) = @_;
+	my($r, $type, $ipid) = @_;
 	$r->content_type('text/xml');
 	$r->status(202);
 	$r->send_http_header;
-	$r->print(_get_rss_msg($type));
+	$r->print(_get_rss_msg($type, $ipid));
 	return DONE;
 }
 
@@ -83,8 +83,9 @@ sub _send_rss {
 my(%RSS);
 
 sub _get_rss_msg {
-	my($type) = @_;
+	my($type, $ipid) = @_;
 	$type ||= 'abuse';
+	$ipid ||= '(unknown)';
 
 	return $RSS{$type} if exists $RSS{$type};
 
@@ -93,11 +94,12 @@ sub _get_rss_msg {
 	slashDisplay('bannedtext_rss', {
 		items	=> $items,
 		type	=> $type,
+		ipid	=> $ipid,
 	}, { Return => 1 });
 
 	return $RSS{$type} = xmlDisplay(rss => {
-		rdfitemdesc => 1,
-		items => $items,
+		rdfitemdesc	=> 1,
+		items		=> $items,
 	}, { Return => 1 } );
 }
 
