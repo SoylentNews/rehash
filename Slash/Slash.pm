@@ -114,9 +114,9 @@ sub selectComments {
 
 		# Keep your friends close but your enemies closer.
 		# Or ignore them, we don't care.
-		$C->{points} += $user->{friend_bonus}
+		$C->{points} += $user->{people_bonus_friend}
 			if ($user->{people}{$C->{uid}} == FRIEND);
-		$C->{points} += $user->{foe_bonus}
+		$C->{points} += $user->{people_bonus_foe}
 			if ($user->{people}{$C->{uid}} == FOE);
 
 		# fix points in case they are out of bounds
