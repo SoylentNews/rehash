@@ -612,7 +612,6 @@ INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_defau
 INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_infinite', '0', 'In the admin.pl storylist, always show all future stories no matter how far in the future?');
 INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_mainpage', 72*3600, 'In the admin.pl storylist, how many seconds to look into the future for stories on the mainpage');
 INSERT INTO vars (name, value, description) VALUES ('admin_timeout','30','time in minutes before idle admin session ends');
-INSERT INTO vars (name, value, description) VALUES ('admin_topic_default_weight', 10, 'Default weight for initial topics brought in from submit.pl submission preview');
 INSERT INTO vars (name, value, description) VALUES ('adminmail','admin@example.com','All admin mail goes here');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_ban','admin@example.com','All admin mail about users being banned goes here');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_mod','admin@example.com','All admin mail about moderation goes here');

@@ -1572,7 +1572,7 @@ sub extractChosenFromForm {
 			$chosen_hr->{$tid} =
 				$tid == $constants->{mainpage_nexus_tid}
 				? 30
-				: $constants->{admin_topic_default_weight} || 10;
+				: $constants->{topic_popup_defaultweight} || 10;
 			my $chosen_topic = $slashdb->getTopic($tid);
 			$chosen_names_hr->{$tid} = $chosen_topic->{textname}
 				if $chosen_topic && $chosen_topic->{tid};
