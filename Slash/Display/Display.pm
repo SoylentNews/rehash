@@ -105,6 +105,16 @@ block this is.  Default is to include comments if the var
 "template_show_comments" is true, to not include comments
 if it is false.  It is true by default.
 
+If the var "template_show_comments" is greater than 1,
+the Nocomm boolean will be ignored and the HTML comments
+will ALWAYS be inserted around templates (except when they
+are invoked from within other templates by INCLUDE or
+PROCESS).  This is NOT what you want for a public site, since
+(for example) email built up from templates will have HTML
+comments in it which will confuse your readers;  HTML tags
+built from several templates may have HTML comments "inside"
+them, breaking your HTML syntax;  etc.
+
 =item Section
 
 Each template is assigned to a section.  This section may be
@@ -178,11 +188,6 @@ sub slashDisplay {
 			"$name;$tempdata->{page};$tempdata->{section}";
 	}
 
-	my @comments = (
-		"\n\n<!-- start template: $TEMPNAME -->\n\n",
-		"\n\n<!-- end template: $TEMPNAME -->\n\n"
-	);
-
 	# copy parent data structure so it is not modified,
 	# so it is left alone on return back to caller
 	$data = $data ? { %$data } : {};
@@ -206,11 +211,14 @@ sub slashDisplay {
 		}
 	}
 
-	my $Nocomm = defined $opt->{Nocomm}
-		? $opt->{Nocomm}
-		: !$constants->{template_show_comments};
+	# template_show_comments == 0		never show HTML comments
+	# template_show_comments == 1		show them iff $opt->{Nocomm}
+	# template_show_comments == 2		always show them - debug only!
 
-	$out = $comments[0] . $out . $comments[1] unless $Nocomm;
+	my $show_comm = $constants->{template_show_comments} ? 1 : 0;
+	$show_comm &&= 0 if $opt->{Nocomm} && $constants->{template_show_comments} < 2;
+	$out = "\n\n<!-- start template: $TEMPNAME -->\n\n$out\n\n<!-- end template: $TEMPNAME -->\n\n"
+		if $show_comm;
 
 	if ($err) {
 		errorLog("$TEMPNAME : $err");
