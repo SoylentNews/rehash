@@ -160,8 +160,8 @@ $werder = new Silly::Werder;
 
 		my $subj = make_werds(1 + rand 5);
 		$subj =~ s/\W+$// if rand(1) < 0.1;
-                $subj =~ s/<[^>]+>//g;
-                $subj =~ s/\b(\w)/\U$1/g if rand(1) < 0.2;
+		$subj =~ s/<[^>]+>//g;
+		$subj =~ s/\b(\w)/\U$1/g if rand(1) < 0.2;
 		if (rand(1) < 0.2) {
 			$subj =~ s/\W*$/ +((qw( . ! ? ))[rand 3]) x (2+rand 5) /e;
 		}
@@ -180,17 +180,17 @@ $werder = new Silly::Werder;
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
 		$slashdb->setStory($stoid, { is_dirty => 1 }) if $stoid;
-	        $family_tree{$cid} = $pid if ! $opts{T};
+		$family_tree{$cid} = $pid if ! $opts{T};
 		$deep_tree{$cid} = $deep_tree{$pid}+1 if $opts{t};
-	        print <<EOT;
+		print <<EOT;
 ($count) Comment created (user=$uid discussion=$discussion_id cid=$cid pid=$pid)
 EOT
  
-        	$count--;
+		$count--;
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_comments} comments created in: ",
-        	timestr(timediff($t1, $t0), 'noc'),"\n";
+		timestr(timediff($t1, $t0), 'noc'),"\n";
 }
 
 # subroutines
@@ -232,9 +232,9 @@ sub getRandomStoid {
 }
 
 sub getRandomParent {
-        return 0 if $opts{T};
+	return 0 if $opts{T};
 
-        my @a = keys %family_tree;
+	my @a = keys %family_tree;
 
 	if ($opts{t}) {
 		# Weight toward nesting deeply.
@@ -262,10 +262,10 @@ sub getRandomParent {
 }
  
 sub getRandomUserID {
-        my($min_uid, $max_uid) = @_;
+	my($min_uid, $max_uid) = @_;
 	my $rand_uid = $slashdb->sqlSelect("uid", "users",
 		"uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
-        return $rand_uid;
+	return $rand_uid;
 }
 
 # CLOSURE!
@@ -310,16 +310,16 @@ sub setRandomIPID {
 		
 
 sub make_werds {
-        my($werds, $link_prob) = @_;
-        $werds = int($werds);
+	my($werds, $link_prob) = @_;
+	$werds = int($werds);
 	$link_prob ||= 0;
-        if ($werds > 40) {
-                $werder->set_werds_num(5,20);
-        } elsif ($werds > 20) {
-                $werder->set_werds_num(3,10);
-        } else {
-                $werder->set_werds_num($werds, $werds);
-        }
+	if ($werds > 40) {
+		$werder->set_werds_num(5,20);
+	} elsif ($werds > 20) {
+		$werder->set_werds_num(3,10);
+	} else {
+		$werder->set_werds_num($werds, $werds);
+	}
 	my $min_syl = int(rand(2)+1);
 	$werder->set_syllables_num($min_syl, $min_syl + int(rand(5)+1));
 	my @links = qw(
@@ -348,20 +348,20 @@ sub make_werds {
 	push @links, 'http://directory.google.com/Top/Arts/Literature/Authors/C/Carroll,_Lewis/Works/Hunting_of_the_Snark,_The/';
 	my $comment;
 	my $cur_werds = 0;
-        my $tag = "";
-        my $quote = q{};
+	my $tag = "";
+	my $quote = q{};
 	my $last_p_werd_num = 0;
-        while ($cur_werds < $werds) {
-                my $new_werds = '';
-                if (int(rand(6))==0 || $werds < $cur_werds * 1.1) {
-                        if (int(rand(2))) {
-                                $new_werds = $werder->question;
-                        } else {
-                                $new_werds = $werder->exclaimation; # Dave, you spelled this word wrong
-                        }
-                } else {
-                        $new_werds = $werder->sentence;
-                }
+	while ($cur_werds < $werds) {
+		my $new_werds = '';
+		if (int(rand(6))==0 || $werds < $cur_werds * 1.1) {
+			if (int(rand(2))) {
+				$new_werds = $werder->question;
+			} else {
+				$new_werds = $werder->exclaimation; # Dave, you spelled this word wrong
+			}
+		} else {
+			$new_werds = $werder->sentence;
+		}
 		if ($link_prob && rand(1) < $link_prob) {
 			my @new_werds = split / /, $new_werds;
 			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
@@ -386,20 +386,20 @@ sub make_werds {
 		if ($tag && rand(1) < 0.5) {
 			$new_werds = "$new_werds$quote</$tag>";
 			$tag = ""; $quote = q{};
-                }
-                $comment .= " $new_werds";
-                $comment =~ s{\s+}{ }g;
-                $cur_werds = $comment =~ tr/ / /;
+		}
+		$comment .= " $new_werds";
+		$comment =~ s{\s+}{ }g;
+		$cur_werds = $comment =~ tr/ / /;
 		if (rand($werds) > 30
 			and rand($cur_werds - $last_p_werd_num) > 20) {
 			$comment .= "<P>";
 			$last_p_werd_num = $cur_werds;
 		}
-        }
-        $comment .= "</$tag>" if $tag;
-        $comment =~ s{</(\w+)>\s+<\1>}{ }g;
-        $comment =~ s/^\s*(.+)\s*$/$1/;
-        $comment =~ s/^\s+//; $comment =~ s/\s+$//;
+	}
+	$comment .= "</$tag>" if $tag;
+	$comment =~ s{</(\w+)>\s+<\1>}{ }g;
+	$comment =~ s/^\s*(.+)\s*$/$1/;
+	$comment =~ s/^\s+//; $comment =~ s/\s+$//;
 	if ($link_prob && $junk) {
 		my @fragments = (
 			"<a", "href=", 'href="', '"', "'", ">", '>">', " > >",
@@ -453,7 +453,7 @@ sub make_werds {
 			}
 		}
 	}
-        $comment;
+	$comment;
 }
 
 sub usage {
