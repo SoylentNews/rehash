@@ -119,6 +119,8 @@ __template__
 	######################
 -%]
 
+<INPUT TYPE="HIDDEN" NAME="topictids_present" VALUE="1">
+
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
 	<TR BGCOLOR="[% user.colors.bg_3 %]">
 		<TH COLSPAN="6"><FONT COLOR="[% user.colors.fg_3 %]">Topics</FONT></TH>

@@ -2593,14 +2593,18 @@ sub saveHome {
 	my(@story_always_topic, @story_always_author, @story_always_nexus);
 	# Topics are either present (value=2) or absent (value=0).  If absent,
 	# push them onto the never list.  Otherwise, do nothing.  (There's no
-	# way to have an "always" topic, at the moment.)
-	for my $tid (
-		sort { $a <=> $b }
-		grep { !$tree->{$_}{nexus} }
-		keys %$tree
-	) {
-		my $key = "topictid$tid";
-		if (!$form->{$key}) {			push @story_never_topic, $tid	}
+	# way to have an "always" topic, at the moment.)  If the hidden
+	# field topictids_present is false, then there are no topic tids,
+	# skip this.
+	if ($form->{topictids_present}) {
+		for my $tid (
+			sort { $a <=> $b }
+			grep { !$tree->{$_}{nexus} }
+			keys %$tree
+		) {
+			my $key = "topictid$tid";
+			if (!$form->{$key}) {		push @story_never_topic, $tid	}
+		}
 	}
 	# Authors are either present (value=2) or absent (value=0).  If
 	# absent, push them onto the never list.  Otherwise, do nothing.
