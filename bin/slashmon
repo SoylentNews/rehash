@@ -50,7 +50,7 @@ sub init {
 	$virtuser = $opts{u} || 'slash';
 	$width = $opts{w} || 106;
 	$height = $opts{r} || 20;
-	$sleep = $opts{s} || 10;
+	$sleep = $opts{'s'} || 10;
 	$min_pl_time = defined($opts{t}) ? $opts{t} : 1;
 
 	createEnvironment($virtuser);
@@ -63,9 +63,13 @@ sub init {
 	$slashdb = getCurrentDB();
 	$constants = getCurrentStatic();
 
+	my $dbs = $slashdb->getDBs;
+
 	my $vus_hr = {
-		map { ( $_, 1 ) }
-		@{$slashdb->sqlSelectColArrayref('virtual_user', 'dbs')}
+		map  { ( $_->{virtual_user}, 1 ) }
+		grep { $_->{isalive} eq 'yes' }
+		map  { @{$dbs->{$_}} }
+		keys %$dbs
 	};
 	my $vus = [ (
 		$slashdb->{virtual_user},
@@ -73,7 +77,6 @@ sub init {
 		grep { $_ ne $slashdb->{virtual_user} }
 		keys %$vus_hr
 	) ];
-	my $log_db = $slashdb->getDBs()->{log}[0]{virtual_user} || '';
 
 	# Set up the @db array based on what virtual users we have.
 	@db = ( );
