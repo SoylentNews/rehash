@@ -4145,14 +4145,14 @@ sub setStory {
 			my($name, $value) = @$duple;
 			last unless $success;
 			if (defined($value) && length($value)) {
-				$success ||= $self->sqlReplace($param_table, {
+				$success = $self->sqlReplace($param_table, {
 					stoid	=> $stoid,
 					name	=> $name,
 					value	=> $value,
 				});
 			} else {
 				my $name_q = $self->sqlQuote($name);
-				$success ||= $self->sqlDelete($param_table,
+				$success = $self->sqlDelete($param_table,
 					"stoid = $stoid AND name = $name_q"
 				);
 			}
