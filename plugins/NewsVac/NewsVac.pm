@@ -2825,275 +2825,278 @@ sub parse_miner {
 #		);
 		if ($self->{debug} > 0) {
 			$self->errLog(getData('parse_miner_processurlend'));
-					$self->timing_dump();
-			}
+				$self->timing_dump();
 		}
+	}
 
-		my $duration = Time::HiRes::time() - $start_time;
-		$self->errLog(getData('parse_miner_longdur', {
-			miner_id	=> $info_ref->{miner_id},
-			miner_name	=> $hr->{name},
-			url_id		=> $url_id,
-			message_len	=> length($message_body),
-			midtime_1	=> round($mid_time_1),
-				#int($mid_time_1*1000+0.5)/1000 .
-			midtime_2	=> round($mid_time_2),
-				#int($mid_time_2*1000+0.5)/1000 .
-			nuggets		=> scalar keys %nugget,
-			duration	=> round($duration),
-				#int($duration*1000+0.5)/1000
-		})) if $duration > 40;
+	my $duration = Time::HiRes::time() - $start_time;
+	$self->errLog(getData('parse_miner_longdur', {
+		miner_id	=> $info_ref->{miner_id},
+		miner_name	=> $hr->{name},
+		url_id		=> $url_id,
+		message_len	=> length($message_body),
+		midtime_1	=> round($mid_time_1),
+			#int($mid_time_1*1000+0.5)/1000 .
+		midtime_2	=> round($mid_time_2),
+			#int($mid_time_2*1000+0.5)/1000 .
+		nuggets		=> scalar keys %nugget,
+		duration	=> round($duration),
+			#int($duration*1000+0.5)/1000
+	})) if $duration > 40;
 
-		return { 
-			is_success 	=> 1, 
-			n_nuggets	=> scalar(keys %nugget), 
-			miner_id 	=> $info_ref->{miner_id},
+	return { 
+		is_success 	=> 1, 
+		n_nuggets	=> scalar(keys %nugget), 
+		miner_id 	=> $info_ref->{miner_id},
+	};
+}
+
+############################################################
+
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
+sub parse_plaintext {
+	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
+	   $conditions_ref) = @_;
+	$content_ref->{plaintext} = '';
+	   
+	$self->errLog(getData('parse_plaintext_start', {url_id => $url_id}))
+		if $self->{debug} > 1;
+
+	my $changed = 0;
+	my $timeout =	$conditions_ref->{timeout} || 
+			$self->{ua}->timeout() 	   || 
+			20;
+
+	if ($info_ref->{content_type} =~ /^text\/html\b/) {
+		eval {
+			local $SIG{ALRM} = sub { die "timeout" };
+			alarm $timeout;
+
+			$#{$self->{hp_parsedtext}} = -1;
+			$self->{hp}->parse($content_ref->{message_body});
+			$content_ref->{plaintext} = join('',
+				map { join("", @$_) }
+				@{$self->{hp_parsedtext}}
+			);
+			$changed = 1 if $content_ref->{plaintext};
+			$#{$self->{hp_parsedtext}} = -1;
+	
+#			my $lynx_cmd = qq
+#[lynx -dump -nolist -width=75 -term=vt102 $filename.htm];
+#			if (!open($fh, "$lynx_cmd |")) {
+#				$self->errLog("could not run $lynx_cmd, $!")
+#					if $self->{debug} > -1;
+#			} else {
+#				while (defined(my $line = <$fh>)) {
+#					chomp $line;
+#					$line =~ s/\s+$//;
+#					$content_ref->{plaintext} .= "$line\n";
+#					$changed = 1;
+#					$self->errLog("lynx output: $line") 
+#						if $self->{debug} > 2;
+#				}
+#			}
+
+			alarm 0;
 		};
-	}
-
-	############################################################
-	=head2 foo( [, ])
-
-	Foooooooo.
-
-	=over 4
-
-	=item Parameters
-
-	=over 4
-
-	=item
-
-	=back
-
-	=item Return value
-
-
-	=item Side effects
-
-
-	=item Dependencies
-
-	=back
-
-	=cut
-
-	sub parse_plaintext {
-		my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
-		   $conditions_ref) = @_;
-		$content_ref->{plaintext} = '';
-		   
-		$self->errLog(getData('parse_plaintext_start', {url_id => $url_id}))
-			if $self->{debug} > 1;
-
-		my $changed = 0;
-		my $timeout =	$conditions_ref->{timeout} || 
-				$self->{ua}->timeout() 	   || 
-				20;
-
-		if ($info_ref->{content_type} =~ /^text\/html\b/) {
-			eval {
-				local $SIG{ALRM} = sub { die "timeout" };
-				alarm $timeout;
-
-				$#{$self->{hp_parsedtext}} = -1;
-				$self->{hp}->parse($content_ref->{message_body});
-				$content_ref->{plaintext} = join('',
-					map { join("", @$_) }
-					@{$self->{hp_parsedtext}}
-				);
-				$changed = 1 if $content_ref->{plaintext};
-				$#{$self->{hp_parsedtext}} = -1;
-		
-	#			my $lynx_cmd = qq
-	#[lynx -dump -nolist -width=75 -term=vt102 $filename.htm];
-	#			if (!open($fh, "$lynx_cmd |")) {
-	#				$self->errLog("could not run $lynx_cmd, $!")
-	#					if $self->{debug} > -1;
-	#			} else {
-	#				while (defined(my $line = <$fh>)) {
-	#					chomp $line;
-	#					$line =~ s/\s+$//;
-	#					$content_ref->{plaintext} .= "$line\n";
-	#					$changed = 1;
-	#					$self->errLog("lynx output: $line") 
-	#						if $self->{debug} > 2;
-	#				}
-	#			}
-
-				alarm 0;
-			};
-			if ($@) {
-				if ($@ =~ /timeout/) {
-					my $outlen = length($content_ref->{plaintext});
-					$self->errLog(
-						getData('parse_plaintext_lynxlate', {
-							url_id		=> $url_id,
-							output_len	=> $outlen,
-						})
-					) if $self->{debug} > 0;
-				} else {
-					$self->errLog(
-						getData('parse_plaintext_lynxerr', {
-							error => $@,
-						})
-					) if $self->{debug} > -1;
-				}
+		if ($@) {
+			if ($@ =~ /timeout/) {
+				my $outlen = length($content_ref->{plaintext});
+				$self->errLog(
+					getData('parse_plaintext_lynxlate', {
+						url_id		=> $url_id,
+						output_len	=> $outlen,
+					})
+				) if $self->{debug} > 0;
+			} else {
+				$self->errLog(
+					getData('parse_plaintext_lynxerr', {
+						error => $@,
+					})
+				) if $self->{debug} > -1;
 			}
-	#		unlink "$filename.htm";
-		} elsif ($info_ref->{content_type} eq 'text/plain') {
-			$content_ref->{plaintext} = $content_ref->{message_body};
-			$changed = 1;
 		}
-
-		if ($changed) {
-			$content_ref->{plaintext} =~ s/\s*\n\s*\n\s*/\n\n/g;
-			$content_ref->{plaintext} =~ s/[ \t]*\n[ \t]*/\n/g;
-			$content_ref->{plaintext} =~ s/[ \t]{2,}/  /g;
-
-			$self->sqlUpdate('url_plaintext', {
-				plaintext => $self->sqlQuote($content_ref->{plaintext}),
-			}, "url_id=$url_id");
-		}
-
-		$self->errLog(getData('parse_plaintext_result', {
-			url_id	=> $url_id,
-			changed	=> $changed,
-			timeout	=> $timeout,
-			bodylen => length($content_ref->{message_body}),
-		       plainlen => length($content_ref->{plaintext}),
-		})) if $self->{debug} > ($changed ? 0 : -1);
-			
-		return { is_success => 1 };
+#		unlink "$filename.htm";
+	} elsif ($info_ref->{content_type} eq 'text/plain') {
+		$content_ref->{plaintext} = $content_ref->{message_body};
+		$changed = 1;
 	}
 
-	############################################################
-	=head2 foo( [, ])
+	if ($changed) {
+		$content_ref->{plaintext} =~ s/\s*\n\s*\n\s*/\n\n/g;
+		$content_ref->{plaintext} =~ s/[ \t]*\n[ \t]*/\n/g;
+		$content_ref->{plaintext} =~ s/[ \t]{2,}/  /g;
 
-	Foooooooo.
-
-	=over 4
-
-	=item Parameters
-
-	=over 4
-
-	=item
-
-	=back
-
-	=item Return value
-
-
-	=item Side effects
-
-
-	=item Dependencies
-
-	=back
-
-	=cut
-
-	sub parse_nugget {
-		my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
-		    $conditions_ref) = @_;
-
-		my $nugget = $self->nugget_url_to_info($url);
-		my $nugget_url_id = $self->url_to_id($nugget->{url});
-		my $response_timestamp =
-			$other_ref->{response_timestamp} ||
-			sql_to_unix_datetime($info_ref->{last_success}) ||
-			time; # hack, hack
-
-		$self->add_rel(
-			$url_id, 
-			$nugget_url_id, 
-			'nugget', 
-			'nugget', 
-			$response_timestamp
-		);
-
-		$self->errLog(getData('parse_nugget', {
-			url_id		=> $url_id,
-			nugget_url	=> $nugget_url_id,
-			timestamp	=> $response_timestamp,
-		})) if $self->{debug} > 1;
-
-		$self->sqlUpdate('url_info', {
-			title => $nugget->{title} 
+		$self->sqlUpdate('url_plaintext', {
+			plaintext => $self->sqlQuote($content_ref->{plaintext}),
 		}, "url_id=$url_id");
-
-		return { is_success => 1 };
 	}
 
-	############################################################
-	=head2 foo( [, ])
+	$self->errLog(getData('parse_plaintext_result', {
+		url_id	=> $url_id,
+		changed	=> $changed,
+		timeout	=> $timeout,
+		bodylen => length($content_ref->{message_body}),
+	       plainlen => length($content_ref->{plaintext}),
+	})) if $self->{debug} > ($changed ? 0 : -1);
+		
+	return { is_success => 1 };
+}
 
-	Foooooooo.
+############################################################
 
-	=over 4
+=head2 foo( [, ])
 
-	=item Parameters
+Foooooooo.
 
-	=over 4
+=over 4
 
-	=item
+=item Parameters
 
-	=back
+=over 4
 
-	=item Return value
+=item
+
+=back
+
+=item Return value
 
 
-	=item Side effects
+=item Side effects
 
 
-	=item Dependencies
+=item Dependencies
 
-	=back
+=back
 
-	=cut
+=cut
 
-	sub spider_by_name {
-		my($self, $name) = @_;
-		my $name_quoted = $self->sqlQuote($name);
-	    
-		my $spider_ar = $self->sqlSelectAll(
-			'conditions, group_0_selects, commands', 
-			'spider',
-			"name = $name_quoted"
-		);
+sub parse_nugget {
+	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
+	    $conditions_ref) = @_;
 
-		if (!$spider_ar or !$spider_ar->[0]) {
-			$self->errLog(getData('spiderbyname_invalidname', {
-				name		=> $name,
-				name_quoted	=> $name_quoted,
-			}, 'newsvac'));
+	my $nugget = $self->nugget_url_to_info($url);
+	my $nugget_url_id = $self->url_to_id($nugget->{url});
+	my $response_timestamp =
+		$other_ref->{response_timestamp} ||
+		sql_to_unix_datetime($info_ref->{last_success}) ||
+		time; # hack, hack
 
-			return 0;
-		}
-		$self->timing_clear() if $self->{debug} > -1;
+	$self->add_rel(
+		$url_id, 
+		$nugget_url_id, 
+		'nugget', 
+		'nugget', 
+		$response_timestamp
+	);
 
-		my($conditions_text, $group_0_selects_text, $commands_text) =
-			@{$spider_ar->[0]};
+	$self->errLog(getData('parse_nugget', {
+		url_id		=> $url_id,
+		nugget_url	=> $nugget_url_id,
+		timestamp	=> $response_timestamp,
+	})) if $self->{debug} > 1;
 
-		my $conditions_ref          = eval $conditions_text;
-		my $group_0_selects_ref     = eval $group_0_selects_text;
-		my $commands_ref            = eval $commands_text;
+	$self->sqlUpdate('url_info', {
+		title => $nugget->{title} 
+	}, "url_id=$url_id");
 
-		$self->errLog(getData('spiderbyname_start', {
-			name			=> $name,
-			name_quoted		=> $name_quoted,
-			group_0_selects_text	=> $group_0_selects_text,
-			commands_text		=> $commands_text,
-			conditions_ref		=> $conditions_ref,
-			group_o_selects_ref	=> $group_0_selects_ref,
-			commands_ref		=> $commands_ref,
-		}, 'newsvac')) if $self->{debug} > 0;
+	return { is_success => 1 };
+}
 
-		$self->spider($conditions_ref, $group_0_selects_ref, @{$commands_ref});
+############################################################
 
-		if ($self->{debug} > -1) {
-			$self->timing_dump();
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
+sub spider_by_name {
+	my($self, $name) = @_;
+	my $name_quoted = $self->sqlQuote($name);
+    
+	my $spider_ar = $self->sqlSelectAll(
+		'conditions, group_0_selects, commands', 
+		'spider',
+		"name = $name_quoted"
+	);
+
+	if (!$spider_ar or !$spider_ar->[0]) {
+		$self->errLog(getData('spiderbyname_invalidname', {
+			name		=> $name,
+			name_quoted	=> $name_quoted,
+		}, 'newsvac'));
+
+		return 0;
+	}
+	$self->timing_clear() if $self->{debug} > -1;
+
+	my($conditions_text, $group_0_selects_text, $commands_text) =
+		@{$spider_ar->[0]};
+
+	my $conditions_ref          = eval $conditions_text;
+	my $group_0_selects_ref     = eval $group_0_selects_text;
+	my $commands_ref            = eval $commands_text;
+
+	$self->errLog(getData('spiderbyname_start', {
+		name			=> $name,
+		name_quoted		=> $name_quoted,
+		group_0_selects_text	=> $group_0_selects_text,
+		commands_text		=> $commands_text,
+		conditions_ref		=> $conditions_ref,
+		group_o_selects_ref	=> $group_0_selects_ref,
+		commands_ref		=> $commands_ref,
+	}, 'newsvac')) if $self->{debug} > 0;
+
+	$self->spider($conditions_ref, $group_0_selects_ref, @{$commands_ref});
+
+	if ($self->{debug} > -1) {
+		$self->timing_dump();
 		$self->errLog(getData('spiderbyname_end', {
 			name => $name,
 		}));
@@ -3101,6 +3104,7 @@ sub parse_miner {
 }
 
 ############################################################
+
 =head2 spider($condition_ref, $group0_selects_ref, @spider_commants)
 
 Executes a spider. Callers will most likely use spider_by_name() as an 
