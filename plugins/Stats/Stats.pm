@@ -304,6 +304,7 @@ sub getReverseMods {
 	my $unm2able =  0.5;	$unm2able = $options->{unm2able} if defined $options->{unm2able};
 	my $denomadd =  4  ;	$denomadd = $options->{denomadd} if defined $options->{denomadd};
 	my $limit =    12  ;	$limit = $options->{limit} if defined $options->{limit};
+	my $min_tokens = -100; # fudge factor: only users who are likely to mod soon
 
 	my $reasons = $self->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
@@ -322,7 +323,8 @@ sub getReverseMods {
 		"comments.cid=moderatorlog.cid
 		 AND users.uid=moderatorlog.uid
 		 AND users_info.uid=moderatorlog.uid
-		 AND moderatorlog.active",
+		 AND moderatorlog.active
+		 AND tokens >= $min_tokens",
 		"GROUP BY muid ORDER BY score DESC, karma, tokens, muid LIMIT $limit",
 	);
 	for my $rm (@$ar) {

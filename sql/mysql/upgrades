@@ -1182,6 +1182,10 @@ CREATE TABLE people_nthdegree (
 	INDEX (friend)
 ) TYPE = Innodb;
 
-INSERT INTO vars (name,value,description) VALUES ('zoo_timer',now(),'Last time the Zoo task ran.');
+INSERT INTO vars (name,value,description) VALUES ('zoo_timer',NOW(),'Last time the Zoo task ran.');
 DROP TABLE IF EXISTS people_log;
+
 # SLASHCODE LAST UPDATED HERE
+
+INSERT INTO vars (name, value, description) VALUES ('mod_karma_bonus_max_downmods',2,'How many downmods before a comment loses its karma_bonus? (>=1)');
+
