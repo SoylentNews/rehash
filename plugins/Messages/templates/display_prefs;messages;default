@@ -41,7 +41,7 @@ Not all options are available for all message types.
 </TD></TR>
 
 	<TR><TD><TABLE ALIGN="LEFT" BGCOLOR="[% user.bg.2 %]">
-[%
+[% messages = Slash.getObject('Slash::Messages');
    FOR code = messagecodes.sort;
       moderef = { $modenone => deliverymodes.$modenone };
 
