@@ -2434,7 +2434,7 @@ sub getModderCommenterIPIDSummary {
 			"moderatorlog.uid as uid, comments.ipid as ipid, count(*) as count",
 			"moderatorlog,comments",
 			$where,
-			"group by uid, ipid");
+			"group by uid, comments.ipid");
 			
 	return $mods;
 }
