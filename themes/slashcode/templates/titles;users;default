@@ -26,6 +26,9 @@ __template__
 [% CASE 'mailPassword_email_title' %]
 	[% constants.sitename %] user password for [% nickname %]
 
+[% CASE 'reset_acct_email_title' %]
+	Verify your [% constants.sitename %] account for user [% nickname %]
+
 [% CASE 'userInfo_main_title' %]
 	Welcome back [% nick %] ([% uid %])
 
