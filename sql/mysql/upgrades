@@ -2405,3 +2405,7 @@ UPDATE story_topics_rendered SET weight = weight * 10         WHERE weight < 10;
 # Changes for plugins/Admin (which you are almost certainly using)
 INSERT INTO vars (name, value, description) VALUES ('topic_popup_defaultweight', '10', 'Default weight for new topics in the popup menu (should probably match default for topic_parents.min_weight)');
 
+ALTER TABLE stories_old ADD COLUMN stoid MEDIUMINT UNSIGNED DEFAULT '0';
+UPDATE stories_old, stories SET stories_old.stoid=stories.stoid WHERE stories_old.sid=stories.sid;
+INSERT INTO story_param (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FROM stories_old WHERE displaystatus=-1;
+
