@@ -26,7 +26,7 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $logdb = getObject('Slash::DB', { db_type => 'log' } );
 	my $counter = 0;
-	my $hoursback = 60;
+	my $hoursback = $constants->{accesslog_hoursback} || 60;
 	my $failures = 10; # This is probably related to a lock failure
 	my $id = $logdb->sqlSelect('MAX(id)',
 		'accesslog',

@@ -17,7 +17,7 @@ use Data::Dumper;
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '8-58/10 0-23 * * *';
+$task{$me}{timespec} = '18 0-23 * * *';
 $task{$me}{timespec_panic_1} = '18 1,10 * * *';		# night only
 $task{$me}{timespec_panic_2} = '';			# don't run
 $task{$me}{resource_locks} = { log_slave => 1 };
@@ -189,7 +189,8 @@ sub give_out_tokens {
 	# Note:  this is a large array -- on Slashdot, at least tens of
 	# thousands of elements.
 
-	my $count_hr = $log_db->fetchEligibleModerators_accesslog();
+	my $count_hr = $log_db->fetchEligibleModerators_accesslog_read();
+
 	my @eligible_uids = @{$backup_db->fetchEligibleModerators_users($count_hr)};
 	my $eligible = scalar @eligible_uids;
 

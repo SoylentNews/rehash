@@ -2090,3 +2090,16 @@ INSERT INTO vars (name, value, description) VALUES ('istroll_max_halflives', '3'
 
 # End of T_2_3_0_133, Start of T_2_3_0_134 - 2004/02/03
 
+DROP TABLE IF EXISTS accesslog_artcom;
+CREATE TABLE accesslog_artcom (
+        uid mediumint UNSIGNED NOT NULL,
+        ts datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        c smallint unsigned NOT NULL DEFAULT '0',
+        INDEX uid (uid),
+        INDEX ts (ts)
+) TYPE=InnoDB;
+
+INSERT INTO vars (name, value, description) VALUES ('moderatord_lastmaxid', '0', 'Last accesslog.id seen by run_moderatord');
+INSERT INTO vars (name, value, description) VALUES ('moderatord_maxrows', '50000', 'Max number of accesslog rows to process at once in run_moderatord');
+INSERT INTO vars (name, value, description) VALUES ('accesslog_hoursback', '60', 'Number of hours before accesslog rows are purged');
+

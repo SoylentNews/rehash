@@ -13,6 +13,7 @@ package Slash::DB::Static::MySQL;
 use strict;
 use Slash::Utility;
 use Digest::MD5 'md5_hex';
+use Time::HiRes;
 use URI ();
 use vars qw($VERSION);
 use base 'Slash::DB::MySQL';
@@ -914,24 +915,48 @@ sub stirPool {
 # Also, the var mod_elig_hoursback is no longer needed.
 # Note that fetchEligibleModerators_accesslog can return a
 # *very* large hashref.
+#
+# New as of 2004/02/04:  fetchEligibleModerators_accesslog has
+# been split into ~_insertnew, ~_deleteold, and ~_read.  They
+# all are methods for the logslavedb, which may or may not be
+# the same as the main slashdb.
 
-sub fetchEligibleModerators_accesslog {
+sub fetchEligibleModerators_accesslog_insertnew {
+	my($self, $lastmaxid, $newmaxid, $youngest_uid) = @_;
+	return if $lastmaxid > $newmaxid;
+	my $ac_uid = getCurrentStatic('anonymous_coward_uid');
+	$self->sqlDo("INSERT INTO accesslog_artcom (uid, ts, c)"
+		. " SELECT uid, AVG(ts) AS ts, COUNT(*) AS c"
+		. " FROM accesslog"
+		. " WHERE id BETWEEN $lastmaxid AND $newmaxid"
+			. " AND (op='article' OR op='comments')"
+		. " AND uid != $ac_uid AND uid <= $youngest_uid"
+		. " GROUP BY uid");
+}
+
+sub fetchEligibleModerators_accesslog_deleteold {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $hoursback = $constants->{accesslog_hoursback} || 60;
+	$self->sqlDelete("accesslog_artcom",
+		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
+}
+
+sub fetchEligibleModerators_accesslog_read {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $hitcount = defined($constants->{m1_eligible_hitcount})
 		? $constants->{m1_eligible_hitcount} : 3;
-
-	# Whether the var "authors_unlimited" is set or not, it doesn't
-	# much matter whether we return admins in this list.
-
 	return $self->sqlSelectAllHashref(
 		"uid",
-		"uid, COUNT(*) AS c",
-		"accesslog FORCE INDEX (op_part)",
-		"op='article' OR op='comments'",
-		"GROUP BY uid
-		 HAVING c >= $hitcount");
+		"uid, SUM(c) AS c",
+		"accesslog_artcom",
+		"",
+		"GROUP BY uid HAVING c >= $hitcount");
 }
+
+# This is a method for the main slashdb, which may or may not be
+# the same as the logslavedb.
 
 sub fetchEligibleModerators_users {
 	my($self, $count_hr) = @_;
@@ -963,7 +988,7 @@ sub fetchEligibleModerators_users {
 		}
 		# If there is more to do, sleep for a moment so we don't
 		# hit the DB too hard.
-		sleep 1 if @uids;
+		Time::HiRes::sleep 0.2 if @uids;
 	}
 
 	my $return_ar = [

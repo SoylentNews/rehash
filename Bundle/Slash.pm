@@ -99,6 +99,8 @@ Apache::Cookie		- may need to put Apache's 'httpd' and 'apxs' into $PATH before 
 
 Apache::Request		- libapreq
 
+Apache::SSI		- required by Slash::Custom::ApacheSSI
+
 AppConfig		- Should be installed with TT, but sometimes not?
 
 Template		- Template Toolkit
