@@ -44,14 +44,14 @@ if ($opts{'A'}) {
 	my @users;
 	while (<$fh>) {
 		next if /^#/; 
-		my ($user) = split /:/;
+		my($user) = split /:/;
 		push @users, $user;
 	}
-	for(@users) {
+	for (@users) {
 		print "Running $_\n";
 		my $pid = fork();
 		if (!defined $pid) {
-				die "error: cannot fork : $!" ;
+			die "error: cannot fork : $!";
 		} elsif ($pid == 0) {
 			$opts{'u'} = $_;
 			main();
