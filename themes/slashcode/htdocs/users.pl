@@ -584,7 +584,7 @@ sub newUser {
 			if ($form->{newsletter} || $form->{comment_reply} || $form->{headlines}) {
 				my $messages  = getObject('Slash::Messages');
 				my %params;
-				$params{MSG_CODE_NEW_COMMENT()} = MSG_MODE_EMAIL()
+				$params{MSG_CODE_COMMENT_REPLY()} = MSG_MODE_EMAIL()
 					if $form->{comment_reply};
 				$params{MSG_CODE_NEWSLETTER()}  = MSG_MODE_EMAIL()
 					if $form->{newsletter};
