@@ -498,7 +498,7 @@ sub quicksend {
 }
 
 sub bulksend {
-	my($self, $addrs, $subj, $message, $code) = @_;
+	my($self, $addrs, $subj, $message, $code, $uid) = @_;
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 
@@ -510,7 +510,7 @@ sub bulksend {
 	($code, my($type)) = $self->getDescription('messagecodes', $code);
 	$code = -1 unless defined $code;
 
-	my $uid = 0;
+	$uid ||= 0;
 	my $msg = {
 		id		=> 0,
 		fuser		=> 0,

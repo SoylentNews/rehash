@@ -143,8 +143,14 @@ sub log {
 
 	$self->sqlInsert($table, {
 		id	=> $msg->{id},
-		user	=> $msg->{user}{uid} || 0,
-		fuser	=> (ref($msg->{fuser}) ? $msg->{fuser}{uid} : $msg->{fuser}),
+		user	=> (ref($msg->{user})
+				? ($msg->{user}{uid} || 0)
+				: ($msg->{user} || 0)
+			   ),
+		fuser	=> (ref($msg->{fuser})
+				? ($msg->{fuser}{uid} || 0)
+				: ($msg->{fuser} || 0)
+			   ),
 		code	=> $msg->{code},
 		mode	=> $mode,
 	}, { delayed => 1 });
@@ -390,8 +396,11 @@ sub _getMailingUsers {
 	my($self, $code) = @_;
 	return unless $code =~ /^-?\d+$/;
 	
-	my $users = $self->_getMailingUsersRaw($code);
-	my $fields = ['realemail', 'exsect', 'extid', 'exaid', 'sectioncollapse']; # 'nickname', 
+	my $users  = $self->_getMailingUsersRaw($code);
+	my $fields = [qw(
+		realemail exsect extid exaid
+		sectioncollapse daily_mail_special
+	)];
 	$users     = { map { $_ => $self->getUser($_, $fields) } @$users };
 	return $users;
 }

@@ -55,21 +55,27 @@ sub generateDailyMailees {
 		my $users = $mailings{$mailing}{users};
 		my $mkeys = $mailings{$mailing}{mkeys} ||= {};
 
-		for (keys %$users) {
-			my $user = $users->{$_};
+		for my $uid (keys %$users) {
+			my $user = $users->{$uid};
 
 			my $key  = $user->{sectioncollapse};
 			for (@{$user}{qw(exaid extid exsect)}) {
 				$key .= '|' . join(',', sort m/'(.+?)'/g);
 			}
+			# allow us to make certain emails sent individually,
+			# by including a unique value in users_param for
+			# this key -- pudge
+			$user->{daily_mail_special} ||= '';
+			$key .= '|' . $user->{daily_mail_special};
 
 			if (exists $mkeys->{$key}) {
 				push @{$mkeys->{$key}{mails}}, $user->{realemail};
 			} else {
 				$mkeys->{$key}{mails} = [$user->{realemail}];
 				$mkeys->{$key}{user}  = {
+					uid => $uid,
 					map { ($_ => $user->{$_}) }
-					qw(sectioncollapse exaid extid exsect)
+					qw(sectioncollapse exaid extid exsect daily_mail_special)
 				};
 			}
 		}
@@ -129,7 +135,8 @@ sub mailingList {
 			my $user  = $mkeys->{$key}{user};
 			my $text = generateDailyMail($mailing, $user) or next;
 			$messages->bulksend(
-				$mkeys->{$key}{mails}, $subj, $text, $code
+				$mkeys->{$key}{mails}, $subj,
+				$text, $code, $user->{uid}
 			);
 		}
 		dailyStuffLog("Daily Mail ($mailing) end");
@@ -149,3 +156,5 @@ sub urlize {
 }
 
 1;
+
+__END__
