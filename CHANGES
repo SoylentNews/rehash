@@ -8,6 +8,9 @@ slash-1.0.10, 2000.xx.xx
 *	Bunches of changes to whitespace / URL / submission
 	stuff, come back and fix up these docs later
 
+*	Removed imagesize.pm; use Image::Size (Jamie McCarthy)
+
+
 slash-1.0.9, 2000.10.02
 -----------------------
 

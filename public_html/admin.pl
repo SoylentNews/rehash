@@ -982,8 +982,7 @@ sub importImage {
 		return "<image:not found>";
 	}
 
-	use imagesize;
-	my($w, $h) = imagesize::imagesize("/tmp/slash/$tf");
+	my($w, $h) = imgsize("/tmp/slash/$tf");
 	return qq[<IMG SRC="$I{rootdir}/$section/] .  getsiddir() . $filename
 		. qq[" WIDTH="$w" HEIGHT="$h" ALT="$section">];
 }

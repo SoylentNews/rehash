@@ -1109,7 +1109,10 @@ sub sqlUpdate {
 	}
 	chop $sql;
 	$sql .= "\nWHERE $where\n";
-	return $I{dbh}->do($sql) or apacheLog($sql);
+
+	my $return = $I{dbh}->do($sql);
+	apacheLog($sql) unless $return;
+	return $return;
 }
 
 ########################################################
@@ -1132,7 +1135,10 @@ sub sqlReplace {
 
 	my $sql = "REPLACE INTO $table ($names) VALUES($values)\n";
 	sqlConnect();
-	return $I{dbh}->do($sql) or apacheLog($sql);
+
+	my $return = $I{dbh}->do($sql);
+	apacheLog($sql) unless $return;
+	return $return;
 }
 
 ########################################################
@@ -1156,7 +1162,10 @@ sub sqlInsert {
 	my $p = 'DELAYED' if $delay;
 	my $sql = "INSERT $p INTO $table ($names) VALUES($values)\n";
 	sqlConnect();
-	return $I{dbh}->do($sql) or apacheLog($sql) && kill 9, $$;
+
+	my $return = $I{dbh}->do($sql);
+	apacheLog($sql) unless $return;
+	return $return;
 }
 
 ########################################################
@@ -2611,6 +2620,8 @@ my $timeformats = {
 	'%U' => '%U',
 	'%u' => '%W',
 	'%%' => '%%'
+	'%Z' => '__TIMEZONE__',
+	'%z' => '__TIMEZONE__',
 };
 
 sub timeCalc {
@@ -2645,6 +2656,8 @@ sub timeCalc {
 
 	# convert the raw date to pretty formatted date
 	$date = UnixDate($date, $I{U}{perlformat});
+	# if there were %z's, flip 'em to the real timezone
+	$date =~ s/__TIMEZONE__/\U$I{U}{tzcode}/g;
 
 	# return the new pretty date
 	return $date;

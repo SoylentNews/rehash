@@ -137,7 +137,6 @@ SOFTWARE REQUIREMENTS
             public_html/topics.pl
             public_html/users.pl
             public_html/404.pl
-            public_html/imagesize.pm
 
     You can get the Slash code in these locations:
 
