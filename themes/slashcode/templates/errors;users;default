@@ -82,6 +82,24 @@ __template__
 	a note that this is regarding an attempt to mail your password,
 	and the name, uid, or email address of the account in question.
 
+[% # OPEN PROXY.
+CASE "mailpasswd open proxy" %]
+Sorry, but according to our tests, you are trying to mail your password 
+from an open HTTP proxy.  Please close the proxy or ask your sysadmin
+to do so, because open proxies are used to spam web boards like this
+one. 
+
+<p>Feel free to contact  [% constants.adminmail_ban %] if you have questions.
+Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+[% # OPEN PROXY.
+CASE "new user open proxy" %]
+Sorry, but according to our tests, you are trying to create an account 
+from an open HTTP proxy.  Please close the proxy or ask your sysadmin
+to do so, because open proxies are used to spam web boards like this
+one. 
+
+<p>Feel free to contact  [% constants.adminmail_ban %] if you have questions.
+Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="100%" title="User already exists" %]
 	The nickname [% nick %] or another similar to it has already been taken. 
