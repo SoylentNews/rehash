@@ -139,6 +139,9 @@ if ($opts{'s'}) {
 					if ($tsemi ne $t2semi || $tsemi ne $filename) {
 						print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
 					}
+					if (length($filename) > 31) {
+						print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+					}
 				} else {
 					print "id $temp2->{tpid}\t$filename NOT updated: $_\n";
 					print "\tError: " . $slashdb->{_dbh}->DBI::err_str . "\n";
@@ -190,6 +193,9 @@ if ($opts{'s'}) {
 		if (defined $temp2 && $temp2->{page} eq $template->{page}
 			&& $temp2->{section} eq $template->{section}
 		) {
+			if (length($filename) > 31) {
+				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+			}
 			if ($template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
 					unless $opts{'t'};
@@ -234,6 +240,9 @@ if ($opts{'s'}) {
 						print "id $tpid\t$filename CREATED\n";
 						if ($tsemi ne $t2semi || $tsemi ne $filename) {
 							print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
+						}
+						if (length($filename) > 31) {
+							print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
 						}
 					} else {
 						print "\tWARNING: unknown error, cannot tell whether '$tsemi' was successfully created from '$_', id may be $tpid\n";
