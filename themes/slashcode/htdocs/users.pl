@@ -719,11 +719,11 @@ sub showInfo {
 	# haven't decided whether ordinary users get this yet
 	$min_comment = 0 unless $admin_flag;
 
+	my($netid, $netid_vis) = ('', '');
 	if ($requested_user->{nonuid}) {
 		$requested_user->{fg} = $user->{fg};
 		$requested_user->{bg} = $user->{bg};
 
-		my $netid;
 		if ($requested_user->{ipid}) {
 			$netid = $requested_user->{ipid} ;
 
@@ -733,7 +733,7 @@ sub showInfo {
 		} else {
 			$netid = $requested_user->{subnetid} ;
 		}
-		my $netid_vis = $netid;
+		$netid_vis = $netid;
 		$netid_vis = substr($netid, 0, $constants->{id_md5_vislength})
 			if $constants->{id_md5_vislength};
 
@@ -776,6 +776,7 @@ sub showInfo {
 		$comments = $slashdb->getCommentsByUID(
 			$requested_user->{uid}, $comments_wanted, $min_comment
 		) if $commentcount;
+		$netid = $requested_user->{uid};
 	}
 
 	for (@$comments) {
@@ -832,6 +833,8 @@ sub showInfo {
 			min_comment		=> $min_comment,
 			admin_flag		=> $admin_flag,
 			admin_block		=> $admin_block,
+			netid			=> $netid,
+			netid_vis		=> $netid_vis,
 		});
 
 	} else {

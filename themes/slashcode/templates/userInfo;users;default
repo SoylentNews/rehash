@@ -13,6 +13,7 @@ Display user's info
 * karma_flag = boolean for display karma
 * admin_block = admin stuff
 * admin_flag = boolean for whether to display admin stuff
+* fieldkey = the field key used to decide what we're looking at
 
 
 __title__
@@ -106,6 +107,15 @@ comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
 [% IF admin_flag && commentcount > n %] 
 <P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% nick_plain | fixparam %]&amp;min_comment=[% n %]"
 >More Comments...</A><P>
+[% END %]
+
+[% IF admin_flag %]
+	<TABLE BORDER=0>
+	<TR><TD ALIGN="CENTER">Moderations performed by [% useredit.nickname %]</TD></TR>
+	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog('uid', useredit.uid) %]</TD></TR>
+	<TR><TD ALIGN="CENTER">&nbsp;<BR>Moderations performed on [% useredit.nickname %]'s comments</TD></TR>
+	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog('cuid', useredit.uid) %]</TD></TR>
+	</TABLE>
 [% END %]
 
 [% IF stories %]

@@ -1,12 +1,16 @@
 __section__
 default
 __description__
-Prints table detailing history of moderation of a comment (SOMETHING ABOUT THIS IS BROKEN)
+Prints table detailing history of moderation of a comment, or a user, or
+	an IPID or SubnetID, or the mods a user did
 
 * mod_admin = boolean for if current user is an admin
-* comments = arrayref of hashref of moderated comments (val, reason, uid, nickname)
+* mods = arrayref of hashref of comment moderations (sid, cid, val, reason,
+	score, ts, active, uid, cuid, nickname)
 * reasonTotal = total moderations
 * reasonHist = arrayref of number of moderations at each reason
+* show_cid = show the cid of each comment?
+* show_modder = show who modded each comment?
 
 __title__
 
@@ -19,22 +23,38 @@ modCommentLog
 __template__
 [% IF mod_admin %]
 <TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-	[% IF comments.size > 0  %]
+	[% IF mods.size > 0  %]
 	<TR BGCOLOR="[% user.bg.3 %]">
+[% IF show_cid %]<TH><FONT COLOR="[% user.fg.3 %]"> cid </FONT></TH>
+		<TD><FONT COLOR="[% user.fg.3 %]"> score </FONT></TH>[% END %]
 		<TH><FONT COLOR="[% user.fg.3 %]"> val </FONT></TH>
 		<TH><FONT COLOR="[% user.fg.3 %]"> reason </FONT></TH>
-		<TH><FONT COLOR="[% user.fg.3 %]"> moderator </FONT></TH>
+[% IF show_modder %]<TH><FONT COLOR="[% user.fg.3 %]"> moderator </FONT></TH> [% END %]
 		<TH><FONT COLOR="[% user.fg.3 %]"> time </FONT></TH>
 		<TH>&nbsp;</FONT></TH>
 	</TR>
 
-		[% FOREACH comment = comments %]
+		[% FOREACH moderation = mods %]
 	<TR>
-		<TD ALIGN="RIGHT"> <B>[% comment.val %]</B> </TD>
-		<TD> [% constants.reasons.${comment.reason} %] </TD>
-		<TD> [% comment.nickname %] (<A HREF="[% constants.rootdir%]/users.pl?op=userinfo&userfield_flag=uid&userfield=[% comment.uid %]">[% comment.uid %]</A>)</TD>
-		<TD> [% comment.ts %]</TD>
-		<TD>[% IF comment.active %] &nbsp; [% ELSE %] <i>inactive</i> [% END %] </TD>
+[% IF show_cid %]
+		<TD ALIGN="RIGHT">
+			<A HREF="[% constants.rootdir %]/comments.pl?sid=[%
+			moderation.sid %]&amp;cid=[% moderation.cid %]">[%
+			moderation.cid %]</A>
+		</TD>
+		<TD ALIGN="RIGHT">
+			[% moderation.score %]
+		</TD>
+[% END %]
+		<TD ALIGN="RIGHT"> <B>[% moderation.val %]</B> </TD>
+		<TD> [% constants.reasons.${moderation.reason} %] </TD>
+[% IF show_modder %]
+		<TD> &nbsp; [% moderation.nickname %] (<A HREF="[%
+			constants.rootdir %]/users.pl?op=userinfo&userfield_flag=uid&userfield=[%
+			moderation.uid %]">[% moderation.uid %]</A>) &nbsp; </TD>
+[% END %]
+		<TD> [% moderation.ts %]</TD>
+		<TD>[% IF moderation.active %] &nbsp; [% ELSE %] <i>inactive</i> [% END %] </TD>
 	</TR>
 		[% END %]
 	[% END %]

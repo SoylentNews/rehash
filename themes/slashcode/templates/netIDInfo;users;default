@@ -10,7 +10,8 @@ Display and ipid/subnetid "users" info
 * min_comment = first comment in list (0 is first)
 * admin_block = admin stuff
 * admin_flag = boolean for whether to display admin stuff
-
+* netid = the md5 of ip or subnet
+* netid_vis = visible portion of same
 
 __title__
 
@@ -23,16 +24,6 @@ netIDInfo
 __template__
 [% USE Slash %]
 [% PROCESS titlebar width="95%" %]
-
-<B>
-
-[% IF edit.ipid %] 
-IP address [% id %], [% edit.ipid %] has posted [% commentcount %] comments
-[% ELSIF edit.subnetid %]
-Subnet [% id %], [% edit.subnetid %] has posted [% commentcount %] comments
-[% END %]
-
-</B><P>
 
 
 [% n = min_comment %]
@@ -58,12 +49,29 @@ on [% comment.cdate %] (Score:[% comment.pts %][% replies %])
 
 [% IF admin_flag %]
 
+[% fieldname = form.fieldname | strip_literal %]
+
+<P><B>[% IF fieldname == 'ipid' %] 
+IPID [% netid_vis %] has posted [% commentcount %] comments.
+[% ELSIF fieldname == 'subnetid' %]
+SubnetID [% netid_vis %] has posted [% commentcount %] comments.
+[% END %]</B><P>
+
 [% IF commentcount > n %]
-<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname | strip_literal %]&amp;min_comment=[% n %]"
+<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% fieldname %]&amp;min_comment=[% n %]"
 >More Comments...</A><P>
 [% END %]
 
 [% admin_block %]
+
+[% IF fieldname == 'ipid' || fieldname == 'subnetid' %]
+        <TABLE BORDER=0>
+	<TR><TD ALIGN="CENTER">&nbsp;<BR>Moderations performed on
+		[% netid_vis %]'s comments</TD></TR>
+	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog(fieldname, netid) %] </TD></TR>
+        </TABLE>
+[% END %]
+
 [% END %]
 
 __seclev__

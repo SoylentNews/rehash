@@ -463,35 +463,45 @@ sub getTemplateList {
 
 ########################################################
 sub getModeratorCommentLog {
-	my($self, $cid) = @_;
-# why was this removed?  -- pudge
-#				"moderatorlog.active=1
-# Probably by accident. -Brian
-#
-# I've replaced it. - Cliff
-#
-# No, on purpose;  modCommentLog;misc;default now displays that data.
-# Removing it again. - Jamie
-#
-# Aha, I think it was removed to solve the problem of inactive comments
-# being listed in the "Moderation Totals."  The better way to solve
-# that is to eliminate them there, which I'm doing now. - Jamie
+	my($self, $asc_desc, $limit, $type, $value) = @_;
 
-	# We no longer need SID as CID is now unique.
-	my $comments = $self->sqlSelectMany("comments.sid as sid,
-				 comments.cid as cid,
-				 comments.points as score,
-				 moderatorlog.uid as uid,
-				 users.nickname as nickname,
-				 moderatorlog.val as val,
-				 moderatorlog.reason as reason,
-				 moderatorlog.ts as ts,
-				 moderatorlog.active as active",
+	$asc_desc ||= 'ASC';
+	$asc_desc = uc $asc_desc;
+	$asc_desc = 'ASC' if $asc_desc ne 'DESC';
+
+	if ($limit and $limit =~ /^(\d+)$/) {
+		$limit = "LIMIT $1";
+	} else {
+		$limit = "";
+	}
+
+	my $vq = $self->sqlQuote($value);
+	my $where_clause = "";
+	   if ($type eq 'uid') {	$where_clause = "moderatorlog.uid=$vq"	}
+	elsif ($type eq 'cid') {	$where_clause = "moderatorlog.cid=$vq"	}
+	elsif ($type eq 'cuid') {	$where_clause = "moderatorlog.cuid=$vq"	}
+	elsif ($type eq 'subnetid') {	$where_clause = "comments.subnetid=$vq"	}
+	elsif ($type eq 'ipid') {	$where_clause = "comments.ipid=$vq"	}
+	return [ ] unless $where_clause;
+	my $uid_clause = "";
+	   if ($type eq 'uid') {	$uid_clause = "comments.uid AS uid"	}
+	else {				$uid_clause = "moderatorlog.uid AS uid"	}
+
+	my $comments = $self->sqlSelectMany("comments.sid AS sid,
+				 comments.cid AS cid,
+				 comments.points AS score,
+				 $uid_clause,
+				 users.nickname AS nickname,
+				 moderatorlog.val AS val,
+				 moderatorlog.reason AS reason,
+				 moderatorlog.ts AS ts,
+				 moderatorlog.active AS active",
 				"moderatorlog, users, comments",
-				"moderatorlog.cid=$cid
-			     AND moderatorlog.uid=users.uid
-			     AND comments.cid=$cid",
-				"ORDER BY ts"
+				"moderatorlog.uid=users.uid
+				 AND $where_clause
+				 AND moderatorlog.cid=comments.cid",
+				"ORDER BY ts $asc_desc",
+				$limit
 	);
 	my(@comments, $comment);
 	push @comments, $comment while ($comment = $comments->fetchrow_hashref);
@@ -3106,7 +3116,7 @@ sub getCommentMostCommonReason {
 		"reason",
 		"reason, COUNT(*) as c",
 		"moderatorlog",
-		"cid=$cid",
+		"cid=$cid AND active=1",
 		"GROUP BY reason"
 	);
 	return undef if !keys %$hr;
