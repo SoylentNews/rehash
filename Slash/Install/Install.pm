@@ -320,7 +320,7 @@ sub _install {
 
 	for (@sql) {
 		next unless $_;
-		s/;$//;
+		s/;\s*$//;
 		unless ($self->sqlDo($_)) {
 			print "Failed on :$_:\n";
 		}
