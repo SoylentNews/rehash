@@ -222,6 +222,8 @@ sub _install {
 		for (@{$hash->{$section}}) {
 			# I hope no one tries to embed spaces in their
 			# theme/plugin... heh!
+			# Yes, this should actually be specific, and not
+			# take shorcuts.  What is it trying to do? -- pudge
 			my($oldfilename, $dir) = split;
 			my $filename = $oldfilename;
 			$filename =~ s/^.*\/(.*)$/$1/;
@@ -290,6 +292,10 @@ sub _install {
 				# the main defaults.sql, so we should allow
 				# REPLACE and UPDATE here. - Jamie
 				next unless /^(INSERT|DELETE|REPLACE|UPDATE)\b/i;
+				# what is this for?  multiline SQL?
+				# maybe be more explicit, or provide a comment:
+				#   until ($_ =~ /;\s*$/) { $_ .= <$fh> }
+				# The syntax is just subobvious.  -- pudge
 				$_ .= <$fh> while $_ !~ /;\s*$/;
 				chomp;
 				s/www\.example\.com/$hostname/g;
@@ -341,6 +347,10 @@ sub _install {
 		if (open($fh, "< $prep_file\0")) {
 			while (<$fh>) {
 				next unless (/^INSERT/i or /^UPDATE/i or /^DELETE/i or /^REPLACE/i or /^ALTER/i or /^CREATE/i);
+				# what is this for?  multiline SQL?
+				# maybe be more explicit, or provide a comment:
+				#   until ($_ =~ /;\s*$/) { $_ .= <$fh> }
+				# The syntax is just subobvious.  -- pudge
 				$_ .= <$fh> while $_ !~ /;\s*$/;
 				chomp;
 				s/www\.example\.com/$hostname/g;

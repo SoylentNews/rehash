@@ -344,8 +344,6 @@ sub get_template {
 		PLUGINS		=> { Slash => 'Slash::Display::Plugin' },
 		%$cfg1,
 		LOAD_TEMPLATES	=> [ Slash::Display::Provider->new({
-			# this won't work until Template 2.05, but won't
-			# hurt anything in the meantime
 			FACTORY		=> 'Slash::Display::Directive',
 			PRE_CHOMP	=> $constants->{template_pre_chomp},
 			POST_CHOMP	=> $constants->{template_post_chomp},
@@ -430,21 +428,15 @@ my %list_ops = (
 		return $list->[rand @$list];
 	},
 
-	'highval'		=> sub {
+	'highval'	=> sub {
 		my $list = $_[0];
-		my $maxval;
-
-		$maxval = (!defined($maxval) or $_ > $maxval) ?  $_ : $maxval
-			for @{$list};
+		my($maxval) = sort { $b <=> $a } @$list;
 		return $maxval;
 	},
 
-	'lowval'		=> sub {
+	'lowval'	=> sub {
 		my $list = $_[0];
-		my $minval;
-
-		$minval = (!defined($minval) or $_ < $minval) ?  $_ : $minval
-			for @{$list};
+		my($minval) = sort { $a <=> $b } @$list;
 		return $minval;
 	},
 );
