@@ -338,18 +338,9 @@ sub printComments {
 		     $user->{commentlimit} > $user->{commentspill} );
 
 	if ($discussion->{type} eq 'archived') {
-		# This state field... what are we really trying to mean here?
-		# 1. The user can only read comments, not post or moderate,
-		#    for some reason and it doesn't really matter what?
-		# 2. The discussion the user is reading is archived?
-		# I see several places where we use meaning 1.  But this is
-		# the only place where it's set so I'm going to assume
-		# meaning 2 will also work for now.  If we ever set it
-		# anywhere else, revisit this code.  (IMHO state variables
-		# that store simple values should be named by what they are
-		# storing, not how that affects logic later in the code.)
-		# - Jamie 2002/02/22
-		$user->{state}{comment_read_only} = 1;
+		# This was named "comment_read_only" but that's not very
+		# descriptive;  let's call it what it is... -Jamie 2002/02/26
+		$user->{state}{discussion_archived} = 1;
 		slashDisplay('printCommNoArchive');
 	}
 
@@ -708,7 +699,7 @@ sub dispComment {
 			    && $comment->{ipid} ne $user->{ipid}
 			    && (!$constants->{mod_same_subnet_forbid}
 				|| $comment->{subnetid} ne $user->{subnetid} )
-			    && (!$user->{state}{comment_read_only}
+			    && (!$user->{state}{discussion_archived}
 				|| $constants->{comments_moddable_archived})
 			    && $comment->{time_unixepoch} >= time() - 3600*
 				($constants->{comments_moddable_hours}
@@ -1190,7 +1181,7 @@ EOT
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
-		}) . " | ") unless $user->{state}{comment_read_only};
+		}) . " | ") unless $user->{state}{discussion_archived};
 
 		my $parent = linkComment({
 			sid	=> $comment->{sid},
@@ -1199,14 +1190,19 @@ EOT
 			subject	=> 'Parent',
 		}, 1);
 		my $mod_select = '';
-		if ($can_mod and !$user->{state}{comment_read_only}) {
+		if ($can_mod && (
+			$constants->{comments_moddable_archived}
+			|| !$user->{state}{discussion_archived}
+		)) {
 			$mod_select = " | "
 				. createSelect("reason_$comment->{cid}",
 					$reasons, '', 1, 1);
 		}
 
 		my $deletion = qq? | <INPUT TYPE="CHECKBOX" NAME="del_$comment->{cid}">?
-			if $user->{is_admin} and !$user->{state}{comment_read_only};
+			if $user->{is_admin}
+				&& ($constants->{comments_moddable_archived}
+					|| !$user->{state}{discussion_archived});
 
 		$return .= <<EOT;
 			<TR><TD>

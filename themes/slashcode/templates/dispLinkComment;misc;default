@@ -17,7 +17,7 @@ __template__
 	[% pid = realpid || pid %]
 	<TR><TD><FONT SIZE="2">
 
-	[ [% UNLESS user.state.comment_read_only %][% Slash.linkComment({
+	[ [% UNLESS user.state.discussion_archived %][% Slash.linkComment({
 		sid	=> sid,
 		pid	=> cid,
 		op	=> 'Reply',
@@ -29,12 +29,15 @@ __template__
 		subject	=> 'Parent',
 	}, 1) %]
 
-	[% IF can_mod && !user.state.comment_read_only %]
+	[% IF can_mod && (
+		!user.state.discussion_archived
+		|| constants.comment_moddable_archived
+	) %]
 	| [% Slash.createSelect("reason_$cid", reasons, '', 1, 1);
 	   END
 	%]
 
-	[% IF user.is_admin && !user.state.comment_read_only %]
+	[% IF user.is_admin && !user.state.discussion_archived %]
 | <INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
 	[% END %]
 	]

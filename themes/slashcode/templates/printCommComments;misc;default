@@ -74,7 +74,11 @@ __template__
 	[% END %]
 	[% lcp %]
 
-[% IF (can_moderate && user.mode != 'archive' && !user.state.comment_read_only) %]
+[% IF (can_moderate && user.mode != 'archive'
+	&& (
+		!user.state.discussion_archived
+		|| constants.comments_moddable_archived
+)) %]
 	<TR><TD>
 		<P>Have you read the
 		<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
