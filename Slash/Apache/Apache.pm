@@ -402,7 +402,22 @@ sub IndexHandler {
 			# $USER_MATCH defined above
 			if ($dbon && $is_user) {
 				$r->args("section=$key");
-				$r->uri("/$index_handler");
+				# For any directory which can be accessed by a
+				# logged-in user in the URI form /foo or /foo/,
+				# but which is not a skin's directory, there
+				# is a problem;  we cannot simply bounce the uri
+				# back to /index.pl or whatever, since the
+				# index handler will not recognize the section
+				# key argument above and will just present the
+				# ordinary homepage.  I don't know the best way
+				# to handle this situation at the moment, so
+				# instead I'm hardcoding in the solution for the
+				# most common problem. - Jamie 2004/07/17
+				if ($key eq "faq") {
+					$r->uri("/faq/index.shtml");
+				} else {
+					$r->uri("/$index_handler");
+				}
 				$r->filename("$basedir/$index_handler");
 				return OK;
 			} else {
