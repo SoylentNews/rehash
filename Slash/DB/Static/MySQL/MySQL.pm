@@ -711,8 +711,7 @@ sub getTop10Comments {
 	}
 
 	formatDate($comments, 4, 4);
-
-	return $comments;
+	return $comments
 }
 
 ########################################################
@@ -730,6 +729,73 @@ sub getWhatsPlaying {
 	return $list;
 }
 
+sub getTopRecentSkinsForDays {
+	my ($self, $days, $options) = @_;
+	my $skins = $self->getSkins();
+	my $limit = "";
+	$limit = " LIMIT $options->{limit}" if $options->{limit};	
+	my $orderby = $options->{orderby} || "score";
+	my $skin_to_nexus;
+	my $nexus_to_skins;
+	my @nexus_tids;
+	my $exclude_clause = "";
+	if ($options->{exclude_skins}) {
+		$exclude_clause = " AND skins.name NOT IN(".( join(',', map { $_ = $self->sqlQuote($_) } @{$options->{exclude_skins}})).") ";
+	}
+	foreach	(values %$skins) {
+		$skin_to_nexus->{$_->{skid}}=$_->{nexus};
+		push @{$nexus_to_skins->{$_->{nexus}}}, $_->{skid} if $_->{skid};
+		push @nexus_tids, $_->{nexus} if $_->{nexus};	
+	}
+	return [] unless @nexus_tids;
+	my $tid_string = join ',', @nexus_tids;
+
+	return $self->sqlSelectAllHashrefArray(
+		"skins.skid, skins.name, skins.title, COUNT(*) as cnt, 
+		 SUM(LOG(($days + 1)- ((UNIX_TIMESTAMP(now()) - UNIX_TIMESTAMP(time))/86400))) as score, 
+		 MAX(time) as recent",
+		"stories, story_topics_rendered,skins",
+		"time <= NOW() AND stories.stoid = story_topics_rendered.stoid AND story_topics_rendered.tid IN($tid_string) AND skins.nexus = story_topics_rendered.tid $exclude_clause",
+		"GROUP BY skins.skid ORDER BY $orderby desc $limit"
+	);
+}
+
+sub getTopRecentSkinTopicsForDays {
+	my ($self, $skid, $days, $options) = @_;
+	$days ||= 14;
+
+	my $orderby = $options->{orderby} || "score";
+	my $limit = "";
+	$limit = " LIMIT $options->{limit}" if $options->{limit};
+	
+	my $exclude_clause = "";
+	if ($options->{exclude_topics}) {
+		$exclude_clause = " AND topics.keyword NOT IN(".( join(',', map { $_ = $self->sqlQuote($_) } @{$options->{exclude_skins}})).") ";
+	}
+	
+	my $nexus = $self->getNexusFromSkid($skid);
+	my @nexus_tids = $self->getNexusTids();
+	my $nexus_exclude_clause = " AND story_topics_rendered.tid NOT IN(".(join ',', @nexus_tids).")" if $options->{exclude_nexus_topics};
+	my $stoids = $self->sqlSelectColArrayref(
+		"stories.stoid",
+		"story_topics_rendered,stories",
+		"story_topics_rendered.stoid = stories.stoid AND stories.time <= NOW() AND stories.time > DATE_SUB(NOW(), INTERVAL $days DAY)
+		 AND story_topics_rendered.tid=$nexus"
+	);
+	my $stoid_str = join ',', @$stoids;
+	return [] unless $stoid_str;
+	my $topic_res = $self->sqlSelectAllHashrefArray(
+		"topics.tid,topics.keyword,topics.textname, COUNT(*) as cnt, COUNT(*) as cnt, 
+		 SUM(LOG(($days + 1)- ((UNIX_TIMESTAMP(now()) - UNIX_TIMESTAMP(time))/86400))) as score,
+		 MAX(time) as recent",
+		"stories,story_topics_rendered,topics",
+		"time < NOW() AND stories.stoid=story_topics_rendered.stoid AND stories.stoid IN($stoid_str) AND story_topics_rendered.tid = topics.tid
+		 AND story_topics_rendered.tid != $nexus $nexus_exclude_clause",
+		"GROUP BY story_topics_rendered.tid ORDER BY $orderby desc $limit"
+	);
+	return $topic_res;
+}
+	
 ########################################################
 # For portald
 sub randomBlock {
@@ -2278,6 +2344,8 @@ sub getTopRecentRealemailDomains {
 
 	return $domains, $daysback, $newaccounts, $newnicks;
 }
+
+
 
 ########################################################
 # freshenup
