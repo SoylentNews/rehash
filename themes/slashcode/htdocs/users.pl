@@ -290,6 +290,8 @@ sub main {
 		# If www.foo.com really thinks it's unsafe to redirect the
 		# user to a URL at foo.com, they need to change this logic
 		# (or find a new web host!) -- Jamie
+		# So you're saying SourceForge.net domains are
+		# messed up?  :)  -- pudge
 
 		my $site_domain = $constants->{basedomain};
 		$site_domain =~ s/^www\.//;
