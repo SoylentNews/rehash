@@ -78,19 +78,19 @@ END %]
 				[% END %]
 				[% FOREACH tid = stid %]
 					[% IF story.tid == tid ; NEXT ; END %]
-					[% topic = Slash.db.getTopic(tid) %]
-					[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-					<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
+					[% topic2 = Slash.db.getTopic(tid) %]
+					[% image = Slash.db.getTopicImageBySection(topic2, constants.section) %]
+					<A HREF="[% constants.rootdir %]/search.pl?topic2=[% topic2.tid %]">
 					[% IF user.noicons %]
-						[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]<BR>
+						[ <A HREF="[% constants.rootdir %]/search.pl?topic2=[% topic2.tid %]"><B>[% topic2.alttext %]</B></A> ]<BR>
 					[% ELSE %]
-						<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
+						<A HREF="[% constants.rootdir %]/search.pl?topic2=[% topic2.tid %]">
 							<IMG
 								SRC="[% constants.imagedir %]/topics/[% image.image %]"
 								WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
 								HSPACE="20" VSPACE="10"
-								ALT="[% topic.alttext %]"
-								TITLE="[% topic.alttext %]"></A><BR>
+								ALT="[% topic2.alttext %]"
+								TITLE="[% topic2.alttext %]"></A><BR>
 					[% END %]
 				[% END %]
 </TD></TR></TABLE>
