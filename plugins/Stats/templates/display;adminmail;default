@@ -78,7 +78,9 @@ gstatic total:        -          -   [% grand_total_static %]
 
    total hits: [% total_hits %]
 
-[% admin_clearpass_warning %][% backup_lag %]
+[% admin_clearpass_warning %]
+[% bad_password_warning %]
+[% backup_lag %]
 
 ------------------------
                             Yesterday   | 2 days ago | 3 days ago
