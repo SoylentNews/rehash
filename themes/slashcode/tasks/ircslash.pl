@@ -17,6 +17,7 @@ use vars qw(
 	%task	$me	$task_exit_flag
 	$irc	$conn	$nick	$channel
 	$remarks_active	$next_remark_id	$next_handle_remarks	$hushed
+	$next_check_slashd
 	%stoid	$clean_exit_flag
 	$parent_pid
 );
@@ -34,10 +35,10 @@ $task{$me}{code} = sub {
 	ircinit();
 
 	$clean_exit_flag = 0;
-	$next_handle_remarks = 0;
 
 	# Set the remark delay (how often we check the DB for new remarks).
 	# If remarks are not wanted, we can check less frequently.
+	$next_handle_remarks = 0;
 	my $remark_delay = $constants->{ircslash_remarks_delay} || 5;
 	$remark_delay = 180 if $remark_delay < 180 && !$remarks_active;
 
@@ -46,7 +47,18 @@ $task{$me}{code} = sub {
 		Time::HiRes::sleep(0.5); # don't waste CPU
 		if (time() >= $next_handle_remarks) {
 			$next_handle_remarks = time() + $remark_delay;
-			handleRemarks();
+			handle_remarks();
+		}
+		if (!$clean_exit_flag && time() >= $next_check_slashd) {
+			$next_check_slashd = time() + 20;
+			my($not_ok, $response) = check_slashd();
+			if ($not_ok) {
+				# Parent slashd process is gone, that's not good,
+				# but the channel doesn't need to hear about it
+				# every 20 seconds.
+				$next_check_slashd = time() + 30 * 60;
+				$conn->privmsg($channel, getIRCData('slashd_parent_gone'));
+			}
 		}
 	}
 
@@ -132,7 +144,7 @@ sub on_public {
 
 	my($arg) = $event->args();
 	if (my($cmd) = $arg =~ /^$nick\b\S*\s*(.+)/) {
-		handleCmd($self, $cmd, $event);
+		handle_cmd($self, $cmd, $event);
 	}
 }
 
@@ -157,7 +169,7 @@ my %cmds = (
 	daddypants	=> \&cmd_daddypants,
 	slashd		=> \&cmd_slashd,
 );
-sub handleCmd {
+sub handle_cmd {
 	my($self, $cmd, $event) = @_;
 	my $responded = 0;
 	for my $key (sort keys %cmds) {
@@ -312,17 +324,11 @@ sub cmd_slashd {
 		sort grep { $st->{$_}{in_progress} } keys %$st;
 	push @response_strs, getIRCData('slashd_curtasks', { tasks => \@cur_running_tasks });
 
-	my $parent_pid_str = "";
-	my $pt = eval { require Proc::ProcessTable };
-	if ($pt) {
-		my $processtable = new Proc::ProcessTable;
-		my $table = $processtable->table();
-		for my $p (@$table) {
-			next unless $p->{pid} == $parent_pid && $p->{fname} eq 'slashd';
-			push @response_strs,
-				getIRCData('slashd_parentpid', { process => $p });
-			last;
-		}
+	my($slashd_not_ok, $check_slashd_data) = check_slashd();
+	if ($slashd_not_ok) {
+		push @response_strs, getIRCData('slashd_parent_gone');
+	} elsif ($check_slashd_data) {
+		push @response_strs, $check_slashd_data;
 	}
 
 	my $result = join " -- ", @response_strs;
@@ -331,12 +337,29 @@ sub cmd_slashd {
 }
 
 sub check_slashd {
-	
+	my $parent_pid_str = "";
+	my $pt = eval { require Proc::ProcessTable };
+	if (!$pt) {
+		# Don't know whether slashd is still present, can't check.
+		# Return 0 meaning slashd is not not OK [sic], and a blank
+		# string.
+		return (0, "");
+	}
+	my $processtable = new Proc::ProcessTable;
+	my $table = $processtable->table();
+	my $response = "";
+	for my $p (@$table) {
+		next unless $p->{pid} == $parent_pid && $p->{fname} eq 'slashd';
+		$response = getIRCData('slashd_parentpid', { process => $p });
+		last;
+	}
+	my $ok = $response ? 1 : 0;
+	return (!$ok, $response);
 }
 
 ############################################################
 
-sub handleRemarks {
+sub handle_remarks {
 	my $slashdb = getCurrentDB();
 	return if $hushed;
 
