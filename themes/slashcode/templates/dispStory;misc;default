@@ -61,12 +61,34 @@ END %]
 		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% IF story.is_future; "#CCCCFF"; ELSE; user.bg.1; END %]">
-				[% IF user.noicons %][ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
-				[% ELSE %]<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"
-					><IMG SRC="[% topic.image %]" WIDTH="[% topic.width %]"
-						HEIGHT="[% topic.height %]" BORDER="0" ALIGN="RIGHT"
-						HSPACE="20" VSPACE="10" ALT="[% topic.alttext %]"></A>
+				<TABLE ALIGN="RIGHT"><TR><TD ALIGN="RIGHT">
+				[% IF user.noicons %]
+					[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
+				[% ELSE %]
+					<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
+						<IMG
+							SRC="[% topic.image %]"
+							WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
+							ALIGN="RIGHT" HSPACE="20" VSPACE="10"
+							ALT="[% topic.alttext %]"
+							TITLE="[%topic.alttext %]"></A>
 				[% END %]
+				[% FOREACH tid = stid %]
+					[% IF story.tid == tid ; NEXT ; END %]
+					[% topic = Slash.db.getTopic(tid) %]
+					[% IF user.noicons %]
+						[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]<BR>
+					[% ELSE %]
+						<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
+							<IMG
+								SRC="[% constants.imagedir %]/topics/[% topic.image %]"
+								WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
+								HSPACE="20" VSPACE="10"
+								ALT="[% topic.alttext %]"
+								TITLE="[%topic.alttext %]"></A><BR>
+					[% END %]
+				[% END %]
+</TD></TR></TABLE>
 				[% story.introtext %]
 			</TD></TR></TABLE>
 		</TD>
