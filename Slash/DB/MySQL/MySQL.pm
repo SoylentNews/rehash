@@ -4641,15 +4641,17 @@ sub countStory {
 ##################################################################
 
 sub moderateComment {
-	my($self, $sid, $cid, $reason) = @_;
+	my($self, $sid, $cid, $reason, $options) = @_;
 	return 0 unless $reason;
+	$options ||= {};
 
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
 	my $comment_changed = 0;
-	my $superAuthor = $constants->{authors_unlimited}
-		&& $user->{seclev} >= $constants->{authors_unlimited};
+	my $superAuthor = $options->{is_superauthor}
+		|| ( $constants->{authors_unlimited}
+			&& $user->{seclev} >= $constants->{authors_unlimited} );
 
 	if ($user->{points} < 1 && !$superAuthor) {
 		return -1;
@@ -4666,16 +4668,16 @@ sub moderateComment {
 	unless ($superAuthor) {
 		# Do not allow moderation of any comments with the same UID as the
 		# current user (duh!).
-		return if $user->{uid} == $comment->{uid};
+		return 0 if $user->{uid} == $comment->{uid};
 		# Do not allow moderation of any comments (anonymous or otherwise)
 		# with the same IP as the current user.
-		return if $user->{ipid} eq $comment->{ipid};
+		return 0 if $user->{ipid} eq $comment->{ipid};
 		# If the var forbids it, do not allow moderation of any comments
 		# with the same *subnet* as the current user.
-		return if $constants->{mod_same_subnet_forbid}
+		return 0 if $constants->{mod_same_subnet_forbid}
 			and $user->{subnetid} eq $comment->{subnetid};
 		# Do not allow moderation of comments that are too old.
-		return unless $comment->{time_unixepoch} >= time() - 3600*
+		return 0 unless $comment->{time_unixepoch} >= time() - 3600*
 			($constants->{comments_moddable_hours}
 				|| 24*$constants->{archive_delay});
 	}
@@ -4696,7 +4698,8 @@ sub moderateComment {
 		my $mid = $self->getModeratorLogID($cid, $user->{uid});
 		if ($mid) {
 			$dispArgs->{type} = 'already moderated';
-			Slash::slashDisplay('moderation', $dispArgs);
+			Slash::slashDisplay('moderation', $dispArgs)
+				unless $options->{no_display};
 			return 0;
 		}
 	}
@@ -4780,7 +4783,8 @@ sub moderateComment {
 			# comment, or some other reason making this mod invalid.
 			# This is really just here as a safety check.
 			$dispArgs->{type} = 'logic error';
-			Slash::slashDisplay('moderation', $dispArgs);
+			Slash::slashDisplay('moderation', $dispArgs)
+				unless $options->{no_display};
 			return 0;
 		}
 
@@ -4835,11 +4839,12 @@ sub moderateComment {
 			val	=> $val,
 			reason	=> $reason,
 			comment	=> $comment
-		});
+		}) unless $options->{no_message};
 	}
 
 	# Now display the template with the moderation results.
-	Slash::slashDisplay('moderation', $dispArgs);
+	Slash::slashDisplay('moderation', $dispArgs)
+		unless $options->{no_display};
 
 	return 1;
 }
