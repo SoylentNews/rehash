@@ -5980,7 +5980,7 @@ sub setAccessList {
 }
 
 #################################################################
-# Should probably cache this instead of relying on MySQL's query cache.
+# XXX Should probably cache this instead of relying on MySQL's query cache.
 sub checkIsProxy {
 	my($self, $ipid) = @_;
 
@@ -5992,7 +5992,7 @@ sub checkIsProxy {
 }
 
 #################################################################
-# Should probably cache this instead of relying on MySQL's query cache.
+# XXX Should probably cache this instead of relying on MySQL's query cache.
 sub checkIsTrusted {
 	my($self, $ipid) = @_;
 
