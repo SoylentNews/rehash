@@ -107,33 +107,33 @@ sub get_backup_db {
 
 	my $read_db = undef;
 
-	# How many times we loop.
-	my $count = $constants->{moderatord_catchup_count} || 2;
-	# The number of updates behind, the read database can be.
-	my $lag = $constants->{moderatord_lag_threshold} || 100_000;
-	# How long to wait between loops.
-	my $sleep_time = $constants->{moderatord_catchup_sleep};
+#	# How many times we loop.
+#	my $count = $constants->{moderatord_catchup_count} || 2;
+#	# The number of updates behind, the read database can be.
+#	my $lag = $constants->{moderatord_lag_threshold} || 100_000;
+#	# How long to wait between loops.
+#	my $sleep_time = $constants->{moderatord_catchup_sleep};
 
-	while ($count--) {
+#	while ($count--) {
 		$read_db = getObject('Slash::DB', $backup_user);
 		if (!$read_db) {
 			moderatordLog("Cannot open read DB: '$backup_user'");
 			return undef;
 		}
-		my $master_stat = ($slashdb->sqlShowMasterStatus())->[0];
-		my $slave_stat = ($read_db->sqlShowSlaveStatus())->[0];
-		if (lc($slave_stat->{Slave_running}) eq 'no') {
-			moderatordLog('Replication requested but not active');
-			return undef;
-		}
-		if ($master_stat->{Position} - $slave_stat->{Pos} > $lag) {
-			# The slave is lagging too much to use;  let's wait
-			# a bit for it to hopefully catch up.
-			$read_db = undef;
-			sleep $sleep_time;
-		}
-		sleep $sleep_time if !$read_db;
-	}
+#		my $master_stat = ($slashdb->sqlShowMasterStatus())->[0];
+#		my $slave_stat = ($read_db->sqlShowSlaveStatus())->[0];
+#		if (lc($slave_stat->{Slave_running}) eq 'no') {
+#			moderatordLog('Replication requested but not active');
+#			return undef;
+#		}
+#		if ($master_stat->{Position} - $slave_stat->{Pos} > $lag) {
+#			# The slave is lagging too much to use;  let's wait
+#			# a bit for it to hopefully catch up.
+#			$read_db = undef;
+#			sleep $sleep_time;
+#		}
+#		sleep $sleep_time if !$read_db;
+#	}
 	return $read_db;
 }
 
