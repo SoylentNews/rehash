@@ -13,6 +13,8 @@ __lang__
 en_US
 __name__
 newsvac
+__seclev__
+1000
 __template__
 <TABLE BGCOLOR="[% user.bg.2 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
 	<TR>
@@ -24,7 +26,3 @@ __template__
 	</TR>
 </TABLE>
 
-__seclev__
-10000
-__seclev__
-100
