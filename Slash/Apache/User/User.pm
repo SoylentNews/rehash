@@ -71,6 +71,9 @@ sub handler {
 	my $apr = Apache::Request->new($r);
 	my $gSkin = getCurrentSkin();
 
+	my $reader_user = $slashdb->getDB('reader');
+	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
+
 	$r->header_out('X-Powered-By' => "Slash $Slash::VERSION");
 	random($r);
 
@@ -83,6 +86,7 @@ sub handler {
 	my $is_ssl = Slash::Apache::ConnectionIsSSL();
 
 	$slashdb->sqlConnect;
+	$reader->sqlConnect;
 
 	##################################################
 	# Don't remove this. This solves a known bug in Apache -- brian
@@ -330,7 +334,7 @@ sub handler {
 	$srand_called ||= 1;
 
 	# If this uid is marked as banned, deny them access.
-	my $banlist = $slashdb->getBanList();
+	my $banlist = $reader->getBanList;
 	if ($banlist->{$uid}) {
 		# The global current user hasn't been created yet, so the
 		# template expects uid just passed in as the var named "uid".
