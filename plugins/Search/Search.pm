@@ -296,8 +296,6 @@ sub findStory {
 			$where .= " AND stories.section = " . $self->sqlQuote($section->{section});
 		}
 	}
-	
-	$where .= " AND sections.isolate != 1 " unless $constants->{sectional_site};
 
 	if (ref($form->{_multi}{tid}) eq 'ARRAY') {
 		$where .= " AND tid IN (" . join(",", @{$form->{_multi}{tid}}) . ") "; 
@@ -479,7 +477,7 @@ sub findDiscussion {
 	my $other;
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC";
-	} elsif ($sort == 3) {
+	} elsif ($form->{query} && $sort == 3) {
 		$other = " ORDER BY last_update DESC";
 	} else {
 		$other = " ORDER BY ts DESC";
@@ -494,12 +492,8 @@ sub findDiscussion {
 		if $form->{type};
 	$where .= " AND topic=" . $self->sqlQuote($form->{tid})
 		if $form->{tid};
-	$where .= " AND section=" . $self->sqlQuote($form->{section})
-		if $form->{section};
 	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
 		if $form->{uid};
-	$where .= " AND approved = $form->{approved}"
-		if $form->{approved};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );

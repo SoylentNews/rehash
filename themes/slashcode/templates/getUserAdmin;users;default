@@ -112,7 +112,6 @@ __template__
 		
 		
 			[% IF authoredit_flag && seclev_field && ! useredit.nonuid  %]
-				[% IF user.seclev >= 10000 %]
 			<TR>
 				<TD><B>Seclev</B></TD>
 				<TD COLSPAN="4">
@@ -135,7 +134,6 @@ __template__
 			<TR>
 				<TD><B>Section</B></TD><TD>[% section_select %]</TD>
 			</TR>
-				[% END %]
 			<TR>
 				<TD><B>Default points (threshcode)</B></TD><TD>[% thresh_select %]</TD><TD>&nbsp;</TD>
 			</TR>

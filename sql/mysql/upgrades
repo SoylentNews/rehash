@@ -346,20 +346,12 @@ ALTER TABLE submissions MODIFY COLUMN email varchar(255) DEFAULT '' NOT NULL;
 
 UPDATE vars SET value=100 WHERE name="authors_unlimited";
 
-# this is to have the ability to not have the 
-# topic pulldown show up in editStory and for
-# saveStory to use categorise_stories value be 
-# what topic is set to
-INSERT INTO vars (name, value, description) VALUES ('use_alt_topic','0','Simple Boolean to make is so editStory uses the categorise story value to set topic');
 #Needed for search, not used in submissions "yet"
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','','Unclassified');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','Hold');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
-# FOUNDRIES UPDATED 4/22/02
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-# FOUNDRIES UPDATED 4/25/02
 #
 # Table structure for table 'subsections'
 #
@@ -375,19 +367,12 @@ CREATE TABLE subsections (
   PRIMARY KEY (id)
 ) TYPE = myisam;
 
-ALTER TABLE stories ADD	category SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
-# ALTER TABLE sections DROP feature_story;
-# FOUNDRIES UPDATED 4/30/02
-INSERT INTO vars (name,value,description) VALUES ('newest_stories','0','how many of the newest stories to print on index');
-INSERT INTO vars (name,value,description) VALUES ('newest_stories_category','0','how many of the newest stories per category to print');
-=======
 # End of T_2_3_0_22, Start of T_2_3_0_23
 
 # If using HumanConf...
 ALTER TABLE humanconf_pool ADD COLUMN inuse TINYINT DEFAULT '0' NOT NULL AFTER lastused;
 
 ALTER TABLE stories ADD subsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
-# LINUX.COM
 ALTER TABLE sections DROP feature_story;
 ALTER TABLE accesslog ADD bytes mediumint UNSIGNED DEFAULT 0 NOT NULL;
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, '');
@@ -401,14 +386,8 @@ ALTER TABLE stories ADD last_update timestamp;
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_img_count','5','Number of recent topics to store in the template "recentTopics"');
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_txt_count','5','Number of recent topics to store in the block "recenttopics"');
 
-# SLASHCODE LAST UPDATED HERE
-INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', -1,'Don't Display');
-INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', 1,'Display');
-# Foundries test site last updated
 
-# For plugins/Admin
-INSERT INTO vars (name, value, description) VALUES ('discussion_sort_order', '3', 'sort code to feed to findDiscussions');
-
+# For plugins/Admin (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('similarstorydays', '30', 'Number of days to look back for uncommon words');
 INSERT INTO vars (name, value, description) VALUES ('similarstorymaxwords', '30', 'Maximum number of top-weighted scores to search for in previous stories');
 INSERT INTO vars (name, value, description) VALUES ('similarstoryminweight', '4', 'Minimum weight necessary for a story to be displayed as similar');
@@ -425,7 +404,6 @@ INSERT INTO vars (name, value, description) VALUES ('uncommonstoryword_thresh', 
 # Added for Pat for discussions -Brian
 ALTER TABLE discussions ADD approved tinyint UNSIGNED DEFAULT 0 NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('discussion_approval', '0', 'If this is set to 1, set all user created discussions when created to 0 so that they must be approved');
-# FOUNDRIES UPDATED
 # For pudge -brian
 ALTER TABLE templates ADD last_update timestamp;
 
@@ -469,9 +447,6 @@ INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Ta
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
 
-# SLASHDOT LAST UPDATED HERE
-# FOUNDRIES LAST UPDATED HERE
-
 # End of T_2_3_0_28, Start of T_2_3_0_29
 
 INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus, and goodkarma)');
@@ -496,14 +471,12 @@ INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|
 
 # End of T_2_3_0_29, Start of T_2_3_0_30
 
-# FOUNDRIES LAST UPDATED
 # OSDNTEST LAST UPDATED HERE
 # OSDN LAST UPDATED HERE
 
 # Forgot this one a little while ago too.
 # For plugins/Stats (ignore if you're not using that plugin):
 INSERT INTO vars (name, value, description) VALUES ('mod_stats','1','Include stats on moderation in the daily admin mail?');
-INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');
 
 # End of R_2_3_0_30, Start of T_2_3_0_31
 
@@ -519,11 +492,6 @@ CREATE TABLE sections_contained (
 ) TYPE = myisam;
 ALTER TABLE sections ADD rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL;
 ALTER TABLE sections ADD last_update timestamp;
-
-# fixes rss being truncated in autosubmit
-ALTER TABLE rss_raw modify column description text;
-
-# FOUNDRIES LAST UPDATE 7/13 
 
 # For plugins/Email ONLY (LC, Slashcode, etc -- NOT SLASHDOT!)
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, 0);

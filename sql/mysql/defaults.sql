@@ -40,8 +40,6 @@ INSERT INTO code_param (type, code, name) VALUES ('discussiontypes',2,'Read Only
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes',0,'Always Display');
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes',1,'Only Display Within Section');
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes',-1,'Never Display');
-INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional',1,'Display');
-INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional',-1,'Don\'t display');
 INSERT INTO code_param (type, code, name) VALUES ('isolatemodes',0,'Part of Site');
 INSERT INTO code_param (type, code, name) VALUES ('isolatemodes',1,'Standalone');
 INSERT INTO code_param (type, code, name) VALUES ('issuemodes',0,'Neither');
@@ -85,7 +83,7 @@ INSERT INTO code_param (type, code, name) VALUES ('postmodes',1,'Plain Old Text'
 INSERT INTO code_param (type, code, name) VALUES ('postmodes',2,'HTML Formatted');
 INSERT INTO code_param (type, code, name) VALUES ('postmodes',3,'Extrans (html tags to text)');
 INSERT INTO code_param (type, code, name) VALUES ('postmodes',4,'Code');
-INSERT INTO code_param (type, code, name) VALUES ('section_topic_type',1,'default');
+INSERT INTO code_param (type, code, name) VALUES ('section_topic_types',1,'default');
 INSERT INTO code_param (type, code, name) VALUES ('extra_types', 1, 'text');
 INSERT INTO code_param (type, code, name) VALUES ('extra_types', 2, 'list');
 
@@ -695,8 +693,6 @@ INSERT INTO vars (name, value, description) VALUES ('do_expiry','1','Flag which 
 INSERT INTO vars (name, value, description) VALUES ('down_moderations','-6','number of how many comments you can post that get down moderated');
 INSERT INTO vars (name, value, description) VALUES ('draconian_charrefs','0','Enable strictest-possible rules for disallowing HTML entities/character references?');
 INSERT INTO vars (name, value, description) VALUES ('enable_index_topic','','set this to the value in string param for index topic \(something like "topic_4"\)');
-INSERT INTO vars (name, value, description) VALUES ('enable_discussion_topic','','discussion topic type');
-INSERT INTO vars (name, value, description) VALUES ('enable_repository_topic','','repository topic type');
 INSERT INTO vars (name, value, description) VALUES ('fancyboxwidth','200','What size should the boxes be in?');
 INSERT INTO vars (name, value, description) VALUES ('feature_story_enabled','0','Simple Boolean to determine if homepage prints feature story');
 INSERT INTO vars (name, value, description) VALUES ('formkey_timeframe','14400','The time frame that we check for a formkey');
@@ -825,7 +821,6 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');
 INSERT INTO vars (name, value, description) VALUES ('submit_show_weight', '0', 'Display optional weight field in submission admin.');
-INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_request','0','Special boolean to cache templates only for a single request');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_size','0','Number of templates to store in cache (0 = unlimited)');
 INSERT INTO vars (name, value, description) VALUES ('template_post_chomp','0','Chomp whitespace after directives (0 = no, 1 = yes, 2 = collapse; 0 or 2 recommended)');
@@ -849,6 +844,3 @@ INSERT INTO vars (name, value, description) VALUES ('users_bio_length','1024','L
 INSERT INTO vars (name, value, description) VALUES ('users_show_info_seclev','0','Minimum seclev to view a user\s info');
 INSERT INTO vars (name, value, description) VALUES ('users_speed_limit','20','How fast a user can change their prefs');
 INSERT INTO vars (name, value, description) VALUES ('writestatus','ok','Simple Boolean to determine if homepage needs rewriting');
-INSERT INTO vars (name, value, description) VALUES ('use_alt_topic','0','Simple Boolean to make is so editStory uses the categorise story value to set topic');
-INSERT INTO vars (name,value,description) VALUES ('newest_stories','0','how many of the newest stories to print on index');
-INSERT INTO vars (name,value,description) VALUES ('newest_stories_category','0','how many of the newest stories per category to print');

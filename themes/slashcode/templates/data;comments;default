@@ -16,7 +16,7 @@ __name__
 data
 __template__
 [% 
-	label = 'forum';
+	label = 'discussion';
 %]
 
 [% SWITCH value %]

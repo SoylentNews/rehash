@@ -79,7 +79,7 @@ sub main {
 			formname 		=> 'discussions',
 			checks			=> 
 			[ qw ( max_post_check valid_check interval_check 
-				formkey_check generate_formkey) ],
+				formkey_check regen_formkey ) ],
 		},
 		reply			=> {
 			function		=> \&editComment,
@@ -113,14 +113,16 @@ sub main {
 			function		=> \&submitComment,
 			seclev			=> 0,
 			post			=> 1,
-			formname 		=> $form->{new_discussion} ? 'discussions' : 'comments',
-			checks			=> $form->{new_discussion} ? [] : 
+			formname 		=> 'comments',
+			checks			=> 
 			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check 
 				formkey_check ) ],
 		},
 	};
 	$ops->{default} = $ops->{display} ;
 	
+	# This is here to save a function call, even though the
+	# function can handle the situation itself
 	my ($discussion, $section);
 
 	if ($form->{sid}) {
@@ -147,7 +149,7 @@ sub main {
 
 	$form->{pid} ||= "0";
 
-	header($discussion ? $discussion->{'title'} : 'Comments', $form->{section});
+	header($discussion ? $discussion->{'title'} : 'Comments', $section);
 
 	if ($user->{is_anon} && length($form->{upasswd}) > 1) {
 		print getError('login error');
@@ -184,7 +186,8 @@ sub main {
 			$formname = $ops->{$op}{formname}; 
 			for my $check (@{$ops->{$op}{checks}}) {
 				$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
-				$error_flag = formkeyHandler($check, $formname, $formkey,undef,$options);
+				$error_flag = formkeyHandler($check, $formname, $formkey,
+					undef, $options);
 				if ($error_flag == -1) {
 					# Special error:  submit failed, go back to     
 					# previewing.  If the error was retryable,
@@ -409,15 +412,10 @@ sub commentIndexUserCreated {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $label = getData('label');
 
+	titlebar("90%", getData('user_discussions'));
 	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
 	my $start = $form->{start} || 0;
-	my $hashref = {};
-	$hashref->{section} = $form->{section} if $form->{section};
-	$hashref->{tid} = $form->{tid} if $form->{tid};
-	$hashref->{type} = 'recycle'; 
-	$hashref->{approved} = '1'; 
-
-	my $discussions = $searchdb->findDiscussion($hashref, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
+	my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'recycle' }, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
 	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
@@ -437,15 +435,9 @@ sub commentIndexUserCreated {
 			$back = -1;
 		}
 
-	
-		my $title = getData('user_discussions');
-
-		$title .= ": " . $slashdb->getTopic($form->{tid},'alttext') . " ($form->{tid})" if $form->{tid};
-
 		slashDisplay('udiscuss_list', {
-			title 		=> $title,
 			discussions	=> $discussions,
-			label		=> $label,
+			'label'		=> $label,
 			forward		=> $forward,
 			args		=> _buildargs($form),
 			start		=> $start,
@@ -647,7 +639,7 @@ sub createDiscussion {
 		});
 	}
 
-	# commentIndex(@_);
+	commentIndex(@_);
 }
 
 ##################################################################

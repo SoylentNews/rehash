@@ -8,6 +8,7 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Data::Dumper;
 
 sub main {
 	my $slashdb   = getCurrentDB();
@@ -16,7 +17,7 @@ sub main {
 	my $form      = getCurrentForm();
 
 
-	my($stories, $Stories, $section);
+	my($stories, $Stories, $storystruct, $section);
 	if ($form->{op} eq 'userlogin' && !$user->{is_anon}) {
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
 		redirect($refer);
@@ -39,7 +40,6 @@ sub main {
 	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
 	my $title = getData('head', { section => $section });
-	
 	header($title, $section->{section});
 
 	my $limit = $section->{type} eq 'collected' ?
@@ -63,13 +63,15 @@ sub main {
 	# this makes sure that existing sites don't
 	# have to worry about being affected by this
 	# change
-	$Stories = displayStories($stories);
+	$storystruct = displayStories($stories);
+	$Stories = $storystruct->{stories}{full};
 
 	my $StandardBlocks = displayStandardBlocks($section, $stories);
 
 	slashDisplay('index', {
 		is_moderator	=> scalar $slashdb->checkForMetaModerator($user),
 		stories		=> $Stories,
+		storystruct	=> $storystruct,
 		boxes		=> $StandardBlocks,
 	});
 
@@ -241,13 +243,24 @@ sub displayStories {
 	# shift them off, so we do not display them in the Older
 	# Stuff block later (simulate the old cursor-based
 	# method)
-
 	while ($_ = shift @{$stories}) {
 		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid) = @{$_};
-		my($tmpreturn, $category, $feature_sid, $other, @links);
+		my($tmpreturn, $category, $other, @links);
 		my @threshComments = split m/,/, $hp;  # posts in each threshold
 
+		if ($constants->{organise_stories}) {
+		    $category = $slashdb->getStory($sid,$constants->{organise_stories});
+		}
+		$category ||= 'stories';
+		$counter->{$category} ||= $x;
+
 		my($storytext, $story) = displayStory($sid, '', $other);
+
+		if ($constants->{get_titles}) {
+			my $titlelink = slashDisplay('storyTitleOnly', { story => $story }, {Return => 1});
+
+			$return->{$category}{titles} .= $titlelink; 
+		}
 
 		$tmpreturn .= $storytext;
 	
@@ -322,13 +335,11 @@ sub displayStories {
 			sid	=> $sid,
 		}, { Return => 1});
 
-		$return .= $tmpreturn;
-
+		$return->{$category}{full} .= $tmpreturn;
 
 		my($w) = join ' ', (split m/ /, $time)[0 .. 2];
 		$today ||= $w;
-
-		last if ++$x > $cnt && $today ne $w;
+		last if ++$counter->{$category} > $cnt && $today ne $w;
 	}
 
 	return $return;

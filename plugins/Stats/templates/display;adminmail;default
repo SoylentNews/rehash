@@ -87,12 +87,9 @@ For [% section.section_name %]
 [% item %]
 [% END %]
 
-[% IF constants.tailslash_stats %]
+-----------------------      
 
-[% tailslash %]
-
------------------------
-[% END %]
+[% tailslash %]      
 
 -----------------------
 

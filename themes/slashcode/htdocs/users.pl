@@ -26,10 +26,6 @@ sub main {
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0 ;
 	my $postflag = $user->{state}{post};
 	my $op = lc($form->{op});
-	print STDERR "OP $op\n";
-	for (keys %$form) {
-	    print STDERR "main FORM key $_ value $form->{$_}\n";
-	}
 
 	# savepasswd is a special case, because once it's called, you
 	# have to reload the form, and you don't want to do any checks if
@@ -43,7 +39,7 @@ sub main {
 	my $ops = {
 		admin		=>  {
 			function 	=> \&adminDispatch,
-			seclev		=> 100,	# if this should be lower,
+			seclev		=> 10000,	# if this should be lower,
 							# then something else is
 							# broken, because it allows
 							# anyone with this seclev
@@ -518,7 +514,7 @@ sub newUser {
 				uid		=> $uid
 			});
 
-			mailPasswd({ uid => $uid }) if getCurrentStatic('mail_passwd');
+			mailPasswd({ uid => $uid });
 
 			return;
 		} else {
@@ -575,9 +571,7 @@ sub mailPasswd {
 		tempnick	=> $tempnick
 	}, 1);
 
-	print STDERR "sending email to $uid $emailtitle\n";
 	doEmail($uid, $emailtitle, $msg) if $user_edit->{nickname};
-	print STDERR "sent email to $uid $emailtitle\n";
 	print getMessage('mailpasswd_mailed_msg', { name => $user_edit->{nickname} });
 }
 
@@ -1489,11 +1483,6 @@ sub saveUserAdmin {
 	my $banned = 0;
 	my $banref;
 
-	print STDERR "saveUserAmin\n";
-	for (keys %$form) {
-	    print STDERR "FORM key $_ value $form->{$_}\n";
-	}
-
 	if ($form->{uid}) {
 		$user_editfield_flag = 'uid';
 		$id = $form->{uid};
@@ -1564,11 +1553,11 @@ sub saveUserAdmin {
 	if ($user->{is_admin} && ($user_editfield_flag eq 'uid' ||
 		$user_editfield_flag eq 'nickname')) {
 
-		$user_edits_table->{seclev} = $form->{seclev} if $user->{seclev} >= 10000;
-		$user_edits_table->{section} = $form->{usersection} if $user->{seclev} >= 10000;
+		$user_edits_table->{seclev} = $form->{seclev};
+		$user_edits_table->{section} = $form->{section};
 		$user_edits_table->{rtbl} = $form->{rtbl} eq 'on' ? 1 : 0 ;
 		$user_edits_table->{rtbl_reason} = $form->{rtbl} eq 'on' ? $form->{rtbl_reason} : '' ;
-		$user_edits_table->{author} = $form->{author} && $user->{seclev} >= 10000 ? 1 : 0 ;
+		$user_edits_table->{author} = $form->{author} ? 1 : 0 ;
 		$user_edits_table->{defaultpoints} = $form->{defaultpoints};
 
 		my $was_author = ($slashdb->getAuthor($id)->{author}) ? 1 : 0;
@@ -2246,14 +2235,14 @@ sub getUserAdmin {
 		$user_editfield = $user_edit->{uid};
 		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$iplist = $slashdb->getNetIDList($user_edit->{uid});
-		$section_select = createSelect('usersection', $sectionref, $user_edit->{section}, 1);
+		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'nickname') {
 		$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
 		$user_editfield = $user_edit->{nickname};
 		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$iplist = $slashdb->getNetIDList($user_edit->{uid});
-		$section_select = createSelect('usersection', $sectionref, $user_edit->{section}, 1);
+		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'md5id') {
 		$user_edit->{nonuid} = 1;

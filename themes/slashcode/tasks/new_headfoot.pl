@@ -16,25 +16,13 @@ $task{$me}{code} = sub {
 	# exiting
 	local *SO = *STDOUT;
 
-	# With the new section code, this is most-likely no longer necessary.
-	#sectionHeaders(@_, "");
-	
+	sectionHeaders(@_, "");
 	my $sections = $slashdb->getSections();
 	for (keys %$sections) {
 		my($section) = $sections->{$_}{section};
 		mkpath "$constants->{basedir}/$section", 0, 0755;
 		sectionHeaders(@_, $sections->{$_});
 	}
-	
-	# Now since we've iterated thru all sections, just now, 
-	# $user->{currentSection} is now set to the last section processed...
-	# whatever that is [since header() sets $user->{currentSection}]. We
-	# must undo this since this may affect template retrieval for other
-	# tasks.
-	#
-	# Now the actual question: undef() or delete(). I'm assuming delete().
-	# - Cliff 2002/05/22
-	delete $user->{currentSection};
 
 	*STDOUT = *SO;
 
@@ -53,21 +41,15 @@ sub sectionHeaders {
 
 	setCurrentForm('ssi', 1);
 	my $fh = gensym();
-
 	open $fh, ">$constants->{basedir}/$section/slashhead.inc"
-		or
-	die "Can't open $constants->{basedir}/$section/slashhead.inc: $!";
-
+		or die "Can't open $constants->{basedir}/$section/slashhead.inc: $!";
 	*STDOUT = $fh;
 	header("", $section, { noheader => 1 });
 	close $fh;
 
 	setCurrentForm('ssi', 0);
-
 	open $fh, ">$constants->{basedir}/$section/slashfoot.inc"
-		or
-	die "Can't open $constants->{basedir}/$section/slashfoot.inc: $!";
-
+		or die "Can't open $constants->{basedir}/$section/slashfoot.inc: $!";
 	*STDOUT = $fh;
 	footer();
 	close $fh;

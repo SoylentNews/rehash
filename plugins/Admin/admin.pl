@@ -25,10 +25,6 @@ sub main {
 	my($tbtitle);
 
 	my $ops = {
-		slashd		=> {
-			function	=> \&displaySlashd,
-			seclev		=> 500,
-		},
 		edit_keyword	=> {
 			function	=> \&editKeyword,
 			seclev		=> 10000,
@@ -51,7 +47,7 @@ sub main {
 		},
 		'delete'		=> {
 			function 	=> \&listStories,
-			seclev		=> 100,
+			seclev		=> 10000,
 		},
 		preview		=> {
 			function 	=> \&editStory,
@@ -67,7 +63,7 @@ sub main {
 
 			function 	=> \&blockEdit,
 
-			seclev		=> 100,
+			seclev		=> 500,
 		},
 		colors 		=> {	# colored,colorpreview,colorsave,colorrevert,
 					# colororig,colorsavedef,
@@ -106,6 +102,14 @@ sub main {
 
 			function 	=> \&varEdit,
 			seclev		=> 10000,
+		},
+		slashd		=> {
+			function	=> \&displaySlashd,
+			seclev		=> 500,
+		},
+		recent		=> {
+			function	=> \&displayRecent,
+			seclev		=> 500,
 		},
 	};
 
@@ -427,8 +431,6 @@ sub templateDelete {
 sub blockEdit {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my $section = $user->{section} || $form->{section};
-
 	my($bid);
 
 	if ($form->{blocksave} || $form->{blocksavedef}) {
@@ -478,7 +480,7 @@ sub blockEdit {
 		my($static_blocks, $portal_blocks);
 		if ($user->{section}) {
 			$static_blocks = $slashdb->getDescriptions('static_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
-			$portal_blocks = $slashdb->getDescriptions('portald_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
+			$static_blocks = $slashdb->getDescriptions('portald_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
 		} else {
 			$static_blocks = $slashdb->getDescriptions('static_block', $user->{seclev}, 1);
 			$portal_blocks = $slashdb->getDescriptions('portald_block', $user->{seclev}, 1);
@@ -710,7 +712,7 @@ sub topicEdit {
 		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 1);
 	my $sections = {};
 	if ($user->{section} && $user->{seclev} <= 9000) {
-	    $sections->{$user->{section}} = $slashdb->getSection($user->{section},'title','',1);
+		$sections->{$user->{section}} = $slashdb->getSection($user->{section},'title');
 	} else {
 		$sections = $slashdb->getDescriptions('sections-contained', '', 1);
 	}
@@ -734,7 +736,7 @@ sub topicEdit {
 
 	if (!$form->{topicdelete}) {
 		if (!$form->{topicnew} && $form->{nexttid}) {
-			$topic = $slashdb->getTopic($form->{nexttid});
+			$topic = $slashdb->getTopic($form->{nexttid}, 0, 1);
 		} else {
 			$topic = {};
 		}
@@ -1026,11 +1028,10 @@ sub editStory {
 	my $extracolref = {};
 	my($fixquotes_check, $autonode_check, 
 		$fastforward_check, $shortcuts_check) =
-	    ('','','','');
+		('','','','');
 	my($multi_topics, $story_topics);
 	my $page = 'index';
-	# my $section = $user->{section} ? $user->{section} : '';
-	my $section = $constants->{section} || $storyref->{section};
+	my $section = $user->{section} ? $user->{section} : '';
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
@@ -1130,15 +1131,7 @@ sub editStory {
 	    $story_topics->{$storyref->{tid}} ||= 1 ; 
 	}
 
-	if ($constants->{use_alt_topic}) {
-		$topic_select = createSelect('tid',$slashdb->getDescriptions('topics_section_type', $section, $constants->{use_alt_topic}),$storyref->{tid},1);
-	} else {
-		if ($section) {
-	    		$topic_select = createSelect('tid', $slashdb->getDescriptions('topics_section', $section),$storyref->{tid}, 1);
-		} else {
-	    		$topic_select = createSelect('tid', $slashdb->getDescriptions('topics'),$storyref->{tid}, 1);
-		}
-	}
+	$topic_select = selectTopic('tid', $storyref->{tid}, $storyref->{section}, 1);
 
 	$section_select = selectSection('section', $storyref->{section}, $sections, 1) unless $user->{section};
 
@@ -1153,11 +1146,10 @@ sub editStory {
 
 	$locktest = lockTest($storyref->{title});
 
-	my $display_codes = $user->{section} ? 'displaycodes_sectional' : 'displaycodes'; 
-	    
-	$description = $slashdb->getDescriptions($display_codes);
-	$displaystatus_select = createSelect('displaystatus', $description, $storyref->{displaystatus}, 1);
-
+	unless ($user->{section}) {
+		$description = $slashdb->getDescriptions('displaycodes');
+		$displaystatus_select = createSelect('displaystatus', $description, $storyref->{displaystatus}, 1);
+	}
 	$description = $slashdb->getDescriptions('commentcodes');
 	$commentstatus_select = createSelect('commentstatus', $description, $storyref->{commentstatus}, 1);
 
@@ -1323,7 +1315,8 @@ sub listStories {
 	}
 
 	for (@$storylist) {
-		my($hits, $comments, $sid, $title, $aid, $time_plain, $topic, $subsection,$section,
+		my($hits, $comments, $sid, $title, $aid, $time_plain, $topic,
+			$subsection, $section,
 			$displaystatus, $writestatus) = @$_;
 		my $time = timeCalc($time_plain, '%H:%M', 0);
 		my $td   = timeCalc($time_plain, '%A %B %d', 0);
@@ -1345,7 +1338,6 @@ sub listStories {
 			'time'		=> $time,
 			canedit		=> $canedit,
 			topic		=> $topic,
-			subsection	=> $subsection,
 			section		=> $section,
 			td		=> $td,
 			td2		=> $td2,
@@ -1447,7 +1439,12 @@ sub updateStory {
 
 	my $tid_ref;
 	my $default_set = 0;
-	my $topic = $form->{tid};
+
+	# Some users can only post to a fixed section
+	if (my $section = getCurrentUser('section')) {
+		$form->{section} = $section;
+		$form->{displaystatus} = 1;
+	}
 
 	$form->{dept} =~ s/ /-/g;
 
@@ -1461,10 +1458,6 @@ sub updateStory {
 		? $slashdb->getTime()
 		: $form->{'time'};
 
-	if ($constants->{use_alt_topic} && $constants->{enable_index_topic} && $constants->{organise_stories}) {
-	    $topic = $form->{$constants->{organise_stories}};
-	}
-
 	if ($constants->{multitopics_enabled}) {
 		for my $k (keys %$form) {
 		    if ($k =~ /tid_(.*)/) {
@@ -1472,9 +1465,9 @@ sub updateStory {
 		    }
 		}
 		for (@{$tid_ref}) {
-		    $default_set++ if ($_ eq $topic && $topic);
+		    $default_set++ if ($_ eq $form->{tid} && $form->{tid});
 		}
-		push @$tid_ref, $topic if !$default_set;
+		push @$tid_ref, $form->{tid} if !$default_set;
 	
 		$slashdb->setStoryTopics($form->{sid}, $tid_ref);
 	}
@@ -1488,7 +1481,7 @@ sub updateStory {
 		sid		=> $form->{sid},
 		title		=> $form->{title},
 		section		=> $form->{section},
-		tid		=> $topic,
+		tid		=> $form->{tid},
 		dept		=> $form->{dept},
 		'time'		=> $time,
 		displaystatus	=> $form->{displaystatus},
@@ -1551,14 +1544,51 @@ sub displaySlashd {
 }
 
 ##################################################################
+sub displayRecent {
+	my($form, $slashdb, $user, $constants) = @_;
+	my($min, $max) = (undef, undef);
+	$min = $form->{min} if defined($form->{min});
+	$max = $form->{max} if defined($form->{max});
+	my $startat = $form->{startat} || undef;
+
+	my $max_cid = $slashdb->sqlSelect("MAX(cid)", "comments");
+	my $recent_comments = $slashdb->getRecentComments({
+		min	=> $min,
+		max	=> $max,
+		startat	=> $startat,
+		num	=> 30,
+	}) || [ ];
+
+	my $id_vislen = $constants->{id_md5_vislength};
+	my $subj_vislen = 30;
+	for my $comm (@$recent_comments) {
+		$comm->{ipid_vis} = substr($comm->{ipid}, 0, $id_vislen);
+		$comm->{subject_vis} = substr($comm->{subject}, 0, $subj_vislen);
+		$comm->{date} = substr($comm->{date}, 5); # strip off year
+	}
+
+	slashDisplay('recent', {
+		startat		=> $startat,
+		max_cid		=> $max_cid,
+		recent_comments	=> $recent_comments,
+		min		=> $min,
+		max		=> $max,
+	});
+}
+
+##################################################################
 sub saveStory {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my $edituser = $slashdb->getUser($form->{uid});
 	my $tid_ref;
-	my $topic = $form->{tid};
 	my $default_set = 0;
 
+	# In the previous form of this, a section only
+	# editor could assign a story to a different user
+	# and bypass their own restrictions for what section
+	# they could post to. -Brian
+	$form->{displaystatus} ||= 1 if ($user->{section} || $edituser->{section});
 	if ($user->{section} || $edituser->{section}) {
 		$form->{section} = $user->{section} ? $user->{section} : $edituser->{section};
 	}
@@ -1575,11 +1605,6 @@ sub saveStory {
 		? $slashdb->getTime()
 		: $form->{'time'};
 
-	
-	if ($constants->{use_alt_topic} && $constants->{enable_index_topic} && $constants->{organise_stories}) {
-	    $topic = $form->{$constants->{organise_stories}};
-	}
-
 	# used to just pass $form to createStory, which is not
 	# a good idea because you end up getting form values 
 	# such as op and apache_request saved into story_param
@@ -1589,7 +1614,7 @@ sub saveStory {
 		title		=> $form->{title},
 		section		=> $form->{section},
 		submitter	=> $form->{submitter},
-		tid		=> $topic,
+		tid		=> $form->{tid},
 		dept		=> $form->{dept},
 		'time'		=> $time,
 		displaystatus	=> $form->{displaystatus},
@@ -1608,6 +1633,7 @@ sub saveStory {
 			$data->{$key} = $form->{$key} if $form->{$key};
 		}
 	}
+#use Data::Dumper; print STDERR "saveStory createStory extras '@$extras' data " . Dumper($data);
 	my $sid = $slashdb->createStory($data);
 
 	# we can use multiple values in forms now, we don't
@@ -1619,23 +1645,22 @@ sub saveStory {
 		    }
 		}
 		for (@{$tid_ref}) {
-		    $default_set++ if $_ eq $topic;
+		    $default_set++ if $_ eq $form->{tid};
 		}
-		push @$tid_ref, $topic if !$default_set;
+		push @$tid_ref, $form->{tid} if !$default_set;
 	
 		$slashdb->setStoryTopics($sid, $tid_ref);
 	}
 
 	if ($sid) {
-
 		my $section = $slashdb->getSection($form->{section});
 		my $rootdir = $section->{rootdir} || $constants->{rootdir};
 
 		my $id = $slashdb->createDiscussion( {
 			title	=> $form->{title},
 			section	=> $form->{section},
-			topic	=> $topic,
-			url	=> "$rootdir/article.pl?sid=$sid&tid=$topic",
+			topic	=> $form->{tid},
+			url	=> "$rootdir/article.pl?sid=$sid&tid=$form->{tid}",
 			sid	=> $sid,
 			ts	=> $form->{'time'}
 		});

@@ -149,7 +149,6 @@ sub getRDF {
 
 	my($bid, $url, $other) = @_;
 	my $rss = new XML::RSS;
-	$rss->strict(0);
 	my $template_name ||= $slashdb->getBlock($bid, 'rss_template');
 	my $items ||= $slashdb->getBlock($bid, 'items');
 	$items ||= $constants->{max_items};
@@ -161,16 +160,9 @@ sub getRDF {
 		portaldLog("failed to get $bid: $@");
 		return;
 	}
-    $d =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g;
+	$d =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g;
 
-    eval { $rss->parse($d) };
-
-    # to compensate for sf.net's broken rss
-    if ($@) { 
-	    $d =~ s/[^[:print:]]//g;
-
-	    eval { $rss->parse($d) } 
-	}
+	eval { $rss->parse($d) };
 
 	if ($@) {
 		portaldLog("$bid did not parse properly:$@");

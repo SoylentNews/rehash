@@ -288,12 +288,12 @@ sub formkeyHandler {
 		$slashdb->updateFormkeyId($formname, $formkey, $user->{uid}, $form->{rlogin}, $form->{upasswd});
 	} elsif ($formkey_op eq 'valid_check') {
 		my $valid = $slashdb->validFormkey($formname, $options);
-print STDERR "formkeyHandler valid_check formname $formname valid '$valid'\n";
+#print STDERR "formkeyHandler valid_check valid '$valid'\n";
 		if ($valid eq 'ok') {
 			# All is well.
 		} else {
 			$msg = formkeyError($valid, $formname);
-print STDERR "formkeyHandler valid_check valid '$valid' formname '$formname' msg '$msg'\n";
+#print STDERR "formkeyHandler valid_check valid '$valid' formname '$formname' msg '$msg'\n";
 			if ($valid eq 'invalidhcretry'
 				|| $valid eq 'invalidhc') {
 				# It's OK, the user can retry.
