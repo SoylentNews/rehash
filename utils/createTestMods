@@ -149,9 +149,11 @@ my(%comments, %comment_data);
 				$comment_data{$did}{$cid}{points},
 				$comment_data{$did}{$cid}{points} + $reasons->{$reason}{val},
 				$reason);
-			$slashdb->setModeratorLog(
+			my $user = { uid => $uid };
+			setRandomIPID($user);
+			$slashdb->createModeratorLog(
 				$comment,
-				$uid,
+				$user,
 				$modval,
 				$reason,
 				($active = (rand(100) > 95) ? 0 : 1),
@@ -209,6 +211,44 @@ sub getRandomUserID {
         return $ret;
 } }
 
+# CLOSURE!
+{ 
+my(@subnets) = ();
+sub setRandomIPID {
+        my $user = shift;
+        my $seed = int(rand(65536));
+
+        if (!@subnets) {
+                # We now generate 10 random subnets which we will use for
+                # the rest of this execution.
+                srand(12345); 
+                while (@subnets < 10) {
+                        my $subnet = sprintf "%d.%d.%d",
+                                1+rand 254, 1+rand 254, 1+rand 254;
+                        push @subnets, $subnet;
+                }
+        }
+
+        srand($user->{uid} + (time % 5));
+        my $uid10 = $user->{uid} % 10;
+        my $quad3;
+        my $fourth;
+        if ($uid10 < rand(10)) {
+                $quad3 = $subnets[$uid10];
+                if ($uid10 < rand(10)) {
+                        $fourth = $uid10 + 1 + (int($user->{uid}/50) % 254);
+                } else {
+                        $fourth = 1+int(rand(4))*int(rand(4))*int(rand(12));
+                }
+        } else {
+                $quad3 = $subnets[rand($#subnets + 1)];
+                $fourth = 1+int(rand(16))*int(rand(16));
+        }
+        $user->{subnetid} = md5_hex("$quad3.0");
+        $user->{ipid} = md5_hex("$quad3.$fourth");
+        srand($$ + time + $seed);
+}
+}
 
 sub usage {
 	print "*** $_[0]\n" if $_[0];

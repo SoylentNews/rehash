@@ -433,7 +433,8 @@ $install->create({ name => 'db_driver',			value => "$driver"});
 #$install->installPlugins(\@plugins, 0, $symlink);
 $install->installTheme($theme, 0, $symlink);
 
-my $uid = $slashdb->createUser($username, $email, $username);
+(my $matchname = lc $username) =~ s/[^a-zA-Z0-9]//g;
+my $uid = $slashdb->createUser($matchname, $email, $username);
 $slashdb->setUser($uid, {
 	passwd => $password,
 	author => 1,

@@ -1422,7 +1422,7 @@ sub moderateCid {
 	}
 
 	# Write the proper records to the moderatorlog.
-	$slashdb->setModeratorLog($comment, $user->{uid}, $val, $reason, $active,
+	$slashdb->createModeratorLog($comment, $user, $val, $reason, $active,
 		$pointsneeded);
 
 	if ($active) {

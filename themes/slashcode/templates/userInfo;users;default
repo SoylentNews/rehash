@@ -13,6 +13,7 @@ Display user's info
 * admin_block = admin stuff
 * admin_flag = boolean for whether to display admin stuff
 * fieldkey = the field key used to decide what we're looking at
+* reasons = hashref from $slashdb->getReasons()
 
 __title__
 
@@ -100,23 +101,39 @@ comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
 [% END %][% END %][% END %]</B><P>
 
 [% n = min_comment %]
-[% FOREACH comment = commentstruct %]
-	[% n = n + 1 %]
-	[% replies = comment.replies ? " Replies: $comment.replies" : "" %]
-	[% IF comment.type == 'poll';
-		label   = "Poll: $comment.disc_title ";
+[% FOREACH comment = commentstruct;
+
+	n = n + 1;
+	replies = comment.replies ? 'Replies:' _ comment.replies _ '; ' : '';
+	score = 'Score:' _ comment.pts;
+	reasonnum = comment.reason;
+	reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
+	IF comment.type == 'poll';
+		label = 'Poll: ';
 	ELSIF comment.type == 'journal';
-		label   = "Journal Discussion: $comment.disc_title";
+		label = 'Journal Discussion: ';
 	ELSE;
-		label    = comment.disc_title;
-	END %]
-<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
-   [% comment.subj %]</A> posted on [% comment.cdate %]
-        (Score:[% comment.pts %][% replies %])
-      <FONT SIZE="2">
-           <BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
-      </FONT>
-[% END %]
+		label = '';
+	END;
+	label = label _ comment.disc_title;
+
+	'<BR><B>'; n; '</B> ';
+	'<A HREF="';
+		constants.rootdir;
+		'/comments.pl?sid='; comment.sid;
+		'&amp;cid='; comment.cid;
+	'">';
+	comment.subj;
+	'</A> posted on ';
+	comment.cdate;
+	' ('; replies; score; reasontext; ') ';
+	'<FONT SIZE="2">';
+		'<BR>attached to <A HREF="';
+			comment.url;
+		'">'; label; '</A>';
+	'</FONT>';
+
+END %]
 
 [% IF admin_flag && commentcount > n %] 
 <P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]"
@@ -133,7 +150,7 @@ comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
 [% END %]
 
 [% IF stories %]
-<P><B>[% IF nick_match %]You have[% ELSE %][% nick %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B>
+<P><B>[% IF nick_match %]You have[% ELSE %][% useredit.nickname %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B>
 <P>
 [% n = 0 %]
 [% FOREACH story = stories %]

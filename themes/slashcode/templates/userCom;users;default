@@ -4,6 +4,14 @@ __description__
 Display user's info
 
 * title = passed to titlebar
+* useredit = hashref of info of the user being viewed
+* commentstruct = arrayref of comments
+* commentcount = count of comments
+* min_comment = min comment to start displaying
+* nickmatch_flag = current user is same as viewed user
+* karma_flag = boolean for display karma
+* admin_flag = boolean for whether to display admin stuff
+* reasons = hashref from $slashdb->getReasons()
 
 __title__
 
@@ -15,44 +23,79 @@ __name__
 userCom
 __template__
 [% USE Slash %]
-[% IF nick_match %]
+
+[% IF nickmatch_flag %]
 	[% title = "Your Comments" %]
 [% ELSE %]
 	[% title = "$nick's Comments" %]
 [% END %]
+
 [% PROCESS titlebar width="100%" %]
 
-[% IF user.is_admin && (admin_flag || nickmatch_flag)  %]
-        <BR><B>Karma</B> [% useredit.karma %] (mostly the sum of moderation done to users comments)<BR>
+<BR>
+[% IF karma_flag && (admin_flag || nickmatch_flag)  %]
+        <B>Karma:</B>
+        [% IF constants.karma_obfuscate;
+                FOREACH score = constants.karma_adj.keys.nsort;
+                        IF useredit.karma <= score;
+                                constants.karma_adj.$score;
+                                IF admin_flag;
+                                        " ("; useredit.karma; ") ";
+                                END;
+                                " (mostly affected by moderation done to your comments)";
+                                LAST;
+                        END;
+                END;
+        ELSE;
+                useredit.karma; "  (mostly the sum of moderation done to your comments)";
+        END; %]<BR>
 [% END %]
 
-<BR><B>[%IF nick_match %]You have[% ELSE %][% nick %] has[% END %] [% commentcount %] comments.
+<BR><B>[% useredit.nickname %] has posted [% commentcount %]
+comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
+[% IF commentcount > 1 %]
 [% IF commentcount > commentstruct.size %]Below find
 [% IF min_comment == 0 %]the most recent [% commentstruct.size %] comments.
 [% ELSE %][% commentstruct.size %] of them.
-[% END %][% END %]</B><P>
+[% END %][% END %][% END %]</B><P>
 
 [% n = min_comment %]
-[% FOREACH comment = commentstruct %]
-	[% n = n + 1 %]
-	[% replies = comment.replies ? " Replies: $comment.replies" : "" %]
-	[% IF comment.type == 'poll';
-		label   = "Poll: $comment.disc_title ";
-	ELSIF comment.type == 'journal';
-		label   = "Journal Discussion: $comment.disc_title";
-	ELSE;
-		label    = comment.disc_title;
-	END %]
-<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
-   [% comment.subj %]</A> posted on [% comment.cdate %]
-        (Score:[% comment.pts %][% replies %])
-      <FONT SIZE="2">
-           <BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
-      </FONT>
-[% END %]
+[% FOREACH comment = commentstruct;
 
-[% IF user.is_admin && commentcount > n %] 
-<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% nick_plain | fixparam %]&amp;min_comment=[% n %]"
+        n = n + 1;
+        replies = comment.replies ? 'Replies:' _ comment.replies _ '; ' : '';
+        score = 'Score:' _ comment.pts;
+        reasonnum = comment.reason;
+        reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
+        IF comment.type == 'poll';
+                label = 'Poll: ';
+        ELSIF comment.type == 'journal';
+                label = 'Journal Discussion: ';
+        ELSE;
+                label = '';
+        END;
+        label = label _ comment.disc_title;
+
+        '<BR><B>'; n; '</B> ';
+        '<A HREF="';
+                constants.rootdir;
+                '/comments.pl?sid='; comment.sid;
+                '&amp;cid='; comment.cid;
+        '">';
+        comment.subj;
+        '</A> posted on ';
+        comment.cdate;
+        ' ('; replies; score; reasontext; ') ';
+        '<FONT SIZE="2">';
+                '<BR>attached to <A HREF="';
+                        comment.url;
+                '">'; label; '</A>';
+        '</FONT>';
+
+END %]
+
+[% IF admin_flag && commentcount > n %]
+<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]"
 >More Comments...</A><P>
 [% END %]
 

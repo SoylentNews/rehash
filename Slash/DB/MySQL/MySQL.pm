@@ -306,6 +306,7 @@ sub createComment {
 	delete $comment->{comment};
 	$comment->{signature} = md5_hex($comment_text);
 	$comment->{-date} = 'now()';
+	$comment->{pointsorig} = $comment->{points} || 0;
 
 	my $cid;
 	if ($self->sqlInsert('comments', $comment)) {
@@ -422,19 +423,21 @@ sub _set_csq {
 }
 
 ########################################################
-sub setModeratorLog {
-	my($self, $comment, $uid, $val, $reason, $active, $points_spent) = @_;
+sub createModeratorLog {
+	my($self, $comment, $user, $val, $reason, $active, $points_spent) = @_;
 
 	$active = 1 unless defined $active;
 	$points_spent = 1 unless defined $points_spent;
 	$self->sqlInsert("moderatorlog", {
-		uid	=> $uid,
+		uid	=> $user->{uid},
+		ipid	=> $user->{ipid} || "",
+		subnetid => $user->{subnetid} || "",
 		val	=> $val,
 		sid	=> $comment->{sid},
 		cid	=> $comment->{cid},
 		cuid	=> $comment->{uid},
 		reason  => $reason,
-		-ts	=> 'now()',
+		-ts	=> 'NOW()',
 		active 	=> $active,
 		spent	=> $points_spent,
 	});
@@ -671,12 +674,20 @@ sub getMetamodsForUserRaw {
 	my $consensus = $constants->{m2_consensus};
 	my $waitpow = $constants->{m2_consensus_waitpow} || 1;
 
-	my $days_back = $constants->{archive_delay};
+	my $days_back = $constants->{archive_delay_mod};
 	my $days_back_cushion = int($days_back/10);
 	$days_back_cushion = $constants->{m2_min_daysbackcushion} || 2
 		if $days_back_cushion < ($constants->{m2_min_daysbackcushion} || 2);
 	$days_back -= $days_back_cushion;
 
+	# XXX I'm considering adding a 'WHERE m2status=0' clause to the
+	# MIN/MAX selects below.  This might help choose mods more
+	# smoothly and make failure (as archive_delay_mod is approached)
+	# less dramatic too.  On the other hand it might screw things
+	# up, making older mods at N-1 M2's never make it to N.  I've
+	# run tests on changes like this before and there's almost no
+	# way to predict accurately what it will do on a live site
+	# without doing it... -Jamie 2002/11/16
 	my($min_old) = $self->sqlSelect("MIN(id)", "moderatorlog");
 	my($max_old) = $self->sqlSelect("MAX(id)", "moderatorlog",
 		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)");
@@ -1543,13 +1554,16 @@ sub getUserEmail {
 #################################################################
 # Turns out it is faster to hit the disk, so forget about
 # comment_heap
+# Yet another method that really should return an arrayref of
+# hashrefs, instead of an arrayref of arrayrefs.  This is
+# currently only used in users.pl  -Jamie
 sub getCommentsByGeneric {
 	my($self, $where_clause, $num, $min) = @_;
 	$min ||= 0;
 
-	my $sqlquery = "SELECT pid,sid,cid,subject,date,points "
-			. " FROM comments WHERE $where_clause "
-			. " ORDER BY date DESC LIMIT $min, $num ";
+	my $sqlquery = "SELECT pid,sid,cid,subject,date,points,uid,reason"
+			. " FROM comments WHERE $where_clause"
+			. " ORDER BY date DESC LIMIT $min, $num";
 
 	my $sth = $self->{_dbh}->prepare($sqlquery);
 	$sth->execute;
@@ -3720,7 +3734,7 @@ sub multiMetaMod {
 # Return: nothing.
 # Note that karma and token changes as a result of metamod are
 # done in the run_moderatord task.
-sub setMetaMod {
+sub createMetaMod {
 	my($self, $m2_user, $m2s, $multi_max) = @_;
 	my $constants = getCurrentStatic();
 	my $consensus = $constants->{m2_consensus};
@@ -5072,12 +5086,12 @@ sub getSlashConf {
 	my %conf_fixup_hashes = (
 		# var name			# default hash of keys/values
 		# --------			# --------------------
-		ad_messaging_sections =>	[ ],
-		comments_perday_bykarma =>	[  -1 => 2,		25 => 25,	99999 => 50          ],
-		karma_adj =>			[ -10 => 'Terrible',	-1 => 'Bad',	    0 => 'Neutral',
-						   12 => 'Positive',	25 => 'Good',	99999 => 'Excellent' ],
-		mod_up_points_needed =>		[ ],
-		m2_consequences =>		[ 0.00 => [qw(  0    +2   -100 -1   )],
+		ad_messaging_sections =>	{ },
+		comments_perday_bykarma =>	{  -1 => 2,		25 => 25,	99999 => 50          },
+		karma_adj =>			{ -10 => 'Terrible',	-1 => 'Bad',	    0 => 'Neutral',
+						   12 => 'Positive',	25 => 'Good',	99999 => 'Excellent' },
+		mod_up_points_needed =>		{ },
+		m2_consequences =>		{ 0.00 => [qw(  0    +2   -100 -1   )],
 						  0.15 => [qw( -2    +1    -40 -1   )],
 						  0.30 => [qw( -0.5  +0.5  -20  0   )],
 						  0.35 => [qw(  0     0    -10  0   )],
@@ -5086,7 +5100,7 @@ sub getSlashConf {
 						  0.70 => [qw(  0     0     +2  0   )],
 						  0.80 => [qw( +0.01 -1     +3  0   )],
 						  0.90 => [qw( +0.02 -2     +4  0   )],
-						  1.00 => [qw( +0.05  0     +5 +0.5 )],	]
+						  1.00 => [qw( +0.05  0     +5 +0.5 )],	}
 	);
 	for my $key (keys %conf_fixup_arrays) {
 		if (defined($conf{$key})) {
