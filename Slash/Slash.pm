@@ -703,7 +703,7 @@ sub _getTopModReasons{
 	my @reasonsTop = ( );
 
 	# Algorithm by MJD in Perl Quiz of the Week #7
-	# http://perl.plover.com/qotw/r/007
+	# http://perl.plover.com/qotw/r/solution/007
 	my @p = map { $_*10/$reasonTotal } @reasonHist;
 	my @r = map { int($_+0.5) } @p;
 	my @e = map { $p[$_] - $r[$_] } (0..$#r);
