@@ -14,6 +14,36 @@ slash-1.0.5, 2000.06.05
 *	Added /'s before links in mainmenu block in slashdata_dump.sql
 	(David-T)
 
+*	Took form checking code out of .pl files and put into methods
+	in Slash.pm - 
+		insertFormkey - inserts new formkey
+		checkSubmission - checks to see if a form submission is valid
+		checkTimesPosted - checks to see if max posts reached
+		submittedAlready - checks to see if a form with a given 
+		formkey has been posted already
+		formAbuse - logs attempts to fook, break, or flood a 
+		particlar form
+		formSuccess - updates formkeys table with a submit time 
+		for a given formkey and increments value to 1 (submitted).	
+		
+*	Warn user before they try to submit that max submissions has
+	been reached (comments.pl and submit.pl)
+
+* 	Fixed code to check if formkey for a submission is being submitted 
+	by the IP address that it was initially created under.
+ 
+*	Changed the id column in formkeys to be "uid-$ENV{REMOTE_ADDR}" 
+	(was just uid) for logged in users
+
+*	New method in Slash.pm - errorMessage. Prints out whatever 
+	argument it receives 
+
+* 	Added/modified tables 
+		abusers - added columns reason, query_string 
+		formkey - changed comment_length to content length
+		host_name - changed to varchar(30) - was varchar(15) 
+		
+
 slash-1.0.4, 2000.05.31
 -----------------------
 

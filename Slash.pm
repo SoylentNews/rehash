@@ -55,7 +55,7 @@ BEGIN {
 		getDateFormat dispComment getDateOffset linkComment redirect
 		getFormkey insertFormkey getFormkeyId checkFormkey intervalString
 		checkSubmission checkTimesPosted formSuccess formAbuse submittedAlready
-		formFailure
+		formFailure errorMessage
 	);
 	$CRLF = "\015\012";
 }
@@ -1465,12 +1465,12 @@ EOT
 
 ########################################################
 sub header {
-	my($title, $section, $status) = @_;
+	my($title, $section) = @_;
 	my $adhtml = '';
 	$title ||= '';
 
 	unless ($I{F}{ssi}) {
-		printf "HTTP/1.0 %s$CRLF", $status ? $status : '200 OK';
+		print "HTTP/1.1 200 OK$CRLF";
 		print $I{SETCOOKIE} if $I{SETCOOKIE};
 		print "Server: $ENV{SERVER_SOFTWARE}$CRLF" if $ENV{SERVER_SOFTWARE};
 		print "Pragma: no-cache$CRLF"
@@ -2708,31 +2708,44 @@ sub submittedAlready {
 
 		my ($submitted_already,$submit_ts) = 0;
 
-		# find out if this form has been submitted already
-		($submitted_already, $submit_ts) = sqlSelect(
-			"value,submit_ts",
-			"formkeys","formkey='$formkey' and formname = '$formname'")
-			or print <<EOT and return(0);
+		my $cant_find_formkey_err =<<EOT;
 <P><B>We can't find your formkey.</B></P>
 <P>You must fill out a form and submit from that
 form as required.</P>
 EOT
+
+		# find out if this form has been submitted already
+		($submitted_already, $submit_ts) = sqlSelect(
+			"value,submit_ts",
+			"formkeys","formkey='$formkey' and formname = '$formname'")
+			or errorMessage($cant_find_formkey_err) and return(0);
+
 		if($submitted_already) {
 			# interval of when it was submitted (this won't be used unless it's already been submitted)
 			my $interval = time() - $submit_ts;
 			my $interval_string = intervalString($interval);
-
-			# else print an error
-			print <<EOT;
+			my $submitted_already_err =<<EOT;
 <B>Easy does it!</B>
 <P>This comment has been submitted already, $interval_string ago.
 No need to try again.</P>
 EOT
+
+			# else print an error
+			errorMessage($submitted_already_err);
 		}
 		return($submitted_already);
 }
 
 ##################################################################
+# nice little function to print out errors
+sub errorMessage {
+	my $error_message = shift;
+	print qq|$error_message\n|;
+	return;
+}
+
+##################################################################
+# logs attempts to break, fool, flood a particular form 
 sub formAbuse {
 	my $reason = shift;
 	# logem' so we can banem'
@@ -2744,7 +2757,6 @@ sub formAbuse {
                	-ts => 'now()',
 	});
 
-	print qq|<br><b>There was an error submitting the form $ENV{SCRIPT_NAME}: $reason!</b><br>\n|;
 	return;
 }
 		
@@ -2800,12 +2812,13 @@ sub checkSubmission {
 	if ($interval < $limit) {
 		my $limit_string = intervalString($limit);
 		my $interval_string = intervalString($interval);
-		print <<EOT;
+		my $speed_limit_err =<<EOT;
 <B>Slow down cowboy!</B><BR>
 <P>$I{sitename} requires you to wait $limit_string between
 each submission of $ENV{SCRIPT_NAME} in order to allow everyone to have a fair chance to post.</P>
 It's been $interval_string since your last submission!<BR>
 EOT
+		errorMessage($speed_limit_err);
 		return(0);
 	} else {
 		# check to see if they haven't posted past their limit 
@@ -2817,6 +2830,8 @@ EOT
 			if ($I{F}{formkey} !~ /\w{10}/ || $I{F}{formkey} =~ /^(.)\1+$/ || ! $is_a_valid_key) {
 				# invalid form key
 				formAbuse("invalid form key");
+				my $invalid_formkey_err = "<br><b>Invalid form key!</b><br>\n"; 
+				errorMessage($invalid_formkey_err);
 				return(0);
 			} 
 
@@ -2829,6 +2844,12 @@ EOT
 		# they posted past their limit
 		} else {
 			formAbuse("max form submissions $max reached");
+			my $timeframe_string = intervalString($I{formkey_timeframe});
+			my $max_posts_err =<<EOT;
+<b>You've reached you limit of maximum submissions to $ENV{SCRIPT_NAME} : 
+$max submissions over $timeframe_string!</b><br>
+EOT
+			errorMessage($max_posts_err);
 			return(0);
 		}
 		

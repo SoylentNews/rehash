@@ -89,7 +89,7 @@ sub main {
 		# find out their Karma
 		($I{U}{karma}) = sqlSelect("karma", "users_info",
 			"uid=$I{U}{uid}") if $I{U}{uid} > 0;
-		editComment();
+		editComment($id);
 
 
 	} elsif ($I{F}{op} eq "delete" && $I{U}{aseclev}) {
@@ -173,7 +173,10 @@ sub saveChanges {
 # Welcome to one of the ancient beast functions.  The comment editor
 # is the form in whcih you edit a comment.
 sub editComment {
+	my $id = shift;
 	$I{U}{points} = 0;
+
+	my $formkey_earliest = time() - $I{formkey_timeframe};
 
 	my $reply = sqlSelectHashref(getDateFormat("date", "time") . ",
 		subject,comments.points as points,comment,realname,nickname,
@@ -194,6 +197,13 @@ sub editComment {
 EOT
 		dispComment($reply);
 		print "\n</TABLE><P>\n\n";
+	}
+
+	if(! checkTimesPosted("comments",$I{max_posts_allowed},$id,$formkey_earliest)) {
+		my $max_posts_warn =<<EOT;
+<br><b>Warning! you've exceeded max allowed submissions for the day : $I{max_submissions_allowed}</b><br>	
+EOT
+		errorMessage($max_posts_warn);
 	}
 
 	if (!$I{allow_anonymous} && (!$I{U}{uid} || $I{U}{uid} < 1)) {

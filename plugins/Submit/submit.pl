@@ -440,9 +440,10 @@ sub displayForm {
 	my $formkey_earliest = time() - $I{formkey_timeframe};
 
 	if(! checkTimesPosted("submissions",$I{max_submissions_allowed},$id,$formkey_earliest)) {
-		print <<EOT;
+		my $max_posts_warn =<<EOT;
 <br><b>Warning! you've exceeded max allowed submissions for the day : $I{max_submissions_allowed}</b><br>	
 EOT
+		errorMessage($max_posts_warn);
 	}
 
 	print <<EOT if $I{submiss_view};
