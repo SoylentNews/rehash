@@ -45,7 +45,7 @@ gstatic total:        -          -   [% grand_total_static %]
 [% IF journal_page > 0 -%]
      journals: [% journal_uids %]   [% journal_ipids %]   [% journal_page %] ([% journal_bytes %])
 [% END -%]
-[% IF users__page > 0 -%]
+[% IF users_page > 0 -%]
         users: [% users_uids %]   [% users_ipids %]   [% users_page %] ([% users_bytes %])
 [% END -%]
 [% IF palm_page > 0 -%]
