@@ -95,6 +95,10 @@ __template__
 		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="retrieve" [% retrieve_checked %]></TD>
 	</TR>
 	<TR>
+		<TD><B>All Sections</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="all_sections" [% all_sections_checked %]></TD>
+	</TR>
+	<TR>
 		<TD><B>URL</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="url" VALUE="[% blockref.url %]"><BR></TD>
 	</TR>

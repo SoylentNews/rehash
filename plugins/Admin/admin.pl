@@ -487,7 +487,7 @@ sub blockEdit {
 		print getData('blockDelete-message', { bid => $form->{deletebid} });
 	}
 
-	my($blockref, $saveflag, $block_select, $retrieve_checked,
+	my($blockref, $saveflag, $block_select, $retrieve_checked, $all_sections_checked,
 		$portal_checked, $block_select1, $block_select2);
 	my($blockedit_flag, $blockdelete_flag, $blockform_flag) = (0, 0, 0);
 	$blockref = {};
@@ -535,6 +535,7 @@ sub blockEdit {
 			$blockedit_flag = 1;
 			$blockref->{ordernum} = "NA" if $blockref->{ordernum} eq '';
 			$retrieve_checked = "CHECKED" if $blockref->{retrieve} == 1;
+			$all_sections_checked = "CHECKED" if $blockref->{all_sections} == 1;
 			$portal_checked = "CHECKED" if $blockref->{portal} == 1;
 		}
 	}
@@ -555,6 +556,7 @@ sub blockEdit {
 		blockform_flag		=> $blockform_flag,
 		portal_checked		=> $portal_checked,
 		retrieve_checked	=> $retrieve_checked,
+		all_sections_checked	=> $all_sections_checked,
 		blocktype_select	=> $blocktype_select,
 		sectionbid		=> $sectionbid,
 		autosubmit_select	=> $autosubmit_select,
