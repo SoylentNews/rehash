@@ -39,11 +39,17 @@ $task{$me}{code} = sub {
 		push @dates, $date;
 	}
 	
-	my $start_id = $constants->{cur_performance_stats_lastid} || 0;
-	my $hist_results = $slashdb->avgDynamicDurationForHour($ops, \@dates, $cur_hour);
+	my $start_id = $slashdb->getVar('cur_performance_stats_lastid','value', 1) || 0;
+	my ($cur_results, $hist_results);
+	
 	my ($max_id) = $logdb->sqlSelect("MAX(id)", "accesslog");
-	my $cur_results  = $logdb->avgDynamicDurationForMinutesBack($ops, 1, $start_id);
+	if ($start_id) {
+		$hist_results = $slashdb->avgDynamicDurationForHour($ops, \@dates, $cur_hour);
+		$cur_results  = $logdb->avgDynamicDurationForMinutesBack($ops, 1, $start_id);
+	}
 	$slashdb->setVar("cur_performance_stats_lastid", $max_id);
+	return if !$start_id;
+	
 
 	my @results;
 
@@ -54,7 +60,7 @@ $task{$me}{code} = sub {
 		my $hist_duration  = $hist_results->{"duration_dy\_$op\_$cur_hour\_mean"}{avg};
 		my $cur_duration   = $cur_results->{$op}{avg};
 		my $sec     = $cur_duration ? sprintf("%.2f", $cur_duration) : "N/A";
-		my $percent = $hist_duration ? sprintf("%d\%", (($cur_duration / $hist_duration) * 100 ) - 100) : "N/A";
+		my $percent = $hist_duration ? int((100 * $cur_duration / $hist_duration ) - 100)."%" : "N/A";
 		$percent = "+$percent" if $percent=~/^[^N-]/;
 		if ($cur_duration && $hist_duration) {
 			$sum_cur_duration  += $cur_duration;
