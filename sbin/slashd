@@ -874,6 +874,8 @@ sub do_child {
 	# action for SIGCHLD is to ignore it.
 	$SIG{CHLD} = 'DEFAULT';
 
+	setUserDBs($user);
+
 	if (verbosity() >= 4) {
 		slashdLog("Child $$ [$me]: sleep for 1 second after fork()");
 	}

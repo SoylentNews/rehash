@@ -1163,6 +1163,10 @@ sub getTopicTree {
 
 	# Cache needs to be built, so build it.
 	my $tree_ref = $self->{$table_cache} ||= {};
+	if (my $regex = $constants->{debughash_getTopicTree}) {
+		$tree_ref = debugHash($regex, $tree_ref) unless tied($tree_ref);
+	}
+
 	my $topics = $self->sqlSelectAllHashref("tid", "*", "topics");
 	my $topic_nexus = $self->sqlSelectAllHashref("tid", "*", "topic_nexus");
 	my $topic_nexus_dirty = $self->sqlSelectAllHashref("tid", "*", "topic_nexus_dirty");
@@ -9091,8 +9095,12 @@ sub getSkins {
 	_genericCacheRefresh($self, 'skins', $expiration);
 	return $self->{$table_cache} if $self->{$table_cache_time};
 
-	my $skins_ref = $self->sqlSelectAllHashref(    "skid",        "*", "skins");
 	my $colors    = $self->sqlSelectAllHashref([qw( skid name )], "*", "skin_colors", "", "GROUP BY skid, name");
+	my $skins_ref = $self->sqlSelectAllHashref(    "skid",        "*", "skins");
+	if (my $regex = $constants->{debughash_getSkins}) {
+		$skins_ref = debugHash($regex, $skins_ref);
+	}
+
 	for my $skid (keys %$skins_ref) {
 		# Set rootdir etc., based on hostname/url, or mainpage's if none
 		my $host_skid  = $skins_ref->{$skid}{hostname} ? $skid : $constants->{mainpage_skid};

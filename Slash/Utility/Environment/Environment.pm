@@ -61,6 +61,9 @@ use vars qw($VERSION @EXPORT);
 	getCurrentVirtualUser
 	getCurrentCache
 
+	setUserDBs
+	saveUserDBs
+
 	createEnvironment
 	getObject
 	getAnonId
@@ -77,6 +80,7 @@ use vars qw($VERSION @EXPORT);
 	eatUserCookie
 	setCookie
 
+	debugHash
 	slashProf
 	slashProfInit
 	slashProfEnd
@@ -1346,36 +1350,12 @@ sub prepareUser {
 	} else {
 		$hostip = '';
 	}
-	
-	# First we find a good reader DB so that we can use that for the user.
-	my $databases = $slashdb->getDBs;
-	my %user_types;
-	for my $type (keys %$databases) {
-		my $db = $databases->{$type};
 
-		# shuffle the deck
-		my $i = @$db;
-		while ($i--) {
-			my $j = int rand($i+1);
-			@$db[$i, $j] = @$db[$j, $i];
-		}
-
-		# there can be only one
-		my $virtual_user;
-		for (@$db) {
-			if ($_->{isalive} eq 'yes') {
-				$virtual_user = $_->{virtual_user};
-				last;
-			}
-		}
-
-		# save in user's state
-		$user_types{$type} = $virtual_user;
-	}
+	# First we find a good reader DB so that we can use that for the user
+	my $user_types = setUserDBs();
+	my $reader = getObject('Slash::DB', { virtual_user => $user_types->{reader} });
 
 	$uid = $constants->{anonymous_coward_uid} unless defined($uid) && $uid ne '';
-
-	my $reader = getObject('Slash::DB', { virtual_user => $user_types{reader} });
 
 	if (isAnon($uid)) {
 		if ($ENV{GATEWAY_INTERFACE}) {
@@ -1391,11 +1371,8 @@ sub prepareUser {
 		$user->{is_anon} = 0;
 	}
 
-	# Now store the DB information from above in the user. -Brian
-	for my $type (keys %user_types) {
-		$user->{state}{dbs}{$type} = $user_types{$type};
-	}
-
+	# Now store the DB information from above in the user
+	saveUserDBs($user, $user_types);
 
 	unless ($user->{is_anon} && $ENV{GATEWAY_INTERFACE}) { # already done in Apache.pm
 		setUserDate($user);
@@ -1506,6 +1483,50 @@ sub prepareUser {
 	return $user;
 }
 
+#========================================================================
+
+sub setUserDBs {
+	my($user) = @_;
+	my $slashdb = getCurrentDB();
+
+	# First we find a good reader DB so that we can use that for the user.
+	my $databases = $slashdb->getDBs;
+	my %user_types;
+	for my $type (keys %$databases) {
+		my $db = $databases->{$type};
+
+		# shuffle the deck
+		my $i = @$db;
+		while ($i--) {
+			my $j = int rand($i+1);
+			@$db[$i, $j] = @$db[$j, $i];
+		}
+
+		# there can be only one
+		my $virtual_user;
+		for (@$db) {
+			if ($_->{isalive} eq 'yes') {
+				$virtual_user = $_->{virtual_user};
+				last;
+			}
+		}
+
+		# save in user's state
+		$user_types{$type} = $virtual_user;
+	}
+
+	saveUserDBs($user, \%user_types) if $user;
+	return \%user_types;
+}
+
+#========================================================================
+
+sub saveUserDBs {
+	my($user, $user_types) = @_;
+	for my $type (keys %$user_types) {
+		$user->{state}{dbs}{$type} = $user_types->{$type};
+	}
+}
 
 #========================================================================
 
@@ -2493,19 +2514,49 @@ sub getCurrentCache {
 ######################################################################
 # for debugging cached hashes, finding out where they are changing
 # inappropriately
+# 
+# to use this, just do something like this to create the hash:
+#
+#   my $skins_ref = $self->sqlSelectAllHashref("skid", "*", "skins");
+#   if (my $regex = $constants->{debughash_getSkins}) {
+#     $skins_ref = debugHash($regex, $skins_ref);
+#   }
+#
+# pass in the regex that contains what a key SHOULD look like (e.g., '^\d+$'),
+# and optionally the original data as a hashref; assign result to variable
+
+sub debugHash {
+	my($regex, $hash) = @_;
+	$hash = {} unless ref $hash eq 'HASH';
+	tie my(%tied), 'Slash::Utility::Environment::Tie', $regex, $hash;
+	return \%tied;
+}
+
 package Slash::Utility::Environment::Tie;
 require Tie::Hash;
-@Slash::Utility::Environment::Tie::ISA = 'Tie::StdHash';
+our @ISA = 'Tie::ExtraHash';
 
-# to use this, just do something like this to create the hash:
-#   tie my(%hash), 'Slash::Utility::Environment::Tie';
-# then modify the condition in STORE below to suit your needs
+sub TIEHASH  {
+	my($class, $regex, $hash) = @_;
+	$hash = {} unless ref $hash eq 'HASH';
+
+	my $ref = ref $regex;
+	unless ($ref && $ref eq 'Regex') {
+		# if no regex, assume any characters are good
+		$regex = '.' unless length $regex;
+		$regex = qr{$regex};
+	}
+
+	return bless [$hash, $regex], $class;
+}
 
 sub STORE {
-	my($hash, $key, $value) = @_;
+	my($ref, $key, $value) = @_;
+	my($hash, $regex) = @$ref;
+
 	$hash->{$key} = $value;
-	if (!$key) {
-		warn "$$: [$key] => [$value] ???? : ", join "|", caller(0);
+	if ($key !~ $regex) {
+		warn "$$: bad hash: [$key] => [$value]: ", join "|", caller(0);
 	}
 }
 
