@@ -3,7 +3,7 @@ use strict;
 use Data::Dumper;
 use SOAP::Lite;
 
-my $host        = 'yaz.pudge.net:8080';
+my $host        = 'www.example.com';
 my $uri         = "http://$host/Slash/SOAP/Test";
 my $proxy       = "http://$host/soap.pl";
 
