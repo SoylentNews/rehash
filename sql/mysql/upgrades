@@ -2485,7 +2485,6 @@ CREATE TABLE topic_param (
 UPDATE vars SET name='m1_pointgrant_factor_upfairratio', description='Factor of upmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' WHERE name='m1_pointgrant_factor_fairratio';
 INSERT INTO vars (name,value,description) SELECT 'm1_pointgrant_factor_downfairratio', value, 'Factor of downmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' FROM vars WHERE name='m1_pointgrant_factor_upfairratio';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
 # SLASHCLUSTER LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
@@ -2506,5 +2505,7 @@ ALTER TABLE stats_daily DROP COLUMN section;
 ALTER TABLE topic_nexus_extras MODIFY COLUMN extras_id MEDIUMINT UNSIGNED NOT NULL auto_increment;
 
 INSERT INTO vars (name, value, description) VALUES ('topic_popup_open', '1', 'Expand all topics by default, or not');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_5_0_22, Start of T_2_5_0_23 - 2004/08/31
