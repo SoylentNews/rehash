@@ -1,10 +1,10 @@
 Summary: Slashdot-Like Automated Story Homepage
 Name: slash
-Version: 1.1.4_bender
+Version: 2.0.0_pre1
 Release: 1
 Copyright: GPL
 Group: Applications/Internet
-Source: ftp://slashcode.sourceforge.net/pub/slashcode/slash-1.1.4-bender.tar.gz
+Source: ftp://slashcode.sourceforge.net/pub/slashcode/slash-2.0.0-pre1.tar.gz
 BuildRoot: /var/tmp/%{name}-buildroot
 
 %description
@@ -13,17 +13,17 @@ It is the code that runs Slashdot. For forums, support, mailing lists, etc.
 please see the Slashcode site.
 
 %prep
-%setup -q -n slash-1.1.4-bender
+%setup -q -n slash-2.0.0-pre1
 
 %build
-make RPM_OPT_FLAGS="$RPM_OPT_FLAGS" PREFIX=$RPM_BUILD_ROOT/usr/local/slash INIT=$RPM_BUILD_ROOT/etc/rc.d USER=99 GROUP=99 RPM=1
+make RPM_OPT_FLAGS="$RPM_OPT_FLAGS" SLASH_PREFIX=$RPM_BUILD_ROOT/usr/local/slash INIT=$RPM_BUILD_ROOT/etc USER=99 GROUP=99 RPM=1
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-mkdir -p $RPM_BUILD_ROOT/etc/rc.d/rc3.d
-mkdir -p $RPM_BUILD_ROOT/etc/rc.d/rc6.d
-make install RPM_OPT_FLAGS="$RPM_OPT_FLAGS" PREFIX=/var/tmp/%{name}-buildroot/usr/local/slash INIT=/var/tmp/%{name}-buildroot/etc/rc.d USER=99 GROUP=99 RPM=1
+mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p $RPM_BUILD_ROOT/etc/rc3.d
+mkdir -p $RPM_BUILD_ROOT/etc/rc6.d
+make install RPM_OPT_FLAGS="$RPM_OPT_FLAGS" SLASH_PREFIX=/var/tmp/%{name}-buildroot/usr/local/slash INIT=/var/tmp/%{name}-buildroot/etc USER=99 GROUP=99 RPM=1
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -32,9 +32,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr (-,nobody,nobody)
 %doc AUTHORS CHANGES COPYING INSTALL MANIFEST MANIFEST.SKIP README
 
-/etc/rc.d/init.d/slash
-/etc/rc.d/rc3.d/S99slash
-/etc/rc.d/rc6.d/K99slash
+/etc/init.d/slash
+/etc/rc3.d/S99slash
+/etc/rc6.d/K99slash
 /usr/local/slash
 /usr/local/slash/bin
 /usr/local/slash/bin/install-slashsite

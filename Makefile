@@ -50,6 +50,7 @@ PREFIX_REPLACE_FILES = utils/slash httpd/slash.conf
 BUILDROOT=/var/tmp/slash-buildroot
 INSTALLSITEARCH=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installsitearch}"'`
 INSTALLSITELIB=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installsitelib}"'`
+INSTALLMAN3DIR=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installman3dir}"'`
 
 #   install the shared object file into Apache 
 # We should run a script on the binaries to get the right
@@ -59,7 +60,7 @@ slash:
 	if ! [ $(RPM) ] ; then \
 		(cd Slash; $(PERL) Makefile.PL; make); \
 	else \
-		(cd Slash; $(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INTALLSITELIB=$(INSTALLSITELIB); make); \
+		(cd Slash; $(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); make); \
 	fi
 
 plugins: 
@@ -70,7 +71,7 @@ plugins:
 		 	if ! [ $(RPM) ] ; then \
 				$(PERL) Makefile.PL; make;\
 			else \
-				$(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB); make; \
+				$(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); make; \
 			fi
 		 fi);
 	fi)
@@ -96,7 +97,7 @@ install: slash plugins
 			if ! [ $(RPM) ] ; then \
 				$(PERL) Makefile.PL; \
 			else \
-				$(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB); \
+				$(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); \
 			fi; \
 			make install; \
 		fi); \
