@@ -1368,7 +1368,9 @@ sub moderate {
 	$slashdb->setDiscussionDelCount($sid, $total_deleted);
 	$was_touched = 1 if $total_deleted;
 
-	slashDisplay('mod_footer');
+	slashDisplay('mod_footer', {
+		metamod_elig => scalar $slashdb->metamodEligible($user),
+	});
 
 	if ($hasPosted && !$total_deleted) {
 		print getError('already posted');
