@@ -34,10 +34,10 @@ ELSE;
 	url = "$story.title ($absdir/article.pl?sid=$story.sid)";
 	sitename = "$constants.sitename ($absdir)";
 END -%]
+<BR><BR><P>
 <hr />
-<BR><BR>
-<P><SMALL><CENTER>&copy; Copyright [% Slash.timeCalc(Slash.db.getTime, "%Y" %]
-- [% constants.sitepublisher %], All Rights Reserved
+<SMALL><CENTER>&copy; Copyright [% Slash.timeCalc(Slash.db.getTime, '%Y') %]
+- [% constants.sitepublisher %], All Rights Reserved</CENTER></SMALL>
 <hr />
 </P>
 <P>
