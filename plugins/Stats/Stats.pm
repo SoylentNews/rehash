@@ -791,12 +791,18 @@ sub getDurationByStaticLocaladdr {
 # the HTTP spec.
 sub getTopReferers {
 	my($self, $options) = @_;
-	my $constants = getCurrentStatic();
 
 	my $count = $options->{count} || 10;
-	my $where = $options->{include_local}
-		? ""
-		: "AND referer NOT LIKE " . $self->sqlQuote($constants->{absolutedir} . "%");
+	my $where;
+	if ($options->{include_local}) {
+		$where = "";
+	} else {
+		my $constants = getCurrentStatic();
+		my $regexp = $constants->{basedomain};
+		$regexp =~ s/\./[.]/g;
+		$regexp = "^https?://([a-z]*[.])?$regexp";
+		$where = " AND referer NOT REGEXP '$regexp'";
+	}
 
 	return $self->sqlSelectAll(
 		"referer, COUNT(*) AS c",
