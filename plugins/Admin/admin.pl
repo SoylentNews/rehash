@@ -1196,11 +1196,7 @@ sub editStory {
 		$subid = $form->{subid};
 		$sid = $form->{sid};
 
-		if (!$form->{'time'} || $form->{fastforward}) {
-			$storyref->{'time'} = $slashdb->getTime();
-		} else {
-			$storyref->{'time'} = $form->{'time'};
-		}
+		$storyref->{'time'} = findTheTime();
 
 		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
 			@stid = grep { $_ } @{$form->{_multi}{stid}};
@@ -1660,9 +1656,7 @@ sub updateStory {
 			$form->{uid}
 		);
 
-	my $time = ($form->{fastforward})
-		? $slashdb->getTime()
-		: $form->{'time'};
+	my $time = findTheTime();
 
 	$slashdb->setStoryTopics($form->{sid}, createStoryTopicData($slashdb, $form));
 	$form->{introtext} = slashizeLinks($form->{introtext});
@@ -1863,9 +1857,7 @@ sub saveStory {
 	$form->{introtext} = balanceTags($form->{introtext});
 	$form->{bodytext} =  balanceTags($form->{bodytext});
 
-	my $time = ($form->{fastforward})
-		? $slashdb->getTime()
-		: $form->{'time'};
+	my $time = findTheTime();
 
 	# used to just pass $form to createStory, which is not
 	# a good idea because you end up getting form values 
@@ -1924,6 +1916,41 @@ sub getTitle {
 	$hashref->{value} = $value;
 	return slashDisplay('titles', $hashref,
 		{ Return => 1, Nocomm => $nocomm });
+}
+
+##################################################################
+# Based on $form, returns the time for a story we're saving.  It
+# takes a look at the 'fastforward' checkbox, handles a blank field
+# semi-intelligently, and rounds all times down to the minute to
+# avoid triggering an annoying (if relatively harmless) misbehavior
+# in freshenup.pl.
+sub findTheTime {
+	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
+	my $time;
+	if ($form->{fastforward}) {
+		$time = $slashdb->getTime();
+	} elsif ($form->{'time'}) {
+		$time = $form->{'time'};
+	} else {
+		# Whoops, the admin left the field blank, bad admin,
+		# no donut.  Pick a time far enough in the future that
+		# it gives the admin time to correct the mistake.
+		# Twenty minutes should be enough.
+		my $add_secs;
+		if ($constants->{subscribe_future_secs}) {
+			$add_secs = $constants->{subscribe_future_secs} + 20*60;
+		} else {
+			$add_secs = 20*60;
+		}
+		$time = $slashdb->getTime({ add_secs => $add_secs });
+	}
+	# Force story times to be rounded down to the nearest minute;  this
+	# eliminates confusion in freshenup.pl about whether index.pl or
+	# article.pl gets written first.
+	$time =~ s/( \d\d:\d\d):\d\d$/$1:00/;
+	return $time;
 }
 
 createEnvironment();

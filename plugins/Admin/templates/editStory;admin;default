@@ -216,7 +216,7 @@ __template__
 		[% # END %]
 
 		[% commentstatus_select %]
-		<INPUT TYPE="TEXT" NAME="time" VALUE="[% storyref.time %]" size="16"><BR>
+		<INPUT TYPE="TEXT" NAME="time" VALUE="[% storyref.time %]" size="19"><BR>
 
 		[ <INPUT TYPE="checkbox" NAME="fixquotes" [% fixquotes_check %]>fixquotes
 		| <INPUT TYPE="checkbox" NAME="autonode" [% autonode_check %]>autonode
