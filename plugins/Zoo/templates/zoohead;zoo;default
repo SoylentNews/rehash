@@ -44,5 +44,17 @@ __template__
 		</TABLE>
 	[% END %]
 [% END %]
+
+</TD>
+
+<TD>&nbsp;</TD>
+<TD WIDTH="210" VALIGN="TOP">[% PROCESS userboxes %]</TD>
+
+</TR>
+
+<TR>
+
+<TD COLSPAN="3" VALIGN="TOP">
+
 __seclev__
 500

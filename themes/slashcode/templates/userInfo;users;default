@@ -92,7 +92,7 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 
 <TD>&nbsp;</TD>
 
-<TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
+<TD WIDTH="210" VALIGN="TOP">[% PROCESS userboxes %]</TD>
 </TR>
 
 <TR><TD VALIGN="TOP" COLSPAN="4">
