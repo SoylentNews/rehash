@@ -320,6 +320,18 @@ EOT
 	$statsSave->createStatDaily("distinct_comment_ipids", scalar(@$distinct_comment_ipids));
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
 	$statsSave->createStatDaily("consensus", $consensus);
+	$statsSave->createStatDaily("modlogs", $modlogs);
+	$statsSave->createStatDaily("modlog_inactive_percent", $modlog_inactive_percent);
+	$statsSave->createStatDaily("metamodlogs", $metamodlogs);
+	$statsSave->createStatDaily("xmodlog", $modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0);
+	$statsSave->createStatDaily("metamodlog_inactive_percent", $metamodlog_inactive_percent);
+	$statsSave->createStatDaily("modlog_yest", $modlogs_yest);
+	$statsSave->createStatDaily("modlog_inactive_percent_yest", $modlog_inactive_percent_yest);
+	$statsSave->createStatDaily("metamodlog_yest", $metamodlogs_yest_total);
+	$statsSave->createStatDaily("xmodlog_yest", $modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0);
+	$statsSave->createStatDaily("metamodlog_inactive_percent_yest", $metamodlog_inactive_percent_yest);
+	$statsSave->createStatDaily("mod_used_total_pool", ($mod_points_pool ? $modlog_spent_yest_total*100/$mod_points_pool : 0));
+	$statsSave->createStatDaily("mod_used_total_comments", ($comments ? $modlog_count_yest_total*100/$comments : 0));
 	$statsSave->createStatDaily("mod_points_pool", $mod_points_pool);
 	$statsSave->createStatDaily("mod_tokens_pool_pos", $mod_tokens_pool_pos);
 	$statsSave->createStatDaily("mod_tokens_pool_neg", $mod_tokens_pool_neg);
@@ -327,6 +339,9 @@ EOT
 	$statsSave->createStatDaily("mod_points_lost_spent", $modlog_spent_yest_total);
 	$statsSave->createStatDaily("mod_points_lost_spent_plus_1", $modlog_yest_hr->{+1}{spent});
 	$statsSave->createStatDaily("mod_points_lost_spent_minus_1", $modlog_yest_hr->{-1}{spent});
+	$statsSave->createStatDaily("mod_points_lost_spent_plus_1_percent", ($modlog_count_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_count_yest_total : 0));
+	$statsSave->createStatDaily("mod_points_lost_spent_minus_1_percent", ($modlog_count_yest_total ? $modlog_yest_hr->{-1}{count}*100/$modlog_count_yest_total : 0));
+	$statsSave->createStatDaily("mod_points_avg_spent", $modlog_count_yest_total ? sprintf("%12.3f", $modlog_spent_yest_total/$modlog_count_yest_total) : "(n/a)");
 	$statsSave->createStatDaily("m2_freq", $constants->{m2_freq} || 86400);
 	$statsSave->createStatDaily("m2_consensus", $constants->{m2_consensus} || 0);
 	$statsSave->createStatDaily("m2_mintokens", $slashdb->getVar("m2_mintokens", "value", 1) || 0);
@@ -334,9 +349,12 @@ EOT
 	$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
 	$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
 	$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
+	$statsSave->createStatDaily("oldest_unm2d_days", $oldest_unm2d_days);
 	$statsSave->createStatDaily("mod_token_conversion_point", $token_conversion_point);
 	$statsSave->createStatDaily("submissions", $submissions);
 	$statsSave->createStatDaily("submissions_comments_match", $submissions_comments_match);
+	$statsSave->createStatDaily("youngest_modelig_uid", sprintf("%d", $youngest_modelig_uid);
+	$statsSave->createStatDaily("youngest_modelig_created", sprintf("%11s", $youngest_modelig_created);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};

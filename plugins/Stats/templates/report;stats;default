@@ -17,6 +17,8 @@ __template__
    mbytes = format("%0.1f MB");
    ints = format("%8d");
    pcts = format("%8d");
+   pctsf = format("%.1f");
+   flts = format("%.1f");
 
    stats = Slash.getObject('Slash::Stats');
 
@@ -100,6 +102,36 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
       PROCESS make_graph gtitle => 'Section Bytes', type => 'lines', stats => sect_byte;
    END;
 
+   CASE 'mod';
+      reportblock = BLOCK;
+      type        = 'area';
+      section     = 'all';
+      form.stats_days = form.stats_days || 1;
+
+      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_key = stats_data_big.keys.sort.0;
+      stats_data = stats_data_big.${stats_data_key};
+
+%]
+
+<PRE>
+     comments: [% ints(stats_data.comments) %] posted yesterday
+   modlog all: [% ints(stats_data.modlogs) %] rows (not counting [% pctsf(stats_data.modlog_inactive_percent) %]% inactive)
+    m2log all: [% ints(stats_data.metamodlogs) %] rows ([% flts(stats_data.xmodlog) %] modlog) (not counting [% pctsf(stats_data.metamodlog_inactive_percent) %]% inactive)
+  modlog yest: [% ints(stats_data.modlog_yest) %] rows (not counting [% pctsf(stats_data.modlog_inactive_percent_yest) %]% inactive)
+   m2log yest: [% ints(stats_data.metamodlog_yest) %] rows ([% flts(stats_data.xmodlog_yest) %]x modlog) (not counting [% pctsf(stats_data.metamodlog_inactive_percent_yest) %]% inactive)
+    consensus: [% ints(stats_data.consensus) %]
+   mod points: [% ints(stats_data.mod_points_pool) %] in pool
+   mods total: [% ints(stats_data.mod_points_lost_spent) %] yesterday ([% pctsf(stats_data.mod_used_total_pool) %]% of pool, [% pctsf(stats_data.mod_used_total_comments) %]% of comments)
+      used -1: [% ints(stats_data.mod_points_lost_spent_minus_1) %] yesterday ([% pctsf(stats_data.mod_points_spent_minus_1_percent) %]%)
+      used +1: [% ints(stats_data.mod_points_lost_spent_plus_1) %] yesterday ([% pctsf(stats_data.mod_points_spent_plus_1_percent)  %]%)
+    avg spent: [% stats_data.mod_points_avg_spent %]
+token convert: [% ints(stats_data.mod_token_conversion_point) %]
+oldest unM2'd: [% IF stats_data.oldest_unm2d_days > -1 %][% ints(stats_data.oldest_unm2d_days) %] days[% ELSE %](n/a)[% END %]
+youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% stats_data.youngest_modelig_created %]
+</PRE>
+
+   END;
 END %]
 
 [% PROCESS titlebar title => reports.${form.report} _ ' for ' _ constants.sitename, width => '100%' %]
