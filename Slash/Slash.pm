@@ -1385,7 +1385,7 @@ sub displayStory {
 		$return = dispStory($story, $author, $topic, $full, $options);
 
 	}
-	my $df = ($user->{mode} eq "archive" || $story->{writestatus} eq "archived")
+	my $df = ($user->{mode} eq "archive" || ($story->{writestatus} eq "archived" && $user->{is_anon}))
 		? $constants->{archive_dateformat} : "";
 	my $storytime = timeCalc($story->{'time'}, $df);
 	my $atstorytime;
