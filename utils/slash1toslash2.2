@@ -354,7 +354,7 @@ EOT
 			if exists $ac_uid{$data->{uid}};
 
 		$data->{tid} = $topics{$data->{tid}} if $data->{tid};
-		$data->{tid} ||= $vars{defaulttopic};
+		$data->{tid} ||= $vars->{defaulttopic};
 		$data->{$_} ||= '' for (qw(comment name email note story));
 		return $data;
 	},
