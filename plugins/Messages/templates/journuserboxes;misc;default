@@ -18,7 +18,7 @@ __template__
 <TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
 </TR>
 
-<TR><TD>&nbsp;</TD>
+<TR>
 
 <TD COLSPAN="2" VALIGN="TOP">
 
