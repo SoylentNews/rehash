@@ -46,12 +46,13 @@
 
 	<P>Metamoderation began as an experiment to see if the primary
 	moderation system (M1) was actually working. Now, it helps us to 
-	remove bad moderators from the M1 eligibility pool.
+	remove bad moderators from the M1 eligibility pool and reward
+	good moderators with more delicious mod points.
 	
 	<BR><BR>
 	<I><SMALL>
 	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
+	Last Modified: 5/21/03 <BR>
 	</SMALL></I>
 
 <A NAME="mm350">
@@ -59,14 +60,13 @@
 
 	<P>In order to be a metamoderator, your account has to be one of the 
 	oldest 90% of accounts on the system. This means that once you've 
-	created your account, you'll have to wait for anywhere from a few weeks 
-	to a month or two, depending on the rate at which new accounts are being
-	created.
+	created your account, you'll have to wait for several months,
+	depending on the rate at which new accounts are being created.
 	
 	<BR><BR>
 	<I><SMALL>
-	Answered by: <A HREF="mailto:joe@nigiri.org">Joe</A> <BR>
-	Last Modified: 10/29/00 <BR>
+	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
+	Last Modified: 5/21/03 <BR>
 	</SMALL></I>
 
 <A NAME="mm400">
@@ -74,25 +74,26 @@
 
 	<P>If you're eligible, and you're logged in, you can meta-moderate. You
 	should see a link at the top of the main page that says "Have you Meta
-	Moderated Today?" Click that link, and you should be taken to the M2
+	Moderated Recently?" Click that link, and you should be taken to the M2
 	page.
 
 	<BR><BR>
 	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 10/29/00 <BR>
+	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
+	Last Modified: 5/21/03 <BR>
 	</SMALL></I>
 
 	
 <A NAME="mm500">
 <H2>How often can I M2?</H2>
 
-	<P>Once per day, GMT.
+	<P>Several times per day (we adjust this slightly sometimes,
+	to keep M1 and M2 in balance).
 	
 	<BR><BR>
 	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
+	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
+	Last Modified: 5/21/03 <BR>
 	</SMALL></I>
 	
 <A NAME="mm600">
@@ -117,13 +118,14 @@
 <A NAME="mm700">
 <H2>How often do moderations appear for M2?</H2>
 
-	<P>As many times as possible during the 14 days between when it is 
-	posted, and when the story is archived.
-	
+	<P>Five times when the system is humming smoothly, which it usually
+	is. If we get more M1 or more M2 than normal, which happens rarely,
+	we might temporarily go to three or seven.
+
 	<BR><BR>
 	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
+	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
+	Last Modified: 5/21/03 <BR>
 	</SMALL></I>
 
 <A NAME="mm800">
@@ -144,16 +146,19 @@
 <A NAME="mm900">
 <H2>Why isn't there a link to M2 on my index.pl?</H2>
 
-	<P>There seems to be a bug in the Slashcode that prevents the
-	appearance of the M2 link if you've never M2ed.  It will also not
-	appear if you aren't logged in.  To meta-moderate, log in and head to
-	<A  HREF="/metamod.pl">/metamod.pl</A>  After that, the link should 
-	appear on the top of your index page.
-	
+	<P>For starters, you have to be logged in, and you have to have
+	spent some time on the site (months) to really get what it's all
+	about, first --
+	<a href="#mm350">see above</a>.
+	Your karma must be Neutral or better. And if you unchecked the
+	<A HREF="//slashdot.org/users.pl?op=edithome">Willing To
+	Moderate</A>
+	checkbox, we also assume you're not willing to M2.
+
 	<BR><BR>
 	<I><SMALL>
-	Answered by: <A HREF="mailto:loonxtall@hotmail.com">Loon</A> <BR>
-	Last Modified: 6/12/00 <BR>
+	Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
+	Last Modified: 5/21/03 <BR>
 	</SMALL></I>
 
 <A NAME="mm1000"> <H2>How should I M2 if the moderator called it "Insightful"
@@ -187,14 +192,14 @@ and I think it should be "Informative"?</H2>
 
 	Maybe.  If you have relatively little karma, there is a possibility of 
 	getting some karma for your efforts.  However you won't be able to get 
-	enough karma to get the +1 <A HREF="com-mod.shtml#cm800">[See Related]</A>.
+	enough karma to get <A HREF="com-mod.shtml#cm800">the +1 karma bonus</A>.
 	That can only be earned by posting comments and getting moderated up. 
 	This is to encourage people to M2, but not let them abuse it.
 
 	<BR><BR>
 	<I><SMALL>
 	Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
-	Last Modified: 6/12/00 <BR>
+	Last Modified: 5/21/03 <BR>
 	</SMALL></I> 
 
 <BR><HR>
