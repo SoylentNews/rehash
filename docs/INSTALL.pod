@@ -1051,6 +1051,35 @@ start your reading here:
 
 L<http:E<sol>E<sol>www.mysql.comE<sol>documentationE<sol>mysqlE<sol>bychapterE<sol>manual_MySQL_Database_Administration.html#Privilege_system>
 
+=item *
+
+mod_gzip
+
+Are you finding that POST operations fail?  Have you compiled in mod_gzip?
+mod_gzip 1.3.19.1a doesn't handle incoming POST very well, with the result
+that our User.pm handler() gets called twice, and the second time through,
+there's no more data on STDIN, so your form is empty.  We use this patch
+to make it ignore POSTs:
+
+	--- mod_gzip_BROKEN_FOR_POST.c  2003-09-26 14:26:36.000000000 -0700
+	+++ mod_gzip.c                  2003-10-06 11:39:45.000000000 -0700
+	@@ -2155,12 +2155,15 @@
+	     ap_table_setn( r->notes,"mod_gzip_result",ap_pstrdup(r->pool,"DECLINED:UNHANDLED_REDIR"));
+	    }
+	  else
+	    {
+	     ap_table_setn( r->notes,"mod_gzip_result",ap_pstrdup(r->pool,"DECLINED:INIT1"));
+	    }
+	+   if ( r->method_number == M_POST ) {
+	+       return DECLINED;
+	+   }
+	 
+	  ap_table_setn( r->notes,"mod_gzip_input_size", ap_pstrdup(r->pool,"0"));
+	  ap_table_setn( r->notes,"mod_gzip_output_size",ap_pstrdup(r->pool,"0"));
+	  ap_table_setn( r->notes,"mod_gzip_compression_ratio",ap_pstrdup(r->pool,"0"));
+	 
+	  #endif
+
 =back
 
 =item *
