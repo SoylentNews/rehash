@@ -4,7 +4,7 @@ package Bundle::Slash;
 # $Id$
 #
 
-$Bundle::Slash::VERSION = '2.33';
+$Bundle::Slash::VERSION = '2.34';
 
 1;
 
