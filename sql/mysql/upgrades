@@ -1579,8 +1579,6 @@ CREATE TABLE IF NOT EXISTS soap_methods (
 
 # End of T_2_3_0_102, Start of T_2_3_0_103 - 2003/06/25
 
-# USEPERL LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home','The shtml page to call if a user is anon and index_noanon is set');
 INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect all anonymous users to index_handler_noanon instead of index.shtml. Set to 1 to activate, 0 to remove.');
 
@@ -1717,8 +1715,9 @@ ALTER TABLE people TYPE=InnoDB;
 
 # End of T_2_3_0_103, Start of T_2_3_0_104 - 2003/07/01
 
-# USEPERL LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
 
 DELETE FROM menus WHERE menu="topics" AND label="Recent Topics";
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'topics','Topic Hierarchy','','[% constants.rootdir %]/topics.pl?op=hierarchy ',0,1,1);
+
+# USEPERL LAST UPDATED HERE
