@@ -35,13 +35,28 @@ sub new {
 
 sub create_comment_vote {
 	my ($data) = @_;
+	my $form = getCurrentForm();
+	
 	my $slashdb = getCurrentDB();
 	my $ratings_reader = getObject('Slash::Rating', { db_type => 'reader' });
-	my $form = getCurrentForm();
+	my $create_vote = 0;
 	my $comment = $data->{comment};
 
-	return unless defined $form->{comment_vote};
+	my $discussion = $slashdb->getDiscussion($comment->{sid});
+	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
+	
+	
+	my $extras;
+	$extras =  $slashdb->getNexusExtrasForChosen({$disc_skin->{nexus} => 1}, {content_type => "comment"}) if $disc_skin && $disc_skin->{nexus};
 
+	return unless $extras;
+	
+	foreach my $extra(@$extras) {
+		$create_vote=1 if $extra->[1] eq "comment_vote";	
+	}
+
+	return unless $create_vote;
+	
 	my $active = "yes";
 	my $val = 0;
 	if ($form->{comment_vote} =~/^\d+$/) {
@@ -107,13 +122,13 @@ sub updateDiscussionRatingStats {
 sub getCommentVoteForCid {
 	my ($self, $cid) = @_;
 	my $cid_q = $self->sqlQuote($cid);
-	return $self->sqlSelectHashref("comment_vote", "cid=$cid_q");
+	return $self->sqlSelectHashref("*", "comment_vote", "cid=$cid_q");
 }
 
 sub getDiscussionRating {
 	my ($self, $sid) = @_;
-	my $siq_q = $self->sqlQuote($sid);
-	return $self->sqlSelectHashref("discussion_rating", "discussion=$cid_q");
+	my $sid_q = $self->sqlQuote($sid);
+	return $self->sqlSelectHashref("*", "discussion_rating", "discussion=$sid_q");
 	
 }
 
