@@ -2814,8 +2814,6 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_dbalert_lagthresh'
 
 # SLASHDOT LAST UPDATED HERE
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_42, Start of T_2_5_0_43 - 2004/12/14
 
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_disp','0','Display dbsparklines in the currentAdminUsers box?');
@@ -2826,3 +2824,4 @@ INSERT INTO vars (name, value, description) VALUES ('dbsparklines_width',150,'Pi
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymax',20,'Max bog value (clip higher values to this)');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymin',-20,'Min lag value (clip lower values to this) - should be negative');
 
+# SLASHCLUSTER LAST UPDATED HERE
