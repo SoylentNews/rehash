@@ -1931,3 +1931,5 @@ INSERT INTO vars VALUES ('subscribe_gen_transaction_id_length','18','Length of t
 INSERT INTO vars VALUES ('subscribe_gift_testing','1','When this is on only admins will be able to see gift subscription form');
 
 # USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_122, Start of T_2_3_0_123 - 2003/10/28
