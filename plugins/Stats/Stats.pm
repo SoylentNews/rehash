@@ -658,26 +658,45 @@ sub getCommentsByDistinctUIDPosters {
 sub getAdminModsInfo {
 	my($self) = @_;
 
+	# First get the list of admins.
+	my $admin_uids_ar = $self->sqlSelectColArrayref(
+		"uid", "users", "seclev > 1");
+	my $admin_uids_str = join(",", sort { $a <=> $b } @$admin_uids_ar);
+	my $nickname_hr = $self->sqlSelectAllKeyValue(
+		"uid, nickname",
+		"users",
+		"uid IN ($admin_uids_str)");
+
 	# First get the count of upmods and downmods performed by each admin.
 	my $m1_uid_val_hr = $self->sqlSelectAllHashref(
 		[qw( uid val )],
-		"moderatorlog.uid AS uid, val, nickname, COUNT(*) AS count",
-		"moderatorlog, users",
-		"users.seclev > 1 AND moderatorlog.uid=users.uid 
+		"uid, val, COUNT(*) AS count",
+		"moderatorlog",
+		"uid IN ($admin_uids_str)
 		 AND ts $self->{_day_between_clause}",
 		"GROUP BY moderatorlog.uid, val"
 	);
+	for my $uid (keys %$m1_uid_val_hr) {
+		for my $val (keys %{ $m1_uid_val_hr->{$uid} }) {
+			$m1_uid_val_hr->{$uid}{$val}{nickname} = $nickname_hr->{$uid};
+		}
+	}
 
 	# Now get a count of fair/unfair counts for each admin.
 	my $m2_uid_val_hr = $self->sqlSelectAllHashref(
 		[qw( uid val )],
-		"users.uid AS uid, metamodlog.val AS val, users.nickname AS nickname, COUNT(*) AS count",
-		"metamodlog, moderatorlog, users",
-		"users.seclev > 1 AND moderatorlog.uid=users.uid
+		"moderatorlog.uid AS uid, metamodlog.val AS val, COUNT(*) AS count",
+		"moderatorlog, metamodlog",
+		"moderatorlog.uid IN ($admin_uids_str)
 		 AND metamodlog.mmid=moderatorlog.id 
-		 AND metamodlog.ts $self->{_day_between_clause} ",
-		"GROUP BY users.uid, metamodlog.val"
+		 AND metamodlog.ts $self->{_day_between_clause}",
+		"GROUP BY moderatorlog.uid, metamodlog.val"
 	);
+	for my $uid (keys %$m2_uid_val_hr) {
+		for my $val (keys %{ $m2_uid_val_hr->{$uid} }) {
+			$m2_uid_val_hr->{$uid}{$val}{nickname} = $nickname_hr->{$uid};
+		}
+	}
 
 	# If nothing for either, no data to return.
 	return { } if !%$m1_uid_val_hr && !%$m2_uid_val_hr;
@@ -703,8 +722,10 @@ sub getAdminModsInfo {
 			$m2_history_mo_hr->{$name}{count};
 	}
 	if (%$m2_uid_val_mo_hr) {
-		my $m2_uid_nickname = $self->sqlSelectAllHashref(
-			"uid",
+		# Get nicknames for every user that shows up in the stats
+		# for the last 30 days (which may be different from the
+		# admins we have now).
+		my $m2_uid_nickname = $self->sqlSelectAllKeyValue(
 			"uid, nickname",
 			"users",
 			"uid IN (" . join(",", keys %$m2_uid_val_mo_hr) . ")"
@@ -712,7 +733,7 @@ sub getAdminModsInfo {
 		for my $uid (keys %$m2_uid_nickname) {
 			for my $fairness (qw( -1 1 )) {
 				$m2_uid_val_mo_hr->{$uid}{$fairness}{nickname} =
-					$m2_uid_nickname->{$uid}{nickname};
+					$m2_uid_nickname->{$uid};
 				$m2_uid_val_mo_hr->{$uid}{$fairness}{count} +=
 					$m2_uid_val_hr->{$uid}{$fairness}{count};
 			}
