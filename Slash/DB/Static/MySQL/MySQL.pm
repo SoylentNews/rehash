@@ -2303,7 +2303,6 @@ sub avgDynamicDurationForMinutesBack {
 	$start_id ||= 0;
 	my $page_types = [@$ops];
 	my $op_clause  = join ',', map { $_ = $self->sqlQuote("$_") } @$page_types;
-	print STDERR ("op_clause: $op_clause");
 	return $self->sqlSelectAllHashref("op",
 		"op, AVG(duration) as avg", "accesslog",
 		"id >= $start_id AND ts >= DATE_SUB(NOW(), INTERVAL $minutes MINUTE) AND static='no' AND op in($op_clause)",
