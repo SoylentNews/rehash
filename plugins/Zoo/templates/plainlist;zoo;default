@@ -1,9 +1,9 @@
 __section__
 default
 __description__
-Displays friends.
+Displays people.
 
-* friends = arrayref of friends (nickname, uid, last entry time, last entry description, last entry id)
+* people = arrayref of people (nickname, uid, last entry time, last entry description, last entry id)
 __title__
 
 __page__
@@ -37,11 +37,11 @@ __template__
 	[% IF editable %]
 		<TD VALIGN="TOP">
 			[% IF form.op == "fans" %]
-					<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% person.0 %]&type=friend">Add Friend</A>
+					<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% person.0 %]&amp;type=friend">Add Friend</A>
 			[% ELSIF form.op == "friends" %]
-					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&type=friend">Remove Friend</A>
+					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&amp;type=friend">Remove Friend</A>
 			[% ELSIF form.op == "foes" %]
-					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&type=foe">Remove Foe</A>
+					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&amp;type=foe">Remove Foe</A>
 			[% END %]
 		</TD>
 	[% END %]

@@ -39,8 +39,8 @@ __template__
 		[% END %]
 		[% UNLESS user.is_anon %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% thisuser.2 %]&type=friend">Add Friend</A>/
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% thisuser.2 %]&type=foe">Add Foe</A>
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% thisuser.2 %]&amp;type=friend">Add Friend</A>/
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% thisuser.2 %]&amp;type=foe">Add Foe</A>
 			</TD>
 		[% END %]
 		</TR>

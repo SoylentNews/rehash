@@ -10,7 +10,6 @@ use DBIx::Password;
 use Slash;
 use Slash::Constants qw(:messages);
 use Slash::Utility;
-use Slash::DB::Utility;
 
 use vars qw($VERSION);
 use base 'Exporter';

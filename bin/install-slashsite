@@ -604,7 +604,7 @@ Site options:
 	-R	Reuse hostname as site name (boolean)
 	-L	Install files in htdocs/ and tasks/ using symlinks [y/n]
 	-P	Comma-separated list of plugin names$sample_plugins
-			("ALL"/"DEFAULT" avoid prompt, do what you'd expect)
+		("ALL"/"DEFAULT" avoid prompt, do what you'd expect)
 
 User options:
 	-a	Admin name

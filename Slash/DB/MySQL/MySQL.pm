@@ -280,7 +280,7 @@ sub createComment {
 sub setModeratorLog {
 	my($self, $comment, $uid, $val, $reason, $active) = @_;
 
-	$active ||= 1;
+	$active = 1 unless defined $active;
 	$self->sqlInsert("moderatorlog", {
 		uid	=> $uid,
 		val	=> $val,
@@ -4594,7 +4594,7 @@ sub setUser {
 
 	# Power to the People
 	if ($hashref->{people}) {
-		$hashref->{people} = freeze $hashref->{people};
+		$hashref->{people} = freeze($hashref->{people});
 	}
 
 	# hm, come back to exboxes later; it works for now
@@ -4696,8 +4696,8 @@ sub getUser {
 				$answer->{$_} = $val;
 			}
 		}
-		$answer->{'people'} = thaw $answer->{'people'} 
-			if ($answer->{'people'});
+		$answer->{'people'} = thaw($answer->{'people'})
+			if $answer->{'people'};
 
 	} elsif ($val) {
 		(my $clean_val = $val) =~ s/^-//;
@@ -4709,8 +4709,7 @@ sub getUser {
 			$answer = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$val'");
 			$answer = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$val'") if !$answer;
 		}
-		$answer = thaw $answer
-			if ($val eq 'people');
+		$answer = thaw($answer) if $val eq 'people';
 
 	} else {
 
@@ -4762,8 +4761,8 @@ sub getUser {
 		# which has the is_admin stuff in it and such.
 		# -Brian
 		$answer->{is_anon} = isAnon($id);
-		$answer->{'people'} = thaw $answer->{'people'} 
-			if ($answer->{'people'});
+		$answer->{'people'} = thaw($answer->{'people'})
+			if $answer->{'people'};
 	}
 
 	return $answer;

@@ -154,9 +154,8 @@ via data in the database. Slash is a database beast in the true sense.
 <H3><A NAME="Slashcodecom1">Is this the same code that runs Slashdot?</A></H3>
 
 <P>
-Yes and no.  Slashdot is currently running Slash 1.0.  This site is
-running Slash 2.0.  The current priorities are releasing Slash 2.0, and
-porting Slashdot to Slash 2.0 (which will result in Slash 2.2).
+Yes.  Slashdot and Slashcode are usually running the latest development
+code from CVS, within a week or so.
 </P>
 
 

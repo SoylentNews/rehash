@@ -50,6 +50,7 @@ use Slash::Utility;
 use Slash::XML;
 use Data::Dumper;
 
+use strict;
 use base 'Exporter';
 use vars qw($VERSION @EXPORT $vuser);
 
@@ -120,6 +121,19 @@ sub slashTest {
 	$::constants = getCurrentStatic();
 	$::user      = getCurrentUser();
 	$::form      = getCurrentForm();
+
+	# auto-create plugin variables ... bwahahaha
+	my $plugins = $::slashdb->getDescriptions('plugins');
+	local $Slash::Utility::NO_ERROR_LOG = 1;
+
+	for my $plugin (grep { /^\w+$/ } keys %$plugins) {
+		my $name = lc $plugin;
+		my $object = getObject("Slash::$plugin");
+		if ($object) {
+			no strict 'refs';
+			${"main::$name"} = $object;
+		}
+	}
 }
 
 #========================================================================
