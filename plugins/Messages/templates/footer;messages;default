@@ -20,7 +20,7 @@ __template__
 [% oldpage = user.currentPage;
    user.currentPage = 'misc';
    PROCESS 'footer';
-   user.currentPage = 'messages';
+   user.currentPage = oldpage;
 %]
 
 __seclev__
