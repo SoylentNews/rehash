@@ -659,12 +659,18 @@ sub getStoryDiscussions {
 	my($self, $section, $limit, $start) = @_;
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
+	my $tables = "discussions, stories",
 	my $where = "displaystatus != -1 AND discussions.sid=stories.sid AND time <= NOW() AND writestatus != 'delete' AND writestatus != 'archived'";
-	$where .= " AND discussions.section = '$section'"
-		if $section;
+
+	if ($section) {
+		$where .= " AND discussions.section = '$section'"
+	} else {
+		$tables .= ", sections";
+		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+	}
 
 	my $discussion = $self->sqlSelectAll("discussions.sid, discussions.title, discussions.url",
-		"discussions, stories",
+		$tables,
 		$where,
 		"ORDER BY time DESC LIMIT $start, $limit"
 	);
@@ -678,13 +684,19 @@ sub getDiscussions {
 	my($self, $section, $limit, $start) = @_;
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
+	my $tables = "discussions";
 
 	my $where = "type != 'archived' AND ts <= now()";
-	$where .= " AND section = '$section'"
-		if $section;
 
-	my $discussion = $self->sqlSelectAll("id, title, url",
-		"discussions",
+	if ($section) {
+		$where .= " AND discussions.section = '$section'"
+	} else {
+		$tables .= ", sections";
+		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+	}
+
+	my $discussion = $self->sqlSelectAll("discussions.id, discussions.title, discussions.url",
+		$tables,
 		$where,
 		"ORDER BY ts DESC LIMIT $start, $limit"
 	);
@@ -699,13 +711,19 @@ sub getDiscussionsByCreator {
 	return unless $uid;
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
+	my $tables = "discussions";
 
 	my $where = "type != 'archived' AND ts <= now() AND uid = $uid";
-	$where .= " AND section = '$section'"
-		if $section;
+
+	if ($section) {
+		$where .= " AND discussions.section = '$section'"
+	} else {
+		$tables .= ", sections";
+		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+	}
 
 	my $discussion = $self->sqlSelectAll("id, title, url",
-		"discussions",
+		$tables,
 		$where,
 		"ORDER BY ts DESC LIMIT $start, $limit"
 	);
@@ -719,6 +737,7 @@ sub getDiscussionsUserCreated {
 
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
+	my $tables = "discussions, users";
 
 	my $where = "type = 'recycle' AND ts <= now() AND users.uid = discussions.uid";
 	$where .= " AND section = '$section'"
@@ -726,8 +745,15 @@ sub getDiscussionsUserCreated {
 	$where .= " AND commentcount > 0"
 		unless $all;
 
-	my $discussion = $self->sqlSelectAll("id, title, ts, users.nickname",
-		"discussions, users",
+	if ($section) {
+		$where .= " AND discussions.section = '$section'"
+	} else {
+		$tables .= ", sections";
+		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+	}
+
+	my $discussion = $self->sqlSelectAll("discussions.id, discussions.title, discussions.ts, users.nickname",
+		$tables,
 		$where,
 		"ORDER BY ts DESC LIMIT $start, $limit"
 	);

@@ -107,7 +107,7 @@ sub editSection {
 	if ($form->{addsection}) {
 		$this_section = {};
 	} else {
-		$this_section = $slashdb->getSection($section);
+		$this_section = $slashdb->getSection($section,'', 1);
 		my $blocks = $slashdb->getSectionBlock($section);
 
 		for (@$blocks) {
@@ -147,7 +147,7 @@ sub saveSection {
 	# dashes should be allowed.
 	$section =~ s/[^A-Za-z0-9\-]//g;
 
-	my $found = $slashdb->getSection($form->{section}, 'section');
+	my $found = $slashdb->getSection($form->{section}, 'section', 1);
 	if ($found) {
 		my $return = $slashdb->setSection($form->{section}, {
 			qid		=> $form->{qid},
