@@ -2613,9 +2613,12 @@ DELETE FROM users_param WHERE value =  2  AND name IN ('domaintags');
 
 INSERT INTO vars (name, value, description) VALUES ('markup_checked_attribute',' CHECKED','The checked attribute that is used on the "input" HTML element, CHECKED for HTML 3.2 and checked="checked" for HTML 4.0 and beyond. Must include leading space!');
 
+ALTER TABLE topic_nexus_extras ADD COLUMN required ENUM("no","yes") NOT NULL DEFAULT 'no';
+ALTER TABLE topic_nexus_extras ADD COLUMN ordering TINYINT UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE topic_nexus_extras MODIFY COLUMN type ENUM('text', 'list', 'textarea') NOT NULL DEFAULT 'text';
+
 INSERT INTO string_param (type, code, name) VALUES ('extra_types','text','Text');
 INSERT INTO string_param (type, code, name) VALUES ('extra_types','textarea','Text Area');
 INSERT INTO string_param (type, code, name) VALUES ('extra_types','list','List');
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','story','Story');
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','comment','Comment');
-ALTER TABLE topic_nexus_extras MODIFY COLUMN type ENUM('text', 'list', 'textarea') NOT NULL DEFAULT 'text';

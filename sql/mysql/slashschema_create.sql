@@ -1010,6 +1010,8 @@ CREATE TABLE topic_nexus_extras (
 	extras_textname VARCHAR(100) NOT NULL,
 	type ENUM('text', 'list') NOT NULL DEFAULT 'text',
 	content_type ENUM('story', 'comment') NOT NULL DEFAULT 'story',
+	required ENUM('no', 'yes') NOT NULL DEFAULT 'no',
+	ordering TINYINT UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (extras_id),
 	UNIQUE tid_keyword (tid, extras_keyword)
 ) TYPE=InnoDB;
