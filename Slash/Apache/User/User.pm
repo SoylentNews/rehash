@@ -615,8 +615,13 @@ Bender:Curse you, merciful Poseidon!
 Bender:I am a hideous triumph of form and function.
 Bender:I'm an outdated piece of junk.
 Bender:The modern world can bite my splintery, wooden ass!
-Bender:Who does that guy think I am?
+Bender:Whoever's directing this is a master of suspense!
+Bender:Fathero!
+Bender:Now that's hospital dancing.
+Bender:Try this, kids at home!
+Bender:I've gone too far! Who does that guy think I am?
 Bender:Down with Bender!
+Bender:Listen up, cause I got a climactic speech.
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
@@ -647,6 +652,7 @@ Fry:You mean Bender is the evil Bender? I'm shocked! Shocked! Well not that shoc
 Fry:I'm literally angry with rage!
 Fry:The butter in my pocket is melting!
 Fry:Stop abducting me!
+Fry:What kind of bozos would start a Bender protest group?
 EOT
 
 1;
