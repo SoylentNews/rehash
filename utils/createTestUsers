@@ -26,7 +26,6 @@ use vars qw( $slashdb $werder $constants $junk );
 my $PROGNAME = basename($0);
 
 my %opts;
-srand(time() ^ ($$+($$<<15)));
 # Remember to doublecheck these match usage()!
 usage('Options used incorrectly') unless getopts('hJu:va:', \%opts);
 usage() if $opts{'h'};
