@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+__title__
+Metakeywords template
+__page__
+misc
+__lang__
+en_US
+__name__
+metakeywordsd
+__instructions__
+placeholder
+__seclev__
+10000
+__template__
+[% SWITCH user.currentSection %]
+[% CASE 'index' %]
+Main page
+[% CASE DEFAULT %]
+[% user.currentSection %] section page
+[% END %
+
