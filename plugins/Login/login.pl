@@ -146,6 +146,7 @@ sub newUser {
 			_sendMailPasswd(@_, $user_send);
 			header(getData('newuserhead')) or return;
 			print getData('newuser_msg', { uid => $uid });
+			footer();
 			return;
 		} else {
 #			$slashdb->resetFormkey($form->{formkey});	
