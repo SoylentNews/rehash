@@ -7490,12 +7490,12 @@ sub getMCD {
 		return $self->{_mcd} = 0;
 	}
 	if ($constants->{memcached_keyprefix}) {
-		$self->{_mcd}{keyprefix} = $constants->{memcached_keyprefix};
+		$self->{_mcd_keyprefix} = $constants->{memcached_keyprefix};
 	} else {
 		# If no keyprefix defined in vars, use the first and
 		# last letter from the sitename.
 		$constants->{sitename} =~ /([A-Za-z]).*(\w)/;
-		$self->{_mcd}{keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
+		$self->{_mcd_keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
 	}
 	return $self->{_mcd};
 }
@@ -9120,7 +9120,7 @@ sub setUser_delete_memcached {
 
 	$uid_list = [ $uid_list ] if !ref($uid_list);
 	for my $uid (@$uid_list) {
-		my $mcdkey = "$mcd->{keyprefix}u:";
+		my $mcdkey = "$self->{_mcd_keyprefix}u:";
 		# The "1" means "don't accept new writes to this key for 1 second."
 		$mcd->delete("$mcdkey$uid", 1);
 		if ($mcddebug > 1) {
@@ -9171,7 +9171,7 @@ sub getUser {
 	my $mcd = $self->getMCD();
 	my $mcddebug = $mcd && $constants->{memcached_debug};
 	my $start_time;
-	my $mcdkey = "$mcd->{keyprefix}u:" if $mcd;
+	my $mcdkey = "$self->{_mcd_keyprefix}u:" if $mcd;
 	my $mcdanswer;
 
 	if ($mcddebug > 1) {
@@ -9696,7 +9696,7 @@ sub _getUser_write_memcached {
 		print STDERR scalar(gmtime) . " $$ _getU_writemcd users_hits_colnames '@$users_hits_colnames' userdata: " . Dumper($userdata);
 	}
 
-	my $mcdkey = "$mcd->{keyprefix}u:";
+	my $mcdkey = "$self->{_mcd_keyprefix}u:";
 
 	my $exptime = $constants->{memcached_exptime_user};
 	$exptime = 1200 if !defined($exptime);

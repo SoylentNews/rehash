@@ -645,7 +645,7 @@ sub printComments {
 		# MemCached key prefix "ctp" means "comment_text, parsed".
 		# Prepend our site key prefix to try to avoid collisions
 		# with other sites that may be using the same servers.
-		$mcdkey = "$mcd->{keyprefix}ctp:";
+		$mcdkey = "$slashdb->{_mcd_keyprefix}ctp:";
 		$mcdkeylen = length($mcdkey);
 		if ($constants->{memcached_debug}) {
 			$mcd_debug = { start_time => Time::HiRes::time };
