@@ -234,13 +234,16 @@ sub ProxyRemoteAddr ($) {
 	my($r) = @_;
 
 	if (!defined($trusted_ip_regex)) {
-		$trusted_ip_regex = getCurrentStatic("x_forwarded_for_trust_regex")
-			|| '127.0.0.1';
+		$trusted_ip_regex = getCurrentStatic("x_forwarded_for_trust_regex");
 		if ($trusted_ip_regex) {
 			# Avoid a little processing each time by doing
 			# the regex parsing just once.
 			$trusted_ip_regex = qr{$trusted_ip_regex};
+		} elsif (!defined($trusted_ip_regex)) {
+			# If not defined, use localhost.
+			$trusted_ip_regex = qr{^127\.0\.0\.1$};
 		} else {
+			# If defined but false, disable.
 			$trusted_ip_regex = '0';
 		}
 	}
