@@ -898,9 +898,14 @@ sub showInfo {
 			}
 
 		} elsif (length($id) == 32) {
-			$fieldkey = 'md5id';
 			$requested_user->{nonuid} = 1;
-			$requested_user->{md5id} = $id;
+			if ($form->{fieldname}
+				&& $form->{fieldname} =~ /^(ipid|subnetid)$/) {
+				$fieldkey = $form->{fieldname};
+			} else {
+				$fieldkey = 'md5id';
+			}
+			$requested_user->{$fieldkey} = $id;
 
 		} elsif ($id =~ /^(\d{1,3}\.\d{1,3}.\d{1,3}\.0)$/ 
 				|| $id =~ /^(\d{1,3}\.\d{1,3}\.\d{1,3})\.?$/) {
@@ -2659,7 +2664,7 @@ sub getUserAdmin {
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
-		if ($id =~ /^(\d+\.\d+\.\d+\.)\.?\d+?/) {
+		if ($id =~ /^(\d+\.\d+\.\d+)(?:\.\d)?/) {
 			$id = $1 . ".0";
 			$user_edit->{subnetid} = $id;
 		} else {

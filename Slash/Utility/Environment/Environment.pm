@@ -1379,7 +1379,8 @@ Hashref of cleaned-up data.
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
-		formkey commentstatus hcanswer mode op section type
+		fieldname formkey commentstatus
+		hcanswer mode op section type
 	);
 
 	# regexes to match dynamically generated numeric fields
