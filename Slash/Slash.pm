@@ -609,6 +609,7 @@ sub moderatorCommentLog {
 
 	for my $mod (@$mods) {
 		vislenify($mod); # add $mod->{ipid_vis}
+		$mod->{ts} = substr($mod->{ts}, 5, -3);
 		$mod->{nickname2} = $slashdb->getUser($mod->{uid2},
 			'nickname') if $both_mods; # need to get 2nd nick
 		next unless $mod->{active};

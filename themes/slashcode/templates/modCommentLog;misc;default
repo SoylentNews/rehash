@@ -68,7 +68,7 @@ __template__
 		<TD> [% moderation.nickname2 | strip_literal %] (<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=[% moderation.uid2 %]">[% moderation.uid2 %]</A>) &nbsp; </TD>[% END %]
 [% END %]
 		<TD> [% moderation.ts %]</TD>
-		<TD>[% IF moderation.active %] &nbsp; [% ELSE %] <i>inactive</i> [% END %] </TD>
+		<TD>[% IF moderation.active %] &nbsp; [% ELSE %] <i>i</i> [% END %] </TD>
 	</TR>
 		[% END %]
 	[% END %]
