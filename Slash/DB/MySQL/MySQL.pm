@@ -5726,7 +5726,7 @@ sub getStoryByTimeAdmin {
 		"ORDER BY time $order LIMIT $limit"
 	);
 	foreach my $story (@$returnable) {
-		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1});
+		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1 });
 	}
 	return $returnable;
 }
@@ -8156,7 +8156,7 @@ sub getSimilarStories {
 		# they match with the current story.  Include a multiplier
 		# based on the length of the match.
 		my $s = $stories->{$sid};
-		$stories->{$sid}{displaystatus} = $self->_displaystatus($stories->{$sid}{stoid}, { no_time_restrict => 1});
+		$stories->{$sid}{displaystatus} = $self->_displaystatus($stories->{$sid}{stoid}, { no_time_restrict => 1 });
 		$s->{weight} = 0;
 		for my $word (@text_uncommon_words) {
 			my $word_weight = 0;
