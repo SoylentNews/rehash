@@ -2131,7 +2131,11 @@ my $finder = Slash::Utility::Data::URI::Find->new(sub {
 
 sub url2html {
 	my($text) = @_;
+	# find() changes strict, but does not change it back,
+	# so we save and restore value on our own
+	my $old = URI::URL::strict;
 	$finder->find(\$text);
+	URI::URL::strict($old);
 	return $text;
 }
 }
