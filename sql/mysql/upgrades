@@ -2526,8 +2526,6 @@ CREATE TABLE story_render_dirty (
         PRIMARY KEY (stoid)
 ) TYPE=InnoDB;
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_26, Start of T_2_5_0_27 - 2004/09/14
 
 ALTER TABLE skins ADD COLUMN ac_uid mediumint UNSIGNED DEFAULT '0' NOT NULL;
@@ -2546,6 +2544,8 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 # SLASHCLUSTER LAST UPDATED HERE
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_27, Start of T_2_5_0_28 - 2004/09/21
 
