@@ -32,7 +32,8 @@ __template__
 				pid	=> pid,
 				cid	=> cid,
 				subject	=> (p + 1),
-				startat	=> (start ? start : 0)
+				subject_only => 1,
+				startat	=> (start ? start : 0),
 			}) %]
 		[% END %]
 	[% END %]

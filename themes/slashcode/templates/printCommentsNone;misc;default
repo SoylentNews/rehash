@@ -33,6 +33,7 @@ __template__
 		pid	=> pid,
 		color	=> user.fg.3,
 		subject	=> 'Top',
+		subject_only => 1,
 	}) %]
 [% END %]
 
