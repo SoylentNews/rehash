@@ -231,7 +231,7 @@ sub displayArticle {
 	}
 
 	for my $article (@$articles) {
-		my($date_current, $time) =  split / /, $article->[0], 2;	
+		my($date_current) = timeCalc($article->[0], "%A %B %d, %Y");
 		if ($date eq $date_current) {
 			push @{$collection->{article}}, {
 				article		=> strip_mode($article->[1], $article->[4]),

@@ -352,7 +352,8 @@ $dbh->disconnect;
 install_message();
 
 sub apache_site_conf {
-	# Ok, I should fix this at some point to extract port
+	my $host_port = $hostname;
+	$host_port .= ":80" unless $host_port =~ /:/;
 	my $text = qq|
 # note that if your site's path is a symlink, the
 # path listed here is most likely the actual path;
@@ -364,10 +365,10 @@ sub apache_site_conf {
     Allow from all
 </Directory>
 
-<VirtualHost $sitename:80>
+<VirtualHost $host_port>
     ServerAdmin $email
     DocumentRoot $prefix_site/$sitename/htdocs
-    ServerName $sitename
+    ServerName $host_noport
     ErrorLog logs/${sitename}_error_log
     CustomLog logs/${sitename}_access_log common
 

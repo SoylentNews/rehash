@@ -340,10 +340,9 @@ sub newrss {	# RSS 1.0
 			);
 		}
 
-		$rss->add_item(
+		my %data = (
 			title		=> xmlencode($story->{title}),
-			'link'		=> xmlencode_plain("$constants->{absolutedir}/article.pl?sid=$story->{sid}",
-			$desc ? (description => xmlencode($desc)) : ()),
+			'link'		=> xmlencode_plain("$constants->{absolutedir}/article.pl?sid=$story->{sid}"),
 
 			dc => {
 				date		=> date2iso8601($story->{'time'}),
@@ -353,11 +352,15 @@ sub newrss {	# RSS 1.0
 
 			slash => {
 				section		=> xmlencode($story->{section}),
-				department	=> xmlencode($story->{dept}),
 				comments	=> $story->{commentcount},
 				hitparade	=> $story->{hitparade},
 			},
 		);
+
+		$data{description}       = xmlencode($desc) if $desc;
+		$data{slash}{department} = xmlencode($story->{dept}) if $constants->{use_dept};
+
+		$rss->add_item(%data);
 	}
 
 	my $file = site2file($section);
