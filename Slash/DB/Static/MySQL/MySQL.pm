@@ -1480,6 +1480,7 @@ sub refreshUncommonStoryWords {
 		"stories.sid = story_text.sid
 		 AND stories.time >= DATE_SUB(NOW(), INTERVAL $n_days DAY)"
 	);
+	my %common_words = map {$_ => 1} split " ", ($constants->{common_story_words} || "");
 	my @weights = (
 		$constants->{uncommon_weight_title} || 8,
 		$constants->{uncommon_weight_introtext} || 1,
@@ -1516,6 +1517,7 @@ sub refreshUncommonStoryWords {
 		}
 		grep { $word_hr->{$_}{count} <= $ignore_threshold }
 		grep { length($_) > $minlen }
+		grep { !$common_words{$_} }
 		keys %$word_hr;
 	my $uncommon_words = substr(join(" ", @uncommon_words), 0, $maxlen);
 	if (length($uncommon_words) == $maxlen) {
