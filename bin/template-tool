@@ -16,6 +16,7 @@
 use strict;
 use File::Basename;
 use FindBin '$Bin';
+use File::Path;
 use File::Spec::Functions;
 use Slash;
 use Slash::Utility;
@@ -30,7 +31,7 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('cdilrsvg:D:O:P:S:p:f:u:h', \%opts);
+usage('Options used incorrectly') unless getopts('cdilrsvg:D:O:P:S:p:f:u:B:h', \%opts);
 usage() if ($opts{'h'} || !keys %opts);
 version() if $opts{'v'};
 boiler() if $opts{'B'};
@@ -64,19 +65,17 @@ if ($opts{'c'}) {
 		die "Non-numeric options given with -i!\n" unless /^\d+$/;
 	} @ARGV if $opts{i};
 	compile_template();
-	exit();
+	exit;
 }
 
 if ($opts{'O'}) {
 	if (! -d $opts{'O'}) {
 		if ($opts{'d'} || $opts{'e'} || ($opts{'l'} && $opts{'f'})) {
-			# needs to use File::Path::mkpath(); and
-			# even if you wanted mkdir, why not use Perl's
-			# mkdir()?  fix please.
-			system("mkdir $opts{'O'}")
+			File::Path::mkpath($opts{'O'}) 
+				or die "Could not make directory $opts{'O'}: $!";
 		} else {
-			print "Invalid directory $opts{'O'} \n";
-			exit(0);
+			print "Invalid directory $opts{'O'}\n";
+			exit;
 		}
 	}
 }
@@ -388,7 +387,7 @@ Debugging options:
 	destination directory.
 
 EOT
-	exit();
+	exit;
 }
 
 sub version {
@@ -405,21 +404,25 @@ EOT
 }
 
 sub boiler {
+	my $section	= $opts{'S'}  || 'default';
+	my $page	= $opts{'P'}  || 'misc';
+	my $name	= shift @ARGV || 'generic';
+
 	my $fh = gensym();
 	open($fh, "> $opts{'B'}") or die "Could not open file for blank template";
 	print $fh <<EOT;
 __section__
-default
+$section
 __description__
 You should describe stuff here.
 __title__
 Useless title to template
 __page__
-misc
+$page
 __lang__
 en_US
 __name__
-generic
+$name
 __template__
 This is where you would
 put all of your html and such to be displayed. See

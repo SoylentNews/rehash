@@ -53,6 +53,11 @@ this password is used.  Go to the URL below to log in:
 
 Make sure you then CHANGE YOUR PASSWORD!
 
+If you have received this message without having requested it, it is
+because someone attempted to use your username or e-mail address.  It
+was mostly likely an innocent mistake, and they are not getting your
+password, so you can safely disregard this message.
+
 Thanks.
 
 [% CASE 'userinfo_msg' %]

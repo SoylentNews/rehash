@@ -312,7 +312,9 @@ sub deleteDaily {
 
 	# Note, on Slashdot, the next line locks the accesslog for several
 	# minutes, up to 10 minutes if traffic has been heavy.
-	$self->sqlDo("DELETE FROM accesslog WHERE date_add(ts,interval 48 hour) < now()");
+	unless ($constants->{noflush_accesslog}) {
+		$self->sqlDo("DELETE FROM accesslog WHERE date_add(ts,interval 48 hour) < now()");
+	}
 }
 
 ########################################################
