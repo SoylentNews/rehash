@@ -1,0 +1,13 @@
+#### %REQUIRED TABLES: comments, content_filters, commentmodes, dateformats
+#### %REQUIRED TABLES: discussions, metamodlog, moderatorlog, newstories
+#### %REQUIRED TABLES: pollanswers, pollquestions, pollvoters, sections
+#### %REQUIRED TABLES: stories, storystuff, sections, submissions, topics
+#### %REQUIRED TABLES: tzcodes, users, users_comments, users_index, users_info
+#### %REQUIRED TABLES: users_prefs
+
+#### %OBSOLETE TABLES: authors, users_key
+
+# Update commands.
+
+ALTER TABLE users MODIFY passwd varchar(32) NOT NULL;
+ALTER TABLE users ADD newpasswd varchar(32);
