@@ -33,6 +33,103 @@ The software and hardware requirements are listed at the end of the
 document, because we know you want to get right into the installation.
 
 
+=head1 UPGRADING
+
+=head2 Slash 2.0.x -> Slash 2.0.y
+
+Read all of this section before doing any of it.
+
+The first thing to do is to, as per the instructions below under
+INSTALLATION, unpack the latest distribution and run make and make
+install with the proper arguments.
+
+=over 4
+
+=item Overwriting Changes
+
+This process will overwrite any customizations of your installed
+modules, or customizations of the installed scripts in
+/usr/local/slash/themes/ and /usr/local/slash/plugins/ (for themes
+and plugins that come with Slash).  If you ran install-slashsite
+with the default option of using symlinks, and made customizations
+to the originals instead of breaking the symlink and copying the file
+over, then this will overwrite your changes.
+
+If you did modify the original instead of a copy, then break the
+symlink, copy over the original (as modified), and then continue.
+The original will be copied over by the new version, and your modified
+copy will remain intact.
+
+=item Templates
+
+With every update, there are changes to templates.  But most people
+will modify their templates.  A relatively simple way to see what
+has changed is to use template-tool and template-check.  This
+procedure should help most users deal with the integration of new
+templates into an existing site (it will only work with the slashcode
+theme, but a simple modification to the code of template-check
+can fix that).
+
+=over 4
+
+=item Dump
+
+Use template-tool to dump your templates into an empty directory.
+
+	% mkdir templates
+	% cd templates
+	% template-tool -u VIRTUAL_USER -d ./
+
+=item Compare
+
+Use template-check to compare installed templates in
+/usr/local/slash/themes/slashcode/ and /usr/local/slash/plugins/ against
+the templates that have been dumped.
+
+	% template-check -u VIRTUAL_USER ./
+
+This will use diff to show you the differences.  You can either go
+into the templates with a text editor (in another window) and change
+the dumped ones by hand, edit them by hand in the Template Editor
+via the web browser, or take a note of every template you want to
+copy over your existing template.
+
+After each directory of templates is done, hit "q" to continue to
+the next plugin/theme.
+
+=item Sync
+
+If you made changes by hand via the web, you are done.  Otherwise, take
+the list of templates to update, and pass the full filenames to
+template-tool (this will either be the templates you modified by hand
+in the dump directory, or the unmodified ones in the installation
+directories). You might need to put each filename in quotes because of
+the ";" character in the filenames.  This will overwrite your existing
+template with the new template.
+
+	% template-tool -u VIRTUAL_USER -s LIST
+
+=back
+
+=item Data
+
+Currently, there are no differences in the schema or the database data
+between versions of Slash 2.0.
+
+=back
+
+
+=head2 Slash 1.0 -> Slash 2.0
+
+Please read the complete documentation of F<utils/slash1toslash2>.
+It is a program that will convert your database from Slash 1.0
+to a new Slash 2.0 database.  The program documentation (which can
+be read with F<perldoc>) details exactly what process it follows
+to do the conversion, so you can attempt to do it by hand if you
+prefer.
+
+
+
 =head1 INSTALLATION
 
 =head2 Installation Notes
@@ -492,18 +589,6 @@ NFS server (dual PIII/600, 2GB RAM, 2 x 9GB hard drive), and one
 database server (quad Xeon/550, 2GB RAM, 6 x 9GB hard drive).  However,
 this is certainly overkill for most sites (and possibly even overkill
 for Slashdot).
-
-
-=head1 UPGRADING
-
-=head2 Slash 1.0 -> Slash 2.0
-
-Please read the complete documentation of F<utils/slash1toslash2>.
-It is a program that will convert your database from Slash 1.0
-to a new Slash 2.0 database.  The program documentation (which can
-be read with F<perldoc>) details exactly what process it follows
-to do the conversion, so you can attempt to do it by hand if you
-prefer.
 
 
 =head1 VERSION
