@@ -103,7 +103,6 @@ sub handler {
 	@{$form}{keys  %{$constants->{form_override}}} =
 		values %{$constants->{form_override}};
 	my $cookies = Apache::Cookie->fetch;
-	$form->{_dynamic_page} = 1;
 
 	# So we are either going to pick the user up from
 	# the form, a cookie, or they will be anonymous
@@ -195,6 +194,7 @@ sub handler {
 	$srand_called ||= 1;
 
 	my $user = prepareUser($uid, $form, $uri, $cookies, $method);
+	$user->{state}{_dynamic_page} = 1;
 	createCurrentUser($user);
 	createCurrentForm($form);
 	if ( ($user->{seclev} <= 1 && !$user->{state}{lostprivs})

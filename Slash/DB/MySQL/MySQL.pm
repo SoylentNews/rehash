@@ -1297,15 +1297,19 @@ sub createAccessLog {
 	my($self, $op, $dat) = @_;
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
+	my $user = getCurrentUser();
 	my $r = Apache->request;
 	my $hostip = $r->connection->remote_ip; 
 	my $bytes = $r->bytes_sent; 
+
+	$user ||= {};
+	$user->{state} ||= {};
 
 	my $uid;
 	if ($ENV{SLASH_USER}) {
 		$uid = $ENV{SLASH_USER};
 	} else {
-		$uid = $constants->{anonymous_coward_uid};
+		$uid = $user->{uid} || $constants->{anonymous_coward_uid};
 	}
 	my $section = $constants->{section};
 	# The following two are special cases
@@ -1349,7 +1353,8 @@ sub createAccessLog {
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
 		duration	=> $duration,
 		local_addr	=> $local_addr,
-		static	=> $form->{_dynamic_page} ? 'no' : 'yes',
+		static	=> $user->{state}->{_dynamic_page} ? 'no' : 'yes',
+		referer	=> $ENV{HTTP_REFERER},
 	}, { delayed => 1 });
 }
 
