@@ -561,6 +561,7 @@ sub insert_task_event {
 		$slashdb->setSlashdStatus($file_nopl, $options);
 	}
 	$slashdb->sqlDo("COMMIT");
+	$slashdb->sqlDo("SET AUTOCOMMIT=1");
 }
 
 # Sort the events from the hash back into an array.  We choose the
