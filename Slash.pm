@@ -1436,8 +1436,10 @@ sub fixurl {
 		$url = fixHref($url) || $url;
 		if ($stripauth) {
 			my $uri = new URI $url;
-			$uri->authority($uri->host);
-			$url = $uri->as_string;
+			if ($uri && $uri->can('host')) {
+				$uri->authority($uri->host);
+				$url = $uri->as_string;
+			}
 		}
 		my $decoded_url = decode_entities($url);
 		return $decoded_url =~ s|^\s*\w+script\b.*$||i ? undef : $url;
