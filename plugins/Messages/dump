@@ -15,7 +15,7 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (6, 'New Submission
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (7, 'Reply to Journal', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (8, 'New Comment', 1000000, '');
 #INSERT INTO message_codes (code, type, seclev, modes) VALUES (9, 'Interuser Messages', 1, '');
-INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, '');
+INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, 0);
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, '0');
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Inbox','[% constants.rootdir %]/my/inbox/',1,13);
