@@ -282,7 +282,7 @@ sub rebuildUser {
 			}
 		}
 	}
-
+	$people ||= {};
 	return $people;
 }
 
