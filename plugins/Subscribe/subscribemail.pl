@@ -27,12 +27,13 @@ $task{$me}{code} = sub {
 
 	my $transaction_list = "";
 	my($total_gross, $total_net, $total_pages_bought) = (0, 0, 0);
-	if (%$new_subscriptions_hr) {
+	if ($num_new_subscriptions > 0) {
 		$transaction_list = sprintf(
 			"%7s %3s %6s %6s %6s %5s %6s %-20s\n", qw(
 			 uid kma $gros $net  today  used  total nickname )
 		);
-		for my $spid (sort { $a <=> $b } keys %$new_subscriptions_hr) {
+		my @spids = sort { $a <=> $b } keys %$new_subscriptions_hr;
+		for my $spid (@spids) {
 			my $spid_hr = $new_subscriptions_hr->{$spid};
 			$total_gross += $spid_hr->{payment_gross};
 			$total_net += $spid_hr->{payment_net};
@@ -46,8 +47,14 @@ $task{$me}{code} = sub {
 			);
 		}
 		$transaction_list .= sprintf(
-			"%-11s %6.2f %6.2f %6d",
+			"%-10s %7.2f %6.2f %6d",
 			"total:", $total_gross, $total_net, $total_pages_bought
+		);
+		$transaction_list .= sprintf(
+			"%-10s %7.2f %6.2f %6d",
+			"mean:", $total_gross/$num_new_subscriptions,
+			$total_net/$num_new_subscriptions,
+			$total_pages_bought/$num_new_subscriptions
 		);
 	}
 
