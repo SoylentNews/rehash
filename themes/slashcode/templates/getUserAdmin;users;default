@@ -66,26 +66,26 @@ __template__
 		[% END %]
 		
 		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0">
+			<FORM ACTION="[% env.script_name %]" METHOD="POST">
 			<TR>
-				<FORM ACTION="[% env.script_name %]" METHOD="POST">
 		[% IF form.formkey %]
 			        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
 		[% END %]
 				<INPUT TYPE="HIDDEN" NAME="op" VALUE="admin">
+
+				[%- IF field == 'uid' -%]
+				<INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid %]">
 		
-				[% IF field == 'uid' %]
-				<TD><INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid %]"></TD>
+				[%- ELSIF field == 'ipid' -%]
+				<INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid %]">
 		
-				[% ELSIF field == 'ipid' %]
-				<TD><INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid %]"></TD>
+				[%- ELSIF field == 'md5id' -%]
+				<INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id %]">
 		
-				[% ELSIF field == 'md5id' %]
-				<TD><INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id %]"></TD>
-		
-				[% ELSIF field == 'subnetid' %]
-				<TD><INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid %]"></TD>
-				[% END %]
-		
+				[%- ELSIF field == 'subnetid' -%]
+				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid %]">
+				[%- END -%]
+
 				<TD VALIGN="MIDDLE">
 					<B>UID/NetID/Nickname:</B> 
 					<INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]">
