@@ -21,7 +21,8 @@ $task{$me}{code} = sub {
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 
-	my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday  });
+	my $statsSave = getObject('Slash::Stats::Writer',
+		{ nocache => 1 }, { day => $yesterday  });
 
 	if ($constants->{backup_db_user}) {
 		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
