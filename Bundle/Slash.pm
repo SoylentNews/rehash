@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$Bundle::Slash::VERSION = '2.31';
+$Bundle::Slash::VERSION = '2.32';
 
 1;
 
@@ -45,30 +45,6 @@ HTML::TokeParser
 
 HTML::CalendarMonth	- used for Events plugin
 
-XML::Parser
-
-XML::RSS
-
-XML::Simple
-
-DBI
-
-Data::ShowTable
-
-J/JW/JWIED/Msql-Mysql-modules-1.2219.tar.gz    - instead of Bundle::DBD::mysql (Data::ShowTable)
-
-Bundle::DBD::mysql	- ???
-
-DBIx::Password
-
-Apache::DBI
-
-Apache::Request		- libapreq; also includes Apache::Cookie
-
-AppConfig		- Should be installed with TT, but sometimes not?
-
-Template		- Template Toolkit
-
 Mail::Sendmail
 
 Mail::Address
@@ -90,6 +66,30 @@ Date::Calc		- Use sparingly, only when necessary
 Time::ParseDate         - Time-modules; Needed for Schedule::Cron
 
 Schedule::Cron
+
+XML::Parser
+
+XML::RSS
+
+XML::Simple
+
+DBI
+
+Data::ShowTable
+
+Bundle::DBD::mysql	- ???
+
+DBIx::Password
+
+Apache::Test
+
+Apache::DBI
+
+Apache::Request		- libapreq; also includes Apache::Cookie
+
+AppConfig		- Should be installed with TT, but sometimes not?
+
+Template		- Template Toolkit
 
 
 =head1 DESCRIPTION
