@@ -401,8 +401,7 @@ sub displayArticle {
 	}
 
 	push @sorted_articles, $collection;
-	my $theme = $slashdb->getUser($uid, 'journal_theme');
-	$theme ||= $constants->{journal_default_theme};
+	my $theme = _checkTheme($slashdb->getUser($uid, 'journal_theme'));
 
 	my $show_discussion = $form->{id} && !$constants->{journal_no_comments_item} && $discussion;
 	my $zoo   = getObject('Slash::Zoo');
@@ -425,10 +424,13 @@ sub setPrefs {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
 
 	my %prefs;
-	for my $name (qw(journal_discuss journal_theme)) {
-		$prefs{$name} = $user->{$name} = $form->{$name}
-			if defined $form->{$name};
-	}
+	$prefs{journal_discuss} = $user->{journal_discuss} =
+		$form->{journal_discuss}
+		if defined $form->{journal_discuss};
+
+	$prefs{journal_theme} = $user->{journal_theme} =
+		_checkTheme($form->{journal_theme})
+		if defined $form->{journal_theme};
 
 	$slashdb->setUser($user->{uid}, \%prefs);
 	
@@ -445,7 +447,7 @@ sub listArticle {
 
 	my $list 	= $journal->list($uid);
 	my $themes	= $journal->themes;
-	my $theme	= $user->{'journal_theme'} || $constants->{journal_default_theme};
+	my $theme	= _checkTheme($user->{'journal_theme'});
 	my $nickname	= $form->{uid}
 		? $slashdb->getUser($form->{uid}, 'nickname')
 		: $user->{nickname};
@@ -637,8 +639,7 @@ sub editArticle {
 			commentcount	=> $commentcount,
 		};
 
-		my $theme = $user->{'journal_theme'};
-		$theme ||= $constants->{journal_default_theme};
+		my $theme = _checkTheme($user->{'journal_theme'});
 		my $zoo   = getObject('Slash::Zoo');
 		slashDisplay($theme, {
 			articles	=> [{ day => $article->{date}, article => [ $disp_article ] }],
@@ -684,6 +685,20 @@ sub _printHead {
 	my $title = getData($head, $data);
 	header($title);
 	slashDisplay("journalhead", { title => $title });
+}
+
+sub _checkTheme {
+	my($theme)	= @_;
+
+	my $constants	= getCurrentStatic();
+	return $constants->{journal_default_theme} if !$theme;
+
+	my $journal	= getObject('Slash::Journal');
+	my $themes	= $journal->themes;
+
+	return $constants->{journal_default_theme}
+		unless grep $_ eq $theme, @$themes;
+	return $theme;
 }
 
 createEnvironment();
