@@ -516,7 +516,7 @@ sub listpolls {
 		$opts->{section} = '';
 	}
 
-	my $questions = $reader->getPollQuestionList($min, $opts);
+	$questions = $reader->getPollQuestionList($min, $opts);
 
 	my $sitename = getCurrentStatic('sitename');
 
