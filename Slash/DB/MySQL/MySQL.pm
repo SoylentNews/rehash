@@ -712,16 +712,22 @@ sub getStoryDiscussions {
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
 	my $tables = "discussions, stories",
-	my $where = "displaystatus != -1 AND discussions.sid=stories.sid AND time <= NOW() AND writestatus != 'delete' AND writestatus != 'archived'";
+	my $where = "displaystatus != -1
+		AND discussions.sid=stories.sid
+		AND time <= NOW()
+		AND discussions.writestatus != 'delete'
+		AND discussions.writestatus != 'archived'";
 
 	if ($section) {
 		$where .= " AND discussions.section = '$section'"
 	} else {
 		$tables .= ", sections";
-		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+		$where .= " AND sections.section = discussions.section
+			AND sections.isolate != 1 ";
 	}
 
-	my $discussion = $self->sqlSelectAll("discussions.sid, discussions.title, discussions.url",
+	my $discussion = $self->sqlSelectAll(
+		"discussions.sid, discussions.title, discussions.url",
 		$tables,
 		$where,
 		"ORDER BY time DESC LIMIT $start, $limit"
