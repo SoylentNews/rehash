@@ -135,9 +135,9 @@ __template__
 				<TD ALIGN="RIGHT" WIDTH="100">Banned</TD>
 				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="banned_reason" VALUE="[% banned_reason | strip_attribute %]">&nbsp;[% banned_time %]</TD>
 			</TR>
-			[% IF useredit.nonuid && field == 'ipid' %]
+			[% IF field == 'ipid' || field == 'md5id' %]
 			<TR>
-				<TD ALIGN="RIGHT" IWDTH="100">Is Proxy</TD>
+				<TD ALIGN="RIGHT" WIDTH="100">Is Proxy</TD>
 				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="isproxy" [% isproxy %]>&nbsp;</TD>
 			</TR>
 			[% END %]
