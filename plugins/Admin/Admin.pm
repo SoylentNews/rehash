@@ -53,6 +53,28 @@ sub getRecentSubs {
 	return $subs;
 }
 
+sub getRecentWebheads {
+	my($self, $max_num_mins, $max_num_ids) = @_;
+	# Pick reasonable defaults.  max_num_minds is passed directly into an
+	# SQL statement so it gets extra syntax checking.
+	$max_num_mins ||= 10;
+	$max_num_mins   = 10   if $max_num_mins !~ /^\d+$/;
+	$max_num_ids ||= 25000;
+
+	my $max_id = $self->getAccesslogMaxID();
+	my $min_id = $max_id - $max_num_ids;
+	$min_id = 0 if $min_id < 0;
+
+	my $data_hr = $self->sqlSelectAllHashref(
+		[qw( minute local_addr )],
+		"DATE_FORMAT(ts, '%m-%d %H:%i') AS minute, local_addr, AVG(duration) AS dur, COUNT(*) AS c",
+		"accesslog",
+		"id >= $min_id AND ts >= DATE_SUB(NOW(), INTERVAL $max_num_mins MINUTE)",
+		"GROUP BY minute, local_addr");
+
+	return $data_hr;
+}
+
 sub getAccesslogAbusersByID {
 	my($self, $options) = @_;
 	my $slashdb = $options->{slashdb} || $self;

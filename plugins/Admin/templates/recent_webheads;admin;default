@@ -1,0 +1,64 @@
+__section__
+default
+__description__
+* data - hashref of hashrefs of hashrefs
+* webheads - list of all webheads in order
+
+__title__
+admin interface recent template
+__page__
+admin
+__lang__
+en_US
+__name__
+recent_webheads
+__template__
+[% PROCESS titlebar title="Recent Webhead Data" width='100%' %]
+
+<TABLE CELLSPACING="2" BORDER="0">
+
+<TR>
+<TH>&nbsp;</TH>
+<TH ROWSPAN="2" VALIGN="BOTTOM">total<BR>hits</TH>
+[% FOREACH wh = webheads %]
+	<TH COLSPAN=2>[% wh %]</TH>
+[% END %]
+</TR>
+
+<TR>
+<TH>minute</TH>
+[% FOREACH wh = webheads %]
+	<TH>time</TH><TH>hits</TH>
+[% END %]
+</TR>
+
+[% FOREACH min = data.keys.sort %]
+
+	<TR>
+	<TD ALIGN="RIGHT">
+		[% min %]
+	</TD>
+	<TD ALIGN="RIGHT">
+		[% total_hits = 0;
+		   FOREACH wh = webheads;
+			total_hits = total_hits + data.$min.$wh.c;
+		   END %]
+		   [% total_hits %]
+	</TD>
+
+	[% FOREACH wh = webheads;
+	   time = data.$min.$wh.dur || '-';
+	   hits = data.$min.$wh.c || '-' %]
+		<TD ALIGN="RIGHT">[% time %]</TD>
+		<TD ALIGN="RIGHT">[% hits %]</TD>
+	[% END %]
+	</TR>
+
+[% END %]
+
+</TABLE>
+
+__seclev__
+100
+__version__
+$Id$
