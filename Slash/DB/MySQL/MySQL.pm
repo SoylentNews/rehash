@@ -5920,6 +5920,13 @@ sub updateStory {
 	$data->{body_length} = length($data->{bodytext});
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 
+	my $prev_section = $self->sqlSelect("section","stories","sid=".$self->sqlQuote($sid));
+	my $old_section_param = $self->sqlSelect("value","story_param","sid=".$self->sqlQuote($sid)." and name ='old_shtml_sections'");
+	if($prev_section and $prev_section ne $data->{section}){
+		$old_section_param .= "$prev_section,";
+		$data->{old_shtml_sections} = $old_section_param;
+	}
+
 	unless ($self->setStory($sid, $data)) {
 		print STDERR "Failed to set topics for story\n";
 		goto error;
