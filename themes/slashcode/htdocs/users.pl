@@ -1698,37 +1698,40 @@ sub saveUser {
 	}
 
 	# The schema is 160 chars but we limit their input to 120.
-	# If the sig becomes too long to fit (domain tagging causes
-	# string expansion and tag balancing can too), warn the user to
-	# use shorter domain names and don't save their change.
-	my $sig = chopEntity($form->{sig}, 120);
-	my $bio = $form->{bio};
+	my(%extr, $err_message);
+	$extr{sig} = chopEntity($form->{sig}, 120);
+	$extr{bio} = chopEntity($form->{bio}, $constants->{users_bio_length} || 1024);
 
-	for my $dat ($sig, $bio) {
+	for my $key (keys %extr) {
+		my $dat = $extr{$key};
 		$dat = strip_html($dat);
 		$dat = balanceTags($dat, 1); # only 1 nesting tag (UL, OL, BLOCKQUOTE) allowed
 		$dat = addDomainTags($dat) if $dat;
-	}
 
-	if (defined($sig) && length($sig) > 160) {
-		print getError('sig_too_long_err');
-		$sig = undef;
-	}
+		# If the sig becomes too long to fit (domain tagging causes
+		# string expansion and tag balancing can too), warn the user to
+		# use shorter domain names and don't save their change.
+		if ($key eq 'sig' && defined($dat) && length($dat) > 160) {
+			print getError('sig_too_long_err');
+			$extr{sig} = undef;
+		}
 
-	my($err_message);
-	# really, comment filters should ignore short length IMO ... oh well.
-	if (length($bio) > 1 && ! filterOk('comments', 'postersubj', $bio, \$err_message)) {
-		print getError('filter message', {
-			err_message	=> $err_message,
-			item		=> 'bio',
-		});
-		$bio = undef;
-	} elsif (! compressOk('comments', 'postersubj', $bio)) {
-		print getError('compress filter', {
-			ratio	=> 'postersubj',
-			item		=> 'bio',
-		});
-		$bio = undef;
+		# really, comment filters should ignore short length IMO ... oh well.
+		if (length($dat) > 1 && ! filterOk('comments', 'postersubj', $dat, \$err_message)) {
+			print getError('filter message', {
+				err_message	=> $err_message,
+				item		=> $key,
+			});
+			$extr{$key} = undef;
+		} elsif (! compressOk('comments', 'postersubj', $dat)) {
+			print getError('compress filter', {
+				ratio		=> 'postersubj',
+				item		=> $key,
+			});
+			$extr{$key} = undef;
+		} else {
+			$extr{$key} = $dat;
+		}
 	}
 
 	# We should do some conformance checking on a user's pubkey,
@@ -1752,8 +1755,9 @@ sub saveUser {
 		copy		=> $form->{copy},
 		quote		=> $form->{quote},
 	};
-	$user_edits_table->{sig} = $sig if defined $sig;
-	$user_edits_table->{bio} = $bio if defined $bio;
+	for (keys %extr) {
+		$user_edits_table->{$_} = $extr{$_} if defined $extr{$_};
+	}
 
 	# don't want undef, want to be empty string so they
 	# will overwrite the existing record

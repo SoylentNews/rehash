@@ -509,3 +509,4 @@ INSERT INTO vars (name, value, description) VALUES ('comments_perday_anon','10',
 
 # End of R_2_3_0_32, Start of T_2_3_0_33
 
+INSERT INTO vars (name, value, description) VALUES ('users_bio_length','1024','Length allowed for user bio');
