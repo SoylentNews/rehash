@@ -1713,9 +1713,10 @@ sub getCommentsByIPIDOrSubnetID {
 # get list of DBs, never cache
 sub getDBs {
 	my($self) = @_;
-	my $dbs = $self->sqlSelectAllHashref('id', '*', 'db');
+	my $dbs = $self->sqlSelectAllHashref('id', '*', 'dbs');
 	my %databases;
 
+	# rearrange to list by "type"
 	for (keys %$dbs) {
 		my $db = $dbs->{$_};
 		$databases{$db->{type}} ||= [];
