@@ -41,6 +41,9 @@ __template__
 [% CASE 'archive_error' %]
 	This discussion has been archived, no further changes/additions can be made to it.
 
+[% CASE 'submitted_comment' %]
+	Submitted Comment
+
 [% END %]
 
 __seclev__

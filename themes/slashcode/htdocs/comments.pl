@@ -235,6 +235,7 @@ sub getError {
 sub delete {
 	my($form, $slashdb, $user, $constants) = @_;
 
+	# The content here should also probably go into a template.
 	titlebar("99%", "Delete $form->{cid}");
 
 	my $delCount = deleteThread($form->{sid}, $form->{cid});
@@ -808,6 +809,7 @@ sub submitComment {
 		return(0);
 	}
 
+
 	$tempComment = strip_mode($tempComment, $form->{posttype});
 	$form->{postercomment} = addDomainTags($tempComment);
 
@@ -816,8 +818,7 @@ sub submitComment {
 #	# (maybe in 2.2.1... sigh)
 #	$form->{postercomment} = distressBinaries($form->{postercomment});
 
-	# this has to be a template -- pudge
-	titlebar("95%", "Submitted Comment");
+	titlebar("95%", getData('submitted_comment'));
 
 	my $pts = 0;
 
@@ -833,13 +834,26 @@ sub submitComment {
 		$pts = $minScore if $pts < $minScore;
 		$pts = $maxScore if $pts > $maxScore;
 	}
+	# This is here to prevent posting to discussions that don't exist/are nd -Brian
+	unless ($user->{is_admin}) {
+		unless ($slashdb->checkDiscussionPostable($form->{sid})) {
+			print getError('submission error');
+			return(0);
+		}
+	}
 
-	my $maxCid = $slashdb->createComment(
-		$form, 
-		$user, 
-		$pts, 
-		$constants->{anonymous_coward_uid}
-	);
+	my $clean_comment = {
+		comment	=>  $form->{postercomment},
+		sid => $form->{sid} , 
+		pid => $form->{pid} ,
+		ipid => $user->{ipid},
+		subnetid => $user->{subnetid},
+		subject => $form->{postersubj},
+		uid => $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
+		points => $pts,
+	};
+
+	my $maxCid = $slashdb->createComment($clean_comment);
 
 	# make the formkeys happy
 	$form->{maxCid} = $maxCid;

@@ -235,31 +235,24 @@ sub sqlTransactionCancel {
 ########################################################
 # Bad need of rewriting....
 sub createComment {
-	my($self, $comment, $user, $pts, $default_user) = @_;
-	$default_user ||= getCurrentStatic('anonymous_coward_uid');
-	my $header = $comment->{sid};
+	my($self, $comment) = @_;
+
+	my $comment_text = $comment->{comment};
+	delete $comment->{comment};
+	$comment->{signature} = md5_hex($comment_text);
+	$comment->{-date} = 'now()';
+
 	my $cid;
-
-	my $signature = md5_hex($comment->{postercomment});
-	my $uid = $comment->{postanon} ? $default_user : $user->{uid};
-	# Basically, this makes sure that the thread is not
-	# been set read only -Brian
-	return -1 if $self->getDiscussion($header, 'type') eq 'archived';
-
-	my $insline = "INSERT into comments (sid,pid,date,ipid,subnetid,subject,uid,points,signature) values ($header," .
-		$self->sqlQuote($comment->{pid}) . ",now(),'$user->{ipid}','$user->{subnetid}'," .
-		$self->sqlQuote($comment->{postersubj}) . ", $uid, $pts, '$signature')";
-
-	if ($self->sqlDo($insline)) {
+	if ($self->sqlInsert('comments', $comment)) {
 		$cid = $self->getLastInsertId();
 	} else {
-		errorLog("$DBI::errstr $insline");
+		errorLog("$DBI::errstr");
 		return -1;
 	}
 
 	$self->sqlInsert('comment_text', {
 			cid	=> $cid,
-			comment	=>  $comment->{postercomment},
+			comment	=>  $comment_text,
 	});
 
 
@@ -271,7 +264,7 @@ sub createComment {
 	$self->sqlUpdate(
 		"discussions",
 		{ -commentcount	=> 'commentcount+1' },
-		"id=$header",
+		"id=$comment->{sid}",
 	);
 
 	return $cid;
@@ -1338,6 +1331,26 @@ sub checkStoryViewable {
 
 	my $count = $self->sqlCount('stories', "sid='$sid' AND  displaystatus != -1 AND time < now()");
 	return $count;
+}
+
+########################################################
+# Ugly yes, needed at the moment, yes
+# $id is a discussion id. -Brian
+sub checkDiscussionPostable {
+	my($self, $id) = @_;
+	return unless $id;
+
+	# This should do it. 
+	my $count = $self->sqlSelect('id', 'discussions', "id='$id' AND  type != 'archived' AND ts < now()");
+	return unless $count;
+
+	# Now, we are going to get paranoid and run the story checker against it
+	my $sid;
+	if ($sid = $self->getDiscussion($id, 'sid')) {
+		return $self->checkStoryViewable($sid);
+	}
+	
+	return 1;
 }
 
 ########################################################
@@ -4604,6 +4617,7 @@ sub getContentFilter {
 ########################################################
 sub getSubmission {
 	my $answer = _genericGet('submissions', 'subid', '', @_);
+	#my $answer = _genericGet('submissions', 'subid', 'submission_param', @_);
 	return $answer;
 }
 

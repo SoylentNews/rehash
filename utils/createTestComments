@@ -161,19 +161,18 @@ $werder = new Silly::Werder;
 		if (rand(1) < 0.2) {
 			$subj =~ s/\W*$/ +((qw( . ! ? ))[rand 3]) x (2+rand 5) /e;
 		}
-	        my $pid = getRandomParent();
-	        my $cid = $slashdb->createComment(
-			{
-	                        postercomment   => $comment,
-        	                sid             => $discussion_id,
-                	        pid             => $pid,
-	                        postersubj      => $subj,
-        	                postanon        => 0,
-                	},
-	                $user,
-			$score,
-			$constants->{anonymous_coward_uid}
-        	);
+		my $pid = getRandomParent();
+		my $clean_comment = {
+				comment         => $comment,
+				sid             => $discussion_id,
+				pid             => $pid,
+				ipid            => $user->{ipid},
+				subnetid        => $user->{subnetid},
+				subject         => $subj,
+				uid             => $user->{uid},
+				points          => $score,
+		};
+		my $cid = $slashdb->createComment($clean_comment);
 		$slashdb->setStory($sid, { writestatus => 'dirty' }) if $sid;
 	        $family_tree{$cid} = $pid if ! $opts{T};
 		$deep_tree{$cid} = $deep_tree{$pid}+1 if $opts{t};
