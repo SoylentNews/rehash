@@ -108,6 +108,25 @@ function [% name %]_change_focus(elem) {
 	[% name %]_elem_focus = elem;
 }
 
+/* handle keypresses in search field */
+function [% name %]_search_key_handler(type, e) {
+	var name = "[% name %]";
+	if (type) {
+		name = name + "-" + type;
+	}
+
+	if (!e) {
+		e = window.event;
+	}
+
+	var key = e.which || e.keyCode;
+
+	[% name %]_search(type);
+
+	e.returnValue = false;
+	return false;
+}
+
 /* find topics matching string */
 function [% name %]_search(type, searchstring) {
 	var name = "[% name %]";
@@ -135,7 +154,7 @@ function [% name %]_search(type, searchstring) {
 
 			var j = 0;
 			if (!searchstring) {
-				j = 1;
+				j = 0;
 			} else {
 				var match = myname.toLowerCase().indexOf(searchstring);
 
