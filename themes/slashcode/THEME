@@ -88,6 +88,7 @@ task=tasks/expire.pl
 task=tasks/flush_formkeys.pl
 task=tasks/new_headfoot.pl
 task=tasks/freshenup.pl
+task=tasks/log_db_qps.pl
 task=tasks/open_backend.pl
 task=tasks/new_motd.pl
 task=tasks/p2f_hof_topics.pl
