@@ -435,8 +435,6 @@ sub set_resources {
 	}
 }
 
-sub abs { $_[0] >= 0 ? $_[0] : -$_[0] }
-
 # Given a task filename, calculates its next execution time, and recreates
 # the event array with that task scheduled for that time.  This happens
 # to be always called when the task in question has already been popped
