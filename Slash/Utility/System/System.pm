@@ -35,6 +35,7 @@ use Mail::Sendmail;
 use Slash::Custom::Bulkmail;	# Mail::Bulkmail
 use Slash::Utility::Environment;
 use Symbol 'gensym';
+use Time::HiRes ();
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT @EXPORT_OK);
@@ -124,8 +125,9 @@ sub sendEmail {
 		Message		=> $content,
 		To		=> $addr,
 		# put in vars ... ?
-		'Content-type'	=> 'text/plain; charset="us-ascii"',
+		'Content-type'			=> 'text/plain; charset="us-ascii"',
 		'Content-transfer-encoding'	=> '8bit',
+		'Message-Id'			=> messageID(),
 	);
 
 	if ($pr && $pr eq 'bulk') {
@@ -146,6 +148,25 @@ sub sendEmail {
 		return 0;
 	}
 }
+
+{ my($localhost);
+sub messageID {
+	my $constants = getCurrentStatic();
+
+	my $host = $constants->{basedomain};
+	if (!$localhost) {
+		chomp($localhost = `hostname`);
+		$localhost ||= '';
+	}
+
+	my $msg_id;
+	if ($host eq $localhost || !length($localhost)) {
+		$msg_id = sprintf('%f-%d-slash@%s', Time::HiRes::time(), $$, $host);
+	} else {
+		$msg_id = sprintf('%f-%d-slash-%s@%s', Time::HiRes::time(), $$, $localhost, $host);
+	}
+	return $msg_id;
+}}
 
 sub bulkEmail {
 	my($addrs, $subject, $content) = @_;
@@ -178,6 +199,10 @@ sub bulkEmail {
 		GOOD	=> $goodfile,
 		BAD	=> $badfile,
 		ERRFILE	=> $errfile,
+		# put in vars ... ?
+		'Content-type'			=> 'text/plain; charset="us-ascii"',
+		'Content-transfer-encoding'	=> '8bit',
+		'Message-Id'			=> messageID(),
 	);
 	my $return = $bulk->bulkmail;
 
