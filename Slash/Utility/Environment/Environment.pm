@@ -1613,6 +1613,7 @@ sub createEnvironment {
 	unless ($virtual_user) {
 		for (@ARGV) {
 			my($key, $val) = split /=/;
+			last if ! defined $val; # stop processing if key=val stops
 			$form{$key} = $val;
 			shift @ARGV;  # remove it
 		}
