@@ -1,6 +1,8 @@
 slash-1.0.10, 2000.xx.xx
 ------------------------
 
+*	Make sessions.sid field longer (Jean Gionet)
+
 *	Change order of installing perl in INSTALL (Dave Aiello)
 
 *	Bunches of changes to whitespace / URL / submission

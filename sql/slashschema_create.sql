@@ -353,7 +353,7 @@ CREATE TABLE sections (
 # Table structure for table 'sessions'
 #
 CREATE TABLE sessions (
-  session varchar(20) DEFAULT '' NOT NULL,
+  session varchar(30) DEFAULT '' NOT NULL,
   aid varchar(30),
   logintime datetime,
   lasttime datetime,
