@@ -62,26 +62,10 @@ __template__
 		Threshold [% threshold_select %]
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
 	[% END %]
-
-	[%# IF topics && !constants.multitopics_display;
-		Slash.createSelect("tid", topics, form.tid, 1, 0, 1);
-	END %]
-
-	[%# IF sections;
-		Slash.createSelect("section", sections, form.section, 1, 0, 1);
-	END %]
-
-	[%# IF subsections;
-		Slash.createSelect("subsection", subsections, form.subsection, 1, 0, 1);
-	END %]
-
-	[%# IF constants.multitopics_display;
-		"<P>\n";
-		INCLUDE topicsearch;
-	END %]
 	<P>
 </FORM>
 
+[% IF sections || topics %]
 </td></tr><tr><td>
 [%
    topics = Slash.db.getTopicTree();
@@ -134,10 +118,13 @@ Topics</b>
 %]</ul></td>
 <td valign="top">
 <font size="-1">
-<ul>[% END; END %]
+<ul>[% END; END # FOREACH %]
 </td></tr>
-</table></td></tr></table>
-[% END %]
+</table>
+[% END # IF listnames.size %]
+
+[% END # IF sections || topics %]
+</td></tr></table>
 
 
 __seclev__
