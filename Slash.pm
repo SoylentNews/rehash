@@ -1733,9 +1733,16 @@ sub reparentComments {
 
 		# do threshold reparenting thing
 		if ($I{U}{reparent} && $comments->[$x]{points} >= $I{U}{threshold}) {
-			while ($pid && $comments->[$pid]{points} < $I{U}{threshold}) {
-				$pid = $comments->[$pid]{pid};
+			my $tmppid = $pid;
+			while ($tmppid && $comments->[$tmppid]{points} < $I{U}{threshold}) {
+				$tmppid = $comments->[$tmppid]{pid};
 				$reparent = 1;
+			}
+
+			if ($reparent && $tmppid >= ($I{F}{cid} || $I{F}{pid})) {
+				$pid = $tmppid;
+			} else {
+				$reparent = 0;
 			}
 		}
 
@@ -1752,12 +1759,14 @@ sub reparentComments {
 
 		if ($reparent) {
 			# remove child from old parent
-			@{$comments->[$comments->[$x]{pid}]{kids}} =
-				grep { $_ != $x }
-				@{$comments->[$comments->[$x]{pid}]{kids}};
-			$comments->[$x]{realpid} = $comments->[$x]{pid};
+			if ($pid >= ($I{F}{cid} || $I{F}{pid})) {
+				@{$comments->[$comments->[$x]{pid}]{kids}} =
+					grep { $_ != $x }
+					@{$comments->[$comments->[$x]{pid}]{kids}}
+			}
 
 			# add child to new parent
+			$comments->[$x]{realpid} = $comments->[$x]{pid};
 			$comments->[$x]{pid} = $pid;
 			push @{$comments->[$pid]{kids}}, $x;
 		}
@@ -2085,7 +2094,7 @@ sub displayThread {
 		$I{F}{startat} = 0; # Once We Finish Skipping... STOP
 		
 		if ($C->{points} < $I{U}{threshold}) {
-			if($I{U}{uid} < 0 || $I{U}{uid} != $C->{uid})  {
+			if ($I{U}{uid} < 0 || $I{U}{uid} != $C->{uid})  {
 				$hidden++;
 				next;
 			}
@@ -2178,13 +2187,16 @@ EOT
 	print "\nError:$@\n" if $@;
 
 	if ($I{U}{mode} ne 'archive') {
+		my $pid = $C->{realpid} || $C->{pid};
 		my $m = sprintf '%s | %s', linkComment({
 			sid => $C->{sid}, pid => $C->{cid}, op => 'Reply',
 			subject => 'Reply to This'
 		}), linkComment({
-			sid => $C->{sid}, cid => $C->{pid}, pid => $C->{pid},
+			sid => $C->{sid},
+			cid => $pid,
+			pid => $pid,
 			subject => 'Parent'
-		}, $C->{pid});
+		}, $pid);
 
 		if ((	   $I{U}{willing}
 			&& $I{U}{points} > 0 
