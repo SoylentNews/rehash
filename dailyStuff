@@ -135,9 +135,9 @@ $email .= "\n-----------------------\n";
 
 $I{dbh}->do("DELETE from pollvoters");
 $I{dbh}->do("DELETE from moderatorlog WHERE
-	to_days(now()) - to_days(ts) > 14 ");
+	to_days(now()) - to_days(ts) > $I{archive_delay} ");
 $I{dbh}->do("DELETE from metamodlog WHERE
-	to_days(now()) - to_days(ts) > 14 ");
+	to_days(now()) - to_days(ts) > $I{archive_delay} ");
 
 my($comlim) = sqlSelect("commentlimit", "users_comments", "uid=-1");
 sqlUpdate("users_comments", { commentlimit => 50000 }, "uid=-1");
@@ -165,9 +165,13 @@ for (@{$E}) {
 }
 sqlUpdate("users_comments",{ commentlimit=>$comlim },"uid=-1");
 
+my $delay1 = $I{archive_delay} * 2;
+my $delay2 = $I{archive_delay} * 9;
+$I{defaultsection} ||= 'articles';
+
 $I{dbh}->do("delete from newstories WHERE 
-	(section='articles' and to_days(now()) - to_days(time) > 28)
-	or (to_days(now()) - to_days(time) > 120)");
+	(section='$I{defaultsection}' and to_days(now()) - to_days(time) > $delay1)
+	or (to_days(now()) - to_days(time) > $delay2)");
 
 $I{dbh}->do("delete from comments where to_days(now()) - to_days(date) > $I{archive_delay}");
 
