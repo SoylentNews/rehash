@@ -615,7 +615,7 @@ sub printComments {
 		? 1 : 0;
 
 	# loop here, pull what cids we can
-	my $cids_needed_ar = $user->{state}{cids};
+	my $cids_needed_ar = $user->{state}{cids} || [ ];
 	my $mcd_debug = { start_time => Time::HiRes::time }
 		if $constants->{memcached_debug};
 	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
