@@ -108,6 +108,7 @@ sub header {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
 
 	my $adhtml = '';
 	my $display;
@@ -147,7 +148,7 @@ sub header {
 
 	my $skid = 0;
 	if ($skin_name) {
-		my $skin = getSkin($skin_name);
+		my $skin = $slashdb->getSkin($skin_name);
 		$skid = $skin->{skid} if $skin;
 	}
 #print STDERR scalar(localtime) . " $$ header skin_name='$skin_name' skid='$skid' det='" . determineCurrentSkin() . "'\n";
