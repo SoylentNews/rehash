@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+__title__
+__page__
+misc
+__lang__
+en_US
+__name__
+performance_stats
+__seclev__
+10000
+__template__
+[% stats = Slash.db.getVar('cur_performance_stats', 'value', 1) %]
+[% items = stats.split('\|') %]
+[% WHILE items.size > 0;
+	cur_set = items.splice(0, 3);
+	IF items.size > 0; %]
+		<font size="2">[% cur_set.0 %] [% cur_set.1 %]s [% cur_set.2 %] [% IF items.size >= 4 %] | [% END %][% IF items.size <= 3 %]<BR>[% END %]</font>
+	[% ELSE %]
+		<font size="2">[% cur_set.1 %][% IF cur_set.2%]% [% cur_set.2 %][% END %]</font>
+	[% END %]
+[% END %]
+	
