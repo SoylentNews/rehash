@@ -62,8 +62,6 @@ sub handler {
 	my $constants = getCurrentStatic();
 	my $slashdb = $dbcfg->{slashdb};
 	my $apr = Apache::Request->new($r);
-
-	setCurrentSkin(determineCurrentSkin());
 	my $gSkin = getCurrentSkin();
 
 	$r->header_out('X-Powered-By' => "Slash $Slash::VERSION");

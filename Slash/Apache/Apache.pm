@@ -329,21 +329,9 @@ sub IndexHandler {
 
 	return DECLINED unless $r->is_main;
 	my $constants = getCurrentStatic();
-	my $gSkin     = getCurrentSkin();
 
-	# XXXSKIN - Pudge, does this look to you like the right solution
-	# for this problem?  One alternative would be to have
-	# getCurrentSkin() check its return value and do this same thing.
-	# Far as I know, this is the only place we need to do this.
-	# If the client is anonymous, Slash::Apache::User::handler has
-	# not been called, so setCurrentSkin hasn't been called, and we
-	# definitely need $gSkin set to do our manipulation of $uri.
-	# ARGH.  Or, do we need to call this every time through, because
-	# otherwise we get old data from previous click?
-#	if (!$gSkin->{skid}) {
-		setCurrentSkin(determineCurrentSkin());
-		$gSkin = getCurrentSkin();
-#	}
+	setCurrentSkin(determineCurrentSkin());
+	my $gSkin     = getCurrentSkin();
 
 	my $uri = $r->uri;
 	my $is_user = $r->header_in('Cookie') =~ $USER_MATCH;
