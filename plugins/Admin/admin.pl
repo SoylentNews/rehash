@@ -908,18 +908,24 @@ sub importText {
 ##################################################################
 # Generated the 'Related Links' for Stories
 sub getRelated {
-	my($story_content) = @_;
+	my($story_content, $tid) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $related_links = $slashdb->getRelatedLinks();
-	my $related_text;
+	my $rl = $slashdb->getRelatedLinks();
+	my $related_text = "";
+	my @rl_keys = sort keys %$rl;
 
-	if ($related_links) {
-		for my $key (values %$related_links) {
-			if ($story_content =~ /\b$key->{keyword}\b/i) {
-				my $str = qq[&middot; <A HREF="$key->{link}">$key->{name}</A><BR>\n];
-				$related_text .= $str unless $related_text =~ /\Q$str\E/;
-			}
+	if ($rl) {
+		my @matchkeys =
+			sort grep {
+				$rl->{$_}{keyword} =~ /^_topic_$tid/
+				||
+				$rl->{$_}{keyword} !~ /^_topic_/
+					&& $story_content =~ /\b$rl->{$_}{keyword}\b/i
+			} @rl_keys;
+		for my $key (@matchkeys) {
+			my $str = qq[&middot; <A HREF="$rl->{$key}{link}">$rl->{$key}{name}</A><BR>\n];
+			$related_text .= $str unless $related_text =~ /\Q$str\E/;
 		}
 	}
 
@@ -1113,7 +1119,8 @@ sub editStory {
 		$user->{currentSection} = $tmp;
 		$storyref->{relatedtext} =
 			getRelated(
-				"$storyref->{title} $storyref->{bodytext} $storyref->{introtext}"
+				"$storyref->{title} $storyref->{bodytext} $storyref->{introtext}",
+				$storyref->{tid}
 			) . otherLinks(
 				$slashdb->getAuthor($storyref->{uid}, 'nickname'),
 				$storyref->{tid}, 
@@ -1239,10 +1246,7 @@ sub editStory {
 	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
 
 	my $num_sim = $constants->{similarstorynumshow} || 5;
-use Time::HiRes; my $start_time = Time::HiRes::time;
 	my $similar_stories = $slashdb->getSimilarStories($storyref, $num_sim);
-my $duration = Time::HiRes::time - $start_time;
-printf STDERR "getSimilarStories duration: %0.3f\n", $duration;
 	# Truncate that data to a reasonable size for display.
 	if ($similar_stories && @$similar_stories) {
 		for my $sim (@$similar_stories) {
@@ -1260,7 +1264,6 @@ printf STDERR "getSimilarStories duration: %0.3f\n", $duration;
 			}
 		}
 	}
-#use Data::Dumper; print STDERR "similar_stories: " . Dumper($similar_stories);
 
 	my $authortext = slashDisplay('futurestorybox', {
 		past => $past,
@@ -1666,9 +1669,9 @@ sub saveStory {
 		$form->{section} = $user->{section} ? $user->{section} : $edituser->{section};
 	}
 	$form->{dept} =~ s/ /-/g;
-	$form->{relatedtext} = getRelated(
-		"$form->{title} $form->{bodytext} $form->{introtext}"
-	) . otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
+	my $story_text = "$form->{title} $form->{bodytext} $form->{introtext}";
+	$form->{relatedtext} = getRelated($story_text, $form->{tid})
+		. otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});
