@@ -10,10 +10,12 @@ use Slash::Utility;
 use Slash::DB;
 use Time::HiRes;
 
+use strict;
+
 use vars qw(
-	$PROGNAME
+	$PROGNAME	$VERSION
 	%opts
-	$virtuser	$width	$height	$sleep
+	$virtuser	$width	$height	$sleep	$min_pl_time
 	@abbreviations	%abbreviations
 	$slashdb	$constants	$logdb
 	@db
@@ -24,6 +26,8 @@ use vars qw(
 	$pages		$loadavg_sum
 	$lines_since_header
 );
+
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 init();
 run();
@@ -36,14 +40,16 @@ sub init {
 
 	$PROGNAME = basename($0);
 
-	usage('Options used incorrectly') unless getopts('hvu:w:r:s:', \%opts);
+	usage('Options used incorrectly') unless getopts('hvu:w:r:s:t:', \%opts);
 	usage() if $opts{h};
 	version() if $opts{v};
 
 	$virtuser = $opts{u} || 'slashdot';
-	$width = $opts{w} || 76;
+	$width = $opts{w} || 106;
 	$height = $opts{r} || 20;
-	$sleep = int($opts{s}); $sleep = 10 if $sleep < 1;
+	$sleep = $opts{s} || 10;
+	$min_pl_time = defined($opts{t}) ? $opts{t} : 1;
+print "min_pl '$min_pl_time'\n";
 
 	createEnvironment($virtuser);
 
@@ -161,7 +167,7 @@ sub print_header {
 			$name,
 			"-" x (int(($wid-$len-0)/2)));
 	}
-	print "\n"; ++$lines_since_header;
+	print "\n";
 
 	# Second line of header: names for the globals, names for DB columns
 	printf("%4s %4s %4s", "time", "load", "pps");
@@ -169,18 +175,22 @@ sub print_header {
 		printf(" %5s %3s %4s %2s", "qps", "sps", "qpp", "at");
 		printf(" %5s", "hit%") if $db->{version} == 4;
 	}
-	print "\n"; ++$lines_since_header;
+	print "\n";
+
+	$lines_since_header = 0;
 }
 
 sub sleep_until {
-	Time::HiRes::sleep($sleep * $num_cycles - (Time::HiRes::time - $time_first));
+	my $sleep_time = $sleep * $num_cycles - (Time::HiRes::time - $time_first);
+	return if $sleep_time <= 0;
+	Time::HiRes::sleep($sleep_time);
 }
 
 sub update_db_ary {
 	for my $db (@db) {
 		($db->{queries_new}, $db->{slow_queries_new}) = getQueries($db->{status_sth});
 		($db->{hitrate}) = getHitRate($db->{innostatus_sth}) if $db->{innostatus_sth};
-		($db->{threads}, $db->{threads_active}, $db->{proclist}) = getProclist($db);
+		getProclist($db);
 	}
 }
 
@@ -228,10 +238,11 @@ sub print_second_line {
 }
 
 sub print_proclist {
-	for my $db (@dbs) {
+	for my $db (@db) {
 		my $pl = $db->{proclist};
 		for my $line (@$pl) {
-			printf "%s %3d %s\n", $line->{vu}, $line->{Time}, $line->{text};
+			my $text = substr($line->{text}, 0, $width - 13);
+			printf "%8s %3d %s\n", $line->{vu}, $line->{Time}, $text;
 			++$lines_since_header;
 		}
 	}
@@ -260,6 +271,7 @@ sub getQueries {
 
 sub getHitRate {
 	my($db) = @_;
+	# parse the text from SHOW INNODB STATUS
 }
 
 sub getProclist {
@@ -275,13 +287,12 @@ sub getProclist {
 		++$threads;
 
 		my $info = $$S{Info};
+		next if !$info;
 		next if $info =~ /SHOW.*PROCESSLIST/i;
 		next if $$S{Command} eq "Sleep";
-		next unless $info;
+		next if $$S{Time} < $min_pl_time;
 
 		++$active;
-
-		my $o = sprintf("%4d", $$S{Time});
 
 		$info =~ s/\s+/ /g;
 		$info =~ s/[^_\'\-\+\.A-Z0-9\(\)<> ,=\|]//gi;
@@ -293,18 +304,18 @@ sub getProclist {
 		for my $abbr (@abbreviations) {
 			$info =~ s/\b$abbr\b/$abbreviations{$abbr}/gi;
 		}
-		$info =~ s/\bSELECT\b/S/i;
-		$o .= substr($info, 0, $width);
 		push @$proclist, {
 			Time	=> sprintf("%4d", $$S{Time}),
 			vu	=> $db->{vu},
-			text	=> substr($info, 0, $width),
-		}
+			text	=> $info,
+		};
 
 	}
 	$sth->finish();
 
-	return ($threads, $active, $proclist);
+	$db->{threads} = $threads;
+	$db->{threads_active} = $active;
+	$db->{proclist} = $proclist;
 }
 
 ############################################################
@@ -325,6 +336,7 @@ Main options:
 	-w	Width max in columns (default 76)
 	-r	Height max in (r)ows (default 20)
 	-s	Sleep time (default 10)
+	-t	Min time before showing slow DB queries (default 1)
 
 Global stats are the left 3 columns:
 	time	Elapsed seconds
