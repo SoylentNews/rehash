@@ -4,7 +4,7 @@ __description__
 
 Form which is displayed when user creates a discussion.
 
-* error = Any error messages that may have occured during processing.
+* error = Any error messages that may have occurred during processing.
 * id = The ID # of the new discussion.
 * format_select	= [Optional] See template "edit_comment;misc;default"
 
