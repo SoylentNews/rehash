@@ -586,9 +586,9 @@ ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
 ALTER TABLE metamodlog ADD INDEX mmid (mmid);
 
-# SLASHDOT LAST UPDATED HERE
+# End of T_2_3_0_39, Start of T_2_3_0_40
 
-# End of T_2_3_0_39
+# End of T_2_3_0_40, Start of T_2_3_0_41
 
 # This should have been this all along -Brian
 ALTER TABLE sections DROP INDEX section;
@@ -669,3 +669,7 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, '
 
 # SLASHCODE LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_41
+
