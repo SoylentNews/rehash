@@ -4042,7 +4042,6 @@ EOT
 		# annoying time format breaks timeCalc in the 
 		# storyTitleOnly template for the index page plugin
 		# I just need the raw time that's in the db
-		$data->[8] = $data->[3];
 		$data = [
 			@$data[0..4], 
 			$data->[3], 
