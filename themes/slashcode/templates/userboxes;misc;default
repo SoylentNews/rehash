@@ -151,6 +151,13 @@ IF !useredit.is_anon;
                         '<BR><HR NOSHADE SIZE="1">';
 			useredit.bio;
                 END;
+
+		IF user.is_admin AND hits;
+			'<BR><HR NOSHADE SIZE="1">';
+			'This story been viewed ';
+			hits;
+			' times.';
+		END;
 	END;
 	Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
 

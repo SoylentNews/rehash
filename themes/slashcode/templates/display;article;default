@@ -33,7 +33,7 @@ __template__
 [% PROCESS maintable_td %]&nbsp;</TD>
 [% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_align="CENTER" mt_valign="TOP" %]
 
-[% PROCESS userboxes;
+[% PROCESS userboxes hits => story.hits;
 
 IF show_poll;
 	PROCESS fancybox
