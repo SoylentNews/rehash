@@ -1605,7 +1605,7 @@ sub tildeEd {
 
 	# Userspace.
 
-	my $userspace = $user_edit->{userspace} || "";
+	my $userspace = $user_edit->{mylinks} || "";
 
 	# Titles of stuff.
 
