@@ -300,7 +300,6 @@ INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','H
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
 
-# SLASHCODE LAST UPDATED HERE
 #
 # Table structure for table 'subsections'
 #
@@ -331,3 +330,4 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site St
 
 ALTER TABLE discussions ADD last_update timestamp;
 ALTER TABLE stories ADD last_update timestamp;
+# SLASHCODE LAST UPDATED HERE
