@@ -20,6 +20,7 @@ use vars qw( %task $me );
 $task{$me}{timespec} = '18 0-23 * * *';
 $task{$me}{timespec_panic_1} = '18 0-10/2 * * *';	# night only
 $task{$me}{timespec_panic_2} = '';			# don't run
+$task{$me}{resource_locks} = { log_slave => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 
@@ -289,6 +290,8 @@ sub reconcile_m2 {
 	# reconciled.
 	my $mods_ar = $slashdb->getModsNeedingReconcile();
 
+	my $both0 = undef;
+	my $tievote = undef;
 	my %newstats = ( );
 	for my $mod_hr (@$mods_ar) {
 
@@ -300,17 +303,27 @@ sub reconcile_m2 {
 
 		# Sanity-checking... what could go wrong?
 		if (!$mod_hr->{uid}) {
-			print STDERR "no uid in \$mod_hr: " . Dumper($mod_hr);
+			slashdLog("no uid in \$mod_hr: " . Dumper($mod_hr));
 			next;
 		}
 		if ($nunfair+$nfair == 0) {
-			print STDERR "M2 fair,unfair both 0 for mod id $mod_hr->{id}\n";
+			$both0->{num}++;
+			$both0->{minid} = $mod_hr->{id} if !$both0->{minid} || $mod_hr->{id} < $both0->{minid};
+			$both0->{maxid} = $mod_hr->{id} if !$both0->{maxid} || $mod_hr->{id} > $both0->{maxid};
+			if (verbosity() >= 3) {
+				slashdLog("M2 fair,unfair both 0 for mod id $mod_hr->{id}");
+			}
 			next;
 		}
 		if (($nunfair+$nfair) % 2 == 0) {
-			print STDERR "M2 fair+unfair=" . ($nunfair+$nfair) . ","
-				. " consensus=$consensus"
-				. " for mod id $mod_hr->{id}\n";
+			$tievote->{num}++;
+			$tievote->{minid} = $mod_hr->{id} if !$tievote->{minid} || $mod_hr->{id} < $tievote->{minid};
+			$tievote->{maxid} = $mod_hr->{id} if !$tievote->{maxid} || $mod_hr->{id} > $tievote->{maxid};
+			if (verbosity() >= 3) {
+				slashdLog("M2 fair+unfair=" . ($nunfair+$nfair) . ","
+					. " consensus=$consensus"
+					. " for mod id $mod_hr->{id}");
+			}
 		}
 
 		my $winner_val = 0;
@@ -371,7 +384,7 @@ sub reconcile_m2 {
 		# Now update the tokens of each M2'er.
 		for my $m2 (@$m2_ar) {
 			if (!$m2->{uid}) {
-				print STDERR "no uid in \$m2: " . Dumper($m2);
+				slashdLog("no uid in \$m2: " . Dumper($m2));
 				next;
 			}
 			my $key = "m2_fair_tokens";
@@ -439,6 +452,13 @@ sub reconcile_m2 {
 			-m2status => 2,
 		}, "id=$mod_hr->{id}");
 
+	}
+
+	if ($both0 && %$both0) {
+		slashdLog("$both0->{num} mods had both fair and unfair 0, ids $both0->{minid} to $both0->{maxid}");
+	}
+	if ($tievote && %$tievote) {
+		slashdLog("$tievote->{num} mods had a tie fair-unfair vote, ids $tievote->{minid} to $tievote->{maxid}");
 	}
 
 	# Update stats to reflect all the token and M2-judgment

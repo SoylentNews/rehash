@@ -1922,3 +1922,5 @@ ALTER TABLE metamodlog CHANGE id id INT UNSIGNED NOT NULL AUTO_INCREMENT;
 
 # End of T_2_3_0_119, Start of T_2_3_0_120 - 2003/09/28
 
+DELETE FROM vars WHERE name='tailslash_stats';
+

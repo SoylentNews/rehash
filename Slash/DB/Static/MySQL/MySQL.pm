@@ -883,38 +883,6 @@ sub stirPool {
 }
 
 ########################################################
-# For tailslash
-sub pagesServed {
-	my($self) = @_;
-	my $returnable = $self->sqlSelectAll("count(*),ts",
-			"accesslog", "to_days(now()) - to_days(ts) <= 1",
-			"GROUP BY ts ORDER BY ts ASC");
-
-	return $returnable;
-
-}
-
-########################################################
-# For tailslash
-sub maxAccessLog {
-	my($self) = @_;
-	my($returnable) = $self->sqlSelect("max(id)", "accesslog");;
-
-	return $returnable;
-}
-
-########################################################
-# For tailslash
-sub getAccessLogInfo {
-	my($self, $id) = @_;
-	my $returnable = $self->sqlSelectAll("host_addr,uid,op,dat,ts,id",
-				"accesslog", "id > $id",
-				"ORDER BY ts DESC");
-	formatDate($returnable, 4, 4, '%H:%M');
-	return $returnable;
-}
-
-########################################################
 # For run_moderatord.pl
 #
 # New as of 2002/09/05:  returns ordered first by hitcount, and

@@ -43,6 +43,8 @@ sub new {
 		? $options->{day}
 		: sprintf("%4d-%02d-%02d", $yest_lt[5] + 1900, $yest_lt[4] + 1, $yest_lt[3]);
 	$self->{_day_between_clause} = " BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' ";
+	($self->{_ts} = $self->{_day}) =~ s/-//g;
+	$self->{_ts_between_clause}  = " BETWEEN '$self->{_ts}000000' AND '$self->{_ts}235959' ";
 
 	my $count = 0;
 	if ($options->{create}) {
@@ -1182,19 +1184,17 @@ sub getDailyScoreTotal {
 sub getTopBadPasswordsByUID{
 	my($self, $options) = @_;
 	my $limit = $options->{limit} || 10;
-	my $day = $self->{_day};
-	$day =~ s/-//g;
 	my $min = $options->{min};
-	my $other = "group by uid ";
-	$other .= " having count(*) >= $options->{min}" if $min;
-	$other .= "  order by count desc limit $limit";
-	my $ar = $self->sqlSelectAllHashrefArray(
-		"nickname, users.uid as uid, count(*) as count",
-		"badpasswords,users",
-		"ts like '$day%' and users.uid = badpasswords.uid",
-		$other
-	);
-	return $ar;
+
+	my $other = "GROUP BY uid ";
+	$other .= " HAVING count(*) >= $options->{min}" if $min;
+	$other .= "  ORDER BY count DESC LIMIT $limit";
+
+	return $self->sqlSelectAllHashrefArray(
+		"nickname, users.uid AS uid, count(*) AS count",
+		"badpasswords, users",
+		"ts $self->{_ts_between_clause} AND users.uid = badpasswords.uid",
+		$other);
 }
 
 ########################################################
@@ -1202,18 +1202,16 @@ sub getTopBadPasswordsByIP{
 	my($self, $options) = @_;
 	my $limit = $options->{limit} || 10;
 	my $min = $options->{min};
-	my $day = $self->{_day};
-	$day =~ s/-//g;
-	my $other = "group by ip";
-	$other .= " having count(*) >= $options->{min}" if $min;
-	$other .= "  order by count desc limit $limit";
-	my $ar = $self->sqlSelectAllHashrefArray(
-		"ip, count(*) as count",
+
+	my $other = "GROUP BY ip";
+	$other .= " HAVING count(*) >= $options->{min}" if $min;
+	$other .= "  ORDER BY count DESC LIMIT $limit";
+	
+	return $self->sqlSelectAllHashrefArray(
+		"ip, count(*) AS count",
 		"badpasswords",
-		"ts like '$day%'",
-		$other
-	);
-	return $ar;
+		"ts $self->{_ts_between_clause}",
+		$other);
 }
 
 ########################################################
@@ -1221,18 +1219,42 @@ sub getTopBadPasswordsBySubnet{
 	my($self, $options) = @_;
 	my $limit = $options->{limit} || 10;
 	my $min = $options->{min};
-	my $day = $self->{_day};
-	$day =~ s/-//g;
-	my $other = "group by subnet";
-	$other .= " having count(*) >= $options->{min}" if $min;
-	$other .= "  order by count desc limit $limit";
-	my $ar = $self->sqlSelectAllHashrefArray(
-		"subnet, count(*) as count",
+
+	my $other = "GROUP BY subnet";
+	$other .= " HAVING count(*) >= $options->{min}" if $min;
+	$other .= "  ORDER BY count DESC LIMIT $limit";
+
+	return $self->sqlSelectAllHashrefArray(
+		"subnet, count(*) AS count",
 		"badpasswords",
-		"ts like '$day%'",
-		$other
-	);
-	return $ar;
+		"ts $self->{_ts_between_clause}",
+		$other);
+}
+
+########################################################
+sub getTailslash {
+	my($self) = @_;
+	my $retval =         "Hour        Hits        Hits/sec\n";
+	my $sprintf_format = "  %02d    %8d          %6.2f    %-40s\n";
+
+        my $page_ar = $self->sqlSelectAllHashrefArray(
+                "HOUR(ts) AS hour, COUNT(*) AS c",
+                "accesslog_temp",
+                "",
+                "GROUP BY hour ORDER BY hour ASC");
+
+	my $max_count = 0;
+	for my $hr (@$page_ar) {
+		$max_count = $hr->{c} if $hr->{c} > $max_count;
+	}
+	for my $hr (@$page_ar) {
+		my $hour = $hr->{hour};
+		my $count = $hr->{c};
+		$retval .= sprintf( $sprintf_format,
+			$hour, $count, $count/3600,
+			("#" x (40*$count/$max_count)) );
+	}
+	return $retval;
 }
 
 ########################################################
@@ -1251,7 +1273,7 @@ sub getTopReferers {
 	}
 
 	return $self->sqlSelectAll(
-		"distinct SUBSTRING_INDEX(referer,'/',3) as referer, COUNT(id) AS c",
+		"DISTINCT SUBSTRING_INDEX(referer,'/',3) AS referer, COUNT(id) AS c",
 		"accesslog_temp",
 		"referer IS NOT NULL AND LENGTH(referer) > 0 AND referer REGEXP '^http' $where ",
 		"GROUP BY referer ORDER BY c DESC, referer LIMIT $count"

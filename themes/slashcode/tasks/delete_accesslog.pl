@@ -20,6 +20,7 @@ use vars qw( %task $me );
 $task{$me}{timespec} = '22 * * * *'; # Normally run once an hour
 $task{$me}{timespec_panic_1} = '20 1,2,3,4,5,6 * * *'; # Just run at night if an issue pops up
 $task{$me}{timespec_panic_2} = ''; # In a pinch don't do anything
+$task{$me}{resource_locks} = { logdb => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;

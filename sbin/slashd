@@ -41,6 +41,7 @@ use Slash::Utility;
 
 use vars qw(
 	%task %task_info $me
+	%resource_info
 	$event_ar
 	$cron
 );
@@ -104,6 +105,7 @@ sub REAPER {
 				$taskname, $status, $signal
 			);
 		}
+		set_resources($taskname, -1);
 		insert_task_event($taskname, 0);
 	}
 	if (verbosity() >= 4) {
@@ -237,7 +239,7 @@ sub end_log {
 				. "s late"
 			: verbosity() >= 2
 				? "; $next_task in ${secs_until}s"
-			: ();
+				: ();
 	}
 
 	if ($forktype != SLASHD_LOG_NEXT_TASK) {
@@ -416,6 +418,25 @@ EOT
 	$entry_time;
 }
 
+# Add or subtract from resource values (to handle a task locking,
+# or giving up, its resources).  Round off to 0 to prevent roundoff
+# errors from accumulating.
+
+sub set_resources {
+	my($task_filename, $mult) = @_;
+	return unless $task{$task_filename}{resource_locks};
+	for my $resource (keys %{$task{$task_filename}{resource_locks}}) {
+		$resource_info{$resource} += $mult
+			* $task{$task_filename}{resource_locks}{$resource};
+		$resource_info{$resource} = 0 if abs($resource_info{$resource}) < 0.001;
+		if (verbosity() >= 3) {
+			slashdLog("set resource_info '$resource' to $resource_info{$resource}");
+		}
+	}
+}
+
+sub abs { $_[0] >= 0 ? $_[0] : -$_[0] }
+
 # Given a task filename, calculates its next execution time, and recreates
 # the event array with that task scheduled for that time.  This happens
 # to be always called when the task in question has already been popped
@@ -423,10 +444,10 @@ EOT
 # happen to work if the task is already on the list for some reason.
 
 sub insert_task_event {
-	my($file, $immediate) = @_;
+	my($filename, $immediate) = @_;
 	my $event_hr = { };
 	if (verbosity() >= 4) {
-		slashdLog("insert_task_event called: '$file' '$immediate'");
+		slashdLog("insert_task_event called: '$filename' '$immediate'");
 	}
 
 	# Convert the existing array into a hash.
@@ -440,11 +461,11 @@ sub insert_task_event {
 	if ($immediate and $constants->{panic} < 1) {
 		$next_time = db_time();
 	} else {
-		$next_time = calc_next_execution_time($file);
+		$next_time = calc_next_execution_time($filename);
 	}
-	$event_hr->{$file}{until_time} = $next_time;
+	$event_hr->{$filename}{until_time} = $next_time;
 	if (verbosity() >= 4) {
-		slashdLog("insert_task_event decided: '$file' next at "
+		slashdLog("insert_task_event decided: '$filename' next at "
 			. scalar(localtime($next_time)));
 	}
 
@@ -469,15 +490,70 @@ sub insert_task_event {
 	}
 }
 
+sub get_next_possible_task {
+
+	# Return the next task that could be executed -- right now that
+	# means the next task that does not have any of its resources
+	# locked by another currently-executing task.  In future it
+	# might be a more complex function to determine that :)
+
+	# If event arrayref not init'd yet, then nothing.
+	return undef unless $event_ar && @$event_ar;
+
+	# Walk thru the list starting from the beginning;  take the
+	# first task that does not require locked resources.
+	for my $task_ar (@$event_ar) {
+		my($task_filename, $until_time) = @$task_ar;
+		return $task_ar if !$task{$task_filename}{resource_locks};
+		my $ok = 1;
+		for my $resource (keys %{$task{$task_filename}{resource_locks}}) {
+			# If the sum of what this task needs plus what is
+			# already in use exceeds 1, this task can't yet run.
+			if ($task{$task_filename}{resource_locks}{$resource}
+				+ ($resource_info{$resource} || 0)
+				> 1) {
+				$ok = 0;
+				last;
+			}
+		}
+		if (verbosity() >= 4) {
+			slashdLog("task '$task_filename' ok=$ok");
+		}
+		return $task_ar if $ok;
+	}
+
+	# Nothing qualifies!
+	return undef;
+}
+
 sub wait_until_task {
+
 	# The time we need to sleep until will stay at the front of the
 	# event array.  However, it may change after every call to
 	# REAPER(), because REAPER() calls insert_task_event().  As
 	# soon as the current time exceeds the time at the front of the
 	# event array, we're done, so we return that first task.
 	my $max_sleep;
-	my($task_filename, $until_time) = @{ $event_ar->[0] };
-	WAIT_UNTIL: while ((my $cur_time = db_time()) < $until_time) {
+	my $next_task = undef;
+	my($task_filename, $until_time);
+
+	WAIT_UNTIL: while (1) {
+
+		$next_task = get_next_possible_task($event_ar);
+		($task_filename, $until_time) = ('', 2**31-1);
+		if ($next_task) {
+			($task_filename, $until_time) = @$next_task;
+		}
+		my $cur_time = db_time();
+		if ($cur_time >= $until_time) {
+			# OK, this task is ready to run;  we're done
+			# twiddling our thumbs.
+			if (verbosity() >= 4) {
+				slashdLog("Ready to run '$task_filename'");
+			}
+			last WAIT_UNTIL;
+		}
+
 		# If there are children waiting to be reaped, we loop
 		# frequently to poll REAPER to look for them to die.
 		# If not, there's no need to hit it frequently.
@@ -493,28 +569,44 @@ sub wait_until_task {
 			scalar(localtime($cur_time)),
 			scalar(localtime($until_time)))
 			if verbosity() >= 3;
+
 		REAPER();
+
 		# If the REAPER() call pushed a new event with a new
 		# until_time onto the front of the event array, then
 		# jump right back into this while loop without
 		# sleeping at all (because the new event may trigger
 		# sooner, even need to be triggered immediately).
-		my $new_until_time = $event_ar->[0][1];
+		my $new_until_time = 2**31-1;
+		my $new_next_task = get_next_possible_task($event_ar);
+		$new_until_time = $new_next_task->[1] if $new_next_task;
 		if ($new_until_time != $until_time) {
 			if (verbosity() >= 4) {
 				slashdLog("REAPER() found new task,"
 					. " cancelling sleep");
 			}
-			$until_time = $new_until_time;
 			next WAIT_UNTIL;
 		}
+
 		# If not, do the sleep we planned to do.
 		sleep $sleep_total;
+
 	}
+
 	slashdLog(sprintf "Finishing sleep: %s >= %s",
 		scalar(localtime(db_time())),
 		scalar(localtime($until_time)))
 		if verbosity() >= 3;
+	return $next_task;
+}
+
+sub pull_task {
+	my($task_ar) = @_;
+	my $task_filename = $task_ar->[0];
+	my($the_task) =		grep { $_->[0] eq $task_filename } @$event_ar;
+	my @new_event_ary =	grep { $_->[0] ne $task_filename } @$event_ar;
+	$event_ar = [ @new_event_ary ];
+	return @$the_task;
 }
 
 sub main {
@@ -535,6 +627,7 @@ sub main {
 	# Initialize the scheduling stuff.
 
 	%task_info = ( );
+	%resource_info = ( );
 	init_cron();
 	process_tasks();
 	init_event_ar();
@@ -557,30 +650,47 @@ sub main {
 	open(STDOUT, '+>' . devnull());
 
 	MAINLOOP: while (1) {
+
 		if (verbosity() >= 4) {
 			slashdLog("Beginning MAINLOOP");
 		}
 
 		# wait_until_task calls REAPER() periodically;  it will
 		# return when there is a task that needs to be called.
-		my $task_info = wait_until_task();
+
+		my $next_task = wait_until_task();
+
+		# If there is no next task, repeat the loop.
+		if (!$next_task) {
+			if (verbosity() >= 2) {
+				slashdLog("No next task, which is highly unusual unless most or all tasks are disabled; sleeping and retrying");
+			}
+			sleep 5;
+			next MAINLOOP;
+		}
 
 		# Recheck the vars table to reload $constants if necessary.
 		# If it changed, this may alter our execution schedule, so
 		# repeat the loop from the top.
+
 		if (update_static()) {
 			next MAINLOOP;
 		}
 
-		# Get the information about the task at the front of the
-		# event array.
-                my($task_filename, $until_time) = @{ shift @$event_ar };
+		# Pull that task out of the event array and get the
+		# information about it.
+
+		my($task_filename, $until_time) = pull_task($next_task);
                 my $basename = basename($task_filename);
                 (my $basename_nopl = $basename) =~ s/\.pl$//;
                 my $subref = $task{$task_filename}{code};
                 my $forktype = SLASHD_WAIT; # the default
                 $forktype = SLASHD_NOWAIT
                         if $task{$task_filename}{fork} == SLASHD_NOWAIT;
+
+		# Mark the resources it needs locked as being in use.
+
+		set_resources($task_filename, +1);
 
 		# Execute it.
 
@@ -606,6 +716,7 @@ sub main {
 
 		# kill the dbh, we have too many problems
 		# if it sticks around during a fork -- pudge
+
 		$slashdb->{_dbh}->disconnect;
 		undef $slashdb->{_dbh};
 
@@ -637,11 +748,12 @@ sub main {
 			}
 		}
 
-		# Sleep for at least a few seconds between tasks.
+		# Sleep for at least a second between tasks.
+
 		if (verbosity() >= 4) {
 			slashdLog("Ending MAINLOOP");
 		}
-		sleep 2;
+		sleep 1;
 		$task_info{$task_filename}{invocations}++;
 
 	}

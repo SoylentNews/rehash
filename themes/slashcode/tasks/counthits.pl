@@ -27,6 +27,7 @@ $maxrows = 150000;
 
 $task{$me}{timespec} = "1-59/$minutes_run * * * *";
 $task{$me}{timespec_panic_1} = ''; # not that important
+$task{$me}{resource_locks} = { log_slave => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
 
 $task{$me}{code} = sub {

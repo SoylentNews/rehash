@@ -651,7 +651,7 @@ EOT
 	$data{data} = \%data;
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
-	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today` if $constants->{tailslash_stats};
+	$data{tailslash} = $logdb->getTailslash();
 
 	$data{backup_lag} = "";
 	for my $slave_name (qw( backup search )) {
