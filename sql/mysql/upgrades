@@ -2665,3 +2665,10 @@ INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysb
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_5_0_33, Start of T_2_5_0_34 - 2004/10/19
+
+# Changes for plugins/Relocate (ignore if not using that plugin)
+ALTER TABLE links DROP INDEX url_index;
+ALTER TABLE links TYPE=InnoDB;
+
+INSERT INTO vars (name, value, description) VALUES ('ircslash_channel_password','','Password for ircslash_channel');
+

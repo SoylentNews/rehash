@@ -758,6 +758,7 @@ INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home
 INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect all anonymous users to index_handler_noanon instead of index.shtml. Set to 1 to activate, 0 to remove.');
 INSERT INTO vars (name, value, description) VALUES ('ircslash','0','Enable the ircslash task and connect to an IRC channel whenever slashd starts');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel','#ircslash','Which channel to join');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_channel_password','','Password for ircslash_channel');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ircname','','Name to use on IRC server (defaults to "(slashsite) slashd")');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_lastremarktime','','Last time a remark was seen');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_nick','','Nick to use on IRC server (has a reasonable default)');
