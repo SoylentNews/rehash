@@ -441,7 +441,7 @@ sub displayForm {
 		$topic_values = $current_hash;
 	}
 
-	$form->{skid} ||= 0;
+	$form->{primaryskid} ||= 0;
 	unless ($form->{tid}) {
 		my $current_hash = { %$skin_values };
 		$current_hash->{0} = "Select Section";
@@ -459,7 +459,7 @@ sub displayForm {
 		$fakeemail = strip_attribute($user->{fakeemail});
 	}
 
-	my $nexus_id = $slashdb->getNexusFromSkid($form->{skid} || $constants->{mainpage_skid});
+	my $nexus_id = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
 
 	my $extracolumns = $slashdb->getNexusExtras($nexus_id) || [ ];
 
@@ -534,15 +534,15 @@ sub saveSub {
 		: getCurrentStatic('anonymous_coward_uid');
 
 	my $submission = {
-		email	=> $form->{email},
-		uid	=> $uid,
-		name	=> $form->{name},
-		story	=> $form->{story},
-		subj	=> $form->{subj},
-		tid	=> $form->{tid},
-		skid	=> $form->{skid}
+		email		=> $form->{email},
+		uid		=> $uid,
+		name		=> $form->{name},
+		story		=> $form->{story},
+		subj		=> $form->{subj},
+		tid		=> $form->{tid},
+		primaryskid	=> $form->{primaryskid}
 	};
-	my $nexus = $slashdb->getNexusFromSkid($form->{skid} || $constants->{mainpage_skid});
+	my $nexus = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
 	my $extras = $slashdb->getNexusExtras($nexus) || [];
 	if ($extras && @$extras) {
 		for (@$extras) {
