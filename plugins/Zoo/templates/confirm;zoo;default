@@ -50,10 +50,11 @@ __template__
 	</TABLE>
 [% END %]
 <P>
-<B>Important Stuff:.</B>
+<B>Important Stuff:</B>
 <LI> Your relationships are public information, and visible to other [% constants.sitename %] readers.
-<LI> Updates to friends and foes are cached and may take a few minutes to take affect.
-<LI> Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these icons mean </A> or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> where you change their values?</A>
+<LI> Updates to friends and foes are cached and may take a few minutes to take effect.
+<LI> Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">what these icons mean</A>
+or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">where you change their values?</A>
 <P>
 <FONT COLOR="[% user.bg.3 %]" size="+1"><B>Your Friends who ...</B></FONT><br>
 <TABLE WIDTH="100%">
