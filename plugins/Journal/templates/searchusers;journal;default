@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+searchusers
+__template__
+[% begin = BLOCK %]
+<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl" ENCTYPE="application/x-www-form-urlencoded">
+<INPUT TYPE="hidden" NAME="op" VALUE="searchusers">
+[% END %]
+
+[% val1 = BLOCK %]
+<INPUT TYPE="text" NAME="nickname" SIZE="20"><INPUT TYPE="submit" VALUE="Find">
+<BR><I><FONT SIZE="-1">(Yes we all need a friend to hold on to)</FONT></I>
+[% END %]
+
+[% PROCESS formbox
+    title => "Find a User's Journal",
+    begin => begin,
+    end   => '</FORM>',
+    pairs => [
+        { label => "Nickname", value => val1 },
+    ]
+%]
+
+__seclev__
+500

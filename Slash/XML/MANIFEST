@@ -1,0 +1,4 @@
+MANIFEST
+Makefile.PL
+XML.pm
+test.pl

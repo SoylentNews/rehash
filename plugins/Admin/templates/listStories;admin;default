@@ -1,0 +1,98 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+listStories
+__template__
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
+
+[% storiestoday = 0;
+FOREACH story = storylistref %]
+
+[% IF story.td != yesterday && !form.section;
+	storiestoday = storiestoday > 1 ? storiestoday : '';
+%]
+	<TR>
+		<TD ALIGN="RIGHT" BGCOLOR="[% user.bg.2 %]">
+			<FONT SIZE="2">[% storiestoday %]</FONT>
+		</TD>
+		<TD COLSPAN="7" ALIGN="right" BGCOLOR="[% user.bg.3 %]">
+			<FONT COLOR="[% user.fg.3 %]" SIZE="2">[% story.td %]</FONT>
+		</TD>
+	</TR>
+[%	storiestoday = 0;
+END;
+
+	yesterday = story.td;
+	storiestoday = storiestoday + 1;
+
+	bgcolor = '';
+	IF story.displaystatus > 0;
+		bgcolor = '#CCCCCC';
+	ELSIF story.writestatus == 'delete' || story.displaystatus < 0;
+		bgcolor = '#999999';
+END %]
+
+	<TR BGCOLOR="[% bgcolor %]" ALT="[% story.displaystatus %]">
+		<TD ALIGN="RIGHT">
+
+[% IF story.canedit %]
+		[<A HREF="[% env.script_name %]?title=[% story.tbtitle %]&op=edit&sid=[% story.sid %]">[% story.x %]</A>]
+[% ELSE %]
+		[[% story.x %]]
+[% END %]
+
+		</TD>
+		<TD><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
+		[% story.title %]&nbsp;</A>
+		</TD>
+		<TD><FONT SIZE="2"><B>[% story.aid %]</B></FONT></TD>
+		<TD><FONT SIZE="2">[% story.topic.substr(0, 5) %]</FONT></TD>
+
+[% IF sectionflag %]
+		<TD>
+		<FONT SIZE="2">
+		<A HREF="[% env.script_name %]?section=[% story.section %]">
+		[% story.section.substr(0, 5) %]</A>
+		</TD>
+[% END %]
+
+		<TD ALIGN="RIGHT">
+[% IF story.hits %]
+		<FONT SIZE="2">[% story.hits %]</FONT>
+[% ELSE %]
+		&nbsp;
+[% END %]
+		</TD>
+		<TD>
+		<FONT SIZE="2">[% story.comments %]</FONT>
+		</TD>
+
+
+[% IF form.section %]
+		<TD><FONT SIZE="2">[% story.td2 %]</TD>
+[% END %]
+
+		<TD><FONT SIZE="2">[% story.time %]</TD>
+	</TR>
+
+[% END %]
+
+</TABLE>
+
+[% IF story.x > 0 and left > 0 %]
+<P ALIGN="RIGHT">
+<B>
+<A HREF="[% env.script_name %]?section=[% form.section %]&op=list&next=[% story.x %]">[% left %] More</A></B></P>
+[% END %]
+
+
+__seclev__
+500

@@ -1,0 +1,35 @@
+INSERT INTO journal_friends (uid, friend) VALUES (1,2);
+INSERT INTO journal_friends (uid, friend) VALUES (2,2);
+
+INSERT INTO journal_themes (name) VALUES ('generic');
+INSERT INTO journal_themes (name) VALUES ('greypage');
+INSERT INTO journal_themes (name) VALUES ('bluebox');
+INSERT INTO journal_themes (name) VALUES ('slashdot');
+
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','[% user.nickname %]\'s Journal','[% constants.rootdir %]/journal.pl?op=display',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Write in Journal','[% constants.rootdir %]/journal.pl?op=edit',1,2);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Delete/Edit Entries','[% constants.rootdir %]/journal.pl?op=list',1,3);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Top 10','[% constants.rootdir %]/journal.pl?op=top',0,4);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friends','[% constants.rootdir %]/journal.pl?op=friends',0,5);
+
+INSERT INTO code_param (type, code, name) VALUES ('journal_discuss', 0, 'Comments Disabled');
+INSERT INTO code_param (type, code, name) VALUES ('journal_discuss', 1, 'Comments Enabled');
+
+INSERT INTO topics (name, image, alttext, width, height) VALUES ('journal', 'topiceditorial.gif', 'User Journal', 58, 55);
+INSERT INTO section_topics (section, tid) VALUES ('articles', LAST_INSERT_ID());
+
+INSERT INTO vars (name, value, description) VALUES ('journal_top', '30', 'Number of journals to display in the top page');
+INSERT INTO vars (name, value, description) VALUES ('journal_default_display', '10', 'Number of journals to display on a user\'s page');
+INSERT INTO vars (name, value, description) VALUES ('journal_default_theme', 'generic', 'Default theme to use on journal entries');
+INSERT INTO vars (name, value, description) VALUES ('journal_default_topic', '5', 'Default topic that all journal discussions belong to');
+INSERT INTO vars (name, value, description) VALUES ('journal_comments', '1', 'Turn on and off comments for journal entries');
+INSERT INTO vars (name, value, description) VALUES ('journal_top_posters', '1', 'Turn on and off top posters view');
+INSERT INTO vars (name, value, description) VALUES ('journal_top_friend', '1', 'Turn on and off top friends view');
+INSERT INTO vars (name, value, description) VALUES ('journal_top_recent', '1', 'Turn on and off top recent view');
+
+INSERT INTO vars (name, value, description) VALUES ('journal_speed_limit','30','seconds delay before repeat posting');
+# this will be less forgiving on journals, where you can delete, edit, etc.
+INSERT INTO vars (name, value, description) VALUES ('max_journal_allowed','30','maximum number of journals per timeframe allowed');
+INSERT INTO vars (name, value, description) VALUES ('max_journals_unusedfk','2000','How many unused formkeys are permitted');
+
+INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('top10journals','',1000,'portald','Top 10 Journals for slashboxes.','index',3,'Most Recent Journal Entries',1,'http://www.example.com/journal.pl?op=top','http://www.example.com/journal.pl?op=top&content_type=rss',1);

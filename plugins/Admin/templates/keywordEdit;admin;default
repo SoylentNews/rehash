@@ -1,0 +1,46 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+keywordEdit
+__template__
+[% PROCESS titlebar width='100%' %]
+<TABLE>
+	<TR>
+		<FORM ACTION="[% env.script_name %]" METHOD="POST">
+			<TD VALIGN="TOP">
+				[% PROCESS formLabel value => "Select a keyword" comment => "fill in the blanks and hit the create button to create a new keyword" %]
+				[% keywords_select %]
+
+				<INPUT TYPE="SUBMIT" NAME="keyworded" VALUE="Select keyword"><BR>
+
+				<BR><INPUT TYPE="HIDDEN" NAME="op" VALUE="edit_keyword"><BR>
+
+				[% PROCESS formLabel value => "Keyword" comment => "this is what we will match against" %]
+				<INPUT TYPE="TEXT" NAME="keyword" VALUE="[% FILTER strip_attribute %][% keyword.keyword %][% END %]">
+
+				[% PROCESS formLabel value => "Name" comment => "this will be the label used in the related links box" %]
+				<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute %][% keyword.name %][% END %]">
+
+				[% PROCESS formLabel value => "Link" comment => "this url is added to the related links box" %]
+				<INPUT TYPE="TEXT" NAME="link" VALUE="[% FILTER strip_attribute %][% keyword.link %][% END %]">
+				<BR>
+
+				<INPUT TYPE="SUBMIT" NAME="keywordnew" VALUE="Create Keyword">
+				<INPUT TYPE="SUBMIT" NAME="keywordsave" VALUE="Save Keyword">
+				<INPUT TYPE="SUBMIT" NAME="keyworddelete" VALUE="Delete Keyword">
+
+			</TD>
+		</FORM>
+	</TR>
+</TABLE>
+
+__seclev__
+500

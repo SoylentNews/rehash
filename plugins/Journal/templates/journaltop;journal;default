@@ -1,0 +1,51 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journaltop
+__template__
+[% USE Slash %]
+[% IF type == 'top';
+	title = "Top Posters By Number of Entries";
+ELSIF type == 'recent';
+	title = "Top Recent Posters By Date";
+ELSIF type == 'friend';
+	title = "Top Posters By Friends";
+END %]
+
+[% IF type == "friend";
+	col2 = "Popularity";
+ELSE;
+	col2 = "Entries";
+END %]
+
+
+[% PROCESS titlebar width => "90%" %]
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+  <TR BGCOLOR="[% user.bg.2 %]">
+    <TD VALIGN="TOP" WIDTH="40%"><B>User</B></TD>
+    <TD VALIGN="TOP" WIDTH="20%"><B>[% col2 %]</B></TD>
+    <TD VALIGN="TOP" WIDTH="40%"><B>Last Updated</B></TD>
+  </TR>
+
+[% FOREACH journal = journals %]
+  <TR>
+    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% journal.2 %]">[% journal.1 %]</A></TD>
+    <TD VALIGN="TOP">[% journal.0 %]</TD>
+    <TD VALIGN="TOP"><EM>[% Slash.timeCalc(journal.3) %]</EM></TD>
+  </TR>
+[% END %]
+
+</TABLE>
+
+<BR><BR>
+
+__seclev__
+100

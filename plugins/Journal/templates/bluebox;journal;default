@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+bluebox
+__template__
+[% USE Slash %]
+<TABLE BORDER="0" BGCOLOR="#000000" WIDTH="100%">
+	<TR><TD>
+		[% FOREACH article = articles %]
+		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" BORDER="0" CELLPADDING="5" CELLSPACING="0">
+			<TR VALIGN="TOP">
+				<TD ALIGN="RIGHT" BGCOLOR="#336699"><B>[% Slash.timeCalc(article.day,"%A %B %d, %y") %]</B></TD>
+			</TR>
+
+			[% FOREACH diatribe = article.article %]
+				<TR VALIGN="TOP">
+					<TD ALIGN="LEFT"> [% Slash.timeCalc(diatribe.date, "%I:%M %p") %] [% diatribe.description %]<BR></TD>
+				</TR>
+				<TR VALIGN="TOP">
+					<TD> [% diatribe.article %]
+						<A HREF="[% constants.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]"
+							><IMG SRC="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" WIDTH="[% diatribe.topic.width %]"
+								HEIGHT="[% diatribe.topic.height %]" BORDER="0" ALIGN="RIGHT"
+								HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.alttext %]"></A>
+					</TD>
+				</TR>
+				[% IF diatribe.discussion %]
+					<TR><TD VALIGN="RIGHT">
+						<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</A>
+					</TD></TR>
+				[% END %]
+			[% END %]
+		</TABLE>
+		[% END %]
+
+[% PROCESS pagination %]
+
+	[% IF !user.is_anon && uid && uid != user.uid %]
+		</TD></TR>
+		<TR VALIGN="TOP" BGCOLOR="#FFFFFF">
+			<TD ALIGN="RIGHT" BGCOLOR="#FFFFFF"><A HREF="[% constants.rootdir %]/journal.pl?op=add&uid=[% uid %]">Add user to friend's list</A></TD>
+		</TR>
+	[% END %]
+
+	</TD></TR>
+</TABLE>
+
+__seclev__
+100

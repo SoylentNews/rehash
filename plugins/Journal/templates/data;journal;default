@@ -1,0 +1,50 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'mainhead' %]
+	[% constants.sitename %] Journal System
+
+[% CASE 'userhead' %]
+	[% nickname %]'s Journal ([% uid %])
+
+[% CASE 'nousers' %]
+	No users with journals found matching "[% form.nickname | strip_literal %]".
+
+[% CASE 'nojournal' %]
+	User "[% nouser.nickname | strip_literal %]" ([% nouser.uid %]) has no journal entries.
+
+[% CASE 'noentries' %]
+	[% nickname ? "$nickname has" : "You have" %] not created any journal entries.
+
+[% CASE 'nofriends' %]
+	You have not made any friends (or all of your friends are losers who have not created entries in their journals).
+
+[% CASE 'create_failed' %]
+	An unknown error occured when you tried to create a journal entry.  Please go back to the beginning and try again.
+
+[% CASE 'no_desc_or_article' %]
+	Either the subject or the journal text was empty.  Please go back and try again.
+
+[% CASE 'noentries_found' %]
+	Sorry, there are no journal entries found for this user.
+
+[% END %]
+
+__seclev__
+10000

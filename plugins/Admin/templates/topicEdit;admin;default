@@ -1,0 +1,72 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+topicEdit
+__template__
+[% PROCESS titlebar width='100%' %]
+<TABLE>
+	<TR>
+		<FORM ACTION="[% env.script_name %]" METHOD="POST">
+		<INPUT TYPE="HIDDEN" NAME="op" VALUE="topics">
+		<TD VALIGN="TOP">
+			[% PROCESS formLabel value => "Select a topic" comment => "hit the create button if you wish to create a new topic" %]
+			[% topics_select %]
+
+			<INPUT TYPE="SUBMIT" NAME="topiced" VALUE="Select topic"><BR>
+
+			[% IF topic.tid %]
+			[% PROCESS formLabel value => "Image as seen", comment => "" %]
+			<IMG SRC="[% image %]" ALT="[% topic.alttext %]" WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]">
+			[% END %]
+
+			<BR><INPUT TYPE="HIDDEN" NAME="tid" VALUE="[% topic.tid %]"><BR>
+			[% PROCESS formLabel value => "Short Name" comment => "used in admin interface" %]
+			<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute %][% topic.name %][% END %]">
+			[% PROCESS formLabel value => "Alt Text", comment => "" %]
+			<INPUT TYPE="TEXT" NAME="alttext" VALUE="[% FILTER strip_attribute %][% topic.alttext %][% END %]">
+			[% PROCESS formLabel value => "Dimensions", comment => "leave blank to determine automatically" %]
+			Width: <INPUT TYPE="TEXT" NAME="width" VALUE="[% topic.width %]" SIZE="4">
+			Height: <INPUT TYPE="TEXT" NAME="height" VALUE="[% topic.height %]" SIZE="4"><BR>
+			<BR>
+
+				[% IF images_flag %]
+
+				[% PROCESS formLabel value => "Image", comment => "" %]
+				[% image_select %]
+				<BR><BR>
+				<FONT SIZE="-2">(note: if you enter a value in the field below, the image pulldown will be ignored)</FONT><BR>
+				Or enter image URL:
+				<INPUT TYPE="TEXT" LENGTH="40" NAME="image2" VALUE="[% image2 %]">
+				<BR>
+
+				[% ELSE %]
+
+				[% PROCESS formLabel value => "No images were found in the topic images directory", comment => "" %]
+					([% constants.basedir %]/images/topics).<BR>
+					<INPUT TYPE="TEXT" NAME="image" VALUE="[% image %]">
+
+				[% END %]
+			<INPUT TYPE="SUBMIT" NAME="topicnew" VALUE="Create new topic">
+			<INPUT TYPE="SUBMIT" NAME="topicsave" VALUE="Save Topic">
+			<INPUT TYPE="SUBMIT" NAME="topicdelete" VALUE="Delete Topic">
+		</TD>
+		<TD VALIGN="TOP">
+		[% PROCESS formLabel value => "Sections", comment => "select which sections a topic belongs to" %]
+		[% FOREACH section = sectionref.keys %]
+		    <INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]<BR>
+		[% END %]
+		</TD>
+		</FORM>
+	</TR>
+</TABLE>
+
+__seclev__
+500

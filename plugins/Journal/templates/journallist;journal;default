@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journallist
+__template__
+[% USE Slash %]
+[% showopts = !user.is_anon && (!uid || uid == user.uid) %]
+[% PROCESS journaloptions IF showopts %]
+
+[% PROCESS titlebar title => "$nickname's Journal Entries", width => "90%" %]
+[% IF showopts %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
+<INPUT TYPE="hidden" NAME="op" VALUE="remove">[% END %]
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+[% FOREACH article = articles %]
+  <TR>
+    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;id=[% article.0 %]"><B>[% article.2 %]</B></A></TD>
+    <TD VALIGN="TOP"><EM>[% Slash.timeCalc(article.1) %]</EM></TD>
+[%- IF showopts %]
+    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</A></TD>
+    <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% article.0 %]" VALUE="1"></TD>
+[%- END %]
+  </TR>
+[% END %]
+[%- IF showopts %]<TR><TD COLSPAN="3">&nbsp;</TD><TD ALIGN="CENTER"><INPUT TYPE="submit" VALUE="Delete Articles"></TD></TR>[% END -%]
+</TABLE>
+[% IF showopts %]</FORM>[% END %]
+
+__seclev__
+100

@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+editbuttons
+__template__
+[% IF newarticle %]
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
+[% END %]
+
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview">
+
+[% IF ! newarticle %]
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="update">
+[%- IF user.seclev <= 10000 %]
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="delete">
+[%- END -%]
+[% END %]
+
+__seclev__
+500

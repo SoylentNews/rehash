@@ -1,0 +1,38 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journaloptions
+__template__
+<FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST" ENCTYPE="application/x-www-form-urlencoded">
+<INPUT TYPE="hidden" NAME="op" VALUE="setprefs">
+[% USE Slash %]
+<TABLE>
+
+[%- IF themes.size > 1 %]
+	<TR VALIGN="TOP"><TD>
+			[% PROCESS formLabel value => "Theme", comment => "Select how your journal will be viewed" %]
+			[% Slash.createSelect("journal_theme", themes, default, 1) %]
+	</TD></TR>
+[%- END %]
+
+	<TR VALIGN="TOP"><TD>
+		[% PROCESS formLabel value => "Comments", comment => "Select default for new entries" %]
+		[% jds = Slash.db.getDescriptions("journal_discuss") %]
+		[% def_jd = user.journal_discuss || 0 %]
+		[% Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
+	</TD></TR>
+</TABLE>
+<INPUT TYPE="submit" NAME="submit" VALUE="change">
+</FORM>
+
+
+__seclev__
+100

@@ -1,0 +1,63 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journaledit
+__template__
+[% USE Slash %]
+<TABLE>
+	<TR VALIGN="TOP"><TD>
+		<FORM ACTION="[% env.script_name %]" METHOD="POST" ENCTYPE="application/x-www-form-urlencoded">
+
+		<INPUT TYPE="hidden" NAME="id" VALUE="[% article.id %]">
+		<INPUT TYPE="hidden" NAME="state" VALUE="editing">
+		<INPUT TYPE="hidden" NAME="preview" VALUE="active">
+		<INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
+
+		[% PROCESS formLabel value => "Subject", comment => "This is required" %]
+		<INPUT TYPE="text" NAME="description" SIZE="60" MAXLENGTH="60" VALUE="[% article.description | strip_attribute %]">
+
+		[% PROCESS formLabel value => "Journal Topic", comment => "";
+		   def_topic = article.tid || constants.journal_default_topic;
+		   Slash.selectTopic('tid', def_topic, '', 1) %]
+
+	[% IF !article.discussion %]
+		[% PROCESS formLabel value => "Comments", comment => "Comments cannot be disabled once enabled" %]
+ 		[% jds = Slash.db.getDescriptions("journal_discuss");
+ 		   def_jd = form.journal_discuss.defined
+ 		   	? form.journal_discuss
+ 		   	: article.id
+ 		   		? 0
+ 		   		: user.journal_discuss || 0;
+		   Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
+	[% ELSE %]
+		[% PROCESS formLabel value => "Comments", comment => "Comments are enabled" %]
+	[% END %]
+
+		[% PROCESS formLabel value => "Entry", comment => "This will go down on your permanent record" %]
+		<TEXTAREA WRAP="virtual" NAME="article" COLS="60" ROWS="20">[% article.article | strip_literal %]</TEXTAREA>
+		<P>
+		<INPUT TYPE="submit" NAME="op" value="preview">
+	[% IF form.preview || article.id %]
+		<INPUT TYPE="submit" NAME="op" VALUE="save">
+	[% END %]
+		[% format_select %]
+		</FORM>
+	</TD></TR>
+	<TR><TD>
+		Allowed HTML: 
+		<FONT SIZE="1">
+			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+		</FONT>
+	</TD></TR>
+</TABLE>
+
+__seclev__
+100

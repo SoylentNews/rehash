@@ -1,0 +1,38 @@
+DROP TABLE IF EXISTS journals;
+CREATE TABLE journals (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	date DATETIME NOT NULL,
+	description VARCHAR(80) NOT NULL,
+	posttype TINYINT DEFAULT '2' NOT NULL,
+	discussion MEDIUMINT  UNSIGNED,
+	tid MEDIUMINT UNSIGNED NOT NULL,
+	PRIMARY KEY (id),
+	KEY uidarticle (uid),
+	FOREIGN KEY (tid) REFERENCES topics(tid),
+	KEY IDandUID (id,uid)
+);
+
+DROP TABLE IF EXISTS journals_text;
+CREATE TABLE journals_text (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	article TEXT NOT NULL,
+	PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS journal_friends;
+CREATE TABLE journal_friends (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	friend MEDIUMINT UNSIGNED NOT NULL,
+	UNIQUE jackandjill (uid,friend),
+	PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS journal_themes;
+CREATE TABLE journal_themes (
+	id TINYINT UNSIGNED NOT NULL auto_increment,
+	name VARCHAR(30) NOT NULL,
+	UNIQUE name(name),
+	PRIMARY KEY (id)
+);

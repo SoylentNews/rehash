@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+varEdit
+__template__
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="vars">
+<TABLE>
+	<TR>
+		<TD>Select Variable Name</TD><TD>[% vars_select %]
+		<INPUT TYPE="SUBMIT" NAME="varedit" VALUE="Select Var"></TD>
+	</TR>
+	<TR>
+		<TD>Variable Name</TD>
+		<TD><INPUT TYPE="TEXT" NAME="thisname" VALUE="[% varsref.name %]"></TD>
+	</TR>
+	<TR>
+		<TD>Value</TD><TD><INPUT TYPE="TEXT" NAME="value" VALUE="[% varsref.value %]"></TD>
+	</TR>
+	<TR>
+		<TD>Description</TD><TD>
+	<INPUT TYPE="TEXT" NAME="desc" VALUE="[% FILTER strip_attribute %][% varsref.description %][% END %]" size="60"></TD>
+	</TR>
+	<TR>
+		<TD COLSPAN="2"><INPUT TYPE="SUBMIT" NAME="varsave" VALUE="Save"></TD>
+	<TR>
+</TABLE>
+</FORM>
+
+__seclev__
+500

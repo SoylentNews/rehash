@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+Displays friends.
+
+* friends = arrayref of friends (nickname, uid, last entry time, last entry description, last entry id)
+* search = boolean for if this screen is shown as the result of a user search
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journalfriends
+__template__
+[% USE Slash %]
+[% IF search; nickstrip = form.nickname | strip_literal; END %]
+[% PROCESS titlebar
+	title => (search ? "User Search Results for \"$nickstrip\"" : "Your Friends"),
+	width => "90%"
+%]
+
+[% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
+<INPUT TYPE="hidden" NAME="op" VALUE="delete">[% END %]
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+[% FOREACH friend = friends %]
+    <TR><TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/">[% friend.0 %]</A></TD>
+[% IF friend.2 %]
+    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/journal/"><B>[% friend.3 %]</B></A></TD>
+    <TD VALIGN="TOP"><EM>[% Slash.timeCalc(friend.2) %]</EM></TD>
+[% ELSE %]
+    <TD VALIGN="TOP">&nbsp;</TD>
+    <TD VALIGN="TOP"><EM>User has no journal entries.</EM></TD>
+[% END %]
+[% IF !user.is_anon && !search %]     <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% friend.1 %]" VALUE="1"></TD>
+[% END %]
+</TR>
+[% END %]
+[% IF !user.is_anon && !search %]<TR><TD COLSPAN="3">&nbsp;</TD><TD ALIGN="CENTER"><INPUT TYPE="submit" VALUE="Remove Friends"></TD></TR>[% END %]
+</TABLE>
+[% IF !user.is_anon && !search %]</FORM>[% END %]
+<BR><BR>
+
+[% PROCESS searchusers %]
+
+__seclev__
+100

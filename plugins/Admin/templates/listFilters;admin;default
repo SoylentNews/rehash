@@ -1,0 +1,77 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+listFilters
+__template__
+[% PROCESS titlebar width='100%' %]
+
+<FORM action="[% env.script_name %]" method="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="listfilters">
+<TABLE>
+	<TR>
+		<TD>Select form</TD><TD>[% form_select %]</TD>
+	</TR>
+	<TR>
+		<TD>List Filters</TD><TD><INPUT TYPE="submit" NAME="listfilters" VALUE="List"></TD>
+	</TR>
+</FORM>
+<FORM action="[% env.script_name %]" method="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="editfilter">
+	<TR>
+		<TD>Create a new Filter</TD><TD><INPUT TYPE="submit" NAME="newfilter" VALUE="Create"></TD>
+	</TR>
+</TABLE>
+
+[% IF filter_ref && form.formname %]
+
+<TABLE BORDER="0">
+	<TR>
+		<TD COLSPAN="9">&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD><B> Filter id <B></TD>
+		<TD><B> Form <B></TD>
+		<TD><B> Regex <B></TD>
+		<TD><B> Modifier <B></TD>
+		<TD><B> Field <B></TD>
+		<TD><B> Ratio <B></TD>
+		<TD><B> Minimum match <B></TD>
+		<TD><B> Minimum length <B></TD>
+		<TD><B> Error message <B></TD>
+	</TR>
+
+	[% FOREACH i = filter_ref %]
+	<TR>
+		<TD>[<A HREF="[% env.script_name %]?op=editfilter&amp;filter_id=[% i.0 %]">[% i.0 %]</A>]</TD>
+		<TD><FONT FACE="courier" size="+1">[% i.1 %]</FONT></TD>
+		<TD> [% i.2 %] </TD>
+		<TD> [% i.3 %] </TD>
+		<TD> [% i.4 %] </TD>
+		<TD> [% i.5 %] </TD>
+		<TD> [% i.6 %] </TD>
+		<TD> [% i.7 %] </TD>
+		<TD> [% i.8 %] </TD>
+	</TR>
+	[% END %]
+
+</TABLE>
+<TABLE>
+	<TR>
+		<TD><INPUT TYPE="submit" NAME="newfilter" VALUE="Create a new filter"></TD>
+	</TR>
+</TABLE>
+
+[% END %]
+
+</FORM>
+
+__seclev__
+500

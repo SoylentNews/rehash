@@ -1,0 +1,99 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'keywordDelete-message' %]
+	Keyword has been deleted
+
+[% CASE 'keywordSave-message' %]
+	Keyword has been saved
+
+[% CASE 'varSave-message' %]
+Saved [% form.thisname %]<BR>
+
+[% CASE 'varDelete-message' %]
+<B>Deleted [% form.thisname %]!</B><BR>
+
+[% CASE 'authorInsert-message' %]
+	Inserted [% form.thisaid %]<BR>
+
+[% CASE 'authorSave-message' %]
+	Saved [% form.thisaid %]<BR>
+
+[% CASE 'authorDelete-message' %]
+	<B>Deleted [% form.thisaid %]!</B><BR>
+
+[% CASE 'authorDelete-confirm-message' %]
+	<B>Do you really want to delete [% aid %]?</B><BR>
+	<INPUT TYPE="HIDDEN" VALUE="[% aid %]" NAME="thisaid">
+	<INPUT TYPE="SUBMIT" VALUE="Cancel delete [% aid %]" NAME="authordelete_cancel">
+	<INPUT TYPE="SUBMIT" VALUE="Delete [% aid %]" NAME="authordelete_confirm">
+
+[% CASE 'authorDelete-deleted-message' %]
+	<B>Deleted [% aid %]!</B><BR>
+
+[% CASE 'authorDelete-cancel-message' %]
+	<B>Canceled Deletion of [% aid %]!</B><BR>
+
+[% CASE 'blockSave-exists-message' %]
+	<P><B>This block, [% bid %], already exists! <BR>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</P>
+
+[% CASE 'templateSave-exists-message' %]
+	<P><B>This template, [% name %], TPID [% tpid %], already exists! <BR>Hit the "back" button, and try another bid (loo
+
+[% CASE 'blockSave-inserted-message' %]
+	Inserted [% bid %]<BR>
+
+[% CASE 'templateSave-inserted-message' %]
+	Inserted template [% name %], TPID [% tpid %]<BR>
+
+[% CASE 'blockSave-saved-message' %]
+	Saved [% bid %]<BR>
+
+[% CASE 'templateSave-saved-message' %]
+	Saved template [% name %], TPID [% tpid %]<BR>
+
+[% CASE 'seclev-message' %]
+	You don't have privileges to template name [% name %], TPID [% tpid %]<BR>
+	
+[% CASE 'blockDelete-message' %]
+	<B>Deleted [% bid %]!</B><BR>
+
+[% CASE 'templateDelete-message' %]
+	<B>Deleted [% name %], TPID [% tpid %]!</B><BR>
+
+[% CASE 'topicSave-message' %]
+	<B>Saved [% form.tid %]!</B><BR>
+
+[% CASE 'updateFilter-message' %]
+
+	[% IF ! form.regex %]
+	<B>You haven't typed in a regex.</B><BR>
+	[% END %]
+
+	[% IF ! form.field %]
+	<B>You haven't typed in a form field.</B><BR>
+	[% END %]
+
+[% CASE 'topicDelete-message' %]
+	<B>Deleted [% tid %]!</B><BR>
+
+[% END %]
+
+__seclev__
+10000

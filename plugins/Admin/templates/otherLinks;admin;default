@@ -1,0 +1,17 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+otherLinks
+__template__
+<LI><A HREF="[% constants.rootdir %]/search.pl?topic=[% tid | fixparam %]">More on [% topic.alttext %]</A></LI>
+<LI><A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid | fixparam %]">Also by [% aid %]</A></LI>
+__seclev__
+500

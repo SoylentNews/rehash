@@ -1,0 +1,4 @@
+MANIFEST
+Makefile.PL
+RSS.pm
+test.pl

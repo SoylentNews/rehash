@@ -1,0 +1,120 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+editFilter
+__template__
+<FORM action="[% env.script_name %]" method="POST">
+<INPUT TYPE="hidden" NAME="op" VALUE="listfilters">
+
+<TABLE BORDER="0">
+	<TR>
+		<TD><B>List Filters</B></TD>
+		<TD> [% form_select %]</TD>
+		<TD>
+		<INPUT TYPE="SUBMIT" NAME="listfilters" VALUE="List">
+		</FORM>
+		</TD>
+	</TR>
+	<TR>
+		<FORM action="[% env.script_name %]" method="POST">
+		<TD><B>Create a new filter</B></TD>
+		<TD> [% form_select %]</TD>
+		<TD>
+		<INPUT TYPE="hidden" NAME="op" VALUE="editfilter">
+		<INPUT TYPE="SUBMIT" NAME="newfilter" VALUE="Create">
+		</FORM>
+		</TD>
+	</TR>
+	<TR>
+		<FORM action="[% env.script_name %]" method="POST">
+		<INPUT TYPE="hidden" NAME="op" VALUE="editfilter">
+		<TD><B>Form to save under:</B></TD>
+		<TD COLSPAN="2"> [% form_select %]</TD>
+	<TR>
+		<TD VALIGN="top" WIDTH="40"><B>Filter id</B><BR>This is not editable<BR><BR></TD>
+		<TD VALIGN="top"><INPUT TYPE="hidden" name="filter_id" value="[% filter_id %]">&nbsp;&nbsp;</TD>
+		<TD VALIGN="top"> [% filter_id %] </TD><TD>&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD VALIGN="top" WIDTH="40"><B> Regex</B><BR>This is the base regex that you use for the filter.<BR><BR></TD>
+		<TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><FONT FACE="courier" SIZE="+1"><BR> [% filter.regex %] </FONT></TD>
+		<TD VALIGN="top"><INPUT TYPE="text" SIZE="30" NAME="regex" VALUE="[% filter.regex %]"></TD>
+	</TR>
+	<TR>
+		<TD VALIGN="top"><B> Modifier </B><BR>The modifier for the regex /xxx/gi /xxx/g /xxx/<BR><BR></TD>
+		<TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><BR> [% filter.modifier %] </TD>
+		<TD VALIGN="top"><INPUT TYPE="text" SIZE="4" NAME="modifier" VALUE="[% filter.modifier %]"></TD>
+	</TR>
+	<TR>
+		<TD VALIGN="top" WIDTH="40"><B> Field </B><BR>
+		This is the field you want to check. Refer to the code to make
+		sure you have the correct fieldname.
+		<BR><BR>
+		</TD><TD>&nbsp;&nbsp;</TD>
+		<TD VALIGN="top"><BR> [% filter.field %] </TD>
+		<TD VALIGN="top"><INPUT TYPE="text" NAME="field" VALUE="[% filter.field %]"></TD>
+	</TR>
+	<TR>
+		<TD VALIGN="top" WIDTH="40">
+		<B> Ratio </B><BR>
+		The percentage of the fieldsize that you want the regex to match.
+		This is used to calculate the number of instances for the regex.
+		For instance, if the ration is .50, and the comment size is 100,
+		then the regex ends up becoming /xxx{50,}/. Note: if this value is > 0,
+		then you cannot use the minimum match field.
+		<BR><BR>
+		</TD>
+		<TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><BR> [% filter.ratio %] </TD>
+		<TD VALIGN="top"><INPUT TYPE="text" SIZE="8" NAME="ratio" VALUE="[% filter.ratio %]"></TD>
+	</TR>
+	<TR>
+		<TD VALIGN="top" WIDTH="40"><B> Minimum match </B><BR>
+		This is the hardcoded minimum for the regex, if you're not using a ratio.
+		For instance, if you set this to 10, your regex becomes /xxx/{10,}.
+		Note: You can't use ratio if you have this set to anything greater than 0
+		<BR><BR>
+		</TD>
+		<TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><BR> [% filter.minimum_match %] </TD>
+		<TD VALIGN="top"><INPUT TYPE="text" SIZE="8" NAME="minimum_match" VALUE="[% filter.minimum_match %]"></TD>
+	</TR>
+	<TR>
+		<TD VALIGN="top" WIDTH="40"><B> Minimum length</B>
+
+		<BR>This is the minimum length of the comment in order for the filter to apply.
+		If set to zero, there will be no minimum size length.
+		<BR><BR>
+		</TD>
+		<TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><BR> [% filter.minimum_length %] </TD>
+		<TD VALIGN="top"><INPUT TYPE="text" SIZE="8" NAME="minimum_length" VALUE="[% filter.minimum_length %]"></TD>
+	</TR>
+	<TR>
+		<TD WIDTH="40">
+		<B> Error message</B>
+		<BR>This is the error message that will be displayed if the filter is matched.<BR><BR>
+		</TD>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><BR> [% filter.err_message %]</TD>
+		<TD VALIGN="top">
+		<TEXTAREA NAME="err_message" COLS="50" ROWS="2">[% filter.err_message | strip_literal %]</TEXTAREA>
+		</TD>
+	</TR>
+</TABLE>
+<TABLE BORDER="0">
+	<TR>
+		<TD><INPUT TYPE="SUBMIT" NAME="updatefilter" VALUE="Save filter"></TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="newfilter" VALUE="Create a new filter"></TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="deletefilter" VALUE="Delete filter"></TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="listfilters" VALUE="List Filters"></TD>
+	</TR>
+	</TR>
+</TABLE>
+</FORM>
+__seclev__
+500

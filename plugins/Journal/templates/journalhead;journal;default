@@ -1,0 +1,20 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+journal
+__lang__
+en_US
+__name__
+journalhead
+__template__
+[% USE Slash %]
+[% Slash.createMenu("users") %]
+[% Slash.createMenu("journal") %]
+[% PROCESS titlebar width => "100%" %]
+
+__seclev__
+500
