@@ -1142,7 +1142,7 @@ sub showInfo {
 			reasons			=> $reader->getReasons(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
-			modval			=> $modval,
+			modval			=> sprintf("%0.3f", $modval),
 			trollpoint		=> sprintf("%0.3f", $trollpoint),
 			hr_hours_back		=> $ipid_hoursback
 		});
