@@ -386,7 +386,7 @@ ALTER TABLE stories ADD last_update timestamp;
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_img_count','5','Number of recent topics to store in the template "recentTopics"');
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_txt_count','5','Number of recent topics to store in the block "recenttopics"');
 
-INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', -1,'Don't Display');
+INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', -1,'Don\'t Display');
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', 1,'Display');
 INSERT INTO vars (name, value, description) VALUES ('discussion_sort_order', '3', 'sort code to feed to findDiscussions');
 
