@@ -148,10 +148,26 @@ sub confirmDaypasskey {
 	return $rows;
 }
 
+sub getDaypassTZOffset {
+	my($self) = @_;
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $dptz = $constants->{daypass_tz} || 'GMT';
+	return 0 if $dptz eq 'GMT';
+
+	my $timezones = $slashdb->getTZCodes();
+	return $timezones->{$dptz} || 0;
+}
+
 sub getGoodonDay {
 	my($self) = @_;
 	my $slashdb = getCurrentDB();
-	my $db_time = $slashdb->getTime();
+	my $constants = getCurrentStatic();
+
+	my $off_set = $self->getDaypassTZOffset();
+	my $db_time = $slashdb->getTime({ add_secs => $off_set });
+
 	# Cheesy (and easy) way of doing this.  Yank the seconds and
 	# just return the (GMT) date.
 	return substr($db_time, 0, 10);
@@ -163,6 +179,7 @@ sub userHasDaypass {
 	# Anonymous users can't have a daypass.
 	return 0 if $user->{is_anon};
 	my $goodonday = $self->getGoodonDay();
+	my $off_set = $self->getDaypassTZOffset();
 	# Really should memcached this, here.
 	my $uid = $user->{uid};
 	my $goodonday_q = $self->sqlQuote($goodonday);
