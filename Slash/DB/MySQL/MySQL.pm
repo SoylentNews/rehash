@@ -3360,6 +3360,7 @@ sub deleteAuthor {
 # the deleted topic can be re-established.
 sub deleteTopic {
 	my($self, $tid, $newtid) = @_;
+	my $constants = getCurrentStatic();
 	my $tid_q = $self->sqlQuote($tid);
 	my $newtid_q = $self->sqlQuote($newtid);
 	my $tree = $self->getTopicTree();
@@ -3432,10 +3433,12 @@ sub deleteTopic {
 	# have the new tid.  Stories are a special case so skip those
 	# for now.
 	# These tables have topics stored as 'tid'.
-	$self->sqlUpdate("submissions",   { tid => $newtid },   "tid=$tid_q");
-	$self->sqlUpdate("journals",      { tid => $newtid },   "tid=$tid_q");
-	$self->sqlUpdate("discussions",   { topic => $newtid }, "topic=$tid_q");
-	$self->sqlUpdate("pollquestions", { topic => $newtid }, "topic=$tid_q");
+	$self->sqlUpdate("submissions",		{ tid => $newtid },	"tid=$tid_q");
+	if ($constants->{plugin}{Journal}) {
+		$self->sqlUpdate("journals",	{ tid => $newtid },	"tid=$tid_q");
+	}
+	$self->sqlUpdate("discussions",		{ topic => $newtid },	"topic=$tid_q");
+	$self->sqlUpdate("pollquestions",	{ topic => $newtid },	"topic=$tid_q");
 
 	# OK, for stories, it's a little more complicated because we have
 	# not just a tid column, but two other tables.  First we mark
