@@ -669,7 +669,6 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, '
 INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',	0, 0,  1, 0.5);
 
 # SLASHCODE LAST UPDATED HERE
-# USEPERL LAST UPDATED HERE
 
 # this is not a DB command but needs to be done for
 # each installed site that uses plugins/Zoo:
@@ -697,3 +696,4 @@ INSERT INTO vars (name, value, description) VALUES ('people_max_subscriber','400
 
 INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Additional multiplier for M2s performed on duplicate mods (leave 0 to disable)');
 
+# USEPERL LAST UPDATED HERE
