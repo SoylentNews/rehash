@@ -262,11 +262,13 @@ INSERT INTO topic_images (id, name, image, width, height) VALUES (1,'news', 'top
 INSERT INTO topic_images (id, name, image, width, height) VALUES (2,'linux', 'topiclinux.gif',60,70);
 INSERT INTO topic_images (id, name, image, width, height) VALUES (3,'slashdot', 'topicslashdot.gif',100,34);
 INSERT INTO topic_images (id, name, image, width, height) VALUES (4,'slash', 'topicslash.gif',81,36);
+INSERT INTO topic_images (id, name, image, width, height) VALUES (5,'programming', 'topicprogramming.gif',80,48);
 
 INSERT INTO topics (tid, name, alttext, default_image) VALUES (1,'news', 'News', 1);
 INSERT INTO topics (tid, name, alttext, default_image) VALUES (2,'linux', 'Linux', 2);
 INSERT INTO topics (tid, name, alttext, default_image) VALUES (3,'slashdot', 'Slashdot', 3);
 INSERT INTO topics (tid, name, alttext, default_image) VALUES (4,'slash', 'Slash', 4);
+INSERT INTO topics (tid, name, alttext, default_image) VALUES (5,'programming', 'Programming', 5);
 
 #
 # Dumping data for table 'tzcodes'
