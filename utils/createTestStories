@@ -190,7 +190,7 @@ sub getRandomAuthorID {
 
 sub getRandomTopicID {
 	# Yes, inefficient.  I do not care.
-	my $tids = $slashdb->sqlSelectAll("tid", "topics");
+	my $tids = $slashdb->sqlSelectAll("tid", "topics", "tid < 10000");
 	my @tids = map { $_->[0] } @$tids;
 	my $rand_tid = @tids[ rand @tids ];
 	return $rand_tid;
