@@ -13,26 +13,7 @@ en_US
 __name__
 header
 __template__
-[%# reserved for article.pl links only ... others possible. %]
-[%# journals, comments, admin story list? %]
-[%# should this be a separate template? %]
-[% IF env.script_name.search('article\.pl') -%]
-	[%- IF link.prev %]
-<LINK REL="prev" HREF="[% constants.rootdir %]/article.pl?sid=[% link.prev.sid %]" TITLE="[% link.prev.title | strip_attribute %]">
-	[%- END ; IF link.next %]
-<LINK REL="next" HREF="[% constants.rootdir %]/article.pl?sid=[% link.next.sid %]" TITLE="[% link.next.title | strip_attribute %]">
-	[%- END ; IF link.author # author is uid %]
-<LINK REL="author" HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% link.author %]">
-	[%- END ;
-ELSE ; # default author link, where author is a nickname
-	IF link.author %]
-<LINK REL="author" HREF="[% constants.rootdir %]/~[% link.author | fixparam %]/" TITLE="[% link.author | strip_attribute %]">
-	[%- END ;
-END ; IF link.section %]
-<LINK REL="parent" HREF="[% constants.rootdir %]/index.pl?section=[% link.section | fixparam %]" TITLE="[% link.section | strip_attribute %]">
-[%- END %]
-<LINK REL="top" HREF="[% constants.rootdir %]/" TITLE="[% constants.slogan | strip_attribute %]">
-<LINK REL="search" HREF="[% constants.rootdir %]/search.pl" TITLE="Search [% constants.sitename | strip_attribute %]">
+[% INCLUDE linkrel %]
 </HEAD>
 <BODY BGCOLOR="[% user.bg.0 %]" TEXT="[% user.fg.1 %]" LINK="[% user.bg.3 %]" VLINK="[% user.fg.1 %]">
 

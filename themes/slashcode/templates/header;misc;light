@@ -11,7 +11,7 @@ en_US
 __name__
 header
 __template__
-[% USE Slash %]
+[% INCLUDE linkrel %]
 </HEAD>
 <BODY>
 

@@ -11,6 +11,7 @@ en_US
 __name__
 header
 __template__
+[% INCLUDE linkrel %]
 </HEAD>
 <BODY BGCOLOR="[% user.bg.1 %]" LINK="[% user.bg.3 %]" VLINK="[% user.bg.3 %]" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0">
 

@@ -125,6 +125,7 @@ template=templates/isEligible;metamod;default
 template=templates/linkComment;misc;default
 template=templates/linkCommentPages;misc;default
 template=templates/linkStory;misc;default
+template=templates/linkrel;misc;default
 template=templates/listTopics;topics;default
 template=templates/lockTest;misc;default
 template=templates/loginForm;users;default
