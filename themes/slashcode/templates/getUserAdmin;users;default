@@ -229,7 +229,7 @@ __template__
 			[% END %]
 			<TR>
 				<TD>&nbsp;</TD>
-				<TD><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save[% IF useredit.nickname; useredit.nickname | strip_attribute; END %]"></TD>
+				<TD><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]"></TD>
 			</TR>
 		[% END %]
 			</FORM>
