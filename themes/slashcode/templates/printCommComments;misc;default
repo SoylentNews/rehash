@@ -88,15 +88,12 @@ __template__
 			|| user.acl.candelcomments_always %]
 			<BR><B>NOTE: Checked comments will be deleted.</B>
 		[% END %]
-		</TD>
-
-</TR>
+		</TD></TR>
 	[% END %]
 	</FORM>
 [% END %]
 
 </TABLE>
-[% PROCESS maintable_td %]&nbsp;</TD>
 __seclev__
 10000
 __version__
