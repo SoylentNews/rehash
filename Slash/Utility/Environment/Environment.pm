@@ -617,7 +617,7 @@ sub getCurrentSkin {
 
 =head2 setCurrentSkin(HASH)
 
-Set up the $current_skin global, which will be returned by
+Set up the current skin global, which will be returned by
 getCurrentSkin(), for both static scripts and under Apache.
 
 =over 4
@@ -643,26 +643,23 @@ Returns no value.
 sub setCurrentSkin {
 	my($id) = @_;
 	my $slashdb = getCurrentDB();
-	my $gSkin = $slashdb->getSkin($id);
-# We used to put the current section into $form->{currentSection}.
-# But that doesn't seem to have a purpose.  So don't bother doing
-# it now with skin.
-#	my $form = getCurrentForm();
-#	$form->{skin} = $gSkin->{name};
-#use Data::Dumper; errorLog("setCurrentSkin called id '$id' gSkin: " . Dumper($gSkin));
 
-	my $ref;
+	my $current_skin;
 	if ($ENV{GATEWAY_INTERFACE}) {
 		my $r = Apache->request;
 		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-		$ref = $cfg->{skin} ||= {};
+		$current_skin = $cfg->{skin} ||= {};
 	} else {
-		$ref = $static_skin ||= {};
+		$current_skin = $static_skin ||= {};
 	}
- 
+
+	return 1 if $current_skin->{skid} && $current_skin->{skid} eq $id;
+
+	my $gSkin = $slashdb->getSkin($id);
+
 	# we want to retain any references to $gSkin that are already
 	# in existence
-	@{$ref}{keys %$gSkin} = values %$gSkin;
+	@{$current_skin}{keys %$gSkin} = values %$gSkin;
 }
 
 #========================================================================
@@ -2476,7 +2473,7 @@ EOT
 
 ######################################################################
 # This needs to move into a Slash::Cache along with the code from
-# Slash::DB::MySQL, 
+# Slash::DB::MySQL
 sub getCurrentCache {
 	my($value) = @_;
 	my $cache;

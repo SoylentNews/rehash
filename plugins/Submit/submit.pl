@@ -273,11 +273,11 @@ sub submissionEd {
 
 	$form->{del} = 0 if $user->{is_admin};
 
-	$def_skin	= getData('defaultskin');
-	$def_note	= getData('defaultnote');
+	$def_skin = getData('defaultskin');
+	$def_note = getData('defaultnote');
 	$cur_skin = $form->{skid} || $def_skin;
-	$cur_note	= $form->{note} || $def_note;
-	$skins = $slashdb->getSubmissionsSkins;
+	$cur_note = $form->{note} || $def_note;
+	$skins    = $slashdb->getSubmissionsSkins;
 
 	for (@$skins) {
 		my($skin, $note, $cnt) = @$_;
@@ -450,7 +450,6 @@ sub displayForm {
 		$current_hash->{0} = "Select Section";
 		$skin_values = $current_hash;
 	}
-
 
 	my $topic = $slashdb->getTopic($form->{tid});
 

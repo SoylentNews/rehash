@@ -118,16 +118,6 @@ my %descriptions = (
 			$_[0]->sqlSelectMany('code,name', 'string_param', "type='commentcodes'" . $where) 
 		},
 
-#	'sections'
-#		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'type="contained"', 'order by title') },
-#
-#	'sections-contained'
-#		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'type="contained"', 'order by title') },
-#
-#	'sections-all'
-#		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', '', 'order by title') },
-
-	# XXXSKIN -- what is the equivalent here to "type='contained'"?
 	'skins'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins') },
 
@@ -1387,7 +1377,7 @@ sub setNexusExtras {
 }
 
 sub setNexusCurrentQid {
-	my ($self, $nexus_id, $qid) = @_;
+	my($self, $nexus_id, $qid) = @_;
 	return $self->sqlUpdate("topic_nexus", { current_qid => $qid }, "tid = $nexus_id");
 }
 
@@ -1418,7 +1408,7 @@ sub getContentFilters {
 }
 
 sub getCurrentQidForSkid {
-	my ($self, $skid) = @_;
+	my($self, $skid) = @_;
 	my $tree = $self->getTopicTree();
 	my $nexus_id = $self->getNexusFromSkid($skid);
 	my $nexus = $tree->{$nexus_id};
@@ -3237,7 +3227,7 @@ sub getPollQuestionList {
 	$where .= " AND pollquestions.discussion  = discussions.id ";
 	$where .= sprintf ' AND primaryskid IN (%s)', join(',', @{$other->{section}})
 		if $other->{section};
-	$where .= sprintf ' AND primary_skid NOT IN (%s)', join(',', @{$other->{exclude_section}})
+	$where .= sprintf ' AND primaryskid NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
 	$where .= " AND pollquestions.topic = $other->{topic} " if $other->{topic};
 
@@ -5374,19 +5364,19 @@ sub displaystatusForStories {
 	my $section_nexus_list = join ',',@sections_nexuses;
 
 	my $mainpage = $self->sqlSelectAllHashref(
-		      'stoid',
-                      'DISTINCT stories.stoid',
-                      'stories, story_topics_rendered AS str ',
-                      "stories.stoid=str.stoid AND str.tid=$constants->{mainpage_nexus_tid} " .
-                      "AND stories.stoid IN ($stoid_list)",
-      );
+		'stoid',
+		'DISTINCT stories.stoid',
+		'stories, story_topics_rendered AS str ',
+		"stories.stoid=str.stoid AND str.tid=$constants->{mainpage_nexus_tid} " .
+		"AND stories.stoid IN ($stoid_list)",
+	);
 
 	my $sectional = $self->sqlSelectAllHashref(
-		      'stoid',
-                      'DISTINCT stories.stoid',
-                      'stories, story_topics_rendered AS str ',
-                      "stories.stoid=str.stoid AND str.tid in($section_nexus_list) " .
-                      "AND stories.stoid IN ($stoid_list)",
+		'stoid',
+		'DISTINCT stories.stoid',
+		'stories, story_topics_rendered AS str ',
+		"stories.stoid=str.stoid AND str.tid in($section_nexus_list) " .
+		"AND stories.stoid IN ($stoid_list)",
 	);
 	foreach (@$stoids) {
 		if ($mainpage->{$_}) {
@@ -5487,6 +5477,7 @@ sub getAuthorNames {
 }
 
 ##################################################################
+# XXXSKIN - is this going to do something?
 sub getUniqueSkinsFromStories {
 	my($self, $stories) = @_;
 
@@ -6895,7 +6886,7 @@ sub createStory {
 	my $suid;
 	$story->{submitter}	= $story->{submitter} ?
 		$story->{submitter} : $story->{uid};
-	$story->{is_dirty}	= 1,
+	$story->{is_dirty}	= 1;
 
 	my $sid_ok = 0;
 	while ($sid_ok == 0) {
@@ -7047,7 +7038,6 @@ sub updateStory {
 			sid		=> $sid,
 			title		=> $data->{title},
 			primaryskid	=> $data->{primaryskid},
-			# XXXSECTIONTOPICS pudge, check this rootdir, look right to you?
 			url		=> "$rootdir/article.pl?sid=$sid"
 						. ($topiclist->[0] && $constants->{tids_in_urls}
 						  ? "&tid=$topiclist->[0]" : ""),
@@ -8344,7 +8334,6 @@ sub getStoryTopicsRendered {
 		"stoid='$stoid'");
 }
 
-
 ########################################################
 # Given a story ID, and assumes the story_topics_chosen table
 # is set up correctly for it.  Renders those chosen topics
@@ -8481,8 +8470,6 @@ sub getTopic {
 	});
 	return $answer;
 }
-
-
 
 ########################################################
 sub getTopics {

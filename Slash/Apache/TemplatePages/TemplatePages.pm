@@ -30,7 +30,6 @@ sub handler {
 		page            => $page,
 		skin            => $skin
 	});
-	# XXXSKIN - header() not yet ported
 	if ($title) {
 		header($title, $skin) or return;
 		my $display = slashDisplay('body', '', { Page => $page, Skin => $skin, Return => 1 });

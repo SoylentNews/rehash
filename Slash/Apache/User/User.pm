@@ -62,7 +62,7 @@ sub handler {
 	my $constants = getCurrentStatic();
 	my $slashdb = $dbcfg->{slashdb};
 	my $apr = Apache::Request->new($r);
-	# XXXSKIN - jamie, any problem with setting this here?
+
 	setCurrentSkin(determineCurrentSkin());
 	my $gSkin = getCurrentSkin();
 

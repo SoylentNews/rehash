@@ -19,7 +19,7 @@ sub main {
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	$story = $reader->getStory($form->{s} || $form->{sid});
+	$story = $reader->getStory($form->{sid});
 
 	my $future_err = 0;
 	if ($story && $story->{is_future} && !($user->{is_admin} || $user->{author})) {

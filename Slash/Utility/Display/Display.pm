@@ -548,6 +548,7 @@ The 'pollbooth' template block.
 =back
 
 =cut
+
 #XXXSKIN getCurrentSkin doesn't seem to be returning anything
 # on portald runs.  It defaults to mainpage skid if nothing
 # is returned.  However perhaps getCurrentSkin needs more

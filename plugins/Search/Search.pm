@@ -91,7 +91,7 @@ sub findComments {
 	my $skin = $reader->getSkin($form->{section});
 
 	# XXXSKIN - discussions.section needs to be fixed somehow to new system
-	if ($skin->{name} eq 'mainpage') { # XXXSKIN - some other way?
+	if ($skin->{skid} eq $constants->{mainpage_skid}) {
 		$where .= " AND discussions.section IN ('" . join("','", @{$skin->{contained}}) . "')" 
 			if $skin->{contained} && @{$skin->{contained}};
 	} else {
@@ -197,8 +197,7 @@ sub findStory {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $skin = $reader->getSkin($form->{section});
 
-	# XXXSKIN - same as the others like this, not sure what to do with it
-	if ($skin->{name} eq 'mainpage') { # XXXSKIN - some other way?
+	if ($skin->{skid} eq $constants->{mainpage_skid}) {
 		$where .= " AND stories.section IN ('" . join("','", @{$skin->{contained}}) . "')" 
 			if $skin->{contained} && @{$skin->{contained}};
 	} else {
@@ -368,20 +367,13 @@ sub findPollQuestion {
 		if $form->{tid};
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $nexus = $reader->getNexusFromSkid( $reader->getSkidFromName($form->{section}) );
-	# XXXSKIN - should be pollquestions.nexus ... need schema change
-	# i don't think i should change schema now, because too much
-	# else related to polls might break more ...
-	$where .= " AND pollquestions.section = " . $self->sqlQuote($nexus)
-		if $nexus;
+	my $skid   = $reader->getSkidFromName($form->{section});
+	$where .= " AND pollquestions.primaryskid = " . $skid if $skid;
 	
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
 
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
-
-	# XXXSKIN - fix for until we fix schema as above
-	$_->{nexus} ||= delete $_->{section} for @$stories;
 
 	return $stories;
 }
@@ -422,14 +414,10 @@ sub findSubmission {
 		if $form->{note};
 
 	my $skid = $reader->getSkidFromName($form->{section});
-	# XXXSKIN - section must be changed to skid in schema
-	$where .= " AND section=$skid" if $skid;
+	$where .= " AND primaryskid=$skid" if $skid;
 
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
-
-	# XXXSKIN - fix for until we fix schema as above
-	$_->{skid} ||= delete $_->{section} for @$stories;
 
 	return $stories;
 }
@@ -506,7 +494,7 @@ sub findDiscussion {
 	my $skin = $reader->getSkin($form->{section});
 
 	# XXXSKIN - discussions.section needs to be fixed somehow to new system
-	if ($skin->{name} eq 'mainpage') { # XXXSKIN - some other way?
+	if ($skin->{skid} eq $constants->{mainpage_skid}) {
 		$where .= " AND section IN ('" . join("','", @{$skin->{contained}}) . "')" 
 			if $skin->{contained} && @{$skin->{contained}};
 	} else {
@@ -620,4 +608,3 @@ Blah blah blah.
 Slash(3).
 
 =cut
-

@@ -597,7 +597,7 @@ sub blockEdit {
 		values		=> [ 'template' ],
 		cache_flag	=> 1,
 		page		=> 'portald',
-		skin		=> $blockref->{skin}  # XXXSKIN - blocks table not ported yet
+		skin		=> $blockref->{skin}
 	});
 	my $rss_template_code = $template_ref->{template}; 
 

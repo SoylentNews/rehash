@@ -43,7 +43,7 @@ __template__
 END %]
 
 
-
+[% # XXXSKIN fix! %]
 [% IF link.section;
 	tmp = BLOCK;
 	myurl = link.section.rootdir || "${gSkin.rootdir}/${link.section.section}" -%]

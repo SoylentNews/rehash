@@ -1316,8 +1316,6 @@ sub getTopReferers {
 	if ($options->{include_local}) {
 		$where = "";
 	} else {
-		# XXXSKIN - assume this will return right thing for tasks/stats, the
-		# mainpage skin?
 		my $gSkin = getCurrentSkin();
 		$where = " AND referer NOT REGEXP '$gSkin->{basedomain}'";
 	}

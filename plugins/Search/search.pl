@@ -471,7 +471,7 @@ sub pollSearchRSS {
 	my @items;
 	for my $entry (@$stories) {
 		my $time = timeCalc($entry->{date});
-		my $url = $slashdb->getSkin($entry->{nexus})->{url};
+		my $url = $slashdb->getSkin($entry->{primaryskid})->{url};
 		my $link = $url || $gSkin->{absolutedir};
 		push @items, {
 			title	=> "$entry->{question} ($time)",
@@ -771,4 +771,3 @@ main();
 
 #################################################################
 1;
-
