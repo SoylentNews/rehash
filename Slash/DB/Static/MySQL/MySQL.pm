@@ -2502,7 +2502,7 @@ sub getTopRecentRealemailDomains {
 		}
 	}
 
-	return $domains, $daysback, $newaccounts, $newnicks;
+	return($domains, $daysback, $newaccounts, $newnicks);
 }
 
 
