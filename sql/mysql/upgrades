@@ -2382,12 +2382,13 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('admin_story_lookahea
 UPDATE IGNORE blocks SET bid='mainpage_more' WHERE bid LIKE '%more' AND skin='mainpage' AND ordernum > -1;
 DELETE FROM blocks WHERE bid LIKE '%more' AND skin='mainpage' AND bid != 'mainpage_more';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_6, Start of T_2_5_0_7 - 2004/07/08
 
 UPDATE vars SET description = 'default code for article comments- normally "enabled"' WHERE name = 'defaultcommentstatus';
 UPDATE vars SET value = 'enabled' WHERE name = 'defaultcommentstatus' AND value  = '0';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_7, Start of T_2_5_0_8 - 2004/07/12
