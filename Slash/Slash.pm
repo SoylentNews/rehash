@@ -657,7 +657,8 @@ sub moderatorCommentLog {
 		$mods = [ grep { $_->{active} } @$mods ];
 	}
 
-	my($reasons, @return, @reasonHist, $reasonTotal);
+	my($reasons, @return, @reasonHist);
+	my $reasonTotal = 0;
 	$reasons = $slashdb->getReasons();
 
 	# Note: Before 2001/01/27 or so, the only things being displayed
