@@ -518,7 +518,13 @@ sub main {
 	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
 
 	$SIG{CHLD} = sub {
-		# for debugging only!!   slashdLog("SIGCHLD called in $$")
+		# Logging is for debugging only!!  Almost anything you do
+		# in a signal handler (including opening, printing to,
+		# and closing a file, which slashdLog does) can call into
+		# the C library which can (though it's unlikely) cause
+		# coredumps and other bad stuff.  For more, see the
+		# comment at the top of the REAPER function.
+		# slashdLog("SIGCHLD called in $$")
 	};
 
 	MAINLOOP: while (1) {
@@ -581,7 +587,7 @@ sub main {
 			$slashdb->sqlConnect();
 
 			if ($pid) {
-				next MAINLOOP unless do_parent($args);
+				next MAINLOOP if !do_parent($args);
 			} elsif (defined $pid) {
 				do_child($args);
 				# should never reach here, do_child exits
@@ -596,6 +602,8 @@ sub main {
 				# current task is *not* added back into
 				# event array if we get here, it is lost
 				# until slashd restarts -- pudge
+				# if weird forks stalk the land, we must
+				# expect casualties -- jamie
 				next MAINLOOP;
 			}
 		}
@@ -664,10 +672,6 @@ sub do_child {
 	my($basename, $forktype, $subref, $basename_nopl, $start_time) =
 		@{$args}{qw(basename forktype subref basename_nopl start_time)};
 
-	if (verbosity() >= 4) {
-		slashdLog("Child $$ [$me]: sleep for 2 seconds after fork()");
-	}
-
 	# In doLogPid we set a handler for these that deletes the slashd.pid
 	# file;  children don't have the right to do that.
 	$SIG{TERM} = $SIG{INT} = 'DEFAULT';
@@ -677,6 +681,10 @@ sub do_child {
 	# -- whatever it may be, it's inappropriate for the child.  The default
 	# action for SIGCHLD is to ignore it.
 	$SIG{CHLD} = 'DEFAULT';
+
+	if (verbosity() >= 4) {
+		slashdLog("Child $$ [$me]: sleep for 2 seconds after fork()");
+	}
 
 	$pids{$$} = {
 		taskname	=> $basename,
@@ -718,7 +726,7 @@ sub do_child {
 		slashdLog("Child $$ exits here");
 	}
 
-	# Child must not drop out of this "if".
+	# Child must not drop out of this subroutine.
 	exit;
 }
 
