@@ -17,8 +17,7 @@ use vars qw(
 	%task	$me	$task_exit_flag
 	$irc	$conn	$nick	$channel
 	$next_remark_id	$next_handle_remarks
-	$hushed
-	%stoid
+	$hushed	%stoid	$clean_exit_flag
 );
 
 $task{$me}{timespec} = '* * * * *';
@@ -32,8 +31,9 @@ $task{$me}{code} = sub {
 
 	ircinit();
 
+	$clean_exit_flag = 0;
 	$next_handle_remarks = 0;
-	while (!$task_exit_flag) {
+	while (!$task_exit_flag && !$clean_exit_flag) {
 		$irc->do_one_loop();
 		Time::HiRes::sleep(0.5); # don't waste CPU
 		if (time() >= $next_handle_remarks) {
@@ -45,7 +45,7 @@ $task{$me}{code} = sub {
 
 	ircshutdown();
 
-	return sprintf("got SIGUSR1, exiting after %d seconds", time - $start_time);
+	return sprintf("exiting after %d seconds", time - $start_time);
 };
 
 sub ircinit {
@@ -80,18 +80,12 @@ sub ircinit {
 }
 
 sub ircshutdown {
-	slashdLog("got SIGUSR1, quitting");
-	eval {
-		$conn->quit("exiting");
-	};
-	if ($@) {
-		slashdLog("error on quit: $@");
-	}
-	eval {
-		$conn->disconnect();
-	};
-	if ($@) {
-		slashdLog("error on disconnect: $@");
+	$conn->quit("exiting");
+	# The disconnect seems to be unnecessary, and throws an error
+	# in my testing, but just to be sure let's call it anyway.
+	eval { $conn->disconnect() };
+	if ($@ && $@ !~ /No active connections left/) {
+		slashdLog("unexpected error on disconnect: $@");
 	}
 }
 
@@ -186,7 +180,7 @@ sub cmd_hush {
 	my($self, $info) = @_;
 	if (!$hushed) {
 		$hushed = 1;
-		slashdLog("hushed: " . Dumper($info));
+		slashdLog("hushed by $info->{event}{nick}");
 		$self->nick("$nick-hushed");
 	}
 }
@@ -195,15 +189,16 @@ sub cmd_unhush {
 	my($self, $info) = @_;
 	if ($hushed) {
 		$hushed = 0;
-		slashdLog("unhushed: " . Dumper($info));
+		slashdLog("unhushed by $info->{event}{nick}");
 		$self->nick("$nick");
 	}
 }
 
 sub cmd_exit {
 	my($self, $info) = @_;
+	slashdLog("got exit from $info->{event}{nick}");
 	$self->privmsg($channel, getIRCData('exiting'));
-	$task_exit_flag = 1;
+	$clean_exit_flag = 1;
 }
 
 sub cmd_ignore {
@@ -218,8 +213,9 @@ sub cmd_ignore {
 			{ nickname => $user->{nickname}, uid => $uid }));
 	} else {
 		$slashdb->setUser($uid, { noremarks => 1 });
-		$self->privmsg($channel, "Ignoring $user->{nickname} ($uid)");
-		slashdLog("ignoring $uid");
+		$self->privmsg($channel, getIRCData('ignoring',
+			{ nickname => $user->{nickname}, uid => $uid }));
+		slashdLog("ignoring $uid, cmd from $info->{event}{nick}");
 	}
 }
 
@@ -229,13 +225,15 @@ sub cmd_unignore {
 	my $slashdb = getCurrentDB();
 	my $user = $slashdb->getUser($uid);
 	if (!$user || !$user->{uid}) {
-		$self->privmsg($channel, "No such user $uid");
+		$self->privmsg($channel, getIRCData('nosuchuser', { uid => $uid }));
 	} elsif (!$user->{noremarks}) {
-		$self->privmsg($channel, "Wasn't ignoring $user->{nickname} ($uid)");
+		$self->privmsg($channel, getIRCData('wasntignoring',
+			{ nickname => $user->{nickname}, uid => $uid }));
 	} else {
 		$slashdb->setUser($uid, { noremarks => undef });
-		$self->privmsg($channel, "No longer ignoring $user->{nickname} ($uid)");
-		slashdLog("unignored $uid");
+		$self->privmsg($channel, getIRCData('unignored',
+			{ nickname => $user->{nickname}, uid => $uid }));
+		slashdLog("unignored $uid, cmd from $info->{event}{nick}");
 	}
 }
 

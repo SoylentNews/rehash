@@ -4,7 +4,8 @@ __description__
 Responses that ircslash.pl makes in-channel.
 
 * value = the lowercased text that was said to ircslash.pl
-* data = extra data that may be used
+
+Extra data may be sent along as well.
 
 __title__
 
@@ -20,6 +21,21 @@ __template__
 
 [% CASE 'exiting' %]
 	Exiting (slashd should restart me within a minute)
+
+[% CASE 'nosuchuser' %]
+	No such user [% uid %]
+
+[% CASE 'alreadyignoring' %]
+	Already ignoring [% nickname %] ([% uid %])
+
+[% CASE 'wasntignoring' %]
+	Wasn't ignoring [% nickname %] ([% uid %])
+
+[% CASE 'ignoring' %]
+	Now ignoring [% nickname %] ([% uid %])
+
+[% CASE 'unignored' %]
+	No longer ignoring [% nickname %] ([% uid %])
 
 [% CASE DEFAULT %]
 	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.
