@@ -418,6 +418,14 @@ sub countDaily {
 	$returnable{unique_users} = $c->rows;
 	$c->finish;
 
+#	# This code doesn't work yet, I think because of the commented-out
+#	# article .shtml logging code in Slash::Apache::IndexHandler.
+#	# - Jamie 2002/07/12
+#	$returnable{total_static} = $self->sqlCount(
+#		"accesslog",
+#		"$yesterday_clause AND dat='shtml'");
+#	$returnable{total_dynamic} = $returnable{total} - $returnable{static};
+
 	$c = $self->sqlSelectMany("dat, COUNT(*)", "accesslog",
 		"$yesterday_clause AND (op='index' OR dat='index')",
 		"GROUP BY dat");
