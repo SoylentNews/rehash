@@ -58,7 +58,7 @@ BEGIN {
 		getDateFormat dispComment getDateOffset linkComment redirect
 		insertFormkey getFormkeyId checkSubmission checkTimesPosted
 		updateFormkeyId formSuccess formAbuse formFailure errorMessage
-		fixurl fixparam chopEntity
+		fixurl fixparam chopEntity balance_tags
 	);
 	$CRLF = "\015\012";
 }
