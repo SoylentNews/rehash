@@ -8,7 +8,7 @@
 # minimum stoid returned, and writes it to a var.
 
 use strict;
-use vars qw( %task $me $minutes_run );
+use vars qw( %task $me );
 use Time::HiRes;
 use Slash::DB;
 use Slash::Display;
@@ -17,11 +17,8 @@ use Slash::Constants ':slashd';
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-# Change this var to change how often the task runs.
-$minutes_run = 3;
-
 $task{$me}{on_startup} = 1;
-$task{$me}{timespec} = "1-59/$minutes_run * * * *";
+$task{$me}{timespec} = "59 10 * * *";
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 
