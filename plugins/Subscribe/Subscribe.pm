@@ -328,7 +328,7 @@ sub getSubscriptionsForUser {
 		"ORDER BY spid",
 	);
 	$sp ||= [ ];
-	formatDate($sp, 0);
+	formatDate($sp, 0, 0, "%m-%d-%y @%I:%M %p");
 	return $sp;
 }
 
@@ -353,7 +353,7 @@ sub getSubscriptionsPurchasedByUser {
 		"ORDER BY spid",
 	);
 	$sp ||= [ ];
-	formatDate($sp, 0);
+	formatDate($sp, 0, 0, "%m-%d-%y @%I:%M %p");
 	return $sp;
 }
 
