@@ -283,7 +283,7 @@ web browser rendering. <br>
 <a name="ac1200"></A>
     <H2>What are Login Sessions?</H2>
     <P> A login session is a glorified cookie.  To provide some added
-    security, we you to determine the location and time duration for
+    security, you can determine the location and time duration for
     your session.  The duration choices are 'Lasts Forever' and 'Closes
     With Browser' and should be pretty self-explanatory.  The former is
     good if you are the only person using your computer.  The latter is
