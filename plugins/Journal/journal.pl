@@ -749,9 +749,8 @@ sub get_entry {
 	my $entry = $journal->get($id);
 	return unless $entry->{id};
 
-	my $nickname = $slashdb->getUser($entry->{uid}, 'nickname');
-
-	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$entry->{id}";
+	$entry->{nickname} = $slashdb->getUser($entry->{uid}, 'nickname');
+	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($entry->{nickname}) . "/journal/$entry->{id}";
 	$entry->{discussion_id} = delete $entry->{'discussion'};
 	$entry->{discussion_url} = "$constants->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
 		if $entry->{discussion_id};
