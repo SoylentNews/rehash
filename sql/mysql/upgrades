@@ -1808,8 +1808,6 @@ ALTER TABLE event_dates CHANGE COLUMN sid sid varchar(16) NOT NULL DEFAULT '', A
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset','0','Convert high-bit characters to character references, which are then filtered by approveCharrefs or encode_html_amp (works only with Latin-1 for now)');
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset_convert','0','Convert some of high-bit chars to ASCII representations instead (see draconian_charset)');
 
-# USEPERL LAST UPDATED HERE
-
 # selection choices for comment bytelimits
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 0, '128K');
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 1, '256K');
@@ -1821,3 +1819,5 @@ INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 6, '896K');
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 7, '1024K');
 
 INSERT INTO vars (name, value, description) VALUES ('defaultbytelimit', 5, 'The default setting for comment bytelimit');
+
+# USEPERL LAST UPDATED HERE
