@@ -3,6 +3,8 @@
 #
 # written by patrick galbraith 
 
+export TZ=GMT
+
 # slash home
 DATADIR=/home/slash
 
