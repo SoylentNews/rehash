@@ -1122,3 +1122,6 @@ ALTER TABLE accesslog ADD COLUMN duration FLOAT DEFAULT 0.0 NOT NULL, ADD COLUMN
 
 # SLASHDOT LAST UPDATED HERE
 
+# Change for plugins/Stats (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('stats_admin_seclev','100','seclev required to look at stats in stats.pl');
+
