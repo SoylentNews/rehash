@@ -213,7 +213,7 @@ sub commentSearch {
 		threshhold 	=> 1,
 	});
 
-	if (@$comments) {
+	if ($comments && @$comments) {
 		# check for extra articles ... we request one more than we need
 		# and if we get the extra one, we know we have extra ones, and
 		# we pop it off
@@ -259,7 +259,7 @@ sub userSearch {
 		journal_option	=> 1,
 	});
 
-	if (@$users) {
+	if ($users && @$users) {
 		# check for extra articles ... we request one more than we need
 		# and if we get the extra one, we know we have extra ones, and
 		# we pop it off
@@ -309,7 +309,7 @@ sub storySearch {
 		'sort'		=> _sort(),
 	});
 
-	if (@$stories) {
+	if ($stories && @$stories) {
 		# check for extra articles ... we request one more than we need
 		# and if we get the extra one, we know we have extra ones, and
 		# we pop it off
@@ -356,7 +356,7 @@ sub pollSearch {
 		'sort'		=> _sort(),
 	});
 
-	if (@$polls) {
+	if ($polls && @$polls) {
 		# check for extra articles ... we request one more than we need
 		# and if we get the extra one, we know we have extra ones, and
 		# we pop it off
@@ -599,7 +599,7 @@ sub journalSearch {
 	# check for extra articles ... we request one more than we need
 	# and if we get the extra one, we know we have extra ones, and
 	# we pop it off
-	if (@$entries) {
+	if ($entries && @$entries) {
 		my $forward;
 		if (@$entries == $constants->{search_default_display} + 1) {
 			pop @$entries;
@@ -675,7 +675,7 @@ sub submissionSearch {
 	# check for extra articles ... we request one more than we need
 	# and if we get the extra one, we know we have extra ones, and
 	# we pop it off
-	if (@$entries) {
+	if ($entries && @$entries) {
 		for(@$entries) {
 			$_->{story} = substr(strip_nohtml($_->{story}),0,80);
 		}
@@ -751,7 +751,7 @@ sub rssSearch {
 	# check for extra articles ... we request one more than we need
 	# and if we get the extra one, we know we have extra ones, and
 	# we pop it off
-	if (@$entries) {
+	if ($entries && @$entries) {
 		for(@$entries) {
 			$_->{title} = strip_plaintext($_->{title});
 			$_->{description} = substr(strip_plaintext($_->{description}),0,80);
