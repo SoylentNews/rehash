@@ -17,7 +17,7 @@ CREATE TABLE subscribe_payments (
 	method		VARCHAR(6),
 	memo		VARCHAR(255) NOT NULL,
 	data		BLOB,
-	payment_type    VARCHAR(10),
+	payment_type	VARCHAR(10),
 	puid		MEDIUMINT UNSIGNED
 	PRIMARY KEY(spid),
 	KEY(uid),
