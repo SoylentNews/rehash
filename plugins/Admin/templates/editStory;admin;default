@@ -104,20 +104,6 @@ __template__
 	</TR>
 	[% END %]
 
-	<!-- ignore this for now -->
-	<!-- TR>
-		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
-		<B>Story Topics:</B>
-		</FONT></TD>
-		<TD BGCOLOR="[% user.bg.2 %]">
-	[% # FOREACH topic = multi_topics.keys %]
-		<INPUT TYPE="checkbox" NAME="tid_[% topic.tid %]" VALUE="[% topic.altext %]" [% story_topics.$topic.tid.CHECKED %]>[% topic.altext %]<BR>
-	[% # END %]
-		</TD>
-	</TR -->
-
-	  
-
 	<TR>
 		<TD BGCOLOR="[% user.bg.3 %]">&nbsp; </TD>
 		<TD BGCOLOR="[% user.bg.2 %]"><FONT COLOR="[% user.fg.2 %]">
@@ -163,9 +149,29 @@ __template__
 <BR>Extended Copy<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
-<TD><TEXTAREA NAME="bodytext" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" WRAP="VIRTUAL">[% storyref.bodytext | strip_literal %]</TEXTAREA></TD>
-<TD valign="top">[% ispell_comments.bodytext %]</TD>
-</TR></TABLE><BR>
+		<TD>
+		<TEXTAREA NAME="bodytext" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" WRAP="VIRTUAL">[% storyref.bodytext | strip_literal %]</TEXTAREA>
+		</TD>
+		<TD valign="top">[% ispell_comments.bodytext %]</TD>
+	</TR>
+</TABLE>
+<BR>
+
+[% IF constants.multitopics_enabled %]
+<TABLE>
+	<TR>
+		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
+		<B>Story Topics:</B>
+		</FONT></TD>
+		<TD BGCOLOR="[% user.bg.2 %]">
+	[% FOREACH topic = multi_topics.keys %]
+		<INPUT TYPE="checkbox" NAME="tid_[% topic %]" VALUE="[% multi_topics.$topic %]" [% IF story_topics.$topic %] CHECKED [% END %]>[% multi_topics.$topic %]<BR>
+	[% END %]
+		</TD>
+	</TR>
+</TABLE>
+<BR>
+[% END %]
 
 [% PROCESS editbuttons %]
 

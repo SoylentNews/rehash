@@ -894,7 +894,6 @@ sub editStory {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my($sid, $storylinks);
-
 	if ($form->{op} eq 'edit') {
 		$sid = $form->{sid};
 	}
@@ -907,6 +906,7 @@ sub editStory {
 	my($fixquotes_check, $autonode_check, 
 		$fastforward_check, $shortcuts_check, $feature_story_check) =
 		('','','','','');
+	my($multi_topics, $story_topics);
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
@@ -990,14 +990,11 @@ sub editStory {
 	$sections = $slashdb->getDescriptions('sections');
 
 
-	# please just ignore this for now. I need to commit some change first
-#	my $multi_topics = $slashdb->getDescriptions('topics_section', $storyref->{section});
-#	my $story_topics = $slashdb->getStoryTopics($storyref->{sid});
-
-
-#	for(@$story_topics) {
-#    $multi_topics->{$_}{CHECKED} = ' CHECKED';
-#} 
+	if ($constants->{multitopics_enabled}) {
+	    $multi_topics = $slashdb->getDescriptions('topics_section', $storyref->{section});
+	    $story_topics = $slashdb->getStoryTopics($storyref->{sid});
+	    $story_topics->{$storyref->{tid}} ||= 1 ; 
+	}
 
 	$topic_select = selectTopic('tid', $storyref->{tid}, $storyref->{section}, 1);
 
@@ -1067,8 +1064,8 @@ sub editStory {
 		authoredit_flag		=> $authoredit_flag,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
-#		multi_topics		=> $multi_topics,
-#		story_topics		=> $story_topics,
+		multi_topics		=> $multi_topics,
+		story_topics		=> $story_topics,
 	});
 }
 
@@ -1284,6 +1281,8 @@ sub editFilter {
 sub updateStory {
 	my($form, $slashdb, $user, $constants) = @_;
 
+	my $tid_ref;
+	my $default_set = 0;
 	# Some users can only post to a fixed section
 	if (my $section = getCurrentUser('section')) {
 		$form->{section} = $section;
@@ -1306,6 +1305,20 @@ sub updateStory {
 		}
 	}
 
+	if ($constants->{multitopics_enabled}) {
+		for my $k (keys %$form) {
+		    if ($k =~ /tid_(.*)/) {
+			push @$tid_ref, $1;
+		    }
+		}
+		for (@{$tid_ref}) {
+		    $default_set++ if $_ eq $form->{tid};
+		}
+		push @$tid_ref, $form->{tid} if !$default_set;
+	
+		$slashdb->setStoryTopics($form->{sid},$tid_ref);
+	}
+
 	$slashdb->updateStory();
 	titlebar('100%', getTitle('updateStory-title'));
 	# make sure you pass it the goods
@@ -1318,6 +1331,8 @@ sub saveStory {
 
 	my $edituser = $slashdb->getUser($form->{uid});
 	my $rootdir = getCurrentStatic('rootdir');
+	my $tid_ref;
+	my $default_set = 0;
 
 	# In the previous form of this, a section only
 	# editor could assign a story to a different user
@@ -1340,6 +1355,20 @@ sub saveStory {
 		} elsif ($slashdb->getSection($form->{section}, 'sid') eq  $sid) {
 			$slashdb->setSection($form->{section}, { feature_story => '' });
 		}
+	}
+
+	if ($constants->{multitopics_enabled}) {
+		for my $k(keys %$form) {
+		    if ($k =~ /tid_(.*)/) {
+			push @$tid_ref, $1;
+		    }
+		}
+		for (@{$tid_ref}) {
+		    $default_set++ if $_ eq $form->{tid};
+		}
+		push @$tid_ref, $form->{tid} if !$default_set;
+	
+		$slashdb->setStoryTopics($sid,$tid_ref);
 	}
 
 	if ($sid) {

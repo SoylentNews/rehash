@@ -233,6 +233,13 @@ INSERT INTO story_param (sid, name, value) VALUES ('00/01/25/1430236', 'qid', '2
 
 
 #
+# dumping data from table 'story_topics'
+#
+
+INSERT INTO story_topics (sid,tid) VALUES ('00/01/25/1430236',4);
+INSERT INTO story_topics (sid,tid) VALUES ('00/01/25/1236215',4);
+
+#
 # Dumping data for table 'submissions'
 #
 

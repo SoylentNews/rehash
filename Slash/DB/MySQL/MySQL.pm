@@ -4687,12 +4687,25 @@ sub getTopics {
 
 ########################################################
 sub getStoryTopics {
-	my($self, $sid, $exclude_tid) = @_;
+	my ($self, $sid) = @_;
 
 	my $answer;
 	my $topics = $self->sqlSelectAll('tid','story_topics', "sid = '$sid'");
+	for (@{$topics}) {
+	    $answer->{$_->[0]} = 1;
+	}
 
-	return $topics;
+	return $answer;
+}
+########################################################
+sub setStoryTopics {
+	my ($self, $sid, $topic_ref) = @_;
+
+	$self->sqlDo("DELETE from story_topics where sid = '$sid'");
+
+	for (@{$topic_ref}) {
+	    $self->sqlInsert("story_topics", { sid => $sid, tid => $_});
+	}
 }
 
 ########################################################
