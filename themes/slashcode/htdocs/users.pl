@@ -1774,7 +1774,7 @@ sub saveUserAdmin {
 		$user_edit->{nonuid} = 1;
 
 		$form->{isproxy} = $form->{isproxy} eq 'on' ? 'yes' : 'no';
-		$slashdb->setIsProxy($user_edit->{ipid}, $form->{is_proxy});
+		$slashdb->setIsProxy($user_edit->{ipid}, $form->{isproxy});
 
 	} elsif ($form->{md5id}) {
 		$user_editfield_flag = 'md5id';
@@ -1783,7 +1783,7 @@ sub saveUserAdmin {
 			= ($form->{md5id}, $form->{md5id});
 
 		$form->{isproxy} = $form->{isproxy} eq 'on' ? 'yes' : 'no';
-                $slashdb->setIsProxy($user_edit->{md5id}, $form->{is_proxy});
+                $slashdb->setIsProxy($user_edit->{md5id}, $form->{isproxy});
 
 	} else { # a bit redundant, I know
 		$user_edit = $user;
