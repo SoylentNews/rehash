@@ -179,7 +179,6 @@ if ($opts{'s'}) {
 	my $n_changed = 0;
 	for (@$templates) {
 	#stolen logic from above, should probably be made into subroutines
-		next unless -f $_;
 		my($filename) = (File::Spec->splitpath($_))[2];
 		my $template = $install->readTemplateFile($_);
 		if (!$template
@@ -253,6 +252,7 @@ if ($opts{'s'}) {
 					} else {
 						print "\tWARNING: unknown error, cannot tell whether '$tsemi' was successfully created from '$_', id may be $tpid\n";
 					}
+					++$n_changed;
 				} else {
 					print "wasn't able to update template $_\n";
 					print "Error: " . $slashdb->{_dbh}->DBI::err_str . "\n";
@@ -265,7 +265,7 @@ if ($opts{'s'}) {
 	print "New templates: $stats{new}\n"
 		if $stats{'new'};
 	if (!$n_changed) {
-		print "template-tool -U: no template changes necessary\n";
+		print "$0 -U: no template changes necessary\n";
 	}
 
 } else {
