@@ -120,7 +120,7 @@ sub findComments {
 	} else {
 		if ($section->{type} eq 'collected') {
 			$where .= " AND discussions.section IN ('" . join("','", @{$section->{contained}}) . "')" 
-				if (@{$section->{contained}});
+				if $section->{contained} && @{$section->{contained}};
 		} else {
 			$where .= " AND discussions.section = " . $self->sqlQuote($section->{section});
 		}
@@ -272,7 +272,10 @@ sub findStory {
 	if ($form->{section}) {
 		if ($form->{section} ne $constants->{section}) {
 			if ($section->{type} eq 'collected') {
-				if ((scalar(@{$section->{contained}}) == 0) || (grep { $form->{section} eq $_ } @{$section->{contained}})) {
+				if (!$section->{contained}
+					|| scalar(@{$section->{contained}}) == 0
+					|| (grep { $form->{section} eq $_ } @{$section->{contained}})
+				) {
 					$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
 				} else {
 					# Section doesn't belong to this contained section
