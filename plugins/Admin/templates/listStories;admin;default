@@ -28,11 +28,11 @@ __template__
 
 [% IF storylistref && storylistref.size > 0;
 
+storiestoday = 0;
 IF ndays_represented > (constants.admin_maxdays_divider || 10);
 	showdayboundaries = 0;
 ELSE;
 	showdayboundaries = 1;
-	storiestoday = 0;
 END;
 FOREACH story = storylistref;
 	IF showdayboundaries && story.td != yesterday;
