@@ -51,8 +51,8 @@ $task{$me}{code} = sub {
 				$tmpl .= "[% CASE '$s' %]\n";
 				$tmpl .= " $sections->{$s}->{title} section: stories related to "; 	
 				my $topics_str = join(', ', @$topic_ref);	
-				$topics_str=~s/,([^,]*)$/, and$1/;
-				$tmpl.=$topics_str.".\n";
+				$topics_str =~ s/,([^,]*)$/, and$1/;
+				$tmpl .= $topics_str.".\n";
 				$topics_index{$_}++ for @$topic_ref;
 			} 
 		}       
@@ -65,7 +65,7 @@ $task{$me}{code} = sub {
 				keys %topics_index
 			)[0..($topics_per_section-1)]
 		);
-	$topics_str=~s/,([^,]*)$/, and$1/;
+	$topics_str =~ s/,([^,]*)$/, and$1/;
 	$tmpl .= $topics_str.".\n";
 	$tmpl .= "[% END %]\n";
 
