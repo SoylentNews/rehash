@@ -163,9 +163,7 @@ sub countDailyByOPDistinctIPID {
 	# This is so lame, and so not ANSI SQL -Brian
 	my($self, $op, $yesterday) = @_;
 	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog",
-		"op='$op' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'", 
-		'',
-		{distinct => 1});
+		"op='$op' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
 }
 
 ########################################################
