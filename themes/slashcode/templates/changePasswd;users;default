@@ -43,9 +43,9 @@ __template__
 [% END %]
 		<B>Session Login</B> [% session %]<BR>
 		<B>Password</B> Enter a new password twice to change it.
-		(must be 6-32 chars long)</B><BR>
-		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="32" MAXLENGTH="32">
-		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="32" MAXLENGTH="32">
+		(must be 6-20 chars long)</B><BR>
+		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">
+		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20" MAXLENGTH="20">
 
 		</TD>
 	</TR>
