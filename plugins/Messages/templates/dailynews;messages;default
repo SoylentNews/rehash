@@ -40,7 +40,7 @@ In this issue:[% FOR story = stories.reverse %]
 	box("  $thisurl/article.pl?sid=$story.sid");
 %]+--------------------------------------------------------------------+
 
-[% story.asciitext; IF story.refs.size %]
+[% story.asciitext.replace('\n(?=\n  \* \[\d+\])', ''); IF story.refs.size %]
 
 [% IF !constants.newsletter_body && story.bodytext -%]
 This story continues at:
