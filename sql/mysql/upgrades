@@ -1519,8 +1519,6 @@ ALTER TABLE accesslist ADD INDEX now_nopalm (now_nopalm);
 
 ALTER TABLE story_text ADD rendered text;
 
-# USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_97, Start of T_2_3_0_98 - 2003/05/28
 
 # do this if you want to use UTF-8, which is recommended ... else don't do this, or
@@ -1719,3 +1717,4 @@ ALTER TABLE people TYPE=InnoDB;
 
 # End of T_2_3_0_103, Start of T_2_3_0_104 - 2003/07/01
 
+# USEPERL LAST UPDATED HERE
