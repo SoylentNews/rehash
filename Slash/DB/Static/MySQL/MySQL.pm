@@ -12,6 +12,7 @@ package Slash::DB::Static::MySQL;
 #####################################################################
 use strict;
 use Slash::Utility;
+use Digest::MD5 'md5_hex';
 use URI ();
 use vars qw($VERSION);
 use base 'Slash::DB::MySQL';
@@ -1019,7 +1020,38 @@ sub countAccesslogDaily {
 	return $self->sqlSelect("count(*)", "accesslog",
 		"to_days(now()) - to_days(ts)=1");
 }
+########################################################
+# For portald
 
+sub createRSS {
+	my($self, $bid, $item) = @_;
+	$self->sqlInsert('rss_raw', {
+			'link_signature' => md5_hex($item->{'link'}),
+			title_signature => md5_hex($item->{'title'}),
+			description_signature => md5_hex($item->{'description'}),
+			'link' => $item->{'link'},
+			title => $item->{'title'},
+			description => $item->{'description'},
+			-created => 'now()',
+			bid => $bid,
+		}, { ignore => 1});
+}
+
+sub getRSSNotProcessed {
+	my($self, $bid, $item) = @_;
+	$self->sqlSelectAllHashrefArray('*', 'rss_raw', ' processed = "no"');
+}
+
+sub expireRSS {
+	my($self, $day) = @_;
+	return unless $day;
+	$self->sqlUpdate('rss_raw', {
+			'processed' => 'yes',
+			'link' => '',
+			title => '',
+			description => '',
+		}, "created < '$day 00:00'");
+}
 ########################################################
 # For slashd
 

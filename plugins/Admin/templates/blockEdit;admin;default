@@ -97,6 +97,10 @@ __template__
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE="[% blockref.rdf %]"><BR></TD>
 	</TR>
 	<TR>
+		<TD><B>Autosubmit</B></TD>
+		<TD COLSPAN="2">[% autosubmit_select %]</TD>
+	</TR>
+	<TR>
 		<TD><B>RSS Template</B></TD>
 		<TD COLSPAN="2">[% rss_select %]</TD>
 		

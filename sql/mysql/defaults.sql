@@ -214,6 +214,8 @@ INSERT INTO site_info VALUES ('','form','comments','comments submission form');
 #
 
 INSERT INTO string_param (type, code, name) VALUES ('section_topic_type','topic_1','Default');
+INSERT INTO string_param (type, code, name) VALUES ('yes_no','yes','yes');
+INSERT INTO string_param (type, code, name) VALUES ('yes_no','no','no');
 
 
 #
@@ -512,6 +514,8 @@ INSERT INTO vars (name, value, description) VALUES ('rdfupdatefrequency','1','Ho
 INSERT INTO vars (name, value, description) VALUES ('rdfupdateperiod','hourly','When to update');
 INSERT INTO vars (name, value, description) VALUES ('reasons','Normal|Offtopic|Flamebait|Troll|Redundant|Insightful|Interesting|Informative|Funny|Overrated|Underrated','first is neutral, next $badreasons are bad, the last two are \"special\", the rest are good');
 INSERT INTO vars (name, value, description) VALUES ('rootdir','//www.example.com','Base URL of site; used for creating on-site links that need protocol-inspecific URL (so site can be used via HTTP and HTTPS at the same time)');
+INSERT INTO vars (name, value, description) VALUES ('rss_expire_days','7','Number of days till we blank the data from the database (the signatures still stick around though)');
+INSERT INTO vars (name, value, description) VALUES ('rss_store','0','Should we be saving incomming submissions for rss');
 INSERT INTO vars (name, value, description) VALUES ('run_ads','0','Should we be running ads?');
 INSERT INTO vars (name, value, description) VALUES ('runtask_verbosity','3','How much information runtask should write to slashd.log: 0-3 or empty string to use slashd_verbosity');
 INSERT INTO vars (name, value, description) VALUES ('sbindir','/usr/local/slash/sbin','Where are the sbin scripts kept');

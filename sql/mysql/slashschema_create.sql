@@ -419,16 +419,17 @@ CREATE TABLE pollvoters (
 
 DROP TABLE IF EXISTS rss_raw;
 CREATE TABLE rss_raw (
-	id smallint UNSIGNED NOT NULL auto_increment,
+	id mediumint UNSIGNED NOT NULL auto_increment,
 	link_signature char(32) DEFAULT '' NOT NULL,
 	title_signature char(32) DEFAULT '' NOT NULL,
 	description_signature char(32) DEFAULT '' NOT NULL,
 	link varchar(255) NOT NULL,
 	title varchar(255) NOT NULL,
 	description varchar(255) NOT NULL,
-	subid varchar(15),
+	subid mediumint UNSIGNED,
 	bid varchar(30),
 	created datetime, 
+	processed enum("no","yes") DEFAULT 'no' NOT NULL,
 	UNIQUE uber_signature (link_signature, title_signature, description_signature),
 	FOREIGN KEY (subid) REFERENCES submissions(subid),
 	FOREIGN KEY (bid) REFERENCES blocks(bid),
@@ -517,10 +518,11 @@ CREATE TABLE sessions (
 	logintime datetime,
 	lasttime datetime,
 	lasttitle varchar(50),
-	last_subid varchar(15),
+	last_subid mediumint UNSIGNED,
 	last_sid varchar(16),
 	INDEX (uid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
+	FOREIGN KEY (last_subid) REFERENCES submissions(subid),
 	PRIMARY KEY (session)
 ) TYPE = myisam;
 
@@ -658,7 +660,7 @@ CREATE TABLE string_param (
 
 DROP TABLE IF EXISTS submissions;
 CREATE TABLE submissions (
-	subid varchar(15) NOT NULL,
+	subid mediumint UNSIGNED NOT NULL auto_increment,
 	email varchar(50) NOT NULL,
 	name varchar(50) NOT NULL,
 	time datetime NOT NULL,
@@ -678,7 +680,7 @@ CREATE TABLE submissions (
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	INDEX (del,section,note),
 	INDEX (uid),
-	KEY subid (subid,section),
+	KEY subid (section,subid),
 	KEY ipid (ipid),
 	KEY subnetid (subnetid)
 ) TYPE = myisam;
@@ -690,7 +692,7 @@ CREATE TABLE submissions (
 DROP TABLE IF EXISTS submission_param;
 CREATE TABLE submission_param (
 	param_id mediumint UNSIGNED NOT NULL auto_increment,
-	subid varchar(15) NOT NULL,
+	subid mediumint UNSIGNED NOT NULL,
 	name varchar(32) DEFAULT '' NOT NULL,
 	value text DEFAULT '' NOT NULL,
 	UNIQUE submission_key (subid,name),

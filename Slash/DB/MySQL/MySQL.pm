@@ -34,6 +34,9 @@ my %descriptions = (
 	'statuscodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='statuscodes'") },
 
+	'yes_no'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='yes_no'") },
+
 	'months'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='months'") },
 
@@ -685,20 +688,21 @@ sub createSubmission {
 	# We don't want to insert blank submissions into the DB. Are filters applied
 	# to submissions, if not, there should be a few rexeps here to do away with
 	# whitespace filled fields.
+	# this subroutine -Brian
 	return unless $submission && ($submission->{story} || $submission->{story});
 
 	$submission->{ipid} = getCurrentUser('ipid');
 	$submission->{subnetid} = getCurrentUser('subnetid');
 	$submission->{email} ||= ''; 
-
-	my($sec, $min, $hour, $mday, $mon, $year) = localtime;
-	my $subid = "$hour$min$sec.$mon$mday$year";
-
+	$submission->{uid} ||= getCurrentStatic('anonymous_coward_uid'); 
 	$submission->{'-time'} = 'now()';
-	$submission->{'subid'} = $subid;
+
+	#my($sec, $min, $hour, $mday, $mon, $year) = localtime;
+	#my $subid = "$hour$min$sec.$mon$mday$year";
+	#$submission->{'subid'} = $subid;
 	$self->sqlInsert('submissions', $submission);
 
-	return $subid;
+	return $self->getLastInsertId();
 }
 
 #################################################################
@@ -1655,6 +1659,10 @@ sub saveBlock {
 
 	my($portal, $retrieve) = (0, 0);
 
+	# If someone marks a block as a portald block then potald is a portald
+	# something tell me I may regret this...  -Brian
+	$form->{type} = 'portald' if $form->{portal} == 1;
+
 	# this is to make sure that a  static block doesn't get
 	# saved with retrieve set to true
 	$form->{retrieve} = 0 if $form->{type} ne 'portald';
@@ -1680,6 +1688,7 @@ sub saveBlock {
 			items		=> $form->{items},
 			section		=> $form->{section},
 			retrieve	=> $form->{retrieve},
+			autosubmit	=> $form->{autosubmit},
 			portal		=> $form->{portal},
 		}, 'bid=' . $self->sqlQuote($bid));
 		$self->sqlUpdate('backup_blocks', {
@@ -1700,6 +1709,7 @@ sub saveBlock {
 			section		=> $form->{section},
 			retrieve	=> $form->{retrieve},
 			portal		=> $form->{portal},
+			autosubmit	=> $form->{autosubmit},
 		}, 'bid=' . $self->sqlQuote($bid));
 	}
 
@@ -3884,9 +3894,6 @@ sub getQuickies {
 # them and then null them? -Brian
 #  my($stuff) = $self->sqlSelect("story", "submissions", "subid='quickies'");
 #	$stuff = "";
-	$self->sqlDo("DELETE FROM submissions WHERE subid='quickies'");
-	my $stuff;
-
 	my $submission = $self->sqlSelectAll("subid,subj,email,name,story",
 		"submissions", "note='Quik' and del=0"
 	);
@@ -3898,7 +3905,7 @@ sub getQuickies {
 sub setQuickies {
 	my($self, $content) = @_;
 	$self->sqlInsert("submissions", {
-		subid	=> 'quickies',
+		#subid	=> 'quickies',
 		subj	=> 'Generated Quickies',
 		email	=> '',
 		name	=> '',
@@ -3906,7 +3913,7 @@ sub setQuickies {
 		section	=> 'articles',
 		tid	=> 'quickies',
 		story	=> $content,
-		uid	=> getCurrentStatic('anonymous_coward_uid'),
+		uid	=> getCurrentUser('uid'),
 	});
 }
 
@@ -4677,6 +4684,17 @@ sub getDiscussion {
 sub getDiscussionBySid {
 	my $answer = _genericGet('discussions', 'sid', '', @_);
 	return $answer;
+}
+
+########################################################
+sub getRSS {
+	my $answer = _genericGet('rss_raw', 'id', '', @_);
+	return $answer;
+}
+
+########################################################
+sub setRSS {
+	_genericSet('rss_raw', 'id', '', @_);
 }
 
 ########################################################

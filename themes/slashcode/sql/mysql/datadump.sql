@@ -243,7 +243,7 @@ INSERT INTO story_topics (sid,tid) VALUES ('00/01/25/1236215',4);
 # Dumping data for table 'submissions'
 #
 
-INSERT INTO submissions (subid, email, name, time, subj, story, tid, section, uid, del, ipid, subnetid) VALUES ('15258.025100','somewhere@somewhere.com','PostMyStory','2000-01-25 15:25:08','This is the Submissions Area','This is where you read the submissions that your readers send you.  From here you can delete them (click the checkboxes and hit update) or attach little notes to them and flag them to be put on hold, or saved for quickies (all of these things are helpful when you have several people working on the backend at the same time).\r\n\r\n<P>Most of the time you\'ll just want to click on the title of the submission, and then either preview/post it, or delete it. ',4,'articles',2,0,'2','8f2e0eec531acf0e836f6770d7990857');
+INSERT INTO submissions (subid, email, name, time, subj, story, tid, section, uid, del, ipid, subnetid) VALUES ('','somewhere@somewhere.com','PostMyStory','2000-01-25 15:25:08','This is the Submissions Area','This is where you read the submissions that your readers send you.  From here you can delete them (click the checkboxes and hit update) or attach little notes to them and flag them to be put on hold, or saved for quickies (all of these things are helpful when you have several people working on the backend at the same time).\r\n\r\n<P>Most of the time you\'ll just want to click on the title of the submission, and then either preview/post it, or delete it. ',4,'articles',2,0,'2','8f2e0eec531acf0e836f6770d7990857');
 
 #
 # Dumping data for table 'templates'

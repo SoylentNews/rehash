@@ -65,6 +65,7 @@ task=tasks/open_backend.pl
 task=tasks/new_motd.pl
 task=tasks/p2f_hof_topics.pl
 task=tasks/refresh_authors_cache.pl
+task=tasks/rss_submit.pl
 task=tasks/run_moderatord.pl
 task=tasks/run_portald.pl
 task=tasks/set_recent_topics.pl

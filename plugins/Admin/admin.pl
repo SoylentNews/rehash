@@ -479,6 +479,9 @@ sub blockEdit {
 	my $blocktype = $slashdb->getDescriptions('blocktype', '', 1);
 	my $blocktype_select = createSelect('type', $blocktype, $blockref->{type}, 1);
 
+	my $yes_no = $slashdb->getDescriptions('yes_no', '', 1);
+	my $autosubmit_select = createSelect('autosubmit', $yes_no, $blockref->{autosubmit}, 1);
+
 	# if the pulldown has been selected and submitted
 	# or this is a block save and the block is a portald block
 	# or this is a block edit via sections.pl
@@ -509,6 +512,7 @@ sub blockEdit {
 		retrieve_checked	=> $retrieve_checked,
 		blocktype_select	=> $blocktype_select,
 		sectionbid		=> $sectionbid,
+		autosubmit_select		=> $autosubmit_select,
 		rss_select		=> $rss_select,
 		rss_template_code	=> $rss_template_code,
 	});
