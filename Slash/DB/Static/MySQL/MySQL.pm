@@ -406,7 +406,7 @@ sub updateStamps {
 ########################################################
 # For dailystuff
 sub getDailyMail {
-	my($self) = @_;
+	my($self, $user) = @_;
 
 	my $columns = "stories.sid, stories.title, stories.section,
 		users.nickname,
@@ -415,7 +415,20 @@ sub getDailyMail {
 	my $tables = "stories, story_text, users";
 	my $where = "time < NOW() AND TO_DAYS(NOW())-TO_DAYS(time)=1 ";
 	$where .= "AND users.uid=stories.uid AND stories.sid=story_text.sid ";
-	$where .= "AND stories.displaystatus=0 ";
+
+	if ($user->{sectioncollapse}) {
+		$where .= "AND stories.displaystatus>=0 ";
+	} else {
+		$where .= "AND stories.displaystatus=0 ";
+	}
+
+	$where .= "AND tid not in ($user->{extid}) "
+		if $user->{extid};
+	$where .= "AND stories.uid not in ($user->{exaid}) "
+		if $user->{exaid};
+	$where .= "AND section not in ($user->{exsect}) "
+		if $user->{exsect};
+
 	my $other = " ORDER BY stories.time DESC";
 
 	my $email = $self->sqlSelectAll($columns, $tables, $where, $other);

@@ -14,12 +14,12 @@ __template__
 	<TR>
 		<TD>
 		<A NAME="[% cid %]"><H4>[% subject %]</H4></A>
-		by [% nickname %] on [% Slash.timeCalc(time) %]
+		by [% nickname | strip_literal %] on [% Slash.timeCalc(time) %]
 		[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% constants.reasons.$reason %][% END %])[% END %]
-		[% UNLESS is_anon %]<BR>(<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&nick=[% nickname | fixparam %]">User #[% uid %] Info</A>)
+		[% UNLESS is_anon %]<BR>(<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">User #[% uid %] Info</A>)
 		[% IF homepage && homepage.length > 8 %]<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
 		[% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
-		<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]">[% Slash.timeCalc(journal_last_entry_date) %]</A>
+		<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
 		[% END %]
 		[% END %]
 		[% IF user.seclev >= 100 %]

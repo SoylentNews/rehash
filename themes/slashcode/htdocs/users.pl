@@ -1116,7 +1116,7 @@ sub editComm {
 	my($formats, $commentmodes_select, $commentsort_select, $title,
 		$uthreshold_select, $highlightthresh_select, $posttype_select);
 
-	my @reasons = ( );
+	my @reasons = ();
 	@reasons = @{$constants->{reasons}}
 		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
 
@@ -1189,7 +1189,7 @@ sub editComm {
 		highlightthresh_select	=> $highlightthresh_select,
 		uthreshold_select	=> $uthreshold_select,
 		posttype_select		=> $posttype_select,
-		reasons		=> \@reasons,
+		reasons			=> \@reasons,
 	});
 }
 

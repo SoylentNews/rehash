@@ -343,28 +343,21 @@ sub _delete_all {
 	$self->sqlDo("DELETE FROM $table WHERE 1=1");
 }
 
-# rewrite
 sub _getMailingUsers {
 	my($self, $code) = @_;
 	return unless $code =~ /^-?\d+$/;
+
 	my $mode  = MSG_MODE_EMAIL;
-	my $cols  = "nickname,users.uid,realemail";
-	my $table = "users,users_comments,users_info,users_messages";
+	my $cols  = "users.uid";
+	my $table = "users,users_messages";
 	my $where = <<SQL;
-users.uid=users_comments.uid AND users.uid=users_info.uid AND users.uid=users_messages.uid
-    AND users_messages.code=$code
-    AND users_messages.mode=$mode
-    AND realemail != ''
+users.uid=users_messages.uid AND
+users_messages.code=$code AND users_messages.mode=$mode AND users.realemail != ''
 SQL
 
-# 	my $cols  = "nickname,users.uid,realemail";
-# 	my $table = "users,users_comments,users_info,users_param";
-# 	my $where = "users.uid=users_comments.uid AND users.uid=users_info.uid AND " .
-# 		"users.uid=users_param.uid AND users_param.name='messagecodes_$code' AND " .
-# 		"users_param.value=1 AND " .
-# 		"realemail != ''";
-
-	my $users = $self->sqlSelectAll($cols, $table, $where);
+	my $users  = $self->sqlSelectColArrayref($cols, $table, $where);
+	my $fields = ['realemail', 'exsect', 'extid', 'exaid', 'sectioncollapse']; # 'nickname', 
+	$users     = { map { $_ => $self->getUser($_, $fields) } @$users };
 	return $users;
 }
 
@@ -374,12 +367,6 @@ sub _getMessageUsers {
 	my $cols  = "users_messages.uid";
 	my $table = "users_messages";
 	my $where = "users_messages.code=$code AND users_messages.mode >= 0";
-
-# 	my $cols  = "u.uid";
-# 	my $table = "users as u, users_param AS up1, users_param AS up2";
-# 	my $where = "u.uid=up1.uid AND u.uid=up2.uid
-# 		AND  up1.name = 'deliverymodes'      AND up1.value >= 0
-# 		AND  up2.name = 'messagecodes_$code' AND up2.value  = 1";
 
 	if ($seclev && $seclev =~ /^-?\d+$/) {
 		$table .= ",users";

@@ -15,6 +15,7 @@ use File::Basename;
 use File::Path;
 use File::Spec::Functions;
 use Slash;
+use Slash::Constants qw(:messages);
 use Slash::Display;
 use Slash::Utility;
 
@@ -36,62 +37,101 @@ dailyStuffLog('MailingList End');
 doLogExit('dailyStuff');
 
 sub generateDailyMail {
-	my $data = $slashdb->getDailyMail();
+	my($n_users, $h_users) = @_;
+	my(%storydata);
+	my %mailings = (
+		dailynews	=> {
+			users	=> $n_users,
+			code	=> MSG_CODE_NEWSLETTER,
+			subj	=> getData('newsletter subject', {}, 'messages'),
+		},
+		dailyheadlines	=> {
+			users	=> $h_users,
+			code	=> MSG_CODE_HEADLINES,
+			subj	=> getData('headlines subject',  {}, 'messages'),
+		},
+	);
 
-	return unless @$data;
+	for my $mailing (keys %mailings) {
+		my $users = $mailings{$mailing}{users};
+		my $mkeys = $mailings{$mailing}{mkeys} ||= {};
 
-	my @stories;
-	for (@$data) {
-		my(%story, @ref);
-		@story{qw(sid title section author tid time dept
-			introtext bodytext)} = @$_;
+		for (keys %$users) {
+			my $user = $users->{$_};
 
-		1 while chomp($story{introtext});
-		1 while chomp($story{bodytext});
+			my $key  = $user->{sectioncollapse};
+			my @ex = @{$user}{qw(exaid extid exsect)};
+			for (@ex) {
+				$key .= '|' . join(',', sort m/'(.+?)'/g);
+			}
 
-		my $asciitext = $story{introtext};
-		$asciitext .= "\n\n" . $story{bodytext} if $constants->{newsletter_body};
-		($story{asciitext}, @ref) = html2text($asciitext, 74);
+			# if this mailing created, just add a user to it
+			if (exists $mkeys->{$key}) {
+				push @{$mkeys->{$key}{mails}}, $user->{realemail};
 
-		$story{refs} = \@ref;
-		push @stories, \%story;
+			# else, we gotta create the mailing
+			} else {
+				my $stories;
+				# get data if not gotten yet
+				if (exists $storydata{$key}) {
+					$stories = $storydata{$key};
+				} else {
+					my $data = $slashdb->getDailyMail($user);
+					next unless @$data; # no mail, no mas!
+
+					for (@$data) {
+						my(%story, @ref);
+						@story{qw(sid title section author tid time dept
+							introtext bodytext)} = @$_;
+
+						1 while chomp($story{introtext});
+						1 while chomp($story{bodytext});
+
+						my $asciitext = $story{introtext};
+						$asciitext .= "\n\n" . $story{bodytext}
+							if $constants->{newsletter_body};
+						($story{asciitext}, @ref) = html2text($asciitext, 74);
+
+						$story{refs} = \@ref;
+						push @$stories, \%story;
+					}
+					$storydata{$key} = $stories;
+				}
+
+				$mkeys->{$key}{mails} = [$user->{realemail}];
+				$mkeys->{$key}{text} = slashDisplay($mailing,
+					{ stories => $stories, urlize => \&urlize },
+					{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
+				);
+			}
+		}
 	}
 
-	my $newsletter = slashDisplay("dailynews",
-		{ stories => \@stories, urlize => \&urlize },
-		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
-	);
-
-	my $headlines  = slashDisplay("dailyheadlines",
-		{ stories => \@stories },
-		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
-	);
-
-	return($newsletter, $headlines);
+	return \%mailings;
 }
 
 sub mailingList {
 	return unless $messages;
-	my($newsletter, $headlines) = generateDailyMail();
-	return unless $headlines;
+	my $n_users	= $messages->getNewsletterUsers();
+	my $h_users	= $messages->getHeadlineUsers();
 
-	# need to change for specific prefs, later
-	my $n_users = $messages->getNewsletterUsers();
-	my $h_users = $messages->getHeadlineUsers();
+	my $mailings	= generateDailyMail($n_users, $h_users) or return;
 
-	# get addresses from users
-	my @n_email = map { $_->[2] } @$n_users;
-	my @h_email = map { $_->[2] } @$h_users;
+	for my $mailing (keys %$mailings) {
+		my $subj  = $mailings->{$mailing}{subj};
+		my $code  = $mailings->{$mailing}{code};
+		my $mkeys = $mailings->{$mailing}{mkeys};
 
-	my $n_subj = getData('newsletter subject', {}, 'messages');
-	my $h_subj = getData('headlines subject',  {}, 'messages');
-
-	dailyStuffLog("Daily Newsletter begin");
-	$messages->bulksend(\@n_email, $n_subj, $newsletter, 0);
-	dailyStuffLog("Daily Newsletter end");
-	dailyStuffLog("Daily Headlines begin");
-	$messages->bulksend(\@h_email, $h_subj, $headlines,  1);
-	dailyStuffLog("Daily Headlines end");
+		dailyStuffLog("Daily Mail ($mailing) begin");
+		for my $key (keys %$mkeys) {
+			dailyStuffLog("Daily Mail ($mailing) begin: $key");
+			$messages->bulksend(
+				$mkeys->{$key}{mails}, $subj,
+				$mkeys->{$key}{text},  $code
+			);
+		}
+		dailyStuffLog("Daily Mail ($mailing) end");
+	}
 }
 
 sub dailyStuffLog {

@@ -36,15 +36,15 @@ __template__
 			<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 			<TD BGCOLOR="#E6E6E6" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#E6E6E6">
 				<FONT FACE="[% constants.mainfontface %]" SIZE="1">by
-[% IF fakeemail %]<A HREF="mailto:[% fakeemail | fixparam %]">[% nickname %]</A>
-<B><FONT SIZE="2">([% fakeemail | strip_literal %])</FONT></B>[% ELSE %][% nickname %][% END %]
+[% IF fakeemail %]<A HREF="mailto:[% fakeemail | fixparam %]">[% nickname | strip_literal %]</A>
+<B><FONT SIZE="2">([% fakeemail | strip_literal %])</FONT></B>[% ELSE %][% nickname | strip_literal %][% END %]
  on [% Slash.timeCalc(time) %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>
 [% UNLESS is_anon %]
 <BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">
 <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">User #[% uid %] Info</A>
 [% IF homepage && homepage.length > 8 %] | <A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
 [% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
-<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]">[% Slash.timeCalc(journal_last_entry_date) %]</A>
+<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
 [% END %]
 </FONT>
 [% END %]
