@@ -54,7 +54,7 @@ use vars qw($VERSION @EXPORT);
 
 #========================================================================
 
-=head2 header([DATA, SECTION, STATUS])
+=head2 header([DATA, SECTION, OPTIONS])
 
 Prints the header for the document.
 
@@ -75,15 +75,15 @@ key, and any other variables you want passed to the header template.
 The section to handle the header.  This sets the
 currentSection constant, too.
 
-=item STATUS
+=item OPTIONS
 
-A special status to print in the HTTP header.
+A Hash with different options (it includes the abiltity to pass along slashDisplay() parameters).
 
 =back
 
 =item Return value
 
-None.
+None, unless the Return option has value. In this case it will return the output instad of printing standard out.
 
 =item Side effects
 
@@ -142,13 +142,13 @@ sub header {
 	getSectionColors();
 
 	# This is ALWAYS displayed. Let the template handle title.
-	slashDisplay('html-header', { title => $data->{title} }, { Nocomm => 1 })
+	slashDisplay('html-header', { title => $data->{title} }, { Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
 		unless $options->{noheader};
 
 	# ssi = 1 IS NOT THE SAME as ssi = 'yes'
 	# ...which is silly. - Jamie 2002/06/26
 	if ($form->{ssi} eq 'yes') {
-		ssiHead($section);
+		ssiHead($section,  $options);
 		return;
 	}
 
@@ -201,9 +201,19 @@ Prints the footer for the document.
 
 =over 4
 
+=item Parameters
+
+=over 4
+
+=item OPTIONS
+
+Collection of options that can be used to change the behavior of templates
+
+=back
+
 =item Return value
 
-None.
+None, unless the Return option has value. In this case it will return the output instad of printing standard out.
 
 =item Dependencies
 
@@ -217,11 +227,15 @@ sub footer {
 	my ($options) = @_;
 	my $user = getCurrentUser();
 
+	my $display;
+
 	if ($user->{state}{adminheader}) {
-		slashDisplay('footer-admin');
+		$display = slashDisplay('footer-admin', '',  { Return => $options->{Return}, Page => $options->{Page} });
 	} else {
-		slashDisplay('footer', { Return => $options->{Return}, Page => $options->{Page} });
+		$display = slashDisplay('footer', '', { Return => $options->{Return}, Page => $options->{Page} });
 	}
+	
+	return $display;
 }
 
 #========================================================================
@@ -289,6 +303,7 @@ The 'ssihead' template block.
 =cut
 
 sub ssiHead {
+	my ($section,  $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
@@ -299,7 +314,7 @@ sub ssiHead {
 	slashDisplay('ssihead', {
 		dir	=> $dir,
 		section => $user->{currentSection} ? "$user->{currentSection}/" : "",
-	});
+	}, { Return => $options->{Return}, Page => $options->{Page} });
 }
 
 ########################################################

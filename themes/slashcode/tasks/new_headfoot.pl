@@ -32,7 +32,6 @@ sub sectionHeaders {
 		if $sections;
 
 	my $form = getCurrentForm();
-	local(*STDOUT);
 
 	setCurrentForm('ssi', 1);
 	my $fh = gensym();
