@@ -456,4 +456,5 @@ sub writeBlankIndexes {
 	}
 }
 
+1;
 

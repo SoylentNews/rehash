@@ -179,6 +179,7 @@ sub createCal {
 	return $cal->as_HTML;
 }
 
+1;
 
 __END__
 
