@@ -101,6 +101,12 @@ sub selectComments {
 		return ( {}, 0 );
 	}
 
+	if ($constants->{ubb_like_forums} && $user->{mode} eq 'parents') {
+		# don't display the comment that describes the forums
+		my $forum_desc = $slashdb->getForumFirstPostHashref($header->{id});
+		delete $thisComment->{$forum_desc->{cid}};
+	}
+
 	my $max_uid = $reader->countUsers({ max => 1 });
 	my $reasons = $reader->getReasons();
 	# We first loop through the comments and assign bonuses and
