@@ -13,7 +13,7 @@ use Slash::Display;
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '49 0-23/3 * * *';
+$task{$me}{timespec} = '47 0-23/6 * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{on_startup} = 1;
 $task{$me}{code} = sub {
@@ -27,7 +27,6 @@ $task{$me}{code} = sub {
 	$tmpl .= "[% SWITCH user.currentSection %]\n";
 	foreach my $s (sort keys %$sections) {
 		$sect .= " $s";
-		 
 		my $stories_ref = $slashdb->sqlSelectColArrayref(
 			"sid",
 			"stories",
@@ -49,19 +48,25 @@ $task{$me}{code} = sub {
 					"tid IN ($tid_str)",
 					"LIMIT $topics_per_section",
 					{ distinct => 1 } );
-				$tmpl .= "[% CASE '$s' %]\n";	
-				$tmpl .= join(', ', @$topic_ref)."\n";	
+				$tmpl .= "[% CASE '$s' %]\n";
+				$tmpl .= " $sections->{$s}->{title} section: stories related to "; 	
+				my $topics_str = join(', ', @$topic_ref);	
+				$topics_str=~s/,([^,]*)$/, and$1/;
+				$tmpl.=$topics_str.".\n";
 				$topics_index{$_}++ for @$topic_ref;
 			} 
 		}       
 	}
 	$tmpl .= "[% CASE 'index' %]\n";
-	$tmpl .=  join(', ',
+	$tmpl .= " Main page: stories related to ";
+	my $topics_str .=  join(', ',
 			(sort
 				{$topics_index{$b} <=> $topics_index{$a}}
 				keys %topics_index
 			)[0..($topics_per_section-1)]
-		) . "\n";
+		);
+	$topics_str=~s/,([^,]*)$/, and$1/;
+	$tmpl .= $topics_str.".\n";
 	$tmpl .= "[% END %]\n";
 
 	# If it exists, we update it, if not, we create it.  The final "1" arg
@@ -81,7 +86,7 @@ $task{$me}{code} = sub {
 		$slashdb->createTemplate(\%template);
 	}
 
-	return "section meta-keywords refreshed:$sect";
+	return "section meta-keywords refreshed: $sect ";
 };
 
 1;
