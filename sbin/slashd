@@ -763,7 +763,7 @@ sub main {
 
 		FORK: {
 			$args->{pid} = my $pid = fork();
-			if(!dbAvailable()) {
+			if (!dbAvailable()) {
 				slashdLog("DB unavailable waiting to start next task");
 				sleep 5 until dbAvailable();
 				slashdLog("DB available again preparing to start next task");

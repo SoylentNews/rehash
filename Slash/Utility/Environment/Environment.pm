@@ -146,9 +146,9 @@ sub dbAvailable {
 	# if we're doing a general check for dbAvailability we set
 	# the token to empty-string and store the lastchecked status
 	# and lastval check in the hashrefs with that as the key
-	$token ||="";
+	$token ||= '';
 
-	if (defined $dbAvailable_lastcheck->{$token} && time < $dbAvailable_lastcheck->{$token} +5) {
+	if (defined $dbAvailable_lastcheck->{$token} && time < ($dbAvailable_lastcheck->{$token} + 5)) {
 		return $dbAvailable_lastval->{$token};
 	}
 

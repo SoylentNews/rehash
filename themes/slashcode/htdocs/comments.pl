@@ -842,7 +842,7 @@ sub validateComment {
 	my $message = '';
 
 	my $read_only;
-	if(!dbAvailable("write_comments")) {
+	if (!dbAvailable("write_comments")) {
 		$$error_message = getError('comment_db_down');
 		$form_success = 0;
 		return;

@@ -1831,7 +1831,7 @@ sub moderate {
 	my($sid, $cid);
 
 	titlebar("100%", "Moderating...");
-	if(!dbAvailable("write_comments")){
+	if (!dbAvailable("write_comments")) {
 		print getData("comment_db_down");
 		return;
 	}

@@ -5375,12 +5375,13 @@ sub createMetaMod {
 		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
 		my $is_fair = $m2s->{$mmid}{is_fair};
 
-		if($constants->{m2_use_sliding_consensus}){
-			my ($cid, $reason ) = $self->sqlSelect("cid,reason","moderatorlog","id=$mmid");
-			my $count = $self->sqlCount("moderatorlog","cid=$cid and reason=$reason");
+		if ($constants->{m2_use_sliding_consensus}) {
+			my ($cid, $reason ) = $self->sqlSelect("cid,reason", "moderatorlog", "id=$mmid");
+			my $count = $self->sqlCount("moderatorlog", "cid=$cid and reason=$reason");
 			my $index = $count - 1;
 			$index = 0 if $index < 1;
-			$index = @{$constants->{m2_sliding_consensus}} - 1 if $index > @{$constants->{m2_sliding_consensus}} -1;
+			$index = @{$constants->{m2_sliding_consensus}} - 1
+				if $index > (@{$constants->{m2_sliding_consensus}} - 1);
 			$consensus = $constants->{m2_sliding_consensus}[$index];
 
 			print STDERR "mmid: $mmid  cid: $cid reason $reason count: $count consensus: $consensus\n";

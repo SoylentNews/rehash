@@ -528,7 +528,7 @@ sub newUser {
 		print getError('emailexists_err', 0, 1);
 		return;
 	} elsif ($matchname ne '' && $form->{newusernick} ne '') {
-		if($constants->{newuser_portscan}) {
+		if ($constants->{newuser_portscan}) {
 			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
 			if ($is_trusted ne 'yes') {
 				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
