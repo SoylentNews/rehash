@@ -204,6 +204,7 @@ sub themes {
 sub searchUsers {
 	my($self, $nickname) = @_;
 	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	if (my $uid = $slashdb->getUserUID($nickname)) {
 		if ($self->sqlSelect('uid', 'journals', "uid=$uid")) {
@@ -214,7 +215,8 @@ sub searchUsers {
 	}
 
 	my($search, $find, $uids, $jusers, $ids, $journals, @users);
-	$search	= getObject("Slash::Search") or return;
+	# This is only important if it exists, aka calling the search db user -Brian
+	$search	= getObject("Slash::Search", $constants->{search_db_user}) or return;
 	$find	= $search->findUsers(
 		{query => $nickname}, 0,
 		getCurrentStatic('search_default_display') + 1
