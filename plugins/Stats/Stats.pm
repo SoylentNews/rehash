@@ -1217,6 +1217,9 @@ sub getDailyScoreTotal {
 }
 
 
+
+
+
 ########################################################
 sub getTopBadPasswordsByUID{
 	my($self, $options) = @_;
@@ -1391,6 +1394,58 @@ sub getSubscriberCrawlers {
 }
 
 ########################################################
+
+sub getTopEarlyInactiveDownmodders {
+	my ($self, $options) = @_;
+	$options ||= {};
+	my $constants = getCurrentStatic();
+	my %user_hits;
+	my $limit = $options->{limit};
+	my $token_cutoff = $constants->{m2_mintokens} || 0;
+	my $mods = $self->sqlSelectAllHashrefArray("id,moderatorlog.cid as cid, moderatorlog.uid as uid",
+				"moderatorlog,comments,users_info",
+				"comments.cid=moderatorlog.cid and moderatorlog.uid=users_info.uid AND points<=1 AND active=0 AND val=-1 AND tokens>=$token_cutoff");
+
+	foreach my $m(@$mods){
+		my $first_mod = $self->sqlSelectColArrayref("id","moderatorlog","cid=$m->{cid}","order by ts asc limit 2");
+		for my $id(@$first_mod){
+			$user_hits{$m->{uid}}++ if $id == $m->{id};
+		}
+	}
+	
+	my @uids =  sort {$user_hits{$b} <=> $user_hits{$a}} keys %user_hits;
+	@uids = splice(@uids, 0, $limit) if $limit;
+
+	my $top_users;
+	foreach(@uids){
+        	push @$top_users, { uid => $_, count=> $user_hits{$_}, nickname=> $self->getUser($_, "nickname")};
+
+	}
+	return $top_users;
+}
+
+sub getTopModdersNearArchive {
+	my ($self,$options) = @_;
+	$options ||= {};
+	my $constants = getCurrentStatic();
+	my $archive_delay = $constants->{archive_delay};
+	return [] unless $archive_delay;
+	my ($token_cutoff,$limit_clause);
+	$token_cutoff = $constants->{m2_mintokens} || 0;
+	$limit_clause = " limit $options->{limit}" if $options->{limit};
+		
+
+	my $top_users = $self->sqlSelectAllHashrefArray("count(moderatorlog.uid) as count, moderatorlog.uid as uid, nickname",
+							"discussions,moderatorlog,users_info,users",
+							"moderatorlog.sid=discussions.id and type='archived' and users_info.uid = moderatorlog.uid 
+							and moderatorlog.ts > date_add(discussions.ts, interval $archive_delay - 3 day) and tokens >= $token_cutoff",
+                                			"group by moderatorlog.uid order by count desc $limit_clause");
+	return $top_users;
+
+}
+
+
+########################################################
 sub setGraph {
 	my($self, $data) = @_;
 
@@ -1495,14 +1550,21 @@ sub getAllStats {
 	my $sel   = 'name, value+0 as value, section, day';
 	my $extra = 'ORDER BY section, day, name';
 	my @where;
+	my @name_where;
 
 	if ($options->{section}) {
 		push @where, 'section = ' . $self->sqlQuote($options->{section});
 	}
 
 	if ($options->{name}) {
-		push @where, 'name = ' . $self->sqlQuote($options->{name});
+		push @name_where, 'name = ' . $self->sqlQuote($options->{name});
 	}
+
+	if ($options->{name_pre}){
+		push @name_where, 'name like '. $self->sqlQuote($options->{name_pre}."%");
+	}
+	
+	my $sep_name_select = $options->{separate_name_select};
 
 	# today is no good
 	my $offset = 1;
@@ -1522,16 +1584,26 @@ sub getAllStats {
 		) if $options->{days};
 	}
 
-	my $data = $self->sqlSelectAll($sel, $table, join(' AND ', @where), $extra) or return;
+	my $data = $self->sqlSelectAll($sel, $table, join(' AND ', @where, @name_where), $extra) or return;
 	my %returnable;
 
 	for my $d (@$data) {
 		# $returnable{SECTION}{DAY}{NAME} = VALUE
 		$returnable{$d->[2]}{$d->[3]}{$d->[0]} = $d->[1];
-
-		$returnable{$d->[2]}{names} ||= [];
-		push @{$returnable{$d->[2]}{names}}, $d->[0]
-			unless grep { $_ eq $d->[0] } @{$returnable{$d->[2]}{names}};
+		if(!$sep_name_select){
+			$returnable{$d->[2]}{names} ||= [];
+			push @{$returnable{$d->[2]}{names}}, $d->[0]
+				unless grep { $_ eq $d->[0] } @{$returnable{$d->[2]}{names}};
+		}
+	}
+	
+	if($sep_name_select){
+		my $names = $self->sqlSelectAll("DISTINCT name, section", $table, join(' AND ', @where));
+		foreach my $name (@$names){
+			$returnable{$name->[1]}{names} ||= [];
+			push @{$returnable{$name->[1]}{names}}, $name->[0]
+				unless grep { $_ eq $name->[0] } @{$returnable{$name->[1]}{names}};
+		}
 	}
 
 	return \%returnable;
