@@ -7042,7 +7042,7 @@ sub sqlShowProcessList {
         my($self) = @_;
 
         $self->sqlConnect();
-        my $proclist = $self->{_dbh}->prepare("SHOW PROCESSLIST");
+        my $proclist = $self->{_dbh}->prepare("SHOW FULL PROCESSLIST");
 
         return $proclist;
 }
@@ -7057,6 +7057,15 @@ sub sqlShowStatus {
         return $status;
 }
 
+########################################################
+sub sqlShowInnodbStatus {
+        my($self) = @_;
+
+        $self->sqlConnect();
+        my $status = $self->{_dbh}->prepare("SHOW INNODB STATUS");
+
+        return $status;
+}
 
 ########################################################
 # Get a unique string for an admin session
