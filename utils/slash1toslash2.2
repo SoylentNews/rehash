@@ -163,17 +163,17 @@ EOT
 				$topics{$story_hash->{$data->{sid}}{tid}} :
 				$vars->{defaulttopic};
 		# Admins must disable stories via their own criterion.
-		$data->{'type'} = 'open';
+		$data->{type} = 'open';
+		$data->{flags} = 'dirty';
 		if (!$opts{I}) {
 			# Reset the flag only if necessary. Pretty much we
 			# want to set things dirty and clean them up later.
 			my $ws = $story_hash->{$data->{sid}}{writestatus} || 0;
-
-			$data->{flags} = 'delete' if $ws == 5 || $ws == 10;
-			$data->{flags} = 'dirty' if $ws == 1;
-			$data->{flags} ||= 'ok';
-		} else {
-			$data->{'flags'} = 'dirty';
+			   if ($ws == 10) 	{ $data->{type} = 'archived';
+			   			  $data->{flags} = 'ok'		}
+			elsif ($ws ==  5) 	{ $data->{flags} = 'delete'	}
+			elsif ($ws ==  1) 	{ $data->{flags} = 'dirty'	}
+			else			{ $data->{flags} = 'ok'		}
 		}
 
 		$data->{'ALLOWED_FIELDS'} = [qw(
@@ -264,15 +264,14 @@ EOT
 		#
 		#$data->{discussion} = $discussions{$data->{sid}};
 		$data->{hits} = $hitlist->{$data->{sid}}{hits} || 0;
-		# We only care about accurate representation of writestats when 
+		# We only care about accurate representation of writestatus when 
 		# we do a full import.
 		if (!$opts{I}) {
-			my $ws = $data->{writestatus};
-
-			$data->{writestatus} = 0;
-			$data->{writestatus} = 'delete' if $ws==5 || $ws==10;
-			$data->{writestatus} = 'dirty' if $ws==1;
-			$data->{writestatus} ||= 'ok';
+			my $ws = $data->{writestatus} || 0;
+			   if ($ws == 10) 	{ $data->{writestatus} = 'archived'	}
+			elsif ($ws ==  5) 	{ $data->{writestatus} = 'delete'	}
+			elsif ($ws ==  1) 	{ $data->{writestatus} = 'dirty'	}
+			else			{ $data->{writestatus} = 'ok'		}
 		} else {
 			$data->{writestatus} = 'dirty';
 		}
@@ -1893,7 +1892,7 @@ The following tables will remain UNTOUCHED in an incremental update:
 	topics
 	tzcodes
 
-The above tables are generally part of a theme, and this should allow for a site\
+The above tables are generally part of a theme, and this should allow for a site
 admin to CHANGE the given theme without needing to reimport the entire dataset, 
 if they so desire.
 
