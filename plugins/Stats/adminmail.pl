@@ -548,6 +548,9 @@ EOT
 	}
 	slashdLog('Send Admin Mail End');
 
+	# for stats.pl to know ...
+	$slashdb->setVar('adminmail_last_run', $yesterday);
+
 	return ;
 };
 

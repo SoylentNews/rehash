@@ -65,7 +65,9 @@ ELSE;  # default to lines
          nums.push(mynum);
       END;
       alldata.push(nums);
-      mytype = this.type _ " (" _ nums.${nums.max} _ ")";
+
+      mytype = this.label || this.type;
+      mytype = mytype _ " (" _ nums.${nums.max} _ ")";
       alltypes.push(mytype);
       plotdata.push([]);
       plotdata.${plotdata.max}.${nums.max} = nums.${nums.max};
@@ -111,9 +113,10 @@ ELSE;  # default to lines
    END;
 
    set_legend(my_graph, alltypes);
-   my_graph.plot(alldata).png | stdout(1);
+   returnimage = my_graph.plot(alldata).png;
 
 END;
-END -%]
+END;
+returnimage -%]
 __seclev__
 1000

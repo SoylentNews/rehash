@@ -29,12 +29,23 @@ __template__
    FOREACH stat = stats;
        IF (stat.0);
           nstat = stat.0 | strip_attribute;
+
           nsection = stat.1 | strip_attribute;
+          IF (!nsection);
+             nsection = section;
+          END;
+
+          nlabel = stat.2 | strip_attribute;
+          IF (!nsection);
+             nlabel = '';
+          END;
+
        ELSE;
           nstat = stat | strip_attribute;
           nsection = section;
        END;
-       statdata = statdata _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection;
+
+       statdata = statdata _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
    END;
 %]
 

@@ -5,10 +5,12 @@
 # $Id$
 
 use strict;
+use File::Path;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:web);
 use Slash::Display;
 use Slash::Utility;
+use URI::Escape;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -57,40 +59,72 @@ sub main {
 sub graph {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
-	my $sections = _get_sections();
-	my @data;
+	my @id;
 	for my $namesec (@{$form->{stats_graph_multiple}}) {
-		my($name, $section) = split /,/, $namesec;
-		my $stats_data = $stats->getAllStats({
-			section	=> $section,
-			name	=> $name,
-			days	=> $form->{stats_days}  # 0 || 14 || 31*3
-		});
-		my $data;
-		for my $day (keys %{$stats_data->{$section}}) {
-			next if $day eq 'names';
-			$data->{$day} = $stats_data->{$section}{$day}{$name};
-		}
-		push @data, { data => $data, type => "$name / $sections->{$section}" };
+		my($name, $section, $label) = split /,/, $namesec;
+		push @id, join '-', map { uri_escape($_, '\W') } ($name, $section, $label);
 	}
 
-	my $type = 'image/png';
-	my $date;  # for when we save to disk
+	for ($form->{stats_days}, $form->{title}, $form->{type}) {
+		my $val = uri_escape($_, '\W');
+		$val = '0' unless length $val;
+		unshift @id, $val;
+	}
+
+	my $id   = join ',', @id;
+	my $day  = $slashdb->getVar('adminmail_last_run', 'value', 1);
+
+	my $image   = $stats->getGraph({ day => $day, id => $id });
+	my $content = $image->{data};
+	my $type    = $image->{content_type} || 'image/png';
+
+	# make image if we don't have it ...
+	if (! $content) {
+		my $sections = _get_sections();
+		my @data;
+		for my $namesec (@{$form->{stats_graph_multiple}}) {
+			my($name, $section, $label) = split /,/, $namesec;
+
+			my $stats_data = $stats->getAllStats({
+				section	=> $section,
+				name	=> $name,
+				days	=> $form->{stats_days}  # 0 || 14 || 31*3
+			});
+			my $data;
+			for my $day (keys %{$stats_data->{$section}}) {
+				next if $day eq 'names';
+				$data->{$day} = $stats_data->{$section}{$day}{$name};
+			}
+
+			$label ||= '';
+			push @data, {
+				data  => $data,
+				type  => "$name / $sections->{$section}",
+				label => $label,
+			};
+		}
+
+		$content = slashDisplay('graph', {
+			set_legend	=> \&_set_legend,
+			data		=> \@data,
+		}, { Return => 1, Nocomm => 1 });
+
+		$stats->setGraph({
+			day		=> $day,
+			id		=> $id,
+			image		=> $content,
+			content_type	=> $type
+		});
+	}
 
 	my $r = Apache->request;
 	$r->content_type($type);
 	$r->header_out('Cache-control', 'private');
 	$r->header_out('Pragma', 'no-cache');
-	$r->set_last_modified($date) if $date;
 	$r->status(200);
 	$r->send_http_header;
 	$r->rflush;
-
-	slashDisplay('graph', {
-		set_legend	=> \&_set_legend,
-		data		=> \@data,
-	}, { Return => 1, Nocomm => 1 });
-
+	$r->print($content);
 	$r->status(200);
 	return 1;
 }

@@ -1,11 +1,18 @@
 DROP TABLE IF EXISTS stats_daily; 
 CREATE TABLE stats_daily (
-	id int UNSIGNED NOT NULL auto_increment,
-	section varchar(30) DEFAULT 'index' NOT NULL,
-	day date NOT NULL,
-	name varchar(32) DEFAULT '' NOT NULL,
-	value FLOAT DEFAULT 0 NOT NULL,
-	UNIQUE day_key_pair (day,name,section),
-	FOREIGN KEY (section) REFERENCES sections(section),
-	PRIMARY KEY (id)
+    id int UNSIGNED NOT NULL auto_increment,
+    section varchar(30) DEFAULT 'index' NOT NULL,
+    day date NOT NULL,
+    name varchar(32) DEFAULT '' NOT NULL,
+    value FLOAT DEFAULT 0 NOT NULL,
+    UNIQUE day_key_pair (day,name,section),
+    FOREIGN KEY (section) REFERENCES sections(section),
+    PRIMARY KEY (id)
 ) TYPE = myisam;
+
+DROP TABLE IF EXISTS stats_graphs_index; 
+CREATE TABLE stats_graphs_index (
+    day DATE NOT NULL,
+    md5 VARCHAR(32) NOT NULL,
+    id BLOB DEFAULT ''
+);

@@ -1040,6 +1040,56 @@ sub countSfNetIssues {
 }
 
 ########################################################
+sub setGraph {
+	my($self, $data) = @_;
+
+	return unless $data->{id} && $data->{day} && $data->{image};
+	$data->{content_type} ||= 'image/png';
+
+	# check to see if we have a duplicate, just in case
+	$data->{want_md5} = 1;
+	my $md5 = $self->getGraph($data);
+	return $md5 if $md5;
+
+	my $blob = getObject('Slash::Blob');
+	$md5 = $blob->create({
+		data		=> $data->{image},
+		content_type	=> $data->{content_type},
+		# see stats.pl:main()
+		seclev		=> getCurrentStatic('stats_admin_seclev') || 100
+	});
+
+	$self->sqlInsert('stats_graphs_index', {
+		day	=> $data->{day},
+		id	=> $data->{id},
+		md5	=> $md5
+	});
+
+	return $md5;
+}
+
+########################################################
+sub getGraph {
+	my($self, $data) = @_;
+
+	return unless $data->{id} && $data->{day};
+
+	my $id  = $self->sqlQuote($data->{id});
+	my $day = $self->sqlQuote($data->{day});
+
+	my $md5 = $self->sqlSelect('md5', 'stats_graphs_index',
+		"id=$id AND day=$day");
+
+	return $md5 if $data->{want_md5};
+
+	my $blob = getObject('Slash::Blob');
+	my $image = $blob->get($md5);
+
+	return $image || {};
+}
+
+
+########################################################
 sub getAllStats {
 	my($self, $options) = @_;
 	my $table = 'stats_daily';

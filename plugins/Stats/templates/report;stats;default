@@ -32,7 +32,8 @@ __template__
 [% reports = {
       'main'      => 'Main Report',
       'mod'       => 'Moderation Report',
-      'subscribe' => 'Subscription Report'
+      'subscribe' => 'Subscription Report',
+      'messages'  => 'Messages Report',
 } %]
 
 [% SWITCH form.report;
@@ -100,6 +101,34 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
 
       PROCESS make_graph gtitle => 'Section Pages', type => 'lines', stats => sect_page;
       PROCESS make_graph gtitle => 'Section Bytes', type => 'lines', stats => sect_byte;
+   END;
+
+
+   CASE 'messages';
+      reportblock = BLOCK;
+      type        = 'line';
+      section     = 'all';
+      form.stats_days = form.stats_days || 1;
+
+      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_key = stats_data_big.keys.sort.0;
+      stats_data = stats_data_big.${stats_data_key};
+
+      messages = Slash.getObject('Slash::Messages');
+      codes = messages.getDescriptions("messagecodes");
+      modes = messages.getDescriptions("deliverymodes");
+
+      %]
+
+      [% stats = [];
+      FOR code = codes.keys.nsort;
+         # skip essentially unused modes 6, 8, 11 for Slashdot
+         NEXT IF code == 6 || code == 8 || code == 11;
+         stats.push(["msg_$code", "", codes.$code]);
+      END;
+
+      PROCESS make_graph gtitle => 'Message Types';
+
    END;
 
    CASE 'mod';
