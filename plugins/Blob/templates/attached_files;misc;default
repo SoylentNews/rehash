@@ -14,9 +14,9 @@ __template__
 [% FOREACH file=files %]
 	[% file.description %]<br>
 	[% IF file.isimage %]
-		&lt;SLASH-IMAGE id="[% file.id %]" TITLE="[% file.description %]"&gt;<br>
+		&lt;SLASH-IMAGE id="[% file.file_id %]" TITLE="[% file.description %]"&gt;<br>
 	[% ELSE %]
-		&lt;SLASH-FILE id="[% file.id %]" TITLE="[% file.description %]"&gt;<br>
+		&lt;SLASH-FILE id="[% file.file_id %]" TITLE="[% file.description %]"&gt;<br>
 	[% END %]
 	<BR>
 [% END %]

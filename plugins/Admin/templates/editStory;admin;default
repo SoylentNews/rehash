@@ -26,6 +26,20 @@ __template__
 			</TD>
 
 			<TD WIDTH="220">
+
+			[% IF constants.plugin.Events && Slash.getObject('Slash::Events') %]
+				[% PROCESS fancybox
+					title = "Set an Event for this Story"
+					contents = "<A HREF=\"$constants.rootdir/eventsadmin.pl?op=edit&amp;sid=$sid\">Make Event</A>"
+				%]
+			[% END %]
+
+			[% IF attached_files %]
+				[% PROCESS fancybox
+					title = "Attached Files"
+					contents = attached_files
+				%]
+			[% END %]
 			
 			[% PROCESS fancybox
 				title = "Related Links"
@@ -62,7 +76,7 @@ __template__
 			%]
 		[% END %]
 
-		[% IF constants.plugin.Blob && constants.story_files && attached_files %]
+		[% IF attached_files %]
 			[% PROCESS fancybox
 				title = "Attached Files"
 				contents = attached_files

@@ -16,7 +16,7 @@ __name__
 imageLink
 __template__
 [% IF id %]
-	<IMG SRC="[% constants.real_rootdir %]/blob.pl?id=[% id | fixparam %]" TITLE="[% title | fixparam %]" ALT="[% title | fixparam %]">
+	<IMG SRC="[% constants.real_rootdir %]/blob.pl?id=[% id | fixparam %]" TITLE="[% title %]" ALT="[% title %]">
 [% END %]
 __seclev__
 10000
