@@ -49,7 +49,6 @@ use vars qw($VERSION @EXPORT);
 	changePassword
 	chopEntity
 	countWords
-	delFromList
 	encryptPassword
 	fixHref
 	fixint
@@ -58,8 +57,8 @@ use vars qw($VERSION @EXPORT);
 	fudgeurl
 	formatDate
 	getArmoredEmail
+	grepn
 	html2text
-	inList
 	root2abs
 	strip_anchor
 	strip_attribute
@@ -1916,7 +1915,7 @@ sub countWords {
 
 =head2 inList(list, value)
 
-Returns TRUE or FALSE depending on if a given value is in an array.
+Returns the 1-based position of the first occurance of $value in @$list.
 
 =over 4
 
@@ -1937,64 +1936,23 @@ The value you wish to search for.
 =item Return value
 
 The position in the list of the first occurance of $value or undef if $value is not in
-the list.
+the list. Please note that the returned list is a 1-based value, not a 0-based value
+ala perl arrays.
 
 =back
 
 =cut
 
 
-sub inList {
+sub grepn {
 	my($list, $value) = @_;
 
-	my $c = 0;
+	my $c = 1;
 	for (@{$list}) {
 		return $c if $_ eq $value;
 		$c++;
 	}
 	return;
-}
-
-=head2 delFromList(list, value)
-
-Returns list with all instances of a given value removed.
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item @$list
-
-A reference to the array we wish to modify.
-
-=item $value
-
-the value to remove.
-
-=back
-
-=item Return value
-
-A list which is a copy of @$list with all instances of $value, removed.
-
-=back
-
-=cut
-
-
-sub delFromList {
-	my($list, $value) = @_;
-
-	my(@newlist) = ();
-	for (@{$list}) {
-		next if $_ eq $value;
-		
-		push @newlist, $_;
-	}
-
-	return @newlist;
 }
 
 
