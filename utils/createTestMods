@@ -86,6 +86,10 @@ my(%comments, %comment_data);
 		my $did = (exists $opts{r}) ?
 			$discussions->[rand $#{$discussions} + 1] : 
 			$discussion_id;
+                if (!$did) {
+			print "Cannot create comments, no discussions found.\n";
+			exit 0;
+		}
 
 		if (!exists $comments{$did}) {
 			$comments{$did} = [
