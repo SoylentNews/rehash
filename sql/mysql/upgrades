@@ -2284,10 +2284,6 @@ UPDATE menus SET value='[% constants.rootdir %]/my/password' WHERE menu='users' 
 
 ### everyone should run install-plugin to install the Login theme
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# End of T_2_3_0_152, Start of T_2_3_0_153 - 2004/05/04
-
 ALTER TABLE open_proxies ADD COLUMN ipid char(32) DEFAULT '' NOT NULL;
 ALTER TABLE open_proxies ADD INDEX ipid (ipid);
 UPDATE open_proxies SET ipid=md5(ip);
@@ -2297,10 +2293,13 @@ INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', '
 # be wary of this, make sure you've not modified it on your own; if so, add 'login' yourself
 UPDATE vars SET value = '^(?:comments|(?:login|users)/(?:nu|mp))$' WHERE name = 'hc_formname_regex';
 
-INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'example.com', 'space separated list of domains that are not valid for email addresses');
+INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'example.com mailinator.com', 'space separated list of domains that are not valid for email addresses');
 
 # Apparently on some installations jpg() works, but the name of the
 # method is GD::Image::jpeg() and that's more compatible.
 UPDATE vars SET description='Format for HC images (png, jpeg)' WHERE name='hc_image_format';
 UPDATE vars SET value='jpeg' WHERE name='hc_image_format' AND value='jpg';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_153, Start of T_2_3_0_154 - 2004/05/11
