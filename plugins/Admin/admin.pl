@@ -1324,6 +1324,7 @@ sub editStory {
 
 		if ($form->{firstpreview}) {
 			$display_check = 'CHECKED';
+			$storyref->{commentstatus}	= $constants->{defaultcommentstatus};
 		} else {
 			$display_check = $form->{display} ? 'CHECKED' : '';
 		}
