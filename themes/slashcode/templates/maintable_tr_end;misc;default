@@ -15,10 +15,7 @@ __name__
 maintable_tr_end
 __template__
 
-<!-- maintable_tr_end -->
-
 [%
-"<!-- curcol '"; user.state.mt.curcol; "' currow '"; user.state.mt.currow; "' -->\n";
 WHILE user.state.mt.curcol < user.state.mt.cols.max;
 	IF user.state.mt.cols.$user.state.mt.curcol < user.state.mt.currow;
 		PROCESS maintable_td; "&nbsp;</TD>";

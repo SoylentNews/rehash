@@ -27,25 +27,18 @@ IF mt_rowspan %] ROWSPAN="[% mt_rowspan %]"[% END;
 IF mt_colspan %] COLSPAN="[% mt_colspan %]"[% END;
 IF mt_width %] WIDTH="[% mt_width %]"[% END;
 IF mt_height %] HEIGHT="[% mt_height %]"[% END %]>
-<!-- maintable_td mt_rowspan '[% mt_rowspan %]' mt_colspan '[% mt_colspan %]' curcol_start '[% user.state.mt.curcol %]' -->
 
 [%
 IF !mt_rowspan; mt_rowspan = 1; END;
 IF !mt_colspan; mt_colspan = 1; END;
 curcol = user.state.mt.curcol;
-"<!-- curcol '"; curcol; "' mt_colspan '"; mt_colspan; "' -->";
 WHILE mt_colspan > 0;
 	curcol = curcol + 1;
-"<!-- max '"; user.state.mt.cols.max; "' -->";
 	WHILE curcol > user.state.mt.cols.max;
-"<!-- pushing 0 -->";
 		user.state.mt.cols.push(0);
-"<!-- new max '"; user.state.mt.cols.max; "' -->";
 	END;
-	"<!-- bumping col '"; curcol; "' up from '"; user.state.mt.cols.${curcol}; "' by '"; mt_rowspan; "' -->";
 	newvalue = user.state.mt.cols.$curcol + mt_rowspan;
 	user.state.mt.cols.$curcol = newvalue;
-	"<!-- bumped col '"; curcol; "', now cols: '";
 	user.state.mt.cols.1; "' '"; 
 	user.state.mt.cols.2; "' '"; 
 	user.state.mt.cols.3; "' '"; 
@@ -56,15 +49,12 @@ END;
 currow = user.state.mt.currow || 0;
 curcol = curcol + 1;
 WHILE user.state.mt.cols.$curcol && user.state.mt.cols.$curcol >= currow;
-	"<!-- skipping col '"; curcol; "' -->";
 	curcol = curcol + 1;
 END;
 curcol = curcol - 1;
 user.state.mt.curcol = curcol;
 mt_align=""; mt_valign=""; mt_rowspan = 0; mt_colspan=0; mt_width=""; mt_height=""
 %]
-
-<!-- curcol_now [% user.state.mt.curcol %], with [% user.state.mt.cols.${user.state.mt.curcol} %] rows -->
 
 __seclev__
 10000

@@ -16,7 +16,6 @@ maintable_tr
 __template__
 
 <TR[% IF mt_valign %] VALIGN="[% mt_valign %]"[% END %]>
-<!-- maintable_tr -->
 
 [%
 user.state.mt.curcol = 1;
@@ -32,7 +31,6 @@ END;
 user.state.mt.curcol = user.state.mt.curcol - 1;
 IF min_rows == 999; min_rows = 0; END;
 user.state.mt.currow = min_rows + 1;
-"<!-- setting user.state.mt.currow to '"; user.state.mt.currow; "' -->";
 %]
 
 __seclev__
