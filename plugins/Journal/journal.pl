@@ -567,7 +567,7 @@ sub saveArticle {
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
-			my $rootdir = $constants->{'rootdir'};
+			my $rootdir = $constants->{real_rootdir};
 			if ($form->{comments_on}) {
 				$description = $article->{description};
 				$form->{tid} = $article->{tid};
