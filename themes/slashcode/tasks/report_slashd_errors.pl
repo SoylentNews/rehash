@@ -51,8 +51,6 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	expireOldErrors($virtual_user, $constants, $slashdb, $user);
-
 	return $num_errors;
 };
 
@@ -65,15 +63,6 @@ sub updateLastRun {
 	$slashdb->setVar('slashd_errnote_lastrun', $now);
 
 	return($now, $lastrun);
-}
-
-sub expireOldErrors {
-	my($virtual_user, $constants, $slashdb, $user) = @_;
-
-	my $interval = $constants->{slashd_errnote_expire} || 90;
-
-	$slashdb->sqlDelete('slashd_errnotes',
-		"ts < DATE_SUB(NOW(), INTERVAL $interval DAY)");
 }
 
 1;

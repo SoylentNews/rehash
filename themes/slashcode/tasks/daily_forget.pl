@@ -15,15 +15,19 @@ $task{$me}{timespec_panic_1} = ''; # if panic, this can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtualuser, $constants, $slashdb, $user) = @_;
-	my $forgotten1 = $slashdb->forgetCommentIPs;
-	my $forgotten2 = $slashdb->forgetSubmissionIPs;
-	my $forgotten3 = $slashdb->forgetOpenProxyIPs;
-	my $forgotten4 = $slashdb->forgetUsersLogtokens;
-	my $forgotten5 = $slashdb->forgetUsersLastLookTime;
-	my $forgotten6 = $slashdb->forgetUsersMailPass;
-	my $forgotten7 = $slashdb->forgetRemarks;
-	my $forgotten8 = $slashdb->forgetStoryTextRendered;
-	return "forgot approx $forgotten1 comment IPs, $forgotten2 submission IPs, $forgotten3 open proxy IPs, $forgotten4 logtokens";
+	my @forgotten = (
+		$slashdb->forgetCommentIPs,
+		$slashdb->forgetSubmissionIPs,
+		$slashdb->forgetOpenProxyIPs,
+		$slashdb->forgetUsersLogtokens,
+		$slashdb->forgetUsersLastLookTime,
+		$slashdb->forgetUsersMailPass,
+		$slashdb->forgetRemarks,
+		$slashdb->forgetStoryTextRendered,
+		$slashdb->forgetErrnotes,
+		$slashdb->forgetRemarks,
+	);
+	return "forgotten: '@forgotten'";
 };
 
 1;

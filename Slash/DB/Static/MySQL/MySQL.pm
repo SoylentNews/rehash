@@ -487,6 +487,24 @@ sub forgetOpenProxyIPs {
 }
 
 ########################################################
+# For daily_forget.pl
+sub forgetErrnotes {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $interval = $constants->{slashd_errnote_expire} || 90;
+	return $slashdb->sqlDelete('slashd_errnotes',
+		"ts < DATE_SUB(NOW(), INTERVAL $interval DAY)");
+}
+
+########################################################
+# For daily_forget.pl
+sub forgetRemarks {
+	my($self) = @_;
+	return $self->sqlDelete("remarks",
+		"time < DATE_SUB(NOW(), INTERVAL 365 DAY)");
+}
+
+########################################################
 # For dailystuff
 sub deleteDaily {
 	my($self) = @_;
