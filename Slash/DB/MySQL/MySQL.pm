@@ -5671,7 +5671,7 @@ sub _genericGets {
 # This is only called by Slash/DB/t/story.t and it doesn't even serve much purpose
 # there...I assume we can kill it?  - Jamie
 # Actually, we should keep it around since it is a generic method -Brian
-# I am using it for something on OSDN.com
+# I am using it for something on OSDN.com -- pudge
 sub getStories {
 	my $answer = _genericGets('stories', 'sid', 'story_param', @_);
 	return $answer;

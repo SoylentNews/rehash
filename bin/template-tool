@@ -121,7 +121,7 @@ if ($opts{'s'}) {
 			delete $template->{instructions};
 			my @diffs;
 			for (qw| template seclev description title |) {
-				push (@diffs, $_)
+				push(@diffs, $_)
 					if ( $template->{$_} ne $temp2->{$_});
 			}
 			my $changes = join(" ", sort(@diffs))

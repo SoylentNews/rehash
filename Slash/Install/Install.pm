@@ -421,7 +421,7 @@ sub getSiteTemplates {
 	push(@files, "$prefix/themes/$theme/THEME");
 	my $plugins = $self->get('plugin');
 	my @plugins;
-	for(keys %$plugins) {
+	for (keys %$plugins) {
 		push @files, "$prefix/plugins/$plugins->{$_}{value}/PLUGIN";
 	}
 	for my $file (@files) {
@@ -429,7 +429,7 @@ sub getSiteTemplates {
 		open($file_handle, "$file");
 		$file =~ s/PLUGIN//;
 		$file =~ s/THEME//;
-		while(my $line = <$file_handle>) {
+		while (my $line = <$file_handle>) {
 			chomp($line);
 			my($key, $val) = split(/=/, $line, 2);
 			$key = lc $key;
