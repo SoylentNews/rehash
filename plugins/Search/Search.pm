@@ -182,13 +182,13 @@ sub findStory {
 	# _score() call above would still have to be done twice,
 	# which depending on search_method could be the same
 	# thing, so it might not matter. - Jamie 2004/04/06
-	my $where = "stories.stoid = story_text.stoid ";
-	$where .= " story_param.name IS NULL";
+	my $where = "stories.stoid = story_text.stoid";
+	$where .= " AND story_param.name IS NULL";
 	$where .= " AND ( MATCH (title) AGAINST ($query)
 		OR MATCH (introtext,bodytext) AGAINST ($query) ) "
 		if $form->{query};
 
-	$where .= " AND time < NOW() AND stories.in_trash = 'no' AND primaryskid != 0 ";
+	$where .= " AND time < NOW() AND stories.in_trash = 'no' AND primaryskid != 0";
 	$where .= " AND stories.uid=" . $self->sqlQuote($form->{author})
 		if $form->{author};
 	$where .= " AND stories.submitter=" . $self->sqlQuote($form->{submitter})
@@ -241,7 +241,7 @@ sub findStory {
 		}
 		my $string = join(',', @{$self->sqlQuote(\@tids)});
 		if ($constants->{topic_search_use_join}) {
-			$tables.= " LEFT JOIN story_topics_rendered ON stories.stoid = story_topics_rendered.stoid ";
+			$tables.= " LEFT JOIN story_topics_rendered ON stories.stoid = story_topics_rendered.stoid";
 # XXXSKIN - no more id in schema, just yank?
 #			$where .= " AND story_topics_rendered.id IS NOT NULL";
 			$where .= " AND story_topics_rendered.tid IN ($string)";
