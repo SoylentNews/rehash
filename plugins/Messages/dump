@@ -13,9 +13,9 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (4, 'Reply to Comme
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (5, 'Journal Entry by Friend', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (6, 'New Submission', 100, '0');
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Messaging','[% constants.rootdir %]/messages.pl?op=display_prefs',1,17);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Messaging','[% constants.rootdir %]/my/messages/',1,17);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','List Messages','[% constants.rootdir %]/messages.pl?op=list',1,13);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Message Preferences','[% constants.rootdir %]/messages.pl?op=display_prefs',1,2);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Message Preferences','[% constants.rootdir %]/my/messages/',1,2);
 
 INSERT INTO vars (name, value, description) VALUES ('message_process_count','100','Number of messages to process at each delivery interval');
 INSERT INTO vars (name, value, description) VALUES ('message_send_expire','7','Number of days to hold message in delivery queue');

@@ -115,14 +115,14 @@ INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flag
 #
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','New User','[% constants.rootdir %]/users.pl?op=newuseradmin',10000,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Your Info','[% constants.rootdir %]/users.pl?op=userinfo',1,10);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Logout','[% constants.rootdir %]/users.pl?op=userclose',1,20);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Your Info','[% constants.rootdir %]/~[% user.nickname | fixparam %]/',1,10);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Logout','[% constants.rootdir %]/my/logout/',1,20);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','<b>Preferences:</b>','',1,30);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Homepage','[% constants.rootdir %]/users.pl?op=edithome',1,40);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Comments','[% constants.rootdir %]/users.pl?op=editcomm',1,50);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','You','[% constants.rootdir %]/users.pl?op=edituser',1,60);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Password','[% constants.rootdir %]/users.pl?op=changepasswd',1,70);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','[% USE Slash %][% IF Slash.db.getMiscUserOpts.size %]Misc[% END %]', '[% constants.rootdir %]/users.pl?op=editmiscopts',1,75);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Homepage','[% constants.rootdir %]/my/homepage/',1,40);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Comments','[% constants.rootdir %]/my/comments/',1,50);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','You','[% constants.rootdir %]/my/',1,60);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Password','[% constants.rootdir %]/my/password/',1,70);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','[% USE Slash %][% IF Slash.db.getMiscUserOpts.size %]Misc[% END %]', '[% constants.rootdir %]/my/misc/',1,75);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('topics','Recent Topics','[% constants.rootdir %]/topics.pl?op=toptopics',0,80);
 
 #
