@@ -2325,6 +2325,10 @@ required, the user can choose to leave it up to us.
 
 Boolean overriding RECOMMENDED; it strips out all domain tags if true.
 
+=item NOTITLE
+
+Boolean which strips out title attributes for links if true
+
 =back
 
 =item Return value
@@ -2336,7 +2340,7 @@ The parsed HTML.
 =cut
 
 sub parseDomainTags {
-	my($html, $recommended, $notags) = @_;
+	my($html, $recommended, $notags, $notitle) = @_;
 	return "" if !defined($html) || $html eq "";
 
 	my $user = getCurrentUser();
@@ -2360,6 +2364,8 @@ sub parseDomainTags {
 		$html =~ s{</a[^<>]+>}   {</a>}gi;
 	}
 
+	$html =~ s{<a([^>]*) title="([^"]+")>} {<a$1>}gi if $notitle;
+	
 	return $html;
 }
 
