@@ -52,7 +52,7 @@ sub main {
 
 	# admin.pl is not for regular users
 	unless ($user->{is_admin}) {
-		redirect("/");
+		redirect("$constants->{rootdir}/");
 		return;
 	}
 

@@ -51,7 +51,7 @@ sub main {
 	unless ($sid) {
 		# Where should we redirect to if not to the rootdir? 
 		# Do we care?
-		redirect($constants->{rootdir});
+		redirect("$constants->{rootdir}/");
 		return;
 	}
 
@@ -70,7 +70,7 @@ sub main {
 	unless ($story) {
 		# Again, an error condition, but we're routed to the rootdir so
 		# how is the user supposed to know something is wrong?
-		redirect($constants->{rootdir});
+		redirect("$constants->{rootdir}/");
 		return;
 	}
 
