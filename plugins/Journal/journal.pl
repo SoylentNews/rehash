@@ -511,6 +511,7 @@ sub listArticle {
 
 sub saveArticle {
 	my($journal, $constants, $user, $form, $slashdb, $ws) = @_;
+	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
 	my $description = strip_notags($form->{description});
 
 	unless ($description ne "" && $form->{article} ne "") {
