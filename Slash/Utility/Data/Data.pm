@@ -736,7 +736,8 @@ sub processCustomTags {
 =head2 breakHtml(TEXT, MAX_WORD_LENGTH)
 
 Private function.  Break up long words in some text.  Will ignore the
-contents of HTML tags.  Called from C<stripByMode> functions.
+contents of HTML tags.  Called from C<stripByMode> functions.  Handles
+spaces before dot-words so as to best work around a Microsoft bug.
 
 =over 4
 
@@ -776,19 +777,51 @@ sub breakHtml {
 
 	$mwl = $mwl || $constants->{'breakhtml_wordlength'} || 50;
 	$l = length $text;
+	my $cnswcr = $constants->{comment_nonstartwordchars_regex};
 
-	for (my $i = 0; $i < $l; $new .= $c, ++$i) {
+	for (my $i = 0; $i < $l; ++$i) {
+		my $append_c = 1;
 		$c = substr($text, $i, 1);
-		if ($c eq '<')		{ $in_tag = 1 }
-		elsif ($c eq '>')	{
+		if ($c eq '<')			{ $in_tag = 1 }
+		  elsif ($c eq '>')		{
 			$in_tag = 0;
 			$this_tag =~ s{^/?(\S+).*}{\U$1};
 			$cwl = 0 if $is_break_tag{$this_tag};
 			$this_tag = '';
-		}
-		elsif ($in_tag)		{ $this_tag .= $c }
-		elsif ($c =~ /\s/)	{ $cwl = 0 }
-		elsif (++$cwl > $mwl)	{ $new .= ' '; $cwl = 1 }
+		} elsif ($in_tag)		{ $this_tag .= $c }
+		  elsif ($c =~ /\s/)		{
+			my $nsc;
+			if (($nsc) = substr($text, $i) =~ $cnswcr) {
+				# This space doesn't count as a wordbreak because of
+				# a Windows/MSIE bug. The regex puts everything up to
+				# and including the non-start-char(s) into $nsc.
+				my $nsclen = length($nsc);
+				if ($cwl+$nsclen >= $mwl) {
+					# If lots of nscs were given, break them up
+					# before appending.  Start with the first,
+					# then all $mwl-long sequences after that.
+					$nsc =~ s{(\S)}{$1 };
+					while ($nsc =~ m{\S{$mwl,}\S}o) {
+						$nsc =~ s{(\S{$mwl})(\S)}{$1 $2}o;
+					}
+					$new .= "$nsc "; # append the nsc(s)
+					$i += $nsclen	# we're skipping ahead
+						-1;	# account for ++$i coming up
+					$cwl = 0;	# starting new word
+					$append_c = 0;
+				} else {
+					$new .= $nsc;	# append the nsc(s)
+					$i += $nsclen	# we're skipping ahead
+						-1;	# account for ++$i coming up
+					$cwl += $nsclen; # still in a word
+					$append_c = 0;
+				}
+			} else {
+				# This space does count as a wordbreak.
+				$cwl = 0;
+			}
+		} elsif (++$cwl > $mwl)		{ $new .= ' '; $cwl = 1 }
+		$new .= $c if $append_c;
 	}
 
 	return $new;

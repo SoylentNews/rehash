@@ -102,6 +102,17 @@ ALTER TABLE sessions add column last_sid varchar(16);
 
 # Start of T_2_3_0_15
 
-# add ECODE tag ... YMMV if you've edited approvedtags previously
-UPDATE vars SET value = "B|I|P|A|LI|OL|UL|EM|BR|TT|STRONG|BLOCKQUOTE|DIV|ECODE" WHERE name = "approvedtags";
+# add ECODE tag ...
+UPDATE vars SET value=CONCAT(value,'|ECODE') WHERE name='approvedtags';
+
+# Message threshold
 INSERT INTO vars (name, value, description) VALUES ('message_threshold','1','Default threshold for a comment to trigger a message');
+
+# End of R_2_3_0_15
+
+# Start of T_2_3_0_16
+
+# Browser bug workaround
+INSERT INTO vars (name, value, description) VALUES ('comment_nonstartwordchars','.,;:/','Chars which cannot start a word (will be forcibly separated from the rest of the word by a space) - this works around a Windows/MSIE "widening" bug - set blank for no action')
+;
+
