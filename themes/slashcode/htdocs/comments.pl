@@ -593,7 +593,7 @@ sub validateComment {
 		my $min_line_len = $constants->{comments_min_line_len}
 			+ ($min_line_len_max - $constants->{comments_min_line_len})
 				* ($check_prefix_len - $kickin)
-				/ ($max_comment_len - $kickin);
+				/ ($max_comment_len - $kickin); # /
 
 		my $check_notags = strip_nohtml($check_prefix);
 		# Don't count & or other chars used in entity tags;  don't count
