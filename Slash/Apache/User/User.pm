@@ -55,8 +55,8 @@ sub handler {
 	my $uri = $r->uri;
 
 	# Exclude any URL that matches the environment variable regex
-	if ($ENV{SLASH_EXCLUDE_URL}) {
-		return OK if $uri =~ /$ENV{SLASH_EXCLUDE_URL}/;
+	if ($ENV{SLASH_EXCLUDE_URL_USERHANDLER}) {
+		return OK if $uri =~ /$ENV{SLASH_EXCLUDE_URL_USERHANDLER}/;
 	}
 
 	$request_start_time ||= Time::HiRes::time;
