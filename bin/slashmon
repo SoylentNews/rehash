@@ -66,16 +66,11 @@ sub init {
 	my $dbs = $slashdb->getDBs;
 
 	my %vus_hash = ( );
-	my @types = sort keys %$dbs;
-	for my $type (@types) {
-		my @dbids_usable =
-		        sort { $a <=> $b }
-			grep { $dbs->{$type}{$_}{weight_total} > 0 }
-			keys %{ $dbs->{$type} };
-		for my $dbid (@dbids_usable) {
-			my $vu = $dbs->{$type}{$dbid}{virtual_user};
-			$vus_hash{$vu} = 1;
-		}
+	my @dbids = sort { $a <=> $b } keys %$dbs;
+	my @dbids_usable = grep { $dbs->{$_}{weight_total} > 0 } @dbids;
+	for my $dbid (@dbids_usable) {
+		my $vu = $dbs->{$dbid}{virtual_user};
+		$vus_hash{$vu} = 1;
 	}
 
 	my $vus = [ (
