@@ -63,16 +63,16 @@ Some of your past moderations have been meta-moderated by other
 	msg2 = '';
 	IF change > 0;
 		msg1="outstanding";
-		msg2="granted";
+		msg2="rewarded with some karma";
 	ELSIF change < 0;
 		msg1="poor";
-		msg2="penalized";
+		msg2="assessed a karma penalty";
 	END;
 	IF change < 0;
 		change = change * -1;
 	END;
 %][% IF msg1 && msg2 %]
-For your [% msg1 %] moderation, you are [% msg2 %] [% change %] karma.
+For your [% msg1 %] moderation, you have been [% msg2 %].
 [% END %]
 [% IF msg.mode == 1 %]<P>[% END %]Thank you for moderating.
 
