@@ -778,6 +778,8 @@ UPDATE menus SET menuorder=10 WHERE label='Recent' AND menu='admin';
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Advanced', '[% constants.rootdir %]/topics.pl', 500, 11);
 
 # none of these existed for me previously, so no rows were updated -- pudge
+# That's fine. Only sites that updated in a brief window would have these -- jamie
+# Change for plugins/Stats (ignore if not using that plugin)
 UPDATE stats_daily SET name='m2_points_lost_spent' WHERE name='m2_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent' WHERE name='mod_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_points_spent_plus_1';
@@ -785,3 +787,4 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_poin
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+
