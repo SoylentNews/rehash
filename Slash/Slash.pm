@@ -646,6 +646,7 @@ sub moderatorCommentLog {
 	}
 
 	my $data = {
+		type		=> $type,
 		mod_admin	=> $mod_admin, 
 		mods		=> $mods,
 		reasonTotal	=> $reasonTotal,
@@ -666,7 +667,7 @@ sub moderatorCommentLog {
 # So $reasonHist[1] is the number of Offtopic moderations (at
 # least if Offtopic is still reason 1).  Returns a list of hashrefs,
 # the top 3 mods performed and their percentages, rounded to the
-# nearest 10%.
+# nearest 10%, sorted largest to smallest.
 sub _getTopModReasons{
 	my($reasonTotal, @reasonHist) = @_;
 	return ( ) unless $reasonTotal;
@@ -720,6 +721,11 @@ sub _getTopModReasons{
 			percent => $reasonRound{$reason},
 		};
 	}
+	@reasonsTop = sort {
+		$b->{percent} <=> $a->{percent}
+		||
+		$a->{reason} <=> $b->{reason}
+	} @reasonsTop;
 
 	return @reasonsTop;
 }

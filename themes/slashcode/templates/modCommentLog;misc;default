@@ -4,6 +4,7 @@ __description__
 Prints table detailing history of moderation of a comment, or a user, or
 	an IPID or SubnetID, or the mods a user did
 
+* type = type of id being logged (cid, uid, ipid, etc.)
 * mod_admin = boolean for if current user is an admin
 * mods = arrayref of hashref of comment moderations (sid, cid, val, reason,
 	score, ts, active, uid, cuid, nickname)
@@ -25,7 +26,9 @@ en_US
 __name__
 modCommentLog
 __template__
+
 [% IF mod_admin %]
+
 <TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	[% IF mods.size > 0  %]
 	<TR BGCOLOR="[% user.bg.3 %]">
@@ -71,6 +74,7 @@ __template__
 	[% END %]
 
 </TABLE>
+
 [% END %]
 
 [% modifiers = [
@@ -91,18 +95,19 @@ __template__
 	{ label = "score_end",			edit = 0,	name = "Total Score:" },
 ] %]
 
-<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="300">
+
 	<TR BGCOLOR="[% user.bg.3 %]">
+		<TH COLSPAN="3" ALIGN="RIGHT"><FONT COLOR="[% user.fg.3 %]"> points</FONT></TH>
 		<TH>&nbsp;</TH>
-		<TH>&nbsp;</TH>
-		<TH COLSPAN="2"><FONT COLOR="[% user.fg.3 %]"> points </FONT></TH>
 	</TR>
+
 [% FOREACH modifier = modifiers %]
-<!-- [% modifier.label %] [% modifier.name %] '[% modifier_hr.${modifier.label} %]' -->
-	[% IF modifier.label.match('^score_')
-		|| (modifier.label == 'moderations' && reasonTotal > 0)
-		|| (modifier.label == 'reason_bonus' && reason)
-		|| modifier_hr.${modifier.label} %]
+	[% IF type == 'cid' && (
+		modifier.label.match('^score_')
+			|| (modifier.label == 'moderations' && reasonTotal > 0)
+			|| (modifier.label == 'reason_bonus' && reason)
+	)	|| modifier_hr.${modifier.label} %]
 	<TR>
 		<TD ALIGN="LEFT">[% modifier.name %]</TD>
 		<TD>&nbsp;</TD>
@@ -112,29 +117,31 @@ __template__
 			(<A HREF="/my/comments/#[% modifier.label | strip_attribute %]">Edit</A>)
 		[%- END -%]
 		</FONT></TD>
+
 		[% IF modifier.label == 'moderations' && reasonTotal > 0 %]
-			</TR><TR>
+			</TR><TR><TD COLSPAN="4"><FONT SIZE="-1">
 			[% IF constants.comments_mod_totals_exact -%]
-				<TD COLSPAN="4"><FONT SIZE="-1">
 				&nbsp;&nbsp;
 				[% FOREACH i = [0 .. reasonHist.max] %]
 					[% IF reasonHist.$i %]
 						[% reasons.$i.name %]=[% reasonHist.$i %],[% " " %]
 					[% END %]
 				[% END %]
-				<B>Total=[% reasonTotal %]</B></FONT></TD>
+				<B>Total=[% reasonTotal %]</B>
 			[% ELSE %]
-				<TD COLSPAN="4"><FONT SIZE="-1">
-				[%- seen_first = 0; FOREACH rtop = reasonsTop -%]
-					[%- NEXT UNLESS rtop.percent > 0 -%]
-					[%- IF seen_first %]<BR>[% END; seen_first=1 %]&nbsp;&nbsp;[% IF rtop.percent < 100 %][% rtop.percent %]% [% END -%]
-					[%- reasons.${rtop.reason}.name -%]
-				[%- END -%]</FONT></TD>
+				[% seen_first = 0; FOREACH rtop = reasonsTop %]
+					[% NEXT UNLESS rtop.percent > 0 %]
+					[% IF seen_first %]<BR>[% END; seen_first=1 %]&nbsp;&nbsp;[% rtop.percent %]%
+					[% reasons.${rtop.reason}.name %]
+				[% END %]
 			[% END %]
+			</FONT></TD>
 		[% END %]
+
 	</TR>
 	[% END %]
 [% END %]
+
 </TABLE>
 
 __seclev__
