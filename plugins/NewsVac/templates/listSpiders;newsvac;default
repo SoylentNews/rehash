@@ -1,0 +1,84 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+listSpiders
+__template__
+[% # listSpiders %]
+
+[% INCLUDE titlebar width="100%" title="List of spiders" %]
+
+<!-- begin list spiders section -->
+<form action="[% env.script_name %]" method="GET">
+<table>
+        <TR>
+                <TD>
+		<input type="submit" name="like" value="List Only Spiders Containing:">
+		<input type="text" size="60" name="like" value="">
+		<input type="hidden" name="op" value="listspiders">
+		</TD>
+        </TR>
+</table>
+</form>
+<form enctype="multipart/form-data" action="[% env.script_name %]" method="POST">
+<table>
+        <tr>
+                <td>
+		<input type="submit" name="newspider" value="Add Spider:">
+		<input type="text" size="60" name="name" value="">
+		</td>
+        </tr>
+</table>
+<table border="0">
+        <tr>
+                <td colspan="7">&nbsp;</td>
+        </tr>
+        <tr>
+                <td align=right><b> &nbsp;&nbsp;&nbsp; ID<b></td>
+                <td><b>Name &nbsp;&nbsp;&nbsp; <b></td>
+                <td><b>Last Edit &nbsp;&nbsp;&nbsp; <b></td>
+                <td><b>Last Edited By &nbsp;&nbsp;&nbsp; <b></td>
+                <td><b>Conditions &nbsp;&nbsp;&nbsp; <b></td>
+                <td><b>Group 0 Selects &nbsp;&nbsp;&nbsp; <b></td>
+                <td><b>Commands &nbsp;&nbsp;&nbsp; <b></td>
+        </tr>
+
+[% IF ! arrayref %]
+	<tr>
+		<td colspan=7><i>no spiders found</i></td>
+	</tr>
+
+[% ELSE %]
+	[% FOREACH hashref = arrayref %]
+        <TR>
+                <td align=right>
+		<A HREF="[% env.script_name %]?op=editspider&spider_id=[% hashref.spider_id %]">[% hashref.spider_id %]</a>
+		</td>
+                <td>[% hashref.name %]</td>
+                <td>[% hashref.last_edit_formatted %]</td>
+                <td>[% hashref.last_edit_aid %]</td>
+                <td>[% hashref.conditions %]</td>
+                <td>[% hashref.group_0_selects %]</td>
+                <td>[% hashref.commands %]</td>
+        </TR>
+	[% END %]
+[% END %]
+
+</TABLE>
+<TABLE>
+        <TR>
+                <TD>
+		<input type="submit" name="newspider" value="Add Spider:">
+		<input type="text" size="60" name="name" value="">
+		</TD>
+        </TR>
+</TABLE>
+</FORM>
+<!-- end list spiders -->

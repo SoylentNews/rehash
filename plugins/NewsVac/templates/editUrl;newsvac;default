@@ -1,0 +1,122 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+editUrl
+__template__
+[% # editUrl %]
+
+[% SWITCH titlebar_type %]
+
+[% CASE 'added';
+   INCLUDE titlebar
+	width="100%" 
+	title="Added URL '$new_url', id '$url_id', assigned miner 'none'" 
+%]
+
+[% CASE 'existing';
+   INCLUDE titlebar
+	width="100%" 
+	title="URL '$new_url' already exists, id '$url_id'" 
+%]
+
+[% CASE 'editing';
+   INCLUDE titlebar
+   	width="100%"
+	title="Editing URL '$url_id'"
+%]
+
+[% END %]
+
+
+<!-- begin editUrl -->
+<FORM action="[% env.script_name %]" method="GET">
+
+[% IF !url_id %] 
+<p>no URL found with ID '[% url_id %]'
+
+[% ELSE %] 
+[% IF miner_id;
+	miner_id = "<a href=\"$env.script_name?op=editminer&miner_id=$miner_id\">$miner_id</a>";
+   END -%]
+[% DEFAULT 
+	miner_id = "<I>n/a</I>",
+	title = "<I>n/a</I>",
+	last_attempt = "<I>n/a</I>",
+	last_success = "<I>n/a</I>",
+	status_code = "<I>n/a</I>",
+	reason_phrase = "<I>n/a</I>",
+	message_body_length = "<I>n/a</I>"
+-%]
+
+<table border="0">
+        <tr valign=top>
+                <td width="40"><b>ID</b>&nbsp;&nbsp;    
+		<input type="hidden" name="url_id" value="[% url_id %]"> 
+		</td>
+                <td>[% url_id %]</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>URL</b>&nbsp;&nbsp;</td>
+                <td><a href="[% url %]">[% url %]</a></td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Title</b>&nbsp;&nbsp;</td>
+                <td>[% title %]</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Miner ID</b>&nbsp;&nbsp;</td>
+                <td>[% miner_id %]</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Miner name</b>&nbsp;&nbsp;</td>
+                <td>
+		<input type="hidden" name="op" value="updateurl">
+		<input type="text" size="20" name="miner_name" value="[% miner_name %]">
+		</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Last&nbsp;Attempt</b>&nbsp;&nbsp;</td>
+                <td>[% last_attempt %]</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Last&nbsp;Success</b>&nbsp;&nbsp;</td>
+                <td>[% last_success %]</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Last&nbsp;Status</b>&nbsp;&nbsp;</td>
+                <td>[% status_code %]  [% reason_phrase %]</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Length&nbsp;of&nbsp;body</b>&nbsp;&nbsp;</td>
+                <td>[% message_body_length %]</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Miner&nbsp;Refs</b>&nbsp;&nbsp;</td>
+                <td>[% referencing %]</td>
+        </tr>
+        <tr valign=top>
+                <td colspan=2 align=center>
+		<input type="submit" name="updateurl" value="Save URL">
+                <input type="submit" name="requesturl" value="Request URL">
+                <input type="submit" name="deleteurl" value="Delete URL"><br>&nbsp;</td>
+        </tr>
+        <tr valign=top>
+                <td colspan=2>
+		<input type="submit" name="newurl" value="Add URL:">
+                <input type="text" size="20" name="newname" value="">
+		</td>
+        </tr>
+</table>
+[% END %]
+		
+</FORM>
+<p>&nbsp;<p>
+<!-- end editUrl -->

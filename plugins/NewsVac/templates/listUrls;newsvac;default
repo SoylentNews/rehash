@@ -1,0 +1,108 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+listUrls
+__template__
+[% # listUrls %] 
+
+[% INCLUDE titlebar width="100%" title="List of urls" %]
+
+<!-- begin list urls section -->
+<form action="[% env.script_name %]" method="GET">
+<table>
+        <TR>
+                <TD><input type="submit" value="List Only URLs Containing:">
+<input type="text" size="60" name="like" value=""></TD>
+<input type="hidden" name="op" value="listurls"></TD>
+        </TR>
+</table>
+</form>
+<form action="[% env.script_name %]" method="GET">
+<table>
+        <TR>
+                <TD><input type="submit" value="Process URLs:">
+<input type="text" size="60" name="ids" value=""></TD>
+<input type="hidden" name="op" value="processurls"></TD>
+        </TR>
+</table>
+</form>
+<form enctype="multipart/form-data" action="[% env.script_name %]" method="POST">
+<table>
+        <tr>
+                <td><input type="submit" value="Add URL:">
+<input type="hidden" name="op" value="newurl">
+<input type="text" size="60" name="newurl" value=""></td>
+        </tr>
+</table>
+<table border="0" width=900>
+        <tr>
+                <td colspan="8">&nbsp;</td>
+        </tr>
+        <tr>
+                <td width="5%"><b>ID</b></td>
+                <td width="10%"><b>OK?</b></td>
+                <td width="10%"><b>Last&nbsp;Success<b></td>
+                <td width="10%"><b>Bytes</b></td>
+                <td width="10%"><b>Hits</b></td>
+                <td width="10%"><b>Miner&nbsp;Name</b></td>
+                <td width="45%"><b>URL</b></td>
+        </tr>
+	[%- IF urls_total != urls_with_miners -%]
+	<tr>
+		<td colspan=8>
+		<i><% n_urls_total %> URLs in database, 
+		<% n_urls_with_miners %> have an associated miner.
+		</i>
+		</td>
+	</tr>
+	[%- END -%]
+	[%- IF !urls -%]
+	<tr>
+		<td colspan=8><i>no urls found [%-
+		IF form.like and n_urls_with_miners -%]
+		(probable error in SQL query - try reload)[%-
+		END -%]</i></td>
+	</tr>
+	[%- END -%]
+	[%- FOREACH u = urls -%]
+		[%- DEFAULT 
+			u.last_success_formatted = '<I>n/a</I>',
+			u.message_body_length = 0,
+			u.referencing = 0
+		-%]
+		[%- YesNo = { '0' => 'N', '1' => 'Y' }; 
+		   IF u.success; success = YesNo.${u.success}; 
+		   ELSE; success = '<I>n/a</I>'; END -%]
+        <TR>
+                <td><A HREF="[% env.script_name
+		    %]?op=editurl&url_id=[% u.url_id %]">[% u.url_id %]</a></td>
+                <td>[% success %]</td>
+                <td>[% u.last_success_formatted.replace(' ', '&nbsp;') %]</td>
+                <td>[% u.message_body_length %]</td>
+                <td>[% u.referencing %]</td>
+                <td><a href="[% env.script_name %]?op=editminer&miner_id=[%
+		    u.miner_id %]">[% u.name %]</a></td>
+                <td><a href="[% u.url %]" target="_blank">[% u.url %]</a></td>
+        </TR>
+	[%- END -%]
+
+</TABLE>
+<TABLE>
+        <TR>
+                <TD>
+			<input type="submit" value="Add URL:">
+			<input type="hidden" name="op" value="newurl">
+			<input type="text" size="60" name="newurl" value="">
+		</TD>
+        </TR>
+</TABLE>
+</FORM>
+<!-- end list urls -->

@@ -1,0 +1,45 @@
+# put this shit into sql dump (for select)
+INSERT INTO code_param (type, code, name) VALUES ('progress', 0, 'broken');
+INSERT INTO code_param (type, code, name) VALUES ('progress', 1, 'ok');
+INSERT INTO code_param (type, code, name) VALUES ('progress', 2, 'great');
+
+#
+# Dumping data for table 'rel'
+#
+
+
+# MySQL dump 7.1
+#
+# Host: cpu86    Database: nfslash
+#--------------------------------------------------------
+# Server version	3.22.32-log
+
+#
+# Dumping data for table 'spider'
+#
+
+INSERT INTO spider VALUES (1,'allminers',20000822190727,'jamie','','[ \'url_info.miner_id > 0\' ]','[\r\n[ 0, 1, q{ rel.parse_code = \'miner\' }, \"LIMIT 5000\" ],\r\n[ 1, 2, q{ rel.parse_code = \'nugget\' }, \"LIMIT 5000\" ],\r\n[ 2, 3, q{ 1 = 0 }, \"LIMIT 0\" ]\r\n]');
+
+# MySQL dump 7.1
+#
+# Host: cpu86    Database: nfslash
+#--------------------------------------------------------
+# Server version	3.22.32-log
+
+#
+# Dumping data for table 'miner'
+#
+
+INSERT INTO miner VALUES (20,'none',20000629201648,'jamie','jamie','broken','','','','','','ThisTextIsNotExpectedToMatchAnything','','Please don\'t edit this miner. -Jamie');
+
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin', 'NewsVac', '[% constants.rootdir %]/newsvac.pl', 5000, 100);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Miners','[% constants.rootdir %]/newsvac.pl?op=listminers',10000,9);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','URLs','[% constants.rootdir %]/newsvac.pl?op=listurls',10000,9);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Spiders','[% constants.rootdir %]/newsvac.pl?op=listspiders',10000,9);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Nuggets','[% constants.rootdir %]/newsvac.pl?op=listnuggets',10000,9);
+m 
+
+INSERT into sections (section, artcount, title, isolate, issue, extras) VALUES ('newsvac', 0, 'NewsVac Links', 0, 0, 0);
+
+INSERT INTO vars (name, value, description) VALUES ('newsvac_topic', 1, 'Default topic for NewsVac items that have been robo-submitted');
+INSERT INTO vars (name, value, description) VALUES ('newsvac_section', 'newsvac', 'Default section for NewsVac items that have been robo-submitted');

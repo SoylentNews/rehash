@@ -1,0 +1,47 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+updateMiner
+__template__
+[% # updateMiner %]
+
+[% IF form.op == 'newminer' %]
+[% INCLUDE titlebar width="100%" title="new miner" %]
+        
+[% ELSIF form.updateminer %]
+[% INCLUDE titlebar width="100%" title="Miner '$name' saved." %]
+
+[% ELSIF form.deleteminer %]
+
+	[% IF num > 0 %]
+[% INCLUDE titlebar
+	width="100%" 
+	title="<B>Cannot delete miner '$name', in use by $url_ar.size URLs</B>"
+%]
+
+<p>You can't delete that miner, it's being used by the following URL(s):
+<UL>
+	[% FOREACH url = url_ar -%]
+<LI>$url_id <a href="$url">$url</a></LI>
+	[% END %]
+</UL>
+	
+<p>If you really want to delete it, edit each URL to stop using it.
+
+	[% ELSE %] 
+[% INCLUDE titlebar
+	width="100%" 
+	title="<B>Deleted miner '$name' (id $miner_id)!</B>"
+%]
+
+	[% END %]
+
+[% END %]

@@ -1,0 +1,63 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+show_miner_rel_info
+__template__
+[% # show_miner_rel_info %]
+
+<p>
+<table width="100%">
+	<tr>
+		<td align="right"><b>ID</b></td>
+		<td><b>Last Attempt</b></td>
+		<td><b>Last Success</b></td>
+		<td><b>URL</b></td>
+		<td><b>Title</b></td>
+		<td width="50%"><b>Slug</b></td>
+		<td><b>Source</b></td>
+	</tr>
+
+	[% FOREACH hashref = arrayref %]
+		[% IF hashref.url.length > 48;
+			url = hashref.url.substr(0, 50);
+			url = "${url}...";
+		   ELSE;
+		   	url = hashref.url;
+		   END -%]
+		[% DEFAULT
+			hashref.slug = "<i>n/a</i>",
+			hashref.source = "<i>n/a</i>",
+			hashref.title = "<i>n/a</i>",
+			hashref.last_attempt = "<i>n/a</i>",
+			hashref.last_success = "<i>n/a</i>"
+		-%]
+		[% IF hashref.url_nugget %]	
+
+	<tr valign="top">
+		<td align=right>
+		<A HREF="[% env.script_name %]?op=editurl&url_id=[% hashref.url_id %]">[% hashref.url_id %]</a>
+		</td>
+		<td>[% hashref.last_attempt %]</td>
+		<td>[% hashref.last_success %]</td>
+		<td><a href="[% hashref.url %]"
+		target="_blank">[% url %]</a></td>
+		<td>[% hashref.title %]</td>
+		<td>[% hashref.slug %]</td>
+		<td>[% hashref.source %]</td>
+	</tr>
+
+		[% END %]
+	[% END %]
+
+</table>
+[% IF arrayref.size == max_results -%] 
+<br><i>(Note - results are limited to the first [% max_results %].)</i>
+[% END -%]

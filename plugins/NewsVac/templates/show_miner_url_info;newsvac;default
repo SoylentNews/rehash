@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+show_miner_url_info
+__template__
+[% # show_miner_url_info %]
+	<p><font size="+1"><b>URL: <a href="[% url %]" target="_new">[% url %]</a></b></font><br>
+	<tt>Original length: [% orig_length %] chars: [% orig_start %] <i>to</i> [% orig_end %]
+	<br>The pre- trimmed [% pre_trimmed_chars %] chars: [% trim_pre_start %] <i>to</i> [% trim_pre_end %]
+	<br>The post trimmed [% post_trimmed_chars %] chars: [% trim_post_start %] <i>to</i> [% trim_post_end %]</tt>
+
+	<pre>[% tags.size %] '&lt;a href' tags in remaining text:
+
+[% FOR t=tags -%]
+[% t.0 %]. [% t.1 %]<font color="red">[% t.2 %]</font>[% t.3 %]
+[% END -%]
+	</pre>

@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+updateSpider
+__template__
+[% # updateSpider %]
+
+[% IF form.updatespider %]
+        
+[% INCLUDE titlebar width="100%" title="Spider '[% form.name %]' saved." %]
+                
+[% ELSIF form.runspider %]
+        
+[% INCLUDE titlebar width="100%" title="Spider '[% spider_name %]' run." %]
+
+[% END %]

@@ -1,0 +1,529 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value -%]
+
+[% CASE "spider_useragent";
+	"Mozilla/4.7 (compatible; newsvac/$version)";
+
+   CASE "newsvac_locked" -%]
+Newsvac Already Locked!
+--------------------------
+NewsVac cannot lock it's semaphore due to the presence of an existing PID file. 
+This either indicates that a copy of NewsVac is running, or that an earlier
+insantiation has crashed. In the later case, please examine your logs to 
+note any errors found; remove the pid file, and restart your servers.
+In the former case, please either wait for the existing instance to finish
+or forcibly start it before rerunning another one.
+
+[% IF constants.runtask_verbosity > 1 -%]
+Error message received was:
+"[% error_message %]"
+[% END -%]
+
+[% CASE "unexpected_init_err" -%]
+NewsVac returned the following error when attempting to obtain a lock:
+"[% error_message %]"
+
+[% CASE "timing_dump" -%]
+[% timestamp %] Timing Dump
+[% FOR d=durations -%]
+[% d.0; # Command
+	FOR c=d.1 -%]
+	[% c.0 %]	[% c.1 %]	[% c.2 %]
+	
+	[%- END -%]
+	[% d.2 %]	[% d.3 %]	total
+	[% d.4 %]			mean
+
+
+[% END %]
+
+[% CASE "add_url_noadderr" -%]
+[% DEFAULT reason="empty" -%]
+Cannot add url '[% url %]', [% reason %]
+
+[% CASE "add_url_result" -%]
+[% IF rc -%]
+ADDED url, '[% url %]'
+[% ELSE -%]
+Insert failed, could NOT ADD url '[% url %]'
+[% END -%]
+
+[% CASE "urls_to_ids_nourls" -%]
+No urls given to urls_to_ids()!
+
+[% CASE "ids_to_urls_noids" -%]
+No url_ids given to ids_to_urls()!
+
+[% CASE "ids_to_urls" -%]
+ids_to_urls...
+hash keys ([% hash_keys.size %]): [% hash_keys.join(' ') %]
+  url_ids ([% id_count %]): [% id_list %]
+     urls ([% urls.size %]): [% urls.join(' ') %]
+
+[% CASE "add_rel_result" -%]
+[% IF rc1 -%]ADDED rel[%- ELSE 
+-%]Did NOT ADD rel [%- IF rc2 -%]but updated rel mark to valid[%- ELSE 
+-%]and could not update rel mark to valid![% END; END %]
+	Url ID#: [% from_url_id %]
+	 To ID#: [% to_url_id %]
+     Parse Code: [% parse_code %]
+	   Type: [% type %]
+
+[% CASE "rel_to_ids_result" -%]
+Given
+	From ID#: [% from_url_id %]
+	  To ID#: [% to_url_id %]
+	Tag Name: [% tagname %]
+	Tag Attr: [% tagattr %]
+Rel IDs are:
+[% rel_ids.join(', ') %]
+
+[% CASE "id_to_rel_result" -%]
+[% IF !ary_ref %]
+Error! Query return no results for rel_id: [% rel_id %]
+[% ELSE -%]
+Rel of #[% rel_id %] is
+	From ID#: [% row.0 %]
+	  To ID#: [% row.1 %]
+	Tag Name: [% row.2 %]
+	Tag Attr: [% row.3 %]
+[%- END -%]
+
+[% CASE "correlate_miner_to_urls_noid" -%]
+No miner id found associated with name '[% miner_name %]'.
+
+[% CASE "correlate_miner_to_urls_result" -%]
+Found miner id #[% miner_id %] associated with name '[% miner_name %]'
+[% FOR u=url_ids -%]
+	updating url_id '[% u %]' to this miner
+[% END %]
+
+[% CASE 'minername_to_id' -%]
+[% IF miner_id.length -%]
+Miner ID #[% miner_id %] is associated with the name '[% miner_name %]'
+[%- ELSE -%]
+No miner found associated with the name '[% miner_name %]'
+[%- END %]
+
+[% CASE 'id_to_minername' -%]
+Miner #[% miner_id %] is called '[% miner_name %]'
+
+[% CASE 'delete_url_ids' -%]
+Deleted the following URL IDs:
+[% id_list %]
+
+[% CASE 'delete_rel_ids' -%]
+Deleted the following REL IDs:
+[% id_list %]
+
+[% CASE 'add_nuggets_return_ids_desturlids' -%]
+add_nuggets_return_ids()
+[% idxtop=dest_url_ids.last; FOR index = [0..idxtop] -%]
+	Dest ID #[% dest_url_ids.$index %] -> [% dest_urls.$index %]
+[% END %]
+
+[% CASE 'add_nuggets_return_ids_nugurlids' -%]
+add_nuggets_return_ids()
+[% idxtop=nugget_url_ids.last; FOR index = [0..idxtop] -%]
+	Nugget ID #[% nugget_url_ids.$index %] -> [% nugget_urls.$index %]
+[% END %]
+
+[% CASE "add_rel_components_missing" -%]
+
+------ Warning ------
+Will not add nugget rel because one or more components are empty: 
+
+#[% idx %]:	Source URL ID: [% src_url_id %]
+		  Dest URL ID: [% dest_url_id %]
+	      Nugget Dest URL: [% nugget_dest_url %]
+	       Nugget URL IDs: [% nugget_url_ids %]
+	   Response Timestamp: [% response_time %]
+
+[% CASE "process_urls" -%]
+Processing URLs:
+[% idxtop=urls.last; FOR index=[0..idxtop] -%]
+	[% index %]. [% IF url_ids.$index %]#[% url_ids.$index %][% ELSE 
+-%]<MISSING>[% END %] - [% IF urls.$index %][% urls.$index %][% ELSE
+-%]<MISSING>[% END %]
+[% END %]
+
+[% CASE "process_url_ids" -%]
+Processing URL IDs:
+[% idxtop=url_ids.last; FOR index=[0..idxtop] -%]
+	[% index %]. [% IF url_ids.$index %]#[% url_ids.$index %][% ELSE
+-%]<MISSING>[% END %] - [% IF urls.$index %][% urls.$index %][% ELSE
+-%]<MISSING>[% END %]
+[% END %]
+
+[% CASE "process_urls_and_ids_listids" -%]
+=== Processing [% num_urls %] URLs with [% url_ids.size %] URL IDs ===
+URL ID List: [% url_ids.join(', ') %]
+
+[% CASE "process_urls_and_ids_missing" -%]
+
+--> URL or URL ID# Missing at index #[% index %]
+
+[% CASE "process_urls_and_ids_reqresult" -%]
+[% result = { '0' => 'FAILED', '1' => 'Succeeded' } -%]
+- Request [% result.$success %] for [% url %] (#[% url_id %])
+
+[% CASE "request_oldinfodisplay" -%]
+-- Old Information:
+[% FOR k=old_info.sort -%]
+	[% k %]: [% IF old_info.$k %][% old_info.$k %][% ELSE %]<UNDEF>[% END
+	-%]
+
+[% END %]
+
+[% CASE "url_still_fresh" -%]
+-- NOT REQUESTING URL ID #[% url_id %] as it is believed fresh for another
+[% dur %] seconds.
+
+[% CASE "request_urlkeysinfo" -%]
+URL ID #[% url_id %]
+--------------------
+     Info keys: [% info.keys.sort.join(' ') %]
+    Other keys: [% other.keys.sort.join(' ') %]
+  Content keys: [% content.keys.sort.join(' ') %]
+Content length: [% content.message_body.length %]
+
+[% CASE "request_urlstale" -%]
+-- URL ID #[% url_id %] is stale (no hash ref).
+
+[% CASE "request_uaerror" -%]
+[% IF err.search('timeout') -%]
+-- Timeout on UA->request() for [% url %] (#[% url_id %])
+[% ELSE -%]
+-- Unknown error on UA->request() for [% url %] (#[% url_id %])]:
+'[% err %]'
+[% END -%]
+
+[% CASE "request_nosuccess" -%]
+-- No success on request of [% url %] (#[% url_id %])
+[% IF response %]Response was [% response %][% END %]
+
+[% CASE "request_delurlbase" -%]
+-- Deleting url_base: 
+	url          - '[% url %]' 
+	url_base     - '[% url_base %]'
+	url_base_str - '[% url_base_str %]'
+
+[% CASE "request_overflow" -%]
+==== DBI OVERFLOW! =====
+Content reference message body length of [% message_body.length
+-%] exceeds maximum size
+of [% 2007 * 1024 %].
+[% IF	(env.0.search('runtask') && constants.runtask_verbosity > 3) or
+	(env.0.search('slashd')  &&  constants.slashd_verbosity > 3)	-%]
+
+Message Body Contents
+=====================
+[% message_body %]
+[%# The following to insure the logs return to visible text state %]
+[% END %]
+
+[% CASE "request_durtoolong" -%]
+-- Request for URL ID #[% url_id %] took way too long, completing in 
+   [% dur %] seconds.
+-- Retrieved [% content_length %] bytes.
+
+[% CASE "analyze_contentlength" -%]
+-- Analysis: Content size of message body = [% content_length %]
+
+[% CASE "analyze_urlid" -%]
+-- Analysis: URL ID #[% url_id %]
+	Parse code: [% parse_code %]
+      Last Success: [% last_success %]
+         Timestamp: [% response_ts %]
+	       URL: [% url %]
+
+[% CASE "analyze_results" -%]
+-- Analyzed URL ID #[% url_id %] using parse code '[% parse_code %]'
+[% success = { '0' => 'FAILED', '1' => 'Success' } -%]
+	success.$is_success in [% duration %] seconds
+	Miner ID #[% miner_id %], [% num_nuggets %] nuggets.
+
+[% CASE "analyze_noparse" -%]
+-- Analysis: No parse method found for parse code '[% parse_code %]'
+
+[% CASE "get_parse_codes" -%]
+-- get_parse_codes: URL ID #[% url_id %] using codes: [% codes.join(' ') %]
+
+[% CASE "parse_html_linkextor_start" -%]
+-- Parsing URL ID #[% url_id %] using HTML::LinkExtor
+
+[% CASE "parse_html_linkextor_baseurl" -%]
+-- Parse (HTML::LinkExtor) Base URL is '[% base_url %]'
+
+[% CASE "parse_html_linkextor_nots" -%]
+-- Parse (HTML::LinkExtor) Cannot determine last given timestamp
+   '[% last_ts %]'
+
+[% CASE "parse_html_linkextor_preparse" -%]
+-- Parse (HTML::LinkExtor) URL ID #[% url_id %]
+[% FOR c=callback.sort -%]
+	[% c %]: [% IF callback.$c %][% callback.$c %][% ELSE %]<UNDEF>[% END 
+	-%]
+
+[% END %]
+[% CASE "parse_html_linkextor_postparse" -%]
+-- Parse (HTML::LinkExtor) URL ID #[% url_id %], body size [% content_length
+-%] bytes.
+   Found: [% callback_link.sort.join(' ') %]
+
+[% CASE "trim_body_bothpredefined" -%]
+-- trim_body: Both pre_text and pre_regex defined by Miner ID #[% miner_id %]
+
+[% CASE "trim_body_thereg" -%]
+-- trim_body: the_reg [% type %] - '[% the_reg %] for Miner ID #[% miner_id %]
+
+[% CASE "trim_body_bothpostdefined" -%]
+-- trim_body: Both post_text and post_regex defined for Miner ID #[% miner_id
+-%]
+
+
+[% CASE "trim_body" -%]
+-- trim_body: Miner ID #[% miner_id %]
+   Body length was [% orig_body_length %] and is now [% body_length -%]
+
+[% CASE "parse_miner_info" -%]
+-- parse_miner: URL - [% url %] (#[% url_id %])
+		Miner #[% miner_id %]
+
+[% CASE "parse_miner_nots" -%]
+-- parse_miner: Cannot determine given timestamp '[% timestamp %]'
+
+[% CASE "parse_miner_ignore" -%]
+-- parse_miner: Ignoring miner 'none' for URL [% url %] (#[% url_id %])
+
+[% CASE "parse_miner_emptybody" -%]
+-- parse_miner: Empty message body for URL associated w/ Miner #[% miner_id %]:
+URL [% url %] (#[% url_id %])
+
+[% CASE "parse_miner_noregex" -%]
+-- parse_miner: Attempt to parse with no regex!
+Miner keys are: [% hr.sort.join(', ') %]
+
+[% CASE "parse_miner_regexerr" -%]
+-- parse_miner: Regular expression error while parsing Miner #[% miner_id %]
+URL [% url %] (#[% url_id %])
+ERROR '[% error %]'
+
+[% CASE "parse_miner_minerdata" -%]
+Base Url: [% base_url %]
+
+Extraction key regex: [% extraction_key_regex %]
+ Message body length: [% body_length %]
+        Extract vars: [% extract_vars.join(' ') %]
+          Tweak code: [% tweak_code %]
+
+[% CASE "parse_miner_extractions" -%]
+-- parse_miner: Extractions are '[% extractions %]'
+
+[% CASE "parse_miner_bodystats" -%]
+Message Body Statistics
+-----------------------
+        Length: [% message_body.length %]
+First 40 chars: '[% message_body.substr(0,40)    %]
+ Last 40 chars: '[% message_body.substr(-40, 40) %]
+
+[% CASE "parse_miner_trackextract" -%]
+-- parse_miner: IDs ([% url_id %], [% miner_id %]) at position [% pos %]
+Extractions: [% extractions.join(', ') %]
+
+[% CASE "parse_miner_showurl" -%]
+-- parse_miner: Nugget URL Info
+	     URL: [% url %]
+	Base URL: [% base_url %]
+	url_base: [% url_base %]
+	Original: [% url_orig %]
+
+[% CASE "parse_miner_badproto" -%]
+-- parse_miner: Unsupported protocol found in URL
+	Original: [% url_orig %]
+	Base URL: [% base_url %]
+	     Now: [% url %]
+
+[% CASE "parse_miner_nuggetkeys" -%]
+-- parse_miner: Nugget keys are [% nugget_keys.join(', ') %]
+
+[% CASE "parse_miner_nuggetinfo" -%]
+-- parse_miner: From Miner '[% miner_name %]' (#[% miner_id %])
+Nuggets: [% nugget_keys.join(', ') %]
+
+[% CASE "parse_miner_preaddnugget" -%]
+-- parse_miner: Timing Dump pre-add Nugget
+
+[% CASE "parse_miner_shownuggets" -%]
+[% idxtop = nuggets.size; idxtop %] Nuggets found via Miner.
+[% FOR n = [0 .. idxtop] -%]
+[% n %]:   URL:	[% url %]
+	 Title:	[% nuggets.${n}.title  %]
+	Source:	[% nuggets.${n}.source %]
+	  Slug: [% nuggets.${n}.slug   %]
+	  Body: [% bodies.$n %]
+[% END %]
+
+[% CASE "parse_miner_addnuggetstart" -%]
+-- parse_miner: START Adding [% num %] nuggets for Miner #[% miner_id
+-%], URL #[% url_id %]
+
+[% CASE "parse_miner_addnuggetend" -%]
+-- parse_miner: END Adding nuggets.
+Returned IDs: [% nugget_url_ids.join(', ') %]
+
+[% CASE "parse_miner_processurlstart" -%]
+-- parse_miner: START Processing URLs for Miner #[% miner_id %], URL #[% url_id 
+-%]
+
+[% CASE "parse_miner_processurlend" -%]
+-- parse_miner: END Processing URLs, timing dump follows
+
+[% CASE "parse_miner_longdur" -%]
+-- parse_miner: Took over 40 seconds to process this Miner:
+Miner '[% miner_name %]' (#[% miner_id %]), URL #[% url_id %]
+	Body Length = [% message_len %]
+	Nugget Keys = [% nuggets %]
+	    Time #1 = [% midtime_1 %]
+	    Time #2 = [% midtime_2 %]
+	   Duration = [% duration %]
+
+[% CASE "parse_plaintext_start" -%]
+-- parse_plaintext: Begin parsing of URL ID #[% url_id %]
+
+[% CASE "parse_plaintext_lynxlate" -%]
+-- parse_plaintext: Lynx ran late on URL ID #[% url_id %], output [% output_len
+-%] bytes.
+
+[% CASE "parse_plaintext_lynxerr" -%]
+-- parse_plaintext: Unknown error resulted when attempting to run lynx:
+'[% error %]'
+
+[% CASE "parse_plaintext_result" -%]
+-- parse_plaintext: Completed
+[% IF changed %]Updated![% ELSE %]No changes.[% END %]
+	URL ID #[% url_id %]
+[% IF changed -%]
+	Timeout = [% timeout %]
+[% END -%]
+	Message Body Length = [% bodylen %]
+	   Plaintext Length = [% plainlen %]
+
+[% CASE "parse_nugget" -%]
+-- parse_nugget: Added Relation between URL ID #[% url_id 
+-%] and (Nugget) URL ID #[% nugget_url_id %]
+Response Timestamp: [% timestamp %]
+
+[% CASE "spiderbyname_invalidname" -%]
+ILLEGAL SPIDER NAME - No spider records found that matched the name of:
+"[% name_quoted %]" [% IF name != name_quoted %]([% name_quoted %])[% END %]
+
+[% CASE "spiderbyname_start" -%]
+BEGIN SPIDER BY NAME =========================================================
+	[% name %]
+========================================================= BEGIN SPIDER BY NAME
+   Quoted Name: [% name_quoted %]
+    Conditions: [% conditions_text %]
+Group 0 Select: [% group_0_selects_text %]
+      Commands: [% commands_text %]
+
+References
+----------
+Conditions: [% conditions_ref %]
+   Selects: [% group_0_selects_ref %]
+  Commands:
+[% FOR c=commands_ref -%]
+	[% c %]
+[% END -%]
+
+[% CASE "spiderbyname_end" -%]
+
+END SPIDER BY NAME ===========================================================
+	[% name %]
+=========================================================== END SPIDER BY NAME
+
+[% CASE "spider_command" -%]
+== Spider Command:
+	Source: '[% src_ar %]'
+	  Dest: '[% dest_ar %]'
+	 Where: '[% where %]'
+	 Extra: '[% extra %]'
+
+[% CASE "spider_processingitem" -%]
+-- spider: Processing the following IDs:
+[% ids.join(', ') %]
+
+[% CASE "spider_selecttext" -%]
+-- spider: Using query
+'[% select_text %]'
+
+[% CASE "spider_destids" -%]
+- [% IF dest_ids.size %]Spider using the following destination URL IDs:
+	[% dest_ids.join(', ') %]
+[% ELSE -%]No destination IDs resulted from last select.[% END %]
+
+[% CASE "spider_init_where" -%]
+-- spider_init: Using condition: '[% where_text %]'
+
+[% CASE "spider_init_ids" -%]
+-- spider_init: Storing the following IDs in the class:
+[% ids.join(', ') %]
+
+[% CASE "garbage_collect" -%]
+-- garbage_collect: Completed!
+Recycled [% num_rels %] relationships, [% num_urls %] URLs, and [% num_bodies
+-%] message bodies.
+Timing dump follows...
+
+[% CASE "robosubmit_worth" -%]
+	W[[% index %]]: [% miner %] [% weight %]
+
+[% CASE "robosubmit_result" -%]
+-- robosubmit: Completed!
+Out of original [% total %], [% worth %] worthy, [% unworthy %] unworthy in [%
+duration -%] seconds.
+
+[% CASE "show_miner_rel_info" -%]
+
+miner rel does not point to a nugget, to '[% url_id %]' from: 
+	[% url_id_list.join(',') %]
+
+[% CASE "miner_update_warning" -%]
+
+------ Miner update ------
+miner update id: 	[% id %]
+name: 			[% name %]
+form name: 		[% form.name %] 
+form owner_id: 		[% form.owner_aid %]
+
+[% CASE "update_content_length" -%]
+length(update_content{message_body}): [% content_length %]
+
+[% CASE "noop" -%]    
+[% INCLUDE titlebar width="100%" title="No Op Given" %]
+
+[% CASE "processing_urls" -%]
+<p>Processing URL IDs '[% url_ids.join(' ') %]' ...
+
+[% CASE "processed_urls" -%]
+<p>Processed URL IDs '[% url_ids.join(' ') %]' in [% dur %] seconds.
+
+[% CASE "excerptdata" -%]
+[% before %]<b>[% excerpt %]</b>[% after %]
+
+[% CASE "formatted_excerpt" -%]
+<a href="[% url %]">url</a> [% slug %] ... [% excerpts.join(' ... ') %]
+
+[% END %]

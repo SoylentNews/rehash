@@ -1,0 +1,33 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+updateUrl
+__template__
+[% # updateUrl %]
+
+[% IF form.deleteurl %] 
+[% INCLUDE titlebar
+	width="100%" 
+	title="Deleted url id '$url_id': '$url'" 
+%]
+
+[% ELSIF form.requesturl %]
+[% INCLUDE titlebar 
+	width="100%" 
+	title="Force-requested url id '$url_id' in $duration secs" %]
+
+[% ELSE %]
+[% INCLUDE titlebar
+	width="100%" 
+	title="Update url id '$url_id' to miner '$miner_name'" 
+%]
+	
+[% END %]

@@ -1,0 +1,18 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+processUrls
+__template__
+[% # processUrls %]
+
+[% INCLUDE titlebar width="100%" title="Processing urls..." %]
+
+<p>Processed URL IDs [% ids %] in [% duration %] seconds.

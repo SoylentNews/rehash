@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+newsvac
+__lang__
+en_US
+__name__
+messages
+__template__
+[% # messages %]
+
+[% USE Slash %]
+[% SWITCH value;
+ 
+CASE "show_miner_rel_info" %]    
+warn "miner rel does not point to a nugget, to '[% url_id %]' from '[% url_id_list %]'";
+
+[% CASE "noop" %]    
+[% TITLEBAR WIDTH="100%" TITLE="No Op Given" %]
+
+[% END %]
