@@ -1355,23 +1355,22 @@ sub processCustomTags {
 	if (grep /^ECODE$/, @{$constants->{approvedtags}}) {
 		my $ecode   = 'ecode';
 		my $open    = qr[\n* <\s* (?:$ecode) (?: \s+ END="(\w+)")? \s*> \n*]xsio;
-		my $close_1 = qr[$open (.*?) \n* <\s* /\2    \s*> \n*]xsio;  # if END is used
-		my $close_2 = qr[$open (.*?) \n* <\s* /ECODE \s*> \n*]xsio;  # if END is not used
+		my $close_1 = qr[($open (.*?) \n* <\s* /\2    \s*> \n*)]xsio;  # if END is used
+		my $close_2 = qr[($open (.*?) \n* <\s* /ECODE \s*> \n*)]xsio;  # if END is not used
 
 		while ($str =~ m[($open)]g) {
 			my $len = length($1);
 			my $end = $2;
 			my $pos = pos($str) - $len;
 
-			my $newlen = 25;  # length('<BLOCKQUOTE></BLOCKQUOTE>')
 			my $close = $end ? $close_1 : $close_2;
-
 			my $substr = substr($str, $pos);
 			if ($substr =~ m/^$close/si) {
-				my $code = strip_code($2);
-				$newlen += length($code);
-				substr($str, $pos, $newlen) = "<blockquote>$code</blockquote>";
-				pos($str) = $pos + $newlen;
+				my $len = length($1);
+				my $code = strip_code($3);
+				my $newstr = "<blockquote>$code</blockquote>";
+				substr($str, $pos, $len) = $newstr;
+				pos($str) = $pos + length($newstr);
 			}
 		}
 	}
