@@ -76,7 +76,6 @@ __template__
    END;
 
    FOREACH t = topic_children;
-      # XXXSKIN obviously there are smarter ways to do this
       NEXT IF !topics.$t.searchable;
       listnames.${topics.$t.textname} = t;
    END;
