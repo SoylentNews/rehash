@@ -16,6 +16,6 @@ my $uid = 2;
 my $nick = $soap->get_nickname($uid)->result;
 my $nuid = $soap->get_uid($nick)->result;
 
-print "Results for UID $uid: $nickname ($nuid)\n";
+print "Results for UID $uid: $nick ($nuid)\n";
 
 __END__
