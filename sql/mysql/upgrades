@@ -2677,3 +2677,16 @@ DROP TABLE IF EXISTS users_count;
 
 INSERT INTO vars (name, value, description) VALUES ('topic_popup_weights', '40=0|30=Mainpage|20=0|10=Sectional|0=0', 'The dividing lines etc. for the topic select box in the story editor');
 
+ALTER TABLE comments TYPE=InnoDB;
+# These next four changes should not be done if you have the Search plugin
+# installed (you almost certainly do), on your _search_ database.  If you
+# have multiple databases, you might issue these commands on your master,
+# and they will probably simply not have an effect (throw a harmless error)
+# on your search DB.  If you have only one DB, skip these next four lines.
+ALTER TABLE comment_text TYPE=InnoDB;
+ALTER TABLE pollquestions TYPE=InnoDB;
+ALTER TABLE story_text TYPE=InnoDB;
+ALTER TABLE users TYPE=InnoDB;
+# (We're going to change searching soon, so this last MyISAM requirement
+# may go away.  Stay tuned.)
+

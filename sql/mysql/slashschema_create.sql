@@ -268,7 +268,7 @@ CREATE TABLE comments (
 	KEY countreplies (pid,sid),
 	KEY uid_date (uid,date),
 	KEY date_sid (date,sid)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'comment_text'
@@ -279,7 +279,7 @@ CREATE TABLE comment_text (
 	cid mediumint UNSIGNED NOT NULL,
 	comment text NOT NULL,
 	PRIMARY KEY (cid)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'content_filters'
@@ -570,7 +570,7 @@ CREATE TABLE pollquestions (
 	flags ENUM("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
 	polltype enum('nodisplay','section','story') default 'section',
 	PRIMARY KEY (qid)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'pollvoters'
@@ -856,7 +856,7 @@ CREATE TABLE story_text (
 	relatedtext text,
 	rendered text,
 	PRIMARY KEY (stoid)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'story_param'
@@ -1100,7 +1100,7 @@ CREATE TABLE users (
 	KEY chk4user (realemail,nickname),
 	KEY chk4matchname (matchname),
 	KEY author_lookup (author)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users_acl'
@@ -1296,17 +1296,16 @@ ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
 ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
 ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
 ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);
-#ALTER TABLE pollquestions ADD FOREIGN KEY (section) REFERENCES sections(section);
 ALTER TABLE pollquestions ADD FOREIGN KEY (discussion) REFERENCES discussions(id);
 ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
-# Stories is now InnoDB and these other tables are still MyISAM,
-# so no foreign keys between them.
+# This doesn't work, makes createStory die
 #ALTER TABLE stories ADD FOREIGN KEY (uid) REFERENCES users(uid);
+# These don't work, should check why...
 #ALTER TABLE stories ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 #ALTER TABLE stories ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
-ALTER TABLE story_text ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
-ALTER TABLE story_topics_chosen ADD FOREIGN KEY (tid) REFERENCES topics(tid);
-ALTER TABLE story_topics_rendered ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+#ALTER TABLE story_text ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
+#ALTER TABLE story_topics_chosen ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+#ALTER TABLE story_topics_rendered ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 #ALTER TABLE submissions ADD FOREIGN KEY (uid) REFERENCES users(uid);
 
 # Commented-out foreign keys are ones which currently cannot be used
