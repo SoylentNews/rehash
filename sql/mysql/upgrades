@@ -497,8 +497,6 @@ ALTER TABLE sections ADD last_update timestamp;
 # For plugins/Email ONLY (LC, Slashcode, etc -- NOT SLASHDOT!)
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, 0);
 
-# USEPERL LAST UPDATED HERE
-
 # End of R_2_3_0_31, Start of T_2_3_0_32
 
 INSERT INTO vars (name, value, description) VALUES ('comments_perday_bykarma','-1=2|25=25|99999=50','Number of comments allowed to be posted per day, by karma score.');
@@ -513,4 +511,6 @@ INSERT INTO vars (name, value, description) VALUES ('users_bio_length','1024','L
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720','Hours after which a submissions\'s ipid/subnetid are forgotten; set very large to disable');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');
+
 # SLASHCODE LAST UPDATED HERE
+# USEPERL LAST UPDATED HERE
