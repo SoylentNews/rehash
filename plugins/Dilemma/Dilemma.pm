@@ -723,12 +723,12 @@ sub getLogDataDump {
 	my $species_info_hr = $self->getDilemmaSpeciesInfo();
 	my $agents_info_hr = $self->getDilemmaAgentsInfo();
 	my $meetlog_sth = $self->sqlSelectMany(
-		"*",
+		"meetid, trid, tick, foodsize",
 		"dilemma_meetlog",
 		"",
 		"ORDER BY meetid");
 	my $playlog_sth = $self->sqlSelectMany(
-		"*",
+		"meetid, daid, playtry, playactual, reward, sawdaid",
 		"dilemma_playlog",
 		"",
 		"ORDER BY meetid, daid");
