@@ -20,6 +20,16 @@ $task{$me}{code} = sub {
 	my($vuser, $consts, $slashdb, $user) = @_;
 	my(@rc);
 
+	slashdLog('Updating User Logins Begin');
+	$slashdb->updateStamps();
+	slashdLog('Updating User Logins End');
+
+	slashdLog('Update Total Counts Begin');
+	my $totalHits = $slashdb->getVar("totalhits");
+	my $count = $slashdb->countAccesslogDaily();
+	$slashdb->setVar("totalhits", $sdTotalHits);
+	slashdLog('Update Total Counts End');
+
 	slashdLog('Daily Deleting Begin');
 	$slashdb->deleteDaily();
 	slashdLog('Daily Deleting End');
