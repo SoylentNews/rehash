@@ -16,7 +16,7 @@ for my $bid (@color_bids) {
 	splice(@f, 5, 0, $f[2]);
 	splice(@b, 5, 0, $f[3]);
 	$slashdb->setBlock($bid, { block => join(",", @f, @b) });
-	print "$bid\t@f @b"
+	print "$bid\t@f @b\n"
 }
 
 __END__

@@ -1024,7 +1024,7 @@ sub createMenu {
 		my $nick_attribute = strip_attribute($lastlook_user->{nickname});
 		push @$menu_items, {
 			value =>	"$constants->{rootdir}/~$nick_fix",
-			label =>	"~$nick_attribute",
+			label =>	"~$nick_attribute ($user->{lastlookuid})",
 			sel_label =>	"otheruser",
 			menuorder =>	99999,
 		};
