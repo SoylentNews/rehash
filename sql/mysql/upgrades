@@ -379,9 +379,7 @@ ALTER TABLE pollanswers CHANGE COLUMN qid qid MEDIUMINT UNSIGNED NOT NULL;
 
 ALTER TABLE formkeys CHANGE COLUMN formname formname varchar(32) DEFAULT '' NOT NULL;
 
-# SLASHDOT LAST UPDATED HERE
-
-# End of R_2_3_0_27
+# End of R_2_3_0_27, Start of T_2_3_0_28
 
 ALTER TABLE vars CHANGE COLUMN name name varchar(48) DEFAULT '' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Tags that don\'t need to be closed');
@@ -390,4 +388,11 @@ INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Ta
 
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_28
+
+INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus, and goodkarma)');
+INSERT INTO vars (name, value, description) VALUES ('karma_obfuscate','0','Should users see, not their numeric karma score, but instead an adjective describing their approximate karma?');
 

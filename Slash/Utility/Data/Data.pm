@@ -772,7 +772,7 @@ The text.
 
 sub breakHtml {
 	my($text, $mwl) = @_;
-	my($new, $l, $c, $in_tag, $this_tag, $cwl);
+	my($new);
 
 	my $constants = getCurrentStatic();
 
@@ -780,69 +780,44 @@ sub breakHtml {
 	# a<P>b</P> breaks words, y<B>z</B> does not
 	my $approvedtags_break = $constants->{'approvedtags_break'}
 		|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
-	my %is_break_tag = map { uc, 1 } @$approvedtags_break;
+	my $break_tag = join '|', @$approvedtags_break;
+	$break_tag = qr{$break_tag}i;
 
 	$mwl = $mwl || $constants->{'breakhtml_wordlength'} || 50;
-	$l = length $text;
-	my $cnswcr = $constants->{comment_nonstartwordchars_regex};
 
-	for (my $i = 0; $i < $l; ++$i) {
-		my $append_c = 1;
-		$c = substr($text, $i, 1);
-		my $c_sp = ($c =~ /^\s$/) ? 1 : 0;
-		if ($c eq '<')			{ $in_tag = 1 }
-		  elsif ($c eq '>')		{
-			$in_tag = 0;
-			$this_tag =~ s{^/?(\S+).*}{\U$1};
-			$cwl = 0 if $is_break_tag{$this_tag};
-			$this_tag = '';
-		} elsif ($in_tag)		{ $this_tag .= $c }
-		  elsif ($c_sp || $cwl >= $mwl) {
-		  	my $nexttext = substr($text, $i);
-			my $nsc;
-			# If we're here because the char is a space, great.
-			# If not, add a space.  Either way, check the
-			# succeeding text to see if further spaces are
-			# necessary to work around the Windows/MSIE bug.
-			if (!$c_sp) {
-				# Prepend a space.
-				$new .= ' ';
-				$nexttext = " $nexttext";
-			}
-			if ($cnswcr && (($nsc) = $nexttext =~ $cnswcr)) {
-				# This space doesn't count as a wordbreak because of
-				# a Windows/MSIE bug. The regex puts everything up to
-				# and including the non-start-char(s) into $nsc.
-				my $nsclen = length($nsc);
-				if ($cwl+$nsclen >= $mwl) {
-					# If lots of nscs were given, break them up
-					# before appending.  Start with the first,
-					# then all $mwl-long sequences after that.
-					$nsc =~ s{(\S)}{$1 };
-					while ($nsc =~ m{\S{$mwl,}\S}o) {
-						$nsc =~ s{(\S{$mwl})(\S)}{$1 $2}o;
-					}
-					$new .= "$nsc "; # append the nsc(s)
-					$i += $nsclen	# we're skipping ahead
-						-1;	# account for ++$i coming up
-					$cwl = 0;	# starting new word
-					$append_c = 0;
-				} else {
-					$new .= $nsc;	# append the nsc(s)
-					$i += $nsclen	# we're skipping ahead
-						-1;	# account for ++$i coming up
-					$cwl += $nsclen; # still in a word
-					$append_c = 0;
-				}
-			} else {
-				# This space we just copied, or the one we
-				# inserted before the char we're about to copy,
-				# does count as a wordbreak.
-				$cwl = $c_sp ? 0 : 1;
-			}
-		} else { ++$cwl }
-		$new .= $c if $append_c;
-	}
+	my $ie_bug_char = qr{[,./:;]};	# Characters IE deems worthy of turning
+					# into nbsps
+
+	$new = $text;
+
+	# The old breaking loop was way too hairy and didn't
+	# work properly anyway, so I'm replacing it with this far simpler
+	# code. -jcg
+
+	# First, convert spaces before an IE bug character into an nbsp.
+	# This ensures that the standard word-breaking mechanism works
+	# despite the IE 'feature' of placing an nbsp behind these characters.
+	$new =~ s{\s+($ie_bug_char)}{\xA0$1}gs;
+
+	# Mark off breaking tags
+	$new =~ s{<(/?(?:$break_tag))>}{ <$1> }gs;
+	# Temporarily hide whitespace inside tags so that the regex below
+	# won't accidentally catch attributes, e.g. the HREF= of an A tag.
+	$new =~ s{(<[^>\s]*)\s}{$1\x00}gs;
+	# Break up overlong words, treating HTML tags as single characters
+	$new =~ s[(
+                    (?:^|\G|\s)		# Must start at a word bound
+                    (?:
+                      (?>(?:<[^>]+>)*)	# Eat up HTML tags
+                      \S
+		    ){$mwl}		# $mwl non-HTML-tag chars in a row
+		  )][$1 ]gsx;
+	# Unhide tag whitespace
+	$new =~ s{\x00}{ }g;
+	# If one of our spaces landed before an IE bug character, drop in
+	# an nbsp to prevent getting around the filter by evenly spacing
+	# bug characters every $mwl characters.
+	$new =~ s{ ($ie_bug_char)}{ &nbsp;$1}gs;
 
 	return $new;
 }
@@ -1047,14 +1022,14 @@ sub approveTag {
 	# These tags go through a secondary, fancier approval process.
 	# Note that approvedtags overrides what is/isn't allowed here.
 	# (At some point we should put this hash into a var, maybe
-	# like "a:href_RU img:src_RU,width,height,alt,longdesc_U"?
+	# like "a:href_RU img:src_RU,alt,width,height,longdesc_U"?)
 	my %attr = (
-		A =>	{ HREF =>	{ req => 1, url => 1 } },
-		IMG =>	{ SRC =>	{ req => 1, url => 1 },
-			  WIDTH =>	{},
-			  HEIGHT =>	{},
-			  ALT =>	{},
-			  LONGDESC =>	{ url => 1 } },
+		A =>	{ HREF =>	{ ord => 1, req => 1, url => 1 } },
+		IMG =>	{ SRC =>	{ ord => 1, req => 1, url => 1 },
+			  ALT =>	{ ord => 2                     },
+			  WIDTH =>	{ ord => 3                     },
+			  HEIGHT =>	{ ord => 4                     },
+			  LONGDESC =>	{ ord => 5,           url => 1 }, },
 	);
 	if ($slash) {
 
@@ -1073,7 +1048,11 @@ sub approveTag {
 
 		my $tree = HTML::TreeBuilder->new_from_content("<$wholetag>");
 		my($elem) = $tree->look_down(_tag => 'body')->content_list;
-		my @attr_order = grep !/^_/, $elem->all_attr_names;
+		return "" unless $elem;
+		my @attr_order =
+			sort { $allowed{uc $a}{ord} <=> $allowed{uc $b}{ord} }
+			grep { !/^_/ && exists $allowed{uc $_} }
+			$elem->all_attr_names;
 		my %attr_data  = map { ($_, $elem->attr($_)) } @attr_order;
 		my $num_req_found = 0;
 #use Data::Dumper;

@@ -72,7 +72,18 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 [% END %]
 </P>
 [% IF karma_flag && (admin_flag || nickmatch_flag)  %]
-        <B>Karma</B> [% useredit.karma %] (mostly the sum of moderation done to users comments)<BR>
+	<B>Karma:</B>
+	[% IF constants.karma_obfuscate;
+		FOREACH adj = constants.karma_adj.keys.nsort;
+			IF useredit.karma <= adj;
+				constants.karma_adj.$adj;
+				" (mostly affected by moderation done to your comments)";
+				LAST;
+			END;
+		END;
+	ELSE;
+		useredit.karma; "  (mostly the sum of moderation done to your comments)";
+	END; %]<BR>
 [% END %]
 
 [% IF useredit.bio %]
