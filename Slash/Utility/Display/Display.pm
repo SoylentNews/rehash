@@ -1469,13 +1469,18 @@ sub _slashUser {
 sub _slashFile {
 	my($tokens, $token, $newtext) = @_;
 
+	my $id = $token->[1]{id};
+	my $title = $token->[1]{title};
+	my $text = $tokens->get_text("/slash");
+	$title ||= $text;
 	my $content = slashDisplay('fileLink', {
-		id    => $token->[1]{id},
-		title => $token->[1]{title},
+		id    => $id,
+		title => $title,
+		text => $text,
 	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-FILE');
 
-	$$newtext =~ s/\Q$token->[3]\E/$content/;
+	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 }
 
 sub _slashLink {
