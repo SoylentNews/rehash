@@ -1449,6 +1449,8 @@ sub deleteSubmission {
 	}
 
 	for (keys %{$form}) {
+		# $form has several new internal variables that match this regexp, so 
+		# the logic below should always check $t.
 		next unless /(.*)_(.*)/;
 		my($t, $n) = ($1, $2);
 		if ($t eq "note" || $t eq "comment" || $t eq "section") {
@@ -1468,10 +1470,9 @@ sub deleteSubmission {
 				$self->sqlUpdate("submissions", \%sub,
 					"subid=" . $self->sqlQuote($n));
 			}
-		} else {
-			my $key = $n;
+		} elsif ($t eq 'del') {
 			$self->sqlUpdate("submissions", { del => 1 },
-				"subid='$key'");
+				'subid=' . $self->sqlQuote($n));
 			$self->setUser($uid,
 				{ -deletedsubmissions => 'deletedsubmissions+1' }
 			);
@@ -4152,10 +4153,13 @@ sub updateStory {
 # cache elsewhere (namely in %Slash::Apache::constants)
 sub getSlashConf {
 	my($self) = @_;
-	# get all the data, yo
-	my %conf = map { $_->[0], $_->[1] }
-		@{ $self->sqlSelectAll('name, value', 'vars') };
 
+	# get all the data, yo! However make sure we can return if any DB
+	# errors occur.
+	my $confdata = $self->sqlSelectAll('name, value', 'vars');
+	return if !defined $confdata;
+	my %conf = map { $_->[0], $_->[1] } @{$confdata};
+		
 	# the rest of this function is where is where we fix up
 	# any bad or missing data in the vars table
 	$conf{rootdir}		||= "//$conf{basedomain}";
@@ -4168,6 +4172,7 @@ sub getSlashConf {
 	$conf{maxkarma}		= 999  unless defined $conf{maxkarma};
 	$conf{minkarma}		= -999 unless defined $conf{minkarma};
 	$conf{expiry_exponent}	= 1 unless defined $conf{expiry_exponent};
+	$conf{panic}		||=0;
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {
