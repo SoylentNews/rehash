@@ -1522,7 +1522,7 @@ sub getTopBadPasswordsByUID{
 	my $min = $options->{min};
 
 	my $other = "GROUP BY uid ";
-	$other .= " HAVING count(DISTINCT password) >= $options->{min}" if $min;
+	$other .= " HAVING count >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 
 	return $self->sqlSelectAllHashrefArray(
@@ -1539,7 +1539,7 @@ sub getTopBadPasswordsByIP{
 	my $min = $options->{min};
 
 	my $other = "GROUP BY ip";
-	$other .= " HAVING count(DISTINCT password) >= $options->{min}" if $min;
+	$other .= " HAVING count >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 	
 	return $self->sqlSelectAllHashrefArray(
@@ -1556,7 +1556,7 @@ sub getTopBadPasswordsBySubnet{
 	my $min = $options->{min};
 
 	my $other = "GROUP BY subnet";
-	$other .= " HAVING count(DISTINCT password) >= $options->{min}" if $min;
+	$other .= " HAVING count >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 
 	return $self->sqlSelectAllHashrefArray(
