@@ -605,6 +605,8 @@ Bender:When will man learn that all races are equally inferior to robots?
 Bender:Curse my natural showmanship!
 Bender:I'm not allowed to sing. Court order.
 Bender:Boy, who knew a cooler could also make a handy wang coffin?
+Bender:I'm so embarrassed. I wish everybody else was dead.
+Bender:Professor! Make a women out of me!
 Fry:There's a lot about my face you don't know.
 Fry:Drugs are for losers. And hypnosis is for losers with big weird eyebrows.
 Fry:These new hands are great. I'm gonna break them in tonight.
