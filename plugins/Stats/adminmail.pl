@@ -87,7 +87,7 @@ EOT
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
-	for(qw| index article search comments palm journal rss|) {
+	for (qw|index article search comments palm journal rss|) {
 		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
 		my $pages = $stats->countDailyByPage($_, $yesterday);
 		my $bytes = $stats->countBytesByPage($_, $yesterday);

@@ -99,8 +99,10 @@ my %descriptions = (
 
 	'section_subsection'
 		=> sub { $_[0]->sqlSelectMany('id,title', 'subsections', "section='$_[2]'") },
+
 	'section_subsection_names'
 		=> sub { $_[0]->sqlSelectMany('title,id', 'subsections', "section='$_[2]'") },
+
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
 
@@ -115,6 +117,7 @@ my %descriptions = (
 
 	'displaycodes_sectional'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='displaycodes_sectional'") },
+
 	'commentcodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='commentcodes'") },
 

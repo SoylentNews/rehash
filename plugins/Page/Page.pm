@@ -79,9 +79,9 @@ sub displayStories {
 		my $subsections = $slashdb->getDescriptions('section_subsection_names', $section); 
 		# from title to id
 		$misc->{subsection} = $subsections->{$other->{subsection}};
-		$limit = $other->{count} ? $other->{count} : $slashdb->getSubSection($misc->{subsection}, 'artcount');
+		$limit = $other->{count} || $slashdb->getSubSection($misc->{subsection}, 'artcount');
 	} else {
-		$limit = $other->{count} ? $other->{count} : $slashdb->getSection($section, 'artcount');
+		$limit = $other->{count} || $slashdb->getSection($section, 'artcount');
 	}
 
 	my $storystruct = [];
