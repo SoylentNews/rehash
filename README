@@ -2,7 +2,7 @@ NAME
     README - Slashdot Readme
 
 DESCRIPTION
-    This is the README file for Slash, release 1.0.8. Please read
+    This is the README file for Slash, release 1.0.9. Please read
     all documentation carefully. The various documents explain the
     database schema, the various fields in the database, and some of
     the reasoning behind the design of the schema, installation and
@@ -31,7 +31,7 @@ DESCRIPTION
     See the Slash web site, with support, docs, latest downloads,
     FAQs, and more, at <URL:http://slashcode.com/>.
 
-    This release is tagged in CVS as v1_0_8_0. See the SourceForge
+    This release is tagged in CVS as v1_0_9_0. See the SourceForge
     site at <http://sourceforge.net/projects/slashcode/> for CVS,
     bug reporting, patch submissions, and downloads.
 
@@ -88,6 +88,5 @@ DESCRIPTION
     See INSTALL.
 
 AUTHOR
-    Patrick Galbraith and Chris Nandor. Last Modified August 18,
-    2000.
-
+    Patrick Galbraith and Chris Nandor. Last Modified Thursday,
+    October 5, 2000.

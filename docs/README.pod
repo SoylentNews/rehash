@@ -4,7 +4,7 @@ README - Slashdot Readme
 
 =head1 DESCRIPTION
 
-This is the README file for Slash, release 1.0.8. Please read all
+This is the README file for Slash, release 1.0.9. Please read all
 documentation carefully.  The various documents explain the database
 schema, the various fields in the database, and some of the reasoning
 behind the design of the schema, installation and setup.
@@ -32,7 +32,7 @@ first.
 See the Slash web site, with support, docs, latest downloads, FAQs, and
 more, at E<lt>URL:http://slashcode.com/E<gt>.
 
-This release is tagged in CVS as v1_0_8_0.  See the SourceForge site
+This release is tagged in CVS as v1_0_9_0.  See the SourceForge site
 at E<lt>http://sourceforge.net/projects/slashcode/E<gt> for CVS, bug
 reporting, patch submissions, and downloads.
 
@@ -95,4 +95,4 @@ See F<INSTALL>.
 
 =head1 AUTHOR
 
-Patrick Galbraith and Chris Nandor.  Last Modified August 18, 2000.
+Patrick Galbraith and Chris Nandor.  Last Modified Thursday, October 5, 2000.
