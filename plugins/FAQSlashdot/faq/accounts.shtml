@@ -184,7 +184,9 @@ web browser rendering. <br>
   <br>
   <i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
   Last Modified: 7/02/02<br><!-- if you modify this answer, edit Slash/Apache/Banlist.pm too -->
-  </small></i> <a name="ac1000"></a> 
+  </small></i> 
+  
+  <a name="ac1000"></a> 
   <h2>How do I get an IP Unbanned?</h2>
   <p>Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a>. Make 
     sure to include the IP in question, and any other pertinent information. If 
@@ -193,6 +195,32 @@ web browser rendering. <br>
     <br>
     <i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
     Last Modified: 3/26/02<br><!-- if you modify this answer, edit Slash/Apache/Banlist.pm too -->
+
+<a name="ac1050"></a> 
+  <h2>My RSS Headline Reader Tells me I Was Banned!</h2>
+  <P>Due largely to the absolutely ridiculous amount of abuse we get on a daily
+  basis from poorly implemented headline readers, we were forced to implement a much
+  more liberal automated banning system on RSS/RDF headline reading applications.
+  Our policy is to allow one request every 30 minutes.  We'll allow a few more before
+  you will get banned, and we are more flexible still with proxy servers.  However
+  in many cases, we have no choice but to ban abuse.
+  
+  <p>You have 2 options: First is to cease beating the crap out of our servers, and
+    just wait a few days/hours.  Depending on the severity of the abuse, you should be
+    back in a matter of hours.  If, after 72 hours, you are still banned, please
+    Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a> and ask
+    for help.  Make sure to include the IP, approximate time of ban and so forth.
+   
+   <P>If 
+    you are connecting through a proxy server, you might need to have your proxy 
+    server's admin contact us instead of you. <br>
+    <br>
+    <i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
+    Last Modified: 3/31/03<br><!-- if you modify this answer, edit Slash/Apache/Banlist.pm too -->
+
+
+
+
     </small></i> <a name="ac1100"></a>
     <h2>Why is someone else's User Name appearing on my User Page's Menu?</h2>
     <p>This is not a bug.  This is a feature!  That name is the last user page
