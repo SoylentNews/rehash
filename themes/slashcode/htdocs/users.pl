@@ -1668,8 +1668,8 @@ sub saveUser {
 	# it doesn't already exist in the userbase.
 	if ($user_edit->{realemail} ne $form->{realemail}) {
 		if ($slashdb->existsEmail($form->{realemail})) {
-			$note = getError('emailexists_err', 0, 1);
-			return $note;
+			$note .= getError('emailexists_err', 0, 1);
+			$form->{realemail} = $user_edit->{realemail}; # can't change!
 		}
 	}
 
@@ -1768,7 +1768,7 @@ sub saveUser {
 
 	$slashdb->setUser($uid, $user_edits_table);
 
-	print getMessage('note', { note => $note}) if $note;
+	print getMessage('note', { note => $note }) if $note;
 
 	editUser({ uid => $uid });
 }
