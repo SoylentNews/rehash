@@ -753,6 +753,7 @@ INSERT INTO vars (name, value, description) VALUES ('istroll_ipid_hours','72','H
 INSERT INTO vars (name, value, description) VALUES ('istroll_uid_hours','72','Hours back that getIsTroll checks uids for comment mods');
 INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus_karma, and goodkarma)');
 INSERT INTO vars (name, value, description) VALUES ('karma_obfuscate','0','Should users see, not their numeric karma score, but instead an adjective describing their approximate karma?');
+INSERT INTO vars (name, value, description) VALUES ('karma_posting_penalty_style', '0', '0=old (starting score decremented), 1=new (display score shown lower, comment can suffer results of additional downvotes)');
 INSERT INTO vars (name, value, description) VALUES ('label_ui','0','Whether to label some things in the admin ui');
 INSERT INTO vars (name, value, description) VALUES ('lastlookmemory','3600','Amount of time the uid last looked-at will be remembered/displayed');
 INSERT INTO vars (name, value, description) VALUES ('lastComments','0','Last time we checked comments for moderation points');
@@ -795,6 +796,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consequences_repeats','3
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_freq','86400','In seconds, the maximum frequency which users can metamoderate');
+INSERT INTO vars (name, value, description) VALUES ('m2_inherit', '0', 'Set to true if you would like to inherit m2s from previous mods with the same cid-reason');
 INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus_karma','12','Usually about half of goodkarma');
 INSERT INTO vars (name, value, description) VALUES ('m2_min_daysbackcushion','2','The minimum days-back cushion');
 INSERT INTO vars (name, value, description) VALUES ('m2_mintokens','0','The min M2 tokens');
