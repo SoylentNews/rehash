@@ -620,7 +620,7 @@ sub getTop10Comments {
 	}
 
 	# if for any reason we don't get any comments, return now
-	return [] if scalar(@$cids) == 0;
+	return [] unless scalar(@$cids);
 
 	foreach (@$cids) {
 		# Of our prospective hot comments, find the overall time
