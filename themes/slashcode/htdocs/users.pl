@@ -1131,7 +1131,9 @@ sub showInfo {
 			replies		=> $replies,
 			ipid		=> $comment->{ipid},
 			ipid_vis	=> $comment->{ipid_vis},
-			karma		=> $comment->{karma}
+			karma		=> $comment->{karma},
+			tweak		=> $comment->{tweak},
+			tweak_orig	=> $comment->{tweak_orig},
 		
 		};
 		#Karma bonus time
