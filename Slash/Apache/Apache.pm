@@ -417,6 +417,8 @@ sub IndexHandler {
 				# most common problem. - Jamie 2004/07/17
 				if ($key eq "faq" || $key eq "palm") {
 					$r->uri("/$key/index.shtml");
+				} elsif ($key eq "docs") {
+					$r->uri("/$key/");
 				} else {
 					$r->uri("/$index_handler");
 				}
