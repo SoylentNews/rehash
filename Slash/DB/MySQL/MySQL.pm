@@ -3398,8 +3398,13 @@ sub getModeratorLogRandom {
 
 ########################################################
 sub countUsers {
-	my($self) = @_;
-	my($users) = $self->sqlCount('users_count');
+	my($self, $options) = @_;
+	my $users;
+	if ($options && $options->{max}) {
+		$users = $self->sqlSelect("max(uid)", "users");
+	} else {
+		$users = $self->sqlCount('users_count');
+	}
 	return $users;
 }
 

@@ -1424,6 +1424,11 @@ sub editComm {
 			$user_edit->{$key} || 0, 1, 1
 		);
 	}
+	# For New User bonus stuff
+	my $new_user_bonus_select = createSelect('new_user_bonus', \@range, 
+			$user_edit->{new_user_bonus} || 0, 1, 1);
+	my $new_user_percent_select = createSelect('new_user_percent', [(1..100)], 
+			$user_edit->{new_user_percent} || 100, 1, 1);
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 	$admin_block = getUserAdmin($id, $fieldkey, 1, 1) if $admin_flag;
@@ -1485,6 +1490,8 @@ sub editComm {
 		reason_select		=> \%reason_select,
 		people			=> \@people,
 		people_select		=> \%people_select,
+		new_user_percent_select => $new_user_percent_select,
+		new_user_bonus_select => $new_user_bonus_select,
 	});
 }
 
@@ -1883,6 +1890,13 @@ sub saveComm {
 	$form->{commentlimit} = 0 if $form->{commentlimit} < 1;
 	$form->{commentspill} = 0 if $form->{commentspill} < 1;
 
+	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};
+	my $min = -$max;
+	my $new_user_bonus = ($form->{new_user_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{new_user_bonus};
+	my $new_user_percent = (($form->{new_user_percent} <= 100 && $form->{new_user_percent} >= 0) 
+			? $form->{new_user_percent}
+			: 100); 
+
 	# This has NO BEARING on the table the data goes into now.
 	# setUser() does the right thing based on the key name.
 	my $users_comments_table = {
@@ -1891,8 +1905,8 @@ sub saveComm {
 		commentlimit	=> $form->{commentlimit},
 		commentsort	=> $form->{commentsort},
 		commentspill	=> $form->{commentspill},
-		domaintags	=> $form->{domaintags},
-		emaildisplay	=> $form->{emaildisplay},
+		domaintags	=> ($form->{domaintags} != 2 ? $form->{domaintags} : undef),
+		emaildisplay	=> $form->{emaildisplay} ? $form->{emaildisplay} : undef,
 		fakeemail	=> $new_fakeemail,
 		highlightthresh	=> $form->{highlightthresh},
 		maxcommentsize	=> $form->{maxcommentsize},
@@ -1908,8 +1922,10 @@ sub saveComm {
 		sigdash		=> ($form->{sigdash} ? 1 : undef),
 		nobonus		=> ($form->{nobonus} ? 1 : undef),
 		postanon	=> ($form->{postanon} ? 1 : undef),
-		textarea_rows	=> $form->{textarea_rows} || $constants->{textarea_rows},
-		textarea_cols	=> $form->{textarea_cols} || $constants->{textarea_cols},
+		new_user_percent => (($new_user_percent && $new_user_percent != 100) ? $new_user_percent : undef),
+		new_user_bonus => ($new_user_bonus ? $new_user_bonus : undef),
+		textarea_rows	=> ($form->{textarea_rows} != $constants->{textarea_rows} ? $form->{textarea_rows} : undef),
+		textarea_cols	=> ($form->{textarea_cols} != $constants->{textarea_cols} ? $form->{textarea_cols} : undef),
 	};
 
 	my @reasons = ();

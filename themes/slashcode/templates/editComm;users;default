@@ -177,6 +177,10 @@ __template__
 		<P><B>Anonymous Modifier</B> (modifier assigned to anonymous posts)<BR>
 		[% people_select.anonymous %]<br>
 
+		<P><B>New User Modifier</B> (assign modifiers to recently created accounts)<BR>
+		[% new_user_percent_select %]% (new users in the last X percentage of the userbase)<br>
+		[% new_user_bonus_select %] (modifier assigned to new user posts)<br>
+
 		<P><B>Limit</B> (only display this many comments, 
 		for best results, set this to a low number and sort by score)<BR>
 		<INPUT TYPE="TEXT" NAME="commentlimit" SIZE="6" VALUE="[% user_edit.commentlimit %]">
