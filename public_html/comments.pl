@@ -542,8 +542,8 @@ EOT
 	# replace with spaces, easier to run compress test on
 	my $compress_comment = $I{F}{postercomment};
         $compress_comment =~ s/<br><br>/\n/ig;
-        $compress_comment =~ s/<p>/\s/ig;
-        $compress_comment =~ s/\&nbsp\;/\s/ig;  
+        $compress_comment =~ s/<p>/ /ig;
+        $compress_comment =~ s/\&nbsp\;/ /ig;  
 
 	# Ok, one list ditch effort to skew out the trolls!
 	if (length($compress_comment) >= 10) {
