@@ -39,7 +39,15 @@ __template__
 </B></P>
 [% END %]
 [% IF form.op AND !savestory %]
-<B>(You must preview once, provide a subject, some text, and a topic before you can submit</B>
+<B>(You must preview once, provide a subject, some text, and a topic before you can submit</B><br />
+	[% IF missing_required.size > 0  %]
+		<b>You're also missing the following required fields</b>
+		<ul>
+		[% FOREACH required = missing_required %]
+			<li>[% required.0 %]</li>	
+		[% END %]
+		</ul>
+	[% END %]
 [% END %]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 [% IF form.formkey %]
@@ -70,10 +78,11 @@ reject the story.</P>
 	[% PROCESS formLabel value => extra.0, comment => "" %]
 	[% IF extra.2 == 'text' %]
 		<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% form.${extra.1} | strip_attribute %]" SIZE="50">
+	[% ELSIF extra.2 == 'textarea' %]
+<TEXTAREA WRAP="VIRTUAL" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" NAME="story">[% form.${extra.1} | strip_literal %]</TEXTAREA><BR>
 	[% ELSIF extra.2 == 'list' %]
 		[% # section:value %]
-		[% pulldown = "$extra.3:$extra.1" %]
-		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), form.${extra.1}, 1, 1) %]	
+		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), form.${extra.1}, 1, 1) %]	
 	[% END %]
 [% END %]
 
@@ -88,11 +97,15 @@ be deleted.)</FONT>
 primaryskid_val = form.primaryskid.defined ? form.primaryskid : constants.submission_default_skid;
 IF constants.submission_force_default || (form.primaryskid && form.hss);
 	hide_section_select = 1;
-END %]
+%]
+	<input type="hidden" name="hss" value="1" />	
+[% END %]
 
 [% IF form.hts && form.tid;
 	hide_topic_select = 1;
-END %]
+%]
+	<input type="hidden" name="hts" value="1" />	
+[% END %]
 
 [% section_topic_title = "" %]
 [% IF hide_section_select && !hide_topic_select;
