@@ -148,6 +148,7 @@ sub header {
 		unless $noheader;
 
 	# ssi = 1 IS NOT THE SAME as ssi = 'yes'
+	# ...which is silly. - Jamie 2002/06/26
 	if ($form->{ssi} eq 'yes') {
 		ssiHead($section);
 		return;
