@@ -74,7 +74,7 @@ sub main {
 	if ($form->{op} eq 'rss' && !$user->{is_admin}) {
 		$form->{op} = 'stories'
 			unless $constants->{search_rss_enabled};
-	} elsif ($form->{op} eq 'rss') {
+	} elsif ($form->{op} eq 'submissions' && !$user->{is_admin}) {
 		$form->{op} = 'stories'
 			unless $constants->{submiss_view};
 	}
