@@ -1,6 +1,5 @@
 description="Submission System"
 name=Submit
-mysql_dump=dump
 htdoc=submit.pl
 templates=templates/data;submit;default
 templates=templates/displayForm;submit;default
