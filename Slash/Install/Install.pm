@@ -398,7 +398,7 @@ sub _getList {
 			$key = lc $key;
 			if ($key =~ /^(
 				htdoc | htdoc_code | htdoc_faq | 
-				image | image_award | image_banner | 
+				image | image_award | image_banner | image_faq |
 				task | template | sbin | misc | topic
 			)s?$/x) {
 				push @{$hash{$dir}{$1}}, $val;
