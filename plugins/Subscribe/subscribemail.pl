@@ -83,9 +83,8 @@ $task{$me}{code} = sub {
 	);
 
 	my $report_link = "";
-	my $plugins = getDescriptions('plugins');
 
-	if ($plugins->{'Stats'}) {
+	if ($constants->{plugin}{Stats}) {
 		$report_link = "\n$constants->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
 	}
 
