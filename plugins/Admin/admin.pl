@@ -1759,7 +1759,7 @@ sub moderate {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my $was_touched = {};
-	my ($sid,$cid);
+	my($sid, $cid);
 
 	titlebar("100%", "Moderating...");
 
@@ -1770,7 +1770,7 @@ sub moderate {
 			
 			# No points and not enough points shouldn't show up since the user
 			# is an admin but check just in case 
-			if($ret_val < 0){
+			if ($ret_val < 0) {
 				if ($ret_val == -1) {
 					print getData('no points');
 				} elsif ($ret_val == -2){
@@ -1787,12 +1787,12 @@ sub moderate {
 	}
 
 	foreach my $s (keys %$was_touched) {
-		if($was_touched->{$s}){
+		if ($was_touched->{$s}) {
 			my $story_sid = $slashdb->getStorySidFromDiscussion($sid);
 			$slashdb->setStory($story_sid, { writestatus => 'dirty' }) if $story_sid;
 		}
 	}
-	my $startat=$form->{startat} || 0;
+	my $startat = $form->{startat} || 0;
 	print getData('moderate_recent_message', { startat => $startat });
 }
 
@@ -1989,8 +1989,6 @@ sub getTitle {
 	return slashDisplay('titles', $hashref,
 		{ Return => 1, Nocomm => $nocomm });
 }
-
-
 
 ##################################################################
 # Based on $form, returns the time for a story we're saving.  It

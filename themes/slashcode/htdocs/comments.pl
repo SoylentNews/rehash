@@ -1380,7 +1380,7 @@ sub moderate {
 			my $ret_val = $slashdb->moderateComment($sid, $1, $form->{$key});
 			
 			# error conditions -- need to call getError
-			if($ret_val < 0){
+			if ($ret_val < 0) {
 				if ($ret_val == -1) {
 					print getError('no points');
 				} elsif ($ret_val == -2){
@@ -1495,7 +1495,7 @@ sub undoModeration {
 
 	for my $mod (@$removed) {
 		$mod->{val} =~ s/^(\d)/+$1/;  # put "+" in front if necessary
-		$messages = getObject('Slash::Messages');
+		my $messages = getObject('Slash::Messages');
 		$messages->send_mod_msg({
 			type	=> 'unmod_msg',
 			sid	=> $sid,

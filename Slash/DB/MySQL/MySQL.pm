@@ -4755,10 +4755,13 @@ sub getStoryByTime {
 	return $returnable;
 }
 
+##################################################################
+#
 sub getStorySidFromDiscussion {
 	my ($self, $discussion) = (@_);
 	return $self->sqlSelect("sid", "stories", "discussion = ".$self->sqlQuote($discussion));
 }
+
 ##################################################################
 # admin.pl only
 sub getStoryByTimeAdmin {
