@@ -167,8 +167,9 @@ sub findComments {
 #}
 
 ####################################################################################
+# I am beginnign to hate all the options.
 sub findUsers {
-	my($self, $form, $start, $limit, $sort, $users_to_ignore) = @_;
+	my($self, $form, $start, $limit, $sort, $with_journal) = @_;
 	# userSearch REALLY doesn't need to be ordered by keyword since you
 	# only care if the substring is found.
 	my $query = $self->sqlQuote($form->{query});
@@ -181,7 +182,10 @@ sub findUsers {
 	my $key = " MATCH (nickname) AGAINST ($query) ";
 	my $tables = 'users';
 	my $where .= ' seclev > 0 ';
-	$where .= " AND $key" if $form->{query};
+	$where .= " AND $key" 
+			if $form->{query};
+	$where .= " AND journal_last_entry_date IS NOT NULL" 
+			if $with_journal;
 
 
 	my $other;
@@ -294,7 +298,6 @@ sub findJournalEntry {
 	my $key = " (MATCH (description) AGAINST ($query) or MATCH (article) AGAINST ($query)) ";
 	my $where = "journals.id = journals_text.id AND journals.uid = users.uid ";
 	$where .= " AND $key" if $form->{query};
-	$where .= " AND time < now() AND writestatus != 'delete' ";
 	$where .= " AND users.nickname=" . $self->sqlQuote($form->{nickname})
 		if $form->{nickname};
 	$where .= " AND users.uid=" . $self->sqlQuote($form->{uid})

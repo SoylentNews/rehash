@@ -18,12 +18,14 @@ sub main {
 		users		=> \&userSearch,
 		stories		=> \&storySearch,
 		polls		=> \&pollSearch,
+		journals	=> \&journalSearch,
 	);
 	my %ops_rss = (
 		comments	=> \&commentSearchRSS,
 		users		=> \&userSearchRSS,
 		stories		=> \&storySearchRSS,
 		polls		=> \&pollSearchRSS,
+		journals	=> \&journalSearchRSS,
 	);
 
 	my $constants = getCurrentStatic();
@@ -47,7 +49,7 @@ sub main {
 	$form->{threshold}	||= getCurrentUser('threshold');
 
 	# get rid of bad characters
-	$form->{query} =~ s/[^A-Z0-9'. ]/ /gi;
+	$form->{query} =~ s/[^A-Z0-9'. :\/]/ /gi;
 
 	# truncate query length
 	if (length($form->{query}) > 40) {
@@ -195,10 +197,11 @@ sub userSearch {
 	my($form, $constants, $slashdb, $searchDB) = @_;
 
 	my $start = $form->{start} || 0;
-	my $users = $searchDB->findUsers($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+	my $users = $searchDB->findUsers($form, $start, $constants->{search_default_display} + 1, $form->{sort}, $form->{journal_only});
 	slashDisplay('searchform', {
 		op		=> $form->{op},
 		'sort'		=> _sort(),
+		journal_option => 1,
 	});
 
 	if (@$users) {
@@ -526,48 +529,55 @@ sub findRetrieveSiteRSS {
 }
 
 #################################################################
-# Do not enable -Brian
-sub findJournalEntry {
+sub journalSearch {
 	my($form, $constants, $slashdb, $searchDB) = @_;
 
 	my $start = $form->{start} || 0;
 	my $entries = $searchDB->findJournalEntry($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+	slashDisplay('searchform', {
+		op		=> $form->{op},
+		'sort'		=> _sort(),
+	});
 
 	# check for extra articles ... we request one more than we need
 	# and if we get the extra one, we know we have extra ones, and
 	# we pop it off
-	my $forward;
-	if (@$entries == $constants->{search_default_display} + 1) {
-		pop @$entries;
-		$forward = $start + $constants->{search_default_display};
-	} else {
-		$forward = 0;
-	}
+	if (@$entries) {
+		my $forward;
+		if (@$entries == $constants->{search_default_display} + 1) {
+			pop @$entries;
+			$forward = $start + $constants->{search_default_display};
+		} else {
+			$forward = 0;
+		}
 
-	# if there are less than search_default_display remaning,
-	# just set it to 0
-	my $back;
-	if ($start > 0) {
-		$back = $start - $constants->{search_default_display};
-		$back = $back > 0 ? $back : 0;
-	} else {
-		$back = -1;
-	}
+		# if there are less than search_default_display remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{search_default_display};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
 
-	slashDisplay('storysearch', {
-		entries		=> $entries,
-		back		=> $back,
-		forward		=> $forward,
-		args		=> _buildargs($form),
-		start		=> $start,
-	});
+		slashDisplay('journalsearch', {
+			entries		=> $entries,
+			back		=> $back,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+		});
+	} else {
+		print getData('nojournals');
+	}
 }
 
 #################################################################
 # Do not enable -Brian
 # do not WRITE in the first place -- pudge
 # Writing is fine if it is not enabled --Brian
-sub findJournalEntryRSS {
+sub journalSearchRSS {
 	my($form, $constants, $slashdb, $searchDB) = @_;
 
 	my $start = $form->{start} || 0;

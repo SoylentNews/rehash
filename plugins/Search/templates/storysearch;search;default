@@ -12,27 +12,23 @@ __name__
 storysearch
 __template__
 [% USE Slash %]
-[% IF stories %]
-	[% x = start ? start : 1 %]
-	[% FOREACH story=stories %]
-		[% IF story.6 %]
-			[% story.6 %] 
-		[% ELSE %]
-			[% x %] 
-		[% END %] 
-		[% Slash.linkStory({
-			section	=> story.5,
-			sid	=> story.2,
-			'link'	=> story.1
-		}) 
-		%]
-		by [% story.0 %] with [% story.4 %] comments <FONT SIZE="2">on [% Slash.timeCalc(story.3) %]</FONT><BR>
-	[% x = x + 1 %]
-	[% END %]
-	[% PROCESS pagination %]
-[% ELSE %]
-	No Matches Found for your query
+[% x = start ? start : 1 %]
+[% FOREACH story=stories %]
+	[% IF story.6 %]
+		[% story.6 %] 
+	[% ELSE %]
+		[% x %] 
+	[% END %] 
+	[% Slash.linkStory({
+		section	=> story.5,
+		sid	=> story.2,
+		'link'	=> story.1
+	}) 
+	%]
+	by [% story.0 %] with [% story.4 %] comments <FONT SIZE="2">on [% Slash.timeCalc(story.3) %]</FONT><BR>
+[% x = x + 1 %]
 [% END %]
+[% PROCESS pagination %]
 <P>
 
 __seclev__

@@ -29,9 +29,14 @@ __template__
 	<INPUT TYPE="RADIO" NAME="op" VALUE="stories"[% IF op == 'stories' %]CHECKED[% END %]> Stories
 	<INPUT TYPE="RADIO" NAME="op" VALUE="comments"[% IF op == 'comments' %]CHECKED[% END %]> Comments
 	<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'users' %]CHECKED[% END %]> Users
-	<INPUT TYPE="RADIO" NAME="op" VALUE="polls"[% IF op == 'polls' %]CHECKED[% END %]> Polls<BR>
+	<INPUT TYPE="RADIO" NAME="op" VALUE="polls"[% IF op == 'polls' %]CHECKED[% END %]> Polls
 	[% IF constants.search_journal_enabled %]
-		<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'journals' %]CHECKED[% END %]> Users<BR>
+		<INPUT TYPE="RADIO" NAME="op" VALUE="journals"[% IF op == 'journals' %]CHECKED[% END %]> Journals
+	[% END %]
+	<br>
+
+	[% IF journal_option %]
+	<INPUT TYPE="RADIO" NAME="journal_only" VALUE="1"[% IF form.journal_only == '1' %]CHECKED[% END %]> Users with Journals
 	[% END %]
 
 	[% IF authors %]

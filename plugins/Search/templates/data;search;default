@@ -29,6 +29,9 @@ __template__
 [% CASE 'nopolls' %]
 	No poll questions were found that match your query.
 
+[% CASE 'nojournals' %]
+	No journals were found to match your query.
+
 [% END %]
 
 __seclev__
