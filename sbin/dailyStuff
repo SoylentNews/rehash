@@ -93,7 +93,7 @@ sub mailingList {
 	my $users = $slashdb->getMailingList();
 
 	for (@{$users}) {
-		sendEmail($_->[0], "24 Hours of $constants->{sitename} Headlines For $_->[2]", <<EOT, 'bulk');
+		sendEmail($_->[0], "24 Hours of $constants->{sitename} Headlines For $_->[2]", <<EOT, '', 'bulk');
       $p
       You are getting this message because you subscribed to it.
       If you want to unsubscribe from this, go to
@@ -124,7 +124,7 @@ sub prog2file {
 # Send a message to the site admin.
 if ($constants->{send_mail} == 1) {
 	for (@{$constants->{stats_reports}}) {
-		sendEmail($_, "$constants->{sitename} Stats Report", $email, 'bulk');
+		sendEmail($_, "$constants->{sitename} Stats Report", $email, '', 'bulk');
 	}
 	mailingList();
 }
