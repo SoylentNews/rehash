@@ -28,6 +28,8 @@ $task{$me}{code} = sub {
 	# other two times, we just update the top three stories and
 	# the front page, skipping sectional stuff and other stories.
 	my $do_all = ($info->{invocation_num} % 3 == 1) || 0;
+	$do_all = 1 
+		if $constants->{task_options}{run_all};
 
 	my $max_stories = defined($constants->{freshenup_max_stories})
 		? $constants->{freshenup_max_stories}
@@ -124,7 +126,15 @@ $task{$me}{code} = sub {
 	}
 
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
-	my $dirty_sections = $slashdb->getSectionsDirty();
+	my $dirty_sections;
+	if ($constants->{task_options}{run_all}) {
+		my $sections = $slashdb->getSections();
+		for (keys %$sections) {
+			push @$dirty_sections, $_;
+		}
+	} else {
+		$dirty_sections = $slashdb->getSectionsDirty();
+	}
 	for my $cleanme (@$dirty_sections) { $updates{$cleanme} = 1 }
 
 	$args = "$vu ssi=yes";
