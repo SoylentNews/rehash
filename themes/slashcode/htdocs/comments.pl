@@ -403,6 +403,9 @@ sub editComment {
 	$form->{nosubscriberbonus} = $user->{is_subscriber} && $user->{nosubscriberbonus}
 						unless $form->{nosubscriberbonus_present};
 
+	if ($form->{lookup_sid}) {
+		slashHook('comment_reply_lookup_sid', {} );
+	}
 	# The sid param is only stripped down to A-Za-z0-9/._ by
 	# filter_params;  make sure it's numeric and exists.
 	my $sid = $form->{sid};
