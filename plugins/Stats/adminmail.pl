@@ -83,8 +83,10 @@ EOT
 
 	my $uniq_comment_users = $stats->countDailyByOPDistinctIPID('comments', $yesterday);
 	my $uniq_article_users = $stats->countDailyByOPDistinctIPID('article', $yesterday);
+	my $uniq_palm_users = $stats->countDailyByOPDistinctIPID('palm', $yesterday);
 	my $comment_page_views = $stats->countDailyByOP('comments',$yesterday);
 	my $article_page_views = $stats->countDailyByOP('article',$yesterday);
+	my $palm_page_views = $stats->countDailyByOP('palm',$yesterday);
 
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
@@ -95,8 +97,11 @@ EOT
 	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
 	$statsSave->createStatDaily($yesterday, "uniq_comment_users", $uniq_comment_users);
 	$statsSave->createStatDaily($yesterday, "uniq_article_users", $uniq_article_users);
+	$statsSave->createStatDaily($yesterday, "uniq_palm_users", $uniq_palm_users);
 	$statsSave->createStatDaily($yesterday, "comment_page_views", $comment_page_views);
 	$statsSave->createStatDaily($yesterday, "article_page_views", $article_page_views);
+	$statsSave->createStatDaily($yesterday, "palm_page_views", $palm_page_views);
+
 	my @numbers = (
 		$count->{total},
 		$count->{unique},
@@ -120,8 +125,10 @@ EOT
 		scalar(@$distinct_comment_ipids),
 		$uniq_comment_users,
 		$uniq_article_users,
+		$uniq_palm_users,
 		$comment_page_views,
 		$article_page_views,
+		$palm_page_views,
 		$count->{journals},
 		$submissions,
 			($submissions ? $submissions_comments_match*100
@@ -147,9 +154,11 @@ $admin_clearpass_warning
      comments: %8d posted yesterday
         IPIDS: %8d distinct IPIDS posted comments
              : %8d distinct IPIDS used comments
-             : %8d distinct IPIDS used articles
+						 : %8d distinct IPIDS used articles
+             : %8d distinct IPIDS used palm pages
     pageviews: %8d for comments
              : %8d for articles
+             : %8d for palm
              : %8d for journals
   submissions: %8d submissions
  sub/comments: %8.1f%% of the submissions came from comment posters from this day
