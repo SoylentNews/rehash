@@ -673,7 +673,10 @@ sub createPollVoter {
 ########################################################
 sub createSubmission {
 	my($self, $submission) = @_;
-	return unless $submission;
+	# We don't want to insert blank submissions into the DB. Are filters applied
+	# to submissions, if not, there should be a few rexeps here to do away with
+	# whitespace filled fields.
+	return unless $submission && ($submission->{story} || $submission->{story});
 
 	$submission->{ipid} = getCurrentUser('ipid');
 	$submission->{subnetid} = getCurrentUser('subnetid');
@@ -3006,7 +3009,8 @@ sub getStoryByTime {
 
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 	if ($section->{isolate}) {
-		$where  = ' AND displaystatus>=0 AND section=' . $self->sqlQuote($story->{'section'})
+		$where  = ' AND displaystatus>=0 AND section=' .
+			  $self->sqlQuote($story->{'section'})
 	} elsif ($user->{sectioncollapse}) {
 		$where .= ' AND displaystatus>=0';
 	} else {
@@ -3021,11 +3025,13 @@ sub getStoryByTime {
 	my $returnable = $self->sqlSelectHashref(
 			'title, sid, section, tid',
 			'stories',
+			
 			"'$time' > DATE_SUB(NOW(), INTERVAL $twice_arch_delay DAY)
 			 AND time $sign '$time'
 			 AND time < NOW()
 			 AND writestatus != 'delete'
 			 $where",
+
 			"ORDER BY time $order LIMIT $limit"
 	);
 
@@ -3896,17 +3902,23 @@ sub setQuickies {
 # What an ugly method
 sub getSubmissionForUser {
 	my($self) = @_;
+
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $del  = $form->{del} || 0;
 
-	my $sql = "SELECT subid,subj,time,tid,note,email,name,section,comment,submissions.uid,karma FROM submissions,users_info";
-	$sql .= "  WHERE submissions.uid=users_info.uid AND $form->{del}=del AND (";
+	my $sql = "SELECT subid,subj,time,tid,note,email,name,section,comment,
+		   submissions.uid,karma,weight FROM submissions,users_info";
+	$sql .= "  WHERE submissions.uid=users_info.uid AND $del=del AND (";
 	$sql .= $form->{note} ? "note=" . $self->sqlQuote($form->{note}) : "isnull(note)";
 	$sql .= "		or note=' ' " unless $form->{note};
 	$sql .= ")";
 	$sql .= "		and tid='$form->{tid}' " if $form->{tid};
-	$sql .= "         and section=" . $self->sqlQuote($user->{section}) if $user->{section};
-	$sql .= "         and section=" . $self->sqlQuote($form->{section}) if $form->{section};
+	# Why do both here? If both are set and non-equal, we've got problems.
+	$sql .= "         and section=" . $self->sqlQuote($user->{section})
+		if $user->{section};
+	$sql .= "         and section=" . $self->sqlQuote($form->{section})
+		if $form->{section};
 	$sql .= "	  ORDER BY time";
 
 	my $cursor = $self->{_dbh}->prepare($sql);
@@ -4234,6 +4246,7 @@ sub getSlashConf {
 	$conf{panic}		||= 0;
 	$conf{textarea_rows}	||= 10;
 	$conf{textarea_cols}	||= 50;
+	$conf{allow_deletions}  ||= 1;
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {

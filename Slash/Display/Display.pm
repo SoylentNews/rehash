@@ -418,9 +418,9 @@ It might seem simpler to just use the functional form:
 	[% form.something | strip_nohtml      # filter %]
 	[% Slash.strip_nohtml(form.something) # function %]
 
-But we might make it harder to use the Slash plugin (see L<Slash::Display::Plugin>)
-in the future (perhaps only certain seclevs?), so it is best to stick with the filter,
-which is most likely faster anyway.
+But we might make it harder to use the Slash plugin (see
+L<Slash::Display::Plugin>) in the future (perhaps only certain seclevs?), so it
+is best to stick with the filter, which is most likely faster anyway.
 
 =cut
 
@@ -428,7 +428,25 @@ my %list_ops = (
 	'rand'		=> sub {
 		my $list = $_[0];
 		return $list->[rand @$list];
-	}
+	},
+
+	'highval'		=> sub {
+		my $list = $_[0];
+		my $maxval;
+
+		$maxval = (!defined($maxval) or $_ > $maxval) ?  $_ : $maxval
+			for @{$list};
+		return $maxval;
+	},
+
+	'lowval'		=> sub {
+		my $list = $_[0];
+		my $minval;
+
+		$minval = (!defined($minval) or $_ < $minval) ?  $_ : $minval
+			for @{$list};
+		return $minval;
+	},
 );
 
 my %scalar_ops = (
@@ -436,6 +454,7 @@ my %scalar_ops = (
 	'lc'		=> sub { lc $_[0] },
 	'ucfirst'	=> sub { ucfirst $_[0] },
 	'lcfirst'	=> sub { lcfirst $_[0] },
+
 	'substr'        => sub {
 		if (@_ == 2) {
 			substr($_[0], $_[1]);

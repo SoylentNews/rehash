@@ -172,8 +172,11 @@ sub previewForm {
 	$email_known = "mailto" if $sub->{email} eq $user->{fakeemail};
 	$sub->{email} = processSub($sub->{email}, $email_known);
 
-	$slashdb->setSession(getCurrentUser('uid'), { lasttitle => $sub->{subj} })
-		if $user->{is_admin};
+	$slashdb->setSession(getCurrentUser('uid'), {
+		lasttitle => $sub->{subj},
+		last_subid=> $form->{subid},
+		last_sid  => '',
+	}) if $user->{is_admin};
 
 	slashDisplay('previewForm', {
 		submission	=> $sub,
@@ -181,7 +184,8 @@ sub previewForm {
 		subid		=> $form->{subid},
 		admin_flag 	=> $admin_flag,
 		lockTest	=> lockTest($sub->{subj}),
-		section		=> $form->{section} || $constants->{defaultsection},
+		section		=> $form->{section} ||
+				   $constants->{defaultsection},
 	});
 }
 
@@ -258,7 +262,7 @@ sub submissionEd {
 		my $sub = $submissions[@submissions] = {};
 		@{$sub}{qw(
 			subid subj time tid note email
-			name section comment uid karma
+			name section comment uid karma weight
 		)} = @$_;
 		$sub->{name}  =~ s/<(.*)>//g;
 		$sub->{email} =~ s/<(.*)>//g;
@@ -274,7 +278,7 @@ sub submissionEd {
 
 		$sub->{ssection} = $sub->{section} ne $constants->{defaultsection}
 			? "&section=$sub->{section}" : '';
-		$sub->{stitle}   = '&title=' . fixparam($sub->{subj});
+		$sub->{stitle}  = '&title=' . fixparam($sub->{subj});
 		$sub->{section} = ucfirst($sub->{section}) unless $user->{is_admin};
 	}
 
@@ -284,10 +288,22 @@ sub submissionEd {
 			? @{$constants->{submit_categories}} : ())
 	);
 
+	# Do we provide a submission list based on a custom sort?
+	my @weighted;
+	if ($constants->{submit_extra_sort_key}) {
+		my $key = $constants->{submit_extra_sort_key};
+
+		# Note, descending order. Is there a way to make this more
+		# flexible? A var that chooses between ascending or descending
+		# order?
+		@weighted = sort { $b->{$key} <=> $a->{$key} } @submissions;
+	}
+
 	my $template = $user->{is_admin} ? 'Admin' : 'User';
 	slashDisplay('subEd' . $template, {
 		submissions	=> \@submissions,
 		selection	=> \%selection,
+		weighted	=> \@weighted,
 	});
 }
 
@@ -299,7 +315,7 @@ sub displayRSS {
 
 	for (@$submissions) {
 		my($subid, $subj, $time, $tid, $note, $email, $name,
-			$section, $comment, $uid, $karma) = @$_;
+		   $section, $comment, $uid, $karma, $weight) = @$_;
 
 		# title should be cleaned up
 		push(@items, {
