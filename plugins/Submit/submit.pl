@@ -244,7 +244,7 @@ sub previewForm {
 
 	slashDisplay('previewForm', {
 		submission	=> $sub,
-		submitter	=> $sub->{uid},
+		submitter	=> $reader->getUser($sub->{uid}),
 		subid		=> $form->{subid},
 		topic		=> $topic,
 		ipid		=> $sub->{ipid},

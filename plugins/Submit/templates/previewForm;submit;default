@@ -52,7 +52,7 @@ TITLE="[% topic.textname %]"></A>
 	[% IF submission.uid != constants.anonymous_coward_uid %]
 		[% IF num_from_uid >= 20 %]<B>[% END %]
 		[% num_from_uid %] submission[% IF num_from_uid != 1 %]s[% END %]
-		from this user
+		from [% submitter.nickname %]
 		[%- IF num_from_uid >= 20 %]</B>[% END -%]
 		[%- IF submission.emaildomain %]
 			and
@@ -61,7 +61,7 @@ TITLE="[% topic.textname %]"></A>
 	[%- IF submission.emaildomain %]
 		[% IF num_with_emaildomain >= 15 %]<B>[% END %]
 		[% num_with_emaildomain %] submission[% IF num_with_emaildomain != 1 %]s[% END %]
-		with this link domain
+		from [% submission.emaildomain -%]
 		[%- IF num_with_emaildomain >= 15 %]</B>[% END -%]
 	[%- END -%]
 	.
@@ -76,7 +76,7 @@ TITLE="[% topic.textname %]"></A>
 		<INPUT TYPE="HIDDEN" NAME="firstpreview" VALUE="1">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
 		<INPUT TYPE="HIDDEN" NAME="topic_source" VALUE="submission">
-		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter %]">
+		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter.uid %]">
 		<BR>title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50" MAXLENGTH="50">
 		<BR>[% lockTest %]
 	[% IF constants.use_dept %]
