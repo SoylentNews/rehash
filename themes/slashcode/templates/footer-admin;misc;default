@@ -26,10 +26,21 @@ __template__
 		</TD>
 		<TD BGCOLOR="#CCCCCC" ALIGN="CENTER"><FONT SIZE="2">[% Slash.horizmenu() %]</FONT></TD>
 		<TD BGCOLOR="#505050" VALIGN="CENTER">
-			<FONT SIZE="2" COLOR="#FFFFFF"><FORM METHOD="GET" ACTION="[% gSkin.rootdir %]/search.pl">
+			<FONT SIZE="2" COLOR="#FFFFFF">
+			[% IF constants.panic or constants.search_google %]
+				<FORM METHOD="GET" ACTION="http://www.google.com/search">
+				<INPUT TYPE="TEXT" NAME="query" VALUE="" SIZE="20">
+				<INPUT TYPE="HIDDEN" NAME="as_sitesearch" VALUE="[% gSkin.basedomain %]">
+				<INPUT TYPE="SUBMIT" VALUE="Google [% constants.sitename %]">
+				</FORM>
+			[% ELSE %]
+			<FORM METHOD="GET" ACTION="[% gSkin.rootdir %]/search.pl">
 				&nbsp;<INPUT TYPE="TEXT" NAME="query" VALUE="" SIZE="15">
 				<INPUT TYPE="SUBMIT" VALUE="Search">&nbsp;
-			</FORM></FONT>
+			</FORM>
+			[% END %]
+			
+			</FONT>
 		</TD>
 	</TR></TABLE>
 </TD></TR></TABLE>
