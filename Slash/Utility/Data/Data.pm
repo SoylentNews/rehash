@@ -459,6 +459,8 @@ sub stripByMode {
 	$no_white_fix = defined($no_white_fix) ?
 		$no_white_fix : $fmode == LITERAL;
 
+	$str =~ s/(?:\015?\012|\015)/\n/g;  # change newline to local newline
+
 	# insert whitespace into long words, convert <>& to HTML entities
 	if ($fmode == LITERAL || $fmode == EXTRANS || $fmode == ATTRIBUTE || $fmode == CODE) {
 		# Encode all HTML tags
@@ -486,7 +488,7 @@ sub stripByMode {
 		if ($fmode == CODE) {  # CODE and TT are the same ... ?
 			$str =~ s{((?:  )+)(?: (\S))?} {
 				("&nbsp; " x (length($1)/2)) .
-				($2 ? "&nbsp;$2" : "")
+				(defined($2) ? "&nbsp;$2" : "")
 			}eg;
 			$str = '<TT>' . $str . '</TT>';
 
@@ -513,7 +515,7 @@ sub stripByMode {
 
 	# for use in templates to remove whitespace from inside HREF anchors
 	} elsif ($fmode == ANCHOR) {
-		$str =~ s/[\r\n]+//g;
+		$str =~ s/\n+//g;
 
 	# probably 'html'
 	} else {
