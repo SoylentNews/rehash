@@ -27,7 +27,7 @@ __template__
 	<font size="-1">On [% Slash.timeCalc(story.time, '%B %o, %Y') %] with [% story.commentcount %] comments</font><br>
 	[% shorten( Slash.strip_notags(story.introtext) ) %]<br>
 	<font size="-1">
-		[% IF skin.name == 'mainpage' %]<a href="[% constants.real_rootdir %]/">Main</a>[% ELSE %]<a href="[% skin.url ? skin.url : "$gSkin.rootdir/[% env.script_name %]?section=$skin.name" %]">[% skin.title %]</a>[% END %] &gt;
+		[% IF skin.name == 'mainpage' %]<a href="[% constants.real_rootdir %]/">Main</a>[% ELSE %]<a href="[% skin.url ? skin.url : "$gSkin.rootdir/$env.script_name?section=$skin.name" %]">[% skin.title %]</a>[% END %] &gt;
 		[% FOREACH tid = story.tids %]
 			[% topic = Slash.db.getTopic(tid) %]
 			<a href="[% gSkin.rootdir %]/[% env.script_name %]?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
