@@ -760,7 +760,7 @@ sub adjust_m2_freq {
 	my $x = $m2count_t / ($m1count_t * $avg_consensus_t);
 	my $y = $m2count_day / ($m1count_day * $avg_consensus_day);
 	my $z = ($y * 2 + $x) / 3;
-	slashdLog(sprintf("m2_freq vars: x: %0.6f y: %0.6f z: %0.6f\n", $x, $y, $z);	
+	slashdLog(sprintf("m2_freq vars: x: %0.6f y: %0.6f z: %0.6f\n", $x, $y, $z));
 
 	# If the daily and the roughly-weekly factors do not agree, we
 	# still adjust the m2_freq, but not nearly as much.  This may
@@ -773,7 +773,7 @@ sub adjust_m2_freq {
 	$z = 3/4 if $z < 3/4;
 	$z = 4/3 if $z > 4/3;
 	$z = ($z-1)*$dampen + 1;
-	slashdLog(sprintf("m2_freq: adjusted  z: %0.6f\n", $z);	
+	slashdLog(sprintf("m2_freq: adjusted  z: %0.6f\n", $z));
 
 	my $cur_m2_freq = $slashdb->getVar('m2_freq', 'value', 1) || 86400;
 	my $new_m2_freq = int($cur_m2_freq * $z ** (1/24) + 0.5);
