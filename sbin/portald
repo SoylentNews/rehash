@@ -233,6 +233,8 @@ for (@{$RDFlist}) {
 	getRDF($bid, $rdf);
 }
 
+$slashdb->setCurrentSectionPolls();
+
 getTop10Comments();
 getSlashdotPoll();
 getUptime();
