@@ -185,6 +185,8 @@ sub generateDailyMail {
 
 	my $r = "$I{sitename} Daily Headline Mailer\n\n";
 	$r .= getblock("emailsponsor");
+	# newlines after advert 
+	$r .= "\n\n";
 
 	return unless @$E;
 	for (@{$E}) {
