@@ -28,7 +28,7 @@ use strict;
 use lib '../';
 use vars '%I';
 use Slash;
-use URI;
+require URI;
 
 #################################################################
 sub main {
@@ -141,18 +141,8 @@ sub previewForm {
 	($subid, my($email, $name, $title, $tid, $introtext, $time, $comment)) =
 		sqlSelect("subid,email,name,subj,tid,story,time,comment",
 		"submissions", "subid=$subid_dbi");
+	($email, $name, $introtext) = processSub($email, $name, $introtext);
 
-	$introtext =~ s/\n\n/\n<P>/gi;
-	$introtext .= " ";
-	$introtext =~  s{(?<!["=>])(http|ftp|gopher|telnet)://([$URI::uric#]+)}{
-		my($proto, $url) = ($1, $2);
-		my $extra = '';
-		$extra = ',' if $url =~ s/,$//;
-		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
-		qq[<A HREF="$proto://$url">$proto://$url</A>$extra];
-	}ogie;
-	$introtext =~ s/\s+$//;
-	$introtext = qq!<I>"$introtext"</I>! if $name;
 
 	if ($comment && $admin) {
 		# This probably should be a block.
@@ -160,21 +150,6 @@ sub previewForm {
 <P>Submission Notes:
 <TABLE WIDTH="95%"><TR><TD BGCOLOR="$I{bg}[2]"><FONT SIZE="-1" COLOR="$I{fg}[2]">$comment</FONT></TD></TR></TABLE>
 EOT
-	}
-
-	if ($email) {
-		local $_ = $email;
-		if (/@/) {
-			$email = "mailto:$email"; 
-		} elsif (!/http/) {
-			$email = "http://$email";
-		}
-
-		$introtext = qq!<A HREF="$email">$name</A> writes $introtext! if $name;
-
-	} else {
-		$introtext = "$name writes $introtext" if $name;
-
 	}
 
 	my @fs = (
@@ -527,8 +502,10 @@ EOT
 
 EOT
 
-		my $story = stripByMode($I{F}{story}, 'html');
-		print qq!<P>$user writes <I>"$story"</I></P>!;
+		my $story = $I{F}{story};
+		($user, $fakeemail, $story) = processSub($user, $fakeemail, $story);
+		$story = stripByMode($story, 'html');
+		print qq!<P>$user writes $story</P>!;
 	}
 
 	print formLabel("The Scoop",
@@ -574,6 +551,9 @@ sub saveSub {
 		my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 
 		my $subid = "$hour$min$sec.$mon$mday$year";
+		($I{F}{from}, $I{F}{email}, $I{F}{story}) = processSub(
+			$I{F}{from}, $I{F}{email}, $I{F}{story}
+		);
 
 		sqlInsert("submissions", {
 			email	=> $I{F}{email},
@@ -589,6 +569,39 @@ sub saveSub {
 
 		formSuccess($I{F}{formkey},0,length($I{F}{subj}));
 	}
+}
+
+#################################################################
+sub processSub {
+	my($email, $name, $introtext) = @_;
+	$introtext =~ s/\n\n/\n<P>/gi;
+	$introtext .= " ";
+	$introtext =~  s{(?<!["=>])(http|ftp|gopher|telnet)://([$URI::uric#]+)}{
+		my($proto, $url) = ($1, $2);
+		my $extra = '';
+		$extra = ',' if $url =~ s/,$//;
+		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
+		qq[<A HREF="$proto://$url">$proto://$url</A>$extra];
+	}ogie;
+	$introtext =~ s/\s+$//;
+	$introtext = qq!<I>"$introtext"</I>! if $name;
+
+	if ($email) {
+		local $_ = $email;
+		if (/@/) {
+			$email = "mailto:$email"; 
+		} elsif (!/http/) {
+			$email = "http://$email";
+		}
+
+		$introtext = qq!<A HREF="$email">$name</A> writes $introtext! if $name;
+
+	} else {
+		$introtext = "$name writes $introtext" if $name;
+
+	}
+
+	return($email, $name, $introtext);
 }
 
 main();
