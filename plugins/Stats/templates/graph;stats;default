@@ -23,77 +23,7 @@ ELSE;  # default to lines
       USE my_graph = GD.Graph.lines(600, 400);
    END;
 
-   period  = form.stats_days ==  93 ? 'Quarterly' :
-             form.stats_days ==  14 ? 'Biweekly' :
-             form.stats_days ==   7 ? 'Weekly' :
-             'Forever';
-
-   days = data.0.data.keys.sort;
-   alldata = [days];
-   plotdata = [[]];
-   alltypes = [];
-   mytotal = {};
-   hasneg = 0;
-   haspos = 0;
-
-   IF (form.type == 'areapercentage');
-      FOREACH this = data;
-         FOREACH day = this.data.keys.sort;
-            mytotal.${day} = (mytotal.${day} || 0) + this.data.${day};
-         END;
-      END;
-   END;
-
-   FOREACH this = data;
-      nums = [];
-      FOREACH day = this.data.keys.sort;
-         IF (form.type == 'areapercentage');
-            IF mytotal.${day};
-               mynum = this.data.${day} / mytotal.${day} * 100;
-            ELSE;
-               mynum = 0;
-            END;
-         ELSE;
-            mynum = this.data.${day};
-         END;
-         IF (!hasneg && mynum < 0);
-            hasneg = 1;
-         END;
-         IF (!haspos && mynum > 0);
-            haspos = 1;
-         END;
-         nums.push(mynum);
-      END;
-      alldata.push(nums);
-
-      mytype = this.label || this.type;
-      mytype = mytype _ " (" _ nums.${nums.max} _ ")";
-      alltypes.push(mytype);
-      plotdata.push([]);
-      plotdata.${plotdata.max}.${nums.max} = nums.${nums.max};
-   END;
-
-   IF (form.type == 'areastackedindex');
-      USE dataloop = iterator(alldata);
-      FOREACH this = dataloop;
-         thisindex = dataloop.index;
-         thismax   = dataloop.max;
-         IF (thisindex > 1);
-            USE thisloop = iterator(this);
-            FOREACH mynum = thisloop;
-               newindex  = thisindex + 1;
-               currindex = thisloop.index;
-               newnum = mynum;
-               FOREACH nextindex = [newindex .. thismax];
-                  newnum = newnum + alldata.${nextindex}.${currindex};
-                  # "$thisindex | $currindex | $mynum | $newnum\n" | stderr;
-               END;
-               alldata.${thisindex}.${currindex} = newnum;
-            END;
-         END;
-      END;
-   END;
-
+   PROCESS calculate;
 
    x_label_skip = days.size / 10;
    x_label_skip = x_label_skip.int;
@@ -110,12 +40,18 @@ ELSE;  # default to lines
       x_labels_vertical   => 1,
       x_label_skip        => x_label_skip,
 
-      line_types          => [ 1, 1, 1, 1, 1, 1, 1,
-                               2, 2, 2, 2, 2, 2, 2,
-                               3, 3, 3, 3, 3, 3, 3,
-                               4, 4, 4, 4, 4, 4, 4  ],
       line_type_scale     => 10,
       line_width          => 2,
+      line_types          => [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                               2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                               3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+                               4, 4, 4, 4, 4, 4, 4  4, 4, 4
+                             ],
+
+      dclrs               => [ 'lred',    'lgreen', 'lblue',   'lyellow',
+                               'lpurple', 'cyan',   'lorange', 'pink',
+                               'gray',   'black'
+                             ],
 
       transparent         => 0,
       show_values         => plotdata

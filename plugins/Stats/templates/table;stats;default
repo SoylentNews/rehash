@@ -1,0 +1,47 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+table
+__template__
+[% PROCESS calculate %]
+
+<H2 ALIGN="CENTER">[% period %] Report for [% constants.sitename %]</H2>
+
+<P ALIGN="CENTER">
+<TABLE BORDER="2" CELLPADDING="2" CELLSPACING="2">
+
+	<TR>
+		<TH></TH>
+[% pct = 100 div alldata.size;
+   FOREACH this = alldata;
+	NEXT IF loop.index == 0;
+	myindex = loop.index - 1 %]
+		<TH WIDTH="[% pct %]%">[% data.${myindex}.label || data.${myindex}.type %]</TH>
+[% END %]
+	</TR>
+
+[% FOREACH day = days %]
+	<TR>
+		<TH>[% day %]</TH>
+
+	[% myindex = loop.index;
+	   FOREACH this = alldata;
+		NEXT IF loop.index == 0 %]
+		<TD ALIGN="RIGHT">[% Slash.commify(this.${myindex}) %]</TD>
+	[% END %]
+	</TR>
+[% END %]
+</TABLE>
+</P>
+__seclev__
+1000
+__version__
+$Id$

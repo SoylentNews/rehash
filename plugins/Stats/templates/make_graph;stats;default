@@ -47,11 +47,14 @@ __template__
 
        statdata = statdata _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
    END;
-%]
+   graphparams = BLOCK %]
+&amp;type=[% type | strip_attribute %]&amp;stats_days=[% days | strip_attribute %][% statdata %][% gtitle %]
+[% END %]
 
-<DIV CLEAR="ALL">
-<IMG SRC="[% constants.rootdir %]/stats.pl?op=graph&amp;type=[% type | strip_attribute %]&amp;stats_days=[% days | strip_attribute %][% statdata %][% gtitle %]">
-</DIV>
+<P>
+<A HREF="[% constants.rootdir %]/stats.pl?op=table[% graphparams %]"
+><IMG SRC="[% constants.rootdir %]/stats.pl?op=graph[% graphparams %]"></A>
+</P>
 __seclev__
 1000
 __version__

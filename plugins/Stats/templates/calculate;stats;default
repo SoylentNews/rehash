@@ -1,0 +1,133 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+calculate
+__template__
+[%
+   period  = form.stats_days ==  93 ? 'Quarterly' :
+             form.stats_days ==  14 ? 'Biweekly' :
+             form.stats_days ==   7 ? 'Weekly' :
+             'Forever';
+
+   byweek = 0;
+   IF (period == 'Quarterly' || period == 'Forever');
+      byweek = 1;
+   END;
+
+   days = data.0.data.keys.sort;
+
+   IF (byweek);
+      daycount = 0;
+      newdays = [];
+      FOREACH day = days;
+         daycount = daycount + 1;
+         IF (!(daycount mod 7) || (loop.index == loop.max));
+            newdays.push(day);
+         END;
+      END;
+      days = newdays;
+   END;
+
+   alldata = [days];
+   plotdata = [[]];
+   alltypes = [];
+   mytotal = {};
+   hasneg = 0;
+   haspos = 0;
+
+   IF (form.type == 'areapercentage');
+      FOREACH this = data;
+         daycount = 0;
+         daytotal = 0;
+         FOREACH day = this.data.keys.sort;
+            daycount = daycount + 1;
+            mytotal.${day} = (mytotal.${day} || 0) + this.data.${day};
+
+            IF (byweek && (daycount mod 7) && (loop.index != loop.max));
+               daytotal = daytotal + mytotal.${day};
+               NEXT;
+            ELSIF (byweek);
+               mytotal.${day} = daytotal;
+               daytotal = 0;
+            END;
+         END;
+      END;
+   END;
+
+   FOREACH this = data;
+      nums = [];
+      daycount = 0;
+      daytotal = 0;
+      FOREACH day = this.data.keys.sort;
+         daycount = daycount + 1;
+         mynum = this.data.${day};
+
+         IF (byweek && (daycount mod 7) && (loop.index != loop.max));
+            daytotal = daytotal + mynum;
+            NEXT;
+         ELSIF (byweek);
+            mynum = daytotal;
+            daytotal = 0;
+         END;
+
+         IF (form.type == 'areapercentage');
+            IF mytotal.${day};
+               mynum = mynum / mytotal.${day} * 100;
+            ELSE;
+               mynum = 0;
+            END;
+         END;
+
+         nums.push(mynum);
+
+         IF (!hasneg && mynum < 0);
+            hasneg = 1;
+         END;
+         IF (!haspos && mynum > 0);
+            haspos = 1;
+         END;
+
+      END;
+
+      alldata.push(nums);
+
+      mytype = this.label || this.type;
+      mytype = mytype _ " (" _ Slash.commify(nums.${nums.max}) _ ")";
+      alltypes.push(mytype);
+      plotdata.push([]);
+      plotdata.${plotdata.max}.${nums.max} = nums.${nums.max};
+   END;
+
+   IF (form.type == 'areastackedindex' && form.op != 'table');
+      USE dataloop = iterator(alldata);
+      FOREACH this = dataloop;
+         thisindex = dataloop.index;
+         thismax   = dataloop.max;
+         IF (thisindex > 1);
+            USE thisloop = iterator(this);
+            FOREACH mynum = thisloop;
+               newindex  = thisindex + 1;
+               currindex = thisloop.index;
+               newnum = mynum;
+               FOREACH nextindex = [newindex .. thismax];
+                  newnum = newnum + alldata.${nextindex}.${currindex};
+                  # "$thisindex | $currindex | $mynum | $newnum\n" | stderr;
+               END;
+               alldata.${thisindex}.${currindex} = newnum;
+            END;
+         END;
+      END;
+   END;
+%]
+__seclev__
+1000
+__version__
+$Id$
