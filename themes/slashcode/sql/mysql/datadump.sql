@@ -35,6 +35,7 @@ INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, ti
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('top10comments','',500,'portald','','index',0,'10 Hot Comments',1,'',NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('userlogin','',1000,'static','','all_sections',4,'Login',1,NULL,NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('newestthree','<!-- newestthree -->',100,'static','','',0,'Newest Three',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('recenttopics','none yet',500,'static','Recent Topics','index',0,'Recent Topics',1,'',NULL,0);
 
 
 #

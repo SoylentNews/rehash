@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use File::Spec;
 
 use vars qw( %task $me );
 
@@ -12,35 +13,51 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
 	my $sth = $slashdb->getNewStoryTopic();
-	my ($html, $num_stories, $cur_tid) = ('', 0);
-
-	my(%tid_list);
+	my($html, $num_stories, $cur_tid) = ('', 0);
+	my $block = '';
+	my $topics = $slashdb->getDescriptions('topics');
+	my %tid_list = ( );
 	while (my $cur_story = $sth->fetchrow_hashref) {
 		my $cur_tid = $cur_story->{tid};
 		# We only want unique topics to be shown.
 		next if exists $tid_list{$cur_story->{tid}};
 		$tid_list{$cur_story->{tid}}++;
-		if ($cur_story->{image} =~ /^\w+\.\w+$/) {
-			$cur_story->{image} =
-			"$constants->{imagedir}/topics/$cur_story->{image}";
+		++$num_stories;
+		if ($num_stories <= $constants->{recent_topic_img_count}) {
+			if ($cur_story->{image} =~ /^\w+\.\w+$/) {
+				$cur_story->{image} = join("/",
+					$constants->{imagedir},
+					"topics",
+					$cur_story->{image}
+				);
+			}
+			$html .= slashDisplay('setrectop_img', {
+				id =>		$cur_tid,
+				image =>	$cur_story->{image},
+				width =>	$cur_story->{width},
+				height =>	$cur_story->{height},
+				alttext =>	$cur_story->{alttext},
+			}, 1);
 		}
-
-# This really shoud be in a template.
-		$html .= <<EOT;
-	<TD><A HREF="$constants->{rootdir}/search.pl?topic=$cur_tid"><IMG
-		SRC="$cur_story->{image}"
-		WIDTH="$cur_story->{width}" HEIGHT="$cur_story->{height}"
-		BORDER="0" ALT="$cur_story->{alttext}"></A>
-	</TD>
-EOT
-
-		# 5 == Var?
-		last if ++$num_stories >= 5;
+		if ($num_stories <= $constants->{recent_topic_txt_count}) {
+			$block .= slashDisplay('setrectop_txt', {
+				id =>		$cur_tid,
+				name =>		$topics->{$cur_tid},
+			}, 1);
+		}
+		if ($num_stories >= $constants->{recent_topic_img_count}
+			&& $num_stories >= $constants->{recent_topic_txt_count}) {
+			# We're done, no more are needed.
+			last;
+		}
 	}
 	$sth->finish();
 	my($tpid) = $slashdb->getTemplateByName('recentTopics', 'tpid');
 	$slashdb->setTemplate($tpid, { template => $html });
-
+	$slashdb->setBlock('recenttopics', {
+		block =>	$block,
+		bid =>		'recenttopics', 
+	});
 	return ;
 };
 

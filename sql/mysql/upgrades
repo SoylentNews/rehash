@@ -324,3 +324,6 @@ ALTER TABLE stories ADD last_update timestamp;
 
 # End of R_2_3_0_23, Start of T_2_3_0_24
 
+INSERT INTO vars (name, value, description) VALUES ('recent_topic_img_count','5','Number of recent topics to store in the template "recentTopics"');
+INSERT INTO vars (name, value, description) VALUES ('recent_topic_txt_count','5','Number of recent topics to store in the block "recenttopics"');
+

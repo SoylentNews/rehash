@@ -520,6 +520,8 @@ INSERT INTO vars (name, value, description) VALUES ('rdfupdatebase','1970-01-01T
 INSERT INTO vars (name, value, description) VALUES ('rdfupdatefrequency','1','How often to update per rdfupdateperiod');
 INSERT INTO vars (name, value, description) VALUES ('rdfupdateperiod','hourly','When to update');
 INSERT INTO vars (name, value, description) VALUES ('reasons','Normal|Offtopic|Flamebait|Troll|Redundant|Insightful|Interesting|Informative|Funny|Overrated|Underrated','first is neutral, next $badreasons are bad, the last two are \"special\", the rest are good');
+INSERT INTO vars (name, value, description) VALUES ('recent_topic_img_count','5','Number of recent topics to store in the template "recentTopics"');
+INSERT INTO vars (name, value, description) VALUES ('recent_topic_txt_count','5','Number of recent topics to store in the block "recenttopics"');
 INSERT INTO vars (name, value, description) VALUES ('rootdir','//www.example.com','Base URL of site; used for creating on-site links that need protocol-inspecific URL (so site can be used via HTTP and HTTPS at the same time)');
 INSERT INTO vars (name, value, description) VALUES ('rss_expire_days','7','Number of days till we blank the data from the database (the signatures still stick around though)');
 INSERT INTO vars (name, value, description) VALUES ('rss_store','0','Should we be saving incomming submissions for rss');

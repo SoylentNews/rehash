@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+Links that make up the top of the page recent topic list
+
+Passed information for a topic
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+setrectop_img
+__template__
+[% USE Slash %]
+
+<TD><A HREF="[% constants.rootdir %]/search.pl?topic=[% id %]"><IMG
+                SRC="[% image %]"
+                WIDTH="[% width %]" HEIGHT="[% height %]"
+                BORDER="0" ALT="[% alttext %]"></A>
+</TD>
+
+__seclev__
+10000
