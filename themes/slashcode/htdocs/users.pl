@@ -504,14 +504,18 @@ sub newUser {
 		my $rootdir = getCurrentStatic('rootdir', 'value');
 
 		if ($uid = $slashdb->createUser($matchname, $form->{email}, $form->{newusernick})) {
+			my $data = {};
+			getOtherUserParams($data);
+			$slashdb->setUser($uid, $data) if keys %$data;
 
 			$title = getTitle('newUser_title');
 
 			$form->{pubkey} = $plugins->{'Pubkey'} ? strip_nohtml($form->{pubkey}, 1) : '';
 			print getMessage('newuser_msg', { 
-				suadmin_flag => $suadmin_flag, 
-				title => $title, 
-				uid => $uid });
+				suadmin_flag	=> $suadmin_flag, 
+				title		=> $title, 
+				uid		=> $uid
+			});
 
 			mailPasswd({ uid => $uid });
 
@@ -1634,6 +1638,7 @@ sub savePasswd {
 			$user_edits_table->{admin_clearpass} = '';
 		}
 
+		getOtherUserParams($user_edits_table);
 		$slashdb->setUser($uid, $user_edits_table) ;
 		$$note .= getMessage('saveuser_passchanged_msg',
 			{ nick => $user_edit->{nickname}, uid => $user_edit->{uid} },
@@ -1768,6 +1773,7 @@ sub saveUser {
 		doEmail($uid, $saveuser_emailtitle, $saveuser_email_msg);
 	}
 
+	getOtherUserParams($user_edits_table);
 	$slashdb->setUser($uid, $user_edits_table);
 
 	print getMessage('note', { note => $note }) if $note;
@@ -1859,7 +1865,7 @@ sub saveComm {
 		$users_comments_table->{"people_bonus_$_"} = ($answer == 0) ? '' : $answer;
 	}
 
-	# Update users with the $users_comments_table hash ref
+	getOtherUserParams($users_comments_table);
 	$slashdb->setUser($uid, $users_comments_table);
 
 	editComm({ uid => $uid });
@@ -1956,8 +1962,7 @@ sub saveHome {
 			unless $form->{willing};
 	}
 
-	# Update users with the $users_index_table thing we've been playing with
-	# for this whole damn sub
+	getOtherUserParams($users_index_table);
 	$slashdb->setUser($uid, $users_index_table);
 
 	editHome({ uid => $uid });
@@ -2295,6 +2300,28 @@ sub getUserAdmin {
 		authoredit_flag 	=> $authoredit_flag,
 		section_select		=> $section_select,
 	}, 1);
+}
+
+#################################################################
+# this is to allow alternate parameters to be specified.  pass in
+# your hash reference to be passed to setUser(), and this will
+# add in those extra parameters.  add the parameters to string_param,
+# type = otherusersparam, code = name of the param.  they will
+# be checked for the main user prefs editing screens, and on
+# user creation -- pudge
+sub getOtherUserParams {
+	my($data) = @_;
+	my $slashdb = getCurrentDB();
+	my $user    = getCurrentUser();
+	my $form    = getCurrentForm();
+	my $params = $slashdb->getDescriptions('otherusersparam');
+
+	for my $param (keys %$params) {
+		if (exists $form->{$param}) {
+			# set user too for output in this request
+			$data->{$param} = $user->{$param} = $form->{$param};
+		}
+	}
 }
 
 #################################################################

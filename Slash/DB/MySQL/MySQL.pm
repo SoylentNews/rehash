@@ -187,6 +187,9 @@ my %descriptions = (
 	'section_extra_types'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='extra_types'") },
 
+	'otherusersparam',
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='otherusersparam'") },
+
 );
 
 ########################################################
@@ -4984,10 +4987,12 @@ sub getTopic {
 
 ########################################################
 sub getSectionTopicType {
-    my($self,$tid) = @_;
-    my $type = $self->sqlSelectAll('section,type', 'section_topics', "tid = $tid");
+	my($self, $tid) = @_;
 
-    return $type;
+	return [] unless $tid;
+	my $type = $self->sqlSelectAll('section,type', 'section_topics', "tid = $tid");
+
+	return $type || [];
 }
 
 ########################################################
@@ -5810,18 +5815,18 @@ sub getMenuItems {
 
 ########################################################
 sub getMiscUserOpts {
-       my($self) = @_;
+	my($self) = @_;
 
-       my $user_seclev = getCurrentUser('seclev') || 0;
-       my $hr = $self->sqlSelectAllHashref("name", "*", "misc_user_opts",
-	       "seclev <= $user_seclev");
-       my $ar = [ ];
-       for my $row (
-	       sort { $hr->{$a}{optorder} <=> $hr->{$b}{optorder} } keys %$hr
-       ) {
-	       push @$ar, $hr->{$row};
-       }
-       return $ar;
+	my $user_seclev = getCurrentUser('seclev') || 0;
+	my $hr = $self->sqlSelectAllHashref("name", "*", "misc_user_opts",
+		"seclev <= $user_seclev");
+	my $ar = [ ];
+	for my $row (
+		sort { $hr->{$a}{optorder} <=> $hr->{$b}{optorder} } keys %$hr
+	) {
+		push @$ar, $hr->{$row};
+	}
+	return $ar;
 }
 
 ########################################################
