@@ -41,9 +41,12 @@ $task{$me}{code} = sub {
 	return;
 };
 
+# this normalizes old and new content, stripping data that
+# updates every time
 sub fudge {
 	my($current, $new) = @_;
-	s|[dD]ate>[^<]+</|| for $current, $new;
+	s{[dD]ate>[^<]+</}{} for $current, $new;
+	s{<(?:slash:)?(?:comments|hitparade)>[^<]+</}{}g for $current, $new;
 	return($current, $new);
 }
 
