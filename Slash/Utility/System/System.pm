@@ -49,6 +49,7 @@ use vars qw($VERSION @EXPORT @EXPORT_OK);
 	doLogInit
 	doLogPid
 	doLogExit
+	save2file
 	prog2file
 	makeDir
 );
@@ -327,6 +328,32 @@ sub doLog {
 	print     $log_msg if $stdout;
 	close $fh;
 }
+
+# Originally from open_backend.pl
+# will write out any data to a given file, but first check to see
+# if the data has changed, so clients don't
+# re-FETCH the file; if they send an If-Modified-Since, Apache
+# will just return a header saying the file has not been modified
+
+# $fudge is an optional coderef to munge the data before comparison
+
+sub save2file {
+	my($file, $data, $fudge) = @_;
+
+	if (open my $fh, '<', $file) {
+		my $current = do { local $/; <$fh> };
+		close $fh;
+		my $new = $data;
+		($current, $new) = $fudge->($current, $new) if $fudge;
+		return if $current eq $new;
+	}
+
+	open my $fh, '>', $file or die "Can't open > $file: $!";
+	print $fh $data;
+	close $fh;
+}
+
+
 
 # Originally from slashd/runtask
 #

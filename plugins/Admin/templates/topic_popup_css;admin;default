@@ -1,0 +1,88 @@
+__section__
+default
+__description__
+Popup tree for topics in admin editor
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+topic_popup_css
+__template__
+/* style for the box around the widget */
+.hpts-outer {
+   visibility:       hidden;
+   position:         absolute;
+   top:              0px;
+   right:            0px;
+   border:           2px outset #333333;
+   background-color: #ffffff;
+   filter:           progid:DXImageTransform.Microsoft.dropShadow( Color=bababa,offx=3,offy=3,positive=true);
+}
+
+/* style for the box that contains the tree */
+.hpts-inner {
+[%- IF scrollbars %]
+   overflow:         scroll;
+[%- END %]
+   width:            [% width %]px;
+[%- IF height %]
+   height:           [% height %]px;
+[%- END %]
+}
+
+/* title bar style.  The width here will define a minimum width for
+   the widget. */
+.hpts-title {
+   padding:          2px;
+   margin-bottom:    4px;
+   font-size:        large;
+   color:            #ffffff;
+   background-color: #[% user.colors.bg_3 %];
+   width:            [% width %]px;
+}
+
+/* style of a block of child nodes - indents them under their parent
+   and starts them hidden */
+.hpts-block {
+   margin-left:      24px;
+   display:          block;
+}
+
+/* style for the button bar at the bottom of the widget */
+.hpts-bbar {
+   padding:          3px;
+   text-align:       left;
+   margin-top:       10px;
+   background-color: #[% user.colors.bg_3 %];
+   width:            [% width %]px;
+}
+
+/* style for the buttons at the bottom of the widget */
+.hpts-button {
+   margin-left:      15px;
+   background-color: #ffffff;
+   color:            #000000;
+}
+
+/* style for selected labels */
+.hpts-label-selected {
+   background:       #98ccfe;
+}
+
+/* style for labels after being unselected */
+.hpts-label-unselected {
+   background:       #ffffff;
+}
+
+/* don't show some stuff */
+.hpts-no-display {
+   display:          none;
+}
+
+__seclev__
+10000
+__version__
+$Id$

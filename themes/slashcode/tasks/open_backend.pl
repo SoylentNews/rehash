@@ -41,28 +41,10 @@ $task{$me}{code} = sub {
 	return;
 };
 
-sub save2file {
-	my($f, $d) = @_;
-	my $fh = gensym();
-
-	# don't rewrite the file if it is has not changed, so clients don't
-	# re-FETCH the file; if they send an If-Modified-Since, Apache
-	# will just return a header saying the file has not been modified
-	# -- pudge
-	# on the other hand, don't abort if the file doesn't exist; that
-	# probably means the site is newly installed - Jamie 2003/09/05
-	if (open $fh, "<$f") {
-		my $current = do { local $/; <$fh> };
-		close $fh;
-		my $new = $d;
-		# normalize ...
-		s|[dD]ate>[^<]+</|| for $current, $new;
-		return if $current eq $new;
-	}
-
-	open $fh, ">$f" or die "Can't open $f: $!";
-	print $fh $d;
-	close $fh;
+sub fudge {
+	my($current, $new) = @_;
+	s|[dD]ate>[^<]+</|| for $current, $new;
+	return($current, $new);
 }
 
 sub _do_rss {
@@ -88,7 +70,7 @@ sub _do_rss {
 	}, 1);
 
 	my $ext = $version == 0.9 ? 'rdf' : 'rss';
-	save2file("$constants->{basedir}/$file.$ext", $rss);
+	save2file("$constants->{basedir}/$file.$ext", $rss, \&fudge);
 }
 
 sub newrdf { _do_rss(@_, "0.9") } # RSS 0.9
@@ -126,7 +108,7 @@ EOT
 	$x .= "</backslash>\n";
 
 	my $file = sitename2filename($name);
-	save2file("$constants->{basedir}/$file.xml", $x);
+	save2file("$constants->{basedir}/$file.xml", $x, \&fudge);
 }
 
 1;

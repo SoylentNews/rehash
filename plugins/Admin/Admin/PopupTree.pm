@@ -64,7 +64,7 @@ Foooooooo.
 =cut
 
 sub getPopupTree {
-	my($stid, $stid_names) = @_;
+	my($stid, $stid_names, $options) = @_;
 	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 	my $constants	= getCurrentStatic();
 	my $tree	= $reader->getTopicTree;
@@ -93,7 +93,8 @@ sub getPopupTree {
 
 	# most of the stuff below (name, title, etc.) should be in vars or getData
 	my $select = Slash::Admin::PopupTree->new(
-		name			=> 'slashtopics',
+		_template_options	=> $options || {},
+		name			=> 'st',
 		data			=> $data,
 		slashtopics		=> \%topics,
 		stid			=> $stid,
@@ -101,7 +102,7 @@ sub getPopupTree {
 		slashorig		=> $tree,
 		title			=> 'Select a Category',
 		button_label		=> 'Choose',
-		onselect		=> 'slashtopics_main_add',
+		onselect		=> 'st_main_add',
 		form_field_form		=> 'slashstoryform',
 		hide_selects		=> 0,
 		scrollbars		=> 1,
@@ -124,7 +125,13 @@ sub _output_generate {
 	$param->{stid}        = $self->{stid};
 	$param->{stid_names}  = $self->{stid_names};
 
-	return slashDisplay('topic_popup_tree', $param, { Return => 1, Page => 'admin' });
+	$self->{_template_options}{type} = 'tree' if
+		!$self->{_template_options}{type} || $self->{_template_options}{type} !~ /^tree|js|css$/;
+
+	my $template_name = sprintf('topic_popup_%s', $self->{_template_options}{type});
+	my $nocomm = $self->{_template_options}{Nocomm} || 0;
+
+	return slashDisplay($template_name, $param, { Return => 1, Page => 'admin', Nocomm => $nocomm });
 }
 
 # there's a little black spot on the sun today

@@ -11,520 +11,52 @@ en_US
 __name__
 topic_popup_tree
 __template__
-[% IF include_css %]<style type="text/css"><!--
-
-  /* style for the box around the widget */
-  .hpts-outer {
-     visibility:       hidden;
-     position:         absolute;
-     top:              0px;
-     right:            0px;
-     border:           2px outset #333333;
-     background-color: #ffffff;
-     filter:           progid:DXImageTransform.Microsoft.dropShadow( Color=bababa,offx=3,offy=3,positive=true);
-  }
-
-  /* style for the box that contains the tree */
-  .hpts-inner {
-[% IF scrollbars %]
-     overflow:         scroll;
-[% END %]
-     width:            [% width %]px;
-[% IF height %]
-     height:           [% height %]px;
-[% END %]
-  }
-
-  /* title bar style.  The width here will define a minimum width for
-     the widget. */
-  .hpts-title {
-     padding:          2px;
-     margin-bottom:    4px;
-     font-size:        large;
-     color:            #ffffff;
-     background-color: #[% user.colors.bg_3 %];
-     width:            [% width %]px;
-  }
-
-  /* style of a block of child nodes - indents them under their parent
-     and starts them hidden */
-  .hpts-block {
-     margin-left:      24px;
-     display:          block;
-  }
-
-  /* style for the button bar at the bottom of the widget */
-  .hpts-bbar {
-     padding:          3px;
-     text-align:       left;
-     margin-top:       10px;
-     background-color: #[% user.colors.bg_3 %];
-     width:            [% width %]px;
-  }
-
-  /* style for the buttons at the bottom of the widget */
-  .hpts-button {
-     margin-left:      15px;
-     background-color: #ffffff;
-     color:            #000000;
-  }
-
-  /* style for selected labels */
-  .hpts-label-selected {
-     background:       #98ccfe;
-  }
-
-  /* style for labels after being unselected */
-  .hpts-label-unselected {
-     background:       #ffffff;
-  }
-
-  /* don't show some stuff */
-  .hpts-no-display {
-     display:          none;
-  }
-
---></style>[% END; #include_css %]
-
-<script language="javascript">
-  /* record location of mouse on each click */
-  var hpts_mouseX;
-  var hpts_mouseY;
-  var hpts_offsetX;
-  var hpts_offsetY;
-  var hpts_locked_obj;
-
-  document.onmousedown = hpts_lock;
-  document.onmousemove = hpts_drag;
-  document.onmouseup   = hpts_release;
-
-  function hpts_lock(evt) {
-        evt = (evt) ? evt : event;
-        hpts_set_locked(evt);
-        hpts_update_mouse(evt);
-
-        if (hpts_locked_obj) {
-            if (evt.pageX) {
-               hpts_offsetX = evt.pageX - ((hpts_locked_obj.offsetLeft) ? 
-                              hpts_locked_obj.offsetLeft : hpts_locked_obj.left);
-               hpts_offsetY = evt.pageY - ((hpts_locked_obj.offsetTop) ? 
-                              hpts_locked_obj.offsetTop : hpts_locked_obj.top);
-            } else if (evt.offsetX || evt.offsetY) {
-               hpts_offsetX = evt.offsetX - ((evt.offsetX < -2) ? 
-                              0 : document.body.scrollLeft);
-               hpts_offsetY = evt.offsetY - ((evt.offsetY < -2) ? 
-                              0 : document.body.scrollTop);
-            } else if (evt.clientX) {
-               hpts_offsetX = evt.clientX - ((hpts_locked_obj.offsetLeft) ? 
-                              hpts_locked_obj.offsetLeft : 0);
-               hpts_offsetY = evt.clientY - ((hpts_locked_obj.offsetTop) ? 
-                               hpts_locked_obj.offsetTop : 0);
-            }
-            return false;
-        }
-
-        return true;
-  }
-
-  function hpts_update_mouse(evt) {
-      if (evt.pageX) {
-         hpts_mouseX = evt.pageX;
-         hpts_mouseY = evt.pageY;
-      } else {
-         hpts_mouseX = evt.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
-         hpts_mouseY = evt.clientY + document.documentElement.scrollTop  + document.body.scrollTop;
-      }
-  }
-
-
-  function hpts_set_locked(evt) {
-    var target = (evt.target) ? evt.target : evt.srcElement;
-    if (target && target.className == "hpts-title") { 
-       hpts_locked_obj = target.parentNode;
-       return;
-    }
-    hpts_locked_obj = null;
-    return;
-  }
-
-  function hpts_drag(evt) {
-        evt = (evt) ? evt : event;
-        hpts_update_mouse(evt);
-
-        if (hpts_locked_obj) {
-           hpts_locked_obj.style.left = (hpts_mouseX - hpts_offsetX) + "px";
-           hpts_locked_obj.style.top  = (hpts_mouseY - hpts_offsetY) + "px";
-           evt.cancelBubble = true;
-           return false;
-        }
-  }
-
-  function hpts_release(evt) {
-     hpts_locked_obj = null;
-  }
-
-  var [% name %]_selected_id = -1;
-  var [% name %]_selected_val;
-  var [% name %]_selected_elem;
-
-  /* expand or collapse a sub-tree */
-  function [% name %]_toggle_expand(id) {
-     var obj = document.getElementById("[% name %]-desc-" + id);
-     var plus = document.getElementById("[% name %]-plus-" + id);
-     var node = document.getElementById("[% name %]-node-" + id);
-     if (obj.style.display != 'block') {
-        obj.style.display = 'block';
-        plus.src = "[% image_path %]minus.png";
-        node.src = "[% image_path %]open_node.png";
-     } else {
-        obj.style.display = 'none';
-        plus.src = "[% image_path %]plus.png";
-        node.src = "[% image_path %]closed_node.png";
-     }
-  }
-
-  /* select or unselect a node */
-  function [% name %]_toggle_select(id, val) {
-     if ([% name %]_selected_id != -1) {
-        /* turn off old selected value */
-        var old = document.getElementById("[% name %]-line-" + [% name %]_selected_id);
-        old.className = "hpts-label-unselected";
-     }
-
-     var img_main = document.[% name %]_main_img;
-     if (id == [% name %]_selected_id) {
-        /* clicked twice, turn it off and go back to nothing selected */
-        [% name %]_selected_id = -1;
-        img_main.style.visibility = "hidden";
-     } else {
-        /* turn on selected item */
-        var new_obj = document.getElementById("[% name %]-line-" + id);
-        new_obj.className = "hpts-label-selected";
-        [% name %]_selected_id = id;
-        [% name %]_selected_val = val;
-
-        /* make topic image appear/disappear */
-        var img_obj  = document.getElementById("[% name %]-img-" + id);
-        if (img_obj) {
-           img_main.style.visibility = "visible";
-           img_main.src = img_obj.value;
-        } else {
-           img_main.style.visibility = "hidden";
-        }
-     }
-  }
-
-  /* it's showtime! */
-  function [% name %]_show() {
-        var obj = document.getElementById("[% name %]-outer");
-        // var x = Math.floor(hpts_mouseX - ([% width %]/2));
-        var x = 2;
-        x = (x > 2 ? x : 2);
-        // var y = Math.floor(hpts_mouseY - ([% IF height %][% height %]/5 * 4[% ELSE %]100[% END %]));
-        var y = Math.floor(hpts_mouseY - 100);
-        y = (y > 2 ? y : 2);
-
-        obj.style.right = x + "px";
-        obj.style.top  = y + "px";
-
-        obj.style.visibility = "visible";
-
-        document.[% name %]_main_img.style.visibility = "hidden";
-
-      [% IF hide_selects %]
-        for(var f = 0; f < document.forms.length; f++) {
-          for(var x = 0; x < document.forms[f].elements.length; x++) {
-             var e = document.forms[f].elements[x];
-             if (e.options) {
-                e.style.visibility = "hidden";
-             }
-          }
-        }
-     [% END %]
-
-     [% IF hide_textareas %]
-        for(var f = 0; f < document.forms.length; f++) {
-          for(var x = 0; x < document.forms[f].elements.length; x++) {
-             var e = document.forms[f].elements[x];
-             if (e.rows) {
-                e.style.visibility = "hidden";
-             }
-          }
-        }
-     [% END %]
-  }
-
-  /* user clicks the ok button */
-  function [% name %]_ok() {
-        if ([% name %]_selected_id == -1) {
-           alert("Please select an item and click Add Topic, or Close Window when you're done.");
-           return;
-        }
-
-        /* fill in a form field if they spec'd one */
-        [% IF form_field %][% IF form_field_form %]document.forms["[% form_field_form %]"][% ELSE %]document.forms[0][% END %].elements["[% form_field %]"].value = [% name %]_selected_val;[% END %]
-
-        /* trigger onselect */
-        [% IF onselect %][% onselect %]([% name %]_selected_val);[% END %]
-  }
-
-  function [% name %]_cancel() {
-        [% name %]_close();
-  }
-
-  function [% name %]_close () {
-        /* hide window */
-        var obj = document.getElementById("[% name %]-outer");
-        obj.style.visibility = "hidden";
-
-        /* clear selection */
-        if ([% name %]_selected_id != -1) {
-                [% name %]_toggle_select([% name %]_selected_id);
-        }
-
-      [% IF hide_selects %]
-        for(var f = 0; f < document.forms.length; f++) {
-          for(var x = 0; x < document.forms[f].elements.length; x++) {
-             var e = document.forms[f].elements[x];
-             if (e.options) {
-                e.style.visibility = "visible";
-             }
-          }
-        }
-      [% END %]
-
-      [% IF hide_textareas %]
-        for(var f = 0; f < document.forms.length; f++) {
-          for(var x = 0; x < document.forms[f].elements.length; x++) {
-             var e = document.forms[f].elements[x];
-             if (e.rows) {
-                e.style.visibility = "visible";
-             }
-          }
-        }
-      [% END %]
-  }
-
-  function [% name %]_get_all_names (id) {
-        var obj = document.getElementById("[% name %]-fullname-" + id);
-        if (obj) {
-           return obj.value;
-        }
-  }
-
-  function [% name %]_get_weight (id) {
-        var obj = document.getElementById("[% name %]-weight-" + id);
-        if (obj) {
-           return obj.value;
-        }
-  }
-
-  function [% name %]_select_weight () {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-        var myweights = document.[% form_field_form %].[% name %]_main_weights;
-
-        var myindex   = myselect.selectedIndex;
-
-        if (myindex == -1) {
-           return;
-        }
-
-        var myvalue = myselectw.options[myindex].value;
-        for (var i = 0; i < myweights.length; i++) {
-           var myoption = myweights.options[i];
-           if (myoption.value == myvalue) {
-              myoption.selected = true;
-           }
-        }
-  }
-
-  function [% name %]_change_weight () {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myweights = document.[% form_field_form %].[% name %]_main_weights;
-
-        for (var i = 0; i < myselect.length; i++) {
-           if (myselect[i].selected == true) {
-              [% name %]_change_weight_really(i, myweights[myweights.selectedIndex].value);
-           }
-        }
-  }
-
-  function [% name %]_change_weight_really (i, val) {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-
-        myselectw[i].value = myselectw[i].text = val;
-        var name = myselect[i].text;
-        var newname = name.replace(/^(.+) \(.*\)$/, "$1 (" + myselectw[i].value + ")");
-        myselect[i].text = newname;
-  }
-
-  function [% name %]_never_display () {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myweights = document.[% form_field_form %].[% name %]_main_weights;
-
-        for (var i = 0; i < myselect.length; i++) {
-           [% name %]_change_weight_really(i, 0);
-        }
-
-        for (var i = 0; i < myweights.length; i++) {
-           if (myweights[i].value == 0) {
-              myweights[i].selected = true;
-           }
-        }
-  }
-
-  function [% name %]_revert_weights () {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-
-        for (var i = 0; i < myselect.length; i++) {
-           [% name %]_change_weight_really(i, myselecto[i].value);
-        }
-
-        [% name %]_select_weight();
-  }
-
-  function [% name %]_main_add (val) {
-        var name      = [% name %]_get_all_names([% name %]_selected_id);
-        var weight    = [% name %]_get_weight([% name %]_selected_id);
-        [% name %]_main_add_really(val, name, weight);
-  }
-
-  function [% name %]_main_add_really (val, name, weight) {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-        var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-        var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
-        var myindex   = myselect.length;
-
-        myselect[myindex]  = new Option(name + " (" + weight + ")", val);
-        myselectw[myindex] = new Option(weight, weight);
-        myselecto[myindex] = new Option(weight, weight);
-        myselecti[myindex] = new Option(name, name);
-        myselect.selectedIndex = myindex;
-        [% name %]_select_weight();
-  }
-
-  /* user clicks the remove button */
-  function [% name %]_remove(noerr) {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-        var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-        var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
-
-        if (myselect.selectedIndex == -1) {
-           if (!noerr) {
-              alert("Please select an item to remove.");
-           }
-           return;
-        }
-
-        /* trigger onselect */
-        myselectw.options[myselect.selectedIndex] = null;
-        myselecto.options[myselect.selectedIndex] = null;
-        myselecti.options[myselect.selectedIndex] = null;
-        myselect.options[myselect.selectedIndex]  = null;
-
-        /* loop! */
-        if (myselect.selectedIndex != -1) {
-           [% name %]_remove(1);
-        }
-  }
-
-  /* user clicks the submit button */
-  function [% name %]_submit() {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-        var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-        var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
-
-        // temporarily make the select boxes visible so Opera will select their values
-        if (useragent_opera()) {
-           myselectw.style.display = 'block';
-           myselecti.style.display = 'block';
-        }
-
-        for (var i = 0; i < myselect.length; i++) {
-           myselect[i].selected  = true;
-           myselectw[i].selected = true;
-           myselecto[i].selected = false;
-           myselecti[i].selected = true;
-        }
-
-        // now make invisible again before submitting
-        if (useragent_opera()) {
-           myselectw.style.display = 'none';
-           myselecti.style.display = 'none';
-        }
-  }
-
-  function slashtopics_load_names () {
-        var myselect  = document.[% form_field_form %].[% name %]_main_select;
-        var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-        var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
-
-        for (var i = 0; i < myselect.length; i++) {
-           if (myselecti[i].value) {
-              myselect[i].text = myselecti[i].value + " (" + myselectw[i].value + ")";
-           }
-        }
-  }
-
-  function useragent_opera () {
-        var agent = navigator.userAgent;
-        if (agent.indexOf('Opera') != -1) {
-           return 1;
-        } else {
-           return 0;
-        }
-  }
-</script>
+[% IF include_css %]
+<link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
+[%- END %]
+<script src="./admin-topic-popup.js" type="text/javascript" />
 
 <div id="[% name %]-outer" class="hpts-outer">
   <div class="hpts-title" id="[% name %]-title">[% title %]</div>
   <div class="hpts-inner">
-  [% thisname = []; thisparent = [] %]
-  [% FOREACH leaf = loop %]
-    [% UNLESS leaf.end_block %]
-       [% thisname.push(leaf.label) %]
-       <div nowrap>
-          [% IF leaf.has_children %]
-              <img id="[% name %]-plus-[% leaf.id %]" width=16 height=16 src="[% image_path %][% UNLESS leaf.open %]minus[% ELSE %]plus[% END %].png" onclick="[% name %]_toggle_expand([% leaf.id %])"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %], '[% leaf.value | html %]')">
-          [% ELSE %]
-              <img width=16 height=16 src="[% image_path %]L.png"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %], '[% leaf.value | html %]')">
-          [% END %]
-                 [% #thisweight = slashtopics.${leaf.value}.parent.${thisparent.last};
-                    #UNLESS thisweight.length;
-                       IF leaf.value == constants.mainpage_nexus_tid;
-                          thisweight = 3;
-                       ELSE;
-                          thisweight = 1;
-                       END;
-                    #END;
-                 %]
-                 <img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %]open_node.png" valign="bottom">
-                 <a href="javascript:void(0);">[% leaf.label %]</a>
-                 [%- IF slashtopics.${leaf.value}.image %]
-                 <input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% constants.imagedir %]/topics/[% slashtopics.${leaf.value}.image %]">
-                 [%- END %]
-                 <input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% thisweight %]">
-                 <input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% thisname.join(' :: ') %]">
-              </span>
-       </div>
-       [% IF leaf.has_children %]
-          [%- thisparent.push(leaf.value) %]
-          <div id="[% name %]-desc-[% leaf.id %]" class="hpts-block" [% UNLESS leaf.open %]style="display: block"[% ELSE %]style="display: none"[% END %] nowrap>
-       [% ELSE %]
-          [% CALL thisname.pop() %]
-       [% END %]
-    [% ELSE %]
-       [% CALL thisparent.pop() %]
-       [% CALL thisname.pop() %]
-      </div>
-    [% END %]
-  [% END %]
+[% thisname = []; thisparent = [];
+   FOREACH leaf = loop;
+     UNLESS leaf.end_block;
+       thisname.push(leaf.label) %]
+<div nowrap>
+[%-    IF leaf.has_children -%]
+<img id="[% name %]-plus-[% leaf.id %]" width=16 height=16 src="[% image_path %][% UNLESS leaf.open %]minus[% ELSE %]plus[% END %].png" onclick="[% name %]_toggle_expand([% leaf.id %])"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
+[%-    ELSE -%]
+<img width=16 height=16 src="[% image_path %]L.png"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
+[%-    END;
+       #thisweight = slashtopics.${leaf.value}.parent.${thisparent.last};
+       #UNLESS thisweight.length;
+         IF leaf.value == constants.mainpage_nexus_tid;
+           thisweight = 3;
+         ELSE;
+           thisweight = 1;
+         END;
+       #END;
+-%]
+<img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %]open_node.png" valign="bottom"><a href="javascript:void(0);">[% leaf.label %]</a>
+[%-    IF slashtopics.${leaf.value}.image -%]
+<input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% constants.imagedir %]/topics/[% slashtopics.${leaf.value}.image %]">
+[%-    END -%]
+<input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% thisweight %]"><input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% thisname.join(' :: ') %]"></span></div>
+[%-    IF leaf.has_children;
+         thisparent.push(leaf.value) -%]
+<div id="[% name %]-desc-[% leaf.id %]" class="hpts-block" [% UNLESS leaf.open %]style="display: block"[% ELSE %]style="display: none"[% END %] nowrap>
+[%-    ELSE;
+         CALL thisname.pop();
+       END;
+     ELSE;
+       CALL thisparent.pop();
+       CALL thisname.pop()
+-%]
+</div>
+[%-  END;
+   END;
+-%]
   </div>
   <div class="hpts-bbar" nowrap>
     <input class="hpts-button" type="button" value="Add Topic"    onclick="[% name %]_ok()">
@@ -535,29 +67,29 @@ __template__
   </div>
 </div>
 
-<select name="slashtopics_main_select" size=5 multiple onchange="slashtopics_select_weight()">
+<select name="[% name %]_main_select" size=5 multiple onchange="[% name %]_select_weight()">
 [%- FOREACH this_stid = stid.sort %]
 <option value="[% this_stid %]">[% slashtopics.${this_stid}.label | strip_html %] ([% stid.$this_stid %])</option>
 [%- END %]</select>
 
-<select name="slashtopics_main_select_weights" multiple class="hpts-no-display">
+<select name="[% name %]_main_select_weights" multiple class="hpts-no-display">
 [%- FOREACH this_stid = stid.sort %]
 <option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
 [%- END %]</select>
 
-<select name="slashtopics_main_select_weights_orig" multiple class="hpts-no-display">
+<select name="[% name %]_main_select_weights_orig" multiple class="hpts-no-display">
 [%- FOREACH this_stid = stid.sort %]
 <option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
 [%- END %]</select>
 
-<select name="slashtopics_main_select_ids" multiple class="hpts-no-display">
+<select name="[% name %]_main_select_ids" multiple class="hpts-no-display">
 [%- FOREACH this_stid = stid.sort %]
 <option value="[% stid_names.$this_stid %]">[% stid_names.$this_stid %]</option>
 [%- END %]</select>
 
-<script language="javascript">slashtopics_load_names();</script>
+<script language="javascript">[% name %]_load_names();</script>
 
-<select name="slashtopics_main_weights" size=1 onchange="slashtopics_change_weight()">
+<select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
 <option value="4">4 - Mainpageworthy (priority)</option>
 <option value="3">3 - Mainpageworthy</option>
 <option value="2">2 - Sectionworthy (priority)</option>
@@ -565,10 +97,10 @@ __template__
 <option value="0">0 - Ignore Topic</option>
 </select>
 <br>
-<input type="button" value="Never Display"  onmouseup="slashtopics_never_display()">
-<input type="button" value="Revert Weights" onmouseup="slashtopics_revert_weights()">
-<input type="button" value="Choose Topics"  onmouseup="slashtopics_show()">
-<input type="button" value="Remove Topic"   onmouseup="slashtopics_remove()">
+<input type="button" value="Never Display"  onmouseup="[% name %]_never_display()">
+<input type="button" value="Revert Weights" onmouseup="[% name %]_revert_weights()">
+<input type="button" value="Choose Topics"  onmouseup="[% name %]_show()">
+<input type="button" value="Remove Topic"   onmouseup="[% name %]_remove()">
 
 __seclev__
 10000
