@@ -117,7 +117,7 @@ EOT
 		$statsSave->createStatDaily($yesterday, "section_${section}_bytes", $bytes);
 		$statsSave->createStatDaily($yesterday, "section_${section}_page", $pages);
 
-		for (qw| article search comments journal rss|) {
+		for (qw| article search comments palm rss|) {
 			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section  });
 			my $pages = $stats->countDailyByPage($_ ,$yesterday, { section => $section  });
 			my $bytes = $stats->countBytesByPage($_ ,$yesterday, { section => $section  });
