@@ -842,6 +842,11 @@ sub validateComment {
 	my $message = '';
 
 	my $read_only;
+	if(!dbAvailable("write_comments")) {
+		$$error_message = getError('comment_db_down');
+		$form_success = 0;
+		return;
+	}
 	for (qw(ipid subnetid uid)) {
 		# We skip the UID test for anonymous users.
 		next if $_ eq 'uid' && $user->{is_anon};
@@ -1460,6 +1465,11 @@ sub moderate {
 		titlebar("100%", "MetaModerating...");
 		print getData("metamoderate_message");
 		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
+		return;
+	}
+
+	if (!dbAvailable("write_comments")) {
+		print getError("comments_db_down");
 		return;
 	}
 
