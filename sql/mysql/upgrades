@@ -367,3 +367,5 @@ INSERT INTO code_param (type, code, name) VALUES ('months',12,'December');
 
 # End of R_2_3_0_25
 
+DELETE FROM sections WHERE title='All Sections' OR section='';
+
