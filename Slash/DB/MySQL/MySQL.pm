@@ -5848,6 +5848,7 @@ sub calcTrollPoint {
 ########################################################
 sub calcModval {
 	my($self, $where_clause, $halflife, $minicache) = @_;
+	my $constants = getCurrentStatic();
 
 	return undef unless $where_clause;
 
