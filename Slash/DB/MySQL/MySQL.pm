@@ -3306,7 +3306,7 @@ sub getAccessListInfo {
 	}
 
 	if ($column eq 'isbanned') {
-		$where .= " AND isbanned = 1 OR wasbanned = 1";
+		$where .= " AND (isbanned = 1 OR wasbanned = 1)";
 	} else {
 		$where .= " AND (readonly = 1 OR wasreadonly = 1) AND formname = '$formname' AND reason != 'expired'";
 	}
