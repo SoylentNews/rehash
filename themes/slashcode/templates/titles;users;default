@@ -39,10 +39,10 @@ __template__
 	User Info for [% md5id_vis %] ([% id %])
 
 [% CASE 'editUser_title' %]
-	Editing [% user_edit.nickname %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]
+	Editing [% user_edit.nickname | strip_literal %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]
 
 [% CASE 'changePasswd_title' %]
-	Change password for [% user_edit.nickname %] ( [% user_edit.uid %]) 
+	Change password for [% user_edit.nickname | strip_literal %] ( [% user_edit.uid %]) 
 
 [% CASE 'tildeEd_title' %]
 	Exclude Stories from the Homepage

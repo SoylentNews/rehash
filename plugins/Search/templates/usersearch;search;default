@@ -21,7 +21,7 @@ __template__
 			</TD>
 		[% END %]
 		<TD VALIGN="TOP">
-			<A HREF="[% gSkin.rootdir %]/~[% thisuser.nickname | fixparam %]/">[% thisuser.nickname %]</A> &nbsp;
+			<A HREF="[% gSkin.rootdir %]/~[% thisuser.nickname | fixparam %]/">[% thisuser.nickname | strip_literal %]</A> &nbsp;
 			[% IF thisuser.fakeemail %]
 				([% thisuser.uid %]) email: <A HREF="mailto:[% thisuser.fakeemail | fixparam %]">[% thisuser.fakeemail | strip_literal %]</A> <BR>
 			[% ELSE %]

@@ -27,7 +27,7 @@ __template__
 	%]
 
 [% CASE 'userboxhead' %]
-	[% user.nickname %]'s Slashbox
+	[% user.nickname | strip_literal %]'s Slashbox
 
 [% CASE 'userboxdefault' %]
 	[% returnme.data_constant = 1 %]

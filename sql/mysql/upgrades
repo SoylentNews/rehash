@@ -2365,3 +2365,5 @@ INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastchange', '1'
 INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastdraw', '1', 'Unix timestamp of last time topic_tree_draw.pl redrew images/topic_tree.png');
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Tree','Tree','[% gSkin.rootdir %]/admin.pl?op=topictree',100,9);
 
+
+UPDATE menus SET label = '[% user.nickname | strip_literal %]\'s Journal' WHERE label = '[% user.nickname %]\'s Journal' AND menu = 'journal';

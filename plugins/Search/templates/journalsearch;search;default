@@ -17,7 +17,7 @@ __template__
 	<FONT SIZE="-1">On [% Slash.timeCalc(journal.date) %]</FONT><BR>
 	[% journal.article %]<BR>
 	<FONT SIZE="-1">
-	Author: <A HREF="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname %]</A>
+	Author: <A HREF="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname | strip_literal %]</A>
 	[% IF journal.score %]<BR>
 	Score: ([% journal.score %])
 	[% END %]

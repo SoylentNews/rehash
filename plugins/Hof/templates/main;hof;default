@@ -56,7 +56,7 @@ by [% item.4 %]<BR>
 [% FOREACH top = topcomments %]
 <B>[% top.score %]</B>
 	<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% top.sid %]&amp;pid=[% top.pid %]#[% top.cid %]">[% top.subj %]</A>
-	by <A HREF="mailto:[% top.fakeemail | fixparam %]">[% top.nickname %]</A> on [% top.cdate %]<BR>
+	by <A HREF="mailto:[% top.fakeemail | fixparam %]">[% top.nickname | strip_literal %]</A> on [% top.cdate %]<BR>
 
 	<FONT SIZE="2">attached to [% storylinks = Slash.linkStory({ link => top.title, section => top.section, sid => top.sid }) %]
 <A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>

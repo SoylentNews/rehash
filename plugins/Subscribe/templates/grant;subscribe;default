@@ -21,7 +21,7 @@ __template__
 [% ELSIF uid and !grant_recipient %]
 	No user found for specified UID ([% uid %]).  Cannot complete grant.
 [% ELSE %]
-	<P>Granting [% pages %] pages to [% grant_recipient.nickname %] ([% grant_recipient.uid %]).<P>
+	<P>Granting [% pages %] pages to [% grant_recipient.nickname | strip_literal %] ([% grant_recipient.uid %]).<P>
 	[% IF grant_success %]
 		<P>Grant completed successfully.</P>
 	[% ELSE %]

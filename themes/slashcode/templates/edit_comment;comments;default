@@ -72,7 +72,7 @@ __template__
 		You are not logged in.  You can log in now using the
 		convenient form below, or
 		<A HREF="[% gSkin.rootdir %]/users.pl">Create an Account</A>,
-		or post as <B>[% user.nickname %]</B>.
+		or post as <B>[% user.nickname | strip_literal %]</B>.
 	</TD></TR>
 	<INPUT TYPE="HIDDEN" NAME="rlogin" VALUE="1">
 
@@ -89,7 +89,7 @@ __template__
 END %]
 	[% UNLESS hide_name %]
 	<TR><TD WIDTH="130" ALIGN="RIGHT">[% PROCESS formLabel value => 'Name' %]</TD><TD WIDTH="500">
-		<A HREF="[% gSkin.rootdir %]/users.pl">[% user.nickname %]</A> [ [% userlink %] ]</TD></TR>
+		<A HREF="[% gSkin.rootdir %]/users.pl">[% user.nickname | strip_literal %]</A> [ [% userlink %] ]</TD></TR>
 	[% END %]
 [% IF user.fakeemail %]
 	[% UNLESS hide_email %]

@@ -31,7 +31,7 @@ __template__
 	
 		<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/subscribe.pl">
 		<CENTER><TABLE BORDER=0 CELLPADDING=3>
-		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="user"> Buy Pages for [% user.nickname %]</TD></TR>
+		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="user"> Buy Pages for [% user.nickname | strip_literal %]</TD></TR>
 		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <INPUT TYPE="text" name="uid" size="6"></TD></TR>
 
 		<TR><TD><BR>
@@ -85,7 +85,7 @@ __template__
 [% IF user.is_admin || ( hits_paidfor && (hits_paidfor > hits_bought) );
 	can_buy = 1; ELSE; can_buy = 0; END %]
 
-<P>[% IF user.uid == user_edit.uid %]You have[% ELSE %]User "[% user_edit.nickname %]" has[% END %]
+<P>[% IF user.uid == user_edit.uid %]You have[% ELSE %]User "[% user_edit.nickname | strip_literal %]" has[% END %]
 paid for a total of [% hits_paidfor %] pages
 and so far [% hits_bought %] have been used up
 ([% hits_bought_today %] today).
@@ -110,7 +110,7 @@ ends. Your day may vary.)
 [% IF user.is_admin %]
 
 	<P>Want to buy
-	[% IF user.uid != user_edit.uid %]"[% user_edit.nickname %]"[% END %]
+	[% IF user.uid != user_edit.uid %]"[% user_edit.nickname | strip_literal %]"[% END %]
 	some pages? You're an admin, so take as many as you want:
 	<INPUT TYPE="TEXT" NAME="buymore" VALUE="0" SIZE="6">
 

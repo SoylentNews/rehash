@@ -145,7 +145,7 @@ please contact the site administrator immediately.
 
 [% CASE 'reset_acct_complete' %]
 	[% IF useredit.uid %]
-	<p>The account for user [% useredit.nickname %] has been reset.  The password
+	<p>The account for user [% useredit.nickname | strip_literal %] has been reset.  The password
 	has been changed and an e-mail has been sent with the new password to verify
 	the e-mail account associated with this account. 
 	[% ELSE %]
@@ -183,7 +183,7 @@ please contact the site administrator immediately.
 	<P>Option(s) changed.<BR>
 
 [% CASE 'no_registration_needed' %]
-	<P>Hello, [% user.nickname %]. Your account is currently registered with
+	<P>Hello, [% user.nickname | strip_literal %]. Your account is currently registered with
 	the system. No re-registration is necessary at this time.<BR>
 
 [% CASE DEFAULT %]

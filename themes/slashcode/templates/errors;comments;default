@@ -140,7 +140,7 @@ with your
 [% IF user.is_anon %]
 MD5'd IPID, which is <tt>[% user.ipid %]</tt>[%
 ELSE %]
-username "<tt>[% user.nickname %]</tt>"[%
+username "<tt>[% user.nickname | strip_literal %]</tt>"[%
 END %]. Let us know how many comments <em>you</em> think you've
 posted in the last 24 hours.
 
@@ -163,7 +163,7 @@ with your MD5'd IPID and SubnetID, which are
 "<tt>[% user.ipid %]</tt>" and "<tt>[% user.subnetid %]</tt>"[%
 IF !user.is_anon %]
 and (optionally, but preferably) your IP number
-"<tt>[% unencoded_ip %]</tt>" and your username "<tt>[% user.nickname %]</tt>"[%
+"<tt>[% unencoded_ip %]</tt>" and your username "<tt>[% user.nickname | strip_literal %]</tt>"[%
 END %].
 
 [% # NESTING TOO DEEP

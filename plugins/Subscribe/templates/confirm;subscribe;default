@@ -24,7 +24,7 @@ __template__
 	[% IF type == "user" %]
 	<P>You've decided to purchase:
 	<UL>
-	<LI>A [% constants.sitename %] subscription for [% user.nickname %] ([% user.uid %])
+	<LI>A [% constants.sitename %] subscription for [% user.nickname | strip_literal %] ([% user.uid %])
 	</UL>
 	If this is correct select your payment type below:
 		<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
@@ -35,7 +35,7 @@ __template__
 		[% IF sub_user %]
 			<P>You've decided to purchase:
 			<UL>
-				<LI>A [% constants.sitename %] gift subscription for [% sub_user.nickname %] ([% sub_user.uid %])
+				<LI>A [% constants.sitename %] gift subscription for [% sub_user.nickname | strip_literal %] ([% sub_user.uid %])
 			</UL>
 			<P>
 			If this is correct select your payment type below:

@@ -33,7 +33,7 @@ up with the hassle.
 Sorry, but the re-registration data which you have provided is invalid, please
 try again!<P>
   [% ELSE %]
-<H2>Welcome, [% user.nickname %]!</H2>
+<H2>Welcome, [% user.nickname | strip_literal %]!</H2>
   [% END %]
 
 In the entry field below, please enter the registration ID which should have

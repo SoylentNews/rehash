@@ -44,7 +44,7 @@ END %]
 		<TD BGCOLOR="#E6E6E6" WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
 				<TD BGCOLOR="[% IF story.is_future; "#CCCCFF"; ELSE; "#E6E6E6"; END %]">
-					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname %]</A>
+					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname | strip_literal %]</A>
 						[% story.atstorytime %]</FONT>
 						[% IF constants.plugin.Print %] 
 							&nbsp;&nbsp;<A HREF="[% gSkin.rootdir -%]/print.pl?sid=[% story.sid %]"><IMG SRC="[% constants.imagedir %]/print.gif" HEIGHT="11" WIDTH="15" BORDER="0" ALT="Printer-friendly"></A>

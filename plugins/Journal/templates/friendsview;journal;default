@@ -20,7 +20,7 @@ __template__
 		[% PROCESS titlebar title => diatribe.description, width => "90%" %]
 		<TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0"> <TR>
 			<TD BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP">
-				<B>Posted by <A HREF="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/">[% diatribe.nickname %]</A> [% user.aton %]
+				<B>Posted by <A HREF="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/">[% diatribe.nickname | strip_literal %]</A> [% user.aton %]
 				<I>[% Slash.timeCalc(diatribe.date) %]</I> (<A HREF="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</A>)
 			</TD>
 			<TD BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP" ALIGN="RIGHT">

@@ -246,7 +246,7 @@ __template__
 					[% FOREACH tmpuid = uidstruct.keys %]
 						<TR bgcolor="eeeeee">
 							<TD><font size=-1><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpuid %]">[% tmpuid %]</font></A></TD>
-							<TD><font size=-1>[% uidstruct.$tmpuid.nickname %]</font></TD>
+							<TD><font size=-1>[% uidstruct.$tmpuid.nickname | strip_literal %]</font></TD>
 							<TD ALIGN="CENTER"><font size=-1>[% IF uidstruct.$tmpuid.comments %]X[% END %]&nbsp;</font></TD>
 							<TD ALIGN="CENTER"><font size=-1>[% IF uidstruct.$tmpuid.submissions %]X[% END %]&nbsp;</FONT></TD>
 							<TD ALIGN="CENTER"><font size=-1>[% IF uidstruct.$tmpuid.moderatorlog %]X[% END %]&nbsp;</FONT></TD>

@@ -32,9 +32,9 @@ If you'd like to, view or edit your
 [% ELSE %]
 
 [% IF type == 'friend' || type == 'foe' || type == 'bitch' %]
-[% zoo_user.nickname %] ([% zoo_user.uid %]) has made you their [% type %].
+[% zoo_user.nickname | strip_literal %] ([% zoo_user.uid %]) has made you their [% type %].
 [% ELSIF type == 'neutral' %]
-[% zoo_user.nickname %] ([% zoo_user.uid %]) has ceased their relationship with you.
+[% zoo_user.nickname | strip_literal %] ([% zoo_user.uid %]) has ceased their relationship with you.
 [% END %]
     [% absolutedir %]/~[% zoo_user.nickname | fixparam %]/
 

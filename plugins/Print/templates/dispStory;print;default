@@ -28,7 +28,7 @@ END -%]
 <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0">
 <TR><TD><B>Title</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% story.title %]</TD></TR>
 <TR><TD><B>Date</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% story.storytime %]</TD></TR>
-<TR><TD><B>Author</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% author.nickname %]</TD></TR>
+<TR><TD><B>Author</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% author.nickname | strip_literal %]</TD></TR>
 <TR><TD><B>Topic</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% topic %]</TD></TR>
 [% IF constants.use_dept -%]
 <TR><TD COLSPAN="2" NOWRAP>from the <EM>[% story.dept %]</EM> dept.</TD></TR>
