@@ -18,7 +18,7 @@ __name__
 start_tab
 __template__
 [% IF justify == 'right' %]
-	<TD VALIGN="TOP" BGCOLOR="[% details.bg_line_color %]" WIDTH=100%>&nbsp;</TD>
+	<TD VALIGN="TOP" BGCOLOR="[% details.bg_line_color %]" WIDTH="100%">&nbsp;</TD>
 [% END %]
 [% IF tab_is_selected %]
 	<TD VALIGN="TOP"><IMG [% details.lt_corner_sel %]></TD>
@@ -30,7 +30,7 @@ __template__
 	<TD VALIGN="TOP"><IMG [% details.lt_unsel_rt_sel %]></TD>
 [% ELSE %]
 	<TD VALIGN="TOP"><IMG [% details.lt_corner_unsel %]></TD>
-	<TD [% details.bg_tab_unsel %]">&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</TD>
+	<TD [% details.bg_tab_unsel %]>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG [% details.lt_unsel_rt_unsel %]></TD>
 [% END %]
 __seclev__

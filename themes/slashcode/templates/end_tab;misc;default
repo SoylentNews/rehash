@@ -18,14 +18,14 @@ __name__
 end_tab
 __template__
 [% IF tab_is_selected %]
-	<TD [% details.bg_tab_sel %]">&nbsp;<A HREF="[% link %]"><B><FONT COLOR="[% details.fg_tab_sel_color %]">[% label %]</FONT></B></A>&nbsp;</TD>
+	<TD [% details.bg_tab_sel %]>&nbsp;<A HREF="[% link %]"><B><FONT COLOR="[% details.fg_tab_sel_color %]">[% label %]</FONT></B></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG [% details.rt_corner_sel %]></TD>
 [% ELSE %]
-	<TD [% details.bg_tab_unsel %]">&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</TD>
+	<TD [% details.bg_tab_unsel %]>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</TD>
 	<TD VALIGN="TOP"><IMG [% details.rt_corner_unsel %]></TD>
 [% END %]
 [% IF justify != 'right' %]
-	<TD VALIGN="TOP" BGCOLOR="[% details.bg_line_color %]" WIDTH=100%>&nbsp;</TD>
+	<TD VALIGN="TOP" BGCOLOR="[% details.bg_line_color %]" WIDTH="100%">&nbsp;</TD>
 [% END %]
 __seclev__
 10000
