@@ -636,115 +636,6 @@ sub updateSpider {
 }
 
 
-#################################################################
-# Here we copy and override the old submissionEd to perform things
-# NewsVac specific.
-sub newsvacSubmissions {
-	my($slashdb, $user, $form, $udbt) = @_;
-	my $constants = getCurrentStatic();
-	my($def_section, $cur_section, $def_note, $cur_note,
-		$sections, @sections, @notes,
-		%all_sections, %all_notes, %sn);
-
-	$form->{del} = 0 if $user->{is_admin};
-
-	$def_section	= getData('defaultsection');
-	$def_note	= getData('defaultnote');
-	$cur_section	= $form->{section} || $def_section;
-	$cur_note	= $form->{note} || $def_note;
-	$sections	= $slashdb->getSubmissionsSections();
-
-	for (@$sections) {
-		my($section, $note, $cnt) = @$_;
-		$all_sections{$section} = 1;
-		$note ||= $def_note;
-		$all_notes{$note} = 1;
-		$sn{$section}{$note} = $cnt;
-	}
-
-	for my $note_str (keys %all_notes) {
-		$sn{$def_section}{$note_str} = 0;
-		for (grep { $_ ne $def_section } keys %sn) {
-			$sn{$def_section}{$note_str} += $sn{$_}{$note_str};
-		}
-	}
-
-	$all_sections{$def_section} = 1;
-
-	# self documentation, right?
-	@sections =	map  { [
-				$_->[0], 
-				($_->[0] eq $def_section ?  '' : $_->[0])
-			] }
-			sort { $a->[1] cmp $b->[1] }
-			map  { [$_, ($_ eq $def_section ? '' : $_)] }
-			keys %all_sections;
-
-	@notes =	map  { [
-				$_->[0], 
-				($_->[0] eq $def_note ? '' : $_->[0])
-			] }
-			sort { $a->[1] cmp $b->[1] }
-			map  { [ $_, ($_ eq $def_note ? '' : $_) ] }
-			keys %all_notes;
-
-	my $title ||= 'Submissions ' . ($user->{is_admin} ?  'Admin' : 'List');
-
-	# Take top 10 submissions by weight 
-
-	slashDisplay('subEdTable', {
-		cur_section	=> $cur_section,
-		cur_note	=> $cur_note,
-		def_section	=> $def_section,
-		def_note	=> $def_note,
-		sections	=> \@sections,
-		notes		=> \@notes,
-		sn		=> \%sn,
-		title		=> $title,
-		width		=> '100%',
-	});
-
-	my(@submissions, $submissions, %selection);
-	$submissions = $slashdb->getSubmissionForUser();
-
-	for (@$submissions) {
-		my $sub = $submissions[@submissions] = {};
-		@{$sub}{qw(
-			subid subj time tid note email
-			name section comment uid karma
-		)} = @$_;
-		$sub->{name}  =~ s/<(.*)>//g;
-		$sub->{email} =~ s/<(.*)>//g;
-		$sub->{is_anon} = isAnon($sub->{uid});
-
-		my @strs = (
-			substr($sub->{subj}, 0, 35),
-			substr($sub->{name}, 0, 20),
-			substr($sub->{email}, 0, 20)
-		);
-		$strs[0] .= '...' if length($sub->{subj}) > 35;
-		$sub->{strs} = \@strs;
-
-		$sub->{ssection} = $sub->{section} ne $constants->{defaultsection}
-			? "&section=$sub->{section}" : '';
-		$sub->{stitle}   = '&title=' . fixparam($sub->{subj});
-		$sub->{section} = ucfirst($sub->{section}) unless $user->{is_admin};
-	}
-
-	%selection = map { ($_, $_) }
-		(qw(Hold Quik), '',	# '' is special
-		(ref $constants->{submit_categories}
-			? @{$constants->{submit_categories}} : ())
-	);
-
-	my $template = $user->{is_admin} ? 'Admin' : 'User';
-	slashDisplay('subEd' . $template, {
-		submissions	=> \@submissions,
-		selection	=> \%selection,
-	});
-}
-
-
 ##################################################################
 sub main {
 	my $udbt	= getObject('Slash::NewsVac');
@@ -802,14 +693,6 @@ sub main {
 		},
 		updatespider => {
 			function=> \&updateSpider,
-			seclev	=> $required_seclev,
-		},
-		list	=> {
-			function=> \&newsvacSubmissions,
-			seclev	=> $required_seclev,
-		},
-		listsubs=> {
-			function=> \&newsvacSubmissions,
 			seclev	=> $required_seclev,
 		},
 		timingdump => {
