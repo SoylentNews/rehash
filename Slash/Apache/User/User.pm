@@ -492,7 +492,7 @@ sub userdir_handler {
 			if ($extra && $extra =~ /^\d+$/) {
 				$args .= "&id=$extra";
 			} elsif ($extra && $extra =~ /^rss$/) {
-				$args .= "&conten_type=rss";
+				$args .= "&content_type=rss";
 			} elsif ($extra && $extra =~ /^friends$/) {
 				$args = "op=friendview";
 			}
