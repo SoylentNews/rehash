@@ -258,24 +258,24 @@ sub main {
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'me',
-			page		=> 'readonly',
+			adminmenu	=> 'info',
+			tab_selected	=> 'readonly',
 		},
 		listbanned => {
 			function	=> \&listBanned,
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'me',
-			page		=> 'banned',
+			adminmenu	=> 'info',
+			tab_selected	=> 'banned',
 		},
 		topabusers 	=> {
 			function	=> \&topAbusers,
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'me',
-			page		=> 'abusers',
+			adminmenu	=> 'info',
+			tab_selected	=> 'abusers',
 		},
 		listabuses 	=> {
 			function	=> \&listAbuses,
@@ -387,7 +387,11 @@ sub main {
 
 	# Print the header and very top stuff on the page.
 	if ($op ne 'userinfo' && $op ne 'display') {
-		header(getMessage('user_header'));
+		my $data = {
+			adminmenu => $ops->{$op}{adminmenu} || 'admin',
+			tab_selected => $ops->{op}{tab_selected},
+		};
+		header(getMessage('user_header'), '', $data);
 		# This is a hardcoded position, bad idea and should be fixed -Brian
 		# Yeah, we should pull this into a template somewhere...
 		print getMessage('note', { note => $errornote }) if defined $errornote;
