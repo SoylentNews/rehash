@@ -1899,6 +1899,11 @@ sub displayRecent {
 		
 	}) || [ ];
 
+    if(defined $form->{show_m2s}){
+        $slashdb->setUser($user->{uid}, { user_m2_with_mod => $form->{show_m2s});
+    }
+
+
 	my $subj_vislen = 30;
 	for my $comm (@$recent_comments) {
 		vislenify($comm); # add $comm->{ipid_vis}
