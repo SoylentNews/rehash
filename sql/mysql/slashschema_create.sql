@@ -723,7 +723,7 @@ CREATE TABLE users_index (
 	uid mediumint UNSIGNED NOT NULL,
 	extid varchar(255),
 	exaid varchar(100),
-	exsect varchar(100),
+	exsect varchar(255),
 	exboxes varchar(255),
 	maxstories tinyint UNSIGNED DEFAULT '30' NOT NULL,
 	noboxes tinyint DEFAULT '0' NOT NULL,

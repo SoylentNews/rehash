@@ -350,6 +350,16 @@ sub getHeadlineUsers {
 	return $self->_getMailingUsers(1);
 }
 
+sub getNewsletterUsersCount {
+	my($self) = @_;
+	return scalar @{$self->_getMailingUsersRaw(0)};
+}
+
+sub getHeadlineUsersCount {
+	my($self) = @_;
+	return scalar @{$self->_getMailingUsersRaw(1)};
+}
+
 # takes message ref or message ID
 sub send {
 	my($self, $msg) = @_;
@@ -472,11 +482,12 @@ sub bulksend {
 	($code, my($type)) = $self->getDescription('messagecodes', $code);
 	$code = -1 unless defined $code;
 
+	my $uid = 0;
 	my $msg = {
 		id		=> 0,
 		fuser		=> 0,
 		altto		=> '',
-		user		=> 0,
+		user		=> $uid,
 		subject		=> $subj,
 		message		=> $message,
 		code		=> $code,
@@ -494,7 +505,7 @@ sub bulksend {
 	} else {
 		messagedLog(getData("send mail error", {
 			addr	=> "[bulk]",
-			uid	=> $msg->{user}{uid},
+			uid	=> $uid,
 			error	=> "unknown error",
 		}, "messages"));
 		return 0;

@@ -113,11 +113,11 @@ sub sendEmail {
 	}
 
 	my %data = (
-		from		=> $constants->{mailfrom},
-		smtp		=> $constants->{smtp_server},
-		subject		=> $subject,
-		body		=> $content,
-		to		=> $addr,
+		From		=> $constants->{mailfrom},
+		Smtp		=> $constants->{smtp_server},
+		Subject		=> $subject,
+		Message		=> $content,
+		To		=> $addr,
 		# put in vars ... ?
 		'Content-type'	=> 'text/plain; charset="us-ascii"',
 		'Content-transfer-encoding'	=> '8bit',
@@ -139,17 +139,19 @@ sub bulkEmail {
 	my($addrs, $subject, $content) = @_;
 	my $constants = getCurrentStatic();
 
-	my $goodfile = catfile($constants->{logdir}, 'bulk-good.log');
-	my $badfile  = catfile($constants->{logdir}, 'bulk-bad.log');
-	my $errfile  = catfile($constants->{logdir}, 'bulk-error.log');
+	my $goodfile = gensym();
+	my $badfile  = gensym();
+	my $errfile  = gensym();
+
+	# should we check errors?  probably.  -- pudge
+	open $goodfile, ">>" . catfile($constants->{logdir}, 'bulk-good.log');
+	open $badfile,  ">>" . catfile($constants->{logdir}, 'bulk-bad.log');
+	open $errfile,  ">>" . catfile($constants->{logdir}, 'bulk-error.log');
 
 	# start logging
-	for my $file ($goodfile, $badfile, $errfile) {
-		my $fh = gensym();
-		open $fh, ">> $file\0" or errorLog("Can't open $file: $!"), return;
+	for my $fh ($goodfile, $badfile, $errfile) {
 		printf $fh "Starting bulkmail '%s': %s\n",
 			$subject, scalar localtime;
-		close $fh;
 	}
 
 	my $valid = Email::Valid->new();
@@ -168,9 +170,7 @@ sub bulkEmail {
 	my $return = $bulk->bulkmail;
 
 	# end logging
-	for my $file ($goodfile, $badfile, $errfile) {
-		my $fh = gensym();
-		open $fh, ">> $file\0" or errorLog("Can't open $file: $!"), return;
+	for my $fh ($goodfile, $badfile, $errfile) {
 		printf $fh "Ending bulkmail   '%s': %s\n\n",
 			$subject, scalar localtime;
 		close $fh;

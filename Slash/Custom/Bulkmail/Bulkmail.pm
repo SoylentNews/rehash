@@ -17,7 +17,7 @@ use strict;
 	my $def_From				= 'Postmaster';
 	my $def_To					= 'postmaster@your.smtp.com';
 	my $def_Smtp				= 'your.smtp.com';		#<--Set this variable.  Important!
-	my $def_Domain				= "smtp.com";
+	my $def_Domain				= "";	# smtp.com
 	my $def_Port 				= '25';
 	my $def_Tries				= '5';
 	my $def_Subject				= "(no subject)";

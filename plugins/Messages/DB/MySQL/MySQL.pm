@@ -343,7 +343,7 @@ sub _delete_all {
 	$self->sqlDo("DELETE FROM $table WHERE 1=1");
 }
 
-sub _getMailingUsers {
+sub _getMailingUsersRaw {
 	my($self, $code) = @_;
 	return unless $code =~ /^-?\d+$/;
 
@@ -356,6 +356,14 @@ users_messages.code=$code AND users_messages.mode=$mode AND users.realemail != '
 SQL
 
 	my $users  = $self->sqlSelectColArrayref($cols, $table, $where);
+	return $users;
+}
+
+sub _getMailingUsers {
+	my($self, $code) = @_;
+	return unless $code =~ /^-?\d+$/;
+	
+	my $users = $self->_getMailingUsersRaw($code);
 	my $fields = ['realemail', 'exsect', 'extid', 'exaid', 'sectioncollapse']; # 'nickname', 
 	$users     = { map { $_ => $self->getUser($_, $fields) } @$users };
 	return $users;
@@ -380,4 +388,3 @@ sub _getMessageUsers {
 1;
 
 __END__
-
