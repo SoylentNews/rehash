@@ -23,7 +23,7 @@ $task{$me}{code} = sub {
 	my $users = $slashdb->sqlSelectColArrayref('uid', 'people');
 
 	for my $uid (@$users) {
-		my $people = $slashdb->setUser($uid, 'people ');
+		my $people = $slashdb->getUser($uid, 'people ');
 		# We clean out everuthing but friend and foe
 		for (keys %$people) {  
 			delete $people->{$_} 
