@@ -16,7 +16,8 @@ __template__
 </HEAD>
 <BODY>
 
-<H1>[% constants.sitename %]: [% constants.slogan %]<BR>
+<H1>[% constants.sitename %]<BR>
+<SMALL>[% constants.slogan %]</SMALL><BR>
 <SMALL>[% constants.absolutedir %]/</SMALL></H1>
 
 [% IF constants.run_ads -%]

@@ -6,7 +6,7 @@ Template to display a story in printable mode.
 * topic = topic data structure
 * story = story data structure
 * links = List of links in the story. Each element of link is a pair of:
-	<url, text>
+	<URL, TEXT>
 
 __title__
 
@@ -20,35 +20,34 @@ __seclev__
 10000
 __template__
 [% UNLESS form.nohtml;
-	title = "<a href=\"$constants.rootdir/$story.section/\">$section.title</a>: $story.title";
-	topic = "<A HREF=\"$constants.rootdir/search.pl?topic=$topic.tid\">$topic.alttext</A>";
+	topic = "<A HREF=\"$constants.absolutedir/search.pl?topic=$topic.tid\">$topic.alttext</A>";
 ELSE;
-	title = story.title;
 	topic = topic.alttext;
 END -%]
 
-<table border="0" valign="left" cellspacing=0 cellpadding=0>
-<tr><td align="left">Title:</td><td>[% story.title -%]</td></tr>
-<tr><td align="left">Date:</td><td>[% story.storytime %]</td></tr>
-<tr><td align="left">Author:</td><td>[% author.nickname %]</td></tr>
-<tr><td align="left">Topic:</td><td>[% topic %]</td></tr>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0">
+<TR><TD><B>Title</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% story.title %]</TD></TR>
+<TR><TD><B>Date</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% story.storytime %]</TD></TR>
+<TR><TD><B>Author</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% author.nickname %]</TD></TR>
+<TR><TD><B>Topic</B></TD>	<TD>&nbsp;&nbsp;</TD>	<TD>[% topic %]</TD></TR>
 [% IF constants.use_dept -%]
-<tr><td colspan="2" nowrap>from the <em>[% story.dept %]</em> dept.</td></tr>
+<TR><TD COLSPAN="2" NOWRAP>from the <EM>[% story.dept %]</EM> dept.</TD></TR>
 [% END -%]
-</table>
-<small>[% constants.absolutedir -%]/article.pl?sid=[% story.sid %]</small>
+</TABLE>
+<SMALL>[% constants.absolutedir -%]/article.pl?sid=[% story.sid %]</SMALL>
 
-<p>[% Slash.parseSlashizedLinks(story.introtext) %]</p>
+<P>[% Slash.parseSlashizedLinks(story.introtext) %]</P>
 [% IF story.bodytext -%]
-<p>[% Slash.parseSlashizedLinks(story.bodytext) %]</p>
+<P>[% Slash.parseSlashizedLinks(story.bodytext) %]</P>
 [% END -%]
 
 [% IF links.size -%]
-<TABLE border="0" valign="left" WIDTH="25%" cellspacing=0 cellpadding=0>
-<TR><TD WIDTH="100%">Links</TD></TR>
+<TABLE BORDER="0" WIDTH="25%" CELLSPACING="0" CELLPADDING="0">
+<TR><TD>Links</TD></TR>
 <TR><TD><HR NOSHADE></TD></TR>
 </TABLE>
-[% FOR l=links -%]
-<LI> #[% loop.count %]. "[% l.1 %]" - [% l.0 %]<BR>
-[% END %]
+
+<OL>[% FOR l=links -%]
+<LI>"[% l.1 %]" - [% l.0 %]</LI>
+[% END %]</OL>
 [% END -%]
