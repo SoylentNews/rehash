@@ -103,7 +103,15 @@ sub _authors {
 # Ugly isn't it?
 sub _topics {
 	my $slashdb = getCurrentDB();
-	my $topics = $slashdb->getDescriptions('topics');
+	my $section = getCurrentForm('section');
+
+	my $topics;
+	if ($section) {
+		$topics = $slashdb->getDescriptions('topics_section', $section);
+	} else {
+		$topics = $slashdb->getDescriptions('topics');
+	}
+
 	$topics->{''} = 'All Topics';
 
 	return $topics;
