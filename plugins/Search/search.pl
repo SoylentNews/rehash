@@ -46,7 +46,7 @@ sub main {
 	$form->{section}	||= '';
 	$form->{'sort'}		||= 1;
 	$form->{section}	= '' if $form->{section} eq 'index'; # XXX fix this right, do a {realsection}
-	$form->{threshold}	||= getCurrentUser('threshold');
+	$form->{threshold}	= getCurrentUser('threshold') if !defined($form->{threshold});
 
 	# get rid of bad characters
 	$form->{query} =~ s/[^A-Z0-9'. :\/]/ /gi;
