@@ -10165,6 +10165,15 @@ sub getTemplateByName {
 	my $table_cache_time = '_templates_cache_time';
 	my $table_cache_id   = '_templates_cache_id';
 
+	# First, we get the cache -- read in ALL templates and store their
+	# data in $self
+	# get new cache unless we have a cache already AND we want to use it
+	unless ($self->{$table_cache_id} &&
+		($constants->{cache_enabled} || $constants->{cache_enabled_template})
+	) {
+		$self->{$table_cache_id} = getTemplateNameCache($self);
+	}               
+
 	#Now, lets determine what we are after
 	my($page, $skin) = (@{$options}{qw(page skin)});
 	unless ($page) {
@@ -10176,15 +10185,6 @@ sub getTemplateByName {
 		$skin ||= getCurrentSkin('name');
 		$skin ||= 'default';
 	}
-
-	# First, we get the cache -- read in ALL templates and store their
-	# data in $self
-	# get new cache unless we have a cache already AND we want to use it
-	unless ($self->{$table_cache_id} &&
-		($constants->{cache_enabled} || $constants->{cache_enabled_template})
-	) {
-		$self->{$table_cache_id} = getTemplateNameCache($self);
-	}               
 
 	#Now, lets figure out the id
 	#name|page|skin => name|page|default => name|misc|skin => name|misc|default
@@ -10210,18 +10210,16 @@ sub getTemplateByName {
 
 		# let's refresh cache, just in case, and warn we are doing it ...
 		if (!$options->{ignore_errors}) {
-			errorLog("Failed template lookup on '$name;$page\[misc\];$skin\[default\]'" .
+			errorLog("Failed template lookup (refreshing cache) on '$name;$page\[misc\];$skin\[default\]'" .
 				", keys: " . scalar(keys %{$self->{$table_cache_id}}) .
-				", callers: " . join(", ", @caller_info) .
-				" ... refreshing cache");
+				", callers: " . join(", ", @caller_info));
 		}
 		$self->{$table_cache_id} = getTemplateNameCache($self);
 
 		if (!$id && !$options->{ignore_errors}) {
-			errorLog("Failed template lookup on '$name;$page\[misc\];$skin\[default\]'" .
+			errorLog("Failed template lookup (returning false) on '$name;$page\[misc\];$skin\[default\]'" .
 				", keys: " . scalar(keys %{$self->{$table_cache_id}}) .
-				", callers: " . join(", ", @caller_info) .
-				" ... returning false");
+				", callers: " . join(", ", @caller_info));
 		}
 		return if !$id;
 	}
