@@ -390,7 +390,7 @@ perl function C<substr>.
 	[% myscalar.substr(2)    # all but first two characters %]
 	[% myscalar.substr(2, 1) # third character %]
 
-Additional list ops include C<rand>, C<lowval>, C<highval>, C<remove>.
+Additional list ops include C<rand>, C<lowval>, C<highval>, C<grepn> and C<remove>.
 
 C<rand> returns a random value from the list.
 
@@ -398,6 +398,9 @@ C<rand> returns a random value from the list.
 
 C<lowval>, and C<highval> do exacly what they sound like, they return the 
 lowest or the highest value in the list.
+
+C<grepn> returns the position of the first occurance of a given value. See 
+C<Slash::Utility::grepn>.
 
 C<remove> returns the list with all entries matching the given parameter,
 removed.
@@ -451,16 +454,16 @@ my %list_ops = (
 		return $minval;
 	},
 
-	'inlist'	=> sub {
+	'grepn'		=> sub {
 		my($list, $searchval) = @_;
 		
-		return inList($list, $searchval);
+		return grepn($list, $searchval);
 	},
 
 	'remove'	=> sub {
 		my($list, $remove_val) = @_;
 
-		return [ delFromList($list, $remove_val) ];
+		return [ grep { $_ ne $remove_val } @$list ];
 	},
 );
 
