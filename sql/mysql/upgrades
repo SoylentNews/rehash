@@ -185,3 +185,6 @@ CREATE TABLE slashd_status (
 	PRIMARY KEY (task)
 ) TYPE = myisam;
 
+# Unique changes for Pat
+ALTER TABLE section_topics DROP PRIMARY KEY;
+ALTER TABLE section_topics ADD PRIMARY KEY (section,type,tid);
