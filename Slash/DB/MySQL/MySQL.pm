@@ -2850,7 +2850,7 @@ sub getStoryByTime {
 
 	my $time = $story->{'time'};
 	my $returnable = $self->sqlSelectHashref(
-			'title, sid, section',
+			'title, sid, section, tid',
 			'stories',
 			"time $sign '$time' AND writestatus != 'delete' AND time < now() $where",
 			"ORDER BY time $order LIMIT $limit"
@@ -3616,7 +3616,7 @@ sub getStoriesEssentials {
 
 	$limit ||= 15;
 	my $columns;
-	$columns = 'sid, section, title, time, commentcount, hitparade';
+	$columns = 'sid, section, title, time, commentcount, hitparade, tid';
 
 	my $where = "time < NOW() ";
 	# Added this to narrow the query a bit more, I need
@@ -3683,7 +3683,7 @@ EOT
 		# because we'd want three different representations, we
 		# just get it once in position 3 and then drop it into
 		# its traditional other locations in the array.
-		$data = [ @$data[0..4], $data->[3], $data->[5], $data->[3] ];
+		$data = [ @$data[0..4], $data->[3], $data->[5], $data->[3], $data->[6] ];
 		formatDate([$data], 3, 3, '%A %B %d %I %M %p');
 		formatDate([$data], 5, 5, '%Y%m%d'); # %Q
 		formatDate([$data], 7, 7, '%s');

@@ -121,6 +121,7 @@ END; %]
 		ls = {
 			link	=> s.title,
 			sid	=> s.sid,
+			tid	=> s.tid,
 			section	=> s.section
 		};
 		Slash.linkStory(ls);

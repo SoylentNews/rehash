@@ -879,7 +879,7 @@ sub getOlderStories {
 	my $form = getCurrentForm();
 
 	for (@$stories) {
-		my($sid, $sect, $title, $time, $commentcount, $day, $hp, $secs) = @{$_}; 
+		my($sid, $sect, $title, $time, $commentcount, $day, $hp, $secs, $tid) = @{$_}; 
 		my($w, $m, $d, $h, $min, $ampm) = split m/ /, $time;
 		$d =~ s/^0//;
 		push @$newstories, {
@@ -899,6 +899,7 @@ sub getOlderStories {
 			'link'		=> linkStory({
 				'link'	=> $title,
 				sid	=> $sid,
+				tid	=> $tid,
 				section	=> $sect
 			})
 		};

@@ -19,9 +19,9 @@ __name__
 linkStory
 __template__
 [% IF dynamic %]
-<A HREF="[% constants.rootdir %]/article.pl?sid=[% sid %][% IF mode %]&amp;mode=[% mode %][% END %][% IF threshold %]&amp;threshold=[% threshold %][% END %]">[% text %]</A>
+<A HREF="[% constants.rootdir %]/article.pl?sid=[% sid %][% IF mode %]&amp;mode=[% mode %][% END %][% IF tid %]&amp;tid=[% tid %][% END %][% IF threshold %]&amp;threshold=[% threshold %][% END %]">[% text %]</A>
 [% ELSE %]
-<A HREF="[% constants.rootdir %]/[% section %]/[% sid %].shtml">[% text %]</A>
+<A HREF="[% constants.rootdir %]/[% section %]/[% sid %].shtml[% IF tid %]?tid=[% tid %][% END %]">[% text %]</A>
 [% END %]
 __seclev__
 10000
