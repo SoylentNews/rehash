@@ -255,6 +255,7 @@ CREATE TABLE discussions (
 	flags enum("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
 	section varchar(30) NOT NULL,
 	last_update timestamp,
+	approved tinyint UNSIGNED DEFAULT 0 NOT NULL,
 	KEY (sid),
 	FOREIGN KEY (sid) REFERENCES stories(sid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
