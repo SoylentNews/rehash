@@ -43,9 +43,9 @@ sub set {
 }
 
 sub getsByUid {
-	my($self, $uid, $limit, $id) = @_;
+	my($self, $uid, $start, $limit, $id) = @_;
 	my $order = "ORDER BY date DESC";
-	$order .= " LIMIT $limit" if $limit;
+	$order .= " LIMIT $start, $limit" if $limit;
 	my $where = "uid = $uid AND journals.id = journals_text.id";
 	$where .= " AND journals.id = $id" if $id;
 
@@ -140,13 +140,18 @@ sub topFriends {
 	my($self, $limit) = @_;
 	$limit ||= 10;
 	my $sql;
-	$sql .= " SELECT count(friend) as c, nickname, friend, max(date) ";
-	$sql .= " FROM journal_friends, users, journals ";
+	$sql .= " SELECT count(friend) as c, nickname, friend ";
+	$sql .= " FROM journal_friends, users ";
 	$sql .= " WHERE friend=users.uid ";
 	$sql .= " GROUP BY nickname ";
 	$sql .= " ORDER BY c DESC ";
 	$self->sqlConnect;
 	my $losers = $self->{_dbh}->selectall_arrayref($sql);
+	$sql = "SELECT max(date) FROM journals WHERE uid=";
+	for(@$losers) {
+		my $date = $self->{_dbh}->selectrow_array($sql . $_->[2]);
+		push @$_, $date;
+	}
 
 	return $losers;
 }

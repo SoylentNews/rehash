@@ -5,6 +5,7 @@ CREATE TABLE journals (
 	date datetime NOT NULL,
 	description varchar(80),
 	posttype int(1) DEFAULT '2' NOT NULL,
+	comment_header int(5),
 	PRIMARY KEY (id),
 	KEY uidarticle (uid),
 	KEY IDandUID (id,uid)

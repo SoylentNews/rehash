@@ -27,6 +27,7 @@ __template__
 						&nbsp;
 					[% END %]
 				</FONT>
+			<HR noshade width="100%" size="1">
 			</TD>
 		<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">
 			<TD ALIGN="LEFT" BGCOLOR="[% user.bg.3 %]">
@@ -36,7 +37,11 @@ __template__
 			</TD>
 			<TD ALIGN="LEFT" BGCOLOR="[% user.bg.3 %]">
 				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
-					<B>Entries</B>
+					[% IF type == 'friend' %]
+						<B>Popularity</B>
+					[% ELSE %]
+						<B>Entries</B>
+					[% END %]
 				</FONT>
 			</TD>
 			<TD ALIGN="LEFT" BGCOLOR="[% user.bg.3 %]">
