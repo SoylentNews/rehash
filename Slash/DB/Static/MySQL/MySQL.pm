@@ -870,23 +870,42 @@ sub fetchEligibleModerators {
 
 	my $hoursback = $constants->{mod_elig_hoursback} || 48;
 	my $minkarma = $constants->{mod_elig_minkarma} || 0;
-	my $returnable =
-		$self->sqlSelectAll(
-			"users_info.uid, COUNT(*) AS c",
-			"users_info, users_prefs, accesslog",
-			"users_info.uid <= $youngest_uid
-			 AND users_info.uid=accesslog.uid
-			 AND users_info.uid=users_prefs.uid
-			 AND (op='article' OR op='comments')
-			 AND willing=1
-			 AND ts >= DATE_SUB(NOW(),
-				INTERVAL $hoursback HOUR)
-			 AND karma >= $minkarma",
-			"GROUP BY users_info.uid
-			 HAVING c >= $hitcount
-			 ORDER BY c, RAND()");
 
-	return $returnable;
+	my $count_hr = $self->sqlSelectAllHashref(
+		"uid",
+		"uid, COUNT(*) AS c",
+		"accesslog USE INDEX (op_part)",
+		"op='article' OR op='comments'",
+		"GROUP BY uid
+		 HAVING c >= $hitcount");
+	my @uids =
+		sort { $a <=> $b } # don't know if this helps MySQL but it can't hurt... much
+		grep { $_ <= $youngest_uid }
+		keys %$count_hr;
+
+	my $splice_count = 5000;
+	while (@uids) {
+		my @uid_chunk = splice @uids, 0, $splice_count;
+		my $uid_list = join(",", @uid_chunk);
+		my $uids_disallowed = $self->sqlSelectColArrayref(
+			"users_info.uid AS uid",
+			"users_info, users_prefs",
+			"(karma < $minkarma OR willing != 1)
+			 AND users_info.uid = users_prefs.uid
+			 AND users_info.uid IN ($uid_list)"
+		);
+		for my $uid (@$uids_disallowed) {
+			delete $count_hr->{$uid};
+		}
+	}
+
+	my $return_ar = [
+		map { [ $count_hr->{$_}{uid}, $count_hr->{$_}{c} ] }
+		sort { $count_hr->{$a}{c} <=> $count_hr->{$b}{c}
+			|| int(rand(3))-1 }
+		keys %$count_hr
+	];
+	return $return_ar;
 }
 
 
