@@ -5,7 +5,6 @@
 # $Id$
 
 use strict;
-use Date::Parse;
 use Digest::MD5 'md5_hex';
 use Slash;
 use Slash::Display;
@@ -980,7 +979,7 @@ sub showInfo {
 						|| $constants->{stir}*24;
 					$requested_user->{points_expire} = timeCalc(
 						$lastgranted,
-						"%Y-%M-%d",
+						"%Y-%m-%d",
 						$user->{off_set} + $hours*3600
 					);
 # Older and much slower way of doing this; required Date::Manip, ick!
