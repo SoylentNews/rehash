@@ -142,7 +142,7 @@ sub previewForm {
 		sqlSelect("subid,email,name,subj,tid,story,time,comment",
 		"submissions", "subid=$subid_dbi");
 
-	$introtext = processSub($email, $name, $introtext);
+	($introtext, $email) = processSub($email, $name, $introtext);
 
 	if ($comment && $admin) {
 		# This probably should be a block.
@@ -588,7 +588,7 @@ sub processSub {
 
 	}
 
-	return $introtext;
+	return wantarray ? ($introtext, $email) : $introtext;
 }
 
 #################################################################
