@@ -27,9 +27,10 @@ use base 'Slash::DB::MySQL';
 sub new {
 	my($class, $user, $options) = @_;
 	my $self = {};
-
+	my $slashdb = getCurrentDB();
 	my $plugin = getCurrentStatic('plugin');
 	my $constants = getCurrentStatic();
+	
 	return unless $plugin->{'Stats'};
 
 	bless($self, $class);
@@ -66,7 +67,8 @@ sub new {
 						print STDERR "log_slave replication not caught up.  Waiting $wait_sec seconds and retrying.\n";
 						sleep $wait_sec if !$caught_up;
 					} else {
-						print STDERR "Checked replication $num_try times without success, giving up."; 
+						print STDERR "Checked replication $num_try times without success, giving up.";
+						$slashdb->insertErrnoteLog("adminmail", "Failed creating temp tables", "Checked replication $num_try times without success, giving up");
 						return undef;
 					}
 				}
