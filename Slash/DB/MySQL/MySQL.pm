@@ -5543,12 +5543,12 @@ sub getStoryByTime {
 	$key .= "|$story->{stoid}";
 
 	if (!$topic && !$section) {
-		$where .= " AND stories_topics_rendered.tid NOT IN ($user->{extid})" if $user->{extid};
+		$where .= " AND story_topics_rendered.tid NOT IN ($user->{extid})" if $user->{extid};
 		$where .= " AND uid NOT IN ($user->{exaid})" if $user->{exaid};
 		# don't cache if user has own prefs -- pudge
 		$key = $user->{extid} || $user->{exaid} || $user->{exsect} ? '' : $key . '|';
 	} elsif ($topic) {
-		$where .= " AND stories_topics_rendered.tid = '$topic'";
+		$where .= " AND story_topics_rendered.tid = '$topic'";
 		$key .= "|$topic";
 	}
 
