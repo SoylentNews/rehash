@@ -24,7 +24,7 @@ for smaller sites' admins.
 This document attempts to explain the changes for Slash administrators,
 and it may be informative reading for Slash authors and editors too.
 
-=head1 OVERVIEW
+=head1 CONCEPTS
 
 I'm not going to bother explaining exactly how the old system worked,
 because it's dead now.  Suffice it to say that every story had one
@@ -75,12 +75,20 @@ make sense for the story (like "Mac OS X") and that the weights assigned
 to those topics will propagate upwards into the correct nexus(es) where
 the story should appear.
 
+Along the way, stories were given a numeric primary key (stoid), as were
+skins.  Don't worry, a story's sid still works just as it did before;
+no Slash URLs are required to change, and in particular all the URLs (for
+search.pl and index.pl) that had "section=" as a parameter still do.
+
+=head1 WEIGHTS
+
 Each topic picked for a story now must have a weight assigned to it.
 Weights are floating-point non-negative numbers.  The templates shipped
-with the stock theme assume that authors will be assigning weights from
-0 to 5, but the only weight value that the core code treats specially
-is 0 (which means "ignore this topic").  How positive weights affect
-the categorization of stories depends entirely on the topic_parents table.
+with the stock theme assume that authors will be assigning only the
+weights 0, 10, 20, 30, 40, or 50, but the only weight value that the
+core code treats specially is 0 (which means "ignore this topic").
+How positive weights affect the categorization of stories depends entirely
+on the topic_parents table.
 
 Even in the old system, topics could be arranged into a tree -- but
 to properly represent section-specific topics one would have to layer
@@ -96,17 +104,142 @@ and "BSD," which conceptually means that it is a subcategory of both,
 and which practically means that assigning "Darwin" a weight will allow
 that weight to propagate up to both.
 
-[To be continued...]
+=head1 RENDERING
 
-weights and their meanings
+This process of weight-propagation occurs when chosen topics are rendered.
+Each parent-child relationship from one topic to another includes a
+minimum weight.  For any given story, if topic T1 is assigned weight W,
+and topic T2 is the parent of T1 with min_weight M, then T2 will also
+be assigned weight W for the story if, and only if, M <= W.
 
-rendering: turning topics_chosen into topics_rendered
+That assignment continues recursively (to topic T3, and so on) in a
+process called "rendering" -- performed by renderTopics().  A story author
+stores his or her topic/weight duples in the story_topics_chosen table,
+and at story save time, these choices are rendered into a (probably
+larger) collection of topic/weight duples that are stored in the
+story_topics_rendered table.
+
+(The above rule describes most of what is involved in the rendering
+process.  The other rules in the algorithm are that if multiple children
+of differing weights both propagate up to the same parent, the greater of
+those weights become the parent's;  and that any topic's chosen weight,
+including a weight of 0, always overrides any weight propagating up from
+its children.)
+
+Finally, when the collection of rendered topic/weight duples has been
+fully formed, all topics with weight 0 are dropped.  Weight 0 can exist
+in chosen topics, but never in rendered topics.
+
+=head1 A SIMPLE EXAMPLE
+
+That may sound a bit complicated, so here's a description using the
+default topics and topic_parents included with the default C<slashcode>
+theme:
+
+=over 4
+
+=item tid 1: mainpage (also a nexus)
+
+=item tid 3: opensource (also a nexus)
+
+=item tid 4: slash
+
+=item tid 7: linux
+
+=back
+
+Tid 4 has tid 3 as a parent, with that relationship having a min_weight
+of 10 associated with it.
+
+Tid 7 also have tid 3 as a parent, with min_weight 10.
+
+Tid 3 has tid 1 as a parent, with min_weight 30.
+
+The skin at C<http://example.com/> reads the nexus tid 1;  the skin at
+C<http://opensource.example.com/> reads the nexus tid 3.
+
+Suppose an editor is working on a story about Slash and assigns it
+the topic "slash," tid 4, with weight 10.  Weight 10 is described as
+"Sectional only" in the code.  When that story is saved, renderTopics
+recursively propagates the weight of its topics, or in this case its
+single topic, up to parents, or in this case parent.  Rendering adds
+tid 3, also at weight 10.  It does not add tid 1 since !(10 >= 30).
+The story thus will appear only on C<http://opensource.example.com/>
+and not C<http://example.com/>.
+
+Now suppose the editor re-edits the story, adding important information
+about Linux.  He or she at that point adds the Linux tid 7 with a
+weight of 30.  Now when it is saved, tid 1 is added since 30 >= 30.
+Now the story will appear at both URLs.
+
+Now suppose the editor is instructed that this story must be removed
+from C<http://opensource.example.com/>, though it should stay on the
+main page C<http://example.com/>.  In the admin.pl editor, he or
+she adds tid 3 with weight 0.  That by itself would remove both nexuses
+when the story saves, since the 0 would prohibit both child tids from
+propagating higher than tid 3 up to tid 1.  Upon clicking Preview,
+the admin sees that "This story will not appear" (see admin.pl
+getDescForTopicsRendered()).  So the admin also adds tid 1 -- any weight
+greater than 0 would do, but weight of 30 makes the most sense since
+the backend describes that as "Mainpageworthy."  Once this story is
+saved, its rows in story_topics_chosen are:
+
+	tid 1, weight 30
+	tid 3, weight  0
+	tid 4, weight 10
+	tid 7, weight 10
+
+and its rows in story_topics_rendered are:
+
+	tid 1, weight 30
+	tid 4, weight 10
+	tid 7, weight 10
+
+Note that, as far as almost all of the code is concerned, the weight
+value in story_topics_rendered is irrelevant;  only whether a row exists
+or not is noted.  (This is why weight of 0 never appears in that table.)
+
+=head1 DISPLAY OPTIONS AND WEIGHTS
+
+So how are these values of weights 10 and 30 decided, and what are 20
+and 50 for?
+
+Previously in Slash, there were three possible values for a story's
+displaystatus:  Never Display, Section-Only, and Always Display.
+Section-Only meant to only display a story in its section's homepage,
+not the site's main page, and Always Display meant to display a story
+both places.
+
+Now that a story may be part of more than one skin (the new term
+for "section"), that distinction is not so simple.  While the method
+_displaystatus() will return an old-style displaystatus value for a story,
+this is for reverse compatibility and is deprecated.  The proper question
+now takes two arguments instead of one:  is a story to be displayed _in_
+a particular skin.
+
+The answer to that question is very simple;  if a row exists in
+story_topics_rendered with the story's stoid and the topic's tid, then
+yes;  otherwise, no.
+
+To prevent everything from breaking at once, and to keep the backend
+story list looking much the same as it did before (white background for
+Always Display, light gray for Section-Only, dark gray for Never Display),
+the "mainpage skin" was created.  Defined by the var mainpage_skid [sic,
+a skid is a skin's numeric primary key], this defines which skin a story
+must be in to be considered "Always Display."  It also defines which topic
+nexus will be colored blue instead of yellow in admin.pl?op=topictree
+(you will need GraphViz installed to see this;  see plugins/Admin/README).
+Nevertheless, Slash is now well-equipped to run a website which consists
+of many subsites, at different URLs, perhaps only loosely networked and
+not necessarily with one central "main" page.
+
+
+
+
 
 multiple skins and how index.pl uses stories.primaryskid
 
 the Topiclist
-
-the mainpage skid/nexus, and why it's (sadly?) still relevant
 
 the topic chooser
 
