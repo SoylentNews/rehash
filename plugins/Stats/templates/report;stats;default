@@ -52,6 +52,9 @@ __template__
  static total:        -          -    [% ints(stats_data.total_static) %]
 gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
   grand total:        -          -    [% ints(stats_data.grand_total) %] ([% PROCESS mbyte bytes => stats_data.grand_total_bytes %])
+ secure total:        -          -    [% ints(stats_data.total_secure) %]
+[% IF constants.subscribe %]sbscrbr total:        -          -    [% ints(stats_data.total_subscriber) %]
+[% END %]
         posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.distinct_comment_ipids) %]
      comments: [% ints(stats_data.comments_uids) %]   [% ints(stats_data.comments_ipids) %]   [% ints(stats_data.comments_page) %] ([% PROCESS mbyte bytes => stats_data.comments_bytes %])
         index:        -          -   [% ints(stats_data.homepage) %]
