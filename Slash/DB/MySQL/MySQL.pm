@@ -1369,8 +1369,8 @@ sub createAccessLog {
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
 		duration	=> $duration,
 		local_addr	=> $local_addr,
-		static	=> $user->{state}->{_dynamic_page} ? 'no' : 'yes',
-		referer	=> $ENV{HTTP_REFERER},
+		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
+		referer		=> $ENV{HTTP_REFERER},
 	}, { delayed => 1 });
 }
 
