@@ -181,18 +181,23 @@ print "Theme selected: $theme\n";
 #---------------------------------------------------
 my $plugins = $install->getPluginList($PREFIX);
 my @plugins = ( );
+my @default_plugins = ( );
+for my $key (sort keys %$plugins) {
+	if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
+		push @default_plugins, $key;
+	}
+}
 if ($opts{'P'}) {
 	@plugins = grep { exists $plugins->{$_} }
 		split /\s*,\s*/, $opts{'P'};
+	push @plugins, @default_plugins if @default_plugins;
 } else {
-	my @default_plugins = ( );
 	my %order_to_name = ( );
 	print "\nPlease select which plugins you would like ('*' marks default).\n";
 	for my $key (sort keys %$plugins) {
 		my $c = " ";
 		if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
 			$c = "*";
-			push @default_plugins, $key;
 		}
 		print "($c) $plugins->{$key}{order}. $key - $plugins->{$key}{description}\n";
 		$order_to_name{$plugins->{$key}{order}} = $key;
@@ -203,8 +208,10 @@ if ($opts{'P'}) {
 		chomp($select = <STDIN>);
 		if ($select =~ /^[\d ,]+$/) {
 			$select =~ s/ +//g;
-			@default_plugins = ( );
-			@plugins = grep { $_ } map { $order_to_name{$_} } split /,/, $select;
+			push @plugins,
+				grep { $_ }
+				map { $order_to_name{$_} }
+				split /,/, $select;
 			last;
 		} elsif ($select eq 'a') {
 			@plugins = map { $plugins->{$_}{name} } sort keys %$plugins;
@@ -212,6 +219,11 @@ if ($opts{'P'}) {
 		}
 	}
 	push @plugins, @default_plugins if @default_plugins;
+}
+{
+	# Eliminate duplicates.
+	my %temp_plugins = map { $_ => 1 } @plugins;
+	@plugins = sort keys %temp_plugins;
 }
 # Zero out the list of plugins
 %{$themes->{$theme}{plugin}} = ( );
