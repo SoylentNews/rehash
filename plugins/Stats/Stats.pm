@@ -825,7 +825,6 @@ sub getDurationByStaticOpHour {
 		"op IN ($ops)",
 		"GROUP BY static, op, hour, dur_round"
 	);
-use Data::Dumper; print "ile_hr " . Dumper($ile_hr);
 
 	_calc_percentiles($hr, $ile_hr, 3);
 
