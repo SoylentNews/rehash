@@ -26,6 +26,7 @@
 use strict;
 use lib '../';
 use vars '%I';
+use Email::Valid;
 use Slash;
 
 #################################################################
@@ -777,9 +778,9 @@ EOT
 
 	# stripByMode _after_ fitting sig into schema, 120 chars
 	$I{F}{sig}	 = stripByMode(substr($I{F}{sig}, 0, 120), 'html');
-	$I{F}{fakeemail} = stripByMode($I{F}{fakeemail});
+	$I{F}{fakeemail} = chopEntity(stripByMode($I{F}{fakeemail}, 'attribute'), 50);
 	$I{F}{homepage}	 = "" if $I{F}{homepage} eq "http://";
-	$I{F}{homepage}	 = stripByMode($I{F}{homepage});
+	$I{F}{homepage}	 = fixurl($I{F}{homepage});
 
 	# for the users table
 	my $H = {
@@ -799,7 +800,7 @@ EOT
 		"nickname=" . $I{dbh}->quote($name));
 
 	if ($oldEmail ne $I{F}{realemail}) {
-		$H->{realemail} = $I{F}{realemail};
+		$H->{realemail} = chopEntity(stripByMode($I{F}{realemail}, 'attribute'), 50);
 		print "\nNotifying $oldEmail of the change to their account.<BR>\n";
 
 		sendEmail($oldEmail, "$I{sitename} user email change for $name", <<EOT);

@@ -42,7 +42,7 @@ BEGIN {
 
 	require Exporter;
 	use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS %I $CRLF);
-	$VERSION = '1.0.6';
+	$VERSION = '1.0.7';
 	@ISA	 = 'Exporter';
 	@EXPORT  = qw(
 		sqlSelectMany sqlSelect sqlSelectHash sqlSelectAll approveTag
@@ -58,7 +58,7 @@ BEGIN {
 		getDateFormat dispComment getDateOffset linkComment redirect
 		insertFormkey getFormkeyId checkSubmission checkTimesPosted
 		updateFormkeyId formSuccess formAbuse formFailure errorMessage
-		fixurl fixparam
+		fixurl fixparam chopEntity
 	);
 	$CRLF = "\015\012";
 }
@@ -1225,7 +1225,8 @@ sub stripByMode {
 		$str =~ s/>//g;
 
 	} elsif ($fmode eq 'attribute') {
-		$str =~ s/"/&#22;/g;
+		$str =~ s/"/&#34;/g;
+		$str =~ s/'/&#39;/g;
 
 	} else {
 		$str = stripBadHtml($str);
@@ -1361,6 +1362,14 @@ sub approveTag {
 	foreach my $goodtag (@{$I{approvedtags}}) {
 		return "<$tag>" if $tag =~ /^$goodtag$/ || $tag =~ m|^/$goodtag$|;
 	}
+}
+
+########################################################
+sub chopEntity {
+	my($text, $length) = @_;
+	$text = substr($text, 0, $length) if $length;
+	$text =~ s/&#?[a-zA-Z0-9]*$//;
+	return $text;
 }
 
 ########################################################
