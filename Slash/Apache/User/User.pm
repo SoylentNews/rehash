@@ -572,15 +572,14 @@ sub DESTROY { }
 
 @QUOTES = split(/\n/, <<'EOT');
 Bender:Fry, of all the friends I've had ... you're the first.
-Bender:I hate people who love me.  And they hate me.
+Bender:I hate people who love me. And they hate me.
 Bender:Oh no! Not the magnet!
 Bender:Bender's a genius!
 Bender:Well I don't have anything else planned for today, let's get drunk!
-Bender:Forget your stupid theme park!  I'm gonna make my own!  With hookers!  And blackjack!  In fact, forget the theme park!
-Bender:Oh, no room for Bender, huh?  Fine.  I'll go build my own lunar lander.  With blackjack.  And hookers.  In fact, forget the lunar lander and the blackjack!  Ah, screw the whole thing.
 Bender:Oh, so, just 'cause a robot wants to kill humans that makes him a radical?
 Bender:There's nothing wrong with murder, just as long as you let Bender whet his beak.
 Bender:Bite my shiny, metal ass!
+Bender:Lick my frozen, metal ass!
 Bender:The laws of science be a harsh mistress.
 Bender:In the event of an emergency, my ass can be used as a flotation device.
 Bender:Like most of life's problems, this one can be solved with bending.
@@ -593,56 +592,46 @@ Bender:Want me to smack the corpse around a little?
 Bender:My full name is Bender Bending Rodriguez.
 Bender:My life, and by extension everyone else's, is meaningless.
 Bender:I'm tired of this room and everyone in it!
-Bender:Wait!  My cheating unit malfunctioned!  You gotta give me a do-over!
+Bender:Wait! My cheating unit malfunctioned! You gotta give me a do-over!
 Bender:Gimme your biggest, strongest, cheapest drink.
-Bender:I'm a fraud.  A poor, lazy, sexy fraud.
+Bender:I'm a fraud. A poor, lazy, sexy fraud.
 Bender:Ahhh, functional.
 Bender:Since I love you all so much, I'd like to give everyone hugs.
-Bender:There!  That oughtta convert a few tailgaters.
-Bender:But-- those girls don't wear cases!  You can see their bare circuits!
+Bender:There! That oughtta convert a few tailgaters.
+Bender:But-- those girls don't wear cases! You can see their bare circuits!
 Bender:They're tormenting me with uptempo singing and dancing!
-Fry:Why couldn't she be the other kind of mermaid, with the fish part on the top and the human part on the bottom?
+Bender:Comedy's a dead art form. Now tragedy -- THAT'S funny.
+Bender:Nothing like a warm fire and a super-soaker of fine cognac.
+Bender:Yes! I got the most! I win X-Mas!
+Bender:I'm one of those lazy, homeless bums I've been hearing about.
+Bender:Shooting DNA at each other to make babies. I find it offensive!
 Fry:There's a lot about my face you don't know.
-Fry:Drugs are for losers.  And hypnosis is for losers with big weird eyebrows.
-Fry:These new hands are great.  I'm gonna break them in tonight.
+Fry:Drugs are for losers. And hypnosis is for losers with big weird eyebrows.
+Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
 Fry:Leela, there's nothing wrong with anything.
 Fry:Augh, I am so unlucky. I've run over black cats that were luckier than me.
-Fry:That's it! You can only take my money for so long before you take it all and I say enough! 
 Fry:Leela, Bender, we're going grave-robbing.
 Fry:Where's Captain Bender? Off catastrophizing some other planet?
-Fry:Would you cram a sock in it, Bender? Those aren't even medals! They're bottle caps and pepperoni slices.
-Fry:To Captain Bender! He's the best! ...at being a big jerk who's stupid and his big ugly face is as dumb as a butt!
 Fry:People said I was dumb but I proved them!
 Fry:It's like a party in my mouth and everyone's throwing up.
 Fry:Nowadays people aren't interested in art that's not tattooed on fat guys.
 Fry:I don't regret this, but I both rue and lament it.
-Fry:I'm gonna be a famous hero just like Neil Armstrong and those other brave guys no one ever heard of.
-Fry:Well, thanks to the Internet I'm now bored with sex.  Is there a place on the web that panders to my lust for violence?
-Fry:Maybe you can't understand this, but I finally found what I need to be happy, and it's not friends, it's things.
-Fry:I heard one time you single-handedly defeated a hoard of rampaging somethings in the something something system.
 Fry:I'm never gonna get used to the thirty-first century. Caffeinated bacon?
-Fry:Professor, please, the fate of the world depends on you getting to second base with Mom.
 Fry:They're great! They're like sex except I'm having them.
 Fry:No, no, I was just picking my nose.
 Fry:How can I live my life if I can't tell good from evil?
 Fry:That's a chick show. I prefer programs of the genre: World's Blankiest Blank.
 Fry:But this is HDTV. It's got better resolution than the real world.
 Fry:I'm gonna be a science fiction hero, just like Uhura, or Captain Janeway, or Xena!
-Fry:He's an animal. He belongs in the wild. Or in the circus on one of those tiny tricycles. Now that's entertainment.
-Fry:I learned how to handle delicate social situations from a little show called "Three's Company."
 Fry:Make up some feelings and tell her you have them.
-Fry:I'm flattered, really. If I was gonna do it with a big freaky mud bug, you'd be way up the list.
 Fry:I'm not a robot like you. I don't like having disks crammed into me... unless they're Oreos, and then only in the mouth.
 Fry:I must be a robot. Why else would human women refuse to date me?
-Fry:If this is some kind of scam, I don't get it.  You already have my power of attorney.
 Fry:Hey look, it's that guy you are!
 Fry:That doesn't look like an "L", unless you count lower case.
-Fry:Hardy Boys: too easy.  Nancy Drew: too hard!
-Fry:And then when I feel so stuffed I can't eat any more, I just use the restroom, and then I *can* eat more!
+Fry:Hardy Boys: too easy. Nancy Drew: too hard!
 Fry:I'm going to continue never washing this cheek again.
 Fry:I haven't had time off since I was twenty-one through twenty-four.
-Fry:I know Big Vinny said he was giving me the kiss of death, but I still think he was gay.
 Fry:The spoon's in the foot powder.
 EOT
 
