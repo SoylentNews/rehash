@@ -14,6 +14,7 @@ INSERT INTO vars (name, value, description) VALUES ('hc_poolsize', '20000', 'Num
 INSERT INTO vars (name, value, description) VALUES ('hc_poolmaxfill', '2000', 'Number of entries at a time to fill the pool with');
 INSERT INTO vars (name, value, description) VALUES ('hc_pool_secs_before_del', '21600', 'Number of seconds after a pool entry last used before it will be deleted');
 INSERT INTO vars (name, value, description) VALUES ('hc_pool_secs_before_use', '3600', 'Number of seconds after a pool entry created before it will be used');
+INSERT INTO vars (name, value, description) VALUES ('hc_possible_fonts', '', 'Possible fonts to use (space-separated, empty for the default)');
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_comments', '0', 'HumanConf switch for posting comments');
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_mailpasswd', '1', 'HumanConf switch for mailing a password');
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_newuser', '1', 'HumanConf switch for creating a new user');

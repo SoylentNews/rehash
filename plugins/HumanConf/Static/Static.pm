@@ -39,14 +39,22 @@ sub new {
 	# sizes for them too (names of TTF fonts should be stored
 	# in a var).
 	$self->{imagemargin} = 6;
-	my @possible_fonts = ( gdMediumBoldFont, gdLargeFont, gdGiantFont );
+
+	my @possible_fonts = @{$constants->{hc_possible_fonts}};
+	@possible_fonts = ( gdMediumBoldFont, gdLargeFont, gdGiantFont ) if !@possible_fonts;
+	@possible_fonts = sort { int(rand(3))-1 } @possible_fonts;
+
 	$self->{prefnumpixels} = $constants->{hc_q1_prefnumpixels} || 1000;
 	my $gdtext = new GD::Text();
 	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
 	$gdtext->set_text($self->shortRandText());
 	my $smallest_diff = 2**31;
 	for my $font (@possible_fonts) {
-		$gdtext->set_font(font => $font);
+		@{$self->{set_font_args}} = ( $font );
+		if ($font =~ m{^(\w+)/(\d+)$}) {
+			@{$self->{set_font_args}} = ($1, $2);
+		}
+		$gdtext->set_font(@{$self->{set_font_args}});
 		my($tempw, $temph) = ($gdtext->get("width"), $gdtext->get("height"));
 		my $pixels = ($tempw+$self->{imagemargin}) * ($temph+$self->{imagemargin});
 		my $diff = $pixels - $self->{prefnumpixels};
@@ -75,13 +83,13 @@ sub deleteOldFromPool {
 		# Delete at least enough to recycle the pool regularly.
 		# Since by default hc_maintain_pool runs 2 times an hour,
 		# the default fraction is enough to guarantee complete
-		# pool turnover every two days.
+		# pool turnover every day.
 		# Note that $runs_per_hour should be coordinated with
 		# the timespec in the task .pl file;  there isn't a good
 		# way to do this at the moment.  Eventually we'll have
 		# DB-based timespecs and we can read that...
 		my $runs_per_hour = 2;
-		$want_delete_fraction = 1/($runs_per_hour*24*2)
+		$want_delete_fraction = 1/($runs_per_hour*24)
 	}
 	my $want_delete = int($cursize*$want_delete_fraction);
 		# Don't delete so many that the pool will get too empty,
@@ -345,46 +353,67 @@ sub drawImage {
 	# Set up the text, and set up the image.
 	my $answer = shortRandText();
 	$gdtext->set_text($answer);
-	$gdtext->set_font( font => $self->{font} );
+	$gdtext->set_font(@{$self->{set_font_args}});
 	my($width, $height) = ($gdtext->get("width")+$self->{imagemargin},
 		$gdtext->get("height")+$self->{imagemargin});
 	my $image = new GD::Image($width, $height);
 
 	# Set up the image's colors.
 	my $background = $image->colorAllocate(255, 255, 255);
-	# And now some fancy footwork to pick a light, "pastel"ish,
-	# reasonably saturated color.
-	my $hue_rand = 160;
-	my @pc = ( 255-int(rand($hue_rand)) );
-	$hue_rand -= 255-$pc[0];
-	push @pc, 255-int(rand($hue_rand));
-	@pc = reverse @pc if rand(1) < 0.5;
-	if (rand(1) < 1/3)	{ unshift @pc, 255 }
-	elsif (rand(1) < 0.5)	{ @pc = ( $pc[0], 255, $pc[1] ) }
-	else			{ push @pc, 255 }
-	my $polycolor = $image->colorAllocate(@pc);
 	my $offblack = int(rand(10));
 	my $textcolor = $image->colorAllocate($offblack, $offblack, $offblack);
+
 	my $n_dotcolors = 10;
 	my @dotcolor = ( );
 	for (1..$n_dotcolors) {
 		push @dotcolor, $image->colorAllocate(
-			int(255-rand(64)),
-			int(255-rand(64)),
-			int(255-rand(64)),
+			int(255-rand(192)),
+			int(255-rand(192)),
+			int(255-rand(192)),
 		);
 	}
 
 	# Paint the white background.
 	$image->filledRectangle(0, 0, $width, $height, $background);
 
-	# Draw a light-colored random polygon on the image.
 	my $poly = new GD::Polygon;
-	my $n_vertices = int(rand(2)+3);
-	for (1..$n_vertices) {
-		$poly->addPt(int(rand($width)), int(rand($height)));
+	if ($width+$height > 100) {
+		# Draw a grid of lines on the image, same color as the text.
+		my $pixels_between = ($width+$height)/8;
+		$pixels_between = 20 if $pixels_between < 20;
+		my $offset = int(rand($pixels_between));
+		my $x = int(rand($pixels_between));
+		while ($x < $width) {
+			$poly->addPt($x, 0);
+			$poly->addPt($x+$offset, $height-1) if $x+$offset < $width;
+			$x += $pixels_between;
+		}
+		my $y = int(rand($pixels_between));
+		while ($y < $width) {
+			$poly->addPt(0, $y);
+			$poly->addPt($width-1, $y+$offset) if $y+$offset < $height;
+			$y += $pixels_between;
+		}
+		$image->polygon($poly, $textcolor);
+	} else {
+		# And now some fancy footwork to pick a light, "pastel"ish,
+		# reasonably saturated color.
+		my $hue_rand = 160;
+		my @pc = ( 255-int(rand($hue_rand)) );
+		$hue_rand -= 255-$pc[0];
+		push @pc, 255-int(rand($hue_rand));
+		@pc = reverse @pc if rand(1) < 0.5;
+		if (rand(1) < 1/3)	{ unshift @pc, 255 }
+		elsif (rand(1) < 0.5)	{ @pc = ( $pc[0], 255, $pc[1] ) }
+		else			{ push @pc, 255 }
+		my $polycolor = $image->colorAllocate(@pc);
+		# Draw a light-colored random polygon on the image.
+		my $n_vertices = int(rand(2)+3);
+		for (1..$n_vertices) {
+			$poly->addPt(int(rand($width)), int(rand($height)));
+		}
+		$image->polygon($poly, $polycolor);
 	}
-	$image->polygon($poly, $polycolor);
 
 	# Speckle with random dots (number proportional to the size of
 	# the image).
@@ -392,8 +421,8 @@ sub drawImage {
 	$n_dots += rand($n_dots/3);
 	$n_dots -= rand($n_dots*2/3);
 	for (1..int($n_dots)) {
-		my($x, $y) = (int(rand($width)), int(rand($height)));
-		$image->setPixel($x, $y, @dotcolor[rand($n_dotcolors)]);
+		my($px, $py) = (int(rand($width)), int(rand($height)));
+		$image->setPixel($px, $py, @dotcolor[rand($n_dotcolors)]);
 	}
 
 	# Superimpose the text over the random stuff.
@@ -413,7 +442,7 @@ sub shortRandText {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $num_chars = $constants->{hc_q1_numchars} || 3;
-	my @c = ('a'..'k',
+	my @c = ('a'..'g', 'i'..'k',
 		# Noel, Noel
 		# (we don't use letters that could be confused
 		# with numbers or other letters)

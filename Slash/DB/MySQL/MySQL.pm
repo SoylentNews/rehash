@@ -6326,6 +6326,7 @@ sub getSlashConf {
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
 		lonetags =>			[qw( P LI BR IMG DT DD)],
 		fixhrefs =>			[ ],
+		hc_possible_fonts =>		[ ],
 		lonetags =>			[ ],
 		op_exclude_from_countdaily =>   [qw( rss )],
 		op_extras_countdaily =>   	[ ],
