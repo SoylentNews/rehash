@@ -1286,9 +1286,10 @@ sub editStory {
 				$storyref->{$field}, {});
 		}
 
-		my $author = $slashdb->getAuthor($storyref->{uid});
-		my $topic = $slashdb->getTopic($storyref->{tid});
-		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full', { stid => \@stid });
+		my $author  = $slashdb->getAuthor($storyref->{uid});
+		my $topic   = $slashdb->getTopic($storyref->{tid});
+		my $preview = $form->{op} eq "preview" ? 1 : 0;
+		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full', { stid => \@stid, preview => $preview });
 	}
 
 	for (@{$extracolumns}) {
