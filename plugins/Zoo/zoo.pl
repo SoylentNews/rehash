@@ -29,6 +29,11 @@ sub main {
 
 	# possible value of "op" parameter in form
 	my $ops = {
+		action		=> { 
+			check => $user_ok,		
+			formkey    => ['formkey_check', 'valid_check'],
+			function => \&action		
+		},
 		add		=> { 
 			check => $user_ok,		
 			formkey    => ['formkey_check', 'valid_check'],
@@ -403,7 +408,7 @@ sub action {
 		print getData("no_go");
 		return;
 	} else {
-		if (testSocialized($zoo, $constants, $user) && ($form->{op} ne 'delete' || $form->{op} ne 'neutral')) {
+		if (testSocialized($zoo, $constants, $user) && ($form->{type} ne 'neutral' || $form->{op} eq 'delete' )) {
 			print getData("no_go");
 			return 0;
 		}

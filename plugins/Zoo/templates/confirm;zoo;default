@@ -84,7 +84,7 @@ Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these i
 
 
 <INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
-<INPUT TYPE="hidden" NAME="op" VALUE="add">
+<INPUT TYPE="hidden" NAME="op" VALUE="action">
 <INPUT TYPE="hidden" NAME="uid" VALUE="[% uid %]">
 </FORM>
 
