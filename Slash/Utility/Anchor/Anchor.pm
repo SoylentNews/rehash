@@ -551,7 +551,7 @@ EOT
 	if ($num == 2 && $need_box) {
 		# we need the ad wrapped in a fancybox
 		if (defined $user->{state}{ad}{$num}
-			&& $user->{state}{ad}{$num} !~ /^<!--/) {
+			&& $user->{state}{ad}{$num} !~ /^<!-- no pos/) {
 			return fancybox($constants->{fancyboxwidth}, 'Advertisement', "<CENTER>" . $user->{state}{ad}{$num} . "</CENTER>", 1, 1);
 		} else { return ""; }
 	} else {
