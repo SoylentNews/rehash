@@ -95,14 +95,28 @@ __template__
 	[% END %]
 
 	[% FOR extra = extras %]
-		<TR>
-			<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
-			<B>[% extra.0 %]</B> </FONT></TD>
-			<TD BGCOLOR="[% user.bg.2 %]">
-			<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% storyref.${extra.1} | strip_attribute %]" SIZE="50">
-			</TD>
-		</TR>
+	<TR>
+		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
+		<B>[% extra.0 %]</B> </FONT></TD>
+		<TD BGCOLOR="[% user.bg.2 %]">
+		<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% storyref.${extra.1} | strip_attribute %]" SIZE="50">
+		</TD>
+	</TR>
 	[% END %]
+
+	<!-- ignore this for now -->
+	<!-- TR>
+		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
+		<B>Story Topics:</B>
+		</FONT></TD>
+		<TD BGCOLOR="[% user.bg.2 %]">
+	[% # FOREACH topic = multi_topics.keys %]
+		<INPUT TYPE="checkbox" NAME="tid_[% topic.tid %]" VALUE="[% topic.altext %]" [% story_topics.$topic.tid.CHECKED %]>[% topic.altext %]<BR>
+	[% # END %]
+		</TD>
+	</TR -->
+
+	  
 
 	<TR>
 		<TD BGCOLOR="[% user.bg.3 %]">&nbsp; </TD>

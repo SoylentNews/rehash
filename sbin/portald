@@ -144,7 +144,8 @@ sub getRDF {
 	my($bid, $url, $other) = @_;
 	my $rss = new XML::RSS;
 	my $template_name ||= $slashdb->getBlock($bid, 'rss_template');
-	my $iterations ||= $slashdb->getBlock($bid, 'iterations');
+	my $items ||= $slashdb->getBlock($bid, 'items');
+	$items ||= $constants->{max_items};
 	# $template_name ||= $constants->{default_rss_template};
 
 	my $d = geturl($url);
@@ -176,7 +177,7 @@ sub getRDF {
 				Page	=> 'portald'
 			});
 
-			last if (++$i >= $iterations && $iterations > 0);
+			last if (++$i >= $items && $items > 0);
 		}
 
 		setblock($bid, "$str$other");

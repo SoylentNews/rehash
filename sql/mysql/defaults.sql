@@ -524,3 +524,4 @@ INSERT INTO vars (name, value, description) VALUES ('users_show_info_seclev','0'
 INSERT INTO vars (name, value, description) VALUES ('users_speed_limit','20','How fast a user can change their prefs');
 INSERT INTO vars (name, value, description) VALUES ('writestatus','ok','Simple Boolean to determine if homepage needs rewriting');
 INSERT INTO vars (name, value, description) VALUES ('feature_story_enabled','0','Simple Boolean to determine if homepage prints feature story');
+INSERT INTO vars (name, value, description) VALUES ('max_items','15','max number of rss items by default');

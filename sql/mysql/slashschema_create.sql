@@ -114,7 +114,7 @@ CREATE TABLE blocks (
 	retrieve tinyint NOT NULL DEFAULT '0',
 	last_update timestamp,
 	rss_template varchar(30),
-	iterations smallint NOT NULL DEFAULT '0', 
+	items smallint NOT NULL DEFAULT '0', 
 	FOREIGN KEY (rss_template) REFERENCES templates(name),
 	PRIMARY KEY (bid),
 	KEY type (type),
@@ -560,6 +560,23 @@ CREATE TABLE story_param (
 	UNIQUE story_key (sid,name),
 	PRIMARY KEY (param_id)
 ) TYPE = myisam;
+
+#
+# Table structure for table 'story_topics'
+#
+
+DROP TABLE IF EXISTS story_topics;
+CREATE TABLE story_topics (
+  id int(5) NOT NULL auto_increment,
+  sid varchar(16) NOT NULL default '',
+  tid smallint(5) unsigned default NULL,
+  FOREIGN KEY (sid) REFERENCES stories(sid),
+  FOREIGN KEY (tid) REFERENCES topics(tid),
+  PRIMARY KEY  (id),
+  INDEX sid (sid),
+  INDEX tid (tid),
+  INDEX sidtid (sid,tid)
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'string_param'

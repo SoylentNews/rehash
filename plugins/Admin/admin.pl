@@ -489,6 +489,7 @@ sub blockEdit {
 	$blockform_flag = 1 if ((! $form->{blockdelete_confirm} && $bid) || $form->{blocknew});
 
 	my $title = getTitle('blockEdit-title', { bid => $bid }, 1);
+	$blockref->{items} ||= $constants->{max_items};
 
 	slashDisplay('blockEdit', {
 		bid 			=> $bid,
@@ -988,6 +989,16 @@ sub editStory {
 
 	$sections = $slashdb->getDescriptions('sections');
 
+
+	# please just ignore this for now. I need to commit some change first
+#	my $multi_topics = $slashdb->getDescriptions('topics_section', $storyref->{section});
+#	my $story_topics = $slashdb->getStoryTopics($storyref->{sid});
+
+
+#	for(@$story_topics) {
+#    $multi_topics->{$_}{CHECKED} = ' CHECKED';
+#} 
+
 	$topic_select = selectTopic('tid', $storyref->{tid}, $storyref->{section}, 1);
 
 	$section_select = selectSection('section', $storyref->{section}, $sections, 1) unless $user->{section};
@@ -1056,6 +1067,8 @@ sub editStory {
 		authoredit_flag		=> $authoredit_flag,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
+#		multi_topics		=> $multi_topics,
+#		story_topics		=> $story_topics,
 	});
 }
 

@@ -1619,7 +1619,7 @@ sub saveBlock {
 			url		=> $form->{url},
 			rdf		=> $form->{rdf},
 			rss_template	=> $form->{rss_template},
-			iterations	=> $form->{iterations},
+			items		=> $form->{items},
 			section		=> $form->{section},
 			retrieve	=> $form->{retrieve},
 			portal		=> $form->{portal},
@@ -1638,7 +1638,7 @@ sub saveBlock {
 			url		=> $form->{url},
 			rdf		=> $form->{rdf},
 			rss_template	=> $form->{rss_template},
-			iterations	=> $form->{iterations},
+			items		=> $form->{items},
 			section		=> $form->{section},
 			retrieve	=> $form->{retrieve},
 			portal		=> $form->{portal},
@@ -4668,6 +4668,16 @@ sub getTopic {
 sub getTopics {
 	my $answer = _genericGetsCache('topics', 'tid', '', @_);
 	return $answer;
+}
+
+########################################################
+sub getStoryTopics {
+	my ($self, $sid, $exclude_tid) = @_;
+
+	my $answer;
+	my $topics = $self->sqlSelectAll('tid','story_topics', "sid = '$sid'");
+
+	return $topics;
 }
 
 ########################################################

@@ -113,8 +113,8 @@ __template__
 		</TD>
 	</TR>
 	<TR>
-		<TD><B>Iterations</B> (max number of links from a rss feed, 0 for all)</TD>
-		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="5" NAME="iterations" VALUE="[% blockref.iterations %]"><BR></TD>
+		<TD><B>Max RSS Items</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="5" NAME="items" VALUE="[% blockref.items %]"><BR></TD>
 	</TR>
 
 	[% IF blockedit_flag %]
