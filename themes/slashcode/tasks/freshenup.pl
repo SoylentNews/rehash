@@ -49,8 +49,7 @@ $task{$me}{code} = sub {
 
 	if ($do_all) {
 		my $x = 0;
-		# this deletes stories that have a writestatus of 5 (now delete), 
-		# which is the delete writestatus
+		# this deletes stories that have a writestatus of 'delete'
 		my $deletable = $slashdb->getStoriesWithFlag(
 			'delete',
 			'ASC',
