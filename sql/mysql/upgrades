@@ -1064,9 +1064,8 @@ INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','T
 # You need to manually copy/symlink stats.pl from plugins/Stats into htdocs to use
 # the new stats.pl program
 
-# USEPERL LAST UPDATED HERE
 # Set to email address(es) appropriate for your site, of course.
-INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@example.com','All admin mail about comment posting goes here');
+INSERT INTO vars (name, value, description) VALUES ('adminmail_post','pudge@perl.org','All admin mail about comment posting goes here');
 
 # End of T_2_3_0_61, Start of T_2_3_0_62
 
@@ -1095,3 +1094,5 @@ ALTER TABLE sections DROP defaultcommentstatus;
 ALTER TABLE sections ADD defaultcommentstatus enum('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof') DEFAULT 'enabled' NOT NULL;
 UPDATE sections SET defaultcommentstatus='enabled';
 UPDATE vars SET value='enabled' WHERE name='defaultcommentstatus';
+
+# USEPERL LAST UPDATED HERE
