@@ -1452,7 +1452,8 @@ it uses are SLASH_LOG_OPERATION and SLASH_LOG_DATA.
 
 =item VIRTUAL_USER
 
-Optional.  You can pass in a virtual user that will be used instead of C<$ARGV[0]>.
+Optional.  You can pass in a virtual user that will be used instead of
+parsing C<@ARGV>.
 
 =back
 
