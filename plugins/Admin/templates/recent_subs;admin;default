@@ -1,0 +1,64 @@
+__section__
+default
+__description__
+* subs
+
+__title__
+admin interface recent template
+__page__
+admin
+__lang__
+en_US
+__name__
+recent_subs
+__template__
+[% PROCESS titlebar title="Recent Subscription Payments" width='100%' %]
+
+[% IF startat > 0;
+	next_startat = startat - 30;
+	IF next_startat < 0; next_startat = 0; END; %]
+	<form action="[% constants.rootdir %]/admin.pl" method="GET">
+	<input type="hidden" name="op" value="recent_subs">
+	<input type="hidden" name="startat" value="[% next_startat | strip_attribute %]">
+	<input type="submit" value="&lt;&lt; Next Sub Payments">
+	</form>
+[% END %]
+
+<table>
+	<tr>
+		<th>spid</th>
+		<th>user</th>
+		<th>email</th>
+		<th>ts</th>
+		<th>payment_gross</th>
+		<th>pages</th>
+		<th>trans_id</th>
+		<th>method</th>
+	</tr>
+
+	[% FOREACH sub = subs %]
+	<tr>
+		<td align="right">[% sub.spid %]</td>
+		<td align="left"><A HREF="[% constants.rootdir
+			%]/~[% user.nickname | strip_attribute %]">[%
+			sub.nickname | strip_literal %] ([% sub.uid %])</A></td>
+		<td align="left">[% sub.email | strip_literal %]</td>
+		<td align="left">[% sub.ts | strip_literal %]</td>
+		<td align="right">[% sub.payment_gross | strip_literal %]</td>
+		<td align="right">[% sub.pages | strip_literal %]</td>
+		<td align="left">[% sub.transaction_id | strip_literal %]</td>
+		<td align="left">[% sub.method | strip_literal %]</td>
+	</tr>
+	[% END %]
+
+</table>
+
+[% prev_startat = startat + 30; %]
+<form action="[% constants.rootdir %]/admin.pl" method="GET">
+<input type="hidden" name="op" value="recent_subs">
+<input type="hidden" name="startat" value="[% prev_startat | strip_attribute %]">
+<input type="submit" value="Prev Sub Payments &gt;&gt;">
+</form>
+
+__seclev__
+100

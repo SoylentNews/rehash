@@ -142,6 +142,12 @@ sub main {
 			adminmenu	=> 'info',
 			tab_selected	=> 'requests',
 		},
+		recent_subs		=> {
+			function	=> \&displayRecentSubs,
+			seclev		=> 500,
+			adminmenu	=> 'info',
+			tab_selected	=> 'subs',
+		},
 	};
 
 	# admin.pl is not for regular users
@@ -1730,6 +1736,20 @@ sub displayRecentRequests {
 		thresh_hps	=> $options->{thresh_hps},
 		data		=> $data,
 		select_secs	=> sprintf("%0.3f", $duration),
+	});
+}
+
+##################################################################
+sub displayRecentSubs {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	my $admindb = getObject("Slash::Admin",
+		$constants->{backup_db_user} || $constants->{log_db_user});
+
+	my $startat = $form->{startat} || 0;
+	my $subs = $admindb->getRecentSubs($startat);
+	slashDisplay('recent_subs', {
+		subs		=> $subs,
 	});
 }
 

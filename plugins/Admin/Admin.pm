@@ -35,8 +35,23 @@ sub new {
 }
 
 sub getAccesslogMaxID {
-	my ($self) = @_;
-	return  $self->sqlSelect("max(id)", "accesslog");
+	my($self) = @_;
+	return $self->sqlSelect("MAX(id)", "accesslog");
+}
+
+sub getRecentSubs {
+	my($self, $startat) = @_;
+	my $slashdb = getCurrentDB();
+	my $subs = $slashdb->sqlSelectAllHashrefArray(
+		"spid, subscribe_payments.uid,
+		 nickname,
+		 email, ts, payment_gross, pages,
+		 transaction_id, method",
+		"subscribe_payments, users",
+		"subscribe_payments.uid=users.uid",
+		"ORDER BY spid DESC
+		 LIMIT $startat, 30");
+	return $subs;
 }
 
 sub getAccesslogAbusersByID {
