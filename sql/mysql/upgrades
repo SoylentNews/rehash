@@ -529,7 +529,6 @@ INSERT INTO string_param (type, code, name) VALUES ('section_types','collected',
 SELECT concat("UPDATE sections SET qid=", value," WHERE section='index';") INTO OUTFILE "/tmp/qidproblem" from vars WHERE name="currentqid";
 source /tmp/qidproblem;
 
-# LINUX.COM LAST UPDATED HERE
 
 # For plugins/Admin (ignore if you're not using that plugin):
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Recent','[% constants.rootdir %]/admin.pl?op=recent',500,18);
@@ -561,7 +560,6 @@ INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the 
 # End of T_2_3_0_36
 
 # FOUNDRIES TEST SITE LAST UPDATED HERE
-# SLASHCODE LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 # from foundries integrations
@@ -580,3 +578,5 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 # in with a "template-tool -U")
 
 # USEPERL LAST UPDATED HERE
+# LINUX.COM LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
