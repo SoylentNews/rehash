@@ -20,9 +20,11 @@ sub main {
 	my $dilemma_db = getObject('Slash::Dilemma');
 
 	my $info = $dilemma_reader->getDilemmaInfo();
+	my $species_hr = $dilemma_reader->getDilemmaSpeciesInfo();
 
 	slashDisplay('maininfo', {
 		info		=> $info,
+		species		=> $species_hr,
 	});
 
 	footer();

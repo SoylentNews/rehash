@@ -44,6 +44,27 @@ sub getDilemmaInfo {
 }
 
 #################################################################
+sub getDilemmaSpeciesInfo {
+	my($self) = @_;
+	my $species = $self->getDilemmaSpecies();
+	my $count = $self->sqlSelectAllHashref(
+		[qw( dsid alive )],
+		"dsid, alive, COUNT(*) AS c",
+		"dilemma_agents",
+		"",
+		"GROUP BY dsid, alive");
+	my $species_info = { };
+	for my $dsid (keys %$species) {
+		$species_info->{$dsid}{name} = $species->{$dsid}{name};
+		$species_info->{$dsid}{code} = $species->{$dsid}{code};
+		$species_info->{$dsid}{alivecount} = $count->{$dsid}{yes}{c} || 0;
+		$species_info->{$dsid}{totalcount} = ($count->{$dsid}{yes}{c}
+			+ $count->{$dsid}{no}{c}) || 0;
+	}
+	return $species_info;
+}
+
+#################################################################
 sub getDilemmaSpecies {
 	my($self) = @_;
 	return $self->sqlSelectAllHashref(
@@ -195,6 +216,7 @@ sub doTickHousekeeping {
 	##########
 	# If this was the last tick, or if there is one or fewer
 	# agents left alive, we're done.
+	my $retval = 1;
 	$self->sqlUpdate("dilemma_info",
 		{ -last_tick => "last_tick + 1" });
 	$info = $self->getDilemmaInfo();
@@ -202,11 +224,32 @@ sub doTickHousekeeping {
 	if ($info->{last_tick} >= $info->{max_runtime} || $count_alive <= 1) {
 		$self->sqlUpdate("dilemma_info",
 			{ alive => 'no' });
-		return 0;
+		$retval = 0;
+	}
+	my $last_tick = $self->getDilemmaInfo()->{last_tick};
+
+	# Write count info for the species into dilemma_stats.
+	my $species = $self->getDilemmaSpeciesInfo();
+	for my $dsid (keys %$species) {
+		$self->sqlInsert("dilemma_stats", {
+			tick => $last_tick,
+			dsid => $dsid,
+			name => "num_alive",
+			value => $species->{$dsid}{alivecount} || 0,
+		}, { ignore => 1 });
 	}
 
-	# Otherwise, we continue.
-	return 1;
+	return $retval;
+}
+
+sub getStatsBySpecies {
+	my($self, $dsid) = @_;
+	my $dsid_q = $self->sqlQuote($dsid);
+	return $self->sqlSelectColArrayref(
+		"value",
+		"dilemma_stats",
+		"dsid=$dsid_q AND name='num_alive'",
+		"ORDER BY tick");
 }
 
 sub getSpecieses {
@@ -306,7 +349,7 @@ sub agentsMeet {
 		my $start_time = Time::HiRes::time;
 		my $response = $safe->reval($me{code});
 		print STDERR "agentsMeet 1 \$\@: '$@'\n" if $@;
-printf STDERR "$agent_data->{$daid}{species_name}/$me{daid} played %.3f against $agent_data->{$it_daid}{species_name}/$it{daid}\n", ($response || 0);
+#printf STDERR "$agent_data->{$daid}{species_name}/$me{daid} played %.3f against $agent_data->{$it_daid}{species_name}/$it{daid}\n", ($response || 0);
 		my $elapsed = Time::HiRes::time - $start_time;
 
 		if (!defined($response)

@@ -19,6 +19,7 @@ $task{$me}{code} = sub {
 	my $dilemma_reader = getObject('Slash::Dilemma', { db_type => 'reader' });
 	my $dilemma_db = getObject('Slash::Dilemma');
 	my $dilemma_info = $dilemma_reader->getDilemmaInfo();
+	return "stopped" if $dilemma_info->{alive} ne 'yes';
 	my $start_tick = $dilemma_info->{last_tick};
 
 	my $start_time = time;
@@ -54,8 +55,43 @@ $task{$me}{code} = sub {
 	}
 
 	$dilemma_info = $dilemma_db->getDilemmaInfo();
+
+	my $legend_ar = [ ];
+	my $alldata_ar = [ ];
+	# X axis: ticks
+	my $last_tick = $dilemma_info->{last_tick};
+	push @$alldata_ar, [ 1 .. $last_tick ];
+	# Y axis: data serieses
+	my $y_max = 0;
+	my $species = $dilemma_reader->getSpecieses();
+	my @dsids = sort { $a <=> $b } keys %$species;
+	for my $dsid (@dsids) {
+		push @$alldata_ar, $dilemma_db->getStatsBySpecies($dsid);
+		for my $n (@{$alldata_ar->[$#$alldata_ar]}) {
+			$y_max = $n if $n > $y_max;
+		}
+		push @$legend_ar, $species->{$dsid}{name};
+	}
+	$y_max = int($y_max/10+1)*10;
+	my $png = slashDisplay('graph', {
+		last_tick	=> $last_tick,
+		alldata		=> $alldata_ar,
+		y_max		=> $y_max,
+		set_legend	=> \&_set_legend,
+		legend		=> $legend_ar,
+	}, { Return => 1, Nocomm => 1, Page => 'dilemma' });
+	my $filename = catfile($constants->{basedir}, "images/specieshistory.png");
+	save2file($filename, $png);
+
 	my $agent_count = $dilemma_db->countAliveAgents();
-	return "alive: $dilemma_info->{alive} tick: $dilemma_info->{last_tick}/$dilemma_info->{max_runtime} agents: $agent_count";
+	return "alive: $dilemma_info->{alive} tick: $last_tick/$dilemma_info->{max_runtime} agents: $agent_count";
 };
+
+# helper method for graph(), because GD->set_legend doesn't
+# take a reference, and TT can only pass a reference -- pudge
+sub _set_legend {
+	my($gd, $legend) = @_;
+	$gd->set_legend(@$legend);
+}
 
 1;

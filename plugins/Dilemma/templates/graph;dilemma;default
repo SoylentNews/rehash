@@ -1,0 +1,83 @@
+__section__
+default
+__description__
+* last_tick
+* alldata - the data serieses
+* y_max - max y value
+* set_legend - callback function ref
+
+__title__
+
+__page__
+dilemma
+__lang__
+en_US
+__name__
+graph
+__template__
+[% FILTER null;
+
+USE my_graph = GD.Graph.lines(800, 600);
+
+IF y_max < 20;
+	y_label_skip = 2;
+ELSIF y_max < 40;
+	y_label_skip = 5;
+ELSIF y_max < 200;
+	y_label_skip = 10;
+ELSIF y_max < 400;
+	y_label_skip = 50;
+ELSIF y_max < 2000;
+	y_label_skip = 100;
+ELSE;
+	y_label_skip = 500;
+END;
+
+IF last_tick < 2000;
+	x_label_skip = 100;
+ELSIF last_tick < 10000;
+	x_label_skip = 500;
+ELSIF last_tick < 30000;
+	x_label_skip = 1000;
+ELSE;
+	x_label_skip = 5000;
+END;
+
+my_graph.set(
+      title               => "Species Alivecount to Tick " _ last_tick,
+
+      zero_axis           => 1,
+
+      x_label_position    => 0.5,
+
+      x_labels_vertical   => 1,
+
+      y_max_value         => y_max,
+      y_label_skip        => y_label_skip,
+
+      x_label_skip        => x_label_skip,
+
+      line_type_scale     => 10,
+      line_width          => 1,
+      line_types          => [	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      				2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				3, 3, 3, 3, 3, 3, 3, 3, 3, 3	],
+
+      dclrs               => [ 'red', 'lgreen', 'blue', 'lorange', 'purple',
+                               'gray', 'dbrown', 'marine', 'dred', 'green',
+			       'dgray', 'lred', 'dgreen', 'lbrown', 'dpink' ],
+
+      transparent         => 0,
+);
+
+my_graph.set(y_min_value => 0);
+set_legend(my_graph, legend);
+
+returnimage = my_graph.plot(alldata).png;
+END;
+
+returnimage -%]
+__seclev__
+1000
+__version__
+$Id$

@@ -2,6 +2,11 @@ __section__
 default
 __description__
 * info = the "tournament" info hashref
+* species = hashref, keys are dsid's of species, subfields are:
+	name = name of the species
+	code = the species' code
+	alivecount = count of alive agents in that species
+	totalcount = count of all agents in that species
 
 __title__
 
@@ -13,12 +18,22 @@ __name__
 maininfo
 __template__
 [% USE Slash %]
-<P>[% PROCESS titlebar title => 'Dilemma Info' %]
+<p>[% PROCESS titlebar title => 'Dilemma Info' %]
 <tt>
-[% FOREACH key = info.keys %]
+[% FOREACH key = info.keys.sort %]
 <p><b>[% key | strip_html %]:</b> [% info.$key | strip_html %]
 [% END %]
 </tt>
+
+<p>[% PROCESS titlebar title => 'Species Status at Tick ' _ info.last_tick %]
+<tt>
+[% FOREACH key = species.keys.nsort %]
+<p>[% species.${key}.name %]: <b>[% species.${key}.alivecount %] alive</b> of [% species.${key}.totalcount %] total
+<br>&nbsp;&nbsp;[% species.${key}.code %]
+[% END %]
+
+<p>[% PROCESS titlebar title => 'Species History' %]
+<p><img src="[% constants.imagedir %]/specieshistory.png">
 
 __seclev__
 10000

@@ -42,3 +42,15 @@ CREATE TABLE dilemma_info (
 	mean_meets INT UNSIGNED DEFAULT 20 NOT NULL
 ) TYPE=InnoDB;
 
+# this will eventually have a column for tournament ID
+# and store more interesting numbers than just name='num_alive'
+DROP TABLE IF EXISTS dilemma_stats;
+CREATE TABLE dilemma_stats (
+	tick INT UNSIGNED NOT NULL,
+	dsid SMALLINT UNSIGNED NOT NULL,
+	name CHAR(16) NOT NULL,
+	value FLOAT,
+	UNIQUE (tick, dsid, name),
+	KEY (dsid, name)
+) TYPE=InnoDB;
+
