@@ -70,18 +70,18 @@ lot of pages, to programs that attempt to coordinate an avalanche of posts
 in the forums (often through misconfigured "Open Relay" proxy servers).<p> 
 &middot; You might be using a proxy server that is also being used by another person  
 who did something from the above list. You should have your <b>proxy server  
-administrator</b> <a href="mailto:banned@slashdot.org">contact us</a>. <br> 
+administrator</b> <a href="mailto:banned\@slashdot.org">contact us</a>. <br> 
 <br> 
-<i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br> 
+<i><small> Answered by: <a href="mailto:malda\@slashdot.org">CmdrTaco</a> <br> 
 Last Modified: 3/26/02<br> 
 </small></i> <a name="ac1000"></a>  
 <h2>How do I get an IP Unbanned?</h2> 
-<p>Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a>. Make  
+<p>Email <a href="mailto:banned\@slashdot.org">banned\@slashdot.org</a>. Make  
 sure to include the IP in question, and any other pertinent information. If  
 you are connecting through a proxy server, you might need to have your proxy  
 server's admin contact us instead of you. <br> 
 <br> 
-<i><small> Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a> <br> 
+<i><small> Answered by: <a href="mailto:malda\@slashdot.org">CmdrTaco</a> <br> 
 Last Modified: 3/26/02</small></i><i><small><br></small></i> 
 </BODY>
 </HTML>
