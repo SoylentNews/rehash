@@ -86,10 +86,13 @@ __template__
 					&nbsp;<INPUT TYPE="checkbox" NAME="accesslist_proxy" [% accesslist.proxy | strip_attribute %]>&nbsp;Proxy &nbsp;
 					<INPUT TYPE="checkbox" NAME="accesslist_trusted" [% accesslist.trusted | strip_attribute %]>&nbsp;Trusted &nbsp;
 				[% END %]
-				<BR><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="255" NAME="accesslist_reason" VALUE="[% accesslist.reason | strip_attribute %]">		
+				<BR><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="255" NAME="accesslist_reason" VALUE="[% accesslist.reason | strip_attribute %]">	
 				[% IF accesslist.ts || accesslist.adminnick %]<BR>[% END %]
 				[% IF accesslist.ts %]<font size=-1>[% accesslist.ts %]</font>[% END %]
 				[% IF accesslist.adminnick %]<font size=-1>  by [% accesslist.adminnick %]</font>[% END %]
+				[% IF useredit.uid %]
+					<br><a href="[% constants.rootdir %]/users.pl?op=force_acct_verify&amp;uid=[% useredit.uid | fixparam %]"><font size="-1">Force User Account Verify</font></a>	
+				[% END %]	
 				</TD>
 			</TR>
 			[% IF subnet_karma.defined %]
