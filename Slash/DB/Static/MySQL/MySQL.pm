@@ -1575,6 +1575,9 @@ sub createRSS {
 	# this will go away once we require Digest::MD5 2.17 or greater
 	# Hey pudge, CPAN is up to Digest::MD5 2.25 or so, think we can
 	# make this go away now? - Jamie 2003/07/24
+	# Oh probably, if someone wants to test it and all, i can
+	# add it to Slash::Bundle etc.  i'll put it on my TODO
+	# and DO it when i can. -- pudge
 	$item->{title} =~ /^(.*)$/;
 	my $title = $1;
 	$item->{description} =~ /^(.*)$/;
@@ -1617,17 +1620,18 @@ sub expireRSS {
 # For slashd
 
 ########################################################
-sub getSlashdStatus {
-	my($self) = @_;
-	my $answer = _genericGet('slashd_status', 'task', '', @_);
-	$answer->{last_completed_hhmm} =
-		substr($answer->{last_completed}, 11, 5)
-		if defined($answer->{last_completed});
-	$answer->{next_begin_hhmm} =
-		substr($answer->{next_begin}, 11, 5)
-		if defined($answer->{next_begin});
-	return $answer;
-}
+# see Slash::DB::MySQL instead
+#sub getSlashdStatus {
+#	my($self) = @_;
+#	my $answer = _genericGet('slashd_status', 'task', '', @_);
+#	$answer->{last_completed_hhmm} =
+#		substr($answer->{last_completed}, 11, 5)
+#		if defined($answer->{last_completed});
+#	$answer->{next_begin_hhmm} =
+#		substr($answer->{next_begin}, 11, 5)
+#		if defined($answer->{next_begin});
+#	return $answer;
+#}
 
 ########################################################
 sub setSlashdStatus {
