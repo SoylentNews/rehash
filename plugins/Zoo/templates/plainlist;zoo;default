@@ -26,7 +26,7 @@ __template__
 	</TD>
 	[% IF editable %]
 		<TD VALIGN="TOP">
-			[% PROCESS zoo_icons person=somebody.0 implied=implied %]
+			[% PROCESS zoo_icons person=somebody.0 implied="" %]
 		</TD>
 	[% END %]
 	<TD VALIGN="TOP">
