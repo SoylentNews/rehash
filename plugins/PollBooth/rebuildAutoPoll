@@ -1,0 +1,90 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2002 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Slash::Constants ':people';
+
+use vars qw( $slashdb $werder $constants $junk );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:v', \%opts);
+usage() if $opts{'h'};
+$opts{'u'} ||= 'slash';
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+
+my $entries = $slashdb->sqlSelectAll('section,qid', 'auto_poll');
+
+for (@$entries) {
+	my $qid = $_->[1];
+	my $sids = $slashdb->sqlSelectColArrayref('sid', 'stories', "qid IS NULL AND section = '$_->[0]'" );
+	for my $sid (@$sids) {
+		print "Doing $sid \n";
+		my $question = $slashdb->getPollQuestion($qid, 'question');
+		my $answers = $slashdb->getPollAnswers($qid, [ qw| answer | ]);
+		my $newpoll = {
+			section => $_->[0],
+			topic => 1,
+			autopoll => 'yes',
+			question  => $question,
+		};
+		
+		my $x =1;
+		for my $answer (@$answers) {
+			$newpoll->{'aid' . $x} = $answer->[0];
+			$x++;
+		}
+		my $qid = $slashdb->savePollQuestion($newpoll);
+		$slashdb->setStory($sid, { qid => $qid, writestatus => 'dirty' });
+	}
+}
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#users]
+
+This rebuilds the people table for the Zoo system.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2002 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

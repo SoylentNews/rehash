@@ -1,0 +1,10 @@
+# Not going to install this unless the pollbooth plugin is installed
+DROP TABLE IF EXISTS auto_poll;
+CREATE TABLE auto_poll (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	section varchar(30) NOT NULL,
+	qid mediumint UNSIGNED,
+	FOREIGN KEY (section) REFERENCES sections(section),
+	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
+	PRIMARY KEY (id)
+);
