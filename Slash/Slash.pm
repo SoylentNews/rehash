@@ -1711,7 +1711,10 @@ EOT
 		}, 1) if $comment->{original_pid};
 
 		push @link, createSelect("reason_$comment->{cid}",
-			$reasons, '', 1, 1) if $can_mod;
+			$reasons, '', 1, 1) if ($can_mod
+			&& $user->{mode} ne 'archive'
+			&& (!$user->{state}{discussion-archived}
+			|| $constants->{comments_moddable_archived}));
 
 		push @link, qq|<INPUT TYPE="CHECKBOX" NAME="del_$comment->{cid}">|
 			if $user->{is_admin};
