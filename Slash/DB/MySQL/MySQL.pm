@@ -372,6 +372,16 @@ sub createComment {
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
+	my $searchtoo = getObject('Slash::SearchToo');
+	if ($searchtoo) {
+		$searchtoo->addRecords(comments =>
+			$searchtoo->prepRecord(comments => {
+				cid     => $cid,
+				comment => $comment_text
+			})
+		);
+	}
+
 	return $cid;
 }
 
