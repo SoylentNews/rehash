@@ -381,17 +381,14 @@ sub main {
                                 $ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
                                 $error_flag = formkeyHandler($check, $formname, $formkey,
                                         undef, $options);
-print STDERR "users.pl main op '$op' formname '$formname' handler '$check' error_flag '$error_flag' options '" . join(" ", sort keys %$options) . "'\n";
                                 if ($error_flag == -1) {
 					# Special error:  HumanConf failed.  Go
 					# back to the previous op, start over.
 					if ($op =~ /^(newuser|mailpasswd)$/) {
 						$op .= "form";
 						$error_flag = 0;
-print STDERR "users.pl main op '$op' error_flag reset to 0\n";
 						next DO_CHECKS;
 					}
-print STDERR "users.pl main op '$op' error_flag remains -1\n";
 				} elsif ($error_flag) {
                                         $done = 1;
                                         last;
@@ -402,7 +399,6 @@ print STDERR "users.pl main op '$op' error_flag remains -1\n";
 
                 if (!$error_flag && !$options->{no_hc}) {
                         my $hc = getObject("Slash::HumanConf");
-print STDERR "users.pl main op '$op' hc '$hc'\n";
                         $hc->reloadFormkeyHC($formname) if $hc;
                 }
 
@@ -411,9 +407,7 @@ print STDERR "users.pl main op '$op' hc '$hc'\n";
 	errorLog("users.pl error_flag '$error_flag'") if $error_flag;
 
 	# call the method
-print STDERR "users.pl main calling op '$op'\n";
 	my $retval = $ops->{$op}{function}->({ op => $op }) if ! $error_flag;
-print STDERR "users.pl main op '$op' returned '$retval'\n";
 	if ($op eq 'mailpasswd' && $retval) {
 		$ops->{$op}{update_formkey} = 0;
 	}

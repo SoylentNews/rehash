@@ -289,12 +289,12 @@ sub formkeyHandler {
 		$slashdb->updateFormkeyId($formname, $formkey, $user->{uid}, $form->{rlogin}, $form->{upasswd});
 	} elsif ($formkey_op eq 'valid_check') {
 		my $valid = $slashdb->validFormkey($formname, $options);
-print STDERR "formkeyHandler valid_check valid '$valid'\n";
+#print STDERR "formkeyHandler valid_check valid '$valid'\n";
 		if ($valid eq 'ok') {
 			# All is well.
 		} else {
 			$msg = formkeyError($valid, $formname);
-print STDERR "formkeyHandler valid_check valid '$valid' formname '$formname' msg '$msg'\n";
+#print STDERR "formkeyHandler valid_check valid '$valid' formname '$formname' msg '$msg'\n";
 			if ($valid eq 'invalidhcretry'
 				|| $valid eq 'invalidhc') {
 				# It's OK, the user can retry.
@@ -330,14 +330,14 @@ print STDERR "formkeyHandler valid_check valid '$valid' formname '$formname' msg
 		}
 		if (!$error_flag && !$options->{no_hc}) {
 			my $hc = getObject("Slash::HumanConf");
-print STDERR "formkeyHandler op '$formkey_op' hc '$hc'\n";
+#print STDERR "formkeyHandler op '$formkey_op' hc '$hc'\n";
 			if ($hc && !$hc->createFormkeyHC($formname)) {
 				$error_flag = 1;
 				$msg = formkeyError('cantinserthc', $formname);
 			}
 		}
 	}
-print STDERR "formkeyHandler op '$formkey_op' formkey '$form->{formkey}' statehc '$user->{state}{hc}' error_flag '$error_flag' msg '$msg'\n";
+#print STDERR "formkeyHandler op '$formkey_op' formkey '$form->{formkey}' statehc '$user->{state}{hc}' error_flag '$error_flag' msg '$msg'\n";
 
 	if ($msg) {
 		if ($message_ref) {
