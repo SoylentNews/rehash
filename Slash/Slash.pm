@@ -90,7 +90,13 @@ sub selectComments {
 		$cid, 
 		$cache_read_only
 	);
-	return ( {}, 0 ) unless $thisComment;
+	if (!$thisComment) {
+		if ($form->{ssi} && $header->{sid}) {
+			my $fake_hp = join(",", (("0") x ($max-$min)));
+			print STDERR "count 0, hitparade $fake_hp\n";
+		}
+		return ( {}, 0 );
+	}
 
 	# We first loop through the comments and assign bonuses and
 	# and such.
