@@ -444,7 +444,7 @@ sub _can_mod {
 		) || (
 		       $user->{acl}{alwaysmodpoints}
 		) );
-use Data::Dumper; print STDERR "_can_mod returning '$retval' for: " . Dumper($user);
+
 	return $retval;
 }
 
