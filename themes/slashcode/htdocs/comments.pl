@@ -786,6 +786,12 @@ sub editComment {
 		$form->{postersubj} = "Re:$form->{postersubj}";
 	}
 
+	my($sections, $section_select);
+	if ($constants->{ubb_like_forums} && $form->{section} && $form->{newdiscussion}) {
+		$sections = $slashdb->getDescriptions('forums');
+		$section_select = createSelect('section', $sections, $form->{section}, 1);
+	}
+
 	my $gotmodwarning;
 	$gotmodwarning = 1 if (($error_message eq getError("moderations to be lost")) || $form->{gotmodwarning});
 	slashDisplay('edit_comment', {
@@ -796,7 +802,8 @@ sub editComment {
 		preview		=> $preview,
 		reply		=> $reply,
 		gotmodwarning	=> $gotmodwarning,
-		newdiscussion	=> $form->{newdiscussion}
+		newdiscussion	=> $form->{newdiscussion},
+		section_select  => $section_select,
 	});
 }
 
