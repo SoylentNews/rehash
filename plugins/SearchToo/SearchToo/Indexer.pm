@@ -269,7 +269,7 @@ sub getRecords {
 # handle delete too?
 sub storeRecords {
 	my($self, $type, $data, $opts) = @_;
-
+return;
 	return unless $self->_handled($type);
 
 	my $slashdb = getCurrentDB();
@@ -278,7 +278,7 @@ sub storeRecords {
 
 	my $count = 0;
 	for my $record (@$data) {
-		next unless keys %$record;
+		next unless $record;
 
 		# deal with multiple instances of same type => id
 		$count++ if $slashdb->sqlInsert('search_index_dump', {
