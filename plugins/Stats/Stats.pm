@@ -293,10 +293,13 @@ sub getRepeatMods {
 		 usersdest.nickname AS destnick,
 		 usersdesti.karma AS destkarma",
 		"users AS usersorg,
+		 users_info AS userorgi,
 		 moderatorlog,
 		 users AS usersdest,
 		 users_info AS usersdesti",
 		"usersorg.uid=moderatorlog.uid
+		 AND usersorg.uid=usersorgi.uid
+		 AND usersorgi.tokens >= -50
 		 AND usersorg.seclev < 100
 		 AND moderatorlog.cuid=usersdest.uid
 		 AND usersdest.uid=usersdesti.uid
@@ -364,7 +367,7 @@ sub getReverseMods {
 	my $unm2able =  0.5;	$unm2able = $options->{unm2able} if defined $options->{unm2able};
 	my $denomadd =  4  ;	$denomadd = $options->{denomadd} if defined $options->{denomadd};
 	my $limit =    12  ;	$limit = $options->{limit} if defined $options->{limit};
-	my $min_tokens = -100; # fudge factor: only users who are likely to mod soon
+	my $min_tokens = -50; # fudge factor: only users who are likely to mod soon
 
 	my $reasons = $self->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
