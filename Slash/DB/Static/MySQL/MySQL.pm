@@ -444,6 +444,8 @@ sub getTop10Comments {
 	my($min_points, $max_points) =
 		($constants->{minpoints}, $constants->{maxpoints});
 
+	my $num_wanted = $constants->{top10comm_num} || 10;
+
 	my $comments;
 	my $num_top10_comments = 0;
 	while (1) {
@@ -457,12 +459,12 @@ sub getTop10Comments {
 				AND comments.points >= $max_points
 				AND users.uid=comments.uid
 				AND comments.sid=stories.discussion",
-			"ORDER BY date DESC LIMIT 10");
+			"ORDER BY date DESC LIMIT $num_wanted");
 		$comments = $c->fetchall_arrayref;
 		$c->finish;
 		$num_top10_comments = scalar(@$comments);
-		last if $num_top10_comments >= 10;
-		# Didn't get 10... try again with lower standards.
+		last if $num_top10_comments >= $num_wanted;
+		# Didn't get $num_wanted... try again with lower standards.
 		--$max_points;
 		# If this is as low as we can get... take what we have.
 		last if $max_points <= $min_points;
