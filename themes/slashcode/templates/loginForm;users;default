@@ -46,7 +46,7 @@ __template__
 	[% IF constants.allow_anonymous %]
 		<P>
 	   	Logging in will allow you to post comments as yourself.  If you
-		don't log in, you will only be able to post as Slash.getCurrentAnonymousCoward("nickname") %].
+		don't log in, you will only be able to post as [% Slash.getCurrentAnonymousCoward("nickname") %].
 		</P>
 
 	[% ELSE %]
