@@ -324,7 +324,7 @@ sub userdir_handler {
 				my $args;
 				if ($extra && $extra =~ /^\d+$/) {
 					$args = "id=$extra&op=edit";
-				} elsif ($extra && $extra =~ /^friends$/) {
+				} elsif ($extra && $extra eq 'friends') {
 					$args = "op=friendview";
 				} else {
 					$args = "op=list";
