@@ -51,7 +51,7 @@ WHILE colspan > 0;
 	colspan = colspan - 1;
 END;
 user.state.mt.curcol = curcol;
-rowspan = 0
+align=""; valign=""; rowspan = 0; colspan=0; width=""
 %]
 
 <!-- curcol_now [% user.state.mt.curcol %], with [% user.state.mt.cols.${user.state.mt.curcol} %] rows -->
