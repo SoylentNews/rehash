@@ -239,9 +239,9 @@ sub displayTopRSS {
 
 	my @items;
 	for my $entry (@$journals) {
-		my $time = timeCalc($entry->[3]);
+#		my $time = timeCalc($entry->[3]);
 		push @items, {
-			title	=> "[$entry->[1]] $entry->[4]",
+			title	=> "[$entry->[1]] $entry->[5]",
 			'link'	=> "$constants->{absolutedir}/~" . fixparam($entry->[1]) . "/journal/"
 		};
 	}
