@@ -106,9 +106,9 @@ Top Relocated URLS
 [% END %]
 
 -----------------------
-[% FOREACH section = sections -%]
+[% FOREACH section = skins -%]
 [% IF section.pages < 1 ; NEXT ; END %]
-For [% section.section_name %]
+For [% section.skin_name %]
                   Pages      IPs   Bandwidth    Users
         total: [% section.pages %] [% section.ipids %] [% section.bytes %] [% section.site_users %]
 [% IF section.index.pages > 0 -%]
