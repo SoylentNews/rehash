@@ -34,8 +34,7 @@ sub main {
 	*I = getSlashConf();
 	getSlash();
 
-	my $id = getFormkeyId($I{F}{uid});
-	my $formkey_earliest = time() - $I{formkey_timeframe};
+	my $id = getFormkeyId($I{U}{uid});
 
 	my($section, $op, $seclev, $aid) = (
 		$I{F}{section}, $I{F}{op}, $I{U}{aseclev}, $I{U}{aid}
@@ -71,35 +70,23 @@ sub main {
 	} elsif (! $op) {
 		yourPendingSubmissions();
 		titlebar("100%", "$I{sitename} Submissions", "c");
-		displayForm($I{U}{nickname},$I{U}{fakeemail}, $I{F}{section});
+		displayForm($I{U}{nickname},$I{U}{fakeemail}, $I{F}{section}, $id);
 
 	} elsif ($op eq "PreviewStory") {
 		titlebar("100%", "$I{sitename} Submission Preview", "c");
 
-		# generate a random key to use for the form
-		$I{F}{formkey} = getFormkey();
-
 		# insert the fact that the form has been displayed,
 		# but not submitted at this point
-		sqlInsert("formkeys", {
-			formkey		=> $I{F}{formkey},
-			formname	=> 'submissions',
-			id		=> $id,
-			sid		=> 'submission',
-			uid		=> $I{U}{uid},
-			host_name	=> $ENV{REMOTE_ADDR},
-			value		=> 0,
-			ts		=> time()
-		});
+		insertFormkey("submissions",$id,"submission");	
 
-		displayForm($I{F}{from}, $I{F}{email}, $I{F}{section});
+
+		displayForm($I{F}{from}, $I{F}{email}, $I{F}{section}, $id);
 
 	} elsif ($op eq "viewsub" && ($seclev > 99 || $I{submiss_view})) {
 		previewForm($aid, $I{F}{subid});
 
 	} elsif ($op eq "SubmitStory") {
-		titlebar("100%", "Saving");
-		saveSub($id,$formkey_earliest);
+		saveSub($id);
 		yourPendingSubmissions();
 
 	} else {
@@ -409,12 +396,12 @@ USER
 
 		</FONT><INPUT TYPE="CHECKBOX" NAME="del_$subid">
 	</NOBR></TD><TD>$ptime</TD><TD>
-		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$s">%s&nbsp;</A>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="2">%s$karma<BR>%s</FONT></TD></TR>
 ADMIN
 	<TD>\u$section</TD><TD>$ptime</TD>
 	<TD>
-		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$s">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="-1">%s<BR>%s</FONT></TD></TR>
 	<TR><TD COLSPAN="7"><IMG SRC="$I{imagedir}/pix.gif" ALT="" HEIGHT="3"></TD></TR>
 USER
@@ -449,7 +436,14 @@ USER
 
 #################################################################
 sub displayForm {
-	my($user, $fakeemail, $section) = @_;
+	my($user, $fakeemail, $section, $id) = @_;
+	my $formkey_earliest = time() - $I{formkey_timeframe};
+
+	if(! checkTimesPosted("submissions",$I{max_submissions_allowed},$id,$formkey_earliest)) {
+		print <<EOT;
+<br><b>Warning! you've exceeded max allowed submissions for the day : $I{max_submissions_allowed}</b><br>	
+EOT
+	}
 
 	print <<EOT if $I{submiss_view};
 <P><B>
@@ -518,33 +512,16 @@ EOT
 #################################################################
 sub saveSub {
 	my $id = shift;
-	my $formkey_earliest = shift;
-	my $is_a_valid_key = 0;
-	my($last_submitted,$interval);
 
-	($last_submitted) = sqlSelect(
-			"max(submit_ts)",
-			"formkeys",
-			"id = '$id' AND formname = 'submissions'") or ($last_submitted = 0);
-
-	$interval = time() - $last_submitted;
-
-	# if the interval is less than the post_limit, let them know
-	my $submission_interval_string = intervalString($I{submission_speed_limit});
-	my $thissub_interval_string = intervalString($interval);
-	if ($interval < $I{submission_speed_limit}) {
-		print <<EOT;
-<B>Slow down cowboy!</B><BR>
-<P>$I{sitename} requires you to wait $submission_interval_string between
-each submission in order to allow everyone to have a fair chance to post a story.</P>
-It's been $thissub_interval_string since your last attempt to post a submission!<BR>
-EOT
-	} else {
+	# if formkey works
+	if(checkSubmission("submissions",$I{submission_speed_limit},$I{max_submissions_allowed},$id)) {
 		if (length $I{F}{subj} < 2) {
+			titlebar("100%", "Error:");
 			print "Please enter a reasonable subject.\n";
 			displayForm($I{F}{from}, $I{F}{email}, $I{F}{section});
 			return;
 		}	
+		titlebar("100%", "Saving");
 
 		print "Perhaps you would like to enter an email address or a URL next time.<P>"
 			unless length $I{F}{email} > 2;
@@ -552,71 +529,29 @@ EOT
 		print "This story has been submitted anonymously<P>"
 			unless length $I{F}{from} > 2;
 
-		my($times_submitted) = sqlSelect( 
-			"count(*) as times_submitted", "formkeys","id = '$id' AND submit_ts >= $formkey_earliest AND formname = 'submissions'");
+		print "<B>There are currently ",
+			sqlSelect("count(*)", "submissions", "del=0"),
+			" submissions pending.</B><P>";
 
-		if ($times_submitted < $I{max_submissions_allowed}) {
+		print getblock("submit_after");
 
-				# find out if this form has been submitted already
-				my($submitted_already, $submit_ts) = sqlSelect(
-					"value,submit_ts",
-					"formkeys","formkey='$I{F}{formkey}' and formname = 'submissions'")
-					or print <<EOT and return;
-<P><B>We can't find your formkey.</B></P>
-<P>Please complete the submissions form to submit a story 
-EOT
-			# make sure that there's a valid form key, and we only care about the last 4 hours!
-			$is_a_valid_key = checkFormkey($formkey_earliest,"submissions");
+		my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 
-			if (($I{F}{formkey} !~ /\w{10}/ || $I{F}{formkey} =~ /^(.)\1+$/ ) && !$is_a_valid_key) {
-				print qq|<B>Invalid form key!</B>\n|;
-			} else {
+		my $subid="$hour$min$sec.$mon$mday$year";
 
-				# unless the form has been submitted, submit it
-				unless ($submitted_already) {
-					print "<B>There are currently ",
-					sqlSelect("count(*)", "submissions", "del=0"),
-					" submissions pending.</B><P>";
+		sqlInsert("submissions", {
+			email	=> $I{F}{email},
+			uid	=> $I{U}{uid},
+			name	=> $I{F}{from},
+			story	=> $I{F}{story},
+			-'time'	=> 'now()',
+			subid	=> $subid,
+			subj	=> $I{F}{subj},
+			tid	=> $I{F}{tid},
+			section	=> $I{F}{section}
+		});
 
-					print getblock("submit_after");
-					my($sec, $min, $hour, $mday, $mon, $year) = localtime;
-
-					my $subid="$hour$min$sec.$mon$mday$year";
-					sqlInsert("submissions", {
-						email	=> $I{F}{email},
-						uid	=> $I{U}{uid},
-						name	=> $I{F}{from},
-						story	=> $I{F}{story},
-						-'time'	=> 'now()',
-						subid	=> $subid,
-						subj	=> $I{F}{subj},
-						tid	=> $I{F}{tid},
-						section	=> $I{F}{section}
-					});
-
-					# update formkeys to show that there has been a successful pos t,
-					# and increment the value from 0 to 1 (shouldn't ever get past 1)
-					# meaning that yes, this form has been submitted, so don't try i t again.
-					sqlUpdate("formkeys", { 
-						-value		=> 'value+1',
-						cid		=> 0,
-						submit_ts	=> time(),
-						comment_length	=> length($I{F}{subj})
-					}, "formkey=" . $I{dbh}->quote($I{F}{formkey}));
-
-				} else {
-					my $interval_string = intervalString($interval);
-					# else print an error
-					print <<EOT;
-			<B>Easy does it!</B>
-			<P>This submission has been submitted already, $interval_string ago.
-			No need to try again.</P>
-EOT
-				}
-			}
-		} else {
-			print qq|You have submitted $times_submitted. The maximum submissions for a day are $I{max_submissions_allowed}.\n|;
-		}
+		formSuccess($I{F}{formkey},0,length($I{F}{subj}));
 	}
 }
 

@@ -36,8 +36,7 @@ sub main {
 	*I = getSlashConf();
 	getSlash();
 
-	my $id = getFormkeyId($I{F}{uid});
-	my $formkey_earliest = time() - $I{formkey_timeframe};
+	my $id = getFormkeyId($I{U}{uid});
 
 	# Seek Section for Appropriate L&F
 	my $sct = $I{dbh}->quote($I{F}{sid}) || "''";
@@ -73,110 +72,25 @@ sub main {
 	}
 
 	if ($I{F}{op} eq "Submit") {
-		my($last_submitted, $interval);
 
-		($last_submitted) = sqlSelect( 
-			"max(submit_ts)",
-			"formkeys",
-			"id = '$id' AND formname = 'comments'") or ($last_submitted = 0);
-
-		$interval = time() - $last_submitted;
-
-		# if the interval is less than the post_limit, let them know
-		if ($interval < $I{post_limit}) {
-			my $post_limit_string = intervalString($I{post_limit});
-			my $comment_interval_string = intervalString($interval);
-			print <<EOT;
-<B>Slow down cowboy!</B><BR>
-<P>$I{sitename} requires you to wait $post_limit_string between
-each post in order to allow everyone to have a fair chance to talk.</P>
-It's been $comment_interval_string since your last submission!<BR>
-EOT
-
-		} else {
-
-			my ($times_posted) = sqlSelect( 
-				"count(*) as times_posted",
-				"formkeys",
-				"id = '$id' AND submit_ts >= $formkey_earliest AND formname = 'comments'");
-
-			if ($times_posted < $I{max_posts_allowed}) {
-
-				# find out if this form has been submitted already
-				my($submitted_already, $submit_ts) = sqlSelect(
-					"value,submit_ts",
-					"formkeys","formkey='$I{F}{formkey}' and formname = 'comments'")
-					or print <<EOT and return;
-<P><B>We can't find your formkey.</B></P>
-<P>Please hit "Reply" from the comment or article you are replying
-to, so you can get a proper form to submit from.</P>
-EOT
-
-	
-				# unless the form has been submitted, submit it
-				unless ($submitted_already) {
-					($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}") if $I{U}{uid} > 0;
-					submitComment();
-				} else {
-					# interval of when it was submitted (this won't be used unless it's already been submitted)
-					my $interval = time() - $submit_ts;
-					my $interval_string = intervalString($interval);
-
-					# else print an error
-					print <<EOT;
-<B>Easy does it!</B>
-<P>This comment has been submitted already, $interval_string ago.
-No need to try again.</P>
-EOT
-				}
-			} else {
-				# logem' so we can banem'
-                                sqlInsert("abusers", {
-                                        host_name => $ENV{REMOTE_ADDR},
-                                        pagename => $ENV{SCRIPT_NAME},
-                                        -ts => 'now()',
-                                });
-
-                                print qq|<b>You've reached your maximum allowed posts for today !</b>\n|;
-                        }
-		} 
+		if(checkSubmission("comments",$I{post_limit},$I{max_posts_allowed},$id)) {
+			($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}") if $I{U}{uid} > 0;
+			submitComment();
+		}
 
 	} elsif ($I{F}{op} eq "Edit" || $I{F}{op} eq "post" 
 			||
 		$I{F}{op} eq "Preview" || $I{F}{op} eq "Reply") {
 
-		my($is_a_valid_key) = 0;
-
 		if ($I{F}{op} eq 'Reply') {
-
-			$I{F}{formkey} = getFormkey();
-
-			# insert the fact that the form has been displayed, but not submitted at this point
-			sqlInsert("formkeys", {
-				formkey		=> $I{F}{formkey},
-				formname 	=> 'comments', 
-				id 		=> $id,
-				sid		=> $I{F}{sid},
-				uid		=> $I{U}{uid},
-				host_name	=> $ENV{REMOTE_ADDR},
-				value		=> 0,
-				ts		=> time()
-			});
+			insertFormkey("comments",$id,$I{F}{sid});	
 		}
 
-		# make sure that there's a valid form key, and we only care about the last 4 hours!
-		$is_a_valid_key = checkFormkey($formkey_earliest,"comments");
+		# find out their Karma
+		($I{U}{karma}) = sqlSelect("karma", "users_info",
+			"uid=$I{U}{uid}") if $I{U}{uid} > 0;
+		editComment();
 
-		if (($I{F}{formkey} !~ /\w{10}/ || $I{F}{formkey} =~ /^(.)\1+$/ )
-			&& $I{F}{op} eq 'post' || ! $is_a_valid_key) {
-			print qq|<B>Invalid form key!</B>\n|;
-
-		} else {
-			# find out their Karma
-			($I{U}{karma}) = sqlSelect("karma", "users_info",
-				"uid=$I{U}{uid}") if $I{U}{uid} > 0;
-			editComment();
-		}
 
 	} elsif ($I{F}{op} eq "delete" && $I{U}{aseclev}) {
 		($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}")
@@ -791,17 +705,8 @@ EOT
 			"uid=" . $I{dbh}->quote($I{U}{uid}), 1
 		);
 
-		
-		# update formkeys to show that there has been a successful post,
-		# and increment the value from 0 to 1 (shouldn't ever get past 1)
-		# meaning that yes, this form has been submitted, so don't try it again.
-		sqlUpdate(
-			"formkeys", { 
-				-value		=> 'value+1',
-				cid		=> $maxCid, 
-				submit_ts	=> time(),
-				comment_length	=> length($I{F}{postercomment})
-			}, "formkey=".$I{dbh}->quote($I{F}{formkey}));
+		# successful submission		
+		formSuccess($I{F}{formkey},$maxCid,length($I{F}{postercomment}));
 
 		my($tc, $mp, $cpp) = getvars(
 			"totalComments",
