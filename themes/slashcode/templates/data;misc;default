@@ -134,7 +134,7 @@ Your [% constants.sitename %] account has expired.
 You can't see this story because it's scheduled in the future,
 where only subscribers can see it.<P>
 Either you are not a subscriber to [% constants.sitename %], or you
-have indicated you don't want story pages ad-free, or you have
+have indicated you don't want Stories pages ad-free, or you have
 set your daily limit of ad-free pages to lower than
 the default [% constants.subscribe_hits_btmd %].
 Any of these three possible issues can be resolved at
