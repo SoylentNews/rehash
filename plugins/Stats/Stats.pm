@@ -91,6 +91,16 @@ sub getSlaveDBLagCount {
 	# not available.
 	return 2**32 if !$backupdb;
 
+	# Use these methods instead, duh!
+	# perl -MSlash::Test=foobar -le 'print Dumper($slashdb->sqlShowMasterStatus())'
+	# $VAR1 = [
+	# 	  {
+	# 	    'Position' => '468524929',
+	# 	    'Binlog_do_db' => '',
+	# 	    'Binlog_ignore_db' => '',
+	# 	    'File' => 'cpu92-bin.246'
+	# 	  }
+	# 	];
 	my $master = ($slashdb ->{_dbh}->selectall_arrayref("SHOW MASTER STATUS"))->[0];
 	my $slave  = ($backupdb->{_dbh}->selectall_arrayref("SHOW SLAVE  STATUS"))->[0];
 	my($master_file) = $master->[0] =~ /\.(\d+)$/;
