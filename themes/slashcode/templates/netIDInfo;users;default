@@ -101,7 +101,7 @@ SubnetID [% netid_vis %] has posted [% commentcount %] comments.
 [% END %]
 
 <BR><B>
-[% IF fieldname == 'ipid' %]IPID[% ELSIF fieldname == 'subnetid' %]SubnetID[% END %] has posted [% subcount %] submissions.</B><P>
+[% IF fieldname == 'ipid' %]IPID[% ELSIF fieldname == 'subnetid' %]SubnetID[% END %] [% netid_vis %] has posted [% subcount %] submissions.</B><P>
 
 [% IF subcount > 0 %]
 	[% FOREACH sub = submissions %]
