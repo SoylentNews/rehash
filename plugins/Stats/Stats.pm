@@ -37,7 +37,7 @@ sub new {
 		? $options->{day}
 		: sprintf("%4d-%02d-%02d", $yest_lt[5] + 1900, $yest_lt[4] + 1, $yest_lt[3]);
 
-	unless ($options->{use_current}) {
+	if ($options->{create}) {
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
 		my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
 		$sth->execute();

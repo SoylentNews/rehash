@@ -24,10 +24,10 @@ $task{$me}{code} = sub {
 	my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday  });
 	# This will need to be changed to "log_db_user"
 	if ($constants->{backup_db_user}) {
-		$stats = getObject('Slash::Stats', $constants->{backup_db_user}, { day => $yesterday  });
+		$stats = getObject('Slash::Stats', $constants->{backup_db_user}, { day => $yesterday, create => 1  });
 		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
 	} else {
-		$stats = getObject('Slash::Stats');
+		$stats = getObject('Slash::Stats', "", { day => $yesterday, create => 1  });
 		$backupdb = $slashdb;
 	}
 
