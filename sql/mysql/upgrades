@@ -513,4 +513,4 @@ INSERT INTO vars (name, value, description) VALUES ('users_bio_length','1024','L
 
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720','Hours after which a submissions\'s ipid/subnetid are forgotten; set very large to disable');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
-INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_mincid','0','Minimum cid to start forgetting IP at');
+INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');
