@@ -1463,11 +1463,15 @@ sub getNexusExtras {
 	my $content_type = $options->{content_type} || "story";
 	my $content_type_q = $self->sqlQuote($content_type);
 	
+	my $content_type_clause = "";
+	$content_type_clause = " AND content_type = $content_type_q " if $content_type ne "all";
+	
 	my $tid_q = $self->sqlQuote($tid);
 	my $answer = $self->sqlSelectAll(
-		'extras_textname, extras_keyword, type',
+		'extras_textname, extras_keyword, type, content_type, required, ordering, extras_id',
 		'topic_nexus_extras', 
-		"tid = $tid_q AND content_type = $content_type_q "
+		"tid = $tid_q $content_type_clause ",
+		"ORDER by ordering, extras_id"
 	);
 
 	return $answer;
@@ -1496,18 +1500,56 @@ sub getNexusExtrasForChosen {
 	my $nexuses = $self->getNexuslistFromChosen($chosen_hr);
 	my $seen_extras = {};
 	my $extras = [ ];
+	my $index = 0;
 	for my $nexusid (@$nexuses) {
 		my $ex_ar = $self->getNexusExtras($nexusid, $options);
 		foreach my $extra (@$ex_ar) {
-			unless ($seen_extras->{$extra->[1]}) {
+			unless (defined $seen_extras->{$extra->[1]}) {
 				push @$extras, $extra;
 				$seen_extras->{$extra->[1]}++;
+			} elsif ($extra->[4] eq "yes"){
+				$extras->[$seen_extras->{$extra->[1]}] = "yes";
 			}
+			$index++;
 		}
 	}
 	
 	return $extras;
 }
+
+sub createNexusExtra {
+	my ($self, $tid, $extra) = @_;
+	$extra ||= {};
+	return unless $tid && $extra->{extras_keyword};
+
+	$extra->{tid} = $tid;
+	$extra->{type}          ||= "text";
+	$extra->{content_type}  ||= "story";
+	$extra->{required}      ||= "no";
+
+	$self->sqlInsert("topic_nexus_extras", $extra);
+}
+
+sub updateNexusExtra {
+	my ($self, $extras_id, $extra) = @_;
+	return unless $extras_id && $extra;
+	
+	$extra->{type}          ||= "text";
+	$extra->{content_type}  ||= "story";
+	$extra->{required}      ||= "no";
+
+	my $extras_id_q = $self->sqlQuote($extras_id);
+	$self->sqlUpdate("topic_nexus_extras", $extra, "extras_id = $extras_id_q");
+}
+
+sub deleteNexusExtra {
+	my ($self, $extras_id) = @_;
+	return unless $extras_id;
+	my $extras_id_q = $self->sqlQuote($extras_id);
+	$self->sqlDelete('topic_nexus_extras', "extras_id = $extras_id_q");
+}
+
+
 
 ########################################################
 # There's still no interface for adding 'list' type extras.
