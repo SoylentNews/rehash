@@ -48,6 +48,10 @@ but is a little annoying.
 
 =cut
 
+# ALTER TABLE url_info MODIFY COLUMN url_digest VARCHAR(32) NOT NULL;
+# UPDATE url_info SET url_digest=MD5(url) WHERE url_id = url_id;
+
+
 use strict;
 use vars qw($VERSION @EXPORT);
 
@@ -63,7 +67,7 @@ use Safe;
 use Time::HiRes;
 use Time::Local;
 
-use Digest::MD5 'md5_base64';
+use Digest::MD5 'md5_hex';
 use LWP;
 use LWP::RobotUA;
 use HTML::Entities;
@@ -438,7 +442,7 @@ sub add_url {
 		return;
 	}
 
-	my $digest = md5_base64($url);
+	my $digest = md5_hex($url);
 
 	my $rc = $self->sqlInsert('url_info', {
 		url 		=> $url,
@@ -797,7 +801,7 @@ None.
 sub add_urls_return_ids {
 	my($self, @urls) = @_;
 
-	my %digest = map { ( $_, md5_base64($_) ) }
+	my %digest = map { ( $_, md5_hex($_) ) }
 		map { ref($_) ? $_->as_string : $_ }
 		@urls;
 
@@ -3763,10 +3767,16 @@ EOT
 	}
 
 	for (@sub) {
+		# skip if too low weight
 		if ($_->{weight} < ($constants->{newsvac_min_weight} || 10)) {
 			$submitworthy{$_->{nugget_url_id}} = 0;
 			next;
 		}
+
+		# skip if url has been submitted before
+		next if $self->sqlSelect("count(*)", "submission_param",
+			'name="url" AND value=' . $self->sqlQuote($_->{url})
+		);
 
 		# Create submission.
 		my $subid = $self->createSubmission({

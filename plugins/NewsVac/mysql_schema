@@ -35,7 +35,7 @@ CREATE TABLE url_content (
 DROP TABLE IF EXISTS url_info;
 CREATE TABLE url_info (
   url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
-  url_digest VARCHAR(16) binary DEFAULT '' NOT NULL,
+  url_digest VARCHAR(32) NOT NULL,
   url TEXT NOT NULL,
   url_base TEXT,
   is_success TINYINT(4),

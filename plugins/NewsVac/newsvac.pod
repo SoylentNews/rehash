@@ -294,13 +294,21 @@ When submitting stories, properly populate the URL and Parent URL fields in sect
 
 Related: perhaps make I<topical> RSS feeds for Slash sites, not just sectional RSS feeds, which would make it so we could have NewsForge/Linux.com be the clearinghouse for NewsVac'd stories, and put those feeds into topics, letting each foundry pick up different applicable topics.  Just a thought, but we need to figure out how to populate foundries soon.  (7)
 
+=item *
+
+Consider adding a counter to the URLs in the database, so we can see if a URL has been mined more than once (as a way to catch popular stories).  This may not be very useful, because the overhwelming majority of mined URLs come from the site being mined, not off-site URLs.  (2)
+
 =back
 
 =head1 CHANGES
 
   $Log$
+  Revision 1.7  2002/10/21 15:11:35  pudge
+  Digest in base64 not handled properly (was 16 chars, needed to be 22); screw it, go to hex, and increase column to 32.
+
   Revision 1.6  2002/10/03 19:36:54  pudge
-  Added note about garbage collection.In previous commit, also updated TODO list.
+  Added note about garbage collection.
+  In previous commit, also updated TODO list.
 
   Revision 1.5  2002/10/03 19:05:31  pudge
   Added large section about newsvac process
