@@ -791,7 +791,9 @@ sub breakHtml {
 
 	# And we also need a regex that will find an HTML entity or
 	# character references, excluding ones that would break words:
-	# a non-breaking entity.
+	# a non-breaking entity.  For now, let's assume *all* entities
+	# are non-breaking (except an encoded space which would be
+	# kinda dumb).
 	my $nbe = qr{ (?:
 		&
 		(?! \# (?:32|x20) )
@@ -849,6 +851,11 @@ sub breakHtml {
 	# an nbsp to work around the IE bug.  This mildly affects rendering
 	# for non-IE readers (grumble), but prevents getting around the
 	# filter by evenly spacing bug characters every $mwl characters.
+	# This could be done less-intrusively (the nbsp doesn't need to
+	# appear in every case, only when it's at exactly the boundary of
+	# the mwl), but the algorithm would be too complicated to
+	# implement in a regex, at least practically speaking, and
+	# walking through the string is also fairly complex.
 	$text =~ s{ ($nswcr)}{ &nbsp;$1}gs;
 #print STDERR "text 7 '$text'\n";
 
