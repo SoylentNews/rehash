@@ -1474,7 +1474,9 @@ sub getDescriptions {
 
 	# I don't really feel like editing the entire %descriptions hash to
 	# list each table with each codetype, so for now at least, I'm just
-	# lumping all them together.
+	# lumping all them together.  Which seems to be fine because on the
+	# sites whose querylogs we've examined so far, 'descriptions'
+	# accounts for, as you might expect, a miniscule amount of DB traffic.
 	my $qlid = $self->_querylog_start('SELECT', 'descriptions');
 	my $sth = $descref->(@_);
 	while (my($id, $desc) = $sth->fetchrow) {
@@ -1669,11 +1671,32 @@ sub getCommentsByIPIDOrSubnetID {
 
 
 #################################################################
-# get list of DBs, never cache
+# Get list of DBs, original plan: never cache
+# Now (July 2003) the plan is that we want to cache this lightly.
+# At one call to this method per click, this select ends up being
+# pretty expensive despite its small data return size and despite
+# its having a near-100% hit rate in MySQL 4.x's query cache.
+# Since we only update the dbs table with a periodic check anyway,
+# we're never going to get an _instantaneous_ failover from reader
+# to writer, so caching this just makes failover slightly _less_
+# immediate.  I can live with that.  - Jamie 2003/07/24
+
+{ # closure surrounding getDBs and getDB
+
+my %_getDBs_cached_databases;
+my $_getDBs_cached_nextcheck;
 sub getDBs {
 	my($self) = @_;
-	my $dbs = $self->sqlSelectAllHashref('id', '*', 'dbs');
+
 	my %databases;
+	if (($_getDBs_cached_nextcheck || 0) > time) {
+		%databases = %_getDBs_cached_databases;
+#		print STDERR gmtime() . " $$ getDBs returning cache"
+#			. " time='" . time . "'"
+#			. " nextcheck in " . ($_getDBs_cached_nextcheck - time) . " secs\n";
+		return \%databases;
+	}
+	my $dbs = $self->sqlSelectAllHashref('id', '*', 'dbs');
 
 	# rearrange to list by "type"
 	for (keys %$dbs) {
@@ -1681,6 +1704,15 @@ sub getDBs {
 		$databases{$db->{type}} ||= [];
 		push @{$databases{$db->{type}}}, $db;
 	}
+
+	# The amount of time to cache this has to be hardcoded,
+	# since we obviously aren't able to get it from the DB
+	# at this level.  Adjust to taste.  Assuming you have an
+	# angel script, this should be roughly similar to how
+	# often that angel runs.
+	$_getDBs_cached_nextcheck = time + 10;
+	%_getDBs_cached_databases = %databases;
+#	print STDERR gmtime() . " $$ getDBs setting cache\n";
 
 	return \%databases;
 }
@@ -1690,10 +1722,22 @@ sub getDBs {
 # not filled in
 sub getDB {
 	my($self, $db_type) = @_;
+
+	if (($_getDBs_cached_nextcheck || 0) > time) {
+		my $vu_ar = $_getDBs_cached_databases{$db_type};
+#		print STDERR gmtime() . " $$ getDB returning cache for '$db_type'"
+#			. " time='" . time . "'"
+#			. " nextcheck in " . ($_getDBs_cached_nextcheck - time) . " secs\n";
+		return "" if !$vu_ar || !@$vu_ar;
+		return $vu_ar->[ rand @$vu_ar ];
+	}
+
 	my $users = $self->sqlSelectColArrayref('virtual_user', 'dbs',
 		'type=' . $self->sqlQuote($db_type) . " AND isalive='yes'");
 	return $users->[rand @$users];
 }
+
+} # end closure surrounding getDBs and getDB
 
 #################################################################
 # get list of DBs, never cache
