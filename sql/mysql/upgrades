@@ -1884,3 +1884,12 @@ CREATE TABLE badpasswords (
 
 # USEPERL LAST UPDATED HERE
 
+# End of T_2_3_0_115, Start of T_2_3_0_116 - 2003/09/03
+
+# This is probably not necessary for your site, but Slashdot has
+# an inconsistency with the CVS schema that this solves, and
+# running this should have no effect on a site that's up-to-date.
+UPDATE sections SET artcount=0 WHERE artcount IS NULL;
+UPDATE sections SET issue=0 WHERE issue IS NULL;
+ALTER TABLE sections CHANGE artcount artcount MEDIUMINT NOT NULL DEFAULT 30, CHANGE issue issue TINYINT NOT NULL DEFAULT 0;
+
