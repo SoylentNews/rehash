@@ -21,7 +21,7 @@ Have you <B><A HREF="[% constants.rootdir %]/metamod.pl">Meta Moderated</A></B> 
 [% IF user.points > 0 %]
 You have <B>[% user.points %]
 <A HREF="[% constants.rootdir %]/moderation.shtml">Moderator</A>
-Points!</B> Use 'em or lose 'em!<BR>
+Point[% user.points == 1 ? '' : 's' %]!</B> Use 'em or lose 'em!<BR>
 [% END %]
 
 [% messages = Slash.getObject("Slash::Messages");
