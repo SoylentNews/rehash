@@ -17,7 +17,7 @@ use Slash::Constants ':slashd';
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # Change this var to change how often the task runs.
-$minutes_run = 10;
+$minutes_run = 6;
 
 # Adjust this to maximize how big of a SELECT we'll do on the log DB.
 # (5000 per minute (above) is probably safe, 10000 per minute just to
