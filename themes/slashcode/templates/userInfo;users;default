@@ -17,8 +17,6 @@ Display user's info
 * fieldkey = the field key used to decide what we're looking at
 * reasons = hashref from $slashdb->getReasons()
 * lastjournal = last journal posted
-* modval = modval for current uid
-* trollpoint = trollpoint for current uid
 * hr_hours_back = number of hours back to show a <HR> for
 __title__
 
@@ -140,12 +138,12 @@ lastjournal.description | strip_notags %]</A></B>,
 <P>
 
 [% IF admin_flag %]
-        [% mod_options.hr_hours_back = hr_hours_back %]
-	<P><TABLE BORDER=0 ALIGN="CENTER">
-	<TR><TD ALIGN="CENTER">Modval for uid: [% modval %]   Trollpoint for uid: [% trollpoint %]</TD></TR>
-	<TR><TD ALIGN="CENTER">Moderations performed by [% useredit.nickname %]:</TD></TR>
+	<P><TABLE BORDER=0 ALIGN="CENTER" width="100%" CELLSPACING="0" CELLPADDING="0">
+	<TR><TD ALIGN="CENTER">[% PROCESS titlebar width="100%" title="Moderations performed by ${useredit.nickname}" %]</TD></TR>
 	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog('uid', useredit.uid, mod_options) %]</TD></TR>
-	<TR><TD ALIGN="CENTER">&nbsp;<BR>Moderations performed on [% useredit.nickname %]'s comments:</TD></TR>
+	<TR><TD>&nbsp;</TD></TR>
+        [% mod_options.hr_hours_back = hr_hours_back %]
+	<TR><TD ALIGN="CENTER">[% PROCESS titlebar width="100%" title="Moderations performed on ${useredit.nickname}'s comments" %]</TD></TR>
 	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog('cuid', useredit.uid, mod_options) %]</TD></TR>
 	</TABLE>
 [% END %]

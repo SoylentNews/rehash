@@ -24,68 +24,6 @@ __template__
 <TABLE BORDER="0" WIDTH="100%">
 	<TR>
 		<TD>
-		[% IF userinfo_flag %]
-		Of the last 10K pages,
-		[%- IF field == 'uid' -%]
-                UID [% useredit.uid | strip_attribute %]
-                [%- ELSIF field == 'ipid' -%]
-                IPID [% useredit.ipid | strip_attribute %]
-                [%- ELSIF field == 'md5id' -%]
-                md5ID [% useredit.md5id | strip_attribute %]
-                [%- ELSIF field == 'subnetid' -%]
-                SubnetID [% useredit.subnetid | strip_attribute %]
-                [%- END -%] has requested [% accesshits.0 %] (of which 2xx: [% accesshits.2 %], 4xx: [% accesshits.4 %], 5xx: [% accesshits.5 %]).
-
-			[% IF uidstruct %]
-		<BR>
-		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
-			<TR BGCOLOR="[% user.bg.3 %]">
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>UID</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Nickname</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Com</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Sub</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Mod</B></FONT></TD>
-			</TR>
-				[% FOREACH tmpuid = uidstruct.keys %]
-			<TR>
-				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpuid %]">[% tmpuid %]</A></TD>
-				<TD>[% uidstruct.$tmpuid.nickname %]</TD>
-				<TD ALIGN="CENTER">[% IF uidstruct.$tmpuid.comments %]X[% END %]&nbsp;</TD>
-				<TD ALIGN="CENTER">[% IF uidstruct.$tmpuid.submissions %]X[% END %]&nbsp;</TD>
-				<TD ALIGN="CENTER">[% IF uidstruct.$tmpuid.moderatorlog %]X[% END %]&nbsp;</TD>
-			</TR>
-				[% END %]
-		</TABLE>
-		<P>
-			[% END %]
-		
-			[% IF ipstruct %]
-		<BR>
-		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
-			<TR BGCOLOR="[% user.bg.3 %]">
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>IPID</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>#</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Date(s)</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Com</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Sub</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Mod</B></FONT></TD>
-			</TR>
-				[% FOREACH tmpip = ipstruct_order %]
-			<TR>
-				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip %]&amp;fieldname=ipid">[% ipstruct.$tmpip.ipid_vis %]</A></TD>
-
-				<TD>[% ipstruct.$tmpip.count %]</TD>
-				<TD>[% ipstruct.$tmpip.dmin; IF ipstruct.$tmpip.dmin != ipstruct.$tmpip.dmax %] to [% ipstruct.$tmpip.dmax; END %]</TD>
-				<TD ALIGN="CENTER">[% IF ipstruct.$tmpip.comments %]X[% END %]&nbsp;</TD>
-				<TD ALIGN="CENTER">[% IF ipstruct.$tmpip.submissions %]X[% END %]&nbsp;</TD>
-				<TD ALIGN="CENTER">[% IF ipstruct.$tmpip.moderatorlog %]X[% END %]&nbsp;</TD>
-			</TR>
-				[% END %]
-		</TABLE>
-		<P>
-			[% END %]
-		
-		[% END %]
 		[% PROCESS titlebar width="100%" title="User Admin" %]
 		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]" WIDTH="100%">
 			<FORM ACTION="[% env.script_name %]" METHOD="POST">
@@ -117,24 +55,22 @@ __template__
 			</TR>
 		[% IF userinfo_flag %]
 			[% IF authoredit_flag && seclev_field && !useredit.nonuid  %]
-				[% IF user.seclev >= 10000 %]
 			<TR>
 				<TD><B>Seclev</B></TD>
-				<TD><INPUT TYPE="TEXT" NAME="seclev" SIZE="7" value="[% useredit.seclev | strip_attribute %]"></TD>
-			</TR>
-			<TR>
-				<TD><B>Author</B></TD>
-				<TD><INPUT TYPE="checkbox" NAME="author" [% useredit.author %]></TD>
-			</TR>
+				[% IF user.seclev >= 10000 %]
+					<TD><INPUT TYPE="TEXT" NAME="seclev" SIZE="7" value="[% useredit.seclev | strip_attribute %]">
+					&nbsp;<INPUT TYPE="checkbox" NAME="author" [% useredit.author %]>
+				[% ELSE %]
+					[% useredit.seclev %]
 				[% END %]
-			<TR>
-				<TD><B>Section</B></TD>
-				<TD>[% section_select %]</TD>
+				Author in 
+				[% section_select %]
+				</TD>
                         </TR>
 			[% END %]
 			[% IF !useredit.nonuid %]
 			<TR>
-				<TD><B>Default points</B></TD>
+				<TD><B>Default&nbsp;points</B></TD>
 				<TD>[% thresh_select %]</TD>
 			</TR>
 			[% END %]
@@ -145,18 +81,15 @@ __template__
 				<INPUT TYPE="checkbox" NAME="accesslist_nopost" [% accesslist.nopost | strip_attribute %]>&nbsp;Comments &nbsp;
 				<INPUT TYPE="checkbox" NAME="accesslist_nosubmit" [% accesslist.nosubmit | strip_attribute %]>&nbsp;Submissions &nbsp;
 				<INPUT TYPE="checkbox" NAME="accesslist_norss" [% accesslist.norss | strip_attribute %]>&nbsp;No&nbsp;RSS &nbsp;
-				<INPUT TYPE="checkbox" NAME="accesslist_nopalm" [% accesslist.nopalm | strip_attribute %]>&nbsp;No&nbsp;Palm &nbsp;
+				<INPUT TYPE="checkbox" NAME="accesslist_nopalm" [% accesslist.nopalm | strip_attribute %]>&nbsp;No&nbsp;Palm  
 				[% IF field == 'ipid' || field == 'md5id' %]
-					<INPUT TYPE="checkbox" NAME="accesslist_proxy" [% accesslist.proxy | strip_attribute %]>&nbsp;Proxy &nbsp;
+					&nbsp;<INPUT TYPE="checkbox" NAME="accesslist_proxy" [% accesslist.proxy | strip_attribute %]>&nbsp;Proxy &nbsp;
 					<INPUT TYPE="checkbox" NAME="accesslist_trusted" [% accesslist.trusted | strip_attribute %]>&nbsp;Trusted &nbsp;
 				[% END %]
-				[% IF !useredit.nonuid %]
-					<!-- INPUT TYPE="checkbox" NAME="accesslist_expired" [% accesslist.expired | strip_attribute %]&nbsp;Expired &nbsp; -->
-				[% END %]
-				<BR><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="255" NAME="accesslist_reason" VALUE="[% accesslist.reason | strip_attribute %]">
-				<BR>
-				[% IF accesslist.ts %]<B>Time:</B> [% accesslist.ts %][% END %]
-				[% IF accesslist.adminnick %]<B>By:</B> [% accesslist.adminnick %][% END %]
+				<BR><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="255" NAME="accesslist_reason" VALUE="[% accesslist.reason | strip_attribute %]">		
+				[% IF accesslist.ts || accesslist.adminnick %]<BR>[% END %]
+				[% IF accesslist.ts %]<font size=-1>[% accesslist.ts %]</font>[% END %]
+				[% IF accesslist.adminnick %]<font size=-1>  by [% accesslist.adminnick %]</font>[% END %]
 				</TD>
 			</TR>
 			[% IF useredit.nonuid %]
@@ -165,125 +98,6 @@ __template__
 				<TD>[% accesslist.estimated_users %]</TD>
 			</TR>
 			[% END %]
-			[% IF ! useredit.nonuid %]
-			<TR>
-				<TD WIDTH="100"><B>Hits<B></TD>
-				<TD ALIGN="LEFT">Last access:
-				[% IF useredit.lastaccess == '0000-00-00 00:00:00'; "never";
-				ELSE; useredit.lastaccess; END %]
-				</TD>
-			</TR>
-			<TR>
-				<TD WIDTH="100"><B>Moderation</B></TD>
-				<TD ALIGN="LEFT">Fair: [% useredit.m2fair %], Unfair: [% useredit.m2unfair %] [% IF useredit.m2unfairpercent %]([% useredit.m2unfairpercent %]%)[% END %]</TD>
-			</TR>
-			<TR>
-				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT">Spent: [% useredit.totalmods %], Stirred: [% useredit.stirred %] [% IF useredit.stirredpercent %]([% useredit.stirredpercent %]%)[% END %]</TD>
-			</TR>
-[% IF useredit.points > 0 %]
-			<TR>
-				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT">Currently has [% useredit.points %] mod points</TD>
-			</TR>
-[% END %]
-			<TR>
-				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT">Last granted mod points:
-				[% IF useredit.lastgranted == '0000-00-00 00:00:00'; "never";
-				ELSE; useredit.lastgranted; END %]
-				</TD>
-			</TR>
-			<TR>
-				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT">Last M2'd:
-				[% IF useredit.lastmm == '0000-00-00 00:00:00'; "never";
-				ELSE; useredit.lastmm; END %]
-				</TD>
-			</TR>
-[% IF constants.subscribe %]
-			<TR>
-				<TD WIDTH="100"><B>Subscription</B></TD>
-				<TD ALIGN="LEFT">
-[% IF useredit.hits_bought+useredit.hits_bought_today+useredit.hits_paidfor == 0 AND useredit.subscribe_payments.size == 0 %]
-					<I>none</I>
-[% ELSE %]
-					Pages "Bought" (Used): [% useredit.hits_bought %],
-					Bought Today: [% useredit.hits_bought_today %],
-					Paid For: [% useredit.hits_paidfor %]<BR><BR></TD>
-[% END %]
-			</TR>
-[% IF useredit.subscribe_payments.size %]
-			<TR>
-				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]">
-				<TR>
-					<TD colspan="8"><B>Subscriptions for User</B></TD>
-				</TR>
-				<TR>
-					<TH>&nbsp;Date&nbsp;</TH>
-					<TH>&nbsp;Email&nbsp;</TH>
-					<TH>&nbsp;$&nbsp;</TH>
-					<TH>&nbsp;Pages&nbsp;</TH>
-					<TH>&nbsp;Method&nbsp;</TH>
-					<TH>&nbsp;TransID&nbsp;</TH>
-					<TH>&nbsp;PurchUID&nbsp;</TH>
-					<TH>&nbsp;Type&nbsp;</TH>
-				</TR>
-[% FOREACH sp = useredit.subscribe_payments %]
-				<TR>
-					<TD>&nbsp;[% sp.0 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.1 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.2 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.3 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.4 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.5 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.6 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.7 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.8 %]&nbsp;</TD>
-				</TR>
-[% END %]
-				</TABLE></TD>
-			</TR>
-[% END %]
-
-
-
-[% IF useredit.subscribe_purchases.size %]
-			<TR>
-				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]">
-				<TR>
-					<TD colspan="8"><B>Subscriptions Given By User</B></TD>
-				</TR>
-				<TR>
-					<TH>&nbsp;Date&nbsp;</TH>
-					<TH>&nbsp;Email&nbsp;</TH>
-					<TH>&nbsp;$&nbsp;</TH>
-					<TH>&nbsp;Pages&nbsp;</TH>
-					<TH>&nbsp;Method&nbsp;</TH>
-					<TH>&nbsp;TransID&nbsp;</TH>
-					<TH>&nbsp;Recipient UID&nbsp;</TH>
-					<TH>&nbsp;Type&nbsp;</TH>
-				</TR>
-[% FOREACH sp = useredit.subscribe_purchases %]
-				<TR>
-					<TD>&nbsp;[% sp.0 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.1 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.2 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.3 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.4 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.5 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.6 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.7 %]&nbsp;</TD>
-					<TD>&nbsp;[% sp.8 %]&nbsp;</TD>
-				</TR>
-[% END %]
-				</TABLE></TD>
-			</TR>
-[% END %]
-
-[% END %]
 			<TR>
 				<TD WIDTH="100"><B>Tokens</B></TD>
 				<TD ALIGN="LEFT"><INPUT TYPE="TEXT" NAME="tokens" SIZE="6" VALUE="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
@@ -293,17 +107,141 @@ __template__
 [% IF all_acls %]
 			<TR>
 				<TD WIDTH="100"><B>ACLs</B></TD>
-				<TD ALIGN="LEFT">[% Slash.createSelect("newacls_multiple", all_acls, useredit.acl, 1, '', 1, 1) %]</TD>
+				<TD ALIGN="LEFT">[% Slash.createSelect("newacls_multiple", all_acls, useredit.acl, 1, '', 1, 1) %]
+				<INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]">
+				 </TD>
 			</TR>
-[% END %]
-
-			[% END %]
+[% ELSE %]
 			<TR>
 				<TD>&nbsp;</TD>
 				<TD><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]"></TD>
 			</TR>
-		[% END %]
+[% END %]
 			</FORM>
+			[% IF ! useredit.nonuid %]
+				[% IF constants.subscribe %]
+				<TR>
+					<TD WIDTH="100" VALIGN="TOP"><B>Subscription&nbsp;</B></TD>
+					<TD>
+					[% IF useredit.subscribe_payments.size or useredit.subscribe_purchases.size%]
+					<TABLE CELLSPACING="0">
+						<TR bgcolor="[% user.bg.3 %]">
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Date</FONT></TH>
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Email</FONT></TH>
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>&nbsp;</FONT></TH>
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Pages</FONT></TH>
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Method</FONT></TH>
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>TransID</FONT></TH>
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>PUID</FONT></TH>
+							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Type</FONT></TH>
+						<TR>
+						[% FOREACH sp = useredit.subscribe_payments %]
+						<TR bgcolor="eeeeee">
+							<TD><font size=-1>&nbsp;[% sp.0 %]&nbsp;</font></TD>
+							<TD><font size=-1>&nbsp;[% 
+								sp.1.chunk(12).join("<BR>");
+							 %]&nbsp;</font></TD>
+							<TD><font size=-1>&nbsp;[% sp.2 %]&nbsp;</font></TD>
+							<TD><font size=-1>&nbsp;[% sp.3 %]&nbsp;</font></TD>
+							<TD><font size=-1>&nbsp;[% sp.4 %]&nbsp;</font></TD>
+							<TD><font size=-1>&nbsp;[% 
+								sp.5.chunk(10).join("<BR>");
+							%]&nbsp;</font></TD>
+							<TD><font size=-1>&nbsp;[% sp.6 %]&nbsp;</font></TD>
+							<TD><font size=-1>&nbsp;[% sp.7 %]&nbsp;</font></TD>
+						</TR>
+						[% END %]
+						[% IF useredit.subscribe_purchases.size %]
+							<TR bgcolor="eeeeee"><TD COLSPAN="8" ALIGN="CENTER"><FONT FACE="-1"><B>Subscriptions given by user</B></FONT><TD></TR>
+							[% FOREACH sp = useredit.subscribe_purchases %]
+								<TR bgcolor="eeeeee">
+									<TD><font size=-1>&nbsp;[% sp.0 %]&nbsp;</font></TD>
+									<TD><font size=-1>&nbsp;[% 
+										sp.1.chunk(12).join("<BR>");
+									 %]&nbsp;</font></TD>
+									<TD><font size=-1>&nbsp;[% sp.2 %]&nbsp;</font></TD>
+									<TD><font size=-1>&nbsp;[% sp.3 %]&nbsp;</font></TD>
+									<TD><font size=-1>&nbsp;[% sp.4 %]&nbsp;</font></TD>
+									<TD><font size=-1>&nbsp;[% 
+										sp.5.chunk(10).join("<BR>");
+									%]&nbsp;</font></TD>
+									<TD><font size=-1>&nbsp;[% sp.6 %]&nbsp;</font></TD>
+									<TD><font size=-1>&nbsp;[% sp.7 %]&nbsp;</font></TD>
+								</TR>
+							[% END %]
+						[% END  %]
+					</TABLE>
+					</TD>
+					[% END %]
+				</TR>
+				<TR>
+					<TD></TD><TD>
+					[% IF useredit.hits_bought+useredit.hits_bought_today+useredit.hits_paidfor == 0 AND useredit.subscribe_payments.size == 0 %]
+						<I>none</I>
+					[% ELSE %]
+						<B>Pages Spent:</B> [% useredit.hits_bought %], <B>Today</B>  [% useredit.hits_bought_today %].<BR>
+						<B>Paid For:</B> [% useredit.hits_paidfor %]
+					[% END %]
+					</TD>
+				</TR>
+				[% END %]
+				<TR><TD VALIGN=TOP><B>Activity</B>
+				<TD>
+				[% IF uidstruct %]
+					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
+						<TR BGCOLOR="[% user.bg.3 %]">
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>UID</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Nickname</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Com</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Sub</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Mod</B></FONT></TD>
+						</TR>
+					[% FOREACH tmpuid = uidstruct.keys %]
+						<TR bgcolor="eeeeee">
+							<TD><font size=-1><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpuid %]">[% tmpuid %]</font></A></TD>
+							<TD><font size=-1>[% uidstruct.$tmpuid.nickname %]</font></TD>
+							<TD ALIGN="CENTER"><font size=-1>[% IF uidstruct.$tmpuid.comments %]X[% END %]&nbsp;</font></TD>
+							<TD ALIGN="CENTER"><font size=-1>[% IF uidstruct.$tmpuid.submissions %]X[% END %]&nbsp;</FONT></TD>
+							<TD ALIGN="CENTER"><font size=-1>[% IF uidstruct.$tmpuid.moderatorlog %]X[% END %]&nbsp;</FONT></TD>
+						</TR>
+					[% END %]
+					</TABLE>
+				[% END %]
+		
+				[% IF ipstruct %]
+					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
+						<TR BGCOLOR="[% user.bg.3 %]">
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>IPID</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>#</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Date(s)</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Com</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Sub</B></FONT></TD>
+							<TD><FONT COLOR="[% user.fg.0 %]" SIZE=-1><B>Mod</B></FONT></TD>
+						</TR>
+					[% FOREACH tmpip = ipstruct_order %]
+						<TR bgcolor="eeeeee">
+							<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip %]&amp;fieldname=ipid"><font size=-1>[% ipstruct.$tmpip.ipid_vis %]</font></A></TD>
+
+							<TD><font size=-1>[% ipstruct.$tmpip.count %]</font></TD>
+							<TD><font size=-1>[% ipstruct.$tmpip.dmin; IF ipstruct.$tmpip.dmin != ipstruct.$tmpip.dmax %] to [% ipstruct.$tmpip.dmax; END %]</font></TD>
+							<TD ALIGN="CENTER"><font size=-1>[% IF ipstruct.$tmpip.comments %]X[% END %]&nbsp;</font></TD>
+							<TD ALIGN="CENTER"><font size=-1>[% IF ipstruct.$tmpip.submissions %]X[% END %]&nbsp;</font></TD>
+							<TD ALIGN="CENTER"><font size=-1>[% IF ipstruct.$tmpip.moderatorlog %]X[% END %]&nbsp;</font></TD>
+						</TR>
+					[% END %]
+					</TABLE>
+				[% END %]
+				[% IF userinfo_flag %]
+			                Requested <B>[% accesshits.0 %]</B> of the last 10K pages.<BR>
+					Last access <B>[% IF useredit.lastaccess == '0000-00-00 00:00:00'; "never";
+					ELSE; useredit.lastaccess; END %]</B>
+				[% END %]
+				</TD>
+			</TR>
+
+
+			[% END %]
+		[% END %]
 		</TABLE>
 		</TD>
 	</TR>
@@ -313,4 +251,4 @@ __template__
 __seclev__
 10000
 __version__
-$Id$
+
