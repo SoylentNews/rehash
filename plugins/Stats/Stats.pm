@@ -72,7 +72,8 @@ sub countModeratorLog {
 	my($self) = @_;
 
 	my $used = $self->sqlCount(
-		'moderatorlog'
+		'moderatorlog',
+		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'"
 	);
 }
 
@@ -413,7 +414,7 @@ sub countModeratorLogHour {
 		"val",
 		"val, COUNT(*) AS count",
 		"moderatorlog",
-		"",
+		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
 		"GROUP BY val"
 	);
 	
@@ -447,7 +448,8 @@ sub countCommentsDaily {
 	my $comments = $self->sqlSelect(
 		"COUNT(*)",
 		"comments",
-		"$cid_limit_clause $section_where"
+		"$cid_limit_clause $section_where
+		 date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'"
 	);
 
 	return $comments; 
