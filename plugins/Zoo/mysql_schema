@@ -8,5 +8,17 @@ CREATE TABLE people (
 	fof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0, 
 	eof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0,
 	UNIQUE degree_of_separation (uid,person),
+	FOREIGN KEY (uid) REFERENCES users(uid),
+	FOREIGN KEY (person) REFERENCES users(uid),
+	PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS people_log;
+CREATE TABLE people_log (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	person MEDIUMINT UNSIGNED NOT NULL,
+	type enum("friend","foe"),
+	action enum("add","delete"),
 	PRIMARY KEY (id)
 );
