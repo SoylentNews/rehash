@@ -21,8 +21,8 @@ $minutes_run = 6;
 
 # Adjust this to maximize how big of a SELECT we'll do on the log DB.
 # (5000 per minute (above) is probably safe, 10000 per minute just to
-# be sure, get much over 500000 total and we *might* bog the log slave
-# DB.)
+# be sure, get much over 500000 total and we might bog the log slave
+# DB... hard to estimate.)
 $maxrows = 150000;
 
 $task{$me}{timespec} = "1-59/$minutes_run * * * *";
@@ -48,8 +48,9 @@ $task{$me}{code} = sub {
         _update_timehash("misc");
 
 	# Do the select on accesslog, and pull the sids that have been hit
-	# into a counting hash.
+	# with article.{pl,shtml} into a counting hash.
 	my %sid_count = ( );
+	my $qlid = $slashdb->_querylog_start('SELECT', 'accesslog');
 	my $sth = $logdb->sqlSelectMany("dat", "accesslog",
 		"id BETWEEN $lastmaxid AND $newmaxid
 			AND status=200 AND op='article'");
@@ -58,6 +59,33 @@ $task{$me}{code} = sub {
 		$sid_count{$dat}++;
 	}
 	$sth->finish();
+	$slashdb->_querylog_finish($qlid);
+
+	# Now do the same for the sids that were hit with comments.pl;
+	# these require a separate lookup into the discussions table.
+	my %disc_id_count = ( );
+	$qlid = $slashdb->_querylog_start('SELECT', 'accesslog');
+	$sth = $logdb->sqlSelectMany("dat", "accesslog",
+		"id BETWEEN $lastmaxid AND $newmaxid
+			AND status=200 AND op='comments'");
+	while (my($dat) = $sth->fetchrow_array()) {
+		next unless $dat =~ m{^\d+$}; # discussion ids are numeric
+		$disc_id_count{$dat}++;
+	}
+	$sth->finish();
+	$slashdb->_querylog_finish($qlid);
+	my $disc_ids = join(",", keys %disc_id_count);
+	if ($disc_ids) {
+		my $reader = getObject('Slash::DB', { db_type => "reader" });
+		my $disc_sid_lookup = $reader->sqlSelectAllHashref(
+			"id",
+			"discussions.id AS id, stories.sid AS sid",
+			"discussions, stories",
+			"discussions.id IN ($disc_ids) AND discussions.sid = stories.sid");
+		for my $disc_id (keys %disc_id_count) {
+			$sid_count{$disc_sid_lookup->{$disc_id}{sid}} += $disc_id_count{$disc_id};
+		}
+	}
 
 	_update_timehash("select");
 
