@@ -93,7 +93,7 @@ my $start_time = Time::HiRes::time;
 	# Times listed are elapsed time from the previous markpoint.
 
 	my $gse_hr = { tid => $gSkin->{nexus} };
-	$gse_hr->{limit} = $user_maxstories if !$user->{is_anon} && $user_maxstories;
+	$gse_hr->{limit} = $user_maxstories if $user_maxstories;
 	$gse_hr->{issue} = $issue if $issue;
 	$gse_hr->{sectioncollapse} = $user->{sectioncollapse} if $user->{sectioncollapse};
 	if (rand(1) < $constants->{index_gse_backup_prob}) {
