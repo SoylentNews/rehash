@@ -8364,7 +8364,7 @@ sub setStoryRenderedFromChosen {
 			{ stoid => $stoid, tid => $key, weight => $rendered_hr->{$key} }
 		)) {
 			# and we should ROLLBACK here
-			return 0;
+			return undef;
 		}
 	}
 
@@ -8378,6 +8378,10 @@ sub getPrimarySkidFromRendered {
 
 	# Eliminate any nexuses not in this set of rendered topics.
 	@nexuses = grep { $rendered_hr->{$_} } @nexuses;
+
+	# No rendered nexuses, none at all, means primaryskid 0,
+	# which means "none".
+	return 0 if !@nexuses;
 
 	# Eliminate the mainpage's nexus.
 	my $mp_skid = getCurrentStatic("mainpage_skid");
