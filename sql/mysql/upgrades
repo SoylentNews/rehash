@@ -1861,8 +1861,6 @@ ALTER TABLE sections CHANGE COLUMN title title VARCHAR(64) DEFAULT '' NOT NULL, 
 # Stuff slashboxes will have a "Yesterday's Edition" link at the bottom.
 # UPDATE sections SET issue=3 WHERE issue=1 AND artcount > 0 AND section NOT IN ('polls', 'search');
 
-# SLASHCODE LAST UPDATED HERE
-
 # End of T_2_3_0_114, Start of T_2_3_0_115 - 2003/08/28
 
 CREATE TABLE badpasswords (
@@ -1930,8 +1928,6 @@ INSERT INTO vars VALUES ('subscribe_allow_gifts','1','Allow gift subscriptions')
 INSERT INTO vars VALUES ('subscribe_gen_transaction_id_length','18','Length of transaction id to generate (up to 32 chars).  Best to keep the length of these ids different from outside verifiers to prevent collisions');
 INSERT INTO vars VALUES ('subscribe_gift_testing','1','When this is on only admins will be able to see gift subscription form');
 
-# USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_122, Start of T_2_3_0_123 - 2003/10/28
 
 
@@ -1940,3 +1936,8 @@ ALTER TABLE users_acl ADD INDEX acl (acl);
 # Set to 1 if you want all future stories displayed in admin stories listing
 INSERT INTO vars (name, value, description) VALUES ('show_all_future_stories_admin', 0, 'Turn this on so all future stories are show in the admin stories list');
 
+# USEPERL LAST UPDATED HERE
+
+# SLASHCODE LAST UPDATED HERE
+
+# End of T_2_3_0_124, Start of T_2_3_0_125 - 2003/11/10
