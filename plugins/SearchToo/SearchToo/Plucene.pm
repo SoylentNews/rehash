@@ -11,14 +11,13 @@ use base 'Slash::DB::Utility';
 use base 'Slash::SearchToo';
 use base 'Slash::SearchToo::Classic';
 
-# maybe add our own analyzer ...
-use Plucene::Analysis::Standard::StandardAnalyzer;
 use Plucene::Document;
 use Plucene::Document::DateSerializer;
 use Plucene::Index::Writer;
 use Plucene::QueryParser;
 use Plucene::Search::HitCollector;
 use Plucene::Search::IndexSearcher;
+use Plucene::Search::TermQuery;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -133,15 +132,19 @@ sub findRecords {
 
 	}
 
-# deal with ranges for threshold, date ... ?
 # how to return results sorted by date?
 # remove croaks from QueryParser->parse
 
 	my $parser = Plucene::QueryParser->new({
-		analyzer => Plucene::Analysis::Standard::StandardAnalyzer->new(),
-		default  => "content" # Default field for non-specified queries
+		analyzer => $self->_analyzer,
+		default  => 'content'
 	});
-	(my $querystring = $terms{query}) =~ s/([-+&|!{}[\]:\\])~*?/\\$1/g; # allowed: ()"^
+
+	my $querystring = $terms{query};
+	# escape special chars
+	$querystring =~ s/([-+&|!{}[\]:\\])~*?/\\$1/g; # allowed: ()"^
+	# normalize to lower case
+	$querystring =~ s/\b(?!AND|NOT|OR)(\w+)\b/\L$1/g;
 	my $newquery = $parser->parse('+(' . $querystring . ')');
 
 	my $filter = 0;
@@ -167,12 +170,11 @@ sub findRecords {
 		my $term_query = Plucene::Search::TermQuery->new({ term => $term }) or next;
 		$newquery->add($term_query, 1);
 	}
-
 #use Data::Dumper;
 #print STDERR Dumper $newquery;
-print STDERR $newquery->to_string, "\n";
+#print STDERR $newquery->to_string, "\n";
 
-	my $searcher = $self->_searcher;
+	my $searcher = $self->_searcher or return $results;
 	my $docs = $searcher->search_top($newquery, $filter, $start + $max);
 
 	$total   = $searcher->max_doc;
@@ -213,8 +215,6 @@ sub addRecords {
 	return unless $type =~ $handled;
 	$self->_type($type);
 
-	my $constants = getCurrentStatic();
-
 	$data = [ $data ] unless ref $data eq 'ARRAY';
 
 	my @documents;
@@ -242,28 +242,21 @@ sub addRecords {
 		push @documents, \%document;
 	}
 
-	my $preader = $self->_reader;
-	for my $document (@documents) {
-		# delete if it is already in there
-		my $term = Plucene::Index::Term->new({
-			field	=> $primary{$type},
-			text	=> $document->{ $primary{$type} }
-		});
-
-		if ($preader->doc_freq($term)) {
-			# this may not show up deleted until optimized
-			$preader->delete_term($term);
-		}
+	# only bother if not adding, i.e., if modifying; if adding we
+	# assume it is new
+	unless ($opts->{add}) {
+		$self->deleteRecords($type => [ map $_->{ $primary{$type} }, @documents ]);
 	}
-	$preader->close;
 
 	my $writer = $self->_writer;
+	my $count = 0;
 	for my $document (@documents) {
 		my $doc = Plucene::Document->new;
 
 		# combine our text fields into one, and then remove them; we
 		# don't need them stored separately
-		$document->{content} = join ' ', @{$document}{ @{$content{$type}} };
+		# normalize to lower case
+		$document->{content} = lc join ' ', @{$document}{ @{$content{$type}} };
 		delete @{$document}{ @{$content{$type}} };
 
 		for my $key (keys %$document) {
@@ -282,13 +275,15 @@ sub addRecords {
 		}
 
 		$writer->add_document($doc);
+		$count += 1;
 	}
-
-	warn "optimizing\n", $writer->optimize if $opts->{optimize};
 
 	undef $writer;
 
-	return;
+	# only optimize if requested (as usual), and changes were made
+	$self->optimize($type) if $opts->{optimize} && $count;
+
+	return $count;
 }
 
 #################################################################
@@ -351,6 +346,69 @@ sub getRecords {
 			}
 		}
 	}
+}
+
+#################################################################
+# Plucene-specific helper methods
+sub isIndexed {
+	my($self, $type, $id, $opts) = @_;
+
+	return unless $type =~ $handled;
+	$self->_type($type);
+
+	my $preader = ($opts->{_reader} || $self->_reader) or return;
+
+	my $term = Plucene::Index::Term->new({
+		field	=> $primary{$type},
+		text	=> $id
+	});
+
+	my $found = $preader->doc_freq($term);
+
+	$preader->close unless $opts->{_reader};
+
+	return($found, $term) if $found;
+}
+
+#################################################################
+sub optimize {
+	my($self, $type) = @_;
+
+	return unless $type =~ $handled;
+	$self->_type($type);
+
+	my $writer = $self->_writer;
+	warn "optimizing\n";
+	$writer->optimize;
+	undef $writer;
+}
+
+#################################################################
+sub deleteRecords {
+	my($self, $type, $ids, $opts) = @_;
+
+	return unless $type =~ $handled;
+	$self->_type($type);
+
+	my $preader = $self->_reader or return;
+
+	$ids = [ $ids ] unless ref $ids;
+
+	my $count = 0;
+	for my $id (@$ids) {
+		my($found, $term) = $self->isIndexed($type => $id, { _reader => $preader });
+		if ($found) {
+			$count += $found;
+			$preader->delete_term($term);
+		}
+	}
+
+	$preader->close;
+
+	# only optimize if requested (as usual), and changes were made
+	$self->optimize($type) if $opts->{optimize} && $count;
+
+	return $count;
 }
 
 #################################################################
@@ -425,34 +483,40 @@ sub _type {
 
 #################################################################
 sub _dir {
-	my($self) = @_;
-	return catdir(getCurrentStatic('datadir'), 'plucene', $self->_type);
+	my($self, $type) = @_;
+	return catdir(getCurrentStatic('datadir'), 'plucene', $self->_type($type));
 }
 
 #################################################################
 sub _searcher {
-	my($self) = @_;
-	return Plucene::Search::IndexSearcher->new($self->_dir);
+	my($self, $type) = @_;
+	my $dir = $self->_dir($type);
+	return -e $dir ? Plucene::Search::IndexSearcher->new($dir) : undef;
 }
 
 #################################################################
 sub _reader {
-	my($self) = @_;
-	return Plucene::Index::Reader->open($self->_dir);
+	my($self, $type) = @_;
+	my $dir = $self->_dir($type);
+	return -e $dir ? Plucene::Index::Reader->open($dir) : undef;
 }
 
 #################################################################
 sub _writer {
-	my($self) = @_;
-	my $dir = $self->_dir;
+	my($self, $type) = @_;
+	my $dir = $self->_dir($type);
 	return Plucene::Index::Writer->new(
-		$dir,
-		Plucene::Analysis::Standard::StandardAnalyzer->new,
-#		Plucene::Analysis::SimpleAnalyzer->new,
+		$dir, $self->_analyzer,
 		-e catfile($dir, 'segments') ? 0 : 1
 	);
 }
 
+# maybe add our own analyzer ...
+use Plucene::Analysis::Standard::StandardAnalyzer;
+sub _analyzer {
+	return Plucene::Analysis::Standard::StandardAnalyzer->new;
+#	return Plucene::Analysis::SimpleAnalyzer->new;
+}
 
 #################################################################
 #################################################################
