@@ -693,6 +693,22 @@ sub dispComment {
 		$comment->{$_} = '' unless exists $comment->{$_};
 	}
 
+	# ipid/subnetid need munging into one text string
+	if ($user->{seclev} >= 100 && $comment->{ipid} && $comment->{subnetid}) {
+		my $vislength = $constants->{id_md5_vislength};
+		my $short_ipid = $comment->{ipid};
+		$short_ipid = substr($short_ipid, 0, $vislength) if $vislength;
+		my $short_subnetid = $comment->{subnetid};
+		$short_subnetid = substr($short_subnetid, 0, $vislength) if $vislength;
+		$comment->{ipid_display} = <<EOT;
+<BR><FONT FACE="$constants->{mainfontface}" SIZE=1>IPID:
+<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$short_ipid</A>&nbsp;&nbsp;SubnetID: 
+<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$short_subnetid</A></FONT>
+EOT
+	} else {
+		$comment->{ipid_display} = "";
+	}
+
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
 		$can_mod, \%reasons
@@ -1076,7 +1092,6 @@ sub _hard_dispComment {
 		}
 	}
 
-	my $ipidinfo_to_display = '';
 	my $people_display;
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		if ($user->{people}{$comment->{uid}} == FRIEND) {
@@ -1088,19 +1103,6 @@ sub _hard_dispComment {
 		}
 	}
 	
-	if ($user->{seclev} >= 100 and $comment->{ipid} and $comment->{subnetid}) {
-		my $vislength = $constants->{id_md5_vislength};
-		my $short_ipid = $comment->{ipid};
-		$short_ipid = substr($short_ipid, 0, $vislength) if $vislength;
-		my $short_subnetid = $comment->{subnetid};
-		$short_subnetid = substr($short_subnetid, 0, $vislength) if $vislength;
-		$ipidinfo_to_display = <<EOT;
-<BR><FONT FACE="$constants->{mainfontface}" SIZE=1>IPID:
-<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$short_ipid</A>&nbsp;&nbsp;SubnetID: 
-<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$short_subnetid</A></FONT>
-EOT
-	}
-
 	my $title = qq|<A NAME="$comment->{cid}"><B>$comment->{subject}</B></A>|;
 	my $return = <<EOT;
 			<TR><TD BGCOLOR="$user->{bg}[2]">
@@ -1108,7 +1110,7 @@ EOT
 				$title $score_to_display
 				</FONT>
 				<BR>by $user_to_display on $time_to_display ($comment_link_to_display) $people_display
-				$userinfo_to_display $ipidinfo_to_display 
+				$userinfo_to_display $comment->{ipid_display}
 			</TD></TR>
 			<TR><TD>
 				$comment_to_display
