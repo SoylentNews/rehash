@@ -14,6 +14,7 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my($stats, $backupdb);
 
+	my $statsSave = getObject('Slash::Stats');
 	if ($constants->{backup_db_user}) {
 		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
 		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
@@ -21,7 +22,6 @@ $task{$me}{code} = sub {
 		$stats = getObject('Slash::Stats');
 		$backupdb = $slashdb;
 	}
-	my $statsSave = getObject('Slash::Stats');
 
 	unless($stats) {
 		slashdLog('No database to run adminmail against');
