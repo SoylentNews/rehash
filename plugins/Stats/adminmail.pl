@@ -81,6 +81,11 @@ EOT
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
+	my $uniq_comment_users = $stats->countDailyCommentsByDistinctIPID($yesterday);
+	my $uniq_article_users = $stats->countDailyArticlesByDistinctIPID($yesterday);
+	my $comment_page_views = $stats->countDailyComments($yesterday);
+	my $article_page_views = $stats->countDailyArticles($yesterday);
+
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
 	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
@@ -88,6 +93,10 @@ EOT
 	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
 	$statsSave->createStatDaily($yesterday, "journals", $count->{journals});
 	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
+	$statsSave->createStatDaily($yesterday, "uniq_comment_users", $uniq_comment_users);
+	$statsSave->createStatDaily($yesterday, "uniq_article_users", $uniq_article_users);
+	$statsSave->createStatDaily($yesterday, "comment_page_views", $comment_page_views);
+	$statsSave->createStatDaily($yesterday, "article_page_views", $article_page_views);
 	my @numbers = (
 		$count->{total},
 		$count->{unique},
@@ -109,12 +118,16 @@ EOT
 						/$modlog_total		: 0),
 		$comments,
 		scalar(@$distinct_comment_ipids),
+		$uniq_comment_users,
+		$uniq_article_users,
+		$comment_page_views,
+		$article_page_views,
+		$count->{journals},
 		$submissions,
 			($submissions ? $submissions_comments_match*100
 						/$submissions		: 0),
 		$sdTotalHits,
 		$count->{index}{index},
-		$count->{journals},
 	);
 	my $email = sprintf(<<"EOT", @numbers);
 $constants->{sitename} Stats for yesterday
@@ -132,13 +145,17 @@ $admin_clearpass_warning
       used -1: %8d yesterday (%.1f%%)
       used +1: %8d yesterday (%.1f%%)
      comments: %8d posted yesterday
-uniq comments: %8d distinct IPIDS posted comments
+        IPIDS: %8d distinct IPIDS posted comments
+             : %8d distinct IPIDS used comments
+             : %8d distinct IPIDS used articles
+    pageviews: %8d for comments
+             : %8d for articles
+             : %8d for journals
   submissions: %8d submissions
  sub/comments: %8.1f%% of the submissions came from comment posters from this day
 
    total hits: %8d
      homepage: %8d
-     journals: %8d
       indexes
 EOT
 

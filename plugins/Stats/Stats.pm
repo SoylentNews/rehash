@@ -152,6 +152,39 @@ sub countCommentsDaily {
 }
 
 ########################################################
+sub countDailyComments {
+	my($self, $yesterday) = @_;
+	$self->sqlSelect("count(*)", "accesslog",
+		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59' GROUP BY op");
+}
+
+########################################################
+sub countDailyArticles {
+	my($self, $yesterday) = @_;
+	$self->sqlSelect("count(*)", "accesslog",
+		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+	 'GROUP BY op');
+}
+
+########################################################
+sub countDailyCommentsByDistinctIPID {
+	my($self, $yesterday) = @_;
+	$self->sqlSelect("count(*)", "accesslog",
+		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'", 
+		'GROUP BY op',
+		{distinct => 1});
+}
+
+########################################################
+sub countDailyArticlesByDistinctIPID {
+	my($self, $yesterday) = @_;
+	$self->sqlSelect("count(*)", "accesslog",
+		"op='comments' AND BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		'GROUP BY op',
+		{distinct => 1});
+}
+
+########################################################
 sub countDaily {
 	my($self) = @_;
 	my %returnable;
