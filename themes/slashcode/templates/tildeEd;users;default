@@ -48,12 +48,14 @@ __template__
 [% END %]
 
 		</MULTICOL></TD>
+<!--
 		<TD VALIGN="TOP"><MULTICOL COLS="3">
-[% FOREACH section = sectionref.keys.sort %]
+[ FOREACH section = sectionref.keys.sort ]
 		<INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]<BR>
-[% END %]
+[ END ]
 		</MULTICOL>
 		</TD>
+-->
 	</TR>
 </TABLE>
 [% PROCESS titlebar width='100%' title=customize_title %]
