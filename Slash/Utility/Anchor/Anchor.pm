@@ -156,7 +156,10 @@ sub header {
 	# ...which is silly. - Jamie 2002/06/26
 	if ($form->{ssi} && $form->{ssi} eq 'yes') {
 		ssiHead($section, $options);
-		return;
+		# Since $form->{ssi} is set by freshenup.pl, we're being run
+		# from a task.  We do want to generate the rest of the page,
+		# so return true.
+		return 1;
 	}
 
 	# if ($constants->{run_ads}) {
