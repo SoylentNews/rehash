@@ -52,7 +52,7 @@ sub main {
 		}
 	}
 
-	my ($slashdb, $searchDB);
+	my($slashdb, $searchDB);
 	if ($constants->{search_db_user}) {
 		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
 		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
