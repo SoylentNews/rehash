@@ -689,20 +689,6 @@ sub countDailyByPageDistinctIPID {
 }
 
 ########################################################
-sub countDaily {
-	my($self, $options) = @_;
-	my %returnable;
-
-	my $constants = getCurrentStatic();
-
-	$returnable{unique} = $self->sqlSelect("DISTINCT host_addr", "accesslog_temp");
-
-	$returnable{unique_users} = $self->sqlSelectMany("DISTINCT uid", "accesslog_temp");
-
-	return \%returnable;
-}
-
-########################################################
 sub countDailyStoriesAccess {
 	my($self) = @_;
 	my $c = $self->sqlSelectMany("dat, COUNT(*), op", "accesslog_temp",

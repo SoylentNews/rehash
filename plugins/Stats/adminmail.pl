@@ -46,7 +46,6 @@ $task{$me}{code} = sub {
 	}
 
 	slashdLog('Send Admin Mail Begin');
-	my $count = $logdb->countDaily();
 	my $articles = $logdb->countDailyStoriesAccess();
 
 	my $reasons = $slashdb->getReasons();
@@ -174,6 +173,8 @@ EOT
 		no_op   => $constants->{op_exclude_from_countdaily},
 	});
 
+	my $unique_users = $logdb->countUsersByPage();
+	my $unique_ips = $logdb->countDailyByPageDistinctIPID();
 
 	my $grand_total = $logdb->countDailyByPage('');
 	$data{grand_total} = $grand_total;
@@ -324,8 +325,8 @@ EOT
 	$statsSave->createStatDaily("grand_total_static", $grand_total_static);
 	$statsSave->createStatDaily("total_bytes", $total_bytes);
 	$statsSave->createStatDaily("grand_total_bytes", $grand_total_bytes);
-	$statsSave->createStatDaily("unique", $count->{unique});
-	$statsSave->createStatDaily("unique_users", $count->{unique_users});
+	$statsSave->createStatDaily("unique", $unique_ips);
+	$statsSave->createStatDaily("unique_users", $unique_users);
 	$statsSave->createStatDaily("comments", $comments);
 	$statsSave->createStatDaily("homepage", $homepage);
 	$statsSave->createStatDaily("distinct_comment_ipids", scalar(@$distinct_comment_ipids));
@@ -391,8 +392,8 @@ EOT
 	$data{grand_total_bytes} = sprintf("%0.1f MB",$grand_total_bytes/(1024*1024));
 	$data{total_subscriber} = sprintf("%8d", $total_subscriber);
 	$data{total_secure} = sprintf("%8d", $total_secure);
-	$data{unique} = sprintf("%8d", $count->{unique}), 
-	$data{users} = sprintf("%8d", $count->{unique_users});
+	$data{unique} = sprintf("%8d", $unique_ips), 
+	$data{users} = sprintf("%8d", $unique_users);
 	$data{accesslog} = sprintf("%8d", $accesslog_rows);
 	$data{formkeys} = sprintf("%8d", $formkeys_rows);
 
