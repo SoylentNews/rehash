@@ -60,7 +60,11 @@ sub main {
 		$r->status(200);
 		$r->send_http_header;
 		$r->rflush;
-		$r->print(displayRSS($form, $journal, $constants));
+		if($form->{content} eq 'top') {
+			$r->print(displayTopRSS($form, $journal, $constants));
+		} else {
+			$r->print(displayRSS($form, $journal, $constants));
+		}
 		$r->status(200);
 	} else {
 		my $uid = $form->{'uid'};
@@ -145,6 +149,46 @@ sub displayRSS {
 				'link'	=> xmlencode("$constants->{absolutedir}/journal.pl?op=get&id=$article->[3]"),
 				description => xmlencode("$nickname wrote: " . strip_mode($article->[1], $article->[4]))
 		);
+	}
+	return $rss->as_string;
+}
+
+sub displayTopRSS {
+	my($form, $journal, $constants) = @_;
+	my $rss = XML::RSS->new(
+		version		=> '1.0',
+		encoding	=> $constants->{rdfencoding},
+	);
+
+	my $journals;
+
+	if ($form->{type} eq 'count') {
+		$journals = $journal->top($constants->{journal_top});
+	} elsif ($form->{type} eq 'friends') {
+		$journals = $journal->topFriends($constants->{journal_top});
+	} else {
+		$journals = $journal->topRecent($constants->{journal_top});
+	}
+
+	$rss->channel(
+		title	=> xmlencode($constants->{sitename} . " Top $constants->{journal_top} Journals"),
+		'link'	=> xmlencode($constants->{absolutedir} . "/journal.pl?op=top"),
+		description	=> xmlencode($constants->{sitename} . " Top $constants->{journal_top} Journals"),
+	);
+
+	$rss->image(
+		title	=> xmlencode($constants->{sitename}),
+		url	=> xmlencode($constants->{rdfimg}),
+		'link'	=> $constants->{absolutedir} . '/',
+	);
+
+
+	for my $entry (@$journals) {
+			my $time = timeCalc($entry->[3]);
+			$rss->add_item(
+				title	=> xmlencode("$entry->[1] ($time)"),
+				'link'	=> (xmlencode($constants->{absolutedir} . '/journal.pl?op=display') . '&amp;' . xmlencode('uid=' . $entry->[2])),
+			);
 	}
 	return $rss->as_string;
 }
