@@ -42,6 +42,7 @@ sub new {
 	$self->{_day} = $options->{day}
 		? $options->{day}
 		: sprintf("%4d-%02d-%02d", $yest_lt[5] + 1900, $yest_lt[4] + 1, $yest_lt[3]);
+	$self->{_day_between_clause} = " BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' ";
 
 	my $count = 0;
 	if ($options->{create}) {
@@ -76,7 +77,7 @@ sub new {
 		# to make use of if -Brian
 		# Having put errors into the _errors table, this is fine the way it is,
 		# now, right? -Jamie 2003/05/20
-		my $sql = "INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' AND status=200 FOR UPDATE";
+		my $sql = "INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts $self->{_day_between_clause} AND status=200 FOR UPDATE";
 		$self->sqlDo($sql);
 		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp"))) {
 			for (1..4) {
@@ -86,7 +87,7 @@ sub new {
 			}
 		}
 
-		$sql = "INSERT INTO accesslog_temp_errors SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' AND status != 200 FOR UPDATE";
+		$sql = "INSERT INTO accesslog_temp_errors SELECT * FROM accesslog WHERE ts $self->{_day_between_clause} AND status != 200 FOR UPDATE";
 		$self->sqlDo($sql);
 		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp_errors"))) {
 			for (1..4) {
@@ -173,7 +174,7 @@ sub countModeratorLog {
 
 	my $day = $self->{_day};
 	$day = $options->{day} if $options->{day};
-	push @clauses, "ts BETWEEN '$day 00:00' AND '$day 23:59:59'"
+	push @clauses, "ts $self->{_day_between_clause}"
 		if $options->{oneday_only};
 
 	push @clauses, "active=1" if $options->{active_only};
@@ -198,7 +199,7 @@ sub countMetamodLog {
 
 	my $day = $self->{_day};
 	$day = $options->{day} if $options->{day};
-	push @clauses, "ts BETWEEN '$day 00:00' AND '$day 23:59:59'"
+	push @clauses, "ts $self->{_day_between_clause}"
 		if $options->{oneday_only};
 
 	push @clauses, "active=1" if $options->{active_only};
@@ -412,7 +413,7 @@ sub getErrorStatuses {
 sub getCommentsByDistinctIPID {
 	my($self, $options) = @_;
 
-	my $where = "date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'";
+	my $where = "date $self->{_day_between_clause}";
 	$where .= " AND discussions.id = comments.sid
 		    AND discussions.section = '$options->{section}'"
 		if $options->{section};
@@ -430,6 +431,46 @@ sub getCommentsByDistinctIPID {
 }
 
 ########################################################
+sub countCommentsByDistinctIPIDPerAnon {
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+
+	my $where = "date $self->{_day_between_clause}";
+	$where .= " AND discussions.id = comments.sid
+		    AND discussions.section = '$options->{section}'"
+		if $options->{section};
+
+	my $tables = 'comments';
+	$tables .= ", discussions" if $options->{section};
+
+	my $ipid_uid_hr = $self->sqlSelectAllHashref(
+		[qw( ipid uid )],
+		"ipid, comments.uid AS uid",
+		$tables, 
+		$where,
+		"GROUP BY ipid, uid"
+	);
+	return (0, 0, 0) unless $ipid_uid_hr && scalar keys %$ipid_uid_hr;
+
+	my($anon_only, $loggedin_only, $both) = (0, 0, 0);
+	my $ac_uid = $constants->{anonymous_coward_uid};
+	for my $ipid (keys %$ipid_uid_hr) {
+		my @uids = keys %{$ipid_uid_hr->{$ipid}};
+		if ($ipid_uid_hr->{$ipid}{$ac_uid}) {
+			# At least one post by AC.
+			if (scalar(@uids) > 1) {
+				++$both;
+			} else {
+				++$anon_only;
+			}
+		} else {
+			++$loggedin_only;
+		}
+	}
+	return ($anon_only, $loggedin_only, $both);
+}
+
+########################################################
 sub getCommentsByDistinctUIDPosters {
 	my($self, $options) = @_;
 
@@ -443,10 +484,10 @@ sub getCommentsByDistinctUIDPosters {
 
 	my $used = $self->sqlSelect(
 		"COUNT(DISTINCT uid)", $tables, 
-		"date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'
+		"date $self->{_day_between_clause}
 		$section_where",
 		'',
-		{ distinct => 1 }
+		{ }
 	);
 }
 
@@ -460,7 +501,7 @@ sub getAdminModsInfo {
 		"moderatorlog.uid AS uid, val, nickname, COUNT(*) AS count",
 		"moderatorlog, users",
 		"users.seclev > 1 AND moderatorlog.uid=users.uid 
-		 AND ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
+		 AND ts $self->{_day_between_clause}",
 		"GROUP BY moderatorlog.uid, val"
 	);
 
@@ -471,7 +512,7 @@ sub getAdminModsInfo {
 		"metamodlog, moderatorlog, users",
 		"users.seclev > 1 AND moderatorlog.uid=users.uid
 		 AND metamodlog.mmid=moderatorlog.id 
-		 AND metamodlog.ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' ",
+		 AND metamodlog.ts $self->{_day_between_clause} ",
 		"GROUP BY users.uid, metamodlog.val"
 	);
 
@@ -523,7 +564,7 @@ sub getAdminModsInfo {
 		"val",
 		"val, COUNT(*) AS count",
 		"moderatorlog",
-		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
+		"ts $self->{_day_between_clause}",
 		"GROUP BY val"
 	);
 	$m1_uid_val_hr->{$total_uid} = {
@@ -535,7 +576,7 @@ sub getAdminModsInfo {
 		"val",
 		"val, COUNT(*) AS count",
 		"metamodlog",
-		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
+		"ts $self->{_day_between_clause}",
 		"GROUP BY val"
 	);
 	$m2_uid_val_hr->{$total_uid} = {
@@ -615,7 +656,7 @@ sub getAdminModsInfo {
 sub countSubmissionsByDay {
 	my($self, $options) = @_;
 
-	my $where = "time BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'";
+	my $where = "time $self->{_day_between_clause}";
 	$where .= " AND section = '$options->{section}'" if $options->{section};
 
 	my $used = $self->sqlCount(
@@ -632,7 +673,7 @@ sub countSubmissionsByCommentIPID {
 	my $slashdb = getCurrentDB();
 	my $in_list = join(",", map { $slashdb->sqlQuote($_) } @$ipids);
 
-	my $where = "time BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'
+	my $where = "time $self->{_day_between_clause}
 		AND ipid IN ($in_list)";
 	$where .= " AND section = '$options->{section}'" if $options->{section};
 
@@ -651,7 +692,7 @@ sub countModeratorLogByVal {
 		"val",
 		"val, SUM(spent) AS spent, COUNT(*) AS count",
 		"moderatorlog",
-		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
+		"ts $self->{_day_between_clause}",
 		"GROUP BY val"
 	);
 	
@@ -684,7 +725,7 @@ sub countCommentsDaily {
 	my $comments = $self->sqlSelect(
 		"COUNT(*)",
 		"comments",
-		"date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'
+		"date $self->{_day_between_clause}
 		 $cid_limit_clause $section_where"
 	);
 
@@ -1012,7 +1053,8 @@ sub _calc_percentiles {
 sub getDailyScoreTotal {
 	my($self, $score) = @_;
 
-	return $self->sqlCount('comments', "points=$score AND date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'");
+	return $self->sqlCount('comments',
+		"points=$score AND date $self->{_day_between_clause}");
 }
 
 ########################################################

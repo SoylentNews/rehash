@@ -70,7 +70,6 @@ $task{$me}{code} = sub {
 		$data{errors}{$type->{op}} = $type->{count};
 		$statsSave->createStatDaily("error_$type->{op}}", $type->{count});
 	}
-	
 
 	my $articles = $logdb->countDailyStoriesAccess();
 
@@ -173,6 +172,9 @@ EOT
 	my $used = $stats->countModeratorLog();
 	my $modlog_yest_hr = $stats->countModeratorLogByVal();
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID();
+	my($distinct_comment_ipids_anononly,
+	   $distinct_comment_ipids_loggedinonly,
+	   $distinct_comment_ipids_anonandloggedin) = $stats->countCommentsByDistinctIPIDPerAnon();
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
 	my $submissions = $stats->countSubmissionsByDay();
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($distinct_comment_ipids);
@@ -407,6 +409,9 @@ EOT
 	$statsSave->createStatDaily("comments", $comments);
 	$statsSave->createStatDaily("homepage", $homepage);
 	$statsSave->createStatDaily("distinct_comment_ipids", scalar(@$distinct_comment_ipids));
+	$statsSave->createStatDaily("distinct_comment_ipids_anononly", $distinct_comment_ipids_anononly);
+	$statsSave->createStatDaily("distinct_comment_ipids_loggedinonly", $distinct_comment_ipids_loggedinonly);
+	$statsSave->createStatDaily("distinct_comment_ipids_anonandloggedin", $distinct_comment_ipids_anonandloggedin);
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
 	$statsSave->createStatDaily("consensus", $consensus);
 	$statsSave->createStatDaily("modlogs", $modlogs);
