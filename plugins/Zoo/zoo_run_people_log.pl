@@ -37,7 +37,8 @@ $task{$me}{code} = sub {
 		}
 		push @deletions, $job->{id};
 	}
-	$zoo->deleteZooJobs(\@deletions);
+	$zoo->deleteZooJobs(\@deletions)
+		if @deletions;
 	slashdLog('Zoo fof/eof End');
 
 	return ;
