@@ -732,7 +732,8 @@ sub showComments {
 	});
 
 	my $min_comment = $form->{min_comment} || 0;
-	$min_comment = 0 unless $user->{is_admin};
+	$min_comment = 0 unless $user->{seclev} > $constants->{comments_more_seclev}
+		|| $constants->{comments_more_seclev} == 2 && $user->{is_subscriber};
 	my $comments_wanted = $user->{show_comments_num}
 		|| $constants->{user_comment_display_default};
 	my $commentcount = $slashdb->countCommentsByUID($uid);
@@ -924,8 +925,8 @@ sub showInfo {
 	my $comments_wanted = $user->{show_comments_num}
 		|| $constants->{user_comment_display_default};
 	my $min_comment = $form->{min_comment} || 0;
-	# haven't decided whether ordinary users get this yet
-	$min_comment = 0 unless $admin_flag;
+	$min_comment = 0 unless $user->{seclev} > $constants->{comments_more_seclev}
+		|| $constants->{comments_more_seclev} == 2 && $user->{is_subscriber};
 
 	my($netid, $netid_vis) = ('', '');
 	if ($requested_user->{nonuid}) {

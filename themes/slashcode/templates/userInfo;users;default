@@ -166,7 +166,8 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 
 	END %]
 	</TABLE>
-	[% IF admin_flag && commentcount > n %] 
+	[% IF (user.seclev > constants.comments_more_seclev || (comments_more_seclev == 2 && user.is_subscriber))
+		&& commentcount > n %]
 		<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]"
 		>More Comments...</A>
 	[% END %]
