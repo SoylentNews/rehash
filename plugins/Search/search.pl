@@ -818,41 +818,42 @@ createEnvironment();
 main();
 
 #=======================================================================
-package Slash::Search;
-use Slash::Utility;
-
-sub getDBUsers {
-	my $constants = getCurrentStatic();
-	if ($constants->{search_db_user}) {
-		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
-		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
-	} else {
-		$slashdb  = getCurrentDB();
-		$searchDB = Slash::Search->new(getCurrentVirtualUser());
-	}
-	return($slashdb, $searchDB);
-}
-
-
-#=======================================================================
-package Slash::Search::SOAP;
-use Slash::Utility;
-
-sub findStory {
-	my($class, $query) = @_;
-	my $user      = getCurrentUser();
-	my $constants = getCurrentStatic();
-	my($slashdb, $searchDB) = Slash::Search::getDBUsers();
-
-	my $stories;
-	if ($constants->{panic} >= 1 or $constants->{search_google}) {
-		$stories = [ ];
-	} else {
-		$stories = $searchDB->findStory({ query => $query }, 0, 15);
-	}
-
-	return $stories;
-}
+#package Slash::Search;
+#use Slash::Utility;
+#
+#sub getDBUsers {
+#	my $constants = getCurrentStatic();
+#	my ($slashdb, $searchDB);
+#	if ($constants->{search_db_user}) {
+#		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
+#		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
+#	} else {
+#		$slashdb  = getCurrentDB();
+#		$searchDB = Slash::Search->new(getCurrentVirtualUser());
+#	}
+#	return($slashdb, $searchDB);
+#}
+#
+#
+##=======================================================================
+#package Slash::Search::SOAP;
+#use Slash::Utility;
+#
+#sub findStory {
+#	my($class, $query) = @_;
+#	my $user      = getCurrentUser();
+#	my $constants = getCurrentStatic();
+#	my($slashdb, $searchDB) = Slash::Search::getDBUsers();
+#
+#	my $stories;
+#	if ($constants->{panic} >= 1 or $constants->{search_google}) {
+#		$stories = [ ];
+#	} else {
+#		$stories = $searchDB->findStory({ query => $query }, 0, 15);
+#	}
+#
+#	return $stories;
+#}
 
 #################################################################
 1;
