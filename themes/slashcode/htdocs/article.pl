@@ -67,9 +67,9 @@ sub main {
 			# section and series links must be defined as separate
 			# constants in vars
 			my($use_section, $use_series);
-			$use_section = $story->{section} if
-				$constants->{use_prev_next_link_section} &&
-				$SECT->{type} eq 'contained';
+#			$use_section = $story->{section} if
+#				$constants->{use_prev_next_link_section} &&
+#				$SECT->{type} eq 'contained';
 			$use_series  = $story->{tid}     if 
 				$constants->{use_prev_next_link_series} &&
 				$reader->getTopic($story->{tid})->{series} eq 'yes';
