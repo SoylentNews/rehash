@@ -2280,8 +2280,6 @@ EOT
 ########################################################
 sub dispStory {
 	my($S, $A, $T, $full) = @_;
-	my($rootdir) = $I{rootdir};
-	$rootdir .= '/' if $rootdir;
 	my $title = $S->{title};
 	if (!$full && index($S->{title}, ':') == -1
 		&& $S->{section} ne $I{defaultsection}
@@ -2289,8 +2287,9 @@ sub dispStory {
 
 		# Need Header
 		my $SECT = getSection($S->{section});
-		$title =
-			"<A HREF=\"$rootdir$S->{section}/\"><FONT COLOR=\"$I{fg}->[3]\">$SECT->{title}</FONT></A>: $S->{title}";
+		$title = <<EOT;
+\t\t\t<A HREF="$I{rootdir}/$S->{section}/"><FONT COLOR="$I{fg}->[3]">$SECT->{title}</FONT></A>: $S->{title}
+EOT
 	}
 
 	titlebar($I{titlebar_width}, $title);
