@@ -310,7 +310,7 @@ The 'ssihead' template block.
 =cut
 
 sub ssiHead {
-	my($section,  $options) = @_;
+	my($section, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
@@ -520,7 +520,15 @@ EOT
 
 	# If this is the first time that getAd() is being called, we have
 	# to set up all the ad data at once before we can return anything.
-	prepAds() if !defined($user->{state}{ad});
+	if (!defined $user->{state}{ad}) {
+		# old way
+		prepAds();
+
+		# new way
+#		if (my $minithin = getObject('Slash::MiniThin', { db_type => 'reader' })) {
+#			$minithin->minithin;
+#		}
+	}
 
 	return $user->{state}{ad}{$num} || "";
 }
