@@ -2017,5 +2017,4 @@ INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 
 # USEPERL LAST UPDATED HERE
 
 # SLASHCODE LAST UPDATED HERE
-
-# REALLY!
+INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid','Default for user\'s cookie_location value (also see users_info schema!)');
