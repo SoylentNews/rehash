@@ -213,8 +213,8 @@ sub _deleteThread {
 
 	if (!$level) {
 		for (@{$comments_deleted}) {
-			$count += $slashdb->deleteComment($_);
-		print STDERR "DELETING $_ : $count \n";
+			$count += $self->deleteComment($_);
+		}
 	}
 
 	return $count;
