@@ -1068,6 +1068,7 @@ sub getRelated {
 	# label; otherwise just use the A content.
 	while ($story_content =~ m|<a\s+(.*?)>(.*?)</a>|sgi) {
 		my($a_attr, $label) = ($1, $2);
+		next unless $a_attr =~ /\bhref\s*=\s*["']/si;
 		if ($a_attr =~ m/(\btitle\s*=\s*(["'])(.*?)\2)/si) {
 			$label = $3;
 			$a_attr =~ s/\Q$1\E//;
