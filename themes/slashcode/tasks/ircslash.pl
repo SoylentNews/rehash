@@ -16,8 +16,8 @@ use Slash::Utility;
 use vars qw(
 	%task	$me	$task_exit_flag
 	$irc	$conn	$nick	$channel
-	$next_remark_id	$next_handle_remarks
-	$hushed	%stoid	$clean_exit_flag
+	$remarks_active	$next_remark_id	$next_handle_remarks	$hushed
+	%stoid	$clean_exit_flag
 	$parent_pid
 );
 
@@ -35,11 +35,16 @@ $task{$me}{code} = sub {
 
 	$clean_exit_flag = 0;
 	$next_handle_remarks = 0;
+
+	# Set the remark delay (how often we check the DB for new remarks).
+	# If remarks are not wanted, we can check less frequently.
+	my $remark_delay = $constants->{ircslash_remarks_delay} || 5;
+	$remark_delay = 180 if $remark_delay < 180 && !$remarks_active;
+
 	while (!$task_exit_flag && !$clean_exit_flag) {
 		$irc->do_one_loop();
 		Time::HiRes::sleep(0.5); # don't waste CPU
 		if (time() >= $next_handle_remarks) {
-			my $remark_delay = $constants->{ircslash_remarks_delay} || 5;
 			$next_handle_remarks = time() + $remark_delay;
 			handleRemarks();
 		}
@@ -65,6 +70,7 @@ sub ircinit {
 	my $ssl =	$constants->{ircslash_ssl}
 				|| 0;
 	
+	$remarks_active = $constants->{ircslash_remarks} || 0;
 	$hushed = 0;
 
 	$irc = new Net::IRC;
@@ -324,6 +330,10 @@ sub cmd_slashd {
 	slashdLog("slashd: $result, cmd from $info->{event}{nick}");
 }
 
+sub check_slashd {
+	
+}
+
 ############################################################
 
 sub handleRemarks {
@@ -347,6 +357,13 @@ sub handleRemarks {
 		my $uid = $remark_hr->{uid};
 		$uid_count{$uid}++;
 		$max_rid = $remark_hr->{rid} if $remark_hr->{rid} > $max_rid;
+	}
+
+	# If remarks are not active, just mark these as read and continue.
+	if (!$remarks_active) {
+		$next_remark_id = $max_rid + 1;
+		$slashdb->setVar('ircslash_nextremarkid', $next_remark_id);
+		return ;
 	}
 	
 	# First pass:  outright strip out remarks from abusive users
