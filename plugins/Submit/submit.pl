@@ -198,12 +198,15 @@ sub previewForm {
 
 	my $num_sim = $constants->{similarstorynumshow} || 5;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-        my $storyref={title=>$sub->{subj},introtext=>$sub->{story}};
+	my $storyref = {
+		title =>	$sub->{subj},
+		introtext =>	$sub->{story},
+	};
 	my $similar_stories = $reader->getSimilarStories($storyref, $num_sim);
+
 	# Truncate that data to a reasonable size for display.
 
-
-       	if ($similar_stories && @$similar_stories) {
+	if ($similar_stories && @$similar_stories) {
 		for my $sim (@$similar_stories) {
 			# Display a max of five words reported per story.
 			$#{$sim->{words}} = 4 if $#{$sim->{words}} > 4;
@@ -233,7 +236,7 @@ sub previewForm {
 		lockTest	=> lockTest($sub->{subj}),
 		section		=> $form->{section} ||
 				   $constants->{defaultsection},
-                similar_stories => $similar_stories
+		similar_stories	=> $similar_stories,
 	});
 }
 
