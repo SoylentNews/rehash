@@ -18,12 +18,12 @@ use base 'Slash::DB::MySQL';
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub new {
-        my($class) = @_;
-        my $self = { };
+	my($class) = @_;
+	my $self = { };
 
 	my $slashdb = getCurrentDB();
-        my $plugins = $slashdb->getDescriptions('plugins');
-        return unless $plugins->{Subscribe};
+	my $plugins = $slashdb->getDescriptions('plugins');
+	return unless $plugins->{Subscribe};
 
 	$self->{defpage} = {
 		map { ( $_, 1 ) }
@@ -40,9 +40,9 @@ sub new {
 		|| $self->{defpage}{article}
 		|| $self->{defpage}{comments};
 
-        bless($self, $class);
+	bless($self, $class);
 
-        return $self;
+	return $self;
 }
 
 ########################################################
@@ -88,22 +88,17 @@ sub new {
 # [E] User's max pages per day to buy is set >= the default (10)
 #
 sub _subscribeDecisionPage {
-	my($self, $trueOnOther, $useMaxNotToday, $r) = @_;
+	my($self, $trueOnOther, $useMaxNotToday, $r, $user) = @_;
 
-        my $user = getCurrentUser();
+	$user ||= getCurrentUser();
 	my $uid = $user->{uid} || 0;
-        return 0 if !$user
-                ||  !$uid
-                ||   $user->{is_anon};
+	return 0 if !$user
+		||  !$uid
+		||   $user->{is_anon};
 
 	# At this point, if we're asking about buying a page, we may know
 	# the answer already.
 	if (!$trueOnOther && !$useMaxNotToday) {
-		# Any part of the code can set this user state variable at any time.
-		# At the moment, this is totally unused, but it might be in future,
-		# if we ever decide that a user action can force a page to be bought
-		# when it otherwise might not be.
-		return 1 if $user->{state}{buyingpage};
 		# If the user hasn't paid for any pages, or has already bought
 		# (used up) all the pages they've paid for, then they are not
 		# buying this one.
@@ -116,7 +111,7 @@ sub _subscribeDecisionPage {
 	# short-circuit here.
 	my $constants = getCurrentStatic();
 	if ($trueOnOther && !$useMaxNotToday) {
-		# If ads aren't on, the user isn't buying this one.
+		# If ads aren't on, we're not going to show this one.
 		return 0 if !$constants->{run_ads};
 		# Otherwise, if the user is not a subscriber, this page
 		# is not adless (though it may not actually have an ad,
@@ -159,14 +154,18 @@ sub _subscribeDecisionPage {
 	# We should use $user->{currentPage} instead of parsing $r->uri
 	# separately here.  But first we'll need to audit the code and
 	# make sure this method is never called before that field is set.
+	# Update 2003/04/25:  Now things have been rearranged a bit and
+	# _subscribeDecisionPage is always called at the same point,
+	# within prepareUser(), after currentPage has been set.  So we
+	# can almost certainly switch to using currentPage.
 	my $decision = 0;
-        $r ||= Apache->request;
-        my $uri = $r->uri;
-        if ($uri eq '/') {
-                $uri = 'index';
-        } else {
-                $uri =~ s{^.*/([^/]+)\.pl$}{$1};
-        }
+	$r ||= Apache->request;
+	my $uri = $r->uri;
+	if ($uri eq '/') {
+		$uri = 'index';
+	} else {
+		$uri =~ s{^.*/([^/]+)\.pl$}{$1};
+	}
 		# We check to see if the user has saved preferences for
 		# which page types they want to buy.  This assumes the
 		# data like $user->{buypage_index} is stored in
@@ -203,18 +202,18 @@ sub _subscribeDecisionPage {
 }
 
 sub adlessPage {
-	my($self, $r) = @_;
-	return $self->_subscribeDecisionPage(1, 0, $r);
+	my($self, $r, $user) = @_;
+	return $self->_subscribeDecisionPage(1, 0, $r, $user);
 }
 
 sub buyingThisPage {
-	my($self, $r) = @_;
-	return $self->_subscribeDecisionPage(0, 0, $r);
+	my($self, $r, $user) = @_;
+	return $self->_subscribeDecisionPage(0, 0, $r, $user);
 }
 
 sub plummyPage {
-	my($self, $r) = @_;
-	return $self->_subscribeDecisionPage(1, 1, $r);
+	my($self, $r, $user) = @_;
+	return $self->_subscribeDecisionPage(1, 1, $r, $user);
 }
 
 # By default, allow readers to buy x pages for $y, 2x pages for $2y,

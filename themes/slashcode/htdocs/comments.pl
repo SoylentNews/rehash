@@ -159,12 +159,11 @@ sub main {
 					# etc.) and if that story is viewable.
 					$future_err = 1;
 					$null_it_out = 1;
-				} else {
-					my $subscribe = getObject("Slash::Subscribe");
-					if (!$subscribe || !$subscribe->plummyPage()) {
-						$future_err = 1;
-						$null_it_out = 1;
-					}
+				} elsif (!$user->{is_subscriber} || !$user->{state}{page_plummy}) {
+					# If the user is not a subscriber or the page is
+					# not able to have plums, sorry!
+					$future_err = 1;
+					$null_it_out = 1;
 				}
 			} elsif ($discussion->{sid} && !$slashdb->checkStoryViewable($discussion->{sid})) {
 				# Probably a Never Display'd story.

@@ -23,14 +23,9 @@ sub main {
 
 	my $future_err = 0;
 	if ($story && $story->{is_future} && !($user->{is_admin} || $user->{author})) {
-		if (!$constants->{subscribe} || !$user->{is_subscriber}) {
-			$future_err = 1;
-		} else {
-			my $subscribe = getObject("Slash::Subscribe");
-			if (!$subscribe || !$subscribe->plummyPage()) {
-				$future_err = 1;
-			}
-		}
+		$future_err = 1 if !$constants->{subscribe}
+			|| !$user->{is_subscriber}
+			|| !$user->{state}{page_plummy};
 		if ($future_err) {
 			$story = '';
 		}

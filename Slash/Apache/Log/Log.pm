@@ -60,12 +60,7 @@ sub UserLog {
 		&& ($user->{is_subscriber} || !$constants->{subscribe_hits_only})
 	) {
 		$user_update = { -hits => 'hits+1' };
-		my $subscribe = getObject('Slash::Subscribe');
-		my $buying = 0;
-		if ($subscribe && $subscribe->buyingThisPage($r)) {
-			$user_update->{-hits_bought} = 'hits_bought+1';
-			$buying = 1;
-		}
+		$user_update->{-hits_bought} = 'hits_bought+1' if $user->{state}{page_buying};
 		my @gmt = gmtime;
 		my $today = sprintf("%04d%02d%02d",
 			$gmt[5]+1900, $gmt[4]+1, $gmt[3]);
@@ -74,7 +69,7 @@ sub UserLog {
 			# be buying this page.  The day has not rolled over.
 			# Increment hits_bought_today iff they are buying this page.
 			$user_update->{-hits_bought_today} = 'hits_bought_today+1'
-				if $buying;
+				if $user->{state}{page_buying};
 		} else {
 			# User may or may not be a subscriber, and may or may not
 			# be buying this page.  The day has rolled over since their
@@ -82,7 +77,7 @@ sub UserLog {
 			# buying this page, or 1 if they are.  Note that we do not
 			# want to set it to the empty string, as that would delete
 			# the param row.
-			$user_update->{hits_bought_today} = $buying ? 1 : 0;
+			$user_update->{hits_bought_today} = $user->{state}{page_buying} ? 1 : 0;
 			if ($user->{hits_bought_today} && !$user->{is_admin}) {
 				my $day = join("-",
 					$user->{lastclick} =~ /^(\d{4})(\d{2})(\d{2})/);
@@ -97,7 +92,8 @@ sub UserLog {
 				}
 			}
 		}
-		if ($buying && $user->{hits_bought} == $user->{hits_paidfor}-1
+		if ($user->{state}{page_buying}
+			&& $user->{hits_bought} == $user->{hits_paidfor}-1
 			and my $statsSave = getObject('Slash::Stats::Writer')) {
 			$statsSave->addStatDaily("subscribe_runout", 1);
 		}

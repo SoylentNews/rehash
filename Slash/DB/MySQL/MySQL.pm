@@ -4773,22 +4773,16 @@ sub _stories_time_clauses {
 	my $secs = $constants->{subscribe_future_secs};
 	# Tweak $secs here somewhat, based on something...?  Nah.
 
-	# First decide whether we're looking into the future or not.
-	# Do the quick tests first, then if necessary do the more
-	# expensive check to see if this page is plummy.
+	# First decide whether we're looking into the future or not.  If we
+	# are going to try for this sort of thing, then either we must NOT
+	# be limiting it to subscribers only, OR the user must be a subscriber
+	# and this page must be plummy (able to have plums).
 	my $future = 0;
 	$future = 1 if $try_future
 		&& $constants->{subscribe}
-		&& $secs;
-	$future = 0 if $must_be_subscriber && !$user->{is_subscriber};
-	if ($future && $must_be_subscriber) {
-		if ($user->{is_subscriber}) {
-			my $subscribe = getObject("Slash::Subscribe");
-			$future = 0 unless $subscribe->plummyPage();
-		} else {
-			$future = 0;
-		}
-	}
+		&& $secs
+		&& (!$must_be_subscriber
+			|| ($user->{is_subscriber} && $user->{state}{page_plummy}));
 
 	if ($future) {
 		$is_future_column = "IF($column_name < NOW(), 0, 1) AS is_future";
@@ -6306,7 +6300,7 @@ sub getTopicImageBySection {
 	my ($self, $topic, $section, $values, $cache) = @_;
 	my $image_sections = $self->getDescriptions("topic_images_section");
 	my $image_id = $image_sections->{"$topic->{tid}|$section"} || $topic->{default_image};	
-	print STDERR "TOPIC $topic->{tid}|$section:$topic->{default_image}:$image_id\n";
+#	print STDERR "TOPIC $topic->{tid}|$section:$topic->{default_image}:$image_id\n";
 	my $answer = _genericGetCache({
 		table		=> 'topic_images',
 		table_prime	=> 'id',
