@@ -1566,10 +1566,14 @@ sub saveComm {
 		my $answer = $form->{"reason_alter_$_"};
 		$answer  = 0
 			if $answer !~ /^[\-+]?\d+$/;
-		$answer  = $constants->{comment_minscore}
-			if $answer < $min;
-		$answer  = $constants->{comment_maxscore}
-			if $answer > $max;
+# I need to change this to be so that the score
+# would never be great then Max + their
+# score just to make it look pretty.
+# But its a holiday. -Brian
+#		$answer  = $constants->{comment_minscore}
+#			if $answer < $min;
+#		$answer  = $constants->{comment_maxscore}
+#			if $answer > $max;
 		$users_comments_table->{"reason_alter_$_"} = ($answer == 0) ? '' : $answer;
 	}
 
