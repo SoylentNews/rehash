@@ -126,7 +126,8 @@ sub main {
 		# like it is with getStory.  We have to add it manually here.
 		$discussion->{is_future} = 1 if $slashdb->checkDiscussionIsInFuture($discussion);
 		# Now check to make sure this discussion can be seen.
-		if (!($user->{author} || $user->{is_admin}) && $discussion) {
+		if (!( $user->{author} || $user->{is_admin} || $user->{has_daypass} )
+			&& $discussion) {
 			my $null_it_out = 0;
 			if ($discussion->{is_future}) {
 				# Discussion is from the future;  decide here

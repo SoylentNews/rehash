@@ -37,7 +37,8 @@ sub main {
 	my $future_err = 0;
 	if ($story
 		&& $story->{is_future} && !$story->{neverdisplay}
-		&& !($user->{is_admin} || $user->{author})) {
+		&& !( $user->{is_admin} || $user->{author} || $user->{has_daypass} )
+	) {
 		$future_err = 1 if !$constants->{subscribe}
 			|| !$user->{is_subscriber}
 			|| !$user->{state}{page_plummy};
