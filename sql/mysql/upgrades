@@ -2547,8 +2547,6 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 
 # SLASHDOT LAST UPDATED HERE
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_28, Start of T_2_5_0_29 - 2004/09/28
 
 # Changes for plugins/Admin (which you are almost certainly using)
@@ -2576,3 +2574,6 @@ INSERT INTO string_param (type, code, name) VALUES ('story023','3','Always');
 
 INSERT INTO vars (name, value, description) VALUES ('issue_lookback_days','90','Number of days to look back in issue mode');
 
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_29, Start of T_2_5_0_30 - 2004/10/06
