@@ -62,7 +62,7 @@ __template__
 
 	</TD></TR>
 	<TR><TD ALIGN="CENTER">
-	[% Slash.moderatorCommentLog('cid', cid, { show_m2s => 1, need_m2_form => !moderate_form, need_m2_button => !moderate_button }); %]
+	[% Slash.moderatorCommentLog('cid', cid, { show_m2s => (form.show_m2s.defined ? form.show_m2s : user.m2_with_comm_mod), need_m2_form => !moderate_form, need_m2_button => 1, title=>" " }); %]
 	</TD></TR>
 [% END %]
 
@@ -88,13 +88,15 @@ __template__
 			|| user.acl.candelcomments_always %]
 			<BR><B>NOTE: Checked comments will be deleted.</B>
 		[% END %]
-		</TD></TR>
+		</TD>
+
+</TR>
 	[% END %]
 	</FORM>
 [% END %]
 
 </TABLE>
-
+[% PROCESS maintable_td %]&nbsp;[% PROCESS maintable_td_end %]
 __seclev__
 10000
 __version__
