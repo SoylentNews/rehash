@@ -721,7 +721,7 @@ sub getDiscussionsByCreator {
 
 #################################################################
 sub getDiscussionsUserCreated {
-	my($self, $section, $limit, $start) = @_;
+	my($self, $section, $limit, $start, $all) = @_;
 
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
@@ -729,6 +729,8 @@ sub getDiscussionsUserCreated {
 	my $where = "type = 'recycle' AND ts <= now() AND users.uid = discussions.uid";
 	$where .= " AND section = '$section'"
 		if $section;
+	$where .= " AND commentcount > 0"
+		unless $all;
 
 	my $discussion = $self->sqlSelectAll("id, title, ts, users.nickname",
 		"discussions, users",
@@ -1419,7 +1421,7 @@ sub deleteSubmission {
 		$subid{$form->{subid}}++;
 	}
 
-	foreach (keys %{$form}) {
+	for (keys %{$form}) {
 		next unless /(.*)_(.*)/;
 		my($t, $n) = ($1, $2);
 		if ($t eq "note" || $t eq "comment" || $t eq "section") {
