@@ -746,19 +746,12 @@ sub editComment {
 		$form->{postersubj} = "Re:$form->{postersubj}";
 	}
 
-# trying to do this in the template
-#	my $formats = $slashdb->getDescriptions('postmodes');
-
-#	my $format_select = $form->{posttype}
-#		? createSelect('posttype', $formats, $form->{posttype}, 1)
-#		: createSelect('posttype', $formats, $user->{posttype}, 1);
 
 	slashDisplay('edit_comment', {
 		error_message 	=> $error_message,
 		label		=> $label,
-		newdiscussion	=> $form->{newdiscussion},
+		discussion	=> $discussion,
 		indextype	=> $form->{indextype},
-		# format_select	=> $format_select,
 		preview		=> $preview,
 		reply		=> $reply,
 	});
@@ -1149,6 +1142,10 @@ sub submitComment {
 			return(0);
 		}
 	}
+	my $posters_uid = $user->{uid};
+	if ($form->{postanon} && $constants->{allow_anonymous} && $user->{karma} > -1 && $discussion->{commentstatus} == 'enabled') {
+		$posters_uid = $constants->{anonymous_coward_uid} ;
+	}
 
 	my $clean_comment = {
 		subject		=> $tempSubject,
@@ -1157,7 +1154,7 @@ sub submitComment {
 		pid		=> $form->{pid} ,
 		ipid		=> $user->{ipid},
 		subnetid	=> $user->{subnetid},
-		uid		=> $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
+		uid		=> $posters_uid,
 		points		=> $pts,
 		karma_bonus	=> $karma_bonus ? 'yes' : 'no',
 		subscriber_bonus => $subscriber_bonus ? 'yes' : 'no',

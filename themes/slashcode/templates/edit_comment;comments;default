@@ -137,7 +137,7 @@ IF !user.is_anon && user.is_subscriber %]
 		<INPUT TYPE="hidden" NAME="nosubscriberbonus_present" VALUE="1">
 		<INPUT TYPE="checkbox" NAME="nosubscriberbonus"[% form.nosubscriberbonus ? " CHECKED" : "" %]> No Subscriber Bonus
 [% do_br = 1; END;
-IF constants.allow_anonymous && user.karma > -1 && !user.is_anon %]
+IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && discussion.commentstatus == 'enabled'  %]
 		<INPUT TYPE="hidden" NAME="postanon_present" VALUE="1">
 		<INPUT TYPE="checkbox" NAME="postanon"[% form.postanon ? " CHECKED" : "" %]> Post Anonymously
 [% do_br = 1; END;
@@ -151,6 +151,7 @@ IF do_br %]<BR>[% END %]
 	:
 	Slash.createSelect('posttype', formats, user.posttype, 1);
 %]
+
 
 [% IF constants.hc && constants.hc_sw_comments && user.state.hc %]
 	[% IF user.state.hcinvalid %]
