@@ -525,8 +525,7 @@ source /tmp/qidproblem;
 
 # SLASHCODE LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
-# USEPERL LAST UPDATED HERE
 
 # For plugins/Admin (ignore if you're not using that plugin):
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Recent','[% constants.rootdir %]/admin.pl?op=recent',500,18);
-
+# USEPERL LAST UPDATED HERE
