@@ -30,7 +30,7 @@ __template__
 		</TD>
 		[% IF user.3 %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/~[% user.1 | fixparam %]/journal/"><B><EM> Last Journal enty [% Slash.timeCalc(user.3) %]</EM></A>
+				<A HREF="[% constants.rootdir %]/~[% user.1 | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(user.3) %]</EM></A>
 			</TD>
 		[% ELSE %]
 			<TD VALIGN="TOP">
@@ -39,7 +39,7 @@ __template__
 		[% END %]
 		[% UNLESS user.is_anon %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% user.0 %]">Add Friend</A>
+				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% user.2 %]">Add Friend</A>
 			</TD>
 		[% END %]
 		</TR>
