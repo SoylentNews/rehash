@@ -30,6 +30,7 @@ my %mimetypes = (
 	eps  => 'application/postscript',
 	zip  => 'application/zip',
 	doc  => 'application/msword',
+	xls  => 'application/ms-excel',
 	pdf  => 'application/pdf',
 	gz   => 'application/x-gzip',
 	bz2  => 'application/x-bzip2',
