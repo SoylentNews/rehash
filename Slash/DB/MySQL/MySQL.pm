@@ -715,8 +715,8 @@ sub getStoryDiscussions {
 	my $where = "displaystatus != -1
 		AND discussions.sid=stories.sid
 		AND time <= NOW()
-		AND discussions.writestatus != 'delete'
-		AND discussions.writestatus != 'archived'";
+		AND stories.writestatus != 'delete'
+		AND stories.writestatus != 'archived'";
 
 	if ($section) {
 		$where .= " AND discussions.section = '$section'"
