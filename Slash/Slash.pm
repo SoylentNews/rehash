@@ -1225,15 +1225,15 @@ sub _hard_dispComment {
 			} 
 			if ($user->{people}{FOE()}{$person}) {
 				my $title = $user->{people}{people_bonus_foe} ? "Foe ($user->{people}{people_bonus_foe})" : "Foe";
-				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/foe.gif" ALT="$title" TITLE="$title"></A> |;
+				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/foe.gif" ALT="$title" TITLE="$title"></A>|;
 			} 
 			if ($user->{people}{FAN()}{$person}) {
 				my $title = $user->{people}{people_bonus_fan} ? "Fan ($user->{people}{people_bonus_fan})" : "Fan";
-				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/fan.gif" ALT="$title" TITLE="$title"></A> |;
+				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/fan.gif" ALT="$title" TITLE="$title"></A>|;
 			} 
 			if ($user->{people}{FREAK()}{$person}) {
 				my $title = $user->{people}{people_bonus_freak} ? "Freak ($user->{people}{people_bonus_freak})" : "Freak";
-				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/freak.gif" ALT="$title" TITLE="$title"></A> |;
+				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/freak.gif" ALT="$title" TITLE="$title"></A>|;
 			} 
 			if ($user->{people}{FOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_fof} ? "Friend of a Friend ($user->{people}{people_bonus_fof})" : "Friend of a Friend";
@@ -1241,7 +1241,7 @@ sub _hard_dispComment {
 			} 
 			if ($user->{people}{EOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_eof} ? "Foe of a Friend ($user->{people}{people_bonus_eof})" : "Foe of a Friend";
-				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/eof.gif" ALT="$title" TITLE="$title"></A> |;
+				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/eof.gif" ALT="$title" TITLE="$title"></A>|;
 			} 
 		}
 	}
