@@ -477,6 +477,42 @@ whitespace/newlines like extrans.
 
 =back
 
+=item XML Encoding
+
+When putting text into XML, such as RSS, we normally assume that the
+text is HTML going in, and HTML coming out.  That is, except for
+E<gt>linkE<lt> elements, which are assumed to be usable URLs, not
+necessarily text that is usable in HTML.  That would be the difference
+between:
+
+	http://example.com/foo?bar=1&baz=2
+
+And:
+
+	http://example.com/foo?bar=1&amp;baz=2
+
+There are two functions for encoding text into XML, and one for
+decoding from XML.
+
+=over 4
+
+=item xmlencode
+
+Standard function for encoding text into XML, which assumes text is
+in HTML.
+
+=item xmlencode_plain
+
+To be used only when the text is, quite specifically, to be able to
+be used directly as-is, with no conversion to or from HTML.
+
+=item xmldecode
+
+Decodes text from XML.  To decode HTML text in the XML,
+use HTML::Entities::decode_entities() after xmldecode().
+
+=back
+
 =back
 
 
@@ -965,6 +1001,9 @@ get/gets/set/sets/create/exists/delete
 =head1 CHANGES
 
 	$Log$
+	Revision 1.3  2001/04/23 17:00:56  pudge
+	Include XML encoding/decoding
+	
 	Revision 1.2  2001/04/13 18:13:59  pudge
 	Add slashstyle and boilerplates to MAIN
 	
