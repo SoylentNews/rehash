@@ -66,7 +66,7 @@ $task{$me}{code} = sub {
 		slashdLog('Daily Archival Begin');
 		my @count = archiveStories($virtual_user, $constants,
 			$slashdb, $user, $astories);
-		slashdLog("Daily Archival End ($count[0] articles in $count[1]s)");
+		slashdLog("Daily Archival End ($count[0] of $count[1] articles in $count[2]s)");
 	}
 
 	# Takes approx. 15 seconds on Slashdot
@@ -80,14 +80,15 @@ sub archiveStories {
 	# Story archival.
 	my $starttime = Time::HiRes::time();
 	my $db = getObject('Slash::DB', { db_type => 'reader' });
-	my $vu = $db->{virtual_user};
+	my $vu = "virtual_user=$db->{virtual_user}";
 	
+	my $totalTriedStories = 0;
 	my $totalChangedStories = 0;
 	for (@{$to_archive}) {
 		my($sid, $title, $section) = @{$_};
 
 		slashdLog("Archiving $sid") if verbosity() >= 2;
-		$totalChangedStories++;
+		$totalTriedStories++;
 
 		# We need to pull some data from a file that article.pl will
 		# write to.  But first it needs us to create the file and
@@ -98,13 +99,14 @@ sub archiveStories {
 		my($filename, $logmsg);
 		if ($section) {
 			$filename = "$constants->{basedir}/$section/$sid.shtml";
-			$logmsg = "$me archived $section:$sid ($title)";
+			$logmsg = "archived $section:$sid ($title)";
 			$args .= " section='$section'";
 			makeDir($constants->{basedir}, $section, $sid);
 		} else {
 			$filename = "$constants->{basedir}/$sid.shtml";
-			$logmsg = "$me archived $sid ($title)";
+			$logmsg = "archived $sid ($title)";
 		}
+		slashdLog("prog2file: $constants->{basedir}/article.pl $args") if verbosity() >= 3;
 		prog2file(
 			"$constants->{basedir}/article.pl",
 			$filename, {
@@ -123,11 +125,12 @@ sub archiveStories {
 				commentcount => $cc,
 				hitparade    => $hp,
 			});
+			$totalChangedStories++;
 		}
 	}
 	my $duration = sprintf("%.2f", Time::HiRes::time() - $starttime);
 	
-	return ($totalChangedStories, $duration);
+	return ($totalTriedStories, $totalChangedStories, $duration);
 };
 
 sub _make_cchp_file {
