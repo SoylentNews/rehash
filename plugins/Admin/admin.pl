@@ -1172,6 +1172,11 @@ sub editStory {
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
 
+		$storyref->{introtext} =~ s/^<P>//;
+		$storyref->{introtext} =~ s/^<BR>//;
+		$storyref->{introtext} =~ s/<P>$//;
+		$storyref->{introtext} =~ s/<BR>$//;
+
 		for my $field (qw( introtext bodytext )) {
 			$storyref->{$field} = $slashdb->autoUrl(
 				$form->{section}, $storyref->{$field});
