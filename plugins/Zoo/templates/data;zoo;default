@@ -26,6 +26,9 @@ __template__
 [% CASE 'nofans' %]
 	[% nickname %]  is either loved by all or just invisible.
 
+[% CASE 'nofreaks' %]
+	[% nickname %]  is hated by no one.
+
 [% CASE 'nofoes' %]
 	[% nickname %]  loves everyone or plays their cards very close to their chest.
 
@@ -34,6 +37,9 @@ __template__
 
 [% CASE 'yournofans' %]
 	You are either loved by all or just invisible.
+
+[% CASE 'yournofriends' %]
+	These are the people who the voices in your head tell you to worry about.
 
 [% CASE 'yournofoes' %]
 	You love everyone or you play your cards very close to your chest.
@@ -47,6 +53,9 @@ __template__
 [% CASE 'fanshead' %]
 	Fans of [% nickname %]
 
+[% CASE 'freakshead' %]
+	Freaks of [% nickname %]
+
 [% CASE 'yourfriendshead' %]
 	Your friends	
 
@@ -54,6 +63,9 @@ __template__
 	Your foes
 
 [% CASE 'yourfanshead' %]
+	Your fans
+
+[% CASE 'yourfreakshead' %]
 	Your fans
 
 [% END %]

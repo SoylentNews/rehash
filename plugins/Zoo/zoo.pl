@@ -34,9 +34,7 @@ sub main {
 		friends		=> [ 1,			\&friends		],
 		fans		=> [ 1,			\&fans		],
 		foes		=> [ 1,			\&foes		],
-		freaks		=> [ 0,			\&list		],
-		editfriend		=> [ $user_ok,			\&edit		],
-		editfoe		=> [ $user_ok,			\&edit		],
+		freaks		=> [ 1,			\&freaks		],
 		default		=> [ 0,			\&list	],
 	);
 
@@ -47,13 +45,9 @@ sub main {
 		return;
 	}
 
-	# hijack RSS feeds
-	if ($form->{content_type} eq 'rss') {
-		# Do nothing for the moment.
-	} else {
-		$ops{$op}[FUNCTION]->($zoo, $constants, $user, $form, $slashdb);
-		footer();
-	}
+	$ops{$op}[FUNCTION]->($zoo, $constants, $user, $form, $slashdb);
+	footer()
+		unless ($form->{content_type} eq 'rss');
 }
 
 sub list {
@@ -82,20 +76,25 @@ sub friends {
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	if ($editable) {
-		_printHead("yourfriendshead");
-	} else {
-		_printHead("friendshead", { nickname => $nick });
-	}
-	
 	my $friends = $zoo->getFriends($uid); 
-	if (@$friends) {
-		slashDisplay('plainlist', { people => $friends, editable => $editable });
+		
+	if ($form->{content_type} eq 'rss') {
+		_rss($friends, $nick, 'friends');
 	} else {
 		if ($editable) {
-			print getData('yournofriends');
+			_printHead("yourfriendshead");
 		} else {
-			print getData('nofriends', { nickname => $nick });
+			_printHead("friendshead", { nickname => $nick });
+		}
+		
+		if (@$friends) {
+			slashDisplay('plainlist', { people => $friends, editable => $editable });
+		} else {
+			if ($editable) {
+				print getData('yournofriends');
+			} else {
+				print getData('nofriends', { nickname => $nick });
+			}
 		}
 	}
 }
@@ -113,20 +112,25 @@ sub foes {
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	if ($editable) {
-		_printHead("yourfoeshead");
-	} else {
-		_printHead("foeshead", { nickname => $nick });
-	}
-	
 	my $foes = $zoo->getFoes($uid); 
-	if (@$foes) {
-		slashDisplay('plainlist', { people => $foes, editable => $editable });
+
+	if ($form->{content_type} eq 'rss') {
+		_rss($foes, $nick, 'foes');
 	} else {
 		if ($editable) {
-			print getData('yournofoes');
+			_printHead("yourfoeshead");
 		} else {
-			print getData('nofoes', { nickname => $nick });
+			_printHead("foeshead", { nickname => $nick });
+		}
+		
+		if (@$foes) {
+			slashDisplay('plainlist', { people => $foes, editable => $editable });
+		} else {
+			if ($editable) {
+				print getData('yournofoes');
+			} else {
+				print getData('nofoes', { nickname => $nick });
+			}
 		}
 	}
 }
@@ -143,20 +147,58 @@ sub fans {
 		$nick = $user->{nick};
 	}
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	if ($editable) {
-		_printHead("yourfanshead");
-	} else {
-		_printHead("fanshead",{ nickname => $nick });
-	}
-
 	my $fans = $zoo->getFans($uid);
-	if (@$fans) {
-		slashDisplay('plainlist', { people => $fans, editable => $editable });
+
+	if ($form->{content_type} eq 'rss') {
+		_rss($fans, $nick, 'fans');
 	} else {
 		if ($editable) {
-			print getData('yournofans');
+			_printHead("yourfanshead");
 		} else {
-			print getData('nofans', { nickname => $nick });
+			_printHead("fanshead",{ nickname => $nick });
+		}
+		if (@$fans) {
+			slashDisplay('plainlist', { people => $fans, editable => $editable });
+		} else {
+			if ($editable) {
+				print getData('yournofans');
+			} else {
+				print getData('nofans', { nickname => $nick });
+			}
+		}
+	}
+}
+
+sub freaks {
+	my($zoo, $constants, $user, $form, $slashdb) = @_;
+
+	my ($uid, $nick);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
+	} else {
+		$uid = $user->{uid};
+		$nick = $user->{nick};
+	}
+	my $editable = ($uid == $user->{uid} ? 1 : 0);
+	my $freaks = $zoo->getFreaks($uid);
+
+	if ($form->{content_type} eq 'rss') {
+		_rss($freaks, $nick, 'freaks');
+	} else {
+		if ($editable) {
+			_printHead("yourfreakshead");
+		} else {
+			_printHead("freakshead",{ nickname => $nick });
+		}
+		if (@$freaks) {
+			slashDisplay('plainlist', { people => $freaks, editable => $editable });
+		} else {
+			if ($editable) {
+				print getData('yournofreaks');
+			} else {
+				print getData('nofreaks', { nickname => $nick });
+			}
 		}
 	}
 }
@@ -243,6 +285,28 @@ sub _printHead {
 	my $title = getData($head, $data);
 	header($title);
 	slashDisplay("zoohead", { title => $title });
+}
+
+sub _rss {
+	my ($entries, $nick, $type) = @_;
+	my $constants = getCurrenStatic();
+	my @items;
+	for my $entry (@$entries) {
+		push @items, {
+			title	=> $entry->[1],
+			'link'	=> ($constants->{absolutedir} . '/~' . fixparam($entry->[1])  . "/"),
+		};
+	}
+
+	xmlDisplay(rss => {
+		channel => {
+			title		=> "$constants->{sitename} $nick's ${type}",
+			'link'		=> "$constants->{absolutedir}/",
+			description	=> "$constants->{sitename} $nick's ${type}",
+		},
+		image	=> 1,
+		items	=> \@items
+	});
 }
 
 createEnvironment();
