@@ -10,6 +10,12 @@ slash-1.0.8, 2000.07.xx
 *	Remove <rss> tag in RDF file / slashd for now (address
 	more fully in bender)
 
+*	Fix portald to be more liberal in which ampersands it decides
+	not to convert in slashboxes
+
+*	Fix users.pl to filter realemail, fakeemail, and homepage
+	more reasonably
+
 
 slash-1.0.7, 2000.07.12
 -----------------------
