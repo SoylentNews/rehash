@@ -574,3 +574,9 @@ ALTER TABLE section_extras MODIFY COLUMN type enum("text","list","topics") DEFAU
 INSERT INTO code_param (type, code, name) VALUES ('submission-state',0,'Pending');
 INSERT INTO code_param (type, code, name) VALUES ('submission-state',1,'Rejected');
 INSERT INTO code_param (type, code, name) VALUES ('submission-state',2,'Accepted');
+
+# For plugins/Repository (ignore if you're not using that plugin):
+DELETE FROM templates WHERE name='listRepository' AND page='repository' AND section='default';
+# (this template was renamed; the new "listRepos" will be added back
+# in with a "template-tool -U")
+
