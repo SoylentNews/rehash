@@ -109,19 +109,19 @@ my $start_time = Time::HiRes::time;
 
 	return do_rss($reader, $constants, $user, $form, $stories, $section) if $rss;
 
-printf STDERR scalar(localtime) . " index.pl $$ preheader %5.3f\n", (Time::HiRes::time - $start_time);
-
 	my $title = getData('head', { section => $section });
 	header($title, $section->{section}) or return;
 
-printf STDERR scalar(localtime) . " index.pl $$ header %5.3f\n", (Time::HiRes::time - $start_time);
+	# TIMING MARKPOINT
+	# Median 0.090 seconds, 90th percentile 0.145 seconds
 
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
 	# index_more block (aka Older Stuff).
 	$Stories = displayStories($stories);
 
-printf STDERR scalar(localtime) . " index.pl $$ displayStories %5.3f\n", (Time::HiRes::time - $start_time);
+	# TIMING MARKPOINT
+	# Median 0.437 seconds, 90th percentile 1.078 seconds
 
 	my($first_date, $last_date) = ($stories->[0]{time}, $stories->[-1]{time});
 	$first_date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
@@ -131,7 +131,8 @@ printf STDERR scalar(localtime) . " index.pl $$ displayStories %5.3f\n", (Time::
 		{ first_date => $first_date, last_date => $last_date }
 	);
 
-printf STDERR scalar(localtime) . " index.pl $$ displayStandardBlocks %5.3f\n", (Time::HiRes::time - $start_time);
+	# TIMING MARKPOINT
+	# Median 0.235 seconds, 90th percentile 0.513 seconds
 
 	slashDisplay('index', {
 		metamod_elig	=> scalar $reader->metamodEligible($user),
@@ -140,10 +141,8 @@ printf STDERR scalar(localtime) . " index.pl $$ displayStandardBlocks %5.3f\n", 
 		boxes		=> $StandardBlocks,
 	});
 
-printf STDERR scalar(localtime) . " index.pl $$ slashDisplay %5.3f\n", (Time::HiRes::time - $start_time);
-
 	# TIMING MARKPOINT
-	# Median 0.814 seconds, 90th percentile 1.551 seconds
+	# Median 0.052 seconds, 90th percentile 0.084 seconds
 
 	footer();
 
