@@ -96,7 +96,7 @@ sub getSubscriberList {
 		"spid,
 		 subscribe_payments.uid as uid,
 		 email, ts, payment_gross, payment_net, pages,
-		 method, transaction_id, data,
+		 method, transaction_id, data, memo,
 		 nickname, realemail, seclev, author,
 		 karma, m2fair, m2unfair, upmods, downmods, created_at,
 		 users_hits.hits as hits, hits_bought, hits_paidfor",
