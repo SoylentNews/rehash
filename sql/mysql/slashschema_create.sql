@@ -382,7 +382,6 @@ CREATE TABLE pollanswers (
 DROP TABLE IF EXISTS pollquestions;
 CREATE TABLE pollquestions (
 	qid mediumint UNSIGNED NOT NULL auto_increment,
-	sid char(16),
 	question char(255) NOT NULL,
 	voters mediumint,
 	topic smallint UNSIGNED NOT NULL,
@@ -544,10 +543,12 @@ CREATE TABLE stories (
 	hitparade varchar(64) DEFAULT '0,0,0,0,0,0,0' NOT NULL,
 	writestatus ENUM("ok","delete","dirty","archived") DEFAULT 'ok' NOT NULL,
 	day_published date DEFAULT '0000-00-00' NOT NULL,
+	qid MEDIUMINT UNSIGNED DEFAULT NULL,
 	PRIMARY KEY (sid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (tid) REFERENCES topics(tid),
 	FOREIGN KEY (section) REFERENCES sections(section),
+	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	INDEX frontpage (displaystatus, writestatus,section),
 	INDEX time (time), /* time > now() shows that this is still valuable, even with frontpage -Brian */
 	INDEX submitter (submitter),

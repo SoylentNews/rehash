@@ -1760,48 +1760,72 @@ sub getAuthorDescription {
 }
 
 ########################################################
-# This method does not follow basic guidlines
-sub getPollVoter {
-	my($self, $id) = @_;
+# Someday we'll support closing polls, in which case this method
+# may return 0 sometimes.
+sub isPollOpen {
+	my($self, $qid) = @_;
+	return 1;
+}
+
+########################################################
+# Has this "user" already voted in a particular poll?  "User" here is
+# specially taken to mean a conflation of IP address (possibly thru proxy)
+# and uid, such that only one anonymous reader can post from any given
+# IP address.
+sub hasVotedIn {
+	my($self, $qid) = @_;
 
 	my $md5 = md5_hex($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR});
-	my $id_quoted = $self->sqlQuote($id);
+	my $qid_quoted = $self->sqlQuote($qid);
+	# Yes, qid/id/uid is a key in pollvoters.
 	my($voters) = $self->sqlSelect('id', 'pollvoters',
-		"qid=$id_quoted AND id='$md5' AND uid=$ENV{SLASH_USER}"
+		"qid=$qid_quoted AND id='$md5' AND uid=$ENV{SLASH_USER}"
 	);
 
-	return $voters;
+	# Should be a max of one row returned.  In any case, if any
+	# data is returned, this "user" has already voted.
+	return $voters ? 1 : 0;
 }
 
 ########################################################
 # Yes, I hate the name of this. -Brian
+# Presumably because it also saves poll answers, and number of
+# votes cast for those answers, and optionally attaches the
+# poll to a story.  Can we think of a better name than
+# "savePollQuestion"? - Jamie
 sub savePollQuestion {
 	my($self, $poll) = @_;
 	$poll->{section} ||= getCurrentStatic('defaultsection');
 	$poll->{voters} ||= "0";
 	my $qid_quoted = "";
 	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
+	my $sid_quoted = "";
+	$sid_quoted = $self->sqlQuote($poll->{sid}) if $poll->{sid};
 	if ($poll->{qid}) {
 		$self->sqlUpdate("pollquestions", {
 			question	=> $poll->{question},
 			voters		=> $poll->{voters},
 			topic		=> $poll->{topic},
 			section		=> $poll->{section},
-			sid		=> $poll->{sid},
 			-date		=>'now()'
 		}, "qid	= $qid_quoted");
+		$self->sqlUpdate("stories", {
+			qid		=> $poll->{qid}
+		}, "sid = $sid_quoted") if $sid_quoted;
 	} else {
 		$self->sqlInsert("pollquestions", {
 			question	=> $poll->{question},
 			voters		=> $poll->{voters},
 			topic		=> $poll->{topic},
 			section		=> $poll->{section},
-			sid		=> $poll->{sid},
 			uid		=> getCurrentUser('uid'),
 			-date		=>'now()'
 		});
 		$poll->{qid} = $self->getLastInsertId();
 		$qid_quoted = $self->sqlQuote($poll->{qid});
+		$self->sqlUpdate("stories", {
+			qid		=> $poll->{qid}
+		}, "sid = $sid_quoted") if $sid_quoted;
 	}
 
 	$self->setVar("currentqid", $poll->{qid}) if $poll->{currentqid};
@@ -2720,26 +2744,44 @@ sub getTopNewsstoryTopics {
 
 ##################################################################
 # Get poll
+# Until today, this has returned an arrayref of arrays, each
+# subarray having 5 values (question, answer, aid, votes, qid).
+# Since sid can no longer point to more than one poll, there
+# can now be only one question, so there's no point in repeating
+# it;  the return format is now a hashref.  Only one place in the
+# core code calls this (Slash::Utility::Display::pollbooth) and
+# only one template (pollbooth;misc;default) uses its values;
+# both have been updated of course.  - Jamie 2002/04/03
 sub getPoll {
 	my($self, $qid) = @_;
-
-	my $col = 'qid';
-	# might want to select by sid ...
-	if ($qid !~ /^\d+$/) {
-		$col = 'sid';
+	my $qid_quoted = $self->sqlQuote($qid);
+	# First select info about the question...
+	my $pollq = $self->sqlSelectHashref(
+		"*", "pollquestions",
+		"qid=$qid_quoted");
+	# Then select all the answers.
+	my $answers_hr = $self->sqlSelectAllHashref(
+		"aid",
+		"aid, answer, votes",
+		"pollanswers",
+		"qid=$qid_quoted"
+	);
+	# Do the sort in perl, it's faster than asking the DB to do
+	# an ORDER BY.
+	my @answers = ( );
+	for my $aid (sort
+		{ $answers_hr->{$a}{aid} <=> $answers_hr->{$b}{aid} }
+		keys %$answers_hr) {
+		push @answers, {
+			answer =>	$answers_hr->{$aid}{answer},
+			aid =>		$answers_hr->{$aid}{aid},
+			votes =>	$answers_hr->{$aid}{votes},
+		};
 	}
-	$qid = $self->sqlQuote($qid);
-	my $sth = $self->{_dbh}->prepare_cached("
-		SELECT question,answer,aid,votes,pollquestions.qid  from pollquestions, pollanswers
-		WHERE pollquestions.qid=pollanswers.qid AND
-		pollquestions.$col=$qid
-		ORDER BY pollanswers.aid
-	");
-	$sth->execute;
-	my $polls = $sth->fetchall_arrayref;
-	$sth->finish;
-
-	return $polls;
+	return {
+		pollq =>	$pollq,
+		answers =>	\@answers
+	};
 }
 
 ##################################################################

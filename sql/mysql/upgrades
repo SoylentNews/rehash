@@ -123,6 +123,8 @@ ALTER TABLE sections ADD	cookiedomain varchar(128) DEFAULT '' NOT NULL;
 # freshenup.pl chunks article .shtml files
 INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100','Maximum number of article.shtml files to write at a time in freshenup.pl');
 
+# Start of T_2_3_0_20
+
 # New hooks table
 DROP TABLE IF EXISTS hooks;
 CREATE TABLE hooks (
@@ -133,3 +135,12 @@ CREATE TABLE hooks (
 	PRIMARY KEY (id),
 	UNIQUE hook_param (param,class,subroutine)
 ) TYPE = myisam;
+
+ALTER TABLE stories ADD COLUMN qid MEDIUMINT UNSIGNED DEFAULT NULL;
+
+perl -MSlash::Test=virtusername -le '$qs = $slashdb->sqlSelectAllHashrefArray("qid, pollquestions.sid AS sid", "pollquestions, stories", "pollquestions.sid=stories.sid"); for my $hr (@$qs) { my($q,$s) = ($hr->{qid}, $hr->{sid}); my $sq=$slashdb->sqlQuote($s); print "$q -> $s\n"; $slashdb->sqlUpdate("stories", { qid => $q }, "sid=$sq") or die "\tFAILED" }'
+
+# (and, once we're convinced everything works)
+ALTER TABLE pollquestions DROP COLUMN sid;
+
+

@@ -3,9 +3,12 @@ default
 __description__
 Prints a pollbooth
 
-* polls = arrayref of answer arrayrefs [question, answer, answer ID]
 * question = question text
+* answers = arrayref of hashrefs (answer, aid, votes)
 * qid = question ID
+* poll_open = is this poll still open?
+* has_voted = has this user already voted?
+* can_vote = can this user still vote?
 * voters = number of voters
 * comments = number of comments
 * sect = section
@@ -20,36 +23,39 @@ __name__
 pollbooth
 __template__
 [% USE Slash %]
-[% IF Slash.db.getPollVoter(qid) %]
-<B>[% question %]</B>
+[% IF !can_vote %]
 
-[% FOREACH ans = polls %][% answer = ans.1; aid = ans.2; votes = ans.3 %]
-	<LI> [% answer %] ([% votes %])
-[% END %]
+	<B>[% question %]</B>
 
-<P><EM>(You've already voted.)</EM><BR>
-[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&amp;qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-<A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]"><B>Polls</B></A> ] <BR>
-Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
+	[% FOREACH ans = answers %]
+		<BR>&middot; [% ans.answer %] ([% ans.votes %])
+	[% END %]
+
+	<P><EM>[% IF has_voted %](You've already voted.)[% ELSIF !poll_open %](Poll is closed.)[% END %]</EM><BR>
+	[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&amp;qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
+	<A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]"><B>Polls</B></A> ] <BR>
+	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
 
 [% ELSE %]
 
-<FORM ACTION="[% constants.rootdir %]/pollBooth.pl">
-	<INPUT TYPE="hidden" NAME="qid" VALUE="[% qid | strip_attribute %]">
-	[% IF user.currentSection %]
-	<INPUT TYPE="hidden" NAME="section" VALUE="[% user.currentSection %]">
+	<FORM ACTION="[% constants.rootdir %]/pollBooth.pl">
+		<INPUT TYPE="hidden" NAME="qid" VALUE="[% qid | strip_attribute %]">
+		[% IF user.currentSection %]
+		<INPUT TYPE="hidden" NAME="section" VALUE="[% user.currentSection | strip_attribute %]">
+		[% END %]
+	<B>[% question %]</B>
+
+	[% FOREACH ans = answers %]
+		<BR><INPUT TYPE="radio" NAME="aid"
+		VALUE="[% ans.aid | strip_attribute %]">[% ans.answer | strip_html %]
 	[% END %]
-<B>[% question %]</B>
 
-[% FOREACH ans = polls %][% answer = ans.1; aid = ans.2; votes = ans.3 %]
-	<BR><INPUT TYPE="radio" NAME="aid" VALUE="[% aid %]">[% answer %]
-[% END %]
+	<BR><INPUT TYPE="submit" VALUE="Vote">
+	[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&amp;qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
+	<A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]"><B>Polls</B></A> ] <BR>
+	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
+	</FORM>
 
-<BR><INPUT TYPE="submit" VALUE="Vote">
-[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&amp;qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-<A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]"><B>Polls</B></A> ] <BR>
-Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
-</FORM>
 [% END %]
 __seclev__
 10000

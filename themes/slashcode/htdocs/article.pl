@@ -57,7 +57,7 @@ sub main {
 		};
 		header($links, $story->{section});
 
-		my $pollbooth = pollbooth($story->{sid}, 1);
+		my $pollbooth = pollbooth($story->{qid}, 1);
 		slashDisplay('display', {
 			poll			=> $pollbooth,
 			section			=> $SECT,

@@ -505,28 +505,38 @@ sub pollbooth {
 	my $constants = getCurrentStatic();
 	my $sect = getCurrentUser('currentSection');
 
+	# If no/undef qid, but pollbooth was called anyway, display
+	# the current (sitewide) poll.
 	$qid = $slashdb->getVar('currentqid', 'value') unless $qid;
+	# If no/undef qid and no sitewide poll, short-circuit out.
 	return "" if $qid eq "";
 
-	my $polls = $slashdb->getPoll($qid);
-	return "" unless @$polls;
-
-	# in case $qid was really an sid
-	$qid = $polls->[0][-1];
-	my $poll_q = $slashdb->getPollQuestion($qid);
-	return "" unless keys %$poll_q;
+	my $poll = $slashdb->getPoll($qid);
+	return "" unless %$poll;
+	my $n_comments = $slashdb->countCommentsBySid(
+		$poll->{pollq}{discussion});
+	my $poll_open = $slashdb->isPollOpen($qid);
+	my $has_voted = $slashdb->hasVotedIn($qid);
+	my $can_vote = !$has_voted && $poll_open;
 
 	my $pollbooth = slashDisplay('pollbooth', {
-		polls		=> $polls,
-		question	=> $polls->[0][0],
+		question	=> $poll->{pollq}{question},
+		answers		=> $poll->{answers},
 		qid		=> $qid,
-		voters		=> $poll_q->{voters},
-		comments	=> $slashdb->countCommentsBySid($poll_q->{discussion}),
+		poll_open	=> $poll_open,
+		has_voted	=> $has_voted,
+		can_vote	=> $can_vote,
+		voters		=> $poll->{pollq}{voters},
+		comments	=> $n_comments,
 		sect		=> $sect,
 	}, 1);
 
-	return $pollbooth if $no_table;
-	fancybox($constants->{fancyboxwidth}, 'Poll', $pollbooth, $center, 1);
+	return $no_table
+		? $pollbooth
+		: fancybox(
+			$constants->{fancyboxwidth}, 'Poll',
+			$pollbooth, $center, 1
+		);
 }
 
 #========================================================================

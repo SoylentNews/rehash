@@ -35,8 +35,11 @@ __template__
 [% CASE 'uid_voted' %]
 	[% user.nickname %] at [% env.remote_addr %] has already voted.
 	[% IF env.http_x_forwarded_for %]
-	(proxy for env.http_x_forwarded_for)
+	(proxy for [% env.http_x_forwarded_for %])
 	[% END %]
+
+[% CASE 'poll_closed' %]
+	Voting is closed on this poll.
 
 [% CASE 'success' %]
 	Your vote ([% aid %]) has been registered.

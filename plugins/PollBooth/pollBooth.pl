@@ -198,10 +198,15 @@ sub vote {
 	if (getCurrentUser('is_anon') and ! getCurrentStatic('allow_anonymous')) {
 		$notes = getData('anon');
 	} elsif ($aid > 0) {
-		my $id = $slashdb->getPollVoter($qid);
+		my $poll_open = $slashdb->isPollOpen($qid);
+		my $has_voted = $slashdb->hasVotedIn($qid);
 
-		if ($id) {
+		if ($has_voted) {
+			# Specific reason why can't vote.
 			$notes = getData('uid_voted');
+		} elsif (!$poll_open) {
+			# Voting is closed on this poll.
+			$notes = getData('poll_closed');
 		} elsif (exists $all_aid{$aid}) {
 			$notes = getData('success', { aid => $aid });
 			$slashdb->createPollVoter($qid, $aid);
