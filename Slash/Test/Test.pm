@@ -258,7 +258,6 @@ sub _getTemplate {
 	} elsif ($template =~ /^(\w+);(\w+);(\w+)$/) {
 		($template, $page, $section) = ($1, $2, $3)
 	}
-print STDERR "_gT template='$template' page='$page' section='$section'\n";
 
 	$data->{Page}    = $page if $page;
 	$data->{Section} = $section if $section;
