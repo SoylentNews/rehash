@@ -571,7 +571,7 @@ sub printComments {
 
 	# Flat and theaded mode don't index, even on large stories, so they
 	# need to use more, smaller pages. 		--Pater
-	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested') ? $comments->{0}{totals}[$user->{threshold}] : $cc;
+	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested') ? $comments->{0}{totals}[$user->{threshold} + 1] : $cc;
 
 	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
 	my $comment_html = slashDisplay('printCommComments', {
