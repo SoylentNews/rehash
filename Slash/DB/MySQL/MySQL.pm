@@ -2255,7 +2255,7 @@ sub getDBs {
 	}
 
 	my $old = {};
-	$constants->{dbs_revive_seconds} ||= 30;
+	my $dbs_revive_seconds = $constants->{dbs_revive_seconds} || 30;
 	if ($cache->{'dbs'}) {
 		for my $v (values %{$cache->{'dbs'}}) {
 			for my $db (@$v) {
@@ -2287,7 +2287,7 @@ sub getDBs {
 		# if DB was down in previous cache, slowly bring it back in
 		} elsif (keys %$old) {
 			$db->{_weight_factor} =  defined($old->{$db->{id}}) ? $old->{$db->{id}} : 1;
-			$db->{_weight_factor} += (10 / $constants->{dbs_revive_seconds})
+			$db->{_weight_factor} += (10 / $dbs_revive_seconds)
 				if $db->{_weight_factor} < 1;
 			$db->{_weight_factor} = 1 if $db->{_weight_factor} > 1;
 			$weight = int($weight * $db->{_weight_factor} + 1);
@@ -8482,6 +8482,8 @@ sub getStoidFromSid {
 #
 sub _write_stories_cache {
 	my($self, $story) = @_;
+	return if !$story || ref($story) ne 'HASH' || !$story->{stoid}
+		|| $story->{is_future};
 	my $stoid = $story->{stoid};
 	my $sid = $story->{sid};
 	$self->{_stories_cache}{"stoid$stoid"} = $story;
@@ -8613,7 +8615,8 @@ sub getStoriesData {
 		# into both the local cache and memcached.
 		for my $stoid (@stoids_needed) {
 			my $story = $retval->{$stoid};
-			next if $story->{is_future};
+			next if !$story || ref($story) ne 'HASH' || !$story->{stoid}
+				|| $story->{is_future};
 			# If this is the first data we're writing into the
 			# cache, mark the time -- this data, and any other
 			# stories we write into the cache for the next
@@ -8669,11 +8672,13 @@ sub getStory {
 			# out and return it.
 			my $mcdkey = "$self->{_mcd_keyprefix}:st:";
 			if (my $answer = $mcd->get("$mcdkey$stoid")) {
-				# Cache the result.
-				$self->_write_stories_cache($answer);
-				$is_in_local_cache = 1;
-				$got_it_from_memcached = 1;
-#print STDERR "getStory $$ A2 id=$id mcd=$mcd try=$try_memcached answer: " . Dumper($answer);
+				if (ref($answer) eq 'HASH' && $answer->{stoid}) {
+					# Cache the result.
+					$self->_write_stories_cache($answer);
+					$is_in_local_cache = 1;
+					$got_it_from_memcached = 1;
+				}
+#print STDERR "getStory $$ A2 id=$id mcd=$mcd try=$try_memcached got_it_from_mcd=$got_it_from_memcached answer: " . Dumper($answer);
 			}
 		}
 #print STDERR "getStory $$ A3 id=$id mcd=$mcd try=$try_memcached keyprefix=$self->{_mcd_keyprefix} stoid=$stoid\n";

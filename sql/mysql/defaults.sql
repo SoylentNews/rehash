@@ -709,6 +709,7 @@ INSERT INTO vars (name, value, description) VALUES ('daily_attime','00:00:00','T
 INSERT INTO vars (name, value, description) VALUES ('daily_last','2000-01-01 01:01:01','Last time dailyStuff was run (GMT)');
 INSERT INTO vars (name, value, description) VALUES ('daily_tz','EST','Base timezone for running dailyStuff');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
+INSERT INTO vars (name, value, description) VALUES ('dbs_revive_seconds','30','After a DB goes from isalive=no to yes, ramp up accesses to it over how many seconds?');
 INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');
 INSERT INTO vars (name, value, description) VALUES ('debughash_getSkins','','false = no debugging; default regex = ^\d+$');
