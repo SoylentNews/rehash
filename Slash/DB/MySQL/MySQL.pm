@@ -3585,9 +3585,6 @@ sub getNumCommPostedByUID {
 }
 
 ##################################################################
-# This method could stand to be more efficient.  Instead of doing a
-# separate getUser($uid, 'nickname') for each uid, those could be
-# one query. - Jamie 2003/04/11
 sub getUIDStruct {
 	my($self, $column, $id) = @_;
 
@@ -6165,12 +6162,13 @@ sub getSlashConf {
 sub getMCD {
 	my($self) = @_;
 
-	# If we already created it for this object, return it.
-	return $self->{_mcd} if $self->{_mcd};
+	# If we already created it for this object, or if we tried to
+	# create it and failed and assigned it 0, return that.
+	return $self->{_mcd} if defined($self->{_mcd});
 
-	# If we aren't using memcached, return undef.
+	# If we aren't using memcached, return false.
 	my $constants = getCurrentStatic();
-	return undef if !$constants->{memcached} || !$constants->{memcached_servers};
+	return 0 if !$constants->{memcached} || !$constants->{memcached_servers};
 
 	# OK, let's try memcached.  The memcached_servers var is in the format
 	# "10.0.0.15:11211 10.0.0.15:11212 10.0.0.17:11211=3".
@@ -6186,7 +6184,10 @@ sub getMCD {
 		servers =>	[ @servers ],
 		debug =>	$constants->{memcached_debug} > 1 ? 1 : 0,
 	});
-	return undef unless $self->{_mcd};
+	if (!$self->{_mcd}) {
+		# Can't connect; not using it.
+		return $self->{_mcd} = 0;
+	}
 	if ($constants->{memcached_keyprefix}) {
 		$self->{_mcd}{keyprefix} = $constants->{memcached_keyprefix};
 	} else {
@@ -7174,10 +7175,6 @@ sub setUser {
 	return 0 unless $uid;
 
 	my $constants = getCurrentStatic();
-	my $mcd = $self->getMCD();
-	# For now, don't get the AC from memcached, always get it from the DB.
-	$mcd = undef if $uid == $constants->{anonymous_coward_uid};
-	my $mcdkey = "$mcd->{keyprefix}u:" if $mcd;
 
 	my(@param, %update_tables, $cache);
 	my $tables = [qw(
@@ -7195,28 +7192,6 @@ sub setUser {
 
 	# Power to the People
 	$hashref->{people} = freeze($hashref->{people}) if $hashref->{people};
-
-	# What we really should do is delete the memcache entry first, then
-	# write to the DB with autocommit off, then before doing the commit,
-	# write to memcache, then commit -- and on failure, delete the
-	# memcache entry again.  And if there are any keys we're setting
-	# that are prefixed with "-", don't write to memcache at all.
-	# Of course the speed advantage comes from putting user_hits columns
-	# into a separate memcached cache.
-	if ($mcd
-		# for now only do this for debugging purposes
-		&& $constants->{memcached_debug}) {
-		my $start_time = Time::HiRes::time;
-		my $user_cache = $self->getUser($uid);
-		for my $key (keys %$hashref) {
-			$user_cache->{$key} = $hashref->{$key};
-		}
-		$mcd->set("$mcdkey$uid", $user_cache);
-		if ($constants->{memcached_debug}) {
-			my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
-			print STDERR scalar(gmtime) . " mcd $$ setUser elapsed=$elapsed uid '$uid'\n";
-		}
-	}
 
 	# hm, come back to exboxes later; it works for now
 	# as is, since external scripts handle it -- pudge
@@ -7240,6 +7215,16 @@ sub setUser {
 		} else {
 			push @param, [$_, $hashref->{$_}];
 		}
+	}
+
+	# Delete from memcached once before we update the DB.  We only need to
+	# delete if we're touching a table other than users_hits (since nothing
+	# in that table is stored in memcached).
+	my $mcd = $self->getMCD();
+	my $mcd_need_delete = 0;
+	if ($mcd) {
+		$mcd_need_delete = 1 if grep { $_ ne 'users_hits' } keys %update_tables;
+		$self->_getUser_delete_memcached($uid) if $mcd_need_delete;
 	}
 
 	my $rows = 0;
@@ -7304,6 +7289,9 @@ sub setUser {
 		}
 	}
 
+	# And delete from memcached again after we update the DB
+	$self->_getUser_delete_memcached($uid) if $mcd_need_delete;
+
 	return $rows;
 }
 
@@ -7316,177 +7304,496 @@ sub getUsersNicknamesByUID {
 }
 
 ########################################################
-# Now here is the thing. We want getUser to look like
-# a generic, despite the fact that it is not :)
+# We want getUser to look like a generic, despite the fact that
+# it is decidedly not :)
+# New as of 9/2003: if memcached is active, we no longer do piecemeal
+# DB loads of anything less than the full user data.  We grab the
+# users_hits table from the DB and everything else from memcached.
 sub getUser {
-	my($self, $id, $val) = @_;
+	my($self, $uid, $val) = @_;
 	my $answer;
-	my $id_q = $self->sqlQuote($id);
+	my $uid_q = $self->sqlQuote($uid);
 
 	my $constants = getCurrentStatic();
-	my $start_time = Time::HiRes::time;
 	my $mcd = $self->getMCD();
+	my $mcddebug = $mcd && $constants->{memcached_debug};
+	my $start_time;
 	my $mcdkey = "$mcd->{keyprefix}u:" if $mcd;
 	my $mcdanswer;
-	if ($mcd
-		&& $constants->{memcached_debug} # for now only do this for debugging
-		and my $rawmcdanswer = $mcd->get("$mcdkey$id")) {
-		# All set; the full hashref for the requested user is in
-		# $answer with all required keys thawed.  Now we just
-		# need to return a limited portion of it if required.
-		if (ref($val) eq 'ARRAY') {
-			for (@$val) {
-				$mcdanswer->{$_} = $rawmcdanswer->{$_};
-			}
-		} elsif ($val) {
-			$mcdanswer = $rawmcdanswer->{$val};
-		} else {
-			$mcdanswer = $rawmcdanswer;
-		}
-		# If we're debugging, go thru the normal getUser to make
-		# sure we have the same value in memcached.  Otherwise,
-		# return what we just got.
-		if (!$constants->{memcached_debug}) {
-			return $mcdanswer;
-		}
-	}
-	if ($mcd && $constants->{mmemcached_debug}) {
-		my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
-		if (defined $mcdanswer) {
-			print STDERR scalar(gmtime) . " mcd $$ getUser '$mcdkey$id' elapsed=$elapsed cache HIT\n";
-		} else {
-			print STDERR scalar(gmtime) . " mcd $$ getUser '$mcdkey$id' elapsed=$elapsed cache MISS\n";
-		}
+
+	if ($mcddebug > 1) {
+		use Data::Dumper;
+		my $v = Dumper($val); $v =~ s/\s+/ /g;
+		print STDERR scalar(gmtime) . " $$ getUser('$uid' ($uid_q), $v) mcd='$mcd'\n";
 	}
 
-	my $tables = [qw(
-		users users_comments users_index
-		users_info users_prefs users_hits
-	)];
-	my $cache = _genericGetCacheName($self, $tables);
+	# If memcached debug enabled, start timer
+
+	$start_time = Time::HiRes::time if $mcddebug;
+
+	# Figure out, based on what columns we were asked for, which tables
+	# we'll need to consult.  _getUser_get_table_data() caches this data,
+	# so it's pretty quick to return everything we might need.  Note
+	# that, with memcached, it might turn out that we don't need to use
+	# the where clause or whatever;  that's OK.
+	my $gtd = $self->_getUser_get_table_data($uid_q, $val);
+
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ getUser can '$gtd->{can_use_mcd}' key '$mcdkey$uid' gtd: " . Dumper($gtd);
+	}
+
+	my $rawmcdanswer;
+	if ($gtd->{can_use_mcd}
+		and $rawmcdanswer = $mcd->get("$mcdkey$uid")) {
+
+		# Excellent, we can pull some data (maybe all of it)
+		# from memcached.  The data at this point is already
+		# in $rawmcdanswer, now we just need to determine
+		# which portion of it to use.
+		# XXX An optimization here would be, when we're
+		# getting the entire user, to not bother with this
+		# for loop, just set $mcdanswer=$rawmcdanswer.
+		my $cols_still_need = [ ];
+		for my $col (@{$gtd->{cols_needed_ar}}) {
+			if (exists($rawmcdanswer->{$col})) {
+				# This column we can pull from mcd.
+				$mcdanswer->{$col} = $rawmcdanswer->{$col};
+				# If we get anything from mcd, we should
+				# get all the params data, so we no longer
+				# need to get them later.
+				$gtd->{all} = 0;
+			} else {
+				# This one we'll need from DB.
+				push @$cols_still_need, $col;
+			}
+		}
+
+		# Now whatever's left, we get from the DB.  If all went
+		# well, this will just be the data from the users_hits
+		# table (but we don't make that assumption, it works
+		# the same whatever data was stored in memcached).
+		if (@$cols_still_need) {
+			my $table_hr = $self->_getUser_get_select_from_where(
+				$uid_q, $cols_still_need);
+			if ($mcddebug > 1) {
+				print STDERR scalar(gmtime) . " $$ getUser still_need: '@$cols_still_need' table_hr: " . Dumper($table_hr);
+			}
+			$answer = $self->_getUser_do_selects(
+				$uid_q,
+				$table_hr->{select_clause},
+				$table_hr->{from_clause},
+				$table_hr->{where_clause},
+				$gtd->{all} ? "all" : $table_hr->{params_needed});
+		}
+
+		# Now merge the memcached and DB data.
+		for my $col (keys %$answer) {
+			$mcdanswer->{$col} = $answer->{$col};
+		}
+		$answer = $mcdanswer;
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ getUser hit, won't write_memcached\n";
+		}
+
+	} else {
+
+		# Turns out we have to go to the DB for everything.
+		# Fortunately, the info we need to select it all has
+		# been precalculated and cached for us.
+		# We're doing an optimization here for the common case
+		# of an empty $val.  If we're being asked for everything
+		# about the user, select_clause will contain a list of
+		# every column, but it will be faster to just ask the DB
+		# for "*".
+		$answer = $self->_getUser_do_selects(
+			$uid_q,
+			($val ? $gtd->{select_clause} : "*"),
+			$gtd->{from_clause},
+			$gtd->{where_clause},
+			$gtd->{all} ? "all" : $gtd->{params_needed});
+
+		# If we just got all the data for the user, and
+		# memcached is active, write it into the cache.
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ getUser miss, may write_memcached: val '$val' all '$gtd->{all}' can '$gtd->{can_use_mcd}'\n";
+		}
+		if (!$val && $gtd->{all} && $gtd->{can_use_mcd}) {
+			$self->_getUser_write_memcached($answer);
+		}
+		
+	}
+
+	$answer->{uid} ||= $uid;
+
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ getUser answer: " . Dumper($answer);
+	}
 
 	if (ref($val) eq 'ARRAY') {
-		my($values, %tables, @param, $where, $table);
-		for (@$val) {
-			(my $clean_val = $_) =~ s/^-//;
-			if ($self->{$cache}{$clean_val}) {
-				$tables{$self->{$cache}{$_}} = 1;
-				$values .= "$_,";
-			} else {
-				push @param, $_;
-			}
+		# Specific column(s) are needed.
+		my $return_hr = { };
+		for my $col (@$val) {
+			$return_hr->{$col} = $answer->{$val};
 		}
-		chop($values);
-
-		for (sort keys %tables) {
-			$where .= "$_.uid=$id_q AND ";
-		}
-		$where =~ s/ AND $//;
-
-		$table = join ',', keys %tables;
-		$answer = $self->sqlSelectHashref($values, $table, $where)
-			if $values;
-		for (@param) {
-			$answer->{$_} = $self->sqlSelect('value', 'users_param', "uid=$id_q AND name='$_'");
-		}
-
+		$answer = $return_hr;
 	} elsif ($val) {
-		(my $clean_val = $val) =~ s/^-//;
-		my $table = $self->{$cache}{$clean_val};
-		if ($table) {
-			$answer = $self->sqlSelect($val, $table, "uid=$id_q");
+		# Exactly one specific column is needed.
+		$answer = $answer->{$val};
+	}
+
+	if ($mcddebug) {
+		my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
+		if (defined $mcdanswer) {
+			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache HIT\n";
 		} else {
-			# First we try it as an acl param -acs
-			$answer = $self->sqlSelect('value', 'users_param', "uid=$id_q AND name='$val'");
-		}
-
-	} else {
-
-		if (!$answer) {
-
-			# The five-way join is causing us some pain.  For testing, let's
-			# use a var to decide whether to do it that way, or a new way
-			# where we do multiple SELECTs.  Let the var decide how many
-			# SELECTs we do, and if more than 1, the first tables we'll pull
-			# off separately are Rob's suspicions:  users_prefs and
-			# users_comments.
-
-			my $n = getCurrentStatic('num_users_selects') || 1;
-			my @tables_ordered = qw( users users_index
-				users_info users_hits
-				users_comments users_prefs );
-			while ($n > 0) {
-				my @tables_thispass = ( );
-				if ($n > 1) {
-					# Grab the columns from the last table still
-					# on the list.
-					@tables_thispass = pop @tables_ordered;
-				} else {
-					# This is the last SELECT we'll be doing, so
-					# join all remaining tables.
-					@tables_thispass = @tables_ordered;
-				}
-				my $table = join(",", @tables_thispass);
-				my $where = join(" AND ", map { "$_.uid=$id_q" } @tables_thispass);
-				if (!$answer) {
-					$answer = $self->sqlSelectHashref('*', $table, $where);
-				} else {
-					my $moreanswer = $self->sqlSelectHashref('*', $table, $where);
-					for (keys %$moreanswer) {
-						$answer->{$_} = $moreanswer->{$_}
-							unless exists $answer->{$_};
-					}
-				}
-				$n--;
-			}
-
-			my($append_acl, $append);
-			$append_acl = $self->sqlSelectColArrayref('acl', 'users_acl', "uid=$id_q");
-			for (@$append_acl) {
-				$answer->{acl}{$_} = 1;
-			}
-			$append = $self->sqlSelectAll('name,value', 'users_param', "uid=$id_q");
-			for (@$append) {
-				$answer->{$_->[0]} = $_->[1];
-			}
-
+			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache MISS can '$gtd->{can_use_mcd}' rawmcdanswer: " . Dumper($rawmcdanswer);
 		}
 	}
+	
+	return $answer;
+}
 
-	# we have a bit of cleanup to do before returning;
+#
+# _getUser_do_selects
+#
+
+sub _getUser_do_selects {
+	my($self, $uid_q, $select, $from, $where, $params) = @_;
+
+	# Here's the big select, the one that does something like:
+	# SELECT foo, bar, baz FROM users, users_blurb, users_snork
+	# WHERE users.uid=123 AND users_blurb.uid=123 AND so on.
+	# Note if we're being asked to get only params, we skip this.
+	my $answer = { };
+	$answer = $self->sqlSelectHashref($select, $from, $where) if $select;
+
+	# Now get the params and the ACLs.  In the special case
+	# where we are being asked to get "all" params (not an
+	# arrayref of specific params), we also get the ACLs too.
+	my $param_ar = [ ];
+	if ($params eq "all") {
+		$param_ar = $self->sqlSelectAllHashrefArray(
+			"name, value",
+			"users_param",
+			"uid = $uid_q");
+		my $acl_ar = $self->sqlSelectColArrayref(
+			"acl",
+			"users_acl",
+			"uid = $uid_q");
+		for my $acl (@$acl_ar) {
+			$answer->{acl}{$acl} = 1;
+		}
+	} elsif (ref($params) eq 'ARRAY' && @$params) {
+		my $param_list = join(",", @$params);
+		$param_ar = $self->sqlSelectAllHashrefArray(
+			"name, value",
+			"users_param",
+			"uid = $uid_q AND name IN ($param_list)");
+	}
+	for my $hr (@$param_ar) {
+		$answer->{$hr->{name}} = $hr->{value};
+	}
+
+	# We have a bit of cleanup to do before returning;
 	# thaw the people element, and clean up possibly broken
-	# exsect/exaid/extid.  gotta do it separately for hashrefs ...
-	if (ref($answer) eq 'HASH') {
-		for (qw(exaid extid exsect)) {
-			next unless $answer->{$_};
-			$answer->{$_} =~ s/,'[^']+$//;
-			$answer->{$_} =~ s/,'?$//;
-		}
-		$answer->{people} = thaw($answer->{people}) if $answer->{people};
-
-	# ... and for scalars
-	} else {
-		if ($val eq 'people') {
-			$answer = thaw($answer);
-		} elsif ($val =~ m/^ex(?:aid|tid|sect)$/) {
-			$answer =~ s/,'[^']+$//;
-			$answer =~ s/,'?$//;
-		}
+	# exsect/exaid/extid.
+	for my $key (qw( exaid extid exsect )) {
+		next unless $answer->{$key};
+		$answer->{$key} =~ s/,'[^']+$//;
+		$answer->{$key} =~ s/,'?$//;
 	}
-
-	if ($mcdanswer && $constants->{memcached_debug}) {
-		use Data::Dumper;
-		local $Data::Dumper::Sortkeys = 1;
-		my $answer_dumped =	Dumper($answer);
-		my $mcdanswer_dumped =	Dumper($mcdanswer);
-		if ($answer_dumped ne $mcdanswer_dumped) {
-			my $val_dumped = Dumper($val);
-			$val_dumped =~ s/\s+/ /g;
-			print STDERR scalar(gmtime) . " $$ getUser mcd diff on id '$id' val '$val_dumped', answer: ${answer_dumped}mcdanswer: ${mcdanswer_dumped}";
-		}
-	}
+	$answer->{people} = thaw($answer->{people}) if $answer->{people};
 
 	return $answer;
+}
+
+#
+# _getUser_compare_mcd_db
+#
+
+sub _getUser_compare_mcd_db {
+	my($self, $uid_q, $answer, $mcdanswer) = @_;
+	my $constants = getCurrentStatic();
+
+	my $errtext = "";
+
+	use Data::Dumper;
+	local $Data::Dumper::Sortkeys = 1;
+	my %union_keys = map { ($_, 1) } (keys %$answer, keys %$mcdanswer);
+	my @union_keys = sort grep !/^-/, keys %union_keys;
+	for my $key (@union_keys) {
+		my $equal = 0;
+		my($db_an_dumped, $mcd_an_dumped);
+		if (!ref($answer->{$key}) && !ref($mcdanswer->{$key})) {
+			if ($answer->{$key} eq $mcdanswer->{$key}) {
+				$equal = 1;
+			} else {
+				$db_an_dumped = "'$answer->{$key}'";
+				$mcd_an_dumped = "'$mcdanswer->{$key}'";
+			}
+		} else {
+			$db_an_dumped = Dumper($answer->{$key});	$db_an_dumped =~ s/\s+/ /g;
+			$mcd_an_dumped = Dumper($mcdanswer->{$key});	$mcd_an_dumped =~ s/\s+/ /g;
+			$equal = 1 if $db_an_dumped eq $mcd_an_dumped;
+		}
+		if (!$equal) {
+			$errtext .= "\tKEY '$key' DB:  $db_an_dumped\n";
+			$errtext .= "\tKEY '$key' MCD: $mcd_an_dumped\n";
+		}
+	}
+
+	if ($errtext) {
+		$errtext = scalar(gmtime) . " $$ getUser mcd diff on uid $uid_q:"
+			. "\n$errtext";
+		print STDERR $errtext;
+	}
+}
+
+########################################################
+#
+# begin closure
+{
+
+my %gsfwcache = ( );
+my %gtdcache = ( );
+my $all_users_tables = [ qw(
+	users		users_comments		users_index
+	users_info	users_prefs		users_hits	) ];
+my $users_hits_colnames;
+
+#
+# _getUser_get_select_from_where
+#
+# Given a list of needed columns, return the SELECT clause,
+# FROM clause, and WHERE clause necessary to hit the DB to
+# get them.
+
+sub _getUser_get_select_from_where {
+	my($self, $uid_q, $cols_needed) = @_;
+	my $cols_needed_sorted = [ sort @$cols_needed ];
+	my $gsfwcachekey = join("|", @$cols_needed_sorted);
+
+	my $mcd = $self->getMCD();
+	my $constants = getCurrentStatic();
+	my $mcddebug = $mcd && $constants->{memcached_debug};
+
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ gU_gsfw uid $uid_q cols '@$cols_needed_sorted' def=" . (defined($gsfwcache{$gsfwcachekey}) ? 1 : 0) . "\n";
+	}
+	if (!defined($gsfwcache{$gsfwcachekey})) {
+		my $cache_name = _genericGetCacheName($self, $all_users_tables);
+
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ gU_gsfw cache_name '$cache_name'\n";
+		}
+		
+		# Need to figure out which tables we need, based on
+		# which cols we need (and we already know that).
+		# In earlier versions of this code, we stripped
+		# a "-" prefix from the keys passed in, but "-col"
+		# should never be passed to getUser, only setUser,
+		# so we don't have to do that.
+		my %need_table = ( );
+		my $params_needed = [ ];
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ gU_gsfw cache name '$cache_name' cache: " . Dumper($self->{$cache_name});
+		}
+		for my $col (@$cols_needed_sorted) {
+			if ($mcddebug > 1) {
+				print STDERR scalar(gmtime) . " $$ gU_gsfw col '$col' table '$self->{$cache_name}{$col}'\n";
+			}
+			if (my $table_name = $self->{$cache_name}{$col}) {
+				$need_table{$table_name} = 1;
+			} else {
+				push @$params_needed, $col;
+			}
+		}
+		my $tables_needed = [ sort keys %need_table ];
+
+		# Determine the FROM clause (comma-separated tables) and the
+		# WHERE clause (AND users_foo.uid=) to pull data from the DB.
+		my $select_clause = join(",", grep { $_ ne 'uid' } @$cols_needed_sorted);
+		my $from_clause = join(",", @$tables_needed);
+
+		$gsfwcache{$gsfwcachekey} = {
+			tables_needed =>	$tables_needed,
+			select_clause =>	$select_clause,
+			from_clause =>		$from_clause,
+			params_needed =>	$params_needed,
+		};
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ gU_gsfw cache_name '$cache_name' gsfwcache: " . Dumper($gsfwcache{$gsfwcachekey});
+		}
+	}
+	my $return_hr = $gsfwcache{$gsfwcachekey};
+	$return_hr->{where_clause} = "("
+		. join(" AND ",
+			map { "$_.uid=$uid_q" } @{$return_hr->{tables_needed}}
+		  )
+		. ")";
+	return $return_hr;
+}
+
+#
+# _getUser_get_table_data
+#
+
+sub _getUser_get_table_data {
+	my($self, $uid_q, $val) = @_;
+	my $constants = getCurrentStatic();
+	my $mcd = $self->getMCD();
+	my $mcddebug = $mcd && $constants->{memcached_debug};
+	my $cache_name = _genericGetCacheName($self, $all_users_tables);
+
+	my $gtdcachekey;
+	my $tables_needed;
+	my $cols_needed;
+
+	# First, normalize the list of columns we need.
+	if (ref($val) eq 'ARRAY') {
+		# Specific column(s) are needed.
+		$cols_needed = $val;
+	} elsif ($val) {
+		# Exactly one specific column is needed.
+		$cols_needed = [ $val ];
+	} else {
+		# All columns are needed.  Special case of gtdcachekey.
+		$gtdcachekey = "__ALL__";
+		# And we only need to do this processing if this case
+		# is not in the cache yet.
+		if (!$gtdcache{$gtdcachekey}) {
+			$cols_needed = [ sort keys %{$self->{$cache_name}} ];
+			$tables_needed = $all_users_tables;
+		}
+	}
+
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ _getU_gtd cols_needed: " . Dumper($cols_needed);
+	}
+
+	# Now, check to see if we know all the answers for that exact
+	# list.  If so, we can skip some processing.
+	$gtdcachekey ||= join("|", @$cols_needed);
+	if (!$gtdcache{$gtdcachekey}) {
+		my $params_needed = [ ];
+		my $where;
+		my $table_list;
+		my %need_table = ( );
+
+		my $table_hr = $self->_getUser_get_select_from_where(
+			$uid_q, $cols_needed);
+		$tables_needed = $table_hr->{tables_needed}
+			if !$tables_needed || !@$tables_needed;
+
+		# Determine whether we need data from memcached, or the DB,
+		# or both.
+		my($can_use_mcd, $need_db);
+		if (!$mcd) {
+			$need_db = 1; $can_use_mcd = 0;
+		} else {
+			if (grep { $_ eq 'users_hits' } @$tables_needed) {
+				$need_db = 1;
+			}
+			if (grep { $_ ne 'users_hits' } @$tables_needed) {
+				$can_use_mcd = 1;
+			}
+		}
+
+		# We've got the data, now write it into the cache;  we'll
+		# return it in a moment.
+		my $hr = $gtdcache{$gtdcachekey} = { };
+		$hr->{tables_needed_ar} =	$tables_needed;
+		$hr->{tables_needed_hr} =	{ map { $_, 1 }
+						      @$tables_needed };
+		$hr->{cols_needed_ar} =		$cols_needed;
+		$hr->{cols_needed_hr} =		{ map { $_, $self->{$cache_name}{$_} }
+						      @$cols_needed };
+		$hr->{params_needed} =		$params_needed;
+		$hr->{select_clause} =		$table_hr->{select_clause};
+		$hr->{from_clause} =		$table_hr->{from_clause};
+		$hr->{need_db} =		$need_db;
+		$hr->{can_use_mcd} =		$can_use_mcd;
+	}
+
+	my $return_hr = $gtdcache{$gtdcachekey};
+	$return_hr->{where_clause} = "("
+		. join(" AND ",
+			map { "$_.uid=$uid_q" } @{$return_hr->{tables_needed_ar}}
+		  )
+		. ")";
+
+	$return_hr->{all} = 1 if $gtdcachekey eq '__ALL__';
+
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ _getU_gtd returning: " . Dumper($return_hr);
+	}
+
+	return $return_hr;
+}
+
+#
+# _getUser_write_memcached
+#
+
+sub _getUser_write_memcached {
+	my($self, $userdata) = @_;
+	my $uid = $userdata->{uid};
+	return unless $uid;
+	my $mcd = getMCD();
+	return unless $mcd;
+	my $constants = getCurrentStatic();
+	my $mcddebug = $mcd && $constants->{memcached_debug};
+
+	# We don't write users_hits data into memcached.  Strip those
+	# columns out.
+	if (!$users_hits_colnames || !@$users_hits_colnames) {
+		my $cache_name = _genericGetCacheName($self, $all_users_tables);
+		$users_hits_colnames = [ ];
+		for my $col (keys %{$self->{$cache_name}}) {
+			push @$users_hits_colnames, $col
+				if $self->{$cache_name}{$col} eq 'users_hits';
+		}
+	}
+	for my $col (@$users_hits_colnames) {
+		delete $userdata->{$col};
+	}
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ _getU_writemcd users_hits_colnames '@$users_hits_colnames' userdata: " . Dumper($userdata);
+	}
+
+	my $mcdkey = "$mcd->{keyprefix}u:";
+
+	my $exptime = $constants->{memcached_exptime_user};
+	$exptime = 1200 if !defined($exptime);
+	$mcd->set("$mcdkey$uid", $userdata, $exptime);
+
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ _getU_writemcd wrote to '$mcdkey$uid' exptime '$exptime': " . Dumper($userdata);
+	}
+	$mcd->set("$mcdkey$uid", $userdata);
+}
+
+}
+# end closure
+#
+########################################################
+
+sub _getUser_delete_memcached {
+	my($self, $uid) = @_;
+	my $mcd = $self->getMCD();
+	return unless $mcd;
+	my $constants = getCurrentStatic();
+	my $mcddebug = $mcd && $constants->{memcached_debug};
+
+	$uid = [ $uid ] if !ref($uid);
+	for my $i (@$uid) {
+		my $mcdkey = "$mcd->{keyprefix}u:";
+		# The "1" means "don't accept new writes to this key for 1 second," I believe.
+		$mcd->delete("$mcdkey$uid", 1);
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ _getU_deletemcd deleted '$mcdkey$i'\n";
+		}
+	}
 }
 
 ########################################################

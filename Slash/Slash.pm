@@ -632,7 +632,7 @@ sub printComments {
 	}
 	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
 	if ($mcd) {
-		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+		if ($constants->{memcached_debug} && $constants->{memcached_debug} > 2) {
 			print STDERR scalar(gmtime) . " printComments memcached mcdkey '$mcdkey'\n";
 		}
 		my @keys_try =
@@ -641,7 +641,7 @@ sub printComments {
 			@$cids_needed_ar;
 		$comment_text = $mcd->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
-		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+		if ($constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 			print STDERR scalar(gmtime) . " printComments memcached got keys '@old_keys' tried for '@keys_try'\n"
 		}
 		$mcd_debug->{hits} = scalar @old_keys if $mcd_debug;
@@ -651,7 +651,7 @@ sub printComments {
 		}
 		@$cids_needed_ar = grep { !exists $comment_text->{$_} } @$cids_needed_ar;
 	}
-	if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+	if ($constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 		print STDERR scalar(gmtime) . " printComments memcached mcd '$mcd' con '$constants->{memcached}' mcd '$mcd' dt '$user->{domaintags}' mcs '$user->{maxcommentsize}' still needed: '@$cids_needed_ar'\n";
 	}
 
@@ -660,7 +660,7 @@ sub printComments {
 	# the tags that were there to hold them.
 	my $more_comment_text = $slashdb->getCommentText($cids_needed_ar) || {}
 		if @$cids_needed_ar;
-	if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+	if ($constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 		print STDERR scalar(gmtime) . " more_comment_text keys: '" . join(" ", sort keys %$more_comment_text) . "'\n";
 	}
 
@@ -689,14 +689,17 @@ sub printComments {
 		$comment_text->{$cid} = parseDomainTags($more_comment_text->{$cid},
 			$comments->{$cid}{fakeemail});
 		if ($mcd && $form->{cid} ne $cid) {
-			my $retval = $mcd->set("$mcdkey$cid", $comment_text->{$cid});
-			if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
-				print STDERR scalar(gmtime) . " printComments memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval\n";
+			my $exptime = $constants->{memcached_exptime_comtext};
+			$exptime = 86400 if !defined($exptime);
+			my $retval = $mcd->set("$mcdkey$cid", $comment_text->{$cid}, $exptime);
+			if ($constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
+				my $exp_at = $exptime ? scalar(gmtime(time + $exptime)) : "never";
+				print STDERR scalar(gmtime) . " printComments memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";
 			}
 		}
 	}
 
-	if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+	if ($constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 		print STDERR scalar(gmtime) . " comment_text keys: '" . join(" ", sort keys %$comment_text) . "'\n";
 	}
 
