@@ -37,12 +37,13 @@ sub new {
 ########################################################
 sub createStatDaily {
 	my($self, $day, $name, $value) = @_;
+	$value = 0 unless $value;
 
-	$self->sqlInsert('stats_daily',
-			day => $day,
-			name => $name,
-			value => $value,
-	);
+	$self->sqlInsert('stats_daily', {
+			'day' => $day,
+			'name' => $name,
+			'value' => $value,
+	});
 }
 
 ########################################################

@@ -13,6 +13,7 @@ $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my($stats, $backupdb);
+
 	if ($constants->{backup_db_user}) {
 		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
 		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
@@ -38,9 +39,6 @@ $task{$me}{code} = sub {
 	my $sdTotalHits = $stats->getVar('totalhits', 'value');
 
 	$sdTotalHits = $sdTotalHits + $count->{'total'};
-	$slashdb->setVar("totalhits", $sdTotalHits);
-
-	$slashdb->updateStamps();
 
 	my $accesslog_rows = $stats->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
@@ -57,12 +55,12 @@ $task{$me}{code} = sub {
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
-	$stats->create($yesterday, "total", $count->{total});
-	$stats->create($yesterday, "unique", $count->{unique});
-	$stats->create($yesterday, "unique_users", $count->{unique_users});
-	$stats->create($yesterday, "comments", $comments);
-	$stats->create($yesterday, "homepage", $count->{index}{index});
-	$stats->create($yesterday, "journals", $count->{journals});
+	$stats->createStatDaily($yesterday, "total", $count->{total});
+	$stats->createStatDaily($yesterday, "unique", $count->{unique});
+	$stats->createStatDaily($yesterday, "unique_users", $count->{unique_users});
+	$stats->createStatDaily($yesterday, "comments", $comments);
+	$stats->createStatDaily($yesterday, "homepage", $count->{index}{index});
+	$stats->createStatDaily($yesterday, "journals", $count->{journals});
 	my @numbers = (
 		$count->{total},
 		$count->{unique},
@@ -112,7 +110,7 @@ EOT
 
 	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
 		$email .= "\t   $_=$count->{index}{$_}\n";
-		$stats->create($yesterday, "index_$_", $count->{index}{$_});
+		$stats->createStatDaily($yesterday, "index_$_", $count->{index}{$_});
 	}
 
 	$email .= "\n-----------------------\n";

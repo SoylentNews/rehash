@@ -5,6 +5,5 @@ CREATE TABLE stats_daily (
 	name varchar(32) DEFAULT '' NOT NULL,
 	value FLOAT DEFAULT 0 NOT NULL,
 	UNIQUE day_key_pair (day,name),
-	UNIQUE (day),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
