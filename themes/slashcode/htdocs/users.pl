@@ -1783,7 +1783,7 @@ sub saveUserAdmin {
 			= ($form->{md5id}, $form->{md5id});
 
 		$form->{isproxy} = $form->{isproxy} eq 'on' ? 'yes' : 'no';
-                $slashdb->setIsProxy($user_edit->{ipid}, $form->{is_proxy});
+                $slashdb->setIsProxy($user_edit->{md5id}, $form->{is_proxy});
 
 	} else { # a bit redundant, I know
 		$user_edit = $user;
