@@ -583,11 +583,14 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 ALTER TABLE string_param MODIFY COLUMN code VARCHAR(128) NOT NULL;
 ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
-# SLASHDOT LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 
-# End of T_2_3_0_38
+# End of T_2_3_0_38, Start of T_2_3_0_39
 
 ALTER TABLE metamodlog ADD INDEX mmid (mmid);
 
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_39
+
