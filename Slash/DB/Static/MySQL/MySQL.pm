@@ -631,7 +631,7 @@ sub deleteOldModRows {
 	while ($need_bottom && $junk_bottom < $need_bottom) {
 		$junk_bottom += $max_rows;
 		$junk_bottom = $need_bottom if $need_bottom < $junk_bottom;
-		$self->sqlDelete('moderatorlog', "id < $junk_bottom");
+		$self->sqlDelete('metamodlog', "id < $junk_bottom");
 		sleep $sleep_between
 			if $sleep_between && $junk_bottom < $need_bottom;
 	}
