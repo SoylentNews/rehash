@@ -18,7 +18,7 @@ zoo_icons
 __template__
 [% USE Slash %]
 [% IF user.uid != person && person && !user.is_anon %]
-	[% IF !user.people.${Slash.FRIEND}.$person && !user.people.${Slash.FOE}.$person && !user.people.${Slash.FAN}.$person && !user.people.${Slash.FREAK}.$person %]
+	[% IF !user.people.${Slash.FRIEND}.$person && !user.people.${Slash.FOE}.$person && !user.people.${Slash.FAN}.$person && !user.people.${Slash.FREAK}.$person && !user.people.${Slash.FOF}.$person && !user.people.${Slash.EOF}.$person %]
 		<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]&amp;type=friend"><IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral" TITLE="Neutral"></A>
 	[% ELSE %]
 		[% IF user.people.${Slash.FRIEND}.$person %]
