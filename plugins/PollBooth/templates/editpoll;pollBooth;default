@@ -7,6 +7,8 @@ Prints form for editing poll
 * qid = question ID
 * question = text of question
 * answers = arrayref of arrayrefs of answers (answer = 0, number = 1)
+* topics  = topics hashref for menu
+* story_ref = story hashref for related story
 __title__
 
 __page__
@@ -25,13 +27,28 @@ __template__
 	<INPUT TYPE="TEXT" NAME="voters" VALUE="[% question.voters %]" SIZE="5"><BR>
 	[% PROCESS formLabel value => "Poll Section" comment => "what section this will be visible in" %]
 	[% sections = Slash.db.getDescriptions('sections-all') %]
-	[% Slash.createSelect('section', sections, question.section, 1) %]
+	[% IF story %]
+		[% sections.${question.section} %] *<BR>
+		<INPUT TYPE="hidden" name="section" value="[% question.section %]">
+	[% ELSE %]
+		[% Slash.createSelect('section', sections, question.section, 1) %]
+	[% END %]
 	[% PROCESS formLabel value => "Poll Topic" comment => "" %]
 	[% DEFAULT question.topic=constants.discussion_default_topic %]
-	[% Slash.selectTopic('topic', question.topic, '', 1) %]
+	[% IF story %]
+		[% topics.${question.topic} %] *<BR>
+		<INPUT TYPE="hidden" name="topic" value="[% question.topic %]">
+	[% ELSE %]
+		[% Slash.createSelect('topic', topics, question.topic, 1, 0 ,1) %]
+	[% END %]
         [% polltype.section = "SlashBox Section Poll"; polltype.story = "Story-Related Poll"; polltype.nodisplay = "Never Display" %]
       	[% PROCESS formLabel value => "Poll Type" comment => "" %]
-[% Slash.createSelect('polltype', polltype, question.polltype, 1) %]
+	[% IF story %]
+		[% polltype.${question.polltype} %] *<BR>
+		<INPUT TYPE="hidden" name="polltype" value="[% question.polltype %]">
+	[% ELSE %]
+		[% Slash.createSelect('polltype', polltype, question.polltype, 1) %]
+	[% END %]
 <font size="-1"><BR>
 Never Display - Poll won't display to regular users until type is changed<BR>
 SlashBox Section Poll - Poll will show up on the side for a given section<BR>
@@ -39,7 +56,7 @@ Story Related Display - Poll is displayed on the specified story's page<BR>
 </font>
 
 	        [% PROCESS formLabel value => "Poll Time" comment => "choose a time in the future if you want to delay this poll's appearance" %]
-        <INPUT TYPE="TEXT" NAME="date" VALUE="[% date %]" size="19"><BR>
+        <INPUT TYPE="TEXT" NAME="date" VALUE="[% date %]" size="19" [% IF story %]readonly[% END %]>[% IF story %]*[% END %]<BR>
 	[% PROCESS formLabel value => "The Answers" comment => "voters" %]
 
 [% FOREACH n = [0 .. 7] %]
@@ -50,9 +67,12 @@ Story Related Display - Poll is displayed on the specified story's page<BR>
 
 	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
 
-[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear with the story" %]
-        <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20"><BR>
-	
+[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear on the story's page" %]
+        <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20"> [% IF question.sid %]<A HREF="[% constants.rootdir %]/article.pl?sid=[% question.sid %]">Related story</A> [% END %]<BR>
+	<font size="2">(time, section, topic, and polltype will be set based on related story's settings)</font><BR>
+	[% IF story %]
+		*<font size="2">These values set from related story</font><BR>
+	[% END %]
 	
 
         <INPUT TYPE="SUBMIT" NAME="op" VALUE="preview">

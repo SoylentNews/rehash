@@ -101,9 +101,8 @@ sub default {
 #################################################################
 sub editpoll {
 	my($form, $slashdb, $constants) = @_;
-
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $qid  = $form->{'qid'};
-
 	my $user = getCurrentUser();
 
 	unless ($user->{'is_admin'}) {
@@ -111,11 +110,20 @@ sub editpoll {
 		return;
 	}
 
-	my($question, $answers, $pollbooth, $checked);
+	my($question, $answers, $pollbooth, $checked,$story_ref);
 	if ($form->{op} eq "preview") {
 		foreach (qw/question voters date section topic polltype/) {
 			$question->{$_} = $form->{$_};
 		}
+		$story_ref = $reader->sqlSelectHashref("sid,qid,time,section,tid,displaystatus","stories","sid=".$reader->sqlQuote
+($form->{sid})) if $form->{sid};
+                if($story_ref){
+                        $question->{'date'}=$story_ref->{'time'};
+                        $question->{topic}=$story_ref->{'tid'};
+                        $question->{section}=$story_ref->{section};
+                        $question->{polltype}=$story_ref->{displaystatus} >=0 ? "story" : "nodisplay";
+		}
+                
 		$question->{polltype} ||= "section";
  
 		my $disp_answers;
@@ -152,6 +160,20 @@ sub editpoll {
 		$question = $slashdb->getPollQuestion($qid);
 		$question->{sid} = $slashdb->getSidForQID($qid)
 			unless $question->{autopoll} eq "yes";
+
+		if($question->{sid}){
+			$story_ref = $reader->sqlSelectHashref("sid,qid,time,section,tid,displaystatus","stories","sid=".$reader->sqlQuote
+($question->{sid}));
+                	if($story_ref){
+                        	$question->{'date'}=$story_ref->{'time'};
+                        	$question->{topic}=$story_ref->{'tid'};
+                        	$question->{section}=$story_ref->{section};
+                        	$question->{polltype}=$story_ref->{displaystatus} >=0 ? "story" : "nodisplay";
+			}
+                }
+		$question->{polltype} ||= "section";
+
+
 		$answers = $slashdb->getPollAnswers(
 			$qid, [qw( answer votes aid )]
 		);
@@ -193,7 +215,7 @@ sub editpoll {
 	my $date = $question->{date};
         $date ||= $form->{date};
         $date ||= $slashdb->getTime();
-
+        my $topics=$reader->getDescriptions('topics_section');
 	slashDisplay('editpoll', {
 		title		=> getData('edit_poll_title', { qid=>$qid }),
 		qid		=> $qid,
@@ -201,7 +223,9 @@ sub editpoll {
 		answers		=> $answers,
 		pollbooth	=> $pollbooth,
 		checked		=> $checked,
-                date            => $date
+                date            => $date,
+		story		=> $story_ref,
+		topics		=> $topics
 	});
 }
 
