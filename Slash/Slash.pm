@@ -997,7 +997,7 @@ sub displayThread {
 		# ahead more, counting all the visible kids.	--Pater
 		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		$form->{startat} ||= 0;
-		next if $skipped < $form->{startat};
+		next if $skipped <= $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
 		if ($comment->{points} < $user->{threshold}) {
