@@ -2418,8 +2418,6 @@ UPDATE skins SET submittable='no' WHERE name='search';
 # Changes for plugins/Admin (which you are almost certainly using)
 INSERT INTO vars (name, value, description) VALUES ('admin_maxdays_divider', '14', 'Max number of days on the admin.pl story list to bother showing the day-dividers');
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_9, Start of T_2_5_0_10 - 2004/07/16
 
 INSERT INTO vars (name, value, description) VALUES ('gse_min_stoid', '0', 'Minimum stoid that getStoriesEssentials - important index.pl optimization - this value set automatically');
@@ -2442,6 +2440,8 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', '
 # SLASHDOT LAST UPDATED HERE, to T_2_5_0_14
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_15, Start of T_2_5_0_16 - 2004/07/22
 
