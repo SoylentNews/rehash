@@ -479,13 +479,14 @@ sub mailPasswd {
 		}
 	}
 
-	unless ($uid) {
+	if (!$uid || isAnon($uid)) {
 		print getError('mailpasswd_notmailed_err');
 		$slashdb->resetFormkey($form->{formkey});	
 		$form->{op} = 'mailpasswdform';
 		displayForm();
 		return(1);
 	}
+
 	my $user_edit = $slashdb->getUser($uid, ['nickname', 'realemail']);
 	my $newpasswd = $slashdb->getNewPasswd($uid);
 	my $tempnick = fixparam($user_edit->{nickname});
