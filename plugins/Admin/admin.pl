@@ -1004,8 +1004,8 @@ sub importFile {
 	} else {
 		return "<attach:not found>";
 	}
-	return qq[<A HREF="$rootdir/$section/] . getsiddir() . $filename
-		. qq[">Attachment</A>];
+	return qq[<a href="$rootdir/$section/] . getsiddir() . $filename
+		. qq[">Attachment</a>];
 }
 
 ########################################################
@@ -1061,7 +1061,9 @@ sub getRelated {
 					&& $story_content =~ /\b$rl->{$_}{keyword}\b/i
 			} @rl_keys;
 		for my $key (@matchkeys) {
-			my $str = qq[&middot; <A HREF="$rl->{$key}{link}">$rl->{$key}{name}</A><BR>\n];
+			# Instead of hard-coding the HTML here, we should
+			# do something a little more flexible.
+			my $str = qq[&middot; <a href="$rl->{$key}{link}">$rl->{$key}{name}</a><br>\n];
 			push @related_text, $str;
 		}
 	}
@@ -1069,14 +1071,14 @@ sub getRelated {
 	# And slurp in all of the anchor links (<A>) from the story just for
 	# good measure.  If TITLE attribute is present, use that for the link
 	# label; otherwise just use the A content.
-	while ($story_content =~ m|<A\s+(.*?)>(.*?)</A>|sgi) {
+	while ($story_content =~ m|<a\s+(.*?)>(.*?)</a>|sgi) {
 		my($a_attr, $label) = ($1, $2);
-		if ($a_attr =~ m/(\bTITLE\s*=\s*(["'])(.*?)\2)/si) {
+		if ($a_attr =~ m/(\btitle\s*=\s*(["'])(.*?)\2)/si) {
 			$label = $3;
 			$a_attr =~ s/\Q$1\E//;
 		}
 
-		$a_attr =~ /\bHREF\s*=\s*(["'])(.*?)\1/;
+		$a_attr =~ /\bhref\s*=\s*(["'])(.*?)\1/;
 		my $a_href = $2;
 		# If we want to exclude certain types of links from appearing
 		# in Related Links, we can make that decision based on the
@@ -1084,13 +1086,17 @@ sub getRelated {
 
 		$label = strip_notags($label);
 		$label =~ s/(\S{30})/$1 /g;
-		my $str = qq[&middot; <A $a_attr>$label</A><BR>\n];
+		# Instead of hard-coding the HTML here, we should
+		# do something a little more flexible.
+		my $str = qq[&middot; <a $a_attr>$label</a><br>\n];
 		push @related_text, $str unless $label eq "?" || $label eq "[?]";
 	}
 
 	for (@{$user->{state}{related_links}}) {
 		push @related_text, sprintf(
-			qq[&middot; <A HREF="%s">%s</A><BR>\n],
+			# Instead of hard-coding the HTML here, we should
+			# do something a little more flexible.
+			qq[&middot; <a href="%s">%s</a><br>\n],
 			strip_attribute($_->[1]), $_->[0]
 		);
 	}
@@ -1358,6 +1364,13 @@ sub editStory {
 			$storyref->{tid}, 
 			$storyref->{uid}
 		);
+		# If getRelated and otherLinks seem to be putting <li>
+		# tags around each item, they probably want a <ul></ul>
+		# surrounding the whole list.  This is a bit hacky but
+		# should help make strictly parsed versions of HTML
+		# work better.
+		$storyref->{relatedtext} = "<ul>\n$storyref->{relatedtext}\n</ul>"
+			if $storyref->{relatedtext} && $storyref->{relatedtext} =~ /^\s*<li>/;
 
 		my $author  = $slashdb->getAuthor($storyref->{uid});
 		my $topic   = $slashdb->getTopic($storyref->{tid});
@@ -1759,6 +1772,14 @@ sub updateStory {
 		$topic,
 		$form->{uid}
 	);
+	# If getRelated and otherLinks seem to be putting <li>
+	# tags around each item, they probably want a <ul></ul>
+	# surrounding the whole list.  This is a bit hacky but
+	# should help make strictly parsed versions of HTML
+	# work better.
+	$form->{relatedtext} = "<ul>\n$form->{relatedtext}\n</ul>"
+		if $form->{relatedtext} && $form->{relatedtext} =~ /^\s*<li>/;
+
 	$slashdb->setCommonStoryWords();
 
 	my $data = {
@@ -2057,6 +2078,13 @@ sub saveStory {
 	my $story_text = "$form->{title} $form->{bodytext} $form->{introtext}";
 	$form->{relatedtext} = getRelated($story_text, $form->{tid})
 		. otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
+	# If getRelated and otherLinks seem to be putting <li>
+	# tags around each item, they probably want a <ul></ul>
+	# surrounding the whole list.  This is a bit hacky but
+	# should help make strictly parsed versions of HTML
+	# work better.
+	$form->{relatedtext} = "<ul>\n$form->{relatedtext}\n</ul>"
+		if $form->{relatedtext} && $form->{relatedtext} =~ /^\s*<li>/;
 
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
