@@ -78,13 +78,13 @@ sub setStoryIndex {
 	for my $sid (@sids) {
 		$stories{$sid} = $self->sqlSelectHashref("*","stories","sid='$sid'");
 	}
-	$self->{_dbh}->sqlTransactionStart("LOCK TABLES newstories WRITE");
+	$self->sqlTransactionStart("LOCK TABLES newstories WRITE");
 
 	foreach my $sid (keys %stories) {
 		$self->sqlReplace("newstories", $stories{$sid}, "sid='$sid'");
 	}
 
-	$self->{_dbh}->sqlTransactionFinish();
+	$self->sqlTransactionFinish();
 }
 
 ########################################################
