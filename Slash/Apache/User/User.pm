@@ -643,6 +643,7 @@ Fry:And then when I feel so stuffed I can't eat any more, I just use the restroo
 Fry:I'm going to continue never washing this cheek again.
 Fry:I haven't had time off since I was twenty-one through twenty-four.
 Fry:I know Big Vinny said he was giving me the kiss of death, but I still think he was gay.
+Fry:The spoon's in the foot powder.
 EOT
 
 1;
