@@ -334,6 +334,7 @@ sub sqlCount {
 	# we just need one stinkin value - count
 	$self->sqlConnect();
 	my $count = $self->{_dbh}->selectrow_array($sql);
+
 	return $count;  # count
 }
 
@@ -595,6 +596,16 @@ sub sqlDo {
 
 	return $rows;
 }
+
+#################################################################
+# Keeps encapsulation
+sub sqlError {
+	my($self) = @_;
+	$self->sqlConnect;
+	return $self->{_dbh}->errstr;
+}
+
+
 
 1;
 

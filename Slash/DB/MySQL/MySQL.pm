@@ -1528,7 +1528,7 @@ sub deleteUser {
 # Get user info from the users table.
 sub getUserAuthenticate {
 	my($self, $user, $passwd, $kind) = @_;
-	my($uid, $cookpasswd, $newpass, $dbh, $user_db,
+	my($uid, $cookpasswd, $newpass, $user_db,
 		$cryptpasswd, @pass);
 
 	return unless $user && $passwd;
@@ -1543,8 +1543,7 @@ sub getUserAuthenticate {
 
 	# RECHECK LOGIC!!  -- pudge
 
-	$dbh = $self->{_dbh};
-	$user_db = $dbh->quote($user);
+	$user_db = $self->sqlQuote($user);
 	$cryptpasswd = encryptPassword($passwd);
 	@pass = $self->sqlSelect(
 		'uid,passwd,newpasswd',
@@ -1653,13 +1652,14 @@ sub getCommentsByGeneric {
 	my($self, $where_clause, $num, $min) = @_;
 	$min ||= 0;
 
-	my $sqlquery = "SELECT pid,sid,cid,subject,date,points,uid,reason"
-			. " FROM comments WHERE $where_clause"
-			. " ORDER BY date DESC LIMIT $min, $num";
-
-	my $sth = $self->{_dbh}->prepare($sqlquery);
-	$sth->execute;
-	my($comments) = $sth->fetchall_arrayref;
+#	my $sqlquery = "SELECT pid,sid,cid,subject,date,points,uid,reason"
+#			. " FROM comments WHERE $where_clause"
+#			. " ORDER BY date DESC LIMIT $min, $num";
+#
+#	my $sth = $self->{_dbh}->prepare($sqlquery);
+#	$sth->execute;
+#	my($comments) = $sth->fetchall_arrayref;
+	my $comments = $self->sqlSelectAll('pid,sid,cid,subject,date,points,uid,reason','comments', $where_clause, " ORDER BY date DESC LIMIT $min, $num");
 	formatDate($comments, 4);
 	return $comments;
 }
@@ -2501,26 +2501,27 @@ sub getPollAnswers {
 	return $answers;
 }
 
-########################################################
-sub getPollQuestions {
-# This may go away. Haven't finished poll stuff yet
+# Deprecated -Brian
+#########################################################
+#sub getPollQuestions {
+## This may go away. Haven't finished poll stuff yet
+##
+#	my($self, $limit) = @_;
 #
-	my($self, $limit) = @_;
-
-	$limit = 25 if (!defined($limit));
-
-	my $poll_hash_ref = {};
-	my $sql = "SELECT qid,question FROM pollquestions ORDER BY date DESC ";
-	$sql .= " LIMIT $limit " if $limit;
-	my $sth = $self->{_dbh}->prepare_cached($sql);
-	$sth->execute;
-	while (my($id, $desc) = $sth->fetchrow) {
-		$poll_hash_ref->{$id} = $desc;
-	}
-	$sth->finish;
-
-	return $poll_hash_ref;
-}
+#	$limit = 25 if (!defined($limit));
+#
+#	my $poll_hash_ref = {};
+#	my $sql = "SELECT qid,question FROM pollquestions ORDER BY date DESC ";
+#	$sql .= " LIMIT $limit " if $limit;
+#	my $sth = $self->{_dbh}->prepare_cached($sql);
+#	$sth->execute;
+#	while (my($id, $desc) = $sth->fetchrow) {
+#		$poll_hash_ref->{$id} = $desc;
+#	}
+#	$sth->finish;
+#
+#	return $poll_hash_ref;
+#}
 
 ########################################################
 sub deleteStory {
@@ -3536,16 +3537,7 @@ sub getSubmissionCount {
 # Get all portals
 sub getPortals {
 	my($self) = @_;
-	my $strsql = "SELECT block,title,blocks.bid,url
-		   FROM blocks
-		  WHERE section='index'
-		    AND type='portald'
-		  GROUP BY bid
-		  ORDER BY ordernum";
-
-	my $sth = $self->{_dbh}->prepare($strsql);
-	$sth->execute;
-	my $portals = $sth->fetchall_arrayref;
+	my $portals = $self->sqlSelectAll('block,title,blocks.bid,url','blocks',"section='index' AND type='portald'", 'GROUP BY bid ORDER BY ordernum');
 
 	return $portals;
 }
@@ -4131,21 +4123,20 @@ sub getCommentsForUser {
 
 	# this was a here-doc.  why was it changed back to slower,
 	# harder to read/edit variable assignments?  -- pudge
-	my $sql;
-	$sql .= " SELECT	cid, date, date as time, subject, nickname, homepage, fakeemail, ";
-	$sql .= "	users.uid as uid, sig, comments.points as points, pid, pid as original_pid, sid, ";
-	$sql .= " lastmod, reason, journal_last_entry_date, ipid, subnetid ";
-	$sql .= "	FROM comments, users  ";
-	$sql .= "	WHERE sid=$sid_quoted AND comments.uid=users.uid ";
+	my $select = " cid, date, date as time, subject, nickname, homepage, fakeemail, ";
+	$select .= "	users.uid as uid, sig, comments.points as points, pid, pid as original_pid, sid, ";
+	$select .= " lastmod, reason, journal_last_entry_date, ipid, subnetid ";
+	my $tables = "	comments, users  ";
+	my $where = "	sid=$sid_quoted AND comments.uid=users.uid ";
 
 	if ($user->{hardthresh}) {
-		$sql .= "    AND (";
-		$sql .= "	comments.points >= " .
-			$self->sqlQuote($user->{threshold});
-		$sql .= "     OR comments.uid=$user->{uid}"
+		$where .= "    AND (";
+		$where .= "	comments.points >= " .
+			$self->whereQuote($user->{threshold});
+		$where .= "     OR comments.uid=$user->{uid}"
 			unless $user->{is_anon};
-		$sql .= "     OR cid=$cid" if $cid;
-		$sql .= "	)";
+		$where .= "     OR cid=$cid" if $cid;
+		$where .= "	)";
 	}
 
 # We are now doing this in the webserver not in the DB
@@ -4156,18 +4147,14 @@ sub getCommentsForUser {
 #			'DESC' : 'ASC';
 
 
-	my $thisComment = $self->{_dbh}->prepare_cached($sql) or errorLog($sql);
-	$thisComment->execute or errorLog($sql);
+	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where);
 
 	my $archive = $cache_read_only;
-	my $comments = [];
 	my $cids = [];
-	while (my $comment = $thisComment->fetchrow_hashref) {
+	for my $comment (@$comments) {
 		$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
-		push @$comments, $comment;
 		push @$cids, $comment->{cid};# if $comment->{points} >= $user->{threshold};
 	}
-	$thisComment->finish;
 
 	# We have a list of all the cids in @$comments.  Get the texts of
 	# all these comments, all at once.
@@ -4181,7 +4168,7 @@ sub getCommentsForUser {
 	# ($comment->{points} < $user->{threshold}). - Jamie
 	# That has side effects and doesn't do that much good anyway,
 	# see SF bug 452558. - Jamie
-	my $start_time = Time::HiRes::time;
+  #	my $start_time = Time::HiRes::time;
 	my $comment_texts = $self->_getCommentTextOld($cids, $archive);
 	# Now distribute those texts into the $comments hashref.
 
@@ -4195,19 +4182,6 @@ sub getCommentsForUser {
 		}
 	}
 
-	if ($constants->{comment_cache_debug}) {
-		my $duration = Time::HiRes::time - $start_time;
-		$self->{_comment_text}{totalcomments} += scalar @$cids;
-		$self->{_comment_text}{secs} += $duration;
-		my $secs = $self->{_comment_text}{secs};
-		my $totalcomments = $self->{_comment_text}{totalcomments};
-		if ($totalcomments and $secs) {
-			my $cache = getCurrentCache();
-			$cache->{status}{comment_text} = 
-				sprintf "%.1f comments/sec",
-					$totalcomments/$secs;
-		}
-	}
 
 	return $comments;
 }
@@ -5169,9 +5143,7 @@ sub getStoryList {
 
 	my $count = $self->sqlSelect("COUNT(*)", $tables, $where);
 
-	my $cursor = $self->{_dbh}->prepare("SELECT $columns FROM $tables WHERE $where $other");
-	$cursor->execute;
-	my $list = $cursor->fetchall_arrayref;
+	my $list = $self->sqlSelectAll($columns, $tables, $where, $other);
 
 	return($count, $list);
 }
@@ -6691,22 +6663,13 @@ sub getMiscUserOpts {
 sub getMenus {
 	my($self) = @_;
 
-	my $sql = "SELECT DISTINCT menu FROM menus ORDER BY menu";
-	my $sth = $self->{_dbh}->prepare($sql);
-	$sth->execute;
-	my $menu_names = $sth->fetchall_arrayref;
-	$sth->finish;
+	my $menu_names = $self->sqlSelectAll("DISTINCT menu", "menus", '', "ORDER BY menu");
 
 	my $menus;
 	for (@$menu_names) {
 		my $script = $_->[0];
-		$sql = "SELECT * FROM menus WHERE menu=" . $self->sqlQuote($script) . " ORDER by menuorder";
-		$sth =	$self->{_dbh}->prepare($sql);
-		$sth->execute();
-		my(@menu, $row);
-		push(@menu, $row) while ($row = $sth->fetchrow_hashref);
-		$sth->finish;
-		$menus->{$script} = \@menu;
+		my $menu = $self->sqlSelectAllHashrefArray('*', "menus", "menu=" . $self->sqlQuote($script), 'ORDER by menuorder');
+		$menus->{$script} = $menu;
 	}
 
 	return $menus;
@@ -6753,20 +6716,8 @@ sub sqlTableExists {
 
 	$self->sqlConnect();
 	my $tab = $self->{_dbh}->selectrow_array(qq!SHOW TABLES LIKE "$table"!);
-	return $tab;
 
-#	if (wantarray) {
-#		my(@tabs) = map { $_->[0] }
-#			@{$self->{_dbh}->selectall_arrayref(
-#				qq!SHOW TABLES LIKE "$table"!
-#			)};
-#		return @tabs;
-#	} else {
-#		my $tab = $self->{_dbh}->selectrow_array(
-#			qq!SHOW TABLES LIKE "$table"!
-#		);
-#		return $tab;
-#	}
+	return $tab;
 }
 
 ########################################################
@@ -6794,23 +6745,24 @@ sub getRandomSpamArmor {
 
 ########################################################
 sub sqlShowProcessList {
-	my($self) = @_;
+        my($self) = @_;
 
-	$self->sqlConnect();
-	my $proclist = $self->{_dbh}->prepare("SHOW PROCESSLIST");
+        $self->sqlConnect();
+        my $proclist = $self->{_dbh}->prepare("SHOW PROCESSLIST");
 
-	return $proclist;
+        return $proclist;
 }
 
 ########################################################
 sub sqlShowStatus {
-	my($self) = @_;
+        my($self) = @_;
 
-	$self->sqlConnect();
-	my $status = $self->{_dbh}->prepare("SHOW STATUS");
+        $self->sqlConnect();
+        my $status = $self->{_dbh}->prepare("SHOW STATUS");
 
-	return $status;
+        return $status;
 }
+
 
 ########################################################
 # Get a unique string for an admin session
