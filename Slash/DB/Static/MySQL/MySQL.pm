@@ -1995,12 +1995,16 @@ sub getStoriesToRefresh {
 	my $tid_clause = "";
 	$tid_clause = " AND story_topics_rendered.tid = $tid" if $tid;
 
+	# Include story_topics_rendered in this select just to make
+	# sure there is at least one topic assigned to such stories.
+	# The check for primaryskid > 0 also ensures the results
+	# don't include neverdisplay stories.
 	my $retval = $self->sqlSelectAllHashrefArray(
 		"DISTINCT stories.stoid AS stoid, sid, primaryskid, title, time",
 		"stories, story_text, story_topics_rendered
 		 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
 		"time < NOW()
-		 AND stories.primaryskid != 0
+		 AND stories.primaryskid > 0
 		 AND stories.stoid = story_text.stoid
 		 AND story_dirty.stoid IS NOT NULL
 		 AND stories.stoid = story_topics_rendered.stoid
