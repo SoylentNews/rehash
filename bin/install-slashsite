@@ -538,8 +538,8 @@ sub apache_site_conf {
         # if you need to debug, temporarily turn this on
         # \$Apache::Registry::Debug = 4;
         my \@pls     = qw(index comments article users journal search metamod);
-        my \$vhost   = '\$host_noport';
-        my \$docroot = '\$prefix_site/\$sitename/htdocs';
+        my \$vhost   = '$host_noport';
+        my \$docroot = '$prefix_site/$sitename/htdocs';
         my \$r       = Apache::RegistryLoader->new;
 
         for my \$u (\@pls) {
