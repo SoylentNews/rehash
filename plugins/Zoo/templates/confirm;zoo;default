@@ -49,10 +49,11 @@ __template__
 		</TR>
 	</TABLE>
 [% END %]
-<P><B>Note:</B> Whom you like and dislike is not private; it can and will be used against you.</P>
-
 <P>
-Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these icons mean </A> or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> where you change their values?</A>
+<B>Important Stuff:.</B>
+<LI> Your relationships are public information, and visible to other [% constants.sitename %] readers.
+<LI> Updates to friends and foes are cached and may take a few minutes to take affect.
+<LI> Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these icons mean </A> or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> where you change their values?</A>
 <P>
 <FONT COLOR="[% user.bg.3 %]" size="+1"><B>Your Friends who ...</B></FONT><br>
 <TABLE WIDTH="100%">
