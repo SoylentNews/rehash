@@ -7697,6 +7697,17 @@ print STDERR "gSE $$ separate SELECTs, min_stoid=$min_stoid\n";
 			"DISTINCT stoid",
 			"story_topics_rendered",
 			$tid_in_where);
+
+		# If that returned no stories, we can short-circuit the rest
+		# of this method because we know the answer already.
+		if (!@$stoids_ar) {
+			if ($return_min_stoid_only) {
+				return 0;
+			} else {
+				return [ ];
+			}
+		}
+
 #print STDERR "gSE $$ stoids_ar returned: '@$stoids_ar' t_i_w '$tid_in_where' tid '@$tid'\n";
 		# Now, if necessary, do another select to eliminate any
 		# stoids with tids that are unwanted.
