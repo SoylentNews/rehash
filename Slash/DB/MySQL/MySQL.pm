@@ -1865,6 +1865,9 @@ sub setStory {
 			if ($isolate);
 	}
 
+	$hashref->{day_published} = $hashref->{'time'}
+		if ($hashref->{'time'});
+
 	for (keys %$hashref) {
 		(my $clean_val = $_) =~ s/^-//;
 		my $key = $self->{$cache}{$clean_val};
@@ -3668,8 +3671,7 @@ sub getStoriesEssentials {
 		my $yesterday_str =
 			'DATE_FORMAT(DATE_SUB(time, INTERVAL 1 DAY),"%Y%m%d")';
 		$where .=
-			"AND '$form->{issue}' BETWEEN $yesterday_str AND
-			$tomorrow_str ";
+			"AND day_published = '$form->{issue}' ";
 	} else {
 		$other .= "LIMIT $limit ";
 	}
@@ -3983,6 +3985,7 @@ sub createStory {
 		tid		=> $story->{tid},
 		dept		=> $story->{dept},
 		'time'		=> $story->{'time'},
+		day_published		=> $story->{'time'},
 		title		=> $story->{title},
 		section		=> $story->{section},
 		displaystatus	=> $story->{displaystatus},
@@ -4037,6 +4040,7 @@ sub updateStory {
 		tid		=> $story->{tid},
 		dept		=> $story->{dept},
 		'time'		=> $time,
+		day_published		=> $time,
 		title		=> $story->{title},
 		section		=> $story->{section},
 		displaystatus	=> $story->{displaystatus},

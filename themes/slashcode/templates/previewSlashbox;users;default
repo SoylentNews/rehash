@@ -26,7 +26,7 @@ you will have that little block added to the right hand side of your
 Exciting?  Not really, but its a great way to waste time.
 
 [% IF is_editable %]
-	<P>Edit <A HREF="[% constants.rootdir %]/admin.pl?op=blocked&bid=[% form.bid %]">[% form.bid %]</A>
+	<P>Edit <A HREF="[% constants.rootdir %]/admin.pl?op=blocks&bid=[% form.bid %]">[% form.bid %]</A>
 [% END %]
 
 	</TD><TD WIDTH="180" VALIGN="TOP">

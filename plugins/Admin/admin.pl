@@ -1322,7 +1322,7 @@ sub updateStory {
 		$slashdb->setStoryTopics($form->{sid}, $tid_ref);
 	}
 
-	$slashdb->updateStory();
+	$slashdb->updateStory($form);
 	titlebar('100%', getTitle('updateStory-title'));
 	# make sure you pass it the goods
 	listStories(@_);

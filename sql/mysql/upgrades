@@ -70,3 +70,9 @@ CREATE TABLE story_topics (
 # New var to regulate comment display - Jamie
 INSERT INTO vars (name, value, description) VALUES ('comments_max_email_len','40','Max num of chars of fakeemail to display in comment header');
 
+#______________________________________________________________________
+# End of T_2_3_0_10
+#______________________________________________________________________
+# New attribute for stories
+ALTER TABLE stories ADD day_published date DEFAULT '0000-00-00' NOT NULL;
+ALTER TABLE stories ADD INDEX published (day_published);
