@@ -107,7 +107,7 @@ sub create {
 sub remove {
 	my($self, $id) = @_;
 	my $uid = $ENV{SLASH_USER};
-	return unless $self->sqlDo("DELETE FROM journals WHERE uid=$uid AND id=$id");
+	return if $self->sqlDo("DELETE FROM journals WHERE uid=$uid AND id=$id") == 0;
 	$self->sqlDo("DELETE FROM journals_text WHERE id=$id");
 
 	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
