@@ -1023,7 +1023,7 @@ sub autoUrl {
 	my $more = substr $I{U}{aid}, 1;
 	$more =~ s/[a-z]//g;
 	$initials = uc($initials . $more);
-	my($now) = sqlSelect('date_format(now(),"m/d h:i")');
+	my($now) = sqlSelect('date_format(now(),"m/d h:i p")');
 
 	# Assorted Automatic Autoreplacements for Convenience
 	s|<disclaimer:(.*)>|<B><A HREF="/about.shtml#disclaimer">disclaimer</A>:<A HREF="$I{U}{url}">$I{U}{aid}</A> owns shares in $1</B>|ig;
