@@ -31,7 +31,7 @@ use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
 use Fcntl;
-use File::Spec;
+use File::Spec::Functions;
 use Time::Local;
 use Time::HiRes;
 
@@ -1195,7 +1195,7 @@ EOT
 
 	# stats for clampe
 	if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME}) {
-		my $fname = File::Spec->catfile('clampe', $user->{ipid});
+		my $fname = catfile('clampe', $user->{ipid});
 		my $comlog = "IPID: $user->{ipid} UID: $user->{uid} SID: $comment->{sid} CID: $comment->{cid} Dispmode: $user->{mode} Thresh: $user->{threshold} CIPID: $comment->{ipid} CUID: $comment->{uid}";
 		doLog($fname, $comlog);	
 	}
