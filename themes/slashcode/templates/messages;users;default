@@ -60,6 +60,14 @@ password, so you can safely disregard this message.
 
 Thanks.
 
+In case you get multiple emails you didn't request, the requester's IP
+was [% remote_ip %].[% IF user_agent %]  Its User-Agent was
+"[% user_agent %]"
+(not that you should trust that value, but it might be interesting).[% END %]
+[% IF x_forwarded_for %]In case that's a properly-configured proxy,
+the value of its X-Forwarded-For header was "[% x_forwarded_for %]" --
+but don't trust that value unless you know a reason to (we don't).[% END %]
+
 [% CASE 'userinfo_msg' %]
 
 <P>This is <B>your</B> User Info page.  There are thousands more, but

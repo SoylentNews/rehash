@@ -1238,3 +1238,9 @@ CREATE TABLE dbs (
   type enum("writer","reader","log","search") DEFAULT "reader" NOT NULL,
   PRIMARY KEY (id)
 ) TYPE = myisam;
+
+INSERT INTO vars (name, value, description) VALUES ('poll_fwdfor','1','Loose proxy management for voting?');
+
+INSERT INTO vars (name, value, description) VALUES ('mailpass_max_hours','48','Mailing a password only allowed mailpass_max_num times per account per this many hours');
+INSERT INTO vars (name, value, description) VALUES ('mailpass_max_num','2','Mailing a password only allowed this many times per account per mainpass_max_hours hours');
+

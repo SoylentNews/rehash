@@ -1077,13 +1077,20 @@ sub getContentFilters {
 ########################################################
 sub createPollVoter {
 	my($self, $qid, $aid) = @_;
+	my $constants = getCurrentStatic();
 
 	my $qid_quoted = $self->sqlQuote($qid);
 	my $aid_quoted = $self->sqlQuote($aid);
+	my $md5;
+	if ($constants->{poll_fwdfor}) { 
+		$md5 = md5_hex($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR});
+	} else {
+		$md5 = md5_hex($ENV{REMOTE_ADDR});
+	}
 	$self->sqlInsert("pollvoters", {
 		qid	=> $qid,
-		id	=> md5_hex($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR}),
-		-'time'	=> 'now()',
+		id	=> $md5,
+		-'time'	=> 'NOW()',
 		uid	=> $ENV{SLASH_USER}
 	});
 
@@ -2384,8 +2391,14 @@ sub isPollOpen {
 # IP address.
 sub hasVotedIn {
 	my($self, $qid) = @_;
+	my $constants = getCurrentStatic();
 
-	my $md5 = md5_hex($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR});
+	my $md5;
+	if ($constants->{poll_fwdfor}) {
+		$md5 = md5_hex($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR});
+	} else {
+		$md5 = md5_hex($ENV{REMOTE_ADDR});
+	}
 	my $qid_quoted = $self->sqlQuote($qid);
 	# Yes, qid/id/uid is a key in pollvoters.
 	my($voters) = $self->sqlSelect('id', 'pollvoters',
@@ -3021,6 +3034,63 @@ sub checkMaxPosts {
 	}
 
 	return $limit_reached;
+}
+
+##################################################################
+sub checkMaxMailPasswords {
+	my($self, $user_check) = @_;
+	my $constants = getCurrentStatic();
+
+	my $max_hrs = $constants->{mailpass_max_hours} || 48;
+	my $time = time;
+	my $user_last_ts = $user_check->{mailpass_last_ts} || $time;
+	my $user_hrs = ($time - $user_last_ts) / 3600;
+	if ($user_hrs > $max_hrs) {
+		# It's been more than max_hours since the user last got
+		# a password sent, so it's OK.
+		return 0;
+	}
+
+	my $max_num = $constants->{mailpass_max_num} || 2;
+	my $user_mp_num = $user_check->{mailpass_num};
+	if ($user_mp_num < $max_num) {
+		# It's been within the last max_hours since the user last
+		# got a password sent, but they haven't used up their
+		# allotment, so it's OK.
+		return 0;
+	}
+
+	# User has gotten too many passwords mailed to them recently.
+	return 1;
+}
+
+##################################################################
+sub setUserMailPasswd {
+	my($self, $user_set) = @_;
+	my $constants = getCurrentStatic();
+
+	my $max_hrs = $constants->{mailpass_max_hours} || 48;
+	my $time = time;
+	my $user_last_ts = $user_set->{mailpass_last_ts} || $time;
+	my $user_hrs = ($time - $user_last_ts) / 3600;
+	if ($user_hrs > $max_hrs) {
+		# It's been more than max_hours since the user last got
+		# a password sent, so reset the clock and the counter.
+		$self->setUser($user_set->{uid}, {
+			mailpass_last_ts	=> $time,
+			mailpass_num		=> 1,
+		});
+	} else {
+		my $user_mp_num = $self->getUser($user_set->{uid},
+			'mailpass_num');
+		my $data = {
+			mailpass_num		=> $user_mp_num+1,
+		};
+		$data->{mailpass_last_ts} = $time
+			if !$user_set->{mailpass_last_ts};
+		$self->setUser($user_set->{uid}, $data);
+	}
+	return 1;
 }
 
 ##################################################################

@@ -58,9 +58,34 @@ __template__
 [% PROCESS titlebar width="100%" title="Nickname not found" %]
 	Nickname was not found. No Password was mailed.<BR>
 
+[% CASE 'mailpasswd_toooften_err' %]
+[% PROCESS titlebar width="100%" title="Password already mailed" %]
+	<P>To prevent you from being harassed with email,
+	[% constants.sitename %] limits you to
+	[% constants.mailpass_max_num || 2 %]
+	password[% IF constants.mailpass_max_num > 1 %]s[% END %]
+	sent to you every
+	[% constants.mailpass_max_hours || 48 %] hours. You're over your
+	limit and we're cutting you off. If you really are that
+	forgetful and need another one, try the human at
+	[% constants.adminmail %].
+
+[% CASE 'mailpasswd_readonly_err' %]
+[% PROCESS titlebar width="100%" title="Cannot mail password" %]
+	<P>Sorry, you cannot use the "mail password" function from your
+	IP number or subnet. If you don't think you should be seeing
+	this error, please email
+	[% IF constants.adminmail_post; constants.adminmail_post;
+	ELSE; constants.adminmail; END %]
+	with your
+	MD5'd IPID, which is <tt>[% user.ipid %]</tt>,
+	a note that this is regarding an attempt to mail your password,
+	and the name, uid, or email address of the account in question.
+
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="100%" title="User already exists" %]
-	The nickname [% nick %] or another similar to it has already been taken.        Please try another choice.<BR>
+	The nickname [% nick %] or another similar to it has already been taken.
+	Please try another choice.<BR>
 
 [% CASE 'checklist_err' %]
 [% PROCESS titlebar width="100%" title="Too many options" %]
