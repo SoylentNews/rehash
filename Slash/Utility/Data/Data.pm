@@ -465,6 +465,8 @@ sub stripByMode {
 		$str =~ s/&/&amp;/g;
 		$str =~ s/</&lt;/g;
 		$str =~ s/>/&gt;/g;
+		### this is not ideal; we want breakHtml to be
+		### entity-aware
 		# attributes are inside tags, and don't need to be
 		# broken up
 		$str = breakHtml($str) unless $no_white_fix || $fmode == ATTRIBUTE;
