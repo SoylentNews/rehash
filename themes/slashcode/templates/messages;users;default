@@ -24,7 +24,15 @@ __template__
 [% END %]
 
 [% CASE 'user_header' %]
+	[%- IF useredit.nonuid != 1 -%]
 	[% useredit.nickname | strip_notags %] - [% constants.sitename %] User
+	[%- ELSIF fieldkey == 'ipid' -%]
+	[% useredit.ipid_vis %] - [% constants.sitename %] IPID
+	[%- ELSIF fieldkey == 'subnetid' -%]
+	[% useredit.subnetid_vis %] - [% constants.sitename %] SubnetID
+	[%- ELSE -%]
+	[% useredit.md5id_vis %] - [% constants.sitename %] md5ID
+	[%- END -%]
 
 [% CASE 'userclose' %]
 	you are now logged out.
