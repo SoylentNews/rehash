@@ -778,7 +778,7 @@ sub valid_email {
 							@							#and an at symbol
 							$atom+						#followed by as many atoms as we want
 							(?:\.$atom+)*				#optionally followed by a dot, and more atoms, as many times as we'd like
-							\.[a-zA-Z]{2,3})\s*$		#followed by 2 or 3 letters
+							\.[a-zA-Z]{2,})\s*$		#followed by at least 2 letters
 							>xo;						
 };
 
