@@ -294,16 +294,6 @@ sub _deleteThread {
 
 ########################################################
 # For daily_forget.pl
-sub forgetRemarks {
-	my($self) = @_;
-	my $constants = getCurrentStatic();
-	my $days_back = $constants->{remarks_expire_days} || 30;
-	return $self->sqlDelete("remarks",
-		"DATE_ADD(time, INTERVAL $days_back DAY) < NOW()");
-}
-
-########################################################
-# For daily_forget.pl
 sub forgetStoryTextRendered {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
