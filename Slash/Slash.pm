@@ -603,9 +603,11 @@ sub _getTopModReasons{
 	my @e = map { $p[$_] - $r[$_] } (0..$#r);
 	my $total_error = 0;
 	for (@e) { $total_error += $_ }
+	# Round total_error to int, to avoid float rounding error
+	my $sign = $total_error < 0 ? -1 : 1;
+	$total_error *= $sign;
+	$total_error = int($total_error+0.5);
 	if ($total_error) {
-		my $sign = $total_error < 0 ? -1 : 1;
-		$total_error *= $sign;
 		for (0..$#r) {
 			next unless $e[$_] * $sign > 0;
 			$r[$_] += $sign;
@@ -614,22 +616,18 @@ sub _getTopModReasons{
 		}
 	}
 	my @reasonRound = map { $_ * 10 } @r;
-#print STDERR "reasonRound '@reasonRound'\n";
 
 	# This part I added, so if it breaks, don't blame MJD :) JRM
 	my @rr_sort = sort { $b <=> $a } @reasonRound;
 	my $min_perc = $rr_sort[-1];
 	$min_perc = $rr_sort[$top_needed-1] if $#rr_sort >= $top_needed-1;
 	$min_perc = 10 if $min_perc < 10; # Need at least 10% to list
-#print STDERR "rr_sort '@rr_sort' min_perc '$min_perc'\n";
 	for my $reason (1..$#reasonRound) {
-#print STDERR "reason '$reason' rR[$reason] '$reasonRound[$reason]'\n";
 		next if $reasonRound[$reason] < $min_perc;
 		push @reasonsTop, {
 			reason => $reason,
 			percent => $reasonRound[$reason]
 		};
-#use Data::Dumper; print STDERR "reasonsTop: " . Dumper(\@reasonsTop);
 		last if scalar(@reasonsTop) >= $top_needed;
 	}
 
