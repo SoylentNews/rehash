@@ -3193,7 +3193,7 @@ sub getUIDList {
 	push @result, $self->sqlSelectAll("DISTINCT uid ", "moderatorlog", $where);
 
 	# unique uids only, please
-	return [keys %{ { map { $_ => 1 } @result } } ];
+	return [ keys %{{ map { $_ => 1 } @result }} ];
 }
 
 ##################################################################
