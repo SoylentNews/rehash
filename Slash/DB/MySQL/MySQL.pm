@@ -1381,6 +1381,7 @@ sub createAccessLog {
 		referer		=> $r->header_in("Referer"),
 		status		=> $status,
 	};
+	return if !$user->{is_admin} && $constants->{accesslog_disable};
 	if ($constants->{accesslog_insert_cachesize} && !$user->{is_admin}) {
 		# Save up multiple accesslog inserts until we can do them all at once.
 		push @{$self->{_accesslog_insert_cache}}, $insert;
