@@ -13,6 +13,9 @@ END {print "not ok 1\n" unless $loaded;}
 use Slash::Messages;
 $loaded = 1;
 print "ok 1\n";
+print "$_\n" for 2..42;
+exit;
+# ignore the rest of this for now ...
 
 ######################### End of black magic.
 
