@@ -253,8 +253,12 @@ sub reconcile_m2 {
 			next;
 		}
 		if (int(($nunfair+$nfair)/2) == ($nunfair+$nfair)/2) {
-			print STDERR "M2 fair+unfair is even, for mod id '$mod_hr->{id}'\n";
-			next;
+			if ($nfair == $nunfair) {
+				# Can't have this!
+				print STDERR "M2 fair+unfair is even and fair==unfair,"
+					. " for mod id '$mod_hr->{id}'\n";
+				next;
+			}
 		}
 		if ($nunfair+$nfair != $consensus) {
 			print STDERR "M2 fair+unfair=" . ($nunfair+$nfair) . ","
@@ -262,6 +266,7 @@ sub reconcile_m2 {
 			# this is unexpected, atomicity must have failed in
 			# setMetaMod(), but we can cope, so this is just a
 			# warning
+			# XXX bug, this is happening, fix this - Jamie 2002/08/30
 		}
 
 		my $winner_val = 1; $winner_val = -1 if $nunfair > $nfair;
