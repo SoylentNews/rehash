@@ -256,10 +256,10 @@ sub removeOptoutForm {
 }
 
 sub removeOptout {
-	my($slashdb, $constants, $user, $form, $Email) = @_;
+	my($slashdb, $constants, $user, $form, $Plugins) = @_;
 
 	my $email = decode_entities($form->{email});
-	my $rc = $Email->removeFromOptoutList($form->{email});
+	my $rc = $Plugins->{Email}->removeFromOptoutList($form->{email});
 	print getData('optout_removed', { result => $rc });
 
 	removeOptoutForm(@_);
