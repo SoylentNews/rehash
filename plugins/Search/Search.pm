@@ -70,7 +70,7 @@ sub findComments {
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "section, discussions.url, discussions.uid, discussions.title, pid, subject, ts, date, comments.uid as uid, comments.cid as cid ";
 	$columns .= ", TRUNCATE((MATCH (comments.subject) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort ne 'date');
+		if ($form->{query} && $sort == 1);
 
 	my $tables = "comments, discussions";
 
@@ -84,13 +84,13 @@ sub findComments {
 
 	$where .= "     AND discussions.sid=" . $self->sqlQuote($form->{sid})
 			if $form->{sid};
-	$where .= "     AND points >= $form->{threshold} "
+	$where .= "     AND points >= " .  $self->sqlQuote($form->{threshold})
 			if $form->{threshold};
 	$where .= "     AND section=" . $self->sqlQuote($form->{section})
 			if $form->{section};
 
 	my $other;
-	if ($form->{query} && $sort ne 'date') {
+	if ($form->{query} && $sort == 1) {
 		$other = " ORDER BY score DESC ";
 	} else {
 		$other = " ORDER BY cid DESC ";
@@ -169,9 +169,9 @@ sub findUsers {
 	my $query = $self->sqlQuote($form->{query});
 	$limit = " LIMIT $start, $limit" if $limit;
 
-	my $columns = 'fakeemail,nickname,users.uid ';
+	my $columns = 'fakeemail,nickname,users.uid,journal_last_entry_date ';
 	$columns .= ", TRUNCATE((MATCH (nickname) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort ne 'date');
+		if ($form->{query} && $sort == 1);
 
 	my $key = " MATCH (nickname) AGAINST ($query) ";
 	my $tables = 'users';
@@ -180,7 +180,7 @@ sub findUsers {
 
 
 	my $other;
-	if ($form->{query} && $sort ne 'date') {
+	if ($form->{query} && $sort == 1) {
 		$other = " ORDER BY score "
 	} else {
 		$other = " ORDER BY users.uid "
@@ -205,13 +205,13 @@ sub findStory {
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "users.nickname, stories.title, stories.sid as sid, time, commentcount, section";
 	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as score "
-		if ($form->{query} && $sort ne 'date');
+		if ($form->{query} && $sort == 1);
 
 	my $tables = "stories,users";
 	$tables .= ",story_text" if $form->{query};
 
 	my $other;
-	if ($form->{query} && $sort ne 'date') {
+	if ($form->{query} && $sort == 1) {
 		$other = " ORDER BY score DESC";
 	} else {
 		$other = " ORDER BY time DESC";
@@ -225,8 +225,9 @@ sub findStory {
 		if $form->{query};
 
 	if ($form->{section}) { 
-		$where .= " AND ((displaystatus = 0 and '$form->{section}' = '')";
-		$where .= " OR (section = '$form->{section}' AND displaystatus != -1))";
+		my $section = $self->sqlQuote($form->{section});
+		$where .= " AND ((displaystatus = 0 and $section = '')";
+		$where .= " OR (section = $section AND displaystatus != -1))";
 	} else {
 		$where .= " AND displaystatus != -1";
 	}
@@ -274,10 +275,10 @@ sub findJournalEntry {
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "users.nickname, journals.description, journals.id as id, date";
 	$columns .= ", TRUNCATE((((MATCH (description) AGAINST($query) + (MATCH (article) AGAINST($query)))) / 2), 1) as score "
-		if ($form->{query} && $sort ne 'date');
+		if ($form->{query} && $sort == 1);
 	my $tables = "journals, journals_text, users";
 	my $other;
-	if ($form->{query} && $sort ne 'date') {
+	if ($form->{query} && $sort == 1) {
 		$other = " ORDER BY score DESC";
 	} else {
 		$other = " ORDER BY date DESC";
@@ -294,6 +295,44 @@ sub findJournalEntry {
 	$where .= " AND users.uid=" . $self->sqlQuote($form->{uid})
 		if $form->{uid};
 	$where .= " AND tid=" . $self->sqlQuote($form->{topic})
+		if $form->{topic};
+	
+	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
+
+	$self->sqlConnect();
+	my $cursor = $self->{_dbh}->prepare($sql);
+	$cursor->execute;
+	my $stories = $cursor->fetchall_arrayref;
+
+	return $stories;
+}
+
+####################################################################################
+sub findPollQuestion {
+	my($self, $form, $start, $limit, $sort) = @_;
+	$start ||= 0;
+
+	my $query = $self->sqlQuote($form->{query});
+	my $columns = "qid, question, voters, date";
+	$columns .= ", TRUNCATE((MATCH (question) AGAINST($query)), 1) as score "
+		if ($form->{query} && $sort == 1);
+	my $tables = "pollquestions";
+	my $other;
+	if ($form->{query} && $sort == 1) {
+		$other = " ORDER BY score DESC";
+	} else {
+		$other = " ORDER BY date DESC";
+	}
+	$other .= " LIMIT $start, $limit" if $limit;
+
+	# The big old searching WHERE clause, fear it
+	my $key = " MATCH (question) AGAINST ($query) ";
+	my $where = " 1 = 1 ";
+	$where .= " AND $key" if $form->{query};
+	$where .= " AND date < now() ";
+	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
+		if $form->{uid};
+	$where .= " AND topic=" . $self->sqlQuote($form->{topic})
 		if $form->{topic};
 	
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";

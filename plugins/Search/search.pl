@@ -16,12 +16,14 @@ sub main {
 	my %ops = (
 		comments	=> \&commentSearch,
 		users		=> \&userSearch,
-		stories		=> \&storySearch
+		stories		=> \&storySearch,
+		polls		=> \&pollSearch,
 	);
 	my %ops_rss = (
 		comments	=> \&commentSearchRSS,
 		users		=> \&userSearchRSS,
-		stories		=> \&storySearchRSS
+		stories		=> \&storySearchRSS,
+		polls		=> \&pollSearchRSS,
 	);
 
 	my $constants = getCurrentStatic();
@@ -40,6 +42,7 @@ sub main {
 	# Set some defaults
 	$form->{query}		||= '';
 	$form->{section}	||= '';
+	$form->{sort}	||= 1;
 	$form->{section}	= '' if $form->{section} eq 'index'; # XXX fix this right, do a {realsection}
 	$form->{threshold}	||= getCurrentUser('threshold');
 
@@ -71,14 +74,6 @@ sub main {
 		if ($constants->{panic} >= 1 or $constants->{search_google}) {
 			slashDisplay('nosearch');
 		} else {
-			slashDisplay('searchform', {
-				sections	=> _sections(),
-				topics		=> _topics(),
-				tref		=> $slashdb->getTopic($form->{topic}),
-				op		=> $form->{op},
-				authors		=> _authors(),
-				'sort'		=> _sort(),
-			});
 			if ($ops{$form->{op}}) {
 				$ops{$form->{op}}->($form, $constants, $slashdb, $searchDB);
 			}
@@ -114,11 +109,8 @@ sub _topics {
 
 #################################################################
 sub _sort {
-	# this needs to be in the database -- pudge
-	my $sort;
-	$sort->{''} = 'Default Order';
-	$sort->{'date'} = 'Order By Date';
-	$sort->{'score'} = 'Order By Score';
+	my $slashdb = getCurrentDB();
+	my $sort = $slashdb->getDescriptions('sortorder');
 
 	return $sort;
 }
@@ -155,35 +147,47 @@ sub commentSearch {
 
 	my $start = $form->{start} || 0;
 	my $comments = $searchDB->findComments($form, $start, $constants->{search_default_display} + 1, $form->{sort});
-
-	# check for extra articles ... we request one more than we need
-	# and if we get the extra one, we know we have extra ones, and
-	# we pop it off
-	my $forward;
-	if (@$comments == $constants->{search_default_display} + 1) {
-		pop @$comments;
-		$forward = $start + $constants->{search_default_display};
-	} else {
-		$forward = 0;
-	}
-
-	# if there are less than search_default_display remaning,
-	# just set it to 0
-	my $back;
-	if ($start > 0) {
-		$back = $start - $constants->{search_default_display};
-		$back = $back > 0 ? $back : 0;
-	} else {
-		$back = -1;
-	}
-
-	slashDisplay('commentsearch', {
-		comments	=> $comments,
-		back		=> $back,
-		forward		=> $forward,
-		args		=> _buildargs($form),
-		start		=> $start,
+	slashDisplay('searchform', {
+		sections	=> _sections(),
+		topics		=> _topics(),
+		tref		=> $slashdb->getTopic($form->{topic}),
+		op		=> $form->{op},
+		'sort'		=> _sort(),
+		threshhold => 1,
 	});
+
+	if (@$comments) {
+		# check for extra articles ... we request one more than we need
+		# and if we get the extra one, we know we have extra ones, and
+		# we pop it off
+		my $forward;
+		if (@$comments == $constants->{search_default_display} + 1) {
+			pop @$comments;
+			$forward = $start + $constants->{search_default_display};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than search_default_display remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{search_default_display};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
+		slashDisplay('commentsearch', {
+			comments	=> $comments,
+			back		=> $back,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+		});
+	} else {
+		print getData('nocomments');
+	}
 }
 
 #################################################################
@@ -192,34 +196,42 @@ sub userSearch {
 
 	my $start = $form->{start} || 0;
 	my $users = $searchDB->findUsers($form, $start, $constants->{search_default_display} + 1, $form->{sort});
-
-	# check for extra articles ... we request one more than we need
-	# and if we get the extra one, we know we have extra ones, and
-	# we pop it off
-	my $forward;
-	if (@$users == $constants->{search_default_display} + 1) {
-		pop @$users;
-		$forward = $start + $constants->{search_default_display};
-	} else {
-		$forward = 0;
-	}
-
-	# if there are less than search_default_display remaning,
-	# just set it to 0
-	my $back;
-	if ($start > 0) {
-		$back = $start - $constants->{search_default_display};
-		$back = $back > 0 ? $back : 0;
-	} else {
-		$back = -1;
-	}
-
-	slashDisplay('usersearch', {
-		users		=> $users,
-		back		=> $back,
-		forward		=> $forward,
-		args		=> _buildargs($form),
+	slashDisplay('searchform', {
+		op		=> $form->{op},
+		'sort'		=> _sort(),
 	});
+
+	if (@$users) {
+		# check for extra articles ... we request one more than we need
+		# and if we get the extra one, we know we have extra ones, and
+		# we pop it off
+		my $forward;
+		if (@$users == $constants->{search_default_display} + 1) {
+			pop @$users;
+			$forward = $start + $constants->{search_default_display};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than search_default_display remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{search_default_display};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
+		slashDisplay('usersearch', {
+			users		=> $users,
+			back		=> $back,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+		});
+	} else {
+		print getData('nousers');
+	}
 }
 
 #################################################################
@@ -228,35 +240,94 @@ sub storySearch {
 
 	my $start = $form->{start} || 0;
 	my $stories = $searchDB->findStory($form, $start, $constants->{search_default_display} + 1, $form->{sort});
-
-	# check for extra articles ... we request one more than we need
-	# and if we get the extra one, we know we have extra ones, and
-	# we pop it off
-	my $forward;
-	if (@$stories == $constants->{search_default_display} + 1) {
-		pop @$stories;
-		$forward = $start + $constants->{search_default_display};
-	} else {
-		$forward = 0;
-	}
-
-	# if there are less than search_default_display remaning,
-	# just set it to 0
-	my $back;
-	if ($start > 0) {
-		$back = $start - $constants->{search_default_display};
-		$back = $back > 0 ? $back : 0;
-	} else {
-		$back = -1;
-	}
-
-	slashDisplay('storysearch', {
-		stories		=> $stories,
-		back		=> $back,
-		forward		=> $forward,
-		args		=> _buildargs($form),
-		start		=> $start,
+	slashDisplay('searchform', {
+		sections	=> _sections(),
+		topics		=> _topics(),
+		tref		=> $slashdb->getTopic($form->{topic}),
+		op		=> $form->{op},
+		authors		=> _authors(),
+		'sort'		=> _sort(),
 	});
+
+	if (@$stories) {
+		# check for extra articles ... we request one more than we need
+		# and if we get the extra one, we know we have extra ones, and
+		# we pop it off
+		my $forward;
+		if (@$stories == $constants->{search_default_display} + 1) {
+			pop @$stories;
+			$forward = $start + $constants->{search_default_display};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than search_default_display remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{search_default_display};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
+		slashDisplay('storysearch', {
+			stories		=> $stories,
+			back		=> $back,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+		});
+	} else {
+		print getData('nostories');
+	}
+}
+
+#################################################################
+sub pollSearch {
+	my($form, $constants, $slashdb, $searchDB) = @_;
+
+	my $start = $form->{start} || 0;
+	my $polls = $searchDB->findPollQuestion($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+	slashDisplay('searchform', {
+		op		=> $form->{op},
+		topics		=> _topics(),
+		tref		=> $slashdb->getTopic($form->{topic}),
+		'sort'		=> _sort(),
+	});
+
+	if (@$polls) {
+		# check for extra articles ... we request one more than we need
+		# and if we get the extra one, we know we have extra ones, and
+		# we pop it off
+		my $forward;
+		if (@$polls == $constants->{search_default_display} + 1) {
+			pop @$polls;
+			$forward = $start + $constants->{search_default_display};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than search_default_display remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{search_default_display};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
+		slashDisplay('pollsearch', {
+			polls		=> $polls,
+			back		=> $back,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+		});
+	} else {
+		print getData('nopolls');
+	}
 }
 
 #################################################################
@@ -349,6 +420,38 @@ sub storySearchRSS {
 			title		=> "$constants->{sitename} Story Search",
 			'link'		=> "$constants->{absolutedir}/search.pl",
 			description	=> "$constants->{sitename} Story Search",
+		},
+		image	=> 1,
+		items	=> \@items
+	});
+}
+
+#################################################################
+sub pollSearchRSS {
+	my($form, $constants, $slashdb, $searchDB) = @_;
+
+	my $start = $form->{start} || 0;
+	my $stories;
+	if ($constants->{panic} >= 1 or $constants->{search_google}) {
+		$stories = [ ];
+	} else {
+		$stories = $searchDB->findPollQuestion($form, $start, 15, $form->{sort});
+	}
+
+	my @items;
+	for my $entry (@$stories) {
+		my $time = timeCalc($entry->[3]);
+		push @items, {
+			title	=> "$entry->[1] ($time)",
+			'link'	=> ($constants->{absolutedir} . 'pollBooth.pl?qid=' . $entry->[0]),
+		};
+	}
+
+	xmlDisplay(rss => {
+		channel => {
+			title		=> "$constants->{sitename} Poll Search",
+			'link'		=> "$constants->{absolutedir}/search.pl",
+			description	=> "$constants->{sitename} Poll Search",
 		},
 		image	=> 1,
 		items	=> \@items

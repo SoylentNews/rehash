@@ -9,3 +9,5 @@ template=templates/pagination;search;default
 template=templates/searchform;search;default
 template=templates/storysearch;search;default
 template=templates/usersearch;search;default
+template=templates/pollsearch;search;default
+template=templates/data;search;default

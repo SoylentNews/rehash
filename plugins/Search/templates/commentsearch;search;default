@@ -23,7 +23,7 @@ __template__
 			<BR><B>[% x %]</B>
 		[% END %] 
 
-			<A HREF="[% comment.1 %]&amp;cid=[% comment.9 %]">[% comment.5 %]</A>
+			<A HREF="[% constants.rootdir %]/comments.pl?cid=[% comment.9 %]">[% comment.5 %]</A>
 
 			by <A HREF="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.7) %]<BR>
 			<FONT SIZE="2">attached to 

@@ -24,27 +24,31 @@ __template__
 	<FONT size=-1>(Note: words under four characters are not indexed)</font>
 	<br>
 	<INPUT TYPE="TEXT" SIZE="40" NAME="query" VALUE="[% form.query %]">
-	<INPUT TYPE="SUBMIT" VALUE="Search">
+	<INPUT TYPE="SUBMIT" VALUE="Search"><BR>
 
 	<INPUT TYPE="RADIO" NAME="op" VALUE="stories"[% IF op == 'stories' %]CHECKED[% END %]> Stories
 	<INPUT TYPE="RADIO" NAME="op" VALUE="comments"[% IF op == 'comments' %]CHECKED[% END %]> Comments
-	<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'users' %]CHECKED[% END %]> Users<BR>
+	<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'users' %]CHECKED[% END %]> Users
+	<INPUT TYPE="RADIO" NAME="op" VALUE="polls"[% IF op == 'polls' %]CHECKED[% END %]> Polls<BR>
 	[% IF constants.search_journal_enabled %]
 		<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'journals' %]CHECKED[% END %]> Users<BR>
 	[% END %]
 
-	[% IF op == 'stories' %]
+	[% IF authors %]
 			[% Slash.createSelect("author", authors, form.author, 1) %]
-	[% ELSIF op == 'comments' %]
+	[% END %]
+
+	[% IF threshhold %]
 		Threshold <INPUT TYPE="TEXT" SIZE="3" NAME="threshold" VALUE="[% form.threshold %]">
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
 	[% END %]
 
-	[% UNLESS op == 'users' %]
-		[% Slash.createSelect("topic", topics, form.topic, 1, 1) %]
-		[% UNLESS op == 'journals' %]
-			[% Slash.createSelect("section", sections, form.section, 1) %]
-		[% END %]
+	[% IF topics %]
+		[% Slash.createSelect("topic", topics, form.topic, 1) %]
+	[% END %]
+
+	[% IF sections %]
+		[% Slash.createSelect("section", sections, form.section, 1) %]
 	[% END %]
 	[% Slash.createSelect("sort", sort, form.sort, 1) %]
 

@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'nousers' %]
+	No usernames were found that match your query.
+
+[% CASE 'nostories' %]
+	No stories were found that match your query.
+
+[% CASE 'nocomments' %]
+	No comments were found that match your query.
+
+[% CASE 'nopolls' %]
+	No poll questions were found that match your query.
+
+[% END %]
+
+__seclev__
+10000

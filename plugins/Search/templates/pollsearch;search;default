@@ -1,0 +1,33 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+pollsearch
+__template__
+[% USE Slash %]
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+	[% FOREACH poll=polls %]
+		<TR>
+		[% IF poll.4 %]
+			<TD VALIGN="TOP">
+				[% poll.4 %]
+			</TD>
+		[% END %]
+		<TD VALIGN="TOP">
+			<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% poll.0 %]">[% poll.1 %]</A> on [% Slash.timeCalc(poll.3) %] with [% poll.2 %] voters.
+		</TD>
+		</TR>
+	[% END %]
+</TABLE>
+[% PROCESS pagination %]
+<P>
+
+__seclev__
+100
