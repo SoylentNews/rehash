@@ -50,6 +50,29 @@ sub new {
 	
 	my $count = 0;
 	if ($options->{create}) {
+		
+		if (getCurrentStatic('adminmail_check_replication')) {
+			my $wait_sec = 30;
+			my $num_try = 0;
+			my $max_tries = 3;
+			
+			my $caught_up = 0;
+			while (!$caught_up) {
+				my $max_id = $self->sqlSelect("MAX(id)", "accesslog");
+				$caught_up = $self->sqlCount("accesslog", "id=$max_id AND ts>='$today\000000'");
+				$num_try++;
+				if (!$caught_up) {
+					if ($num_try < $max_tries) {
+						print STDERR "log_slave replication not caught up.  Waiting $wait_sec seconds and retrying.\n";
+						sleep $wait_sec if !$caught_up;
+					} else {
+						print STDERR "Checked replication $num_try times without success, giving up."; 
+						return undef;
+					}
+				}
+				
+			}
+		}
 
 		# Why not just truncate? If we did we would never pick up schema changes -Brian
 		# Create "accesslog_temp" and "accesslog_temp_errors" from the
@@ -98,26 +121,31 @@ sub new {
 	
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp",
+			"*",
 			"accesslog",
 			"ts $self->{_day_between_clause} AND status  = 200 AND op != 'rss'",
 			3, 60);
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_rss",
+			"*",
 			"accesslog",
 			"ts $self->{_day_between_clause} AND status  = 200 AND op = 'rss'",
 			3, 60);
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_errors",
+			"*",
 			"accesslog",
 			"ts $self->{_day_between_clause} AND status != 200",
 			3, 60);
 		my $stats_reader = getObject('Slash::Stats', { db_type => 'reader' });	
 		my $recent_subscribers = $stats_reader->getRecentSubscribers();
+		
 		if ($recent_subscribers && @$recent_subscribers) {
 			my $recent_subscriber_uidlist = join(", ", @$recent_subscribers);
 		
 			return undef unless $self->_do_insert_select(
 				"accesslog_temp_subscriber",
+				"*",
 				"accesslog_temp",
 				"uid IN ($recent_subscriber_uidlist)",
 				3, 60);
@@ -134,13 +162,27 @@ sub new {
 		my $page_list = join ',', map {$self->sqlQuote($_)} @PAGES;
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_other",
+			"*",
 			"accesslog_temp",
 			"op NOT in($page_list)",
 			3, 60);
+		return undef unless $self->_do_insert_select(
+			"accesslog_temp_host_addr",
+			"host_addr, IF(uid = $constants->{anonymous_coward_uid}, 'yes', 'no')",
+			"accesslog_temp",
+			"",
+			3, 60);
+	
+		return undef unless $self->_do_insert_select(
+			"accesslog_temp_host_addr",
+			"host_addr, IF(uid = $constants->{anonymous_coward_uid}, 'yes', 'no')",
+			"accesslog_temp_rss",
+			"",
+			3, 60);
+
+
 	}
 
-	$self->sqlDo("INSERT IGNORE INTO accesslog_temp_host_addr SELECT host_addr, IF(uid=$constants->{anonymous_coward_uid},'yes','no') from accesslog_temp ");
-	$self->sqlDo("INSERT IGNORE INTO accesslog_temp_host_addr SELECT host_addr, IF(uid=$constants->{anonymous_coward_uid},'yes','no') from accesslog_temp_rss ");
 
 	return $self;
 }
@@ -1895,13 +1937,15 @@ sub getAllStats {
 
 ########################################################
 sub _do_insert_select {
-	my($self, $to_table, $from_table, $where_clause, $retries, $sleep_time) = @_;
+	my($self, $to_table, $from_cols, $from_table, $where, $retries, $sleep_time, $options) = @_;
 	my $try_num = 0;
 	my $rows = 0;
 	I_S_LOOP: while (!$rows) {
+		my $where_clause = "";
+		$where_clause = "WHERE $where " if $where;
 
 		my $sql = "INSERT INTO $to_table"
-			. " SELECT * FROM $from_table WHERE $where_clause FOR UPDATE";
+			. " SELECT $from_cols FROM $from_table $where_clause FOR UPDATE";
 		$rows = $self->sqlDo($sql);
 		# Apparently this insert can, under some circumstances,
 		# including mismatched lib versions, succeed but return
