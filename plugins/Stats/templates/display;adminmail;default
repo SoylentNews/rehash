@@ -61,6 +61,9 @@ For [% section.section_name %]
         users: [% section.users %]
 
                   Pages      IPs   Bandwidth    Users
+[% IF section.index.page > 0 -%]
+     index: [% section.index.page %] [% section.index.ipids %] [% section.index.bytes %] [% section.index.users %]
+[% END -%]
 [% IF section.comments.page > 0 -%]
      comments: [% section.comments.page %] [% section.comments.ipids %] [% section.comments.bytes %] [% section.comments.users %]
 [% END -%]
