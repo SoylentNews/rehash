@@ -78,6 +78,7 @@ __template__
    END;
 
    FOREACH t = topic_children;
+      # XXXSKIN obviously there are smarter ways to do this
       NEXT IF !form.tid && (
           topics.$t.textname == "Geeks in Space" ||
           topics.$t.textname == "Features" ||
@@ -115,7 +116,7 @@ Topics</b>
 <ul>
 [% FOREACH s = listnames.keys.sort -%]
 <li><a href="[% gSkin.rootdir %]/search.pl?tid=[% listnames.$s %]">[% s %]</a>[%
-   IF user.is_admin %] [<a href="[% gSkin.rootdir %]/admin.pl?op=topics&nexttid=[% listnames.$s %]">edit</a>] [%
+   IF user.is_admin %] [<a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% listnames.$s %]">edit</a>] [%
 END %]</li>
 [%- i = i + 1;
     IF i == listcount.int || i == 0;
