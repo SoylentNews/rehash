@@ -243,6 +243,7 @@ EOT
 	$data{total_hits} = sprintf("%8d", $sdTotalHits);
 	$data{homepage} = sprintf("%8d", $count->{index}{index});
 	$data{day} = $yesterday;
+	$data{distinct_comment_posters_uids} = $distinct_comment_posters_uids;
 
 #	my @sections;
 #	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
