@@ -409,7 +409,6 @@ themes/slashcode/templates/footer;misc;light
 themes/slashcode/templates/formLabel;misc;default
 themes/slashcode/templates/formbox;misc;default
 themes/slashcode/templates/formkeyErrors;misc;default
-themes/slashcode/templates/genQuickies;submit;default
 themes/slashcode/templates/getOlderStories;misc;default
 themes/slashcode/templates/getUserAdmin;users;default
 themes/slashcode/templates/header;misc;admin
