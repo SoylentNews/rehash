@@ -161,6 +161,8 @@ ends. Your day may vary.)
 <P>If you have any questions or concerns about billing, ad&nbsp;display,
 or other subscription-related issues, please contact
 <A HREF="mailto:[% constants.subscribe_email %]">[% constants.subscribe_email %]</A>.
+If your question is about your daily headlines email, you can edit that at
+<A HREF="[% constants.rootdir %]/my/messages">[% constants.absolutedir %]/my/messages</A>.
 
 __seclev__
 10000
