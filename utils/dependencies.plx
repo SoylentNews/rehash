@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# this attempts top make sure there are no dependency conflicts.
+# this attempts to make sure there are no dependency conflicts.
 # run it every once in awhile if you care to.
 #
 # $Id$
