@@ -154,8 +154,8 @@ INSERT INTO pollanswers (qid, aid, answer, votes) VALUES (2,5,'manic depressive'
 # Dumping data for table 'pollquestions'
 #
 
-INSERT INTO pollquestions (qid, question, voters, date, discussion, uid) VALUES (1,'What flavor of ice cream?',5,'2000-01-16 19:11:10', 3, 2);
-INSERT INTO pollquestions (qid, sid, question, voters, date, discussion, uid) VALUES (2, '00/01/25/1430236', 'Are you happy?',7,'2000-01-19 16:23:00', 4, 2);
+INSERT INTO pollquestions (qid, question, voters, date, discussion, uid) VALUES (1, 'What flavor of ice cream?', 5, '2000-01-16 19:11:10', 3, 2);
+INSERT INTO pollquestions (qid, question, voters, date, discussion, uid) VALUES (2, 'Are you happy?', 7, '2000-01-19 16:23:00', 4, 2);
 
 #
 # Dumping data for table 'pollvoters'
@@ -215,8 +215,8 @@ INSERT INTO section_topics (section, tid) VALUES ('features', 1);
 # Dumping data for table 'stories'
 #
 
-INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, commentstatus, discussion, submitter, writestatus) VALUES ('00/01/25/1430236',4,2,'You\'ve Installed Slash!','congratulations-dude','2000-08-28 20:47:46',0,'articles',0,0,1,2, 'dirty');
-INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, commentstatus, discussion, submitter, writestatus) VALUES ('00/01/25/1236215',4,2,'Now What?','where-do-you-go-from-here','2000-01-25 08:32:02',0,'articles',0,0,2,2, 'dirty');
+INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, commentstatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1430236',4,2,'You\'ve Installed Slash!','congratulations-dude','2000-08-28 20:47:46',0,'articles',0,0,1,2, 'dirty', 2);
+INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, commentstatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1236215',4,2,'Now What?','where-do-you-go-from-here','2000-01-25 08:32:02',0,'articles',0,0,2,2, 'dirty', NULL);
 
 
 #
