@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# Need to pass the four passed-in vars to the newxxx() routines
-
 use strict;
 use Slash;
 use Slash::XML;
@@ -17,13 +15,13 @@ $task{$me}{code} = sub {
 
 	my($backupdb);
 	if ($constants->{backup_db_user}) {
-		$backupdb  = getObject('Slash::DB', $constants->{backup_db_user});
+		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
 	} else {
 		$backupdb = $slashdb;
 	}
 
 	my $stories = $backupdb->getBackendStories();
-	if ($stories and @$stories) {
+	if ($stories && @$stories) {
 		newxml(@_, undef, $stories);
 		newrdf(@_, undef, $stories);
 		newwml(@_, undef, $stories);
@@ -34,7 +32,7 @@ $task{$me}{code} = sub {
 	for (keys %$sections) {
 		my($section) = $sections->{$_}->{section};
 		$stories = $backupdb->getBackendStories($section);
-		if ($stories and @$stories) {
+		if ($stories && @$stories) {
 			newxml(@_, $section, $stories);
 			newrdf(@_, $section, $stories);
 			newrss(@_, $section, $stories);
