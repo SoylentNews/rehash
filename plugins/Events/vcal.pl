@@ -16,7 +16,8 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
-	#Yeah, I am being lazy and paranoid  -Brian
+	# Yeah, I am being lazy and paranoid  -Brian
+	my $story;
 	if (!($user->{author} or $user->{is_admin}) and !$slashdb->checkStoryViewable($form->{sid})) {
 		$story = '';
 	} else {
