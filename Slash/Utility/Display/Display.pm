@@ -499,7 +499,8 @@ sub linkStory {
 
 	# We need to make sure we always get the right link -Brian
 	$story_link->{section} ||= $reader->getStory($story_link->{sid}, 'section');
-	$story_link->{'link'} ||= $reader->getStory($story_link->{sid}, 'title');
+	$story_link->{'link'} = $reader->getStory($story_link->{sid}, 'title')
+		if $story_link->{'link'} eq "";
 	my $section = $reader->getSection($story_link->{section});
 	my $url = $section->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
 
