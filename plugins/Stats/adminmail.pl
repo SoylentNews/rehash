@@ -38,7 +38,7 @@ $task{$me}{code} = sub {
 	my $cc_days_back = $constants->{archive_delay} || 14;
 	my @cc_days = ($yesterday);
 
-	for my $db(1..$cc_days_back){
+	for my $db (1..$cc_days_back) {
 		my @day = localtime(time-86400*($days_back+$db));
 		my $day = sprintf "%4d-%02d-%02d",
         	        $day[5] + 1900, $day[4] + 1, $day[3];
@@ -49,7 +49,7 @@ $task{$me}{code} = sub {
 	# average hits per story for each in the e-mail	
 
 	my @ah_days = ($yesterday);
-	for my $db(1,2){
+	for my $db (1, 2) {
 		my @day = localtime(time-86400*($days_back+$db));
 		my $day = sprintf "%4d-%02d-%02d",
         	        $day[5] + 1900, $day[4] + 1, $day[3];
@@ -339,9 +339,9 @@ EOT
 		$statsSave->createStatDaily("users_subscriber", $users_subscriber, { section => $section });
 			
 		foreach my $d (@cc_days) {
-			my $avg_comments = $stats->getAverageCommentCountPerStoryOnDay($d, { section => $section}) || 0;
+			my $avg_comments = $stats->getAverageCommentCountPerStoryOnDay($d, { section => $section }) || 0;
 			$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
-							{ section   => $section, overwrite => 1, day => $d });
+							{ section => $section, overwrite => 1, day => $d });
 		}
 
 		for my $op (@PAGES) {
@@ -536,7 +536,7 @@ EOT
 	}
 	
 	foreach my $day (@ah_days){
-		my $avg = $stats->sqlSelect("value","stats_daily","day='$day' and section='all' and name='avg_hits_per_story'");
+		my $avg = $stats->sqlSelect("value", "stats_daily", "day='$day' and section='all' and name='avg_hits_per_story'");
 		push @{$data{avg_hits_per_story}}, sprintf("%12.1f", $avg);
 	}
 
