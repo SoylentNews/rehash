@@ -24,6 +24,11 @@ $task{$me}{code} = sub {
 	my $num_total_renewing_subscribers = $sub_static->countTotalRenewingSubs();
 	my $num_current_renewing_subscribers = $sub_static->countCurrentRenewingSubs();
 
+	my $num_total_gift_subscribers = $sub_static->countTotalGiftSubs();
+	my $num_current_gift_subscribers = $sub_static->countCurrentGiftSubs();
+	my $num_total_renewing_gift_subscribers = $sub_static->countTotalRenewingGiftSubs();
+	my $num_current_renewing_gift_subscribers = $sub_static->countCurrentRenewingGiftSubs();
+        
 	my $new_subscriptions_hr = $sub_static->getSubscriberList();
 	my $num_new_subscriptions = scalar(keys %$new_subscriptions_hr);
 	my $num_gift_subscriptions = 0 ;
@@ -190,6 +195,11 @@ $task{$me}{code} = sub {
 		$statsSave->createStatDaily("subscribers_current", $num_current_subscribers);
 		$statsSave->createStatDaily("subscribers_renewing_total", $num_total_renewing_subscribers);
 		$statsSave->createStatDaily("subscribers_renewing_current", $num_current_renewing_subscribers);
+		
+		$statsSave->createStatDaily("subscribers_gift_total", $num_total_gift_subscribers);
+		$statsSave->createStatDaily("subscribers_gift_current", $num_current_gift_subscribers);
+		$statsSave->createStatDaily("subscribers_gift_renewing_total", $num_total_renewing_gift_subscribers);
+		$statsSave->createStatDaily("subscribers_gift_renewing_current", $num_current_renewing_gift_subscribers);
 	}
 
 	my @numbers = (
@@ -200,6 +210,15 @@ $task{$me}{code} = sub {
 		$num_total_subscribers,
 		$num_total_renewing_subscribers,
 		$num_new_subscriptions,
+	);
+
+	my @gift_numbers = (
+		$num_current_gift_subscribers,
+		$num_current_renewing_gift_subscribers,
+		$num_total_gift_subscribers - $num_current_gift_subscribers,
+		$num_total_renewing_gift_subscribers - $num_current_renewing_gift_subscribers,
+		$num_total_gift_subscribers,
+		$num_total_renewing_gift_subscribers
 	);
 
 	my($report_link, $monthly_stats) = ("", "");
@@ -246,22 +265,30 @@ EOT
 
 		}
 	}
-
-	my $email = sprintf(<<"EOT", @numbers);
+	my $email = sprintf(<<"EOT", @numbers,@gift_numbers);
 $constants->{sitename} Subscriber Info for $yesterday
 $report_link
 $monthly_stats
 
    Today
    -----
-current subscribers: %6d
-  of which renewing:      %6d
- former subscribers: %6d
-  of which renewing:      %6d
-  total subscribers: %6d
-  of which renewing:      %6d
+current subscribers    :  %6d
+   of which renewing   :       %6d
+former subscribers     :  %6d
+  of which renewing    :       %6d
+total subscribers      :  %6d
+  of which renewing    :       %6d
 
-today subscriptions: %6d
+today subscriptions    : %6d
+   
+Gift Subscriptions Today
+   -----
+current gift subscribers: %6d
+   of which renewing    :      %6d
+former gift subscribers : %6d
+   of which renewing    :      %6d
+total gift subscribers  : %6d
+   of which renewing    :      %6d
 
 $transaction_list
 EOT

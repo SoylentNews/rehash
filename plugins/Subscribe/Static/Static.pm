@@ -71,6 +71,55 @@ sub countCurrentRenewingSubs {
         } );
 }
 
+sub countTotalGiftSubs {
+	my($self) = @_;
+	my @gift_uids = $self->_getUidsForPaymentType("gift");
+	return 0 unless @gift_uids;
+	return $self->sqlSelect("count(DISTINCT uid)","subscribe_payments","payment_type='gift' and uid in(".join(',',@gift_uids).")");
+}
+
+sub countCurrentGiftSubs {
+	my($self) = @_;
+	my @gift_uids = $self->_getUidsForPaymentType("gift");
+	return 0 unless @gift_uids;
+	return $self->sqlCount('users_hits',
+		'hits_paidfor > 0 AND hits_paidfor > hits_bought AND uid in('.join(',',@gift_uids).')');
+}
+
+sub countTotalRenewingGiftSubs {
+        my($self) = @_;
+	my @gift_uids = $self->_getUidsForPaymentType("gift");
+	return 0 unless @gift_uids;
+	return scalar( @{
+                $self->sqlSelectColArrayref(
+                        'users_hits.uid, COUNT(*) AS c',
+                        'users_hits LEFT JOIN subscribe_payments ON users_hits.uid = subscribe_payments.uid AND users_hits.uid in('.join(',',@gift_uids).')',
+                        'hits_paidfor > 0',
+                        'GROUP BY users_hits.uid HAVING c > 1'
+                )
+        } );
+}
+
+sub countCurrentRenewingGiftSubs {
+        my($self) = @_;
+	my @gift_uids = $self->_getUidsForPaymentType("gift");
+	return 0 unless @gift_uids;
+        return scalar( @{
+                $self->sqlSelectColArrayref(
+                        'users_hits.uid, COUNT(*) AS c',
+                        'users_hits LEFT JOIN subscribe_payments ON users_hits.uid = subscribe_payments.uid',
+                        'hits_paidfor > 0 AND hits_paidfor > hits_bought AND users_hits.uid in('.join(',',@gift_uids).')',
+                        'GROUP BY users_hits.uid HAVING c > 1'
+                )
+        } );
+}
+
+sub _getUidsForPaymentType {
+	my ($self, $type) = @_;
+	my $ar = $self->sqlSelectColArrayref("DISTINCT uid", "subscribe_payments","payment_type = ".$self->sqlQuote($type));
+	return @$ar;
+}
+
 ########################################################
 # Pass in start and end dates in TIMESTAMP format, i.e.,
 # YYYYMMDDhhmmss.  The hhmmss is optional.  The end date is
