@@ -3105,9 +3105,18 @@ sub checkReadOnly {
 		$where = "ipid = '$tmpid'";
 	}
 
-	$where .= " AND readonly = 1 AND formname = '$formname' AND reason != 'expired'";
+	# Setting readonly blocks posting;  setting isbanned also blocks
+	# posting even if readonly isn't set.
+	$where .= " AND (readonly = 1 OR isbanned = 1)";
+	# A blank formname means this entry applies to everything.
+	$where .= " AND (formname = '$formname' OR formname = '')";
+	# For when we get user expiration working.
+	$where .= " AND reason != 'expired'";
 
-	$self->sqlSelect("readonly", "accesslist", $where);
+	# We used to return the "readonly" value but now we're allowing that
+	# it might be 0... get the id instead and go by that.
+	my $id = $self->sqlSelect("id", "accesslist", $where);
+	return $id ? 1 : 0;
 }
 
 ##################################################################
@@ -3196,22 +3205,31 @@ sub getBanList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
 	
-	_genericCacheRefresh($self, 'banlist', $constants->{'banlist_expire'});
-	my $banlist_ref = $self->{'_banlist_cache'} ||= {};
+	# I believe we need to call _genericGetsCache() here.  Maybe it
+	# was decided not to do that because the method returns a copy
+	# of the cache hashref, and the BanList may be quite large.
+	# But something needs to set $self->{_banlist_cache_time} or
+	# the _genericCacheRefresh() call does no good because this
+	# table's cache will never expire. - Jamie 2002/12/28
+	_genericCacheRefresh($self, 'banlist', $constants->{banlist_expire});
+	my $banlist_ref = $self->{_banlist_cache} ||= {};
 
 	%$banlist_ref = () if $refresh;
 
-	if (! keys %$banlist_ref) {
-		my $sth = $self->{_dbh}->prepare("SELECT ipid,subnetid,uid from accesslist WHERE isbanned = 1");
-		$sth->execute;
-		my $list = $sth->fetchall_arrayref;
+	if (!keys %$banlist_ref) {
+		my $list = $self->sqlSelectAll("ipid, subnetid, uid",
+			"accesslist", "isbanned=1");
 		for (@$list) {
-			$banlist_ref->{$_->[0]} = 1 if $_->[0] ne '';
-			$banlist_ref->{$_->[1]} = 1 if $_->[1] ne '';
-			$banlist_ref->{$_->[2]} = 1 if ($_->[2] ne '' and $_->[2] ne $constants->{'anon_coward_uid'});
+			$banlist_ref->{$_->[0]} = 1 if $_->[0];
+			$banlist_ref->{$_->[1]} = 1 if $_->[1];
+			$banlist_ref->{$_->[2]} = 1 if $_->[2]
+				&& $_->[2] != $constants->{anon_coward_uid};
 		}
 		# why this? in case there are no banned users.
-		$banlist_ref->{'junk'} = 1;
+		# (this should be unnecessary;  we could use another var to
+		# indicate whether the cache is fresh, besides checking its
+		# number of keys at the top of this "if")
+		$banlist_ref->{_junk_placeholder} = 1;
 	}
 
 	return $banlist_ref;
@@ -6499,17 +6517,20 @@ sub _genericSet {
 # You can use this to reset cache's in a timely
 # manner :)
 sub _genericCacheRefresh {
-	my($self, $table,  $expiration) = @_;
+	my($self, $table, $expiration) = @_;
+#print STDERR "_genericCacheRefresh($table,$expiration)\n";
 	return unless $expiration;
 	my $table_cache = '_' . $table . '_cache';
 	my $table_cache_time = '_' . $table . '_cache_time';
 	my $table_cache_full = '_' . $table . '_cache_full';
+#print STDERR "_genericCacheRefresh($table,$expiration) s->{tct}='" . (defined($self->{$table_cache_time}) ? $self->{$table_cache_time} : "undef") . "'\n";
 	return unless $self->{$table_cache_time};
 	my $time = time();
 	my $diff = $time - $self->{$table_cache_time};
 
+#print STDERR "_genericCacheRefresh($table,$expiration) TIME:$diff:$expiration:$time:$self->{$table_cache_time}\n";
 	if ($diff > $expiration) {
-		# print STDERR "TIME:$diff:$expiration:$time:$self->{$table_cache_time}:\n";
+#print STDERR "_genericCacheRefresh setting '$table_cache' to empty\n";
 		$self->{$table_cache} = {};
 		$self->{$table_cache_time} = 0;
 		$self->{$table_cache_full} = 0;
