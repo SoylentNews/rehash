@@ -281,6 +281,7 @@ sub main {
 	slashdLogInit();
 
 	# Process task specific options, if any.
+	$constants->{task_options} = { };
 	if ($opts{'o'}) {
 		my($hash);
 		for (split /,/, $opts{o}) {
@@ -288,6 +289,10 @@ sub main {
 		}
 		$constants->{task_options} = $hash;
 	}
+	$constants->{task_options_text} = join(",",
+		map { "$_=$constants->{task_options}{$_}" }
+		sort keys %{$constants->{task_options}}
+	);
 
 	my $task_name_nopl = $task_name;
 	$task_name_nopl =~ s/\.pl$//;
@@ -296,7 +301,10 @@ sub main {
 	});
 
 	my $subref = get_task_subref();
-	slashdLog("$task_name begin") if verbosity() >= 2;
+	slashdLog("$task_name begin"
+		. ($constants->{task_options_text} ? " $constants->{task_options_text}" : "")
+	) if verbosity() >= 2;
+
 	my $start_time = Time::HiRes::time;
 	# runtask doesn't fork, there wouldn't be much point
 	my $rc = $subref->($virtual_user, $constants, $slashdb, $user, {});
