@@ -831,15 +831,11 @@ sub topicSave {
 
 	# The next few lines need to be wrapped in a transaction -Brian
 	$slashdb->deleteSectionTopicsByTopic($form->{tid}, $form->{type});
-	for my $element1(keys %$form) {
-		if ($element1 =~ /^exsect_(.*)/) {
-			my $sect = $1;
-			for my $element2(keys %$form) {
-			    if ($element2 =~ /^extype_${sect}_(.*)/) {
-				my $type = $1;
-				$slashdb->createSectionTopic($sect, $form->{tid}, $type);
-			    }
-			}
+	for my $element1 (keys %$form) {
+		if ($element1 =~ /^exsect/) {
+			# I picked | because sections, types can have _ in them -Brian
+			my ($junk, $sect, $type) = split(/\|/, $element1);
+			$slashdb->createSectionTopic($sect, $form->{tid}, $type);
 		}
 
 	}
