@@ -168,18 +168,18 @@ sub vote {
 		@{sqlSelectAll("aid", "pollanswers", "qid=$qid_dbi")} if $qid;
 
 	if (! keys %all_aid) {
- 		print "Invalid poll!<BR>";
+		print "Invalid poll!<BR>";
 		# Non-zero denotes error condition and that comments should not be 
 		# printed.
 		return 1;
 	}
-		
+
 	my $qid_htm = stripByMode($qid, 'attribute');
 
 	my $notes = "Displaying poll results";
 	if ($I{U}{uid} == -1 && ! $I{allow_anonymous}) {
 		$notes = "You may not vote anonymously.  " .
-		    qq[Please <A HREF="$I{rootdir}/users.pl">log in</A>.];
+			qq[Please <A HREF="$I{rootdir}/users.pl">log in</A>.];
 
 	} elsif ($aid > 0) {
 		my($id) = sqlSelect("id","pollvoters",
