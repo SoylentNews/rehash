@@ -20,7 +20,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'help' %]
-	Commands: help, [un]hush, [un]ignore, slashd, ping, who, whois (uid|nick)[% IF plugins.daddypants %], daddypants [now|next|today|tomorrow|n days][% END %]
+	Commands: help, [un]hush, [un]ignore, slashd, ping, who, whois (uid|nick), quote (symbol), dbs, [% IF plugins.daddypants %], daddypants [now|next|today|tomorrow|n days][% END %]
 
 [% CASE 'exiting' %]
 	Exiting (slashd should restart me within a minute)
@@ -61,6 +61,18 @@ __template__
 	[% ELSE %]
 		Price for [% stock.name %] at [% stock.time %]: [% stock.last %] ([% stock.net %] from last close/open [% stock.close %]/[% stock.open %]) -- Today's lo-hi [% stock.low %]-[% stock.high %] -- Year lo-hi [% stock.year_low %]-[% stock.year_high %]
 	[% END %]
+
+[% CASE 'dbs_response' %]
+	[% FOREACH dbid = dbids;
+		dbs.$dbid.virtual_user;
+		" alive="; dbs.$dbid.was_alive;
+		" lag="; dbs.$dbid.lag;
+		" bog="; dbs.$dbid.bog;
+		UNLESS loop.last(); " -- "; END;
+	END %]
+
+[% CASE 'dbs_nodata' %]
+	Error: no dbs_readerstatus data found within the last minute.
 
 [% CASE DEFAULT %]
 	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.

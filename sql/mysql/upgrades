@@ -2769,3 +2769,15 @@ UPDATE vars SET value=300 WHERE name='freshenup_max_stories';
 
 # End of T_2_5_0_38, Start of T_2_5_0_39 - 2004/11/23
 
+ALTER TABLE dbs ADD UNIQUE type_vu (type, virtual_user);
+ALTER TABLE dbs_readerstatus ADD COLUMN had_weight tinyint UNSIGNED NOT NULL DEFAULT 1, ADD COLUMN had_weight_adjust float UNSIGNED NOT NULL default 1, DROP INDEX ts_bog;
+
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_bog_secs_start','5','Number of seconds of reader DB bog at which balance_readers.pl should start to reduce its weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_bog_secs_end','60','Number of seconds of reader DB bog at which balance_readers.pl hits the minimum weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_bog_weight_min','0.2','The minimum weight to multiply a reader DB\'s base weight by once its bog hits dbs_reader_bog_secs_end');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_lag_secs_start','5','Number of seconds of reader DB lag at which balance_readers.pl should start to reduce its weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_lag_secs_end','30','Number of seconds of reader DB lag at which balance_readers.pl hits the minimum weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_lag_weight_min','0.1','The minimum weight to multiply a reader DB\'s base weight by once its lag hits dbs_reader_lag_secs_end');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_reduce_max','2.0','The maximum number of units per minute to reduce weight down to the minimum');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_increase_max','1.0','The maximum number of units per minute to restore weight back up to 1');
+

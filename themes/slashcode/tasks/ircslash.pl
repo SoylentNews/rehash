@@ -201,6 +201,7 @@ my %cmds = (
 	whois		=> \&cmd_whois,
 	daddypants	=> \&cmd_daddypants,
 	slashd		=> \&cmd_slashd,
+	dbs		=> \&cmd_dbs,
 	quote		=> \&cmd_quote,
 );
 sub handle_cmd {
@@ -398,7 +399,6 @@ sub cmd_quote {
 	# Generate and emit the response.
 	my $response = getIRCData('quote_response', { stock => \%stock });
 	$self->privmsg($channel, $response);
-	slashdLog("stock: " . Dumper(\%stock));
 	slashdLog("quote: $response, cmd from $info->{event}{nick}");
 }
 } # end closure
@@ -451,6 +451,28 @@ sub check_slashd {
 	}
 	my $ok = $response ? 1 : 0;
 	return (!$ok, $response);
+}
+
+sub cmd_dbs {
+	my($self, $info) = @_;
+	my $slashdb = getCurrentDB();
+	my $dbs = $slashdb->getDBs();
+	my $dbs_data = $slashdb->getDBsReaderStatus(60);
+	my $response;
+	if (%$dbs_data) {
+		for my $dbid (keys %$dbs_data) {
+			$dbs_data->{$dbid}{virtual_user} = $dbs->{$dbid}{virtual_user};
+			$dbs_data->{$dbid}{lag} = sprintf("%.1f", $dbs_data->{$dbid}{lag} || 0);
+			$dbs_data->{$dbid}{bog} = sprintf("%.1f", $dbs_data->{$dbid}{bog} || 0);
+		}
+		my @dbids =
+			sort { $dbs->{$a}{virtual_user} cmp $dbs->{$b}{virtual_user} }
+			keys %$dbs_data;
+		$response = getIRCData('dbs_response', { dbids => \@dbids, dbs => $dbs_data });
+	} else {
+		$response = getIRCData('dbs_nodata');
+	}
+	$self->privmsg($channel, $response);
 }
 
 ############################################################

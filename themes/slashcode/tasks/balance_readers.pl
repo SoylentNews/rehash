@@ -95,8 +95,11 @@ sub check_readers {
 	my $reader_info = { };
 
 	# Weed out readers that are isalive='no'
-	my $vu_alive_hr = $slashdb->sqlSelectAllKeyValue(
-		"virtual_user, IF(isalive='yes',1,0)", "dbs", "type='reader'");
+	my $vu_hr = $slashdb->sqlSelectAllHashref(
+		"virtual_user",
+		"virtual_user, IF(isalive='yes',1,0) AS isalive, weight, weight_adjust",
+		"dbs", "type='reader'");
+	my $vu_alive_hr = {( map {( $_, $vu_hr->{$_}{isalive} )} keys %$vu_hr )};
 	my @alive_vus = grep { $vu_alive_hr->{$_} } sort keys %$readers;
 
 	# Note dead readers so they can be marked as dead when we return.
@@ -109,6 +112,10 @@ sub check_readers {
 	my %process = ( );
 	my %slave_sql_id = ( );
 	for my $vu (@alive_vus) {
+
+		# Copy across the data from the dbs table.
+		$reader_info->{$vu}{had_weight}		= $vu_hr->{$vu}{weight};
+		$reader_info->{$vu}{had_weight_adjust}	= $vu_hr->{$vu}{weight_adjust};
 
 		# Connect to this reader (this will also attempt to ping it
 		# and make sure it's reachable).  If we can't, mark it as
@@ -330,6 +337,8 @@ sub log_reader_info {
 			slave_lag_secs	=> $info->{slave_lag_secs},
 			query_bog_secs	=> $info->{query_bog_secs},
 			bog_rsqid	=> $bog_rsqid,
+			had_weight	=> $info->{had_weight},
+			had_weight_adjust => $info->{had_weight_adjust},
 		};
 		$slashdb->createDBReaderStatus($log_hr);
 	}
@@ -338,7 +347,91 @@ sub log_reader_info {
 
 sub adjust_readers {
 	my($slashdb, $reader_info) = @_;
-	# Not coded yet.
+
+	my $constants = getCurrentStatic();
+	my $reduce_max   = $constants->{dbs_reader_weight_reduce_max};
+	my $increase_max = $constants->{dbs_reader_weight_increase_max};
+	my $weight_adjust = { };
+
+	VU: for my $vu (sort keys %$reader_info) {
+
+		# If this DB is marked as isalive='no', it's not our
+		# responsibility, skip it.
+		next VU unless $reader_info->{was_alive};
+
+		# If this DB was not reachable, set its weight to 0
+		# immediately.
+		if (!$reader_info->{was_reachable}) {
+			set_reader_weight_adjust($slashdb, $vu, 0);
+			next VU;
+		}
+
+		# Get how lagged this slave DB's slave process is.
+		# If we did indeed reach the reader DB and found that
+		# its slave process was not running, that counts as a
+		# very high lag (which it will be, shortly, unless
+		# the slave process gets restarted!).
+		my $lag = $reader_info->{$vu}{slave_lag_secs};
+		$lag = 9999 if !$reader_info->{$vu}{was_running};
+
+		# Get the weight_adjust fraction for lag.
+		my $wa_lag = get_adjust_fraction($lag,
+			$constants->{dbs_reader_lag_secs_start},
+			$constants->{dbs_reader_lag_secs_end},
+			$constants->{dbs_reader_lag_weight_min});
+
+		# Get how bogged the DB is.
+		my $bog = $reader_info->{$vu}{query_bog_secs};
+
+		# Get the weight_adjust fraction for bog.
+		my $wa_bog = get_adjust_fraction($bog,
+			$constants->{dbs_reader_bog_secs_start},
+			$constants->{dbs_reader_bog_secs_end},
+			$constants->{dbs_reader_bog_weight_min});
+
+		# Decide what the total fraction we're going to use is.
+		# (For now, let's just do the min of those two.  We may
+		# want to combine them in a synergistic way later or
+		# something.)
+		my $wa_total = $wa_lag;
+		$wa_total = $wa_bog if $wa_bog < $wa_total;
+		set_reader_weight_adjust($slashdb, $vu, $wa_total);
+	}
+}
+
+sub get_adjust_fraction {
+	my($secs, $secs_start, $secs_end, $weight_min) = @_;
+	if ($secs < $secs_start) {
+		# This one's as good as it gets :)
+		return 1;
+	}
+	if ($secs >= $secs_end) {
+		# This one's as bad as it gets :(
+		return $weight_min;
+	}
+	# This one's somewhere in the middle.  Scale
+	# linearly to find out where.
+	return 1 - ($secs-$secs_start)*(1-$weight_min)/($secs_end-$secs_start);
+}
+
+# Set the weight for this virtual user to the new value given --
+# but, do not increase it or reduce it more than the amount given,
+# nor make it larger than 1 or smaller than 0.  We do this with
+# some clever SQL.
+sub set_reader_weight_adjust {
+	my($slashdb, $vu, $new_wa) = @_;
+
+	my $dbid = get_reader_dbid($vu);
+	my $constants = getCurrentStatic();
+	my $delay = $constants->{dbs_reader_adjust_delay} || 5;
+	my $reduce_max = $constants->{dbs_reader_weight_reduce_max}*$delay/60;
+	my $increase_max = $constants->{dbs_reader_weight_increase_max}*$delay/60;
+
+	$slashdb->sqlUpdate("dbs",
+		{ -weight_adjust	=> "GREATEST(0, weight_adjust-$reduce_max,
+						LEAST(1, weight_adjust+$increase_max,
+							$new_wa))" },
+		"dbid=$dbid");
 }
 
 sub delete_old_logs {

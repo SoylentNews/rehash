@@ -710,7 +710,15 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
 INSERT INTO vars (name, value, description) VALUES ('dbs_reader_adjust_delay','5','Number of seconds between each adjustment of reader DB weights');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_bog_secs_start','5','Number of seconds of reader DB bog at which balance_readers.pl should start to reduce its weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_bog_secs_end','60','Number of seconds of reader DB bog at which balance_readers.pl hits the minimum weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_bog_weight_min','0.2','The minimum weight to multiply a reader DB\'s base weight by once its bog hits dbs_reader_bog_secs_end');
 INSERT INTO vars (name, value, description) VALUES ('dbs_reader_expire_secs', 86400 * 7,'Number of seconds worth of dbs_readerstatus log to keep around');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_lag_secs_start','5','Number of seconds of reader DB lag at which balance_readers.pl should start to reduce its weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_lag_secs_end','30','Number of seconds of reader DB lag at which balance_readers.pl hits the minimum weight');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_lag_weight_min','0.1','The minimum weight to multiply a reader DB\'s base weight by once its lag hits dbs_reader_lag_secs_end');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_reduce_max','2.0','The maximum number of units per minute to reduce weight down to the minimum');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_increase_max','1.0','The maximum number of units per minute to restore weight back up to 1');
 INSERT INTO vars (name, value, description) VALUES ('dbs_revive_seconds','30','After a DB goes from isalive=no to yes, ramp up accesses to it over how many seconds?');
 INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');

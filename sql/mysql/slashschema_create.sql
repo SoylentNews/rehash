@@ -343,8 +343,9 @@ CREATE TABLE dbs_readerstatus (
 	slave_lag_secs float DEFAULT '0',
 	query_bog_secs float DEFAULT '0',
 	bog_rsqid mediumint UNSIGNED DEFAULT NULL,
-	KEY ts_dbid (ts, dbid),
-	KEY ts_bog (ts, bog_rsqid, query_bog_secs)
+	had_weight tinyint UNSIGNED NOT NULL DEFAULT 1,
+	had_weight_adjust float UNSIGNED NOT NULL DEFAULT 1,
+	KEY ts_dbid (ts, dbid)
 ) TYPE=InnoDB;
 
 #
