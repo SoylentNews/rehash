@@ -98,7 +98,7 @@ Avg Comments Per Article:   [% avg_comments_per_story.0 %]|[% avg_comments_per_s
 [% FOREACH ru = rand_users_yest %][% ru.nickname %] ([% ru.uid %]) <[% ru.realemail %]>[% IF !loop.last %]  [% IF loop.count mod 2 == 0; "\n"; END %][% END %][% END %]
 
 Recent top [% top_recent_domains.size %] email domains:
-[% FOREACH trd = top_recent_domains; trd.c; "  "; trd.domain; "\n"; END %]
+[% FOREACH trd = top_recent_domains; trd.c; "  "; trd.initdomain; "\n"; END %]
 
 -----------------------
 [% FOREACH section = sections -%]

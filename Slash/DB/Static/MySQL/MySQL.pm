@@ -2032,9 +2032,8 @@ sub getTopRecentRealemailDomains {
 	my $min_uid = $self->getFirstUIDCreatedDaysBack($daysback, $yesterday);
 	return [ ] unless $min_uid;
 	return $self->sqlSelectAllHashrefArray(
-		"SUBSTRING(realemail, LOCATE('\@', realemail)+1) AS domain,
-		 COUNT(*) AS c",
-		"users",
+		"initdomain, COUNT(*) AS c",
+		"users_info",
 		"uid >= $min_uid",
 		"GROUP BY domain ORDER BY c DESC, domain LIMIT $num");
 }
