@@ -641,6 +641,7 @@ sub updateSpider {
 # NewsVac specific.
 sub newsvacSubmissions {
 	my($slashdb, $user, $form, $udbt) = @_;
+	my $constants = getCurrentStatic();
 	my($def_section, $cur_section, $def_note, $cur_note,
 		$sections, @sections, @notes,
 		%all_sections, %all_notes, %sn);
@@ -687,7 +688,7 @@ sub newsvacSubmissions {
 			map  { [ $_, ($_ eq $def_note ? '' : $_) ] }
 			keys %all_notes;
 
-	$title ||= 'Submissions ' . ($user->{is_admin} ?  'Admin' : 'List');
+	my $title ||= 'Submissions ' . ($user->{is_admin} ?  'Admin' : 'List');
 
 	# Take top 10 submissions by weight 
 
