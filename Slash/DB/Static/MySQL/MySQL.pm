@@ -1046,10 +1046,14 @@ sub setSlashdStatus {
 ########################################################
 sub createSlashdStatus {
 	my($self, $taskname) = @_;
-	return $self->sqlInsert(
+	$self->sqlInsert(
 		"slashd_status",
 		{ task => $taskname },
 		{ ignore => 1 } );
+	$self->sqlUpdate(
+		"slashd_status",
+		{ in_progress => 0 },
+		"task=" . $self->sqlQuote($taskname));
 }
 
 ########################################################
