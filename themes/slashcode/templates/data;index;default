@@ -30,7 +30,7 @@ __template__
 	[% user.nickname %]'s Slashbox
 
 [% CASE 'friends_journal_head' %]
-	Your Friend's Journals
+	Your Friends' Journals
 
 [% CASE 'userboxdefault' %]
 	This is your user space.  Love it.
