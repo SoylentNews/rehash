@@ -932,8 +932,7 @@ hashref of author data, and hashref of topic data.
 =cut
 
 sub displayStory {
-	# caller is the pagename of the calling script
-	my($sid, $full, $other) = @_;	# , $caller  no longer needed?  -- pudge
+	my($sid, $full, $other) = @_;	
 
 	my $slashdb = getCurrentDB();
 	my $story = $slashdb->getStory($sid);

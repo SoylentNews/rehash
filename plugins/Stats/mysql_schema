@@ -4,6 +4,8 @@ CREATE TABLE stats_daily (
 	day date NOT NULL,
 	name varchar(32) DEFAULT '' NOT NULL,
 	value FLOAT DEFAULT 0 NOT NULL,
+	section varchar(30) NOT NULL,
 	UNIQUE day_key_pair (day,name),
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (section) REFERENCES sections(section)
 ) TYPE = myisam;

@@ -23,9 +23,7 @@ __template__
 		<TD><B>Section</B></TD>
 			[% END %]
 
-			[% IF constants.enable_index_topic %]
-		<TD><B>Index topic</B></TD>
-			[% END %]
+		<TD><B>Subsection</B></TD>
 		<TD><B>Hits</B></TD>
 		<TD><B>Comments</B></TD>
 		<TD><B>Date</B></TD>
@@ -74,10 +72,11 @@ END %]
 		<TD>
 		<FONT SIZE="2">
 		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
-		[% story.title %]&nbsp;</A> 
+		[% story.title %]&nbsp;</A>
 		</FONT>
 		</TD>
 		<TD><FONT SIZE="2"><B>[% story.aid %]</B></FONT></TD>
+
 		<TD><FONT SIZE="2">[% story.topic.substr(0, 5) %]</FONT></TD>
 
 	[% UNLESS user.section || form.section %]
@@ -91,11 +90,9 @@ END %]
 	[% IF constants.enable_index_topic %]
 		<TD>
 		<FONT SIZE="2">
-		[% 
-			index_topic = Slash.db.getStory(story.sid,constants.enable_index_topic);
-			index_topic_name = Slash.db.getTopic(index_topic,'alttext');
-			IF index_topic_name ;%]
-		[% index_topic_name %] ([% index_topic %])
+		<!-- subsection [% story.subsection %] -->
+		[% IF story.subsection ; subsection_name = Slash.db.getSubSection(story.subsection,'title'); %]
+		[% subsection_name %] ([% story.subsection %])
 			[% ELSE ;%]
 		n/a
 			[% END;

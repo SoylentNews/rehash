@@ -219,11 +219,11 @@ sub submissionEd {
 		$cur_section = $form->{section} || $def_section;
 	}
 	$cur_note	= $form->{note} || $def_note;
-	$sections = $slashdb->getSubmissionsSections();
+	$sections = $slashdb->getSubmissionsSections($user->{section});
 
 	for (@$sections) {
 		my($section, $note, $cnt) = @$_;
-		$all_sections{$section} = 1;
+		$all_sections{$section} = 1 if ! $user->{section};
 		$note ||= $def_note;
 		$all_notes{$note} = 1;
 		$sn{$section}{$note} = $cnt;
@@ -236,13 +236,13 @@ sub submissionEd {
 		}
 	}
 
-	$all_sections{$def_section} = 1;
+	$all_sections{$def_section} = 1 if ! $user->{section};
 
 	# self documentation, right?
 	@sections =	map  { [$_->[0], ($_->[0] eq $def_section ? '' : $_->[0])] }
 			sort { $a->[1] cmp $b->[1] }
 			map  { [$_, ($_ eq $def_section ? '' : $_)] }
-			keys %all_sections;
+			keys %all_sections if ! $user->{section};
 
 	@notes =	map  { [$_->[0], ($_->[0] eq $def_note ? '' : $_->[0])] }
 			sort { $a->[1] cmp $b->[1] }

@@ -45,6 +45,9 @@ __template__
 [% IF form.formkey %]
 	<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
 [% END %]
+[% IF new_discussion %]
+	<INPUT TYPE="HIDDEN" NAME="new_discussion" VALUE="new_discussion">
+[% END %]
 
 	<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1">
 [% userlink = '' %]

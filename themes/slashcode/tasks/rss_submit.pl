@@ -32,6 +32,7 @@ $task{$me}{code} = sub {
 		my $block = $slashdb->getBlock($rss->{bid});
 		my $description = $rss->{description} ? $rss->{description} : $rss->{title};
 		if ($block->{'autosubmit'} eq 'yes') {
+			print "getting rss\ntitle $rss->{title}\ndescription\n$description\n";
 			my $submission = {
 				email	=> $rss->{link},
 				name	=> $block->{title},
