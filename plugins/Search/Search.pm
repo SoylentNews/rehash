@@ -279,11 +279,13 @@ sub findStory {
 					$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
 				} else {
 					# Section doesn't belong to this contained section
-					return;
+					# Tecnically we should return nothing but users are too dumb for that :)  -Brian
+					$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
 				}
 			} else  {
 				# Means we are dealing with a contained section and this is not the contained section
-				return;
+				# Tecnically we should return nothing but users are too dumb for that :)  -Brian
+				$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
 			}
 		} else {
 			$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
