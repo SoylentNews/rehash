@@ -165,7 +165,14 @@ Incremented token-count on [% num_updated %] users.
 	the default [% constants.subscribe_hits_btmd %].
 	Any of these three possible issues can be resolved at
 	<A HREF="[% constants.real_rootdir %]/subscribe.pl">your subscription page</A>.<P>
-
+[% CASE 'percentage' %]
+[% IF count > 0;
+        pct = (sum / count*100) FILTER format('%2.0f');
+        pct = pct _ "%";
+   ELSE;
+   pct = "n/a";
+ END %]
+[% pct %]
 [% CASE DEFAULT %]
 ---- MISSING MISCELLANEOUS DATA SEGMENT --- [[% value %]] block not found.
 

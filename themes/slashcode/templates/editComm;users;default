@@ -284,7 +284,11 @@ __template__
 		[% user_comment_sort_type.${user_edit.user_comment_sort_type} = 'CHECKED' -%]
 		&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="user_comment_sort_type" [% user_comment_sort_type.1 %] VALUE="1"> Selected by create time descending<BR>
 		&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="user_comment_sort_type" [% user_comment_sort_type.2 %] VALUE="2"> Selected by create time descending, results grouped by discussion, newest discussion first.
-
+		[% IF user.is_admin %]
+		<P><B>Show Moderations in User Comment Listing</B><INPUT TYPE="checkbox" NAME="mod_with_comm" [% s_mod_check %]></P>
+		<P><B>Show Metamoderation in User Moderation Listing</B><INPUT TYPE="checkbox" NAME="m2_with_mod" [% s_m2_check %]></P>
+		<P><B>Show Metamoderation in Comment Moderation Listing</B><INPUT TYPE="checkbox" NAME="m2_with_mod_on_comm" [% s_m2c_check %]></P>
+		[% END %]
 		</TD>
 	</TR>
 </TABLE>

@@ -118,7 +118,7 @@ __template__
 			</TR>
 [% END %]
 			[% IF ! useredit.nonuid %]
-				[% IF constants.subscribe %]
+				[% IF constants.subscribe && (useredit.subscribe_payments.size or useredit.subscribe_purchases.size) %]
 				<TR>
 					<TD WIDTH="100" VALIGN="TOP"><B>Subscription&nbsp;</B></TD>
 					<TD>
