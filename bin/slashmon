@@ -120,6 +120,10 @@ sub init {
 
 sub run {
 
+	# Drop the starting time onto the console just in case we later
+	# want to correlate times.
+	print scalar(gmtime) . "\n";
+
 	while (1) {
 
 		print_header() if $lines_since_header > $height;
