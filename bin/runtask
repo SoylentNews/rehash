@@ -35,7 +35,32 @@ my $PROGNAME = basename($0);
 $SLASH_PREFIX = "/usr/local/slash"
 	if !-e "$SLASH_PREFIX/slash.sites" || !-f _ || !-r _;
 
-main();
+usage('Options used incorrectly') unless (getopts('AhvlV:o:u:', \%opts));
+usage() if $opts{'h'};
+version() if $opts{'v'};
+if ($opts{'A'}) {
+	my $fh = gensym();
+	open($fh, "$SLASH_PREFIX/slash.sites") or die "can't open slash.sites, $!";
+	my @users;
+	while (<$fh>) {
+		my ($user) = split /:/;
+		push @users, $user;
+	}
+	for(@users) {
+		print "Running $_\n";
+		my $pid = fork();
+		if (!defined $pid) {
+				die "error: cannot fork : $!" ;
+		} elsif ($pid == 0) {
+			$opts{'u'} = $_;
+			main();
+		} else {
+			wait();
+		}
+	}
+} else {
+	main();
+}
 exit 0;
 
 ############################################################
@@ -220,9 +245,6 @@ sub init_cron {
 
 sub main {
 	# Remember to doublecheck these match usage()!
-	usage('Options used incorrectly') unless (getopts('hvlV:o:u:', \%opts));
-	usage() if $opts{'h'};
-	version() if $opts{'v'};
 	$opts{'u'} ||= 'slash';
 
 	$task_name = $ARGV[0];
@@ -296,6 +318,7 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user (must exist in /usr/local/slash/slash.sites)
+	-A	cycle though all of the sites installed
 
 	-l	List tasks for this virtual user
 
