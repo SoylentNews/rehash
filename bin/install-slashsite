@@ -611,7 +611,7 @@ hostname you may also need to add a NameVirtualHost to your httpd.conf.
 If you do not have your Slash site in the root of the web server (e.g.,
 "http://www.example.com/mysite/" instead of "http://mysite.example.com/"),
 you will need to adjust the rootdir, rdfimage, imagedir, absolutedir,
-and cookiepath variables, as you also need to change your Apache config
+and cookiepath variables, and you also need to change your Apache config
 appropriately.  These are all in the "vars" table of your database.
 
 To restart apache do:
