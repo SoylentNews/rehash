@@ -2790,10 +2790,12 @@ sub getUserAdmin {
 	my $user	= getCurrentUser();
 	my $form	= getCurrentForm();
 	my $constants	= getCurrentStatic();
+	my $slashdb	= getCurrentDB();
 	$id ||= $user->{uid};
 
 	my($expired, $uidstruct, $readonly);
 	my($user_edit, $user_editfield, $ipstruct, $ipstruct_order, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
+	my $proxy_check = {};
 	my @accesshits;
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
@@ -2835,6 +2837,13 @@ sub getUserAdmin {
 		$user_editfield = $id;
 		$uidstruct = $reader->getUIDStruct('ipid', $user_edit->{ipid});
 		@accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
+
+		if ($form->{userfield} =~/^\d+\.\d+\.\d+\.(\d+)$/) {
+			if($1 ne "0"){
+				$proxy_check->{available} = 1;
+				$proxy_check->{results} = $slashdb->checkForOpenProxy($form->{userfield}) if $form->{check_proxy};
+			}
+		}
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
@@ -2900,6 +2909,22 @@ sub getUserAdmin {
 		$user_edit->{subscribe_purchases} =
 			$subscribe->getSubscriptionsPurchasedByUser($user_edit->{uid},{ only_types => [ "grant", "gift" ] });
 	}
+	my $ipid = $user_edit->{ipid};
+	my $subnetid = $user_edit->{subnetid};
+	my $post_restrictions = {};
+	my ($subnet_karma, $ipid_karma);
+
+	if ($ipid and !$subnetid) {
+		$ipid = md5_hex($ipid) if length($ipid) != 32;
+		$subnetid = $reader->getSubnetFromIPID($ipid);
+	}
+
+	if ($subnetid) {
+		$subnetid = md5_hex($subnetid) if length($subnetid) != 32;
+		$post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $subnetid);
+		$subnet_karma = $reader->getNetIDKarma("subnetid", $subnetid);
+		$ipid_karma = $reader->getNetIDKarma("ipid", $ipid) if $ipid;
+	}
 
 	my $all_acls = $reader->getAllACLs();
 	my $all_acls_hr = { map { ( $_, $_ ) } keys %$all_acls };
@@ -2921,6 +2946,10 @@ sub getUserAdmin {
 		authoredit_flag 	=> $authoredit_flag,
 		section_select		=> $section_select,
 		all_acls		=> $all_acls_hr,
+		proxy_check		=> $proxy_check,
+		subnet_karma		=> $subnet_karma,
+		ipid_karma		=> $ipid_karma,
+		post_restrictions	=> $post_restrictions
 	}, 1);
 }
 
