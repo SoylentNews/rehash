@@ -319,74 +319,6 @@ sub deleteDaily {
 
 ########################################################
 # For dailystuff
-sub countDaily {
-	my($self) = @_;
-	my %returnable;
-
-	my $constants = getCurrentStatic();
-
-	($returnable{'total'}) = $self->sqlSelect("count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1");
-
-	my $c = $self->sqlSelectMany("count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1 GROUP BY host_addr");
-	$returnable{'unique'} = $c->rows;
-	$c->finish;
-
-	$c = $self->sqlSelectMany("count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1 GROUP BY uid");
-	$returnable{'unique_users'} = $c->rows;
-	$c->finish;
-
-	$c = $self->sqlSelectMany("count(*)", "accesslog",
-		"op='journal' AND to_days(now()) - to_days(ts)=1 GROUP BY op");
-	$returnable{'journals'} = $c->rows;
-	$c->finish;
-
-#	my($comments) = $self->sqlSelect("count(*)", "accesslog",
-#		"to_days(now()) - to_days(ts)=1 AND op='comments'");
-
-	$c = $self->sqlSelectMany("dat,count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1 AND
-		(op='index' OR dat='index')
-		GROUP BY dat");
-
-	my(%indexes, %articles, %commentviews);
-
-	while (my($sect, $cnt) = $c->fetchrow) {
-		$indexes{$sect} = $cnt;
-	}
-	$c->finish;
-
-	$c = $self->sqlSelectMany("dat,count(*),op", "accesslog",
-		"to_days(now()) - to_days(ts)=1 AND op='article'",
-		"GROUP BY dat");
-
-	while (my($sid, $cnt) = $c->fetchrow) {
-		$articles{$sid} = $cnt;
-	}
-	$c->finish;
-
-	# clean the key table
-
-# not used ... ?
-# 	$c = $self->sqlSelectMany("dat,count(*)", "accesslog",
-# 		"to_days(now()) - to_days(ts)=1 AND op='comments'",
-# 		"GROUP BY dat");
-# 	while (my($sid, $cnt) = $c->fetchrow) {
-# 		$commentviews{$sid} = $cnt;
-# 	}
-# 	$c->finish;
-
-	$returnable{'index'} = \%indexes;
-	$returnable{'articles'} = \%articles;
-
-
-	return \%returnable;
-}
-
-########################################################
-# For dailystuff
 sub updateStamps {
 	my($self) = @_;
 	my $columns = "uid";
@@ -396,13 +328,10 @@ sub updateStamps {
 
 	my $E = $self->sqlSelectAll($columns, $tables, $where, $other);
 
-	$self->sqlTransactionStart("LOCK TABLES users_info WRITE");
-
 	for (@{$E}) {
 		my $uid = $_->[0];
 		$self->setUser($uid, {-lastaccess=>'now()'});
 	}
-	$self->sqlTransactionFinish();
 }
 
 ########################################################
@@ -573,6 +502,7 @@ sub getSectionInfo {
 		ORDER BY section"
 	);
 
+	$self->sqlConnect();
 	for (@{$sections}) {
 		@{%{$_}}{qw(month day)} =
 			$self->{_dbh}->selectrow_array(<<EOT);
@@ -703,7 +633,8 @@ sub stirPool {
 sub getLastUser {
 	my($self) = @_;
 	# Why users_info instead of users?	- Cliff
-	my($totalusers) = $self->sqlSelect("max(uid)", "users_info");
+	# No reason, and I think the other was slower -Brian
+	my $totalusers  = $self->sqlSelect("max(uid)", "users");
 
 	return $totalusers;
 }
@@ -1044,7 +975,15 @@ sub deleteOldFormkeys {
 	my($self, $timeframe) = @_;
 	$timeframe ||= 14400;
 	my $nowtime = time();
-	$self->sqlDo("delete from formkeys where ts < ($nowtime - (2*".$timeframe."))");
+	$self->sqlDo("DELETE FROM formkeys WHERE ts < ($nowtime - (2*".$timeframe."))");
+}
+
+########################################################
+sub countAccesslogDaily {
+	my($self) = @_;
+
+	return self->sqlSelect("count(*)", "accesslog",
+		"to_days(now()) - to_days(ts)=1");
 }
 
 1;
