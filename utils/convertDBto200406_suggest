@@ -89,14 +89,14 @@ for my $skid (sort { $a <=> $b } keys %$skins) {
 # You may (or may not) want to add links to this (these) topic(s),
 # which appear in existing stories but are not currently linked,
 # directly or otherwise, to the skin's nexus tid $skin->{nexus}.
-# Sample links are given with min_weight 1 linking directly to the
+# Sample links are given with min_weight 10 linking directly to the
 # nexus;  that may or may not be what you want.
 EOT
 		for my $tid (sort { $popular_tid_hr->{$b}{c} <=> $popular_tid_hr->{$a}{c} } keys %$popular_tid_hr) {
 			my $c = $popular_tid_hr->{$tid}{c};
 			print "# === $c stories with tid $tid '$tree->{$tid}{textname}'\n";
 			print "INSERT INTO topic_parents (tid, parent_tid, min_weight) VALUES (";
-			print "$tid, $skin->{nexus}, 1";
+			print "$tid, $skin->{nexus}, 10";
 			print ");\n";
 
 		}

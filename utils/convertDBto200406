@@ -128,7 +128,7 @@ for my $tid (sort { $a <=> $b } keys %$old_topics_hr) {
 }
 
 #
-# Convert topics.parent_topics into topic_parents, min_weight 1
+# Convert topics.parent_topics into topic_parents, min_weight 10
 #
 
 print <<EOT;
@@ -137,7 +137,7 @@ DROP TABLE IF EXISTS topic_parents_new;
 CREATE TABLE topic_parents_new (
         tid SMALLINT UNSIGNED NOT NULL,
         parent_tid SMALLINT UNSIGNED NOT NULL,
-        min_weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+        min_weight FLOAT UNSIGNED DEFAULT 10 NOT NULL,
         UNIQUE child_and_parent (tid, parent_tid),
         INDEX parent_tid (parent_tid)
 ) TYPE=InnoDB;
@@ -147,12 +147,12 @@ my %parents = ( );
 for my $tid (keys %$old_topics_hr) {
         # In the old schema, parent_topic of 0 means no parent
         next if $old_topics_hr->{$tid}{parent_topic} == 0;
-        $parents{$tid}{ $old_topics_hr->{$tid}{parent_topic} } = 1;
+        $parents{$tid}{ $old_topics_hr->{$tid}{parent_topic} } = 10;
 }
 for my $tid (sort { $a <=> $b } keys %parents) {
         for my $pid (sort { $a <=> $b } keys %{$parents{$tid}}) {
                 print "INSERT INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
-                print "$tid, $pid, 1";
+                print "$tid, $pid, 10";
                 print ");\n";
         }
 }
@@ -184,7 +184,6 @@ DROP TABLE IF EXISTS skins_new;
 CREATE TABLE skins_new (
         skid SMALLINT UNSIGNED NOT NULL DEFAULT 0 AUTO_INCREMENT,
         nexus SMALLINT UNSIGNED NOT NULL,
-        min_weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
         artcount_min MEDIUMINT UNSIGNED DEFAULT '10' NOT NULL,
         artcount_max MEDIUMINT UNSIGNED DEFAULT '30' NOT NULL,
         name VARCHAR(30) NOT NULL,
@@ -219,9 +218,9 @@ sub getNextSkid {
 
 sub output_insert_skins_new {
         my($skid) = @_;
-        print "INSERT INTO skins_new (skid, nexus, min_weight, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (";
+        print "INSERT INTO skins_new (skid, nexus, artcount_min, artcount_max, name, title, issue, url, hostname, cookiedomain, index_handler, max_rewrite_secs, last_rewrite) VALUES (";
         print join ", ", map { $slashdb->sqlQuote($skins{$skid}{$_}) }
-                qw( skid nexus min_weight artcount_min artcount_max name title
+                qw( skid nexus artcount_min artcount_max name title
                     issue url hostname cookiedomain index_handler
                     max_rewrite_secs last_rewrite );
         print ");\n";
@@ -257,7 +256,6 @@ for my $section (@old_sections) {
         $skins{$next_skid} = {
                 skid            => $next_skid,
                 nexus           => $next_tid,
-                min_weight      => $section eq 'mainpage' ? 3 : 1,
                 artcount_min    => int($old_sections_hr->{$section}{artcount}/3),
                 artcount_max    => $old_sections_hr->{$section}{artcount},
                 name            => $section,
@@ -410,7 +408,7 @@ for my $id (sort { $a <=> $b } keys %$old_subsections_hr) {
 
 #
 # The section_subsections table turns into topic_parents binding sections
-# and subsections.  min_weight 1 unless the parent section is mainpage.
+# and subsections.  min_weight 10 unless the parent section is mainpage.
 #
 
 print "\n";
@@ -425,7 +423,7 @@ for my $duple (@$old_section_subsections_ar) {
         }
         my $parent_nexus = $skins{$parent_skid}{nexus};
         my $child_nexus = $subsections{$subsection};
-        my $min_weight = $section eq 'mainpage' ? 3 : 1;
+        my $min_weight = $section eq 'mainpage' ? 30 : 10;
         print "INSERT INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
         print "$child_nexus, $parent_nexus, $min_weight";
         print ");\n";
@@ -434,7 +432,7 @@ for my $duple (@$old_section_subsections_ar) {
 
 # #
 # # The section_topics table turns into topic_parents binding sections and
-# # topics.  min_weight 1 unless the parent section is mainpage.
+# # topics.  min_weight 10 unless the parent section is mainpage.
 # # Note, I am ignoring 'type' -- this really seems NEVER to have been used.
 # # -- Argh! no, it doesn't create any links.
 # #
@@ -454,7 +452,7 @@ for my $duple (@$old_section_subsections_ar) {
 #                 next;
 #         }
 #         my $parent_nexus = $skins{$parent_skid}{nexus};
-#         my $min_weight = $section eq 'mainpage' ? 3 : 1;
+#         my $min_weight = $section eq 'mainpage' ? 30 : 10;
 #         print "INSERT IGNORE INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
 #         print "$child_tid, $parent_nexus, $min_weight";
 #         print ");\n";
@@ -466,7 +464,7 @@ for my $duple (@$old_section_subsections_ar) {
 # EOT
 
 #
-# Any topic with no parents is assigned to 'mainpage', min_weight 3
+# Any topic with no parents is assigned to 'mainpage', min_weight 30
 #
 
 my $mainpage_skid = getSkidFromName('mainpage');
@@ -485,9 +483,9 @@ EOT
 
 for my $tid (@lonely_topics) {
         print "INSERT INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
-        print "$tid, $mainpage_nexus, 3";
+        print "$tid, $mainpage_nexus, 30";
         print ");\n";
-        $parents{$tid}{$mainpage_nexus} = 3;
+        $parents{$tid}{$mainpage_nexus} = 30;
 }
 
 print <<EOT;

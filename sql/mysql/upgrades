@@ -2392,3 +2392,13 @@ UPDATE vars SET value = 'enabled' WHERE name = 'defaultcommentstatus' AND value 
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_7, Start of T_2_5_0_8 - 2004/07/12
+
+# This next line may throw an error if the spurious column has
+# already been removed.  That's OK.
+ALTER TABLE skins DROP COLUMN min_weight;
+
+ALTER TABLE topic_parents ALTER COLUMN min_weight SET DEFAULT 10;
+UPDATE topic_parents         SET min_weight = min_weight * 10 WHERE min_weight < 10;
+UPDATE story_topics_chosen   SET weight = weight * 10         WHERE weight < 10;
+UPDATE story_topics_rendered SET weight = weight * 10         WHERE weight < 10;
+

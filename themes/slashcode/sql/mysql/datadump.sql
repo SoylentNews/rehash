@@ -272,19 +272,19 @@ INSERT INTO story_param (stoid, name, value) VALUES (1, 'qid', '2');
 # dumping data from table 'story_topics_chosen'
 #
 
-INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (1,4,3);
-INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (2,4,3);
+INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (1,4,30);
+INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (2,4,30);
 
 #
 # dumping data from table 'story_topics_rendered'
 #
 
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,1,3);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,1,3);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,2,3);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,2,3);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,4,3);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,4,3);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,1,30);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,1,30);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,2,30);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,2,30);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,4,30);
+INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,4,30);
 
 #
 # Dumping data for table 'submissions'
@@ -322,15 +322,13 @@ INSERT INTO topic_nexus VALUES (3, NULL);
 # Dumping data for table 'topic_parents'
 #
 
-INSERT INTO topic_parents VALUES (2,1,3);
-INSERT INTO topic_parents VALUES (3,1,3);
-INSERT INTO topic_parents VALUES (4,1,3);
-INSERT INTO topic_parents VALUES (5,1,3);
-INSERT INTO topic_parents VALUES (6,1,3);
-INSERT INTO topic_parents VALUES (7,1,3);
-INSERT INTO topic_parents VALUES (8,1,3);
-INSERT INTO topic_parents VALUES (4,3,1);
-INSERT INTO topic_parents VALUES (7,3,1);
+INSERT INTO topic_parents VALUES (2,1,30);
+INSERT INTO topic_parents VALUES (3,1,30);
+INSERT INTO topic_parents VALUES (5,1,30);
+INSERT INTO topic_parents VALUES (6,1,30);
+INSERT INTO topic_parents VALUES (8,1,30);
+INSERT INTO topic_parents VALUES (4,3,10);
+INSERT INTO topic_parents VALUES (7,3,10);
 
 #
 # Dumping data for table 'tzcodes'
