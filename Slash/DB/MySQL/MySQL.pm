@@ -10,6 +10,7 @@ use HTML::Entities;
 use Time::HiRes;
 use Date::Format qw(time2str);
 use Slash::Utility;
+use Storable qw(thaw freeze);
 use URI ();
 use vars qw($VERSION);
 use base 'Slash::DB';
@@ -929,6 +930,7 @@ sub deleteUser {
 		newpasswd	=> '',
 		homepage	=> '',
 		passwd		=> '',
+		people		=> '',
 		sig		=> '',
 		seclev		=> 0
 	});
@@ -4583,11 +4585,17 @@ sub setUser {
 		users_info users_prefs
 	)];
 
-	# special cases for password, exboxes
+	# special cases for password, exboxes, people
 	if (exists $hashref->{passwd}) {
 		# get rid of newpasswd if defined in DB
 		$hashref->{newpasswd} = '';
 		$hashref->{passwd} = encryptPassword($hashref->{passwd});
+	}
+
+	# Power to the People
+	if (exists $hashref->{people}) {
+		# get rid of newpasswd if defined in DB
+		$hashref->{people} = freeze $hashref->{people};
 	}
 
 	# hm, come back to exboxes later; it works for now
@@ -4689,6 +4697,8 @@ sub getUser {
 				$answer->{$_} = $val;
 			}
 		}
+		$answer->{'people'} = thaw $answer->{'people'} 
+			if ($answer->{'people'});
 
 	} elsif ($val) {
 		(my $clean_val = $val) =~ s/^-//;
@@ -4700,6 +4710,8 @@ sub getUser {
 			$answer = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$val'");
 			$answer = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$val'") if !$answer;
 		}
+		$answer = thaw $answer
+			if ($val eq 'people');
 
 	} else {
 
@@ -4746,7 +4758,13 @@ sub getUser {
 		for (@$append) {
 			$answer->{$_->[0]} = $_->[1];
 		}
+		# Why is this here? We keep biz logic out of this layer.
+		# getUser() returns the user info, not an actual user hash
+		# which has the is_admin stuff in it and such.
+		# -Brian
 		$answer->{is_anon} = isAnon($id);
+		$answer->{'people'} = thaw $answer->{'people'} 
+			if ($answer->{'people'});
 	}
 
 	return $answer;
