@@ -2188,10 +2188,10 @@ sub getTopRecentRealemailDomains {
 		my $i = 0;
 		$newnicks->{$domain->{initdomain}} = "";
 
-		while ($length + length($nicks->[$i]) + 2 < 78) {
+		while ($length + length($nicks->[$i][0]) + 2 < 78) {
 			$newnicks->{$domain->{initdomain}} .= ', ' unless !$i;
-			$newnicks->{$domain->{initdomain}} .= $nicks->[$i];
-			$length += length($nicks->[$i]) + 2;
+			$newnicks->{$domain->{initdomain}} .= $nicks->[$i][0];
+			$length += length($nicks->[$i][0]) + 2;
 			$i++;
 		}
 	}
