@@ -167,6 +167,28 @@ $task{$me}{code} = sub {
 			$do_log ||= (verbosity() >= 1);
 		}
 
+		# if we wrote a section page previously replace
+		# old pages with a redirect to the current
+		# article
+
+		my @old_sect = $slashdb->getPrevSectionsForSid($sid);
+		if(@old_sect){
+			foreach my $old_sect (@old_sect) {
+				next if $old_sect eq $section;
+				my $url = $constants->{rootdir}."/$section/$sid.shtml";
+				my $fn = "$basedir/$old_sect/$sid.shtml";
+				if(-e $fn){
+					my $fh = gensym();
+					if(!open($fh, ">", $fn)){
+						warn("Couldn't open file: $fn for writing");
+					} else {
+						print $fh slashDisplay("articlemoved", { url=> $url },{ Return => 1 } );
+						close $fh;
+					}
+				}
+			}
+			$slashdb->clearPrevSectionsForSid($sid);
+		}
 		# Now we extract what we need from the file we created
 		my $set_ok = 0;
 		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file, $cchp_param);
