@@ -1,0 +1,58 @@
+Just some notes on a rewrite I was thinking about. This may give you a headache 
+if you read it. Zoo stuff is just a wee bit complicated :)
+This would not work with the current schema because we would never know who
+created the relationship in FOF/EOF (which is something we need to know). Might 
+mean splitting up the tables which wouldn't be the worst thing to happen (and in all honesty
+might make this a little more workable).
+	-Brian
+
+Cases:
+User Marks Person as a Friend
+	Check for prior relationship, jump to neutralize and then return to here.
+	Update the User's relationship to person in the DB as friend.
+	Update the User's people hash
+	Update the person's relationship with the user with FAN
+
+	Grab users's friends
+	Increment FOF flag for these people to person
+
+	Grab person's friends
+	Increment FOF flag for these people in relationship to user
+
+	Grab person's foes
+	Increment EOF flag for these people in relationship to user
+	Add all users to the rebuild list.
+
+User Marks User as a Foe
+	Check for prior relationship, jump to neutralize and then return to here.
+	Update the user's relationship in the DB as a foe.
+	Update the User's people hash
+	Update the person's relationship with the user with Freak
+
+	Grab users's friends
+	Increment FOF flag for these people to person
+	Add all users to the rebuild list.
+
+User Marks makes relationship Nuetral
+	Find Relationship
+	If friend:
+		Grab person's friends
+		Decrement FOF flag for these people
+
+		Grab person's foes
+		Decrement EOF flag for these people
+		
+		Grab own Friends
+		Decrement FOF flag for these people
+
+		Blank Relationship
+
+		Update the User's people hash
+		Add all users to the rebuild list.
+
+	If foe
+		Grab own Friends
+		Decrement EOF flag for these people
+
+		Blank Relationship
+		Add all users to the rebuild list.
