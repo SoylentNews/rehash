@@ -49,7 +49,7 @@ post it for all to share and enjoy.  It is <B>very</B>
 important that you write a clear simple subject, and 
 include relevant links in your story.  If you wish to be 
 anonymous, feel free to leave the identifying fields 
-blank.  Anonymity has no affect on whether we will accept or 
+blank.  Anonymity has no effect on whether we will accept or 
 reject the story.</P>
 
 [% PROCESS formLabel value => "Your Name", comment => "Leave Blank to be Anonymous" %]
