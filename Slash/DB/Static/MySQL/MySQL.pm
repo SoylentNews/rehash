@@ -2372,16 +2372,91 @@ sub getModderCommenterIPIDSummary {
 }
 
 ########################################################
+# Returns a string representing pages per second that the site
+# has done recently, based on recent accesslog entries, and the
+# MAX(id) that was retrieved.  Optionally pass in the MAX(id)
+# from the previous call to try to optimize how much of the
+# table to bite off.  This is designed to be called once a
+# minute, and to occupy the accesslog table as little as
+# possible.
+sub getAccesslogPPS {
+	my($self, $last_max_id) = @_;
+	my $max_id = $self->sqlSelect("MAX(id)", "accesslog") || 0;
+	my $span = $last_max_id ? $max_id - $last_max_id : 0;
+
+	my $pps = "-";
+	my $rowsback = 1000;
+	# If the site is accumulating accesslog rows at fewer
+	# than 500 per minute, then don't look back as far as
+	# we otherwise might.
+	$rowsback = $span*2 if $span && $rowsback > $span*2;
+	$rowsback = $max_id-1 if $rowsback > $max_id-1;
+
+	my $retries = 3;
+	while ($retries-- > 0) {
+		my $lookback_id = $max_id - $rowsback;
+		$lookback_id = 1 if $lookback_id < 1;
+		my($count, $time) = $self->sqlSelect(
+			"COUNT(*), UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(MIN(ts))",
+			"accesslog",
+			"id >= $lookback_id AND op != 'image'");
+		if (!$count || $count < 10) {
+			# Very small count;  site is almost unused.
+			$pps = "slow";
+			$retries = 0;
+		} elsif ($time > $count) {
+			# Under 1 page/sec;  count less, to make sure
+			# this is a _recent_ stat.
+			if ($rowsback <= 250) {
+				# Close enough.
+				# Guaranteed not div-by-zero because
+				# $time > 10.
+				$pps = sprintf("%.1f", $count / $time);
+				$retries = 0;
+			} else {
+				$rowsback /= 2;
+			}
+		} elsif ($time < 3) {
+			# Page count would be _very_ high;  count more,
+			# to make sure we're not just measuring a
+			# random spike in DB write timing.
+			if ($rowsback >= 4000) {
+				$pps = "fast";
+				$retries = 0;
+			} elsif ($rowsback * 2 >= $max_id - 1) {
+				# No sense looking farther back.
+				# This site must be pretty new.
+				if ($time > 0) {
+					$pps = sprintf("%.1f", $count / $time);
+				} else {
+					$pps = "n/a";
+				}
+				$retries = 0;
+			} else {
+				$rowsback *= 2;
+			}
+		} else {
+			# Guaranteed not div-by-zero because $time >= 3.
+			$pps = sprintf("%.1f", $count / $time);
+			$retries = 0;
+		}
+	}
+	return ($pps, $max_id);
+}
+
+########################################################
 
 sub avgDynamicDurationForHour {
 	my($self, $ops, $days, $hour) = @_;
 	my $page_types = [@$ops];
-	my $name_clause  = join ',', map { $_ = $self->sqlQuote("duration_dy_$_\_$hour\_mean") } @$page_types;
+	my $name_clause = join ',', map { $_ = $self->sqlQuote("duration_dy_$_\_$hour\_mean") } @$page_types;
 	my $day_clause = join ',', map { $_ = $self->sqlQuote($_) } @$days;
 
-	return $self->sqlSelectAllHashref("name",
-		"AVG(value) as avg, name", "stats_daily",
-		"name IN ($name_clause) and day IN ($day_clause)",
+	return $self->sqlSelectAllHashref(
+		"name",
+		"AVG(value) AS avg, name",
+		"stats_daily",
+		"name IN ($name_clause) AND day IN ($day_clause)",
 		"GROUP BY name"
 	);
 }
@@ -2390,10 +2465,15 @@ sub avgDynamicDurationForMinutesBack {
 	my($self, $ops, $minutes, $start_id) = @_;
 	$start_id ||= 0;
 	my $page_types = [@$ops];
-	my $op_clause  = join ',', map { $_ = $self->sqlQuote("$_") } @$page_types;
-	return $self->sqlSelectAllHashref("op",
-		"op, AVG(duration) as avg", "accesslog",
-		"id >= $start_id AND ts >= DATE_SUB(NOW(), INTERVAL $minutes MINUTE) AND static='no' AND op in($op_clause)",
+	my $op_clause = join ',', map { $_ = $self->sqlQuote("$_") } @$page_types;
+	return $self->sqlSelectAllHashref(
+		"op",
+		"op, AVG(duration) AS avg",
+		"accesslog",
+		"id >= $start_id
+		 AND ts >= DATE_SUB(NOW(), INTERVAL $minutes MINUTE)
+		 AND static='no'
+		 AND op IN ($op_clause)",
 		"GROUP BY op"
 	);
 }

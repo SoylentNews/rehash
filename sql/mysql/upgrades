@@ -2315,6 +2315,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_oldest_zone_mult', '2', 
 INSERT INTO vars (name, value, description) VALUES ('m2_oldzone', '0', 'Starting id (youngest) of the old-zone of moderations that still require M2 (the oldest certain percentile)');
 
 # End of T_2_3_0_154, Start of T_2_3_0_155 - 2004/05/18
+
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats', '', 'Stores current performance stats in a var for display to admins');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_disp', '1', 'Show current performance stats?');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 'article|comments|index', 'ops to show current performance stats for');
@@ -2439,3 +2440,4 @@ INSERT INTO vars (name, value, description) VALUES ('freshenup_small_cc','30','H
 # SLASHDOT LAST UPDATED HERE, to T_2_5_0_13
 
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', 'Pages per second the site is running at');
+
