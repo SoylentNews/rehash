@@ -1,10 +1,18 @@
 #!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2003 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
 
 use strict;
-use Slash;
-use Slash::Display;
+use Slash 2.003;
 use Slash::Blob;
+use Slash::Display;
 use Slash::Utility;
+
+use vars qw($VERSION);
+
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub main {
 	my $slashdb   = getCurrentDB();
@@ -42,7 +50,7 @@ sub main {
 			? 'editBySid'
 			: 'listFilesForStories';
 
-# admin.pl is not for regular users
+	# admin.pl is not for regular users
 	unless ($user->{is_admin}) {
 		redirect("/");
 		return;
