@@ -1486,7 +1486,7 @@ Hashref of cleaned-up data.
 		filter_id hbtm height highlightthresh
 		isolate issue last maillist max
 		maxcommentsize maximum_length maxstories
-		min minimum_length minimum_match next
+		min min_comment minimum_length minimum_match next
 		nobonus_present
 		nosubscriberbonus_present
 		ordernum pid
