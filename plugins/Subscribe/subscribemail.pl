@@ -26,16 +26,18 @@ $task{$me}{code} = sub {
 
 	my $new_subscriptions_hr = $sub_static->getSubscriberList();
 	my $num_new_subscriptions = scalar(keys %$new_subscriptions_hr);
+	my $num_gift_subscriptions = 0 ;
 
 	my $subscribers_hr = { };
 
 	my $transaction_list = "";
 	my($total_gross, $total_net, $total_pages_bought, $total_karma) = (0, 0, 0, 0);
+	my($gift_gross, $gift_pages, $gift_users, $gift_karma, $gift_net) = (0, 0, 0, 0, 0);
 	my %gross_count = ( );
 	if ($num_new_subscriptions > 0) {
 		$transaction_list = sprintf(
-			"%7s %6s %3s %6s %6s %6s %5s %6s %-20s\n", qw(
-			 uid method kma $gros $net today used total nickname )
+			"%7s %6s %3s %6s %6s %6s %5s %7s %-20s %5s %5s %7s %s\n", qw(
+			 uid method kma $gros $net today used total nickname type new puid purchaser)
 		);
 		my @spids = sort { $a <=> $b } keys %$new_subscriptions_hr;
 
@@ -45,12 +47,25 @@ $task{$me}{code} = sub {
 			my $spid_hr = $new_subscriptions_hr->{$spid};
 			$subscribers_hr->{$spid_hr->{uid}}{payment_gross} += $spid_hr->{payment_gross};
 			$subscribers_hr->{$spid_hr->{uid}}{pages} += $spid_hr->{pages};
+			
+			if($spid_hr->{payment_type} eq "gift"){
+				$subscribers_hr->{$spid_hr->{uid}}{gift}++;
+				$gift_gross += $spid_hr->{payment_gross};
+				$gift_pages += $spid_hr->{pages};
+				$gift_karma += $spid_hr->{karma};
+				$gift_net += $spid_hr->{payment_net};
+				$num_gift_subscriptions++;
+			}  
 		}
 		for my $uid (keys %$subscribers_hr) {
 			$subscribers_hr->{$uid}{is_new} =
 				($subscribers_hr->{$uid}{pages}
 					== $slashdb->getUser($uid, 'hits_paidfor'))
 				? 1 : 0;
+			if($subscribers_hr->{$uid}{gift}){
+				$subscribers_hr->{$uid}{is_gift_new} = $subscribers_hr->{$uid}{is_new};
+				$gift_users++;
+			}
 		}
 
 		for my $spid (@spids) {
@@ -61,12 +76,14 @@ $task{$me}{code} = sub {
 			$total_pages_bought += $spid_hr->{pages};
 			$total_karma += $spid_hr->{karma};
 			$transaction_list .= sprintf(
-				"%7d %6s %3d %6.2f %6.2f %6d %5d %6d %-20s %s\n",
+				"%7d %6s %3d %6.2f %6.2f %6d %5d %7d %-20s %-5s %5s %7s %s\n",
 				@{$spid_hr}{qw(
 					uid method karma payment_gross payment_net
-					pages hits_bought hits_paidfor nickname
+					pages hits_bought hits_paidfor nickname payment_type
 				)},
 				($subscribers_hr->{$spid_hr->{uid}}{is_new} ? "NEW" : "renew"),
+				$spid_hr->{uid} != $spid_hr->{puid} ?  $spid_hr->{puid} : "",
+				$spid_hr->{uid} != $spid_hr->{puid} ?  $slashdb->getUser($spid_hr->{puid}, "nickname") : ""
 			);
 			if ($spid_hr->{memo} && $spid_hr->{memo} =~ /\S/) {
 				my $memo = $spid_hr->{memo};
@@ -75,7 +92,7 @@ $task{$me}{code} = sub {
 			}
 		}
 		$transaction_list .= sprintf(
-			"%-17s %7.2f %6.2f %6d\n",
+			"\n%-17s %7.2f %6.2f %6d\n",
 			"total:",
 			$total_gross,
 			$total_net,
@@ -90,6 +107,24 @@ $task{$me}{code} = sub {
 			$total_net/$num_new_subscriptions,
 			$total_pages_bought/$num_new_subscriptions
 		);
+
+		if($num_gift_subscriptions){
+			$transaction_list .= sprintf(
+				"%-17s %7.2f %6.2f %6d\n",
+				"gift total:",
+				$gift_gross,
+				$gift_net,
+				$gift_pages
+			);
+			$transaction_list .= sprintf(
+				"%-14s %3d %6.2f %6.2f %6d\n\n",
+				"gift mean:",
+				$gift_karma/$num_gift_subscriptions,
+				$gift_gross/$num_gift_subscriptions,
+				$gift_net/$num_gift_subscriptions,
+				$gift_pages/$num_gift_subscriptions
+			);
+		}
 		my $running_total_gross = 0;
 		for my $gross (sort { $a <=> $b } keys %gross_count) {
 			$running_total_gross += $gross*$gross_count{$gross};
@@ -110,9 +145,17 @@ $task{$me}{code} = sub {
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 	my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday });
 	if ($statsSave) {
+
 		my($new_count, $sum_new_pages, $sum_new_payments) = (0, 0, 0);
+		my($new_gift_count, $sum_new_gift_pages, $sum_new_gift_payments) = (0, 0, 0);
 		my($renew_count, $sum_renew_pages, $sum_renew_payments) = (0, 0, 0);
+
 		for my $uid (keys %$subscribers_hr) {
+			if ($subscribers_hr->{$uid}{is_gift_new}){
+				++$new_gift_count;
+				$sum_new_gift_pages += $subscribers_hr->{$uid}{pages};
+				$sum_new_gift_payments += $subscribers_hr->{$uid}{payment_gross};
+			} 
 			if ($subscribers_hr->{$uid}{is_new}) {
 				++$new_count;
 				$sum_new_pages += $subscribers_hr->{$uid}{pages};
@@ -129,6 +172,15 @@ $task{$me}{code} = sub {
 		$statsSave->createStatDaily("subscribe_renew_users",	$renew_count);
 		$statsSave->createStatDaily("subscribe_renew_pages",	$sum_renew_pages);
 		$statsSave->createStatDaily("subscribe_renew_payments",	$sum_renew_payments);
+
+		$statsSave->createStatDaily("subscribe_new_gift_users",   $new_gift_count);
+		$statsSave->createStatDaily("subscribe_new_gift_pages",   $sum_new_gift_pages);
+		$statsSave->createStatDaily("subscribe_new_gift_payments",   $sum_new_gift_payments);
+
+		$statsSave->createStatDaily("subscribe_gift_users",    $gift_users);
+		$statsSave->createStatDaily("subscribe_gift_pages",    $gift_pages);
+		$statsSave->createStatDaily("subscribe_gift_payments", $gift_gross);
+
 		# If the runout and bought stats don't already exist for yesterday,
 		# create them.
 		$statsSave->createStatDaily("subscribe_runout", 0);

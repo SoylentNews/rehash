@@ -27,6 +27,7 @@ __template__
 	[% IF (constants.subscribe_allow_gifts && (!constants.subscribe_gift_testing || user.is_admin)) %]
 		<P>You can buy a subscription for yourself or a gift subscription for another user.
 		Payment options include PayPal and credit-card.
+		<P>Recipients of gift subscriptions will be notified of your purchase through email.
 	
 		<FORM METHOD="POST" ACTION="[% constants.rootdir %]/subscribe.pl">
 		<CENTER><TABLE BORDER=0 CELLPADDING=3>

@@ -99,7 +99,7 @@ sub getSubscriberList {
 		 method, transaction_id, data, memo,
 		 nickname, realemail, seclev, author,
 		 karma, m2fair, m2unfair, upmods, downmods, created_at,
-		 users_hits.hits as hits, hits_bought, hits_paidfor",
+		 users_hits.hits as hits, hits_bought, hits_paidfor, payment_type, puid",
 		"subscribe_payments, users, users_info, users_hits",
 		"ts BETWEEN '$start' AND '$end'
 		 AND subscribe_payments.uid = users.uid
