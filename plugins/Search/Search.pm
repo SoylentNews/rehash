@@ -90,7 +90,7 @@ sub findComments {
 		}
 	}
 	$where .= "     AND points >= " .  $self->sqlQuote($form->{threshold})
-			if $form->{threshold};
+			if defined($form->{threshold});
 	$where .= "     AND section=" . $self->sqlQuote($form->{section})
 			if $form->{section};
 
