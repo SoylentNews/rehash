@@ -126,6 +126,12 @@ $task{$me}{code} = sub {
 	}
 
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
+
+	my($base) = split(/\./, $constants->{index_handler});
+	# -M is in days, 0.0417 is approx an hour
+	# Maybe this should be in a var. --Pater
+	$w = 'notok' if (-M "$basedir/$base.shtml" > 0.0417);
+
 	my $dirty_sections;
 	if ($constants->{task_options}{run_all}) {
 		my $sections = $slashdb->getDescriptions('sections-all');
