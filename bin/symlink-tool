@@ -1,0 +1,182 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2002 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# By Jamie McCarthy, jamie@slashdot.org
+# Based on template-tool, by Cliff Wood, Patrick Galbraith, Brian Aker
+
+use strict;
+use File::Basename;
+use File::Path;
+use File::Spec::Functions;
+use Slash;
+use Slash::Utility;
+use Slash::DB;
+use Slash::Install;
+use Getopt::Std;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+my %opts;
+
+my $symlink_exists = eval { symlink("",""); 1 };
+if (!$symlink_exists) {
+	print STDERR "Sorry - symlink() not implemented on your system,\n";
+	print STDERR "so (duh!) symlink-tool cannot run.\n";
+	exit 1;
+}
+
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly')
+	unless getopts('hvu:TUV', \%opts);
+usage() if $opts{h} || !keys %opts;
+version() if $opts{v};
+usage('Right now only -U does anything') if !$opts{U};
+my $testing = $opts{T} ? 1 : 0;
+my $verbose = $opts{V} ? 1 : 0;
+
+my $virtuser = $opts{u} || 'slash';
+createEnvironment($virtuser);
+my $slashdb = getCurrentDB();
+my $constants = getCurrentStatic();
+my $install = Slash::Install->new($virtuser);
+
+# This will read all the themes and all the plugins available for this
+# installation.
+my $site_theme = $install->get("theme")->{value};
+my $site_plugins = $install->get("plugin");
+my @site_plugins = sort
+	map { $site_plugins->{$_}{value} }
+	keys %$site_plugins;
+
+# What one theme, and what subset of the available plugins, is this
+# site using?
+my $theme_hr = $install->_getList(
+	$constants->{slashdir}, "themes", "THEME"
+)->{$site_theme};
+my $plugin_list = $install->_getList(
+	$constants->{slashdir}, "plugins", "PLUGIN"
+);
+
+my %subdir_files = ( );
+my @theme_htdocs_keys = grep /^(htdoc|image|topic)/, keys %$theme_hr;
+for my $key (@theme_htdocs_keys) {
+	push @{$subdir_files{htdocs}}, @{$theme_hr->{$key}};
+}
+@{$subdir_files{tasks}} = @{$theme_hr->{task}};
+@{$subdir_files{misc}} = @{$theme_hr->{misc}};
+
+my $theme_dir = $theme_hr->{dir};
+my $site_dir = $constants->{datadir};
+
+#print "theme_dir '$theme_dir'\nsite_dir '$site_dir'\n";
+
+if (!$testing && !-w $site_dir) {
+	print STDERR "No write access to '$site_dir'\n";
+	print STDERR "for EUID $>, cannot write any files\n";
+	exit 1;
+}
+
+my $num_changes = 0;
+for my $subdir (sort keys %subdir_files) {
+	my @files = sort @{$subdir_files{$subdir}};
+	for my $target_file (@files) {
+		# Strip off "../slashcode/" from front to find
+		# where the symlink was installed in the
+		# "site/foo" tree.
+		my $theme_file_abs = canonpath(catfile($theme_dir, $target_file));
+		my $site_rel_file = $target_file;
+		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
+		my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
+		# At this point, $site_file_abs is e.g.
+		# '/usr/local/slash/site/mysite/tasks/spamarmor.pl'
+		# and $theme_file_abs is e.g.
+		# '/usr/local/slash/theme/customtheme/../slashcode/tasks/spamarmor.pl'
+		$num_changes += handle_file($site_file_abs, $theme_file_abs);
+	}
+}
+if ($num_changes == 0) {
+	print "symlink-tool -U: no symlink changes necessary\n";
+}
+
+###############################################
+sub handle_file {
+	my($symlink_file, $target_file) = @_;
+	lstat($symlink_file);
+	if (!-e _) {
+		print "Symlink at '$symlink_file' missing, ";
+		if ($testing) {
+			print "would create: '$target_file'\n";
+			return 1;
+		}
+		my $success = symlink($target_file, $symlink_file);
+		if (!$success) {
+			print "attempt to create FAILED: $!\n";
+			return 1;
+		}
+		print "successfully added link to '$target_file'\n";
+		return 1;
+	}
+	my $cur_target_file = readlink($symlink_file);
+	if ($cur_target_file eq $target_file) {
+#		if ($verbose) {
+#			print "Correct: $symlink_file -> $target_file\n";
+#		}
+		return 0;
+	}
+	print "Symlink at '$symlink_file' mispointed at '$cur_target_file', ";
+	if ($testing) {
+		print "would repoint to '$target_file'\n";
+		return 1;
+	}
+	my $success = unlink $symlink_file;
+	if (!$success) {
+		print "attempt to unlink FAILED: $!\n";
+		return 1;
+	}
+	$success = symlink($target_file, $symlink_file);
+	if (!$success) {
+		print "original unlinked, attempt to link properly FAILED: $!\n";
+		return 1;
+	}
+	print "successfully relinked to '$target_file'\n";
+	return 1;
+}
+
+###############################################
+sub usage {
+	print "*** $_[0] \n" if $_[0];
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] <template templateN>
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-T	Test run, report but don't do anything
+	-U	Upgrade your symlinks to the latest for your theme and plugins
+
+Debugging options:
+	-V	Increases verbosity.
+
+EOT
+	exit 0;
+}
+
+###############################################
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2002 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit 0;
+}
+
