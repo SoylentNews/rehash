@@ -142,6 +142,18 @@ SOFTWARE REQUIREMENTS
             public_html/404.pl
             public_html/imagesize.pm
 
+    You can get the Slash code in these locations:
+
+    FTP
+                ftp://ftp.slashdot.org//pub/slash/
+
+    HTTP, CVS
+                http://sourceforge.net/project/?group_id=4421
+
+        The CVS repository is tagged with versions, so to get release 1.0.3,
+        get tag v1_0_3_0. The last number will be incremented during
+        development (v1_0_3_1, v1_0_3_2, etc.) until the next release.
+
 PRE-INSTALLATION THOUGHTS
     The are several configurations recommended, depending on scale.
 
