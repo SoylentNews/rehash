@@ -120,7 +120,7 @@ rootdir variable, converted to absolute with proper protocol.
 
 sub root2abs {
 	my $rootdir = getCurrentStatic('rootdir');
-	my $is_ssl = ConnectionIsSSL();
+	my $is_ssl = Slash::Apache::ConnectionIsSSL();
 	if ($rootdir =~ m|^//|) {
 		$rootdir = ($is_ssl ? 'https:' : 'http:') . $rootdir;
 	}
