@@ -9,9 +9,11 @@
 # and the Users code is just there temporarily for testing.
 
 use strict;
-use SOAP::Transport::HTTP;
 use Slash;
 use Slash::Utility;
+
+#use SOAP::Lite 'trace';
+require SOAP::Transport::HTTP;
 
 #################################################################
 sub main {
@@ -26,13 +28,8 @@ sub main {
 		my $user = getCurrentUser();
 		$r->method('POST') if $user->{state}{post};
 
-		# this doesn't currently work ... working on it -- pudge
-		# default to error handler that returns value of
-		# global variable $Slash::SOAP::ERROR
-		unless ($newaction) {
-			$newaction ||= 'Slash::SOAP::returnError';
-			errorLog($Slash::SOAP::ERROR);
-		}
+		# log error
+		errorLog($Slash::SOAP::ERROR) if !$newaction;
 
 		my $dispatch = SOAP::Transport::HTTP::Apache->dispatch_to($newaction);
 		return $dispatch->handle;
