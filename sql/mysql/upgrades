@@ -1154,4 +1154,10 @@ INSERT INTO vars (name, value, description) VALUES ('lastlookmemory','3600','Amo
 # SLASHCODE LAST UPDATED HERE
 
 # USEPERL LAST UPDATED HERE
+
 ALTER TABLE comments ADD karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL;
+
+# End of T_2_3_0_67, Start of T_2_3_0_68
+
+# SLASHDOT LAST UPDATED HERE
+
