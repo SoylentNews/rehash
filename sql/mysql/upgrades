@@ -1403,3 +1403,6 @@ ALTER TABLE accesslist ADD COLUMN adminuid mediumint(8) unsigned NOT NULL defaul
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCODE LAST UPDATED HERE
+
+# the 'what's playing' slashbox
+INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0','Whether or not to turn on the "What''s Playing" Slashbox.');
