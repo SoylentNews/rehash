@@ -6239,6 +6239,12 @@ sub getMCDStats {
 	my $mcd = $self->getMCD();
 	return undef unless $mcd;
 
+	# Right now (11/04/2003) this depends on a custom patch to
+	# Cache::Memcached.  I hope to have that in the CPAN version
+	# soon.  Until it is, unless you have my patch, this isn't
+	# going to work, sorry. - Jamie
+	return undef unless $mcd->can("stats");
+
 	my $stats = $mcd->stats();
 	for my $server (keys %{$stats->{hosts}}) {
 		_getMCDStats_percentify($stats->{hosts}{$server}{misc},
