@@ -336,12 +336,18 @@ EOT
 		extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
 	}) if $recent_subscriber_uidlist;
 	my $total_secure = $logdb->countDailySecure();
-	# XXX This loop needs to be flattened.
+
+	my $op_uniq  = $logdb->countDailyByPageDistinctIPIDs();
+	my $op_pages = $logdb->countDailyByPages();
+	my $op_bytes = $logdb->countBytesByPages();
+	my $op_uids  = $logdb->countUsersByPages();
+
 	for my $op (@PAGES) {
-		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
-		my $pages = $logdb->countDailyByPage($op);
-		my $bytes = $logdb->countBytesByPage($op);
-		my $uids = $logdb->countUsersByPage($op);
+		my $uniq  = $op_uniq->{$op}{cnt};
+		my $pages = $op_pages->{$op}{cnt};
+		my $bytes = $op_bytes->{$op}{bytes};
+		my $uids  = $op_uids->{$op}{uids};
+
 		$data{"${op}_label"} = sprintf("%8s", $op);
 		$data{"${op}_uids"} = sprintf("%8d", $uids);
 		$data{"${op}_ipids"} = sprintf("%8d", $uniq);

@@ -917,6 +917,12 @@ sub countBytesByPage {
 }
 
 ########################################################
+sub countBytesByPages {
+	my($self, $options) = @_;
+	$self->sqlSelectAllHashref("op","op, SUM(bytes) as bytes", "accesslog_temp", '', "GROUP BY op");
+}
+
+########################################################
 sub countUsersByPage {
 	my($self, $op, $options) = @_;
 	my $where = "1=1 ";
@@ -927,6 +933,12 @@ sub countUsersByPage {
 	$where = "($where) AND $options->{extra_where_clause}"
 		if $options->{extra_where_clause};
 	$self->sqlSelect("COUNT(DISTINCT uid)", "accesslog_temp", $where);
+}
+
+########################################################
+sub countUsersByPages {
+	my($self, $options) = @_;
+	$self->sqlSelectAllHashref("op", "op, COUNT(DISTINCT uid) AS uids", "accesslog_temp", '', "GROUP BY op");
 }
 
 ########################################################
@@ -958,6 +970,16 @@ sub countDailyByPage {
 }
 
 ########################################################
+sub countDailyByPages {
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+	$options ||= {};
+
+	$self->sqlSelectAllHashref("op", "op,count(*) AS cnt", "accesslog_temp", "", "GROUP BY op");
+}
+
+
+########################################################
 sub countDailyByPageDistinctIPID {
 	# This is so lame, and so not ANSI SQL -Brian
 	my($self, $op, $options) = @_;
@@ -972,6 +994,16 @@ sub countDailyByPageDistinctIPID {
 	$where .=" AND uid != $constants->{anonymous_coward_uid} " if $options->{user_type} eq "logged-in";
 	$self->sqlSelect("COUNT(DISTINCT host_addr)", "accesslog_temp", $where);
 }
+
+########################################################
+sub countDailyByPageDistinctIPIDs {
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+	
+	$self->sqlSelectAllHashref("op", "op, COUNT(DISTINCT host_addr) AS cnt", "accesslog_temp", "", "GROUP BY op");
+}
+
+
 
 ########################################################
 sub countDailyStoriesAccess {
