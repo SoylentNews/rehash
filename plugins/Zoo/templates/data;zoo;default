@@ -24,13 +24,13 @@ __template__
 	[% nickname %] is all alone in the world.
 
 [% CASE 'nofans' %]
-	[% nickname %]  is either loved by all or just invisible.
+	[% nickname %] is either loved by all or just invisible.
 
 [% CASE 'nofreaks' %]
-	[% nickname %]  is hated by no one.
+	[% nickname %] is hated by no one.
 
 [% CASE 'nofoes' %]
-	[% nickname %]  loves everyone or plays their cards very close to their chest.
+	[% nickname %] loves everyone or plays their cards very close to their chest.
 
 [% CASE 'yournofriends' %]
 	You are alone in the world.
@@ -69,7 +69,8 @@ __template__
 	Your fans
 
 [% CASE 'over_socialized' %]
-	You are over the limit for the number of friends and foes you can have, please remove some from you list before adding any more.
+	You are over the limit for the number of friends and foes you can have.
+	Please remove some from your list before adding any more.
 
 [% END %]
 
