@@ -782,7 +782,7 @@ sub validateComment {
 		# We skip the UID test for anonymous users.
 		next if $_ eq 'uid' && $user->{is_anon};
 		# Otherwise we perform the specific read-only test.
-		$read_only = $slashdb->checkReadOnly('comments', {
+		$read_only = $slashdb->checkReadOnly('nopost', {
         	        $_ => $user->{$_},
 	        });
 		# Bail if a specific test returns TRUE

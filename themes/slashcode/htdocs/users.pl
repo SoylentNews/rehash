@@ -1844,91 +1844,42 @@ sub saveUserAdmin {
 
 	} elsif ($form->{subnetid}) {
 		$user_editfield_flag = 'subnetid';
-		$user_edit->{uid} = $constants->{anonymous_coward_uid};
 		($id, $user_edit->{subnetid})  = ($form->{subnetid}, $form->{subnetid});
 		$user_edit->{nonuid} = 1;
 
 	} elsif ($form->{ipid}) {
 		$user_editfield_flag = 'ipid';
 		($id, $user_edit->{ipid})  = ($form->{ipid}, $form->{ipid});
-		$user_edit->{subnetid} = $1 . "0" ;
-		$user_edit->{subnetid} = md5_hex($user_edit->{subnetid});
-		$user_edit->{uid} = $constants->{anonymous_coward_uid};
 		$user_edit->{nonuid} = 1;
-
-		$form->{isproxy} = $form->{isproxy} eq 'on' ? 'yes' : 'no';
-		$slashdb->setIsProxy($user_edit->{ipid}, $form->{isproxy});
 
 	} elsif ($form->{md5id}) {
 		$user_editfield_flag = 'md5id';
-		#($id, $user_edit->{ipid}, $user_edit->{subnetid})
 		($id, $user_edit->{$form->{fieldname}})
 			= ($form->{md5id}, $form->{md5id});
 
-		$form->{isproxy} = $form->{isproxy} eq 'on' ? 'yes' : 'no';
-                $slashdb->setIsProxy($user_edit->{md5id}, $form->{isproxy});
-
-	} else { # a bit redundant, I know
-		$user_edit = $user;
-	}
-
-	for my $formname ('comments', 'submit') {
-		my $aclinfo =
-			$slashdb->getAccessListInfo(
-				$formname, 'readonly', $user_edit
-			);
-		my $existing_reason = $aclinfo->{reason};
-		my $is_readonly_now =
-			$slashdb->checkReadOnly($formname, $user_edit) ? 1 : 0;
-
-		my $keyname = "readonly_" . $formname;
-		my $reason_keyname = $formname . "_ro_reason";
-		$form->{$keyname} = $form->{$keyname} eq 'on' ? 1 : 0 ;
-		$form->{$reason_keyname} ||= '';
-
-		if ($form->{$keyname} != $is_readonly_now) {
-			if ($existing_reason ne $form->{$reason_keyname}) {
-				$slashdb->setAccessList(
-					$formname, 
-					$user_edit, 
-					$form->{$keyname}, 
-					'readonly', 
-					$form->{$reason_keyname}
-				);
-			} else {
-				$slashdb->setAccessList(
-					$formname, 
-					$user_edit, 
-					$form->{$keyname}, 
-					'readonly'
-				);
-			}
-		} elsif ($existing_reason ne $form->{$reason_keyname}) {
-			$slashdb->setAccessList(
-				$formname, 
-				$user_edit, 
-				$form->{$keyname}, 
-				'readonly', 
-				$form->{$reason_keyname}
-			);
-		}
-
-		# $note .= getError('saveuseradmin_notsaved', { field => $user_editfield_flag, id => $id });
-	}
-
-	$banref = $slashdb->getBanList(1);
-	$banned = $banref->{$id} ? 1 : 0;
-	$form->{banned} = $form->{banned} eq 'on' ? 1 : 0 ;
-	if ($banned) {
-		if ($form->{banned} == 0) {
-			$slashdb->setAccessList('', $user_edit, 0, 'isbanned', $form->{banned_reason});
-			$slashdb->getBanList(1);
-		}
 	} else {
-		if ($form->{banned} == 1) {
-			$slashdb->setAccessList('', $user_edit, $form->{banned}, 'isbanned', $form->{banned_reason});
-			$slashdb->getBanList(1);
-		}
+		# If we were not fed valid data, don't do anything.
+		return ;
+	}
+
+	for my $field (qw( readonly_comments readonly_submit banned isproxy )) {
+		$form->{$field} = 0 unless $form->{$field} eq 'on';
+	}
+	my @access_add = ( );
+	push @access_add, 'nopost'	if $form->{readonly_nopost};
+	push @access_add, 'nosubmit'	if $form->{readonly_nosubmit};
+	push @access_add, 'ban'		if $form->{banned};
+	push @access_add, 'proxy'	if $form->{isproxy};
+	my $reason = "";
+	$reason ||= $form->{nopost_ro_reason}	if $form->{readonly_nopost};
+	$reason ||= $form->{nosubmit_ro_reason}	if $form->{readonly_nosubmit};
+	$reason ||= $form->{banned_reason}	if $form->{banned};
+#	$reason ||= $form->{proxy_reason}	if $form->{isproxy}; # no proxy reason field in template right now
+
+	$slashdb->setAccessList($user_edit, \@access_add, $reason);
+
+	if ($form->{banned} eq 'on') {
+		$slashdb->getBanList(1); # reload the list
 	}
 
 	$note .= getMessage('saveuseradmin_saved', { field => $user_editfield_flag, id => $id}) if $save_success;
@@ -2497,7 +2448,7 @@ sub saveMiscOpts {
 sub listReadOnly {
 	my $slashdb = getCurrentDB();
 
-	my $readonlylist = $slashdb->getAccessList(0, 'readonly');
+	my $readonlylist = $slashdb->getAccessList(0, 'nopost');
 
 	slashDisplay('listReadOnly', {
 		readonlylist => $readonlylist,
@@ -2509,7 +2460,7 @@ sub listReadOnly {
 sub listBanned {
 	my $slashdb = getCurrentDB();
 
-	my $bannedlist = $slashdb->getAccessList(0, 'isbanned');
+	my $bannedlist = $slashdb->getAccessList(0, 'ban');
 
 	slashDisplay('listBanned', {
 		bannedlist => $bannedlist,
@@ -2704,7 +2655,6 @@ sub getUserAdmin {
 		$user_edit->{ipid} = $id;
 		$user_editfield = $id;
 		$uidstruct = $slashdb->getUIDStruct('ipid', $user_edit->{ipid});
-		$isproxy = $slashdb->checkIsProxy($user_edit->{ipid}) eq 'yes' ? ' CHECKED' : '';
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
@@ -2724,9 +2674,13 @@ sub getUserAdmin {
 		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 	}
 
-	for my $formname ('comments', 'submit') {
-		$readonly->{$formname} =
-			$slashdb->checkReadOnly($formname, $user_edit) ? 
+	if ($field eq 'ipid' || $field eq 'md5id' && $form->{fieldname} eq 'ipid') {
+		$isproxy = $slashdb->getAccessListInfo('proxy', { ipid => $id }) ? ' CHECKED' : '';
+	}
+
+	for my $access_type ('nopost', 'nosubmit') {
+		$readonly->{$access_type} =
+			$slashdb->checkReadOnly($access_type, $user_edit) ? 
 				' CHECKED' : '';
 
 		# This is WACKY, but it should fix the problem.
@@ -2734,17 +2688,16 @@ sub getUserAdmin {
 			{ $form->{fieldname} => $user_edit->{md5id} } : 
 			$user_edit;
 
-		my $aclinfo = $slashdb->getAccessListInfo(
-                               	$formname, 'readonly', $user_chk);
-		$readonly_reasons->{$formname} = $aclinfo->{reason};
+		my $aclinfo = $slashdb->getAccessListInfo($access_type, $user_chk);
+		$readonly_reasons->{$access_type} = $aclinfo->{reason} || "";
 	}
-	
+
 	my $banref = $slashdb->getBanList(1);
 
 	$banned = $banref->{$id} ? ' CHECKED' : '';
-	my $aclinfo = $slashdb->getAccessListInfo('', 'isbanned', $user_edit);
-	$banned_reason = $aclinfo->{reason};
-	$banned_time = $aclinfo->{datetime};
+	my $aclinfo = $slashdb->getAccessListInfo('ban', $user_edit);
+	$banned_reason = $aclinfo->{reason} || "";
+	$banned_time = $aclinfo->{datetime} || "";
 
 	$user_edit->{author} = ($user_edit->{author} == 1) ? ' CHECKED' : '';
 	if (! $user->{nonuid}) {

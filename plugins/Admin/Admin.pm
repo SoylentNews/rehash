@@ -86,7 +86,7 @@ sub getAccesslogAbusersByID {
 		"ipid",
 		"ipid, ts, reason",
 		"accesslist",
-		"ipid IN ($ipids) AND isbanned AND reason != ''"
+		"ipid IN ($ipids) AND FIND_IN_SET('ban', now) AND reason != ''"
 	);
 	for my $row (@$ar) {
 		next unless exists $hr->{$row->{ipid}};

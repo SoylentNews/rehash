@@ -20,8 +20,7 @@ __template__
 		<TD BGCOLOR="[% user.fg.4 %]"><B>UID</B></TD>
 		<TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
 		<TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
-		<TD BGCOLOR="[% user.fg.4 %]"><B>Page</B></TD>
-		<TD BGCOLOR="[% user.fg.4 %]"><B>Reason</B></TD>
+		<TD BGCOLOR="[% user.fg.4 %]"><B>Now</B></TD>
 	</TR>
 [% FOR abuse = abuses %]
 	<TR>
@@ -30,7 +29,6 @@ __template__
 		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.2 %]">[% abuse.2 %]</TD>
 		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.3 %]">[% abuse.3 %]</TD>
 		<TD>[% abuse.4 %]</TD>
-		<TD>[% abuse.5 %]</TD>
 	</TR>
 [% END %]
 </TABLE>

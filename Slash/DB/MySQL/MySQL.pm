@@ -3178,8 +3178,8 @@ sub checkExpired {
 
 ##################################################################
 sub checkReadOnly {
-	my($self, $formname, $user_check) = @_;
-
+	my($self, $access_type, $user_check) = @_;
+	$access_type ||= 'nopost';
 	$user_check ||= getCurrentUser();  # might not be actual current user!
 	my $constants = getCurrentStatic();
 
@@ -3225,10 +3225,8 @@ sub checkReadOnly {
 	}
 
 	for my $where (@$where_ary) {
-		# Setting readonly blocks posting.
-		$where .= " AND readonly = 1";
-		# A blank formname means this entry applies to everything.
-		$where .= " AND (formname = '$formname' OR formname = '')";
+		# Setting nopost blocks posting, nosubmit blocks submitting.
+		$where .= " AND FIND_IN_SET('$access_type', now)";
 		# For when we get user expiration working.
 		$where .= " AND reason != 'expired'";
 	}
@@ -3445,8 +3443,10 @@ sub getBanList {
 	%$banlist_ref = () if $refresh;
 
 	if (!keys %$banlist_ref) {
-		my $list = $self->sqlSelectAll("ipid, subnetid, uid",
-			"accesslist", "isbanned=1");
+		my $list = $self->sqlSelectAll(
+			"ipid, subnetid, uid",
+			"accesslist",
+			"FIND_IN_SET('ban', now)");
 		for (@$list) {
 			$banlist_ref->{$_->[0]} = 1 if $_->[0];
 			$banlist_ref->{$_->[1]} = 1 if $_->[1];
@@ -3463,14 +3463,52 @@ sub getBanList {
 	return $banlist_ref;
 }
 
+########################################################
+sub getNorssList {
+	my($self, $refresh) = @_;
+	my $constants = getCurrentStatic();
+	
+	# I believe we need to call _genericGetsCache() here.  Maybe it
+	# was decided not to do that because the method returns a copy
+	# of the cache hashref, and the BanList may be quite large.
+	# But something needs to set $self->{_norsslist_cache_time} or
+	# the _genericCacheRefresh() call does no good because this
+	# table's cache will never expire. - Jamie 2002/12/28
+	_genericCacheRefresh($self, 'norsslist', $constants->{banlist_expire});
+	my $norsslist_ref = $self->{_norsslist_cache} ||= {};
+
+	%$norsslist_ref = () if $refresh;
+
+	if (!keys %$norsslist_ref) {
+		my $list = $self->sqlSelectAll(
+			"ipid, subnetid, uid",
+			"accesslist",
+			"FIND_IN_SET('norss', now)");
+		for (@$list) {
+			$norsslist_ref->{$_->[0]} = 1 if $_->[0];
+			$norsslist_ref->{$_->[1]} = 1 if $_->[1];
+			$norsslist_ref->{$_->[2]} = 1 if $_->[2]
+				&& $_->[2] != $constants->{anon_coward_uid};
+		}
+		# why this? in case there are no RSS-banned users.
+		# (this should be unnecessary;  we could use another var to
+		# indicate whether the cache is fresh, besides checking its
+		# number of keys at the top of this "if")
+		$norsslist_ref->{_junk_placeholder} = 1;
+	}
+
+	return $norsslist_ref;
+}
+
 ##################################################################
 sub getAccessList {
 	my($self, $min, $flag) = @_;
 	$min ||= 0;
 	my $max = $min + 100;
 
-	my $where = "$flag = 1";
-	$self->sqlSelectAll('ts, uid, ipid, subnetid, formname, reason',
+	my $where = "FIND_IN_SET('$flag', now)";
+	$self->sqlSelectAll(
+		'ts, uid, ipid, subnetid, now',
 		'accesslist',
 		$where,
 		"ORDER BY ts DESC LIMIT $min, $max");
@@ -3501,7 +3539,7 @@ sub getAbuses {
 ##################################################################
 # returns a hashref with reason and datetime fields
 sub getAccessListInfo {
-	my($self, $formname, $column, $user_check) = @_;
+	my($self, $now, $user_check) = @_;
 
 	my $constants = getCurrentStatic();
 	my $ref = {};
@@ -3531,19 +3569,15 @@ sub getAccessListInfo {
 	}
 
 	for my $where (@$where_ary) {
-		if ($column eq 'isbanned') {
-			$where .= " AND (isbanned = 1 OR wasbanned = 1)";
-		} else {
-			$where .= " AND (readonly = 1 OR wasreadonly = 1) AND formname = '$formname' AND reason != 'expired'";
-		}
+		$where .= " AND FIND_IN_SET('$now', now)";
 	}
 	
-	my $aclinfo = {};
-	$aclinfo->{reason} = '';
+	my $aclinfo = undef;
 	for my $where (@$where_ary) {
 		$ref = $self->sqlSelectAll("reason, ts", 'accesslist', $where);
 		for my $row (@$ref) {
-			if ($aclinfo->{reason} eq '') {
+			$aclinfo ||= { };
+			if (!exists($aclinfo->{reason}) || $aclinfo->{reason} eq '') {
 				$aclinfo->{reason}   = $row->[0];
 				$aclinfo->{datetime} = $row->[1];
 			} elsif ($aclinfo->{reason} ne $row->[0]) {
@@ -3561,116 +3595,70 @@ sub getAccessListInfo {
 }
 
 ##################################################################
-sub setAccessList {
-	# do not use this method to set/unset expired or isproxy
-	my($self, $formname, $user_check, $setflag, $column, $reason) = @_;
+sub addAccessList {
+	my($self, $now_here, $reason) = @_;
+}
 
+##################################################################
+sub removeAccessList {
+	my($self, $now_gone, $reason) = @_;
+}
+
+##################################################################
+sub setAccessList {
+	# Old comment: Do not use this method to set/unset expired or isproxy
+	# New comment: Feel free to use this method to set isproxy.  "Expired"
+	# is still not functional. - Jamie 2003/03/04
+	my($self, $user_check, $new_now, $reason) = @_;
+	my $constants = getCurrentStatic();
+
+	# "Expired" isn't implemented yet.
 	return if $reason eq 'expired';
 
-	my $insert_hashref = {};
-#	print STDERR "banned $column\n";
-	$insert_hashref->{"-$column"} = 1;
-	my $constants = getCurrentStatic();
+	my $insert_hr = {};
+	my $where = "(reason IS NULL OR reason != 'expired')";
 	my $rows;
 
-	my $where = "";
-#	$where .= "/* setAccessList $column WHERE clause */ ";
-
-	if ($user_check) {
-		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
-			$where .= "uid = $user_check->{uid}";
-			$insert_hashref->{-uid} = $user_check->{uid};
-
-		} elsif ($user_check->{ipid}) {
-			$where .= "ipid = '$user_check->{ipid}'";
-			$insert_hashref->{ipid} = $user_check->{ipid};
-
-		} elsif ($user_check->{subnetid}) {
-			$where .= "subnetid = '$user_check->{subnetid}'";
-			$insert_hashref->{subnetid} = $user_check->{subnetid};
-		}
-
-	} else {
-		$user_check = getCurrentUser();
-		$where = "(ipid = '$user_check->{ipid}' OR subnetid = '$user_check->{subnetid}')";
+	$user_check ||= getCurrentUser();
+	if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
+		$where .= " AND uid = $user_check->{uid}";
+		$insert_hr->{uid} = $user_check->{uid};
+	} elsif ($user_check->{ipid}) {
+		$where .= " AND ipid = '$user_check->{ipid}'";
+		$insert_hr->{ipid} = $user_check->{ipid};
+	} elsif ($user_check->{subnetid}) {
+		$where .= " AND subnetid = '$user_check->{subnetid}'";
+		$insert_hr->{subnetid} = $user_check->{subnetid};
 	}
 
-	$where .= " AND formname = '$formname' AND reason != 'expired'" if $column eq 'readonly';
-	$insert_hashref->{formname} = $formname if $formname ne '';
-	$insert_hashref->{reason} = $reason if $reason ne '';
-	$insert_hashref->{-ts} = 'now()';
+	my $update_hr = {
+		-ts	=> 'NOW()',			# reset the timestamp
+		-was	=> 'now',			# move the "now" column to the "was" column
+		now	=> join(",", @$new_now),	# set the new "now" column
+	};
+	$update_hr->{reason} = $reason if $reason ne '';
 
-	my $newcol;
-        # this could probably be a regex, but I'm erring on
-        # the side of caution --Pater
-        $newcol = 'wasbanned' if $column eq 'isbanned';
-        $newcol = 'wasreadonly' if $column eq 'readonly';
-
-	$rows = $self->sqlSelect('count(*)', 'accesslist', " $where AND ($column = 1 OR $newcol = 1)");
+	$rows = $self->sqlCount("accesslist", $where);
 	$rows ||= 0;
-
-	if ($setflag == 0) {
-		if ($rows > 0) {
-			my $return = $self->sqlUpdate("accesslist", {
-				"-$column" => $setflag,
-				"-$newcol" => 1,
-				reason     => $reason,
-			}, $where);
-
-			return $return ? 1 : 0;
-		}
-	} else {
-		if ($rows > 0) {
-			my $return = $self->sqlUpdate("accesslist", {
-				"-$column" => $setflag,
-				"-$newcol" => 0,
-				reason		=> $reason,
-			}, $where);
-
-			return $return ? 1 : 0;
-		} else {
-			my $return = $self->sqlInsert("accesslist", $insert_hashref);
-			return $return ? 1 : 0;
-		}
+	if ($rows == 0) {
+		# No row currently exists for this uid, ipid or subnetid.
+		# Insert one.  Then we will update it.
+		$self->sqlInsert("accesslist", $insert_hr);
 	}
+	$rows = $self->sqlUpdate("accesslist", $update_hr, $where,
+		{ assn_order => [( '-was', 'now' )] });
+	return $rows ? 1 : 0;
 }
 
 #################################################################
 sub checkIsProxy {
 	my($self, $ipid) = @_;
 
-	my $rows = $self->sqlSelect('COUNT(*)', 'accesslist', "ipid='$ipid' AND isproxy='yes'");
+	my $rows = $self->sqlCount("accesslist",
+		"ipid='$ipid' AND FIND_IN_SET('proxy', now)");
 	$rows ||= 0;
 
 	return $rows ? 'yes' : 'no';
-}
-
-#################################################################
-sub setIsProxy {
-	my($self, $ipid, $isproxy) = @_;
-
-	if ($isproxy ne 'yes' && $isproxy ne 'no') {
-		$isproxy = $isproxy ? 'yes' : 'no';
-	}
-
-	my $rows = $self->sqlSelect('COUNT(*)', 'accesslist', "ipid='$ipid'");
-        $rows ||= 0;
-
-	if ($rows > 0) {
-		my $return = $self->sqlUpdate('accesslist', {
-			'-isproxy' => $isproxy,
-		}, "ipid='$ipid'");
-
-		return $return ? 1 : 0;
-	} else {
-		my $return = $self->sqlInsert('accesslist', {
-			'-ipid'    => $ipid,
-			'-isproxy' => $isproxy,
-			'-ts'      => 'now()',
-		});
-
-		return $return ? 1 : 0;
-	}
 }
 
 ##################################################################
@@ -4226,15 +4214,13 @@ sub createMetaMod {
 		) unless $m2_user->{tokens} < $self->getVar("m2_mintokens", "value", 1);
 
 		$rows += 0; # if no error, returns 0E0 (true!), we want a numeric answer
+		my $ui_hr = { };
+		if ($is_fair)	{ ++$voted_fair;   $ui_hr->{-m2fair}   = "m2fair+1" }
+		else		{ ++$voted_unfair; $ui_hr->{-m2unfair} = "m2unfair+1" }
+		$self->sqlUpdate("users_info", $ui_hr, "uid=$mod_uid");
 		if ($rows) {
-			# If a row was successfully updated, then there are
-			# other updates we need to do too.  First, tally the
-			# counts for the affected user.
-			my $ui_hr = { };
-			if ($is_fair)	{ ++$voted_fair;   $ui_hr->{-m2fair}   = "m2fair+1" }
-			else		{ ++$voted_unfair; $ui_hr->{-m2unfair} = "m2unfair+1" }
-			$self->sqlUpdate("users_info", $ui_hr, "uid=$mod_uid");
-			# Then insert a row into metamodlog.
+			# If a row was successfully updated, insert a row
+			# into metamodlog.
 			$self->sqlInsert("metamodlog", {
 				mmid =>		$mmid,
 				uid =>		$m2_user->{uid},
