@@ -42,7 +42,7 @@ $task{$me}{code} = sub {
 				name	=> $block->{title},
 				story	=> $description,
 				subj	=> $rss->{title},
-				skid	=> $blockskin->{skid},
+				primaryskid => $blockskin->{skid},
 			};
 			$subid = $slashdb->createSubmission($submission);
 			if (!$subid) {
