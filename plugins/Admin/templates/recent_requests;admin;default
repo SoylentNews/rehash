@@ -1,13 +1,11 @@
 __section__
 default
 __description__
-* startat - starting offset (0 for top comment)
-* max_cid - highest cid in the DB
-* recent_comments - arrayref of hashrefs, each one comment, each with fields
-	sid, cid, date, ipid, subnetid, subject, uid, score, lastmod, reason, 
-	nickname, sum_val, num_mods
-* min - setting of min threshold
-* max - setting of max threshold
+* id
+* ts
+* threshold
+* data
+
 __title__
 admin interface recent template
 __page__
@@ -19,25 +17,34 @@ recent_requests
 __template__
 [% PROCESS titlebar title="Recent Requests" width='100%' %]
 
+	<BR><TABLE BORDER=0 CELLSPACING="0" CELLPADDING="0">
 <FORM ACTION="[% constants.rootdir %]/admin.pl?op=recent_requests" method="GET">
-	<BR>ID <INPUT TYPE="text" NAME="id" VALUE="[% id %]" SIZE="50">
-	<BR>Time [% ts %] ([% Slash.db.getTime %])
-	<BR>Threshold <INPUT TYPE="text" NAME="threshold" VALUE="[% threshold %]" SIZE="5">
-	<INPUT TYPE="hidden" NAME="op" VALUE="recent_requests">
-	<BR><INPUT TYPE="SUBMIT" NAME="none" VALUE="Reload">
-	<BR><FONT SIZE="-1">Notes: ID represents a position in the accesslog and time is the time of that id. If you blank the entry it will update to the current max(id) value.</FONT> 
+<INPUT TYPE="hidden" NAME="op" VALUE="recent_requests">
+	<TR><TD>ID</TD><TD><INPUT TYPE="text" NAME="id" VALUE="[% id %]" SIZE="15"></TD></TR>
+	<TR><TD>ID Time</TD><TD>[% ts %]</TD></TR>
+	<TR><TD>Current Time&nbsp;</TD><TD>[% Slash.db.getTime %]</TD></TR>
+	<TR><TD>Threshold&nbsp;</TD><TD><INPUT TYPE="text" NAME="threshold" VALUE="[% threshold %]" SIZE="5"></TD></TR>
+	<TR><TD>&nbsp;</TD><TD><INPUT TYPE="SUBMIT" NAME="none" VALUE="Reload"></TD></TR>
+	</TABLE>
+	<BR><FONT SIZE="-1"><B>ID</B> represents a position in the accesslog
+	and <B>time</B> is the time of that id. If you blank the entry it will
+	update to the current MAX(id) value.</FONT> 
 	<BR><BR>
 	<TABLE>
 		<TR>
-			<TD>Count</TD>
-			<TD>Host MD5</TD>
-			<TD>Page</TD>
+			<TH>Count</TH>
+			<TH>Page</TH>
+			<TH>IPID</TH>
+			<TH>MIN(ts)</TH>
+			<TH>MAX(ts)</TH>
 		</TR>
 		[% FOREACH row = data %]
 			<TR>
-				<TD>[% row.c %]</TD>
-				<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% row.host_addr %]&amp;fieldname=ipid">[% row.host_addr %]</A></TD>
-				<TD>[% row.op %]</TD>
+				<TD ALIGN="RIGHT">[% row.c %]&nbsp;</TD>
+				<TD ALIGN="LEFT">[% row.op %]&nbsp;</TD>
+				<TD>&nbsp;<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% row.ipid | strip_attribute %]&amp;fieldname=ipid">[% row.ipid_vis %]</A>&nbsp;</TD>
+				<TD>&nbsp;[% row.mints %]&nbsp;</TD>
+				<TD>&nbsp;[% row.maxts %]&nbsp;</TD>
 			</TR>
 		[% END %]
 	</TABLE>

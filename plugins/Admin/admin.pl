@@ -1693,21 +1693,21 @@ sub displayRecent {
 sub displayRecentRequests {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my $admindb = getObject("Slash::Admin", $constants->{backup_db_user} || $constants->{log_db_user});
+	my $admindb = getObject("Slash::Admin",
+		$constants->{backup_db_user} || $constants->{log_db_user});
 	my $id = $form->{id};
 	my $ts = $form->{ts};
-	$id ||= $admindb->getAccesslogMaxID()
-		unless $id;
-	$ts ||= $slashdb->getAccesslog($id, 'ts')
-		unless $ts;
+	$id ||= $admindb->getAccesslogMaxID();
+	$ts ||= $slashdb->getAccesslog($id, 'ts');
 
 	my $data = $admindb->getAccesslogAbusersByID($id, $form->{threshold});
+	vislenify($data); # add {ipid_vis} to each row
 
 	slashDisplay('recent_requests', {
 		id		=> $id,
 		ts		=> $ts,
-		threshold		=> $form->{threshold} || 20, # Yes this needs to be a var -Brian
-		data	=> $data,
+		threshold	=> $form->{threshold} || 20, # Yes this needs to be a var -Brian
+		data		=> $data,
 	});
 }
 

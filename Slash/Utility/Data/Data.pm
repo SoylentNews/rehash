@@ -2370,7 +2370,8 @@ Given an MD5 string such as an IPID or SubnetID, converts it to
 the length as determined by the id_md5_vislength var.  If passed
 a hashref, looks for any and all of the keys ipid, subnetid, and
 md5id, and if found, adds the same keys with _vis appended and
-shortened values.
+shortened values.  If passed an arrayref, it must be an arrayref
+of hashrefs, and does the above for each hashref.
 
 =over 4
 
@@ -2398,18 +2399,27 @@ it is modified in place.
 =cut
 
 sub vislenify {
-	my($id_or_hashref, $len) = @_;
+	my($id_or_ref, $len) = @_;
 	$len ||= getCurrentStatic('id_md5_vislength') || 32;
-	if (ref $id_or_hashref) {
-		return unless ref($id_or_hashref) eq 'HASH';
-		my $hr = $id_or_hashref;
-		for my $key (qw( ipid subnetid md5id )) {
-			if ($hr->{$key}) {
-				$hr->{"${key}_vis"} = substr($hr->{$key}, 0, $len);
+	if (ref $id_or_ref) {
+		if (ref($id_or_ref) eq 'HASH') {
+			my $hr = $id_or_ref;
+			for my $key (qw( ipid subnetid md5id )) {
+				if ($hr->{$key}) {
+					$hr->{"${key}_vis"} = substr($hr->{$key}, 0, $len);
+				}
+			}
+		} elsif (ref($id_or_ref) eq 'ARRAY') {
+			for my $item_hr (@$id_or_ref) {
+				for my $key (qw( ipid subnetid md5id )) {
+					if ($item_hr->{$key}) {
+						$item_hr->{"${key}_vis"} = substr($item_hr->{$key}, 0, $len);
+					}
+				}
 			}
 		}
 	} else {
-		return substr($id_or_hashref, 0, $len);
+		return substr($id_or_ref, 0, $len);
 	}
 }
 
