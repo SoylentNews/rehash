@@ -1921,7 +1921,17 @@ sub writeLog {
 sub createLog {
 	my($uri, $dat, $status) = @_;
 	my $constants = getCurrentStatic();
-	my $logdb = getObject('Slash::DB', { db_type => 'log' });
+
+	# At this point, if we have short-circuited the
+	# "PerlAccessHandler  Slash::Apache::User"
+	# by returning an apache code like DONE before that processing
+	# could take place (which currently happens in Banlist.pm), then
+	# prepareUser() has not been called, thus the $user->{state}{dbs}
+	# table is not set up.  So to make sure we write to the proper
+	# logging DB (assuming there is one), we have to use the old-style
+	# arguments to getObject(), instead of passing in {db_type=>'log'}.
+	# - Jamie 2003/05/25
+	my $logdb = getObject('Slash::DB', { virtual_user => $constants->{log_db_user} });
 
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
 
