@@ -25,7 +25,7 @@ sub main {
 		'time'	=> timeCalc(scalar localtime),
 	});
 
-	footer($form->{ssi});
+	footer();
 }
 
 createEnvironment();
