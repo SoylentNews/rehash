@@ -27,7 +27,6 @@ my $start_time = Time::HiRes::time;
 		|| $form->{upasswd} || $form->{unickname}
 	) {
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
-printf STDERR scalar(localtime) . " index.pl $$ redirect returnto $refer elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 		redirect($refer); return;
 	}
 
@@ -39,7 +38,6 @@ printf STDERR scalar(localtime) . " index.pl $$ redirect returnto $refer elapsed
 		upBid($form->{bid}), $c++ if /^u$/;
 		dnBid($form->{bid}), $c++ if /^d$/;
 		rmBid($form->{bid}), $c++ if /^x$/;
-printf STDERR scalar(localtime) . " index.pl $$ redirect since op=$form->{op} c=$c elapsed %5.3f\n", (Time::HiRes::time - $start_time) if $c;
 		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME}), return if $c;
 	}
 
@@ -73,7 +71,12 @@ printf STDERR scalar(localtime) . " index.pl $$ redirect since op=$form->{op} c=
 		$limit = $user->{maxstories};
 	}
 
-printf STDERR scalar(localtime) . " index.pl $$ pre elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+	# TIMING START
+	# From here to the "TIMING END", the bulk of the work in index.pl is
+	# done.  Times listed at "TIMING MARKPOINT" are as measured on
+	# Slashdot, normalized such that the median request takes 1 second.
+	# Times listed are elapsed time from the previous markpoint.
+
 	$stories = $reader->getStoriesEssentials(
 		$limit, $form->{section},
 		'',
@@ -101,7 +104,8 @@ printf STDERR scalar(localtime) . " index.pl $$ pre elapsed %5.3f\n", (Time::HiR
 		$future_plug = 1;
 	}
 
-printf STDERR scalar(localtime) . " index.pl $$ pre-displays elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+	# TIMING MARKPOINT
+	# Median 0.145 seconds, 90th percentile 0.222 seconds
 
 	return do_rss($reader, $constants, $user, $form, $stories) if $rss;
 
@@ -127,12 +131,17 @@ printf STDERR scalar(localtime) . " index.pl $$ pre-displays elapsed %5.3f\n", (
 		stories		=> $Stories,
 		boxes		=> $StandardBlocks,
 	});
-printf STDERR scalar(localtime) . " index.pl $$ after slashDisplay elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+
+	# TIMING MARKPOINT
+	# Median 0.814 seconds, 90th percentile 1.551 seconds
 
 	footer();
 
 	writeLog($form->{section});
-printf STDERR scalar(localtime) . " index.pl $$ after writeLog elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+
+	# TIMING MARKPOINT
+	# Median 0.037 seconds, 90th percentile 0.059 seconds
+
 }
 
 
