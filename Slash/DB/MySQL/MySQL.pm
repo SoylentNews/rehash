@@ -1364,12 +1364,18 @@ sub getNexusExtrasForChosen {
 	return [ ] unless $chosen_hr;
 
 	my $nexuses = $self->getNexuslistFromChosen($chosen_hr);
-
+	my $seen_extras = {};
 	my $extras = [ ];
 	for my $nexusid (@$nexuses) {
 		my $ex_ar = $self->getNexusExtras($nexusid);
-		push @$extras, @$ex_ar;
+		foreach my $extra (@$ex_ar) {
+			unless ($seen_extras->{$extra->[1]}) {
+				push @$extras, $extra;
+				$seen_extras->{$extra->[1]}++;
+			}
+		}
 	}
+	
 	return $extras;
 }
 
@@ -5720,7 +5726,7 @@ sub getStoryByTimeAdmin {
 		"ORDER BY time $order LIMIT $limit"
 	);
 	foreach my $story (@$returnable) {
-		$story->{displaystatus} = $self->_displaystatus($story->{stoid});
+		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1});
 	}
 	return $returnable;
 }
@@ -8150,7 +8156,7 @@ sub getSimilarStories {
 		# they match with the current story.  Include a multiplier
 		# based on the length of the match.
 		my $s = $stories->{$sid};
-		$stories->{$sid}{displaystatus} = $self->_displaystatus($stories->{$sid}{stoid});
+		$stories->{$sid}{displaystatus} = $self->_displaystatus($stories->{$sid}{stoid}, { no_time_restrict => 1});
 		$s->{weight} = 0;
 		for my $word (@text_uncommon_words) {
 			my $word_weight = 0;
