@@ -12,7 +12,6 @@ template=templates/editbuttons;admin;default
 template=templates/ispellok;admin;default
 template=templates/listFilters;admin;default
 template=templates/listStories;admin;default
-template=templates/listTopics;admin;default
 template=templates/messages;admin;default
 template=templates/otherLinks;admin;default
 template=templates/relatedlinks;admin;default
