@@ -1003,9 +1003,10 @@ sub getOlderStories {
 
 	$form->{start} ||= 0;
 
+	my $artcount = $section->{artcount} / 3;
 	if ($section->{section} eq 'index') {
 		# XXX Fake it...
-		$section->{artcount} = 15;
+		$artcount = $section->{artcount} = 15;
 	}
 
 	slashDisplay('getOlderStories', {
@@ -1013,7 +1014,7 @@ sub getOlderStories {
 		section		=> $section,
 		cur_time	=> time,
 		yesterday	=> $yesterday,
-		start		=> $section->{artcount} + $form->{start} + scalar(@$stories),
+		start		=> $artcount + $form->{start} + scalar(@$stories),
 	}, 1);
 }
 
