@@ -34,7 +34,7 @@ Slashdot.  Exciting?  Nope.
 =cut
 
 use strict;
-use vars '%I';
+use vars qw(%I %savedBlocks);
 use Slash;
 use LWP::UserAgent;
 use HTTP::Request;
@@ -42,7 +42,6 @@ use URI::Escape;
 use XML::Parser;
 
 *I = getSlashConf();
-my %savedBlocks;
 #my ($basedir,$datadir)=getvars("basedir","datadir");
 
 sub makeTmp {
