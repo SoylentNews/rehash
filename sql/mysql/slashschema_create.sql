@@ -791,7 +791,6 @@ CREATE TABLE story_text (
 	rendered text,
 	FOREIGN KEY (sid) REFERENCES stories(sid),
 	PRIMARY KEY (sid),
-	INDEX rendered (rendered(1))
 ) TYPE=InnoDB;
 
 #
