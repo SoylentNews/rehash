@@ -4403,7 +4403,10 @@ sub createStory {
 			-karma => $newkarma },
 		"uid=$suid") if !isAnon($suid);
 
-		$self->setSubmission($story->{subid}, { del => 2, sid => $story->{sid} });
+		$self->setSubmission($story->{subid}, {
+			del	=> 2,
+			sid	=> $story->{sid}
+		});
 	}
 
 	$story->{submitter}	= $story->{submitter} ?

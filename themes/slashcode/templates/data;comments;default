@@ -53,7 +53,7 @@ __template__
 
 [% CASE 'no_discreate_msg' %]
 	You either aren't <a href="[% constants.rootdir %]/users.pl">logged in</a>
-	or don't have sufficient priveledges to submit a [% label %].
+	or don't have sufficient privileges to submit a [% label %].
 [% END %]
 
 __seclev__
