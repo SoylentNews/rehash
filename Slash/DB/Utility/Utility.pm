@@ -156,9 +156,7 @@ sub create {
 	$self->sqlInsert($table, $val);
 
 	# what should $prime really be?  add a new var to $self? -- pudge
-	my($rid) = $self->getLastInsertId($table, $prime);
-
-	return $rid;
+	return $self->getLastInsertId();
 }
 
 ##################################################################
@@ -240,6 +238,13 @@ sub sqlConnect {
 	}
 
 	return 1; # We return true that the sqlConnect was ok.
+}
+
+#######################################################
+# Wrapper to get the latest ID from the database
+sub getLastInsertId {
+	my($self) = @_;
+	return $self->sqlSelect('LAST_INSERT_ID()');
 }
 
 ########################################################

@@ -50,8 +50,6 @@ sub main {
 		my $SECT = $slashdb->getSection($story->{section});
 		# This should be a getData call for title
 		my $title = "$constants->{sitename} | $story->{title}";
-		$story->{introtext} = parseSlashizedLinks($story->{introtext});
-		$story->{bodytext} =  parseSlashizedLinks($story->{bodytext});
 
 		my $authortext;
 		if ($user->{is_admin} ) {
@@ -83,7 +81,6 @@ sub main {
 
 		my $pollbooth = pollbooth($story->{qid}, 1)
 			if $story->{qid};
-
 		slashDisplay('display', {
 			poll			=> $pollbooth,
 			section			=> $SECT,

@@ -223,6 +223,11 @@ template=templates/userSub;users;default
 template=templates/user_titlebar;misc;default
 template=templates/userlogin;misc;default
 template=templates/users;menu;default
+template=templates/hrefLink;misc;default
+template=templates/userLink;misc;default
+template=templates/fileLink;misc;default
+template=templates/imageLink;misc;default
+
 misc=misc/spamarmors
 plugin=Admin
 plugin=FAQ

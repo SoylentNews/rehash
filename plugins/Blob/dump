@@ -1,0 +1,1 @@
+INSERT INTO vars (name, value, description) VALUES ('story_files', '1', 'Allow stories to use files from Slash::Blob');

@@ -1138,7 +1138,7 @@ sub displayStory {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	my $story = $slashdb->getStory($sid);
+	my $story = $slashdb->getStory($sid, '', $other->{force_cache});
 	my $author = $slashdb->getAuthor($story->{uid},
 		['nickname', 'fakeemail', 'homepage']);
 	my $topic = $slashdb->getTopic($story->{tid});
@@ -1166,7 +1166,11 @@ sub displayStory {
 	}
 
 	$story->{introtext} = parseSlashizedLinks($story->{introtext});
-	$story->{bodytext} =  parseSlashizedLinks($story->{bodytext});
+	$story->{introtext} = processSlashTags($story->{introtext}, {});
+	if ($full) {
+		$story->{bodytext} = parseSlashizedLinks($story->{bodytext});
+		$story->{bodytext} = processSlashTags($story->{bodytext}, {});
+	}
 
 	my $return = dispStory($story, $author, $topic, $full, $other);
 	return($return, $story, $author, $topic);

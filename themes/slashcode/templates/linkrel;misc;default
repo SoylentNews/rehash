@@ -15,6 +15,11 @@ linkrel
 __template__
 <LINK REL="top"       HREF="[% constants.real_rootdir %]/" TITLE="[% constants.slogan | strip_attribute %]">
 <LINK REL="search"    HREF="[% constants.rootdir %]/search.pl" TITLE="Search [% constants.sitename | strip_attribute %]">
+[% SECT = Slash.db.getSection() %]
+<LINK REL="alternate" TYPE="application/rss+xml" TITLE="[% constants.sitename | strip_attribute %] ([% SECT.title | strip_attribute %]) RSS" HREF="[% constants.rootdir %]/[% Slash.sitename2filename(SECT.section) %].rss">
+<LINK REL="alternate" TYPE="application/rss+xml" TITLE="[% constants.sitename | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/index.rss">
+
+
 
 [%- IF link.section;
 	myurl = link.section.rootdir || "${constants.rootdir}/${link.section.section}" %]

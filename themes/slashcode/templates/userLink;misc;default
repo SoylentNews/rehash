@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+Display a link to a user.
+
+Either pass in a nickname or a uid. 
+Also will take the "bonus" flag which will print out the bonus for the user.
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+userLink
+__template__
+[% IF !nickname %]
+	[% nickname = Slash.db.getUser(uid, 'nickname') %]
+[% END %]
+[% IF !uid %]
+	[% uid = Slash.db.getUserUid(nickname) %]
+[% END %]
+[% IF nickname && uid %]
+	<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% nickname | strip_literal %] ([% uid %])</A>
+	[% IF !user.is_anon %][% PROCESS zoo_icons person=uid bonus=bonus %][% END %]
+[% END %]
+__seclev__
+10000

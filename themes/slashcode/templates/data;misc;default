@@ -56,6 +56,27 @@ __template__
 [% CASE 'seconds' %]
 	seconds
 
+[% CASE 'SLASH-UNKNOWN-TAG' %]
+<b>[Unknown Slash Tag [% tag %]]</b>
+
+[% CASE 'SLASH-UNKNOWN-IMAGE' %]
+<b>[Unknown Image]</b>
+
+[% CASE 'SLASH-UNKNOWN-IMAGE' %]
+<b>[Unknown Image]</b>
+
+[% CASE 'SLASH-UNKNOWN-STORY' %]
+<b>[Unknown Story]</b>
+
+[% CASE 'SLASH-UNKNOWN-USER' %]
+<b>[Unknown User]</b>
+
+[% CASE 'SLASH-UNKNOWN-FILE' %]
+<b>[Unknown File]</b>
+
+[% CASE 'SLASH-UNKNOWN-LINK' %]
+<b>[Unknown Link]</b>
+
 [% CASE 'noformkey' %]
 <P><B>We can't find your formkey.</B></P>
 <P>You must fill out a form and submit from that

@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+
+__title__
+Attached files list
+__page__
+misc
+__lang__
+en_US
+__name__
+attached_files
+__template__
+[% FOREACH file=files %]
+	[% file.description %]<br>
+	[% IF file.isimage %]
+		&lt;SLASH-IMAGE id="[% file.id %]" TITLE="[% file.description %]"&gt;<br>
+	[% ELSE %]
+		&lt;SLASH-FILE id="[% file.id %]" TITLE="[% file.description %]"&gt;<br>
+	[% END %]
+	<BR>
+[% END %]
+
+__seclev__
+10000

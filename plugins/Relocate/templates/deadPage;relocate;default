@@ -1,0 +1,18 @@
+__section__
+default
+__description__
+
+__title__
+Attached files list
+__page__
+relocate
+__lang__
+en_US
+__name__
+deadPage
+__template__
+<h2>D'oh!</H2>
+Sorry, the url [% link.url %] that you wished to connect to is currently down (we noticed it at [% Slash.timeCalc(link.last_seen) %].<br>
+You might consider trying to access a cached version of it on google.
+__seclev__
+10000

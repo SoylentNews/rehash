@@ -49,17 +49,11 @@ sub save2file {
 	close $fh;
 }
 
-sub site2file {
-	my($virtual_user, $constants, $backupdb, $user, $section) = @_;
-	(my $file = $section || lc $constants->{sitename}) =~ s/\W+//g;
-	return $file;
-}
-
 sub _do_rss {
 	my($virtual_user, $constants, $backupdb, $user, $info,
 		$section, $stories, $version) = @_;
 
-	my $file    = site2file($virtual_user, $constants, $backupdb, $user, $section);
+	my $file    = sitename2filename($section);
 	my $SECT    = $backupdb->getSection($section);
 	my $link    = ($SECT->{url}  || $constants->{absolutedir}) . '/';
 	my $title   = $constants->{sitename};
@@ -120,7 +114,7 @@ EOT
 </wml>
 EOT
 
-	my $file = site2file($virtual_user, $constants, $backupdb, $user, $section);
+	my $file = sitename2filename($virtual_user, $constants, $backupdb, $user, $section);
 	save2file("$constants->{basedir}/$file.wml", $x);
 }
 
@@ -155,7 +149,7 @@ EOT
 
 	$x .= "</backslash>\n";
 
-	my $file = site2file($virtual_user, $constants, $backupdb, $user, $section);
+	my $file = sitename2filename($virtual_user, $constants, $backupdb, $user, $section);
 	save2file("$constants->{basedir}/$file.xml", $x);
 }
 

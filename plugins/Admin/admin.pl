@@ -1087,7 +1087,7 @@ sub editStory {
 	my($sid, $storylinks);
 	# Added validation of sid -Brian
 	if ($form->{op} eq 'edit' && $form->{sid}) {
-		$sid = $slashdb->getStory($form->{sid}, 'sid');
+		$sid = $slashdb->getStory($form->{sid}, 'sid', 1);
 	}
 	# Basically, we upload the bodytext if we realize a name has been passed in -Brian
 	if ($form->{bodytext_file}) {
@@ -1163,7 +1163,7 @@ sub editStory {
 
 		$topic = $slashdb->getTopic($storyref->{tid});
 		$form->{uid} ||= $user->{uid};
-		$author = $slashdb->getAuthor($form->{uid});
+		#$author = $slashdb->getAuthor($form->{uid});
 		$subid = $form->{subid};
 		$sid = $form->{sid};
 
@@ -1176,7 +1176,7 @@ sub editStory {
 		my $tmp = $user->{currentSection};
 		$user->{currentSection} = $storyref->{section};
 
-		$storycontent = dispStory($storyref, $author, $topic, 'Full');
+	#	$storycontent = dispStory($storyref, $author, $topic, 'Full');
 
 		$user->{currentSection} = $tmp;
 		$storyref->{relatedtext} =
@@ -1203,7 +1203,10 @@ sub editStory {
 	} elsif (defined $sid) { # Loading an existing SID
 		my $tmp = $user->{currentSection};
 		$user->{currentSection} = $slashdb->getStory($sid, 'section', 1);
-		($story, $storyref, $author, $topic) = displayStory($sid, 'Full');
+		$user->{state}{editing} = 1;
+		#($story) = displayStory($sid, 'Full', { force_cache => 1});
+		$storyref = $slashdb->getStory($sid, '', 1);
+		
 		$storyref->{writestatus} = 'dirty';
 		$storyref->{commentstatus}  = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
 		$extracolumns = $slashdb->getSectionExtras($user->{currentSection}) || [ ];
@@ -1228,6 +1231,22 @@ sub editStory {
 		$storyref->{uid} = $user->{uid};
 		$storyref->{writestatus} = "dirty";
 		$subid = $form->{subid};
+	}
+
+	if ($storyref->{title}) {
+		my $reloDB = getObject("Slash::Relocate");
+		my %story_copy = %$storyref;
+		if ($reloDB) {
+			$story_copy{introtext} = $reloDB->href2SlashTag($story_copy{introtext}, $sid);
+			$story_copy{bodytext} = $reloDB->href2SlashTag($story_copy{bodytext}, $sid);
+		}
+		$story_copy{introtext} = parseSlashizedLinks($story_copy{introtext});
+		$story_copy{bodytext} =  parseSlashizedLinks($story_copy{bodytext});
+		$story_copy{introtext} = processSlashTags($story_copy{introtext}, {});
+		$story_copy{bodytext} = processSlashTags($story_copy{bodytext}, {});
+		my $author = $slashdb->getAuthor($storyref->{uid});
+		my $topic = $slashdb->getTopic($storyref->{tid});
+		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full');
 	}
 
 	for (@{$extracolumns}) {
@@ -1339,6 +1358,13 @@ sub editStory {
 	}, { Return => 1 });
 
 	my $slashdtext = get_slashd_box();
+	my $attached_files;
+	if ($constants->{plugin}{Blob}) {
+		my $blobdb = getObject("Slash::Blob");
+		my $files = $blobdb->getFilesForStory($sid);
+		$attached_files = slashDisplay('attached_files', { files => $files }, { Return => 1});
+	}
+	
 
 	# We probably should just pass the raw data instead of the formatted
 	# <SELECT> into this template and let the template deal with the
@@ -1370,6 +1396,7 @@ sub editStory {
 		story_topics		=> $story_topics,
 		similar_stories		=> $similar_stories,
 		topic_select_sec	=> \@topic_select_sec,
+		attached_files		=> $attached_files,
 	});
 }
 
@@ -1629,6 +1656,11 @@ sub updateStory {
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});
 	$form->{bodytext} =  balanceTags($form->{bodytext});
+	my $reloDB = getObject("Slash::Relocate");
+	if ($reloDB) {
+		$form->{introtext} = $reloDB->href2SlashTag($form->{introtext}, $form->{sid});
+		$form->{bodytext} = $reloDB->href2SlashTag($form->{bodytext}, $form->{sid});
+	}
 
 	my $data = {
 		uid		=> $form->{uid},

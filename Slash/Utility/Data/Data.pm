@@ -67,6 +67,7 @@ use vars qw($VERSION @EXPORT);
 	html2text
 	root2abs
 	set_rootdir
+	sitename2filename
 	strip_anchor
 	strip_attribute
 	strip_code
@@ -2756,6 +2757,15 @@ sub grepn {
 	}
 	return;
 }
+
+#========================================================================
+# Removed from openbackend
+sub sitename2filename {
+	my($section) = @_;
+	(my $filename = $section || lc getCurrentStatic('sitename')) =~ s/\W+//g;
+	return $filename;
+}
+
 
 1;
 

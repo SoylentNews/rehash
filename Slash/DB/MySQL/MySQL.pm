@@ -282,13 +282,6 @@ sub init {
 	# probably perform a delete on anything matching, here.
 }
 
-#######################################################
-# Wrapper to get the latest ID from the database
-sub getLastInsertId {
-	my($self, $table, $col) = @_;
-	my($answer) = $self->sqlSelect('LAST_INSERT_ID()');
-	return $answer;
-}
 
 ########################################################
 # Yes, this is ugly, and we can ditch it in about 6 months
@@ -1475,59 +1468,6 @@ sub getDescriptions {
 
 	$self->{$cache} = $codeBank_hash_ref if getCurrentStatic('cache_enabled');
 	return $codeBank_hash_ref;
-}
-
-########################################################
-# Get user info from the users table.
-# If you don't pass in a $script, you get everything
-# which is handy for you if you need the entire user
-
-# why not just axe this entirely and always get all the data? -- pudge
-# Worry about access times. Realize that when MySQL has row level
-# locking that we can combine all of the user table (except param)
-# into one table again. -Brian
-
-sub getUserInstance {
-	my($self, $uid, $script) = @_;
-
-	my $user;
-	unless ($script) {
-		$user = $self->getUser($uid);
-		return $user || undef;
-	}
-
-	$user = $self->sqlSelectHashref('*', 'users',
-		' uid = ' . $self->sqlQuote($uid)
-	);
-	return undef unless $user;
-	my $user_extra = $self->sqlSelectHashref('*', "users_prefs", "uid=$uid");
-	while (my($key, $val) = each %$user_extra) {
-		$user->{$key} = $val;
-	}
-
-	# what is this for?  it appears to want to do the same as the
-	# code above ... but this assigns a scalar to a scalar ...
-	# perhaps `@{$user}{ keys %foo } = values %foo` is wanted?  -- pudge
-#	$user->{ keys %$user_extra } = values %$user_extra;
-
-#	if (!$script || $script =~ /index|article|comments|metamod|search|pollBooth/)
-	{
-		my $user_extra = $self->sqlSelectHashref('*', "users_comments", "uid=$uid");
-		while (my($key, $val) = each %$user_extra) {
-			$user->{$key} = $val;
-		}
-	}
-
-	# Do we want the index stuff?
-#	if (!$script || $script =~ /index/)
-	{
-		my $user_extra = $self->sqlSelectHashref('*', "users_index", "uid=$uid");
-		while (my($key, $val) = each %$user_extra) {
-			$user->{$key} = $val;
-		}
-	}
-
-	return $user;
 }
 
 ########################################################

@@ -102,6 +102,48 @@ sub clean {
 	$self->sqlDo("DELETE FROM $self->{'_table'} WHERE reference_count < 1");
 }
 
+sub getFilesForStories {
+	my ($self) = @_;
+	$self->sqlSelectAllHashrefArray('*', 'story_files', '', "ORDER BY sid,description");
+}
+
+sub getFilesForStory {
+	my ($self, $sid) = @_;
+	return unless $sid;
+	$self->sqlSelectAllHashrefArray('*', 'story_files', "sid=" . $self->sqlQuote($sid), "ORDER BY description");
+}
+
+sub createFileForStory {
+	my ($self, $values) = @_;
+		return unless $values->{sid} && $values->{data};
+
+		my $content = {
+			seclev => $values->{seclev},
+			filename => $values->{filename},
+			content_type => $values->{content_type},
+			data => $values->{data},
+		};
+		my $id = $self->create($content);
+		my $content_type = $self->get($id, 'content_type');
+
+		my $file_content = {
+			sid => $values->{sid},
+			description => $values->{description} || $values->{filename} || $content_type,
+			isimage => ($content_type =~ /^image/) ? 'yes': 'no',
+			file_id => $id,
+		};
+	$self->sqlInsert('story_files', $file_content);
+
+	return $self->getLastInsertId();
+}
+
+sub	deleteStoryFile {
+	my ($self, $id) = @_;
+	my $file_id = $self->sqlSelect("file_id", "story_files", "id =" . $self->sqlQuote($id));
+	$self->delete($file_id);
+	$self->sqlDelete("story_files", "id=" . $self->sqlQuote($id));
+}
+
 
 sub DESTROY {
 	my($self) = @_;

@@ -18,7 +18,7 @@ __template__
 	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid | strip_attribute %]">
 [% END %]
 
-[% IF form.title %]
+[% IF storyref.title %]
 	<TABLE>
 		<TR VALIGN=TOP>
 			<TD>
@@ -59,6 +59,13 @@ __template__
 			[% PROCESS fancybox
 				title = "Set an Event for this Story"
 				contents = "<A HREF=\"$constants.rootdir/eventsadmin.pl?op=edit&amp;sid=$sid\">Make Event</A>"
+			%]
+		[% END %]
+
+		[% IF constants.plugin.Blob && constants.story_files && attached_files %]
+			[% PROCESS fancybox
+				title = "Attached Files"
+				contents = attached_files
 			%]
 		[% END %]
 
@@ -205,6 +212,9 @@ __template__
 		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward
 		| <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit&amp;question=[% storyref.title | fixparam %]">
 		Related Poll</A>
+			[% IF constants.plugin.Blob && constants.story_files %]
+				| <A HREF="[% constants.real_rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% sid %]">Attach File</A>
+			[% END %]
 		[% END %]
 		[% IF subid %]
 		| <A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% subid %]">submission</A>

@@ -1,0 +1,27 @@
+#
+# Table structure for table 'links'
+#
+
+CREATE TABLE links (
+	id CHAR(32) DEFAULT '' NOT NULL,
+	url TEXT DEFAULT '' NOT NULL,
+	last_seen DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	is_alive enum('yes','no') DEFAULT 'yes' NOT NULL,
+	INDEX url_index (url(200)),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+#
+# Table structure for table 'links_sid'
+#
+
+CREATE TABLE links_for_stories (
+	id char(32) DEFAULT '' NOT NULL,
+	sid CHAR(16) NOT NULL,
+	count INT DEFAULT 0 NOT NULL,
+	FOREIGN KEY (sid) REFERENCES stories(sid),
+	FOREIGN KEY (id) REFERENCES links(id),
+	INDEX sid (sid),
+	PRIMARY KEY (id,sid)
+) TYPE = myisam;
+

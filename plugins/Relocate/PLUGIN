@@ -1,0 +1,5 @@
+name=Relocate
+description="redirect your href links"
+mysql_schema=mysql_schema
+htdoc=relocate.pl
+template=templates/deadPage;relocate;default

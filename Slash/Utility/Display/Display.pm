@@ -28,6 +28,7 @@ use strict;
 use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
+use HTML::TokeParser ();
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -47,6 +48,7 @@ use vars qw($VERSION @EXPORT);
 	matchingStrings
 	pollbooth
 	portalbox
+	processSlashTags
 	selectMode
 	selectSection
 	selectSortcode
@@ -409,7 +411,6 @@ sub linkStory {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	$reader ||= getCurrentDB();
 
 	my $mode = $story_link->{mode} || $user->{mode};
 	my $threshold = undef;
@@ -444,6 +445,8 @@ sub linkStory {
 	}
 
 	# We need to make sure we always get the right link -Brian
+	$story_link->{section} ||= $reader->getStory($story_link->{sid}, 'section');
+	$story_link->{'link'} ||= $reader->getStory($story_link->{sid}, 'title');
 	my $section = $reader->getSection($story_link->{section});
 	my $url = $section->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
 
@@ -463,6 +466,7 @@ sub linkStory {
 		url		=> $url,
 		text		=> $story_link->{'link'},
 		dynamic		=> $dynamic,
+		title		=> $story_link->{title},
 	}, { Return => 1, Nocomm => 1 });
 }
 
@@ -1155,19 +1159,20 @@ sub lockTest {
 ########################################################
 # this sucks, but it is here for now
 sub _hard_linkStory {
-	my($story_link, $mode, $threshold, $dynamic, $url, $tid_string) = @_;
+	my($story_link, $mode, $threshold, $dynamic, $url, $tid_string, $title) = @_;
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
+	my $f_title = $story_link->{title};
 
 	if ($dynamic) {
 	    my $link = qq[<A HREF="$url/article.pl?sid=$story_link->{sid}];
 	    $link .= "&amp;mode=$mode" if $mode;
 	    $link .= "&amp;tid=$tid_string" if $tid_string;
 	    $link .= "&amp;threshold=$threshold" if defined($threshold);
-	    $link .= qq[">$story_link->{link}</A>];
+	    $link .= qq[" TITLE="$f_title">$story_link->{link}</A>];
 	    return $link;
 	} else {
-	    return qq[<A HREF="$url/$story_link->{section}/$story_link->{sid}.shtml?tid=$tid_string">$story_link->{link}</A>];
+	    return qq[<A HREF="$url/$story_link->{section}/$story_link->{sid}.shtml?tid=$tid_string" $f_title>$story_link->{link}</A>];
 	}
 }
 
@@ -1204,7 +1209,7 @@ sub _hard_linkComment {
 		$display .= "#$comment->{cid}" if $comment->{cid};
 	}
 
-	$display .= qq!">$subject</A>!;
+	$display .= qq|">$subject</A>|;
 	if (!$comment->{subject_only}) {
 		$display .= qq| by $comment->{nickname}|;
 		$display .= qq| <FONT SIZE="-1">(Score:$comment->{points})</FONT> |
@@ -1215,6 +1220,159 @@ sub _hard_linkComment {
 	$display .= "\n";
 
 	return $display;
+}
+
+#========================================================================
+my $slashTags = {
+	'slash-image' => \&_slashImage,
+	'slash-story' => \&_slashStory,
+	'slash-user' => \&_slashUser,
+	'slash-file' => \&_slashFile,
+	'slash-break' => \&_slashPageBreak,
+	'slash-link' => \&_slashLink,
+	'slash' => \&_slashSlash,
+};
+
+sub processSlashTags {
+	my($text, $options) = @_;
+	return unless $text;
+	
+	my $newtext = $text;
+	my $user = getCurrentUser();
+	my $tokens = HTML::TokeParser->new(\$text);
+
+	return $newtext unless $tokens;
+	while (my $token = $tokens->get_tag(keys %$slashTags)) {
+			if (ref($slashTags->{$token->[0]}) eq 'CODE') {
+				$slashTags->{$token->[0]}->($tokens, $token,\$newtext);
+			} else {
+				my $content = getData('SLASH-UNKNOWN-TAG', { tag => $token->[0] });
+				print STDERR "BAD TAG $token->[0]\n";
+				$newtext =~ s/$token->[3]/$content/;
+			}
+																						 
+	}
+
+	if ($user->{stats}{pagebreaks} && !$user->{state}{editing}) {
+		my $form = getCurrentForm();
+		# The logic is that if they are on the first page then page will be empty
+		# -Brian
+		my @parts = split /<slash-break>/is, $newtext;
+		if ($form->{page}) {
+			$newtext = $parts[$form->{page} -1];
+		} else {
+			$newtext = $parts[0];
+		}
+	}
+
+	return $newtext;
+}
+
+sub _slashImage {
+	my ($tokens, $token, $newtext) = @_;
+
+	my $content = slashDisplay('imageLink', {
+			id => $token->[1]->{id},
+			title => $token->[1]->{title},
+			}, { Return => 1 });
+	$content ||= getData('SLASH-UKNOWN-IMAGE');
+
+	$$newtext =~ s/$token->[3]/$content/;
+}
+
+sub _slashStory {
+	my ($tokens, $token, $newtext) = @_;
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $sid = $token->[1]->{story};
+	my $content = linkStory({
+			'link'	=> $token->[1]->{text},
+			sid	=> $token->[1]->{story},
+			title	=> $reader->getStory($token->[1]->{story}, 'title'),
+			});
+	$content ||= getData('SLASH-UKNOWN-STORY');
+
+	$$newtext =~ s/$token->[3]/$content/;
+}
+
+sub _slashUser {
+	my ($tokens, $token, $newtext) = @_;
+
+	my $content = slashDisplay('userLink', {
+			uid => $token->[1]->{uid},
+			nickname => $token->[1]->{nickname}, 
+			}, { Return => 1 });
+	$content ||= getData('SLASH-UKNOWN-USER');
+
+	$$newtext =~ s/$token->[3]/$content/;
+}
+
+sub _slashFile {
+	my ($tokens, $token, $newtext) = @_;
+
+	my $content = slashDisplay('fileLink', {
+			id => $token->[1]->{id},
+			title => $token->[1]->{title},
+			}, { Return => 1 });
+	$content ||= getData('SLASH-UKNOWN-FILE');
+
+	$$newtext =~ s/$token->[3]/$content/;
+}
+
+sub _slashLink {
+	my ($tokens, $token, $newtext) = @_;
+
+	my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
+	my ($content);
+	if ($reloDB) {
+		my $string = $token->[1]->{text} || $token->[1]->{title};
+		$content = slashDisplay('hrefLink', {
+				id => $token->[1]->{id},
+				title => $token->[1]->{title},
+				text => $string,
+				}, { Return => 1 });
+	}
+	$content ||= getData('SLASH-UKNOWN-LINK');
+
+	$$newtext =~ s/$token->[3]/$content/;
+}
+
+sub _slashPageBreak {
+	my ($tokens, $token, $newtext) = @_;
+	my $user = getCurrentUser();
+
+	$user->{stats}{pagebreaks}++;
+
+	return;
+}
+
+sub _slashSlash {
+	my ($tokens, $token, $newtext) = @_;
+
+	my ($content, $data);
+	if ($token->[1]->{href}) {
+		my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
+		$data = $tokens->get_text("/slash");
+		if ($reloDB) {
+			$content = slashDisplay('hrefLink', {
+					id => $token->[1]->{id},
+					title => $token->[1]->{href},
+					text => $data,
+					}, { Return => 1 });
+		}
+		$content ||= getData('SLASH-UKNOWN-LINK');
+	} elsif ($token->[1]->{story}) {
+		$data = $tokens->get_text("/slash");
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		$content = linkStory({
+				'link'	=> $data,
+				sid	=> $token->[1]->{story},
+				title	=> $reader->getStory($token->[1]->{story}, 'title'),
+				});
+		$content ||= getData('SLASH-UKNOWN-STORY');
+	} # More of these type can go here.
+
+	$$newtext =~ s#$token->[3]$data</SLASH>#$content#is;
 }
 
 1;
