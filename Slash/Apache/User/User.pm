@@ -95,14 +95,19 @@ sub handler {
 	# data to be, so no later code will try to read from it.  Maybe we
 	# should do this in filter_params itself, but for now it's here.
 	# -- jamie
+	# And gee it sure looks like this makes this handler get executed
+	# twice and the second time through it comes as a GET with no
+	# parameters because they've been nuked.  But when I comment
+	# those three lines out, it at least works, so that's what I'm
+	# doing for now.  We'll figure it out better later.  -- jamie
 
 	my $method = $r->method;
 
 	my $form = filter_params($apr);
 
-	$r->method('GET');
-	$r->method_number(M_GET);
-	$r->headers_in->unset('Content-length');
+#	$r->method('GET');
+#	$r->method_number(M_GET);
+#	$r->headers_in->unset('Content-length');
 
 	# And now the request is safe for CGI.pm or anything else to try
 	# to work with -- or at least it won't hang.
