@@ -1512,8 +1512,8 @@ sub extractChosenFromForm {
 	if (defined $form->{topic_source} && $form->{topic_source} eq "submission"
 		&& $form->{subid}) {
 		my @topics = ($form->{tid});
-		if ($form->{skid}) {
-			my $nexus = $slashdb->getNexusFromSkid($form->{skid});
+		if ($form->{primaryskid}) {
+			my $nexus = $slashdb->getNexusFromSkid($form->{primaryskid});
 			push @topics, $nexus if $nexus;
 		}
 		for my $tid (@topics) {
