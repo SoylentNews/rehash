@@ -1795,12 +1795,17 @@ sub deletePoll {
 	my($self, $qid) = @_;
 
 	my $qid_quoted = $self->sqlQuote($qid);
-	my $did = $self->sqlSelect('discussion', 'pollquestions',
-		"qid=$qid_quoted");
-	$self->deleteDiscussion($did);
-	$self->sqlDo("DELETE FROM pollanswers WHERE qid=$qid_quoted");
+	my $did = $self->sqlSelect(
+		'discussion', 
+		'pollquestions',
+		"qid=$qid_quoted"
+	);
+
+	$self->deleteDiscussion($did) if $did;
+
+	$self->sqlDo("DELETE FROM pollanswers   WHERE qid=$qid_quoted");
 	$self->sqlDo("DELETE FROM pollquestions WHERE qid=$qid_quoted");
-	$self->sqlDo("DELETE FROM pollvoters WHERE qid=$qid_quoted");
+	$self->sqlDo("DELETE FROM pollvoters    WHERE qid=$qid_quoted");
 }
 
 ########################################################
