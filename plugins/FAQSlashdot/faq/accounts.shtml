@@ -22,12 +22,14 @@
 	</SMALL></I>
 
 <A NAME="ac105"></a>
-<H2>How do I change my password?</H2>
+<H2>How do I change my password or email address?</H2>
 
-	<P>Go to the <A HREF="http://slashdot.org/users.pl?op=edituser">User Info Editing Page</A> while you are logged in and use the form provided there.<BR><BR>
+	<P>Go to the
+	<A HREF="http://slashdot.org/users.pl?op=edituser">User Info Editing Page</A>
+	while you are logged in and use the form provided there.<BR><BR>
 	<I><SMALL>
 	Answered by: <A HREF="mailto:pater@slashdot.org">CowboyNeal</A> <BR>
-        Last Modified: 1/10/01 <BR>
+        Last Modified: 4/03/03 <BR>
         </SMALL></I>
 	 
 <A NAME="ac200"></a>
@@ -46,11 +48,11 @@
 <A NAME="ac300"></a>
 <H2>I forgot/can't get my password!</H2> 
 
-	You should be able to get it from <A HREF=/users.pl>the user
+	You should be able to get it from <A HREF="/users.pl">the user
 	login page</A>.  Just type in your nickname and hit 'mailpasswd' and
 	your password will be whisked off to your email address.  If, however, this
 	doesn't seem to be working, email <A
-	HREF=mailto:passwords@slashdot.org>passwords@slashdot.org</A> for help.
+	HREF="mailto:passwords@slashdot.org">passwords@slashdot.org</A> for help.
 	
 	<BR><BR>
 	<I><SMALL>
@@ -68,7 +70,7 @@
 	In an handful of cases, the problem could be related to  a problem
 	with a proxy server, but this is very unlikely. If you've turned
 	cookies on and tried again to log in, and it still doesn't work, drop
-	<A HREF=mailto:pater@slashdot.org>CowboyNeal</A> a note and he'll try
+	<A HREF="mailto:pater@slashdot.org">CowboyNeal</A> a note and he'll try
 	to help you.
 
 	

@@ -578,9 +578,9 @@ sub getTop10Comments {
 	my $num_top10_comments = 0;
 
 	while (1) {
-                # Select the latest comments with high scores.  If we
-                # can't get 10 of them, our standards are too high;
-                # lower our minimum score requirement and re-SELECT.
+		# Select the latest comments with high scores.  If we
+		# can't get 10 of them, our standards are too high;
+		# lower our minimum score requirement and re-SELECT.
 		$cids = $self->sqlSelectAll(
 			'cid',
 			'comments',
