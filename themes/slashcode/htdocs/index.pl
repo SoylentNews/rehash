@@ -99,6 +99,7 @@ my $start_time = Time::HiRes::time;
 	if (rand(1) < $constants->{index_gse_backup_prob}) {
 		$stories = $reader->getStoriesEssentials($gse_hr);
 	} else {
+		my $slashdb = getCurrentDB();
 		$stories = $slashdb->getStoriesEssentials($gse_hr);
 	}
 #use Data::Dumper;
