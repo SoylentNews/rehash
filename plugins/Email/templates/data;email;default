@@ -21,6 +21,15 @@ CASE 'header';
 	returnme.data_constant = 1;
 	"Email Story to a Friend";
 
+CASE 'readonly';
+	returnme.data_constant = 1;
+	"You are not allowed to post to this page.   Email $constants.adminmail_ban,
+including your user name/ID and IP address, for more information.";
+
+CASE 'not_logged_in';
+	returnme.data_constant = 1;
+	"You must be logged in to use this feature.  Please log in to continue.";
+
 CASE 'invalid_email';
 	returnme.data_constant = 1;
 	"I'm sorry. The email address that you have entered is invalid.";
@@ -38,9 +47,12 @@ CASE 'optout_removed';
 	"Address <TT>$email</TT> removed from opt-out list.<BR>";
 
 CASE 'mail_result';
-	UNLESS rc;
-		"Story mailed successfully.";
-	ELSE;
+	UNLESS rc -%]
+[% storylinks = Slash.linkStory({ link => "the story", sid => form.sid }) %]
+Story mailed successfully.  Return to
+<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
+or to <A HREF="[% constants.rootdir %]/">the home page</A>.
+	[%- ELSE;
 "An error occured while attempting to mail the story.  Please check that
 the email address is valid.  If you believe this error is due to a
 bug, please send email to $constants.adminmail";

@@ -50,11 +50,12 @@ sub main {
 	my $default = 'email_form';
 	my $ops = {
 		email_form	=> {
-			allowed		=> $allow_anon,
+			allowed		=> 1, # handle in email_form
 			function	=> \&emailStoryForm,
 			formkey		=> $fk_gen,
 			form		=> 'email_form',
 		},
+
 		email_send	=> {
 			allowed		=> $allow_anon && $ispost,
 			function	=> \&emailStory,
@@ -68,6 +69,7 @@ sub main {
 			formkey		=> $fk_gen,
 			form		=> 'optout_form',
 		},
+
 		optout_save	=> {
 			allowed		=> $ispost,
 			function	=> \&emailOptout,
@@ -144,6 +146,13 @@ sub main {
 sub emailStoryForm {
 	my($slashdb, $constants, $user, $form) = @_;
 
+	unless ($constants->{email_allow_anonymous} || !$user->{is_anon}) {
+		print getData('not_logged_in');
+		my $url = "$constants->{rootdir}/email.pl?op=email_form&sid=$form->{sid}";
+		slashDisplay('userlogin', { return_url => $url });
+		return;
+	}
+
 	my $story;
 	$story = $slashdb->getStory($form->{sid}) if $form->{sid};
 
@@ -165,6 +174,19 @@ sub emailStory {
 	if ($Email->checkOptoutList($email)) {
 		print getData('optout_email');
 		return;
+	}
+
+	for (qw(ipid subnetid uid)) {
+		# We skip the UID test for anonymous users.
+		next if $_ eq 'uid' && $user->{is_anon};
+		# Otherwise we perform the specific read-only test.
+		my $read_only = $slashdb->checkReadOnly('nopost', {
+			$_ => $user->{$_},
+		});
+		if ($read_only) {
+			print getData('readonly');
+			return;
+		}
 	}
 
 	# Retrieve story and all information necessary for proper display.

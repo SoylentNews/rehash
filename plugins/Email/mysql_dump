@@ -5,4 +5,5 @@ INSERT INTO vars (name, value, description) VALUES ('max_email_form_viewings', 2
 INSERT INTO vars (name, value, description) VALUES ('max_optout_form_allowed', 10, 'The number of times a given user (identified by IP address) can use the opt-out form');
 INSERT INTO vars (name, value, description) VALUES ('max_optout_form_viewings', 20, 'The maximum number of FORM VIEWS (for the "Opt Out" form) that users can pull down, per day.');
 INSERT INTO vars (name, value, description) VALUES ('email_use_userident', 0, 'If set to "true" then if a logged in user sends a story using the Email-a-Story feature, their email address will be used. If the user is not logged in, or if this option is "false", then the address used will be that of the anonymous user (ie, the "site" email address)');
+INSERT INTO vars (name, value, description) VALUES ('email_allow_anonymous', 0, 'Boolean for allowing anonymous use of plugin.');
 
