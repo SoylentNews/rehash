@@ -21,9 +21,9 @@ __template__
 [%# define site_url just in case url is not passed to template %]
 [% site_url = url ? url : constants.rootdir %] 
 [% IF dynamic %]
-<A HREF="[% site_url %]/article.pl?sid=[% sid %][% IF mode %]&amp;mode=[% mode %][% END %][% IF tid_string %]&amp;tid=[% $tid_string %][% END %][% IF threshold %]&amp;threshold=[% threshold %][% END %]">[% text %]</A>
+<A HREF="[% site_url %]/article.pl?sid=[% sid %][% IF mode %]&amp;mode=[% mode %][% END %][% IF tid_string %]&amp;tid=[% tid_string %][% END %][% IF threshold %]&amp;threshold=[% threshold %][% END %]">[% text %]</A>
 [% ELSE %]
-<A HREF="[% site_url %]/[% section %]/[% sid %].shtml[% IF $tid_string %]?tid=[% $tid_string %][% END %]">[% text %]</A>
+<A HREF="[% site_url %]/[% section %]/[% sid %].shtml[% IF tid_string %]?tid=[% tid_string %][% END %]">[% text %]</A>
 [% END %]
 __seclev__
 10000
