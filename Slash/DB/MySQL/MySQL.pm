@@ -1902,8 +1902,8 @@ sub getCommentsByGeneric {
 	my $limit = " LIMIT $min, $num " if $num;
 	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
 		if $options->{limit_days};
-        my $sort_field = $options->{sort_field} || "date";
-        my $sort_dir = $options->{sort_dir} || "DESC";
+	my $sort_field = $options->{sort_field} || "date";
+	my $sort_dir = $options->{sort_dir} || "DESC";
 
 	my $comments = $self->sqlSelectAllHashrefArray(
 		'*', 'comments', $where_clause,
@@ -5139,7 +5139,7 @@ sub createMetaMod {
 
 	# If this user has no saved mods, by definition nothing they try
 	# to M2 is valid, unless of course they're an admin.
-	return if !$m2_user->{mods_saved} and !$m2_user->{is_admin};
+	return if !$m2_user->{mods_saved} && !$m2_user->{is_admin};
 
 	# The user is only allowed to metamod the mods they were given.
 	my @mods_saved = $self->getModsSaved($m2_user);
@@ -5147,7 +5147,7 @@ sub createMetaMod {
 	my $saved_mods_encountered = 0;
 	my @m2s_mmids = sort { $a <=> $b } keys %$m2s;
 	for my $mmid (@m2s_mmids) {
-		delete $m2s->{$mmid} if !$mods_saved{$mmid} and !$m2_user->{is_admin};
+		delete $m2s->{$mmid} if !$mods_saved{$mmid} && !$m2_user->{is_admin};
 		$saved_mods_encountered++ if $mods_saved{$mmid};
 	}
 
@@ -5164,7 +5164,8 @@ sub createMetaMod {
 	# Whatever happens below, as soon as we get here, this user has
 	# done their M2 for the day and gets their list of OK mods cleared.
 	# The one exception is admins who didn't metamod any of their saved mods.
-	if(!$m2_user->{is_admin} || ($m2_user->{is_admin} and $saved_mods_encountered )){
+	if (!$m2_user->{is_admin}
+		|| ($m2_user->{is_admin} && $saved_mods_encountered)) {
 		$rows = $self->sqlUpdate("users_info", {
 			-lastmm =>	'NOW()',
 			mods_saved =>	'',
@@ -5632,7 +5633,10 @@ sub getStoriesBySubmitter {
 	$limit = 'LIMIT ' . $limit if $limit;
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'sid,title,time',
-		'stories', "submitter='$id' AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty' OR writestatus='archived') and displaystatus >= 0 ",
+		'stories',
+		"submitter='$id' AND time < NOW()
+		 AND displaystatus >= 0
+		 AND writestatus IN ('ok', 'dirty', 'archived')",
 		"ORDER by time DESC $limit");
 	return $answer;
 }
@@ -5641,7 +5645,10 @@ sub getStoriesBySubmitter {
 sub countStoriesBySubmitter {
 	my($self, $id) = @_;
 
-	my $count = $self->sqlCount('stories', "submitter='$id'  AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty' OR writestatus='archived') and displaystatus >= 0");
+	my $count = $self->sqlCount('stories',
+		"submitter='$id' AND time < NOW()
+		 AND displaystatus >= 0
+		 AND writestatus IN ('ok', 'dirty', 'archived')");
 
 	return $count;
 }
