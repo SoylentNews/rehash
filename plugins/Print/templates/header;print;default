@@ -17,7 +17,7 @@ __template__
 <BODY>
 
 <H1>[% constants.sitename %]: [% constants.slogan %]<BR>
-<SMALL>[% constants.absolutedir %]</SMALL></H1>
+<SMALL>[% constants.absolutedir %]/</SMALL></H1>
 
 [% IF constants.run_ads -%]
 <!-- add code. You can use your own ad system - we use one that 

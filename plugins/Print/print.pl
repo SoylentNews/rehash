@@ -85,6 +85,10 @@ sub main {
 	header($sect_title, 'print');
 	$user->{is_admin} = $adm;
 
+	# this will fail on several types of links, and assumes certain
+	# link formatting; html2text() in Slash::Utility is more robust,
+	# though it will reformat as text, which isn't desirable, but
+	# perhaps it could be modified somewhat for use here. -- pudge
 	my @story_links;
 	push @story_links, [$1, $2] while
 		$story->{relatedtext} =~
