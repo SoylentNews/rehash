@@ -163,25 +163,41 @@ type:</P>
 <P>You might also wish to install each module by hand, using distributions
 found on the CPAN.  See <A HREF="http://perldoc.com/m?perlmodinstall">http://perldoc.com/m?perlmodinstall</A>
 for more information on installing perl modules.</P>
-<P><STRONG>Note</STRONG>: You must have certain libraries existing on your system before
-building, for Compress::Zlib and XML::Parser.  See <A HREF="#perl">perl</A>.</P>
+<P><STRONG>Important Notes</STRONG>:</P>
+<UL>
+<LI>
+You must have certain libraries existing on your system before
+building, for Compress::Zlib and XML::Parser.  See <A HREF="#perl">perl</A>.
+<P></P>
+<LI>
+If running BSD, also install the BSD::Resource module.
+<P></P>
+<LI>
+If not using MySQL, just allow the installation of its drivers
+to continue, and possibly fail.  Then install the driver you need
+(e.g., for PostgreSQL, use "DBD::Pg") using the CPAN shell.
+<P></P></UL>
 <P>To use the CPAN module, invoke the CPAN shell:</P>
 <PRE>
         perl -MCPAN -e shell</PRE>
 <P>After it has been configured, install Bundle::Slash:</P>
 <PRE>
         cpan&gt; install Bundle::Slash</PRE>
+<P>To read the README for any module, before or after installing:</P>
+<PRE>
+        cpan&gt; readme MODULE</PRE>
 <P>When Bundle::Slash is finished, install the DBIx::Password
 module:</P>
 <PRE>
         cpan&gt; install DBIx::Password</PRE>
 <P>When asked, give the info for accessing the Slash database created
-in step 1.</P>
-<P>Feel free to re-run ``install Bundle::Slash'' if you get errors, or just
-aren't sure what's been installed, etc.  It will safely skip anything
-already installed.</P>
-<P><STRONG>Note</STRONG>: If running BSD, also install the BSD::Resource module.</P>
-<P></P>
+in step 1.  This is your <STRONG>virtual user</STRONG> information; it is a single
+name that is used to refer to a configuration for connecting to your
+database.</P>
+<P>If you have problems, feel free to re-run "install Bundle::Slash".  It
+will safely skip anything already installed.</P>
+<P>To read the documentation of any of the modules, once they have been
+installed, type "perldoc MODULE" at the command line.</P>
 <LI>
 <STRONG>Install Slash.</STRONG>
 <P>Unpack the distribution and go to the new directory that
@@ -235,6 +251,18 @@ Answer the questions.  When done, another configuration
 file will be created at <EM>$SLASH_PREFIX/$SITENAME/$SITENAME.conf</EM>.
 You can put its contents unto your httpd.conf, or you can just <CODE>Include</CODE>
 it in your httpd.conf.</P>
+<P></P>
+<LI>
+<STRONG>Start it up.</STRONG>
+<P>After installation of the site is done, and Apache has been stopped
+and started (do NOT try to restart Apache, but do a full stop and
+start), run slashd.  This should be done via the init script:</P>
+<PRE>
+        /etc/init.d/slash start</PRE>
+<P>slashd is the daemon that runs routine maintenance on Slash sites,
+including sending out daily mailings, cleaning up the database,
+and updating stories.  The init script above will start up an
+individual slashd daemon process process for each installed site.</P>
 <P></P></OL>
 <P>
 <HR>
@@ -311,7 +339,7 @@ Version 5.6.0 (5.005_03).
 <P></P>
 <DT><STRONG><A NAME="item_MySQL">MySQL</A></STRONG><BR>
 <DD>
-Version 3.23 (3.22).
+Version 3.23 (3.22; 3.23 will be required in Slash 2.2).
 <PRE>
         <A HREF="http://www.mysql.com/">http://www.mysql.com/</A></PRE>
 <P></P>
