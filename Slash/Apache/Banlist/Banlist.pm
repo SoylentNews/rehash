@@ -45,8 +45,10 @@ sub handler {
 <H1>Either your network or ip address has been banned
 from this site</H1><BR>
 due to script flooding that originated
-from your network or ip address. If you feel that this
-is unwarranted, feel free to include your IP address
+from your network or ip address
+-- or this IP might have been used to post comments designed to break
+web browser rendering.
+If you feel that this is unwarranted, feel free to include your IP address
 (<b>$cur_ip</b>) in the subject of an email, and we will examine why
 there is a ban. If you fail to include the IP address (again,
 <em>in the Subject!</em>), then
@@ -70,10 +72,12 @@ lot of pages, to programs that attempt to coordinate an avalanche of posts
 in the forums (often through misconfigured "Open Relay" proxy servers).<p> 
 &middot; You might be using a proxy server that is also being used by another person  
 who did something from the above list. You should have your <b>proxy server  
-administrator</b> <a href="mailto:banned\@slashdot.org">contact us</a>. <br> 
-<br> 
-<i><small> Answered by: <a href="mailto:malda\@slashdot.org">CmdrTaco</a> <br> 
-Last Modified: 3/26/02<br> 
+administrator</b> <a href="mailto:banned\@slashdot.org">contact us</a>.<p> 
+&middot; Your IP might have been used to post comments designed to break
+web browser rendering. <br>
+  <br>
+  <i><small> Answered by: <a href="mailto:malda\@slashdot.org">CmdrTaco</a> <br>
+  Last Modified: 7/02/02<br>
 </small></i> <a name="ac1000"></a>  
 <h2>How do I get an IP Unbanned?</h2> 
 <p>Email <a href="mailto:banned\@slashdot.org">banned\@slashdot.org</a>. Make  
