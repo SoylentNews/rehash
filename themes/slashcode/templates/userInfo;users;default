@@ -110,7 +110,7 @@ comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
 [% END %]
 
 [% IF admin_flag %]
-	<TABLE BORDER=0 ALIGN="CENTER">
+	<P><TABLE BORDER=0 ALIGN="CENTER">
 	<TR><TD ALIGN="CENTER">Moderations performed by [% useredit.nickname %]:</TD></TR>
 	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog('uid', useredit.uid) %]</TD></TR>
 	<TR><TD ALIGN="CENTER">&nbsp;<BR>Moderations performed on [% useredit.nickname %]'s comments:</TD></TR>
