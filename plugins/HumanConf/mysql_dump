@@ -20,4 +20,4 @@ INSERT INTO vars (name, value, description) VALUES ('hc_possible_fonts', '', 'Po
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_comments', '0', 'HumanConf switch for posting comments');
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_mailpasswd', '1', 'HumanConf switch for mailing a password');
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_newuser', '1', 'HumanConf switch for creating a new user');
-INSERT INTO vars (name, value, description) VALUES ('hc_image_format','jpg','Format for HC images (png, jpg, etc.)');
+INSERT INTO vars (name, value, description) VALUES ('hc_image_format','jpeg','Format for HC images (png, jpeg)');
