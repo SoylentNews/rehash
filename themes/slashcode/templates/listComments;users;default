@@ -100,7 +100,8 @@ thread_col_2 = user.bg.2;
 		n = n + 1;
 		shown_comments = shown_comments + 1; total_replies = comment.replies + total_replies;
 		replies = comment.replies ? comment.replies : '';
-		score = comment.pts;
+		score = comment.pts + comment.tweak;
+		score = Slash.constrain_score(score)
 		total_score = comment.pts + total_score;
 		total_karma = comment.karma + total_karma;
 		reasonnum = comment.reason;
