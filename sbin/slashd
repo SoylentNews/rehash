@@ -509,6 +509,8 @@ slashdLog("Beginning while(1) loop");
 		# Get its information and wait until it's ready.
 		my $subref = $task{$task_filename}{code};
 		my $fork = $task{$task_filename}{fork};
+		$fork ||= SLASHD_WAIT
+			if $constants->{fork_all_tasks};
 		$fork = undef unless defined($fork) &&
 			($fork == SLASHD_WAIT || $fork == SLASHD_NOWAIT);
 		$fork = SLASHD_WAIT unless defined $fork;
