@@ -8,11 +8,11 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (-1, 'Unknown Messa
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (0, 'Daily Newsletter', 1, '0');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (1, 'Daily Headlines', 1, '0');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (2, 'Metamoderation Results', 1, '');
-INSERT INTO message_codes (code, type, seclev, modes) VALUES (3, 'Moderation of Comment', 1, '');
-INSERT INTO message_codes (code, type, seclev, modes) VALUES (4, 'Reply to Comment', 1, '');
+INSERT INTO message_codes (code, type, seclev, modes) VALUES (3, 'Comment Moderation', 1, '');
+INSERT INTO message_codes (code, type, seclev, modes) VALUES (4, 'Comment Reply', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (5, 'Journal Entry by Friend', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (6, 'New Submission', 100, '0');
-INSERT INTO message_codes (code, type, seclev, modes) VALUES (7, 'Reply to Journal', 1, '');
+INSERT INTO message_codes (code, type, seclev, modes) VALUES (7, 'Journal Reply', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (8, 'New Comment', 1000000, '');
 #INSERT INTO message_codes (code, type, seclev, modes) VALUES (9, 'Interuser Messages', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, 0);

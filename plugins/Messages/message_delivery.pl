@@ -7,7 +7,7 @@
 use strict;
 use File::Spec::Functions;
 use Slash::Utility;
-use Slash::Constants ':slashd';
+use Slash::Constants qw(:slashd :messages);
 
 my $me = 'message_delivery.pl';
 
@@ -44,13 +44,71 @@ $task{$me}{code} = sub {
 		$msgs = $messages->gets($count, { 'send' => 'now' });
 	}
 
+
+	my %collective;
+	my %to_delete;
+	# perhaps put collective msg types as a field in message_codes?
+	for my $code (MSG_CODE_M2, MSG_CODE_COMMENT_MODERATE) {
+		my $c = 0;
+		for my $msg (@$msgs) {
+			if ($msg->{code} == $code) {
+				push @{ $collective{ $code }{ $msg->{user}{uid} } }, $msg;
+				delete $msgs->[$c];
+			}
+			$c++;
+		}
+	}
+
+	for my $code (keys %collective) {
+		my $type = $messages->getDescription('messagecodes', $code);
+
+		for my $uid (keys %{$collective{ $code }}) {
+			my $coll = $collective{ $code }{ $uid };
+			my $msg  = $coll->[0];
+			my $mode = $messages->getMode($msg);
+			my $message;
+
+			# perhaps put these formatting things in templates?
+			if ($mode == MSG_MODE_EMAIL) {
+				$message = join "\n\n" . ('=' x 80) . "\n\n", map {
+					$_->{message}
+				} @$coll;
+
+			} elsif ($mode == MSG_MODE_WEB) {
+				$message = join "\n\n<P><HR><P>\n\n", map {
+					$_->{message}
+				} @$coll;
+
+			} else {
+				next;
+			}
+
+			$to_delete{ $msg->{id} } = [ map {
+					$_->{id}
+				} @{$coll}[1 .. $#{$coll}]
+			];
+
+			$msg->{message} = $message;
+			$msg->{subject} = $type;
+			push @$msgs, $msg;
+		}
+	}
+
 	my @good  = $messages->process(@$msgs);
 
 	my %msgs  = map { ($_->{id}, $_) } @$msgs;
 
-	for (@good) {
-		messagedLog("msg \#$_ sent successfully.");
-		delete $msgs{$_};
+	for my $id (@good) {
+		messagedLog("msg \#$id sent successfully.");
+		delete $msgs{$id};
+		if (exists $to_delete{$id}) {
+			for my $nid (@{ $to_delete{$id} }) {
+				if ($messages->delete($nid)) {
+					messagedLog("msg \#$nid sent successfully.");
+					++$successes;
+				}
+			}
+		}
 		++$successes;
 	}
 

@@ -1635,7 +1635,7 @@ sub send_mod_msg {
 			reasons		=> $slashdb->getReasons(),
 		};
 		$messages->create($users->[0],
-			MSG_CODE_COMMENT_MODERATE, $data
+			MSG_CODE_COMMENT_MODERATE, $data, 0, '', 'defer'
 		);
 	}
 }
