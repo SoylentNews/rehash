@@ -38,14 +38,17 @@ sub main {
 		save		=> {
 			function	=> \&saveStory,
 			seclev		=> 100,
+			tab_selected	=> 'stories',
 		},
 		update		=> {
 			function	=> \&updateStory,
 			seclev		=> 100,
+			tab_selected	=> 'stories',
 		},
 		list		=> {
 			function	=> \&listStories,
 			seclev		=> 100,
+			tab_selected	=> 'stories',
 		},
 		default		=> {
 			function	=> \&listStories,
@@ -55,6 +58,7 @@ sub main {
 		'delete'		=> {
 			function 	=> \&listStories,
 			seclev		=> 10000,
+			tab_selected	=> 'stories',
 		},
 		preview		=> {
 			function 	=> \&editStory,
@@ -91,6 +95,7 @@ sub main {
 			function 	=> \&editFilter, # newfilter,updatefilter,deletefilter,
 			seclev		=> 100,
 			adminmenu	=> 'config',
+			tab_selected	=> 'filters',
 		},
 		siteinfo	=> {
 			function 	=> \&siteInfo,
