@@ -745,8 +745,8 @@ sub submitComment {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
 			if (@$users && !grep { $users->[0] == $_ } @users) {
 				my $data  = {
-					template_name	=> 'journal_reply_msg',
-					subject		=> { template_name => 'journal_reply_msg_subj' },
+					template_name	=> 'journrep',
+					subject		=> { template_name => 'journrep_subj' },
 					reply		=> $reply,
 					discussion	=> $discussion,
 				};
@@ -763,8 +763,8 @@ sub submitComment {
 			for my $usera (@$users) {
 				next if grep { $usera == $_ } @users;
 				my $data  = {
-					template_name	=> 'commentnew',
-					subject		=> { template_name => 'commentnew_subj' },
+					template_name	=> 'commnew',
+					subject		=> { template_name => 'commnew_subj' },
 					reply		=> $reply,
 					discussion	=> $discussion,
 				};

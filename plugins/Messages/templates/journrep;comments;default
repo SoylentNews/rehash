@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+journrep
+__template__
+[% USE Slash %]
+[% IF msg.mode == 1 %]
+
+<P>
+[% reply.nickname %] has posted a comment,
+<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
+%]">[% reply.subject %]</A></B>, in reply to your journal entry,
+<B><A HREF="[% discussion.url %]">[% discussion.title %]</A></B>.
+</P>
+
+[% ELSE %]
+
+[% reply.nickname %] has posted a comment in reply to your journal entry.
+    [% reply.subject %]    
+    [% constants.absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
+
+Attached to:
+    [% discussion.title %]
+    [% Slash.url2abs(discussion.url) %]
+
+[% END %]
+__seclev__
+500

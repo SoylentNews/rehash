@@ -1,0 +1,16 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+commnew_subj
+__template__
+New Comment: [% reply.subject %]
+__seclev__
+500
