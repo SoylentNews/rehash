@@ -1247,6 +1247,8 @@ sub getTopicTree {
 		$tree_ref->{$skins->{$skid}{nexus}}{skid} = $skid;
 	}
 
+	$self->confirmTopicTree($tree_ref);
+
 	$self->{$table_cache} = $tree_ref;
 	$self->{$table_cache_time} = time;
 	if ($tid_wanted) {
@@ -1254,6 +1256,88 @@ sub getTopicTree {
 	} else {
 		return $tree_ref;
 	}
+}
+
+########################################################
+# Given a topic tree, check it for loops (trees should not have
+# loops).  Die if there's an error.
+sub confirmTopicTree {
+	my($self, $tree) = @_;
+
+	# First, get the "central tree."  This is the tree that excludes
+	# recursively all leaf nodes.  A leaf node is a topic which
+	# has fewer than two other topics attached to it.  Such a node
+	# obviously cannot be part of any loop.	By removing the outer
+	# layer so to speak of such topics, then repeating the removal
+	# until the tree does not change, we are left with a smaller
+	# tree (possibly empty) which will be faster to check for loops.
+	# For example, if a tree consists of A->B->C, the first pass
+	# will strip off A and C since they have only one node connecting
+	# to a non-leaf;  the second pass strips off B since it now has
+	# zero nodes connecting to non-leafs.
+
+	my %leaf = ( );
+	while (1) {
+		my $start_leaf_keys = scalar(keys %leaf);
+		for my $tid (keys %$tree) {
+			my $links = 0;
+			if ($tree->{$tid}{parents}) {
+				$links += scalar grep { !$leaf{$_} } @{ $tree->{$tid}{parents} };
+			}
+			if ($tree->{$tid}{children}) {
+				$links += scalar grep { !$leaf{$_} } @{ $tree->{$tid}{children} };
+			}
+			if ($links < 2) {
+				$leaf{$tid} = 1;
+			}
+		}
+		# If that didn't turn up any new leaf nodes, we've
+		# found them all.
+		last if scalar(keys %leaf) == $start_leaf_keys;
+	}
+
+print STDERR scalar(localtime) . " tree " . scalar(keys %$tree) . " nodes, of which " . scalar(keys %leaf) . " are leaf nodes\n";
+
+	# If the entire tree is made up of leaf nodes, we're done already.
+	return 1 if scalar(keys %leaf) == scalar(keys %$tree);
+
+	# We walk the remaining tree recursively.  First scanning down for
+	# children, then up for parents.  Along the way, we mark vetted
+	# topics, as they are vetted, in the $vetted hashref.
+	sub _vet_node_children {
+		my($tree, $leaf, $vetted, $tid, $parents) = @_;
+		return if $vetted->{$tid};
+		die "tid $tid is its own child" if $parents->{$tid};
+		$parents->{$tid} = 1;
+		return unless $tree->{$tid}{children};
+		my @children = grep { !$leaf->{$_} } @{ $tree->{$tid}{children} };
+		for my $child (@children) {
+			_vet_node_children($tree, $leaf, $vetted, $child, $parents);
+		}
+		$vetted->{$tid} = 1;
+	}
+	sub _vet_node_parents {
+		my($tree, $leaf, $vetted, $tid, $children) = @_;
+		return if $vetted->{$tid};
+		die "tid $tid is its own parent" if $children->{$tid};
+		$children->{$tid} = 1;
+		return unless $tree->{$tid}{parents};
+		my @parents = grep { !$leaf->{$_} } @{ $tree->{$tid}{parents} };
+		for my $parent (@parents) {
+			_vet_node_parents($tree, $leaf, $vetted, $parent, $children);
+		}
+		$vetted->{$tid} = 1;
+	}
+	my %vetted_children = ( );
+	my %vetted_parents = ( );
+	for my $tid (keys %leaf) {
+		_vet_node_children($tree, \%leaf, \%vetted_children, $tid, { });
+		_vet_node_parents($tree, \%leaf, \%vetted_parents, $tid, { });
+	}
+
+print STDERR scalar(localtime) . " tree vetted\n";
+	
+	return 1;
 }
 
 ########################################################
