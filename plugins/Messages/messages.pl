@@ -52,9 +52,9 @@ my $start_time = Time::HiRes::time;
 	}
 
 	# dispatch of op
-printf STDERR scalar(localtime) . " messages.pl before $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+#printf STDERR scalar(localtime) . " messages.pl before $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 	$ops{$op}[FUNCTION]->($messages, $constants, $user, $form);
-printf STDERR scalar(localtime) . " messages.pl after  $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+#printf STDERR scalar(localtime) . " messages.pl after  $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 
 	# writeLog('SOME DATA');	# if appropriate
 }
