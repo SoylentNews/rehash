@@ -52,16 +52,19 @@ END {
 
 ################################################################################
 sub geturl {
+	my($url, $options) = @_;
 	my $ua = new LWP::UserAgent;
-	my $request = new HTTP::Request('GET', $_[0]);
+	my $request = new HTTP::Request('GET', $url);
 	$ua->proxy(http => $constants->{http_proxy}) if $constants->{http_proxy};
-	$ua->timeout(30);
+	my $timeout = 30;
+	$timeout = $options->{timeout} if $options->{timeout};
+	$ua->timeout($timeout);
 	my $result = $ua->request($request);
 
 	if ($result->is_success) {
 		return $result->content;
 	} else {
-		return 0;
+		return "";
 	}
 }
 
