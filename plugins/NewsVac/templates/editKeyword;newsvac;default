@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 editKeyword
-__seclev__
-10000
 __template__
 [%
 
@@ -61,4 +59,4 @@ END;
 <INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="" SIZE=10>
 </FORM>
 __seclev__
-100
+10000

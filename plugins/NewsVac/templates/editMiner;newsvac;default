@@ -101,6 +101,64 @@ __template__
 		</td>
         </tr>
         <tr valign=top>
+                <td width="40"><b>Pre-story (text)</b>&nbsp;&nbsp;</td>
+                <td>
+			<textarea TYPE="text" cols=80 rows=3 
+			NAME="pre_story_text">[% miner.pre_story_text 
+			| strip_literal %]</textarea>
+		</td>
+                <td>
+			<input type="checkbox" name="pre_story_text_cs"[% 
+			checkboxes.pre_story_text -%]>Case-sensitive?
+		</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Post-story (text)</b>&nbsp;&nbsp;</td>
+                <td>
+			<textarea TYPE="text" cols=80 rows=3 
+			NAME="post_story_text">[% miner.post_story_text 
+			| strip_literal -%]</textarea>
+		</td>
+                <td>
+			<input type="checkbox" name="post_story_text_cs"[% 
+			checkboxes.post_story_text -%]>Case-sensitive?
+		</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Pre-story (regex)</b>&nbsp;&nbsp;</td>
+                <td>
+			[% IF errs.pre_story_regex -%]
+			<b><font color="red">Regex error: '[% errs.pre_story_regex
+			-%]'</font></b><br>
+			[% END -%]
+
+			<textarea TYPE="text" cols=80 rows=6 
+			NAME="pre_story_regex">[% miner.pre_story_regex
+			| strip_literal -%]</textarea>
+		</td>
+                <td>
+			<input type="checkbox" name="pre_story_regex_cs"[% 
+			checkboxes.pre_story_regex -%]>Case-sensitive?</td>
+        </tr>
+        <tr valign=top>
+                <td width="40"><b>Post-story (regex)</b>&nbsp;&nbsp;</td>
+                <td>
+			[% IF errs.post_story_regex -%]
+			<b><font color="red">Regex error: '[% 
+			errs.post_story_regex -%]'</font></b><br>
+			[% END -%]
+
+			<textarea TYPE="text" cols=80 rows=6 
+			NAME="post_story_regex">[% miner.post_story_regex 
+			| strip_literal %]</textarea>
+		</td>
+                <td>
+			<input type="checkbox" 
+			name="post_story_regex_cs"[% 
+			checkboxes.post_story_regex %]>Case-sensitive?
+		</td>
+        </tr>
+        <tr valign=top>
                 <td width="40"><b>Vars</b>&nbsp;&nbsp;</td>
                 <td><input type="text" size="60" name="extract_vars" value="[% 
 		miner.extract_vars | strip_attribute -%]"></td>

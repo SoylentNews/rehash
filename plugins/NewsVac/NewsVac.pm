@@ -510,6 +510,37 @@ EOT
 	return $rc ? $self->getLastInsertId : 0;
 }
 
+
+############################################################
+
+=head2 url_to_miner(url_id)
+
+Get original miner ID from url's url_id, by way of original nugget url
+and mined url.  May return multiple values.
+
+=cut
+
+sub url_to_miner {
+	my($self, $url_id) = @_;
+
+	my $columns = 'miner.miner_id';
+	my $tables  = 'miner, rel as rel1, rel as rel2';
+	my $where   = join(' AND ',
+		'rel1.to_url_id   = ' . $self->sqlQuote($url_id),
+		'rel1.parse_code  = "nugget"',
+		'rel1.type        = "nugget"',
+		'rel1.from_url_id = rel2.to_url_id',
+		'rel2.parse_code  = "miner"',
+		'rel2.type        = miner.name'
+	);
+
+	my $other   = 'ORDER BY rel1.first_verified DESC';
+
+	my $miners = $self->sqlSelectColArrayref($columns, $tables, $where, $other) || [];
+	return @$miners;
+}
+
+
 ############################################################
 
 =head2 url_to_id(url)
@@ -1057,8 +1088,9 @@ Foooooooo.
 
 sub add_miner_and_urls {
 	# This parameter list needs to be simplified, somehow.
-	my($self, $minername, $last_edit_aid, $pre_stories_text,
-		$post_stories_text, $pre_stories_regex, $post_stories_regex,
+	my($self, $minername, $last_edit_aid,
+		$pre_stories_text, $post_stories_text, $pre_stories_regex, $post_stories_regex,
+		$pre_story_text, $post_story_text, $pre_story_regex, $post_story_regex,
 		$extract_vars, $extract_regex, $tweak_code, @urls) = @_;
 
 	my $owner_aid = $last_edit_aid;
@@ -1071,6 +1103,10 @@ sub add_miner_and_urls {
 		post_stories_text	=> $post_stories_text,
 		pre_stories_regex	=> $pre_stories_regex,
 		post_stories_regex	=> $post_stories_regex,
+		pre_story_text		=> $pre_story_text,
+		post_story_text		=> $post_story_text,
+		pre_story_regex		=> $pre_story_regex,
+		post_story_regex	=> $post_story_regex,
 		extract_vars		=> $extract_vars,
 		extract_regex		=> $extract_regex,
 		tweak_code		=> $tweak_code,
@@ -2465,8 +2501,7 @@ sub trim_body {
 	if ($the_reg) {
 		# What the hell are THESE for? The sole purpose, as I see it, is to
 		# break any pre regexp entered!
-		#$the_reg =~ s{^(\(\?i\))?(.*)}{$1\\A[\\000-\\377]*$2};
-
+		$the_reg =~ s{^(\(\?i\))?(.*)}{$1\\A[\\000-\\377]*$2};
 		$self->errLog(getData('trim_body_thereg', {
 			the_reg => $the_reg,
 			miner_id=> $miner_id,
@@ -2493,7 +2528,7 @@ sub trim_body {
 	if ($the_reg) {
 		# What the hell are THESE for? The sole purpose, as I see it, is to
 		# break any post regexp entered!
-		#$the_reg .= "[\\000-\\377]*\\Z";
+		$the_reg .= "[\\000-\\377]*\\Z";
 		$self->errLog(getData('trim_body_thereg', {
 			the_reg	=> $the_reg,
 			miner_id=> $miner_id,
@@ -2879,6 +2914,22 @@ sub parse_plaintext {
 			20;
 
 	if ($info_ref->{content_type} =~ /^text\/html\b/) {
+		# first, trim body
+		# just take first miner; in the future, perhaps try
+		# to get first miner that has regexes
+		my($miner_id) = $self->url_to_miner($url_id);
+		my $regexps = $self->getMinerRegexps($miner_id);
+
+		my $msg_body = $content_ref->{message_body};
+		$self->trim_body(
+			$miner_id,
+			\$msg_body,
+			$regexps->{pre_story_text},
+			$regexps->{pre_story_regex},
+			$regexps->{post_story_text},
+			$regexps->{post_story_regex}
+		);
+
 		eval {
 			# This die() is legal.
 			local $SIG{ALRM} = sub { die "timeout" };
@@ -2889,7 +2940,7 @@ sub parse_plaintext {
 			#
 			# This is a cute trick, see below.
 			$#{$self->{hp_parsedtext}} = -1;
-			$self->{hp}->parse($content_ref->{message_body});
+			$self->{hp}->parse($msg_body);
 			$content_ref->{plaintext} = join('',
 				map { join("", @$_) }
 				@{$self->{hp_parsedtext}}
@@ -2923,6 +2974,23 @@ sub parse_plaintext {
 
 	} elsif ($info_ref->{content_type} eq 'text/plain') {
 		$content_ref->{plaintext} = $content_ref->{message_body};
+
+		# trim body
+		# just take first miner; in the future, perhaps try
+		# to get first miner that has regexes
+		my($miner_id) = $self->url_to_miner($url_id);
+		my $regexps = $self->getMinerRegexps($miner_id);
+
+		my $msg_body = $content_ref->{message_body};
+		$self->trim_body(
+			$miner_id,
+			\$content_ref->{plaintext},
+			$regexps->{pre_story_text},
+			$regexps->{pre_story_regex},
+			$regexps->{post_story_text},
+			$regexps->{post_story_regex}
+		);
+
 		$changed = 1;
 	}
 
@@ -2931,7 +2999,6 @@ sub parse_plaintext {
 		$content_ref->{plaintext} =~ s/[ \t]*\n[ \t]*/\n/g;
 		$content_ref->{plaintext} =~ s/[ \t]{2,}/  /g;
 
-		# Must Trim Message Body Here !!!
 		$self->sqlUpdate('url_plaintext', {
 			plaintext => $content_ref->{plaintext},
 		}, "url_id=$url_id");
@@ -4529,6 +4596,10 @@ Hash reference containing the following keys:
 	pre_stories_regex
 	post_stories_text
 	post_stories_regex
+	pre_story_text
+	pre_story_regex
+	post_story_text
+	post_story_regex
 
 =item Side effects
 
@@ -4547,7 +4618,9 @@ sub getMinerRegexps {
 
 	my $returnable = $self->sqlSelectHashref(
 		'pre_stories_text, pre_stories_regex,
-		 post_stories_text, post_stories_regex',
+		 post_stories_text, post_stories_regex,
+		 pre_story_text, pre_story_regex,
+		 post_story_text, post_story_regex',
 		'miner', 'miner_id=' . $self->sqlQuote($miner_id)
 	);
 

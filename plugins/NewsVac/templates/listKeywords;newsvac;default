@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 listKeywords
-__seclev__
-10000
 __template__
 [% INCLUDE titlebar width="100%", title="List Keywords" -%]
 
@@ -53,4 +51,4 @@ Select Tag:
 <INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="" SIZE=10>
 </FORM>
 __seclev__
-100
+10000

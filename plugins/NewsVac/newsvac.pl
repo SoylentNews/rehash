@@ -129,8 +129,10 @@ sub editMiner {
 
 	$miner->{last_edit} = timeCalc($miner->{last_edit});
 
-	my @fields = qw(pre_stories_regex post_stories_regex extract_regex
-		pre_stories_text post_stories_text);
+	my @fields = qw(extract_regex
+		pre_stories_text post_stories_text pre_stories_regex post_stories_regex
+		pre_story_text post_story_text pre_story_regex post_story_regex
+	);
 
 	# Remove the (?i) and instead set the checkbox appropriately.
 	# This begs to be made into a loop.
@@ -186,7 +188,7 @@ sub updateMiner {
 		} else {
 			$newsvac->add_miner_and_urls(
 				$name, $user->{nickname},
-				'', '', '', '', '', '', ''
+				'', '', '', '', '', '', '', '', '', '', ''
 			);
 			$miner_id = $newsvac->minername_to_id($name);
 			slashDisplay('updateMiner');
@@ -204,6 +206,10 @@ sub updateMiner {
 			post_stories_text
 			pre_stories_regex
 			post_stories_regex
+			pre_story_text
+			post_story_text
+			pre_story_regex
+			post_story_regex
 			extract_vars
 			extract_regex
 			tweak_code
@@ -577,8 +583,8 @@ sub updateUrl {
 		} else {
 			$newsvac->add_miner_and_urls(
 				$miner_name, $user->{aid},
-				'', '', '', '', '', 'put your regex here', '',
-				$url
+				'', '', '', '', '', '', '', '', '',
+				'put your regex here', '', $url
 			);
 		}
 
