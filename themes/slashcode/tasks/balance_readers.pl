@@ -274,6 +274,7 @@ sub get_sql_type_from_state {
 		|| $state eq 'init'
 		|| $state eq 'creating table'
 		|| $state eq 'preparing'
+		|| $state eq 'removing tmp table'
 		|| $state eq 'query end'
 		|| $state eq 'end'
 	) {
