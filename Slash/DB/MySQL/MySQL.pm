@@ -3382,14 +3382,14 @@ sub setAccessList {
 	$insert_hashref->{reason} = $reason if $reason ne '';
 	$insert_hashref->{-ts} = 'now()';
 
-	$rows = $self->sqlSelect('count(*)', 'accesslist', " $where AND $column = 1");
-	$rows ||= 0;
-
 	my $newcol;
         # this could probably be a regex, but I'm erring on
         # the side of caution --Pater
         $newcol = 'wasbanned' if $column eq 'isbanned';
         $newcol = 'wasreadonly' if $column eq 'readonly';
+
+	$rows = $self->sqlSelect('count(*)', 'accesslist', " $where AND ($column = 1 OR $newcol = 1)");
+	$rows ||= 0;
 
 	if ($setflag == 0) {
 		if ($rows > 0) {
