@@ -323,7 +323,7 @@ sub savePrefs {
 			$error = 1;
 		}
 
-		my $return_uid = $reader->getUserAuthenticate($uid, $form->{oldpass}, 1);
+		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass}, 1);
 		if (!$return_uid || $return_uid != $uid) {
 			push @note, getData('oldpassbad');
 			$error = 1;

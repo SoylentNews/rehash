@@ -1425,7 +1425,7 @@ sub prepareUser {
 	} else {
 		$user = $reader->getUser($uid);
 		$user->{is_anon} = 0;
-		$user->{logtoken} = bakeUserCookie($uid, $reader->getLogToken($uid));
+		$user->{logtoken} = bakeUserCookie($uid, $slashdb->getLogToken($uid));
 	}
 #print STDERR scalar(localtime) . " $$ prepareUser user->uid=$user->{uid} is_anon=$user->{is_anon}\n";
 
