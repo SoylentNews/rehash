@@ -528,6 +528,7 @@ sub printComments {
 
 	if ($discussion->{type} eq 'archived'
 		|| ($discussion->{is_future} && !$constants->{subscribe_future_post})
+		|| ($discussion->{commentstatus} && $discussion->{commentstatus} ne 'enabled')
 	) {
 		# This was named "comment_read_only" but that's not very
 		# descriptive;  let's call it what it is... -Jamie 2002/02/26
