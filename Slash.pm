@@ -32,6 +32,7 @@ use Date::Manip;
 use File::Spec::Functions;
 use HTML::Entities;
 use Mail::Sendmail;
+use URI;
 
 Apache::SIG->set;
 
@@ -1500,10 +1501,7 @@ EOT
 
 ########################################################
 sub redirect {
-	my $url = shift;
-	if ($url !~ m|^http://|i) {
-		$url =~ s|^/*|$I{rootdir}/|;
-	}
+	my $url = URI->new_abs(shift, $I{rootdir})->canonical->as_string;
 
 	my %params = (
 		-type		=> 'text/html',
