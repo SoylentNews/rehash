@@ -67,7 +67,7 @@ $task{$me}{code} = sub {
 		# Now we extract what we need from the error channel.
 		my($cc, $hp) = (0, $default_hp);
 		if (@rc && $rc[1]
-			&& (($cc, $hp) = $rc[1] =~ /count (\d+), hitparade (.+)$/)) {
+			&& (($cc, $hp) = $rc[1] =~ /count (\d+), hitparade (.+)$/m)) {
 			# all is well, data was found
 			$slashdb->setStory($sid, { 
 				writestatus  => 'ok',
@@ -75,7 +75,7 @@ $task{$me}{code} = sub {
 				hitparade    => $hp,
 			});
 		} else {
-			slashdLog("*** Update data not in error channel!");
+			slashdLog("*** Update data not in error channel: '@rc'");
 		}
 
 	}

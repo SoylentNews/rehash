@@ -378,6 +378,8 @@ INSERT INTO vars (name, value, description) VALUES ('comments_max_email_len','40
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len','10','Minimum minimum average line length');
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len_max','20','Maximum minimum average line length');
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len_kicks_in','100','Num chars at which minimum average line length first takes effect');
+INSERT INTO vars (name, value, description) VALUES ('comments_moddable_archived','0','Are comments in discussions that have been archived moderatable?');
+INSERT INTO vars (name, value, description) VALUES ('comments_moddable_hours','336','Num hours after being posted that a comment may be moderated');
 INSERT INTO vars (name, value, description) VALUES ('comments_response_limit','5','interval between reply and submit');
 INSERT INTO vars (name, value, description) VALUES ('comments_speed_limit','120','seconds delay before repeat posting');
 INSERT INTO vars (name, value, description) VALUES ('commentstatus','0','default comment code');
@@ -395,7 +397,6 @@ INSERT INTO vars (name, value, description) VALUES ('defaultdisplaystatus','0','
 INSERT INTO vars (name, value, description) VALUES ('defaultsection','articles','Default section to display');
 INSERT INTO vars (name, value, description) VALUES ('defaulttopic','1','Default topic to use');
 INSERT INTO vars (name, value, description) VALUES ('delete_old_stories', '0', 'Delete stories and discussions that are older than the archive delay.');
-INSERT INTO vars (name, value, description) VALUES ('discussion_archive','15','Number of days till discussions are set to read only.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_create_seclev','1','Seclev required to create discussions (yes, this could be an ACL in the future).');
 INSERT INTO vars (name, value, description) VALUES ('discussion_default_topic', '1', 'Default topic of user-created discussions.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_display_limit', '30', 'Number of default discussions to list.');

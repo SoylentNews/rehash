@@ -458,7 +458,6 @@ sub sqlSelectAllHashref {
 sub sqlSelectAllHashrefArray {
 	my($self, $select, $from, $where, $other) = @_;
 
-	# Yes, if ID is not in $select things will be bad
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;

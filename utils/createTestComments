@@ -225,7 +225,7 @@ sub getRandomParent {
 	}
 	# Otherwise pick one.
 	my $pid = $a[ rand @a ];
-	return $pid;
+	return $pid || 0;
 }
  
 sub getRandomUserID {

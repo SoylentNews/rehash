@@ -108,8 +108,8 @@ sub archiveStories {
 		}
 
 		# Now we extract what we need from the error channel.
-		slashdLog("$me *** Update data not in error channel!")
-			unless $rc[1] =~ /count (\d+), hitparade (.+)$/;
+		slashdLog("$me *** Update data not in error channel: '@rc'")
+			unless $rc[1] =~ /count (\d+), hitparade (.+)$/m;
 
 		my $cc = $1 || 0;
 		my $hp = $2 || 0;

@@ -3194,6 +3194,7 @@ sub getCommentsForUser {
 	my $comments = [];
 	my $cids = [];
 	while (my $comment = $thisComment->fetchrow_hashref) {
+		$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
 		push @$comments, $comment;
 		push @$cids, $comment->{cid};# if $comment->{points} >= $user->{threshold};
 	}

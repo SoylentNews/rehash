@@ -338,6 +338,17 @@ sub printComments {
 		     $user->{commentlimit} > $user->{commentspill} );
 
 	if ($discussion->{type} eq 'archived') {
+		# This state field... what are we really trying to mean here?
+		# 1. The user can only read comments, not post or moderate,
+		#    for some reason and it doesn't really matter what?
+		# 2. The discussion the user is reading is archived?
+		# I see several places where we use meaning 1.  But this is
+		# the only place where it's set so I'm going to assume
+		# meaning 2 will also work for now.  If we ever set it
+		# anywhere else, revisit this code.  (IMHO state variables
+		# that store simple values should be named by what they are
+		# storing, not how that affects logic later in the code.)
+		# - Jamie 2002/02/22
 		$user->{state}{comment_read_only} = 1;
 		slashDisplay('printCommNoArchive');
 	}
@@ -686,20 +697,25 @@ sub dispComment {
 	# I rearranged the order of these tests (check anon first for speed)
 	# and pulled some of the tests from dispComment/_hard_dispComment
 	# back here as well, just to have it all in one place. - Jamie 2001/08/17
-	my $can_mod =	!$user->{is_anon} &&
-			$constants->{allow_moderation} &&
-			!$comment->{no_moderation} &&
-			!$user->{state}{comment_read_only} &&
-			( ( $user->{points} > 0 &&
-			    $user->{willing} &&
-			    $comment->{uid} != $user->{uid} &&
-			    $comment->{lastmod} != $user->{uid} &&
-			    $comment->{ipid} ne $user->{ipid} &&
-			    (    !$constants->{mod_same_subnet_forbid}
-			      || $comment->{subnetid} ne $user->{subnetid} )
+	my $can_mod =	   !$user->{is_anon}
+			&& $constants->{allow_moderation}
+			&& !$comment->{no_moderation}
+			&& ( (
+			       $user->{points} > 0
+			    && $user->{willing}
+			    && $comment->{uid} != $user->{uid}
+			    && $comment->{lastmod} != $user->{uid}
+			    && $comment->{ipid} ne $user->{ipid}
+			    && (!$constants->{mod_same_subnet_forbid}
+				|| $comment->{subnetid} ne $user->{subnetid} )
+			    && (!$user->{state}{comment_read_only}
+				|| $constants->{comments_moddable_archived})
+			    && $comment->{time_unixepoch} >= time() - 3600*
+				($constants->{comments_moddable_hours}
+				|| 24*$constants->{archive_delay})
 			) || (
-			    $user->{seclev} >= 100 &&
-			    $constants->{authors_unlimited}
+			       $user->{seclev} >= 100
+			    && $constants->{authors_unlimited}
 			) );
 
 	# don't inherit these ...

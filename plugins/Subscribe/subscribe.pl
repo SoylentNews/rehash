@@ -161,10 +161,10 @@ sub paypal {
 		$payment->{payment_net} = $payment->{payment_gross};
 	}
 
-	my $subs = getObject('Slash::Subscribe');
-	my $num_pages = $subs->convertDollarsToPages($payment->{payment_gross});
+	my $subscribe = getObject('Slash::Subscribe');
+	my $num_pages = $subscribe->convertDollarsToPages($payment->{payment_gross});
 	$payment->{pages} = $num_pages;
-	my $rows = $subs->insertPayment($payment);
+	my $rows = $subscribe->insertPayment($payment);
 	if ($rows == 1) {
 		$slashdb->setUser($payment->{uid}, {
 			"-hits_paidfor" => "hits_paidfor + $num_pages"
