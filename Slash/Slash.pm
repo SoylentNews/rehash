@@ -103,6 +103,11 @@ sub selectComments {
 		# By setting pid to zero, we remove the threaded
 		# relationship between the comments
 		$C->{pid} = 0 if $user->{commentsort} > 3; # Ignore Threads
+		# I think instead we want something like this... (not this
+		# precisely, it munges up other things).
+		# I'm still looking into how to get parent links and
+		# children to show up properly in flat mode. - Jamie 2002/07/30
+#		$user->{state}{noreparent} = 1 if $user->{commentsort} > 3;
 
 		# User can setup to give points based on size.
 		$C->{points}++ if length($C->{comment}) > $user->{clbig}
