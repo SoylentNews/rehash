@@ -7,4 +7,4 @@ task=adminmail.pl
 template=templates/data;adminmail;default
 template=templates/display;adminmail;default
 template=templates/display;modmail;default
-template=templates/list;stats
+template=templates/list;stats;default
