@@ -45,14 +45,14 @@ sub main {
 		});
 	} else {
 		if (@$stories) {
-			header($time, $form->{section});
+			header($time);
 			slashDisplay('events', {
 				title 			=> $time,
 				events 			=> $stories,
 				'date'  		=> $date,
 			});
 		} else {
-			header($time, $form->{section});
+			header($time);
 			slashDisplay('events', {
 				title 			=> $time,
 				message 		=> getData('notfound'),

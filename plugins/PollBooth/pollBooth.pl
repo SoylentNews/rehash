@@ -36,7 +36,7 @@ sub main {
 		$ops{$op}->($slashdb,$form);
 		# Why not do this in a more generic manner you say? 
 		# Because I am paranoid about this being abused. -Brian
-		my $SECT = $slashdb->getSection($form->{section});
+		my $SECT = $slashdb->getSection();
 		if ($SECT) {
 			my $url = $SECT->{rootdir} || $constants->{real_rootdir};
 			

@@ -14,7 +14,7 @@ sub main {
 	my $form	= getCurrentForm();
 	my $constants	= getCurrentStatic();
 
-	header(getData('head'), $form->{section});
+	header(getData('head'));
 
 	my($hofDB);
 

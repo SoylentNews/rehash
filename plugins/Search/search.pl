@@ -95,7 +95,7 @@ sub main {
 		$form->{op} = 'stories' if !exists($ops_rss{$form->{op}});
 		$ops_rss{$form->{op}}->($form, $constants, $slashdb, $searchDB);
 	} else {
-		header("$constants->{sitename}: Search $form->{query}", $form->{section});
+		header("$constants->{sitename}: Search $form->{query}");
 		titlebar("99%", "Searching $form->{query}");
 		$form->{op} = 'stories' if !exists($ops{$form->{op}});
 

@@ -102,8 +102,7 @@ sub main {
 	);
 
 	header(
-		getData('header', { tbtitle => $tbtitle } ),
-		$section, { admin => 1 }
+		getData('header', { tbtitle => $tbtitle } ), '', { admin => 1 }
 	);
 
 	if ($user->{seclev} < 100) {
