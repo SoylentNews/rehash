@@ -35,30 +35,11 @@ sub new {
 
 	$self->{imagemargin} = $constants->{hc_q1_margin} || 6;
 
-	# Use a bit of randomness and fallback to find a font we like.
-	my @possible_fonts = @{$constants->{hc_possible_fonts}};
-	@possible_fonts = ( gdMediumBoldFont, gdLargeFont, gdGiantFont ) if !@possible_fonts;
-	@possible_fonts = sort { int(rand(3))-1 } @possible_fonts;
-
-	$self->{prefnumpixels} = $constants->{hc_q1_prefnumpixels} || 1000;
-	my $gdtext = new GD::Text();
-	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
-	$gdtext->set_text($self->shortRandText());
-	my $smallest_diff = 2**31;
-	for my $font (@possible_fonts) {
-		@{$self->{set_font_args}} = ( $font );
-		if ($font =~ m{^(\w+)/(\d+)$}) {
-			@{$self->{set_font_args}} = ($1, $2);
-		}
-		$gdtext->set_font(@{$self->{set_font_args}});
-		my($tempw, $temph) = ($gdtext->get("width"), $gdtext->get("height"));
-		my $pixels = ($tempw+$self->{imagemargin}) * ($temph+$self->{imagemargin});
-		my $diff = $pixels - $self->{prefnumpixels};
-		$diff = -$diff if $diff < 0;
-		if ($diff < $smallest_diff) {
-			$self->{font} = $font;
-			$smallest_diff = $diff;
-		}
+	# Set the list of possible fonts.
+	if ($constants->{hc_possible_fonts}) {
+		@{ $self->{possible_fonts} } = @{$constants->{hc_possible_fonts}};
+	} else {
+		@{ $self->{possible_fonts} } = ( gdMediumBoldFont, gdLargeFont, gdGiantFont );
 	}
 
 	return $self;
@@ -85,7 +66,8 @@ sub deleteOldFromPool {
 		# way to do this at the moment.  Eventually we'll have
 		# DB-based timespecs and we can read that...
 		my $runs_per_hour = 2;
-		$want_delete_fraction = 1/($runs_per_hour*24)
+		$want_delete_fraction = 1/($runs_per_hour*2.4)
+#		$want_delete_fraction = 1/($runs_per_hour*24)
 	}
 	my $want_delete = int($cursize*$want_delete_fraction);
 		# Don't delete so many that the pool will get too empty,
@@ -332,6 +314,157 @@ sub addPool {
 	}, "hcpid=$hcpid");
 }
 
+sub get_sizediff {
+	my($self, $gdtext, $pixels_wanted, $font, $fontsize) = @_;
+	$gdtext->set_font($font, $fontsize);
+	my($tempw, $temph) = ($gdtext->get("width"), $gdtext->get("height"));
+	my $pixels = ($tempw+$self->{imagemargin}) * ($temph+$self->{imagemargin});
+	my $diff = abs($pixels - $pixels_wanted);
+	return $diff;
+}
+
+sub get_font_args {
+	my($self, $text) = @_;
+	my $constants = getCurrentStatic();
+
+	$self->{prefnumpixels} = $constants->{hc_q1_prefnumpixels} || 1000;
+	my $gdtext = new GD::Text();
+	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
+	$gdtext->set_text($self->shortRandText());
+
+	my @pf = @{ $self->{possible_fonts} };
+	my $font = @pf[rand @pf];
+	my $first_fontsize_try = 30; # default first guess
+	if ( $font =~ m{^(\w+)/(\d+)$} ) {
+		$font = $1;
+		$first_fontsize_try = $2;
+	}
+
+	# "pixels wanted"
+	my $pw = $self->{prefnumpixels};
+
+	# We are looking for the minimum of the pixel difference.  Since
+	# image size increases monotonically with font size, there is
+	# guaranteed to be exactly 1 or 2 values at which the pixel diff
+	# is at a minimum.  We begin with one guess, then check the
+	# diffs immediately above and below it to see which is headed in
+	# the right direction.
+	my $i = $first_fontsize_try - 1;
+	my $j = $first_fontsize_try; # first guess
+	my $k = $first_fontsize_try + 1;
+	my $di = $self->get_sizediff($gdtext, $pw, $font, $i);
+	my $dj = $self->get_sizediff($gdtext, $pw, $font, $j);
+	my $dk = $self->get_sizediff($gdtext, $pw, $font, $k);
+	if ($di == $dj || $dj == $dk) {
+		# Two values being equal means that they are both the
+		# minimum, so we can return either one.  We got lucky!
+		return ($font, $j);
+	}
+	if ($di > $dj && $dj < $dk) {
+		# The center value being smaller than the other two
+		# means that it is the one minimum.  We got lucky!
+		return ($font, $j);
+	}
+
+	# Either i or k is a better choice than j.  Figure out which,
+	# then set up the vars so we walk up or down sizes starting
+	# from there.
+	my @vals = ( $j );
+	my $start = $j;
+	my $multiplier;
+	if ($di < $dj) {
+		# i is a better direction, so we walk down.
+		$multiplier = 5/6;
+		push @vals, $i;
+	} else {
+		# k is a better direction, so we walk up.
+		$multiplier = 6/5;
+		push @vals, $k;
+	}
+
+	# Walk up or down until we bridge the minimum.  We'll know
+	# that happens when we find a value that _increases_ from
+	# the minimum seen so far.  We want to save the last 3
+	# values found, at that point.
+	my $min_so_far = $dj;
+	my $best_size = $j;
+	my $found_min = 0;
+	my $next_try = $start;
+	my($fontsize_smallest, $fontsize_largest) = (5, 100);
+	while (!$found_min) {
+		my $old_try = $next_try;
+		$next_try = int($old_try * $multiplier + 0.5);
+		if ($next_try == $old_try) {
+			# Must change by at least one point size
+			if ($multiplier < 1) {
+				$next_try = $old_try - 1;
+			} else {
+				$next_try = $old_try + 1;
+			}
+		}
+		push @vals, $next_try;
+		my $new_d = $self->get_sizediff($gdtext, $pw, $font, $next_try);
+		if ($new_d < $min_so_far) {
+			# That beats the old record.
+			$min_so_far = $new_d;
+			$best_size = $next_try;
+		} else {
+			# OK, we've crossed the minimum and come back up.
+			$found_min = 1;
+		}
+		if ($next_try < $fontsize_smallest || $next_try > $fontsize_largest) {
+			# We're out of bounds, that's bad.
+			$found_min = 1;
+			print STDERR scalar(gmtime) . " Font size out of bounds: $font $next_try $new_d\n";
+		}
+	}
+
+	# The answer we want is somewhere in the range of the last
+	# 3 values we checked.
+	my($left, $right);
+	if ($multiplier < 1) {
+		$left = $vals[-1];
+		$right = $vals[-3];
+	} else {
+		$left = $vals[-3];
+		$right = $vals[-1];
+	}
+#print STDERR "font=$font left=$left right=$right vals=@vals\n";
+
+	# Hopefully this is a narrow range so we can just check values
+	# within it to find the answer we want.  (This could be better
+	# optimized, but let's just get it working first :)
+	$min_so_far = 2**31 - 1;
+	$best_size = undef;
+	DO_TRY: for $next_try ($left .. $right) {
+		my $new_d = $self->get_sizediff($gdtext, $pw, $font, $next_try);
+		if ($new_d < $min_so_far) {
+			$min_so_far = $new_d;
+			$best_size = $next_try;
+		} else {
+#print STDERR "font=$font next_try=$next_try new_d=$new_d min_so_far=$min_so_far done\n";
+			# We've just gone past the minimum, we're done.
+			last DO_TRY;
+		}
+#print STDERR "font=$font next_try=$next_try new_d=$new_d min_so_far=$min_so_far best_size=$best_size\n";
+	}
+
+	return($font, $best_size);
+}
+
+sub get_new_gdtext {
+	my($self, $text) = @_;
+	my $constants = getCurrentStatic();
+
+	my $gdtext = new GD::Text();
+	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
+	$gdtext->set_text($text);
+	my @font_args = $self->get_font_args($text);
+	$gdtext->set_font(@font_args);
+
+	return $gdtext;
+}
+
 sub drawImage {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
@@ -347,13 +480,9 @@ sub drawImage {
 
 	# Set up the text object (this could probably be cached in $self,
 	# but it hardly takes any time to do it over and over).
-	my $gdtext = new GD::Text();
-	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
-
-	# Set up the text, and set up the image.
 	my $answer = shortRandText();
-	$gdtext->set_text($answer);
-	$gdtext->set_font(@{$self->{set_font_args}});
+	my $gdtext = $self->get_new_gdtext($answer);
+
 	my($width, $height) = ($gdtext->get("width")+$self->{imagemargin},
 		$gdtext->get("height")+$self->{imagemargin});
 	my $image = new GD::Image($width, $height);
