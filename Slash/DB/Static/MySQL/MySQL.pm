@@ -232,26 +232,25 @@ sub deleteRecycledComments {
 	my $comments = $self->sqlSelectAll(
 		'cid, discussions.id',
 		'comments,discussions',
-		"to_days(now()) - to_days(date) > $days_to_archive AND 
+		"TO_DAYS(NOW()) - TO_DAYS(date) > $days_to_archive AND 
 		discussions.id = comments.sid AND
 		discussions.type = 'recycle' AND 
 		comments.pid = 0"
 	);
 
+	return 0 if !$comments || !@$comments;
+
 	my $rtotal = 0;
-	# This *must* be made faster, it seems to do about 4 per minute
-	# unless the comments being deleted are mostly-threaded.  Maybe
-	# it's time to make _deleteThread not be recursive.
+	# On Slashdot this seems to delete about 20 comments a second.
 	for my $comment (@$comments) {
-		next if !$comment or ref($comment) ne 'ARRAY' or !@$comment;
-		my $local_count = $self->_deleteThread($comment->[0]);
-		$self->setDiscussionDelCount($comment->[1], $local_count);
+		my($cid, $discussion) = @$comment;
+		my $local_count = $self->_deleteThread($cid);
+		$self->setDiscussionDelCount($discussion, $local_count);
 		$rtotal += $local_count;
 	}
 
 	return $rtotal;
 }
-	
 
 sub _deleteThread {
 	my($self, $cid, $level, $comments_deleted) = @_;
