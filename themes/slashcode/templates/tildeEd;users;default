@@ -60,7 +60,7 @@ __template__
 </TABLE>
 [% PROCESS titlebar width='100%' title=customize_title %]
 [%- col_max_size = box_order.size / 3; col_size = 0 -%]
-<TABLE><TR><TD VALIGN="TOP">
+<TABLE BGCOLOR="[% user.colors.bg_2 %]"><TR><TD VALIGN="TOP">
 [% FOREACH bid = box_order %]
 	[% IF section_descref.$bid.boldflag %]
 		<B>
