@@ -56,7 +56,7 @@ __template__
 	[% ELSE %]
 		[% IF user.is_anon; url="$constants.rootdir/$name/"; 
 		   ELSE; url="$constants.rootdir/index.pl?section=$name"; END -%]
-		<A HREF="[% url %]">[% iIF section.hostname; section.hostname; ELSE; section.title; END %]</A>
+		<A HREF="[% url %]">[% IF section.hostname; section.hostname; ELSE; section.title; END %]</A>
 	[% END %]
 
 [% CASE 'editstory' %]
