@@ -78,6 +78,10 @@ $werder = new Silly::Werder;
 				$story_table, "sid=".$slashdb->sqlQuote($sid));
 		}
 		my $discussion = $slashdb->getDiscussion($discussion_id);
+		if (!$discussion_id || !$discussion) {
+			print "Cannot create comments, no stories found.\n";
+			exit 0;
+		}
 	 
 		%family_tree = %deep_tree = ( );
 
