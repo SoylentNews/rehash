@@ -137,12 +137,11 @@ __template__
 		<FONT COLOR="[% user.colors.fg_3 %]">
 		[% PROCESS editbuttons %]
 
-		[% author_select %]
-
 		[% IF storyref.sid %]
 			<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% storyref.sid %]">
 		[% END %]
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter | strip_attribute %]">
+		<INPUT TYPE="checkbox" NAME="display" [% display_check %]><b>Display</b>
 		</FONT></TD>
 	</TR>
 	<TR>
@@ -175,6 +174,14 @@ __template__
 	</TR>
 	[% END %]
 
+	<TR>
+		<TD BGCOLOR="[% user.colors.bg_3 %]"><FONT COLOR="[% user.colors.fg_3 %]">
+		<B>Author</B> </FONT></TD>
+		<TD BGCOLOR="[% user.colors.bg_2 %]">
+		[% author_select %]
+		</TD>
+	</TR>
+
 	[% FOR extra = extras %]
 	<TR>
 		<TD BGCOLOR="[% user.colors.bg_3 %]"><FONT COLOR="[% user.colors.fg_3 %]">
@@ -185,12 +192,6 @@ __template__
 		[% ELSIF extra.2 == 'list' %]
 			[% pulldown = "$extra.3:$extra.1" %]
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), storyref.${extra.1}, 1, 1) %]	
-		[% ELSE %]
-			[% pulldown = extra.1 %]
-			<TD BGCOLOR="[% user.colors.bg_2 %]">
-			[% pulldown_section = form.section || user.section || storyref.section %]
-			[%# XXXSKIN - i don't know what this is but it is broken because topics_section_type does not exist %]
-			[% Slash.createSelect(pulldown, Slash.db.getDescriptions('topics_section_type', pulldown_section, pulldown), storyref.$pulldown, 1, 1) %]
 		[% END %]
 		</TD>
 	</TR>

@@ -1261,10 +1261,15 @@ sub editStory {
 
 	my $newarticle = 1 if !$stoid && !$form->{stoid} && !$form->{sid};
 
+	my $display_check;
+
 #use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "editStory form: " . Dumper($form);
 
 	# Editing a story that has yet to go into the DB...
 	# basically previewing. -Brian 
+	# I've never understood why we check *this* field to make
+	# that determination.  Now that we have $newarticle, should
+	# we be using that instead? - Jamie
 	if ($form->{title}) {
 
 		my $storyskin = $gSkin;
@@ -1310,16 +1315,22 @@ sub editStory {
 		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
 			{ skid => $storyref->{primaryskid} });
 
-		
 		$storyref->{'time'} = findTheTime();
 
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 
+		if ($form->{firstpreview}) {
+			$display_check = 'CHECKED';
+		} else {
+			$display_check = $form->{display} ? 'CHECKED' : '';
+		}
+
 	} elsif ($stoid) { # Loading an existing SID
 
 		$user->{state}{editing} = 1;
+		# Overwrite all the $storyref keys we copied in from $form.
 		$storyref = $slashdb->getStory($stoid, '', 1);
 		my $tmp = $user->{currentSkin} || $gSkin->{textname};
 		$user->{currentSkin} = $storyref->{skin}{name};
@@ -1336,7 +1347,14 @@ sub editStory {
 		my $chosen_hr = $slashdb->getStoryTopicsChosen($stoid);
 		$storyref->{topics_chosen} = $chosen_hr;
 		$storyref->{topics_chosen_names} = { };
-		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
+
+		my $render_info = { };
+# Don't need to do this, I don't think.  Only when saving does it matter.
+# We might as well leave the rendered info so we get the proper primary
+# skid, just like setStory will.
+#		$render_info->{neverdisplay} = 1 if $storyref->{neverdisplay};
+		my $rendered_hr = $slashdb->renderTopics($chosen_hr, $render_info);
+
 		$storyref->{topics_rendered} = $rendered_hr;
 		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
 		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
@@ -1347,6 +1365,7 @@ sub editStory {
 			$storyref->{$field} = parseSlashizedLinks(
 				$storyref->{$field});
 		}
+		$display_check = $storyref->{neverdisplay} ? '' : 'CHECKED';
 
 	} else { # New Story
 
@@ -1367,6 +1386,7 @@ sub editStory {
 			{ skid => $storyref->{primaryskid} });
 
 		$storyref->{is_dirty} = 1;
+		$display_check = 'CHECKED';
 
 	}
 
@@ -1500,7 +1520,9 @@ sub editStory {
 		$attached_files = slashDisplay('attached_files', { files => $files }, { Return => 1});
 	}
 
-	my $shown_in_desc = getDescForTopicsRendered($storyref->{topics_rendered}, $storyref->{primaryskid});
+	my $shown_in_desc = getDescForTopicsRendered($storyref->{topics_rendered},
+		$storyref->{primaryskid},
+		$display_check ? 1 : 0);
 	# We probably should just pass the raw data instead of the formatted
 	# <SELECT> into this template and let the template deal with the
 	# HTML, here. Formatting these elements outside of the template
@@ -1523,6 +1545,7 @@ sub editStory {
 		autonode_check		=> $autonode_check,
 		fastforward_check	=> $fastforward_check,
 		shortcuts_check		=> $shortcuts_check,
+		display_check		=> $display_check,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
 		similar_stories		=> $similar_stories,
@@ -1562,7 +1585,7 @@ sub extractChosenFromForm {
 ##################################################################
 sub getDescForTopicsRendered {
 	# this should probably use templates ...
-	my($topics_rendered, $primaryskid) = @_;
+	my($topics_rendered, $primaryskid, $display) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $tree = $slashdb->getTopicTree();
@@ -1587,7 +1610,12 @@ sub getDescForTopicsRendered {
 	if (!@sorted_nexuses) {
 		$desc = "This story will not appear.";
 	} else {
-		$desc = "This story will be ";
+		$desc = "This story ";
+		if ($display) {
+			$desc .= "will be ";
+		} else {
+			$desc .= "would be ";
+		}
 		my $first_nexus = shift @sorted_nexuses;
 		my $x = sprintf($remove, $first_nexus, $tree->{$first_nexus}{textname});
 		if ($first_nexus == $mainpage_nexus_tid) {
@@ -1599,7 +1627,7 @@ sub getDescForTopicsRendered {
 			$desc .= ", and linked from ";
 			if (@sorted_nexuses == 1) {
 				my $x = sprintf($remove, $sorted_nexuses[0], $tree->{$sorted_nexuses[0]}{textname});
-				$desc .= "$tree->{$sorted_nexuses[0]}{textname} $x.";
+				$desc .= "$tree->{$sorted_nexuses[0]}{textname} $x";
 			} else {
 				my $last_nexus = pop @sorted_nexuses;
 				my $next_to_last_nexus = pop @sorted_nexuses;
@@ -1609,10 +1637,13 @@ sub getDescForTopicsRendered {
 					my $x = sprintf($remove, $_, $tree->{$_}{textname});
 					$desc .= "$tree->{$_}{textname} $x, ";
 				}
-				$desc .= "$tree->{$next_to_last_nexus}{textname} $y and $tree->{$last_nexus}{textname} $z.";
+				$desc .= "$tree->{$next_to_last_nexus}{textname} $y and $tree->{$last_nexus}{textname} $z";
 			}
-		} else {
+		}
+		if ($display) {
 			$desc .= ".";
+		} else {
+			$desc .= "... but Display is unchecked so it won't be displayed.";
 		}
 	}
 	return "<b>$desc</b>";
@@ -1895,6 +1926,8 @@ sub updateStory {
 			$data->{$key} = $form->{$key};
 		}
 	}
+
+	$data->{neverdisplay} = $form->{display} ? '' : 1;
 
 #print STDERR "admin.pl before updateStory data: " . Dumper($data);
 	if (!$slashdb->updateStory($form->{sid}, $data)) {
@@ -2197,6 +2230,8 @@ sub saveStory {
 		next unless $type eq 'text';
 		$data->{$keyword} = $form->{$keyword};
 	}
+
+	$data->{neverdisplay} = 1 if !$form->{display};
 
 	my $sid = $slashdb->createStory($data);
 

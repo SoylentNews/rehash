@@ -3391,7 +3391,10 @@ sub setStory {
 		# If a topics_chosen hashref was given, we write not just that,
 		# but also topics_rendered, primaryskid and tid.
 		$self->setStoryTopicsChosen($stoid, $chosen_hr);
-		my($primaryskid, $tids) = $self->setStoryRenderedFromChosen($stoid, $chosen_hr);
+		my $info_hr = { };
+		$info_hr->{neverdisplay} = 1 if $hashref->{neverdisplay};
+		my($primaryskid, $tids) = $self->setStoryRenderedFromChosen($stoid, $chosen_hr,
+			$info_hr);
 		$hashref->{primaryskid} = $primaryskid;
 		$hashref->{tid} = $tids->[0] || 0;
 	}
@@ -6922,7 +6925,10 @@ sub createStory {
 		$error = "Failed to set chosen topics for story '$stoid'\n" if !$success;
 	}
 	if (!$error) {
-		($primaryskid, $tids) = $self->setStoryRenderedFromChosen($stoid, $story->{topics_chosen});
+		my $info_hr = { };
+		$info_hr->{neverdisplay} = 1 if $story->{neverdisplay};
+		($primaryskid, $tids) = $self->setStoryRenderedFromChosen($stoid,
+			$story->{topics_chosen}, $info_hr);
 		$error = "Failed to set rendered topics for story '$stoid'\n" if !defined($primaryskid);
 	}
 	delete $story->{topics_chosen};
@@ -8383,7 +8389,7 @@ sub getStoryTopicsRendered {
 # whose remaining elements are the topics in topiclist order.
 # Pass in $chosen_hr to save a query.
 sub setStoryRenderedFromChosen {
-	my($self, $stoid, $chosen_hr) = @_;
+	my($self, $stoid, $chosen_hr, $info) = @_;
 
 	$chosen_hr ||= $self->getStoryTopicsChosen($stoid);
 	my $rendered_hr = $self->renderTopics($chosen_hr);
@@ -8392,12 +8398,14 @@ sub setStoryRenderedFromChosen {
 		{ topics_chosen => $chosen_hr });
 
 	$self->sqlDelete("story_topics_rendered", "stoid = $stoid");
-	for my $key (sort keys %$rendered_hr) {
-		unless ($self->sqlInsert("story_topics_rendered", 
-			{ stoid => $stoid, tid => $key, weight => $rendered_hr->{$key} }
-		)) {
-			# and we should ROLLBACK here
-			return undef;
+	if (!$info->{neverdisplay}) {
+		for my $key (sort keys %$rendered_hr) {
+			unless ($self->sqlInsert("story_topics_rendered", 
+				{ stoid => $stoid, tid => $key, weight => $rendered_hr->{$key} }
+			)) {
+				# and we should ROLLBACK here
+				return undef;
+			}
 		}
 	}
 

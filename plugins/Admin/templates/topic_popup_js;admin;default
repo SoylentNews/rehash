@@ -294,32 +294,6 @@ function [% name %]_change_weight_really (i, val) {
 	myselect[i].text = newname;
 }
 
-function [% name %]_never_display () {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myweights = document.[% form_field_form %].[% name %]_main_weights;
-
-	for (var i = 0; i < myselect.length; i++) {
-		[% name %]_change_weight_really(i, 0);
-	}
-
-	for (var i = 0; i < myweights.length; i++) {
-		if (myweights[i].value == 0) {
-			myweights[i].selected = true;
-		}
-	}
-}
-
-function [% name %]_revert_weights () {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-
-	for (var i = 0; i < myselect.length; i++) {
-		[% name %]_change_weight_really(i, myselecto[i].value);
-	}
-
-	[% name %]_select_weight();
-}
-
 function [% name %]_main_add (val) {
 	var name   = [% name %]_get_all_names([% name %]_selected_id);
 	var weight = [% name %]_get_weight([% name %]_selected_id);
