@@ -19,7 +19,7 @@ $task{$me}{code} = sub {
 
 	slashdLog('Send Subscribe Mail Begin');
 
-	my $subscribers = $slashdb->sqlCount('users_info', 'hits_paidfor > 0');
+	my $subscribers = $slashdb->sqlCount('users_hits', 'hits_paidfor > 0');
 
 	my @numbers = (
 		$subscribers

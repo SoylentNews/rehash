@@ -40,14 +40,22 @@ sub UserLog {
 
 	my $user = getCurrentUser();
 	return if !$user or !$user->{uid} or $user->{is_anon};
-	my $slashdb = getCurrentDB();
 
-	my $user_update = { -hits => 'hits+1' };
-	my $subscribe = getObject('Slash::Subscribe');
-	if ($subscribe and $subscribe->buyingThisPage($r)) {
-		$user_update->{-hits_bought} = 'hits_bought+1';
+	my $user_update = undef;
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	if ($constants->{subscribe}) {
+		my $is_subscriber = $user->{hits_paidfor}
+			&& $user->{hits_bought} < $user->{hits_paidfor};
+		if ($is_subscriber || !$constants->{subscribe_hits_only}) {
+			$user_update = { -hits => 'hits+1' };
+			my $subscribe = getObject('Slash::Subscribe');
+			if ($subscribe and $subscribe->buyingThisPage($r)) {
+				$user_update->{-hits_bought} = 'hits_bought+1';
+			}
+		}
 	}
-	$slashdb->setUser($user->{uid}, $user_update);
+	$slashdb->setUser($user->{uid}, $user_update) if $user_update;
 
 	return OK;
 }

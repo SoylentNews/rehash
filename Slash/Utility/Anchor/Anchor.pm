@@ -302,9 +302,12 @@ sub getAd {
 	my($num, $log) = @_;
 	$num ||= 1;
 
-	my $subscribe = getObject('Slash::Subscribe');
-	if ($subscribe and $subscribe->buyingThisPage()) {
-		return "\n<!-- subscriber, no ad -->\n";
+	my $constants = getCurrentStatic();
+	if ($constants->{subscribe}) {
+		my $subscribe = getObject('Slash::Subscribe');
+		if ($subscribe and $subscribe->buyingThisPage()) {
+			return "\n<!-- subscriber, no ad -->\n";
+		}
 	}
 
 	unless ($ENV{SCRIPT_NAME}) {

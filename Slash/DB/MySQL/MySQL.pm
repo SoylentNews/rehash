@@ -1148,6 +1148,7 @@ sub createUser {
 	$self->sqlInsert("users_prefs", { uid => $uid });
 	$self->sqlInsert("users_comments", { uid => $uid });
 	$self->sqlInsert("users_index", { uid => $uid });
+	$self->sqlInsert("users_hits", { uid => $uid });
 	$self->sqlInsert("users_count", { uid => $uid });
 
 	# All param fields should be set here, as some code may not behave
@@ -3728,7 +3729,6 @@ sub getSubmissionForUser {
 ########################################################
 sub calcModval {
 	my($self, $where_clause, $halflife, $minicache) = @_;
-#my $start_time = Time::HiRes::time();
 
 	# There's just no good way to do this with a join; it takes
 	# over 1 second and if either comment posting or moderation
@@ -3747,7 +3747,6 @@ sub calcModval {
 	# get the moderatorlog valsum twice.
 	my $cid_text = join(",", @$cid_ar);
 	if ($minicache and defined($minicache->{$cid_text})) {
-#printf STDERR "cM 1 %4d %6.3f %7.3f\n", scalar(@$cid_ar), Time::HiRes::time()-$start_time, $minicache->{$cid_text};
 		return $minicache->{$cid_text};
 	}
 
@@ -3779,7 +3778,6 @@ sub calcModval {
 	}
 
 	$minicache->{$cid_text} = $modval if $minicache;
-#printf STDERR "cM 0 %4d %6.3f %7.3f\n", scalar(@$cid_ar), Time::HiRes::time()-$start_time, $modval;
 	$modval;
 }
 
@@ -3847,23 +3845,17 @@ sub getIsTroll {
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 	my($modval, $trollpoint);
 	my $minicache = { };
-#my $time = time;
 
 	# Check for modval by IPID.
 	$trollpoint = -abs($constants->{istroll_downmods_ip}) - $good_behavior;
 	$modval = $self->calcModval("ipid = '$user->{ipid}'",
 		$ipid_hoursback, $minicache);
-#my $idstuff = "";
-#$idstuff  = " uid $user->{uid}" if !$user->{is_anon};
-#$idstuff .= " ipid '$user->{ipid}' subnetid '$user->{subnetid}'";
-#printf STDERR "gIT %d %d ip modval %.3f trollpoint %d%s\n", $time, ($modval <= $trollpoint?1:0), $modval, $trollpoint, $idstuff;
 	return 1 if $modval <= $trollpoint;
 
 	# Check for modval by subnet.
 	$trollpoint = -abs($constants->{istroll_downmods_subnet}) - $good_behavior;
 	$modval = $self->calcModval("subnetid = '$user->{subnetid}'",
 		$ipid_hoursback, $minicache);
-#printf STDERR "gIT %d %d subnet modval %.3f trollpoint %d %s\n", $time, ($modval <= $trollpoint?1:0), $modval, $trollpoint, $idstuff;
 	return 1 if $modval <= $trollpoint;
 
 	# At this point, if the user is not logged in, then we don't need
@@ -3873,7 +3865,6 @@ sub getIsTroll {
 	# Check for modval by user ID.
 	$trollpoint = -abs($constants->{istroll_downmods_user}) - $good_behavior;
 	$modval = $self->calcModval("comments.uid = $user->{uid}", $uid_hoursback);
-#printf STDERR "gIT %d %d user modval %.3f trollpoint %d%s\n", $time, ($modval <= $trollpoint?1:0), $modval, $trollpoint, $idstuff;
 	return 1 if $modval <= $trollpoint;
 
 	# All tests passed, user is not a troll.
@@ -4583,6 +4574,7 @@ sub setUser {
 	my $tables = [qw(
 		users users_comments users_index
 		users_info users_prefs
+		users_hits
 	)];
 
 	# special cases for password, exboxes, people
@@ -4659,7 +4651,7 @@ sub getUser {
 	my $answer;
 	my $tables = [qw(
 		users users_comments users_index
-		users_info users_prefs
+		users_info users_prefs users_hits
 	)];
 	# The sort makes sure that someone will always get the cache if
 	# they have the same tables
@@ -4718,7 +4710,8 @@ sub getUser {
 		# users_comments.
 
 		my $n = getCurrentStatic('num_users_selects') || 1;
-		my @tables_ordered = qw( users users_index users_info
+		my @tables_ordered = qw( users users_index
+			users_info users_hits
 			users_comments users_prefs );
 		while ($n > 0) {
 			my @tables_thispass = ( );
@@ -4765,12 +4758,6 @@ sub getUser {
 			$answer->{$_} =~ s/,'?$//;
 		}
 		$answer->{'people'} = thaw($answer->{'people'}) if $answer->{'people'};
-
-		# Why is this here? We keep biz logic out of this layer.
-		# getUser() returns the user info, not an actual user hash
-		# which has the is_admin stuff in it and such.
-		# -Brian
-		$answer->{is_anon} = isAnon($id);
 
 	# ... and for scalars
 	} else {

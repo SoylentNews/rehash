@@ -38,20 +38,16 @@ sub buyingThisPage {
 	my($self, $r) = @_;
 
         my $user = getCurrentUser();
+	my $uid = $user->{uid} || 0;
         return 0 if !$user
-                ||  !$user->{uid}
-                ||   $user->{is_anon}
-                ||  !$user->{hits_paidfor}
+                ||  !$uid
+                ||   $user->{is_anon};
+
+	return 0 if !$user->{hits_paidfor}
                 || ( $user->{hits_bought}
 			&& $user->{hits_bought} >= $user->{hits_paidfor} );
 
-	if ($user->{"boughtpage_ALL"}) {
-		if (getCurrentStatic('subscribe_debug')) {
-			print STDERR "buyingThisPage $user->{uid} $user->{hits_bought} $user->{hits_paidfor} ALL\n";
-		}
-		return 1;
-	}
-
+	my $buying = 0;
         $r ||= Apache->request;
         my $uri = $r->uri;
         if ($uri eq '/') {
@@ -59,14 +55,19 @@ sub buyingThisPage {
         } else {
                 $uri =~ s{^.*/([^/]+)\.pl$}{$1};
         }
-        if ($user->{"boughtpage_$uri"}) {
-		if (getCurrentStatic('subscribe_debug')) {
-			print STDERR "buyingThisPage $user->{uid} $user->{hits_bought} $user->{hits_paidfor} uri '$uri'\n";
-		}
-                return 1;
-        }
-
-        return 0;
+	if ($uri =~ /^(index|article|comments)$/) {
+		$buying = 1 if $user->{"buypage_$uri"};
+	} else {
+		$buying = 1 if $user->{buypage_index}
+			or $user->{buypage_article}
+			or $user->{buypage_comments};
+	}
+	if (getCurrentStatic('subscribe_debug')) {
+		print STDERR "buyingThisPage $buying $user->{uid}"
+			. " $user->{hits_bought} $user->{hits_paidfor}"
+			. " uri '$uri'\n";
+	}
+	return $buying;
 }
 
 1;

@@ -1,2 +1,2 @@
-ALTER TABLE users_info ADD COLUMN hits_bought INT DEFAULT 0 NOT NULL AFTER hits, ADD COLUMN hits_paidfor INT DEFAULT 0 NOT NULL AFTER hits_bought;
+ALTER TABLE users_hits ADD COLUMN hits_bought INT DEFAULT 0 NOT NULL AFTER hits, ADD COLUMN hits_paidfor INT DEFAULT 0 NOT NULL AFTER hits_bought;
 

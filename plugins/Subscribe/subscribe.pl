@@ -68,7 +68,7 @@ sub save {
 		$user_update->{hits_paidfor} = $user->{hits_paidfor} || 0;
 		$user_update->{hits_paidfor} += $buymore;
 	}
-	for my $key (grep /^boughtpage_\w+$/, keys %$form) {
+	for my $key (grep /^buypage_\w+$/, keys %$form) {
 		# Empty string means delete the row from users_param.
 		$user_update->{$key} = $form->{$key} ? 1 : "";
 	}

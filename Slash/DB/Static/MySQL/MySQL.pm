@@ -319,6 +319,8 @@ sub deleteDaily {
 
 ########################################################
 # For dailystuff
+# With users_hits now storing "lastclick", this gets a lot
+# easier. - Jamie XXX
 sub updateStamps {
 	my($self) = @_;
 	my $columns = "uid";
@@ -516,6 +518,14 @@ SELECT COUNT(*) FROM stories
 WHERE section='$_->{section}'
 	AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2 AND time < NOW()
 	AND displaystatus > -1
+EOT
+
+		$_->{count_sectional} =
+			$self->{_dbh}->selectrow_array(<<EOT);
+SELECT COUNT(*) FROM stories
+WHERE section='$_->{section}'
+	AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2 AND time < NOW()
+	AND displaystatus > 0
 EOT
 
 	}

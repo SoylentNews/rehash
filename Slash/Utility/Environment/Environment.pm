@@ -1185,7 +1185,7 @@ sub filter_params {
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
-		artcount bseclev cid clbig clsmall
+		artcount bseclev buymore cid clbig clsmall
 		commentlimit commentsort commentspill
 		commentstatus del displaystatus
 		filter_id height highlightthresh
