@@ -1296,12 +1296,14 @@ UPDATE users_messages SET code = 4 WHERE code = 8;
 
 # End of T_2_3_0_74, Start of T_2_3_0_75
 
-# SLASHDOT LAST UPDATED HERE
-# USEPERL LAST UPDATED HERE
-
 DROP TABLE IF EXISTS stats_graphs_index; 
 CREATE TABLE stats_graphs_index (
     day DATE NOT NULL,
     md5 VARCHAR(32) NOT NULL,
     id BLOB DEFAULT ''
 );
+
+INSERT INTO vars (name, value, description) VALUES ('adminmail_last_run','2003-02-20','day adminmail last ran');
+
+# SLASHDOT LAST UPDATED HERE
+# USEPERL LAST UPDATED HERE

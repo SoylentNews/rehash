@@ -4,3 +4,4 @@ INSERT INTO vars (name, value, description) VALUES ('mod_stats_min_repeat','2','
 INSERT INTO vars (name, value, description) VALUES ('op_exclude_from_countdaily','rss','Ops to omit from daily counts in adminmail');
 INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');
 INSERT INTO vars (name, value, description) VALUES ('stats_admin_seclev','100','seclev required to look at stats in stats.pl');
+INSERT INTO vars (name, value, description) VALUES ('adminmail_last_run','2003-02-20','day adminmail last ran');
