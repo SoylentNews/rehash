@@ -69,9 +69,13 @@ sub selectComments {
 	my $num_scores = $max - $min + 1;
 
 	my $comments; # One bigass struct full of comments
-	foreach my $x (0..$num_scores-1) {
-		$comments->{0}{totals}[$x] = 
-		$comments->{0}{natural_totals}[$x] = 0;
+	for my $x (0..$num_scores-1) {
+		$comments->{0}{totals}[$x] = 0;
+	}
+	my $y = 0;
+	for my $x ($min..$max) {
+		$comments->{0}{total_keys}{$x}= $y;
+		$y++;
 	}
 
 	# When we pull comment text from the DB, we only want to cache it if
@@ -126,6 +130,8 @@ sub selectComments {
 		# fix points in case they are out of bounds
 		$C->{points} = $min if $C->{points} < $min;
 		$C->{points} = $max if $C->{points} > $max;
+		# Let us fill the hash range for hitparade
+		$comments->{0}{totals}[$comments->{0}{total_keys}{$C->{points}}]++;  
 	}
 
 	# If we are sorting by highest score we resort to figure in bonuses
@@ -155,7 +161,7 @@ sub selectComments {
 		push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
 
 		# The next line deals with hitparade -Brian
-		$comments->{0}{totals}[$C->{points} - $min]++;  # invert minscore
+		#$comments->{0}{totals}[$C->{points} - $min]++;  # invert minscore
 
 		# This deals with what will appear.
 		$comments->{$C->{pid}}{visiblekids}++
@@ -172,8 +178,6 @@ sub selectComments {
 	# (2, 1, 3, 5, 4, 2, 1) becomes (18, 16, 15, 12, 7, 3, 1).
 	for my $x (reverse(0..$num_scores-2)) {
 		$comments->{0}{totals}[$x] += $comments->{0}{totals}[$x + 1];
-		$comments->{0}{natural_totals}[$x]+=
-			$comments->{0}{natural_totals}[$x + 1];
 	}
 
 	if ($form->{ssi} && $header->{sid}) {
