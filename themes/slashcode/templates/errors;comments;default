@@ -58,8 +58,7 @@ Please <A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.
 
 [% # POST ANON OPTION DISABLED.
 CASE "postanon_option_disabled" %]
-The post anonymously option you are attempting to use is one that isn't
-available to your user.  
+Anonymous posting is not available to your user.  
 
 [% # NO BODY.
 CASE "no body" %]
