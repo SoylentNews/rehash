@@ -1264,8 +1264,6 @@ INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (1
 # update the messaging stats in stats_daily, using the last several weeks
 # of stats in message_log
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_72, Start of T_2_3_0_73
 
 # End of T_2_3_0_73, Start of T_2_3_0_74
@@ -1296,4 +1294,8 @@ INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0'
 # THEN, finally, run the code below.  :-)
 UPDATE users_messages SET code = 4 WHERE code = 8;
 
+# End of T_2_3_0_74, Start of T_2_3_0_75
+
+# SLASHDOT LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
+
