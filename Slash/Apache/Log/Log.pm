@@ -15,6 +15,12 @@ use vars qw($VERSION);
 # AMY: Leela's gonna kill me.
 # BENDER: Naw, she'll probably have me do it.
 
+#
+# This is the first PerlCleanupHandler in each site's .conf file
+# (as written by install-slashsite).  This handler writes to the
+# accesslog table.
+#
+
 sub handler {
 	my($r) = @_;
 	my $constants = getCurrentStatic();
@@ -44,9 +50,15 @@ sub handler {
 	return OK;
 }
 
-# Rob asked for this, keeping this at the end means
-# we can turn it off easily enough (and it won't happen
-# during page stuff
+#
+# This is the second PerlCleanupHandler in each site's .conf file
+# (as written by install-slashsite).  This handler writes new
+# values into the users_* tables, and possibly updates stats as
+# well.  Note that this should not be called for image hits, since
+# we don't think of GIFs, PNGs and JPEGs as "hits" (and if we
+# count them for subscribers we will do them a disservice).
+#
+
 sub UserLog {
 	my($r) = @_;
 
@@ -56,11 +68,40 @@ sub UserLog {
 	my $user_update = undef;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+
+	# First check to see if this is an admin who sent a password
+	# in cleartext.  If so and if we want to flag that, flag it
+	# and continue.  If not, then check to see if this is an image we've just
+	# served, in which case we don't write a log entry.
+
+	if ($constants->{admin_check_clearpass}
+		&&  $user->{state}{admin_clearpass_thisclick}
+		&& !$user->{admin_clearpass}) {
+		# This could be any value as long as it's true.
+		$user_update->{admin_clearpass} = join(" ",
+			$r->connection->remote_ip, scalar(gmtime));
+	}
+
+	my($op) = getOpAndDatFromStatusAndURI($r->status, $r->uri);
+	# Short-circuit so we don't log image requests -- unless
+	# this is an admin who just sent a password in the clear.
+	# There are other less-important things that might get updated
+	# but none of them matters enough to continue processing.
+	if ($op eq 'image' and !$user_update->{admin_clearpass}) {
+		print STDERR scalar(gmtime) . " $$ UserLog short-circuit image\n";
+		return ;
+	}
+
+	# For the below logic, note that if we're on an image hit,
+	# page_buying will be false.
 	if ($constants->{subscribe}
 		&& ($user->{is_subscriber} || !$constants->{subscribe_hits_only})
 	) {
-		$user_update = { -hits => 'hits+1' };
-		$user_update->{-hits_bought} = 'hits_bought+1' if $user->{state}{page_buying};
+		if ($op ne 'image') {
+			$user_update = { -hits => 'hits+1' };
+			$user_update->{-hits_bought} = 'hits_bought+1'
+				if $user->{state}{page_buying};
+		}
 		my @gmt = gmtime;
 		my $today = sprintf("%04d%02d%02d",
 			$gmt[5]+1900, $gmt[4]+1, $gmt[3]);
@@ -98,15 +139,8 @@ sub UserLog {
 			$statsSave->addStatDaily("subscribe_runout", 1);
 		}
 	}
-	if ($constants->{admin_check_clearpass}
-		&&  $user->{state}{admin_clearpass_thisclick}
-		&& !$user->{admin_clearpass}) {
-		# This could be any value as long as it's true.
-		$user_update->{admin_clearpass} = join(" ",
-			$r->connection->remote_ip, scalar(gmtime));
-	}
 	if ($constants->{memcached_debug}) {
-		print STDERR scalar(gmtime) . " mcd $$ UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
+		print STDERR scalar(gmtime) . " $$ mcd UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
 	}
 	$slashdb->setUser($user->{uid}, $user_update) if $user_update && %$user_update;
 

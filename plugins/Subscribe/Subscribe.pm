@@ -64,11 +64,12 @@ sub new {
 # start seeing ads on bought page types, but as long as their max is
 # at least the default, those bought page types are still considered
 # "plumworthy" or (and this is an ugly term but it's short) "plummy."
+# And image hits are their own thing.
 #
 # So:
 #
-# adless = A && (B || C) && D
-# buying = A &&  B       && D
+# adless = A && (B || C) && D      && !I
+# buying = A &&  B       && D      && !I
 # plummy = A && (B || C)      && E
 #
 # Where:
@@ -85,6 +86,7 @@ sub new {
 #         one of those checkboxes checked)
 # [D] User has pages remaining for today before hitting the max
 # [E] User's max pages per day to buy is set >= the default (10)
+# [I] This hit is an image, not an actual page.
 #
 sub _subscribeDecisionPage {
 	my($self, $trueOnOther, $useMaxNotToday, $r, $user) = @_;
@@ -118,6 +120,14 @@ sub _subscribeDecisionPage {
 		return 0 if !$user->{hits_paidfor}
 			|| ( $user->{hits_bought}
 				&& $user->{hits_bought} >= $user->{hits_paidfor} );
+	}
+
+	# If we're on an image hit, not a page, then there may be
+	# a simple answer.
+	if (!$useMaxNotToday) {
+		my($status, $uri) = ($r->status, $r->uri);
+		my($op) = getOpAndDatFromStatusAndURI($status, $uri);
+		return 0 if $op eq 'image';
 	}
 
 	my $today_max_def = $constants->{subscribe_hits_btmd} || 10;
