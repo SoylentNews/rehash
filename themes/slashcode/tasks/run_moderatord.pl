@@ -419,13 +419,7 @@ sub reconcile_m2 {
 			my $comment_subj = ($slashdb->getComments(
 				$mod_hr->{sid}, $mod_hr->{cid}
 			))[2];
-			my $comment_url =
-				fudgeurl(	# inserts scheme if necessary
-					join("",
-						$constants->{rootdir},
-						"/comments.pl?sid=", $mod_hr->{sid},
-						"&cid=", $mod_hr->{cid}
-				)	);
+			my $comment_url = "/comments.pl?sid=$mod_hr->{sid}&cid=$mod_hr->{cid}";
 
 			$m2_results{$mod_hr->{uid}}{change} ||= 0;
 			$m2_results{$mod_hr->{uid}}{change} += $csq->{m1_karma}{sign}

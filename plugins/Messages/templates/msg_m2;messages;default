@@ -36,24 +36,25 @@ Some of your past moderations have been meta-moderated by other
 [% FOREACH m2item = m2 -%]
 	[% 
 		IF m2item.url;
-			discussion = "<A HREF=\"$m2item.url\">$m2item.title</A>";
+			comment = "<A HREF=\"$m2item.url\">$m2item.subj</A>";
 		ELSE;
-			discussion = "$m2item.title";
+			comment = "$m2item.subj";
 		END;
 	-%]
-	<LI> "[% m2item.subj %]" from the discussion [% discussion %] which you
-	moderated as <B>[% m2item.reason.name %]</B> was voted 
-	<B>[% vote_result.${m2item.vote} %]</B>
+	<LI> "<A HREF="[% constants.rootdir; m2item.url | strip_attribute %]">[% m2item.subj %]</A>" from the discussion
+	"[% $m2item.title %]" which you moderated as <B>[% m2item.reason.name %]</B> was voted 
+	<B>[% vote_result.${m2item.vote} %]</B>.
 
 [% END %]
 </UL>
 [% ELSE %]
 [% FOREACH m2item = m2 -%]
 	[%- reason = m2item.reason -%]
-	- "[% m2item.subj | decode_entities %]" from the discussion [% discussion | decode_entities %]
-	which you moderated as "[% reason.name %]" was voted [% vote_result.${m2item.vote} %]
+	- "[% m2item.subj | decode_entities %]" from the discussion
+	[% discussion | decode_entities %] which you moderated as
+	"[% reason.name %]" was voted [% vote_result.${m2item.vote} %].
 [% IF m2item.url -%]
-	<[% Slash.url2abs(m2item.url, absolutedir) %]>
+	[% absolutedir; m2item.url %]
 
 [%- END %]
 [% END %]
