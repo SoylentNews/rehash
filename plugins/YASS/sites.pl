@@ -19,7 +19,7 @@ sub main {
 				title   => "$constants->{sitename} links",
 				'link'  => "$constants->{absolutedir}/sites.pl?content_type=rss",
 			},
-			items   => $feed->getActive(15),
+			items   => $yass->getActive(15),
 		});
 
 	} elsif ($form->{'content_type'} eq 'ocs') {
@@ -27,7 +27,7 @@ sub main {
 	# because I am working on rewriting XML::OCS and
 	# until I am done I am going to leave this like this.
 	# -Brian
-		my $all = $feed->getActive();
+		my $all = $yass->getActive();
 		my $r = Apache->request;
 		$r->header_out('Cache-Control', 'private');
 		$r->content_type('text/xml');

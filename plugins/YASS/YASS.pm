@@ -38,15 +38,17 @@ sub getActive {
 
 	my $sids;
 	unless($limit) {
-		$sids = $self->sqlSelectAll('sid', 
-															 'story_parm', 
-															 "name = 'active' AND value = 'yes' ",
-															 "ORDER by title");
+		$sids = $self->sqlSelectAll(
+			"sid", 
+			"story_param", 
+			"name = 'active' AND value = 'yes'",
+			"ORDER BY title");
 	} else {
-		$sids = $self->sqlSelectAll('story_param.sid', 
-															 'story_parm, stories', 
-															 "name = 'active' AND value = 'yes' AND stories.sid = story_param.sid ",
-															 "ORDER by date DESC LIMIT $limit");
+		$sids = $self->sqlSelectAll(
+			"story_param.sid", 
+			"story_param, stories", 
+			"name = 'active' AND value = 'yes' AND stories.sid = story_param.sid",
+			"ORDER BY date DESC LIMIT $limit");
 	}
 
 	my @all;
