@@ -21,22 +21,37 @@ __template__
 		[% constants.subscribe_future_name %]
 	[% ELSIF discussion.commentstatus == 'disabled' %]
 		New comment creation has been disabled on this discussion.
-	[% ELSIF discussion.type == 'archived' %]
+	[% ELSE %]
+		[%- d_nickname = Slash.db.getUser(discussion.uid, 'nickname') -%]
+		[%- msg = BLOCK -%]
+This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as
+		[%- END -%]
 		[% IF discussion.commentstatus == 'friends_only' %]
-			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as Friends only. Offer them a bribe and maybe they will let you post.
+			[% type = "Friends only" %]
+			[% snark = "Offer them a bribe and maybe they will let you post." %]
 		[% ELSIF discussion.commentstatus == 'friends_fof_only' %]
-			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as Friends and Friends of Friends only. Offer them or one of their friends a bribe and maybe they will let you post.
+			[% type = "Friends and Friends of Friends only" %]
+			[% snark = "Offer them or one of their friends a bribe and maybe they will let you post." %]
 		[% ELSIF discussion.commentstatus == 'no_foe' %]
-			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as no Foes. They don't want you in their sandbox.
+			[% type = "no Foes" %]
+			[% snark = "They don't want you in their sandbox." %]
 		[% ELSIF discussion.commentstatus == 'no_foe_eof' %]
-			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as no Foes and no Friends' foes. They and their friends think you suck.
+			[% type = "no Foes and no Friends' foes" %]
+			[% snark = "They and their friends think you suck." %]
+		[% END %]
+
+		[% IF discussion.type != 'archived' %]
+			[% msg %] [% type %].
 		[% ELSE %]
-			This discussion has been archived.
-			No new comments can be posted.
+			[% IF discussion.commentstatus == 'friends_only'
+			|| discussion.commentstatus == 'friends_fof_only'
+			|| discussion.commentstatus == 'no_foe'
+			|| discussion.commentstatus == 'no_foe_eof' %]
+				[% msg %] [% type %].  [% snark %]
+			[% ELSE %]
+				This discussion has been archived.
+				No new comments can be posted.
+			[% END %]
 		[% END %]
 	[% END %]
 </FONT></TD></TR>
