@@ -17,6 +17,13 @@ footer
 __seclev__
 10000
 __template__
+[% IF constants.run_ads -%]
+<!-- add code. You can use your own ad system - we use one that 
+sets a env variable in apache that contains the ad itself and just put it
+in this block -->
+<!-- end ad code -->
+[% END -%]
+
 [% UNLESS form.nohtml;
 	rootdir = constants.rootdir;
 	url = "<a href=\"$rootdir/article.pl?sid=$story.sid\">$story.title</a>";
@@ -25,19 +32,19 @@ ELSE;
 	absdir = constants.absolutedir;
 	url = "$story.title ($absdir/article.pl?sid=$story.sid)";
 	sitename = "$constants.sitename ($absdir)";
-END %]
+END -%]
 <hr />
 <P>All trademarks and copyrights on this page are owned by their respective
 companies.</P>
 <P>
 <SMALL>printed from [% sitename %], [% url %] on [% time %]</SMALL>
 </P>
-[% IF form.auto %]
+[% IF form.auto -%]
 <script language="JavaScript1.2">
 <!--
 	if (window.print) { window.print(); }
 //-->
 </script>
-[% END %]
+[% END -%]
 </BODY>
 </HTML>

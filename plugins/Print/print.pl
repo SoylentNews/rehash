@@ -85,12 +85,24 @@ sub main {
 	header($sect_title, 'print');
 	$user->{is_admin} = $adm;
 
+	my @story_links;
+	push @story_links, [$1, $2] while
+		$story->{relatedtext} =~
+		m!<A HREF="?([^"<]+?)"?>([^<]+?)</A>!ig;
+	# Drop the last two links, "More on <topic>", "Also by <author>", as 
+	# they don't appear in the story. 
+	#
+	# Plugin/Theme writers. If you change how story_text.relatedtext works,
+	# you may have to adust either the regexp, the slice below, or both!
+	@story_links = @story_links[0 .. $#story_links - 2];
+
 	slashDisplay('dispStory', {
 		user		=> $user,
 		story		=> $story,
 		topic		=> $topic,
 		author		=> $author,
 		section		=> $sect_title,
+		links		=> \@story_links,
 	}, { Nocomm => 1 });
 
 	slashDisplay('footer', {
