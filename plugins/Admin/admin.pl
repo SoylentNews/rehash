@@ -1354,7 +1354,7 @@ sub editStory {
 
 		# Get the related text.
 		$storyref->{relatedtext} = getRelated(
-			"$storyref->{title} $storyref->{introtext} $storyref->{bodytext}",
+			"$story_copy->{title} $story_copy->{introtext} $story_copy->{bodytext}",
 			\@stid
 		) . otherLinks(
 			$slashdb->getAuthor($storyref->{uid}, 'nickname'),
