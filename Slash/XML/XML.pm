@@ -97,6 +97,7 @@ sub xmlDisplay {
 	my($type, $param, $opt) = @_;
 
 	my($class, $file);
+	$type =~ s/[^\w]+//g;
 	for my $try (uc($type), $type) {
 		$class = "Slash::XML::$try";
 		$file  = "Slash/XML/$try.pm";
