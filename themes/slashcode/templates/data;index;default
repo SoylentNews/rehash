@@ -51,7 +51,7 @@ __template__
 	[% END %]
 
 [% CASE 'editstory' %]
-	<A HREF="[% constants.rootdir %]/admin.pl?op=edit&sid=[% sid %]">Edit</A>
+	<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit</A>
 
 [% END %]
 

@@ -53,7 +53,7 @@ __template__
 		</TD></TR>
 		<TR VALIGN="TOP" BGCOLOR="[% user.bg.0 %]">
 			<TD ALIGN="RIGHT" BGCOLOR="[% user.bg.0 %]">
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&type=friend">Add Friend</A>
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</A>
 	[% END %]
 
 </TD></TR></TABLE>

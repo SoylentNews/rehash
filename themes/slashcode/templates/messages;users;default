@@ -37,7 +37,7 @@ __template__
 	<B>passwd</B>=mailed to [% form.email | strip_literal %]<BR>
 	[% IF suadmin_flag %]
 		<P>Now you can edit the newly created user  
-		<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&userfield=[% uid %]">
+		<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% uid %]">
 		[% form.newusernick %], UID [% uid %]</A></P>
 	[% ELSE %]
 	<P>Once you receive your password, you can log in and
@@ -49,7 +49,7 @@ __template__
 Your new password is [% newpasswd %].  Your old password will still work until
 this password is used.  Go to the URL below to log in:
 
-<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick %]&returnto%3D%2Fusers.pl%3Fop=changepasswd>
+<[% constants.absolutedir %]/index.pl?op=userlogin&amp;upasswd=[% newpasswd %]&amp;unickname=[% tempnick %]&amp;returnto%3D%2Fusers.pl%3Fop=changepasswd>
 
 Make sure you then CHANGE YOUR PASSWORD!
 

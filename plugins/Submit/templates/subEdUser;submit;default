@@ -24,7 +24,7 @@ __template__
 		[% sub.time %]&nbsp;
 	[% END %]
 	</TD><TD>
-		<A HREF="[% env.script_name %]?op=viewsub&subid=[% sub.subid %]&note=[% form.note %][% sub.stitle %]"
+		<A HREF="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid %]&amp;note=[% form.note %][% sub.stitle %]"
 		>[% sub.strs.0 %]&nbsp;</A>
 	</TD><TD><FONT SIZE="-1">[% sub.strs.1 %]<BR>[% sub.strs.2 %]</FONT></TD></TR>
 	<TR><TD COLSPAN="6"><IMG SRC="[% constants.imagedir %]/pix.gif" ALT="" HEIGHT="3"></TD></TR>

@@ -78,8 +78,9 @@ __template__
 <FONT COLOR="[% user.fg.3 %]">Search Discussion</FONT></A></FONT>
 	</TD></TR>
 
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER"><FONT SIZE="2">
+	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER">
 		<FORM ACTION="[% constants.rootdir %]/comments.pl">
+		<FONT SIZE="2">
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
 		<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
 		<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">
@@ -98,13 +99,15 @@ __template__
 		[% UNLESS user.state.discussion_archived %]
 			<INPUT TYPE="submit" NAME="op" VALUE="Reply">
 		[% END %]
+		</FONT>
+		</FORM>
 	</TD></TR>
 	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
 		<FONT COLOR="[% user.fg.3 %]" SIZE="1">
 <B>The Fine Print:</B>
 The following comments are owned by whoever posted them.
 We are not responsible for them in any way.
-</FONT></FORM></TD></TR>
+</FONT></TD></TR>
 
 [% IF user.mode == 'nocomment' %]
 		</TABLE>

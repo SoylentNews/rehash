@@ -72,13 +72,14 @@ __template__
 	[% END %]
 
 		<INPUT TYPE="submit" NAME="op" VALUE="Change">
+		</FORM>
 	</TD></TR>
 	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
 		<FONT COLOR="[% user.fg.3 %]" SIZE="1">
 <B>The Fine Print:</B>
 The following comments are owned by whoever posted them.
 We are not responsible for them in any way.
-</FONT></FORM></TD></TR>
+</FONT></TD></TR>
 </TABLE>
 
 __seclev__

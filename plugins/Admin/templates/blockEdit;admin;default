@@ -104,7 +104,7 @@ __template__
 	<TR>
 		<TD>&nbsp;</TD>
 		<TD ALIGN="left" COLSPAN="2">
-		<TABLE BORDER="1" BGCOLOR="FFFFFF">
+		<TABLE BORDER="1" BGCOLOR="#FFFFFF">
 			<TR>
 				<TD><CODE> [% rss_template_code | strip_literal %] </CODE></TD>
 			</TR>
@@ -179,8 +179,8 @@ __template__
 
 </TABLE>
 </FORM>
-<B><A HREF="[% constants.rootdir %]/sections.pl?section=[% sectionbid %]&op=editsection">[% sectionbid %]</A></B>
-(<A HREF="[% constants.rootdir %]/users.pl?op=previewbox&bid=[% bid %]">preview</A>)
+<B><A HREF="[% constants.rootdir %]/sections.pl?section=[% sectionbid %]&amp;op=editsection">[% sectionbid %]</A></B>
+(<A HREF="[% constants.rootdir %]/users.pl?op=previewbox&amp;bid=[% bid %]">preview</A>)
 
 
 

@@ -1105,7 +1105,7 @@ sub _hard_dispComment {
 		$score_to_display .= ")";
 	}
 
-	$comment_link_to_display = qq|<A HREF="$constants->{rootdir}/comments.pl?sid=$comment->{sid}&cid=$comment->{cid}">#$comment->{cid}</A>|;
+	$comment_link_to_display = qq|<A HREF="$constants->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}">#$comment->{cid}</A>|;
 
 	if (isAnon($comment->{uid})) {
 		$user_to_display = $comment->{nickname};

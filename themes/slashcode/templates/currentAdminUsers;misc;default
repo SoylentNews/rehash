@@ -15,7 +15,7 @@ en_US
 __name__
 currentAdminUsers
 __template__
-<TABLE HEIGHT="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 
 [% FOREACH author = ids %]
 	[% id         = author.0;

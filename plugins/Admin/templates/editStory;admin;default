@@ -128,7 +128,7 @@ __template__
 
 		[% IF sid %]
 		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward
-		| <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&qid=[% storyref.qid %]&op=edit&question=[% storyref.title | fixparam %]">
+		| <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit&amp;question=[% storyref.title | fixparam %]">
 		Related Poll</A>
 		[% END %]
 

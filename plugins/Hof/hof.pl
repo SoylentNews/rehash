@@ -77,7 +77,7 @@ sub main {
 # 			$titles{$bid} =~ s/<(.*?)>//g;
 # 			print <<EOT;
 # 
-# <B>$b{$bid}</B> <A HREF="$I{rootdir}/users.pl?op=preview&bid=$bid">$titles{$bid}</A><BR>
+# <B>$b{$bid}</B> <A HREF="$I{rootdir}/users.pl?op=preview&amp;bid=$bid">$titles{$bid}</A><BR>
 # EOT
 # 			last if $x > 10;
 # 		}

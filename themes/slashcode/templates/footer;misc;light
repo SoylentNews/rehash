@@ -15,7 +15,7 @@ __template__
 <P>[% Slash.horizmenu() %]
 
 <FORM METHOD="GET" ACTION="[% constants.rootdir %]/search.pl">
-  <INPUT TYPE="name" NAME="query" VALUE="" WIDTH="20" SIZE="20" LENGTH="20">
+  <INPUT TYPE="TEXT" NAME="query" VALUE="" WIDTH="20" SIZE="20">
   <INPUT TYPE="submit" VALUE="Search [% constants.sitename %]">
 </FORM>
 

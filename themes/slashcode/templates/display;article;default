@@ -53,7 +53,7 @@ ELSE;
 	[% IF user.seclev > 99 && user.uid;
 		M = BLOCK %]
 [% M %] | <A HREF="[% constants.rootdir %]/admin.pl">Admin</A> |
-	  <A HREF="[% constants.rootdir %]/admin.pl?op=edit&sid=[% story.sid %]">Editor</A>
+	  <A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">Editor</A>
 		[% END;
 	END;
 	M = "$M ]<P>\n";
@@ -67,10 +67,10 @@ for instructions. (<B>updated 9.9!</B>)
 
 <P>
 
-<LI>You can't post & moderate the same discussion.
-<LI>Concentrate on Promoting more than Demoting.
-<LI>Browse at -1 to keep an eye out for abuses.
-<LI><A HREF="mailto:[% constants.adminmail %]">Mail the admin</A> URLs showing abuse
+&middot; You can't post & moderate the same discussion.
+<BR>&middot; Concentrate on Promoting more than Demoting.
+<BR>&middot; Browse at -1 to keep an eye out for abuses.
+<BR>&middot; <A HREF="mailto:[% constants.adminmail %]">Mail the admin</A> URLs showing abuse
 (the cid link please!).
 		[% END;
 	END;

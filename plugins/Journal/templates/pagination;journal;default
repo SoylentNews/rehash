@@ -17,13 +17,13 @@ __template__
 		<TR VALIGN="TOP" BGCOLOR="#FFFFFF">
 			<TD ALIGN="RIGHT" BGCOLOR="#FFFFFF">
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&uid=[% uid %]&start=[% forward %]">&lt;Next [% constants.journal_default_display %] entries</A>
+					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt;Next [% constants.journal_default_display %] entries</A>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&uid=[% uid %]&start=[% back %]">Last [% constants.journal_default_display %] entries&gt;</A>
+					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Last [% constants.journal_default_display %] entries&gt;</A>
 				[% END %]
 			</TD>
 		</TR>

@@ -74,7 +74,7 @@ __template__
 	[% END %]
 
 		<INPUT TYPE="CHECKBOX" NAME="exboxes_[% bid %]"[% section_descref.$bid.checked %]>
-		<A HREF="[% env.script_name %]?op=previewbox&bid=[% bid %]">
+		<A HREF="[% env.script_name %]?op=previewbox&amp;bid=[% bid %]">
 
 	[% IF bid == 'srandblock' %]
 		Semi-Random Box

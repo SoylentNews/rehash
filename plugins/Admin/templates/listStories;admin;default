@@ -50,7 +50,7 @@ END %]
 [% END %]
 
 [% IF story.canedit %]
-		[<A HREF="[% env.script_name %]?title=[% story.tbtitle %]&op=edit&sid=[% story.sid %]">[% story.x %]</A>]
+		[<A HREF="[% env.script_name %]?title=[% story.tbtitle %]&amp;op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
 [% ELSE %]
 		[[% story.x %]]
 [% END %]
@@ -96,7 +96,7 @@ END %]
 [% IF story.x > 0 and left > 0 %]
 <P ALIGN="RIGHT">
 <B>
-<A HREF="[% env.script_name %]?section=[% form.section %]&op=list&next=[% story.x %]">[% left %] More</A></B></P>
+<A HREF="[% env.script_name %]?section=[% form.section %]&amp;op=list&amp;next=[% story.x %]">[% left %] More</A></B></P>
 [% END %]
 
 

@@ -28,7 +28,7 @@ __template__
 [% END %]
 
 <P><EM>(You've already voted.)</EM><BR>
-[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&qid=[% qid %]&aid=-1"><B>Results</B></A> |
+[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&amp;qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
 <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]"><B>Polls</B></A> ] <BR>
 Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
 
@@ -46,7 +46,7 @@ Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
 [% END %]
 
 <BR><INPUT TYPE="submit" VALUE="Vote">
-[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&qid=[% qid %]&aid=-1"><B>Results</B></A> |
+[ <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]&amp;qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
 <A HREF="[% constants.rootdir %]/pollBooth.pl?section=[% sect %]"><B>Polls</B></A> ] <BR>
 Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
 </FORM>

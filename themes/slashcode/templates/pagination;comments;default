@@ -15,13 +15,13 @@ __template__
 	[% back = back || 0;
 	   IF (back > -1) || forward %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&[% END %]start=[% back %]">&lt;Last [% constants.discussion_display_limit %] discussions</A>
+					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&amp;[% END %]start=[% back %]">&lt;Last [% constants.discussion_display_limit %] discussions</A>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&[% END %]start=[% forward %]">Next [% constants.discussion_display_limit %] discussions&gt;</A>
+					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&amp;[% END %]start=[% forward %]">Next [% constants.discussion_display_limit %] discussions&gt;</A>
 				[% END %]
 	[% END %]
 __seclev__

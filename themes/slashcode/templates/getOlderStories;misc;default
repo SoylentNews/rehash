@@ -30,33 +30,33 @@ __template__
 		today = "$story.w $story.m $story.d";
 		IF !section or section.section == 'index' %]
 			<P><B>[% IF cur_time && story.secs && cur_time-story.secs > 7*86400
-				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&mode=[% user.currentMode %]"
+				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&amp;mode=[% user.currentMode %]"
 				>[% story.m %] [% story.d %]</A></FONT>[%
 			ELSE
-				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&mode=[% user.currentMode %]"
+				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&amp;mode=[% user.currentMode %]"
 				>[% story.w %]</A></FONT> [% story.m %] [% story.d %][%
 			END %]</B></P>
 		[% ELSIF section.issue && section.issue > 1 %]
-			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&issue=[% story.day %]&mode=[% user.currentMode %]"
+			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&amp;issue=[% story.day %]&amp;mode=[% user.currentMode %]"
 				>[% story.w %]</A></FONT> [% story.m %] [% story.d %]</B></P>
 		[% ELSE %]
 			<P><B><FONT SIZE="4">[% story.w %]</FONT> [% story.m %] [% story.d %]</B></P>
 		[% END;
 	END %]
-	<LI>[% story.link %] ([% story.commentcount %])</LI>
+	&middot; [% story.link %] ([% story.commentcount %])<BR>
 [% END %]
 
 [% IF !section or section.section == 'index' %]
 <P ALIGN="RIGHT"><B><A HREF="[% constants.rootdir %]/search.pl?start=[% start %]">Older Articles</A></B>
-<BR><B><A HREF="[% constants.rootdir %]/index.pl?mode=[% user.currentMode %]&issue=[% yesterday %]"
+<BR><B><A HREF="[% constants.rootdir %]/index.pl?mode=[% user.currentMode %]&amp;issue=[% yesterday %]"
 >Yesterday's Edition</A></B>
 [% ELSIF section.issue %]
 <P ALIGN="RIGHT">
 	[% IF section.issue == 1 || section.issue == 3 %]
-<BR><B><A HREF="[% constants.rootdir %]/search.pl?section=[% section.section %]&start=[% start %]"
+<BR><B><A HREF="[% constants.rootdir %]/search.pl?section=[% section.section %]&amp;start=[% start %]"
 >Older Articles</A></B>
 	[% END %][% IF section.issue == 2 || section.issue == 3 %]
-<BR><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&mode=[% user.currentMode %]&issue=[% yesterday %]"
+<BR><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&amp;mode=[% user.currentMode %]&amp;issue=[% yesterday %]"
 >Yesterday's Edition</A></B>
 	[% END %]
 [% END %]

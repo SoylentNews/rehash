@@ -23,7 +23,7 @@ __template__
 	<TR>
 		<TD>
 		<P>You can automatically login by clicking
-		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&upasswd=[% useredit.passwd | fixparam %]&unickname=[% useredit.nickname | fixparam %]">This Link</A> and Bookmarking the resulting page. 
+		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;upasswd=[% useredit.passwd | fixparam %]&amp;unickname=[% useredit.nickname | fixparam %]">This Link</A> and Bookmarking the resulting page. 
 		This is totally insecure, but very convenient.
 		</P>
 		<BR>

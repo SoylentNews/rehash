@@ -36,7 +36,7 @@ __template__
 		[% sub.time %]&nbsp;
 	[% END %]
 	</TD><TD>
-		<A HREF="[% env.script_name %]?op=viewsub&subid=[% sub.subid %]&note=[% form.note %][% sub.stitle%][% sub.ssection %]"
+		<A HREF="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid %]&amp;note=[% form.note %][% sub.stitle%][% sub.ssection %]"
 		>[% sub.strs.0 %]&nbsp;</A>
 	</TD><TD><FONT SIZE="2">[% sub.strs.1 %]
 	[% UNLESS sub.is_anon %]
