@@ -93,7 +93,7 @@ sub countSubmissionsByDay {
 
 	my $used = $self->sqlCount(
 		'submissions', 
-		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'"
+		"time BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'"
 	);
 }
 
@@ -101,7 +101,8 @@ sub countSubmissionsByDay {
 sub countSubmissionsByCommentIPID {
 	my($self, $yesterday, $ipids) = @_;
 	return unless @$ipids;
-	my $in_list = join(",", @$ipids);
+	my $slashdb = getCurrentDB();
+	my $in_list = join(",", map { $slashdb->sqlQuote($_) } @$ipids);
 
 	my $used = $self->sqlCount(
 		'comments', 
