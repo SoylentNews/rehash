@@ -474,9 +474,9 @@ EOT
 
   	print <<EOT;
 	<P><B>Password</B> Enter new passwd twice to change it.
-		(must be at least 6 chars long)<BR>
-		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20">
-		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20"><P>
+		(must be 6-20 chars long)<BR>
+		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">
+		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20" MAXLENGTH="20"><P>
 
 </TD></TR></TABLE><P>
 
@@ -982,11 +982,11 @@ EOT3
 
 	print <<EOT;
 
-	<P><B>Nick:</B><BR>
+	<P><B>Nick:</B> (maximum 20 characters long)<BR>
 	<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="$I{F}{unickname}"><BR>
 
-	<B>Password:</B><BR>
-	<INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20"><BR>
+	<B>Password:</B> (6-20 characters long)<BR>
+	<INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20"><BR>
 
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="userlogin">
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="mailpasswd">
@@ -1005,7 +1005,7 @@ EOT1
 EOT2
 
 	print <<EOT;
-	(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-$</TT>, plus space,
+	(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
 	are allowed in nicknames, and all others will be stripped out.)
 
 	<INPUT TYPE="TEXT" NAME="newuser" SIZE="20" MAXLENGTH="20" VALUE="$I{F}{newuser}">
