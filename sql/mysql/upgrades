@@ -1942,6 +1942,14 @@ INSERT INTO vars (name, value, description) VALUES ('show_all_future_stories_adm
 
 # End of T_2_3_0_124, Start of T_2_3_0_125 - 2003/11/10
 
+
 # for messages (adjust to suit your own tastes, but these are new defaults):
 REPLACE INTO vars (name, value, description) VALUES ('message_web_expire','14','Number of days to keep message on web site');
 REPLACE INTO vars (name, value, description) VALUES ('message_web_maxtotal','25','Number of total messages to keep on web site, per user');
+
+# for relocate plugin if you don't have this installed you don't need this
+# this column allows the user to decide what links or groups of links stats are collected for
+ALTER TABLE links add stats_type VARCHAR(24);
+
+
+ALTER TABLE accesslist ADD estimated_users SMALLINT UNSIGNED DEFAULT 1;

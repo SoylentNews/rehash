@@ -52,6 +52,7 @@ CREATE TABLE accesslist (
 	was_nopalm enum('no','yes') NOT NULL default 'no',
 	was_proxy enum('no','yes') NOT NULL default 'no',
 	was_trusted enum('no','yes') NOT NULL default 'no',
+	estimated_users smallint UNSIGNED default 1,
 	PRIMARY KEY  (id),
 	KEY uid (uid),
 	KEY ipid (ipid),
