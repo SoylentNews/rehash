@@ -796,6 +796,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consequences_repeats','3
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_freq','86400','In seconds, the maximum frequency which users can metamoderate');
+INSERT INTO vars (name, value, description) VALUES ('m2_if_smoother',5,'Number that acts as multiplier for the if_expr, should probably be around your average m2needed/consensus value');
 INSERT INTO vars (name, value, description) VALUES ('m2_inherit', '0', 'Set to true if you would like to inherit m2s from previous mods with the same cid-reason');
 INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus_karma','12','Usually about half of goodkarma');
 INSERT INTO vars (name, value, description) VALUES ('m2_min_daysbackcushion','2','The minimum days-back cushion');
@@ -912,6 +913,8 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');
 INSERT INTO vars (name, value, description) VALUES ('submit_show_weight', '0', 'Display optional weight field in submission admin.');
+INSERT INTO vars (name, value, description) VALUES ('subnet_karma_comments_needed','5','Number of comments needed before subnet karma is used for disallowing posting');
+INSERT INTO vars (name, value, description) VALUES ('subnet_karma_post_limit_range','-5|-9|-10|-999999','range of subnet karma to block posting at -5|-9|-10|-999999 blocks anonymous posting at -5 to -9 subnet karma, and all posting from -10 to -999999 subnet karma');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_request','0','Special boolean to cache templates only for a single request');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_size','0','Number of templates to store in cache (0 = unlimited)');
 INSERT INTO vars (name, value, description) VALUES ('template_post_chomp','0','Chomp whitespace after directives (0 = no, 1 = yes, 2 = collapse; 0 or 2 recommended)');
