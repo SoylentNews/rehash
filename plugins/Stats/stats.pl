@@ -34,6 +34,7 @@ sub main {
 		report	=> [ $admin,		\&report	],
 		graph	=> [ $admin,		\&graph		],
 		table	=> [ $admin,		\&table		],
+		csv	=> [ $admin,		\&csv		],
 		list	=> [ $admin_post,	\&list		],
 
 		default	=> [ $admin,		\&list		]
@@ -52,7 +53,7 @@ sub main {
 
 	# from data;SCRIPTNAME;default
 	#getData('head')
-	unless ($op eq 'graph') {
+	unless ($op eq 'graph' || $op eq 'csv') {
 		header('', '', { admin => 1, adminmenu => 'info', tab_selected => 'stats' } );
 		print createMenu('stats');
 	}
@@ -60,7 +61,7 @@ sub main {
 	# dispatch of op
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats);
 
-	footer() unless $op eq 'graph';
+	footer() unless $op eq 'graph' || $op eq 'csv';
 }
 
 sub _get_graph_data {
@@ -130,6 +131,37 @@ sub table {
 	slashDisplay('table', {
 		data		=> $data,
 	});
+}
+
+sub csv {
+	my($slashdb, $constants, $user, $form, $stats) = @_;
+
+	my($data) = _get_graph_data($slashdb, $constants, $user, $form, $stats);
+
+	my $content = slashDisplay('csv', {
+		data		=> $data,
+	}, {
+		Nocomm		=> 1,
+		Return		=> 1,
+	});
+
+	my $filename = join '-',
+		$constants->{sitename},
+		$form->{stats_days},
+		$form->{title};
+	$filename =~ s/[^\w_.-]+//g;
+
+	my $r = Apache->request;
+	$r->content_type('text/csv');
+	$r->header_out('Cache-control', 'private');
+	$r->header_out('Pragma', 'no-cache');
+	$r->header_out('Content-Disposition', "attachment; filename=$filename.csv");
+	$r->status(200);
+	$r->send_http_header;
+	$r->rflush;
+	$r->print($content);
+	$r->status(200);
+	return 1;
 }
 
 sub graph {

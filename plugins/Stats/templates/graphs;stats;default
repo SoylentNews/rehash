@@ -20,17 +20,24 @@ showtotal = 0;
 mygraphs = [
 	'Pages',
 	'Hits',
+	'Total Users',
 	'Comments',
-	'Users',
 	'Page Bytes',
 	'Total Bytes',
 	'Section Pages',
 	'Section Bytes',
+
 	'Message Types',
-	'Scores',
+
+	'Comment Scores',
 	'Total Comments',
 	'Total Moderations',
 	'Total Metamoderations',
+
+        'New Subscriptions',
+        'Total Subscribers',
+        'Total Renewing Subscribers',
+        'Subscriber Pages'
 ];
 
 
@@ -157,6 +164,7 @@ SWITCH gtitle;
       END;
 
       PROCESS make_graph
+         showtotal => 1,
          type      => 'areastacked'; 
 
   # Moderation Report
@@ -189,6 +197,7 @@ SWITCH gtitle;
   # Subscription Report
   CASE 'New Subscriptions';
       PROCESS make_graph
+         showtotal => 1,
          section   => 'all',
          type      => 'areastacked',
          statdata  => ['subscribe_new_users', 'subscribe_renew_users'];

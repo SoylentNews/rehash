@@ -7,6 +7,7 @@ requiresplugin=Blob
 task=adminmail.pl
 task=stats_graphs_delete.pl
 template=templates/calculate;stats;default
+template=templates/csv;stats;default
 template=templates/data;adminmail;default
 template=templates/display;adminmail;default
 template=templates/display;modmail;default

@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+csv
+__template__
+[% PROCESS calculate %]
+"Date"
+[%- pct = 100 div alldata.size;
+	FOREACH this = alldata;
+		NEXT IF loop.index == 0;
+		myindex = loop.index - 1 -%]
+,"[% alltypes.${myindex} | replace('"', '\\"') | replace('[\r\n\t\v]', ' ') %]"
+[%- END %]
+[% FOREACH day = days -%]
+"[% day %]"
+[%- myindex = loop.index;
+	FOREACH this = alldata;
+		NEXT IF loop.index == 0 -%]
+,"[% this.${myindex} %]"
+[%- END %]
+[% END %]
+
+__seclev__
+1000
+__version__
+$Id$
