@@ -23,7 +23,7 @@ use Carp;
 use Errno;
 use File::Basename;
 use File::Path;
-use File::Spec::Functions;
+use File::Spec::Functions qw(:DEFAULT devnull);
 use LWP::UserAgent;
 use HTTP::Request;
 use POSIX ':sys_wait_h';
@@ -554,13 +554,7 @@ sub main {
 	};
 
 	# daemonize
-	close STDOUT;
-
-	# this is a ridiculous fix for a ridiculous bug:
-	# http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-09/msg00956.html
-	# so we are stealing STDOUT's fd so it can't be used elsewhere;
-	# it's ridiculous that we should have to -- pudge
-	open my $fh, '>', catfile($constants->{logdir}, 'openwarn');
+	open(STDOUT, '+>' . devnull());
 
 	MAINLOOP: while (1) {
 		if (verbosity() >= 4) {
