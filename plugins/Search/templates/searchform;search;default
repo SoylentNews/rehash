@@ -57,7 +57,7 @@ __template__
 	[% END %]
 
 	[% IF threshhold %]
-		Threshold <INPUT TYPE="TEXT" SIZE="3" NAME="threshold" VALUE="[% form.threshold %]">
+		Threshold [% threshold_select %]
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
 	[% END %]
 

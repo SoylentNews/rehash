@@ -178,13 +178,20 @@ sub commentSearch {
 
 	my $start = $form->{start} || 0;
 	my $comments = $searchDB->findComments($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+
+	my $formats = $slashdb->getDescriptions('threshcodes');
+	my $threshold_select = createSelect(
+		'threshold', $formats, $form->{threshold}, 1
+	);
+
 	slashDisplay('searchform', {
-		sections	=> _sections(),
-		topics		=> _topics(),
-		tref		=> $slashdb->getTopic($form->{tid}),
-		op		=> $form->{op},
-		'sort'		=> _sort(),
-		threshhold 	=> 1,
+		sections	 => _sections(),
+		topics		 => _topics(),
+		tref		 => $slashdb->getTopic($form->{tid}),
+		op		 => $form->{op},
+		'sort'		 => _sort(),
+		threshhold 	 => 1,
+		threshold_select => $threshold_select,
 	});
 
 	if ($comments && @$comments) {
