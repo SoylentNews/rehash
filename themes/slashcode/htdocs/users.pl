@@ -287,6 +287,7 @@ sub main {
 		force_acct_verify => {
 			function	=> \&forceAccountVerify,
 			seclev		=> 100,
+			post		=> 1,
 			formname 	=> $formname,
 			checks		=> []
 		}	
