@@ -690,6 +690,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len_kicks
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len_max','20','Maximum minimum average line length');
 INSERT INTO vars (name, value, description) VALUES ('comments_moddable_archived','0','Are comments in discussions that have been archived moderatable?');
 INSERT INTO vars (name, value, description) VALUES ('comments_moddable_hours','336','Num hours after being posted that a comment may be moderated');
+INSERT INTO vars (name, value, description) VALUES ('comments_portscan_all_for_proxy', '0', 'If true, when ANY posting is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid posting if successful -- overrides comments_portscan_anon_for_proxy');
 INSERT INTO vars (name, value, description) VALUES ('comments_portscan_anon_for_proxy', '0', 'If true, when anonymous posting is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid posting if successful');
 INSERT INTO vars (name, value, description) VALUES ('comments_portscan_cachehours', '48', 'If comments_portscan_anon_for_proxy is true, hours to cache a result of a portscan for open proxies on a particular IP');
 INSERT INTO vars (name, value, description) VALUES ('comments_portscan_ports', '80 8080 8000 3128', 'If comments_portscan_anon_for_proxy is true, scan these space-separated ports');

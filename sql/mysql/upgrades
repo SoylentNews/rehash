@@ -2213,3 +2213,11 @@ CREATE TABLE open_proxies (
 	KEY ts (ts)
 ) TYPE=InnoDB;
 
+# End of T_2_3_0_144, Start of T_2_3_0_146 - 2004/03/23
+
+INSERT INTO vars (name, value, description) VALUES ('comments_portscan_all_for_proxy', '0', 'If true, when ANY posting is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid posting if successful -- overrides comments_portscan_anon_for_proxy');
+
+ALTER TABLE code_param CHANGE COLUMN type type VARCHAR(24) NOT NULL DEFAULT '';
+UPDATE code_param SET type='section_topic_types'    WHERE type='section_topic_ty';
+UPDATE code_param SET type='displaycodes_sectional' WHERE type='displaycodes_sec';
+
