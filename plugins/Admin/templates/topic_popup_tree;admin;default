@@ -30,9 +30,9 @@ __template__
 [%-    END -%]
 <img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %][% IF leaf.open %]open[% ELSE %]closed[% END %]_node.png" valign="bottom"><a href="javascript:void(0);">[% leaf.label %]</a>
 [%-    IF slashtopics.${leaf.value}.image -%]
-<input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% constants.imagedir %]/topics/[% slashtopics.${leaf.value}.image %]">
+<input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% slashtopics.${leaf.value}.image %]">
 [%-    END -%]
-<input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% constants.topic_popup_defaultweight || 1 %]"><input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% thisname.join(' :: ') %]"></span></div>
+<input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% constants.topic_popup_defaultweight || 1 %]"><input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% thisname.join(' :: ') %]"><input type="hidden" id="[% name %]-tid-[% leaf.id %]" value="[% leaf.value | html %]"></span></div>
 [%-    IF leaf.has_children;
          thisparent.push(leaf.value) -%]
 <div id="[% name %]-desc-[% leaf.id %]" class="hpts-block" [% IF leaf.open %]style="display: block"[% ELSE %]style="display: none"[% END %] nowrap>
@@ -57,6 +57,37 @@ __template__
     <img name="[% name %]_main_img">
   </div>
 </div>
+
+<!-- address book style -->
+<div id="[% name %]-ab-outer" class="hpts-outer">
+  <div class="hpts-title" id="[% name %]-title">Select Topics - AB</div>
+  <div class="hpts-inner">
+
+<table><tr><td><p>
+<input width="30" name="[% name %]_ab_searchfield" id="[% name %]-ab-searchfield">
+<input width="30" type="button" value="Search" onmouseup="[% name %]_search('ab')">
+<font size="-2"><br>
+[%- FOREACH letter = ['A' .. 'Z'] %]
+<a href="javascript:[% name %]_search('ab','[% letter %]')">[% letter %]</a>
+[%- END %]
+<br></font>
+</p><p>
+
+    <div id="[% name %]-ab-searchlist">
+      <!-- div nowrap><span id="[% name %]-ab-line-22" ondblclick="[% name %]_ok('ab')" onclick="[% name %]_toggle_select(22,4,'ab')"><a href="javascript:void(0);">Ask Slashdot</a><input type="hidden" id="[% name %]-ab-weight-22" value="10"><input type="hidden" id="[% name %]-ab-fullname-22" value="Index :: Ask Slashdot"></span></div -->
+    </div>
+</p></td></tr></table>
+  </div>
+
+  <div class="hpts-bbar" nowrap>
+    <input class="hpts-button" type="button" value="Add Topic"    onclick="[% name %]_ok('ab')">
+    <input class="hpts-button" type="button" value="Close Window" onclick="[% name %]_cancel('ab')">
+  </div>
+  <div style="text-align: center">
+    <img name="[% name %]_ab_main_img">
+  </div>
+</div>
+
 __seclev__
 10000
 __version__

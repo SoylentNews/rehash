@@ -99,7 +99,83 @@ var [% name %]_selected_id = -1;
 [%- FOR quickname = names %]
 var [% quickname %]_selected_val;
 [%- END %]
+var [% name %]_selected_type;
 var [% name %]_max_id = [% loop.max %];
+
+/* find topics matching string */
+function [% name %]_search(type, searchstring) {
+	var name = "[% name %]";
+	if (type) {
+		name = name + "-" + type;
+	}
+
+	if (!searchstring) {
+		var searchobj = document.getElementById(name + "-searchfield");
+		searchstring = searchobj.value;
+	}
+	searchstring = searchstring.toLowerCase();
+
+	var tids = new Array;
+	for (var i = 0; i <= [% name %]_max_id; i++) {
+		var obj = document.getElementById("[% name %]-fullname-" + i);
+		if (obj) {
+			var j = 0;
+			var myname = obj.value.substr(obj.value.lastIndexOf(' :: ') + 4);
+
+			if (!searchstring) {
+				j = 1;
+			} else {
+				var match = myname.toLowerCase().indexOf(searchstring);
+
+				if (searchstring.length > 1) {
+					if (match != -1) {
+						j = 1;
+					}
+				// if search term is one letter, only use at beginning
+				} else if (match == 0) {
+					j = 1;
+				}
+			}
+
+			if (j) {
+				var tidobj = document.getElementById("[% name %]-tid-" + i);
+				var thistid = new Array (myname, i, tidobj.value);
+				tids[tidobj.value] = thistid;
+			}
+		}
+	}
+
+	/* clear selection */
+	if (type == [% name %]_selected_type && [% name %]_selected_id != -1) {
+		[% name %]_toggle_select([% name %]_selected_id, 0, type);
+	}
+		
+	var thistext = '';
+	tids.sort([% name %]_search_sort);
+	for (var i = 0; i <= tids.length; i++) {
+		if (tids[i]) {
+			thistext = thistext +
+				'<div nowrap><span id="[% name %]-ab-line-' + tids[i][1] +
+				'" ondblclick="[% name %]_ok(\'ab\')" onclick="[% name %]_toggle_select(' +
+				tids[i][1] + ',' + tids[i][2] +
+				',\'ab\')"><a href="javascript:void(0);">' + tids[i][0] +
+				'</a></span></div>';
+		}
+	}
+
+	var htmlobj = document.getElementById(name + "-searchlist");
+	htmlobj.innerHTML = thistext;
+
+	/* don't submit page */
+	return false;
+}
+
+/* sort the array of arrays */
+function [% name %]_search_sort(a, b) {
+	if (a[0].toLowerCase() > b[0].toLowerCase()) { return  1 }
+	if (a[0].toLowerCase() < b[0].toLowerCase()) { return -1 }
+	else                                         { return  0 }
+}
 
 /* get saved list */
 function [% name %]_get_saved_tree() {
@@ -195,32 +271,45 @@ function [% name %]_collapse(id) {
 }
 
 /* select or unselect a node */
-function [% name %]_toggle_select(id, val) {
+function [% name %]_toggle_select(id, val, type) {
+	var name = "[% name %]";
+	var iname = "[% name %]";
+	if (type) {
+		name = name + "-" + type;
+		iname = iname + "_" + type;
+	}
+
 	if ([% name %]_selected_id != -1) {
 		/* turn off old selected value */
-		var old = document.getElementById("[% name %]-line-" + [% name %]_selected_id);
+		var oldname = "[% name %]";
+		if ([% name %]_selected_type) {
+			oldname = oldname + "-" + [% name %]_selected_type;
+		}
+		var old = document.getElementById(oldname + "-line-" + [% name %]_selected_id);
 		old.className = "hpts-label-unselected";
 	}
 
-	var img_main = document.[% name %]_main_img;
-	if (id == [% name %]_selected_id) {
+	var img_main = document[iname + "_main_img"];
+	if (id == [% name %]_selected_id && type == [% name %]_selected_type) {
 		/* clicked twice, turn it off and go back to nothing selected */
 		[% name %]_selected_id = -1;
+		[% name %]_selected_type = '';
 		img_main.style.visibility = "hidden";
 	} else {
 		/* turn on selected item */
-		var new_obj = document.getElementById("[% name %]-line-" + id);
+		var new_obj = document.getElementById(name + "-line-" + id);
 		new_obj.className = "hpts-label-selected";
 		[% name %]_selected_id  = id;
 		[%- FOR quickname = names %]
 		[% quickname %]_selected_val = val;
 		[%- END %]
+		[% name %]_selected_type = type;
 
 		/* make topic image appear/disappear */
-		var img_obj	 = document.getElementById("[% name %]-img-" + id);
+		var img_obj = document.getElementById("[% name %]-img-" + id);
 		if (img_obj) {
 			img_main.style.visibility = "visible";
-			img_main.src = img_obj.value;
+			img_main.src = "[% constants.imagedir %]/topics/" + img_obj.value;
 		} else {
 			img_main.style.visibility = "hidden";
 		}
@@ -228,8 +317,15 @@ function [% name %]_toggle_select(id, val) {
 }
 
 /* it's showtime! */
-function [% name %]_show() {
-	var obj = document.getElementById("[% name %]-outer");
+function [% name %]_show(type) {
+	var name = "[% name %]";
+	var iname = "[% name %]";
+	if (type) {
+		name = name + "-" + type;
+		iname = iname + "_" + type;
+	}
+
+	var obj = document.getElementById(name + "-outer");
 	// var x = Math.floor(hpts_mouseX - ([% width %]/2));
 	var x = 2;
 	// x = (x > 2 ? x : 2);
@@ -242,7 +338,7 @@ function [% name %]_show() {
 
 	obj.style.visibility = "visible";
 
-	document.[% name %]_main_img.style.visibility = "hidden";
+	document[iname + "_main_img"].style.visibility = "hidden";
 
 [%- IF hide_selects %]
 	for(var f = 0; f < document.forms.length; f++) {
@@ -264,23 +360,35 @@ function [% name %]_show() {
 	}
 [%- END %]
 
-	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
-	mybutton.value = "Close Window";
-	mybutton.onmouseup = [% name %]_close;
+	var mybutton  = document.[% form_field_form %][iname + "_topic_toggle"];
+	if (type) {
+		mybutton.onmouseup = new Function ('[% name %]_close("' + type + '")');
+		mybutton.value = "Close Window - " + type.toUpperCase();
+	} else {
+		mybutton.onmouseup = function () { [% name %]_close() };
+		mybutton.value = "Close Window";
+	}
 }
 
-function [% name %]_cancel() {
-	[% name %]_close();
+function [% name %]_cancel(type) {
+	[% name %]_close(type);
 }
 
-function [% name %]_close () {
+function [% name %]_close(type) {
+	var name = "[% name %]";
+	var iname = "[% name %]";
+	if (type) {
+		name = name + "-" + type;
+		iname = iname + "_" + type;
+	}
+
 	/* hide window */
-	var obj = document.getElementById("[% name %]-outer");
+	var obj = document.getElementById(name + "-outer");
 	obj.style.visibility = "hidden";
 
 	/* clear selection */
-	if ([% name %]_selected_id != -1) {
-		[% name %]_toggle_select([% name %]_selected_id);
+	if (type == [% name %]_selected_type && [% name %]_selected_id != -1) {
+		[% name %]_toggle_select([% name %]_selected_id, 0, type);
 	}
 
 [%- IF hide_selects %]
@@ -303,19 +411,24 @@ function [% name %]_close () {
 	}
 [%- END %]
 
-	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
-	mybutton.value = "Choose Topics";
-	mybutton.onmouseup = [% name %]_show;
+	var mybutton  = document.[% form_field_form %][iname + "_topic_toggle"];
+	if (type) {
+		mybutton.onmouseup = new Function ('[% name %]_show("' + type + '")');
+		mybutton.value = "Choose Topics - " + type.toUpperCase();
+	} else {
+		mybutton.onmouseup = function () { [% name %]_show() };
+		mybutton.value = "Choose Topics";
+	}
 }
 
-function [% name %]_get_all_names (id) {
+function [% name %]_get_all_names(id) {
 	var obj = document.getElementById("[% name %]-fullname-" + id);
 	if (obj) {
 		return obj.value;
 	}
 }
 
-function [% name %]_get_weight (id) {
+function [% name %]_get_weight(id) {
 	var obj = document.getElementById("[% name %]-weight-" + id);
 	if (obj) {
 		return obj.value;
@@ -335,12 +448,12 @@ function [% name %]_ok() {
 	[% IF form_field %][% IF form_field_form %]document.forms["[% form_field_form %]"][% ELSE %]document.forms[0][% END %].elements["[% form_field %]"].value = [% name %]_selected_val;[% END %]
 
 	/* trigger onselect */
-	[% IF onselect == "st_main_add" %][% name %]_main_add([% name %]_selected_val);
+	[% IF onselect == names.0 _ "_main_add" %][% name %]_main_add([% name %]_selected_val);
 	[% ELSIF onselect %][% onselect %]([% name %]_selected_val);
 	[% END %]
 }
 
-function [% name %]_select_weight () {
+function [% name %]_select_weight() {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
 	var myweights = document.[% form_field_form %].[% name %]_main_weights;
@@ -360,7 +473,7 @@ function [% name %]_select_weight () {
 	}
 }
 
-function [% name %]_change_weight () {
+function [% name %]_change_weight() {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myweights = document.[% form_field_form %].[% name %]_main_weights;
 
@@ -371,7 +484,7 @@ function [% name %]_change_weight () {
 	}
 }
 
-function [% name %]_change_weight_really (i, val) {
+function [% name %]_change_weight_really(i, val) {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
 
@@ -381,13 +494,13 @@ function [% name %]_change_weight_really (i, val) {
 	myselect[i].text = newname;
 }
 
-function [% name %]_main_add (val) {
+function [% name %]_main_add(val) {
 	var name   = [% names.0 %]_get_all_names([% names.0 %]_selected_id);
 	var weight = [% names.0 %]_get_weight([% names.0 %]_selected_id);
 	[% name %]_main_add_really(val, name, weight);
 }
 
-function [% name %]_main_add_really (val, name, weight, noerr) {
+function [% name %]_main_add_really(val, name, weight, noerr) {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
 	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
@@ -478,12 +591,14 @@ function [% name %]_submit() {
 		myselecti.style.display = 'none';
 	}
 
-	[% IF name == names.1 -%]
+[% IF name == names.1 -%]
 	[% names.0 %]_submit();
-	[% ELSE -%]
+[% ELSE -%]
 	var mysaved   = document.[% form_field_form %].[% name %]_saved_tree;
 	mysaved.value = [% name %]_get_saved_tree();
-	[% END -%]
+
+	document.[% form_field_form %].submit();
+[% END -%]
 }
 
 function [% name %]_load_names() {

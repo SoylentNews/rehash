@@ -75,8 +75,9 @@ __template__
 	[% name %]_reset_saved_tree(list);
 </script>
 
-<input type="button" value="Choose Topics"  onmouseup="[% name %]_show()" name="[% name %]_topic_toggle">
-<input type="button" value="Collapse All"   onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+<input type="button" value="Choose Topics"      onmouseup="[% name %]_show()" name="[% name %]_topic_toggle">
+<input type="button" value="Choose Topics - AB" onmouseup="[% name %]_show('ab')" name="[% name %]_ab_topic_toggle">
+<input type="button" value="Collapse All"       onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
 </td></tr></table>
 
 __seclev__
