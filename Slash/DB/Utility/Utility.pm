@@ -427,17 +427,27 @@ sub sqlSelectAll {
 # hash ref of all records
 sub sqlSelectAllHashref {
 	my($self, $id , $select, $from, $where, $other) = @_;
+	# Yes, if $id is not in $select things will be bad
+	
+	# Allow $id to be an arrayref to collect multiple rows of results
+	# keyed by more than one column.  E.g. if you "GROUP BY foo, bar"
+	# then pass "[qw( foo bar )]" for $id and the column "baz" will
+	# be at $returnable->{$foovalue}{$barvalue}{baz}.
+	$id = [ $id ] if !ref($id);
 
-	# Yes, if ID is not in $select things will be bad
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
 	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
-	my $returnable;
+	my $returnable = { };
 	while (my $row = $sth->fetchrow_hashref) {
-		$returnable->{$row->{$id}} = $row;
+		my $reference = $returnable;
+		for my $next_id (@$id) {
+			$reference = \%{$reference->{$row->{$next_id}}};
+		}
+		%$reference = %$row;
 	}
 	$sth->finish;
 
