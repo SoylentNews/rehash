@@ -90,7 +90,9 @@ __template__
 
 		Threshold: [%
 			Slash.selectThreshold(comments.0.totals);
-			Slash.selectMode(user.mode);
+			IF user.mode != 'parents';
+			  Slash.selectMode(user.mode);
+			END;
 			Slash.selectSortcode(user.commentsort) %]
 
 	[% UNLESS user.is_anon %]

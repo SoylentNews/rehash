@@ -108,7 +108,8 @@ sub selectComments {
 	for my $C (@$thisComment) {
 		# By setting pid to zero, we remove the threaded
 		# relationship between the comments
-		$C->{pid} = 0 if $user->{commentsort} > 3; # Ignore Threads
+		$C->{pid} = 0 if $user->{commentsort} > 3
+			&& $user->{mode} ne 'parents'; # Ignore Threads
 
 		# I think instead we want something like this... (not this
 		# precisely, it munges up other things).
@@ -988,7 +989,8 @@ sub displayThread {
 	# metamoderation.
 	if ($user->{mode} eq 'flat'
 		|| $user->{mode} eq 'archive'
-		|| $user->{mode} eq 'metamod') {
+		|| $user->{mode} eq 'metamod'
+		|| $user->{mode} eq 'parents') {
 		$indent = 0;
 		$full = 1;
 	} elsif ($user->{mode} eq 'nested') {
@@ -1040,7 +1042,7 @@ sub displayThread {
 			$finish_list++;
 		}
 
-		if ($comment->{kids}) {
+		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			$return .= $const->{cagebegin} if $cagedkids;
 			$return .= $const->{indentbegin} if $indent;
 			$return .= displayThread($sid, $cid, $lvl+1, $comments, $const);

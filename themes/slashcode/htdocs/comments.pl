@@ -358,6 +358,8 @@ sub displayComments {
 		printComments($discussion, $form->{cid}, $form->{cid});
 	} elsif ($form->{sid}) {
 		printComments($discussion, $form->{pid});
+	} elsif ($constants->{ubb_like_forums}) {
+		commentIndexUserCreated(@_);
 	} else {
 		commentIndex(@_);
 	}
