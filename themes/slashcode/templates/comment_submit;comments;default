@@ -4,6 +4,11 @@ __description__
 Message displayed when a user submits a comment.
 
 No specially passed variables.
+
+Pulls the user's message prefs, if appropriate.  Message 3 = "Moderation
+of Comment", message 4 = "Replay to Comment".  If both are set to "no,"
+give the user a little tip about how they can be turned on.
+
 __title__
 
 __page__
@@ -13,8 +18,22 @@ en_US
 __name__
 comment_submit
 __template__
-Comment Submitted. There will be a delay before the comment becomes part of the static page.
-What you submitted appears below.  If there is a mistake...well, you should have used the
-'Preview' button!<P>
+Comment Submitted. There will be a delay before the comment becomes part
+of the static page.  What you submitted appears below.  If there is a
+mistake...well, you should have used the 'Preview' button!<P>
+
+[% IF !user.is_anon && constants.plugin.Messages %]
+	[% message = Slash.getObject('Slash::Messages');
+	prefs = message.getPrefs(user.uid);
+	messagecodes = message.getDescriptions('messagecodes');
+	IF (messagecodes.3 && !prefs.3.defined)
+		&& (messagecodes.4 && !prefs.4.defined) %]
+		If you'd like to be notified when your comments are
+		moderated and/or replied-to, please visit the
+		<A HREF="[% constants.rootdir %]/my/messages/">Message
+		Preferences page</a>.
+	[% END %]
+[% END %]
+
 __seclev__
 1000
