@@ -472,6 +472,10 @@ sub getModeratorCommentLog {
 #
 # No, on purpose;  modCommentLog;misc;default now displays that data.
 # Removing it again. - Jamie
+#
+# Aha, I think it was removed to solve the problem of inactive comments
+# being listed in the "Moderation Totals."  The better way to solve
+# that is to eliminate them there, which I'm doing now. - Jamie
 
 	# We no longer need SID as CID is now unique.
 	my $comments = $self->sqlSelectMany("comments.sid as sid,
@@ -3068,35 +3072,69 @@ sub deleteVar {
 # has been removed and now resides at the theme level.
 #	- Cliff 7/3/01
 # It now returns a boolean: whether or not the comment was changed. - Jamie
-# The last UPDATE statement wasn't getting execute because:
-# $s ||= $expr is a SHORT CIRCUIT. If $s is non-zero, $expr isn't evaluated.
-# This has now been fixed and the intended behavior should remain unchanged.
-# - Cliff 7/17/01
 sub setCommentCleanup {
-	my($self, $cid, $val, $reason) = @_;
+	my($self, $cid, $val, $newreason, $oldreason) = @_;
 
 	return 0 if $val eq '+0';
 
-	# Grab the user object.
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	my $strsql = "SET
-		points=points$val,
-		reason=$reason,
-		lastmod=$user->{uid}
-		WHERE cid=$cid
-		AND points " .
-			($val < 0 ? " > $constants->{comment_minscore}" : "") .
-			($val > 0 ? " < $constants->{comment_maxscore}" : "");
-
-	$strsql .= " AND lastmod<>$user->{uid}"
+	my $update = {
+		-points => "points$val",
+		reason => $self->getCommentMostCommonReason($cid,
+			$newreason, $oldreason),
+		lastmod => $user->{uid},
+	};
+	my $where = "cid=$cid AND points ";
+	$where .= " > $constants->{comment_minscore}" if $val < 0;
+	$where .= " < $constants->{comment_maxscore}" if $val > 0;
+	$where .= " AND lastmod<>$user->{uid}"
 		unless $user->{seclev} >= 100 && $constants->{authors_unlimited};
 
-	my($rc1, $rc2) = (0, 0);
-	$rc2 = 1 if $self->sqlDo("UPDATE comments $strsql") > 0;
+	return $self->sqlUpdate("comments", $update, $where);
+}
 
-	return $rc1 || $rc2;
+########################################################
+# This gets the mathematical mode, in other words the most common, of the
+# moderations done to a comment.  If no mods, return undef.  Tiebreakers
+# break ties, first tiebreaker found wins.  "cid" is a key in moderatorlog
+# so this is not a table scan.
+sub getCommentMostCommonReason {
+	my($self, $cid, @tiebreaker_reasons) = @_;
+	my $hr = $self->sqlSelectAllHashref(
+		"reason",
+		"reason, COUNT(*) as c",
+		"moderatorlog",
+		"cid=$cid",
+		"GROUP BY reason"
+	);
+	return undef if !keys %$hr;
+	# Sort first by popularity and secondarily by reason.
+	# "reason" is a numeric field, so we sort $a<=>$b numerically.
+	my @sorted_keys = sort {
+		$hr->{$a}{c} <=> $hr->{$b}{c}
+		||
+		$a <=> $b
+	} keys %$hr;
+	my $top_count = $hr->{$sorted_keys[-1]}{c};
+	@sorted_keys = grep { $hr->{$_}{c} == $top_count } @sorted_keys;
+	# Now sorted_keys are only the top values, one or more of them,
+	# any of which could be the winning reason.
+	if (scalar(@sorted_keys) == 1) {
+		# A clear winner.  Return it.
+		return $sorted_keys[0];
+	}
+	# No clear winner. Are any of our tiebreakers contenders?
+	my %sorted_hash = ( map { $_ => 1 } @sorted_keys );
+	for my $reason (@tiebreaker_reasons) {
+		# Yes, return the first tiebreaker we find.
+		return $reason if $sorted_hash{$reason};
+	}
+	# Nope, we don't have a good way to resolve the tie. Pick whatever
+	# comes first in the reason list (reasons are all numeric and
+	# sorted_keys is already sorted, making this easy).
+	return $sorted_keys[0];
 }
 
 
@@ -4102,7 +4140,7 @@ sub getSlashConf {
 	# any bad or missing data in the vars table
 	$conf{rootdir}		||= "//$conf{basedomain}";
 	$conf{absolutedir}	||= "http://$conf{basedomain}";
-	$conf{basedir}		||= $conf{datadir} . "/public_html";
+	$conf{basedir}		||= "$conf{datadir}/public_html";
 	$conf{imagedir}		||= "$conf{rootdir}/images";
 	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";
 	$conf{cookiepath}	||= URI->new($conf{rootdir})->path . '/';

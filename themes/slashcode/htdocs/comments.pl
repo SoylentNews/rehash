@@ -1085,14 +1085,11 @@ sub moderateCid {
 		}
 	}
 
-	my $modreason = $reason;
 	my $val = "-1";
 	if ($reason == 9) { # Overrated
 		$val = "-1";
-		$reason = $comment->{reason};
 	} elsif ($reason == 10) { # Underrated
 		$val = "+1";
-		$reason = $comment->{reason};
 	} elsif ($reason > $constants->{badreasons}) {
 		$val = "+1";
 	}
@@ -1116,7 +1113,7 @@ sub moderateCid {
 	}
 
 	# Write the proper records to the moderatorlog.
-	$slashdb->setModeratorLog($comment, $user->{uid}, $val, $modreason, $active);
+	$slashdb->setModeratorLog($comment, $user->{uid}, $val, $reason, $active);
 
 	if ($active) {
 		# Increment moderators total mods and deduct their point for playing.
@@ -1147,9 +1144,9 @@ sub moderateCid {
 		}
 
 		# Make sure our changes get propagated back to the comment.
-		# Note that we use the ADJUSTED reason value, $reason.
 		$comment_changed =
-			$slashdb->setCommentCleanup($cid, $val, $reason);
+			$slashdb->setCommentCleanup($cid, $val, $reason,
+				$comment->{reason});
 		if (!$comment_changed) {
 			# This shouldn't happen;  the only way we believe it
 			# could is if $val is 0, the comment is already at
@@ -1203,7 +1200,7 @@ sub moderateCid {
 					moderation	=> {
 						user	=> $user,
 						value	=> $val,
-						reason	=> $modreason,
+						reason	=> $reason,
 					},
 				};
 				$messages->create(
