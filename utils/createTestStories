@@ -119,7 +119,7 @@ $constants = getCurrentStatic();
 		};
 
 		my $sid = $slashdb->createStory($story);
-		$slashdb->setStoryTopics($story->{sid}, createStoryTopicData($self, $story));
+		$slashdb->setStoryTopics($story->{sid}, createStoryTopicData($slashdb, $story));
 		my $reloDB = getObject("Slash::Relocate");
 		if ($reloDB && $sid) {
 			$slashdb->setStory($sid, { 
