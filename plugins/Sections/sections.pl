@@ -164,7 +164,7 @@ sub editSection {
 		issue		=> $issue,
 		blocks		=> \@blocks,
 		topics		=> $slashdb->getDescriptions(
-		'topics_section', $section
+			'topics_section', $section
 		),
 		extras		=> $extras,
 	});
@@ -179,7 +179,7 @@ sub saveSection {
 	# Non alphanumerics are not allowed in the section key.
 	# And I don't see a reason for underscores either, but
 	# dashes should be allowed.
-	($section  = $form->{section}) =~ s/[^A-Za-z0-9\-]//g;
+	($section = $form->{section}) =~ s/[^A-Za-z0-9\-]//g;
 
 	# Before we insert, give some reasonable defaults.
 	$form->{url} 	  ||= '';
