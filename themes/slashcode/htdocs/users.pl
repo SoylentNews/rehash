@@ -268,11 +268,17 @@ sub main {
 	}
 
 	if ($op eq 'userlogin' && ! $user->{is_anon}) {
-		# why disable "returnto" ?  What's going on? -- pudge
-		# no one responded, so i am changing it back
-# 		my $refer = URI->new_abs($constants->{rootdir},
+		# We absolutize the return-to URL to our homepage just to
+		# be sure nobody can use the site as a redirection service.
+		# We decide whether to use the secure homepage or not
+		# based on whether the current page is secure.
+		my $abs_dir =
+			( $constants->{absolutedir_secure}
+				&& Slash::Apache::ConnectionIsSSL() )
+			? $constants->{absolutedir_secure}
+			: $constants->{absolutedir};
 		my $refer = URI->new_abs($form->{returnto} || $constants->{rootdir},
-			$constants->{absolutedir});
+			$abs_dir);
 
 		# Tolerate redirection with or without a "www.", this is a
 		# little sloppy but it may help avoid a subtle misbehavior

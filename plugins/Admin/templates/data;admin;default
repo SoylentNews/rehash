@@ -101,7 +101,7 @@ Saved [% form.thisname %]<BR>
 	<A HREF="[% constants.absolutedir_secure %]/users.pl?op=changepasswd">change
 	your password</A>
 	immediately! If you have additional problems, please contact the
-	<A HREF="[% constants.siteadmin %]">site admin</a>.[%
+	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">site admin</a>.[%
 	IF moreinfo %] More info: "[% moreinfo | strip_literal %]".[%
 	END %]&nbsp;**</B></P></BLOCKQUOTE>
 

@@ -251,7 +251,8 @@ sub ConnectionIsSSL {
 		? 1 : 0;
 	return 1 if $https_on;
 
-	# Nope, it's not SSL.
+	# Nope, it's not SSL.  We're out of ideas, if the above didn't
+	# work we must not be on SSL.
 	return 0;
 }
 
