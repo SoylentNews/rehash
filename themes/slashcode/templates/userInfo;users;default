@@ -97,7 +97,6 @@ lastjournal.description | strip_notags %]</A></B>,
 	[% END %]
 [% END %]
 
-[% END %]
 <P>
 [% IF submissions.size > 0  %]
 [% IF admin_flag or useredit.uid == user.uid;
