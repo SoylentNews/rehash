@@ -538,8 +538,7 @@ sub main {
 		my $subref = $task{$task_filename}{code};
 		my $forktype = SLASHD_WAIT; # the default
 		$forktype = SLASHD_NOWAIT
-			if !$constants->{fork_all_tasks}
-				&& $task{$task_filename}{fork} == SLASHD_NOWAIT;
+			if $task{$task_filename}{fork} == SLASHD_NOWAIT;
 
 		# wait_until calls REAPER() periodically.
 		wait_until($until_time);
