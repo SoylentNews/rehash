@@ -26,20 +26,23 @@ use Cwd;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-
 my %opts;
+
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('cdilrstvUg:D:O:P:S:p:f:u:B:h', \%opts);
+usage('Options used incorrectly')
+	unless getopts('cdilrsTtVvUg:D:O:P:S:p:f:u:B:h', \%opts);
 usage() if ($opts{'h'} || !keys %opts);
-usage('Option -t requires -s or -U') if ($opts{'t'} && (!$opts{'s'} && !$opts{'U'}));
+usage('Option -t requires -s or -U') if $opts{'t'} && !$opts{'s'} && !$opts{'U'};
 version() if $opts{'v'};
 boiler() if $opts{'B'};
 
 # if deleting, then there should be no other operation or file flags
-usage('deletion with other op flags') if ( $opts{'r'} && ($opts{'d'} || $opts{'l'} || $opts{'f'} || $opts{'s'} || $opts{'e'} ));
+usage('deletion with other op flags')
+	if	$opts{'r'} &&
+		($opts{'d'} || $opts{'l'} || $opts{'f'} || $opts{'s'} || $opts{'e'});
 
 # can't have multiple IDs on a save
-usage('too many ids to save') if (@ARGV > 2 && $opts{'s'} && $opts{'i'});
+usage('too many ids to save') if $opts{'s'} && $opts{'i'} && @ARGV > 2;
 
 $opts{'u'} ||= 'slash';
 
@@ -296,8 +299,17 @@ if ($opts{'s'}) {
 			if (@ARGV) {
 				for (@ARGV) {
 					if ($opts{'i'}) {
-						$templatelist->{$key} = $templates->{$key}
-							if $key == $_;
+						unless ($_ =~ /^(\d+)?-(\d+)?$/) {
+							$templatelist->{$key} = $templates->{$key} if $key == $_;
+						} else {
+							# Process ID range.
+							my($low, $high) = ($1, $2);
+							next unless $low || $high;
+
+							for ($low .. $high) {
+								$templatelist->{$_} = $templates->{$_} if $templates->{$_};
+							}
+						}
 
 					} else {
 						my $templatename = $_;
@@ -325,6 +337,8 @@ if ($opts{'s'}) {
 		}
 	} elsif ($opts{'r'}) {
 		delete_templates($templatelist);
+	} elsif ($opts{'T'}) {
+		check_site_templates($templatelist);
 	}
 }
 
@@ -390,7 +404,7 @@ EOT
 ###############################################
 sub delete_templates {
 	my($templatelist) = @_;
-	return unless @{$templatelist};
+	return unless keys %{$templatelist};
 	my $list = join(" ", keys(%$templatelist));
 	
 	print "You are about to delete the following templates:\n\n";
@@ -427,14 +441,17 @@ sub compile_template {
 
 		# get template text or pass template data
 		if ($opts{i}) {
-			my $data = $slashdb->getTemplate($_, ['name', 'page', 'section']);
+			my $data = $slashdb->getTemplate(
+				$_, ['name', 'page', 'section']
+			);
 			@{$user}{qw(currentPage currentSection)} =
 				@{$data}{qw(page section)};
 			$template = $data->{name};
 
-		# this doesn't work, -f takes arg, filename
-		# is not in @ARGV
 		} elsif ($opts{f}) {
+			# this doesn't work, -f takes arg, filename
+			# is not in @ARGV
+			#
 			# The logic here is that $template would be set to the contents
 			# of the file named $_.
 			local $/ = undef;
@@ -464,6 +481,64 @@ sub compile_template {
 		my $ok = $template_provider->process($template, {}, \$out);
 		warn $template_provider->error unless $ok;
 	}
+}
+
+sub check_site_templates {
+	my ($templatelist) = @_;
+
+	my $template_provider = Slash::Display::get_template({}, {});
+	my $template_list;
+
+	$template_list = [ sort keys %{$templatelist} ];
+	return unless @{$template_list};
+
+	printf "Testing %d templates, from #%d to #%d\n\n",
+		scalar @{$template_list}, @{$template_list}[0, -1] 
+	if $opts{'V'};
+
+	my $error_count = 0;
+	my $user = getCurrentUser();
+	for (@{$template_list}) {
+		# Dealing with two types of lists, here. Icky, but it works.
+		my $template = $templatelist ?
+			$templatelist->{$_} : $slashdb->getTemplate($_);
+
+		# Try to compile the template. If it doesn't work, note the error
+		# and continue.
+		my($tdoc, $out);
+		eval {
+			$user->{currentSection} = $template->{section};
+			$user->{currentPage} = $template->{page};
+			$tdoc = $template_provider->process(
+				\$template->{template}, {}, \$out
+			)
+		};
+		# If $tdoc is defined, then $err contains WARNINGS.
+		my $err = $template_provider->error();
+		my $failed = !defined $tdoc && $err;
+		$error_count++ if $failed;
+
+		if ($opts{'V'}) {
+			printf "----- Template #%-4d (%31s): ", 
+				$_, 
+				join(';', @{$template}{qw(name page section)});
+
+			if ($failed) {
+				printf "Error!\n%s\n\n", $err;
+			} else {
+				print "ok\n";
+			}
+		} else {
+			printf "----- Template #%-4d (%31s): Error!\n%s\n\n", 
+				$_, 
+				join(';', @{$template}{qw(name page section)}),
+				$err
+			if $failed;
+		}
+	}
+	printf "\n%d templates tested, %d errors found.\n\n",
+		scalar @{$template_list},
+		$error_count;
 }
 
 ###############################################
@@ -527,6 +602,11 @@ Debugging options:
 	-O	<directory> Destination directory of compiled templates
 		(default is ".")
 
+	-T	Test listed templates.
+		[ WARNING: This can be computationally intensive. Please refrain
+		  from running on production sites ]
+	-V	Increases verbosity.
+
 	Compiled templates are saved as <template-name>.ttc in the
 	destination directory.
 
@@ -548,12 +628,13 @@ EOT
 }
 
 sub boiler {
-	my $section	= $opts{'S'}  || 'default';
-	my $page	= $opts{'P'}  || 'misc';
-	my $name	= shift @ARGV || 'generic';
+	my @split	= split /;/, $opts{'B'};
+	my $section	= $opts{'S'}  || $split[2] || 'default';
+	my $page	= $opts{'P'}  || $split[1] || 'misc';
+	my $name	= shift @ARGV || $split[0] || 'generic';
 
 	my $fh = gensym();
-	open($fh, "> $opts{'B'}") or die "Could not open file for blank template";
+	open($fh, ">$opts{'B'}") or die "Could not open file for blank template";
 	print $fh <<EOT;
 __section__
 $section
@@ -567,12 +648,12 @@ __lang__
 en_US
 __name__
 $name
+__seclev__
+10000
 __template__
 This is where you would
 put all of your html and such to be displayed. See
 Template(3) for more information about syntax.
-__seclev__
-10000
 EOT
 	close(FILE);
 	exit;

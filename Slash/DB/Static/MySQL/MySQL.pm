@@ -116,7 +116,7 @@ sub getNewStoryTopic {
 	# many we snarf down the whole table).  This guesstimate should
 	# work for all sites except those that post tons of duplicate
 	# topic stories.
-	$needed = $needed*3 + 5;
+	$needed = $needed * 3 + 5;
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"alttext, image, width, height, stories.tid AS tid",
 		"stories, topics",
@@ -1439,11 +1439,38 @@ sub createSlashdStatus {
 }
 
 ########################################################
+# Basically, a special-purpose alias to setSlashdStatus()
+sub updateTaskSummary {
+	my($self, $taskname, $summary) = @_;
+
+	$self->setSlashdStatus($taskname, {
+		summary => $summary,
+	});
+}
+
+########################################################
 #freshenup
 sub getSectionsDirty {
 	my($self) = @_;
 
 	$self->sqlSelectColArrayref('section', 'sections', '(writestatus = "dirty") OR ((UNIX_TIMESTAMP(last_update) + rewrite) <  UNIX_TIMESTAMP(now()) )');
+}
+
+########################################################
+# Was once used in template-tool's check_site_templates()
+# but is now deprecated. Left here in case another 
+# application has need of it, but can be removed if
+# necessary.   	- Cliff 2002-09-10
+sub getAllTemplateIds {
+	my($self, $min, $max) = @_;
+	my $where;
+
+	return if $min =~ /\D/ or $max =~ /\D/;
+
+	$where = "tpid BETWEEN $min AND $max" if $min || $max;
+	$self->sqlSelectColArrayref(
+		'tpid', 'templates', $where, 'ORDER BY tpid'
+	);
 }
 
 1;
