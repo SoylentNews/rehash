@@ -2213,9 +2213,6 @@ CREATE TABLE open_proxies (
 	KEY ts (ts)
 ) TYPE=InnoDB;
 
-
-
-
 # End of T_2_3_0_144, Start of T_2_3_0_146 - 2004/03/23
 
 UPDATE vars SET name='comments_portscan', description='Scan incoming IPs for open proxy ports? 0=never, 1=anon posting only, 2=all posting' WHERE name='comments_portscan_anon_for_proxy';

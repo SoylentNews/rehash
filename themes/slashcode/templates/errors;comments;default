@@ -41,10 +41,12 @@ one. If you really can't close it and still want to post, you'll have to
 <A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
 <p>If you have questions, mention that your proxy is at
 <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
 [% # COMMENT TABLE NOT AVAILABLE FOR WRITING
 CASE "comment_db_down" %]
 Database maintenance is currently taking place.  Some items such
 as comment posting and moderation are currently unavailable.
+
 [% # ALREADY POSTED.
 CASE "already posted" %]
 You've already posted something in this discussion<BR>

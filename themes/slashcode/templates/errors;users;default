@@ -91,6 +91,7 @@ one.
 
 <p>Feel free to contact  [% constants.adminmail_ban %] if you have questions.
 Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
 [% # OPEN PROXY.
 CASE "new user open proxy" %]
 Sorry, but according to our tests, you are trying to create an account 
@@ -100,6 +101,7 @@ one.
 
 <p>Feel free to contact  [% constants.adminmail_ban %] if you have questions.
 Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="100%" title="User already exists" %]
 	The nickname [% nick %] or another similar to it has already been taken. 
@@ -122,6 +124,7 @@ Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]
 [% PROCESS titlebar width="100%" title="Password too short" %]
 	[% END %]
 	Password is too short and was not changed.<BR>
+
 [% CASE 'saveuser_badoldpass_err' %]
 	[% IF titlebar %]
 [% PROCESS titlebar width="100%" title="Incorrect current password" %]
