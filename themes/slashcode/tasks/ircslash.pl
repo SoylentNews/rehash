@@ -143,6 +143,7 @@ my %cmds = (
 	unhush		=> \&cmd_unhush,
 	ignore		=> \&cmd_ignore,
 	unignore	=> \&cmd_unignore,
+	daddypants	=> \&cmd_daddypants,
 	'exit'		=> \&cmd_exit,
 );
 sub handleCmd {
@@ -151,7 +152,7 @@ sub handleCmd {
 	for my $key (sort keys %cmds) {
 		if (my($text) = $cmd =~ /\b$key\b\S*\s*(.*)/i) {
 			my $func = $cmds{$key};
-			&$func($self, {
+			$func->($self, {
 				text	=> $text,
 				key	=> $key,
 				event	=> $event,
@@ -236,6 +237,30 @@ sub cmd_unignore {
 		slashdLog("unignored $uid, cmd from $info->{event}{nick}");
 	}
 }
+
+{
+my $daddy = require Slash::DaddyPants;
+sub cmd_daddypants {
+	return unless $daddy;
+	my($self, $info) = @_;
+
+	my %args = (
+		name   => 1,
+#		email  => 1
+	);
+
+	if ($info->{text} =~ /^\s*([a-zA-Z]+)/) {
+		$args{when} = $1;
+	} elsif ($info->{text} =~ /^\s*(\d+\s+days)/) {
+		$args{when} = $1;
+	} elsif ($info->{text} && $info->{text} =~ /^(-?\d+)/) {
+		$args{time} = $info->{text};
+	}
+
+	return Slash::DaddyPants::daddypants(\%args);
+}
+}
+
 
 ############################################################
 
