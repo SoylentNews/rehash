@@ -60,7 +60,7 @@ __template__
 		<A HREF="[% constants.rootdir %]/faq.shtml">faq</A> |
 		<A HREF="[% constants.rootdir %]/authors.pl">authors</A> |
 		<A HREF="[% constants.rootdir %]/users.pl">preferences</A> |
-		<A HREF="[% constants.rootdir %]/[% Slash.sitename2filename(user.currentSection) %].rss"><IMG SRC="[% constants.imagedir %]/rssicon.gif" WIDTH="36" HEIGHT="14" ALT="RSS feed"></A> ]
+		<A HREF="[% PROCESS rsslink %]"><IMG SRC="[% constants.imagedir %]/rssicon.gif" WIDTH="36" HEIGHT="14" ALT="RSS feed"></A> ]
 	</FONT>
 </CENTER>
 </BODY>

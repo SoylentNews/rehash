@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+Return a proper link to RSS for current user.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+rsslink
+__template__
+[%- IF (constants.rss_allow_index && (
+	user.is_admin
+		||
+	(constants.rss_allow_index > 1 && user.is_subscriber)
+		||
+	(constants.rss_allow_index > 2 && !user.is_anon)
+))
+%][% Slash.root2abs() %]/index.pl?content_type=rss&amp;logtoken=[% user.logtoken | fixparam %][%
+ELSE
+%][% constants.rootdir %]/[% Slash.sitename2filename(user.currentSection) %].rss[%
+END -%]
+__seclev__
+10000
+__version__
+$Id$

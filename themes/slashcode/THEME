@@ -201,6 +201,7 @@ template=templates/reRegisterMail;messages;default
 template=templates/recentTopics;misc;default
 template=templates/regResult;users;default
 template=templates/rereg_mail;messages;default
+template=templates/rsslink;misc;default
 template=templates/sectionindexd;misc;default
 template=templates/sectionisolate;misc;default
 template=templates/select;misc;default
