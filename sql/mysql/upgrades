@@ -2429,7 +2429,6 @@ INSERT INTO vars (name, value, description) VALUES ('gse_min_stoid', '0', 'Minim
 
 # End of T_2_5_0_11, Start of T_2_5_0_12 - 2004/07/19
 
-# SLASHDOT LAST UPDATED HERE, to T_2_5_0_11
 
 # End of T_2_5_0_12, Start of T_2_5_0_13 - 2004/07/19
 
@@ -2437,3 +2436,6 @@ INSERT INTO vars (name, value, description) VALUES ('freshenup_small_cc','30','H
 
 # End of T_2_5_0_13, Start of T_2_5_0_14 - 2004/07/19
 
+# SLASHDOT LAST UPDATED HERE, to T_2_5_0_13
+
+INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', 'Pages per second the site is running at');
