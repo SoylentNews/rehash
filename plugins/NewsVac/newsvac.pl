@@ -140,9 +140,8 @@ sub editMiner {
 	for my $field (@fields) {
 		# set checkbox if field has (?i) at beginning
 		warn $field;
-		$checkboxes{$field} = ' CHECKED' if
-			$miner->{$field} &&
-			$miner->{$field} !~ s{^\(\?i\)}{};
+		$checkboxes{$field} = $constants->{markup_checked_attribute}
+			if $miner->{$field} && $miner->{$field} !~ s{^\(\?i\)}{};
 	}
 
 	for my $field (grep /_regex$/, @fields) {

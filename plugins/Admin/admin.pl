@@ -641,9 +641,9 @@ sub blockEdit {
 		if ($blockref->{bid}) {
 			$blockedit_flag = 1;
 			$blockref->{ordernum} = "NA" if $blockref->{ordernum} eq '';
-			$retrieve_checked = "CHECKED" if $blockref->{retrieve} == 1;
-			$all_skins_checked = "CHECKED" if $blockref->{all_skins} == 1;
-			$portal_checked = "CHECKED" if $blockref->{portal} == 1;
+			$retrieve_checked = $constants->{markup_checked_attribute} if $blockref->{retrieve} == 1;
+			$all_skins_checked = $constants->{markup_checked_attribute} if $blockref->{all_skins} == 1;
+			$portal_checked = $constants->{markup_checked_attribute} if $blockref->{portal} == 1;
 		}
 	}
 
@@ -1312,10 +1312,10 @@ sub editStory {
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 
 		if ($form->{firstpreview}) {
-			$display_check = 'CHECKED';
+			$display_check = $constants->{markup_checked_attribute};
 			$storyref->{commentstatus}	= $constants->{defaultcommentstatus};
 		} else {
-			$display_check = $form->{display} ? 'CHECKED' : '';
+			$display_check = $form->{display} ? $constants->{markup_checked_attribute} : '';
 		}
 
 	} elsif ($stoid) { # Loading an existing SID
@@ -1356,7 +1356,7 @@ sub editStory {
 			$storyref->{$field} = parseSlashizedLinks(
 				$storyref->{$field});
 		}
-		$display_check = $storyref->{neverdisplay} ? '' : 'CHECKED';
+		$display_check = $storyref->{neverdisplay} ? '' : $constants->{markup_checked_attribute};
 
 	} else { # New Story
 
@@ -1377,7 +1377,7 @@ sub editStory {
 			{ skid => $storyref->{primaryskid} });
 
 		$storyref->{is_dirty} = 1;
-		$display_check = 'CHECKED';
+		$display_check = $constants->{markup_checked_attribute};
 
 	}
 
@@ -1454,10 +1454,10 @@ sub editStory {
 	$description = $slashdb->getDescriptions('commentcodes');
 	$commentstatus_select = createSelect('commentstatus', $description, $storyref->{commentstatus}, 1);
 
-	$fixquotes_check	= 'CHECKED' if $form->{fixquotes};
-	$autonode_check		= 'CHECKED' if $form->{autonode};
-	$fastforward_check	= 'CHECKED' if $form->{fastforward};
-	$shortcuts_check	= 'CHECKED' if $form->{shortcuts};
+	$fixquotes_check	= $constants->{markup_checked_attribute} if $form->{fixquotes};
+	$autonode_check		= $constants->{markup_checked_attribute} if $form->{autonode};
+	$fastforward_check	= $constants->{markup_checked_attribute} if $form->{fastforward};
+	$shortcuts_check	= $constants->{markup_checked_attribute} if $form->{shortcuts};
 
 	$slashdb->setSession($user->{uid}, {
 		lasttitle	=> $storyref->{title},

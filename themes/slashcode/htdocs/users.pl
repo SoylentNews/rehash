@@ -1604,9 +1604,10 @@ sub tildeEd {
 	for my $ary (sort { lc $a->[1] cmp lc $b->[1]} @$sections_description) {
 		my($bid, $title, $boldflag) = @$ary;
 		push @$box_order, $bid;
-		$section_descref->{$bid}{checked} = $slashboxes_hr->{$bid}
-			? ' CHECKED'
-			: '';
+		$section_descref->{$bid}{checked} =
+			$slashboxes_hr->{$bid}
+				? $constants->{markup_checked_attribute}
+				: '';
 		$title =~ s/<(.*?)>//g;
 		$section_descref->{$bid}{title} = $title;
 	}
@@ -1794,6 +1795,7 @@ sub editHome {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 
 	print createMenu("users", {
 		style =>	'tabbed',
@@ -1834,10 +1836,10 @@ sub editHome {
 	$formats = $slashdb->getDescriptions('dateformats');
 	$tzformat_select = createSelect('tzformat', $formats, $user_edit->{dfid}, 1);
 
-	my $l_check = $user_edit->{light}		? ' CHECKED' : '';
-	my $b_check = $user_edit->{noboxes}		? ' CHECKED' : '';
-	my $i_check = $user_edit->{noicons}		? ' CHECKED' : '';
-	my $w_check = $user_edit->{willing}		? ' CHECKED' : '';
+	my $l_check = $user_edit->{light}		? $constants->{markup_checked_attribute} : '';
+	my $b_check = $user_edit->{noboxes}		? $constants->{markup_checked_attribute} : '';
+	my $i_check = $user_edit->{noicons}		? $constants->{markup_checked_attribute} : '';
+	my $w_check = $user_edit->{willing}		? $constants->{markup_checked_attribute} : '';
 
 	my $tilde_ed = tildeEd($user_edit);
 
@@ -1978,18 +1980,18 @@ sub editComm {
 		'bytelimit', $formats, $user_edit->{bytelimit}, 1
 	);
 
-	my $h_check  = $user_edit->{hardthresh}		 ? ' CHECKED' : '';
-	my $r_check  = $user_edit->{reparent}		 ? ' CHECKED' : '';
-	my $n_check  = $user_edit->{noscores}		 ? ' CHECKED' : '';
-	my $s_check  = $user_edit->{nosigs}		 ? ' CHECKED' : '';
-	my $d_check  = $user_edit->{sigdash}		 ? ' CHECKED' : '';
-	my $b_check  = $user_edit->{nobonus}		 ? ' CHECKED' : '';
-	my $sb_check = $user_edit->{nosubscriberbonus}	 ? ' CHECKED' : '';
-	my $p_check  = $user_edit->{postanon}		 ? ' CHECKED' : '';
-	my $nospell_check = $user_edit->{no_spell}	 ? ' CHECKED' : '';
-	my $s_mod_check = $user_edit->{mod_with_comm}	 ? ' CHECKED' : '';
-	my $s_m2_check = $user_edit->{m2_with_mod}	 ? ' CHECKED' : '';
-	my $s_m2c_check = $user_edit->{m2_with_comm_mod} ? ' CHECKED' : '';
+	my $h_check  = $user_edit->{hardthresh}		 ? $constants->{markup_checked_attribute} : '';
+	my $r_check  = $user_edit->{reparent}		 ? $constants->{markup_checked_attribute} : '';
+	my $n_check  = $user_edit->{noscores}		 ? $constants->{markup_checked_attribute} : '';
+	my $s_check  = $user_edit->{nosigs}		 ? $constants->{markup_checked_attribute} : '';
+	my $d_check  = $user_edit->{sigdash}		 ? $constants->{markup_checked_attribute} : '';
+	my $b_check  = $user_edit->{nobonus}		 ? $constants->{markup_checked_attribute} : '';
+	my $sb_check = $user_edit->{nosubscriberbonus}	 ? $constants->{markup_checked_attribute} : '';
+	my $p_check  = $user_edit->{postanon}		 ? $constants->{markup_checked_attribute} : '';
+	my $nospell_check = $user_edit->{no_spell}	 ? $constants->{markup_checked_attribute} : '';
+	my $s_mod_check = $user_edit->{mod_with_comm}	 ? $constants->{markup_checked_attribute} : '';
+	my $s_m2_check = $user_edit->{m2_with_mod}	 ? $constants->{markup_checked_attribute} : '';
+	my $s_m2c_check = $user_edit->{m2_with_comm_mod} ? $constants->{markup_checked_attribute} : '';
 
 	$formats = $slashdb->getDescriptions('postmodes');
 	$posttype_select = createSelect(
@@ -3026,7 +3028,7 @@ sub getUserAdmin {
 	if ($field eq 'uid') {
 		$user_edit = $reader->getUser($id);
 		$user_editfield = $user_edit->{uid};
-		$expired = $reader->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
+		$expired = $reader->checkExpired($user_edit->{uid}) ? $constants->{markup_checked_attribute} : '';
 		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
 		@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{uid}) if defined($logdb);
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
@@ -3034,7 +3036,7 @@ sub getUserAdmin {
 	} elsif ($field eq 'nickname') {
 		$user_edit = $reader->getUser($reader->getUserUID($id));
 		$user_editfield = $user_edit->{nickname};
-		$expired = $reader->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
+		$expired = $reader->checkExpired($user_edit->{uid}) ? $constants->{markup_checked_attribute} : '';
 		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
 		@accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
@@ -3092,7 +3094,7 @@ sub getUserAdmin {
 		$accesslist->{ts}	||= $info_hr->{ts};
 		$accesslist->{adminuid}	||= $info_hr->{adminuid};
 		$accesslist->{estimated_users} ||= $info_hr->{estimated_users};
-		$accesslist->{$access_type} = " CHECKED";
+		$accesslist->{$access_type} = $constants->{markup_checked_attribute};
 	}
 	if (exists $accesslist->{adminuid}) {
 		$accesslist->{adminnick} = $accesslist->{adminuid}
@@ -3100,7 +3102,7 @@ sub getUserAdmin {
 			: '(unknown)';
 	}
 
-	$user_edit->{author} = ($user_edit->{author} == 1) ? ' CHECKED' : '';
+	$user_edit->{author} = ($user_edit->{author} == 1) ? $constants->{markup_checked_attribute} : '';
 	if (! $user->{nonuid}) {
 		my $threshcodes = $reader->getDescriptions('threshcode_values','',1);
 		$thresh_select = createSelect('defaultpoints', $threshcodes, $user_edit->{defaultpoints}, 1);
