@@ -95,3 +95,6 @@ ALTER TABLE section_extras ADD type ENUM("text","list") DEFAULT 'text' NOT NULL,
 
 ALTER TABLE users_hits ADD COLUMN hits_bought_today SMALLINT UNSIGNED DEFAULT 0 NOT NULL AFTER hits_bought;
 ALTER TABLE sessions add column last_subid varchar(15), last_sid varchar(16);
+
+# End of R_2_3_0_14
+
