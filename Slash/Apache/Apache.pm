@@ -79,6 +79,7 @@ sub SlashVirtualUser ($$$) {
 			# Must not just copy the form_override info
 			$new_cfg->{form_override} = {}; 
 			$new_cfg->{absolutedir} = $_->{url};
+			$new_cfg->{absolutedir_secure} = set_rootdir($_->{url}, $cfg->{constants}{absolutedir_secure});
 			$new_cfg->{rootdir} = set_rootdir($_->{url}, $cfg->{constants}{rootdir});
 			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
 			$new_cfg->{defaultsubsection} = $_->{defaultsubsection} if $_->{defaultsubsection};
@@ -165,8 +166,9 @@ sub SlashSectionHost ($$$$) {
 			unless $_ eq 'form_override';
 	}
 	# Must not just copy the form_override info
-	$new_cfg->{form_override} = {}; 
+	$new_cfg->{form_override} = {};
 	$new_cfg->{absolutedir} = $url;
+	$new_cfg->{absolutedir_secure} = set_rootdir($url, $cfg->{constants}{absolutedir_secure});
 	$new_cfg->{rootdir} = set_rootdir($url, $cfg->{constants}{rootdir});
 	$new_cfg->{basedomain} = $hostname;
 	$new_cfg->{defaultsection} = $section;
