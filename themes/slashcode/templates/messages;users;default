@@ -98,9 +98,8 @@ up top there, where you can customize [% constants.sitename %],
 change your password, or just click pretty widgets to kill time.
 
 [% CASE 'tilded_customize_msg' %]
-<TABLE WIDTH="100%" BGCOLOR="[% user.colors.bg_2 %]" ALIGN="CENTER" BORDER="0">
-	<TR><TD>
-	<P><B>Note</B> that you can only choose a dozen or so boxes!
+	<TABLE WIDTH="100%" BGCOLOR="[% user.colors.bg_2 %]" BORDER="0"><TR><TD>
+	<P><P><B>Note</B> that you can only choose a dozen or so boxes!
 
 	<BR>If you choose 
 	'<B>User Space</B>' above, the contents of this box will be inside:
