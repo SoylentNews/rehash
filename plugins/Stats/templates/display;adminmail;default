@@ -45,6 +45,10 @@ gstatic total:        -          -    [% grand_total_static %]
 [% admin_clearpass_warning %][% backup_lag %]
 
 -----------------------
+[% rand_users_yest.size %] random users created yesterday:
+[% FOREACH ru = rand_users_yest %][% ru.nickname %] ([% ru.uid %])  [% IF loop.count mod 4 == 0 && !loop.last; "\n"; END %][% END %]
+
+-----------------------
 [% FOREACH section = sections -%]
 
 For [% section.section_name %]

@@ -477,6 +477,7 @@ EOT
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);
 	$statsSave->createStatDaily('users_created', $new_users_yest);
+	$data{rand_users_yest} = $slashdb->getRandUsersCreatedYest(12);
 
 	my $email = slashDisplay('display', \%data, {
 		Return => 1, Page => 'adminmail', Nocomm => 1

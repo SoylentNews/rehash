@@ -1615,6 +1615,29 @@ sub getNumNewUsersSinceDaysback {
 }
 
 ########################################################
+# Returns the uid/nicks of a random sample of users created
+# since yesterday.
+sub getRandUsersCreatedYest {
+	my($self, $num) = @_;
+	$num ||= 10;
+
+	my $max_uid = $self->countUsers({ max => 1 });
+	my $min = $self->sqlSelect(
+		"MIN(uid)",
+		"users_info",
+		"SUBSTRING(created_at, 1, 10) >= SUBSTRING(DATE_SUB(
+			NOW(), INTERVAL 1 DAY
+		 ), 1, 10)");
+	my $users_ar = $self->sqlSelectAllHashrefArray(
+		"uid, nickname",
+		"users",
+		"uid BETWEEN $min AND $max_uid",
+		"ORDER BY RAND() LIMIT $num");
+	@$users_ar = sort { $a->{uid} <=> $b->{uid} } @$users_ar;
+	return $users_ar;
+}
+
+########################################################
 #freshenup
 sub getSectionsDirty {
 	my($self) = @_;

@@ -800,7 +800,7 @@ sub getStatToday {
 sub getStatLastNDays {
 	my($self, $name, $days) = @_;
 	my $name_q = $self->sqlQuote($name);
-	return $self->sqlSelect("AVG(value + 0)", "stats_daily",
+	return $self->sqlSelect("AVG(value) + 0", "stats_daily",
 		"name = $name_q
 		 AND day BETWEEN DATE_SUB('$self->{_day}', INTERVAL $days DAY) AND '$self->{_day}'");
 }
