@@ -1,0 +1,308 @@
+#!perl -w
+# run this document through perl to check its syntax
+use Pod::Checker;
+podchecker(\*DATA);
+__END__
+
+=head1 NAME
+
+slashtags - Special SLASH tags in Slash stories
+
+=head1 DESCRIPTION
+
+There are several additional "tags" available to Slash authors/editors
+(currently only in stories, though perhaps eventually in comments and
+journals).
+
+These tags allow things like linking to stories and users, adding links
+to the Related Links box, and more.  Read on for usage guidelines
+and syntax.
+
+
+=head1 OVERVIEW
+
+There are two basic types of SLASH tags, those that enclose content and
+those that do not.
+
+	# with
+	<SLASH-LINK HREF="http://slashcode.com/">Go to slashcode</SLASH>
+	# without
+	<SLASH-FILE ID="0123456789abcdef">
+
+There are also two basic types of syntax.  One is the hyphenated form,
+which is a bit more brief, as above.  The other is to take the hyphenated
+part out and put it in the TYPE attribute, like so:
+
+	<SLASH TYPE="file" ID="0123456789abcdef"> 
+
+The order of the attributes in the tag doesn't matter.  Slash will automatically
+rewrite the hyphenated form into the non-hyphenated form, so you can write
+with either, but when you read it back, it will be the latter.
+
+If a TYPE is not supplied, using either syntax, Slash will use the following
+logic to determine type:
+
+	Provided attribute	Type
+	==================      ====
+	HREF			LINK
+	STORY			STORY
+	NICKNAME		USER
+	USER			USER
+
+If you have none of those attributes, you must include the type.
+
+So, these are the standard methods to link to a story:
+
+	<SLASH-STORY STORY="03/08/12/158239">Some story</SLASH>
+	<SLASH TYPE="story" STORY="03/08/12/158239">Some story</SLASH>
+
+However, this is also legal:
+
+	<SLASH STORY="03/08/12/158239">Some story</SLASH>
+
+=head1 TAGS
+
+These are the different types of tags, the available options for each, and
+a short description.
+
+
+=head2 FILE
+
+This tag encloses text.  Available attributes:
+
+=over 4
+
+=item ID [REQUIRED]
+
+The ID of the file in the database, provided in the "Attached Files" slashbox.
+
+=item TITLE [OPTIONAL]
+
+The enclosed text is used if not supplied.
+
+=item TYPE [OPTIONAL]
+
+"file", if hyphenated form not used.
+
+=back
+
+The SLASH-FILE tag allows linking to a file that has already been put into
+the Slash database, via the "Attach File" link that appears in the story editor
+once the story has been saved.  Files attached to that story appear in the
+story's "Attached Files" slashbox in the story editor, along with syntax to
+use to include the file, something like this:
+
+	<SLASH-FILE ID="SOMEID" TITLE="foo">foo</SLASH> 
+
+B<Note>: as noted, this syntax, upon preview/update, will change to:
+
+	<SLASH TYPE="file" ID="SOMEID" TITLE="foo">foo</SLASH>
+
+This is processed into something like:
+
+	<A HREF="//slash.example.com/blob.pl?id=SOMEID" TITLE="foo">foo</A>
+
+
+=head2 IMAGE
+
+This tag does not enclose text.  Available attributes:
+
+=over 4
+
+=item ID [REQUIRED]
+
+The ID of the file in the database, provided in the "Attached Files" slashbox.
+
+=item TITLE [OPTIONAL]
+
+The enclosed text is used if not supplied.  TITLE value is also used for the
+ALT attributed.
+
+=item ALIGN [OPTIONAL]
+
+Alignment of image (e.g., top, middle, bottom, left, right).
+
+=item WIDTH [OPTIONAL]
+
+Width of image (e.g., 200).  Automatically added if left empty.
+
+=item HEIGHT [OPTIONAL]
+
+Height of image (e.g., 200).  Automatically added if left empty.
+
+=item TYPE [OPTIONAL]
+
+"image", if hyphenated form not used.
+
+=back
+
+The SLASH-IMAGE tag is almost the same as the SLASH-FILE tag, but with additional
+attributes, and uses an IMG SRC output instead of an A HREF output.
+
+	<SLASH-IMAGE ID="SOMEID" TITLE="foo" WIDTH="200" HEIGHT="200">
+
+This is processed into something like:
+
+	<IMG SRC="//slash.example.com/blob.pl?id=SOMEID" TITLE="foo"
+	WIDTH="200" HEIGHT="200">
+
+
+=head2 LINK
+
+This tag encloses text.  Available attributes (please note that
+I<either> ID or HREF attribute are required):
+
+=over 4
+
+=item ID [OPTIONAL]
+
+The ID of the desired link.  If not supplied, one will be created automatically
+from the HREF attribute.
+
+=item HREF [OPTIONAL]
+
+The URL to the desired link; not required if ID is supplied.
+
+=item TITLE [OPTIONAL]
+
+The enclosed text is used if not supplied.  TITLE value is used for the
+ALT attribute.
+
+=item TYPE [OPTIONAL]
+
+"link", if hyphenated form not used.
+
+=back
+
+The SLASH-LINK tag creates a link to an arbitrary URL.  It uses the
+Slash::Relocate plugin, which is then used to control and track links to
+outside URLs.
+
+	<SLASH-LINK HREF="http://www.example.com/">Example site</SLASH>
+
+This is processed into something like (assuming the user is a friend):
+
+	<A HREF="//slash.example.com/relocate.pl?id=SOMEID"
+	TITLE="Example site">Example site</A>
+
+
+=head2 RELATED
+
+This tag encloses text.  Available attributes:
+
+=over 4
+
+=item HREF [REQUIRED]
+
+The URL of the link.
+
+=item TYPE [OPTIONAL]
+
+"related", if hyphenated form not used.
+
+=back
+
+The SLASH-RELATED tag creates an additional entry to the bottom of a story's
+"Related Links" slashbox.  It produces no output.
+
+	<SLASH-RELATED HREF="http://www.example.com/">Example site</SLASH>
+
+This produces no output in the story; rather, it adds to the "Related Links"
+slashbox text something like:
+
+	&middot; <A HREF="http://www.example.com/">Example site</A><BR>
+
+
+=head2 USER
+
+This tag does not enclose text.  Available attributes (please note that
+I<either> UID or NICKNAME attribute are required):
+
+=over 4
+
+=item UID [OPTIONAL]
+
+The UID of the desired user.  USER attribute may be used
+instead of UID attribute.
+
+=item NICKNAME [OPTIONAL]
+
+The nickname of the desired user.
+
+=item TYPE [OPTIONAL]
+
+"user", if hyphenated form not used.
+
+=back
+
+The SLASH-USER tag creates a link to a user's Slash page, including
+appropriate "zoo icons" for the viewing user.
+
+	<SLASH-USER UID="6">
+
+This is processed into something like (assuming the user is a friend):
+
+	<A HREF="//slash.example.com/~user/" TITLE="user">user (6)</A>
+	<A HREF="//slash.example.com/zoo.pl?op=check&amp;uid=6"><IMG
+	BORDER="0" SRC="//images.slash.example.com/friend.gif"
+	ALT="Friend" TITLE="Friend"></A>
+
+
+=head2 STORY
+
+This tag encloses text.  Available attributes:
+
+=over 4
+
+=item STORY [REQUIRED]
+
+The SID of the desired story.
+
+=item TITLE [OPTIONAL]
+
+The title of the story, used for the TITLE attribute of the link.  If not supplied,
+the story's title in the database is used.
+
+=item TYPE [OPTIONAL]
+
+"story", if hyphenated form not used.
+
+=back
+
+The SLASH-STORY tag creates a link to another Slash story.
+
+	<SLASH-STORY STORY="SOMESID">foo</SLASH>
+
+This is processed into something like (assuming the user is a friend):
+
+	<A HREF="//slash.example.com/article.pl?sid=SOMESID"
+	TITLE="STORYSUBJECT">foo</A>
+
+
+=head2 BREAK
+
+This tag does not enclose text.  Available attributes:
+
+=over 4
+
+=item TYPE [OPTIONAL]
+
+"break", if hyphenated form not used.
+
+=back
+
+The SLASH-BREAK tag adds page breaks.  It can only be used in
+the bodytext of a story.
+
+	<SLASH-BREAK>
+
+This works with the pagenum form variable (and the pagemenu template, called
+from the dispStory template).  If pagenum=1 or is pagenum is false, then
+introtext and everything up to the first SLASH-BREAK in bodytext is displayed.
+If pagenum=2, then introtext is replaced by everything between the first
+and second SLASH-BREAK tags, and no bodytext is displayed.  And so on.
+
+
+=head1 VERSION
+
+$Id$
