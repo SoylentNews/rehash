@@ -3651,7 +3651,7 @@ sub getStoriesEssentials {
 	$where .= "AND stories.uid not in ($user->{exaid}) "
 		if $user->{exaid};
 	$where .= "AND section not in ($user->{exsect}) "
-		if $user->{exsect};
+		if $user->{exsect} && !$section;
 
 	# Order
 	my $other = "ORDER BY time DESC ";
