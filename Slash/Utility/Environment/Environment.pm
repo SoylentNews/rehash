@@ -2612,6 +2612,9 @@ EOT
 	printf STDERR <<"EOT", "PID", "what", "time", "pct";
 %-6.6s: %-64.64s % 6.6s $unit (%6.6s%%)
 EOT
+	printf STDERR <<"EOT", $$, 'total', $total, '100.00';
+%-6d: %-64.64s % 6d $unit (%6.6s%%)
+EOT
 	for (sort { $totals{$b} <=> $totals{$a} } keys %totals) {
 		my $p = $totals{$_} / $total * 100;
 		my $s = sprintf('%.2f', $p);
