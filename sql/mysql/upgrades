@@ -1095,8 +1095,6 @@ UPDATE vars SET value='enabled' WHERE name='defaultcommentstatus';
 UPDATE users_param SET value = 'enabled'  WHERE name = 'journal_discuss' AND value = 1;
 UPDATE users_param SET value = 'disabled' WHERE name = 'journal_discuss' AND value = 0;
 
-# USEPERL LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('stats_sfnet_groupids','4421','List of sf.net group IDs to keep stats on');
 
 # Change for plugins/Stats (ignore if not using that plugin)
@@ -1117,3 +1115,4 @@ ALTER TABLE moderatorlog ADD INDEX uid (uid), ADD INDEX cuid (cuid);
 
 ALTER TABLE accesslog ADD COLUMN duration FLOAT DEFAULT 0.0 NOT NULL, ADD COLUMN local_addr VARCHAR(16) DEFAULT '' NOT NULL;
 
+# USEPERL LAST UPDATED HERE
