@@ -16,7 +16,7 @@ __template__
 		<P>&nbsp</P>
 		<A href="[% real.rootdir %]/admin.pl?op=edit&amp;sid=[% file.sid %]">[% Slash.db.getStory(file.sid, 'title') %]</A> <A href="[% real.rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% file.sid %]">(files)</a><br>
 	[% END %]
-	<LI><A href="[% real.rootdir %]/blob.pl?id=[% file.file_id %]">[% file.description %]</A> [% IF file.is_image %](image)[% END %] <br>
+	<LI><A href="[% real.rootdir %]/blob.pl?id=[% file.file_id %]">[% file.description | strip_literal %]</A> [% IF file.is_image %](image)[% END %] <br>
 	[% prev = file.sid %]
 [% END %]
 

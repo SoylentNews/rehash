@@ -20,7 +20,7 @@ File to upload: <INPUT TYPE="FILE" NAME="file_content"><BR>
 
 [% PROCESS formLabel value => "Delete Files" comment => "" %]
 	[% FOREACH file=files %]
-		<A href="[% constants.real_rootdir %]/blob.pl?id=[% file.file_id %]">[% file.description %]</A> [% IF file.is_image %](image)[% END %] <input type="checkbox" name="delete" value="[% file.id %]"><br>
+		<A href="[% constants.real_rootdir %]/blob.pl?id=[% file.file_id %]">[% file.description | strip_literal %]</A> [% IF file.is_image %](image)[% END %] <input type="checkbox" name="delete" value="[% file.id %]"><br>
 	[% END %]
 	<P>
 	<B>Checked files will be deleted</B> 
