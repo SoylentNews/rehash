@@ -879,8 +879,14 @@ sub approveTag {
 	if ($tag =~ /^URL:(.+)$/is) {
 		my $url = fudgeurl($1);
 		return qq!<A HREF="$url">$url</A>!;
-	} elsif ($tag =~ /href\s*=(.+)$/is) {
-		my $url = fudgeurl($1);
+	} elsif ($tag =~ /href\s*=\s*(.+)$/is) {
+		my $url_raw = $1;
+		# Try to get a little closer to the URL we want, and in
+		# particular, don't strip '<a href="foo" target="bar">'
+		# to the URL 'footarget=bar'.
+		$url_raw = $1 if $url_raw =~ /^"([^"]+)"/;
+		$url_raw =~ s/\s+target=.+//;
+		my $url = fudgeurl($url_raw);
 		return qq!<A HREF="$url">!;
 	}
 
