@@ -1879,9 +1879,10 @@ sub displayRecentMods {
 
 sub displayRecent {
 	my($form, $slashdb, $user, $constants) = @_;
-	my($min, $max) = (undef, undef);
+	my($min, $max, $sid) = (undef, undef, undef);
 	$min = $form->{min} if defined($form->{min});
 	$max = $form->{max} if defined($form->{max});
+	$sid = $form->{sid} if defined($form->{sid});
 	my $startat = $form->{startat} || undef;
 
 	my $max_cid = $slashdb->sqlSelect("MAX(cid)", "comments");
@@ -1890,6 +1891,8 @@ sub displayRecent {
 		max	=> $max,
 		startat	=> $startat,
 		num	=> 100,
+		sid	=> $sid
+		
 	}) || [ ];
 
 	my $subj_vislen = 30;
@@ -1905,6 +1908,7 @@ sub displayRecent {
 		recent_comments	=> $recent_comments,
 		min		=> $min,
 		max		=> $max,
+		sid		=> $sid
 	});
 }
 
