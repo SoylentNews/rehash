@@ -1,0 +1,43 @@
+__section__
+default
+__description__
+Footer to be displayed on printable pages.
+
+* story = story data structure
+* time = formatted time string
+
+__title__
+
+__page__
+print
+__lang__
+en_US
+__name__
+footer
+__seclev__
+10000
+__template__
+[% UNLESS form.nohtml;
+	rootdir = constants.rootdir;
+	url = "<a href=\"$rootdir/article.pl?sid=$story.sid\">$story.title</a>";
+	sitename = "<a href=\"$rootdir\">$constants.sitename</a>";
+ELSE;
+	absdir = constants.absolutedir;
+	url = "$story.title ($absdir/article.pl?sid=$story.sid)";
+	sitename = "$constants.sitename ($absdir)";
+END %]
+<hr />
+<P>All trademarks and copyrights on this page are owned by their respective
+companies.</P>
+<P>
+<SMALL>printed from [% sitename %], [% url %] on [% time %]</SMALL>
+</P>
+[% IF form.auto %]
+<script language="JavaScript1.2">
+<!--
+	if (window.print) { window.print(); }
+//-->
+</script>
+[% END %]
+</BODY>
+</HTML>

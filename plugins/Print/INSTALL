@@ -1,0 +1,34 @@
+Don't forget to modify the display;article;default template to add a link to
+the printable version of the story.  Lacking good taste and style, I use
+something like this: 
+
+<p>
+[% printurl = 
+	"<a href=\"$constants.rootdir/print.pl?sid=$story.sid\">print</a>";
+   printurl;
+%]
+</p>
+
+If you're interested in <link /> tag support, you can change header;misc;default
+to add a link to the printable version.  Note that this must appear before the
+</HEAD> line.  Pudge suggests:
+
+	<link rel="alternate" href="[% constants.rootdir %]/print.pl?sid=[% sid %]"
+		title="Printing Version" />
+
+This assumes your version of article.pl passes 'sid' to the template.  As of
+Slash 2.1.1 beta, it does not.
+
+Note that there are two optional boolean parameters that can be passed to the
+URL.
+
+	- nohtml, if specified, will remove links from everything but the story
+	- auto, if specified, will use JavaScript to attempt to pop up a print
+	  dialog automatically
+
+These should become user-configurable parameters.  Perhaps a future version of
+print.pl will allow customization on this level.
+
+Enjoy,
+-- chromatic
+03 November 2001

@@ -1,0 +1,11 @@
+1.11 misc cleanup, based on helpful suggestions
+	- use 'print' page, not section (Alvaro del Castillo <acs@barrapunto.com>)
+	- use 'return', not 'exit' for mod_perl (Pudge)
+	- improved bodytext handling (Alex McLintock <alex@OWAL.co.uk>)
+
+1.1 ported to Slash 2.2 (Fry beta) by chromatic <chromatic@wgz.org>
+	- added templates
+	- packaged into a plugin proper
+	- added GPL, INSTALL, Changes, MANIFEST
+
+1.0	original version by Norbert "Momo_102" Kuemin <momo_102@bluemail.ch>

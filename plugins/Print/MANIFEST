@@ -1,0 +1,11 @@
+Changes
+GPL
+INSTALL
+MANIFEST
+Makefile.PL
+PLUGIN
+print.pl
+images/print.gif
+templates/dispStory;print;default
+templates/header;print;default
+templates/footer;print;default

@@ -1,0 +1,21 @@
+__section__
+print
+__description__
+Header for a printable story.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+header
+__seclev__
+10000
+__template__
+</HEAD>
+<BODY>
+
+<H1>[% constants.sitename %]</H1>
+<H2>[% constants.slogan %]</H2>
+

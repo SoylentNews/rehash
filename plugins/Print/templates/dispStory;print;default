@@ -1,0 +1,41 @@
+__section__
+default
+__description__
+Template to display a story in printable mode.
+
+* topic = topic data structure
+* story = story data structure
+__title__
+
+__page__
+print
+__lang__
+en_US
+__name__
+dispStory
+__seclev__
+10000
+__template__
+[% UNLESS form.nohtml;
+	title = "<a href=\"$constants.rootdir/$story.section/\">$section.title</a>: $story.title";
+	topic = "<A HREF=\"$constants.rootdir/search.pl?topic=$topic.tid\">$topic.alttext</A>";
+ELSE;
+	title = story.title;
+	topic = topic.alttext;
+END -%]
+
+<h2 align="left">[% story.title %]</h2>
+<table border="0" valign="left">
+<tr><th align="left">Date:</th><td>[% story.storytime %]</td></tr>
+<tr><th align="left">Author:</th><td>[% author.nickname %]</td></tr>
+<tr><th align="left">Topic:</th><td>[% topic %]</td></tr>
+
+[% IF constants.use_dept -%]
+<tr><td colspan="2" nowrap>from the <em>[% story.dept %]</em> dept.</td></tr>
+[% END -%]
+
+</table>
+<p>[% story.introtext %]</p>
+[% IF story.bodytext -%]
+<p>[% story.bodytext %]</p>
+[% END -%]
