@@ -99,7 +99,7 @@ EOT
 		<topic>$story->{tid}</topic>
 		<comments>$story->{commentcount}</comments>
 		<section>$name</section>
-		<image>$story->{image}</image>
+		<image>$story->{image}{image}</image>
 	</story>
 
 EOT
