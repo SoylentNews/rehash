@@ -3186,28 +3186,6 @@ sub getPollAnswers {
 	return $answers;
 }
 
-# Deprecated -Brian
-#########################################################
-#sub getPollQuestions {
-## This may go away. Haven't finished poll stuff yet
-##
-#	my($self, $limit) = @_;
-#
-#	$limit = 25 if (!defined($limit));
-#
-#	my $poll_hash_ref = {};
-#	my $sql = "SELECT qid,question FROM pollquestions ORDER BY date DESC ";
-#	$sql .= " LIMIT $limit " if $limit;
-#	my $sth = $self->{_dbh}->prepare_cached($sql);
-#	$sth->execute;
-#	while (my($id, $desc) = $sth->fetchrow) {
-#		$poll_hash_ref->{$id} = $desc;
-#	}
-#	$sth->finish;
-#
-#	return $poll_hash_ref;
-#}
-
 ########################################################
 sub deleteStory {
 	my($self, $sid) = @_;
@@ -7046,16 +7024,12 @@ sub getSlashConf {
 		}
 	}
 
-	if ($conf{email_domains_invalid}) {
-		my $regex = sprintf('[^\w-](?:%s)$',
-			join '|', map quotemeta, split ' ', $conf{email_domains_invalid});
-		$conf{email_domains_invalid} = qr{$regex};
-	}
-
-	if ($conf{submit_domains_invalid}) {
-		my $regex = sprintf('[^\w-](?:%s)$',
-                        join '|', map quotemeta, split ' ', $conf{submit_domains_invalid});
-                $conf{submit_domains_invalid} = qr{$regex};
+	for my $var (qw(email_domains_invalid submit_domains_invalid)) {
+		if ($conf{$var}) {
+			my $regex = sprintf('[^\w-](?:%s)$',
+				join '|', map quotemeta, split ' ', $conf{$var});
+			$conf{$var} = qr{$regex};
+		}
 	}
 
 	if ($conf{comment_nonstartwordchars}) {
