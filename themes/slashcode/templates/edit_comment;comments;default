@@ -90,7 +90,7 @@ END %]
 <!-- end anon login code -->
 [% END %]
 [% IF user.homepage %]
-	<TR><TD ALIGN="RIGHT">URL</TD>
+	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'URL' %]</TD>
 		<TD><A HREF="[% user.homepage %]">[% user.homepage | strip_literal %]</A></TD></TR>
 [% END %]
 
