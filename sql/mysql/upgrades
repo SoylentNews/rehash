@@ -2510,9 +2510,10 @@ INSERT INTO vars (name, value, description) VALUES ('gse_table_join_row_cutoff',
 
 # SLASHDOT LAST UPDATED HERE
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_23, Start of T_2_5_0_24 - 2004/09/01
 
 ALTER TABLE topic_nexus_extras add column content_type enum("story","comment") DEFAULT 'story' NOT NULL;
 
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_24, Start of T_2_5_0_25 - 2004/09/03
