@@ -1433,13 +1433,14 @@ sub setUserDate {
 
 	my $timezones     = $slashdb->getTZCodes;
 	my $tz            = $timezones->{ $user->{tzcode} };
+	$user->{off_set}  = $tz->{off_set};  # we need for calculation
 
 	my $is_dst = 0;
 	if ($user->{dst} eq "on") {  # manual on ("on")
 		$is_dst = 1;
 
 	} elsif (!$user->{dst}) { # automatic (calculate on/off) ("")
-		$is_dst = isDST($tz->{dst_region});
+		$is_dst = isDST($tz->{dst_region}, $user);
 
 	} # manual off ("off")
 
@@ -1462,7 +1463,7 @@ sub setUserDate {
 
 #========================================================================
 
-=head2 isDST(REGION [, TIME, OFFSET])
+=head2 isDST(REGION [, USER, TIME, OFFSET])
 
 Returns boolean for whether given time, for given user, is in Daylight
 Savings Time.
@@ -1477,6 +1478,10 @@ Savings Time.
 
 The name of the current DST region (e.g., America, Europe, Australia).
 It must match the C<region> column of the C<dst> table.
+
+=item USER
+
+You will get better results if you pass in the USER, but it is optional.
 
 =item TIME
 
@@ -1513,9 +1518,9 @@ my %last = (
 # oh well, unless someone has a solution.
 
 sub isDST {
-	my($region, $unixtime, $off_set) = @_;
+	my($region, $user, $unixtime, $off_set) = @_;
 	my $slashdb = getCurrentDB();
-	my $user    = getCurrentUser();
+	$user     ||= getCurrentUser();
 
 	my $regions = $slashdb->getDSTRegions;
 
