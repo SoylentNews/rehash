@@ -1840,8 +1840,8 @@ sub moderate {
 	for my $key (sort keys %{$form}) {
 		if ($key =~ /^reason_(\d+)_(\d+)$/) {
 			($sid, $cid) = ($1, $2);
-			my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});
-			
+			next if $form->{$key} eq "";
+			my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});			
 			# No points and not enough points shouldn't show up since the user
 			# is an admin but check just in case 
 			if ($ret_val < 0) {
@@ -1867,7 +1867,11 @@ sub moderate {
 		}
 	}
 	my $startat = $form->{startat} || 0;
-	print getData('moderate_recent_message', { startat => $startat });
+	if($form->{returnto}){
+		print getData('moderate_recent_message_returnto', { returnto => $form->{returnto} });
+	} else {
+		print getData('moderate_recent_message', { startat => $startat });
+	}
 }
 
 
