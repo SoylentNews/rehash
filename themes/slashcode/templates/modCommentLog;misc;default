@@ -78,7 +78,7 @@ __template__
 		<B>Total=[% reasonTotal %]</B>.
 	[% ELSE %]
 		<FONT COLOR="[% user.bg.3 %]"><B>Moderations</B></FONT>:
-		[% FOREACH rtop = reasonsTop %][% rtop.percent %]% [% reasons.${rtop.reason}.name %][% UNLESS loop.last %], [% END %][% END %]
+		[% FOREACH rtop = reasonsTop %][% IF rtop.percent < 100 %][% rtop.percent %]% [% END %][% reasons.${rtop.reason}.name %][% UNLESS loop.last %], [% END %][% END %]
 	[% END %]
 [% END %]
 

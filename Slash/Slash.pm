@@ -610,17 +610,22 @@ sub _getTopModReasons{
 		}
 	}
 	my @reasonRound = map { $_ * 10 } @r;
+#print STDERR "reasonRound '@reasonRound'\n";
 
 	# This part I added, so if it breaks, don't blame MJD :) JRM
 	my @rr_sort = sort { $b <=> $a } @reasonRound;
 	my $min_perc = $rr_sort[-1];
 	$min_perc = $rr_sort[$top_needed-1] if $#rr_sort >= $top_needed-1;
-	for my $reason (0..$#reasonRound) {
+	$min_perc = 10 if $min_perc < 10; # Need at least 10% to list
+#print STDERR "rr_sort '@rr_sort' min_perc '$min_perc'\n";
+	for my $reason (1..$#reasonRound) {
+#print STDERR "reason '$reason' rR[$reason] '$reasonRound[$reason]'\n";
 		next if $reasonRound[$reason] < $min_perc;
 		push @reasonsTop, {
 			reason => $reason,
 			percent => $reasonRound[$reason]
 		};
+#use Data::Dumper; print STDERR "reasonsTop: " . Dumper(\@reasonsTop);
 		last if scalar(@reasonsTop) >= $top_needed;
 	}
 
