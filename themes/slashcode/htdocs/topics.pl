@@ -49,22 +49,21 @@ sub hierarchy {
 		if ($topic->{parent_topic}) {
 			push(@{$parents{$topic->{parent_topic}}{child}}, $topic);
 		}
-		$parents{$topic->{tid}}{parent} = $topic;
+		$parents{$topic->{tid}} = $topic;
 	}
 	
 	for my $parent (values %parents) {
 		# We remove children that have no children. No Welfare state for us! 
-		next if $parent->{parent}{parent_topic} && !$parent->{child};
 		if ($parent->{child}) {
 			my @children = sort({ $a->{alttext} cmp $b->{alttext} } @{$parent->{child}});
 			$parent->{child} = \@children;
 		}
+		next if $parent->{parent_topic};
 		push @topics, $parent;
 	}
-	@topics = sort({ $a->{parent}{alttext} cmp $b->{parent}{alttext} } @topics);
+	@topics = sort({ $a->{alttext} cmp $b->{alttext} } @topics);
 
 	slashDisplay('hierarchy', {
-		title		=> 'Hierarchy of Topics',
 		topics		=> \@topics,
 	});
 }
