@@ -3657,11 +3657,25 @@ sub setAccessList {
 	$rows ||= 0;
 	if ($rows == 0) {
 		# No row currently exists for this uid, ipid or subnetid.
-		# Insert one.  Then we will update it.
-		$self->sqlInsert("accesslist", $insert_hr);
+		# If we are setting anything to "yes" or have a reason,
+		# then we need to go ahead, otherwise there is no point
+		# to this.
+		if (exists $update_hr->{reason}
+			||
+			scalar grep { $update_hr->{$_} eq 'yes' }
+				grep /^now_/, keys %$update_hr
+		) {
+			# Insert a row.  Then we will update it.  Set
+			# $rows to indicate that this was done.
+			$rows = $self->sqlInsert("accesslist", $insert_hr);
+		}
 	}
-	$rows = $self->sqlUpdate("accesslist", $update_hr, $where,
-		{ assn_order => [ @assn_order ] });
+	if ($rows) {
+		# If there is 1 or more rows to update, or if there weren't
+		# but we inserted one, then do this update.
+		$rows = $self->sqlUpdate("accesslist", $update_hr, $where,
+			{ assn_order => [ @assn_order ] });
+	}
 	return $rows ? 1 : 0;
 }
 
