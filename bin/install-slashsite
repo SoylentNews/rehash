@@ -110,6 +110,8 @@ unless ($opts{'o'}) {
 	$owner = $opts{'o'};
 }
 $owner_id = getpwnam($owner);
+die "You really, really don't want to run your Slash site as root!"
+	if $owner eq 'root' || $owner_id == 0;
 die "$owner is not a valid user name.\n" unless defined $owner_id;
 
 unless ($opts{'g'}) {
