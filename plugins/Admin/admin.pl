@@ -1832,7 +1832,7 @@ sub moderate {
 
 	titlebar("100%", "Moderating...");
 	if(!dbAvailable("write_comments")){
-		print getData("comments_db_down");
+		print getData("comment_db_down");
 		return;
 	}
 	for my $key (sort keys %{$form}) {
