@@ -509,6 +509,7 @@ sub apache_site_conf {
     # memory usage, degrades when it is On.
     SlashCompileTemplates Off
     
+    PerlAccessHandler  Slash::Apache::Banlist
     PerlAccessHandler  Slash::Apache::User
     PerlCleanupHandler Slash::Apache::Log
     PerlCleanupHandler Slash::Apache::Log::UserLog

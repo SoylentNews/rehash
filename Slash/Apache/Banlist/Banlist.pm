@@ -38,6 +38,7 @@ sub handler {
 		# the idea is that the banned script is costing us
 		# resources, and we want to get rid of them as cheaply
 		# as possible.
+		my $constants = getCurrentStatic();
 		my $bug_off =<<EOT;
 <HTML>
 <HEAD><TITLE>BANNED!</TITLE></HEAD>
@@ -52,9 +53,11 @@ If you feel that this is unwarranted, feel free to include your IP address
 (<b>$cur_ip</b>) in the subject of an email, and we will examine why
 there is a ban. If you fail to include the IP address (again,
 <em>in the Subject!</em>), then
-your message will be deleted and ignored. I mean come
-on, we're good, we're not psychic.
-
+your message will be deleted and ignored. I mean come on,
+we're good, we're not psychic.
+EOT
+		if ($constants->{basedomain} eq 'slashdot.org') {
+			$bug_off .= <<EOT;
 <p>Since you can't read the FAQ because you're banned, here's the
 <a href="/faq/accounts.shtml#ac900">relevant portion</a>:
 
@@ -72,7 +75,7 @@ lot of pages, to programs that attempt to coordinate an avalanche of posts
 in the forums (often through misconfigured "Open Relay" proxy servers).<p> 
 &middot; You might be using a proxy server that is also being used by another person  
 who did something from the above list. You should have your <b>proxy server  
-administrator</b> <a href="mailto:banned\@slashdot.org">contact us</a>.<p> 
+administrator</b> <a href="mailto:banned\@$constants->{basedomain}">contact us</a>.<p> 
 &middot; Your IP might have been used to post comments designed to break
 web browser rendering. <br>
   <br>
@@ -80,13 +83,16 @@ web browser rendering. <br>
   Last Modified: 7/02/02<br>
 </small></i> <a name="ac1000"></a>  
 <h2>How do I get an IP Unbanned?</h2> 
-<p>Email <a href="mailto:banned\@slashdot.org">banned\@slashdot.org</a>. Make  
+<p>Email <a href="mailto:banned\@$constants->{basedomain}">banned\@$constants->{basedomain}</a>. Make  
 sure to include the IP in question, and any other pertinent information. If  
 you are connecting through a proxy server, you might need to have your proxy  
 server's admin contact us instead of you. <br> 
 <br> 
 <i><small> Answered by: <a href="mailto:malda\@slashdot.org">CmdrTaco</a> <br> 
 Last Modified: 3/26/02</small></i><i><small><br></small></i> 
+EOT
+		}
+		$bug_off .= <<EOT;
 </BODY>
 </HTML>
 EOT
