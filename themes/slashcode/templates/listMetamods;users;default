@@ -36,7 +36,6 @@ __template__
 	[% END %]
 	<tr><td align="center">
 	<table cellspacing="0" cellpadding="2" width="100%">
-	[% IF m2_listing %]
 	<tr bgcolor="[% user.bg.3 %]">
 		<th align="left"><font size="-1" color="[% user.fg.3 %]">Date</font></th>
 		<th align="left"><font size="-1" color="[% user.fg.3 %]">Comment</font></th>
@@ -47,7 +46,6 @@ __template__
 		<th align="center"><font size="-1" color="[% user.fg.3 %]">Off</font></th>
 		<th align="center"><font size="-1" color="[% user.fg.3 %]">LD</font></th>
 	</tr>
-	[% END %]		
 	[% FOREACH m2 = metamods %]
 	[%
 		total_m2s = total_m2s + 1;
@@ -99,7 +97,7 @@ __template__
 		   	END; 
 			
 		END %]
-		<td align="left">[% m2fair_str _ " " _ m2unfair_str; %]</td>
+		<td align="left">[% m2fair_str _ "&nbsp;" _ m2unfair_str; %]</td>
 		<td align="center">[% IF m2.unanimous %]X[% END %]</td>
 		<td align="center">[% IF m2.offside %]X[% END %]</td>
 		<td align="center">[% IF m2.ld %]X[% END %]</td>
