@@ -1,5 +1,5 @@
 INSERT IGNORE into hooks (param, class, subroutine) VALUES ("comment_save_success", "Slash::Rating", "create_comment_vote");
-INSERT IGNORE INTO vars (name, value, description) VALUES ('set_disc_rating_last_id', '0', 'last vote_id reconciled');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('set_disc_rating_last_cid', '0', 'Last comment vote cid reconciled');
 
 INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "0", "0 stars");
 INSERT INTO string_param (type, code, name) VALUES ("comment_vote", "1", "1 stars");

@@ -68,11 +68,43 @@ sub create_comment_vote {
 
 }
 
+sub getUniqueDiscussionsBetweenCids {
+	my($self, $start_cid, $end_cid) = @_;
+	my $discussions = $self->sqlSelectColArrayref(
+		"DISTINCT comments.sid",
+		"comments, comment_vote",
+		"comments.cid=comment_vote.cid
+		 AND comments.cid BETWEEN $start_cid AND $end_cid");
+	return $discussions;
+}
+
+sub updateDiscussionRatingStats {
+	my($self, $discussions) = @_;
+	return 0 unless $discussions && @$discussions;
+	my $sid_clause = "sid IN (" . join(",", @$discussions) . ")";
+	my $hr = $self->sqlSelectAllHashref(
+		[qw( sid active )],
+		"sid, active, COUNT(*) AS c, AVG(val) AS avgval",
+		"comments, comment_vote",
+		"comments.cid=comment_vote.cid
+		 AND $sid_clause",
+		"GROUP BY sid");
+	my $rows = 0;
+	for my $sid (keys %$hr) {
+		my $sid_hr = $hr->{$sid};
+		my $replace_hr = { discussion => $sid };
+		$replace_hr->{active_votes} =  $sid_hr->{yes}{c} || 0;
+		$replace_hr->{total_votes}  = ($sid_hr->{yes}{c} || 0) + ($sid_hr->{no}{c} || 0);
+		$replace_hr->{avg_rating}   = $sid_hr->{yes}{avgval} || undef;
+		$rows += $self->sqlReplace("discussion_rating", $replace_hr);
+	}
+	return $rows;
+}
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
 }
-
 
 1;
 
