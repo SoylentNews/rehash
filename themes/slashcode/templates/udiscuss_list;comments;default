@@ -18,10 +18,11 @@ udiscuss_list
 __template__
 [% USE Slash %]
 <MULTICOLS COLS=2>
-[% FOR d = discussions %]
-	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% d.0 %]">[%
-IF d.1.defined && d.1.length %][% d.1 %][% ELSE %]untitled[% END %]</A>
-	created by [% d.3 %] on [% Slash.timeCalc(d.2) %]
+[% FOR discussion = discussions %]
+	[% nickname = Slash.db.getUser(comment.uid, 'nickname') %]
+	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
+IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A>
+	created by <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> on [% Slash.timeCalc(discussion.ts) %]
 [% END %]
 </MULTICOL>
 <P>
