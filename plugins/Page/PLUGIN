@@ -2,5 +2,6 @@ name=Page
 description="Alternative index page for sites"
 htdoc=page.pl
 template=templates/index;page;default
+template=templates/index;page;default.1
 template=templates/data;page;default
 template=templates/storyTitleOnly;page;default

@@ -1,0 +1,172 @@
+__section__
+default
+__description__
+This is the main block of html and code that gets evaled to create the main
+index page.
+
+__title__
+
+__page__
+page
+__lang__
+en_US
+__name__
+index
+__template__
+	
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<!- begin whats new -->
+				<td width="60%" valign="top">
+				<p>[% PROCESS topicbar title="WHAT'S NEW" %]
+				[% 
+					misc.count = 3;
+					whatsnew = index.displayStoriesByTitle(form.section, misc);
+
+					FOREACH story = whatsnew; %]
+				[% story.widget %]
+					[% END;
+				%]
+
+				<small><b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b><br>
+				<b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_50=What%27s+New">What's old?</a> ]</b>  
+				</small>
+				<!-- end whats new -->
+
+                <!-- begin feature article -->
+                <p>[% PROCESS topicbar title="FEATURE ARTICLE" %]
+				[% 
+				misc.subsection = 'features';
+				misc.count 	= 6;
+				feature = 
+				index.displayStories(form.section,misc); 
+				story = feature.shift;
+
+				%]
+				[% # just one story, so we know its [0] %]
+				[% story.widget %]
+                <!-- end of feature article -->
+
+
+				<!-- begin news -->
+				<p>[% PROCESS topicbar title="NEWS" %]
+				[% 
+				misc.subsection = 'news';
+				misc.count	= 5;
+				news = index.displayStories(form.section, misc);
+
+					FOREACH story = news; %]
+				[% story.widget %]
+					[% END;
+				%]
+
+
+				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_49=News">Older news</a> ]</b><br> 
+				<b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest news</a> ]</b>
+				</small>
+				<!-- end of news -->
+
+				<!-- begin right column -->
+				</td>
+				<td><img src="[% constants.imagedir %]/pix.gif" width="16" height="1" alt=""></td>
+				<td width="40%" valign="top"> 
+				<p>[% PROCESS topicbar title="CALENDAR" %]
+				<!-- SECTION [% form.section %] -->
+				[% 
+					section = form.section;
+					IF form.date;
+						mydate = form.date;
+					ELSE;
+						mydate = Slash.timeCalc(Slash.db.getTime(), '%Y-%m-%d');
+					END;
+					
+					events = Slash.getObject('Slash::Events');
+					IF events;
+						myevents = events.getEvents(mydate, '','', section);
+
+						FOREACH event=myevents; %]
+				
+				<small><b><A HREF="[% constants.rootdir %]/article.pl?sid=[% event.sid %]">
+				[% event.title %]</A></b><br>
+				[% event.begin %] - [% event.end %]</small><p>
+						[% END;
+					END;
+				%]
+				<small><b>[ <a HREF="[% constants.rootdir %]/submit.pl?section=[% form.section %]">Suggest an event</a> ]</b></small> 
+				<! -- end calendar -->
+				
+				<!-- begin past features -->
+				<p>[% PROCESS topicbar title="PAST FEATURES" %]
+				[% 
+					FOREACH story = feature ; %]
+				[% story.widget %]
+					[% END;
+				%]
+		
+				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=&section=[% form.section %]&topic_52=Past+Features">Older features</a> ]</b></small>
+				<!-- end pastfeatures -->
+				
+				<!-- guided opinion -->	
+				<p>[% PROCESS topicbar title="GUIDED OPINION" %]
+				[% 
+					misc.subsection = 'opinion';
+					misc.count 	= 5;
+					opinion = index.displayStories(form.section, misc);
+					FOREACH story = opinion ; %]
+				[% story.widget %]
+					[% END;
+				%]
+				<small><b>[ <a HREF="[% constants.rootdir %]/search.pl?query=opinions&section=[% form.section %]&topic_51=Guided+Opinion">Past opinions</a> ]</b></small> 
+				<!-- end guided opinion -->
+	
+				<!-- begin new forum -->
+				<p>[% PROCESS topicbar title="NEW FORUM THREAD" %]
+				[%  
+
+				searchobj = Slash.getObject('Slash::Search');
+				IF searchobj;
+
+					type = constants.enable_discussion_topic || 'topic_2';
+					forum_topics = Slash.db.getDescriptions('topics_section_type', form.section, type); 
+
+					FOR t = forum_topics.keys; 
+						hashref.tid = t;
+						hashref.section = form.section;
+						hashref.type = 'recycle';
+						hashref.approved = 1; 
+						total_discussions = Slash.db.sqlCount('discussions',"topic = '$t' AND section = '$form.section'");
+						discussions = searchobj.findDiscussion(hashref,0,5,3); 
+						
+						IF discussions; %]
+				<small>
+				<b><a href="[% constants.rootdir %]/comments.pl?op=user_created_index&amp;tid=[% t %]&amp;section=[% form.section %]&amp;type=recycle">[% forum_topics.$t %]</a> Total: ([%
+				total_discussions %])</b>
+				</small>
+				<ul>
+							[% FOR discussion = discussions %]
+					<li>
+					<small>
+					<b>
+					<A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">
+								[% IF discussion.title.defined && discussion.title.length %]
+					[% discussion.title %]
+								[% ELSE %]
+					untitled
+								[% END %]
+					</A>
+					</b>
+					</small>
+							[% END %]
+						[% END %]
+				</ul>
+					[% END; 
+				END; %]
+
+				<!-- end new forum -->
+
+				</td>
+			</tr>
+		</table>
+		</td>
+__seclev__
+10000

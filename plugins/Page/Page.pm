@@ -20,8 +20,13 @@ use base 'Slash::DB::Utility';
 #################################################################
 # Ok, so we want a nice module to do the front page and utilise 
 # subsections. We also want to scrap the old way of doign things.
-# I now present to you ... Page Patrick 'CaptTofu' Galbraith
+# I now present to you ... Page
+# Patrick 'CaptTofu' Galbraith
 # 6.9.02
+
+
+
+#################################################################
 sub new {
 	my ($class, $user) = @_;
 
@@ -71,13 +76,13 @@ sub displayStories {
 	my $limit = '';
 
 	if ($misc->{subsection}) {
-		my $subsections = $slashdb->getDescriptions('section_subsection_name', $section); 
+		my $subsections = $slashdb->getDescriptions('section_subsection_names', $section); 
 		# from title to id
 		$misc->{subsection} = $subsections->{$other->{subsection}};
-		$limit = $slashdb->getSubSection($other->{subsection}, 'article_count') if ! $other->{count};
+		$limit = $other->{count} ? $other->{count} : $slashdb->getSubSection($misc->{subsection}, 'artcount');
+	} else {
+		$limit = $other->{count} ? $other->{count} : $slashdb->getSection($section, 'artcount');
 	}
-	
-	$limit = $other->{count} if $other->{count};
 
 	my $storystruct = [];
 
@@ -86,15 +91,16 @@ sub displayStories {
 	while (my $story = shift @{$stories}) {
 		my $sid = $story->[0];
 		my $title = $story->[2];
-		my $time = $story->[3];
+		my $time = $story->[9];
+		my $storytime = timeCalc($time, '%B %d, %Y');
 
 		my $storyref = {};
 
 		if ($other->{titles_only}) {
 			my $storycontent = $self->getStoryTitleContent({ 
-					sid => $sid, 
-					time => $time, 
-					title => $title
+					sid 	=> $sid, 
+					'time' 	=> $time, 
+					title 	=> $title
 			});
 
 			$storystruct->[$i]{sid} = $sid;

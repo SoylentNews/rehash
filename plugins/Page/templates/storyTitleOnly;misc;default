@@ -1,0 +1,17 @@
+__section__
+default
+__description__
+this is just for listing the damned titles and links to article.pl
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+storyTitleOnly
+__template__
+<small>[% Slash.timeCalc(story.time, '%B %d, %Y') %]</small><br>
+<b><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A></b><p>
+__seclev__
+100
