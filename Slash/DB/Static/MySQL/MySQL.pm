@@ -890,7 +890,7 @@ sub getSkinInfo {
 				 AND in_trash = 'no' AND time < NOW()
 				 AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2");
 			my $ds_hr = $self->displaystatusForStories($stoids);
-			$child_data{count_sectional} = scalar(grep { $ds_hr->{$_} == 0 } @$stoids);
+			$child_data{count_sectional} = scalar(grep { $ds_hr->{$_} == 1 } @$stoids);
 
 			$children{$child_tid} = \%child_data;
 			push @{$index{$skinname}}, $children{$child_tid};
