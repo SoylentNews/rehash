@@ -31,6 +31,9 @@ WHICH_GREP=`which grep`;
 WHICH_UNAME=`which uname`;
 WHICH_AWK=`which awk`;
 
+# if you use sudo, fill this in, like "sudo -u slashdot"
+MYSUDO="";
+
 # This prolly ain't 100% accurate, but it should be good enough.
 OS=`$WHICH_UNAME | $WHICH_AWK '{print $1}'`;
 
@@ -52,7 +55,9 @@ start_slashd () {
 	# if you aren't using GMT for internal dates, please change
 	# the appropriate lines, below.  But why wouldn't you?
 
-	if [ "$OS" = "FreeBSD" ] ; then
+	if [ "$MYSUDO" ] ; then
+		TZ=GMT $MYSUDO $SLASHD $VIRTUAL_USER_NAME &
+	elif [ "$OS" = "FreeBSD" ] ; then
 		TZ=GMT su $USERNAME -c "$SLASHD $VIRTUAL_USER_NAME" &
 	elif [ "$OS" = "Linux" ] ; then 
 		su - $USERNAME -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
@@ -80,11 +85,11 @@ stop_slashd () {
 
 	if [ -f $RUNNINGPID ] ; then
 		echo -n "Stopping $PROGNAME $VIRTUAL_USER_NAME: ";
-		if ! kill `$WHICH_CAT $RUNNINGPID` ; then
+		if ! $MYSUDO kill `$WHICH_CAT $RUNNINGPID` ; then
 			echo -n "...using kill -9 to make sure ...";
 			sleep 3;
-			kill -9 `$WHICH_CAT $RUNNINGPID`;
-			rm -f $RUNNINGPID;
+			$MYSUDO kill -9 `$WHICH_CAT $RUNNINGPID`;
+			$MYSUDO rm -f $RUNNINGPID;
 		fi
 		echo "ok.";
 	else
