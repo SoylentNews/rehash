@@ -741,7 +741,6 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes o
 
 INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
 
-# USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_47, Start of T_2_3_0_48
@@ -778,7 +777,11 @@ UPDATE menus SET menuorder=9 WHERE label='Slashd' AND menu='admin';
 UPDATE menus SET menuorder=10 WHERE label='Recent' AND menu='admin';
 
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Advanced', '[% constants.rootdir %]/topics.pl', 500, 11);
+
+# none of these existed for me previously, so no rows were updated -- pudge
 UPDATE stats_daily SET name='m2_points_lost_spent' WHERE name='m2_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent' WHERE name='mod_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_points_spent_plus_1';
 UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_points_spent_minus_1';
+
+# USEPERL LAST UPDATED HERE
