@@ -224,7 +224,7 @@ sub print_first_line {
 	if ($weed_out_images) {
 		$pages = $logdb->sqlCount("accesslog",
 			"id BETWEEN " . ($maxlog_last+1) . " AND $maxlog_new"
-			. " AND op != 'image'");
+			. " AND op != 'image' AND (op != 'rss' OR static = 'no')");
 	} else {
 		$pages = $maxlog_new - $maxlog_last;
 	}
