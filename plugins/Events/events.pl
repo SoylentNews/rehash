@@ -47,16 +47,22 @@ sub main {
 		if (@$stories) {
 			header($time);
 			slashDisplay('events', {
-				title 			=> $time,
-				events 			=> $stories,
-				'date'  		=> $date,
+				title 		=> $time,
+				events 		=> $stories,
+				'date'  	=> $date,
 			});
 		} else {
 			header($time);
+			# There was no data;events;default template, so the
+			# getData call below would fail;  I added one with
+			# a generic string for that datum.  If anyone wants
+			# to take a look and make sure the error string
+			# makes sense, edit it, and delete this comment,
+			# feel free. - Jamie 2003/06/20
 			slashDisplay('events', {
-				title 			=> $time,
-				message 		=> getData('notfound'),
-				'date'  		=> $date,
+				title 		=> $time,
+				message 	=> getData('notfound'),
+				'date'  	=> $date,
 			});
 		}
 		footer();
