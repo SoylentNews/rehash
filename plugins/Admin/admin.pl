@@ -512,7 +512,7 @@ sub blockEdit {
 		retrieve_checked	=> $retrieve_checked,
 		blocktype_select	=> $blocktype_select,
 		sectionbid		=> $sectionbid,
-		autosubmit_select		=> $autosubmit_select,
+		autosubmit_select	=> $autosubmit_select,
 		rss_select		=> $rss_select,
 		rss_template_code	=> $rss_template_code,
 	});
