@@ -781,8 +781,8 @@ INSERT INTO pollquestions_new (qid,question,voters,topic,discussion,date,uid,sec
 EOT
 
 for my $skid (sort { $a <=> $b } keys %skins) {
-        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
-        print "UPDATE pollquestions_new SET primaryskid=$skid WHERE section=$section_q;\n";
+	my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+	print "UPDATE pollquestions_new SET primaryskid=$skid WHERE section=$section_q;\n";
 }
 my $mainpage_skid = $slashdb->getVar('mainpage_skid','value',1);
 print "UPDATE pollquestions_new SET primaryskid=$mainpage_skid WHERE primaryskid IS NULL;\n";
