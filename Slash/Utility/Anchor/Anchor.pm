@@ -403,8 +403,8 @@ sub ssiHeadFoot {
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
 	(my $dir = $constants->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
-	my $hostname = $slashdb->getSection($user->{currentSection}, 'hostname')
-		if $user->{currentSection};
+#	my $hostname = $slashdb->getSection($user->{currentSection}, 'hostname')
+#		if $user->{currentSection};
 	my $page = $options->{Page} || $user->{currentPage} || 'misc';
 
 	# if there's a special .inc header for this page, use it, else it's
@@ -658,7 +658,7 @@ sub getSectionBlock {
 		: $user->{currentSection};
 
 	my $block;
-	if ($thissect and ($thissect ne 'index')) {
+	if ($thissect && $thissect ne 'index') {
 		$block = $slashdb->getBlock("${thissect}_${name}", 'block');
 	}
 
