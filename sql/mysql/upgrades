@@ -2258,9 +2258,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_freq_max', '172800', 'Ma
 
 # End of T_2_3_0_148, Start of T_2_3_0_149 - 2004/04/06
 
-ALTER TABLE comments ADD COLUMN disp_mod_orig TINYINT NOT NULL DEFAULT 0 AFTER karma_abs, ADD COLUMN disp_mod TINYINT NOT NULL DEFAULT 0;
-
-ALTER TABLE moderatorlog ADD COLUMN mod_disp_mod TINYINT NOT NULL DEFAULT 0;
+ALTER TABLE comments ADD COLUMN tweak_orig TINYINT NOT NULL DEFAULT 0 AFTER karma_abs, ADD COLUMN tweak TINYINT NOT NULL DEFAULT 0;
 
 INSERT INTO vars (name, value, description) VALUES ('m2_inherit', '0', 'Set to true if you would like to inherit m2s from previous mods with the same cid-reason');
 
