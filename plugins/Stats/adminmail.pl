@@ -47,15 +47,7 @@ $task{$me}{code} = sub {
 
 	slashdLog('Send Admin Mail Begin');
 	my $count = $logdb->countDaily();
-
-	# homepage hits are logged as either '' or 'shtml'
-	$count->{'index'}{'index'} += delete $count->{'index'}{''};
-	$count->{'index'}{'index'} += delete $count->{'index'}{'shtml'};
-	# these are 404s
-	delete $count->{'index.html'};
-
-	my $sdTotalHits = $backupdb->getVar('totalhits', 'value', 1);
-	$sdTotalHits = $sdTotalHits + $count->{'total'};
+	my $articles = $logdb->countDailyStoriesAccess();
 
 	my $reasons = $slashdb->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
@@ -169,6 +161,19 @@ EOT
 	my $m2_text = getM2Text($stats->getModM2Ratios(), {
 		oldest => $oldest_to_show
 	});
+
+	my $sdTotalHits = $backupdb->getVar('totalhits', 'value', 1);
+	my $daily_total = $logdb->countDailyByPage('', {
+			no_op => $constants->{op_exclude_from_countdaily},
+			});
+	$sdTotalHits = $sdTotalHits + $daily_total;
+	# Need to figure in the main section plus what the handler is.
+	# This doesn't work for the other sites... -Brian
+	my $homepage = $logdb->countDailyByPage('', {
+			section => 'index',
+			no_op => $constants->{op_exclude_from_countdaily},
+			});
+
 
 	my $grand_total = $logdb->countDailyByPage('');
 	$data{grand_total} = $grand_total;
@@ -311,7 +316,7 @@ EOT
 		}
 	}
 
-	$statsSave->createStatDaily("total", $count->{total});
+	$statsSave->createStatDaily("total", $daily_total);
 	$statsSave->createStatDaily("total_static", $total_static);
 	$statsSave->createStatDaily("total_subscriber", $total_subscriber);
 	$statsSave->createStatDaily("total_secure", $total_secure);
@@ -322,7 +327,7 @@ EOT
 	$statsSave->createStatDaily("unique", $count->{unique});
 	$statsSave->createStatDaily("unique_users", $count->{unique_users});
 	$statsSave->createStatDaily("comments", $comments);
-	$statsSave->createStatDaily("homepage", $count->{index}{index});
+	$statsSave->createStatDaily("homepage", $homepage);
 	$statsSave->createStatDaily("distinct_comment_ipids", scalar(@$distinct_comment_ipids));
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
 	$statsSave->createStatDaily("consensus", $consensus);
@@ -381,7 +386,7 @@ EOT
 		}
 	}
 
-	$data{total} = sprintf("%8d", $count->{total});
+	$data{total} = sprintf("%8d", $daily_total);
 	$data{total_bytes} = sprintf("%0.1f MB",$total_bytes/(1024*1024));
 	$data{grand_total_bytes} = sprintf("%0.1f MB",$grand_total_bytes/(1024*1024));
 	$data{total_subscriber} = sprintf("%8d", $total_subscriber);
@@ -428,16 +433,16 @@ EOT
 	$statsSave->createStatDaily("sub_comments", $data{sub_comments});
 	$statsSave->createStatDaily("total_hits", $sdTotalHits);
 
-	$data{homepage} = sprintf("%8d", $count->{index}{index});
+	$data{homepage} = sprintf("%8d", $homepage);
 	$data{day} = $yesterday ;
 	$data{distinct_comment_posters_uids} = sprintf("%8d", $distinct_comment_posters_uids);
 
 	my @lazy;
 	for my $key (sort
-		{ ($count->{articles}{$b} || 0) <=> ($count->{articles}{$a} || 0) }
-		keys %{$count->{articles}}
+		{ ($articles->{$b} || 0) <=> ($articles->{$a} || 0) }
+		keys %$articles
 	) {
-		my $value = $count->{'articles'}{$key};
+		my $value = $articles->{$key};
 
  		my $story = $backupdb->getStory($key, ['title', 'uid']);
 
