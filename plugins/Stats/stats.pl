@@ -21,7 +21,9 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
-	my $stats     = getObject('Slash::Stats', { db_type => 'log_slave' } );
+	# we can make a separate reader and writer, but we need to write, so
+	# for now ... writer
+	my $stats     = getObject('Slash::Stats', { db_type => 'writer' } );
 
 	my $admin      = $user->{seclev} >= ($constants->{stats_admin_seclev} || 100);
 	my $admin_post = $admin && $user->{state}{post};
