@@ -10,20 +10,21 @@ INSTALL - Slash Installation
 
 =head1 SYNOPSIS
 
-This document describes how to install Slash 2.1/2.2 (where you see
-"2.2" you may safely assume "2.1", except where specified).  For instructions on
+This document describes how to install Slash 2.2.  For instructions on
 installation or upgrade of previous versions of Slash, see the INSTALL
 document included with those distributions.
 
 These instructions have only been tested on Linux. Installation under
 BSD and other Unix OSes should work similarly, but there are problems
 with the Makefile and installtion under some non-Linux OSes.  Feel free
-to submit bug reports (better, patches) for any such problems.
+to submit bug reports (or better, patches) for any such problems.
 We've had reports of the 1.0.x version of Slash running on Windows,
 but have done no testing and have no further information, and have no
 information about Slash 2 running on Windows.
 
-PostgreSQL support in Slash 2 is currently alpha-quality.
+PostgreSQL was supported (alpha-quality) in earlier versions of Slash
+2, but has not been updated at all since late 2001.  At this point,
+Slash works only with MySQL.
 
 Slash can always be downloaded from SourceForge.net, from the FTP site,
 and via CVS.
@@ -34,15 +35,28 @@ and via CVS.
 
 See the SourceForge.net page for patches and bug reports.
 
+=head2 Which version should I use?
+
+If you are using Slash 2.2.5 or before, including all 2.1.x, 2.0.x, and
+1.x versions, you should upgrade to the latest version in the 2.2 tree,
+2.2.6, as soon as possible.  There are security issues with previous
+versions.  You should not install previous versions.
+
+As of this writing (June 2003), our last official release (2.2.6) was
+some time ago and many features have been added since.  We have not
+yet released 2.3.0.  If you want to use more recent code, check out CVS
+versions from cvs.slashcode.com.  You probably do not want to use the
+very latest CVS.  See "CVS tags" below for advice on choosing and
+maintaining a CVS installation.
 
 =head2 Important Note
 
-The software and hardware requirements are listed at the end of the
-document, because we know you want to get right into the installation.
-Please read those requirements if you have B<any> question about
-what might be required.
+We know you want to get right into the installation, but you probably
+want to read this whole document first.  Notably, the software and
+hardware requirements are given later on.
 
-Upgrading information is also toward the end of the document.
+Also, you will find information on upgrading a Slash site (which can be
+tricky);  uninstalling;  and troubleshooting for common problems.
 
 
 =head1 INSTALLATION
@@ -56,18 +70,18 @@ Upgrading information is also toward the end of the document.
 For slashd (see F<utils/slash>, which starts slashd),
 mod_perl (see F<httpd/httpd.conf>), and MySQL, we set all processes
 to run in GMT.  Then it is easy to convert dates to whatever the
-user's local time is.  If you have date offset problems, check that all of
-these are properly set to run in GMT.
+user's local time is.  If you have date offset problems, check that
+all of these are properly set to run in GMT.  Your server(s) do not
+actually need to have their operating systems set to GMT (ours aren't),
+but if you want to do that, it won't hurt anything.
 
 =item *
 
 You cannot have different versions of the Slash modules installed for
-different sites on the same Apache server.  Well, if you want to, you
+different sites on the same Apache server.  (Well, if you want to, you
 can try the Apache::PerlVINC module, but this is B<not> recommended for
 performance reasons. Slash is designed to have one shared core of code
-for all Slash sites on a system.  (This is made easier than it was in
-1.0.x, where to customize a site, you needed to change the module code;
-this should no longer be necessary.)
+for all Slash sites on a system.)
 
 =item *
 
@@ -209,19 +223,19 @@ building, for Compress::Zlib and XML::Parser (see L<"REQUIREMENTS">).
 
 =item B<BSD>
 
-If running BSD, also install the BSD::Resource module.
+If running BSD, also install the BSD::Resource module.  We have
+heard reports of problems running Slash on BSD, but you are
+welcome to try;  patches would be lovely.
 
 =item B<Alternate DBs>
 
-If not using MySQL, just allow the installation of its drivers
-to continue, and possibly fail.  Then install the driver you need
-(e.g., for PostgreSQL, use "DBD::Pg") using the CPAN shell.
-But note -- while our design allows for supporting multiple
-DBs, B<actually> supporting anything other than MySQL has
-fallen by the wayside with recent (post-2.0) versions of
-Slash. We haven't heard from our users that this is an
-important feature and it isn't one we need ourselves, so
-it's not a high priority. We welcome patches and feedback.
+Slash currently requires MySQL.  While our design allows for
+supporting multiple DBs, B<actually> supporting anything other
+than MySQL has fallen by the wayside since the release of Slash
+version 2.0.  We have heard almost zero demand for any other
+database, and this isn't a feature we need ourselves, so it's
+not a high priority. Patches and feedback are, of course,
+always welcome.
 
 =item B<DBIx::Password>
 
@@ -669,6 +683,10 @@ template with the new template.
 
 =back
 
+=head2 Slash 2.2.6 -E<gt> Slash CVS
+
+Use the sql/mysql/upgrades file;  see "CVS tags" below.
+
 =head2 Slash 1.0 -E<gt> Slash 2.2
 
 Please read the complete documentation of F<utils/slash1toslash2.2>.
@@ -696,25 +714,26 @@ perl 5.6.0 is supported, but MySQL 3.22 is not.
 =item perl
 
 Version 5.6.1 (5.6.0). [NOTE: perl 5.6.0 may have some problems.
-5.6.1 is recommended.]
+5.6.1 is recommended. We have found no problems with 5.8.0, so
+if you have that, don't downgrade on our account.]
 
 	http://www.cpan.org/
 
 =item MySQL
 
-Version 3.23.42 (3.23).
+Version 4.0.12 (3.23.42).
 
 	http://www.mysql.com/
 
 =item Apache
 
-Version 1.3.20 (1.3.6).
+Version 1.3.27 (1.3.6).
 
 	http://httpd.apache.org/
 
 =item mod_perl
 
-Versions 1.26 (1.21).
+Versions 1.27 (1.21).
 
 	http://perl.apache.org/
 
@@ -815,20 +834,19 @@ the Bundle::Slash distribution.
 
 =head2 Hardware
 
-There are no specific hardware requirements.  Apache (with mod_perl) and
-MySQL both take up a lot of RAM; running a complete system with 128MB
-might be possible, if you do some tuning of the configuration, but a
-practical minimum 256MB is recommended, though less could be sufficient
-with some tuning.Storage space depends on how busy you expect the site
-to be; 250MB is possible, but a minimum 1GB is recommended.  Necessary
-processor speed is also dependent on how busy the site is; Pentium 133
-or equivalent might work, but less than a Pentium II/200 is not
-recommended.
+There are no specific hardware requirements.  Apache (with mod_perl)
+and MySQL both take up a lot of RAM. Running a complete system with
+128MB might be possible, if you do some tuning of the configuration,
+but a practical minimum of 256MB is recommended.  Storage space depends
+on how busy you expect the site to be; a minimum 1GB is recommended.
+Necessary processor speed is also dependent on how busy the site is;
+Pentium 133 or equivalent might work, but less than a Pentium II/200 is
+not recommended.
 
 For the curious, Slashdot (as of September 2001) runs on nine machines:
 nine webservers (each is Pentium III/600, 1GB RAM, 9GB hard drive), one
 NFS server (600MHz PIII, 1GB RAM), and three database servers
-database server (quad 600MHz PIII, 4GB RAM).  One database server is
+(quad 600MHz PIII, 4GB RAM).  One database server is
 live, one is a replicated backup, and a third is for doing live searches
 and performance-intensive SELECTs by daemons etc.
 
@@ -875,6 +893,43 @@ fry
 
 =back
 
+=head2 Security note
+
+We are no longer releasing bugfixes, even for security, for the 1.0
+or 2.0 versions, and do not recommend their use.  If we become aware
+of security issues in the 2.2 tree, we will release another version.
+For this reason, if you are using any version of Slash in 2.2.x or
+earlier, we recommend you upgrade to the latest version of 2.2, which
+as of this writing (June 2003) is 2.2.6.
+
+=head2 CVS tags
+
+Our development of 2.3/2.4 has gone on exceptionally long without an
+tarball release of 2.3.0.  Many Slash hosting sites are choosing to
+follow CVS instead of waiting.
+
+Installation of the latest CVS (as of June 2003) is almost identical
+to the installation of 2.2.
+
+You probably do not want to use the
+very latest CVS, as the Slash developers are constantly updating it.
+If you wish to live on the edge, try a T_2_3_0_x tag ("Testing in 2.3.0
+branch" -- one or two of these are added every week, Slashdot uses them,
+but they may have bugs).  If you are content to just hang out near the
+edge, look for one of the R_2_3_0_x cvs tags ("Release candidates for
+2.3.0" -- these have been tested and are believed free of major bugs).
+
+To upgrade from 2.2.x to the CVS tree, you will need to follow the
+instructions in the sql/mysql/upgrades file.  At the moment, these are
+just SQL commands you will need to issue, but read carefully because
+you may have to use judgement and issue command-line commands and so on.
+(We are working on a tool to automate this process.)  Once you are
+upgraded to, or have installed, a given CVS tag, upgrading to later
+CVS tags is simply a matter of following along in that file -- we append
+as we go, and each T_* tag is clearly marked.
+
+=head2 Important Note
+
 =head1 COMMON INSTALLATION PROBLEMS
 
 Here are some common reasons why Slash installations fail.
@@ -907,7 +962,7 @@ latest version will make life easier. Note that you'll want to
 recompile mod_perl/Apache after upgrading perl.
 
 We believe everything works fine with perl 5.8.0, but have not
-run production sites on it ourselves.
+run Slashdot on it yet.
 
 =item *
 
@@ -916,7 +971,7 @@ Multiple Perls installed.
 If you have more than one binary file named C<perl>, trouble
 awaits. It's OK to have a C</usr/bin/perl5.00503> even after
 installing 5.6.1, but if your C</usr/bin/perl> is a different
-version from C</usr/local/bin/perl>, you're in for a world of hurt.
+version from C</usr/local/bin/perl>, you may be in for a world of hurt.
 
 =item *
 
