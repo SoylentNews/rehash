@@ -557,7 +557,7 @@ my %actions = (
 				"<BR>\n" . ("&nbsp; " x length($1))
 			}ieg;						},
 	remove_tags => sub {
-			${$_[0]} =~ s/<.*?>//g;				},
+			${$_[0]} =~ s/<.*?>//gs;			},
 	remove_ltgt => sub {
 			${$_[0]} =~ s/<//g;
 			${$_[0]} =~ s/>//g;				},
