@@ -27,29 +27,28 @@ use Plucene::Search::IndexSearcher;
 our $handled = qr{^(?:comments)$};
 
 #################################################################
-# fields that will be combined into the content field
+# fields that will be combined into the content field,
+# for indexing and tokenization
 our %content = (
 	comments	=> [qw(comment subject)],
 	stories		=> [qw(introtext bodytext title)],
 );
 
-# fields that will be indexed and tokenized
+# additional fields that will be indexed and tokenized
 our %text = (
 	comments	=> [ qw(tids) ],
 	stories		=> [ qw(tids) ],
 );
 
 # fields that will be stored, but not indexed
-our %stored = (
-	comments	=> [ qw(time) ],
-	stories		=> [ qw(time) ],
-);
+# (not planning on storing unindexed data for now, so not used)
+our %stored = ();
 
 our %primary = (
 	comments	=> 'cid',
 );
 
-# content fields don't need to be indexed
+# content fields don't need to be indexed (just in case we do keep them around)
 for my $type (keys %stored) {
 	unshift @{$stored{$type}}, @{$content{$type}};
 }
@@ -129,19 +128,52 @@ sub findRecords {
 		}
 		%terms = (%terms,
 			sid		=> $query->{sid},
-			threshold	=> $query->{points_min},
+			points_min	=> $query->{points_min},
 		);
 
 	}
+
+# deal with ranges for threshold, date ... ?
+# how to return results sorted by date?
+# remove croaks from QueryParser->parse
 
 	my $parser = Plucene::QueryParser->new({
 		analyzer => Plucene::Analysis::Standard::StandardAnalyzer->new(),
 		default  => "content" # Default field for non-specified queries
 	});
-	my $newquery = $parser->parse('foobarbaz:e22 OR content:mah');
+	(my $querystring = $terms{query}) =~ s/([-+&|!{}[\]:\\])~*?/\\$1/g; # allowed: ()"^
+	my $newquery = $parser->parse('+(' . $querystring . ')');
+
+	my $filter = 0;
+	if (length $terms{points_min}) {
+		# fall through if it's exact
+		if ($terms{points_min} != $constants->{comment_maxscore}) {
+			$filter = Slash::SearchToo::Plucene::Filter->new({
+				field => '_points_',
+				from  => _get_points(delete $terms{points_min}),
+				to    => _get_points($constants->{comment_maxscore}),
+			});
+		} else {
+			$terms{_points_} = _get_points(delete $terms{points_min});
+		}
+	}
+
+	for my $key (keys %terms) {
+		next if $key eq 'query' || ! length($terms{$key});
+		my $term = Plucene::Index::Term->new({
+			field	=> $key,
+			text	=> $terms{$key}
+		}) or next;
+		my $term_query = Plucene::Search::TermQuery->new({ term => $term }) or next;
+		$newquery->add($term_query, 1);
+	}
+
+#use Data::Dumper;
+#print STDERR Dumper $newquery;
+print STDERR $newquery->to_string, "\n";
 
 	my $searcher = $self->_searcher;
-	my $docs = $searcher->search_top($newquery, 0, $start + $max);
+	my $docs = $searcher->search_top($newquery, $filter, $start + $max);
 
 	$total   = $searcher->max_doc;
 	$matches = $docs->total_hits;
@@ -168,7 +200,9 @@ sub findRecords {
 		push @$records, \%data;
 	}
 
+	$self->getRecords($type => $records);
 	$self->prepResults($results, $records, $total, $matches, $start, $max);
+
 	return $results;
 }
 
@@ -192,25 +226,16 @@ sub addRecords {
 
 		if ($type eq 'comments') {
 			%document = (
-				_date_			=> _get_date($record->{date}),
-#				date			=> $record->{date},
-				points			=> $record->{points},
-
 				cid			=> $record->{cid},
-				pid			=> $record->{pid},
-				uid			=> $record->{uid},
 
-#				comment			=> $record->{comment},
-#				subject			=> $record->{subject},
+				_date_			=> _get_date($record->{date}),
+				_points_		=> _get_points($record->{points}),
 
+				comment			=> $record->{comment},
+				subject			=> $record->{subject},
+				sid			=> $record->{discussion_id},
 				primaryskid		=> $processed->{section},
 				tids			=> join(' ', @{$processed->{topic}}),
-
-				discussion_id		=> $record->{discussion_id},
-				discussion_title	=> $record->{discussion_title},
-				discussion_date		=> _get_date($record->{discussion_date}),
-				discussion_uid		=> $record->{discussion_uid},
-				discussion_url		=> $record->{discussion_url},
 			);
 		}
 
@@ -226,6 +251,7 @@ sub addRecords {
 		});
 
 		if ($preader->doc_freq($term)) {
+			# this may not show up deleted until optimized
 			$preader->delete_term($term);
 		}
 	}
@@ -234,20 +260,21 @@ sub addRecords {
 	my $writer = $self->_writer;
 	for my $document (@documents) {
 		my $doc = Plucene::Document->new;
+
+		# combine our text fields into one, and then remove them; we
+		# don't need them stored separately
 		$document->{content} = join ' ', @{$document}{ @{$content{$type}} };
+		delete @{$document}{ @{$content{$type}} };
 
 		for my $key (keys %$document) {
-			next unless $document->{$key};
+			next unless length $document->{$key};
 			my $field;
 
 			if ($key eq 'content' || $text{$type}{$key}) {
-#warn "Text: $key\n";
 				$field = Plucene::Document::Field->Text($key, $document->{$key});
 			} elsif ($stored{$type}{$key}) {
-#warn "UnIndexed: $key\n";
 				$field = Plucene::Document::Field->UnIndexed($key, $document->{$key});
 			} else {
-#warn "Keyword: $key\n";
 				$field = Plucene::Document::Field->Keyword($key, $document->{$key});
 			}
 
@@ -279,7 +306,7 @@ sub prepRecord {
 
 	if ($type eq 'comments') {
 		my $comment = $db->getComment($data->{cid}) or return {};
-		for (qw(date points cid pid uid subject sid)) {
+		for (qw(date points cid subject)) {
 			$record{$_} = $comment->{$_};
 		}
 
@@ -287,10 +314,6 @@ sub prepRecord {
 
 		my $discussion = $db->getDiscussion($comment->{sid});
 		$record{discussion_id}    = $discussion->{id};
-		$record{discussion_title} = $discussion->{title};
-		$record{discussion_date}  = $discussion->{ts};
-		$record{discussion_uid}   = $discussion->{uid};
-		$record{discussion_url}   = $discussion->{url};
 		$record{section}          = $discussion->{primaryskid};
 		$record{topic}            = $discussion->{stoid}
 			? $db->getStoryTopicsRendered($discussion->{stoid})
@@ -298,6 +321,36 @@ sub prepRecord {
 	}
 
 	return \%record;
+}
+
+#################################################################
+sub getRecords {
+	my($self, $type, $data, $opts) = @_;
+
+	return unless $type =~ $handled;
+	$self->_type($type);
+
+	# default to ... search?  reader?
+	my $db = $opts->{db} || getObject('Slash::DB', { type => 'reader' });
+	my %record;
+
+	if ($type eq 'comments') {
+		for my $datum (@$data) {
+			# just return the whole comment ... why not?
+			my $comment = $db->getComment($datum->{cid});
+			$datum = $comment || {};
+			if ($comment->{sid}) {
+				my $discussion = $db->getDiscussion($comment->{sid});
+				@{$datum}{qw(
+					primaryskid url title
+					author_uid did
+				)} = @{$discussion}{qw(
+					primaryskid url title
+					uid id
+				)};
+			}
+		}
+	}
 }
 
 #################################################################
@@ -331,12 +384,37 @@ sub _fudge_data {
 }
 
 #################################################################
+# make it easier to sort by serializing the date
 sub _get_date {
 	my($time, $format) = @_;
 	$format ||= '%Y-%m-%d %H:%M:%S';
 	return freeze_date(Time::Piece->strptime($time, $format));
 }
 
+#################################################################
+# make it easier to sort by converting to alphabet
+sub _get_points {
+	my($points) = @_;
+
+	my $constants = getCurrentStatic();
+	my $min = $constants->{comment_minscore};
+	my $max = $constants->{comment_maxscore};
+
+	$points = $points < $min
+		? $min
+		: $points > $max
+			? $max
+			: $points;
+
+	my $start  = $min;
+	my $finish = 'a';
+	until ($start == $points) {
+		$start++;
+		$finish++;
+	}
+
+	return $finish;
+}
 
 #################################################################
 sub _type {
@@ -376,7 +454,19 @@ sub _writer {
 }
 
 
+#################################################################
+#################################################################
+package Slash::SearchToo::Plucene::Filter;
+use base 'Plucene::Search::DateFilter';
 
+sub new {
+	my($self, $args) = @_;
+	bless {
+		field => $args->{field},
+		from  => $args->{from},
+		to    => $args->{to},
+	}, $self;
+}
 
 
 1;
