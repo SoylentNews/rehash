@@ -180,6 +180,9 @@ sub previewForm {
 	my $sub = $slashdb->getSubmission($form->{subid});
 
 	my $topic = $slashdb->getTopic($sub->{tid});
+	$topic->{image} = "$constants->{imagedir}/topics/$topic->{image}"
+                if $topic->{image} =~ /^\w+\.\w+$/;
+
 	my $extracolumns = $slashdb->getSectionExtras($sub->{section}) || [ ];
 	my $ipid_vis = $constants->{id_md5_vislength} ? substr($sub->{ipid}, 0, $constants->{id_md5_vislength}) : $sub->{ipid};
 
