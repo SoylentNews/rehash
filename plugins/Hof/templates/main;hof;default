@@ -39,7 +39,7 @@ __template__
 
 <P>[% PROCESS titlebar title => 'Most Active Submitters' %]
 [% FOREACH item = activesub %]
-<B>[% item.0 %]</B> <A HREF="[% constants.rootdir %]/~[% item.1 %]/">[% item.1 %]</A><BR>
+<B>[% item.0 %]</B> <A HREF="[% constants.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</A><BR>
 [% END %]</P>
 
 <P>[% PROCESS titlebar title => 'Most Active Poll Topics' %]

@@ -1273,7 +1273,7 @@ sub deleteThread {
 
 	$level ||= 0;
 
-	my $count = 1;
+	my $count = 0;
 	my @delList;
 	$comments_deleted = \@delList if !$level;
 
@@ -1282,16 +1282,22 @@ sub deleteThread {
 	my $delkids = $slashdb->getCommentChildren($cid);
 
 	# Delete children of $cid.
+	my %comment_hash;
 	push @{$comments_deleted}, $cid;
 	for (@{$delkids}) {
 		my($cid) = @{$_};
 		push @{$comments_deleted}, $cid;
-		$count += deleteThread($sid, $cid, $level+1, $comments_deleted);
+		deleteThread($sid, $cid, $level+1, $comments_deleted);
 	}
-	# And now delete $cid.
-	$count += $slashdb->deleteComment($cid);
+	for (@{$comments_deleted}) {
+		$comment_hash{$_} = 1;
+	}
+	@{$comments_deleted} = keys %comment_hash;
 
 	if (!$level) {
+		for (@{$comments_deleted}) {
+			$count += $slashdb->deleteComment($_);
+		}
 		# SID remains for display purposes, only.
 		slashDisplay('deleted_cids', {
 			sid			=> $sid,

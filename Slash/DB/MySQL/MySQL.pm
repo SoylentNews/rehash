@@ -1310,6 +1310,9 @@ sub deleteComment {
 		$total_rows += $self->sqlDo("DELETE FROM $table WHERE cid=$cid");
 	}
 	if ($total_rows != scalar(@comment_tables)) {
+		# Here is the thing, an orphaned comment with no text blob
+		# would fuck up the comment count.
+		# Bad juju, no cookie -Brian
 		errorLog("deleteComment cid $cid from $discussion_id,"
 			. " only $total_rows deletions");
 		return 0;

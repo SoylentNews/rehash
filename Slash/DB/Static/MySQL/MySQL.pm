@@ -192,7 +192,7 @@ sub _deleteThread {
 		return 0;
 	}
 
-	my $count = 1;
+	my $count = 0;
 	my @delList;
 	$comments_deleted = \@delList if !$level;
 
@@ -203,10 +203,19 @@ sub _deleteThread {
 	for (@{$delkids}) {
 		my($cid) = @{$_};
 		push @{$comments_deleted}, $cid;
-		$count += $self->_deleteThread($cid, $level+1, $comments_deleted);
+		$self->_deleteThread($cid, $level+1, $comments_deleted);
 	}
-	# And now delete $cid.
-	$count += $self->deleteComment($cid);
+	my %comment_hash;
+	for (@{$comments_deleted}) {
+		$comment_hash{$_} = 1;
+	}
+	@{$comments_deleted} = keys %comment_hash;
+
+	if (!$level) {
+		for (@{$comments_deleted}) {
+			$count += $slashdb->deleteComment($_);
+		print STDERR "DELETING $_ : $count \n";
+	}
 
 	return $count;
 }
