@@ -4021,10 +4021,11 @@ sub getSlashConf {
 	my $confdata = $self->sqlSelectAll('name, value', 'vars');
 	return if !defined $confdata;
 	my %conf = map { $_->[0], $_->[1] } @{$confdata};
-		
+
 	# the rest of this function is where is where we fix up
 	# any bad or missing data in the vars table
 	$conf{rootdir}		||= "//$conf{basedomain}";
+	$conf{real_rootdir}	||= $conf{rootdir};  # for when rootdir changes
 	$conf{absolutedir}	||= "http://$conf{basedomain}";
 	$conf{absolutedir_secure} ||= "https://$conf{basedomain}";
 	$conf{basedir}		||= "$conf{datadir}/public_html";
