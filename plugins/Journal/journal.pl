@@ -177,7 +177,7 @@ sub displayArticle {
 			push @sorted_articles, $collection if ($date and (keys %$collection));
 			$collection = {};
 			$date = $date_current;
-			$collection->{day} = $date;
+			$collection->{day} = $article->[0];
 			push @{$collection->{article}}, {
 				article		=> strip_mode($article->[1], $article->[4]),
 				date		=> $article->[0],
@@ -226,7 +226,7 @@ sub saveArticle {
 			posttype	=> $form->{posttype},
 		});
 	} else {
-		$journal->create($description, $form->{article},
+		$journal->create($description,
 			$form->{article}, $form->{posttype});
 	}
 	listArticle(@_);

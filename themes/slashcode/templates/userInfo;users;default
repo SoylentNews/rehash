@@ -71,7 +71,7 @@ Last Journal Entry was [% Slash.timeCalc(userbio.journal_last_entry_date) %]</A>
  </PRE><P>
 [% END %]
 
-<B>[% nick %] has posted [% commentstruct.size %] comments</B><BR><P>
+<B>[% nick %] has posted [% commentstruct.size %] comments</B><P>
 
 [% n = 0 %]
 [% FOREACH comment = commentstruct %]
@@ -84,12 +84,12 @@ Last Journal Entry was [% Slash.timeCalc(userbio.journal_last_entry_date) %]</A>
 		href    = "$constants.rootdir/pollBooth.pl?qid=$comment.sid";
 		label   = question.question;
         END %]
-<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]">
+<B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]">
    [% comment.subj %]</A> posted on [% comment.cdate %]
         (Score:[% comment.pts %][% replies %])
       <FONT SIZE="2">
            <BR>attached to <A HREF="[% href %]">[% label %]</A>
-      </FONT>
+      </FONT><BR>
 [% END %]
 
 [% IF admin_flag %]
