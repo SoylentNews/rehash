@@ -349,7 +349,7 @@ EOT
 	my $total_secure = $logdb->countDailySecure();
 
 	for my $op (@PAGES) {
-		my $summary = $logdb->getSummaryStats({ op => $op});
+		my $summary = $logdb->getSummaryStats({ op => $op, no_op => $constants->{op_exclude_from_countdaily} });
 		my $uniq  = $summary->{cnt};
 		my $pages = $summary->{pages};
 		my $bytes = $summary->{bytes};
