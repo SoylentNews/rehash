@@ -96,7 +96,7 @@ sub setPrefs {
 
 	# First we delete, then we insert, this allows us to remove MSG_MODE_NONE type entries
 	# Basically it keeps defaults out of the DB, and makes it smaller :)
-	$self->sqlDelete("$table", "uid = $uid");
+	$self->sqlDelete($table, "uid = $uid");
 	for my $code (keys %$prefs) {
 		next if $prefs->{$code} == MSG_MODE_NONE;
 		$self->sqlInsert($table, {

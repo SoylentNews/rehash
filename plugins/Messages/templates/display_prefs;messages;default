@@ -67,7 +67,8 @@ Not all options are available for all message types.
 %]
 <TR>
 	<TD><B>[% messagecodes.$code %]</B></TD>
-	<TD>[% Slash.createSelect("deliverymodes_$code", moderef, prefs.$code, 1, 1) %]</TD>
+	<TD>[% UNLESS prefs.${code}.defined; prefs.$code = modenone; END;
+	Slash.createSelect("deliverymodes_$code", moderef, prefs.$code, 1, 1) %]</TD>
 </TR>
 [%- END %]
 	</TABLE></TD></TR>
