@@ -1363,7 +1363,7 @@ sub fixurl {
 	# different char set if destined to be a query string parameter
 	if ($parameter) {
 		$url =~ s/([^\w.!*'(),;:@\$\/% -])/sprintf "%%%02X", ord $1/ge;
-		$url =~ s/ /+/g;
+		$url =~ s/ /%20/g;
 	} else {
 		$url =~ s/[" ]//g;
 		$url =~ s/^'(.+?)'$/$1/g;

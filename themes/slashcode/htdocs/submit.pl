@@ -416,6 +416,7 @@ USER
 		# Adds proper section for form editor.
 		my $sec = $section ne $I{defaultsection} ? "&section=$section" : "";
 		my $stitle = '&title=' . fixurl($subj, 1);
+		$stitle =~ s/%/%%/g; # for sprintf
 
 		printf(($admin ? <<ADMIN : <<USER), @strs);
 		</FONT><INPUT TYPE="CHECKBOX" NAME="del_$subid">
