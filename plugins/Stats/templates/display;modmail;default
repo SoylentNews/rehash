@@ -29,6 +29,12 @@ oldest unM2'd: [% IF oldest_unm2d_days > -1 %][% oldest_unm2d_days %] days[% ELS
 youngest elig: uid [% youngest_modelig_uid %], created on [% youngest_modelig_created %]
 
 [% m2_text; admin_mods_text %]
+[% IF reverse_mods %]
+REVERSE MODS:
+[%	FOREACH rm = reverse_mods;
+rm.score; "  "; constants.absolutedir_secure %]/~[% rm.nickname | fixparam %] ([% rm.muid %]):  tokens [% rm.tokens %], karma [% rm.karma %][% IF rm.isrecent; " *"; END %]
+[%	END %]
+[% END %]
 [% IF repeat_mods;
 	FOREACH dir = [ '-1', '1' ];
 		IF repeat_mods.$dir.keys.size >= 1;

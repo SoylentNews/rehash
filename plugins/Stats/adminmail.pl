@@ -256,6 +256,7 @@ EOT
 	$mod_data{repeat_mods} = $stats->getRepeatMods({
 		min_count => $constants->{mod_stats_min_repeat}
 	});
+	$mod_data{reverse_mods} = $stats->getReverseMods();
 
 	my $static_op_hour = $stats->getDurationByStaticOpHour({});
 	for my $is_static (keys %$static_op_hour) {
