@@ -8749,25 +8749,29 @@ sub updateStory {
 
 ########################################################
 sub createRemark {
-	my($self, $uid, $stoid, $remark) = @_;
+	my($self, $uid, $stoid, $remark, $type) = @_;
+	$type ||= "user";
 	$self->sqlInsert('remarks', {
 		uid	=> $uid,
 		stoid	=> $stoid,
 		remark	=> $remark,
 		-time	=> 'NOW()',
+		type 	=> $type
 	});
 }
 
 ########################################################
 sub getRemarksStarting {
-	my($self, $starting) = @_;
+	my($self, $starting, $options) = @_;
 	return [ ] unless $starting;
 	$starting ||= 0;
+	my $type_clause;
+	$type_clause = " AND type=" . $self->sqlQuote($options->{type}) if $options->{type};
 	my $starting_q = $self->sqlQuote($starting);
 	return $self->sqlSelectAllHashrefArray(
-		"rid, stoid, remarks.uid, remark, karma",
+		"rid, stoid, remarks.uid, remark, karma, remarks.type",
 		"remarks, users_info",
-		"remarks.uid=users_info.uid AND rid >= $starting_q");
+		"remarks.uid=users_info.uid AND rid >= $starting_q $type_clause");
 }
 
 ########################################################
