@@ -455,6 +455,7 @@ EOT
 
 #################################
 sub newmega {
+	return;
 	my $c = getBackendStories();
 	my $y = 0;    
 	my $um = <<EOT;
@@ -525,7 +526,7 @@ sub openBackend {
 	newxml();
 	newrdf();
 	newwml();
-	newmega();
+#	newmega();
 	my $sec = sqlSelectMany("section", "sections");
 	while(my($s) = $sec->fetchrow) {
 		newxml($s);
