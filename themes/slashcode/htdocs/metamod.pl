@@ -46,7 +46,9 @@ sub metaModerate {
 	my @mods_saved = $slashdb->getModsSaved();
 	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
 
+	# %m2s is the data structure we'll be building.
 	my %m2s = ( );
+
 	for my $key (keys %{$form}) {
 		# Metamod form data can only be a '+' or a '-'.
 		next unless $form->{$key} =~ /^[+-]$/;
@@ -60,7 +62,10 @@ sub metaModerate {
 	}
 
 	# The setMetaMod() method does all the heavy lifting here.
-	$slashdb->setMetaMod($user, \%m2s);
+	# Re m2_multicount:  if this var is set, then our vote for
+	# reason r on cid c applies potentially to *all* mods of
+	# reason r on cid c.
+	$slashdb->setMetaMod($user, \%m2s, $constants->{m2_multicount});
 
 	print getData('thanks');
 }

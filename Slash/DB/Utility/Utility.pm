@@ -328,7 +328,8 @@ sub sqlCount {
 	my($self, $table, $where) = @_;
 
 	my $sql = "SELECT count(*) AS count FROM $table";
-	$sql .= " WHERE $where" if  $where;
+	$sql .= " WHERE $where" if $where;
+
 	# we just need one stinkin value - count
 	$self->sqlConnect();
 	my $count = $self->{_dbh}->selectrow_array($sql);

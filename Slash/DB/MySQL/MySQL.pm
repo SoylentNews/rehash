@@ -646,7 +646,7 @@ sub getMetamodsForUserRaw {
 	my $m2able_reasons = join(",",
 		sort grep { $reasons->{$_}{m2able} }
 		keys %$reasons);
-	return [ ] unless $m2able_reasons;
+	return [ ] if !$m2able_reasons;
 
 	my $consensus = $constants->{m2_consensus};
 	my $consensus_frac = sprintf("%.4f",
@@ -669,9 +669,22 @@ sub getMetamodsForUserRaw {
 	my $old_range = $max_old-$min_old; $old_range = 1 if $old_range < 1;
 	my $new_range = $max_new-$min_new; $new_range = 1 if $new_range < 1;
 
-	my $already_list = join ",", sort keys %$already_have_hr;
-	my $already_clause = "";
-	$already_clause = " AND id NOT IN ($already_list)" if $already_list;
+	# Prepare the lists of ids and cids to exclude.
+	my $already_id_list = "";
+	if (%$already_have_hr) {
+		$already_id_list = join ",", sort keys %$already_have_hr;
+	}
+	my $already_cids_hr = { };
+	my $already_cid_list = "";
+	if ($already_id_list) {
+		$already_cids_hr = $self->sqlSelectAllHashref(
+			"cid",
+			"cid",
+			"moderatorlog",
+			"id IN ($already_id_list)"
+		);
+		$already_cid_list = join(",", sort keys %$already_cids_hr);
+	}
 
 	# We need to consult two tables to get a list of moderatorlog IDs
 	# that it's OK to M2:  moderatorlog of course, and metamodlog to
@@ -682,10 +695,17 @@ sub getMetamodsForUserRaw {
 	# However, since we can't predict how many of our hits will be
 	# deemed "bad" (unusable), we may have to loop around more than
 	# once to get enough.
+	my $getmods_loops = 0;
 	my @ids = ( );
 	my $mod_hr;
-	GETMODS: while ($num_needed > 0) {
+	GETMODS: while ($num_needed > 0 && ++$getmods_loops <= 5) {
 		my $limit = $num_needed*2+10; # get more, hope it's enough
+		my $already_id_clause = "";
+		$already_id_clause  = " AND  id NOT IN ($already_id_list)"
+			if $already_id_list;
+		my $already_cid_clause = "";
+		$already_cid_clause = " AND cid NOT IN ($already_cid_list)"
+			if $already_cid_list;
 		$mod_hr = { };
 		$mod_hr = $self->sqlSelectAllHashref(
 			"id",
@@ -699,10 +719,10 @@ sub getMetamodsForUserRaw {
 			) AS rank",
 			"moderatorlog",
 			"uid != $uid_q AND cuid != $uid_q
-			 AND m2status = 0
+			 AND m2status=0
 			 AND reason IN ($m2able_reasons)
 			 AND active=1
-			 $already_clause",
+			 $already_id_clause $already_cid_clause",
 			"ORDER BY rank LIMIT $limit"
 		);
 		last GETMODS if !$mod_hr || !scalar(keys %$mod_hr);
@@ -713,13 +733,33 @@ sub getMetamodsForUserRaw {
 			$self->sqlSelectColArrayref("mmid", "metamodlog",
 				"mmid IN ($mod_ids) AND uid = $uid_q");
 
-		my @new_ids =
+		# Add the new IDs to the list.
+		my @potential_new_ids =
+			# In order by rank, in case we got more than needed.
 			sort { $mod_hr->{$a}{rank} <=> $mod_hr->{$b}{rank} }
-			grep { !$mod_ids_bad{$_} }
 			keys %$mod_hr;
+		# Walk through the new potential mod IDs, and add them in
+		# one at a time.  Those which are for cids already on our
+		# list, or for mods this user has already metamodded, don't
+		# make the cut.
+		my @new_ids = ( );
+		for my $id (@potential_new_ids) {
+			my $cid = $mod_hr->{$id}{cid};
+			next if $already_cids_hr->{$cid};
+			next if $mod_ids_bad{$id};
+			push @new_ids, $id;
+			$already_cids_hr->{$cid} = 1;
+		}
 		$#new_ids = $num_needed-1 if $#new_ids > $num_needed-1;
 		push @ids, @new_ids;
 		$num_needed -= scalar(@new_ids);
+	}
+	if ($getmods_loops > 5) {
+		use Data::Dumper;
+		print STDERR "GETMODS looped the max number of times,"
+			. " returning '@ids' for uid '$uid'"
+			. " num_needed '$num_needed'"
+			. " already_had: " . Dumper($already_have_hr);
 	}
 
 	return \@ids;
@@ -3519,12 +3559,102 @@ sub getStoryByTimeAdmin {
 }
 
 ########################################################
+# Input: $m2_user and %$m2s are the same as for setMetaMod, below.
+# $max is the max number of mods that an M2 vote can count on.
+# Return: modified %$m2s in place.
+sub multiMetaMod {
+	my($self, $m2_user, $m2s, $max) = @_;
+	return if !$max;
+
+	my $constants = getCurrentStatic();
+	my @orig_mmids = keys %$m2s;
+	return if !@orig_mmids;
+	my $orig_mmid_in = join(",", @orig_mmids);
+	my $uid_q = $self->sqlQuote($m2_user->{uid});
+	my $reasons = $self->getReasons();
+	my $m2able_reasons = join(",",
+		sort grep { $reasons->{$_}{m2able} }
+		keys %$reasons);
+	return if !$m2able_reasons;
+	my $max_limit = $max * scalar(@orig_mmids) * 2;
+
+	# $id_to_cr is the cid-reason hashref.  From it we'll make
+	# an SQL clause that matches any moderations whose cid and
+	# reason both match any of the moderations passed in.
+	my $id_to_cr = $self->sqlSelectAllHashref(
+		"id",
+		"id, cid, reason",
+		"moderatorlog",
+		"id IN ($orig_mmid_in) AND active=1"
+	);
+	return if !%$id_to_cr;
+	my @cr_clauses = ( );
+	for my $mmid (keys %$id_to_cr) {
+		push @cr_clauses, "(cid=$id_to_cr->{$mmid}{cid}"
+			. " AND reason=$id_to_cr->{$mmid}{reason})";
+	}
+	my $cr_clause = join(" OR ", @cr_clauses);
+
+	# Get a list of other mods which duplicate one or more of the
+	# ones we're modding, but aren't in fact the ones we're modding.
+	my $others = $self->sqlSelectAllHashrefArray(
+		"id, cid, reason",
+		"moderatorlog",
+		"($cr_clause)
+		 AND uid != $uid_q AND cuid != $uid_q
+		 AND m2status=0
+		 AND reason IN ($m2able_reasons)
+		 AND active=1
+		 AND id NOT IN ($orig_mmid_in)",
+		"ORDER BY RAND() LIMIT $max_limit"
+	);
+
+	# If there are none, we're done.
+	return if !$others or !@$others;
+
+	# To decide which of those other mods we can use, we need to
+	# limit how many we use for each cid-reason pair.  That means
+	# setting up a hashref whose keys are cid-reason pairs, and
+	# counting until we hit a limit.  This is so that, in the odd
+	# situation where a cid has been moderated a zillion times
+	# with one reason, people who metamod one of those zillion
+	# moderations will not have undue power (nor undue
+	# consequences applied to themselves).
+
+	# Set up the counting hashref, and the hashref to correlate
+	# cid-reason back to orig mmid.
+	my $cr_count = { };
+	my $cr_to_id = { };
+	for my $mmid (keys %$m2s) {
+		my $cid = $id_to_cr->{$mmid}{cid};
+		my $reason = $id_to_cr->{$mmid}{reason};
+		$cr_count->{"$cid-$reason"} = 0;
+		$cr_to_id->{"$cid-$reason"} = $mmid;
+	}
+	for my $other_hr (@$others) {
+		my $new_mmid = $other_hr->{id};
+		my $cid = $other_hr->{cid};
+		my $reason = $other_hr->{reason};
+		next if $cr_count->{"$cid-$reason"}++ >= $max;
+		my $old_mmid = $cr_to_id->{"$cid-$reason"};
+		# And here, we add another M2 with the same is_fair
+		# value as the old one -- this is the whole purpose
+		# for this method.
+		my %old = %{$m2s->{$old_mmid}};
+		$m2s->{$new_mmid} = \%old;
+	}
+}
+
+########################################################
 # Input: %$m2s is a hash whose keys are moderatorlog IDs (mmids) and
 # values are hashrefs with keys "is_fair" (0=unfair, 1=fair).
+# $m2_user is the user hashref for the user who is M2'ing.
+# $multi_max is the maximum number of additional mods which each
+# mod in %$m2s can apply to (see the constants m2_multicount).
 # Return: nothing.
 # Note that karma changes are done in the run_moderatord task.
 sub setMetaMod {
-	my($self, $m2_user, $m2s) = @_;
+	my($self, $m2_user, $m2s, $multi_max) = @_;
 	my $constants = getCurrentStatic();
 	my $consensus = $constants->{m2_consensus};
 	my $rows;
@@ -3536,6 +3666,20 @@ sub setMetaMod {
 	# The user is only allowed to metamod the mods they were given.
 	my @mods_saved = $self->getModsSaved();
 	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
+	my @m2s_mmids = keys %$m2s;
+	for my $mmid (@m2s_mmids) {
+		delete $m2s->{$mmid} if !$mods_saved{$mmid};
+	}
+
+	# If we are allowed to multiply these M2's to apply to other
+	# mods, go ahead.  multiMetaMod changes $m2s in place.  Note
+	# that we first screened %$m2s to allow only what was saved for
+	# this user;  having made sure they are not trying to fake an
+	# M2 of something disallowed, now we can multiply them out to
+	# possibly affect more.
+	if ($multi_max) {
+		$self->multiMetaMod($m2_user, $m2s, $multi_max);
+	}
 
 	# Whatever happens below, as soon as we get here, this user has
 	# done their M2 for the day and gets their list of OK mods cleared.
@@ -3574,7 +3718,8 @@ sub setMetaMod {
 							AND MOD(m2count, 2) = 1,
 							1, 0)",
 			},
-			"id=$mmid AND m2status=0",
+			"id=$mmid AND m2status=0
+			 AND m2count < $consensus AND active=1",
 			{ assn_order => [qw( -m2count -m2status )] },
 		) unless $m2_user->{tokens} < 0;
 
@@ -3599,7 +3744,8 @@ sub setMetaMod {
 			# moderation in question was assigned to more than
 			# $consensus users, and the other users pushed it up to
 			# the $consensus limit already.  Or this user has
-			# gotten bad M2 and has negative tokens.
+			# gotten bad M2 and has negative tokens.  Or the mod is
+			# no longer active.
 			$self->sqlInsert("metamodlog", {
 				mmid =>		$mmid,
 				uid =>		$m2_user->{uid},
@@ -3615,18 +3761,6 @@ sub setMetaMod {
 		-m2fairvotes	=> "m2fairvotes+$voted_fair",
 		-m2unfairvotes	=> "m2unfairvotes+$voted_unfair",
 	}, "uid=$m2_user->{uid}");
-}
-
-########################################################
-# No, this is not API, this is pretty specialized
-sub getModeratorLogRandom {
-	my($self, $uid) = @_;
-	my($m2max) = $self->sqlSelect("max(mmid)", "metamodlog", "uid=$uid");
-	my($modmax) = $self->sqlSelect("max(id)", "moderatorlog");
-
-	# KLUDGE: This assumes that $m2max will always be below
-	# $max - vars(m2_comment).
-	return $m2max + int rand($modmax - $m2max);
 }
 
 ########################################################

@@ -693,4 +693,7 @@ INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES
 
 # Set to email address(es) appropriate for your site, of course.
 INSERT INTO vars (name, value, description) VALUES ('adminmail_mod','admin@example.com','All admin mail about moderation goes here');
-INSERT INTO vars (name,value,description) VALUES ('people_max_subscriber','400','Maximum number of friends/foes you can have');
+INSERT INTO vars (name, value, description) VALUES ('people_max_subscriber','400','Maximum number of friends/foes you can have');
+
+INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Additional multiplier for M2s performed on duplicate mods (leave 0 to disable)');
+
