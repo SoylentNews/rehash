@@ -1670,7 +1670,7 @@ sub getDBs {
 sub getDB {
 	my($self, $db_type) = @_;
 	my $users = $self->sqlSelectColArrayref('virtual_user', 'dbs',
-		'type=' . $self->sqlQuote($db_type));
+		'type=' . $self->sqlQuote($db_type) . " AND isalive='yes'");
 	return $users->[rand @$users];
 }
 
