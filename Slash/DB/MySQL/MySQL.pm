@@ -7548,6 +7548,7 @@ sub getStoryList {
 		my $lookahead = $is_mainpage
 			? $constants->{admin_story_lookahead_mainpage}
 			: $constants->{admin_story_lookahead_default};
+		$lookahead ||= 72 * 3600;
 		push @where, "time < DATE_ADD(NOW(), INTERVAL $lookahead SECOND)";
 	}
 
