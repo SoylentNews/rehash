@@ -4580,10 +4580,18 @@ sub getSlashConf {
 						   12 => 'Positive',	25 => 'Good',	99999 => 'Excellent' ],
 	);
 	for my $key (keys %conf_fixup_arrays) {
-		$conf{$key} = $fixup     ->($conf{$key}) || $conf_fixup_arrays{$key};
+		if (defined($conf{$key})) {
+			$conf{$key} = $fixup->($conf{$key});
+		} else {
+			$conf{$key} = $conf_fixup_arrays{$key};
+		}
 	}
 	for my $key (keys %conf_fixup_hashes) {
-		$conf{$key} = $fixup_hash->($conf{$key}) || $conf_fixup_hashes{$key};
+		if (defined($conf{$key})) {
+			$conf{$key} = $fixup_hash->($conf{$key});
+		} else {
+			$conf{$key} = $conf_fixup_hashes{$key};
+		}
 	}
 
 	if ($conf{comment_nonstartwordchars}) {
