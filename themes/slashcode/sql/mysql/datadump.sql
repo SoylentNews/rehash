@@ -273,7 +273,7 @@ INSERT INTO users_comments (uid, points, posttype, defaultpoints, highlightthres
 # Dumping data for table 'users_hits'
 #
 
-INSERT INTO users (uid, hits) VALUES (1,0);
+INSERT INTO users_hits (uid, hits) VALUES (1,0);
 
 #
 # Dumping data for table 'users_index'
