@@ -1565,7 +1565,7 @@ sub saveComm {
 	for (@reasons) {
 		my $answer = $form->{"reason_alter_$_"};
 		$answer  = 0
-			if $answer !~ /^[-|+]?\d+$/;
+			if $answer !~ /^[\-+]?\d+$/;
 		$answer  = $constants->{comment_minscore}
 			if $answer < $min;
 		$answer  = $constants->{comment_maxscore}
