@@ -2959,7 +2959,16 @@ sub grepn {
 # Removed from openbackend
 sub sitename2filename {
 	my($section) = @_;
-	(my $filename = $section || lc getCurrentStatic('sitename')) =~ s/\W+//g;
+	my $filename = '';
+
+	if ($section ne 'light') {
+		$filename = $section || lc getCurrentStatic('sitename');
+	} else {
+		$filename = lc getCurrentStatic('sitename');
+	}
+
+	$filename =~ s/\W+//g;
+
 	return $filename;
 }
 
