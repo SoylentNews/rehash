@@ -19,10 +19,6 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid %]">
 	[% END %]
 
-	[% IF form.submitter %]
-<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% form.submitter %]">
-	[% END %]
-
 <TABLE>
 	<TR VALIGN=TOP>
 		<TD>
@@ -66,6 +62,7 @@ __template__
 		[% END %]
 
 		<INPUT TYPE="HIDDEN" NAME="writestatus" VALUE="[% storyref.writestatus %]">
+		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter %]">
 
 		[% IF authoredit_flag %]
 		[% author_select %]
