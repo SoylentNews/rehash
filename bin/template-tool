@@ -381,13 +381,14 @@ EOT
 ###############################################
 sub delete_templates {
 	my($templatelist) = @_;
+	return unless @{$templatelist};
 	my $list = join(" ", keys(%$templatelist));
 	
 	print "You are about to delete the following templates:\n\n";
 	printf "%s\t%s;%s;%s\n",
 		@{$templatelist->{$_}}{qw(tpid name page section)}
 	for keys %{$templatelist};
-	print "\nAre you sure you want to delete these templates? [Y/n]";
+	print "\nDelete these templates? [y/N]";
 	
 	chomp(my $answer = <STDIN>);
 	if ($answer =~ /^[Yy]$/) {
