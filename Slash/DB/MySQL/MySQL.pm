@@ -3553,6 +3553,7 @@ sub metamodEligible {
 
 	# Easy tests the user can fail to be ineligible to metamod.
 	return 0 if $user->{is_anon} || !$user->{willing} || $user->{karma} < 0;
+	return 1 if $user->{is_admin};
 
 	# Not eligible if metamodded too recently.
 	my $constants = getCurrentStatic();

@@ -13,39 +13,43 @@ __name__
 dispLinkComment
 __template__
 [% USE Slash %]
-[% IF (user.mode != 'archive' && user.mode != 'metamod' && nickname != "-") %]
-	[% pid = realpid || pid %]
-	<TR><TD><FONT SIZE="2">
+[% IF user.mode != 'metamod' %]
+	[% IF user.is_admin || pid || !user.state.discussion_archived %]
+		[% pid = realpid || pid %]
+		<TR><TD><FONT SIZE="2">
 
-	[ [% UNLESS user.state.discussion_archived %][% Slash.linkComment({
-		sid	=> sid,
-		pid	=> cid,
-		op	=> 'Reply',
-		subject	=> 'Reply to This',
-		subject_only => 1,
-	}) %] | [% END %][% Slash.linkComment({
-		sid	=> sid,
-		cid	=> pid,
-		pid	=> pid,
-		subject	=> 'Parent',
-		subject_only => 1,
-	}, 1) %]
+		[ [% UNLESS user.state.discussion_archived %][% Slash.linkComment({
+			sid	=> sid,
+			pid	=> cid,
+			op	=> 'Reply',
+			subject	=> 'Reply to This',
+		}) %][% END %]
 
-	[% IF can_mod && (
-		!user.state.discussion_archived
-		|| constants.comment_moddable_archived
-	) %]
-	| [% Slash.createSelect("reason_$cid", reasons, '', 1, 1);
-	   END
-	%]
+		[% IF !(user.state.discussion_archived) && (pid || can_mod || user.is_admin) %] | [% END %]
 
-	[% IF user.is_admin && !user.state.discussion_archived %]
-| <INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
+		[% IF pid %][% Slash.linkComment({
+			sid	=> sid,
+			cid	=> pid,
+			pid	=> pid,
+			subject	=> 'Parent',
+		}, 1) %][% END %]
+		
+		[% IF pid && ( can_mod || user.is_admin) %] | [% END %]
+
+		[% IF can_mod %]
+		[% Slash.createSelect("reason_$cid", reasons, '', 1, 1) 
+		%][% END %]
+
+		[% IF can_mod && user.is_admin %] | [% END %]
+
+		[% IF user.is_admin %]
+		<INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
+		[% END %]
+		]
+		</FONT></TD></TR>
+	<TR><TD>
+
 	[% END %]
-	]
-	</FONT></TD></TR>
-<TR><TD>
-
 [% END %]
 
 __seclev__
