@@ -497,9 +497,7 @@ sub _printHead {
 	my($head, $data) = @_;
 	my $title = getData($head, $data);
 	header($title);
-	print STDERR "ZOO zoohead \n";
 	slashDisplay("zoohead", { title => $title });
-	print STDERR "ZOO zoohead \n";
 }
 
 sub _rss {
