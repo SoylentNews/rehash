@@ -136,6 +136,7 @@ EOT
 		: 0;
 
 	my $oldest_unm2d = $stats->getOldestUnm2dMod();
+	my $oldest_unm2d_days = sprintf("%10.1f", $oldest_unm2d ? (time-$oldest_unm2d)/86400 : -1);
 	my $youngest_modelig_uid = $stats->getYoungestEligibleModerator();
 	my $youngest_modelig_created = $stats->getUser($youngest_modelig_uid,
 		'created_at');
@@ -154,7 +155,7 @@ EOT
 	my $consensus = $constants->{m2_consensus};
 	my $token_conversion_point = $stats->getTokenConversionPoint();
 
-	my $oldest_to_show = int($oldest_unm2d) + 7;
+	my $oldest_to_show = int($oldest_unm2d_days) + 7;
 	$oldest_to_show = 21 if $oldest_to_show < 21;
 	my $m2_text = getM2Text($stats->getModM2Ratios(), {
 		oldest => $oldest_to_show
@@ -354,7 +355,7 @@ EOT
 	$mod_data{xmodlog} = sprintf("%.1fx", ($modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0));
 	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0));
 	$mod_data{consensus} = sprintf("%8d", $consensus);
-	$mod_data{oldest_unm2d_days} = sprintf("%10.1f", $oldest_unm2d ? (time-$oldest_unm2d)/86400 : -1);
+	$mod_data{oldest_unm2d_days} = $oldest_unm2d_days;
 	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);
 	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created);
 	$mod_data{mod_points_pool} = sprintf("%8d", $mod_points_pool);
@@ -502,7 +503,6 @@ sub getM2Text {
 	# which have been completely M2'd, and "_" which is for
 	# mods which cannot be M2'd.
 
-	# Only one option supported for now (pretty trivial :)
 	my $width = 78;
 	$width = $options->{width} if $options->{width};
 	$width = 10 if $width < 10;
