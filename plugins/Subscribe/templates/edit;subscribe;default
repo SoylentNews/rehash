@@ -36,7 +36,7 @@ You will be able to purchase banner-ad-free pages.
 [%
 	pages = [
 		{ pagename => "index",
-		  descr	   => "<b>Homepage</b>" },
+		  descr	   => "<b>Homepage</b> (Plum: The Mysterious Future!)" },
 		{ pagename => "article",
 		  descr	   => "<b>Stories</b> (usually with reader comments)" },
 		{ pagename => "comments",
@@ -147,6 +147,12 @@ ends. Your day may vary.)
 	TYPE="TEXT" NAME="hbtm"
 	VALUE="[% hits_bought_today_max %]"
 	SIZE="6">
+	[% IF constants.subscribe_hits_btmd && constants.subscribe_hits_btmd > 2 %]
+	<BR>Note that setting this value between 1 and
+	[% constants.subscribe_hits_btmd - 1 %]
+	will disable some
+	<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss1600">plums</A>.
+	[% END %]
 
 [% END %]
 
