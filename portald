@@ -65,6 +65,7 @@ sub deleteTmp {
 sub geturl {
 	my $ua = new LWP::UserAgent;
 	my $request = new HTTP::Request('GET', $_[0]);
+	$ua->proxy(http => $I{http_proxy}) if $I{http_proxy}; 
 	$ua->timeout(30);
 	my $result = $ua->request($request);
 
