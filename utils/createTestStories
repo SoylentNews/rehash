@@ -87,27 +87,29 @@ $constants = getCurrentStatic();
 			"epoch ".get_time($opts{t})),
 			"%Y-%m-%d %H-%M-%S");
 
-		# 40% of stories have 1 topic ID, 60% have 2
-		my @topics;
-		push @topics,  getRandomTopicID();
-		push @topics, getRandomTopicID() if rand(1) < 0.6;
+		# 40% of stories have 1 topic ID, 40% have 2, 20% have 3
+		my @topics = ( );
+		my $r = rand(1);
+		push @topics, getRandomTopicID();
+		push @topics, getRandomTopicID() if $r < 0.6;
+		push @topics, getRandomTopicID() if $r < 0.2;
 
 		my $topics = {};
 		%$topics = map { $_ => 0 } @topics;
 
-		if (rand (1) < 0.7) {
+		if (rand(1) < 0.5) {
 			# run in the section for each topic
 			foreach (@topics) {
-				$topics->{$_} = 1;
+				$topics->{$_} = 10;
 			}
-		} elsif (rand(1) < 0.8) {
+		} elsif (rand(1) < 0.95) {
 			my $m_tid = $topics[rand @topics];
 			# elevate to mainpage from one tid / sectional from any others
 			foreach (@topics) {
-				$topics->{$_} = $_ == $m_tid ? 4 : 1;
+				$topics->{$_} = $_ == $m_tid ? 30 : 10;
 			}
-		} 
-	
+		}
+
 		my $commentstatus = rand(1) < .95 ? "enabled" : "disabled";
 		
 		my $story = {
@@ -123,6 +125,9 @@ $constants = getCurrentStatic();
 			rendered	=> undef,
 			commentstatus   => $commentstatus
 		};
+
+		# Small chance of ND'ing this story.
+		$story->{neverdisplay} = 1 if rand(1) < 0.1;
 
 		my $sid = $slashdb->createStory($story);
 		my $reloDB = getObject("Slash::Relocate");
