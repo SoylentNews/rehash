@@ -215,17 +215,16 @@ sub do_logdatadump {
 		$xml .= "</meeting>\n";
 		# Dump the xml to disk, if it's gotten big enough
 		if (length($xml) > 16384) {
-			my $new_cb = do_ldd_gz_dump($gz, $xml);
-			$compbytes += $new_cb;
+			do_ldd_gz_dump($gz, $xml);
 			$uncompbytes += length($xml);
 			$xml = "";
 		}
 	}
 	$meetlog_sth->finish();
 	$xml .= "</dilemmalogdump>\n";
-	my $new_cb = do_ldd_gz_finish($gz, $xml);
-	$compbytes += $new_cb;
+	do_ldd_gz_finish($gz, $xml);
 	$uncompbytes += length($xml);
+	$compbytes = -s $filename;
 	return " wrote xml file $compbytes/$uncompbytes bytes";
 }
 
