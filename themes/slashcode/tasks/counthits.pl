@@ -17,7 +17,7 @@ use Slash::Constants ':slashd';
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # Change this var to change how often the task runs.
-$minutes_run = 6;
+$minutes_run = 20;
 
 # Adjust this to maximize how big of a SELECT we'll do on the log DB.
 # (5000 per minute (above) is probably safe, 10000 per minute just to
@@ -106,8 +106,6 @@ $task{$me}{code} = sub {
 		);
 		$total_hits += $sid_count{$sid};
 		_update_timehash("update");
-		Time::HiRes::sleep(0.02);
-		_update_timehash("sleep");
 	}
 
 	$slashdb->setVar("counthits_lastmaxid", $newmaxid);
