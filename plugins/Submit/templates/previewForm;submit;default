@@ -60,13 +60,13 @@ TITLE="[% topic.textname %]"></A>
 		[% IF extra.2 == 'text' %]
 			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} | strip_attribute %]" SIZE="50">
 		[% ELSIF extra.2 == 'list' %]
-			[% pulldown = "$extra.3:$extra.1" %]
+			[% pulldown = "$extra.1" %]
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), submission.${extra.1}, 1, 1) %]
 		[% END %]
 	[% END %]
 		<BR>
 	[% Slash.createSelect('primaryskid', Slash.db.getDescriptions('skins'), submission.primaryskid, 1, 0, 1) %]
-	[% Slash.createSelect('tid', Slash.db.getDescriptions('non_nexus_topics'), submission.tid, 1, 0, 1) %]
+	[% Slash.createSelect('tid', Slash.db.getDescriptions('topics-submittable'), submission.tid, 1, 0, 1) %]
 
 		<INPUT TYPE="submit" NAME="op" VALUE="preview"><BR>
 		<BR>Intro Copy<BR>
