@@ -4020,13 +4020,13 @@ sub getStoriesEssentials {
 			if $SECT->{contained} && @{$SECT->{contained}};
 
 		if ($user->{sectioncollapse}) {
-			$where .= "AND displaystatus >= 0 ";
+			$where .= " AND displaystatus >= 0 ";
 		} else {
-			$where .= "AND displaystatus = 0 ";
+			$where .= " AND displaystatus = 0 ";
 		}
 	} else {
 		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
-			$where .= "AND displaystatus => 0 ";
+			$where .= " AND displaystatus => 0 ";
 	}
 
 	$where .= "AND tid='$tid' " if $tid;
