@@ -12,6 +12,6 @@ __name__
 msg_email_subj
 __template__
 [% subj = msg.subject || msg.type %]
-[[% constants.sitename %]] [% subj | decode_entities %]
+[[% constants.sitename %]] [% subj | decode_entities | strip_anchor %]
 __seclev__
 500
