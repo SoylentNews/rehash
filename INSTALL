@@ -78,8 +78,8 @@ INSTALLATION
 
         Slash requires that your MySQL server run in the GMT timezome. Find
         your global my.cnf file (probably "/etc/my.cnf" or
-        "/etc/mysql/my.cnf"), locate the "[safe_mysqld]" group, and add this
-        line to it:
+        "/etc/mysql/my.cnf"), locate the "[mysqld_safe]" (or
+        "[safe_mysqld]") group, and add this line to it:
 
                 timezone = GMT
 
@@ -365,6 +365,60 @@ INSTALLATION OPTIONS
     at all on a system, without the permission of the administrator of that
     system.
 
+  Separate Image Server
+    Those of you with infinite RAM will have no problems hosting as many
+    Slash sites as you want on a single box running just Apache. Those whose
+    RAM is limited may be able to keep your MaxClients down to a reasonable
+    level to avoid going into swap, and still not lock clients out of your
+    website, by using a separate webserver process to deliver your images.
+
+    This is possible with any website, of course, not just a Slash site, but
+    because Slash's httpd clients all have mod_perl, a lot of perl modules,
+    and a lot of templates all compiled into RAM, they are especially heavy.
+    While serving an image may take only a few milliseconds, which would you
+    rather have tied up on your computer for those milliseconds, 25 MB of
+    RAM or 5 MB?
+
+    Slashdot, and some other Slash sites we're hosting, are currently using
+    boa 0.94.14rc17 (<http://www.boa.org/>) for images. Boa is fast and has
+    a small footprint. It's easy to build ("./configure && make") but you
+    have to install it yourself by copying the binary and mkdir'ing a little
+    tree wherever you want it. We did roughly this. Your mileage may vary.
+    This sets up an alternate server just for images on port 8080, and sets
+    Slash's imagedir var to point to it. Your apache will still serve images
+    at the old URLs if anyone requests them, but nobody will, because your
+    site's pages will all point to boa:
+
+            # Install boa and set up its files.
+            cd /usr/local/src/boa-0.94.14rc17
+            ./configure && make
+            mkdir /usr/local/boa
+            mkdir /usr/local/boa/bin
+            mkdir /usr/local/boa/htdocs
+            cp -a src/{boa,boa_indexer,webindex.pl} /usr/local/boa/bin/
+            ln -s /usr/local/slash/site/mysite/htdocs/images /usr/local/boa/htdocs/images.mysite.com
+            touch /usr/local/boa/htdocs/favicon.ico
+
+            # Set up and edit boa conf file.
+            cp examples/boa.conf /usr/local/boa/
+            # At this point we patched /usr/local/boa/boa.conf, changing
+            # Port to 8080, ServerName to www.mysite.com, DocumentRoot to
+            # /usr/local/boa/htdocs, and commenting out the DirectoryIndex,
+            # DirectoryMaker, Alias and ScriptAlias directives.
+
+            # Start boa.
+            /usr/local/boa/bin/boa
+
+            # In mysql client:
+            # UPDATE vars SET value='//www.mysite.com:8080/images.mysite.com' WHERE name='imagedir';
+            # UPDATE stories SET writestatus='dirty';
+
+            # Restart apache, slashd;  let slashd rewrite .shtml files both
+            # recent and archived.
+
+    You'll probably also want to create a script in your init.d and rcN.d
+    directories so boa runs at startup along with apache.
+
 UPGRADING
     These upgrade procedures are still in testing. Please read them entirely
     before beginning. We are not responsible for any loss of data or
@@ -556,8 +610,9 @@ REQUIREMENTS
 
     perl
         Version 5.6.1 (5.6.0). [NOTE: perl 5.6.0 may have some problems.
-        5.6.1 is recommended. We have found no problems with 5.8.0, so if
-        you have that, don't downgrade on our account.]
+        5.6.1 is recommended. We have found no problems with 5.8.0, but we
+        haven't tested Unicode thoroughly; if you have 5.8, we don't suggest
+        you downgrade just for us.]
 
                 http://www.cpan.org/
 
@@ -811,6 +866,39 @@ COMMON INSTALLATION PROBLEMS
             <http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL
             _Database_Administration.html#Privilege_system>
 
+        *   mod_gzip
+
+            Are you finding that POST operations fail? Have you compiled in
+            mod_gzip? mod_gzip 1.3.19.1a doesn't handle incoming POST very
+            well, with the result that our User.pm handler() gets called
+            twice, and the second time through, there's no more data on
+            STDIN, so your form is empty. We use this patch to make it
+            ignore POSTs:
+
+                    --- mod_gzip_BROKEN_FOR_POST.c  2003-09-26 14:26:36.000000000 -0700
+                    +++ mod_gzip.c                  2003-10-06 11:39:45.000000000 -0700
+                    @@ -2155,12 +2155,15 @@
+                         ap_table_setn( r->notes,"mod_gzip_result",ap_pstrdup(r->pool,"DECLINED:UNHANDLED_REDIR"));
+                        }
+                      else
+                        {
+                         ap_table_setn( r->notes,"mod_gzip_result",ap_pstrdup(r->pool,"DECLINED:INIT1"));
+                        }
+                    +   if ( r->method_number == M_POST ) {
+                    +       return DECLINED;
+                    +   }
+
+                      ap_table_setn( r->notes,"mod_gzip_input_size", ap_pstrdup(r->pool,"0"));
+                      ap_table_setn( r->notes,"mod_gzip_output_size",ap_pstrdup(r->pool,"0"));
+                      ap_table_setn( r->notes,"mod_gzip_compression_ratio",ap_pstrdup(r->pool,"0"));
+
+                      #endif
+
+            Or just use mod_gzip 1.3.26.1a and omit POST from the list of
+            methods it handles, in your httpd.conf:
+
+                    mod_gzip_handle_methods GET
+
     *   Make sure you don't confuse the different types of "users":
 
         *   Apache user -- a unix system user account, e.g. "nobody";
@@ -837,17 +925,17 @@ UNINSTALLING
     If you want to uninstall a site, there are two steps you must follow:
 
     1.  Stop slashd with "/etc/init.d/slash stop" ("/etc/rc.d/init.d/slash
-        stop" for Red Hat systems). Edit "/usr/local/slash/slash.sites" to
-        remove the line referencing the site you wish to uninstall. Restart
-        slashd with "/etc/init.d/slash start".
+        stop" for Red Hat systems). Then edit "/usr/local/slash/slash.sites"
+        to remove the line referencing the site you wish to uninstall. Then
+        restart slashd with "/etc/init.d/slash start".
 
     2.  Edit your Apache httpd.conf file so that the directives for the
-        site's VirtualHost are not included. This may mean deleting or
-        commenting out the actual lines in
-        "/usr/local/apache/conf/httpd.conf", or perhaps just commenting out
-        an "Include yoursitename.conf" in that file or in
-        "/usr/local/slash/httpd/slash.conf", depending on how you set it up
-        after the "install-slashsite" command in step 6. Restart Apache with
+        site's VirtualHost are not included. If you did the standard
+        install, that file probably "Include"s
+        "/usr/local/slash/httpd/slash.conf", which "Include"s
+        "/usr/local/slash/yoursitename/yoursitename.conf", so you'll want to
+        delete or comment out the "Include" line in the file
+        "/usr/local/slash/httpd/slash.conf". Restart Apache with
         "/usr/local/apache/bin/apachectl stop ; sleep 10 ;
         /usr/local/apache/bin/apachectl start".
 
