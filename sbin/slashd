@@ -218,7 +218,7 @@ sub send_children_usr1 {
 	if (@pids) {
 		my @info_str = ( );
 		for my $pid (@pids) {
-			my $success = kill USR1, $pid;
+			my $success = kill USR1 => $pid;
 			push @info_str, "pid $pid ($pids{$pid}{taskname})"
 				. ($success ? "" : " (FAILED)");
 		}
