@@ -90,7 +90,7 @@ sub archiveStories {
 		slashdLog("Archiving $sid") if verbosity() >= 2;
 		$totalChangedStories++;
 
-                # We need to pull some data from a file that article.pl will
+		# We need to pull some data from a file that article.pl will
 		# write to.  But first it needs us to create the file and
 		# tell it where it will be.
 		my($cchp_file, $cchp_param) = _make_cchp_file();

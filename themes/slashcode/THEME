@@ -76,6 +76,7 @@ pg_prep=sql/postgresql/prep.sql
 task=tasks/daily.pl
 task=tasks/daily_archive.pl
 task=tasks/daily_forget.pl
+task=tasks/delete_accesslog.pl
 task=tasks/expire.pl
 task=tasks/flush_formkeys.pl
 task=tasks/new_headfoot.pl
