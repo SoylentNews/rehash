@@ -1855,7 +1855,16 @@ sub saveHome {
 		$users_index_table->{dfid}   = $form->{tzformat};
 	}
 
-	$users_index_table->{mylinks} = $form->{mylinks} || '';
+	# Force the User Space area to contain only known-good HTML tags.
+	# Unfortunately the cookie login model makes it just too risky
+	# to allow scripts in here;  CSS's steal passwords.  There are
+	# no known vulnerabilities at this time, but a combination of the
+	# social engineering taking place (inviting users to put Javascript
+	# from websites in here, and making available script URLs for that
+	# purpose), plus the fact that this could be used to amplify the
+	# seriousness of any future vulnerabilities, means it's way past
+	# time to shut this feature down.  - Jamie 2002/03/06
+	$users_index_table->{mylinks} = strip_html($form->{mylinks} || '');
 
 	# If a user is unwilling to moderate, we should cancel all points, lest
 	# they be preserved when they shouldn't be.
