@@ -29,10 +29,11 @@ oldest unM2'd: [% IF oldest_unm2d_days > -1 %][% oldest_unm2d_days %] days[% ELS
 youngest elig: uid [% youngest_modelig_uid %], created on [% youngest_modelig_created %]
 
 [% m2_text; admin_mods_text %]
+[% IF constants.absolutedir_secure; absolutedir = constants.absolutedir_secure; ELSE; absolutedir = constants.absolutedir; END %]
 [% IF reverse_mods %]
 REVERSE MODS:
 [%	FOREACH rm = reverse_mods;
-rm.score; "  "; constants.absolutedir_secure %]/~[% rm.nickname | fixparam %] ([% rm.muid %]):  tokens [% rm.tokens %], karma [% rm.karma %][% IF rm.isrecent; " *"; END %]
+rm.score; "  "; absolutedir %]/~[% rm.nickname | fixparam %] ([% rm.muid %]):  tokens [% rm.tokens %], karma [% rm.karma %][% IF rm.isrecent; " *"; END %]
 [%	END %]
 [% END %]
 [% IF repeat_mods;
@@ -43,7 +44,7 @@ REPEAT [% dirword %]MODS:
 [%			FOREACH orguid = repeat_mods.$dir.keys.nsort;
 				FOREACH destuid = repeat_mods.$dir.$orguid.keys.nsort;
 					hr = repeat_mods.$dir.$orguid.$destuid;
-constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])[% IF hr.isrecent; " *"; END %]
+absolutedir %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])[% IF hr.isrecent; " *"; END %]
 [%				END;
 			END;
 		END;
