@@ -100,7 +100,7 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('topics.tid as tid,topics.alttext as alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid AND type= '$_[3]'") },
 
 	'section_subsection'
-		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.title', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]->sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
+		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.alttext', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]->sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection', 'ORDER BY alttext') },
 
 	'section_subsection_names'
 		=> sub { $_[0]->sqlSelectMany('title, id', 'subsections') },
@@ -4641,11 +4641,24 @@ sub getSubmissionForUser {
 
 	push @where, 'tid=' . $self->sqlQuote($form->{tid}) if $form->{tid};
 
-	# Why do both here? If both are set and non-equal, we've got problems.
-	push @where, 'section=' . $self->sqlQuote($user->{section})
-		if $user->{section};
-	push @where, 'section=' . $self->sqlQuote($form->{section})
-		if $form->{section};
+	# What was here before was a bug since you could end up in a section that was different then what
+  # the form was passing in (the result was something like WHERE section="foo" AND section="bar". 
+	# Look in CVS for the previous code. Now, this what we are doing. If form.section is passed in 
+	# we override anything about the section and display what the user asked for. The exception is for 
+	# a section admin. In that case user.section is all they should see (and is all that we let them
+	# see. Now, if the user is not a section admin and form.section is not set we make
+	# a call to getSection() which will pass us back whatever section we are in. Now in the case of
+	# a site with an "index" section that is a collected section that has no members, aka Slashdot,
+	# we will return everything for every section. Otherwise we return just sections from the collection.
+	# In a contained section we just return what is in that section (say like "science" on Slashdot). 
+	# Mail me about questions. -Brian
+	my $SECT = $self->getSection($user->{section} ? $user->{section} : $form->{section});
+	if ($SECT->{type} eq 'collected') {
+		push @where, " AND section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
+	} else {
+		push @where, " AND section = " . $self->sqlQuote($SECT->{section});
+	}
 	
 	my $submissions = $self->sqlSelectAllHashrefArray(
 		'submissions.*, karma',
