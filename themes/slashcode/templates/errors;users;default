@@ -128,6 +128,11 @@ __template__
 	<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">re-enter your
 	email address</A>, again.
 
+[% CASE 'email_do_not_match' %]
+	Sorry! The email addresses you've entered do not match.  Please go back and
+	carefully  <A HREF="[% constants.rootdir %]/users.pl?op=newuserform">re-enter
+	your email address information</A>, again.
+
 [% CASE 'sig_too_long_err' %]
 	Sorry, adding domain tags to your sig made it too long. Please try again,
 	using fewer links or shorter domain names.<BR>
