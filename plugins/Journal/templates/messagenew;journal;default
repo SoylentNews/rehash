@@ -13,10 +13,7 @@ messagenew
 __template__
 [% IF msg.mode == 1 %]
 
-<P>
-<A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname %]</A> has posted a new journal entry,
-<B><A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</A></B>.
-</P>
+<URL:[% constants.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]>
 
 [% ELSE %]
 

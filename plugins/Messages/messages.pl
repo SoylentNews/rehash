@@ -291,11 +291,15 @@ sub display_message {
 
 	my $message = $messages->getWeb($form->{id});
 
-	header(getData('header'));
-	slashDisplay('display', {
-		message		=> $message,
-	});
-	footer();
+	if ($message->{message} =~ /^<URL:(\S+)>$/) {
+		redirect($1);
+	} else {
+		header(getData('header'));
+		slashDisplay('display', {
+			message		=> $message,
+		});
+		footer();
+	}
 }
 
 sub delete_message {
