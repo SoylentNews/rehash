@@ -2295,3 +2295,4 @@ INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', '
 # be wary of this, make sure you've not modified it on your own; if so, add 'login' yourself
 UPDATE vars SET value = '^(?:comments|(?:login|users)/(?:nu|mp))$' WHERE name = 'hc_formname_regex';
 
+INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'example.com', 'space separated list of domains that are not valid for email addresses');

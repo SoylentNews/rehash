@@ -5,7 +5,6 @@
 # $Id$
 
 use strict;
-use Email::Valid;
 use Slash 2.003;
 use Slash::Constants qw(:web :messages);
 use Slash::Display;
@@ -81,7 +80,7 @@ sub newUser {
 	my @note;
 	my $error = 0;
 
-	if (!$form->{email} || !Email::Valid->rfc822($form->{email})) {
+	if (!$form->{email} || !emailValid($form->{email})) {
 		push @note, getData('email_invalid');
 		$error = 1;
 	} elsif ($form->{email} ne $form->{email2}) {

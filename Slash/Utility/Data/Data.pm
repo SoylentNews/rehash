@@ -29,6 +29,7 @@ use Date::Format qw(time2str);
 use Date::Language;
 use Date::Parse qw(str2time);
 use Digest::MD5 qw(md5_hex md5_base64);
+use Email::Valid;
 use HTML::Entities qw(:DEFAULT %char2entity);
 use HTML::FormatText;
 use HTML::TreeBuilder;
@@ -59,6 +60,7 @@ use vars qw($VERSION @EXPORT);
 	countWords
 	decode_entities
 	ellipsify
+	emailValid
 	encryptPassword
 	findWords
 	fixHref
@@ -126,6 +128,47 @@ sub nick2matchname {
 	$nick =~ s/[^a-zA-Z0-9]//g;
 	return $nick;
 }
+
+#========================================================================
+
+=head2 emailValid(EMAIL)
+
+Returns true if email is valid, false otherwise.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item EMAIL
+
+Email address to check.
+
+=back
+
+=item Return value
+
+True if email is valid, false otherwise.
+
+=back
+
+=cut
+
+sub emailValid {
+	my($email) = @_;
+
+	my $constants = getCurrentStatic();
+	return 0 if $constants->{email_domains_invalid}
+		&& ref($constants->{email_domains_invalid})
+		&& $email =~ $constants->{email_domains_invalid};
+
+	my $valid = Email::Valid->new;
+	return 0 unless $valid->rfc822($email);
+
+	return 1;
+}
+
 
 #========================================================================
 

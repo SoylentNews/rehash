@@ -14,7 +14,6 @@ use Slash 2.003;	# require Slash 2.3.x
 use Slash::Display;
 use Slash::Utility;
 use Slash::Constants ':messages';
-use Email::Valid;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -165,7 +164,7 @@ sub emailStory {
 
 	# Check input for valid RFC822 email address.
 	my $email = decode_entities($form->{email});
-	if (!Email::Valid->rfc822($email)) {
+	if (!emailValid($email)) {
 		print getData('invalid_email');
 		return;
 	}
@@ -242,7 +241,7 @@ sub emailOptout {
 	my($Email, $Messages) = @{$Plugins}{qw(Email Messages)};
 
 	my $email = decode_entities($form->{email});
-	if (Email::Valid->rfc822($email)) {
+	if (emailValid($email)) {
 		# Send final confirmation email to the address being removed
 		# as another form of abuse protection.
 		my $msg_data = {

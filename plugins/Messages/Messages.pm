@@ -36,7 +36,6 @@ More to come.
 use strict;
 use base qw(Slash::Messages::DB::MySQL);
 use vars qw($VERSION);
-use Email::Valid;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants ':messages';
 use Slash::Display;
@@ -440,7 +439,7 @@ sub send {
 		}
 
 		$addr    = $msg->{altto} || $msg->{user}{realemail};
-		unless (Email::Valid->rfc822($addr)) {
+		unless (emailValid($addr)) {
 			messagedLog(getData("send mail error", {
 				addr	=> $addr,
 				uid	=> $msg->{user}{uid},

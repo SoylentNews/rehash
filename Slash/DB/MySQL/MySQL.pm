@@ -6959,6 +6959,12 @@ sub getSlashConf {
 		}
 	}
 
+	if ($conf{email_domains_invalid}) {
+		my $regex = sprintf('[^\w-](?:%s)$',
+			join '|', map quotemeta, split ' ', $conf{email_domains_invalid});
+		$conf{email_domains_invalid} = qr{$regex};
+	}
+
 	if ($conf{comment_nonstartwordchars}) {
 		# Expand this into a complete regex.  We catch not only
 		# these chars in their raw form, but also all HTML entities
