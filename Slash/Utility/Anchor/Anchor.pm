@@ -153,9 +153,6 @@ sub header {
 	#	$adhtml = getAd(1);
 	# }
 
-	# pass section - otherwise, static pages will get 'index' as the section 
-	# PMG 7/12/02
-	$data->{section} = $section;
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
 		slashDisplay('header-admin', $data);
