@@ -1088,7 +1088,8 @@ sub createMenu {
 		$menu = "users" unless $nm->{page} eq "menu";
 		if (@$items) {
 			$menu_text .= slashDisplay($menu,
-				{ items =>	$items },
+				{ items =>	$items,
+				  color =>	$color },
 				{ Return => 1, Page => 'menu' });
 		}
 	}

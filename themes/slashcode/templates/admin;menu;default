@@ -29,6 +29,6 @@ __template__
 	{ link = "/admin.pl?op=recent",		label = "Info",			sel_label = "recent" },
 	{ link = "/getting_started.shtml",	label = "Help",			sel_label = "help" },
 ];
-PROCESS tabbedmenu tabs=tabs selected=page; %]
+PROCESS tabbedmenu tabs=tabs color=color selected=page; %]
 __seclev__
 10000
