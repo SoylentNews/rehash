@@ -142,11 +142,13 @@ sub main {
 		if ($story->{discussion}) {
 			my $discussion = $reader->getDiscussion($story->{discussion});
 			$discussion->{is_future} = $story->{is_future};
-			# This is to get tid in comments. It would be a mess to pass it
-			# directly to every comment -Brian
-			my $tids = $reader->getStoryTopicsJustTids($story->{sid}); 
-			my $tid_string = join('&amp;tid=', @$tids);
-			$user->{state}{tid} = $tid_string;
+			if ($constants->{tids_in_urls}) {
+				# This is to get tid in comments. It would be a mess to
+				# pass it directly to every comment -Brian
+				my $tids = $reader->getStoryTopicsJustTids($story->{sid}); 
+				my $tid_string = join('&amp;tid=', @$tids);
+				$user->{state}{tid} = $tid_string;
+			}
 			# If no comments ever have existed and commentstatus is disabled,
 			# just skip the display of the comment header bar -Brian
 			printComments($discussion)

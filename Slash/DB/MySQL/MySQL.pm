@@ -6163,9 +6163,13 @@ sub createStory {
 		title		=> $story->{title},
 		section		=> $story->{section},
 		topic		=> $story->{tid},
-		url		=> "$rootdir/article.pl?sid=$story->{sid}&tid=$story->{topic}",
+		url		=> "$rootdir/article.pl?sid=$story->{sid}"
+					. ($constants->{tids_in_urls}
+					  ? "&tid=$story->{topic}" : ""),
 		sid		=> $story->{sid},
-		commentstatus	=> $comment_codes->{$story->{commentstatus}} ? $story->{commentstatus} : getCurrentStatic('defaultcommentstatus'),
+		commentstatus	=> $comment_codes->{$story->{commentstatus}}
+				   ? $story->{commentstatus}
+				   : $constants->{defaultcommentstatus},
 		ts		=> $story->{'time'}
 	};
 	my $id = $self->createDiscussion($discussion);

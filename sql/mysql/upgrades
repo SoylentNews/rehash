@@ -2129,3 +2129,6 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For 
 ALTER TABLE message_codes ADD COLUMN acl VARCHAR(32) DEFAULT '' NOT NULL;
 UPDATE message_codes SET acl = 'stats' WHERE code = 10;
 INSERT INTO message_codes (code, type, seclev, modes, acl) VALUES (14, 'Daily Moderation Stats', 100, 0, 'stats');
+
+INSERT INTO vars (name, value, description) VALUES ('tids_in_urls', '0', 'Want tid=1&tid=2 in story and discussion-related URLs?');
+

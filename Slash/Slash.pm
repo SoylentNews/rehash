@@ -794,9 +794,9 @@ sub moderatorCommentLog {
 	my $limit = $type eq 'cid' ? 0 : 100;
 	my $both_mods = (($type =~ /ipid/) || ($type =~ /subnetid/) || ($type =~ /global/)) ? 1 : 0;
 	my $skip_ip_disp  = 0;
-	if( $type=~/^b(ip|subnet)id$/ ){
+	if ($type =~ /^b(ip|subnet)id$/) {
 		$skip_ip_disp = 1;
-	} elsif ( $type =~/^(ip|subnet)id$/){
+	} elsif ($type =~ /^(ip|subnet)id$/) {
 		$skip_ip_disp = 2;
 	}
 	my $gmcl_opts = {};

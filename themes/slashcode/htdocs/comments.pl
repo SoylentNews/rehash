@@ -136,16 +136,20 @@ sub main {
 		if ($form->{sid} !~ /^\d+$/) {
 			$discussion = $slashdb->getDiscussionBySid($form->{sid});
 			$section = $discussion->{section};
-			my $tids = $slashdb->getStoryTopicsJustTids($form->{sid}); 
-			my $tid_string = join('&amp;tid=', @$tids);
-			$user->{state}{tid} = $tid_string;
+			if ($constants->{tids_in_urls}) {
+				my $tids = $slashdb->getStoryTopicsJustTids($form->{sid}); 
+				my $tid_string = join('&amp;tid=', @$tids);
+				$user->{state}{tid} = $tid_string;
+			}
 		} else {
 			$discussion = $slashdb->getDiscussion($form->{sid});
 			$section = $discussion->{section};
+			if ($constants->{tids_in_urls}) {
+				# This is to get tid in comments. It would be a mess to
+				# pass it directly to every comment -Brian
+				$user->{state}{tid} = $discussion->{topic};
+			}
 		}
-		# This is to get tid in comments. It would be a mess to pass it
-		# directly to every comment -Brian
-		$user->{state}{tid} = $discussion->{topic};
 		# The is_future field isn't automatically added by getDiscussion
 		# like it is with getStory.  We have to add it manually here.
 		$discussion->{is_future} = 1 if $slashdb->checkDiscussionIsInFuture($discussion);

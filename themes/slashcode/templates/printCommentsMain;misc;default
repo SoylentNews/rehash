@@ -84,9 +84,9 @@ __template__
 		<FORM ACTION="[% constants.rootdir %]/comments.pl">
 		<FONT SIZE="2">
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
-		<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
-		<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">
-		<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% form.startat %]">
+		[% IF cid %]<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">[% END %]
+		[% IF pid %]<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">[% END %]
+		[% IF form.startat %]<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% form.startat %]">[% END %]
 
 		Threshold: [%
 			Slash.selectThreshold(comments.0.totals);
