@@ -13,11 +13,15 @@ recent_mods
 __template__
 
 [% USE Slash %]
-<TABLE>
-	<TR><TD ALIGN="CENTER">Latest Moderations</TD></TR>
+<P>
 	[% mod_options.hours_back = 72 %]
-	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog("global", "", mod_options) %] </TD></TR>
-</TABLE>
+        [% mod_options.title = "Latest Moderations";
+	   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+	   mod_options.need_m2_form = 1;
+	   mod_options.need_m2_button = 1;
+	   mod_options.meta_mod_only = 1;
+	%]
+	[% Slash.moderatorCommentLog("global", "", mod_options) %] 
 
 __seclev__
 500
