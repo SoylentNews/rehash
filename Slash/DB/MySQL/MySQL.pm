@@ -4672,7 +4672,7 @@ sub getTopics {
 
 ########################################################
 sub getStoryTopics {
-	my ($self, $sid, $exclude_tid) = @_;
+	my($self, $sid, $exclude_tid) = @_;
 
 	my $answer;
 	my $topics = $self->sqlSelectAll('tid','story_topics', "sid = '$sid'");
