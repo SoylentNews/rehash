@@ -43,7 +43,8 @@ END %]
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
 				<TD BGCOLOR="#E6E6E6">
 					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname %]</A>
-						[% user.aton %] [% story.storytime %]</FONT><BR>
+						[% user.aton %] [% story.storytime %]</FONT>[%
+IF constants.plugin.Print -%] &nbsp;&nbsp;<A HREF="[% constants.rootdir %]/print.pl?sid=[% story.sid %]"><IMG SRC="[% constants.imagedir %]/print.gif" BORDER="0"></A>[% END %]<BR>
 					[% IF constants.use_dept && story.dept %]<FONT FACE="[% constants.mainfontface %]" SIZE="1">from the <B>[% story.dept %]</B> dept.</FONT>[% END %]
 				</TD>
 			</TR></TABLE>
@@ -94,10 +95,5 @@ END %]
 	Slash.getAd(constants.ad_messaging_num);
 END -%]
 [% END %]
-
-[% IF full && constants.plugin.Print -%]
-<P><SMALL><A HREF="[% constants.rootdir %]/print.pl?sid=[% story.sid
--%]">Printer Friendly Version</A></SMALL>
-[% END -%]
 __seclev__
 10000
