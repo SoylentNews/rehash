@@ -1499,26 +1499,27 @@ sub getData {
 	my $opts_getname = $opts; $opts_getname->{GetName} = 1;
 
 	my $name = slashDisplayName('data', $hashref, $opts_getname);
-	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} };
+	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} } ||= { };
 
 	if (defined $var->{$value}) {
-#		print STDERR "getData $$ value='$value' cache_hit\n";
+#		print STDERR "getData $$ value='$value' tpid='$name->{tempdata}{tpid}' len=" . length($var->{$value}) . " cache_hit\n";
 		return $var->{$value};
 	}
 
 	my $str = slashDisplay($name, $hashref, $opts);
+	return undef if !defined($str);
 
 	if ($hashref->{returnme}{data_constant}) {
-		$cache->{getdata}{_last_refresh} = time unless $cache->{getdata}{_last_refresh};
+		$cache->{getdata}{_last_refresh} ||= time;
 		$var->{$value} = $str;
 	}
-#	print STDERR "Slash.pm getData $$ value='$value' tpid='$name->{tempdata}{tpid}' cache_miss\n";
+#	print STDERR "getData $$ value='$value' tpid='$name->{tempdata}{tpid}' len=" . length($str) . " cache_miss\n";
 	return $str;
 }
 
 sub _dataCacheRefresh {
 	my($cache) = @_;
-	if ($cache->{getdata}{_last_refresh} < (time() - $cache->{getdata}{_expiration})) {
+	if ($cache->{getdata}{_last_refresh} < time - $cache->{getdata}{_expiration}) {
 		$cache->{getdata} = {};
 		$cache->{getdata}{_last_refresh} = time;
 		$cache->{getdata}{_expiration} = getCurrentStatic('block_expire');
