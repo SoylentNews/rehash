@@ -92,7 +92,12 @@ sub selectComments {
 		$cid, 
 		$cache_read_only
 	);
-	if (!$thisComment || !@$thisComment) {
+	# i don't know why this line had || !@$thisComment, but it
+	# breaks things (most notably, things relying on hitparade,
+	# like slash:hitparade in rss, selectThreshold in comments,
+	# etc.) when there are no comments YET, but the discussion
+	# is valid -- pudge
+	if (!$thisComment) { #|| !@$thisComment) {
 		_print_cchp($header);
 		return ( {}, 0 );
 	}
