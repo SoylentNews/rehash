@@ -1,0 +1,147 @@
+__section__
+default
+__description__
+Prints table showing metamoderations performed by user
+__page__
+users
+__lang__
+en_US
+__name__
+listMetamods
+__template__
+
+[% IF metamods.size > 0 %]
+	[%
+		bg_col_1 = "DDDDDD";
+		bg_col_2 = user.bg.2;
+		bg_toggle = 0;
+		total_m2s = 0;
+		done_m2s = 0;
+		unfair_m2s = 0;
+		offside_m2s = 0;
+		lone_dissent_m2s = 0;
+		unanimous_m2s = 0;
+		
+	%]
+
+	<table border="0" align="center" width="100%" cellspacing="0" cellpadding="0">
+	[% IF title %]
+		[% m2_listing_op = m2_listing ? 0 : 1;
+		   self_url = PROCESS base_url_m2 value=the_user.uid;
+		   url_tail = PROCESS state_url_m2 override = { m2_listing => m2_listing_op };
+		   self_url = self_url  _ url_tail;
+		   extra = "<td width=\"14\" bgcolor=\"" _ user.bg.3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" bordeR=0></a></td>";
+		%]
+		<tr><td align="center">[% PROCESS titlebar width="100%" title=title td_extra = extra %]</td></tr>
+	[% END %]
+	<tr><td align="center">
+	<table cellspacing="0" cellpadding="2" width="100%">
+	[% IF m2_listing %]
+	<tr bgcolor="[% user.bg.3 %]">
+		<th align="left"><font size="-1" color="[% user.fg.3 %]">Date</font></th>
+		<th align="left"><font size="-1" color="[% user.fg.3 %]">Comment</font></th>
+		<th align="left"><font size="-1" color="[% user.fg.3 %]">Mod</font></th>
+		<th align="left"><font size="-1" color="[% user.fg.3 %]">Vote</font></th>
+		<th align="left"><font size="-1" color="[% user.fg.3 %]">M2</font></th>
+	</tr>
+	[% END %]		
+	[% FOREACH m2 = metamods %]
+	[%
+		total_m2s = total_m2s + 1;
+		IF m2.val < 0;
+			unfair_m2s = unfair_m2s + 1;
+		END;
+		IF m2.m2status > 0;
+			done_m2s = done_m2s + 1;
+			IF m2.m2fair == 0 || m2.m2unfair == 0;
+				unanimous_m2s = unanimous_m2s + 1;
+			END;
+			IF m2.val > 0;
+				IF m2.m2unfair > m2.m2fair;
+					offside_m2s = offside_m2s + 1;
+					m2.offside = 1;
+					IF m2.m2fair == 1;
+						lone_dissent_m2s = lone_dissent_m2s + 1;
+					END;
+				END;
+			ELSIF m2.val < 0;
+				IF m2.m2fair > m2.m2unfair;
+					offside_m2s = offside_m2s + 1;
+					m2.offside = 1;
+					IF m2.m2fair == 1;
+						lone_dissent_m2s = lone_dissent_m2s + 1;
+					END;
+				END;
+			END;
+		END;
+	%]
+	[% IF m2_listing %]
+	<TR BGCOLOR="[% bg_toggle ? bg_col_1 : bg_col_2 %]">
+		[% bg_toggle = !bg_toggle %]
+		<td><font size="-1">[% Slash.timeCalc(m2.ts) %]</font></td>
+		<td><a href="[% constants.rootdir %]/comments.pl?sid=[% m2.sid %]&amp;cid=[% m2.cid %]">[% m2.subject %]</a></td>
+		<td>[% IF m2.modval > 0 %]+[% ELSIF m2.modval < 0 %]-[% END %][% m2.modval %] [% reasons.${m2.reason}.name %]</td>
+		<td>[% IF m2.val>0 %]Fair[% ELSE %]Unfair[% END %]</td>
+		[% IF !reasons.${m2.reason}.m2able;
+			m2fair_str = "-";
+			m2unfair_str = "-";
+		ELSE;
+			IF m2.m2status > 0; 
+				m2fair_str = "<b><i>" _ m2.m2fair _ "</i></b>"; m2unfair_str = "<b><i>" _ m2.m2unfair _ "</i></b>";
+		 	  ELSE;
+				m2fair_str = m2.m2fair; m2unfair_str =  m2.m2unfair;
+		   	END; 
+			
+		END %]
+		<td align="left">[% m2fair_str _ " " _ m2unfair_str; %][% IF m2.offside %]*[% END %]</td>
+	</tr>
+	[% END %]
+	[% END %]
+	[% IF m2_listing %]
+	<tr bgcolor="[% user.bg.2 %]"><TD COLSPAN="5">[% PROCESS horiz_rule %]</td></tr>
+	[% END %]
+	<tr bgcolor="[% user.bg.2 %]"><td><font size="-1"><B>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></font></td>
+	<td><font size="-1"><b>
+		Unanimous: [% unanimous_m2s %] 
+		([% Slash.getData('percentage', { sum => unanimous_m2s, count => done_m2s}, 'misc') %]) 
+		Offside: [% offside_m2s %]
+		([% Slash.getData('percentage', { sum => offside_m2s, count => done_m2s}, 'misc') %]) 
+	</b></font></td>
+	<td><font size="-1"><b>
+		Lone Dissent: [% lone_dissent_m2s %]
+		([% Slash.getData('percentage', { sum => lone_dissent_m2s, count => done_m2s}, 'misc') %]) 
+	</b></font></td>
+	<td colspan="2"><font size="-1"><b>
+		Unfair Votes: [% unfair_m2s %]
+		([% Slash.getData('percentage', { sum => unfair_m2s, count => total_m2s}, 'misc') %]) 
+	</b></font></td></tr>
+	</table>
+	</td></tr></table>
+		
+[% END %]
+
+[% BLOCK base_url_m2; 
+	base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;uid=" _ value;
+	base_url;
+END %]
+[% BLOCK state_url_m2;
+	state_url="";
+	state_params = ["show_m2s","show_m1s","min_comment","m2_listing"];
+
+	FOREACH param = state_params;
+		IF form.${param}.defined || override.${param}.defined;
+			state_url = state_url _ "&amp;" _ param _ "=";
+			IF override.${param}.defined;
+				fp_val = BLOCK; override.${param} | fixparam; END;
+			ELSE;
+				fp_val = BLOCK; form.${param} | fixparam; END;
+			END;
+			state_url = state_url _ fp_val;
+		END;
+	END;
+	state_url;
+END %]
+__seclev__
+10000
+__version__
+$Id$
