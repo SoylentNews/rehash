@@ -2181,28 +2181,42 @@ sub deleteContentFilter {
 sub saveTopic {
 	my($self, $topic) = @_;
 	my($tid) = $topic->{tid} || 0;
+
+	# This seems like a wasted query to me... *shrug* -Cliff
 	my($rows) = $self->sqlSelect('count(*)', 'topics', "tid=$tid");
+
 	my $image = $topic->{image2} ? $topic->{image2} : $topic->{image};
 
-	if ($rows == 0) {
-		$self->sqlInsert('topics', {
-			name	=> $topic->{name},
-			image	=> $image,
-			alttext	=> $topic->{alttext},
-			width	=> $topic->{width},
-			height	=> $topic->{height},
-			parent_topic	=> $topic->{parent_topic},
-		});
-		$tid = $self->getLastInsertId();
+	# Save image info, first. We'll need the ID, later.
+	my $imgid = $self->sqlSelect('id', 'topic_images',
+		'name=' . $self->sqlQuote($topic->{name}) .
+		' AND image=' . $self->sqlQuote($image)
+	);
+
+	my $data = {
+		name		=> $topic->{name},
+		image		=> $image,
+		width		=> $topic->{width},
+		height		=> $topic->{height},
+	};
+
+	# Using the topic as the name here probably isn't what is intended, but
+	# it should work just fine for now.     -Cliff
+	if (!$imgid) {
+		$self->sqlInsert('topic_images', $data);
+		$imgid = $self->getLastInsertId;
 	} else {
-		$self->sqlUpdate('topics', {
-			image	=> $image,
-			alttext	=> $topic->{alttext},
-			width	=> $topic->{width},
-			height	=> $topic->{height},
-			name	=> $topic->{name},
-			parent_topic	=> $topic->{parent_topic},
-		}, "tid=$tid");
+		$self->sqlUpdate('topic_images', $data, "id=$imgid");
+	}
+
+	$data->{alttext}	= $topic->{alttext};
+	$data->{parent_topic}	= $topic->{parent_topic};
+
+	if ($rows == 0) {
+		$self->sqlInsert('topics', $data);
+		$tid = $self->getLastInsertId;
+	} else {
+		$self->sqlUpdate('topics', $data, "tid=$tid");
 	}
 
 	return $tid;
