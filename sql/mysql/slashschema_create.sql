@@ -139,6 +139,21 @@ CREATE TABLE backup_blocks (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'badpasswords'
+#
+
+CREATE TABLE badpasswords (
+	uid mediumint(8) NOT NULL DEFAULT 0,
+	ip varchar(15) NOT NULL DEFAULT '',
+	subnet varchar(15) NOT NULL DEFAULT '',
+	password varchar(20) NOT NULL DEFAULT '',
+	ts timestamp(14) NOT NULL,
+	INDEX uid (uid),
+	INDEX ip (ip),
+	INDEX subnet (subnet)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'blocks'
 #
 

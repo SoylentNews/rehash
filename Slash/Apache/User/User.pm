@@ -334,25 +334,20 @@ sub authors {
 
 ########################################################
 sub userLogin {
-	my($name, $passwd) = @_;
+	my($uid, $passwd) = @_;
 	my $r = Apache->request;
 	my $slashdb = getCurrentDB();
 
 	# Do we want to allow logins with encrypted passwords? -- pudge
 #	$passwd = substr $passwd, 0, 20;
 	my($uid, $cookpasswd, $newpass) =
-		$slashdb->getUserAuthenticate($name, $passwd); #, 1
+		$slashdb->getUserAuthenticate($uid, $passwd); #, 1
 
 	if (!isAnon($uid)) {
 		setCookie('user', bakeUserCookie($uid, $cookpasswd),
 			$slashdb->getUser($uid, 'session_login'));
 		return($uid, $newpass);
 	} else {
-		my $hostip = $r->connection->remote_ip;
-		my $subnet = $hostip;
-		$subnet =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
-		my $name_uid = $slashdb->getUserUID($name);
-		$slashdb->sqlInsert("badpasswords", { uid => $name, password => $passwd, subnet => $subnet, ip => $hostip } );
 		return getCurrentStatic('anonymous_coward_uid');
 	}
 }

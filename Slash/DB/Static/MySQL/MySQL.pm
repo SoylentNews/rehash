@@ -417,29 +417,29 @@ sub deleteDaily {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 
+# This is now done more efficiently, throughout the day, by the
+# counthits.pl task.
 #	$self->updateStoriesCounts();
+
+	$self->sqlDelete('badpasswords', "TO_DAYS(NOW()) - TO_DAYS(ts) > 2");
+
+	$self->sqlDelete('pollvoters');
+
 	my $archive_delay_mod =
 		   $constants->{archive_delay_mod}
 		|| $constants->{archive_delay}
 		|| 14;
+	$self->sqlDelete('moderatorlog',
+		"TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
+	$self->sqlDelete('metamodlog',
+		"TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
 
-	# Now for some random stuff
-	$self->sqlDo("DELETE from badpasswords
-		WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > 2");
-	$self->sqlDo("DELETE FROM pollvoters");
-	$self->sqlDo("DELETE FROM moderatorlog
-		WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
-	$self->sqlDo("DELETE FROM metamodlog
-		WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
+# This is now done by the flush_formkeys task.
+#	my $delete_time = time() - $constants->{formkey_timeframe};
+#	$self->sqlDelete('formkeys', "ts < $delete_time");
 
-	# Formkeys
-	my $delete_time = time() - $constants->{'formkey_timeframe'};
-	$self->sqlDo("DELETE FROM formkeys WHERE ts < $delete_time");
-
-	unless ($constants->{noflush_empty_discussions}) {
-		$self->sqlDo("DELETE FROM discussions
-			WHERE type='recycle' AND commentcount=0");
-	}
+	$self->sqlDelete('discussions', "type='recycle' AND commentcount=0")
+		unless $constants->{noflush_empty_discussions};
 }
 
 ########################################################
@@ -1557,9 +1557,7 @@ sub refreshUncommonStoryWords {
 # For tasks/flush_formkeys.pl
 sub deleteOldFormkeys {
 	my($self, $timeframe) = @_;
-	$timeframe ||= 14400;
-	$timeframe *= 2; # why are we doubling this? bizarre - Jamie 2003/07/24
-	my $delete_before_time = time - $timeframe;
+	my $delete_before_time = time - ($timeframe || 14400);
 	$self->sqlDelete("formkeys", "ts < $delete_before_time");
 }
 

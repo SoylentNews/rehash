@@ -1531,11 +1531,11 @@ sub deleteUser {
 ########################################################
 # Get user info from the users table.
 sub getUserAuthenticate {
-	my($self, $user, $passwd, $kind) = @_;
-	my($uid, $cookpasswd, $newpass, $user_db,
+	my($self, $uid_try, $passwd, $kind) = @_;
+	my($uid_verified, $cookpasswd, $newpass, $uid_try_q,
 		$cryptpasswd, @pass);
 
-	return unless $user && $passwd;
+	return undef unless $uid_try && $passwd;
 
 	# if $kind is 1, then only try to auth password as plaintext
 	# if $kind is 2, then only try to auth password as encrypted
@@ -1547,46 +1547,77 @@ sub getUserAuthenticate {
 
 	# RECHECK LOGIC!!  -- pudge
 
-	$user_db = $self->sqlQuote($user);
+	$uid_try_q = $self->sqlQuote($uid_try);
 	$cryptpasswd = encryptPassword($passwd);
 	@pass = $self->sqlSelect(
 		'uid,passwd,newpasswd',
 		'users',
-		"uid=$user_db"
+		"uid=$uid_try_q"
 	);
 
 	# try ENCRYPTED -> ENCRYPTED
 	if ($kind == $EITHER || $kind == $ENCRYPTED) {
 		if ($passwd eq $pass[$PASSWD]) {
-			$uid = $pass[$UID];
+			$uid_verified = $pass[$UID];
 			$cookpasswd = $passwd;
 		}
 	}
 
 	# try PLAINTEXT -> ENCRYPTED
-	if (($kind == $EITHER || $kind == $PLAIN) && !defined $uid) {
+	if (($kind == $EITHER || $kind == $PLAIN) && !defined $uid_verified) {
 		if ($cryptpasswd eq $pass[$PASSWD]) {
-			$uid = $pass[$UID];
+			$uid_verified = $pass[$UID];
 			$cookpasswd = $cryptpasswd;
 		}
 	}
 
 	# try PLAINTEXT -> NEWPASS
-	if (($kind == $EITHER || $kind == $PLAIN) && !defined $uid) {
+	if (($kind == $EITHER || $kind == $PLAIN) && !defined $uid_verified) {
 		if ($passwd eq $pass[$NEWPASSWD]) {
 			$self->sqlUpdate('users', {
 				newpasswd	=> '',
 				passwd		=> $cryptpasswd
-			}, "uid=$user_db");
+			}, "uid=$uid_try_db");
 			$newpass = 1;
 
-			$uid = $pass[$UID];
+			$uid_verified = $pass[$UID];
 			$cookpasswd = $cryptpasswd;
 		}
 	}
 
+	# If we tried to authenticate and failed, log this attempt to
+	# the badpasswords table.
+	if (!$uid_verified) {
+		$self->createBadPasswordLog($uid_try, $passwd);
+	}
+
 	# return UID alone in scalar context
-	return wantarray ? ($uid, $cookpasswd, $newpass) : $uid;
+	return wantarray ? ($uid_verified, $cookpasswd, $newpass) : $uid_verified;
+}
+
+########################################################
+# Log a bad password in a login attempt.
+sub createBadPasswordLog {
+	my($uid, $password_wrong) = @_;
+	my $constants = getCurrentStatic();
+
+	# Failed login attempts as the anonymous coward don't count.
+	return if $uid == $constants->{anonymous_coward_uid};
+
+	# Bad passwords that don't come through the web,
+	# we don't bother to log.
+	my $r = Apache->request;
+	return unless $r;
+
+	my $hostip = $r->connection->remote_ip;
+	my $subnet = $hostip;
+	$subnet =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+	$slashdb->sqlInsert("badpasswords", {
+		uid =>          $uid,
+		password =>     $password_wrong,
+		ip =>           $hostip,
+		subnet =>       $subnet,
+	} );
 }
 
 ########################################################

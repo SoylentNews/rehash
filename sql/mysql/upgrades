@@ -1873,13 +1873,14 @@ ALTER TABLE sections CHANGE COLUMN title title VARCHAR(64) DEFAULT '' NOT NULL, 
 
 # End of T_2_3_0_114, Start of T_2_3_0_115 - 2003/08/28
 
-CREATE TABLE `badpasswords` (
-  `uid` mediumint(8) default NULL,
-  `ip` varchar(15) default NULL,
-  `subnet` varchar(15) default NULL,
-  `password` varchar(20) default NULL,
-  `ts` timestamp(14) NOT NULL,
-  INDEX uid (uid),
-  INDEX ip (ip),
-  INDEX subnet (subnet)
-);
+CREATE TABLE badpasswords (
+	uid mediumint(8) NOT NULL DEFAULT 0,
+	ip varchar(15) NOT NULL DEFAULT '',
+	subnet varchar(15) NOT NULL DEFAULT '',
+	password varchar(20) NOT NULL DEFAULT '',
+	ts timestamp(14) NOT NULL,
+	INDEX uid (uid),
+	INDEX ip (ip),
+	INDEX subnet (subnet)
+) TYPE=InnoDB;
+
