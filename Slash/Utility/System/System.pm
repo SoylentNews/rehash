@@ -107,8 +107,13 @@ sub sendEmail {
 	my($addr, $subject, $content, $pr) = @_;
 	my $constants = getCurrentStatic();
 
+	# print errors under slashdb only if high level
+	# of verbosity -- pudge
+	my $log_error = defined &verbosity ? verbosity() >= 3 : 1;
+
 	unless (Email::Valid->rfc822($addr)) {
-		errorLog("Can't send mail '$subject' to $addr: Invalid address");
+		errorLog("Can't send mail '$subject' to $addr: Invalid address")
+			if $log_error;
 		return 0;
 	}
 
@@ -130,7 +135,8 @@ sub sendEmail {
 	if (sendmail(%data)) {
 		return 1;
 	} else {
-		errorLog("Can't send mail '$subject' to $addr: $Mail::Sendmail::error");
+		errorLog("Can't send mail '$subject' to $addr: $Mail::Sendmail::error")
+			if $log_error;
 		return 0;
 	}
 }
