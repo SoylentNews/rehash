@@ -20,6 +20,8 @@ __template__
 [% PROCESS maintable_tr_end %]
 [% PROCESS maintable_end %]
 
+</FONT>
+
 <P>
 
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
