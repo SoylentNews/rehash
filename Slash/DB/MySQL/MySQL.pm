@@ -9417,6 +9417,10 @@ sub getTopiclistFromChosen {
 	my($self, $chosen_hr, $options) = @_;
 	my $tree = $self->getTopicTree();
 
+	# Determine which of the chosen topics are eligible.  Those with
+	# weight 0 are to be excluded.
+	my @eligible_tids = grep { $chosen_hr->{$_} > 0 } keys %$chosen_hr;
+
 	# Determine which of the chosen topics is in the preferred skin
 	# (using the weights given).  These will get priority.
 	my $skid = $options->{skid} || 0;
@@ -9426,9 +9430,10 @@ sub getTopiclistFromChosen {
 		%in_skid = map { $_, 1 }
 			grep { $self->isTopicParent($nexus, $_,
 				{ weight => $chosen_hr->{$_} }) }
-			keys %$chosen_hr;
+			@eligible_tids
 	}
 
+	# Sort the eligible tids into the desired order.
 	my @tids = sort {
 			# Highest priority is whether this topic is
 			# NOT a nexus (nexus topics go at the end).
@@ -9445,7 +9450,8 @@ sub getTopiclistFromChosen {
 		|| $tree->{$a}{textname} cmp $tree->{$b}{textname}
 			# Last priority is primary key sort
 		|| $a <=> $b
-	} keys %$chosen_hr;
+	} @eligible_tids;
+
 	return \@tids;
 }
 
