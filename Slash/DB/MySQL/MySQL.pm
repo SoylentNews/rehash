@@ -886,7 +886,7 @@ sub getMetamodCountsForModsByType {
 
 	my($cols, $where);
 	$cols = "mmid, count(*) as count";
-	$where = "mmid in ($id_str)";
+	$where = "mmid in ($id_str) AND active=1 ";
 	if ($type eq "fair") {
 		$where .= " AND val > 0 ";
 	} elsif ($type eq "unfair") {
@@ -6323,6 +6323,7 @@ sub getSlashConf {
 		fixhrefs =>			[ ],
 		lonetags =>			[ ],
 		op_exclude_from_countdaily =>   [qw( rss )],
+		op_extras_countdaily =>   	[ ],
 		mod_stats_reports =>		[ $conf{adminmail_mod} ],
 		stats_reports =>		[ $conf{adminmail} ],
 		stats_sfnet_groupids =>		[ 4421 ],
