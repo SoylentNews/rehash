@@ -28,7 +28,7 @@ my_graph.set(
 
 	transparent		=> 0,
 
-	dclrs			=> [ 'green', 'red', 'lgray', 'lgray' ],
+	dclrs			=> [ 'black', 'green', 'red', 'lgray', 'lgray' ],
 
 	x_ticks			=> 0,
 	y_tick_number		=> 0,
@@ -43,8 +43,8 @@ my_graph.set(
 
 );
 
-my_graph.set(y_min_value => constants.dbsparklines_ymin);
-my_graph.set(y_max_value => constants.dbsparklines_ymax);
+my_graph.set(y_min_value => constants.dbsparklines_ymin - 1);
+my_graph.set(y_max_value => constants.dbsparklines_ymax + 1);
 #my_graph.set(x_min_value => 0);
 #my_graph.set(x_max_value => alldata.0.size);
 

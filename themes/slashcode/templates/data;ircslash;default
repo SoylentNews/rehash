@@ -64,6 +64,7 @@ __template__
 
 [% CASE 'dbs_response' %]
 	[% FOREACH dbid = dbids;
+		# need to check here, .lag and .bog may be '?'
 		IF dbs.$dbid.lag < constants.ircslash_dbalert_lagthresh / 2
 			&& dbs.$dbid.bog < constants.ircslash_dbalert_bogthresh / 2
 			&& dbs.$dbid.was_alive

@@ -45,6 +45,10 @@ my $bar = "bar:"; for (@$bog_ar) { $bar .= " " . (defined($_) ? sprintf("%.2f", 
 slashdLog($bar);
 my $lar = "lar:"; for (@$lag_ar) { $lar .= " " . (defined($_) ? sprintf("%.2f", $_) : "U") }
 slashdLog($lar);
+my $bgar = "bgar:"; for (@$bog_ground_ar) { $bgar .= " " . (defined($_) ? sprintf("%.2f", $_) : "U") }
+slashdLog($bgar); # 2nd
+my $lgar = "lgar:"; for (@$lag_ground_ar) { $lgar .= " " . (defined($_) ? sprintf("%.2f", $_) : "U") }
+slashdLog($lgar); # 3rd
 
 		my $png = slashDisplay('dbsparkline',
 			{ alldata => [ $bog_ar, $lag_ar, $bog_ground_ar, $lag_ground_ar ] },
@@ -52,7 +56,7 @@ slashdLog($lar);
 
 slashdLog("vu=$vu length(png)=" . length($png) . " size(bog_ar)=" . scalar(@$bog_ar) . " size(lag_ar)=" . scalar(@$lag_ar));
 		my $dir = catdir($constants->{basedir}, "images/dbsparklines");
-		mkpath $dir, 0, 0775 unless -e $dir;
+		mkpath($dir, 0, 0775) unless -e $dir;
 		my $filename = catfile($dir,
 			"${vu}_$constants->{dbsparklines_pngsuffix}.png");
 slashdLog("filename='$filename'");
