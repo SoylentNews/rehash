@@ -930,6 +930,7 @@ INSERT INTO vars (name, value, description) VALUES ('stats_sfnet_groupids','4421
 INSERT INTO vars (name, value, description) VALUES ('stem_uncommon_words', '1', 'Use stems of words for detecting similar stories instead of whole words?');
 INSERT INTO vars (name, value, description) VALUES ('stir','3','Number of days before unused moderator points expire');
 INSERT INTO vars (name, value, description) VALUES ('story_expire','600','Default expiration time for story cache');
+INSERT INTO vars (name, value, description) VALUES ('story_never_topic_allow','0','Allow story_never_topic data to be edited and passed to getStoriesEssentials? 0=no, 1=subscriber-only, 2=yes');
 INSERT INTO vars (name, value, description) VALUES ('submiss_ts','1','print timestamp in submissions view');
 INSERT INTO vars (name, value, description) VALUES ('submiss_view','1','allow users to view submissions queue');
 INSERT INTO vars (name, value, description) VALUES ('submission_bonus','3','Bonus given to user if submission is used');
