@@ -109,10 +109,11 @@ These constants are for message delivery modes and message type codes.
 	MSG_CODE_ADMINMAIL
 	MSG_CODE_EMAILSTORY
 	MSG_CODE_ZOO_CHANGE
+	MSG_CODE_BADPASSWORD
 
 =cut
 
-# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12
+# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13
 
 =pod
 
