@@ -1452,3 +1452,17 @@ ALTER TABLE topics DROP image;
 # Change for plugins/Subscribe (ignore if not using that plugin)
 ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;
 
+#
+# Table structure for table 'users_acl'
+#
+
+DROP TABLE IF EXISTS users_acl;
+CREATE TABLE users_acl (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	uid mediumint UNSIGNED NOT NULL,
+	acl varchar(32) NOT NULL,
+	UNIQUE uid_key (uid,acl),
+	KEY uid (uid),
+	FOREIGN KEY (uid) REFERENCES users(uid),
+	PRIMARY KEY (id)
+) TYPE = myisam;

@@ -6518,7 +6518,7 @@ sub setUser {
 	$cache = _genericGetCacheName($self, $tables);
 
 	for (keys %$hashref) {
-		(my $clean_val = $_) =~ s/^-//;
+	(my $clean_val = $_) =~ s/^-//;
 		my $key = $self->{$cache}{$clean_val};
 		if ($key) {
 			push @{$update_tables{$key}}, $_;
@@ -6558,11 +6558,28 @@ sub setUser {
 			$rows += $self->sqlDelete('users_param', 
 				"uid = $uid AND name = " . $self->sqlQuote($_->[0]));
 		} elsif ($_->[0] eq "acl") {
-			$rows += $self->sqlReplace('users_acl', {
-				uid	=> $uid,
-				name	=> $_->[1]{name},
-				value	=> $_->[1]{value},
-			});
+			my (@delete, @add);
+			my $acls = $_->[1];
+			for my $key (keys(%$acls)) {
+				if ($acls->{$key}) {
+					push @add, $key;
+				} else {
+					push @delete, $key;
+				}
+			} 
+			if (@delete) {
+				my $string = join(',', @{$self->sqlQuote(\@delete)});
+				$self->sqlDo("DELETE FROM users_acl WHERE acl IN ($string)");
+			}
+			if (@add) {
+				my $string;
+				for (@add) {
+					my $qacl = $self->sqlQuote($_);
+					$string .= qq| ($uid, $qacl),|
+				}
+				chop($string);
+				$self->sqlDo("INSERT IGNORE INTO users_acl (uid, acl) VALUES $string");
+			}
 		} else {
 			$rows += $self->sqlReplace('users_param', {
 				uid	=> $uid,
@@ -6619,10 +6636,7 @@ sub getUser {
 		$answer = $self->sqlSelectHashref($values, $table, $where)
 			if $values;
 		for (@param) {
-			# First we try it as an acl param -acs
-			my $val = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$_'");
-			$val = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$_'") if !defined $val;
-			$answer->{$_} = $val;
+			$answer->{$_} = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$_'");
 		}
 
 	} elsif ($val) {
@@ -6632,8 +6646,7 @@ sub getUser {
 			$answer = $self->sqlSelect($val, $table, "uid=$id");
 		} else {
 			# First we try it as an acl param -acs
-			$answer = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$val'");
-			$answer = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$val'") if !defined $answer;
+			$answer = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$val'");
 		}
 
 	} else {
@@ -6675,9 +6688,9 @@ sub getUser {
 		}
 
 		my($append_acl, $append);
-		$append_acl = $self->sqlSelectAll('name,value', 'users_acl', "uid=$id");
+		$append_acl = $self->sqlSelectColArrayref('acl', 'users_acl', "uid=$id");
 		for (@$append_acl) {
-			$answer->{$_->[0]} = $_->[1];
+			$answer->{acl}{$_} = 1;
 		}
 		$append = $self->sqlSelectAll('name,value', 'users_param', "uid=$id");
 		for (@$append) {

@@ -986,9 +986,8 @@ DROP TABLE IF EXISTS users_acl;
 CREATE TABLE users_acl (
 	id mediumint UNSIGNED NOT NULL auto_increment,
 	uid mediumint UNSIGNED NOT NULL,
-	name varchar(32) NOT NULL,
-	value varchar(254),
-	UNIQUE uid_key (uid,name),
+	acl varchar(32) NOT NULL,
+	UNIQUE uid_key (uid,acl),
 	KEY uid (uid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (id)

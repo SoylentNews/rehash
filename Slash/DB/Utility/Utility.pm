@@ -589,7 +589,15 @@ sub sqlInsert {
 sub sqlQuote {
 	my($self, $value) = @_;
 	$self->sqlConnect;
-	return $self->{_dbh}->quote($value);
+	if (ref($value) eq 'ARRAY') {
+		my (@array);
+		for (@$value) {
+			push @array, $self->{_dbh}->quote($_);
+		}
+		return \@array;
+	} else {
+		return $self->{_dbh}->quote($value);
+	}
 }
 
 #################################################################

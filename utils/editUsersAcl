@@ -1,0 +1,97 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2002 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Benchmark;
+
+use vars qw( $slashdb $constants );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my %opts;
+srand(time() ^ ($$+($$<<15)));
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:vaU:dl', \%opts);
+usage() if $opts{'h'};
+version() if $opts{'v'};
+usage("You must supply either -a, -d, or -l") unless $opts{'a'} || $opts{'d'} || $opts{'l'};
+usage("You must supply a UID") unless $opts{'U'};
+$opts{'u'} ||= 'slash';
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+
+
+main();
+
+sub main {
+	my %hash;
+	if ($opts{'a'}) {
+		for(@ARGV) {
+			$hash{$_} = 1;
+		}
+	} elsif ($opts{'d'}) {
+		for(@ARGV) {
+			$hash{$_} = 0;
+		}
+	}
+
+	if (keys %hash) {
+		$slashdb->setUser($opts{'U'}, { acl => \%hash });
+	}
+
+	my $user = $slashdb->getUser($opts{'U'});
+	print "$user->{nickname} current ACL's\n";
+	for (keys (%{$user->{acl}})) {
+		print "\t$_\n";
+	}
+}
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [acls..]
+
+This utility builds test Zoo users. It basically makes everyone related to everyone else.
+You probably don't want to run this.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-U	A uid to add or delete ACL from
+	-a	Add the following ACL's
+	-l	List the user's ACL
+	-d	Delete the following ACL's
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2002 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
