@@ -228,9 +228,11 @@ sub print_first_line {
 			if (!defined($db->{hitrate})) {
 				print " ?";
 			} elsif ($db->{hitrate} >= 98) {
-				print " +";
-			} else {
+				print "  ";
+			} elsif ($db->{hitrate} >= 94) {
 				print " -";
+			} else {
+				print " X";
 			}
 		}
 	}
@@ -260,12 +262,14 @@ sub print_second_line {
 }
 
 sub print_proclist {
-	for my $db (@db) {
+	OUTER: for my $db (@db) {
+		my $db_lines = 0;
 		my $pl = $db->{proclist};
-		for my $line (@$pl) {
+		INNER: for my $line (@$pl) {
 			my $text = substr($line->{text}, 0, $width - 13);
 			printf "%-8s %4d %s\n", $line->{vu}, $line->{Time}, $text;
 			++$lines_since_header;
+			++$db_lines; last INNER if $db_lines >= 8;
 		}
 	}
 }
