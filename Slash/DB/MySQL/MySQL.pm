@@ -4599,8 +4599,6 @@ sub countCommentsBySubnetID {
 sub countCommentsByIPID {
 	my($self, $ipid, $options) = @_;
 	return 0 if !$ipid;
-	use Data::Dumper;
-	print STDERR ($options);
 	return $self->countCommentsByGeneric("ipid='$ipid'", $options);
 }
 
