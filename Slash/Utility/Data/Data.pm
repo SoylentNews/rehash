@@ -686,7 +686,7 @@ See C<stripByMode> for details.
 
 sub strip_mode {
 	my($string, $mode, @args) = @_;
-	return if !$mode || $mode < 1 || $mode > 4;	# user-supplied modes are 1-4
+	return "" if !$mode || $mode < 1 || $mode > 4;	# user-supplied modes are 1-4
 	return stripByMode($string, $mode, @args);
 }
 
