@@ -188,8 +188,12 @@ sub getAdminModsInfo {
 			: 0;
 		# Add the m2 data for this admin.
 		$hr->{$nickname}{uid} = $uid;
-		$hr->{$nickname}{m2_text} = sprintf("was judged %5d fair, %5d un (%6.2f%% un)",
-			$nfair, $nunfair, $percent);
+		$hr->{$nickname}{m2_text} = sprintf("\@ %5d fair, %5d un",
+			$nfair, $nunfair);
+		if ($nfair+$nunfair >= 20) { # this number is pretty arbitrary
+			$hr->{$nickname}{m2_text} .= sprintf(" (%6.2f%% un)",
+				$percent);
+		}
 		$hr->{$nickname}{m2_fair} = $nfair;
 		$hr->{$nickname}{m2_unfair} = $nunfair;
 		# If this admin had m2 activity today but no m1 activity,
