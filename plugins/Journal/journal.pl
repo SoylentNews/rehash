@@ -748,7 +748,7 @@ sub get_entry {
 
 	my $nickname = $slashdb->getUser($entry->{uid}, 'nickname');
 
-	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$entry->{id}/";
+	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$entry->{id}";
 	$entry->{discussion_id} = delete $entry->{'discussion'};
 	$entry->{discussion_url} = "$constants->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
 		if $entry->{discussion_id};
@@ -774,7 +774,7 @@ sub get_entries {
 	for my $article (@$articles) {
 		push @items, {
 			subject	=> $article->[2],
-			url	=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]/",
+			url	=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]",
 			id	=> $article->[3],
 		};
 	}

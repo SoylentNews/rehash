@@ -28,8 +28,7 @@ __template__
 [% IF user.uid == uid %]
 <A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</A> |
 <A HREF="[% constants.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</A>
-[% END %]
-[% IF user.uid != uid  %]
+[% ELSE %]
 	[% IF is_friend %]
 	| <A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]&amp;type=friend">Remove Friend</A>
 	[% ELSE %]

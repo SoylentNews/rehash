@@ -11,10 +11,11 @@ en_US
 __name__
 meta
 __template__
+[% name = "del_$article.id" %]
 [% PROCESS titlebar width => "100%" title = "Deleting Article" %]
 <FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST">
 <INPUT TYPE="hidden" NAME="op" VALUE="remove">
-<INPUT TYPE="hidden" NAME="[% del_$article.id %]" VALUE="1">
+<INPUT TYPE="hidden" NAME="[% name %]" VALUE="1">
 <P>Alright, before we do this thing, I just want to really make
 sure that you want to delete your journal entry
 <B>[% article.description | strip_literal %]</B>.</P>
