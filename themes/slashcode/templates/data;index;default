@@ -26,6 +26,15 @@ __template__
 	   END;
 	%]
 
+[% CASE 'rsshead' %]
+	[% varsection = Slash.db.getVar('section');
+	   IF varsection.value == constants.section;
+	      constants.sitename;
+	   ELSE;
+	      constants.sitename %]: [% section.title;
+	   END;
+	%]
+
 [% CASE 'userboxhead' %]
 	[% user.nickname %]'s Slashbox
 
