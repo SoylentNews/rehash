@@ -1261,6 +1261,8 @@ sub editStory {
 		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
 		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
 			{ skid => $storyref->{primaryskid} });
+		# not normally set here, so we force it to be safe
+		$storyref->{tid} = $storyref->{topiclist};
 
 		$storyref->{'time'} = findTheTime();
 
@@ -2133,10 +2135,12 @@ sub saveStory {
 	$form->{dept} =~ s/ /-/g;
 
 	my($chosen_hr) = extractChosenFromForm($form);
+	my $tids = $slashdb->getTopicListFromChosen($chosen_hr);
 
 	my $story_text = "$form->{title} $form->{bodytext} $form->{introtext}";
-	$form->{relatedtext} = getRelated($story_text, $form->{tid})
-		. otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
+	$form->{relatedtext} = getRelated($story_text, $tids)
+		. otherLinks($edituser->{nickname}, $tids, $edituser->{uid});
+
 	# If getRelated and otherLinks seem to be putting <li>
 	# tags around each item, they probably want a <ul></ul>
 	# surrounding the whole list.  This is a bit hacky but
