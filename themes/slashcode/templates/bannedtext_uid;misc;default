@@ -3,6 +3,9 @@ default
 __description__
 Text to display to users banned by UID.
 
+* uid = the banned uid (we can't trust 'user' at this stage,
+	since createCurrentUser() hasn't been called)
+
 __title__
 
 __page__
@@ -19,7 +22,7 @@ __template__
 Your user account has been banned from [% constants.sitename %],
 due to script flooding, or the posting of comments designed to break web browser
 rendering, that originated from your network or IP address.  If you feel that
-this is unwarranted, feel free to include your UID (<b>[% user.uid %]</b>) in the
+this is unwarranted, feel free to include your UID (<b>[% uid %]</b>) in the
 subject of an email to
 <A HREF="mailto:[% constants.adminmail_ban | strip_attribute %]">[% constants.adminmail_ban %]</A>,
 and we will examine why there is a ban. If you fail to include the UID (again,
