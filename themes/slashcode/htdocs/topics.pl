@@ -13,8 +13,14 @@ use Slash::Utility;
 sub main {
 	my $slashdb = getCurrentDB();
 	my $form    = getCurrentForm();
+	my $user    = getCurrentUser();
 
 	header(getData('head'));
+	
+	if ($user->{seclev} >= 100) {
+		print createMenu('adv-admin');
+	}
+
 	print createMenu('topics');
 
 	if ($form->{op} eq 'toptopics') {

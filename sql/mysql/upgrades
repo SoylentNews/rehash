@@ -760,3 +760,18 @@ INSERT INTO vars (name, value, description) VALUES ('mod_stir_token_cost','2','W
 INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_days','14','How many days of inactivity before tokens start to decay?');
 INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_perday','1','If inactivity, how many tokens lost per day?');
 
+UPDATE menus SET menu='adv-admin', menuorder=1 WHERE label='Topics' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=2 WHERE label='Blocks' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=3 WHERE label='Colors' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=4 WHERE label='Filters' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=5 WHERE label='Sections' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=6 WHERE label='Users' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=7 WHERE label='Templates' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=8 WHERE label='Vars' AND menu='admin';
+UPDATE menus SET menu='adv-admin', menuorder=9 WHERE label='Site' AND menu='admin';
+
+UPDATE menus SET menuorder=9 WHERE label='Slashd' AND menu='admin';
+UPDATE menus SET menuorder=10 WHERE label='Recent' AND menu='admin';
+
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Advanced', '[% constants.rootdir %]/topics.pl', 500, 11);
+
