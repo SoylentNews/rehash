@@ -40,9 +40,8 @@ on [% Slash.timeCalc(time) %]
 	)</FONT>
 [% END %]
 
-		[% IF user.seclev >= 100 %]
-		<BR>IPID: <A HREF="[% constants.real_rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid %]</A>&nbsp;&nbsp;SubnetID: <A HREF="[% constants.real_rootdir %]/users.pl?op=userinfo&amp;userfield=[% subnetid %]&amp;fieldname=ipid">[% subnetid %]</A>
-		[% END %]
+		[% ipid_display %]
+
 		<P>[% comment %]
 		[% UNLESS user.nosigs %]
 			<BR>[% sig %]
