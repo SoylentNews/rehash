@@ -101,7 +101,7 @@ EOT
 
 	my $sections =  $slashdb->getSections();
 	$sections->{index} = 'index';
-	for my $section (keys %$sections) {
+	for my $section (sort(keys %$sections)) {
 		my $index = $constants->{defaultsection} eq $section ? 1 : 0;
 		my $temp = {};
 		$temp->{section_name} = $section;
