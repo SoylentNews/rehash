@@ -53,3 +53,17 @@ ALTER TABLE users DROP INDEX chk4email;
 ALTER TABLE moderatorlog DROP INDEX sid_2;
 ALTER TABLE moderatorlog ADD INDEX sid_2 (cid,uid,sid);
 ALTER TABLE moderatorlog DROP INDEX cid;
+
+# new multi topics stuff
+DROP TABLE IF EXISTS story_topics;
+CREATE TABLE story_topics (
+  id int(5) NOT NULL auto_increment,
+  sid varchar(16) NOT NULL default '',
+  tid smallint(5) unsigned default NULL,
+  FOREIGN KEY (sid) REFERENCES stories(sid),
+  FOREIGN KEY (tid) REFERENCES topics(tid),
+  PRIMARY KEY  (id),
+  INDEX sid (sid),
+  INDEX tid (tid),
+) TYPE=MyISAM;
+

@@ -1,3 +1,5 @@
+<<<<<<< slashschema_create.sql
+=======
 #	MySQL dump 8.10
 #
 # Host: localhost	  Database: dump
@@ -11,6 +13,7 @@
 # Table structure for table 'abusers'
 #
 
+>>>>>>> 1.22
 DROP TABLE IF EXISTS abusers;
 CREATE TABLE abusers (
 	abuser_id mediumint UNSIGNED NOT NULL auto_increment,
@@ -574,7 +577,7 @@ CREATE TABLE story_topics (
   FOREIGN KEY (tid) REFERENCES topics(tid),
   PRIMARY KEY  (id),
   INDEX tid (tid),
-  INDEX sidtid (sid,tid)
+  INDEX sid (sid),
 ) TYPE=MyISAM;
 
 #

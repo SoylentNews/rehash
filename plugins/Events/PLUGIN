@@ -1,4 +1,9 @@
 name=Events
 description="Events System"
 htdoc=events.pl
-template=templates/index;events;default
+htdoc=eventsadmin.pl
+mysql_prep=mysql_prep
+mysql_schema=mysql_schema
+template=templates/index;eventsadmin;default
+template=templates/eventsadmin;misc;default
+template=templates/events;misc;default
