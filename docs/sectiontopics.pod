@@ -239,6 +239,8 @@ not necessarily with one central "main" page.
 
 multiple skins and how index.pl uses stories.primaryskid
 
+skins.cookiedomain and the cookiedomain var
+
 the Topiclist
 
 the topic chooser
@@ -247,10 +249,10 @@ no admin.pl interface to edit topic tree yet, but op=topictree
 	(and GraphViz, see plugins/Admin/README)
 
 suggestions for a clean topic tree
-	(use min_weight 1 to connect many/most topics to logical
+	(use min_weight 10 to connect many/most topics to logical
 	 categorizations, which could/should be nexuses, then
-	 connect those to mainpage with min_weight 3, finally
-	 bring loose topics to mainpage with min_weight 3)
+	 connect those to mainpage with min_weight 30, finally
+	 bring loose topics to mainpage with min_weight 30)
 
 utils/convertDBto200406
 
