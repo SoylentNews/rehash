@@ -154,7 +154,7 @@ IF !useredit.is_anon;
 
 		IF user.is_admin AND hits;
 			'<BR><HR NOSHADE SIZE="1">';
-			'This story been viewed ';
+			'This story has been viewed ';
 			hits;
 			' times.';
 		END;
