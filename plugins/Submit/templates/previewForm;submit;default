@@ -45,8 +45,15 @@ __template__
 
 <P>Submitted by <B>[% submission.name %]
 	<A HREF="[% submission.email %]">[% submission.email %]</A></B>
-	at [% submission.time %] <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+	at [% submission.time %] [% IF admin_flag %]<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</A>[% END %]
 
+[% PROCESS titlebar title=submission.subj %]
+<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
+SRC="[% topic.image %]"
+WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
+ALIGN="RIGHT" HSPACE="20" VSPACE="10"
+ALT="[% topic.alttext %]"
+TITLE="[% topic.alttext %]"></A>
 <P>[% subtext %]</P>
 
 [% IF admin_flag %]

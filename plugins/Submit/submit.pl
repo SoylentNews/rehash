@@ -198,7 +198,7 @@ sub previewForm {
 		submitter	=> $sub->{uid},
 		subid		=> $form->{subid},
 		topic		=> $topic,
-		ipid		=> $ipid,
+		ipid		=> $sub->{ipid},
 		ipid_vis	=> $ipid_vis,
 		admin_flag 	=> $admin_flag,
 		extras 		=> $extracolumns,
