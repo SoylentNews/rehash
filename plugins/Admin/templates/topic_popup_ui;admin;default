@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+Popup tree UI for topics in admin editor
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+topic_popup_ui
+__template__
+[% IF include_css %]
+<link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
+[%- END %]
+<script src="./admin-topic-popup.js" type="text/javascript"></script>
+
+<select name="[% name %]_main_select" size=5 multiple onchange="[% name %]_select_weight()">
+[%- FOREACH this_stid = stid.sort %]
+<option value="[% this_stid %]">[% slashtopics.${this_stid}.label | strip_html %] ([% stid.$this_stid %])</option>
+[%- END %]</select>
+
+<select name="[% name %]_main_select_weights" multiple class="hpts-no-display">
+[%- FOREACH this_stid = stid.sort %]
+<option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
+[%- END %]</select>
+
+<select name="[% name %]_main_select_weights_orig" multiple class="hpts-no-display">
+[%- FOREACH this_stid = stid.sort %]
+<option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
+[%- END %]</select>
+
+<select name="[% name %]_main_select_ids" multiple class="hpts-no-display">
+[%- FOREACH this_stid = stid.sort %]
+<option value="[% stid_names.$this_stid %]">[% stid_names.$this_stid %]</option>
+[%- END %]</select>
+
+<select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
+<option value="4">4 - Mainpageworthy (priority)</option>
+<option value="3">3 - Mainpageworthy</option>
+<option value="2">2 - Sectionworthy (priority)</option>
+<option value="1">1 - Sectionworthy</option>
+<option value="0">0 - Ignore Topic</option>
+</select>
+<br>
+<input type="button" value="Never Display"  onmouseup="[% name %]_never_display()">
+<input type="button" value="Revert Weights" onmouseup="[% name %]_revert_weights()">
+<input type="button" value="Choose Topics"  onmouseup="[% name %]_show()" name="[% name %]_topic_toggle">
+<input type="button" value="Remove Topic"   onmouseup="[% name %]_remove()">
+
+<script language="javascript">[% name %]_load_names();</script>
+
+__seclev__
+10000
+__version__
+$Id$

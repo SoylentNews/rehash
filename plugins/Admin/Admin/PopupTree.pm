@@ -126,8 +126,8 @@ sub _output_generate {
 	$param->{stid}        = $self->{stid};
 	$param->{stid_names}  = $self->{stid_names};
 
-	$self->{_template_options}{type} = 'tree' if
-		!$self->{_template_options}{type} || $self->{_template_options}{type} !~ /^tree|js|css$/;
+	$self->{_template_options}{type} = 'ui' if
+		!$self->{_template_options}{type} || $self->{_template_options}{type} !~ /^tree|js|css|ui$/;
 
 	my $template_name = sprintf('topic_popup_%s', $self->{_template_options}{type});
 	my $nocomm = $self->{_template_options}{Nocomm} || 0;

@@ -181,9 +181,9 @@ function [% name %]_show() {
 	}
 [%- END %]
 
-	var mybutton  = document.slashstoryform.st_topic_toggle;
+	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
 	mybutton.value = "Close Window";
-	mybutton.onmouseup = st_close;
+	mybutton.onmouseup = [% name %]_close;
 }
 
 /* user clicks the ok button */
@@ -234,9 +234,9 @@ function [% name %]_close () {
 	}
 [%- END %]
 
-	var mybutton  = document.slashstoryform.st_topic_toggle;
+	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
 	mybutton.value = "Choose Topics";
-	mybutton.onmouseup = st_show;
+	mybutton.onmouseup = [% name %]_show;
 }
 
 function [% name %]_get_all_names (id) {
@@ -326,27 +326,42 @@ function [% name %]_main_add (val) {
 	[% name %]_main_add_really(val, name, weight);
 }
 
-function [% name %]_main_add_really (val, name, weight) {
+function [% name %]_main_add_really (val, name, weight, noerr) {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
 	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
 	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
-	var myindex   = myselect.length;
 
-	myselect[myindex]  = new Option(name + " (" + weight + ")", val);
-	myselectw[myindex] = new Option(weight, weight);
-	myselecto[myindex] = new Option(weight, weight);
-	myselecti[myindex] = new Option(name, name);
-	myselect.selectedIndex = myindex;
-	[% name %]_select_weight();
+	var duplicates = new Array;
+	for (var i = 0; i < myselect.length; i++) {
+		if (myselect[i].value == val) {
+			duplicates.unshift(i);
+		}
+	}
+
+	var do_it = 1;
+	if (duplicates.length) {
+		do_it = (noerr || confirm("This operation will replace the existing topic from the selection box.  Continue?"));
+	}
+
+	if (do_it) {
+		for (var i = 0; i < duplicates.length; i++) {
+			[% name %]_remove_really(duplicates[i]);
+		}
+
+		var myindex   = myselect.length;
+		myselect[myindex]  = new Option(name + " (" + weight + ")", val);
+		myselectw[myindex] = new Option(weight, weight);
+		myselecto[myindex] = new Option(weight, weight);
+		myselecti[myindex] = new Option(name, name);
+		myselect.selectedIndex = myindex;
+		[% name %]_select_weight();
+	}
 }
 
 /* user clicks the remove button */
 function [% name %]_remove(noerr) {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
 
 	if (myselect.selectedIndex == -1) {
 		if (!noerr) {
@@ -355,16 +370,25 @@ function [% name %]_remove(noerr) {
 		return;
 	}
 
-	/* trigger onselect */
-	myselectw.options[myselect.selectedIndex] = null;
-	myselecto.options[myselect.selectedIndex] = null;
-	myselecti.options[myselect.selectedIndex] = null;
-	myselect.options[myselect.selectedIndex]  = null;
+	[% name %]_remove_really(myselect.selectedIndex);
 
 	/* loop! */
 	if (myselect.selectedIndex != -1) {
 		[% name %]_remove(1);
 	}
+}
+
+function [% name %]_remove_really(index) {
+	var myselect  = document.[% form_field_form %].[% name %]_main_select;
+	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
+	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
+	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
+
+	/* trigger onselect */
+	myselectw.options[index] = null;
+	myselecto.options[index] = null;
+	myselecti.options[index] = null;
+	myselect.options[index]  = null;
 }
 
 /* user clicks the submit button */

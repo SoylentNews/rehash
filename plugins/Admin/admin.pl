@@ -1581,7 +1581,7 @@ sub getDescForTopicsRendered {
 					[$val, $_]
 				} @story_nexuses;
 
-	my $remove = qq{[<a href="javascript:st_main_add_really(%d,'%s',0)"><font color="$user->{colors}{fg_3}">x</font></a>]};
+	my $remove = qq{[<a href="javascript:st_main_add_really(%d,'%s',0,1)"><font color="$user->{colors}{fg_3}">x</font></a>]};
 
 	my $desc;
 	if (!@sorted_nexuses) {

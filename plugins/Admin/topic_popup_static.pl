@@ -23,6 +23,13 @@ $task{$me}{code} = sub {
 		my $new = Slash::Admin::PopupTree::getPopupTree({}, {}, { type => $type, Nocomm => 1 });
 		next unless $new;
 
+		if ($type eq 'js') {
+			my $tree = Slash::Admin::PopupTree::getPopupTree({}, {}, { type => 'tree', Nocomm => 1 });
+			$tree =~ s/'/\\'/g;
+			$tree =~ s/\n/\\n/g;
+			$new .= "\n\ndocument.write('$tree');\n\n";
+		}
+
 		my $file = catfile($constants->{basedir}, "admin-topic-popup.$type");
 		save2file($file, $new);
 	}
