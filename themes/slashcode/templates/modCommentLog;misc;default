@@ -117,8 +117,8 @@ bg_col_2 = user.bg.2;
 			[% END %]
 			[% IF !moderation.active %]*[% END %]
 		</TD>
-	        <TD>[% IF !suppress_mod_head; moderation.points_orig; END %]</TD>
-		<TD ALIGN="RIGHT">
+	        <TD ALIGN="right">[% moderation.points_orig; %]</TD>
+		<TD ALIGN="right">
 			[% IF !suppress_mod_head; moderation.score; END %]
 		</TD>
 		<TD ALIGN="RIGHT"> <B>[% IF !suppress_mod_head %][% IF moderation.val > 0; "+"; END; moderation.val %][% END %]</B> </TD>

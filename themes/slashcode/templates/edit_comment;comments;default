@@ -6,6 +6,10 @@ Template which renders the comment editor.
 * error_message = error message if there is an error
 * preview = preview of comment, if applicable
 * reply = hashref of comment replying to
+* hide_name = hide name / log out link
+* hide_email = hide email display
+
+ 
 __title__
 
 __page__
@@ -83,12 +87,15 @@ __template__
 [% ELSE;
 	userlink = "<A HREF=\"${constants.rootdir}/users.pl?op=userclose\">Log Out</A>";
 END %]
-
+	[% UNLESS hide_name %]
 	<TR><TD WIDTH="130" ALIGN="RIGHT">[% PROCESS formLabel value => 'Name' %]</TD><TD WIDTH="500">
 		<A HREF="[% constants.rootdir %]/users.pl">[% user.nickname %]</A> [ [% userlink %] ]</TD></TR>
+	[% END %]
 [% IF user.fakeemail %]
+	[% UNLESS hide_email %]
 	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Email' %]</TD>
 		<TD>[% user.fakeemail | strip_literal %]</TD></TR>
+	[% END %]
 <!-- end anon login code -->
 [% END %]
 [% IF user.homepage %]
@@ -98,7 +105,7 @@ END %]
 
 	[% IF newdiscussion || form.newdiscussion %]
 		<TR>
-			<TD ALIGN="RIGHT">Topic: </TD>
+			<TD ALIGN="RIGHT">[% PROCESS formLabel value=>'Topic' %]</TD>
 			<TD>
 				[% Slash.selectTopic('topic', form.topic, section, 1) %]
 			</TD>
@@ -112,9 +119,9 @@ END %]
 		</TR>
 		[% END %]
 		<TR>
-			<TD ALIGN="RIGHT">URL: </TD>
+			<TD ALIGN="RIGHT">[% PROCESS formLabel value=>'URL' %]</TD>
 			<TD>
-				<INPUT TYPE="text" NAME="url" VALUE="[% form.url | strip_attribute %]" SIZE=60>
+				<INPUT TYPE="text" NAME="url" VALUE="[% form.url | strip_attribute %]" SIZE=50>
 			</TD>
 		</TR>
 	[% END %]
@@ -189,35 +196,38 @@ IF do_br %]<BR>[% END %]
 [% END %]
 
 	</TD></TR><TR>
-		<TD VALIGN="TOP" ALIGN="RIGHT">Allowed HTML: </TD><TD><FONT SIZE="1">
+		<TD VALIGN="TOP" ALIGN="RIGHT"><font color="[% user.bg.3 %]"><B>Allowed HTML</B></font></TD><TD><FONT SIZE="1">
 			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
 		[% IF constants.approvedtags.grep("ECODE").0 %]
 			(Use "ECODE" instead of "PRE" or "CODE".)
 		[% END %]
 		</FONT>
 	</TD></TR>
+	<TR>
+		<TD VALIGN="TOP" ALIGN="RIGHT"><font color="[% user.bg.3 %]"><B>Important Stuff</B></font></TD>
+		<TD><P>
+			<LI>Please try to keep posts on topic.
+		<LI>Try to reply to other people's comments instead of starting new threads.
+		<LI>Read other people's messages before posting your own to avoid simply duplicating
+		what has already been said.
+		<LI>Use a clear subject that describes what your message is about.
+		<LI>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be
+		moderated. (You can read everything, even moderated posts, by adjusting your
+		threshold on the User Preferences Page)
+		[% IF user.is_anon %]
+			<LI>If you want replies to your comments sent to you, consider
+			<A HREF="[% constants.rootdir %]/my/">logging in</A> or
+			<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">creating
+			an account</A>.
+		[% END %]
+
+		<P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
+		<A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.</FONT>
+		</TD>
+	</TR>
 </TABLE>
 
 </FORM>
-
-<B>Important Stuff:</B>
-	<LI>Please try to keep posts on topic.
-	<LI>Try to reply to other people's comments instead of starting new threads.
-	<LI>Read other people's messages before posting your own to avoid simply duplicating
-		what has already been said.
-	<LI>Use a clear subject that describes what your message is about.
-	<LI>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be
-		moderated. (You can read everything, even moderated posts, by adjusting your
-		threshold on the User Preferences Page)
-	[% IF user.is_anon %]
-		<LI>If you want replies to your comments sent to you, consider
-		<A HREF="[% constants.rootdir %]/my/">logging in</A> or
-		<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">creating
-		an account</A>.
-	[% END %]
-
-<P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
-	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.</FONT>
 
 __seclev__
 1000

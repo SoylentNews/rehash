@@ -16,16 +16,19 @@ en_US
 __name__
 discuss_list
 __template__
-<table>
+<table width="100%" cellpadding="0" cellspacing="0">
 	<tr>
 		<td align="left">
-<UL>
+[% IF discussions.size > 0  %]
+<TABLE WIDTH="100%" cellpadding="0" cellspacing="0">
+<TR bgcolor="[% user.bg.3 %]"><TH ALIGN="LEFT"><font color="[% user.fg.0 %]" size=-1>Discussion</font></TH><TH ALIGN="LEFT"><font color="[% user.fg.0 %]" size=-1>Referrer</font></TH><TH ALIGN="LEFT"><font color="[% user.fg.0 %]" size=-1>Last Update</font></TH><TH ALIGN="RIGHT"><font color="[% user.fg.0 %]" size=-1>Comment Count</font></TH></TR>
 [% FOR discussion = discussions %]
-	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
-IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A>
-	(<A HREF="[% discussion.url %]">referrer</A>) Last Updated on [% Slash.timeCalc(discussion.last_update) %] | [% discussion.commentcount %] comments </LI>
+	<TR bgcolor="[% user.bg.2 %]"><TD><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
+IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A></TD>
+	<TD><A HREF="[% discussion.url %]">referrer</A></TD><TD>[% Slash.timeCalc(discussion.last_update) %]</TD><TD ALIGN="RIGHT">[% discussion.commentcount %] comments </TD></TR>
 [% END %]
-</UL>
+[% END %]
+</TABLE>
 <P>
 [% PROCESS pagination label=label %]
 		</td>
@@ -36,7 +39,7 @@ IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]<
 
 [% IF user.seclev >= constants.discussion_create_seclev && !suppress_create;
     # PROCESS discreate topic=constants.discussion_default_topic label=label; 
-    PROCESS edit_comment indextype=indextype newdiscussion=1 topic=constants.discussion_default_topic label=label; 
+    PROCESS edit_comment indextype=indextype newdiscussion=1 topic=constants.discussion_default_topic label=label hide_name=1 hide_email=1; 
 ELSIF user.seclev < constants.discussion_create_seclev;
 	Slash.getData('no_discreate_msg');
 END %]
