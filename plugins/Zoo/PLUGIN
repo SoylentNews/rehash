@@ -5,5 +5,4 @@ htdoc=zoo.pl
 template=templates/data;zoo;default
 template=templates/plainlist;zoo;default
 template=templates/zoohead;zoo;default
-template=templates/add;zoo;default
-template=templates/delete;zoo;default
+template=templates/confirm;zoo;default

@@ -120,7 +120,7 @@ sub _set {
 	$self->sqlDo("REPLACE INTO people (uid,person,type) VALUES ($uid, $person, '$type')");
 	my $slashdb = getCurrentDB();
 	my $people = $slashdb->getUser($uid, 'people');
-	$people->{$person} = {$const};
+	$people->{$person} = $const;
 	$slashdb->setUser($uid, { people => $people })
 }
 

@@ -21,31 +21,79 @@ sub main {
 	my $slashdb   = getCurrentDB();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $formname = 'zoo';
+	my $formkey = $form->{formkey};
 
 	# require POST and logged-in user for these ops
 	my $user_ok   = $user->{state}{post} && !$user->{is_anon};
 
 	# possible value of "op" parameter in form
-	my %ops = (
-		add		=> [ $user_ok,		\&add		], # formkey?
-		'delete'		=> [ $user_ok,		\&delete		], # formkey?
-		addcheck		=> [ $user->{seclev},		\&check		], # formkey?
-		'deletecheck'		=> [ $user->{seclev},		\&check		], # formkey?
-		friends		=> [ 1,			\&friends		],
-		fans		=> [ 1,			\&fans		],
-		foes		=> [ 1,			\&foes		],
-		freaks		=> [ 1,			\&freaks		],
-		default		=> [ 0,			\&list	],
-	);
+	my $ops = {
+		add		=> { 
+			check => $user_ok,		
+			formkey    => ['formkey_check', 'valid_check'],
+			function => \&action		
+		},
+		'delete'		=> { 
+			check => $user_ok,		
+			formkey    => ['formkey_check', 'valid_check'],
+			function => \&action		
+		},
+		addcheck		=> { 
+			check => $user->{seclev},		
+			formkey    => ['generate_formkey'],
+			function => 	\&check		
+		}, 
+		deletecheck		=> { 
+			check => $user->{seclev},		
+			formkey    => ['generate_formkey'],
+			function => \&check		
+		},
+		check		=> { 
+			check => $user->{seclev},		
+			formkey    => ['generate_formkey'],
+			function => \&check		
+		},
+		friends		=> { 
+			check => 1,			
+			function => \&friends		
+		},
+		fans		=> { 
+			check => 1,			
+			function => \&fans		
+		},
+		foes		=> { 
+			check => 1,			
+			function => \&foes		
+		},
+		freaks		=> { 
+			check => 1,			
+			function => \&freaks		
+		},
+		default		=> { 
+			check => 0,			
+			function => \&list	
+		},
+	};
 
 	my $op = $form->{'op'};
-	print STDERR "OP $op\n";
-	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
+	if ($user->{seclev} < 100) {
+		if ($ops->{$op}{formkey}) {
+			for my $check (@{$ops->{$op}{formkey}}) {
+				$ops->{$op}{update_formkey} = 1 
+					if ($check eq 'formkey_check');
+				my $error_flag = formkeyHandler($check, $formname, $formkey);
+				last if $error_flag;
+			}
+		}
+	}
+
+	if (!$op || !exists $ops->{$op} || !$ops->{$op}->{check}) {
 		redirect($constants->{rootdir});
 		return;
 	}
 
-	$ops{$op}[FUNCTION]->($zoo, $constants, $user, $form, $slashdb);
+	$ops->{$op}->{function}->($zoo, $constants, $user, $form, $slashdb);
 	footer()
 		unless ($form->{content_type} eq 'rss');
 }
@@ -203,15 +251,30 @@ sub freaks {
 	}
 }
 
-
-sub add {
+sub action {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	if ($form->{uid}) {
-		if ($form->{type} eq 'foe') {
-			$zoo->setFoe($user->{uid}, $form->{uid});
-		} elsif ($form->{type} eq 'friend') {
-			$zoo->setFriend($user->{uid}, $form->{uid});
+	if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
+			_printHead("mainhead");
+			print getData("over_socialized");
+			return;
+	} else {
+		if ( $form->{op} eq 'delete' || $form->{type} eq 'neutral') {
+			if ($form->{uid}) {
+				$zoo->delete($user->{uid}, $form->{uid});
+			} else {
+				for my $uid (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
+					$zoo->delete($user->{uid}, $uid);
+				}
+			}
+		} else {
+			if ($form->{uid}) {
+				if ($form->{type} eq 'foe') {
+					$zoo->setFoe($user->{uid}, $form->{uid});
+				} elsif ($form->{type} eq 'friend') {
+					$zoo->setFriend($user->{uid}, $form->{uid});
+				}
+			}
 		}
 	}
 	# This is just to make sure the next view gets it right
@@ -224,26 +287,30 @@ sub add {
 	}
 }
 
-sub delete {
+sub check {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	if ($form->{uid}) {
-		$zoo->delete($user->{uid}, $form->{uid});
-	} else {
-		for my $uid (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
-			$zoo->delete($user->{uid}, $uid);
+	if ($form->{uid} && $form->{type}) {
+		if ($zoo->count() > $constants->{people_max}) {
+			_printHead("mainhead");
+			print getData("over_socialized");
 		}
-	}
-	# This is just to make sure the next view gets it right
-	if ($form->{type} eq 'foe') {
-		redirect($constants->{rootdir} . "/my/foes/");
-		return;
-	} else {
-		redirect($constants->{rootdir} . "/my/friends/");
-		return;
-	}
-}
+		
+		_printHead("mainhead");
+		if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
+			print getData("no_go");
+			return 0;
+		}
 
+		my $type =  $form->{op} eq 'deletecheck' ? 'neutral' : ($form->{type} eq 'foe' ? 'foe' : 'friend');
+		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
+		slashDisplay('confirm', { 
+			uid => $form->{uid},
+			nickname => $nickname,
+			type => $type,
+			 });
+	} 
+}
 
 sub _validFormkey {
 	my $error;
@@ -263,28 +330,6 @@ sub _validFormkey {
 		return 1;
 	}
 }
-
-sub check {
-	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	if ($form->{uid} && $form->{type}
-		&& $form->{type} =~ /^(friend|foe)$/) {
-		if ($zoo->count() > $constants->{people_max}) {
-			_printHead("mainhead");
-			print getData("over_socialized");
-		}
-		
-		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
-		_printHead("mainhead");
-		my $template = ($form->{op} eq 'addcheck') ? 'add' : 'delete';
-		slashDisplay($template, { 
-			uid => $form->{uid},
-			nickname => $nickname,
-			type => $form->{type}
-			 });
-	} 
-}
-
 
 sub _printHead {
 	my($head, $data) = @_;

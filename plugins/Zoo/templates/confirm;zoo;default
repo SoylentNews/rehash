@@ -1,0 +1,41 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+confirm
+__template__
+[% USE Slash %]
+<FORM ACTION="[% constants.rootdir %]/zoo.pl" METHOD="POST">
+<TABLE>
+	<TR>
+		<TD>
+		So how do you perceive <B>[% nickname | strip_literal %]</B>?
+		</TD>
+		<TD>
+			<INPUT TYPE="RADIO" NAME="type" VALUE="friend"[% IF type == 'friend' %]CHECKED[% END %]> Friend <br>
+			<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %]CHECKED[% END %]> Neutral <br>
+			<INPUT TYPE="RADIO" NAME="type" VALUE="foe"[% IF type == 'foe' %]CHECKED[% END %]> Foe <br>
+		</TD>
+	</TR>
+</TABLE>
+
+<P><B>Note:</B> Who you like and dislike is not private; it can and will be used against you.</P>
+
+[% IF form.formkey %]
+<INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+<INPUT TYPE="hidden" NAME="op" VALUE="add">
+<INPUT TYPE="hidden" NAME="uid" VALUE="[% uid %]">
+<P><INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
+</FORM>
+
+__seclev__
+500
