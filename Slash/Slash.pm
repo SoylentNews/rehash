@@ -96,7 +96,6 @@ sub selectComments {
 		$thisComment = $reader->getCommentsForUser($header->{id}, $cid, $cache_read_only);
 	}
 
-
 	if (!$thisComment) {
 		_print_cchp($header);
 		return ( {}, 0 );
