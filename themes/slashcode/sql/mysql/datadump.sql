@@ -301,14 +301,14 @@ INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,4);
 # Dumping data for table 'topics'
 #
 
-INSERT INTO topics VALUES (1,'mainpage', 'Main Page', 'no', '', 0, 0, 'no');
-INSERT INTO topics VALUES (2,'features','Features', 'no', '', 0, 0, 'no');
-INSERT INTO topics VALUES (3,'opensource','Open Source', 'no', '', 0, 0, 'no');
-INSERT INTO topics VALUES (4,'slash', 'Slash', 'no', 'topicslash.gif',81,36,'yes');
-INSERT INTO topics VALUES (5,'programming', 'Programming', 'no', 'topicprogramming.gif',80,48,'yes');
-INSERT INTO topics VALUES (6,'news', 'News', 'no', 'topicnews.gif',34,44,'yes');
-INSERT INTO topics VALUES (7,'linux', 'Linux', 'no', 'topiclinux.gif',60,70,'yes');
-INSERT INTO topics VALUES (8,'slashdot', 'Slashdot', 'no', 'topicslashdot.gif',100,34,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (1,'mainpage', 'Main Page', 'no', '', 0,0, 'no');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (2,'features','Features', 'no', '', 0, 0, 'no');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (3,'opensource','Open Source', 'no', '',0, 0, 'no');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (4,'slash', 'Slash', 'no', 'topicslash.gif',81,36,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (5,'programming', 'Programming', 'no', 'topicprogramming.gif',80,48,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (6,'news', 'News', 'no', 'topicnews.gif',34,44,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (7,'linux', 'Linux', 'no', 'topiclinux.gif',60,70,'yes');
+INSERT INTO topics (tid, keyword, textname, series, image, width, height, submittable) VALUES (8,'slashdot', 'Slashdot', 'no', 'topicslashdot.gif',100,34,'yes');
 
 #
 # Dumping data for table 'topic_nexus'
@@ -357,7 +357,7 @@ INSERT INTO users_hits (uid, hits) VALUES (1,0);
 # Dumping data for table 'users_index'
 #
 
-INSERT INTO users_index (uid, extid, exaid, exsect, exboxes, maxstories, noboxes) VALUES (1,'','','','',30,0);
+INSERT INTO users_index (uid, maxstories, noboxes) VALUES (1,30,0);
 
 #
 # Dumping data for table 'users_info'
