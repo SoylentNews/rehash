@@ -1,0 +1,78 @@
+__section__
+default
+__description__
+Change password form
+
+* useredit = hashref of user info
+* author_flag = user is author
+* title = passed to titlebar
+* session = popup for session login
+* got_old_pass = set to 1 if you've already been passed the old password correctly 
+
+
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+changePasswd
+__template__
+<H2>[% IF form.note == "Please change your password now!";
+	"Please change your password now! ";
+END; note %]</H2>
+
+[% title = "Change password for $user_edit.nickname ($user_edit.uid)" %]
+[% PROCESS prefs_titlebar tab_selected='password' %]
+
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
+	<TR>
+		<TD>
+[% IF constants.offer_insecure_login_link -%]
+		<P>You can automatically log in by clicking
+		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
+		This is totally insecure, but very convenient.
+		</P>
+[%- END %]
+
+		<FORM ACTION="[% env.script_name %]" METHOD="POST">
+		[% PROCESS formkey_tag %]
+		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
+
+[%- session = Slash.db.getDescriptions('session_login');
+   session_sel = Slash.createSelect('session_login', session, useredit.session_login, 1);
+
+   clocation = Slash.db.getDescriptions('cookie_location');
+   clocation_order = [];
+   FOREACH cloc = ['none', 'classbid', 'subnetid', 'ipid'];
+      clocation_order.push(cloc) IF clocation.$cloc;
+   END;
+   clocation_sel = Slash.createSelect('cookie_location', clocation, useredit.cookie_location, 1, 0, clocation_order);
+-%]
+
+		My <A HREF="[% constants.rootdir %]/faq/accounts.shtml#ac1200">login session</A> [% session_sel %] and [% clocation_sel %]
+
+		<P>Note: changing your password or login cookie preferences will disable all
+		cookies for this account, requiring all browsers to reauthenticate.</P>
+
+		Enter your <b>current</b> password <BR>
+		<INPUT TYPE="PASSWORD" NAME="oldpass" SIZE="20" MAXLENGTH="20" VALUE=""><BR>
+
+		<B>Password</B> Enter a new password twice to change it.
+		(must be 6-20 chars long)</B><BR>
+		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">
+		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20" MAXLENGTH="20">
+
+		</TD>
+	</TR>
+</TABLE>
+
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="saveprefs">
+<INPUT TYPE="SUBMIT" VALUE="Change Login Prefs">
+</FORM>
+
+__seclev__
+500
+__version__
+$Id$

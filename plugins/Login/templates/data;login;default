@@ -1,0 +1,119 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+login
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'loginhead' %]
+	[% SWITCH form.op %]
+
+	[% CASE 'userclose' %]
+		Logging Out
+
+	[% CASE DEFAULT %]
+		Log In
+
+	[% END %]
+
+[% CASE 'mailpasswdhead' %]
+	[% IF form.unickname %]
+		Error Mailing Password
+
+	[% ELSE %]
+		Mail Password
+
+	[% END %]
+
+[% CASE 'prefshead' %]
+	Change Login Preferences
+
+[% CASE 'passnomatch' %]
+	Passwords don't match.
+
+[% CASE 'passtooshort' %]
+	Password too short.
+
+[% CASE 'passtoolong' %]
+	Password too long.
+
+[% CASE 'oldpassbad' %]
+	Current password is incorrect.
+
+[% CASE 'notchanged' %]
+	Preferences not changed.
+
+[% CASE 'passchanged' %]
+	Preferences changed.
+
+[% CASE 'mail_nonickname' %]
+	User was not found.  No password was mailed.
+
+[% CASE 'mail_readonly' %]
+	Sorry, you cannot use the "mail password" function from your
+	IP number or subnet. If you don't think you should be seeing
+	this error, please email [% constants.adminmail_ban %]
+	with your IPID, which is "[% user.ipid %]";
+	a note that this is regarding an attempt to mail your password;
+	and the name, uid, and email address of the account in question.
+
+[% CASE 'mail_toooften' %]
+	To prevent you from being harassed with email,
+	[% constants.sitename %] limits you to
+	[% constants.mailpass_max_num || 2 %]
+	password[% IF constants.mailpass_max_num > 1 %]s[% END %]
+	sent to you every
+	[% constants.mailpass_max_hours || 48 %] hours. You're over your
+	limit and we're cutting you off. If you really are that
+	forgetful and need another one, try the human at
+	[% constants.adminmail %].
+
+[% CASE 'mail_mailed_note' %]
+	The password for [% name %] was emailed to its registered
+	email address.
+
+[% CASE 'mail_subject' %]
+	[% constants.sitename %] User Password for [% nickname %]
+
+[% CASE 'mail_msg' %]
+
+Your new password is [% newpasswd %].  Your old password will still work until
+this password is used.  Go to the URL below to log in:
+
+<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Fusers.pl%3Fop=changepasswd>
+
+Make sure you then CHANGE YOUR PASSWORD!
+
+If you have received this message without having requested it, it is
+because someone attempted to use your username or e-mail address.  It
+was mostly likely an innocent mistake, and they are not getting your
+password, so you can safely disregard this message.
+
+Thanks.
+
+In case you get multiple emails you didn't request, the requester's IP
+was [% remote_ip %].[% IF user_agent %]  Its user agent was
+"[% user_agent %]"
+(not that you should trust that value, but it might be interesting).[% END %]
+[% IF x_forwarded_for %]In case that's a properly-configured proxy,
+the value of its X-Forwarded-For header was "[% x_forwarded_for %]" --
+but don't trust that value unless you know a reason to (we don't).[% END %]
+
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$
