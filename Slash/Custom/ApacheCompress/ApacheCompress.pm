@@ -24,8 +24,9 @@ use Apache::Constants qw(:common);
 
 sub handler {
   my $r = shift;
+  
+  my $can_gzip = can_gzip($r);
 
-  my $can_gzip = $r->header_in('Accept-Encoding') =~ /gzip/;
   my $filter   = lc $r->dir_config('Filter') eq 'on';
   #warn "can_gzip=$can_gzip, filter=$filter";
   return DECLINED unless $can_gzip or $filter;
@@ -33,8 +34,8 @@ sub handler {
   # Other people's eyes need to check this 1.1 stuff.
   if ($r->protocol =~ /1\.1/) {
     my %vary = map {$_,1} qw(Accept-Encoding User-Agent);
-    if (my @vary = $r->header_out('Vary')) {
-      @vary{@vary} = ();
+    if (my $vary = $r->header_out('Vary')||0) {
+      $vary{$vary} = 1;
     }
     $r->header_out('Vary' => join ',', keys %vary);
   }
@@ -56,8 +57,8 @@ sub handler {
   if ($can_gzip) {
     $r->content_encoding('gzip');
     $r->send_http_header;
-    local $/;
-    print Compress::Zlib::memGzip(<$fh>);
+#    $r->print( Compress::Zlib::memGzip(do {local $/; <$fh>}) );
+    print( Compress::Zlib::memGzip(do {local $/; <$fh>}) );
   } else {
     $r->send_http_header;
     $r->send_fd($fh);
@@ -66,8 +67,47 @@ sub handler {
   return OK;
 }
 
-1;
+sub can_gzip {
+  my $r = shift;
+
+  my $how_decide = $r->dir_config('CompressDecision');
+  if (!defined($how_decide) || lc($how_decide) eq 'header') {
+    return +($r->header_in('Accept-Encoding')||'') =~ /gzip/;
+  } elsif (lc($how_decide) eq 'user-agent') {
+    return guess_by_user_agent($r->header_in('User-Agent'));
+  }
+  
+  die "Unrecognized value '$how_decide' specified for CompressDecision";
+}
+  
+sub guess_by_user_agent {
+  # This comes from Andreas' Apache::GzipChain.  It's very out of
+  # date, though, I'd like it if someone sent me a better regex.
+
+  my $ua = shift;
+  return $ua =~  m{
+		   ^Mozilla/            # They all start with Mozilla...
+		   \d+\.\d+             # Version string
+		   [\s\[\]\w\-]+        # Language
+		   (?:
+		    \(X11               # Any unix browser should work
+		    |             
+		    Macint.+PPC,\sNav   # Does this match anything??
+		   )
+		  }x;
+}
+
 
 1;
+
+
+# Verbose version:
+#    my $content = do {local $/; <$fh>};
+#    my $content_size = length($content);
+#    $content = Compress::Zlib::memGzip(\$content);
+#    my $compressed_size = length($content);
+#    my $ratio = int(100*$compressed_size/$content_size) if $content_size;
+#    print STDERR "GzipCompression $content_size/$compressed_size ($ratio%)\n";
+#    print $content;
 
 __END__

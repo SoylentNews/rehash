@@ -16,9 +16,25 @@ use strict;
 use base 'Apache::SSI';
 use vars qw($VERSION);
 
-use Apache::Constants qw(:common OPT_INCNOEXEC);
+use Apache::Constants qw(:common :http OPT_INCNOEXEC);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
+sub output {
+    my $self = shift;
+    
+    my @parts = split m/(<!--#.*?-->)/s, $self->{'text'};
+    while (@parts) {
+#        $self->{_r}->print( ('', shift @parts)[1-$self->{'suspend'}[0]] );
+        print( ('', shift @parts)[1-$self->{'suspend'}[0]] );
+        last unless @parts;
+        my $ssi = shift @parts;
+        if ($ssi =~ m/^<!--#(.*)-->$/s) {
+#            $self->{_r}->print( $self->output_ssi($1) );
+            print( $self->output_ssi($1) );
+        } else { die 'Parse error' }
+    }
+}
 
 sub ssi_perl {
   my($self, $args, $margs) = @_;
@@ -41,16 +57,15 @@ sub ssi_include {
       $self->error("Include of ", $subr->filename, " failed: $!");
     }
   } else {
-    unless ($subr->run == OK) {
-      $self->error("Include of '@{[$subr->filename()]}' failed: $!");
+    if ( $subr->status == HTTP_OK ) {
+      # Subrequests can fuck up %ENV, make sure it's restored upon exit.
+      # Unfortunately 'local(%ENV)=%ENV' reportedly causes segfaults.
+      my %save_ENV = %ENV;
+      $subr->run == OK
+        or $self->error("Include of '@{[$subr->filename()]}' failed: $!");
+      %ENV = %save_ENV;
     }
   }
-  
-  ## Make sure that all of the variables set in the include are present here.
-  #my $env = $subr->subprocess_env();
-  #foreach ( keys %$env ) {
-  #  $self->{_r}->subprocess_env($_, $env->{$_});
-  #}
   
   return '';
 }
