@@ -987,9 +987,12 @@ sub setCookie {
 	);
 
 	$cookie->expires('+1y') unless $session;
-	$cookie->domain($domain) if $domain;
 
 	$cookie->bake;
+	if ($domain) {
+		$cookie->domain($domain);
+		$cookie->bake;
+	}
 }
 
 #========================================================================
