@@ -173,6 +173,11 @@ my $start_time = Time::HiRes::time;
 			my $do_offer = $daypass_db->doOfferDaypass();
 			if ($do_offer) {
 				$daypass_plug_text = $daypass_db->getOfferText();
+				# On days where a daypass is being offered, for
+				# users who are eligible, we give them that
+				# message instead of (not in addition to) the
+				# "please subscribe" message.
+				$future_plug = 0;
 			}
 		}
 	}
