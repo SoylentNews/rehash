@@ -37,12 +37,12 @@ $slashdb->sqlDo("INSERT IGNORE INTO people (uid,person) SELECT * from people_sel
 $slashdb->sqlDo("DROP TABLE people_select");
 
 # Put back fans
-$slashdb->sqlDo(qq|SELECT CONCAT("UPDATE people SET perceive='fan' WHERE uid =", person, ";") INTO OUTFILE '/tmp/rebuildpeople.sql' FROM people WHERE type='friend'|);
-$slashdb->sqlDo("source /tmp/rebuildpeople.sql");
+$slashdb->sqlDo(qq|SELECT CONCAT("UPDATE people SET perceive='fan' WHERE uid =", person, " AND person =", uid, ";") INTO OUTFILE '/tmp/rebuildpeople-fan.sql' FROM people WHERE type='friend'|);
+$slashdb->sqlDo("source /tmp/rebuildpeople-fan.sql");
 
 # Put back freaks
-$slashdb->sqlDo(qq|SELECT CONCAT("UPDATE people SET perceive='freak' WHERE uid =", person, ";") INTO OUTFILE '/tmp/rebuildpeople.sql' FROM people WHERE type='foe'|);
-$slashdb->sqlDo("source /tmp/rebuildpeople.sql");
+$slashdb->sqlDo(qq|SELECT CONCAT("UPDATE people SET perceive='freak' WHERE uid =", person, " AND person =", uid, ";") INTO OUTFILE '/tmp/rebuildpeople-freak.sql' FROM people WHERE type='foe'|);
+$slashdb->sqlDo("source /tmp/rebuildpeople-freak.sql");
 
 $slashdb->sqlDo("TRUNCATE people_nthdegree");
 print "Cleaned nthdegree!\n";
