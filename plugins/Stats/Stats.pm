@@ -159,8 +159,12 @@ sub getAdminModsInfo {
 	# Build a hashref with one key for each admin user, and subkeys
 	# that give data we will want for stats.
 	my($nup, $ndown, $nfair, $nunfair, $percent);
+	my @m1_keys = sort keys %$m1_uid_val_hr;
+	my @m2_keys = sort keys %$m2_uid_val_hr;
+	my %all_keys = map { $_ => 1 } @m1_keys, @m2_keys;
+	my @all_keys = sort keys %all_keys;
 	my $hr = { };
-	for my $uid (keys %$m1_uid_val_hr) {
+	for my $uid (@m1_keys) {
 		my $nickname = $m1_uid_val_hr->{$uid} {1}{nickname}
 			|| $m1_uid_val_hr->{$uid}{-1}{nickname}
 			|| "";
@@ -186,9 +190,12 @@ sub getAdminModsInfo {
 			# $hr->{$nickname}{m2_unfair} = 0;
 		}
 	}
-	for my $uid (keys %$m2_uid_val_hr) {
-		my $nickname = $m2_uid_val_hr->{$uid} {1}{nickname}
+	for my $uid (@all_keys) {
+		my $nickname =
+			   $m2_uid_val_hr->{$uid} {1}{nickname}
 			|| $m2_uid_val_hr->{$uid}{-1}{nickname}
+			|| $m2_uid_val_wk_hr->{$uid} {1}{nickname}
+			|| $m2_uid_val_wk_hr->{$uid}{-1}{nickname}
 			|| "";
 		next unless $nickname;
 		$nfair   = $m2_uid_val_hr->{$uid} {1}{count} || 0;
@@ -203,6 +210,8 @@ sub getAdminModsInfo {
 		if ($nfair+$nunfair >= 20) { # this number is pretty arbitrary
 			$hr->{$nickname}{m2_text} .= sprintf(" (%5.1f%% un)",
 				$percent);
+		} else {
+			$hr->{$nickname}{m2_text} .= " " x  12;
 		}
 		# Also calculate overall-week percentage.
 		my $nfair_wk   = $m2_uid_val_wk_hr->{$uid} {1}{count} || 0;
@@ -214,6 +223,9 @@ sub getAdminModsInfo {
 			$hr->{$nickname}{m2_text} .= sprintf(" (wk: %5.1f%%)",
 				$percent);
 		}
+		# Trim off whitespace at the end;
+		$hr->{$nickname}{m2_text} =~ s/\s+$//;
+		# Set another few data points.
 		$hr->{$nickname}{m2_fair} = $nfair;
 		$hr->{$nickname}{m2_unfair} = $nunfair;
 		# If this admin had m2 activity today but no m1 activity,
