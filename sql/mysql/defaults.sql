@@ -816,6 +816,7 @@ INSERT INTO vars (name, value, description) VALUES ('runtask_verbosity','3','How
 INSERT INTO vars (name, value, description) VALUES ('sbindir','/usr/local/slash/sbin','Where are the sbin scripts kept');
 INSERT INTO vars (name, value, description) VALUES ('search_google','0','Turn on to disable local search (and invite users to use google.com)');
 INSERT INTO vars (name, value, description) VALUES ('section','index','This is the current setting for section.');
+INSERT INTO vars (name, value, description) VALUES ('selectcomm_backup_prob','0','Probability that Slash.pm selectComments will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('send_mail','1','Turn On/Off to allow the system to send email messages.');
 INSERT INTO vars (name, value, description) VALUES ('siteadmin','admin','The admin for the site');
 INSERT INTO vars (name, value, description) VALUES ('siteadmin_name','Slash Admin','The pretty name for the admin for the site');

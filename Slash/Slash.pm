@@ -87,15 +87,17 @@ sub selectComments {
 	$cache_read_only = 1 if timeCalc($header->{ts}, '%s') <
 		time - 3600 * $constants->{comment_cache_max_hours};
 
-	my $thisComment;
-	if ($options->{use_writer}) {
-		$thisComment = $slashdb->getCommentsForUser( $header->{id}, $cid, $cache_read_only);
-	} elsif ($constants->{backup_db_user} &&  rand(1) < 0.5) {
-		my $backupdb = getObject('Slash::DB', $constants->{backup_db_user});
-		$thisComment = $backupdb->getCommentsForUser( $header->{id}, $cid, $cache_read_only);
+	my $fetchdb;
+	if (!$options->{force_read_from_master}
+		&& $constants->{backup_db_user}
+		&& $constants->{selectcomm_backup_prob}
+		&& rand(1) < $constants->{selectcomm_backup_prob}) {
+		$fetchdb = getObject('Slash::DB', $constants->{backup_db_user});
+		$fetchdb ||= $slashdb;
 	} else {
-		$thisComment = $slashdb->getCommentsForUser( $header->{id}, $cid, $cache_read_only);
+		$fetchdb = $slashdb;
 	}
+	my $thisComment = $fetchdb->getCommentsForUser($header->{id}, $cid, $cache_read_only);
 
 	if (!$thisComment) {
 		_print_cchp($header);
@@ -474,7 +476,9 @@ sub printComments {
 	my $lvl = 0;
 
 	# Get the Comments
-	my($comments, $count) = selectComments($discussion, $cidorpid, { use_writer => $options->{use_writer}});
+	my($comments, $count) = selectComments($discussion, $cidorpid,
+		{ force_read_from_master => $options->{force_read_from_master} }
+	);
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
 		# No such comment in this discussion.
