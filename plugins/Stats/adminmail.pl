@@ -462,7 +462,7 @@ EOT
 			my $uniq = $section_page_summary_stats->{$skid}{$op}{cnt}	|| 0;
 			my $pages = $section_page_summary_stats->{$skid}{$op}{pages}	|| 0;
 			my $bytes = $section_page_summary_stats->{$skid}{$op}{bytes}	|| 0;
-			my $users = $section_page_summary_stats->{$skid}{$op}{users}	|| 0;
+			my $users = $section_page_summary_stats->{$skid}{$op}{uids}	|| 0;
 			$temp->{$op}{label} = sprintf("%8s", $op);
 			$temp->{$op}{ipids} = sprintf("%8u", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
