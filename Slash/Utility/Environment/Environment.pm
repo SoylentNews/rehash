@@ -135,7 +135,6 @@ sub dbAvailable {
 	# much as possible since this will be called at least twice
 	# per click.
 	my($token) = @_;
-print STDERR scalar(localtime) . " dbAvailable\n";
 	return 0 if -e "/usr/local/slash/dboff";
 	return 1 unless $token && $token =~ /^(\w+)/;
 	return 0 if -e "/usr/local/slash/dboff_$1";
