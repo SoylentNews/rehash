@@ -88,7 +88,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_moddable_hours','3
 # Brian says "list" is being yanked and "type" is part of code that PatG
 # hasn't yet committed, so I'm ignoring it for now... this is here in
 # upgrades as a reminder.
-ALTER TABLE section_extras ADD type ENUM("text","list") DEFAULT 'text' NOT NULL, ADD list VARCHAR(255) DEFAULT '' NOT NULL;
+ALTER TABLE section_extras ADD type ENUM("text","list") DEFAULT 'text' NOT NULL;
 # End of R_2_3_0_13
 
 # Start of T_2_3_0_14
@@ -163,4 +163,3 @@ CREATE TABLE submission_param (
 INSERT INTO code_param (type, code, name) VALUES ('section_topic_types',1,'default');
 ALTER TABLE section_topics ADD COLUMN type smallint UNSIGNED NOT NULL;
 UPDATE section_topics SET type=1;
-
