@@ -894,11 +894,12 @@ sub dispStory {
 	my $template_name = $other->{story_template}
 		? $other->{story_template} : 'dispStory';
 
-	# Might this logic be better off in the template? It's sole purpose
+	# Might this logic be better off in the template? Its sole purpose
 	# is aesthetics.
-	$other->{magic} = (!$full && (index($story->{title}, ':') == -1)
-			&& ($story->{section} ne $constants->{defaultsection}
-			&& $story->{section} ne $constants->{section}))
+	$other->{magic} = !$full
+			&& index($story->{title}, ':') == -1
+			&& $story->{section} ne $constants->{defaultsection}
+			&& $story->{section} ne $constants->{section}
 		if !exists $other->{magic};
 
 	my $section = $slashdb->getSection($story->{section});
