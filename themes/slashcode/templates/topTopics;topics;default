@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+Display the top topics
+
+* title = passed to titlebar
+* width = passed to titlebar
+* topics = arrayref of hashrefs of topics (tid, alttext, image, width, height, cnt, count, stories)
+* currtime = current time
+__title__
+
+__page__
+topics
+__lang__
+en_US
+__name__
+topTopics
+__template__
+[% INCLUDE titlebar %]
+<TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="3">
+[% FOREACH topic = topics %]
+	<TR><TD ALIGN="RIGHT" VALIGN="TOP>
+		<FONT SIZE="6" COLOR="[% user.bg.3 %]">[% topic.alttext %]</FONT>
+		<BR>( [% topic.count %] )
+		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
+			SRC="[% constants.imagedir %]/topics/[% topic.image %]"
+			BORDER="0" ALT="[% topic.alttext %]" ALIGN="RIGHT"
+			HSPACE="0" VSPACE="10" WIDTH="[% topic.width %]"
+			HEIGHT="[% topic.height %]"></A>
+	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
+		[% topic.stories %]
+	</TD></TR>
+[% END %]
+</TABLE>
+
+<BR><FONT SIZE="2"><CENTER>generated on [% currtime %]</CENTER></FONT><BR>
+
+__seclev__
+10000

@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+Create a link to a comment
+
+* date = date of comment
+* commentsort = user's comment sorting pref
+* mode = user's mode pref
+* comment = make link to only one comment, not whole story (i.e., include cid= in link)
+
+Also included are all the individual elements of the comment and its poster: sid, cid, pid, date, subject, uid, points, lastmod, reason, nickname, fakeemail, homepage, sig
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+linkComment
+__template__
+[% subject = color? "<FONT COLOR=\"$color\">$subject</FONT>" : subject %]
+<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&op=[% op %]&threshold=[% threshold %]&commentsort=[% commentsort %]&mode=[% mode %]&startat=[% startat %][% IF comment %]&cid=[% cid %][% ELSE %]&pid=[% pid %][% IF cid %]#[% cid %][% END %][% END %]">[% subject %]</A>
+
+[% IF nickname %]
+	by [% nickname %]
+[% END %]
+
+[% IF not user.noscores and points %]
+	<FONT SIZE="-1">(Score:[% points %])</FONT>
+[% END %]
+
+[% IF date %]
+	<FONT SIZE="-1">[% time %]</FONT>
+[% END %]
+
+__seclev__
+10000

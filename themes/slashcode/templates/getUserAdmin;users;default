@@ -1,0 +1,60 @@
+__section__
+default
+__description__
+Template for editing user
+
+* edituser = hashref for user being edited
+* seclev_field = boolean to display seclev editing field
+* uid_checked = whether or not uid is checked
+* nickname_checked = whether or not nickname is checked
+* author_select = select popup for authors
+* author_flag = current user is author
+* authoredit_flag = current user can edit authors
+* form_flag = i have no idea
+__title__
+users admin
+__page__
+users
+__lang__
+en_US
+__name__
+getUserAdmin
+__template__
+[% IF form_flag %]
+<FORM ACTION="[% env.script_name %]">
+[% END %]
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0">
+[% IF authoredit_flag %]
+	<TR>
+		<TD COLSPAN=3"><B>Authors</B></TD>
+		<TD>[% author_select %]</TD>
+		<TD><INPUT TYPE="SUBMIT" NAME="authoredit" VALUE="Edit Author"></TD>
+	</TR>
+[% END %]
+	<TR>
+		<TD ALIGN="RIGHT"><B>User ID</B><BR><B>Nickname</B></TD>
+		<TD ALIGN="RIGHT"><INPUT TYPE="radio" NAME="userfield_flag" VALUE="userid"[% uid_checked %]><BR>
+		<INPUT TYPE="radio" NAME="userfield_flag" VALUE="nickname"[% nickname_checked %]></TD>
+		<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/admin_bracket.gif" WIDTH="22" HEIGHT="43"></TD>
+		<TD VALIGN="MIDDLE"><INPUT TYPE="TEXT" NAME="userfield" VALUE="[% FILTER strip_attribute; form.userfield; END %]"></TD>
+		<TD VALIGN="BOTTOM"><INPUT TYPE="SUBMIT" NAME="useredit" VALUE="Edit User"></TD>
+	</TR>
+
+[% IF authoredit_flag && seclev_field %]
+	<TR>
+		<TD><B>Seclev</B></TD>
+		<TD COLSPAN="4"><INPUT TYPE="TEXT" NAME="seclev" value="[% edituser.seclev %]"></TD>
+	</TR>
+	<TR>
+		<TD><B>Author flag (user is an author)</B></TD>
+		<TD COLSPAN="4"><INPUT TYPE="checkbox" NAME="author" [% author_flag %]></TD>
+	</TR>
+[% END %]
+
+</TABLE>
+[% IF form_flag %]
+</FORM>
+[% END %]
+__seclev__
+10000

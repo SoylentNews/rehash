@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+A little admin menu ... should this be deleted?  Is it used anymore?
+
+No specially passed variables.
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+miniAdminMenu
+__template__
+<FORM ACTION="[% env.script_name %]">
+	<FONT SIZE="1"> [
+		<A HREF="[% constants.rootdir %]/admin.pl">Admin</A> |
+		<INPUT TYPE="HIDDEN" NAME="op" VALUE="suedituser">
+		<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute; form.nick; END %]">
+		<INPUT TYPE="SUBMIT" VALUE="Edit">
+	</FONT> ]
+</FORM>
+
+__seclev__
+10000

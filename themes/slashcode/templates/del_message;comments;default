@@ -1,0 +1,20 @@
+__section__
+default
+__description__
+Message printed when comments have been deleted from a discussion.
+
+* total_deleted = number of deleted comments
+* comment_count = current number of comments
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+del_message
+__template__
+[% total_deleted %] comments deleted. Comment count set to [% comment_count %]<BR>
+
+__seclev__
+1000

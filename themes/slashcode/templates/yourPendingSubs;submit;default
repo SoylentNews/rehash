@@ -1,0 +1,42 @@
+__section__
+default
+__description__
+Display user's pending submissions
+
+* title = passed to titlebar
+* width = passed to titlebar
+* submissions = arrayref of submissions
+* totalcount = total submissions pending
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+yourPendingSubs
+__template__
+[% INCLUDE titlebar %]
+
+<P>Here are your recent submissions to [% constants.sitename %],
+and their staus within the system:</P>
+
+<UL>
+[% FOREACH submission = submissions %]
+	[%	time    = submission.0
+		subj    = submission.1
+		section = submission.2
+		tid     = submission.3
+		del     = submission.4
+	%]
+
+	<LI>[% time %] [% subj %] ([% section %],[% tid %])
+	[%	# this is a multiple ?: operator thingy ... i hope it makes sense ...
+		# if del == 1 it is rejected, if del == 2 it is accepted, else it is pending %]
+	[% del == 1 ? '(rejected)' : del == 2 ? '(accepted)' : '' %]
+	</LI>
+[% END %]
+</UL>
+
+__seclev__
+10000

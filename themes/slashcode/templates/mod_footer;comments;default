@@ -1,0 +1,20 @@
+__section__
+default
+__description__
+This block is displayed right after moderation occurs.
+
+No specially passed variables.
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+mod_footer
+__template__
+</UL>
+
+
+__seclev__
+1000

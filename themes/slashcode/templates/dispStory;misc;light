@@ -1,0 +1,33 @@
+__section__
+light
+__description__
+Display story for light mode.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+dispStory
+__template__
+
+[% IF magic;
+	title = "<A HREF=\"$constants.rootdir/$story.section/\">$section.title</A>: $story.title";
+ELSE;
+	title = story.title;
+END %]
+
+[% INCLUDE titlebar %]
+
+<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.tid %]</A> | 
+<B>Posted by [% author.nickname %] [% user.aton %] [% story.storytime %]</B><BR>
+
+[% IF constants.use_dept %]
+<FONT SIZE="2"><B>from the [% story.dept %] dept.</B></FONT><BR>
+[% END %]
+
+[% story.introtext %]
+
+__seclev__
+10000

@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Delete a section
+
+* section = section name
+__title__
+
+__page__
+sections
+__lang__
+en_US
+__name__
+delSection
+__template__
+		<FORM ACTION="[% env.script_name %]" METHOD="POST">
+		<P>
+		Do you really want to delete the [% section %] section?
+		<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% section %]">
+		<INPUT TYPE="SUBMIT" NAME="deletesection_cancel" VALUE="Cancel">
+		<INPUT TYPE="SUBMIT" NAME="deletesection_confirm" VALUE="Delete [% section %]">
+		</P>
+		</FORM>
+
+__seclev__
+10000

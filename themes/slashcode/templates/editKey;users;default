@@ -1,0 +1,18 @@
+__section__
+default
+__description__
+Edit public key
+
+* pubkey = public key text
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+editKey
+__template__
+<P><B>Public Key</B><BR><TEXTAREA NAME="pubkey" ROWS="4" COLS="60">[% FILTER strip_literal; pubkey; END %]</TEXTAREA>
+__seclev__
+500

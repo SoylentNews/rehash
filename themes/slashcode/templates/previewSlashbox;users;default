@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+Preview a slashbox
+
+* title = passed to titlebar
+* width = passed to titlebar
+* block = hashref of some block info (bid, title, block)
+* is_editable = current user may edit box
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+previewSlashbox
+__template__
+[% INCLUDE titlebar %]
+
+What you see on the right hand side is a preview of the block thingee
+labeled "[% FILTER strip_literal; block.title; END %]".  If you select it from the
+<A HREF="[% constants.rootdir %]/users.pl?op=preferences">Preferences Page</A>,
+you will have that little block added to the right hand side of your
+<A HREF="[% constants.rootdir %]/index.pl">Custom [% constants.sitename %]</A> page.
+Exciting?  Not really, but its a great way to waste time.
+
+[% IF is_editable %]
+	<P>Edit <A HREF="[% constants.rootdir %]/admin.pl?op=blocked&bid=[% form.bid %]">[% form.bid %]</A>
+[% END %]
+
+	</TD><TD WIDTH="180" VALIGN="TOP">
+
+__seclev__
+10000

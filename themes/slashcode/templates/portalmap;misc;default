@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+Creates imagemap for inclusion in titlebar of a portalbox
+
+* title = title of portalbox
+* bid = block id of block in portalbox
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+portalmap
+__template__
+<MAP NAME="[% bid %]">
+<AREA SHAPE="rect" COORDS="0,0,7,7" HREF="[% env.script_name %]?op=d&bid=[% bid %]" ALT="Down">
+<AREA SHAPE="rect" COORDS="8,0,14,7" HREF="[% env.script_name %]?op=x&bid=[% bid %]" ALT="Kill">
+<AREA SHAPE="rect" COORDS="15,0,21,7" HREF="[% env.script_name %]?op=u&bid=[% bid %]" ALT="Up">
+</MAP>
+
+<IMG SRC="[% constants.imagedir %]/portalmap.gif" WIDTH="21" HEIGHT="7" HSPACE="1" VSPACE="1"
+	BORDER="0" USEMAP="#[% bid %]" ALIGN="RIGHT">
+
+[% title %]
+
+__seclev__
+500

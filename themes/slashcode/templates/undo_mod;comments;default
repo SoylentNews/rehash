@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+Template which displays a message indicating moderation undone for
+every item in the template variable 'removed'.
+
+* removed = array ref of CIDs that moderation has been undone to
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+undo_mod
+__template__
+[% FOR r = removed %]
+Undoing moderation to Comment #[% r %]<BR>
+[% END %]
+__seclev__
+1000

@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+Displays currently logged-in admin users.
+
+* ids = admin uids
+* can_edit_admins = boolean for if current user can edit admins
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+currentAdminUsers
+__template__
+<TABLE HEIGHT="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+
+[% FOREACH author = ids %]
+	[% id         = author.0
+	   lastsecs   = author.1
+	   lasttitle = author.2
+	%]
+
+	<TR><TD BGCOLOR="[% user.bg.3 %]">
+	[% IF can_edit_admins %]
+		<A HREF="[% constants.rootdir %]/admin.pl?op=authors&thisaid=[% id %]">
+	[% END %]
+		<FONT COLOR="[% user.fg.3 %]" SIZE="2"><B>[% id %]</B></FONT>
+	[% IF can_edit_admins %]
+		</A>
+	[% END %]
+
+	</TD><TD BGCOLOR="[% user.bg.2 %]">
+		<FONT COLOR="[% user.fg.1 %]" SIZE="2">[% lastsecs %]
+		[% IF lastsecs and lasttitle %]
+			&nbsp;/&nbsp;[% lasttitle %]
+		[% END %]
+		</FONT>&nbsp;
+	</TD></TR>
+
+[% END %]
+
+</TABLE>
+
+__seclev__
+10000

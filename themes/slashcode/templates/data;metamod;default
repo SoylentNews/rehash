@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+metamod
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+[% CASE 'not-eligible' %]
+<BR>You are currently not eligible to Meta Moderate.<BR>
+Return to <A HREF="[% constants.rootdir %]/">the [% constants.sitename %] homepage</A>.<BR>
+
+[% CASE 'header' %]
+Meta Moderation
+
+[% END %]
+
+__seclev__
+1000

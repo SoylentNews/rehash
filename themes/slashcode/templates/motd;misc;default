@@ -1,0 +1,19 @@
+__section__
+default
+__description__
+Hrm, we either need an easy API to update a template from slashd (do we have one?), or this needs to remain as a block. 
+That wouldn't be very hard to do to be honest. -Brian
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+motd
+__template__
+Bite my shiny, metal ass! 
+		-- Bender
+
+__seclev__
+500

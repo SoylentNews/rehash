@@ -1,0 +1,89 @@
+__section__
+default
+__description__
+Display submission form
+
+* fixedstory = submission for preview
+* savestory = boolean for OK to print "Submit" button
+* username = user's name
+* fakeemail = user's mail/URL
+* section = submission section name
+* topic = submission topic hashref
+* width = passed to titlebar
+* title = passed to titlebar
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+displayForm
+__template__
+[% USE Slash;
+	IF fakeemail && username;
+		subtext = "<A HREF=\"$fakeemail\">$username</A> writes <EM>\"$fixedstory\"</EM>";
+	ELSIF username;
+		subtext = "$username writes <EM>\"$fixedstory\"</EM>";
+	ELSE;
+		subtext = fixedstory;
+	END;
+%]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+[% IF savestory %]
+<INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+<P>Please enter your story submission here.  You need to include a subject if you
+want to save it.</P>
+
+[% INCLUDE formLabel value => "Your Name", comment => "Leave Blank to be Anonymous" %]
+<INPUT TYPE="text" NAME="from" VALUE="[% username %]" SIZE="50">
+
+[% INCLUDE formLabel value => "Your Email or Homepage", comment => "Where Users Can Contact You" %]
+<INPUT TYPE="text" NAME="email" VALUE="[% fakeemail %]" SIZE="50">
+
+[% INCLUDE formLabel value => "Subject", comment => "Be Descriptive, Clear and Simple!" %]
+<INPUT TYPE="text" NAME="subj" VALUE="[% form.subj %]" SIZE="50">
+
+<BR><FONT SIZE="2">
+(bad subjects='Check This Out!' or 'An Article'.
+We get many submissions each day, and if yours isn't clear, it will
+be deleted.)</FONT>
+
+[% INCLUDE formLabel value => "Topic and Section" %]
+
+[% tid = form.tid || 'news' %]
+[% Slash.selectTopic('tid', tid, 1) %]
+[% Slash.selectSection('section', section, 0, 1) %]
+
+<BR><FONT SIZE="2">(Almost everything should go under Articles)</FONT>
+
+[% IF savestory %]
+<P>[% INCLUDE titlebar("100%", title => form.subj) %]
+<IMG SRC="[% constants.imagedir %]/topics/[% topic.image %]" ALIGN="RIGHT" BORDER="0"
+	ALT="[% topic.alttext %]" HSPACE="30" VSPACE="10"
+	WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]">
+
+<P>[% subtext %]</P>
+[% END %]
+
+[% INCLUDE formLabel value => "The Scoop",
+	comment => "HTML is fine, but double check those URLs and HTML tags!" %]
+
+
+<TEXTAREA WRAP="VIRTUAL" COLS="70" ROWS="12" NAME="story">[% FILTER strip_literal; form.story; END %]</TEXTAREA><BR>
+<FONT SIZE="2">(Are you sure you included a URL?  Didja test them for typos?)</FONT><P>
+
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="PreviewStory">
+[% IF savestory %]
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="SubmitStory">
+[% ELSE %]
+(You must preview once before you can submit)
+[% END %]
+
+</FORM><P>
+
+__seclev__
+10000

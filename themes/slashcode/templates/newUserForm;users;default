@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+Form for new user.
+
+No specially passed variables.
+__title__
+New User Form
+__page__
+users
+__lang__
+en_US
+__name__
+newUserForm
+__template__
+[% INCLUDE titlebar title=title width="100%" %]
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+	<TR>
+		<TD>
+		<B>Nick Name</B><BR>
+		<INPUT TYPE="TEXT" NAME="newuser" VALUE="">
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+		<B>Real Email</B> <BR>
+		<INPUT TYPE="TEXT" NAME="email" VALUE="" SIZE="40"><BR>
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="newuser">
+		</TD>
+	</TR>
+</TABLE>
+</FORM>
+__seclev__
+10000

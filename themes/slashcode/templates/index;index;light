@@ -1,0 +1,21 @@
+__section__
+light
+__description__
+Index for light mode.
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+index
+__template__
+[% stories %]
+
+<P>
+
+[% UNLESS user.noboxes; boxes; END %]
+
+__seclev__
+10000

@@ -1,0 +1,105 @@
+__section__
+default
+__description__
+Display a comment
+
+* comment_shrunk = comment was too long; this is the stripped down version
+* reasons = hashref of moderation "reasons"
+* can_mod = boolean for whether or not current user can moderate
+* is_anon = boolean for whether or not comment user is anonymous
+
+Also included are all the individual elements of the comment and its poster: sid, cid, pid, date, subject, comment, uid, points, lastmod, reason, nickname, fakeemail, homepage, sig
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+dispComment
+__template__
+[% USE Slash %]
+
+	<TR><TD>
+	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+		<TR VALIGN="TOP">
+			<TD BGCOLOR="[% user.bg.3 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
+			<TD BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD>
+				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]"><A NAME="[% cid %]"><B>[% subject %]</B></A>
+[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% constants.reasons.$reason %][% END %])[% END %]
+</FONT>
+			</TD></TR></TABLE></TD>
+			<TD BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
+		</TR>
+
+		<TR>
+			<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
+			<TD BGCOLOR="#E6E6E6" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#E6E6E6">
+				<FONT FACE="[% constants.mainfontface %]" SIZE="1">by
+[% IF fakeemail %]<A HREF="mailto:[% fakeemail %]">[% nickname %]</A>
+<B><FONT SIZE="2">([% fakeemail %])</FONT></B>[% ELSE %][% nickname %][% END %]
+ on [% time %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&cid=[% cid %]">#[% cid %]</A>)</FONT><BR>
+				<FONT FACE="[% constants.mainfontface %]" SIZE="1">
+[% UNLESS is_anon %](<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&nick=[% FILTER fixparam; nickname; END %]">User #[% uid %] Info</A>)[% END %]
+[% IF homepage && homepage.length > 8 %]<A HREF="[% homepage %]">[% homepage %]</A><BR>[% END %]
+</FONT>
+			</TD></TR></TABLE></TD>
+			<TD BACKGROUND="[% constants.imagedir %]/gr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
+		</TR>
+
+		<TR><TD BGCOLOR="#006666" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
+		<TR>
+			<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
+			<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+[% IF comment_shrunk;
+	linkComment = Slash.linkComment({
+		sid	=> sid,
+		cid	=> cid,
+		pid	=> cid,
+		subject	=> 'Read the rest of this comment...'
+	}, 1);
+	comment = "$comment_shrunk<P><B>$linkComment</B>";
+	ELSIF not user.nosigs && sig;
+	comment = "$comment<BR>$sig";
+	END
+%]
+[% comment %]
+			</TD></TR></TABLE></TD>
+			<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
+		</TR>
+		<TR><TD BGCOLOR="[% user.bg.3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
+	</TABLE>
+	</TD></TR>
+
+[% IF user.mode != 'archive' %]
+	[% pid = realpid || pid %]
+	<TR><TD><FONT SIZE="2">
+
+	[ [% Slash.linkComment({
+		sid	=> sid,
+		pid	=> cid,
+		op	=> 'Reply',
+		subject	=> 'Reply to This',
+	}) %] | [% Slash.linkComment({
+		sid	=> sid,
+		cid	=> pid,
+		pid	=> pid,
+		subject	=> 'Parent',
+	}, 1) %]
+
+	[% IF can_mod %]
+	| [% Slash.createSelect("reason_$cid", reasons, '', 1, 1);
+	   END
+	%]
+
+	[% IF user.is_admin %]
+| <INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
+	[% END %]
+	]
+	</FONT></TD></TR>
+<TR><TD>
+
+[% END %]
+
+__seclev__
+10000

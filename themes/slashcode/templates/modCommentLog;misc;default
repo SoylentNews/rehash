@@ -1,0 +1,50 @@
+__section__
+default
+__description__
+Prints table detailing history of moderation of a comment (SOMETHING ABOUT THIS IS BROKEN)
+
+* mod_admin = boolean for if current user is an admin
+* comments = arrayref of hashref of moderated comments (val, reason, uid, nickname)
+* reasonTotal = total moderations
+* reasonHist = arrayref of number of moderations at each reason
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+modCommentLog
+__template__
+[% IF mod_admin %]
+<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+	<TR BGCOLOR="[% user.bg.3 %]">
+		<TH><FONT COLOR="[% user.fg.3 %]"> val </FONT></TH>
+		<TH><FONT COLOR="[% user.fg.3 %]"> reason </FONT></TH>
+		<TH><FONT COLOR="[% user.fg.3 %]"> moderator </FONT></TH>
+	</TR>
+
+	[% FOREACH comment = comments %]
+	<TR>
+		<TD> <B>[% comment.val %]</B> </TD>
+		<TD> [% constants.reasons.${comment.reason} %] </TD>
+		<TD> [% comment.nickname %] ([% comment.uid %]) </TD>
+	</TR>
+	[% END %]
+
+	</TABLE>
+[% END %]
+
+[% IF reasonTotal %]
+	<FONT COLOR="[% user.bg.3 %]"><B>Moderation Totals</B></FONT>:
+	[% FOREACH i = [0 .. reasonHist.size] %]
+		[% IF reasonHist.$i %]
+			[% constants.reasons.$i %]=[% reasonHist.$i %],
+		[% END %]
+	[% END %]
+	<B>Total=[% reasonTotal %]</B>.
+[% END %]
+
+__seclev__
+10000

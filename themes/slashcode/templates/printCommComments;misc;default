@@ -1,0 +1,92 @@
+__section__
+default
+__description__
+The printing of the comments
+
+* can_moderate = boolean for whether current user is eligible to moderate
+* comment = hashref of main comment to display (if cid is specified)
+* comments = big ol' arrayref of comments
+* next = hashref of next comment for "next" link
+* previous = hashref of previous comment for "previous" link
+* sid = story ID
+* cid = comment ID
+* pid = base parent ID
+* cc = number of siblings of this comment
+* lvl = what nesting level we're at
+* lcp = linkCommentPages value
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+printCommComments
+__template__
+[% USE Slash %]
+
+[% IF can_moderate %]
+	<FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
+	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
+	<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
+	<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">
+[% END %]
+
+
+[% IF cid %]
+	[% Slash.dispComment(comment) %]
+	</TD></TR>
+	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER">
+
+	[% IF previous %]
+		&lt;&lt;[% Slash.linkComment(previous, 1) %]
+	[% END %]
+
+	[% IF previous && (comment.pid || next) %]
+		|
+	[% END %]
+
+	[% IF comment.pid %]
+		[% Slash.linkComment(comment, 1) %]
+	[% END %]
+
+	[% IF next && (comment.pid || previous) %]
+		|
+	[% END %]
+
+	[% IF next %]
+		[% Slash.linkComment(next, 1) %]&gt;&gt;
+	[% END %]
+
+	</TD></TR>
+	<TR><TD ALIGN="CENTER">
+	[% Slash.moderatorCommentLog(sid, cid) %]
+	</TD></TR>
+[% END %]
+
+	[% lcp %]
+	[% IF lvl %]
+	<TR><TD>
+	[% END %]
+	[% Slash.displayThread(sid, pid, lvl, comments) %]
+	[% IF lvl %]
+	</TD></TR>
+	[% END %]
+	[% lcp %]
+
+[% IF can_moderate %]
+	<TR><TD>
+		<P>Have you read the
+		<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
+		yet? (<B>Updated 9.9</B>)
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="moderate">
+	[% IF user.is_admin && constants.authors_unlimited %]
+		<BR><B>NOTE: Checked comments will be deleted.</B>
+	[% END %]
+	</TD></TR></FORM>
+[% END %]
+
+</TABLE>
+
+__seclev__
+10000

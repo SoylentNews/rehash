@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+topics
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'head' %]
+	[% constants.sitename %]: Topics
+
+[% END %]
+
+__seclev__
+10000

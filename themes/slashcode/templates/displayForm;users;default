@@ -1,0 +1,80 @@
+__section__
+default
+__description__
+Display login form
+
+* newnick = new nickname
+* title = passed to titlebar
+* msg = message to display
+* title2 = second title ?
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+displayForm
+__template__
+<TABLE WIDTH="100%" CELLPADDING="10">
+	<TR>
+		<TD WIDTH="50%" VALIGN="TOP">
+		<P>
+		<FORM ACTION="[% env.script_name %]" METHOD="GET">
+
+
+[% INCLUDE titlebar width="100%" %]
+
+[% IF form.unickname %]
+		Danger, Will Robinson!  You didn't login!  You apparently put
+		in the wrong password, or the wrong nickname, or else space
+		aliens have infested the server.  I'd suggest trying again,
+		or clicking that mail password button if you forgot your password.
+
+	[% IF constants.allow_anonymous %]
+	   	Logging in will allow you to post comments as yourself.  If you
+		don't login, you will only be able to post as [% constants.anon_name %].
+
+	[% ELSE %]
+	      	You can only post comments if you have a valid account
+
+	[% END %]
+
+[% ELSE %]
+
+[% END %]
+
+		<P>
+		<B>Nick:</B> (maximum 20 characters long)<BR>
+		<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% FILTER strip_attribute; form.unickname; END %]"><BR>
+
+		<B>Password:</B> (6-20 characters long)<BR>
+		<INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20"><BR>
+
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="userlogin">
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="mailpasswd">
+
+		</TD>
+		<TD WIDTH="50%" VALIGN="TOP">
+
+[% INCLUDE titlebar title=title2 width="100%" %]
+
+[% msg %]
+
+		(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
+		are allowed in nicknames, and all others will be stripped out.)
+
+		<INPUT TYPE="TEXT" NAME="newuser" SIZE="20" MAXLENGTH="20" VALUE="[% newnick %]">
+		<BR> and a <B>valid email address</B> address to send your registration
+		information. This address will <B>not</B> be displayed on [% constants.sitename %].
+		<INPUT TYPE="TEXT" NAME="email" SIZE="20" VALUE="[% FILTER strip_attribute; form.email; END %]"><BR>
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="newuser"> Click the button to
+		be mailed a password.<BR>
+
+		</FORM>
+		</TD>
+	</TR>
+</TABLE>
+
+__seclev__
+500

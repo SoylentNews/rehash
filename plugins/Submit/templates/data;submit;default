@@ -1,0 +1,53 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'header' %]
+	[% constants.sitename %] Submissions[% tbtitle %]
+
+[% CASE 'updatehead' %]
+	Deleting [% subids.join(', ') %]
+
+[% CASE 'quickieshead' %]
+	Quickies Generated
+
+[% CASE 'previewhead' %]
+	[% constants.sitename %] Submission Preview
+
+[% CASE 'defaulthead' %]
+	[% constants.sitename %] Submissions
+
+[% CASE 'maxallowed' %]
+	<P><B>Warning! you've exceeded max allowed submissions for the day : [% constants.max_submissions_allowed %]</B></P>
+
+[% CASE 'error' %]
+	Error
+
+[% CASE 'badsubject' %]
+	Please enter a reasonable subject.
+
+[% CASE 'defaultsection' %]
+	All Sections
+
+[% CASE 'defaultnote' %]
+	Unclassified
+
+[% END %]
+
+__seclev__
+10000

@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+Print links to pages for additional comments
+
+* sid = sid
+* pid = pid
+* cid = cid
+* total = total comments
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+linkCommentPages
+__template__
+[% USE Slash %][% UNLESS (total < user.commentlimit) || (user.commentlimit < 1) %]
+	[% pages = total / user.commentlimit %]
+
+	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER"><FONT SIZE="2">
+	[% FOREACH p = [0 .. pages] %]
+		[% start = user.commentlimit * p %]
+		[% IF p != 0 %] | [% END %]
+		[% IF start == form.startat %]<B>([% END %][% Slash.linkComment({
+			sid	=> sid,
+			pid	=> pid,
+			cid	=> cid,
+			subject	=> p,
+			startat	=> x
+		}) %][% IF start == form.startat %])</B>[% END %]
+	[% END %]
+
+	[% IF user.breaking %]
+		([% constants.sitename %] Overload: CommentLimit [% user.commentlimit %])
+	[% END %]
+
+	</FONT></TD></TR>
+[% END %]
+
+__seclev__
+10000

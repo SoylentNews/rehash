@@ -1,0 +1,16 @@
+__section__
+light
+__description__
+Fancybox for light mode.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+fancybox
+__template__
+<H3>[% title %]</H3><P>[% contents %]</P>
+__seclev__
+10000

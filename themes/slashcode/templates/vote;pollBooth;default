@@ -1,0 +1,70 @@
+__section__
+default
+__description__
+Display votes and graph of votes
+
+* qid = question ID
+* width = passed to titlebar
+* title = passed to titlebar
+* voters = number of voters
+* pollitems = arrayref of available answers
+* notes = any notes to display to voter
+__title__
+
+__page__
+pollBooth
+__lang__
+en_US
+__name__
+vote
+__template__
+<CENTER><TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="500">
+	<TR><TD> </TD><TD COLSPAN="1">
+[% INCLUDE titlebar %]
+<FONT SIZE="2">[% notes %]</FONT></TD></TR>
+[% FOR poll = pollitems %]
+	[% answer     = poll.0
+		imagewidth = poll.1
+		votes      = poll.2
+		percent    = poll.3
+	%]
+	<TR>
+		<TD WIDTH="100" ALIGN="RIGHT">[% answer %] &nbsp;</TD>
+		<TD WIDTH="450"><NOBR><IMG
+			SRC="[% constants.imagedir %]/leftbar.gif" WIDTH="4" HEIGHT="20" ALT=""><IMG
+			SRC="[% constants.imagedir %]/mainbar.gif" HEIGHT=20
+			width="[% imagewidth %]" ALT="[% percent %]%"><IMG
+			SRC="[% constants.imagedir %]/rightbar.gif" WIDTH="4" HEIGHT="20" ALT="">
+			[% votes %] /
+			<FONT COLOR="#006666">[% percent %]%</FONT></NOBR>
+		</TD>
+	</TR>
+
+[% END %]
+
+	<TR><TD COLSPAN="2" ALIGN="RIGHT">
+		<FONT SIZE="4"><B>[% voters %] total votes.</B></FONT>
+	</TD></TR><TR><TD COLSPAN="2"><P ALIGN="CENTER">
+		[
+			<A HREF="[% env.script_name %]?qid=[% FILTER strip_attribute; qid; END %]">Voting Booth</A> |
+			<A HREF="[% env.script_name %]">Other Polls</A> |
+			<A HREF="[% constants.rootdir %]/">Back Home</A>
+		]
+	</TD></TR><TR><TD COLSPAN="2">
+<P>
+	<LI>Don't complain about lack of options. You've got to pick a few
+	when you do multiple choice.  Those are the breaks.
+
+	<LI>Feel free to suggest poll ideas if you're feeling creative.
+	I'd strongly suggest reading the past polls first.
+
+	<LI>This whole thing is wildly inaccurate.  Rounding errors,
+	ballot stuffers, dynamic IPs, firewalls.  If you're using these
+	numbers to do anything important, you're insane.
+</P>
+	</TD></TR>
+</TABLE></CENTER>
+
+
+__seclev__
+10000

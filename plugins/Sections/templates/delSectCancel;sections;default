@@ -1,0 +1,17 @@
+__section__
+default
+__description__
+Cancel delete of a section
+* section = section name
+__title__
+
+__page__
+sections
+__lang__
+en_US
+__name__
+delSectCancel
+__template__
+<B>Canceled deletion of [% section %].</B><BR>
+__seclev__
+10000

@@ -1,0 +1,22 @@
+__section__
+default
+__description__
+Text composing a redirect body; this will be sent after (in addition to) the HTTP 302 header request for the browser to be redirected, and should only be seen by browsers that do not understand the redirection request
+
+* url = URL to redirect to
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+html-redirect
+__template__
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML><HEAD><TITLE>302 Moved</TITLE></HEAD><BODY>
+<P>You really want to be on <A HREF="[% url %]">[% url %]</A> now.</P>
+</BODY>
+
+__seclev__
+10000

@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+Create a link to a story, whenever it needs one
+
+* dynamic = boolean for using dynamic, instead of static, page
+* mode = comment mode
+* threshold = comment threshold
+* sid = story id
+* section = story section
+* text = text to put in link
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+linkStory
+__template__
+<A HREF="[% constants.rootdir %]/article.pl?sid=[% sid %]&mode=[% mode %]&threshold=[% threshold %]">[% text %]</A>
+__seclev__
+10000

@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+Message that is displayed when comments are deleted from a discussion.
+
+* sid = story ID
+* count = number of deleted comments
+* comments_deleted = arrayref of CIDs of deleted comments
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+deleted_cids
+__template__
+The following
+[% IF count > 1 %][% count %] comments[% ELSE %]comment[% END %] were deleted from [% sid%]:
+[% FOR c = comments_deleted %]
+#[% c %][% UNLESS c == comments_deleted.last %], [% END %]
+[% END %]
+<BR>
+__seclev__
+1000

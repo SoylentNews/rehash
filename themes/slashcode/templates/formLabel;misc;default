@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+Print a label next to a form element
+
+* value = label
+* comment = comment to put next to label
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+formLabel
+__template__
+<P><FONT COLOR="[% user.bg.3 %]"><B>[% value %]</B></FONT>
+[% IF comment %]
+([% comment %])
+[% END %]
+<BR>
+
+__seclev__
+10000

@@ -1,0 +1,129 @@
+__section__
+default
+__description__
+Template which renders the comment editor.
+
+* error_message = error message if there is an error
+* format_select = post type popup list
+* preview = preview of comment, if applicable
+* reply = hashref of comment replying to
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+edit_comment
+__template__
+[% USE Slash %]
+[% IF form.pid %]
+	[% INCLUDE titlebar width="95%" title=reply.subject %]
+	<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="95%" ALIGN="CENTER">
+	[% Slash.dispComment(reply) %]
+	</TABLE><P>
+[% END %]
+[% IF preview %]
+	[% INCLUDE titlebar width="95%" title="Preview Comment" %]
+	[% preview %]
+	<P>
+
+[% END %]
+	[% INCLUDE titlebar width="95%" title="Post Comment" %]
+
+[% IF error_message %][% error_message %][% END %]
+
+<FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
+
+	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
+	<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% form.pid %]">
+	<INPUT TYPE="HIDDEN" NAME="mode" VALUE="[% user.mode %]">
+	<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% user.startat %]">
+	<INPUT TYPE="HIDDEN" NAME="threshold" VALUE="[% user.threshold %]">
+	<INPUT TYPE="HIDDEN" NAME="commentsort" VALUE="[% user.commentsort %]">
+[% IF form.formkey %]
+	<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+	<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1">
+[% userlink = '' %]
+[% IF user.is_anon %]
+	[% userlink = "<A HREF=\"${constants.rootdir}/users.pl\">Create Account</A>" %]
+	<TR><TD> </TD><TD>
+		You are not logged in.  You can login now using the
+		convenient form below, or
+		<A HREF="[% constants.rootdir %]/users.pl">Create an Account</A>.
+		Posts without proper registration are posted as
+		<B>[% user.nickname %]</B>
+	</TD></TR>
+	<INPUT TYPE="HIDDEN" NAME="rlogin" VALUE="userlogin">
+
+	<TR><TD ALIGN="RIGHT">Nick</TD><TD>
+		<INPUT TYPE="TEXT" NAME="unickname" VALUE="[% form.nickname %]">
+
+	</TD></TR><TR><TD ALIGN="RIGHT">Passwd</TD><TD>
+		<INPUT TYPE="PASSWORD" NAME="upasswd">
+
+	</TD></TR>
+[% ELSE;
+	userlink = "<A HREF=\"${constants.rootdir}/users.pl?op=userclose\">Log Out</A>";
+END %]
+
+	<TR><TD WIDTH="130" ALIGN="RIGHT">Name: </TD><TD WIDTH="500">
+		<A HREF="[% constants.rootdir %]/users.pl">[% user.nickname %]</A> [ [% userlink %] ]</TD></TR>
+[% IF user.fakeemail %]
+	<TR><TD ALIGN="RIGHT">Email: </TD>
+		<TD>[% user.fakeemail %]</TD></TR>
+[% END %]
+[% IF user.homepage %]
+	<TR><TD ALIGN="RIGHT">URL</TD>
+		<TD><A HREF="[% user.homepage %]">[% user.homepage %]</A></TD></TR>
+[% END %]
+
+	<TR><TD ALIGN="RIGHT">Subject: </TD>
+		<TD><INPUT TYPE='text' NAME='postersubj' VALUE="[% form.postersubj %]" SIZE=50 MAXLENGTH=50></TD>
+	</TR>
+	<TR>
+		<TD ALIGN="RIGHT" VALIGN="TOP">Comment</TD>
+		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="10"
+		COLS="50">[% FILTER strip_literal; form.postercomment; END %]</TEXTAREA>
+		<BR>(Use the Preview Button! Check those URLs!
+		Don't forget the http://!)
+	</TD></TR>
+
+	<TR><TD> </TD><TD>
+
+[% IF !user.is_anon && user.karma > constants.goodkarma %]
+		<INPUT TYPE="checkbox" NAME="nobonus" VALUE="$form.nobonus"> No Score +1 Bonus
+[% do_br = 1; END;
+IF constants.allow_anonymous && user.karma > -1 && !user.is_anon %]
+		<INPUT TYPE="checkbox" NAME="postanon" VALUE="$form.postanon"> Post Anonymously
+[% do_br = 1; END;
+IF do_br %]<BR>[% END %]
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
+		[% format_select %]
+	</TD></TR><TR>
+		<TD VALIGN="TOP" ALIGN="RIGHT">Allowed HTML: </TD><TD><FONT SIZE="1">
+			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+		</FONT>
+	</TD></TR>
+</TABLE>
+
+</FORM>
+
+<B>Important Stuff:</B>
+	<LI>Please try to keep posts on topic.
+	<LI>Try to reply to other people comments instead of starting new threads.
+	<LI>Read other people's messages before posting your own to avoid simply duplicating
+		what has already been said.
+	<LI>Use a clear subject that describes what your message is about.
+	<LI>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be
+		moderated. (You can read everything, even moderated posts, by adjusting your
+		threshold on the User Preferences Page)
+
+<P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
+	<A HREF="mailto:[% constants.admin_mail %]">[% constants.admin_name %]</A>.</FONT>
+
+__seclev__
+1000
