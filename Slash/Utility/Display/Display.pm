@@ -1086,8 +1086,12 @@ sub _hard_linkComment {
 		# $comment->{threshold}? Hmm. I'm not sure what it
 		# means for a comment to have a threshold. If it's 0,
 		# does the following line do the right thing? - Jamie
+		# You know, I think this is a bug that comes up every so often. But in 
+		# theory when you go to the comment link "threshhold" should follow 
+		# with you. -Brian
 	$display .= "&threshold=" . ($comment->{threshold} || $user->{threshold});
 	$display .= "&commentsort=$user->{commentsort}";
+	$display .= "&tid=$user->{state}{tid}" if $user->{state}{tid};
 	$display .= "&mode=$user->{mode}";
 	$display .= "&startat=$comment->{startat}" if $comment->{startat};
 

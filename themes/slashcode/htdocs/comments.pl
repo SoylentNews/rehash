@@ -131,10 +131,13 @@ sub main {
 		if ($form->{sid} !~ /^\d+$/) {
 			$discussion = $slashdb->getDiscussionBySid($form->{sid});
 			$section = $discussion->{section};
+			$user->{state}{tid} = $discussion->{topic};
 		} else {
 			$discussion = $slashdb->getDiscussion($form->{sid});
 			$section = $discussion->{section};
 		}
+		# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
+		$user->{state}{tid} = $discussion->{topic};
 		if (!$user->{is_admin} and $discussion->{sid}) {
 			unless ($slashdb->checkStoryViewable($discussion->{sid})) {
 				$form->{sid} = '';

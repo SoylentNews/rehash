@@ -70,6 +70,8 @@ sub main {
 		});
 
 		my $discussion = $slashdb->getDiscussionBySid($story->{sid});
+		# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
+		$user->{state}{tid} = $discussion->{topic};
 		printComments($discussion);
 	} else {
 		my $message = getData('no_such_sid');
