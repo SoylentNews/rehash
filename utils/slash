@@ -31,8 +31,9 @@ WHICH_GREP=`which grep`;
 WHICH_UNAME=`which uname`;
 WHICH_AWK=`which awk`;
 
-# if you use sudo, fill this in, like "sudo -u slashdot"
-MYSUDO="";
+# if you use sudo, create a file called mysudo in $DATADIR, containing
+# your sudo line, like "sudo -u slashdot"
+MYSUDO=`cat $DATADIR/mysudo 2>/dev/null`
 
 # This prolly ain't 100% accurate, but it should be good enough.
 OS=`$WHICH_UNAME | $WHICH_AWK '{print $1}'`;
