@@ -1934,10 +1934,6 @@ ALTER TABLE users_acl ADD INDEX acl (acl);
 # Set to 1 if you want all future stories displayed in admin stories listing
 INSERT INTO vars (name, value, description) VALUES ('show_all_future_stories_admin', 0, 'Turn this on so all future stories are show in the admin stories list');
 
-# USEPERL LAST UPDATED HERE
-
-# SLASHCODE LAST UPDATED HERE
-
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_124, Start of T_2_3_0_125 - 2003/11/10
@@ -1967,3 +1963,8 @@ INSERT INTO vars (name, value, description) VALUES ('archive_dateformat',' %I:%M
 INSERT INTO vars (name, value, description) VALUES ('archive_dir','ASC','direction we want items to be archived ordered and handled');
 INSERT INTO vars (name, value, description) VALUES ('archive_limit','500','maximum number of articles to archive at a time');
 
+# USEPERL LAST UPDATED HERE
+
+# SLASHCODE LAST UPDATED HERE
+
+# End of T_2_3_0_125, Start of T_2_3_0_126 - 2003/12/02
