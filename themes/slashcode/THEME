@@ -201,6 +201,7 @@ misc=misc/spamarmors
 plugin=Admin
 plugin=Messages
 plugin=Search
+plugin=Sections
 plugin=Submit
 plugin=Stats
 plugin=Journal
