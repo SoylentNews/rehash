@@ -496,7 +496,7 @@ EOT
 			$statsSave->createStatDaily("${op}_ipids", $uniq, { skid => $skid});
 			$statsSave->createStatDaily("${op}_bytes", $bytes, { skid => $skid});
 			$statsSave->createStatDaily("${op}_page", $pages, { skid => $skid});
-			$statsSave->createStatDaily("${op}_user", $users, { skid => $skid});
+			$statsSave->createStatDaily("${op}_user", $uids, { skid => $skid});
 		}
 
 		$statsSave->createStatDaily( "page_from_rss", $stats_from_rss->{$skid}{cnt}, {skid => $skid});
