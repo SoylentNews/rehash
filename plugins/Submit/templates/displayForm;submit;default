@@ -38,7 +38,7 @@ __template__
 	<A HREF="[% env.script_name %]?op=list">View Current Pending Submissions</A>
 </B></P>
 [% END %]
-[% IF form.op AND !save_story %]
+[% IF form.op AND !savestory %]
 <B>(You must preview once, provide a subject, some text, and a topic before you can submit</B>
 [% END %]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
