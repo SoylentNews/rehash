@@ -736,6 +736,23 @@ sub countDaily {
 }
 
 ########################################################
+sub countDailySubscriber {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	return 0 unless $constants->{subscribe};
+	my $subscribers = $self->sqlSelectColArrayref(
+		"uid",
+		"users_hits",
+		"hits_paidfor > hits_bought
+		 AND lastclick >= DATE_SUB(NOW(), INTERVAL 48 HOUR)",
+	);
+	return 0 unless $subscribers && @$subscribers;
+	my $uid_list = join(", ", @$subscribers);
+	my $count = $self->sqlCount("accesslog_temp", "uid IN ($uid_list)");
+	return $count;
+}
+
+########################################################
 sub getDurationByStaticOpHour {
 	my($self, $options) = @_;
 
