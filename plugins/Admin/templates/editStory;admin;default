@@ -13,7 +13,7 @@ en_US
 __name__
 editStory
 __template__
-<FORM ACTION="/admin.pl" METHOD="POST" enctype="multipart/form-data">
+<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST" enctype="multipart/form-data">
 [% IF form.subid %]
 	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid | strip_attribute %]">
 [% END %]
