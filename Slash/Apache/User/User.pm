@@ -266,7 +266,12 @@ sub handler {
 
 	# this needs to get called once per child ... might as well
 	# have it called here. -- pudge
-	srand(time ^ ($$ + ($$ << 15))) unless $srand_called;
+	# Note that (and this may be new starting in perl 5.6 or so)
+	# if you call srand() with no arguments, perl will try hard
+	# to find random data to seed with, using /dev/urandom if
+	# possible.  This is almost certainly better than any seed
+	# we could cobble together with time() and $$ and so on.
+	srand() unless $srand_called;
 	$srand_called ||= 1;
 
 	# If this uid is marked as banned, deny them access.
