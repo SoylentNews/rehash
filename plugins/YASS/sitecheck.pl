@@ -49,13 +49,14 @@ $task{$me}{code} = sub {
 	my $junk;
 	my $ua = LWP::UserAgent->new();
 	for (@$sites) {
+		print "$_->{url} ($constants->{yass_extra}) \n"
 		my $response = $ua->get($_->{url} . $constants->{yass_extra});
 		if($response->is_success) {
 			$yass->success($_->{id});
-			print "active\t$_->{url}\n";
+			print "\tactive\t$_->{url}\n";
 		} else {
 			$yass->failed($_->{id});
-			print "dead\t$_->{url}\n";
+			print "\tdead\t$_->{url}\n";
 		}
 	}
 	slashdLog('Checking YASS sites End');
