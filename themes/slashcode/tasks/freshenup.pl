@@ -28,7 +28,19 @@ $task{$me}{code} = sub {
 		slashdLog("Deleting $sid ($title)") if verbosity() >= 1;
 	}
 	my $stories = $slashdb->getStoriesWithFlag('dirty');
-	#my @updatedsids;
+	my $max_stories = defined($constants->{freshenup_max_stories})
+		? $constants->{freshenup_max_stories}
+		: 100;
+	if ($max_stories && scalar(@$stories) > $max_stories) {
+		# There are too many stories marked as dirty.  Just update
+		# some of the most recent ones (sorted by sid, which is
+		# vaguely the same as chronological order), then skip ahead
+		# to the index.shtml's, and pick up the rest of the stories
+		# next time around.
+		@$stories = (sort {
+			$a->[0] cmp $b->[0]		# sort by sid
+		} @$stories)[-$max_stories..-1];
+	}
 	my $totalChangedStories = 0;
 	my $vu = "virtual_user=$virtual_user";
 	my $default_hp = join(",", ("0") x
@@ -39,8 +51,6 @@ $task{$me}{code} = sub {
 		slashdLog("Updating $sid") if verbosity() >= 2;
 		$updates{$section} = 1;
 		$totalChangedStories++;
-		# What was this for?
-		#push @updatedsids, $sid;
 
 		my @rc;
 		if ($section) {
