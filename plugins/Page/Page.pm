@@ -89,7 +89,7 @@ sub displayStoryList {
 			$data->{fulldata} = $_ if $other->{retrieve_data};
 		} elsif (ref $_ eq 'ARRAY') {
 			# Handle data from getStoryEssentials()
-			my($sid, $time, $title) = @{$_}[0, 9, 2];
+			my($sid, $time, $title) = @{$_}{qw(sid time title)}; #[0, 9, 2];
 
 			$data->{essentials} = $_ if $other->{retrieve_essentials};
 			if ($other->{titles_only}) {
@@ -155,10 +155,7 @@ sub displayStories {
 	# 	return $self->displayStoryList($stories, $other)
 	# - Cliff
 	while (my $story = shift @{$stories}) {
-		my $sid = $story->[0];
-		my $section = $story->[1];
-		my $title = $story->[2];
-		my $time = $story->[9];
+		my($sid, $section, $time, $title) = @{$_}{qw(sid section time title)}; #[0, 9, 2];
 		my $atstorytime;
 
 		if ($other->{titles_only}) {
