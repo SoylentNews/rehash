@@ -107,8 +107,14 @@ sub create {
 sub remove {
 	my($self, $id) = @_;
 	my $uid = $ENV{SLASH_USER};
-	return if $self->sqlDo("DELETE FROM journals WHERE uid=$uid AND id=$id") == 0;
-	$self->sqlDo("DELETE FROM journals_text WHERE id=$id");
+
+	if ($self->sqlDelete("journals", "uid=$uid AND id=$id") == 0) {
+		# Return value 0E0 means "no rows deleted" (i.e. this user owns
+		# no such journal) and undef means "error."  Either way, abort.
+		return;
+	}
+
+	$self->sqlDelete("journals_text", "id=$id");
 
 	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
 	if ($date) {
