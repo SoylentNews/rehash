@@ -7207,7 +7207,7 @@ sub getSlashConf {
 		approvedtags_break =>		[qw( P LI OL UL BR BLOCKQUOTE DIV HR DL DT DD)],
 		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
-		charrefs_good_entity =>		[qw( amp lt gt euro )],
+		charrefs_good_entity =>		[qw( amp lt gt euro pound yen )],
 		charrefs_good_numeric =>	[ ],
 		cur_performance_stat_ops =>	[ ],
 		lonetags =>			[qw( P LI BR IMG DT DD)],
