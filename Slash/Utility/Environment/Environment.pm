@@ -1287,6 +1287,8 @@ sub filter_params {
 	my %special = (
 		sid	=> sub { $_[0] =~ s|[^A-Za-z0-9/._]||g	},
 		flags	=> sub { $_[0] =~ s|[^a-z0-9_,]||g	},
+		query	=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
+			         $_[0] =~ s|\s+| |g;		},
 	);
 	# add more specials
 	$special{qid} = $special{sid};
