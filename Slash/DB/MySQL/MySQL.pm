@@ -4949,6 +4949,7 @@ sub countStory {
 
 sub moderateComment {
 	my($self, $sid, $cid, $reason, $options) = @_;
+	return 0 unless dbAvailable("write_comments");
 	return 0 unless $reason;
 	$options ||= {};
 
