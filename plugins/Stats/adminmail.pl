@@ -486,8 +486,26 @@ EOT
 		Return => 1, Page => 'modmail', Nocomm => 1
 	}) if $constants->{mod_stats};
 
-	# Send a message to the site admin.
 	my $messages = getObject('Slash::Messages');
+
+	# do message log stuff
+	if ($messages) {
+		my $msg_log = $messages->getDailyLog( $statsSave->{_day} );
+		my %msg_codes;
+
+		# msg_12_1 -> code 12, mode 1 (relationship change, web)
+		for my $type (@$msg_log) {
+			my($code, $mode, $count) = @$type;
+			$msg_codes{$code} += $count;
+			$statsSave->createStatDaily("msg_${code}_${mode}", $count);
+		}
+
+		for my $code (keys %msg_codes) {
+			$statsSave->createStatDaily("msg_${code}", $msg_codes{$code});
+		}
+	}
+
+	# Send a message to the site admin.
 	if ($messages) {
 		$data{template_name} = 'display';
 		$data{subject} = getData('email subject', {
