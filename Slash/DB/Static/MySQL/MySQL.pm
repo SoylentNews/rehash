@@ -2475,7 +2475,7 @@ sub getAccesslogPPS {
 		my $lookback_id = $max_id - $rowsback;
 		$lookback_id = 1 if $lookback_id < 1;
 		my($count, $time) = $self->sqlSelect(
-			"COUNT(*), UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(MIN(ts))",
+			"COUNT(*), UNIX_TIMESTAMP(MAX(ts)) - UNIX_TIMESTAMP(MIN(ts))",
 			"accesslog",
 			"id >= $lookback_id AND op != 'image'");
 		if (!$count || $count < 10) {
