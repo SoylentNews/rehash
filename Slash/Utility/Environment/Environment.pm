@@ -1762,7 +1762,6 @@ sub createLog {
 		$uri =~ s|^/(.*)\.tar\.gz$|$1|;
 	} elsif ($uri =~ /\.rss$/ || $uri =~ /\.xml$/ || $uri =~ /\.rdf$/) {
 		$uri = 'rss';
-		$logdb->createAccessLog('rss', $dat);
 	} elsif ($uri =~ /\.shtml$/) {
 		$uri =~ s|^/(.*)\.shtml$|$1|;
 		$dat = $uri if $uri =~ $page;	
