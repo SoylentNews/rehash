@@ -22,7 +22,7 @@ __template__
 [% IF submission.comment && admin_flag %]
 <P>Submission Notes:
 <TABLE WIDTH="95%"><TR><TD BGCOLOR="[% user.bg.2 %]">
-	<FONT SIZE="-1" COLOR="[% user.fg.2 %]">[% submission.comment %]</FONT>
+	<FONT SIZE="-1" COLOR="[% user.fg.2 %]">[% submission.comment | strip_literal %]</FONT>
 </TD></TR></TABLE>
 [% END %]
 [% IF submission.sid %]

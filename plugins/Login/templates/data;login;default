@@ -29,13 +29,7 @@ __template__
 	[% END %]
 
 [% CASE 'mailpasswdhead' %]
-	[% IF form.unickname %]
-		Error Mailing Password
-
-	[% ELSE %]
-		Mail Password
-
-	[% END %]
+	Mail Password
 
 [% CASE 'prefshead' %]
 	Change Login Preferences

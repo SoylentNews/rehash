@@ -3,13 +3,6 @@ default
 __description__
 Change password form
 
-* useredit = hashref of user info
-* author_flag = user is author
-* title = passed to titlebar
-* session = popup for session login
-* got_old_pass = set to 1 if you've already been passed the old password correctly 
-
-
 __title__
 
 __page__
@@ -23,7 +16,7 @@ __template__
 	"Please change your password now! ";
 END; note %]</H2>
 
-[% title = "Change password for $user_edit.nickname ($user_edit.uid)" %]
+[% title = "Change password for $user.nickname ($user.uid)" %]
 [% PROCESS prefs_titlebar tab_selected='password' %]
 
 <TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
@@ -31,36 +24,36 @@ END; note %]</H2>
 		<TD>
 [% IF constants.offer_insecure_login_link -%]
 		<P>You can automatically log in by clicking
-		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
+		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
 		This is totally insecure, but very convenient.
 		</P>
 [%- END %]
 
 		<FORM ACTION="[% env.script_name %]" METHOD="POST">
 		[% PROCESS formkey_tag %]
-		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
+		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user.uid %]">
 
 [%- session = Slash.db.getDescriptions('session_login');
-   session_sel = Slash.createSelect('session_login', session, useredit.session_login, 1);
+   session_sel = Slash.createSelect('session_login', session, user.session_login, 1);
 
    clocation = Slash.db.getDescriptions('cookie_location');
    clocation_order = [];
    FOREACH cloc = ['none', 'classbid', 'subnetid', 'ipid'];
       clocation_order.push(cloc) IF clocation.$cloc;
    END;
-   clocation_sel = Slash.createSelect('cookie_location', clocation, useredit.cookie_location, 1, 0, clocation_order);
+   clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_location, 1, 0, clocation_order);
 -%]
 
-		My <A HREF="[% constants.rootdir %]/faq/accounts.shtml#ac1200">login session</A> [% session_sel %] and [% clocation_sel %]
+		My <B><A HREF="[% constants.rootdir %]/faq/accounts.shtml#ac1200">login session</A></B> [% session_sel %] and [% clocation_sel %]
 
 		<P>Note: changing your password or login cookie preferences will disable all
-		cookies for this account, requiring all browsers to reauthenticate.</P>
+		other cookies for this account, requiring all other browsers using this account
+		to reauthenticate.</P>
 
-		Enter your <b>current</b> password <BR>
+		[% PROCESS formLabel value => "Current Password" comment => "To change your password, enter your current password" %]
 		<INPUT TYPE="PASSWORD" NAME="oldpass" SIZE="20" MAXLENGTH="20" VALUE=""><BR>
 
-		<B>Password</B> Enter a new password twice to change it.
-		(must be 6-20 chars long)</B><BR>
+		[% PROCESS formLabel value => "New Password" comment => "Enter your new password twice, must be 6-20 chars long" %]
 		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">
 		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20" MAXLENGTH="20">
 
