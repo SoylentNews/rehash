@@ -135,8 +135,6 @@ $task{$me}{code} = sub {
 		my $mp_tid = $constants->{mainpage_nexus_tid};
 		my $displaystatus = $slashdb->_displaystatus($story->{stoid});
 		
-		slashdLog("Displaystatus $displaystatus for sid '$sid'");
-
 		slashdLog("Updating $sid") if verbosity() >= 3;
 		$dirty_skins{$skid} = 1;
 		if ($displaystatus == 0) {
