@@ -33,7 +33,7 @@ __template__
    	day = "$story.day_of_week $story.month $story.day";
 	IF this_today != day;
 		this_today = day; %]
-		<p><b><font size="4"><a href="[% gSkin.rootdir %]/index.pl?issue=[% story.issue %]">
+		<p><b><font size="4"><a href="[% gSkin.rootdir %]/index.pl?issue=[% story.issue | strip_paramattr %]">
 		[%- IF cur_time && story.secs && cur_time-story.secs < 7*86400
 		    # If the story is within the last week, show (and link) the day-of-week -%]
 			[% story.day_of_week %]</a></font> [% story.month %] [% story.day %]
@@ -44,7 +44,7 @@ __template__
 		</b></p>
 	[%- END %]
 	&middot;
-	<A HREF="[% story.link.0 %]"[% IF story.link.2 %] TITLE="[% story.link.2 %]"[% END %]>[% story.link.1 %]</A>
+	<A HREF="[% story.link.0 | strip_urlattr %]"[% IF story.link.2 %] TITLE="[% story.link.2 | strip_attribute %]"[% END %]>[% story.link.1 %]</A>
 	([% story.commentcount %])<BR>
 	[% start = start + 1; c = c + 1; LAST IF c >= max_older_stories %]
 [% END %]
