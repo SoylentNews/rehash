@@ -613,13 +613,11 @@ sub printComments {
 	# Currently, the only user prefs that affect comment rendering at
 	# this level are whether domaintags are the default, and whether
 	# maxcommentsize is the default.
-	my $try_memcached =
-		   $constants->{memcached}
-		&& $slashdb->{_mcd}
-		&& $form->{mode} ne 'archive'
-		&& $user->{domaintags} == 2
-		&& $user->{maxcommentsize} == $constants->{default_maxcommentsize}
-		? 1 : 0;
+	my $mcd = $slashdb->getMCD();
+	$mcd = undef if
+		   $form->{mode} eq 'archive'
+		|| $user->{domaintags} != 2
+		|| $user->{maxcommentsize} != $constants->{default_maxcommentsize};
 
 	# loop here, pull what cids we can
 	my $cids_needed_ar = $user->{state}{cids} || [ ];
@@ -629,11 +627,11 @@ sub printComments {
 		# Prepend our site key prefix to try to avoid collisions
 		# with other sites that may be using the same servers.
 		$mcd_debug = { start_time => Time::HiRes::time };
-		$mcdkey = "$slashdb->{_mcd}{keyprefix}ctp:";
+		$mcdkey = "$mcd->{keyprefix}ctp:";
 		$mcdkeylen = length($mcdkey);
 	}
 	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
-	if ($try_memcached) {
+	if ($mcd) {
 		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
 			print STDERR scalar(gmtime) . " printComments memcached mcdkey '$mcdkey'\n";
 		}
@@ -641,7 +639,7 @@ sub printComments {
 			map { "$mcdkey$_" }
 			grep { $_ != $form->{cid} }
 			@$cids_needed_ar;
-		$comment_text = $slashdb->{_mcd}->get_multi(@keys_try);
+		$comment_text = $mcd->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
 		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
 			print STDERR scalar(gmtime) . " printComments memcached got keys '@old_keys' tried for '@keys_try'\n"
@@ -654,7 +652,7 @@ sub printComments {
 		@$cids_needed_ar = grep { !exists $comment_text->{$_} } @$cids_needed_ar;
 	}
 	if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
-		print STDERR scalar(gmtime) . " printComments memcached try_memcached '$try_memcached' con '$constants->{memcached}' s->m '$slashdb->{_mcd}' dt '$user->{domaintags}' mcs '$user->{maxcommentsize}' still needed: '@$cids_needed_ar'\n";
+		print STDERR scalar(gmtime) . " printComments memcached mcd '$mcd' con '$constants->{memcached}' mcd '$mcd' dt '$user->{domaintags}' mcs '$user->{maxcommentsize}' still needed: '@$cids_needed_ar'\n";
 	}
 
 	# Now we get fresh with the comment text. We take all of the cids
@@ -690,8 +688,8 @@ sub printComments {
 		# valid to write to memcached.
 		$comment_text->{$cid} = parseDomainTags($more_comment_text->{$cid},
 			$comments->{$cid}{fakeemail});
-		if ($try_memcached && $form->{cid} ne $cid) {
-			my $retval = $slashdb->{_mcd}->set("$mcdkey$cid", $comment_text->{$cid});
+		if ($mcd && $form->{cid} ne $cid) {
+			my $retval = $mcd->set("$mcdkey$cid", $comment_text->{$cid});
 			if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
 				print STDERR scalar(gmtime) . " printComments memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval\n";
 			}
@@ -705,7 +703,7 @@ sub printComments {
 	if ($mcd_debug) {
 		$mcd_debug->{hits} ||= 0;
 		printf STDERR scalar(gmtime) . " printComments memcached"
-			. " tried=$try_memcached total_cids=%d hits=%d misses=%d elapsed=%6.4f\n",
+			. " tried=" . ($mcd ? 1 : 0) . " total_cids=%d hits=%d misses=%d elapsed=%6.4f\n",
 			$mcd_debug->{total} , $mcd_debug->{hits},
 			$mcd_debug->{total} - $mcd_debug->{hits},
 			Time::HiRes::time - $mcd_debug->{start_time};

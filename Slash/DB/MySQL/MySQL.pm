@@ -5947,33 +5947,46 @@ sub getSlashConf {
 	# We only need to do this on startup.
 	$conf{classes} = $self->getClasses();
 
-	# Let's try memcached.  The memcached_servers var is in the format
+	return \%conf;
+}
+
+##################################################################
+# It would be best to write a Slash::MemCached class, preferably as
+# a plugin, but let's just do this for now.
+sub getMCD {
+	my($self) = @_;
+
+	# If we already created it for this object, return it.
+	return $self->{_mcd} if $self->{_mcd};
+
+	# If we aren't using memcached, return undef.
+	my $constants = getCurrentStatic();
+	return undef if !$constants->{memcached} || !$constants->{memcached_servers};
+
+	# OK, let's try memcached.  The memcached_servers var is in the format
 	# "10.0.0.15:11211 10.0.0.15:11212 10.0.0.17:11211=3".
-	# It would be best to write a Slash::MemCached class, preferably as
-	# a plugin, but let's just do this for now.
-	if ($conf{memcached} && $conf{memcached_servers}) {
-		my @servers = split / /, $conf{memcached_servers};
-		for my $server (@servers) {
-			if ($server =~ /(.+)=(\d+)$/) {
-				$server = [ $1, $2 ];
-			}
-		}
-		require MemCachedClient;
-		$self->{_mcd} = MemCachedClient->new({
-			servers =>	[ @servers ],
-			debug =>	$conf{memcached_debug} > 1 ? 1 : 0,
-		});
-		if ($conf{memcached_keyprefix}) {
-			$self->{_mcd}{keyprefix} = $conf{memcached_keyprefix};
-		} else {
-			# If no keyprefix defined in vars, use the first and
-			# last letter from the sitename.
-			$conf{sitename} =~ /([A-Za-z]).*(\w)/;
-			$self->{_mcd}{keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
+
+	my @servers = split / /, $constants->{memcached_servers};
+	for my $server (@servers) {
+		if ($server =~ /(.+)=(\d+)$/) {
+			$server = [ $1, $2 ];
 		}
 	}
-
-	return \%conf;
+	require MemCachedClient;
+	$self->{_mcd} = MemCachedClient->new({
+		servers =>	[ @servers ],
+		debug =>	$constants->{memcached_debug} > 1 ? 1 : 0,
+	});
+	return undef unless $self->{_mcd};
+	if ($constants->{memcached_keyprefix}) {
+		$self->{_mcd}{keyprefix} = $constants->{memcached_keyprefix};
+	} else {
+		# If no keyprefix defined in vars, use the first and
+		# last letter from the sitename.
+		$constants->{sitename} =~ /([A-Za-z]).*(\w)/;
+		$self->{_mcd}{keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
+	}
+	return $self->{_mcd};
 }
 
 ##################################################################
@@ -6951,6 +6964,12 @@ sub setUser {
 	my($self, $uid, $hashref, $options) = @_;
 	return 0 unless $uid;
 
+	my $constants = getCurrentStatic();
+	my $mcd = $self->getMCD();
+	# For now, don't get the AC from memcached, always get it from the DB.
+	$mcd = undef if $uid == $constants->{anonymous_coward_uid};
+	my $mcdkey = "$mcd->{keyprefix}u:" if $mcd;
+
 	my(@param, %update_tables, $cache);
 	my $tables = [qw(
 		users users_comments users_index
@@ -6966,9 +6985,28 @@ sub setUser {
 	}
 
 	# Power to the People
-	if ($hashref->{people}) {
-		my $people = $hashref->{people};
-		$hashref->{people} = freeze($people);
+	$hashref->{people} = freeze($hashref->{people}) if $hashref->{people};
+
+	# What we really should do is delete the memcache entry first, then
+	# write to the DB with autocommit off, then before doing the commit,
+	# write to memcache, then commit -- and on failure, delete the
+	# memcache entry again.  And if there are any keys we're setting
+	# that are prefixed with "-", don't write to memcache at all.
+	# Of course the speed advantage comes from putting user_hits columns
+	# into a separate memcached cache.
+	if ($mcd
+		# for now only do this for debugging purposes
+		&& $constants->{memcached_debug}) {
+		my $start_time = Time::HiRes::time;
+		my $user_cache = $self->getUser($uid);
+		for my $key (keys %$hashref) {
+			$user_cache->{$key} = $hashref->{$key};
+		}
+		$mcd->set("$mcdkey$uid", $user_cache);
+		if ($constants->{memcached_debug}) {
+			my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
+			print STDERR scalar(gmtime) . " mcd $$ setUser elapsed=$elapsed uid '$uid'\n";
+		}
 	}
 
 	# hm, come back to exboxes later; it works for now
@@ -7028,7 +7066,7 @@ sub setUser {
 		} elsif ($_->[0] eq "acl") {
 			my(@delete, @add);
 			my $acls = $_->[1];
-			for my $key (keys(%$acls)) {
+			for my $key (sort keys %$acls) {
 				if ($acls->{$key}) {
 					push @add, $key;
 				} else {
@@ -7037,12 +7075,12 @@ sub setUser {
 			} 
 			if (@delete) {
 				my $string = join(',', @{$self->sqlQuote(\@delete)});
-				$self->sqlDo("DELETE FROM users_acl WHERE acl IN ($string)");
+				$self->sqlDelete("users_acl", "acl IN ($string)");
 			}
 			if (@add) {
 				my $string;
-				for (@add) {
-					my $qacl = $self->sqlQuote($_);
+				for my $acl (@add) {
+					my $qacl = $self->sqlQuote($acl);
 					$string .= qq| ($uid, $qacl),|
 				}
 				chop($string);
@@ -7074,12 +7112,47 @@ sub getUsersNicknamesByUID {
 sub getUser {
 	my($self, $id, $val) = @_;
 	my $answer;
+
+	my $constants = getCurrentStatic();
+	my $start_time = Time::HiRes::time;
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$mcd->{keyprefix}u:" if $mcd;
+	my $mcdanswer;
+	if ($mcd
+		&& $constants->{memcached_debug} # for now only do this for debugging
+		and my $rawmcdanswer = $mcd->get("$mcdkey$id")) {
+		# All set; the full hashref for the requested user is in
+		# $answer with all required keys thawed.  Now we just
+		# need to return a limited portion of it if required.
+		if (ref($val) eq 'ARRAY') {
+			for (@$val) {
+				$mcdanswer->{$_} = $rawmcdanswer->{$_};
+			}
+		} elsif ($val) {
+			$mcdanswer = $rawmcdanswer->{$val};
+		} else {
+			$mcdanswer = $rawmcdanswer;
+		}
+		# If we're debugging, go thru the normal getUser to make
+		# sure we have the same value in memcached.  Otherwise,
+		# return what we just got.
+		if (!$constants->{memcached_debug}) {
+			return $mcdanswer;
+		}
+	}
+	if ($mcd && $constants->{mmemcached_debug}) {
+		my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
+		if (defined $mcdanswer) {
+			print STDERR scalar(gmtime) . " mcd $$ getUser '$mcdkey$id' elapsed=$elapsed cache HIT\n";
+		} else {
+			print STDERR scalar(gmtime) . " mcd $$ getUser '$mcdkey$id' elapsed=$elapsed cache MISS\n";
+		}
+	}
+
 	my $tables = [qw(
 		users users_comments users_index
 		users_info users_prefs users_hits
 	)];
-	# The sort makes sure that someone will always get the cache if
-	# they have the same tables
 	my $cache = _genericGetCacheName($self, $tables);
 
 	if (ref($val) eq 'ARRAY') {
@@ -7095,7 +7168,7 @@ sub getUser {
 		}
 		chop($values);
 
-		for (keys %tables) {
+		for (sort keys %tables) {
 			$where .= "$_.uid=$id AND ";
 		}
 		$where =~ s/ AND $//;
@@ -7119,50 +7192,54 @@ sub getUser {
 
 	} else {
 
-		# The five-way join is causing us some pain.  For testing, let's
-		# use a var to decide whether to do it that way, or a new way
-		# where we do multiple SELECTs.  Let the var decide how many
-		# SELECTs we do, and if more than 1, the first tables we'll pull
-		# off separately are Rob's suspicions:  users_prefs and
-		# users_comments.
+		if (!$answer) {
 
-		my $n = getCurrentStatic('num_users_selects') || 1;
-		my @tables_ordered = qw( users users_index
-			users_info users_hits
-			users_comments users_prefs );
-		while ($n > 0) {
-			my @tables_thispass = ( );
-			if ($n > 1) {
-				# Grab the columns from the last table still
-				# on the list.
-				@tables_thispass = pop @tables_ordered;
-			} else {
-				# This is the last SELECT we'll be doing, so
-				# join all remaining tables.
-				@tables_thispass = @tables_ordered;
-			}
-			my $table = join(",", @tables_thispass);
-			my $where = join(" AND ", map { "$_.uid=$id" } @tables_thispass);
-			if (!$answer) {
-				$answer = $self->sqlSelectHashref('*', $table, $where);
-			} else {
-				my $moreanswer = $self->sqlSelectHashref('*', $table, $where);
-				for (keys %$moreanswer) {
-					$answer->{$_} = $moreanswer->{$_}
-						unless exists $answer->{$_};
+			# The five-way join is causing us some pain.  For testing, let's
+			# use a var to decide whether to do it that way, or a new way
+			# where we do multiple SELECTs.  Let the var decide how many
+			# SELECTs we do, and if more than 1, the first tables we'll pull
+			# off separately are Rob's suspicions:  users_prefs and
+			# users_comments.
+
+			my $n = getCurrentStatic('num_users_selects') || 1;
+			my @tables_ordered = qw( users users_index
+				users_info users_hits
+				users_comments users_prefs );
+			while ($n > 0) {
+				my @tables_thispass = ( );
+				if ($n > 1) {
+					# Grab the columns from the last table still
+					# on the list.
+					@tables_thispass = pop @tables_ordered;
+				} else {
+					# This is the last SELECT we'll be doing, so
+					# join all remaining tables.
+					@tables_thispass = @tables_ordered;
 				}
+				my $table = join(",", @tables_thispass);
+				my $where = join(" AND ", map { "$_.uid=$id" } @tables_thispass);
+				if (!$answer) {
+					$answer = $self->sqlSelectHashref('*', $table, $where);
+				} else {
+					my $moreanswer = $self->sqlSelectHashref('*', $table, $where);
+					for (keys %$moreanswer) {
+						$answer->{$_} = $moreanswer->{$_}
+							unless exists $answer->{$_};
+					}
+				}
+				$n--;
 			}
-			$n--;
-		}
 
-		my($append_acl, $append);
-		$append_acl = $self->sqlSelectColArrayref('acl', 'users_acl', "uid=$id");
-		for (@$append_acl) {
-			$answer->{acl}{$_} = 1;
-		}
-		$append = $self->sqlSelectAll('name,value', 'users_param', "uid=$id");
-		for (@$append) {
-			$answer->{$_->[0]} = $_->[1];
+			my($append_acl, $append);
+			$append_acl = $self->sqlSelectColArrayref('acl', 'users_acl', "uid=$id");
+			for (@$append_acl) {
+				$answer->{acl}{$_} = 1;
+			}
+			$append = $self->sqlSelectAll('name,value', 'users_param', "uid=$id");
+			for (@$append) {
+				$answer->{$_->[0]} = $_->[1];
+			}
+
 		}
 	}
 
@@ -7175,7 +7252,7 @@ sub getUser {
 			$answer->{$_} =~ s/,'[^']+$//;
 			$answer->{$_} =~ s/,'?$//;
 		}
-		$answer->{'people'} = thaw($answer->{'people'}) if $answer->{'people'};
+		$answer->{people} = thaw($answer->{people}) if $answer->{people};
 
 	# ... and for scalars
 	} else {
@@ -7184,6 +7261,18 @@ sub getUser {
 		} elsif ($val =~ m/^ex(?:aid|tid|sect)$/) {
 			$answer =~ s/,'[^']+$//;
 			$answer =~ s/,'?$//;
+		}
+	}
+
+	if ($mcdanswer && $constants->{memcached_debug}) {
+		use Data::Dumper;
+		local $Data::Dumper::Sortkeys = 1;
+		my $answer_dumped =	Dumper($answer);
+		my $mcdanswer_dumped =	Dumper($mcdanswer);
+		if ($answer_dumped ne $mcdanswer_dumped) {
+			my $val_dumped = Dumper($val);
+			$val_dumped =~ s/\s+/ /g;
+			print STDERR scalar(gmtime) . " $$ getUser mcd diff on id '$id' val '$val_dumped', answer: ${answer_dumped}mcdanswer: ${mcdanswer_dumped}";
 		}
 	}
 

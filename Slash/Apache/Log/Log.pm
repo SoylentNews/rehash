@@ -105,7 +105,10 @@ sub UserLog {
 		$user_update->{admin_clearpass} = join(" ",
 			$r->connection->remote_ip, scalar(gmtime));
 	}
-	$slashdb->setUser($user->{uid}, $user_update) if $user_update;
+	if ($constants->{memcached_debug}) {
+		print STDERR scalar(gmtime) . " mcd $$ UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
+	}
+	$slashdb->setUser($user->{uid}, $user_update) if $user_update && %$user_update;
 
 	return OK;
 }
