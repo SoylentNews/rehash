@@ -4545,10 +4545,10 @@ sub getStoriesEssentials {
 		$where .= " AND displaystatus >= 0 ";
 	}
 
-	$where .= " AND tid='$tid' " if $tid;
-	$where .= " AND sid = '$misc->{sid}' " if $misc->{sid};
-	$where .= " AND sid != '$misc->{exclude_sid}' " if $misc->{exclude_sid};
-	$where .= " AND subsection=$misc->{subsection} " if $misc->{subsection};
+	$where .= " AND tid = "        . $self->sqlQuote($tid)                 if $tid;
+	$where .= " AND sid = "        . $self->sqlQuote($misc->{sid})         if $misc->{sid};
+	$where .= " AND sid != "       . $self->sqlQuote($misc->{exclude_sid}) if $misc->{exclude_sid};
+	$where .= " AND subsection = " . $self->sqlQuote($misc->{subsection})  if $misc->{subsection};
 
 	# User Config Vars
 	$where .= " AND tid not in ($user->{extid}) "
