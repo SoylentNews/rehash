@@ -2053,19 +2053,23 @@ sub createUser {
 
 
 ########################################################
-# Do not like this method -Brian
 sub setVar {
 	my($self, $name, $value) = @_;
+	my $name_q = $self->sqlQuote($name);
+	my $retval;
 	if (ref $value) {
-		$self->sqlUpdate('vars', {
-			value		=> $value->{'value'},
-			description	=> $value->{'description'}
-		}, 'name=' . $self->sqlQuote($name));
+		my $update = { };
+		for my $k (qw( value description )) {
+			$update->{$k} = $value->{$k} if defined $value->{$k};
+		}
+		return 0 unless $update;
+		$retval = $self->sqlUpdate('vars', $update, "name=$name_q");
 	} else {
-		$self->sqlUpdate('vars', {
+		$retval = $self->sqlUpdate('vars', {
 			value		=> $value
-		}, 'name=' . $self->sqlQuote($name));
+		}, "name=$name_q");
 	}
+	return $retval;
 }
 
 ########################################################
