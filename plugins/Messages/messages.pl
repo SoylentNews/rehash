@@ -105,7 +105,7 @@ sub edit_message {
 
 <B>Important Stuff:</B>
 	<LI>Please try to keep posts on topic.
-	<LI>Try to reply to other people comments instead of starting new threads.
+	<LI>Try to reply to other people's comments instead of starting new threads.
 	<LI>Read other people's messages before posting your own to avoid simply duplicating
 		what has already been said.
 	<LI>Use a clear subject that describes what your message is about.
