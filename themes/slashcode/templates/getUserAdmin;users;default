@@ -23,7 +23,6 @@ __template__
 	<TR>
 		<TD>
 		[% IF userinfo_flag %]
-		<P>[ <B><A HREF="[% constants.rootdir %]/users.pl?op=topabusers">Top Abusers</A></B> | <B><A HREF="[% constants.rootdir %]/users.pl?op=listreadonly">Read Only List</A></B> | <B><A HREF="[% constants.rootdir %]/users.pl?op=listbanned">Banned List</A></B> ]</P>
 			[% IF uidstruct %]
 		<BR>
 		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
