@@ -7498,6 +7498,28 @@ sub getTime {
 	return $t;
 }
 
+sub getTimeAgo {
+	my ($self, $time) = @_;
+	my $q_time = $self->sqlQuote($time);
+	my $units_given = 0;
+	my $remainder = $self->sqlSelect("UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP($q_time)");
+
+	my $diff = {};
+	$diff->{is_future} = 1 if $remainder < 0;
+	$diff->{is_past}   = 1 if $remainder > 0;
+	$diff->{is_now}    = 1 if $remainder == 0;
+	$remainder = abs($remainder);
+	$diff->{days} = int($remainder / 86400);
+	$remainder -= $diff->{days}* 86400;
+	$diff->{hours} = int($remainder / 3600);
+	$remainder -= $diff->{hours} * 3600;
+	$diff->{minutes} = int($remainder / 60);
+	$remainder -= $diff->{minutes} * 60;
+	$diff->{seconds} = $remainder;
+	
+	return $diff;
+}
+
 ##################################################################
 # And if a webserver had a date that is off... -Brian
 # ...it wouldn't matter; "today's date" is a timezone dependent concept.
