@@ -1125,7 +1125,7 @@ sub editstory {
 
 	my $newarticle = 1 if !$sid && !$I{F}{sid};
 
-	print "$msg" if (defined($msg));
+	print $msg if defined $msg;
 
 	print <<EOT;
 

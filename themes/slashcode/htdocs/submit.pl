@@ -416,7 +416,7 @@ USER
 
 		# Adds proper section and title for form editor.
 		my $sec = $section ne $I{defaultsection} ? "&section=$section" : '';
-		my $stitle = '&title=' . fixurl($subj, 1);
+		my $stitle = '&title=' . fixparam($subj);
 		$stitle =~ s/%/%%/g; # for sprintf
 
 		printf(($admin ? <<ADMIN : <<USER), @strs);
