@@ -17,7 +17,7 @@ __template__
 <B>Nickname:</B><BR>
 <INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE=""><BR>
 <B>Password:</B><BR>
-<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% FILTER fixurl; return_url ? return_url : "[% constants.rootdir %]/"; END %]">
+<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% FILTER fixurl; return_url ? return_url : "$constants.rootdir/"; END %]">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="userlogin">
 <INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20"><BR>
 <INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Login">
