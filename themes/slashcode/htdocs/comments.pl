@@ -652,15 +652,16 @@ sub _createDiscussion {
 		# we don't want to override prefs too easily.  this
 		# can be modified to become more inclusive later,
 		# if needed.  -- pudge
-		my $newurl	= $form->{url}
+		my $newurl	   = $form->{url}
 			? $form->{url}
 			: $ENV{HTTP_REFERER} =~ m|\Q$constants->{rootdir}/comments.pl\E$|
 				? ""
 				: $ENV{HTTP_REFERER};
-		$form->{url}	= fudgeurl($newurl);
+		$form->{url}	   = fudgeurl($newurl);
 		# $form->{title}	= strip_notags($form->{title});
-		$form->{title}	= strip_notags($form->{postersubj});
-		$form->{topic}  = $constants->{defaulttopic};
+		$form->{title}	   = strip_notags($form->{postersubj});
+		$form->{topic}   ||= $constants->{defaulttopic};
+		$form->{section} ||= $constants->{defaultsection};
 
 
 		# for now, use the postersubj filters; problem is,
@@ -681,6 +682,7 @@ sub _createDiscussion {
 			$id = $slashdb->createDiscussion({
 				title	=> $form->{title},
 				topic	=> $form->{topic},
+				section => $form->{section},
 				url	=> $form->{url} || 1,
 				type	=> "recycle"
 			});
