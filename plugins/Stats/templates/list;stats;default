@@ -71,7 +71,7 @@ __template__
         	[% day %]: [% stats_num %]<BR>
         [% END %]
 	<B>Total: [% stats_total %]</B>
-[% PROCESS make_graph stats => [myname] %]
+[% PROCESS make_graph statdata => [myname] %]
 [% END %]
 
 [% BLOCK doform %]
