@@ -98,14 +98,27 @@ EOT
 
 	my $admin_mods = $stats->getAdminModsInfo($yesterday);
 	my $admin_mods_text = "";
-	for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
-		$admin_mods_text .= sprintf("%13.13s: %26s %-35s\n",
-			$nickname,
-			$admin_mods->{$nickname}{m1_text},
-			$admin_mods->{$nickname}{m2_text}
-		);
+	my($num_admin_mods, $num_mods) = (0, 0);
+	if ($admin_mods) {
+		for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
+			$admin_mods_text .= sprintf("%13.13s: %26s %-35s\n",
+				$nickname,
+				$admin_mods->{$nickname}{m1_text},
+				$admin_mods->{$nickname}{m2_text}
+			);
+			if ($nickname eq '~Day Total') {
+				$num_mods += $admin_mods->{$nickname}{m1_up};
+				$num_mods += $admin_mods->{$nickname}{m1_down};
+			} else {
+				$num_admin_mods += $admin_mods->{$nickname}{m1_up}
+				$num_admin_mods += $admin_mods->{$nickname}{m1_down}
+			}
+		}
+		$admin_mods_text =~ s/ +$//gm;
+		$admin_mods_text .= sprintf("%13.13s: %4d of %4d (%6.2f%%)\n",
+			"Admin Mods", $num_admin_mods, $num_mods,
+			($num_mods ? $num_admin_mods*100/$num_mods : 0);
 	}
-	$admin_mods_text =~ s/ +$//gm;
 
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
