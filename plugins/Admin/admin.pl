@@ -907,12 +907,11 @@ sub getRelated {
 	# good measure.  If TITLE attribute is present, use that for the link
 	# label; otherwise just use the A content.
 	while ($story_content =~ m|<A\s+(.*?)>(.*?)</A>|sgi) {
-	 my($a_attr, $label) = ($1, $2);
-	 if ($a_attr =~ m/\bTITLE\s*=\s*"(.*?)"/si ||
-							+       $a_attr =~ m/\bTITLE\s*=\s*'(.*?)'/si) {
-		 $label = $1;
-		 $a_attr =~ s/$&//;
-	 }
+		my($a_attr, $label) = ($1, $2);
+		if ($a_attr =~ m/(\bTITLE\s*=\s*(["'])(.*?)\2)/si) {
+			$label = $3;
+			$a_attr =~ s/$1//;
+		}
 
 		$label = strip_notags($label);
 		$label =~ s/(\S{30})/$1 /g;
