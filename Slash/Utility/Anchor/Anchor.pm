@@ -147,6 +147,9 @@ sub header {
 	slashDisplay('html-header', { title => $data->{title} }, { Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
 		unless $options->{noheader};
 
+	$user->{state}{mt}{curcol} = 0;
+	$user->{state}{mt}{cols} = [ ];
+
 	# ssi = 1 IS NOT THE SAME as ssi = 'yes'
 	# ...which is silly. - Jamie 2002/06/26
 	if ($form->{ssi} && $form->{ssi} eq 'yes') {
@@ -165,8 +168,6 @@ sub header {
 #print STDERR "header(options->page) defined: '$options->{page}' for title '$data->{title}'\n" if defined($options->{page});
 	$data->{tab_selected} = $options->{tab_selected} if $options->{tab_selected};
 
-	$user->{state}{mt}{curcol} = 0;
-	$user->{state}{mt}{cols} = [ ];
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
 		$display = slashDisplay('header-admin', $data, { Return => $options->{Return}, Page => $options->{Page} });

@@ -72,6 +72,7 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 </TD>
 [% PROCESS maintable_td %]&nbsp;</TD>
 [% PROCESS maintable_td width=(constants.fancyboxwidth + 10) align="CENTER" valign="TOP" %]
+<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0">
 [% boxes || "&nbsp;" %]
 [% END %]
 
