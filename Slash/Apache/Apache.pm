@@ -340,9 +340,10 @@ sub IndexHandler {
 	# definitely need $gSkin set to do our manipulation of $uri.
 	# ARGH.  Or, do we need to call this every time through, because
 	# otherwise we get old data from previous click?
-	if (!$gSkin->{skid}) {
+#	if (!$gSkin->{skid}) {
 		setCurrentSkin(determineCurrentSkin());
-	}
+		$gSkin = getCurrentSkin();
+#	}
 
 	my $uri = $r->uri;
 	my $is_user = $r->header_in('Cookie') =~ $USER_MATCH;
@@ -379,12 +380,12 @@ sub IndexHandler {
 			my($base) = split(/\./, $gSkin->{index_handler});
 			$base = $constants->{index_handler_noanon}
 				if $constants->{index_noanon};
-			if ($constants->{static_section}) {
-				$r->filename("$basedir/$constants->{static_section}/$base.shtml");
-				$r->uri("/$constants->{static_section}/$base.shtml");
-			} else {
+			if ($gSkin->{skid} == $constants->{mainpage_skid}) {
 				$r->filename("$basedir/$base.shtml");
 				$r->uri("/$base.shtml");
+			} else {
+				$r->filename("$basedir/$gSkin->{name}/$base.shtml");
+				$r->uri("/$gSkin->{name}/$base.shtml");
 			}
 			writeLog('shtml');
 			return OK;
@@ -401,10 +402,13 @@ sub IndexHandler {
 		}
 
 		my $slashdb = getCurrentDB();
-		my $section = $slashdb->getSection($key);
-		my $index_handler = $section->{index_handler}
-			|| $gSkin->{index_handler};
-		if ($section && $section->{id} && $index_handler ne 'IGNORE') {
+		my $new_skin = $slashdb->getSkin($key);
+		my $new_skid = $new_skin->{skid} || $constants->{mainpage_skid};
+		setCurrentSkin($new_skid);
+		$gSkin = getCurrentSkin();
+
+		my $index_handler = $gSkin->{index_handler};
+		if ($index_handler ne 'IGNORE') {
 			my $basedir = $constants->{basedir};
 
 			# $USER_MATCH defined above
