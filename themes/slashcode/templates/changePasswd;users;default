@@ -43,7 +43,14 @@ __template__
 [% ELSE %]
 		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
 [% END %]
-		My login cookie <B>expires</B> [% session %] and <B>works from</B> [% clocation %]<BR>
+		My login cookie <B>expires</B> [% session %] and <B>works from</B> [% clocation %]
+
+		<P>Note: currently, to change your login cookie preferences, you must change your
+		password.  This will be fixed in the future.  You can change your password to
+		whatever your current password is, if you like, so it won't actually change.</P>
+
+		<P>Note: changing your password or login cookie preferences will disable all
+		cookies for this account, requiring all browsers to reauthenticate.</P>
 [% IF !admin_flag %]
 		[% IF got_oldpass %]
 			<INPUT TYPE="HIDDEN" NAME="oldpass" VALUE="[% form.oldpass | strip_attribute %]">	
