@@ -1550,8 +1550,8 @@ sub changePasswd {
 
 	my $got_oldpass = 0;
 	if ($form->{oldpass}) {
-		my $return_uid = $slashdb->getUserAuthenticate($id, $form->{oldpass});
-		$got_oldpass = 1 if $id == $return_uid;
+		my $return_uid = $slashdb->getUserAuthenticate($id, $form->{oldpass}, 1);
+		$got_oldpass = 1 if $return_uid && $id == $return_uid;
 	}
 
 	slashDisplay('changePasswd', {
@@ -2025,7 +2025,7 @@ sub savePasswd {
 		$error_flag++;
 	}
 
-	if (length $form->{pass1} < 6 || !$form->{pass1} || $form->{pass1}  eq "") {
+	if (!$form->{pass1} || length $form->{pass1} < 6) {
 		$$note .= getError('saveuser_passtooshort_err', { titlebar => 0 }, 0, 1)
 			if $note;
 		$error_flag++;
@@ -2033,8 +2033,8 @@ sub savePasswd {
 
 	if (!$user->{is_admin}){
 		# not an admin -- check old password before changing passwd
-		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass});
-		if ($return_uid != $uid) {
+		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass}, 1);
+		if (!$return_uid || $return_uid != $uid) {
 			$$note .= getError('saveuser_badoldpass_err', { titlebar => 0 }, 0, 1) 
 				if $note;
 			$error_flag++;
@@ -2045,14 +2045,15 @@ sub savePasswd {
 	if (! $error_flag) {
 		$user_edits_table->{passwd} = $form->{pass1} if $form->{pass1};
 		$user_edits_table->{session_login} = $form->{session_login};
-		my $pass = bakeUserCookie($uid,
-			$user_edits_table->{passwd}
-				? encryptPassword($user_edits_table->{passwd})
-				: $user_edit->{passwd}
-		);
 
+		# changed pass, so delete all logtokens
+		$slashdb->deleteLogToken($form->{uid}, 1);
+
+		# only set cookie if user is current user
 		if ($form->{uid} eq $user->{uid}) {
-			setCookie('user', $pass, $user_edits_table->{session_login});
+			my $value  = $slashdb->getLogToken($form->{uid}, 1);
+			my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($form->{uid}, 1));
+			setCookie('user', $cookie, $user_edits_table->{session_login});
 		}
 
 		if ($user->{admin_clearpass}

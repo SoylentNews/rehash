@@ -63,6 +63,7 @@ use vars qw($VERSION @EXPORT);
 	isSubscriber
 	prepareUser
 	filter_params
+	get_ipids
 
 	setUserDate
 	isDST
@@ -164,7 +165,7 @@ sub getCurrentMenu {
 
 =head2 getCurrentUser([MEMBER])
 
-Returns the current authenicated user.
+Returns the current authenticated user.
 
 =over 4
 
@@ -957,12 +958,12 @@ A random value based on alphanumeric characters
 
 #========================================================================
 
-=head2 bakeUserCookie(UID, PASSWD)
+=head2 bakeUserCookie(UID, VALUE)
 
-Bakes (creates) a user cookie from its ingredients (UID, PASSWD).
+Bakes (creates) a user cookie from its ingredients (UID, VALUE).
 
-Currently cookie is hexified: this should be changed, no need anymore,
-perhaps?  -- pudge
+The cookie used to be hexified; it is no longer.  We can still read such
+cookies, though, but we don't create them.
 
 =over 4
 
@@ -974,9 +975,9 @@ perhaps?  -- pudge
 
 User ID.
 
-=item PASSWD
+=item VALUE
 
-Password.
+Cookie's value.
 
 =back
 
@@ -992,7 +993,6 @@ Created cookie.
 sub bakeUserCookie {
 	my($uid, $passwd) = @_;
 	my $cookie = $uid . '::' . $passwd;
-	$cookie =~ s/(.)/sprintf("%%%02x", ord($1))/ge;
 	return $cookie;
 }
 
@@ -1001,10 +1001,10 @@ sub bakeUserCookie {
 =head2 eatUserCookie(COOKIE)
 
 Digests (parses) a user cookie, returning it to its original ingredients
-(UID, password).
+(UID, value).
 
-Currently cookie is hexified: this should be changed, no need anymore,
-perhaps?  -- pudge
+The cookie used to be hexified; it is no longer.  We can still read such
+cookies, though.
 
 =over 4
 
@@ -1020,7 +1020,7 @@ Cookie to be parsed.
 
 =item Return value
 
-The UID and password encoded in the cookie.
+The UID and value encoded in the cookie.
 
 =back
 
@@ -1028,7 +1028,8 @@ The UID and password encoded in the cookie.
 
 sub eatUserCookie {
 	my($cookie) = @_;
-	$cookie =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack('C', hex($1))/ge;
+	$cookie =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack('C', hex($1))/ge
+		unless $cookie =~ /^\d+::/;
 	my($uid, $passwd) = split(/::/, $cookie, 2);
 	return($uid, $passwd);
 }
@@ -1048,7 +1049,7 @@ called multiple times to set multiple cookies.
 
 =item NAME
 
-NAme of the cookie.
+Name of the cookie.
 
 =item VALUE
 
@@ -1188,7 +1189,7 @@ sub prepareUser {
 	}
 	
 	# First we find a good reader DB so that we can use that for the user.
-	my $databases = $slashdb->getDBs();
+	my $databases = $slashdb->getDBs;
 	my %user_types;
 	for my $type (keys %$databases) {
 		my $db = $databases->{$type};
@@ -1227,6 +1228,7 @@ sub prepareUser {
 		$user->{state} = {};
 	} else {
 		$user = $reader->getUser($uid);
+		$user->{logtoken} = $reader->getLogToken($uid);
 		$user->{is_anon} = 0;
 	}
 
@@ -1241,10 +1243,7 @@ sub prepareUser {
 	}
 
 	$user->{state}{post}	= $method eq 'POST' ? 1 : 0;
-	$user->{ipid}		= md5_hex($hostip);
-	$user->{subnetid}	= $hostip;
-	$user->{subnetid}	=~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
-	$user->{subnetid}	= md5_hex($user->{subnetid});
+	@{$user}{qw[ipid subnetid]} = get_ipids($hostip);
 
 	my @defaults = (
 		['mode', 'thread'], qw[
@@ -1349,6 +1348,25 @@ sub prepareUser {
 
 #========================================================================
 
+sub get_ipids {
+	my($hostip, $no_md5) = @_;
+	if (!$hostip && $ENV{GATEWAY_INTERFACE}) {
+		my $r = Apache->request;
+		$hostip = $r->connection->remote_ip;
+	} elsif (!$hostip) {
+		$hostip = '';
+	}
+
+	my $ipid = $no_md5 ? $hostip : md5_hex($hostip);
+	(my $subnetid = $hostip) =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+	$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
+	(my $classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
+	$classbid = $no_md5 ? $classbid : md5_hex($classbid);
+	return($ipid, $subnetid, $classbid);
+}
+
+#========================================================================
+
 =head2 filter_params(PARAMS)
 
 This cleans up form data before it is used by the program.
@@ -1411,10 +1429,12 @@ Hashref of cleaned-up data.
 
 	# special few
 	my %special = (
-		sid	=> sub { $_[0] =~ s|[^A-Za-z0-9/._]||g	},
-		flags	=> sub { $_[0] =~ s|[^a-z0-9_,]||g	},
-		query	=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
-			         $_[0] =~ s|\s+| |g;		},
+		logtoken	=> sub { $_[0] = '' unless
+					 $_[0] =~ m|^(\d+)::[A-Za-z0-9/+]{22}$|	},
+		sid		=> sub { $_[0] =~ s|[^A-Za-z0-9/._]||g		},
+		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g		},
+		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
+			        	 $_[0] =~ s|\s+| |g;			},
 	);
 
 

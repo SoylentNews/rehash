@@ -8,6 +8,7 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Slash::XML;
 use Time::HiRes;
 
 sub main {
@@ -42,6 +43,20 @@ printf STDERR scalar(localtime) . " index.pl $$ redirect since op=$form->{op} c=
 		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME}), return if $c;
 	}
 
+
+	my $rss = $constants->{rss_allow_index} && $form->{content_type} eq 'rss' && (
+		$user->{is_admin}
+			||
+		($constants->{rss_allow_index} > 1 && $user->{is_subscriber})
+			||
+		($constants->{rss_allow_index} > 2 && !$user->{is_anon})
+	);
+
+	# $form->{logtoken} is only allowed if using rss
+	if ($form->{logtoken} && !$rss) {
+		redirect($ENV{SCRIPT_NAME});
+	}
+
 	$section = $reader->getSection($form->{section});
 
 	# Decide what our limit is going to be.
@@ -63,13 +78,6 @@ printf STDERR scalar(localtime) . " index.pl $$ pre elapsed %5.3f\n", (Time::HiR
 		$limit, $form->{section},
 		'',
 	);
-
-	my($first_date, $last_date) = ($stories->[0]{time}, $stories->[-1]{time});
-	$first_date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
-	$last_date  =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
-
-	my $title = getData('head', { section => $section });
-	header($title, $section->{section}) or return;
 
 	# We may, in this listing, have a story from the Mysterious Future.
 	# If so, there are three possibilities:
@@ -95,10 +103,19 @@ printf STDERR scalar(localtime) . " index.pl $$ pre elapsed %5.3f\n", (Time::HiR
 
 printf STDERR scalar(localtime) . " index.pl $$ pre-displays elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 
+	return do_rss($reader, $constants, $user, $form, $stories) if $rss;
+
+	my $title = getData('head', { section => $section });
+	header($title, $section->{section}) or return;
+
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
 	# index_more block (aka Older Stuff).
 	$Stories = displayStories($stories);
+
+	my($first_date, $last_date) = ($stories->[0]{time}, $stories->[-1]{time});
+	$first_date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
+	$last_date  =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
 
 	my $StandardBlocks = displayStandardBlocks($section, $stories,
 		{ first_date => $first_date, last_date => $last_date }
@@ -116,6 +133,36 @@ printf STDERR scalar(localtime) . " index.pl $$ after slashDisplay elapsed %5.3f
 
 	writeLog($form->{section});
 printf STDERR scalar(localtime) . " index.pl $$ after writeLog elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+}
+
+
+sub do_rss {
+	my($reader, $constants, $user, $form, $stories) = @_;
+	my @rss_stories;
+	for (@$stories) {
+		my $story = $reader->getStory($_->{sid});
+		$story->{introtext} = parseSlashizedLinks($story->{introtext});
+		$story->{introtext} = processSlashTags($story->{introtext});
+		# this REALLY REALLY SUCKS and MUST be rewritten before going live -- pudge
+		$story->{introtext} =~ s{(HREF|SRC)="(//[^/]+)}{$1 . '="' . url2abs($2)}eg;
+		push @rss_stories, { story => $story };
+	}
+
+	xmlDisplay('rss', {
+		channel	=> {
+			title	=> "$constants->{sitename} Subscriber Feed",  # in vars or something
+		},
+		version 		=> $form->{rss_version},
+		image			=> 1,
+		items			=> \@rss_stories,
+		rdfitemdesc		=> 1,
+		rdfitemdesc_html	=> 1,
+	}, {
+		filename		=> lc($constants->{sitename}) . '.rss',
+	});
+
+	writeLog($form->{section});
+	return;
 }
 
 #################################################################

@@ -28,7 +28,7 @@ use strict;
 use Date::Format qw(time2str);
 use Date::Language;
 use Date::Parse qw(str2time);
-use Digest::MD5 'md5_hex';
+use Digest::MD5 qw(md5_hex md5_base64);
 use HTML::Entities;
 use HTML::FormatText;
 use HTML::TreeBuilder;
@@ -66,6 +66,7 @@ use vars qw($VERSION @EXPORT);
 	fudgeurl
 	formatDate
 	getArmoredEmail
+	createLogToken
 	grepn
 	html2text
 	nickFix
@@ -393,6 +394,29 @@ sub timeCalc {
 
 	# return the new pretty date
 	return $date;
+}
+
+#========================================================================
+
+=head2 createLogToken()
+
+Return new random 20-character logtoken, composed of hex chars.
+
+=over 4
+
+=item Return value
+
+Random password.
+
+=back
+
+=cut
+
+{
+	my $int = 2**32-1;
+	sub createLogToken {
+		return md5_base64(int rand $int);
+	}
 }
 
 #========================================================================

@@ -28,7 +28,7 @@ __template__
 		<TD>
 [% IF constants.offer_insecure_login_link %]
 		<P>You can automatically log in by clicking
-		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;upasswd=[% useredit.passwd | fixparam %]&amp;unickname=[% useredit.nickname | fixparam %]">This Link</A> and Bookmarking the resulting page. 
+		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
 		This is totally insecure, but very convenient.
 		</P>
 [% END %]

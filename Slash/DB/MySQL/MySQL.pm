@@ -1344,7 +1344,6 @@ sub createAccessLog {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $r = Apache->request;
-	my $hostip = $r->connection->remote_ip; 
 	my $bytes = $r->bytes_sent; 
 
 	$user ||= {};
@@ -1364,10 +1363,10 @@ sub createAccessLog {
 			: $constants->{section};
 	}
 
-	my $ipid = getCurrentUser('ipid') || md5_hex($hostip);
-	$hostip =~ s/^(\d+\.\d+\.\d+)\.\d+$/$1.0/;
-	$hostip = md5_hex($hostip);
-	my $subnetid = getCurrentUser('subnetid') || $hostip;
+	my($ipid, $subnetid) = (getCurrentUser('ipid'), getCurrentUser('subnetid'));
+	if (!$ipid || !$subnetid) {
+		($ipid, $subnetid) = get_ipids($r->connection->remote_ip);
+	}
 
 	if ($op eq 'index' && $dat =~ m|^([^/]*)/|) {
 		$section = $1;
@@ -1542,56 +1541,74 @@ sub deleteUser {
 # Get user info from the users table.
 sub getUserAuthenticate {
 	my($self, $uid_try, $passwd, $kind) = @_;
-	my($uid_verified, $cookpasswd, $newpass, $uid_try_q,
-		$cryptpasswd, @pass);
+	my($newpass, $cookpasswd);
 
 	return undef unless $uid_try && $passwd;
 
 	# if $kind is 1, then only try to auth password as plaintext
 	# if $kind is 2, then only try to auth password as encrypted
-	# if $kind is undef or 0, try as encrypted
-	#	(the most common case), then as plaintext
-	my($EITHER, $PLAIN, $ENCRYPTED) = (0, 1, 2);
+	# if $kind is 3, then only try to auth user with logtoken
+	# if $kind is undef or 0, try as logtoken (the most common case),
+	#	then encrypted, then as plaintext
+	my($EITHER, $PLAIN, $ENCRYPTED, $LOGTOKEN) = (0, 1, 2, 3);
 	my($UID, $PASSWD, $NEWPASSWD) = (0, 1, 2);
 	$kind ||= $EITHER;
 
 	# RECHECK LOGIC!!  -- pudge
 
-	$uid_try_q = $self->sqlQuote($uid_try);
-	$cryptpasswd = encryptPassword($passwd);
-	@pass = $self->sqlSelect(
-		'uid,passwd,newpasswd',
-		'users',
-		"uid=$uid_try_q"
-	);
+	my $uid_try_q = $self->sqlQuote($uid_try);
+	my $uid_verified = 0;
 
-	# try ENCRYPTED -> ENCRYPTED
-	if ($kind == $EITHER || $kind == $ENCRYPTED) {
-		if ($passwd eq $pass[$PASSWD]) {
-			$uid_verified = $pass[$UID];
+	if ($kind == $LOGTOKEN || $kind == $EITHER) {
+		# get existing logtoken, if exists
+		if ($passwd eq $self->getLogToken($uid_try)) {
+			$uid_verified = $uid_try;
 			$cookpasswd = $passwd;
 		}
-	}
 
-	# try PLAINTEXT -> ENCRYPTED
-	if (($kind == $EITHER || $kind == $PLAIN) && !defined $uid_verified) {
-		if ($cryptpasswd eq $pass[$PASSWD]) {
-			$uid_verified = $pass[$UID];
-			$cookpasswd = $cryptpasswd;
+	}
+		
+	if ($kind != $LOGTOKEN && !$uid_verified) {
+		my $cryptpasswd = encryptPassword($passwd);
+		my @pass = $self->sqlSelect(
+			'uid,passwd,newpasswd',
+			'users',
+			"uid=$uid_try_q"
+		);
+
+		# try ENCRYPTED -> ENCRYPTED
+		if ($kind == $EITHER || $kind == $ENCRYPTED) {
+			if ($passwd eq $pass[$PASSWD]) {
+				$uid_verified = $pass[$UID];
+				# get existing logtoken, if exists, or new one
+				$cookpasswd = $self->getLogToken($uid_verified, 1);
+			}
 		}
-	}
 
-	# try PLAINTEXT -> NEWPASS
-	if (($kind == $EITHER || $kind == $PLAIN) && !defined $uid_verified) {
-		if ($passwd eq $pass[$NEWPASSWD]) {
-			$self->sqlUpdate('users', {
-				newpasswd	=> '',
-				passwd		=> $cryptpasswd
-			}, "uid=$uid_try_q");
-			$newpass = 1;
+		# try PLAINTEXT -> ENCRYPTED
+		if (($kind == $EITHER || $kind == $PLAIN) && !$uid_verified) {
+			if ($cryptpasswd eq $pass[$PASSWD]) {
+				$uid_verified = $pass[$UID];
+				# get existing logtoken, if exists, or new one
+				$cookpasswd = $self->getLogToken($uid_verified, 1);
+			}
+		}
 
-			$uid_verified = $pass[$UID];
-			$cookpasswd = $cryptpasswd;
+		# try PLAINTEXT -> NEWPASS
+		if (($kind == $EITHER || $kind == $PLAIN) && !$uid_verified) {
+			if ($passwd eq $pass[$NEWPASSWD]) {
+				$self->sqlUpdate('users', {
+					newpasswd	=> '',
+					passwd		=> $cryptpasswd
+				}, "uid=$uid_try_q");
+				$newpass = 1;
+
+				$uid_verified = $pass[$UID];
+				# delete existing logtokens
+				$self->deleteLogToken($uid_verified, 1);
+				# create new logtoken
+				$cookpasswd = $self->setLogToken($uid_verified);
+			}
 		}
 	}
 
@@ -1619,13 +1636,11 @@ sub createBadPasswordLog {
 	my $r = Apache->request;
 	return unless $r;
 
-	my $hostip = $r->connection->remote_ip;
-	my $subnet = $hostip;
-	$subnet =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+	my($ip, $subnet) = get_ipids($r->connection->remote_ip, 1);
 	$self->sqlInsert("badpasswords", {
 		uid =>          $uid,
 		password =>     $password_wrong,
-		ip =>           $hostip,
+		ip =>           $ip,
 		subnet =>       $subnet,
 	} );
 
@@ -1704,6 +1719,55 @@ sub getNewPasswd {
 	return $newpasswd;
 }
 
+########################################################
+# Get a logtoken from the DB, or create a new one
+sub getLogToken {
+	my($self, $uid, $new) = @_;
+	my($ipid, $subnetid, $classbid) = get_ipids();
+	my $uid_q = $self->sqlQuote($uid);
+	my $value = $self->sqlSelect(
+		'value', 'users_logtokens',
+		"uid=$uid_q AND " .
+		"locationid='$classbid' AND ".
+		"expires >= NOW()"
+	);
+
+	# if $new, then create a new value if none exists
+	$value ||= $self->setLogToken($uid) if $new;
+
+	return $value;
+}
+
+########################################################
+# Make a new logtoken, save it in the DB, and return it.
+sub setLogToken {
+	my($self, $uid) = @_;
+	my $logtoken = createLogToken();
+	my($ipid, $subnetid, $classbid) = get_ipids();
+	$self->sqlReplace('users_logtokens', {
+		uid		=> $uid,
+		value		=> $logtoken,
+		locationid	=> $classbid,
+		-expires 	=> 'DATE_ADD(NOW(), INTERVAL 1 YEAR)'
+	});
+	return $logtoken;
+}
+
+########################################################
+# Make a new logtoken, save it in the DB, and return it.
+sub deleteLogToken {
+	my($self, $uid, $all) = @_;
+
+	my $uid_q = $self->sqlQuote($uid);
+	my $where = "uid=$uid_q";
+
+	if (!$all) {
+		my($ipid, $subnetid, $classbid) = get_ipids();
+		$where .= " AND locationid='$classbid'";
+	}
+
+	$self->sqlDelete('users_logtokens', $where);
+}
 
 ########################################################
 # Get user info from the users table.
@@ -3016,6 +3080,9 @@ sub getUnsetFkCount {
 sub updateFormkeyId {
 	my($self, $formname, $formkey, $uid, $rlogin, $upasswd) = @_;
 
+	# here we check to see if a user has logged in just now, and
+	# has any formkeys assigned to him; if so, we assign them to
+	# his newly-granted UID
 	if (! isAnon($uid) && $rlogin && length($upasswd) > 1) {
 		my $constants = getCurrentStatic();
 		my $last_count = $self->_getLastFkCount($formname);
@@ -6556,13 +6623,10 @@ sub getStory {
 	my $table_cache = '_stories_cache';
 	my $table_cache_time= '_stories_cache_time';
 
-	my $val_scalar = 1;
-	$val_scalar = 0 if !$val or ref($val);
-
 	# Go grab the data if we don't have it, or if the caller
 	# demands that we grab it anyway.
 	my $is_in_cache = exists $self->{$table_cache}{$id};
-	if (!$is_in_cache or $force_cache_freshen) {
+	if (!$is_in_cache || $force_cache_freshen) {
 		# We avoid the join here. Sure, it's two calls to the db,
 		# but why do a join if it's not needed?
 		my($append, $answer, $db_id);
@@ -6579,7 +6643,7 @@ sub getStory {
 		for my $ary_ref (@$append) {
 			$answer->{$ary_ref->[0]} = $ary_ref->[1];
 		}
-		if (!$answer or ref($answer) ne 'HASH') {
+		if (!$answer || ref($answer) ne 'HASH') {
 			# If there's no data for this sid, then there's no data
 			# for us to return, and we shouldn't touch the cache.
 			return undef;
@@ -6594,8 +6658,8 @@ sub getStory {
 	}
 
 	# The data is in the table cache now.
-	my $retval = undef;
-	if ($val_scalar) {
+	my $retval;
+	if ($val && !ref $val) {
 		# Caller only asked for one return value.
 		if (exists $self->{$table_cache}{$id}{$val}) {
 			$retval = $self->{$table_cache}{$id}{$val};

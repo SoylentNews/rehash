@@ -124,9 +124,17 @@ sub handler {
 	my $uid;
 	my $op = $form->{op} || '';
 
-	if (($op eq 'userlogin' || $form->{rlogin}) && length($form->{upasswd}) > 1) {
-
+	if ((($op eq 'userlogin' || $form->{rlogin}) && length($form->{upasswd}) > 1)
+		||
+	     ($op eq 'userlogin' && $form->{logtoken})
+	) {
 		my $tmpuid = $slashdb->getUserUID($form->{unickname});
+		my $passwd = $form->{upasswd};
+		my $logtoken;
+		if (!$tmpuid && $form->{logtoken}) {
+			($tmpuid, $passwd) = eatUserCookie($form->{logtoken});
+			$logtoken = $form->{logtoken};
+		}
 
 		# Don't allow login attempts from IPIDs that have been marked
 		# as "nopost" -- those are mostly open proxies.  Check both
@@ -136,12 +144,12 @@ sub handler {
 		# values, checkReadOnly() knows how to do that.
 		my $read_only = 0;
 		my $hostip = $r->connection->remote_ip;
-		if ($slashdb->checkReadOnly('nopost', { ipid => $hostip })) {
+		my($ip, $subnet) = get_ipids($hostip, 1);
+		if ($slashdb->checkReadOnly('nopost', { ipid => $ip })) {
 			$read_only = 1;
 		} else {
-			$hostip =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
 			$read_only = 1 if $slashdb->checkReadOnly('nopost', {
-				subnetid => $hostip });
+				subnetid => $subnet });
 		}
 
 		my $newpass;
@@ -149,10 +157,10 @@ sub handler {
 			# We know we can't log in, don't even try.
 			$uid = 0;
 		} else {
-			($uid, $newpass) = userLogin($tmpuid, $form->{upasswd});
+			($uid, $newpass) = userLogin($tmpuid, $passwd, $logtoken);
 		}
 
-		# here we want to redirect only if the user has posted via
+		# here we want to redirect only if the user has requested via
 		# GET, and the user has logged in successfully
 
 		if ($method eq 'GET' && $uid && ! isAnon($uid)) {
@@ -178,6 +186,54 @@ sub handler {
 #			return REDIRECT;
 		}
 
+	} elsif ($form->{logtoken} || ($cookies->{user} && $cookies->{user}->value)) {
+		# $form->{logtoken} overrides the cookie under some circumstances,
+		# but is NOT used here to log user in with a cookie, it is only for
+		# one-shot requests, unless coupled with userlogin op, as above
+		my $logtoken = '';
+		if ($form->{logtoken}) {
+			# only allow this for certain pages/ops etc.
+			# and that page must doublecheck for permissions etc., still,
+			# redirecting user back to a main page upon failure
+			if ($constants->{rss_allow_index} && $form->{content_type} eq 'rss' && $uri =~ m{^/index\.pl$}) {
+				$logtoken = $form->{logtoken};
+			} else {
+				delete $form->{logtoken};
+			}
+		}
+
+		my($tmpuid, $value) = eatUserCookie($logtoken || $cookies->{user}->value);
+		my $cookvalue;
+		if ($tmpuid && $tmpuid > 0 && $tmpuid != $constants->{anonymous_coward_uid}) {
+			($uid, $cookvalue) =
+				$slashdb->getUserAuthenticate($tmpuid, $value);
+		}
+
+		if (!$logtoken && $uid && $op ne 'userclose') {
+			# set cookie every time, in case session_login
+			# value changes, or time is almost expired on
+			# saved cookie, or password changes, or ...
+
+			# can't set it every time, it upsets people.
+			# we need to set it only if password or
+			# session_login changes. -- pudge
+
+			# if existing cookie is not a logtoken cookie, make it one
+			if ($value !~ m|^[A-Za-z0-9/+]{22}$|) {
+	 			setCookie('user', bakeUserCookie($uid, $cookvalue),
+	 				$slashdb->getUser($uid, 'session_login')
+	 			);
+	 		}
+		} elsif (!$logtoken) {
+			if ($op eq 'userclose') {
+				$slashdb->deleteLogToken($uid);
+			}
+
+			$uid = $constants->{anonymous_coward_uid};
+			delete $cookies->{user};
+			setCookie('user', '');
+		}
+
 	} elsif ($op eq 'userclose') {
 		# It may be faster to just let the delete fail then test -Brian
 		# well, uid is undef here ... can't use it to test
@@ -189,36 +245,10 @@ sub handler {
 		#$slashdb->deleteSession(); #  if $slashdb->getUser($uid, 'seclev') >= 99;
 		delete $cookies->{user};
 		setCookie('user', '');
-
-	} elsif ($cookies->{user} and $cookies->{user}->value) {
-		my($tmpuid, $password) = eatUserCookie($cookies->{user}->value);
-		my $cookpasswd;
-		if ($tmpuid && $tmpuid > 0 && $tmpuid != $constants->{anonymous_coward_uid}) {
-			($uid, $cookpasswd) =
-				$slashdb->getUserAuthenticate($tmpuid, $password);
-		}
-
-		if ($uid) {
-			# set cookie every time, in case session_login
-			# value changes, or time is almost expired on
-			# saved cookie, or password changes, or ...
-
-			# can't set it every time, it upsets people.
-			# we need to set it only if password or
-			# session_login changes. -- pudge
-
-# 			setCookie('user', bakeUserCookie($uid, $cookpasswd),
-# 				$slashdb->getUser($uid, 'session_login')
-# 			);
-		} else {
-			$uid = $constants->{anonymous_coward_uid};
-			delete $cookies->{user};
-			setCookie('user', '');
-		}
 	}
 
 	# This has happened to me a couple of times.
-	delete $cookies->{user} if ($cookies->{user} and !($cookies->{user}->value));
+	delete $cookies->{user} if $cookies->{user} && !$cookies->{user}->value;
 
 	$uid = $constants->{anonymous_coward_uid} unless defined $uid;
 
@@ -254,12 +284,11 @@ sub handler {
 		# instead of going through prepareUser(), because this is
 		# much, much faster.
 		my $hostip = $r->connection->remote_ip;
-		my $subnet = $hostip;
-		$subnet =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+		my($ipid, $subnetid) = get_ipids($hostip);
 		my $user = {
 			uid		=> $uid,
-			ipid		=> md5_hex($hostip),
-			subnetid	=> md5_hex($subnet),
+			ipid		=> $ipid,
+			subnetid	=> $subnetid,
 		};
 		createCurrentUser($user);
 		return FORBIDDEN;
@@ -387,16 +416,21 @@ sub authors {
 
 ########################################################
 sub userLogin {
-	my($uid_try, $passwd) = @_;
+	my($uid_try, $passwd, $logtoken) = @_;
 	my $slashdb = getCurrentDB();
 
-	# Do we want to allow logins with encrypted passwords? -- pudge
-#	$passwd = substr $passwd, 0, 20;
-	my($uid, $cookpasswd, $newpass) =
-		$slashdb->getUserAuthenticate($uid_try, $passwd); #, 1
+	# only allow plain text passwords, unless logtoken is passed,
+	# then only allow that
+	# my($EITHER, $PLAIN, $ENCRYPTED, $LOGTOKEN) = (0, 1, 2, 3);
+	## this is disabled for now; some people still using saved URLs
+	## with encrypted passwords etc. ... come back to it later -- pudge
+	my $kind = 0; #$logtoken ? 3 : 1;
+
+	my($uid, $cookvalue, $newpass) =
+		$slashdb->getUserAuthenticate($uid_try, $passwd, $kind);
 
 	if (!isAnon($uid)) {
-		setCookie('user', bakeUserCookie($uid, $cookpasswd),
+		setCookie('user', bakeUserCookie($uid, $cookvalue),
 			$slashdb->getUser($uid, 'session_login'));
 		return($uid, $newpass);
 	} else {
@@ -756,7 +790,7 @@ Slash::Apache::User - Apache Authenticate for Slash user
 
 This is the user authenication system for Slash. This is
 where you want to be if you want to modify slashcode's
-method of authenication. The rest of Slash depends
+method of authentication. The rest of Slash depends
 on finding the UID of the user in the SLASH_USER
 environmental variable.
 

@@ -73,7 +73,7 @@ __template__
 	<INPUT TYPE="HIDDEN" NAME="rlogin" VALUE="1">
 
 	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Nick' %]</TD><TD>
-		<INPUT TYPE="TEXT" NAME="unickname" VALUE="[% form.nickname %]">
+		<INPUT TYPE="TEXT" NAME="unickname" VALUE="[% form.nickname | strip_attribute %]">
 
 	</TD></TR><TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Password' %]</TD><TD>
 		<INPUT TYPE="PASSWORD" NAME="upasswd">
