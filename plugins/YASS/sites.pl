@@ -4,7 +4,6 @@ use XML::OCS;
 use Slash;
 use Slash::Utility;
 use Slash::Display;
-use Slash::Feed;
 use Slash::XML;
 
 sub main {
