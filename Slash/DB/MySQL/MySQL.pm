@@ -4579,6 +4579,7 @@ sub countCommentsByGeneric {
 	my($self, $where_clause, $options) = @_;
 	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
 		if $options->{limit_days};
+	$where_clause .= " AND cid >= $options->{cid_at_or_after} " if $options->{cid_at_or_after};
 	return $self->sqlCount('comments', $where_clause, $options);
 }
 
@@ -4884,13 +4885,18 @@ sub _calc_karma_token_loss {
 	my($self, $reason_karma_change, $comment_change_hr) = @_;
 	my $constants = getCurrentStatic();
 	my($kc, $tc); # karma change, token change
-
 	$kc = $reason_karma_change;
 	if ($constants->{mod_down_karmacoststyle}) {
 		if ($constants->{mod_down_karmacoststyle} == 1) {
 			my $change = abs($comment_change_hr->{points_max}
 				- $comment_change_hr->{points_after});
 			$kc *= $change;
+		}
+	}
+	if(defined $constants->{comment_karma_loss_limit} and $constants->{comment_karma_loss_limit} ne ""){
+		my $future_karma = $comment_change_hr->{karma} + $kc;
+		if($future_karma < $constants->{comment_karma_loss_limit}){
+			$kc = $constants->{comment_karma_loss_limit} - $comment_change_hr->{karma};
 		}
 	}
 	$tc = $kc;
@@ -5380,8 +5386,8 @@ sub setCommentForMod {
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	my $hr = { };
-	($hr->{cid}, $hr->{points_before}, $hr->{points_orig}, $hr->{points_max}) =
-		$self->sqlSelect("cid, points, pointsorig, pointsmax",
+	($hr->{cid}, $hr->{points_before}, $hr->{points_orig}, $hr->{points_max}, $hr->{karma}) =
+		$self->sqlSelect("cid, points, pointsorig, pointsmax, karma",
 			"comments", "cid=$cid", "LOCK IN SHARE MODE");
 	$hr->{points_change} = $val;
 	$hr->{points_after} = $hr->{points_before} + $val;
@@ -5394,6 +5400,14 @@ sub setCommentForMod {
 	} else {
 		$karma_val = $val;
 	}
+	
+	if(defined $constants->{comment_karma_loss_limit} and $constants->{comment_karma_loss_limit} ne "") {
+		my $future_karma = $hr->{karma} + $karma_val;
+		if($future_karma < $constants->{comment_karma_loss_limit}){
+			$karma_val = $constants->{comment_karma_loss_limit} - $hr->{karma};
+		}
+	}
+
 	if ($karma_val) {
 		my $karma_abs_val = abs($karma_val);
 		$update->{-karma}     = sprintf("karma%+d", $karma_val);
@@ -5408,6 +5422,7 @@ sub setCommentForMod {
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
+
 
 	return $changed ? $hr : undef;
 }
