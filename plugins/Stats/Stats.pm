@@ -395,6 +395,34 @@ sub getErrorStatuses {
 }
 
 ########################################################
+sub getAverageCommentCountPerStoryOnDay{
+	my ($self, $day, $options) = @_;
+	my $col = "avg(commentcount)";
+	my $where = " date_format(time,'%Y-%m-%d') = '$day' ";
+	$where .= " and section = '$options->{section}' " if $options->{section};
+	return $self->sqlSelect($col,"stories",$where);
+}
+
+########################################################
+
+sub getAverageHitsPerStoryOnDay{
+	my ($self, $day, $pages, $other) = @_;
+	my $numStories = $self->getNumberStoriesPerDay($day, $other);
+	return $numStories ? $pages / $numStories : 0;
+}
+
+########################################################
+
+sub getNumberStoriesPerDay{
+	my ($self, $day, $options) = @_;
+	my $col = "count(*)";
+	my $where = " date_format(time,'%Y-%m-%d') = '$day' ";
+	$where .= " and section = '$options->{section}' " if $options->{section};
+	return $self->sqlSelect($col,"stories",$where);
+
+}
+
+########################################################
 sub getCommentsByDistinctIPID {
 	my($self, $options) = @_;
 

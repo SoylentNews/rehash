@@ -10,7 +10,7 @@ use vars qw( %task $me );
 # GMT if you installed everything correctly.  So 6:07 AM GMT is a good
 # sort of midnightish time for the Western Hemisphere.  Adjust for
 # your audience and admins.
-$task{$me}{timespec} = '50 6 * * *';
+$task{$me}{timespec} = '17 20 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
@@ -29,6 +29,29 @@ $task{$me}{code} = sub {
 	my @yesttime = localtime(time-86400*$days_back);
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
+	
+	# figure out all the days we want to set average story commentcounts for
+	my $cc_days_back = $constants->{archive_delay} || 14;
+	my @cc_days = ($yesterday);
+
+	for my $db(1..$cc_days_back){
+		my @day = localtime(time-86400*($days_back+$db));
+		my $day = sprintf "%4d-%02d-%02d",
+        	        $day[5] + 1900, $day[4] + 1, $day[3];
+		push @cc_days, $day;
+	}
+
+	# compute dates for the last 3 days so we can get the
+	# average hits per story for each in the e-mail	
+
+	my @ah_days = ($yesterday);
+	for my $db(1..$cc_days_back){
+		my @day = localtime(time-86400*($days_back+$db));
+		my $day = sprintf "%4d-%02d-%02d",
+        	        $day[5] + 1900, $day[4] + 1, $day[3];
+		push @ah_days, $day;
+	}
+	
 
 	my $overwrite = 0;
 	$overwrite = 1 if $constants->{task_options}{overwrite};
@@ -243,6 +266,13 @@ EOT
 		$statsSave->createStatDaily("${op}_ipids", $uniq);
 		$statsSave->createStatDaily("${op}_bytes", $bytes);
 		$statsSave->createStatDaily("${op}_page", $pages);
+		if($op eq "article"){
+			my $avg = $stats->getAverageHitsPerStoryOnDay($yesterday, $pages);
+			#my $num_stories=$stats->getNumberStoriesPerDay($yesterday);
+			#my $avg = $num_stories ? ($pages / $num_stories) : 0;
+			$statsSave->createStatDaily("avg_hits_per_story", $avg);
+			$data{avg_hits_per_story} = sprintf("%12.1f",$avg);
+		}
 	}
 	#Other not recorded
 	{
@@ -306,6 +336,12 @@ EOT
 		$statsSave->createStatDaily("page", $pages, { section => $section });
 		$statsSave->createStatDaily("users", $users, { section => $section });
 		$statsSave->createStatDaily("users_subscriber", $users_subscriber, { section => $section });
+			
+		foreach my $d(@cc_days){
+			my $avg_comments = $stats->getAverageCommentCountPerStoryOnDay($d, { section => $section}) || 0;
+			$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
+							{ section   => $section, overwrite => 1, day => $d });
+		}
 
 		for my $op (@PAGES) {
 			my $uniq = $logdb->countDailyByPageDistinctIPID($op, { section => $section });
@@ -323,6 +359,13 @@ EOT
 			$statsSave->createStatDaily("${op}_bytes", $bytes, { section => $section});
 			$statsSave->createStatDaily("${op}_page", $pages, { section => $section});
 			$statsSave->createStatDaily("${op}_user", $users, { section => $section});
+
+			if($op eq "article"){
+				my $avg = $stats->getAverageHitsPerStoryOnDay($yesterday, $pages, { section => $section });
+				#my $num_stories=$stats->getNumberStoriesPerDay($yesterday, { section => $section });
+				#my $avg = $num_stories ? ($pages / $num_stories) : 0;
+				$statsSave->createStatDaily("avg_hits_per_story", $avg, { section => $section });
+			}
 		}
 		#Other not recorded
 		{
@@ -343,6 +386,13 @@ EOT
 		}
 
 		push(@{$data{sections}}, $temp);
+	}
+
+	foreach my $d(@cc_days){
+		my $avg_comments= $stats->getAverageCommentCountPerStoryOnDay($d) || 0;
+		$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
+						{ overwrite => 1, day => $d });
+		push @{$data{avg_comments_per_story}}, sprintf("%12.1f", $avg_comments);
 	}
 
 
@@ -484,6 +534,11 @@ EOT
 	my $accesslist_counts = $stats->getAccesslistCounts();
 	for my $key (keys %$accesslist_counts) {
 		$statsSave->createStatDaily("accesslist_$key", $accesslist_counts->{$key});
+	}
+	
+	foreach my $day (@ah_days){
+		my $avg = $stats->sqlSelect("value","stats_daily",'day="$day" and section="all"');
+		push @{$data{avg_hits_per_story}}, sprintf("%12.1f", $avg);
 	}
 
 	$data{total} = sprintf("%8d", $daily_total);

@@ -63,6 +63,9 @@ gstatic total:        -          -   [% grand_total_static %]
      comments: [% comments %] posted yesterday
   submissions: [% submissions %] submissions 
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
+
+                          
+
 [% IF error_count > 0 -%]
        errors: [% error_count %] pages generated errors
 [% END -%]
@@ -76,6 +79,11 @@ gstatic total:        -          -   [% grand_total_static %]
    total hits: [% total_hits %]
 
 [% admin_clearpass_warning %][% backup_lag %]
+
+------------------------
+                            Yesterday   | 2 days ago | 3 days ago
+    Avg Hits Per Article:   [% avg_hits_per_story.0 %]|[% avg_hits_per_story.1 %]|[% avg_hits_per_story.2 %]    
+Avg Comments Per Article:   [% avg_comments_per_story.0 %]|[% avg_comments_per_story.1 %]|[% avg_comments_per_story.2 %]
 
 -----------------------
 [% rand_users_yest.size %] random users created yesterday:
