@@ -162,7 +162,7 @@ sub checkList {
 	my $string = shift;
 	$string = substr($string, 0, -1);
 
-	$string =~ s/[^\w,]//g;
+	$string =~ s/[^\w,-]//g;
 	my @e = split m/,/, $string;
 	$string = sprintf "'%s'", join "','", @e;
 
@@ -204,7 +204,7 @@ EOT
 
 	print qq!</TD><TD WIDTH="180" VALIGN="TOP">!;
 
-	print portalbox("200", $title, $content, "", $url);
+	print portalbox($I{fancyboxwidth}, $title, $content, "", $url);
 }
 
 #################################################################

@@ -55,6 +55,7 @@ my %my_conf = (
 	approvedtags    => [qw(B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV)],
 	defaultsection  => 'articles',  # default section for articles
 	http_proxy	=> '',	# 'http://proxy.example.com/'
+	fancyboxwidth	=> 200,
 
 # this controls the life of %storyBank
 	story_expire	=> 600,

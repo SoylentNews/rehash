@@ -27,6 +27,8 @@
 ###############################################################################
 use strict;
 use vars '%I';
+use File::Basename;
+use File::Path;
 use Slash;
 
 *I = getSlashConf();
@@ -157,7 +159,7 @@ for (@{$E}) {
 		"$I{basedir}/$section/$sid"."_F.shtml");
 
 	unlink("$I{basedir}/$section/$sid.shtml")
-		or die "Can't unlink $I{basedir}/$section/$sid.shtml: $!";
+		or warn "Can't unlink $I{basedir}/$section/$sid.shtml: $!";
 	symlink("$I{basedir}/$section/${sid}_F.shtml", "$I{basedir}/$section/$sid.shtml")
 		or die "Can't symlink $I{basedir}/$section/${sid}_F.shtml -> $sid.shtml";
 	$I{dbh}->do("DELETE FROM comments WHERE sid='$sid'");
@@ -224,18 +226,14 @@ EOT
 
 sub prog2file {
 	my($c, $f) = @_;
-#	print "$c $f\n";
-
 	my $d = `$c`;
-	$d =~ s/[\t\n\r\s ]+/ /g;
+	my $dir = dirname($f);
+	mkpath($dir, 0, 0755) unless -e $dir;
 	if (length($d) > 0) {
+		local *F;
 		open F, ">$f" or die "Can't open $f: $!";
 		print F $d;
 		close F;
-		# Do some scp's
-		# system("scp $d root@linux360.dn.net:$d");
-		# system("scp $d root@linux361.dn.net:$d");
-		# system("scp $d root@linux362.dn.net:$d"); # Only do 362 first!
 		return "1";
 
 	} else {

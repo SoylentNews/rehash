@@ -532,9 +532,7 @@ sub getUser {
 		}
 
 		# Do we want the index stuff?
-		if (!$ENV{SCRIPT_NAME} || $ENV{SCRIPT_NAME} =~ /index/) {
-			getExtraStuff('index');
-		}
+		getExtraStuff('index');
 
 	} else {
 		getAnonCookie();
@@ -677,7 +675,7 @@ sub setCookie {
 	my %cookie = (
 		-name		=> $name,
 		-path		=> $I{cookiepath},
-		-value		=> $val,
+		-value		=> $val || '',
 	);
 
 	$cookie{-expires} = '+1y' unless $session;
@@ -969,7 +967,7 @@ EOT
 	$cursor->finish;
 
 	return $tablestuff if $notable;
-	fancybox(200, 'Poll', $tablestuff, 'c');
+	fancybox($I{fancyboxwidth}, 'Poll', $tablestuff, 'c');
 }
 
 
@@ -1527,18 +1525,14 @@ EOT
 
 ########################################################
 sub getAd {
-	return "<!--#perl sub=\"sub { require Slash; use Slash; print Slash::getAd(); }\" -->"
+	my $num = $_[0] || 1;
+
+	return qq|<!--#perl sub="sub { use Slash; print Slash::getAd($num); }" -->|
 		unless $ENV{SCRIPT_NAME};
 
 	anonLog() unless $ENV{SCRIPT_NAME} =~ /\.pl/; # Log non .pl pages
 
-	my $ad .= <<EOT;
-<center>
-$ENV{AD_BANNER_1}
-</center>
-<p>
-EOT
-	return $ad;
+	return $ENV{"AD_BANNER_$num"};
 }
 
 ########################################################
@@ -1603,7 +1597,7 @@ EOT
 	}
 
 	if ($I{run_ads}) {
-		$adhtml = getAd();
+		$adhtml = getAd(1);
 	}
 
 	my $topics;
@@ -1692,8 +1686,17 @@ sub fancybox {
 	my($width, $title, $contents) = @_;
 	return unless $title && $contents;
 
-	my $mainwidth = $width-4;
+	my $tmpwidth = $width;
+	my $pct = 1 if $tmpwidth =~ s/%$//;
+	# used in some blocks
+	my $mainwidth = $tmpwidth-4;
 	my $insidewidth = $mainwidth-8;
+	if ($pct) {
+		for ($mainwidth, $insidewidth) {
+			$_ .= '%';
+		}
+	}
+
 	my $execme = getWidgetBlock('fancybox');
 	print eval $execme;
 	print "\nError:$@\n" if $@;
@@ -1716,8 +1719,16 @@ sub portalbox {
 	my $execme = getWidgetBlock('portalmap');
 	$title = eval $execme if $bid;
 
-	my $mainwidth = $width-4;
+	my $tmpwidth = $width;
+	my $pct = 1 if $tmpwidth =~ s/%$//;
+	# used in some blocks
+	my $mainwidth = $tmpwidth-4;
 	my $insidewidth = $mainwidth-8;
+	if ($pct) {
+		for ($mainwidth, $insidewidth) {
+			$_ .= '%';
+		}
+	}
 
 	$execme = getWidgetBlock('fancybox');
 	my $e = eval $execme;

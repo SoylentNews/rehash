@@ -1,8 +1,13 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -sw
 # get recent comments
-# pudge@pobox.com, 2000.06.02
+# pudge@pobox.com, 2000.06.02 - 2000.08.14
 
+# call with -sid to print by sid, not just date
+# call with -cid to direct URL to specific CID, not entire article
+
+use vars qw(@a $sid $cid %I);
 use lib '..';
+use strict;
 use Slash;
 *I = getSlashConf;
 
@@ -12,33 +17,61 @@ my $comm = sqlSelectMany(
 	'', 'ORDER BY date DESC LIMIT ' . (shift || 30)
 );
 
-my $len = 38 + length($I{rootdir});
+my($cidlink, $scriptname, $baselen);
+if ($cid) {
+	$cidlink = '&cid=';
+	$scriptname = 'comments';
+	$baselen = 43;
+} else {
+	$cidlink = '#';
+	$scriptname = 'article';
+	$baselen = 38;
+}
+my $len = $baselen + length($I{rootdir});
 my $lines = '-' x $len;
 my $lts = '<' x ($len-3);
+my(%sids, %dates);
 
 init();
 
-while (@a = $comm->fetchrow) {
-	push @a, "$I{rootdir}/article.pl?sid=$a[0]#$a[1]";
-	write;
+while (my @data = $comm->fetchrow) {
+	my $cidlink = 
+	@a = (@data, "$I{rootdir}/$scriptname.pl?sid=$data[0]$cidlink$data[1]");
+	if ($sid) {
+		push @{$sids{$data[0]}}, [@a];
+		$dates{$data[0]} = $data[3]
+			if !$dates{$data[0]}
+			|| $dates{$data[0]} lt $data[3];
+	} else {
+		write;
+	}
+}
+
+if ($sid) {
+	for my $sid (sort { $dates{$b} cmp $dates{$a} } keys %dates) {
+		for (sort { $b->[0] cmp $a->[0] } @{$sids{$sid}}) {
+			@a = @$_;
+			write;
+		}
+	}
 }
 
 print <<EOT;  # footer
-+------------------+--------+-------+---------------------+$lines+
++------------------+------+-------+---------------------+$lines+
 EOT
 
 sub init {
 eval <<EOT;
 format STDOUT_TOP =
-+------------------+--------+-------+---------------------+$lines+
-| sid              | cid    | uid   | date                | url${\(' ' x ($len-4))}|
-+------------------+--------+-------+---------------------+$lines+
++------------------+------+-------+---------------------+$lines+
+| sid              | cid  | uid   | date                | url${\(' ' x ($len-4))}|
++------------------+------+-------+---------------------+$lines+
 .
 EOT
 
 eval <<EOT;
 format STDOUT =
-| \@<<<<<<<<<<<<<<< | \@<<<<< | \@<<<< | \@<<<<<<<<<<<<<<<<<< | \@$lts |
+| \@<<<<<<<<<<<<<<< | \@<<< | \@<<<< | \@<<<<<<<<<<<<<<<<<< | \@$lts |
 \@a
 .
 EOT

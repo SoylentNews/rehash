@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$Bundle::Slash::VERSION = '1.0.6';
+$Bundle::Slash::VERSION = '1.0.7';
 
 1;
 
@@ -21,6 +21,8 @@ Bundle::CPAN	- File::Spec,Digest::MD5,Compress::Zlib,libnet,Archive::Tar,Data::D
 Bundle::LWP	- URI,HTML::Parser,MIME::Base64
 
 Bundle::DBI	- Storable
+
+DBI::FAQ
 
 Bundle::DBD::mysql  - Data::ShowTable
 

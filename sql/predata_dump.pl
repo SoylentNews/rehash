@@ -8,7 +8,7 @@ chomp(my $hostname = shift || `hostname`);
 open(DUMP,"<./slashdata_dump.sql") or die "can't locate slashdata_dump.sql! Where is it?";
 
 while(<DUMP>) {
-	s/www\.yoursite\.com/$hostname/g;
+	s/(?:www\.)?example\.com/$hostname/g;
 	$newdump .= $_;
 }
 close(DUMP);

@@ -745,19 +745,19 @@ print <<EOT if $I{F}{color_block};
 	<TR>
 		<TD>Background color 1 \$I{bg}[1]</TD>
 		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg1" VALUE="$colors[5]"></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="$colors[5]">Background color 1 \$I{fg}[1]</FONT></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="$colors[5]">Background color 1 \$I{bg}[1]</FONT></TD>
 		<TD BGCOLOR="$colors[5]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TD>
 	<TR>
 		<TD>Background color 2 \$I{bg}[2]</TD>
 		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg2" VALUE="$colors[6]"></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="$colors[6]">Background color 2 \$I{fg}[2]</FONT></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="$colors[6]">Background color 2 \$I{bg}[2]</FONT></TD>
 		<TD BGCOLOR="$colors[6]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
 	<TR>
 		<TD>Background color 3 \$I{bg}[3]</TD>
 		<TD><INPUT TYPE="TEXT" WIDTH="12" NAME="bg3" VALUE="$colors[7]"></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="$colors[7]">Background color 3 \$I{fg}[3]</FONT></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="$colors[7]">Background color 3 \$I{bg}[3]</FONT></TD>
 		<TD BGCOLOR="$colors[7]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
 	<TR>
@@ -1183,7 +1183,7 @@ EOT
 		$S->{relatedtext} = getRelated("$S->{title} $S->{bodytext} $S->{introtext}")
 			. otherLinks($S->{aid}, $S->{tid});
 
-		fancybox(200, 'Related Links', $S->{relatedtext});
+		fancybox($I{fancyboxwidth}, 'Related Links', $S->{relatedtext});
 		$I{query}->param('relatedtext', $S->{relatedtext});
 		$I{query}->hidden('relatedtext');
 
@@ -1202,7 +1202,7 @@ EOT
 		$I{currentSection} = $tmp;
 		print '</TD><TD WIDTH="220" VALIGN="TOP">';
 
-		fancybox(200,'Related Links', $S->{relatedtext});
+		fancybox($I{fancyboxwidth},'Related Links', $S->{relatedtext});
 		$I{query}->param('relatedtext', $S->{relatedtext});
 
 		print '</TD></TR></TABLE>';
@@ -1313,13 +1313,14 @@ EOT
 	print <<EOT;
 
 Extended Copy<BR>
-	<TEXTAREA NAME="bodytext" COLS="70" WRAP="VIRTUAL" ROWS="10">$bodytext</TEXTAREA><BR>
-Import Image (don't even both trying this yet :)<BR>
-	<INPUT TYPE="file" NAME="importme"><BR>
+	<TEXTAREA NAME="bodytext" COLS="70" WRAP="VIRTUAL" ROWS="40">$bodytext</TEXTAREA><BR>
 
 <!-- end edit story -->
 
 EOT
+
+#Import Image (don't even both trying this yet :)<BR>
+#	<INPUT TYPE="file" NAME="importme"><BR>
 
 	editbuttons($newarticle);
 }
