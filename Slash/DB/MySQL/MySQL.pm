@@ -10826,7 +10826,7 @@ sub getSection {
 sub getSkin {
 	my($self, $skid, $options) = @_;
 	if (!$skid) {
-		errorLog("cannot getSkin for empty skid");
+		errorLog("cannot getSkin for empty skid") if $ENV{GATEWAY_INTERFACE};
 		$skid = getCurrentStatic('mainpage_skid');
 	}
 	my $skins = $self->getSkins($options);
