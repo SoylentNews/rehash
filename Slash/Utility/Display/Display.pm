@@ -517,7 +517,8 @@ sub pollbooth {
 		can_vote	=> $can_vote,
 		voters		=> $poll->{pollq}{voters},
 		comments	=> $n_comments,
-		sect		=> $sect,
+		comments	=> $n_comments,
+		sect		=> $sect->{section},
 	}, 1);
 
 	return $no_table
