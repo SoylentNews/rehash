@@ -53,6 +53,8 @@ $task{$me}{code} = sub {
 	# lets do the errors
 	$data{not_found} = $logdb->countByStatus("404");
 	$statsSave->createStatDaily("not_found", $data{not_found});
+	$data{status_202} = $logdb->countByStatus("202");
+	$statsSave->createStatDaily("status_202", $data{status_202});
 
 	my $errors = $logdb->getErrorStatuses();
 	my $error_count = $logdb->countErrorStatuses();
@@ -458,6 +460,7 @@ EOT
 	$data{formkeys} = sprintf("%8d", $formkeys_rows);
 	$data{error_count} = sprintf("%8d", $data{error_count});
 	$data{not_found} = sprintf("%8d", $data{not_found});
+	$data{status_202} = sprintf("%8d", $data{status_202});
 
 	$mod_data{comments} = sprintf("%8d", $comments);
 	$mod_data{modlog} = sprintf("%8d", $modlogs);

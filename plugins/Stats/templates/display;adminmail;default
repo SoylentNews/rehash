@@ -59,6 +59,9 @@ gstatic total:        -          -   [% grand_total_static %]
 [% IF not_found > 0 -%]
     not found: [% not_found %] pages were not found
 [% END -%]
+[% IF status_202 > 0 -%]
+   status 202: [% status_202 %] pages sent with status 202 (rejected RSS)
+[% END -%]
 
    total hits: [% total_hits %]
 
