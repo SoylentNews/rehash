@@ -2211,6 +2211,8 @@ sub saveTopic {
 
 	$data->{alttext}	= $topic->{alttext};
 	$data->{parent_topic}	= $topic->{parent_topic};
+	$data->{default_image}	= $imgid;
+	delete $data->{image};
 
 	if ($rows == 0) {
 		$self->sqlInsert('topics', $data);
