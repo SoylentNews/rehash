@@ -2416,10 +2416,9 @@ sub resetFormkey {
 
 	my $constants = getCurrentStatic();
 
-
 	my $update_ref = {
 		-value          => 0,
-		-idcount        => '(idcount -1)',
+		-idcount        => '(idcount-1)',
 		ts              => time(),
 		submit_ts       => '0',
 	};

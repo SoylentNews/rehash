@@ -444,7 +444,7 @@ sub commentIndexUserCreated {
 
 		my $title = getData('user_discussions');
 
-		$title .= ": " . $slashdb->getTopic($form->{tid},'alttext') . " ($form->{tid})" if $form->{tid};
+		$title .= ": " . $slashdb->getTopic($form->{tid}, 'alttext') . " ($form->{tid})" if $form->{tid};
 	
 		slashDisplay('udiscuss_list', {
 			discussions	=> $discussions,
@@ -457,9 +457,9 @@ sub commentIndexUserCreated {
 	} else {
 		print getData('nodiscussions');
 		slashDisplay('edit_comment', {
-			topic => $constants->{discussion_default_topic},
-			new_discussion => 1,
-			label => $label,
+			topic		=> $constants->{discussion_default_topic},
+			new_discussion	=> 1,
+			label		=> $label,
 		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
 }
@@ -635,14 +635,14 @@ sub createDiscussion {
 		my $newform = {
 			sid	=> $id,
 			pid	=> 0, 
-			label		=> $label,
+			label	=> $label,
 			title	=> $form->{title},
 			formkey => $form->{formkey},
 		};
 		# We COULD drop ID from the call below, but not right now.
 		slashDisplay('newdiscussion', { 
 			error 		=> $error, 
-			'label'		=> $label,
+			label		=> $label,
 			form		=> $newform,
 			format_select	=> $format_select,
 			id 		=> $id,
@@ -800,12 +800,12 @@ sub validateComment {
 
 	$$subj =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
 
-	print STDERR "comm $$comm subj $$subj\n";
+#	print STDERR "comm $$comm subj $$subj\n";
 	for ($$comm, $$subj) {
 		my $d = decode_entities($_);
 		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
 		if ($d !~ /\w/) {		# require SOME non-whitespace
-			print STDERR "d $d no body\n";
+#			print STDERR "d $d no body\n";
 			$$error_message = getError('no body');
 			return;
 		}
@@ -970,7 +970,7 @@ sub previewForm {
 	my $previewForm;
 	if ($form->{new_discussion} && $user->{seclev} < $constants->{discussion_create_seclev}) { 
 		$previewForm = slashDisplay('newdiscussion', {
-			error => getError('seclevtoolow'),
+			error	=> getError('seclevtoolow'),
 		});
 	} elsif ($tempSubject && $tempComment) {
 		$previewForm = slashDisplay('preview_comm', {
@@ -1022,8 +1022,8 @@ sub submitComment {
 	$tempComment = addDomainTags($tempComment);
 
 	if ($form->{new_discussion} && $user->{seclev} >= $constants->{discussion_new_seclev} ) {
-
-		my $newurl	= $form->{url} ? $form->{url}
+		my $newurl	= $form->{url}
+			? $form->{url}
 			: $ENV{HTTP_REFERER} =~ m|\Q$constants->{rootdir}/comments.pl\E$|
 				? ""
 				: $ENV{HTTP_REFERER};
@@ -1078,8 +1078,8 @@ sub submitComment {
 	my $clean_comment = {
 		subject		=> $tempSubject,
 		comment		=> $tempComment,
-		sid		=> $id , 
-		pid		=> $form->{pid} ,
+		sid		=> $id,
+		pid		=> $form->{pid},
 		ipid		=> $user->{ipid},
 		subnetid	=> $user->{subnetid},
 		uid		=> $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
@@ -1184,6 +1184,7 @@ sub submitComment {
 				$users{$usera}++;
 			}
 		}
+
 		if ($form->{new_discussion}) {
 			if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
 				slashDisplay('newdiscussion', { 

@@ -500,7 +500,7 @@ sub findDiscussion {
 		if $form->{approved};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
-	print STDERR "select $columns from $tables where $where $other\n";
+#	print STDERR "select $columns from $tables where $where $other\n";
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $stories;
