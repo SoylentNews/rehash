@@ -58,8 +58,8 @@ sub findComments {
 	my $columns;
 	$columns .= "primaryskid, url, discussions.uid AS author_uid, discussions.title AS title, ";
 	$columns .= "pid, subject, ts, date, comments.uid AS uid, cid, ";
-	$columns .= "discussions.id AS did, ";
-	$columns .= "TRUNCATE( "
+	$columns .= "discussions.id AS did";
+	$columns .= ", TRUNCATE( "
 		. $self->_score('comments.subject', $form->{query}, $constants->{search_method})
 		. ", 1) AS score "
 		if $form->{query};
