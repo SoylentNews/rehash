@@ -916,6 +916,7 @@ CREATE TABLE topics (
 	name char(20) NOT NULL,
 	alttext char(40),
 	default_image mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	series tinyint DEFAULT 0 NOT NULL,
 	PRIMARY KEY (tid)
 ) TYPE=InnoDB;
 

@@ -4364,50 +4364,61 @@ sub getAuthorNames {
 }
 
 ##################################################################
-# Oranges to Apples. Would it be faster to grab some of this
-# data from the cache? Or is it just as fast to grab it from
-# the database?
+#
 sub getStoryByTime {
-	my($self, $sign, $story, $section, $limit) = @_;
-	my $where;
+	my($self, $sign, $story, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	$limit ||= '1';
+	$options    = {} if !$options || ref($options) ne 'HASH';
+	my $limit   = $options->{limit}   || 1;
+	my $topic   = $options->{topic}   || '';
+	my $section = $options->{section} || '';
+	my $where;
 
 	# We only do getStoryByTime() for stories that are more recent
-	# than twice the story archiving delay.  If the DB has to scan
-	# back thousands of stories, this can really bog.  We solve
-	# this by having the first clause in the WHERE be an impossible
-	# condition for any stories that are too old (this is more
+	# than twice the story archiving delay (or bytime_delay if defined).
+	# If the DB has to scan back thousands of stories, this can really bog.
+	# We solve this by having the first clause in the WHERE be an
+	# impossible condition for any stories that are too old (this is more
 	# straightforward than parsing the timestamp in perl).
 	my $time = $story->{time};
-	my $twice_arch_delay = $constants->{archive_delay}*2;
-	$twice_arch_delay = 7 if $twice_arch_delay < 7;
+	my $bytime_delay = $constants->{bytime_delay} || $constants->{archive_delay}*2;
+	$bytime_delay = 7 if $bytime_delay < 7;
 
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 
-	if ($user->{sectioncollapse}) {
+	if (!$section && !$topic && $user->{sectioncollapse}) {
 		$where .= ' AND displaystatus>=0';
 	} else {
 		$where .= ' AND displaystatus=0';
 	}
 
-	$where .= "   AND tid not in ($user->{'extid'})" if $user->{'extid'};
-	$where .= "   AND uid not in ($user->{'exaid'})" if $user->{'exaid'};
-	$where .= "   AND section not in ($user->{'exsect'})" if $user->{'exsect'};
-	$where .= "   AND sid != '$story->{'sid'}'";
+	$where .= " AND sid != '$story->{sid}'";
+	if (!$topic && !$section) {
+		$where .= " AND tid not in ($user->{extid})" if $user->{extid};
+		$where .= " AND uid not in ($user->{exaid})" if $user->{exaid};
+		$where .= " AND section not in ($user->{exsect})" if $user->{exsect};
+	} elsif ($section) {
+		$where .= " AND section = '$section'";
+	} elsif ($topic) {
+		$where .= " AND tid = '$topic'";
+	}
+
+#	print STDERR "SELECT title, sid, section, tid FROM stories WHERE " .
+#		"'$time' > DATE_SUB(NOW(), INTERVAL $bytime_delay DAY) AND time $sign '$time' AND time < NOW() AND writestatus != 'delete' $where " .
+#		"ORDER BY time $order LIMIT $limit\n";
 
 	my $returnable = $self->sqlSelectHashref(
-			'title, sid, section, tid',
-			'stories',
-			
-			"'$time' > DATE_SUB(NOW(), INTERVAL $twice_arch_delay DAY)
-			 AND time $sign '$time'
-			 AND time < NOW()
-			 AND writestatus != 'delete'
-			 $where",
+		'title, sid, section, tid',
+		'stories',
 
-			"ORDER BY time $order LIMIT $limit"
+		"'$time' > DATE_SUB(NOW(), INTERVAL $bytime_delay DAY)
+		 AND time $sign '$time'
+		 AND time < NOW()
+		 AND writestatus != 'delete'
+		 $where",
+
+		"ORDER BY time $order LIMIT $limit"
 	);
 
 	return $returnable;
@@ -4419,18 +4430,18 @@ sub getStoryByTimeAdmin {
 	my($self, $sign, $story, $limit) = @_;
 	my($where);
 	my $user = getCurrentUser();
-	$limit ||= '1';
+	$limit ||= 1;
 
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 
-	$where .= "   AND sid != '$story->{'sid'}'";
+	$where .= " AND sid != '$story->{sid}'";
 
 	my $time = $story->{'time'};
 	my $returnable = $self->sqlSelectAllHashrefArray(
-			'title, sid, time, displaystatus',
-			'stories',
-			"time $sign '$time' AND writestatus != 'delete' $where",
-			"ORDER BY time $order LIMIT $limit"
+		'title, sid, time, displaystatus',
+		'stories',
+		"time $sign '$time' AND writestatus != 'delete' $where",
+		"ORDER BY time $order LIMIT $limit"
 	);
 
 	return $returnable;

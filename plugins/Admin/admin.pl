@@ -1358,9 +1358,9 @@ sub editStory {
 		bodytext =>     get_ispell_comments($storyref->{bodytext}),
 	} unless $user->{no_spell};
 
-	my $future = $slashdb->getStoryByTimeAdmin('>', $storyref, "3");
-	$future = [ reverse(@$future) ];
-	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
+	my $future = $slashdb->getStoryByTimeAdmin('>', $storyref, 3);
+	$future = [ reverse @$future ];
+	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, 3);
 
 	my $num_sim = $constants->{similarstorynumshow} || 5;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });

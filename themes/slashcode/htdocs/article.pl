@@ -46,21 +46,44 @@ sub main {
 
 		my $authortext;
 		if ($user->{is_admin} ) {
-			my $future = $reader->getStoryByTimeAdmin('>', $story, "3");
-			$future = [ reverse(@$future) ];
-			my $past = $reader->getStoryByTimeAdmin('<', $story, "3");
+			my $future = $reader->getStoryByTimeAdmin('>', $story, 3);
+			$future = [ reverse @$future ];
+			my $past = $reader->getStoryByTimeAdmin('<', $story, 3);
 
 			$authortext = slashDisplay('futurestorybox', {
-							past => $past,
-							future => $future,
-						}, { Return => 1 });
+				past	=> $past,
+				future	=> $future,
+			}, { Return => 1 });
 		}
 
 		# set things up to use the <LINK> tag in the header
-		my($next, $prev) = ('', '');
+		my %stories;
+		my $prev_next_linkrel = '';
 		if ($constants->{use_prev_next_link}) {
-			$next = $reader->getStoryByTime('>', $story, $SECT) unless $story->{is_future};
-			$prev = $reader->getStoryByTime('<', $story, $SECT);
+#			my $topics = $reader->getStoryTopics($form->{sid}, 1);
+#			my $alltopics = $reader->getTopics;
+#			my @topics = grep { $alltopics->{$_}{series} } keys %$topics;
+#			warn "More than one series?  Using only first ($topics[0]) for $form->{sid}"
+#				if @topics > 1;
+			my $use_series  = $story->{tid} if $reader->getTopic($story->{tid})->{series};
+			my $use_section = $story->{section} if $SECT->{type} eq 'contained';
+			unless ($story->{is_future}) {
+				$stories{'next'}   = $reader->getStoryByTime('>', $story);
+				$stories{'s_next'} = $reader->getStoryByTime('>', $story, { section => $use_section })
+					if $use_section;
+				$stories{'t_next'} = $reader->getStoryByTime('>', $story, { topic => $use_series })
+					if $use_series;
+			}
+
+			$stories{'prev'}   = $reader->getStoryByTime('<', $story);
+			$stories{'s_prev'} = $reader->getStoryByTime('<', $story, { section => $use_section })
+				if $use_section;
+			$stories{'t_prev'} = $reader->getStoryByTime('<', $story, { topic => $use_series })
+				if $use_series;
+
+			# you should only have one next/prev link, so do series first, then sectional,
+			# then main, each if applicable -- pudge
+			$prev_next_linkrel = $use_series ? 't_' : $use_section ? 's_' : '';
 		}
 
 		my $links = {
@@ -68,12 +91,12 @@ sub main {
 			story	=> $story,
 			'link'	=> {
 				section	=> $SECT,
-				prev	=> $prev,
-				'next'	=> $next,
+				prev	=> $stories{$prev_next_linkrel . 'prev'},
+				'next'	=> $stories{$prev_next_linkrel . 'next'},
 				author	=> $story->{uid},
 			},
 		};
-		
+
 		my $topics = $reader->getStoryTopics($form->{sid}, 1);
 		my @topic_desc = values %$topics;
 		my $a;
@@ -103,8 +126,7 @@ sub main {
 			show_poll		=> $pollbooth ? 1 : 0,
 			story			=> $story,
 			authortext		=> $authortext,
-			'next'			=> $next,
-			prev			=> $prev,
+			stories			=> \%stories,
 		});
 
 		# Still not happy with this logic -Brian

@@ -8,8 +8,7 @@ Template which describes the layout of the article display (and included comment
 * section_block = section block hashref
 * show_poll = boolean for showing poll or not
 * story = story data structure
-* next = data structure for next story
-* prev = data structure for previous story
+* stories = links to next/prev stories
 
 __title__
 
@@ -24,11 +23,26 @@ __template__
 
 <P>
 
-[% n = BLOCK; PROCESS nextStory s=next; END %]
-[% p = BLOCK; PROCESS nextStory s=prev; END %]
-[% IF p %] &lt;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% END %][% n %] &nbsp;&gt; [% END %]
-<P>&nbsp;</TD>
+[% n = BLOCK; PROCESS nextStory s=stories.next; END %]
+[% p = BLOCK; PROCESS nextStory s=stories.prev; END %]
+[% IF p %] <BR>&lt;&nbsp; [% p %][% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END %]
+
+<!--
+[%# this stuff won't be used right now ... it works, but the layout sucks %]
+[%# so modify it for your own site if you wish %]
+[% n = BLOCK; PROCESS nextStory s=stories.s_next; END %]
+[% p = BLOCK; PROCESS nextStory s=stories.s_prev; END %]
+[% IF p %] <BR>Section: &lt;&nbsp; [% p %][% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END %]
+
+[% n = BLOCK; PROCESS nextStory s=stories.t_next; END %]
+[% p = BLOCK; PROCESS nextStory s=stories.t_prev; END %]
+[% IF p %] <BR>Series: &lt;&nbsp; [% p %][% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END %]
+-->
+
+</P><P>&nbsp;</P></TD>
 
 [% PROCESS maintable_td %]&nbsp;</TD>
 [% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_align="CENTER" mt_valign="TOP" %]
