@@ -862,8 +862,6 @@ DELETE FROM vars WHERE name='commentsPerPoint';
 UPDATE users_param SET name='people_bonus_anonymous', value='-3' WHERE name='anon_comments' AND value='1';
 DELETE FROM users_param WHERE name='anon_comments';
 
-# USEPERL LAST UPDATED HERE
-
 # BEFORE running this, if you have any existing tzcodes not in the defaults,
 # you may wish to take note of them so you can re-add them appropriately.
 DROP TABLE IF EXISTS dst;
@@ -952,3 +950,4 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 
 UPDATE menus SET label=CONCAT('~', label, ' ([% user.uid %])') WHERE menu='users' AND sel_label='me';
 
+# USEPERL LAST UPDATED HERE
