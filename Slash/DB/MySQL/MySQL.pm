@@ -5420,6 +5420,17 @@ sub getSlashdStatus {
 }
 
 ##################################################################
+sub getAccesslog {
+	my($self) = @_;
+	my $answer = _genericGet({
+		table		=> 'accesslog',
+		table_prime	=> 'id',
+		arguments	=> \@_,
+	});
+	return $answer;
+}
+
+##################################################################
 sub getSlashdStatuses {
 	my($self) = @_;
 	my $answer = _genericGets('slashd_status', 'task', '', @_);

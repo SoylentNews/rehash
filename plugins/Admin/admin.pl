@@ -135,6 +135,12 @@ sub main {
 			adminmenu	=> 'info',
 			tab_selected	=> 'recent',
 		},
+		recent_requests		=> {
+			function	=> \&displayRecentRequests,
+			seclev		=> 500,
+			adminmenu	=> 'info',
+			tab_selected	=> 'requests',
+		},
 	};
 
 	# admin.pl is not for regular users
@@ -1676,6 +1682,28 @@ sub displayRecent {
 		recent_comments	=> $recent_comments,
 		min		=> $min,
 		max		=> $max,
+	});
+}
+
+##################################################################
+sub displayRecentRequests {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	my $admindb = getObject("Slash::Admin", $constants->{backup_db_user} || $constants->{log_db_user} );
+	my $id = $form->{id};
+	my $ts = $form->{ts};
+	$id ||= $admindb->getAccesslogMaxID()
+		unless $id;
+	$ts ||= $slashdb->getAccesslog($id, 'ts')
+		unless $ts;
+
+	my $data = $admindb->getAccesslogAbusersByID($id, $form->{threshold});
+
+	slashDisplay('recent_requests', {
+		id		=> $id,
+		ts		=> $ts,
+		threshold		=> $form->{threshold} || 20, # Yes this needs to be a var -Brian
+		data	=> $data,
 	});
 }
 

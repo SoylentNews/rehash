@@ -19,6 +19,7 @@ template=templates/listStories;admin;default
 template=templates/messages;admin;default
 template=templates/otherLinks;admin;default
 template=templates/recent;admin;default
+template=templates/recent_requests;admin;default
 template=templates/relatedlinks;admin;default
 template=templates/siteInfo;admin;default
 template=templates/slashd_box;misc;default

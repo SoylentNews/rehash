@@ -1,0 +1,47 @@
+__section__
+default
+__description__
+* startat - starting offset (0 for top comment)
+* max_cid - highest cid in the DB
+* recent_comments - arrayref of hashrefs, each one comment, each with fields
+	sid, cid, date, ipid, subnetid, subject, uid, score, lastmod, reason, 
+	nickname, sum_val, num_mods
+* min - setting of min threshold
+* max - setting of max threshold
+__title__
+admin interface recent template
+__page__
+admin
+__lang__
+en_US
+__name__
+recent_requests
+__template__
+[% PROCESS titlebar title="Recent Requests" width='100%' %]
+
+<FORM ACTION="[% constants.rootdir %]/admin.pl?op=recent_requests" method="GET">
+	<BR>ID <INPUT TYPE="text" NAME="id" VALUE="[% id %]" SIZE="50">
+	<BR>Time [% ts %] ([% Slash.db.getTime %])
+	<BR>Threshold <INPUT TYPE="text" NAME="threshold" VALUE="[% threshold %]" SIZE="5">
+	<INPUT TYPE="hidden" NAME="op" VALUE="recent_requests">
+	<BR><INPUT TYPE="SUBMIT" NAME="none" VALUE="Reload">
+	<BR><FONT SIZE="-1">Notes: ID represents a position in the accesslog and time is the time of that id. If you blank the entry it will update to the current max(id) value.</FONT> 
+	<BR><BR>
+	<TABLE>
+		<TR>
+			<TD>Count</TD>
+			<TD>Host MD5</TD>
+			<TD>Page</TD>
+		</TR>
+		[% FOREACH row = data %]
+			<TR>
+				<TD>[% row.c %]</TD>
+				<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% row.host_addr %]&amp;fieldname=ipid">[% row.host_addr %]</A></TD>
+				<TD>[% row.op %]</TD>
+			</TR>
+		[% END %]
+	</TABLE>
+</FORM>
+
+__seclev__
+100
