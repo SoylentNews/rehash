@@ -1854,7 +1854,7 @@ sub getSRDsWithinLatest {
 		$srd_latest = $self->sqlSelectColArrayref(
 			"stoid",
 			"story_render_dirty",
-			"stoid > " . $max_stoid - $num_latest);
+			"stoid > " . ($max_stoid - $num_latest));
 	} else {
 		$srd_latest = $self->sqlSelectColArrayref(
 			"stoid",
