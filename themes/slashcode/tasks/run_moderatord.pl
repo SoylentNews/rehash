@@ -90,33 +90,8 @@ sub give_out_points {
 
 	moderatordLog(getData('moderatord_log_header'));
 
-	my $backup_db = undef;
-	my $log_db = undef;
-
-	# If a backup DB is defined, we use that one.
-	my $backup_user = $constants->{backup_db_user} || '';
-	if ($backup_user) {
-		$backup_db = getObject('Slash::DB', $backup_user);
-		if ($backup_db) {
-			moderatordLog("Using backup database '$backup_user'");
-		} else {
-			moderatordLog("Skipping run, backup DB not avail");
-			return ;
-		}
-	}
-
-	# If an accesslog DB is defined, we use that one;  otherwise we
-	# default to the same as the backup DB.
-	my $log_user = $constants->{log_db_user} || '';
-	if ($log_user) {
-		$log_db = getObject('Slash::DB', $log_user);
-		if ($log_db) {
-			moderatordLog("Using accesslog database '$log_user'");
-		} else {
-			moderatordLog("Skipping run, accesslog DB not avail");
-			return ;
-		}
-	}
+	my $backup_db = getObject('Slash::DB', 'reader');
+	my $log_db = getObject('Slash::DB', 'log_slave');
 
 	my $newcomments = get_num_new_comments($constants, $slashdb);
 	if ($newcomments > 0) {
