@@ -29,6 +29,7 @@ sub new {
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;
+	$self->sqlConnect;
 
 	# The default _day is yesterday.  (86400 seconds = 1 day)
 	my @yest_lt = localtime(time - 86400);
@@ -36,17 +37,18 @@ sub new {
 		? $options->{day}
 		: sprintf("%4d-%02d-%02d", $yest_lt[5] + 1900, $yest_lt[4] + 1, $yest_lt[3]);
 
-	$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
-	my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
-	$sth->execute();
-	my $rows = $sth->fetchrow_arrayref;
-	$rows->[1] =~ s/accesslog/accesslog_temp/;
-	$self->{_table} = "accesslog_temp";
-	$self->sqlDo($rows->[1]);
-	$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid(uid)");
-	$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX section(section)");
-	$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'");
-	$self->sqlConnect;
+	unless ($options->{use_current}) {
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
+		my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
+		$sth->execute();
+		my $rows = $sth->fetchrow_arrayref;
+		$rows->[1] =~ s/accesslog/accesslog_temp/;
+		$self->{_table} = "accesslog_temp";
+		$self->sqlDo($rows->[1]);
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid(uid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX section(section)");
+		$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'");
+	}
 
 	return $self;
 }
