@@ -29,5 +29,8 @@ END %]
 
 [% story.introtext %]
 
+[% IF full && (story.bodytext || story.books_publisher) %]<P>
+
+[% story.bodytext %][% END %]
 __seclev__
 10000

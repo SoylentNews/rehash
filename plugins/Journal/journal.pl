@@ -5,15 +5,15 @@
 # $Id$
 
 use strict;
-use Slash;
-use Slash::DB;
-use Slash::Utility;
-use Slash::Journal;
-use Slash::Display;
+use Apache;
 use Date::Manip;
 use XML::RSS;
-use Apache;
 
+use Slash;
+use Slash::DB;
+use Slash::Display;
+use Slash::Journal;
+use Slash::Utility;
 
 sub main {
 	my %ops = (
@@ -314,7 +314,7 @@ sub addFriend {
 }
 
 sub deleteFriend {
-	my ($form, $journal) = @_;
+	my($form, $journal) = @_;
 
 	$journal->delete($form->{uid}) if $form->{uid} ;
 	displayDefault(@_);

@@ -109,6 +109,20 @@ sub friends {
 	return $friends;
 }
 
+sub reverse_friends {
+	my($self) = @_;
+	my $uid = $ENV{SLASH_USER};
+	my $sql;
+	$sql .= " SELECT u.nickname, j.uid";
+	$sql .= " FROM journal_friends as j, users as u";
+	$sql .= " WHERE j.friend = $uid AND j.uid = u.uid";
+	$sql .= " GROUP BY u.nickname ORDER BY uid ASC";
+	$self->sqlConnect;
+	my $friends = $self->{_dbh}->selectall_arrayref($sql);
+
+	return $friends;
+}
+
 sub add {
 	my($self, $friend) = @_;
 	my $uid = $ENV{SLASH_USER};

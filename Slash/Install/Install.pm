@@ -197,7 +197,7 @@ sub _install {
 
 	if ($plugin->{"${driver}_dump"}) {
 		if (my $dump_file = "$plugin->{dir}/" . $plugin->{"${driver}_dump"}) {
-			open(DUMP, "< $dump_file");
+			open(DUMP, "< $dump_file") or warn "Can't open $dump_file: $!";
 			while (<DUMP>) {
 				next unless /^INSERT/;
 				chomp;
