@@ -6,6 +6,7 @@ Prints a pollbooth
 * question = question text
 * answers = arrayref of hashrefs (answer, aid, votes)
 * qid = question ID
+* has_activated = has this poll become active?
 * poll_open = is this poll still open?
 * has_voted = has this user already voted?
 * can_vote = can this user still vote?
@@ -13,6 +14,7 @@ Prints a pollbooth
 * comments = number of comments
 * sect = section
 * returnto = Optional URL to return to once vote is registered.
+
 
 __title__
 
@@ -23,6 +25,7 @@ en_US
 __name__
 pollbooth
 __template__
+[% IF has_activated or user.is_admin %]
 [% IF !can_vote %]
 
 	<B>[% question %]</B>
@@ -61,7 +64,8 @@ __template__
 	</FORM>
 
 [% END %]
+[% END %]
 __seclev__
 10000
 __version__
-$Id$
+ $Id$

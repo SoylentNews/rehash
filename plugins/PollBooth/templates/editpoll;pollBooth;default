@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-Priunts form for editing poll
+Prints form for editing poll
 
 * checked = whether or not poll appears on homepage
 * qid = question ID
@@ -29,6 +29,14 @@ __template__
 	[% PROCESS formLabel value => "Poll Topic" comment => "" %]
 	[% DEFAULT question.topic=constants.discussion_default_topic %]
 	[% Slash.selectTopic('topic', question.topic, '', 1) %]
+        [% polltype.section = "SlashBox Section Poll"; polltype.story = "Story-Related Poll" %]
+      	[% PROCESS formLabel value => "Poll Type" comment => "choose SlashBox Section Poll if you want the poll to appear in the selected sections side SlashBox -- Select Story-Related Poll and define the story id you want to link it to below if you want it showing up with a specific article" %]
+
+[% Slash.createSelect('polltype', polltype, question.polltype, 1) %]
+
+
+	        [% PROCESS formLabel value => "Poll Time" comment => "choose a time in the future if you want to delay this poll's appearance" %]
+        <INPUT TYPE="TEXT" NAME="date" VALUE="[% date %]" size="19"><BR>
 	[% PROCESS formLabel value => "The Answers" comment => "voters" %]
 
 [% FOREACH n = [0 .. 7] %]
@@ -36,14 +44,16 @@ __template__
 	<INPUT TYPE="text" NAME="votes[% n + 1%]" VALUE="[% answers.$n.1 or 0 %]" SIZE="5"><BR>
 [% END %]
 
-	[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear with the story" %]
-	<INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20">
-	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
-	[% PROCESS formLabel value => "SlashBox Poll" comment => "if checked, this will be the poll used in slashboxes for the selected section" %]
-	<INPUT TYPE="CHECKBOX" NAME="currentqid" [% IF checked %]CHECKED[% END %]> <br>
 
-	<INPUT TYPE="SUBMIT" VALUE="Save">
-	<INPUT TYPE="HIDDEN" NAME="op" VALUE="save">
+	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
+
+[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear with the story" %]
+        <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20"><BR>
+	
+	
+
+        <INPUT TYPE="SUBMIT" NAME="op" VALUE="preview">
+	<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
 </FORM>
 [% IF pollbooth %]
 	</TD>
