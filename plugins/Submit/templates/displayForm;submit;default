@@ -52,8 +52,10 @@ anonymous, feel free to leave the identifying fields
 blank.  Anonymity has no effect on whether we will accept or 
 reject the story.</P>
 
+[%# username is the only of from, email, subj that needs to be filtered in %]
+[%# the tag attribute; the others already have been in submit.pl.          %]
 [% PROCESS formLabel value => "Your Name", comment => "Leave Blank to be Anonymous" %]
-<INPUT TYPE="text" NAME="name" VALUE="[% username %]" SIZE="50">
+<INPUT TYPE="text" NAME="name" VALUE="[% username | strip_attribute %]" SIZE="50">
 
 [% PROCESS formLabel value => "Your Email or Homepage", comment => "Where Users Can Contact You" %]
 <INPUT TYPE="text" NAME="email" VALUE="[% fakeemail %]" SIZE="50">
