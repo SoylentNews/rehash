@@ -14,9 +14,6 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Top
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Edit Preferences','[% constants.rootdir %]/journal.pl?op=editprefs',1,4);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friend\'s Journals','[% constants.rootdir %]/journal.pl?op=friends',0,5);
 
-INSERT INTO code_param (type, code, name) VALUES ('journal_discuss', 0, 'Comments Disabled');
-INSERT INTO code_param (type, code, name) VALUES ('journal_discuss', 1, 'Comments Enabled');
-
 INSERT INTO topics (name, image, alttext, width, height) VALUES ('journal', 'topiceditorial.gif', 'User Journal', 58, 55);
 INSERT INTO section_topics (section, tid) VALUES ('articles', LAST_INSERT_ID());
 
