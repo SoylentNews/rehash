@@ -255,6 +255,7 @@ reload: install
 #   cleanup
 clean:
 	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; make clean)
+	(rm Slash/Apache/Apache.xs Slash/Apache/User/User.xs)
 	(cd plugins; make clean)
 
 dist: $(DISTVNAME).tar$(SUFFIX)
