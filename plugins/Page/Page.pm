@@ -160,11 +160,6 @@ sub displayStories {
 		my $title = $story->[2];
 		my $time = $story->[9];
 		my $atstorytime;
-		if ($story->{is_future}) {
-			$atstorytime = $constants->{subscribe_future_name};
-		} else {
-			$atstorytime = $user->{aton} . " " . timeCalc($time, '%B %d, %Y');
-		}
 
 		if ($other->{titles_only}) {
 			my $storycontent = $self->getStoryTitleContent({ 
