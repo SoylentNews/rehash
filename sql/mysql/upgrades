@@ -2506,8 +2506,6 @@ INSERT INTO vars (name, value, description) VALUES ('topic_popup_open', '1', 'Ex
 
 INSERT INTO vars (name, value, description) VALUES ('gse_table_join_row_cutoff', '1000', 'Number of stoids below which getStoriesEssentials performs 2 separate selects and above which it performs a JOIN');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_23, Start of T_2_5_0_24 - 2004/09/01
 
 ALTER TABLE topic_nexus_extras ADD COLUMN content_type ENUM("story","comment") NOT NULL DEFAULT 'story';
@@ -2531,6 +2529,8 @@ CREATE TABLE story_render_dirty (
 ) TYPE=InnoDB;
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_26, Start of T_2_5_0_27 - 2004/09/14
 
