@@ -1463,12 +1463,12 @@ EOT
 
 ########################################################
 sub header {
-	my($title, $section) = @_;
+	my($title, $section, $status) = @_;
 	my $adhtml = '';
 	$title ||= '';
 
 	unless ($I{F}{ssi}) {
-		print "HTTP/1.1 200 OK$CRLF";
+		printf "HTTP/1.0 %s$CRLF", $status ? $status : '200 OK';
 		print $I{SETCOOKIE} if $I{SETCOOKIE};
 		print "Server: $ENV{SERVER_SOFTWARE}$CRLF" if $ENV{SERVER_SOFTWARE};
 		print "Pragma: no-cache$CRLF"
