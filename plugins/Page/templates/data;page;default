@@ -18,7 +18,13 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'head' %]
-	[% section.title %]
+	[% varsection = Slash.db.getVar('section');
+	   IF varsection.value == constants.section;
+	      constants.sitename %]: [% constants.slogan;
+	   ELSE;
+	      section.title;
+	   END;
+	%]
 
 [% CASE 'userboxhead' %]
 	[% user.nickname %]'s Slashbox

@@ -162,7 +162,7 @@ sub getLinksContent {
 	my $constants = getCurrentStatic();
 
 	# posts in each threshold
-	my @threshComments = split m/,/, $storyref->{hits}; 
+	my @threshComments = split m/,/, $storyref->{hitparade}; 
 
 	push @links, linkStory({
 		'link'	=> getData('readmore'),
