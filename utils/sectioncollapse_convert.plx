@@ -6,7 +6,7 @@ $slashdb->sqlDelete("users_param", "name='sectioncollapse' AND value='0'");
 my $mp_tid = $constants->{mainpage_nexus_tid} || 1;
 my $nexuses = $slashdb->getNexusChildrenTids($mp_tid);
 
-$slashdb->sqlDo("LOCK TABLES users_index, users_param WRITE");
+$slashdb->sqlDo("LOCK TABLES users_index WRITE, users_param WRITE");
 
 my $uid_ar = $slashdb->sqlSelectColArrayref("uid", "users_param",
 	"name='sectioncollapse' AND value='1'",
