@@ -15,9 +15,9 @@ __template__
 <table><tr><td valign="TOP">
 	<form action="[% env.script_name %]" method="POST" name="slashstoryform">
 	<input type="HIDDEN" name="op" value="topics">
-	[%# PROCESS formLabel value => "Select a topic" comment => "hit the create button if you wish to create a new topic" %]
-	[%# topics_select %]
-	<!-- input type="SUBMIT" name="topiced" value="Select topic" -->
+	[% PROCESS formLabel value => "Select a topic" comment => "hit the create button if you wish to create a new topic" %]
+	[% Slash.createSelect('nexttid', topic_desc, form.nexttid, 1, 0, 1)%]	
+	<input type="SUBMIT" name="topiced" value="Edit Topic">
 
 	[% IF topic.tid %]<input type="HIDDEN" name="tid" value="[% topic.tid %]">[% END %]
 
@@ -45,15 +45,15 @@ __template__
 	<br><input type="checkbox" name="nexus" value="1"[% topic.nexus ? ' checked' : '' %]>
 	[%- PROCESS formLabel value => "Nexus", comment => "grouping of related stories", nobreak => 1 %]
 
+	<br><input type="checkbox" name="submittable" value="1"[% topic.submittable ? ' checked' : '' %]>
+	[%- PROCESS formLabel value => "Submittable", comment => "users can submit stories under this topic", nobreak => 1 %]
+
 	<p>
 
 	[% topic_select %]
-	[%# Slash.createSelect('parent_topic', Slash.db.getDescriptions('topics'), topic.parent, 1, 0, 1, 1)%]	
 
-
-	<input type="SUBMIT" name="topicnew" value="Create new topic">
+	<input type="SUBMIT" name="topicnew" value="Create New Topic">
 	<input type="SUBMIT" name="topicsave" value="Save Topic" onclick="stc_submit()">
-
 
 	<p />
 	[% IF topic_param.size %]
@@ -74,13 +74,11 @@ __template__
 	[% END %]
 	</TABLE>
 	</p>
-	<p>
-	[% #PROCESS formLabel value => "Replacement Topic", comment => "if deleting the topic, select a topic to replace it with ... this is irreversible!" %]
-	[% #Slash.createSelect('replacementtid', Slash.db.getDescriptions('topics'), '', 1, 0, 1)%]	
-	<p>
-	<input type="SUBMIT" name="topicnew" value="Create new topic">
-	<input type="SUBMIT" name="topicsave" value="Save Topic" onclick="stc_submit()">
-	<!-- input type="SUBMIT" name="topicdelete" value="Delete Topic" -->
+
+	[% PROCESS formLabel value => "Replacement Topic", comment => "if deleting the topic, select a topic to replace it with ... this is irreversible!", nobreak => 0 %]
+	[% Slash.createSelect('replacementtid', topic_desc, '', 1, 0, 1) %]
+	<input type="SUBMIT" name="topicdelete" value="Delete Topic">
+
 	</form>
 </td></tr></table>
 

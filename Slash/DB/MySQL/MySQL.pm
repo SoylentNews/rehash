@@ -3131,7 +3131,8 @@ sub saveTopic {
 		}
 	}
 
-
+	my %dirty_topics;
+	##### check for recursives?
 	for my $x (qw(parent child)) {
 		my %relations;
 		my $name = $x . '_topic';
@@ -3150,12 +3151,17 @@ sub saveTopic {
 
 		my $del_str = join ',', keys %relations;
 		if ($x eq 'parent') {
+			my $tids = $self->sqlSelectColArrayref("parent_tid", "topic_parents", "tid=$tid");
+			$dirty_topics{$_}++ for @$tids;
 			$self->sqlDelete('topic_parents', "tid=$tid AND parent_tid NOT IN ($del_str)") if $del_str;
 		} elsif ($x eq 'child') {
+			my $tids = $self->sqlSelectColArrayref("tid", "topic_parents", "parent_tid=$tid");
+			$dirty_topics{$_}++ for @$tids;
 			$self->sqlDelete('topic_parents', "parent_tid=$tid AND tid NOT IN ($del_str)") if $del_str;
 		}
 
 		for my $thistid (keys %relations) {
+			$dirty_topics{$thistid}++;
 			my %relation = (
 				tid		=> $tid,
 				parent_tid	=> $thistid,
@@ -3176,7 +3182,7 @@ sub saveTopic {
 		$self->sqlDelete('topic_nexus', "tid=$tid");
 	}
 
-	$self->setVar('topic_tree_lastchange', time());
+	$self->markTopicsDirty([ $tid, keys %dirty_topics ]);
 
 	return $tid;
 }

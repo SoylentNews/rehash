@@ -834,30 +834,32 @@ sub topicEdit {
 	closedir $dh;
 	$available_images->{""} = "None";
 
-	my $topics_select = createSelect('nexttid', 
-		$slashdb->getDescriptions('topics', '', 1),
-		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 
-		1, 0, 1
-	);
+	my %topic_desc = %{$slashdb->getDescriptions('topics', '', 1)};
+	for my $tid (keys %topic_desc) {
+		delete $topic_desc{$tid} if $tid && !(	# just in case someone added a bad tid
+							# filter out product guide topics
+			$tid < ($constants->{product_guide_tid_lower_limit} || 10_000)
+				||
+			$tid > ($constants->{product_guide_tid_upper_limit} || 20_000)
+		);
+	}
 
 	my $topic_param = [];
 	my($parents, $children);
-	if (!$form->{topicdelete}) {
-		if (!$form->{topicnew} && $form->{nexttid}) {
-			my $tree  = $slashdb->getTopicTree(undef, { no_cache => 1 });
-			$topic    = $tree->{ $form->{nexttid} };
-			$parents  = $topic->{parent};
-			$children = $topic->{child};
-			# We could get this by reading $topic->{topic_param_keys}
-			# but getTopicParamsForTid() works too.  For that matter,
-			# the topicEdit template could read it directly out of
-			# $topic, no need to create it separately... oh well :)
-			$topic_param = $slashdb->getTopicParamsForTid($form->{nexttid});
-		} else {
-			$topic = {};
-			$parents = {};
-			$children = {};
-		}
+	if (!$form->{topicnew} && $form->{nexttid}) {
+		my $tree  = $slashdb->getTopicTree(undef, { no_cache => 1 });
+		$topic    = $tree->{ $form->{nexttid} };
+		$parents  = $topic->{parent};
+		$children = $topic->{child};
+		# We could get this by reading $topic->{topic_param_keys}
+		# but getTopicParamsForTid() works too.  For that matter,
+		# the topicEdit template could read it directly out of
+		# $topic, no need to create it separately... oh well :)
+		$topic_param = $slashdb->getTopicParamsForTid($form->{nexttid});
+	} else {
+		$topic = {};
+		$parents = {};
+		$children = {};
 	}
 
 	my $topic_select = Slash::Admin::PopupTree::getPopupTree(
@@ -887,7 +889,7 @@ sub topicEdit {
 		image2			=> $image2,
 		topic			=> $topic,
 		topic_select		=> $topic_select,
-		topics_select		=> $topics_select,
+		topic_desc		=> \%topic_desc,
 		image_select		=> $image_select,
 		topic_param		=> $topic_param,
 	});
@@ -903,11 +905,14 @@ sub topicDelete {
 	$tid ||= $form->{tid};
 
 	my($success, $errmsg) = $slashdb->deleteTopic($tid, $form->{replacementtid});
-	$form->{tid} = '';
 
 	if (!$success) {
 		# we should dump this to the screen instead
 		warn $errmsg;
+		$form->{nexttid} = $form->{tid};
+		$form->{tid} = '';
+	} else {
+		$form->{nexttid} = $form->{replacementtid};
 	}
 }
 

@@ -1666,7 +1666,7 @@ Hashref of cleaned-up data.
 		min min_comment minimum_length minimum_match next
 		nobonus_present
 		nosubscriberbonus_present nv_offset 
-		ordernum pid
+		ordernum pid submittable
 		postanon_present posttype ratio retrieve
 		show_m1s show_m2s
 		seclev start startat threshold
