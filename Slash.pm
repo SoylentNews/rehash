@@ -1358,18 +1358,18 @@ sub approveTag {
 ########################################################
 sub fixurl {
 	my($url, $parameter) = @_;
-	$url =~ s/[" ]//g;
-	$url =~ s/^'(.+?)'$/$1/g;
 
 	# encode all non-safe, non-reserved characters
 	# different char set if destined to be a query string parameter
 	if ($parameter) {
 		$url =~ s/([^\w.+!*'(),;:@\$\/%-])/sprintf "%%%02X", ord $1/ge;
 	} else {
+		$url =~ s/[" ]//g;
+		$url =~ s/^'(.+?)'$/$1/g;
 		$url =~ s/([^\w.+!*'(),;:@\$\/%-?=&#])/sprintf "%%%02X", ord $1/ge;
+		$url = fixHref($url) || $url;
 	}
 
-	$url = fixHref($url) || $url;
 	my $decoded_url = decode_entities($url);
 	return $decoded_url =~ s|^\s*\w+script\b.*$||i ? undef : $url;
 }
