@@ -70,7 +70,11 @@ $task{$me}{code} = sub {
 	
 	$elapsed = $new_last_time - $last_time if $last_time;
 	if ($accesslog_last && $new_accesslog_last) {
-		$pages = $new_accesslog_last - $accesslog_last;
+		if ($constants->{accesslog_imageregex} eq 'NONE') {
+			$pages = $new_accesslog_last - $accesslog_last;
+		} else {
+			$pages = $logdb->sqlCount("accesslog", "id BETWEEN $accesslog_last and $new_accesslog_last and op!='image'");
+		}
 	}
 
 	if($elapsed and $elapsed > 0 ) {
