@@ -1230,7 +1230,7 @@ sub filter_params {
 	);
 
 	# regexes to match dynamically generated numeric fields
-	my @regints = (qr/^reason_.+$/, qr/^votes.+$/);
+	my @regints = (qr/^reason_.+$/, qr/^votes.+$/, qr/^people_bonus_.+$/);
 
 	# special few
 	my %special = (

@@ -68,6 +68,24 @@ sub SlashVirtualUser ($$$) {
 	createCurrentUser($anonymous_coward);
 
 	$cfg->{menus} = $cfg->{slashdb}->getMenus();
+	my $sections = $cfg->{slashdb}->getSections();
+	for (@$sections) {
+		if ($_->{hostname} && $_->{url}) {
+			my $new_cfg;
+			for (keys %{$cfg->{constants}}) {
+				$new_cfg->{$_} = $cfg->{constants}{$_}
+					unless $_ eq 'form_override';
+			}
+			# Must not just copy the form_override info
+			$new_cfg->{form_override} = {}; 
+			$new_cfg->{absolutedir} = $_->{url};
+			$new_cfg->{rootdir} = $_->{url};
+			$new_cfg->{basedomain} = $_->{hostname};
+			$new_cfg->{static_section} = $_->{section};
+			$new_cfg->{form_override}{section} = $$_->{section};
+			$cfg->{site_constants}{$_->{hostname}} = $new_cfg;
+		}
+	}
 	# If this is not here this will go poorly.
 	$cfg->{slashdb}->{_dbh}->disconnect;
 }

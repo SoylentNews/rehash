@@ -490,7 +490,6 @@ sub sqlUpdate {
 	}
 	chop $sql;
 	$sql .= "\nWHERE $where\n";
-	$self->sqlConnect();
 	my $rows = $self->sqlDo($sql);
 	# print STDERR "SQL: $sql\n";
 	return $rows;
@@ -503,7 +502,6 @@ sub sqlDelete {
 	my $sql = "DELETE FROM $table";
 	$sql .= " WHERE $where" if $where;
 	$sql .= " LIMIT $limit" if $limit;
-	$self->sqlConnect();
 	my $rows = $self->sqlDo($sql);
 	# print STDERR "SQL: $sql\n";
 	return $rows;
@@ -531,7 +529,6 @@ sub sqlInsert {
 	chop($values);
 
 	my $sql = "INSERT$delayed INTO $table ($names) VALUES($values)\n";
-	$self->sqlConnect();
 	return $self->sqlDo($sql);
 }
 
