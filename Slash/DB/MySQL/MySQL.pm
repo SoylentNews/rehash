@@ -155,6 +155,15 @@ sub init {
 	$self->{_sectionBoxes} = {};
 }
 
+#######################################################
+# Wrapper to get the latest ID from the database
+sub getLastInsertId {
+	my($self,$table,$col) = @_;
+ 	my ($answer) = $self->sqlSelect('LAST_INSERT_ID()');
+	return $answer;
+}
+
+
 ########################################################
 # Yes, this is ugly, and we can ditch it in about 6 months
 # Turn off autocommit here
@@ -420,7 +429,7 @@ sub getSessionInstance {
 			-logintime => 'now()', -lasttime => 'now()',
 			lasttitle => $title }
 		);
-		($session_out) = $self->sqlSelect("LAST_INSERT_ID()");
+		$session_out = $self->getLastInsertId('sessions','session');
 	}
 	return $session_out;
 
@@ -704,7 +713,7 @@ sub createContentFilter {
 		err_message	=> ''
 	});
 
-	my($filter_id) = $self->sqlSelect("LAST_INSERT_ID()");
+	my $filter_id = $self->getLastInsertId('content_filters','filter_id');
 
 	return $filter_id;
 }
@@ -734,7 +743,7 @@ sub createUser {
 
 # This is most likely a transaction problem waiting to
 # bite us at some point. -Brian
-	my($uid) = $self->sqlSelect("LAST_INSERT_ID()");
+	my $uid = $self->getLastInsertId('users','uid');
 	return unless $uid;
 	$self->sqlInsert("users_info", { uid => $uid, -lastaccess => 'now()' } );
 	$self->sqlInsert("users_prefs", { uid => $uid } );
@@ -1822,7 +1831,6 @@ sub getCommentReply {
 sub getCommentsForUser {
 	my($self, $sid, $cid) = @_;
 	my $user = getCurrentUser();
-	my $form = getCurrentForm();
 	my $sql = "SELECT cid,date,
 				subject,comment,
 				nickname,homepage,fakeemail,
@@ -3086,7 +3094,7 @@ sub createTemplate {
 		}
 	}
 	$self->sqlInsert('templates', $hash);
-	my($tpid) = $self->sqlSelect('LAST_INSERT_ID()');
+	my $tpid  = $self->getLastInsertId('templates','tpid');
 	return $tpid;
 }
 
