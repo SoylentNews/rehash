@@ -643,6 +643,21 @@ CREATE TABLE related_links (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'remarks'
+#
+
+DROP TABLE IF EXISTS remarks;
+CREATE TABLE remarks (
+	uid mediumint UNSIGNED NOT NULL,
+	stoid MEDIUMINT UNSIGNED NOT NULL,
+	time DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	remark varchar(100),
+	INDEX uid (uid),
+	INDEX stoid (stoid),
+	INDEX time (time)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'sessions'
 #
 

@@ -8063,14 +8063,7 @@ sub createStory {
 #	$self->{_dbh}{AutoCommit} = 0;
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
-	# yes, this format is correct, don't change it :-)
-	# but sids are rapidly becoming obsolete :)
-	my $sidformat = '%02d/%02d/%02d/%02d%0d2%02d';
-	# Create a sid based on the current time.
-	my $start_time = time;
-	my @lt = localtime($start_time);
-	$lt[5] %= 100; $lt[4]++; # year and month
-	$story->{sid} = sprintf($sidformat, @lt[reverse 0..5]);
+	$story->{sid} = createSid();
 
 	my $suid;
 	$story->{submitter}	= $story->{submitter} ?
@@ -8083,12 +8076,8 @@ sub createStory {
 			{ sid => $story->{sid} },
 			{ ignore => 1 } ); # don't need error messages
 		if ($sid_ok == 0) { # returns 0E0 on collision, which == 0
-			# Look back in time until we find a free second.
-			# This is faster than waiting forward in time :)
-			--$start_time;
-			@lt = localtime($start_time);
-			$lt[5] %= 100; $lt[4]++; # year and month
-			$story->{sid} = sprintf($sidformat, @lt[reverse 0..5]);
+			# Keep looking...
+			$story->{sid} = createSid($story->{sid});
 		}
 	}
 
@@ -8290,6 +8279,28 @@ sub updateStory {
 
 	return $sid;
 
+}
+
+########################################################
+sub createRemark {
+	my($self, $uid, $stoid, $remark) = @_;
+	$self->sqlInsert('remarks', {
+		uid	=> $uid,
+		stoid	=> $stoid,
+		remark	=> $remark,
+		-time	=> 'NOW()',
+	});
+}
+
+########################################################
+sub getRemarksSince {
+	my($self, $since) = @_;
+	return [ ] unless $since;
+	my $since_q = $self->sqlQuote($since);
+	return $self->sqlSelectAllHashrefArray(
+		"stoid, uid, remark",
+		"remarks",
+		"time > $since_q");
 }
 
 ########################################################

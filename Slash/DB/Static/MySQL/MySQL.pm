@@ -293,27 +293,14 @@ sub _deleteThread {
 }
 
 ########################################################
-# For dailystuff
-# This just updates the counts for the day before
-# -Brian
-# This is now done more efficiently throughout the day,
-# by the counthits.pl task - Jamie
-#sub updateStoriesCounts {
-#	my($self) = @_;
-#	my $constants = getCurrentStatic();
-#	my $counts = $self->sqlSelectAll(
-#		'dat,count(*)',
-#		'accesslog',
-#		"op='article' AND dat !='' AND to_days(now()) - to_days(ts) = 1",
-#		'GROUP BY(dat)'
-#	);
-#
-#	for my $count (@$counts) {
-#		$self->sqlUpdate('stories', { -hits => "hits+$count->[1]" },
-#			'sid=' . $self->sqlQuote($count->[0])
-#		);
-#	}
-#}
+# For daily_forget.pl
+sub forgetRemarks {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $days_back = $constants->{remarks_expire_days} || 30;
+	return $self->sqlDelete("remarks",
+		"DATE_ADD(time, INTERVAL $days_back DAY) < NOW()");
+}
 
 ########################################################
 # For daily_forget.pl

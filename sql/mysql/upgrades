@@ -2628,9 +2628,22 @@ INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','comme
 INSERT INTO vars (name, value, description) VALUES ('ircslash','0','Enable the ircslash task and connect to an IRC channel whenever slashd starts');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel','#ircslash','Which channel to join');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ircname','','Name to use on IRC server (defaults to "(slashsite) slashd")');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_lastremarktime','','Last time a remark was seen');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_nick','','Nick to use on IRC server (has a reasonable default)');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_port','6667','Port to use on IRC server');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_server','irc.slashnet.org','Which IRC server to connect to');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ssl','0','Try to connect over SSL?');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_username','','Username to use on IRC server (has a reasonable default)');
+
+DROP TABLE IF EXISTS remarks;
+CREATE TABLE remarks (
+	uid mediumint UNSIGNED NOT NULL,
+	stoid MEDIUMINT UNSIGNED NOT NULL,
+	time DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	remark varchar(100),
+	INDEX uid (uid),
+	INDEX stoid (stoid),
+	INDEX time (time)
+) TYPE=InnoDB;
+
 

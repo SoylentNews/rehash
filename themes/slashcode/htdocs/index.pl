@@ -13,12 +13,12 @@ use Time::HiRes;
 
 sub main {
 my $start_time = Time::HiRes::time;
-	my $constants = getCurrentStatic();
-	my $user      = getCurrentUser();
-	my $form      = getCurrentForm();
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $constants	= getCurrentStatic();
+	my $user	= getCurrentUser();
+	my $form	= getCurrentForm();
+	my $slashdb	= getCurrentDB();
+	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 
-	my($stories, $Stories); # could this be MORE confusing please? kthx
 	if ($form->{op} eq 'userlogin' && !$user->{is_anon}
 			# Any login attempt, successful or not, gets
 			# redirected to the homepage, to avoid keeping
@@ -29,6 +29,8 @@ my $start_time = Time::HiRes::time;
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
 		redirect($refer); return;
 	}
+
+	my($stories, $Stories); # could this be MORE confusing please? kthx
 
 	# why is this commented out?  -- pudge
 	# $form->{mode} = $user->{mode} = "dynamic" if $ENV{SCRIPT_NAME};
@@ -86,12 +88,6 @@ my $start_time = Time::HiRes::time;
 #		$limit = $user_maxstories;
 #	}
 
-	# TIMING START
-	# From here to the "TIMING END", the bulk of the work in index.pl is
-	# done.  Times listed at "TIMING MARKPOINT" are as measured on
-	# Slashdot, normalized such that the median request takes 1 second.
-	# Times listed are elapsed time from the previous markpoint.
-
 	my $gse_hr = { };
 	# Set the characteristics that stories can be in to appear.  This
 	# is a simple list:  the current skin's nexus, and then if the
@@ -131,7 +127,6 @@ my $start_time = Time::HiRes::time;
 	if (rand(1) < $constants->{index_gse_backup_prob}) {
 		$stories = $reader->getStoriesEssentials($gse_hr);
 	} else {
-		my $slashdb = getCurrentDB();
 		$stories = $slashdb->getStoriesEssentials($gse_hr);
 	}
 #use Data::Dumper;
@@ -160,9 +155,6 @@ my $start_time = Time::HiRes::time;
 		$future_plug = 1;
 	}
 
-	# TIMING MARKPOINT
-	# Median 0.145 seconds, 90th percentile 0.222 seconds
-
 	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss;
 
 #	# See comment in plugins/Journal/journal.pl for its call of
@@ -179,9 +171,6 @@ my $start_time = Time::HiRes::time;
 	my $linkrel = {};
 	$Stories = displayStories($stories, $linkrel);
 
-	# TIMING MARKPOINT
-	# Median 0.437 seconds, 90th percentile 1.078 seconds
-
 	# damn you, autovivification!
 	my($first_date, $last_date);
 	if (@$stories) {
@@ -194,14 +183,28 @@ my $start_time = Time::HiRes::time;
 		{ first_date => $first_date, last_date => $last_date }
 	);
 
-	# TIMING MARKPOINT
-	# Median 0.235 seconds, 90th percentile 0.513 seconds
-
 	my $title = getData('head', { skin => $skin_name });
 	header({ title => $title, link => $linkrel }) or return;
 
-	# TIMING MARKPOINT
-	# Median 0.090 seconds, 90th percentile 0.145 seconds
+	if ($form->{op} eq 'remark'
+		&& $user->{is_subscriber}
+		&& $form->{sid}
+		&& $form->{remark})
+	{
+		my $sid = $form->{sid};
+		my $story = $slashdb->getStory($sid);
+		my $remark = $form->{remark};
+		# If what's pasted in contains a substring that looks
+		# like a sid, yank it out and just use that.
+		my $targetsid = getSidFromRemark($remark);
+		$remark = $targetsid if $targetsid;
+		if ($story) {
+			$slashdb->createRemark($user->{uid},
+				$story->{stoid},
+				$remark);
+			print getData('remark_thanks');
+		}
+	}
 
 	slashDisplay('index', {
 		metamod_elig	=> scalar $reader->metamodEligible($user),
@@ -210,17 +213,17 @@ my $start_time = Time::HiRes::time;
 		boxes		=> $StandardBlocks,
 	});
 
-	# TIMING MARKPOINT
-	# Median 0.052 seconds, 90th percentile 0.084 seconds
-
 	footer();
 
 	writeLog($skin_name);
-
-	# TIMING MARKPOINT
-	# Median 0.037 seconds, 90th percentile 0.059 seconds
 }
 
+sub getSidFromRemark {
+	my($remark) = @_;
+	my $regex = regexSid();
+	my($sid) = $remark =~ $regex;
+	return $sid || "";
+}
 
 sub do_rss {
 	my($reader, $constants, $user, $form, $stories, $skin_name) = @_;

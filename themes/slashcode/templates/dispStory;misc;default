@@ -104,6 +104,17 @@ END %]
 
 [% IF full && user.is_admin && !preview %]<BR><A HREF="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]
 
+[% IF story.is_future %]<P><FONT SIZE="-1">See any serious problems with this story?
+Paste a short message here (if it's a dupe, the URL would be great)
+<form action="/index.pl" method="POST">
+<input type="HIDDEN" name="op" value="remark">
+<input type="TEXT" name="remark" size="20" maxlength="100">
+<input type="HIDDEN" name="sid" value="[% story.sid | strip_attribute %]">
+</form>
+or email
+<A HREF="mailto:[% constants.adminmail %]?subject=[DP]%20[% story.title | strip_paramattr %]">our on-duty editor</A>.</FONT>
+[% END %]
+
 [% IF full && story.bodytext %]
 
 <BR><TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>

@@ -71,6 +71,9 @@ __template__
 [% CASE 'edit' %]
 	Edit
 
+[% CASE 'remark_thanks' %]
+	<p><b>Thanks for your remark to our editors!</b><p>
+
 [% END %]
 
 __seclev__

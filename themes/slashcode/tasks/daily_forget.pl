@@ -21,6 +21,7 @@ $task{$me}{code} = sub {
 	my $forgotten4 = $slashdb->forgetUsersLogtokens;
 	my $forgotten5 = $slashdb->forgetUsersLastLookTime;
 	my $forgotten6 = $slashdb->forgetUsersMailPass;
+	my $forgotten7 = $slashdb->forgetRemarks;
 	return "forgot approx $forgotten1 comment IPs, $forgotten2 submission IPs, $forgotten3 open proxy IPs, $forgotten4 logtokens";
 };
 

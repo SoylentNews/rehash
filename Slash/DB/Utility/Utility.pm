@@ -500,11 +500,6 @@ sub sqlSelectHash {
 }
 
 ##########################################################
-# selectCount 051199
-# inputs: scalar string table, scaler where clause
-# returns: via ref from input
-# Simple little function to get the count of a table
-##########################################################
 sub sqlCount {
 	my($self, $table, $where) = @_;
 

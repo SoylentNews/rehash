@@ -758,6 +758,7 @@ INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect
 INSERT INTO vars (name, value, description) VALUES ('ircslash','0','Enable the ircslash task and connect to an IRC channel whenever slashd starts');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel','#ircslash','Which channel to join');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ircname','','Name to use on IRC server (defaults to "(slashsite) slashd")');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_lastremarktime','','Last time a remark was seen');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_nick','','Nick to use on IRC server (has a reasonable default)');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_port','6667','Port to use on IRC server');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_server','irc.slashnet.org','Which IRC server to connect to');
