@@ -771,8 +771,9 @@ sub add_entry {
 	my $form = _save_params(0, @_) || {};
 
 	$form->{posttype}		||= $user->{posttype};
-	$form->{journal_discuss}	||= $user->{journal_discuss};
 	$form->{tid}			||= $constants->{journal_default_topic};
+	$form->{journal_discuss}	= $user->{journal_discuss}
+		unless defined $form->{journal_discuss};
 
 	no strict 'refs';
 	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
