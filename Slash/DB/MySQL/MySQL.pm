@@ -10,7 +10,6 @@ use Digest::MD5 'md5_hex';
 use Time::HiRes;
 use Date::Format qw(time2str);
 use Data::Dumper;
-use POSIX ();
 use Slash::Utility;
 use Storable qw(thaw freeze);
 use URI ();
@@ -2291,7 +2290,7 @@ sub getDBs {
 			$db->{_weight_factor} += (10 / $constants->{dbs_revive_seconds})
 				if $db->{_weight_factor} < 1;
 			$db->{_weight_factor} = 1 if $db->{_weight_factor} > 1;
-			$weight = POSIX::ceil($weight * $db->{_weight_factor});
+			$weight = int($weight * $db->{_weight_factor} + 1);
 		}
 
 		push @{$databases{$db->{type}}}, ($db) x $weight;
