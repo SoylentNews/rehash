@@ -26,7 +26,7 @@ __template__
 	<TR><TD BGCOLOR="[% user.colors.bg_3 %]" ALIGN="CENTER">
 		<FONT SIZE="2" COLOR="[% user.colors.fg_3 %]">
 [% IF title %]
-		<A HREF="[% link %]"><FONT COLOR="[% user.colors.fg_3 %]">[% title %]</FONT></A>
+		<A HREF="[% link | strip_urlattr %]"><FONT COLOR="[% user.colors.fg_3 %]">[% title %]</FONT></A>
 [% ELSE %]
 	[% Slash.linkComment({
 		sid	=> sid,
