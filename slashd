@@ -267,7 +267,7 @@ sub sectionHeaders {
 	header("", $section, "thread");
 	close FH;
 
-	$I{F}{ssi} = 1;
+	$I{F}{ssi} = 0;
 	open FH, ">$I{basedir}/$section/slashfoot.inc"
 		or die "Can't open $I{basedir}/$section/slashfoot.inc: $!";
 	*STDOUT = *FH;
