@@ -71,14 +71,18 @@ sub update_modlog_ids {
 	# way to predict accurately what it will do on a live site
 	# without doing it... -Jamie 2002/11/16
 
-	my($min_old) = $reader->sqlSelect("MIN(id)", "moderatorlog", "m2status=0 AND active=1 AND reason in($m2able_reasons)");
+	my($min_old) = $reader->sqlSelect("MIN(id)", "moderatorlog",
+		"m2status=0 AND active=1 AND reason IN ($m2able_reasons)");
 	my($max_old) = $reader->sqlSelect("MAX(id)", "moderatorlog",
-		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY) AND m2status=0 AND active=1 AND reason in($m2able_reasons)");
+		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)
+		 AND m2status=0 AND active=1 AND reason IN ($m2able_reasons)");
 	$min_old = 0 if !$min_old;
 	$max_old = $min_old if !$max_old;
 	my($min_new) = $reader->sqlSelect("MIN(id)", "moderatorlog",
-		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY) AND m2status=0 AND active=1 AND reason in($m2able_reasons)");
-	my($max_new) = $reader->sqlSelect("MAX(id)", "moderatorlog", "m2status=0 AND active=1 AND reason in($m2able_reasons)");
+		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY)
+		 AND m2status=0 AND active=1 AND reason IN ($m2able_reasons)");
+	my($max_new) = $reader->sqlSelect("MAX(id)", "moderatorlog",
+		"m2status=0 AND active=1 AND reason IN ($m2able_reasons)");
 	$min_new = 0 if !$min_new;
 	$max_new = $min_new if !$max_new;
 
