@@ -1011,7 +1011,7 @@ EOT2
 	(Note: the characters &amp;, &lt; and &gt; are not allowed in nicknames.)
 
 	<INPUT TYPE="TEXT" NAME="newuser" SIZE="20" MAXLENGTH="20" VALUE="$I{F}{newuser}">
-	<BR> and an <B>valid email address </B> address to send your registration
+	<BR> and a <B>valid email address</B> address to send your registration
 	information. This address will <B>not</B> be displayed on $I{sitename}.
 	<INPUT TYPE="TEXT" NAME="email" SIZE="20" VALUE="$I{F}{email}"><BR>
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="newuser"> Click the button to
