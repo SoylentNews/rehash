@@ -4,4 +4,4 @@ htdoc=subscribe.pl
 mysql_dump=mysql_dump
 mysql_schema=mysql_schema
 task=subscribemail.pl
-template=edit;subscribe;default
+template=templates/edit;subscribe;default
