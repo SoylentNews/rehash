@@ -8660,7 +8660,6 @@ sub getSkin {
 		$skid = getCurrentStatic('mainpage_skid');
 	}
 	my $skins = $self->getSkins($options);
-#use Data::Dumper; print "getSkin skins: " . Dumper($skins);
 	if ($skid !~ /^\d+$/) {
 		for my $id (sort keys %$skins) {
 			if ($skins->{$id}{name} eq $skid) {
