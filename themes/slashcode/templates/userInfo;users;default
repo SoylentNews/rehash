@@ -56,9 +56,9 @@ __template__
  <B>User Bio</B><BR>[% FILTER strip_html ; userbio.bio ; END %]<P>
 [% END %]
 
-[% IF userbio.public_key %]
+[% IF userbio.pubkey %]
    <B>Public Key</B><BR><PRE>
-  [% FILTER strip_literal; userbio.public_key; END %]
+  [% FILTER strip_literal; userbio.pubkey; END %]
  </PRE><P>
 [% END %]
 

@@ -493,7 +493,7 @@ sub templateSave {
 			return;
 		} else {
 			print "trying to insert $name<br>\n";
-			$tpid = $form->{thistpid} = $slashdb->createTemplate({
+			$tpid = ($form->{thistpid}) = $slashdb->createTemplate({
                			name		=> $name,
 				template        => $form->{template},
 				title		=> $form->{title},
