@@ -4551,7 +4551,7 @@ sub getSlashConf {
 			       . '[' . join("", @chars) . ']'
 			       . '|&#(?:' . join("|", @entities) . ');'
 		       . ')';
-		my $regex = '^(\s+' . "$dotchar+" . ')\S';
+		my $regex = '(\s+)' . "($dotchar+)" . '(\S)';
 		$conf{comment_nonstartwordchars_regex} = qr{$regex}i;
 	}
 

@@ -799,11 +799,17 @@ sub breakHtml {
 		;
 	) }xi;
 
-	# First, convert spaces before an IE bug character into an nbsp.
+	# First, convert spaces before an IE bug character into a
+	# space followed by a non-breaking-space entity.
 	# This ensures that the standard word-breaking mechanism works
 	# despite the IE 'feature' of making the space before these chars
 	# effectively non-breaking.
-	$text =~ s{\s+($nswcr)}{&nbsp;$1}gs;
+#use Data::Dumper;
+#print STDERR "nswcr '$nswcr'\n";
+#print STDERR "nbe '$nbe'\n";
+#print STDERR "text 1 '$text'\n";
+	$text =~ s{$nswcr}{ &nbsp;$2$3}gs;
+#print STDERR "text 2 '$text'\n";
 
 	# Mark off breaking tags
 	$text =~ s{
@@ -811,6 +817,7 @@ sub breakHtml {
 		(</?$break_tag>)
 		\s*
 	}{ <$1> }gsx;
+#print STDERR "text 3 '$text'\n";
 
 	# Temporarily hide whitespace inside tags so that the regex below
 	# won't accidentally catch attributes, e.g. the HREF= of an A tag.
@@ -818,6 +825,7 @@ sub breakHtml {
 		(<[^>\s]*)	# Seek in a tab up to its
 		\s+		# first whitespace
 	}{$1\x00}gsx;		# and replace the space with NUL
+#print STDERR "text 4 '$text'\n";
 
 	# Break up overlong words, treating entities/character references
 	# as single characters and ignoring HTML tags.
@@ -831,15 +839,18 @@ sub breakHtml {
 			)
 		){$mwl}			# $mwl non-HTML-tag chars in a row
 	)}{$1 }gsx;
+#print STDERR "text 5 '$text'\n";
 
 	# Change the NULs back to whitespace.
 	$text =~ s{\x00}{ }g;
+#print STDERR "text 6 '$text'\n";
 
 	# If one of our spaces landed before an IE bug character, drop in
 	# an nbsp to work around the IE bug.  This mildly affects rendering
 	# for non-IE readers (grumble), but prevents getting around the
 	# filter by evenly spacing bug characters every $mwl characters.
 	$text =~ s{ ($nswcr)}{ &nbsp;$1}gs;
+#print STDERR "text 7 '$text'\n";
 
 	return $text;
 }
