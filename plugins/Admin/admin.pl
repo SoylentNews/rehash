@@ -737,6 +737,7 @@ sub topicEdit {
 	closedir(DIR);
 
 	my $tdesc = 'topics_all';
+	#What is this for? -Brian
 	if ($user->{section} && $user->{seclev} <= 9000) {
 		$tdesc = 'topics_section';
 	}
@@ -1084,7 +1085,7 @@ sub editStory {
 		('','','','');
 	my($multi_topics, $story_topics);
 	my $page = 'index';
-	my $section = $user->{section} ? $user->{section} : '';
+	my $section = $user->{section} ? $user->{section} : $form->{section};
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
 
