@@ -163,3 +163,6 @@ CREATE TABLE submission_param (
 INSERT INTO code_param (type, code, name) VALUES ('section_topic_types',1,'default');
 ALTER TABLE section_topics ADD COLUMN type smallint UNSIGNED NOT NULL;
 UPDATE section_topics SET type=1;
+
+# Autopoll update
+ALTER TABLE pollquestions ADD COLUMN autopoll enum("no","yes") DEFAULT 'no' NOT NULL;

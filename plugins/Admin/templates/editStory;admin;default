@@ -62,7 +62,7 @@ __template__
 		</TD>
 		<TD WIDTH="220">
 
-		[% IF Slash.getObject('Slash::Events'); %]
+		[% IF constants.plugin.Events && Slash.getObject('Slash::Events'); %]
 			[% PROCESS fancybox
 				title = "Set an Event for this Story"
 				contents = "<A HREF=\"$constants.rootdir/eventsadmin.pl?op=edit&amp;sid=$sid\">Make Event</A>"

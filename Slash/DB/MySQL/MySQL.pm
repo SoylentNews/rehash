@@ -1811,6 +1811,7 @@ sub savePollQuestion {
 			question	=> $poll->{question},
 			voters		=> $poll->{voters},
 			topic		=> $poll->{topic},
+			autopoll	=> $poll->{autopoll},
 			section		=> $poll->{section},
 			-date		=>'now()'
 		}, "qid	= $qid_quoted");
@@ -1823,6 +1824,7 @@ sub savePollQuestion {
 			voters		=> $poll->{voters},
 			topic		=> $poll->{topic},
 			section		=> $poll->{section},
+			autopoll	=> $poll->{autopoll},
 			uid		=> getCurrentUser('uid'),
 			-date		=>'now()'
 		});
@@ -1900,9 +1902,10 @@ sub getPollQuestionList {
 		}
 	}
 
-	$where = sprintf 'section IN (%s)', join(',', @{$other->{section}})
+	$where .= "autopoll = 'no'"; 
+	$where = sprintf ' AND section IN (%s)', join(',', @{$other->{section}})
 		if $other->{section};
-	$where = sprintf 'section NOT IN (%s)', join(',', @{$other->{exclude_section}})
+	$where = sprintf ' AND section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
 
 	my $questions = $self->sqlSelectAll(

@@ -195,11 +195,11 @@ INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras, fea
 # Dumping data for table 'section_topics'
 #
 
-INSERT INTO section_topics (section, tid) VALUES ('articles', 1);
-INSERT INTO section_topics (section, tid) VALUES ('articles', 2);
-INSERT INTO section_topics (section, tid) VALUES ('articles', 3);
-INSERT INTO section_topics (section, tid) VALUES ('articles', 4);
-INSERT INTO section_topics (section, tid) VALUES ('features', 1);
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 1, 1);
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 2, 1);
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 3, 1);
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 4, 1);
+INSERT INTO section_topics (section, tid, type) VALUES ('features', 1, 1);
 
 #
 # Dumping data for table 'sessions'
