@@ -289,8 +289,6 @@ ALTER TABLE blocks ADD COLUMN rss_cookie varchar(255),
 #We ran into URLs that were longer then 50 characters 
 ALTER TABLE submissions MODIFY COLUMN email varchar(255) DEFAULT '' NOT NULL;
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 UPDATE vars SET value=100 WHERE name="authors_unlimited";
 
 #Needed for search, not used in submissions "yet"
@@ -298,3 +296,5 @@ INSERT INTO string_param (type, code, name) VALUES ('submission-notes','','Uncla
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','Hold');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
