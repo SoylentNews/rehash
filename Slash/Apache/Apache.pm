@@ -283,7 +283,7 @@ sub ConnectionIsSSL {
 }
 
 sub ConnectionIsSecure {
-	return 1 if ConnectionIsSSL;
+	return 1 if ConnectionIsSSL();
 
 	# If the connection comes from a local IP or a network deemed
 	# secure by the admin, it's secure.  (The too-clever-by-half
