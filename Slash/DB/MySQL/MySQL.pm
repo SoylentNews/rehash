@@ -4502,7 +4502,7 @@ sub getSlashConf {
 		my $hr = { };
 		return $hr if !$ar;
 		for my $str (@$ar) {
-			my($k, $v) = split("=", $str);
+			my($k, $v) = split(/=/, $str);
 			$v = 1 if !defined($v);
 			$hr->{$k} = $v;
 		}
