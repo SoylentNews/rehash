@@ -1,0 +1,22 @@
+CREATE TABLE comment_rating (
+	vote_id mediumint UNSIGNED NOT NULL auto_increment,
+	uid mediumint UNSIGNED NOT NULL,
+	ipid char(32) DEFAULT '' NOT NULL,
+	sid mediumint UNSIGNED NOT NULL,
+	cid mediumint UNSIGNED NOT NULL,
+	val tinyint DEFAULT '0' NOT NULL,
+	active tinyint DEFAULT '1' NOT NULL,
+	ts DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	PRIMARY KEY rating_id (rating_id),
+	KEY uid_sid (uid,sid),
+	KEY ipid_sid (ipid,sid)
+);
+
+
+CREATE TABLE discussion_rating (
+	sid mediumint UNSIGNED NOT NULL UNIQUE,
+	total_votes mediumint,
+	active_votes mediumint,
+	avg_rating float NOT NULL DEFAULT '0',
+	PRIMARY KEY (sid)
+);
