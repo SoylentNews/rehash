@@ -829,6 +829,7 @@ sub getModeratorCommentLog {
 	$asc_desc ||= 'ASC';
 	$asc_desc = uc $asc_desc;
 	$asc_desc = 'ASC' if $asc_desc ne 'DESC';
+	my $order_col = $options->{order_col} || "ts";
 
 	if ($limit and $limit =~ /^(\d+)$/) {
 		$limit = "LIMIT $1";
@@ -887,7 +888,7 @@ sub getModeratorCommentLog {
 		"$where_clause
 		 AND moderatorlog.cid=comments.cid 
 		 $time_clause",
-		"ORDER BY ts $asc_desc $limit"
+		"ORDER BY $order_col $asc_desc $limit"
 	);
 	my(@comments, $comment,@ml_ids);
 	while ($comment = $sth->fetchrow_hashref) {
@@ -1891,13 +1892,17 @@ sub getUserEmail {
 # 
 sub getCommentsByGeneric {
 	my($self, $where_clause, $num, $min, $options) = @_;
+	$options ||= {};
 	$min ||= 0;
 	my $limit = " LIMIT $min, $num " if $num;
 	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
 		if $options->{limit_days};
+        my $sort_field = $options->{sort_field} || "date";
+        my $sort_dir = $options->{sort_dir} || "DESC";
+
 	my $comments = $self->sqlSelectAllHashrefArray(
 		'*', 'comments', $where_clause,
-		"ORDER BY date DESC $limit");
+		"ORDER BY $sort_field $sort_dir $limit");
 
 	return $comments;
 }
@@ -4869,16 +4874,15 @@ sub _calc_karma_token_loss {
 ##################################################################
 sub metamodEligible {
 	my($self, $user) = @_;
+	
+	# This should be true since admins should be able to do
+	# anything at anytime.  We now also provide admins controls
+	# to metamod arbitrary moderations	
+	return 1 if $user->{is_admin};
 
 	# Easy tests the user can fail to be ineligible to metamod.
 	return 0 if $user->{is_anon} || !$user->{willing} || $user->{karma} < 0;
 
-	# Technically I believe the next bit should always be right under
-	# the doctrine that an admin should be able to to anything but
-	# maybe the cat ate a plant tonight
-	# and thus Jim Jones really did it with the monkey wrench in the
-	# blue room -Brian
-	#return 1 if $user->{is_admin};
 
 	# Not eligible if metamodded too recently.
 	my $constants = getCurrentStatic();
@@ -5127,15 +5131,17 @@ sub createMetaMod {
 	my $rows;
 
 	# If this user has no saved mods, by definition nothing they try
-	# to M2 is valid.
-	return if !$m2_user->{mods_saved};
+	# to M2 is valid, unless of course they're an admin.
+	return if !$m2_user->{mods_saved} and !$m2_user->{is_admin};
 
 	# The user is only allowed to metamod the mods they were given.
 	my @mods_saved = $self->getModsSaved($m2_user);
 	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
+	my $saved_mods_encountered = 0;
 	my @m2s_mmids = sort { $a <=> $b } keys %$m2s;
 	for my $mmid (@m2s_mmids) {
-		delete $m2s->{$mmid} if !$mods_saved{$mmid};
+		delete $m2s->{$mmid} if !$mods_saved{$mmid} and !$m2_user->{is_admin};
+		$saved_mods_encountered++ if $mods_saved{$mmid};
 	}
 
 	# If we are allowed to multiply these M2's to apply to other
@@ -5150,21 +5156,23 @@ sub createMetaMod {
 
 	# Whatever happens below, as soon as we get here, this user has
 	# done their M2 for the day and gets their list of OK mods cleared.
-	$rows = $self->sqlUpdate("users_info", {
-		-lastmm =>	'NOW()',
-		mods_saved =>	'',
-	}, "uid=$m2_user->{uid} AND mods_saved != ''");
-	$self->setUser_delete_memcached($m2_user->{uid});
-	if (!$rows) {
-		# The update failed, presumably because the user clicked
-		# the MetaMod button multiple times quickly to try to get
-		# their decisions to count twice.  The user did not count
-		# on our awesome powers of atomicity:  only one of those
-		# clicks got to set mods_saved to empty.  That one wasn't
-		# us, so we do nothing.
-		return ;
+	# The one exception is admins who didn't metamod any of their saved mods.
+	if(!$m2_user->{is_admin} || ($m2_user->{is_admin} and $saved_mods_encountered )){
+		$rows = $self->sqlUpdate("users_info", {
+			-lastmm =>	'NOW()',
+			mods_saved =>	'',
+		}, "uid=$m2_user->{uid} AND mods_saved != ''");
+		$self->setUser_delete_memcached($m2_user->{uid});
+		if (!$rows) {
+			# The update failed, presumably because the user clicked
+			# the MetaMod button multiple times quickly to try to get
+			# their decisions to count twice.  The user did not count
+			# on our awesome powers of atomicity:  only one of those
+			# clicks got to set mods_saved to empty.  That one wasn't
+			# us, so we do nothing.
+			return ;
+		}
 	}
-
 	my($voted_fair, $voted_unfair) = (0, 0);
 	for my $mmid (keys %$m2s) {
 		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
@@ -5617,7 +5625,7 @@ sub getStoriesBySubmitter {
 	$limit = 'LIMIT ' . $limit if $limit;
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'sid,title,time',
-		'stories', "submitter='$id' AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty') and displaystatus >= 0 ",
+		'stories', "submitter='$id' AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty' OR writestatus='archived') and displaystatus >= 0 ",
 		"ORDER by time DESC $limit");
 	return $answer;
 }
