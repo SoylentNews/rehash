@@ -166,7 +166,7 @@ form [% formname %] [% formkey %] already submitted
 You do not have appropriate permissions to perform that action.
 
 [% CASE %]
-An unexpected error has occured.<BR><B>[% value %]</B><BR>
+An unexpected error has occurred.<BR><B>[% value %]</B><BR>
 [% END %]
 
 __seclev__
