@@ -3194,6 +3194,7 @@ sub getNumCommPostedByUID {
 sub getUIDList {
 	my($self, $column, $id) = @_;
 
+	my @result = ( );
 	my $where = '';
 	$id = md5_hex($id) if length($id) != 32;
 	if ($column eq 'md5id') {
@@ -3204,7 +3205,13 @@ sub getUIDList {
 	} else {
 		return [ ];
 	}
-	return $self->sqlSelectAll("DISTINCT uid ", "comments", $where);
+
+	push @result, $self->sqlSelectAll("DISTINCT uid ", "submissions", $where);
+	push @result, $self->sqlSelectAll("DISTINCT uid ", "comments", $where);
+	push @result, $self->sqlSelectAll("DISTINCT uid ", "moderatorlog", $where);
+
+	# unique uids only, please
+	return [keys %{ { map { $_ => 1 } @result } } ];
 }
 
 ##################################################################
