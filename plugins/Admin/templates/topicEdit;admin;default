@@ -48,6 +48,10 @@ __template__
 
 	<br><input type="checkbox" name="submittable" value="1"[% topic.submittable ? ' checked' : '' %]>
 	[%- PROCESS formLabel value => "Submittable", comment => "users can submit stories under this topic", nobreak => 1 %]
+	<br><input type="checkbox" name="searchable" value="1"[% topic.searchable  ? ' checked' : '' %]>
+	[%- PROCESS formLabel value => "Searchable", comment => "does this topic show up under search?", nobreak => 1 %]
+	<br><input type="checkbox" name="storypickable" value="1"[% topic.storypickable ? ' checked' : '' %]>
+	[%- PROCESS formLabel value => "Story Pickable", comment => "Can a user select this topic for story exclusion?", nobreak => 1 %]
 
 	<p>
 
