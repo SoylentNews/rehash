@@ -631,7 +631,8 @@ EOT
 	if ($num == 2 && $need_box) {
 		# we need the ad wrapped in a fancybox
 		if (defined $user->{state}{ad}{$num}
-			&& $user->{state}{ad}{$num} !~ /^<!-- no pos/) {
+			&& $user->{state}{ad}{$num} !~ /^<!-- no pos/
+			&& $user->{state}{ad}{$num} !~ /^<!-- place/) {
 			# if we're called from shtml, we won't have colors
 			# set, so we should get some set before making a
 			# box.				-- Pater
