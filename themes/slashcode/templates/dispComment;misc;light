@@ -26,9 +26,9 @@ __template__
 		[% END %]
 		[% UNLESS user.is_anon || is_anon || uid == user.uid %]
 			[% IF user.people.$uid == Slash.FRIEND %]
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Friend ]"></A>
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Friend ]</A>
 			[% ELSIF user.people.$uid == Slash.FOE %]
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[% Foe %]</A>
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Foe ]</A>
 			[% ELSE %]
 				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Neutral ]</A>
 			[% END %]
