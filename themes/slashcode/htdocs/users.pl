@@ -641,15 +641,22 @@ sub mailPasswd {
 		}
 	}
 
-	my $user_edit = $slashdb->getUser($uid);
-
+	my $user_edit;
 	my $err_name = '';
-	$err_name = 'mailpasswd_notmailed_err' if !$uid || isAnon($uid);
-	$err_name = 'mailpasswd_readonly_err' if !$err_name
-		&& ($slashdb->checkReadOnly('ipid')
-			|| $slashdb->checkReadOnly('subnetid'));
-	$err_name = 'mailpasswd_toooften_err' if !$err_name
-		&& $slashdb->checkMaxMailPasswords($user_edit);
+	if (!$uid || isAnon($uid)) {
+		$err_name = 'mailpasswd_notmailed_err';
+	}
+	if (!$err_name) {
+		$user_edit = $slashdb->getUser($uid);
+		$err_name = 'mailpasswd_readonly_err'
+			if $slashdb->checkReadOnly('ipid')
+				|| $slashdb->checkReadOnly('subnetid');
+	}
+	if (!$err_name) {
+		$err_name = 'mailpasswd_toooften_err'
+			if $slashdb->checkMaxMailPasswords($user_edit);
+	}
+
 	if ($err_name) {
 		print getError($err_name);
 		$slashdb->resetFormkey($form->{formkey});	
