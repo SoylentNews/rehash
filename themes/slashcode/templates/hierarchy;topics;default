@@ -27,9 +27,9 @@ __template__
 [% BLOCK topic_children %]
 	<li>
 	[% IF user.is_admin %]
-		<a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% tree.$tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
+		<a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% tree.$tid.tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
 	[% ELSE %]
-		<a href="[% gSkin.rootdir %]/search.pl?topic=[% tree.$tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
+		<a href="[% gSkin.rootdir %]/search.pl?topic=[% tree.$tid.tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
 	[% END %]
 	</li>
 	
