@@ -313,7 +313,7 @@ sub commentIndex {
 			print getData('nodiscussions');
 			slashDisplay('discreate', {
 				topic => $constants->{discussion_default_topic},
-				disclabel => $label,
+				label => $label,
 			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 		}
 	} else {
@@ -351,7 +351,7 @@ sub commentIndex {
 			print getData('nodiscussions');
 			slashDisplay('discreate', {
 				topic => $constants->{discussion_default_topic},
-				disclabel	=> $label,
+				label	=> $label,
 			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 		}
 	}
@@ -398,7 +398,7 @@ sub commentIndexUserCreated {
 		print getData('nodiscussions');
 		slashDisplay('discreate', {
 			topic => $constants->{discussion_default_topic},
-			disclabel => $label,
+			label => $label,
 		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
 }
