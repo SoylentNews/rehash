@@ -1095,5 +1095,8 @@ ALTER TABLE sections ADD defaultcommentstatus enum('disabled','enabled','friends
 UPDATE sections SET defaultcommentstatus='enabled';
 UPDATE vars SET value='enabled' WHERE name='defaultcommentstatus';
 
+UPDATE users_param SET value = 'enabled'  WHERE name = 'journal_discuss' AND value = 1;
+UPDATE users_param SET value = 'disabled' WHERE name = 'journal_discuss' AND value = 0;
+
 # USEPERL LAST UPDATED HERE
 
