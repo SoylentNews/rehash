@@ -9,7 +9,7 @@ use Slash::Utility;
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '5-55/10 * * * *';
+$task{$me}{timespec} = '10,40 * * * *';
 $task{$me}{timespec_panic_1} = '';
 $task{$me}{on_startup} = 1;
 $task{$me}{code} = sub {
