@@ -505,15 +505,26 @@ sub findDiscussion {
 sub _score {
 	my ($self, $col, $query, $method) = @_;
 	if ($method) {
-		my $terms;
-		for (split / /, $query) {
-			$terms .= $self->sqlQuote($_) . ",";
+		# We were getting malformed SQL queries with the previous
+		# way this was done, so I made it a bit more robust.  If
+		# no search terms are passed in with $query, instead of
+		# crashing it returns "0" which of course will assign a
+		# score of 0 to all hits.  I'd prefer to see the callers
+		# massage $form->{query} themselves, stripping leading
+		# and trailing spaces before passing it in here, but this
+		# will do for now. - Jamie 2002/10/20
+		my @terms = ( );
+		for my $term (split / /, $query) {
+			$term =~ /^\s*(.*?)\s*$/; $term = $1;
+			next unless $term;
+			push @terms, $self->sqlQuote($_);
 		}
-		chop($terms);
+		return "0" if !@terms;
+		my $terms = join(",", @terms);
 		return "($method($col, $terms))";
 	} else {
-		$query =  $self->sqlQuote($query);
-		return "\n(MATCH ($col) AGAINST($query))\n";
+		$query = $self->sqlQuote($query);
+		return "\n(MATCH ($col) AGAINST ($query))\n";
 	}
 }
 
