@@ -67,8 +67,7 @@ sub init {
 
 	my %vus_hash = ( );
 	my @dbids = sort { $a <=> $b } keys %$dbs;
-	my @dbids_usable = grep { $dbs->{$_}{weight_total} > 0 } @dbids;
-	for my $dbid (@dbids_usable) {
+	for my $dbid (@dbids) {
 		my $vu = $dbs->{$dbid}{virtual_user};
 		$vus_hash{$vu} = 1;
 	}
