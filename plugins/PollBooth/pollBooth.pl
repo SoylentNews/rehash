@@ -13,6 +13,7 @@ use Slash::Utility;
 sub main {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
 
 	my %ops = (
 		edit		=> \&editpoll,
@@ -21,12 +22,27 @@ sub main {
 		list		=> \&listpolls,
 		default		=> \&default,
 		vote		=> \&vote,
+		vote_return		=> \&vote_return,
 		get		=> \&poll_booth,
 	);
 
 	my $op = $form->{op};
+	$op = 'default' unless $ops{$form->{op}};
 	if (defined $form->{'aid'} && $form->{'aid'} !~ /^\-?\d$/) {
 		undef $form->{'aid'};
+	}
+
+	if ($op eq "vote_return") {
+		$ops{$op}->($slashdb,$form);
+		# Why not do this in a more generic manner you say? 
+		# Because I am paranoid about this being abused. -Brian
+		if ($form->{sid}) {
+			my $section = $slashdb->getStory($form->{sid}, 'section');
+			my $url = $slashdb->getSection($section, 'url');
+			$url ||= $constants->{real_rootdir};
+			
+			redirect($url, "/article.pl?sid=$form->{sid}");
+		}
 	}
 
 	if ($form->{qid}) {
@@ -36,7 +52,6 @@ sub main {
 		header(getData('title'), $form->{section});
 	}
 
-	$op = 'default' unless $ops{$form->{op}};
 	$ops{$op}->($form);
 
 	writeLog($form->{'qid'});
@@ -162,6 +177,7 @@ sub savepoll {
 			$discussion = $slashdb->createDiscussion({
 				title	=> $form->{question},
 				topic	=> $form->{topic},
+				approved  => 1, # Story discussions are always approved -Brian
 				url	=> "$constants->{rootdir}/pollBooth.pl?qid=$qid&aid=-1",
 			});
 		} elsif ($poll->{discussion}) {
@@ -177,6 +193,28 @@ sub savepoll {
 			if $discussion && $discussion != $poll->{discussion};
 	}
 	$slashdb->setStory($form->{sid}, { qid => $qid }) if $form->{sid};
+}
+
+#################################################################
+sub vote_return {
+	my($slashdb, $form) = @_;
+
+	my $qid = $form->{'qid'};
+	my $aid = $form->{'aid'};
+	return unless $qid && $aid;
+
+	my(%all_aid) = map { ($_->[0], 1) }
+		@{$slashdb->getPollAnswers($qid, ['aid'])};
+	my $poll_open = $slashdb->isPollOpen($qid);
+	my $has_voted = $slashdb->hasVotedIn($qid);
+
+	if ($has_voted) {
+		# Specific reason why can't vote.
+	} elsif (!$poll_open) {
+		# Voting is closed on this poll.
+	} elsif (exists $all_aid{$aid}) {
+		$slashdb->createPollVoter($qid, $aid);
+	}
 }
 
 #################################################################
