@@ -154,7 +154,11 @@ EOT
 	my $consensus = $constants->{m2_consensus};
 	my $token_conversion_point = $stats->getTokenConversionPoint();
 
-	my $m2_text = getM2Text($stats->getModM2Ratios());
+	my $oldest_to_show = int($oldest_unm2d) + 7;
+	$oldest_to_show = 21 if $oldest_to_show < 21;
+	my $m2_text = getM2Text($stats->getModM2Ratios(), {
+		oldest => $oldest_to_show
+	});
 
 	my $grand_total = $stats->countDailyByPage('', );
 	$data{grand_total} = $grand_total;
@@ -459,9 +463,10 @@ sub getM2Text {
 
 	# Build the $text data, one line at a time.
 	my @days = sort keys %$mmr;
-	if (scalar(@days) > 30) {
+	my $oldest = $options->{oldest} || 30;
+	if (scalar(@days) > $oldest) {
 		# If we have too much data, throw away the oldest.
-		@days = @days[-30..-1];
+		@days = @days[-$oldest..-1];
 	}
 	sub valsort { ($b eq 'X' ? 999 : $b eq '_' ? -999 : $b) <=> ($a eq 'X' ? 999 : $a eq '_' ? -999 : $a) }
 	for my $day (@days) {
