@@ -778,11 +778,21 @@ sub getAllStats {
 		push @where, 'name = ' . $self->sqlQuote($options->{name});
 	}
 
+	# today is no good
+	my $offset = 1;
+	# yesterday no good either, early in the day
+	$offset++ if (localtime)[2] < 8;
+
+	push @where, sprintf(
+		'(day <= DATE_SUB(NOW(), INTERVAL %d DAY))',
+		$offset
+	);
+
 	if ($options->{days} && $options->{days} > 0) {
 		push @where, sprintf(
-				'(day > DATE_SUB(NOW(), INTERVAL %d DAY))',
-				$options->{days} + 1
-			) if $options->{days};
+			'(day > DATE_SUB(NOW(), INTERVAL %d DAY))',
+			$options->{days} + $offset
+		) if $options->{days};
 	}
 
 	my $data = $self->sqlSelectAll($sel, $table, join(' AND ', @where), $extra) or return;

@@ -29,6 +29,7 @@ ELSE;  # default to lines
 
    days = data.0.data.keys.sort;
    alldata = [days];
+   plotdata = [[]];
    alltypes = [];
    mytotal = {};
    hasneg = 0;
@@ -56,11 +57,13 @@ ELSE;  # default to lines
          IF (!haspos && mynum > 0);
             haspos = 1;
          END;
-#         foooo = [-500 .. 0];
          nums.push(mynum);
       END;
       alldata.push(nums);
-      alltypes.push(this.type);
+      mytype = this.type _ " (" _ nums.${nums.max} _ ")";
+      alltypes.push(mytype);
+      plotdata.push([]);
+      plotdata.${plotdata.max}.${nums.max} = nums.${nums.max};
    END;
 
    x_label_skip = days.size / 10;
@@ -69,25 +72,24 @@ ELSE;  # default to lines
    gtitle = form.title || "$period Report for $constants.sitename";
 
    my_graph.set(
-#      x_label             => period.ucfirst,
-#      y_label             => 'Number',
       title               => gtitle,
 
       x_label_position    => 0.5,
-#      y_max_value         => nums.highval,
-#      y_min_value         => nums.lowval,
 
       zero_axis           => 1,
 
       x_labels_vertical   => 1,
       x_label_skip        => x_label_skip,
 
-#      line_types          => [ 1, 2, 3, 4 ],
-#      line_type_scale     => 8,
+      line_types          => [ 1, 1, 1, 1, 1, 1, 1,
+                               2, 2, 2, 2, 2, 2, 2,
+                               3, 3, 3, 3, 3, 3, 3,
+                               4, 4, 4, 4, 4, 4, 4  ],
+      line_type_scale     => 10,
       line_width          => 2,
 
       transparent         => 0,
-      show_values         => 0
+      show_values         => plotdata
    );
 
    IF (!hasneg);

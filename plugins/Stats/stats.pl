@@ -25,15 +25,16 @@ sub main {
 		: $slashdb;
 	my $stats     = getObject('Slash::Stats', $logdb->{virtual_user});
 
-	my $admin_post = $user->{is_admin} && $user->{state}{post};
+	my $admin      = $user->{seclev} >= $constants->{stats_admin_seclev} || 100;
+	my $admin_post = $admin && $user->{state}{post};
 
 	# possible value of "op" parameter in form
 	my %ops = (
-		report	=> [ $user->{is_admin},	\&report	],
-		graph	=> [ $user->{is_admin},	\&graph		],
+		report	=> [ $admin,		\&report	],
+		graph	=> [ $admin,		\&graph		],
 		list	=> [ $admin_post,	\&list		],
 
-		default	=> [ $user->{is_admin},	\&list		]
+		default	=> [ $admin,		\&list		]
 	);
 
 	# prepare op to proper value if bad value given
@@ -70,7 +71,7 @@ sub graph {
 			next if $day eq 'names';
 			$data->{$day} = $stats_data->{$section}{$day}{$name};
 		}
-		push @data, { data => $data, type => "$name ($sections->{$section})" };
+		push @data, { data => $data, type => "$name / $sections->{$section}" };
 	}
 
 	my $type = 'image/png';

@@ -17,7 +17,7 @@ How I did installed it on Debian:
   occur, but they don't seem to affect the module use for our purposes;
   use "force install GD::Text::Align" if necessary.
 
-* Using CPAN shell, installed GD::Graph.  Feel free to cd to "samples"
+* Using CPAN shell, install GD::Graph.  Feel free to cd to "samples"
   in GD-Graph and type "make", and then look at the .png output
   files.  Your GD library may think you have GIF support when you don't;
   if so, edit save.pl to set "my $ext = 'png'" and type "make EXT=png".
