@@ -155,6 +155,7 @@ sub displayStories {
 	# - Cliff
 	while (my $story = shift @{$stories}) {
 		my $sid = $story->[0];
+		my $section = $story->[1];
 		my $title = $story->[2];
 		my $time = $story->[9];
 		my $storytime = timeCalc($time, '%B %d, %Y');
@@ -163,7 +164,8 @@ sub displayStories {
 			my $storycontent = $self->getStoryTitleContent({ 
 					sid 	=> $sid, 
 					'time' 	=> $time, 
-					title 	=> $title
+					title 	=> $title,
+					section	=> $section
 			});
 			$storystruct->[$i]{widget} = $storycontent;
 		} else {
