@@ -138,7 +138,7 @@ sub displayRSS {
 	);
 
 
-	my $articles = $journal->getsByUid($uid, 0, $constants->{journal_default_display});
+	my $articles = $journal->getsByUid($uid, 0, 15);
 	for my $article (@$articles) {
 			$rss->add_item(
 				title	=> xmlencode($article->[2]),
