@@ -559,13 +559,13 @@ INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the 
 
 # End of T_2_3_0_36, Start of T_2_3_0_37
 
-# FOUNDRIES TEST SITE LAST UPDATED HERE
 
 # from foundries integrations
 ALTER TABLE string_param MODIFY COLUMN code varchar(128) NOT NULL;
 ALTER TABLE menus MODIFY COLUMN label varchar(255) DEFAULT '' NOT NULL;
 ALTER TABLE rss_raw MODIFY COLUMN description text;
 ALTER TABLE section_extras MODIFY COLUMN type enum("text","list","topics") DEFAULT 'text' NOT NULL;
+
 # For submissions notes -Brian
 INSERT INTO code_param (type, code, name) VALUES ('submission-state',0,'Pending');
 INSERT INTO code_param (type, code, name) VALUES ('submission-state',1,'Rejected');
@@ -578,7 +578,6 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 
 # FOUNDRIES TEST SITE LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
-# SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_37, Start of T_2_3_0_38
 
@@ -587,6 +586,6 @@ ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
 # USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_38
-
