@@ -275,6 +275,20 @@ CREATE TABLE formkeys (
 ) TYPE = myisam;
 
 #
+# Table structure for table 'hooks'
+#
+
+DROP TABLE IF EXISTS hooks;
+CREATE TABLE hooks (
+	id mediumint(5) UNSIGNED NOT NULL auto_increment,
+	param varchar(50) DEFAULT '' NOT NULL,
+	class varchar(100) DEFAULT '' NOT NULL,
+	subroutine varchar(100) DEFAULT '' NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE hook_param (param,class,subroutine)
+) TYPE = myisam;
+
+#
 # Table structure for table 'menus'
 #
 
