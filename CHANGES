@@ -37,6 +37,8 @@ slash-1.0.4, 2000.05.31
 *	Moved redundant code from submit.pl and comments.pl that handled
 	formkey functionality into Slash.pm
 
+*	fixed admin.pl to now have URL field.
+
 
 slash-1.0.3, 2000.05.22
 -----------------------
