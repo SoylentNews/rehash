@@ -387,14 +387,21 @@ sub displayStories {
 		}
 
 		if ($story->{section} ne $constants->{defaultsection} && (!$form->{section} || $form->{section} eq 'index')) {
-			my $SECT  = $reader->getSection($story->{section});
-			push @links, getData('seclink', {
-				name	=> $story->{section},
-				section	=> $SECT
-			});
+			my $SECT = $reader->getSection($story->{section});
+			my $url;
+			if ($SECT->{rootdir}) {
+				my $url = $SECT->{rootdir} . '/';
+			} elsif ($user->{is_anon}) {
+				$url = $constants->{rootdir} . '/' . $story->{section} . '/';
+			} else {
+				$url = $constants->{rootdir} . '/index.pl?section=' . $story->{section};
+			}
+			push @links, [ $url, $SECT->{title} ];
 		}
 
-		push @links, getData('editstory', { sid => $story->{sid} }) if $user->{seclev} > 100;
+		if ($user->{seclev} >= 100) {
+			push @links, [ "$constants->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", 'Edit' ];
+		}
 
 		# I added sid so that you could set up replies from the front page -Brian
 		$tmpreturn .= slashDisplay('storylink', {

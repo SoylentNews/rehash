@@ -19,7 +19,11 @@ __template__
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#CCCCCC">
 
 				<P><FONT FACE="[% constants.mainfontface %]" SIZE="2"><B>(</B>
-[% links.join(' | ') %]
+[% FOREACH storylinks = links; IF storylinks.ref == 'ARRAY' %]
+<A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 %]</A>
+[% ELSE; storylinks; END %]
+[% UNLESS loop.last %] | [% END %]
+[% END %]
 				<B>)</B></FONT></P>
 
 			</TD></TR></TABLE>

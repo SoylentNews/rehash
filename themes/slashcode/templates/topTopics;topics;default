@@ -31,12 +31,13 @@ __template__
 	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
 	[% FOREACH story = topic.stories %]
 		[% IF story.sid %]
-			[% Slash.linkStory({
+			[% storylinks = Slash.linkStory({
 				section	=> story.section,
 				tid	=> story.tid,
 				sid	=> story.sid,
 				'link'	=> story.title
 			}) %]
+<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
 			<FONT SIZE="-1">
 				([% story.commentcount %] comments) - [% Slash.timeCalc(story.time, '%B %o, %Y') %]
 			</FONT>

@@ -225,7 +225,7 @@ sub prepareStory {
 #########################################################
 
 sub getLinksContent { 
-	my ($self, $storyref, $other) = @_;
+	my($self, $storyref, $other) = @_;
 
 	if ($other->{custom_links}) {
 		# For when the default links just aren't what we want, we
@@ -236,7 +236,7 @@ sub getLinksContent {
 		}, { Return => 1 });
 	}
 
-	my (@links, $link, $thresh,@cclink);	
+	my(@links, $link, $thresh, @cclink);	
 
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -295,16 +295,21 @@ sub getLinksContent {
 	
 	if ($storyref->{section} ne $constants->{defaultsection} 
 		&& !$form->{section}) {
-		my ($section) = $self->getSection($storyref->{section});
-
-		push @links, getData('seclink', {
-			name	=> $storyref->{section},
-			section	=> $section
-		});
+		my $SECT = $reader->getSection($storyref->{section});
+		my $url;
+		if ($SECT->{rootdir}) {
+			my $url = $SECT->{rootdir} . '/';
+		} elsif ($user->{is_anon}) {
+			$url = $constants->{rootdir} . '/' . $story->{section} . '/';
+		} else {
+			$url = $constants->{rootdir} . '/index.pl?section=' . $story->{section};
+		}
+		push @links, [ $url, $SECT->{title} ];
 	}
-	
-	push @links, getData('editstory', 
-		{ sid => $storyref->{sid} }) if $user->{seclev} > 100;
+
+	if ($user->{seclev} >= 100) {
+		push @links, [ "$constants->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", 'Edit' ];
+	}
 
 	my $storycontent = 
 		slashDisplay('storylink', {

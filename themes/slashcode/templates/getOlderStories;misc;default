@@ -46,7 +46,9 @@ __template__
 			<P><B><FONT SIZE="4">[% story.day_of_week %]</FONT> [% story.month %] [% story.day %]</B></P>
 		[% END;
 	END %]
-	&middot; [% story.link %] ([% story.commentcount %])<BR>
+	&middot;
+	<A HREF="[% story.link.0 %]"[% IF story.link.2 %] TITLE="[% story.link.2 %]"[% END %]>[% story.link.1 %]</A>
+	([% story.commentcount %])<BR>
 	[% start = start + 1; c = c + 1; LAST IF c >= max_older_stories %]
 [% END %]
 

@@ -22,14 +22,18 @@ __template__
 <P>[% PROCESS titlebar title => 'Most Active Stories' %]
 [% FOREACH item = actives %]
 <B><FONT SIZE="4">[% item.3 %]</FONT></B>
-[% Slash.linkStory({ link => item.1, section => item.2, sid => item.0 }) %] by [% item.4 %]<BR>
+[% storylinks = Slash.linkStory({ link => item.1, section => item.2, sid => item.0 }) %]
+<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
+by [% item.4 %]<BR>
 [% END %]</P>
 
 
 <P>[% PROCESS titlebar title => 'Most Visited Stories' %]
 [% FOREACH item = visited %]
 <B><FONT SIZE="4">[% item.3 %]</FONT></B>
-[% Slash.linkStory({ link => item.1, section => item.2, sid => item.0 }) %] by [% item.4 %]<BR>
+[% storylinks = Slash.linkStory({ link => item.1, section => item.2, sid => item.0 }) %]
+<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
+by [% item.4 %]<BR>
 [% END %]</P>
 
 <P>[% PROCESS titlebar title => 'Most Active Authors' %]
@@ -54,7 +58,8 @@ __template__
 	<A HREF="[% constants.rootdir %]/comments.pl?sid=[% top.sid %]&amp;pid=[% top.pid %]#[% top.cid %]">[% top.subj %]</A>
 	by <A HREF="mailto:[% top.fakeemail | fixparam %]">[% top.nickname %]</A> on [% top.cdate %]<BR>
 
-	<FONT SIZE="2">attached to [% Slash.linkStory({ link => top.title, section => top.section, sid => top.sid }) %]
+	<FONT SIZE="2">attached to [% storylinks = Slash.linkStory({ link => top.title, section => top.section, sid => top.sid }) %]
+<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
 	posted on [% top.sdate %] by [% top.anickname %]</FONT><BR><BR>
 [% END %]</P>
 [% END %]

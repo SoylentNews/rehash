@@ -1,6 +1,8 @@
 __section__
 default
 __description__
+THIS SHOULD NOT BE USED AND IS GOING AWAY
+
 Create a link to a story, whenever it needs one
 
 * dynamic = boolean for using dynamic, instead of static, page

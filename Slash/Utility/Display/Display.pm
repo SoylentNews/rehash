@@ -407,68 +407,84 @@ The 'linkStory' template block.
 =cut
 
 sub linkStory {
-	my($story_link) = @_;
-	my $user = getCurrentUser();
+	my($story_link, $render) = @_;
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $user      = getCurrentUser();
 
-	my $mode = $story_link->{mode} || $user->{mode};
-	my $threshold = undef;
-	$threshold = $story_link->{threshold} if exists $story_link->{threshold};
-	my $dynamic = 0;
+	my($url, $script, $title, $section, %params);
+	$script = 'article.pl';
+	$params{sid} = $story_link->{sid};
+	$params{mode} = $story_link->{mode} || $user->{mode};
+	$params{threshold} = $story_link->{threshold} if exists $story_link->{threshold};
 
 	# Setting $dynamic properly is important.  When generating the
 	# AC index.shtml, it's a big win if we link to other
 	# prerendered .shtml URLs whenever possible/appropriate.
 	# But, we must link to the .pl when necessary.
 
-	if ($ENV{SCRIPT_NAME} or !$user->{is_anon}) {
+	my $dynamic = 0;
+	if ($ENV{SCRIPT_NAME} || !$user->{is_anon}) {
 		# Whenever we're invoked from Apache, use dynamic links.
 		# This test will be true 99% of the time we come through
 		# here, so it's first.
 		$dynamic = 1;
-	} elsif ($mode) {
+	} elsif ($params{mode}) {
 		# If we're an AC script, but this is a link to e.g.
 		# mode=nocomment, then we need to have it be dynamic.
-		$dynamic = 1 if $mode ne $reader->getUser(
-			$constants->{anonymous_coward_uid},
-			'mode',
-		);
+		$dynamic = 1 if $params{mode} ne getCurrentAnonymousCoward('mode');
 	}
-	if (!$dynamic and defined($threshold)) {
+
+	if (!$dynamic && defined($params{threshold})) {
 		# If we still think we can get away with a nondynamic link,
 		# we need to check one more thing.  Even an AC linking to
 		# an article needs to make the link dynamic if it's the
 		# "n comments" link, where threshold = -1.  For maximum
 		# compatibility we check against the AC's threshold.
-		$dynamic = 1 if $threshold != getCurrentAnonymousCoward('threshold');
+		$dynamic = 1 if $params{threshold} != getCurrentAnonymousCoward('threshold');
 	}
 
 	# We need to make sure we always get the right link -Brian
-	$story_link->{section} ||= $reader->getStory($story_link->{sid}, 'section');
-	$story_link->{'link'} = $reader->getStory($story_link->{sid}, 'title')
-		if $story_link->{'link'} eq "";
-	my $section = $reader->getSection($story_link->{section});
-	my $url = $section->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
+	$story_link->{'link'} = $reader->getStory($story_link->{sid}, 'title') if $story_link->{'link'} eq '';
+	$title       = $story_link->{'link'};
+	$section     = $story_link->{section} ||= $reader->getStory($story_link->{sid}, 'section');
+	$params{tid} = $reader->getStoryTopicsJustTids($story_link->{sid}); 
 
-	my $tids = $reader->getStoryTopicsJustTids($story_link->{sid}); 
-	my $tid_string = join('&amp;tid=', @$tids);
+	my $SECT = $reader->getSection($story_link->{section});
+	$url = $SECT->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
 
-	return _hard_linkStory($story_link, $mode, $threshold, $dynamic, $url, $tid_string)
-		if $constants->{comments_hardcoded} && !$user->{light};
+	if ($dynamic) {
+		$url .= '/' . $script . '?';
+		for my $key (keys %params) {
+			if (ref $params{$key} eq 'ARRAY') {
+				$url .= "$key=$_&" for @{$params{$key}};
+			} else {
+				$url .= "$key=$params{$key}&";
+			}
+		}
+		chop $url;
+	} else {
+		$url .= $section . '/' . $story_link->{sid} . '.shtml';
+		# manually add the tid for now
+		if ($params{tid}) {
+			if (ref $params{tid} eq 'ARRAY') {
+				$url .= 'tid=' . fixparam($_) . '&' for @{$params{tid}};
+			} else {
+				$url .= 'tid=' . fixparam($params{tid}) . '&';
+			}
+			chop $url;
+		}
+	}
 
-	return slashDisplay('linkStory', {
-		mode		=> $mode,
-		threshold	=> $threshold,
-		tid		=> $story_link->{tid},
-		tid_string	=> $tid_string,
-		sid		=> $story_link->{sid},
-		section		=> $story_link->{section},
-		url		=> $url,
-		text		=> $story_link->{'link'},
-		dynamic		=> $dynamic,
-		title		=> $story_link->{title},
-	}, { Return => 1, Nocomm => 1 });
+	if ($render) {
+		my $rendered = '<A HREF="' . $url . '"';
+		$rendered .= ' TITLE="' . strip_attribute($story_link->{title}) . '"'
+			if $story_link->{title} ne '';
+		$rendered .= '>' . $title . '</A>';
+		return $rendered;
+	} else {
+		return [$url, $title, $story_link->{title}];
+	}
 }
 
 #========================================================================
@@ -1162,26 +1178,6 @@ sub lockTest {
 
 ########################################################
 # this sucks, but it is here for now
-sub _hard_linkStory {
-	my($story_link, $mode, $threshold, $dynamic, $url, $tid_string, $title) = @_;
-	my $constants = getCurrentStatic();
-	my $f_title = sprintf 'TITLE="%s"', strip_attribute($story_link->{title});
-
-	if ($dynamic) {
-		my $link = qq[<A HREF="$url/article.pl?sid=$story_link->{sid}];
-		$link .= "&amp;mode=$mode" if $mode;
-		$link .= "&amp;tid=$tid_string" if $tid_string;
-		$link .= "&amp;threshold=$threshold" if defined($threshold);
-		$link .= qq[" $f_title>$story_link->{link}</A>];
-		return $link;
-	} else {
-		return qq[<A HREF="$url/$story_link->{section}/$story_link->{sid}.shtml?tid=$tid_string" $f_title>$story_link->{link}</A>];
-	}
-}
-
-
-########################################################
-# this sucks, but it is here for now
 sub _hard_linkComment {
 	my($comment, $printcomment, $date) = @_;
 	my $user = getCurrentUser();
@@ -1398,11 +1394,20 @@ sub _slashStory {
 
 	my $sid = $token->[1]{story};
 	my $text = $tokens->get_text("/slash");
-	my $content = linkStory({
+	my $storylinks = linkStory({
 		'link'	=> $text,
 		sid	=> $token->[1]{story},
 		title	=> $token->[1]{title},
 	});
+
+	my $content;
+	if ($storylinks->[0] && $storylinks->[2]) {
+		$content = '<A HREF="' . $storylinks->[0] . '"';
+		$content .= ' TITLE="' . strip_attribute($storylinks->[2]) . '"'
+			if $storylinks->[2] ne '';
+		$content .= '>' . $storylinks->[1] . '</A>';
+	}
+
 	$content ||= Slash::getData('SLASH-UNKNOWN-STORY');
 
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
