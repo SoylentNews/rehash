@@ -124,12 +124,12 @@ sub getSlash {
 	my %nums = map {($_ => 1)} qw(
 		last next artcount bseclev cid clbig clsmall
 		commentlimit commentsort commentspill commentstatus
-		del displaystatus filter_id hardthresh height
-		highlightthresh isolate issue light maillist max
+		del displaystatus filter_id height
+		highlightthresh isolate issue maillist max
 		maxcommentsize maximum_length maxstories min minimum_length
-		minimum_match noboxes noicons noscores nosigs ordernum pid
-		reparent retrieve seclev startat uid uthreshold voters width
-		willing writestatus ratio
+		minimum_match ordernum pid
+		retrieve seclev startat uid uthreshold voters width
+		writestatus ratio
 	);
 
 	# regexes to match dynamically generated numeric fields
@@ -2292,7 +2292,7 @@ sub dispStory {
 		# Need Header
 		my $SECT = getSection($S->{section});
 		$title = <<EOT;
-\t\t\t<A HREF="$I{rootdir}/$S->{section}/"><FONT COLOR="$I{fg}->[3]">$SECT->{title}</FONT></A>: $S->{title}
+\t\t\t<A HREF="$I{rootdir}/$S->{section}/"><FONT COLOR="$I{fg}[3]">$SECT->{title}</FONT></A>: $S->{title}
 EOT
 	}
 
