@@ -108,14 +108,9 @@ sub findComments {
 	}
 
 
-	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
-	$sql .= " LIMIT $start, $limit" if $limit;
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $search = $self->sqlSelectAll($columns, $tables, $where, $other );
 
-	$self->sqlConnect();
-	my $cursor = $self->{_dbh}->prepare($sql);
-	$cursor->execute;
-
-	my $search = $cursor->fetchall_arrayref;
 	return $search;
 }
 
@@ -201,13 +196,8 @@ sub findUsers {
 		$other = " ORDER BY users.uid "
 	}
 
-	my $sql = "SELECT $columns FROM $tables WHERE $where $other $limit";
-
-	$self->sqlConnect();
-	my $sth = $self->{_dbh}->prepare($sql);
-	$sth->execute;
-
-	my $users = $sth->fetchall_arrayref;
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $users = $self->sqlSelectAll($columns, $tables, $where, $other );
 
 	return $users;
 }
@@ -243,7 +233,6 @@ sub findStory {
 	} else {
 		$other = " ORDER BY time DESC";
 	}
-	$other .= " LIMIT $start, $limit" if $limit;
 
 	# The big old searching WHERE clause, fear it
 	my $key = " (MATCH (stories.title) AGAINST ($query) or MATCH (introtext,bodytext) AGAINST ($query)) ";
@@ -280,12 +269,8 @@ EOT
 			if $form->{topic};
 	}
 	
-	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
-
-	$self->sqlConnect();
-	my $cursor = $self->{_dbh}->prepare($sql);
-	$cursor->execute;
-	my $stories = $cursor->fetchall_arrayref;
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $stories = $self->sqlSelectAll($columns, $tables, $where, $other );
 
 	return $stories;
 }
@@ -324,7 +309,6 @@ sub findJournalEntry {
 	} else {
 		$other = " ORDER BY date DESC";
 	}
-	$other .= " LIMIT $start, $limit" if $limit;
 
 	# The big old searching WHERE clause, fear it
 	my $key = " (MATCH (description) AGAINST ($query) or MATCH (article) AGAINST ($query)) ";
@@ -337,12 +321,8 @@ sub findJournalEntry {
 	$where .= " AND tid=" . $self->sqlQuote($form->{topic})
 		if $form->{topic};
 	
-	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
-
-	$self->sqlConnect();
-	my $cursor = $self->{_dbh}->prepare($sql);
-	$cursor->execute;
-	my $stories = $cursor->fetchall_arrayref;
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $stories = $self->sqlSelectAll($columns, $tables, $where, $other );
 
 	return $stories;
 }
@@ -363,7 +343,6 @@ sub findPollQuestion {
 	} else {
 		$other = " ORDER BY date DESC";
 	}
-	$other .= " LIMIT $start, $limit" if $limit;
 
 	# The big old searching WHERE clause, fear it
 	my $key = " MATCH (question) AGAINST ($query) ";
@@ -377,10 +356,72 @@ sub findPollQuestion {
 	
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
 
-	$self->sqlConnect();
-	my $cursor = $self->{_dbh}->prepare($sql);
-	$cursor->execute;
-	my $stories = $cursor->fetchall_arrayref;
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $stories = $self->sqlSelectAll($columns, $tables, $where, $other );
+
+	return $stories;
+}
+
+####################################################################################
+sub findSubmission {
+	my($self, $form, $start, $limit, $sort) = @_;
+	$start ||= 0;
+
+	my $query = $self->sqlQuote($form->{query});
+	my $columns = "subid, subj, time, story";
+	$columns .= ", TRUNCATE((MATCH (subj,story) AGAINST($query)), 1) as score "
+		if ($form->{query} && $sort == 2);
+	my $tables = "submissions";
+	my $other;
+	if ($form->{query} && $sort == 2) {
+		$other = " ORDER BY score DESC";
+	} else {
+		$other = " ORDER BY time DESC";
+	}
+
+	# The big old searching WHERE clause, fear it
+	my $key = " MATCH (subj,story) AGAINST ($query) ";
+	my $where = " 1 = 1 ";
+	$where .= " AND $key" if $form->{query};
+	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
+		if $form->{uid};
+	$where .= " AND tid=" . $self->sqlQuote($form->{tid})
+		if $form->{tid};
+	$where .= " AND note=" . $self->sqlQuote($form->{note})
+		if $form->{note};
+	
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
+
+	return $stories;
+}
+
+####################################################################################
+sub findRSS {
+	my($self, $form, $start, $limit, $sort) = @_;
+	$start ||= 0;
+
+	my $query = $self->sqlQuote($form->{query});
+	my $columns = "title, link, description, created";
+	$columns .= ", TRUNCATE((MATCH (title,description) AGAINST($query)), 1) as score "
+		if ($form->{query} && $sort == 2);
+	my $tables = "rss_raw";
+	my $other;
+	if ($form->{query} && $sort == 2) {
+		$other = " ORDER BY score DESC";
+	} else {
+		$other = " ORDER BY created DESC";
+	}
+
+	# The big old searching WHERE clause, fear it
+	my $key = " MATCH (title,description) AGAINST ($query) ";
+	my $where = " 1 = 1 ";
+	$where .= " AND $key" if $form->{query};
+	$where .= " AND bid=" . $self->sqlQuote($form->{bid})
+		if $form->{bid};
+	
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $stories;
 }

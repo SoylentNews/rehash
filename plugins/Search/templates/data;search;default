@@ -32,6 +32,12 @@ __template__
 [% CASE 'nojournals' %]
 	No journals were found to match your query.
 
+[% CASE 'nosubmissions' %]
+	No submissions were found to match your query.
+
+[% CASE 'norss' %]
+	No rss entries were found to match your query.
+
 [% CASE 'all_sections' %]
 	All Sections
 

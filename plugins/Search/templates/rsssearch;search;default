@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+rsssearch
+__template__
+[% USE Slash %]
+[% x = start ? start : 1 %]
+[% FOREACH entry=entries %]
+	[% IF entry.score %]
+		[% entry.score %]
+	[% ELSE %]
+		[% x %] 
+	[% END %]
+	<A HREF="[% entry.link %]">[% entry.title %]</A>
+	<FONT SIZE="2">on [% Slash.timeCalc(entry.created) %]</FONT>
+	[% IF entry.description %]
+		<BR>[% entry.description %]...
+	[% END %]
+	<P>
+[% x = x + 1 %]
+[% END %]
+[% PROCESS pagination %]
+<P>
+
+__seclev__
+100

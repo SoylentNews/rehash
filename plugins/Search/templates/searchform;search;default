@@ -35,6 +35,14 @@ __template__
 	[% IF constants.search_journal_enabled %]
 		<INPUT TYPE="RADIO" NAME="op" VALUE="journals"[% IF op == 'journals' %]CHECKED[% END %]> Journals
 	[% END %]
+	[% IF constants.rss_store %]
+		[% IF constants.search_rss_enabled || user.is_admin %]
+			<INPUT TYPE="RADIO" NAME="op" VALUE="rss"[% IF op == 'rss' %]CHECKED[% END %]> RSS Headlines
+		[% END %]
+	[% END %]
+	[% IF constants.submiss_view || user.is_admin %]
+		<INPUT TYPE="RADIO" NAME="op" VALUE="submissions"[% IF op == 'submissions' %]CHECKED[% END %]> Submissions
+	[% END %]
 	<br>
 
 	[% IF journal_option %]
@@ -43,6 +51,10 @@ __template__
 
 	[% IF authors %]
 		[% Slash.createSelect("author", authors, form.author, 1, 0, 1) %]
+	[% END %]
+
+	[% IF submission_notes %]
+		[% Slash.createSelect("note", submission_notes, form.note, 1, 0, 1) %]
 	[% END %]
 
 	[% IF threshhold %]

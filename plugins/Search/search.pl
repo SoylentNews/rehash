@@ -19,6 +19,8 @@ sub main {
 		stories		=> \&storySearch,
 		polls		=> \&pollSearch,
 		journals	=> \&journalSearch,
+		submissions	=> \&submissionSearch,
+		rss		=> \&rssSearch,
 	);
 	my %ops_rss = (
 		comments	=> \&commentSearchRSS,
@@ -26,10 +28,13 @@ sub main {
 		stories		=> \&storySearchRSS,
 		polls		=> \&pollSearchRSS,
 		journals	=> \&journalSearchRSS,
+		submissions	=> \&submissionSearchRSS,
+		rss		=> \&rssSearchRSS,
 	);
 
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
+	my $user = getCurrentForm();
 
 	my($slashdb, $searchDB);
 
@@ -66,6 +71,13 @@ sub main {
 
 	# The default search operation is to search stories.
 	$form->{op} ||= 'stories';
+	if ($form->{op} eq 'rss' && !$user->{is_admin}) {
+		$form->{op} = 'stories'
+			unless $constants->{search_rss_enabled};
+	} elsif ($form->{op} eq 'rss') {
+		$form->{op} = 'stories'
+			unless $constants->{submiss_view};
+	}
 
 	if ($form->{content_type} eq 'rss') {
 		# Here, panic mode is handled within the individual funcs.
@@ -613,6 +625,163 @@ sub journalSearchRSS {
 			title		=> "$constants->{sitename} Journal Search",
 			'link'		=> "$constants->{absolutedir}/search.pl",
 			description	=> "$constants->{sitename} Journal Search",
+		},
+		image	=> 1,
+		items	=> \@items
+	});
+}
+
+#################################################################
+sub submissionSearch {
+	my($form, $constants, $slashdb, $searchDB) = @_;
+
+	my $start = $form->{start} || 0;
+	my $entries = $searchDB->findSubmission($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+	slashDisplay('searchform', {
+		op		=> $form->{op},
+		sections	=> _sections(),
+		topics		=> _topics(),
+		submission_notes => $slashdb->getDescriptions('submission-notes'),
+		tref		=> $slashdb->getTopic($form->{topic}),
+		'sort'		=> _sort(),
+	});
+
+	# check for extra articles ... we request one more than we need
+	# and if we get the extra one, we know we have extra ones, and
+	# we pop it off
+	if (@$entries) {
+		for(@$entries) {
+			$_->{story} = substr(strip_plaintext($_->{story}),0,80);
+		}
+		my $forward;
+		if (@$entries == $constants->{search_default_display} + 1) {
+			pop @$entries;
+			$forward = $start + $constants->{search_default_display};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than search_default_display remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{search_default_display};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
+		slashDisplay('subsearch', {
+			entries		=> $entries,
+			back		=> $back,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+		});
+	} else {
+		print getData('nosubmissions');
+	}
+}
+
+#################################################################
+sub submissionSearchRSS {
+	my($form, $constants, $slashdb, $searchDB) = @_;
+
+	my $start = $form->{start} || 0;
+	my $entries = $searchDB->findSubmission($form, $start, 15, $form->{sort});
+
+	my @items;
+	for my $entry (@$entries) {
+		my $time = timeCalc($entry->{time});
+		push @items, {
+			title		=> "$entry->{subj} ($time)",
+			'link'		=> ($constants->{absolutedir} . '/submit.pl?subid=' . $entry->{subid}),
+			'description'	=> $entry->{story},
+		};
+	}
+
+	xmlDisplay(rss => {
+		channel => {
+			title		=> "$constants->{sitename} Submission Search",
+			'link'		=> "$constants->{absolutedir}/search.pl",
+			description	=> "$constants->{sitename} Submission Search",
+		},
+		image	=> 1,
+		items	=> \@items
+	});
+}
+
+#################################################################
+sub rssSearch {
+	my($form, $constants, $slashdb, $searchDB) = @_;
+
+	my $start = $form->{start} || 0;
+	my $entries = $searchDB->findRSS($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+	slashDisplay('searchform', {
+		op		=> $form->{op},
+		'sort'		=> _sort(),
+	});
+
+	# check for extra articles ... we request one more than we need
+	# and if we get the extra one, we know we have extra ones, and
+	# we pop it off
+	if (@$entries) {
+		for(@$entries) {
+			$_->{title} = strip_plaintext($_->{title});
+			$_->{description} = substr(strip_plaintext($_->{description}),0,80);
+		}
+		my $forward;
+		if (@$entries == $constants->{search_default_display} + 1) {
+			pop @$entries;
+			$forward = $start + $constants->{search_default_display};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than search_default_display remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{search_default_display};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
+		slashDisplay('rsssearch', {
+			entries		=> $entries,
+			back		=> $back,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+		});
+	} else {
+		print getData('norss');
+	}
+}
+
+#################################################################
+sub rssSearchRSS {
+	my($form, $constants, $slashdb, $searchDB) = @_;
+
+	my $start = $form->{start} || 0;
+	my $entries = $searchDB->findRSS($form, $start, 15, $form->{sort});
+
+	my @items;
+	for my $entry (@$entries) {
+		my $time = timeCalc($entry->[2]);
+		push @items, {
+			title	=> "$entry->{title} ($time)",
+			'link'	=> $entry->{link}, # No, this is not right -Brian
+			'description'	=> $entry->{description},
+		};
+	}
+
+	xmlDisplay(rss => {
+		channel => {
+			title		=> "$constants->{sitename} RSS Search",
+			'link'		=> "$constants->{absolutedir}/search.pl",
+			description	=> "$constants->{sitename} RSS Search",
 		},
 		image	=> 1,
 		items	=> \@items

@@ -7,4 +7,4 @@ ALTER TABLE users add fulltext (nickname);
 ALTER TABLE pollquestions add fulltext (question);
 ALTER TABLE journals add fulltext (description);
 ALTER TABLE journals_text add fulltext (article);
-
+ALTER TABLE submissions add fulltext (subj,story);
