@@ -752,7 +752,7 @@ sub validateComment {
 		my $num_allowed = 9999;
 		K_CHECK: for my $k (sort { $a <=> $b }
 			keys %{$constants->{comments_perday_bykarma}}) {
-			if ($user->{karma} < $k) {
+			if ($user->{karma} <= $k) {
 				$num_allowed = $constants->{comments_perday_bykarma}{$k};
 				last K_CHECK;
 			}
