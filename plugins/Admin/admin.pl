@@ -840,15 +840,19 @@ sub topicEdit {
 	$available_images = { map { ($_, $_) } grep /\.(?:gif|jpe?g|png)$/, readdir $dh };
 	closedir $dh;
 
+	$available_images->{""} = "None";
+
 	$topics_select = createSelect('nexttid', 
 		$slashdb->getDescriptions('topics', '', 1),
 		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 
 		1, 0, 1
 	);
 
+	my $topic_param = [];
 	if (!$form->{topicdelete}) {
 		if (!$form->{topicnew} && $form->{nexttid}) {
 			$topic = $slashdb->getTopicTree($form->{nexttid}, { no_cache => 1 });
+			$topic_param = $slashdb->getTopicParamsForTid($form->{nexttid});
 		} else {
 			$topic = {};
 		}
@@ -878,6 +882,7 @@ sub topicEdit {
 		topic			=> $topic,
 		topics_select		=> $topics_select,
 		image_select		=> $image_select,
+		topic_param		=> $topic_param
 	});
 }
 
@@ -907,8 +912,23 @@ sub topicSave {
 	if (!$form->{width} && !$form->{height} && ! $form->{image2}) {
 		@{ $form }{'width', 'height'} = imgsize("$basedir/images/topics/$form->{image}");
 	}
+	my $topic_param = {};
+	foreach my $key (keys %$form) {
+		next unless $key=~/^tp_cur_/ || $key=~/^tpname_new_/;
+		my $param_name;
+		my $num;
+		if (($param_name) = $key =~ /^tp_cur_(.*)$/) {
+			$topic_param->{$param_name} = $form->{$key};
+		} elsif(($num) = $key =~/^tpname_new_(.*)/) {
+			if ($form->{"tpname_new_$num"}) {
+				$topic_param->{$form->{"tpname_new_$num"}} = $form->{"tpvalue_new_$num"};
+			}
+		}
+	}
 
-	$form->{tid} = $slashdb->saveTopic($form);
+	my $options = { param => $topic_param };
+	
+	$form->{tid} = $slashdb->saveTopic($form, $options);
 	$form->{nexttid} = $form->{tid};
 }
 
@@ -1991,10 +2011,11 @@ sub displayRecentMods {
 
 sub displayRecent {
 	my($form, $slashdb, $user, $constants) = @_;
-	my($min, $max, $sid) = (undef, undef, undef);
+	my($min, $max, $sid, $primaryskid) = (undef, undef, undef, undef);
 	$min = $form->{min} if defined($form->{min});
 	$max = $form->{max} if defined($form->{max});
 	$sid = $form->{sid} if defined($form->{sid});
+	$primaryskid = $form->{primaryskid} if defined($form->{primaryskid});
 	my $startat = $form->{startat} || undef;
 
 	my $max_cid = $slashdb->sqlSelect("MAX(cid)", "comments");
@@ -2003,7 +2024,8 @@ sub displayRecent {
 		max	=> $max,
 		startat	=> $startat,
 		num	=> 100,
-		sid	=> $sid
+		sid	=> $sid,
+		primaryskid => $primaryskid
 		
 	}) || [ ];
 

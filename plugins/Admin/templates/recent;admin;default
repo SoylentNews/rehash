@@ -18,7 +18,13 @@ __name__
 recent
 __template__
 [% PROCESS titlebar title="Recent Comments and Moderation" width='100%' %]
-
+[% skins = Slash.db.getSkins %]
+Show only comments from section:
+[% FOREACH skid = skins.keys %]
+	<A HREF="[% gSkin.rootdir %]/admin.pl?op=recent&amp;primaryskid=[% skid %]">[% skins.$skid.title %]</A> |	
+[% END %]
+<A HREF="[% gSkin.rootdir %]/admin.pl?op=recent">All</A>	
+<BR>
 [% IF !startat; startat = 0; END;
    IF startat > 0;
 	next_startat = startat - 100;
@@ -31,6 +37,7 @@ __template__
 	[% IF max.defined %]
 		<input type="hidden" name="max" value="[% max | strip_attribute %]">
 	[% END %]
+	<input type="hidden" name="primayskid" value="[% form.sid | strip_attribute %]">
 	<input type="hidden" name="sid" value="[% form.sid | strip_attribute %]">
 	<input type="hidden" name="startat" value="[% next_startat | strip_attribute %]">
 	<input type="submit" value="&lt;&lt; Next Comments">

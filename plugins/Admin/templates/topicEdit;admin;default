@@ -57,6 +57,25 @@ __template__
 				<input type="TEXT" name="image" value="[% image %]">
 
 			[% END %]
+			<p />
+			[% IF topic_param.size %]
+			<b>Current Topic Params</b>
+			<p>
+			<TABLE>
+			[% FOREACH tp = topic_param %]
+				<TR><TD>[% tp.name %]:</TD><TD> <INPUT TYPE="TEXT" NAME="tp_cur_[% tp.name %]" VALUE="[% tp.value | strip_attribute %]" SIZE="50"></TD></TR>
+			[% END %]
+			</TABLE>
+			[% END %]
+			</p>
+			<b>New Topic Params:</b>
+			<p>
+			<TABLE>
+			[% FOREACH number = [1..5] %]
+			<TR><TD><b>Name</b></TD><TD> <INPUT TYPE="TEXT" NAME="tpname_new_[% number %]" SIZE="32" MAXLENGTH="32"> <b>Value</b> <INPUT TYPE="TEXT" NAME="tpvalue_new_[% number %]" SIZE="50"</TD></TR>
+			[% END %]
+			</TABLE>
+			</p>
 			<p>
 			[% #PROCESS formLabel value => "Replacement Topic", comment => "if deleting the topic, select a topic to replace it with ... this is irreversible!" %]
 			[% #Slash.createSelect('replacementtid', Slash.db.getDescriptions('topics'), '', 1, 0, 1)%]	
