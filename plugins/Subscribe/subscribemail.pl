@@ -21,6 +21,7 @@ $task{$me}{code} = sub {
 	slashdLog('Send Subscribe Mail Begin');
 
 	my $num_total_subscribers = $slashdb->sqlCount('users_hits', 'hits_paidfor > 0');
+	my $num_current_subscribers = $slashdb->sqlCount('users_hits', 'hits_paidfor > hits_bought');
 	my $new_subscriptions_hr = $subscribe->getSubscriberList();
 	my $num_new_subscriptions = scalar(keys %$new_subscriptions_hr);
 
@@ -94,38 +95,43 @@ $task{$me}{code} = sub {
 			);
 		}
 
-		my @yesttime = localtime(time-86400);
-		my $yesterday = sprintf "%4d-%02d-%02d",
-			$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
-		if (my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday })) {
-			my($new_count, $sum_new_pages, $sum_new_payments) = (0, 0, 0);
-			my($renew_count, $sum_renew_pages, $sum_renew_payments) = (0, 0, 0);
-			for my $uid (keys %$subscribers_hr) {
-				if ($subscribers_hr->{$uid}{is_new}) {
-					++$new_count;
-					$sum_new_pages += $subscribers_hr->{$uid}{pages};
-					$sum_new_payments += $subscribers_hr->{$uid}{payment_gross};
-				} else {
-					++$renew_count;
-					$sum_renew_pages += $subscribers_hr->{$uid}{pages};
-					$sum_renew_payments += $subscribers_hr->{$uid}{payment_gross};
-				}
-			}
-			$statsSave->createStatDaily("subscribe_new_users",	$new_count);
-			$statsSave->createStatDaily("subscribe_new_pages",	$sum_new_pages);
-			$statsSave->createStatDaily("subscribe_new_payments",	$sum_new_payments);
-			$statsSave->createStatDaily("subscribe_renew_users",	$renew_count);
-			$statsSave->createStatDaily("subscribe_renew_pages",	$sum_renew_pages);
-			$statsSave->createStatDaily("subscribe_renew_payments",	$sum_renew_payments);
-			# If the runout stat doesn't already exist for yesterday, create it.
-			$statsSave->createStatDaily("subscribe_runout", 0);
-		}
+	}
 
+	my @yesttime = localtime(time-86400);
+	my $yesterday = sprintf "%4d-%02d-%02d",
+		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
+	if (my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday })) {
+		my($new_count, $sum_new_pages, $sum_new_payments) = (0, 0, 0);
+		my($renew_count, $sum_renew_pages, $sum_renew_payments) = (0, 0, 0);
+		for my $uid (keys %$subscribers_hr) {
+			if ($subscribers_hr->{$uid}{is_new}) {
+				++$new_count;
+				$sum_new_pages += $subscribers_hr->{$uid}{pages};
+				$sum_new_payments += $subscribers_hr->{$uid}{payment_gross};
+			} else {
+				++$renew_count;
+				$sum_renew_pages += $subscribers_hr->{$uid}{pages};
+				$sum_renew_payments += $subscribers_hr->{$uid}{payment_gross};
+			}
+		}
+		$statsSave->createStatDaily("subscribe_new_users",	$new_count);
+		$statsSave->createStatDaily("subscribe_new_pages",	$sum_new_pages);
+		$statsSave->createStatDaily("subscribe_new_payments",	$sum_new_payments);
+		$statsSave->createStatDaily("subscribe_renew_users",	$renew_count);
+		$statsSave->createStatDaily("subscribe_renew_pages",	$sum_renew_pages);
+		$statsSave->createStatDaily("subscribe_renew_payments",	$sum_renew_payments);
+		# If the runout stat doesn't already exist for yesterday, create it.
+		$statsSave->createStatDaily("subscribe_runout", 0);
+
+		$statsSave->createStatDaily("subscribe_subscribers_ever", $num_total_subscribers);
+		$statsSave->createStatDaily("subscribe_subscribers_current", $num_current_subscribers);
 	}
 
 	my @numbers = (
+		$num_current_subscribers,
+		$num_total_subscribers - $num_current_subscribers,
 		$num_total_subscribers,
-		$num_new_subscriptions
+		$num_new_subscriptions,
 	);
 
 	my($report_link, $monthly_stats) = ("", "");
@@ -159,8 +165,10 @@ EOT
 $constants->{sitename} Subscriber Info for yesterday
 $report_link
 $monthly_stats
-total subscribers: %8d
-new subscriptions: %8d
+current subscribers: %8d
+ former subscribers: %8d
+  total subscribers: %8d
+  new subscriptions: %8d
 
 $transaction_list
 EOT
