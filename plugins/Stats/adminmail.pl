@@ -106,7 +106,7 @@ EOT
 		my $temp = {};
 		$temp->{section_name} = $section;
 		my $uniq = $stats->countDailyByPageDistinctIPID('', $yesterday, { section => $section  });
-		my $pages = $stats->countDailyByPage('', $yesterday, { section => $section  });
+		my $pages = $stats->countDailyByPage('', $yesterday, { section => $section, no_op => 'rss'  });
 		my $bytes = $stats->countBytesByPage('', $yesterday, { section => $section  });
 		my $users = $stats->countUsersByPage('', $yesterday, { section => $section  });
 		$temp->{ipids}  = sprintf("%8d", $uniq);
@@ -119,7 +119,7 @@ EOT
 
 		for (qw| article search comments palm rss|) {
 			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section  });
-			my $pages = $stats->countDailyByPage($_, $yesterday, { section => $section  });
+			my $pages = $stats->countDailyByPage($_, $yesterday, { section => $section, no_op => 'rss' });
 			my $bytes = $stats->countBytesByPage($_, $yesterday, { section => $section  });
 			my $users = $stats->countUsersByPage($_, $yesterday, { section => $section  });
 			$temp->{$_}{ipids}  = sprintf("%8d", $uniq);

@@ -358,6 +358,8 @@ sub countDailyByPage {
 		if $op;
 	$where .= "section='$options->{section}' AND "
 		if $options->{section};
+	$where .= "op !='$options->{no_op}' AND "
+		if $options->{no_op} && !$op;
 	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	$self->sqlSelect("count(*)", "accesslog", $where);
 }
