@@ -95,8 +95,8 @@ sub main {
 #################################################################
 # Ugly isn't it?
 sub _authors {
-	my $slashdb = getCurrentDB();
-	my $authors = $slashdb->getDescriptions('all-authors');
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $authors = $reader->getDescriptions('all-authors');
 	my %newauthors = %$authors;
 	$newauthors{''} = getData('all_authors');
 
@@ -106,14 +106,14 @@ sub _authors {
 #################################################################
 # Ugly isn't it?
 sub _topics {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $section = getCurrentForm('section');
 
 	my $topics;
 	if ($section) {
-		$topics = $slashdb->getDescriptions('topics_section', $section);
+		$topics = $reader->getDescriptions('topics_section', $section);
 	} else {
-		$topics = $slashdb->getDescriptions('topics');
+		$topics = $reader->getDescriptions('topics');
 	}
 
 	my %newtopics = %$topics;
@@ -124,8 +124,8 @@ sub _topics {
 
 #################################################################
 sub _sort {
-	my $slashdb = getCurrentDB();
-	my $sort = $slashdb->getDescriptions('sortorder');
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $sort = $reader->getDescriptions('sortorder');
 
 	return $sort;
 }
@@ -133,8 +133,8 @@ sub _sort {
 #################################################################
 # Ugly isn't it?
 sub _sections {
-	my $slashdb = getCurrentDB();
-	my $sections = $slashdb->getDescriptions('sections');
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $sections = $reader->getDescriptions('sections');
 	my %newsections = %$sections;
 	$newsections{''} = getData('all_sections');
 
@@ -144,9 +144,9 @@ sub _sections {
 #################################################################
 # Ugly isn't it?
 sub _subsections {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $form = getCurrentForm();
-	my $subsections = $slashdb->getDescriptions('section_subsection', $form->{section}, 1)
+	my $subsections = $reader->getDescriptions('section_subsection', $form->{section}, 1)
 		if $form->{section};
 	return undef
 		unless (keys %$subsections);
