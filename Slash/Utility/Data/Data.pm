@@ -400,22 +400,45 @@ sub timeCalc {
 
 =head2 createLogToken()
 
-Return new random 20-character logtoken, composed of hex chars.
+Return new random 20-character logtoken, composed of \w chars.
 
 =over 4
 
 =item Return value
 
-Random password.
+Return a random password that matches /^\w{20}$/.
+
+We're only pulling out 3 chars each time thru this loop, so we only
+need (and trust) about 18 bits worth of randomness.  We re-seed srand
+periodically to try to get more randomness into the mix ("it uses a
+semirandom value supplied by the kernel (if it supports the /dev/urandom
+device)", says the Camel book).  I don't think I'm doing anything
+mathematically dumb to introduce any predictability into this, so it
+should be fine, wasteful of a few microseconds perhaps, ugly perhaps, but
+the 20-char value it returns should have very close to 119 bits of
+randomness.
 
 =back
 
 =cut
 
 {
-	my $int = 2**32-1;
+	my $maxint = 2**32-1;
 	sub createLogToken {
-		return md5_base64(int rand $int);
+		my $str = "";
+		my $need_srand = 0;
+		while (length($str) < 20) {
+			if ($need_srand) {
+				srand();
+				$need_srand = 0;
+			}
+			my $r = rand($maxint) . ":" . rand($maxint);
+			my $md5 = md5_base64($r);
+			$md5 =~ s/\W//g;
+			$str .= substr($md5, int(rand 8) + 5, 3);
+			$need_srand = 1 if rand() < 0.3;
+		}
+		return substr($str, 0, 20);
 	}
 }
 
