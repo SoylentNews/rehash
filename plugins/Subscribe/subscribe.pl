@@ -64,7 +64,7 @@ sub edit {
 
 	my $subscribe = getObject('Slash::Subscribe');
 	my @defpages = sort keys %{$subscribe->{defpage}};
-	my $edited_defaults_yet = exists $user->{"buypage_$defpages[0]"};
+	my $edited_defaults_yet = exists $user->{buypage_index};
 	my $user_newvalues = { };
 	if (!$edited_defaults_yet) {
 		for my $page (@defpages) {
@@ -100,7 +100,7 @@ sub save {
 
 	my $subscribe = getObject('Slash::Subscribe');
 	my @defpages = sort keys %{$subscribe->{defpage}};
-	my $edited_defaults_yet = exists $user->{"buypage_$defpages[0]"};
+	my $edited_defaults_yet = exists $user->{buypage_index};
 
 	my $user_update = { };
 	my $user_newvalues = { };
