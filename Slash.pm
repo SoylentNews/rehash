@@ -1203,6 +1203,9 @@ sub stripByMode {
 	$fmode ||= 'nohtml';
 
 	$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
+	# ASCII only ?
+#	$str =~ s/[^\011\040\033-176]/sprintf '&#%d;', ord $1/ge;
+
 	if ($fmode eq 'literal' || $fmode eq 'exttrans' || $fmode eq 'attribute') {
 		# Encode all HTML tags
 		$str =~ s/&/&amp;/g;
@@ -1226,7 +1229,8 @@ sub stripByMode {
 
 	} elsif ($fmode eq 'attribute') {
 		$str =~ s/"/&#34;/g;
-		$str =~ s/'/&#39;/g;
+#		$str =~ s/'/&#39;/g;	# ' should be OK if we use
+					# " consistently
 
 	} else {
 		$str = stripBadHtml($str);
