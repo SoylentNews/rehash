@@ -36,6 +36,7 @@ have been read or not.  After [% constants.message_web_expire || 31 %] days, the
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 [% FOREACH message = message_list %]
   <TR>
+    <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% message.id %]" VALUE="1"></TD>
     <TD VALIGN="TOP">[% IF ! message.readed
       %]<FONT COLOR="[% user.bg.3 %]">*</FONT>[% ELSE
       %]&nbsp;[% END %]</TD>
@@ -43,10 +44,10 @@ have been read or not.  After [% constants.message_web_expire || 31 %] days, the
 			message.id
 		%]"><B>[% message.subject || 'Message' %]</B></A></TD>
     <TD VALIGN="TOP"><EM>[% Slash.timeCalc(message.date) %]</EM></TD>
-    <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% message.id %]" VALUE="1"></TD>
   </TR>
 [% END %]
-  <TR><TD COLSPAN="2">&nbsp;</TD><TD ALIGN="RIGHT"><NOSCRIPT>&nbsp;</NOSCRIPT><SCRIPT TYPE="text/javascript" LANGUAGE="Javascript" CHARSET="iso-8859-1">
+  <TR><TD ALIGN="CENTER"><INPUT TYPE="submit" VALUE="Delete"></TD>
+    <TD ALIGN="LEFT"><NOSCRIPT>&nbsp;</NOSCRIPT><SCRIPT TYPE="text/javascript" LANGUAGE="Javascript" CHARSET="iso-8859-1">
 <!--
 [%# this JavaScript should not actually be a problem for anyone, but %]
 [%# if it is, it is easy to strip out ... %]
@@ -56,8 +57,7 @@ function selectall (myform) {
 }
 document.write('<INPUT TYPE="button" VALUE="Select All" ONCLICK="selectall(this.form)"> ');
 //-->
-</SCRIPT></TD><TD ALIGN="CENTER">
-<INPUT TYPE="submit" VALUE="Delete"></TD></TR>
+</SCRIPT></TD><TD COLSPAN="2">&nbsp;</TD></TR>
 </TABLE>
 
 <INPUT TYPE="hidden" NAME="op" VALUE="deletemsgs">
