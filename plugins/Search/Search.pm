@@ -249,11 +249,22 @@ sub findStory {
 		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
 	}
 
-	if (ref($form->{_multi}{tid}) eq 'ARRAY') {
-		$where .= " AND tid IN (" . join(",", @{$form->{_multi}{tid}}) . ") "; 
-	} else {
-		$where .= " AND tid=" . $self->sqlQuote($form->{tid})
-			if $form->{tid};
+	# Here we find the possible sids that could have this tid and then search only those
+	if ($form->{tid}) {
+		my @tids;
+		if (ref($form->{_multi}{tid}) eq 'ARRAY') {
+			push @tids, @{$form->{_multi}{tid}};
+		} else {
+			push @tids, $form->{tid};
+		}
+		my $string = join(',', @{$self->sqlQuote(\@tids)});
+		my $sids = $self->sqlSelectColArrayref('sid', 'story_topics', "tid IN ($string)");
+		if ($sids && @$sids) {
+			$string = join(',', @{$self->sqlQuote($sids)});
+			$where .= " AND stories.sid IN ($string) ";
+		} else {
+			return; # No results could possibly match
+		}
 	}
 	
 	$other .= " LIMIT $start, $limit" if $limit;

@@ -235,6 +235,7 @@ sub sqlConnect {
 			#}
 		}
 	}
+	$self->{_dbh}{PrintError} = 0; #"off" this kills the issue of bad SQL sending errors to the client
 
 	return 1; # We return true that the sqlConnect was ok.
 }
