@@ -1865,3 +1865,7 @@ ALTER TABLE sections CHANGE COLUMN title title VARCHAR(64) DEFAULT '' NOT NULL, 
 # UPDATE sections SET issue=3 WHERE issue=1 AND artcount > 0 AND section NOT IN ('polls', 'search');
 
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_114, Start of T_2_3_0_115 - 2003/08/28
+
