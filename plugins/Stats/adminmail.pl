@@ -348,15 +348,12 @@ EOT
 	}) if $recent_subscriber_uidlist;
 	my $total_secure = $logdb->countDailySecure();
 
-	slashdLog("Page Summary Stats Begin");
-	my $page_summary_stats = $logdb->getPageSummaryStats({ ops => [@PAGES] });
-	slashdLog("Page Summary Stats End");
-
 	for my $op (@PAGES) {
-		my $uniq  = $page_summary_stats->{$op}{cnt};
-		my $pages = $page_summary_stats->{$op}{pages};
-		my $bytes = $page_summary_stats->{$op}{bytes};
-		my $uids  = $page_summary_stats->{$op}{uids};
+		my $summary = $logdb->getSummaryStats({ op => $op});
+		my $uniq  = $summary->{cnt};
+		my $pages = $summary->{pages};
+		my $bytes = $summary->{bytes};
+		my $uids  = $summary->{uids};
 
 		$data{"${op}_label"} = sprintf("%8s", $op);
 		$data{"${op}_uids"} = sprintf("%8u", $uids);
@@ -417,29 +414,21 @@ EOT
 	#XXXSECTIONTOPICS - don't think we need this anymore but just making sure
 	#$sections->{index} = 'index';
 	
-	slashdLog("Section Summary Stats Begin");
-	my $section_summary_stats = $logdb->getSectionSummaryStats({
-			no_op		=> $constants->{op_exclude_from_countdaily}
-	});
-	slashdLog("Section Summary Stats End");
 	slashdLog("Other Section Summary Stats Begin");
 	my $other_section_summary_stats = $logdb->getSectionSummaryStats({
 			no_op		=> [@PAGES]
 	});
 	slashdLog("Other Section Summary Stats End");
 	
-	slashdLog("Section Page Summary Stats Begin");
-	my $section_page_summary_stats = $logdb->getSectionPageSummaryStats({ ops => [@PAGES] });
-	slashdLog("Section Page Summary Stats End");
-	
 	
 	for my $skid (sort keys %$skins) {
 		my $temp = {};
 		$temp->{skin_name} = $skins->{$skid};
-		my $uniq = $section_summary_stats->{$skid}{cnt}		|| 0;
-		my $pages = $section_summary_stats->{$skid}{pages}	|| 0;
-		my $bytes = $section_summary_stats->{$skid}{bytes}	|| 0;
-		my $users = $section_summary_stats->{$skid}{uids}	|| 0;
+		my $summary = $logdb->getSummaryStats({ skid => $skid });
+		my $uniq = $summary->{cnt}	|| 0;
+		my $pages = $summary->{pages}	|| 0;
+		my $bytes = $summary->{bytes}	|| 0;
+		my $users = $summary->{uids}	|| 0;
 		my $users_subscriber = 0;
 		$users_subscriber = $logdb->countUsersByPage('', {
 			skid			=> $skid,
@@ -462,10 +451,11 @@ EOT
 		}
 
 		for my $op (@PAGES) {
-			my $uniq = $section_page_summary_stats->{$skid}{$op}{cnt}	|| 0;
-			my $pages = $section_page_summary_stats->{$skid}{$op}{pages}	|| 0;
-			my $bytes = $section_page_summary_stats->{$skid}{$op}{bytes}	|| 0;
-			my $users = $section_page_summary_stats->{$skid}{$op}{uids}	|| 0;
+			my $summary = $logdb->getSummaryStats({ skid => $skid, op => $op });
+			my $uniq  = $summary->{cnt}	|| 0;
+			my $pages = $summary->{pages}	|| 0;
+			my $bytes = $summary->{bytes}	|| 0;
+			my $users = $summary->{uids}	|| 0;
 			$temp->{$op}{label} = sprintf("%8s", $op);
 			$temp->{$op}{ipids} = sprintf("%8u", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));

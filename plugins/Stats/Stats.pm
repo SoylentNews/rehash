@@ -70,8 +70,7 @@ sub new {
 
 		# Add in the indexes we need.
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid (uid)");
-		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX skid (skid)");
-		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_skid (op,skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX skid_op (skid,op)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_uid_skid (op, uid, skid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX status_op_skid (status, op, skid)");
 		# It might be worth adding an index on referer(4) too.  We use it
@@ -918,6 +917,26 @@ sub countCommentsDaily {
 
 	return $comments; 
 }
+
+
+sub getSummaryStats {
+	my ($self, $options);
+	my @where;
+	
+	my $no_op = $options->{no_op} || [ ];
+	$no_op = [ $no_op ] if $options->{no_op} && !ref($no_op);
+	if (@$no_op) {
+		my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
+		push @where,  "op NOT IN ($op_not_in)";
+	}
+
+	push @where, "op = ".$self->sqlSqlQuote($options->{op}) if $options->{op};
+	push @where, "skid = ".$self->sqlSqlQuote($options->{skid}) if $options->{skid};
+
+	my $where = join ' AND ', @where;
+	$self->sqlSelectHashrf("COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) as uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp", $where);
+}
+
 
 ########################################################
 sub getSectionSummaryStats {
