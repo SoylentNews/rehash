@@ -76,7 +76,7 @@ sub main {
 		},
 		'eof'		=> { 
 			check => 1,			
-			function => \&eof		
+			function => \&enof		
 		},
 		all		=> { 
 			check => 1,			
@@ -208,7 +208,7 @@ sub fof {
 	}
 }
 
-sub eof {
+sub enof {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
 	my ($uid, $nick);
