@@ -124,7 +124,7 @@ END; %]
 </TD></TR></TABLE>
 [% END %]
 <P>
-[% IF subcount > 0 %]
+[% IF subcount > 0 and (admin_flag or (user.uid == useredit.uid and !user.is_anon)) %]
 [% title = "${useredit.nickname}'s " _ ((subcount>submissions.size) ? "Latest " : "") _ "Submissions"; %]
 [% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
 [% END %]
