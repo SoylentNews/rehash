@@ -32,9 +32,7 @@ A user has sent you the following story from [% constants.sitename %]:
 	IF constants.use_dept;
 		box("  from the $story.dept dept.");
 	END;
-	thisurl = Slash.url2abs(
-		Slash.db.getSection(story.section, 'rootdir'), gSkin.absolutedir) ||
-		gSkin.absolutedir;
+	thisurl = Slash.url2abs(Slash.db.getSection(story.section, 'rootdir'), absolutedir) || absolutedir;
 
 	stime = Slash.timeCalc(story.time, "%A %B %d, @%H:%M");
 	box("  posted by $author on $stime ($topicname)");
