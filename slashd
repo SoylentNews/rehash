@@ -38,6 +38,7 @@ use URI::Escape;
 *I = getSlashConf();
 my $totalChangedStories = 1;
 
+mkpath "$I{datadir}/logs/", 0, 0755 or die "Can't mkpath '$I{datadir}/logs/': $!";
 open STDERR, ">> $I{datadir}/logs/slashd.log"
 	or die "Can't open STDERR to $I{datadir}/logs/slashd.log: $!";
 

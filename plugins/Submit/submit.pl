@@ -305,7 +305,6 @@ EOT
 	my $cur_note_str = $I{F}{note} || 'Unclassified';
 
 	my(%all_sections, %all_notes, %sn);
-	%all_sections = map { ($_ || 'All Sections') => 1 } keys %{$I{sectionBank}};
 
 	while (my($section, $note, $cnt) = $c->fetchrow) {
 		my $section_str = $section;
