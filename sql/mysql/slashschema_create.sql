@@ -538,6 +538,7 @@ CREATE TABLE subsections (
 	title varchar(30) NOT NULL,
 	section varchar(30) NOT NULL,
 	artcount mediumint DEFAULT '30' NOT NULL,
+	alttext varchar(40) NOT NULL,
 	UNIQUE code_key (title,section),
 	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
