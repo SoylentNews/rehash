@@ -16,6 +16,9 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my($stats, $backupdb, %data, %mod_data);
+	
+	# These are the ops (aka pages) that we scan for.
+	my @PAGES = qw|index article search comments palm journal rss page users|;
 
 	my @yesttime = localtime(time-86400);
 	my $yesterday = sprintf "%4d-%02d-%02d", 
@@ -187,7 +190,7 @@ EOT
 	$data{total_static} = $total_static;
 	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
 	my $total_secure = $stats->countDailySecure();
-	for my $op (qw|index article search comments palm journal rss page users|) {
+	for my $op (@PAGES) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
 		my $pages = $logdb->countDailyByPage($op);
 		my $bytes = $logdb->countBytesByPage($op);
@@ -202,6 +205,24 @@ EOT
 		$statsSave->createStatDaily("${op}_ipids", $uniq);
 		$statsSave->createStatDaily("${op}_bytes", $bytes);
 		$statsSave->createStatDaily("${op}_page", $pages);
+	}
+	#Other not recorded
+	{
+		my $options = { no_op => \@PAGES};
+		my $uniq = $logdb->countDailyByPageDistinctIPID('', $options);
+		my $pages = $logdb->countDailyByPage('', $options);
+		my $bytes = $logdb->countBytesByPage('', $options);
+		my $uids = $logdb->countUsersByPage('', $options);
+		$data{"other_uids"} = sprintf("%8d", $uids);
+		$data{"other_ipids"} = sprintf("%8d", $uniq);
+		$data{"other_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
+		$data{"other_page"} = sprintf("%8d", $pages);
+		# Section is problematic in this definition, going to store
+		# the data in "all" till this is resolved. -Brian
+		$statsSave->createStatDaily("other_uids", $uids);
+		$statsSave->createStatDaily("other_ipids", $uniq);
+		$statsSave->createStatDaily("other_bytes", $bytes);
+		$statsSave->createStatDaily("other_page", $pages);
 	}
 
 # Not yet
@@ -236,13 +257,13 @@ EOT
 		$temp->{ipids} = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{pages} = sprintf("%8d", $pages);
-		$temp->{users} = sprintf("%8d", $users);
+		$temp->{site_users} = sprintf("%8d", $users);
 		$statsSave->createStatDaily("ipids", $uniq, { section => $section });
 		$statsSave->createStatDaily("bytes", $bytes, { section => $section } );
 		$statsSave->createStatDaily("page", $pages, { section => $section });
 		$statsSave->createStatDaily("users", $users, { section => $section });
 
-		for my $op (qw| index article search comments palm rss page|) {
+		for my $op (@PAGES) {
 			my $uniq = $logdb->countDailyByPageDistinctIPID($op,  { section => $section  });
 			my $pages = $logdb->countDailyByPage($op,  {
 				section => $section,
@@ -259,6 +280,24 @@ EOT
 			$statsSave->createStatDaily("${op}_page", $pages, { section => $section});
 			$statsSave->createStatDaily("${op}_user", $users, { section => $section});
 		}
+		#Other not recorded
+		{
+			my $options = { no_op => \@PAGES , section => $section };
+			my $uniq = $logdb->countDailyByPageDistinctIPID('', $options);
+			my $pages = $logdb->countDailyByPage('', $options);
+			my $bytes = $logdb->countBytesByPage('', $options);
+			my $uids = $logdb->countUsersByPage('', $options);
+			my $op = 'other';
+			$temp->{$op}{ipids} = sprintf("%8d", $uniq);
+			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
+			$temp->{$op}{pages} = sprintf("%8d", $pages);
+			$temp->{$op}{users} = sprintf("%8d", $users);
+			$statsSave->createStatDaily("${op}_ipids", $uniq, { section => $section});
+			$statsSave->createStatDaily("${op}_bytes", $bytes, { section => $section});
+			$statsSave->createStatDaily("${op}_page", $pages, { section => $section});
+			$statsSave->createStatDaily("${op}_user", $users, { section => $section});
+		}
+
 		push(@{$data{sections}}, $temp);
 	}
 

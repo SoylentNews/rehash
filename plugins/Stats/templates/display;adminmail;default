@@ -35,6 +35,8 @@ gstatic total:        -          -    [% grand_total_static %]
         users: [% users_uids %]   [% users_ipids %]   [% users_page %] ([% users_bytes %])
          palm: [% palm_uids %]   [% palm_ipids %]   [% palm_page %] ([% palm_bytes %])
           rss: [% rss_uids %]   [% rss_ipids %]   [% rss_page %] ([% rss_bytes %])
+        other: [% other_uids %]   [% other_ipids %]   [% other_page %] ([% other_bytes %])
+
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
      comments: [% comments %] posted yesterday
@@ -54,7 +56,7 @@ gstatic total:        -          -    [% grand_total_static %]
 [% IF section.pages < 1 ; NEXT ; END %]
 For [% section.section_name %]
                   Pages      IPs   Bandwidth    Users
-        total: [% section.pages %] [% section.ipids %] [% section.bytes %] [% section.users %]
+        total: [% section.pages %] [% section.ipids %] [% section.bytes %] [% section.site_users %]
 [% IF section.index.pages > 0 -%]
         index: [% section.index.pages %] [% section.index.ipids %] [% section.index.bytes %] [% section.index.users %]
 [% END -%]
@@ -75,6 +77,9 @@ For [% section.section_name %]
 [% END -%]
 [% IF section.rss.pages > 0 -%]
           rss: [% section.rss.pages %] [% section.rss.ipids %] [% section.rss.bytes %] [% section.rss.users %]
+[% END -%]
+[% IF section.other.pages > 0 -%]
+        other: [% section.other.pages %] [% section.other.ipids %] [% section.other.bytes %] [% section.other.users %]
 [% END -%]
 [% END -%]
 
