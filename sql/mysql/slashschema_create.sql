@@ -115,6 +115,7 @@ CREATE TABLE blocks (
 	last_update timestamp,
 	rss_template varchar(30),
 	items smallint NOT NULL DEFAULT '0', 
+	autosubmit enum("no","yes") DEFAULT 'no' NOT NULL,
 	FOREIGN KEY (rss_template) REFERENCES templates(name),
 	PRIMARY KEY (bid),
 	KEY type (type),
@@ -171,7 +172,7 @@ CREATE TABLE comments (
 	KEY ipid (ipid),
 	KEY subnetid (subnetid),
 	KEY theusual (sid,uid,points,cid),
-	KEY countreplies (sid,pid)
+	KEY countreplies (pid,sid)
 ) TYPE = myisam;
 
 #
@@ -413,6 +414,28 @@ CREATE TABLE pollvoters (
 ) TYPE = myisam;
 
 #
+# Table structure for table 'rss_raw'
+#
+
+DROP TABLE IF EXISTS rss_raw;
+CREATE TABLE rss_raw (
+	id smallint UNSIGNED NOT NULL auto_increment,
+	link_signature char(32) DEFAULT '' NOT NULL,
+	title_signature char(32) DEFAULT '' NOT NULL,
+	description_signature char(32) DEFAULT '' NOT NULL,
+	link varchar(255) NOT NULL,
+	title varchar(255) NOT NULL,
+	description varchar(255) NOT NULL,
+	subid varchar(15),
+	bid varchar(30),
+	created datetime, 
+	UNIQUE uber_signature (link_signature, title_signature, description_signature),
+	FOREIGN KEY (subid) REFERENCES submissions(subid),
+	FOREIGN KEY (bid) REFERENCES blocks(bid),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+#
 # Table structure for table 'related_links'
 #
 
@@ -480,7 +503,7 @@ CREATE TABLE section_topics (
 	type varchar(16) NOT NULL DEFAULT 'topic_1',
 	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (tid) REFERENCES topics(tid),
-	PRIMARY KEY (section,tid)
+	PRIMARY KEY (section,type,tid)
 ) TYPE = myisam;
 
 #

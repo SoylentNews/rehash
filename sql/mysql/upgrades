@@ -202,12 +202,13 @@ CREATE TABLE slashd_status (
 # Unique changes for Pat
 ALTER TABLE section_topics DROP PRIMARY KEY;
 ALTER TABLE section_topics ADD PRIMARY KEY (section,type,tid);
+INSERT INTO string_param (type, code, name) VALUES ('yes_no','yes','yes');
+INSERT INTO string_param (type, code, name) VALUES ('yes_no','no','no');
 INSERT INTO vars (name, value, description) VALUES ('label_ui','0','Whether to label some things in the admin ui');
 INSERT INTO vars (name, value, description) VALUES ('enable_index_topic','','set this to the value in string param for index topic \(something like "topic_4"\)');
 INSERT INTO vars (name, value, description) VALUES ('get_titles','0','get the story titles');
 INSERT INTO vars (name, value, description) VALUES ('organise_stories','','organise story blocks');
 INSERT INTO string_param (Type, code, name) VALUES ('section_topic_type','topic_1','Default');
-
 
 # another small change for topic types
 ALTER TABLE section_topics MODIFY COLUMN type varchar(16) NOT NULL DEFAULT 'topic_1';
@@ -216,3 +217,8 @@ UPDATE section_topics SET type = 'topic_1' WHERE topic = '1';
 # Change for plugins/Subscribe
 ALTER TABLE subscribe_payments ADD COLUMN method VARCHAR(6) AFTER transaction_id;
 
+ALTER TABLE comments DROP index countreplies;
+ALTER TABLE comments ADD KEY countreplies (pid,sid);
+
+# Not read just yet but I am leaving it here as a note -Brian
+# ALTER TABLE blocks ADD autosubmit enum("no","yes") DEFAULT 'no' NOT NULL;
