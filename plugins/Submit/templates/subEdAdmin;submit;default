@@ -27,13 +27,13 @@ __template__
 	<TR><TD COLSPAN=4 ALIGN="CENTER"><NOBR>
 	Top Submissions by Weight
 	</NOBR></TD></TR>
-[%	count = 0;
-		FOR sub = weighted;
-			PROCESS sub_display;
-			"\n";
-			count = count + 1;
-			LAST IF count > constants.submit_num_weighted;
-	END -%]
+	[%	count = 0;
+			FOR sub = weighted;
+				PROCESS sub_display;
+				"\n";
+				count = count + 1;
+				LAST IF count > constants.submit_num_weighted;
+		END -%]
 	<TR><TD COLSPAN=4 ALIGN="CENTER"><HR NOSHADE></TD></TR>
 [% END -%]
 

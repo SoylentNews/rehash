@@ -211,7 +211,11 @@ sub submissionEd {
 
 	$def_section	= getData('defaultsection');
 	$def_note	= getData('defaultnote');
-	$cur_section	= $form->{section} || $def_section;
+	if ($user->{section} && !$form->{section}) {
+		$cur_section	= $user->{section};
+	} else {
+		$cur_section	= $form->{section} || $def_section;
+	}
 	$cur_note	= $form->{note} || $def_note;
 	$sections = $slashdb->getSubmissionsSections();
 
