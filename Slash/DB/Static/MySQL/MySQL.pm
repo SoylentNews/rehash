@@ -664,33 +664,27 @@ sub getDailyMail {
 		users.nickname, stories.tid, stories.time, stories.dept,
 		story_text.introtext, story_text.bodytext ";
 	my $tables = "stories, story_text, users, story_topics_rendered";
-	my $where = "time < NOW() AND TO_DAYS(NOW())-TO_DAYS(time)=1 ";
-	$where .= "AND users.uid=stories.uid AND stories.stoid=story_text.stoid AND story_topics_rendered.stoid = stories.stoid ";
+	my $where = "time < NOW() AND TO_DAYS(NOW())-TO_DAYS(time)=1
+		 AND users.uid = stories.uid
+		 AND stories.stoid = story_text.stoid
+		 AND story_topics_rendered.stoid = stories.stoid ";
 
-	# XXXSECTIONTOPICS - The 'sectioncollapse' bit now means:
-	# 0 - only want stories in the mainpage nexus mailed
-	# 1 - want all stories in the mainpage nexus, or any
-	# other nexuses linked to it, mailed
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
-# XXXSKIN - improve this - "sectioncollapse" is going to be replaced
-# by just having users pick which sections they always want to see,
-# so the story_always_* fields need to be used instead
-	if ($user->{sectioncollapse}) {
-		my $nexuses = $self->getNexusChildrenTids($mp_tid);
-		my $nexus_clause = join ',', @$nexuses, $mp_tid;
-		$where .= "AND story_topics_rendered.tid IN ($nexus_clause) ";
-	} else {
-		$where .= "AND story_topics_rendered.tid = $mp_tid ";
-	}
+	my @always_nexuses = map { $self->sqlQuote($_) } split /,/, $user->{story_always_nexus};
+	push @always_nexuses, $mp_tid;
+	my $always_nexuses_clause = join ',', @always_nexuses;
+	$where .= " AND story_topics_rendered.tid IN ($always_nexuses_clause)";
+
+	my @never_authors = map { $self->sqlQuote($_) } split /,/, $user->{story_never_author};
+	my $never_authors_clause = join ',', @never_authors;
+	$where .= " AND stories.uid NOT IN ($never_authors_clause)"
+		if $never_authors_clause;
 
 # XXXSKIN - fix this - the "never"s need to be screened out after the
-# sqlSelectAll, not here.
-	$where .= "AND story_topics_rendered.tid NOT IN ($user->{story_never_topic}) "
-		if $user->{story_never_topic};
-	$where .= "AND story_topics_rendered.tid NOT IN ($user->{story_never_nexus}) "
-		if $user->{story_never_nexus};
-	$where .= "AND stories.uid NOT IN ($user->{story_never_author}) "
-		if $user->{story_never_author};
+# sqlSelectAll, not here.  Or we need a LEFT JOIN like is done in
+# getStoriesEssentials.  This simply won't work.
+#	$where .= " AND story_topics_rendered.tid NOT IN ($user->{story_never_nexus})"
+#		if $user->{story_never_nexus};
 
 	my $other = " ORDER BY stories.time DESC";
 
