@@ -2703,3 +2703,6 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_day','
 INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_month','20','How many remarks a single user can send, in a month, before we start ignoring them');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_year','100','How many remarks a single user can send, in a year, before we start ignoring them');
 
+ALTER TABLE users_info ADD INDEX tokens (tokens);
+ALTER TABLE users_comments ADD INDEX points (points);
+

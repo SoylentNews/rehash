@@ -1145,7 +1145,8 @@ CREATE TABLE users_comments (
 	noscores tinyint DEFAULT '0' NOT NULL,
 	mode ENUM('flat', 'nested', 'nocomment', 'thread') DEFAULT 'thread' NOT NULL,
 	threshold tinyint DEFAULT '0' NOT NULL,
-	PRIMARY KEY (uid)
+	PRIMARY KEY (uid),
+	KEY points (points)
 ) TYPE=InnoDB;
 
 #
@@ -1229,7 +1230,8 @@ CREATE TABLE users_info (
 	people MEDIUMBLOB,
 	PRIMARY KEY (uid),
 	KEY (initdomain),
-	KEY (created_ipid)
+	KEY (created_ipid),
+	KEY tokens (tokens)
 ) TYPE=InnoDB;
 
 #
