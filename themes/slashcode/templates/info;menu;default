@@ -14,15 +14,22 @@ en_US
 __name__
 info
 __template__
-<TABLE BGCOLOR="[% user.bg.2 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
-	<TR>
-		<TD>
-[ [% FOR i = items %]
-		<FONT SIZE="2"><A HREF="[% i.value %]">[% i.label %]</A></FONT>
-	[% " | " UNLESS loop.last %]
-[% END %] ]	</TD>
+<NOBR>
+<TABLE WIDTH="100%" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">
+	<TR BGCOLOR="[% user.bg.2 %]">
+	[% PROCESS start_tab link="/" label="Home" selected=( page == 'home' ) next=( page == 'stories' ) %]
+	[% PROCESS mid_tab link="/admin.pl" label="Stories" selected=( page == 'stories' ) next=( page == 'Site' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=siteinfo" label="Site" selected=( page == 'site' ) next=( page == 'abusers' ) %]
+	[% PROCESS mid_tab link="/users.pl?op=topabusers" label="Abusers" selected=( page == 'abusers' ) next=( page == 'readonly' ) %]
+	[% PROCESS mid_tab link="/users.pl?op=listreadonly" label="Read Only" selected=( page == 'readonly' ) next=( page == 'banned' ) %]
+	[% PROCESS mid_tab link="/users.pl?op=listbanned" label="Banned" selected=( page == 'banned' ) next=( page == 'slashd' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=slashd" label="Slashd" selected=( page == 'slashd' ) next=( page == 'recent' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=recent" label="Recent" selected=( page == 'recent' ) next=( page == 'config' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=topics" label="Config" selected=( page == 'config' ) next=( page == 'help" ) %]
+	[% PROCESS end_tab link="/getting_started.shtml" label="Help" selected=( page == 'help' ) %]
 	</TR>
 </TABLE>
+</NOBR>
 
 __seclev__
 10000
