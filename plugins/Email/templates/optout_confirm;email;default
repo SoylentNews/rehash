@@ -13,10 +13,12 @@ optout_confirm
 __seclev__
 5000
 __template__
-An opt-out of [% constants.sitename %]'s story emailing feature has been
-requested for this email address. If indeed you do wish to opt-out, then
-no further action on your part is necessary. If this request has been
-made in error, please send an email to:
+An opt-out of [% constants.sitename %]'s story emailing feature
+has been requested for this email address. If indeed you do wish
+to opt-out, then no further action on your part is necessary. 
+If this request has been made in error, please send an email 
+to:
+
 	[% constants.adminmail %]
 
 Thanks for reading [% constants.sitename %]!

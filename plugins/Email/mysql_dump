@@ -1,7 +1,7 @@
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin', 'Email Opt-out List', '[% constants.rootdir %]/email.pl?op=optoutrem_form', 5000, 200);
 
 INSERT INTO vars (name, value, description) VALUES ('max_email_form_allowed', 10, 'The number of times a given user (identified by IP address) can send email, per day.');
-INSERT INTO vars (name, value, description) VALUES ('max_email_form_viewings', 50, 'The maximum number of FORM VIEWS (for the "Send Email" form) that users can pull down, per day.');
+INSERT INTO vars (name, value, description) VALUES ('max_email_form_viewings', 25, 'The maximum number of FORM VIEWS (for the "Send Email" form) that users can pull down, per day.');
 INSERT INTO vars (name, value, description) VALUES ('max_optout_form_allowed', 10, 'The number of times a given user (identified by IP address) can use the opt-out form');
 INSERT INTO vars (name, value, description) VALUES ('max_optout_form_viewings', 20, 'The maximum number of FORM VIEWS (for the "Opt Out" form) that users can pull down, per day.');
 INSERT INTO vars (name, value, description) VALUES ('email_use_userident', 0, 'If set to "true" then if a logged in user sends a story using the Email-a-Story feature, their email address will be used. If the user is not logged in, or if this option is "false", then the address used will be that of the anonymous user (ie, the "site" email address)');
