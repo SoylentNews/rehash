@@ -242,6 +242,10 @@ if ($randbid) {
     setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
 }
 
+# from 'portald-site'
+getWhatsPlayingBox($slashdb) if $constants->{slashbox_whatsplaying}
+	&& defined &getWhatsPlayingBox;
+
 foreach (keys %savedBlocks) {
 	# NOT backupdb!
 	$slashdb->setBlock($_, { block => $savedBlocks{$_} });
@@ -249,8 +253,6 @@ foreach (keys %savedBlocks) {
 
 # from 'portald-site'
 newSemiRandomBlock($slashdb) if defined &newSemiRandomBlock;
-getWhatsPlayingBox($slashdb) if $constants->{slashbox_whatsplaying}
-	&& defined &getWhatsPlayingBox;
 
 portaldLog("Sucessfully Saved Portals");
 
