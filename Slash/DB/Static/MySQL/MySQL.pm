@@ -658,13 +658,12 @@ sub convert_tokens_to_points {
 	# + and - instead of using absolute values. - Jamie 2002/08/08
 
 	for my $uid (@$uids) {
-		my($tokens, $points);
-
-		$self->setUser($uid, {
+		my $rows = $self->setUser($uid, {
 			-lastgranted	=> 'NOW()',
-			-tokens		=> $tokens,
-			-points		=> $points,
+			-tokens		=> "tokens - $tokentrade",
+			-points		=> "LEAST(points + $pointtrade, $maxpoints)",
 		});
+		$granted{$uid} = 1 if $rows;
 	}
 
 	# We used to do some fancy footwork with a cursor and locking
@@ -785,8 +784,8 @@ sub fetchEligibleModerators {
 			 AND users_info.uid=users_prefs.uid
 			 AND (op='article' OR op='comments')
 			 AND willing=1
-			 AND karma >= 0
-			 GROUP BY users_info.uid
+			 AND karma >= 0",
+			"GROUP BY users_info.uid
 			 HAVING c >= $hitcount
 			 ORDER BY c");
 
@@ -797,9 +796,11 @@ sub fetchEligibleModerators {
 # For run_moderatord.pl
 sub updateTokens {
 	my($self, $uidlist) = @_;
-	for my $uid (@{$uidlist}) {
+	my $maxtokens = $constants->{maxtokens} || 60;
+	for my $uid (@$uidlist) {
+		next unless $uid;
 		$self->setUser($uid, {
-			-tokens	=> "tokens+1",
+			-tokens	=> "LEAST(tokens+1, $maxtokens)",
 		});
 	}
 }

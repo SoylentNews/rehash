@@ -170,18 +170,20 @@ sub give_out_tokens {
 	my $eligible = scalar @eligible_uids;
 
 	# Chop off the least and most clicks.
-
 	my $start = int($eligible * $constants->{m1_pointgrant_start});
 	my $end   = int($eligible * $constants->{m1_pointgrant_end});
 	@eligible_uids = @eligible_uids[$start..$end];
-	my $least = $eligible_uids[0][0];
-	my $most  = $eligible_uids[-1][0];
-	@eligible_uids =
-		map { $_ = $_->[0] } # ignore count, we only want uid
-		@eligible_uids;
 
-	# Now add tokens.
+	# Pull off some useful data for logging tidbits.
+	my $startuid = $eligible_uids[0][0],
+	my $enduid = $eligible_uids[-1][0],
+	my $least = $eligible_uids[0][1],
+	my $most = $eligible_uids[-1][1],
 
+	# Ignore count now, we only want uid.
+	@eligible_uids = map { $_ = $_->[0] } @eligible_uids;
+
+	# Decide who's going to get the tokens.
 	my %update_uids = ( );
 	for (my $x = 0; $x < $num_tokens; $x++) {
 		my $uid = $eligible_uids[rand @eligible_uids];
@@ -190,7 +192,6 @@ sub give_out_tokens {
 	my @update_uids = sort keys %update_uids;
 
 	# Log info about what we're about to do.
-
 	moderatordLog(getData('moderatord_tokenmsg', {
 		new_comments	=> $comments,
 		stirredpoints	=> $stirredpoints,
@@ -199,13 +200,15 @@ sub give_out_tokens {
 		eligible	=> $eligible,
 		start		=> $start,
 		end		=> $end,
+		startuid	=> $startuid,
+		enduid		=> $enduid,
 		least		=> $least,
 		most		=> $most,
 		num_updated	=> scalar @update_uids,
 	}));
 
 	# Finally, give each user her or his tokens.
-
+#print STDERR "update_uids: '@update_uids'\n";
 	$slashdb->updateTokens(\@update_uids);
 }
 
@@ -219,9 +222,8 @@ sub reconcile_m2 {
 	my $sql;
 
 	# %m2_results is a hash whose keys are uids.  Its values are
-	# hashrefs with the keys "change" (an int), "m2" (an array of
-	# hashrefs with values title, url, subject, vote, reason), and
-	# "m2_count" (a hashref whose keys are other uids).
+	# hashrefs with the keys "change" (an int) and "m2" (an array of
+	# hashrefs with values title, url, subject, vote, reason).
 	my %m2_results = ( );
 
 	# We load the optional plugin objects here, so we save a few cycles.
@@ -333,14 +335,23 @@ sub reconcile_m2 {
 
 		# Store data for the message we may send.
 		if ($messages) {
-			my $comment_subj = ($slashdb->getComments(
-				$mod_hr->{sid}, $mod_hr->{cid}
-			))[2];
 
 			# Get discussion metadata without caching it.
 			my $discuss = $slashdb->getDiscussion(
 				$mod_hr->{sid}
 			);
+
+			# Get info on the comment.
+			my $comment_subj = ($slashdb->getComments(
+				$mod_hr->{sid}, $mod_hr->{cid}
+			))[2];
+			my $comment_url =
+				fudgeurl(	# inserts scheme if necessary
+					join("",
+						$constants->{rootdir},
+						"/comments.pl?sid=", $mod_hr->{sid},
+						"&cid=", $mod_hr->{cid}
+				)	);
 
 			$m2_results{$mod_hr->{uid}}{change} ||= 0;
 			$m2_results{$mod_hr->{uid}}{change} += $csq->{m1_karma}{sign}
@@ -348,7 +359,7 @@ sub reconcile_m2 {
 
 			push @{$m2_results{$mod_hr->{uid}}{m2}}, {
 				title	=> $discuss->{title},
-				url	=> $discuss->{url},
+				url	=> $comment_url,
 				subj	=> $comment_subj,
 				vote	=> $winner_val,
 				reason  => $reasons->{$mod_hr->{reason}}
@@ -384,9 +395,6 @@ sub reconcile_m2 {
 			if (@{$msg_user}) {
 				$data->{m2} = $m2_results{$_}{m2};
 				$data->{change} = $m2_results{$_}{change};
-				$data->{num_metamods} =
-					scalar
-					keys %{$m2_results{$_}{m2_count}};
 				$messages->create($_, MSG_CODE_M2, $data);
 			}
 		}
