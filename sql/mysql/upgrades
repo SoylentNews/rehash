@@ -372,7 +372,6 @@ source /tmp/dis;
 select concat("UPDATE stories SET commentcount=", discussions.commentcount, " WHERE discussion=", id, ";") INTO OUTFILE "/tmp/dis2" from discussions;
 source /tmp/dis2;
 
-# SLASHDOT LAST UPDATED HERE
 # OSDNTEST LAST UPDATED HERE
 # OSDN LAST UPDATED HERE
 
@@ -380,5 +379,7 @@ ALTER TABLE pollanswers CHANGE COLUMN qid qid MEDIUMINT UNSIGNED NOT NULL;
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+# SLASHDOT (T_2_3_0_27) LAST UPDATED HERE
 
 ALTER TABLE formkeys CHANGE COLUMN formname formname varchar(32) DEFAULT '' NOT NULL;
+ALTER TABLE vars CHANGE COLUMN name name varchar(48) DEFAULT '' NOT NULL;
