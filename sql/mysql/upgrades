@@ -76,3 +76,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_max_email_len','40
 # New attribute for stories
 ALTER TABLE stories ADD day_published date DEFAULT '0000-00-00' NOT NULL;
 ALTER TABLE stories ADD INDEX published (day_published);
+
+INSERT INTO vars (name, value, description) VALUES ('comments_moddable_archived','0','Are comments in discussions that have been archived moderatable?');
+INSERT INTO vars (name, value, description) VALUES ('comments_moddable_hours','336','Num hours after being posted that a comment may be moderated');
+
