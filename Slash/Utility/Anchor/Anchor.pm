@@ -145,8 +145,13 @@ sub header {
 		return if $r->header_only;
 	}
 
-#print STDERR scalar(localtime) . " $$ header skin_name='$skin_name' det='" . determineCurrentSkin() . "'\n";
-	setCurrentSkin($skin_name || determineCurrentSkin());
+	my $skid = 0;
+	if ($skin_name) {
+		my $skin = getSkin($skin_name);
+		$skid = $skin->{skid} if $skin;
+	}
+#print STDERR scalar(localtime) . " $$ header skin_name='$skin_name' skid='$skid' det='" . determineCurrentSkin() . "'\n";
+	setCurrentSkin($skid || determineCurrentSkin());
 	getSkinColors();
 
 	# This is ALWAYS displayed. Let the template handle the title
