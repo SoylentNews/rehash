@@ -28,6 +28,8 @@ __template__
 		<P>You can buy a subscription for yourself or a gift subscription for another user.
 		Payment options include PayPal and credit-card.
 		<P>Recipients of gift subscriptions will be notified of your purchase through email.
+
+		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a> [% END %]
 	
 		<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/subscribe.pl">
 		<CENTER><TABLE BORDER=0 CELLPADDING=3>
@@ -46,6 +48,8 @@ __template__
 		<P>Hit the PayPal or credit-card link below to subscribe to
 		[% constants.sitename %].
 		You will be able to purchase banner-ad-free pages.
+		
+		[% IF user.is_subscriber %]<p>Want to be notified when your subscription is running low or expires?  Change your notification options <a href="[% gSkin.rootdir %]/my/messages/">here</a> [% END %]
 
 		<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
 		<TD>[% PROCESS paypalbut %]</TD>
