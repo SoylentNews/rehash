@@ -11,8 +11,10 @@ performance_stats
 __seclev__
 10000
 __template__
+[% pps = Slash.db.getVar('cur_performance_pps', 'value', 1) %]
 [% stats = Slash.db.getVar('cur_performance_stats', 'value', 1) %]
 [% items = stats.split('\|') %]
+[% IF pps.defined; "<font size='2'>"; pps; "PPS</font><br>"; END; %]
 [% WHILE items.size > 0;
 	cur_set = items.splice(0, 3);
 	IF items.size > 0; %]
