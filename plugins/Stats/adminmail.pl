@@ -840,9 +840,9 @@ EOT
 				day => $mod_data{day}
 			}, 'adminmail');
 			$mod_data{template_page} = 'modmail';
-			my $mod_message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
+			my $mod_message_users = $messages->getMessageUsers(MSG_CODE_MODSTATS);
 			for (@$mod_message_users) {
-				$messages->create($_, MSG_CODE_ADMINMAIL, \%mod_data);
+				$messages->create($_, MSG_CODE_MODSTATS, \%mod_data);
 			}
 		}
 	}

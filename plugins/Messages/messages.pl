@@ -238,9 +238,10 @@ sub save_prefs {
 	my $messagecodes = $messages->getDescriptions('messagecodes');
 	for my $code (keys %$messagecodes) {
 		my $coderef = $messages->getMessageCode($code);
-		if ($user->{seclev} < $coderef->{seclev} || !exists($form->{"deliverymodes_$code"})) {
-			$params{$code} = MSG_MODE_NONE;
-		} elsif ($coderef->{subscribe} && !isSubscriber($user)) {
+		if (!exists($form->{"deliverymodes_$code"})
+			||
+		    !$messages->checkMessageUser($code, $slashdb->getUser($uid))
+		) {
 			$params{$code} = MSG_MODE_NONE;
 		} else {
 			$params{$code} = fixint($form->{"deliverymodes_$code"});

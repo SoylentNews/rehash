@@ -19,10 +19,11 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (6, 'New Submission
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (7, 'Journal Reply', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (8, 'New Comment', 1000000, '');
 #INSERT INTO message_codes (code, type, seclev, modes) VALUES (9, 'Interuser Messages', 1, '');
-INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, 0);
+INSERT INTO message_codes (code, type, seclev, modes, acl) VALUES (10, 'Daily Site Stats', 100, 0, 'stats');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, '0');
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (12, 'Relationship Change', 1, '', 'collective', 1);
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (13, 'Bad login attempt warnings', 1, 1, 'now', 0);
+INSERT INTO message_codes (code, type, seclev, modes, acl) VALUES (14, 'Daily Moderation Stats', 100, 0, 'stats');
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Inbox','[% constants.rootdir %]/my/inbox/',1,13);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Message Preferences','[% constants.rootdir %]/my/messages/',1,2);

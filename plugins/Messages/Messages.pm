@@ -323,11 +323,26 @@ sub checkMessageCodes {
 	return \@newuids;
 }
 
+
+# verify user can receive message
+sub checkMessageUser {
+	my($self, $code, $userm) = @_;
+	my $coderef = $self->getMessageCode($code) or return [];
+	my $ok = ($userm->{seclev} >= $coderef->{seclev}
+		||
+	   ($coderef->{acl} && $userm->{acl}{ $coderef->{acl} })
+		||
+	   ($coderef->{subscribe} && isSubscriber($userm))
+	);
+	return $ok;
+}
+
+
 # must return an array ref
 sub getMessageUsers {
 	my($self, $code) = @_;
 	my $coderef = $self->getMessageCode($code) or return [];
-	my $users = $self->_getMessageUsers($code, $coderef->{seclev}, $coderef->{subscribe});
+	my $users = $self->_getMessageUsers($code, $coderef->{seclev}, $coderef->{subscribe}, $coderef->{acl});
 	return $users || [];
 }
 
@@ -340,10 +355,7 @@ sub getMode {
 	my $coderef = $self->getMessageCode($code) or return MSG_MODE_NOCODE;
 
 	# user not allowed to receive this message type
-	return MSG_MODE_NOCODE if
-		( $msg->{user}{seclev} < $coderef->{seclev} )
-			||
-		( $coderef->{subscribe} && !isSubscriber($msg->{user}) );
+	return MSG_MODE_NOCODE unless $self->checkMessageUser($code, $msg->{user});
 
 	# user has no delivery mode set
 	return MSG_MODE_NONE if	$mode == MSG_MODE_NONE

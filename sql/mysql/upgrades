@@ -2042,8 +2042,6 @@ REPLACE INTO code_param (type, code, name) VALUES ('session_login',1,'closes wit
 
 INSERT INTO vars (name, value, description) VALUES ('common_story_words', 'about above across after again against almost along already also although always among another anyone arise around aside asked available away became because become becomes been before began behind being better between both brought called came can\'t cannot certain certainly come could days didn\'t different does done down during each either else enough especially even ever every fact find following form found from further gave gets give given gives giving going gone hardly have having here himself however http important into it\'s itself just keep kept knew know known largely later least like look made mainly make many maybe might more most mostly much must nearly neither never next none noted nothing obtain obtained often once only other others ought over overall owing particularly past people perhaps please possible present probably quite rather read ready really right said same saying says seem seems seen several shall should show showed shown shows similar similarly since some something sometime sometimes somewhat soon such sure take taken tell than that that\'s their theirs them themselves then there therefore these they thing things think this those though through throughout thus time together told took toward turn under unless until upon used using usually various very want well were what what when where whether which while whole whom whose wide widely will will with within without would year years your', 'Words which are considered too common to be used in detecting "similar" stories');
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_3_0_132, Start of T_2_3_0_133 - 2004/01/30
 
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_bonus_minfairfrac', '0.8', 'Fraction of Fair metamods a mod has to get for its user to be eligible for the m2 csq bonuses');
@@ -2097,7 +2095,6 @@ INSERT INTO vars (name, value, description) VALUES ('moderatord_lastmaxid', '0',
 INSERT INTO vars (name, value, description) VALUES ('moderatord_maxrows', '50000', 'Max number of accesslog rows to process at once in run_moderatord');
 INSERT INTO vars (name, value, description) VALUES ('accesslog_hoursback', '60', 'Number of hours before accesslog rows are purged');
 
-# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_134, Start of T_2_3_0_135 - 2004/02/04
 
@@ -2123,3 +2120,12 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For 
 
 # End of T_2_3_0_135, Start of T_2_3_0_136 - 2004/02/10
 
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_3_0_136, Start of T_2_3_0_137 - 2004/02/12
+
+ALTER TABLE message_codes ADD COLUMN acl VARCHAR(32) DEFAULT '' NOT NULL;
+UPDATE message_codes SET acl = 'stats' WHERE code = 10;
+INSERT INTO message_codes (code, type, seclev, modes, acl) VALUES (14, 'Daily Moderation Stats', 100, 0, 'stats');
