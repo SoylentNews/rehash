@@ -108,7 +108,7 @@ sub selectComments {
 		# Adjust reasons. Do we need a reason?
 		# Are you threatening me?
 		my $reason =  $constants->{reasons}[$C->{reason}];
-		$C->{points} = $user->{"reason_alter_$reason"} 
+		$C->{points} += $user->{"reason_alter_$reason"} 
 				if ($user->{"reason_alter_$reason"});
 
 		# fix points in case they are out of bounds
