@@ -60,11 +60,11 @@ EOT
 
 #################################################################
 sub karmaBonus {
-	# Sliding scale: having karma closer to $I{m2_maxkarma}, 
+	# Sliding scale: having karma closer to $I{m2_maxbonus}, 
 	# lowers a users chance for M2 bonus.
-	my $x = $I{m2_maxkarma} - $I{U}{karma};
+	my $x = $I{m2_maxbonus} - $I{U}{karma};
 	return 0 unless $x > 0;
-	return 1 if rand($I{m2_maxkarma}) < $x;
+	return 1 if rand($I{m2_maxbonus}) < $x;
 	return 0;
 }
 

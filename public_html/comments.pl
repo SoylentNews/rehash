@@ -755,8 +755,8 @@ sub moderate {
 			sqlUpdate(
 				"stories",
 				{
-					-commentcount	=> "commentcount-$delCount",
-					writestatus	=>1
+					-commentcount => "commentcount-$delCount",
+					writestatus	=> 1
 				},
 				"sid=" . $I{dbh}->quote($I{F}{sid}), 1
 			);
