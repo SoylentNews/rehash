@@ -27,8 +27,8 @@ __name__
 modCommentLog
 __template__
 [% IF mod_admin %]
-[% sum=0; up=0; down=0; cnt=0; %]
-[% a_sum=0; a_up=0; a_down=0; a_cnt=0; %]
+[% down=0; cnt=0; m2_down=0; m2_count=0; m2_offside=0; %]
+[% a_down=0; a_cnt=0; a_m2_down=0; m2_count=0; a_m2_offside=0; %]
 <TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	[% IF mods.size > 0  %]
 	<TR BGCOLOR="[% user.bg.3 %]">
@@ -36,6 +36,8 @@ __template__
 		<TH><FONT COLOR="[% user.fg.3 %]"> score </FONT></TH>[% END %]
 		<TH><FONT COLOR="[% user.fg.3 %]"> val </FONT></TH>
 		<TH><FONT COLOR="[% user.fg.3 %]"> reason </FONT></TH>
+		<TH><FONT COLOR="[% user.fg.3 %]"> M2+ </FONT></TH>
+		<TH><FONT COLOR="[% user.fg.3 %]"> M2- </FONT></TH>
 [% IF show_modder %]<TH COLSPAN="2"><FONT COLOR="[% user.fg.3 %]"> 
 		[% IF mod_to_from == 'to' %]moderatee[% ELSE %]moderator[% END %]
 </FONT></TH>
@@ -44,9 +46,9 @@ __template__
 		<TH><FONT COLOR="[% user.fg.3 %]"> time </FONT></TH>
 		<TH>&nbsp;</FONT></TH>
 	</TR>
-		[% hr_shown = 0 %]
+		[% hr_shown = 0; %]
 		[% FOREACH moderation = mods %]
-		[% IF (timestamp_hr and timestamp_hr.gt(moderation.ts) and !hr_shown); hr_shown=1 %]<TR><TD COLSPAN="[% IF both_mods %]9[% ELSE %]8[% END %]"><HR></TD></TR>[% END %]
+		[% IF (timestamp_hr and timestamp_hr.gt(moderation.ts) and !hr_shown); hr_shown=1 %]<TR><TD COLSPAN="[% IF both_mods %]11[% ELSE %]10[% END %]"><HR></TD></TR>[% END %]
 	<TR>
 [% IF show_cid %]
 		<TD ALIGN="RIGHT">
@@ -60,6 +62,15 @@ __template__
 [% END %]
 		<TD ALIGN="RIGHT"> <B>[% IF moderation.val > 0; "+"; END; moderation.val %]</B> </TD>
 		<TD> [% reasons.${moderation.reason}.name %] </TD>
+		[% IF moderation.m2status > 0; 
+			m2fair_str = "<I>" _ moderation.m2fair _ "</I>"; m2unfair_str = "<I>" _ moderation.m2unfair _ "</I>";
+		   ELSE;
+			m2fair_str = moderation.m2fair; m2unfair_str =  moderation.m2unfair;
+		   END; 
+		%]
+                
+		<TD ALIGN="RIGHT"> [% m2fair_str %] </TD>
+		<TD ALIGN="RIGHT"> [% m2unfair_str %] </TD>
 [% IF show_modder %]
 		<TD> &nbsp; <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% moderation.ipid | strip_attribute %]&amp;fieldname=ipid">[% moderation.ipid_vis %]</A> </TD>
 		<TD> [% moderation.nickname | strip_literal %] (<A HREF="[%
@@ -72,16 +83,29 @@ __template__
 		<TD>[% IF moderation.active %] &nbsp; [% ELSE %] <i>in</i> [% END %] </TD>
 	</TR>
 		[% IF moderation.active %]
-			[%  a_sum = a_sum + moderation.val; IF moderation.val > 0; a_up = a_up+1; END; IF moderation.val < 0; a_down = a_down + 1; END; a_count = a_count+1; %]	
+			[%  a_sum = a_sum + moderation.val; IF moderation.val > 0; a_up = a_up+1; END; IF moderation.val < 0; a_down = a_down + 1; END; a_count = a_count+1;  IF moderation.m2unfair > moderation.m2fair; a_m2_down = a_m2_down + 1; END; a_m2_count = a_m2_count + moderation.m2fair + moderation.m2unfair %]
+			[% IF moderation.m2fair >= moderation.m2unfair; a_m2_offside = a_m2_offside + moderation.m2unfair; ELSE; a_m2_offside = a_m2_offside + moderation.m2fair; END %]
+		
 		[% END %]
-		[% sum = sum + moderation.val; IF moderation.val > 0; up = up+1; END; IF moderation.val < 0; down = down + 1; END; count = count+1; %]	
+	
+		[% sum = sum + moderation.val; IF moderation.val > 0; up = up+1; END; IF moderation.val < 0; down = down + 1; END; count = count+1; 
+		IF moderation.m2unfair > moderation.m2fair; m2_down = m2_down + 1; END; m2_count= m2_count + moderation.m2fair + moderation.m2unfair; %]
+
+		[% IF moderation.m2fair >= moderation.m2unfair; m2_offside = m2_offside + moderation.m2unfair; ELSE; m2_offside = m2_offside + moderation.m2fair; END %]
 		[% END %]
-		[% colspan=5; IF both_mods; colspan = colspan+1; END; IF show_cid; colspan=colspan+2; END; %]
+		[% colspan=7; IF both_mods; colspan = colspan+1; END; IF show_cid; colspan=colspan+2; END; %]
 		<TR><TD COLSPAN="[% colspan %]">
-			<TABLE>
-			<TR><TD></TD><TD><B>Sum</B></TD><TD><B>Up:Down</B></TD><TD><B>Count</B></TD></TR>
-			<TR><TD><B>All</B></TD><TD ALIGN="RIGHT">[% IF sum > 0; "+"; END; sum %]</TD><TD ALIGN="RIGHT">[% up %]:[% down %]</TD><TD ALIGN="RIGHT">[% count %]</TD></TR>
-			<TR><TD ALIGN="RIGHT"><B>Active</B></TD><TD ALIGN="RIGHT">[% IF a_sum > 0; "+"; END; a_sum %]</TD><TD ALIGN="RIGHT">[% a_up %]:[% a_down %]</TD><TD ALIGN="RIGHT">[% a_count %]</TD></TR>
+			<TABLE CELLSPACING="3">
+			<TR><TD></TD><TD><B>DownMods</B></TD><TD><B>Count</B></TD><TD><B>DownM2s</B></TD><TD><B>M2Offside</B></TD></TR>
+			<TR><TD><B>All</B></TD>
+			<TD ALIGN="RIGHT">[% PROCESS percentage sum=>down, count=>count %]</TD><TD ALIGN="RIGHT">[% count %]</TD>
+			<TD ALIGN="RIGHT">[% PROCESS percentage sum=> m2_down, count=>count %]</TD><TD ALIGN="RIGHT">[% PROCESS percentage sum => m2_offside, count => m2_count  %]</TD></TR>
+			<TR><TD ALIGN="RIGHT"><B>Active</B></TD>
+			<TD ALIGN="RIGHT">[% PROCESS percentage sum=> a_down, count=> a_count %]</TD>
+
+
+</TD><TD ALIGN="RIGHT">[% a_count %]</TD>
+			<TD ALIGN="RIGHT">[% PROCESS percentage sum =>  a_m2_down, count => a_count %]</TD><TD ALIGN="RIGHT">[% PROCESS percentage sum=> a_m2_offside; count => a_m2_count %]</TD></TR>
 			</TABLE>	
 		</TD></TR>
 	[% END %]
@@ -172,6 +196,15 @@ END %]
 
 </TABLE>
 
+[% END %]
+[% BLOCK percentage %]
+[%IF count > 0;
+	pct = (sum / count*100) FILTER format('%2.0f');
+	pct = pct _ "%";
+ELSE;
+pct = "n/a";
+ END; %]
+[%- pct -%]
 [% END %]
 
 __seclev__

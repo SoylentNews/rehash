@@ -143,7 +143,7 @@ END %].
 [% # NESTING TOO DEEP
 CASE "nesting too deep" %]
 You can only post nested lists and blockquotes [% constants.nesting_maxdepth %]
-levels deep. Please fix your UL, OL, and BLOCKQUOTE tags.
+levels deep. Please fix your UL, OL, DL, and BLOCKQUOTE tags.
 
 [% # LOW CHARS-PER-LINE
 CASE "low chars-per-line" %]
