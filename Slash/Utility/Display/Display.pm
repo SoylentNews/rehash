@@ -25,6 +25,7 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
+use Image::Size;
 use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
@@ -1224,25 +1225,25 @@ sub _hard_linkComment {
 
 #========================================================================
 my $slashTags = {
-	'image'    => \&_slashImage,
-	'story'    => \&_slashStory,
-	'user'     => \&_slashUser,
-	'link'     => \&_slashLink,
-	'break'    => \&_slashPageBreak,
 	'file'     => \&_slashFile,
+	'image'    => \&_slashImage,
+	'link'     => \&_slashLink,
+	'related'  => \&_slashRelated,
+	'user'     => \&_slashUser,
+	'story'    => \&_slashStory,
+	'break'    => \&_slashPageBreak,
 	'comment'  => \&_slashComment,
 	'journal'  => \&_slashJournal,
-	'related'  => \&_slashRelated,
 };
 
 my $cleanSlashTags = {
-	'story'    => \&_cleanSlashStory,
-	'user'     => \&_cleanSlashUser,
-	'nickname' => \&_cleanSlashUser, # alternative syntax
 	'link'     => \&_cleanSlashLink,
+	'related'  => \&_cleanSlashRelated,
+	'user'     => \&_cleanSlashUser,
+	'story'    => \&_cleanSlashStory,
+	'nickname' => \&_cleanSlashUser, # alternative syntax
 	'comment'  => \&_cleanSlashComment,
 	'journal'  => \&_cleanSlashJournal,
-	'related'  => \&_cleanSlashRelated,
 };
 
 sub cleanSlashTags {
@@ -1267,6 +1268,43 @@ sub cleanSlashTags {
 	}
 
 	return $newtext;
+}
+
+sub _cleanSlashLink {
+	my($tokens, $token, $newtext) = @_;
+	my $relocateDB = getObject('Slash::Relocate');
+
+	if (!$token->[1]{id}) {
+		my $link  = $relocateDB->create({ url => $token->[1]{href} });
+		my $href  = strip_attribute($token->[1]{href});
+		my $title = strip_attribute($token->[1]{title});
+		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
+	} else {
+		my $url   = $relocateDB->get($token->[1]{id}, 'url');
+		my $link  = $relocateDB->create({ url => $token->[1]{href} });
+		my $href  = strip_attribute($token->[1]{href});
+		my $title = strip_attribute($token->[1]{title});
+		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
+	}
+}
+
+sub _cleanSlashRelated {
+	my($tokens, $token, $newtext) = @_;
+
+	my $href  = strip_attribute($token->[1]{href});
+	my $text;
+	if ($token->[1]{text}) {
+		$text = $token->[1]{text};
+	} else {
+		$text = $tokens->get_text("/slash");
+	}
+
+	my $content = qq|<SLASH HREF="$href" TYPE="related">$text</SLASH>|;
+	if ($token->[1]{text}) {
+		$$newtext =~ s#\Q$token->[3]\E#$content#is;
+	} else {
+		$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
+	}
 }
 
 sub _cleanSlashUser {
@@ -1309,43 +1347,6 @@ sub _cleanSlashStory {
 	my $sid = strip_attribute($token->[1]{story});
 
 	my $content = qq|<SLASH STORY="$sid" TITLE="$title" TYPE="story">$text</SLASH>|;
-	if ($token->[1]{text}) {
-		$$newtext =~ s#\Q$token->[3]\E#$content#is;
-	} else {
-		$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
-	}
-}
-
-sub _cleanSlashLink {
-	my($tokens, $token, $newtext) = @_;
-	my $relocateDB = getObject('Slash::Relocate');
-
-	if (!$token->[1]{id}) {
-		my $link  = $relocateDB->create({ url => $token->[1]{href} });
-		my $href  = strip_attribute($token->[1]{href});
-		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
-	} else {
-		my $url   = $relocateDB->get($token->[1]{id}, 'url');
-		my $link  = $relocateDB->create({ url => $token->[1]{href} });
-		my $href  = strip_attribute($token->[1]{href});
-		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
-	}
-}
-
-sub _cleanSlashRelated {
-	my($tokens, $token, $newtext) = @_;
-
-	my $href  = strip_attribute($token->[1]{href});
-	my $text;
-	if ($token->[1]{text}) {
-		$text = $token->[1]{text};
-	} else {
-		$text = $tokens->get_text("/slash");
-	}
-
-	my $content = qq|<SLASH HREF="$href" TYPE="related">$text</SLASH>|;
 	if ($token->[1]{text}) {
 		$$newtext =~ s#\Q$token->[3]\E#$content#is;
 	} else {
@@ -1406,8 +1407,40 @@ sub processSlashTags {
 	return $newtext;
 }
 
+sub _slashFile {
+	my($tokens, $token, $newtext) = @_;
+
+	my $id = $token->[1]{id};
+	my $title = $token->[1]{title};
+	my $text = $tokens->get_text("/slash");
+	$title ||= $text;
+	my $content = slashDisplay('fileLink', {
+		id    => $id,
+		title => $title,
+		text  => $text,
+	}, {
+		Return => 1,
+		Nocomm => 1,
+	});
+	$content ||= Slash::getData('SLASH-UNKNOWN-FILE');
+
+	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
+}
+
 sub _slashImage {
 	my($tokens, $token, $newtext) = @_;
+
+		warn "$token->[1]{width} $token->[1]{height}";
+	if (!$token->[1]{width} || !$token->[1]{height}) {
+		my $blob = getObject("Slash::Blob", { db_type => 'reader' });
+		my $data = $blob->get($token->[1]{id});
+		if ($data && $data->{data}) {
+			my($w, $h) = imgsize(\$data->{data});
+			$token->[1]{width}  = $w if $w && !defined $token->[1]{width};
+			$token->[1]{height} = $h if $h && !defined $token->[1]{height};
+		}
+	}
+		warn "$token->[1]{width} $token->[1]{height}";
 
 	my $content = slashDisplay('imageLink', {
 		id	=> $token->[1]{id},
@@ -1420,6 +1453,53 @@ sub _slashImage {
 		Nocomm => 1,
 	});
 	$content ||= Slash::getData('SLASH-UNKNOWN-IMAGE');
+
+	$$newtext =~ s/\Q$token->[3]\E/$content/;
+}
+
+sub _slashLink {
+	my($tokens, $token, $newtext) = @_;
+
+	my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
+	my($content);
+	my $text = $tokens->get_text("/slash");
+	if ($reloDB) {
+		$content = slashDisplay('hrefLink', {
+			id    => $token->[1]{id},
+			title => $token->[1]{title} || $text,
+			text  => $text,
+		}, {
+			Return => 1,
+			Nocomm => 1,
+		});
+	}
+	$content ||= Slash::getData('SLASH-UNKNOWN-LINK');
+
+	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
+}
+
+sub _slashRelated {
+	my($tokens, $token, $newtext) = @_;
+	my $user = getCurrentUser();
+
+	my $link = $token->[1]{href};
+	my $text = $tokens->get_text("/slash");
+
+	push @{$user->{state}{related_links}}, [ $text, $link ];
+	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E##is;
+}
+
+sub _slashUser {
+	my($tokens, $token, $newtext) = @_;
+
+	my $content = slashDisplay('userLink', {
+		uid      => $token->[1]{uid},
+		nickname => $token->[1]{nickname},
+	}, {
+		Return => 1,
+		Nocomm => 1,
+	});
+	$content ||= Slash::getData('SLASH-UNKNOWN-USER');
 
 	$$newtext =~ s/\Q$token->[3]\E/$content/;
 }
@@ -1446,73 +1526,6 @@ sub _slashStory {
 	$content ||= Slash::getData('SLASH-UNKNOWN-STORY');
 
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
-}
-
-sub _slashUser {
-	my($tokens, $token, $newtext) = @_;
-
-	my $content = slashDisplay('userLink', {
-		uid      => $token->[1]{uid},
-		nickname => $token->[1]{nickname},
-	}, {
-		Return => 1,
-		Nocomm => 1,
-	});
-	$content ||= Slash::getData('SLASH-UNKNOWN-USER');
-
-	$$newtext =~ s/\Q$token->[3]\E/$content/;
-}
-
-sub _slashFile {
-	my($tokens, $token, $newtext) = @_;
-
-	my $id = $token->[1]{id};
-	my $title = $token->[1]{title};
-	my $text = $tokens->get_text("/slash");
-	$title ||= $text;
-	my $content = slashDisplay('fileLink', {
-		id    => $id,
-		title => $title,
-		text  => $text,
-	}, {
-		Return => 1,
-		Nocomm => 1,
-	});
-	$content ||= Slash::getData('SLASH-UNKNOWN-FILE');
-
-	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
-}
-
-sub _slashLink {
-	my($tokens, $token, $newtext) = @_;
-
-	my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
-	my($content);
-	my $text = $tokens->get_text("/slash");
-	if ($reloDB) {
-		$content = slashDisplay('hrefLink', {
-			id    => $token->[1]{id},
-			title => $token->[1]{title} || $token->[1]{href} || $text,
-			text  => $text,
-		}, {
-			Return => 1,
-			Nocomm => 1,
-		});
-	}
-	$content ||= Slash::getData('SLASH-UNKNOWN-LINK');
-
-	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
-}
-
-sub _slashRelated {
-	my($tokens, $token, $newtext) = @_;
-	my $user = getCurrentUser();
-
-	my $link = $token->[1]{href};
-	my $text = $tokens->get_text("/slash");
-
-	push @{$user->{state}{related_links}}, [ $text, $link ];
-	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E##is;
 }
 
 sub _slashPageBreak {
