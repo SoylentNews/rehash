@@ -654,6 +654,7 @@ Bender:Aw, this bends!
 Bender:Farewell, big blue ball of idiots!
 Bender:This guy's not making any sense.  Can I kill him?  Please?
 Bender:Hooray, we don't have to do anything!
+Bender:I only speak enough binary to ask where the bathroom is.
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
