@@ -468,7 +468,6 @@ themes/slashcode/templates/select;misc;default
 themes/slashcode/templates/selectThreshLabel;misc;default
 themes/slashcode/templates/sendPasswdForm;users;default
 themes/slashcode/templates/showInfoConflict;users;default
-themes/slashcode/templates/ssifoot;misc;default
 themes/slashcode/templates/ssihead;misc;default
 themes/slashcode/templates/storylink;index;default
 themes/slashcode/templates/storylink;index;light
