@@ -2114,8 +2114,8 @@ CREATE TABLE slashd_errnotes (
 
 # Change for plugins/HumanConf (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('hc_possible_fonts', '', 'Possible fonts to use (space-separated, empty for the default)');
-INSERT INTO vars (name, value, description) VALUES ('hc_pool_secs_before_del', '21600', 'Number of seconds after a pool entry last used before it will be deleted');
-INSERT INTO vars (name, value, description) VALUES ('hc_pool_secs_before_use', '3600', 'Number of seconds after a pool entry created before it will be used');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('hc_pool_secs_before_del', '21600', 'Number of seconds after a pool entry last used before it will be deleted');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('hc_pool_secs_before_use', '3600', 'Number of seconds after a pool entry created before it will be used');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_margin', '6', 'For question 1 (images), margin around the image in pixels');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For question 1 (images), maximum number of radians to rotate (positive or negative, so the range is twice this)');
 
@@ -2124,3 +2124,4 @@ ALTER TABLE comments CHANGE COLUMN karma ckarma SMALLINT NOT NULL DEFAULT 0, CHA
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_135, Start of T_2_3_0_136 - 2004/02/10
+
