@@ -79,7 +79,9 @@ sub main {
 		if ($story->{discussion}) {
 			my $discussion = $slashdb->getDiscussion($story->{discussion});
 			# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
-			$user->{state}{tid} = $discussion->{topic};
+			my $tids = $slashdb->getStoryTopicsJustTids($story->{sid}); 
+			my $tid_string = join('&amp;tid=', @$tids);
+			$user->{state}{tid} = $tid_string;
 			# If no comments ever have existed just skip the display of the comment header bar -Brian
 			printComments($discussion)
 				if $discussion && !($discussion->{commentcount} > 0 && $discussion->{commentstatus} eq 'disabled');

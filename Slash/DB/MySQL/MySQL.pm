@@ -1640,19 +1640,16 @@ sub getUserEmail {
 # currently only used in users.pl  -Jamie
 # If anyone ever rewrites this move the formatDate() out to the template.
 # Display logic belongs in display. -Brian
+#
+# Corrected all of the above (those messages will go away soon.
+# -Brian, Tue Jan 21 14:49:30 PST 2003
+# 
 sub getCommentsByGeneric {
 	my($self, $where_clause, $num, $min) = @_;
 	$min ||= 0;
 
-#	my $sqlquery = "SELECT pid,sid,cid,subject,date,points,uid,reason"
-#			. " FROM comments WHERE $where_clause"
-#			. " ORDER BY date DESC LIMIT $min, $num";
-#
-#	my $sth = $self->{_dbh}->prepare($sqlquery);
-#	$sth->execute;
-#	my($comments) = $sth->fetchall_arrayref;
-	my $comments = $self->sqlSelectAll('pid,sid,cid,subject,date,points,uid,reason','comments', $where_clause, " ORDER BY date DESC LIMIT $min, $num");
-	formatDate($comments, 4);
+	my $comments = $self->sqlSelectAllHashrefArray('pid,sid,cid,subject,date,points,uid,reason,karma_bonus','comments', $where_clause, " ORDER BY date DESC LIMIT $min, $num");
+
 	return $comments;
 }
 

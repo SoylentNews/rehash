@@ -135,7 +135,7 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 			comment.subj;
 			'</A>&nbsp;';
 		'</TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; comment.cdate; '</NOBR></TD>';
+		'<TD VALIGN="TOP"><NOBR>&nbsp;'; Slash.timeCalc(comment.cdate); '</NOBR></TD>';
 		'<TD VALIGN="TOP"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
 		'<TD VALIGN="TOP"><NOBR>&nbsp;'; score; reasontext; '</NOBR></TD>';
 		'</TR>';

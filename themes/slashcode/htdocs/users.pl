@@ -1000,7 +1000,7 @@ sub showInfo {
 	if ($comments && @$comments) {
 		my %uids = ();
 		for my $c (@$comments) {
-			$uids{$c->[6]}++;
+			$uids{$c->{uid}}++;
 		}
 		my $uids = join(", ", sort { $a <=> $b } keys %uids);
 		$uid_hr = $slashdb->sqlSelectAllHashref(
@@ -1011,19 +1011,16 @@ sub showInfo {
 		);
 	}
 
-	for (@$comments) {
-		my($pid, $sid, $cid, $subj, $cdate, $pts, $uid, $reason) = @$_;
-		$uid ||= 0;
-
+	for my $comment (@$comments) {
 		my $type;
 		# This works since $sid is numeric.
-		my $replies = $slashdb->countCommentsBySidPid($sid, $cid);
+		my $replies = $slashdb->countCommentsBySidPid($comment->{sid}, $comment->{cid});
 
 		# This is ok, since with all luck we will not be hitting the DB
 		# ...however, the "sid" parameter here must be the string
 		# based SID from either the "stories" table or from
 		# pollquestions.
-		my($discussion) = $slashdb->getDiscussion($sid);
+		my($discussion) = $slashdb->getDiscussion($comment->{sid});
 
 		if ($discussion->{url} =~ /journal/i) {
 			$type = 'journal';
@@ -1032,23 +1029,27 @@ sub showInfo {
 		} else {
 			$type = 'story';
 		}
+		$comment->{points} += $user->{karma_bonus}
+			if $user->{karma_bonus} && $comment->{karma_bonus} eq 'yes';
 
 		my $data = {
-			pid 		=> $pid,
+			pid 		=> $comment->{pid},
 			url		=> $discussion->{url},
 			type 		=> $type,
 			disc_title	=> $discussion->{title},
-			sid 		=> $sid,
-			cid 		=> $cid,
-			subj		=> $subj,
-			cdate		=> $cdate,
-			pts		=> $pts,
-			reason		=> $reason,
-			uid		=> $uid,
+			sid 		=> $comment->{sid},
+			cid 		=> $comment->{cid},
+			subj		=> $comment->{subject},
+			cdate		=> $comment->{date},
+			pts		=> $comment->{points},
+			reason		=> $comment->{reason},
+			uid		=> $comment->{uid},
 			replies		=> $replies,
 		};
+		#Karma bonus time
+
 		for my $col (@extra_cols_wanted) {
-			$data->{$col} = $uid_hr->{$uid}{$col} if defined $uid_hr->{$uid}{$col};
+			$data->{$col} = $uid_hr->{$comment->{uid}}{$col} if defined $uid_hr->{$comment->{uid}}{$col};
 		}
 		push @$commentstruct, $data;
 	}

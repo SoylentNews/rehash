@@ -129,7 +129,9 @@ sub main {
 		if ($form->{sid} !~ /^\d+$/) {
 			$discussion = $slashdb->getDiscussionBySid($form->{sid});
 			$section = $discussion->{section};
-			$user->{state}{tid} = $discussion->{topic};
+			my $tids = $slashdb->getStoryTopicsJustTids($form->{sid}); 
+			my $tid_string = join('&amp;tid=', @$tids);
+			$user->{state}{tid} = $tid_string;
 		} else {
 			$discussion = $slashdb->getDiscussion($form->{sid});
 			$section = $discussion->{section};
