@@ -2856,8 +2856,6 @@ INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (1
 
 INSERT INTO misc_user_opts (name, optorder, seclev, default_val, vals_regex, short_desc, long_desc, opts_html) VALUES ('disable_submit_bin_refresh',100,100,'0',NULL,'Disable bin refresh?','Do you want to disable refreshing the submissions bin?',NULL);
 
-# SLASHDOT LAST UPDATED HERE
-
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_50, Start of T_2_5_0_51 - 2005/03/01
@@ -2874,6 +2872,11 @@ ALTER TABLE daypass_keys ADD COLUMN earliest_confirmable DATETIME NOT NULL DEFAU
 INSERT INTO vars (name, value, description) VALUES ('daypass_adnum', '13', 'Which ad number to pass to getAd?');
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_onlywhentmf', '0', 'Offer daypasses only when there is a story in The Mysterious Future?');
 
+# End of T_2_5_0_53, Start of T_2_5_0_54 - 2005/03/29
+
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# End of T_2_5_0_53, Start of T_2_5_0_54 - 2005/03/29
+# End of T_2_5_0_54, Start of T_2_5_0_55 - 2005/03/31
+
+# SLASHDOT LAST UPDATED HERE
+
