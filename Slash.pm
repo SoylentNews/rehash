@@ -1731,14 +1731,14 @@ sub reparentComments {
 		my $reparent;
 
 		# do threshold reparenting thing
-		unless ($comments->[$x]{points} < $I{U}{threshold}) {
+		if ($I{U}{reparent} && $comments->[$x]{points} >= $I{U}{threshold}) {
 			while ($pid && $comments->[$pid]{points} < $I{U}{threshold}) {
 				$pid = $comments->[$pid]{pid};
 				$reparent = 1;
 			}
 		}
 
-		if ($depth && ! $reparent) { # don't reparent again!
+		if ($depth && !$reparent) { # don't reparent again!
 			# set depth of this comment based on parent's depth
 			$comments->[$x]{depth} = ($pid ? $comments->[$pid]{depth} : 0) + 1;
 
