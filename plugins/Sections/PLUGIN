@@ -1,0 +1,9 @@
+description="Sections Editor"
+name=Sections
+htdoc=sections.pl
+templates=templates/data;sections;default
+templates=templates/delSectCancel;sections;default
+templates=templates/delSectConfirm;sections;default
+templates=templates/delSection;sections;default
+templates=templates/editSection;sections;default
+templates=templates/listSections;sections;default
