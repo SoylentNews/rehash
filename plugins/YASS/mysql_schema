@@ -1,0 +1,14 @@
+DROP TABLE IF EXISTS yass_sites;
+CREATE TABLE yass_sites (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	sid char(16) NOT NULL,
+	url varchar(250) NOT NULL,
+	rdf varchar(250) NOT NULL,
+	created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	touched datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	failures MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+	bid char(32) NOT NULL,
+	FOREIGN KEY (sid) REFERENCES stories(sid),
+	UNIQUE sidurl (sid, url),
+	PRIMARY KEY (id)
+);

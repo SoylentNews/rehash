@@ -1,1 +1,1 @@
-INSERT INTO vars (name, value, description) VALUES ('yass_section', 'yass', 'Section to pull URL list from.');
+INSERT INTO vars (name, value, description) VALUES ('yass_failures', '14', 'If you have failures for this many days, deactive the site.');

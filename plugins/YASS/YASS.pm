@@ -31,31 +31,65 @@ sub new {
 	return $self;
 }
 
+sub getURLsSids {
+	my ($self) = @_;
+	$self->sqlSelectAll("value, sid", "story_param", "name='url'");
+}
+
+sub create {
+	my ($self, $hash) = @_;
+	$hash->{-touched} = "now()";
+	$self->sqlInsert($hash);
+}
+
+sub success {
+	my ($self, $id) = @_;
+	my $hash->{-touched} = "now()";
+	$self->sqlUpdate($hash, "id = $id");
+}
+
+sub setURL {
+	my ($self, $id, $url, $rdf) = @_;
+	my $hash->{url} = $url;
+	my $hash->{rdf} = $rdf;
+	$self->sqlUpdate($hash, "id = $id");
+}
+
+sub exists {
+	my ($self, $sid, $url) = @_;
+	my $q_url = $self->sqlQuote($url);
+	my $q_sid = $self->sqlQuote($sid);
+	my $return =  $self->sqlSelect('id', 'yass_sites', "sid = $q_sid AND url = $q_url");
+	unless ($return) {
+		$return = $self->sqlSelect('sid', 'yass_sites', "sid = $q_sid");
+	}
+	return $return;
+}
+
+sub failed {
+	my ($self, $id) = @_;
+	my $hash->{-touched} = "now()";
+	$self->sqlUpdate($hash, "id = $id");
+}
+
+
 sub getActive {
 	my ($self, $limit) = @_;
+	my $failures = getCurrentStatic('yass_failures');
+	$failures ||= '14';
 
 	my $sid;
 
-	unless($limit) {
-		$sid = $self->sqlSelectColArrayref(
-			"sid", 
-			"story_param", 
-			"name = 'active' AND value = 'yes'");
+	if($limit) {
+		$order = "ORDER BY time DESC LIMIT $limit";
 	} else {
-		$sid = $self->sqlSelectColArrayref(
-			"story_param.sid", 
-			"story_param, stories", 
-			"name = 'active' AND value = 'yes' AND stories.sid = story_param.sid",
-			"ORDER BY time DESC LIMIT $limit");
+		$order = "ORDER BY title ASC");
 	}
-	my $in_list = '"';
-	$in_list .= join('","', @$sid);
-	$in_list .= '"';
 	my $all = $self->sqlSelectAllHashrefArray(
-		"story_param.sid as sid, story_param.value as url, title", 
-		"story_param, stories", 
-		"story_param.sid IN ($in_list) AND story_param.name = 'url' AND stories.sid = story_param.sid",
-		"ORDER BY title ASC");
+		"yass_sites.sid as sid, url, title", 
+		"yass_sites, stories", 
+		"stories.sid = yass_sites.sid and failed < $failures",
+		$order);
 
 	return $all;
 }
