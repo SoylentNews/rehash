@@ -67,6 +67,8 @@ use vars qw($VERSION @EXPORT);
 	getArmoredEmail
 	grepn
 	html2text
+	nickFix
+	nick2matchname
 	root2abs
 	set_rootdir
 	sitename2filename
@@ -98,6 +100,26 @@ use vars qw($VERSION @EXPORT);
 # 	processCustomTags
 # 	stripByMode
 # );
+
+#========================================================================
+
+sub nickFix {
+	my($nick) = @_;
+	my $constants = getCurrentStatic();
+	$nick =~ s/\s+/ /g;
+	$nick =~ s/[^$constants->{nick_chars}]+//g;
+	$nick = substr($nick, 0, $constants->{nick_maxlen});
+	return $nick;
+}
+
+#========================================================================
+
+sub nick2matchname {
+	my($nick) = @_;
+	$nick = lc $nick;
+	$nick =~ s/[^a-zA-Z0-9]//g;
+	return $nick;
+}
 
 #========================================================================
 

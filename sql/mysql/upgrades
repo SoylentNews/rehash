@@ -1561,7 +1561,7 @@ ALTER TABLE rss_raw ADD INDEX processed (processed);
 SELECT CONCAT("DELETE FROM story_topics WHERE id='", st1.id, "';") INTO OUTFILE "/tmp/del-extra-story-topics.sql" FROM story_topics AS st1, story_topics AS st2 WHERE st1.sid=st2.sid AND st1.tid=st2.tid AND st1.id < st2.id;
 SOURCE /tmp/del-extra-story-topics.sql;
 ALTER TABLE story_topics ADD UNIQUE sid_tid (sid,tid);
-INSERT INTO story_topics SELECT "", sid, tid, "no" FROM stories;
+INSERT IGNORE INTO story_topics SELECT "", sid, tid, "no" FROM stories;
 ALTER TABLE story_topics DROP INDEX sid_tid;
 
 CREATE TABLE IF NOT EXISTS soap_methods (
@@ -1575,8 +1575,11 @@ CREATE TABLE IF NOT EXISTS soap_methods (
         UNIQUE soap_method(class, method)
 );
 
-
 # USEPERL LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home','The shtml page to call if a user is anon and index_noanon is set');
 INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect all anonymous users to index_handler_noanon instead of index.shtml. Set to 1 to activate, 0 to remove.');
+
+INSERT INTO vars (name, value, description) VALUES ('nick_chars', ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*\'(),-', 'Characters allowed in user nicknames');
+INSERT INTO vars (name, value, description) VALUES ('nick_maxlen', '20', 'Max length of nickname, should correspond with schema for users.nickname');
+

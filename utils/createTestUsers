@@ -54,7 +54,24 @@ $werder = new Silly::Werder;
 		$username =~ s{\W+$}{};
 		$username =~ s{\b(\w)}{\U$1}g if rand(1) < 0.5;
 		$username =~ s{\b(\w)}{\L$1}g if rand(1) < 0.2;
-		(my $matchname = lc $username) =~ s/[^a-zA-Z0-9]//g;
+
+		# Insert more junk chars into username.
+		my $junk_nc = $constants->{nick_chars};
+		$junk_nc =~ tr/a-zA-Z//d;
+		my $jnc_l = length($junk_nc);
+		while ($junk_nc && rand(1) < 0.4
+			&& length($username) < $constants->{nick_maxlen}) {
+			my $l = length($username);
+			my $loc = int(rand($l)+1);
+			my $ch = substr($junk_nc, int(rand($jnc_l)), 1);
+			$username = substr($username, 0, $loc)
+				. $ch
+				. substr($username, $loc);
+		}
+
+		$username = nickFix($username);
+		my $matchname = nick2matchname($username);
+
 		$werder->set_syllables_num(1, 2);
 		$werder->set_werds_num(3, 5);
 		my $email = $werder->sentence;

@@ -5441,6 +5441,8 @@ sub getSlashConf {
 	$conf{m2_consensus}       = 2*int(($conf{m2_consensus} || 5)/2) + 1
 		if !$conf{m2_consensus}
 		   || ($conf{m2_consensus}-1)/2 != int(($conf{m2_consensus}-1)/2);
+	$conf{nick_chars}	||= q{ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*'(),-};
+	$conf{nick_maxlen}	||= 20;
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {

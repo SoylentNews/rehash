@@ -800,6 +800,8 @@ INSERT INTO vars (name, value, description) VALUES ('modviewseclev','100','Minim
 INSERT INTO vars (name, value, description) VALUES ('multitopics_enabled','0','whether or not to allow stories to have multiple topics');
 INSERT INTO vars (name, value, description) VALUES ('nesting_maxdepth','3','Maximum depth to which <BLOCKQUOTE>-type tags can be nested');
 INSERT INTO vars (name, value, description) VALUES ('newsletter_body','0','Print bodytext, not merely introtext, in newsletter.');
+INSERT INTO vars (name, value, description) VALUES ('nick_chars', ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*\'(),-', 'Characters allowed in user nicknames');
+INSERT INTO vars (name, value, description) VALUES ('nick_maxlen', '20', 'Max length of nickname, should correspond with schema for users.nickname');
 INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
 INSERT INTO vars (name, value, description) VALUES ('organise_stories','','organise story blocks');
 INSERT INTO vars (name, value, description) VALUES ('panic','0','0:Normal, 1:No frills, 2:Essentials only');
