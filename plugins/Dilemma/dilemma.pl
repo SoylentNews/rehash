@@ -81,10 +81,15 @@ sub main {
 
 	my $info = $dilemma_reader->getDilemmaInfo();
 	my $species_hr = $dilemma_reader->getDilemmaSpeciesInfo();
+	my $species_order = [
+		sort { $species_hr->{$b}{alivecount} <=> $species_hr->{$a}{alivecount} }
+		keys %$species_hr
+	];
 
 	slashDisplay('maininfo', {
 		info		=> $info,
 		species		=> $species_hr,
+		species_order	=> $species_order,
 	});
 
 	slashDisplay('index', {
@@ -379,17 +384,6 @@ sub displayStories {
 		}, { Return => 1 });
 
 		$return .= $tmpreturn;
-	}
-
-	unless ($constants->{index_no_prev_next_day}) {
-		my($today, $tomorrow, $yesterday, $week_ago) = getOlderDays($form->{issue});
-		$return .= slashDisplay('next_prev_issue', {
-			today           => $today,
-			tomorrow        => $tomorrow,
-			yesterday       => $yesterday,
-			week_ago        => $week_ago,
-			linkrel         => $linkrel,
-		}, { Return => 1 });
 	}
 
 	return $return;

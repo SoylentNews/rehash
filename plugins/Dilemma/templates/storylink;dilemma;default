@@ -1,0 +1,41 @@
+__section__
+default
+__description__
+Create links to the story (see data/index template for formatting of each link)
+
+* links = arrayref of links
+__title__
+
+__page__
+dilemma
+__lang__
+en_US
+__name__
+storylink
+__template__
+	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
+		<TD BACKGROUND="[% constants.imagedir %]/wl_cccccc.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
+		<TD BGCOLOR="[% user.colors.bg_1 %]" WIDTH="100%">
+			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#CCCCCC">
+
+				<P><FONT FACE="[% constants.mainfontface %]" SIZE="2"><B>(</B>
+[% FOREACH storylinks = links; IF storylinks.ref == 'ARRAY' %]
+<A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</A>
+[% ELSE; storylinks; END %]
+[% UNLESS loop.last %] | [% END %]
+[% END %]
+				<B>)</B></FONT></P>
+
+			</TD></TR></TABLE>
+		</TD>
+		<TD BACKGROUND="[% constants.imagedir %]/wr_cccccc.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
+		</TR>
+		<TR><TD BGCOLOR="[% user.colors.bg_3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
+	</TABLE>
+
+<BR><BR>
+
+__seclev__
+10000
+__version__
+$Id$

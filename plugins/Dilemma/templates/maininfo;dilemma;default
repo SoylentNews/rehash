@@ -7,6 +7,7 @@ __description__
 	code = the species' code
 	alivecount = count of alive agents in that species
 	totalcount = count of all agents in that species
+* species_order = order of the species dsid's, by descending alivecount
 
 __title__
 
@@ -18,19 +19,23 @@ __name__
 maininfo
 __template__
 [% USE Slash %]
-<p>[% PROCESS titlebar title => 'Dilemma Info' %]
+<p>[% PROCESS titlebar title => 'Dilemma Info' width='100%' %]
 <tt>
 [% FOREACH key = info.keys.sort %]
-<p><b>[% key | strip_html %]:</b> [% info.$key | strip_html %]
+<br><b>[% key | strip_html %]:</b> [% info.$key | strip_html %]
 [% END %]
 </tt>
 
-<p>[% PROCESS titlebar title => 'Species Status at Tick ' _ info.last_tick %]
-<tt>
+<p>[% PROCESS titlebar title => 'Species Status at Tick ' _ info.last_tick width='100%' %]
+<table cellspacing="1" border="0">
+<tr><th>Species<br>Name</th><th>Alive<br>Now</th><th>Alive<br>Ever</th></tr>
 [% FOREACH key = species.keys.nsort %]
-<p>[% species.${key}.name %]: <b>[% species.${key}.alivecount %] alive</b> of [% species.${key}.totalcount %] total
-<br>&nbsp;&nbsp;[% species.${key}.code %]
+<tr><td align="left"><tt>[% species.${key}.name %]&nbsp;&nbsp;</tt></td>
+<td align="right"><tt>&nbsp;&nbsp;[% species.${key}.alivecount %]</tt></td>
+<td align="right"><tt>&nbsp;&nbsp;[% species.${key}.totalcount %]</tt></td></tr>
+<!-- <br>&nbsp;&nbsp;[% species.${key}.code %] -->
 [% END %]
+</table>
 
 <p>[% PROCESS titlebar title => 'Species History' %]
 <p><img src="[% constants.imagedir %]/specieshistory.png">

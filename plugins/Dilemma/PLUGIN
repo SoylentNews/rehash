@@ -7,6 +7,9 @@ task=dilemma_backend.pl
 mysql_schema=mysql_schema.sql
 mysql_dump=mysql_dump.sql
 template=templates/data;dilemma;default
+template=templates/index;dilemma;default
 template=templates/graph;dilemma;default
 template=templates/maininfo;dilemma;default
+template=templates/next_prev_issue;dilemma;default
+template=templates/storylink;dilemma;default
 

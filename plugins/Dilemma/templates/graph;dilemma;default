@@ -17,7 +17,7 @@ graph
 __template__
 [% FILTER null;
 
-USE my_graph = GD.Graph.lines(800, 600);
+USE my_graph = GD.Graph.lines(640, 480);
 
 IF y_max < 12;
 	y_label_skip = 1;
