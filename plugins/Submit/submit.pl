@@ -140,7 +140,7 @@ sub main {
 # update the notes and sections fields but don't delete anything.
 sub updateSubmissions {
 	my($constants, $slashdb, $user, $form) = @_;
-	$slashdb->deleteSubmission(0, 1);
+	$slashdb->deleteSubmission({ nodelete => 1 });
 	submissionEd(@_);
 }
 
@@ -266,7 +266,7 @@ sub mergeSubmissions {
 	}
 
 	# need to do this even if nothing is checked, so we update notes etc.
-	my @subids = $slashdb->deleteSubmission;
+	my @subids = $slashdb->deleteSubmission({ accepted => 1 });
 
 	submissionEd(@_, getData('mergehead', { subids => \@subids }));
 }
