@@ -124,7 +124,7 @@ sub main {
 
 		topics 		=> {	# topiced,topicnew,topicsave,topicdelete
 
-			function 	=>  \&topicEdit,
+			function 	=> \&topicEdit,
 			seclev		=> 10000,
 			adminmenu	=> 'config',
 			tab_selected	=> 'topics',
@@ -825,13 +825,8 @@ sub topicEdit {
 
 	closedir(DIR);
 
-	my $tdesc = 'topics_all';
-	#What is this for? -Brian
-	if ($user->{section} && $user->{seclev} <= 9000) {
-		$tdesc = 'topics_section';
-	}
 	$topics_select = createSelect('nexttid', 
-		$slashdb->getDescriptions($tdesc, $user->{section}, 1),
+		$slashdb->getDescriptions('topics_all', $user->{section}, 1),
 		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 
 		1, 
 		0, 
