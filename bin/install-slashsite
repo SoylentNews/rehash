@@ -385,8 +385,10 @@ close $dump;
 # constraints -- since we will be adding data in an order
 # not guaranteed to match those constraints.  When all
 # the data is inserted, we can turn them back on.
-unshift @sql,	'SET FOREIGN_KEY_CHECKS = 0';
-push @sql,	'SET FOREIGN_KEY_CHECKS = 1';
+
+$dbh->do("SET FOREIGN_KEY_CHECKS = 0");
+
+# Now process all the SQL.
 
 for my $cmd (@sql) {
 	next unless $cmd;
@@ -458,6 +460,8 @@ if ($opts{'i'}) {
 } else {
 	$include = '';
 }
+
+$dbh->do("SET FOREIGN_KEY_CHECKS = 1");
 
 # Now, lets update slash.sites
 my $sites = gensym();
