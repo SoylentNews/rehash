@@ -154,7 +154,7 @@ __template__
 <BR>Intro Copy<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
-<TD><TEXTAREA WRAP="VIRTUAL" NAME="introtext" COLS="70" ROWS="10">[% storyref.introtext | strip_literal %]</TEXTAREA></TD>
+<TD><TEXTAREA WRAP="VIRTUAL" NAME="introtext" COLS="[% user.textarea_cols || constants.textarea_cols %]" ROWS="10">[% storyref.introtext | strip_literal %]</TEXTAREA></TD>
 <TD valign="top">[% ispell_comments.introtext %]</TD>
 </TR></TABLE><BR>
 
@@ -163,7 +163,7 @@ __template__
 <BR>Extended Copy<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
-<TD><TEXTAREA NAME="bodytext" COLS="70" WRAP="VIRTUAL" ROWS="10">[% storyref.bodytext | strip_literal %]</TEXTAREA></TD>
+<TD><TEXTAREA NAME="bodytext" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" WRAP="VIRTUAL">[% storyref.bodytext | strip_literal %]</TEXTAREA></TD>
 <TD valign="top">[% ispell_comments.bodytext %]</TD>
 </TR></TABLE><BR>
 
