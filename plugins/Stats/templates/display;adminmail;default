@@ -67,6 +67,15 @@ For [% section.section_name %]
 [% item %]
 [% END %]
 
+[% IF top_referers.size %]
+-----------------------      
+
+Top referers:
+[% FOREACH referer = top_referers -%]
+[% referer.1 %]  [% referer.0 %]
+[% END %]
+
+[% END %]
 -----------------------      
 
 [% tailslash %]      

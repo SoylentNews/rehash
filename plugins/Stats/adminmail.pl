@@ -426,6 +426,8 @@ EOT
 		}
 	}
 
+	$data{top_referers} = $stats->getTopReferers();
+
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);
 	$statsSave->createStatDaily('users_created', $new_users_yest);

@@ -787,6 +787,26 @@ sub getDurationByStaticLocaladdr {
 }
 
 ########################################################
+# Note, we are carrying the misspelling of "referrer" over from
+# the HTTP spec.
+sub getTopReferers {
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+
+	my $count = $options->{count} || 10;
+	my $where = $options->{include_local}
+		? ""
+		: "AND referer NOT LIKE " . $self->sqlQuote($constants->{absolutedir} . "%");
+
+	return $self->sqlSelectAll(
+		"referer, COUNT(*) AS c",
+		"accesslog_temp",
+		"LENGTH(referer) > 0 $where",
+		"GROUP BY referer ORDER BY c DESC, referer LIMIT $count"
+	);
+}
+
+########################################################
 sub countSfNetIssues {
 	my($self, $group_id) = @_;
 	my $constants = getCurrentStatic();
