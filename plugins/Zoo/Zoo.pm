@@ -65,7 +65,7 @@ sub countFoes {
 
 sub count {
 	my($self, $uid) = @_;
-	$self->sqlCount('uid', 'people', "uid = $uid");
+	$self->sqlCount('people', "uid = $uid");
 }
 
 sub _get {
@@ -78,6 +78,22 @@ sub _get {
 	);
 	return $people;
 }
+
+# Still in my brain, this is left as a note -Brian
+# This has a special reason for existing. Right now we
+# can easily fetch info on friends and foes. Future
+# features though will not have as easy of a time.
+#sub getFriendInfo {
+#	my($self, $people) = @_;
+#
+#	my $info = $self->sqlSelectAll(
+#		'uid, nickname, journal_last_entry_date',
+#		'users',
+#		"uid IN (" . join(",", map { $_->[0] } @$people) . ")"
+#		 ) if @$people;
+#
+#	return $info;
+#}
 
 sub _getOpposite {
 	my($self, $uid, $type) = @_;
