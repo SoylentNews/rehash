@@ -3763,14 +3763,14 @@ sub getKnownOpenProxy {
 	my $port = $self->sqlSelect("port",
 		"open_proxies",
 		"ip = $ip_q AND ts >= DATE_SUB(NOW(), INTERVAL $hours_back HOUR)");
-#print STDERR "getKnownOpenProxy returning " . (defined($port) ? "'$port'" : "undef") . " for ip '$ip'\n";
+#print STDERR scalar(localtime) . " getKnownOpenProxy returning " . (defined($port) ? "'$port'" : "undef") . " for ip '$ip'\n";
 	return $port;
 }
 
 sub setKnownOpenProxy {
 	my($self, $ip, $port) = @_;
 	return 0 unless $ip;
-print STDERR "setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
+#print STDERR scalar(localtime) . " setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
 	return $self->sqlReplace("open_proxies", {
 		ip =>	$ip,
 		port =>	$port,
@@ -3835,7 +3835,7 @@ sub checkForOpenProxy {
 			my $orig_req = $response->request();
 			$_proxy_port = $orig_req->{_slash_proxytest_port};
 			if (!$_proxy_port) {
-				print STDERR scalar(localtime) . " _cfop_callback got data but false port, protocol '$protocol' port '$_proxy_port' succ '" . ($response->is_success()) . "' data '$data' content '" . $response->content() . "'\n";
+				print STDERR scalar(localtime) . " _cfop_callback got data but no port, protocol '$protocol' port '$_proxy_port' succ '" . ($response->is_success()) . "' data '$data' content '" . $response->content() . "'\n";
 			}
 			$_proxy_port ||= 1;
 			# We can quit listening on any of the
