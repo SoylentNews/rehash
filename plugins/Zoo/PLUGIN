@@ -8,6 +8,7 @@ template=templates/plainlist;zoo;default
 template=templates/zoohead;zoo;default
 template=templates/confirm;zoo;default
 template=templates/zoo_icons;misc;default
+image=images/eof.gif
 image=images/fof.gif
 image=images/fan.gif
 image=images/foe.gif
