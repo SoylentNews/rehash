@@ -2221,3 +2221,7 @@ ALTER TABLE code_param CHANGE COLUMN type type VARCHAR(24) NOT NULL DEFAULT '';
 UPDATE code_param SET type='section_topic_types'    WHERE type='section_topic_ty';
 UPDATE code_param SET type='displaycodes_sectional' WHERE type='displaycodes_sec';
 
+ALTER TABLE badpasswords ADD COLUMN realemail VARCHAR(50) NOT NULL DEFAULT '';
+
+DROP TABLE topic_image_sections;
+

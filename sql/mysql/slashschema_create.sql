@@ -158,6 +158,7 @@ CREATE TABLE badpasswords (
 	subnet varchar(15) NOT NULL DEFAULT '',
 	password varchar(20) NOT NULL DEFAULT '',
 	ts timestamp(14) NOT NULL,
+	realemail VARCHAR(50) NOT NULL DEFAULT '',
 	INDEX uid (uid),
 	INDEX ip (ip),
 	INDEX subnet (subnet)
@@ -213,7 +214,7 @@ CREATE TABLE classes (
 DROP TABLE IF EXISTS code_param;
 CREATE TABLE code_param (
 	param_id smallint UNSIGNED NOT NULL auto_increment,
-	type varchar(16) NOT NULL,
+	type varchar(24) NOT NULL,
 	code tinyint DEFAULT '0' NOT NULL,
 	name varchar(32) NOT NULL,
 	UNIQUE code_key (type,code),
@@ -974,19 +975,7 @@ CREATE TABLE topics (
 ) TYPE=InnoDB;
 
 #
-# Table structure for table 'topic_image_sections'
-#
-
-DROP TABLE IF EXISTS topic_image_sections;
-CREATE TABLE topic_image_sections (
-	tid smallint UNSIGNED DEFAULT 0 NOT NULL,
-	topic_image mediumint UNSIGNED DEFAULT 0 NOT NULL,
-	section varchar(30) DEFAULT 'index' NOT NULL,
-	PRIMARY KEY (tid,section)
-) TYPE=InnoDB;
-
-#
-# Table structure for table 'topics'
+# Table structure for table 'topic_images'
 #
 
 DROP TABLE IF EXISTS topic_images;

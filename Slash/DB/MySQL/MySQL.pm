@@ -94,9 +94,6 @@ my %descriptions = (
 	'topics'
 		=> sub { $_[0]->sqlSelectMany('tid,alttext', 'topics') },
 
-	'topic_images_section'
-		=> sub { $_[0]->sqlSelectMany('concat(tid, "|", section), topic_image', 'topic_image_sections') },
-
 	'topics_all'
 		=> sub { $_[0]->sqlSelectMany('tid,alttext', 'topics') },
 
@@ -1693,12 +1690,19 @@ sub createBadPasswordLog {
 	my $r = Apache->request;
 	return unless $r;
 
+	# We also store the realemail field of the actual user account
+	# at the time the password was tried, so later, if the password
+	# is cracked and the account stolen, there is a record of who
+	# the real owner is.
+	my $realemail = $self->getUser($uid, 'realemail');
+
 	my($ip, $subnet) = get_ipids($r->connection->remote_ip, 1);
 	$self->sqlInsert("badpasswords", {
 		uid =>          $uid,
 		password =>     $password_wrong,
 		ip =>           $ip,
 		subnet =>       $subnet,
+		realemail =>	$realemail,
 	} );
 
 	my $warn_limit = $constants->{bad_password_warn_user_limit} || 0;
@@ -7687,11 +7691,12 @@ sub getTopicImage {
 }
 
 ########################################################
+# Since the topic_images_section table was taken out,
+# this is basically the same as the getTopicImage call
+# with different parameters.
 sub getTopicImageBySection {
 	my($self, $topic, $section, $values, $cache) = @_;
-	my $image_sections = $self->getDescriptions("topic_images_section");
-	# Yes the hash lookup is right, review the getDescription call if you have questions
-	my $image_id = $image_sections->{"$topic->{tid}|$section"} || $topic->{default_image};	
+	my $image_id = $topic->{default_image};	
 	my $answer = _genericGetCache({
 		table		=> 'topic_images',
 		table_prime	=> 'id',
