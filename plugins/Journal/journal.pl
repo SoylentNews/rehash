@@ -838,6 +838,14 @@ sub get_entries {
 	return \@items;
 }
 
+# this WILL NOT remain in journal.pl, it is here only temporarily, until
+# we get the more generic SOAP interface up and running, and then the Search
+# SOAP working (this will be in the Search SOAP API, i think)
+sub get_uid_from_nickname {
+	my($self, $nick) = @_;
+	return getCurrentDB->getUserUID($nick);
+}
+
 sub _save_params {
 	my %form;
 	my $modify = shift;
