@@ -115,7 +115,7 @@ my $reasons = $slashdb->getReasons();
 		# Do the metamod.
 		$slashdb->setModsSaved($m2user, [( keys %m2s )]);
 		$m2user = $slashdb->getUser($m2user->{uid});
-		$slashdb->setMetaMod($m2user, \%m2s, $multicount);
+		$slashdb->createMetaMod($m2user, \%m2s, $multicount);
 
 		$m2count++;
 
