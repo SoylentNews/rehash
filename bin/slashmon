@@ -20,8 +20,9 @@ use vars qw(
 	$time_last	$maxlog_last
 	$time_first	$maxlog_first
 	$time_new	$maxlog_new
-	$num_cycles	$loadavg_sum
-	$pages		$loadavg
+	$num_cycles	$loadavg
+	$pages		$loadavg_sum
+	$lines_since_header
 );
 
 init();
@@ -91,6 +92,7 @@ sub init {
 		|| $slashdb->{virtual_user};
 	$logdb = getObject('Slash::DB', $log_user);
 
+	$lines_since_header = 999999;
 	$num_cycles = 0;
 	$loadavg_sum = 0;
 
@@ -115,7 +117,7 @@ sub run {
 
 	while (1) {
 
-		print_header() if $num_cycles % 5 == 0;
+		print_header() if $lines_since_header > $height;
 		++$num_cycles;
 		sleep_until();
 
@@ -124,14 +126,14 @@ sub run {
 
 		update_db_ary();
 
-		my $loadavg = getLoadavg();
+		$loadavg = getLoadavg();
 		$loadavg_sum += $loadavg;
 
 		print_first_line($time_new);
 		print_second_line($time_new);
 		print_proclist();
 
-		print "\n";
+		print "\n"; ++$lines_since_header;
 
 		$time_last = $time_new;
 		$maxlog_last = $maxlog_new;
@@ -149,7 +151,7 @@ sub print_header {
 	# First line of header: spaces over the global stuff, headers for DBs
 	printf("%4s %4s %4s", "", "", "");
 	for my $db (@db) {
-		my $wid = 17;
+		my $wid = 18;
 		$wid += 6 if $db->{version} == 4;
 		my $name = $db->{vu};
 		my $len = length($name);
@@ -159,15 +161,15 @@ sub print_header {
 			$name,
 			"-" x (int(($wid-$len-0)/2)));
 	}
-	print "\n";
+	print "\n"; ++$lines_since_header;
 
 	# Second line of header: names for the globals, names for DB columns
 	printf("%4s %4s %4s", "time", "load", "pps");
 	for my $db (@db) {
-		printf(" %4s %3s %4s %2s", "qps", "sps", "qpp", "at");
+		printf(" %5s %3s %4s %2s", "qps", "sps", "qpp", "at");
 		printf(" %5s", "hit%") if $db->{version} == 4;
 	}
-	print "\n";
+	print "\n"; ++$lines_since_header;
 }
 
 sub sleep_until {
@@ -178,8 +180,7 @@ sub update_db_ary {
 	for my $db (@db) {
 		($db->{queries_new}, $db->{slow_queries_new}) = getQueries($db->{status_sth});
 		($db->{hitrate}) = getHitRate($db->{innostatus_sth}) if $db->{innostatus_sth};
-		($db->{threads}, $db->{threads_active}, $db->{proclist})
-			= getProclist($db->{proclist_sth});
+		($db->{threads}, $db->{threads_active}, $db->{proclist}) = getProclist($db);
 	}
 }
 
@@ -194,7 +195,7 @@ sub print_first_line {
 		($maxlog_new - $maxlog_last) / $time_elapsed
 	);
 	for my $db (@db) {
-		printf(" %4.1f %3.1f %4.1f %2d",
+		printf(" %5.1f %3.1f %4.1f %2d",
 			($db->{queries_new} - $db->{queries_last}) / $time_elapsed,
 			($db->{slow_queries_new} - $db->{slow_queries_last}) / $time_elapsed,
 			($db->{queries_new} - $db->{queries_last}) / $pages,
@@ -202,7 +203,7 @@ sub print_first_line {
 		);
 		printf(" %5.1f", $db->{hitrate}) if $db->{version} == 4;
 	}
-	print "\n";
+	print "\n"; ++$lines_since_header;
 }
 
 sub print_second_line {
@@ -216,18 +217,24 @@ sub print_second_line {
 		$pages / $time_elapsed,
 	);
 	for my $db (@db) {
-		printf(" %4.1f %3.1f %4.1f %2s",
+		printf(" %5.1f %3.1f %4.1f %2s",
 			($db->{queries_new} - $db->{queries_first}) / $time_elapsed,
 			($db->{slow_queries_new} - $db->{slow_queries_first}) / $time_elapsed,
 			($db->{queries_new} - $db->{queries_first}) / $pages,
 		);
 		print " " x 6 if $db->{version} == 4;
 	}
-	print "\n";
+	print "\n"; ++$lines_since_header;
 }
 
 sub print_proclist {
-	# output $db->{proclist}s here
+	for my $db (@dbs) {
+		my $pl = $db->{proclist};
+		for my $line (@$pl) {
+			printf "%s %3d %s\n", $line->{vu}, $line->{Time}, $line->{text};
+			++$lines_since_header;
+		}
+	}
 }
 
 ############################################################
@@ -256,7 +263,8 @@ sub getHitRate {
 }
 
 sub getProclist {
-	my($sth) = @_;
+	my($db) = @_;
+	my $sth = $db->{proclist_sth};
 	my $threads = 0;
 	my $active = 0;
 	my $proclist = [ ];
@@ -287,7 +295,11 @@ sub getProclist {
 		}
 		$info =~ s/\bSELECT\b/S/i;
 		$o .= substr($info, 0, $width);
-		push @$proclist, $o;
+		push @$proclist, {
+			Time	=> sprintf("%4d", $$S{Time}),
+			vu	=> $db->{vu},
+			text	=> substr($info, 0, $width),
+		}
 
 	}
 	$sth->finish();
