@@ -556,9 +556,9 @@ sub apache_site_conf {
     AddType text/xml .xml
     AddType text/xml .wml
 
-    # change default of "utf-8" here if you change "content_type_webpage"
-    # in vars, and vice versa
-    AddType text/html;charset=utf-8 .shtml
+    # change default of "iso-8859-1" here (to, for example, utf-8)
+    # if you change "content_type_webpage" in vars, and vice versa
+    AddType text/html;charset=iso-8859-1 .shtml
     AddHandler server-parsed .shtml
 
     AddType text/html .inc

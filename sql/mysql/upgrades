@@ -1835,3 +1835,9 @@ ALTER TABLE users_comments CHANGE COLUMN mode mode ENUM('flat', 'nested', 'nocom
 # SLASHDOT LAST UPDATED HERE
 
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('MAGST',  39600, 'Magadan',           'Asia',   'MAGDT',  43200);
+
+# sigh ... this really needs to be iso-8859-1 ... make it utf-8 if you want
+# make sure you also put the right thing in your Apache confs for something like:
+#   AddType text/html;charset=iso-8859-1 .shtml
+# -- pudge
+REPLACE INTO vars (name, value, description) VALUES ('content_type_webpage','text/html; charset=iso-8859-1','The Content-Type header for webpages');

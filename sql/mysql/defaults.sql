@@ -678,7 +678,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_response_limit','5
 INSERT INTO vars (name, value, description) VALUES ('comments_speed_limit','120','seconds delay before repeat posting');
 INSERT INTO vars (name, value, description) VALUES ('comments_wsfactor','1.0','Whitespace factor');
 INSERT INTO vars (name, value, description) VALUES ('commentstatus','0','default comment code');
-INSERT INTO vars (name, value, description) VALUES ('content_type_webpage','text/html; charset=utf-8','The Content-Type header for webpages');
+INSERT INTO vars (name, value, description) VALUES ('content_type_webpage','text/html; charset=iso-8859-1','The Content-Type header for webpages');
 INSERT INTO vars (name, value, description) VALUES ('cookiedomain','','Domain for cookie to be active (normally leave blank)');
 INSERT INTO vars (name, value, description) VALUES ('cookiepath','/','Path on server for cookie to be active');
 INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the secure flag in cookies if SSL is on?');
