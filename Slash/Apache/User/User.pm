@@ -167,6 +167,7 @@ sub handler {
 			$uid = 0;
 		} else {
 			($uid, $newpass) = userLogin($tmpuid, $passwd, $logtoken);
+			$slashdb->clearAccountVerifyNeededFlags($uid) if $uid;
 		}
 
 		# here we want to redirect only if the user has requested via
