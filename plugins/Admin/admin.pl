@@ -1431,10 +1431,6 @@ sub saveStory {
 	}
 	my $sid = $slashdb->createStory($data);
 
-	if ($form->{subid}) {
-	    $slashdb->deleteSubmission($form->{subid});
-	}
-
 	if ($constants->{feature_story_enabled}) {
 		if ($form->{feature_story}) {
 			$slashdb->setSection($form->{section}, { feature_story => $sid });
