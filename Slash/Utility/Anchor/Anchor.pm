@@ -531,7 +531,7 @@ sub getAd {
 		# shtml code which *will* generate the actual ad when it's
 		# executed later.
 		return <<EOT;
-<!--#perl sub="sub { use Slash; print Slash::getAd($num); }" -->
+<!--#perl sub="sub { use Slash; print Slash::getAd($num, $need_box); }" -->
 EOT
 	}
 
