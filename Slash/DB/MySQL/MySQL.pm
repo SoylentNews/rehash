@@ -1365,7 +1365,7 @@ sub createAccessLog {
 		duration	=> $duration,
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
-		secure		=> $user->{state}{ssl},
+		secure		=> $user->{state}{ssl} || 0,
 		referer		=> $r->header_in("Referer"),
 		status		=> $status,
 	};
