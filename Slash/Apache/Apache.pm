@@ -96,7 +96,11 @@ sub SlashSetVarHost ($$$$$) {
 		print STDERR "SlashSetVarHost must be called after call SlashVirtualUser \n";
 		exit(1);
 	}
-	my %$new_cfg = %{$cfg->{constants}};
+	my $new_cfg;
+	for (keys %{$cfg->{constants}}) {
+		$new_cfg->{$_} = $cfg->{constants}{$_}
+			unless $_ eq 'form_override';
+	}
 	$new_cfg->{$key} = $value;
 	$cfg->{site_constants}{$hostname} = $new_cfg;
 }
@@ -107,7 +111,11 @@ sub SlashSetFormHost ($$$$$) {
 		print STDERR "SlashSetFormHost must be called after call SlashVirtualUser \n";
 		exit(1);
 	}
-	my %$new_cfg = %{$cfg->{constants}};
+	my $new_cfg;
+	for (keys %{$cfg->{constants}}) {
+		$new_cfg->{$_} = $cfg->{constants}{$_}
+			unless $_ eq 'form_override';
+	}
 	$new_cfg->{form_override}{$key} = $value;
 	$cfg->{site_constants}{$hostname} = $new_cfg;
 }
@@ -120,10 +128,16 @@ sub SlashSectionHost ($$$$) {
 		print STDERR "SlashSectionHost must be called after call SlashVirtualUser \n";
 		exit(1);
 	}
-	my %$new_cfg = %{$cfg->{constants}};
+	# Yes, this looks slower then the other method but I was getting different results.
+	# Bad results, and its Friday. Bad results on Friday is a bad thing.
+	# -Brian
+	my $new_cfg;
+	for (keys %{$cfg->{constants}}) {
+		$new_cfg->{$_} = $cfg->{constants}{$_}
+			unless $_ eq 'form_override';
+	}
 	# Must not just copy the form_override info
-	%$new_cfg->{form_override} = {}; 
-	%{$new_cfg->{form_override}}= %{$cfg->{constants}{form_override}};
+	$new_cfg->{form_override} = {}; 
 	$new_cfg->{absolutedir} = $url;
 	$new_cfg->{rootdir} = $url;
 	$new_cfg->{basedomain} = $hostname;
