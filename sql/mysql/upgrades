@@ -511,9 +511,7 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','0','Minimum subid to start forgetting IP at');
 
-# SLASHCODE LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
-# LINUX.COM LAST UPDATED HERE
 ALTER TABLE sections DROP isolate;
 
 # For plugins/Stats (ignore if you're not using that plugin):
@@ -523,3 +521,5 @@ INSERT INTO vars (name, value, description) VALUES ('db_slave_lag_ignore',100000
 
 INSERT INTO string_param (type, code, name) VALUES ('section_types','contained','Contained Section');
 INSERT INTO string_param (type, code, name) VALUES ('section_types','collected','Collection of Sections');
+# SLASHCODE LAST UPDATED HERE
+# LINUX.COM LAST UPDATED HERE
