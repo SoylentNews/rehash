@@ -88,7 +88,7 @@ sub UserLog {
 	# There are other less-important things that might get updated
 	# but none of them matters enough to continue processing.
 	if ($op eq 'image' and !$user_update->{admin_clearpass}) {
-		print STDERR scalar(gmtime) . " $$ UserLog short-circuit image\n";
+#		print STDERR scalar(gmtime) . " $$ UserLog short-circuit image\n";
 		return ;
 	}
 
