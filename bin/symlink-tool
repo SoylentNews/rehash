@@ -132,6 +132,7 @@ if (!$testing && !-w $site_dir) {
 	exit 1;
 }
 
+my %processed = ( );
 my $num_changes = 0;
 for my $subdir (sort keys %theme_subdir_files) {
 	my @files = sort @{$theme_subdir_files{$subdir}};
@@ -144,6 +145,12 @@ for my $subdir (sort keys %theme_subdir_files) {
 		my $site_rel_file = $target_file;
 		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 		my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
+		if ($processed{$site_file_abs}) {
+			if ($verbose) {
+				print "Skipping file in theme, already processed: '$site_file_abs'\n";
+			}
+			next;
+		}
 		my $site_file_abs_dot = dotfile($site_file_abs);
 		my $site_file_abs_dot_short = dotfile($site_rel_file);
 		# At this point, $site_file_abs is e.g.
@@ -154,6 +161,7 @@ for my $subdir (sort keys %theme_subdir_files) {
 		# '/usr/local/slash/theme/slashcode/tasks/spamarmor.pl'
 		$num_changes += handle_file($site_file_abs, $theme_file_abs,
 			$site_file_abs_dot, $site_file_abs_dot_short);
+		$processed{$site_file_abs} = 1;
 	}
 }
 for my $plugin (sort keys %plugin_subdir_files) {
@@ -172,6 +180,12 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			$site_rel_file =~ s{^(?:$subdir/)?}{$subdir/};
 			my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
 #print "plugin '$plugin' subdir '$subdir' site_rel_file '$site_rel_file' site_file_abs '$site_file_abs'\n";
+			if ($processed{$site_file_abs}) {
+				if ($verbose) {
+					print "Skipping file in '$plugin' plugin, already processed: '$site_file_abs'\n";
+				}
+				next;
+			}
 			my $site_file_abs_dot = dotfile($site_file_abs);
 			my $site_file_abs_dot_short = dotfile($site_rel_file);
 			# At this point, $site_file_abs is e.g.
@@ -182,6 +196,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# '/usr/local/slash/plugin/Stats/adminmail.pl'
 			$num_changes += handle_file($site_file_abs, $plugin_file_abs,
 				$site_file_abs_dot, $site_file_abs_dot_short);
+			$processed{$site_file_abs} = 1;
 		}
 	}
 }
