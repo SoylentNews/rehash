@@ -488,18 +488,18 @@ sub displayStories {
 		}
 
 		if ($story->{section} ne $constants->{defaultsection} && (!$form->{section} || $form->{section} eq 'index')) {
-			my $SECT = $reader->getSection($story->{section});
+			my $skin = $reader->getSkin($story->{section});
 			my $url;
 
-			if ($SECT->{rootdir}) {
-				$url = $SECT->{rootdir} . '/';
+			if ($skin->{rootdir}) {
+				$url = $skin->{rootdir} . '/';
 			} elsif ($user->{is_anon}) {
 				$url = $gSkin->{rootdir} . '/' . $story->{section} . '/';
 			} else {
-				$url = $gSkin->{rootdir} . '/index.pl?section=' . $story->{section};
+				$url = $gSkin->{rootdir} . '/' . $gSkin->{index_handler} . '?section=' . $story->{section};
 			}
 
-			push @links, [ $url, $SECT->{hostname} || $SECT->{title} ];
+			push @links, [ $url, $skin->{hostname} || $skin->{title} ];
 		}
 
 		if ($user->{seclev} >= 100) {
