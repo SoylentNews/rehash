@@ -1,7 +1,8 @@
 __section__
 default
 __description__
-
+* storylistref
+* ndays_represented = the number of days that appear in the listing
 __title__
 
 __page__
@@ -18,11 +19,7 @@ __template__
 		<TD><B>Preview</B></TD>
 		<TD><B>Author</B></TD>
 		<TD><B>Topic</B></TD>
-
-			[% UNLESS form.section %]
 		<TD><B>Skin</B></TD>
-			[% END %]
-
 		<TD><B>Hits</B></TD>
 		<TD><B>Comments</B></TD>
 		<TD><B>Date</B></TD>
@@ -30,11 +27,16 @@ __template__
 		[% END %]
 
 [% IF storylistref && storylistref.size > 0;
-storiestoday = 0;
-FOREACH story = storylistref %]
 
-[% IF story.td != yesterday && !form.section;
-	storiestoday = storiestoday > 1 ? storiestoday : '';
+IF ndays_represented > 10;
+	showdayboundaries = 0;
+ELSE;
+	showdayboundaries = 1;
+	storiestoday = 0;
+END;
+FOREACH story = storylistref;
+	IF showdayboundaries && story.td != yesterday;
+		storiestoday = storiestoday > 1 ? storiestoday : '';
 %]
 	<TR>
 		<TD ALIGN="RIGHT" BGCOLOR="[% user.colors.bg_2 %]">
@@ -44,8 +46,8 @@ FOREACH story = storylistref %]
 			<FONT COLOR="[% user.colors.fg_3 %]" SIZE="2">[% story.td %]</FONT>
 		</TD>
 	</TR>
-[%	storiestoday = 0;
-END;
+[%		storiestoday = 0;
+	END;
 
 	yesterday = story.td;
 	storiestoday = storiestoday + 1;
@@ -55,7 +57,7 @@ END;
 		bgcolor = '#CCCCCC';
 	ELSIF story.in_trash == 'yes' || story.displaystatus < 0;
 		bgcolor = '#999999';
-END %]
+	END %]
 
 	<TR BGCOLOR="[% bgcolor %]">
 		<TD ALIGN="RIGHT">
@@ -74,14 +76,19 @@ END %]
 
 		<TD><FONT SIZE="2">[% story.topic.substr(0, 5) %]</FONT></TD>
 
-	[% UNLESS form.section %]
+	[% # Here we used to exclude the name of the section if this was
+	   # a section-only listing.  But now the primaryskin may indeed
+	   # differ from the section being displayed.  So list it. %]
 		<TD>
 		<FONT SIZE="2">
-		<A HREF="[% env.script_name %]?section=[% story.skinname %]">
-		[% story.skinname.substr(0, 5) %]</A>
+		[% IF story.skinname.match("^_") %]
+			[% story.skinname.substr(0, 5) %]
+		[% ELSE %]
+			<A HREF="[% env.script_name %]?section=[% story.skinname %]">
+				[% story.skinname.substr(0, 5) %]</A>
+		[% END %]
 		</FONT>
 		</TD>
-	[% END %]
 
 		<TD>
 		<FONT SIZE="2">

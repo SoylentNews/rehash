@@ -2526,20 +2526,11 @@ sub getCommentPid {
 # not "is it viewable anywhere on the site."  But as long as it
 # is still around, try to make it work retroactively. - Jamie 2004/05
 # XXXSECTIONTOPICS get rid of this eventually
-# XXXSKIN - this seems to be quite broken ... it returns pretty much everything
-# it ignores weights, so if tid 4 is a child of 2, and 2 is a nexus, and child of 1,
-# anything in tid 4 weight 1 will show up as viewable from 1
-# i am a bit lost on how to fix
+# If no $start_tid is passed in, this will return "sectional" stories
+# as viewable, i.e. a story in _any_ nexus will be viewable.
 sub checkStoryViewable {
 	my($self, $sid, $start_tid, $options) = @_;
 	return unless $sid;
-
-	$options ||= {};
-	my($column_time, $where_time) = $self->_stories_time_clauses({
-		try_future => 1, must_be_subscriber => 1
-	});
-
-	my $time_clause  = $options->{no_time_restrict} ? "" : " AND $where_time";
 
 	# If there is no sid in the DB, assume that it is an old poll
 	# or something that has a "fake" sid, which are always
@@ -2552,7 +2543,7 @@ sub checkStoryViewable {
 	} else {
 		$stoid = $self->sqlSelect("stoid", "stories", "sid='$sid'");
 	}
-	return 1 unless $stoid;
+	return 0 unless $stoid;
 
 	my @nexuses;
 	if ($start_tid) {
@@ -2560,8 +2551,26 @@ sub checkStoryViewable {
 	} else {
 		@nexuses = $self->getNexusTids();
 	}
-	
 	my $nexus_clause = join ',', @nexuses;
+
+	# If stories.time is not involved, this goes very fast;  we
+	# just look for rows in a single table, and either they're
+	# there or not.
+	if ($options->{no_time_restrict}) {
+		my $count = $self->sqlCount(
+			"story_topics_rendered",
+			"stoid = '$stoid' AND tid IN ($nexus_clause)");
+		return $count > 0 ? 1 : 0;
+	}
+
+	# We need to look at stories.time, so this is a join.
+
+	$options ||= {};
+	my($column_time, $where_time) = $self->_stories_time_clauses({
+		try_future => 1, must_be_subscriber => 1
+	});
+
+	my $time_clause  = $options->{no_time_restrict} ? "" : " AND $where_time";
 
 	my $count = $self->sqlCount(
 		"stories, story_topics_rendered",
@@ -6398,6 +6407,7 @@ sub _stories_time_clauses {
 	my $must_be_subscriber =	$options->{must_be_subscriber}	|| 0;
 	my $column_name =		$options->{column_name}		|| "time";
 	my $exact_now =			$options->{exact_now}		|| 0;
+	my $timecalc_off_set =		$options->{timecalc_off_set}	|| 0;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
@@ -6422,7 +6432,7 @@ sub _stories_time_clauses {
 	# also round our selection time to the minute, so the query cache
 	# can work for the full 60 seconds.
 	my $now = $exact_now ? 'NOW()'
-		: $self->sqlQuote(timeCalc(0, '%Y-%m-%d %k:%M:00', 0));
+		: $self->sqlQuote(timeCalc(0, '%Y-%m-%d %k:%M:00', $timecalc_off_set));
 
 	if ($future) {
 		$is_future_column = "IF($column_name <= $now, 0, 1) AS is_future";
@@ -7492,7 +7502,7 @@ sub getDay {
 }
 
 ##################################################################
-# XXXSECTIONTOPICS this needs some work
+# XXXSECTIONTOPICS this should be working fine now 2004/07/08
 sub getStoryList {
 	my($self, $first_story, $num_stories) = @_;
 	$first_story ||= 0;
@@ -7502,41 +7512,70 @@ sub getStoryList {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
+	my $is_mainpage = $gSkin->{skid} == $constants->{mainpage_skid} ? 1 : 0;
 
-	# CHANGE DATE_ FUNCTIONS
-	my $columns = 'hits, stories.commentcount AS commentcount, stories.stoid, stories.sid,'
-		. 'story_text.title, stories.uid, stories.tid,'
-		. 'time, stories.in_trash, primaryskid, skins.name AS skinname';
-	my $tables = 'stories, story_text, skins';
-	my @where = ( 'stories.primaryskid = skins.skid', 'story_text.stoid = stories.stoid' ); # stories.tid=topics.tid ";
-	if ($gSkin->{skid} != $constants->{mainpage_skid}) {
+	my $columns = "hits, stories.commentcount AS commentcount,
+		stories.stoid, stories.sid,
+		story_text.title, stories.uid, stories.tid,
+		time, stories.in_trash, primaryskid,
+		IF(skins.skid IS NULL, '_none', skins.name) AS skinname";
+	my $tables = 'stories, story_text';
+	my @where = ( 'stories.stoid = story_text.stoid' );
+
+	# If this is a "sectional" (one skin only) admin.pl storylist,
+	# then restrict ourselves to only stories matching its nexus.
+	if (!$is_mainpage) {
 		$tables .= ', story_topics_rendered AS str';
-		push @where, 'stories.stoid = str.stoid', 'str.tid = $gSkin->{nexus}';
+		push @where,
+			'stories.stoid = str.stoid',
+			"str.tid = $gSkin->{nexus}";
 	}
-	push @where, "time < DATE_ADD(NOW(), INTERVAL 72 HOUR) "
-		if $form->{section} eq '' && !$constants->{show_all_future_stories_admin};
-	
+
+	# We also need the primaryskid for each story LEFT JOINed
+	# to the skins table (because a primaryskid of 0 means no
+	# skin, which is fine but it won't match a row in skins).
+	# This is really just so we get skinname, which honestly
+	# we could just iterate into the data using getSkins()
+	# afterwards...
+	$tables .= ' LEFT JOIN skins ON skins.skid=stories.primaryskid';
+
+	# How far ahead in time to look?  We have three vars that control
+	# this:  one boolean that decides whether infinite or not, and if
+	# not, two others that give lookahead time in seconds.
+	if ($constants->{admin_story_lookahead_infinite}) {
+		# We want all future stories.  So don't limit by time at all.
+	} else {
+		my $lookahead = $is_mainpage
+			? $constants->{admin_story_lookahead_mainpage}
+			: $constants->{admin_story_lookahead_default};
+		push @where, "time < DATE_ADD(NOW(), INTERVAL $lookahead SECOND)";
+	}
+
 	my $other = "ORDER BY time DESC LIMIT $first_story, $num_stories";
 
 	my $where = join ' AND ', @where;
-	my $count = $self->sqlSelect("COUNT(*)", $tables, $where);
 
+	# Fetch the count, and fetch the data.
+
+	my $count = $self->sqlSelect("COUNT(*)", $tables, $where);
 	my $list = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
-	
+
+	# Set some data tidbits for each story on the list.  Don't set
+	# displaystatus yet;  we'll do that next, with a method that
+	# fetches a lot of data all at once for efficiency.
 	my $stoids = [];
-	foreach my $story (@$list) {
-#		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1 });
+	my $tree = $self->getTopicTree();
+	for my $story (@$list) {
 		$story->{skinname} ||= 'mainpage';
-		my $topic = $self->getTopic($story->{tid});
-		$story->{topic} = $topic->{keyword} if $topic;
+		$story->{topic} = $tree->{$story->{tid}}{keyword};
 		push @$stoids, $story->{stoid};
 	}
-
+	# Now set displaystatus.
 	my $ds = $self->displaystatusForStories($stoids);
-
-	foreach my $story (@$list) {
+	for my $story (@$list) {
 		$story->{displaystatus} = $ds->{$story->{stoid}};
 	}
+
 	return($count, $list);
 }
 

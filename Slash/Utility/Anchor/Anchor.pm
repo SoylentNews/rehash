@@ -49,6 +49,8 @@ use vars qw($VERSION @EXPORT);
 
 # really, these should not be used externally, but we leave them
 # here for reference as to what is in the package
+# The above sentence is a very old comment;  still true, or is it
+# OK to export these? - Jamie 2004/07/08
 # @EXPORT_OK = qw(
 # 	getSectionBlock
 # 	getSkinColors
@@ -678,6 +680,8 @@ sub getSectionBlock {
 # else (which happens pretty rarely, but still).
 # This is here for reverse compatibility only, we hope it
 # will go away eventually. - Jamie 2004/06
+# Also, it's kinda misnamed, since it only returns success/failure,
+# the actual color data is put into $user->{colors}
 sub getSkinColors {
 	my $user = getCurrentUser();
 
