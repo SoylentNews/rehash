@@ -31,6 +31,8 @@ mygraphs = [
 
 	'Comment Scores',
 	'Total Comments',
+	'Total Comments By Source',
+	'Comment IPIDs',
 	'Total Moderations',
 	'Total Metamoderations',
 
@@ -180,6 +182,19 @@ SWITCH gtitle;
          section   => 'all',
          type      => 'area',
          statdata  => ['comments'];
+
+  CASE 'Total Comments By Source';
+      PROCESS make_graph
+         section   => 'all',
+         type      => 'areastacked',
+         statdata  => ['comments_ipids_anononly', 'comments_ipids_loggedinonly', 'comments_ipids_anonandloggedin', 'comments_proxyanon'];
+
+  CASE 'Comment IPIDs';
+      PROCESS make_graph
+         showtotal => 1,
+         section   => 'all',
+         type      => 'areastacked',
+         statdata  => ['distinct_comment_ipids_anononly', 'distinct_comment_ipids_loggedinonly', 'distinct_comment_ipids_anonandloggedin'];
 
   CASE 'Total Moderations';
       PROCESS make_graph
