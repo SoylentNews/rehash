@@ -1204,7 +1204,6 @@ sub editStory {
 		my $tmp = $user->{currentSection};
 		$user->{currentSection} = $slashdb->getStory($sid, 'section', 1);
 		$user->{state}{editing} = 1;
-		#($story) = displayStory($sid, 'Full', { force_cache => 1});
 		$storyref = $slashdb->getStory($sid, '', 1);
 		
 		$storyref->{writestatus} = 'dirty';

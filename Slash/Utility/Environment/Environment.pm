@@ -1958,7 +1958,17 @@ sub createLog {
 	} elsif ($uri =~ /\.shtml$/) {
 		$uri =~ s|^/(.*)\.shtml$|$1|;
 		$dat = $uri if $uri =~ $page;	
-		$uri =~ s|^/?(\w+)/?.*|$1|;
+		$uri =~ s|^/?(\w+)/?(.*)|$1|;
+		my $suspected_handler = $2;
+		my $SECT;
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		if ($SECT = $reader->getSection($uri) ) {
+			my $handler = $SECT->{index_handler};
+			$handler =~ s|^(.*)\.pl$|$1|;
+			if ($handler eq $suspected_handler) {
+				$uri = $handler;
+			}
+		}
 	} elsif ($uri =~ /\.html$/) {
 		$uri =~ s|^/(.*)\.html$|$1|;
 		$dat = $uri if $uri =~ $page;	
@@ -1968,7 +1978,6 @@ sub createLog {
 	if (getCurrentUser('is_admin')) {
 		$logdb->createAccessLogAdmin($uri, $dat, $status);
 	}
-
 }
 
 #========================================================================

@@ -313,6 +313,7 @@ sub sqlSelectArrayRef {
 		return undef;
 	}
 	my $r = $sth->fetchrow_arrayref;
+	$sth->finish;
 	return $r;
 }
 

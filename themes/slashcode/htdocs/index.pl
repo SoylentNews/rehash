@@ -207,7 +207,6 @@ sub displayStandardBlocks {
 				$boxBank->{$bid}{url}
 			);
 		} elsif ($bid eq 'friends_journal' && $constants->{plugin}{Journal} && $constants->{plugin}{Zoo}) {
-			# this is only executed if poll is to be dynamic
 			my $journal = getObject("Slash::Journal");
 			my $zoo = getObject("Slash::Zoo");
 			my $uids = $zoo->getFriendsUIDs($user->{uid});

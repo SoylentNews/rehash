@@ -47,10 +47,6 @@ $VERSION   	= '2.003000';  # v2.3.0
 	getOlderStories moderatorCommentLog printComments
 );
 
-# all of these will also get moved elsewhere
-# @EXPORT_OK = qw(
-# 	getCommentTotals reparentComments selectComments
-# );
 
 # this is the worst damned warning ever, so SHUT UP ALREADY!
 $SIG{__WARN__} = sub { warn @_ unless $_[0] =~ /Use of uninitialized value/ };
@@ -63,6 +59,7 @@ $SIG{__WARN__} = sub { warn @_ unless $_[0] =~ /Use of uninitialized value/ };
 sub selectComments {
 	my($header, $cid, $options) = @_;
 	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -91,7 +88,6 @@ sub selectComments {
 	if ($options->{force_read_from_master}) {
 		$thisComment = $slashdb->getCommentsForUser($header->{id}, $cid, $cache_read_only);
 	} else {
-		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		$thisComment = $reader->getCommentsForUser($header->{id}, $cid, $cache_read_only);
 	}
 
@@ -100,8 +96,8 @@ sub selectComments {
 		return ( {}, 0 );
 	}
 
-	my $max_uid = $slashdb->countUsers({ max => 1 });
-	my $reasons = $slashdb->getReasons();
+	my $max_uid = $reader->countUsers({ max => 1 });
+	my $reasons = $reader->getReasons();
 	# We first loop through the comments and assign bonuses and
 	# and such.
 	for my $C (@$thisComment) {
@@ -215,7 +211,7 @@ sub selectComments {
 
 	_print_cchp($header, $count, $comments->{0}{totals});
 
-	reparentComments($comments, $header);
+	reparentComments($comments, $reader);
 	return($comments, $count);
 }
 
@@ -356,8 +352,7 @@ sub _print_cchp {
 
 ########################################################
 sub reparentComments {
-	my($comments) = @_;
-	my $slashdb = getCurrentDB();
+	my($comments, $reader) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -368,7 +363,7 @@ sub reparentComments {
 
 	# adjust depth for root pid or cid
 	if (my $cid = $form->{cid} || $form->{pid}) {
-		while ($cid && (my($pid) = $slashdb->getComment($cid, 'pid'))) {
+		while ($cid && (my($pid) = $reader->getComment($cid, 'pid'))) {
 			$depth++;
 			$cid = $pid;
 		}
@@ -985,7 +980,7 @@ The 'dispComment' template block.
 
 sub dispComment {
 	my($comment) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -1018,7 +1013,7 @@ sub dispComment {
 		$comment->{sig} = "--<BR>$comment->{sig}";
 	}
 
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $reader->getReasons();
 
 	my $can_mod = _can_mod($comment);
 
@@ -1113,7 +1108,7 @@ The 'dispStory' template block.
 
 sub dispStory {
 	my($story, $author, $topic, $full, $other) = @_;
-	my $slashdb      = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants    = getCurrentStatic();
 	my $template_name = $other->{story_template}
 		? $other->{story_template} : 'dispStory';
@@ -1126,7 +1121,7 @@ sub dispStory {
 			&& $story->{section} ne $constants->{section}
 		if !exists $other->{magic};
 
-	my $section = $slashdb->getSection($story->{section});
+	my $section = $reader->getSection($story->{section});
 
 	$topic->{image} = "$constants->{imagedir}/topics/$topic->{image}" 
 		if $topic->{image} =~ /^\w+\.\w+$/; 
@@ -1183,13 +1178,13 @@ hashref of author data, and hashref of topic data.
 sub displayStory {
 	my($sid, $full, $other) = @_;	
 
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	my $story = $slashdb->getStory($sid, '', $other->{force_cache});
-	my $author = $slashdb->getAuthor($story->{uid},
+	my $story = $reader->getStory($sid, '', $other->{force_cache});
+	my $author = $reader->getAuthor($story->{uid},
 		['nickname', 'fakeemail', 'homepage']);
-	my $topic = $slashdb->getTopic($story->{tid});
+	my $topic = $reader->getTopic($story->{tid});
 
 	# convert the time of the story (this is database format)
 	# and convert it to the user's prefered format
@@ -1264,7 +1259,7 @@ The 'getOlderStories' template block.
 sub getOlderStories {
 	my($stories, $section) = @_;
 	my($count, $newstories, $today, $stuff);
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -1303,7 +1298,7 @@ sub getOlderStories {
 			timelocal(0, 0, 12, $d, $m - 1, $y - 1900) - 86400
 		), '%Y%m%d');
 	} else {
-		$yesterday = $slashdb->getDay(1);
+		$yesterday = $reader->getDay(1);
 	}
 
 	$form->{start} ||= 0;

@@ -13,6 +13,8 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	$ENV{REQUEST_URI} ||= '';
+	my $r = Apache->request();
+	$r->status(404);
 
 	# catch old .shtml links ... need to check for other schemes, too?
 	if ($ENV{REQUEST_URI} =~ m|^/?\w+/(\d\d/\d\d/\d\d/\d+)\.shtml$|) {
