@@ -282,11 +282,8 @@ EOT
 
 #################################################################
 sub changePassword {
-	my $r = crypt($_[0], substr(rand, 2, 2));
-	$r =~ s/[i1Il]/x/g;
-	$r =~ s/[^A-Z1-9]//gi;
-	$r = substr($r, 2, 8);
-	return $r;
+	my @chars = grep !/[0O1Iil]/, 0..9, 'A'..'Z', 'a'..'z';
+	return join '', map { $chars[rand @chars] } 0 .. 7;
 }
 
 #################################################################
