@@ -12,19 +12,17 @@ __name__
 pollsearch
 __template__
 [% USE Slash %]
-<OL start=[% x = start ? start : 1; x %]>
 [% FOREACH poll=polls %]
-	<LI>
-		<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</A> on [% Slash.timeCalc(poll.date) %] 
-		<FONT SIZE="-1">
-		Voters: [% poll.voters %]
-		[% IF poll.score %]
-				Score: [% poll.score %]
-		[% END %]
-		</FONT>
-	</LI>
+	<B><A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</A></B><BR>
+	<FONT SIZE="-1">
+	On [% Slash.timeCalc(poll.date) %]<BR>
+	Voters: [% poll.voters %]<BR>
+	[% IF poll.score %]
+			Score: [% poll.score %]
+	[% END %]
+	</FONT>
+	<P>
 [% END %]
-</OL>
 [% PROCESS pagination %]
 <P>
 

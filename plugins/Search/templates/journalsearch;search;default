@@ -12,10 +12,9 @@ __name__
 journalsearch
 __template__
 [% USE Slash %]
-<OL start=[% x = start ? start : 1; x %]>
 [% FOREACH journal=entries %]
-<LI>
-	<A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</A> <FONT SIZE="-1">on [% Slash.timeCalc(journal.date) %]</FONT><BR>
+	<B><A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</A></B><BR>
+	<FONT SIZE="-1">On [% Slash.timeCalc(journal.date) %]</FONT><BR>
 	[% journal.article %]<BR>
 	<FONT SIZE="-1">
 	Author: <A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname %]</A>
@@ -24,9 +23,7 @@ __template__
 	[% END %]
 	</FONT>
 	<P>
-</LI>
 [% END %]
-</OL>
 [% PROCESS pagination %]
 <P>
 

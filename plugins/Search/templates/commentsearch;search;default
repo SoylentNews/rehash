@@ -13,23 +13,19 @@ commentsearch
 __template__
 [% USE Slash %]
 <P>This search covers only subjects of comments that are posted.<P>
-<OL start=[% x = start ? start : 1; x %]>
 [% FOREACH comment=comments %]
-	<LI>
 	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
-		<A HREF="[% constants.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</A>
+	<B><A HREF="[% constants.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</A></B>
 
-		by <A HREF="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.date) %]<BR>
-		<FONT SIZE="-1">
-		Attached to:  <A HREF="[% comment.url %]">[% comment.title %]</A> posted on [% Slash.timeCalc(comment.ts) %]<BR>
-		[% IF comment.score %]
-			Score: [% comment.score %] <br>
-		[% END %]
-		</FONT>
-		<P>
-	</LI>
+	by <A HREF="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.date) %]<BR>
+	<FONT SIZE="-1">
+	Attached to:  <A HREF="[% comment.url %]">[% comment.title %]</A> posted on [% Slash.timeCalc(comment.ts) %]<BR>
+	[% IF comment.score %]
+		Score: [% comment.score %] <br>
+	[% END %]
+	</FONT>
+	<P>
 [% END %]
-</OL>
 [% PROCESS pagination %]
 <P>
 

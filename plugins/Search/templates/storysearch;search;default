@@ -12,28 +12,25 @@ __name__
 storysearch
 __template__
 [% USE Slash %]
-<OL start=[% x = start ? start : 1; x %]>
 [% FOREACH story=stories %]
-<LI>
 	[% Slash.linkStory({
 		section	=> story.section,
 		tid	=> story.tid,
 		sid	=> story.sid,
 		'link'	=> story.title
 	}) 
-	%] <FONT SIZE="-1">on [% Slash.timeCalc(story.time) %] with [% story.commentcount %] comments</FONT><BR>
+	%]</B><BR>
+	<FONT SIZE="-1">On [% Slash.timeCalc(story.time) %] with [% story.commentcount %] comments</FONT><BR>
 	[% story.introtext %] <BR>
 	<FONT SIZE="-1">
 		[% section = Slash.db.getSection(story.section); topic = Slash.db.getTopic(story.tid) %]
-		[% IF section.section == constants.defaultsection %]<A HREF="/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "/index.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A><BR>
+		Section: [% IF section.section == constants.defaultsection %]<A HREF="/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "/index.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A><BR>
 		[% IF story.score %]
 			Score: [% story.score %] <br>
 		[% END %] 
 	</FONT>
-<P>
-</LI>
+	<P>
 [% END %]
-</OL>
 [% PROCESS pagination %]
 <P>
 

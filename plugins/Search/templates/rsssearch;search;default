@@ -12,20 +12,16 @@ __name__
 rsssearch
 __template__
 [% USE Slash %]
-[% x = start ? start : 1 %]
 [% FOREACH entry=entries %]
-	[% IF entry.score %]
-		[% entry.score %]
-	[% ELSE %]
-		[% x %] 
-	[% END %]
-	<A HREF="[% entry.link %]">[% entry.title %]</A>
-	<FONT SIZE="2">on [% Slash.timeCalc(entry.created) %]</FONT>
+	<B><A HREF="[% entry.link %]">[% entry.title %]</A><B><BR>
+	<FONT SIZE="-1">On [% Slash.timeCalc(entry.created) %]</FONT>
 	[% IF entry.description %]
-		<BR>[% entry.description %]...
+		[% entry.description %]...<BR>
+	[% END %]
+	[% IF entry.score %]
+		Score: [% entry.score %]<BR>
 	[% END %]
 	<P>
-[% x = x + 1 %]
 [% END %]
 [% PROCESS pagination %]
 <P>

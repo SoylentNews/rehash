@@ -12,26 +12,24 @@ __name__
 subsearch
 __template__
 <P>
-<OL start=[% x = start ? start : 1; x %]>
 [% FOREACH entry=entries %]
-	<LI>
-		<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</A>
-		<FONT SIZE="-1">on [% Slash.timeCalc(entry.time) %]</FONT><BR>
+		<B><A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</A></B><BR>
+		<FONT SIZE="-1">On [% Slash.timeCalc(entry.time) %]</FONT><BR>
 		[% entry.story %]<BR>
 		<FONT SIZE="-1">
 		[% submission_state = Slash.db.getDescriptions('submission-state') %]
 		[% section = Slash.db.getSection(entry.section); topic = Slash.db.getTopic(entry.tid) %]
 		[% IF section.section == constants.defaultsection %]<A HREF="/submit.pl?op=list">Main</A>[% ELSE %]<A HREF="/submit.pl?section=[% entry.section %]&amp;op=list">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% entry.tid %]&amp;op=submissions">[% topic.alttext %]</A><BR>
 		State: [% del = entry.del; submission_state.$del %]<BR>
+		[% IF entry.note %]
 		Note: [% entry.note %]<BR>
+		[% END %]
 		[% IF entry.score %]
 			Score: [% entry.score %]<BR>
 		[% END %]
 		</FONT>
 		<P>
-	</LI>
 [% END %]
-</OL>
 <P>
 [% PROCESS pagination %]
 <P>
