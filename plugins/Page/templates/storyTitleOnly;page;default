@@ -11,8 +11,12 @@ en_US
 __name__
 storyTitleOnly
 __template__
-<small>[% Slash.timeCalc(story.time, '%B %d, %Y') %]</small><br>
-<b><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A></b><p>
+<p><small>[% Slash.timeCalc(story.time, '%B %d, %Y') %]</small><br>
+<b>[% storylinks = Slash.linkStory({
+	link	=> story.title,
+	sid	=> story.sid,
+	section => story.section
+}) %]<a href="[% storylinks.0 %]"[% IF storylinks.2 %] title="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</a></b></p>
 __seclev__
 100
 __version__
