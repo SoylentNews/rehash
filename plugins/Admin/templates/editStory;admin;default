@@ -15,7 +15,7 @@ editStory
 __template__
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 [% IF form.subid %]
-	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid %]">
+	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid | strip_attribute %]">
 [% END %]
 
 [% IF form.title %]
@@ -125,8 +125,8 @@ __template__
 		[% IF storyref.sid %]
 			<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% storyref.sid %]">
 		[% END %]
-		<INPUT TYPE="HIDDEN" NAME="writestatus" VALUE="[% storyref.writestatus %]">
-		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter %]">
+		<INPUT TYPE="HIDDEN" NAME="writestatus" VALUE="[% storyref.writestatus | strip_attribute %]">
+		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter | strip_attribute %]">
 		</FONT></TD>
 	</TR>
 	<TR>

@@ -271,7 +271,7 @@ sub saveSection {
 			cookiedomain	=> $form->{cookiedomain},
 			hostname	=> $form->{hostname},
 			index_handler	=> $form->{index_handler},
-			type	=> $form->{type},
+			type		=> $form->{type},
 		});
 
 		print getData('update', { section => $section });
@@ -287,7 +287,7 @@ sub saveSection {
 			cookiedomain	=> $form->{cookiedomain},
 			hostname	=> $form->{hostname},
 			index_handler	=> $form->{index_handler},
-			type	=> $form->{type},
+			type		=> $form->{type},
 		});
 		print getData($return ? 'insert' : 'failed', { 
 			section => $section
