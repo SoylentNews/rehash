@@ -99,7 +99,7 @@ EOT
 	my $admin_mods = $stats->getAdminModsInfo($yesterday);
 	my $admin_mods_text = "";
 	for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
-		$admin_mods_text .= sprintf("%13.13s: %29s %45s\n",
+		$admin_mods_text .= sprintf("%13.13s: %26s %-35s\n",
 			$nickname,
 			$admin_mods->{$nickname}{m1_text},
 			$admin_mods->{$nickname}{m2_text}
