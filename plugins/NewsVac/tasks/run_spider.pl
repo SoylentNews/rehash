@@ -31,7 +31,7 @@ use vars qw( %task $me );
 
 # We run spiders, periodically depending 
 # on this cron timespec.
-$task{$me}{timespec} = '*/15 * * * *';	# Every 15 mins.
+$task{$me}{timespec} = '0-59/15 * * * *';	# Every 15 mins.
 $task{$me}{timespec_panic_1} = '';	# Don't run at all in a panic.
 
 $task{$me}{'fork'} = 1;			# If allowed, fork this task from 
