@@ -22,24 +22,24 @@ $task{$me}{code} = sub {
 		'COUNT(ts) AS num, taskname, line, errnote, moreinfo',
 		'slashd_errnotes',
 		"ts BETWEEN '$lastrun' AND '$now'",
-		'GROUP BY taskname');
+		'GROUP BY taskname, line ORDER BY taskname, line');
+	my $num_errors = $data{errors} ? scalar(@{$data{errors}}) : 0;
 
 	my $messages = getObject('Slash::Messages');
-	
+
 	if ($messages && keys %{$data{errors}}) {
 		$data{template_name} = 'display';
 		$data{subject} = 'slashd Error Alert';
 		$data{template_page} = 'slashderrnote';
 		my $admins = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
-
-		for (@$admins) {
-			$messages->create($_, MSG_CODE_ADMINMAIL, \%data);
+		for my $uid (@$admins) {
+			$messages->create($uid, MSG_CODE_ADMINMAIL, \%data);
 		}
 	}
 
 	expireOldErrors($virtual_user, $constants, $slashdb, $user);
 
-	return;
+	return $num_errors;
 };
 
 sub updateLastRun {
