@@ -352,6 +352,10 @@ sub submissionEd {
 
 	$form->{del} = 0 if $user->{is_admin};
 
+	if (defined $form->{toggle_bin_refresh} && $user->{is_admin}) {
+		$slashdb->setUser($user->{uid}, { opt_disable_submit_bin_refresh => $form->{toggle_bin_refresh} ? 1 : 0 });
+	}
+
 	$def_skin = getData('defaultskin');
 	$def_note = getData('defaultnote');
 	$cur_skin = $form->{skin} || $def_skin;

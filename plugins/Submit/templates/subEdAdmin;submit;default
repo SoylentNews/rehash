@@ -14,7 +14,15 @@ en_US
 __name__
 subEdAdmin
 __template__
-<META HTTP-EQUIV="Refresh" CONTENT="900; URL=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]">
+[% refresh = 1 %]
+[% IF form.toggle_bin_refresh.defined; 
+	IF form.toggle_bin_refresh; refresh = 0; ELSE; refresh = 1; END;
+   ELSE;
+	refresh = !user.opt_disable_submit_bin_refresh;
+ END %]
+[% IF refresh %]
+	<META HTTP-EQUIV="Refresh" CONTENT="900; URL=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]">
+[% END %]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="note" VALUE="[% form.note | strip_attribute %]">
 <INPUT TYPE="HIDDEN" NAME="skin" VALUE="[% form.skin | strip_attribute %]">
@@ -62,6 +70,9 @@ __template__
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="Update">
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="Delete">
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="Merge">
+
+<P>
+<a href="[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]&amp;toggle_bin_refresh=[% IF !refresh; "0"; ELSE; 1; END %]"><font size="-1">[% IF !refresh;  "Enable Bin Refresh"; ELSE; "Disable Bin Refresh"; END; %]</font></a>
 
 </FORM>
 
