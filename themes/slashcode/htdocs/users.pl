@@ -895,7 +895,7 @@ sub showInfo {
 	}
 
 	# Can't get user data for the anonymous user.
-	if (isAnon($uid)) {
+	if ($fieldkey eq 'uid' && isAnon($uid)) {
 		header(getMessage('user_header'));
 		return displayForm();
 	}
