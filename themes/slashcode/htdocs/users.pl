@@ -2715,7 +2715,19 @@ sub saveHome {
 		});
 	}
 	if ($form->{restore_slashbox_defaults}) {
-		setToDefaults($user_edits_table, {}, { slashboxes => "" });
+		setToDefaults($user_edits_table, {
+			'story_never_topic' => 1,
+			'story_never_author' => 1,
+			'story_never_nexus' => 1,
+			'story_always_topic' => 1,
+			'story_always_author' => 1,
+			'story_always_nexus' => 1,
+			'maxstories' => 1,
+			'noboxes' => 1,
+			'light' => 1,
+			'noicons' => 1,
+			'willing' => 1
+		}, { slashboxes => "" });
 	}
 
 #print scalar(localtime) . " uet: " . Dumper($user_edits_table);
