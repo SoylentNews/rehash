@@ -577,7 +577,6 @@ sub setModsSaved {
 sub getMetamodsForUser {
 	my($self, $user, $num_comments) = @_;
 	my $constants = getCurrentStatic();
-
 	# First step is to see what the user already has marked down to
 	# be metamoderated.  If there are any such id's, that still
 	# aren't done being M2'd, keep those on the user's to-do list.
@@ -753,41 +752,13 @@ sub getMetamodsForUserRaw {
 	my($self, $uid, $num_needed, $already_have_hr) = @_;
 	my $uid_q = $self->sqlQuote($uid);
 	my $constants = getCurrentStatic();
+	my $m2_wait_hours = $constants->{m2_wait_hours} || 12;
 
 	my $reasons = $self->getReasons();
 	my $m2able_reasons = join(",",
 		sort grep { $reasons->{$_}{m2able} }
 		keys %$reasons);
 	return [ ] if !$m2able_reasons;
-
-	my $consensus = $constants->{m2_consensus};
-	my $waitpow = $constants->{m2_consensus_waitpow} || 1;
-
-	my $if_smoother = $constants->{m2_if_smoother} || 5;	
-
-	my $days_back = $constants->{archive_delay_mod};
-	my $days_back_cushion = int($days_back/10);
-	$days_back_cushion = $constants->{m2_min_daysbackcushion} || 2
-		if $days_back_cushion < ($constants->{m2_min_daysbackcushion} || 2);
-	$days_back -= $days_back_cushion;
-
-	# XXX I'm considering adding a 'WHERE m2status=0' clause to the
-	# MIN/MAX selects below.  This might help choose mods more
-	# smoothly and make failure (as archive_delay_mod is approached)
-	# less dramatic too.  On the other hand it might screw things
-	# up, making older mods at N-1 M2's never make it to N.  I've
-	# run tests on changes like this before and there's almost no
-	# way to predict accurately what it will do on a live site
-	# without doing it... -Jamie 2002/11/16
-	my $min_old = $self->getVar('m2_modlogid_min_old', 'value', 1) || 0;
-	my $max_old = $self->getVar('m2_modlogid_max_old', 'value', 1) || 0;
-	my $min_new = $self->getVar('m2_modlogid_min_new', 'value', 1) || 0;
-	my $max_new = $self->getVar('m2_modlogid_max_new', 'value', 1) || 0;
-	my $min_mid = $max_old+1;
-	my $max_mid = $min_new-1;
-	my $old_range = $max_old-$min_old; $old_range = 1 if $old_range < 1;
-	my $mid_range = $max_mid-$min_mid; $mid_range = 1 if $mid_range < 1;
-	my $new_range = $max_new-$min_new; $new_range = 1 if $new_range < 1;
 
 	# Prepare the lists of ids and cids to exclude.
 	my $already_id_list = "";
@@ -820,36 +791,7 @@ sub getMetamodsForUserRaw {
 	my $getmods_loops = 0;
 	my @ids = ( );
 	my $mod_hr;
-	my $range_offset = 0.9;
-	$range_offset = $constants->{m2_range_offset}
-		if defined($constants->{m2_range_offset});
-	my $twice_range_offset = $range_offset * 2;
-	my $if_expr = "";
-	if ($waitpow != 1) {
-		$if_expr = <<EOT;
-			IF(	id BETWEEN $min_old AND $max_mid,
-				IF(
-					id BETWEEN $min_old and $max_old,
-					POW(         (id-$min_old)/$old_range,     $waitpow),
-					POW(GREATEST((id-$min_mid)/$mid_range, 0), $waitpow)
-						+ $range_offset
-				),
-				POW(GREATEST((id-$min_new)/$new_range, 0), $waitpow)
-					+ $twice_range_offset			)
-EOT
-	} else {
-		$if_expr = <<EOT;
-			IF(	id BETWEEN $min_old AND $max_mid,
-				IF(
-					id BETWEEN $min_old and $max_old,
-					(id-$min_old)/$old_range,
-					(id-$min_mid)/$mid_range
-						+ $range_offset
-				),
-				(id-$min_new)/$new_range
-					+ $twice_range_offset			)
-EOT
-	}
+	
 	GETMODS: while ($num_needed > 0 && ++$getmods_loops <= 3) {
 		my $limit = $num_needed*2+10; # get more, hope it's enough
 		my $already_id_clause = "";
@@ -862,12 +804,13 @@ EOT
 		$mod_hr = $reader->sqlSelectAllHashref(
 			"id",
 			"id, cid,
-			 (m2count/m2needed) * $if_smoother + $if_smoother * $if_expr + RAND() AS rank",
+			 RAND() AS rank",
 			"moderatorlog",
 			"uid != $uid_q AND cuid != $uid_q
 			 AND m2status=0
 			 AND reason IN ($m2able_reasons)
 			 AND active=1
+			 AND ts < DATE_SUB(NOW(), INTERVAL $m2_wait_hours HOUR)
 			 $already_id_clause $already_cid_clause",
 			"ORDER BY rank LIMIT $limit"
 		);
@@ -4233,6 +4176,15 @@ sub getNetIDStruct {
 }
 
 ########################################################
+
+sub getSubnetFromIPID {
+	my ($self, $ipid) = @_;
+	my $ipid_q = $self->sqlQuote($ipid);
+	my ($subnet) = $self->sqlSelect("subnetid", "comments", "ipid = $ipid_q AND subnetid IS NOT NULL and subnetid!=''", "LIMIT 1");
+	return $subnet;
+}
+
+########################################################
 sub getBanList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
@@ -4272,6 +4224,26 @@ sub getBanList {
 	}
 
 	return $banlist_ref;
+}
+
+sub getNetIDPostingRestrictions {
+	my ($self, $type, $value) = @_;
+	my $constants = getCurrentStatic();
+	my $restrictions = { no_anon => 0, no_post => 0 };
+	if ($type eq "subnetid") {
+		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed};
+		my ($subnet_karma, $subnet_post_cnt) = $self->getNetIDKarma("subnetid", $value);
+		my ($sub_anon_max, $sub_anon_min, $sub_all_max, $sub_all_min ) = @{$constants->{subnet_karma_post_limit_range}};
+		if ($subnet_post_cnt >= $subnet_karma_comments_needed) {
+			if ($subnet_karma >= $sub_anon_min && $subnet_karma <= $sub_anon_max) {
+				$restrictions->{no_anon} = 1;
+			}
+			if ($subnet_karma >= $sub_all_min && $subnet_karma <= $sub_all_max) {
+				$restrictions->{no_post} = 1;
+			}
+		}
+	}
+	return $restrictions;
 }
 
 ########################################################
@@ -5414,14 +5386,15 @@ sub multiMetaMod {
 			. " AND reason=$id_to_cr->{$mmid}{reason})";
 	}
 	my $cr_clause = join(" OR ", @cr_clauses);
-
+	my $user_limit_clause = "";
+	$user_limit_clause =  " AND uid != $uid_q AND cuid != $uid_q " unless $m2_user->{seclev} >= 100;
 	# Get a list of other mods which duplicate one or more of the
 	# ones we're modding, but aren't in fact the ones we're modding.
 	my $others = $self->sqlSelectAllHashrefArray(
 		"id, cid, reason",
 		"moderatorlog",
 		"($cr_clause)".
-		" AND uid != $uid_q AND cuid != $uid_q ".
+		$user_limit_clause.
 		" AND m2status=0
 		 AND reason IN ($m2able_reasons)
 		 AND active=1
