@@ -116,7 +116,8 @@ with your
 MD5'd IPID, which is <tt>[% user.ipid %]</tt>[%
 ELSE %]
 username "<tt>[% user.nickname %]</tt>"[%
-END %].
+END %]. Let us know how many comments <em>you</em> think you've
+posted in the last 24 hours.
 
 [% # TROLL MESSAGE.
 CASE "troll message" %]
