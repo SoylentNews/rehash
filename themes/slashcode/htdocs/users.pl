@@ -1093,8 +1093,8 @@ sub showInfo {
 		$constants->{user_submitter_display_default}
 	) unless !$storycount || $requested_user->{nonuid};
 
-	my $subcount = $slashdb->countSubmissionsByNetID($id, $fieldkey) if $requested_user->{nonuid};
-	my $submissions = $slashdb->getSubmissionsByNetID($id, $fieldkey) if $requested_user->{nonuid};
+	my $subcount = $slashdb->countSubmissionsByNetID($netid, $fieldkey) if $requested_user->{nonuid};
+	my $submissions = $slashdb->getSubmissionsByNetID($netid, $fieldkey) if $requested_user->{nonuid};
 
 	if ($requested_user->{nonuid}) {
 		slashDisplay('netIDInfo', {
