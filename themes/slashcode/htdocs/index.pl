@@ -36,8 +36,7 @@ sub main {
 
 	$section = $slashdb->getSection($form->{section});
 
-	$section->{artcount} = $user->{maxstories} unless $user->{is_anon};
-	$section->{mainsize} = int($section->{artcount} / 3);
+	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
 	my $title = getData('head', { section => $section });
 	
@@ -237,7 +236,7 @@ sub displayStories {
 
 	my($today, $x) = ('', 1);
 	my $cnt = int($user->{maxstories} / 3);
-	my($return, $counter, $feature_retrieved);
+	my($return, $counter);
 
 	# shift them off, so we do not display them in the Older
 	# Stuff block later (simulate the old cursor-based
