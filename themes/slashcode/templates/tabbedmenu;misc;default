@@ -26,37 +26,37 @@ __template__
 [% IF color == 'colored';
 	details = {
 		bg_line_color		=> user.bg.5,
-		lt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/menu_wwx.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		lt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_wwo.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		bg_tab_sel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_wobg.gif' _ '" BGCOLOR="' _ user.bg.3 _ '"',
-		bg_tab_unsel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_wxbg.gif' _ '" BGCOLOR="' _ user.bg.2 _ '"',
+		lt_corner_sel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		lt_corner_unsel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		bg_tab_sel		=> 'BGCOLOR="' _ user.bg.3 _ '"',
+		bg_tab_unsel		=> 'BGCOLOR="' _ user.bg.2 _ '"',
 		fg_tab_sel_color	=> user.fg.3,
 		fg_tab_unsel_color	=> user.fg.2,
-		lt_sel_rt_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_wox.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		lt_unsel_rt_unsel	=> 'SRC="' _ constants.imagedir _ '/menu_wxx.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		lt_unsel_rt_sel		=> 'SRC="' _ constants.imagedir _ '/menu_wxo.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		rt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/menu_wow.gif'  _ '" WIDTH="8" HEIGHT="19"',
-		rt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_wxw.gif'  _ '" WIDTH="8" HEIGHT="19"',
+		lt_sel_rt_unsel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		lt_unsel_rt_unsel	=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		lt_unsel_rt_sel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		rt_corner_sel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		rt_corner_unsel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
 	};
 ELSE;
 	details = {
 		bg_line_color		=> user.bg.3,
-		lt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/menu_ggo.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		lt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_ggx.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		bg_tab_sel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_bgo.gif' _ '" BGCOLOR="' _ user.bg.5 _ '"',
-		bg_tab_unsel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_bgx.gif' _ '" BGCOLOR="' _ user.bg.2 _ '"',
+		lt_corner_sel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		lt_corner_unsel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		bg_tab_sel		=> 'BGCOLOR="' _ user.bg.5 _ '"',
+		bg_tab_unsel		=> 'BGCOLOR="' _ user.bg.2 _ '"',
 		fg_tab_sel_color	=> user.fg.5,
 		fg_tab_unsel_color	=> user.fg.2,
-		lt_sel_rt_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_gox.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		lt_unsel_rt_unsel	=> 'SRC="' _ constants.imagedir _ '/menu_gxx.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		lt_unsel_rt_sel		=> 'SRC="' _ constants.imagedir _ '/menu_gxo.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		rt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/menu_gog.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		rt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_gxg.gif'  _ '" WIDTH="9" HEIGHT="19"',
+		lt_sel_rt_unsel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		lt_unsel_rt_unsel	=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		lt_unsel_rt_sel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		rt_corner_sel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
+		rt_corner_unsel		=> 'WIDTH="1" HEIGHT="1" ALT=""',
 	};
 END %]
 <NOBR>
-<TABLE WIDTH="100%" valign="MIDDLE" CELLPADDING="0" CELLSPACING="0">
-	<TR BGCOLOR="[% details.bg_tab_unsel_color %]">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0">
+	<TR BGCOLOR="[% user.bg.4 %]">
 [% FOREACH tab = tabs;
 	IF loop.first;
 		tabtmpl = "start_tab";
@@ -71,6 +71,11 @@ END %]
 		next_tab_is_selected=(loop.next && (loop.next.label == save_tab_selected || loop.next.sel_label == save_tab_selected));
 END %]
 	</TR>
+</TABLE>
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+	<TR BGCOLOR="[% user.bg.4 %]">
+		<TD><IMG [% details.lt_corner_sel %]></TD>
+        </TR>
 </TABLE>
 </NOBR>
 __seclev__
