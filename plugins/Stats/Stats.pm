@@ -344,7 +344,6 @@ sub countBytesByPage {
 sub countUsersByPage {
 	my($self, $op, $yesterday, $options) = @_;
 	my $where = "op='$op' AND "
-	my $where = "op='$op' AND "
 		if $op;
 	$where .= "section='$options->{section}' AND "
 		if $options->{section};
