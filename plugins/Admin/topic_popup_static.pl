@@ -18,6 +18,7 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
+	Slash::Utility::Anchor::getSkinColors();
 	for my $type ('css', 'js') {
 		my $new = Slash::Admin::PopupTree::getPopupTree({}, {}, { type => $type, Nocomm => 1 });
 		next unless $new;
