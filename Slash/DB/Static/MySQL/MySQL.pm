@@ -451,6 +451,7 @@ sub updateLastaccess {
 			"TO_DAYS(NOW()) - TO_DAYS(ts) <= 1",
 			"GROUP BY uid"
 		);
+		return unless $uids_ar && @$uids_ar;
 		my $uids_in = join(",", sort @$uids_ar);
 		$self->sqlUpdate(
 			"users_info",
