@@ -39,7 +39,7 @@ change your password, or just click pretty widgets to kill time.
 
 [% IF mod_flag %]
 <P>You're a moderator with [% points %] point[% user.points == 1 ? '' : 's' %]
-[%- IF points && useredit.points_expire %] (expire after [% useredit.points_expire %])[% END %].
+[%- IF points && useredit.points_expire %] (expire on [% useredit.points_expire %])[% END %].
 Please read the
 <A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
 before you do any moderation.<BR><P>

@@ -5,7 +5,7 @@
 # $Id$
 
 use strict;
-use Date::Manip qw(UnixDate DateCalc);
+use Date::Parse;
 use Digest::MD5 'md5_hex';
 use Slash;
 use Slash::Display;
@@ -347,7 +347,7 @@ sub main {
 	}
 
 	header(getMessage('user_header'));
-# This is a hardcoded position, bad idea and should be fixed -Brian
+	# This is a hardcoded position, bad idea and should be fixed -Brian
 	print getMessage('note', { note => $errornote }) if defined $errornote;
 	print createMenu($formname, {
 		style =>	'tabbed',
@@ -979,9 +979,16 @@ sub showInfo {
 					my $hours = $constants->{mod_stir_hours}
 						|| $constants->{stir}*24;
 					$requested_user->{points_expire} = timeCalc(
-						UnixDate(DateCalc($lastgranted, "+ $hours hours"),
-							"%C"), '%Y-%m-%d'
+						$lastgranted,
+						"%Y-%M-%d",
+						$user->{off_set} + $hours*3600
 					);
+# Older and much slower way of doing this; required Date::Manip, ick!
+#					$requested_user->{points_expire} = timeCalc(
+#						UnixDate(DateCalc($lastgranted, "+ $hours hours"),
+#							"%C"),
+#						'%Y-%m-%d'
+#					);
 				}
 			}
 
