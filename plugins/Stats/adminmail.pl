@@ -89,8 +89,8 @@ EOT
 
 	for(qw| article search comments palm journal rss|) {
 		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
-		my $pages = $stats->countDailyByPage($_ ,$yesterday);
-		my $bytes = $stats->countBytesByPage($_ ,$yesterday);
+		my $pages = $stats->countDailyByPage($_, $yesterday);
+		my $bytes = $stats->countBytesByPage($_, $yesterday);
 		$data{"${_}_ipids"}  = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
@@ -106,9 +106,9 @@ EOT
 		my $temp = {};
 		$temp->{section_name} = $section;
 		my $uniq = $stats->countDailyByPageDistinctIPID('', $yesterday, { section => $section  });
-		my $pages = $stats->countDailyByPage('' ,$yesterday, { section => $section  });
-		my $bytes = $stats->countBytesByPage('' ,$yesterday, { section => $section  });
-		my $users = $stats->countUsersByPage('' ,$yesterday, { section => $section  });
+		my $pages = $stats->countDailyByPage('', $yesterday, { section => $section  });
+		my $bytes = $stats->countBytesByPage('', $yesterday, { section => $section  });
+		my $users = $stats->countUsersByPage('', $yesterday, { section => $section  });
 		$temp->{ipids}  = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
@@ -119,9 +119,9 @@ EOT
 
 		for (qw| article search comments palm rss|) {
 			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section  });
-			my $pages = $stats->countDailyByPage($_ ,$yesterday, { section => $section  });
-			my $bytes = $stats->countBytesByPage($_ ,$yesterday, { section => $section  });
-			my $users = $stats->countUsersByPage($_ ,$yesterday, { section => $section  });
+			my $pages = $stats->countDailyByPage($_, $yesterday, { section => $section  });
+			my $bytes = $stats->countBytesByPage($_, $yesterday, { section => $section  });
+			my $users = $stats->countUsersByPage($_, $yesterday, { section => $section  });
 			$temp->{$_}{ipids}  = sprintf("%8d", $uniq);
 			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
