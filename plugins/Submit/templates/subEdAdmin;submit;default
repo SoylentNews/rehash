@@ -73,6 +73,7 @@ BLOCK sub_display -%]
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
 		[% Slash.selectSection("section_$sub.subid", sub.section, 0, 1) %]
 
+		[%# this is called del_ for legacy reasons, but is also use for merging %]
 		</FONT><INPUT TYPE="CHECKBOX" NAME="del_[% sub.subid %]">
 	</NOBR></TD><TD>
 	[% IF constants.submiss_ts %]
