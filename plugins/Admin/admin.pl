@@ -1113,7 +1113,7 @@ sub listStories {
 
 	my($hits, $comments, $sid, $title, $aid, $time, $tid, $section, 
 	$displaystatus, $writestatus, $td, $td2, $yesterday, $tbtitle,
-	$count, $left, $substrtid,$substrsection, $sectionflag);
+	$count, $left, $substrtid, $sectionflag);
 
 	my($i, $canedit) = (0, 0);
 
@@ -1134,11 +1134,6 @@ sub listStories {
 		next if $x < $first;
 		last if $x > $first + 40;
 
-		unless ($user->{section} || $form->{section}) {
-			$sectionflag = 1;
-			$substrsection = substr($section, 0, 5);
-		}
-
 		$storylistref->[$i] = {
 			'x'		=> $x,
 			hits		=> $hits,
@@ -1150,8 +1145,7 @@ sub listStories {
 			canedit		=> $canedit,
 			substrtid	=> $substrtid,
 			section		=> $section,
-			sectionflag	=> $sectionflag,
-			substrsection	=> $substrsection,
+			substrsection	=> substr($section, 0, 5),
 			td		=> $td,
 			td2		=> $td2,
 			writestatus	=> $writestatus,
@@ -1161,10 +1155,13 @@ sub listStories {
 		$i++;
 	}
 
+	$sectionflag = 1 unless ($user->{section} || $form->{section});
+
 	$count = @$storylist;
 	$left = $count - $x;
 
 	slashDisplay('listStories', {
+		sectionflag	=> $sectionflag,
 		storylistref	=> $storylistref,
 		'x'		=> $x,
 		left		=> $left
