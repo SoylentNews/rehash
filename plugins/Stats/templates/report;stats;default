@@ -112,7 +112,6 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
       PROCESS graphs gtitle => 'Pages';
       PROCESS graphs gtitle => 'Hits';
       PROCESS graphs gtitle => 'Comment Scores';
-      PROCESS graphs gtitle => 'Page Bytes';
       PROCESS graphs gtitle => 'Total Bytes';
       PROCESS graphs gtitle => 'Section Pages';
       END;

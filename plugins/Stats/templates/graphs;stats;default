@@ -91,18 +91,18 @@ SWITCH gtitle;
       PROCESS make_graph
          section  => form.stats_section,
          type     => 'areastacked',
-         statdata => ['rss_bytes', 'palm_bytes'];
+         statdata => ['index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
   ELSE;
       PROCESS make_graph
          section  => 'all',
          type     => 'areastackedindex',
-         statdata => ['grand_total_bytes', 'rss_bytes', 'palm_bytes'];
+         statdata => ['grand_total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
   END;
 
   CASE 'Section Pages';
-      sections = Slash.db.getDescriptions('sections');
+      avail_sections = Slash.db.getDescriptions('sections');
       sect_page = [];
-      FOREACH section = sections.keys.sort;
+      FOREACH section = avail_sections.keys.sort;
          sect_page.push(['page', section]);
       END;
       PROCESS make_graph
@@ -110,9 +110,9 @@ SWITCH gtitle;
          statdata => sect_page;
 
   CASE 'Section Bytes';
-      sections = Slash.db.getDescriptions('sections');
+      avail_sections = Slash.db.getDescriptions('sections');
       sect_byte = [];
-      FOREACH section = sections.keys.sort;
+      FOREACH section = avail_sections.keys.sort;
          sect_byte.push(['bytes', section]);
       END;
       PROCESS make_graph
