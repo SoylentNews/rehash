@@ -38,9 +38,8 @@ slash-2.0.0, 2001.04.xx
 	additions of pagination and viewing recent journal entry
 	on user's info page *
 
-*	Search now works. XML/RSS search features have been added.
-  All you need to do is add &content_type=rss to a search
-	query and you will get XML/RSS info.
+*	Search now works.  XML/RSS search features have been added;
+	use content_type=rss to get data in RSS format
 
 *	Catch links to old .shtml article pages and redirect to the
 	correct location in 404.pl

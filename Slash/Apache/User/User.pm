@@ -73,12 +73,6 @@ sub handler {
 	}
 
 	$slashdb->sqlConnect;
-	#Ok, this solves the annoying issue of not having true OOP in perl
-	# You can comment this out if you want if you only use one database type
-	# long term, it might be nice to create new classes for each slashdb
-	# object, and set @ISA for each class, or make each other class inherit
-	# from Slash::DB instead of vice versa ...
-	$slashdb->fixup;
 
 	my $method = $r->method;
 	# Don't remove this. This solves a known bug in Apache -- brian

@@ -1,6 +1,7 @@
 description="Admin Interface"
 name=Admin
 mysql_dump=dump
+oracle_dump=dump
 pg_dump=dump
 htdoc=admin.pl
 template=templates/adminLoginForm;admin;default

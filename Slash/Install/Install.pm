@@ -5,7 +5,7 @@
 
 package Slash::Install;
 use strict;
-use vars qw($VERSION @ISA);
+use vars qw($VERSION);
 use DBIx::Password;
 use Slash;
 use Slash::DB::Utility;
@@ -16,96 +16,82 @@ use File::Path;
 
 # BENDER: Like most of life's problems, this one can be solved with bending.
 
-@ISA       = qw(Slash::DB::Utility);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub new {
-	my ($class, $user) = @_;
-	my $self = {};
-	bless ($self,$class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-	$self->{slashdb} = Slash::DB->new($user);
-
-	return $self;
+	my($class, $user) = @_;
+	return bless {
+		slashdb => Slash::DB->new($user)
+	}, $class;
 }
 
 sub create {
-	my ($self, $values) = @_;
-	$self->sqlInsert('site_info', $values);
+	my($self, $values) = @_;
+	$self->{slashdb}->sqlInsert('site_info', $values);
 }
 
 sub delete {
-	my ($self, $key) = @_;
-	my $sql = "DELETE from site_info WHERE name = " . $self->sqlQuote($key);
-	$self->sqlDo($sql);
+	my($self, $key) = @_;
+	$self->{slashdb}->sqlDo('DELETE FROM site_info WHERE name = ?', [$key]);
 }
 
 sub deleteByID  {
-	my ($self, $key) = @_;
-	my $sql = "DELETE from site_info WHERE param_id=$key";
-	$self->sqlDo($sql);
+	my($self, $key) = @_;
+	$self->{slashdb}->sqlDo('DELETE from site_info WHERE param_id = ?', [$key]);
 }
 
-sub get{
-	my ($self, $key) = @_;
-	my $count = $self->sqlCount('site_info', "name=" . $self->sqlQuote($key));
+sub get {
+	my($self, $key) = @_;
+	my $count = $self->{slashdb}->sqlCount('site_info', 'name = ?', [$key]);
 	my $hash;
-	if($count > 1) {
-		$hash = $self->sqlSelectAllHashref('param_id', '*', 'site_info', "name=" . $self->sqlQuote($key));
+	if ($count > 1) {
+		$hash = $self->{slashdb}->sqlSelectAllHashref('param_id', '*', 'site_info', 'name = ?', [$key]);
 	} else {
-		$hash = $self->sqlSelectHashref('*', 'site_info', "name=" . $self->sqlQuote($key));
+		$hash = $self->{slashdb}->sqlSelectHashref('*', 'site_info', 'name = ?', [$key]);
 	}
 
 	return $hash;
 }
 
-sub exists{
-	my ($self, $key, $value) = @_;
+sub exists {
+	my($self, $key, $value) = @_;
 	return unless $key;
-	my $where;
-	$where .= "name=" . $self->sqlQuote($key);
-	$where .= " AND value=" . $self->sqlQuote($value) if $value;
-	my $count = $self->sqlCount('site_info', $where);
-
+	my $where = 'name = ?';
+	my $binds = [$key];
+	if ($value) {
+		$where .= ' AND value = ?';
+		push @$binds, $value;
+	}
+	my $count = $self->{slashdb}->sqlCount('site_info', $where, $binds);
 	return $count;
 }
 
-sub getValue{
-	my ($self, $key) = @_;
-	my $count = $self->sqlCount('site_info', "name=" . $self->sqlQuote($key));
+sub getValue {
+	my($self, $key) = @_;
+	my $count = $self->{slashdb}->sqlCount('site_info', 'name = ?', [$key]);
 	my $value;
-	unless($count > 1) {
-		($value) = $self->sqlSelect('value', 'site_info', "name=" . $self->sqlQuote($key));
+	unless ($count > 1) {
+		($value) = $self->{slashdb}->sqlSelect('value', 'site_info', 'name = ?', [$key]);
 	} else {
-		$value = $self->sqlSelectColArrayref('value', 'site_info', "name=" . $self->sqlQuote($key));
+		$value = $self->{slashdb}->sqlSelectColArrayref('value', 'site_info', 'name = ?', [$key]);
 	}
-
 	return $value;
 }
 
 sub getByID {
-	my ($self, $id) = @_;
-	my $return = $self->sqlSelectHashref('*', 'site_info', "param_id = $id");
-
+	my($self, $id) = @_;
+	my $return = $self->{slashdb}->sqlSelectHashref('*', 'site_info', 'param_id = ?', [$id]);
 	return $return;
 }
 
-sub DESTROY {
-	my ($self) = @_;
-	if($self->{_dbh}) {
-		$self->{_dbh}->disconnect unless ($ENV{GATEWAY_INTERFACE});
-	}
-}
-
 sub readTemplateFile {
-	my ($self, $filename) = @_;
-	return unless(-f $filename);
+	my($self, $filename) = @_;
+	return unless -f $filename;
 	open(FILE, $filename) or die "$! unable to open file $filename to read from";
 	my @file = <FILE>;
 	my %val;
 	my $latch;
-	for(@file) {
+	for (@file) {
 		if (/^__(.*)__$/) {
 			$latch = $1;
 			next;
@@ -113,17 +99,17 @@ sub readTemplateFile {
 		$val{$latch} .= $_  if $latch;
 	}
 	$val{'tpid'} = undef if $val{'tpid'};
-	for(qw| name page section lang seclev description title |) {
+	for (qw| name page section lang seclev description title |) {
 		chomp($val{$_}) if $val{$_};
 	}
-	
+
 	return \%val;
 }
 
 sub writeTemplateFile {
-	my ($self, $filename, $template) = @_;
+	my($self, $filename, $template) = @_;
 	open(FILE, '>' . $filename) or die "$! unable to open file $filename to write to";
-	for(keys %$template) {
+	for (keys %$template) {
 		next if ($_ eq 'tpid');
 		print FILE "__${_}__\n";
 		$template->{$_} =~ s/\015\012/\n/g;
@@ -204,8 +190,8 @@ sub _install {
 
 	if ($plugin->{"${driver}_dump"}) {
 		if (my $dump_file = "$plugin->{dir}/" . $plugin->{"${driver}_dump"}) {
-			open(DUMP,"< $dump_file");
-			while(<DUMP>) {
+			open(DUMP, "< $dump_file");
+			while (<DUMP>) {
 				next unless /^INSERT/;
 				chomp;
 				s/www\.example\.com/$hostname/g;
@@ -218,21 +204,22 @@ sub _install {
 
 	for (@sql) {
 		next unless $_;
-		unless ($self->sqlDo($_)) {
+		s/;$//;
+		unless ($self->{slashdb}->sqlDo($_)) {
 			print "Failed on :$_:\n";
 		}
 	}
 
-	if($plugin->{'template'}) {
-		for(@{$plugin->{'template'}}) {
+	if ($plugin->{'template'}) {
+		for (@{$plugin->{'template'}}) {
 			my $template = $self->readTemplateFile("$plugin->{'dir'}/$_");
 			$self->{slashdb}->createTemplate($template) if $template;
 		}
 	}
 	if ($plugin->{note}) {
-		my $file = "$plugin->{dir}/$plugin->{note}";  
+		my $file = "$plugin->{dir}/$plugin->{note}";
 		open(FILE, $file);
-		while(<FILE>) {
+		while (<FILE>) {
 			print;
 		}
 	}
@@ -247,7 +234,7 @@ sub getPluginList {
 		next if $dir =~ /^\.$/;
 		next if $dir =~ /^\.\.$/;
 		next if $dir =~ /^CVS$/;
-		open(PLUGIN, "< $prefix/plugins/$dir/PLUGIN") or next; 
+		open(PLUGIN, "< $prefix/plugins/$dir/PLUGIN") or next;
 		$plugins{$dir}->{'dir'} = "$prefix/plugins/$dir";
 		#This should be override by the actual name of the plugin
 		$plugins{$dir}->{'name'} = $dir;
@@ -293,7 +280,7 @@ Slash::Install - Install libraries for slash
 
 =head1 SYNOPSIS
 
-  use Slash::Install;
+	use Slash::Install;
 
 =head1 DESCRIPTION
 

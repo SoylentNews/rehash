@@ -8,90 +8,50 @@ package Slash::DB;
 use strict;
 use DBIx::Password;
 use Slash::DB::Utility;
-use vars qw($VERSION @ISA @ISAPg @ISAMySQL);
+use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@ISA       = qw[ Slash::Utility ];
-@ISAPg     = qw[ Slash::Utility Slash::DB::PostgreSQL Slash::DB::MySQL ];
-@ISAMySQL  = qw[ Slash::Utility Slash::DB::MySQL ];
 
 # BENDER: Bender's a genius!
 
+# Registry of DBI DSNs => Slash::DB driver modules
+# If you add another driver, make sure there's an entry here
+my $dsnmods = {
+	mysql	=> 'MySQL',
+	Oracle	=> 'Oracle',
+	Pg	=> 'PostgreSQL'
+};
+
 sub new {
 	my($class, $user) = @_;
-	my $self = {};
 	my $dsn = DBIx::Password::getDriver($user);
-	if ($dsn) {
-		if ($dsn =~ /mysql/) {
-			require Slash::DB::MySQL;
-			@ISA = @ISAMySQL;
-			unless ($ENV{GATEWAY_INTERFACE}) {
-				require Slash::DB::Static::MySQL;
-				push(@ISA, 'Slash::DB::Static::MySQL');
-				push(@ISAMySQL, 'Slash::DB::Static::MySQL');
-			}
-#		} elsif ($dsn =~ /oracle/) {
-#			require Slash::DB::Oracle;
-#			push(@ISA, 'Slash::DB::Oracle');
-#			require Slash::DB::MySQL;
-#			push(@ISA, 'Slash::DB::MySQL');
-#			unless ($ENV{GATEWAY_INTERFACE}) {
-#				require Slash::DB::Static::Oracle;
-#				push(@ISA, 'Slash::DB::Static::Oracle');
-## should these be here, in addition? -- pudge
-## Longterm yes, right now it is pretty much pointless though --Brian
-##				require Slash::DB::Static::MySQL;
-##				push(@ISA, 'Slash::DB::Static::MySQL');
-#			}
-		} elsif ($dsn =~ /Pg/) {
-			require Slash::DB::PostgreSQL;
-			require Slash::DB::MySQL;
-			@ISA = @ISAPg;
-			unless ($ENV{GATEWAY_INTERFACE}) {
-				require Slash::DB::Static::PostgreSQL;
-				push(@ISA, 'Slash::DB::Static::PostgreSQL',
-				           'Slash::DB::Static::MySQL');
-				push(@ISAPg, 'Slash::DB::Static::MySQL');
-			}
-		}
-	} else {
-		warn("We don't support the database ($dsn) specified.\nUsing virtual user '$user' "
-			. DBIx::Password::getDriver($user));
-	}
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->{db_driver} = $dsn;
-	$self->SUPER::sqlConnect();
-#	$self->init();
-	return $self;
-}
+	if (my $modname = $dsnmods->{$dsn}) {
+		my $dbclass = ($ENV{GATEWAY_INTERFACE})
+			? "Slash::DB::$modname"
+			: "Slash::DB::Static::$modname";
+		eval "use $dbclass"; die $@ if $@;
 
-# hm.  should this really be here?  in theory, we could use anything
-# we wanted, including non-DBI modules, to provide the Slash::DB API.
-# but this might break that.  aside from this, Slash::DB makes no
-# assumptions about how the API is implemented (well, and the sqlConnect()
-# and init() calls above).  maybe instead, we could call
-# $self->SUPER::disconnect(),  and have a disconnect() there that calls
-# $self->{_dbh}->disconnect ... ?   -- pudge
+		# Bless into the class we're *really* wanting -- thebrain
+		my $self = bless {
+			virtual_user		=> $user,
+			db_driver		=> $dsn,
+			# See setPrepareMethod below -- thebrain
+			_dbh_prepare_method	=> 'prepare_cached'
+		}, $dbclass;
+		$self->sqlConnect();
+		return $self;
+	} elsif ($dsn) {
+		die "Database $dsn unsupported! (virtual user: $user)";
+	} else {
+		die "DBIx::Password returned *nothing* for virtual user $user DSN (is the username correct?)";
+	}
+}
 
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect
 		if ! $ENV{GATEWAY_INTERFACE} && defined $self->{_dbh};
 }
-
-# This is for sites running in multiple threaded/process environments
-# where you want to run two different database types
-sub fixup {
-	my ($self) = @_;
-
-	if ($self->{db_driver} =~ /mysql/) {
-		@ISA = @ISAMySQL;
-	} elsif ($self->{db_driver} =~ /Pg/) {
-		@ISA = @ISAPg;
-	} 
-}
-
 
 1;
 

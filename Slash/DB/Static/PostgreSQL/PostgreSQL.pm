@@ -5,12 +5,12 @@
 
 package Slash::DB::Static::PostgreSQL;
 use strict;
-use Slash::DB::Utility;
+use vars qw($VERSION);
 use Slash::Utility;
-use URI ();
-use vars qw(@ISA $VERSION);
 
-@ISA = qw( Slash::DB::Utility );
+use base 'Slash::DB::PostgreSQL';
+use base 'Slash::DB::Static::MySQL';
+
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # BENDER: I hate people who love me.  And they hate me.

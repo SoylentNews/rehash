@@ -11,11 +11,10 @@ package Slash::DB::Static::MySQL;
 #
 #####################################################################
 use strict;
-use DBIx::Password;
-use Slash::DB::Utility;
 use Slash::Utility;
 use URI ();
 use vars qw($VERSION);
+use base 'Slash::DB::MySQL';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 

@@ -5,12 +5,12 @@
 
 package Slash::DB::MySQL;
 use strict;
-use Slash::DB::Utility;
 use Slash::Utility;
 use URI ();
-use vars qw($VERSION @ISA);
+use vars qw($VERSION);
+use base 'Slash::DB';
+use base 'Slash::DB::Utility';
 
-@ISA = qw( Slash::DB::Utility );
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # BENDER: I hate people who love me.  And they hate me.
@@ -747,16 +747,19 @@ sub setSession {
 
 ########################################################
 sub setBlock {
-	_genericSet('blocks', 'bid', '', @_);
+	my $self = shift;
+	$self->_genericSet('blocks', 'bid', '', @_);
 }
 
 ########################################################
 sub setDiscussion {
-	_genericSet('discussions', 'sid', '', @_);
+	my $self = shift;
+	$self->_genericSet('discussions', 'sid', '', @_);
 }
 
 ########################################################
 sub setTemplate {
+	my $self = shift;
 	for (qw| page name section |) {
 		next unless $_[2]->{$_};
 		if ($_[2]->{$_} =~ /;/) {
@@ -764,7 +767,7 @@ sub setTemplate {
 			return;
 		}
 	}
-	_genericSet('templates', 'tpid', '', @_);
+	$self->_genericSet('templates', 'tpid', '', @_);
 }
 
 ########################################################
@@ -842,12 +845,7 @@ sub setStoryCount {
 ########################################################
 sub getSectionTitle {
 	my($self) = @_;
-	my $sth = $self->{_dbh}->prepare("SELECT section,title FROM sections ORDER BY section");
-	$sth->execute;
-	my $sections = $sth->fetchall_arrayref;
-	$sth->finish;
-
-	return $sections;
+	return $self->sqlSelectAll('section, title', 'sections', '', 'ORDER BY section');
 }
 
 ########################################################
@@ -923,7 +921,9 @@ sub deleteAuthor {
 ########################################################
 sub deleteTopic {
 	my($self, $tid) = @_;
-	$self->sqlDo('DELETE from topics WHERE tid=' . $self->{_dbh}->quote($tid));
+	# Make sure All is immutable
+	return if !defined $tid || $tid eq $self->TopicAllKey;
+	$self->sqlDo('DELETE from topics WHERE tid = ?', [$tid]);
 }
 
 ########################################################
@@ -949,7 +949,9 @@ sub deleteTemplate {
 ########################################################
 sub deleteSection {
 	my($self, $section) = @_;
-	$self->sqlDo("DELETE from sections WHERE section='$section'");
+	# Make sure All is immutable
+	return if !defined $section || $section eq $self->SectionAllKey;
+	$self->sqlDo('DELETE from sections WHERE section = ?', [$section]);
 }
 
 ########################################################
@@ -1209,9 +1211,10 @@ sub deleteStoryAll {
 
 ########################################################
 sub setStory {
-	_genericSet('stories', 'sid', 'story_param', @_);
+	my $self = shift;
+	$self->_genericSet('stories', 'sid', 'story_param', @_);
 	# ??? should we do this?  -- pudge
-	_genericSet('newstories', 'sid', 'story_param', @_);
+	$self->_genericSet('newstories', 'sid', 'story_param', @_);
 }
 
 ########################################################
@@ -2303,10 +2306,10 @@ sub _saveExtras {
 
 ########################################################
 sub getStory {
-	my($self) = @_;
+	my $self = shift;
 	# We need to expire stories
-	_genericCacheRefresh($self, 'stories', getCurrentStatic('story_expire'));
-	my $answer = _genericGetCache('stories', 'sid', 'story_param', @_);
+	$self->_genericCacheRefresh('stories', getCurrentStatic('story_expire'));
+	my $answer = $self->_genericGetCache('stories', 'sid', 'story_param', @_);
 
 	return $answer;
 }
@@ -2422,21 +2425,23 @@ sub getAdmins {
 
 ########################################################
 sub getPollQuestion {
-	my $answer = _genericGet('pollquestions', 'qid', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGet('pollquestions', 'qid', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getDiscussion {
-	my $answer = _genericGet('discussions', 'sid', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGet('discussions', 'sid', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getBlock {
-	my($self) = @_;
-	_genericCacheRefresh($self, 'blocks', getCurrentStatic('block_expire'));
-	my $answer = _genericGetCache('blocks', 'bid', '', @_);
+	my $self = shift;
+	$self->_genericCacheRefresh('blocks', getCurrentStatic('block_expire'));
+	my $answer = $self->_genericGetCache('blocks', 'bid', '', @_);
 	return $answer;
 }
 
@@ -2453,9 +2458,9 @@ sub _getTemplateNameCache {
 
 ########################################################
 sub getTemplate {
-	my($self) = @_;
-	_genericCacheRefresh($self, 'templates', getCurrentStatic('block_expire'));
-	my $answer = _genericGetCache('templates', 'tpid', '', @_);
+	my $self = shift;
+	$self->_genericCacheRefresh('templates', getCurrentStatic('block_expire'));
+	my $answer = $self->_genericGetCache('templates', 'tpid', '', @_);
 	return $answer;
 }
 
@@ -2464,7 +2469,7 @@ sub getTemplate {
 sub getTemplateByName {
 	my($self, $name, $values, $cache_flag, $page, $section) = @_;
 	return if ref $name;	# no scalar refs, only text names
-	_genericCacheRefresh($self, 'templates', getCurrentStatic('block_expire'));
+	$self->_genericCacheRefresh('templates', getCurrentStatic('block_expire'));
 
 	my $table_cache = '_templates_cache';
 	my $table_cache_time= '_templates_cache_time';
@@ -2529,61 +2534,71 @@ sub getTemplateByName {
 
 ########################################################
 sub getTopic {
-	my $answer = _genericGetCache('topics', 'tid', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGetCache('topics', 'tid', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getTopics {
-	my $answer = _genericGetsCache('topics', 'tid', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGetsCache('topics', 'tid', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getTemplates {
-	my $answer = _genericGetsCache('templates', 'tpid', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGetsCache('templates', 'tpid', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getContentFilter {
-	my $answer = _genericGet('content_filters', 'filter_id', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGet('content_filters', 'filter_id', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getSubmission {
-	my $answer = _genericGet('submissions', 'subid', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGet('submissions', 'subid', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getSection {
-	my $answer = _genericGetCache('sections', 'section', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGetCache('sections', 'section', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getSections {
-	my $answer = _genericGetsCache('sections', 'section', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGetsCache('sections', 'section', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getModeratorLog {
-	my $answer = _genericGet('moderatorlog', 'id', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGet('moderatorlog', 'id', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getNewStory {
-	my $answer = _genericGet('newstories', 'sid', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGet('newstories', 'sid', '', @_);
 	return $answer;
 }
 
 ########################################################
 sub getVar {
-	my $answer = _genericGet('vars', 'name', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGet('vars', 'name', '', @_);
 	return $answer;
 }
 
@@ -2615,7 +2630,7 @@ sub setUser {
 		} # if nonref scalar, just let it pass
 	}
 
-	$cache = _genericGetCacheName($self, $tables);
+	$cache = $self->_genericGetCacheName($tables);
 
 	for (keys %$hashref) {
 		(my $clean_val = $_) =~ s/^-//;
@@ -2655,7 +2670,7 @@ sub getUser {
 	)];
 	# The sort makes sure that someone will always get the cache if
 	# they have the same tables
-	my $cache = _genericGetCacheName($self, $tables);
+	my $cache = $self->_genericGetCacheName($tables);
 
 	if (ref($val) eq 'ARRAY') {
 		my($values, %tables, @param, $where, $table);
@@ -2745,10 +2760,10 @@ sub _genericGetCacheName {
 # We assum most people called set to hit the database
 # and just not the cache (if one even exists)
 sub _genericSet {
-	my($table, $table_prime, $param_table, $self, $id, $value) = @_;
+	my($self, $table, $table_prime, $param_table, $id, $value) = @_;
 
 	if ($param_table) {
-		my $cache = _genericGetCacheName($self, $table);
+		my $cache = $self->_genericGetCacheName($table);
 
 		my(@param, %updates);
 		for (keys %$value) {
@@ -2809,9 +2824,10 @@ sub _genericCacheRefresh {
 # This is protected and don't call it from your
 # scripts directly.
 sub _genericGetCache {
-	return _genericGet(@_) unless getCurrentStatic('cache_enabled');
+	my $self = shift;
+	return $self->_genericGet(@_) unless getCurrentStatic('cache_enabled');
 
-	my($table, $table_prime, $param_table,  $self, $id, $values, $cache_flag) = @_;
+	my($table, $table_prime, $param_table, $id, $values, $cache_flag) = @_;
 	my $table_cache = '_' . $table . '_cache';
 	my $table_cache_time= '_' . $table . '_cache_time';
 
@@ -2861,7 +2877,7 @@ sub _genericGetCache {
 # This is protected and don't call it from your
 # scripts directly.
 sub _genericClearCache {
-	my($table, $self) = @_;
+	my($self, $table) = @_;
 	my $table_cache= '_' . $table . '_cache';
 
 	$self->{$table_cache} = {};
@@ -2871,14 +2887,14 @@ sub _genericClearCache {
 # This is protected and don't call it from your
 # scripts directly.
 sub _genericGet {
-	my($table, $table_prime, $param_table, $self, $id, $val) = @_;
+	my($self, $table, $table_prime, $param_table, $id, $val) = @_;
 	my($answer, $type);
 	my $id_db = $self->{_dbh}->quote($id);
 
 	if ($param_table) {
 	# With Param table 
 		if (ref($val) eq 'ARRAY') {
-			my $cache = _genericGetCacheName($self, $table);
+			my $cache = $self->_genericGetCacheName($table);
 
 			my($values, @param);
 			for (@$val) {
@@ -2898,7 +2914,7 @@ sub _genericGet {
 			}
 
 		} elsif ($val) {
-			my $cache = _genericGetCacheName($self, $table);
+			my $cache = $self->_genericGetCacheName($table);
 			(my $clean_val = $val) =~ s/^-//;
 			my $table = $self->{$cache}{$clean_val};
 			if ($table) {
@@ -2934,9 +2950,10 @@ sub _genericGet {
 # This is protected and don't call it from your
 # scripts directly.
 sub _genericGetsCache {
-	return _genericGets(@_) unless getCurrentStatic('cache_enabled');
+	my $self = shift;
+	return $self->_genericGets(@_) unless getCurrentStatic('cache_enabled');
 
-	my($table, $table_prime, $param_Table, $self, $cache_flag) = @_;
+	my($table, $table_prime, $param_Table, $cache_flag) = @_;
 	my $table_cache= '_' . $table . '_cache';
 	my $table_cache_time= '_' . $table . '_cache_time';
 	my $table_cache_full= '_' . $table . '_cache_full';
@@ -2957,7 +2974,7 @@ sub _genericGetsCache {
 #		$self->{$table_cache}{ $row->{$table_prime} } = $row;
 #	}
 #	$sth->finish;
-	$self->{$table_cache} = _genericGets(@_);
+	$self->{$table_cache} = $self->_genericGets(@_);
 	$self->{$table_cache_full} = 1;
 	$self->{$table_cache_time} = time();
 
@@ -2969,14 +2986,14 @@ sub _genericGetsCache {
 # This is protected and don't call it from your
 # scripts directly.
 sub _genericGets {
-	my($table, $table_prime, $param_table, $self, $values) = @_;
+	my($self, $table, $table_prime, $param_table, $values) = @_;
 	my(%return, $sth, $params);
 
 	if (ref($values) eq 'ARRAY') {
 		my $get_values;
 
 		if ($param_table) {
-			my $cache = _genericGetCacheName($self, $table);
+			my $cache = $self->_genericGetCacheName($table);
 			for (@$values) {
 				(my $clean_val = $values) =~ s/^-//;
 				if ($self->{$cache}{$clean_val}) {
@@ -2996,7 +3013,7 @@ sub _genericGets {
 		$sth = $self->sqlSelectMany($val, $table);
 	} elsif ($values) {
 		if ($param_table) {
-			my $cache = _genericGetCacheName($self, $table);
+			my $cache = $self->_genericGetCacheName($table);
 			(my $clean_val = $values) =~ s/^-//;
 			my $use_table = $self->{$cache}{$clean_val};
 
@@ -3040,13 +3057,15 @@ sub _genericGets {
 
 ########################################################
 sub getStories {
-	my $answer = _genericGets('stories', 'sid', 'story_param', @_);
+	my $self = shift;
+	my $answer = $self->_genericGets('stories', 'sid', 'story_param', @_);
 	return $answer;
 }
 
 ########################################################
 sub getSessions {
-	my $answer = _genericGets('sessions', 'session', '', @_);
+	my $self = shift;
+	my $answer = $self->_genericGets('sessions', 'session', '', @_);
 	return $answer;
 }
 
