@@ -94,13 +94,12 @@ change your password, or just click pretty widgets to kill time.
 	<P></TD></TR></TABLE>
 
 [% CASE 'saveuser_email_msg' %]
-	The user account [% nickname %] on [% constants.sitename %]
-	had this email associated with it.  A web user from
-	[% env.remote_addr %] has just changed it to
-	[% realemail | strip_literal %].
+The user account [% nickname %] on [% constants.sitename %] had this email associated
+with it.  A web user from [% env.remote_addr %] has just changed it to
+[% realemail | strip_literal %].
 
-	If this is not correct, if you did not request this change,
-	please contact the site administrator immediately.
+If this is not correct, if you did not request this change,
+please contact the site administrator immediately.
 
 	[% constants.siteadmin_name %]
 	[% constants.adminmail %]
