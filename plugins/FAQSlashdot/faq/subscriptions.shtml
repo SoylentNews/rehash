@@ -270,11 +270,21 @@ they want... or down, if they're prejudiced against subscribers for
 some reason. If you're bashful, you can switch this off (check the
 "No Subscriber Bonus" checkbox while posting).
 
+<!--
+(This no longer applies, since everyone can exclude sections and authors
+from the homepage, and as many as they want -- but not topics.)
 <li>You get to
 <a href="//slashdot.org/users.pl?op=edithome">exclude more topics</a>
 from the homepage. Yeah, we give our subscribers what they want: Less
 Slashdot!  Non-subscribers can exclude about 17 topics on average,
 subscribers about 60.
+-->
+
+<li>Your RSS feed, linked from the bottom of the homepage, will be
+customized for your <a href="/my/homepage">homepage preferences</a>.
+If you have sections set up to always appear on your homepage, they
+will be in your custom RSS feed too -- and the same holds for sections
+or authors you have excluded.
 
 </ul>
 
