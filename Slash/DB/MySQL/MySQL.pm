@@ -8621,6 +8621,8 @@ sub getSection {
 
 	return undef if !$skin;
 
+	$skin = { %$skin };  # copy, don't change!
+
 	# Now, for historical reasons, we pad this out with the
 	# information that was in there before. - Jamie 2004/05
 	$skin->{artcount} = $skin->{artcount_max};
@@ -8629,16 +8631,6 @@ sub getSection {
 	$skin->{last_update} = $skin->{last_rewrite};
 	$skin->{qid} = 0; # XXXSECTIONTOPICS this is wrong
 	$skin->{rewrite} = $skin->{max_rewrite_secs};
-	if ($skin->{url}) {
-		my $rootdir_uri = new URI($skin->{url});
-		$rootdir_uri->scheme("");
-		$skin->{rootdir} = $rootdir_uri->as_string;
-	} else {
-		# XXXSECTIONTOPIC should do this with mainpage_skid,
-		# see the comment in getSkins.
-		my $gSkin = getCurrentSkin();
-		$skin->{rootdir} = $gSkin->{rootdir};
-	}
 	$skin->{section} = $skin->{name};
 	$skin->{type} = $skin->{name} =~ /^(index|mainpage)$/ ? 'collected' : 'contained'; # XXXSECTIONTOPICS this is a hack guess and probably wrong in at least one case
 	my $topic_tree = $self->getTopicTree();
