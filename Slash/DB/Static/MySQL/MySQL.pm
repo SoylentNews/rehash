@@ -323,6 +323,25 @@ sub forgetUsersLogtokens {
 
 ########################################################
 # For daily_forget.pl
+sub forgetUsersLastLookTime {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => "reader" });
+	my $min_lastlooktime = time - ($constants->{lastlookmemory} + 86400*7);
+	my $uids = $reader->sqlSelectColArrayref("uid", "users_param",
+		"name='lastlooktime' AND value < '$min_lastlooktime'");
+
+	my $splice_count = 2000;
+	while (@$uids) {
+		my @uid_chunk = splice @$uids, 0, $splice_count;
+		my $uids_in = join(",", @uid_chunk);
+		$self->sqlDelete("users_param",
+			"name IN ('lastlooktime', 'lastlookuid') AND uid IN ($uids_in)");
+	}
+}
+
+########################################################
+# For daily_forget.pl
 sub forgetCommentIPs {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
