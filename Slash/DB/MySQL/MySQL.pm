@@ -2822,9 +2822,34 @@ sub deleteTopic {
 
 	if ($newtid) {
 		### check to see if this would create a children/parent loop!
-		$self->sqlUpdate('topic_parents', {
-			parent_tid => $newtid
-		}, "tid=$tid_q");
+		my @children = $slashdb->getAllChildrenTids($tid);
+		if (grep { $_ == $newtid } @children) {
+			# Houston we have a problem.  Throw an informative
+			# error here. - Jamie
+		}
+
+		# We have to do two things in the topic_parents table.  In both
+		# cases, we ignore failed UPDATEs, which will happen if the new
+		# tid/parent_tid unique key collides with an existing row, which
+		# would indicate that the topic in question has a relationship
+		# with the new topic already.  Ignoring the failure means that
+		# the already-existing min_weight will be unchanged, which is
+		# what we want.  Afterwards we delete any rows which failed to
+		# UPDATE.
+		# The first thing is to update the to-be-deleted topic's children
+		# to instead point to its replacement.
+		$self->sqlUpdate('topic_parents',
+			{ parent_tid => $newtid },
+			"parent_tid=$tid_q",
+			{ ignore => 1 });
+		$self->sqlDelete('topic_parents', "parent_tid=$tid_q");
+		# Second, update the to-be-deleted topic's parents to instead
+		# be pointed-to by its replacement.
+		$self->sqlUpdate('topic_parents',
+			{ tid => $newtid },
+			"tid=$tid_q",
+			{ ignore => 1 });
+		$self->sqlDelete('topic_parents', "tid=$tid_q");
 
 		for my $table (qw(stories submissions journals)) {
 			$self->sqlUpdate($table, {
