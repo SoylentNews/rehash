@@ -125,9 +125,6 @@ sub getUptime {
 
 	my $stats = $x;
 
-# This can take a long while on inno.  Since we're doing this every hour,
-# and since this isn't terribly interesting data, skip it.
-#	my($today, $yesterday) = $backupdb->getAccesslogCountTodayAndYesterday();
 #	my $tc = $constants->{totalComments};
 	my $th = $constants->{totalhits};
 

@@ -611,23 +611,6 @@ sub randomBlock {
 
 }
 
-########################################################
-# For portald
-# ugly method name
-sub getAccesslogCountTodayAndYesterday {
-	my($self) = @_;
-	my $c = $self->sqlSelectMany("count(*), to_days(now()) - to_days(ts) as d",
-		"accesslog",
-		"",
-		"GROUP by d order by d asc");
-
-	my($today) = $c->fetchrow;
-	my($yesterday) = $c->fetchrow;
-	$c->finish;
-
-	return ($today, $yesterday);
-
-}
 
 ########################################################
 # For portald

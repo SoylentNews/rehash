@@ -42,6 +42,7 @@ CREATE TABLE accesslist (
 	reason varchar(120), 
 	wasbanned tinyint unsigned DEFAULT 0 NOT NULL,
 	wasreadonly tinyint unsigned DEFAULT 0 NOT NULL,
+	isproxy enum("no","yes") DEFAULT "no" NOT NULL,
 	PRIMARY KEY id (id), 
 	key uid (uid), 
 	key ipid (ipid), 
