@@ -866,7 +866,9 @@ They get
 for helping support the site, including the asterisk and the glorious
 bragging rights that go along with it. If you are
 <a href="//slashdot.org/users.pl">logged in</a>,
-you can use this information to assign a bonus or penalty to their
+you can use this information to assign a
+<a href="//slashdot.org/users.pl?op=editcomm#subscriber_bonus">bonus or penalty</a>
+to their
 default comment score.  Or disable it outright.  It's really up to you.
 
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
