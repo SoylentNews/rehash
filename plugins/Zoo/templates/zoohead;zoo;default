@@ -18,7 +18,7 @@ __template__
 		<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
 			<TR>
 				<TD><FONT SIZE=-1>
-					[ <A HREF="[% constants.rootdir %]/my/friends/friends">Friends of Friends</A> | <A HREF="[% constants.rootdir %]/my/friends/friends">Foes of Friends</A> ]
+					[ <A HREF="[% constants.rootdir %]/my/friends/friends">Friends of Friends</A> | <A HREF="[% constants.rootdir %]/my/friends/foes">Foes of Friends</A> ]
 				</FONT>
 				</TD>
 			</TR>
