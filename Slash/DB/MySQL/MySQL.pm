@@ -5907,7 +5907,6 @@ sub getVar {
 ########################################################
 sub setUser {
 	my($self, $uid, $hashref, $options) = @_;
-#use Data::Dumper; print STDERR "setUser params: " . Dumper([ $uid, $hashref, $options ]) if $options;
 	return 0 unless $uid;
 
 	my(@param, %update_tables, $cache);
@@ -5972,7 +5971,6 @@ sub setUser {
 					if (defined($and_where)) {
 						$where .= " AND ($and_where)";
 					}
-#print STDERR "key '$key' minihash{$key} '$minihash{$key}' clean_val '$clean_val' and_where '$and_where' where '$where' options " . Dumper($options) if defined($options) && keys %$options;
 				}
 			}
 		}
