@@ -400,12 +400,12 @@ sub _querylog_writecache {
 		&& @{$self->{_querylog}{cache}};
 	my $dbh = $self->{_querylog}{db}{_dbh};
 	return unless $dbh;
-	$dbh->do("SET AUTOCOMMIT=0");
+	$dbh->{AutoCommit} = 0;
 	while (my $sql = shift @{$self->{_querylog}{cache}}) {
 		$dbh->do($sql);
 	}
-	$dbh->do("COMMIT");
-	$dbh->do("SET AUTOCOMMIT=1");
+	$dbh->commit;
+	$dbh->{AutoCommit} = 1;
 }
 
 ########################################################
