@@ -118,9 +118,10 @@ sub create {
 				# real actual UID for "database integrity"
 	}
 
+	my $origtype = $type;
 	(my($code), $type) = $self->getDescription('messagecodes', $type);
 	unless (defined $code) {
-		messagedLog(getData("type not found", { type => $type }, "messages"));
+		messagedLog(getData("type not found", { type => $origtype }, "messages"));
 		return 0;
 	}
 
