@@ -20,18 +20,12 @@ __template__
 	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
 	{ link = "$constants.rootdir/stats.pl",			label = "Stats",		sel_label = "stats" },
 	{ link = "$constants.rootdir/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
-	{ link = "$constants.rootdir/users.pl?op=topabusers",	label = "Abusers",		sel_label = "abusers" },
-	{ link = "$constants.rootdir/users.pl?op=listreadonly",	label = "Read&nbsp;Only",	sel_label = "readonly" },
-	{ link = "$constants.rootdir/users.pl?op=listbanned",	label = "Banned",		sel_label = "banned" },
-	{ link = "$constants.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
-	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Posting",		sel_label = "recent" },
-	{ link = "$constants.rootdir/admin.pl?op=recent_mods",	label = "Mods",			sel_label = "recent_mods" },
-	{ link = "$constants.rootdir/admin.pl?op=recent_requests", label = "Reqs",		sel_label = "requests" },
 	{ link = "$constants.rootdir/admin.pl?op=recent_subs",	label = "Subs",			sel_label = "subs" },
+	{ link = "$constants.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
 	{ link = "$constants.rootdir/admin.pl?op=recent_webheads", label = "Webheads",		sel_label = "webheads" },
 	{ link = "$constants.rootdir/admin.pl?op=mcd_stats",	label = "Memcached",		sel_label = "mcdstats" },
+	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "security" },
 	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
-	{ link = "$constants.rootdir/slashguide.shtml",		label = "Help",			sel_label = "help" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]
 

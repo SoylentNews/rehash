@@ -25,8 +25,8 @@ __template__
 	{ link = "$constants.rootdir/submit.pl?op=list",	label = "$subs&nbsp;Submissions", sel_label = "submissions" },
 	{ link = "$constants.rootdir/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
 	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "topics" },
-	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Info",			sel_label = "recent" },
-	{ link = "$constants.rootdir/slashguide.shtml",		label = "Help",			sel_label = "help" },
+	{ link = "$constants.rootdir/stats.pl",			label = "Info",			sel_label = "stats" },
+	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "recent" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; lightfontcolor=lightfontcolor || "" %]
 __seclev__
