@@ -151,8 +151,8 @@ EOT
 	my($change, $excon);
 	if ($y > $I{m2_mincheck}) {
 		if (!$flag && karmaBonus()) {
-			# Bonus Karma For Helping Out - the idea here, is to not let 
-			# meta-moderators get the +1 posting bonus.
+			# Bonus Karma For Helping Out - the idea here, is to not 
+			# let meta-moderators get the +1 posting bonus.
 			($change, $excon) =
 				("karma$I{m2_bonus}", "and karma<$I{m2_maxbonus}");
 			$change = $I{m2_maxbonus}
@@ -183,10 +183,9 @@ sub metaMod {
 	if ($muid && $val && !$flag) {
 		if ($val eq '+') {
 			sqlUpdate("users_info", { -m2fair => "m2fair+1" }, "uid=$muid");
-			# The only limit on karma accumulated by good moderators is the 
-			# the system limit.
+			# There is a limit on how much karma you can get from M2.
 			sqlUpdate("users_info", { -karma => "karma+1" },
-				"$muid=uid and karma<$I{maxkarma}");
+				"$muid=uid and karma<$I{m2_maxbonus}");
 		} elsif ($val eq '-') {
 			sqlUpdate("users_info", { -m2unfair => "m2unfair+1" },
 				"uid=$muid");
@@ -281,8 +280,8 @@ EOT
 		# The '-' in place of nickname -may- be a problem, though. And we
 		# Probably shouldn't assume a score of 0, here either but we'll leave
 		# it for now.
-		@{%{$C}}{qw(nickname uid fakeemail homepage points)} =
-			('-', -1, '', '', 0);
+		@{%{$C}}{qw(nickname uid fakeemail homepage points sig)} =
+			('-', -1, '', '', 0, '');
 		dispComment($C);
 		printf <<EOT, linkStory({ 'link' => $C->{title}, sid => $C->{sid} });
 	<TR><TD>
@@ -320,7 +319,7 @@ sub isEligible {
 
 	my($tuid) = sqlSelect("count(*)", "users");
 	
-	if ($I{U}{uid} > int($tuid * $I{m2_percentage}) ) {
+	if ($I{U}{uid} > int($tuid * $I{m2_userpercentage}) ) {
 		print "You haven't been a $I{sitename} user long enough.";
 		return 0;
 	}
