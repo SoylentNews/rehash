@@ -489,9 +489,11 @@ sub pollSearchRSS {
 	my @items;
 	for my $entry (@$stories) {
 		my $time = timeCalc($entry->{date});
+		my $url = $slashdb->getSection($entry->{section}, 'url');
+		my $link = $url ? $url . '/' : $constants->{absolutedir};
 		push @items, {
 			title	=> "$entry->{question} ($time)",
-			'link'	=> ($constants->{absolutedir} . 'pollBooth.pl?qid=' . $entry->{qid}),
+			'link'	=> ($url . 'pollBooth.pl?qid=' . $entry->{qid}),
 		};
 	}
 

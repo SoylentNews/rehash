@@ -330,7 +330,7 @@ sub findPollQuestion {
 
 	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
-	my $columns = "qid, question, voters, date";
+	my $columns = "*";
 	$columns .= ", TRUNCATE( " . $self->_score('question', $form->{query}, $constants->{search_method}) . ", 1) as score "
 		if $form->{query};
 	my $tables = "pollquestions";
