@@ -22,7 +22,7 @@ __template__
 
 <TR>
 
-<TD COLSPAN="4" VALIGN="TOP">
+<TD VALIGN="TOP" COLSPAN="3">
 
 __seclev__
 500
