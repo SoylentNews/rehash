@@ -34,34 +34,57 @@ ELSE;
 END %]
 
 [% tabs = [ ];
+plugins = Slash.db.getDescriptions("plugins");
 IF user.uid == uid;
 	tabs = [
 		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
-		{ link = "/my/inbox",		label = "Messages",	sel_label = "messages" },
-		{ link = "/my/friends",		label = "Friends",	sel_label = "friends" },
-		{ link = "/my/fans",		label = "Fans",		sel_label = "fans" },
-		{ link = "/my/foes",		label = "Foes",		sel_label = "foes" },
-		{ link = "/my/freaks",		label = "Freaks",	sel_label = "freaks" },
 	];
+	IF plugins.Journal; tabs.push(
+		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+	); END;
+	IF plugins.Messages; tabs.push(
+		{ link = "/my/inbox",		label = "Messages",	sel_label = "messages" },
+	); END;
+	IF plugins.Zoo; tabs.push(
+		{ link = "/my/friends",		label = "Friends",	sel_label = "friends" },
+	); tabs.push(
+		{ link = "/my/fans",		label = "Fans",		sel_label = "fans" },
+	); tabs.push(
+		{ link = "/my/foes",		label = "Foes",		sel_label = "foes" },
+	); tabs.push(
+		{ link = "/my/freaks",		label = "Freaks",	sel_label = "freaks" },
+	); END;
 ELSIF user.is_anon;
 	tabs = [
 		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
-		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
-		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
-		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
-		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
 	];
+	IF plugins.Journal; tabs.push(
+		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+	); END;
+	IF plugins.Zoo; tabs.push(
+		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+	); tabs.push(
+		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+	); tabs.push(
+		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+	); tabs.push(
+		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
+	); END;
 ELSE;
 	tabs = [
 		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
-		{ link = "/zoo.pl?op=check&uid=$uid", label = "Relation", sel_label = "relation" },
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
-		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
-		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
-		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
 	];
+	IF plugins.Zoo; tabs.push(
+		{ link = "/zoo.pl?op=check&uid=$uid", label = "Relation", sel_label = "relation" },
+	); tabs.push(
+		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+	); tabs.push(
+		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+	); tabs.push(
+		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+	); tabs.push(
+		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+	); END;
 END;
 
 PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]

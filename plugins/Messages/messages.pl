@@ -261,7 +261,7 @@ sub list_messages {
 		style =>	'tabbed',
 		justify =>	'right',
 		color =>	'colored',
-		tab_selected =>	'users',
+		tab_selected =>	'me',
 	});
 	slashDisplay('user_titlebar', {
 		nickname => $user->{nickname},

@@ -1243,7 +1243,6 @@ sub tildeEd {
 		$section_descref->{$bid}{title} = $title;
 	}
 
-	my $tilded_customize_msg = getMessage('tilded_customize_msg');
 	my $tilded_box_msg = getMessage('tilded_box_msg');
 	$tilde_ed = slashDisplay('tildeEd', {
 		title			=> $title,

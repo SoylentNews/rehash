@@ -18,17 +18,27 @@ __template__
 [% title = title || "$user.nickname (This is you!)";
 PROCESS titlebar title=title width="100%";
 
-tabs = [ ];
+plugins = Slash.db.getDescriptions("plugins");
 tabs = [
 	{ link = "/users.pl?op=edituser",	label = "User",		sel_label = "user" },
 	{ link = "/users.pl?op=edithome",	label = "Homepage",	sel_label = "home" },
-	{ link = "/users.pl?op=editcomm",	label = "Comments",	sel_label = "comments" },
-	{ link = "/my/inbox",			label = "Messages",	sel_label = "messages" },
-	{ link = "/journal.pl?op=editprefs",	label = "Journal",	sel_label = "journal" },
-	{ link = "/users.pl?op=editmiscopts",	label = "Misc",		sel_label = "misc" },
-	{ link = "/subscribe.pl",		label = "Subscription",	sel_label = "subscription" },
-	{ link = "/users.pl?op=changepasswd",	label = "Password",	sel_label = "password" },
+	{ link = "/users.pl?op=editcomm",	label = "Comments",	sel_label = "comments" }
 ];
+IF plugins.Messages; tabs.push(
+	{ link = "/my/messages",		label = "Messages",	sel_label = "messages" },
+); END;
+IF plugins.Journal; tabs.push(
+	{ link = "/journal.pl?op=editprefs",	label = "Journal",	sel_label = "journal" },
+); END;
+IF Slash.db.getMiscUserOpts.size; tabs.push(
+	{ link = "/users.pl?op=editmiscopts",	label = "Misc",		sel_label = "misc" },
+); END;
+IF plugins.Subscribe; tabs.push(
+	{ link = "/subscribe.pl",		label = "Subscription",	sel_label = "subscription" },
+); END;
+tabs.push(
+	{ link = "/users.pl?op=changepasswd",	label = "Password",	sel_label = "password" },
+);
 
 PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
 
