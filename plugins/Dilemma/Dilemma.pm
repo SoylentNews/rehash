@@ -8,12 +8,10 @@ package Slash::Dilemma;
 use strict;
 use Time::HiRes;
 use Safe;
-use Storable qw( freeze thaw );
+use Storable qw( freeze thaw dclone );
 use Slash::Utility;
 use Slash::DB::Utility;
-use vars qw($VERSION
-	%me %it $foodsize $me_play $it_play
-);
+use vars qw($VERSION);
 use base 'Slash::DB::Utility';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -161,7 +159,7 @@ sub doTickHousekeeping {
 	my($self) = @_;
 	my $info = $self->getDilemmaInfo();
 
-#print STDERR "doTickHousekeeping info: " . Dumper($info);
+##print STDERR "doTickHousekeeping info: " . Dumper($info);
 
 	# If the info is complete, this is easy.
 	return 0 if $info->{alive} ne 'yes';
@@ -203,7 +201,7 @@ sub doTickHousekeeping {
 		"dilemma_agents",
 		"food >= $birth_food_q");
 	my $species_births_hr = $self->reproduceAgents($fat_daids);
-#print STDERR "species_births_hr: " . Dumper($species_births_hr);
+##print STDERR "species_births_hr: " . Dumper($species_births_hr);
 	# Update the species stats for the births.
 	for my $dsid (keys %$species_births_hr) {
 		my $dsid_q = $self->sqlQuote($dsid);
@@ -231,6 +229,7 @@ sub doTickHousekeeping {
 	# Write count info for the species into dilemma_stats.
 	my $species = $self->getDilemmaSpeciesInfo();
 	for my $dsid (keys %$species) {
+		# Should this be an sqlReplace instead?
 		$self->sqlInsert("dilemma_stats", {
 			tick => $last_tick,
 			dsid => $dsid,
@@ -274,14 +273,16 @@ sub getAgents {
 		my $memory = $agent_data->{$daid}{memory};
 		my $thawed = undef;
 		if ($memory) {
-			$thawed = thaw($memory);
+			my $thawed_ref = thaw($memory);
+#print STDERR "thawed_ref: " . Dumper($thawed_ref);
+			$thawed = $$thawed_ref if defined($thawed_ref);
 		}
 		$agent_data->{$daid}{memory} = $thawed;
 		# Copy over a few fields from its species.
 		$agent_data->{$daid}{code} = $species->{$agent_data->{$daid}{dsid}}{code};
 		$agent_data->{$daid}{species_name} = $species->{$agent_data->{$daid}{dsid}}{name};
 	}
-#use Data::Dumper; print STDERR "agent_data: " . Dumper($agent_data);
+#use Data::Dumper; print STDERR "agent_data for daids '$daids_list': " . Dumper($agent_data);
 	return $agent_data;
 }
 
@@ -292,115 +293,254 @@ sub setAgents {
 	# lock table here
 	my $total_rows = 0;
 	for my $daid (@daids) {
-		my %new = %{$agent_data->{$daid}};
+		my $new_hr = dclone($agent_data->{$daid});
 		my $daid_q = $self->sqlQuote($daid);
-		delete $new{daid};
-		delete $new{code};
-		delete $new{species_name};
-		if (defined $new{memory}) {
-			my $frozen_memory = freeze($new{memory});
+		delete $new_hr->{daid};
+		delete $new_hr->{code};
+		delete $new_hr->{species_name};
+		if (defined $new_hr->{memory}) {
+			my $frozen_memory = freeze(\$new_hr->{memory});
 			# Agents can't save memories longer than a certain
-			# limit;  those that try get BRAIN-WIPED.
+			# limit;  those that try get BRAIN-WIPED.  Mwoohaha.
 			$frozen_memory = "" if length($frozen_memory) > 10_000;
-			$new{memory} = $frozen_memory;
+			$new_hr->{memory} = $frozen_memory;
 		} else {
-			$new{memory} = "";
+			$new_hr->{memory} = "";
 		}
-#print STDERR "setAgents updating: " . Dumper(\%new);
+#print STDERR "setAgents daid=$daid updating: " . Dumper($new_hr);
 		$total_rows += $self->sqlUpdate(
 			"dilemma_agents",
-			\%new,
+			$new_hr,
 			"daid=$daid_q");
 	}
 	# unlock table
 	return $total_rows;
 }
 
+sub runSafeWithGlobals {
+	my($self, $code, $global_hr, $options) = @_;
+	my $debug_str = $options->{debuginfo} || "";
+	my $start_time = Time::HiRes::time;
+	my $safe = new Safe();
+	$safe->permit(qw( :default :base_math ));
+	for my $key (sort keys %$global_hr) {
+		my($type, $varname) = $key =~ /^([\$\@\%])([A-Za-z]\w*)$/;
+		if (!$type) { warn "no type match for key '$key'" }
+		next unless $type;
+		my $vg = $safe->varglob($varname);
+		my $value = $global_hr->{$key};
+		   if ($type eq '$') { $$vg =  $value }
+		elsif ($type eq '@') { @$vg = @$value }
+		elsif ($type eq '%') { %$vg = %$value }
+#		   if ($type eq '$') { $$vg =  $value; print STDERR "rswg set scalar '$vg' to '$value'\n" }
+#		elsif ($type eq '@') { @$vg = @$value; print STDERR "rswg set array '$vg' to '@$value'\n" }
+#		elsif ($type eq '%') { %$vg = %$value; print STDERR "rswg set hash '$vg' to keys '" . join(" ", sort keys %$value) . "'\n" }
+	}
+	my($err, $retval);
+	$code = [ $code ] if ref($code) ne 'ARRAY';
+	for my $line (@$code) {
+		$retval = $safe->reval($line);
+		$err = $@;
+		last if $err;
+	}
+	my $elapsed = Time::HiRes::time - $start_time;
+	if ($err) {
+		# A code error is interpreted as total defection.
+		$retval = 0;
+		if ($err && $err =~ /Undefined subroutine .*debrief called/) {
+			# Don't log this if the problem is simply that
+			# an optional function is not defined.
+			$err = "";
+		}
+	}
+	if ($err) {
+		$debug_str = " debug_info='$debug_str'" if $debug_str;
+		chomp $err;
+#		printf STDERR "Safe->reval%s error: '%s'\n",
+#			$debug_str,
+#			$err;
+	}
+#use Data::Dumper;
+#printf STDERR "runSafeWithGlobals in %.5f secs for '%s', global_hr_memory_hash: %s", $elapsed, $debug_str, Dumper($global_hr->{"\%memory"});
+	return($retval, $safe);
+}
+
+sub agentPlay {
+	my($self, $play_hr) = @_;
+
+	my $agent_data	= $play_hr->{agent_data};
+	my $info	= $play_hr->{info};
+	my $me_daid	= $play_hr->{me_daid};
+	my $it_daid	= $play_hr->{it_daid};
+
+	# For convenience.
+	my %me = %{ $agent_data->{$me_daid} };
+#use Data::Dumper; print STDERR "agentPlay daid=$me_daid me: " . Dumper(\%me);
+
+	# Call the play() function.
+	my @code = ( $me{code}, "play()" );
+
+	# Create the package in which this agent will run.  There may be
+	# a way to save some time here by caching it and poking in the
+	# values of its globals afterwards, I don't know.
+	my($response) = $self->runSafeWithGlobals( \@code, {
+		'$memory'	=> $me{memory},
+		'$cur_tick'	=> $info->{last_tick},
+		'$foodsize'	=> $play_hr->{foodsize},
+		'$me_id'	=> $me_daid,
+		'$me_food'	=> $me{food},
+		'$it_id'	=> $it_daid,
+	}, { debuginfo => "agentPlay daid=$me{daid} dsid=$me{dsid}" });
+
+	# Convert undef, "", "0 but true", 0E0, etc. all to 0;
+	# canonicalize scientific notation and so on.
+	$response += 0;
+
+	# Failure to respond with a number between 0 and 1
+	# is interpreted as total defection.
+	if (!defined($response)
+		|| !length($response)
+		|| $response < 0
+		|| $response > 1) {
+		$response = 0;
+	}
+
+##printf STDERR "$agent_data->{$me_daid}{species_name}/$me_daid played %.3f against $agent_data->{$it_daid}{species_name}/$it_daid\n", ($response || 0);
+
+	return $response;
+}
+
+sub agentDebrief {
+	my($self, $debrief_hr) = @_;
+
+	my $agent_data	= $debrief_hr->{agent_data};
+	my $info	= $debrief_hr->{info};
+	my $me_daid	= $debrief_hr->{me_daid};
+	my $it_daid	= $debrief_hr->{it_daid};
+
+	# For convenience.
+	my %me = %{ $agent_data->{$me_daid} };
+
+	# Call the debrief() function.
+	my @code = ( $me{code}, "debrief()" );
+
+	# Create the package in which this agent will run.  Note that
+	# unlike agentPlay() we don't care about the return value,
+	# but we are going to need the Safe object to pull out the
+	# (presumably updated) memory value.
+#use Data::Dumper;
+##print STDERR "agentDebrief me_memory: " . Dumper($me{memory});
+	my $memory_clone = undef;
+	if (defined($me{memory})) {
+		if (ref($me{memory})) {
+			$memory_clone = dclone($me{memory});
+		} else {
+			$memory_clone = $me{memory};
+		}
+	}
+#print STDERR "agentDebrief me_daid=$me_daid memory_clone: " . Dumper($memory_clone);
+	my($dummy, $safe) = $self->runSafeWithGlobals( \@code, {
+		'$memory'	=> $memory_clone,
+		'$cur_tick'	=> $info->{last_tick},
+		'$foodsize'	=> $debrief_hr->{foodsize},
+		'$me_id'	=> $me_daid,
+		'$me_food'	=> $me{food},
+		'$me_play'	=> $debrief_hr->{me_play},
+		'$me_gain'	=> $debrief_hr->{me_gain},
+		'$it_id'	=> $it_daid,
+		'$it_play'	=> $debrief_hr->{it_play},
+		'$it_gain'	=> $debrief_hr->{it_gain},
+	}, { debuginfo => "agentDebrief daid=$me{daid} dsid=$me{dsid}" });
+	my $new_memory_varglob = $safe->varglob("memory");
+	my $new_memory = undef;
+	   if (defined($$new_memory_varglob))	{ $new_memory =  $$new_memory_varglob }
+	elsif (@$new_memory_varglob)		{ $new_memory = \@$new_memory_varglob }
+	elsif (%$new_memory_varglob)		{ $new_memory = \%$new_memory_varglob }
+#use Data::Dumper; print STDERR "agentDebrief me_daid=$me_daid it_daid=$it_daid safe '$safe' nmv '$new_memory_varglob' nm: " . Dumper($new_memory) . "me{memory}: " . Dumper($me{memory}) . "memory_clone: " . Dumper($memory_clone);
+	return $new_memory;
+}
+
 sub agentsMeet {
 	my($self, $meeting_hr) = @_;
 	my $daids = $meeting_hr->{daids};
-	$foodsize = $meeting_hr->{foodsize};
+	my $foodsize = $meeting_hr->{foodsize};
 
+	my $info = $self->getDilemmaInfo();
 	my $agent_data = $self->getAgents($daids);
-	my %response = ( );
 
-	for my $daid (@$daids) {
-		# Spin off a copy of this agent and store it in
-		# $me for its code to read as it seems fit.
-		%me = %{ $agent_data->{$daid} };
+	# For each agent, get its play by calling its play() function.
 
-		# Here's the only info an agent gets about its
-		# opponent:  its daid.  It might be fun to pass
-		# along something about its age, or how much
-		# food it has, so agents could use that info
-		# if they wants.  But for now, just the daid.
-		my($it_daid) = grep { $_ != $daid } @$daids;
-		%it = ( daid => $it_daid );
-
-		$me_play = $it_play = undef;
-
-		# Call each species' code for the first time.
-		# $me_play and $it_play are undef, indicating
-		# we need a response.
-
-		my $safe = new Safe();
-		$safe->permit(qw( :default :base_math :base_loop ));
-		$safe->share(qw( %me %it $foodsize $me_play $it_play ));
-		my $start_time = Time::HiRes::time;
-		my $response = $safe->reval($me{code});
-		print STDERR "agentsMeet 1 \$\@: '$@'\n" if $@;
-#printf STDERR "$agent_data->{$daid}{species_name}/$me{daid} played %.3f against $agent_data->{$it_daid}{species_name}/$it{daid}\n", ($response || 0);
-		my $elapsed = Time::HiRes::time - $start_time;
-
-		if (!defined($response)
-			|| !length($response)
-			|| $response !~ /^\d*(\.\d+)?$/
-			|| $response < 0
-			|| $response > 1) {
-			# Failure to respond with a number between
-			# 0 and 1 means total cooperation.
-			$response{$daid} = 1;
-		} else {
-			$response{$daid} = $response;
-		}
-	}
-#print STDERR "response: " . Dumper(\%response);
+	my @response = ( );
+	$response[0] = $self->agentPlay({
+		agent_data =>	$agent_data,
+		info =>		$info,
+		foodsize =>	$foodsize,
+		me_daid =>	$daids->[0],
+		it_daid =>	$daids->[1],
+	});
+	$response[1] = $self->agentPlay({
+		agent_data =>	$agent_data,
+		info =>		$info,
+		foodsize =>	$foodsize,
+		me_daid =>	$daids->[1],
+		it_daid =>	$daids->[0],
+	});
 
 	# For each agent, calculate the payoffs (aka who "won" if you
-	# are in a zero-sum mentality).  Then call each species' code
-	# again with $me_play and $it_play set, indicating the code
-	# can update its memory if it wants;  then save the payoffs
-	# and new memories to the DB.
+	# are in a zero-sum mentality).
 
-	for my $daid (@$daids) {
-		%me = %{ $agent_data->{$daid} };
+	my @payoff = ( );
+	$payoff[0] = $self->determinePayoff(
+		$response[0], $response[1],
+		{ foodsize => $foodsize });
+	$payoff[1] = $self->determinePayoff(
+		$response[1], $response[0],
+		{ foodsize => $foodsize });
 
-		my($it_daid) = grep { $_ != $daid } @$daids;
-		%it = ( daid => $it_daid );
+	# Then call each species' debrief() function with $me_play and
+	# $it_play set (plus some other variables), letting it update its
+	# $memory if its wants; then save the payoffs and new memories to
+	# the DB.
 
-		$me_play = $response{$daid};
-		$it_play = $response{$it_daid};
-		my $payoff = $self->determinePayoff(
-			$me_play, $it_play,
-			{ foodsize => $foodsize });
+	my @memory = ( );
+	$memory[0] = $self->agentDebrief({
+		agent_data =>	$agent_data,
+		info =>		$info,
+		foodsize =>	$foodsize,
+		me_daid =>	$daids->[0],
+		me_play =>	$response[0],
+		me_gain =>	$payoff[0],
+		it_daid =>	$daids->[1],
+		it_play =>	$response[1],
+		it_gain =>	$payoff[1],
+	});
+	$memory[1] = $self->agentDebrief({
+		agent_data =>	$agent_data,
+		info =>		$info,
+		foodsize =>	$foodsize,
+		me_daid =>	$daids->[1],
+		me_play =>	$response[1],
+		me_gain =>	$payoff[1],
+		it_daid =>	$daids->[0],
+		it_play =>	$response[0],
+		it_gain =>	$payoff[0],
+	});
 
-		my $safe = new Safe();
-		$safe->permit(qw( :default :base_math :base_loop ));
-		$safe->share(qw( %me %it $foodsize $me_play $it_play ));
-		my $start_time = Time::HiRes::time;
-		$safe->reval($me{code});
-		print STDERR "agentsMeet 2 \$\@: '$@'\n" if $@;
-		my $elapsed = Time::HiRes::time - $start_time;
+#use Data::Dumper;
+#print STDERR "agent_data: " . Dumper($agent_data);
+#print STDERR "daids: " . Dumper($daids);
+#print STDERR "response: '@response' payoff '@payoff' memory '@memory'\n";
+my $memlen0 = $memory[0] ? length(freeze(\$memory[0])) : 0;
+my $memlen1 = $memory[1] ? length(freeze(\$memory[1])) : 0;
+printf STDERR "foodsize %.3f:  %s/%d played %.3f, gained %.3f food, memlen %d; %s/%d played %.3f, gained %.3f food, memlen %d\n",
+	$foodsize,
+	$agent_data->{$daids->[0]}{species_name}, $daids->[0],
+	$response[0], $payoff[0], $memlen0,
+	$agent_data->{$daids->[1]}{species_name}, $daids->[1],
+	$response[1], $payoff[1], $memlen1;
 
-		# The agent presumably modified its memories based
-		# on this new information.  Copy that memory hashref
-		# back into its hashref, on top of what was there,
-		# so it will be saved in the DB.
-		$agent_data->{$daid}{memory} = $me{memory};
-
-		$self->awardPayoffAndMemory($agent_data->{$daid},
-			$payoff);
-	}
+	$self->awardPayoffAndMemory($daids->[0], $payoff[0], $memory[0]);
+	$self->awardPayoffAndMemory($daids->[1], $payoff[1], $memory[1]);
 }
 
 sub determinePayoff {
@@ -414,13 +554,13 @@ sub determinePayoff {
 }
 
 sub awardPayoffAndMemory {
-	my($self, $agent_data, $payoff) = @_;
-	my $daid = $agent_data->{daid};
+	my($self, $daid, $payoff, $memory) = @_;
+
 	my $payoff_q = $self->sqlQuote($payoff);
-	my $daid_q = $self->sqlQuote($daid);
-	my $dsid_q = $self->sqlQuote($agent_data->{dsid});
 
 	# Increment the species rewardtotal.
+	my $agent_data = $self->getAgents([ $daid ]);
+	my $dsid_q = $self->sqlQuote($agent_data->{$daid}{dsid});
 	$self->sqlUpdate(
 		"dilemma_species",
 		{ -rewardtotal => "rewardtotal + $payoff_q" },
@@ -430,18 +570,12 @@ sub awardPayoffAndMemory {
 	my $new_daid = {
 		$daid => {
 			-food => "food + $payoff_q",
-			memory => $agent_data->{memory},
+			# memory gets frozen by setAgents()
+			memory => $memory,
 		}
 	};
-	$self->setAgents($new_daid);
-#	my $frozen_memory = "";
-#	$frozen_memory = freeze($agent_data->{memory})
-#		if defined($agent_data->{memory});
-#	$self->sqlUpdate(
-#		"dilemma_agents",
-#		{ -food => "food + $payoff_q",
-#		  memory => $frozen_memory,	},
-#		"daid = $daid_q");
+	# Return the number of rows affected.
+	return $self->setAgents($new_daid);
 }
 
 #################################################################

@@ -39,7 +39,7 @@ $task{$me}{code} = sub {
 		my $food_per_time = $dilemma_info->{food_per_time};
 
 		my $n_meets = $dilemma_info->{mean_meets};
-		$n_meets = int($n_meets * (0.8 + rand(1)*0.4) + 0.5);
+		$n_meets = int($n_meets * (2/3 + rand(1)*(3/2-2/3)) + 0.5);
 		$n_meets = 1 if $n_meets < 1;
 		my $food_per_interaction = $food_per_time/$n_meets;
 

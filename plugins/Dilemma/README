@@ -1,8 +1,12 @@
-This is a mathematical toy, not meant to be installed on production
-websites.  It serves primarily as sample code to demonstrate how to
-write a plugin with all the major components:  SQL schema, SQL data,
-templates, slashd task, and frontend webpage script.
+$Id$
 
-This code doesn't really do anything yet.  It uses the Safe module
-but of course don't put any perl code into your DB that shouldn't
-be executed.  Use at your own risk.
+This is a mathematical simulation/toy, of highly specialized purpose, and
+thus not meant to be installed on most production websites.
+
+It serves as sample code to demonstrate how to write a plugin with all
+the major components:  SQL schema, SQL data, templates, slashd task,
+frontend webpage script, and Makefile.PL and PLUGIN files of course.
+
+For those interested in the Prisoner's Dilemma, who might want to use
+this module on their Slash site or for information about programming
+its strategies, please see README.Dilemma.
