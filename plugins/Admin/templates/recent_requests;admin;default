@@ -67,14 +67,20 @@ __template__
 				<TD ALIGN="LEFT">&nbsp;[% row.op %]&nbsp;</TD>
 				<TD>&nbsp;<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% row.ipid | strip_attribute %]&amp;fieldname=ipid">[% row.ipid_vis %]</A>&nbsp;</TD>
 				<TD ALIGN="RIGHT">&nbsp;[% row.secs %]&nbsp;</TD>
-				<TD>&nbsp;[% row.mints %]&nbsp;</TD>
-				<TD>&nbsp;[% row.maxts %]</TD>
+				<TD>&nbsp;[% row.mints.substr(5) %]&nbsp;</TD>
+				<TD>&nbsp;[% row.maxts.substr(5) %]&nbsp;</TD>
 			</TR>
+			[% IF row.bannedts %]
+			<TR>
+				<TD COLSPAN="3">&nbsp;</TD>
+				<TD COLSPAN="4"><FONT SIZE="-1">Banned:&nbsp;[% row.bannedts %]&nbsp;[% row.bannedreason %]</FONT></TD>
+			</TR>
+			[% END %]
 		[% END %]
 	</TABLE>
 [% ELSE %]
 	<P><FONT SIZE="-1">No matches over threshold. Select took
-	[% select_secs %] to run.</FONT>
+	[% select_secs %] seconds to run.</FONT>
 [% END %]
 	
 </FORM>

@@ -1698,13 +1698,13 @@ sub displayRecentRequests {
 		$constants->{backup_db_user} || $constants->{log_db_user});
 
 	# Note, limit the id passed in by making sure we don't try to do a
-	# select on more than 200,000 rows.  This is an arbitrary number,
+	# select on more than 500,000 rows.  This is an arbitrary number,
 	# but the intent is to keep from locking up the DB too much.
 	my $min_id = $form->{min_id};
 	my $max_id = $admindb->getAccesslogMaxID();
 	$min_id = $max_id - 10_000 > 1 ? $max_id : 1	if !$min_id;
 	$min_id = $max_id + $min_id			if  $min_id < 0;
-	$min_id = $max_id				if  $min_id < $max_id - 200_000;
+	$min_id = $max_id				if  $min_id < $max_id - 500_000;
 
 	my $min_id_ts ||= $slashdb->getAccesslog($min_id, 'ts');
 

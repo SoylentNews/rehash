@@ -60,6 +60,23 @@ sub getAccesslogAbusersByID {
 		 ORDER BY maxts DESC, c DESC
 		 LIMIT $limit"
 	);
+	return [ ] if !$ar || !@$ar;
+
+	# If we're returning data, find any IPIDs which are already listed
+	# as banned and put the reason in too.
+	my @ipids = map { $self->sqlQuote($_->{ipid}) } @$ar;
+	my $ipids = join(",", @ipids);
+	my $hr = $self->sqlSelectAllHashref(
+		"ipid",
+		"ipid, ts, reason",
+		"accesslist",
+		"ipid IN ($ipids) AND isbanned AND reason != ''"
+	);
+	for my $row (@$ar) {
+		next unless exists $hr->{$row->{ipid}};
+		$row->{bannedts}     = $hr->{$row->{ipid}}{ts};
+		$row->{bannedreason} = $hr->{$row->{ipid}}{reason};
+	}
 	return $ar;
 }
 
