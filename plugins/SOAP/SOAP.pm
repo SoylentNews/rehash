@@ -49,7 +49,7 @@ sub new {
 
 sub returnError {
 	my($self, $error) = @_;
-	return $error || $Slash::SOAP::ERROR || 'Unknown error';
+	return $error || $ERROR || 'Unknown error';
 }
 
 {
@@ -62,13 +62,13 @@ sub handleMethod {
 	my $user      = getCurrentUser();
 
 	unless ($constants->{soap_enabled}) {
-		$Slash::SOAP::ERROR = 'SOAP not enabled';
+		$ERROR = 'SOAP not enabled';
 		return;
 	}
 
 	# security problem previous to 0.55
 	unless (SOAP::Lite->VERSION >= 0.55) {
-		$Slash::SOAP::ERROR = sprintf('SOAP::Lite version %d insecure, please update to 0.55 or greater', SOAP::Lite->VERSION);
+		$ERROR = sprintf('SOAP::Lite version %d insecure, please update to 0.55 or greater', SOAP::Lite->VERSION);
 		return;
 	}
 
@@ -81,17 +81,17 @@ sub handleMethod {
 	my $data = $self->getClassMethod($class, $method);
 
 	unless ($data) {
-		$Slash::SOAP::ERROR = sprintf('Method %s::%s not found', $class, $method);
+		$ERROR = sprintf('Method %s::%s not found', $class, $method);
 		return;
 	}
 
 	unless ($user->{seclev} >= $data->{seclev}) {
-		$Slash::SOAP::ERROR = 'Current user does not have access to this method';
+		$ERROR = 'Current user does not have access to this method';
 		return;
 	}
 
 	if ($data->{subscriber_only} && !$user->{is_subscriber}) {
-		$Slash::SOAP::ERROR = 'Current user does not have access to this method';
+		$ERROR = 'Current user does not have access to this method';
 		return;
 	}
 
@@ -153,7 +153,7 @@ sub validFormkey {
 	if ($error) {
 		# these error messages should be run through strip_html, or something
 		# play around with it
-		$Slash::SOAP::ERROR = $error;
+		$ERROR = $error;
 		return 0;
 	} else {
 		# why does anyone care the length?
