@@ -103,12 +103,14 @@ install: slash plugins
 	# Create all necessary directories.
 	$(INSTALL) -d \
 		$(SLASH_PREFIX)/bin/ \
+		$(SLASH_PREFIX)/httpd/ \
+		$(SLASH_PREFIX)/themes/ \
+		$(SLASH_PREFIX)/plugins/ \
 		$(SLASH_PREFIX)/sbin \
 		$(SLASH_PREFIX)/sql/ \
 		$(SLASH_PREFIX)/sql/mysql/ \
 		$(SLASH_PREFIX)/sql/oracle/ \
-		$(SLASH_PREFIX)/sql/postgresql \
-		$(SLASH_PREFIX)/httpd/
+		$(SLASH_PREFIX)/sql/postgresql
 
 	# Quick hack to avoid the need for "cp -ruv" which breaks under FreeBSD
 	# is to just copy the directories now. We may end up copying over a file
