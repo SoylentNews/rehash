@@ -51,7 +51,7 @@ use base 'Exporter';
 use vars qw($VERSION @EXPORT @EXPORT_OK $CONTEXT %FILTERS $TEMPNAME);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT	   = qw(slashDisplay);
+@EXPORT	   = qw(slashDisplay slashDisplayName);
 @EXPORT_OK = qw(get_template);
 my(%objects);
 
@@ -155,38 +155,17 @@ sub slashDisplay {
 	return unless $name;
 
 	my $constants = getCurrentStatic();
-	my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' }); 
 	my $user      = getCurrentUser();
 
-	# save for later (local() seems not to work ... ?)
-	my $origSection = $user->{currentSection};
-	my $origPage = $user->{currentPage};
-
-	# allow slashDisplay(NAME, DATA, RETURN) syntax
-	if (! ref $opt) {
-		$opt = $opt == 1 ? { Return => 1 } : {};
+	my($origSection, $origPage, $tempdata);
+	unless (ref($name) eq 'HASH') {
+		$name = slashDisplayName($name, $data, $opt);
 	}
 
-	if ($opt->{Section} && $opt->{Section} eq 'NONE') {
-		$user->{currentSection} = 'default';
-	# admin and light are special cases
-	} elsif ($user->{currentSection} eq 'admin') {
-		$user->{currentSection} = 'admin';
-	} elsif ($user->{light}) {
-		$user->{currentSection} = 'light';
-	} elsif ($opt->{Section}) {
-		$user->{currentSection} = $opt->{Section};
-	}
-
-	if ($opt->{Page} && $opt->{Page} eq 'NONE') {
-		$user->{currentPage} = 'misc';
-	} elsif ($opt->{Page}) {
-		$user->{currentPage} = $opt->{Page};
-	}
-
-	for (qw[currentSection currentPage]) {
-		$user->{$_} = defined $user->{$_} ? $user->{$_} : '';
-	}
+	($name, $data, $opt, $origSection, $origPage, $tempdata) = @{$name}{qw(
+		name data opt origSection origPage tempdata
+	)};
 
 	$TEMPNAME = 'anon';
 	unless (ref $name) {
@@ -194,7 +173,7 @@ sub slashDisplay {
 		# it is cached the performance hit is generally light,
 		# and this is the only good way to get the actual name,
 		# page, section, we bite the bullet and do it
-		my $tempdata = $reader->getTemplateByName($name, [qw(tpid page section)]);
+		$tempdata ||= $reader->getTemplateByName($name, [qw(tpid page section)]);
 		$TEMPNAME = "ID $tempdata->{tpid}, " .
 			"$name;$tempdata->{page};$tempdata->{section}";
 	}
@@ -244,6 +223,60 @@ sub slashDisplay {
 	$user->{currentPage}	= $origPage;
 
 	return $opt->{Return} ? $out : $ret;
+}
+
+#========================================================================
+
+sub slashDisplayName {
+	my($name, $data, $opt) = @_;
+	return unless $name;
+
+	my $constants = getCurrentStatic();
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' }); 
+	my $user      = getCurrentUser();
+
+	# save for later (local() seems not to work ... ?)
+	my $origSection = $user->{currentSection};
+	my $origPage = $user->{currentPage};
+
+	# allow slashDisplay(NAME, DATA, RETURN) syntax
+	if (! ref $opt) {
+		$opt = $opt == 1 ? { Return => 1 } : {};
+	}
+
+	if ($opt->{Section} && $opt->{Section} eq 'NONE') {
+		$user->{currentSection} = 'default';
+	# admin and light are special cases
+	} elsif ($user->{currentSection} eq 'admin') {
+		$user->{currentSection} = 'admin';
+	} elsif ($user->{light}) {
+		$user->{currentSection} = 'light';
+	} elsif ($opt->{Section}) {
+		$user->{currentSection} = $opt->{Section};
+	}
+
+	if ($opt->{Page} && $opt->{Page} eq 'NONE') {
+		$user->{currentPage} = 'misc';
+	} elsif ($opt->{Page}) {
+		$user->{currentPage} = $opt->{Page};
+	}
+
+	for (qw[currentSection currentPage]) {
+		$user->{$_} = defined $user->{$_} ? $user->{$_} : '';
+	}
+
+	my $tempdata;
+	$tempdata = $reader->getTemplateByName($name, [qw(tpid page section)])
+		if $opt->{GetName};
+
+	return {
+		name        => $name,
+		data        => $data,
+		opt         => $opt,
+		origSection => $origSection,
+		origPage    => $origPage,
+		tempdata    => $tempdata,
+	};
 }
 
 #========================================================================
