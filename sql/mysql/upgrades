@@ -1908,6 +1908,7 @@ INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_user','12
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_comtext','86400','Number of seconds comment text lives in memcached before requiring a re-read from the DB (empty string=default, 0=forever)');
 
 # USEPERL LAST UPDATED HERE
+
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_118, Start of T_2_3_0_119 - 2003/09/23
@@ -1923,4 +1924,14 @@ ALTER TABLE metamodlog CHANGE id id INT UNSIGNED NOT NULL AUTO_INCREMENT;
 # End of T_2_3_0_119, Start of T_2_3_0_120 - 2003/09/28
 
 DELETE FROM vars WHERE name='tailslash_stats';
+
+# Change for plugins/Subscribe (ignore if not using that plugin)
+ALTER TABLE subscribe_payments ADD COLUMN payment_type VARCHAR(10) DEFAULT 'user';
+ALTER TABLE subscribe_payments ADD COLUMN puid MEDIUMINT UNSIGNED;
+UPDATE subscribe_payments SET puid=uid;
+ALTER TABLE subscribe_payments ADD INDEX puid (puid);
+
+INSERT INTO vars VALUES ('subscribe_allow_gifts','1','Allow gift subscriptions');
+INSERT INTO vars VALUES ('subscribe_gen_transaction_id_length','18','Length of transaction id to generate (up to 32 chars).  Best to keep the length of these ids different from outside verifiers to prevent collisions');
+INSERT INTO vars VALUES ('subscribe_gift_testing','1','When this is on only admins will be able to see gift subscription form');
 
