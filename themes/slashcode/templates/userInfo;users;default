@@ -93,11 +93,13 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
  <B>User Bio</B><BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<P>
 [% END %]
 
-<BR><B>[% nick %] has posted [% commentcount %] comments.
+<BR><B>[% nick %] has posted [% commentcount %]
+comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
+[% IF commentcount > 1 %]
 [% IF commentcount > commentstruct.size %]Below find
 [% IF min_comment == 0 %]the most recent [% commentstruct.size %] comments.
 [% ELSE %][% commentstruct.size %] of them.
-[% END %][% END %]</B><P>
+[% END %][% END %][% END %]</B><P>
 
 [% n = min_comment %]
 [% FOREACH comment = commentstruct %]
