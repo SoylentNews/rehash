@@ -47,6 +47,12 @@ __template__
 [% CASE 'reject' %]
 	Your vote ([% aid %]) was rejected.
 
+[% CASE 'noquestion' %]
+	You must provide a question.
+
+[% CASE 'noanswer' %]
+	You must provide one or more answers.
+
 [% END %]
 
 __seclev__

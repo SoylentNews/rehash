@@ -169,6 +169,23 @@ sub savepoll {
 		default(@_);
 		return;
 	}
+
+	if ($form->{question} !~ /\S/) {
+		print getData('noquestion');
+		editpoll(@_);
+		return;
+	} else {
+		my $q = 0;
+		for (my $i = 1; $i < 9; $i++) {
+			$q++ if $form->{"aid$i"} =~ /\S/;
+		}
+		if (!$q) {
+			print getData('noanswer');
+			editpoll(@_);
+			return;
+		}
+	}
+
 	slashDisplay('savepoll');
 	#We are lazy, we just pass along $form as a $poll
 	# Correct section for sectional editor first -Brian
