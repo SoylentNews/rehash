@@ -437,14 +437,15 @@ sub saveSub {
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);
-
-		for (@$users) {
-			my $data  = {
-				template_name	=> 'messagenew',
-				subject		=> { template_name => 'messagenew_subj' },
-				submission	=> $submission,
-			};
-			$messages->create($_, MSG_CODE_NEW_SUBMISSION, $data);
+		if (ref($users) && ref($users) eq 'ARRAY') {
+			for (@$users) {
+				my $data  = {
+					template_name	=> 'messagenew',
+					subject		=> { template_name => 'messagenew_subj' },
+					submission	=> $submission,
+				};
+				$messages->create($_, MSG_CODE_NEW_SUBMISSION, $data);
+			}
 		}
 	}
 
