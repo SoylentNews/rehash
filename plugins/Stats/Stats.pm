@@ -705,6 +705,8 @@ sub countUsersByPage {
 		if $op;
 	$where .= " AND section='$options->{section}' "
 		if $options->{section};
+	$where = "($where) AND $options->{extra_where_clause}"
+		if $options->{extra_where_clause};
 	$self->sqlSelect("COUNT(DISTINCT uid)", "accesslog_temp", $where);
 }
 

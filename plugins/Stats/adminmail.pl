@@ -208,7 +208,11 @@ EOT
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 	$data{total_static} = sprintf("%8d", $total_static);
-	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
+	my $recent_subscribers = $stats->getRecentSubscribers();
+	my $recent_subscriber_uidlist = "";
+	$recent_subscriber_uidlist = join(", ", @$recent_subscribers)
+		if $recent_subscribers && @$recent_subscribers;
+	my $total_subscriber = $logdb->countDailySubscribers($recent_subscribers);
 	my $total_secure = $logdb->countDailySecure();
 	for my $op (@PAGES) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
@@ -267,13 +271,18 @@ EOT
 		my $index = $constants->{defaultsection} eq $section ? 1 : 0;
 		my $temp = {};
 		$temp->{section_name} = $section;
-		my $uniq = $logdb->countDailyByPageDistinctIPID('',  { section => $section });
-		my $pages = $logdb->countDailyByPage('',  {
-			section => $section,
-			no_op => $constants->{op_exclude_from_countdaily}
+		my $uniq = $logdb->countDailyByPageDistinctIPID('', { section => $section });
+		my $pages = $logdb->countDailyByPage('', {
+			section		=> $section,
+			no_op		=> $constants->{op_exclude_from_countdaily}
 		} );
-		my $bytes = $logdb->countBytesByPage('',  { section => $section });
-		my $users = $logdb->countUsersByPage('',  { section => $section });
+		my $bytes = $logdb->countBytesByPage('', { section => $section });
+		my $users = $logdb->countUsersByPage('', { section => $section });
+		my $users_subscriber = 0;
+		$users_subscriber = $logdb->countUsersByPage('', {
+			section			=> $section,
+			extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
+		}) if $recent_subscriber_uidlist;
 		$temp->{ipids} = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{pages} = sprintf("%8d", $pages);
@@ -282,15 +291,16 @@ EOT
 		$statsSave->createStatDaily("bytes", $bytes, { section => $section } );
 		$statsSave->createStatDaily("page", $pages, { section => $section });
 		$statsSave->createStatDaily("users", $users, { section => $section });
+		$statsSave->createStatDaily("users_subscriber", $users_subscriber, { section => $section });
 
 		for my $op (@PAGES) {
-			my $uniq = $logdb->countDailyByPageDistinctIPID($op,  { section => $section  });
-			my $pages = $logdb->countDailyByPage($op,  {
+			my $uniq = $logdb->countDailyByPageDistinctIPID($op, { section => $section });
+			my $pages = $logdb->countDailyByPage($op, {
 				section => $section,
 				no_op => $constants->{op_exclude_from_countdaily}
 			} );
-			my $bytes = $logdb->countBytesByPage($op,  { section => $section  });
-			my $users = $logdb->countUsersByPage($op,  { section => $section  });
+			my $bytes = $logdb->countBytesByPage($op, { section => $section });
+			my $users = $logdb->countUsersByPage($op, { section => $section });
 			$temp->{$op}{ipids} = sprintf("%8d", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$op}{pages} = sprintf("%8d", $pages);
@@ -322,7 +332,7 @@ EOT
 	}
 
 
-	my $total_bytes = $logdb->countBytesByPage('',  {
+	my $total_bytes = $logdb->countBytesByPage('', {
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 	my $grand_total_bytes = $logdb->countBytesByPage('');
