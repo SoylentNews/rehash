@@ -1859,7 +1859,7 @@ sub createBadPasswordLog {
 	# at the time the password was tried, so later, if the password
 	# is cracked and the account stolen, there is a record of who
 	# the real owner is.
-	my $realemail = $self->getUser($uid, 'realemail');
+	my $realemail = $self->getUser($uid, 'realemail') || '';
 
 	my($ip, $subnet) = get_ipids($r->connection->remote_ip, 1);
 	$self->sqlInsert("badpasswords", {
