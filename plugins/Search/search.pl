@@ -102,9 +102,10 @@ sub main {
 sub _authors {
 	my $slashdb = getCurrentDB();
 	my $authors = $slashdb->getDescriptions('all-authors');
-	$authors->{''} = getData('all_authors');
+	my %newauthors = %$authors;
+	$newauthors{''} = getData('all_authors');
 
-	return $authors;
+	return \%newauthors;
 }
 
 #################################################################
@@ -120,9 +121,10 @@ sub _topics {
 		$topics = $slashdb->getDescriptions('topics');
 	}
 
-	$topics->{''} = getData('all_topics');
+	my %newtopics = %$topics;
+	$newtopics{''} = getData('all_topics');
 
-	return $topics;
+	return \%newtopics;
 }
 
 #################################################################
@@ -138,9 +140,10 @@ sub _sort {
 sub _sections {
 	my $slashdb = getCurrentDB();
 	my $sections = $slashdb->getDescriptions('sections');
-	$sections->{''} = getData('all_sections');
+	my %newsections = %$sections;
+	$newsections{''} = getData('all_sections');
 
-	return $sections;
+	return \%newsections;
 }
 
 #################################################################
