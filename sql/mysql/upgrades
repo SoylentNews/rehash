@@ -1653,7 +1653,6 @@ ALTER TABLE users_param TYPE=InnoDB;
 ALTER TABLE users_prefs TYPE=InnoDB;
 ALTER TABLE vars TYPE=InnoDB;
 
-# Change for plugins/Subscribe (ignore if not using that plugin)
 # plugins/Blob (ignore if not using that plugin)
 ALTER TABLE blobs TYPE=InnoDB;
 ALTER TABLE story_files TYPE=InnoDB;
