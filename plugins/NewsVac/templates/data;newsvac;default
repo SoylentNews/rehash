@@ -40,15 +40,14 @@ NewsVac returned the following error when attempting to obtain a lock:
 [% title %]
 [% repeat('-', title.size) %]
 [% IF durations.size -%]
-[% timestamp %]
 [% FOR d=durations -%]
-[% d.0; # Command
+[% "$d.0\n"; # Command
 	FOR c=d.1 -%]
 	[% c.0 %]	[% c.1 %]	[% c.2 %]
 	
 	[%- END -%]
-	[% d.2 %]	[% d.3 %]	total
-	[% d.4 %]			mean
+		[% d.2 %]	[% d.3 %]	total
+		[% d.4 %]			mean
 
 
 [% END %]
@@ -74,10 +73,20 @@ No urls given to urls_to_ids()!
 No url_ids given to ids_to_urls()!
 
 [% CASE "ids_to_urls" -%]
-ids_to_urls...
-hash keys ([% hash_keys.size %]): [% hash_keys.join(' ') %]
-  url_ids ([% id_count %]): [% id_list %]
-     urls ([% urls.size %]): [% urls.join(' ') %]
+-- IDs to URLs    
+[% h1 = "Url ID ($size_urlids)";	# First heading
+   h2 = "URL ($size_urls)";		# Second heading
+   c2 = 30; s=' '; 			# c2 = start of 2nd column. s=space.
+    d = '-';				# d = dash
+-%]
+[%# So we create a poor man's table which breaks down URL ID and URL. %]
+[% h1                  %][% sp=c2 - h1.length; 
+ 			    s.repeat(sp)       -%][% h2 %]
+[% d.repeat(h1.length) %][% s.repeat(sp)        %][% d.repeat(h2.length) %]
+[% FOR u=url_hash.sort -%]
+[% u                   %][% sp=c2 - u.length; 
+                            s.repeat(sp)       -%][% url_hash.$u %]
+[% END -%]
 
 [% CASE "add_rel_result" -%]
 [% IF rc1 -%]ADDED rel[%- ELSE 
@@ -347,7 +356,8 @@ First 40 chars: '[% message_body.substr(0,40)    %]
  Last 40 chars: '[% message_body.substr(-40, 40) %]
 
 [% CASE "parse_miner_trackextract" -%]
--- parse_miner: IDs ([% url_id %], [% miner_id %]) at position [% pos %]
+-- parse_miner: Miner ID #[% miner_id %], URL ID #[% url_id %] at position [%
+pos -%]
 Extractions: [% extractions.join(', ') %]
 
 [% CASE "parse_miner_showurl" -%]
@@ -376,7 +386,7 @@ Nuggets: [% nugget_keys.join(', ') %]
 [% CASE "parse_miner_shownuggets" -%]
 [% idxtop = nuggets.size; idxtop %] Nuggets found via Miner.
 [% FOR n = [0 .. idxtop] -%]
-[% n %]:   URL:	[% url %]
+#[%n%]	   URL:	[% url %]
 	 Title:	[% nuggets.${n}.title  %]
 	Source:	[% nuggets.${n}.source %]
 	  Slug: [% nuggets.${n}.slug   %]
@@ -493,6 +503,9 @@ END SPIDER BY NAME ===========================================================
 Recycled [% num_rels %] relationships, [% num_urls %] URLs, and [% num_bodies
 -%] message bodies.
 Timing dump follows...
+
+[% CASE "robosubmit_regex" -%]
+Master query regular expression used: "[% regex %]"
 
 [% CASE "robosubmit_worth" -%]
 	W[[% index %]]: [% miner %] [% weight %]

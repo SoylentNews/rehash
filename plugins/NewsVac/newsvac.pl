@@ -398,18 +398,18 @@ sub show_miner_url_info {
 		}
 
 		slashDisplay('show_miner_url_info', { 
-			tags => \@tags, 
-			duration => $duration,
-			url => $url,  
-			orig_length => $orig_length,
-			orig_start => $orig_start,
-			orig_end => $orig_end,
-			pre_trimmed_chars => $pre_trimmed_chars,
-			trim_pre_start => $trim_pre_start,
-			trim_pre_end => $trim_pre_end,
-			post_trimmed_chars => $post_trimmed_chars,
-			trim_post_start	=> $trim_post_start,
-			trim_post_end	=> $trim_post_end,
+			tags			=> \@tags, 
+			duration		=> $duration,
+			url			=> $url,  
+			orig_length		=> $orig_length,
+			orig_start		=> $orig_start,
+			orig_end		=> $orig_end,
+			pre_trimmed_chars 	=> $pre_trimmed_chars,
+			trim_pre_start		=> $trim_pre_start,
+			trim_pre_end		=> $trim_pre_end,
+			post_trimmed_chars	=> $post_trimmed_chars,
+			trim_post_start		=> $trim_post_start,
+			trim_post_end		=> $trim_post_end,
 		});
 
 		show_miner_rel_info(
@@ -636,6 +636,115 @@ sub updateSpider {
         }
 }
 
+
+#################################################################
+# Here we copy and override the old submissionEd to perform things
+# NewsVac specific.
+sub newsvacSubmissions {
+	my($slashdb, $user, $form, $udbt) = @_;
+	my($def_section, $cur_section, $def_note, $cur_note,
+		$sections, @sections, @notes,
+		%all_sections, %all_notes, %sn);
+
+	$form->{del} = 0 if $user->{is_admin};
+
+	$def_section	= getData('defaultsection');
+	$def_note	= getData('defaultnote');
+	$cur_section	= $form->{section} || $def_section;
+	$cur_note	= $form->{note} || $def_note;
+	$sections	= $slashdb->getSubmissionsSections();
+
+	for (@$sections) {
+		my($section, $note, $cnt) = @$_;
+		$all_sections{$section} = 1;
+		$note ||= $def_note;
+		$all_notes{$note} = 1;
+		$sn{$section}{$note} = $cnt;
+	}
+
+	for my $note_str (keys %all_notes) {
+		$sn{$def_section}{$note_str} = 0;
+		for (grep { $_ ne $def_section } keys %sn) {
+			$sn{$def_section}{$note_str} += $sn{$_}{$note_str};
+		}
+	}
+
+	$all_sections{$def_section} = 1;
+
+	# self documentation, right?
+	@sections =	map  { [
+				$_->[0], 
+				($_->[0] eq $def_section ?  '' : $_->[0])
+			] }
+			sort { $a->[1] cmp $b->[1] }
+			map  { [$_, ($_ eq $def_section ? '' : $_)] }
+			keys %all_sections;
+
+	@notes =	map  { [
+				$_->[0], 
+				($_->[0] eq $def_note ? '' : $_->[0])
+			] }
+			sort { $a->[1] cmp $b->[1] }
+			map  { [ $_, ($_ eq $def_note ? '' : $_) ] }
+			keys %all_notes;
+
+	$title ||= 'Submissions ' . ($user->{is_admin} ?  'Admin' : 'List');
+
+	# Take top 10 submissions by weight 
+
+	slashDisplay('subEdTable', {
+		cur_section	=> $cur_section,
+		cur_note	=> $cur_note,
+		def_section	=> $def_section,
+		def_note	=> $def_note,
+		sections	=> \@sections,
+		notes		=> \@notes,
+		sn		=> \%sn,
+		title		=> $title,
+		width		=> '100%',
+	});
+
+	my(@submissions, $submissions, %selection);
+	$submissions = $slashdb->getSubmissionForUser();
+
+	for (@$submissions) {
+		my $sub = $submissions[@submissions] = {};
+		@{$sub}{qw(
+			subid subj time tid note email
+			name section comment uid karma
+		)} = @$_;
+		$sub->{name}  =~ s/<(.*)>//g;
+		$sub->{email} =~ s/<(.*)>//g;
+		$sub->{is_anon} = isAnon($sub->{uid});
+
+		my @strs = (
+			substr($sub->{subj}, 0, 35),
+			substr($sub->{name}, 0, 20),
+			substr($sub->{email}, 0, 20)
+		);
+		$strs[0] .= '...' if length($sub->{subj}) > 35;
+		$sub->{strs} = \@strs;
+
+		$sub->{ssection} = $sub->{section} ne $constants->{defaultsection}
+			? "&section=$sub->{section}" : '';
+		$sub->{stitle}   = '&title=' . fixparam($sub->{subj});
+		$sub->{section} = ucfirst($sub->{section}) unless $user->{is_admin};
+	}
+
+	%selection = map { ($_, $_) }
+		(qw(Hold Quik), '',	# '' is special
+		(ref $constants->{submit_categories}
+			? @{$constants->{submit_categories}} : ())
+	);
+
+	my $template = $user->{is_admin} ? 'Admin' : 'User';
+	slashDisplay('subEd' . $template, {
+		submissions	=> \@submissions,
+		selection	=> \%selection,
+	});
+}
+
+
 ##################################################################
 sub main {
 	my $udbt	= getObject('Slash::NewsVac');
@@ -648,77 +757,64 @@ sub main {
 	header("vacSlash $user->{tzcode} $user->{offset}");
 
 	my $op = $form->{op};
+	my $required_seclev = getCurrentStatic('newsvac_admin_seclev');
 
 	my $ops = {
 		listminers => {
-			function => \&listMiners,
-			seclev	=> 10000,
+			function=> \&listMiners,
+			seclev	=> $required_seclev,
 		},
 		editminer => {
-			function => \&editMiner,
-			seclev	=> 10000,
+			function=> \&editMiner,
+			seclev	=> $required_seclev,
 		},
 		updateminer => {
-			function => \&updateMiner,
-			seclev	=> 10000,
+			function=> \&updateMiner,
+			seclev	=> $required_seclev,
 		},
 		listurls => {
-			function => \&listUrls,
-			seclev	=> 10000,
+			function=> \&listUrls,
+			seclev	=> $required_seclev,
 		},
 		processurls => {
-			function => \&processUrls,
-			seclev	=> 10000,
+			function=> \&processUrls,
+			seclev	=> $required_seclev,
 		},
 		newurl => {
-			function => \&editUrl,
-			seclev	=> 10000,
+			function=> \&editUrl,
+			seclev	=> $required_seclev,
 		},
 		editurl => {
-			function => \&editUrl,
-			seclev	=> 10000,
+			function=> \&editUrl,
+			seclev	=> $required_seclev,
 		},
 		updateurl => {
-			function => \&updateUrl,
-			seclev	=> 10000,
+			function=> \&updateUrl,
+			seclev	=> $required_seclev,
 		},
 		listspiders => {
-			function => \&listSpiders,
-			seclev	=> 10000,
+			function=> \&listSpiders,
+			seclev	=> $required_seclev,
 		},
 		editspider => {
-			function => \&editSpider,
-			seclev	=> 10000,
+			function=> \&editSpider,
+			seclev	=> $required_seclev,
 		},
 		updatespider => {
-			function => \&updateSpider,
-			seclev	=> 10000,
+			function=> \&updateSpider,
+			seclev	=> $required_seclev,
 		},
-
-		# this doesn't seem to exist
-		listnuggets => {
-			#function => \&listNuggets,
-			function => \&notDoneYet,
-			seclev	=> 10000,
+		list	=> {
+			function=> \&newsvacSubmissions,
+			seclev	=> $required_seclev,
 		},
-		
-		# this doesn't seem to exist
-		editnugget => {
-			#function => \&editNugget,
-			function => \&notDoneYet,
-			seclev	=> 10000,
+		listsubs=> {
+			function=> \&newsvacSubmissions,
+			seclev	=> $required_seclev,
 		},
-		
-		# this doesn't seem to exist
-		updatenugget => {
-			#function => \&updateNugget,
-			function => \&notDoneYet,
-			seclev	=> 10000,
-		},
-
 		timingdump => {
-			function => \$udbt->timing_dump,
-			seclev	=> 10000,
+			function=> \$udbt->timing_dump,
+			seclev	=> $required_seclev,
 		},
 	};
 

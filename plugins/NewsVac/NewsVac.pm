@@ -353,7 +353,8 @@ sub timing_dump {
 	my($self) = @_;
 	my(@timing_data, @durations);
 
-	my $ts = scalar(localtime);
+	# Timestamp unnecessary, since it's automatically done by errLog().
+	#my $ts = scalar(localtime);
     	for my $cmd (sort keys %{$self->{timing_data}}) {
 		my $total = round($self->{timing_data}{$cmd}{total});
 		my $total_n = 0;
@@ -364,18 +365,20 @@ sub timing_dump {
 		for (sort {$a<=>$b} keys %{$self->{timing_data}{$cmd}}) {
 			my $n = $self->{timing_data}{$cmd}{$_};
 			$total_n += $n;
-			# $self->errLog("$_\t" . round($_) . "\t$n\n");
-			push @dur, [$_, round($_), $n];
+
+			# Be aware that @dur, position 1, is an array ref that
+			# contains individual command timings.
+			push @{$dur[1]}, [$_, round($_ * $n), $n];
 		}
 		my $mean = round($total/$total_n);
+
+		# We push totals and averages onto @dur, then @dur gets added
+		# to our main list of durations.
 		push @dur, ($total, $total_n, $mean);
-		# $self->errLog("\t$total\t$total_n\ttotal\n");
-		# $self->errLog("$mean\t\t\tmean\n\n");
 		push @durations, \@dur;
 	}
 
 	$self->errLog(getData('timing_dump', {
-		timestamp => $ts,
 		durations => \@durations,
 	}));
 
@@ -463,9 +466,9 @@ sub add_url {
 	$url = $self->sqlQuote($url);
 	$digest = $self->sqlQuote($digest);
 
-	my $rc = $self->sqlInsert("url_info", { 
-		url => $url,
-		url_digest => $digest,
+	my $rc = $self->sqlInsert('url_info', { 
+		url 		=> $url,
+		url_digest 	=> $digest,
 	}); 	
 	$self->errLog(getData('add_url_result', {
 		url => $url, 
@@ -648,10 +651,9 @@ sub ids_to_urls {
 	$hash{$_->[0]} = $_->[1] for @{$ar};
 	my @urls = map { $hash{$_} ? $hash{$_} : '' } @url_ids;
 	$self->errLog(getData('ids_to_urls', {
-		hash_keys	=> [sort keys %hash],
-		id_list		=> $id_list,
-		id_count	=> scalar(@url_ids),
-		urls		=> \@urls,
+		url_hash	=> \%hash,
+		size_urls	=> scalar @urls,
+		size_urlids	=> scalar @url_ids,
 	})) if $self->{debug} > 1;
 
 	return @urls;
@@ -1010,8 +1012,10 @@ sub correlate_miner_to_urls {
 		
 		return;
 	}
-	$self->errLog("miner_id '$miner_id' for name '$minername'")
-		if $self->{debug} > 1;
+
+	# Redundant, information is printed with the next call to errLog().
+	#$self->errLog("miner_id '$miner_id' for name '$minername'")
+	#	if $self->{debug} > 1;
 
 	# We might not need these locks any further.
 	#$self->sqlTransactionStart('LOCK TABLES url_info WRITE');
@@ -1149,16 +1153,23 @@ sub delete_url_ids {
 
 	my $id_list = sprintf '(%s)', join(',', @_[1..$#_]);
 
-	$self->sqlDo("DELETE FROM url_info WHERE url_id IN $id_list");
-	$self->sqlDo("DELETE FROM url_analysis WHERE url_id IN $id_list");
-	$self->sqlDo("DELETE FROM url_content WHERE url_id IN $id_list");
+	$self->sqlDo("DELETE FROM url_content      WHERE url_id IN $id_list");
     	$self->sqlDo("DELETE FROM url_message_body WHERE url_id IN $id_list");
-	$self->sqlDo("DELETE FROM url_plaintext WHERE url_id IN $id_list");
-	$self->sqlDo("DELETE FROM nugget_sub WHERE url_id IN $id_list");
+	$self->sqlDo("DELETE FROM url_plaintext    WHERE url_id IN $id_list");
+	$self->sqlDo("DELETE FROM nugget_sub       WHERE url_id IN $id_list");
+
+	# Make sure to check both sides of the relationship.
 	$self->sqlDo(<<EOT);
 DELETE FROM rel WHERE from_url_id IN $id_list OR to_url_id IN $id_list
 EOT
 
+	# Yes, we want to delete url IDs, but NOT ones associated with a miner.
+	# That would be bad.
+	$self->sqlDo(<<EOT);
+DELETE FROM url_info WHERE url_id IN $id_list AND miner_id=0
+EOT
+
+	$self->sqlDo("DELETE FROM url_analysis WHERE url_id IN $id_list");
 	$self->errLog(getData('delete_url_ids', {
     		id_list => $id_list,
 	})) if $self->{debug} > 1;
@@ -1921,7 +1932,8 @@ sub analyze {
 	my @parse_codes = $self->get_parse_codes(@_[1 .. $#_]);
 
 	for my $parse_code (@parse_codes) {
-		$self->errLog("parse_code $parse_code") if $self->{debug} > 1;
+		# Redundant. Information printed with next call to errLog().
+		#$self->errLog("parse_code $parse_code") if $self->{debug} > 1;
 		
 		my $ua_start = Time::HiRes::time();
 		my $ary_ref = $self->sqlSelectColArrayref(
@@ -2532,7 +2544,9 @@ sub parse_miner {
 	})) if $self->{debug} > 1;
 	my($count, $url, $title, $source, $slug, $body, $key) = (0);
 	while ($message_body =~ /$extract_regex/gx) {
-		$self->errLog("pos " . pos($message_body)) if $self->{debug} > 1;
+		# Kinda redundant.
+		#$self->errLog("pos " . pos($message_body))
+		#	if $self->{debug} > 1;
 		@extractions = ( );
 		eval $get_extractions;
 
@@ -2541,7 +2555,7 @@ sub parse_miner {
 			miner_id	=> $info_ref->{miner_id},
 			'pos'		=> pos($message_body),
 			extractions	=> \@extractions,
-		})) if $self->{debug} > 1;
+		})) if $self->{debug} > 2;
 
 		$extractions{$_} = '' for @extraction_keys;
 		for my $i (0..$#extract_vars) {
@@ -2586,7 +2600,7 @@ sub parse_miner {
 			if ($url !~ /^(http|ftp):/) {
 				my($origurl, $etc) = split("\n", $_);
 
-				$self->errLog(getDat('parse_miner_badproto', {
+				$self->errLog(getData('parse_miner_badproto', {
 					url	=> $url,
 					url_orig=> $origurl,
 					base_url=> $base_url,
@@ -2701,7 +2715,7 @@ sub parse_miner {
 #			@nugget_url_ids
 #		);
 		if ($self->{debug} > 0) {
-			$self->errlog(getData('parse_miner_processurlend'));
+			$self->errLog(getData('parse_miner_processurlend'));
 			$self->timing_dump();
 		}
 	}
@@ -3225,24 +3239,13 @@ sub garbage_collect {
 	$n_rels = scalar(@{$ary_ref}) if $ary_ref;
 
 	$ary_ref = $self->sqlSelectColArrayref(
-		'url_id', 
-
-		'url_info LEFT JOIN rel ON 
-		 url_info.url_id=rel.to_url_id OR 
-		 url_info.url_id=rel.from_url_id', 
-
-		'url_info.miner_id = 0 AND rel.rel_id IS NULL',
-		'LIMIT 10000'
-	);
-
-	$ary_ref = $self->sqlSelectColArrayref(
 		'url_id',
 		
 		'url_info LEFT JOIN rel ON 
 		 url_info.url_id=rel.to_url_id OR 
 		 url_info.url_id=rel.from_url_id',
 		 
-		'url_info.miner_id = 0 AND rel.rel_id IS NULL',
+		'url_info.miner_id=0 AND rel.rel_id IS NULL',
 		
 		'LIMIT 10000'
 	);
@@ -3312,6 +3315,7 @@ sub robosubmit {
 	my(@keyword_keys) = ( );
 	my $start_time = Time::HiRes::time();
 	my $constants = getCurrentStatic();
+
 	$self->load_keywords(
 		\%keywords, 
 		\@keyword_keys, 
@@ -3325,13 +3329,14 @@ sub robosubmit {
 	# 
 	#my $sth = $self->sqlTransactionStart("robosubmitlock WRITE");
 
-	if ($self->{debug} > 0) {
-		$self->errLog("master_sql_regex: '$master_sql_regex'");
-	}
+	$self->errLog(getData('robosubmit_regex', {
+		regex => $master_sql_regex,
+	})) if ($self->{debug} > 0);
 
 
 	my $fields = <<EOT;
-miner.name, ui2.url_id, ui2.url, ui3.url, ui3.title, ui3.last_success, up3.plaintext,
+miner.name, ui2.url_id, ui2.url, ui3.url, ui3.title, ui3.last_success,
+up3.plaintext,
 	(CONCAT(ui2.title, '  ', up3.plaintext) REGEXP '$master_sql_regex'
 	  OR 
 	 ui2.url REGEXP 'slug=[^=]*$master_sql_regex_encoded') AS matches
@@ -3463,9 +3468,9 @@ EOT
 						if length($before) > 20;
                                         $after  =~ s{\s+\S*$}{} 
 						if length($after) > 20;
-					$before = encode($before);
-					$excerpt = encode($excerpt);
-					$after = encode($after);
+					$before  = encode_entities($before);
+					$excerpt = encode_entities($excerpt);
+					$after   = encode_entities($after);
 
                                         $excerpts{"$location$keynum"} = 
 						getData('excerptdata', {
@@ -3528,7 +3533,7 @@ EOT
 		$self->sqlInsert('nugget_sub', {
 			url_id 		=> $_,
                         submitworthy 	=> $submitworthy{$_}
-		});
+		}, 'IGNORE');
                 $submitworthy{$_} ? ++$worthy : ++$unworthy;
         }
         $sth->finish(); # not really necessary
@@ -3543,7 +3548,7 @@ EOT
 		unworthy=> $unworthy,
 		duration=> round($elapsed_time),
 			#int($elapsed_time * 1000 + 0.5) / 1000
-	})) if $self->{debug} > 2;
+	})) if $self->{debug} > 1;
 }
 
 ############################################################
@@ -4511,9 +4516,10 @@ Hashref of insert data where the keys are the fieldnames.
 
 =item $extra
 
-Hashref containing booleans, the following keys are valid:
-	delayed	- Use a delayed insert.
-	ignore	- Ignore any errors resulting from insert.
+Comma separated list of any from set of ('IGNORE', 'DELAYED').
+
+	IGNORE  - Any SQL errors are ignored
+	DELAYED - INSERT is delayed until a suitably idle time.
 
 =back
 
@@ -4965,6 +4971,7 @@ None.
 =cut
 sub round {
 	my($num, $sig) = @_;
+	return 0 if $num == 0;
 	$sig = 1 if !defined $sig;
 
 	my $exp = int(log($num) / log(10));

@@ -36,8 +36,8 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin', 'News
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Miners','[% constants.rootdir %]/newsvac.pl?op=listminers',10000,9);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','URLs','[% constants.rootdir %]/newsvac.pl?op=listurls',10000,9);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Spiders','[% constants.rootdir %]/newsvac.pl?op=listspiders',10000,9);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Nuggets','[% constants.rootdir %]/newsvac.pl?op=listnuggets',10000,9);
-m 
+# This functionality was planned but never finished. Maybe someday?
+#INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Nuggets','[% constants.rootdir %]/newsvac.pl?op=listnuggets',10000,9);
 
 INSERT into sections (section, artcount, title, isolate, issue, extras) VALUES ('newsvac', 0, 'NewsVac Links', 0, 0, 0);
 

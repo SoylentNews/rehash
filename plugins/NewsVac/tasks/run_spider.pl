@@ -14,6 +14,11 @@
 # 		  performed, and no times are written to the database. This 
 # 		  behavior may change in the future.
 #
+#	disable_template_cache = If set and non-zero (boolean), then this 
+#	forces the template cache off. This causes a serious hit on
+#	performance and should not be used unless you REALLY know what you are
+#	doing.
+#
 #	* Consider adding in a limit here? *
 
 use strict;
@@ -40,6 +45,11 @@ $task{$me}{code} = sub {
 
 	# Set default values on task options.
 	$constants->{task_options}{spiders} ||= '';
+
+	# Override constants caching and force it ON. For the number of 
+	# template calls this thing makes, this is a necessity.
+	$constants->{cache_enabled} = 1 
+		unless $constants->{task_options}{disable_template_cache};
 
 	# Get our plugin.
 	my $newsvac = getObject('Slash::NewsVac');
@@ -106,14 +116,19 @@ $task{$me}{code} = sub {
 
 		# Execute miner.
 		my $rc = $newsvac->spider_by_name($spider_name);
-		$newsvac->robosubmit();
-		# Clean up?
+		# Perform ROBOsubmission only if the spider exists.
+		$newsvac->robosubmit() unless $rc == 0;
+
+		# Any Clean up?
 
 		# Don't write to the database if miners were user-specified.
-		next unless ref $_;
-		$slashdb->sqlUpdate('spiders', {
-			-last_run => 'UNIX_TIMESTAMP()'
-		}, "timespec_id=$_->[1]");
+		# This can be determined simply by whether or not our loop
+		# value is a reference.
+		if (ref $_ eq 'ARRAY') {
+			$slashdb->sqlUpdate('spiders', {
+				-last_run => 'UNIX_TIMESTAMP()'
+			}, "timespec_id=$_->[1]");
+		}
 
 		push @executed_spiders, $spider_name;
 	}
