@@ -2686,8 +2686,6 @@ ALTER TABLE users TYPE=InnoDB;
 # (We're going to change searching soon, so this last MyISAM requirement
 # may go away.  Stay tuned.)
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -2706,3 +2704,6 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_year',
 ALTER TABLE users_info ADD INDEX tokens (tokens);
 ALTER TABLE users_comments ADD INDEX points (points);
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_35, Start of T_2_5_0_36 - 2004/11/03
