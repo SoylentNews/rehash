@@ -81,8 +81,8 @@ sub init {
 	my $vus = [ (
 		$slashdb->{virtual_user},
 		sort { $a cmp $b }
-			grep { $_ ne $slashdb->{virtual_user} }
-			keys %vus_hash
+		grep { $_ ne $slashdb->{virtual_user} }
+		keys %vus_hash
 	) ];
 
 	# Set up the @db array based on what virtual users we have.
