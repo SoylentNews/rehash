@@ -29,14 +29,14 @@ sub main {
 		userlogin	=> [ 1,				\&loginForm		],
 		userclose	=> [ $user_ok,			\&loginForm		],
 		mailpasswdform	=> [ 1,				\&mailPasswdForm	],
-		mailpasswd	=> [ 1,				\&mailPasswd		],
+		mailpasswd	=> [ $post_ok,			\&mailPasswd		],
 		changeprefs	=> [ $user_ok,			\&changePrefs		],
 		saveprefs	=> [ $post_ok && $user_ok,	\&savePrefs		],
 	);
 
-	my $op = $form->{'op'};
+	my $op = $form->{op};
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
-		$op = 'userlogin';
+		$form->{op} = $op = 'userlogin';
 	}
 
 	# you are logged in, just go to your prefs (you were authenticated
@@ -55,7 +55,7 @@ sub main {
 sub loginForm {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
 
-	header(getData('loginhead'));
+	header(getData('loginhead')) or return;
 	slashDisplay('loginForm');
 	footer();
 }
@@ -64,7 +64,9 @@ sub loginForm {
 sub mailPasswdForm {
 	my($slashdb, $reader, $constants, $user, $form, $note) = @_;
 
-	header(getData('mailpasswdhead'));
+	_validFormkey('generate_formkey') or return;
+
+	header(getData('mailpasswdhead')) or return;
 	slashDisplay('sendPasswdForm', { note => $note });
 	footer();
 }
@@ -72,6 +74,9 @@ sub mailPasswdForm {
 #################################################################
 sub mailPasswd {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
+
+	_validFormkey(qw(max_post_check valid_check interval_check formkey_check))
+		or return;
 
 	my $error = 0;
 	my @note;
@@ -111,7 +116,7 @@ sub mailPasswd {
 
 	if ($error) {
 		my $note = join ' ', @note;
-		$slashdb->resetFormkey($form->{formkey});
+#		$slashdb->resetFormkey($form->{formkey});
 		return mailPasswdForm(@_, $note);
 	}
 
@@ -145,7 +150,7 @@ sub mailPasswd {
 
 	doEmail($uid, $subject, $msg);
 	$slashdb->setUserMailPasswd($user_send);
-	mailPasswdForm(@_, getData('mail_mailed_note'));
+	mailPasswdForm(@_, getData('mail_mailed_note', { name => $user_send->{nickname} }));
 }
 
 
@@ -159,7 +164,9 @@ sub changePrefs {
 	# damned code everywhere, and i will not be a party to
 	# such madness.
 
-	header(getData('prefshead'));
+	_validFormkey('generate_formkey') or return;
+
+	header(getData('prefshead')) or return;
 	slashDisplay('changePasswd', { note => $note });
 	footer();
 }
@@ -168,6 +175,9 @@ sub changePrefs {
 #################################################################
 sub savePrefs {
 	my($slashdb, $reader, $constants, $user, $form) = @_;
+
+	_validFormkey(qw(max_post_check valid_check formkey_check))
+		or return;
 
 	my $error = 0;
 	my @note;
@@ -205,10 +215,11 @@ sub savePrefs {
 	if ($error) {
 		push @note, getData('notchanged');
 		$note = join ' ', @note;
+#		$slashdb->resetFormkey($form->{formkey});
 	} else {
 		my $user_save = {};
 		$user_save->{passwd} = $form->{pass1} if $changepass;
-		$user_save->{session_login}   = $form->{session_login};
+		$user_save->{session_login} = $form->{session_login};
 		$user_save->{cookie_location} = $form->{cookie_location};
 
 		# changed pass, so delete all logtokens
@@ -223,8 +234,7 @@ sub savePrefs {
 			$user_save->{admin_clearpass} = '';
 		}
 
-		getOtherUserParams($user_save);
-		$slashdb->setUser($user->{uid}, $user_save) ;
+		$slashdb->setUser($user->{uid}, $user_save);
 		$note = getData('passchanged');
 
 		my $value  = $slashdb->getLogToken($uid, 1);
@@ -233,6 +243,44 @@ sub savePrefs {
 	}
 	changePrefs(@_, $note);
 }
+
+sub _validFormkey {
+	my(@checks) = @_;
+	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+	my $op = $form->{op};
+
+	# eventually change s/users/login/g
+	my $formname = $op =~ /^mailpasswd(?:form)?$/ ? 'users/mp' : 'users'; 
+
+	my $options = {};
+	if (   !$constants->{plugin}{HumanConf}
+	    || !$constants->{hc}
+	    || (!$constants->{hc_sw_mailpasswd} && $op eq 'mailpasswdform')
+	) {
+		$options->{no_hc} = 1;
+	}
+
+	Slash::Utility::Anchor::getSectionColors();
+
+	my $error;
+	for (@checks) {
+		warn "$op: $formname: $_\n";
+		my $err = formkeyHandler($_, $formname, 0, \$error, $options);
+	}
+	warn "\n";
+
+	if ($error) {
+		header() or return;
+		print $error;
+		return 0;
+	} else {
+		# why does anyone care the length?
+		getCurrentDB()->updateFormkey(0, length($ENV{QUERY_STRING}));
+		return 1;
+	}
+}
+
 
 createEnvironment();
 main();
