@@ -155,7 +155,6 @@ sub create {
 	$val->{$prime} = $id if $id;
 	$self->sqlInsert($table, $val);
 
-	# what should $prime really be?  add a new var to $self? -- pudge
 	return $self->getLastInsertId();
 }
 

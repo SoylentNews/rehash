@@ -62,9 +62,6 @@ __template__
 [% CASE 'SLASH-UNKNOWN-IMAGE' %]
 <b>[Unknown Image]</b>
 
-[% CASE 'SLASH-UNKNOWN-IMAGE' %]
-<b>[Unknown Image]</b>
-
 [% CASE 'SLASH-UNKNOWN-STORY' %]
 <b>[Unknown Story]</b>
 

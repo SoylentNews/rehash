@@ -282,7 +282,6 @@ sub init {
 	# probably perform a delete on anything matching, here.
 }
 
-
 ########################################################
 # Yes, this is ugly, and we can ditch it in about 6 months
 # Turn off autocommit here

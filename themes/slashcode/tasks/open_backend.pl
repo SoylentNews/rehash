@@ -114,7 +114,7 @@ EOT
 </wml>
 EOT
 
-	my $file = sitename2filename($virtual_user, $constants, $backupdb, $user, $section);
+	my $file = sitename2filename($section);
 	save2file("$constants->{basedir}/$file.wml", $x);
 }
 
@@ -149,7 +149,7 @@ EOT
 
 	$x .= "</backslash>\n";
 
-	my $file = sitename2filename($virtual_user, $constants, $backupdb, $user, $section);
+	my $file = sitename2filename($section);
 	save2file("$constants->{basedir}/$file.xml", $x);
 }
 

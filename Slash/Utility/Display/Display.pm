@@ -1214,14 +1214,14 @@ sub _hard_linkStory {
 	my($story_link, $mode, $threshold, $dynamic, $url, $tid_string, $title) = @_;
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
-	my $f_title = $story_link->{title};
+	my $f_title = sprintf 'TITLE="%s"', strip_attribute($story_link->{title});
 
 	if ($dynamic) {
 	    my $link = qq[<A HREF="$url/article.pl?sid=$story_link->{sid}];
 	    $link .= "&amp;mode=$mode" if $mode;
 	    $link .= "&amp;tid=$tid_string" if $tid_string;
 	    $link .= "&amp;threshold=$threshold" if defined($threshold);
-	    $link .= qq[" TITLE="$f_title">$story_link->{link}</A>];
+	    $link .= qq[" $f_title>$story_link->{link}</A>];
 	    return $link;
 	} else {
 	    return qq[<A HREF="$url/$story_link->{section}/$story_link->{sid}.shtml?tid=$tid_string" $f_title>$story_link->{link}</A>];
@@ -1278,11 +1278,11 @@ sub _hard_linkComment {
 my $slashTags = {
 	'slash-image' => \&_slashImage,
 	'slash-story' => \&_slashStory,
-	'slash-user' => \&_slashUser,
-	'slash-file' => \&_slashFile,
+	'slash-user'  => \&_slashUser,
+	'slash-file'  => \&_slashFile,
 	'slash-break' => \&_slashPageBreak,
-	'slash-link' => \&_slashLink,
-	'slash' => \&_slashSlash,
+	'slash-link'  => \&_slashLink,
+	'slash'       => \&_slashSlash,
 };
 
 sub processSlashTags {
@@ -1296,13 +1296,12 @@ sub processSlashTags {
 	return $newtext unless $tokens;
 	while (my $token = $tokens->get_tag(keys %$slashTags)) {
 			if (ref($slashTags->{$token->[0]}) eq 'CODE') {
-				$slashTags->{$token->[0]}->($tokens, $token,\$newtext);
+				$slashTags->{$token->[0]}->($tokens, $token, \$newtext);
 			} else {
 				my $content = getData('SLASH-UNKNOWN-TAG', { tag => $token->[0] });
 				print STDERR "BAD TAG $token->[0]\n";
 				$newtext =~ s/$token->[3]/$content/;
 			}
-																						 
 	}
 
 	if ($user->{stats}{pagebreaks} && !$user->{state}{editing}) {
@@ -1321,68 +1320,68 @@ sub processSlashTags {
 }
 
 sub _slashImage {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $content = slashDisplay('imageLink', {
-			id => $token->[1]->{id},
-			title => $token->[1]->{title},
-			}, { Return => 1 });
+		id    => $token->[1]{id},
+		title => $token->[1]{title},
+	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-IMAGE');
 
 	$$newtext =~ s/$token->[3]/$content/;
 }
 
 sub _slashStory {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $sid = $token->[1]->{story};
 	my $content = linkStory({
-			'link'	=> $token->[1]->{text},
-			sid	=> $token->[1]->{story},
-			title	=> $reader->getStory($token->[1]->{story}, 'title'),
-			});
+		'link'	=> $token->[1]{text},
+		sid	=> $token->[1]{story},
+		title	=> $reader->getStory($token->[1]{story}, 'title'),
+	});
 	$content ||= getData('SLASH-UKNOWN-STORY');
 
 	$$newtext =~ s/$token->[3]/$content/;
 }
 
 sub _slashUser {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $content = slashDisplay('userLink', {
-			uid => $token->[1]->{uid},
-			nickname => $token->[1]->{nickname}, 
-			}, { Return => 1 });
+		uid      => $token->[1]{uid},
+		nickname => $token->[1]{nickname}, 
+	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-USER');
 
 	$$newtext =~ s/$token->[3]/$content/;
 }
 
 sub _slashFile {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $content = slashDisplay('fileLink', {
-			id => $token->[1]->{id},
-			title => $token->[1]->{title},
-			}, { Return => 1 });
+		id    => $token->[1]{id},
+		title => $token->[1]{title},
+	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-FILE');
 
 	$$newtext =~ s/$token->[3]/$content/;
 }
 
 sub _slashLink {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
-	my ($content);
+	my $content;
 	if ($reloDB) {
-		my $string = $token->[1]->{text} || $token->[1]->{title};
+		my $string = $token->[1]{text} || $token->[1]{title};
 		$content = slashDisplay('hrefLink', {
-				id => $token->[1]->{id},
-				title => $token->[1]->{title},
-				text => $string,
-				}, { Return => 1 });
+			id    => $token->[1]{id},
+			title => $token->[1]{title},
+			text  => $string,
+		}, { Return => 1 });
 	}
 	$content ||= getData('SLASH-UKNOWN-LINK');
 
@@ -1390,7 +1389,7 @@ sub _slashLink {
 }
 
 sub _slashPageBreak {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 	my $user = getCurrentUser();
 
 	$user->{stats}{pagebreaks}++;
@@ -1399,28 +1398,29 @@ sub _slashPageBreak {
 }
 
 sub _slashSlash {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
-	my ($content, $data);
+	my($content, $data);
 	if ($token->[1]->{href}) {
 		my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
 		$data = $tokens->get_text("/slash");
 		if ($reloDB) {
 			$content = slashDisplay('hrefLink', {
-					id => $token->[1]->{id},
-					title => $token->[1]->{href},
-					text => $data,
-					}, { Return => 1 });
+				id    => $token->[1]{id},
+				title => $token->[1]{href},
+				text  => $data,
+			}, { Return => 1 });
 		}
 		$content ||= getData('SLASH-UKNOWN-LINK');
+
 	} elsif ($token->[1]->{story}) {
 		$data = $tokens->get_text("/slash");
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		$content = linkStory({
-				'link'	=> $data,
-				sid	=> $token->[1]->{story},
-				title	=> $reader->getStory($token->[1]->{story}, 'title'),
-				});
+			'link'	=> $data,
+			sid	=> $token->[1]{story},
+			title	=> $reader->getStory($token->[1]{story}, 'title'),
+		});
 		$content ||= getData('SLASH-UKNOWN-STORY');
 	} # More of these type can go here.
 
