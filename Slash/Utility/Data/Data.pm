@@ -2417,32 +2417,31 @@ sub _slashlink_to_link {
 	}
 	my $frag = delete $attr{frag} || "";
 	# Generate the return value.
-	my $retval = q{<A HREF="};
+	my $url = "";
 	if ($sn eq 'comments') {
-		$retval .= qq{$skin_root/comments.pl?};
-		$retval .= join("&",
+		$url .= qq{$skin_root/comments.pl?};
+		$url .= join("&",
 			map { qq{$_=$attr{$_}} }
 			sort keys %attr);
-		$retval .= qq{#$frag} if $frag;
+		$url .= qq{#$frag} if $frag;
 	} elsif ($sn eq 'article') {
 		# Different behavior here, depending on whether we are
 		# outputting for a dynamic page, or a static one.
 		# This is the main reason for doing slashlinks at all!
 		if ($ssi) {
-			$retval .= qq{$skin_root/};
-			$retval .= qq{$skin_name/$attr{sid}.shtml};
-			$retval .= qq{?tid=$attr{tid}} if $attr{tid};
-			$retval .= qq{#$frag} if $frag;
+			$url .= qq{$skin_root/};
+			$url .= qq{$skin_name/$attr{sid}.shtml};
+			$url .= qq{?tid=$attr{tid}} if $attr{tid};
+			$url .= qq{#$frag} if $frag;
 		} else {
-			$retval .= qq{$skin_root/article.pl?};
-			$retval .= join("&",
+			$url .= qq{$skin_root/article.pl?};
+			$url .= join("&",
 				map { qq{$_=$attr{$_}} }
 				sort keys %attr);
-			$retval .= qq{#$frag} if $frag;
+			$url .= qq{#$frag} if $frag;
 		}
 	}
-	$retval .= q{">};
-	return $retval;
+	return q{<A HREF="} . strip_urlattr($url) . q{">};
 }
 
 #========================================================================
