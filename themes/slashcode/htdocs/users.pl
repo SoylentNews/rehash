@@ -1675,7 +1675,8 @@ sub editComm {
 	my $constants = getCurrentStatic();
 	my $user_edit = {};
 	my($formats, $commentmodes_select, $commentsort_select, $title,
-		$uthreshold_select, $highlightthresh_select, $posttype_select);
+		$uthreshold_select, $highlightthresh_select, $posttype_select,
+		$bytelimit_select);
 
 	my $admin_block = '';
 	my $fieldkey;
@@ -1777,6 +1778,14 @@ sub editComm {
 		'highlightthresh', $formats, $user_edit->{highlightthresh}, 1
 	);
 
+	$user_edit->{bytelimit} = $constants->{defaultbytelimit}
+		if $user_edit->{bytelimit} < 0 || $user_edit->{bytelimit} > 7;
+	my $bytelimit_desc = $user_edit->{is_subscriber} ? 'bytelimit' : 'bytelimit_sub';
+	$formats = $slashdb->getDescriptions($bytelimit_desc);
+	$bytelimit_select = createSelect(
+		'bytelimit', $formats, $user_edit->{bytelimit}, 1
+	);
+
 	my $h_check  = $user_edit->{hardthresh}		? ' CHECKED' : '';
 	my $r_check  = $user_edit->{reparent}		? ' CHECKED' : '';
 	my $n_check  = $user_edit->{noscores}		? ' CHECKED' : '';
@@ -1821,6 +1830,7 @@ sub editComm {
 		subscriber_bonus	=> $subscriber_bonus,
 		small_length_bonus_select => $small_length_bonus_select,
 		long_length_bonus_select => $long_length_bonus_select,
+		bytelimit_select	=> $bytelimit_select,
 	});
 }
 
