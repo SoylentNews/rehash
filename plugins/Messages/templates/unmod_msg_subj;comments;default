@@ -14,3 +14,5 @@ __template__
 Undo Moderation of "[% comment.subject %]"
 __seclev__
 500
+__version__
+$Id$

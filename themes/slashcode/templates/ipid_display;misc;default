@@ -22,3 +22,5 @@ data.subnetid %]&amp;fieldname=subnetid">[% data.subnetid_vis %]</A></FONT>
 
 __seclev__
 10000
+__version__
+$Id$

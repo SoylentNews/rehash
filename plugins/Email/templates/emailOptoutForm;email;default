@@ -33,3 +33,5 @@ Enter email address to be removed from further story emailings:<BR>
 <INPUT TYPE="SUBMIT" VALUE"="Opt Out">
 </FORM>
 
+__version__
+$Id$

@@ -56,3 +56,5 @@ Copyright 1997-2002 [% constants.sitepublisher %].  All rights reserved.
 
 __seclev__
 500
+__version__
+$Id$

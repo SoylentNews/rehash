@@ -19,3 +19,5 @@ Undoing moderation to Comment #[% r.cid %]<BR>
 [% END %]
 __seclev__
 1000
+__version__
+$Id$

@@ -30,3 +30,5 @@ send your suggestions to the administrator ([% useradmin %]).
 
 __seclev__
 1000
+__version__
+$Id$

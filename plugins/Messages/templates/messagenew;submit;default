@@ -30,3 +30,5 @@ submission.subj | fixparam %]">[% submission.subj | strip_literal %]</A></B>.
 
 __seclev__
 100
+__version__
+$Id$

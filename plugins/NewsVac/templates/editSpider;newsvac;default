@@ -97,3 +97,5 @@ date.format(t.last_run, "%F %R") -%] for [% t.duration %]s, '[% t.results %]')</
 <!-- end editSpider -->
 __seclev__
 100
+__version__
+$Id$

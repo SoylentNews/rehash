@@ -77,3 +77,5 @@ password mailed to you</A> by entering your nickname, uid, or email address.
 [% END %]
 __seclev__
 10000
+__version__
+$Id$

@@ -86,3 +86,5 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 
 __seclev__
 500
+__version__
+$Id$

@@ -52,3 +52,5 @@ END -%]
 [% END -%]
 </BODY>
 </HTML>
+__version__
+$Id$

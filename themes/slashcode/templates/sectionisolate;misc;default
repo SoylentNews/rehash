@@ -17,3 +17,5 @@ __template__
 <INPUT TYPE="hidden" NAME="[% name %]" VALUE="[% section %]">
 __seclev__
 10000
+__version__
+$Id$

@@ -35,3 +35,5 @@ user.state.mt.currow = min_rows + 1;
 
 __seclev__
 10000
+__version__
+$Id$

@@ -39,3 +39,5 @@ to <A HREF="[% constants.rootdir %]/users.pl">your user page</A>.
 
 __seclev__
 1000
+__version__
+$Id$

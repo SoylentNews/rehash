@@ -14,3 +14,5 @@ __template__
 New Journal Entry by [% journal.nickname %], "[% journal.description %]"
 __seclev__
 100
+__version__
+$Id$

@@ -92,3 +92,5 @@ or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">where you change t
 
 __seclev__
 500
+__version__
+$Id$

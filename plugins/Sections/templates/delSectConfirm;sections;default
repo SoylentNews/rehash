@@ -18,3 +18,5 @@ __template__
 [% PROCESS titlebar %]
 __seclev__
 10000
+__version__
+$Id$

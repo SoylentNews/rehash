@@ -27,3 +27,5 @@ in this block -->
 [% Slash.getAd(1) %]
 <!-- end ad code -->
 [% END -%]
+__version__
+$Id$

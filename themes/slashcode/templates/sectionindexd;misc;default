@@ -32,3 +32,5 @@ __template__
 	</TR>
 __seclev__
 1000
+__version__
+$Id$

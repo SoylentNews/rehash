@@ -62,3 +62,5 @@ __template__
 
 __seclev__
 500
+__version__
+$Id$

@@ -118,3 +118,5 @@ Your [% constants.sitename %] account has expired.
 
 __seclev__
 10000
+__version__
+$Id$

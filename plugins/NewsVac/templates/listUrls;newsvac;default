@@ -101,3 +101,5 @@ constants.rootdir %]/newsvac.pl" method="POST">
 
 __seclev__
 100
+__version__
+$Id$

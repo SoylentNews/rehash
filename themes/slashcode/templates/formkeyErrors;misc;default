@@ -185,3 +185,5 @@ If the problem persists, and all other options have been tried, contact the
 
 __seclev__
 1000
+__version__
+$Id$

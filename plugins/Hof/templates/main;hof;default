@@ -62,3 +62,5 @@ __template__
 <P><FONT SIZE="2"><CENTER>generated on [% currtime %]</CENTER></FONT></P>
 __seclev__
 10000
+__version__
+$Id$

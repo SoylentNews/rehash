@@ -151,3 +151,5 @@ whitespace and/or less repetition.
 [% END %]
 __seclev__
 10000
+__version__
+$Id$

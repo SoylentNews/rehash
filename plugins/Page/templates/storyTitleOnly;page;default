@@ -15,3 +15,5 @@ __template__
 <b><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A></b><p>
 __seclev__
 100
+__version__
+$Id$

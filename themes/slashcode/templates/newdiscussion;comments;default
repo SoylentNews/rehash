@@ -30,3 +30,5 @@ has been created.  Go to <A HREF="[% constants.rootdir %]/comments.pl?sid=[% id 
 
 __seclev__
 500
+__version__
+$Id$

@@ -165,3 +165,5 @@ please contact the site administrator immediately.
 [% END %]
 __seclev__
 10000
+__version__
+$Id$

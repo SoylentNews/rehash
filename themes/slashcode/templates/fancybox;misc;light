@@ -14,3 +14,5 @@ __template__
 <H3>[% title %]</H3><P>[% contents %]</P>
 __seclev__
 10000
+__version__
+$Id$

@@ -17,3 +17,5 @@ __template__
 &middot; <A HREF="[% constants.rootdir %]/search.pl?tid=[% id %]">[% name %]</A><BR>
 __seclev__
 10000
+__version__
+$Id$

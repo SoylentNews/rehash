@@ -14,3 +14,5 @@ __template__
 New Comment "[% reply.subject %]" by [% reply.nickname %]
 __seclev__
 500
+__version__
+$Id$

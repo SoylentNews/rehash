@@ -126,3 +126,5 @@ SubnetID [% netid_vis %] has posted [% commentcount %] comments.
 
 __seclev__
 500
+__version__
+$Id$

@@ -15,3 +15,5 @@ New Submission "[% submission.subj %]"
 
 __seclev__
 100
+__version__
+$Id$

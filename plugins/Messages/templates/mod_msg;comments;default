@@ -41,3 +41,5 @@ It is currently scored [% reasons.${comment.reason}.name %] ([% comment.points %
 
 __seclev__
 500
+__version__
+$Id$

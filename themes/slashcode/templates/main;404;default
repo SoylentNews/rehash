@@ -41,3 +41,5 @@ The requested URL ([% origin %]) was not found.<p>
 <P>If you feel like it, mail the url, and where ya came from to <A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.adminmail %].</A>
 __seclev__
 10000
+__version__
+$Id$

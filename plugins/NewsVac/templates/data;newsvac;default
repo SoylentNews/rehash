@@ -628,3 +628,5 @@ Spider '[% spider %]' is stale [% IF count %](iter: [% count %])[% END -%]
 [% END %]
 __seclev__
 100
+__version__
+$Id$

@@ -22,3 +22,5 @@ miner rel does not point to a nugget, to '[% url_id %]' from '[% url_id_list %]'
 [% END %]
 __seclev__
 100
+__version__
+$Id$

@@ -49,3 +49,5 @@ __template__
                 </TD>
         </TR>
 </TABLE>
+__version__
+$Id$

@@ -78,3 +78,5 @@ For your [% msg1 %] moderation, you have been [% msg2 %].
 
 __seclev__
 500
+__version__
+$Id$

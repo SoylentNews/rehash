@@ -51,3 +51,5 @@ END -%]
 <LI>"[% l.1 %]" - [% l.0 %]</LI>
 [% END %]</OL>
 [% END -%]
+__version__
+$Id$

@@ -23,3 +23,5 @@ to:
 
 Thanks for reading [% constants.sitename %]!
 
+__version__
+$Id$

@@ -192,3 +192,5 @@ IF do_br %]<BR>[% END %]
 
 __seclev__
 1000
+__version__
+$Id$

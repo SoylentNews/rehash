@@ -66,3 +66,5 @@ To opt-out of further emailings;
 
 Copyright 1997-2002 [% constants.sitepublisher %].  All rights reserved.
 
+__version__
+$Id$

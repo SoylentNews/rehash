@@ -18,3 +18,5 @@ __template__
 <p>Processed URL IDs [% ids %] in [% duration %] seconds.
 __seclev__
 100
+__version__
+$Id$

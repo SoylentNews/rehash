@@ -14,3 +14,5 @@ __template__
 Reply to "[% discussion.title %]" by [% reply.nickname %]
 __seclev__
 500
+__version__
+$Id$

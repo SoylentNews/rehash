@@ -36,3 +36,5 @@ CASE "moderated" %]
 [% END %]
 __seclev__
 1000
+__version__
+$Id$

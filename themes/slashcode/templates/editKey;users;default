@@ -16,3 +16,5 @@ __template__
 <P><B>Public Key</B><BR><TEXTAREA NAME="pubkey" ROWS="4" COLS="60">[% pubkey | strip_literal %]</TEXTAREA>
 __seclev__
 500
+__version__
+$Id$

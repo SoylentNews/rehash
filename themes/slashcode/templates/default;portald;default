@@ -14,3 +14,5 @@ __template__
 &middot; <A HREF="[% item.link | strip_attribute %]">[% item.title | strip_notags %]</A><BR>
 __seclev__
 10000
+__version__
+$Id$

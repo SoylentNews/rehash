@@ -49,3 +49,5 @@ Enter email address to send story to:
 <INPUT TYPE="SUBMIT" VALUE="Send Email">
 </FORM>
 
+__version__
+$Id$

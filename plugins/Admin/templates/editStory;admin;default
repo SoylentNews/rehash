@@ -247,3 +247,5 @@ storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; 
 
 __seclev__
 10000
+__version__
+$Id$

@@ -25,3 +25,5 @@ The [% slave_name %] database is lagged behind the master by [% bytes %] bytes.
 [% END %]
 __seclev__
 500
+__version__
+$Id$

@@ -71,3 +71,5 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 
 __seclev__
 10000
+__version__
+$Id$

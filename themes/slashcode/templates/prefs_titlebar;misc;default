@@ -42,3 +42,5 @@ PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selec
 
 __seclev__
 10000
+__version__
+$Id$

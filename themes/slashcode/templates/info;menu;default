@@ -30,3 +30,5 @@ PROCESS tabbedmenu tabs=tabs color=color selected=page; %]
 
 __seclev__
 10000
+__version__
+$Id$

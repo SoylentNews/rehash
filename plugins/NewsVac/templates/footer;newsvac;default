@@ -46,3 +46,5 @@ __template__
 <!-- end newsvacadmin footer -->
 __seclev__
 100
+__version__
+$Id$

@@ -49,3 +49,5 @@ END %]
 [% END %]
 __seclev__
 10000
+__version__
+$Id$

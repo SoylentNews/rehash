@@ -15,3 +15,5 @@ __seclev__
 5000
 __template__
 Emailed Story: [% story.title %]
+__version__
+$Id$

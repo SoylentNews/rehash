@@ -39,3 +39,5 @@ scored [% reasons.${comment.reason} %] ([% comment.points %]).
 
 __seclev__
 500
+__version__
+$Id$

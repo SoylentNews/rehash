@@ -85,3 +85,5 @@ CASE 'formkeyError';
 END  # SWITCH / CASE
 
 -%]
+__version__
+$Id$

@@ -147,3 +147,5 @@ END;
 returnimage -%]
 __seclev__
 1000
+__version__
+$Id$
