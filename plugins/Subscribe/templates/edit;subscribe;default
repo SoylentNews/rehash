@@ -74,8 +74,8 @@ and so far [% hits_bought %] have been used up
 	contribution very much.
 [% END %]
 
-<p>(Note: we use Greenwich Mean Time to decide where "today" begins
-and ends.)
+<p>(We use Greenwich Mean Time to decide where "today" begins and
+ends. Your day may vary.)
 
 [% IF can_buy %]
 
