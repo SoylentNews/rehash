@@ -1275,7 +1275,12 @@ sub editComm {
 		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
 
 	my %reason_select;
-	my @range = (-6 .. 6);
+
+# 	my @range = (-6 .. 6);
+	my $hi = $constants->{comment_maxscore} - $constants->{comment_minscore};
+	my $lo = -$hi;
+	my @range = ($lo .. $hi);
+
 	for (@reasons) {
 		my $key = "reason_alter_$_";
 		$reason_select{$_} = createSelect($key, \@range, 
