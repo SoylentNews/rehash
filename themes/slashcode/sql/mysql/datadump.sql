@@ -279,12 +279,12 @@ INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (2,4,30);
 # dumping data from table 'story_topics_rendered'
 #
 
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,1,30);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,1,30);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,2,30);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,2,30);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (1,4,30);
-INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,4,30);
+INSERT INTO story_topics_rendered (stoid,tid) VALUES (1,1);
+INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,1);
+INSERT INTO story_topics_rendered (stoid,tid) VALUES (1,2);
+INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,2);
+INSERT INTO story_topics_rendered (stoid,tid) VALUES (1,4);
+INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,4);
 
 #
 # Dumping data for table 'submissions'
@@ -301,14 +301,14 @@ INSERT INTO story_topics_rendered (stoid,tid,weight) VALUES (2,4,30);
 # Dumping data for table 'topics'
 #
 
-INSERT INTO topics VALUES (1,'mainpage', 'Main Page', 'no', '', 0, 0);
-INSERT INTO topics VALUES (2,'features','Features', 'no', '', 0, 0);
-INSERT INTO topics VALUES (3,'opensource','Open Source', 'no', '', 0, 0);
-INSERT INTO topics VALUES (4,'slash', 'Slash', 'no', 'topicslash.gif',81,36);
-INSERT INTO topics VALUES (5,'programming', 'Programming', 'no', 'topicprogramming.gif',80,48);
-INSERT INTO topics VALUES (6,'news', 'News', 'no', 'topicnews.gif',34,44);
-INSERT INTO topics VALUES (7,'linux', 'Linux', 'no', 'topiclinux.gif',60,70);
-INSERT INTO topics VALUES (8,'slashdot', 'Slashdot', 'no', 'topicslashdot.gif',100,34);
+INSERT INTO topics VALUES (1,'mainpage', 'Main Page', 'no', '', 0, 0, 'no');
+INSERT INTO topics VALUES (2,'features','Features', 'no', '', 0, 0, 'no');
+INSERT INTO topics VALUES (3,'opensource','Open Source', 'no', '', 0, 0, 'no');
+INSERT INTO topics VALUES (4,'slash', 'Slash', 'no', 'topicslash.gif',81,36,'yes');
+INSERT INTO topics VALUES (5,'programming', 'Programming', 'no', 'topicprogramming.gif',80,48,'yes');
+INSERT INTO topics VALUES (6,'news', 'News', 'no', 'topicnews.gif',34,44,'yes');
+INSERT INTO topics VALUES (7,'linux', 'Linux', 'no', 'topiclinux.gif',60,70,'yes');
+INSERT INTO topics VALUES (8,'slashdot', 'Slashdot', 'no', 'topicslashdot.gif',100,34,'yes');
 
 #
 # Dumping data for table 'topic_nexus'
