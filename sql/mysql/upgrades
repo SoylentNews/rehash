@@ -1976,8 +1976,6 @@ INSERT INTO vars (name, value, description) VALUES ('topic_search_sid_limit', 10
 
 # End of T_2_3_0_127, Start of T_2_3_0_128 - 2003/12/11
 
-# SLASHDOT LAST UPDATED HERE
-
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_128, Start of T_2_3_0_129 - 2003/12/16
@@ -2045,6 +2043,8 @@ REPLACE INTO string_param (type, code, name) VALUES ('cookie_location','ipid','n
 
 REPLACE INTO code_param (type, code, name) VALUES ('session_login',0,'lasts forever');
 REPLACE INTO code_param (type, code, name) VALUES ('session_login',1,'closes with browser');
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_131, Start of T_2_3_0_132 - 2004/01/27
 
