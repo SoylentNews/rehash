@@ -477,11 +477,11 @@ sub quicksend {
 
 	# allow for altto
 	if ($tuser =~ /\D/) {
-		$msg->{user}{uid}	= 0;
-		$msg->{altto}		= $tuser;
+		$msg{user}{uid}	= 0;
+		$msg{altto}	= $tuser;
 	} else {
-		$msg->{user}		= $slashdb->getUser($tuser);
-		$msg->{altto}		= '';
+		$msg{user}	= $slashdb->getUser($tuser);
+		$msg{altto}	= '';
 	}
 
 	$self->send(\%msg);
