@@ -275,8 +275,8 @@ sub sqlSelect {
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
-	my $sth = $self->{_dbh}->prepare_cached($sql);
 	$self->sqlConnect();
+	my $sth = $self->{_dbh}->prepare_cached($sql);
 	if (!$sth->execute) {
 		errorLog($sql);
 		$self->sqlConnect;

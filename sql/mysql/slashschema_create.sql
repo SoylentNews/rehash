@@ -32,7 +32,7 @@ CREATE TABLE abusers (
 DROP TABLE IF EXISTS accesslist; 
 CREATE TABLE accesslist ( 
 	id mediumint NOT NULL auto_increment, 
-	uid mediumint UNSIGNED,
+	uid mediumint UNSIGNED NOT NULL,
 	ipid char(32),
 	subnetid char(32),
 	formname varchar(20) DEFAULT '' NOT NULL,

@@ -314,10 +314,6 @@ sub userdir_handler {
 				$r->args("op=freaks");
 				$r->uri('/zoo.pl');
 				$r->filename($constants->{basedir} . '/zoo.pl');
-			} elsif ($op eq 'freaks') {
-				$r->args("op=freaks");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
 			} elsif ($op eq 'comments') {
 				$r->args("op=editcomm");
 				$r->uri('/users.pl');

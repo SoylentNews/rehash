@@ -15,8 +15,8 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (6, 'New Submission
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (7, 'Reply to Journal', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (8, 'New Comment', 1000000, '');
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Messaging','[% constants.rootdir %]/my/messages/',1,17);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','List Messages','[% constants.rootdir %]/messages.pl?op=list',1,13);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Inbox','[% constants.rootdir %]/my/inbox/',1,17);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Inbox','[% constants.rootdir %]/my/inbox/',1,13);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Message Preferences','[% constants.rootdir %]/my/messages/',1,2);
 
 INSERT INTO vars (name, value, description) VALUES ('message_process_count','100','Number of messages to process at each delivery interval');

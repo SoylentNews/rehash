@@ -45,7 +45,19 @@ __template__
 [% IF homepage && homepage.length > 8 %] | <A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
 [% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
 <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
+</FONT>
 [% END %]
+[% END %]
+[% UNLESS user.is_anon || is_anon || uid == user.uid %]
+&nbsp;&nbsp; 
+<FONT FACE="[% constants.mainfontface %]" SIZE="1">
+	[% IF user.people.$uid == Slash.FRIEND %]
+	<A HREF="[% constants.rootdir %]/zoo.pl?op=delecheck&amp;type=friend&amp;uid=[% uid %]">DeFriend</A>/<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=foe&amp;uid=[% uid %]">Foe</A>
+	[% ELSIF user.people.$uid == Slash.FOE %]
+	<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">Friend</A>/<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;type=foe&amp;uid=[% uid %]">DeFoe</A>
+	[% ELSE %]
+	<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">Friend</A>/<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=foe&amp;uid=[% uid %]">Foe</A>
+	[% END %]
 </FONT>
 [% END %]
 [% IF user.seclev >= 100 && ipid && subnetid %]

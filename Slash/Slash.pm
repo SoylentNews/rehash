@@ -26,6 +26,7 @@ Slash is the code that runs Slashdot.
 use strict;  # ha ha ha ha ha!
 use Symbol 'gensym';
 
+use Slash::Constants ':people';
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
@@ -85,7 +86,7 @@ sub selectComments {
 		$cid, 
 		$cache_read_only
 	);
-
+	
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# is in the index of the hash (based on its cid).
@@ -110,6 +111,13 @@ sub selectComments {
 		my $reason =  $constants->{reasons}[$C->{reason}];
 		$C->{points} += $user->{"reason_alter_$reason"} 
 				if ($user->{"reason_alter_$reason"});
+
+		# Keep your friends close but your enemies closer.
+		# Or ignore them, we don't care.
+		$C->{points} += $user->{friend_bonus}
+			if ($user->{people}{$C->{uid}} == FRIEND);
+		$C->{points} += $user->{foe_bonus}
+			if ($user->{people}{$C->{uid}} == FOE);
 
 		# fix points in case they are out of bounds
 		$C->{points} = $min if $C->{points} < $min;
