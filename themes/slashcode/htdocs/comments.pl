@@ -844,7 +844,7 @@ sub validateComment {
 		# Don't count & or other chars used in entity tags;  don't count
 		# chars commonly used in ascii art.  Not that it matters much.
 		# Do count chars commonly used in source code.
-		my $num_chars = $check_notags =~ tr/A-Za-z0-9?!(){}[]-+='"@$//;
+		my $num_chars = $check_notags =~ tr/A-Za-z0-9?!(){}[]+='"@$-//;
 
 		# Note that approveTags() has already been called by this point,
 		# so all tags present are legal and uppercased.
