@@ -330,6 +330,7 @@ INSERT INTO vars (name, value, description) VALUES ('recent_topic_txt_count','5'
 
 # For plugins/Admin
 INSERT INTO vars (name, value, description) VALUES ('similarstorydays', '30', 'Number of days to look back for uncommon words');
+INSERT INTO vars (name, value, description) VALUES ('similarstorymaxwords', '30', 'Maximum number of top-weighted scores to search for in previous stories');
 INSERT INTO vars (name, value, description) VALUES ('similarstoryminweight', '4', 'Minimum weight necessary for a story to be displayed as similar');
 INSERT INTO vars (name, value, description) VALUES ('similarstorynumshow', '5', 'Maximum number of similar stories to show in admin preview');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords', '', 'Uncommon words found in recent stories');

@@ -4815,6 +4815,10 @@ sub getSimilarStories {
 #print STDERR "uncommon intersection: '@text_uncommon_words'\n";
 	# If there is no intersection, return now.
 	return [ ] unless @text_uncommon_words;
+	# If that list is too long, don't use all of them.
+	my $maxwords = $constants->{similarstorymaxwords} || 30;
+	$#text_uncommon_words = $maxwords-1
+		if $#text_uncommon_words > $maxwords-1;
 	# Find previous stories which have used these words.
 	my $where = "";
 	my @where_clauses = ( );

@@ -17,6 +17,7 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slash
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Help','[% constants.rootdir %]/slashguide.shtml',1,17);
 INSERT INTO vars (name, value, description) VALUES ('ispell', 'ispell', 'Location of ispell binary or empty string to turn off');
 INSERT INTO vars (name, value, description) VALUES ('similarstorydays', '30', 'Number of days to look back for uncommon words when determining similar stories');
+INSERT INTO vars (name, value, description) VALUES ('similarstorymaxwords', '30', 'Maximum number of top-weighted scores to search for in previous stories');
 INSERT INTO vars (name, value, description) VALUES ('similarstoryminweight', '4', 'Minimum weight necessary for a story to be displayed as similar');
 INSERT INTO vars (name, value, description) VALUES ('similarstorynumshow', '5', 'Maximum number of similar stories to show in admin preview');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords', '', 'A generated list of uncommon words found in recent stories');
