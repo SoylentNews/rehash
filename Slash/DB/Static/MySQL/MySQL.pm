@@ -660,16 +660,6 @@ sub convert_tokens_to_points {
 	for my $uid (@uids) {
 		my($tokens, $points);
 
-		my $rtbl = $self->getUser($uid, 'rtbl') || 0;
-		if ($rtbl) {
-			$tokens = 0;
-			$points = 0;
-		} else {
-			$tokens = "LEAST(tokens,$maxtokens) - $tokentrade",
-			$points = "points + $pointtrade",
-		}
-
-		$granted{$uid} = $rtbl ? 0 : 1;
 		$self->setUser($uid, {
 			-lastgranted	=> 'NOW()',
 			-tokens		=> $tokens,

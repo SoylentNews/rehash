@@ -187,9 +187,8 @@ EOT
 		my($data) = @_;
 
 		# This should even handle the cases of new additions to MAIN
-		# code (read: Slashdot-only) -- IE users_info.rtbl. -- If 
-		# the MAIN based site uses these fields, they'll get copied
-		# if they don't, no problem.
+		# code (read: Slashdot-only) -- If the MAIN based site uses
+		# these fields, they'll get copied, if they don't, no problem.
 
 		# Resolve UID collisions (anonymous user). Remember we drop
 		# any records from UID $ac_uid{$ac_uid{-1}}, since they aren't

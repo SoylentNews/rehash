@@ -2372,7 +2372,6 @@ sub getUserAdmin {
 	}
 
 	$user_edit->{author} = ($user_edit->{author} == 1) ? ' CHECKED' : '';
-	$user_edit->{rtbl} = ($user_edit->{rtbl} == 1) ? ' CHECKED' : '';
 	if (! $user->{nonuid}) {
 		my $threshcodes = $slashdb->getDescriptions('threshcode_values','',1);
 		$thresh_select = createSelect('defaultpoints', $threshcodes, $user_edit->{defaultpoints}, 1);

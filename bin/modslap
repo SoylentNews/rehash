@@ -41,7 +41,6 @@ my $constants = getCurrentStatic();
 		$slashdb->setUser($_, {
 			-karma	=> $constants->{badkarma},
 			-points	=> 0,
-			rtbl	=> 1,
 		});
 	}
 }
