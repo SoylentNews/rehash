@@ -90,8 +90,14 @@ END %]
 </TABLE>
 
 [% ELSE %]
-[% IF constants.run_ads && constants.ad_messaging_num %][% Slash.getAd(constants.ad_messaging_num) %][% END %]
+[% IF constants.run_ads && constants.ad_messaging_num;
+	Slash.getAd(constants.ad_messaging_num);
+END -%]
 [% END %]
 
+[% IF full && constants.plugin.Print -%]
+<P><SMALL><A HREF="[% constants.rootdir %]/print.pl?sid=[% story.sid
+-%]">Printer Friendly Version</A></SMALL>
+[% END -%]
 __seclev__
 10000
