@@ -613,7 +613,7 @@ sub createSectionTopic {
 	my($self, $section, $tid, $type) = @_;
 	$type ||= 'topic_1'; # ! is the default type
 
-	    $self->sqlDo("INSERT INTO section_topics (section, tid, type) VALUES ('$section',$tid, '$type')");
+	$self->sqlDo("INSERT INTO section_topics (section, tid, type) VALUES ('$section',$tid, '$type')");
 }
 
 ########################################################
@@ -4809,8 +4809,8 @@ sub getTopic {
 
 ########################################################
 sub getSectionTopicType {
-    my ($self,$tid) = @_;
-    my $type = $self->sqlSelectAll('section,type','section_topics',"tid = $tid");
+    my($self,$tid) = @_;
+    my $type = $self->sqlSelectAll('section,type', 'section_topics', "tid = $tid");
 
     return $type;
 }

@@ -178,8 +178,7 @@ sub getRDF {
 			# this is if you want a nice numbering 
 			# layout in your block <ol> works, but 
 			# is ugly
-			$item->{counter} = $i;
-			$item->{counter} += 1;
+			$item->{counter} = $i + 1;
 			$str .= slashDisplay($template_name, {
 				item	=> $item,
 			}, {

@@ -66,7 +66,6 @@ sub main {
 
 	my $StandardBlocks = displayStandardBlocks($section, $stories);
 
-
 	slashDisplay('index', {
 		is_moderator	=> scalar $slashdb->checkForMetaModerator($user),
 		stories		=> $Stories,
@@ -74,6 +73,7 @@ sub main {
 		storystruct	=> $storystruct,
 		boxes		=> $StandardBlocks,
 	});
+
 	footer();
 
 	writeLog($form->{section});
@@ -238,6 +238,7 @@ sub displayStories {
 	my $user      = getCurrentUser();
 
 	my($today, $x) = ('', 1);
+	# ??? why is this being changed ???
 	# my $cnt = int($user->{maxstories} / 3);
 	my $cnt = 30; 
 	my $return;
@@ -248,9 +249,7 @@ sub displayStories {
 	# method)
 	while ($_ = shift @{$stories}) {
 		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid) = @{$_};
-		my ($tmpreturn, $category, $feature_sid);
-		my $other;
-		my @links;
+		my($tmpreturn, $category, $feature_sid, $other, @links);
 		my @threshComments = split m/,/, $hp;  # posts in each threshold
 
 		if ($constants->{organise_stories}) {
@@ -260,103 +259,103 @@ sub displayStories {
 		# feature_retrieved keeps the code from checking again for that section
 		# if the feature story has already been retrieved
 		if ($constants->{feature_story_enabled} && ! $feature_retrieved->{$thissection}) {
-		    $feature_sid = $slashdb->getSection($thissection,'feature_story'); 
-		    if ($sid eq $feature_sid) {
-			$other->{story_template} = 'dispFeature';
-			$category = 'feature';
-			# ok, we have the feature story for this section
-			$feature_retrieved->{$thissection} = 1;
-		    }	
+			$feature_sid = $slashdb->getSection($thissection,'feature_story');
+			if ($sid eq $feature_sid) {
+				$other->{story_template} = 'dispFeature';
+				$category = 'feature';
+				# ok, we have the feature story for this section
+				$feature_retrieved->{$thissection} = 1;
+			}	
 		}
 		
 		my($storytext, $story) = displayStory($sid, '', $other);
 
 		if ($constants->{get_titles}) {
-		    my $titlelink = slashDisplay('storyTitleOnly', { story => $story }, {Return => 1});
+			my $titlelink = slashDisplay('storyTitleOnly', { story => $story }, {Return => 1});
 
-		    $return->{$category}{titles} .= $titlelink; 
+			$return->{$category}{titles} .= $titlelink; 
 		}
 
 		$tmpreturn .= $storytext;
 	
 		push @links, linkStory({
-		    'link'	=> getData('readmore'),
-		    sid		=> $sid,
-		    tid	=> $tid,
-		    section	=> $thissection
+			'link'	=> getData('readmore'),
+			sid	=> $sid,
+			tid	=> $tid,
+			section	=> $thissection
 		});
 
 		my $link;
 
 		if ($constants->{body_bytes}) {
-		    $link = length($story->{bodytext}) . ' ' .
-		    getData('bytes');
+			$link = length($story->{bodytext}) . ' ' .
+				getData('bytes');
 		} else {
-		    my $count = countWords($story->{introtext}) +
-		    countWords($story->{bodytext});
-		    $link = sprintf '%d %s', $count, getData('words');
+			my $count = countWords($story->{introtext}) +
+				countWords($story->{bodytext});
+			$link = sprintf '%d %s', $count, getData('words');
 		}
 
 		if ($story->{bodytext} || $cc) {
-		    push @links, linkStory({
-		    'link'	=> $link,
-		    sid		=> $sid,
-		    tid		=> $tid,
-		    mode	=> 'nocomment',
-		    section	=> $thissection
-		}) if $story->{bodytext};
+			push @links, linkStory({
+				'link'	=> $link,
+				sid	=> $sid,
+				tid	=> $tid,
+				mode	=> 'nocomment',
+				section	=> $thissection
+			}) if $story->{bodytext};
 
-		my @cclink;
-		my $thresh = $threshComments[$user->{threshold} + 1];
+			my @cclink;
+			my $thresh = $threshComments[$user->{threshold} + 1];
 
-		if ($cc = $threshComments[0]) {
-		    if ($user->{threshold} > -1 && $cc ne $thresh) {
-			$cclink[0] = linkStory({
-			    sid		=> $sid,
-			    tid		=> $tid,
-			    threshold	=> $user->{threshold},
-			    'link'		=> $thresh,
-			    section		=> $thissection
+			if ($cc = $threshComments[0]) {
+				if ($user->{threshold} > -1 && $cc ne $thresh) {
+					$cclink[0] = linkStory({
+						sid		=> $sid,
+						tid		=> $tid,
+						threshold	=> $user->{threshold},
+						'link'		=> $thresh,
+						section		=> $thissection
+					});
+				}
+			}
+
+			$cclink[1] = linkStory({
+				sid		=> $sid,
+				tid		=> $tid,
+				threshold	=> -1,
+				'link'		=> $cc || 0,
+				section		=> $thissection
 			});
-		    }
+
+			push @cclink, $thresh, ($cc || 0);
+			push @links, getData('comments', { cc => \@cclink })
+				if $cc || $thresh;
 		}
 
-		$cclink[1] = linkStory({
-		    sid		=> $sid,
-		    tid		=> $tid,
-		    threshold	=> -1,
-		    'link'		=> $cc || 0,
-		    section		=> $thissection
-		});
+		if ($thissection ne $constants->{defaultsection} && !$form->{section}) {
+			my($section) = $slashdb->getSection($thissection);
+			push @links, getData('seclink', {
+				name	=> $thissection,
+				section	=> $section
+			});
+		}
 
-		push @cclink, $thresh, ($cc || 0);
-		push @links, getData('comments', { cc => \@cclink })
-		if $cc || $thresh;
-	    }
+		push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
 
-	    if ($thissection ne $constants->{defaultsection} && !$form->{section}) {
-		my($section) = $slashdb->getSection($thissection);
-		push @links, getData('seclink', {
-		    name	=> $thissection,
-		    section	=> $section
-		});
-	    }
+		my $link_template = $category eq 'feature' ? 'feature_storylink' : 'storylink';
 
-	    push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
+		# I added sid so that you could set up replies from the front page -Brian
+		$tmpreturn .= slashDisplay($link_template, {
+			links	=> \@links,
+			sid	=> $sid,
+		}, { Return => 1});
 
-	    my $link_template = $category eq 'feature' ? 'feature_storylink' : 'storylink';
+		$return->{$category}{full} .= $tmpreturn;
 
-	    # I added sid so that you could set up replies from the front page -Brian
-	    $tmpreturn .= slashDisplay($link_template, {
-		links	=> \@links,
-		sid	=> $sid,
-	    }, { Return => 1});
-
-	    $return->{$category}{full} .= $tmpreturn;
-
-	    my($w) = join ' ', (split m/ /, $time)[0 .. 2];
-	    $today ||= $w;
-	    last if ++$x > $cnt && $today ne $w;
+		my($w) = join ' ', (split m/ /, $time)[0 .. 2];
+		$today ||= $w;
+		last if ++$x > $cnt && $today ne $w;
 	}
 
 	return $return;

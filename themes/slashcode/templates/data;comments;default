@@ -27,6 +27,7 @@ __template__
 
 [% CASE 'labelcap' %]
 	[% labelcap %]
+
 [% CASE 'users_no_discussions' %]
 	This user has created no [% label %]s.
 

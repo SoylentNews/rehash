@@ -687,23 +687,23 @@ sub topicEdit {
 
 	my $tdesc = 'topics_all';
 	if ($user->{section} && $user->{seclev} <= 9000) {
-	    $tdesc = 'topics_section';
+		$tdesc = 'topics_section';
 	}
 	$topics_select = createSelect('nexttid', 
-			$slashdb->getDescriptions($tdesc,$user->{section},1),
-			$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 1);
+		$slashdb->getDescriptions($tdesc, $user->{section}, 1),
+		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 1);
 	my $sections = {};
 	if ($user->{section} && $user->{seclev} <= 9000) {
-	    $sections->{$user->{section}} = $slashdb->getSection($user->{section},'title');
+		$sections->{$user->{section}} = $slashdb->getSection($user->{section},'title');
 	} else {
-	    $sections = $slashdb->getDescriptions('sections-all', '', 1);
+		$sections = $slashdb->getDescriptions('sections-all', '', 1);
 	}
 
 	my $section_topics_arref = $slashdb->getSectionTopicType($form->{nexttid});
 	my $section_topics_hashref = {};
 
 	for (@$section_topics_arref) {
-	    $section_topics_hashref->{$_->[0]}{$_->[1]} = 1;
+		$section_topics_hashref->{$_->[0]}{$_->[1]} = 1;
 	}
 	my $types = $slashdb->getDescriptions('genericstring', 'section_topic_type');
 	my $sectionref;
@@ -711,8 +711,8 @@ sub topicEdit {
 	while (my($section, $title) = each %$sections) {
 		$sectionref->{$section}{checked} = ($section_topics_hashref->{$section}) ? ' CHECKED' : '';
 		$sectionref->{$section}{title} = $title;
-		for my $type(keys %$types) {
-		    $sectionref->{$section}{$type}{checked} = ($section_topics_hashref->{$section}{$type}) ? ' CHECKED' : '';
+		for my $type (keys %$types) {
+			$sectionref->{$section}{$type}{checked} = ($section_topics_hashref->{$section}{$type}) ? ' CHECKED' : '';
 		} 
 	}
 

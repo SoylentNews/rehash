@@ -28,10 +28,7 @@ __template__
 
 [% val3 = BLOCK %]
 [% 
-	section = form.section;
-	IF ! section;
-		section  = user.section;
-	END;
+	section = form.section || user.section;
 %]
 <INPUT TYPE="hidden" NAME="section" VALUE="[% section %]">
 [% # Slash.selectTopic('topic', topic, section, 1) %]

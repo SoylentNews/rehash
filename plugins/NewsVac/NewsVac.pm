@@ -97,7 +97,7 @@ my %nvdescriptions = (
 ############################################################
 
 sub new {
-	my ($class, $user, %conf) = @_;
+	my($class, $user, %conf) = @_;
     
 	my $self = {};
 
@@ -208,7 +208,7 @@ sub lockNewsVac {
 		}, 'newsvac');
 	}
 
-	return ($self->{using_lock} = 1);
+	return($self->{using_lock} = 1);
 }
 
 ############################################################
@@ -310,15 +310,15 @@ sub timing {
     
 # 	Let's replace this with something a bit more concise.
 
-    if ($duration < 0.055) {
-	$duration = int($duration*100+0.5)/100;
-    } elsif ($duration < 0.55) {
-	$duration = int($duration*10+0.5)/10;
-    } elsif ($duration < 5.5) {
-	$duration = int($duration+0.5);
-    } else {
-	$duration = int($duration+5);
-    }
+	if ($duration < 0.055) {
+		$duration = int($duration*100+0.5)/100;
+	} elsif ($duration < 0.55) {
+		$duration = int($duration*10+0.5)/10;
+	} elsif ($duration < 5.5) {
+		$duration = int($duration+0.5);
+	} else {
+		$duration = int($duration+5);
+	}
 
 	# Round to an extra significant digit for small numbers and to the 
 	# nearest 5 for larger values. See helper function round() for how
@@ -364,10 +364,12 @@ None.
 =cut
 
 sub timing_clear {
-    my($self) = @_;
+	my($self) = @_;
 
-    delete $self->{timing_data};
-    $self->{timing_data} = {};
+	# delete + assign unnecessary, unless something else
+	# has a reference to the timing_data hashref
+	delete $self->{timing_data};
+	$self->{timing_data} = {};
 }
 
 ############################################################
@@ -516,7 +518,7 @@ None.
 =cut
 
 sub add_url {
-	my ($self, $url) = @_;
+	my($self, $url) = @_;
 
 	$url = $self->canonical($url)->as_string();
 	if (!$url || $url =~ /^(javascript|mailto):/) {
@@ -688,7 +690,7 @@ None.
 =cut
 
 sub urls_to_ids {
-	my ($self, @urls) = @_;
+	my($self, @urls) = @_;
 
 	if (!@urls) {
 		$self->errLog(getData('urls_to_ids_nourls'));
@@ -745,7 +747,7 @@ None
 
 sub id_to_url {
 	# This should keep a cache for efficiency.
-	my ($self, $url_id) = @_;
+	my($self, $url_id) = @_;
 
 	my $url = undef;
 	$url_id = $self->sqlQuote($url_id);
@@ -789,7 +791,7 @@ None.
 =cut
 
 sub ids_to_urls {
-	my ($self, @url_ids) = @_;
+	my($self, @url_ids) = @_;
 	my %hash;
 
 	if (!@url_ids) {
@@ -855,7 +857,7 @@ None.
 =cut
 
 sub add_urls_return_ids {
-	my ($self, @urls) = @_;
+	my($self, @urls) = @_;
 
 	my %digest = map { ( $_, Digest::MD5::md5_base64($_) ) } @urls;
 
@@ -908,7 +910,7 @@ None.
 =cut
 
 sub add_rels_mark_valid {
-	my ($self, @rels) = @_;
+	my($self, @rels) = @_;
 			
 	for (@rels) {
 		$self->sqlInsert('rel', {
@@ -971,7 +973,7 @@ Adds a record to the 'rel' table and marks it as VALID.
 =cut
 
 sub add_rel {
-	my ($self, $from_url_id, $to_url_id, $parse_code, $type,
+	my($self, $from_url_id, $to_url_id, $parse_code, $type,
 	    $first_verified) = @_;
 
 	my $first_verified_string = unix_to_sql_datetime($first_verified);
@@ -1035,7 +1037,7 @@ sub rels_to_ids {
 	#
 	# Good, because the Slash:DB::MySQL call below wouldn't work anyways!
 	# - Cliff
-	my ($self, $from_url_id, $to_url_id, $tagname, $tagattr) = @_;
+	my($self, $from_url_id, $to_url_id, $tagname, $tagattr) = @_;
 
 	my @where;
 	push @where, 'from_url_id=' . $self->sqlQuote($from_url_id)
@@ -1102,8 +1104,8 @@ None.
 
 sub id_to_rel {
 	# This should keep a cache for efficiency.
-	my ($self, $rel_id) = @_;
-	my ($ary_ref);
+	my($self, $rel_id) = @_;
+	my($ary_ref);
 	my $q_rel_id = $self->sqlQuote($rel_id);
 
 	my $select_text = <<EOT;
@@ -1152,7 +1154,7 @@ Foooooooo.
 
 sub add_miner_and_urls {
  	# This parameter list needs to be simplified, somehow.
-	my ($self, $minername, $last_edit_aid, $pre_stories_text, 
+	my($self, $minername, $last_edit_aid, $pre_stories_text, 
 	    $post_stories_text, $pre_stories_regex, $post_stories_regex,
 	    $extract_vars, $extract_regex, $tweak_code, @urls) = @_;
 
@@ -1203,7 +1205,7 @@ Foooooooo.
 =cut
 
 sub correlate_miner_to_urls {
-	my ($self, $minername, @urls) = @_;
+	my($self, $minername, @urls) = @_;
 
 	my $miner_id = $self->minername_to_id($minername);
 	unless ($miner_id) {
@@ -1267,7 +1269,7 @@ Foooooooo.
 
 sub minername_to_id {
 	# This should keep a cache for efficiency.
-	my ($self, $minername) = @_;
+	my($self, $minername) = @_;
 
 	my $miner_id = $self->sqlSelect(
 		'miner_id', 'miner', "name=" . $self->sqlQuote($minername)
@@ -1310,7 +1312,7 @@ Foooooooo.
 
 sub id_to_minername {
 	# This should keep a cache for efficiency.
-	my ($self, $miner_id) = @_;
+	my($self, $miner_id) = @_;
 
 	my $minername = $self->sqlSelect('name', 'miner', "miner_id=$miner_id");
 	
@@ -1465,7 +1467,7 @@ Foooooooo.
 =cut
 
 sub info_to_nugget_url {
-	my ($self, $dest_url, $title, $source, $slug) = @_;
+	my($self, $dest_url, $title, $source, $slug) = @_;
 
 	$dest_url = $self->canonical($dest_url)->as_string();
 	$title = tag_space_squeeze($title);
@@ -1518,7 +1520,7 @@ Foooooooo.
 =cut
 
 sub nugget_url_to_info {
-	my ($self, $nugget_url) = @_;
+	my($self, $nugget_url) = @_;
 	my %info = ( );
 
 	$nugget_url =~ s{^nugget://}{};
@@ -1557,7 +1559,7 @@ Foooooooo.
 =cut
 
 sub add_nuggets_return_ids {
-	my ($self, $miner_name, @nugget_hashes) = @_;
+	my($self, $miner_name, @nugget_hashes) = @_;
     
 	my @dest_urls = ( );
 	for my $nh (@nugget_hashes) {
@@ -1696,7 +1698,7 @@ Foooooooo.
 =cut
 
 sub process_url_ids {
-	my ($self, $conditions_ref, @url_ids) = @_;
+	my($self, $conditions_ref, @url_ids) = @_;
 	my @urls = $self->ids_to_urls(@url_ids);
 
 	$self->errLog(getData('process_url_ids', {
@@ -1734,7 +1736,7 @@ Foooooooo.
 =cut
 
 sub process_urls_and_ids {
-	my ($self, $conditions_ref, $urls_ar, $ids_ar) = @_;
+	my($self, $conditions_ref, $urls_ar, $ids_ar) = @_;
 	my $start_time;
     
 	$self->errLog(getData('process_urls_and_ids_listids', {
@@ -1815,7 +1817,7 @@ Foooooooo.
 =cut
 
 sub request {
-	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
+	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
 	    $conditions_ref) = @_;
     
 	my $start_time = Time::HiRes::time();
@@ -2145,7 +2147,7 @@ Foooooooo.
 =cut
 
 sub analyze {
-	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
+	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
 	    $conditions_ref) = @_;
 
 	$self->errLog(getData('analyze_contentlength', {
@@ -2278,7 +2280,7 @@ Foooooooo.
 =cut
 
 sub get_parse_codes {
-    my ($self, $url_id, $url, $update_info_ref, $update_content_ref,
+    my($self, $url_id, $url, $update_info_ref, $update_content_ref,
         $response_timestamp) = @_;
     
 	my @codes = ( );
@@ -2341,7 +2343,7 @@ Foooooooo.
 =cut
 
 sub get_parse_code_method {
-	my ($self, $code) = @_;
+	my $self, $code) = @_;
 
 	return \&parse_html_linkextor	if $code eq 'html_linkextor';
 	return \&parse_miner		if $code eq 'miner';
@@ -2433,7 +2435,7 @@ Foooooooo.
 # You know, I don't think this is even used. See get_parse_codes
 # which is basically a straight port from UDBT.pm
 sub parse_html_linkextor {
-	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
+	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
             $conditions_ref) = @_;
 
 	$self->errLog(getData('parse_html_linkextor_start', {
@@ -2521,7 +2523,7 @@ Foooooooo.
 =cut
 
 sub parse_html_linkextor_callback {
-	my ($self, $tagname, %attr) = @_;
+	my($self, $tagname, %attr) = @_;
 
 	for (keys %attr) {
 		my $new_url = URI->new_abs(
@@ -2561,7 +2563,7 @@ Foooooooo.
 =cut
 
 sub trim_body {
-	my ($self, $miner_id, $body_ref, $pre_text, $pre_regex, $post_text,
+	my($self, $miner_id, $body_ref, $pre_text, $pre_regex, $post_text,
 	    $post_regex) = @_;
 	my $orig_body_length = length($$body_ref);
     
@@ -2655,7 +2657,7 @@ Foooooooo.
 =cut
 
 sub parse_miner {
-	my ($self, $url_id, $url_orig, $info_ref, $content_ref, $other_ref,
+	my($self, $url_id, $url_orig, $info_ref, $content_ref, $other_ref,
 	    $conditions_ref) = @_;
 
 	$self->errLog(getData('parse_miner_info', {
@@ -3124,7 +3126,7 @@ Foooooooo.
 =cut
 
 sub parse_nugget {
-	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
+	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
 	    $conditions_ref) = @_;
 
 	my $nugget = $self->nugget_url_to_info($url);
@@ -3427,7 +3429,7 @@ None.
 =cut
 
 sub spider_init {
-	my ($self, $conditions_ref, $group_0_wheres_ref) = @_;
+	my($self, $conditions_ref, $group_0_wheres_ref) = @_;
     
 	# sd = spider data
 	$self->{sd} = { };
@@ -3515,7 +3517,7 @@ None.
 sub garbage_collect {
 	my($self) = @_;
 
-	my ($n_rels, $n_urls, $n_mbs) = (0, 0, 0);
+	my($n_rels, $n_urls, $n_mbs) = (0, 0, 0);
 	$self->timing_clear() if $self->{debug} > -1;
 
 	my $ary_ref = $self->sqlSelectColArrayref(
@@ -3664,7 +3666,7 @@ EOT
 
 	my($sec, $min, $hour, $mday, $mon, $year) = localtime(int($start_time)); 
         my($i, %submitworthy, @sub) = (0);
-        while (my ($miner_name, $nugget_url_id, $nugget_url, $url, $title, 
+        while (my($miner_name, $nugget_url_id, $nugget_url, $url, $title, 
 		   $time, $plaintext, $matches) = $sth->fetchrow())
 	{
                 if (!$matches) {              
@@ -3819,7 +3821,7 @@ EOT
                 $submitworthy{$_->{nugget_url_id}} = 1;            
         }
 
-        my ($worthy, $unworthy) = (0, 0);
+        my($worthy, $unworthy) = (0, 0);
 
         for (sort { $a <=> $b } keys %submitworthy) {
 		$self->sqlInsert('nugget_sub', {
@@ -3895,7 +3897,7 @@ None.
 =cut
 
 sub load_keywords {
-	my ($self, $kw_ref, $keys_ref, $m_regex_ref, $m_regex_enc_ref) = @_;
+	my($self, $kw_ref, $keys_ref, $m_regex_ref, $m_regex_enc_ref) = @_;
 
 	my $cursor = $self->sqlSelectMany(
 		'id,regex,weight,tag', 'newsvac_keywords'
@@ -3994,7 +3996,7 @@ None.
 =cut
 
 sub check_regex {
-	my ($self, $regex, $flags) = @_;
+	my($self, $regex, $flags) = @_;
 
 	$flags = '' if !$flags;
 	my $err = '';
@@ -4441,7 +4443,7 @@ None.
 =cut
 
 sub deleteURL {
-	my ($self, $url_id) = @_;
+	my($self, $url_id) = @_;
 
 	my $q_id = $self->sqlQuote($url_id);
 	my $where = "url_id=$q_id";
