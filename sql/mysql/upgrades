@@ -2258,12 +2258,6 @@ ALTER TABLE users_info ADD COLUMN up_fair MEDIUMINT UNSIGNED DEFAULT '0' NOT NUL
 
 INSERT INTO vars (name, value, description) VALUES ('karma_posting_penalty_style', '0', '0=old (starting score decremented), 1=new (display score shown lower, comment can suffer results of additional downvotes)');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_3_0_149, Start of T_2_3_0_150 - 2004/04/13
 
 # End of T_2_3_0_150, Start of T_2_3_0_151 - 2004/04/20
@@ -2273,6 +2267,12 @@ INSERT INTO vars (name, value, description) VALUES ('subnet_karma_post_limit_ran
 INSERT INTO vars (name, value, description) VALUES ('subnet_karma_comments_needed','5','Number of comments needed before subnet karma is used for disallowing posting');
 
 INSERT INTO vars (name, value, description) VALUES ('maxtokens_add','3','Max tokens to give any one user per pass');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_151, Start of T_2_3_0_152 - 2004/04/27
 
