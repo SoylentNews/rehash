@@ -2562,12 +2562,7 @@ sub checkStoryViewable {
 	# "viewable."  When we fully integrate user-created discussions
 	# and polls into the tid/nexus system, this can go away.
 	# Also at the same time, convert sid into stoid.
-	my $stoid;
-	if ($sid =~ /^\d+$/) {
-		$stoid = $sid;
-	} else {
-		$stoid = $self->sqlSelect("stoid", "stories", "sid='$sid'");
-	}
+	my $stoid = $self->getStoidFromSidOrStoid($sid);
 	return 0 unless $stoid;
 
 	return 0 if $self->sqlCount(
@@ -3188,8 +3183,11 @@ sub savePollQuestion {
 	my $qid_quoted = "";
 	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
 
+	my $stoid;
+	$stoid = $self->getStoidFromSidOrStoid($poll->{sid}) if $poll->{sid};
 	my $sid_quoted = "";
 	$sid_quoted = $self->sqlQuote($poll->{sid}) if $poll->{sid};
+	$self->setStory_delete_memcached([ $stoid ]) if $stoid;
 
 	# get hash of fields to update based on the linked story
 	my $data = $self->getPollUpdateHashFromStory($poll->{sid}, {
@@ -3234,6 +3232,7 @@ sub savePollQuestion {
 			qid		=> $poll->{qid}
 		}, "sid = $sid_quoted") if $sid_quoted;
 	}
+	$self->setStory_delete_memcached([ $stoid ]) if $stoid;
 
 	# Loop through 1..8 and insert/update if defined
 	for (my $x = 1; $x < 9; $x++) {
@@ -3265,7 +3264,7 @@ sub savePollQuestion {
 	return $poll->{qid};
 }
 
-sub updatePollFromStory{
+sub updatePollFromStory {
 	my($self, $sid, $opts) = @_;
 	my($data, $qid) = $self->getPollUpdateHashFromStory($sid, $opts);
 	if ($qid){
@@ -3274,11 +3273,16 @@ sub updatePollFromStory{
 }
 
 #XXXSECTIONTOPICS section and tid still need to be handled
-sub getPollUpdateHashFromStory{
-	my($self, $sid, $opts) = @_;
-	my $story_ref=$self->sqlSelectHashref("sid,qid,time,primaryskid,tid", "stories", "sid=" . $self->sqlQuote($sid));
+sub getPollUpdateHashFromStory {
+	my($self, $id, $opts) = @_;
+	my $stoid = $self->getStoidFromSidOrStoid($id);
+	return undef unless $stoid;
+	my $story_ref = $self->sqlSelectHashref(
+		"sid,qid,time,primaryskid,tid",
+		"stories",
+		"stoid=$stoid");
 	my $data;
-	my $viewable = $self->checkStoryViewable($sid);
+	my $viewable = $self->checkStoryViewable($stoid);
 	if ($story_ref->{qid}) {
 		$data->{date}		= $story_ref->{time} if $opts->{date};
 		$data->{polltype}	= $viewable ? "story" : "nodisplay" if $opts->{polltype};
@@ -3412,26 +3416,15 @@ sub markSkinDirty {
 ########################################################
 sub markStoryClean {
 	my($self, $id) = @_;
-	my $stoid;
-	my $id_style = $self->_storyidstyle($id);
-	if ($id_style eq 'stoid') {
-		$stoid = $id;
-	} else {
-		$stoid = $self->getStory($id, 'stoid', 1);
-	}
+	my $stoid = $self->getStoidFromSidOrStoid($id);
 	$self->sqlDelete('story_dirty', "stoid = $stoid");
 }
 
 ########################################################
 sub markStoryDirty {
 	my($self, $id) = @_;
-	my $stoid;
-	my $id_style = $self->_storyidstyle($id);
-	if ($id_style eq 'stoid') {
-		$stoid = $id;
-	} else {
-		$stoid = $self->getStory($id, 'stoid', 1);
-	}
+	my $stoid = $self->getStoidFromSidOrStoid($id);
+	$self->setStory_delete_memcached([ $stoid ]);
 	$self->sqlInsert('story_dirty', { stoid => $stoid }, { ignore => 1 });
 }
 
@@ -3455,14 +3448,12 @@ sub setStory {
 	my %update_tables = ( );
 
 	# Grandfather in an old-style sid.
-	my $stoid;
-	my $id_style = $self->_storyidstyle($id);
-	if ($id_style eq 'stoid') {
-		$stoid = $id;
-	} else {
-		$stoid = $self->getStory($id, 'stoid', 1);
-		return 0 unless $stoid;
-	}
+	my $stoid = $self->getStoidFromSidOrStoid($id);
+	return 0 unless $stoid;
+
+	# Delete the memcached entry before doing this, because
+	# whatever is there now is invalid.
+	$self->setStory_delete_memcached([ $stoid ]);
 
 	# We modify data before we're done.  Make a copy.
 	my %h = %$hashref;
@@ -3552,7 +3543,31 @@ sub setStory {
 		}
 	}
 
+	# Delete the memcached entry after having done that,
+	# to make sure nothing incorrect was set while we were
+	# in the middle of updating the DB.
+	$self->setStory_delete_memcached([ $stoid ]);
+
 	return $ok;
+}
+
+########################################################
+sub setStory_delete_memcached {
+	my($self, $stoid_list) = @_;
+	my $mcd = $self->getMCD();
+	return unless $mcd;
+	my $constants = getCurrentStatic();
+	my $mcddebug = $constants->{memcached_debug};
+
+	$stoid_list = [ $stoid_list ] if !ref($stoid_list);
+	for my $stoid (@$stoid_list) {
+		my $mcdkey = "$self->{_mcd_keyprefix}:st:";
+		# The "3" means "don't accept new writes to this key for 3 seconds."
+		$mcd->delete("$mcdkey$stoid", 3);
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ setS_deletemcd deleted '$mcdkey$stoid'\n";
+		}
+	}
 }
 
 ########################################################
@@ -4529,13 +4544,21 @@ sub getBanList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
 	my $debug = $constants->{debug_db_cache};
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:al:ban" if $mcd;
+	my $banlist_ref;
 
 	# Randomize the expire time a bit;  it's not good for the DB
 	# to have every process re-ask for this at the exact same time.
 	my $expire_time = $constants->{banlist_expire};
 	$expire_time += int(rand(60)) if $expire_time;
 	_genericCacheRefresh($self, 'banlist', $expire_time);
-	my $banlist_ref = $self->{_banlist_cache} ||= {};
+	$banlist_ref = $self->{_banlist_cache} ||= {};
+
+	if (!keys %$banlist_ref && $mcd) {
+		$banlist_ref = $mcd->get($mcdkey);
+		return $banlist_ref if $banlist_ref;
+	}
 
 	%$banlist_ref = () if $refresh;
 
@@ -4559,6 +4582,10 @@ sub getBanList {
 		# number of keys at the top of this "if")
 		$banlist_ref->{_junk_placeholder} = 1;
 		$self->{_banlist_cache_time} = time() if !$self->{_banlist_cache_time};
+
+		if ($mcd) {
+			$mcd->set($mcdkey, $banlist_ref, $constants->{banlist_expire} || 900);
+		}
 	}
 
 	if ($debug) {
@@ -5615,9 +5642,22 @@ sub getUniqueSkinsFromStories {
 }
 
 ##################################################################
-# XXXSECTIONTOPICS lots of section stuff in here that still needs to be looked at
-# as well as the exclusion of topics/sections
-
+# XXXSECTIONTOPICS lots of section stuff in here that still needs
+# to be looked at as well as the exclusion of topics/sections
+#
+# AND -- this is important -- this data needs to be cached in
+# story_nextprev.  The code for that table isn't written yet:  a
+# utils/ script needs to populate it, and freshenup needs to
+# update it whenever a dirty story is rewritten.  Until we
+# get subqueries this will be a two-select process:
+# 	$order =
+# 	SELECT order FROM story_nextprev WHERE stoid=$stoid AND tid=$tid
+# where $tid is the nexus that the order is to be considered in,
+# and then
+# 	@next_stoids =
+# 	SELECT stoid FROM story_nextprev
+# 		WHERE tid=$tid AND order > $order LIMIT $n
+# with < instead of > to get the previous stoids of course.
 sub getStoryByTime {
 	my($self, $sign, $story, $options) = @_;
 	my $constants = getCurrentStatic();
@@ -5996,7 +6036,11 @@ sub countUsers {
 ########################################################
 sub createVar {
 	my($self, $name, $value, $desc) = @_;
-	$self->sqlInsert('vars', {name => $name, value => $value, description => $desc});
+	$self->sqlInsert('vars', {
+		name =>		$name,
+		value =>	$value,
+		description =>	$desc,
+	});
 }
 
 ########################################################
@@ -6839,17 +6883,15 @@ sub getSubmissionForUser {
 	);
 
 	for my $sub (@$submissions) {
-		my $append = $self->sqlSelectAll(
+		my $append = $self->sqlSelectAllKeyValue(
 			'name,value',
 			'submission_param',
 			"subid=" . $self->sqlQuote($sub->{subid})
 		);
-
-		for (@$append) {
-			$sub->{$_->[0]} = $_->[1];
+		for my $key (keys %$append) {
+			$sub->{$key} = $append->{$key};
 		}
 	}
-
 
 	formatDate($submissions, 'time', 'time', '%m/%d  %H:%M');
 
@@ -7246,12 +7288,17 @@ sub updateStory {
 	$data->{body_length} = length($data->{bodytext});
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 
+	my $error = "";
+
+	my $stoid = $self->getStoidFromSidOrStoid($sid);
+	$error = "no stoid for sid '$sid'" unless $stoid;
 	my $sid_q = $self->sqlQuote($sid);
 
 #use Data::Dumper; print STDERR "MySQL.pm updateStory before setStory data: " . Dumper($data);
-	my $error = "";
-	if (!$self->setStory($sid, $data)) {
-		$error = "Failed to setStory '$sid'\n";
+	if (!$error) {
+		if (!$self->setStory($stoid, $data)) {
+			$error = "Failed to setStory '$sid' '$stoid'\n";
+		}
 	}
 
 	if (!$error) {
@@ -7260,6 +7307,7 @@ sub updateStory {
 		my $topiclist = $self->getTopiclistFromChosen($data->{topics_chosen});
 #use Data::Dumper; print STDERR "MySQL.pm updateStory topiclist '@$topiclist' topics_chosen: " . Dumper($data->{topics_chosen});
 		my $dis_data = {
+			stoid		=> $stoid,
 			sid		=> $sid,
 			title		=> $data->{title},
 			primaryskid	=> $data->{primaryskid},
@@ -7281,7 +7329,7 @@ sub updateStory {
 	if (!$error) {
 		my $days_to_archive = $constants->{archive_delay};
 		$self->sqlUpdate('discussions', { type => 'open' },
-			"sid='$sid' AND type='archived'
+			"stoid='$stoid' AND type='archived'
 			 AND ((TO_DAYS(NOW()) - TO_DAYS(ts)) <= $constants->{archive_delay})"
 		);
 		$self->setVar('writestatus', 'dirty');
@@ -7311,30 +7359,54 @@ sub updateStory {
 
 }
 
+sub _getSlashConf_rawvars {
+	my($self) = @_;
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+	my $got_from_memcached = 0;
+	my $vars_hr;
+	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:vars";
+		if ($vars_hr = $mcd->get($mcdkey)) {
+			$got_from_memcached = 1;
+		}
+	}
+	$vars_hr ||= $self->sqlSelectAllKeyValue('name, value', 'vars');
+	if ($mcd && !$got_from_memcached) {
+		# Cache this for about 10 minutes.
+		my $expire_time = $vars_hr->{story_expire} || 600;
+		$mcd->set($mcdkey, $vars_hr, $expire_time);
+	}
+	return $vars_hr;
+}
+
 ########################################################
 # Now, the idea is to not cache here, since we actually
-# cache elsewhere (namely in %Slash::Apache::constants)
+# cache elsewhere (namely in %Slash::Apache::constants) - Brian
+# I'm caching this in memcached now though. - Jamie
 sub getSlashConf {
 	my($self) = @_;
 
-	# get all the data, yo! However make sure we can return if any DB
-	# errors occur.
-	my $confdata = $self->sqlSelectAll('name, value', 'vars');
-	return if !defined $confdata;
-	my %conf = map { $_->[0], $_->[1] } @{$confdata};
+	# Get the raw vars data (possibly from a memcached cache).
+
+	my $vars_hr = $self->_getSlashConf_rawvars();
+	return if !defined $vars_hr;
+	my %conf = %$vars_hr;
+
+	# Now start adding and tweaking the data for various reasons:
+	# convenience, fixing bad data, etc.
+
 	# This allows you to do stuff like constant.plugin.Zoo in a template
 	# and know that the plugin is installed -Brian
 	my $plugindata = $self->sqlSelectColArrayref('value', 'site_info',
 		"name='plugin'");
-	for (@$plugindata) {
-		$conf{plugin}{$_} = 1;
+	for my $plugin (@$plugindata) {
+		$conf{plugin}{$plugin} = 1;
 	}
 	$conf{reasons} = $self->sqlSelectAllHashref(
 		"id", "*", "modreasons"
 	);
 
-	# the rest of this function is where is where we fix up
-	# any bad or missing data in the vars table
 	$conf{rootdir}		||= "//$conf{basedomain}";
 	$conf{real_rootdir}	||= $conf{rootdir};  # for when rootdir changes
 	$conf{real_section}	||= $conf{section};  # for when section changes
@@ -7529,9 +7601,6 @@ sub getSlashConf {
 		}   
 
 	}
-
-	# for fun ... or something
-	$conf{colors} = $self->sqlSelect("block", "blocks", "bid='colors'");
 
 	# We only need to do this on startup.
 	$conf{classes} = $self->getClasses();
@@ -7945,12 +8014,44 @@ sub getRecentComments {
 
 ########################################################
 
-sub _storyidstyle {
+# This method is used to grandfather in old-style sid's,
+# automatically converting them to stoids.
+sub getStoidFromSidOrStoid {
 	my($self, $id) = @_;
-	if ($id =~ /^\d+$/) {
-		return "stoid";
+	return $id if $id =~ /^\d+$/;
+	return $self->getStoidFromSid($id);
+}
+
+# This method does the conversion efficiently.  There are three
+# likely levels of caching here, to minimize the impact of this
+# backwards-compatibility feature as much as possible:  a RAM
+# cache in this Slash::DB::MySQL object (set to never expire,
+# since this data is tiny and never changes);  memcached (ditto,
+# but just with a very long expiration time); and MySQL's query
+# cache (which expires only when the stories table is written,
+# hopefully only every few minutes).  Only if all those fail
+# will it actually put any load on the DB.
+sub getStoidFromSid {
+	my($self, $sid) = @_;
+	if (my $stoid = $self->{_sid_conversion_cache}{$sid}) {
+#print STDERR "getStoidFromSid $$ returning from cache $sid=$stoid\n";
+		return $stoid;
 	}
-	return "sid";
+	my($mcd, $mcdkey);
+	if ($mcd = $self->getMCD()) {
+		$mcdkey = "$self->{_mcd_keyprefix}:sid:";
+		if (my $answer = $mcd->get("$mcdkey$sid")) {
+			$self->{_sid_conversion_cache}{$sid} = $answer;
+#print STDERR "getStoidFromSid $$ returning from memcached $sid=$answer\n";
+			return $answer;
+		}
+	}
+	my $sid_q = $self->sqlQuote($sid);
+	my $stoid = $self->sqlSelect("stoid", "stories", "sid=$sid_q");
+	$self->{_sid_conversion_cache}{$sid} = $stoid;
+	$mcd->set("$mcdkey$sid", $stoid, 7 * 86400) if $mcd;
+#print STDERR "getStoidFromSid $$ returning from db $sid=$stoid\n";
+	return $stoid;
 }
 
 sub getStory {
@@ -7962,63 +8063,76 @@ sub getStory {
 	my $table_cache = '_stories_cache';
 	my $table_cache_time= '_stories_cache_time';
 
-	# Determine whether a sid or a stoid is being requested;  this
-	# method now accepts either in $id.
-	my $id_style = $self->_storyidstyle($id);
+	# Accept either a stoid or a sid.
+	my $stoid = $self->getStoidFromSidOrStoid($id);
 
 	# Go grab the data if we don't have it, or if the caller
 	# demands that we grab it anyway.
-	my $is_in_cache = exists $self->{$table_cache}{"$id_style$id"};
-	if (!$is_in_cache || $force_cache_freshen) {
-		# We avoid the join here. Sure, it's two calls to the db,
-		# but why do a join if it's not needed?
-#print STDERR "getStory cache miss for $$ '$id_style' '$id'\n";
-		my($append, $answer, $id_clause);
-		if ($id_style eq "sid") {
-			$id_clause = "sid=" . $self->sqlQuote($id);
-		} else {
-			$id_clause = "stoid=$id";
+	my $is_in_local_cache = exists $self->{$table_cache}{"stoid$stoid"};
+	my $use_local_cache = $is_in_local_cache && !$force_cache_freshen;
+	my $mcd;
+	my $got_it_from_db = 0;
+	my $got_it_from_memcached = 0;
+	my $use_memcached = 0;
+#print STDERR "getStory $$ A id=$id is_in_local_cache=$is_in_local_cache use_local_cache=$use_local_cache force_cache_freshen=$force_cache_freshen\n";
+	if (!$use_local_cache) {
+		$mcd = $self->getMCD();
+		my $try_memcached = $mcd && !$force_cache_freshen;
+		if ($try_memcached) {
+			# Try to get the story from memcached;  if success,
+			# write it into local cache where we will pluck it
+			# out and return it.
+			my $mcdkey = "$self->{_mcd_keyprefix}:st:";
+			if (my $answer = $mcd->get("$mcdkey$stoid")) {
+				# Cache the result.
+				$self->{$table_cache}{"stoid$stoid"} = $answer;
+				$is_in_local_cache = 1;
+				$got_it_from_memcached = 1;
+#print STDERR "getStory $$ A2 id=$id mcd=$mcd try=$try_memcached answer='" . join(" ", sort keys %$answer) . "'\n";
+			}
 		}
+#print STDERR "getStory $$ A3 id=$id mcd=$mcd try=$try_memcached keyprefix=$self->{_mcd_keyprefix} stoid=$stoid\n";
+	}
+#print STDERR "getStory $$ B id=$id is_in_local_cache=$is_in_local_cache use_local_cache=$use_local_cache\n";
+	if (!$is_in_local_cache || $force_cache_freshen) {
+		# Load it from the DB, write it into local cache,
+		# where we will pluck it out and return it.
+		my($append, $answer, $id_clause);
+		$id_clause = "stoid=$stoid";
 		my($column_clause) = $self->_stories_time_clauses({
 			try_future => 1, must_be_subscriber => 0
 		});
-		$answer = $self->sqlSelectHashref("*, $column_clause", 'stories', $id_clause);
+		$answer = $self->sqlSelectHashref("*, $column_clause",
+			'stories', $id_clause);
 		if (!$answer || ref($answer) ne 'HASH' || !$answer->{stoid}) {
 			# If there's no data for us to return,
 			# we shouldn't touch the cache.
 			return undef;
 		}
-		if ($id_style eq "sid") {
-			# We were passed an $id in the old sid form.
-			# Convert it internally now, because the rest of
-			# the selects we do require the new form.
-			$id_clause = "stoid=$answer->{stoid}";
-		}
 		$append = $self->sqlSelectHashref('*', 'story_text', $id_clause);
 		for my $key (keys %$append) {
 			$answer->{$key} = $append->{$key};
 		}
-		$append = $self->sqlSelectAll('name,value', 'story_param', $id_clause);
-		for my $ary_ref (@$append) {
-			$answer->{$ary_ref->[0]} = $ary_ref->[1];
-		}
-		if (!$answer || ref($answer) ne 'HASH') {
-			# If there's no data for this sid, then there's no data
-			# for us to return, and we shouldn't touch the cache.
-			return undef;
+		$append = $self->sqlSelectAllKeyValue('name,value',
+			'story_param', $id_clause);
+		for my $key (keys %$append) {
+			$answer->{$key} = $append->{$key};
 		}
 		# If this is the first data we're writing into the cache,
 		# mark the time -- this data, and any other stories we
 		# write into the cache for the next n seconds, will be
 		# expired at that time.
 		$self->{$table_cache_time} = time() if !$self->{$table_cache_time};
-		# Cache the data (twice).
-		$self->{$table_cache}{"sid$answer->{sid}"}     = $answer;
-		$self->{$table_cache}{"stoid$answer->{stoid}"} = $answer;
+		# Cache the data (using two pointers to the same data).
+		$self->{$table_cache}{"stoid$stoid"} = $answer;
+		# Note that we got this from the DB, in which case it's
+		# authoritative enough to write into memcached later.
+		$got_it_from_db = 1;
 	}
+#print STDERR "getStory $$ C id=$id table_cache='" . join(" ", sort keys %{ $self->{$table_cache}{"stoid$stoid"} }) . "'\n";
 
 	# The data is in the table cache now.
-	my $hr = $self->{$table_cache}{"$id_style$id"};
+	my $hr = $self->{$table_cache}{"stoid$stoid"};
 	my $retval;
 	if ($val && !ref $val) {
 		# Caller only asked for one return value.
@@ -8032,6 +8146,7 @@ sub getStory {
 		my %return = %$hr;
 		$retval = \%return;
 	}
+
 	# If the story in question is in the future, we now zap it from the
 	# cache -- on the theory that (1) requests for stories from the future
 	# should be few in number and (2) the fake column indicating that it
@@ -8042,11 +8157,18 @@ sub getStory {
 	# (2) we can't expire individual stories, we'd have to expire the
 	# whole story cache, and that would not be good for performance.
 	if ($hr->{is_future}) {
-		my $sid   = $hr->{sid};
-		my $stoid = $hr->{stoid};
-		delete $self->{$table_cache}{"sid$sid"};
 		delete $self->{$table_cache}{"stoid$stoid"};
+#print STDERR "getStory $$ is_future, delete ram cache for $stoid\n";
+	} elsif ($got_it_from_db and $mcd ||= $self->getMCD()) {
+		# The fact that we're keeping it in our cache means it may
+		# be valuable to have in the memcached cache too, and
+		# either it's not in memcached already or we just got a
+		# fresh copy that's worth writing over what's there with.
+		my $mcdkey = "$self->{_mcd_keyprefix}:st:";
+		$mcd->set("$mcdkey$stoid", $hr, $constants->{story_expire});
+#print STDERR "getStory $$ set memcached " . scalar(keys %$hr) . " keys for $stoid: '" . join(" ", sort keys %$hr) . "'\n";
 	}
+#print STDERR "getStory $$ got from " . ($got_it_from_db ? "DB" : $got_it_from_memcached ? "MEMCACHED" : "LOCALCACHE") . " returning " . scalar(keys %$hr) . " keys for $stoid\n";
 	# Now return what we need to return.
 	return $retval;
 }
@@ -8627,6 +8749,7 @@ sub getStoryTopicsRendered {
 sub setStoryRenderedFromChosen {
 	my($self, $stoid, $chosen_hr, $info) = @_;
 
+	$self->setStory_delete_memcached([ $stoid ]);
 	$chosen_hr ||= $self->getStoryTopicsChosen($stoid);
 	my $rendered_hr = $self->renderTopics($chosen_hr);
 	my $primaryskid = $self->getPrimarySkidFromRendered($rendered_hr);
@@ -8644,6 +8767,7 @@ sub setStoryRenderedFromChosen {
 			}
 		}
 	}
+	$self->setStory_delete_memcached([ $stoid ]);
 
 	return($primaryskid, $tids);
 }
@@ -8746,14 +8870,8 @@ sub getTopiclistForStory {
 	my($self, $id, $options) = @_;
 
 	# Grandfather in an old-style sid.
-	my $stoid;
-	my $id_style = $self->_storyidstyle($id);
-	if ($id_style eq 'stoid') {
-		$stoid = $id;
-	} else {
-		$stoid = $self->getStory($id, 'stoid', 1);
-		return undef unless $stoid;
-	}
+	my $stoid = $self->getStoidFromSidOrStoid($id);
+	return undef unless $stoid;
 
 	my $chosen_hr = $options->{topics_chosen} || $self->getStoryTopicsChosen($stoid);
 	return $self->getTopiclistFromChosen($chosen_hr, $options);
@@ -8791,15 +8909,8 @@ sub getStoryTopics {
 	my($self, $id, $add_names) = @_;
 	my($topicdesc);
 
-	# Grandfather in an old-style sid.
-	my $stoid;
-	my $id_style = $self->_storyidstyle($id);
-	if ($id_style eq 'stoid') {
-		$stoid = $id;
-	} else {
-		$stoid = $self->getStory($id, 'stoid', 1);
-		return undef unless $stoid;
-	}
+	my $stoid = $self->getStoidFromSidOrStoid($id);
+	return undef unless $stoid;
 
 	my $topics = $self->sqlSelectAll(
 		'tid',
@@ -8836,19 +8947,14 @@ sub setStoryTopicsChosen {
 	my($self, $id, $topic_ref) = @_;
 
 	# Grandfather in an old-style sid.
-	my $stoid;
-	my $id_style = $self->_storyidstyle($id);
-	if ($id_style eq 'stoid') {
-		$stoid = $id;
-	} else {
-		$stoid = $self->getStory($id, 'stoid', 1);
-		return 0 unless $stoid;
-	}
+	my $stoid = $self->getStoidFromSidOrStoid($id);
+	return 0 unless $stoid;
 
 	# There are atomicity issues here if two admins click Update at
 	# the same time.  We really should wrap the delete-insert
 	# as a single COMMIT.  Not that it matters much.  - Jamie
 
+	$self->setStory_delete_memcached([ $stoid ]);
 	$self->sqlDelete("story_topics_chosen", "stoid = $stoid");
 	for my $key (sort { $a <=> $b } keys %{$topic_ref}) {
 		unless ($self->sqlInsert("story_topics_chosen", 
@@ -8858,6 +8964,7 @@ sub setStoryTopicsChosen {
 			return 0;
 		}
 	}
+	$self->setStory_delete_memcached([ $stoid ]);
 
 	return 1;
 }
@@ -9202,9 +9309,9 @@ sub setUser_delete_memcached {
 
 	$uid_list = [ $uid_list ] if !ref($uid_list);
 	for my $uid (@$uid_list) {
-		my $mcdkey = "$self->{_mcd_keyprefix}u:";
-		# The "1" means "don't accept new writes to this key for 1 second."
-		$mcd->delete("$mcdkey$uid", 1);
+		my $mcdkey = "$self->{_mcd_keyprefix}:u:";
+		# The "3" means "don't accept new writes to this key for 3 seconds."
+		$mcd->delete("$mcdkey$uid", 3);
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ setU_deletemcd deleted '$mcdkey$uid'\n";
 		}
@@ -9253,7 +9360,7 @@ sub getUser {
 	my $mcd = $self->getMCD();
 	my $mcddebug = $mcd && $constants->{memcached_debug};
 	my $start_time;
-	my $mcdkey = "$self->{_mcd_keyprefix}u:" if $mcd;
+	my $mcdkey = "$self->{_mcd_keyprefix}:u:" if $mcd;
 	my $mcdanswer;
 
 	if ($mcddebug > 1) {
@@ -9466,6 +9573,8 @@ sub _getUser_do_selects {
 	# arrayref of specific params), we also get the ACLs too.
 	my $param_ar = [ ];
 	if ($params eq "all") {
+		# ...we could rewrite this to use sqlSelectAllKeyValue,
+		# if we wanted...
 		$param_ar = $self->sqlSelectAllHashrefArray(
 			"name, value",
 			"users_param",
@@ -9485,6 +9594,8 @@ sub _getUser_do_selects {
 		}
 	} elsif (ref($params) eq 'ARRAY' && @$params) {
 		my $param_list = join(",", map { $self->sqlQuote($_) } @$params);
+		# ...we could rewrite this to use sqlSelectAllKeyValue,
+		# if we wanted...
 		$param_ar = $self->sqlSelectAllHashrefArray(
 			"name, value",
 			"users_param",
@@ -9782,7 +9893,7 @@ sub _getUser_write_memcached {
 		print STDERR scalar(gmtime) . " $$ _getU_writemcd users_hits_colnames '@$users_hits_colnames' userdata: " . Dumper($userdata);
 	}
 
-	my $mcdkey = "$self->{_mcd_keyprefix}u:";
+	my $mcdkey = "$self->{_mcd_keyprefix}:u:";
 
 	my $exptime = $constants->{memcached_exptime_user};
 	$exptime = 1200 if !defined($exptime);
@@ -9858,7 +9969,8 @@ sub _genericSet {
 		# need for a fully sql92 database.
 		# transactions baby, transactions... -Brian
 		for (@param)  {
-			$self->sqlReplace($param_table, { $table_prime => $id, name => $_->[0], value => $_->[1] });
+			$self->sqlReplace($param_table,
+				{ $table_prime => $id, name => $_->[0], value => $_->[1] });
 		}
 	} else {
 		$ok = $self->sqlUpdate($table, $value, $table_prime . '=' . $self->sqlQuote($id));
@@ -10025,9 +10137,10 @@ sub _genericGet {
 
 		} else {
 			$answer = $self->sqlSelectHashref('*', $table, "$table_prime=$id_db");
-			my $append = $self->sqlSelectAll('name,value', $param_table, "$table_prime=$id_db");
-			for (@$append) {
-				$answer->{$_->[0]} = $_->[1];
+			my $append = $self->sqlSelectAllKeyValue('name,value',
+				$param_table, "$table_prime=$id_db");
+			for my $key (keys %$append) {
+				$answer->{$key} = $append->{$key};
 			}
 #			$answer->{$col_table->{label}} = $self->sqlSelectColArrayref($col_table->{key}, $col_table->{table}, "$col_table->{table_index}=$id_db")  
 #				if $col_table;
@@ -10096,7 +10209,8 @@ sub _genericGets {
 				if ($self->{$cache}{$clean_val}) {
 					push @$get_values, $_;
 				} else {
-					my $val = $self->sqlSelectAll("$table_prime, name, value", $param_table, "name='$_'");
+					my $val = $self->sqlSelectAll("$table_prime, name, value",
+						$param_table, "name='$_'");
 					for my $row (@$val) {
 						push @$params, $row;
 					}
@@ -10122,7 +10236,8 @@ sub _genericGets {
 				$qlid = $self->_querylog_start('SELECT', $table);
 				$sth = $self->sqlSelectMany($values, $table);
 			} else {
-				my $val = $self->sqlSelectAll("$table_prime, name, value", $param_table, "name=$values");
+				my $val = $self->sqlSelectAll("$table_prime, name, value",
+					$param_table, "name=$values");
 				for my $row (@$val) {
 					push @$params, $row;
 				}
@@ -10305,7 +10420,7 @@ sub getMenus {
 sub sqlReplace {
 	my($self, $table, $data) = @_;
 	my($names, $values);
-
+ 
 	for (keys %$data) {
 		if (/^-/) {
 			$values .= "\n  $data->{$_},";
@@ -10315,10 +10430,10 @@ sub sqlReplace {
 		}
 		$names .= "$_,";
 	}
-
+ 
 	chop($names);
 	chop($values);
-
+ 
 	my $sql = "REPLACE INTO $table ($names) VALUES($values)\n";
 	$self->sqlConnect();
 	my $qlid = $self->_querylog_start('REPLACE', $table);
