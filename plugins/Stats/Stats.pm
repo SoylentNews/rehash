@@ -374,7 +374,6 @@ sub countDailyByPageDistinctIPID {
 	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog", $where);
 }
 
-
 ########################################################
 sub countDaily {
 	my($self) = @_;

@@ -1062,14 +1062,14 @@ sub submitComment {
 		if ($messages && $constants->{commentnew_msg}) {
 			my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
 
+			my $data  = {
+				template_name	=> 'commnew',
+				subject		=> { template_name => 'commnew_subj' },
+				reply		=> $reply,
+				discussion	=> $discussion,
+			};
 			for my $usera (@$users) {
 				next if $users{$usera};
-				my $data  = {
-					template_name	=> 'commnew',
-					subject		=> { template_name => 'commnew_subj' },
-					reply		=> $reply,
-					discussion	=> $discussion,
-				};
 				$messages->create($usera, MSG_CODE_NEW_COMMENT, $data);
 				$users{$usera}++;
 			}
@@ -1365,10 +1365,8 @@ sub moderateCid {
 						reason	=> $reason,
 					},
 				};
-				$messages->create(
-					$users->[0],
-					MSG_CODE_COMMENT_MODERATE,
-					$data
+				$messages->create($users->[0],
+					MSG_CODE_COMMENT_MODERATE, $data
 				);
 			}
 		}

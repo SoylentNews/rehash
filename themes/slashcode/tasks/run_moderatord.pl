@@ -204,7 +204,6 @@ sub reconcileM2 {
 			template_page	=> 'messages',
 			subject		=> {
 				template_name	=> 'msg_m2_subj',
-				template_page	=> 'messages',
 			},
 		};
 

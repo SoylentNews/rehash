@@ -77,11 +77,6 @@ key.  Pass the name of the template in as the "template_name"
 key.  If "subject" is a template, then pass it as a hashref,
 with "template_name" as one of the keys.
 
-B<NOTE>: You cannot re-use the same MESSAGE reference for
-multiple messages.  The data is manipulated.  You must pass in
-a new data structure each time through.  This should be fixed
-in future versions.
-
 =item FROM_ID
 
 Either the UID of the user sending the message, or 0 to denote
@@ -135,6 +130,9 @@ sub create {
 	if (!ref $data) {
 		$message = $data;
 	} elsif (ref $data eq 'HASH') {
+		# copy parent data structure so it is not modified,
+		# so it is left alone on return back to caller
+		$data = { %$data };
 		unless ($data->{template_name}) {
 			messagedLog(getData("no template", 0, "messages"));
 			return 0;
@@ -142,19 +140,26 @@ sub create {
 
 		my $user = getCurrentUser();
 		$data->{_NAME}    = delete($data->{template_name});
-		$data->{_PAGE}    = delete($data->{template_page})    || $user->{currentPage};
-		$data->{_SECTION} = delete($data->{template_section}) || $user->{currentSection};
+		$data->{_PAGE}    = delete($data->{template_page})
+			|| $user->{currentPage};
+		$data->{_SECTION} = delete($data->{template_section})
+			|| $user->{currentSection};
 
 		# set subject
 		if (exists $data->{subject} && ref($data->{subject}) eq 'HASH') {
+			# copy parent data structure so it is not modified,
+			# so it is left alone on return back to caller
+			$data->{subject} = { %{$data->{subject}} };
 			unless ($data->{subject}{template_name}) {
 				messagedLog(getData("no template subject", 0, "messages"));
 				return 0;
 			}
 
 			$data->{subject}{_NAME}    = delete($data->{subject}{template_name});
-			$data->{subject}{_PAGE}    = delete($data->{subject}{template_page})    || $user->{currentPage};
-			$data->{subject}{_SECTION} = delete($data->{subject}{template_section}) || $user->{currentSection};
+			$data->{subject}{_PAGE}    = delete($data->{subject}{template_page})
+				|| $data->{_PAGE}    || $user->{currentPage};
+			$data->{subject}{_SECTION} = delete($data->{subject}{template_section})
+				|| $data->{_SECTION} || $user->{currentSection};
 		}
 
 		$message = $data;

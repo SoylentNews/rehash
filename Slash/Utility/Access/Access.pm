@@ -149,7 +149,7 @@ Returns an error message to be printed out by calling script
 =cut
 
 sub formkeyError {
-	my ($value, $formname, $limit, $nocomm) = @_;
+	my($value, $formname, $limit, $nocomm) = @_;
 
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();

@@ -215,7 +215,9 @@ sub slashDisplay {
 		);
 	}
 
-	$data ||= {};
+	# copy parent data structure so it is not modified,
+	# so it is left alone on return back to caller
+	$data = $data ? { %$data } : {};
 
 	# let us pass in a context if we have one
 	my $template = $CONTEXT || get_template(0, 0, 1);
