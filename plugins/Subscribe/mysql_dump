@@ -1,3 +1,5 @@
 INSERT INTO vars (name, value, description) VALUES ('subscribe', 1, 'Subscriptions enabled?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_debug', 0, 'Debug plugins/Subscribe?');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_defpages', 'index article', 'Space-separated list of default pages (script names)');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_secretword', 'changemenow', 'Secret word to buy pages with');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_hits_only', 1, '0=All users get users_hits updated, 1=Only subscribed users');

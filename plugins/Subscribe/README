@@ -1,0 +1,38 @@
+A note about the subscribe.pl "secret word":
+
+The secret word is so you can set up purchasing sponsorships however
+you prefer to do it, without having to worry about firewalls or writing
+complex code.  It's not especially secure so if you're concerned about
+users illicitly sponsoring pages on your website, please consider the
+security issues carefully.  An overview of those issues is below.
+
+To use the secret word, simply set the var "subscribe_secretword" in
+your site's database to something secret.  Don't reuse a password, just
+make something up;  as long as you have admin access to your own site,
+you can check it or change it anytime you like through the admin.pl
+"vars" menu.
+
+However you've set up subscription purchasing, activating a subscription
+will be simple.  When the user with uid 123 purchases 456 pages, and if
+your secret word is "foo", you just access this URL from anywhere:
+
+	http://yoursite.com/subscribe.pl?uid=123&buymore=456&secretword=foo
+
+If you have a fancy credit-card processing server somewhere, set it
+up to hit that URL.  If you take checks yourself, just type it into
+your browser.  Doesn't matter as long as the URL gets hit.
+
+Security:  as mentioned above, don't reuse a password.  If you have a
+server which processes purchases and then contacts your webserver, try
+to put it on the same LAN on a switched hub so the secret word can't
+be sniffed.  But then, if someone is sniffing your webservers' traffic
+you probably have bigger problems (your admins probably hit /admin.pl
+over non-secure HTTP, which means their cookies' username/password can
+be sniffed too...)
+
+Also, as usual, anyone that has read access to your DBIx/Password.pm
+can read this, but again, if an unauthorized party has such access,
+you have bigger problems.
+
+- Jamie
+

@@ -31,6 +31,18 @@ $constants->{sitename} Subscriber Info for yesterday
 subscribers: %8d
 EOT
 
+	if ($constants->{subscribe_secretword} eq 'changemenow') {
+		$email .= <<EOT;
+
+*** You have not yet changed your subscribe secret word!    ***
+*** Change it now or sneaky users will be able to buy pages ***
+*** without actually buying them!  It's the var named:      ***
+***                  subscribe_secretword                   ***
+*** (See plugins/Subscribe/README for details on using it.) ***
+
+EOT
+	}
+
 	$email .= "\n-----------------------\n";
 
 	# Send a message to the site admin.
