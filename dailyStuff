@@ -64,7 +64,9 @@ while(my($sid, $cnt) = $c->fetchrow) {
 $c->finish;
 
 # clean the key table
-$I{dbh}->do("DELETE FROM commentkey WHERE to_days(ts) < to_days(now())");
+
+my $delete_time = time() - $I{formkey_timeframe};
+$I{dbh}->do("DELETE FROM formkeys WHERE ts < $delete_time");
 
 sub updateStamps {
 	my $columns = "uid";

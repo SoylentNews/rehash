@@ -82,13 +82,12 @@ my %my_conf = (
 	tokenspercomment	=> 6,	# Number of tokens to feed the system for each comment
 	down_moderations	=> -6,	# number of how many comments you can post that get down moderated
 
-# very important - if you set this to one, make sure 
-# that you can use IPC::Shareable on your system
-	use_ipc			=> 0,
+# comment posting and story submission abuse settings
 	post_limit		=> 10,	# seconds delay before repeat posting
 	max_posts_allowed	=> 30,	# maximum number of posts per day allowed
 	max_submissions_allowed => 20,	# maximum number of submissions per day allowed
 	submission_speed_limit	=> 300,	# how fast they can submit
+	formkey_timeframe 	=> 14400, # the time frame that we check for a formkey
 
 	# see Slash::fixHref()
 	fixhrefs => [

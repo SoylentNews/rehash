@@ -34,6 +34,9 @@ sub main {
 	*I = getSlashConf();
 	getSlash();
 
+	my $id = getFormkeyId($I{F}{uid});
+	my $formkey_earliest = time() - $I{formkey_timeframe};
+
 	my($section, $op, $seclev, $aid) = (
 		$I{F}{section}, $I{F}{op}, $I{U}{aseclev}, $I{U}{aid}
 	);
@@ -73,22 +76,20 @@ sub main {
 	} elsif ($op eq "PreviewStory") {
 		titlebar("100%", "$I{sitename} Submission Preview", "c");
 
-		my @rand_array = ( 'a' .. 'z', 'A' .. 'Z', 0 .. 9 );
-
 		# generate a random key to use for the form
-		$I{F}{formkey} = join("",
-			map { $rand_array[rand @rand_array] }  0 .. 9) ;
+		$I{F}{formkey} = getFormkey();
 
 		# insert the fact that the form has been displayed,
 		# but not submitted at this point
 		sqlInsert("formkeys", {
 			formkey		=> $I{F}{formkey},
 			formname	=> 'submissions',
+			id		=> $id,
 			sid		=> 'submission',
 			uid		=> $I{U}{uid},
 			host_name	=> $ENV{REMOTE_ADDR},
-			-ts		=> 'now()',
-			value		=> 0
+			value		=> 0,
+			ts		=> time()
 		});
 
 		displayForm($I{F}{from}, $I{F}{email}, $I{F}{section});
@@ -98,7 +99,7 @@ sub main {
 
 	} elsif ($op eq "SubmitStory") {
 		titlebar("100%", "Saving");
-		saveSub();
+		saveSub($id,$formkey_earliest);
 		yourPendingSubmissions();
 
 	} else {
@@ -516,23 +517,27 @@ EOT
 
 #################################################################
 sub saveSub {
-	my $valid_formkeys;
+	my $id = shift;
+	my $formkey_earliest = shift;
 	my $is_a_valid_key = 0;
-	my($id, $interval);
+	my($last_submitted,$interval);
 
-	($interval) = sqlSelect(
-		"time_to_sec(now()) - time_to_sec(max(submit_ts)) as time_interval",
-		"formkeys",
-		"host_name ='$ENV{REMOTE_ADDR}' and formname = 'submissions'"
-	);
+	($last_submitted) = sqlSelect(
+			"max(submit_ts)",
+			"formkeys",
+			"id = '$id' AND formname = 'submissions'") or ($last_submitted = 0);
+
+	$interval = time() - $last_submitted;
 
 	# if the interval is less than the post_limit, let them know
-	if ($interval && $interval < $I{submission_speed_limit} && $interval > 0) {
+	my $submission_interval_string = intervalString($I{submission_speed_limit});
+	my $thissub_interval_string = intervalString($interval);
+	if ($interval < $I{submission_speed_limit}) {
 		print <<EOT;
 <B>Slow down cowboy!</B><BR>
-<P>$I{sitename} requires you to wait $I{submission_speed_limit} seconds between
+<P>$I{sitename} requires you to wait $submission_interval_string between
 each submission in order to allow everyone to have a fair chance to post a story.</P>
-It's been $interval seconds since your last attempt to post a submission!<BR>
+It's been $thissub_interval_string since your last attempt to post a submission!<BR>
 EOT
 	} else {
 		if (length $I{F}{subj} < 2) {
@@ -548,41 +553,24 @@ EOT
 			unless length $I{F}{from} > 2;
 
 		my($times_submitted) = sqlSelect( 
-			"count(*) as times_submitted", "formkeys","host_name = '$ENV{REMOTE_ADDR}' AND to_days(ts) = to_days(now()) AND formname = 'submissions'");
+			"count(*) as times_submitted", "formkeys","id = '$id' AND submit_ts >= $formkey_earliest AND formname = 'submissions'");
 
-		if ($times_submitted <= $I{max_submissions_allowed}) {
+		if ($times_submitted < $I{max_submissions_allowed}) {
+
+				# find out if this form has been submitted already
+				my($submitted_already, $submit_ts) = sqlSelect(
+					"value,submit_ts",
+					"formkeys","formkey='$I{F}{formkey}' and formname = 'submissions'")
+					or print <<EOT and return;
+<P><B>We can't find your formkey.</B></P>
+<P>Please complete the submissions form to submit a story 
+EOT
 			# make sure that there's a valid form key, and we only care about the last 4 hours!
-			$valid_formkeys = sqlSelectAll("formkey", "formkeys",
-				"(time_to_sec(now()) - time_to_sec(ts)) < 14400 AND formname = 'comments'");
-			for (@{$valid_formkeys}) {
-				$is_a_valid_key++ if $I{F}{formkey} eq $_->[0];
-			}
+			$is_a_valid_key = checkFormkey($formkey_earliest,"submissions");
 
 			if (($I{F}{formkey} !~ /\w{10}/ || $I{F}{formkey} =~ /^(.)\1+$/ ) && !$is_a_valid_key) {
 				print qq|<B>Invalid form key!</B>\n|;
 			} else {
-				my $interval_string = "";
-				# find out if this form has been submitted already
-				my($submitted_already, $interval) = sqlSelect(
-					"value,(time_to_sec(now()) - time_to_sec(ts)) as time_interval",
-					"formkeys","formkey='$I{F}{formkey}' and formname = 'submissions'");
-
-				# Ok, this isn't necessary, but it makes it look better than saying:
-				#  "blah blah submitted 23333332288 seconds ago" 
-				# call me anal.
-				if ($interval > 60) {
-					if ($interval > 3600) {
-						my $hours = int($interval/3600);
-						my $minutes = int( ($interval % 3600) / 60);
-						$interval_string = "$hours hours ";
-						$interval_string .= ", $minutes minutes " if $minutes > 0;
-					} else {
-						my $minutes = int($interval / 60);
-						$interval_string = "$minutes minutes ";
-					}
-				} else {
-					$interval_string = "$interval seconds ";
-				} 
 
 				# unless the form has been submitted, submit it
 				unless ($submitted_already) {
@@ -612,11 +600,12 @@ EOT
 					sqlUpdate("formkeys", { 
 						-value		=> 'value+1',
 						cid		=> 0,
-						-submit_ts	=> 'now()',
+						submit_ts	=> time(),
 						comment_length	=> length($I{F}{subj})
 					}, "formkey=" . $I{dbh}->quote($I{F}{formkey}));
 
 				} else {
+					my $interval_string = intervalString($interval);
 					# else print an error
 					print <<EOT;
 			<B>Easy does it!</B>
