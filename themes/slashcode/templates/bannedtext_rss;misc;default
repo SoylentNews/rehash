@@ -21,7 +21,7 @@ __template__
 	items.push({
 		title       => "Why Do I Not Get the Latest Stories in RSS?",
 		link        => constants.absolutedir _ "/faq.shtml",
-		description => "Your RSS reader is abusing the " _ constants.sitename _ " server.  You are requesting pages more often than our terms of service allow. Please email " _ constants.adminmail_ban _ "."
+                description => "Your RSS reader is abusing the " _ constants.sitename _ " server. You are requesting pages more often than our terms of service allow. Please see the FAQ for more information, or email " _ constants.adminmail_ban _ " with your IPID MD5:" _ user.ipid _ "."
 	});
 
 	CASE 'ban';
