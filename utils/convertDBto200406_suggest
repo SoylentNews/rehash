@@ -72,16 +72,16 @@ EOT
 my $skins = $slashdb->getSkins();
 for my $skid (sort { $a <=> $b } keys %$skins) {
 	my $skin = $skins->{$skid};
-	my $child_topics = $slashdb->getAllChildrenTids($skin->{nexus});
-	next unless $child_topics && @$child_topics;
-	my $children_already = join(", ", $skin->{nexus}, @$child_topics);
+	my @child_topics = $slashdb->getAllChildrenTids($skin->{nexus});
+	next unless @child_topics;
+	my $children_already = join(", ", $skin->{nexus}, @child_topics);
 	my $popular_tid_hr = $slashdb->sqlSelectAllHashref(
 		[qw( stc_tid )],
 		"story_topics_chosen.tid AS stc_tid, COUNT(*) AS c",
 		"stories, story_topics_chosen",
 		"stories.stoid=story_topics_chosen.stoid
 		 AND story_topics_chosen.tid NOT IN ($children_already)",
-		"GROUP BY std_tid HAVING c >= 3 ORDER BY c DESC LIMIT 5");
+		"GROUP BY stc_tid HAVING c >= 3 ORDER BY c DESC LIMIT 5");
 	if (keys %$popular_tid_hr) {
 		print <<EOT;
 # For skin $skid, '$skin->{title}'
