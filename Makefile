@@ -35,6 +35,7 @@ GROUP = nobody
 CP = cp
 INSTALL = install
 UNAME = `uname`
+MAKE = make -s
 
 # Plugins (any directory in plugins/)
 PLUGINS = `find . -name CVS -prune -o -type d -name [a-zA-Z]\* -maxdepth 1 -print`
@@ -66,10 +67,10 @@ INSTALLMAN3DIR=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installman3dir
 slash:
 	@echo "=== INSTALLING SLASH MODULES ==="
 	@if [ ! "$(RPM)" ] ; then \
-		(cd Slash; $(PERL) Makefile.PL; make install UNINST=1); \
+		(cd Slash; $(PERL) Makefile.PL; $(MAKE) install UNINST=1); \
 	else \
 		echo " - Performing an RPM build"; \
-		(cd Slash; $(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); make install UNINST=1); \
+		(cd Slash; $(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); $(MAKE) install UNINST=1); \
 	fi
 
 plugins: 
@@ -81,11 +82,11 @@ plugins:
 		 if [ -f Makefile.PL ]; then \
 		 	if [ ! "$(RPM)" ] ; then \
 				$(PERL) Makefile.PL; \
-				make install UNINST=1;\
+				$(MAKE) install UNINST=1;\
 			else \
 				echo " - Performing an RPM build."; \
 				$(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); \
-				make install UNINST=1; \
+				$(MAKE) install UNINST=1; \
 			fi; \
 		 fi); \
 	done)
@@ -102,9 +103,7 @@ install: slash plugins
 		$(SLASH_PREFIX)/plugins/ \
 		$(SLASH_PREFIX)/sbin \
 		$(SLASH_PREFIX)/sql/ \
-		$(SLASH_PREFIX)/sql/mysql/ \
-		$(SLASH_PREFIX)/sql/oracle/ \
-		$(SLASH_PREFIX)/sql/postgresql
+		$(SLASH_PREFIX)/sql/mysql/
 
 	# Quick hack to avoid the need for "cp -ruv" which breaks under FreeBSD
 	# is to just copy the directories now. We may end up copying over a file
@@ -125,10 +124,10 @@ install: slash plugins
 	# supports that option; however, its use is strongly discouraged, as it
 	# does not correctly copy special files, symbolic links or FIFOs. 
 	#
-	(cd plugins; make clean) 
-	$(CP) -rv plugins/* $(SLASH_PREFIX)/plugins
+	(cd plugins; $(MAKE) clean) 
+	$(CP) -r plugins/* $(SLASH_PREFIX)/plugins
 	# Now all other themes
-	$(CP) -rv themes/* $(SLASH_PREFIX)/themes
+	$(CP) -r themes/* $(SLASH_PREFIX)/themes
 	
 	# Insure we use the proper Perl interpreter and prefix in all scripts that 
 	# we install. Note the use of Perl as opposed to dirname(1) and basename(1)
@@ -145,7 +144,6 @@ install: slash plugins
 	 	replace=0; \
 	 fi; \
 	 for f in $$binfiles $$sbinfiles $$themefiles $$pluginfiles; do \
-		echo "Installing '$$f' in $(SLASH_PREFIX)/$$d $$replacestr"; \
 		n=$(SLASH_PREFIX)/$$f; \
 		$(INSTALL) -d $(SLASH_PREFIX)/$$d; \
 	 	if [ $$replace ]; then \
@@ -219,14 +217,12 @@ install: slash plugins
 		-o								\
 		\( -name CVS -type d   -o   -name .#* -type f \)		\
 			-a \( -prune						\
-				-exec echo "(cleaning out {})" \;		\
 				-exec $(RM_RF) {} \; \)				\
 		2> /dev/null ;							\
 	else									\
 	find $(SLASH_PREFIX)							\
 		\( -name CVS -type d   -o   -name .#* -type f \)		\
 			-a \( -prune						\
-				-exec echo "(cleaning out {})" \;		\
 				-exec $(RM_RF) {} \; \)				\
 		2> /dev/null ;							\
 	fi
@@ -259,9 +255,9 @@ reload: install
 
 #   cleanup
 clean:
-	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; make clean)
+	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; $(MAKE) clean)
 	(rm Slash/Apache/Apache.xs Slash/Apache/User/User.xs)
-	(cd plugins; make clean)
+	(cd plugins; $(MAKE) clean)
 	find ./ | grep \# | xargs rm
 
 dist: $(DISTVNAME).tar$(SUFFIX)
@@ -280,7 +276,7 @@ distdir :
 	-e "manicopy(maniread(),'$(DISTVNAME)', '$(DIST_CP)');"
 
 manifest :
-	(cd Slash; make distclean)
+	(cd Slash; $(MAKE) distclean)
 	$(PERL) -MExtUtils::Manifest -e 'ExtUtils::Manifest::mkmanifest'
 
 rpm :
