@@ -48,6 +48,7 @@ use vars qw($VERSION @EXPORT);
 	balanceTags
 	changePassword
 	chopEntity
+	countWords
 	encryptPassword
 	fixHref
 	fixint
@@ -519,6 +520,7 @@ sub stripByMode {
 
 	# probably 'html'
 	} else {
+		# $fmode == HTML, hopefully
 		$str = stripBadHtml($str);
 		$str = breakHtml($str) unless $no_white_fix;
 	}
@@ -1747,6 +1749,34 @@ sub fixint {
 	$int =~ s/^(-?[\d.]+).*$/$1/s or return;
 	return $int;
 }
+
+########################################################
+# Count words in a given scalar will strip HTML tags
+# before counts are made.
+sub countWords {
+	my ($body) = @_;
+
+	# Sanity check.
+	return 0 if ref $body;
+
+	# Get rid of nasty print artifacts that may screw up counts.
+	$body = strip_nohtml($body);
+	$body =~ s/['`"~@#$%^()|\\\/!?.]//g;
+	$body =~ s/&(?:\w+|#(\d+));//g;
+	$body =~ s/[;\-,+=*&]/ /g;
+	$body =~ s/\s\s+/ /g;
+
+	# count words in $body.
+	my(@words) = ($body =~ /\b/g);
+
+	# Since we count boundaries, each word has two boundaries, so 
+	# we divide by two to get our count. This results in values 
+	# *close* to the return from a 'wc -w' on $body (within 1) 
+	# so I think this is close enough. ;) 
+	# - Cliff
+	return scalar @words / 2;
+}
+
 
 1;
 

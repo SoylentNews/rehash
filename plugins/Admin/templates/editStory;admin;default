@@ -137,7 +137,8 @@ __template__
 	</TR>
 </TABLE>
 
-<BR>Intro Copy<BR>
+<BR>Intro Copy[% IF storyref.introtext_wordcount %] ([%
+storyref.introtext_wordcount %] word[s])[% END %]<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
 <TD><TEXTAREA WRAP="VIRTUAL" NAME="introtext" COLS="[% user.textarea_cols || constants.textarea_cols %]" ROWS="10">[% storyref.introtext | strip_literal %]</TEXTAREA></TD>
@@ -146,7 +147,8 @@ __template__
 
 [% PROCESS editbuttons %]
 
-<BR>Extended Copy<BR>
+<BR>Extended Copy[% IF storyref.bodytext_wordcount %] ([%
+storyref.bodytext_wordcount %] word[s])[% END %]<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
 		<TD>
