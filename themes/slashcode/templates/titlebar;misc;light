@@ -2,6 +2,9 @@ __section__
 light
 __description__
 Titlebar for light mode.
+* future = boolean: whether story is in the future
+	(currently not used)
+
 __title__
 
 __page__
@@ -12,5 +15,7 @@ __name__
 titlebar
 __template__
 <H2>[% title %]</H2>
+[% future = 0 %]
+
 __seclev__
 10000

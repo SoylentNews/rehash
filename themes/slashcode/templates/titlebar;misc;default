@@ -5,6 +5,9 @@ Prints the bar above each story, containing the actual title of the story.
 
 * width = width of widget
 * title = text for title
+* future = boolean: whether story is in the future
+	(currently not used)
+
 __title__
 
 __page__
@@ -27,6 +30,8 @@ __template__
 		<TD BGCOLOR="[% user.bg.3 %]" ALIGN="right"><IMG SRC="[% constants.imagedir %]/cr.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
 	</TR>
 </TABLE>
+
+[% future = 0 %]
 
 __seclev__
 10000

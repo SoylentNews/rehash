@@ -27,7 +27,7 @@ ELSE;
 	title = story.title;
 END %]
 
-[% PROCESS titlebar %]
+[% PROCESS titlebar future=story.is_future %]
 
 <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A> | 
 <B>Posted by [% author.nickname %] [% story.atstorytime %]</B><BR>

@@ -14,7 +14,7 @@ __name__
 mainmenu
 __template__
 [% IF user.state.buyingpage %]
-<NOBR>$-Paid-Page-$</NOBR><P>
+<NOBR>Subscribed</NOBR><P>
 [% END %]
 		<A HREF="[% constants.rootdir %]/about.shtml">About</A><BR>
 		<A HREF="[% constants.rootdir %]/faq.shtml">FAQ</A><BR>
