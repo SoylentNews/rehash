@@ -41,7 +41,7 @@ __template__
 
 	<P><EM>[% IF has_voted %](You've already voted.)[% ELSIF !poll_open %](Poll is closed.)[% END %]</EM><BR>
 	[ <A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-	<A HREF="[% gSkin.rootdir %]/pollBooth.pl?"><B>Polls</B></A> ] <BR>
+	<A HREF="[% gSkin.rootdir %]/pollBooth.pl"><B>Polls</B></A> ] <BR>
 	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
 
 [% ELSE %]
