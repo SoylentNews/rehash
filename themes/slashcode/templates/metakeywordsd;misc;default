@@ -1,8 +1,10 @@
 __section__
 default
 __description__
+Placeholder for the metakeywords that get written by the task
+refresh_section_metakeywords.pl.
 __title__
-Metakeywords template
+
 __page__
 misc
 __lang__
@@ -19,5 +21,6 @@ __template__
 Main page
 [% CASE DEFAULT %]
 [% user.currentSection %] section page
-[% END %
-
+[% END %]
+__version__
+$Id$

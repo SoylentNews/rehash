@@ -35,7 +35,7 @@ __template__
 
 [% END %]
 
-[% IF not user.noscores and points %]
+[% IF !user.noscores && points.defined %]
 	<FONT SIZE="-1">(Score:[% points %])</FONT>
 [% END %]
 
