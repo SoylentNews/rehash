@@ -16,6 +16,7 @@ __template__
 	   storylinks = Slash.linkStory({
 		section	=> skin.name,
 		tid	=> story.tid,
+		tids	=> story.tids,
 		sid	=> story.sid,
 		'link'	=> story.title
 	}) 
@@ -26,7 +27,7 @@ __template__
 	[% story.introtext %] <BR>
 	<FONT SIZE="-1">
 		Section: [% IF skin.name == 'mainpage' %]<A HREF="[% constants.real_rootdir %]/">Main</A>[% ELSE %]<A HREF="[% skin.url ? skin.url : "$gSkin.rootdir/search.pl?section=$skin.name" %]">[% skin.title %]</A>[% END %] &gt;
-		[% FOREACH tid = story.tid %]
+		[% FOREACH tid = story.tids %]
 			[% topic = Slash.db.getTopic(tid) %]
 			<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</A>[% ",&nbsp;" UNLESS loop.last %]
 		[% END %]

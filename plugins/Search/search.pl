@@ -283,6 +283,7 @@ sub storySearch {
 		}
 
 		for (@$stories) {
+			next if length($_->{introtext}) <= $constants->{search_text_length};
 			$_->{introtext} = substr(strip_notags($_->{introtext}),0,$constants->{search_text_length});
 			$_->{introtext} =~ s/(.*) .*$/$1.../g;
 		}

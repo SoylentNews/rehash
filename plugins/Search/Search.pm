@@ -160,13 +160,14 @@ sub findStory {
 	my $columns;
 	$columns .= "title, stories.stoid AS stoid, sid, "; 
 	$columns .= "time, commentcount, stories.primaryskid AS skid, ";
-	$columns .= "introtext, ";
-	$columns .= "TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
-		if $form->{query};
+	$columns .= "introtext ";
+	if ($form->{query}) {
+		$columns .= ", TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) AS score "
+	}
 
 	my $tables = "stories, story_text";
 
-	my $other;
+	my $other = '';
 	$other .= " HAVING score > 0 "
 		if $form->{query};
 	if ($form->{query} && $sort == 2) {
@@ -176,8 +177,11 @@ sub findStory {
 	}
 
 	# The big old searching WHERE clause, fear it
-	# XXX This can be a single MATCH now if we do a FULLTEXT
-	# index on all three columns. - Jamie 2004/04/06
+	# XXXSECTIONTOPICS This can be a single MATCH now if we do
+	# a FULLTEXT index on all three columns.  Of course the
+	# _score() call above would still have to be done twice,
+	# which depending on search_method could be the same
+	# thing, so it might not matter. - Jamie 2004/04/06
 	my $where = "stories.stoid = story_text.stoid ";
 	$where .= " AND ( MATCH (title) AGAINST ($query)
 		OR MATCH (introtext,bodytext) AGAINST ($query) ) "
@@ -260,10 +264,10 @@ sub findStory {
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
-	# Don't return just one topic id in tid, make it an arrayref
-	# to all topic ids -- in the preferred order.
+	# Don't return just one topic id in tid, also return an arrayref
+	# in tids, with all topic ids in the preferred order.
 	for my $story (@$stories) {
-		$story->{tid} = $reader->getTopiclistForStory($story->{stoid});
+		$story->{tids} = $reader->getTopiclistForStory($story->{stoid});
 	}
 
 	return $stories;

@@ -456,7 +456,12 @@ sub linkStory {
 	$title       = $story_link->{'link'};
 	$story_link->{skin} ||= $story_link->{section} || $reader->getStory($story_link->{sid}, 'primaryskid');
 	if ($constants->{tids_in_urls}) {
-		$params{tid} = $reader->getTopiclistForStory($story_link->{sid});
+		if ($story_link->{tids} && @{$story_link->{tids}}) {
+			$params{tids} = $story_link->{tids};
+		} else {
+			$params{tids} = $reader->getTopiclistForStory(
+				$story_link->{stoid} || $story_link->{sid});
+		}
 	}
 
 	my $skin = $reader->getSkin($story_link->{skin});
@@ -465,10 +470,12 @@ sub linkStory {
 	if ($dynamic) {
 		$url .= '/' . $script . '?';
 		for my $key (keys %params) {
+			my $urlkey = $key;
+			$urlkey = 'tid' if $urlkey eq 'tids';
 			if (ref $params{$key} eq 'ARRAY') {
-				$url .= "$key=$_&" for @{$params{$key}};
+				$url .= "$urlkey=$_&" for @{$params{$key}};
 			} else {
-				$url .= "$key=$params{$key}&";
+				$url .= "$urlkey=$params{$key}&";
 			}
 		}
 		chop $url;
@@ -483,11 +490,11 @@ sub linkStory {
 		if ($constants->{tids_in_urls} && $params{tid}) {
 			$url .= '?';
 			if (ref $params{tid} eq 'ARRAY') {
-				$url .= 'tid=' . fixparam($_) . '&' for @{$params{tid}};
+				$url .= 'tid=' . join( "&tid=", map { fixparam($_) } @{$params{tid}} )
+					if @{$params{tid}};
 			} else {
-				$url .= 'tid=' . fixparam($params{tid}) . '&';
+				$url .= 'tid=' . fixparam($params{tid});
 			}
-			chop $url;
 		}
 	}
 
