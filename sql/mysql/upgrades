@@ -1119,8 +1119,6 @@ ALTER TABLE accesslog ADD COLUMN duration FLOAT DEFAULT 0.0 NOT NULL, ADD COLUMN
 
 # End of T_2_3_0_64, Start of T_2_3_0_65
 
-# SLASHDOT LAST UPDATED HERE
-
 # Change for plugins/Stats (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('stats_admin_seclev','100','seclev required to look at stats in stats.pl');
 
@@ -1132,4 +1130,8 @@ ALTER TABLE accesslog ADD referer varchar(254);
 # USEPERL LAST UPDATED HERE
 
 ALTER TABLE moderatorlog ADD INDEX m2stat_act (m2status, active);
+
+# End of T_2_3_0_65, Start of T_2_3_0_66
+
+# SLASHDOT LAST UPDATED HERE
 
