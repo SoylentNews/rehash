@@ -68,7 +68,7 @@ sub findComments {
 	# select comment ID, comment Title, Author, Email, link to comment
 	# and SID, article title, type and a link to the article
 	my $query = $self->sqlQuote($form->{query});
-	my $columns = "section, discussions.url, discussions.uid, discussions.title, pid, subject, ts, date, comments.uid as uid, comments.cid as cid ";
+	my $columns = "section, discussions.url, discussions.uid, discussions.title, pid, subject, ts, date, comments.uid as uid, comments.cid as cid, discussions.id ";
 	$columns .= ", TRUNCATE((MATCH (comments.subject) AGAINST($query)), 1) as score "
 		if ($form->{query} && $sort == 2);
 

@@ -17,13 +17,13 @@ __template__
 	[% x = start ? start : 1 %]
 	[% FOREACH comment=comments %]
 		[% user_email = Slash.db.getUser(comment.8, ['fakeemail', 'nickname']) %]
-		[% IF comment.10 %]
-			<BR><B>[% comment.10 %]</B>
+		[% IF comment.11 %]
+			<BR><B>[% comment.11 %]</B>
 		[% ELSE %]
 			<BR><B>[% x %]</B>
 		[% END %] 
 
-			<A HREF="[% constants.rootdir %]/comments.pl?cid=[% comment.9 %]">[% comment.5 %]</A>
+			<A HREF="[% constants.rootdir %]/comments.pl?cid=[% comment.9 %]&amp;sid=[% comment.10 %]">[% comment.5 %]</A>
 
 			by <A HREF="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.7) %]<BR>
 			<FONT SIZE="2">attached to 
