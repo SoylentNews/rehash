@@ -536,6 +536,95 @@ The manipulated string.
 
 { # closure for stripByMode
 
+my %latin1_to_ascii = (
+	133	=> '...',
+	135	=> 'f',
+	138	=> 'S',
+	140	=> 'OE',
+	142	=> 'Z',
+	145	=> '\'',
+	146	=> '\'',
+	147	=> '"',
+	148	=> '"',
+	150	=> '-',
+	151	=> '--',
+	153	=> '(TM)',
+	154	=> 's',
+	156	=> 'oe',
+	158	=> 'z',
+	159	=> 'Y',
+	166	=> '|',
+	169	=> '(C)',
+	174	=> '(R)',
+	177	=> '+/-',
+	188	=> '1/4',
+	189	=> '1/2',
+	190	=> '3/4',
+	192	=> 'A',
+	193	=> 'A',
+	194	=> 'A',
+	195	=> 'A',
+	196	=> 'A',
+	197	=> 'A',
+	198	=> 'AE',
+	199	=> 'C',
+	200	=> 'E',
+	201	=> 'E',
+	202	=> 'E',
+	203	=> 'E',
+	204	=> 'I',
+	205	=> 'I',
+	206	=> 'I',
+	207	=> 'I',
+	208	=> 'D',
+	209	=> 'N',
+	210	=> 'O',
+	211	=> 'O',
+	212	=> 'O',
+	213	=> 'O',
+	214	=> 'O',
+	215	=> 'x',
+	216	=> 'O',
+	217	=> 'U',
+	218	=> 'U',
+	219	=> 'U',
+	220	=> 'U',
+	221	=> 'Y',
+	223	=> 'B',
+	224	=> 'a',
+	225	=> 'a',
+	226	=> 'a',
+	227	=> 'a',
+	228	=> 'a',
+	229	=> 'a',
+	230	=> 'ae',
+	231	=> 'c',
+	232	=> 'e',
+	233	=> 'e',
+	234	=> 'e',
+	235	=> 'e',
+	236	=> 'i',
+	237	=> 'i',
+	238	=> 'i',
+	239	=> 'i',
+	240	=> 'd',
+	241	=> 'n',
+	242	=> 'o',
+	243	=> 'o',
+	244	=> 'o',
+	245	=> 'o',
+	246	=> 'o',
+	247	=> '/',
+	248	=> 'o',
+	249	=> 'u',
+	250	=> 'u',
+	251	=> 'u',
+	252	=> 'u',
+	253	=> 'y',
+	255	=> 'y',
+);
+
+
 my %action_data = ( );
 
 my %actions = (
@@ -601,7 +690,17 @@ my %actions = (
 	remove_newlines => sub {
 			${$_[0]} =~ s/\n+//g;				},
 	debugprint => sub {
-			print STDERR "stripByMode debug '${$_[0]}'\n";	},
+			print STDERR "stripByMode debug ($_[1]) '${$_[0]}'\n";	},
+
+	encode_high_bits => sub {
+			# !! assume Latin-1 !!
+			if (getCurrentStatic('draconian_charset')) {
+				my $convert = getCurrentStatic('draconian_charset_convert');
+				# anything not CRLF tab space or ! to ~ in Latin-1
+				# is converted to entities, where approveCharrefs or
+				# encode_html_amp takes care of them later
+				${$_[0]} =~ s/([^\n\r\t !-~])/($convert && $latin1_to_ascii{ord($1)}) || sprintf("&#%u;", ord($1))/ge;
+			}						},
 );
 
 my %mode_actions = (
@@ -610,11 +709,14 @@ my %mode_actions = (
 			remove_newlines			)],
 	NOTAGS, [qw(
 			newline_to_local
+			encode_high_bits
 			remove_tags
 			remove_ltgt
-			encode_html_amp_ifnotent	)],
+			encode_html_amp_ifnotent
+			approveCharrefs			)],
 	ATTRIBUTE, [qw(
 			newline_to_local
+			encode_high_bits
 			encode_html_amp
 			encode_html_ltgt
 			encode_html_quote		)],
@@ -631,12 +733,14 @@ my %mode_actions = (
 	NOHTML, [qw(
 			newline_to_local
 			trailing_whitespace
+			encode_high_bits
 			remove_tags
 			remove_ltgt
 			encode_html_amp			)],
 	PLAINTEXT, [qw(
 			newline_to_local
 			trailing_whitespace
+			encode_high_bits
 			processCustomTags
 			remove_trailing_lts
 			approveTags
@@ -650,6 +754,7 @@ my %mode_actions = (
 	HTML, [qw(
 			newline_to_local
 			trailing_whitespace
+			encode_high_bits
 			processCustomTags
 			remove_trailing_lts
 			approveTags
@@ -661,6 +766,7 @@ my %mode_actions = (
 	CODE, [qw(
 			newline_to_local
 			trailing_whitespace
+			encode_high_bits
 			encode_html_amp
 			encode_html_ltgt
 			whitespace_tagify
@@ -669,6 +775,7 @@ my %mode_actions = (
 	EXTRANS, [qw(
 			newline_to_local
 			trailing_whitespace
+			encode_high_bits
 			encode_html_amp
 			encode_html_ltgt
 			breakHtml_ifwhitefix
@@ -684,7 +791,7 @@ sub stripByMode {
 
 	my @actions = @{$mode_actions{$fmode}};
 	for my $action (@actions) {
-		$actions{$action}->(\$str);
+		$actions{$action}->(\$str, $fmode);
 	}
 	return $str;
 }
@@ -1349,7 +1456,7 @@ sub approveCharref {
 	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
 	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
 	my %bad_numeric = map { $_, 1 } @{$constants->{charrefs_bad_numeric}};
-	my %bad_entity = map { $_, 1 } @{$constants->{charrefs_bad_entity}};
+	my %bad_entity  = map { $_, 1 } @{$constants->{charrefs_bad_entity}};
 
 	if ($ok == 1 && $charref =~ /^#/) {
 		# Probably a numeric character reference.
