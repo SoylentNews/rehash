@@ -457,6 +457,7 @@ sub printComments {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	if (!$discussion || !$discussion->{id}) {
 		print getData('no_such_sid', {}, '');
@@ -498,11 +499,16 @@ sub printComments {
 		&& ( $user->{commentlimit} > $cc ||
 		     $user->{commentlimit} > $user->{commentspill} );
 
-	if ($discussion->{type} eq 'archived' || $discussion->{is_future}) {
+	if ($discussion->{type} eq 'archived'
+		|| ($discussion->{is_future} && !$constants->{subscribe_future_post})
+	) {
 		# This was named "comment_read_only" but that's not very
 		# descriptive;  let's call it what it is... -Jamie 2002/02/26
 		if ($discussion->{type} eq 'archived') {
 			$user->{state}{discussion_archived} = 1;
+		}
+		if ($discussion->{is_future} && !$constants->{subscribe_future_post}) {
+			$user->{state}{discussion_future_nopost} = 1;
 		}
 		slashDisplay('printCommNoArchive', { discussion => $discussion });
 	}
@@ -1153,7 +1159,7 @@ sub displayStory {
 
 	# And now we're also calling parseSlashizedLinks. - 2002/05/24 Jamie
 
-	if ($story->{is_future}) {
+	if ($story->{is_future} && !($user->{author} || $user->{is_admin})) {
 		$story->{atstorytime} = $constants->{subscribe_future_name};
 	} else {
 		$story->{atstorytime} = $user->{aton} . " " . timeCalc($story->{'time'});

@@ -1982,7 +1982,9 @@ sub checkStoryViewable {
 	my($self, $sid) = @_;
 	return unless $sid;
 
-	my($column_time, $where_time) = $self->_stories_time_clauses(1);
+	my($column_time, $where_time) = $self->_stories_time_clauses({
+		try_future => 1, must_be_subscriber => 1
+	});
 	my $count = $self->sqlCount(
 		'stories',
 		"sid='$sid' AND displaystatus != -1 AND $where_time",
@@ -1996,7 +1998,11 @@ sub checkStoryViewable {
 sub checkDiscussionIsInFuture {
 	my($self, $discussion) = @_;
 	return 0 unless $discussion && $discussion->{sid};
-	my($column_time, $where_time) = $self->_stories_time_clauses(1, 'ts');
+	my($column_time, $where_time) = $self->_stories_time_clauses({
+		try_future =>		1,
+		must_be_subscriber =>	0,
+		column_name =>		"ts",
+	});
 	my $count = $self->sqlCount(
 		'discussions',
 		"id='$discussion->{id}' AND type != 'archived'
@@ -2015,9 +2021,11 @@ sub checkDiscussionPostable {
 	my $constants = getCurrentStatic();
 
 	# This should do it. 
-	my($column_time, $where_time) = $self->_stories_time_clauses(
-		$constants->{subscribe_future_post},
-		"ts");
+	my($column_time, $where_time) = $self->_stories_time_clauses({
+		try_future =>		$constants->{subscribe_future_post},
+		must_be_subscriber =>	1,
+		column_name =>		"ts",
+	});
 	my $count = $self->sqlCount(
 		'discussions',
 		"id='$id' AND type != 'archived' AND $where_time",
@@ -4747,18 +4755,36 @@ sub countStoriesBySubmitter {
 
 ########################################################
 sub _stories_time_clauses {
-	my($self, $try_future, $column_name) = @_;
+	my($self, $options) = @_;
+	my $try_future =		$options->{try_future}		|| 0;
+	my $must_be_subscriber =	$options->{must_be_subscriber}	|| 0;
+	my $column_name =		$options->{column_name}		|| "time";
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	$column_name ||= "time";
+
 	my($is_future_column, $where);
 
 	my $secs = $constants->{subscribe_future_secs};
-	# Tweak $secs here somewhat, based on something...?
-	if ($try_future
+	# Tweak $secs here somewhat, based on something...?  Nah.
+
+	# First decide whether we're looking into the future or not.
+	# Do the quick tests first, then if necessary do the more
+	# expensive check to see if this page is plummy.
+	my $future = 0;
+	$future = 1 if $try_future
 		&& $constants->{subscribe}
-		&& $secs
-		&& $user->{is_subscriber}) {
+		&& $secs;
+	$future = 0 if $must_be_subscriber && !$user->{is_subscriber};
+	if ($future && $must_be_subscriber) {
+		if ($user->{is_subscriber}) {
+			my $subscribe = getObject("Slash::Subscribe");
+			$future = 0 unless $subscribe->plummyPage();
+		} else {
+			$future = 0;
+		}
+	}
+
+	if ($future) {
 		$is_future_column = "IF($column_name < NOW(), 0, 1) AS is_future";
 		$where = "$column_name < DATE_ADD(NOW(), INTERVAL $secs SECOND)";
 	} else {
@@ -4785,11 +4811,12 @@ sub getStoriesEssentials {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	$section ||= $constants->{section};
-	my $seeing_future = 0;
 
 	$limit ||= 15;
 
-	my($column_time, $where_time) = $self->_stories_time_clauses(1);
+	my($column_time, $where_time) = $self->_stories_time_clauses({
+		try_future => 1, must_be_subscriber => 1
+	});
 	my $columns = "sid, section, title, time, commentcount, hitparade, tid, $column_time";
 
 	my $where = "$where_time ";
@@ -5748,7 +5775,9 @@ sub getStory {
 		# but why do a join if it's not needed?
 		my($append, $answer, $db_id);
 		$db_id = $self->sqlQuote($id);
-		my($column_clause) = $self->_stories_time_clauses(1);
+		my($column_clause) = $self->_stories_time_clauses({
+			try_future => 1, must_be_subscriber => 0
+		});
 		$answer = $self->sqlSelectHashref("*, $column_clause", 'stories', "sid=$db_id");
 		$append = $self->sqlSelectHashref('*', 'story_text', "sid=$db_id");
 		for my $key (keys %$append) {
@@ -5773,20 +5802,33 @@ sub getStory {
 	}
 
 	# The data is in the table cache now.
+	my $retval = undef;
 	if ($val_scalar) {
 		# Caller only asked for one return value.
 		if (exists $self->{$table_cache}{$id}{$val}) {
-			return $self->{$table_cache}{$id}{$val};
-		} else {
-			return undef;
+			$retval = $self->{$table_cache}{$id}{$val};
 		}
 	} else {
 		# Caller asked for multiple return values.  It really doesn't
 		# matter what specifically they asked for, we always return
 		# the same thing:  a hashref with all the values.
 		my %return = %{$self->{$table_cache}{$id}};
-		return \%return;
+		$retval = \%return;
 	}
+	# If the story in question is in the future, we now zap it from the
+	# cache -- on the theory that (1) requests for stories from the future
+	# should be few in number and (2) the fake column indicating that it
+	# is from the future is something we don't want to cache because its
+	# "true" value will become incorrect within a few minutes.  We don't
+	# just set the value to expire at a particular time because (1) that
+	# would involve converting the story's timestamp to unix epoch, and
+	# (2) we can't expire individual stories, we'd have to expire the
+	# whole story cache, and that would not be good for performance.
+	if ($self->{$table_cache}{$id}{is_future}) {
+		delete $self->{$table_cache}{$id};
+	}
+	# Now return what we need to return.
+	return $retval;
 }
 
 ########################################################

@@ -1169,8 +1169,9 @@ sub prepareUser {
 	$slashdb = getCurrentDB();
 	$constants = getCurrentStatic();
 
+	my $r;
 	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
+		$r = Apache->request;
 		$hostip = $r->connection->remote_ip;
 	} else {
 		$hostip = '';
@@ -1288,8 +1289,12 @@ sub prepareUser {
 
 	if ($constants->{subscribe}
 		&& $user->{hits_paidfor}
-		&& $user->{hits_bought} < $user->{hits_paidfor}) {
+		&& $user->{hits_bought} < $user->{hits_paidfor}
+	) {
 		$user->{is_subscriber} = 1;
+		if (my $subscribe = getObject('Slash::Subscribe')) {
+			$user->{state}{plummy_page} = $subscribe->plummyPage($r);
+		}
 	}
 
 	if ($user->{seclev} >= 100) {

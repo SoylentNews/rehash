@@ -47,8 +47,48 @@ sub new {
 
 ########################################################
 # Internal.
+#
+# There are three separate boolean subscriber-related decisions that
+# must be made for each page delivered to someone who has paid for 1
+# or more pages:
+#
+#         - Is this page ad-free?         adlessPage()
+#         - Is this page bought?          buyingThisPage()
+#         - Does this page get plums?     plummyPage()
+#
+# The decisions are separate.  But they are related, so the logic is
+# all handled here in _subscribeDecisionPage.  Users get to control
+# whether they want to see ads on three types of pages, plus implicit
+# control over a fourth type of "all others" (which are adless but
+# don't use up a subscription).  Users get to control the maximum
+# number of pages per day that they will buy.  Beyond that point they
+# start seeing ads on bought page types, but as long as their max is
+# at least the default, those bought page types are still considered
+# "plumworthy" or (and this is an ugly term but it's short) "plummy."
+#
+# So:
+#
+# adless = A && (B || C) && D
+# buying = A &&  B       && D
+# plummy = A && (B || C)      && E
+#
+# Where:
+#
+# [A] User is a subscriber, i.e.:
+#         1. subscription plugin is installed and turned on
+#         2. user is logged in
+#         3. user has more paidfor pages than bought pages
+# [B] User has stated they want this type of page bought
+#         EXPLICITLY (it's one of the "big three" types and that
+#         checkbox is checked for this user)
+# [C] User wants this type of page bought IMPLICITLY (it's
+#         not one of the "big three" but the user has at least
+#         one of those checkboxes checked)
+# [D] User has pages remaining for today before hitting the max
+# [E] User's max pages per day to buy is set >= the default (10)
+#
 sub _subscribeDecisionPage {
-	my($self, $trueOnOther, $r) = @_;
+	my($self, $trueOnOther, $useMaxNotToday, $r) = @_;
 
         my $user = getCurrentUser();
 	my $uid = $user->{uid} || 0;
@@ -56,42 +96,66 @@ sub _subscribeDecisionPage {
                 ||  !$uid
                 ||   $user->{is_anon};
 
-	# Any part of the code can set this user state variable at any time.
-	return 1 if $user->{state}{buyingpage};
+	# At this point, if we're asking about buying a page, we may know
+	# the answer already.
+	if (!$trueOnOther && !$useMaxNotToday) {
+		# Any part of the code can set this user state variable at any time.
+		# At the moment, this is totally unused, but it might be in future,
+		# if we ever decide that a user action can force a page to be bought
+		# when it otherwise might not be.
+		return 1 if $user->{state}{buyingpage};
+		# If the user hasn't paid for any pages, or has already bought
+		# (used up) all the pages they've paid for, then they are not
+		# buying this one.
+		return 0 if !$user->{hits_paidfor}
+			|| ( $user->{hits_bought}
+				&& $user->{hits_bought} >= $user->{hits_paidfor} );
+	}
 
-	# If the user hasn't paid for any pages, or has already bought
-	# (used up) all the pages they've paid for, then they are not
-	# buying this one.
-
-	return 0 if !$user->{hits_paidfor}
-                || ( $user->{hits_bought}
-			&& $user->{hits_bought} >= $user->{hits_paidfor} );
-
-	# If ads aren't on, the user isn't buying this one.
+	# If we're asking whether to show an ad, there may be a simple
+	# short-circuit here.
 	my $constants = getCurrentStatic();
-	return 0 if !$constants->{run_ads};
+	if ($trueOnOther && !$useMaxNotToday) {
+		# If ads aren't on, the user isn't buying this one.
+		return 0 if !$constants->{run_ads};
+	}
 
-	# Has the user exceeded the maximum number of pages they want
-	# to buy *today*?  (Here is where the algorithm decides that
-	# "today" is a GMT day.)
-	my @gmt = gmtime;
-	my $today = sprintf("%04d%02d%02d", $gmt[5]+1900, $gmt[4]+1, $gmt[3]);
-	if ($today eq substr($user->{lastclick}, 0, 8)) {
-		# This is not the first click of the day, so the today_max may
-		# indeed apply.
-		my $today_max = $constants->{subscribe_hits_btmd} || 10;
+	my $today_max_def = $constants->{subscribe_hits_btmd} || 10;
+	if ($useMaxNotToday) {
+		# If the user has set their maximum number of pages to a
+		# nonzero number under the default, then no, this page is
+		# not "plummy".
+		if ($user->{hits_bought_today_max}
+			&& $user->{hits_bought_today_max} < $today_max_def) {
+			return 0;
+		}
+	} else {
+		my $today_max = $today_max_def;
 		$today_max = $user->{hits_bought_today_max}
 			if defined($user->{hits_bought_today_max});
-		# If this value ends up 0 (whether because the user set it to 0, or
-		# the site var is 0 and the user didn't override) then there is no
-		# daily maximum.
-		if ($today_max) {
-			return 0 if $user->{hits_bought_today} >= $today_max;
+		# Has the user exceeded the maximum number of pages they want
+		# to buy *today*?  (Here is where the algorithm decides that
+		# "today" is a GMT day.)
+		my @gmt = gmtime;
+		my $today = sprintf("%04d%02d%02d", $gmt[5]+1900, $gmt[4]+1, $gmt[3]);
+		if ($today eq substr($user->{lastclick}, 0, 8)) {
+			# This is not the first click of the day, so the today_max
+			# may indeed apply.
+			my $today_max = $constants->{subscribe_hits_btmd} || 10;
+			$today_max = $user->{hits_bought_today_max}
+				if defined($user->{hits_bought_today_max});
+			# If this value ends up 0 (whether because the user set it to 0,
+			# or the site var is 0 and the user didn't override) then there
+			# is no daily maximum.
+			if ($today_max) {
+				return 0 if $user->{hits_bought_today} >= $today_max;
+			}
 		}
 	}
 
-	# The user has paid for pages and may be buying this one.
-
+	# We should use $user->{currentPage} instead of parsing $r->uri
+	# separately here.  But first we'll need to audit the code and
+	# make sure this method is never called before that field is set.
 	my $decision = 0;
         $r ||= Apache->request;
         my $uri = $r->uri;
@@ -137,12 +201,17 @@ sub _subscribeDecisionPage {
 
 sub adlessPage {
 	my($self, $r) = @_;
-	return $self->_subscribeDecisionPage(1, $r);
+	return $self->_subscribeDecisionPage(1, 0, $r);
 }
 
 sub buyingThisPage {
 	my($self, $r) = @_;
-	return $self->_subscribeDecisionPage(0, $r);
+	return $self->_subscribeDecisionPage(0, 0, $r);
+}
+
+sub plummyPage {
+	my($self, $r) = @_;
+	return $self->_subscribeDecisionPage(1, 1, $r);
 }
 
 # By default, allow readers to buy x pages for $y, 2x pages for $2y,

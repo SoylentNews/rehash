@@ -98,7 +98,7 @@ __template__
 	[% END %]
 
 		<INPUT TYPE="submit" NAME="op" VALUE="Change">
-		[% UNLESS user.state.discussion_archived %]
+		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			<INPUT TYPE="submit" NAME="op" VALUE="Reply">
 		[% END %]
 		</FONT>

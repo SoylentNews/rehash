@@ -111,6 +111,17 @@ Incremented token-count on [% num_updated %] users.
 [% CASE 'rereg_email_subject' %]
 Your [% constants.sitename %] account has expired.
 
+[% CASE 'article_nosubscription' %]
+[% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" %]
+You can't see this story because it's scheduled in the future,
+where only subscribers can see it.<P>
+Either you are not a subscriber to [% constants.sitename %], or you
+have indicated you don't want story pages ad-free, or you have
+set your daily limit of ad-free pages to lower than
+the default [% constants.subscribe_hits_btmd %].
+Any of these three possible issues can be resolved at
+<A HREF="[% constants.rootdir %]/subscribe.pl">your subscription page</A>.<P>
+
 [% CASE DEFAULT %]
 ---- MISSING MISCELLANEOUS DATA SEGMENT --- [[% value %]] block not found.
 

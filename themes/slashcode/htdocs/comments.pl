@@ -124,6 +124,7 @@ sub main {
 	# function can handle the situation itself
 	my ($discussion, $section);
 
+	my $future_err = 0;
 	if ($form->{sid}) {
 		# SID compatibility
 		if ($form->{sid} !~ /^\d+$/) {
@@ -139,17 +140,36 @@ sub main {
 		# This is to get tid in comments. It would be a mess to pass it
 		# directly to every comment -Brian
 		$user->{state}{tid} = $discussion->{topic};
-		if (!$user->{is_admin} && $discussion->{sid}) {
-			unless ($slashdb->checkStoryViewable($discussion->{sid})) {
+		# The is_future field isn't automatically added by getDiscussion
+		# like it is with getStory.  We have to add it manually here.
+		$discussion->{is_future} = 1 if $slashdb->checkDiscussionIsInFuture($discussion);
+		# Now check to make sure this discussion can be seen.
+		if (!($user->{author} || $user->{is_admin}) && $discussion) {
+			my $null_it_out = 0;
+			if ($discussion->{is_future}) {
+				# Discussion is from the future;  decide here
+				# whether the user is allowed to see it or not.
+				# If not, we'll present the error a bit later.
+				if (!$constants->{subscribe} || !$user->{is_subscriber}) {
+					$future_err = 1;
+					$null_it_out = 1;
+				} else {
+					my $subscribe = getObject("Slash::Subscribe");
+					if (!$subscribe || !$subscribe->plummyPage()) {
+						$future_err = 1;
+						$null_it_out = 1;
+					}
+				}
+			} elsif ($discussion->{sid} && !$slashdb->checkStoryViewable($discussion->{sid})) {
+				# Probably a Never Display'd story.
+				$null_it_out = 1;
+			}
+			if ($null_it_out) {
 				$form->{sid} = '';
 				$discussion = '';
 				$op = 'default';
 				$section = '';
 			}
-		}
-		if ($discussion && $slashdb->checkDiscussionIsInFuture($discussion)) {
-			$discussion->{is_future} = 1;
-			$user->{state}{buyingpage} = 1;
 		}
 	}
 
@@ -163,6 +183,10 @@ sub main {
 	}
 	$op = 'default' if ( ($user->{seclev} < $ops->{$op}{seclev}) || ! $ops->{$op}{function});
 	$op = 'default' if (! $postflag && $ops->{$op}{post});
+
+	if ($future_err) {
+		print getError("nosubscription");
+	}
 
 	# Admins don't jump through these formkey hoops.
 	if ($user->{is_admin}) {
@@ -225,7 +249,7 @@ sub main {
 			my $hc = getObject("Slash::HumanConf");
 			$hc->reloadFormkeyHC($formname) if $hc;
 		}
-	} 
+	}
 
 	if (!$error_flag) {
 		# CALL THE OP

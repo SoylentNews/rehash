@@ -43,10 +43,6 @@ sub main {
 
 	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
-	# The {buyingpage} state must be set before header() is called to
-	# properly display the mainmenu in the left column.
-	
-
 	my $limit = $artcount;
 	if ($form->{issue}) {
 		$limit *= 7;
@@ -64,7 +60,6 @@ sub main {
 
 	for my $story (@$stories) {
 		if ($story->[10]) {
-			$user->{state}{buyingpage} = 1;
 			$story->[3] =
 				$story->[5] =
 				$story->[7] = $constants->{subscriber_future_name};

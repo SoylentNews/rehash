@@ -17,7 +17,7 @@ __template__
 	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
 		<TR><TD><FONT SIZE="2">
 
-		[ [% UNLESS user.state.discussion_archived %][% Slash.linkComment({
+		[ [% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %][% Slash.linkComment({
 			sid	=> sid,
 			pid	=> cid,
 			op	=> 'Reply',

@@ -28,6 +28,22 @@ sub main {
 		$story = $reader->getStory($form->{sid});
 	}
 
+	my $future_err = 0;
+	if ($story->{is_future} && !$user->{is_admin}) {
+		if (!$constants->{subscribe} || !$user->{is_subscriber}) {
+			$future_err = 1;
+		} else {
+			my $subscribe = getObject("Slash::Subscribe");
+			if (!$subscribe || !$subscribe->plummyPage()) {
+				$future_err = 1;
+			}
+		}
+		if ($future_err) {
+			$story = '';
+		} else {
+			$story->{time} = $constants->{subscriber_future_name};
+		}
+	}
 	if ($story) {
 		my $SECT = $slashdb->getSection($story->{section});
 		# This should be a getData call for title
@@ -45,11 +61,6 @@ sub main {
 							past => $past,
 							future => $future,
 						}, { Return => 1 });
-		}
-
-		if ($story->{is_future}) {
-			$story->{time} = $constants->{subscriber_future_name};
-			$user->{state}{buyingpage} = 1;
 		}
 
 		# set things up to use the <LINK> tag in the header
@@ -99,8 +110,13 @@ sub main {
 						&& $discussion->{commentstatus} eq 'disabled' );
 		}
 	} else {
-		my $message = getData('no_such_sid');
-		header($message, $form->{section});
+		header('Error', $form->{section});
+		my $message;
+		if ($future_err) {
+			$message = getData('article_nosubscription');
+		} else {
+			$message = getData('no_such_sid');
+		}
 		print $message;
 	}
 
@@ -110,6 +126,14 @@ sub main {
 	} else {
 		writeLog($form->{sid});
 	}
+}
+
+sub getError {
+	my($value, $hashref, $nocomm) = @_;
+	$hashref ||= {};
+	$hashref->{value} = $value;
+	return slashDisplay('errors', $hashref,
+		{ Return => 1, Nocomm => $nocomm });
 }
 
 createEnvironment();

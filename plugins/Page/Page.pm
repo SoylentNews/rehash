@@ -162,7 +162,6 @@ sub displayStories {
 		my $atstorytime;
 		if ($story->{is_future}) {
 			$atstorytime = $constants->{subscribe_future_name};
-			$user->{state}{buyingpage} = 1;
 		} else {
 			$atstorytime = $user->{aton} . " " . timeCalc($time, '%B %d, %Y');
 		}
