@@ -1127,7 +1127,7 @@ sub approveTag {
 	my($wholetag) = @_;
 #print STDERR "BEGIN approveTag <$wholetag>\n";
 
-	$wholetag =~ s/^\s*?(.*)\s*?$/$1/; # trim leading and trailing spaces
+	$wholetag =~ s/^\s*(.*?)\s*$/$1/; # trim leading and trailing spaces
 	$wholetag =~ s/\bstyle\s*=(.*)$//is; # go away please
 
 	# Take care of URL:foo and other HREFs
@@ -2060,48 +2060,64 @@ sub slashizeLinks {
 # URLs that match a pattern are converted into our special format.
 # Those that don't are passed through.  This function mirrors the
 # behavior of _slashlink_to_link.
-
+{
+# This closure is here because generating the %urla table is
+# somewhat resource-intensive.
+my %urla;
 sub _link_to_slashlink {
 	my($pre, $url, $post) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $retval = "$pre$url$post";
+	my $abs = $constants->{absolutedir};
 #print STDERR "_link_to_slashlink begin '$url'\n";
 
-	# URLs may show up in any section, which means when absolutized
-	# their host may be either the main one or a sectional one.  We
-	# have to allow for any of those possibilities.
-	my $abs = $constants->{absolutedir};
-	my $sections = $slashdb->getSections();
-	my @sect_urls = grep { $_ }
-		map { $sections->{$_}{rootdir} }
-		sort keys %$sections;
-	my $any_host = "(?:"
-		. join("|", $abs, @sect_urls)
-		. ")";
+	if (!%urla) {
+		# URLs may show up in any section, which means when absolutized
+		# their host may be either the main one or a sectional one.
+		# We have to allow for any of those possibilities.
+		my $sections = $slashdb->getSections();
+		my @sect_urls = grep { $_ }
+			map { $sections->{$_}{rootdir} }
+			sort keys %$sections;
+		my %all_urls = ( );
+		for my $url ($abs, @sect_urls) {
+			for my $scheme (undef, "http", "https") {
+				my $new_url = URI->new($url);
+				$new_url->scheme($scheme);
+				$new_url = $new_url->as_string;
+				$all_urls{$new_url} = 1;
+			}
+		}
+		my $any_host = "(?:"
+			. join("|", sort keys %all_urls)
+			. ")";
+#print STDERR "link_to_slashlink abs '$abs' any_host '$any_host'\n";
+		# All possible URLs' arguments, soon to be attributes
+		# in the new tag (thus "urla").	Values are the name
+		# of the script ("sn") and expressions that can pull
+		# those arguments out of a text URL.  (We could use
+		# URI::query_form to pull out the .pl arguments, but that
+		# wouldn't help with the .shtml regex so we might as well
+		# do it this way.)  If we ever want to extend slash-linking
+		# to cover other tags, here's the place to start.
+		%urla = (
+			qr{^$any_host/article\.pl\?} =>
+				{ _sn => 'article',
+				  sid => qr{\bsid=([\w/]+)} },
+			qr{^$any_host/\w+/\d+/\d+/\d+/\d+\.shtml\b} =>
+				{ _sn => 'article',
+				  sid => qr{^$any_host/\w+/(\d+/\d+/\d+/\d+)\.shtml\b} },
+			qr{^$any_host/comments\.pl\?} =>
+				{ _sn => 'comments',
+				  sid => qr{\bsid=(\d+)},
+				  cid => qr{\bcid=(\d+)} },
+		);
+#use Data::Dumper; print STDERR Dumper(\%urla);
+	}
 
 	my $canon_url = URI->new_abs($url, $abs)->canonical;
 	my $frag = $canon_url->fragment() || "";
-
-	# All possible URLs' arguments, soon to be attributes in the
-	# new tag (thus "urla").  Values are the name of the script ("sn")
-	# and expressions that can pull those arguments out of a text URL.
-	# (We could use URI::query_form to pull out the .pl arguments, but
-	# that wouldn't help with the .shtml regex so we might as well do
-	# it this way.)  If we ever want to extend slash-linking to cover
-	# other tags, here's the place to start.
-	my %urla = (
-		qr{^$any_host/article\.pl\?} =>
-			{ _sn => 'article',
-			  sid => qr{\bsid=([\w/]+)} },
-		qr{^$any_host/\w+/\d+/\d+/\d+/\d+\.shtml\b} =>
-			{ _sn => 'article',
-			  sid => qr{^$any_host/\w+/(\d+/\d+/\d+/\d+)\.shtml\b} },
-		qr{^$any_host/comments\.pl\?} =>
-			{ _sn => 'comments',
-			  sid => qr{\bsid=(\d+)},
-			  cid => qr{\bcid=(\d+)} },
-	);
 
 	# %attr is the data structure storing the attributes of the <a>
 	# tag that we will use.
@@ -2152,6 +2168,7 @@ sub _link_to_slashlink {
 	# Return either the new $retval we just made, or just send the
 	# original text back.
 	return $retval;
+}
 }
 
 
