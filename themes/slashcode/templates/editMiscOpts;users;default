@@ -39,7 +39,7 @@ __template__
 	&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="opt_[% opt.name %]" value="0"
 		[% IF !opt.checked; constants.markup_checked_attribute; END %]>&nbsp;Off
 	&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="opt_[% opt.name %]" value="1"
-		[% IF opt.checked; "constants.markup_checked_attribute; ND %]>&nbsp;On<BR>
+		[% IF opt.checked; constants.markup_checked_attribute; END %]>&nbsp;On<BR>
 [% END %]
 
 		<INPUT TYPE="SUBMIT" VALUE="Save">
