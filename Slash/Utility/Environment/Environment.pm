@@ -1259,15 +1259,6 @@ sub prepareUser {
 	}
 	$user->{karma_bonus} = '+1' unless defined($user->{karma_bonus});
 
-	if ($user->{commentlimit} > $constants->{breaking}
-		&& $user->{mode} ne 'archive'
-		&& $user->{mode} ne 'metamod') {
-		$user->{commentlimit} = int($constants->{breaking} / 2);
-		$user->{breaking} = 1;
-	} else {
-		$user->{breaking} = 0;
-	}
-
 	# All sorts of checks on user data
 	$user->{exaid}		= _testExStr($user->{exaid}) if $user->{exaid};
 	$user->{exboxes}	= _testExStr($user->{exboxes}) if $user->{exboxes};
@@ -1288,6 +1279,17 @@ sub prepareUser {
 		$user->{currentPage} = $1;
 	} else {
 		$user->{currentPage} = 'misc';
+	}
+
+	if (($user->{currentPage} eq 'article'
+		|| $user->{currentPage} eq 'comments')
+		&& ($user->{commentlimit} > $constants->{breaking}
+		&& $user->{mode} ne 'archive'
+		&& $user->{mode} ne 'metamod')) {
+		$user->{commentlimit} = int($constants->{breaking} / 2);
+		$user->{breaking} = 1;
+	} else {
+		$user->{breaking} = 0;
 	}
 
 	if ($constants->{subscribe}) {
