@@ -1,0 +1,17 @@
+__section__
+default
+__description__
+Dummy template, because we call this, but never use it
+__title__
+
+__page__
+page
+__lang__
+en_US
+__name__
+data
+__template__
+__seclev__
+10000
+__version__
+$Id$
