@@ -87,7 +87,6 @@ sub main {
 			$future_plug = 1;
 		}
 	}
-print STDERR "index.pl future_plug '$future_plug'\n";
 
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
