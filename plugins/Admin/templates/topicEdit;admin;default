@@ -72,7 +72,7 @@ __template__
 		[% FOREACH section = sectionref.keys %]
 			<TR>
 				<TD>
-				<INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]&nbsp;
+				[% sectionref.$section.title %]&nbsp;
 				</TD>
 			[% FOREACH type=types %]
 				<TD>
