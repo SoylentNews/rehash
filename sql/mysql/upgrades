@@ -1415,8 +1415,6 @@ ALTER TABLE accesslist ADD INDEX now_trusted (now_trusted);
 
 # End of T_2_3_0_86, Start of T_2_3_0_87 - 2003/04/16
 
-# USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_87, Start of T_2_3_0_88 - 2003/04/16
 
 ALTER TABLE story_topics ADD is_parent ENUM("no", "yes") DEFAULT 'no' NOT NULL;
@@ -1466,3 +1464,5 @@ CREATE TABLE users_acl (
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
+
+# USEPERL LAST UPDATED HERE
