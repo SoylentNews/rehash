@@ -9,6 +9,7 @@ use Socket;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
 use Date::Format qw(time2str);
+use Data::Dumper;
 use Slash::Utility;
 use Storable qw(thaw freeze);
 use URI ();
@@ -836,7 +837,6 @@ EOT
 		$num_needed -= scalar(@new_ids);
 	}
 	if ($getmods_loops > 3) {
-		use Data::Dumper;
 		print STDERR "GETMODS looped the max number of times,"
 			. " returning '@ids' for uid '$uid'"
 			. " num_needed '$num_needed'"
@@ -5900,7 +5900,7 @@ sub createStory {
 	my $rootdir = $section->{rootdir} || $constants->{rootdir};
 	my $comment_codes = $self->getDescriptions("commentcodes");
 
-	my $id = $self->createDiscussion( {
+	my $discussion = {
 		title		=> $story->{title},
 		section		=> $story->{section},
 		topic		=> $story->{tid},
@@ -5908,18 +5908,19 @@ sub createStory {
 		sid		=> $story->{sid},
 		commentstatus	=> $comment_codes->{$story->{commentstatus}} ? $story->{commentstatus} : getCurrentStatic('defaultcommentstatus'),
 		ts		=> $story->{'time'}
-	});
+	};
+	my $id = $self->createDiscussion($discussion);
 	unless ($id) {
-		print STDERR "Failed to create discussion for story\n";
+		print STDERR "Failed to create discussion for story: " . Dumper($discussion);
 		goto error;
 	}
 	unless ($self->setStory($story->{sid}, { discussion => $id })) {
-		print STDERR "Failed to set  discussion for story\n";
+		print STDERR "Failed to set discussion '$id' for story '$story->{sid}'\n";
 		goto error;
 	}
 	# Take all secondary topics and shove them into the array for the story
 	unless ($self->setStoryTopics($story->{sid}, createStoryTopicData($self))) {
-		print STDERR "Failed to set topics for story\n";
+		print STDERR "Failed to set topics for story '$story->{sid}'\n";
 		goto error;
 	}
 
@@ -6631,7 +6632,6 @@ sub getSimilarStories {
 		grep { $text_words->{$_}{count} }
 		grep { length($_) > 3 }
 		@recent_uncommon_words;
-#use Data::Dumper;
 #print STDERR "text_words: " . Dumper($text_words);
 #print STDERR "uncommon intersection: '@text_uncommon_words'\n";
 	# If there is no intersection, return now.
@@ -7440,7 +7440,6 @@ sub getUser {
 	my $mcdanswer;
 
 	if ($mcddebug > 1) {
-		use Data::Dumper;
 		my $v = Dumper($val); $v =~ s/\s+/ /g;
 		print STDERR scalar(gmtime) . " $$ getUser('$uid' ($uid_q), $v) mcd='$mcd'\n";
 	}
@@ -7707,7 +7706,6 @@ sub _getUser_compare_mcd_db {
 
 	my $errtext = "";
 
-	use Data::Dumper;
 	local $Data::Dumper::Sortkeys = 1;
 	my %union_keys = map { ($_, 1) } (keys %$answer, keys %$mcdanswer);
 	my @union_keys = sort grep !/^-/, keys %union_keys;
