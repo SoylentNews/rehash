@@ -16,9 +16,13 @@ __template__
    USE format;
    mbytes = format("%0.1f MB");
    ints = format("%8d");
+   ints2 = format("%5d");
+   ints3 = format("%6d");
    pcts = format("%8d");
    pctsf = format("%.1f");
    flts = format("%.1f");
+   flts2 = format("%5.2f");
+   dlrs = format("%7.2f");
 
    stats = Slash.getObject('Slash::Stats');
 
@@ -159,6 +163,31 @@ oldest unM2'd: [% IF stats_data.oldest_unm2d_days > -1 %][% ints(stats_data.olde
 youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% stats_data.youngest_modelig_created %]
 </PRE>
 
+[%
+   END;
+
+   CASE 'subscribe';
+      reportblock = BLOCK;
+      type        = 'area';
+      section     = 'all';
+      form.stats_days = form.stats_days || 1;
+
+      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_key = stats_data_big.keys.sort.0;
+      stats_data = stats_data_big.${stats_data_key};
+%]
+   Monthly Stats (Average Per Day)
+   -------------------------------
+            Users   Pages   Payments
+New:        [% flts2(stats_data.subscribe_new_users_last30) %]   [% ints2(stats_data.subscribe_new_pages_last30) %]   \$[% dlrs(stats_data.subscribe_new_payments_last30) %]
+Renew:      [% flts2(stats_data.subscribe_renew_users_last30) %]   [% ints2(stats_data.subscribe_renew_pages_last30) %]    [% dlrs(stats_data.subscribe_renew_payments_last30) %]
+Total:      [% flts2(stats_data.subscribe_new_users_last30 + stats_data.subscribe_renew_users_last30) %]   [% flts2(stats_data.subscribe_new_pages_last30 + stats_data.subscribe_renew_pages_last30) %]   \$[% dlrs(stats_data.subscribe_new_payments_last30 + stats_data.subscribe_renew_payments_last30) %]
+Ran out:    [% flts2(stats_data.subscribe_runout) %]
+
+current subscribers: [% ints3(stats_data.subscribers_current) %]
+ former subscribers: [% ints3(stats_data.subscribers_total - stats_data.subscribers_current) %]     
+  total subscribers: [% ints3(stats_data.subscribers_total) %]    
+  new subscriptions: [% ints3(stats_data.subscribe_new_users) %] 
 [%
    END;
 END %]
