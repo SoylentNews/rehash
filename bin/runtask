@@ -43,6 +43,7 @@ if ($opts{'A'}) {
 	open($fh, "$SLASH_PREFIX/slash.sites") or die "can't open slash.sites, $!";
 	my @users;
 	while (<$fh>) {
+		next if /^#/; 
 		my ($user) = split /:/;
 		push @users, $user;
 	}
