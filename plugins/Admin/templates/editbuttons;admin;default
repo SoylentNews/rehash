@@ -16,9 +16,9 @@ __template__
 [% END %]
 
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="preview">
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="update">
 
 [% IF ! newarticle %]
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="update">
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="delete">
 [% END %]
 

@@ -21,7 +21,7 @@ __template__
 				<INPUT TYPE="hidden" NAME="preview" VALUE="active">
 				<INPUT TYPE="text" NAME="description" value="[% FILTER strip_attribute; article.description; END %]">
 				<P>
-					<TEXTAREA NAME="article" COLS="60" ROWS="20">[% FILTER strip_literal; article.article; END %]</TEXTAREA>
+					<TEXTAREA WRAP="virtual" NAME="article" COLS="60" ROWS="20">[% FILTER strip_literal; article.article; END %]</TEXTAREA>
 				</P>
 				<INPUT TYPE="submit" NAME="op" value="preview">
 				[% IF form.preview %]

@@ -952,7 +952,7 @@ sub editStory {
 
 	my($authoredit_flag, $extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $topic, $storycontent, $storybox, $locktest,
-		$editbuttons, $sections, $topic_select, $section_select, $author_select,
+		$sections, $topic_select, $section_select, $author_select,
 		$extracolumns, $displaystatus_select, $commentstatus_select, $description);
 	my $extracolref = {};
 	my($fixquotes_check,$autonode_check,$fastforward_check) = ('off','off','off');
@@ -1030,8 +1030,6 @@ sub editStory {
 
 	$sections = $slashdb->getDescriptions('sections');
 
-	$editbuttons = editbuttons($newarticle);
-
 	$topic_select = selectTopic('tid', $storyref->{tid}, 1);
 
 	$section_select = selectSection('section', $storyref->{section}, $sections, 1) unless $user->{section};
@@ -1082,7 +1080,7 @@ sub editStory {
 		storycontent		=> $storycontent,
 		storybox		=> $storybox,
 		sid			=> $sid,
-		editbuttons		=> $editbuttons,
+		newarticle		=> $newarticle,
 		topic_select		=> $topic_select,
 		section_select		=> $section_select,
 		author_select		=> $author_select,
@@ -1249,14 +1247,6 @@ sub updateFilter {
 		titlebar("100%", getTitle('updateFilter-delete-title'));
 		listFilters();
 	}
-}
-
-##################################################################
-sub editbuttons {
-	my($newarticle) = @_;
-	my $editbuttons = slashDisplay('editbuttons',
-		{ newarticle => $newarticle }, 1);
-	return $editbuttons
 }
 
 ##################################################################

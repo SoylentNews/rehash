@@ -52,7 +52,7 @@ __template__
 		<TD BGCOLOR="[% user.bg.3 %]">&nbsp; </TD>
 		<TD BGCOLOR="[% user.bg.3 %]">
 		<FONT COLOR="[% user.fg.3 %]">
-		[% editbuttons %]
+		[% INCLUDE editbuttons %]
 		[% topic_select %]
 
 		[% UNLESS user.section %]
@@ -144,13 +144,13 @@ __template__
 </TABLE>
 [% END %]
 
-[% editbuttons %]
+[% INCLUDE editbuttons %]
 
 Extended Copy<BR>
 <TEXTAREA NAME="bodytext" COLS="70" WRAP="VIRTUAL" ROWS="10">[% FILTER strip_literal; storyref.bodytext; END %]</TEXTAREA>
 <BR>
 
-[% editbuttons %]
+[% INCLUDE editbuttons %]
 
 </FORM>
 
