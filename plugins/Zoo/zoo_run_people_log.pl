@@ -6,7 +6,7 @@ use Slash::Display;
 
 use vars qw( %task $me );
 
-# We have no transactions going on in here so the information is not 100% correct -Brian
+# Rewritten
 $task{$me}{timespec} = '27 * * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -15,6 +15,7 @@ $task{$me}{code} = sub {
 	my($friends_cache, @deletions);
 
 	my $zoo = getObject('Slash::Zoo');
+
 	my @today = localtime();
 	my $today = sprintf "%4d-%02d-%02d", 
 		$today[5] + 1900, $today[4] + 1, $today[3];
@@ -23,13 +24,13 @@ $task{$me}{code} = sub {
 	$stats->createStatDaily("zoo_counts", "0");	
 
 	slashdLog('Zoo fof/eof Begin');
-	my $people = $zoo->getZooUsersForProcessing($slashdb->getVar('zoo_timer'));
+	my $people = $zoo->getZooUsersForProcessing();
 	slashdLog('Zoo fof/eof Processing ' . scalar(@$people) . ' people');
 	# Each job represents someone who has added or removed someone as a friend/foe. -Brian
 	for my $person (@$people) {
-		$zoo->rebuildUser($person);
+		my $new_people = $zoo->rebuildUser($person);
+		$slashdb->setUser($person, { people => $new_people, people_status => 'ok'});
 	}
-	$slashdb->sqlUpdate('vars', { -value => 'now()'}, 'name="zoo_timer"');
 	$stats->updateStatDaily("zoo_counts", "value+" . @$people);	
 	slashdLog('Zoo fof/eof End');
 

@@ -82,15 +82,17 @@ sub getFriendsUIDs {
 sub setFriend {
 	my($self, $uid, $person) = @_;
 	_set(@_, 'friend', FRIEND);
-	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'fof' from people WHERE uid=$uid AND type='friend' AND person != $person  AND person != $uid");
-	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'fof' from people WHERE uid=$person AND type='friend' AND $uid != person  AND person != $person");
-	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'eof' from people WHERE uid=$person AND type='foe' AND $uid != person  AND person != $person");
+	my $data = $self->sqlSelectColArrayref('uid', 'people', "person=$uid AND type='friend'");
+	my $list = join (',', @$data);
+	$self->sqlDo("UPDATE users_info SET people_status='dirty' WHERE uid IN ($list)");
 }
 
 sub setFoe {
 	my($self, $uid, $person) = @_;
 	_set(@_, 'foe', FOE);
-	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'eof' from people WHERE uid=$uid AND type='friend' AND person != $person AND person != $uid");
+	my $data = $self->sqlSelectColArrayref('uid', 'people', "person=$uid AND type='friend'");
+	my $list = join (',', @$data);
+	$self->sqlDo("UPDATE users_info SET people_status='dirty' WHERE uid IN ($list)");
 }
 
 sub _set {
@@ -174,13 +176,10 @@ sub delete {
 		delete $other_people->{FREAK()}{$uid};
 		$slashdb->setUser($person, { people => $other_people })
 	}
+	my $data = $self->sqlSelectColArrayref('uid', 'people', "person=$uid AND type='friend'");
+	my $list = join (',', @$data);
+	$self->sqlDo("UPDATE users_info SET people_status='dirty' WHERE uid IN ($list)");
 
-	# Only in friend situations do we worry about removing any relationships you gained -Brian
-	if ($type eq 'friend') {
-		$self->sqlDo("DELETE FROM people_nthdegree WHERE uid=$uid AND friend=$person");
-	}
-	# Now we remove any relationships we might have gained from this -Brian
-	$self->sqlDo("DELETE FROM people_nthdegree WHERE person=$person AND friend=$uid");
 }
 
 sub topFriends {
@@ -265,32 +264,22 @@ SQL
 }
 
 sub getZooUsersForProcessing {
-	my($self, $time) = @_;
-	my $people = $self->sqlSelectAll('DISTINCT uid', 'people', "last_update > '$time' ");
-	my $people2 = $self->sqlSelectAll('DISTINCT uid', 'people_nthdegree', "last_update > '$time' ");
+	my($self) = @_;
+	my $people = $self->sqlSelectColArrayref('uid', 'users_info', "people_status='dirty'");
 
-	my %people = ( );
-
-	for (@$people) {
-		$people{$_->[0]} = 1;
-	}
-	for (@$people2) {
-		$people{$_->[0]} = 1;
-	}
-	my @people = keys %people;
-
-	return \@people;
+	return $people;
 }
 
 sub rebuildUser {
 	my($self, $uid) = @_;
-	my $first =  $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
-	my $second =  $self->sqlSelectAllHashrefArray('*', 'people_nthdegree', "uid = $uid");
+	my $data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
 	my $people;
 
-	for (@$first) {
+	my @friends;
+	for (@$data) {
 		if ($_->{type} eq 'friend') {
 			$people->{FRIEND()}{$_->{person}} = 1;
+			push @friends, $_->{person};
 		} elsif ($_->{type} eq 'foe') {
 			$people->{FOE()}{$_->{person}} = 1;
 		}
@@ -301,10 +290,12 @@ sub rebuildUser {
 		}
 	}
 
-	for (@$second) {
-		if ($_->{type} eq 'fof') {
+	my $list = join (',', @friends);
+	$data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
+	for (@$data) {
+		if ($_->{type} eq 'friend') {
 			$people->{FOF()}{$_->{person}}{$_->{friend}} = 1;
-		} elsif ($_->{type} eq 'eof') {
+		} elsif ($_->{type} eq 'foe') {
 			$people->{EOF()}{$_->{person}}{$_->{friend}} = 1;
 		}
 	}

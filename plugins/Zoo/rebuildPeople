@@ -28,7 +28,7 @@ $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 
 # First clean up fans/freaks
-$slashdb->sqlDo("UPDATE people SET perceive=NULL";
+$slashdb->sqlDo("UPDATE people SET perceive=NULL");
 $slashdb->sqlDo("DELETE FROM people WHERE type IS NULL");
 
 # Put in blanks
@@ -44,48 +44,15 @@ $slashdb->sqlDo("source /tmp/rebuildpeople-fan.sql");
 $slashdb->sqlDo(qq|SELECT CONCAT("UPDATE people SET perceive='freak' WHERE uid =", person, " AND person =", uid, ";") INTO OUTFILE '/tmp/rebuildpeople-freak.sql' FROM people WHERE type='foe'|);
 $slashdb->sqlDo("source /tmp/rebuildpeople-freak.sql");
 
-$slashdb->sqlDo("TRUNCATE people_nthdegree");
-print "Cleaned nthdegree!\n";
-my $sth = $slashdb->sqlSelectMany("uid, person, type", "people");
-my $count = 0;
-my $rows = $sth->rows;
-while (my $row = $sth->fetchrow_arrayref) {
-	$count++;
-	if ($row->[2] eq 'foe') {
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $row->[1], $row->[0], 'eof' from people WHERE uid=$row->[0] AND type='friend' AND person != $row->[1] AND person != $row->[0]");
-	} elsif ($row->[2] eq 'friend') {
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $row->[1], $row->[0], 'fof' from people WHERE uid=$row->[0] AND type='friend' AND person != $row->[1]  AND person != $row->[0]");
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $row->[0], person, $row->[1], 'fof' from people WHERE uid=$row->[1] AND type='friend' AND $row->[0] != person  AND person != $row->[1]");
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $row->[0], person, $row->[1], 'eof' from people WHERE uid=$row->[1] AND type='foe' AND $row->[0] != person  AND person != $row->[1]");
-	}
-	print "$count out of $rows\n" if $count < 1000 && (($count % 100) == 0);
-	print "$count out of $rows\n" if $count < 10000 && (($count % 1000) == 0);
-	print "$count out of $rows\n" if (($count % 10000) == 0);
-}
-# See, if we only used MySQL 4.X I would just do a UNION :)
-my $people = $slashdb->sqlSelectAll('DISTINCT uid', 'people');
-my $people2 = $slashdb->sqlSelectAll('DISTINCT uid', 'people_nthdegree');
-
-my %people;
-
-for (@$people) {
-	$people{$_->[0]} = 1;
-}
-for (@$people2) {
-	$people{$_->[0]} = 1;
-}
-
-my @people = keys %people;
+# 
+my $people = $slashdb->sqlSelectColArrayref('DISTINCT uid', 'people');
 
 my $zoo = getObject("Slash::Zoo");
-for (@people) {
+for (@$people) {
 	my $people = $zoo->rebuildUser($_);
 	$slashdb->setUser($_, { people => $people});
 
 }
-
-$slashdb->sqlUpdate('vars', { -value => 'now()'}, 'name="zoo_timer"');
-
 
 sub usage {
 	print "*** $_[0]\n" if $_[0];
