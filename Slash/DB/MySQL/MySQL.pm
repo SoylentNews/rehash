@@ -2384,8 +2384,16 @@ sub getAuthorDescription {
 # may return 0 sometimes.
 sub isPollOpen {
 	my($self, $qid) = @_;
+        return 0 unless $self->hasPollActivated($qid);
 	return 1;
 }
+
+#####################################################
+sub hasPollActivated{
+	my ($self, $qid) = @_;
+        return $self->sqlCount("pollquestions","qid='$qid' and date <= now()");
+}
+
 
 ########################################################
 # Has this "user" already voted in a particular poll?  "User" here is
@@ -2427,6 +2435,7 @@ sub savePollQuestion {
 	$poll->{section}  ||= getCurrentStatic('defaultsection');
 	$poll->{voters}   ||= "0";
 	$poll->{autopoll} ||= "no";
+	$poll->{polltype} ||= "section";
 
 	my $qid_quoted = "";
 	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
@@ -2441,7 +2450,8 @@ sub savePollQuestion {
 			topic		=> $poll->{topic},
 			autopoll	=> $poll->{autopoll},
 			section		=> $poll->{section},
-			-date		=>'now()'
+			date		=> $poll->{date},
+                        polltype        => $poll->{polltype}
 		}, "qid	= $qid_quoted");
 		$self->sqlUpdate("stories", {
 			qid		=> $poll->{qid}
@@ -2454,7 +2464,8 @@ sub savePollQuestion {
 			section		=> $poll->{section},
 			autopoll	=> $poll->{autopoll},
 			uid		=> getCurrentUser('uid'),
-			-date		=>'now()'
+			date		=> $poll->{date},
+                        polltype        => $poll->{polltype}
 		});
 		$poll->{qid} = $self->getLastInsertId();
 		$qid_quoted = $self->sqlQuote($poll->{qid});
@@ -2486,7 +2497,8 @@ sub savePollQuestion {
 	$self->sqlUpdate('sections', { qid => ''}, " qid = $poll->{qid} ")	
 		if ($poll->{qid});
 
-	if ($poll->{qid} && $poll->{currentqid}) {
+	
+	if ($poll->{qid} && $poll->{polltype} eq "section" && $poll->{date} le $self->getTime()) {
 		$self->setSection($poll->{section}, { qid => $poll->{qid} });
 	}
 
@@ -2544,6 +2556,8 @@ sub getPollQuestionList {
 		if $other->{section};
 	$where .= sprintf ' AND section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
+        $where .= " AND date <= NOW() ";
+
 
 	my $questions = $self->sqlSelectAll(
 		'qid, question, date, voters, commentcount',
