@@ -63,163 +63,51 @@ sub getRelationships {
 	return $rel;
 }
 
-sub getFriends {
-	_get(@_, "friend");
-}
-
-sub getFof {
-	_getAssociation(@_, "fof");
-}
-
-sub getEof {
-	_getAssociation(@_, "eof");
-}
-
+# Get the details for relationships
 sub getFriendsUIDs {
-	_getUIDs(@_, "friend");
-}
+	my ($self, $uid) = @_;
 
-sub getFriendsConsideredUIDs {
-	_getConsiderUIDs(@_, "friend");
-}
-
-sub getFoes {
-	_get(@_, "foe");
-}
-
-sub getFoesUIDs {
-	_getUIDs(@_, "foe");
-}
-
-sub getFreaks {
-	my ($self) = @_;
-	_getOpposite(@_, "foe");
-}
-
-sub getFans {
-	_getOpposite(@_, "friend");
-}
-
-sub getAll {
-	my($self, $uid, $type) = @_;
-
-	my $people = $self->sqlSelectAll(
-		'users.uid, nickname',
-		'people, users',
-		"people.uid = $uid AND person = users.uid",
-		" ORDER BY nickname "
-	);
-	return $people;
-}
-
-sub countFriends {
-	my($self, $uid) = @_;
-	$self->sqlCount('people', "type='friend'  AND uid = $uid");
-}
-
-sub countFoes {
-	my($self, $uid) = @_;
-	$self->sqlCount('people', "type='foe' AND uid = $uid");
-}
-
-sub count {
-	my($self, $uid) = @_;
-	$self->sqlCount('people', "uid = $uid AND type is not NULL");
-}
-
-sub _get {
-	my($self, $uid, $type) = @_;
-
-	my $people = $self->sqlSelectAll(
-		'users.uid, nickname, journal_last_entry_date',
-		'people, users',
-		"people.uid = $uid AND type =\"$type\" AND person = users.uid",
-		" ORDER BY nickname "
-	);
-	return $people;
-}
-
-sub _getAssociation {
-	my($self, $uid, $type) = @_;
-
-	my $people = $self->sqlSelectAll(
-		'users.uid, nickname, journal_last_entry_date',
-		'people, users',
-		"people.uid = $uid AND $type > 0 AND person = users.uid",
-		" ORDER BY nickname "
-	);
-	return $people;
-}
-
-sub _getUIDs {
-	my($self, $uid, $type) = @_;
-
-	my $people = $self->sqlSelectColArrayref(
-		'person',
-		'people',
-		"people.uid = $uid AND type ='$type' "
-	);
-	return $people;
-}
-
-sub _getConsiderUIDs {
-	my($self, $uid, $type) = @_;
-
-	my $people = $self->sqlSelectColArrayref(
-		'uid',
-		'people',
-		"people.person = $uid AND type ='$type' "
-	);
-	return $people;
-}
-
-# Still in my brain, this is left as a note -Brian
-# This has a special reason for existing. Right now we
-# can easily fetch info on friends and foes. Future
-# features though will not have as easy of a time.
-#sub getFriendInfo {
-#	my($self, $people) = @_;
-#
-#	my $info = $self->sqlSelectAll(
-#		'uid, nickname, journal_last_entry_date',
-#		'users',
-#		"uid IN (" . join(",", map { $_->[0] } @$people) . ")"
-#		 ) if @$people;
-#
-#	return $info;
-#}
-
-sub _getOpposite {
-	my($self, $uid, $type) = @_;
-
-	my $people = $self->sqlSelectAll(
-		'people.uid, nickname, journal_last_entry_date',
-		'people, users',
-		"person = $uid AND type =\"$type\" AND users.uid = people.uid",
-		" ORDER BY nickname "
-	);
-	return $people;
+	my $slashdb = getCurrentDB();
+	my $user = getCurrentUser();
+	my $people = $slashdb->getUser($uid, 'people');
+	if ($uid == $uid) {
+		$people = $user->{people};
+	} else {
+		$people = $slashdb->getUser($uid, 'people');
+	}
+	my @people = keys %{$people->{FRIEND()}};
+	return \@people;
 }
 
 sub setFriend {
+	my($self, $uid, $person) = @_;
 	_set(@_, 'friend', FRIEND);
+	$self->sqlDo("INSERT people_nthdegree SELECT person, $person, $uid, 'fof' from people WHERE uid=$uid AND type='friend' AND person != $person  AND person != $uid");
+	$self->sqlDo("INSERT people_nthdegree SELECT $uid, person, $person, 'fof' from people WHERE uid=$person AND type='friend' AND $uid != person  AND person != $person");
+	$self->sqlDo("INSERT people_nthdegree SELECT $uid, person, $person, 'eof' from people WHERE uid=$person AND type='foe' AND $uid != person  AND person != $person");
 }
 
 sub setFoe {
+	my($self, $uid, $person) = @_;
 	_set(@_, 'foe', FOE);
+	$self->sqlDo("INSERT people_nthdegree SELECT person, $person, $uid, 'eof' from people WHERE uid=$uid AND type='friend' AND person != $person AND person != $uid");
 }
 
 sub _set {
 	my($self, $uid, $person, $type, $const) = @_;
 	my $slashdb = getCurrentDB();
 
+	# Lets see if we need to wipe out a relationship first....
+	my $current_standing = $self->sqlSelectHashref('uid, type', 'people', "uid = $uid AND person = $person");
+	# We need to check to see if type has value to make sure we are not looking at fan or freak
+	$self->delete($uid, $person, $current_standing->{type})
+		if ($current_standing && $current_standing->{type});
 	# First we do the main person
-	if ($self->sqlSelect('uid', 'people', "uid = $uid AND person = $person")) {
+	if ($current_standing && $current_standing->{uid}) {
 		$self->sqlUpdate('people', { type => $type }, "uid = $uid AND person = $person");
 	} else {
 		$self->sqlInsert('people', { uid => $uid,  person => $person, type => $type });
 	}
-	$self->sqlInsert('people_log', { uid => $uid,  person => $person, type => $type, action => 'add' });
 	my $people = $slashdb->getUser($uid, 'people');
 	# First we clean up, then we reapply
 	delete $people->{FRIEND()}{$person};
@@ -244,77 +132,6 @@ sub _set {
 
 }
 
-sub addFof {
-	my($self, $uid, $person, $original) = @_;
-	my $slashdb = getCurrentDB();
-
-	# First we do the main person
-	if ($self->sqlSelect('uid', 'people', "uid = $uid AND person = $person")) {
-		$self->sqlUpdate('people', { -fof => "fof+1" }, "uid = $uid AND person = $person");
-	} else {
-		$self->sqlInsert('people', { uid => $uid,  person => $person, fof => 1 });
-	}
-	my $people = $slashdb->getUser($uid, 'people');
-	# First we clean up, then we reapply
-	$people->{FOF()}{$person}{$original} = 1;
-	$slashdb->setUser($uid, { people => $people });
-}
-
-sub addEof {
-	my($self, $uid, $person, $original) = @_;
-	my $slashdb = getCurrentDB();
-
-	# First we do the main person
-	if ($self->sqlSelect('uid', 'people', "uid = $uid AND person = $person")) {
-		$self->sqlUpdate('people', { '-eof' => "eof+1" }, "uid = $uid AND person = $person");
-	} else {
-		$self->sqlInsert('people', { uid => $uid,  person => $person, 'eof' => 1 });
-	}
-	my $people = $slashdb->getUser($uid, 'people');
-	# First we clean up, then we reapply
-	$people->{EOF()}{$person}{$original} = 1;
-	$slashdb->setUser($uid, { people => $people });
-}
-
-sub deleteFof {
-	my($self, $uid, $person, $original) = @_;
-	my $slashdb = getCurrentDB();
-
-	# First we do the main person
-	my $number = $self->sqlSelect('fof', 'people', "uid = $uid AND person = $person");
-	if ($number <= 1) {
-		$self->sqlUpdate('people', { fof => "0" }, "uid = $uid AND person = $person");
-	} else {
-		$self->sqlUpdate('people', { -fof => "fof - 1" }, "uid = $uid AND person = $person");
-	}
-	my $people = $slashdb->getUser($uid, 'people');
-	# First we clean up
-	delete $people->{FOF()}{$person}{$original};
-	# Now delete the hash if there are no longer people pointing to it
-	delete $people->{FOF()}{$person}
-		unless (keys %{$people->{FOF()}{$person}});
-	$slashdb->setUser($uid, { people => $people });
-}
-
-sub deleteEof {
-	my($self, $uid, $person, $original) = @_;
-	my $slashdb = getCurrentDB();
-
-	# First we do the main person
-	my $number = $self->sqlSelect('eof', 'people', "uid = $uid AND person = $person");
-	if ($number <= 1) {
-		$self->sqlUpdate('people', { 'eof' => "0" }, "uid = $uid AND person = $person");
-	} else {
-		$self->sqlUpdate('people', { '-eof' => "eof - 1" }, "uid = $uid AND person = $person");
-	}
-	my $people = $slashdb->getUser($uid, 'people');
-	# First we clean up
-	delete $people->{EOF()}{$person}{$original};
-	# Now delete the hash if there are no longer people pointing to it
-	delete $people->{EOF()}{$person}
-		unless (keys %{$people->{EOF()}{$person}});
-	$slashdb->setUser($uid, { people => $people });
-}
 
 sub isFriend {
 	my($self, $uid, $friend) = @_;
@@ -340,10 +157,9 @@ sub isFoe {
 
 # This just really neutrilzes the relationship.
 sub delete {
-	my($self, $uid, $person) = @_;
-	my $type = $self->sqlSelect('type', 'people', "uid=$uid AND person=$person");
+	my($self, $uid, $person, $type) = @_;
+	$type ||= $self->sqlSelect('type', 'people', "uid=$uid AND person=$person");
 	$self->sqlDo("UPDATE people SET type=NULL WHERE uid=$uid AND person=$person");
-	$self->sqlInsert('people_log', { uid => $uid,  person => $person, type => $type, action => 'delete' });
 	my $slashdb = getCurrentDB();
 	my $people = $slashdb->getUser($uid, 'people');
 	if ($people) {
@@ -352,12 +168,19 @@ sub delete {
 		$slashdb->setUser($uid, { people => $people })
 	}
 	$self->sqlDo("UPDATE people SET perceive=NULL WHERE uid=$person AND person=$uid");
-	$people = $slashdb->getUser($person, 'people');
-	if ($people) {
-		delete $people->{FAN()}{$uid};
-		delete $people->{FREAK()}{$uid};
-		$slashdb->setUser($person, { people => $people })
+	my $other_people = $slashdb->getUser($person, 'people');
+	if ($other_people) {
+		delete $other_people->{FAN()}{$uid};
+		delete $other_people->{FREAK()}{$uid};
+		$slashdb->setUser($person, { people => $other_people })
 	}
+
+	# Only in friend situations do we worry about removing any relationships you gained -Brian
+	if ($type eq 'friend') {
+		$self->sqlDo("DELETE FROM people_nthdegree WHERE uid=$uid AND friend=$person");
+	}
+	# Now we remove any relationships we might have gained from this -Brian
+	$self->sqlDo("DELETE FROM people_nthdegree WHERE person=$person AND friend=$uid");
 }
 
 sub topFriends {
@@ -435,30 +258,51 @@ SQL
 	return $friends;
 }
 
-sub deleteZooJobs {
-	my ($self, $list) = @_;
-	my $return;
+sub getZooUsersForProcessing {
+	my ($self, $time) = @_;
+	my $people = $slashdb->sqlSelectAll('uid', 'people', "last_update > '$time' ");
+	my $people2 = $slashdb->sqlSelectAll('uid', 'people_nthdegree', "last_update > '$time' ");
 
-	if (ref($list)) {
-		$return = $self->sqlDo("DELETE FROM people_log WHERE id IN (" . join(",", @$list) . ")");
-	} else {
-		$return = $self->sqlDo("DELETE FROM people_log WHERE id = $list ");
+	my %people;
+
+	for (@$people) {
+		$people{$_->[0]} = 1;
 	}
-	if ($return) {
-		$self->{_dbh}->commit; 
-	} else {
-		$self->{_dbh}->rollback; 
+	for (@$people2) {
+		$people{$_->[0]} = 1;
 	}
-	$self->{_dbh}->{AutoCommit} = 1; 
+	my @people = keys %people;
+
+	return \@people;
 }
 
-sub getZooJobs {
-	my ($self, $limit) = @_;
-	$limit = "LIMIT $limit"
-		if $limit;
+sub rebuildUser {
+	my ($self, $uid) = @_;
+	my $first =  $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
+	my $second =  $self->sqlSelectAllHashrefArray('*', 'people_nthdegree', "uid = $uid");
+	my $people;
+	for (@$first) {
+		if ($_->{type} eq 'friend') {
+			$people->{FRIEND()} = $_->{person}; 
+		} elsif ($_->{type} eq 'foe') {
+			$people->{FOE()} = $_->{person}; 
+		}
+		if ($_->{perceive} eq 'fan') {
+			$people->{FAN()} = $_->{person}; 
+		} elsif ($_->{type} eq 'freak') {
+			$people->{FREAK()} = $_->{person}; 
+		}
+	}
 
-	$self->{_dbh}->{AutoCommit} = 0; 
-	return $self->sqlSelectAllHashrefArray('*', 'people_log', '', "ORDER BY id " . $limit);
+	for (@$second) {
+		if ($_->{type} eq 'fof') {
+			$people->{FOF()}{$_->{person}} = $_->{friend}; 
+		} elsif ($_->{type} eq 'eof') {
+			$people->{EOF()}{$_->{person}} = $_->{friend};
+		}
+	}
+
+	return $people;
 }
 
 sub DESTROY {

@@ -28,40 +28,7 @@ $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 my $zoo = getObject("Slash::Zoo");
 
-my $people;
-
-my $entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND type = 'friend'");
-for my $friend (@$entries) {
-	$people->{FRIEND()}{$friend} = 1;
-	my $fof = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $friend AND type = 'friend'");
-	for (@$fof) {
-		$people->{FOF()}{$_}{$friend} = 1;
-	}
-	my $eof = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $friend AND type = 'foe'");
-	for (@$eof) {
-		$people->{EOF()}{$_}{$friend} = 1;
-	}
-}
-
-$entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND type = 'foe'");
-for (@$entries) {
-	$people->{FOE()}{$_} = 1;
-}
-
-$entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND perceive = 'fan'");
-for (@$entries) {
-	$people->{FAN()}{$_} = 1;
-}
-
-$entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND perceive = 'freak'");
-for (@$entries) {
-	$people->{FREAK()}{$_} = 1;
-}
-
-$slashdb->setUser($opts{'U'}, { people => $people });
-
-
-
+$zoo->rebuildUser($opts{'U'});
 
 sub usage {
 	print "*** $_[0]\n" if $_[0];

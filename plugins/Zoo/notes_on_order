@@ -1,58 +1,97 @@
-Just some notes on a rewrite I was thinking about. This may give you a headache 
-if you read it. Zoo stuff is just a wee bit complicated :)
-This would not work with the current schema because we would never know who
-created the relationship in FOF/EOF (which is something we need to know). Might 
-mean splitting up the tables which wouldn't be the worst thing to happen (and in all honesty
-might make this a little more workable).
+*Out of Date*
+
+Just some notes on the rewrite. This may give you a headache 
+if you read it but give it a shot if you are curious. SQL statements 
+marked with * are the actual SQL calls that will occur.
 	-Brian
 
 Cases:
 User Marks Person as a Friend
 	Check for prior relationship, jump to neutralize and then return to here.
-	Update the User's relationship to person in the DB as friend.
-	Update the User's people hash
-	Update the person's relationship with the user with FAN
 
-	Grab users's friends
-	Increment FOF flag for these people to person
+	Update the User's and Person's relationship(see mutual)
+
+	Grab People who consider this user a friend (use for rebuild)
+		-SELECT person from people WHERE uid=$user.uid AND type='friend';
+	Create FOF flag for these people to person
+		-INSERT people_nthdegree (uid,person,friend,type) VALUES ($their_uid, $person, $user.uid, 'fof');
+	*INSERT people_nthdegree SELECT person, $person, $user.uid, 'fof' from people WHERE uid=$user.uid AND type='friend';
 
 	Grab person's friends
-	Increment FOF flag for these people in relationship to user
+		-SELECT person from people WHERE uid=$person AND type='friend';
+	Create FOF flag for these people in relationship to user
+		-INSERT people_nthdegree (uid,person,friend,type) VALUES ($user.uid, $persons_friend, $person, 'fof');
+	*INSERT people_nthdegree SELECT $user.uid, person, $person, 'fof' from people WHERE uid=$person AND type='friend'
 
 	Grab person's foes
-	Increment EOF flag for these people in relationship to user
+		-SELECT person from people WHERE uid=$person AND type='foe';
+	Create EOF flag for these people in relationship to user
+		-INSERT people_nthdegree (uid,person,friend,type) VALUES ($user.uid, $persons_friend, $person, 'eof');
+	*INSERT people_nthdegree SELECT $user.uid, person, $person, 'eof' from people WHERE uid=$person AND type='foe';
+
+
+	Rebuild User
 	Add all users to the rebuild list.
 
 User Marks User as a Foe
 	Check for prior relationship, jump to neutralize and then return to here.
-	Update the user's relationship in the DB as a foe.
-	Update the User's people hash
-	Update the person's relationship with the user with Freak
 
-	Grab users's friends
-	Increment FOF flag for these people to person
+	Update the User's and Person's relationship (see mutual)
+
+	Grab People who consider this user a friend (use for rebuild)
+		-SELECT person from people WHERE uid=$user.uid AND type='friend';
+	Create EOF flag for these people to person
+		-INSERT people_nthdegree (uid,person,friend,type) VALUES ($their_uid, $person, $user.uid, 'eof');
+	*INSERT people_nthdegree (uid,person,friend,type) VALUES SELECT person, $person, $user.uid, 'eof' from people WHERE uid=$user.uid AND type='friend';
+
+	Rebuild User
 	Add all users to the rebuild list.
 
 User Marks makes relationship Nuetral
 	Find Relationship
 	If friend:
-		Grab person's friends
-		Decrement FOF flag for these people
+		Remove all relationships created by person for user
+			-DELETE FROM people_nthdegree WHERE uid=$user.uid AND friend=$person;
 
-		Grab person's foes
-		Decrement EOF flag for these people
-		
-		Grab own Friends
-		Decrement FOF flag for these people
+		Grab People who consider this user a friend (use for rebuild)
+			-SELECT person from people WHERE uid=$user.uid AND type='friend';
+		Remove all relationships created by user for friends
+			-DELETE FROM people_nthdegree WHERE person=$person AND friend=$user.uid;
 
 		Blank Relationship
 
-		Update the User's people hash
+		Rebuild User unless subquery
 		Add all users to the rebuild list.
 
 	If foe
-		Grab own Friends
-		Decrement EOF flag for these people
-
 		Blank Relationship
+
+		Grab People who consider this user a friend (use for rebuild)
+			-SELECT person from people WHERE uid=$user.uid AND type='friend';
+		Delete EOF flag for these people to person
+			-DELETE FROM people_nthdegree WHERE person=$person AND friend=$user.uid;
+
+		Rebuild User unless subquery
 		Add all users to the rebuild list.
+
+Rebuild User:
+	SELECT person, type from people WHERE uid=$user.uid
+	for () {}
+	SELECT person, type from people_nthdegree WHERE uid=$user.uid
+	for () {}
+	setUser($uid, { people => $people };
+
+Blank Relationship
+	UPDATE people SET type=NULL WHERE uid=$user.uid AND person=$person;
+	UPDATE people SET perceive=NULL WHERE uid=$person AND person=$user.uid;
+
+Mutual
+	if ($self->sqlSelect('uid', 'people', "uid = $uid AND person = $person")) {
+		$self->sqlUpdate('people', { type => $type }, "uid = $uid AND person = $person");
+	} else {
+		$self->sqlInsert('people', { uid => $uid,  person => $person, type => $type });
+	}
+
+
+*Extending sqlInsert() to handle SELECT statements is probably a good idea (this is
+only the second time I have used them in our code but I do find them quite handy)

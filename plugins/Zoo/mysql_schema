@@ -7,6 +7,7 @@ CREATE TABLE people (
 	perceive enum("fan","freak"),
 	fof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0, 
 	eof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0,
+	last_update timestamp,
 	UNIQUE degree_of_separation (uid,person),
 	INDEX (person),
 	FOREIGN KEY (uid) REFERENCES users(uid),
@@ -14,12 +15,15 @@ CREATE TABLE people (
 	PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS people_log;
-CREATE TABLE people_log (
-	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-	uid MEDIUMINT UNSIGNED NOT NULL,
-	person MEDIUMINT UNSIGNED NOT NULL,
-	type enum("friend","foe"),
-	action enum("add","delete"),
-	PRIMARY KEY (id)
-);
+DROP TABLE IF EXISTS people_nthdegree;
+CREATE TABLE people_nthdegree (
+	uid MEDIUMINT UNSIGNED NOT NULL, /* The person who owns the relationship */
+	person MEDIUMINT UNSIGNED NOT NULL, /* Who the relationship is against */
+	friend MEDIUMINT UNSIGNED NOT NULL, /* Which friend is responsible for the relationship */
+	type enum("fof","eof"),
+	last_update timestamp,
+	UNIQUE degree_of_separation (uid,person,friend),
+	INDEX (person),
+	INDEX (uid),
+	INDEX (friend)
+) TYPE = Innodb;

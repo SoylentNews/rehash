@@ -1165,3 +1165,23 @@ ALTER TABLE comments ADD karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL;
 
 INSERT INTO vars (name, value, description) VALUES ('comment_startword_workaround','1','Should breakHtml() insert kludgy HTML to work around an MSIE bug?');
 
+# New Zoo stuff, run rebuildPeople after you install the latest code and apply these changes -Brian
+ALTER TABLE people drop	fof;
+ALTER TABLE people drop eof;
+ALTER TABLE people add	last_update timestamp;
+
+DROP TABLE IF EXISTS people_nthdegree;
+CREATE TABLE people_nthdegree (
+	uid MEDIUMINT UNSIGNED NOT NULL, /* The person who owns the relationship */
+	person MEDIUMINT UNSIGNED NOT NULL, /* Who the relationship is against */
+	friend MEDIUMINT UNSIGNED NOT NULL, /* Which friend is responsible for the relationship */
+	type enum("fof","eof"),
+	last_update timestamp,
+	UNIQUE degree_of_separation (uid,person,friend),
+	INDEX (person),
+	INDEX (uid),
+	INDEX (friend)
+) TYPE = Innodb;
+
+INSERT INTO vars (name,value,description) VALUES ('zoo_timer',now(),'Last time the Zoo task ran.');
+DROP TABLE IF EXISTS people_log;

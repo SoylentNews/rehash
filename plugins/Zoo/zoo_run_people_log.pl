@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Slash::Constants qw( :messages :slashd );
+use Slash::Constants qw( :messages :slashd :people );
 use Slash::Display;
 
 use vars qw( %task $me );
@@ -23,30 +23,14 @@ $task{$me}{code} = sub {
 	$stats->createStatDaily("zoo_counts", "0");	
 
 	slashdLog('Zoo fof/eof Begin');
-	for (1..$constants->{zoo_process_limit}) {
-		my $jobs = $zoo->getZooJobs(1);
-		for my $job (@$jobs) {
-			my $friends = $friends_cache->{$job->{uid}} ? $friends_cache->{$job->{uid}} : $zoo->getFriendsConsideredUIDs($job->{uid});
-			for(@$friends) {
-				if ($job->{type} eq 'friend') {
-					if ($job->{action} eq 'add') {
-						$zoo->addFof($_, $job->{person}, $job->{uid});
-					} else {
-						$zoo->deleteFof($_, $job->{person}, $job->{uid});
-					}
-				} else {
-					if ($job->{action} eq 'add') {
-						$zoo->addEof($_, $job->{person}, $job->{uid});
-					} else {
-						$zoo->deleteEof($_, $job->{person}, $job->{uid});
-					}
-				}
-			}
-			if($zoo->deleteZooJobs($job->{id})) {
-				$stats->updateStatDaily("zoo_counts", "value+1");	
-			}
-		}
+	my $people = $zoo->getZooUsersForProcessing($slashdb->getVar('zoo_timer'));
+	slashdLog('Zoo fof/eof Processing ' . scalar(@$people) . 'jobs');
+	# Each job represents someone who has added or removed someone as a friend/foe. -Brian
+	for my $person (@$people) {
+		$zoo->rebuildUser($person);
 	}
+	$slashdb->sqlUpdate('vars', { -value => 'now()'}, 'name="zoo_timer"');
+	$stats->updateStatDaily("zoo_counts", "value+" . @$people);	
 	slashdLog('Zoo fof/eof End');
 
 	return ;

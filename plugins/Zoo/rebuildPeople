@@ -8,6 +8,7 @@ use strict;
 use File::Basename;
 use Getopt::Std;
 use Slash;
+use Slash::DB;
 use Slash::Utility;
 use Slash::Constants ':people';
 
@@ -25,24 +26,41 @@ $opts{'u'} ||= 'slash';
 createEnvironment($opts{u});
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
-my $zoo = getObject("Slash::Zoo");
 
-$slashdb->sqlDo("UPDATE users_info SET people=NULL");
-$slashdb->sqlDo("DELETE FROM people WHERE type='' OR type IS NULL");
-$slashdb->sqlDo("DELETE FROM people_log");
-$slashdb->sqlDo("UPDATE people SET eof=0,fof=0");
-my $entries = $slashdb->sqlSelectAll('uid, person, type', 'people');
-
-my $num = @$entries;
-my $x = 0;
-for (@$entries) {
-	print "NUM " . ($x++) . " for $num \n";
-	if ($_->[2] eq 'friend') {
-		$zoo->setFriend($_->[0], $_->[1]);
-	} elsif ($_->[2] eq 'foe') {
-		$zoo->setFoe($_->[0], $_->[1]);
+my $people = $slashdb->sqlSelectAll("uid, person, type", "people");
+$slashdb->sqlDo("DELETE FROM people_nthdegree");
+for (@$people) {
+	if ($_->[2] eq 'foe') {
+		print "$_->[1] is a foe of $_->[0]\n";
+		$slashdb->sqlDo("INSERT people_nthdegree SELECT person, $_->[1], $_->[0], 'eof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1] AND person != $_->[0]");
+	} elsif ($_->[2] eq 'friend') {
+		print "$_->[1] is a friend of $_->[0]\n";
+		$slashdb->sqlDo("INSERT people_nthdegree SELECT person, $_->[1], $_->[0], 'fof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1]  AND person != $_->[0]");
+		$slashdb->sqlDo("INSERT people_nthdegree SELECT $_->[0], person, $_->[1], 'fof' from people WHERE uid=$_->[1] AND type='friend' AND $_->[0] != person  AND person != $_->[1]");
+		$slashdb->sqlDo("INSERT people_nthdegree SELECT $_->[0], person, $_->[1], 'eof' from people WHERE uid=$_->[1] AND type='foe' AND $_->[0] != person  AND person != $_->[1]");
 	}
 }
+# See, if we only used MySQL 4.X I would just do a UNION :)
+$people = $slashdb->sqlSelectAll('uid', 'people');
+my $people2 = $slashdb->sqlSelectAll('uid', 'people_nthdegree');
+
+my %people;
+
+for (@$people) {
+	$people{$_->[0]} = 1;
+}
+for (@$people2) {
+	$people{$_->[0]} = 1;
+}
+
+my @people = keys %people;
+
+my $zoo = getObject("Slash::Zoo");
+for (@people) {
+	$zoo->rebuildUser($_);
+}
+
+$slashdb->sqlUpdate('vars', { -value => 'now()'}, 'name="zoo_timer"');
 
 
 sub usage {
