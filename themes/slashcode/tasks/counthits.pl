@@ -45,7 +45,7 @@ $task{$me}{code} = sub {
                 slashdLog("Nothing to do, lastmaxid '$lastmaxid', newmaxid '$newmaxid'");
 		if ($lastmaxid > $newmaxid + 2) {
 			# Something odd is going on... this ID is off.
-			slashdErrnote("counthits_lastmaxid '$lastmaxid' is higher than it should be '$newmaxid', did accesslog maybe get rebuilt?");
+			slashdErrnote("counthits_lastmaxid '$lastmaxid' is higher than it should be '$newmaxid' -- maybe accesslog got rebuilt, or db unavailable and failover order is incorrect?");
 		}
                 return "";
         }
