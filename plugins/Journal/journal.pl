@@ -29,7 +29,7 @@ sub main {
 				$r->method('POST');
 			}
 			$user->{state}{packagename} = __PACKAGE__;
-			return SOAP::Transport::HTTP::Apache->dispatch_to('Journal')->handle;
+			return SOAP::Transport::HTTP::Apache->dispatch_to('Slash::Journal::SOAP')->handle;
 		}
 	}
 
@@ -684,7 +684,7 @@ createEnvironment();
 main();
 
 #=======================================================================
-package Journal;
+package Slash::Journal::SOAP;
 use Slash::Utility;
 
 sub modify_entry {
