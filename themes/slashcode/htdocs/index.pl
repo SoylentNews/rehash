@@ -292,6 +292,17 @@ sub displayStories {
 	# Stuff block later (simulate the old cursor-based
 	# method)
 	my $story;
+
+	# get some of our constant messages but do it just once instead
+	# of for every story
+	my $msg;
+	$msg->{readmore}=getData('readmore');
+	if($constants->{body_bytes}){
+		$msg->{bytes} = getData('bytes');
+	} else {
+		$msg->{words} = getData('words');
+	}
+	
 	while ($story = shift @$stories) {
 		my($tmpreturn, $other, @links);
 
@@ -323,7 +334,7 @@ sub displayStories {
 		$tmpreturn .= $storytext;
 	
 		push @links, linkStory({
-			'link'	=> getData('readmore'),
+			'link'	=> $msg->{readmore},
 			sid	=> $story->{sid},
 			tid	=> $story->{tid},
 			section	=> $story->{section}
@@ -333,9 +344,9 @@ sub displayStories {
 
 		if ($constants->{body_bytes}) {
 			$link = $story->{body_length} . ' ' .
-				getData('bytes');
+				$msg->{bytes};
 		} else {
-			$link = sprintf '%d %s', $story->{word_count}, getData('words');
+			$link = sprintf '%d %s', $story->{word_count}, $msg->{words};
 		}
 
 		if ($story->{body_length} || $story->{commentcount}) {

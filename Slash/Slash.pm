@@ -1475,14 +1475,42 @@ the last page visited by the user as determined by Slash::Apache::User.
 =back
 
 =cut
-
 sub getData {
 	my($value, $hashref, $page) = @_;
+	my $cache=getCurrentCache();
+	_dataCacheRefresh($cache);
+	
+	use Data::Dumper;
+	print STDERR "CACHE: ".Dumper($cache->{getdata})."\n";
+	
 	$hashref ||= {};
 	$hashref->{value} = $value;
+	$hashref->{returnme} = {};
 	my %opts = ( Return => 1, Nocomm => 1 );
 	$opts{Page} = $page || 'NONE' if defined $page;
-	return slashDisplay('data', $hashref, \%opts);
+	
+	
+	my $name=slashDisplayName('data', $hashref, {%opts,GetName=>1});
+	if(defined $cache->{getdata}{$name->{tempdata}{tpid}}{$value}){
+		return $cache->{getdata}{$name->{tempdata}{tpid}}{$value};
+	}
+	
+	my $str=slashDisplay($name, $hashref, %opts);
+	
+	if($hashref->{returnme}{data_constant}){
+		$cache->{getdata}{_last_refresh}=time() unless $cache->{getdata}{_last_refresh};
+		$cache->{getdata}{$name->{tempdata}{tpid}}{$value}=$str;
+	}
+	return $str;
+}
+
+sub _dataCacheRefresh{
+	my ($cache) = @_;
+	if($cache->{getdata}{_last_refresh} < (time() - $cache->{getdata}{_expiration})){
+		$cache->{getdata} = {};
+		$cache->{getdata}{_last_refresh} = time();
+		$cache->{getdata}{_expiration} = getCurrentStatic('block_expire');
+	}
 }
 
 ########################################################
