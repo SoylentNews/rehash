@@ -40,7 +40,7 @@ __template__
 	[% END %]
 
 	[% IF authors %]
-			[% Slash.createSelect("author", authors, form.author, 1) %]
+		[% Slash.createSelect("author", authors, form.author, 1, 0, 1) %]
 	[% END %]
 
 	[% IF threshhold %]
@@ -49,12 +49,13 @@ __template__
 	[% END %]
 
 	[% IF topics %]
-		[% Slash.createSelect("topic", topics, form.topic, 1) %]
+		[% Slash.createSelect("topic", topics, form.topic, 1, 0, 1) %]
 	[% END %]
 
 	[% IF sections %]
-		[% Slash.createSelect("section", sections, form.section, 1) %]
+		[% Slash.createSelect("section", sections, form.section, 1, 0, 1) %]
 	[% END %]
+
 	[% Slash.createSelect("sort", sort, form.sort, 1) %]
 
 	<P>
