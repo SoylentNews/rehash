@@ -405,7 +405,7 @@ sub countDaily {
 	$returnable{total} = 0;
 	for my $op (keys %$totals_op) {
 		$returnable{total} += $totals_op->{$op}{count}
-			unless $op eq 'rss';		# doesn't count in total
+			unless grep $op, $constants->{op_exclude_from_countdaily}; # doesn't count in total
 	}
 
 	my $c = $self->sqlSelectMany("COUNT(*)", "accesslog",

@@ -771,6 +771,7 @@ INSERT INTO vars (name, value, description) VALUES ('multitopics_enabled','0','w
 INSERT INTO vars (name, value, description) VALUES ('nesting_maxdepth','3','Maximum depth to which <BLOCKQUOTE>-type tags can be nested');
 INSERT INTO vars (name, value, description) VALUES ('newsletter_body','0','Print bodytext, not merely introtext, in newsletter.');
 INSERT INTO vars (name, value, description) VALUES ('noflush_accesslog','0','DO NOT flush the accesslog table, 0=Flush, 1=No Flush');
+INSERT INTO vars (name, value, description) VALUES ('op_exclude_from_countdaily','rss','Ops to omit from daily counts in adminmail');
 INSERT INTO vars (name, value, description) VALUES ('organise_stories','','organise story blocks');
 INSERT INTO vars (name, value, description) VALUES ('panic','0','0:Normal, 1:No frills, 2:Essentials only');
 INSERT INTO vars (name, value, description) VALUES ('poll_cache','0','On home page, cache and display default poll for users (if false, is extra hits to database)');

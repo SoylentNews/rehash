@@ -4559,6 +4559,7 @@ sub getSlashConf {
 		lonetags =>			[qw( P LI BR IMG )],
 		fixhrefs =>			[ ],
 		lonetags =>			[ ],
+		op_exclude_from_countdaily =>   [qw( rss )],
 		reasons =>			[qw( Normal Offtopic Flamebait Troll Redundant
 						     Insightful Interesting Informative Funny
 						     Overrated Underrated )],
