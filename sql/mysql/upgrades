@@ -301,7 +301,7 @@ INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','H
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
 #
 # Table structure for table 'subsections'
 #
@@ -326,3 +326,4 @@ ALTER TABLE stories ADD subsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
 ALTER TABLE sections DROP feature_story;
 
 # OSDN LAST UPDATED HERE
+# USEPERL LAST UPDATED HERE
