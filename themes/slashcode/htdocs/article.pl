@@ -75,7 +75,12 @@ sub main {
 		# this should really be done per-story, perhaps with article_nocomment
 		# being a default for the story editor instead of being system-wide; that feature
 		# has been begun, but doesn't work -- pudge
-		printComments($discussion) unless $constants->{article_nocomment};
+		if ($constants->{article_nocomment}) {
+			# to do the error channel
+			Slash::selectComments($discussion, 0) if $form->{ssi};
+		} else {
+			printComments($discussion);
+		}
 	} else {
 		my $message = getData('no_such_sid');
 		header($message, $form->{section});
