@@ -7,6 +7,7 @@
 use Slash::Constants ':slashd';
 
 use strict;
+use Time::HiRes;
 
 use Compress::Zlib;
 
@@ -17,6 +18,11 @@ $task{$me}{timespec_panic_1} = '';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
+
+	my $cpu_percent_target = $constants->{dilemma_cpu_percent_target} || 50;
+	$cpu_percent_target = 50 if $cpu_percent_target < 0 || $cpu_percent_target > 100;
+	my $cpu_fraction_target = $cpu_percent_target / 100;
+	my $wait_factor = 1/$cpu_fraction_target - 1;
 
 	my $dilemma_reader = getObject('Slash::Dilemma', { db_type => 'reader' });
 	my $dilemma_db = getObject('Slash::Dilemma');
@@ -47,11 +53,13 @@ $task{$me}{code} = sub {
 
 		for (1..$n_meets) {
 			my $players = $dilemma_reader->getUniqueRandomAgents(2);
+			my $start_meet = Time::HiRes::time;
 			my $meeting_hr = {
 				daids =>	$players,
 				foodsize =>	$food_per_interaction,
 			};
 			$dilemma_db->agentsMeet($meeting_hr, $dilemma_info);
+			cpu_sleep($start_meet, $wait_factor);
 		}
 		my $still_running = $dilemma_db->doTickHousekeeping();
 		last unless $still_running;
@@ -114,6 +122,15 @@ $task{$me}{code} = sub {
 sub _set_legend {
 	my($gd, $legend) = @_;
 	$gd->set_legend(@$legend);
+}
+
+sub cpu_sleep {
+	my($start_time, $wait_factor) = @_;
+	my $elapsed = Time::HiRes::time - $start_time;
+	my $sleep_time = $elapsed * $wait_factor;
+	return unless $sleep_time > 0;
+	$sleep_time = 5 if $sleep_time > 5;
+	Time::HiRes::sleep($sleep_time);
 }
 
 sub do_logdatadump {
