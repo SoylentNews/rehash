@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$Bundle::Slash::VERSION = '2.13';
+$Bundle::Slash::VERSION = '2.30';
 
 1;
 
@@ -49,7 +49,7 @@ DBI
 
 Data::ShowTable
 
-J/JW/JWIED/Msql-Mysql-modules-1.2216.tar.gz    - instead of Bundle::DBD::mysql (Data::ShowTable)
+J/JW/JWIED/Msql-Mysql-modules-1.2219.tar.gz    - instead of Bundle::DBD::mysql (Data::ShowTable)
 
 DBIx::Password
 
@@ -76,6 +76,8 @@ Time::HiRes
 Date::Parse		- TimeDate
 
 Date::Manip             - Still needed, but not for long
+
+Date::Calc
 
 Time::ParseDate         - Time-modules; Needed for Schedule::Cron
 
