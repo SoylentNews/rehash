@@ -174,7 +174,7 @@ sub main {
 			# is being called by slashd, and we need to write
 			# that file, then here's where we print an empty
 			# file that will satisfy slashd. - Jamie
-			Slash::_print_cchp({ sid => "dummy" });
+			Slash::_print_cchp({ stoid => "dummy" });
 		}
 	} else {
 		header('Error', $form->{section}) or return;
