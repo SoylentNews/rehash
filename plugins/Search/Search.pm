@@ -79,8 +79,12 @@ sub findComments {
 			$where .= "     AND discussions.id=" . $self->sqlQuote($form->{sid})
 		}
 	}
-	$where .= "     AND points >= " .  $self->sqlQuote($form->{threshold})
-			if defined($form->{threshold});
+	if(defined $form->{threshold}){
+		my $threshold   = $form->{threshold};
+		my $threshold_q = $self->sqlQuote($threshold);
+		$where .= " AND GREATEST((points + tweak), $constants->{comment_minscore}) >= $threshold_q ";
+		
+	}
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $SECT = $reader->getSection($form->{section});
