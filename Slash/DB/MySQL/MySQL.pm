@@ -100,10 +100,10 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('topics.tid as tid,topics.alttext as alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid AND type= '$_[3]'") },
 
 	'section_subsection'
-		=> sub { $_[0]->sqlSelectMany('id,title', 'subsections', "section='$_[2]'") },
+		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.title', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]->sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
 
 	'section_subsection_names'
-		=> sub { $_[0]->sqlSelectMany('title,id', 'subsections', "section='$_[2]'") },
+		=> sub { $_[0]->sqlSelectMany('subsections.title, subsections.id', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]>sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
 
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
@@ -1858,25 +1858,25 @@ sub createSubSection {
 
 	$self->sqlInsert('subsections', {
 		title		=> $subsection,
-		section		=> $section,
 		artcount	=> $artcount || 0,
 	});
 }
 
 ########################################################
+# This is a really dumb method, I hope I am not to blame (I don't think I am though...) -Brian
 sub removeSubSection {
-	my($self, $section, $subsection) = @_;
-
-	my $where;
-	if ($subsection =~ /^\d+$/) {
-		$where = 'id=' . $self->sqlQuote($subsection);
-	} else {
-		$where = sprintf 'name=%s AND title=%s',
-			$self->sqlQuote($section),
-			$self->sqlQuote($subsection);
-	}
-
-	$self->sqlDelete('subsections', $where);
+#	my($self, $section, $subsection) = @_;
+#
+#	my $where;
+#	if ($subsection =~ /^\d+$/) {
+#		$where = 'id=' . $self->sqlQuote($subsection);
+#	} else {
+#		$where = sprintf 'name=%s AND title=%s',
+#			$self->sqlQuote($section),
+#			$self->sqlQuote($subsection);
+#	}
+#
+#	$self->sqlDelete('subsections', $where);
 }
 
 ########################################################
@@ -5957,8 +5957,8 @@ sub getSubSectionsBySection {
 
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'*',
-		'subsections',
-		'section=' . $self->sqlQuote($section)
+		'section_subsections, subsections',
+		'section_subsections.section=' . $self->sqlQuote($section) . ' AND subsections.id = section_subsections.subsection'
 	);
 
 	return $answer;

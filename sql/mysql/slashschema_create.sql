@@ -553,6 +553,19 @@ CREATE TABLE section_extras (
 	PRIMARY KEY (param_id)
 ) TYPE = myisam;
 
+#
+# Table structure for table 'section_subsections'
+#
+
+DROP TABLE IF EXISTS section_subsections;
+CREATE TABLE section_subsections (
+	section varchar(30) NOT NULL,
+	subsection smallint UNSIGNED NOT NULL,
+	FOREIGN KEY (section) REFERENCES sections(section),
+	FOREIGN KEY (subsection) REFERENCES subsections(subsection),
+	PRIMARY KEY (section,subsection)
+) TYPE = myisam;
+
 
 #
 # Table structure for table 'section_topics'
@@ -576,10 +589,9 @@ DROP TABLE IF EXISTS subsections;
 CREATE TABLE subsections (
 	id smallint UNSIGNED NOT NULL auto_increment,
 	title varchar(30) NOT NULL,
-	section varchar(30) NOT NULL,
 	artcount mediumint DEFAULT '30' NOT NULL,
 	alttext varchar(40) NOT NULL,
-	UNIQUE code_key (title,section),
+	UNIQUE code_key (title),
 	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
