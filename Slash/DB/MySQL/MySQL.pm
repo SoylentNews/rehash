@@ -6947,8 +6947,16 @@ sub createStory {
 		}
 	}
 	if (!$error) {
-		my $storyskin = $self->getSkin($story->{primaryskid});
-		my $rootdir = $storyskin->{rootdir};
+		my $rootdir;
+		if ($story->{primaryskid}) {
+			my $storyskin = $self->getSkin($story->{primaryskid});
+			$rootdir = $storyskin->{rootdir};
+		} else {
+			# The story is set never-display so its discussion's rootdir
+			# probably doesn't matter.  Just go with the default.
+			my $storyskin = $self->getSkin($comments->{mainpage_skid});
+			$rootdir = $storyskin->{rootdir};
+		}
 		my $comment_codes = $self->getDescriptions("commentcodes");
 
 		my $discussion = {
