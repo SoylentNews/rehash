@@ -4577,7 +4577,7 @@ sub getCommentReply {
 		"date,date as time,subject,comments.points as points,
 		comment_text.comment as comment,realname,nickname,
 		fakeemail,homepage,comments.cid as cid,sid,
-		users.uid as uid",
+		users.uid as uid,reason",
 		"comments,comment_text,users,users_info,users_comments",
 		"sid=$sid_quoted
 		AND comments.cid=$pid
