@@ -61,7 +61,6 @@ $task{$me}{code} = sub {
 		"GROUP BY val"
 	);
 	my $modlog_total = $modlog_hr->{1}{count} + $modlog_hr->{-1}{count};
-	my $mm_factor = ($modlog_rows ? $metamodlog_rows/$modlog_rows : 0);
 
 	# Count comments posted yesterday... using a primary key,
 	# if it'll save us a table scan.  On Slashdot this cuts the
@@ -80,34 +79,55 @@ $task{$me}{code} = sub {
 		"$cid_limit_clause date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'"
 	);
 
-	my $modlog_text = sprintf(<<"EOT", $accesslog_rows, $formkeys_rows, $modlog_rows, $metamodlog_rows, $mm_factor, $mod_points, $modlog_total, ($mod_points ? $modlog_total*100/$mod_points : 0), $modlog_hr->{-1}{count}, $modlog_hr->{1}{count}, $comments);
- accesslog: %7d rows total
-  formkeys: %7d rows total
-    modlog: %7d rows total
-metamodlog: %7d rows total (%.1fx)
-mod points: %7d in system
-used total: %7d yesterday (%.1f%%)
-   used -1: %7d yesterday
-   used +1: %7d yesterday
-  comments: %7d posted yesterday
-EOT
-
-	my $email = <<EOT;
+	my @numbers = (
+		$count->{total},
+		$count->{unique},
+		$count->{unique_users},
+		$accesslog_rows,
+		$formkeys_rows,
+		$modlog_rows,
+		$metamodlog_rows,
+			($modlog_rows  ? $metamodlog_rows/$modlog_rows : 0),
+		$mod_points,
+		$modlog_total,
+			($mod_points   ? $modlog_total*100/$mod_points : 0),
+			($comments     ? $modlog_total*100/$comments   : 0),
+		$modlog_hr->{-1}{count},
+			($modlog_total ? $modlog_hr->{-1}{count}*100
+						/$modlog_total         : 0),
+		$modlog_hr->{1}{count},
+			($modlog_total ? $modlog_hr->{1}{count}*100
+						/$modlog_total         : 0),
+		$comments,
+		$sdTotalHits,
+		$count->{index}{index},
+		$count->{journals},
+	);
+	my $email = sprintf(<<"EOT", @numbers);
 $constants->{sitename} Stats for yesterday
 
-     total: $count->{'total'}
-    unique: $count->{'unique'}
-     users: $count->{'unique_users'}
+     total: %8d
+    unique: %8d
+     users: %8d
+  
+ accesslog: %8d rows total
+  formkeys: %8d rows total
+    modlog: %8d rows total
+metamodlog: %8d rows total (%.1fx modlog)
+mod points: %8d in pool
+used total: %8d yesterday (%.1f%% of pool, %.1f%% of comments)
+   used -1: %8d yesterday (%.1f%%)
+   used +1: %8d yesterday (%.1f%%)
+  comments: %8d posted yesterday
 
-$modlog_text
-total hits: $sdTotalHits
-  homepage: $count->{'index'}{'index'}
-  journals: $count->{'journals'}
+total hits: %8d
+  homepage: %8d
+  journals: %8d
    indexes
 EOT
 
-	for (keys %{$count->{'index'}}) {
-		$email .= "\t   $_=$count->{'index'}{$_}\n"
+	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
+		$email .= "\t   $_=$count->{index}{$_}\n"
 	}
 
 	$email .= "\n-----------------------\n";
