@@ -3826,19 +3826,25 @@ sub checkForOpenProxy {
 	local $_proxy_port = undef;
 	sub _cfop_callback {
 		my($data, $response, $protocol) = @_;
-		if ($response->is_success()
-			&& $response->content() =~ /\bok\b/) {
-			# We got one success;  the IP is a proxy;
-			# we can quit listening on any of the
+#print STDERR scalar(localtime) . " _cfop_callback protocol '$protocol' port '$_proxy_port' succ '" . ($response->is_success()) . "' data '$data' content '" . ($response->is_success() ? $response->content() : "(fail)") . "'\n";
+		if ($response->is_success() && $data eq "ok\n") {
+			# We got a success, so the IP is a proxy.
+			# We should know the proxy's port at this
+			# point;  if not, that's remarkable, so
+			# print an error.
+			my $orig_req = $response->request();
+			$_proxy_port = $orig_req->{_slash_proxytest_port};
+			if (!$_proxy_port) {
+				print STDERR scalar(localtime) . " _cfop_callback got data but false port, protocol '$protocol' port '$_proxy_port' succ '" . ($response->is_success()) . "' data '$data' content '" . $response->content() . "'\n";
+			}
+			$_proxy_port ||= 1;
+			# We can quit listening on any of the
 			# other ports that may have connected,
 			# returning immediately from the wait().
 			# So we want to return C_ENDALL.  Except
 			# C_ENDALL doesn't seem to _work_, it
 			# crashes in _remove_current_connection.
 			# Argh.  So we use C_LASTCON.
-			my $orig_req = $response->request();
-			$_proxy_port = $orig_req->{_slash_proxytest_port} || 1;
-#print STDERR scalar(localtime) . " _cfop_callback protocol '$protocol' port '$_proxy_port' succ '" . $response->is_success() . "'\n";
 			return LWP::Parallel::UserAgent::C_LASTCON;
 		}
 #print STDERR scalar(localtime) . " _cfop_callback protocol '$protocol' succ '0'\n";
