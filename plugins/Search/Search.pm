@@ -161,7 +161,7 @@ sub findComments {
 #}
 
 ####################################################################################
-# I am beginnign to hate all the options.
+# I am beginning to hate all the options.
 sub findUsers {
 	my($self, $form, $start, $limit, $sort, $with_journal) = @_;
 	# userSearch REALLY doesn't need to be ordered by keyword since you
@@ -544,7 +544,7 @@ sub _cleanQuery {
 	my ($self, $query) = @_;
 	# This next line could be removed -Brian
 	# get rid of bad characters
-	$query =~ s/[^A-Z0-9'. :\/]/ /gi;
+	$query =~ s/[^A-Z0-9'. :\/_]/ /gi;
 
 	# This should be configurable -Brian
 	# truncate query length
