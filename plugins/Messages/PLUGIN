@@ -6,6 +6,7 @@ mysql_dump=dump
 htdoc=messages.pl
 task=message_delete.pl
 task=message_delivery.pl
+template=templates/badpassword_msg;misc;default
 template=templates/commnew;comments;default
 template=templates/commnew_sub;comments;default
 template=templates/dailyheadlines;messages;default
