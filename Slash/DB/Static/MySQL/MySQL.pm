@@ -1187,11 +1187,16 @@ sub setSlashdStatus {
 		"task=" . $self->sqlQuote($taskname)
 	);
 }
+
 ########################################################
 sub countPollQuestion {
 	my($self, $qid) = @_;
-	my $answer = $slashdb->sqlSelect("SUM(votes)", "pollanswers","qid = $qid","GROUP BY qid");
-	
+	my $answer = $self->sqlSelect(
+		"SUM(votes)",
+		"pollanswers",
+		"qid = $qid",
+		"GROUP BY qid");
+
 	return $answer;
 }
 
