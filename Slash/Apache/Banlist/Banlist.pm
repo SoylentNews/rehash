@@ -23,6 +23,8 @@ sub handler {
 
 	return DECLINED unless $r->is_main;
 
+	$Slash::Apache::User::request_start_time ||= Time::HiRes::time;
+
 	# Ok, this will make it so that we can reliably use Apache->request
 	Apache->request($r);
 	my $hostip = $r->connection->remote_ip;
@@ -51,6 +53,7 @@ print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . 
 	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
 		# Send a special "you are banned" page if the user is
 		# hitting RSS.
+print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . $r->uri . " returning FORBIDDEN for ipid '$banlist->{$cur_ipid}'\n";
 		return _send_rss($r, 'ban') if $is_rss;
 		# Send our usual "you are banned" page, whether the user
 		# is on palm or not.  It's mostly text so palm users

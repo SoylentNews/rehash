@@ -2682,7 +2682,8 @@ sub getUserAdmin {
 	$id ||= $user->{uid};
 
 	my($expired, $uidstruct, $readonly);
-	my($user_edit, $user_editfield, $ipstruct, $ipstruct_order, $authors, $author_flag, $topabusers, $thresh_select,$section_select, $accesshits);
+	my($user_edit, $user_editfield, $ipstruct, $ipstruct_order, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
+	my @accesshits;
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my $accesslist;
@@ -2695,7 +2696,7 @@ sub getUserAdmin {
 		$user_editfield = $user_edit->{uid};
 		$expired = $reader->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
-		$accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{uid}) if defined($logdb);
+		@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{uid}) if defined($logdb);
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'nickname') {
@@ -2703,7 +2704,7 @@ sub getUserAdmin {
 		$user_editfield = $user_edit->{nickname};
 		$expired = $reader->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
-		$accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
+		@accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'md5id') {
@@ -2711,10 +2712,10 @@ sub getUserAdmin {
 		$user_edit->{md5id} = $id;
 		if ($form->{fieldname} and $form->{fieldname} =~ /^(ipid|subnetid)$/) {
 			$uidstruct = $reader->getUIDStruct($form->{fieldname}, $user_edit->{md5id});
-			$accesshits = $logdb->countAccessLogHitsInLastX($form->{fieldname}, $user_edit->{md5id}) if defined($logdb);
+			@accesshits = $logdb->countAccessLogHitsInLastX($form->{fieldname}, $user_edit->{md5id}) if defined($logdb);
 		} else {
 			$uidstruct = $reader->getUIDStruct('md5id', $user_edit->{md5id});
-			$accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{md5id}) if defined($logdb);
+			@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{md5id}) if defined($logdb);
 		}
 
 	} elsif ($field eq 'ipid') {
@@ -2722,7 +2723,7 @@ sub getUserAdmin {
 		$user_edit->{ipid} = $id;
 		$user_editfield = $id;
 		$uidstruct = $reader->getUIDStruct('ipid', $user_edit->{ipid});
-		$accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
+		@accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
@@ -2735,16 +2736,14 @@ sub getUserAdmin {
 
 		$user_editfield = $id;
 		$uidstruct = $reader->getUIDStruct('subnetid', $user_edit->{subnetid});
-		$accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{subnetid}) if defined($logdb);
+		@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{subnetid}) if defined($logdb);
 
 	} else {
 		$user_edit = $id ? $reader->getUser($id) : $user;
 		$user_editfield = $user_edit->{uid};
 		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
-		$accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
+		@accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
 	}
-
-	$accesshits ||= 0;
 
 	for my $access_type (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
 		$accesslist->{$access_type} = "";
@@ -2803,7 +2802,7 @@ sub getUserAdmin {
 		ipstruct		=> $ipstruct,
 		ipstruct_order		=> $ipstruct_order,
 		uidstruct		=> $uidstruct,
-		accesshits		=> $accesshits,
+		accesshits		=> \@accesshits,
 		seclev_field		=> $seclev_field,
 		expired 		=> $expired,
 		topabusers		=> $topabusers,

@@ -52,7 +52,7 @@ sub handler {
 
 	return DECLINED unless $r->is_main;
 
-	$request_start_time = Time::HiRes::time;
+	$request_start_time ||= Time::HiRes::time;
 
 	# Ok, this will make it so that we can reliably use Apache->request
 	Apache->request($r);
