@@ -32,6 +32,11 @@ sub main {
 		content_type	=> $data->{content_type},
 		filename	=> $data->{filename},
 		do_etag		=> 1,
+		dis_type	=> 'inline',	# best to default to inline,
+						# users can choose to download
+						# if they wish, and most file
+						# types will auto-download anyway,
+						# even if set to inline
 		content		=> $data->{data}
 	});
 }

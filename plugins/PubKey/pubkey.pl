@@ -31,6 +31,7 @@ sub main {
 		content_type	=> 'text/plain',
 		filename	=> "pubkey-$uid.asc",
 		do_etag		=> 1,
+		dis_type	=> 'inline',
 		content		=> $content
 	});
 }

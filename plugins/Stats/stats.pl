@@ -154,8 +154,8 @@ sub csv {
 	http_send({
 		content_type	=> 'text/csv',
 		filename	=> $filename,
-		attachment	=> 1,
 		do_etag		=> 1,
+		dis_type	=> 'attachment',
 		content		=> $content
 	});
 }
@@ -198,6 +198,7 @@ sub graph {
 		content_type	=> $type,
 		filename	=> $filename,
 		do_etag		=> 1,
+		dis_type	=> 'inline',
 		content		=> $content
 	});
 }

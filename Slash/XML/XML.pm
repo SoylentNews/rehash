@@ -146,6 +146,7 @@ sub xmlDisplay {
 			content_type	=> 'text/xml',
 			filename	=> $opt->{filename},
 			etag		=> md5_hex($temp),
+			dis_type	=> 'inline',
 			content		=> $content
 		});
 	}

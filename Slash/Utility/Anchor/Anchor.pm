@@ -280,7 +280,11 @@ sub http_send {
 	if ($opt->{filename}) {
 		$opt->{filename} =~ s/[^\w_.-]/_/g;
 		my $val = "filename=$opt->{filename}";
-		$val = "attachment; $val" if $opt->{attachment};
+		# none by default, MSIE etc. had problems?
+		if ($opt->{dis_type}) {
+			$opt->{dis_type} =~ s/\W+//;
+			$val = "$opt->{dis_type}; $val";
+		}
 		$r->header_out('Content-Disposition', $val);
 	}
 
