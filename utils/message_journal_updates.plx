@@ -35,8 +35,8 @@ my $prefs = $slashdb->sqlSelectAll(<<COLS, <<TABLES, <<WHERE);
 upd.uid, upd.value, up0.value, up1.value, up2.value,
 up3.value, up4.value, up5.value, up6.value
 COLS
-users_param as upd, users_param as up0, users_param as up1, users_param as up2,
-users_param as up3, users_param as up4, users_param as up5, users_param as up6
+users_param AS upd, users_param AS up0, users_param AS up1, users_param AS up2,
+users_param AS up3, users_param AS up4, users_param AS up5, users_param AS up6
 TABLES
 upd.uid=up0.uid AND upd.uid=up1.uid AND upd.uid=up2.uid AND upd.uid=up3.uid AND
 upd.uid=up4.uid AND upd.uid=up5.uid AND upd.uid=up6.uid AND
