@@ -23,9 +23,9 @@ __template__
 [% CASE 'userhead' %]
 	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/"><FONT COLOR="#FFFFFF">Journal</FONT></A>
 
-
 [% CASE 'friendhead' %]
 	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/"><FONT COLOR="#FFFFFF">Friends</FONT></A>
+
 [% CASE 'nousers' %]
 	No users with journals found matching "[% form.nickname | strip_literal %]".
 

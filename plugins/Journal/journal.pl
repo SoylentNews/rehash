@@ -21,6 +21,16 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
+	my $r = Apache->request;
+	if ($r->header_in('SOAPAction')) {
+		require SOAP::Transport::HTTP;
+		if ($user->{state}{post}) {
+			$r->method('POST');
+		}
+		$user->{state}{packagename} = __PACKAGE__;
+		return SOAP::Transport::HTTP::Apache->dispatch_to('Journal')->handle;
+	}
+
 	# require POST and logged-in user for these ops
 	my $user_ok   = $user->{state}{post} && !$user->{is_anon};
 
@@ -105,7 +115,7 @@ sub displayFriends {
 
 	_printHead("mainhead");
 
-	my $zoo   = getObject('Slash::Zoo');
+	my $zoo = getObject('Slash::Zoo');
 	my $friends = $zoo->getFriendsWithJournals();
 	if (@$friends) {
 		slashDisplay('journalfriends', { friends => $friends });
@@ -224,6 +234,7 @@ sub displayTopRSS {
 		items	=> \@items
 	});
 }
+
 sub displayArticleFriends {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
 	my($date, $forward, $back, $nickname, $uid);
@@ -397,6 +408,7 @@ sub displayArticle {
 		forward		=> $forward,
 		show_discussion	=> (($form->{id} && !$constants->{journal_no_comments_item} && $discussion) ? 0 : 1),
 	});
+
 	if ($form->{id} && !$constants->{journal_no_comments_item} && $discussion) {
 		printComments($discussion);
 	}
@@ -529,8 +541,8 @@ sub saveArticle {
 		# create messages
 		my $messages = getObject('Slash::Messages');
 		if ($messages) {
-			my $zoo   = getObject('Slash::Zoo');
-			my $friends   = $zoo->getFriendsForMessage;
+			my $zoo = getObject('Slash::Zoo');
+			my $friends = $zoo->getFriendsForMessage;
 
 			for (@$friends) {
 				my $data = {
@@ -667,5 +679,122 @@ sub _printHead {
 
 createEnvironment();
 main();
+
+#=======================================================================
+package Journal;
+use Slash::Utility;
+
+sub modify_entry {
+	my($class, $id) = (shift, shift);
+	my $journal   = getObject('Slash::Journal');
+	my $constants = getCurrentStatic();
+	my $user      = getCurrentUser();
+	my $slashdb   = getCurrentDB();
+
+	return if $user->{is_anon};
+
+	my $entry = $journal->get($id);
+	return unless $entry->{id};
+	my $form = _save_params(1, @_) || {};
+
+	for (keys %$form) {
+		$entry->{$_} = $form->{$_} if defined $form->{$_};
+	}
+
+	no strict 'refs';
+	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
+	my $newid = $saveArticle->($journal, $constants, $user, $entry, $slashdb, 1);
+	return $newid == $id ? $id : undef;
+}
+
+sub add_entry {
+	my $class = shift;
+	my $journal   = getObject('Slash::Journal');
+	my $constants = getCurrentStatic();
+	my $user      = getCurrentUser();
+	my $slashdb   = getCurrentDB();
+
+	return if $user->{is_anon};
+
+	my $form = _save_params(0, @_) || {};
+
+	$form->{posttype} ||= $user->{posttype};
+	$form->{tid} ||= $constants->{journal_default_topic};
+
+	no strict 'refs';
+	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
+	my $id = $saveArticle->($journal, $constants, $user, $form, $slashdb, 1);
+	return $id;
+}
+
+
+sub delete_entry {
+	my($class, $id) = @_;
+	my $journal   = getObject('Slash::Journal');
+	my $user      = getCurrentUser();
+
+	return if $user->{is_anon};
+	return $journal->remove($id);
+}
+
+sub get_entry {
+	my($class, $id) = @_;
+	my $journal   = getObject('Slash::Journal');
+	my $constants = getCurrentStatic();
+	my $slashdb   = getCurrentDB();
+
+	my $entry = $journal->get($id);
+	return unless $entry->{id};
+
+	my $nickname = $slashdb->getUser($entry->{uid}, 'nickname');
+
+	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$entry->{id}/";
+	$entry->{discussion_id} = delete $entry->{'discussion'};
+	$entry->{discussion_url} = "$constants->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
+		if $entry->{discussion_id};
+	$entry->{body} = delete $entry->{article};
+	$entry->{subject} = delete $entry->{description};
+	return $entry;
+}
+
+sub get_entries {
+	my($class, $uid, $num) = @_;
+	my $journal   = getObject('Slash::Journal');
+	my $constants = getCurrentStatic();
+	my $user      = getCurrentUser();
+	my $slashdb   = getCurrentDB();
+
+	$user		= $slashdb->getUser($uid, ['nickname']) if $uid;
+	$uid		= $uid || $user->{uid};
+	my $nickname	= $user->{nickname};
+	return unless $uid;
+
+	my $articles = $journal->getsByUid($uid, 0, $num || 15);
+	my @items;
+	for my $article (@$articles) {
+		push @items, {
+			subject	=> $article->[2],
+			url	=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]/",
+			id	=> $article->[3],
+		};
+	}
+	return \@items;
+}
+
+sub _save_params {
+	my %form;
+	my $modify = shift;
+	if (!$modify && @_ == 2) {
+		@form{qw(description article)} = @_;
+	} elsif (!(@_ % 2)) {
+		my %data = @_;
+		@form{qw(description article journal_discuss posttype tid)} =
+			@data{qw(subject body discuss posttype tid)};
+	} else {
+		return;
+	}
+
+	return \%form;
+}
 
 1;
