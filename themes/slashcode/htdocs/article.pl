@@ -81,7 +81,7 @@ sub main {
 			if $story->{is_future} && !($user->{is_admin} || $user->{author});
 
 		my $pollbooth = pollbooth($story->{qid}, 1)
-			if $story->{qid};
+			if $story->{qid} and ($slashdb->hasPollActivated($story->{qid}) or $user->{is_admin}) ;
 		slashDisplay('display', {
 			poll			=> $pollbooth,
 			section			=> $SECT,
