@@ -2437,8 +2437,6 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', '
 
 # End of T_2_5_0_14, Start of T_2_5_0_15 - 2004/07/20
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_15, Start of T_2_5_0_16 - 2004/07/22
 
 # End of T_2_5_0_16, Start of T_2_5_0_17 - 2004/07/26
@@ -2451,8 +2449,6 @@ INSERT INTO vars (name, value, description) VALUES ('submission_force_default', 
 ALTER TABLE dbs ADD COLUMN weight tinyint UNSIGNED NOT NULL DEFAULT 1;
 INSERT INTO vars (name, value, description) VALUES ('debughash_getSkins','','false = no debugging; default regex = ^\d+$');
 INSERT INTO vars (name, value, description) VALUES ('debughash_getTopicTree','','false = no debugging; default regex = ^\d+$');
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_5_0_18, Start of T_2_5_0_19 - 2004/08/03
 
@@ -2488,4 +2484,9 @@ CREATE TABLE topic_param (
 
 UPDATE vars SET name='m1_pointgrant_factor_upfairratio', description='Factor of upmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' WHERE name='m1_pointgrant_factor_fairratio';
 INSERT INTO vars (name,value,description) SELECT 'm1_pointgrant_factor_downfairratio', value, 'Factor of downmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' FROM vars WHERE name='m1_pointgrant_factor_upfairratio';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_21, Start of T_2_5_0_22 - 2004/08/10
 
