@@ -51,7 +51,8 @@ __template__
 [% IF user.points %]
 		| <B>[% user.points %]</B>
 		<A HREF="[% constants.rootdir %]/moderation.shtml">
-		<FONT COLOR="[% user.fg.3 %]">moderator</FONT></A> points
+		<FONT COLOR="[% user.fg.3 %]">moderator</FONT></A>
+		point[% user.points == 1 ? '' : 's' %]
 [% END %]
 
 		| <A HREF="[% constants.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">

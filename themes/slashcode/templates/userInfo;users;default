@@ -41,7 +41,8 @@ up top there, where you can customize [% constants.sitename %],
 change your password, or just click pretty widgets to kill time.
 
 [% IF mod_flag %]
-<P>You're a moderator with [% points %] points[% IF points && lastgranted %] (expire after [% lastgranted %])[% END %]. Please read the
+<P>You're a moderator with [% points %] point[% user.points == 1 ? '' : 's' %]
+[%- IF points && lastgranted %](expire after [% lastgranted %])[% END %]. Please read the
 <A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
 before you do any moderation.<BR><P>
 [% END %]

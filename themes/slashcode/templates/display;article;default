@@ -60,7 +60,8 @@ ELSE;
 	IF user.points || user.seclev > 99;
 		M = BLOCK %]
 [% M %]<A HREF="[% constants.rootdir %]/users.pl">You</A> have moderator access and
-<B>[% user.points %]</B> points. Welcome to those of you just joining: <B>please</B>
+<B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %].
+Welcome to those of you just joining: <B>please</B>
 read the <A HREF="[% constants.rootdir %]/moderation.shtml">moderator guidelines</A>
 for instructions. (<B>updated 9.9!</B>)
 
