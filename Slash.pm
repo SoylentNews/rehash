@@ -2658,11 +2658,13 @@ sub getFormkeyId {
 	# if user logs in during submission of form, after getting
 	# formkey as AC, check formkey with user as AC
 	if ($I{query}->param('rlogin') && length($I{F}{upasswd}) > 1) {
-		$id = crypt($ENV{REMOTE_ADDR}, reverse $ENV{REMOTE_ADDR});
+		# id includes '&' to prevent uid's and IPs
+		# from potentially being the same
+		$id = '-1&' . $ENV{REMOTE_ADDR};
 	} elsif ($uid > 0) {
 		$id = $uid;
 	} else {
-		$id = crypt($ENV{REMOTE_ADDR}, reverse $ENV{REMOTE_ADDR});
+		$id = '-1&' . $ENV{REMOTE_ADDR};
 	}
 	return($id);
 }

@@ -95,6 +95,9 @@ slash-1.0.5, 2000.06.xx
 	to encode every character that is not safe or reserved,
 	according to RFC1738)
 
+*	Changed formkey to be by uid for logged in users, IP address
+	for everyone else
+
 *	Plenty of minor code cleanups
 
 
