@@ -42,7 +42,11 @@ mygraphs = [
         'Subscriber Pages',
 
 	'RSS Pages',
-	'Pages From RSS'
+	'Pages From RSS',
+	'RSS UIDS',
+	'From RSS UIDS',
+	'RSS IPIDS',
+	'From RSS IPIDS',
 	
 ];
 
@@ -306,7 +310,7 @@ SWITCH gtitle;
       PROCESS make_graph
          type      => 'lines',
          statdata  => sect_page;
-  CASE 'RSS IPIDS';
+  CASE 'From RSS IPIDS';
         avail_skins = Slash.db.getDescriptions('skins');
         sect_page = [];
         FOREACH skin = avail_skins.keys.sort;
