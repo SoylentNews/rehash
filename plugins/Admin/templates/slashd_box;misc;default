@@ -25,7 +25,7 @@ __template__
 		<B>[% task.task %]</B> <i>in progress</i><BR>
 	[% END %]
 [% ELSE %]
-	<b>no tasks in progress</b>
+	<b>no tasks in progress</b><BR>
 [% END %]
 	[% FOREACH task = tasks_last %]
 		[% task.task %] [% task.last_completed_hhmm %]<BR>

@@ -19,7 +19,7 @@ __template__
 		<th>Last Completed</th>
 		<th>Duration</th>
 		<th>Summary</th>
-		<td>Next</th>
+		<th>Next</th>
 	</tr>
 
 	[% FOREACH task = tasks.keys.sort %]
@@ -27,7 +27,7 @@ __template__
 		<td>[% task %]</td>
 		<td>[% IF tasks.$task.in_progress; "&middot;"; ELSE; "&nbsp;"; END %]</td>
 		<td>[% tasks.$task.last_completed %]</td>
-		<td>[% tasks.$task.duration %]</td>
+		<td align="right">[% tasks.$task.duration %]</td>
 		<td>[% tasks.$task.summary %]</td>
 		<td>[% tasks.$task.next_begin %]</td>
 	</tr>
