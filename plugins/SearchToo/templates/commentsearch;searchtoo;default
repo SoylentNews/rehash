@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+commentsearch
+__template__
+<p>This search covers only subjects of comments that are posted.</p>
+[% FOREACH comment=results.records %]
+	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
+	<b><a href="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</a></b>
+
+	by <a href="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname | strip_literal %]</a> on [% Slash.timeCalc(comment.date) %]<BR>
+	<font size="-1">
+	Attached to:  <a href="[% comment.url %]">[% comment.title %]</a> posted on [% Slash.timeCalc(comment.ts) %]<br>
+	[% IF comment.score %]
+		Score: [% comment.score %]<br>
+	[% END %]
+	</font>
+	<p>
+[% END %]
+[% PROCESS pagination %]
+<P>
+
+
+__seclev__
+100
+__version__
+$Id$

@@ -1,0 +1,14 @@
+MANIFEST
+Makefile.PL
+PLUGIN
+SearchToo/Classic.pm
+SearchToo/Makefile.PL
+SearchToo.pm
+dump
+searchtoo.pl
+templates/commentsearch;searchtoo;default
+templates/data;searchtoo;default
+templates/nosearch;searchtoo;default
+templates/pagination;searchtoo;default
+templates/searchform;searchtoo;default
+templates/storysearch;searchtoo;default
