@@ -42,10 +42,22 @@ __template__
 <TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
 	<TR>
 		<TD VALIGN=MIDDLE>
-		[% UNLESS user_edit.emaildisplay.defined;
-			user_edit.emaildisplay = 0; END %]
-		[% emaildisplay.${user_edit.emaildisplay} = 'CHECKED' %]
-        	<P><B>Email Display</B><BR>
+        	<P><B>Email Display</B>
+		(currently
+		[%- IF !user_edit.fakeemail; " not displayed";
+		ELSE; ": <TT>"; user_edit.fakeemail | strip_literal; "</TT>";
+		END %])<BR>
+		[% IF !user_edit.emaildisplay.defined;
+			IF user_edit.fakeemail %]
+			<i>(Your current email address was apparently set before
+			users' email addresses were forced to one of the below
+			choices. Please pick one and click Save.)</i><BR>
+			[% END;
+			user_edit.emaildisplay = 0;
+		END;
+		IF user_edit.emaildisplay.defined;
+			emaildisplay.${user_edit.emaildisplay} = 'CHECKED';
+		END %]
                 &nbsp;&nbsp;&nbsp;
 		<INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.0 %] 
 		VALUE=0>&nbsp;
@@ -58,7 +70,7 @@ __template__
                 <INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.2 %] 
 		VALUE=2>&nbsp;
                 Show your real email address without cowering behind childish
-		anonymity or obfuscation<BR>
+		anonymity or obfuscation.<BR>
 
 		<P><B>Disable Sigs</B> (strip sig quotes from comments)
 		<INPUT TYPE="CHECKBOX" NAME="nosigs"[% s_check %]>
