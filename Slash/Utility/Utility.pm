@@ -2340,7 +2340,7 @@ sub prepareUser {
 		$user->{currentPage} = 'misc';
 	}
 
-	if ($user->{seclev} >= 99) {
+	if ($user->{seclev} >= 100) {
 		$user->{is_admin} = 1;
 		my $sid;
 		#This cookie could go, and we could have session instance

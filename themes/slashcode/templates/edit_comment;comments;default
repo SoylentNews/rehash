@@ -81,7 +81,7 @@ END %]
 [% END %]
 
 	<TR><TD ALIGN="RIGHT">Subject: </TD>
-		<TD><INPUT TYPE='text' NAME='postersubj' VALUE="[% form.postersubj %]" SIZE=50 MAXLENGTH=50></TD>
+		<TD><INPUT TYPE="text" NAME="postersubj" VALUE="[% FILTER strip_attribute; form.postersubj; END %]" SIZE=50 MAXLENGTH=50></TD>
 	</TR>
 	<TR>
 		<TD ALIGN="RIGHT" VALIGN="TOP">Comment</TD>
@@ -94,10 +94,10 @@ END %]
 	<TR><TD> </TD><TD>
 
 [% IF !user.is_anon && user.karma > constants.goodkarma %]
-		<INPUT TYPE="checkbox" NAME="nobonus" VALUE="$form.nobonus"> No Score +1 Bonus
+		<INPUT TYPE="checkbox" NAME="nobonus" [% form.nobonus ? "CHECKED" : "" %]> No Score +1 Bonus
 [% do_br = 1; END;
 IF constants.allow_anonymous && user.karma > -1 && !user.is_anon %]
-		<INPUT TYPE="checkbox" NAME="postanon" VALUE="$form.postanon"> Post Anonymously
+		<INPUT TYPE="checkbox" NAME="postanon" [% form.postanon ? "CHECKED" : "" %]> Post Anonymously
 [% do_br = 1; END;
 IF do_br %]<BR>[% END %]
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">

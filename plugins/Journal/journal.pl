@@ -109,7 +109,7 @@ sub displayRSS {
 	my($form, $journal, $constants) = @_;
 	my $rss = XML::RSS->new(
 		version		=> '0.91',
-		encoding	=>'UTF-8'
+		encoding	=> $constants->{rdfencoding},
 	);
 	my $slashdb = getCurrentDB();
 

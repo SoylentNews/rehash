@@ -242,8 +242,8 @@ sub displayStories {
 			});
 
 			push @cclink, $thresh, ($cc || 0);
-			push @links, getData('comments', { cc => \@cclink });
-
+			push @links, getData('comments', { cc => \@cclink })
+				if $cc || $thresh;
 		}
 
 		if ($thissection ne $constants->{defaultsection} && !getCurrentForm('section')) {

@@ -23,21 +23,21 @@ The requested URL ([% origin %]) was not found.<p>
 [% ELSE %]
 [% SWITCH error %]
 	[% CASE 1 %]
-		<P>Someone <I>probably</I> just forgot the \"http://\" part of the URL, and you might really want to be here: <A HREF=\"[% url %]\">[% url %]</A>.
+		<P>Someone <I>probably</I> just forgot the "http://" part of the URL, and you might really want to be here: <A HREF="[% url %]">[% url %]</A>.
 	[% CASE 2 %]
-		<P>Someone <I>probably</I> just forgot the \"ftp://\" part of the URL, and you might really want to be here: <A HREF=\"[% url %]\">[% url %]</A>.
+		<P>Someone <I>probably</I> just forgot the "ftp://" part of the URL, and you might really want to be here: <A HREF="[% url %]">[% url %]</A>.
 	[% CASE 3 %]
-		<P>Someone <I>probably</I> just forgot the \"mailto:\" part of the URL, and you might really want to be here: <A HREF=\"[% url %]\">[% url %]</A>.
+		<P>Someone <I>probably</I> just forgot the "mailto:" part of the URL, and you might really want to be here: <A HREF="[% url %]">[% url %]</A>.
 	[% CASE 6 %]
-		<P>All of the older articles have been moved to /articles/older, so you probably want to be here: <A HREF=\"[% url %]\">[% url %]</A>.
+		<P>All of the older articles have been moved to /articles/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
 	[% CASE 7 %]
-		<P>All of the older features have been moved to /features/older, so you probably want to be here: <A HREF=\"[% url %]\">[% url %]</A>.
+		<P>All of the older features have been moved to /features/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
 	[% CASE 8 %]
-		<P>All of the older book reviews have been moved to /books/older, so you probably want to be here: <A HREF=\"[% url %]\">[% url %]</A>.
+		<P>All of the older book reviews have been moved to /books/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
 	[% CASE 9 %]
-		<P>All of the older Ask $constants->{sitename} articles have been moved to /askslashdot/older, so you probably want to be here: <A HREF=\"[% url %]\">[% url %]</A>.
+		<P>All of the older Ask $constants->{sitename} articles have been moved to /askslashdot/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
 [% END %]
 [% END %]
-<P>If you feel like it, mail the url, and where ya came from to <A HREF=\"mailto:[% constants.adminmail %]\">[% constants.adminmail %]</A>
+<P>If you feel like it, mail the url, and where ya came from to <A HREF="mailto:[% constants.adminmail %]">[% constants.adminmail %]</A>
 __seclev__
 10000

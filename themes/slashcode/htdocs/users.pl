@@ -461,7 +461,7 @@ sub editHome {
 	my $tzformat_select = createSelect('tzformat', $formats, $user_edit->{dfid}, 1);
 
 	$formats = $slashdb->getDescriptions('tzcodes');
-	my $tzcode_select = createSelect('tzcode', $formats, $user_edit->{tzcode}, 1);
+	my $tzcode_select = createSelect('tzcode', [ keys %$formats ], $user_edit->{tzcode}, 1);
 
 	my $l_check = $user_edit->{light}	? ' CHECKED' : '';
 	my $b_check = $user_edit->{noboxes}	? ' CHECKED' : '';
