@@ -452,9 +452,9 @@ sub getDaysOfUnarchivedStories {
 ########################################################
 sub getAverageCommentCountPerStoryOnDay {
 	my($self, $day, $options) = @_;
-	my $col = "avg(commentcount)";
-	my $where = " date_format(time,'%Y-%m-%d') = '$day' ";
-	$where .= " and section = '$options->{section}' " if $options->{section};
+	my $col = "AVG(commentcount)";
+	my $where = " DATE_FORMAT(time,'%Y-%m-%d') = '$day' ";
+	$where .= " AND section = '$options->{section}' " if $options->{section};
 	return $self->sqlSelect($col, "stories", $where);
 }
 
@@ -468,9 +468,9 @@ sub getAverageHitsPerStoryOnDay {
 ########################################################
 sub getNumberStoriesPerDay {
 	my($self, $day, $options) = @_;
-	my $col = "count(*)";
-	my $where = " date_format(time,'%Y-%m-%d') = '$day' ";
-	$where .= " and section = '$options->{section}' " if $options->{section};
+	my $col = "COUNT(*)";
+	my $where = " DATE_FORMAT(time,'%Y-%m-%d') = '$day' ";
+	$where .= " AND section = '$options->{section}' " if $options->{section};
 	return $self->sqlSelect($col, "stories", $where);
 
 }
