@@ -323,30 +323,46 @@ sub createComment {
 	$comment->{-date} = 'now()';
 	$comment->{pointsorig} = $comment->{points} || 0;
 
+	$self->{_dbh}->{AutoCommit} = 0;
+
 	my $cid;
 	if ($self->sqlInsert('comments', $comment)) {
 		$cid = $self->getLastInsertId();
 	} else {
+		$self->{_dbh}->rollback;
+		$self->{_dbh}->{AutoCommit} = 1;
 		errorLog("$DBI::errstr");
 		return -1;
 	}
 
-	$self->sqlInsert('comment_text', {
+	unless ($self->sqlInsert('comment_text', {
 			cid	=> $cid,
 			comment	=>  $comment_text,
-	});
-
+	})) {
+		$self->{_dbh}->rollback;
+		$self->{_dbh}->{AutoCommit} = 1;
+		errorLog("$DBI::errstr");
+		return -1;
+	}
 
 	# should this be conditional on the others happening?
 	# is there some sort of way to doublecheck that this value
 	# is correct?  -- pudge
 	# This is fine as is; if the insert failed, we've already
 	# returned out of this method. - Jamie
-	$self->sqlUpdate(
+	unless ($self->sqlUpdate(
 		"discussions",
 		{ -commentcount	=> 'commentcount+1' },
 		"id=$comment->{sid}",
-	);
+	)) {
+		$self->{_dbh}->rollback;
+		$self->{_dbh}->{AutoCommit} = 1;
+		errorLog("$DBI::errstr");
+		return -1;
+	} 
+
+	$self->{_dbh}->commit;
+	$self->{_dbh}->{AutoCommit} = 1;
 
 	return $cid;
 }
