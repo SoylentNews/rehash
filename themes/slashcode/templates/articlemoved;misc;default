@@ -4,6 +4,10 @@ __description__
 Template to handle redirection from old article location to new one
 
 url - url to redirect to
+
+See:
+https://sourceforge.net/tracker/index.php?func=detail&aid=1052367&group_id=4421&atid=104421
+
 __title__
 Useless title to template
 __page__
