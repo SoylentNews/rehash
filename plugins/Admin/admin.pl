@@ -1332,7 +1332,8 @@ sub editStory {
 	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
 
 	my $num_sim = $constants->{similarstorynumshow} || 5;
-	my $similar_stories = $slashdb->getSimilarStories($storyref, $num_sim);
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $similar_stories = $reader->getSimilarStories($storyref, $num_sim);
 	# Truncate that data to a reasonable size for display.
 	if ($similar_stories && @$similar_stories) {
 		for my $sim (@$similar_stories) {
@@ -1766,11 +1767,9 @@ sub displayRecent {
 sub displayRecentRequests {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my $admindb = getObject("Slash::Admin",
-		$constants->{log_db_user} || $constants->{backup_db_user});
+	my $admindb = getObject("Slash::Admin", { db_type => 'log_db_user' });
 
-	my $logdb = getObject("Slash::DB",
-		$constants->{log_db_user} || $constants->{backup_db_user});
+	my $logdb = getObject("Slash::DB", { db_type => 'log_db_user' });
 
 	# Note, limit the id passed in by making sure we don't try to do a
 	# select on more than 500,000 rows.  This is an arbitrary number,
@@ -1820,8 +1819,7 @@ sub displayRecentSubs {
 		return;
 	}
 
-	my $admindb = getObject("Slash::Admin",
-		$constants->{backup_db_user} || $constants->{log_db_user});
+	my $admindb = getObject("Slash::Admin", { db_type => 'log_db_user' });
 
 	my $startat = $form->{startat} || 0;
 	my $subs = $admindb->getRecentSubs($startat);

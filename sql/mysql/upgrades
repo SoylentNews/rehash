@@ -1367,7 +1367,7 @@ SOURCE /tmp/comlen;
 
 # Change for plugins/Blob (ignore if not using that plugin)
 DROP TABLE IF EXISTS story_files;
-CREATE TABLE story_files (
+CREATE TABLE IF NOT EXISTS story_files (
 	id int(5) NOT NULL auto_increment,
 	sid varchar(16) NOT NULL default '',
 	description varchar(80) NOT NULL default '',

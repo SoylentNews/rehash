@@ -15,7 +15,7 @@ $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
-	my($stats, $backupdb, %data, %mod_data);
+	my(%data, %mod_data);
 	
 	# These are the ops (aka pages) that we scan for.
 	my @PAGES = qw|index article search comments palm journal rss page users|;
@@ -33,13 +33,8 @@ $task{$me}{code} = sub {
 	my $statsSave = getObject('Slash::Stats::Writer',
 		{ nocache => 1 }, { day => $yesterday  });
 
-	if ($constants->{backup_db_user}) {
-		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
-		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
-	} else {
-		$stats = getObject('Slash::Stats');
-		$backupdb = $slashdb;
-	}
+	my $stats = getObject('Slash::Stats', { db_type => 'reader' });
+	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $logdb = getObject('Slash::Stats', {
 		db_type	=> 'log_slave',

@@ -37,12 +37,7 @@ my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
 my $totalChangedStories = 1;
 
-my $backupdb;
-if ($constants->{backup_db_user}) {
-	$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
-} else {
-	$backupdb = $slashdb;
-}
+my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 
 ################################################################################
 # really tired of deleting the thing if portald pukes ;)

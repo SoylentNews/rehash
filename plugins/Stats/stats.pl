@@ -22,10 +22,7 @@ sub main {
 	my $form      = getCurrentForm();
 
 	# This will need to be changed to "log_db_user"
-	my $logdb     = $constants->{backup_db_user}
-		? getObject('Slash::DB', $constants->{backup_db_user})
-		: $slashdb;
-	my $stats     = getObject('Slash::Stats', $logdb->{virtual_user});
+	my $stats     = getObject('Slash::Stats', { db_type => 'log_slave' } );
 
 	my $admin      = $user->{seclev} >= ($constants->{stats_admin_seclev} || 100);
 	my $admin_post = $admin && $user->{state}{post};

@@ -75,13 +75,8 @@ sub archiveStories {
 	my($virtual_user, $constants, $slashdb, $user, $to_archive) = @_;
 	# Story archival.
 	my $starttime = Time::HiRes::time();
-
-	my $vu = "virtual_user=$virtual_user";
-	if ($constants->{backup_db_user}
-		&& ($virtual_user ne $constants->{backup_db_user})
-		&& $constants->{archive_use_backup_db}) {
-		$vu = "virtual_user=$constants->{backup_db_user}";
-	}
+	my $db = getObject('Slash::DB', { db_type => 'reader' });
+	my $vu = $db->{virtual_user};
 	
 	my $totalChangedStories = 0;
 	for (@{$to_archive}) {

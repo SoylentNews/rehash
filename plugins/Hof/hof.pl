@@ -16,13 +16,7 @@ sub main {
 
 	header(getData('head'));
 
-	my($hofDB);
-
-	if ($constants->{backup_db_user}) {
-		$hofDB = getObject('Slash::Hof', { db_type => 'reader' });
-	} else {
-		$hofDB = getObject('Slash::Hof');
-	}
+	my $hofDB = getObject('Slash::Hof', { db_type => 'reader' });
 
 	my @topcomments = ( );
 # getCommentsTop() comes in two versions as of 2001/07/12.  The old

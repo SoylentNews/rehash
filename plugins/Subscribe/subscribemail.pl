@@ -9,13 +9,7 @@ $task{$me}{timespec_panic_2} = ''; # if major panic, this can wait
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	my $backupdb;
-	if ($constants->{backup_db_user}) {
-		$backupdb = getObject('Slash::DB',
-			$constants->{backup_db_user});
-	} else {
-		$backupdb = $slashdb;
-	}
+	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 	my $sub_static = getObject("Slash::Subscribe::Static", { db_type => 'reader' });
 	my $subscribe = getObject('Slash::Subscribe', { db_type => 'reader' });
 

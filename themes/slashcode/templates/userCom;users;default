@@ -22,70 +22,32 @@ en_US
 __name__
 userCom
 __template__
-[% USE Slash %]
-
-[% IF nickmatch_flag %]
-	[% title = "Your Comments" %]
-[% ELSE %]
-	[% title = "$nick's Comments" %]
-[% END %]
-
-[% IF commentcount > 0 %]
-	[% commenttitle =
-		  ((min_comment == 0) ? "" : "$commentstruct.size of ")
-		_ "$useredit.nickname's "
-		_ ((commentstruct.size == commentcount || min_comment > 0) ? "" : "Latest $commentstruct.size of $commentcount ")
-		_ "Comment"
-		_ (commentcount == 1 ? "" : "s") %]
+[% IF commentstruct.size %]
+	[% commenttitle = "Latest $commentstruct.size of $commentcount comments " %]
 	[% PROCESS titlebar width="100%" title = commenttitle %]
-	<P><TABLE BORDER="0" WIDTH="100%">
-	
 	[% n = min_comment %]
-	[% FOREACH comment = commentstruct;
-	
-		n = n + 1;
-		replies = comment.replies ? 'Replies:' _ comment.replies : '';
-		score = 'Score:' _ comment.pts;
-		reasonnum = comment.reason;
-		reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
-		IF comment.type == 'poll';
-			label = 'Poll: ';
-		ELSIF comment.type == 'journal';
-			label = 'Journal Discussion: ';
-		ELSE;   
-			label = '';
-		END;    
-		label = label _ comment.disc_title;
-		
-		'<TR>';
-		'<TD VALIGN="TOP">';
-			IF min_comment > 0; '<B>'; n; '</B> '; END;
-			'<A HREF="';
-				constants.rootdir;
-				'/comments.pl?sid='; comment.sid;
-				'&amp;cid='; comment.cid;
-			'">';   
-			comment.subj;
-			'</A>&nbsp;';
-		'</TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; comment.cdate; '</NOBR></TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; score; reasontext; '</NOBR></TD>';
-		'</TR>';
-		'<TR><TD VALIGN="TOP" COLSPAN="4"><FONT SIZE="2">';
-			'&nbsp;&nbsp;&nbsp;attached to <A HREF="';
-				comment.url;
-			'">'; label; '</A>';
-		'</FONT></TD></TR>';
-	
-	END %]
-	</TABLE>
-	[% IF (user.seclev > constants.comments_more_seclev || (comments_more_seclev == 2 && user.is_subscriber))
-		&& commentcount > n %]
-		<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | fixparam %]&amp;min_comment=[% n %]"     
-		>More Comments...</A>
+	[% FOREACH comment = commentstruct %]
+		[% n = n + 1 %]
+		[% IF comment.type == 'poll';
+			label   = "Poll: $comment.disc_title ";
+			ELSIF comment.type == 'journal';
+			label   = "Journal Discussion: $comment.disc_title";
+			ELSE;
+			label    = comment.disc_title;
+		END %]
+		<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
+		[% comment.subject %]</A> posted on [% Slash.timeCalc(comment.date) %]
+	(Score:[% comment.points %][% IF comment.replies %] Replies: [% comment.replies %][% END %])
+		<FONT SIZE="2">
+		<BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
+		</FONT>
+	[% END %]
+	[% IF (user.seclev > constants.comments_more_seclev || (comments_more_seclev == 2 && user.is_subscriber)) && commentcount > n %]
+		<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nickname | fixparam %]&amp;min_comment=[% n %]"     >More Comments...</A>
 	[% END %]
 [% ELSE %]
+	[% title = useredit.nickname | strip_literal %]
+	[% PROCESS titlebar width="100%" %]
 	<B>[% useredit.nickname | strip_literal %] has yet to post any comments.</B>
 [% END %]
 
