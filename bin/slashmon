@@ -65,17 +65,24 @@ sub init {
 
 	my $dbs = $slashdb->getDBs;
 
-	my $vus_hr = {
-		map  { ( $_->{virtual_user}, 1 ) }
-		grep { $_->{isalive} eq 'yes' }
-		map  { @{$dbs->{$_}} }
-		keys %$dbs
-	};
+	my %vus_hash = ( );
+	my @types = sort keys %$dbs;
+	for my $type (@types) {
+		my @dbids_usable =
+		        sort { $a <=> $b }
+			grep { $dbs->{$type}{$_}{weight_total} > 0 }
+			keys %{ $dbs->{$type} };
+		for my $dbid (@dbids_usable) {
+			my $vu = $dbs->{$type}{$dbid}{virtual_user};
+			$vus_hash{$vu} = 1;
+		}
+	}
+
 	my $vus = [ (
 		$slashdb->{virtual_user},
 		sort { $a cmp $b }
-		grep { $_ ne $slashdb->{virtual_user} }
-		keys %$vus_hr
+			grep { $_ ne $slashdb->{virtual_user} }
+			keys %vus_hash
 	) ];
 
 	# Set up the @db array based on what virtual users we have.
