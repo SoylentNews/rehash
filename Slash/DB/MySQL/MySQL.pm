@@ -37,6 +37,9 @@ my %descriptions = (
 	'yes_no'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='yes_no'") },
 
+	'submission-notes'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='submission-notes'") },
+
 	'months'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='months'") },
 
