@@ -144,29 +144,38 @@ my $start_time = Time::HiRes::time;
 	#    to be made aware of this story's existence, so ignore it.
 	my $future_plug = 0;
 
+	# Is there a story in the Mysterious Future?
+	my $is_future_story = 0;
+	$is_future_story = 1 if @$stories # damn you, autovivification!
+		&& $stories->[0]{is_future};
+
 	# Do we want to display the plug saying "there's a future story,
 	# subscribe and you can see it"?  Yes if the user is logged-in
 	# but not a subscriber, but only if the first story is actually
 	# in the future.  Just check the first story;  they're in order.
-	if (@$stories # damn you, autovivification!
-		&& $stories->[0]{is_future}
+	if ($is_future_story
 		&& !$user->{is_subscriber}
 		&& !$user->{is_anon}
 		&& $constants->{subscribe_future_plug}) {
 		$future_plug = 1;
 	}
 
+	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss;
+
 	# Do we want to display the plug offering the user a daypass?
 	my $daypass_plug_text = "";
 	if ($constants->{daypass}) {
-		my $daypass_db = getObject('Slash::Daypass', { db_type => 'reader' });
-		my $do_offer = $daypass_db->doOfferDaypass();
-		if ($do_offer) {
-			$daypass_plug_text = $daypass_db->getOfferText();
+		# If this var is set, only offer a daypass when there
+		# is a future story available.
+		if (!$constants->{daypass_offer_onlywhentmf}
+			|| $is_future_story) {
+			my $daypass_db = getObject('Slash::Daypass', { db_type => 'reader' });
+			my $do_offer = $daypass_db->doOfferDaypass();
+			if ($do_offer) {
+				$daypass_plug_text = $daypass_db->getOfferText();
+			}
 		}
 	}
-
-	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss;
 
 #	# See comment in plugins/Journal/journal.pl for its call of
 #	# getSkinColors() as well.
@@ -524,19 +533,19 @@ sub displayStories {
 		# This user may not be authorized to see future stories;  if so,
 		# skip them.
 		if ($story->{is_future}) {
+			# If subscribers are allowed to see 0 seconds into the
+			# future, future stories are off-limits.
+			next if !$constants->{subscribe_future_secs};
 			# If the user is a subscriber or has a daypass, the
 			# is_subscriber field will be set.  If that field is
 			# not set, future stories are off-limits.
-			next if !$user->{is_subscriber};
+			next if !$user->{is_subscriber} && !$user->{has_daypass};
 			# If the user is only an honorary subscriber because
 			# they have a daypass, and honorary subscribers don't
 			# get to see The Mysterious Future, future stories are
 			# off-limits.
-			next if $user->{is_subscriber} && $user->{has_daypass}
+			next if !$user->{is_subscriber} && $user->{has_daypass}
 				&& !$constants->{daypass_seetmf};
-			# If subscribers are allowed to see 0 seconds into the
-			# future, future stories are off-limits.
-			next if !$constants->{subscribe_future_secs};
 		}
 
 		# Check the day this story was posted (in the user's timezone).

@@ -10,6 +10,8 @@ use Slash::Utility;
 use Slash::DB::Utility;
 use vars qw($VERSION);
 use base 'Slash::DB::Utility';
+# For sqlReplace, for now
+use base 'Slash::DB::MySQL';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -45,7 +47,8 @@ sub getDaypassesAvailable {
 		# (Re)load the cache from a reader DB.
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		$_getDA_cache = $reader->sqlSelectAllHashrefArray(
-			"daid, adnum, UNIX_TIMESTAMP(starttime) AS startts, UNIX_TIMESTAMP(endtime) AS endts",
+			"daid, adnum, minduration,
+			 UNIX_TIMESTAMP(starttime) AS startts, UNIX_TIMESTAMP(endtime) AS endts, aclreq",
 			"daypass_available");
 		$_getDA_cached_nextcheck = time() + ($constants->{daypass_cache_expire} || 300);
 
@@ -55,46 +58,58 @@ sub getDaypassesAvailable {
 }
 } # end closure
 
-sub getDaypassAdnum {
+sub getDaypass {
 	my($self) = @_;
 
 	my $constants = getCurrentStatic();
-	return 0 unless $constants->{daypass};
+	return undef unless $constants->{daypass};
 
 	my $da_ar = $self->getDaypassesAvailable();
-	return 0 if !$da_ar || !@$da_ar;
+	return undef if !$da_ar || !@$da_ar;
 
 	# There are one or more rows in the table, which might mean there
 	# are one or more daypass ads that we can show.
 	my @ads_available = ( );
 	my $time = time();
+	my $user = undef;
 	for my $hr (@$da_ar) {
 		next unless $hr->{startts} <= $time;
 		next unless $time <= $hr->{endts};
-		# If we want to test the daypass by requiring a user ACL,
-		# here's the place to add a restriction. - Jamie
-		push @ads_available, $hr->{adnum};
+		if ($hr->{aclreq}) {
+			$user ||= getCurrentUser();
+			print STDERR scalar(localtime) . " $$ cannot get user in getDaypass\n" if !$user;
+			next unless $user && $user->{acl}{ $hr->{aclreq} };
+		}
+		push @ads_available, $hr;
 	}
 
-	return 0 unless @ads_available;
+	return undef unless @ads_available;
 
 	# Return a random one.
 	return $ads_available[rand(@ads_available)];
 }
 
 sub createDaypasskey {
-	my($self) = @_;
+	my($self, $dp_hr) = @_;
+
+	# If no daypass was available, we can't return a key.
+	return "" if !$dp_hr;
 
 	my $user = getCurrentUser();
 	# Daypasses are not available to anonymous users (yet).
 	return "" if $user->{is_anon};
 
+	# How far in the future before this daypass can be confirmed?
+	# I.e. how much of the ad do we insist the user watch?
+	my $secs_ahead = $dp_hr->{minduration} || 0;
+
 	my $key = getAnonId(1);
 	my $rows = $self->sqlInsert('daypass_keys', {
-		uid		=> $user->{uid},
-		daypasskey	=> $key,
-		-key_given	=> 'NOW()',
-		key_confirmed	=> undef,
+		uid			=> $user->{uid},
+		daypasskey		=> $key,
+		-key_given		=> 'NOW()',
+		-earliest_confirmable	=> "DATE_ADD(NOW(), INTERVAL $secs_ahead SECOND)",
+		key_confirmed		=> undef,
 	});
 	if ($rows < 1) {
 		return "";
@@ -117,14 +132,16 @@ sub confirmDaypasskey {
 	my $rows = $self->sqlUpdate(
 		"daypass_keys",
 		{ -key_confirmed => "NOW()" },
-		"uid=$uid AND daypasskey=$key_q");
-	
+		"uid = $uid
+		 AND daypasskey = $key_q
+		 AND earliest_confirmable <= NOW()");
+
 	if ($rows > 0) {
 		my $hr = {
 			uid	=> $uid,
 			goodon	=> $self->getGoodonDay(),
 		};
-		$rows = $self->sqlInsert('daypass_keys', $hr);
+		$rows = $self->sqlReplace('daypass_users', $hr);
 	}
 
 	$rows = 0 if $rows < 1;
@@ -164,8 +181,8 @@ sub doOfferDaypass {
 	# If the user already has a daypass, then no.
 	return 0 if $self->userHasDaypass($user);
 	# If there are no ads available for this user, then no.
-	my $adnum = $self->getDaypassAdnum();
-	return 0 unless $adnum;
+	my $dp_hr = $self->getDaypass();
+	return 0 unless $dp_hr;
 	# Otherwise, yes.
 	return 1;
 }

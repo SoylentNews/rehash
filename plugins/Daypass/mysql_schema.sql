@@ -4,8 +4,10 @@
 CREATE TABLE daypass_available (
 	daid		SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	adnum		SMALLINT NOT NULL DEFAULT 0,
+	minduration	SMALLINT NOT NULL DEFAULT 0,
 	starttime	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	endtime		DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	aclreq		VARCHAR(32) DEFAULT NULL,
 	PRIMARY KEY daid (daid)
 ) TYPE=InnoDB;
 
@@ -20,6 +22,8 @@ CREATE TABLE daypass_available (
 # to read, set type='site', and data does not matter.
 # The restrictions will be enforced from the starttime to the endtime,
 # or if endtime is NULL, from the starttime on.
+# If this table is empty, daypasses will be optional (and actually
+# that's all that is supported in the code right now).
 
 CREATE TABLE daypass_needs (
 	type		ENUM('skin', 'site', 'article') NOT NULL DEFAULT 'skin',
@@ -34,11 +38,12 @@ CREATE TABLE daypass_needs (
 # non-NULL and a row for that user is created in daypass_users.
 
 CREATE TABLE daypass_keys (
-	dpkid		INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	uid		MEDIUMINT UNSIGNED NOT NULL,
-	daypasskey	CHAR(20) NOT NULL DEFAULT '',
-	key_given	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-	key_confirmed	DATETIME DEFAULT NULL,
+	dpkid			INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	uid			MEDIUMINT UNSIGNED NOT NULL,
+	daypasskey		CHAR(20) NOT NULL DEFAULT '',
+	key_given		DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	earliest_confirmable	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	key_confirmed		DATETIME DEFAULT NULL,
 	PRIMARY KEY dpkid (dpkid),
 	UNIQUE uid_daypasskey (uid, daypasskey),
 	KEY key_given (key_given)

@@ -13,9 +13,11 @@ use Slash::Utility;
 sub main {
 	my $gSkin = getCurrentSkin();
 	my $daypass_reader = getObject('Slash::Daypass', { db_type => 'reader' });
-print STDERR "dp_r: " . Dumper($daypass_reader);
+use Data::Dumper;
+$Data::Dumper::Sortkeys = 1;
+print STDERR scalar(localtime) . " daypass.pl $$ dp_r: " . Dumper($daypass_reader);
 	my $dps = $daypass_reader->getDaypassesAvailable();
-print STDERR "dps: " . Dumper($dps);
+print STDERR scalar(localtime) . " daypass.pl $$ dps: " . Dumper($dps);
 	if (!$dps || !@$dps) {
 		redirect($gSkin->{rootdir});
 	}
@@ -29,24 +31,59 @@ print STDERR "dps: " . Dumper($dps);
 		$dpk = $1 || "";
 	}
 
+	my $adnum = 0;
+
 	if ($dpk) {
+
 		if ($daypass_writer->confirmDaypasskey($dpk)) {
 			# Pause to allow replication to catch up, so when
 			# the user gets back to the homepage, they will
 			# show up as having the daypass.
 			sleep 2;
+			redirect($gSkin->{rootdir});
+			# Having done that, don't continue with the rest of this
+			# function (in particular, don't create a new key).
+			return ;
 		}
-		# For now we always redirect back to the homepage --
-		# whether the key was matched successfully or not!
-		redirect($gSkin->{rootdir});
+		# The user probably didn't watch enough of the
+		# ad.  Let them keep watching!
+		print STDERR scalar(localtime) . " daypass.pl $$ apparently early click\n";
+		$adnum = $form->{adnum};
+		$adnum =~ /^(\d+)$/;
+		$adnum = $1 || 0;
+		if (!$adnum) {
+			# We don't know which ad they were watching (they
+			# probably edited the URL) so fetch a new one.
+print STDERR scalar(localtime) . " daypass.pl $$ no adnum found, refetching\n";
+			$dpk = "";
+		}
+
 	}
 
-	my $adnum = $daypass_reader->getDaypassAdnum();
-	$dpk = $daypass_writer->createDaypassKey();
 	if (!$dpk) {
-		# Something went wrong.  We can't show the user a key.
-		redirect($gSkin->{rootdir});
+
+		my $dp_hr = $daypass_reader->getDaypass();
+		if (!$dp_hr) {
+			# Something went wrong.  We don't have a daypass for
+			# the user to see.
+print STDERR scalar(localtime) . " daypass.pl $$ cannot choose daypass\n";
+			redirect($gSkin->{rootdir});
+			return ;
+		}
+		$dpk = $daypass_writer->createDaypasskey($dp_hr);
+		if (!$dpk) {
+			# Something went wrong.  We can't show the user a key.
+print STDERR scalar(localtime) . " daypass.pl $$ cannot show key\n";
+			redirect($gSkin->{rootdir});
+			return ;
+		}
+		$adnum = $dp_hr->{adnum};
+
 	}
+
+	# Whether because the user just got a new key created for
+	# them, or because they clicked too fast and we're reusing
+	# their old key, they have a key in $dpk.
 
 	header(getData('head')) or return;
 

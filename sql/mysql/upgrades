@@ -2870,3 +2870,9 @@ INSERT INTO misc_user_opts (name, optorder, seclev, default_val, vals_regex, sho
 
 INSERT INTO message_codes (code, type, seclev) VALUES (18, 'Invalid HTML Input', 100);
 
+# Changes for plugins/Daypass (ignore if not using that plugin)
+ALTER TABLE daypass_available ADD COLUMN minduration SMALLINT NOT NULL DEFAULT 0 AFTER adnum, ADD COLUMN aclreq VARCHAR(32) DEFAULT NULL;
+ALTER TABLE daypass_keys ADD COLUMN earliest_confirmable DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER key_given;
+INSERT INTO vars (name, value, description) VALUES ('daypass_adnum', '13', 'Which ad number to pass to getAd?');
+INSERT INTO vars (name, value, description) VALUES ('daypass_offer_onlywhentmf', '0', 'Offer daypasses only when there is a story in The Mysterious Future?');
+

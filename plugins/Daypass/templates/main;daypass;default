@@ -15,7 +15,7 @@ main
 __template__
 
 <p>When done viewing our ad, you may
-<a href="/daypass.pl?dpk=[% daypasskey | strip_attribute %]">continue</a>
+<a href="/daypass.pl?dpk=[% dpk | strip_attribute %]&amp;adnum=[% adnum | strip_attribute %]">continue</a>
 with your honorary subscription for the day.
 
 <p>[% Slash.getAd(adnum) %]
