@@ -111,7 +111,6 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
       stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data = stats_data_big.${stats_data_key};
-
 %]
 
 <PRE>
@@ -131,6 +130,7 @@ oldest unM2'd: [% IF stats_data.oldest_unm2d_days > -1 %][% ints(stats_data.olde
 youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% stats_data.youngest_modelig_created %]
 </PRE>
 
+[%
    END;
 END %]
 
