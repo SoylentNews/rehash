@@ -1117,8 +1117,8 @@ EOT
 		$S->{commentstatus} = $I{F}{commentstatus} if exists $I{F}{commentstatus};
 		$S->{dept} =~ s/ /-/gi;
 
-		$S->{introtext} = autoUrl($I{F}{section});
-		$S->{bodytext} = autoUrl($I{F}{section});
+		$S->{introtext} = autoUrl($I{F}{section}, $S->{introtext});
+		$S->{bodytext} = autoUrl($I{F}{section}, $S->{bodytext});
 
 		$T = getTopic($S->{tid});
 		$I{F}{aid} ||= $I{U}{aid};
