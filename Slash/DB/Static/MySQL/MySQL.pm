@@ -178,7 +178,8 @@ sub updateArchivedDiscussions {
 		{ type => 'archived' },
 		"TO_DAYS(NOW()) - TO_DAYS(ts) > $days_to_archive
 		 AND type = 'open'
-		 AND flags != 'delete'"
+		 AND flags != 'delete'
+		 AND archivable = 'yes'"
 	);
 }
 
@@ -204,16 +205,18 @@ sub getArchiveList {
 	# (which is the new equivalent of the old "never display").
 	# That replaces "displaystatus > -1" - Jamie 2005/04
 	my $returnable = $self->sqlSelectAll(
-		'stories.stoid, sid, title',
+		'stories.stoid, stories.sid, story_text.title',
 		'stories LEFT JOIN story_param
 		ON stories.stoid = story_param.stoid AND story_param.name="neverdisplay",
-		story_text, story_topics_rendered',
+		story_text, story_topics_rendered, discussions',
 		"stories.stoid=story_text.stoid
+		 AND stories.discussion = discussions.id
 		 AND stories.stoid = story_topics_rendered.stoid
 		 AND TO_DAYS(NOW()) - TO_DAYS(time) > $days_to_archive
 		 AND is_archived = 'no'
 		 AND story_topics_rendered.tid IN ($nexus_clause)
-		 AND name IS NULL",
+		 AND name IS NULL
+		 AND archivable='yes'",
 		"GROUP BY stoid ORDER BY time $dir LIMIT $limit"
 	);
 
