@@ -488,6 +488,7 @@ sub getSiteTemplates {
 	}
 	#Themes override plugins so this has to run after plugins. -Brian
 	my $theme = $self->get('theme');
+	# it might be nice if this looks in the THEME file ... -- pudge
 	my $include_theme = $self->get('include_theme');
 	if ($include_theme) {
 		my @no_templates; # Not current used -Brian
