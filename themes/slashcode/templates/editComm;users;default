@@ -212,7 +212,7 @@ __template__
 		<P><B>Comment Limit</B> (only display this many comments, 
 		for best results, set this to a low number and sort by score)
 		If set above [% constants.breaking %], then it is ignored and
-		[% result = constants.breaking / 2; result; %] is used instead.<BR>
+		[% constants.breaking / 2 %] is used instead.<BR>
 		<INPUT TYPE="TEXT" NAME="commentlimit" SIZE="6" VALUE="[% user_edit.commentlimit %]">
 
 		<P><B>Comment Byte Limit</B> (number of bytes of comments
