@@ -249,6 +249,7 @@ EOT
 	my $total_bytes = $stats->countBytesByPage('',  {
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
+	my $grand_total_bytes = $stats->countBytesByPage('');
 
 	my $admin_mods = $stats->getAdminModsInfo();
 	my $admin_mods_text = getAdminModsText($admin_mods);
@@ -293,6 +294,7 @@ EOT
 	$statsSave->createStatDaily("grand_total", $grand_total);
 	$statsSave->createStatDaily("grand_total_static", $grand_total_static);
 	$statsSave->createStatDaily("total_bytes", $total_bytes);
+	$statsSave->createStatDaily("grand_total_bytes", $grand_total_bytes);
 	$statsSave->createStatDaily("unique", $count->{unique});
 	$statsSave->createStatDaily("unique_users", $count->{unique_users});
 	$statsSave->createStatDaily("comments", $comments);
@@ -334,6 +336,7 @@ EOT
 
 	$data{total} = sprintf("%8d", $count->{total});
 	$data{total_bytes} = sprintf("%0.1f MB",$total_bytes/(1024*1024));
+	$data{grand_total_bytes} = sprintf("%0.1f MB",$grand_total_bytes/(1024*1024));
 	$data{unique} = sprintf("%8d", $count->{unique}), 
 	$data{users} = sprintf("%8d", $count->{unique_users});
 	$data{accesslog} = sprintf("%8d", $accesslog_rows);

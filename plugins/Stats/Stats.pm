@@ -625,7 +625,7 @@ sub countBytesByPage {
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
 
-	$self->sqlSelect("sum(bytes)", "accesslog_temp", $where);
+	$self->sqlSelect("SUM(bytes)", "accesslog_temp", $where);
 }
 
 ########################################################
