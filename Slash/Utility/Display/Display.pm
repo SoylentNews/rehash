@@ -420,7 +420,7 @@ sub linkStory {
 	my($url, $script, $title, %params);
 	$script = 'article.pl';
 	$params{sid} = $story_link->{sid};
-	$params{mode} = $story_link->{mode} || $user->{mode};
+	$params{mode} = $story_link->{mode} if $story_link->{mode};
 	$params{threshold} = $story_link->{threshold} if exists $story_link->{threshold};
 
 	# Setting $dynamic properly is important.  When generating the
