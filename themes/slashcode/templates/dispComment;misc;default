@@ -22,8 +22,6 @@ en_US
 __name__
 dispComment
 __template__
-[% USE Slash %]
-
 	<TR><TD>
 	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 		<TR VALIGN="TOP">
@@ -102,4 +100,3 @@ __seclev__
 10000
 __version__
 $Id$
-
