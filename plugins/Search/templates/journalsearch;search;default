@@ -1,0 +1,33 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+journalsearch
+__template__
+[% USE Slash %]
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+	[% FOREACH journal=journals %]
+		<TR>
+		[% IF journal.4 %]
+			<TD VALIGN="TOP">
+				[% journal.4 %]
+			</TD>
+		[% END %]
+		<TD VALIGN="TOP">
+			<A HREF="[% constants.rootdir %]/journal.pl?id=[% journal.2 %]">[% journal.1 %]</A> on [% Slash.timeCalc(journal.3) %] by <A HREF="[% constants.rootdir %]~[% journal.0 | fixparam %]/">[% journal.0 %]</A>.
+		</TD>
+		</TR>
+	[% END %]
+</TABLE>
+[% PROCESS pagination %]
+<P>
+
+__seclev__
+100
