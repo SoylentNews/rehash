@@ -11,7 +11,6 @@ en_US
 __name__
 list
 __template__
-[% constants.sitename %] Moderation Stats for [% day %]
 [% PROCESS titlebar title => "Available Stats for Dumping" %]
 
 <FORM METHOD="POST" ACTION="[% env.script_name %]">
