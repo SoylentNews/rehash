@@ -365,7 +365,11 @@ sub templateSave {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
-	$form->{seclev} ||= 500;
+	if (!$form->{seclev}) {
+		$form->{seclev} = 500;
+	} elsif ($form->{seclev} > $user->{seclev}) {
+		$form->{seclev} = $user->{seclev};
+	}
 
 	my $id = $slashdb->getTemplate($tpid, '', 1);
 	my $temp = $slashdb->getTemplateByName($name, [ 'section', 'page', 'name', 'tpid', 'seclev' ], 1 , $page, $section);
