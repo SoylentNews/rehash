@@ -1629,6 +1629,7 @@ sub editComm {
 	my $lo = -$hi;
 	my @range = map { $_ > 0 ? "+$_" : $_ } ($lo .. $hi);
 
+	# Reason modifiers
 	for my $reason_name (@reasons) {
 		my $key = "reason_alter_$reason_name";
 		$reason_select{$reason_name} = createSelect(
@@ -1637,6 +1638,7 @@ sub editComm {
 		);
 	}
 
+	# Zoo relation modifiers
 	my %people_select;
 	my @people =  qw(friend foe anonymous fof eof freak fan);
 	for (@people) {
@@ -1645,18 +1647,19 @@ sub editComm {
 			$user_edit->{$key} || 0, 1, 1
 		);
 	}
-	# For New User bonus stuff
+
+	# New-user modifier
 	my $new_user_bonus_select = createSelect('new_user_bonus', \@range, 
 			$user_edit->{new_user_bonus} || 0, 1, 1);
 	my $new_user_percent_select = createSelect('new_user_percent',
-			[( 1..19, 20, 25, 30, 35, 40, 45, 50, 55,
-				  60, 65, 70, 75, 80, 85, 90, 95 )], 
+			[( 1..15, 20, 25, 30, 35, 40, 45, 50, 55,
+			  60, 65, 70, 75, 80, 85, 90, 95 )], 
 			$user_edit->{new_user_percent} || 100, 1, 1);
-	#Karma bonus
+	# Karma modifier
 	my $karma_bonus = createSelect('karma_bonus', \@range, 
 			$user_edit->{karma_bonus} || 0, 1, 1);
 
-	#Length Bonus -Brian
+	# Length modifier
 	my $small_length_bonus_select = createSelect('clsmall_bonus', \@range, 
 			$user_edit->{clsmall_bonus} || 0, 1, 1);
 	my $long_length_bonus_select = createSelect('clbig_bonus', \@range, 

@@ -208,12 +208,9 @@ sub _get_points {
 	}
 
 	# If you don't trust new users
-	if ($user->{new_user_bonus} && $user->{new_user_percent}) {
-		my $perc = 100*$C->{uid}/$max_uid;
-		if ($perc > $user->{new_user_percent}) {
-			$hr->{new_user_bonus} =
-				$user->{new_user_bonus};
-		}
+	if ($user->{new_user_bonus} && $user->{new_user_percent}
+		&& 100 - 100*$C->{uid}/$max_uid < $user->{new_user_percent}) {
+		$hr->{new_user_bonus} = $user->{new_user_bonus};
 	}
 
 	# Adjust reasons. Do we need a reason?
