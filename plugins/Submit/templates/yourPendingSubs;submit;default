@@ -50,7 +50,7 @@ Summary:&nbsp;
 [% IF summary.1 > 0 %]
 <p>Note: grousing about rejected submissions is Offtopic and usually
 gets moderated that way.
-<a href="[% constants.real_rootdir $]/faq/editorial.shtml#ed200">It happens</a>,
+<a href="[% constants.real_rootdir %]/faq/editorial.shtml#ed200">It happens</a>,
 don't take it personally.
 [% END %]
 
