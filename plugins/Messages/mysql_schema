@@ -14,7 +14,7 @@ CREATE TABLE message_drop (
         date    TIMESTAMP NOT NULL,
         altto   VARCHAR(50) DEFAULT '' NOT NULL,
         send    ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL,
-        message BLOB DEFAULT '' NOT NULL,
+        message MEDIUMBLOB DEFAULT '' NOT NULL,
         PRIMARY KEY (id)
 ) TYPE=InnoDB;
 

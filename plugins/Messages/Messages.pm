@@ -1071,7 +1071,6 @@ sub send_mod_msg {
 			comment		=> $comm,
 			discussion	=> $discussion,
 			moderation	=> {
-				user	=> $user,
 				value	=> $val,
 				reason	=> $reason,
 			},
