@@ -277,14 +277,15 @@ sub getUserBoxes {
 sub upBid {
 	my($bid) = @_;
 	my @a = getUserBoxes();
-
-	if ($a[0] eq $bid) {
-		($a[0], $a[@a-1]) = ($a[@a-1], $a[0]);
-	} else {
-		for (my $x = 1; $x < @a; $x++) {
-			($a[$x-1], $a[$x]) = ($a[$x], $a[$x-1]) if $a[$x] eq $bid;
-		}
+	# Build the %order hash with the order in the values.
+	my %order = ( );
+	for my $i (0..$#a) {
+		$order{$a[$i]} = $i;
 	}
+	# Reduce the value of the block that's reordered.
+	$order{$bid} -= 1.5;
+	# Resort back into the new order.
+	@a = sort { $order{$a} <=> $order{$b} } keys %order;
 	saveUserBoxes(@a);
 }
 
@@ -292,13 +293,15 @@ sub upBid {
 sub dnBid {
 	my($bid) = @_;
 	my @a = getUserBoxes();
-	if ($a[@a-1] eq $bid) {
-		($a[0], $a[@a-1]) = ($a[@a-1], $a[0]);
-	} else {
-		for (my $x = @a-1; $x > -1; $x--) {
-			($a[$x], $a[$x+1]) = ($a[$x+1], $a[$x]) if $a[$x] eq $bid;
-		}
+	# Build the %order hash with the order in the values.
+	my %order = ( );
+	for my $i (0..$#a) {
+		$order{$a[$i]} = $i;
 	}
+	# Increase the value of the block that's reordered.
+	$order{$bid} += 1.5;
+	# Resort back into the new order.
+	@a = sort { $order{$a} <=> $order{$b} } keys %order;
 	saveUserBoxes(@a);
 }
 
@@ -306,9 +309,7 @@ sub dnBid {
 sub rmBid {
 	my($bid) = @_;
 	my @a = getUserBoxes();
-	for (my $x = @a; $x >= 0; $x--) {
-		splice @a, $x, 1 if $a[$x] eq $bid;
-	}
+	@a = grep { $_ ne $bid } @a;
 	saveUserBoxes(@a);
 }
 
