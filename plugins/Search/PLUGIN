@@ -3,6 +3,7 @@ htdoc=search.pl
 mysql_dump=dump
 mysql_prep=mysql_prep
 description=Slash Search is the default search engine for Slash.
+requiresplugin=Messages
 template=templates/commentsearch;search;default
 template=templates/nosearch;search;default
 template=templates/pagination;search;default

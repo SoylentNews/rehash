@@ -139,7 +139,7 @@ sub installThemes {
 
 	for my $answer (@$answers) {
 		for (keys %$themes) {
-			if ($answer eq $themes->{$_}{order}) {
+			if ($answer eq $themes->{$_}{installorder}) {
 				$self->_install($themes->{$_}, $symlink, 0);
 			}
 		}
@@ -287,8 +287,12 @@ sub _install {
 	}
 	@sql = ();
 
-	if ($hash->{'plugin'}) {
-		for (keys %{$hash->{'plugin'}}) {
+	if ($hash->{plugin}) {
+		for (sort {
+			$hash->{plugin}{$a}{installorder} <=> $hash->{plugin}{$b}{installorder}
+			||
+			$a cmp $b
+		} keys %{$hash->{plugin}}) {
 			$self->installPlugin($_, 0, $symlink);
 		}
 	}
@@ -346,11 +350,18 @@ sub _install {
 }
 
 sub getPluginList {
-	return _getList(@_, 'plugins', 'PLUGIN');
+	my $plugin_list = _getList(@_, 'plugins', 'PLUGIN');
+	setListOrder($plugin_list);
+	setListInstallOrder($plugin_list);
+	return $plugin_list;
 }
 
 sub getThemeList {
-	return _getList(@_, 'themes', 'THEME');
+	my $theme_list = _getList(@_, 'themes', 'THEME');
+	setListOrder($theme_list);
+	# Don't care about installorder for themes, since only one
+	# gets installed.
+	return $theme_list;
 }
 
 sub _getList {
@@ -370,9 +381,9 @@ sub _getList {
 		next if $dir =~ /^CVS$/;
 		my $fh = gensym;
 		open($fh, "< $prefix/$subdir/$dir/$type\0") or next;
-		$hash{$dir}->{'dir'} = "$prefix/$subdir/$dir";
+		$hash{$dir}{dir} = "$prefix/$subdir/$dir";
 		#This should be overridden by the actual name of the plugin
-		$hash{$dir}->{'name'} = $dir;
+		$hash{$dir}{name} = $dir;
 
 		my @info;
 		{
@@ -384,23 +395,80 @@ sub _getList {
 			next if /^#/;
 			my($key, $val) = split(/=/, $_, 2);
 			$key = lc $key;
-			if ($key =~ /^(htdoc|htdoc_code|htdoc_faq|template|image|image_award|image_banner|task|sbin|misc|topic)s?$/) {
-				push @{$hash{$dir}->{$key}}, $val;
+			if ($key =~ /^(
+				htdoc | htdoc_code | htdoc_faq | 
+				image | image_award | image_banner | 
+				task | template | sbin | misc | topic
+			)s?$/x) {
+				push @{$hash{$dir}{$key}}, $val;
 			} elsif ($key =~ /^(plugin)s?$/) {
-				$hash{$dir}->{plugin}{$val} = 1;
+				$hash{$dir}{plugin}{$val} = 1;
 			} else {
-				$hash{$dir}->{$key} = $val;
+				# E.g., "requiresplugin"
+				$hash{$dir}{$key} = $val;
 			}
 		}
 	}
-	my $x = 0;
-	for (sort keys %hash) {
-		$x++;
-		$hash{$_}->{'order'} = $x;
+
+	$self->{"_$subdir"} = \%hash;
+	return \%hash;
+}
+
+##################################################
+# Set the {order} field of each element of %$hr to
+# 1 thru whatever, in ascii order of the elements' names.
+sub setListOrder {
+	my($hr) = @_;
+	my $dir;
+	my @dirs = sort keys %$hr;
+
+	my $i = 0;
+	for $dir (@dirs) { $hr->{$dir}{order} = ++$i }
+}
+
+##################################################
+# Set the {installorder} field of each element of %$hr to
+# 1 thru whatever, in the order that the elements (plugins)
+# should be installed (or where it doesn't matter, in ascii
+# order).
+sub setListInstallOrder {
+	my($hr) = @_;
+	my $dir;
+	my @dirs = sort keys %$hr;
+	my $n_dirs = scalar @dirs;
+
+	for $dir (@dirs) { $hr->{$dir}{installorder} = 0 }
+
+	# This algorithm is a bit lame but it's simple and works.
+	# Go through the list of plugins n times, where n = the number
+	# of plugins itself, and each time fix at least one ordering
+	# problem (probably more).  After all n times, the order will
+	# be as correct as it's going to be (recursive "requires"ing
+	# is stupid but it won't break anything and its results will
+	# be predictable).
+	for (1..$n_dirs) {
+		for $dir (@dirs) {
+			# If this plugin says it requires another plugin, and
+			# if that other named plugin actually exists, our
+			# installorder must come after it.
+			if ($hr->{$dir}{requiresplugin}
+				&& $hr->{$hr->{$dir}{requiresplugin}}) {
+				my $old = $hr->{$dir}{installorder};
+				my $new = $hr->{$hr->{$dir}{requiresplugin}}{installorder}+1;
+				$hr->{$dir}{installorder} = $new if $old < $new;
+			}
+		}
 	}
 
-	$self->{"_" . $subdir} = \%hash;
-	return \%hash;
+	# At this point, {installorder} should be accurate with duplicates.
+	# Now make it unambiguous, and a permutation of {order}.
+	@dirs = sort {
+		$hr->{$a}{installorder} <=> $hr->{$b}{installorder}
+		||
+		$a cmp $b
+	} @dirs;
+	my $i = 0;
+	for $dir (@dirs) { $hr->{$dir}{installorder} = ++$i }
 }
 
 sub reloadArmors {

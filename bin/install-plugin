@@ -38,7 +38,7 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 	print "\nPlease select which plugins you would like?\n" unless $opts{'l'} ;
 	my $plugins = $install->getPluginList($PREFIX);
 	for (sort keys %$plugins) {
-		print "$plugins->{$_}{'order'}.\t$_ $plugins->{$_}{'description'}\n";
+		print "$plugins->{$_}{order}.\t$_ $plugins->{$_}{'description'}\n";
 	}
 	exit 0 if $opts{'l'};
 
@@ -53,7 +53,7 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 			last;
 		} elsif ($select eq 'a') {
 			for (keys %$plugins) {
-				push @answers, $plugins->{$_}{'order'};
+				push @answers, $plugins->{$_}{order};
 			}
 			last;
 		} elsif ($select eq "") {

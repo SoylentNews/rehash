@@ -156,11 +156,15 @@ if ($opts{'T'}) {
 }
 if (!$theme) {
 	print "\nWhich theme do you want to use?\n";
-	for (sort keys %$themes) {
+	for (sort {
+		$themes->{$a}{order} <=> $themes->{$b}{order}
+		||
+		$a cmp $b
+	} keys %$themes) {
 		if ((keys %$themes) > 1) {
-			print "( )$themes->{$_}{'order'}.\t$_ $themes->{$_}{'description'}\n";
+			print "( )$themes->{$_}{order}.\t$_ $themes->{$_}{description}\n";
 		} else {
-			print "(*)$themes->{$_}{'order'}.\t$_ $themes->{$_}{'description'}\n";
+			print "(*)$themes->{$_}{order}.\t$_ $themes->{$_}{description}\n";
 		}
 	}
 	if ((keys %$themes) > 1) {
@@ -183,7 +187,11 @@ print "Theme selected: $theme\n";
 my $plugins = $install->getPluginList($PREFIX);
 my @plugins = ( );
 my @default_plugins = ( );
-my @all_plugins = sort keys %$plugins;
+my @all_plugins = sort {
+	$plugins->{$a}{order} <=> $plugins->{$b}{order}
+	||
+	$a cmp $b
+} keys %$plugins;
 for my $key (@all_plugins) {
 	if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
 		push @default_plugins, $key;
@@ -195,7 +203,7 @@ if ($opts{'P'}) {
 	push @plugins, @default_plugins if @default_plugins;
 } else {
 	my %order_to_name = ( );
-	print "\nPlease select which plugins you would like ('*' marks default).\n";
+	print "\nPlease select which plugins you would like ('*' marks the default and minimum).\n";
 	for my $key (@all_plugins) {
 		my $c = " ";
 		if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
@@ -223,6 +231,14 @@ if ($opts{'P'}) {
 	push @plugins, @default_plugins if @default_plugins;
 }
 {
+	# Add in any plugins that are required by the selection set.
+	# This may/will add a lot of duplicates.
+	for (1..scalar(@all_plugins)) {
+		for my $plugin (@plugins) {
+			my $req = $plugins->{$plugin}{requiresplugin};
+			push @plugins, $req if $req;
+		}
+	}
 	# Eliminate duplicates.
 	my %temp_plugins = map { $_ => 1 } @plugins;
 	if ($temp_plugins{DEFAULT}) {
@@ -249,9 +265,7 @@ if ($opts{'P'}) {
 %{$themes->{$theme}{plugin}} = ( );
 # Add back in the ones just selected
 for my $plugin (@plugins) {
-	if ($plugins->{$plugin}) {
-		$themes->{$theme}{plugin}{$plugin} = 1;
-	}
+	$themes->{$theme}{plugin}{$plugin} = $plugins->{$plugin};
 }
 # Show the user what was picked
 print "Plugins selected: " . join(" ", sort keys %{$themes->{$theme}{plugin}}) . "\n\n";
