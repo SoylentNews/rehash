@@ -16,7 +16,6 @@ en_US
 __name__
 discuss_list
 __template__
-[% USE Slash %]
 <table>
 	<tr>
 		<td align="left">
@@ -24,7 +23,7 @@ __template__
 [% FOR discussion = discussions %]
 	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
 IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A>
-	(<A HREF="[% discussion.url %]">referrer</A>) Last Updated on [% discussion.last_update %] | [% discussion.commentcount %] comments </LI>
+	(<A HREF="[% discussion.url %]">referrer</A>) Last Updated on [% Slash.timeCalc(discussion.last_update) %] | [% discussion.commentcount %] comments </LI>
 [% END %]
 </UL>
 <P>
