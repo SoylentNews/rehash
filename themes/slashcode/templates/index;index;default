@@ -70,7 +70,7 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 [% UNLESS user.noboxes %]
 </TD>
 <TD>&nbsp;</TD><TD WIDTH="210" ALIGN="CENTER" VALIGN="TOP">
-[% boxes %]
+[% boxes || "&nbsp;" %]
 [% END %]
 
 
