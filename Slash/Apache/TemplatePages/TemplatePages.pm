@@ -19,8 +19,8 @@ use vars qw($VERSION);
 sub handler {
 	my($r) = @_;
 	my $constants = getCurrentStatic();
+	return NOT_FOUND unless dbAvailable();
 	my $slashdb = getCurrentDB();
-	return NOT_FOUND if -e "$constants->{datadir}/dboff";
 	my $page = $r->uri;
 	$page =~ s|^/(.*)\.tmpl$|$1|;
 	my $section = getCurrentForm('section');

@@ -1484,6 +1484,7 @@ sub getDescriptions {
 	# accounts for, as you might expect, a miniscule amount of DB traffic.
 	my $qlid = $self->_querylog_start('SELECT', 'descriptions');
 	my $sth = $descref->(@_);
+	return { } if !$sth;
 	while (my($id, $desc) = $sth->fetchrow) {
 		$codeBank_hash_ref->{$id} = $desc;
 	}
@@ -8281,7 +8282,7 @@ sub _genericGetCacheName {
 		$cache = '_' . join ('_', sort(@$tables), 'cache_tables_keys');
 		unless (keys %{$self->{$cache}}) {
 			for my $table (@$tables) {
-				my $keys = $self->getKeys($table);
+				my $keys = $self->getKeys($table) || [ ];
 				for (@$keys) {
 					$self->{$cache}{$_} = $table;
 				}
@@ -8290,7 +8291,7 @@ sub _genericGetCacheName {
 	} else {
 		$cache = '_' . $tables . 'cache_tables_keys';
 		unless (keys %{$self->{$cache}}) {
-			my $keys = $self->getKeys($tables);
+			my $keys = $self->getKeys($tables) || [ ];
 			for (@$keys) {
 				$self->{$cache}{$_} = $tables;
 			}
@@ -8890,7 +8891,7 @@ sub sqlTableExists {
 	my($self, $table) = @_;
 	return unless $table;
 
-	$self->sqlConnect();
+	$self->sqlConnect() || return undef;
 	my $tab = $self->{_dbh}->selectrow_array(qq!SHOW TABLES LIKE "$table"!);
 
 	return $tab;
@@ -8901,7 +8902,7 @@ sub sqlSelectColumns {
 	my($self, $table) = @_;
 	return unless $table;
 
-	$self->sqlConnect();
+	$self->sqlConnect() || return undef;
 	my $rows = $self->{_dbh}->selectcol_arrayref("SHOW COLUMNS FROM $table");
 	return $rows;
 }

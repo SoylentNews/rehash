@@ -480,7 +480,9 @@ sub getThemeList {
 sub getSiteTemplates {
 	my($self) = @_;
 	my (%templates, @no_templates, @final);
-	my $slash_prefix = $self->get('base_install_directory')->{value};
+	my $bid = $self->get('base_install_directory');
+	die "cannot find base_install_directory, DB is probably unreachable" if !$bid;
+	my $slash_prefix = $bid->{value};
 	my $plugins = $self->get('plugin');
 	my @plugins;
 	for (keys %$plugins) {

@@ -50,7 +50,9 @@ my $install = Slash::Install->new($virtuser);
 
 # This will read all the themes and all the plugins available for this
 # installation.
-my $site_theme = $install->get("theme")->{value};
+my $get_theme = $install->get("theme");
+die "cannot get theme, DB probably unreachable" if !$get_theme;
+my $site_theme = $get_theme->{value};
 my $site_plugins = $install->get("plugin");
 my @site_plugins = sort
 	map { $site_plugins->{$_}{value} }

@@ -97,8 +97,7 @@ sub SlashVirtualUser ($$$) {
 			$cfg->{site_constants}{$_->{hostname}} = $new_cfg;
 		}
 	}
-	# If this is not here this will go poorly.
-	$cfg->{slashdb}->{_dbh}->disconnect;
+	$cfg->{slashdb}->{_dbh}->disconnect if $cfg->{slashdb}->{_dbh};
 }
 
 sub SlashSetVar ($$$$) {
@@ -325,7 +324,7 @@ sub IndexHandler {
 	# thing dynamically
 	# my $slashdb = getCurrentDB();
 	# my $dbon = $slashdb->sqlConnect(); 
-	my $dbon = ! -e "$constants->{datadir}/dboff";
+	my $dbon = dbAvailable();
 
 	if ($uri eq '/' && $constants->{index_handler} ne 'IGNORE') {
 		my $basedir = $constants->{basedir};
