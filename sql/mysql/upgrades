@@ -2328,10 +2328,12 @@ ALTER TABLE comments ADD INDEX uid_date (uid,date);
 # Switching this on may help performance on large sites.  Don't turn on until you've created the uid_date index
 INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index', '0', 'Give user comments query hint to use specific index?');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_155, Start of T_2_3_0_156 - 2004/05/25
 
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_156, Start of T_2_3_0_157 - 2004/06/01
