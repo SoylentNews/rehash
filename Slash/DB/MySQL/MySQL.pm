@@ -3512,7 +3512,7 @@ sub getStoriesBySubmitter {
 sub countStoriesBySubmitter {
 	my($self, $id) = @_;
 
-	my $count = $self->sqlCount('stories', "submitter='$id'");
+	my $count = $self->sqlCount('stories', "submitter='$id'  AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty') and displaystatus >= 0");
 
 	return $count;
 }
