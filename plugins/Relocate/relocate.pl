@@ -16,6 +16,7 @@ sub main {
 
 	my $link = $relocateDB->get($form->{id});
 	if (!$link) {
+		my $constants = getCurrentStatic();
 		redirect("$constants->{rootdir}/404.pl");
 	} elsif ($link->{is_alive} eq 'no') {
 		header("D'Oh"); # Needs to be templated -Brian
