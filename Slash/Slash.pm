@@ -776,15 +776,15 @@ sub dispStory {
 	my $slashdb      = getCurrentDB();
 	my $constants    = getCurrentStatic();
 	my $form_section = getCurrentForm('section');
-	my $template_name = $other->{story_template} ? 
-		$other->{story_template} : 'dispStory';
+	my $template_name = $other->{story_template}
+		? $other->{story_template} : 'dispStory';
 
 	# Might this logic be better off in the template? It's sole purpose
 	# is aesthetics.
-	$other->{magic} = (!$full && (index($story->{title}, ':') == -1) &&
-			  ($story->{section} ne $constants->{defaultsection} &&
-			   $story->{section} ne $form_section))
-	if !exists $other->{magic};
+	$other->{magic} = (!$full && (index($story->{title}, ':') == -1)
+			&& ($story->{section} ne $constants->{defaultsection}
+			&& $story->{section} ne $form_section))
+		if !exists $other->{magic};
 
 	my $section = $slashdb->getSection($story->{section});
 
@@ -1123,7 +1123,7 @@ sub _hard_dispComment {
 			</TD></TR>
 EOT
 
-	# Do not display comment navigation and reply links if we are in 
+	# Do not display comment navigation and reply links if we are in
 	# archive mode or if we are in metamod. Nicknames are always equal to
 	# '-' in metamod. This logic is extremely old and could probably be
 	# better formulated.
