@@ -5367,6 +5367,7 @@ sub getSlashConf {
 	# any bad or missing data in the vars table
 	$conf{rootdir}		||= "//$conf{basedomain}";
 	$conf{real_rootdir}	||= $conf{rootdir};  # for when rootdir changes
+	$conf{real_section}	||= $conf{section};  # for when section changes
 	$conf{absolutedir}	||= "http://$conf{basedomain}";
 		# If absolutedir_secure is not defined, it defaults to the
 		# same as absolutedir.
