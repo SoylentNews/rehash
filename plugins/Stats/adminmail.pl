@@ -95,7 +95,7 @@ EOT
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
 		$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq);
-		$statsSave->createStatDaily($yesterday, "${_}_bytes", $$bytes);
+		$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes);
 		$statsSave->createStatDaily($yesterday, "${_}_page", $pages);
 	}
 
