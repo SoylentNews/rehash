@@ -969,9 +969,13 @@ sub topicDelete {
 	if (!$success) {
 		# we should dump this to the screen instead
 		warn $errmsg;
+		slashHook('admin_topic_delete_failed',
+			{ tid => $form->{tid}, replacement => $form->{replacementtid} });
 		$form->{nexttid} = $form->{tid};
 		$form->{tid} = '';
 	} else {
+		slashHook('admin_topic_delete_success',
+			{ tid => $form->{tid}, replacement => $form->{replacementtid} });
 		$form->{nexttid} = $form->{replacementtid};
 	}
 }
