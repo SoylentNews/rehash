@@ -47,6 +47,16 @@ main page or by searching for them in the database by using the search
 form at the bottom of the front page.
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
 <br><i><font size=-1>Last Modified: 12/17/01</font></i>
+<br><a NAME="ui400"></a>
+<h2>
+Why do I see Some Other User's Nickname in my Menu?</h2>
+This is a short cut.  Essentially, there is a tab on your user menu (appearing on
+many pages like Journals and Users) that shows the nickname and UID of the last user
+that you looked at.  This is not a bug!  This is a helpful shortcut so that you can
+hop back and forth between your friends information, and theirs. 
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 3/3/03</font></i>
+
 <p>
 <hr>
 <table>
