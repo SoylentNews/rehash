@@ -27,6 +27,7 @@ __template__
 			<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% poll.0 %]">[% poll.1 %]</A> on [% Slash.timeCalc(poll.3) %] with [% poll.2 %] voters.
 		</TD>
 		</TR>
+	[% x = x + 1 %]
 	[% END %]
 </TABLE>
 [% PROCESS pagination %]
