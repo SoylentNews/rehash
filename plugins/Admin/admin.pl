@@ -1167,7 +1167,10 @@ sub listStories {
 			$canedit = 1;
 		}
 
-		my $feature_story_flag = ($slashdb->getSection($section,'sid') eq $sid) ? 1 : 0;
+		my $feature_story_flag = 
+			($slashdb->getSection($section, 'feature_story') eq
+			 $sid);
+
 		$storylistref->[$i] = {
 			'x'		=> $i + $first_story + 1,
 			hits		=> $hits,
