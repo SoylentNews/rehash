@@ -2332,8 +2332,6 @@ INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1'
 
 # SLASHDOT LAST UPDATED HERE
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_3_0_156, Start of T_2_3_0_157 - 2004/06/01
 
 ######################################################################
@@ -2379,10 +2377,13 @@ INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_defau
 UPDATE vars SET name='admin_story_lookahead_infinite', description='In the admin.pl storylist, always show all future stories no matter how far in the future?' WHERE name='show_all_future_stories_admin';
 INSERT IGNORE INTO vars (name, value, description) VALUES ('admin_story_lookahead_infinite', '0', 'In the admin.pl storylist, always show all future stories no matter how far in the future?');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_5, Start of T_2_5_0_6 - 2004/07/08
 
 UPDATE IGNORE blocks SET bid='mainpage_more' WHERE bid LIKE '%more' AND skin='mainpage' AND ordernum > -1;
 DELETE FROM blocks WHERE bid LIKE '%more' AND skin='mainpage' AND bid != 'mainpage_more';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_5, Start of T_2_5_0_6 - 2004/07/08
