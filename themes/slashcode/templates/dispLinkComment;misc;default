@@ -29,7 +29,7 @@ __template__
 			|
 			[% Slash.linkComment({
 			sid	=> sid,
-			pid	=> cid,
+			cid	=> cid,
 			subject => 'View this thread',
 			subject_only => 1,
 		}) %][% END %]
