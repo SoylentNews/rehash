@@ -1213,8 +1213,6 @@ INSERT INTO vars (name, value, description) VALUES ('index_gse_backup_prob','0',
 INSERT INTO vars (name, value, description) VALUES ('selectcomm_backup_prob','0','Probability that Slash.pm selectComments will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('prepuser_backup_prob','0','Probability that Environment.pm prepareUser will look to backup_db_user instead of the main db: 0=never, 1=always');
 
-# SLASHDOT LAST UPDATED HERE
-
 # Doesn't have to be 250, pick whatever for your own site.
 INSERT INTO vars (name, value, description) VALUES ('comment_commentlimit','250','Max commentlimit users can set');
 UPDATE users_comments SET commentlimit=250 WHERE commentlimit > 250;
@@ -1265,3 +1263,5 @@ INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (1
 # of stats in message_log
 
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
