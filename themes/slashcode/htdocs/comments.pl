@@ -483,6 +483,12 @@ sub commentIndexUserCreated {
 		$constants->{discussion_display_limit} + 1, 
 		$start, $constants->{discussion_sort_order});
 
+	my $section_select;	
+	if ($constants->{ubb_like_forums}) {
+		my $sections = $slashdb->getDescriptions('forums');
+		$section_select = createSelect('section', $sections, $form->{section}, 1);
+	}
+
 	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
@@ -505,7 +511,7 @@ sub commentIndexUserCreated {
 # REMOVE ?
 
 #		$title .= ": " . $slashdb->getTopic($form->{tid},'alttext') . " ($form->{tid})" if $form->{tid};
-	
+
 		slashDisplay('udiscuss_list', {
 			discussions	=> $discussions,
 			error_message	=> $error_message,
@@ -515,12 +521,14 @@ sub commentIndexUserCreated {
 			args		=> _buildargs($form),
 			start		=> $start,
 			back		=> $back,
+			section_select  => $section_select,
 		});
 	} else {
 		print getData('nodiscussions');
 		slashDisplay('edit_comment', {
 			newdiscussion	=> 1,
 			label		=> $label,
+			section_select  => $section_select,
 		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
 }

@@ -238,6 +238,9 @@ my %descriptions = (
 		);
 	},
 
+	'forums'
+		=> sub { $_[0]->sqlSelectMany('subsection.id, subsection.alttext', 'section_subsections, subsections', "section_subsections.subsection=subsections.id AND section_subsections.section='forums'") },
+	
 );
 
 ########################################################

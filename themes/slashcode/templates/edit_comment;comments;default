@@ -102,6 +102,14 @@ END %]
 				[% Slash.selectTopic('topic', form.topic, section, 1) %]
 			</TD>
 		</TR>
+		[% IF section_select %]
+		<TR>
+			<TD ALIGN="RIGHT">Section: </TD>
+			<TD>
+				[% section_select %]
+			</TD>
+		</TR>
+		[% END %]
 		<TR>
 			<TD ALIGN="RIGHT">URL: </TD>
 			<TD>
