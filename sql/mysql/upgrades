@@ -1151,7 +1151,6 @@ INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_max_new','0','A
 
 INSERT INTO vars (name, value, description) VALUES ('lastlookmemory','3600','Amount of time the uid last looked-at will be remembered/displayed');
 
-# SLASHCODE LAST UPDATED HERE
 
 # USEPERL LAST UPDATED HERE
 
@@ -1185,3 +1184,4 @@ CREATE TABLE people_nthdegree (
 
 INSERT INTO vars (name,value,description) VALUES ('zoo_timer',now(),'Last time the Zoo task ran.');
 DROP TABLE IF EXISTS people_log;
+# SLASHCODE LAST UPDATED HERE
