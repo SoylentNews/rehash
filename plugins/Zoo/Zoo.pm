@@ -65,7 +65,7 @@ sub getRelationships {
 
 # Get the details for relationships
 sub getFriendsUIDs {
-	my ($self, $uid) = @_;
+	my($self, $uid) = @_;
 
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
@@ -205,8 +205,8 @@ sub topFriends {
 }
 
 sub count {
-  my($self, $uid) = @_;
-  $self->sqlCount('people', "uid = $uid AND type is not NULL");
+	my($self, $uid) = @_;
+	$self->sqlCount('people', "uid = $uid AND type is not NULL");
 } 
 
 
@@ -265,7 +265,7 @@ SQL
 }
 
 sub getZooUsersForProcessing {
-	my ($self, $time) = @_;
+	my($self, $time) = @_;
 	my $people = $self->sqlSelectAll('uid', 'people', "last_update > '$time' ");
 	my $people2 = $self->sqlSelectAll('uid', 'people_nthdegree', "last_update > '$time' ");
 
@@ -283,7 +283,7 @@ sub getZooUsersForProcessing {
 }
 
 sub rebuildUser {
-	my ($self, $uid) = @_;
+	my($self, $uid) = @_;
 	my $first =  $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
 	my $second =  $self->sqlSelectAllHashrefArray('*', 'people_nthdegree', "uid = $uid");
 	my $people;
