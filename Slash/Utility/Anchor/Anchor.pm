@@ -305,7 +305,7 @@ sub getAd {
 	my $constants = getCurrentStatic();
 	if ($constants->{subscribe}) {
 		my $subscribe = getObject('Slash::Subscribe');
-		if ($subscribe and $subscribe->buyingThisPage()) {
+		if ($subscribe and $subscribe->adlessPage()) {
 			return "\n<!-- subscriber, no ad -->\n";
 		}
 	}

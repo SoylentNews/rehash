@@ -82,7 +82,9 @@ and so far [% hits_bought %] have been used up.
 	everything but comments pages.
 
 	<P><TABLE BORDER=0 CELLSPACING=1 WIDTH="100%">
-	<TR><TH>&nbsp;Ads&nbsp;</TH><TH>&nbsp;No&nbsp;Ads&nbsp;</TH><TH WIDTH="100%">&nbsp;</TH></TR>
+	<TR><TH>&nbsp;&nbsp;Ads&nbsp;&nbsp;</TH>
+	<TH>&nbsp;&nbsp;No&nbsp;Ads&nbsp;&nbsp;</TH>
+	<TH WIDTH="100%">&nbsp;&nbsp;</TH></TR>
 
 	[% FOREACH page = pages %]
 
@@ -98,6 +100,10 @@ and so far [% hits_bought %] have been used up.
 	[% anything_to_edit = 1 %]
 
 	[% END %]
+
+	<TR><TD>&nbsp;</TD><TD>&nbsp;</TD>
+	<TD VALIGN="top" ALIGN="left">&nbsp;Set "No Ads" for any of these, and
+	you'll get ads disabled for free on other types of pages too.</TD></TR>
 
 </TABLE>
 
