@@ -28,10 +28,7 @@ __template__
 
 <P><B>Note:</B> Who you like and dislike is not private; it can and will be used against you.</P>
 
-[% IF form.formkey %]
 <INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
-[% END %]
-
 <INPUT TYPE="hidden" NAME="op" VALUE="add">
 <INPUT TYPE="hidden" NAME="uid" VALUE="[% uid %]">
 <P><INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>

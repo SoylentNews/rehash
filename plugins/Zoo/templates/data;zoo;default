@@ -74,6 +74,9 @@ __template__
 [% CASE 'no_go' %]
 	Sorry, this is not an option.
 
+[% CASE 'no_uid' %]
+	Sorry, you did not specify a user.
+
 [% CASE 'over_socialized' %]
 	You are over the limit for the number of friends and foes you can have.
 	Please remove some from your list before adding any more.

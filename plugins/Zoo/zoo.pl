@@ -76,17 +76,30 @@ sub main {
 		},
 	};
 
+	my ($note, $error_flag);
 	my $op = $form->{'op'};
 	if ($user->{seclev} < 100) {
 		if ($ops->{$op}{formkey}) {
 			for my $check (@{$ops->{$op}{formkey}}) {
-				$ops->{$op}{update_formkey} = 1 
-					if ($check eq 'formkey_check');
-				my $error_flag = formkeyHandler($check, $formname, $formkey);
+				$error_flag = formkeyHandler($check, $formname, $formkey, \$note);
+				$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
 				last if $error_flag;
 			}
 		}
 	}
+	if ($error_flag) {
+		header();
+		print $note;
+		footer();
+		return;
+	}
+
+	if ($ops->{$op}{update_formkey} && $user->{seclev} < 100 && ! $error_flag) {
+		# successful save action, no formkey errors, update existing formkey
+		# why assign to an unused variable? -- pudge
+		my $updated = $slashdb->updateFormkey($formkey, length($ENV{QUERY_STRING}));
+	}
+	errorLog("zoo.pl error_flag '$error_flag'") if $error_flag;
 
 	if (!$op || !exists $ops->{$op} || !$ops->{$op}->{check}) {
 		redirect($constants->{rootdir});
@@ -309,25 +322,8 @@ sub check {
 			nickname => $nickname,
 			type => $type,
 		});
-	} 
-}
-
-sub _validFormkey {
-	my $error;
-	# this is a hack, think more on it, OK for now -- pudge
-	Slash::Utility::Anchor::getSectionColors();
-	for (qw(max_post_check interval_check formkey_check)) {
-		last if formkeyHandler($_, 0, 0, \$error);
-	}
-
-	if ($error) {
-		_printHead("mainhead");
-		print $error;
-		return 0;
 	} else {
-		# why does anyone care the length?
-		getCurrentDB()->updateFormkey(0, length(getCurrentForm()->{article}));
-		return 1;
+		print getData("no_uid");
 	}
 }
 
