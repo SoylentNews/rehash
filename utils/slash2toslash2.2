@@ -666,22 +666,8 @@ EOT
 	my $cond = '';
 	if ($opts{I}) {
 		$cond = "WHERE ts >= $datecond";
-
-		# Preserve min discussion ID of deleted records so we can
-		# properly delete discussion_hitparade.
-		my $sth_d = $dbh_new->prepare(<<EOT);
-SELECT min(id) FROM discussions $cond
-EOT
-		$sth_d->execute;
-		my($min_did) = $sth_d->fetchrow_array;
-
 		$deleted_discussions = 
 			$dbh_new->do("DELETE FROM discussions $cond");
-
-		$dbh_new->do(<<EOT) if $min_did;
-DELETE FROM discussion_hitparade WHERE discussion >= $min_did
-EOT
-
 	}
 
 	$sql = <<EOT;

@@ -129,11 +129,6 @@ INSERT INTO dateformats (id, format, description) VALUES (17,'%Y.%m.%d %k:%M','1
 
 
 #
-# Dumping data for table 'discussion_hitparade'
-#
-
-
-#
 # Dumping data for table 'formkeys'
 #
 
