@@ -26,7 +26,7 @@ $task{$me}{code} = sub {
 	my $num_new_subscriptions = scalar(keys %$new_subscriptions_hr);
 
 	my $transaction_list = "";
-	my($total_gross, $total_net, $total_pages_bought) = (0, 0, 0);
+	my($total_gross, $total_net, $total_pages_bought, $total_karma) = (0, 0, 0, 0);
 	if ($num_new_subscriptions > 0) {
 		$transaction_list = sprintf(
 			"%7s %3s %6s %6s %6s %5s %6s %-20s\n", qw(
@@ -38,6 +38,7 @@ $task{$me}{code} = sub {
 			$total_gross += $spid_hr->{payment_gross};
 			$total_net += $spid_hr->{payment_net};
 			$total_pages_bought += $spid_hr->{pages};
+			$total_karma += $spid_hr->{karma};
 			$transaction_list .= sprintf(
 				"%7d %3d %6.2f %6.2f %6d %5d %6d %-20s\n",
 				@{$spid_hr}{qw(
@@ -47,12 +48,17 @@ $task{$me}{code} = sub {
 			);
 		}
 		$transaction_list .= sprintf(
-			"%-10s %7.2f %6.2f %6d",
-			"total:", $total_gross, $total_net, $total_pages_bought
+			"%-10s %7.2f %6.2f %6d\n",
+			"total:",
+			$total_gross,
+			$total_net,
+			$total_pages_bought
 		);
 		$transaction_list .= sprintf(
-			"%-10s %7.2f %6.2f %6d",
-			"mean:", $total_gross/$num_new_subscriptions,
+			"%-7s %3d %6.2f %6.2f %6d",
+			"mean:",
+			$total_karma/$num_new_subscriptions,
+			$total_gross/$num_new_subscriptions,
 			$total_net/$num_new_subscriptions,
 			$total_pages_bought/$num_new_subscriptions
 		);
