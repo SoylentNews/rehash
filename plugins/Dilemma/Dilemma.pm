@@ -55,7 +55,7 @@ sub getDilemmaSpeciesInfo {
 	for my $dsid (keys %$species) {
 		$species_info->{$dsid}{name} = $species->{$dsid}{name};
 		$species_info->{$dsid}{code} = $species->{$dsid}{code};
-		$species_info->{$dsid}{sumfood} = $species-{$dsid}{sumfood};
+		$species_info->{$dsid}{sumfood} = $species->{$dsid}{sumfood};
 		$species_info->{$dsid}{alivecount} = $count->{$dsid}{yes}{c} || 0;
 		$species_info->{$dsid}{totalcount} = ($count->{$dsid}{yes}{c}
 			+ $count->{$dsid}{no}{c}) || 0;
