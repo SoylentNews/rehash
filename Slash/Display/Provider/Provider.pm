@@ -247,13 +247,19 @@ sub template {
 
 	return "sub { return '' }" unless $block =~ /\S/;
 
-	my $extra;
-	$extra .= "my \$anon = Slash::getCurrentAnonymousCoward();\n" if $block =~ /\$anon->/;
-	$extra .= "my \$user = Slash::getCurrentUser();\n" if $block =~ /\$user->/;
-	$extra .= "my \$form = Slash::getCurrentForm();\n" if $block =~ /\$form->/;
-	$extra .= "my \$constants = Slash::getCurrentStatic();\n" if $block =~ /\$constants->/;
-# experimental
-	$extra .= "# USE\n\$stash->set('Slash', \$context->plugin('Slash'));\n";
+	my $extra = <<'EOF';
+my $anon = Slash::getCurrentAnonymousCoward();
+my $user = Slash::getCurrentUser();
+my $form = Slash::getCurrentForm();
+my $constants = Slash::getCurrentStatic();
+
+$stash->set('Slash', $context->plugin('Slash'));
+$stash->set('anon', $anon);
+$stash->set('user', $user);
+$stash->set('form', $form);
+$stash->set('constants', $constants);
+$stash->set('env', { map { (lc, $ENV{$_}) } keys %ENV });
+EOF
 
 	my $template = <<EOF;
 sub {
@@ -261,7 +267,7 @@ sub {
     my \$stash   = \$context->stash;
     my \$output  = '';
     my \$error;
-    
+
     eval { BLOCK: {
 $extra
 $block

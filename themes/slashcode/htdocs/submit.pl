@@ -434,7 +434,6 @@ sub saveSub {
 	$submission->{subid} = $slashdb->createSubmission($submission);
 	# $slashdb->formSuccess($form->{formkey}, 0, length($form->{subj}));
 
-	# fix getMessageUsers before enabling again -- pudge
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);

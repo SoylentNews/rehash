@@ -381,7 +381,7 @@ sub _getMessageUsers {
 		$where .= " AND users.uid = users_messages.uid AND seclev >= $seclev";
 	}
 
-	my $users  = $self->sqlSelectArrayRef($cols, $table, $where);
+	my $users  = $self->sqlSelectColArrayref($cols, $table, $where);
 	return $users;
 }
 
