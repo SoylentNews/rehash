@@ -1201,16 +1201,16 @@ sub prepareUser {
 		# save in user's state
 		$user_types{$type} = $virtual_user;
 	}
+
 	$uid = $constants->{anonymous_coward_uid} unless defined($uid) && $uid ne '';
 
 	my $reader = getObject('Slash::DB', { db_type => $user_types{'reader'} });
-	$reader ||= $slashdb;
 
 	if (isAnon($uid)) {
 		if ($ENV{GATEWAY_INTERFACE}) {
 			$user = getCurrentAnonymousCoward();
 		} else {
-			$user = $slashdb->getUser($constants->{anonymous_coward_uid});
+			$user = $reader->getUser($constants->{anonymous_coward_uid});
 		}
 		$user->{is_anon} = 1;
 
@@ -1316,7 +1316,6 @@ sub prepareUser {
 		$user->{seclev} = 1;
 		$user->{state}{lostprivs} = 1;
 	}
-
 
 	return $user;
 }

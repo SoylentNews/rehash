@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2002 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
@@ -18,7 +18,6 @@ sub main {
 
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	$reader ||= $slashdb;
 
 	#Yeah, I am being lazy and paranoid  -Brian
 	#Always check the main DB for story status since it will always be accurate -Brian

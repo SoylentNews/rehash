@@ -92,7 +92,6 @@ sub selectComments {
 		$thisComment = $slashdb->getCommentsForUser($header->{id}, $cid, $cache_read_only);
 	} else {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
-		$reader ||= $slashdb;
 		$thisComment = $reader->getCommentsForUser($header->{id}, $cid, $cache_read_only);
 	}
 
