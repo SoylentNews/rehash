@@ -489,6 +489,11 @@ sub sqlSelectAllHashrefArray {
 ########################################################
 sub sqlUpdate {
 	my($self, $table, $data, $where, $options) = @_;
+
+	# If no changes were passed in, there's nothing to do.
+	# (And if we tried to proceed we'd generate an SQL error.)
+	return 0 if !keys %$data;
+
 	my $sql = "UPDATE $table SET ";
 
 	my @data_fields = ( );

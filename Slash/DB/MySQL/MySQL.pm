@@ -3662,7 +3662,8 @@ sub deleteVar {
 sub setCommentCleanup {
 	my($self, $cid, $val, $newreason, $oldreason) = @_;
 
-	return 0 if $val eq '+0';
+	$val += 0;
+	return 0 if !$val;
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
@@ -5809,7 +5810,8 @@ sub setUser {
 				}
 			}
 		}
-		$rows += $self->sqlUpdate($table, \%minihash, $where);
+		$rows += $self->sqlUpdate($table, \%minihash, $where)
+			if keys %minihash;
 	}
 	# What is worse, a select+update or a replace?
 	# I should look into that. (REPLACE is faster) -Brian

@@ -646,7 +646,7 @@ ALTER TABLE users_info ADD COLUMN m2info VARCHAR(64) DEFAULT '' NOT NULL AFTER l
 ALTER TABLE users_info ADD COLUMN mods_saved VARCHAR(120) DEFAULT '' NOT NULL AFTER lastmm;
 DROP TABLE IF EXISTS modreasons;
 CREATE TABLE modreasons (
-	id tinyint UNSIGNED NOT NULL AUTO_INCREMENT,
+	id tinyint UNSIGNED NOT NULL,
 	name char(32) DEFAULT '' NOT NULL,
 	m2able tinyint DEFAULT '1' NOT NULL,
 	listable tinyint DEFAULT '1' NOT NULL,
