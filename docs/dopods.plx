@@ -15,3 +15,8 @@ for (qw(INSTALL README)) {
 	print "Copying $_ to parent directory\n";
 	copy $_, catfile(updir, $_) or warn "Couldn't copy\n";
 }
+
+for (qw(pod2html-dircache pod2html-itemcache)) {
+	print "Unlinking $_\n";
+	unlink $_ or warn "Couldn't unlink $_: $!";
+}
