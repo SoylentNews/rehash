@@ -531,7 +531,6 @@ INSERT INTO string_param (type, code, name) VALUES ('section_types','collected',
 SELECT concat("UPDATE sections SET qid=", value," WHERE section='index';") INTO OUTFILE "/tmp/qidproblem" from vars WHERE name="currentqid";
 source /tmp/qidproblem;
 
-# SLASHCODE LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
 
 # For plugins/Admin (ignore if you're not using that plugin):
@@ -560,3 +559,4 @@ INSERT INTO vars (name, value, description) VALUES ('op_exclude_from_countdaily'
 
 # USEPERL LAST UPDATED HERE
 
+# SLASHCODE LAST UPDATED HERE
