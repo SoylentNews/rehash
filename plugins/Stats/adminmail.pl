@@ -4,7 +4,6 @@ use strict;
 use Slash::Constants qw( :messages :slashd );
 use Slash::Display;
 use Date::Calc qw( Today Add_Delta_Days);
-use Data::Dumper;
 
 use vars qw( %task $me );
 
@@ -44,7 +43,6 @@ $task{$me}{code} = sub {
 
 	my $sdTotalHits = $stats->getVar('totalhits', 'value');
 	$sdTotalHits = $sdTotalHits + $count->{'total'};
-	print "totalhits $sdTotalHits\n";
 
 	my $admin_clearpass_warning = '';
 	if ($constants->{admin_check_clearpass}) {
@@ -70,7 +68,6 @@ EOT
 	}
 
 	my $accesslog_rows = $stats->sqlCount('accesslog');
-	print "accesslog rows $accesslog_rows\n";
 	my $formkeys_rows = $stats->sqlCount('formkeys');
 	my $modlog_rows = $stats->sqlCount('moderatorlog');
 	my $metamodlog_rows = $stats->sqlCount('metamodlog');
@@ -284,15 +281,12 @@ EOT
 	# Send a message to the site admin.
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
-		print "we have a messages object\n";
 		$data{template_name} = 'display';
 		$data{subject} = getData('email subject', {
 			day =>	$data{day}
 		}, 'adminmail');
 		$data{template_page} = 'adminmail';
 		my $message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
-		print "we have a messages_users ref\n";
-		print Dumper($message_users);
 		for (@$message_users) {
 
 			$messages->create($_, MSG_CODE_ADMINMAIL, \%data);
