@@ -463,7 +463,7 @@ sub linkStory {
 		mode		=> $mode,
 		threshold	=> $threshold,
 		tid		=> $story_link->{tid},
-		tid_string		=> $tid_string,
+		tid_string	=> $tid_string,
 		sid		=> $story_link->{sid},
 		section		=> $story_link->{section},
 		url		=> $url,
