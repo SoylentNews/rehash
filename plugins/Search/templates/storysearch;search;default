@@ -12,23 +12,28 @@ __name__
 storysearch
 __template__
 [% USE Slash %]
-[% x = start ? start : 1 %]
+<OL start=[% x = start ? start : 1; x %]>
 [% FOREACH story=stories %]
-	[% IF story.score %]
-		[% story.score %] 
-	[% ELSE %]
-		[% x %] 
-	[% END %] 
+<LI>
 	[% Slash.linkStory({
 		section	=> story.section,
 		tid	=> story.tid,
 		sid	=> story.sid,
 		'link'	=> story.title
 	}) 
-	%]
-	by [% story.nickname %] with [% story.commentcount %] comments <FONT SIZE="2">on [% Slash.timeCalc(story.time) %]</FONT><BR>
-[% x = x + 1 %]
+	%] <FONT SIZE="-1">on [% Slash.timeCalc(story.time) %] with [% story.commentcount %] comments</FONT><BR>
+	[% story.introtext %] <BR>
+	<FONT SIZE="-1">
+		[% section = Slash.db.getSection(story.section); topic = Slash.db.getTopic(story.tid) %]
+		[% IF section.section == constants.defaultsection %]<A HREF="/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "/index.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A><BR>
+		[% IF story.score %]
+			Score: [% story.score %] <br>
+		[% END %] 
+	</FONT>
+<P>
+</LI>
 [% END %]
+</OL>
 [% PROCESS pagination %]
 <P>
 

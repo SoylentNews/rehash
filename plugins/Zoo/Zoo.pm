@@ -437,7 +437,11 @@ SQL
 
 sub deleteZooJobs {
 	my ($self, $list) = @_;
-	$self->sqlDo("DELETE FROM people_log WHERE id IN (" . join(",", @$list) . ")");
+	if (ref($list)) {
+		$self->sqlDo("DELETE FROM people_log WHERE id IN (" . join(",", @$list) . ")");
+	} else {
+		$self->sqlDo("DELETE FROM people_log WHERE id = $list ");
+	}
 }
 
 sub getZooJobs {
@@ -447,7 +451,6 @@ sub getZooJobs {
 
 	return $self->sqlSelectAllHashrefArray('*', 'people_log', '', "ORDER BY id " . $limit);
 }
-
 
 sub DESTROY {
 	my($self) = @_;

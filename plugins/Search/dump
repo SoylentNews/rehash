@@ -2,3 +2,4 @@ INSERT INTO vars (name, value, description) VALUES ('search_db_user', '', 'Enter
 INSERT INTO vars (name, value, description) VALUES ('search_default_display', '30', 'Default number of entries to display on Search page');
 INSERT INTO vars (name, value, description) VALUES ('search_journal_enabled', '1', 'Turns on searching journals.');
 INSERT INTO vars (name, value, description) VALUES ('search_rss_enabled', '1', 'Turns on searching rss.');
+INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method to use to weight scores for search returns (and to narrow down possible matches)');

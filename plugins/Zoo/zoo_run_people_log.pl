@@ -17,28 +17,28 @@ $task{$me}{code} = sub {
 	my $zoo = getObject('Slash::Zoo');
 
 	slashdLog('Zoo fof/eof Begin');
-	my $jobs = $zoo->getZooJobs($constants->{zoo_process_limit});
-	for my $job (@$jobs) {
-		my $friends = $friends_cache->{$job->{uid}} ? $friends_cache->{$job->{uid}} : $zoo->getFriendsConsideredUIDs($job->{uid});
-		for(@$friends) {
-			if ($job->{type} eq 'friend') {
-				if ($job->{action} eq 'add') {
-					$zoo->addFof($_, $job->{person}, $job->{uid});
+	for (1..$constants->{zoo_process_limit}) {
+		my $jobs = $zoo->getZooJobs(1);
+		for my $job (@$jobs) {
+			my $friends = $friends_cache->{$job->{uid}} ? $friends_cache->{$job->{uid}} : $zoo->getFriendsConsideredUIDs($job->{uid});
+			for(@$friends) {
+				if ($job->{type} eq 'friend') {
+					if ($job->{action} eq 'add') {
+						$zoo->addFof($_, $job->{person}, $job->{uid});
+					} else {
+						$zoo->deleteFof($_, $job->{person}, $job->{uid});
+					}
 				} else {
-					$zoo->deleteFof($_, $job->{person}, $job->{uid});
-				}
-			} else {
-				if ($job->{action} eq 'add') {
-					$zoo->addEof($_, $job->{person}, $job->{uid});
-				} else {
-					$zoo->deleteEof($_, $job->{person}, $job->{uid});
+					if ($job->{action} eq 'add') {
+						$zoo->addEof($_, $job->{person}, $job->{uid});
+					} else {
+						$zoo->deleteEof($_, $job->{person}, $job->{uid});
+					}
 				}
 			}
+			$zoo->deleteZooJobs($job->{id})
 		}
-		push @deletions, $job->{id};
 	}
-	$zoo->deleteZooJobs(\@deletions)
-		if @deletions;
 	slashdLog('Zoo fof/eof End');
 
 	return ;

@@ -97,8 +97,9 @@ sub main {
 		$form->{op} = 'stories' if !exists($ops_rss{$form->{op}});
 		$ops_rss{$form->{op}}->($form, $constants, $slashdb, $searchDB);
 	} else {
+		# Yep, these are hardcoded, and someday this should change... -Brian 
 		header("$constants->{sitename}: Search $form->{query}");
-		titlebar("99%", "Searching $form->{query}");
+		titlebar("99%", "Searching For:  $form->{query}");
 		$form->{op} = 'stories' if !exists($ops{$form->{op}});
 
 		# Here, panic mode is handled without needing to call the
@@ -323,6 +324,11 @@ sub storySearch {
 			$forward = 0;
 		}
 
+		for(@$stories) {
+			$_->{introtext} = substr(strip_nohtml($_->{introtext}),0,80);
+			$_->{introtext} =~ s/(.*) .*$/$1.../g;
+		}
+
 		# if there are less than search_default_display remaning,
 		# just set it to 0
 		my $back;
@@ -474,6 +480,7 @@ sub storySearchRSS {
 		push @items, {
 			title	=> "$entry->{title} ($time)",
 			'link'	=> ($constants->{absolutedir} . '/article.pl?sid=' . $entry->{sid}),
+			description	=> $entry->{introtext}
 		};
 	}
 
@@ -609,6 +616,10 @@ sub journalSearch {
 		} else {
 			$forward = 0;
 		}
+		for(@$entries) {
+			$_->{article} = substr(strip_nohtml($_->{article}),0,80);
+			$_->{article} =~ s/(.*) .*$/$1.../g;
+		}
 
 		# if there are less than search_default_display remaning,
 		# just set it to 0
@@ -645,6 +656,7 @@ sub journalSearchRSS {
 		push @items, {
 			title	=> "$entry->{description} ($time)",
 			'link'	=> ($constants->{absolutedir} . '/~' . fixparam($entry->{nickname}) . '/journal/' . $entry->{id}),
+			description	=> $constants->{article},
 		};
 	}
 
@@ -652,7 +664,7 @@ sub journalSearchRSS {
 		channel => {
 			title		=> "$constants->{sitename} Journal Search",
 			'link'		=> "$constants->{absolutedir}/search.pl",
-			description	=> "$constants->{sitename} Journal Search",
+			description	=> "$constants->{sitename} Journal Search"
 		},
 		image	=> 1,
 		items	=> \@items
@@ -678,15 +690,16 @@ sub submissionSearch {
 	# and if we get the extra one, we know we have extra ones, and
 	# we pop it off
 	if ($entries && @$entries) {
-		for(@$entries) {
-			$_->{story} = substr(strip_nohtml($_->{story}),0,80);
-		}
 		my $forward;
 		if (@$entries == $constants->{search_default_display} + 1) {
 			pop @$entries;
 			$forward = $start + $constants->{search_default_display};
 		} else {
 			$forward = 0;
+		}
+		for(@$entries) {
+			$_->{story} = substr(strip_nohtml($_->{story}),0,80);
+			$_->{story} =~ s/(.*) .*$/$1.../g;
 		}
 
 		# if there are less than search_default_display remaning,

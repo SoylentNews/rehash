@@ -31,35 +31,6 @@ sub new {
 	return $self;
 }
 
-#################################################################
-# Private method used by the search methods
-sub _keysearch {
-	my($self, $keywords, $columns) = @_;
-
-	my @words = split m/ /, $keywords;
-	my $sql;
-	my $x = 0;
-	my $latch = 0;
-
-	for my $word (@words) {
-		next if length $word < 3;
-		last if $x++ > 3;
-		$sql .= " AND " if $sql;
-		$sql .= " ( ";
-		$latch = 0;
-		for (@$columns) {
-			$sql .= " OR " if $latch;
-			$sql .= "$_ LIKE " . $self->sqlQuote("%$word%"). " ";
-			$latch++;
-		}
-		$sql .= " ) ";
-	}
-	# void context, does nothing?
-	$sql = "0" unless $sql;
-
-	return qq|($sql)|;
-};
-
 ####################################################################################
 # This has been changed. Since we no longer delete comments
 # it is safe to have this run against stories.
@@ -73,8 +44,8 @@ sub findComments {
 	$columns .= "discussions.section as section, discussions.url as url, discussions.uid as author_uid,";
 	$columns .= "discussions.title as title, pid, subject, ts, date, comments.uid as uid, ";
 	$columns .= "comments.cid as cid, discussions.id as did ";
-	$columns .= ", TRUNCATE((MATCH (comments.subject) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= ", TRUNCATE( " . $self->_score('comments.subject', $form->{query}, $constants->{search_method}) . ", 1) as score "
+		if $form->{query};
 
 	my $tables = "comments, discussions";
 
@@ -127,6 +98,8 @@ sub findComments {
 	}
 
 	my $other;
+	$other .= " HAVING score > 0 "
+		if $form->{query};
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC ";
 	} else {
@@ -200,10 +173,11 @@ sub findUsers {
 	# userSearch REALLY doesn't need to be ordered by keyword since you
 	# only care if the substring is found.
 	my $query = $self->sqlQuote($form->{query});
+	my $constants = getCurrentStatic();
 
 	my $columns = 'fakeemail,nickname,users.uid as uid,journal_last_entry_date ';
-	$columns .= ", TRUNCATE((MATCH (nickname) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= ", TRUNCATE( " . $self->_score('nickname', $form->{query}, $constants->{search_method}) . ", 1) as score "
+		if $form->{query};
 
 	my $key = " MATCH (nickname) AGAINST ($query) ";
 	my $tables = 'users';
@@ -215,6 +189,8 @@ sub findUsers {
 
 
 	my $other;
+	$other .= " HAVING score > 0 "
+		if $form->{query};
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score "
 	} else {
@@ -236,16 +212,18 @@ sub findStory {
 
 	my $query = $self->sqlQuote($form->{query});
 	my $columns;
-	$columns .= "users.nickname as nickname, stories.title as title, stories.sid as sid, "; 
+	$columns .= "title, stories.sid as sid, "; 
 	$columns .= "time, commentcount, stories.section as section,";
-	$columns .= "stories.tid as tid ";
-	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= "tid, ";
+	$columns .= "introtext ";
+	$columns .= ", TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
+		if $form->{query};
 
-	my $tables = "stories,users";
-	$tables .= ",story_text" if $form->{query};
+	my $tables = "stories,story_text";
 
 	my $other;
+	$other .= " HAVING score > 0 "
+		if $form->{query};
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC";
 	} else {
@@ -253,9 +231,8 @@ sub findStory {
 	}
 
 	# The big old searching WHERE clause, fear it
-	my $key = " (MATCH (stories.title) AGAINST ($query) or MATCH (introtext,bodytext) AGAINST ($query)) ";
-	my $where = "stories.uid = users.uid ";
-	$where .= " AND stories.sid = story_text.sid AND $key" 
+	my $where = "stories.sid = story_text.sid ";
+	$where .= " AND  (MATCH (stories.title) AGAINST ($query) or MATCH (introtext,bodytext) AGAINST ($query)) "
 		if $form->{query};
 
 	$where .= " AND time < now() AND stories.writestatus != 'delete' ";
@@ -335,19 +312,22 @@ sub findRetrieveSite {
 sub findJournalEntry {
 	my($self, $form, $start, $limit, $sort) = @_;
 	$start ||= 0;
+	my $constants = getCurrentStatic();
 
 	my $query = $self->sqlQuote($form->{query});
 	my $columns;
 	$columns .= "users.nickname as nickname, journals.description as description, ";
-	$columns .= "journals.id as id, date, users.uid as uid";
-	$columns .= ", TRUNCATE((((MATCH (description) AGAINST($query) + (MATCH (article) AGAINST($query)))) / 2), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= "journals.id as id, date, users.uid as uid, article";
+	$columns .= ", TRUNCATE((( " . $self->_score('description', $form->{query}, $constants->{search_method}) . " + " .  $self->_score('article', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
+		if $form->{query};
 	my $tables = "journals, journals_text, users";
 	my $other;
+	$other .= " HAVING score > 0 "
+		if ($form->{query});
 	if ($form->{query} && $sort == 2) {
-		$other = " ORDER BY score DESC";
+		$other .= " ORDER BY score DESC";
 	} else {
-		$other = " ORDER BY date DESC";
+		$other .= " ORDER BY date DESC";
 	}
 
 	# The big old searching WHERE clause, fear it
@@ -371,13 +351,16 @@ sub findJournalEntry {
 sub findPollQuestion {
 	my($self, $form, $start, $limit, $sort) = @_;
 	$start ||= 0;
+	my $constants = getCurrentStatic();
 
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "qid, question, voters, date";
-	$columns .= ", TRUNCATE((MATCH (question) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= ", TRUNCATE( " . $self->_score('question', $form->{query}, $constants->{search_method}) . ", 1) as score "
+		if $form->{query};
 	my $tables = "pollquestions";
 	my $other;
+	$other .= " HAVING score > 0 "
+		if ($form->{query});
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC";
 	} else {
@@ -406,13 +389,16 @@ sub findPollQuestion {
 sub findSubmission {
 	my($self, $form, $start, $limit, $sort) = @_;
 	$start ||= 0;
+	my $constants = getCurrentStatic();
 
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "subid, subj, time, story";
-	$columns .= ", TRUNCATE((MATCH (subj,story) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= ", TRUNCATE( " . $self->_score('subj,story', $form->{query}, $constants->{search_method}) . ", 1) as score "
+		if $form->{query};
 	my $tables = "submissions";
 	my $other;
+	$other .= " HAVING score > 0 "
+		if ($form->{query});
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC";
 	} else {
@@ -440,13 +426,16 @@ sub findSubmission {
 sub findRSS {
 	my($self, $form, $start, $limit, $sort) = @_;
 	$start ||= 0;
+	my $constants = getCurrentStatic();
 
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "title, link, description, created";
-	$columns .= ", TRUNCATE((MATCH (title,description) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= ", TRUNCATE( " . $self->_score('title,description', $form->{query}, $constants->{search_method}) . ", 1) as score "
+		if $form->{query};
 	my $tables = "rss_raw";
 	my $other;
+	$other .= " HAVING score > 0 "
+		if ($form->{query});
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC";
 	} else {
@@ -474,10 +463,12 @@ sub findDiscussion {
 
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "*";
-	$columns .= ", TRUNCATE((MATCH (title) AGAINST($query)), 1) as score "
-		if ($form->{query} && $sort == 2);
+	$columns .= ", TRUNCATE( " . $self->_score('title', $form->{query}, $constants->{search_method}) . ", 1) as score "
+		if $form->{query};
 	my $tables = "discussions";
 	my $other;
+	$other .= " HAVING score > 0 "
+		if ($form->{query});
 	if ($form->{query} && $sort == 2) {
 		$other = " ORDER BY score DESC";
 	} elsif ($sort == 3) {
@@ -508,6 +499,21 @@ sub findDiscussion {
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $stories;
+}
+
+sub _score {
+	my ($self, $col, $query, $method) = @_;
+	if ($method) {
+		my $terms;
+		for (split / /, $query) {
+			$terms .= $self->sqlQuote($_) . ",";
+		}
+		chop($terms);
+		return "($method($col, $terms))";
+	} else {
+		$query =  $self->sqlQuote($query);
+		return "\n(MATCH ($col) AGAINST($query))\n";
+	}
 }
 
 #################################################################
