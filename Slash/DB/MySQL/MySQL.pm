@@ -2200,25 +2200,28 @@ sub saveTopic {
 		height		=> $topic->{height},
 	};
 
+	my $data2 = {
+		name		=> $topic->{name},
+		default_image	=> $imgid,
+		alttext		=> $topic->{alttext},
+		parent_topic	=> $topic->{parent_topic},
+	};
+
+
 	# Using the topic as the name here probably isn't what is intended, but
 	# it should work just fine for now.     -Cliff
 	if (!$imgid) {
 		$self->sqlInsert('topic_images', $data);
-		$imgid = $self->getLastInsertId;
+		$data2->{default_image} = $self->getLastInsertId;
 	} else {
 		$self->sqlUpdate('topic_images', $data, "id=$imgid");
 	}
 
-	$data->{alttext}	= $topic->{alttext};
-	$data->{parent_topic}	= $topic->{parent_topic};
-	$data->{default_image}	= $imgid;
-	delete $data->{image};
-
 	if ($rows == 0) {
-		$self->sqlInsert('topics', $data);
+		$self->sqlInsert('topics', $data2);
 		$tid = $self->getLastInsertId;
 	} else {
-		$self->sqlUpdate('topics', $data, "tid=$tid");
+		$self->sqlUpdate('topics', $data2, "tid=$tid");
 	}
 
 	return $tid;
