@@ -2402,6 +2402,11 @@ sub getUserAdmin {
 		$user_edit->{m2unfairpercent} = sprintf("%.2f",
 			$user_edit->{m2unfair}*100/$m2total);
 	}
+	my $mod_total = ($user_edit->{totalmods} || 0) + ($user_edit->{stirred} || 0);
+	if ($mod_total) {
+		$user_edit->{stirredpercent} = sprintf("%.2f",
+			$user_edit->{stirred}*100/$mod_total);
+	}
 
 	return slashDisplay('getUserAdmin', {
 		field			=> $field,
