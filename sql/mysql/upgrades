@@ -1754,8 +1754,6 @@ INSERT INTO vars (name, value, description) VALUES ('counthits_lastmaxid','1','L
 
 # End of T_2_3_0_108, Start of T_2_3_0_109 - 2003/07/17
 
-# SLASHDOT LAST UPDATED HERE
-
 ALTER TABLE dbs CHANGE type type ENUM("writer","reader","log","search","log_slave","querylog") DEFAULT "reader" NOT NULL;
 
 # If you want to do your querylogging to a separate DB, create an entry
@@ -1804,11 +1802,14 @@ ALTER TABLE journals CHANGE COLUMN tid tid SMALLINT UNSIGNED NOT NULL;
 # plugins/Events (ignore if not using that plugin)
 ALTER TABLE event_dates CHANGE COLUMN sid sid varchar(16) NOT NULL DEFAULT '', ADD INDEX sid (sid);
 
-# should be '1' for Slashdot ....
+# End of T_2_3_0_109, Start of T_2_3_0_110 - 2003/07/17
+# End of T_2_3_0_110, Start of T_2_3_0_111 - 2003/07/23
+
+# We set these to '1' for Slashdot.
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset','0','Convert high-bit characters to character references, which are then filtered by approveCharrefs or encode_html_amp (works only with Latin-1 for now)');
 INSERT INTO vars (name, value, description) VALUES ('draconian_charset_convert','0','Convert some of high-bit chars to ASCII representations instead (see draconian_charset)');
 
-# End of T_2_3_0_111, Start of T_2_3_0_112 - 2003/08/??
+# End of T_2_3_0_111, Start of T_2_3_0_112 - 2003/07/30
 
 # selection choices for comment bytelimits
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 0, '128K');
@@ -1824,10 +1825,12 @@ INSERT INTO vars (name, value, description) VALUES ('defaultbytelimit', 5, 'The 
 
 # USEPERL LAST UPDATED HERE
 
-# End of T_2_3_0_112, Start of T_2_3_0_113 - 2003/08/08
+# End of T_2_3_0_112, Start of T_2_3_0_113 - 2003/08/06
 
 UPDATE users_comments SET mode='thread' WHERE mode IS NULL OR mode NOT IN ('flat', 'nested', 'nocomment', 'thread');
 UPDATE users_comments SET threshold=0 WHERE threshold IS NULL;
 UPDATE users_comments SET commentsort=0 WHERE commentsort IS NULL;
 ALTER TABLE users_comments CHANGE COLUMN mode mode ENUM('flat', 'nested', 'nocomment', 'thread') DEFAULT 'thread' NOT NULL, CHANGE COLUMN commentsort commentsort TINYINT DEFAULT '0' NOT NULL, CHANGE COLUMN threshold threshold TINYINT DEFAULT '0' NOT NULL;
+
+# SLASHDOT LAST UPDATED HERE
 
