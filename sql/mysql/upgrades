@@ -992,9 +992,7 @@ INSERT INTO vars (name, value, description) VALUES ('archive_delay_mod', '60', '
 INSERT INTO vars (name, value, description) VALUES ('mod_stir_recycle_fraction', '1.0', 'What fraction of unused mod points get recycled back into the system?');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_stirratio', '1.1', 'Factor of stirred-points ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
 
-# SLASHDOT LAST UPDATED HERE
-
-# End of T_2_3_0_57
+# End of T_2_3_0_57, Start of T_2_3_0_58
 
 # Subsection stuff -Brian
 DROP TABLE IF EXISTS section_subsections;
@@ -1010,4 +1008,10 @@ ALTER TABLE subsections DROP section;
 
 # Change for plugins/Subscribe (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('subscribe_email', 'admin@example.com', 'Email address for subscription-related issues');
+
+ALTER TABLE related_links CHANGE name name VARCHAR(80);
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_58
 
