@@ -116,7 +116,6 @@ mod_perl must be installed by hand, because of the special configuration
 required for it.
 
 Optional but recommended modules include:  Cache::Memcached Silly::Werder
-GD GD::Text Apache::SSI Apache::RegistryFilter
-
+GD GD::Text Apache::SSI Apache::RegistryFilter GraphViz
 
 =cut

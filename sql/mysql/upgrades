@@ -2337,3 +2337,32 @@ INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1'
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_156, Start of T_2_3_0_157 - 2004/06/01
+
+######################################################################
+
+# End of T_2_3_0_157, Start of T_2_5_0_1 - 2004/07/01
+
+# You want to run utils/convertDBto200406 here, then follow its
+# instructions, read its output.  Shut your site down and execute
+# the commands it gives.  Then if all looks well, do a 'make install'
+# and run utils/convertDBto200406_suggest and execute whatever of
+# _its_ commands you see fit to.  Finally, run
+# utils/convertDBto200406_render.  Of course, you need more detailed
+# instructions than this because without them you don't know what
+# the heck you're reading or what you "see fit to," but we're working
+# on those instructions, they aren't written yet.  This is the fun
+# part about cutting-edge code, isn't it!
+
+# You probably want to install the CPAN module GraphViz here, along
+# with whatever it needs;  see plugins/Admin/README for details.
+# If you don't, set topic_tree_draw to 0 instead of 1.
+
+# Changes for plugins/Admin (which you are almost certainly using)
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw', '1', 'Draw the images/topic_tree.png?');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontname', 'freefont/FreeMono', 'Name of font used for labels in the topic tree');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontsize', '10', 'Size of font used for labels in the topic tree');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastchange', '1', 'Unix timestamp of last change to the topic tree');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastdraw', '1', 'Unix timestamp of last time topic_tree_draw.pl redrew images/topic_tree.png');
+INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Tree','Tree','[% gSkin.rootdir %]/
+admin.pl?op=topictree',100,9);
+

@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+Just displays the topic tree PNG, assuming it's there.
+__title__
+admin interface topicTree template
+__page__
+admin
+__lang__
+en_US
+__name__
+topicTree
+__template__
+[% PROCESS titlebar title=constants.sitename _ " Topic Tree Graphic" width='100%' %]
+<table width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td>
+<img src="[% constants.imagedir %]/topic_tree.png">
+</td></tr></table>
+__seclev__
+100
+__version__
+$Id$

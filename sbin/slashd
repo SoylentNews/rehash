@@ -953,4 +953,9 @@ sub PRINTF {
 	main::slashdLog(sprintf($format, @args));
 }
 
+sub FILENO {
+	my($fh) = @_;
+	return fileno($fh);
+}
+
 1;

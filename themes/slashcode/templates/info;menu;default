@@ -20,6 +20,7 @@ __template__
 	{ link = "$gSkin.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
 	{ link = "$gSkin.rootdir/stats.pl",			label = "Stats",		sel_label = "stats" },
 	{ link = "$gSkin.rootdir/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
+	{ link = "$gSkin.rootdir/admin.pl?op=topictree",	label = "Tree",			sel_label = "tree" },
 	{ link = "$gSkin.rootdir/admin.pl?op=recent_subs",	label = "Subs",			sel_label = "subs" },
 	{ link = "$gSkin.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
 	{ link = "$gSkin.rootdir/admin.pl?op=recent_webheads", label = "Webheads",		sel_label = "webheads" },

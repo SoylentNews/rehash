@@ -24,6 +24,7 @@ INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('co
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('config','Info','Info','[% gSkin.rootdir %]/admin.pl?op=recent',500,10);
 
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Site','Site','[% gSkin.rootdir %]/admin.pl?op=siteinfo',100,9);
+INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Tree','Tree','[% gSkin.rootdir %]/admin.pl?op=topictree',100,9);
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Slashd','Slashd','[% gSkin.rootdir %]/admin.pl?op=slashd',500,9);
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Recent','Recent','[% gSkin.rootdir %]/admin.pl?op=recent',500,10);
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Normal','Normal','[% gSkin.rootdir %]/admin.pl',500,12);
@@ -34,9 +35,14 @@ INSERT INTO vars (name, value, description) VALUES ('similarstorydays', '30', 'N
 INSERT INTO vars (name, value, description) VALUES ('similarstorymaxwords', '30', 'Maximum number of top-weighted scores to search for in previous stories');
 INSERT INTO vars (name, value, description) VALUES ('similarstoryminweight', '4', 'Minimum weight necessary for a story to be displayed as similar');
 INSERT INTO vars (name, value, description) VALUES ('similarstorynumshow', '5', 'Maximum number of similar stories to show in admin preview');
-INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_bodytext','0.5','The min M1 karma');
-INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_introtext','1','The min M1 karma');
-INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8','The min M1 karma');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw', '1', 'Draw the images/topic_tree.png?');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontname', 'freefont/FreeMono', 'Name of font used for labels in the topic tree');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontsize', '10', 'Size of font used for labels in the topic tree');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastchange', '1', 'Unix timestamp of last change to the topic tree');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastdraw', '1', 'Unix timestamp of last time topic_tree_draw.pl redrew images/topic_tree.png');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_bodytext','0.5','Relative weight for uncommon words found in bodytext of stories');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_introtext','1','Relative weight for uncommon words found in introtext of stories');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8','Relative weight for uncommon words found in titles of stories');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords', '', 'A generated list of uncommon words found in recent stories');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords_maxlen', '65000', 'Maximum length of the uncommon words list');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstoryword_minlen', '3', 'Minimum length of the words in the uncommon words list');

@@ -82,7 +82,6 @@ sub main {
 		},
 		colors 		=> {	# colored,colorpreview,colorsave,colorrevert,
 					# colororig,colorsavedef,
-
 			function 	=> \&colorEdit,
 			seclev		=> 10000,
 			adminmenu	=> 'config',
@@ -112,23 +111,25 @@ sub main {
 			adminmenu	=> 'info',
 			tab_selected	=> 'site',
 		},
-
+		topictree	=> {
+			function 	=> \&topicTree,
+			seclev		=> 100,
+			adminmenu	=> 'info',
+			tab_selected	=> 'topictree',
+		},
 		templates 	=> {
 			function 	=> \&templateEdit,
 			seclev		=> 500,
 			adminmenu	=> 'config',
 			tab_selected	=> 'templates',
 		},
-
 		topics 		=> {	# topiced,topicnew,topicsave,topicdelete
-
 			function 	=> \&topicEdit,
 			seclev		=> 10000,
 			adminmenu	=> 'config',
 			tab_selected	=> 'topics',
 		},
 		vars 		=> {	# varsave, varedit
-
 			function 	=> \&varEdit,
 			seclev		=> 10000,
 			adminmenu	=> 'config',
@@ -331,6 +332,13 @@ sub siteInfo {
 		site_info	=> $site_info,
 	});
 
+}
+
+##################################################################
+sub topicTree {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	slashDisplay('topicTree');
 }
 
 ##################################################################

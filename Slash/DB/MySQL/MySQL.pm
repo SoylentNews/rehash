@@ -1142,15 +1142,17 @@ sub undoModeration {
 # If no tid is given, returns the whole tree.  Otherwise,
 # returns the data for the topic with that numeric id.
 sub getTopicTree {
-	my($self, $tid) = @_;
+	my($self, $tid_wanted, $options) = @_;
 	my $constants = getCurrentStatic();
 
 	my $table_cache		= "_topictree_cache";
 	my $table_cache_time	= "_topictree_cache_time";
-	_genericCacheRefresh($self, 'topictree', $constants->{block_expire});
+	_genericCacheRefresh($self, 'topictree',
+		$options->{no_cache} ? -1 : $constants->{block_expire}
+	);
 	if ($self->{$table_cache_time}) {
-		if ($tid) {
-			return $self->{$table_cache}{$tid} || undef;
+		if ($tid_wanted) {
+			return $self->{$table_cache}{$tid_wanted} || undef;
 		} else {
 			return $self->{$table_cache};
 		}
@@ -1201,8 +1203,8 @@ sub getTopicTree {
 
 	$self->{$table_cache} = $tree_ref;
 	$self->{$table_cache_time} = time;
-	if ($tid) {
-		return $tree_ref->{$tid} || undef;
+	if ($tid_wanted) {
+		return $tree_ref->{$tid_wanted} || undef;
 	} else {
 		return $tree_ref;
 	}
