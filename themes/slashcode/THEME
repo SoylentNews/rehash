@@ -233,6 +233,7 @@ template=templates/storylink;index;light
 template=templates/tabbedmenu;misc;default
 template=templates/three;misc;default
 template=templates/tildeEd;users;default
+template=templates/timeago;misc;default
 template=templates/titlebar;misc;default
 template=templates/titlebar;misc;light
 template=templates/titles;users;default
