@@ -314,8 +314,8 @@ sub deleteMessages {
 		if ($_->[1] > $webmx) {
 			my $c = $_->[1] - $webmx;
 			my $delids = $self->sqlSelectColArrayref(
-				"id", "message_web", "user=$_->[0]",
-				"ORDER BY date DESC LIMIT $c"
+				$prime, $table, "user=$_->[0]",
+				"ORDER BY date ASC LIMIT $c"
 			);
 			$self->_delete_web($_, 0, 1) for @$delids;
 		}
