@@ -10,6 +10,7 @@ use vars qw( %task $me );
 # your audience and admins.
 $task{$me}{timespec} = '7 8 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
+$task{$me}{on_startup} = 1;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
