@@ -612,8 +612,8 @@ sub userdir_handler {
 			}
 			return OK;
 		} else {
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
+			$r->uri('/login.pl');
+			$r->filename($constants->{basedir} . '/login.pl');
 			return OK;
 		}
 	}
