@@ -6518,7 +6518,7 @@ sub setUser {
 	$cache = _genericGetCacheName($self, $tables);
 
 	for (keys %$hashref) {
-	(my $clean_val = $_) =~ s/^-//;
+		(my $clean_val = $_) =~ s/^-//;
 		my $key = $self->{$cache}{$clean_val};
 		if ($key) {
 			push @{$update_tables{$key}}, $_;
@@ -6558,7 +6558,7 @@ sub setUser {
 			$rows += $self->sqlDelete('users_param', 
 				"uid = $uid AND name = " . $self->sqlQuote($_->[0]));
 		} elsif ($_->[0] eq "acl") {
-			my (@delete, @add);
+			my(@delete, @add);
 			my $acls = $_->[1];
 			for my $key (keys(%$acls)) {
 				if ($acls->{$key}) {

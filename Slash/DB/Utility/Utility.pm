@@ -590,7 +590,7 @@ sub sqlQuote {
 	my($self, $value) = @_;
 	$self->sqlConnect;
 	if (ref($value) eq 'ARRAY') {
-		my (@array);
+		my(@array);
 		for (@$value) {
 			push @array, $self->{_dbh}->quote($_);
 		}
