@@ -569,12 +569,13 @@ sub getTop10Comments {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 
-	my($min_points, $max_points) =
-		($constants->{minpoints}, $constants->{maxpoints});
+	my($min_score, $max_score) =
+		($constants->{comment_minscore}, $constants->{comment_maxscore});
 
 	my $num_wanted = $constants->{top10comm_num} || 10;
 
-	my($cids, $comments);
+	my $cids = [];
+	my $comments = [];
 	my $num_top10_comments = 0;
 
 	while (1) {
@@ -585,15 +586,15 @@ sub getTop10Comments {
 			'cid',
 			'comments',
 			"date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-				AND points >= $max_points",
+				AND points >= $max_score",
 			'ORDER BY date DESC');
 
 		$num_top10_comments = scalar(@$cids);
 		last if $num_top10_comments >= $num_wanted;
                 # Didn't get $num_wanted... try again with lower standards.
-                --$max_points;
+                --$max_score;
                 # If this is as low as we can get... take what we have.
-                last if $max_points <= $min_points;
+                last if $max_score <= $min_score;
 	}
 
 	foreach (@$cids) {
@@ -615,7 +616,7 @@ sub getTop10Comments {
 			"cid=$cids->[$num_top10_comments]->[0]
 				AND users.uid=comments.uid
                                 AND comments.sid=stories.discussion");
-		push @$comments, $comment;
+		push @$comments, $comment if $comment;
 		++$num_top10_comments;
 	}
 
