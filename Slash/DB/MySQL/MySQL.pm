@@ -7071,6 +7071,25 @@ sub sqlShowStatus {
 #	return $newsid;
 #}
 
+
+########################################################
+sub DESTROY {
+	my($self) = @_;
+
+	# flush accesslog insert cache
+	if (@{$self->{_accesslog_insert_cache}}) {
+		$self->sqlDo("SET AUTOCOMMIT=0");
+		while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
+			$self->sqlInsert('accesslog', $hr, { delayed => 1 });
+		}
+		$self->sqlDo("commit");
+		$self->sqlDo("SET AUTOCOMMIT=1");
+	}
+
+	$self->SUPER::DESTROY; # up up up
+}
+
+
 1;
 
 __END__
