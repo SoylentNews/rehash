@@ -1299,8 +1299,6 @@ CREATE TABLE stats_graphs_index (
 
 INSERT INTO vars (name, value, description) VALUES ('adminmail_last_run','2003-02-20','day adminmail last ran');
 
-# USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_75, Start of T_2_3_0_76
 
 INSERT INTO vars (name, value, description) VALUES ('subscribe_future_secs','0','Seconds worth of stories that subscribers can see into The Mysterious Future');
@@ -1360,3 +1358,4 @@ ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255) NOT NULL DEFAULT
 #INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
 
 # DEVCHANNEL LAST UPDATED HERE
+# USEPERL LAST UPDATED HERE
