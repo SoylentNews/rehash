@@ -4,7 +4,7 @@ package Bundle::Slash;
 # $Id$
 #
 
-$Bundle::Slash::VERSION = '2.35';
+$Bundle::Slash::VERSION = '2.50';
 
 1;
 
@@ -108,6 +108,8 @@ Template		- Template Toolkit
 LWP::Parallel
 
 Lingua::Stem
+
+URI::Find
 
 
 =head1 DESCRIPTION
