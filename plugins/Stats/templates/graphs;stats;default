@@ -61,17 +61,27 @@ SWITCH gtitle;
          statdata => ['grand_total', 'rss_page', 'palm_page'];
   END;
 
+  CASE 'Total Users';
+  IF (form.stats_section && form.stats_section != 'all');
+      PROCESS make_graph
+         section  => form.stats_section,
+         type     => 'area',
+         statdata => ['ipids', 'users', 'users_subscriber'];
+  ELSE;
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'area',
+         statdata => [['unique', '', 'ipids'],
+                      ['unique_users', '', 'users'],
+                      ['total_subscriber', '', 'users_subscriber']
+                     ];
+  END;
+
   CASE 'Comments';
       PROCESS make_graph
          section  => form.stats_section || 'all',
          type     => 'area',
          statdata => ['comments'];
-
-  CASE 'Users';
-      PROCESS make_graph
-         section  => 'all',
-         type     => 'areapercentage',
-         statdata => ['unique', 'unique_users'];
 
   CASE 'Page Bytes';
   IF (form.stats_section && form.stats_section != 'all');
@@ -169,6 +179,33 @@ SWITCH gtitle;
          statdata => ['m2_fair_total', 'm2_unfair_total'];
 
 
+  # Subscription Report
+  CASE 'New Subscriptions';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'areastacked',
+         statdata => ['subscribe_new_users', 'subscribe_renew_users'];
+
+  CASE 'Total Subscribers';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'area',
+         statdata => ['subscribers_total', 'subscribers_current'];
+
+  CASE 'Total Renewing Subscribers';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'area',
+         statdata => ['subscribers_renewing_total', 'subscribers_renewing_current'];
+
+  CASE 'Subscriber Pages';
+      PROCESS make_graph
+         section  => 'all',
+         type     => 'area',
+         statdata => ['total_subscriber', 'subscribe_hits_bought', 'total_secure'];
+
+
+  # default
   CASE;
       "";
 
