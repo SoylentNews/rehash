@@ -20,6 +20,11 @@ __template__
 	<TD VALIGN="TOP">
 		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/">[% person.1 %]</A>
 	</TD>
+	[% IF editable %]
+		<TD VALIGN="TOP">
+			[% PROCESS zoo_icons person=item.0 %]
+		</TD>
+	[% END %]
 	<TD VALIGN="TOP">
 		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/friends/">friends</A>
 	</TD>
@@ -34,17 +39,6 @@ __template__
 		<TD VALIGN="TOP">&nbsp;</TD>
 	[% END %]
 
-	[% IF editable %]
-		<TD VALIGN="TOP">
-			[% IF form.op == "fans" %]
-					<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% person.0 %]&amp;type=friend">Add Friend</A>
-			[% ELSIF form.op == "friends" %]
-					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&amp;type=friend">Remove Friend</A>
-			[% ELSIF form.op == "foes" %]
-					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&amp;type=foe">Remove Foe</A>
-			[% END %]
-		</TD>
-	[% END %]
 </TR>
 [% END %]
 </TABLE>

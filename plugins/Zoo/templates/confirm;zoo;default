@@ -19,9 +19,9 @@ __template__
 		So how do you perceive <B>[% nickname | strip_literal %]</B>?  [% PROCESS zoo_icons person=uid %]
 		</TD>
 		<TD>
-			<INPUT TYPE="RADIO" NAME="type" VALUE="friend"[% IF type == 'friend' %]CHECKED[% END %]> Friend <br>
-			<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %]CHECKED[% END %]> Neutral <br>
-			<INPUT TYPE="RADIO" NAME="type" VALUE="foe"[% IF type == 'foe' %]CHECKED[% END %]> Foe <br>
+			<INPUT TYPE="RADIO" NAME="type" VALUE="friend"[% IF type == 'friend' %]CHECKED[% END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif" ALT="Friend"> Friend<br>
+			<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %]CHECKED[% END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral"> Neutral<br>
+			<INPUT TYPE="RADIO" NAME="type" VALUE="foe"[% IF type == 'foe' %]CHECKED[% END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif" ALT="Foe"> Foe <br>
 		</TD>
 	</TR>
 </TABLE>

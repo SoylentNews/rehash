@@ -67,7 +67,8 @@ sub getAll {
 	my $people = $self->sqlSelectAll(
 		'users.uid, nickname',
 		'people, users',
-		"people.uid = $uid AND person = users.uid"
+		"people.uid = $uid AND person = users.uid",
+		" ORDER BY nickname "
 	);
 	return $people;
 }
@@ -93,7 +94,8 @@ sub _get {
 	my $people = $self->sqlSelectAll(
 		'users.uid, nickname, journal_last_entry_date',
 		'people, users',
-		"people.uid = $uid AND type =\"$type\" AND person = users.uid"
+		"people.uid = $uid AND type =\"$type\" AND person = users.uid",
+		" ORDER BY nickname "
 	);
 	return $people;
 }
@@ -131,7 +133,8 @@ sub _getOpposite {
 	my $people = $self->sqlSelectAll(
 		'people.uid, nickname, journal_last_entry_date',
 		'people, users',
-		"person = $uid AND type =\"$type\" AND users.uid = people.uid"
+		"person = $uid AND type =\"$type\" AND users.uid = people.uid",
+		" ORDER BY nickname "
 	);
 	return $people;
 }
