@@ -56,11 +56,11 @@ sub updateRecentTopics {
 				);
 			}
 			$html .= slashDisplay('setrectop_img', {
-				id	=> $cur_tid,
-				image	=> $cur_story->{image},
-				width	=> $cur_story->{width},
-				height	=> $cur_story->{height},
-				alttext => $cur_story->{alttext},
+				id	 => $cur_tid,
+				image	 => $cur_story->{image},
+				width	 => $cur_story->{width},
+				height	 => $cur_story->{height},
+				textname => $cur_story->{alttext},
 			}, 1);
 		}
 #		if ($num_stories <= $constants->{recent_topic_txt_count}) {
