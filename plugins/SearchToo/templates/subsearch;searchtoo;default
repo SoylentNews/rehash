@@ -22,7 +22,7 @@ __template__
 		Section: [% IF skin.name == 'mainpage' %]<a href="[% constants.real_rootdir %]/submit.pl?op=list">Main</a>[% ELSE %]<a href="[% skin.url ? skin.url : gSkin.rootdir %]/submit.pl?section=[% entry.skin %]&amp;op=list">[% skin.title %]</a>[% END %] &gt;
 		[% FOREACH tid = entry.tid %]
 			[% topic = Slash.db.getTopic(tid) %]
-			<a href="[% gSkin.rootdir %]/searchtoo.pl?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
+			<a href="[% gSkin.rootdir %]/[% env.script_name %]?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
 		[% END %]<br>
 		State: [% del = entry.del; submission_state.$del %]<br>
 		[% IF entry.note %]

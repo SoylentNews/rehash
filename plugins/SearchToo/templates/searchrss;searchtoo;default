@@ -17,7 +17,7 @@ rss.items = [];
 rss.channel = {
 	title       => "$constants.sitename Search",
 	description => "$constants.sitename Search",
-	link        => "$gSkin.absolutedir/searchtoo.pl",
+	link        => "$gSkin.absolutedir/[% env.script_name %]",
 };
 
 IF op == 'stories';
