@@ -232,11 +232,14 @@ if ($opts{'P'}) {
 }
 {
 	# Add in any plugins that are required by the selection set.
-	# This may/will add a lot of duplicates.
+	# This may/will add a lot of duplicates, which get uniquified
+	# in the next step.
 	for (1..scalar(@all_plugins)) {
 		for my $plugin (@plugins) {
-			my $req = $plugins->{$plugin}{requiresplugin};
-			push @plugins, $req if $req;
+			my $req_hr = $plugins->{$plugin}{requiresplugin};
+			if ($req_hr and %$req_hr) {
+				push @plugins, keys %$req_hr;
+			}
 		}
 	}
 	# Eliminate duplicates.

@@ -400,11 +400,12 @@ sub _getList {
 				image | image_award | image_banner | 
 				task | template | sbin | misc | topic
 			)s?$/x) {
-				push @{$hash{$dir}{$key}}, $val;
-			} elsif ($key =~ /^(plugin)s?$/) {
-				$hash{$dir}{plugin}{$val} = 1;
+				push @{$hash{$dir}{$1}}, $val;
+			} elsif ($key =~ /^(
+				plugin | requiresplugin
+			)s?$/x) {
+				$hash{$dir}{$1}{$val} = 1;
 			} else {
-				# E.g., "requiresplugin"
 				$hash{$dir}{$key} = $val;
 			}
 		}
@@ -419,11 +420,11 @@ sub _getList {
 # 1 thru whatever, in ascii order of the elements' names.
 sub setListOrder {
 	my($hr) = @_;
-	my $dir;
-	my @dirs = sort keys %$hr;
+	my $plugin;
+	my @plugins = sort keys %$hr;
 
 	my $i = 0;
-	for $dir (@dirs) { $hr->{$dir}{order} = ++$i }
+	for $plugin (@plugins) { $hr->{$plugin}{order} = ++$i }
 }
 
 ##################################################
@@ -433,42 +434,53 @@ sub setListOrder {
 # order).
 sub setListInstallOrder {
 	my($hr) = @_;
-	my $dir;
-	my @dirs = sort keys %$hr;
-	my $n_dirs = scalar @dirs;
+	my $plugin;
+	my @plugins = sort keys %$hr;
+	my $n_plugins = scalar @plugins;
 
-	for $dir (@dirs) { $hr->{$dir}{installorder} = 0 }
+	for $plugin (@plugins) { $hr->{$plugin}{installorder} = 0 }
 
 	# This algorithm is a bit lame but it's simple and works.
+	# Its lameness will suck an extra few milliseconds at install
+	# time, which isn't a big deal.
 	# Go through the list of plugins n times, where n = the number
 	# of plugins itself, and each time fix at least one ordering
 	# problem (probably more).  After all n times, the order will
-	# be as correct as it's going to be (recursive "requires"ing
-	# is stupid but it won't break anything and its results will
-	# be predictable).
-	for (1..$n_dirs) {
-		for $dir (@dirs) {
-			# If this plugin says it requires another plugin, and
-			# if that other named plugin actually exists, our
-			# installorder must come after it.
-			if ($hr->{$dir}{requiresplugin}
-				&& $hr->{$hr->{$dir}{requiresplugin}}) {
-				my $old = $hr->{$dir}{installorder};
-				my $new = $hr->{$hr->{$dir}{requiresplugin}}{installorder}+1;
-				$hr->{$dir}{installorder} = $new if $old < $new;
+	# be as correct as it's going to be (and by the way, recursive
+	# looping "requires"ing is stupid but it won't break anything
+	# and its results will be predictable).
+	for (1..$n_plugins) {
+		for my $dep (@plugins) {
+			# If this plugin says it requires other plugins,
+			# we loop through them all and set our installorder
+			# to come after all theirs.
+			if ($hr->{$dep}{requiresplugin}
+				&& ref($hr->{$dep}{requiresplugin}) eq 'HASH') {
+				my $new = $hr->{$dep}{installorder};
+				my @reqs = keys %{$hr->{$dep}{requiresplugin}};
+				for my $req (@reqs) {
+					if ($hr->{$req}
+						&& $hr->{$req}{installorder}+1
+						 > $hr->{$dep}{installorder}) {
+						$new = $hr->{$req}{installorder}+1;
+					}
+				}
+				$hr->{$dep}{installorder} = $new;
 			}
 		}
 	}
 
 	# At this point, {installorder} should be accurate with duplicates.
-	# Now make it unambiguous, and a permutation of {order}.
-	@dirs = sort {
+	# Now make it unambiguous, and a permutation of {order}.  By
+	# falling back on plugin name alphabetical order we make sure
+	# ties are resolved predictably.
+	@plugins = sort {
 		$hr->{$a}{installorder} <=> $hr->{$b}{installorder}
 		||
 		$a cmp $b
-	} @dirs;
+	} @plugins;
 	my $i = 0;
-	for $dir (@dirs) { $hr->{$dir}{installorder} = ++$i }
+	for $plugin (@plugins) { $hr->{$plugin}{installorder} = ++$i }
 }
 
 sub reloadArmors {
