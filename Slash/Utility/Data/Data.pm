@@ -1733,6 +1733,9 @@ sub fudgeurl {
 
 	my $constants = getCurrentStatic();
 
+	### should we just escape spaces, quotes, apostrophes, and <> instead
+	### of removing them? -- pudge
+
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
 	$url =~ s/["\s]//g;
