@@ -5821,11 +5821,10 @@ sub getStory {
 		# but why do a join if it's not needed?
 		my($append, $answer, $db_id);
 		$db_id = $self->sqlQuote($id);
-#		my($column_clause) = $self->_stories_time_clauses({
-#			try_future => 1, must_be_subscriber => 0
-#		});
-#		$answer = $self->sqlSelectHashref("*, $column_clause", 'stories', "sid=$db_id");
-		$answer = $self->sqlSelectHashref("*", 'stories', "sid=$db_id");
+		my($column_clause) = $self->_stories_time_clauses({
+			try_future => 1, must_be_subscriber => 0
+		});
+		$answer = $self->sqlSelectHashref("*, $column_clause", 'stories', "sid=$db_id");
 		$append = $self->sqlSelectHashref('*', 'story_text', "sid=$db_id");
 		for my $key (keys %$append) {
 			$answer->{$key} = $append->{$key};
@@ -5871,9 +5870,9 @@ sub getStory {
 	# would involve converting the story's timestamp to unix epoch, and
 	# (2) we can't expire individual stories, we'd have to expire the
 	# whole story cache, and that would not be good for performance.
-#	if ($self->{$table_cache}{$id}{is_future}) {
-#		delete $self->{$table_cache}{$id};
-#	}
+	if ($self->{$table_cache}{$id}{is_future}) {
+		delete $self->{$table_cache}{$id};
+	}
 	# Now return what we need to return.
 	return $retval;
 }
