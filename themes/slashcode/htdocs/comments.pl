@@ -885,10 +885,6 @@ sub submitComment {
 
 	my $maxCid = $slashdb->createComment($clean_comment);
 
-	# testing
-	errorLog("POST1: $maxCid $form->{sid}")
-		if $constants->{basedomain} eq 'use.perl.org';
-
 	# make the formkeys happy
 	$form->{maxCid} = $maxCid;
 
@@ -929,35 +925,17 @@ sub submitComment {
 			-totalcomments => 'totalcomments+1',
 		});
 
-		# testing
-		errorLog("POST2: $maxCid $form->{sid}")
-			if $constants->{basedomain} eq 'use.perl.org';
 		my($messages, $reply, %users);
 		if ($form->{pid} || $discussion->{url} =~ /\bjournal\b/ || $constants->{commentnew_msg}) {
 			$messages = getObject('Slash::Messages');
 			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
-
-			# testing
-			errorLog("POST3: $maxCid $form->{sid} '$form->{pid} || $discussion->{url} =~ /\bjournal\b/ || $constants->{commentnew_msg}'")
-				if $constants->{basedomain} eq 'use.perl.org';
 		}
-
-		# testing
-		errorLog("POST4: $maxCid $form->{sid}")
-			if $constants->{basedomain} eq 'use.perl.org';
 
 		# reply to comment
 		if ($messages && $form->{pid}) {
-			# testing
-			errorLog("POST5: $maxCid $form->{sid} ${\(join ' ', sort keys %users)}")
-				if $constants->{basedomain} eq 'use.perl.org';
-
 			my $parent = $slashdb->getCommentReply($form->{sid}, $form->{pid});
 			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
 			if (@$users && !$users{$users->[0]}) {
-				# testing
-				errorLog("POST5a: $maxCid $form->{sid} $users->[0]")
-					if $constants->{basedomain} eq 'use.perl.org';
 				my $data  = {
 					template_name	=> 'reply_msg',
 					subject		=> { template_name => 'reply_msg_subj' },
@@ -973,14 +951,8 @@ sub submitComment {
 
 		# reply to journal
 		if ($messages && $discussion->{url} =~ /\bjournal\b/) {
-			# testing
-			errorLog("POST6: $maxCid $form->{sid} ${\(join ' ', sort keys %users)}")
-				if $constants->{basedomain} eq 'use.perl.org';
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
 			if (@$users && !$users{$users->[0]}) {
-				# testing
-				errorLog("POST6a: $maxCid $form->{sid} $users->[0]")
-					if $constants->{basedomain} eq 'use.perl.org';
 				my $data  = {
 					template_name	=> 'journrep',
 					subject		=> { template_name => 'journrep_subj' },
@@ -995,16 +967,10 @@ sub submitComment {
 
 		# comment posted
 		if ($messages && $constants->{commentnew_msg}) {
-			# testing
-			errorLog("POST7: $maxCid $form->{sid} ${\(join ' ', sort keys %users)}")
-				if $constants->{basedomain} eq 'use.perl.org';
 			my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
 
 			for my $usera (@$users) {
 				next if $users{$usera};
-				# testing
-				errorLog("POST7a: $maxCid $form->{sid} $usera")
-					if $constants->{basedomain} eq 'use.perl.org';
 				my $data  = {
 					template_name	=> 'commnew',
 					subject		=> { template_name => 'commnew_subj' },
@@ -1015,15 +981,7 @@ sub submitComment {
 				$users{$usera}++;
 			}
 		}
-
-		# testing
-		errorLog("POST8: $maxCid $form->{sid} ${\(join ' ', sort keys %users)}")
-			if $constants->{basedomain} eq 'use.perl.org';
 	}
-
-	# testing
-	errorLog("POST9: $maxCid $form->{sid}")
-		if $constants->{basedomain} eq 'use.perl.org';
 
 	return(1);
 }
