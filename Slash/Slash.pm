@@ -1159,6 +1159,7 @@ sub displayStory {
 
 	# And now we're also calling parseSlashizedLinks. - 2002/05/24 Jamie
 
+	$story->{storytime} = timeCalc($story->{'time'});
 	if ($story->{is_future} && !($user->{author} || $user->{is_admin})) {
 		$story->{atstorytime} = $constants->{subscribe_future_name};
 	} else {
