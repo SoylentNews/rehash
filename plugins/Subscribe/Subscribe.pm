@@ -228,9 +228,12 @@ sub plummyPage {
 # By default, allow readers to buy x pages for $y, 2x pages for $2y,
 # etc.  If you want to have n-for-the-price-of-m sales or whatever,
 # change the logic here.
+# Also, if someone hacks the HTML to purchase less than one
+# subscription, they get nothing.
 sub convertDollarsToPages {
 	my($self, $amount) = @_;
 	my $constants = getCurrentStatic();
+	$amount = 0 if $amount < $constants->{paypal_amount};
 	return sprintf("%0.0f", $amount*$constants->{paypal_num_pages}/
 		$constants->{paypal_amount});
 }
