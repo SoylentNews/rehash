@@ -7077,7 +7077,11 @@ sub DESTROY {
 	my($self) = @_;
 
 	# flush accesslog insert cache
-	if (@{$self->{_accesslog_insert_cache}}) {
+	if (ref $self->{_accesslog_insert_cache}) {
+
+		printf STDERR "%s exiting; inserting %d rows into accesslog\n",
+			$$, scalar @{$self->{_accesslog_insert_cache}};
+
 		$self->sqlDo("SET AUTOCOMMIT=0");
 		while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
 			$self->sqlInsert('accesslog', $hr, { delayed => 1 });
