@@ -898,10 +898,9 @@ Version 5.6.1 (5.6.0). [NOTE: perl 5.6.0 may have some problems.
 
 	http://www.cpan.org/
 
-We believe everything works fine with perl 5.8.x, and have several small
-Slash installations on it, but we have not tested Unicode thoroughly,
-nor have we run Slashdot on it yet.  If you're going with 5.8.x, we
-suggest 5.8.1 or later, as there are numerous small bugs in 5.8.0.
+We believe everything works fine with perl 5.8.x, x >= 1, and have
+several small Slash installations on it, but we have not tested Unicode
+thoroughly, nor have we run Slashdot on it yet.
 
 =item MySQL
 
@@ -924,10 +923,17 @@ Version 1.29 (1.21).
 
 	http://perl.apache.org/
 
+=item memcached
+
+Memcached is not required, but more and more, we are adding optimizations
+to Slash which take load off your database.  If you are concerned about
+performance, this is one of the first options to install.
+
+	http://www.danga.com/memcached/
+
 =item Sendmail or other transport daemon
 
 Refer to your OS distribution.
-
 
 =item Perl module distributions
 
@@ -951,7 +957,8 @@ On Debian Linux, try:
 	apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
 
 The current list of required perl modules can be found in the
-F<Bundle/Slash.pm> file.
+F<Bundle/Slash.pm> file.  At its end we also list optional modules,
+which may be required depending on your setup.
 
 =back
 
@@ -959,6 +966,11 @@ F<Bundle/Slash.pm> file.
 =head2 Hardware Requirements
 
 There are no specific hardware requirements.
+
+Slash is designed to work well on multi-machine setups, with one or
+more webheads that are separate from one or more MySQL DB machines.
+But for low-load sites (1-5 pages/sec or slower), it can probably be
+run OK on a single machine.
 
 Apache (with mod_perl) and MySQL both take up a lot of RAM. Running a
 complete system with 128MB might be possible, if you do some tuning of
@@ -973,8 +985,8 @@ stories and comments are added (keep an eye on the F<site/foo/logs/>
 directory, too).  A minimum of 1 GB of disk is recommended.
 
 Necessary processor speed is also dependent on how busy the site is.
-Pentium 133 or equivalent might work, but a Pentium II/400 or better
-is recommended.
+A Pentium II/400 equivalent is recommended, but obviously, the faster
+the better.
 
 For the curious, Slashdot (as of September 2001) runs on nine machines:
 nine webservers (each is Pentium III/600, 1GB RAM, 9GB hard drive), one
