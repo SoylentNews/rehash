@@ -492,12 +492,14 @@ sub getSiteTemplates {
 }
 
 sub _parseFilesForTemplates {
-	my ($file, $templates, $no_templates) = @_;
+	my($file, $templates, $no_templates) = @_;
+
 	my $file_handle = gensym;
-	if (!(-e $file)) {
-		print STDERR "Could not open $file\n";
-	} 
-	open($file_handle, "$file");
+	unless (open($file_handle, "< $file\0")) {
+		warn "Can't open $file: $!";
+		return;
+	}
+
 	$file =~ s/PLUGIN//;
 	$file =~ s/THEME//;
 	while (my $line = <$file_handle>) {
@@ -508,7 +510,7 @@ sub _parseFilesForTemplates {
 			my @parts = split /\//, $val;
 			$templates->{pop(@parts)} = "$file/$val";
 		}
-		push @$no_templates, "$val"
+		push @$no_templates, $val
 			if ($key eq 'no-template');
 	}
 }
