@@ -2331,7 +2331,6 @@ sub saveComm {
 		commentspill    => 50,
 		mode            => 'thread'
 	};
-	$defaults = { mode => undef, commentspill=> undef};
 
 	my @reasons = ( );
 	my $reasons = $slashdb->getReasons();
