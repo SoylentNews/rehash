@@ -66,6 +66,9 @@ before you do any moderation.<BR><P>
 Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A>
 [ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
 <BR>
+	[% UNLESS nickmatch_flag %]
+					<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% useredit.uid %]">BeFriend User</A><BR>
+	[% END %]
 [% END %]
 </P>
 
