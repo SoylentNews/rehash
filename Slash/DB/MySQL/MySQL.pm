@@ -4633,7 +4633,7 @@ sub getAbuses {
 # status codes 1xx, 2xx, 3xx, 4xx and 5xx respectively.
 sub countAccessLogHitsInLastX {
 	my($self, $field, $check, $x) = @_;
-	$x ||= 10000;
+	$x ||= 1000;
 	$check = md5hex($check) if length($check) != 32 && $field ne 'uid';
 	my $where = '';
 
