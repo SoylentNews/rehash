@@ -118,14 +118,14 @@ sub init {
 	$time_last = $time_first;
 
 	for my $db (@db) {
-		$db->{status_sth} = $db->{db}->sqlShowStatus();
-		$db->{innostatus_sth} = $db->{db}->sqlShowInnodbStatus()
+		$db->{status_query} = "SHOW STATUS";
+		$db->{innostatus_query} = "SHOW INNODB STATUS"
 			if $db->{version} == 4
 				&& $db->{vu} ne 'search'; # hack, hack
-		$db->{proclist_sth} = $db->{db}->sqlShowProcessList();
+		$db->{proclist_query} = "SHOW FULL PROCESSLIST";
 		($db->{queries_first}, $db->{slow_queries_first})
 			= ($db->{queries_last}, $db->{slow_queries_last})
-			= getQueries($db->{status_sth});
+			= getQueries($db);
 	}
 
 }
@@ -179,7 +179,7 @@ sub print_header {
 	printf("%4s %4s %5s %4s %4s", "", "", "", "", "");
 	for my $db (@db) {
 		my $wid = 14;
-		$wid += 2 if $db->{innostatus_sth};
+		$wid += 2 if $db->{innostatus_query};
 		my $name = $db->{vu};
 		my $len = length($name);
 		print join("",
@@ -194,7 +194,7 @@ sub print_header {
 	printf("%4s %4s %5s %4s %4s", "time", "load", "cps", "pps", "qpp");
 	for my $db (@db) {
 		printf(" %4s %3s %4s", "qps", "sps", "qpp");
-		print " h" if $db->{innostatus_sth};
+		print " h" if $db->{innostatus_query};
 	}
 	print "\n";
 
@@ -209,8 +209,8 @@ sub sleep_until {
 
 sub update_db_ary {
 	for my $db (@db) {
-		($db->{queries_new}, $db->{slow_queries_new}) = getQueries($db->{status_sth});
-		($db->{hitrate}) = getHitRate($db->{innostatus_sth}) if $db->{innostatus_sth};
+		($db->{queries_new}, $db->{slow_queries_new}) = getQueries($db);
+		($db->{hitrate}) = getHitRate($db) if $db->{innostatus_query};
 		getProclist($db);
 	}
 }
@@ -249,7 +249,7 @@ sub print_first_line {
 			($db->{queries_new} - $db->{queries_last}) / $time_elapsed,
 			($db->{queries_new} - $db->{queries_last}) / $pages,
 		);
-		if ($db->{innostatus_sth}) {
+		if ($db->{innostatus_query}) {
 			if (!defined($db->{hitrate})) {
 				print " ?";
 			} elsif ($db->{hitrate} >= 98) {
@@ -311,35 +311,38 @@ sub getLoadavg {
 }
 
 sub getQueries {
-	my($sth) = @_;
+	my($db) = @_;
+	my $query = $db->{status_query};
+	my $sth = $db->{db}{_dbh}->prepare($query);
 	my($q, $sq);
-	my $num_tries = 3;
-	while (!$q && --$num_tries >= 0) {
-		$sth->execute();
-		while (my($key, $val) = $sth->fetchrow()) {
-			$q = $val, next	if $key eq "Questions";
-			$sq = $val	if $key eq "Slow_queries";
-		}
-		$sth->finish();
+	$sth->execute();
+	while (my($key, $val) = $sth->fetchrow()) {
+		$q = $val, next if $key eq "Questions";
+		$sq = $val      if $key eq "Slow_queries";
 	}
+	$sth->finish();
 	if (!$q) {
-		print STDERR "getQueries returning q='$q' sq='$sq' for sth '$sth'\n";
+		print STDERR "getQueries returning q='$q' sq='$sq' for '$query'\n";
 	}
 	return($q, $sq);
 }
 
 sub getHitRate {
-	my($sth) = @_;
+	my($db) = @_;
+	my $query = $db->{innostatus_query};
+	my $sth = $db->{db}{_dbh}->prepare($query);
 	$sth->execute();
 	my($text) = $sth->fetchrow();
 	my($num, $denom) = $text =~ /Buffer pool hit rate (\d+)[ \/]+(\d+)/;
+	$sth->finish();
 	return undef unless $denom;
 	return 100*$num/$denom;
 }
 
 sub getProclist {
 	my($db) = @_;
-	my $sth = $db->{proclist_sth};
+	my $query = $db->{proclist_query};
+	my $sth = $db->{db}{_dbh}->prepare($query);
 	my $threads = 0;
 	my $active = 0;
 	my $proclist = [ ];
@@ -399,12 +402,12 @@ Usage: $PROGNAME [OPTIONS] ... [UIDs]
 Monitor the Slash site's database.
 
 Main options:
-	-h      Help (this message)
-	-v      Version
+	-h	Help (this message)
+	-v	Version
 	-i	Accesslog may contain images; do a SELECT from it to
 		weed them out when counting pages
 
-	-u      Virtual user (default "slashdot")
+	-u	Virtual user (default "slashdot")
 	-w	Width max in columns (default 76)
 	-r	Height max in (r)ows (default 20)
 	-s	Sleep time (default 10)
