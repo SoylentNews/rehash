@@ -277,6 +277,7 @@ Perform these tasks as root.
 
 Create the group "slash".
 
+
 =item 2.
 
 Create the user "slash" with slashdot gid. B<Note>: if using multiple
@@ -288,16 +289,19 @@ B<Note>: For security's sake, you may wish to add the web server user
 so that all the files are writable by user and group and not world,
 to keep other users on the system from modifying the files.
 
+
 =item 3.
 
 Unpack the slash code tarball in the slash user's home directory. This
 will place everything where it should belong.
+
 
 =item 4.
 
 chown everything in this tree as slash:slash (i.e., C<chown -R
 slash:slash /home/slash>).  chmod the main directory to be readable
 and executable by all (i.e., C<chmod a+rx /home/slash>).
+
 
 =item 5.
 
@@ -317,7 +321,45 @@ For virtual hosts, you should create a separate account and Slash
 installation for each virtual host, so repeat the instructions
 relating to creation of accounts for each virtual host.
 
+
 =item 6.
+
+Install perl.
+
+On Slashdot and Slashcode, we have all of the modules
+installed in the Apache directory, so that we can NFS mount that one
+directory on several machines, and they all have the same modules and
+configuration.  If you want to do that, when the configuration process
+asks where you want to put perl modules (both system and local) have
+it put them in the directory tree you'll install apache in
+(i.e., F</usr/local/apache/lib>).  Otherwise, the default installation
+directories are usually fine.
+
+
+=item 7.
+
+Untar apache and mod_perl. Build mod_perl. Have its build process build
+and install apache for you:
+
+	perl Makefile.PL APACHE_SRC=/where_you_have_the_source DO_HTTPD=1 \
+		USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
+		APACHE_PREFIX=/where_apache_will_be_installed
+	make
+	make test
+	make install
+
+This will install both mod_perl and apache.
+
+B<You MUST install mod_perl and Apache as directed here>.  OK, that is
+not strictly true, but it is mostly true.  If you already have mod_perl
+installed, chances are it is not configured properly to work with Slash
+and you must rebuild it.  If you are using the provided httpd.conf file
+from the slash distribution, and Apache is giving you errors, chances
+are mod_perl is not installed correctly, and you need to build it from
+scratch.
+
+
+=item 8.
 
 Install MySQL. Please refer to MySQL documentation for compilation
 and/or installation notes for any questions with this.  Find the
@@ -333,7 +375,8 @@ to run in GMT.  Then it is easy to convert dates to whatever the
 user's local time is.  If you have date problems, check that all of
 these are properly set to run in GMT.
 
-=item 7.
+
+=item 9.
 
 Create the slash mysql user and database.
 
@@ -356,7 +399,7 @@ settings. We'd suggest you don't let other users on the database have
 access to this user.
 
 
-=item 8.
+=item 10.
 
 Run the slash schema creation script and load sample slash db data dump.
 This dump has minimal data for the system to work. This data is needed
@@ -377,42 +420,6 @@ used for default links in the HTML).
 	mysql -uslash -pnewpassword slash < slashdata_dump.sql
 	mysql -uslash -pnewpassword slash < slashdata_prep.sql
 
-
-=item 9.
-
-Install perl.
-
-On Slashdot and Slashcode, we have all of the modules
-installed in the Apache directory, so that we can NFS mount that one
-directory on several machines, and they all have the same modules and
-configuration.  If you want to do that, when the configuration process
-asks where you want to put perl modules (both system and local) have
-it put them in the directory tree you'll install apache in
-(i.e., F</usr/local/apache/lib>).  Otherwise, the default installation
-directories are usually fine.
-
-
-=item 10.
-
-Untar apache and mod_perl. Build mod_perl. Have its build process build
-and install apache for you:
-
-	perl Makefile.PL APACHE_SRC=/where_you_have_the_source DO_HTTPD=1 \
-		USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
-		APACHE_PREFIX=/where_apache_will_be_installed
-	make
-	make test
-	make install
-
-This will install both mod_perl and apache.
-
-B<You MUST install mod_perl and Apache as directed here>.  OK, that is
-not strictly true, but it is mostly true.  If you already have mod_perl
-installed, chances are it is not configured properly to work with Slash
-and you must rebuild it.  If you are using the provided httpd.conf file
-from the slash distribution, and Apache is giving you errors, chances
-are mod_perl is not installed correctly, and you need to build it from
-scratch.
 
 =item 11.
 
@@ -459,6 +466,9 @@ if using the CPAN shell you can do this:
 	cpan> look File::Spec     # opens shell to proper dir
 	% make install UNINST=1   # install from shell
 
+B<Note>: Some BSD installations might require the installation of
+the BSD::Resource module.
+
 
 =item 12.
 
@@ -495,9 +505,11 @@ address Apache will be listening on):
 
 	echo "Listen MY.IP.ADD.RESS:80" > /etc/apache.listen
 
+
 =item 14.
 
 Start apache.
+
 
 =item 15.
 
@@ -511,10 +523,12 @@ Create all the links to this file for the various run levels.
 Note: this script is a startup script, and is not the same script as the
 F<slashd> in the same directory as F<Slash.pm>.
 
+
 =item 16.
 
 Start slashd with the startup script (i.e., C</etc/init.d/slashd
 start>).
+
 
 =item 17.
 

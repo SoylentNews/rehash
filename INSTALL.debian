@@ -33,3 +33,6 @@ Digest-MD5              libdigest-md5-perl
 URI                     liburi-perl
 libwww-perl             libwww-perl
 DateManip               libdate-manip-perl
+Storable                libstorable-perl
+Mail-Sendmail           libmail-sendmail-perl
+Image-Size              libimage-size-perl
