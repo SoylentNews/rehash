@@ -1,668 +1,726 @@
-# Slashcode schema creation script for Oracle 8.x
-# Stephen Clouse <thebrain@warpcore.org>
-#
-# Based off sql/mysql/slashschema_create.sql, rev 1.4
-#
-# Summary of changes from original MySQL script:
-#   - Since Oracle still treats '' as NULL (in violation of SQL-92),
-#     all DEFAULT '' clauses have been removed since they are pretty
-#     much worthless
-#   - A few NOT NULL constraints were removed since they didnt really
-#     seem to be necessary:
-#       - content_filters.modifier
-#   - Some VARCHAR fields have had their max lengths extended to
-#     avoid ORA-01401 (inserted value too large for column) errors;
-#     MySQL silently truncates the value so it doesn''t error out
-#   - Several field names conflict with Oracle reserved words.  These
-#     fields and their new names are:
-#       - *(uid) => user_id
-#       - *(comment) => comment_text
-#       - *(mode) => comment_mode
-#       - comments(date) => comment_date
-#       - pollquestions(date) => poll_date
-#       - sessions(session) => session_id
-#   - MySQL-specific datatypes converted to Oracle datatypes, or
-#     datatypes with differences in implementation changed to avoid
-#     heavy internal reworking:
-#       - CHAR(*) => VARCHAR2(*) (because Oracle right pads CHARs)
-#       - INT(*) => NUMBER(38)
-#       - TINYINT(*) => NUMBER(3)
-#       - VARCHAR(*) => VARCHAR2(*)
-#       - TIMEDATE => DATE
-#       - TEXT => VARCHAR2(4000) or CLOB
-#   - Everything has been given a nice descriptive name, including
-#     constraints
-#   - UNIQUE constraints in Oracle automatically create an index to
-#     manage the constraint, so KEY declarations that were the same
-#     as a UNIQUE constraint were thrown out (normally they would be
-#     turned into a CREATE INDEX statement)
-#   - Auto-increment fields are effectively simulated using a BEFORE
-#     INSERT trigger
-#
-# Note that the Oracle user you set up for slash needs the following
-# privileges:
-#      CREATE SESSION
-#      CREATE TABLE
-#      CREATE SEQUENCE
-#      CREATE OR REPLACE TRIGGER
-#
-# This has been tested on Oracle 8.1.6.  It should work with any 8.x
-# version but no guarantees are offered.  I highly doubt it will work
-# with pre-8 versions.
+/**************************************************
+*
+*       file: slashdot_schema_8i.sql
+*  ported by: toms (guru@oracleplace.com)
+*       date: December, 2000
+*  copyright: 2000, VALinux
+*
+*    comment: Entire schema for slashdot system.
+*             login into account with resource privileges
+*
+*    WARNING: This script is destructive, it DROPS and 
+*             creates every table in the schema.
+*
+**************************************************/
 
 
+spool slashdot_schema_8i.log
 
-DROP TABLE abusers;
+prompt drop table abusers
+drop table abusers;
+
+/**********************************************
+*  TRUNCing a date with no time is redundant
+*  but, I wear suspenders with a belt, so.....
+***********************************************/
+
+prompt create table abusers
 CREATE TABLE abusers (
-	abuser_id	NUMBER(38)					CONSTRAINT pk_abusers PRIMARY KEY,
-	host_name	VARCHAR2(25)					CONSTRAINT nn_abusers_host_name NOT NULL,
-	pagename	VARCHAR2(20)					CONSTRAINT nn_abusers_pagename NOT NULL,
-	ts		DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_abusers_ts NOT NULL,
-	reason		VARCHAR2(120)					CONSTRAINT nn_abusers_reason NOT NULL,
-	querystring	VARCHAR2(60)					CONSTRAINT nn_abusers_querystring NOT NULL
+  abuser_id          number(12),
+  host_name          varchar2(25)  DEFAULT '' NOT NULL,
+  pagename           varchar2(20)  DEFAULT '' NOT NULL,
+  ts                 date          DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  reason             varchar2(120) DEFAULT '' NOT NULL,
+  querystring        varchar2(60)  DEFAULT '' NOT NULL,
+  constraint abusers_pk PRIMARY KEY (abuser_id)
 );
-CREATE INDEX idx_abusers_host_name ON abusers (host_name);
-CREATE INDEX idx_abusers_reason ON abusers (reason);
-DROP SEQUENCE seq_abusers;
-CREATE SEQUENCE seq_abusers START WITH 1;
-CREATE OR REPLACE TRIGGER trg_abusers_auto_inc BEFORE INSERT ON abusers FOR EACH ROW
-BEGIN
-IF (:new.abuser_id IS NULL OR :new.abuser_id = 0) THEN
-	SELECT seq_abusers.nextval INTO :new.abuser_id FROM DUAL;
-END IF;
-END;
+
+prompt drop sequence abusers_seq
+drop sequence abusers_seq;
+
+prompt create sequence abusers_seq
+create sequence abusers_seq
+    start with 1;
+
+prompt create index idx_host_name
+CREATE INDEX idx_host_name ON abusers(host_name);
+
+prompt create index idx_reason
+CREATE INDEX idx_reason ON abusers(reason);
 
 
+/**********************************************************
+*  IMPORTANT NOTE
+*  uid is a reserved word in Oracle
+*  the uid has been replaced with user_id
+*
+*  int4 is not a valid Oracle datatype
+*  replaced int4 with Number(12) ie: 12 digits of precision
+*
+*  int2 is not a valid Oracle datatype
+*  replaced int2 with Number(6) ie: 6 digits of precision
+*
+*  serial is not a valid Oracle datatype
+*  replace serial with number(12) and supplied a sequence as
+*  table_name_seq.
+*
+***********************************************************/
 
-DROP TABLE accesslog;
+prompt drop table accesslog
+drop table accesslog;
+
+prompt create table accesslog
 CREATE TABLE accesslog (
-	id		NUMBER(38)					CONSTRAINT pk_accesslog PRIMARY KEY,
-	host_addr	VARCHAR2(16)					CONSTRAINT nn_accesslog_host_addr NOT NULL,
-	op		VARCHAR2(32),
-	dat		VARCHAR2(64),
-	user_id		NUMBER(38)					CONSTRAINT nn_accesslog_user_id NOT NULL,
-	ts		DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_accesslog_ts NOT NULL,
-	query_string	VARCHAR2(2048),
-	user_agent	VARCHAR2(512)
+  id                 number(12),
+  host_addr          varchar2(16)  DEFAULT '' NOT NULL,
+  op                 varchar2(8),
+  dat                varchar2(32),
+  user_id            number(12)    NOT NULL,
+  ts                 date          DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  query_string       varchar2(50),
+  user_agent         varchar2(50),
+  constraint accesslog_pk PRIMARY KEY (id)
 );
-DROP SEQUENCE seq_accesslog;
-CREATE SEQUENCE seq_accesslog START WITH 1;
-CREATE OR REPLACE TRIGGER trg_accesslog_auto_inc BEFORE INSERT ON accesslog FOR EACH ROW
-BEGIN
-IF (:new.id IS NULL OR :new.id = 0) THEN
-	SELECT seq_accesslog.nextval INTO :new.id FROM DUAL;
-END IF;
-END;
+
+prompt drop sequence accesslog_seq
+drop sequence accesslog_seq;
+
+prompt create sequence accesslog_seq
+create sequence accesslog_seq
+       start with 1;
 
 
+prompt drop table backup_blocks
+drop table backup_blocks;
 
-DROP TABLE backup_blocks;
+
+prompt create table backup_blocks
 CREATE TABLE backup_blocks (
-	bid		VARCHAR2(30)					CONSTRAINT pk_backup_blocks PRIMARY KEY,
-	block		VARCHAR2(4000)
+	bid       varchar2(30) DEFAULT '' NOT NULL,
+	block     clob         default empty_clob(),
+	constraint backup_blocks_pk PRIMARY KEY (bid)
 );
 
 
+prompt drop table blocks
+drop table blocks;
 
-DROP TABLE blocks;
+prompt create table blocks
 CREATE TABLE blocks (
-	bid		VARCHAR2(30)					CONSTRAINT pk_blocks PRIMARY KEY,
-	block		VARCHAR2(4000),
-	seclev		NUMBER(38),
-	type		VARCHAR2(20)					CONSTRAINT nn_blocks_type NOT NULL,
-	description	VARCHAR2(4000),
-	section		VARCHAR2(30)					CONSTRAINT nn_blocks_section NOT NULL,
-	ordernum	NUMBER(3)	DEFAULT 0,
-	title		VARCHAR2(128),
-	portal		NUMBER(3)	DEFAULT 0,
-	url		VARCHAR2(128),
-	rdf		VARCHAR2(255),
-	retrieve	NUMBER(38)	DEFAULT 0
+  bid         varchar2(30)   DEFAULT '' NOT NULL,
+  block       clob           default empty_clob(),
+  user_id     number(12),
+  seclev      number(12),
+  type        varchar2(20)   DEFAULT '' NOT NULL,
+  description clob           default empty_clob(),
+  section     varchar2(30)   DEFAULT '' NOT NULL,
+  ordernum    number(10)     DEFAULT '0',
+  title       varchar2(128),
+  portal      number(10)     DEFAULT '0',
+  url         varchar2(128),
+  rdf         varchar2(255),
+  retrieve    number(10)     DEFAULT '0',
+  constraint blocks_pk PRIMARY KEY (bid)
 );
-CREATE INDEX idx_blocks_type ON blocks (type);
-CREATE INDEX idx_blocks_section ON blocks (section);
 
 
+CREATE INDEX idx_section ON blocks(section);
+CREATE INDEX idx_type ON blocks(type);
 
-DROP TABLE code_param;
+
+prompt drop table code_param
+drop table code_param;
+
+prompt create table code_param
 CREATE TABLE code_param (
-	param_id	NUMBER(38)					CONSTRAINT pk_code_param PRIMARY KEY,
-	type		VARCHAR2(16)					CONSTRAINT nn_code_param_type NOT NULL,
-	code		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_code_param_code NOT NULL,
-	name		VARCHAR2(32),
-	CONSTRAINT	un_code_param_code_key				UNIQUE (type,code)
+	param_id      number(12),
+	type          varchar2(16),
+	code          number(10)    DEFAULT '0' NOT NULL,
+	name          varchar2(32),
+	constraint code_param_unq UNIQUE (type,code),
+	constraint code_param_pk PRIMARY KEY (param_id)
 );
-DROP SEQUENCE seq_code_param;
-CREATE SEQUENCE seq_code_param START WITH 1;
-CREATE OR REPLACE TRIGGER trg_code_param_auto_inc BEFORE INSERT ON code_param FOR EACH ROW
-BEGIN
-IF (:new.param_id IS NULL OR :new.param_id = 0) THEN
-	SELECT seq_code_param.nextval INTO :new.param_id FROM DUAL;
-END IF;
-END;
 
+prompt drop sequence code_param_seq
+drop sequence code_param_seq;
 
+prompt create sequence code_param_seq
+create sequence code_param_seq
+     start with 1;
 
-DROP TABLE commentmodes;
+prompt drop table commentmodes
+drop table commentmodes;
+
+/*********************************************************
+*  IMPORTANT NOTE: 
+*  mode is a reserved word in Oracle
+*  the mode column renamed comment_mode
+*
+*  date is a reserved word
+*  the date column is replaced by comment_date
+**********************************************************/
+
+prompt create table commentmodes
 CREATE TABLE commentmodes (
-	comment_mode	VARCHAR2(16)					CONSTRAINT pk_commentmodes PRIMARY KEY,
-	name		VARCHAR2(32),
-	description	VARCHAR2(64)
+  comment_mode varchar2(16)   DEFAULT '' NOT NULL,
+  name         varchar2(32),
+  description  varchar2(64),
+  constraint commentmodes_pk PRIMARY KEY (comment_mode)
 );
 
 
+prompt drop table comments
+drop table comments;
 
-DROP TABLE comments;
+/*********************************************************
+*  IMPORTANT NOTE: 
+*  comment is a reserved word in Oracle
+*  comment column renamed comment_text
+*
+*  date is a reserved word
+*  date column is replaced by comment_date
+**********************************************************/
+
+
+prompt create table comments
 CREATE TABLE comments (
-	sid		VARCHAR2(16),
-	cid		NUMBER(38)	DEFAULT 0,
-	pid		NUMBER(38)	DEFAULT 0,
-	comment_date	DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_comments_date NOT NULL,
-	host_name	VARCHAR2(30)	DEFAULT '0.0.0.0'		CONSTRAINT nn_comments_host_name NOT NULL,
-	subject		VARCHAR2(50)					CONSTRAINT nn_comments_subject NOT NULL,
-	comment_text	CLOB						CONSTRAINT nn_comments_comment NOT NULL,
-	user_id		NUMBER(38)					CONSTRAINT nn_comments_user_id NOT NULL,
-	points		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_comments_points NOT NULL,
-	lastmod		NUMBER(38),
-	reason		NUMBER(38)	DEFAULT 0,
-	CONSTRAINT	pk_comments					PRIMARY KEY (sid, cid)
+  sid          varchar2(30)  DEFAULT '' NOT NULL,
+  cid          number(12)    DEFAULT 0  NOT NULL,
+  pid          number(12)    DEFAULT 0  NOT NULL,
+  comment_date date          DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  host_name    varchar2(30)  DEFAULT '0.0.0.0' NOT NULL,
+  subject      varchar2(50)  DEFAULT '' NOT NULL,
+  comment_text clob          default empty_clob() not null,
+  user_id      number(12)    NOT NULL,
+  points       number(10)    DEFAULT 0 NOT NULL,
+  lastmod      number(10),
+  reason       number(10)    DEFAULT 0,
+  constraint   comments_pk   PRIMARY KEY (sid,cid)
 );
-CREATE INDEX idx_comments_display ON comments (sid, points, user_id);
-CREATE INDEX idx_comments_byname ON comments (user_id, points);
-CREATE INDEX idx_comments_theusual ON comments (sid, user_id, points, cid);
-CREATE INDEX idx_comments_countreplies ON comments (sid, pid);
 
 
+CREATE INDEX idx_display ON comments(sid,points,user_id);
+CREATE INDEX idx_byname ON comments(user_id,points);
+CREATE INDEX idx_theusual ON comments(sid,user_id,points,cid);
+CREATE INDEX idx_countreplies ON comments(sid,pid);
 
-DROP TABLE content_filters;
+
+prompt drop table content_filters
+drop table content_filters;
+
+prompt create table content_filters
 CREATE TABLE content_filters (
-	filter_id	NUMBER(38)					CONSTRAINT pk_content_filters PRIMARY KEY,
-	regex		VARCHAR2(100)					CONSTRAINT nn_content_filters_regex NOT NULL,
-	modifier	VARCHAR2(5),
-	field		VARCHAR2(20)					CONSTRAINT nn_content_filters_field NOT NULL,
-	ratio		NUMBER(38,4)	DEFAULT 0			CONSTRAINT nn_content_filters_ratio NOT NULL,
-	minimum_match	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_content_filters_min_match NOT NULL,
-	minimum_length	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_content_filters_min_length NOT NULL,
-	err_message	VARCHAR2(150),
-	maximum_length	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_content_filters_max_length NOT NULL
+  filter_id      number(12),
+  regex          varchar2(100)    DEFAULT '' NOT NULL,
+  modifier       varchar2(5)      DEFAULT '' NOT NULL,
+  field          varchar2(20)     DEFAULT '' NOT NULL,
+  ratio          number(16,4)     DEFAULT 0.0000 NOT NULL,
+  minimum_match  number(12)       DEFAULT 0 NOT NULL,
+  minimum_length number(12)       DEFAULT 0 NOT NULL,
+  err_message    varchar2(150)    DEFAULT '',
+  maximum_length number(12)       DEFAULT 0 NOT NULL,
+  constraint contect_filers_pk PRIMARY KEY (filter_id)
 );
-CREATE INDEX idx_content_filters_regex ON content_filters (regex);
-CREATE INDEX idx_content_filters_field_key ON content_filters (field);
-DROP SEQUENCE seq_content_filters;
-CREATE SEQUENCE seq_content_filters START WITH 1;
-CREATE OR REPLACE TRIGGER trg_content_filters_auto_inc BEFORE INSERT ON content_filters FOR EACH ROW
-BEGIN
-IF (:new.filter_id IS NULL OR :new.filter_id = 0) THEN
-	SELECT seq_content_filters.nextval INTO :new.filter_id FROM DUAL;
-END IF;
-END;
+CREATE INDEX idx_regex ON content_filters(regex);
+CREATE INDEX idx_field ON content_filters(field);
 
+prompt drop sequence content_filters_seq
+drop sequence content_filters_seq;
 
+prompt create sequence content_filters_seq
+create sequence content_filters_seq
+       start with 1;  
+       
 
-DROP TABLE dateformats;
+prompt drop table dateformats
+drop table dateformats;
+
+prompt create table dateformats
 CREATE TABLE dateformats (
-	id		NUMBER(38)					CONSTRAINT pk_dateformats PRIMARY KEY,
-	format		VARCHAR2(32),
-	description	VARCHAR2(64)
+  id            number(12) DEFAULT '0' NOT NULL,
+  format        varchar2(32),
+  description   varchar2(64),
+  constraint dateformats_pk PRIMARY KEY (id)
 );
 
 
+prompt drop table discussions
+drop table discussions;
 
-DROP TABLE discussions;
+prompt create table discussions
 CREATE TABLE discussions (
-	sid		VARCHAR2(16)					CONSTRAINT pk_discussions PRIMARY KEY,
-	title		VARCHAR2(128),
-	url		VARCHAR2(128),
-	ts		DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_discussions_ts NOT NULL
+  sid     varchar2(20)    DEFAULT '' NOT NULL,
+  title   varchar2(128),
+  url     varchar2(128),
+  ts      date            DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  constraint discussions_pk PRIMARY KEY (sid)
 );
 
 
+prompt drop table formkeys
+drop table formkeys;
 
-DROP TABLE formkeys;
+prompt create table formkeys
 CREATE TABLE formkeys (
-	formkey		VARCHAR2(20)					CONSTRAINT pk_formkeys PRIMARY KEY,
-	formname	VARCHAR2(20)					CONSTRAINT nn_formkeys_formname NOT NULL,
-	id		VARCHAR2(30)					CONSTRAINT nn_formkeys_id NOT NULL,
-	sid		VARCHAR2(16)					CONSTRAINT nn_formkeys_sid NOT NULL,
-	user_id		NUMBER(38)					CONSTRAINT nn_formkeys_user_id NOT NULL,
-	host_name	VARCHAR2(30)	DEFAULT '0.0.0.0'		CONSTRAINT nn_formkeys_host_name NOT NULL,
-	value		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_formkeys_value NOT NULL,
-	cid		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_formkeys_cid NOT NULL,
-	ts		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_formkeys_ts NOT NULL,
-	submit_ts	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_formkeys_submit_ts NOT NULL,
-	content_length	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_formkeys_content_length NOT NULL
+  formkey        varchar2(20) DEFAULT '' NOT NULL,
+  formname       varchar2(20) DEFAULT '' NOT NULL,
+  id             varchar2(30) DEFAULT '' NOT NULL,
+  sid            varchar2(30) DEFAULT '' NOT NULL,
+  user_id        number(12)   NOT NULL,
+  host_name      varchar2(30) DEFAULT '0.0.0.0' NOT NULL,
+  value          number(10)   DEFAULT 0 NOT NULL,
+  cid            number(12)   DEFAULT 0 NOT NULL,
+  ts             number(10)   DEFAULT 0 NOT NULL,
+  submit_ts      number(10)   DEFAULT 0 NOT NULL,
+  content_length number(10)   DEFAULT 0 NOT NULL,
+  constraint formkeys PRIMARY KEY (formkey)
 );
-CREATE INDEX idx_formkeys_formname ON formkeys (formname);
-CREATE INDEX idx_formkeys_id ON formkeys (id);
-CREATE INDEX idx_formkeys_ts ON formkeys (ts);
-CREATE INDEX idx_formkeys_submit_ts ON formkeys (submit_ts);
+
+
+prompt drop sequence formkeys_seq
+drop sequence formkeys_seq;
+
+prompt create sequence formkeys_seq;
+create sequence formkeys_seq;
+
+CREATE INDEX idx_formname ON formkeys(formname);
+CREATE INDEX idx_id ON formkeys(id);
+CREATE INDEX idx_ts ON formkeys(ts);
+CREATE INDEX idx_submit_ts ON formkeys(submit_ts);
+
+
+/**********************************************
+*  IMPORTANT NOTE
+*  Oracle automatically creates indexes for 
+*  columns with a unique constraint, so 
+*  indexes do not need to be explicity created.
+************************************************/
 
 
 
-DROP TABLE site_info;
-CREATE TABLE site_info (
-	param_id	NUMBER(38)					CONSTRAINT pk_site_info PRIMARY KEY,
-	name		VARCHAR2(50)					CONSTRAINT nn_site_info_name NOT NULL,
-	value		VARCHAR2(200)					CONSTRAINT nn_site_info_value NOT NULL,
-	description	VARCHAR2(255),
-	CONSTRAINT	un_site_info_site_keys				UNIQUE (name,value)
-);
-DROP SEQUENCE seq_site_info;
-CREATE SEQUENCE seq_site_info START WITH 1;
-CREATE OR REPLACE TRIGGER trg_site_info_auto_inc BEFORE INSERT ON site_info FOR EACH ROW
-BEGIN
-IF (:new.param_id IS NULL OR :new.param_id = 0) THEN
-	SELECT seq_site_info.nextval INTO :new.param_id FROM DUAL;
-END IF;
-END;
+prompt drop table menus
+drop table menus;
 
 
-
-DROP TABLE menus;
+prompt create table menus
 CREATE TABLE menus (
-	id		NUMBER(38)					CONSTRAINT pk_menus PRIMARY KEY,
-	menu		VARCHAR2(20)					CONSTRAINT nn_menus_menu NOT NULL,
-	label		VARCHAR2(200)					CONSTRAINT nn_menus_label NOT NULL,
-	value		VARCHAR2(4000),
-	seclev		NUMBER(38),
-	menuorder	NUMBER(38),
-	CONSTRAINT	un_menus_page_labels				UNIQUE (menu,label)
+	id         number(10),
+	menu       varchar2(20)   DEFAULT '' NOT NULL,
+	label      varchar2(200)  DEFAULT '' NOT NULL,
+	value      clob           default empty_clob(),
+	seclev     number(12),
+	menuorder  number(12),
+	constraint mensu_unq UNIQUE (menu,label),
+	constraint menus_pk PRIMARY KEY (id)
 );
-DROP SEQUENCE seq_menus;
-CREATE SEQUENCE seq_menus START WITH 1;
-CREATE OR REPLACE TRIGGER trg_menus_auto_inc BEFORE INSERT ON menus FOR EACH ROW
-BEGIN
-IF (:new.id IS NULL OR :new.id = 0) THEN
-	SELECT seq_menus.nextval INTO :new.id FROM DUAL;
-END IF;
-END;
 
 
+prompt drop table metamodlog
+drop table metamodlog;
 
-DROP TABLE metamodlog;
+prompt create table metamodlog
 CREATE TABLE metamodlog (
-	mmid		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_metamodlog_mmid NOT NULL,
-	user_id		NUMBER(38)					CONSTRAINT nn_metamodlog_user_id NOT NULL,
-	val		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_metamodlog_val NOT NULL,
-	ts		DATE,
-	id		NUMBER(38)					CONSTRAINT pk_metamodlog PRIMARY KEY,
-	flag		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_metamodlog_flag NOT NULL
+  id           number(12),
+  mmid         number(12)  DEFAULT 0 NOT NULL,
+  user_id      number(12)  DEFAULT 1 NOT NULL,
+  val          number(12)  DEFAULT 0 NOT NULL,
+  ts           date,
+  constraint metamodlog_pk PRIMARY KEY (id)
 );
-DROP SEQUENCE seq_metamodlog;
-CREATE SEQUENCE seq_metamodlog START WITH 1;
-CREATE OR REPLACE TRIGGER trg_metamodlog_auto_inc BEFORE INSERT ON metamodlog FOR EACH ROW
-BEGIN
-IF (:new.id IS NULL OR :new.id = 0) THEN
-	SELECT seq_metamodlog.nextval INTO :new.id FROM DUAL;
-END IF;
-END;
 
 
+prompt drop table moderatorlog
+drop table moderatorlog;
 
-DROP TABLE moderatorlog;
+prompt create table moderatorlog
 CREATE TABLE moderatorlog (
-	id		NUMBER(38)					CONSTRAINT pk_moderatorlog PRIMARY KEY,
-	user_id		NUMBER(38)					CONSTRAINT nn_moderatorlog_user_id NOT NULL,
-	val		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_moderatorlog_val NOT NULL,
-	sid		VARCHAR2(16)					CONSTRAINT nn_moderatorlog_sid NOT NULL,
-	ts		DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_moderatorlog_ts NOT NULL,
-	cid		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_moderatorlog_cid NOT NULL,
-	reason		NUMBER(38)	DEFAULT 0,
-	active		NUMBER(38)	DEFAULT 1			CONSTRAINT nn_moderatorlog_active NOT NULL
+  id          number(12),
+  user_id     number(12)   DEFAULT 1 NOT NULL,
+  val         number(6)    DEFAULT 0 NOT NULL,
+  sid         varchar2(30) DEFAULT '' NOT NULL,
+  ts          date         DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  cid         number(12)   DEFAULT 0 NOT NULL,
+  reason      number(12)   DEFAULT 0,
+  constraint moderatorlog_pk PRIMARY KEY (id)
 );
-CREATE INDEX idx_moderatorlog_sid ON moderatorlog (sid, cid);
-CREATE INDEX idx_moderatorlog_sid_2 ON moderatorlog (sid, user_id, cid);
-DROP SEQUENCE seq_moderatorlog;
-CREATE SEQUENCE seq_moderatorlog START WITH 1;
-CREATE OR REPLACE TRIGGER trg_moderatorlog_auto_inc BEFORE INSERT ON moderatorlog FOR EACH ROW
-BEGIN
-IF (:new.id IS NULL OR :new.id = 0) THEN
-	SELECT seq_moderatorlog.nextval INTO :new.id FROM DUAL;
-END IF;
-END;
+
+CREATE INDEX idx_sid ON moderatorlog(sid,cid);
+CREATE INDEX idx_sid_2 ON moderatorlog(sid,user_id,cid);
 
 
+prompt drop table newstories 
+drop table newstories;
 
-DROP TABLE newstories;
+prompt create table newstores
 CREATE TABLE newstories (
-	sid		VARCHAR2(16)					CONSTRAINT pk_newstories PRIMARY KEY,
-	tid		VARCHAR2(20)					CONSTRAINT nn_newstories_tid NOT NULL,
-	user_id		NUMBER(38)					CONSTRAINT nn_newstories_user_id NOT NULL,
-	commentcount	NUMBER(38)	DEFAULT 0,
-	title		VARCHAR2(100)					CONSTRAINT nn_newstories_title NOT NULL,
-	dept		VARCHAR2(100),
-	time		DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_newstories_time NOT NULL,
-	introtext	CLOB,
-	bodytext	CLOB,
-	writestatus	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_newstories_writestatus NOT NULL,
-	hits		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_newstories_hits NOT NULL,
-	section		VARCHAR2(30)					CONSTRAINT nn_newstories_section NOT NULL,
-	displaystatus	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_newstories_displaystatus NOT NULL,
-	commentstatus	NUMBER(38),
-	hitparade	VARCHAR2(64)	DEFAULT '0,0,0,0,0,0,0',
-	relatedtext	CLOB,
-	extratext	CLOB
+  sid           varchar2(20)  DEFAULT '' NOT NULL,
+  tid           varchar2(20)  DEFAULT '' NOT NULL,
+  user_id       number(12)    DEFAULT 1 NOT NULL,
+  commentcount  number(6)     DEFAULT 0,
+  title         varchar2(100) DEFAULT '' NOT NULL,
+  dept          varchar2(100),
+  time          date          DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  introtext     clob,
+  bodytext      clob,
+  writestatus   number(6)     DEFAULT 0 NOT NULL,
+  hits          number(6)     DEFAULT 0 NOT NULL,
+  section       varchar2(15)  DEFAULT '' NOT NULL,
+  displaystatus number(6)     DEFAULT 0 NOT NULL,
+  commentstatus number(6),
+  hitparade     varchar2(64)  DEFAULT '0,0,0,0,0,0,0',
+  relatedtext   clob,
+  extratext     clob,
+  constraint newstories_pk PRIMARY KEY (sid)
 );
-CREATE INDEX idx_newstories_time ON newstories (time);
-CREATE INDEX idx_newstories_searchform ON newstories (displaystatus, time);
+CREATE INDEX idx_time_new ON newstories(time);
+CREATE INDEX idx_searchform_new ON newstories(displaystatus,time);
 
 
+prompt drop table pollanswers
+drop table pollanswers;
 
-DROP TABLE pollanswers;
+
+/*****************************************************
+* IMPORTANT NOTE:
+* qid, answer changed from char(20) to varchar2(30)
+* in next two tables
+*
+* char in oracle pads with spaces
+* if you want padded spaces, change it back
+*****************************************************/
+
+prompt create table pollanswers
 CREATE TABLE pollanswers (
-	qid		VARCHAR2(20),
-	aid		NUMBER(38)	DEFAULT 0,
-	answer		VARCHAR2(255),
-	votes		NUMBER(38),
-	CONSTRAINT	pk_pollanswers					PRIMARY KEY (qid, aid)
+  qid      varchar2(20) DEFAULT '' NOT NULL,
+  aid      number(12) DEFAULT 0 NOT NULL,
+  answer   varchar2(255),
+  votes    number(12),
+  constraint pollanswers_pk PRIMARY KEY (qid,aid)
 );
 
 
 
-DROP TABLE pollquestions;
+/***************************************************
+* IMPORTANT NOTE
+* date is reserved word
+* column date changed to poll_que_date
+***************************************************/
+
+prompt drop table pollquestions
+drop table pollquestions;
+
+prompt create table pollquestions
 CREATE TABLE pollquestions (
-	qid		VARCHAR2(20)					CONSTRAINT pk_pollquestions PRIMARY KEY,
-	question	VARCHAR2(255)					CONSTRAINT nn_pollquestions_question NOT NULL,
-	voters		NUMBER(38),
-	poll_date	DATE
+  qid             varchar2(20) DEFAULT '' NOT NULL,
+  question        varchar2(255) DEFAULT '' NOT NULL,
+  voters          number(12),
+  poll_que_date   date,
+  constraint      pollquestions_pk PRIMARY KEY (qid)
 );
 
 
 
-DROP TABLE pollvoters;
+/******************************************************
+*  IMPORTANT NOTE
+*  unique constraint automatically indexes columns
+*  skipped explicit statement to create idx_qid
+*********************************************************/
+
+prompt drop table pollvoters
+drop table pollvoters;
+
+prompt create table pollvoters
 CREATE TABLE pollvoters (
-	qid		VARCHAR2(20)					CONSTRAINT nn_pollvoters_qid NOT NULL,
-	id		VARCHAR2(35)					CONSTRAINT nn_pollvoters_id NOT NULL,
-	time		DATE,
-	user_id		NUMBER(38)					CONSTRAINT nn_pollvoters_user_id NOT NULL
+  qid      varchar2(20) DEFAULT '' NOT NULL,
+  id       varchar2(35) DEFAULT '' NOT NULL,
+  time     date,
+  user_id  number(12) NOT NULL,
+  constraint pollvoters_unq UNIQUE (qid,id,user_id)
 );
-CREATE INDEX idx_pollvoters_qid ON pollvoters (qid, id, user_id);
 
 
+prompt drop table postmodes
+drop table postmodes;
 
-DROP TABLE sections;
+prompt create table postmodes
+CREATE TABLE postmodes (
+  code       varchar2(10) DEFAULT '' NOT NULL,
+  name       varchar2(32),
+  constraint postmodes_pk PRIMARY KEY (code)
+);
+
+
+prompt drop table sections
+drop table sections;
+
+prompt create table sections
 CREATE TABLE sections (
-	section		VARCHAR2(30)					CONSTRAINT pk_sections PRIMARY KEY,
-	artcount	NUMBER(38),
-	title		VARCHAR2(64),
-	qid		VARCHAR2(20)					CONSTRAINT nn_sections_qid NOT NULL,
-	isolate		NUMBER(38),
-	issue		NUMBER(38),
-	extras		NUMBER(38)	DEFAULT 0
+  section      varchar2(30) DEFAULT '' NOT NULL,
+  artcount     number(12),
+  title        varchar2(64),
+  qid          varchar2(20) DEFAULT '' NOT NULL,
+  isolate      number(6),
+  issue        number(6),
+  extras       number(12)   DEFAULT 0,
+  constraint sections_pk PRIMARY KEY (section)
 );
 
 
+/**************************************************
+*  IMPORTANT NOTE
+*  session is an Oracle reserved word,
+*  column session changed to session_id
+**************************************************/
 
-DROP TABLE sessions;
+prompt drop table sessions
+drop table sessions;
+
+prompt create table sessions
 CREATE TABLE sessions (
-	session_id	NUMBER(38)					CONSTRAINT pk_sessions PRIMARY KEY,
-	user_id		NUMBER(38),
-	logintime	DATE,
-	lasttime	DATE,
-	lasttitle	VARCHAR2(50)
+  session_id  varchar2(20) DEFAULT '' NOT NULL,
+  user_id     number(12)   DEFAULT 1 NOT NULL,
+  logintime   date,
+  lasttime    date,
+  lasttitle   varchar2(50),
+  constraint sessions_pk PRIMARY KEY (session_id)
 );
-DROP SEQUENCE seq_sessions;
-CREATE SEQUENCE seq_sessions START WITH 1;
-CREATE OR REPLACE TRIGGER trg_sessions_auto_inc BEFORE INSERT ON sessions FOR EACH ROW
-BEGIN
-IF (:new.session_id IS NULL OR :new.session_id = 0) THEN
-	SELECT seq_sessions.nextval INTO :new.session_id FROM DUAL;
-END IF;
-END;
 
 
+/**************************************************
+*  IMPORTANT NOTE
+*  indexes on time and displaystatus, time created
+*  automatically with unique constraint
+***************************************************/
 
-DROP TABLE stories;
+
+prompt drop table stories
+drop table stories;
+
+prompt create table stories
 CREATE TABLE stories (
-	sid		VARCHAR2(16)					CONSTRAINT pk_stories PRIMARY KEY,
-	tid		VARCHAR2(20)					CONSTRAINT nn_stories_tid NOT NULL,
-	user_id		NUMBER(38)	DEFAULT 1			CONSTRAINT nn_stories_user_id NOT NULL,
-	commentcount	NUMBER(38)	DEFAULT 0,
-	title		VARCHAR2(100)					CONSTRAINT nn_stories_title NOT NULL,
-	dept		VARCHAR2(100),
-	time		DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_stories_time NOT NULL,
-	introtext	CLOB,
-	bodytext	CLOB,
-	writestatus	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_stories_writestatus NOT NULL,
-	hits		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_stories_hits NOT NULL,
-	section		VARCHAR2(30)					CONSTRAINT nn_stories_section NOT NULL,
-	displaystatus	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_stories_displaystatus NOT NULL,
-	commentstatus	NUMBER(38),
-	hitparade	VARCHAR2(64)	DEFAULT '0,0,0,0,0,0,0',
-	relatedtext	CLOB,
-	extratext	CLOB
-);
-CREATE INDEX idx_stories_time ON stories (time);
-CREATE INDEX idx_stories_searchform ON stories (displaystatus, time);
-
-
-
-DROP TABLE story_param;
-CREATE TABLE story_param (
-	param_id	NUMBER(38)					CONSTRAINT pk_story_param PRIMARY KEY,
-	sid		VARCHAR2(16)					CONSTRAINT nn_story_param_sid NOT NULL,
-	name		VARCHAR2(32)					CONSTRAINT nn_story_param_name NOT NULL,
-	value		VARCHAR2(254)					CONSTRAINT nn_story_param_value NOT NULL,
-	CONSTRAINT	un_story_param_story_key			UNIQUE (sid, name)
-);
-DROP SEQUENCE seq_story_param;
-CREATE SEQUENCE seq_story_param START WITH 1;
-CREATE OR REPLACE TRIGGER trg_story_param_auto_inc BEFORE INSERT ON story_param FOR EACH ROW
-BEGIN
-IF (:new.param_id IS NULL OR :new.param_id = 0) THEN
-	SELECT seq_story_param.nextval INTO :new.param_id FROM DUAL;
-END IF;
-END;
-
-
-
-DROP TABLE storiestuff;
-CREATE TABLE storiestuff (
-	sid		VARCHAR2(16)					CONSTRAINT pk_storiestuff PRIMARY KEY,
-	hits		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_storiestuff_hits NOT NULL
+  sid           varchar2(20)  DEFAULT '' NOT NULL,
+  tid           varchar2(20)  DEFAULT '' NOT NULL,
+  user_id       number(12)    DEFAULT 1 NOT NULL,
+  commentcount  number(6)     DEFAULT 0,
+  title         varchar2(100) DEFAULT '' NOT NULL,
+  dept          varchar2(100),
+  time          date          DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  introtext     clob,
+  bodytext      clob,
+  writestatus   number(6)     DEFAULT 0 NOT NULL,
+  hits          number(10)    DEFAULT 0 NOT NULL,
+  section       varchar2(15)  DEFAULT '' NOT NULL,
+  displaystatus number(6)     DEFAULT 0 NOT NULL,
+  commentstatus number(6),
+  hitparade     varchar2(64)  DEFAULT '0,0,0,0,0,0,0',
+  relatedtext   clob,
+  extratext     clob,
+  constraint stories_pk PRIMARY KEY (sid),
+  constraint stories_time_unq UNIQUE (time),
+  constraint stories_stat_unq UNIQUE (displaystatus,time)
 );
 
 
+prompt drop table users_param
+drop table users_param;
 
-DROP TABLE submissions;
-CREATE TABLE submissions (
-	subid		VARCHAR2(15)					CONSTRAINT pk_submissions PRIMARY KEY,
-	email		VARCHAR2(50),
-	name		VARCHAR2(50),
-	time		DATE,
-	subj		VARCHAR2(50),
-	story		CLOB,
-	tid		VARCHAR2(20),
-	note		VARCHAR2(30),
-	section		VARCHAR2(30)					CONSTRAINT nn_submissions_section NOT NULL,
-	comment_text	VARCHAR2(255),
-	user_id		NUMBER(38)	DEFAULT 1			CONSTRAINT nn_submissions_user_id NOT NULL,
-	del		NUMBER(3)	DEFAULT 0			CONSTRAINT nn_submissions_del NOT NULL
-);
-CREATE INDEX idx_submissions_subid ON submissions (subid, section);
-
-
-
-DROP TABLE templates;
-CREATE TABLE templates (
-	tpid		NUMBER(38)					CONSTRAINT pk_templates PRIMARY KEY,
-	name		VARCHAR2(30)					CONSTRAINT nn_templates_name NOT NULL,
-	page		VARCHAR2(20)	DEFAULT 'misc'			CONSTRAINT nn_templates_page NOT NULL,
-	section		VARCHAR2(30)	DEFAULT 'default'		CONSTRAINT nn_templates_section NOT NULL,
-	lang		VARCHAR2(5)	DEFAULT 'en_US'			CONSTRAINT nn_templates_lang NOT NULL,
-	template	CLOB,
-	seclev		NUMBER(38),
-	description	VARCHAR2(4000),
-	title		VARCHAR2(128),
-	CONSTRAINT	un_templates_true_template			UNIQUE (name, page, section, lang)
-);
-DROP SEQUENCE seq_templates;
-CREATE SEQUENCE seq_templates START WITH 1;
-CREATE OR REPLACE TRIGGER trg_templates_auto_inc BEFORE INSERT ON templates FOR EACH ROW
-BEGIN
-IF (:new.tpid IS NULL OR :new.tpid = 0) THEN
-	SELECT seq_templates.nextval INTO :new.tpid FROM DUAL;
-END IF;
-END;
-
-
-
-DROP TABLE topics;
-CREATE TABLE topics (
-	tid		VARCHAR2(20)					CONSTRAINT pk_topics PRIMARY KEY,
-	image		VARCHAR2(30),
-	alttext		VARCHAR2(40),
-	width		NUMBER(38),
-	height		NUMBER(38)
-);
-
-
-
-DROP TABLE tzcodes;
-CREATE TABLE tzcodes (
-	tz		VARCHAR2(3)					CONSTRAINT pk_tzcodes PRIMARY KEY,
-	off_set		NUMBER(38),
-	description	VARCHAR2(64)
-);
-
-
-
-DROP TABLE users;
-CREATE TABLE users (
-	user_id		NUMBER(38)					CONSTRAINT pk_users PRIMARY KEY,
-	nickname	VARCHAR2(20)					CONSTRAINT nn_users_nickname NOT NULL,
-	realemail	VARCHAR2(50)					CONSTRAINT nn_users_realemail NOT NULL,
-	fakeemail	VARCHAR2(50),
-	homepage	VARCHAR2(100),
-	passwd		VARCHAR2(32)					CONSTRAINT nn_users_passwd NOT NULL,
-	sig		VARCHAR2(160),
-	seclev		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_seclev NOT NULL,
-	matchname	VARCHAR2(20),
-	newpasswd	VARCHAR2(8)
-);
-CREATE INDEX idx_users_login ON users (user_id, passwd, nickname);
-CREATE INDEX idx_users_chk4user ON users (nickname, realemail);
-CREATE INDEX idx_users_nickname_lookup ON users (nickname);
-CREATE INDEX idx_users_chk4email ON users (realemail);
-DROP SEQUENCE seq_users;
-CREATE SEQUENCE seq_users START WITH 1;
-CREATE OR REPLACE TRIGGER trg_users_auto_inc BEFORE INSERT ON users FOR EACH ROW
-BEGIN
-IF (:new.user_id IS NULL OR :new.user_id = 0) THEN
-	SELECT seq_users.nextval INTO :new.user_id FROM DUAL;
-END IF;
-END;
-
-
-
-DROP TABLE users_comments;
-CREATE TABLE users_comments (
-	user_id		NUMBER(38)	DEFAULT 1			CONSTRAINT pk_users_comments PRIMARY KEY,
-	points		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_comments_points NOT NULL,
-	posttype	NUMBER(38)	DEFAULT 2			CONSTRAINT nn_users_comments_posttype NOT NULL,
-	defaultpoints	NUMBER(38)	DEFAULT 1			CONSTRAINT nn_users_comments_defaultpt NOT NULL,
-	highlightthresh	NUMBER(38)	DEFAULT 4			CONSTRAINT nn_users_comments_hlthresh NOT NULL,
-	maxcommentsize	NUMBER(38)	DEFAULT 4096			CONSTRAINT nn_users_comments_maxcommentsz NOT NULL,
-	hardthresh	NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_comments_hardthresh NOT NULL,
-	clbig		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_comments_clbig NOT NULL,
-	clsmall		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_comments_clsmall NOT NULL,
-	reparent	NUMBER(3)	DEFAULT 1			CONSTRAINT nn_users_comments_reparent NOT NULL,
-	nosigs		NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_comments_nosigs NOT NULL,
-	commentlimit	NUMBER(38)	DEFAULT 100			CONSTRAINT nn_users_comments_commentlimit NOT NULL,
-	commentspill	NUMBER(38)	DEFAULT 50			CONSTRAINT nn_users_comments_commentspill NOT NULL,
-	commentsort	NUMBER(38)	DEFAULT 0,
-	noscores	NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_comments_noscores NOT NULL,
-	comment_mode	VARCHAR2(10)	DEFAULT 'thread',
-	threshold	NUMBER(38)	DEFAULT 0
-);
-
-
-
-DROP TABLE users_index;
-CREATE TABLE users_index (
-	user_id		NUMBER(38)	DEFAULT 1			CONSTRAINT pk_users_index PRIMARY KEY,
-	extid		VARCHAR2(255),
-	exaid		VARCHAR2(100),
-	exsect		VARCHAR2(100),
-	exboxes		VARCHAR2(255),
-	maxstories	NUMBER(38)	DEFAULT 30			CONSTRAINT nn_users_index_maxstories NOT NULL,
-	noboxes		NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_index_noboxes NOT NULL
-);
-
-
-
-DROP TABLE users_info;
-CREATE TABLE users_info (
-	user_id		NUMBER(38)	DEFAULT 1			CONSTRAINT pk_users_info PRIMARY KEY,
-	totalmods	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_totalmods NOT NULL,
-	realname	VARCHAR2(50),
-	bio		CLOB,
-	tokens		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_tokens NOT NULL,
-	lastgranted	DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_users_info_lastgranted NOT NULL,
-	karma		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_karma NOT NULL,
-	maillist	NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_info_maillist NOT NULL,
-	totalcomments	NUMBER(38)	DEFAULT 0,
-	lastmm		DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_users_info_lastmm NOT NULL,
-	lastaccess	DATE		DEFAULT TO_DATE('0001','YYYY')	CONSTRAINT nn_users_info_lastaccess NOT NULL,
-	lastmmid	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_lastmmid NOT NULL,
-	m2fair		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_m2fair NOT NULL,
-	m2unfair	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_m2unfair NOT NULL,
-	m2fairvotes	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_m2fairvotes NOT NULL,
-	m2unfairvotes	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_m2unfairvotes NOT NULL,
-	upmods		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_upmods NOT NULL,
-	downmods	NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_info_downmods NOT NULL,
-	session_login	NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_info_session_login NOT NULL
-);
-
-
-
-DROP TABLE users_param;
+prompt create table users_param
 CREATE TABLE users_param (
-	param_id	NUMBER(38)					CONSTRAINT pk_users_param PRIMARY KEY,
-	user_id		NUMBER(38)	DEFAULT 1			CONSTRAINT nn_users_param_user_id NOT NULL,
-	name		VARCHAR2(32)					CONSTRAINT nn_users_param_name NOT NULL,
-	value		VARCHAR2(4000)					CONSTRAINT nn_users_param_value NOT NULL,
-	CONSTRAINT	un_users_param_user_id_key			UNIQUE (user_id, name)
-);
-CREATE INDEX idx_users_param_user_id ON users_param (user_id);
-DROP SEQUENCE seq_users_param;
-CREATE SEQUENCE seq_users_param START WITH 1;
-CREATE OR REPLACE TRIGGER trg_users_param_auto_inc BEFORE INSERT ON users_param FOR EACH ROW
-BEGIN
-IF (:new.param_id IS NULL OR :new.param_id = 0) THEN
-	SELECT seq_users_param.nextval INTO :new.param_id FROM DUAL;
-END IF;
-END;
-
-
-
-DROP TABLE users_prefs;
-CREATE TABLE users_prefs (
-	user_id		NUMBER(38)	DEFAULT 1			CONSTRAINT pk_users_prefs PRIMARY KEY,
-	willing		NUMBER(3)	DEFAULT 1			CONSTRAINT nn_users_prefs_willing NOT NULL,
-	dfid		NUMBER(38)	DEFAULT 0			CONSTRAINT nn_users_prefs_dfid NOT NULL,
-	tzcode		VARCHAR2(3)	DEFAULT 'EDT'			CONSTRAINT nn_users_prefs_tzcode NOT NULL,
-	noicons		NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_prefs_noicons NOT NULL,
-	light		NUMBER(3)	DEFAULT 0			CONSTRAINT nn_users_prefs_light NOT NULL,
-	mylinks		VARCHAR2(255)	DEFAULT 'none'			CONSTRAINT nn_users_prefs_mylinks NOT NULL,
-	lang		VARCHAR2(5)	DEFAULT 'en_US'			CONSTRAINT nn_users_prefs_lang NOT NULL
+	param_id     number(12),
+        sid          varchar2(20) DEFAULT '' NOT NULL,
+	name         varchar2(32) NOT NULL,
+	value        clob,
+	constraint users_param_unq UNIQUE (sid, name),
+	constraint param_id PRIMARY KEY (param_id)
 );
 
 
+prompt drop table storiestuff
+drop table storiestuff;
 
-DROP TABLE vars;
+prompt create table storiestuff
+CREATE TABLE storiestuff (
+  sid        varchar2(20)   DEFAULT '' NOT NULL,
+  hits       number(6)      DEFAULT 0 NOT NULL,
+  constraint storiesstuff_pk PRIMARY KEY (sid)
+);
+
+
+/*************************************************
+*  IMPORTANT NOTE
+*  comment is a reserved word
+*  column comment changed to submission_comment
+**************************************************/
+
+prompt drop table submissions
+drop table submissions;
+
+prompt create table submissions
+CREATE TABLE submissions (
+  subid               varchar2(15)   DEFAULT '' NOT NULL,
+  email               varchar2(50),
+  name                varchar2(50),
+  time                date,
+  subj                varchar2(50),
+  story               clob,
+  tid                 varchar2(20),
+  note                varchar2(30),
+  section             varchar2(30)   DEFAULT '' NOT NULL,
+  submission_comment  varchar2(255),
+  user_id             number(12)     DEFAULT 1 NOT NULL,
+  del                 number(6)      DEFAULT 0 NOT NULL,
+  constraint submissions_pk PRIMARY KEY (subid)
+);
+CREATE INDEX idx_subid ON submissions(subid,section);
+
+
+prompt drop table templates
+drop table templates;
+
+prompt create table templates
+CREATE TABLE templates (
+	tpid         varchar2(30) DEFAULT '' NOT NULL,
+	template     clob,
+	seclev       number(12),
+	description  clob,
+	title        varchar2(128),
+	page         varchar2(20) DEFAULT 'misc' NOT NULL,
+	constraint templates_pk PRIMARY KEY (tpid)
+);
+CREATE INDEX idx_tmpltpage ON templates(page);
+
+
+prompt drop table topics
+drop table topics;
+
+
+prompt create table topics
+CREATE TABLE topics (
+  tid     varchar2(20) DEFAULT '' NOT NULL,
+  image   varchar2(30),
+  alttext varchar2(40),
+  width   number(12),
+  height  number(12),
+  constraint topics_pk PRIMARY KEY (tid)
+);
+
+
+prompt drop table tzcodes
+drop table tzcodes;
+
+prompt create table tzcodes
+CREATE TABLE tzcodes (
+  tz           char(3) DEFAULT '' NOT NULL,
+  value        number(12),
+  description  varchar2(64),
+  constraint tzcodes_pk PRIMARY KEY (tz)
+);
+
+
+/**************************************************
+* IMPORTANT NOTE
+* mode is a reserved word
+* column mode chnaged to user_mode
+***************************************************/
+
+
+prompt drop table users
+drop table users;
+
+
+prompt create table users
+CREATE TABLE users (
+  user_id          number(12),
+  nickname         varchar2(20)   DEFAULT '' NOT NULL,
+  realemail        varchar2(50)   DEFAULT '' NOT NULL,
+  fakeemail        varchar2(50),
+  homepage         varchar2(100),
+  passwd           varchar2(32)   DEFAULT '' NOT NULL,
+  sig              varchar2(160),
+  seclev           number(12)     DEFAULT 0 NOT NULL,
+  matchname        varchar2(20),
+  newpasswd        varchar2(32),
+  points           number(12)     DEFAULT 0 NOT NULL,
+  posttype         varchar2(10)   DEFAULT 'html' NOT NULL,
+  defaultpoints    number(12)     DEFAULT 1 NOT NULL,
+  highlightthresh  number(12)     DEFAULT 4 NOT NULL,
+  maxcommentsize   number(12)     DEFAULT 4096 NOT NULL,
+  hardthresh       number(6)      DEFAULT 0 NOT NULL,
+  clbig            number(12)     DEFAULT 0 NOT NULL,
+  clsmall          number(12)     DEFAULT 0 NOT NULL,
+  reparent         number(12)     DEFAULT 1 NOT NULL,
+  nosigs           number(12)     DEFAULT 0 NOT NULL,
+  commentlimit     number(12)     DEFAULT 100 NOT NULL,
+  commentspill     number(12)     DEFAULT 50 NOT NULL,
+  commentsort      number(6)      DEFAULT 0,
+  noscores         number(6)      DEFAULT 0 NOT NULL,
+  user_mode        varchar2(10)   DEFAULT 'thread',
+  threshold        number(6)      DEFAULT 0,
+  extid            varchar2(255),
+  exaid            varchar2(100),
+  exsect           varchar2(100),
+  exboxes          varchar2(255),
+  maxstories       number(12)     DEFAULT 30 NOT NULL,
+  noboxes          number(6)      DEFAULT 0 NOT NULL,
+  totalmods        number(12)     DEFAULT 0 NOT NULL,
+  realname         varchar2(50),
+  bio              clob,
+  tokens           number(12)     DEFAULT 0 NOT NULL,
+  lastgranted      date           DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  karma            number(12)     DEFAULT 0 NOT NULL,
+  maillist         number(6)      DEFAULT 0 NOT NULL,
+  totalcomments    number(6)      DEFAULT 0,
+  lastmm           date           DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  lastaccess       date           DEFAULT trunc(to_date('1970-01-01', 'YYYY-MM-DD')) NOT NULL,
+  lastmmid         number(12)     DEFAULT 0 NOT NULL,
+  session_login    number(6)      DEFAULT 0 NOT NULL,
+  willing          number(6)      DEFAULT 1 NOT NULL,
+  dfid             number(12)     DEFAULT 0 NOT NULL,
+  tzcode           char(3)        DEFAULT 'edt' NOT NULL,
+  noicons          number(6)      DEFAULT 0 NOT NULL,
+  light            number(6)      DEFAULT 0 NOT NULL,
+  mylinks          varchar2(255)  DEFAULT '' NOT NULL,
+  constraint users_pk PRIMARY KEY (user_id)
+);
+CREATE INDEX idx_login ON users(user_id,passwd,nickname);
+CREATE INDEX idx_chk4user ON users(nickname,realemail);
+CREATE INDEX idx_chk4email ON users(realemail);
+
+prompt drop sequence users_seq
+drop sequence users_seq;
+
+prompt create sequence users_seq
+create sequence users_seq
+      start with 1;
+
+
+
+prompt drop table users_param
+drop table users_param;
+
+prompt create table users_param
+CREATE TABLE users_param (
+	param_id       number(12),
+	user_id        number(12)   DEFAULT 1 NOT NULL,
+	name           varchar2(32) NOT NULL,
+	value          clob,
+	constraint users_param_unq UNIQUE (user_id, name),
+        constraint users_param_pk PRIMARY KEY (param_id)
+);
+
+
+
+prompt drop table vars
+drop table vars;
+
+
+prompt create table vars
 CREATE TABLE vars (
-	name		VARCHAR2(32)					CONSTRAINT pk_vars PRIMARY KEY,
-	value		VARCHAR2(4000),
-	description	VARCHAR2(255)
+  name          varchar2(32) DEFAULT '' NOT NULL,
+  value         clob,
+  description   varchar2(127),
+  constraint vars_pk PRIMARY KEY (name)
 );
 
 
-
-# End of schema conversion -- everything under here is Oracle specific
-
-DROP TABLE clob_compare;
-CREATE GLOBAL TEMPORARY TABLE clob_compare (
-	id		NUMBER(38),
-	data		CLOB
-) ON COMMIT PRESERVE ROWS;
+spool off

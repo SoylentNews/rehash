@@ -192,7 +192,7 @@ sub selectTopic {
 	my %topics = map {
 		($_, $topicbank->{$_}{alttext})
 	} keys %$topicbank;
-	delete $topics{$slashdb->TopicAllKey} unless $all;
+	delete $topics{''} unless $all;
 
 	createSelect($label, \%topics, $default, $return);
 }
@@ -264,7 +264,7 @@ sub selectSection {
 	} grep {
 		!($sectionbank->{$_}{isolate} && $seclev < 500)
 	} keys %$sectionbank;
-	delete $sections{$slashdb->SectionAllKey} unless $all;
+	delete $sections{''} unless $all;
 
 	createSelect($label, \%sections, $default, $return);
 }

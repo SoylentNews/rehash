@@ -222,22 +222,10 @@ unless ($opts{'e'}) {
 	$email = $opts{'e'};
 }
 
-my $trgst = '';
-
 # Dump in the schema then pepper with a trace of your own theme
 open(CREATE, "< $PREFIX/sql/$driver/schema.sql")
 	or die "Can't open $PREFIX/sql/$driver/schema.sql: $!.\n";
 while (<CREATE>) {
-	# ugly-as-hell hack to keep Oracle trigger code from getting munged
-	# the syntax is sensitive plus there *has* to be a semicolon at the end
-	# (yes, one that gets passed in the statement, not the EOS delimiter!)
-	if ($driver eq 'oracle' and (/^CREATE OR REPLACE TRIGGER/ or $trgst)) {
-		$trgst .= $_;
-		next unless /^END;$/;
-		$trgst =~ s/;/#/g;
-		$_ = "$trgst;";
-		$trgst = '';
-	}
 	chomp;
 	next if /^#/;
 	next if /^$/;
@@ -249,13 +237,6 @@ close (CREATE);
 $sql = join '', @create;
 @sql = split /;/, $sql;
 
-# again with the oracle trigger thing hacking
-if ($driver eq 'oracle') {
-	for (@sql) {
-		s/#/;/g if /^CREATE OR REPLACE TRIGGER/;
-	}
-}
-
 open(DUMP,"< $theme/sql/$driver/datadump.sql")
 	or die "Can't open $theme/sql/$driver/datadump.sql: $!.\n";
 while (<DUMP>) {
@@ -264,14 +245,6 @@ while (<DUMP>) {
 	s/;$//;
 	s/www\.example\.com/$hostname/g;
 	s/admin\@example\.com/$email/g;
-	if ($driver eq 'oracle') {
-		# With this we can almost use the MySQL dump verbatim
-		# Of course, MySQL could have just compiled with SQL-92, too
-		s/\\r/\r/g;
-		s/\\n/\n/g;
-		s/\\'/''/g;
-		s/\\(["\\])/$1/g;
-	}
 	push @sql, $_;
 }
 close(DUMP);

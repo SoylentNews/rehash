@@ -6,8 +6,8 @@
 package Slash::DB::Utility;
 
 use strict;
-use DBIx::Password;
 use Slash::Utility;
+use DBIx::Password;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -42,7 +42,6 @@ sub sqlConnect {
 			eval {
 				local $SIG{'ALRM'} = sub { die "Connection timed out" };
 				alarm $timeout;
-				$self->DBPreConnectSetup();
 				$self->{_dbh} = DBIx::Password->connect_cached($self->{virtual_user});
 				alarm 0;
 			};
@@ -57,156 +56,78 @@ sub sqlConnect {
 			#	my $time = localtime();
 			#	print STDERR "Rebuilt at $time\n";
 			#}
-
-			# See below -- thebrain
-			$self->DBPostConnectSetup();
 		}
 	}
 }
 
-# Additional setup instructions for a DB connection before and
-# after it has been setup can be inserted by overriding these
-# methods; see Slash::DB::Oracle for an example -- thebrain
-sub DBPreConnectSetup  { return 0 }
-sub DBPostConnectSetup { return 0 }
-
-# This sets the method called to prepare a statement.  The primary use of this
-#   is Oracle, where prepare_cached does more harm than good (by perpetually
-#   tying up SQL cursors) and is unnecessary anyway (thanks to the server-side
-#   SQL cache), so it should just use prepare for everything. -- thebrain
-sub setPrepareMethod {
-	$_[0]->{_dbh_prepare_method} = $_[1];
-}
-
-# These set what value means 'all' in the topics and sections tables, which is
-#   important in a few areas.  This is yet another Oracle hack because Oracle
-#   stupidly makes '' == NULL and primary keys are NOT NULL fields.  I set the
-#   defaults to '' here, but if you happen across another database as damaged
-#   as Oracle in this regard, you can override these in the driver. -- thebrain
-sub TopicAllKey { return '' };
-sub SectionAllKey { return '' };
-
 ########################################################
-# These _sqlPrepare* methods set up their respective statements but
-# don't execute them, instead returning the component parts so we can
-# execute and fetch on our own terms.  This decouples the statement
-# generation so it doesn't have to be duplicated each time we change
-# the execute/fetch technique du jour.
-# The most prominent useful place for this is in the REPLACE emulation
-# for Oracle, which prepares an insert but defers the execute back to
-# the sqlReplace function, where it gets error trapped so appropriate
-# action can be taken if the error isn't a truly fatal one. -- thebrain
-sub _sqlPrepareSelect {
-	my $self	= shift;
-	my $sql		= '';
-
-	foreach my $elem ('SELECT ',' FROM ',' WHERE ',' ') {
-		last if !@_ or ref($_[0]) eq 'ARRAY';
-		my $et = shift;
-		$sql .= $elem . $et if $et;
-	}
-
-	my $binds	= [];
-	$binds		= shift if ref($_[0]) eq 'ARRAY';
-	my $attr	= {};
-	$attr		= shift if ref($_[0]) eq 'HASH';
-
-	$self->sqlConnect();
-	my $pmeth = $self->{_dbh_prepare_method};
-	my $sth = $self->{_dbh}->$pmeth($sql);
-	foreach my $bp (keys %$attr) {
-		$sth->bind_param($bp, undef, $attr->{$bp});
-	}
-	return($sth, $sql, [@$binds]);
-}
-
-########################################################
-sub _sqlPrepareInsert {
-	my $self	= shift;
-	my $table	= shift;
-	my $data	= shift;
-	my $attr	= {};
-	$attr		= shift if ref($_[0]) eq 'HASH';
-
-	my($names, $values, @binds, %bindattr);
-
-	foreach my $key (keys %$data) {
-		if ($key =~ s/^-//) {
-			$values .= "$data->{-$key},";
-		} else {
-			$values .= '?,';
-			push @binds, $data->{$key};
-			$bindattr{scalar(@binds)} = $attr->{$key} if $attr->{$key};
-		}
-		$names .= "$key,";
-	}
-
-	chop($names);
-	chop($values);
-
-	$self->sqlConnect();
-	my $sql = "INSERT INTO $table ($names) VALUES ($values)\n";
-	my $pmeth = $self->{_dbh_prepare_method};
-	my $sth = $self->{_dbh}->$pmeth($sql);
-	foreach my $bp (keys %bindattr) {
-		$sth->bind_param($bp, undef, $bindattr{$bp});
-	}
-	return ($sth, $sql, \@binds);
-}
-
+# Useful SQL Wrapper Functions
 ########################################################
 sub sqlSelectMany {
-	my $self = shift;
-	my($sth, $sql, $binds) = $self->_sqlPrepareSelect(@_);
-	if ($sth->execute(@$binds)) {
+	my($self, $select, $from, $where, $other) = @_;
+
+	my $sql = "SELECT $select ";
+	$sql .= "   FROM $from " if $from;
+	$sql .= "  WHERE $where " if $where;
+	$sql .= "        $other" if $other;
+
+	my $sth = $self->{_dbh}->prepare_cached($sql);
+	$self->sqlConnect();
+	if ($sth->execute) {
 		return $sth;
 	} else {
 		$sth->finish;
-		errorLog($self->sqlFillInPlaceholders($sql, $binds));
-		$self->sqlConnect();
+		errorLog($sql);
+		$self->sqlConnect;
 		return undef;
 	}
 }
 
 ########################################################
 sub sqlSelect {
-	my $self = shift;
-	my $sth = $self->sqlSelectMany(@_) || return undef;
-	my @r = $sth->fetchrow_array;
+	my($self, $select, $from, $where, $other) = @_;
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+	
+	my $sth = $self->{_dbh}->prepare_cached($sql);
+	$self->sqlConnect();
+	if (!$sth->execute) {
+		errorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
+	my @r = $sth->fetchrow;
 	$sth->finish;
+
 	return @r;
 }
 
 ########################################################
 sub sqlSelectArrayRef {
-	my $self = shift;
-	my $sth = $self->sqlSelectMany(@_) || return undef;
+	my($self, $select, $from, $where, $other) = @_;
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+	
+	$self->sqlConnect();
+	my $sth = $self->{_dbh}->prepare_cached($sql);
+	if (!$sth->execute) {
+		errorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
 	my $r = $sth->fetchrow_arrayref;
-	$sth->finish;
 	return $r;
 }
 
 ########################################################
-sub sqlSelectHashref {
-	my $self = shift;
-	my $sth = $self->sqlSelectMany(@_) || return undef;
-
-	# perldoc DBI:
-	# Currently, a new hash reference is returned for each
-	# row.  _This_will_change_ in the future to return the
-	# same hash ref each time, so don't rely on the current
-	# behaviour.
-	my $dh = $sth->fetchrow_hashref('NAME_lc') || {};
-	$sth->finish;
-	return keys %$dh ? { %$dh } : undef;
-}
-
-########################################################
-# This is kinda pointless -- thebrain
 sub sqlSelectHash {
-	my $self = shift;
-	my $hash = $self->sqlSelectHashref(@_) or return;
-	return %$hash;
+	my($self) = @_;
+	my $hash = $self->sqlSelectHashref(@_);
+	return map { $_ => $hash->{$_} } keys %$hash;
 }
 
 ##########################################################
@@ -216,17 +137,59 @@ sub sqlSelectHash {
 # Simple little function to get the count of a table
 ##########################################################
 sub sqlCount {
-	my $self = shift;
-	return ($self->sqlSelect('COUNT(*)', @_))[0];
+	my($self, $table, $where) = @_;
+
+	my $sql = "SELECT count(*) AS count FROM $table";
+	$sql .= " WHERE $where" if  $where;
+	# we just need one stinkin value - count
+	$self->sqlConnect();
+	my $count = $self->{_dbh}->selectrow_array($sql);
+	return $count;  # count
+}
+
+
+########################################################
+sub sqlSelectHashref {
+	my($self, $select, $from, $where, $other) = @_;
+
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+
+	$self->sqlConnect();
+	my $sth = $self->{_dbh}->prepare_cached($sql);
+	
+	unless ($sth->execute) {
+		errorLog($sql);
+		$self->sqlConnect;
+		return;
+	} 
+	my $H = $sth->fetchrow_hashref;
+	$sth->finish;
+	return $H;
 }
 
 ########################################################
 sub sqlSelectColArrayref {
-	my $self = shift;
-	my $sth = $self->sqlSelectMany(@_) || return undef;
-	my $a = $self->{_dbh}->selectcol_arrayref($sth);
-	$sth->finish;
-	return $a;
+	my($self, $select, $from, $where, $other) = @_;
+
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+
+	$self->sqlConnect();
+	my $sth = $self->{_dbh}->prepare_cached($sql);
+	
+	my $array = $self->{_dbh}->selectcol_arrayref($sth);
+	unless (defined($array)) {
+		errorLog($sql);
+		$self->sqlConnect;
+		return;
+	} 
+
+	return $array;
 }
 
 ########################################################
@@ -244,11 +207,21 @@ sub sqlSelectColArrayref {
 # returns: 
 # array ref of all records
 sub sqlSelectAll {
-	my $self = shift;
-	my $sth = $self->sqlSelectMany(@_) || return undef;
-	my $a = $self->{_dbh}->selectall_arrayref($sth);
-	$sth->finish;
-	return $a;
+	my($self, $select, $from, $where, $other) = @_;
+
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+
+	$self->sqlConnect();
+	my $H = $self->{_dbh}->selectall_arrayref($sql);
+	unless ($H) {
+		errorLog($sql);
+		$self->sqlConnect;
+		return;
+	}
+	return $H;
 }
 
 ########################################################
@@ -265,20 +238,23 @@ sub sqlSelectAll {
 # returns: 
 # array ref of all records
 sub sqlSelectAllHashref {
-	my $self = shift;
-	my $id = shift;
-	my $sth = $self->sqlSelectMany(@_) || return undef;
-	my $h = {};
-	while (my $row = $sth->fetchrow_hashref('NAME_lc')) {
-		# perldoc DBI:
-		# Currently, a new hash reference is returned for each
-		# row.  _This_will_change_ in the future to return the
-		# same hash ref each time, so don't rely on the current
-		# behaviour.
-		$h->{$row->{$id}} = { %$row };
+	my($self, $id , $select, $from, $where, $other) = @_;
+
+	# Yes, if ID is not in $select things will be bad
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+
+	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
+	my $returnable;
+	while (my $row = $sth->fetchrow_hashref) {
+		$returnable->{$row->{$id}} = $row;
 	}
 	$sth->finish;
-	return $h;
+	
+	
+	return $returnable;
 }
 
 ########################################################
@@ -294,105 +270,88 @@ sub sqlSelectAllHashref {
 # returns: 
 # array ref of all records
 sub sqlSelectAllHashrefArray {
-	my $self = shift;
-	my $sth = $self->sqlSelectMany(@_) || return undef;
-	my $a = [];
-	while (my $row = $sth->fetchrow_hashref('NAME_lc')) {
-		# perldoc DBI:
-		# Currently, a new hash reference is returned for each
-		# row.  _This_will_change_ in the future to return the
-		# same hash ref each time, so don't rely on the current
-		# behaviour.
-		push @$a, { %$row };
+	my($self, $select, $from, $where, $other) = @_;
+
+	# Yes, if ID is not in $select things will be bad
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+
+	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
+	my @returnable;
+	while (my $row = $sth->fetchrow_hashref) {
+		push @returnable, $row;
 	}
 	$sth->finish;
-	return $a;
+	
+	
+	return \@returnable;
 }
 
-#######################################################
+########################################################
 sub sqlUpdate {
-	my $self	= shift;
-	my $table	= shift;
-	my $data	= shift;
-	my $dataattr	= {};
-	$dataattr	= shift if ref($_[0]) eq 'HASH';
-	my $where	= shift;
-	my $wherebinds	= [];
-	$wherebinds	= shift if ref($_[0]) eq 'ARRAY';
-	my $whereattr	= {};
-	$whereattr	= shift if ref($_[0]) eq 'HASH';
-
-	my(@binds, %bindattr);
+	my($self, $table, $data, $where) = @_;
 	my $sql = "UPDATE $table SET";
-	foreach my $key (keys %$data) {
-		if ($key =~ s/^-//) {
-			$sql .= " $key = $data->{-$key},";
-		} else {
-			$sql .= " $key = ?,";
-			push @binds, $data->{$key};
-			$bindattr{scalar(@binds)} = $dataattr->{$key} if $dataattr->{$key};
+	foreach (keys %$data) {
+		if (/^-/) {
+			s/^-//;
+			$sql .= "\n  $_ = $data->{-$_},";
+		} else { 
+			$sql .= "\n $_ = " . $self->{_dbh}->quote($data->{$_}) . ',';
 		}
 	}
 	chop $sql;
-
 	$sql .= "\nWHERE $where\n";
-	for (my $i = 0; $i < @$wherebinds; $i++) {
-		push @binds, $wherebinds->[$i];
-		$bindattr{scalar(@binds)} = $whereattr->{$i+1} if $whereattr->{$i+1};
-	}
-
 	$self->sqlConnect();
-	my $rows = $self->sqlDo($sql, \@binds, \%bindattr);
+	my $rows = $self->sqlDo($sql);
 	#print STDERR "SQL: $sql\n";
 	return $rows;
 }
 
 ########################################################
 sub sqlInsert {
-	my $self = shift;
-	my($sth, $sql, $binds) = $self->_sqlPrepareInsert(@_);
-	if (my $rv = $sth->execute(@$binds)) {
-		return $rv;
-	} else {
-		errorLog($self->sqlFillInPlaceholders($sql, $binds));
-		$self->sqlConnect;
-		return undef;
+	my($self, $table, $data) = @_;
+	my($names, $values);
+
+	foreach (keys %$data) {
+		if (/^-/) {
+			$values .= "\n  $data->{$_},";
+			s/^-//;
+		} else {
+			$values .= "\n  " . $self->{_dbh}->quote($data->{$_}) . ',';
+		}
+		$names .= "$_,";	
 	}
+
+	chop($names);
+	chop($values);
+
+	my $sql = "INSERT INTO $table ($names) VALUES($values)\n";
+	$self->sqlConnect();
+	return $self->sqlDo($sql);
 }
 
 #################################################################
 sub sqlQuote {
-	return $_[0]->{_dbh}->quote($_[1]);
+	my($self, $sql) = @_;
+	my $db_sql = $self->{_dbh}->quote($sql);
+
+	return $db_sql;
 }
 
 #################################################################
 sub sqlDo {
-	my($self, $sql, $binds, $bindattrs) = @_;
+	my($self, $sql) = @_;
 	$self->sqlConnect();
-	my $rows;
-	if ($bindattrs && keys %$bindattrs) {
-		my $sth = $self->{_dbh}->prepare($sql);
-		foreach my $bp (keys %$bindattrs) {
-			$sth->bind_param($bp, undef, $bindattrs->{$bp});
-		}
-		$rows = $sth->execute(@$binds);
-	} else {
-		$rows = $self->{_dbh}->do($sql, undef, @$binds);
-	}
+	my $rows = $self->{_dbh}->do($sql);
 	unless ($rows) {
-		errorLog($self->sqlFillInPlaceholders($sql, [@$binds]));
+		errorLog($sql);
 		$self->sqlConnect;
 		return;
 	}
-	return $rows;
-}
 
-#################################################################
-# For error reporting purposes -- thebrain
-sub sqlFillInPlaceholders {
-	my($self, $sql, $binds) = @_;
-	$sql =~ s/\?/$self->{_dbh}->quote(shift @$binds)/ge;
-	return $sql;
+	return $rows;
 }
 
 1;

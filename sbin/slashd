@@ -326,7 +326,7 @@ sub newrss {	# RSS 1.0
 		title		=> 'Search ' . xmlencode($constants->{sitename}),
 		description	=> 'Search ' . xmlencode($constants->{sitename}) . ' stories',
 		name		=> 'query',
-		'link'		=> xmlencode_plain("$constants->{absolutedir}/search.pl)"
+		'link'		=> xmlencode_plain("$constants->{absolutedir}/search.pl"),
 	);
 
 	my $stories_and_topics = $slashdb->getBackendStories($section);

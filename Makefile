@@ -104,11 +104,7 @@ install: slash plugins
 	done)
 
 	# Create all necessary directories.
-	install -d $(SLASH_PREFIX)/bin/ $(SLASH_PREFIX)/sbin \
-		$(SLASH_PREFIX)/sql/ $(SLASH_PREFIX)/sql/mysql/ $(SLASH_PREFIX)/sql/oracle/ $(SLASH_PREFIX)/sql/postgresql \
-		$(SLASH_PREFIX)/themes/ $(SLASH_PREFIX)/themes/slashcode/htdocs/ $(SLASH_PREFIX)/themes/slashcode/sql/ \
-		$(SLASH_PREFIX)/themes/slashcode/sql/mysql $(SLASH_PREFIX)/themes/slashcode/sql/oracle $(SLASH_PREFIX)/themes/slashcode/sql/postgresql \
-		$(SLASH_PREFIX)/themes/slashcode/backup $(SLASH_PREFIX)/themes/slashcode/logs/ $(SLASH_PREFIX)/plugins/ $(SLASH_PREFIX)/httpd/
+	install -d $(SLASH_PREFIX)/bin/ $(SLASH_PREFIX)/sbin $(SLASH_PREFIX)/sql/ $(SLASH_PREFIX)/sql/mysql/ $(SLASH_PREFIX)/sql/postgresql $(SLASH_PREFIX)/themes/ $(SLASH_PREFIX)/themes/slashcode/htdocs/ $(SLASH_PREFIX)/themes/slashcode/sql/ $(SLASH_PREFIX)/themes/slashcode/sql/postgresql $(SLASH_PREFIX)/themes/slashcode/sql/mysql $(SLASH_PREFIX)/themes/slashcode/backup $(SLASH_PREFIX)/themes/slashcode/logs/ $(SLASH_PREFIX)/plugins/ $(SLASH_PREFIX)/httpd/
 
 	# Quick hack to avoid the need for "cp -ruv" which breaks under FreeBSD
 	# is to just copy the directories now. We may end up copying over a file
@@ -153,7 +149,6 @@ install: slash plugins
 	done)
 
 	$(CP) sql/mysql/slashschema_create.sql $(SLASH_PREFIX)/sql/mysql/schema.sql
-	$(CP) sql/oracle/slashschema_create.sql $(SLASH_PREFIX)/sql/oracle/schema.sql
 	$(CP) sql/postgresql/slashschema_create.sql $(SLASH_PREFIX)/sql/postgresql/schema.sql
 
 	# This needs BSD support (and Solaris)...

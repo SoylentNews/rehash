@@ -5,7 +5,7 @@
 
 package Slash::Install;
 use strict;
-use vars qw($VERSION);
+use vars qw($VERSION @ISA);
 use DBIx::Password;
 use Slash;
 use Slash::DB::Utility;
@@ -16,38 +16,45 @@ use File::Path;
 
 # BENDER: Like most of life's problems, this one can be solved with bending.
 
+@ISA       = qw(Slash::DB::Utility);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub new {
 	my($class, $user) = @_;
-	return bless {
-		slashdb => Slash::DB->new($user)
-	}, $class;
+	my $self = {};
+	bless($self, $class);
+	$self->{virtual_user} = $user;
+	$self->sqlConnect;
+	$self->{slashdb} = Slash::DB->new($user);
+
+	return $self;
 }
 
 sub create {
 	my($self, $values) = @_;
-	$self->{slashdb}->sqlInsert('site_info', $values);
+	$self->sqlInsert('site_info', $values);
 }
 
 sub delete {
 	my($self, $key) = @_;
-	$self->{slashdb}->sqlDo('DELETE FROM site_info WHERE name = ?', [$key]);
+	my $sql = "DELETE from site_info WHERE name = " . $self->sqlQuote($key);
+	$self->sqlDo($sql);
 }
 
 sub deleteByID  {
 	my($self, $key) = @_;
-	$self->{slashdb}->sqlDo('DELETE from site_info WHERE param_id = ?', [$key]);
+	my $sql = "DELETE from site_info WHERE param_id=$key";
+	$self->sqlDo($sql);
 }
 
 sub get {
 	my($self, $key) = @_;
-	my $count = $self->{slashdb}->sqlCount('site_info', 'name = ?', [$key]);
+	my $count = $self->sqlCount('site_info', "name=" . $self->sqlQuote($key));
 	my $hash;
 	if ($count > 1) {
-		$hash = $self->{slashdb}->sqlSelectAllHashref('param_id', '*', 'site_info', 'name = ?', [$key]);
+		$hash = $self->sqlSelectAllHashref('param_id', '*', 'site_info', "name=" . $self->sqlQuote($key));
 	} else {
-		$hash = $self->{slashdb}->sqlSelectHashref('*', 'site_info', 'name = ?', [$key]);
+		$hash = $self->sqlSelectHashref('*', 'site_info', "name=" . $self->sqlQuote($key));
 	}
 
 	return $hash;
@@ -56,31 +63,31 @@ sub get {
 sub exists {
 	my($self, $key, $value) = @_;
 	return unless $key;
-	my $where = 'name = ?';
-	my $binds = [$key];
-	if ($value) {
-		$where .= ' AND value = ?';
-		push @$binds, $value;
-	}
-	my $count = $self->{slashdb}->sqlCount('site_info', $where, $binds);
+	my $where;
+	$where .= "name=" . $self->sqlQuote($key);
+	$where .= " AND value=" . $self->sqlQuote($value) if $value;
+	my $count = $self->sqlCount('site_info', $where);
+
 	return $count;
 }
 
 sub getValue {
 	my($self, $key) = @_;
-	my $count = $self->{slashdb}->sqlCount('site_info', 'name = ?', [$key]);
+	my $count = $self->sqlCount('site_info', "name=" . $self->sqlQuote($key));
 	my $value;
 	unless ($count > 1) {
-		($value) = $self->{slashdb}->sqlSelect('value', 'site_info', 'name = ?', [$key]);
+		($value) = $self->sqlSelect('value', 'site_info', "name=" . $self->sqlQuote($key));
 	} else {
-		$value = $self->{slashdb}->sqlSelectColArrayref('value', 'site_info', 'name = ?', [$key]);
+		$value = $self->sqlSelectColArrayref('value', 'site_info', "name=" . $self->sqlQuote($key));
 	}
+
 	return $value;
 }
 
 sub getByID {
 	my($self, $id) = @_;
-	my $return = $self->{slashdb}->sqlSelectHashref('*', 'site_info', 'param_id = ?', [$id]);
+	my $return = $self->sqlSelectHashref('*', 'site_info', "param_id = $id");
+
 	return $return;
 }
 
@@ -205,7 +212,7 @@ sub _install {
 	for (@sql) {
 		next unless $_;
 		s/;$//;
-		unless ($self->{slashdb}->sqlDo($_)) {
+		unless ($self->sqlDo($_)) {
 			print "Failed on :$_:\n";
 		}
 	}
