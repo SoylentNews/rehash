@@ -102,12 +102,12 @@ sub main {
 			my $tids = $reader->getStoryTopicsJustTids($story->{sid}); 
 			my $tid_string = join('&amp;tid=', @$tids);
 			$user->{state}{tid} = $tid_string;
-			# If no comments ever have existed just skip the display
-			# of the comment header bar -Brian
+			# If no comments ever have existed and commentstatus is disabled,
+			# just skip the display of the comment header bar -Brian
 			printComments($discussion)
-				if $discussion
-					&& !( $discussion->{commentcount} > 0
-						&& $discussion->{commentstatus} eq 'disabled' );
+				if $discussion && !(
+					!$discussion->{commentcount} && $discussion->{commentstatus} eq 'disabled'
+				);
 		}
 	} else {
 		header('Error', $form->{section});
