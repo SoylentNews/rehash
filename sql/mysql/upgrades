@@ -2151,8 +2151,6 @@ ALTER TABLE message_drop CHANGE COLUMN message message MEDIUMBLOB DEFAULT '' NOT
 
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt,width,height,longdesc_U', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_140, Start of T_2_3_0_141 - 2004/03/03
@@ -2163,3 +2161,6 @@ INSERT INTO vars (name, value, description) VALUES ('store_com_page1_min_cid_for
 
 INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_size', 24, "Number of submissions shown per page on a user page.  Set to 0 to show all");
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_141, Start of T_2_3_0_142 - 2004/03/09
