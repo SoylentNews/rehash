@@ -254,7 +254,7 @@ EOT
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{admin_mods_text} = $admin_mods_text;
-#	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
+	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
 
 	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail', Nocomm => 1 });
 
