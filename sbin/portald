@@ -151,7 +151,29 @@ sub getRDF {
 	$items ||= $constants->{max_items};
 	$template_name ||= $constants->{default_rss_template};
 
-	my $d = geturl($url);
+	my $d;
+	# this only works for a very limited subset of RSS feeds,
+	# the section-only story ones, and it only works for
+	# where $section matches something getSkin() knows about
+	### this is incomplete -- pudge
+	if (0 && $url =~ m{^//([^/]+)/([^.+])\.(\w+)}) {
+		my($host, $section, $ext) = ($1, $2, $3);
+		my $skin = $slashdb->getSkin($section);
+		if ($skin) {
+			
+		}
+
+		# bah, never mind!
+		if (!$d) {
+			$url = "http:$url";
+			$d = geturl($url);
+		}
+	}
+
+	$d ||= geturl($url);
+	if (urlFromSite($url)) {
+		$d =~ s/(?:&(?:amp;)?|\?)from=rss//g;
+	}
 
 	if (!$d) {
 		portaldLog("failed to get $bid: $@");
