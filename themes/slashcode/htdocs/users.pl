@@ -284,6 +284,13 @@ sub main {
 			formname	=> $formname,
 			checks		=> [],
 		},
+		force_acct_verify => {
+			function	=> \&forceAccountVerify,
+			seclev		=> 100,
+			formname 	=> $formname,
+			checks		=> []
+		}	
+	
 	} ;
 
 	# Note this is NOT the default op.  "userlogin" or "userinfo" is
@@ -2677,6 +2684,40 @@ sub listAbuses {
 }
 
 #################################################################
+
+sub forceAccountVerify {
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $uid = $form->{uid};
+	my $useredit = $slashdb->getUser($uid);
+	
+	if($useredit->{uid}){
+		my $newpasswd = $slashdb->resetUserAccount($uid);
+		$slashdb->deleteLogToken($uid, 1);
+		my $emailtitle = getTitle('reset_acct_email_title', {
+			nickname	=> $useredit->{nickname}
+		}, 1);
+
+		my $msg = getMessage('reset_acct_msg', {
+			newpasswd	=> $newpasswd,
+			tempnick	=> $useredit->{nickname},
+		}, 1);
+		
+		$slashdb->setUser($useredit->{uid}, {
+					waiting_for_account_verify => 1,
+					account_verify_request_time => $slashdb->getTime()
+				  });
+		
+		doEmail($useredit->{uid}, $emailtitle, $msg) if $useredit->{uid};
+	}
+	
+	print getMessage("reset_acct_complete", { useredit => $useredit }, 1);	
+}
+
+#################################################################
 sub displayForm {
 	my($hr) = @_;
 
@@ -2928,6 +2969,8 @@ sub getUserAdmin {
 
 	if ($ipid and !$subnetid) {
 		$ipid = md5_hex($ipid) if length($ipid) != 32;
+		$proxy_check->{ipid} = $ipid;
+		$proxy_check->{currently} = $slashdb->getKnownOpenProxy($ipid, "ipid");
 		$subnetid = $reader->getSubnetFromIPID($ipid);
 	}
 
