@@ -17,15 +17,15 @@ __template__
 		<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">
 			<TD COLSPAN=3 ALIGN="LEFT" BGCOLOR="[% user.bg.3 %]">
 				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]">
-					[% IF title == 'top' %]
+					[% IF type == 'top' %]
 						<B>Top Posters By Number of Entries</B>
-					[% ELSIF title == 'recent' %]
+					[% ELSIF type == 'recent' %]
 						<B>Top Recent Posters</B>
-					[% ELSIF title == 'friend' %]
+					[% ELSIF type == 'friend' %]
 						<B>Top Posters By Friends</B>
 					[% ELSE %]
 						&nbsp;
-					[ END]
+					[% END %]
 				</FONT>
 			</TD>
 		<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">

@@ -224,13 +224,8 @@ sub userLogin {
 sub userdir_handler {
 	my($r) = @_;
 
-	my $cfg = Apache::ModuleConfig->get($r);
-
-	my $dbcfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-	my $constants = $dbcfg->{constants};
-
+	my $constants = getCurrentStatic();
 	my $uri = $r->uri;
-
 	if ($constants->{rootdir}) {
 		my $path = URI->new($constants->{rootdir})->path;
 		$uri =~ s/^\Q$path//;
@@ -238,7 +233,7 @@ sub userdir_handler {
 
 	if ($uri =~ m[^/~(.*)]) {
 		my $clean = $1;
-		$clean =~ s/\///g;
+		$clean =~ s|\/.*$||;
 		$r->args("nick=$clean");
 		$r->uri('/users.pl');
 		$r->filename($constants->{basedir} . '/users.pl');

@@ -4,7 +4,7 @@
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
-# First version by Brian, brian@tanegnt.org
+# First version by Brian, brian@tangent.org
 # Updated by Patrick Galbraith, capttofu@slashdot.org
 
 # I hope someone takes this over. A TK frontend
@@ -93,7 +93,8 @@ if ($opts{'S'} and $opts{'P'}) {
 
 # start the processing
 if ($opts{'s'}) {
-	for(@ARGV) {
+	for (@ARGV) {
+		$_ = catfile($opts{'O'}, $_) if $opts{'O'};
 		my $template = $install->readTemplateFile($_);
 		next unless $template;
 		print "Preparing to insert $template->{name} using filename $_\n";

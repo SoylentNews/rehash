@@ -51,19 +51,28 @@ sub SlashVirtualUser ($$$) {
 
 sub IndexHandler {
 	my($r) = @_;
-	if ($r->uri eq '/') {
-		# cookie data will begin with word char or %
-		if ($r->header_in('Cookie') =~ /\b(?:user)=[%\w]/) {
-			$r->filename($r->document_root . '/index.pl');
+
+	my $constants = getCurrentStatic();
+	my $uri = $r->uri;
+	if ($constants->{rootdir}) {
+		my $path = URI->new($constants->{rootdir})->path;
+		$uri =~ s/^\Q$path//;
+	}
+
+	if ($uri eq '/') {
+		my $filename  = $r->filename;
+		my $basedir   = $constants->{basedir};
+
+		# cookie data will begin with word char or %,
+		# some "empty" cookies will have three characters
+		# to denote null, "%00"
+		if ($r->header_in('Cookie') =~ /\b(?:user)=[%\w]/) { # {4,}
+			$r->uri('/index.pl');
+			$r->filename("$basedir/index.pl");
 			return OK;
 		} else {
-		# We should fix this at some point since
-		# technically this would break if somone
-		# setup slash in a subdirectory (and its
-		# only a theory that it even would work
-		# since I don't think anyone has tried 
-		# it). -Brian
-			$r->filename($r->document_root . '/index.shtml');
+			$r->uri('/index.shtml');
+			$r->filename("$basedir/index.shtml");
 			writeLog('shtml');
 			return OK;
 		}
@@ -72,8 +81,7 @@ sub IndexHandler {
 	return DECLINED;
 }
 
-sub DESTROY {
-}
+sub DESTROY { }
 
 
 1;
