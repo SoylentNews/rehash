@@ -127,7 +127,7 @@ sub new {
 			@PAGES = @{$options->{other_no_op}};
 		} else {
 			@PAGES = qw|index article search comments palm journal rss page users|;
-			@PAGES, @{$constants->{op_extras_countdaily}};
+			push @PAGES, @{$constants->{op_extras_countdaily}};
 		}
 
 		
