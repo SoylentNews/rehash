@@ -345,31 +345,52 @@ sub prepAds {
 		$adless = 1 if $subscribe && $subscribe->adlessPage();
 	}
 
-	# $ENV{SCRIPT_NAME} is e.g. 1) "/index.pl", 2) "/article.pl",
-	# 3) "/slashhead.inc", 4) "/articles/slashhead.inc",
-	# 5) "/index.shtml", or 6) "/12/34/56/7890.shtml".  But prepAds()
-	# will not be called for 5 or 6 because it will have already been
-	# invoked by the ad header in 3 or 4 respectively.  And the
-	# messaging ads are only relevant to 2, 4 and 6.  So we need to
-	# be sure that messaging ads can be set up in {state}{ads} in
-	# cases 2 or 4.  And since in case 4 we can't assume that the DB
-	# is up, we have to treat any SCRIPT_NAME in the format
-	# /foo/slashhead.inc as if "foo" is a valid section (so let's not
-	# create /faq/slashhead.inc or there is mild potential for ad
-	# confusion).  And cases 2 thru 6 depend on ssihead;misc;default
+	# Let's lay out some representative possibilities so we
+	# get the logic right:
+	#
+	# case	messads ok?	$ENV{SCRIPT_NAME}	$ENV{DOCUMENT_URI}
+	# 1	no		/index.pl		/index.pl
+	# 2	yes		/article.pl		/article.pl
+	# 3	no		/slashhead.inc		/index.shtml
+	# 4	no		/slashhead.inc		/faq/foo.shtml (or similar)
+	# 5	yes		/articles/slashhead.inc	/articles/12/34/56/7890.shtml
+	# 6	no		/articles/slashhead.inc	/articles/index.shtml
+	# 7	n/a		/index.shtml		/index.shtml
+	# 8	n/a		/faq/foo.shtml		/faq/foo.shtml
+	#
+	# Cases 7 and 8 (and many others similar) don't matter, since
+	# prepAds() will be called in their .inc header, so the
+	# decision will be made in cases 3 and 4.
+	#
+	# Note that distinguishing 4 from 5 is nontrivial:  we can't tell
+	# the difference between "faq" and "articles", since we can't
+	# rely on the DB being available at this stage.  Any alphanumeric
+	# first-level directory may be a valid section name.  And we
+	# don't want to limit ourselves by looking for the "12/34/56"
+	# subdirectories within genuine article directories, that gets
+	# hackish very fast.  What we *can* do is assume that case 4
+	# and case 5 will continue to be distinguished by 4's use of
+	# the root-level /slashhead.inc and 5's use of section-specific
+	# /articles/slashhead.inc.  So if e.g. /faq/slashhead.inc is
+	# created in future, this logic will need to be revisited.
+	#
+	# Note also that this logic depends on ssihead;misc;default
 	# keeping its <!--#include--> line the same.
+
 	my $use_messaging = 0;
 	$use_messaging = 1 if !$adless
 		&& $ENV{"AD_BANNER_$ad_messaging_num"}
 		&& rand(1) < $ad_messaging_prob
+		&& $ENV{SCRIPT_NAME}
+		&& $ENV{DOCUMENT_URI}
+		&& $ENV{DOCUMENT_URI} !~ m{\bindex\.\b} # disable case 6 (also 1,3)
 		&& (
-			(     $ENV{SCRIPT_NAME}			# case 2
-			   && $ENV{SCRIPT_NAME} =~ m{\barticle\.pl\b}
-			) || (
-			      $ENV{SCRIPT_NAME}			# case 4
-			   && $ENV{SCRIPT_NAME} =~ m{/(\w+)/slashhead\.inc$}
-			)
+				# enable case 2
+			   $ENV{SCRIPT_NAME} =~ m{\barticle\.pl\b}
+				# enable cases 5 and 6 (but 6 was eliminated above)
+			|| $ENV{SCRIPT_NAME} =~ m{/(\w+)/slashhead\.inc$}
 		);
+
 	# If it is desirable to only display messaging ads on article.pl
 	# stories that have bodytext, here would be the place to do that
 	# test.  It should just be a simple case of testing
