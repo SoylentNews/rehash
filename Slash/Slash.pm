@@ -220,29 +220,31 @@ sub _get_points {
 
 	# Keep your friends close but your enemies closer.
 	# Or ignore them, we don't care.
-	if ($user->{people}{FRIEND()}{$C->{uid}}) {
-		$hr->{people_bonus_friend} =
-			$user->{people_bonus_friend};
-	}
-	if ($user->{people}{FOE()}{$C->{uid}}) {
-		$hr->{people_bonus_foe} =
-			$user->{people_bonus_foe}
-	}
-	if ($user->{people}{FREAK()}{$C->{uid}}) {
-		$hr->{people_bonus_freak} =
-			$user->{people_bonus_freak}
-	}
-	if ($user->{people}{FAN()}{$C->{uid}}) {
-		$hr->{people_bonus_fan} =
-			$user->{people_bonus_fan}
-	}
-	if ($user->{people}{FOF()}{$C->{uid}}) {
-		$hr->{people_bonus_fof} =
-			$user->{people_bonus_fof}
-	}
-	if ($user->{people}{EOF()}{$C->{uid}}) {
-		$hr->{people_bonus_eof} =
-			$user->{people_bonus_eof}
+	if ($user->{uid} != $C->{uid}) {
+		if ($user->{people}{FRIEND()}{$C->{uid}}) {
+			$hr->{people_bonus_friend} =
+				$user->{people_bonus_friend};
+		}
+		if ($user->{people}{FOE()}{$C->{uid}}) {
+			$hr->{people_bonus_foe} =
+				$user->{people_bonus_foe}
+		}
+		if ($user->{people}{FREAK()}{$C->{uid}}) {
+			$hr->{people_bonus_freak} =
+				$user->{people_bonus_freak}
+		}
+		if ($user->{people}{FAN()}{$C->{uid}}) {
+			$hr->{people_bonus_fan} =
+				$user->{people_bonus_fan}
+		}
+		if ($user->{people}{FOF()}{$C->{uid}}) {
+			$hr->{people_bonus_fof} =
+				$user->{people_bonus_fof}
+		}
+		if ($user->{people}{EOF()}{$C->{uid}}) {
+			$hr->{people_bonus_eof} =
+				$user->{people_bonus_eof}
+		}
 	}
 
 	# Karma bonus time

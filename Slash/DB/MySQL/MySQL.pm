@@ -7056,7 +7056,7 @@ sub sqlReplace {
 	my($self, $table, $data) = @_;
 	my($names, $values);
 
-	foreach (keys %$data) {
+	for (keys %$data) {
 		if (/^-/) {
 			$values .= "\n  $data->{$_},";
 			s/^-//;
