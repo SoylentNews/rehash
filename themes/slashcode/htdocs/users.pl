@@ -1538,7 +1538,7 @@ sub tildeEd {
 
 	# Set up $topic_hr, @topictid_order, and $story023_default{topic}.
 
-	my $topic_hr = $reader->getDescriptions('non_nexus_topics');
+	my $topic_hr = $reader->getDescriptions('non_nexus_topics-storypickable');
 	my @topictid_order = sort { lc $topic_hr->{$a} cmp lc $topic_hr->{$b} } keys %$topic_hr;
 	for my $tid (@topictid_order) {
 		     if ($prefs{story_never_topic}{$tid}) {
@@ -1552,8 +1552,9 @@ sub tildeEd {
 
 	# Set up $nexus_hr, @nexustid_order, and $story023_default{nexus}.
 
-	my $nexus_tids_ar = $reader->getNexusChildrenTids($constants->{mainpage_nexus_tid});
 	my $topic_tree = $reader->getTopicTree();
+	my $nexus_tids_ar = $reader->getNexusChildrenTids($constants->{mainpage_nexus_tid});
+	@$nexus_tids_ar = grep {$topic_tree->{$_}{storypickable}} @$nexus_tids_ar;
 	my $nexus_hr = { };
 	for my $tid (@$nexus_tids_ar) {
 		$nexus_hr->{$tid} = $topic_tree->{$tid}{textname};
