@@ -718,6 +718,8 @@ INSERT INTO vars (name, value, description) VALUES ('id_md5_vislength','5','Num 
 INSERT INTO vars (name, value, description) VALUES ('imagedir','//www.example.com/images','Absolute URL for image directory');
 INSERT INTO vars (name, value, description) VALUES ('index_gse_backup_prob','0','Probability that index.pl getStoriesEssentials will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call fo conections to the root of the server.');
+INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home','The shtml page to call if a user is anon and index_noanon is set');
+INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect all anonymous users to index_handler_noanon instead of index.shtml. Set to 1 to activate, 0 to remove.');
 INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_ip','4','Downmods at which an IP is considered a troll');
 INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_subnet','6','Downmods at which a subnet is considered a troll');
 INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_user','4','Downmods at which a user is considered a troll');

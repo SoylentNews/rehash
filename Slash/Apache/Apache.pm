@@ -315,6 +315,9 @@ sub IndexHandler {
 			# consider using File::Basename::basename() here
 			# for more robustness, if it ever matters -- pudge
 			my($base) = split(/\./, $constants->{index_handler});
+			$base = $constants->{index_handler_noanon}
+				if $constants->{index_noanon};
+
 			if ($constants->{static_section}) {
 				$r->filename("$basedir/$constants->{static_section}/$base.shtml");
 				$r->uri("/$constants->{static_section}/$base.shtml");
