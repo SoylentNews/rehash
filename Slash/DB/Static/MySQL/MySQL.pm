@@ -580,14 +580,15 @@ sub getSitesRDF {
 ########################################################
 sub getSectionInfo {
 	my($self) = @_;
+	$self->sqlConnect();
+	# Make more sense to make this a getDescriptions call -Brian
 	my $sections = $self->sqlSelectAllHashrefArray(
 		"section, url",
 		"sections",
-		"",
-		" ORDER BY section"
+		"type='contained' ",
+		"ORDER BY section"
 	);
 
-	$self->sqlConnect();
 	for (@{$sections}) {
 		@{%{$_}}{qw(month monthname day)} =
 			$self->{_dbh}->selectrow_array(<<EOT);
