@@ -79,32 +79,32 @@ sub href2SlashTag {
 			# Go on and test to see if URL's have changed
 			if ($token->[0] eq 'slash') {
 				#Skip non HREF links
-				next unless $token->[1]->{href};
-				if (!$token->[1]->{id}) {
-					my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
-					my $href = strip_attribute($token->[1]->{href});
-					my $title = strip_attribute($token->[1]->{title});
+				next unless $token->[1]{href} && $token->[1]{type} eq 'link';
+				if (!$token->[1]{id}) {
+					my $link = $self->create({ sid => $sid, url => $token->[1]{href}});
+					my $href = strip_attribute($token->[1]{href});
+					my $title = strip_attribute($token->[1]{title});
 					$text =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 				} else {
-					my $url = $self->get($token->[1]->{id}, 'url');
-					next if $url eq $token->[1]->{href};
-					my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
-					my $href = strip_attribute($token->[1]->{href});
-					my $title = strip_attribute($token->[1]->{title});
+					my $url = $self->get($token->[1]{id}, 'url');
+					next if $url eq $token->[1]{href};
+					my $link = $self->create({ sid => $sid, url => $token->[1]{href}});
+					my $href = strip_attribute($token->[1]{href});
+					my $title = strip_attribute($token->[1]{title});
 					$text =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 				}
 			# New links to convert!!!!
 			} else {
 				# We ignore some types of href
-				next if $token->[1]->{name};
-				next if $token->[1]->{href} eq '__SLASHLINK__';
-				next if ($token->[1]->{href} =~ /^mailto/i);
+				next if $token->[1]{name};
+				next if $token->[1]{href} eq '__SLASHLINK__';
+				next if ($token->[1]{href} =~ /^mailto/i);
 				#This allows you to have a link bypass this system
-				next if ($token->[1]->{FORCE} && $user->{is_admin});
-				my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
+				next if ($token->[1]{FORCE} && $user->{is_admin});
+				my $link = $self->create({ sid => $sid, url => $token->[1]{href}});
 				my $data = $tokens->get_text("/a");
-				my $href = strip_attribute($token->[1]->{href});
-				my $title = strip_attribute($token->[1]->{title});
+				my $href = strip_attribute($token->[1]{href});
+				my $title = strip_attribute($token->[1]{title});
 				$text =~ s#\Q$token->[3]$data</a>\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">$data</SLASH>#is;
 			}
 		}

@@ -448,7 +448,7 @@ sub linkStory {
 	$story_link->{'link'} = $reader->getStory($story_link->{sid}, 'title') if $story_link->{'link'} eq '';
 	$title       = $story_link->{'link'};
 	$section     = $story_link->{section} ||= $reader->getStory($story_link->{sid}, 'section');
-	$params{tid} = $reader->getStoryTopicsJustTids($story_link->{sid}); 
+	$params{tid} = $reader->getStoryTopicsJustTids($story_link->{sid});
 
 	my $SECT = $reader->getSection($story_link->{section});
 	$url = $SECT->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
@@ -518,7 +518,7 @@ works with NO_TABLE).
 
 If this parameter is specified, the voting widget will take the vote and return
 the user to the specified URI. Note that you WILL NOT be able to redirect
-outside of the site usign this parameter for security reasons (hence the need for 
+outside of the site using this parameter for security reasons (hence the need for
 URIs as opposed to URLs).
 
 =back
@@ -850,7 +850,7 @@ sub portalbox {
 		url	=> $url,
 	}, { Return => 1, Nocomm => 1 });
 
-	if (($user->{exboxes} && $getblocks eq 'index') || 
+	if (($user->{exboxes} && $getblocks eq 'index') ||
 		($user->{exboxes} && $constants->{slashbox_sections})) {
 		$title = slashDisplay('portalmap', {
 			title	=> $title,
@@ -1097,7 +1097,7 @@ sub createMenu {
 	if ($style eq 'tabbed') {
 		# All menus in the tabbed style use the same template.
 		$menu_text .= slashDisplay("tabbedmenu",
-		 	{ tabs =>		$items,
+			{ tabs =>		$items,
 			  justify =>		$options->{justify} || 'left',
 			  color =>		$color,
 			  tab_selected =>	$options->{tab_selected},	},
@@ -1193,8 +1193,8 @@ sub _hard_linkComment {
 # $comment->{threshold}? Hmm. I'm not sure what it
 # means for a comment to have a threshold. If it's 0,
 # does the following line do the right thing? - Jamie
-# You know, I think this is a bug that comes up every so often. But in 
-# theory when you go to the comment link "threshhold" should follow 
+# You know, I think this is a bug that comes up every so often. But in
+# theory when you go to the comment link "threshhold" should follow
 # with you. -Brian
 	$display .= "&amp;threshold=" . ($comment->{threshold} || $user->{threshold});
 	$display .= "&amp;commentsort=$user->{commentsort}";
@@ -1232,6 +1232,7 @@ my $slashTags = {
 	'file'     => \&_slashFile,
 	'comment'  => \&_slashComment,
 	'journal'  => \&_slashJournal,
+	'related'  => \&_slashRelated,
 };
 
 my $cleanSlashTags = {
@@ -1241,14 +1242,15 @@ my $cleanSlashTags = {
 	'link'     => \&_cleanSlashLink,
 	'comment'  => \&_cleanSlashComment,
 	'journal'  => \&_cleanSlashJournal,
+	'related'  => \&_cleanSlashRelated,
 };
 
 sub cleanSlashTags {
 	my($text, $options) = @_;
 	return unless $text;
 
-
-	$text =~ s#<slash-(image|story|user|file|break|link|comment|journal)#<SLASH TYPE="\L$1\E"#gis;
+	my $tag_re = join '|', sort keys %$slashTags;
+	$text =~ s#<slash-($tag_re)#<SLASH TYPE="\L$1\E"#gis;
 	my $newtext = $text;
 	my $tokens = Slash::Custom::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
@@ -1290,7 +1292,7 @@ sub _cleanSlashUser {
 }
 
 sub _cleanSlashStory {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 	return unless $token->[1]{story};
 
 	my $text;
@@ -1301,8 +1303,8 @@ sub _cleanSlashStory {
 	}
 
 	my $slashdb = getCurrentDB();
-	my $title = $token->[1]{title} 
-	? strip_attribute($token->[1]{title}) 
+	my $title = $token->[1]{title}
+		? strip_attribute($token->[1]{title})
 		: strip_attribute($slashdb->getStory($token->[1]{story}, 'title', 1));
 	my $sid = strip_attribute($token->[1]{story});
 
@@ -1315,7 +1317,7 @@ sub _cleanSlashStory {
 }
 
 sub _cleanSlashLink {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 	my $relocateDB = getObject('Slash::Relocate');
 
 	if (!$token->[1]{id}) {
@@ -1329,6 +1331,25 @@ sub _cleanSlashLink {
 		my $href  = strip_attribute($token->[1]{href});
 		my $title = strip_attribute($token->[1]{title});
 		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
+	}
+}
+
+sub _cleanSlashRelated {
+	my($tokens, $token, $newtext) = @_;
+
+	my $href  = strip_attribute($token->[1]{href});
+	my $text;
+	if ($token->[1]{text}) {
+		$text = $token->[1]{text};
+	} else {
+		$text = $tokens->get_text("/slash");
+	}
+
+	my $content = qq|<SLASH HREF="$href" TYPE="related">$text</SLASH>|;
+	if ($token->[1]{text}) {
+		$$newtext =~ s#\Q$token->[3]\E#$content#is;
+	} else {
+		$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 	}
 }
 
@@ -1432,7 +1453,7 @@ sub _slashUser {
 
 	my $content = slashDisplay('userLink', {
 		uid      => $token->[1]{uid},
-		nickname => $token->[1]{nickname}, 
+		nickname => $token->[1]{nickname},
 	}, {
 		Return => 1,
 		Nocomm => 1,
@@ -1483,13 +1504,23 @@ sub _slashLink {
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
 }
 
+sub _slashRelated {
+	my($tokens, $token, $newtext) = @_;
+	my $user = getCurrentUser();
+
+	my $link = $token->[1]{href};
+	my $text = $tokens->get_text("/slash");
+
+	push @{$user->{state}{related_links}}, [ $text, $link ];
+	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E##is;
+}
+
 sub _slashPageBreak {
 	my($tokens, $token, $newtext) = @_;
 	my $user = getCurrentUser();
 
 	$user->{state}{pagebreaks}++;
-
-	return;
+	$$newtext =~ s#\Q$token->[3]\E##is;
 }
 
 sub _slashComment {

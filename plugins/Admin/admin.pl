@@ -965,7 +965,9 @@ sub getRelated {
 	my($story_content, $tid) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $rl = $slashdb->getRelatedLinks();
+	my $user    = getCurrentUser;
+
+	my $rl = $slashdb->getRelatedLinks;
 	my @related_text = ( );
 	my @rl_keys = sort keys %$rl;
 
@@ -1013,6 +1015,13 @@ sub getRelated {
 		$label =~ s/(\S{30})/$1 /g;
 		my $str = qq[&middot; <A $a_attr>$label</A><BR>\n];
 		push @related_text, $str unless $label eq "?" || $label eq "[?]";
+	}
+
+	for (@{$user->{state}{related_links}}) {
+		push @related_text, sprintf(
+			qq[&middot; <A HREF="%s">%s</A><BR>\n],
+			strip_attribute($_->[1]), $_->[0]
+		);
 	}
 
 	# Check to make sure we don't include the same link twice.
@@ -1204,17 +1213,6 @@ sub editStory {
 			@stid = $form->{stid};
 		}
 
-		# Get the related text.
-		$storyref->{relatedtext} =
-			getRelated(
-				"$storyref->{title} $storyref->{introtext} $storyref->{bodytext}",
-				\@stid
-			) . otherLinks(
-				$slashdb->getAuthor($storyref->{uid}, 'nickname'),
-				$storyref->{tid}, 
-				$storyref->{uid}
-			);
-
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
@@ -1282,6 +1280,16 @@ sub editStory {
 			my $options = $field eq 'bodytext' ? { break => 1 } : undef;
 			$story_copy{$field} = processSlashTags($storyref->{$field}, $options);
 		}
+
+		# Get the related text.
+		$storyref->{relatedtext} = getRelated(
+			"$storyref->{title} $storyref->{introtext} $storyref->{bodytext}",
+			\@stid
+		) . otherLinks(
+			$slashdb->getAuthor($storyref->{uid}, 'nickname'),
+			$storyref->{tid}, 
+			$storyref->{uid}
+		);
 
 		my $author  = $slashdb->getAuthor($storyref->{uid});
 		my $topic   = $slashdb->getTopic($storyref->{tid});
@@ -1653,14 +1661,6 @@ sub updateStory {
 	} elsif ($form->{stid}) {
 		@stid = $form->{stid};
 	}
-	$form->{relatedtext} = getRelated(
-			"$form->{title} $form->{bodytext} $form->{introtext}",
-			$topic
-		) . otherLinks(
-			$slashdb->getAuthor($form->{uid}, 'nickname'),
-			$topic,
-			$form->{uid}
-		);
 
 	my $time = findTheTime();
 
@@ -1669,13 +1669,26 @@ sub updateStory {
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});
 	$form->{bodytext} =  balanceTags($form->{bodytext});
+
 	my $reloDB = getObject("Slash::Relocate");
 	if ($reloDB) {
 		$form->{introtext} = $reloDB->href2SlashTag($form->{introtext}, $form->{sid});
 		$form->{bodytext} = $reloDB->href2SlashTag($form->{bodytext}, $form->{sid});
 	}
+
 	$form->{introtext} = cleanSlashTags($form->{introtext});
 	$form->{bodytext} = cleanSlashTags($form->{bodytext});
+
+	# grab our links for getRelated, but toss away the result -- pudge
+	processSlashTags("$form->{bodytext} $form->{introtext}");
+	$form->{relatedtext} = getRelated(
+		"$form->{title} $form->{bodytext} $form->{introtext}",
+		$topic
+	) . otherLinks(
+		$slashdb->getAuthor($form->{uid}, 'nickname'),
+		$topic,
+		$form->{uid}
+	);
 
 	my $data = {
 		uid		=> $form->{uid},
@@ -1694,6 +1707,7 @@ sub updateStory {
 		subsection	=> $form->{subsection},
 		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
+
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
 		for (@$extras) {
@@ -1887,6 +1901,7 @@ sub saveStory {
 		commentstatus	=> $form->{commentstatus},
 		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
+
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
 		for (@$extras) {
