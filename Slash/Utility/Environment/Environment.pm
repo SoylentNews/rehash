@@ -1670,12 +1670,24 @@ Hashref of cleaned-up data.
 		url_id spider_id miner_id keyword_id
 		st_main_select stc_main_select
 		parent_topic child_topic
+		skid primaryskid
+	),
+	# Survey
+	qw(
+		svid sqid ordnum next_sqid condnext_sqid sqcid
+		owneruid discussionid uid_min uid_max
+		expyear expmonth expday exphour expmin
+		openyear openmonth openday openhour openmin
 	);
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
 		fieldname formkey commentstatus filter
 		hcanswer mode op section thisname type
+	),
+	# Survey
+	qw(
+		svsid
 	);
 
 	# regexes to match dynamically generated numeric fields
