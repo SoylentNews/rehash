@@ -2467,3 +2467,7 @@ INSERT INTO vars (name, value, description) VALUES ('gse_precache_mins_ahead','2
 
 # End of T_2_5_0_20, Start of T_2_5_0_21 - 2004/08/05
 
+ALTER TABLE comments ADD INDEX date_sid (date, sid);
+ALTER TABLE stories ADD INDEX discussion_stoid (discussion, stoid);
+ALTER TABLE moderatorlog ADD INDEX ts_uid_sid (ts, uid, sid);
+
