@@ -3,11 +3,12 @@ default
 __description__
 Template to drop in a TD for the maintable (and update state vars).
 
-* valign
-* align
-* rowspan
-* colspan
-* width
+* mt_valign
+* mt_align
+* mt_rowspan
+* mt_colspan
+* mt_width
+* mt_height
 
 __title__
 
@@ -20,19 +21,20 @@ maintable_td
 __template__
 
 <TD[%
-IF align %] ALIGN="[% align %]"[% END;
-IF valign %] VALIGN="[% valign %]"[% END;
-IF rowspan %] ROWSPAN="[% rowspan %]"[% END;
-IF colspan %] COLSPAN="[% colspan %]"[% END;
-IF width %] WIDTH="[% width %]"[% END %]>
-<!-- maintable_td rowspan '[% rowspan %]' colspan '[% colspan %]' curcol_start '[% user.state.mt.curcol %]' -->
+IF mt_align %] ALIGN="[% mt_align %]"[% END;
+IF mt_valign %] VALIGN="[% mt_valign %]"[% END;
+IF mt_rowspan %] ROWSPAN="[% mt_rowspan %]"[% END;
+IF mt_colspan %] COLSPAN="[% mt_colspan %]"[% END;
+IF mt_width %] WIDTH="[% mt_width %]"[% END;
+IF mt_height %] HEIGHT="[% mt_height %]"[% END %]>
+<!-- maintable_td mt_rowspan '[% mt_rowspan %]' mt_colspan '[% mt_colspan %]' curcol_start '[% user.state.mt.curcol %]' -->
 
 [%
-IF !rowspan; rowspan = 1; END;
-IF !colspan; colspan = 1; END;
+IF !mt_rowspan; mt_rowspan = 1; END;
+IF !mt_colspan; mt_colspan = 1; END;
 curcol = user.state.mt.curcol;
-"<!-- curcol '"; curcol; "' colspan '"; colspan; "' -->";
-WHILE colspan > 0;
+"<!-- curcol '"; curcol; "' mt_colspan '"; mt_colspan; "' -->";
+WHILE mt_colspan > 0;
 	curcol = curcol + 1;
 "<!-- max '"; user.state.mt.cols.max; "' -->";
 	WHILE curcol > user.state.mt.cols.max;
@@ -40,18 +42,18 @@ WHILE colspan > 0;
 		user.state.mt.cols.push(0);
 "<!-- new max '"; user.state.mt.cols.max; "' -->";
 	END;
-	"<!-- bumping col '"; curcol; "' up from '"; user.state.mt.cols.${curcol}; "' by '"; rowspan; "' -->";
-	user.state.mt.cols.$curcol = (user.state.mt.cols.$curcol) + rowspan;
+	"<!-- bumping col '"; curcol; "' up from '"; user.state.mt.cols.${curcol}; "' by '"; mt_rowspan; "' -->";
+	user.state.mt.cols.$curcol = (user.state.mt.cols.$curcol) + mt_rowspan;
 	"<!-- bumped col '"; curcol; "', now cols: '";
 	user.state.mt.cols.1; "' '"; 
 	user.state.mt.cols.2; "' '"; 
 	user.state.mt.cols.3; "' '"; 
 	user.state.mt.cols.4; "' '"; 
 	user.state.mt.cols.5; "' -->";
-	colspan = colspan - 1;
+	mt_colspan = mt_colspan - 1;
 END;
 user.state.mt.curcol = curcol;
-align=""; valign=""; rowspan = 0; colspan=0; width=""
+mt_align=""; mt_valign=""; mt_rowspan = 0; mt_colspan=0; mt_width=""; mt_height=""
 %]
 
 <!-- curcol_now [% user.state.mt.curcol %], with [% user.state.mt.cols.${user.state.mt.curcol} %] rows -->

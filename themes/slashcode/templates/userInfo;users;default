@@ -59,13 +59,13 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 </TD>
 
 [% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td width=(constants.fancyboxwidth + 10) valign="TOP" -%]
+[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_valign="TOP" -%]
 [% PROCESS userboxes %]
 </TD>
 </TR>
 
 [% PROCESS maintable_tr %]
-[% PROCESS maintable_td valign="TOP" colspan="4" %]
+[% PROCESS maintable_td mt_valign="TOP" mt_colspan="4" %]
 
 [% IF commentcount > 0 %]
 	[% commenttitle =

@@ -3,7 +3,7 @@ default
 __description__
 Template to drop in a TR for the maintable (and update state vars).
 
-* valign
+* mt_valign
 
 __title__
 
@@ -15,10 +15,11 @@ __name__
 maintable_tr
 __template__
 
-<TR[% IF valign %] VALIGN="[% valign %]"[% END %]>
+<TR[% IF mt_valign %] VALIGN="[% mt_valign %]"[% END %]>
 <!-- maintable_tr -->
 
 [%
+user.state.mt.curcol = 1;
 min_cols = 999;
 FOR rowcheck = user.state.mt.cols;
 	NEXT IF loop.first;
@@ -26,7 +27,8 @@ FOR rowcheck = user.state.mt.cols;
 		min_cols = rowcheck;
 		user.state.mt.curcol = loop.index;
 	END;
-END
+END;
+user.state.mt.curcol = user.state.mt.curcol - 1
 %]
 
 __seclev__

@@ -36,7 +36,7 @@ IF form.refresh %]
 <P>&nbsp;</TD>
 
 [% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td width=(constants.fancyboxwidth + 10) align="RIGHT" valign="TOP" %]
+[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_align="RIGHT" mt_valign="TOP" %]
 
 [% PROCESS userboxes;
 
@@ -64,7 +64,7 @@ END %]
 </TD></TR>
 
 [% PROCESS maintable_tr %]
-[% PROCESS maintable_td colspan="4" %]
+[% PROCESS maintable_td mt_colspan="4" %]
 
 [% BLOCK nextStory;
 	IF !s;

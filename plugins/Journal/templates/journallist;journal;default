@@ -26,6 +26,10 @@ __template__
 [% IF showopts %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
 <INPUT TYPE="hidden" NAME="op" VALUE="remove">[% END %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+  <TR>
+    <TH ALIGN="LEFT">Journal Entry</TH>
+    <TH ALIGN="LEFT">Date</TH>
+  </TR>
 [% FOREACH article = articles %]
   <TR>
     <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]"><B>[% article.2 %]</B></A></TD>
