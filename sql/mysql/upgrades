@@ -1506,16 +1506,23 @@ ALTER TABLE stories ADD body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL, ADD w
 #SOURCE /tmp/storieslength;
 # And now that that's done... honestly, something should go here to set word_count
 
-# End of T_2_3_0_96, Start of T_2_3_0_97 - 2003/05/20
-
-# SLASHDOT LAST UPDATED HERE
-
-
-ALTER TABLE story_text ADD rendered text;
 INSERT INTO vars (name, value, description) VALUES ('cache_enabled_template','1','If set, then template caching is still active even if var cache_enabled is turned off.');
 INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
 
 ALTER TABLE accesslist ADD COLUMN now_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER now_norss, ADD COLUMN was_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER was_norss;
 ALTER TABLE accesslist ADD INDEX now_nopalm (now_nopalm);
 
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_96, Start of T_2_3_0_97 - 2003/05/20
+# We recommend that _97 not be used, it seems to have story caching bugs.
+# If you're tracking T_ tags closely, you're living on the edge.  :)
+# Stick with _96 or before for now.  - Jamie 2003/05/30
+
+ALTER TABLE story_text ADD rendered text;
+
 # USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_97, Start of T_2_3_0_98 - 2003/05/28
+
+
