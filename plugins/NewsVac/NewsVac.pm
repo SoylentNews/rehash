@@ -2812,7 +2812,7 @@ sub parse_miner {
 
 			my $cpt = new Safe;
 			$cpt->permit(qw(:base_core :base_mem :base_loop));
-			$cpt->share(qw($cancel $count $url $title $source $slug $body));
+			$cpt->share(qw($cancel $count $url $title $source $slug $body &uri_unescape));
 			$cpt->reval($tweak_code);
 
 			delete $nugget{$key};
