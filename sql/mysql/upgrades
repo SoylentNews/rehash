@@ -1512,8 +1512,6 @@ INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set
 ALTER TABLE accesslist ADD COLUMN now_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER now_norss, ADD COLUMN was_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER was_norss;
 ALTER TABLE accesslist ADD INDEX now_nopalm (now_nopalm);
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_96, Start of T_2_3_0_97 - 2003/05/20
 # We recommend that _97 not be used, it seems to have story caching bugs.
 # If you're tracking T_ tags closely, you're living on the edge.  :)
@@ -1531,4 +1529,9 @@ REPLACE INTO vars (name, value, description) VALUES ('content_type_webpage','tex
 
 ALTER TABLE modreasons ADD COLUMN karma TINYINT NOT NULL DEFAULT '0' AFTER val;
 UPDATE modreasons SET karma=val;
+
+# End of T_2_3_0_98, Start of T_2_3_0_99 - 2003/06/03
+# End of T_2_3_0_99, Start of T_2_3_0_100 - 2003/06/05
+
+# SLASHDOT LAST UPDATED HERE
 
