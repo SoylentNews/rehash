@@ -500,14 +500,21 @@ sub linkStory {
 		}
 	}
 
+	my @extra_attrs_allowed = qw( title class id );
 	if ($render) {
 		my $rendered = '<a href="' . strip_attribute($url) . '"';
-		$rendered .= ' title="' . strip_attribute($story_link->{title}) . '"'
-			if $story_link->{title} ne '';
+		for my $attr (@extra_attrs_allowed) {
+			my $val = $story_link->{$attr};
+			next unless $val;
+			$rendered .=
+				  qq{ $attr="}
+				. strip_attribute($val)
+				. qq{"};
+		}
 		$rendered .= '>' . strip_html($title) . '</a>';
 		return $rendered;
 	} else {
-		return [$url, $title, $story_link->{title}];
+		return [$url, $title, @{$story_link}{@extra_attrs_allowed}];
 	}
 }
 
