@@ -1424,7 +1424,6 @@ sub listStories {
 	my($count, $storylist) = $slashdb->getStoryList($first_story, $num_stories);
 
 	my $storylistref = [];
-	my($i, $canedit) = (0, 0);
 
 	if ($form->{op} eq 'delete') {
 		rmStory($form->{sid});
@@ -1433,6 +1432,7 @@ sub listStories {
 		titlebar('100%', getTitle('listStories-title'));
 	}
 
+	my $i = $first_story || 0 ;
 	for (@$storylist) {
 		my($hits, $comments, $sid, $title, $aid, $time_plain, $topic,
 			$subsection, $section,
@@ -1443,19 +1443,15 @@ sub listStories {
 
 		$title = substr($title, 0, 50) . '...' if (length $title > 55);
 		my $tbtitle = fixparam($title);
-		if ($user->{uid} eq $aid || $user->{seclev} >= 100) {
-			$canedit = 1;
-		}
 
-		$storylistref->[$i] = {
-			'x'		=> $i + $first_story + 1,
+		push (@$storylistref, {
+			'x'		=> ++$i,
 			hits		=> $hits,
 			comments	=> $comments,
 			sid		=> $sid,
 			title		=> $title,
 			aid		=> $slashdb->getAuthor($aid, 'nickname'),
 			'time'		=> $time,
-			canedit		=> $canedit,
 			topic		=> $topic,
 			section		=> $section,
 			subsection	=> $subsection,
@@ -1464,8 +1460,7 @@ sub listStories {
 			writestatus	=> $writestatus,
 			displaystatus	=> $displaystatus,
 			tbtitle		=> $tbtitle,
-		};
-		$i++;
+		});
 	}
 
 	slashDisplay('listStories', {

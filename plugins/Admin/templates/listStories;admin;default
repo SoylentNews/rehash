@@ -61,11 +61,7 @@ END %]
 
 		<TD ALIGN="RIGHT">
 		<FONT SIZE="2">
-[% IF story.canedit %]
-		[<A HREF="[% env.script_name %]?op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
-[% ELSE %]
-		[[% story.x %]]
-[% END %]
+		[<A HREF="[% constants.rootdir %]/admin.p?op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
 		</FONT>
 
 		</TD>
