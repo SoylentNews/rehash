@@ -51,7 +51,6 @@ __template__
 [% CASE 'created_discussion' %]
 	[% label.ucfirst %] has been created	
 
-
 [% CASE 'no_discreate_msg' %]
 	You either aren't <a href="[% constants.rootdir %]/users.pl">logged in
 	</a> or don't have sufficient priveledges to submit a [% label %].
