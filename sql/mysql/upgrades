@@ -982,3 +982,5 @@ UPDATE users_prefs SET tzcode = 'WET' WHERE tzcode = 'WEST';
 UPDATE users_prefs SET tzcode = 'CET' WHERE tzcode = 'CEST';
 UPDATE users_prefs SET tzcode = 'EET' WHERE tzcode = 'EEST';
 # SLASHCODE LAST UPDATED HERE
+ALTER TABLE people ADD index(person);
+
