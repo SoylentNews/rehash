@@ -107,7 +107,7 @@ change your password, or just click pretty widgets to kill time.
 
 [% CASE 'tilded_customize_msg' %]
 	<TABLE WIDTH="100%" BGCOLOR="[% user.colors.bg_2 %]" BORDER="0"><TR><TD>
-	<P><P>You can choose at most 20 boxes.
+	<P><P>You can choose at most [% constants.slashboxes_maxnum %] boxes.
 	<BR>If you choose 
 	'<B>User Space</B>' above, the contents of this box will be inside:
 	<BR><TEXTAREA NAME="mylinks" rows=8 COLS="40" WRAP="VIRTUAL">[% userspace | strip_literal %]</TEXTAREA>
