@@ -10,6 +10,26 @@ for my $id (@$friends) {
 	});
 }
 
+# catch the headlines-only people
+my $prefs = $slashdb->sqlSelectAll(<<COLS, <<TABLES, <<WHERE);
+up1.uid, up1.value
+COLS
+users_param AS up1
+TABLES
+up1.name="messagecodes_1"
+WHERE
+
+for my $user (@$prefs) {
+	my $uid   = $user->[0];
+	my $mode  = $user->[1] ? 0 : -1;
+
+	$slashdb->sqlReplace("users_messages", {
+		uid	=> $uid,
+		code	=> 1,
+		mode	=> $mode,
+	});
+}
+
 
 my $prefs = $slashdb->sqlSelectAll(<<COLS, <<TABLES, <<WHERE);
 upd.uid, upd.value, up0.value, up1.value, up2.value,
@@ -30,14 +50,15 @@ for my $user (@$prefs) {
 	my $uid   = $user->[0];
 	my $mode  = $user->[1];
 
+	# set up proper mode for each
 	my @codes = map { $_ ? $mode : -1 } @{$user}[2..8];
 
-	if ($mode == 1) {
-		for (0, 1, 6) {
-			$codes[$_] = 0;
-		}
+	# disallow web for new submissions and nightly mails
+	for (0, 1, 6) {
+		$codes[$_] = 0 if $codes[$_] == 1;
 	}
 
+	# set each
 	for (my $i = 0; $i < @codes; $i++) {
 		$slashdb->sqlReplace("users_messages", {
 			uid	=> $uid,
