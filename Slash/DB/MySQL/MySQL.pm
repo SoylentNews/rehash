@@ -283,7 +283,6 @@ sub init {
 	# These are here to remind us of what exists
 	$self->{_storyBank} = {};
 	$self->{_codeBank} = {};
-	$self->{_sectionBank} = {};
 
 	$self->{_boxes} = {};
 	$self->{_sectionBoxes} = {};
