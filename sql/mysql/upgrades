@@ -1899,5 +1899,5 @@ INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (1
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_uid','40','Warn admin if user specifies password incorrectly this many times in one day');
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_ip','40','Warn admin if an ip specifies password incorrectly this many times in one day');
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_subnet','60','Warn admin if a subnet specifies password incorrectly this many times in one day');
-INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_user_interval','30','Warn a user on the Nth bad password attempt within 24 hours. Set to 0 if you do not want users to be warned');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_user_limit','30','Warn a user on the Nth bad password attempt within 24 hours. Set to 0 if you do not want users to be warned');
 
