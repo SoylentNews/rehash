@@ -103,13 +103,6 @@ IF section_block.block;
 		center		= 1;
 END;
 
-IF user.is_admin AND form.op == 'preview';
-	PROCESS fancybox
-		title		= 'Story admin'
-		contents	= authorbox
-		center		= 1;
-END %]    
- 
 </TD></TR><TR><TD COLSPAN="4">
 
 [% BLOCK nextStory;
