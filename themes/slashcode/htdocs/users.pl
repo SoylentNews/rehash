@@ -1399,20 +1399,22 @@ sub editComm {
 		$fieldkey = 'uid';
 	}
 
-	my @reasons = ();
-	@reasons = @{$constants->{reasons}}
-		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
+	my @reasons = ( );
+	my $reasons = $slashdb->getReasons();
+	for my $id (sort { $a <=> $b } keys %$reasons) {
+		push @reasons, $reasons->{$id}{name};
+	}
 
 	my %reason_select;
 
 	my $hi = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $lo = -$hi;
-	# And this was wrong, see we display +3 not 3. So the display was a bit off :)
-	my @range = map { $_ > 0 ? '+' . $_ : $_ } ($lo .. $hi);
+	my @range = map { $_ > 0 ? "+$_" : $_ } ($lo .. $hi);
 
-	for (@reasons) {
-		my $key = "reason_alter_$_";
-		$reason_select{$_} = createSelect($key, \@range, 
+	for my $reason_name (@reasons) {
+		my $key = "reason_alter_$reason_name";
+		$reason_select{$reason_name} = createSelect(
+			$key, \@range, 
 			$user_edit->{$key} || 0, 1, 1
 		);
 	}
@@ -1935,12 +1937,14 @@ sub saveComm {
 					? $form->{textarea_cols} : undef),
 	};
 
-	my @reasons = ();
-	@reasons = @{$constants->{reasons}}
-		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
+	my @reasons = ( );
+	my $reasons = $slashdb->getReasons();
+	for my $id (sort { $a <=> $b } keys %$reasons) {
+		push @reasons, $reasons->{$id}{name};
+	}
 
-	for (@reasons) {
-		my $key = "reason_alter_$_";
+	for my $reason_name (@reasons) {
+		my $key = "reason_alter_$reason_name";
 		my $answer = $form->{$key};
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
 		$users_comments_table->{$key} = ($answer == 0) ? '' : $answer;

@@ -436,7 +436,6 @@ sub updateLastaccess {
 				{ lastaccess => $day },
 				"uid IN ($uids_in)"
 			);
-print STDERR "lastaccess set from lastclick to $day for $uids_in\n";
 		}
 	} else {
 		my @gmt = gmtime(time-86400);
@@ -453,7 +452,6 @@ print STDERR "lastaccess set from lastclick to $day for $uids_in\n";
 			{ lastaccess => $yesterday },
 			"uid IN ($uids_in) AND lastaccess < '$yesterday'"
 		);
-print STDERR "lastaccess set from accesslog to $yesterday for $uids_in\n";
 	}
 }
 
@@ -802,6 +800,10 @@ sub getAccessLogInfo {
 
 ########################################################
 # For run_moderatord.pl
+# New as of 2002/09/05:  returns ordered first by hitcount, and
+# second randomly, so when give_out_tokens() chops off the list
+# halfway through the minimum number of clicks, the survivors
+# are determined at random and not by (probably) uid order.
 sub fetchEligibleModerators {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
@@ -825,7 +827,7 @@ sub fetchEligibleModerators {
 			 AND karma >= 0",
 			"GROUP BY users_info.uid
 			 HAVING c >= $hitcount
-			 ORDER BY c");
+			 ORDER BY c, RAND()");
 
 	return $returnable;
 }
