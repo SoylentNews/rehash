@@ -1029,8 +1029,6 @@ UPDATE sections SET defaultsection='articles' WHERE section='index';
 # UPDATE sections SET defaulttopic=99;
 ALTER TABLE sections DROP extras;
 
-# USEPERL LAST UPDATED HERE
-
 DELETE FROM templates WHERE section="admin";
 
 # Change for plugins/Journal (ignore if not using that plugin)
@@ -1061,3 +1059,5 @@ CREATE TABLE accesslog_admin (
 ) TYPE = myisam;
 #This was missed sometime in the past -Brian
 INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','This turns off delayed inserts (which you probably want to do)');
+
+# USEPERL LAST UPDATED HERE
