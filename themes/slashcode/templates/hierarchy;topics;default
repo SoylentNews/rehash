@@ -23,7 +23,7 @@ __template__
 	[% IF user.is_admin %]
 		<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
 	[% ELSE %]
-		[% topic.alttext %]
+		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
 	[% END %]
 	<BR>
 	[% IF topic.child %]
@@ -33,7 +33,7 @@ __template__
 					[% IF user.is_admin %]
 						<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
 					[% ELSE %]
-						[% topic.alttext %]
+						<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
 					[% END %]
 				</LI>
 				[% IF topic.child %]
@@ -43,7 +43,7 @@ __template__
 								[% IF user.is_admin %]
 									<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
 								[% ELSE %]
-									[% topic.alttext %]
+									<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
 								[% END %]
 							</LI>
 							[% IF topic.child %]
@@ -53,7 +53,7 @@ __template__
 											[% IF user.is_admin %]
 												<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
 											[% ELSE %]
-												[% topic.alttext %]
+												<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
 											[% END %]
 										</LI>
 									[% END %]
@@ -64,7 +64,7 @@ __template__
 													[% IF user.is_admin %]
 														<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
 													[% ELSE %]
-														[% topic.alttext %]
+														<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A>
 													[% END %]
 												</LI>
 											[% END %]

@@ -16,7 +16,7 @@ __template__
 [% DEFAULT title="$constants.sitename: $constants.slogan" %]
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML><HEAD><TITLE>[% title | strip_notags %]</TITLE>
-<META NAME="KEYWORDS" CONTENT="[% PROCESS metakeywordsd %]">
+<META NAME="Description" CONTENT="[% constants.sitename %] [% PROCESS metakeywordsd %]">
 
 __seclev__
 10000
