@@ -396,6 +396,7 @@ DBIx::Password user '$opts{u}' lacks CREATE and/or DROP permissions.
 Fix this, or whatever the problem is, and rerun $PROGNAME.
 Failed command: $cmd
 EOT
+			exit 1;
 		}
 		# It's OK if a DROP TABLE does nothing, that just means
 		# the table wasn't there to begin with.
