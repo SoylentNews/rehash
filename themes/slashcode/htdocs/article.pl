@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2002 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
@@ -17,13 +17,16 @@ sub main {
 	my $form      = getCurrentForm();
 
 	my $story;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	$reader ||= $slashdb;
 
 	#Yeah, I am being lazy and paranoid  -Brian
+	#Always check the main DB for story status since it will always be accurate -Brian
 	if (!($user->{author} || $user->{is_admin})
 		&& !$slashdb->checkStoryViewable($form->{sid})) {
 		$story = '';
 	} else {
-		$story = $slashdb->getStory($form->{sid});
+		$story = $reader->getStory($form->{sid});
 	}
 
 	if ($story) {
@@ -35,9 +38,9 @@ sub main {
 
 		my $authortext;
 		if ($user->{is_admin} ) {
-			my $future = $slashdb->getStoryByTimeAdmin('>', $story, "3");
+			my $future = $reader->getStoryByTimeAdmin('>', $story, "3");
 			$future = [ reverse(@$future) ];
-			my $past = $slashdb->getStoryByTimeAdmin('<', $story, "3");
+			my $past = $reader->getStoryByTimeAdmin('<', $story, "3");
 
 			$authortext = slashDisplay('futurestorybox', {
 							past => $past,
@@ -46,8 +49,8 @@ sub main {
 		}
 
 		# set things up to use the <LINK> tag in the header
-		my $next = $slashdb->getStoryByTime('>', $story, $SECT);
-		my $prev = $slashdb->getStoryByTime('<', $story, $SECT);
+		my $next = $reader->getStoryByTime('>', $story, $SECT);
+		my $prev = $reader->getStoryByTime('<', $story, $SECT);
 
 		my $links = {
 			title	=> $title,
@@ -77,9 +80,9 @@ sub main {
 
 		#Still not happy with this logic -Brian
 		if ($story->{discussion}) {
-			my $discussion = $slashdb->getDiscussion($story->{discussion});
+			my $discussion = $reader->getDiscussion($story->{discussion});
 			# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
-			my $tids = $slashdb->getStoryTopicsJustTids($story->{sid}); 
+			my $tids = $reader->getStoryTopicsJustTids($story->{sid}); 
 			my $tid_string = join('&amp;tid=', @$tids);
 			$user->{state}{tid} = $tid_string;
 			# If no comments ever have existed just skip the display of the comment header bar -Brian
