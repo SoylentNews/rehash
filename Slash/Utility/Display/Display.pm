@@ -487,13 +487,13 @@ sub linkStory {
 		my $skinname = $skin->{name} eq 'mainpage' ? 'articles' : $skin->{name};
 		$url .= '/' . $skinname . '/' . $story_link->{sid} . '.shtml';
 		# manually add the tid(s), if wanted
-		if ($constants->{tids_in_urls} && $params{tid}) {
+		if ($constants->{tids_in_urls} && $params{tids}) {
 			$url .= '?';
-			if (ref $params{tid} eq 'ARRAY') {
-				$url .= 'tid=' . join( "&tid=", map { fixparam($_) } @{$params{tid}} )
-					if @{$params{tid}};
+			if (ref $params{tids} eq 'ARRAY') {
+				$url .= 'tid=' . join( "&tid=", map { fixparam($_) } @{$params{tids}} )
+					if @{$params{tids}};
 			} else {
-				$url .= 'tid=' . fixparam($params{tid});
+				$url .= 'tid=' . fixparam($params{tids});
 			}
 		}
 	}
