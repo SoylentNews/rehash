@@ -1241,15 +1241,29 @@ sub fudgeurl {
 	# run it through the grungy URL miscellaneous-"fixer"
 	$url = fixHref($url) || $url;
 
-	my $uri = new URI $url;
-	my $scheme = undef;
-	$scheme = $uri->scheme if $uri && $uri->can("scheme");
 	if (!$scheme_regex) {
 		$scheme_regex = join("|", map { lc } @{$constants->{approved_url_schemes}});
 		$scheme_regex = qr{^(?:$scheme_regex)$};
 	}
 
-	if ($scheme && $scheme !~ $scheme_regex) {
+	my $uri = new URI $url;
+	my $scheme = undef;
+	$scheme = $uri->scheme if $uri && $uri->can("scheme");
+	if ($uri && !$scheme && $uri->can("authority") && $uri->authority) {
+		# The URI has an authority but no scheme, e.g. "//sitename.com/".
+		# URI.pm doesn't always handle this well.  E.g. host() returns
+		# undef.  So give it a scheme.
+		# XXX Rethink this -- it could probably be put lower down, in
+		# the "if" that handles stripping the userinfo.  We don't
+		# really need to add the scheme for most URLs. - Jamie
+		$uri->scheme("http");
+	}
+	if (!$uri) {
+
+		# Nothing we can do with it; manipulate the probably-bogus
+		# $url at the end of this function and return it.
+
+	} elsif ($scheme && $scheme !~ $scheme_regex) {
 
 		$url =~ s/^$scheme://i;
 		$url =~ tr/A-Za-z0-9-//cd; # allow only a few chars, for security
