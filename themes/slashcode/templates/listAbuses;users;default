@@ -1,8 +1,8 @@
 __section__
 default
 __description__
-* plugins - list of plugins and their descriptions
-* site_info - list of site info variables	
+* site_info - list of site info variables
+
 __title__
 admin interface siteInfo Template
 __page__

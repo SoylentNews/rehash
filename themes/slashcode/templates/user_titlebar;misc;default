@@ -32,18 +32,17 @@ ELSE;
 END %]
 
 [% tabs = [ ];
-plugins = Slash.db.getDescriptions("plugins");
 IF user.uid == uid;
 	tabs = [
 		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
 	];
-	IF plugins.Journal; tabs.push(
+	IF constants.plugin.Journal; tabs.push(
 		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
 	); END;
-	IF plugins.Messages; tabs.push(
+	IF constants.plugin.Messages; tabs.push(
 		{ link = "/my/inbox",		label = "Messages",	sel_label = "messages" },
 	); END;
-	IF plugins.Zoo; tabs.push(
+	IF constants.plugin.Zoo; tabs.push(
 		{ link = "/my/friends",		label = "Friends",	sel_label = "friends" },
 	); tabs.push(
 		{ link = "/my/fans",		label = "Fans",		sel_label = "fans" },
@@ -56,10 +55,10 @@ ELSIF user.is_anon;
 	tabs = [
 		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
 	];
-	IF plugins.Journal; tabs.push(
+	IF constants.plugin.Journal; tabs.push(
 		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
 	); END;
-	IF plugins.Zoo; tabs.push(
+	IF constants.plugin.Zoo; tabs.push(
 		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
 	); tabs.push(
 		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
@@ -72,13 +71,13 @@ ELSE;
 	tabs = [
 		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
 	];
-	IF plugins.Zoo; tabs.push(
+	IF constants.plugin.Zoo; tabs.push(
 		{ link = "/zoo.pl?op=check&uid=$uid", label = "Relation", sel_label = "relation" },
 	); END;
-	IF plugins.Journal; tabs.push(
+	IF constants.plugin.Journal; tabs.push(
 		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
 	); END;
-	IF plugins.Zoo; tabs.push(
+	IF constants.plugin.Zoo; tabs.push(
 		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
 	); tabs.push(
 		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
