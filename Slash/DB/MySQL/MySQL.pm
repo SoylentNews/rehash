@@ -2252,6 +2252,16 @@ sub getDBs {
 #			. " nextcheck in " . ($_getDBs_cached_nextcheck - time) . " secs\n";
 		return \%databases;
 	}
+
+	my $old = {};
+	if ($cache->{'dbs'}) {
+		while (my($k, $v) = each %{$cache->{'dbs'}}) {
+			for my $db (@$v) {
+				$old->{$db->{id}}++ if $db->{isalive} eq 'yes';
+			}
+		}
+	}
+
 	my $dbs = $self->sqlSelectAllHashref('id', '*', 'dbs');
 
 	# rearrange to list by "type"
@@ -2259,6 +2269,19 @@ sub getDBs {
 		my $db = $dbs->{$_};
 		$databases{$db->{type}} ||= [];
 		$db->{weight} = 1 if !$db->{weight} || $db->{weight} < 1;
+
+		# if DB was down in previous cache, slowly bring it back in
+		# for now, just increment weight by one; seems easiest,
+		# as the DB can control how quickly something comes back by
+		# adjusting the weights in the DB -- pudge
+		if (keys %$old && (($old->{$db->{id}} || 0) < $db->{weight})) {
+			$db->{weight} = $old->{$db->{id}} + 1;
+
+		# we don't need it in the hash more than once if it is down ...
+		} elsif ($db->{isalive} ne 'yes') {
+			$db->{weight} = 1;
+		}
+
 		push @{$databases{$db->{type}}}, ($db) x $db->{weight};
 	}
 
