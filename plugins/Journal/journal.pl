@@ -76,6 +76,13 @@ sub displayTop {
 
 	_printHead("mainhead");
 
+	# this should probably be in a separate template, so the site admins
+	# can select the order themselves -- pudge
+	if ($constants->{journal_top_recent}) {
+		$journals = $journal->topRecent();
+		slashDisplay('journaltop', { journals => $journals, type => 'recent' });
+	}
+
 	if ($constants->{journal_top_posters}) {
 		$journals = $journal->top();
 		slashDisplay('journaltop', { journals => $journals, type => 'top' });
@@ -86,10 +93,6 @@ sub displayTop {
 		slashDisplay('journaltop', { journals => $journals, type => 'friend' });
 	}
 
-	if ($constants->{journal_top_recent}) {
-		$journals = $journal->topRecent();
-		slashDisplay('journaltop', { journals => $journals, type => 'recent' });
-	}
 }
 
 sub displayFriends {
