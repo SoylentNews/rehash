@@ -1295,3 +1295,5 @@ INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0'
 # 
 # THEN, finally, run the code below.  :-)
 UPDATE users_messages SET code = 4 WHERE code = 8;
+
+# USEPERL LAST UPDATED HERE
