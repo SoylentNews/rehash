@@ -84,6 +84,8 @@ sub create {
 	} else {
 		$values->{$prime} = $id;
 		$self->sqlInsert($table, $values);
+		# XXX that sqlInsert should be checked for error, and if
+		# it failed, return false
 	}
 
 	return $found || $id ;
@@ -149,6 +151,8 @@ sub createFileForStory {
 	};
 
 	my $id = $self->create($content);
+	# XXX that $id should be checked for errors, and if it is false,
+	# this method should return false as well
 	my $content_type = $self->get($id, 'content_type');
 
 	my $file_content = {

@@ -119,6 +119,9 @@ sub addFileForStory {
 		};
 
 		$blobdb->createFileForStory($content);
+		# XXX The above method should have its return code checked;
+		# if false, we should emit an error string (to STDOUT,
+		# since header() is already called)
 	}
 
 	if ($form->{delete}) {
