@@ -2179,6 +2179,8 @@ INSERT INTO vars (name, value, description) VALUES ('hof_do_not_count', '', 'Do 
 
 INSERT INTO vars (name, value, description) VALUES ('accesslog_imageregex', '^/images/hc/', 'Image hits will only be written into accesslog if their URL path matches this regex, empty string for all, NONE for none');
 
+# censorware.net, mccarthy.vg, slash.mccarthy.vg last updated here
+
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_repeats','3=-4|5=-12|10=-100','Token penalties for modding same user multiple times, applied at M2 reconcile time');
 
 INSERT INTO vars (name, value, description) VALUES ('comment_karma_limit','','Max karma that a single comment can cost a user, normally negative values or 0 to never take karma with downmods, empty string for unlimited');
@@ -2654,16 +2656,11 @@ CREATE TABLE remarks (
 
 INSERT INTO vars (name, value, description) VALUES ('task_timespec_freshenup', '* * * * *', 'Custom timespec (in cron style) for the freshenup task. Add more task_timespec_ vars if you want to override other task timespecs.');
 
-INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysback','7','Oldest stories to write a story_text.rendered field for, in days');
-
-
 ALTER TABLE skins ADD COLUMN searchable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL AFTER submittable;
 ALTER TABLE skins ADD COLUMN storypickable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL AFTER searchable;
 
 ALTER TABLE topics ADD COLUMN searchable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL after submittable;
 ALTER TABLE topics ADD COLUMN storypickable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL after searchable;
-
-INSERT INTO vars (name, value, description) VALUES ('task_timespec_freshenup', '* * * * *', 'Custom timespec (in cron style) for the freshenup task. Add more task_timespec_ vars if you want to override other task timespecs.');
 
 INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysback','7','Oldest stories to write a story_text.rendered field for, in days');
 
