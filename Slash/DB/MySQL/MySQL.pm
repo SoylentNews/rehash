@@ -971,7 +971,11 @@ sub createAccessLog {
 	} else {
 		$uid = $constants->{anonymous_coward_uid};
 	}
-	my $section = $form->{section} ? $form->{section} : 'index';
+	my $section = $constants->{section};
+	# The following two are special cases
+	if ($op eq 'index' || $op eq 'article') {
+		$section = $form->{section} ? $form->{section} : $constants->{section};
+	}
 
 	my $ipid = getCurrentUser('ipid') || md5_hex($hostip);
 	$hostip =~ s/^(\d+\.\d+\.\d+)\.\d+$/$1.0/;

@@ -42,6 +42,7 @@ sub SlashVirtualUser ($$$) {
 	createCurrentVirtualUser($cfg->{VirtualUser} = $user);
 	createCurrentDB		($cfg->{slashdb} = Slash::DB->new($user));
 	createCurrentStatic	($cfg->{constants} = $cfg->{slashdb}->getSlashConf($user));
+	$cfg->{constants}{section} = 'index'; # This is in here till I finish up some work -Brian
 
 	# placeholders ... store extra placeholders in DB?  :)
 	for (qw[user form themes template cookie objects cache site_constants]) {
@@ -85,6 +86,7 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
 			$new_cfg->{real_rootdir} = $_->{url} if $_->{isolate};  # you gotta keep 'em separated, unh!
 			$new_cfg->{defaultsection} = $_->{section};
+			$new_cfg->{section} = $_->{section};
 			$new_cfg->{basedomain} = $_->{hostname};
 			$new_cfg->{static_section} = $_->{section};
 			$new_cfg->{index_handler} = $_->{index_handler};
