@@ -1378,7 +1378,7 @@ sub createAccessLog {
 		secure		=> Slash::Apache::ConnectionIsSecure(),
 		referer		=> $ENV{HTTP_REFERER},
 	};
-	if ($constants->{accesslog_insert_cachesize}) {
+	if ($constants->{accesslog_insert_cachesize} && !$user->{is_admin}) {
 		# Save up multiple accesslog inserts until we can do them all at once.
 		push @{$self->{_accesslog_insert_cache}}, $insert;
 		my $size = scalar(@{$self->{_accesslog_insert_cache}});
