@@ -1180,7 +1180,7 @@ sub breakHtml {
 	# These are tags that "break" a word;
 	# a<P>b</P> breaks words, y<B>z</B> does not
 	my $approvedtags_break = $constants->{'approvedtags_break'}
-		|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
+		|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV DL)];
 	my $break_tag = join '|', @$approvedtags_break;
 	$break_tag = qr{(?:$break_tag)}i;
 
@@ -2021,7 +2021,7 @@ sub balanceTags {
 
 			if ($max_nest_depth) {
 				my $cur_depth = 0;
-				for (qw( UL OL DIV BLOCKQUOTE )) { $cur_depth += $tags{$_} }
+				for (qw( UL OL DIV BLOCKQUOTE DL )) { $cur_depth += $tags{$_} }
 				return undef if $cur_depth > $max_nest_depth;
 			}
 		}
