@@ -21,6 +21,7 @@ __template__
 </TR>
 
 [% PROCESS maintable_tr %]
+[% PROCESS maintable_td %]&nbsp;</TD>
 [% PROCESS maintable_td mt_valign="TOP" %]
 
 __seclev__
