@@ -296,7 +296,7 @@ sub rebuildUser {
 		}
 		if ($_->{perceive} eq 'fan') {
 			$people->{FAN()}{$_->{person}} = 1;
-		} elsif ($_->{type} eq 'freak') {
+		} elsif ($_->{perceive} eq 'freak') {
 			$people->{FREAK()}{$_->{person}} = 1;
 		}
 	}

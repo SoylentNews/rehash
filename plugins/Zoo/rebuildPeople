@@ -27,6 +27,23 @@ createEnvironment($opts{u});
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 
+# First clean up fans/freaks
+$slashdb->sqlDo("UPDATE people SET perceive=NULL";
+$slashdb->sqlDo("DELETE FROM people WHERE type IS NULL");
+
+# Put in blanks
+$slashdb->sqlDo("CREATE TEMPORARY TABLE people_select SELECT person,uid FROM people WHERE type IS NOT NULL");
+$slashdb->sqlDo("INSERT IGNORE INTO people (uid,person) SELECT * from people_select");
+$slashdb->sqlDo("DROP TABLE people_select");
+
+# Put back fans
+$slashdb->sqlDo(qq|SELECT CONCAT("UPDATE people SET perceive='fan' WHERE uid =", person, ";") INTO OUTFILE '/tmp/rebuildpeople.sql' FROM people WHERE type='friend'|);
+$slashdb->sqlDo("source /tmp/rebuildpeople.sql");
+
+# Put back freaks
+$slashdb->sqlDo(qq|SELECT CONCAT("UPDATE people SET perceive='freak' WHERE uid =", person, ";") INTO OUTFILE '/tmp/rebuildpeople.sql' FROM people WHERE type='foe'|);
+$slashdb->sqlDo("source /tmp/rebuildpeople.sql");
+
 $slashdb->sqlDo("TRUNCATE people_nthdegree");
 print "Cleaned nthdegree!\n";
 my $sth = $slashdb->sqlSelectMany("uid, person, type", "people");
