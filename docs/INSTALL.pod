@@ -195,9 +195,17 @@ You can get the Slash code in these locations:
 	http://sourceforge.net/project/?group_id=4421
 
 The CVS repository is tagged with versions, so to get release
-1.0.3, get tag v1_0_3_0.  The last number will be incremented
-during development (v1_0_3_1, v1_0_3_2, etc.) until the next
-release.
+1.0.3, get tag "v1_0_3_0".  The last number will be incremented
+during development ("v1_0_3_1", "v1_0_3_2", etc.) until the next
+release.  Sometimes, a release may be tagged with a last number
+of something other than "0".  Exactly what tag a given release
+is based on is in F<README>.
+
+There is a separate development branch of Slash.  Its branch
+is "bender".  Primarily small changes and bugfixes will go into
+the MAIN branch, with major changes going into the development
+branch.
+
 
 =back
 
