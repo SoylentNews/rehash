@@ -1405,6 +1405,7 @@ sub chopEntity {
 	my($text, $length) = @_;
 	$text = substr($text, 0, $length) if $length;
 	$text =~ s/&#?[a-zA-Z0-9]*$//;
+	$text =~ s/<[^>]*$//;
 	return $text;
 }
 
@@ -1452,6 +1453,43 @@ sub fixint {
 }
 
 ########################################################
+sub balance_tags {
+	my($html, $hard) = @_;
+	my %tags;
+	my $match = 'B|I|A|OL|UL|EM|TT|STRONG|BLOCKQUOTE|DIV';
+
+	while ($html =~ m|(<(/?)($match)\b[^>]*>)|igo) { # loop over tags
+		my($tag, $close, $whole) = (uc $3, $2, $1);
+
+		if ($close) {
+			$tags{$tag}--;
+
+			# remove orphaned close tags if count < 0
+			while ($tags{$tag} < 0) {
+				my $p = pos($html) - length($whole);
+				$html =~ s|^(.{$p})</$tag>|$1|si;
+				$tags{$tag}++;
+			}
+
+		} else {
+			$tags{$tag}++;
+
+			if (($tags{UL} + $tags{OL} + $tags{BLOCKQUOTE}) > 4) {
+				return;
+			}
+		}	
+	}
+
+	for my $tag (keys %tags) {
+		# add extra close tags
+		while ($tags{$tag} > 0) {
+			$html .= "</$tag>";
+			$tags{$tag}--;
+		}
+	}
+
+	return $html;
+}
 	
 
 ###############################################################################
@@ -2340,7 +2378,10 @@ EOT
 	if ($I{F}{mode} ne 'archive' && length($C->{comment}) > $I{U}{maxcommentsize}
 		&& $I{F}{cid} ne $C->{cid}) {
 
-		$C->{comment} = substr $C->{comment}, 0, $I{U}{maxcommentsize};
+		$C->{comment} = balance_tags(
+			chopEntity($C->{comment}, $I{U}{maxcommentsize})
+		);
+
 		$C->{comment} .= sprintf '<P><B>%s</B>', linkComment({
 			sid => $C->{sid}, cid => $C->{cid}, pid => $C->{cid},
 			subject => "Read the rest of this comment..."
