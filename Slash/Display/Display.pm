@@ -528,6 +528,17 @@ my %scalar_ops = (
 		my $maxval = $_[0] || 1;
 		return rand($maxval);
 	},
+	# integer value to Systeme Internationale (K=kilo, M=mega, etc.)
+	size2si		=> sub {
+		my $v = $_[0] || 0;
+		my $a = $v < 0 ? -$v : $v;
+		my @formats = qw(  %d  %.1fK  %.1fM  %.1fG  %.1fT  );
+		while (my $format = shift @formats) {
+			return sprintf($format, $v) if $a < 2*1024 || !@formats;
+			$a /= 1024; $v /= 1024;
+		}
+		return "size2si_err";
+	},
 );
 
 @{$Template::Stash::HASH_OPS}  {keys %hash_ops}   = values %hash_ops;

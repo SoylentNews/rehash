@@ -160,6 +160,12 @@ sub main {
 			adminmenu	=> 'info',
 			tab_selected	=> 'webheads',
 		},
+		mcd_stats		=> {
+			function	=> \&displayMcdStats,
+			seclev		=> 500,
+			adminmenu	=> 'info',
+			tab_selected	=> 'mcdstats',
+		},
 	};
 
 	# admin.pl is not for regular users
@@ -1912,7 +1918,7 @@ sub displayRecentWebheads {
 
 	my $admindb = getObject("Slash::Admin", { db_type => 'log' });
 
-	my $data_hr = $admindb->getRecentWebheads();
+	my $data_hr = $admindb->getRecentWebheads(10, 5000);
 
 	# We need the list of all webheads too.
 	my %webheads = ( );
@@ -1936,6 +1942,18 @@ sub displayRecentWebheads {
 		data		=> $data_hr,
 		webheads	=> $webheads_ar,
 	});
+}
+
+##################################################################
+sub displayMcdStats {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	my $stats = $slashdb->getMCDStats();
+	if (!$stats) {
+		print getData('no-mcd-stats');
+		return;
+	}
+	slashDisplay('mcd_stats', { stats => $stats });
 }
 
 ##################################################################

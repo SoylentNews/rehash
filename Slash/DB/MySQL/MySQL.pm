@@ -1526,6 +1526,7 @@ sub deleteUser {
 		seclev		=> 0
 	});
 	my $rows = $self->sqlDelete("users_param", "uid=$uid");
+	$self->setUser_delete_memcached($uid);
 	return $rows;
 }
 
@@ -1961,6 +1962,8 @@ sub createUser {
 	$self->{_dbh}->{AutoCommit} = 1;
 
 	$self->sqlInsert("users_count", { uid => $uid });
+
+	$self->setUser_delete_memcached($uid);
 
 	return $uid;
 }
@@ -4925,6 +4928,7 @@ sub createMetaMod {
 		-lastmm =>	'NOW()',
 		mods_saved =>	'',
 	}, "uid=$m2_user->{uid} AND mods_saved != ''");
+	$self->setUser_delete_memcached($m2_user->{uid});
 	if (!$rows) {
 		# The update failed, presumably because the user clicked
 		# the MetaMod button multiple times quickly to try to get
@@ -4993,12 +4997,14 @@ sub createMetaMod {
 			});
 		}
 
+		$self->setUser_delete_memcached($mod_uid);
 	}
 
 	$self->sqlUpdate("users_info", {
 		-m2fairvotes	=> "m2fairvotes+$voted_fair",
 		-m2unfairvotes	=> "m2unfairvotes+$voted_unfair",
 	}, "uid=$m2_user->{uid}") if $voted_fair || $voted_unfair;
+	$self->setUser_delete_memcached($m2_user->{uid});
 }
 
 ########################################################
@@ -5540,6 +5546,7 @@ sub getSubmissionsMerge {
 			$self->sqlUpdate('users_info', {
 				-karma => $newkarma },
 			"uid=$sub->{uid}");
+			$self->setUser_delete_memcached($sub->{uid});
 		}
 	}
 
@@ -5846,6 +5853,7 @@ sub createStory {
 			$self->sqlUpdate('users_info', {
 				-karma => $newkarma },
 			"uid=$suid");
+			$self->setUser_delete_memcached($suid);
 		}
 
 		$self->setSubmission($story->{subid}, {
@@ -6205,8 +6213,8 @@ sub getMCD {
 			$server = [ $1, $2 ];
 		}
 	}
-	require MemCachedClient;
-	$self->{_mcd} = MemCachedClient->new({
+	require Cache::Memcached;
+	$self->{_mcd} = Cache::Memcached->new({
 		servers =>	[ @servers ],
 		debug =>	$constants->{memcached_debug} > 1 ? 1 : 0,
 	});
@@ -6223,6 +6231,33 @@ sub getMCD {
 		$self->{_mcd}{keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
 	}
 	return $self->{_mcd};
+}
+
+##################################################################
+sub getMCDStats {
+	my($self) = @_;
+	my $mcd = $self->getMCD();
+	return undef unless $mcd;
+
+	my $stats = $mcd->stats();
+	for my $server (keys %{$stats->{hosts}}) {
+		_getMCDStats_percentify($stats->{hosts}{$server}{misc},
+			qw(	get_hits	cmd_get		get_hit_percent ));
+		_getMCDStats_percentify($stats->{hosts}{$server}{malloc},
+			qw(	total_alloc	arena_size	total_alloc_percent ));
+	}
+	_getMCDStats_percentify($stats->{total},
+			qw(	get_hits	cmd_get		get_hit_percent ));
+	_getMCDStats_percentify($stats->{total},
+			qw(	malloc_total_alloc	malloc_arena_size	malloc_total_alloc_percent ));
+	return $stats;
+}
+
+sub _getMCDStats_percentify {
+	my($hr, $num, $denom, $dest) = @_;
+	my $perc = "-";
+	$perc = sprintf("%.1f", $hr->{$num}*100 / $hr->{$denom}) if $hr->{$denom};
+	$hr->{$dest} = $perc;
 }
 
 ##################################################################
@@ -7250,7 +7285,7 @@ sub setUser {
 	my $mcd_need_delete = 0;
 	if ($mcd) {
 		$mcd_need_delete = 1 if grep { $_ ne 'users_hits' } keys %update_tables;
-		$self->_getUser_delete_memcached($uid) if $mcd_need_delete;
+		$self->setUser_delete_memcached($uid) if $mcd_need_delete;
 	}
 
 	my $rows = 0;
@@ -7318,9 +7353,27 @@ sub setUser {
 	}
 
 	# And delete from memcached again after we update the DB
-	$self->_getUser_delete_memcached($uid) if $mcd_need_delete;
+	$self->setUser_delete_memcached($uid) if $mcd_need_delete;
 
 	return $rows;
+}
+
+sub setUser_delete_memcached {
+	my($self, $uid_list) = @_;
+	my $mcd = $self->getMCD();
+	return unless $mcd;
+	my $constants = getCurrentStatic();
+	my $mcddebug = $mcd && $constants->{memcached_debug};
+
+	$uid_list = [ $uid_list ] if !ref($uid_list);
+	for my $uid (@$uid_list) {
+		my $mcdkey = "$mcd->{keyprefix}u:";
+		# The "1" means "don't accept new writes to this key for 1 second."
+		$mcd->delete("$mcdkey$uid", 1);
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ setU_deletemcd deleted '$mcdkey$uid'\n";
+		}
+	}
 }
 
 # Nicknames
@@ -7621,7 +7674,13 @@ sub _getUser_compare_mcd_db {
 
 ########################################################
 #
-# begin closure
+# Begin closure.  This is OK to use these variables to store the
+# caches, instead of getCurrentCache(), because all sites running
+# on a given webhead are running the same code and so need to be
+# at the same version of Slash.  The only way this cached data could
+# differ between different sites being served by the same webhead,
+# is if they are at different versions (and if the users_* schema
+# changed between those versions).
 {
 
 my %gsfwcache = ( );
@@ -7849,23 +7908,6 @@ sub _getUser_write_memcached {
 #
 ########################################################
 
-sub _getUser_delete_memcached {
-	my($self, $uid) = @_;
-	my $mcd = $self->getMCD();
-	return unless $mcd;
-	my $constants = getCurrentStatic();
-	my $mcddebug = $mcd && $constants->{memcached_debug};
-
-	$uid = [ $uid ] if !ref($uid);
-	for my $i (@$uid) {
-		my $mcdkey = "$mcd->{keyprefix}u:";
-		# The "1" means "don't accept new writes to this key for 1 second," I believe.
-		$mcd->delete("$mcdkey$i", 1);
-		if ($mcddebug > 1) {
-			print STDERR scalar(gmtime) . " $$ _getU_deletemcd deleted '$mcdkey$i'\n";
-		}
-	}
-}
 
 ########################################################
 # This could be optimized by not making multiple calls

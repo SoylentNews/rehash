@@ -116,10 +116,12 @@ sub _set {
 	$self->sqlInsert('people', { uid => $person,  person => $uid }, { ignore => 1});
 	$self->sqlUpdate('people', { perceive => $s_type }, "uid = $person AND person = $uid");
 
-	my $data = $self->sqlSelectColArrayref('uid', 'people', "person=$uid AND type='friend'");
-	push @$data, $person;
-	my $list = join (',', @$data);
-	$self->sqlDo("UPDATE users_info SET people_status='dirty' WHERE uid IN ($list)");
+	my $uid_ar = $self->sqlSelectColArrayref('uid', 'people',
+		"person=$uid AND type='friend'");
+	push @$uid_ar, $person;
+	my $uid_list = join (',', @$uid_ar);
+	$self->sqlUpdate("users_info", { people_status => 'dirty' }, "uid IN ($uid_list)");
+	$self->setUser_delete_memcached($uid_ar);
 }
 
 
@@ -145,20 +147,23 @@ sub isFoe {
 	return $is_foe;
 }
 
-# This just really neutrilzes the relationship.
+# This just really neutralizes the relationship.
 sub delete {
 	my($self, $uid, $person, $type) = @_;
-	$self->sqlDo("UPDATE people SET type=NULL WHERE uid=$uid AND person=$person");
-	my $slashdb = getCurrentDB();
-	$self->sqlDo("UPDATE people SET perceive=NULL WHERE uid=$person AND person=$uid");
+
+	$self->sqlUpdate("people", { type => undef }, "uid=$uid AND person=$person");
+	$self->sqlUpdate("people", { perceive => undef }, "uid=$person AND person=$uid");
+
 	# Cleanup
 	my $people = $self->rebuildUser($uid);
-	$slashdb->setUser($uid, { people => $people });
-	my $data = $self->sqlSelectColArrayref('uid', 'people', "person=$uid AND type='friend'");
-	push @$data, $person;
-	my $list = join (',', @$data);
-	$self->sqlDo("UPDATE users_info SET people_status='dirty' WHERE uid IN ($list)");
+	$self->setUser($uid, { people => $people });
 
+	my $uid_ar = $self->sqlSelectColArrayref('uid', 'people',
+		"person=$uid AND type='friend'");
+	push @$uid_ar, $person;
+	my $uid_list = join (',', @$uid_ar);
+	$self->sqlUpdate("users_info", { people_status => 'dirty' }, "uid IN ($uid_list)");
+	$self->setUser_delete_memcached($uid_ar);
 }
 
 sub topFriends {

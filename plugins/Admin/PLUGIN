@@ -17,6 +17,7 @@ template=templates/ispellok;admin;default
 template=templates/keywordEdit;admin;default
 template=templates/listFilters;admin;default
 template=templates/listStories;admin;default
+template=templates/mcd_stats;admin;default
 template=templates/messages;admin;default
 template=templates/otherLinks;admin;default
 template=templates/recent;admin;default

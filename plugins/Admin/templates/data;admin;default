@@ -110,13 +110,20 @@ Saved [% form.thisname %]<BR>
 [% # NO POINTS.
 CASE "no points" %]
 	You don't have any moderator points.<BR>
+
 [% # NO POINTS.
 CASE "not enough points" %]
 	You don't have enough moderator points.<BR>
+
 [% CASE "unknown_moderation_warning" %]
 	An unknown error occurred while moderating.<BR>
+
 [% CASE "moderate_recent_message" %]
 	<P>Return to the set of <A HREF="[% constants.rootdir %]/admin.pl?op=recent&amp;startat=[% startat %]">recent comments</A> you were just moderating.</P>
+
+[% CASE "no-mcd-stats" %]
+	<p>Looks like memcached is not active; no stats were available.
+
 [% END %]
 __seclev__
 10000
