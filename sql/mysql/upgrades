@@ -1068,8 +1068,6 @@ INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@exam
 
 # End of T_2_3_0_61, Start of T_2_3_0_62
 
-# SLASHDOT LAST UPDATED HERE
-
 # should be email-only
 UPDATE message_codes SET modes = 0 WHERE code = 10;
 
@@ -1107,3 +1105,8 @@ UPDATE stats_daily SET name='mod_token_conversion_point' WHERE name='token_conve
 ALTER TABLE accesslog_admin ADD COLUMN secure TINYINT UNSIGNED DEFAULT 0 NOT NULL;
 
 # SLASHCODE LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_62, Start of T_2_3_0_63
+
