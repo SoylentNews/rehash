@@ -61,8 +61,9 @@ sub getBackendStories {
 
 	my $select;
 	$select .= "stories.sid, stories.title, time, dept, stories.uid,";
-	$select .= "alttext, image, stories.commentcount, stories.section as section,";
-	$select .= "story_text.introtext, story_text.bodytext,topics.tid as tid";
+	$select .= "alttext, image, commentcount, hitparade,";
+	$select .= "stories.section as section, introtext,";
+	$select .= "bodytext, topics.tid as tid";
 	my $from = "stories, story_text, topics";
 
 	my $where;
