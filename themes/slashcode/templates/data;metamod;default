@@ -27,7 +27,7 @@ Meta Moderation
 <P>The moderation system for [% constants.sitename %] is currently down.</P>
 
 [% CASE 'unexpected_item' %]
-<P>An error occurred during proccessing. Please re-load your meta-moderation form
+<P>An error occurred during processing. Please re-load your meta-moderation form
 and try again.</P>
 
 [% END %]

@@ -3121,9 +3121,9 @@ sub getCommentsForUser {
 		$sql .= "	)";
 	}
 
-	if ( $user->{commentsort} == 1 || $user->{commentsort} == 5 || $user->{commentsort} == '3') {
+	if ($user->{commentsort} == 1 || $user->{commentsort} == 5 || $user->{commentsort} == 3) {
 		$sql .= "	  ORDER BY ";
-		$sql .= "comments.points DESC, " if $user->{commentsort} == '3';
+		$sql .= "comments.points DESC, " if $user->{commentsort} == 3;
 		$sql .= " cid ";
 		$sql .= 'DESC' 
 			if ($user->{commentsort} == 1 || $user->{commentsort} == 5);

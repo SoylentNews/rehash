@@ -69,7 +69,7 @@ sub SlashVirtualUser ($$$) {
 
 	$cfg->{menus} = $cfg->{slashdb}->getMenus();
 	my $sections = $cfg->{slashdb}->getSections();
-	for ( values %$sections) {
+	for (values %$sections) {
 		if ($_->{hostname} && $_->{url}) {
 			my $new_cfg;
 			for (keys %{$cfg->{constants}}) {

@@ -26,7 +26,7 @@ __template__
 	</TR>
 </TABLE>
 
-<P><B>Note:</B> Who you like and dislike is not private; it can and will be used against you.</P>
+<P><B>Note:</B> Whom you like and dislike is not private; it can and will be used against you.</P>
 
 <INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
 <INPUT TYPE="hidden" NAME="op" VALUE="add">

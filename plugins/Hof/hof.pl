@@ -11,12 +11,12 @@ use Slash::Utility;
 
 ##################################################################
 sub main {
-	my $form    = getCurrentForm();
-	my $constants    = getCurrentStatic();
+	my $form	= getCurrentForm();
+	my $constants	= getCurrentStatic();
 
 	header(getData('head'), $form->{section});
 
-	my ($hofDB);
+	my($hofDB);
 
 	if ($constants->{backup_db_user}) {
 		$hofDB = getObject('Slash::Hof', $constants->{backup_db_user});

@@ -182,7 +182,6 @@ sub addFof {
 	my($self, $uid, $person) = @_;
 	my $slashdb = getCurrentDB();
 
-
 	# First we do the main person
 	if ($self->sqlSelect('uid', 'people', "uid = $uid AND person = $person")) {
 		$self->sqlUpdate('people', { -fof => "fof+1" }, "uid = $uid AND person = $person");
@@ -199,7 +198,6 @@ sub addEof {
 	my($self, $uid, $person) = @_;
 	my $slashdb = getCurrentDB();
 
-
 	# First we do the main person
 	if ($self->sqlSelect('uid', 'people', "uid = $uid AND person = $person")) {
 		$self->sqlUpdate('people', { -fof => "fof+1" }, "uid = $uid AND person = $person");
@@ -215,7 +213,6 @@ sub addEof {
 sub deleteFof {
 	my($self, $uid, $person) = @_;
 	my $slashdb = getCurrentDB();
-
 
 	# First we do the main person
 	my $number = $self->sqlSelect('fof', 'people', "uid = $uid AND person = $person");
@@ -237,7 +234,6 @@ sub deleteFof {
 sub deleteEof {
 	my($self, $uid, $person) = @_;
 	my $slashdb = getCurrentDB();
-
 
 	# First we do the main person
 	my $number = $self->sqlSelect('eof', 'people', "uid = $uid AND person = $person");

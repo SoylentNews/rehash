@@ -649,6 +649,12 @@ Subroutines beginning with C<_> are special: they are not to be used
 outside the current file.  There is not to be enforced by the code
 itself, but by someone named Guido.
 
+For plugin-specific variables, especially in the C<vars> table,
+prefix the variable with the plugin's name.
+
+	soap_journal_enable	# wrong
+	journal_soap_enable	# right
+
 For large for() loops, do not use $_, but name the variable.
 Do not use $_ (or assume it) except for when it is absolutely
 clear what is going on, or when it is required (such as with
@@ -1036,6 +1042,9 @@ get/gets/set/sets/create/exists/delete
 =head1 CHANGES
 
 	$Log$
+	Revision 1.6  2002/02/14 20:47:22  pudge
+	Misc. fixes
+	
 	Revision 1.5  2001/11/03 04:22:45  brian
 	Fry :)
 	
