@@ -287,7 +287,14 @@ sub handler {
 	# This has happened to me a couple of times.
 	delete $cookies->{user} if $cookies->{user} && !$cookies->{user}->value;
 
-	$uid = $constants->{anonymous_coward_uid} unless defined $uid;
+	if (!$uid) {
+		if ($gSkin && $gSkin->{ac_uid}) {
+			$uid = $gSkin->{ac_uid};
+		} else {
+			$uid = $constants->{anonymous_coward_uid};
+		}
+	}
+#print STDERR scalar(localtime) . " $$ User handler uid=$uid gSkin->skid=$gSkin->{skid}\n";
 
 	# Ok, yes we could use %ENV here, but if we did and
 	# if someone ever wrote a module in another language
@@ -481,7 +488,10 @@ sub userLogin {
 			$slashdb->getUser($uid, 'session_login'));
 		return($uid, $newpass);
 	} else {
-		return getCurrentStatic('anonymous_coward_uid');
+		my $gSkin = getCurrentSkin();
+		return $gSkin && $gSkin->{ac_uid}
+			? $gSkin->{ac_uid}
+			: getCurrentStatic('anonymous_coward_uid');
 	}
 }
 

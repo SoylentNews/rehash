@@ -330,6 +330,7 @@ sub IndexHandler {
 	return DECLINED unless $r->is_main;
 	my $constants = getCurrentStatic();
 
+#print STDERR scalar(localtime) . " $$ IndexHandler A\n";
 	setCurrentSkin(determineCurrentSkin());
 	my $gSkin     = getCurrentSkin();
 
@@ -392,6 +393,7 @@ sub IndexHandler {
 		my $slashdb = getCurrentDB();
 		my $new_skin = $slashdb->getSkin($key);
 		my $new_skid = $new_skin->{skid} || $constants->{mainpage_skid};
+#print STDERR scalar(localtime) . " $$ IndexHandler B new_skid=$new_skid\n";
 		setCurrentSkin($new_skid);
 		$gSkin = getCurrentSkin();
 

@@ -657,13 +657,39 @@ sub setCurrentSkin {
 		$current_skin = $static_skin ||= {};
 	}
 
-	return 1 if $current_skin->{skid} && $current_skin->{skid} eq $id;
+#print STDERR scalar(localtime) . " $$ setCurrentSkin id=$id c_s->{skid}=$current_skin->{skid}\n";
+	return 1 if $current_skin->{skid} && $current_skin->{skid} == $id;
 
 	my $gSkin = $slashdb->getSkin($id);
 
 	# we want to retain any references to $gSkin that are already
 	# in existence
 	@{$current_skin}{keys %$gSkin} = values %$gSkin;
+
+	# Now, if prepareUser() has already been called, we have to update
+	# the anonymous coward.	Otherwise, we leave it alone and trust
+	# that prepareUser() will set it properly itself.
+	my $user = getCurrentUser();
+#print STDERR scalar(localtime) . " $$ setCurrentSkin user->uid=$user->{uid} current_skin->skid=$current_skin->{skid}\n";
+	if ($user->{uid}) {
+		# prepareUser() has been called already, so it's OK to
+		# call it again.
+		my $new_ac_uid = $current_skin->{ac_uid} || getCurrentStatic('anonymous_coward_uid');
+		my $ac_user = getCurrentAnonymousCoward();
+#print STDERR scalar(localtime) . " $$ setCurrentSkin new_ac_uid='$new_ac_uid' ac_user->uid='$ac_user->{uid}'\n";
+		if ($ac_user->{uid} != $new_ac_uid) {
+			$ENV{SLASH_USER} = $new_ac_uid;
+			my $form = getCurrentForm();
+			my $new_ac_user = prepareUser($new_ac_uid, $form, $0);
+#print STDERR scalar(localtime) . " $$ new_ac_user: " . Dumper($new_ac_user);
+			createCurrentAnonymousCoward($new_ac_user);
+			# If the user is not currently logged in, switch them
+			# from the old AC user to the new AC user.
+			if ($user->{is_anon}) {
+				createCurrentUser($new_ac_user);
+			}
+		}
+	}
 }
 
 #========================================================================
@@ -1016,23 +1042,31 @@ Returns true if the UID is an anonymous coward, otherwise false.
 
 sub isAnon {
 	my($uid) = @_;
-	# this might be undefined in the event of a comment preview
-	# when a data structure is not fully filled out, etc.
+
+	# This might be undefined in the event of a comment preview
+	# when a data structure is not fully filled out.  So let's
+	# handle improper input by saying yes, that bogus value is
+	# anonymous (the least dangerous response).
 	return 1 if	!defined($uid)		# no undef
 		||	$uid eq ''		# no empty string
 		||	$uid =~ /[^0-9]/	# only integers
 		||	$uid < 1		# only positive
 	;
 
-	my $anon_uids = getCurrentStatic('anonymous_coward_uids');
-	if ($anon_uids) {
-		for (@$anon_uids) {
-			return 1 if $uid == $_;
-		}
-		return 0;
+	# Quick check for very common case.
+	my $constants = getCurrentStatic();
+	return 1 if $uid == $constants->{anonymous_coward_uid};
+
+	# Might be one of the alternate ACs specified in a skin.
+	# Check them all.
+	my $slashdb = getCurrentDB();
+	my $skins = $slashdb->getSkins();
+	for my $skid (keys %$skins) {
+		return 1 if $uid == $skins->{$skid}{ac_uid};
 	}
 
-	return $uid == getCurrentStatic('anonymous_coward_uid');
+	# Nope, this UID is not anonymous.
+	return 0;
 }
 
 #========================================================================
@@ -1345,6 +1379,7 @@ bunches of other user datum.
 sub prepareUser {
 	# we must get form data and cookies, because we are preparing it here
 	my($uid, $form, $uri, $cookies, $method) = @_;
+#print STDERR scalar(localtime) . " $$ prepareUser($uid)\n";
 	my($slashdb, $constants, $user, $hostip);
 
 	$cookies ||= {};
@@ -1364,21 +1399,35 @@ sub prepareUser {
 	my $user_types = setUserDBs();
 	my $reader = getObject('Slash::DB', { virtual_user => $user_types->{reader} });
 
-	$uid = $constants->{anonymous_coward_uid} unless defined($uid) && $uid ne '';
+	if (!$uid) {
+		# No user defined;  set the anonymous coward user.
+		my $gSkin = getCurrentSkin();
+		if ($gSkin && $gSkin->{ac_uid}) {
+			$uid = $gSkin->{ac_uid};
+		} else {
+			$uid = $constants->{anonymous_coward_uid};
+		}
+	}
 
-	if ($uid == $constants->{anonymous_coward_uid}) {
+	if (isAnon($uid)) {
 		if ($ENV{GATEWAY_INTERFACE}) {
 			$user = getCurrentAnonymousCoward();
-		} else {
-			$user = $reader->getUser($constants->{anonymous_coward_uid});
+#print STDERR scalar(localtime) . " $$ prepareUser going to getCurrentAnonymousCoward for uid $uid, got uid $user->{uid}\n";
+		}
+		if (!$user || $user->{uid} != $uid) {
+			# If we didn't just call getCurrentAnonymousCoward, or if
+			# the AC user we got is not the AC user we were expecting,
+			# we need to load that user from the DB.
+			$user = $reader->getUser($uid);
 		}
 		$user->{is_anon} = 1;
 		$user->{state} = {};
 	} else {
 		$user = $reader->getUser($uid);
+		$user->{is_anon} = 0;
 		$user->{logtoken} = bakeUserCookie($uid, $reader->getLogToken($uid));
-		$user->{is_anon} = isAnon($uid);
 	}
+#print STDERR scalar(localtime) . " $$ prepareUser user->uid=$user->{uid} is_anon=$user->{is_anon}\n";
 
 	# Now store the DB information from above in the user
 	saveUserDBs($user, $user_types);
@@ -2335,8 +2384,15 @@ sub createEnvironment {
 	createCurrentDB($slashdb);
 	createCurrentStatic($constants);
 
-	$ENV{SLASH_USER} = $constants->{anonymous_coward_uid};
-	my $user = prepareUser($constants->{anonymous_coward_uid}, $form, $0);
+	# The current anonymous coward may end up changing later,
+	# if a new skin is assigned, and the current user may end up
+	# changing later if a user is successfully authorized.
+	# Either is OK.
+	my $gSkin = getCurrentSkin();
+#print STDERR scalar(localtime) . " $$ createEnvironment gSkin->skid=$gSkin->{skid} ac_uid=$gSkin->{ac_uid}\n";
+	my $ac_uid = $gSkin->{ac_uid} || $constants->{anonymous_coward_uid};
+	$ENV{SLASH_USER} = $ac_uid;
+	my $user = prepareUser($ac_uid, $form, $0);
 	createCurrentUser($user);
 	createCurrentAnonymousCoward($user);
 }

@@ -145,6 +145,7 @@ sub header {
 		return if $r->header_only;
 	}
 
+#print STDERR scalar(localtime) . " $$ header skin_name='$skin_name' det='" . determineCurrentSkin() . "'\n";
 	setCurrentSkin($skin_name || determineCurrentSkin());
 	getSkinColors();
 

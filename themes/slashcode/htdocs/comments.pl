@@ -164,11 +164,24 @@ sub main {
 
 	$form->{pid} ||= "0";
 
-	my $title = $discussion ? $discussion->{'title'} : 'Comments';
+	# If this is a comment post, we can't write the header yet,
+	# because submitComment() _may_ want to do a redirect
+	# instead of emitting a webpage.
 
-	header($title, $section) or return;
+	my $header_emitted = 0;
+	my $title = $discussion ? $discussion->{'title'} : 'Comments';
+	if ($op ne 'submit') {
+		header($title, $section) or return;
+		$header_emitted = 1;
+	}
+
+#print STDERR scalar(localtime) . " $$ A op=$op header_emitted=$header_emitted\n";
 
 	if ($user->{is_anon} && length($form->{upasswd}) > 1) {
+		if (!$header_emitted) {
+			header($title, $section) or return;
+			$header_emitted = 1;
+		}
 		print getError('login error');
 		$op = 'preview';
 	}
@@ -176,8 +189,14 @@ sub main {
 	$op = 'default' if (! $postflag && $ops->{$op}{post});
 
 	if ($future_err) {
+		if (!$header_emitted) {
+			header($title, $section) or return;
+			$header_emitted = 1;
+		}
 		print getError("nosubscription");
 	}
+
+#print STDERR scalar(localtime) . " $$ B op=$op header_emitted=$header_emitted\n";
 
 	# Admins don't jump through these formkey hoops.
 	if ($user->{is_admin}) {
@@ -191,6 +210,7 @@ sub main {
 	# Admins should only jump through the remaining formkey hoops
 	# if this var is set.  (Should we leave this as a seclev<100
 	# check, or just check {is_admin}?)
+	my $formkey_msg = "";
 	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
 		$formkey = $form->{formkey};
 
@@ -211,7 +231,19 @@ sub main {
 			for my $check (@{$ops->{$op}{checks}}) {
 				$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
 				$error_flag = formkeyHandler($check, $formname, $formkey,
-					undef, $options);
+					\$formkey_msg, $options);
+				# If there was an error, we have it stored in $formkey_msg
+				# instead of printed directly.  Now that we know whether
+				# there was one or not, we can print the header if need be
+				# and then print the msg if need be.
+				if ($error_flag) {
+					if (!$header_emitted) {
+						header($title, $section) or return;
+						$header_emitted = 1;
+					}
+#print STDERR scalar(localtime) . " $$ B2 op=$op header_emitted=$header_emitted formkey_msg='$formkey_msg'\n";
+					print $formkey_msg;
+				}
 				if ($error_flag == -1) {
 					# Special error:  submit failed, go back to     
 					# previewing.  If the error was retryable,
@@ -244,6 +276,8 @@ sub main {
 			$hc->reloadFormkeyHC($formname) if $hc;
 		}
 	}
+
+#print STDERR scalar(localtime) . " $$ C op=$op header_emitted=$header_emitted\n";
 
 	if (!$error_flag) {
 		# CALL THE OP
@@ -397,7 +431,10 @@ sub editComment {
 	my $extras = [];	
 	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
 	
-	$extras =  $slashdb->getNexusExtrasForChosen({$disc_skin->{nexus} => 1}, {content_type => "comment"}) if $disc_skin && $disc_skin->{nexus};
+	$extras =  $slashdb->getNexusExtrasForChosen(
+		{ $disc_skin->{nexus} => 1 },
+		{ content_type => "comment" })
+		if $disc_skin && $disc_skin->{nexus};
 
 	my $gotmodwarning;
 	$gotmodwarning = 1 if (($error_message eq getError("moderations to be lost")) || $form->{gotmodwarning});
@@ -781,8 +818,10 @@ sub previewForm {
 
 ##################################################################
 # Saves the Comment
-# A note, right now form->{sid} is a discussion id, not a
-# story id.
+# Here, $form->{sid} is a discussion id, not a story id.
+# Also, header() is NOT called before this function is called,
+# so (assuming we don't want to do a redirect) it must be
+# called manually.
 sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
@@ -791,6 +830,7 @@ sub submitComment {
 	$form->{nosubscriberbonus} = $user->{nosubscriberbonus}
 						unless $form->{nosubscriberbonus_present};
 
+	my $header_emitted = 0;
 	my $id = $form->{sid};
 	my $label = getData('label');
 
@@ -798,6 +838,7 @@ sub submitComment {
 	$discussion->{type} = isDiscussionOpen($discussion);
 
 	if ($discussion->{type} eq 'archived') {
+		header('Comments', $discussion->{section}) or return;
 		print getData('archive_error');
 		return;
 	}
@@ -821,6 +862,10 @@ sub submitComment {
 			? $constants->{comments_codemode_wsfactor}
 			: $constants->{comments_wsfactor} || 1) )
 	) {
+		# The comment did not validate.  We're not actually going to
+		# post the comment this time around, we are (probaly) just
+		# going to walk through the editing cycle again.
+		header('Comments', $discussion->{section}) or return;
 		$slashdb->resetFormkey($form->{formkey});
 		if (! $form->{newdiscussion}) {
 			editComment(@_, $error_message);
@@ -841,9 +886,13 @@ sub submitComment {
 	$tempComment = addDomainTags($tempComment);
 
 	if ($form->{newdiscussion}) {
+		header('Comments', $discussion->{section}) or return;
+		$header_emitted = 1;
 		$id = _createDiscussion($form, $slashdb, $user, $constants);
 		return 1 unless $id;
 	}
+
+#print STDERR scalar(localtime) . " $$ D header_emitted=$header_emitted\n";
 
 #	# Slash is not a file exchange system
 #	# still working on this...stay tuned for real commit
@@ -851,9 +900,25 @@ sub submitComment {
 # 	# maybe during the next glacial cycle.
 #	$tempComment = distressBinaries($tempComment);
 
-	unless ($form->{newdiscussion}) {
+	# If we want a redirect to a new URL after comment posting success,
+	# set some vars to indicate that.  Note that cleanRedirectUrlFromForm
+	# both reads the URL from $form and confirms that it's been signed
+	# with the correct confirmation password ('returnto_passwd').
+	my $do_emit_html = 1;
+	my $redirect_to = undef;
+	if ($redirect_to = cleanRedirectUrlFromForm("commentpostsuccess")) {
+		$do_emit_html = 0;
+	}
+	if ($do_emit_html) {
+		header('Comments', $discussion->{section}) or return;
+		$header_emitted = 1;
+	}
+
+	if (!$form->{newdiscussion} && $header_emitted) {
 		titlebar("100%", getData('submitted_comment'));
 	}
+
+#print STDERR scalar(localtime) . " $$ E header_emitted=$header_emitted do_emit_html=$do_emit_html redirect_to=" . (defined($redirect_to) ? $redirect_to : "undef") . "\n";
 
 	my $pts = 0;
 	my $karma_bonus = 0;
@@ -883,6 +948,9 @@ sub submitComment {
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
 	unless ($user->{is_admin} || $form->{newdiscussion}) {
 		unless ($slashdb->checkDiscussionPostable($id)) {
+			if (!$header_emitted) {
+				header('Comments', $discussion->{section}) or return;
+			}
 			print getError('submission error');
 			return(0);
 		}
@@ -891,6 +959,8 @@ sub submitComment {
 	if ($form->{postanon} && $constants->{allow_anonymous} && $user->{karma} > -1 && $discussion->{commentstatus} eq 'enabled') {
 		$posters_uid = $constants->{anonymous_coward_uid} ;
 	}
+
+#print STDERR scalar(localtime) . " $$ F header_emitted=$header_emitted do_emit_html=$do_emit_html\n";
 
 	my $clean_comment = {
 		subject		=> $tempSubject,
@@ -912,6 +982,8 @@ sub submitComment {
 
 	my $maxCid = $slashdb->createComment($clean_comment);
 
+#print STDERR scalar(localtime) . " $$ G maxCid=$maxCid\n";
+
 	# make the formkeys happy
 	$form->{maxCid} = $maxCid;
 
@@ -921,6 +993,9 @@ sub submitComment {
 
 	if ($maxCid == -1) {
 		# What vars should be accessible here?
+		if (!$header_emitted) {
+			header('Comments', $discussion->{section}) or return;
+		}
 		print getError('submission error');
 		return(0);
 
@@ -929,20 +1004,31 @@ sub submitComment {
 		#	- $maxCid?
 		# What are the odds on this happening? Hmmm if it is we should
 		# increase the size of int we used for cid.
+		if (!$header_emitted) {
+			header('Comments', $discussion->{section}) or return;
+		}
 		print getError('maxcid exceeded');
 		return(0);
 	} else {
-		slashDisplay('comment_submit', {
-			metamod_elig => scalar $slashdb->metamodEligible($user),
-		}) if ! $form->{newdiscussion};
+		if (!$form->{newdiscussion} && $do_emit_html) {
+			if (!$header_emitted) {
+				header('Comments', $discussion->{section}) or return;
+			}
+			slashDisplay('comment_submit', {
+				metamod_elig => scalar $slashdb->metamodEligible($user),
+			});
+		}
 
 		my $saved_comment = $slashdb->getComment($maxCid);
+
 		slashHook('comment_save_success', { comment => $saved_comment });
 		
 		undoModeration($id);
-		printComments($discussion, $maxCid, $maxCid,
-			{ force_read_from_master => 1, just_submitted => 1 }
-		) if !$form->{newdiscussion};
+		if (!$form->{newdiscussion} && $do_emit_html) {
+			printComments($discussion, $maxCid, $maxCid,
+				{ force_read_from_master => 1, just_submitted => 1 }
+			);
+		}
 
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
@@ -1018,7 +1104,11 @@ sub submitComment {
 				$users{$usera}++;
 			}
 		}
+		# If discussion created
 		if ($form->{newdiscussion}) {
+			if (!$header_emitted) {
+				header('Comments', $discussion->{section}) or return;
+			}
 			if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
 				slashDisplay('newdiscussion', { 
 					error 		=> $error_message, 
@@ -1040,6 +1130,20 @@ sub submitComment {
 				commentIndexCreator(@_, $error_message);
 			} else {
 				commentIndex(@_,$error_message);
+			}
+		}
+
+		# OK -- if we make it all the way here, and there were
+		# no errors so no header has been emitted, and we were
+		# asked to redirect to a new URL, NOW we can finally
+		# do it.
+		if ($redirect_to) {
+#print STDERR scalar(localtime) . " $$ H redirecting to '$redirect_to'\n";
+			redirect($redirect_to);
+		} else {
+#print STDERR scalar(localtime) . " $$ H not redirecting, emitted=$header_emitted\n";
+			if (!$header_emitted) {
+				header('Comments', $discussion->{section}) or return;
 			}
 		}
 	}

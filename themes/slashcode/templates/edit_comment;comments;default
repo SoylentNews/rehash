@@ -50,6 +50,12 @@ __template__
 
 	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid || sid %]">
 	<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% form.pid %]">
+	[% IF form.returnto_commentpostsuccess && form.returnto_commentpostsuccess_confirm %]
+		<INPUT TYPE="HIDDEN" NAME="returnto_commentpostsuccess"
+			VALUE="[% form.returnto_commentpostsuccess | strip_attribute %]">
+		<INPUT TYPE="HIDDEN" NAME="returnto_commentpostsuccess_confirm"
+			VALUE="[% form.returnto_commentpostsuccess_confirm | strip_attribute %]">
+	[% END %]
 	<INPUT TYPE="HIDDEN" NAME="mode" VALUE="[% user.mode %]">
 	<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% user.startat %]">
 	<INPUT TYPE="HIDDEN" NAME="threshold" VALUE="[% user.threshold %]">

@@ -2534,3 +2534,8 @@ CREATE TABLE story_render_dirty (
 
 # End of T_2_5_0_26, Start of T_2_5_0_27 - 2004/09/14
 
+ALTER TABLE skins ADD COLUMN ac_uid mediumint UNSIGNED DEFAULT '0' NOT NULL;
+
+INSERT INTO vars (name, value, description) VALUES ('returnto_passwd',CONCAT('changeme', rand()),'Password used to sign MD5s for returnto URLs from remote sites');
+
+

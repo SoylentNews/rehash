@@ -693,6 +693,7 @@ CREATE TABLE skins (
 	index_handler VARCHAR(30) DEFAULT 'index.pl' NOT NULL,
 	max_rewrite_secs MEDIUMINT UNSIGNED DEFAULT '3600' NOT NULL,
 	last_rewrite TIMESTAMP NOT NULL,
+	ac_uid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	PRIMARY KEY (skid),
 	UNIQUE name (name)
 ) TYPE=InnoDB;

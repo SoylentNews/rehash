@@ -56,6 +56,7 @@ use vars qw($VERSION @EXPORT);
 	changePassword
 	chopEntity
 	cleanRedirectUrl
+	cleanRedirectUrlFromForm
 	commify
 	countTotalVisibleKids
 	countWords
@@ -394,6 +395,34 @@ sub cleanRedirectUrl {
 	}
 
 	return $clean;
+}
+
+#========================================================================
+
+sub cleanRedirectUrlFromForm {
+	my($redirect_formname) = @_;
+	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
+	my $form = getCurrentForm();
+
+	my $formname = $redirect_formname ? "returnto_$redirect_formname" : "returnto";
+	my $formname_confirm = "${formname}_confirm";
+	my $returnto = $form->{$formname} || "";
+	return undef if !$returnto;
+
+	my $returnto_confirm = $form->{$formname_confirm} || "";
+
+	my $returnto_passwd = $constants->{returnto_passwd};
+	my $confirmed = md5_hex("$returnto$returnto_passwd") eq $returnto_confirm;
+	if ($confirmed) {
+		# The URL and the password have been concatted together
+		# and confirmed with the MD5, so we know it comes from a
+		# trusted source.  Approve it.
+		return $returnto;
+	} else {
+		# There is no proper MD5, so don't redirect.
+		return undef;
+	}
 }
 
 #========================================================================
