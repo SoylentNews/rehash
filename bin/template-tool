@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+#	my($db_name, $db_page, $db_section) = split $;, $key;
+#
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2003 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
@@ -142,9 +144,10 @@ if ($opts{'s'}) {
 					if ($tsemi ne $t2semi || $tsemi ne $filename) {
 						print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
 					}
-					if (length($filename) > 31) {
-						print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
-					}
+# Mac OS 9 is flea-bitten Darwin carcasses, or something like that.
+#					if (length($filename) > 31) {
+#						print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+#					}
 				} else {
 					print "id $temp2->{tpid}\t$filename NOT updated: $_\n";
 					print "\tError: " . $slashdb->{_dbh}->DBI::err_str . "\n";
@@ -178,8 +181,25 @@ if ($opts{'s'}) {
 	# in /usr/local/slash.
 
 	my $templates = $install->getSiteTemplates;
-	my %stats = ( 'new' => 0, 'different' => 0);
+	my %stats = ( 'new' => 0, different => 0, extraneous => 0 );
 	my $n_changed = 0;
+
+	# Find templates that exist in the DB but not on disk;  do this
+	# by turning the $templates (list of files on disk) into a hash
+	# in the format of getTemplateNameCache() (list of templates in
+	# the DB);  then they can be compared easily.
+	my %templates_in_db = ( );
+	my $template_name = $slashdb->getTemplateNameCache();
+	for my $key (sort keys %$template_name) {
+		my $tsemi = join ";", split $;, $key;
+		$templates_in_db{$tsemi} = $template_name->{$key};
+	}
+
+	# We'll build the list of templates on disk as we run through
+	# the list.  (We want to go by the data inside each file, not
+	# just the filename.)
+	my %templates_on_disk = ( );
+
 	for (@$templates) {
 	#stolen logic from above, should probably be made into subroutines
 		my($filename) = (File::Spec->splitpath($_))[2];
@@ -192,6 +212,7 @@ if ($opts{'s'}) {
 			next;
 		}
 		my $tsemi = join(";", @$template{'name','page','section'});
+		$templates_on_disk{$tsemi} = 1;
 #		print "Preparing $template->{name} using $filename: $_\n";
 		my $temp2 = $slashdb->getTemplateByName($template->{name},'', 1,
 			$template->{page}, $template->{section}, 1);
@@ -199,9 +220,10 @@ if ($opts{'s'}) {
 		if (defined $temp2 && $temp2->{page} eq $template->{page}
 			&& $temp2->{section} eq $template->{section}
 		) {
-			if (length($filename) > 31) {
-				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
-			}
+# Mac OS 9 is flea-bitten Darwin carcasses, or something like that.
+#			if (length($filename) > 31) {
+#				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+#			}
 			if ($template->{instructions}
 				&& $template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
@@ -249,9 +271,10 @@ if ($opts{'s'}) {
 						if ($tsemi ne $t2semi || $tsemi ne $filename) {
 							print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
 						}
-						if (length($filename) > 31) {
-							print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
-						}
+# Mac OS 9 is flea-bitten Darwin carcasses, or something like that.
+#						if (length($filename) > 31) {
+#							print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
+#						}
 					} else {
 						print "\tWARNING: unknown error, cannot tell whether '$tsemi' was successfully created from '$_', id may be $tpid\n";
 					}
@@ -263,10 +286,19 @@ if ($opts{'s'}) {
 			}
 		}
 	}
+
+	for my $name (sort keys %templates_in_db) {
+		next if $templates_on_disk{$name};
+		print "id $templates_in_db{$name}\t$name is in the DB but not on disk\n";
+		++$stats{extraneous};
+	}
+
 	print "Different templates: $stats{different}\n"
 		if $stats{different};
 	print "New templates: $stats{new}\n"
 		if $stats{'new'};
+	print "Extraneous templates: $stats{extraneous}\n"
+		if $stats{extraneous};
 	if (!$n_changed) {
 		print "$0 -U: no template changes necessary\n";
 	}
