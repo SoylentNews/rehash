@@ -293,7 +293,7 @@ sub getRepeatMods {
 		 usersdest.nickname AS destnick,
 		 usersdesti.karma AS destkarma",
 		"users AS usersorg,
-		 users_info AS userorgi,
+		 users_info AS usersorgi,
 		 moderatorlog,
 		 users AS usersdest,
 		 users_info AS usersdesti",
