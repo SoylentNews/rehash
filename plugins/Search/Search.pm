@@ -285,7 +285,7 @@ sub findStory {
 	} else {
 		if ($section->{type} eq 'collected') {
 			$where .= " AND stories.section IN ('" . join("','", @{$section->{contained}}) . "')" 
-				if (@{$section->{contained}});
+				if $section->{contained} && @{$section->{contained}};
 		} else {
 			$where .= " AND stories.section = " . $self->sqlQuote($section->{section});
 		}
