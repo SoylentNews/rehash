@@ -77,7 +77,7 @@ Last Modified: 3/26/02<br>
 </small></i> <a name="ac1000"></a>  
 <h2>How do I get an IP Unbanned?</h2> 
 <p>Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a>. Make  
-sure to include the IP in question, and any other pertinant information. If  
+sure to include the IP in question, and any other pertinent information. If  
 you are connecting through a proxy server, you might need to have your proxy  
 server's admin contact us instead of you. <br> 
 <br> 
