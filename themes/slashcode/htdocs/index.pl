@@ -17,10 +17,15 @@ sub main {
 
 
 	my($stories, $Stories, $section);
-	if ($form->{op} eq 'userlogin' && !$user->{is_anon}) {
+	if ($form->{op} eq 'userlogin' && !$user->{is_anon}
+			# Any login attempt, successful or not, gets
+			# redirected to the homepage, to avoid keeping
+			# the password or nickname in the query_string of
+			# the URL (this is a security risk via "Referer")
+		|| $form->{upasswd} || $form->{unickname}
+	) {
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
-		redirect($refer);
-		return;
+		redirect($refer); return;
 	}
 
 	# why is this commented out?  -- pudge

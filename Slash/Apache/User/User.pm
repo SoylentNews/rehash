@@ -107,7 +107,7 @@ sub handler {
 	my $uid;
 	my $op = $form->{op} || '';
 
-	if (($op eq 'userlogin' || $form->{'rlogin'}) && length($form->{upasswd}) > 1) {
+	if (($op eq 'userlogin' || $form->{rlogin}) && length($form->{upasswd}) > 1) {
 		my $tmpuid = $slashdb->getUserUID($form->{unickname});
 		($uid, my($newpass)) = userLogin($tmpuid, $form->{upasswd});
 
@@ -119,6 +119,8 @@ sub handler {
 			$form->{returnto} =~ s/%3F/?/;
 			$form->{returnto} = url2abs($newpass
 				? "$constants->{rootdir}/users.pl?op=changepasswd" .
+					# XXX This "note" field is ignored now...
+					# right?  - Jamie 2002/09/17
 				  "&note=Please+change+your+password+now!"
 				: $form->{returnto}
 					? $form->{returnto}

@@ -700,7 +700,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Addit
 # End of T_2_3_0_43, Start of T_2_3_0_44
 
 # For plugins/Stats (ignore if you're not using that plugin):
-INSERT INTO vars (name, value, description) VALUES ('mod_stats_reports','admin@example.com|admin2@example.com','Who to send daily moderation stats reports to');
+INSERT INTO vars (name, value, description) VALUES ('mod_stats_reports','admin@example.com','Who to send daily moderation stats reports to');
 
 # End of T_2_3_0_44, Start of T_2_3_0_45
 
@@ -740,5 +740,7 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes o
 # working with all of you - good luck!
 # Best wishes!
 
-# End of T_2_3_0_46
+# End of T_2_3_0_46, Start of T_2_3_0_47
+
+INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
 

@@ -22,10 +22,12 @@ __template__
 <TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
 	<TR>
 		<TD>
+[% IF constants.offer_insecure_login_link %]
 		<P>You can automatically log in by clicking
 		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;upasswd=[% useredit.passwd | fixparam %]&amp;unickname=[% useredit.nickname | fixparam %]">This Link</A> and Bookmarking the resulting page. 
 		This is totally insecure, but very convenient.
 		</P>
+[% END %]
 		<BR>
 
 		<FORM ACTION="[% env.script_name %]" METHOD="POST">
