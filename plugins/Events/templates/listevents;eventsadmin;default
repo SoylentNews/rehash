@@ -29,15 +29,25 @@ __template__
 </TABLE>
 [% INCLUDE titlebar width="100%" title="Select Date" %]
 <FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
-Day 
-<SELECT NAME="day">
+From:
+<SELECT NAME="beginday">
 [% FOREACH i = days %]
 	
-	<OPTION VALUE="[% i %]" [% IF i == day_selected %]SELECTED[% END %]>[% i %]
+	<OPTION VALUE="[% i %]" [% IF i == selectedref.beginday %]SELECTED[% END %]>[% i %]
 [% END %]
 </SELECT>
-Month [% Slash.createSelect("month", months, month_selected, 1, 1) %]&nbsp;
-Year [% Slash.createSelect("year", years, year_selected, 1, 1) %]&nbsp;
+Month [% Slash.createSelect("beginmonth", months, selectedref.beginmonth, 1, 1) %]&nbsp;
+Year [% Slash.createSelect("beginyear", years, selectedref.beginyear, 1, 1) %]&nbsp;
+<BR>
+To:
+<SELECT NAME="endday">
+[% FOREACH i = days %]
+	
+	<OPTION VALUE="[% i %]" [% IF i == selectedref.endday %]SELECTED[% END %]>[% i %]
+[% END %]
+</SELECT>
+Month [% Slash.createSelect("endmonth", months, selectedref.endmonth, 1, 1) %]&nbsp;
+Year [% Slash.createSelect("endyear", years, selectedref.endyear, 1, 1) %]&nbsp;
 &nbsp;
 <INPUT NAME="op" VALUE="List" TYPE="SUBMIT">
 </FORM>

@@ -175,6 +175,11 @@ sub getRDF {
 			for (keys %{$item}) {
 			    $item->{$_} = xmldecode($item->{$_});
 			}
+			# this is if you want a nice numbering 
+			# layout in your block <ol> works, but 
+			# is ugly
+			$item->{counter} = $i;
+			$item->{counter} += 1;
 			$str .= slashDisplay($template_name, {
 				item	=> $item,
 			}, {
@@ -244,7 +249,11 @@ for (@{$RDFlist}) {
 getTop10Comments();
 getSlashdotPoll();
 getUptime();
-setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
+
+my $randbid = $slashdb->getBlock('rand','bid');
+if ($randbid) {
+    setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
+}
 
 foreach (keys %savedBlocks) {
 	# NOT backupdb!

@@ -21,23 +21,34 @@ __template__
 [% val1 = BLOCK %]
 <INPUT TYPE="text" NAME="title" SIZE=60>
 [% END %]
-
 [% val2 = BLOCK %]
 <INPUT TYPE="text" NAME="url" SIZE=60>
 <BR><FONT SIZE="-1">(if a form element needs some help, stick it here)</FONT>
 [% END %]
 
 [% val3 = BLOCK %]
-[% Slash.selectTopic('topic', topic, '', 1) %]
+[% 
+	section = form.section;
+	IF ! section;
+		section  = user.section;
+	END;
+%]
+<INPUT TYPE="hidden" NAME="section" VALUE="[% section %]">
+[% # Slash.selectTopic('topic', topic, section, 1) %]
+[% 
+	type=constants.enable_discussion_topic || "topic_1";
+		
+	Slash.createSelect('topic', Slash.db.getDescriptions('topics_section_type', section, type), topic, 1, 1); 
+%]	
+
 <INPUT TYPE="submit" NAME="submit" VALUE="Submit">
 [% END %]
-
 [% PROCESS formbox
-    title => "Create a discussion",
+    title => "Create a $disclabel",
     begin => begin,
     end   => '</FORM>',
     pairs => [
-        { label => "Name this discussion", value => val1 },
+        { label => "Name this $disclabel", value => val1 },
         { label => "Optional referring URL", value => val2 },
         { label => "Pick a Topic", value => val3 },
     ]

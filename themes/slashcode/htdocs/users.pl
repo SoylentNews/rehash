@@ -428,6 +428,7 @@ sub newUser {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $plugins = $slashdb->getDescriptions('plugins');
 	my $title;
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0;
 
@@ -447,7 +448,7 @@ sub newUser {
 
 			$title = getTitle('newUser_title');
 
-			$form->{pubkey} = strip_nohtml($form->{pubkey}, 1);
+			$form->{pubkey} = $plugins->{'Pubkey'} ? strip_nohtml($form->{pubkey}, 1) : '';
 			print getMessage('newuser_msg', { 
 				suadmin_flag => $suadmin_flag, 
 				title => $title, 
@@ -1142,6 +1143,7 @@ sub editUser {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $plugins = $slashdb->getDescriptions('plugins');
 
 	my $user_edit = {};
 	my($admin_block, $title);
@@ -1178,7 +1180,7 @@ sub editUser {
 		useredit 		=> $user_edit,
 		admin_flag		=> $admin_flag,
 		title			=> $title,
-		editkey 		=> editKey($user_edit->{uid}),
+		editkey 		=> $plugins->{'Pubkey'} ? editKey($user_edit->{uid}) : '',
 		admin_block		=> $admin_block
 	});
 }
@@ -1575,6 +1577,7 @@ sub saveUser {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $plugins = $slashdb->getDescriptions('plugins');
 	my $uid;
 	my $user_editfield_flag;
 
@@ -1637,7 +1640,7 @@ sub saveUser {
 	# We should do some conformance checking on a user's pubkey,
 	# make sure it looks like one of the known types of public
 	# key.  Until then, just make sure it doesn't have HTML.
-	$form->{pubkey} = strip_nohtml($form->{pubkey}, 1);
+	$form->{pubkey} = $plugins->{'Pubkey'} ? strip_nohtml($form->{pubkey}, 1) : '';
 
 	my $homepage = $form->{homepage};
 	$homepage = '' if $homepage eq 'http://';

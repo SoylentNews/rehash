@@ -185,6 +185,9 @@ sub saveSection {
 	$form->{hostname} ||= '';
 	$form->{artcount} ||= 0;
 
+	print STDERR "url $form->{url}\n";
+	print STDERR "hostname $form->{hostname}\n";
+
 	my $found = $slashdb->getSection($section, 'section', 1);
 	if ($found) {
 		$slashdb->setSection($section, {

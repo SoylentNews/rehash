@@ -86,7 +86,10 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('tid,alttext', 'topics') },
 
 	'topics_section'
-		=> sub { $_[0]->sqlSelectMany('topics.tid,topics.alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid AND type=1") },
+		=> sub { $_[0]->sqlSelectMany('topics.tid,topics.alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid") },
+
+	'topics_section_type'
+		=> sub { $_[0]->sqlSelectMany('topics.tid as tid,topics.alttext as alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid AND type= '$_[3]'") },
 
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
@@ -158,7 +161,7 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('name,value', 'site_info', "name != 'plugin'") },
 
 	'topic-sections'
-		=> sub { $_[0]->sqlSelectMany('section,1', 'section_topics', "tid = '$_[2]' AND type=1") },
+		=> sub { $_[0]->sqlSelectMany('section,type', 'section_topics', "tid = '$_[2]'") },
 
 	'forms'
 		=> sub { $_[0]->sqlSelectMany('value,value', 'site_info', "name = 'form'") },
@@ -589,9 +592,13 @@ sub undoModeration {
 ########################################################
 sub deleteSectionTopicsByTopic {
 	my($self, $tid, $type) = @_;
-	$type ||= 1; # ! is the default type
+	# $type ||= 1; # ! is the default type
+	# arghghg no, it's not, and this caused
+	# saving a topic to not work. 
+	# not fun  at 12:19 AM
+	$type ||= 0;
 
-	$self->sqlDo("DELETE FROM section_topics WHERE tid=$tid AND type=$type");
+	$self->sqlDo("DELETE FROM section_topics WHERE tid=$tid");
 }
 
 ########################################################
@@ -604,9 +611,9 @@ sub deleteRelatedLink {
 ########################################################
 sub createSectionTopic {
 	my($self, $section, $tid, $type) = @_;
-	$type ||= 1; # ! is the default type
+	$type ||= 'topic_1'; # ! is the default type
 
-	$self->sqlDo("INSERT INTO section_topics (section, tid, type) VALUES ('$section',$tid, $type)");
+	    $self->sqlDo("INSERT INTO section_topics (section, tid, type) VALUES ('$section',$tid, '$type')");
 }
 
 ########################################################
@@ -4798,6 +4805,14 @@ sub getTemplateByName {
 sub getTopic {
 	my $answer = _genericGetCache('topics', 'tid', '', @_);
 	return $answer;
+}
+
+########################################################
+sub getSectionTopicType {
+    my ($self,$tid) = @_;
+    my $type = $self->sqlSelectAll('section,type','section_topics',"tid = $tid");
+
+    return $type;
 }
 
 ########################################################

@@ -12,6 +12,25 @@ __name__
 listStories
 __template__
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
+		[% IF constants.label_ui_flag %]
+	<TR>
+		<TD><B>Edit</B></TD>
+		<TD><B>Preview</B></TD>
+		<TD><B>Author</B></TD>
+		<TD><B>Topic</B></TD>
+
+			[% UNLESS user.section || form.section %]
+		<TD><B>Section</B></TD>
+			[% END %]
+
+			[% IF constants.enable_index_topic %]
+		<TD><B>Index topic</B></TD>
+			[% END %]
+		<TD><B>Hits</B></TD>
+		<TD><B>Comments</B></TD>
+		<TD><B>Date</B></TD>
+	</TR>
+		[% END %]
 
 [% storiestoday = 0;
 FOREACH story = storylistref %]
@@ -40,53 +59,72 @@ END;
 		bgcolor = '#999999';
 END %]
 
-	<TR BGCOLOR="[% bgcolor %]" ALT="[% story.displaystatus %]">
-		<TD ALIGN="RIGHT">
-
 [% IF constants.feature_story_enabled && story.feature_story_flag %] 
 	[% featured = "(Feature Story)"; %]
 [% ELSE %]
 	[% featured = ''; %]
 [% END %]
 
+	<TR BGCOLOR="[% bgcolor %]" ALT="[% story.displaystatus %]">
+
+		<TD ALIGN="RIGHT">
+		<FONT SIZE="2">
 [% IF story.canedit %]
 		[<A HREF="[% env.script_name %]?title=[% story.tbtitle %]&amp;op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
 [% ELSE %]
 		[[% story.x %]]
 [% END %]
+		</FONT>
 
 		</TD>
-		<TD><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
-		[% story.title %]&nbsp;</A> [% featured %]
+		<TD>
+		<FONT SIZE="2">
+		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
+		[% story.title %]&nbsp;</A> <small>[% featured %]</small>
+		</FONT>
 		</TD>
 		<TD><FONT SIZE="2"><B>[% story.aid %]</B></FONT></TD>
 		<TD><FONT SIZE="2">[% story.topic.substr(0, 5) %]</FONT></TD>
 
-[% IF sectionflag %]
+	[% UNLESS user.section || form.section %]
 		<TD>
 		<FONT SIZE="2">
 		<A HREF="[% env.script_name %]?section=[% story.section %]">
 		[% story.section.substr(0, 5) %]</A>
+		</FONT>
 		</TD>
-[% END %]
+	[% END %]
+	[% IF constants.enable_index_topic %]
+		<TD>
+		<FONT SIZE="2">
+		[% 
+			index_topic = Slash.db.getStory(story.sid,constants.enable_index_topic);
+			index_topic_name = Slash.db.getTopic(index_topic,'alttext');
+			IF index_topic_name ;%]
+		[% index_topic_name %] ([% index_topic %])
+			[% ELSE ;%]
+		n/a
+			[% END;
+		%]
+		</FONT>
+		</TD>
+	[% END %]
 
-		<TD ALIGN="RIGHT">
+		<TD>
+		<FONT SIZE="2">
 [% IF story.hits %]
-		<FONT SIZE="2">[% story.hits %]</FONT>
+		[% story.hits %]
 [% ELSE %]
-		&nbsp;
+		n/a	
 [% END %]
+		</FONT>
 		</TD>
 		<TD>
 		<FONT SIZE="2">[% story.comments %]</FONT>
 		</TD>
 
-
-[% IF form.section %]
-		<TD><FONT SIZE="2">[% story.td2 %]</TD>
-[% END %]
-
-		<TD><FONT SIZE="2">[% story.time %]</TD>
+		<TD><FONT SIZE="2">[% story.td2 %]&nbsp;
+		<FONT SIZE="2">[% story.time %]</TD>
 	</TR>
 
 [% END %]

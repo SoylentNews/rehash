@@ -140,11 +140,15 @@ __template__
 		[% IF extra.2 == 'text' %]
 		<TD BGCOLOR="[% user.bg.2 %]">
 		<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% storyref.${extra.1} | strip_attribute %]" SIZE="50">
-		[% ELSE %]
+		[% ELSIF extra.2 == 'list' %]
 		<TD BGCOLOR="[% user.bg.2 %]">
 		[% # section:value %]
 		[% pulldown = "$extra.3:$extra.1" %]
 		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), storyref.${extra.1}, 1, 1) %]	
+		[% ELSE %]
+		<TD BGCOLOR="[% user.bg.2 %]">
+		[% type = extra.1 %]
+		[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), storyref.$type, 1, 1) %]	
 		[% END %]
 		</TD>
 	</TR>

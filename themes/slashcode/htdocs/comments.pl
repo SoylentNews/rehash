@@ -276,8 +276,11 @@ sub displayComments {
 sub commentIndex {
 	my($form, $slashdb, $user, $constants) = @_;
 
+	my $label = getData('label');
+	my $labelcap = getData('labelcap');
+
 	if ($form->{all}) {
-		titlebar("90%", getData('all_discussions'));
+		titlebar("100%", getData('all_discussions'));
 		my $start = $form->{start} || 0;
 		my $discussions = $slashdb->getDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
 		if ($discussions && @$discussions) {
@@ -301,6 +304,7 @@ sub commentIndex {
 
 			slashDisplay('discuss_list', {
 				discussions	=> $discussions,
+				label		=> $label,
 				forward		=> $forward,
 				args		=> _buildargs($form),
 				start		=> $start,
@@ -309,11 +313,12 @@ sub commentIndex {
 		} else {
 			print getData('nodiscussions');
 			slashDisplay('discreate', {
-				topic => $constants->{discussion_default_topic}
+				topic => $constants->{discussion_default_topic},
+				disclabel => $label,
 			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 		}
 	} else {
-		titlebar("90%", getData('active_discussions'));
+		titlebar("100%", getData('active_discussions'));
 		my $start = $form->{start} || 0;
 		my $discussions = $slashdb->getStoryDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
 		if ($discussions && @$discussions) {
@@ -337,6 +342,7 @@ sub commentIndex {
 
 			slashDisplay('discuss_list', {
 				discussions	=> $discussions,
+				label		=> $label,
 				forward		=> $forward,
 				args		=> _buildargs($form),
 				start		=> $start,
@@ -345,7 +351,8 @@ sub commentIndex {
 		} else {
 			print getData('nodiscussions');
 			slashDisplay('discreate', {
-				topic => $constants->{discussion_default_topic}
+				topic => $constants->{discussion_default_topic},
+				disclabel	=> $label,
 			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 		}
 	}
@@ -356,6 +363,7 @@ sub commentIndex {
 # parameters
 sub commentIndexUserCreated {
 	my($form, $slashdb, $user, $constants) = @_;
+	my $label = getData('label');
 
 	titlebar("90%", getData('user_discussions'));
 	my $start = $form->{start} || 0;
@@ -381,6 +389,7 @@ sub commentIndexUserCreated {
 
 		slashDisplay('udiscuss_list', {
 			discussions	=> $discussions,
+			'label'		=> $label,
 			forward		=> $forward,
 			args		=> _buildargs($form),
 			start		=> $start,
@@ -389,7 +398,8 @@ sub commentIndexUserCreated {
 	} else {
 		print getData('nodiscussions');
 		slashDisplay('discreate', {
-			topic => $constants->{discussion_default_topic}
+			topic => $constants->{discussion_default_topic},
+			disclabel => $label,
 		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
 }
@@ -400,6 +410,7 @@ sub commentIndexUserCreated {
 sub commentIndexCreator {
 	my($form, $slashdb, $user, $constants) = @_;
 
+	my $label = getData('label');
 	my($uid, $nickname);
 	if ($form->{uid} or $form->{nick}) {
 		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
@@ -437,6 +448,7 @@ sub commentIndexCreator {
 
 		slashDisplay('discuss_list', {
 			discussions	=> $discussions,
+			'label'		=> $label,
 			forward		=> $forward,
 			args		=> _buildargs($form),
 			start		=> $start,
@@ -453,6 +465,8 @@ sub commentIndexCreator {
 # parameters
 sub commentIndexPersonal {
 	my($form, $slashdb, $user, $constants) = @_;
+
+	my $label = getData('label');
 
 	titlebar("90%", getData('user_discussion', { name => $user->{nickname}}));
 	my $start = $form->{start} || 0;
@@ -478,6 +492,7 @@ sub commentIndexPersonal {
 
 		slashDisplay('discuss_list', {
 			discussions	=> $discussions,
+			'label'		=> $label,
 			forward		=> $forward,
 			args		=> _buildargs($form),
 			start		=> $start,
@@ -496,6 +511,9 @@ sub commentIndexPersonal {
 sub createDiscussion {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $id;
+
+	my $label = getData('label');
+	my $labelcap = getData('labelcap');
 
 	if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
 		# if form.url is empty, try the REFERER.  if it
@@ -561,6 +579,8 @@ sub createDiscussion {
 		# We COULD drop ID from the call below, but not right now.
 		slashDisplay('newdiscussion', { 
 			error 		=> $error, 
+			'label'		=> $label,
+			'labelcap'	=> $labelcap,
 			form		=> $newform,
 			format_select	=> $format_select,
 			id 		=> $id,

@@ -8,6 +8,7 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Data::Dumper;
 
 sub main {
 	my $slashdb   = getCurrentDB();
@@ -16,6 +17,7 @@ sub main {
 	my $form      = getCurrentForm();
 
 
+	my($stories, $Feature, $Stories, $storystruct, $section);
 	if ($form->{op} eq 'userlogin' && !$user->{is_anon}) {
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
 		redirect($refer);
@@ -33,7 +35,6 @@ sub main {
 		redirect($ENV{SCRIPT_NAME}), return if $c;
 	}
 
-	my $section;
 	if ($form->{section}) {
 		$section = $slashdb->getSection($form->{section});
 	} else {
@@ -50,36 +51,29 @@ sub main {
 	my $limit = $section->{section} eq 'index' ?
 	    $user->{maxstories} : $section->{artcount};
 
-	my($stories, $feature, $Feature, $other);
-	if ($constants->{feature_story_enabled} && $section->{feature_story}) {
-		# ok, I extended it to take an sid so I could get just one particlar story
-		$other->{sid} = $section->{feature_story};
-		$feature = $slashdb->getStoriesEssentials(1,$section->{section},'', $other);
-		$other->{sid} = '';
-		# this is the 'feature_story' flag in displayStories
-		$feature->[0][9] = 1;
-		$Feature = displayStories($feature,1);
-
-		$other->{exclude_sid} = $section->{feature_story};
-	}
-
 	$stories = $slashdb->getStoriesEssentials(
 		$limit, 
 		($form->{section} ne 'index') ? $form->{section} : '',
 		'',
-		$other,
 	);
 
-	my $Stories = displayStories($stories);
+	# this makes sure that existing sites don't
+	# have to worry about being affected by this
+	# change
+	$storystruct = displayStories($stories);
+	$Stories = $storystruct->{stories}{full};
+	$Feature = $storystruct->{feature}{full};
+
 	my $StandardBlocks = displayStandardBlocks($section, $stories);
+
 
 	slashDisplay('index', {
 		is_moderator	=> scalar $slashdb->checkForMetaModerator($user),
 		stories		=> $Stories,
 		feature		=> $Feature,
+		storystruct	=> $storystruct,
 		boxes		=> $StandardBlocks,
 	});
-
 	footer();
 
 	writeLog($form->{section});
@@ -237,103 +231,132 @@ sub displayStandardBlocks {
 #################################################################
 # pass it how many, and what.
 sub displayStories {
-	my($stories, $feature) = @_;
+	my($stories) = @_;
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
 
 	my($today, $x) = ('', 1);
-	my $cnt = int($user->{maxstories} / 3);
+	# my $cnt = int($user->{maxstories} / 3);
+	my $cnt = 30; 
 	my $return;
+	my $feature_retrieved;
 
 	# shift them off, so we do not display them in the Older
 	# Stuff block later (simulate the old cursor-based
 	# method)
 	while ($_ = shift @{$stories}) {
-		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid, $feature) = @{$_};
+		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid) = @{$_};
+		my ($tmpreturn, $category, $feature_sid);
+		my $other;
 		my @links;
 		my @threshComments = split m/,/, $hp;  # posts in each threshold
-		my $other;
-		$other->{story_template} = 'dispFeature' if $feature;
+
+		if ($constants->{organise_stories}) {
+		    $category = $slashdb->getStory($sid,$constants->{organise_stories});
+		}
+		$category ||= 'stories';
+		# feature_retrieved keeps the code from checking again for that section
+		# if the feature story has already been retrieved
+		if ($constants->{feature_story_enabled} && ! $feature_retrieved->{$thissection}) {
+		    $feature_sid = $slashdb->getSection($thissection,'feature_story'); 
+		    if ($sid eq $feature_sid) {
+			$other->{story_template} = 'dispFeature';
+			$category = 'feature';
+			# ok, we have the feature story for this section
+			$feature_retrieved->{$thissection} = 1;
+		    }	
+		}
+		
 		my($storytext, $story) = displayStory($sid, '', $other);
 
-		$return .= $storytext;
+		if ($constants->{get_titles}) {
+		    my $titlelink = slashDisplay('storyTitleOnly', { story => $story }, {Return => 1});
 
+		    $return->{$category}{titles} .= $titlelink; 
+		}
+
+		$tmpreturn .= $storytext;
+	
 		push @links, linkStory({
-			'link'	=> getData('readmore'),
-			sid	=> $sid,
-			tid	=> $tid,
-			section	=> $thissection
+		    'link'	=> getData('readmore'),
+		    sid		=> $sid,
+		    tid	=> $tid,
+		    section	=> $thissection
 		});
 
 		my $link;
 
 		if ($constants->{body_bytes}) {
-			$link = length($story->{bodytext}) . ' ' .
-				getData('bytes');
+		    $link = length($story->{bodytext}) . ' ' .
+		    getData('bytes');
 		} else {
-			my $count = countWords($story->{introtext}) +
-				    countWords($story->{bodytext});
-			$link = sprintf '%d %s', $count, getData('words');
+		    my $count = countWords($story->{introtext}) +
+		    countWords($story->{bodytext});
+		    $link = sprintf '%d %s', $count, getData('words');
 		}
+
 		if ($story->{bodytext} || $cc) {
-			push @links, linkStory({
-				'link'	=> $link,
-				sid	=> $sid,
-				tid	=> $tid,
-				mode	=> 'nocomment',
-				section	=> $thissection
-			}) if $story->{bodytext};
+		    push @links, linkStory({
+		    'link'	=> $link,
+		    sid		=> $sid,
+		    tid		=> $tid,
+		    mode	=> 'nocomment',
+		    section	=> $thissection
+		}) if $story->{bodytext};
 
-			my @cclink;
-			my $thresh = $threshComments[$user->{threshold} + 1];
+		my @cclink;
+		my $thresh = $threshComments[$user->{threshold} + 1];
 
-			if ($cc = $threshComments[0]) {
-				if ($user->{threshold} > -1 && $cc ne $thresh) {
-					$cclink[0] = linkStory({
-						sid		=> $sid,
-						tid		=> $tid,
-						threshold	=> $user->{threshold},
-						'link'		=> $thresh,
-						section		=> $thissection
-					});
-				}
-			}
-
-			$cclink[1] = linkStory({
-				sid		=> $sid,
-				tid		=> $tid,
-				threshold	=> -1,
-				'link'		=> $cc || 0,
-				section		=> $thissection
+		if ($cc = $threshComments[0]) {
+		    if ($user->{threshold} > -1 && $cc ne $thresh) {
+			$cclink[0] = linkStory({
+			    sid		=> $sid,
+			    tid		=> $tid,
+			    threshold	=> $user->{threshold},
+			    'link'		=> $thresh,
+			    section		=> $thissection
 			});
-
-			push @cclink, $thresh, ($cc || 0);
-			push @links, getData('comments', { cc => \@cclink })
-				if $cc || $thresh;
+		    }
 		}
 
-		if ($thissection ne $constants->{defaultsection} && !$form->{section}) {
-			my($section) = $slashdb->getSection($thissection);
-			push @links, getData('seclink', {
-				name	=> $thissection,
-				section	=> $section
-			});
-		}
+		$cclink[1] = linkStory({
+		    sid		=> $sid,
+		    tid		=> $tid,
+		    threshold	=> -1,
+		    'link'		=> $cc || 0,
+		    section		=> $thissection
+		});
 
-		push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
+		push @cclink, $thresh, ($cc || 0);
+		push @links, getData('comments', { cc => \@cclink })
+		if $cc || $thresh;
+	    }
 
-		my $link_template = $feature ? 'feature_storylink' : 'storylink';
-		# I added sid so that you could set up replies from the front page -Brian
-		$return .= slashDisplay($link_template, {
-			links	=> \@links,
-			sid	=> $sid,
-		}, { Return => 1});
+	    if ($thissection ne $constants->{defaultsection} && !$form->{section}) {
+		my($section) = $slashdb->getSection($thissection);
+		push @links, getData('seclink', {
+		    name	=> $thissection,
+		    section	=> $section
+		});
+	    }
 
-		my($w) = join ' ', (split m/ /, $time)[0 .. 2];
-		$today ||= $w;
-		last if ++$x > $cnt && $today ne $w;
+	    push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
+
+	    my $link_template = $category eq 'feature' ? 'feature_storylink' : 'storylink';
+
+	    # I added sid so that you could set up replies from the front page -Brian
+	    $tmpreturn .= slashDisplay($link_template, {
+		links	=> \@links,
+		sid	=> $sid,
+	    }, { Return => 1});
+
+	    $return->{$category}{full} .= $tmpreturn;
+
+	    my($w) = join ' ', (split m/ /, $time)[0 .. 2];
+	    $today ||= $w;
+	    last if ++$x > $cnt && $today ne $w;
 	}
 
 	return $return;

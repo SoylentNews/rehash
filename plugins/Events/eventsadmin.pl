@@ -55,20 +55,48 @@ sub editEvent {
 
 	my ($slashdb,$constants,$user,$form,$events) = @_;
 
+	# I really hate all this ugly select code
+	if ($form->{beginmonth} && $form->{beginyear} && $form->{beginday}) {
+	    $form->{begindate} = $form->{beginyear} . "/" . $form->{beginmonth} . "/" . $form->{beginday};
+	}
+	if ($form->{endmonth} && $form->{endyear} && $form->{endday}) {
+	    $form->{enddate} = $form->{endyear} . "/" . $form->{endmonth} . "/" . $form->{endday};
+	}
+
+	$form->{begindate} ||= timeCalc($slashdb->getTime(), '%Y-%m-%d');
+	$form->{enddate} ||= $form->{begindate}; 
+
 	if ($form->{op} eq 'delete') {
 		$events->deleteDates($form->{id});
 		print "Deleted event $form->{id} sid $form->{sid}<br>\n";
 	} elsif ($form->{op} eq 'add') {
-		$form->{end} ||= $form->{begin};
-		$events->setDates($form->{sid} , $form->{begin}, $form->{end});
+		$form->{enddate} ||= $form->{begindate};
+		$events->setDates($form->{sid} , $form->{begindate}, $form->{enddate});
 	}
 	my $dates =  $events->getDatesBySid($form->{sid});
 	my $title =  $events->getStory($form->{sid}, 'title');
 
+	my $days = [1 .. 31] ;
+	my $months = $slashdb->getDescriptions('months');
+	my $years = $slashdb->getDescriptions('years');
+	my $selectedref = {};
+
+	for ( 'beginday','beginmonth', 'beginyear', 'endday', 'endmonth', 'endyear') {
+	    my $formatstring = '%d';
+	    $formatstring = '%m' if $_ =~ /month/;
+	    $formatstring = '%Y' if $_ =~ /year/;
+	    $selectedref->{$_} = $form->{$_} ? $form->{$_} : int(timeCalc($slashdb->getTime(),$formatstring));
+	}	
+
+
 	slashDisplay('editevent', {
 		storytitle 		=> $title,
 		dates 			=> $dates,
+		days			=> $days,
+		months			=> $months,
+		years			=> $years,
 		sid 			=> $form->{sid},
+		selectedref		=> $selectedref,
 	});
 };
 
@@ -76,20 +104,29 @@ sub editEvent {
 sub listEvents { 
 	my ($slashdb,$constants,$user,$form,$events) = @_;
 
-	if ($form->{month} && $form->{year} && $form->{day}) {
-	    $form->{date} = $form->{year} . "/" . $form->{month} . "/" . $form->{day};
+	# I really hate all this ugly select code
+	if ($form->{beginmonth} && $form->{beginyear} && $form->{beginday}) {
+	    $form->{begindate} = $form->{beginyear} . "/" . $form->{beginmonth} . "/" . $form->{beginday};
+	}
+	if ($form->{endmonth} && $form->{endyear} && $form->{endday}) {
+	    $form->{enddate} = $form->{endyear} . "/" . $form->{endmonth} . "/" . $form->{endday};
 	}
 
-	$form->{date} ||= timeCalc($slashdb->getTime(), '%Y-%m-%d');
-	my $stories =  $events->getEvents($form->{date});
+	$form->{begindate} ||= timeCalc($slashdb->getTime(), '%Y-%m-%d');
+	# $form->{enddate} ||= $form->{begindate}; 
+	my $stories =  $events->getEvents($form->{begindate},$form->{enddate});
 
 	my $days = [1 .. 31] ;
-
 	my $months = $slashdb->getDescriptions('months');
 	my $years = $slashdb->getDescriptions('years');
-	my $day_selected = $form->{day} ? $form->{day} : int(timeCalc($slashdb->getTime(), '%d'));
-	my $month_selected = $form->{month} ? $form->{month} : int(timeCalc($slashdb->getTime(),'%m'));
-	my $year_selected = $form->{year} ? $form->{year} : timeCalc($slashdb->getTime(), '%Y');
+	my $selectedref = {};
+
+	for ( 'beginday','beginmonth', 'beginyear', 'endday', 'endmonth', 'endyear') {
+	    my $formatstring = '%d';
+	    $formatstring = '%m' if $_ =~ /month/;
+	    $formatstring = '%Y' if $_ =~ /year/;
+	    $selectedref->{$_} = $form->{$_} ? $form->{$_} : int(timeCalc($slashdb->getTime(),$formatstring));
+	}	
 
 	if ($form->{content_type} eq 'rss') {
 		my @items;
@@ -110,17 +147,12 @@ sub listEvents {
 		});
 	} else {
 		if (@$stories) {
-			# put this fucker in a template
-			my $tmptitle = 'List Templates';
 			slashDisplay('listevents', {
-				title	=> $tmptitle,
-				events	=> $stories,
-				days	=> $days,
-				months	=> $months,	    
-				years	=> $years,
-				month_selected => $month_selected,
-				year_selected => $year_selected,
-				day_selected => $day_selected,
+				events		=> $stories,
+				days		=> $days,
+				months		=> $months,	    
+				years		=> $years,
+				selectedref	=> $selectedref,
 			});
 		} else {
 			my $message = "Sorry, nothing found";

@@ -68,7 +68,6 @@ sub setDates {
 	my ($self, $sid, $begin, $end) = @_;
 	$self->sqlDo("INSERT INTO event_dates (sid,begin,end) VALUES ('$sid', '$begin', '$end')");
 }
-
 sub minDate {
 	my ($self, $sid) = @_;
 	return $self->sqlSelect("MIN(begin)", 'event_dates', "sid = '$sid'" );
@@ -85,12 +84,12 @@ sub deleteDates {
 }
 
 sub getEventsByDay {
-	my ($self, $date, $limit) = @_;
+	my ($self, $begin, $end, $limit) = @_;
 
 	my $user = getCurrentUser();
 	my $section;
 	$section ||= $user->{section};
-	my $where = "((to_days('$date') >= to_days(begin)) AND (to_days('$date') <= to_days(end)))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
+	my $where = "((to_days(begin) >= to_days('$begin')) AND (to_days(end) <= to_days('$end')))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
 	$where .= " AND stories.section = '$section'" if $section;
 	my $order = "ORDER BY tid";
 	$order .= " LIMIT $limit "
@@ -106,11 +105,16 @@ sub getEventsByDay {
 }
 
 sub getEvents {
-	my ($self, $date, $limit, $section, $topic)  = @_;
+	my ($self, $begin, $end, $limit, $section, $topic)  = @_;
+
+	my $begin ||= timeCalc($self->getTime(), '%Y-%m-%d');
 
 	my $user = getCurrentUser();
 	$section ||= $user->{section};
-	my $where = "(to_days('$date') <= to_days(begin)) AND stories.sid = event_dates.sid";
+	my $where = " to_days(begin) >= to_days('$begin') "; 
+	$where = " ($where AND to_days(end) <= to_days('$end')) " if $end; 
+	$where .= " AND stories.sid = event_dates.sid";
+
 	$where .= " AND topics.tid = stories.tid";
 
 	$where .= " AND stories.tid = $topic" if $topic;

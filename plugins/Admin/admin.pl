@@ -685,14 +685,35 @@ sub topicEdit {
 
 	closedir(DIR);
 
-	$topics_menu = $slashdb->getDescriptions('topics_all', '', 1);
-	$topics_select = createSelect('nexttid', $topics_menu, $form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 1);
-	my $sections = $slashdb->getDescriptions('sections-all', '', 1);
-	my $section_topics = $slashdb->getDescriptions('topic-sections', $form->{nexttid}, 1);
+	my $tdesc = 'topics_all';
+	if ($user->{section} && $user->{seclev} <= 9000) {
+	    $tdesc = 'topics_section';
+	}
+	$topics_select = createSelect('nexttid', 
+			$slashdb->getDescriptions($tdesc,$user->{section},1),
+			$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 1);
+	my $sections = {};
+	if ($user->{section} && $user->{seclev} <= 9000) {
+	    $sections->{$user->{section}} = $slashdb->getSection($user->{section},'title');
+	} else {
+	    $sections = $slashdb->getDescriptions('sections-all', '', 1);
+	}
+
+	my $section_topics_arref = $slashdb->getSectionTopicType($form->{nexttid});
+	my $section_topics_hashref = {};
+
+	for (@$section_topics_arref) {
+	    $section_topics_hashref->{$_->[0]}{$_->[1]} = 1;
+	}
+	my $types = $slashdb->getDescriptions('genericstring', 'section_topic_type');
 	my $sectionref;
+
 	while (my($section, $title) = each %$sections) {
-		$sectionref->{$section}{checked} = ($section_topics->{$section}) ? ' CHECKED' : '';
+		$sectionref->{$section}{checked} = ($section_topics_hashref->{$section}) ? ' CHECKED' : '';
 		$sectionref->{$section}{title} = $title;
+		for my $type(keys %$types) {
+		    $sectionref->{$section}{$type}{checked} = ($section_topics_hashref->{$section}{$type}) ? ' CHECKED' : '';
+		} 
 	}
 
 	if (!$form->{topicdelete}) {
@@ -741,7 +762,7 @@ sub topicDelete {
 	$tid ||= $form->{tid};
 
 	$slashdb->deleteTopic($tid);
-	$slashdb->deleteSectionTopicsByTopic($form->{tid});
+	$slashdb->deleteSectionTopicsByTopic($form->{tid}, $form->{type});
 	$form->{tid} = '';
 }
 
@@ -757,11 +778,18 @@ sub topicSave {
 	$form->{tid} = $slashdb->saveTopic($form);
 
 	# The next few lines need to be wrapped in a transaction -Brian
-	$slashdb->deleteSectionTopicsByTopic($form->{tid});
-	for my $item (keys %$form) {
-		if ($item =~ /^exsect_(.*)/) {
-			$slashdb->createSectionTopic($1, $form->{tid});
+	$slashdb->deleteSectionTopicsByTopic($form->{tid}, $form->{type});
+	for my $element1(keys %$form) {
+		if ($element1 =~ /^exsect_(.*)/) {
+			my $sect = $1;
+			for my $element2(keys %$form) {
+			    if ($element2 =~ /^extype_${sect}_(.*)/) {
+				my $type = $1;
+				$slashdb->createSectionTopic($sect, $form->{tid}, $type);
+			    }
+			}
 		}
+
 	}
 
 	$form->{nexttid} = $form->{tid};
@@ -1210,7 +1238,6 @@ sub listStories {
 	my($count, $storylist) = $slashdb->getStoryList($first_story, $num_stories);
 
 	my $storylistref = [];
-	my($sectionflag);
 	my($i, $canedit) = (0, 0);
 
 	if ($form->{op} eq 'delete') {
@@ -1258,10 +1285,7 @@ sub listStories {
 		$i++;
 	}
 
-	$sectionflag = 1 unless ($user->{section} || $form->{section});
-
 	slashDisplay('listStories', {
-		sectionflag	=> $sectionflag,
 		storylistref	=> $storylistref,
 		'x'		=> $i + $first_story,
 		left		=> $count - ($i + $first_story),

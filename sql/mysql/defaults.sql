@@ -210,6 +210,11 @@ INSERT INTO site_info VALUES ('','form','comments','comments submission form');
 #
 
 #
+# Dumping data for string_param
+#
+INSERT INTO string_param (Type, code, name) VALUES ('section_topic_type','topic_1','Default');
+
+#
 # Dumping data for table 'submissions'
 #
 
@@ -544,3 +549,8 @@ INSERT INTO vars (name, value, description) VALUES ('users_show_info_seclev','0'
 INSERT INTO vars (name, value, description) VALUES ('users_speed_limit','20','How fast a user can change their prefs');
 INSERT INTO vars (name, value, description) VALUES ('user_submitter_display_default','24','Number of stories to display on user\'s info page');
 INSERT INTO vars (name, value, description) VALUES ('writestatus','ok','Simple Boolean to determine if homepage needs rewriting');
+INSERT INTO vars (name, value, description) VALUES ('label_ui_flag','0','Whether to label some things in the admin ui');
+INSERT INTO vars (name, value, description) VALUES ('enable_index_topic','','set this to the value in string param for index topic \(something like "topic_4"\)');
+INSERT INTO vars (name, value, description) VALUES ('get_titles','0','get the story titles');
+INSERT INTO vars (name, value, description) VALUES ('organise_stories','','organise story blocks');
+

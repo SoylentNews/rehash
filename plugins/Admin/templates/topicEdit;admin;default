@@ -32,6 +32,7 @@ __template__
 			<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute %][% topic.name %][% END %]">
 			[% PROCESS formLabel value => "Alt Text", comment => "" %]
 			<INPUT TYPE="TEXT" NAME="alttext" VALUE="[% FILTER strip_attribute %][% topic.alttext %][% END %]">
+
 			[% PROCESS formLabel value => "Dimensions", comment => "leave blank to determine automatically" %]
 			Width: <INPUT TYPE="TEXT" NAME="width" VALUE="[% topic.width %]" SIZE="4">
 			Height: <INPUT TYPE="TEXT" NAME="height" VALUE="[% topic.height %]" SIZE="4"><BR>
@@ -59,10 +60,28 @@ __template__
 			<INPUT TYPE="SUBMIT" NAME="topicdelete" VALUE="Delete Topic">
 		</TD>
 		<TD VALIGN="TOP">
-		[% PROCESS formLabel value => "Sections", comment => "select which sections a topic belongs to" %]
+		[% PROCESS formLabel value => "Sections and topic types", comment => "select which sections a topic belongs to and which types a topic is listed as" %]
+		[% types = Slash.db.getDescriptions('genericstring','section_topic_type') %]
+		<TABLE>
+			<TR>
+				<TD><B>section</B></TD>
+				[% FOREACH type=types %]
+				<TD><B>[% type.value %]</B></TD>
+				[% END %]
+			</TR>
 		[% FOREACH section = sectionref.keys %]
-		    <INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]<BR>
+			<TR>
+				<TD>
+				<INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]&nbsp;
+				</TD>
+			[% FOREACH type=types %]
+				<TD>
+				<INPUT TYPE="CHECKBOX" NAME="extype_[% section %]_[% type.key %]"[% sectionref.$section.${type.key}.checked %]><BR>
+				</TD>
+			[% END %]
+			</TR>
 		[% END %]
+		</TABLE>
 		</TD>
 		</FORM>
 	</TR>

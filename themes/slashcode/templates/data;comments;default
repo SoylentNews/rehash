@@ -15,35 +15,48 @@ en_US
 __name__
 data
 __template__
+[% 
+	label = 'discussion';
+	labelcap = 'Discussion';
+%]
+
 [% SWITCH value %]
 
+[% CASE 'label' %]
+	[% label %]
+
+[% CASE 'labelcap' %]
+	[% labelcap %]
 [% CASE 'users_no_discussions' %]
-	This user has created no discussions.
+	This user has created no [% label %]s.
 
 [% CASE 'nodiscussions' %]
-	There are no discussions listed here.
+	There are no [% label %]s listed here.
 
 [% CASE 'active_discussions' %]
-	Several Active Discussions
+	Several Active [% labelcap %]s 
 
 [% CASE 'all_discussions' %]
-	All Active Discussions
+	All Active [% labelcap %]s 
 
 [% CASE 'user_discussions' %]
-	User Created Discussions
+	User Created  [% labelcap %]s
 
 [% CASE 'user_discussion' %]
-	Discussions created by [% name %]
+	[% labelcap %]s created by [% name %]
 
 [% CASE 'no_such_sid' %]
-	This is not the discussion you are looking for.
+	This is not the [% label %] you are looking for.
 
 [% CASE 'archive_error' %]
-	This discussion has been archived, no further changes/additions can be made to it.
+	This [% label %] has been archived, no further changes/additions can be made to it.
 
 [% CASE 'submitted_comment' %]
 	Submitted Comment
 
+[% CASE 'no_discreate_msg' %]
+	You either aren't <a href="[% constants.rootdir %]/users.pl">logged in
+	</a> or don't have sufficient priveledges to submit a [% label %].
 [% END %]
 
 __seclev__

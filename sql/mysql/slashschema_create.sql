@@ -477,7 +477,7 @@ DROP TABLE IF EXISTS section_topics;
 CREATE TABLE section_topics (
 	section varchar(30) NOT NULL,
 	tid smallint UNSIGNED NOT NULL,
-	type smallint UNSIGNED NOT NULL,
+	type varchar(16) NOT NULL DEFAULT 'topic_1',
 	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (tid) REFERENCES topics(tid),
 	PRIMARY KEY (section,tid)
@@ -622,8 +622,8 @@ CREATE TABLE story_topics (
 DROP TABLE IF EXISTS string_param;
 CREATE TABLE string_param (
 	param_id smallint UNSIGNED NOT NULL auto_increment,
-	type varchar(16) NOT NULL,
-	code varchar(16) NOT NULL,
+	type varchar(32) NOT NULL,
+	code varchar(32) NOT NULL,
 	name varchar(32) NOT NULL,
 	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)

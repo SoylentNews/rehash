@@ -17,20 +17,27 @@ __name__
 discuss_list
 __template__
 [% USE Slash %]
-<MULTICOLS COLS=2>
+<table>
+	<tr>
+		<td align="left">
 [% FOR d = discussions %]
 	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% d.0 %]">[%
 IF d.1.defined && d.1.length %][% d.1 %][% ELSE %]untitled[% END %]</A>
-	(<A HREF="[% d.2 %]">referer</A>)
+	(<A HREF="[% d.2 %]">referer</A>)</LI>
 [% END %]
-</MULTICOL>
+</UL>
 <P>
-[% PROCESS pagination %]
+[% PROCESS pagination label=label %]
+		</td>
+	</tr>
+</table>
 
 <P>
 
 [% IF user.seclev >= constants.discussion_create_seclev && !supress_create;
-    PROCESS discreate topic=constants.discussion_default_topic;
+    PROCESS discreate topic=constants.discussion_default_topic disclabel=label; 
+ELSIF user.seclev < constants.discussion_create_seclev;
+	Slash.getData('no_discreate_msg');
 END %]
 
 __seclev__
