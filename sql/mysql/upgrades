@@ -2841,3 +2841,5 @@ INSERT INTO vars (name, value, description) VALUES ('adminmail_check_replication
 DROP TABLE IF EXISTS accesslog_build_unique_host_addr;
 
 ALTER TABLE users MODIFY sig varchar(200);
+
+# End of T_2_5_0_46, Start of T_2_5_0_47 - 2005/02/02
