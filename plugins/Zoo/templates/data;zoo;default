@@ -98,10 +98,10 @@ __template__
 [% CASE 'yourfreakshead' %]
 	Your freaks
 
-[% case 'yourfriendsoffriendshead' %]
+[% CASE 'yourfriendsoffriendshead' %]
 	Your friend's friends.
 
-[% case 'yourfriendsenemieshead' %]
+[% CASE 'yourfriendsenemieshead' %]
 	Your friend's foes.
 
 [% CASE 'yourall' %]
