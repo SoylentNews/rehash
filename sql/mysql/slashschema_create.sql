@@ -167,6 +167,7 @@ CREATE TABLE comments (
 	subject varchar(50) NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
 	points tinyint DEFAULT '0' NOT NULL,
+	pointsorig tinyint DEFAULT '0' NOT NULL,
 	lastmod mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	reason tinyint UNSIGNED DEFAULT '0' NOT NULL,
 	signature char(32) DEFAULT '' NOT NULL,
@@ -376,6 +377,8 @@ CREATE TABLE misc_user_opts (
 DROP TABLE IF EXISTS moderatorlog;
 CREATE TABLE moderatorlog (
 	id int UNSIGNED NOT NULL auto_increment,
+	ipid char(32) DEFAULT '' NOT NULL,
+	subnetid char(32) DEFAULT '' NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
 	val tinyint DEFAULT '0' NOT NULL,
 	sid mediumint UNSIGNED DEFAULT '' NOT NULL,

@@ -1013,5 +1013,10 @@ ALTER TABLE related_links CHANGE name name VARCHAR(80);
 
 # SLASHDOT LAST UPDATED HERE
 
-# End of T_2_3_0_58
+# End of T_2_3_0_58, Start of T_2_3_0_59
+
+ALTER TABLE comments ADD COLUMN pointsorig tinyint DEFAULT '0' NOT NULL AFTER points;
+UPDATE comments SET pointsorig=points;
+ALTER TABLE moderatorlog ADD COLUMN ipid char(32) DEFAULT '' NOT NULL AFTER id;
+ALTER TABLE moderatorlog ADD COLUMN subnetid char(32) DEFAULT '' NOT NULL AFTER ipid;
 
