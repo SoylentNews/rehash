@@ -28,6 +28,8 @@ __template__
 
 [% IF submission.sid %]
 	<P><A HREF="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</A>
+[% ELSIF submission.del == 2 %]
+	<p><i>No link to story available</i></p>
 [% END %]
 
 [% PROCESS titlebar width="100%" title=submission.subj %]
