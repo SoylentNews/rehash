@@ -62,7 +62,7 @@ sub default {
 			);
 			my $discussion = 
 				$slashdb->getDiscussion($discussion_id);
-			printComments($discussion) if $discussion;
+			printComments($discussion,'', '', 1) if $discussion;
 		}
 	}
 }
@@ -80,13 +80,26 @@ sub editpoll {
 
 	my $currentqid = $slashdb->getVar('currentqid', 'value')
 		if $qid;
-	my $question = $slashdb->getPollQuestion($qid, ['question', 'voters', 'sid'])
-		if $qid;
+	my ($question, $answers, $pollbooth);
+	if ($qid) {
+		$question = $slashdb->getPollQuestion($qid, ['question', 'voters', 'sid']);
+		$answers = $slashdb->getPollAnswers($qid, ['answer', 'votes', 'aid']);
+		my $polls;
+		for (@$answers) {
+			push @$polls, [$question, $_->[0], $_->[2], $_->[1]];
+		}
+		my $raw_pollbooth = slashDisplay('pollbooth', {
+			polls		=> $polls,
+			question	=> $question->{question},
+			qid		=> $qid,
+			voters		=> $question->{voters},
+		}, 1);
+		my $constants = getCurrentStatic();
+		$pollbooth = fancybox($constants->{fancyboxwidth}, 'Poll', $raw_pollbooth, 0, 1);
+	}
 
-	my $answers;
 	if ($question) {
 		$question->{voters} ||= 0;
-		$answers = $slashdb->getPollAnswers($qid, ['answer', 'votes']) if $qid;
 	} else {
 		$question->{voters} ||= 0;
 		$question->{question} = $form->{question}; 
@@ -99,6 +112,7 @@ sub editpoll {
 		qid		=> $qid,
 		question	=> $question,
 		answers		=> $answers,
+		pollbooth	=> $pollbooth,
 	});
 }
 

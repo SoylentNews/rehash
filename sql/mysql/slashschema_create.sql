@@ -648,7 +648,7 @@ CREATE TABLE users (
 	seclev mediumint UNSIGNED DEFAULT '0' NOT NULL,	/* This is set to 0 as a safety factor */
 	matchname varchar(20),
 	newpasswd varchar(8),
-	journal_last_entry_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	journal_last_entry_date datetime,
 	author tinyint DEFAULT 0 NOT NULL,
 	PRIMARY KEY (uid),
 	KEY login (uid,passwd,nickname),

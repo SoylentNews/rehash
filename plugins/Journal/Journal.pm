@@ -116,10 +116,14 @@ sub remove {
 	return unless $self->sqlDo("DELETE FROM journals WHERE uid=$uid AND id=$id");
 	$self->sqlDo("DELETE FROM journals_text WHERE id=$id");
 
-	my($date) = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
-	$date ||= 0;	# has to be defined
+	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
+	if ($date) {
+		$date = $self->sqlQuote($date);
+	} else {
+		$date = "NULL";
+	}
 	my $slashdb = getCurrentDB();
-	$slashdb->setUser($uid, { journal_last_entry_date => $date });
+	$slashdb->setUser($uid, { -journal_last_entry_date => $date });
 }
 
 sub friends {

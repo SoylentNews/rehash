@@ -77,7 +77,7 @@ sub main {
 		});
 
 		my $discussion = $slashdb->getDiscussionBySid($story->{sid});
-		printComments($discussion);
+		printComments($discussion, '', '', 1);
 	} else {
 		my $message = getData('no_such_sid');
 		header($message);

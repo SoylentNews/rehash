@@ -33,11 +33,11 @@ __template__
 
 	[% IF editable %]
 		<TD VALIGN="TOP">
-		[% IF form.op == "fans" %]
-				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% friend.0 %]">Add Friend</A>
-		[% ELSIF form.op == "friends" %]
-				<A HREF="[% constants.rootdir %]/journal.pl?op=deletemeta&amp;delete=[% friend.0 %]">Remove Friend</A>
-		[% END %]
+			[% IF form.op == "fans" %]
+					<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% friend.0 %]">Add Friend</A>
+			[% ELSIF form.op == "friends" %]
+					<A HREF="[% constants.rootdir %]/journal.pl?op=deletemeta&amp;delete=[% friend.0 %]">Remove Friend</A>
+			[% END %]
 		</TD>
 	[% END %]
 </TR>

@@ -297,6 +297,22 @@ sub userdir_handler {
 				$r->args("op=list");
 				$r->uri('/messages.pl');
 				$r->filename($constants->{basedir} . '/messages.pl');
+			} elsif ($op eq 'friends') {
+				$r->args("op=friends");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
+			} elsif ($op eq 'foes') {
+				$r->args("op=foes");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
+			} elsif ($op eq 'fans') {
+				$r->args("op=fans");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
+			} elsif ($op eq 'faultfinders') {
+				$r->args("op=faultfinders");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
 			} else {
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
@@ -329,6 +345,18 @@ sub userdir_handler {
 			$r->args("nick=$nick");
 			$r->uri('/pubkey.pl');
 			$r->filename($constants->{basedir} . '/pubkey.pl');
+		} elsif ($op eq 'friends') {
+			$r->args("op=friends&nick=$nick");
+			$r->uri('/zoo.pl');
+			$r->filename($constants->{basedir} . '/zoo.pl');
+		} elsif ($op eq 'fans') {
+			$r->args("op=fans&nick=$nick");
+			$r->uri('/zoo.pl');
+			$r->filename($constants->{basedir} . '/zoo.pl');
+		} elsif ($op eq 'foes') {
+			$r->args("op=foes&nick=$nick");
+			$r->uri('/zoo.pl');
+			$r->filename($constants->{basedir} . '/zoo.pl');
 		} else {
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');

@@ -56,6 +56,8 @@ INSERT INTO code_param (type, code, name) VALUES ('sortcodes',1,'Newest First');
 INSERT INTO code_param (type, code, name) VALUES ('sortcodes',3,'Highest Scores First');
 INSERT INTO code_param (type, code, name) VALUES ('sortcodes',4,'Oldest First (Ignore Threads)');
 INSERT INTO code_param (type, code, name) VALUES ('sortcodes',5,'Newest First (Ignore Threads)');
+INSERT INTO code_param (type, code, name) VALUES ('sortorder',1,'Order By Date');
+INSERT INTO code_param (type, code, name) VALUES ('sortorder',2,'Order By Score');
 INSERT INTO code_param (type, code, name) VALUES ('statuscodes',1,'Refreshing');
 INSERT INTO code_param (type, code, name) VALUES ('statuscodes',0,'Normal');
 INSERT INTO code_param (type, code, name) VALUES ('statuscodes',10,'Archive');

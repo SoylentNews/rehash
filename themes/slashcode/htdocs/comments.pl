@@ -123,13 +123,6 @@ sub main {
 	# function can handle the situation itself
 	my ($discussion, $section);
 
-	# For those fresh morning where you wake up and don't have
-  # have a sid.
-	if (!$form->{sid} && $form->{cid}) {
-		$form->{sid} = $slashdb->getComment($form->{cid}, 'sid');
-		$user->{state}{comment_override_display} = 1;
-	}
-
 	if ($form->{sid}) {
 		# SID compatibility
 		if ($form->{sid} !~ /^\d+$/) {

@@ -677,7 +677,7 @@ sub topicEdit {
 
 	$topics_menu = $slashdb->getDescriptions('topics_all', '', 1);
 	$topics_select = createSelect('nexttid', $topics_menu, $form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 1);
-	my $sections = $slashdb->getDescriptions('sections', '', 1);
+	my $sections = $slashdb->getDescriptions('sections-all', '', 1);
 	my $section_topics = $slashdb->getDescriptions('topic-sections', $form->{nexttid}, 1);
 	my $sectionref;
 	while (my($section, $title) = each %$sections) {
@@ -1310,8 +1310,14 @@ sub saveStory {
 	my $edituser = $slashdb->getUser($form->{uid});
 	my $rootdir = getCurrentStatic('rootdir');
 
-	$form->{displaystatus} ||= 1 if $edituser->{section};
-	$form->{section} = $edituser->{section} if $edituser->{section};
+	# In the previous form of this, a section only
+  # editor could assign a story to a different user
+  # and bypass their own restrictions for what section
+  # they could post to. -Brian
+	$form->{displaystatus} ||= 1 if ($user->{section} || $edituser->{section});
+	if ($user->{section} || $edituser->{section}) {
+		$form->{section} = $user->{section} ? $user->{section} : $edituser->{section};
+	}
 	$form->{dept} =~ s/ /-/g;
 	$form->{relatedtext} = getRelated(
 		"$form->{title} $form->{bodytext} $form->{introtext}"
