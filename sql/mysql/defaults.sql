@@ -880,8 +880,7 @@ INSERT INTO vars (name, value, description) VALUES ('tokenspercomment','6','Numb
 INSERT INTO vars (name, value, description) VALUES ('tokensperpoint','8','Number of tokens per point');
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('totalComments','0','Total number of comments posted');
-INSERT INTO vars (name, value, description) VALUES ('totalhits','383','Total number of hits the site has had thus far');
-INSERT INTO vars (name, value, description) VALUES ('updatemin','5','do slashd updates, default 5');
+INSERT INTO vars (name, value, description) VALUES ('totalhits','0','Total number of hits the site has had thus far');
 INSERT INTO vars (name, value, description) VALUES ('use_dept','1','use \"dept.\" field');
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link','1','Boolean where to use next/prev links for articles');
 INSERT INTO vars (name, value, description) VALUES ('user_comment_display_default','24','Number of comments to display on user\'s info page');
