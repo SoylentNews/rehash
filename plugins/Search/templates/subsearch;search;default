@@ -19,7 +19,7 @@ __template__
 	[% ELSE %]
 		[% x %] 
 	[% END %]
-	<A HREF="[% constants.rootdir %]/submit.pl?subid=[% entry.subid %]">[% entry.subj %]</A>
+	<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</A>
 	<FONT SIZE="2">on [% Slash.timeCalc(entry.time) %]</FONT><BR>
 	[% entry.story %]...
 	<P>
