@@ -2889,7 +2889,7 @@ sub getOtherUserParams {
 # $defaults - hashref of defaults to set to something other 
 #             than the empty string
 sub setToDefaults {
-	my ($data, $skip, $defaults) = @_;
+	my($data, $skip, $defaults) = @_;
 	foreach my $key (keys %$data) {
 		next if $skip->{$key};
 		$data->{$key} = exists $defaults->{$key} ? $defaults->{$key} : "";
