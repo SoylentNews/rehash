@@ -29,9 +29,9 @@ __template__
 			<TR BGCOLOR="[% user.bg.3 %]">
 				<TD><FONT COLOR="[% user.fg.0 %]"><B>UID</B></FONT></TD>
 				<TD><FONT COLOR="[% user.fg.0 %]"><B>Nickname</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Comments</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Submissions</B></FONT></TD>
-				<TD><FONT COLOR="[% user.fg.0 %]"><B>Moderations</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Com</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Sub</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Mod</B></FONT></TD>
 			</TR>
 				[% FOREACH tmpuid = uidstruct.keys %]
 			<TR>
