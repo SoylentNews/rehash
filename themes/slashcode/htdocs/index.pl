@@ -73,8 +73,14 @@ sub main {
 	#    to be made aware of this story's existence, so ignore it.
 	my $future_plug = 0;
 
-	# Just check the first story since they are in order -Brian
-	if ($stories->[0]{is_future} && !$user->{is_subscriber} && !$user->{is_anon} && $constants->{subscribe_future_plug}) {
+	# Do we want to display the plug saying "there's a future story,
+	# subscribe and you can see it"?  Yes if the user is logged-in
+	# but not a subscriber, but only if the first story is actually
+	# in the future.  Just check the first story;  they're in order.
+	if ($stories->[0]{is_future}
+		&& !$user->{is_subscriber}
+		&& !$user->{is_anon}
+		&& $constants->{subscribe_future_plug}) {
 		$future_plug = 1;
 	}
 
@@ -278,7 +284,7 @@ sub displayStories {
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
 
-	my($today, $x) = ('', 1);
+	my($today, $x) = ('', 0);
 	my $cnt = int($user->{maxstories} / 3);
 	my($return, $counter);
 
@@ -286,9 +292,29 @@ sub displayStories {
 	# Stuff block later (simulate the old cursor-based
 	# method)
 	my $story;
-	while ($story = shift @{$stories}) {
+	while ($story = shift @$stories) {
 		my($tmpreturn, $other, @links);
-		next if (($story->{is_future} && !$user->{is_subscriber}) || ($story->{is_future} && $constants->{subscribe_future_secs} < 1)) ;
+
+		# This user may not be authorized to see future stories;  if so,
+		# skip them.
+		next if $story->{is_future}
+			&& (!$user->{is_subscriber} || !$constants->{subscribe_future_secs});
+
+		# Check the day this story was posted (in the user's timezone).
+		# Compare it to what we believe "today" is (which will be the
+		# first eligible story in this list).  If this story's day is
+		# not "today", and if we've already displayed enough stories
+		# to sufficiently fill the homepage (typically 10), then we're
+		# done -- put the story back on the list (so it'll correctly
+		# appear in the Older Stuff box) and exit.
+		my $day = timeCalc($story->{time},'%A %B %d');
+		my($w) = join ' ', (split m/ /, $day)[0 .. 2];
+		$today ||= $w;
+		if (++$x > $cnt && $today ne $w) {
+			unshift @$stories, $story;
+			last;
+		}
+
 		my @threshComments = split m/,/, $story->{hitparade};  # posts in each threshold
 
 		$other->{is_future} = 1 if $story->{is_future};
@@ -366,11 +392,6 @@ sub displayStories {
 		}, { Return => 1});
 
 		$return .= $tmpreturn;
-
-		my $day = timeCalc($story->{time},'%A %B %d');
-		my($w) = join ' ', (split m/ /, $day)[0 .. 2];
-		$today ||= $w;
-		last if ++$x > $cnt && $today ne $w;
 	}
 
 	return $return;
