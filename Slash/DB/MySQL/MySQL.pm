@@ -2717,7 +2717,7 @@ sub getDB {
 	my($self, $db_type) = @_;
 
 	my $dbs = $self->getDBs;
-	my @found = [ grep { $_->{isalive} eq 'yes'} @{$dbs->{$db_type}} ];
+	my @found = grep { $_->{isalive} eq 'yes' } @{$dbs->{$db_type}};
 
 	return $found[rand @found]{virtual_user};
 }
