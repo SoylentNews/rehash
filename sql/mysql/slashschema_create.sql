@@ -265,7 +265,8 @@ CREATE TABLE comments (
 	KEY ipid (ipid),
 	KEY subnetid (subnetid),
 	KEY theusual (sid,uid,points,cid),
-	KEY countreplies (pid,sid)
+	KEY countreplies (pid,sid),
+	KEY uid_date (uid,date)
 ) TYPE=MyISAM;
 
 #
