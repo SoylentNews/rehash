@@ -33,7 +33,7 @@ END %]
 		<TD BGCOLOR="#E6E6E6" WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
 				<TD BGCOLOR="#E6E6E6">
-					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.fakeemail %]">[% author.nickname %]</A>
+					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname %]</A>
 						[% user.aton %] [% story.storytime %]</FONT><BR>
 					[% IF constants.use_dept %]<FONT FACE="[% constants.mainfontface %]" SIZE="1">from the <B>[% story.dept %]</B> dept.</FONT>[% END %]
 				</TD>

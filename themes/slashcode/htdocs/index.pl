@@ -233,27 +233,28 @@ sub displayStories {
 						'link'		=> $thresh
 					});
 				}
-
-				$cclink[1] = linkStory({
-					sid		=> $sid, 
-					threshold	=> -1, 
-					'link'		=> $cc || 0
-				});
-
-				push @cclink, $thresh, ($cc || 0);
-				push @links, getData('comments', { cc => \@cclink });
 			}
 
-			if ($thissection ne $constants->{defaultsection} && !getCurrentForm('section')) {
-				my($section) = getSection($thissection);
-				push @links, getData('seclink', {
-					name	=> $thissection,
-					section	=> $section
-				});
-			}
+			$cclink[1] = linkStory({
+				sid		=> $sid, 
+				threshold	=> -1, 
+				'link'		=> $cc || 0
+			});
 
-			push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
+			push @cclink, $thresh, ($cc || 0);
+			push @links, getData('comments', { cc => \@cclink });
+
 		}
+
+		if ($thissection ne $constants->{defaultsection} && !getCurrentForm('section')) {
+			my($section) = getSection($thissection);
+			push @links, getData('seclink', {
+				name	=> $thissection,
+				section	=> $section
+			});
+		}
+
+		push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
 
 		$return .= slashDisplay('storylink', {
 			links	=> \@links,

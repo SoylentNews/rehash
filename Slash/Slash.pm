@@ -1898,7 +1898,8 @@ sub displayStory {
 
 	my $slashdb = getCurrentDB();
 	my $story = $slashdb->getStory($sid);
-	my $author = $slashdb->getAuthor($story->{uid}, ['nickname', 'fakeemail']);
+	my $author = $slashdb->getAuthor($story->{uid},
+		['nickname', 'fakeemail', 'homepage']);
 	my $topic = $slashdb->getTopic($story->{tid});
 	
 	# convert the time of the story (this is database format) 

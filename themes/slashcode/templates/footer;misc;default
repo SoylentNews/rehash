@@ -30,7 +30,7 @@ __template__
 [% IF user.is_admin %]
 [% Slash.currentAdminUsers() %]
 [% ELSE %]
-<FONT SIZE="2" FACE="[% constants.mainfontface %]"><I>[% INCLUDE motd %]</I><FONT>
+<FONT SIZE="2" FACE="[% constants.mainfontface %]"><I>[% INCLUDE motd %]</I></FONT>
 [% END %]
 </TD>
 				<TD><A HREF="http://slashcode.com/"><IMG SRC="[% constants.imagedir %]/slashlogo.gif" BORDER="0"></A></TD>

@@ -26,7 +26,7 @@ have posted.</P>
 [% FOREACH uid = uids %]
 	[% name = uid.1 %]
 	<H2><B><A HREF="[% constants.rootdir %]/search.pl?op=stories&author=[% uid.1 %]">[% uid.0 %]</A></B>
-	<A HREF="[% authors.$name.fakeemail %]">[% authors.$name.nickname %]</A></H2>
+	<A HREF="[% authors.$name.homepage %]">[% authors.$name.nickname %]</A></H2>
 	[% IF admin %]
 		<A HREF="[% constants.rootdir %]/users.pl?authoredit=1&authoruid=[% authors.$name.uid %]">edit</A>
 	[% END %]

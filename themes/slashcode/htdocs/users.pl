@@ -102,13 +102,13 @@ sub main {
 	} elsif ($op eq 'mailpasswd') {
 		mailPassword($slashdb->getUserUID($form->{unickname}));
 
-	} elsif ($op eq 'suedituser' && $user->{seclev} > 100) {
+	} elsif ($op eq 'suedituser' && $user->{seclev} >= 100) {
 		editUser($slashdb->getUserUID($form->{name}));
 
-	} elsif ($op eq 'susaveuser' && $user->{seclev} > 100) {
+	} elsif ($op eq 'susaveuser' && $user->{seclev} >= 100) {
 		saveUser($form->{uid}); 
 
-	} elsif ($op eq 'sudeluser' && $user->{seclev} > 100) {
+	} elsif ($op eq 'sudeluser' && $user->{seclev} >= 100) {
 		delUser($form->{uid});
 
 	} elsif ($op eq 'userclose') {
@@ -128,7 +128,7 @@ sub main {
 		displayForm();
 	}
 
-	# miniAdminMenu() if $user->{seclev} > 100;
+	# miniAdminMenu() if $user->{seclev} >= 100;
 	writeLog($user->{nickname});
 
 	footer();
@@ -163,7 +163,7 @@ sub previewSlashbox {
 	my $form = getCurrentForm();
 
 	my $block = $slashdb->getBlock($form->{bid}, ['title', 'block', 'url']);
-	my $is_editable = $user->{seclev} > 999;
+	my $is_editable = $user->{seclev} >= 1000;
 
 	my $title = getTitle('previewslashbox_title', { blocktitle => $block->{title} });
 	slashDisplay('previewSlashbox', {
@@ -274,12 +274,6 @@ sub userInfo {
 
  	$karma_flag = 1 if $userbio->{seclev} || $userbio->{uid} == $uid;
 
-	my $public_key = $userbio->{pubkey};
-	$public_key = strip_html($public_key, 1) if $public_key;
-
-#	if ($userbio->{nickname} eq $orignick) {
-#	wouldn't this be better?
-# slower comparison (and we already have both) -Brian
 	if ($userbio->{uid} == $user->{uid}) {
 		$nickmatch_flag = 1;
 		$points = $userbio->{points};
@@ -325,14 +319,10 @@ sub userInfo {
 
 	slashDisplay('userInfo', {
 		title			=> $title,
-		uid			=> $uid,
 		nick			=> $nick,
-		fakeemail		=> $userbio->{fakeemail},
-		homepage		=> $userbio->{homepage},
-		bio			=> $userbio->{bio},
+		userbio			=> $userbio,
 		points			=> $points,
 		lastgranted		=> $lastgranted,
-		public_key		=> $public_key,
 		commentstruct		=> $commentstruct || [],
 		nickmatch_flag		=> $nickmatch_flag,
 		mod_flag		=> $mod_flag,
@@ -471,7 +461,6 @@ sub editHome {
 	my $tzformat_select = createSelect('tzformat', $formats, $user_edit->{dfid}, 1);
 
 	$formats = $slashdb->getDescriptions('tzcodes');
-	$formats = { map { ($_ => uc($_)) } keys %$formats };
 	my $tzcode_select = createSelect('tzcode', $formats, $user_edit->{tzcode}, 1);
 
 	my $l_check = $user_edit->{light}	? ' CHECKED' : '';
@@ -550,13 +539,9 @@ sub saveUser {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	# we need to come up with a new seclev system. What seclev
-	# should allow an admin user to save another user on 
-	# the system?  -- pat (?)
-	# the highest one.  -- pudge
 	my $uid = $user->{seclev} >= 100 ? shift : $user->{uid};
 	my $user_email  = $slashdb->getUser($uid, ['nickname', 'realemail']);
-	my ($note, $author_flag);
+	my($note, $author_flag);
 
 	$user_email->{nickname} = substr($user_email->{nickname}, 0, 20);
 	return if isAnon($uid);

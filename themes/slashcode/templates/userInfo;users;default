@@ -4,13 +4,9 @@ __description__
 Display user's info
 
 * title = passed to titlebar
-* uid = uid
 * nick = nickname
-* fakeemail = fakeemail
-* homepage = homepage
-* bio = bio
+* userbio = hashref of user's info
 * points = available moderation points
-* public_key = public key
 * commentstruct = arrayref of comments
 * nickmatch_flag = current user is same as viewed user
 * mod_flag = is moderator
@@ -30,8 +26,8 @@ userInfo
 __template__
 [% INCLUDE titlebar width="95%" %]
 
-<A HREF="[% homepage %]">[% homepage %]</A><BR>
-<A HREF="mailto:[% fakeemail %]">[% fakeemail %]</A><BR>
+<A HREF="[% userbio.homepage %]">[% userbio.homepage %]</A><BR>
+<A HREF="mailto:[% userbio.fakeemail %]">[% userbio.fakeemail %]</A><BR>
 
 
 [% IF nickmatch_flag %]
@@ -53,16 +49,16 @@ __template__
 
 
 [% IF karma_flag %]
-        <B>Karma</B> [% karma %] (mostly the sum of moderation done to users comments)<BR>
+        <B>Karma</B> [% userbio.karma %] (mostly the sum of moderation done to users comments)<BR>
 [% END %]
 
-[% IF bio %]
- <B>User Bio</B><BR>[% FILTER strip_html ; bio ; END %]<P>
+[% IF userbio.bio %]
+ <B>User Bio</B><BR>[% FILTER strip_html ; userbio.bio ; END %]<P>
 [% END %]
 
-[% IF public_key %]
+[% IF userbio.public_key %]
    <B>Public Key</B><BR><PRE>
-  [% FILTER strip_literal; public_key; END %]
+  [% FILTER strip_literal; userbio.public_key; END %]
  </PRE><P>
 [% END %]
 

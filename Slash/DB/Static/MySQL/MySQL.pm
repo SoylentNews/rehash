@@ -280,7 +280,7 @@ sub getTop10Comments {
 	my $comments = $c->fetchall_arrayref;
 	$c->finish;
 
-	formatDate($comments, 'date', 'd');
+	formatDate($comments, 4, 4);
 
 	return $comments;
 }

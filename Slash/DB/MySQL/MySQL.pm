@@ -738,14 +738,14 @@ sub createUser {
 # Do not like this method -Brian
 sub setVar {
 	my($self, $name, $value) = @_;
-	if (ref($value)) {
+	if (ref $value) {
 		$self->sqlUpdate('vars', {
-			value => $value->{'value'},
-			description => $value->{'desc'}
+			value		=> $value->{'value'},
+			description	=> $value->{'description'}
 		}, 'name=' . $self->sqlQuote($name));
 	} else {
 		$self->sqlUpdate('vars', {
-			value => $value
+			value		=> $value
 		}, 'name=' . $self->sqlQuote($name));
 	}
 }
@@ -1713,7 +1713,9 @@ sub createVar {
 ########################################################
 sub deleteVar {
 	my($self, $name) = @_;
-	$self->sqlDo("DELETE from vars WHERE name=$name");
+	
+	$self->sqlDo("DELETE from vars WHERE name=" .
+		$self->{_dbh}->quote($name));
 }
 
 ########################################################
@@ -2347,7 +2349,7 @@ sub getAuthor {
 	# On a side note, I hate grabbing "*" from a database
 	# -Brian
 	$self->{$table_cache}{$id} = {};
-	my $answer = $self->sqlSelectHashref('users.uid as uid,nickname,fakeemail,bio', 
+	my $answer = $self->sqlSelectHashref('users.uid as uid,nickname,fakeemail,homepage,bio', 
 		'users,users_info', 'users.uid=' . $self->{_dbh}->quote($id) . ' AND users.uid = users_info.uid');
 	$self->{$table_cache}{$id} = $answer;
 
@@ -2381,7 +2383,40 @@ sub getAuthors {
 	}
 
 	$self->{$table_cache} = {};
-	my $sth = $self->sqlSelectMany('uid,nickname,fakeemail', 'users', 'seclev >= 100');
+	my $sth = $self->sqlSelectMany('users.uid,nickname,fakeemail,homepage,bio',
+		'users,users_info,users_param',
+		'users_param.name="author" and users_param.value=1 and ' .
+		'users.uid = users_param.uid and users.uid = users_info.uid');
+	while (my $row = $sth->fetchrow_hashref) {
+		$self->{$table_cache}{ $row->{'uid'} } = $row;
+	}
+
+	$self->{$table_cache_full} = 1;
+	$sth->finish;
+	$self->{$table_cache_time} = time();
+
+	my %return = %{$self->{$table_cache}};
+	return \%return;
+}
+
+########################################################
+# copy of getAuthors, for admins ... needed for anything?
+sub getAdmins {
+	my($self, $cache_flag) = @_;
+
+	my $table = 'admins';
+	my $table_cache= '_' . $table . '_cache';
+	my $table_cache_time= '_' . $table . '_cache_time';
+	my $table_cache_full= '_' . $table . '_cache_full';
+
+	if (keys %{$self->{$table_cache}} && $self->{$table_cache_full} && !$cache_flag) {
+		my %return = %{$self->{$table_cache}};
+		return \%return;
+	}
+
+	$self->{$table_cache} = {};
+	my $sth = $self->sqlSelectMany('users.uid,nickname,fakeemail,homepage,bio',
+		'users,users_info', 'seclev >= 100 and users.uid = users_info.uid');
 	while (my $row = $sth->fetchrow_hashref) {
 		$self->{$table_cache}{ $row->{'uid'} } = $row;
 	}
@@ -2473,11 +2508,10 @@ sub getTemplateByName {
 		$type  = $values ? 1 : 0;
 	}
 
-	if ($type) {
-		return $self->{$table_cache}{$id}{$values}
-			if (keys %{$self->{$table_cache}{$id}} && !$cache_flag);
-	} else {
-		if (keys %{$self->{$table_cache}{$id}} && !$cache_flag) {
+	if (!$cache_flag && exists $self->{$table_cache}{$id} && keys %{$self->{$table_cache}{$id}}) {
+		if ($type) {
+			return $self->{$table_cache}{$id}{$values};
+		} else {
 			my %return = %{$self->{$table_cache}{$id}};
 			return \%return;
 		}
@@ -3041,6 +3075,7 @@ sub createTemplate {
 		}
 	}
 	$self->sqlInsert('templates', $hash);
+	return $self->sqlSelect('LAST_INSERT_ID()');
 }
 
 ########################################################

@@ -144,7 +144,7 @@ sub main {
 			$section = $form->{newS} ? $form->{newsection} : $form->{savesection};
 			$page = $form->{newP} ? $form->{newpage} : $form->{savepage};
 		}
-		
+
 		templateSave($form->{thistpid}, $form->{name},  $page, $section);
 		templateEdit($user->{seclev}, $form->{thistpid}, $page, $section);
 
@@ -248,8 +248,8 @@ sub varSave {
 		my $value = $slashdb->getVar($form->{thisname});
 		if ($value) {
 			$slashdb->setVar($form->{thisname}, {
-				value   => $form->{value},
-				description => $form->{desc}
+				value		=> $form->{value},
+				description	=> $form->{desc}
 			});
 		} else {
 			$slashdb->createVar($form->{thisname}, $form->{value}, $form->{desc});
@@ -258,8 +258,10 @@ sub varSave {
 		if ($form->{desc}) {
 			print getMessage('varSave-message');
 		} else {
-			$slashdb->deleteVar($form->{thisname});
-			print getMessage('varDelete-message');
+# please don't delete this by just removing comment,
+# since we don't even warn the admin this will happen.
+#			$slashdb->deleteVar($form->{thisname});
+#			print getMessage('varDelete-message');
 		}
 	}
 }
@@ -491,7 +493,7 @@ sub templateSave {
 			return;
 		} else {
 			print "trying to insert $name<br>\n";
-			$slashdb->createTemplate({
+			$tpid = $form->{thistpid} = $slashdb->createTemplate({
                			name		=> $name,
 				template        => $form->{template},
 				title		=> $form->{title},
@@ -987,10 +989,10 @@ sub editStory {
 		$author = $slashdb->getAuthor($form->{uid});
 		$sid = $form->{sid};
 
-		if (!$form->{time} || $form->{fastforward}) {
-			$storyref->{time} = $slashdb->getTime();
+		if (!$form->{'time'} || $form->{fastforward}) {
+			$storyref->{'time'} = $slashdb->getTime();
 		} else {
-			$storyref->{time} = $form->{time};
+			$storyref->{'time'} = $form->{'time'};
 		}
 
 		my $tmp = $user->{currentSection};
