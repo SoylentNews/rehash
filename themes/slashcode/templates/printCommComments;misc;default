@@ -96,7 +96,7 @@ __template__
 [% END %]
 
 </TABLE>
-[% PROCESS maintable_td %]&nbsp;[% PROCESS maintable_td_end %]
+[% PROCESS maintable_td %]&nbsp;</TD>
 __seclev__
 10000
 __version__
