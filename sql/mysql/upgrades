@@ -328,3 +328,6 @@ ALTER TABLE sections DROP feature_story;
 # USEPERL LAST UPDATED HERE
 ALTER TABLE accesslog ADD bytes mediumint UNSIGNED DEFAULT 0 NOT NULL;
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, '');
+
+ALTER TABLE discussions ADD last_update timestamp;
+ALTER TABLE stories ADD last_update timestamp;
