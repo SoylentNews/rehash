@@ -207,6 +207,12 @@ sub handler {
 	createEnv($r) if $cfg->{env};
 	authors($r) if $form->{'slashcode_authors'};
 
+	# a special test mode for getting a new template
+	# object (hence, fresh cache) for each request
+	if ($constants->{template_cache_request}) {
+		undef $dbcfg->{template};
+	}
+
 	# Weird hack for getCurrentCache() till I can code up proper logic for it
 	{
 		my $cache = getCurrentCache();

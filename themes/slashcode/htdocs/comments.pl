@@ -794,7 +794,7 @@ sub previewForm {
 		\$tempComment, \$tempSubject, $error_message, 1,
 		($form->{posttype} == CODE
 			? $constants->{comments_codemode_wsfactor}
-			: 1.0) )
+			: $constants->{comments_wsfactor} || 1) )
 		or return;
 
 	$tempComment = addDomainTags($tempComment);
@@ -857,7 +857,7 @@ sub submitComment {
 		\$tempComment, \$tempSubject, $error_message, 1,
 		($form->{posttype} == CODE
 			? $constants->{comments_codemode_wsfactor}
-			: 1.0) )
+			: $constants->{comments_wsfactor} || 1) )
 	) {
 		$slashdb->resetFormkey($form->{formkey});
 		editComment(@_, $error_message);
@@ -1292,7 +1292,7 @@ sub deleteThread {
 	my @delList;
 	$comments_deleted = \@delList if !$level;
 
-	return unless $user->{seclev} > 100;
+	return unless $user->{seclev} >= 1000;
 
 	my $delkids = $slashdb->getCommentChildren($cid);
 
