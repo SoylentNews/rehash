@@ -84,7 +84,8 @@ on [% Slash.timeCalc(time) %]
 		sid	=> sid,
 		cid	=> cid,
 		pid	=> cid,
-		subject	=> 'Read the rest of this comment...'
+		subject	=> 'Read the rest of this comment...',
+		subject_only => 1
 	}, 1) %]
 	<P><B>[% linkComment %]</B>
 [% END %]
