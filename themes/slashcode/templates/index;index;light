@@ -16,7 +16,7 @@ __template__
 
 [% UNLESS user.is_anon %]
 [% IF is_moderator %]
-Have you <B><A HREF="[% constants.rootdir %]/metamod.pl">Meta Moderated</A></B> Today?<BR>
+Have you <B><A HREF="[% constants.rootdir %]/metamod.pl">Meta Moderated</A></B> Recently?<BR>
 [% END %]
 
 [% messages = Slash.getObject("Slash::Messages");
