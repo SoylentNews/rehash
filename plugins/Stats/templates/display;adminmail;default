@@ -43,7 +43,9 @@ gstatic total:        -          -    [% grand_total_static %]
 [% IF palm_page > 0 -%]
          palm: [% palm_uids %]   [% palm_ipids %]   [% palm_page %] ([% palm_bytes %])
 [% END -%]
+[% IF rss_ipids > 0 -%]
           rss: [% rss_uids %]   [% rss_ipids %]   [% rss_page %] ([% rss_bytes %])
+[% END -%]
         other: [% other_uids %]   [% other_ipids %]   [% other_page %] ([% other_bytes %])
 
     accesslog: [% accesslog %] rows total
@@ -51,6 +53,9 @@ gstatic total:        -          -    [% grand_total_static %]
      comments: [% comments %] posted yesterday
   submissions: [% submissions %] submissions 
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
+[% IF error_count > 0 -%]
+       errors: [% error_count %]% pages generated errors
+[% END -%]
 
    total hits: [% total_hits %]
 
@@ -105,6 +110,12 @@ Top referers:
 [% FOREACH referer = top_referers -%]
 [% referer.1 %]  [% referer.0 %]
 [% END %]
+
+[% IF errors > 0 -%]
+Error count by Page:
+[% FOREACH error = errors -%]
+[% error.op %]  [% error.count %]
+[% END =%]
 
 [% END %]
 -----------------------      

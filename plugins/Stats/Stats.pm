@@ -48,21 +48,36 @@ sub new {
 	if ($options->{create}) {
 		# Why not just truncate? If we did we would never pick up schema changes -Brian
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_errors");
 		my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
 		$sth->execute();
 		my $rows = $sth->fetchrow_arrayref;
 		$rows->[1] =~ s/accesslog/accesslog_temp/;
 		$self->{_table} = "accesslog_temp";
 		$self->sqlDo($rows->[1]);
+		$rows->[1] =~ s/accesslog_temp/accesslog_temp_errors/;
+		$self->sqlDo($rows->[1]);
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid(uid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX section(section)");
 		# The status line =200 is temp till I can go through and fix more of this to make use of if -Brian
-		$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' AND status=200 FOR UPDATE");
+		my $sql = "INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' AND status=200 FOR UPDATE";
+		$self->sqlDo($sql);
 		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp"))) {
 			for (1..4) {
 				sleep 5;
-				$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' FOR UPDATE");
-				return $self if $self->sqlSelect("count(id)", "accesslog_temp");
+				$self->sqlDo($sql);
+				last if $self->sqlSelect("count(id)", "accesslog_temp");
+			}
+		}
+
+		# Now everything that wasn't ok
+		$sql = "INSERT INTO accesslog_temp_errors SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' AND status != 200 FOR UPDATE";
+		$self->sqlDo($sql);
+		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp_errors"))) {
+			for (1..4) {
+				sleep 5;
+				$self->sqlDo($sql);
+				last if $self->sqlSelect("count(id)", "accesslog_temp_errors");
 			}
 		}
 	}
@@ -333,6 +348,37 @@ sub getReverseMods {
 	}
 
 	return $ar;
+}
+########################################################
+sub countErrorStatuses {
+	my($self, $options) = @_;
+
+	my $where = " status BETWEEN 500 AND 600 ";
+
+	$self->sqlSelect("count(id)", "accesslog_temp_errors", $where);
+}
+
+########################################################
+sub countByStatus {
+	my($self, $status, $options) = @_;
+
+	my $where = " status = $status  ";
+
+	$self->sqlSelect("count(id)", "accesslog_temp_errors", $where);
+}
+
+########################################################
+sub getErrorStatuses {
+	my($self, $op, $options) = @_;
+
+	my $where = "1=1 ";
+	$where .= " AND op='$op' "
+		if $op;
+	$where .= " AND section='$options->{section}' "
+		if $options->{section};
+	$where .= " AND status BETWEEN 500 AND 600 ";
+
+	$self->sqlSelectAllHashrefArray("status, count(ops) as count", "accesslog_temp_errors", $where, " GROUP BY status ORDER BY status ");
 }
 
 ########################################################

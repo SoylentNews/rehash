@@ -1372,7 +1372,7 @@ sub createAccessLog {
 		duration	=> $duration,
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
-		secure		=> Slash::Apache::ConnectionIsSecure(),
+		secure		=> $user->{state}{ssl},
 		referer		=> $r->header_in("Referer"),
 		status		=> $status,
 	};
@@ -3266,7 +3266,8 @@ sub getNumCommPostedByUID {
 		"uid=$uid
 		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)"
 	);
-	my($num_comm, $sum_mods) = @$ar;
+	my($num_comm, $sum_mods) = @$ar
+		if ref($ar) eq 'ARRAY';
 	$sum_mods ||= 0;
 	if (wantarray()) {
 		return ($num_comm, $sum_mods);

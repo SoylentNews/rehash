@@ -50,6 +50,21 @@ $task{$me}{code} = sub {
 	}
 
 	slashdLog("Send Admin Mail Begin for $yesterday");
+	# lets do the errors
+	$data{not_found} = $stats->countByStatus("404");
+	$statsSave->createStatDaily("not_found", $data{not_found});
+
+	my $errors = $stats->getErrorStatuses();
+	my $error_count = $stats->countErrorStatuses();
+	$data{error_count} = $error_count;
+	$statsSave->createStatDaily("error_count", $data{error_count});
+	$data{errors} = {};
+	for my $type (@$errors) {
+		$data{errors}{$type->{op}} = $type->{count};
+		$statsSave->createStatDaily("error_$type->{op}}", $type->{count});
+	}
+	
+
 	my $articles = $logdb->countDailyStoriesAccess();
 
 	my $reasons = $slashdb->getReasons();
