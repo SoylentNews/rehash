@@ -65,7 +65,7 @@ __template__
 [% CASE 'freakshead' %]
 	Freaks of [% nickname %]
 
-[% CASE 'freakshead' %]
+[% CASE 'yourhead' %]
 	Everyone who thinks anything about [% nickname %]
 
 [% CASE 'yourfriendshead' %]
