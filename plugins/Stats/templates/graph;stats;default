@@ -17,7 +17,7 @@ IF form.type == 'pie';
    USE my_graph = GD.Graph.pie(600, 400);
 
 ELSE;  # default to lines
-   IF (form.type == 'area' || form.type == 'areapercentage');
+   IF (form.type == 'area' || form.type == 'areapercentage' || form.type == 'areastacked' || form.type == 'areastackedindex');
       USE my_graph = GD.Graph.area(600, 400);
    ELSE;
       USE my_graph = GD.Graph.lines(600, 400);
@@ -49,8 +49,8 @@ ELSE;  # default to lines
       FOREACH day = this.data.keys.sort;
          IF (form.type == 'areapercentage');
             IF mytotal.${day};
-            mynum = this.data.${day} / mytotal.${day} * 100;
-         ELSE;
+               mynum = this.data.${day} / mytotal.${day} * 100;
+            ELSE;
                mynum = 0;
             END;
          ELSE;
@@ -72,6 +72,28 @@ ELSE;  # default to lines
       plotdata.push([]);
       plotdata.${plotdata.max}.${nums.max} = nums.${nums.max};
    END;
+
+   IF (form.type == 'areastackedindex');
+      USE dataloop = iterator(alldata);
+      FOREACH this = dataloop;
+         thisindex = dataloop.index;
+         thismax   = dataloop.max;
+         IF (thisindex > 1);
+            USE thisloop = iterator(this);
+            FOREACH mynum = thisloop;
+               newindex  = thisindex + 1;
+               currindex = thisloop.index;
+               newnum = mynum;
+               FOREACH nextindex = [newindex .. thismax];
+                  newnum = newnum + alldata.${nextindex}.${currindex};
+                  # "$thisindex | $currindex | $mynum | $newnum\n" | stderr;
+               END;
+               alldata.${thisindex}.${currindex} = newnum;
+            END;
+         END;
+      END;
+   END;
+
 
    x_label_skip = days.size / 10;
    x_label_skip = x_label_skip.int;
@@ -108,8 +130,13 @@ ELSE;  # default to lines
    	my_graph.set(y_max_value => 0);
    END;
 
-   IF (form.type == 'areapercentage');
+   IF (form.type == 'areapercentage' || form.type == 'areastacked');
    	my_graph.set(cumulate => 1);
+   END;
+
+   IF (form.type == 'areapercentage');
+   	my_graph.set(y_min_value => 0);
+   	my_graph.set(y_max_value => 100);
    END;
 
    set_legend(my_graph, alltypes);
