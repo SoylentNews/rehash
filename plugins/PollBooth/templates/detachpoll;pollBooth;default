@@ -29,3 +29,5 @@ __template__
 
 	[% END %]
 [% END %]
+__version__
+$Id$

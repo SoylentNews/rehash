@@ -41,3 +41,5 @@ can also use the form below to select the poll qid you like to attach the story 
 			</FORM>
 		</TD>
 </TABLE>
+__version__
+$Id$
