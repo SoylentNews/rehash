@@ -1136,31 +1136,6 @@ sub factorEligibleModerators {
 		push @return_uids, ($uid) x $count;
 	}
 
-# Because this is a complicated method, here is some lengthy debugging
-# output that doesn't appear to be necessary... this will be removed
-# soon. - Jamie
-#	print STDERR "factorEligibleModerators ran on " . scalar(@$orig_uids)
-#		. " uids, producing a list of " . scalar(@return_uids)
-#		. " uids, in "
-#		. sprintf("%0.3f", Time::HiRes::time - $start_time)
-#		. " seconds\n";
-#	print STDERR "factorEligibleModerators orig start: '@$orig_uids[0..9]' now start: '@return_uids[0..9]'\n";
-#	print STDERR "factorEligibleModerators orig   end: '@$orig_uids[-10..-1]' now   end: '@return_uids[-10..-1]'\n";
-#	for my $uid (sort { $u_hr->{$a}{factor_m2total} <=> $u_hr->{$b}{factor_m2total} }
-#		keys %$u_hr) {
-#		print STDERR
-#			sprintf("m2total %0.4f m2ratio %0.4f stirredratio %0.4f uid %6d m2fair %6d stirred %6d",
-#				$u_hr->{$uid}{factor_m2total} || 1,
-#				$u_hr->{$uid}{factor_m2ratio} || 1,
-#				$u_hr->{$uid}{factor_stirredratio} || 1,
-#				$uid,
-#				$u_hr->{$uid}{m2fair},
-#				$u_hr->{$uid}{stirred}
-#			) . "\n";
-#	}
-#use Data::Dumper;
-#	print STDERR "factorEligibleModerators u_hr: " . Dumper($u_hr);
-
 	return \@return_uids;
 }
 
@@ -1219,6 +1194,79 @@ sub updateTokens {
 			-tokens	=> "LEAST(tokens+1, $maxtokens)",
 		});
 	}
+}
+
+########################################################
+# For run_moderatord.pl
+# Given a fractional value representing the fraction of fair M2
+# votes, returns the token/karma consequences of that fraction
+# in a hashref.  Makes the very complex var m2_consequences a
+# little easier to use.  Note that the value returned has three
+# fields:  a float, its sign, and an SQL expression which may be
+# either an integer or an IF().
+sub getM2Consequences {
+        my($self, $frac) = @_;
+        my $constants = getCurrentStatic();
+        my $c = $constants->{m2_consequences};
+        my $retval = { };
+        for my $ckey (sort { $a <=> $b } keys %$c) {
+                if ($frac <= $ckey) {
+                        my @vals = @{$c->{$ckey}};
+                        for my $key (qw(        m2_fair_tokens
+                                                m2_unfair_tokens
+                                                m1_tokens
+                                                m1_karma )) {
+                                $retval->{$key}{num} = shift @vals; 
+                        }
+                        for my $key (keys %$retval) {
+                                $self->_set_csq($key, $retval->{$key});
+                        }
+                        last;
+                }
+        }
+        return $retval;
+}
+        
+sub _set_csq {
+        my($self, $key, $hr) = @_;
+        my $n = $hr->{num};
+        if (!$n) {
+                $hr->{chance} = $hr->{sign} = 0;
+                $hr->{sql_base} = $hr->{sql_possible} = "";
+                $hr->{sql_and_where} = undef;
+                return ;
+        }
+
+        my $constants = getCurrentStatic();
+        my $column = 'tokens';
+        $column = 'karma' if $key =~ /karma$/;
+        my $max = ($column eq 'tokens')
+                ? $constants->{m2_consequences_token_max}
+                : $constants->{m2_maxbonus_karma};
+        my $min = ($column eq 'tokens')
+                ? $constants->{m2_consequences_token_min}
+                : $constants->{minkarma};
+        
+        my $sign = 1; $sign = -1 if $n < 0;
+        $hr->{sign} = $sign;
+        
+        my $a = abs($n);
+        my $i = int($a);
+        
+        $hr->{chance} = $a - $i;
+        $hr->{num_base} = $i * $sign;
+        $hr->{num_possible} = ($i+1) * $sign;
+        if ($sign > 0) {
+                $hr->{sql_and_where}{$column} = "$column < $max";
+                $hr->{sql_base} = $i ? "LEAST($column+$i, $max)" : "";
+                $hr->{sql_possible} = "LEAST($column+" . ($i+1) . ", $max)"
+                        if $hr->{chance};
+        } else {
+                $hr->{sql_and_where}{$column} = "$column > $min";
+                $hr->{sql_base} = $i ? "GREATEST($column-$i, $min)" : "";
+                $hr->{sql_possible} = "GREATEST($column-" . ($i+1) . ", $min)"
+                        if $hr->{chance};
+        }
 }
 
 ########################################################
