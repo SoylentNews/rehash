@@ -46,10 +46,10 @@ __template__
 %]
       
 <PRE>                   UIDs      IPIDs      Pages 
-        total: [% ints(stats_data.users) %]   [% ints(stats_data.unique) %]   [% ints(stats_data.total) %] ([% PROCESS mbyte bytes => stats_data.total_bytes %])
+        total: [% ints(stats_data.unique_users) %]   [% ints(stats_data.unique) %]   [% ints(stats_data.total) %] ([% PROCESS mbyte bytes => stats_data.total_bytes %])
  static total:        -          -    [% ints(stats_data.total_static) %]
   grand total:        -          -    [% ints(stats_data.grand_total) %] ([% PROCESS mbyte bytes => stats_data.grand_total_bytes %])
-        posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.IPIDS) %]
+        posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.distinct_comment_ipids) %]
      comments: [% ints(stats_data.comments_uids) %]   [% ints(stats_data.comments_ipids) %]   [% ints(stats_data.comments_page) %] ([% PROCESS mbyte bytes => stats_data.comments_bytes %])
         index:        -          -   [% ints(stats_data.homepage) %]
      articles: [% ints(stats_data.article_uids) %]   [% ints(stats_data.article_ipids) %]   [% ints(stats_data.article_page) %] ([% PROCESS mbyte bytes => stats_data.article_bytes %])
