@@ -822,7 +822,8 @@ sub submitComment {
 	my $pts = 0;
 
 	if (!$user->{is_anon} && !$form->{postanon}) {
-		$pts = ($user->{karma} < 0) ? 0 : $user->{defaultpoints};
+		$pts = $user->{defaultpoints};
+		$pts-- if $user->{karma} < 0;
 		$pts-- if $user->{karma} < $constants->{badkarma};
 		$pts++ if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
 			&& !$form->{nobonus};
