@@ -787,12 +787,10 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_poin
 # SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE users_info CHANGE people people MEDIUMBLOB;
-<<<<<<< upgrades
 
 # Do not run this on Slashdot, I have already done it for the DB that matters -Brian
 ALTER TABLE accesslog DROP INDEX op_part;
 ALTER TABLE accesslog ADD INDEX op_part (op, section);
-=======
 
 # End of T_2_3_0_48, Start of T_2_3_0_49
 
