@@ -124,7 +124,7 @@ sub _make_cchp_file {
 	my $cchp_suffix;
 	my($cchp_file, $cchp_param) = ("", "");
 	while (!$cchp_fh) {
-		$cchp_file = File::Temp::mktemp("${cchp_prefix}XXXXXXXX");
+		$cchp_file = File::Temp::mktemp("${cchp_prefix}XXXXXXXXXX");
 		($cchp_suffix) = $cchp_file =~ /^\Q$cchp_prefix\E(.+)$/;
 		$cchp_param = " cchp='$cchp_suffix'";
 		if (!sysopen($cchp_fh, $cchp_file,
