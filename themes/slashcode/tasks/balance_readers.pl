@@ -136,6 +136,13 @@ sub check_readers {
 #$hr_d =~ s/\s+/ /g;
 #slashdLog("vu '$vu' process id $hr->{Id}: $hr_d");
 
+			# I believe this is a bug in MySQL starting
+			# somewhere around or before 4.0.12, and fixed
+			# by 4.0.21 -- the Time field on some processes
+			# can be the unsigned version of a small
+			# negative number.  Call it zero.
+			$hr->{Time} = 0 if $hr->{Time} > 4_200_000_000;
+
 			# Store the record of what this process is doing.
 			$process{$vu}{$hr->{Id}} = \%{ $hr };
 
@@ -148,12 +155,18 @@ sub check_readers {
 					   $hr->{State} =~ /Reading master update/
 					|| $hr->{State} =~ /Waiting for master to send event/
 					|| $hr->{State} =~ /Queueing master event to the relay log/
+					|| $hr->{State} =~ /Queueing event from master/
 				) {
 					# This is the I/O process, skip it.
 					next;
 				} elsif (
 					   $hr->{State} =~ /waiting for binlog update/
+					|| $hr->{State} =~ /Processing master log event/
 					|| $hr->{State} =~ /Has read all relay log/
+					|| $hr->{State} =~ /Reading event from the relay log/
+					|| $hr->{State} =~ /Updating/
+					|| $hr->{State} =~ /freeing items/
+					|| $hr->{State} eq 'update'
 					|| $hr->{State} eq 'end'
 				) {
 					# This is the SQL process, it's the
@@ -163,7 +176,7 @@ sub check_readers {
 				} else {
 					# Don't know what this one is, log an error.
 					my $state = substr($hr->{State}, 0, 200);
-					slashdLog("Process id $hr->{Id} has unknown system user state '$state'");
+					slashdLog("Process id $hr->{Id} on vu '$vu' has unknown system user state '$state'");
 				}
 			}
 
@@ -284,9 +297,13 @@ sub log_reader_info {
 		my $log_hr = {
 			-ts		=> 'NOW()',
 			dbid		=> get_reader_dbid($slashdb, $vu),
-			was_alive	=> $was_alive		? 'yes' : 'no',
-			was_reachable	=> $was_reachable	? 'yes' : 'no',
-			was_running	=> $was_running		? 'yes' : 'no',
+			was_alive	=> $was_alive			? 'yes' : 'no',
+			was_reachable	=> defined($was_reachable)
+						? ($was_reachable	? 'yes' : 'no')
+						: undef,
+			was_running	=> defined($was_running)
+						? ($was_running	? 'yes' : 'no')
+						: undef,
 			slave_lag_secs	=> $info->{slave_lag_secs},
 			query_bog_secs	=> $info->{query_bog_secs},
 			bog_rsqid	=> $bog_rsqid,
