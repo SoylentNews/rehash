@@ -82,6 +82,11 @@ __template__
    display:          none;
 }
 
+/* for up/down/etc. buttons */
+.hpts-icon {
+   padding-bottom:   10px;
+}
+
 __seclev__
 10000
 __version__

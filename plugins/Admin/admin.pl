@@ -875,7 +875,7 @@ sub topicEdit {
 	}
 
 	my $topic_select = Slash::Admin::PopupTree::getPopupTree(
-		$parents, {}, { type => 'ui_topiced' }, { stcid => $children }
+		$parents, { type => 'ui_topiced' }, { stcid => $children }
 	);
 
 	if ($available_images) {
@@ -981,7 +981,7 @@ sub topicSave {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $basedir = $constants->{basedir};
 
-	my($chosen_hr, $chosen_names_hr, $chosenc_hr, $chosenc_names_hr) = extractChosenFromForm($form);
+	my($chosen_hr, $chosenc_hr) = extractChosenFromForm($form);
 	$form->{parent_topic} = $chosen_hr;
 	$form->{child_topic} = $chosenc_hr;
 
@@ -1331,9 +1331,8 @@ sub editStory {
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
 
-		my($chosen_hr, $chosen_names_hr) = extractChosenFromForm($form);
+		my($chosen_hr) = extractChosenFromForm($form);
 		$storyref->{topics_chosen} = $chosen_hr;
-		$storyref->{topics_chosen_names} = $chosen_names_hr;
 		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
 		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
 		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
@@ -1357,7 +1356,6 @@ sub editStory {
 		$sid = $form->{sid};
 
 		$storyref->{topics_chosen} = $chosen_hr;
-		$storyref->{topics_chosen_names} = $chosen_names_hr;
 		$storyref->{topics_rendered} = $rendered_hr;
 		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
 		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
@@ -1397,7 +1395,6 @@ sub editStory {
 
 		my $chosen_hr = $slashdb->getStoryTopicsChosen($stoid);
 		$storyref->{topics_chosen} = $chosen_hr;
-		$storyref->{topics_chosen_names} = { };
 
 		my $render_info = { };
 # Don't need to do this, I don't think.  Only when saving does it matter.
@@ -1430,7 +1427,6 @@ sub editStory {
 		$storyref->{uid} = $user->{uid};
 
 		$storyref->{topics_chosen} = { };
-		$storyref->{topics_chosen_names} = { };
 		$storyref->{topics_rendered} = { };
 		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered({ });
 		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen({},
@@ -1500,7 +1496,7 @@ sub editStory {
 		$storyref->{$key} = $form->{$key} || $storyref->{$key};
 	}
 
-	my $topic_select = Slash::Admin::PopupTree::getPopupTree($storyref->{topics_chosen}, $storyref->{topics_chosen_names});
+	my $topic_select = Slash::Admin::PopupTree::getPopupTree($storyref->{topics_chosen});
 
 	my $authors = $slashdb->getDescriptions('authors', '', 1);
 	my $author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
@@ -1612,11 +1608,9 @@ sub extractChosenFromForm {
 	my $constants = getCurrentStatic();
 
 	my $chosen_hr = { };
-	my $chosen_names_hr = { };
 	my $chosenc_hr = { };   # c is for child, in topic editor
-	my $chosenc_names_hr = { };
 
-	if (defined $form->{topic_source} && $form->{topic_source} eq "submission"
+	if (defined $form->{topic_source} && $form->{topic_source} eq 'submission'
 		&& $form->{subid}) {
 		my @topics = ($form->{tid});
 		if ($form->{primaryskid}) {
@@ -1629,26 +1623,37 @@ sub extractChosenFromForm {
 				? 30
 				: $constants->{topic_popup_defaultweight} || 10;
 			my $chosen_topic = $slashdb->getTopic($tid);
-			$chosen_names_hr->{$tid} = $chosen_topic->{textname}
-				if $chosen_topic && $chosen_topic->{tid};
 		}
 	} else {
-		my(%chosen, %chosen_names);
+		my(%chosen);
 		for my $x (qw(st stc)) {
 			my $input = $x . '_main_select';
 			next unless $form->{$input};
 
+			my @weights = sort { $b <=> $a } keys %{$constants->{topic_popup_weights}};
+			# normalize to dividing lines, so no priorities
+			if (defined $form->{topic_source} && $form->{topic_source} eq 'topiced') {
+				@weights = grep { $constants->{topic_popup_weights}{$_} } @weights;
+			}
+
+			my $weight = shift @weights;
 			for my $i (0..$#{$form->{$input}}) {
-				$chosen{$x}{$form->{$input}[$i]}
-					= $form->{$input . '_weights'}[$i];
-				$chosen_names{$x}{$form->{$input}[$i]}
-					= $form->{$input . '_ids'}[$i];
+				my $tid = $form->{$input}[$i];
+				if ($tid =~ /^-(\d+)$/) {
+					until ($weight < $1) {
+						last unless @weights;
+						$weight = shift @weights;
+					}
+					next;
+				}
+				$chosen{$x}{$tid} = $weight;
+				# only dividers have values
+				$weight = shift @weights if @weights
+					&& !$constants->{topic_popup_weights}{$weight};
 			}
 
 			$chosen_hr = $chosen{st};
 			$chosenc_hr = $chosen{stc};
-			$chosen_names_hr = $chosen_names{st};
-			$chosenc_names_hr = $chosen_names{stc};
 		}
 	}
 
@@ -1657,12 +1662,16 @@ sub extractChosenFromForm {
 		my $user = getCurrentUser();
 		my %tmp;
 		for (qw(st_saved_tree st_tree_pref)) {
-			$user->{$_} = $tmp{$_} = $form->{$_} if exists $form->{$_};
+			next unless exists $form->{$_};
+			if ($_ eq 'st_tree_pref') {
+				$form->{$_} = '' unless $form->{$_} eq 'ab';
+			}
+			$user->{$_} = $tmp{$_} = $form->{$_};
 		}
 		$slashdb->setUser($user->{uid}, \%tmp);
 	}
 
-	return($chosen_hr, $chosen_names_hr, $chosenc_hr, $chosenc_names_hr);
+	return($chosen_hr, $chosenc_hr);
 }
 
 ##################################################################

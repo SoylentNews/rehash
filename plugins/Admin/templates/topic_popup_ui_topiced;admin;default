@@ -11,75 +11,75 @@ en_US
 __name__
 topic_popup_ui_topiced
 __template__
-[% names = name; stpid = stid %]
+[% names = name; name = names.0; stpid = stid; stpid_ordered = stid_ordered %]
+<input type="hidden" value="topiced" name="topic_source">
 [% IF include_css %]
-<link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
+<link rel="stylesheet" type="text/css" rev="alternate" href="[% gSkin.rootdir %]/admin-topic-popup.css">
 [%- END %]
-<script src="./admin-topic-popup.js" type="text/javascript"></script>
+<script src="[% gSkin.rootdir %]/admin-topic-popup.js" type="text/javascript"></script>
 
-<table cellpadding=5><tr>
-[% FOR name = names;
-	IF name == names.0;
-		stid = stpid;
-	ELSIF name == names.1;
-		stid = stcid;
-	END %]
-<td valign="top" bgcolor="#cccccc">
-<font color="[% user.colors.bg_3 %]"><b>[% IF name == "st" %]Parents[% ELSE %]Children[% END %]</b></font><br>
-
-<select name="[% name %]_main_select" size=5 multiple onchange="[% name %]_select_weight()">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% this_stid %]">[% slashtopics.${this_stid}.label | strip_html %] ([% stid.$this_stid %])</option>
-[%- END %]</select>
-
-<select name="[% name %]_main_select_weights" multiple class="hpts-no-display">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% stid.$this_stid %]">[% stids.$this_stid %]</option>
-[%- END %]</select>
-
-<select name="[% name %]_main_select_weights_orig" multiple class="hpts-no-display">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
-[%- END %]</select>
-
-<select name="[% name %]_main_select_ids" multiple class="hpts-no-display">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% stid_names.$this_stid %]">[% stid_names.$this_stid %]</option>
-[%- END %]</select>
-
-<br>
-
-<select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
-<option value="40">40</option>
-<option value="30">30</option>
-<option value="20">20</option>
-<option value="10">10</option>
-<option value="0">0</option>
-</select>
-
-<input type="button" value="Add"   onclick="[% name %]_ok()">
-<input type="button" value="Del"   onclick="[% name %]_remove()">
-<input type="button" value="Visit" onclick="[% name %]_visit()">
-
-</td>
-[% END %]
-</tr><tr><td align="center" bgcolor="#cccccc" colspan="[% names.size %]">
-[% name = names.0 %]
-<input type="button" value="Choose Topics" onclick="[% name %]_show('[% user.st_tree_pref %]')" name="[% name %]_topic_toggle">
-<input type="button" value="Collapse All"  onclick="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
 <input type="hidden" value="topiced" name="[% name %]_submit_op">
-[% mykey = name _ "_tree_pref" -%]
-<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
 [% mykey = name _ "_saved_tree" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
-
 <script language="javascript">
 	[% name %]_load_names();
 	var list = new Array ([% user.$mykey %]);
 	[% name %]_reset_saved_tree(list);
 </script>
+[% mykey = name _ "_tree_pref" -%]
+<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
+
+<table cellpadding=5><tr>
+[% FOR name = names;
+	IF name == names.0;
+		stid = stpid;
+		stid_ordered = stpid_ordered;
+	ELSIF name == names.1;
+		stid = stcid;
+		stid_ordered = stcid_ordered;
+	END %]
+<td valign="top" bgcolor="#bbbbbb">
+<font color="[% user.colors.bg_3 %]"><b>[% IF name == "st" %]Parents[% ELSE %]Children[% END %]</b></font><br>
+
+<table cellpadding="2"><tr><td>
+<select name="[% name %]_main_select" size=10 multiple onchange="[% name %]_select_weight()" onfocus="[% names.0 %]_change_focus('[% name %]')">
+[%- myweights = constants.topic_popup_weights.keys.nsort.reverse;
+    myweight = myweights.shift;
+
+    FOREACH this_stid = stid_ordered;
+      WHILE stid.$this_stid < myweight;
+        IF constants.topic_popup_weights.$myweight %]
+<option value="-[% myweight %]">-^- [% constants.topic_popup_weights.$myweight | strip_html %] -^-</option>
+[%-     END;
+        myweight = myweights.shift;
+        LAST IF myweight == 0;
+      END;
+%]
+<option value="[% this_stid %]">[% slashtopics.${this_stid}.label | strip_html %]</option>
+[%- END;
+
+    WHILE myweight || myweights.size;
+      IF constants.topic_popup_weights.$myweight %]
+<option value="-[% myweight %]">-^- [% constants.topic_popup_weights.$myweight | strip_html %] -^-</option>
+[%-   END;
+      myweight = myweights.shift;
+    END;
+%]</select>
+</td><td style="vertical-align:top">
+
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-arrow-up.gif"   alt="up"     title="Move Item Up"       width="15" height="9"  onclick="[% name %]_move_item(1)"><br />
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-remove.gif"     alt="remove" title="Remove Topic"       width="15" height="15" onclick="[% name %]_remove()" onmouseup="document.[% form_field_form %].[% name %]_main_select.focus()"><br />
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-open.gif"       alt="open"   title="Open Topics Window" width="15" height="15" onclick="[% names.0 %]_show('[% user.$mykey %]')" onmouseup="document.[% form_field_form %].[% name %]_main_select.focus()" name="[% name %]_topic_toggle"><br />
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-arrow-down.gif" alt="down"   title="Move Item Down"     width="15" height="9"  onclick="[% name %]_move_item(-1)">
 
 </td></tr></table>
+
+<input type="button" value="Add"   onclick="[% names.0 %]_change_focus('[% name %]'); [% names.0 %]_ok()">
+<input type="button" value="Visit" onclick="[% name %]_visit()">
+
+</td>
+[% END %]
+</tr></table>
 
 __seclev__
 10000

@@ -2675,3 +2675,5 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_channel_password',
 INSERT INTO vars (name, value, description) VALUES ('users_count','1','(Approximate) number of users registered on this slash site');
 DROP TABLE IF EXISTS users_count;
 
+INSERT INTO vars (name, value, description) VALUES ('topic_popup_weights', '40=0|30=Mainpage|20=0|10=Sectional|0=0', 'The dividing lines etc. for the topic select box in the story editor');
+

@@ -101,6 +101,12 @@ var [% quickname %]_selected_val;
 [%- END %]
 var [% name %]_selected_type;
 var [% name %]_max_id = [% loop.max %];
+var [% name %]_elem_focus = '[% name %]';
+
+/* save which SELECT box has "focus", for adding */
+function [% name %]_change_focus(elem) {
+	[% name %]_elem_focus = elem;
+}
 
 /* find topics matching string */
 function [% name %]_search(type, searchstring) {
@@ -227,7 +233,7 @@ function [% name %]_collapse_all() {
 		}
 	}
 
-	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle_all;
+	var mybutton = document.[% form_field_form %].[% name %]_topic_toggle_all;
 	mybutton.value = "Expand";
 	mybutton.onclick = [% name %]_expand_all;
 }
@@ -241,7 +247,7 @@ function [% name %]_expand_all() {
 		}
 	}
 
-	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle_all;
+	var mybutton = document.[% form_field_form %].[% name %]_topic_toggle_all;
 	mybutton.value = "Collapse";
 	mybutton.onclick = [% name %]_collapse_all;
 }
@@ -308,7 +314,7 @@ function [% name %]_toggle_select(id, val, type) {
 		/* turn on selected item */
 		var new_obj = document.getElementById(name + "-line-" + id);
 		new_obj.className = "hpts-label-selected";
-		[% name %]_selected_id  = id;
+		[% name %]_selected_id = id;
 		[%- FOR quickname = names %]
 		[% quickname %]_selected_val = val;
 		[%- END %]
@@ -334,9 +340,24 @@ function [% name %]_show(type) {
 		iname = iname + "_" + type;
 	}
 
+	var mybuttons = new Array ('[% names.join("','") %]');
+	for (var i = 0; i < mybuttons.length; i++) {
+		var mybutton = document.[% form_field_form %][mybuttons[i] + '_topic_toggle'];
+		if (mybutton) {
+			mybutton.src = "[% image_path %]admin-topic-close.gif";
+			mybutton.alt = "close";
+			mybutton.title = "Close Topics Window";
+			if (type) {
+				mybutton.onclick = new Function ('[% name %]_close("' + type + '")');
+			} else {
+				mybutton.onclick = function () { [% name %]_close() };
+			}
+		}
+	}
+
 	var obj  = document.getElementById(name + "-outer");
-	var obj2 = document.getElementById("st-display");
-        var ot   = obj2.offsetTop;
+	var obj2 = document.getElementById("[% name %]-display");
+	var ot   = obj2.offsetTop;
 	/* get absolute value of element */
 	while ((obj2 = obj2.offsetParent) != null) {
 		ot += obj2.offsetTop;
@@ -352,7 +373,7 @@ function [% name %]_show(type) {
 	y = (y > 2 ? y : 2);
 
 	obj.style.right = x + "px";
-	obj.style.top  = y + "px";
+	obj.style.top   = y + "px";
 
 	obj.style.visibility = "visible";
 
@@ -378,14 +399,6 @@ function [% name %]_show(type) {
 	}
 [%- END %]
 
-	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
-	mybutton.value = "Close Window";
-	if (type) {
-		mybutton.onclick = new Function ('[% name %]_close("' + type + '")');
-	} else {
-		mybutton.onclick = function () { [% name %]_close() };
-	}
-
 	var mytree = document.[% form_field_form %].[% name %]_tree_pref;
 	mytree.value = type;
 }
@@ -405,6 +418,21 @@ function [% name %]_close(type) {
 	if (type) {
 		name = name + "-" + type;
 		iname = iname + "_" + type;
+	}
+
+	var mybuttons = new Array ('[% names.join("','") %]');
+	for (var i = 0; i < mybuttons.length; i++) {
+		var mybutton = document.[% form_field_form %][mybuttons[i] + '_topic_toggle'];
+		if (mybutton) {
+			mybutton.src = "[% image_path %]admin-topic-open.gif";
+			mybutton.alt = "open";
+			mybutton.title = "Open Topics Window";
+			if (type) {
+				mybutton.onclick = new Function ('[% name %]_show("' + type + '")');
+			} else {
+				mybutton.onclick = function () { [% name %]_show() };
+			}
+		}
 	}
 
 	/* hide window */
@@ -435,14 +463,6 @@ function [% name %]_close(type) {
 		}
 	}
 [%- END %]
-
-	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
-	mybutton.value = "Choose Topics";
-	if (type) {
-		mybutton.onclick = new Function ('[% name %]_show("' + type + '")');
-	} else {
-		mybutton.onclick = function () { [% name %]_show() };
-	}
 }
 
 function [% name %]_get_all_names(id) {
@@ -459,11 +479,9 @@ function [% name %]_get_weight(id) {
 	}
 }
 
-[% FOR name = names %]
-
 /* user clicks the ok button */
 function [% name %]_ok() {
-	if ([% names.0 %]_selected_id == -1) {
+	if ([% name %]_selected_id == -1) {
 		alert("Please select an item and click Add Topic, or Close Window when you're done.");
 		return;
 	}
@@ -472,51 +490,17 @@ function [% name %]_ok() {
 	[% IF form_field %][% IF form_field_form %]document.forms["[% form_field_form %]"][% ELSE %]document.forms[0][% END %].elements["[% form_field %]"].value = [% name %]_selected_val;[% END %]
 
 	/* trigger onselect */
-	[% IF onselect == names.0 _ "_main_add" %][% name %]_main_add([% name %]_selected_val);
-	[% ELSIF onselect %][% onselect %]([% name %]_selected_val);
+	[%- IF onselect == name _ "_main_add" %]
+	if ([% name %]_elem_focus == '[% names.1 %]') {
+		[% names.1 %]_main_add([% names.1 %]_selected_val);
+	} else {
+		[% name %]_main_add([% name %]_selected_val);
+	}
+	[%- ELSIF onselect %][% onselect %]([% name %]_selected_val);
 	[% END %]
 }
 
-function [% name %]_select_weight() {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-	var myweights = document.[% form_field_form %].[% name %]_main_weights;
-
-	var myindex   = myselect.selectedIndex;
-
-	if (myindex == -1) {
-		return;
-	}
-
-	var myvalue = myselectw.options[myindex].value;
-	for (var i = 0; i < myweights.length; i++) {
-		var myoption = myweights.options[i];
-		if (myoption.value == myvalue) {
-			myoption.selected = true;
-		}
-	}
-}
-
-function [% name %]_change_weight() {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myweights = document.[% form_field_form %].[% name %]_main_weights;
-
-	for (var i = 0; i < myselect.length; i++) {
-		if (myselect[i].selected == true) {
-			[% name %]_change_weight_really(i, myweights[myweights.selectedIndex].value);
-		}
-	}
-}
-
-function [% name %]_change_weight_really(i, val) {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-
-	myselectw[i].value = myselectw[i].text = val;
-	var name = myselect[i].text;
-	var newname = name.replace(/^(.+) \(.*\)$/, "$1 (" + myselectw[i].value + ")");
-	myselect[i].text = newname;
-}
+[% FOR name = names %]
 
 function [% name %]_main_add(val) {
 	var name   = [% names.0 %]_get_all_names([% names.0 %]_selected_id);
@@ -525,10 +509,7 @@ function [% name %]_main_add(val) {
 }
 
 function [% name %]_main_add_really(val, name, weight, noerr) {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
 
 	var duplicates = new Array;
 	for (var i = 0; i < myselect.length; i++) {
@@ -547,19 +528,67 @@ function [% name %]_main_add_really(val, name, weight, noerr) {
 			[% name %]_remove_really(duplicates[i]);
 		}
 
-		var myindex   = myselect.length;
-		myselect[myindex]  = new Option(name + " (" + weight + ")", val);
-		myselectw[myindex] = new Option(weight, weight);
-		myselecto[myindex] = new Option(weight, weight);
-		myselecti[myindex] = new Option(name, name);
-		myselect.selectedIndex = myindex;
-		[% name %]_select_weight();
+		var newindex = myselect.length; // default to end of list
+		for (var i = 0; i < myselect.length; i++) {
+			var myval = myselect[i].value;
+			if (myval.indexOf('-') == 0) {
+				if (myval.substr(1) <= weight) {
+					newindex = i;
+					i = myselect.length;
+				}
+			}
+		}
+
+		var oldindex = myselect.length;
+		myselect[oldindex] = new Option(name, val);
+		[% name %]_main_reorder(oldindex, newindex);
 	}
+}
+
+/* move item in list */
+function [% name %]_main_reorder(oldindex, newindex) {
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
+
+	myselect.focus();
+
+	if (myselect[oldindex].value.indexOf('-') == 0) {
+		return;
+	}
+
+	if (oldindex != newindex) {
+		var myoption = new Option(myselect[oldindex].text, myselect[oldindex].value);
+
+		if (oldindex > newindex) {
+			for (var i = oldindex-1; i >= newindex; i--) {
+				myselect[i+1] = new Option(myselect[i].text, myselect[i].value);
+			}
+		} else if (oldindex < newindex) {
+			for (var i = oldindex+1; i <= newindex; i++) {
+				myselect[i-1] = new Option(myselect[i].text, myselect[i].value);
+			}
+		}
+		myselect[newindex] = myoption;
+	}
+	myselect.selectedIndex = newindex;
+}
+
+/* user clicks the remove button */
+function [% name %]_move_item(direction, noerr) {
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
+
+	if (myselect.selectedIndex == -1) {
+		if (!noerr) {
+			alert("Please select an item to remove.");
+		}
+		return;
+	}
+
+	[% name %]_main_reorder(myselect.selectedIndex, myselect.selectedIndex - direction);
 }
 
 /* user clicks the remove button */
 function [% name %]_remove(noerr) {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
 
 	if (myselect.selectedIndex == -1) {
 		if (!noerr) {
@@ -577,42 +606,23 @@ function [% name %]_remove(noerr) {
 }
 
 function [% name %]_remove_really(index) {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
 
-	/* trigger onselect */
-	myselectw.options[index] = null;
-	myselecto.options[index] = null;
-	myselecti.options[index] = null;
-	myselect.options[index]  = null;
+	if (myselect[index].value.indexOf('-') == 0) {
+		/* don't remove dividers, just deselect */
+		myselect[index].selected = false;
+	} else {
+		/* remove it */
+		myselect[index] = null;
+	}
 }
 
 /* user clicks the submit button */
 function [% name %]_submit(button) {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
-	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
-
-	// temporarily make the select boxes visible so Opera will select their values
-	if (useragent_opera()) {
-		myselectw.style.display = 'block';
-		myselecti.style.display = 'block';
-	}
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
 
 	for (var i = 0; i < myselect.length; i++) {
-		myselect[i].selected  = true;
-		myselectw[i].selected = true;
-		myselecto[i].selected = false;
-		myselecti[i].selected = true;
-	}
-
-	// now make invisible again before submitting
-	if (useragent_opera()) {
-		myselectw.style.display = 'none';
-		myselecti.style.display = 'none';
+		myselect[i].selected = true;
 	}
 
 [% IF name == names.1 -%]
@@ -622,7 +632,7 @@ function [% name %]_submit(button) {
 	mysaved.value = [% name %]_get_saved_tree();
 
 	var myop = document.[% form_field_form %].[% name %]_submit_op;
-	myop.name  = button.name;
+	myop.name = button.name;
 	myop.value = button.value;
 
 	document.[% form_field_form %].submit();
@@ -630,24 +640,15 @@ function [% name %]_submit(button) {
 }
 
 function [% name %]_load_names() {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
-	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
-	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
-
-	for (var i = 0; i < myselect.length; i++) {
-		if (myselecti[i].value) {
-			myselect[i].text = myselecti[i].value + " (" + myselectw[i].value + ")";
-		}
-	}
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
 
 	if (myselect[0]) {
-		myselect[0].selected  = true;
-		[% name %]_select_weight();
+		myselect[0].selected = true;
 	}
 }
 
 function [% name %]_visit() {
-	var myselect  = document.[% form_field_form %].[% name %]_main_select;
+	var myselect = document.[% form_field_form %].[% name %]_main_select;
 
 	if (myselect.selectedIndex == -1) {
 		if (!noerr) {
@@ -657,19 +658,11 @@ function [% name %]_visit() {
 	}
 
 	document.location = '[% gSkin.rootdir %]/admin.pl?op=topics&nexttid='
-		+ myselect.options[myselect.selectedIndex].value;
+		+ myselect[myselect.selectedIndex].value;
 }
 
 [% END %]
 
-function useragent_opera() {
-	var agent = navigator.userAgent;
-	if (agent.indexOf('Opera') != -1) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
 __seclev__
 10000
 __version__

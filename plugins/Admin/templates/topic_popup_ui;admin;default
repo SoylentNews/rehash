@@ -14,52 +14,54 @@ __template__
 <table cellpadding="2"><tr><td>
 [%- name = name.0 %]
 [%- IF include_css %]
-<link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
+<link rel="stylesheet" type="text/css" rev="alternate" href="[% gSkin.rootdir %]/admin-topic-popup.css">
 [%- END %]
-<script src="./admin-topic-popup.js" type="text/javascript"></script>
+<script src="[% gSkin.rootdir %]/admin-topic-popup.js" type="text/javascript"></script>
 
-<select name="[% name %]_main_select" size=5 multiple onchange="[% name %]_select_weight()">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% this_stid %]">[% slashtopics.${this_stid}.label | strip_html %] ([% stid.$this_stid %])</option>
-[%- END %]</select>
-
-<select name="[% name %]_main_select_weights" multiple class="hpts-no-display">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
-[%- END %]</select>
-
-<select name="[% name %]_main_select_weights_orig" multiple class="hpts-no-display">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
-[%- END %]</select>
-
-<select name="[% name %]_main_select_ids" multiple class="hpts-no-display">
-[%- FOREACH this_stid = stid.sort %]
-<option value="[% stid_names.$this_stid %]">[% stid_names.$this_stid %]</option>
-[%- END %]</select>
-
-</td><td>
-
-<select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
-<option value="40">40 - Mainpageworthy (priority)</option>
-<option value="30">30 - Mainpageworthy</option>
-<option value="20">20 - Sectionworthy (priority)</option>
-<option value="10">10 - Sectionworthy</option>
-<option value="0">0 - Ignore Topic</option>
-</select>
-<br><input type="button" value="Remove Topic"  onclick="[% name %]_remove()">
-<br><input type="button" value="Choose Topics" onclick="[% name %]_show('[% user.st_tree_pref %]')" name="[% name %]_topic_toggle">
 <input type="hidden" value="preview" name="[% name %]_submit_op">
-[% mykey = name _ "_tree_pref" -%]
-<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
 [% mykey = name _ "_saved_tree" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
-
 <script language="javascript">
 	[% name %]_load_names();
 	var list = new Array ([% user.$mykey %]);
 	[% name %]_reset_saved_tree(list);
 </script>
+[% mykey = name _ "_tree_pref" -%]
+<input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
+
+<select name="[% name %]_main_select" size=10 multiple onchange="[% name %]_select_weight()">
+[%- myweights = constants.topic_popup_weights.keys.nsort.reverse;
+    myweight = myweights.shift;
+
+    FOREACH this_stid = stid_ordered;
+      WHILE stid.$this_stid < myweight;
+        IF constants.topic_popup_weights.$myweight %]
+<option value="-[% myweight %]">-^- [% constants.topic_popup_weights.$myweight | strip_html %] -^-</option>
+[%-     END;
+        myweight = myweights.shift;
+        LAST IF myweight == 0;
+      END;
+%]
+<option value="[% this_stid %]">[% slashtopics.${this_stid}.label | strip_html %]</option>
+[%- END;
+
+    WHILE myweight || myweights.size;
+      IF constants.topic_popup_weights.$myweight %]
+<option value="-[% myweight %]">-^- [% constants.topic_popup_weights.$myweight | strip_html %] -^-</option>
+[%-   END;
+      myweight = myweights.shift;
+    END;
+%]</select>
+
+</td><td style="vertical-align:top">
+
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-arrow-up.gif"   alt="up"     title="Move Item Up"       width="15" height="9"  onclick="[% name %]_move_item(1)"><br />
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-remove.gif"     alt="remove" title="Remove Topic"       width="15" height="15" onclick="[% name %]_remove()" onmouseup="document.[% form_field_form %].[% name %]_main_select.focus()"><br />
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-open.gif"       alt="open"   title="Open Topics Window" width="15" height="15" onclick="[% name %]_show('[% user.$mykey %]')" onmouseup="document.[% form_field_form %].[% name %]_main_select.focus()" name="[% name %]_topic_toggle"><br />
+<img class="hpts-icon" src="[% constants.imagedir %]/admin-topic-arrow-down.gif" alt="down"   title="Move Item Down"     width="15" height="9"  onclick="[% name %]_move_item(-1)">
+
+</td><td>
+
 </td></tr></table>
 
 __seclev__

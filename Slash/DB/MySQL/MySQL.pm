@@ -3420,6 +3420,11 @@ sub saveTopic {
 			}
 
 			$self->sqlInsert('topic_parents', \%relation, { ignore => 1 });
+			# update changed weights
+			$self->sqlUpdate('topic_parents',
+				{ min_weight => $relation{min_weight} },
+				"tid = $relation{tid} AND parent_tid = $relation{parent_tid}",
+			) if $relation{min_weight};
 		}
 	}
 
@@ -8660,6 +8665,8 @@ sub getSlashConf {
 						  0.90 => [qw( +0.02 -2     +4  0   )],
 						  1.00 => [qw( +0.05  0     +5 +0.5 )],	},
 		m2_consequences_repeats =>	{ 3 => -4, 5 => -12, 10 => -100 },
+		# 40=0|30=Mainpage|20=0|10=Sectional|0=0
+		topic_popup_weights	=>	{ 40 => 0, 30 => 'Mainpage', 20 => 0, 10 => 'Sectional', 0 => 0 },
 	);
 	for my $key (keys %conf_fixup_arrays) {
 		if (defined($conf{$key})) {

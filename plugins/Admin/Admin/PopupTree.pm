@@ -64,7 +64,7 @@ Foooooooo.
 =cut
 
 sub getPopupTree {
-	my($stid, $stid_names, $options, $param) = @_;
+	my($stid, $options, $param) = @_;
 	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 	my $constants	= getCurrentStatic();
 	my $tree	= $reader->getTopicTree;
@@ -114,7 +114,6 @@ sub getPopupTree {
 		slashtopics		=> \%topics,
 		stid			=> $stid,
 		stcid			=> $stcid,
-		stid_names		=> $stid_names,
 		slashorig		=> $tree,
 		title			=> 'Select Topics',
 		button_label		=> 'Choose',
@@ -140,7 +139,15 @@ sub _output_generate {
 	$param->{slashtopics} = $self->{slashtopics};
 	$param->{stid}        = $self->{stid} || {};
 	$param->{stcid}       = $self->{stcid} || {};
-	$param->{stid_names}  = $self->{stid_names} || {};
+
+	for my $key (qw(stid stcid)) {
+		$param->{"${key}_ordered"} = [
+			map  { $_->[0] }
+			sort { $b->[1] <=> $a->[1] }
+			map  { [ $_, $param->{$key}{$_} ] }
+			keys %{$param->{$key}}
+		];
+	}
 
 	$self->{_template_options}{type} = 'ui' if
 		!$self->{_template_options}{type} || $self->{_template_options}{type} !~ /^tree|js|css|ui(?:_\w+)?$/;

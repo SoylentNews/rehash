@@ -1646,11 +1646,7 @@ Hashref of cleaned-up data.
 	my %multivalue = map {($_ => 1)} qw(
 		section_multiple
 		st_main_select
-		st_main_select_weights
-		st_main_select_ids
 		stc_main_select
-		stc_main_select_weights
-		stc_main_select_ids
 	);
 
 	# fields that are numeric only
@@ -1674,8 +1670,7 @@ Hashref of cleaned-up data.
 		textarea_rows textarea_cols tokens
 		s subid stid stoid tpid tid qid aid pagenum
 		url_id spider_id miner_id keyword_id
-		st_main_select st_main_select_weights
-		stc_main_select stc_main_select_weights
+		st_main_select stc_main_select
 		parent_topic child_topic
 	);
 
