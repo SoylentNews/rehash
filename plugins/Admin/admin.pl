@@ -1115,9 +1115,9 @@ sub listStories {
 	for (@$storylist) {
 		my($hits, $comments, $sid, $title, $aid, $time_plain, $tid, $section,
 			$displaystatus, $writestatus) = @$_;
-		my $time = timeCalc($time_plain, '%H:%M');
-		my $td   = timeCalc($time_plain, '%A %B %d');
-		my $td2  = timeCalc($time_plain, '%m/%d');
+		my $time = timeCalc($time_plain, '%H:%M', 0);
+		my $td   = timeCalc($time_plain, '%A %B %d', 0);
+		my $td2  = timeCalc($time_plain, '%m/%d', 0);
 
 		my $substrtid = substr($tid, 0, 5);
 		$title = substr($title, 0, 50) . '...' if (length $title > 55);
