@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+delete
+__template__
+[% IF user.uid == uid %]
+<P>Removing yourself as a [% type %]?  Some breakups are much
+harder than others.</P>
+[% ELSE %]
+<P>Alright, before we do this thing, I just want to really make
+sure that you want to remove <B>[% nickname | strip_literal %]</B>
+([% uid %]) as your [% type %].</P>
+[% END %]
+
+[% PROCESS titlebar width => "100%" title => "Adding $type" %]
+<FORM ACTION="[% constants.rootdir %]/zoo.pl" METHOD="POST">
+<INPUT TYPE="hidden" NAME="type" VALUE="[% type %]">
+<INPUT TYPE="hidden" NAME="op" VALUE="delete">
+<INPUT TYPE="hidden" NAME="uid" VALUE="[% uid %]">
+<P><INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
+</FORM>
+
+__seclev__
+500
