@@ -1535,3 +1535,12 @@ UPDATE modreasons SET karma=val;
 
 # SLASHDOT LAST UPDATED HERE
 
+# End of T_2_3_0_100, Start of T_2_3_0_101 - 2003/06/12
+
+ALTER TABLE story_text ADD INDEX rendered (rendered(1));
+# If you have MySQL 4.x, do the next line.  If you're still on 3.x,
+# figure it out yourself, we don't have a line for that :)
+# UPDATE stories,story_text SET writestatus='dirty', rendered=NULL WHERE stories.sid=story_text.sid AND stories.writestatus IN ('ok', 'dirty');
+
+INSERT INTO vars (name, value, description) VALUES ('freshen_homepage_min_minutes','60','Number of minutes between updating the main index.shtml homepage (if 0, disabled, only updates when freshenup.pl believes it is required)');
+

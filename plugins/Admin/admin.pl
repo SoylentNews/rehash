@@ -1677,19 +1677,6 @@ sub updateStory {
 	$form->{introtext} = cleanSlashTags($form->{introtext});
 	$form->{bodytext} = cleanSlashTags($form->{bodytext});
 
-	my $rendered;
-	{
-		local $user->{currentSection} = "index";
-		local $user->{noicons} = "";
-		local $user->{light} = "";
-
-		# ugly hack, but for now, needed: without it, when an
-		# editor edits in foo.sitename.com, saved stories get
-		# rendered with that section
-		Slash::Utility::Anchor::getSectionColors();
-
-		$rendered =  displayStory($form->{sid}, '', { get_cacheable => 1 });
-	}
 	my $data = {
 		uid		=> $form->{uid},
 		sid		=> $form->{sid},
@@ -1705,7 +1692,7 @@ sub updateStory {
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		subsection	=> $form->{subsection},
-		rendered        => $rendered,
+		rendered        => undef, # freshenup.pl will write this
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
@@ -1900,6 +1887,7 @@ sub saveStory {
 		subid		=> $form->{subid},
 		subsection	=> $form->{subsection},
 		commentstatus	=> $form->{commentstatus},
+		rendered        => undef, # freshenup.pl will write this
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
@@ -1909,10 +1897,6 @@ sub saveStory {
 		}
 	}
 	my $sid = $slashdb->createStory($data);
-	{
-		local $user->{currentSection} = "index";
-		$slashdb->setStory($sid, { rendered => displayStory($sid, '', { get_cacheable => 1 }) });
-	}
 
 	if ($sid) {
 		slashHook('admin_save_story_success', { story => $data });

@@ -27,7 +27,7 @@ CREATE TABLE abusers (
 	KEY subnetid (subnetid),
 	KEY reason (reason),
 	KEY ts (ts)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS accesslist; 
 CREATE TABLE accesslist (
@@ -63,7 +63,7 @@ CREATE TABLE accesslist (
 	KEY now_norss (now_norss),
 	KEY now_proxy (now_proxy),
 	KEY now_trusted (now_trusted)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS accesslog; 
 CREATE TABLE accesslog (
@@ -88,7 +88,7 @@ CREATE TABLE accesslog (
 	INDEX op_part (op(12), section),
 	INDEX ts (ts),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS accesslog_admin;
 CREATE TABLE accesslog_admin (
@@ -108,7 +108,7 @@ CREATE TABLE accesslog_admin (
 	INDEX host_addr (host_addr),
 	INDEX ts (ts),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 
 #
@@ -125,7 +125,7 @@ CREATE TABLE authors_cache (
 	bio text NOT NULL,
 	author tinyint DEFAULT 0 NOT NULL,
 	PRIMARY KEY (uid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'backup_blocks'
@@ -137,7 +137,7 @@ CREATE TABLE backup_blocks (
 	block text,
 	FOREIGN KEY (bid) REFERENCES blocks(bid),
 	PRIMARY KEY (bid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'classes'
@@ -151,7 +151,7 @@ CREATE TABLE classes (
 	fallback enum("writer","reader","log","search"),
 	UNIQUE class_key (class),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'blocks'
@@ -181,7 +181,7 @@ CREATE TABLE blocks (
 	PRIMARY KEY (bid),
 	KEY type (type),
 	KEY section (section)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 
 #
@@ -196,7 +196,7 @@ CREATE TABLE code_param (
 	name varchar(32) NOT NULL,
 	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'commentmodes'
@@ -208,7 +208,7 @@ CREATE TABLE commentmodes (
 	name varchar(32),
 	description varchar(64),
 	PRIMARY KEY (mode)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'comments'
@@ -238,7 +238,7 @@ CREATE TABLE comments (
 	KEY subnetid (subnetid),
 	KEY theusual (sid,uid,points,cid),
 	KEY countreplies (pid,sid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'comment_text'
@@ -250,7 +250,7 @@ CREATE TABLE comment_text (
 	comment text NOT NULL,
 	FOREIGN KEY (cid) REFERENCES comments(cid),
 	PRIMARY KEY (cid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'content_filters'
@@ -271,7 +271,7 @@ CREATE TABLE content_filters (
 	KEY form (form),
 	KEY regex (regex),
 	KEY field_key (field)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'dateformats'
@@ -283,7 +283,7 @@ CREATE TABLE dateformats (
 	format varchar(32),
 	description varchar(64),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'dbs'
@@ -296,7 +296,7 @@ CREATE TABLE dbs (
 	isalive enum("no","yes") DEFAULT "no" NOT NULL,
 	type enum("writer","reader","log","search", "log_slave") DEFAULT "reader" NOT NULL,
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'discussions'
@@ -324,7 +324,7 @@ CREATE TABLE discussions (
 	FOREIGN KEY (topic) REFERENCES topics(tid),
 	INDEX (type,uid,ts),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'dst'
@@ -343,7 +343,7 @@ CREATE TABLE dst (
 	end_wday      TINYINT       NOT NULL,
 	end_month     TINYINT       NOT NULL,
 	PRIMARY KEY (region)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'formkeys'
@@ -373,7 +373,7 @@ CREATE TABLE formkeys (
 	KEY ts (ts),
 	KEY last_ts (ts),
 	KEY submit_ts (submit_ts)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'hooks'
@@ -387,7 +387,7 @@ CREATE TABLE hooks (
 	subroutine varchar(100) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE hook_param (param,class,subroutine)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'menus'
@@ -406,7 +406,7 @@ CREATE TABLE menus (
 	PRIMARY KEY (id),
 	KEY page_labels (menu,label),
 	UNIQUE page_labels_un (menu,label)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'metamodlog'
@@ -425,7 +425,7 @@ CREATE TABLE metamodlog (
 	PRIMARY KEY (id),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (mmid) REFERENCES moderatorlog(id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'misc_user_opts'
@@ -442,7 +442,7 @@ CREATE TABLE misc_user_opts (
 	long_desc text DEFAULT '',
 	opts_html text DEFAULT '',
 	PRIMARY KEY (name)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'moderatorlog'
@@ -473,7 +473,7 @@ CREATE TABLE moderatorlog (
 	KEY uid (uid),
 	KEY cuid (cuid),
 	KEY m2stat_act (m2status,active)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'modreasons'
@@ -490,7 +490,7 @@ CREATE TABLE modreasons (
 	fairfrac float DEFAULT '0.5' NOT NULL,
 	unfairname varchar(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id)
-) TYPE=myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'pollanswers'
@@ -504,7 +504,7 @@ CREATE TABLE pollanswers (
 	votes mediumint,
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (qid,aid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'pollquestions'
@@ -526,7 +526,7 @@ CREATE TABLE pollquestions (
 	FOREIGN KEY (discussion) REFERENCES discussions(id),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (qid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'pollvoters'
@@ -541,7 +541,7 @@ CREATE TABLE pollvoters (
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	KEY qid (qid,id,uid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'rss_raw'
@@ -564,7 +564,7 @@ CREATE TABLE rss_raw (
 	FOREIGN KEY (subid) REFERENCES submissions(subid),
 	FOREIGN KEY (bid) REFERENCES blocks(bid),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'related_links'
@@ -578,7 +578,7 @@ CREATE TABLE related_links (
 	link varchar(128) NOT NULL,
 	KEY (keyword),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'sections'
@@ -609,7 +609,7 @@ CREATE TABLE sections (
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	FOREIGN KEY (subsection) REFERENCES subsections(id),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'sections_contained'
@@ -624,7 +624,7 @@ CREATE TABLE sections_contained (
 	FOREIGN KEY (container) REFERENCES sections(section),
 	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'section_extras'
@@ -640,7 +640,7 @@ CREATE TABLE section_extras (
 	FOREIGN KEY (section) REFERENCES sections(section),
 	UNIQUE extra (section,name),
 	PRIMARY KEY (param_id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'section_subsections'
@@ -653,7 +653,7 @@ CREATE TABLE section_subsections (
 	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (subsection) REFERENCES subsections(subsection),
 	PRIMARY KEY (section,subsection)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 
 #
@@ -668,7 +668,7 @@ CREATE TABLE section_topics (
 	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (tid) REFERENCES topics(tid),
 	PRIMARY KEY (section,type,tid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'subsections'
@@ -683,7 +683,7 @@ CREATE TABLE subsections (
 	UNIQUE code_key (title),
 	FOREIGN KEY (section) REFERENCES sections(section),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'sessions'
@@ -702,7 +702,7 @@ CREATE TABLE sessions (
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (last_subid) REFERENCES submissions(subid),
 	PRIMARY KEY (session)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS site_info;
 CREATE TABLE site_info (
@@ -712,7 +712,7 @@ CREATE TABLE site_info (
 	description varchar(255),
 	UNIQUE site_keys (name,value),
 	PRIMARY KEY (param_id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS slashd_status;
 CREATE TABLE slashd_status (
@@ -723,7 +723,7 @@ CREATE TABLE slashd_status (
 	summary VARCHAR(255) NOT NULL DEFAULT '',
 	duration float(6,2) DEFAULT '0.00' NOT NULL,
 	PRIMARY KEY (task)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 
 #
@@ -737,7 +737,7 @@ CREATE TABLE spamarmors (
 	code text,
 	active mediumint default '1',
 	PRIMARY KEY  (armor_id)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 
 #
@@ -776,7 +776,7 @@ CREATE TABLE stories (
 	INDEX time (time), /* time > now() shows that this is still valuable, even with frontpage -Brian */
 	INDEX submitter (submitter),
 	INDEX published (day_published)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'story_text'
@@ -790,8 +790,9 @@ CREATE TABLE story_text (
 	relatedtext text,
 	rendered text,
 	FOREIGN KEY (sid) REFERENCES stories(sid),
-	PRIMARY KEY (sid)
-) TYPE = myisam;
+	PRIMARY KEY (sid),
+	INDEX rendered (rendered(1))
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'story_param'
@@ -805,7 +806,7 @@ CREATE TABLE story_param (
 	value text DEFAULT '' NOT NULL,
 	UNIQUE story_key (sid,name),
 	PRIMARY KEY (param_id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'story_topics'
@@ -822,7 +823,7 @@ CREATE TABLE story_topics (
   PRIMARY KEY (id),
   INDEX tid (tid),
   INDEX sid (sid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'string_param'
@@ -836,7 +837,7 @@ CREATE TABLE string_param (
 	name varchar(64) NOT NULL,
 	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'submissions'
@@ -869,7 +870,7 @@ CREATE TABLE submissions (
 	KEY subid (section,subid),
 	KEY ipid (ipid),
 	KEY subnetid (subnetid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'submission_param'
@@ -883,7 +884,7 @@ CREATE TABLE submission_param (
 	value text DEFAULT '' NOT NULL,
 	UNIQUE submission_key (subid,name),
 	PRIMARY KEY (param_id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'templates'
@@ -902,7 +903,7 @@ CREATE TABLE templates (
 	last_update timestamp,
 	PRIMARY KEY (tpid),
 	UNIQUE true_template (name,page,section,lang)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'topics'
@@ -916,7 +917,7 @@ CREATE TABLE topics (
 	alttext char(40),
 	default_image mediumint UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (tid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'topic_image_sections'
@@ -928,7 +929,7 @@ CREATE TABLE topic_image_sections (
 	topic_image mediumint UNSIGNED DEFAULT 0 NOT NULL,
 	section varchar(30) DEFAULT 'index' NOT NULL,
 	PRIMARY KEY (tid,section)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'topics'
@@ -942,7 +943,7 @@ CREATE TABLE topic_images (
 	width smallint UNSIGNED,
 	height smallint UNSIGNED,
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'tzcodes'
@@ -957,7 +958,7 @@ CREATE TABLE tzcodes (
 	dst_tz        CHAR(4),
 	dst_off_set   MEDIUMINT,
 	PRIMARY KEY (tz)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users'
@@ -982,7 +983,7 @@ CREATE TABLE users (
 	KEY chk4user (realemail,nickname),
 	KEY chk4matchname (matchname),
 	KEY author_lookup (author)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users_acl'
@@ -997,7 +998,7 @@ CREATE TABLE users_acl (
 	KEY uid (uid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 
 #
@@ -1025,7 +1026,7 @@ CREATE TABLE users_comments (
 	threshold tinyint DEFAULT '0',
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users_count'
@@ -1035,7 +1036,7 @@ DROP TABLE IF EXISTS users_count;
 CREATE TABLE users_count (
 	uid mediumint UNSIGNED NOT NULL,
 	PRIMARY KEY (uid)
-) TYPE = myisam;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'users_hits'
@@ -1047,7 +1048,7 @@ CREATE TABLE users_hits (
 	lastclick TIMESTAMP,
 	hits int DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users_index'
@@ -1064,7 +1065,7 @@ CREATE TABLE users_index (
 	noboxes tinyint DEFAULT '0' NOT NULL,
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users_info'
@@ -1103,7 +1104,7 @@ CREATE TABLE users_info (
 	people MEDIUMBLOB,
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users_param'
@@ -1119,7 +1120,7 @@ CREATE TABLE users_param (
 	KEY (uid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (param_id)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'users_prefs'
@@ -1137,7 +1138,7 @@ CREATE TABLE users_prefs (
 	lang char(5) DEFAULT 'en_US' NOT NULL,
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
-) TYPE = myisam;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'vars'
@@ -1149,5 +1150,5 @@ CREATE TABLE vars (
 	value text,
 	description varchar(255),
 	PRIMARY KEY (name)
-) TYPE = myisam;
+) TYPE=InnoDB;
 

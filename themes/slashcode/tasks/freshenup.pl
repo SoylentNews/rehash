@@ -54,7 +54,47 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	my $stories = $slashdb->getStoriesWithFlag(
+	my $stories;
+	
+	# Render any stories that need rendering.  This used to be done
+	# by admin.pl;  now admin.pl just sets story_text.rendered=NULL
+	# and lets this task do it.
+
+	$stories = $slashdb->getStoriesNeedingRender(
+		$do_all ? 10 : 3
+	);
+	STORIES_RENDER: for my $sid (@$stories) {
+
+		# Don't run forever...
+		if (time > $start_time + 30) {
+			slashdLog("Aborting stories at render, too much elapsed time");
+			last STORIES_RENDER;
+		}
+
+		my $rendered;
+		{
+			local $user->{currentSection} = "index";
+			local $user->{noicons} = "";
+			local $user->{light} = "";
+
+			# ugly hack, but for now, needed: without it, when an
+			# editor edits in foo.sitename.com, saved stories get
+			# rendered with that section
+			Slash::Utility::Anchor::getSectionColors();
+
+			$rendered = displayStory($sid, '', { get_cacheable => 1 });
+		}
+		$slashdb->updateStory($sid, {
+			rendered =>	$rendered,
+			writestatus =>	'dirty',
+		});
+
+	}
+
+	# Freshen the static versions of any stories that have changed.
+	# This means writing the .shtml files.
+
+	$stories = $slashdb->getStoriesWithFlag(
 		$do_all ? 'all_dirty' : 'mainpage_dirty',
 		'DESC',
 		$max_stories
@@ -62,7 +102,7 @@ $task{$me}{code} = sub {
 
 	my $bailed = 0;
 	my $totalChangedStories = 0;
-	STORIES: for my $story (@$stories) {
+	STORIES_FRESHEN: for my $story (@$stories) {
 
 		# Don't run forever freshening stories.  Before we
 		# stomp on too many other invocations of freshenup.pl,
@@ -71,8 +111,8 @@ $task{$me}{code} = sub {
 		# 90 seconds of work should mean we only stomp on the
 		# one invocation following.
 		if (time > $start_time + 90) {
-			slashdLog("Aborting stories, too much elapsed time");
-			last STORIES;
+			slashdLog("Aborting stories at freshen, too much elapsed time");
+			last STORIES_FRESHEN;
 		}
 
 		my($sid, $title, $section, $displaystatus) =
@@ -128,9 +168,15 @@ $task{$me}{code} = sub {
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
 
 	my($base) = split(/\./, $constants->{index_handler});
-	# -M is in days, 0.0417 is approx an hour
-	# Maybe this should be in a var. --Pater
-	$w = 'notok' if (-M "$basedir/$base.shtml" > 0.0417);
+
+	# Does the homepage need to be freshened whether we think it's
+	# necessary or not?
+	my $min_days = $constants->{freshen_homepage_min_minutes} || 0;
+	if ($min_days) {
+		# It's actually in minutes right now;  convert to days for -M.
+		$min_days /= 60*24;
+		$w = 'notok' if -M "$basedir/$base.shtml" > $min_days;
+	}
 
 	my $dirty_sections;
 	if ($constants->{task_options}{run_all}) {
