@@ -46,11 +46,11 @@ __END__
 
 =head1 NAME
 
-Slash::Apache::Log - Handles logging for slashdot
+Slash::Apache::TemplatePages - Handles logging for slashdot
 
 =head1 SYNOPSIS
 
-	use Slash::Apache::Log;
+	use Slash::Apache::TemplatePages;
 
 =head1 DESCRIPTION
 
