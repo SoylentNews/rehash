@@ -46,7 +46,7 @@ $task{$me}{code} = sub {
 		slashdLog("Daily Archival End ($rc[0] articles in $rc[1]s)");
 	}
 
-	slashdLog('Begin Daily Comment Recyle');
+	slashdLog('Begin Daily Comment Recycle');
 	my $msg = $slashdb->deleteRecycledComments();
 	slashdLog("End Daily Comment Recycle ($msg recycled)");
 };

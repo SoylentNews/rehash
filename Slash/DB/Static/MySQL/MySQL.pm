@@ -176,6 +176,9 @@ sub deleteRecycledComments {
 	);
 
 	my $rtotal = 0;
+	# This *must* be made faster, it seems to do about 4 per minute
+	# unless the comments being deleted are mostly-threaded.  Maybe
+	# it's time to make _deleteThread not be recursive.
 	for my $comment (@$comments) {
 		next if !$comment or ref($comment) ne 'ARRAY' or !@$comment;
 		my $local_count = $self->_deleteThread($comment->[0]);
