@@ -334,8 +334,8 @@ sub timeCalc {
 
 	$off_set = $user->{off_set} unless defined $off_set;
 
-	# massage data for YYYYMMDDHHmmSS
-	$date =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/$1-$2-$3 $4:$5:$6/;
+	# massage data for YYYYMMDDHHmmSS or YYYYMMDDHHmm
+	$date =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?$/"$1-$2-$3 $4:$5:" . ($6 || '00')/e;
 
 	# find out the user's time based on personal offset in seconds
 	$date = str2time($date) + $off_set;

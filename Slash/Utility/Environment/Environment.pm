@@ -1188,9 +1188,7 @@ sub prepareUser {
 
 	if ($uri =~ m[^/$]) {
 		$user->{currentPage} = 'index';
-	} elsif ($uri =~ m{/([^/]+)\.pl$}) {
-		$user->{currentPage} = $1;
-	} elsif ($uri =~ m{([^/]+)\.pl$}) {
+	} elsif ($uri =~ m{(?:/|\b)([^/]+)\.pl$}) {
 		$user->{currentPage} = $1;
 	} else {
 		$user->{currentPage} = 'misc';
@@ -1269,6 +1267,7 @@ Hashref of cleaned-up data.
 		uthreshold voters width
 		textarea_rows textarea_cols
 		subid tpid tid qid aid
+		url_id spider_id miner_id keyword_id
 	);
 
 	# fields that have ONLY a-zA-Z0-9_

@@ -42,6 +42,11 @@ You can also pass in a UID to use instead of anonymous coward:
 
 	% perl -MSlash::Test=virtualuser,2 -e 'print Dumper $user'
 
+Plugin variables automatically spring into existence, such as $journal, $messages,
+etc.  Feel free to do:
+
+	% perl -MSlash::Test -e 'print Dumper $journal->themes'
+
 =head1 EXPORTED FUNCTIONS
 
 =cut
