@@ -93,8 +93,31 @@ sub handler {
 	my $op = $form->{op} || '';
 
 	if (($op eq 'userlogin' || $form->{rlogin}) && length($form->{upasswd}) > 1) {
+
 		my $tmpuid = $slashdb->getUserUID($form->{unickname});
-		($uid, my($newpass)) = userLogin($tmpuid, $form->{upasswd});
+
+		# Don't allow login attempts from IPIDs that have been marked
+		# as "nopost" -- those are mostly open proxies.  Check both
+		# the ipid and the subnetid (we can't use values in $user
+		# because that doesn't get set up until prepareUser is called,
+		# later in this function).  Note we don't have to MD5 the
+		# values, checkReadOnly() knows how to do that.
+		my $read_only = 0;
+		my $hostip = $r->connection->remote_ip;
+		if ($slashdb->checkReadOnly('nopost', { ipid => $hostip })) {
+			$read_only = 1;
+		} else {
+			$hostip =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+			$read_only = 1 if $slashdb->checkReadOnly('nopost', {
+				subnetid => $hostip });
+		}
+
+		my $newpass;
+		if ($read_only) {
+			$uid = 0;
+		} else {
+			($uid, $newpass) = userLogin($tmpuid, $form->{upasswd});
+		}
 
 		# here we want to redirect only if the user has posted via
 		# GET, and the user has logged in successfully

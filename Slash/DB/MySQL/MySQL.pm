@@ -2611,10 +2611,9 @@ sub savePollQuestion {
 
 	# Go on and unset any reference to the qid in sections, if it 
 	# needs to exist the next statement will correct this. -Brian
-	$self->sqlUpdate('sections', { qid => ''}, " qid = $poll->{qid} ")	
-		if ($poll->{qid});
+	$self->sqlUpdate('sections', { qid => '0' }, " qid = $poll->{qid} ")	
+		if $poll->{qid};
 
-	
 	if ($poll->{qid} && $poll->{polltype} eq "section" && $poll->{date} le $self->getTime()) {
 		$self->setSection($poll->{section}, { qid => $poll->{qid} });
 	}

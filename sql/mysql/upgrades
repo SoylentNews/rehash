@@ -1853,3 +1853,15 @@ INSERT INTO vars (name, value, description) VALUES ('bytime_delay','120','days t
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link_series','0','Boolean where to use next/prev links for articles in a series (topic)');
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link_section','0','Boolean where to use next/prev links for articles in a section');
 
+INSERT INTO vars (name, value, description) VALUES ('top_sid','','The sid of the most recent story on the homepage');
+
+UPDATE sections SET title='' WHERE title IS NULL;
+UPDATE sections SET qid='0' WHERE qid IS NULL;
+ALTER TABLE sections CHANGE COLUMN title title VARCHAR(64) DEFAULT '' NOT NULL, CHANGE COLUMN qid qid MEDIUMINT DEFAULT '0' NOT NULL;
+
+# This is a change we're making for Slashdot;  it's something to consider
+# for your own site, depending on how you have set up your sections.
+# The practical change you'll see is that now sectional index.pl Older
+# Stuff slashboxes will have a "Yesterday's Edition" link at the bottom.
+# UPDATE sections SET issue=3 WHERE issue=1 AND artcount > 0 AND section NOT IN ('polls', 'search');
+
