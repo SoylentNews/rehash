@@ -1758,10 +1758,17 @@ sub getDescriptions {
 	my $qlid = $self->_querylog_start('SELECT', 'descriptions');
 	my $sth = $descref->(@_);
 	return { } if !$sth;
-	while (my($id, $desc) = $sth->fetchrow) {
-		$codeBank_hash_ref->{$id} = $desc;
+
+	# allow $descref to return a hashref, instead of a statement handle
+	if (ref($sth) =~ /::st$/) {
+		while (my($id, $desc) = $sth->fetchrow) {
+			$codeBank_hash_ref->{$id} = $desc;
+		}
+		$sth->finish;
+	} else {
+		@{$codeBank_hash_ref}{keys %$sth} = values %$sth;
 	}
-	$sth->finish;
+
 	$self->_querylog_finish($qlid);
 
 	$self->{$cache} = $codeBank_hash_ref if getCurrentStatic('cache_enabled');

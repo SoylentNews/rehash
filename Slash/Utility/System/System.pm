@@ -161,9 +161,9 @@ sub messageID {
 
 	my $msg_id;
 	if ($host eq $localhost || !length($localhost)) {
-		$msg_id = sprintf('%f-%d-slash@%s', Time::HiRes::time(), $$, $host);
+		$msg_id = sprintf('<%f-%d-slash@%s>', Time::HiRes::time(), $$, $host);
 	} else {
-		$msg_id = sprintf('%f-%d-slash-%s@%s', Time::HiRes::time(), $$, $localhost, $host);
+		$msg_id = sprintf('<%f-%d-slash-%s@%s>', Time::HiRes::time(), $$, $localhost, $host);
 	}
 	return $msg_id;
 }}
