@@ -5,7 +5,6 @@ Print older stories for older stories box
 
 * cur_time = current time()
 * stories = arrayref of story hashrefs
-* section = section data structure
 * yesterday = the value to put in the "yesterday's edition" link
 * week_ago = the date from a week ago 
 * start = where to start counting from in search.pl return values
@@ -16,8 +15,8 @@ Each story has the keys sid, section, title, time, commentcount,
 day (w, m, d, h, min, ampm), secs (since unix epoch) and
 link (which is a linkStory() value)
 
-XXX This is hacked up pretty badly to work with the fake section "index".
-We really need to decide what the status of "index" is.
+XXXSECTIONTOPICS the above key list is wrong at least for 'section' :)
+
 __title__
 
 __page__
@@ -29,45 +28,42 @@ getOlderStories
 __template__
 [% this_today = '';
    c = 0;
-   max_older_stories = section.artcount_max / 2 || 15;
+   max_older_stories = gSkin.artcount_max / 2 || 15;
    FOREACH story = stories;
    	day = "$story.day_of_week $story.month $story.day";
 	IF this_today != day;
-		this_today = day;
-		IF !section or section.section == 'index' %]
-			<P><B>[% IF cur_time && story.secs && cur_time-story.secs > 7*86400
-				%]<FONT SIZE="4"><A HREF="[% gSkin.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
-				>[% story.month %] [% story.day %]</A></FONT>[%
-			ELSE
-				%]<FONT SIZE="4"><A HREF="[% gSkin.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
-				>[% story.day_of_week %]</A></FONT> [% story.month %] [% story.day %][%
-			END %]</B></P>
-		[% ELSIF section.issue && section.issue > 1 %]
-			<P><B><FONT SIZE="4"><A HREF="[% gSkin.rootdir %]/index.pl?section=[% section.section %]&amp;issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
-				>[% story.day_of_week %]</A></FONT> [% story.month %] [% story.day %]</B></P>
-		[% ELSE %]
-			<P><B><FONT SIZE="4">[% story.day_of_week %]</FONT> [% story.month %] [% story.day %]</B></P>
-		[% END;
-	END %]
+		this_today = day; %]
+		<p><b><font size="4"><a href="[% gSkin.rootdir %]/index.pl?issue=[% story.issue %]">
+		[%- IF cur_time && story.secs && cur_time-story.secs < 7*86400
+		    # If the story is within the last week, show (and link) the day-of-week -%]
+			[% story.day_of_week %]</a></font> [% story.month %] [% story.day %]
+		[%- ELSE
+		    # Otherwise, show the whole date, because just the day would confuse -%]
+			[% story.month %] [% story.day %]</a></font>
+		[%- END -%]
+		</b></p>
+	[%- END %]
 	&middot;
 	<A HREF="[% story.link.0 %]"[% IF story.link.2 %] TITLE="[% story.link.2 %]"[% END %]>[% story.link.1 %]</A>
 	([% story.commentcount %])<BR>
 	[% start = start + 1; c = c + 1; LAST IF c >= max_older_stories %]
 [% END %]
 
-[% IF !section or section.section == 'index' %]
-<P ALIGN="RIGHT"><B><A HREF="[% gSkin.rootdir %]/search.pl?start=[% start %]">Older Articles</A></B>
-<BR><B>[% PROCESS next_prev_issue older_stories = 1 %]</B>
-[% ELSIF section.issue %]
-<P ALIGN="RIGHT">
-	[% IF section.issue == 1 || section.issue == 3 %]
-<BR><B><A HREF="[% gSkin.rootdir %]/search.pl?section=[% section.section %]&amp;start=[% start %]"
->Older Articles</A></B>
-	[% END %]
-	[% IF (section.issue == 2 || section.issue == 3) and first_date >= yesterday and last_date <= yesterday %]
-<BR><B>[% PROCESS next_prev_issue older_stories = 1 %]</B>
-	[% END %]
-[% END %]
+<p align="right">
+
+[% # only do this if we want to have an "Older Articles" link
+   # pointing back in time into search.pl
+   # (why wouldn't we??) %]
+
+<b><a href="[% gSkin.rootdir %]/search.pl?start=[% start %]
+	[%- IF gSkin.skid != constants.mainpage_skid %]&amp;section=[% gSkin.name; END -%]
+">Older Articles</a></b>
+
+[% # only do this if we want to have a yesterday/today/"June 1"
+   # style next/previous day issue link
+   # (why wouldn't we??) %]
+
+<br><b>[% PROCESS next_prev_issue older_stories = 1 %]</b>
 
 __seclev__
 10000
