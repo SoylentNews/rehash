@@ -172,7 +172,7 @@ CREATE TABLE blocks (
 	url varchar(128),
 	rdf varchar(255),
 	retrieve tinyint NOT NULL DEFAULT '0',
-	last_update timestamp,
+	last_update timestamp NOT NULL,
 	rss_template varchar(30),
 	items smallint NOT NULL DEFAULT '0', 
 	autosubmit ENUM("no","yes") DEFAULT 'no' NOT NULL,
@@ -327,7 +327,7 @@ CREATE TABLE discussions (
 	commentcount smallint UNSIGNED DEFAULT '0' NOT NULL,
 	flags ENUM("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
 	section varchar(30) NOT NULL,
-	last_update timestamp,
+	last_update timestamp NOT NULL,
 	approved tinyint UNSIGNED DEFAULT 0 NOT NULL,
 	commentstatus ENUM('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof') DEFAULT 'enabled' NOT NULL, /* Default is that we allow anyone to write */
 	KEY (sid),
@@ -626,7 +626,7 @@ CREATE TABLE sections (
 	defaulttopic TINYINT DEFAULT '1' NOT NULL,
 	defaultsection VARCHAR(30),  /* Only set in collected sections */
 	defaultsubsection SMALLINT UNSIGNED NOT NULL,
-	last_update timestamp DEFAULT '20000101000000' NOT NULL,
+	last_update timestamp NOT NULL,
 	UNIQUE (section),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
@@ -790,7 +790,7 @@ CREATE TABLE stories (
 	day_published DATE DEFAULT '0000-00-00' NOT NULL,
 	qid MEDIUMINT UNSIGNED DEFAULT NULL,
 	subsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
-	last_update timestamp,
+	last_update timestamp NOT NULL,
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (sid),
@@ -916,7 +916,7 @@ CREATE TABLE templates (
 	seclev mediumint UNSIGNED NOT NULL,
 	description text,
 	title varchar(128),
-	last_update timestamp,
+	last_update timestamp NOT NULL,
 	PRIMARY KEY (tpid),
 	UNIQUE true_template (name,page,section,lang)
 ) TYPE=InnoDB;
