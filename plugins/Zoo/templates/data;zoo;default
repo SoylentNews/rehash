@@ -44,6 +44,9 @@ __template__
 [% CASE 'yournofoes' %]
 	You love everyone or you play your cards very close to your chest.
 
+[% CASE 'yournofreaks' %]
+	Everyone loves you, that or they are to afraid to admit otherwise.
+
 [% CASE 'friendshead' %]
 	Friends of [% nickname %]
 
@@ -66,7 +69,10 @@ __template__
 	Your fans
 
 [% CASE 'yourfreakshead' %]
-	Your fans
+	Your freaks
+
+[% CASE 'no_go' %]
+	Sorry, this is not an option.
 
 [% CASE 'over_socialized' %]
 	You are over the limit for the number of friends and foes you can have.
