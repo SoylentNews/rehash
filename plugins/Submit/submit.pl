@@ -220,7 +220,8 @@ sub previewForm {
 		title =>	$sub->{subj},
 		introtext =>	$sub->{story},
 	};
-	my $similar_stories = $reader->getSimilarStories($storyref, $num_sim);
+	my $similar_stories = [];
+	$similar_stories = $reader->getSimilarStories($storyref, $num_sim) if $user->{is_admin};
 
 	# Truncate that data to a reasonable size for display.
 
