@@ -34,7 +34,7 @@ __template__
 		[% skins.${question.primaryskid}.title %] *<BR>
 		<INPUT TYPE="hidden" name="primaryskid" value="[% question.primaryskid %]">
 	[% ELSE %]
-		[% Slash.createSelect('skid', skins, question.primaryskid, 1) %]
+		[% Slash.createSelect('primaryskid', skins, question.primaryskid, 1) %]
 	[% END %]
 	[% PROCESS formLabel value => "Poll Topic" comment => "" %]
 	[% DEFAULT question.topic=constants.discussion_default_topic %]
