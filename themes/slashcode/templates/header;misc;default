@@ -26,7 +26,7 @@ __template__
 	[%- END ;
 ELSE ; # default author link, where author is a nickname
 	IF link.author %]
-<LINK REL="author" HREF="[% constants.rootdir %]/~[% link.author | fixparam %]/" TITLE="[% link.author | strip_param %]">
+<LINK REL="author" HREF="[% constants.rootdir %]/~[% link.author | fixparam %]/" TITLE="[% link.author | strip_attribute %]">
 	[%- END ;
 END ; IF link.section %]
 <LINK REL="parent" HREF="[% constants.rootdir %]/index.pl?section=[% link.section | fixparam %]" TITLE="[% link.section | strip_attribute %]">
