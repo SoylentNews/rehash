@@ -786,6 +786,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consequences_bonus_quint
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_bonus_quintile_4', '1.1', 'Fairly moderate a comment in the fourth 20% of a discussion and gain this bonus multiplier');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_bonus_quintile_5', '1.1', 'Fairly moderate a comment in the last 20% of a discussion and gain this bonus multiplier');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_bonus_replypost_tokenmult', '1.2', 'Fairly moderate a reply, instead of a top-level comment, and gain this bonus multiplier');
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences_repeats','3=-4|5=-12|10=-100','Token penalties for modding same user multiple times, applied at M2 reconcile time');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_freq','86400','In seconds, the maximum frequency which users can metamoderate');

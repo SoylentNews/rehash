@@ -1252,9 +1252,12 @@ sub updateTokens {
 # little easier to use.  Note that the value returned has three
 # fields:  a float, its sign, and an SQL expression which may be
 # either an integer or an IF().
+# The mod_hr passed in here is the same format as the items
+# returned by getModsNeedingReconcile().
 sub getM2Consequences {
 	my($self, $frac, $mod_hr) = @_;
 	my $constants = getCurrentStatic();
+
 	my $c = $constants->{m2_consequences};
 	my $retval = { };
 	for my $ckey (sort { $a <=> $b } keys %$c) {
@@ -1273,21 +1276,48 @@ sub getM2Consequences {
 			last;
 		}
 	}
+
+	my $cr = $constants->{m2_consequences_repeats};
+	if ($cr && %$cr) {
+		my $repeats = $self->_csq_repeats($mod_hr);
+		for my $min (sort { $b <=> $a } keys %$cr) {
+			if ($min <= $repeats) {
+				$retval->{m1_tokens}{num} += $cr->{$min};
+				$self->_set_csq('m1_tokens', $retval->{m1_tokens});
+				last;
+			}
+		}
+	}
+
 	return $retval;
+}
+
+sub _csq_repeats {
+	my($self, $mod_hr) = @_;
+	# Count the number of moderations performed by this user
+	# on the same target user, in the same direction (up or
+	# down), before the current mod we're reconciling, but of
+	# course after the archive_delay_mod (or a max of 60 days).
+	my $ac_uid = getCurrentStatic("anonymous_coward_uid");
+	return $self->sqlCount(
+		"moderatorlog",
+		"active=1
+		 AND uid=$mod_hr->{uid} AND cuid=$mod_hr->{cuid}
+		 AND cuid != $ac_uid
+		 AND val=$mod_hr->{val}
+		 AND id < $mod_hr->{id}
+		 AND ts >= DATE_SUB(NOW(), INTERVAL 60 DAY)");
 }
 
 sub _csq_bonuses {
 	my($self, $frac, $retval, $mod_hr) = @_;
 	my $constants = getCurrentStatic();
 
-	# Only moderations that meet a certain minimum level of
-	# Fairness qualify for the following bonuses.
-	return if $frac < $constants->{m2_consequences_bonus_minfairfrac};
-
+	my $num = $retval->{m1_tokens}{num};
 	# Only moderations that are going to give a token bonus
 	# already qualify to have that bonus hiked.
-	my $num = $retval->{m1_tokens}{num};
 	return if $num <= 0;
+
 	my $num_orig = $num;
 	my @applied = qw( );
 
@@ -1387,10 +1417,19 @@ sub _csq_bonuses {
 		push @applied, "pointsorig_$mod_hr->{points_orig}";
 	}
 
+	return if $num == $num_orig;
+
+	if ($frac < $constants->{m2_consequences_bonus_minfairfrac}) {
+		# Only moderations that meet a certain minimum
+		# level of Fairness qualify for the bonuses.
+		# This mod did not meet that level.  So now, the
+		# consequences change does not happen if it would
+		# be advantageous to the moderator.
+		return if $num_orig > $num;
+	}
+
 printf STDERR "%s m2_consequences change from '%d' to '%.2f' because '%s' id %d cid %d uid %d\n",
 scalar(localtime), $num_orig, $num, join(" ", @applied), $mod_hr->{id}, $mod_hr->{cid}, $mod_hr->{uid};
-
-	return if $num == $num_orig;
 
 	$retval->{m1_tokens}{num} = sprintf("%+.3f", $num);
 }

@@ -2169,3 +2169,5 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_si
 
 INSERT INTO vars (name, value, description) VALUES ('accesslog_imageregex', '^/images/hc/', 'Image hits will only be written into accesslog if their URL path matches this regex, empty string for all, NONE for none');
 
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences_repeats','3=-4|5=-12|10=-100','Token penalties for modding same user multiple times, applied at M2 reconcile time');
+

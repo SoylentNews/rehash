@@ -6531,7 +6531,8 @@ sub getSlashConf {
 						  0.70 => [qw(  0     0     +2  0   )],
 						  0.80 => [qw( +0.01 -1     +3  0   )],
 						  0.90 => [qw( +0.02 -2     +4  0   )],
-						  1.00 => [qw( +0.05  0     +5 +0.5 )],	}
+						  1.00 => [qw( +0.05  0     +5 +0.5 )],	},
+		m2_consequences_repeats =>	{ 3 => -4, 5 => -12, 10 => -100 },
 	);
 	for my $key (keys %conf_fixup_arrays) {
 		if (defined($conf{$key})) {
