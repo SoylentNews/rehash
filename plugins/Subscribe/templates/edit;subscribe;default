@@ -85,7 +85,8 @@ and so far [% hits_bought %] have been used up.
 
 	<P>We give you some control over deciding where to suppress ads.
 	New subscribers default to suppressing ads everywhere except on
-	comments pages.
+	comments pages. For accounting purposes, we'd appreciate if you
+	had at least one type of ad being suppressed.
 
 	<P><TABLE BORDER=0 CELLSPACING=1 WIDTH="100%">
 	<TR><TH>&nbsp;&nbsp;Ads&nbsp;&nbsp;</TH>
