@@ -13,6 +13,7 @@ use strict;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Display;
 use Slash::Utility;
+use Slash::Constants ':messages';
 use Email::Valid;
 use HTML::Entities;
 use vars qw($VERSION);
@@ -94,9 +95,12 @@ sub main {
 
 	header(getData('header'));
 
-	# Instantiate plugin.
-	my $Email;
-	unless ($Email = getObject('Slash::Email')) {
+	# Instantiate necessary plugins.
+	my %Plugins = (
+		Email 	=> getObject('Slash::Email'),
+		Messages=> getObject('Slash::Messages'),
+	);
+	unless ($Plugins{Email} && $Plugins{Messages}) {
 		print getData('plugin_not_installed');
 		footer();
 		return;
@@ -126,7 +130,7 @@ sub main {
 			$constants, 
 			$user, 
 			$form,
-			$Email
+			\%Plugins
 		);
 	} else {
 		print getData('formkeyError', {
@@ -149,7 +153,8 @@ sub emailStoryForm {
 }
 
 sub emailStory {
-	my($slashdb, $constants, $user, $form, $Email) = @_;
+	my($slashdb, $constants, $user, $form, $Plugins) = @_;
+	my($Email, $Messages) = @{$Plugins}{qw(Email Messages)};
 
 	# Check input for valid RFC822 email address.
 	my $email = decode_entities($form->{email});
@@ -180,14 +185,29 @@ sub emailStory {
 		"$story->{introtext}\n\n$story->{bodytext}",
 		74
 	);
+	# It is wise to not have embedded objects in anything passed to 
+	# Slash::Messages::create() [ala anything used by Storable], so we 
+	# must convert the returned links to strings.
+	$_ = $_->as_string for @{$story->{links}};
 
-	$story->{formatted_text} = slashDisplay('dispStory', {
-		story	=> $story,
-	}, { Return => 1, Nocomm => 1 });
-	
 	# E-mail story.
-	my $subject = getData('email_subject', { story => $story });
-	my $rc = sendEmail($email, $subject, $story->{formatted_text});
+	my $msg_data = {
+		template_name	=> 'dispStory',
+		story		=> $story,
+		subject		=> {
+			template_name => 'email_subj',
+		},
+	};
+	my $uid = $constants->{email_use_userident} ?
+		$user->{uid} : $constants->{anonymous_coward_uid};
+	my $rc = $Messages->create(
+		0, MSG_CODE_EMAILSTORY, $msg_data, $uid, $email
+	);
+
+	# Since we are using create, $rc is deprecated. We only can know
+	# if the message was successfully added to the Messaging queue, not
+	# if it was sent correctly (because it hasn't been sent and we 
+	# can't wait for it to be). 
 	print getData('mail_result', { code => $rc });
 }
 
@@ -198,21 +218,32 @@ sub emailOptoutForm {
 }
 
 sub emailOptout {
-	my($slashdb, $constants, $user, $form, $Email) = @_;
+	my($slashdb, $constants, $user, $form, $Plugins) = @_;
+	my($Email, $Messages) = @{$Plugins}{qw(Email Messages)};
 
 	my $email = decode_entities($form->{email});
 	if (Email::Valid->rfc822($email)) {
 		# Send final confirmation email to the address being removed
 		# as another form of abuse protection.
-		my $content = slashDisplay('optout_confirm', 0, {
-			Return => 1, NoComm => 1
-		});
-		my $subject = getData('optout_confirm_subject');
-		my $rc = sendEmail($email, $subject, $content);
+		my $msg_data = {
+			template_name	=> 'optout_confirm',
+			subject		=> {
+				template_name => 'optout_subj',
+			},
+		};
+		my $uid = $constants->{anonymous_coward_uid};
+		my $rc = $Messages->create(
+			0, MSG_CODE_EMAILSTORY, $msg_data, $uid, $email
+		);
+
 		# If we bomb the attempt to send the final mail, we may have
 		# been fed a bogus address. Only remove from list if the
 		# email was successfully sent.
-		$Email->addToOptoutList($email) if $rc;
+		# ...Not using a direct email sending method, this can not
+		# not be accurately determined as yet.
+		#$Email->addToOptoutList($email) if $rc;
+
+		$Email->addToOptoutList($email);
 		print getData('optout_added', { result => $rc });
 	} else {
 		print getData('invalid_email');

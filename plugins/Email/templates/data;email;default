@@ -41,10 +41,12 @@ CASE 'optout_removed';
 
 "$email removed from story emailing opt-out list.<BR>";
 
+# Deprecated (see email_subj;email;defalt)
 CASE 'email_subject';
 
 "Emailed Story: \"$story.title\" from $constants.sitename";
 
+# Deprecated (see optout_subj;email;default)
 CASE 'optout_email_subject';
 
 "[CONFIRM] Story Email Opt-out Request for $constants.sitename";
