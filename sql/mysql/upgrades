@@ -853,3 +853,5 @@ INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showano
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 40, 0);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 50, 0);
 
+DELETE FROM vars WHERE name='commentsPerPoint';
+
