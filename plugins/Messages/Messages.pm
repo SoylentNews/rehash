@@ -404,6 +404,10 @@ sub send {
 	} elsif ($mode == MSG_MODE_EMAIL) {
 		my($addr, $content, $subject, $contemp, $subtemp);
 
+		# print errors to slashd.log under slashd only if high level
+		# of verbosity -- pudge
+		my $log_error = defined &main::verbosity ? main::verbosity() >= 3 : 1;
+
 		unless ($constants->{send_mail}) {
 			messagedLog(getData("send_mail false", 0, "messages"));
 			return 0;
@@ -415,7 +419,7 @@ sub send {
 				addr	=> $addr,
 				uid	=> $msg->{user}{uid},
 				error	=> "Invalid address"
-			}, "messages"));
+			}, "messages")) if $log_error;
 			return 0;
 		}
 
@@ -434,7 +438,7 @@ sub send {
 				addr	=> $addr,
 				uid	=> $msg->{user}{uid},
 				error	=> $Mail::Sendmail::error
-			}, "messages"));
+			}, "messages")) if $log_error;
 			return 0;
 		}
 
