@@ -142,10 +142,6 @@ Refer to your OS distribution.
 
 	http://search.cpan.org/search?dist=Storable
 
-=item ipc_shareable-0.30
-
-	http://search.cpan.org/search?dist=ipc_shareable
-
 B<Note>: IPC::Shareable is only needed for the troll speed limit
 feature, which is off by default (settable via the C<use_ipc>
 variable in F<slashdotrc.pl>).  Also, on all of our test systems,
@@ -746,4 +742,4 @@ directory, and make sure you have the latest code.
 
 =head1 AUTHOR
 
-Patrick Galbraith and Chris Nandor.  Last Modified May 31, 2000.
+Patrick Galbraith and Chris Nandor.  Last Modified June 1, 2000.

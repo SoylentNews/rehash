@@ -44,6 +44,8 @@ slash-1.0.4, 2000.05.31
 
 *	Fixed typo in admin.pl (Nathan Vonnahme)
 
+*	Strip & out of new nicknames
+
 slash-1.0.3, 2000.05.22
 -----------------------
 
