@@ -58,7 +58,7 @@ Discuss this story at:
 To opt-out of further emailings:
     [% thisurl %]/email.pl?op=optout_form
 
-Copyright 1997-2003 [% constants.sitepublisher %].  All rights reserved.
+Copyright 1997-2004 [% constants.sitepublisher %].  All rights reserved.
 
 __version__
 $Id$

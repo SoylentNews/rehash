@@ -25,7 +25,7 @@ __template__
 [% END %]
 
 
-Copyright 1997-2003 [% constants.sitepublisher %].  All rights reserved.
+Copyright 1997-2004 [% constants.sitepublisher %].  All rights reserved.
 
 __seclev__
 500
