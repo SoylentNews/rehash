@@ -1,0 +1,1 @@
+INSERT INTO vars (name, value, description) VALUES ('yass_section', 'yass', 'Section to pull URL list from.');
