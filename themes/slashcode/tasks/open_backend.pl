@@ -48,14 +48,16 @@ sub save2file {
 	# re-FETCH the file; if they send an If-Modified-Since, Apache
 	# will just return a header saying the file has not been modified
 	# -- pudge
-	open $fh, "<$f" or die "Can't open $f: $!";
-	my $current = do { local $/; <$fh> };
-	close $fh;
-
-	my $new = $d;
-	# normalize ...
-	s|<dc:date>[^<]*</dc:date>|| for $current, $new;
-	return if $current eq $new;
+	# on the other hand, don't abort if the file doesn't exist; that
+	# probably means the site is newly installed - Jamie 2003/09/05
+	if (open $fh, "<$f") {
+		my $current = do { local $/; <$fh> };
+		close $fh;
+		my $new = $d;
+		# normalize ...
+		s|<dc:date>[^<]*</dc:date>|| for $current, $new;
+		return if $current eq $new;
+	}
 
 	open $fh, ">$f" or die "Can't open $f: $!";
 	print $fh $d;
