@@ -433,8 +433,8 @@ sub sqlSelectMany {
 	if ($sth->execute) {
 		return $sth;
 	} else {
-		$sth->finish;
 		$self->sqlErrorLog($sql);
+		$sth->finish;
 		$self->sqlConnect;
 		return undef;
 	}
@@ -558,6 +558,11 @@ sub sqlSelectColArrayref {
 	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
+	unless ($sth) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return;
+	}
 
 	my $array = $self->{_dbh}->selectcol_arrayref($sth);
 	unless (defined($array)) {
