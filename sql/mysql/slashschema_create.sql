@@ -1131,11 +1131,11 @@ CREATE TABLE users_logtokens (
 	lid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	locationid CHAR(32) NOT NULL DEFAULT '',
-	temp TINYINT NOT NULL DEFAULT '0',
+	temp ENUM("yes","no") NOT NULL DEFAULT "no",
 	expires DATETIME NOT NULL DEFAULT '2000-01-01 00:00:00',
 	value CHAR(22) NOT NULL DEFAULT '',
 	PRIMARY KEY (lid),
-	UNIQUE uid_locationid (uid, locationid, temp),
+	UNIQUE uid_locationid_temp (uid, locationid, temp),
 	KEY (locationid),
 	KEY (temp)
 ) TYPE=InnoDB;
