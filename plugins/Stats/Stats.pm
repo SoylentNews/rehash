@@ -201,6 +201,15 @@ sub countMetamodLog {
 }
 
 ########################################################
+# Well this stat ends up being written as modlog_m2count_0
+# which is useless to date (2004-04-20) since it also counts
+# active mods which are un-m2able (under/overrated).  At the
+# 0 count level, it's including old mods.  (Of course, at
+# the 1 and above count levels, the un-m2able mods don't
+# show up, so that's fine.)  Question is, do we change the
+# stat now and just ignore all the old data, or do we create
+# a new stat to correctly track count=0, reason IN m2able?
+# - Jamie
 sub countUnmetamoddedMods {
 	my($self, $options) = @_;
 	my $active_clause = $options->{active_only} ? " AND active=1" : "";
