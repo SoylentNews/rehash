@@ -2119,8 +2119,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('hc_pool_secs_before_
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_margin', '6', 'For question 1 (images), margin around the image in pixels');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For question 1 (images), maximum number of radians to rotate (positive or negative, so the range is twice this)');
 
-ALTER TABLE comments CHANGE COLUMN karma ckarma SMALLINT NOT NULL DEFAULT 0, CHANGE COLUMN karma_abs ckarma_abs SMALLINT UNSIGNED NOT NULL DEFAULT 0;
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_135, Start of T_2_3_0_136 - 2004/02/10

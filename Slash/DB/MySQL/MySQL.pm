@@ -5276,18 +5276,18 @@ sub setCommentForMod {
 	$hr->{points_change} = $val;
 	$hr->{points_after} = $hr->{points_before} + $val;
 
-	my $ckarma_val;
+	my $karma_val;
 	if (!$constants->{mod_down_karmacoststyle}) {
-		$ckarma_val = $val;
+		$karma_val = $val;
 	} elsif ($val < 0) {
-		$ckarma_val = ($hr->{points_before}+$val) - $hr->{points_max};
+		$karma_val = ($hr->{points_before}+$val) - $hr->{points_max};
 	} else {
-		$ckarma_val = $val;
+		$karma_val = $val;
 	}
-	if ($ckarma_val) {
-		my $ckarma_abs_val = abs($ckarma_val);
-		$update->{-ckarma}     = sprintf("ckarma%+d", $ckarma_val);
-		$update->{-ckarma_abs} = sprintf("ckarma_abs%+d", $ckarma_abs_val);
+	if ($karma_val) {
+		my $karma_abs_val = abs($karma_val);
+		$update->{-karma}     = sprintf("karma%+d", $karma_val);
+		$update->{-karma_abs} = sprintf("karma_abs%+d", $karma_abs_val);
 	}
 
 	my $changed = $self->sqlUpdate("comments", $update, $where, {
