@@ -28,6 +28,13 @@ __template__
       used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
 [% END -%]
      comments: [% comments %] posted yesterday
+        Users: [% distinct_comment_posters_uids %] distinct uids posted comments
+             : [% comments_uids %] distinct uids used comments
+             : [% article_uids %] distinct uids used articles
+             : [% search_uids %] distinct uids used search
+             : [% journal_uids %] distinct uids used journals
+             : [% palm_uids %] distinct uids used palm pages
+             : [% rss_uids %] distinct uids used rss pages
         IPIDS: [% IPIDS %] distinct IPIDS posted comments
              : [% comments_ipids %] distinct IPIDS used comments
              : [% article_ipids %] distinct IPIDS used articles

@@ -47,6 +47,7 @@ sub createStatDaily {
 	};
 
 	$insert->{section} = $options->{section} if $options->{section};
+	$insert->{section} ||= 'all';
 
 	$self->sqlInsert('stats_daily', $insert, { ignore => 1 });
 }
@@ -181,6 +182,27 @@ sub getCommentsByDistinctIPID {
 
 	my $used = $self->sqlSelectColArrayref(
 		'ipid', $tables, 
+		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
+		 $section_where",
+		'',
+		{ distinct => 1 }
+	);
+}
+
+########################################################
+sub getCommentsByDistinctUIDPosters {
+	my($self, $yesterday, $options) = @_;
+
+	my $section_where = "";
+	$section_where .= " AND discussions.id = comments.sid
+			    AND discussions.section = '$options->{section}'"
+		if $options->{section};
+
+	my $tables = 'comments';
+	$tables .= ", discussions" if $options->{section};
+
+	my $used = $self->sqlSelect(
+		'count(DISTINCT uid)', $tables, 
 		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
 		 $section_where",
 		'',

@@ -81,6 +81,7 @@ EOT
 	my $used = $stats->countModeratorLog($yesterday);
 	my $modlog_hr = $stats->countModeratorLogHour($yesterday);
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID($yesterday);
+	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters($yesterday);
 	my $submissions = $stats->countSubmissionsByDay($yesterday);
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($yesterday, $distinct_comment_ipids);
 	my $modlog_total = $modlog_hr->{1}{count} + $modlog_hr->{-1}{count};
@@ -91,13 +92,19 @@ EOT
 		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
 		my $pages = $stats->countDailyByPage($_, $yesterday);
 		my $bytes = $stats->countBytesByPage($_, $yesterday);
+		my $uids = $stats->countUsersByPage($_, $yesterday);
+		$data{"${_}_uids"} = sprintf("%8d", $uniq);
 		$data{"${_}_ipids"} = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
-		$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq, { section => 'index'});
-		$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes, { section => 'index'});
-		$statsSave->createStatDaily($yesterday, "${_}_page", $pages, { section => 'index'});
+		# Section is problematic in this definition, going to store the data in all
+	  # "all" till this is resolved. -Brian
+		$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq);
+		$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes);
+		$statsSave->createStatDaily($yesterday, "${_}_page", $pages);
 	}
+
+	$statsSave->createStatDaily($yesterday, "distinct_comment_posters", $distinct_comment_posters_uids);
 
 # Not yet
 #	my $codes = $stats->getMessageCodes($yesterday);
@@ -109,9 +116,9 @@ EOT
 #		$temp->{people} = sprintf("%8d", $people);
 #		$temp->{uses} = sprintf("%8d", $uses);
 #		$temp->{mode} = sprintf("%8d", $mode);
-#		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people, { section => 'index'});
-#		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses, { section => 'index'});
-#		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode, { section => 'index'});
+#		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people);
+#		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses);
+#		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode);
 #		push(@{$data{messages}}, $temp);
 #	}
 
@@ -189,13 +196,14 @@ EOT
 		min_count => $constants->{mod_stats_min_repeat}
 	});
 
-	$statsSave->createStatDaily($yesterday, "total", $count->{total}, { section => 'index'});
-	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes, { section => 'index'});
-	$statsSave->createStatDaily($yesterday, "unique", $count->{unique}, { section => 'index'});
-	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users}, { section => 'index'});
-	$statsSave->createStatDaily($yesterday, "comments", $comments, { section => 'index'});
-	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index}, { section => 'index'});
-	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids, { section => 'index'});
+	$statsSave->createStatDaily($yesterday, "total", $count->{total});
+	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes);
+	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
+	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
+	$statsSave->createStatDaily($yesterday, "comments", $comments);
+	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
+	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
+	$statsSave->createStatDaily($yesterday, "distinct_comment_posters_uids", $distinct_comment_posters_uids);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
@@ -207,7 +215,7 @@ EOT
 				? "_admin_$uid"
 				: "_total";
 			my $val = $admin_mods->{$nickname}{$stat};
-			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val, { section => 'index'});
+			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val);
 		}
 	}
 
@@ -239,7 +247,7 @@ EOT
 #	my @sections;
 #	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
 #		push(@sections, { key => $_, value => $count->{index}{$_} });
-#		$statsSave->createStatDaily($yesterday, "$_", $count->{index}{$_}, {section => 'index'});
+#		$statsSave->createStatDaily($yesterday, "$_", $count->{index}{$_});
 #	}
 
 	my @lazy;
