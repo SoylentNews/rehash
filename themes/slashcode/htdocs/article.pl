@@ -21,8 +21,15 @@ sub main {
 
 	$story = $reader->getStory($form->{sid});
 
+	# Set the $future_err flag if a story would be available to be
+	# displayed, except it is in the future, and the user is not
+	# allowed to see stories in the future.  This is only used to
+	# decide what kind of error message to report to the user,
+	# later on, if they can't see the story.
 	my $future_err = 0;
-	if ($story && $story->{is_future} && !($user->{is_admin} || $user->{author})) {
+	if ($story
+		&& $story->{is_future} && !$story->{neverdisplay}
+		&& !($user->{is_admin} || $user->{author})) {
 		$future_err = 1 if !$constants->{subscribe}
 			|| !$user->{is_subscriber}
 			|| !$user->{state}{page_plummy};
