@@ -878,6 +878,16 @@ sub getMetamodsForUserRaw {
 		}
 		push @ids, @new_ids;
 		$num_needed -= scalar(@new_ids);
+
+		# If we tried to get all the oldzone mods we wanted, and
+		# failed, give up trying now.  The rest of the looping we
+		# do should be for non-oldzone mods (i.e. we only look
+		# for the oldzone on the first pass through here).
+		if ($num_oldzone_needed) {
+			print STDERR scalar(localtime) . " could not get all oldzone mods needed: ids '@ids' num_needed '$num_needed' num_oldzone_needed '$num_oldzone_needed' num_normal_needed '$num_normal_needed'\n";
+			$num_normal_needed += $num_oldzone_needed;
+			$num_oldzone_needed = 0;
+		}
 	}
 	if ($getmods_loops > 4) {
 		print STDERR "GETMODS looped the max number of times,"
