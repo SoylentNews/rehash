@@ -121,14 +121,18 @@ sub handler {
 		if ($method eq 'GET' && $uid && ! isAnon($uid)) {
 			$form->{returnto} =~ s/%3D/=/;
 			$form->{returnto} =~ s/%3F/?/;
-			$form->{returnto} = url2abs($newpass
+			my $absolutedir = $is_ssl
+				? $constants->{absolutedir_secure}
+				: $constants->{absolutedir};
+			$form->{returnto} = url2abs(($newpass
 				? "$constants->{rootdir}/users.pl?op=changepasswd" .
 					# XXX This "note" field is ignored now...
 					# right?  - Jamie 2002/09/17
 				  "&note=Please+change+your+password+now!"
 				: $form->{returnto}
 					? $form->{returnto}
-					: $uri
+					: $uri),
+				$absolutedir
 			);
 			# not working ... move out into users.pl and index.pl
 			# I may know why this is the case, we may need
@@ -208,6 +212,7 @@ sub handler {
 	# "_dynamic_page" or any hash key name beginning with _ or .
 	# cannot be accessed from templates -- pudge
 	$user->{state}{_dynamic_page} = 1;
+	$user->{state}{ssl} = $is_ssl;
 	createCurrentUser($user);
 	createCurrentForm($form);
 

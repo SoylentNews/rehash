@@ -119,12 +119,13 @@ rootdir variable, converted to absolute with proper protocol.
 =cut
 
 sub root2abs {
-	my $rootdir = getCurrentStatic('rootdir');
-	my $is_ssl = Slash::Apache::ConnectionIsSSL();
-	if ($rootdir =~ m|^//|) {
-		$rootdir = ($is_ssl ? 'https:' : 'http:') . $rootdir;
+	my $user = getCurrentUser();
+
+	if ($user->{state}{ssl}) {
+		return getCurrentStatic('absolutedir_secure');
+	} else {
+		return getCurrentStatic('absolutedir');
 	}
-	return $rootdir;
 }
 
 #========================================================================
@@ -197,9 +198,7 @@ sub url2abs {
 	my $newurl;
 
 	# set base only if not already set, and rootdir exists
-	if (!$base && getCurrentStatic('rootdir')) {
-		$base = root2abs($url);
-	}
+	$base ||= root2abs();
 
 	if ($base) {
 		$newurl = URI->new_abs($url, $base)->canonical->as_string;
