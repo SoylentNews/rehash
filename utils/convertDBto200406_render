@@ -35,7 +35,10 @@ $stoids = $slashdb->sqlSelectColArrayref("stoid", "stories");
 
 for my $stoid (@$stoids) {
 	my($primaryskid, $tids) = $slashdb->setStoryRenderedFromChosen($stoid);
-	my $tid = $tids->[0] || 0;
+	# use original tid if it's set and remains in the returned set
+	my $orig_tid = $slashdb->getStory($stoid, 'tid');
+	my $tid = $orig_tid if $orig_tid and scalar grep { $_ == $orig_tid } @$tids;
+	$tid ||= $tids->[0] || 0;
 	my $update_hr = {
 		tid => $tid,
 		primaryskid => $primaryskid,
