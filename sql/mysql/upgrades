@@ -2178,3 +2178,18 @@ INSERT INTO vars (name, value, description) VALUES ('comment_karma_limit','','Ma
 
 # End of T_2_3_0_143, Start of T_2_3_0_144 - 2004/03/16
 
+DELETE from vars where name = "submissions_listing_page_size";
+
+INSERT INTO vars (name, value, description) VALUES ('submissions_accepted_only_page_size', 20, "Number of submissions shown per page when only accepted submissions are shown.  Set to 0 to show all");
+INSERT INTO vars (name, value, description) VALUES ('submissions_all_page_size', 40, "Number of submissions shown per page on a user page when all submission statuses are shown.  Set to 0 to show all");
+
+
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Stories','stories','[% constants.rootdir %]/admin.pl',100,0,1);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Mods','recent_mods','[% constants.rootdir %]/admin.pl?op=recent_mods',500,0,2);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Reqs','requests','[% constants.rootdir %]/admin.pl?op=recent_requests',500,0,3);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Posting','recent','[% constants.rootdir %]/admin.pl?op=recent',500,0,4);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Abusers','abusers','[% constants.rootdir %]/users.pl?op=topabusers',100,0,5);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Read&nbsp;Only','readonly','[% constants.rootdir %]/users.pl?op=listreadonly',100,0,6);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Banned','banned','[% constants.rootdir %]/users.pl?op=listbanned',100,0,7);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Info','stats','[% constants.rootdir %]/stats.pl',100,0,8);
+INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Config','config','[% constants.rootdir %]/admin.pl?op=topics',10000,0,9);
