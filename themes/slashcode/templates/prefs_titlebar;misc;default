@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+
+* tab_selected = label of selected tab
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+prefs_titlebar
+__template__
+<!-- prefs_titlebar tab_selected=[% tab_selected %] -->
+
+[% title = title || "$user.nickname (This is you!)";
+PROCESS titlebar title=title width="100%";
+
+tabs = [ ];
+tabs = [
+	{ link = "/users.pl?op=edituser",	label = "User",		sel_label = "user" },
+	{ link = "/users.pl?op=edithome",	label = "Homepage",	sel_label = "home" },
+	{ link = "/users.pl?op=editcomm",	label = "Comments",	sel_label = "comments" },
+	{ link = "/my/inbox",			label = "Messages",	sel_label = "messages" },
+	{ link = "/journal.pl?op=editprefs",	label = "Journal",	sel_label = "journal" },
+	{ link = "/users.pl?op=editmiscopts",	label = "Misc",		sel_label = "misc" },
+	{ link = "/subscribe.pl",		label = "Subscription",	sel_label = "subscription" },
+	{ link = "/users.pl?op=changepasswd",	label = "Password",	sel_label = "password" },
+];
+
+PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
+
+__seclev__
+10000
