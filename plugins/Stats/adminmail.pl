@@ -344,17 +344,15 @@ EOT
 		extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
 	}) if $recent_subscriber_uidlist;
 	my $total_secure = $logdb->countDailySecure();
-
-	my $op_uniq  = $logdb->countDailyByPageDistinctIPIDs();
-	my $op_pages = $logdb->countDailyByPages();
-	my $op_bytes = $logdb->countBytesByPages();
-	my $op_uids  = $logdb->countUsersByPages();
+	slashdLog("Page Summary Stats Begin");
+	my $page_summary_stats = $logdb->getPageSummaryStats({ ops => [@PAGES] });
+	slashdLog("Page Summary Stats End");
 
 	for my $op (@PAGES) {
-		my $uniq  = $op_uniq->{$op}{cnt};
-		my $pages = $op_pages->{$op}{cnt};
-		my $bytes = $op_bytes->{$op}{bytes};
-		my $uids  = $op_uids->{$op}{uids};
+		my $uniq  = $page_summary_stats->{$op}{cnt};
+		my $pages = $page_summary_stats->{$op}{pages};
+		my $bytes = $page_summary_stats->{$op}{bytes};
+		my $uids  = $page_summary_stats->{$op}{uids};
 
 		$data{"${op}_label"} = sprintf("%8s", $op);
 		$data{"${op}_uids"} = sprintf("%8u", $uids);
@@ -414,16 +412,30 @@ EOT
 	my $stats_from_rss = $logdb->countFromRSSStatsBySections();
 	#XXXSECTIONTOPICS - don't think we need this anymore but just making sure
 	#$sections->{index} = 'index';
+	
+	slashdLog("Section Summary Stats Begin");
+	my $section_summary_stats = $logdb->getSectionSummaryStats({
+			no_op		=> $constants->{op_exclude_from_countdaily}
+	});
+	slashdLog("Section Summary Stats End");
+	slashdLog("Other Section Summary Stats Begin");
+	my $other_section_summary_stats = $logdb->getSectionSummaryStats({
+			no_op		=> [@PAGES]
+	});
+	slashdLog("Other Section Summary Stats End");
+	
+	slashdLog("Section Page Summary Stats Begin");
+	my $section_page_summary_stats = $logdb->getSectionPageSummaryStats({ op => [@PAGES] });
+	slashdLog("Section Page Summary Stats End");
+	
+	
 	for my $skid (sort keys %$skins) {
 		my $temp = {};
 		$temp->{skin_name} = $skins->{$skid};
-		my $uniq = $logdb->countDailyByPageDistinctIPID('', { skid => $skid });
-		my $pages = $logdb->countDailyByPage('', {
-			skid		=> $skid,
-			no_op		=> $constants->{op_exclude_from_countdaily}
-		} );
-		my $bytes = $logdb->countBytesByPage('', { skid => $skid });
-		my $users = $logdb->countUsersByPage('', { skid => $skid });
+		my $uniq = $section_summary_stats->{$skid}{cnt};
+		my $pages = $section_summary_stats->{$skid}{pages};
+		my $bytes = $section_summary_stats->{$skid}{bytes};
+		my $users = $section_summary_stats->{$skid}{uids};
 		my $users_subscriber = 0;
 		$users_subscriber = $logdb->countUsersByPage('', {
 			skid			=> $skid,
@@ -446,12 +458,10 @@ EOT
 		}
 
 		for my $op (@PAGES) {
-			my $uniq = $logdb->countDailyByPageDistinctIPID($op, { skid => $skid });
-			my $pages = $logdb->countDailyByPage($op, {
-				skid => $skid,
-			} );
-			my $bytes = $logdb->countBytesByPage($op, { skid => $skid });
-			my $users = $logdb->countUsersByPage($op, { skid => $skid });
+			my $uniq = $section_page_summary_stats->{$skid}{$op}{cnt};
+			my $pages = $section_page_summary_stats->{$skid}{$op}{pages};
+			my $bytes = $section_page_summary_stats->{$skid}{$op}{bytes};
+			my $users = $section_page_summary_stats->{$skid}{$op}{users};
 			$temp->{$op}{label} = sprintf("%8s", $op);
 			$temp->{$op}{ipids} = sprintf("%8u", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
@@ -469,11 +479,11 @@ EOT
 		}
 		#Other not recorded
 		{
-			my $options = { no_op => \@PAGES , skid => $skid };
-			my $uniq = $logdb->countDailyByPageDistinctIPID('', $options);
-			my $pages = $logdb->countDailyByPage('', $options);
-			my $bytes = $logdb->countBytesByPage('', $options);
-			my $uids = $logdb->countUsersByPage('', $options);
+			
+			my $uniq = $other_section_summary_stats->{$skid}{cnt};
+			my $pages = $other_section_summary_stats->{$skid}{pages};
+			my $bytes = $other_section_summary_stats->{$skid}{bytes};
+			my $uids = $other_section_summary_stats->{$skid}{uids};
 			my $op = 'other';
 			$temp->{$op}{ipids} = sprintf("%8u", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
