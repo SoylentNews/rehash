@@ -25,7 +25,7 @@ sub main {
 	# for now ... writer
 	my $stats     = getObject('Slash::Stats', { db_type => 'writer' } );
 
-	my $admin      = $user->{seclev} >= ($constants->{stats_admin_seclev} || 100);
+	my $admin      = $user->{acl}{stats}; #$user->{seclev} >= ($constants->{stats_admin_seclev} || 100);
 	my $admin_post = $admin && $user->{state}{post};
 
 	# possible value of "op" parameter in form
@@ -44,13 +44,20 @@ sub main {
 		$op = 'default';
 	}
 
+	if (!$ops{$op}[ALLOWED]) {
+		redirect("$constants->{rootdir}/users.pl");
+		return;
+	}
+
 	# from data;SCRIPTNAME;default
 	#getData('head')
-	header('', '', { admin => 1 } ) unless $op eq 'graph';
+	unless ($op eq 'graph') {
+		header('', '', { admin => 1, adminmenu => 'info', tab_selected => 'stats' } );
+		print createMenu('stats');
+	}
 
 	# dispatch of op
-	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats)
-		if $ops{$op}[ALLOWED];
+	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats);
 
 	footer() unless $op eq 'graph';
 }
