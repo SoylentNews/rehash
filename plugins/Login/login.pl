@@ -216,7 +216,7 @@ sub mailPasswd {
 	my $user_send = $reader->getUser($uid);
 
 	if (!$error) {
-		if ($reader->checkReadOnly) {
+		if ($reader->checkReadOnly(nopost => { ipid => $user->{ipid} })) {
 			push @note, getData('mail_readonly');
 			$error = 1;
 
