@@ -691,6 +691,7 @@ CREATE TABLE story_param_new (
         PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
 INSERT INTO story_param_new (stoid, name, value) SELECT stories_new.stoid, story_param.name, story_param.value FROM stories_new, story_param WHERE stories_new.sid=story_param.sid ORDER BY stories_new.stoid, name;
+INSERT INTO story_param_new (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FROM stories_new WHERE displaystatus=-1;
 DROP TABLE IF EXISTS story_text_new;
 CREATE TABLE story_text_new (
         stoid MEDIUMINT UNSIGNED NOT NULL,
