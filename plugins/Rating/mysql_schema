@@ -1,22 +1,25 @@
-CREATE TABLE comment_rating (
+CREATE TABLE comment_vote (
 	vote_id mediumint UNSIGNED NOT NULL auto_increment,
 	uid mediumint UNSIGNED NOT NULL,
 	ipid char(32) DEFAULT '' NOT NULL,
-	sid mediumint UNSIGNED NOT NULL,
+	discussion mediumint UNSIGNED NOT NULL,
 	cid mediumint UNSIGNED NOT NULL,
 	val tinyint DEFAULT '0' NOT NULL,
-	active tinyint DEFAULT '1' NOT NULL,
+	active ENUM("no", "yes") DEFAULT "yes" NOT NULL,
 	ts DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	PRIMARY KEY vote_id (vote_id),
-	KEY uid_sid (uid,sid),
-	KEY ipid_sid (ipid,sid)
+	KEY uid_discussion_cid (uid,discussion,cid),
+	KEY ipid_discussion_cid (ipid,discussion,cid),
+	KEY cid (cid),
+	KEY discussion_active_val (discussion, active, val),
+	KEY ts (ts)
 );
-
 
 CREATE TABLE discussion_rating (
-	sid mediumint UNSIGNED NOT NULL UNIQUE,
-	total_votes mediumint,
-	active_votes mediumint,
-	avg_rating float NOT NULL DEFAULT '0',
-	PRIMARY KEY (sid)
+	discussion mediumint UNSIGNED NOT NULL UNIQUE,
+	total_votes mediumint NOT NULL DEFAULT 0,
+	active_votes mediumint NOT NULL DEFAULT 0,
+	avg_rating float DEFAULT NULL,
+	PRIMARY KEY (discussion)
 );
+

@@ -17,35 +17,40 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtualuser, $constants, $slashdb, $user, $info, $gSkin) = @_;
 	my $last_max = $slashdb->getVar('set_disc_rating_last_id', 'value', 1) || 0;
-	my $this_max = $slashdb->sqlSelect("MAX(vote_id)", "comment_vote",) || $last_max;
-	
-	my $sids = $slashdb->sqlSelectColArrayref("DISTINCT(sid)", "comment_vote", "vote_id > $last_max");
-	
-	if (@$sids) {
-		my $sid_clause = "sid IN (".( join ",", @$sids ).")";
-		my $summary = $slashdb->sqlSelectAllHashref("sid", 
-						"sid, count(*) as active_votes, avg(val) as rating",
-						"comment_vote",
-						"$sid_clause AND active = 1",
-						"GROUP BY sid"
+	my $this_max = $slashdb->sqlSelect("MAX(vote_id)", "comment_vote") || $last_max;
+
+	my $discussions = $slashdb->sqlSelectColArrayref(
+		"DISTINCT(discussion)",
+		"comment_vote",
+		"vote_id BETWEEN " . ($last_max+1) . " AND $this_max");
+
+	if (@$discussions) {
+		my $discussion_clause = "discussion IN (" . join(",", @$discussions) . ")";
+		my $summary = $slashdb->sqlSelectAllHashref(
+			"discussion", 
+			"discussion, COUNT(*) AS active_votes, AVG(val) AS rating",
+			"comment_vote",
+			"$discussion_clause AND active = 'yes'",
+			"GROUP BY discussion"
 		);
-	
-		my $votes = $slashdb->sqlSelectAllHashref("sid", 
-						"sid, count(*) as votes",
-						"comment_vote",
-						"$sid_clause",
-						"GROUP BY sid"
+
+		my $votes = $slashdb->sqlSelectAllHashref(
+			"discussion", 
+			"discussion, COUNT(*) AS votes",
+			"comment_vote",
+			"$discussion_clause",
+			"GROUP BY discussion"
 		);
-		
-		foreach my $sid (@$sids) {
-			my $avg_rating = $summary->{$sid}{rating} || 0;
-			my $active_votes = $summary->{$sid}{active_votes} || 0;
-			my $total_votes = $votes->{$sid}{votes} || 0;
-			
+
+		foreach my $discussion (@$discussions) {
+			my $avg_rating = $summary->{$discussion}{rating}; # undef/NULL is OK here
+			my $active_votes = $summary->{$discussion}{active_votes} || 0;
+			my $total_votes = $votes->{$discussion}{votes} || 0;
+
 			$slashdb->sqlReplace(
 				"discussion_rating",
 				{
-					sid => $sid,
+					discussion => $discussion,
 					total_votes => $total_votes,
 					active_votes => $active_votes,
 					avg_rating => $avg_rating
@@ -55,10 +60,10 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	my $num = @$sids;
+	my $num = @$discussions;
 	$slashdb->setVar("set_disc_rating_last_id", $this_max);
-	
-	slashdLog("$num Ratings updated");
+
+	slashdLog("$num ratings updated");
 
 };
 
