@@ -872,6 +872,16 @@ sub getTemplateList {
 }
 
 ########################################################
+sub countUserModsInDiscussion {
+	my($self, $uid, $disc_id) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	my $disc_id_q = $self->sqlQuote($disc_id);
+	return $self->sqlCount(
+		"moderatorlog",
+		"uid=$uid_q AND active=1 AND sid=$disc_id_q");
+}
+
+########################################################
 sub getModeratorCommentLog {
 	my($self, $asc_desc, $limit, $type, $value, $options) = @_;
 	$options ||= {};

@@ -1008,14 +1008,18 @@ sub validateComment {
 		}
 	}
 
-	if ($constants->{allow_moderation} && !$user->{is_anon} && !$form->{gotmodwarning} && 
-		$slashdb->sqlCount("moderatorlog","uid=$user->{uid} and active=1 sid=$form->{sid}") && !$form->{postanon} && 
-		!($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited}) && 
-		!$user->{acl}{modpoints_always})  {
-
+	if ($constants->{allow_moderation}
+		&& !$user->{is_anon}
+		&& !$form->{postanon}
+		&& !$form->{gotmodwarning}
+		&& !( $constants->{authors_unlimited}
+			&& $user->{seclev} >= $constants->{authors_unlimited} )
+		&& !$user->{acl}{modpoints_always}
+		&& $slashdb->countUserModsInDiscussion($user->{uid}, $form->{sid}) > 0
+	) {
 		$$error_message = getError("moderations to be lost");
 		$form_success = 0;
-		return; 
+		return;
 	}
 
 	$$error_message ||= '';
