@@ -2798,6 +2798,19 @@ sub getDB {
 
 #################################################################
 
+# Utility function to return an array of all the virtual users for
+# all the DBs of one specific type.
+
+sub getDBVUsForType {
+	my($self, $type) = @_;
+	my $dbs = $self->getDBs();
+	return map { $dbs->{$_}{virtual_user} }
+		grep { $dbs->{$_}{type} eq $type }
+		keys %$dbs;
+}
+
+#################################################################
+
 # Writing to the dbs_readerstatus table.
 
 sub createDBReaderStatus {
