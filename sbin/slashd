@@ -542,9 +542,12 @@ sub insert_task_event {
 			. scalar(localtime($next_time)));
 	}
 
-	# Rebuild the array in the proper order.
+	# Rebuild the array in the proper order.  Wrap this in a transaction
+	# so the DB doesn't have to go to disk 50 times, it can write all
+	# the rows at once.
 	$event_ar = [ ];
 	my @files = rebuild_event_ar($event_hr);
+	$slashdb->sqlDo("SET AUTOCOMMIT=0");
 	for my $file (@files) {
 		push @$event_ar, [ $file, $event_hr->{$file}{until_time} ];
 		(my $file_nopl = $file) =~ s/\.pl$//;
@@ -557,6 +560,7 @@ sub insert_task_event {
 		};
 		$slashdb->setSlashdStatus($file_nopl, $options);
 	}
+	$slashdb->sqlDo("COMMIT");
 }
 
 # Sort the events from the hash back into an array.  We choose the
