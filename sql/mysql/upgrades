@@ -1,9 +1,13 @@
 # This is the upgrade file for SQL. What does this mean to you?
 # If you are a developer you should leave notes here as to what
 # was done and when. This includes inserts, alter tables and deletions.
-# The Format is that you add your changes to the end with notes
-# and who you are. If your changes occur after a certain release tag
-# then you need to place your changes there.
+# Changes should always be appended, and when a tag is applied,
+# an End/Start comment should be appended.
+#
+# "End of X" means that tag X was applied "here" (at this point in
+#      the file, on the date given)..
+# "Start of Y" is just intended to clarify that work on the next tag
+#      after X started at the same time that X was tagged.
 
 #
 # $Id$
@@ -13,6 +17,13 @@
 # for required changes to update a site from fry to devel 
 # this matches cvs diff -r fry -r T_2_3_0_10 -U3 sql/mysql/slashschema_create.sql
 #
+# So if you are upgrading a site from 2.2.x, you should start here
+# and apply all the changes below.  Simply pasting in the whole
+# list almost certainly won't work, since we have several notes
+# where you need to run a brief perl script or something;  you will
+# need to read down it and apply those brief moments of human
+# intelligence.  Sorry.  We plan to build a tool to automate this
+# upgrade process... someday. - Jamie 2003/03/31
 
 ALTER TABLE vars CHANGE name name varchar(48) DEFAULT '' NOT NULL;
 
@@ -2213,6 +2224,8 @@ CREATE TABLE open_proxies (
 
 # End of T_2_3_0_145, Start of T_2_3_0_146 - 2004/03/24
 
+# End of T_2_3_0_146, Start of T_2_3_0_147 - 2004/03/24
+
 UPDATE vars SET name='comments_portscan', description='Scan incoming IPs for open proxy ports? 0=never, 1=anon posting only, 2=all posting' WHERE name='comments_portscan_anon_for_proxy';
 
 ALTER TABLE code_param CHANGE COLUMN type type VARCHAR(24) NOT NULL DEFAULT '';
@@ -2238,5 +2251,5 @@ INSERT INTO vars (name, value, description) VALUES ('newuser_portscan', '0', 'If
 
 ALTER TABLE open_proxies ADD COLUMN xff VARCHAR(15) DEFAULT NULL;
 
-# End of T_2_3_0_146, Start of T_2_3_0_147 - 2004/03/30
+# End of T_2_3_0_147, Start of T_2_3_0_148 - 2004/03/30
 
