@@ -9183,20 +9183,40 @@ sub getUrlFromTitle {
 }
 
 ##################################################################
+# What time does the database think it is?  Various parts of the
+# code are synched to that time, which may be different from the
+# time that the machine we're running on thinks it is.
+#
+# We use two closure'd variables here and do a little dance just to
+# avoid calling SELECT NOW() more than once every ten minutes.
+# This optimization only saves a very cheap call, but it may be a
+# very frequent call too, and there's just no need, clocks can't
+# possibly drift very much.
+#
+# Options are:
+#	add_secs	Seconds to add to the actual GMT time
+#	unix_format	Return a unix epoch integer instead of
+#			an SQL format string
+
+{ # closure
+my($last_db_time_offset, $last_db_time_confirm) = (undef, undef);
 sub getTime {
 	my($self, $options) = @_;
-
-	my $add_secs = $options->{add_secs} || 0;
-
-	my $t;
-	if (!$add_secs) {
-		$t = $self->sqlSelect('NOW()');
-	} else {
-		$t = $self->sqlSelect("DATE_ADD(NOW(), INTERVAL $add_secs SECOND)");
+	my $my_time = time();
+	if (!$last_db_time_confirm
+		|| $my_time > $last_db_time_confirm + 600) {
+		my $db_unix_time = timeCalc($self->sqlSelect('NOW()'), "%s", 0);
+		$last_db_time_offset = $db_unix_time - $my_time;
+		$last_db_time_confirm = $my_time;
 	}
-
-	return $t;
+	my $total_offset = $last_db_time_offset + ($options->{add_secs} || 0);
+	if ($options->{unix_format}) {
+		return time() + $total_offset;
+	} else {
+		return timeCalc(0, "%Y-%m-%d %T", $total_offset);
+	}
 }
+} # end closure
 
 ##################################################################
 sub getTimeAgo {

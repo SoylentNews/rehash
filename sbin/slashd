@@ -143,27 +143,12 @@ sub slashdLogDie {
 	die $err;
 }
 
-# What time does the database think it is?  Our tasks are synched to
-# that time, which may be different from the time that the machine
-# we're running on thinks it is.
-#
-# We use two closure'd variables here and do a little dance just to
-# avoid calling SELECT NOW() more than once every ten minutes.
-# Not that it really matters, this optimization saves just about
-# nothing, but there's just no need, clocks can't possibly drift
-# anywere near that much.
+# The closure and cache that was done on this is now done in
+# MySQL.pm, making this utility function pretty much a no-op.
 
-{ my($last_db_time_offset, $last_db_time_confirm) = (undef, undef);
 sub db_time {
-	my $my_time = time;
-	if (!$last_db_time_confirm
-		or $my_time > $last_db_time_confirm + 600) {
-		my $db_time = timeCalc($slashdb->getTime(), "%s", 0);
-		$last_db_time_offset = $db_time - $my_time;
-		$last_db_time_confirm = $my_time;
-	}
-	return $my_time + $last_db_time_offset;
-} }
+	return $slashdb->getTime({ unix_format => 1 });
+}
 
 # Get the logging verbosity from the database.
 #
