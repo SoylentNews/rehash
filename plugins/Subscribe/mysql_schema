@@ -17,10 +17,13 @@ CREATE TABLE subscribe_payments (
 	method		VARCHAR(6),
 	memo		VARCHAR(255) NOT NULL,
 	data		BLOB,
+	payment_type    VARCHAR(10),
+	puid		MEDIUMINT UNSIGNED
 	PRIMARY KEY(spid),
 	KEY(uid),
 	KEY(ts),
-	UNIQUE(transaction_id)
+	UNIQUE(transaction_id),
+	KEY(puid)
 ) TYPE = InnoDB;
 
 ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;

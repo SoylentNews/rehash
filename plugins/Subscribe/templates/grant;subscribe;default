@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+uid             - uid passed to this page
+pages           - number of pages requested
+grant_recipient - hashref for user that is getting the pages
+grant_success   - boolean for whether the grant was inserted successfully 
+__title__
+grant;subscribe;default
+__page__
+subscribe
+__lang__
+en_US
+__name__
+grant
+__seclev__
+10000
+__template__
+[% IF !uid or !pages %]
+	No UID ([% uid %]) given or no pages ([% pages %]) requested.  Cannot complete grant.
+[% ELSIF uid and !grant_recipient %]
+	No user found for specified UID ([% uid %]).  Cannot complete grant.
+[% ELSE %]
+	<P>Granting [% pages %] pages to [% grant_recipient.nickname %] ([% grant_recipient.uid %]).<P>
+	[% IF grant_success %]
+		<P>Grant completed successfully.</P>
+	[% ELSE %]
+		<P><B>Error:</B> Grant did not complete successfully.</P>
+	[% END %]
+[% END %]
+

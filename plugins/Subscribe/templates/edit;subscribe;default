@@ -24,14 +24,27 @@ edit
 __template__
 [% IF !user.is_admin; user_edit = user; END %]
 
-<P>Hit the PayPal or credit-card link below to subscribe to
-[% constants.sitename %].
-You will be able to purchase banner-ad-free pages.
+	[% IF (constants.subscribe_allow_gifts && (!constants.subscribe_gift_testing || user.is_admin)) %]
+		<P>You can buy a subscription for yourself or a gift subscription for another user.
+		Payment options include PayPal and credit-card.
+	
+		<FORM METHOD="POST" ACTION="[% constants.rootdir %]/subscribe.pl">
+		<CENTER><TABLE BORDER=0 CELLPADDING=3>
+		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="user"> Buy Pages for [% user.nickname %]</TD></TR>
+		<TR><TD><INPUT TYPE="radio" name="subscription_type" value="gift"> Buy Gift Subscription for UID <INPUT TYPE="text" name="uid" size="6"></TD></TR>
+		<TR><TD><INPUT TYPE="hidden" name="op" value="confirm"><INPUT TYPE="submit" value="Continue and choose payment type"></TD></TR>
+		</TABLE></CENTER>
+	</FORM>
+	[% ELSE %]
+		<P>Hit the PayPal or credit-card link below to subscribe to
+		[% constants.sitename %].
+		You will be able to purchase banner-ad-free pages.
 
-<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
-<TD>[% PROCESS paypalbut %]</TD>
-<TD>[% PROCESS ccbut %]</TD>
-</TR></TABLE></CENTER>
+		<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
+		<TD>[% PROCESS paypalbut %]</TD>
+		<TD>[% PROCESS ccbut %]</TD>
+		</TR></TABLE></CENTER>
+	[% END %]
 
 [%
 	pages = [
@@ -163,6 +176,18 @@ ends. Your day may vary.)
 	</FORM>
 
 [% END %]
+[% IF user.is_admin %]
+	<FORM METHOD="POST" ACTION="[% constants.rootdir %]/subscribe.pl">
+	<P>You're an admin so feel free to grant free pages to deserving users.<BR>
+	<TABLE>
+	<TR><TD>Number of pages:</TD><TD><INPUT TYPE="TEXT" NAME="pages" VALUE="0" SIZE="6"></TD></TR>
+	<TR><TD>User UID:</TD><TD><INPUT TYPE="TEXT" NAME="uid" VALUE="" SIZE="8"></TD></TR>
+	<TR><TD COLSPAN="2"><INPUT TYPE="SUBMIT" NAME="op" VALUE="grant"></TD></TR>
+	</TABLE>
+	</FORM>
+
+[% END %]
+
 
 <P>If you have any questions or concerns about billing, ad&nbsp;display,
 or other subscription-related issues, please contact

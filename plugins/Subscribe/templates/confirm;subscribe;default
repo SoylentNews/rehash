@@ -1,0 +1,53 @@
+__section__
+default
+__description__
+Template to allow confirmation of subscription type and
+choose payment type when gift subscriptions are allowed
+
+* type     - subscription type (gift or user)
+* uid      - uid of user to buy the subscription for (defaults to current user)
+* sub_user - user hashref for the recipient of a gift subscription 
+
+__title__
+Useless title to template
+__page__
+subscribe
+__lang__
+en_US
+__name__
+confirm
+__seclev__
+10000
+__template__
+[% IF type == "user" || type == "gift" %]
+	[% IF type == "user" %]
+	<P>You've decided to purchase:
+	<UL>
+	<LI>A [% constants.sitename %] subscription for [% user.nickname %] ([% user.uid %])
+	</UL>
+	If this is correct select your payment type below:
+		<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
+		<TD>[% PROCESS paypalbut %]</TD>
+		<TD>[% PROCESS ccbut %]</TD>
+		</TR></TABLE></CENTER>
+	[% ELSIF type == "gift" %]
+		[% IF sub_user %]
+			<P>You've decided to purchase:
+			<UL>
+				<LI>A [% constants.sitename %] gift subscription for [% sub_user.nickname %] ([% sub_user.uid %])
+			</UL>
+			<P>
+			If this is correct select your payment type below:
+			[% gift.uid = uid; gift.puid = user.uid %]
+			<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
+			<TD>[% PROCESS paypalbut gift = gift; %]</TD>
+			<TD>[% PROCESS ccbut gift = gift; %]</TD>
+			</TR></TABLE></CENTER>
+		[% ELSE %]
+			<P>No user was found for the UID ([% uid %]) you specified.  Please <A HREF="[% constants.rootdir %]/subscribe.pl">go back</A> and correct this to continue.
+		
+		[% END %]
+	[% END %]
+[% ELSE %]
+Recognized subscription type not selected
+[% END %]
