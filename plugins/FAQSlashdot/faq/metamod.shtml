@@ -1,4 +1,13 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <title>Slashdot FAQ - Meta-moderation</title>
 <!--#include virtual="/slashhead.inc"-->
+
+<!--
+($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
+-->
+
 <TABLE>
 	<TR width="100%">
 		<TD><A HREF="com-mod.shtml">Previous Section</A>

@@ -1,4 +1,13 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <title>Slashdot FAQ - Editorial</title>
 <!--#include virtual="/slashhead.inc"-->
+
+<!--
+($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
+-->
+
 <table>
 <tr>
 <td><a href="faq-meta.shtml">Previous Section</a></td>
