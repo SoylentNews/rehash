@@ -1617,6 +1617,8 @@ sub getUserEmail {
 # Yet another method that really should return an arrayref of
 # hashrefs, instead of an arrayref of arrayrefs.  This is
 # currently only used in users.pl  -Jamie
+# If anyone ever rewrites this move the formatDate() out to the template.
+# Display logic belongs in display. -Brian
 sub getCommentsByGeneric {
 	my($self, $where_clause, $num, $min) = @_;
 	$min ||= 0;
@@ -2453,8 +2455,6 @@ sub getPollQuestionList {
 		$where,
 		"ORDER BY date DESC LIMIT $offset,20"
 	);
-
-	formatDate($questions, 2, 2, '%A, %B %e, %Y'); # '%F'
 
 	return $questions;
 }
