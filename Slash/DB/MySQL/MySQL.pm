@@ -2513,6 +2513,7 @@ sub savePollQuestion {
 	$poll->{section}  ||= getCurrentStatic('defaultsection');
 	$poll->{voters}   ||= "0";
 	$poll->{autopoll} ||= "no";
+	$poll->{autopoll} ||= "no";
 	$poll->{polltype} ||= "section";
 
 	my $qid_quoted = "";
@@ -2520,6 +2521,13 @@ sub savePollQuestion {
 
 	my $sid_quoted = "";
 	$sid_quoted = $self->sqlQuote($poll->{sid}) if $poll->{sid};
+
+	# get hash of fields to update based on the linked story
+	my $data=$self->getPollUpdateHashFromStory($poll->{sid},{topic=>1, section=>1, date=>1, polltype=>1 }) if $poll->{sid};
+	# replace form values with those from story
+	foreach(keys %$data){
+		$poll->{$_}=$data->{$_};
+	}
 
 	if ($poll->{qid}) {
 		$self->sqlUpdate("pollquestions", {
@@ -2583,6 +2591,28 @@ sub savePollQuestion {
 	return $poll->{qid};
 }
 
+sub updatePollFromStory{
+	my ($self,$sid,$opts) = @_;
+	my ($data,$qid) = $self->getPollUpdateHashFromStory($sid,$opts);
+	if($qid){
+		$self->sqlUpdate("pollquestions",$data,"qid=".$self->sqlQuote($qid));
+	}
+}
+sub getPollUpdateHashFromStory{
+	my ($self,$sid,$opts) = @_;
+	my $story_ref=$self->sqlSelectHashref("sid,qid,time,section,tid,displaystatus","stories","sid=".$self->sqlQuote($sid));
+	my $data;
+	if($story_ref->{qid}){
+		$data->{date}=$story_ref->{time} if $opts->{date};
+		$data->{polltype}=$story_ref->{displaystatus} >= 0 ? "story" : "nodisplay" if $opts->{polltype};
+		$data->{topic}=$story_ref->{tid} if $opts->{topic};
+		$data->{section}=$story_ref->{section} if $opts->{section};
+	}
+	# return the hash of fields and values to update for the poll
+	# if asked for the array return the qid of the poll too
+	return wantarray ? ($data, $story_ref->{qid}) : $data;
+}
+
 ########################################################
 # A note, this does not remove the issue of a story
 # still having a poll attached to it (orphan issue)
@@ -2635,14 +2665,17 @@ sub getPollQuestionList {
 		if $other->{section};
 	$where .= sprintf ' AND section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
+	$where .= " AND pollquestions.topic = $other->{topic} " if $other->{topic};
+       
 	$where .= " AND date <= NOW() " unless $admin;
-
+	my $limit;
+	$limit = $other->{limit} || 20;
 
 	my $questions = $self->sqlSelectAll(
-		'qid, question, date, voters, commentcount, polltype, date>now() as future',
+		'qid, question, date, voters, commentcount, polltype, date>now() as future,pollquestions.topic',
 		'pollquestions,discussions',
 		$where,
-		"ORDER BY date DESC LIMIT $offset,20"
+		"ORDER BY date DESC LIMIT $offset, $limit"
 	);
 
 	return $questions;
@@ -3980,13 +4013,14 @@ sub currentAdmin {
 ########################################################
 #
 sub getTopNewsstoryTopics {
-	my($self, $limit) = @_;
-
+	my($self, $limit, $section) = @_;
+        $section="" if $section eq "index";
 	my $all = 1 if !$limit;
 
 	$limit =~ s/\D+//g;
 	$limit = 10 if !$limit || $limit == 1;
-
+        my $sect_clause;
+        $sect_clause=" AND section='$section' " if $section;
 	my $other  = $all ? '' : "LIMIT $limit";
 	my $topics = $self->sqlSelectAllHashrefArray(
 		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(time) AS tme",
@@ -3995,6 +4029,7 @@ sub getTopNewsstoryTopics {
 		AND displaystatus >= 0
 		AND time <= NOW()
 		AND topics.tid=stories.tid
+		$sect_clause
 		GROUP BY topics.tid
 		ORDER BY tme DESC
 		$other"
@@ -4005,9 +4040,39 @@ sub getTopNewsstoryTopics {
 		$_->{count}  = delete $_->{cnt};
 		$_->{'time'} = delete $_->{tme};
 	}
-
 	return $topics;
 }
+
+
+sub getTopPollTopics {
+	my($self, $limit) = @_;
+	my $all = 1 if !$limit;
+
+	$limit =~ s/\D+//g;
+	$limit = 10 if !$limit || $limit == 1;
+        my $sect_clause;
+	my $other  = $all ? '' : "LIMIT $limit";
+	my $topics = $self->sqlSelectAllHashrefArray(
+		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(date) AS tme",
+		'topics,pollquestions',
+		"polltype != 'nodisplay'
+		AND autopoll = 'no' 
+		AND date <= NOW()
+		AND topics.tid=pollquestions.topic
+		GROUP BY topics.tid
+		ORDER BY tme DESC
+		$other"
+	);
+
+	# fix names
+	for (@$topics) {
+		$_->{count}  = delete $_->{cnt};
+		$_->{'time'} = delete $_->{tme};
+	}
+	return $topics;
+}
+
+
 
 ##################################################################
 # Get poll
@@ -5508,9 +5573,10 @@ sub updateStory {
 		$self->setVar('writestatus', 'dirty');
 		$self->setSection($data->{section}, { writestatus => 'dirty' });
 	}
-
+	
 	$self->{_dbh}->commit;
 	$self->{_dbh}{AutoCommit} = 1;
+        $self->updatePollFromStory($sid,{date=>1,topic=>1,section=>1,polltype=>1});
 
 	return $sid;
 
