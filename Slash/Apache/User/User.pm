@@ -611,6 +611,7 @@ Bender:Float like a floatbox, sting like an automatic stingin' machine.
 Bender:Crippling pain? That's not covered by my insurance fraud.
 Bender:Let's commence preparations for rumbling!
 Bender:Woohoo, I'm popular!
+Bender:Ah crap, I'm some sort of robot!
 Fry:There's a lot about my face you don't know.
 Fry:Drugs are for losers. And hypnosis is for losers with big weird eyebrows.
 Fry:These new hands are great. I'm gonna break them in tonight.
