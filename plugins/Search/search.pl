@@ -220,7 +220,7 @@ sub commentSearch {
 		my $forward;
 		if (@$comments == $constants->{search_default_display} + 1) {
 			pop @$comments;
-			$forward = $start + $constants->{search_default_display};
+			$forward = $start + $constants->{search_default_display} + 1;
 		} else {
 			$forward = 0;
 		}
