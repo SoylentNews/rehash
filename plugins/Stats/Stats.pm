@@ -61,6 +61,20 @@ sub getPointsInPool {
 }
 
 ########################################################
+sub getTokensInPoolPos {
+	my($self) = @_;
+	return $self->sqlSelect('SUM(tokens)', 'users_info',
+		'tokens > 0');
+}
+
+########################################################
+sub getTokensInPoolNeg {
+	my($self) = @_;
+	return $self->sqlSelect('SUM(tokens)', 'users_info',
+		'tokens < 0');
+}
+
+########################################################
 sub getAdminsClearpass {
 	my($self) = @_;
 	return $self->sqlSelectAllHashref(

@@ -117,6 +117,8 @@ EOT
 		'created_at');
 
 	my $mod_points_pool = $stats->getPointsInPool();
+	my $mod_tokens_pool_pos = $stats->getTokensInPoolPos();
+	my $mod_tokens_pool_neg = $stats->getTokensInPoolNeg();
 	my $used = $stats->countModeratorLog();
 	my $modlog_yest_hr = $stats->countModeratorLogByVal();
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID();
@@ -228,6 +230,8 @@ EOT
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
 	$statsSave->createStatDaily("consensus", $consensus);
 	$statsSave->createStatDaily("mod_points_pool", $mod_points_pool);
+	$statsSave->createStatDaily("mod_tokens_pool_pos", $mod_tokens_pool_pos);
+	$statsSave->createStatDaily("mod_tokens_pool_neg", $mod_tokens_pool_neg);
 	$statsSave->createStatDaily("mod_points_needmeta", $modlogs_needmeta_yest);
 	$statsSave->createStatDaily("mod_points_lost_spent", $modlog_yest_total);
 	$statsSave->createStatDaily("mod_points_lost_spent_plus_1", $modlog_yest_hr->{+1}{count});
