@@ -284,7 +284,7 @@ __template__
 	</TR>
 </TABLE>
 <P>
-<INPUT TYPE="SUBMIT" VALUE="Save">
+<INPUT TYPE="SUBMIT" VALUE="Save"> <INPUT TYPE="SUBMIT" NAME="restore_defaults" VALUE="Restore Defaults">
 </FORM>
 
 __seclev__
