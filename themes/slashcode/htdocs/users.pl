@@ -901,7 +901,8 @@ sub showInfo {
 	}
 
 	my $user_change = { };
-	if ($fieldkey eq 'uid' && !$user->{is_anon} && $uid != $user->{uid}) {
+	if ($fieldkey eq 'uid' && !$user->{is_anon}
+		&& $uid != $user->{uid} && !isAnon($uid)) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;

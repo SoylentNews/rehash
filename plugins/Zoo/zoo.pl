@@ -637,7 +637,7 @@ sub check {
 
 	my $nickname = $slashdb->getUser($uid, 'nickname');
 	my $user_change = { };
-	if ($uid != $user->{uid}) {
+	if ($uid != $user->{uid} && !isAnon($uid)) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
