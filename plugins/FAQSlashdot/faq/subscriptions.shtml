@@ -97,6 +97,21 @@ to use them on <b>comments, articles, or the homepage</b>.
   <p><i><font size=-1>Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i> 
     <br>
     <i><font size=-1>Last Modified: 03/03/02</font></i> 
+  <p><a name="ss950"></a> 
+  <h2>How long does it take my payment to go through?</h2>
+  <p>Normally, you should be taken to
+  <a href="/subscribe.pl">your subscription page</a>
+  a few seconds after completing payment, and should see a confirmation of how
+  many pages you bought and the options you can change.
+  <p>In rare cases, a server glitch may prevent Slashdot from knowing about
+  your payment for a little while. If your subscription page doesn't seem to
+  know that you're a subscriber yet, please allow at least twenty minutes
+  for our servers to retry their connections. After that, if there's still a
+  problem, email
+  <a href="mailto:subscriptions@slashdot.org">subscriptions@slashdot.org</a>.
+<p><i><font size=-1>Answered by: <a href="mailto:Robo@slashdot.org">Robo</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 03/05/08</font></i> <br>
   <p><a name="ss1000"></a> 
   <h2> I paid for a subscription and ads are still popping up!</h2>
   <p> Please, <b>don't freak out</b>. </p>
