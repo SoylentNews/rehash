@@ -943,6 +943,11 @@ sub validateComment {
 		$$error_message = getError('anonymous disallowed');
 		return;
 	}
+
+	if (!$user->{is_anon} && $form->{postanon} && $user->{karma} < 0) {
+		$$error_message = getError('postanon_option_disabled');
+		return
+	}
 		
 	my $post_restrictions = $slashdb->getNetIDPostingRestrictions("subnetid", $user->{subnetid});	
 	if (($user->{is_anon} || $form->{postanon}) && $constants->{allow_anonymous} && $post_restrictions->{no_anon}) {
@@ -1480,34 +1485,28 @@ sub moderate {
 	my $was_touched = 0;
 
 	my $meta_mods_performed = 0;
-	if ($user->{is_admin}) {
-		$meta_mods_performed = metaModerate();		
-	}
 
-	if ($form->{meta_mod_only}) {
-		titlebar("100%", getData('metamoderating'));
-		print getData("metamoderate_message");
-		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
-		return;
-	}
+	my $skip_moderation = $form->{meta_mod_only} || 0;
 
+	my $message = "";
+	
 	if (!dbAvailable("write_comments")) {
 		print getError("comment_db_down");
 		return;
 	}
-
-	if ($discussion->{type} eq 'archived'
-		&& !$constants->{comments_moddable_archived}) {
-		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
-		print getData('archive_error');
-		return;
-	}
-
+	
 	if (! $constants->{allow_moderation}) {
-		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
 		print getData('no_moderation');
 		return;
 	}
+
+
+
+	if ($discussion->{type} eq 'archived'
+		&& !$constants->{comments_moddable_archived}) {
+		$message .= getData('archive_error');
+	}
+
 
 	my $total_deleted = 0;
 	my $hasPosted;
@@ -1519,51 +1518,68 @@ sub moderate {
 				&& $user->{seclev} >= $constants->{authors_unlimited})
 			|| $user->{acl}{modpoints_always};
 
-	slashDisplay('mod_header');
-	print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
 
-	# Handle Deletions, Points & Reparenting
-	# It would be nice to sort these by current score of the comments
-	# ascending, maybe also by val ascending, or some way to try to
-	# get the single-point-spends first and then to only do the
-	# multiple-point-spends if the user still has points.
-	my $can_del = ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
-		|| $user->{acl}{candelcomments_always};
-	for my $key (sort keys %{$form}) {
-		if ($can_del && $key =~ /^del_(\d+)$/) {
-			$total_deleted += deleteThread($sid, $1);
-		} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
-			my $cid = $1;
-			my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});
-			# If an error was returned, tell the user what
-			# went wrong.
-			if ($ret_val < 0) {
-				if ($ret_val == -1) {
-					print getError('no points');
-				} elsif ($ret_val == -2){
-					print getError('not enough points');
+	if($skip_moderation){
+		print $message;
+		if ($user->{is_admin}) {
+			$meta_mods_performed = metaModerate();		
+		}
+		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
+		return;
+	} else {
+		slashDisplay('mod_header');
+		
+
+		# Handle Deletions, Points & Reparenting
+		# It would be nice to sort these by current score of the comments
+		# ascending, maybe also by val ascending, or some way to try to
+		# get the single-point-spends first and then to only do the
+		# multiple-point-spends if the user still has points.
+		my $can_del = ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
+			|| $user->{acl}{candelcomments_always};
+		for my $key (sort keys %{$form}) {
+			if ($can_del && $key =~ /^del_(\d+)$/) {
+				$total_deleted += deleteThread($sid, $1);
+			} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
+				my $cid = $1;
+				my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});
+				# If an error was returned, tell the user what
+				# went wrong.
+				if ($ret_val < 0) {
+					if ($ret_val == -1) {
+						print getError('no points');
+					} elsif ($ret_val == -2){
+						print getError('not enough points');
+					}
+				} else {
+					$was_touched += $ret_val;
 				}
-			} else {
-				$was_touched += $ret_val;
 			}
 		}
-	}
-	$slashdb->setDiscussionDelCount($sid, $total_deleted);
-	$was_touched = 1 if $total_deleted;
+		$slashdb->setDiscussionDelCount($sid, $total_deleted);
+		$was_touched = 1 if $total_deleted;
+		
+		if ($user->{is_admin}) {
+			$meta_mods_performed = metaModerate();		
+		}
+		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
 
-	slashDisplay('mod_footer', {
-		metamod_elig => scalar $slashdb->metamodEligible($user),
-	});
-
-	if ($hasPosted && !$total_deleted) {
-		print getError('already posted');
-
-	} elsif ($user->{seclev} && $total_deleted) {
-		slashDisplay('del_message', {
-			total_deleted	=> $total_deleted,
-			comment_count	=> $slashdb->countCommentsBySid($sid),
+		slashDisplay('mod_footer', {
+			metamod_elig => scalar $slashdb->metamodEligible($user),
 		});
+
+		if ($hasPosted && !$total_deleted) {
+			print getError('already posted');
+	
+		} elsif ($user->{seclev} && $total_deleted) {
+			slashDisplay('del_message', {
+				total_deleted	=> $total_deleted,
+				comment_count	=> $slashdb->countCommentsBySid($sid),
+			});
+		}
+
 	}
+
 	printComments($discussion, $form->{pid}, $form->{cid},
 		{ force_read_from_master => 1 } );
 
