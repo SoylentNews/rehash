@@ -323,6 +323,57 @@ sub forgetCommentIPs {
 
 ########################################################
 # For dailystuff
+sub forgetSubmissionIPs {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+
+	# Forget the source IP information for comments older than a given
+	# time.
+	my $hours = $constants->{submit_forgetip_hours} ||
+		$constants->{comments_forgetip_hours} || 720;
+	my $hours1 = $hours-1; $hours1 = 0 if $hours1 < 0;
+
+	# At what cid do we start scanning?
+	my $minsubid = $constants->{submit_forgetip_minsubid};
+	if (!defined($minsubid)) {
+		$self->sqlInsert('vars', {
+			name	=> 'submit_forgetip_minsubid',
+			value	=> '0',
+		});
+		$minsubid = 0;
+	}
+	# How many rows to do at once?  We don't want to tie up the DB
+	# for too long at one sitting.  Find the first discussion posted
+	# just after the time limit, and then the first comment in that
+	# discussion.  A discussion predates its comments, so this comment
+	# is guaranteed to postdate the time limit, and finding it doesn't
+	# require a table scan of comments, only of discussions.
+	my $maxrows = $constants->{submit_forgetip_maxrows} ||
+		$constants->{comments_forgetip_maxrows} || 10000;
+	my $maxsubid = $minsubid + $maxrows;
+	my $nextsubid = $minsubid;
+	{
+		# Do the update.
+		$self->sqlUpdate("submissions",
+			{ ipid => '', subnetid => '' },
+			"subid BETWEEN $minsubid AND $maxsubid
+			AND time < DATE_SUB(NOW(), INTERVAL $hours HOUR)"
+		);
+		# How far did we go?
+		$nextsubid = $self->sqlSelect("MAX(subid)",
+			"submissions",
+			"subid BETWEEN $minsubid AND $maxsubid
+			AND ipid = ''",
+		);
+		$nextsubid ||= $minsubid;
+		# The next forgetting can start here.
+		$self->setVar('submit_forgetip_minsubid', $nextsubid);
+	}
+	return $nextsubid - $minsubid;
+}
+
+########################################################
+# For dailystuff
 sub deleteDaily {
 	my($self) = @_;
 	my $constants = getCurrentStatic();

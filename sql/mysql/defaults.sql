@@ -818,6 +818,9 @@ INSERT INTO vars (name, value, description) VALUES ('submission_bonus','3','Bonu
 INSERT INTO vars (name, value, description) VALUES ('submissions_speed_limit','300','How fast they can submit');
 INSERT INTO vars (name, value, description) VALUES ('submit_categories','Back','Extra submissions categories');
 INSERT INTO vars (name, value, description) VALUES ('submit_extra_sort_key', '', 'Provides an additional submission list sorted on the given field name');
+INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720','Hours after which a submissions\'s ipid/subnetid are forgotten; set very large to disable');
+INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
+INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_mincid','0','Minimum cid to start forgetting IP at');
 INSERT INTO vars (name, value, description) VALUES ('submit_show_weight', '0', 'Display optional weight field in submission admin.');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_request','0','Special boolean to cache templates only for a single request');
 INSERT INTO vars (name, value, description) VALUES ('template_cache_size','0','Number of templates to store in cache (0 = unlimited)');
