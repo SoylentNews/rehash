@@ -78,9 +78,9 @@ ELSIF env.script_name.search('journal\.pl');
 	IF link.uid && link.nickname; tmp = BLOCK -%]
 <LINK REL="author"    TITLE="[% link.nickname | strip_attribute %]" HREF="[% gSkin.rootdir %]/~[% link.nickname | strip_paramattr %]/">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="[% link.nickname | strip_attribute %]'s Journal RSS" HREF="[% PROCESS rsslink rsslink_style = 'journal' %]" TYPE="application/rss+xml">
+<LINK REL="alternate" TITLE="[% link.nickname | strip_attribute %]'s Journal RSS" HREF="[% PROCESS rsslink_journal rsslink_style = 'journal' %]" TYPE="application/rss+xml">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="[% link.nickname | strip_attribute %]'s Friends' Journals RSS" HREF="[% PROCESS rsslink rsslink_style = 'journalfriends' %]" TYPE="application/rss+xml">
+<LINK REL="alternate" TITLE="[% link.nickname | strip_attribute %]'s Friends' Journals RSS" HREF="[% PROCESS rsslink_journal rsslink_style = 'journalfriends' %]" TYPE="application/rss+xml">
 	[%- END; linkrels.push(tmp); END;
 
 	IF constants.journal_top;
