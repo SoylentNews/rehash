@@ -648,7 +648,7 @@ sub validateComment {
 		$$error_message = getError('readonly');
 		$form_success = 0;
 		# editComment('', $$error_message), return unless $preview;
-		return unless $preview;
+		return;
 	}
 
 	if (isTroll()) {
