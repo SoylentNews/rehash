@@ -17,6 +17,9 @@ __name__
 edit_comment
 __template__
 [% USE Slash %]
+<!-- error message -->
+[% IF error_message %]<P><B>[% error_message %]</B><P>[% END %]
+<!-- end error message -->
 [% IF form.pid %]
 	[% PROCESS titlebar width="95%" title=reply.subject %]
 	<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="95%" ALIGN="CENTER">
@@ -30,10 +33,6 @@ __template__
 
 [% END %]
 	[% PROCESS titlebar width="95%" title="Post Comment" %]
-
-<!-- error message -->
-[% IF error_message %][% error_message %][% END %]
-<!-- end error message -->
 
 <FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
 

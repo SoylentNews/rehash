@@ -7,7 +7,7 @@
 use strict;
 use HTML::Entities;
 use Slash 2.003;	# require Slash 2.3.x
-use Slash::Constants qw(:messages);
+use Slash::Constants qw(:messages :strip);
 use Slash::Display;
 use Slash::Utility;
 
@@ -605,9 +605,6 @@ sub editComment {
 		? createSelect('posttype', $formats, $form->{posttype}, 1)
 		: createSelect('posttype', $formats, $user->{posttype}, 1);
 
-	my $approved_tags =
-		join "\n", map { "\t\t\t&lt;$_&gt;" } @{$constants->{approvedtags}};
-
 	slashDisplay('edit_comment', {
 		error_message 	=> $error_message,
 		format_select	=> $format_select,
@@ -620,7 +617,8 @@ sub editComment {
 ##################################################################
 # Validate comment, looking for errors
 sub validateComment {
-	my($comm, $subj, $error_message, $preview) = @_;
+	my($comm, $subj, $error_message, $preview, $wsfactor) = @_;
+	$wsfactor ||= 1;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -658,46 +656,52 @@ sub validateComment {
 	$$subj =~ s/Score:(.*)//i;
 
 	unless (defined($$comm = balanceTags($$comm, $constants->{nesting_maxdepth}))) {
-		# This error message never gets seen because one or more later
-		# errors overwrite it.
+		# If we didn't return from right here, one or more later
+		# error messages would overwrite this one.
 		$$error_message = getError('nesting too deep');
-		# editComment('', $$error_message), return unless $preview;
-		return unless $preview;
+		return ;
 	}
 
 	my $dupRows = $slashdb->findCommentsDuplicate($form->{sid}, $$comm);
-
-	if ($dupRows || !$form->{sid}) {
-		$$error_message = getError('validation error', {
-			dups	=> $dupRows,
-		});
-		# editComment('', $$error_message), return unless $preview;
+	if ($dupRows) {
+		$$error_message = getError('duplication error');
+		$form_success = 0;
 		return unless $preview;
-		# return;
 	}
 
-	if (length($$comm) > 100) {
-		local $_ = $$comm;
-		my($w, $br); # Words & BRs
-		$w++ while m/\w/g;
-		$br++ while m/<BR>/gi;
+	if ($constants->{comments_min_line_len}
+		&& length($$comm) > $constants->{comments_min_line_len_kicks_in}) {
 
-		# Should the naked '7' be converted to a Slash Variable for return by
-		# getCurrentStatic(). 	- Cliff
-		if (($w / ($br + 1)) < 7) {
-			$$error_message = getError('low words-per-line', {
-				ratio 	=> $w / ($br + 1),
-			});
-		#	editComment('', $$error_message), return unless $preview;
-			return unless $preview;
-		#	return;
+		my $comment_notags = strip_nohtml($$comm);
+		# Don't count & or other chars used in entity tags;  don't count
+		# chars commonly used in ascii art.  Not that it matters much.
+		# Do count chars commonly used in source code.
+		my $num_chars = $comment_notags =~ tr/A-Za-z0-9?!(){}[]-+='"@$//;
+
+		# Note that approveTags() has already been called by this point,
+		# so all tags present are legal and uppercased.
+		my $breaktags = $constants->{'approvedtags_break'}
+			|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
+		my $breaktags_regex = "</?(?:" . join("|", @$breaktags) . ")>";
+		my $num_lines = 0;
+		$num_lines++ while $$comm =~ /$breaktags_regex/g;
+
+		if ($num_lines > 3) {
+			my $avg_line_len = $num_chars/$num_lines;
+			if ($avg_line_len < $constants->{comments_min_line_len}) {
+				$$error_message = getError('low chars-per-line', {
+					ratio 	=> sprintf("%0.1f", $avg_line_len),
+				});
+				$form_success = 0;
+				return unless $preview;
+			}
 		}
 	}
 
-
-	# test comment and subject using filterOk. If the filter is
-	# matched against the content, display an error with the
-	# particular message for the filter that was matched
+	# Test comment and subject using filterOk and compressOk.
+	# If the filter is matched against the content, or the comment
+	# compresses too well, display an error with the particular
+	# message for the filter that was matched.
 	my $fields = {
 			postersubj 	=> 	$$subj,
 			postercomment 	=>	$$comm,
@@ -709,25 +713,21 @@ sub validateComment {
 			$$error_message = getError('filter message', {
 					err_message	=> $message,
 			});
-
-			$form_success = 0;
-		#	editComment('', $$error_message), return unless $preview;
 			return unless $preview;
+			$form_success = 0;
 			last;
 		}
 		# run through compress test
-		if (! compressOk('comments', $_, $fields->{$_})) {
+		if (! compressOk('comments', $_, $fields->{$_}, $wsfactor)) {
 			# blammo luser
 			$$error_message = getError('compress filter', {
 					ratio	=> $_,
 			});
-			#editComment('', $$error_message), return unless $preview;
 			return unless $preview;
 			$form_success = 0;
 			last;
 		}
 	}
-
 
 	$$error_message ||= '';
 	# Return false if error condition...
@@ -745,15 +745,33 @@ sub previewForm {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	$user->{sig} = "" if $form->{postanon};
 
 	my $tempSubject = strip_notags($form->{postersubj});
 	my $tempComment = $form->{postercomment};
 
-	validateComment(\$tempComment, \$tempSubject, $error_message, 1) or return;
+	# The strip_mode needs to happen before the balanceTags() which is
+	# called from validateComment.  This is because strip_mode calls
+	# stripBadHtml, which calls approveTag repeatedly, which
+	# eliminates malformed tags.  balanceTags should not ever see
+	# malformed tags or it may choke.
+	#
+	# For the mode "CODE", validateComment() is called with a
+	# "whitespace factor" half what is normally used.  Code is likely
+	# to have many linebreaks and runs of whitespace; this makes the
+	# compression filter more lenient about allowing them.
 
-	$tempComment = strip_mode($form->{postercomment}, $form->{posttype});
+	$tempComment = strip_mode($tempComment, $form->{posttype});
+
+	validateComment(
+		\$tempComment, \$tempSubject, $error_message, 1,
+		($form->{posttype} == CODE
+			? $constants->{comments_codemode_wsfactor}
+			: 1.0) )
+		or return;
+
 	$tempComment = addDomainTags($tempComment);
 	$tempComment = parseDomainTags($tempComment,
 		!$form->{postanon} && $user->{fakeemail});
@@ -802,23 +820,31 @@ sub submitComment {
 
 	my $error_message;
 
-	$form->{postersubj} = strip_notags($form->{postersubj});
-
+	my $tempSubject = strip_notags($form->{postersubj});
 	my $tempComment = $form->{postercomment};
 
-	unless (validateComment(\$tempComment, \$form->{postersubj}, \$error_message)) {
+	# See the comment above validateComment() called from previewForm.
+	# Same thing applies here.
+
+	$tempComment = strip_mode($tempComment, $form->{posttype});
+
+	unless (validateComment(
+		\$tempComment, \$tempSubject, $error_message, 1,
+		($form->{posttype} == CODE
+			? $constants->{comments_codemode_wsfactor}
+			: 1.0) )
+	) {
 		$slashdb->resetFormkey($form->{formkey});
 		editComment(@_, $error_message);
 		return(0);
 	}
 
-	$tempComment = strip_mode($tempComment, $form->{posttype});
-	$form->{postercomment} = addDomainTags($tempComment);
+	$tempComment = addDomainTags($tempComment);
 
 #	# Slash is not a file exchange system
 #	# still working on this...stay tuned for real commit
-#	# (maybe in 2.2.1... sigh)
-#	$form->{postercomment} = distressBinaries($form->{postercomment});
+#	# (maybe in 2.x... sigh)
+#	$tempComment = distressBinaries($tempComment);
 
 	titlebar("95%", getData('submitted_comment'));
 
@@ -845,12 +871,12 @@ sub submitComment {
 	}
 
 	my $clean_comment = {
-		comment		=> $form->{postercomment},
+		subject		=> $tempSubject,
+		comment		=> $tempComment,
 		sid		=> $form->{sid} , 
 		pid		=> $form->{pid} ,
 		ipid		=> $user->{ipid},
 		subnetid	=> $user->{subnetid},
-		subject		=> $form->{postersubj},
 		uid		=> $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
 		points		=> $pts,
 	};

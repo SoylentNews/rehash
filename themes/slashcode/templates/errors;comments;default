@@ -112,9 +112,9 @@ CASE "nesting too deep" %]
 You can only post nested lists and blockquotes [% constants.nesting_maxdepth %]
 levels deep. Please fix your UL, OL, and BLOCKQUOTE tags.
 
-[% # LOW WORDS-PER-LINE
-CASE "low words-per-line" %]
-Your comment has too few words per line (currently [% ratio %]).<BR>
+[% # LOW CHARS-PER-LINE
+CASE "low chars-per-line" %]
+Your comment has too few characters per line (currently [% ratio %]).<BR>
 
 [% # FILTER MESSAGE.
 CASE "filter message" %]
@@ -139,21 +139,9 @@ CASE "submission error" %]
 CASE "maxcid exceeded" %]
 Don't you have anything better to do with your life?<BR>
 
-[% # VALIDATION ERROR. (possible dup? not quite sure about this one...)
-CASE "validation error" %]
-Something is wrong: parent=[% form.pid %] dups=[% dups %] discussion=[% form.sid %]
-<UL>
-[% IF form.postersubj %]
-	<LI>Didja forget a subject?</LI>
-[% END %]
-[% IF dups %]
-	<LI>Duplicate.  Did you submit twice?</LI>
-[% END %]
-[% UNLESS form.sid %]
-	<LI>Space aliens have eaten your data.</LI>
-[% END %]
-	<LI>Let us know if anything exceptionally strange happens</LI>
-</UL>
+[% # DUPLICATION ERROR.
+CASE "duplication error" %]
+This exact comment has already been posted. Try to be more original...
 
 [% # FORMABUSE MAX POSTS 
 CASE "formabuse_maxposts" %]

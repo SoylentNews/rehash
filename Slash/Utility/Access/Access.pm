@@ -211,7 +211,7 @@ sub formkeyError {
 		# set it back
 		$hashref->{value} = $tmpvalue; 
 	}
-		
+
 	return slashDisplay('formkeyErrors', $hashref,
 		{ Return => 1, Nocomm => $nocomm });
 }
@@ -520,7 +520,8 @@ sub compressOk {
 	# leave it here, it causes problems if use'd in the
 	# apache startup phase
 	require Compress::Zlib;
-	my($formname, $field, $content) = @_;
+	my($formname, $field, $content, $wsfactor) = @_;
+	$wsfactor ||= 1;
 
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
@@ -535,11 +536,14 @@ sub compressOk {
 
 	# These could be tweaked.  $slice_size could be roughly 300-2000;
 	# the $x_space vars could go up or down by a factor of roughly 2.
+	# "wsfactor" is the whitespace factor;  normal is 1.0, but the
+	# larger the value the more difficult to accept a comment with lots
+	# of whitespace.  Values between 0.2 and 5 probably make sense.
 	my $slice_size = 500;
-	my $nbsp_space = " " x 12;
-	my $breaktag_space = " " x 4;
-	my $spacerun_min = 5;
-	my $spacerun_exp = 1.4;
+	my $nbsp_space = " " x (1 + int(11 * $wsfactor));
+	my $breaktag_space = " " x (1 + int(3 * $wsfactor));
+	my $spacerun_min = 1 + int(4 / $wsfactor);
+	my $spacerun_exp = 1 + 0.4 * $wsfactor;
 
 	my $orig_length = length($content);
 	my $slice_remainder = $orig_length % $slice_size;
