@@ -135,6 +135,10 @@ sub dbAvailable {
 	# much as possible since this will be called at least twice
 	# per click.
 	my($token) = @_;
+
+	# Until this gets optimized, we don't do it.
+	return 1;
+
 	return 0 if -e "/usr/local/slash/dboff";
 	return 1 unless $token && $token =~ /^(\w+)/;
 	return 0 if -e "/usr/local/slash/dboff_$1";
