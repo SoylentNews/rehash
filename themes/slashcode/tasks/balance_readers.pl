@@ -147,28 +147,12 @@ sub check_readers {
 			$process{$vu}{$hr->{Id}} = \%{ $hr };
 
 			# Find the system user that does the slave SQL.
-			# There may be a well-defined way to tell the two
-			# slave processes apart but I don't know it,
-			# so I'm figuring this out as I go.
 			if ($hr->{User} eq 'system user') {
-				if (
-					   $hr->{State} =~ /Reading master update/
-					|| $hr->{State} =~ /Waiting for master to send event/
-					|| $hr->{State} =~ /Queueing master event to the relay log/
-					|| $hr->{State} =~ /Queueing event from master/
-				) {
+				my $type = get_sql_type_from_state($hr->{State});
+				if ($type eq 'io') {
 					# This is the I/O process, skip it.
 					next;
-				} elsif (
-					   $hr->{State} =~ /waiting for binlog update/
-					|| $hr->{State} =~ /Processing master log event/
-					|| $hr->{State} =~ /Has read all relay log/
-					|| $hr->{State} =~ /Reading event from the relay log/
-					|| $hr->{State} =~ /Updating/
-					|| $hr->{State} =~ /freeing items/
-					|| $hr->{State} eq 'update'
-					|| $hr->{State} eq 'end'
-				) {
+				} elsif ($type eq 'sql') {
 					# This is the SQL process, it's the
 					# one we want.
 					$slave_sql_id{$vu} = $hr->{Id};
@@ -176,16 +160,19 @@ sub check_readers {
 				} else {
 					# Don't know what this one is, log an error.
 					my $state = substr($hr->{State}, 0, 200);
-					slashdLog("Process id $hr->{Id} on vu '$vu' has unknown system user state '$state'");
+					slashdLog("Process id $hr->{Id} on vu '$vu'"
+						. " has unknown system user state"
+						. " '$state'");
 				}
+			} else {
+				# It's not one of the SQL processes.  Consolidate
+				# similar or identical queries into an array of
+				# how long each has been running.
+				next unless $hr->{Info};
+				my $query = query_consolidate($hr->{Info});
+				$process{$vu}{query}{$query} ||= [ ];
+				push @{ $process{$vu}{query}{$query} }, $hr->{Time};
 			}
-
-			# Consolidate similar or identical queries into an
-			# array of how long each has been running.
-			next unless $hr->{Info};
-			my $query = query_consolidate($hr->{Info});
-			$process{$vu}{query}{$query} ||= [ ];
-			push @{ $process{$vu}{query}{$query} }, $hr->{Time};
 		}
 #		$process{$vu}{n_sleeping} = $n_sleeping;
 		$sth->finish();
@@ -230,8 +217,10 @@ sub check_readers {
 				grep { $_ >= 3 }
 				@{ $process{$vu}{query}{$query} };
 			# There must be at least 3 similar queries for us
-			# to care about it.
-			next unless @bog_times;
+			# to care about it.  Otherwise we assume it's a
+			# backend task, or perhaps a rare (admin?) function
+			# that doesn't come up much.
+			next unless @bog_times >= 3;
 			# OK, sum them up and see if we beat the record.
 			my $bog_sum = 0;
 			for my $t (@bog_times) { $bog_sum += $t }
@@ -246,6 +235,35 @@ sub check_readers {
 	}
 
 	return $reader_info;
+}
+
+# There may be a well-defined way to tell the two slave processes apart
+# but I don't know it, so I'm figuring this out as I go.
+
+sub get_sql_type_from_state {
+	my($state) = @_;
+	if (
+		   $state =~ /Queueing event from master/
+		|| $state =~ /Queueing master event to the relay log/
+		|| $state =~ /Reading master update/
+		|| $state =~ /Waiting for master to send event/
+	) {
+		return 'io';
+	} elsif (
+		   $state =~ /freeing items/
+		|| $state =~ /Has read all relay log/
+		|| $state =~ /Processing master log event/
+		|| $state =~ /Reading event from the relay log/
+		|| $state =~ /Searching rows for update/
+		|| $state =~ /Sending data/
+		|| $state =~ /^updat(e|ing)$/i
+		|| $state =~ /waiting for binlog update/
+		|| $state eq 'init'
+		|| $state eq 'end'
+	) {
+		return 'sql';
+	}
+	return 'unknown';
 }
 
 # Canonicalize and consolidate a query.  We're trying to map all queries
