@@ -153,6 +153,7 @@ sub get_num_new_comments {
 
 sub give_out_tokens {
 	my($comments, $constants, $slashdb, $read_db) = @_;
+	$read_db = $slashdb if !defined($read_db);
 	my $num_tokens = $comments * $constants->{tokenspercomment};
 	my $stirredpoints = $slashdb->stirPool();
 	$num_tokens += $stirredpoints * $constants->{tokensperpoint};
@@ -181,6 +182,16 @@ sub give_out_tokens {
 
 	# Ignore count now, we only want uid.
 	@eligible_uids = map { $_ = $_->[0] } @eligible_uids;
+
+	# If the appropriate vars are set, give tokens preferentially to
+	# users who are better-qualified to have them.
+	my $factor_ratio = $constants->{m1_pointgrant_factor_fairratio} || 0;
+	my $factor_total = $constants->{m1_pointgrant_factor_fairtotal} || 0;
+	if ($factor_ratio || $factor_total) {
+		my @orig_uids = @eligible_uids;
+		@eligible_uids = @{$read_db->factorEligibleModerators(
+			\@orig_uids, $factor_ratio, $factor_total)};
+	}
 
 	# Decide who's going to get the tokens.
 	my %update_uids = ( );
@@ -253,8 +264,7 @@ sub reconcile_m2 {
 			print STDERR "M2 fair,unfair both 0 for mod id $mod_hr->{id}\n";
 			next;
 		}
-		if ($nunfair+$nfair != $consensus
-			&& (($nunfair+$nfair) % 2 == 0)) {
+		if (($nunfair+$nfair) % 2 == 0) {
 			print STDERR "M2 fair+unfair=" . ($nunfair+$nfair) . ","
 				. " consensus=$consensus"
 				. " for mod id $mod_hr->{id}\n";

@@ -10,6 +10,7 @@ use Getopt::Std;
 use Slash;
 use Slash::Utility;
 use Benchmark;
+use Data::Dumper;
 
 use vars qw( $slashdb $constants );
 
@@ -48,6 +49,8 @@ my $reasons = $slashdb->getReasons();
 {
 	print "Generating meta-moderations...\n";
 
+	my $multicount = $constants->{m2_multicount} || 0;
+
 	my $t0 = new Benchmark;
 	my $startcount = getM2ClosedCount(); 
 	my($curcount, $m2count) = (0, 0);
@@ -61,8 +64,8 @@ my $reasons = $slashdb->getReasons();
 				$m2user, $constants->{m2_comments}
 			);
 
-			# OK, so this guy is finished as an M2.
-			if (! @{$comments}) {
+			if (!$comments || !@$comments) {
+				# No more M2 for this user.
 				getRandomUID('exclude', $m2user->{uid});
 				next;
 			}
@@ -73,12 +76,13 @@ my $reasons = $slashdb->getReasons();
 		{
 			local $" = ', ';
 			$_ = $_->{id} for @cids;
-			printf <<EOT, $#cids + 1;
-M2: UID #$m2user->{uid} metamoderates %d - (@cids)
-EOT
-
+			print "M2: UID #$m2user->{uid} metamoderates"
+				. " " . ($#cids + 1)
+				. " - (@cids)"
+				. " (+more? multi=$multicount)\n";
 		}
 
+		my %m2s = ( );
 		for (@{$comments}) {
 			# Our M2 vote starts off with a bias towards "fair".
 			my $unfair_frac = 0.10;
@@ -101,26 +105,15 @@ EOT
 			# OK, decide whether the vote is for fair or unfair.
 			my $is_fair = (rand(1) < $unfair_frac) ? 0 : 1;
 
-			# Do the metamod.
-			$slashdb->setMetaMod($m2user, {
-				$_->{id}, { is_fair => $is_fair }
-			});
-
-			# Check where the m2count got to.
-			my $m2_count = $slashdb->sqlSelect(
-				'm2count',
-				'moderatorlog',
-				"id=$_->{id}"
-			);
-
-			$m2count++;
-			if ($opts{D} > 2) {
-				printf <<EOT, $m2_count, $constants->{m2_consensus}, ($m2_count == $constants->{m2_consensus} ? " *" : "");
-M2($m2count): ID #$_->{id}, M2Mod = $m2user->{uid}, is_fair = $is_fair, C=%d/%d%s
-EOT
-
-			}
+			$m2s{$_->{id}}{is_fair} = $is_fair;
 		}
+
+		# Do the metamod.
+		$slashdb->setModsSaved($m2user, [( keys %m2s )]);
+		$m2user = $slashdb->getUser($m2user->{uid});
+		$slashdb->setMetaMod($m2user, \%m2s, $multicount);
+
+		$m2count++;
 
 		$curcount = getM2ClosedCount() if ! $opts{F};
 	}} while (!$opts{F} && $curcount-$startcount < $opts{num_closed}) ||

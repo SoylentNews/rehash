@@ -443,7 +443,12 @@ sub setModsSaved {
 	my($self, $user, $mods_saved_ar) = @_;
 	$user = getCurrentUser() if !$user;
 
-	my $mods_saved_txt = join(",", grep /^\d+$/, @$mods_saved_ar);
+#print STDERR "mods_saved_ar  '@$mods_saved_ar'\n";
+	my $mods_saved_txt = join(",",
+		sort { $a <=> $b }
+		grep /^\d+$/,
+		@$mods_saved_ar);
+#print STDERR "mods_saved_txt '$mods_saved_txt'\n";
 	$self->setUser($user->{uid}, { mods_saved => $mods_saved_txt });
 }
 
@@ -466,7 +471,7 @@ sub getMetamodsForUser {
 
 	# Get saved list of mods to M2 (and check its formatting).
 
-	my @mods_saved = $self->getModsSaved();
+	my @mods_saved = $self->getModsSaved($user);
 
 	# See which still need M2'ing.
 
@@ -475,7 +480,7 @@ sub getMetamodsForUser {
 		my $mods_not_done = $self->sqlSelectColArrayref(
 			"id",
 			"moderatorlog",
-			"id IN ($mods_saved) AND active=1 AND m2status = 0"
+			"id IN ($mods_saved) AND active=1 AND m2status=0"
 		);
 		@mods_saved = grep /^\d+$/, @$mods_not_done;
 	}
@@ -759,6 +764,7 @@ sub getMetamodsForUserRaw {
 		print STDERR "GETMODS looped the max number of times,"
 			. " returning '@ids' for uid '$uid'"
 			. " num_needed '$num_needed'"
+			. " (maybe out of mods to M2?)"
 			. " already_had: " . Dumper($already_have_hr);
 	}
 
@@ -3585,7 +3591,8 @@ sub multiMetaMod {
 		"id",
 		"id, cid, reason",
 		"moderatorlog",
-		"id IN ($orig_mmid_in) AND active=1"
+		"id IN ($orig_mmid_in)
+		 AND active=1 AND m2status=0"
 	);
 	return if !%$id_to_cr;
 	my @cr_clauses = ( );
@@ -3652,7 +3659,8 @@ sub multiMetaMod {
 # $multi_max is the maximum number of additional mods which each
 # mod in %$m2s can apply to (see the constants m2_multicount).
 # Return: nothing.
-# Note that karma changes are done in the run_moderatord task.
+# Note that karma and token changes as a result of metamod are
+# done in the run_moderatord task.
 sub setMetaMod {
 	my($self, $m2_user, $m2s, $multi_max) = @_;
 	my $constants = getCurrentStatic();
@@ -3661,15 +3669,18 @@ sub setMetaMod {
 
 	# If this user has no saved mods, by definition nothing they try
 	# to M2 is valid.
+#print STDERR "mods_saved: '$m2_user->{mods_saved}'\n";
 	return if !$m2_user->{mods_saved};
 
 	# The user is only allowed to metamod the mods they were given.
-	my @mods_saved = $self->getModsSaved();
+	my @mods_saved = $self->getModsSaved($m2_user);
 	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
-	my @m2s_mmids = keys %$m2s;
+	my @m2s_mmids = sort { $a <=> $b } keys %$m2s;
+#print STDERR "m2s keys before: '@m2s_mmids', mods_saved '@mods_saved'\n";
 	for my $mmid (@m2s_mmids) {
 		delete $m2s->{$mmid} if !$mods_saved{$mmid};
 	}
+#print STDERR "m2s keys  after: '" . join(" ", keys %$m2s) . "'\n";
 
 	# If we are allowed to multiply these M2's to apply to other
 	# mods, go ahead.  multiMetaMod changes $m2s in place.  Note
@@ -3679,27 +3690,34 @@ sub setMetaMod {
 	# possibly affect more.
 	if ($multi_max) {
 		$self->multiMetaMod($m2_user, $m2s, $multi_max);
+#print STDERR "m2s keys after mMM: '" . join(" ", keys %$m2s) . "'\n";
 	}
 
 	# Whatever happens below, as soon as we get here, this user has
 	# done their M2 for the day and gets their list of OK mods cleared.
-	my $mods_saved_q = $self->sqlQuote($m2_user->{mods_saved});
 	$rows = $self->sqlUpdate("users_info", {
 		-lastmm =>	'NOW()',
 		mods_saved =>	'',
-	}, "uid=$m2_user->{uid} AND mods_saved=$mods_saved_q");
+	}, "uid=$m2_user->{uid} AND mods_saved != ''");
 	if (!$rows) {
 		# The update failed, presumably because the user clicked
 		# the MetaMod button multiple times quickly to try to get
 		# their decisions to count twice.  The user did not count
-		# on our awesome powers of atomicity.  Do nothing.
+		# on our awesome powers of atomicity:  only one of those
+		# clicks got to set mods_saved to empty.  That one wasn't
+		# us, so we do nothing.
+#print STDERR "no rows updated in setting mods_saved empty for uid $m2_user->{uid}\n";
 		return ;
 	}
 
+#print STDERR "mods_saved rows '$rows'\n";
+
 	my($voted_fair, $voted_unfair) = (0, 0);
 	for my $mmid (keys %$m2s) {
+#print STDERR "looping for $mmid\n";
 		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
 		my $is_fair = $m2s->{$mmid}{is_fair};
+#print STDERR "mod_uid '$mod_uid' is_fair '$is_fair'\n";
 
 		# Increment the m2count on the moderation in question.  If
 		# this increment pushes it to the current consensus threshold,
@@ -3760,7 +3778,7 @@ sub setMetaMod {
 	$self->sqlUpdate("users_info", {
 		-m2fairvotes	=> "m2fairvotes+$voted_fair",
 		-m2unfairvotes	=> "m2unfairvotes+$voted_unfair",
-	}, "uid=$m2_user->{uid}");
+	}, "uid=$m2_user->{uid}") if $voted_fair || $voted_unfair;
 }
 
 ########################################################

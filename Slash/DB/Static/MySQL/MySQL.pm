@@ -831,6 +831,185 @@ sub fetchEligibleModerators {
 
 	return $returnable;
 }
+########################################################
+# For run_moderatord.pl
+# Quick overview:  This method takes a list of uids who are eligible
+# to be moderators and returns that same list, with the "worst"
+# users made statistically less likely to be on it, and the "best"
+# users more likely to remain on the list and appear more than once.
+# Longer explanation:
+# This method takes a list of uids who are eligible to be moderators
+# (i.e., eligible to receive tokens which may end up giving them mod
+# points).  It also takes two numeric values, positive numbers that
+# are almost certainly slightly greater than 1 (e.g. 1.3 or so).
+# For each uid, two values are calculated, the total number of times
+# the user has been M2'd "fair," and the ratio of fair-to-unfair M2s
+# for the user.  Two lists of the uids are made, from "worst" to
+# "best," the "worst" user in each case having the probability of
+# being eligible for tokens (remaining on the list) reduced and the
+# "best" with that probability increased (appearing two or more
+# times on the list).
+sub factorEligibleModerators {
+	my($self, $orig_uids, $factor_ratio, $factor_total) = @_;
+	return $orig_uids if !$orig_uids || !@$orig_uids || scalar(@$orig_uids) < 10;
+	$factor_ratio = 0 if $factor_ratio == 1;
+	$factor_total = 0 if $factor_total == 1;
+	return $orig_uids if !$factor_ratio || !$factor_total;
+
+	my $start_time = Time::HiRes::time;
+
+	my @return_uids = ( );
+
+	my $uids_in = join(",", @$orig_uids);
+	my $u_hr = $self->sqlSelectAllHashref(
+		"uid",
+		"uid, m2fair, m2unfair",
+		"users_info",
+		"uid IN ($uids_in)",
+	);
+
+	# Assign one of the ratio values that will be used in the sorts
+	# in a moment.  We precalculate this because it's used in several
+	# places.  Note that we only calculate the fairness *ratio* if
+	# there are a decent number of votes, otherwise we leave it undef.
+	for my $uid (keys %$u_hr) {
+		my $ratio = undef;
+		if ($u_hr->{$uid}{m2fair}+$u_hr->{$uid}{m2unfair} >= 5) {
+			$ratio = $u_hr->{$uid}{m2fair}
+				/ ($u_hr->{$uid}{m2fair}+$u_hr->{$uid}{m2unfair});
+		}
+		$u_hr->{$uid}{m2fairratio} = $ratio;
+	}
+
+	if ($factor_total) {
+		# Assign a token likeliness factor based on the absolute
+		# number of "fair" M2s assigned to each user's moderations.
+		# Sort by total m2fair first (that's the point of this
+		# code).  If there's a tie in that, the secondary sort is
+		# by ratio, and tertiary is by uid (newest first).
+		my @new_uids = sort {
+				$u_hr->{$a}{m2fair} <=> $u_hr->{$b}{m2fair}
+				||
+				( defined($u_hr->{$a}{m2fairratio})
+					&& defined($u_hr->{$b}{m2fairratio})
+				  ? $u_hr->{$a}{m2fairratio} <=> $u_hr->{$b}{m2fairratio}
+				  : 0 )
+				||
+				$b <=> $a
+			} @$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $factor_total, 'factor_m2total',
+			\@new_uids);
+	}
+
+	if ($factor_ratio) {
+		# Assign a token likeliness factor based on the ratio of
+		# "fair" to "unfair" M2s assigned to each user's
+		# moderations.  In order not to be "prejudiced" against
+		# users with no M2 history, those users get no change in
+		# their factor (i.e. 1) by simply being left out of the
+		# list.  Sort by ratio first (that's the point of this
+		# code);  if there's a tie in ratio, the secondary sort
+		# order is total m2fair, and tertiary is uid (newest first).
+		my @new_uids = sort {
+			  	$u_hr->{$a}{m2fairratio} <=> $u_hr->{$b}{m2fairratio}
+				||
+				$u_hr->{$a}{m2fair} <=> $u_hr->{$b}{m2fair}
+				||
+				$b <=> $a
+			} grep { defined($u_hr->{$_}{m2fairratio}) }
+			@$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $factor_ratio, 'factor_m2ratio',
+			\@new_uids);
+	}
+
+	# Now modify the list of uids.  Each uid in the list has the product
+	# of its factors calculated.  If the product is exactly 1, that uid
+	# is left alone.  If less than 1, there is a chance the uid will be
+	# deleted from the list.  If more than 1, there is a chance it will
+	# be doubled up in the list (or more than doubled for large factors).
+	for my $uid (@$orig_uids) {
+		my $factor = 1;
+		$factor *= $u_hr->{$uid}{factor_m2total}
+			if defined($u_hr->{$uid}{factor_m2total});
+		$factor *= $u_hr->{$uid}{factor_m2ratio}
+			if defined($u_hr->{$uid}{factor_m2ratio});
+		# If the factor is, say, 1.3, then the count of this uid is
+		# at least 1, and there is a 0.3 chance that it goes to 2.
+		my $count = int($factor);
+		$count++ if rand() < $factor-$count;
+		push @return_uids, ($uid) x $count;
+	}
+
+# Because this is a complicated method, here is some lengthy debugging
+# output that doesn't appear to be necessary... this will be removed
+# soon. - Jamie
+#	print STDERR "factorEligibleModerators ran on " . scalar(@$orig_uids)
+#		. " uids, producing a list of " . scalar(@return_uids)
+#		. " uids, in "
+#		. sprintf("%0.3f", Time::HiRes::time - $start_time)
+#		. " seconds\n";
+#	print STDERR "factorEligibleModerators orig start: '@$orig_uids[0..9]' now start: '@return_uids[0..9]'\n";
+#	print STDERR "factorEligibleModerators orig   end: '@$orig_uids[-10..-1]' now   end: '@return_uids[-10..-1]'\n";
+#	for my $uid (sort { $u_hr->{$a}{factor_m2total} <=> $u_hr->{$b}{factor_m2total} }
+#		keys %$u_hr) {
+#		print STDERR "m2total "
+#			. sprintf("%0.4f %6d %6d", $u_hr->{$uid}{factor_m2total}, $uid, $u_hr->{$uid}{m2fair})
+#			. "\n";
+#	}
+#use Data::Dumper;
+#	print STDERR "factorEligibleModerators u_hr: " . Dumper($u_hr);
+
+	return \@return_uids;
+}
+
+# This specialized utility function takes a list of uids and assigns
+# values into the hashrefs that are their values in %$u_hr.  The
+# @$uidlist determines the order that the values will be assigned.
+# The first uid gets the value 1/$factor (and since $factor should
+# be >1, this value will be <1).  The middle uid in @$uidlist will
+# get the value approximately 1, and the last uid will get the value
+# $factor.  After these assignments are made, any uid keys in %$u_hr
+# *not* in @$uidlist will be given the value 1.  The 2nd-level hash
+# key that these values are assigned to is $u_hr->{$uid}{$field}.
+sub _set_factor {
+	my($u_hr, $factor, $field, $uidlist) = @_;
+	my $halfway = int($#$uidlist/2);
+	return if $halfway <= 1;
+
+	if ($factor != 1) {
+		for my $i (0 .. $halfway) {
+
+			# We'll use this first as a numerator, then as
+			# a denominator.
+			my $between_1_and_factor = 1 + ($factor-1)*($i/$halfway);
+
+			# Set the lower uid, which ranges from 1/$factor to
+			# $factor/$factor.
+			my $uid = $uidlist->[$i];
+			$u_hr->{$uid}{$field} = $between_1_and_factor/$factor;
+
+			# Set its counterpart the higher uid, which ranges from
+			# $factor/$factor to $factor/1 (but we build this list
+			# backwards, from $#uidlist down to $halfway-ish, so we
+			# start at $factor/1 and come down to $factor/$factor).
+			my $j = $#$uidlist-$i;
+			$uid = $uidlist->[$j];
+			$u_hr->{$uid}{$field} = $factor/$between_1_and_factor;
+
+		}
+	}
+
+	# uids which didn't get a value assigned just get "1".
+	for my $uid (keys %$u_hr) {
+		$u_hr->{$uid}{$field} = 1 if !defined($u_hr->{$uid}{$field});
+	}
+}
 
 ########################################################
 # For run_moderatord.pl
