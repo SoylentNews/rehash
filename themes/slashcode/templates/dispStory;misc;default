@@ -106,7 +106,7 @@ END %]
 
 [% IF story.is_future %]<P><FONT SIZE="-1">See any serious problems with this story?
 Paste a short message here (if it's a dupe, the URL would be great)
-<form action="/index.pl" method="POST">
+<form action="[% gSkin.rootdir %]/index.pl" method="POST">
 <input type="HIDDEN" name="op" value="remark">
 <input type="TEXT" name="remark" size="20" maxlength="100">
 <input type="HIDDEN" name="sid" value="[% story.sid | strip_attribute %]">
