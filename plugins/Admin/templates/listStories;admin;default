@@ -30,7 +30,7 @@ __template__
 	</TR>
 		[% END %]
 
-[% IF storylistref && storylistref.count > 0;
+[% IF storylistref && storylistref.size > 0;
 storiestoday = 0;
 FOREACH story = storylistref %]
 
