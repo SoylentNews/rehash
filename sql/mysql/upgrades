@@ -371,3 +371,8 @@ DELETE FROM sections WHERE title='All Sections' OR section='';
 
 ALTER TABLE string_param CHANGE COLUMN name name VARCHAR(64) NOT NULL;
 
+# This is to fix commentcounts -Brian
+select concat("UPDATE discussions SET commentcount=", count(cid), " WHERE id=", sid, ";") INTO OUTFILE "/tmp/dis" from comments GROUP BY sid;
+source /tmp/dis;
+select concat("UPDATE stories SET commentcount=", discussions.commentcount, " WHERE discussion=", id, ";") INTO OUTFILE "/tmp/dis2" from discussions;
+source /tmp/dis2;

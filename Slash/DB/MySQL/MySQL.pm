@@ -3996,8 +3996,10 @@ sub getStoriesEssentials {
 			'DATE_FORMAT(DATE_ADD(time, INTERVAL 1 DAY),"%Y%m%d")';
 		my $yesterday_str =
 			'DATE_FORMAT(DATE_SUB(time, INTERVAL 1 DAY),"%Y%m%d")';
-		$where .=
-			"AND day_published = '$form->{issue}' ";
+#		$where .=
+#			"AND day_published = '$form->{issue}' ";
+		$where .=" AND '$form->{issue}' BETWEEN $yesterday_str AND
+			$tomorrow_str ";
 	} else {
 		$other .= "LIMIT $limit ";
 	}
