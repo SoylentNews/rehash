@@ -19,10 +19,10 @@ __template__
 [% gSkin.absolutedir_secure %]/stats.pl?op=report&report=main&stats_days=7
 
                    UIDs      IPIDs      Pages 
-        total: [% users %]   [% unique %]   [% total %] ([% total_bytes %])
+        total:        -          -   [% total %] ([% total_bytes %])
  static total:        -          -   [% total_static %]
 gstatic total:        -          -   [% grand_total_static %]
-  grand total:        -          -   [% grand_total %] ([% grand_total_bytes %])
+  grand total: [% users %]   [% unique %]   [% grand_total %] ([% grand_total_bytes %])
  secure total:        -          -   [% total_secure %]
 [% IF constants.subscribe %]sbscrbr total:        -          -   [% total_subscriber %]
 [% END %]
