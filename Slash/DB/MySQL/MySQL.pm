@@ -8526,7 +8526,7 @@ sub getStoryTopics {
 	$topicdesc =  {
 		map { @{$_} }
 		@{$self->sqlSelectAll(
-			'tid, name',
+			'tid, keyword',
 			'topics'
 		)}
 	} if $add_names == 2;
