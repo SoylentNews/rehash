@@ -155,14 +155,18 @@
 
 	
 <P>Occassionally we <a href="accounts.shtml#ac900">ban IPs</a> who are abusing 
-  our servers in some way. If this happens, please read <a href="accounts.shtml#ac1000">How do I get an IP Unbanned</a>. 
-  These bans exist to prevent Denial of Service attacks that either overburden 
-  our servers, or flood the forums. 
+  our servers in some way. If this happens, please read 
+  <a href="accounts.shtml#ac1000">How do I get an IP Unbanned</a>. 
+  These bans are relatively rare, but they are necessary in cases where specific
+  Users or IPs intentionally try to disrupt service for other users by crapflooding
+  the forums, game the moderation system, or to overburden our servers.
+  
 <p> The moderation system has a variety of limits in it as well, but these bans 
   are temporary and exist more as a rate limiter to make sure that people stay 
   on topic, and everyone gets a chance to speak. You can learn more about the 
-  moderation system by reading <a href="com-mod.shtml">Comments and Moderation</a>.<BR>
-  <BR>
+  moderation system by reading <a href="com-mod.shtml">Comments and Moderation</a>.
+
+<P>
   <I><SMALL> Answered by: <A HREF="mailto:malda@slashdot.org">CmdrTaco</A> <BR>
   Last Modified: 03/26/02<BR>
   </SMALL></I> <A NAME="ac900"></a> 
@@ -191,7 +195,7 @@ web browser rendering. <br>
   <a name="ac1000"></a> 
   <h2>How do I get an IP Unbanned?</h2>
   <p>Email <a href="mailto:banned@slashdot.org">banned@slashdot.org</a>. Make 
-    sure to include the IP in question, and any other pertinent information. If 
+    sure to include the IP in question, UID, timeframes, and any other pertinent information. If 
     you are connecting through a proxy server, you might need to have your proxy 
     server's admin contact us instead of you.<br>
     <br>
