@@ -803,7 +803,7 @@ sub adjust_m2_freq {
 
 sub delete_old_mod_rows {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
-	$slashdb->deleteOldModRows();
+	$slashdb->deleteOldModRows({ sleep_between => 30 });
 }
 
 1;

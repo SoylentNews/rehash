@@ -585,15 +585,20 @@ sub deleteDaily {
 
 ########################################################
 # For run_moderatord.pl
+# Pass in option "sleep_between" of a few seconds, maybe up to a
+# minute, if for some reason the deletion still makes slave
+# replication lag... (but it shouldn't, anymore) - 2005/01/06
 sub deleteOldModRows {
-	my($self) = @_;
+	my($self, $options) = @_;
 
 	my $reader = getObject('Slash::DB', { db_type => "reader" });
 	my $constants = getCurrentStatic();
+	my $max_rows = $constants->{mod_delete_maxrows} || 1000;
 	my $archive_delay_mod =
 		   $constants->{archive_delay_mod}
 		|| $constants->{archive_delay}
 		|| 14;
+	my $sleep_between = $options->{sleep_between} || 0;
 
 	# Find the minimum ID in these tables that should remain, then
 	# delete everything before it.  We do it this way to keep the
@@ -602,19 +607,35 @@ sub deleteOldModRows {
 	# just pretty lame, I know...
 
 	$self->sqlDo("SET FOREIGN_KEY_CHECKS=0");
-	my $min_m1_id = $reader->sqlSelect('MIN(id)',
+
+	# First delete from the bottom up for the moderatorlog.
+
+	my $junk_bottom = $reader->sqlSelect('MIN(id)', 'moderatorlog');
+	my $need_bottom = $reader->sqlSelect('MIN(id)',
 		'moderatorlog',
 		"ts >= DATE_SUB(NOW(), INTERVAL $archive_delay_mod DAY)");
-	if ($min_m1_id) {
-		$self->sqlDelete('moderatorlog', "id < $min_m1_id");
+	while ($need_bottom && $junk_bottom < $need_bottom) {
+		$junk_bottom += $max_rows;
+		$junk_bottom = $need_bottom if $need_bottom < $junk_bottom;
+		$self->sqlDelete('moderatorlog', "id < $junk_bottom");
+		sleep $sleep_between
+			if $sleep_between;
 	}
 
-	my $min_m2_id = $reader->sqlSelect('MIN(id)',
+	# Now delete from the bottom up for the metamodlog.
+
+	$junk_bottom = $reader->sqlSelect('MIN(id)', 'metamodlog');
+	$need_bottom = $reader->sqlSelect('MIN(id)',
 		'metamodlog',
 		"ts >= DATE_SUB(NOW(), INTERVAL $archive_delay_mod DAY)");
-	if ($min_m2_id) {
-		$self->sqlDelete('metamodlog', "id < $min_m2_id");
+	while ($need_bottom && $junk_bottom < $need_bottom) {
+		$junk_bottom += $max_rows;
+		$junk_bottom = $need_bottom if $need_bottom < $junk_bottom;
+		$self->sqlDelete('moderatorlog', "id < $junk_bottom");
+		sleep $sleep_between
+			if $sleep_between && $junk_bottom < $need_bottom;
 	}
+
 	$self->sqlDo("SET FOREIGN_KEY_CHECKS=1");
 }
 
