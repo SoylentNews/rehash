@@ -124,6 +124,9 @@ sub main {
 		return;
 	}
 
+	# We really should have a $zoo_reader that we also pass to
+	# these functions. - Jamie
+
 	$ops->{$op}->{function}->($zoo, $constants, $user, $form, $slashdb, $gSkin);
 	my $r;
 	if ($r = Apache->request) {
