@@ -570,9 +570,8 @@ sub decayTokens {
 sub getDailyMail {
 	my($self, $user) = @_;
 
-	my $columns = "stories.sid, title, stories.primaryskid,
-		users.nickname,
-		stories.tid, stories.time, stories.dept,
+	my $columns = "DISTINCT stories.sid, title, stories.primaryskid,
+		users.nickname, stories.tid, stories.time, stories.dept,
 		story_text.introtext, story_text.bodytext ";
 	my $tables = "stories, story_text, users, story_topics_rendered";
 	my $where = "time < NOW() AND TO_DAYS(NOW())-TO_DAYS(time)=1 ";
