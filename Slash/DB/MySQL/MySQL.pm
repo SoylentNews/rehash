@@ -5267,7 +5267,8 @@ sub getStoryList {
 		. 'time, name, stories.subsection,stories.section, displaystatus, stories.writestatus';
 	my $tables = "stories, topics";
 	my $where = "stories.tid=topics.tid ";
-	my $SECT = $self->getSection($user->{section} ? $user->{section} : $form->{section});
+	# See getSubmissionsForUser() on why the following is like this. -Brian
+	my $SECT = $self->getSection($user->{section} || $form->{section});
 	if ($SECT->{type} eq 'collected') {
 		$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
 			if $SECT->{contained} && @{$SECT->{contained}};
