@@ -157,6 +157,7 @@ sub _set {
 	} else {
 		$self->sqlInsert('people', { uid => $uid,  person => $person, type => $type });
 	}
+	$self->sqlInsert('people_log', { uid => $uid,  person => $person, type => $type, action => 'add' });
 	my $people = $slashdb->getUser($uid, 'people');
 	# First we clean up, then we reapply
 	delete $people->{FRIEND()}{$person};
@@ -280,7 +281,9 @@ sub isFoe {
 # This just really neutrilzes the relationship.
 sub delete {
 	my($self, $uid, $person) = @_;
+	my $type = $self->sqlSelect('type', 'people', "uid=$uid AND person=$person");
 	$self->sqlDo("UPDATE people SET type=NULL WHERE uid=$uid AND person=$person");
+	$self->sqlInsert('people_log', { uid => $uid,  person => $person, type => $type, action => 'delete' });
 	my $slashdb = getCurrentDB();
 	my $people = $slashdb->getUser($uid, 'people');
 	if ($people) {

@@ -597,3 +597,13 @@ ALTER TABLE metamodlog ADD INDEX mmid (mmid);
 # This should have been this all along -Brian
 ALTER TABLE sections DROP INDEX section;
 ALTER TABLE sections ADD UNIQUE section (section);
+
+DROP TABLE IF EXISTS people_log;
+CREATE TABLE people_log (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	person MEDIUMINT UNSIGNED NOT NULL,
+	type enum("friend","foe"),
+	action enum("add","delete"),
+	PRIMARY KEY (id)
+);

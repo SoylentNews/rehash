@@ -91,6 +91,20 @@ $werder = new Silly::Werder;
 
 		print "New user: $username (User #$uid) ($email)\n";
 	}
+	print "Making friends \n";
+	$slashdb->sqlDo("DELETE FROM people");
+	$slashdb->sqlDo("UPDATE users_info SET people=NULL");
+	my $uids = $slashdb->sqlSelectColArrayref('uid', 'users');
+	my $zoo   = getObject('Slash::Zoo');
+	for my $uid (@$uids) {
+		for my $person (@$uids) {
+			if ((rand() * 10)%2) {
+				$zoo->setFriend($uid, $person);
+			} else {
+				$zoo->setFoe($uid, $person);
+			}
+		}
+	}
 }
 
 # subroutines
