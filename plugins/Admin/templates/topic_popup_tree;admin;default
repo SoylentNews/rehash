@@ -14,7 +14,7 @@ __template__
 [% IF include_css %]
 <link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
 [%- END %]
-<script src="./admin-topic-popup.js" type="text/javascript" />
+<script src="./admin-topic-popup.js" type="text/javascript"></script>
 
 <div id="[% name %]-outer" class="hpts-outer">
   <div class="hpts-title" id="[% name %]-title">[% title %]</div>
