@@ -24,6 +24,7 @@ my %data = (
 	'Slash::Apache::User' => [qw(
 		Slash
 		Slash::Apache
+		Slash::Display
 		Slash::Utility
 	)],
 	'Slash::Constants' => [qw(
