@@ -1809,6 +1809,7 @@ sub savePollQuestion {
 	my($self, $poll) = @_;
 	$poll->{section} ||= getCurrentStatic('defaultsection');
 	$poll->{voters} ||= "0";
+	$poll->{autopoll} ||= "no";
 	my $qid_quoted = "";
 	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
 	my $sid_quoted = "";
