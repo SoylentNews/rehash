@@ -44,13 +44,16 @@ use vars qw($VERSION @EXPORT);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(
 	addDomainTags
+	slashizeLinks
 	approveCharref
 	parseDomainTags
+	parseSlashizedLinks
 	balanceTags
 	changePassword
 	chopEntity
 	countWords
 	encryptPassword
+	findWords
 	fixHref
 	fixint
 	fixparam
@@ -1531,7 +1534,7 @@ if necessary.
 
 =item HTML
 
-The HTML with tagged with domains.
+The HTML tagged with domains.
 
 =item RECOMMENDED
 
@@ -1558,7 +1561,7 @@ sub parseDomainTags {
 
 	my $user = getCurrentUser();
 
-	# default is 2 # XXX Jamie I think should be 1
+	# default is 2
 	my $udt = exists($user->{domaintags}) ? $user->{domaintags} : 2;
 
 	$udt =~ /^(\d+)$/;			# make sure it's numeric, sigh
@@ -1581,6 +1584,93 @@ sub parseDomainTags {
 	return $html;
 }
 
+
+#========================================================================
+
+=head2 parseSlashizedLinks(HTML)
+
+To be called before sending the HTML to the user for display.  Takes
+HTML with slashized links (see slashizedLinks()) and converts them to
+the appropriate HTML.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item HTML
+
+The HTML with slashized links.
+
+=back
+
+=item Return value
+
+The parsed HTML.
+
+=back
+
+=cut
+
+sub parseSlashizedLinks {
+	my($html) = @_;
+	$html =~ s{
+		<A[ ]HREF="__SLASHLINK__"
+		([^>]+)
+		>
+	}{
+		_slashlink_to_link($1)
+	}gxe;
+	return $html;
+}
+
+# This function mirrors the behavior of _link_to_slashlink.
+
+sub _slashlink_to_link {
+	my($sl) = @_;
+	my $ssi = getCurrentForm('ssi') || 0;
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $root = $constants->{rootdir};
+	my %attr = $sl =~ / (\w+)="([^"]+)"/g;
+	# We should probably de-strip-attribute the values of %attr
+	# here, but it really doesn't matter.
+
+	# Load up special values and delete them from the attribute list.
+	my $sn = delete $attr{sn} || "";
+	my $sect = delete $attr{sect} || "";
+	my $sect_root = ($sect ? $slashdb->getSection($sect, "url") : "")
+		|| $root;
+	my $frag = delete $attr{frag} || "";
+	# Generate the return value.
+	my $retval = q{<A HREF="};
+	if ($sn eq 'comments') {
+		$retval .= qq{$sect_root/comments.pl?};
+		$retval .= join("&",
+			map { qq{$_=$attr{$_}} }
+			sort keys %attr);
+		$retval .= qq{#$frag} if $frag;
+	} elsif ($sn eq 'article') {
+		# Different behavior here, depending on whether we are
+		# outputting for a dynamic page, or a static one.
+		# This is the main reason for doing slashlinks at all!
+		if ($ssi) {
+			$retval .= qq{$sect_root/};
+			$retval .= qq{$sect/$attr{sid}.shtml};
+			$retval .= qq{?tid=$attr{tid}} if $attr{tid};
+			$retval .= qq{#$frag} if $frag;
+		} else {
+			$retval .= qq{$sect_root/article.pl?};
+			$retval .= join("&",
+				map { qq{$_=$attr{$_}} }
+				sort keys %attr);
+			$retval .= qq{#$frag} if $frag;
+		}
+	}
+	$retval .= q{">};
+	return $retval;
+}
 
 #========================================================================
 
@@ -1709,6 +1799,146 @@ sub _url_to_domain_tag {
 	}
 	return "</a $info>";
 }
+
+#========================================================================
+
+=head2 slashizeLinks(HTML)
+
+Munges HTML E<lt>aE<gt> tags that point to specific types of links on
+this Slash site (articles.pl, comments.pl, and articles .shtml pages)
+into a special type of E<lt>aE<gt> tag.  Note that this is not proper
+HTML, and that it will be converted back to proper HTML when the
+story is displayed.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item HTML
+
+The HTML to slashize links in.
+
+=back
+
+=item Return value
+
+The converted HTML.
+
+=back
+
+=cut
+
+sub slashizeLinks {
+	my($html) = @_;
+	$html =~ s{
+		(<a[^>]+href\s*=\s*"?)
+		([^"<>]+)
+		([^>]*>)
+	}{
+		_link_to_slashlink($1, $2, $3)
+	}gxie;
+	return $html;
+}
+
+# URLs that match a pattern are converted into our special format.
+# Those that don't are passed through.  This function mirrors the
+# behavior of _slashlink_to_link.
+
+sub _link_to_slashlink {
+	my($pre, $url, $post) = @_;
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $retval = "$pre$url$post";
+#print STDERR "_link_to_slashlink begin '$url'\n";
+
+	# URLs may show up in any section, which means when absolutized
+	# their host may be either the main one or a sectional one.  We
+	# have to allow for any of those possibilities.
+	my $abs = $constants->{absolutedir};
+	my $sections = $slashdb->getSections();
+	my @sect_urls = grep { $_ }
+		map { $sections->{$_}{url} }
+		sort keys %$sections;
+	my $any_host = "(?:"
+		. join("|", $abs, @sect_urls)
+		. ")";
+
+	my $canon_url = URI->new_abs($url, $abs)->canonical;
+	my $frag = $canon_url->fragment() || "";
+
+	# All possible URLs' arguments, soon to be attributes in the
+	# new tag (thus "urla").  Values are the name of the script ("sn")
+	# and expressions that can pull those arguments out of a text URL.
+	# (We could use URI::query_form to pull out the .pl arguments, but
+	# that wouldn't help with the .shtml regex so we might as well do
+	# it this way.)  If we ever want to extend slash-linking to cover
+	# other tags, here's the place to start.
+	my %urla = (
+		qr{^$any_host/article\.pl\?} =>
+			{ _sn => 'article',
+			  sid => qr{\bsid=([\w/]+)} },
+		qr{^$any_host/\w+/\d+/\d+/\d+/\d+\.shtml\b} =>
+			{ _sn => 'article',
+			  sid => qr{^$any_host/\w+/(\d+/\d+/\d+/\d+)\.shtml\b} },
+		qr{^$any_host/comments\.pl\?} =>
+			{ _sn => 'comments',
+			  sid => qr{\bsid=(\d+)},
+			  cid => qr{\bcid=(\d+)} },
+	);
+
+	# %attr is the data structure storing the attributes of the <a>
+	# tag that we will use.
+	my %attr = ( );
+	URLA: for my $regex (sort keys %urla) {
+		# This loop only applies to the regex that matches this
+		# URL (if any).
+		next unless $canon_url =~ $regex;
+
+		# The non-underscore keys are regexes that we need to
+		# pull from the URL.
+		for my $arg (sort grep !/^_/, keys %{$urla{$regex}}) {
+			($attr{$arg}) = $canon_url =~ $urla{$regex}{$arg};
+			delete $attr{$arg} if !$attr{$arg};
+		} 
+		# The _sn key is special, it gets copied into sn.
+		$attr{sn} = $urla{$regex}{_sn}; 
+		# Section and topic attributes get thrown in too.
+		if ($attr{sn} eq 'comments') {
+			# sid is actually a discussion id!
+			$attr{sect} = $slashdb->getDiscussion(
+				$attr{sid}, 'section');
+			$attr{tid} = $slashdb->getDiscussion(
+				$attr{sid}, 'topic');
+		} else {
+			# sid is a story id
+			$attr{sect} = $slashdb->getStory( 
+				$attr{sid}, 'section', 1);
+			$attr{tid} = $slashdb->getStory(
+				$attr{sid}, 'tid', 1);
+		}
+		$attr{frag} = $frag if $frag;
+		# We're done once we match any regex to the link's URL.
+		last URLA;
+	}
+
+	# If we have something good in %attr, we can go ahead and
+	# use our custom tag.  Concatenate it together.
+	if ($attr{sn}) {
+		$retval = q{<A HREF="__SLASHLINK__" }
+			. join(" ",
+				map { qq{$_="} . strip_attribute($attr{$_}) . qq{"} }
+				sort keys %attr)
+			. q{>};
+	}
+
+#print STDERR "_link_to_slashlink end '$url'\n";
+	# Return either the new $retval we just made, or just send the
+	# original text back.
+	return $retval;
+}
+
 
 #========================================================================
 
@@ -1992,6 +2222,88 @@ sub countWords {
 	# so I think this is close enough. ;)
 	# - Cliff
 	return scalar @words / 2;
+}
+
+########################################################
+# A very careful extraction of all the words from HTML text.
+# URLs count as words.  (A different algorithm than countWords
+# because countWords just has to be fast; this has to be
+# precise.  Also, this counts occurrences of each word -- which
+# is different than counting the overall number of words.)
+sub findWords {
+	my($text, $weight_factor, $wordcount) = @_;
+	my $constants = getCurrentStatic();
+
+	# The default amount to add is 1.
+	$weight_factor ||= 1;
+
+	# Return a hashref;  keys are the words, values are the
+	# number of times they appear.  If a hashref was passed
+	# in, add to it, otherwise make our own.
+	$wordcount ||= { };
+
+	# Pull out linked URLs from $text and treat them specially.
+	# We only recognize the two most common types of link.
+	# Actually, we could use HTML::LinkExtor here, which might
+	# be more robust...
+	my @urls_ahref = $text =~ m{
+		<a[^>]+href\s*=\s*"?
+		([^"<>]+)
+	}gxi;
+	my @urls_imgsrc = $text =~ m{
+		<img[^>]+src\s*=\s*"?
+		([^"<>]+)
+	}gxi;
+	foreach my $url (@urls_ahref, @urls_imgsrc) {
+		$url = URI->new_abs($url, $constants->{absolutedir})
+			->canonical
+			->as_string;
+		# Tiny URLs don't count.
+		next unless length($url) > 8;
+		# All URLs get a high weight so they are almost
+		# guaranteed to get into the list.
+		$wordcount->{$url}{weight} += $weight_factor * 10;
+		$wordcount->{$url}{count}++;
+	}
+
+	# Now remove the text's HTML tags and find and count the
+	# words remaining in the text.  For our purposes, words
+	# can include character references (entities) and the '
+	# and - characters as well as \w.  This regex is a bit
+	# messy.  I've tried to reduce backtracking as much as
+	# possible but it's still a concern.
+	$text = strip_notags($text);
+	my $entity = qr{(?:&(?:(?:#x[0-9a-f]+|\d+)|[a-z0-9]+);)};
+	my @words = $text =~ m{
+		(
+			# Start with a non-apostrophe, non-dash char.
+			(?: $entity | \w )
+			# Followed by, optionally, any valid char.
+			[\w'-]?
+			# Followed by zero or more sequence of entities,
+			# character references, or normal chars.  The
+			# ' and - must alternate with the other types,
+			# so '' and -- break words.
+			(?:
+				(?: $entity | \w ) ['-]?
+			)*
+			# And end with a non-apostrophe, non-dash char.
+			(?: $entity | \w )
+		)
+	}gxi;
+	for my $word (@words) {
+		# Ignore all words less than 4 chars.
+		next unless length($word) > 3;
+		$wordcount->{lc $word}{weight} += $weight_factor;
+	}
+	my %uniquewords = map { ( lc($_), 1 ) } @words;
+	for my $word (keys %uniquewords) {
+		$wordcount->{$word}{count}++;
+	}
+
+	# Return the hashref (the same one passed in, if one was
+	# passed in).
+	return $wordcount;
 }
 
 #========================================================================

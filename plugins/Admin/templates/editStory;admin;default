@@ -2,8 +2,8 @@ __section__
 default
 __description__
 
-Added to storyref, introtext_wordcount and bodytext_wordcount. These fields are inserted by admin.pl
-before this template is displayed.
+Added to storyref, introtext_wordcount and bodytext_wordcount. These
+fields are inserted by admin.pl before this template is displayed.
 __title__
 
 __page__
@@ -85,7 +85,29 @@ __template__
 		</TD>
 	</TR>
 </TABLE>
-	[% END %]
+[% END %]
+
+[% IF similar_stories.size > 0 %]
+	<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
+		<TR><TD COLSPAN="5" ALIGN="CENTER"><B>Similar Stories:</B></TD></TR>
+		[% FOREACH story = similar_stories %]
+			<TR>
+			<TD VALIGN="TOP">[% IF story.displaystatus == 0;
+				"&nbsp;";
+				ELSIF story.displaystatus == 1;
+					"<I>sect</I>";
+				ELSE;
+					"<I>ND</I>";
+				END; %]</TD>
+			<TD ALIGN="RIGHT" VALIGN="TOP">[% story.weight %]</TD>
+			<TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
+			[% story.title %]</A></TD>
+			<TD VALIGN="TOP">[% Slash.timeCalc(story.time) %]</TD>
+			<TD VALIGN="TOP">[% story.words.join(" ") %]</TD>
+			</TR>
+		[% END %]
+	</TABLE>
+[% END %]
 
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
@@ -187,7 +209,7 @@ __template__
 </TABLE>
 
 <BR>Intro Copy[% IF storyref.introtext_wordcount %] ([%
-storyref.introtext_wordcount %] word[s])[% END %]<BR>
+storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"; END %])[% END %]<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
 <TD><TEXTAREA WRAP="VIRTUAL" NAME="introtext" COLS="[% user.textarea_cols || constants.textarea_cols %]" ROWS="10">[% storyref.introtext | strip_literal %]</TEXTAREA></TD>
@@ -197,7 +219,7 @@ storyref.introtext_wordcount %] word[s])[% END %]<BR>
 [% PROCESS editbuttons %]
 
 <BR>Extended Copy[% IF storyref.bodytext_wordcount %] ([%
-storyref.bodytext_wordcount %] word[s])[% END %]<BR>
+storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])[% END %]<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
 		<TD>

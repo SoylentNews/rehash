@@ -4772,6 +4772,128 @@ sub getStory {
 }
 
 ########################################################
+sub getSimilarStories {
+	my($self, $story, $max_wanted) = @_;
+	$max_wanted ||= 100;
+	my $constants = getCurrentStatic();
+	my($title, $introtext, $bodytext) =
+		($story->{title} || "",
+		 $story->{introtext} || "",
+		 $story->{bodytext} || "");
+	my $not_original_sid = $story->{sid} || "";
+	$not_original_sid = " AND stories.sid != "
+		. $self->sqlQuote($not_original_sid)
+		if $not_original_sid;
+
+	my $text = "$title $introtext $bodytext";
+	# Find a list of all the words in the current story.
+	my $text_words = findWords($text);
+	# Load up the list of words in recent stories (the only ones we
+	# need to concern ourselves with looking for).
+	my @recent_uncommon_words = split " ",
+		($self->getVar("uncommonstorywords", "value") || "");
+	# If we don't (yet) know the list of uncommon words, return now.
+	return [ ] unless @recent_uncommon_words;
+	# Find the intersection of this story and recent stories.
+	my @text_uncommon_words =
+		sort {
+			$text_words->{$b}{weight} <=> $text_words->{$a}{weight}
+			||
+			$a cmp $b
+		}
+		grep { $text_words->{$_}{count} }
+		grep { length($_) > 3 }
+		@recent_uncommon_words;
+#use Data::Dumper;
+#print STDERR "text_words: " . Dumper($text_words);
+#print STDERR "uncommon intersection: '@text_uncommon_words'\n";
+	# If there is no intersection, return now.
+	return [ ] unless @text_uncommon_words;
+	# Find previous stories which have used these words.
+	my $where = "";
+	my @where_clauses = ( );
+	for my $word (@text_uncommon_words) {
+		my $word_q = $self->sqlQuote('%' . $word . '%');
+		push @where_clauses, "stories.title LIKE $word_q";
+		push @where_clauses, "story_text.introtext LIKE $word_q";
+		push @where_clauses, "story_text.bodytext LIKE $word_q";
+	}
+	$where = join(" OR ", @where_clauses);
+	my $n_days = $constants->{similarstorydays} || 30;
+	my $stories = $self->sqlSelectAllHashref(
+		"sid",
+		"stories.sid AS sid, title, introtext, bodytext,
+			time, displaystatus",
+		"stories, story_text",
+		"stories.sid = story_text.sid $not_original_sid
+		 AND stories.time >= DATE_SUB(NOW(), INTERVAL $n_days DAY)
+		 AND ($where)"
+	);
+#print STDERR "similar stories: " . Dumper($stories);
+
+	for my $sid (keys %$stories) {
+		# Add up the weights of each story in turn, for how closely
+		# they match with the current story.  Include a multiplier
+		# based on the length of the match.
+		my $s = $stories->{$sid};
+		$s->{weight} = 0;
+		for my $word (@text_uncommon_words) {
+			my $word_weight = 0;
+			my $wr = qr{(?i:\b\Q$word\E)};
+			my $m = log(length $word);
+			$word_weight += 2.0*$m * (() = $s->{title} =~     m{$wr}g);
+			$word_weight += 1.0*$m * (() = $s->{introtext} =~ m{$wr}g);
+			$word_weight += 0.5*$m * (() = $s->{bodytext} =~  m{$wr}g);
+			$s->{word_hr}{$word} = $word_weight if $word_weight > 0;
+			$s->{weight} += $word_weight;
+		}
+		# Round off weight to 0 decimal places (to an integer).
+		$s->{weight} = sprintf("%.0f", $s->{weight});
+		# Store (the top-scoring-ten of) the words that connected
+		# the original story to this story.
+		$s->{words} = [
+			sort { $s->{word_hr}{$b} <=> $s->{word_hr}{$a} }
+			keys %{$s->{word_hr}}
+		];
+		$#{$s->{words}} = 9 if $#{$s->{words}} > 9;
+	}
+	# If any stories match and are above the threshold, return them.
+	# Pull out the top $max_wanted scorers.  Then sort them by time.
+	my $minweight = $constants->{similarstoryminweight} || 4;
+	my @sids = sort {
+		$stories->{$b}{weight} <=> $stories->{$a}{weight}
+		||
+		$stories->{$b}{'time'} cmp $stories->{$a}{'time'}
+		||
+		$a cmp $b
+	} grep { $stories->{$_}{weight} >= $minweight } keys %$stories;
+#print STDERR "all sids @sids stories " . Dumper($stories);
+	return [ ] if !@sids;
+	$#sids = $max_wanted-1 if $#sids > $max_wanted-1;
+	# Now that we have only the ones we want, push them onto the
+	# return list sorted by time.
+	my $ret_ar = [ ];
+	for my $sid (sort {
+		$stories->{$b}{'time'} cmp $stories->{$a}{'time'}
+		||
+		$stories->{$b}{weight} <=> $stories->{$a}{weight}
+		||
+		$a cmp $b
+	} @sids) {
+		push @$ret_ar, {
+			sid =>		$sid,
+			weight =>	sprintf("%.0f", $stories->{$sid}{weight}),
+			title =>	$stories->{$sid}{title},
+			'time' =>	$stories->{$sid}{'time'},
+			words =>	$stories->{$sid}{words},
+			displaystatus => $stories->{$sid}{displaystatus},
+		};
+	}
+#print STDERR "ret_ar " . Dumper($ret_ar);
+	return $ret_ar;
+}
+
+########################################################
 sub getAuthor {
 	my($self) = @_;
 	_genericCacheRefresh($self, 'authors_cache', getCurrentStatic('block_expire'));

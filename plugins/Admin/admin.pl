@@ -1037,14 +1037,14 @@ sub editStory {
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
 
-		$storyref->{introtext} = $slashdb->autoUrl(
-			$form->{section}, 
-			$storyref->{introtext}
-		);
-		$storyref->{bodytext} = $slashdb->autoUrl(
-			$form->{section}, 
-			$storyref->{bodytext}
-		);
+		for my $field (qw( introtext bodytext )) {
+			$storyref->{$field} = $slashdb->autoUrl(
+				$form->{section}, $storyref->{$field});
+			$storyref->{$field} = slashizeLinks(
+				$storyref->{$field});
+			$storyref->{$field} = parseSlashizedLinks(
+				$storyref->{$field});
+		}
 
 		$topic = $slashdb->getTopic($storyref->{tid});
 		$form->{uid} ||= $user->{uid};
@@ -1147,6 +1147,27 @@ sub editStory {
 	$future = [ reverse(@$future) ];
 	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
 
+	my $num_sim = $constants->{similarstorynumshow} || 5;
+	my $similar_stories = $slashdb->getSimilarStories($storyref, $num_sim);
+	# Truncate that data to a reasonable size for display.
+	if ($similar_stories && @$similar_stories) {
+		for my $sim (@$similar_stories) {
+			# Display a max of five words reported per story.
+			$#{$sim->{words}} = 4 if $#{$sim->{words}} > 4;
+			for my $word (@{$sim->{words}}) {
+				# Max of 12 chars per word.
+				$word = substr($word, 0, 12);
+			}
+			if (length($sim->{title}) > 35) {
+				# Max of 35 char title.
+				$sim->{title} = substr($sim->{title}, 0, 30);
+				$sim->{title} =~ s/\s+\S+$//;
+				$sim->{title} .= "...";
+			}
+		}
+	}
+#use Data::Dumper; print STDERR "similar_stories: " . Dumper($similar_stories);
+
 	my $authortext = slashDisplay('futurestorybox', {
 		past => $past,
 		present => $storyref,
@@ -1180,6 +1201,7 @@ sub editStory {
 		extras			=> $extracolumns,
 		multi_topics		=> $multi_topics,
 		story_topics		=> $story_topics,
+		similar_stories		=> $similar_stories,
 	});
 }
 
@@ -1423,12 +1445,14 @@ sub updateStory {
 	
 		$slashdb->setStoryTopics($form->{sid}, $tid_ref);
 	}
+	$form->{introtext} = slashizeLinks($form->{introtext});
+	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 
 	my $data = {
-		uid	=> $form->{uid},
-		sid	=> $form->{sid},
-		title	=> $form->{title},
-		section	=> $form->{section},
+		uid		=> $form->{uid},
+		sid		=> $form->{sid},
+		title		=> $form->{title},
+		section		=> $form->{section},
 		tid		=> $form->{tid},
 		dept		=> $form->{dept},
 		'time'		=> $time,
@@ -1448,6 +1472,7 @@ sub updateStory {
 		}
 	}
 
+#use Data::Dumper; print STDERR "updateStory setStory data " . Dumper($data);
 	$slashdb->setStory($form->{sid}, $data);
 	my $dis_data = {
 		sid	=> $data->{sid},
@@ -1498,6 +1523,8 @@ sub saveStory {
 	$form->{relatedtext} = getRelated(
 		"$form->{title} $form->{bodytext} $form->{introtext}"
 	) . otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
+	$form->{introtext} = slashizeLinks($form->{introtext});
+	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 
 	my $time = ($form->{fastforward})
 		? $slashdb->getTime()
@@ -1531,6 +1558,7 @@ sub saveStory {
 			$data->{$key} = $form->{$key} if $form->{$key};
 		}
 	}
+#use Data::Dumper; print STDERR "saveStory createStory extras '@$extras' data " . Dumper($data);
 	my $sid = $slashdb->createStory($data);
 
 	# we can use multiple values in forms now, we don't

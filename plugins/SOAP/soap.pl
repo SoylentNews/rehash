@@ -24,7 +24,7 @@ sub main {
 			if ($user->{state}{post}) {
 				$r->method('POST');
 			}
-			# Do some secutiry checking here
+			# Do some security checking here
 			$user->{state}{packagename} = __PACKAGE__;
 			return SOAP::Transport::HTTP::Apache->dispatch_to
 				($action)->handle;

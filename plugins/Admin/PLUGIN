@@ -3,6 +3,7 @@ name=Admin
 mysql_dump=dump
 pg_dump=dump
 htdoc=admin.pl
+task=refresh_uncommon.pl
 template=templates/adminLoginForm;admin;default
 template=templates/blockEdit;admin;default
 template=templates/colorEdit;admin;default

@@ -1029,6 +1029,58 @@ sub createAuthorCache {
 }
 
 ########################################################
+# For plugins/Admin/refresh_uncommon.pl
+sub refreshUncommonStoryWords {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $ignore_threshold = $constants->{uncommonstoryword_thresh} || 2;
+	my $n_days = $constants->{similarstorydays} || 30;
+	$ignore_threshold = int($n_days/$ignore_threshold+0.5);
+
+	# First, get a collection of all words posted in stories for the last
+	# however-many days.
+	my $arr = $self->sqlSelectAll(
+		"title, introtext, bodytext",
+		"story_text, stories",
+		"stories.sid = story_text.sid
+		 AND stories.time >= DATE_SUB(NOW(), INTERVAL $n_days DAY)"
+	);
+	my $word_hr = { };
+	for my $ar (@$arr) {
+		findWords($ar->[0], 8  , $word_hr) if $ar->[0];	# title
+		findWords($ar->[1], 1  , $word_hr) if $ar->[1];	# introtext
+		findWords($ar->[2], 0.5, $word_hr) if $ar->[2];	# bodytext
+	}
+#use Data::Dumper; print STDERR Dumper($word_hr);
+
+	# The only words that count as uncommon are the ones that appear in
+	# stories less frequently than once every uncommonstoryword_thresh
+	# days.  Everything else is, well, too common to bother with.
+	my @uncommon_words = ( );
+	my $maxlen = $constants->{uncommonstorywords_maxlen} || 65000;
+	my $minlen = $constants->{uncommonstoryword_minlen} || 3;
+	my $length = $maxlen+1;
+	@uncommon_words =
+		sort {
+			$word_hr->{$b}{weight} <=> $word_hr->{$a}{weight}
+			||
+			length($b) <=> length($a)
+			||
+			$a cmp $b
+		}
+		grep { $word_hr->{$_}{count} <= $ignore_threshold }
+		grep { length($_) > $minlen }
+		keys %$word_hr;
+#print STDERR "@uncommon_words\n";
+	my $uncommon_words = substr(join(" ", @uncommon_words), 0, $maxlen);
+	if (length($uncommon_words) == $maxlen) {
+		$uncommon_words =~ s/\s+\S+\Z//;
+	}
+
+	$self->setVar("uncommonstorywords", $uncommon_words);
+}
+
+########################################################
 # For tasks/flush_formkeys.pl
 sub deleteOldFormkeys {
 	my($self, $timeframe) = @_;

@@ -19,7 +19,8 @@ sub main {
 	my $story;
 
 	#Yeah, I am being lazy and paranoid  -Brian
-	if (!($user->{author} or $user->{is_admin}) and !$slashdb->checkStoryViewable($form->{sid})) {
+	if (!($user->{author} || $user->{is_admin})
+		&& !$slashdb->checkStoryViewable($form->{sid})) {
 		$story = '';
 	} else {
 		$story = $slashdb->getStory($form->{sid});
@@ -30,6 +31,9 @@ sub main {
 		my $title = $SECT->{isolate} ?
 			"$SECT->{title} | $story->{title}" :
 			"$constants->{sitename} | $story->{title}";
+		$story->{introtext} = parseSlashizedLinks($story->{introtext});
+		$story->{bodytext} =  parseSlashizedLinks($story->{bodytext});
+
 		my $authortext;
 		if ($user->{is_admin} ) {
 			my $future = $slashdb->getStoryByTimeAdmin('>', $story, "3");
