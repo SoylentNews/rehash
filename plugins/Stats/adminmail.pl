@@ -24,6 +24,10 @@ $task{$me}{code} = sub {
 	
 	# These are the ops (aka pages) that we scan for.
 	my @PAGES = qw|index article search comments palm journal rss page users|;
+	my @op_extra_pages = grep{$_} split(/\|/, $constants->{op_extras_countdaily});
+	my $no_op = [ grep {$_} split(/\|/, $constants->{op_exclude_from_countdaily}) ];
+	push @PAGES, @op_extra_pages;
+	$data{extra_pagetypes} = \@op_extra_pages;
 
 	my $days_back;
 	if (defined $constants->{task_options}{days_back}) {
@@ -262,16 +266,16 @@ EOT
 	slashdLog("Page Counting Begin");
 	my $sdTotalHits = $backupdb->getVar('totalhits', 'value', 1);
 	my $daily_total = $logdb->countDailyByPage('', {
-		no_op => $constants->{op_exclude_from_countdaily},
+		no_op => $no_op,
 	});
 
 	my $anon_daily_total = $logdb->countDailyByPage('', {
-		no_op     => $constants->{op_exclude_from_countdaily},
+		no_op     => $no_op,
 		user_type => "anonymous"
 	});
 
 	my $logged_in_daily_total = $logdb->countDailyByPage('', {
-		no_op     => $constants->{op_exclude_from_countdaily},
+		no_op     => $no_op,
 		user_type => "logged-in"
 	});
 	
@@ -280,7 +284,7 @@ EOT
 	# This doesn't work for the other sites... -Brian
 	my $homepage = $logdb->countDailyByPage('index', {
 		section => 'index',
-		no_op   => $constants->{op_exclude_from_countdaily},
+		no_op   => $no_op,
 	});
 
 	my $unique_users = $logdb->countUsersByPage();
@@ -294,7 +298,7 @@ EOT
 	$data{grand_total_static} = sprintf("%8d", $grand_total_static);
 	my $total_static = $logdb->countDailyByPage('', {
 		static => 'yes',
-		no_op => $constants->{op_exclude_from_countdaily}
+		no_op => $no_op 
 	} );
 	$data{total_static} = sprintf("%8d", $total_static);
 	my $recent_subscribers = $stats->getRecentSubscribers();
@@ -312,6 +316,7 @@ EOT
 		my $pages = $logdb->countDailyByPage($op);
 		my $bytes = $logdb->countBytesByPage($op);
 		my $uids = $logdb->countUsersByPage($op);
+		$data{"${op}_label"} = sprintf("%8s", $op);
 		$data{"${op}_uids"} = sprintf("%8d", $uids);
 		$data{"${op}_ipids"} = sprintf("%8d", $uniq);
 		$data{"${op}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
@@ -373,7 +378,7 @@ EOT
 		my $uniq = $logdb->countDailyByPageDistinctIPID('', { section => $section });
 		my $pages = $logdb->countDailyByPage('', {
 			section		=> $section,
-			no_op		=> $constants->{op_exclude_from_countdaily}
+			no_op		=> $no_op
 		} );
 		my $bytes = $logdb->countBytesByPage('', { section => $section });
 		my $users = $logdb->countUsersByPage('', { section => $section });
@@ -402,10 +407,11 @@ EOT
 			my $uniq = $logdb->countDailyByPageDistinctIPID($op, { section => $section });
 			my $pages = $logdb->countDailyByPage($op, {
 				section => $section,
-				no_op => $constants->{op_exclude_from_countdaily}
+				no_op => $no_op
 			} );
 			my $bytes = $logdb->countBytesByPage($op, { section => $section });
 			my $users = $logdb->countUsersByPage($op, { section => $section });
+			$temp->{$op}{label} = sprintf("%8s", $op);
 			$temp->{$op}{ipids} = sprintf("%8d", $uniq);
 			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$op}{pages} = sprintf("%8d", $pages);
@@ -471,7 +477,7 @@ EOT
 
 
 	my $total_bytes = $logdb->countBytesByPage('', {
-		no_op => $constants->{op_exclude_from_countdaily}
+		no_op => $no_op
 	} );
 	my $grand_total_bytes = $logdb->countBytesByPage('');
 
@@ -762,6 +768,15 @@ EOT
 			$sub_report .= sprintf("%6d %s\n", $sub->{cnt}, ($slashdb->getUser($sub->{uid}, 'nickname') || $sub->{uid})); 
 	 	}
 		$data{crawling_subscribers} = $sub_report if $sub_report; 
+	}	
+	my $late_modders 		= $stats->getTopModdersNearArchive({limit => 5});
+	my $early_inactive_modders      = $stats->getTopEarlyInactiveDownmodders({limit => 5 });
+	foreach my $mod (@$late_modders){
+		$data{late_modders_report} .= sprintf("%-6d %-20s %5d",$mod->{uid}, $mod->{nickname}, $mod->{count});
+	}
+
+	foreach my $mod (@$early_inactive_modders){
+		$data{early_inactive_modders_report} .= sprintf("%-6d %-20s %5d",$mod->{uid}, $mod->{nickname}, $mod->{count});
 	}
 
 	my $email = slashDisplay('display', \%data, {
