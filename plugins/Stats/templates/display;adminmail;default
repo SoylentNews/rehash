@@ -107,8 +107,9 @@ Top Relocated URLS
 [% END %]
 
 Pages From RSS By Section
+------------------------------------------------
+Section		         Pages     UIDS    IPIDS
 [% FOREACH section = skins -%]
-Section		      Pages   UIDS     IPIDS
 [%- rss_skin_name = section.skin_name FILTER format('%20s') -%]
 [%  rss_skin_name %]  [% section.page_from_rss %] [% section.uid_from_rss %] [% section.ipid_from_rss %]
 [% END %]
