@@ -257,17 +257,31 @@ EOT
 		min_count => $constants->{mod_stats_min_repeat}
 	});
 
-	my $op_hour_static = $stats->getDurationByStaticOpHour({});
-	for my $is_static (keys %$op_hour_static) {
-		for my $op (keys %{$op_hour_static->{$is_static}}) {
-			for my $hour (keys %{$op_hour_static->{$is_static}{$op}}) {
+	my $static_op_hour = $stats->getDurationByStaticOpHour({});
+	for my $is_static (keys %$static_op_hour) {
+		for my $op (keys %{$static_op_hour->{$is_static}}) {
+			for my $hour (keys %{$static_op_hour->{$is_static}{$op}}) {
 				my $prefix = "duration_";
 				$prefix .= $is_static eq 'yes' ? 'st_' : 'dy_';
 				$prefix .= "${op}_${hour}_";
 				for my $statname (qw( avg stddev )) {
-					my $value = $op_hour_static->{$is_static}{$op}{$hour}{"dur_$statname"};
+					my $value = $static_op_hour->{$is_static}{$op}{$hour}{"dur_$statname"};
 					$statsSave->createStatDaily("$prefix$statname", $value);
 				}
+			}
+		}
+	}
+
+	my $static_localaddr = $stats->getDurationByStaticLocaladdr();
+	for my $is_static (keys %$static_localaddr) {
+		for my $localaddr (keys %{$static_localaddr->{$is_static}}) {
+			my $prefix = "duration_";
+			$prefix .= $is_static eq 'yes' ? 'st_' : 'dy_';
+			$prefix .= "${localaddr}_";
+			$prefix =~ s/\W+/_/g; # change "."s in localaddr into "_"s
+			for my $statname (qw( avg stddev )) {
+				my $value = $static_localaddr->{$is_static}{$localaddr}{"dur_$statname"};
+				$statsSave->createStatDaily("$prefix$statname", $value);
 			}
 		}
 	}

@@ -773,6 +773,20 @@ sub getDurationByStaticOpHour {
 }
 
 ########################################################
+sub getDurationByStaticLocaladdr {
+	my($self) = @_;
+
+	return $self->sqlSelectAllHashref(
+		[qw( static local_addr )],
+		"static, local_addr,
+		 AVG(duration) AS dur_avg, STDDEV(duration) AS dur_stddev",
+		"accesslog_temp",
+		"",
+		"GROUP BY static, local_addr"
+	);
+}
+
+########################################################
 sub countSfNetIssues {
 	my($self, $group_id) = @_;
 	my $constants = getCurrentStatic();
