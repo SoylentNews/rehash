@@ -2549,8 +2549,6 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 
 # End of T_2_5_0_27, Start of T_2_5_0_28 - 2004/09/21
 
-# SLASHDOT LAST UPDATED HERE
-
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_28, Start of T_2_5_0_29 - 2004/09/28
@@ -2608,6 +2606,8 @@ INSERT INTO vars (name, value, description) VALUES ('slashboxes_maxnum','25','Ma
 DELETE FROM users_param WHERE value =  0  AND name IN ('clbig_bonus', 'clsmall_bonus', 'postanon', 'subscriber_bonus');
 DELETE FROM users_param WHERE value ='+1' AND name IN ('karma_bonus');
 DELETE FROM users_param WHERE value =  2  AND name IN ('domaintags');
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_31, Start of T_2_5_0_32 - 2004/10/10
 
