@@ -735,7 +735,9 @@ sub do_child {
 	my $info = {
 		invocation_num => $invocation_num,
 	};
-slashdLog("invocation_num $info->{invocation_num}");
+	if (verbosity() >= 4) {
+		slashdLog("invocation_num $info->{invocation_num}");
+	}
 	my $summary = $subref->($virtual_user, $constants, $slashdb, $user,
 		$info);
 
