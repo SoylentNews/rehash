@@ -36,7 +36,7 @@ $task{$me}{code} = sub {
 	# doesn't return a new value, then there were no new
 	# comments posted during that period several days ago,
 	# so we just keep using the old value.
-	my $cid = $slashdb->getCidForDaysBack($days, $startat) || $startat;
+	my $cid = $slashdb->getCidForDaysBack($days, $start_at) || $start_at;
 	my $success = $slashdb->setVar("min_cid_last_$days\_days", $cid);
 
 	if ($success) {
