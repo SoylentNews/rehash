@@ -240,7 +240,7 @@ sub displayRSS {
 				tid		=> $article->[5],
 			},
 			title		=> $article->[2],
-			description	=> url2html(strip_mode($article->[1], $article->[4])),
+			description	=> strip_mode($article->[1], $article->[4]),
 			'link'		=> root2abs() . '/~' . fixparam($nickname) . "/journal/$article->[3]",
 		};
 	}
@@ -378,7 +378,7 @@ sub displayArticleFriends {
 
 		# should get comment count, too -- pudge
 		push @collection, {
-			article		=> url2html(strip_mode($article->[1], $article->[4])),
+			article		=> strip_mode($article->[1], $article->[4]),
 			date		=> $article->[0],
 			description	=> strip_notags($article->[2]),
 			topic		=> $topics->{$article->[5]},
@@ -492,7 +492,7 @@ sub displayArticle {
 				: 0;
 		}
 
-		my $stripped_article = url2html(strip_mode($article->[1], $article->[4]));
+		my $stripped_article = strip_mode($article->[1], $article->[4]);
 		$stripped_article = noFollow($stripped_article)
 			unless $karma > $constants->{goodkarma};
 
@@ -765,7 +765,7 @@ sub editArticle {
 	$posttype ||= $user->{'posttype'};
 
 	if ($article->{article}) {
-		my $strip_art = url2html(strip_mode($article->{article}, $posttype));
+		my $strip_art = strip_mode($article->{article}, $posttype);
 		my $strip_desc = strip_notags($article->{description});
 
 		my $commentcount = $article->{discussion}

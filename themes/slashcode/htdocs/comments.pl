@@ -768,10 +768,10 @@ sub previewForm {
 	# to have many linebreaks and runs of whitespace; this makes the
 	# compression filter more lenient about allowing them.
 
-	$tempComment = url2html(strip_mode($tempComment,
+	$tempComment = strip_mode($tempComment,
 		# if no posttype given, pick a default
 		$form->{posttype} || PLAINTEXT
-	));
+	);
 
 	validateComment(
 		\$tempComment, \$tempSubject, $error_message, 1,
@@ -878,10 +878,10 @@ sub submitComment {
 	# See the comment above validateComment() called from previewForm.
 	# Same thing applies here.
 
-	$tempComment = url2html(strip_mode($tempComment,
+	$tempComment = strip_mode($tempComment,
 		# if no posttype given, pick a default
 		$form->{posttype} || PLAINTEXT
-	));
+	);
 
 	unless (validateComment(
 		\$tempComment, \$tempSubject, $error_message, 1,

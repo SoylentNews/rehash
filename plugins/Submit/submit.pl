@@ -554,9 +554,9 @@ sub displayForm {
 
 	my $fixedstory;
 	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
-		$fixedstory = strip_plaintext(url2html($form->{story}));
+		$fixedstory = strip_plaintext(url2html_old($form->{story}));
 	} else {
-		$fixedstory = strip_html(url2html($form->{story}));
+		$fixedstory = strip_html(url2html_old($form->{story}));
 
 		# some submitters like to add whitespace before and
 		# after their introtext. This is never wanted. --Pater
@@ -612,9 +612,9 @@ sub saveSub {
 	}
 
 	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
-		$form->{story} = strip_plaintext(url2html($form->{story}));
+		$form->{story} = strip_plaintext(url2html_old($form->{story}));
 	} else {
-		$form->{story} = strip_html(url2html($form->{story}));
+		$form->{story} = strip_html(url2html_old($form->{story}));
 	}
 	$form->{story} = balanceTags($form->{story});
 
@@ -704,15 +704,14 @@ sub processSub {
 }
 
 #################################################################
-=pod
-sub url2html {
+sub url2html_old {
 	my($introtext) = @_;
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
 
 	# this is kinda experimental ... esp. the $extra line
-	# we know it can break real URLs, but probably will preserve
-	# real URLs more often than it will break them
+	# we know the $extra line can break real URLs, but probably will
+	# preserve real URLs more often than it will break them
 	$introtext =~  s{(?<!['"=>])(http|https|ftp|gopher|telnet)://([$URI::uric#]+)}{
 		my($proto, $url) = ($1, $2);
 		my $extra = '';
@@ -723,7 +722,6 @@ sub url2html {
 	$introtext =~ s/\s+$//;
 	return $introtext;
 }
-=cut
 
 #################################################################
 
