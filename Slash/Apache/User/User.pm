@@ -359,7 +359,8 @@ sub userdir_handler {
 		# $r->uri($ops{$op}[0]);
 		# $r->filename($constants->{basedir} . $ops{$op}[0]);
 		# Not against it, or something like it. This is getting a bit long. 
-    # I would rather prefer it did not turn out like ops have though. -Brian
+		# I would rather prefer it did not turn out like ops have though. -Brian
+		# what do you mean? -- pudge
 
 		if ($op eq 'journal') {
 			$r->args("op=display&nick=$nick");

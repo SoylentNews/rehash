@@ -201,7 +201,7 @@ sub userSearch {
 	slashDisplay('searchform', {
 		op		=> $form->{op},
 		'sort'		=> _sort(),
-		journal_option => 1,
+		journal_option	=> 1,
 	});
 
 	if (@$users) {
