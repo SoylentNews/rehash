@@ -94,7 +94,7 @@ IF !useredit.is_anon;
 		IF useredit.aim;
 			'<BR><B>AOL IM:</B> ';
 			useredit.aim | strip_literal;
-			'(<B><A HREF="aim:addbuddy?screenname=';
+			' (<B><A HREF="aim:addbuddy?screenname=';
 			useredit.aim | strip_attribute;
 			'">Add Buddy</A>, ';
 			'<A HREF="aim:goim?screenname=';
