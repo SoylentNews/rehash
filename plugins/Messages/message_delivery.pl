@@ -32,7 +32,7 @@ $task{$me}{code} = sub {
 	$time[4] += 1;
 	my $date = sprintf "%04d%02d%02d%02d%02d%02d", @time[5, 4, 3, 2, 1, 0];
 	my $now  = sprintf "%04d-%02d-%02d", @time[5, 4, 3];
-	my $last_deferred = $slashdb->getVar('message_last_deferred', 'value') || 0;
+	my $last_deferred = $slashdb->getVar('message_last_deferred', 'value', 1) || 0;
 
 	my($successes, $failures) = (0, 0);
 	my $count = $constants->{message_process_count} || 10;
