@@ -994,15 +994,15 @@ sub editStory {
 		$sid = $form->{sid};
 	}
 
-	my($authoredit_flag, $extracolumn_flag) = (0, 0);
+	my($extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $topic, $storycontent, $locktest,
 		$sections, $topic_select, $section_select, $author_select,
 		$extracolumns, $displaystatus_select, $commentstatus_select, 
 		$subid, $description);
 	my $extracolref = {};
 	my($fixquotes_check, $autonode_check, 
-		$fastforward_check, $shortcuts_check, $feature_story_check) =
-		('','','','','');
+		$fastforward_check, $shortcuts_check) =
+		('','','','');
 	my($multi_topics, $story_topics);
 	my $page = 'index';
 	my $section = $user->{section} ? $user->{section} : '';
@@ -1063,7 +1063,6 @@ sub editStory {
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
-		$feature_story_check	= 'CHECKED' if ($slashdb->getSection($storyref->{section}, 'feature_story') eq $storyref->{sid} && $storyref->{sid} ne '');
 
 	} elsif (defined $sid) { # Loading an existing SID
 		my $tmp = $user->{currentSection};
@@ -1074,7 +1073,6 @@ sub editStory {
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
-		$feature_story_check	= 'CHECKED' if ($slashdb->getSection($storyref->{section}, 'feature_story') eq $storyref->{sid} && $storyref->{sid} ne '');
 		$subid = $storyref->{subid};
 
 	} else { # New Story
@@ -1108,11 +1106,12 @@ sub editStory {
 
 	$section_select = selectSection('section', $storyref->{section}, $sections, 1) unless $user->{section};
 
-	if ($user->{seclev} >= 100) {
-		$authoredit_flag = 1;
-		my $authors = $slashdb->getDescriptions('authors', '', 1);
-		$author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
-	}
+	my $authors = $slashdb->getDescriptions('authors', '', 1);
+	$author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
+
+	my $categories = $slashdb->getDescriptions('section_category', $storyref->{section}, 1);
+	my $category_select = createSelect('category', $categories, $storyref->{category}, 1)
+		if $categories;
 
 	$storyref->{dept} =~ s/ /-/gi;
 
@@ -1168,9 +1167,8 @@ sub editStory {
 		autonode_check		=> $autonode_check,
 		fastforward_check	=> $fastforward_check,
 		shortcuts_check		=> $shortcuts_check,
-		feature_story_check	=> $feature_story_check,
+		category_select		=> $category_select,
 		user			=> $user,
-		authoredit_flag		=> $authoredit_flag,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
 		multi_topics		=> $multi_topics,
@@ -1275,10 +1273,6 @@ sub listStories {
 			$canedit = 1;
 		}
 
-		my $feature_story_flag = 
-			($slashdb->getSection($section, 'feature_story') eq
-			 $sid);
-
 		$storylistref->[$i] = {
 			'x'		=> $i + $first_story + 1,
 			hits		=> $hits,
@@ -1293,7 +1287,6 @@ sub listStories {
 			td		=> $td,
 			td2		=> $td2,
 			writestatus	=> $writestatus,
-			feature_story_flag => $feature_story_flag,
 			displaystatus	=> $displaystatus,
 			tbtitle		=> $tbtitle,
 		};
@@ -1406,14 +1399,6 @@ sub updateStory {
 	$form->{relatedtext} = getRelated("$form->{title} $form->{bodytext} $form->{introtext}")
 		. otherLinks($slashdb->getAuthor($form->{uid}, 'nickname'), $form->{tid}, $form->{uid});
 
-	if ($constants->{feature_story_enabled}) {
-		if ($form->{feature_story}) {
-			$slashdb->setSection($form->{section}, { feature_story => $form->{sid} });
-		} elsif ($slashdb->getSection($form->{section}, 'feature_story') eq $form->{sid}) {
-			$slashdb->setSection($form->{section}, { feature_story => '' });
-		}
-	}
-
 	my $time = ($form->{fastforward})
 		? $slashdb->getTime()
 		: $form->{'time'};
@@ -1446,6 +1431,7 @@ sub updateStory {
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
+		category	=> $form->{category},
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
@@ -1529,6 +1515,7 @@ sub saveStory {
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		subid		=> $form->{subid},
+		category	=> $form->{category},
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
@@ -1538,14 +1525,6 @@ sub saveStory {
 		}
 	}
 	my $sid = $slashdb->createStory($data);
-
-	if ($constants->{feature_story_enabled}) {
-		if ($form->{feature_story}) {
-			$slashdb->setSection($form->{section}, { feature_story => $sid });
-		} elsif ($slashdb->getSection($form->{section}, 'feature_story') eq  $sid) {
-			$slashdb->setSection($form->{section}, { feature_story => '' });
-		}
-	}
 
 	if ($constants->{multitopics_enabled}) {
 		for my $k(keys %$form) {

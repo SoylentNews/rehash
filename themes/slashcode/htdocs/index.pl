@@ -62,14 +62,12 @@ sub main {
 	# change
 	$storystruct = displayStories($stories);
 	$Stories = $storystruct->{stories}{full};
-	$Feature = $storystruct->{feature}{full};
 
 	my $StandardBlocks = displayStandardBlocks($section, $stories);
 
 	slashDisplay('index', {
 		is_moderator	=> scalar $slashdb->checkForMetaModerator($user),
 		stories		=> $Stories,
-		feature		=> $Feature,
 		storystruct	=> $storystruct,
 		boxes		=> $StandardBlocks,
 	});
@@ -239,14 +237,14 @@ sub displayStories {
 
 	my($today, $x) = ('', 1);
 	my $cnt = int($user->{maxstories} / 3);
-	my($return, $counter, $feature_retrieved);
+	my($return, $counter);
 
 	# shift them off, so we do not display them in the Older
 	# Stuff block later (simulate the old cursor-based
 	# method)
 	while ($_ = shift @{$stories}) {
 		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid) = @{$_};
-		my($tmpreturn, $category, $feature_sid, $other, @links);
+		my($tmpreturn, $category, $other, @links);
 		my @threshComments = split m/,/, $hp;  # posts in each threshold
 
 		if ($constants->{organise_stories}) {
@@ -254,17 +252,6 @@ sub displayStories {
 		}
 		$category ||= 'stories';
 		$counter->{$category} ||= $x;
-		# feature_retrieved keeps the code from checking again for that section
-		# if the feature story has already been retrieved
-		if ($constants->{feature_story_enabled} && ! $feature_retrieved->{$thissection}) {
-			$feature_sid = $slashdb->getSection($thissection,'feature_story');
-			if ($sid eq $feature_sid) {
-				$other->{story_template} = 'dispFeature';
-				$category = 'feature';
-				# ok, we have the feature story for this section
-				$feature_retrieved->{$thissection} = 1;
-			}	
-		}
 		
 		my($storytext, $story) = displayStory($sid, '', $other);
 
@@ -341,10 +328,8 @@ sub displayStories {
 
 		push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
 
-		my $link_template = $category eq 'feature' ? 'feature_storylink' : 'storylink';
-
 		# I added sid so that you could set up replies from the front page -Brian
-		$tmpreturn .= slashDisplay($link_template, {
+		$tmpreturn .= slashDisplay('storylink', {
 			links	=> \@links,
 			sid	=> $sid,
 		}, { Return => 1});

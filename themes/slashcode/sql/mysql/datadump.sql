@@ -188,8 +188,8 @@ INSERT INTO related_links (keyword, name, link) VALUES ('perl','Perl','http://us
 # Dumping data for table 'sections'
 #
 
-INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras, feature_story) VALUES ('articles',30,'Articles','',0,0,0,'');
-INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras, feature_story) VALUES ('features',21,'Features','eyesight',0,1,0,'');
+INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras) VALUES ('articles',30,'Articles','',0,0,0);
+INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras) VALUES ('features',21,'Features','eyesight',0,1,0);
 
 #
 # Dumping data for table 'section_topics'

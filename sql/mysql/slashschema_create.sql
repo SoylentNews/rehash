@@ -124,6 +124,21 @@ CREATE TABLE blocks (
 ) TYPE = myisam;
 
 #
+# Table structure for table 'categories'
+#
+
+DROP TABLE IF EXISTS categories;
+CREATE TABLE categories (
+	id smallint UNSIGNED NOT NULL auto_increment,
+	title varchar(30) NOT NULL,
+	section varchar(30) NOT NULL,
+	artcount mediumint DEFAULT '30' NOT NULL,
+	UNIQUE code_key (title,section),
+	FOREIGN KEY (section) REFERENCES sections(section),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+#
 # Table structure for table 'code_param'
 #
 
@@ -465,7 +480,6 @@ CREATE TABLE sections (
 	isolate tinyint DEFAULT '0' NOT NULL,
 	issue tinyint DEFAULT '0' NOT NULL,
 	extras mediumint DEFAULT '0',
-	feature_story char(16) NOT NULL,
 	url char(128) DEFAULT '' NOT NULL,
 	hostname char(128) DEFAULT '' NOT NULL,
 	cookiedomain char(128) DEFAULT '' NOT NULL,
@@ -473,7 +487,6 @@ CREATE TABLE sections (
 	writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL,
 	KEY (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
-	FOREIGN KEY (feature_story) REFERENCES stories(sid),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 
@@ -569,23 +582,24 @@ CREATE TABLE spamarmors (
 
 DROP TABLE IF EXISTS stories;
 CREATE TABLE stories (
-	sid char(16) NOT NULL,
-	tid smallint UNSIGNED NOT NULL,
-	uid mediumint UNSIGNED NOT NULL,
-	title varchar(100) DEFAULT '' NOT NULL,
-	dept varchar(100),
-	time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	hits mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	section varchar(30) DEFAULT '' NOT NULL,
-	displaystatus tinyint DEFAULT '0' NOT NULL,
-	commentstatus tinyint,
-	discussion mediumint UNSIGNED,
-	submitter mediumint UNSIGNED NOT NULL,
-	commentcount smallint UNSIGNED DEFAULT '0' NOT NULL,
-	hitparade varchar(64) DEFAULT '0,0,0,0,0,0,0' NOT NULL,
+	sid CHAR(16) NOT NULL,
+	tid SMALLINT UNSIGNED NOT NULL,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	title VARCHAR(100) DEFAULT '' NOT NULL,
+	dept VARCHAR(100),
+	time DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	hits MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
+	section VARCHAR(30) DEFAULT '' NOT NULL,
+	displaystatus TINYINT DEFAULT '0' NOT NULL,
+	commentstatus TINYINT,
+	discussion MEDIUMINT UNSIGNED,
+	submitter MEDIUMINT UNSIGNED NOT NULL,
+	commentcount SMALLINT UNSIGNED DEFAULT '0' NOT NULL,
+	hitparade VARCHAR(64) DEFAULT '0,0,0,0,0,0,0' NOT NULL,
 	writestatus ENUM("ok","delete","dirty","archived") DEFAULT 'ok' NOT NULL,
-	day_published date DEFAULT '0000-00-00' NOT NULL,
+	day_published DATE DEFAULT '0000-00-00' NOT NULL,
 	qid MEDIUMINT UNSIGNED DEFAULT NULL,
+	category SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (sid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (tid) REFERENCES topics(tid),

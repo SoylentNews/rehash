@@ -61,10 +61,6 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 ([% user.uid %]).</B></FONT><P>
 [% END %]
 
-[% IF constants.feature_story_enabled && feature %]
-	[% feature %]
-[% END %]
-
 [% stories %]
 
 [% UNLESS user.noboxes %]

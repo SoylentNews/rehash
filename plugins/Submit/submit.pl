@@ -456,7 +456,7 @@ sub saveSub {
 	if ($extras && @$extras) {
 		for (@$extras) {
 			my $key = $_->[1];
-			$submission->{$key} = $form->{$key} if $form->{$key};
+			$submission->{$key} = strip_nohtml($form->{$key}) if $form->{$key};
 		}
 	}
 	$submission->{subid} = $slashdb->createSubmission($submission);

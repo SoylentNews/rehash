@@ -59,12 +59,6 @@ END;
 		bgcolor = '#999999';
 END %]
 
-[% IF constants.feature_story_enabled && story.feature_story_flag %] 
-	[% featured = "(Feature Story)"; %]
-[% ELSE %]
-	[% featured = ''; %]
-[% END %]
-
 	<TR BGCOLOR="[% bgcolor %]" ALT="[% story.displaystatus %]">
 
 		<TD ALIGN="RIGHT">
@@ -80,7 +74,7 @@ END %]
 		<TD>
 		<FONT SIZE="2">
 		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
-		[% story.title %]&nbsp;</A> <small>[% featured %]</small>
+		[% story.title %]&nbsp;</A> 
 		</FONT>
 		</TD>
 		<TD><FONT SIZE="2"><B>[% story.aid %]</B></FONT></TD>

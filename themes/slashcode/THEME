@@ -162,7 +162,6 @@ template=templates/selectThreshLabel;misc;default
 template=templates/sendPasswdForm;users;default
 template=templates/ssihead;misc;default
 template=templates/storylink;index;default
-template=templates/feature_storylink;index;default
 template=templates/storylink;index;light
 template=templates/tildeEd;users;default
 template=templates/titlebar;misc;default

@@ -298,3 +298,20 @@ INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+#
+# Table structure for table 'categories'
+#
+
+DROP TABLE IF EXISTS categories;
+CREATE TABLE categories (
+	id smallint UNSIGNED NOT NULL auto_increment,
+	title varchar(30) NOT NULL,
+	section varchar(30) NOT NULL,
+	artcount mediumint DEFAULT '30' NOT NULL,
+	UNIQUE code_key (title,section),
+	FOREIGN KEY (section) REFERENCES sections(section),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+ALTER TABLE stories ADD	category SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
+ALTER TABLE sections DROP feature_story;

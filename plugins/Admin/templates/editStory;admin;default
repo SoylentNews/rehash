@@ -96,20 +96,20 @@ __template__
 		[% topic_select %]
 
 		[% UNLESS user.section %]
-		[% section_select %]
+			[% section_select %]
 		[% END %]
 
 		<INPUT TYPE="HIDDEN" NAME="writestatus" VALUE="[% storyref.writestatus %]">
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter %]">
 
-		[% IF authoredit_flag %]
 		[% author_select %]
-		[% ELSIF storyref.uid %]
-		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% storyref.uid %]">
+
+		[% IF category_select %]
+			[% category_select %]
 		[% END %]
 
 		[% IF storyref.sid %]
-		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% storyref.sid %]">
+			<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% storyref.sid %]">
 		[% END %]
 
 		</FONT></TD>
@@ -169,10 +169,6 @@ __template__
 		[ <INPUT TYPE="checkbox" NAME="fixquotes" [% fixquotes_check %]>fixquotes
 		| <INPUT TYPE="checkbox" NAME="autonode" [% autonode_check %]>autonode
 		| <INPUT TYPE="checkbox" NAME="shortcuts" [% shortcuts_check %]>story shortcuts
-
-	[% IF constants.feature_story_enabled %]
-		| <INPUT TYPE="checkbox" NAME="feature_story" [% feature_story_check %]>feature story
-	[% END %]
 
 		[% IF sid %]
 		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward
