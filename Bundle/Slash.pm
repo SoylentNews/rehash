@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$VERSION = '1.0.3';
+$Bundle::Slash::VERSION = '1.0.4';
 
 1;
 
@@ -16,15 +16,13 @@ C<perl -MCPAN -e 'install "Bundle::Slash"'>
 
 =head1 CONTENTS
 
-Bundle::libnet
+Bundle::CPAN	- File::Spec,Digest::MD5,Compress::Zlib,libnet,Archive::Tar,Data::Dumper
 
-Bundle::LWP         - includes URI, HTML::Parser, MIME::Base64, Digest::MD5
+Bundle::LWP	- URI,HTML::Parser,MIME::Base64
 
-File::Spec
+Bundle::DBI	- Storable
 
-Bundle::DBI
-
-Bundle::DBD::mysql  - includes Data::ShowTable
+Bundle::DBD::mysql  - Data::ShowTable
 
 Date::Parse         - TimeDate
 
@@ -40,20 +38,15 @@ Apache::DBILogConfig
 
 Apache::DBILogger
 
-Compress::Zlib
-
 Image::Size
 
 
 =head1 DESCRIPTION
 
-Should we do IPC::Shareable too?  It is not as stable, it seems.
-Ah, but now there is a new version!
-
-Bundle::CPAN would be nice, but Archive::Tar seems broken now.  Ah,
-but now it is fixed!  We will come back and re-address this soon.
-
 mod_perl must be installed by hand, because of the special configuration
 required for it.
+
+IPC::Shareable no longer required for IPC, since we are no longer doing
+IPC.
 
 =cut
