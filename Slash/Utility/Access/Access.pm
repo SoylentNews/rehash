@@ -393,11 +393,13 @@ sub checkFormPost {
 		if ($slashdb->checkTimesPosted($formname, $max, $id, $formkey_earliest)) {
 			undef $formkey unless $formkey =~ /^\w{10}$/;
 
-			unless ($formkey && $slashdb->checkFormkey($formkey_earliest, $formname, $id, $formkey)) {
-				$slashdb->createAbuse("invalid form key", $formname, $ENV{QUERY_STRING});
-				$$err_message = Slash::getData('invalidformkey', '', '');
-				return;
-			}
+# wtf?  no method checkFormkey exists ...
+# of course, checkFormPost is never even called ...
+#			unless ($formkey && $slashdb->checkFormkey($formkey_earliest, $formname, $id, $formkey)) {
+#				$slashdb->createAbuse("invalid form key", $formname, $ENV{QUERY_STRING});
+#				$$err_message = Slash::getData('invalidformkey', '', '');
+#				return;
+#			}
 
 			if (submittedAlready($formkey, $formname, $err_message)) {
 				$slashdb->createAbuse("form already submitted", $formname, $ENV{QUERY_STRING});

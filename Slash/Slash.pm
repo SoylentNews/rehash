@@ -1646,6 +1646,12 @@ sub getData {
 	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} } ||= { };
 
 	if (defined $var->{$value}) {
+		# restore our original values; this is done if
+		# slashDisplay is called, but it is not called here -- pudge
+		my $user = getCurrentUser();
+		$user->{currentSkin}	= $name->{origSkin};
+		$user->{currentPage}	= $name->{origPage};
+
 		return $var->{$value};
 	}
 

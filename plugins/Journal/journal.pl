@@ -594,12 +594,10 @@ sub listArticle {
 }
 
 sub saveArticle {
-printf STDERR "00:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 	my($journal, $constants, $user, $form, $reader, $gSkin, $ws) = @_;
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
 	my $description = strip_notags($form->{description});
 
-printf STDERR "01:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 	# from comments.pl
 	for ($description, $form->{article}) {
 		my $d = decode_entities($_);
@@ -613,21 +611,17 @@ printf STDERR "01:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('curren
 			return 0;
 		}
 	}
-printf STDERR "02:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 
 	return 0 unless _validFormkey($ws ? qw(max_post_check interval_check) : ());
 
-printf STDERR "03:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 	my $slashdb = getCurrentDB();
 	if ($form->{id}) {
-printf STDERR "04:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 
 		my %update;
 		my $article = $journal->get($form->{id});
 
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
-printf STDERR "05:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
 			my $rootdir = $gSkin->{rootdir};
 			if ($form->{comments_on}) {
@@ -641,43 +635,35 @@ printf STDERR "05:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('curren
 				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$form->{id}",
 			});
 			$update{discussion}  = $did;
-printf STDERR "06:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 
 		# update description if changed
 		} elsif (!$form->{comments_on} && $article->{discussion} && $article->{description} ne $description) {
 			$slashdb->setDiscussion($article->{discussion}, { title => $description });
-printf STDERR "07:%d:journal:currentPage :: ", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 		}
 
-printf STDERR "08:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 		unless ($form->{comments_on}) {
 			for (qw(article tid posttype)) {
 				$update{$_} = $form->{$_} if defined $form->{$_};
 			}
 			$update{description} = $description;
-printf STDERR "09:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 		}
 
 		$journal->set($form->{id}, \%update);
-printf STDERR "10:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 
 		return $form->{id} if $ws;
 		$form = { id => $form->{id} };
 
 	} else {
-printf STDERR "11:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 		my $id = $journal->create($description,
 			$form->{article}, $form->{posttype}, $form->{tid});
 
 		unless ($id) {
-printf STDERR "12:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 			unless ($ws) {
 				_printHead("mainhead") or return;
 				print getData('create_failed');
 			}
 			return 0;
 		}
-printf STDERR "13:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled') {
 			my $rootdir = $gSkin->{rootdir};
@@ -687,17 +673,14 @@ printf STDERR "13:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('curren
 				commentstatus	=> $form->{journal_discuss},
 				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$id",
 			});
-printf STDERR "14:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 			$journal->set($id, { discussion => $did });
 		}
-printf STDERR "15:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 
 		# create messages
 		my $messages = getObject('Slash::Messages');
 		if ($messages) {
 			my $zoo = getObject('Slash::Zoo');
 			my $friends = $zoo->getFriendsForMessage;
-printf STDERR "16:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 
 			my $data = {
 				template_name	=> 'messagenew',
@@ -714,16 +697,13 @@ printf STDERR "16:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('curren
 			for (@$friends) {
 				$messages->create($_, MSG_CODE_JOURNAL_FRIEND, $data);
 			}
-printf STDERR "17:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 		}
 
 		return $id if $ws;
 		$form = { id => $id };
 	}
 
-printf STDERR "18:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 	displayArticle($journal, $constants, $user, $form, $reader);
-printf STDERR "19:%d:journal:currentPage :: %s:%d\n", $$, getCurrentUser('currentPage'), getCurrentUser('uid');
 }
 
 sub articleMeta {
