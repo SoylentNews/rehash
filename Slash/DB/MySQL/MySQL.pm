@@ -5841,7 +5841,7 @@ sub _get_insert_and_where_accesslist {
 
 	$user_check ||= getCurrentUser();
 	if ($user_check) {
-		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
+		if ($user_check->{uid} && $user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
 			$where_ary = [ "uid = $user_check->{uid}" ];
 			$insert_hr->{uid} = $user_check->{uid};
 		} elsif ($user_check->{ipid}) {
