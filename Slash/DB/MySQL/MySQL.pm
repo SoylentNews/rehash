@@ -4771,6 +4771,7 @@ sub getRecentComments {
 		$constants->{comment_maxscore});
 	$min = $options->{min} if defined $options->{min};
 	$max = $options->{max} if defined $options->{max};
+	$max = $min if $max < $min;
 	my $startat = $options->{startat} || 0;
 	my $num = $options->{num} || 30; # should be a var
 

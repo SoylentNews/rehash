@@ -1564,12 +1564,15 @@ sub displayRecent {
 	for my $comm (@$recent_comments) {
 		$comm->{ipid_vis} = substr($comm->{ipid}, 0, $id_vislen);
 		$comm->{subject_vis} = substr($comm->{subject}, 0, $subj_vislen);
+		$comm->{date} = substr($comm->{date}, 5); # strip off year
 	}
 
 	slashDisplay('recent', {
 		startat		=> $startat,
 		max_cid		=> $max_cid,
 		recent_comments	=> $recent_comments,
+		min		=> $min,
+		max		=> $max,
 	});
 }
 
