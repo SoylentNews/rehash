@@ -52,11 +52,11 @@ __template__
 
 [% CASE 'seclink' %]
 	[% IF section.rootdir %]
-		<A HREF="[% section.rootdir %]/">[% section.title %]</A>
+		<A HREF="[% section.rootdir %]/">[% IF section.hostname; section.hostname; ELSE; section.title; END %]</A>
 	[% ELSE %]
 		[% IF user.is_anon; url="$constants.rootdir/$name/"; 
 		   ELSE; url="$constants.rootdir/index.pl?section=$name"; END -%]
-		<A HREF="[% url %]">[% section.title %]</A>
+		<A HREF="[% url %]">[% iIF section.hostname; section.hostname; ELSE; section.title; END %]</A>
 	[% END %]
 
 [% CASE 'editstory' %]
