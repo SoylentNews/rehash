@@ -128,8 +128,10 @@ $task{$me}{code} = sub {
 		# If the runout stat doesn't already exist for yesterday, create it.
 		$statsSave->createStatDaily("subscribe_runout", 0);
 
-		$statsSave->createStatDaily("subscribe_subscribers_ever", $num_total_subscribers);
-		$statsSave->createStatDaily("subscribe_subscribers_current", $num_current_subscribers);
+		$statsSave->createStatDaily("subscribers_total", $num_total_subscribers);
+		$statsSave->createStatDaily("subscribers_current", $num_current_subscribers);
+		$statsSave->createStatDaily("subscribers_renewing_total", $num_total_renewing_subscribers);
+		$statsSave->createStatDaily("subscribers_renewing_current", $num_current_renewing_subscribers);
 	}
 
 	my @numbers = (
