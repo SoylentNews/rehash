@@ -1452,7 +1452,7 @@ sub deleteModeratorlog {
 		return;
 	}
 
-	my $mmids = $slashdb->sqlSelectColArrayref(
+	my $mmids = $self->sqlSelectColArrayref(
 		'id', 'moderatorlog', $where
 	);
 	return unless @$mmids;
