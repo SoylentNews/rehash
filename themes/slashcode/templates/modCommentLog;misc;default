@@ -42,7 +42,10 @@ light_bgcolor ="#EEEEEE";
 down=0; cnt=0; m2_down=0; m2_count=0; m2_offside=0; 
 a_down=0; a_cnt=0; a_m2_down=0; a_m2_up=0; m2_count=0; a_m2_offside=0; a_m2_unfair_votes=0; unanimous = 0; unresolved=0;
 show_uid_totals = (type == "uid" && (this_user.totalmods || this_user.downmods || this_user.upmods || this_user.m2unfair || this_user.m2unfairpercent || this_user.stirred));
- 
+
+bg_toggle = 0;
+bg_col_1 = "DDDDDD";
+bg_col_2 = user.bg.2;
 %]
 [% IF mods.size > 0  || show_uid_totals %]
 	[% IF user.is_admin and need_m2_form %]
@@ -94,8 +97,15 @@ show_uid_totals = (type == "uid" && (this_user.totalmods || this_user.downmods |
 			IF moderation.m2_identity == prev_mod.m2_identity && moderation.reason == prev_mod.reason; suppress_mod_head = 1; ELSE; suppress_mod_head = 0; END;
 			IF moderation.m2_identity == next_mod.m2_identity && moderation.reason == next.reason; suppress_m2s = 1; ELSE; suppress_m2s = 0; END;
 		 END %]
+		[% IF type=="cid";
+			IF !suppress_mod_head; 
+				bg_toggle=!bg_toggle;
+			END;
+		   ELSE;
+			bg_toggle=!bg_toggle;
+		END; %]
 		[% IF (timestamp_hr and timestamp_hr.gt(moderation.ts) and !hr_shown); hr_shown=1 %]<TR><TD COLSPAN="[% total_cols %]">[% PROCESS horiz_rule %]</TD></TR>[% END %]
-	<TR>
+	<TR bgcolor="[% bg_toggle ? bg_col_1 : bg_col_2 %]">
 		<TD ALIGN="LEFT">
 			[% IF show_cid %]
 			<A HREF="[% constants.rootdir %]/comments.pl?sid=[%
@@ -325,7 +335,7 @@ END %]
 [% BLOCK base_url_mod %]
 	[% base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;fieldname=";
 	IF type == "uid" or type == "cuid";
-		base_url = base_url _ "uid&amp;userfield=" _ value;
+		base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;uid=" _ value;
 	ELSIF type =="cid";
 		base_url = constants.rootdir _ "/comments.pl?sid=${mods.0.sid}&amp;pid=${mods.0.pid}&amp;cid=${mods.0.cid}";
 	ELSIF type =="global";
