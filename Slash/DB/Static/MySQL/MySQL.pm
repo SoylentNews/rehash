@@ -626,6 +626,21 @@ sub getTop10Comments {
 
 ########################################################
 # For portald
+sub getWhatsPlaying {
+	my($self) = @_;
+
+	my $list = $self->sqlSelectAll(
+		'nickname, value',
+		'users, users_param',
+		"users.uid = users_param.uid
+			AND seclev > 99
+			AND name='playing'",
+		'ORDER BY users.uid ASC');
+	return $list;
+}
+
+########################################################
+# For portald
 sub randomBlock {
 	my($self) = @_;
 	my $c = $self->sqlSelectMany("bid,title,url,block",
