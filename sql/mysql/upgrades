@@ -2039,6 +2039,8 @@ ALTER TABLE moderatorlog ADD COLUMN points_orig tinyint DEFAULT NULL;
 ### do these ONLY IF you want cookies to work everywhere by default ...
 ### it may invalidate existing user cookies if you've previously
 ### been using logtokens, so beware -- pudge
+# If your MySQL is a version prior to 4.0.1, the next command will
+# fail;  the fix is simple, just eliminate the "AFTER session_login".
 ALTER TABLE users_info MODIFY COLUMN cookie_location enum("classbid","subnetid","ipid","none") DEFAULT "none" NOT NULL AFTER session_login;
 REPLACE INTO vars (name, value, description) VALUES ('cookie_location','none','Default for user\'s cookie_location value (also see users_info schema!)');
 
@@ -2203,6 +2205,10 @@ INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder
 ALTER TABLE users_info ADD COLUMN csq_bonuses FLOAT NOT NULL DEFAULT '0';
 
 ALTER TABLE moderatorlog ADD COLUMN m2needed MEDIUMINT UNSIGNED DEFAULT '0' AFTER m2count;
+# If your MySQL is a version prior to 4.0.2, the next command
+# will fail;  just do it by hand:
+#    SELECT value FROM vars WHERE name='m2_consensus';
+#    UPDATE moderatorlog SET m2needed=(that value) WHERE m2needed=0;
 UPDATE moderatorlog, vars SET moderatorlog.m2needed = vars.value WHERE vars.name='m2_consensus' AND m2needed=0;
 
 INSERT INTO vars (name, value, description) VALUES ('comments_portscan_anon_for_proxy', '0', 'If true, when anonymous posting is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid posting if successful');
