@@ -28,7 +28,7 @@ __template__
 
 [% # print section headers %]
 [% FOREACH section = sections %]
-	<TD>&nbsp;<B><A HREF="[% env.script_name %]?section=[% section.1 %]&op=list">[% section.0 %]</A></B>&nbsp;</TD>
+	<TD>&nbsp;<B><A HREF="[% constants.real_rootdir %]/submit.pl?section=[% section.1 %]&amp;op=list">[% section.0 %]</A></B>&nbsp;</TD>
 	[% IF section.0 == def_section %]
 	<TD></TD>
 	[% END %]
@@ -42,14 +42,14 @@ __template__
 [% FOREACH note = notes %]
 
 <TR ALIGN="RIGHT">
-	<TD>&nbsp;<B><A HREF="[% env.script_name %]?note=[% note.1 %]&op=list">[% note.0 %]</A></B>&nbsp;</TD>
+	<TD>&nbsp;<B><A HREF="[% constants.real_rootdir %]/submit.pl?note=[% note.1 %]&amp;op=list">[% note.0 %]</A></B>&nbsp;</TD>
 	[% FOREACH section = sections %]
 		[% s = section.0;
 		   n = note.0;
 		   count = sn.$s.$n || 0;
 		   bgcolor = " BGCOLOR=\"$user.bg.1\"" IF n == cur_note && s == cur_section;
 		%]
-	<TD[% bgcolor %]><A HREF="[% env.script_name %]?section=[% section.1 %]&op=list&note=[% note.1 %]">[% count %]</A>&nbsp;</TD>
+	<TD[% bgcolor %]><A HREF="[% constants.real_rootdir %]/submit.pl?section=[% section.1 %]&amp;op=list&amp;note=[% note.1 %]">[% count %]</A>&nbsp;</TD>
 		[% IF section.0 == def_section %]
 	<TD></TD>
 		[% END %]
