@@ -28,6 +28,13 @@ sub handler {
 	my $uri = $r->uri;
 	my $dat = $r->err_header_out('SLASH_LOG_DATA');
 
+	# Added this so that small sites would not have admin logins 
+	# recorded in their stats. -Brian
+	if (!$constants->{log_admin} &&  $uri !~ /admin/ ) {
+		return OK 
+			if getCurrentUser('is_admin');
+	}
+
 	createLog($uri, $dat);
 	return OK;
 }
