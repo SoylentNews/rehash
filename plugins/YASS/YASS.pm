@@ -51,7 +51,7 @@ sub success {
 sub setURL {
 	my ($self, $id, $url, $rdf) = @_;
 	my $hash->{url} = $url;
-	my $hash->{rdf} = $rdf;
+	$hash->{rdf} = $rdf;
 	$self->sqlUpdate($hash, "id = $id");
 }
 
@@ -80,10 +80,11 @@ sub getActive {
 
 	my $sid;
 
-	if($limit) {
+	my $order;
+	if ($limit) {
 		$order = "ORDER BY time DESC LIMIT $limit";
 	} else {
-		$order = "ORDER BY title ASC");
+		$order = "ORDER BY title ASC";
 	}
 	my $all = $self->sqlSelectAllHashrefArray(
 		"yass_sites.sid as sid, url, title", 
