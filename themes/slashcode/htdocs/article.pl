@@ -52,8 +52,9 @@ sub main {
 
 		my $links = {
 			title	=> $title,
+			story	=> $story,
 			'link'	=> {
-				section	=> $SECT->{title},
+				section	=> $SECT,
 				prev	=> $prev,
 				'next'	=> $next,
 				author	=> $story->{uid},
