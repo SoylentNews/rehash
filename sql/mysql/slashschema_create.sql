@@ -443,6 +443,8 @@ CREATE TABLE section_extras (
 	section varchar(30) NOT NULL,
 	name varchar(100) NOT NULL,
 	value varchar(100) NOT NULL,
+	type enum("text","list") DEFAULT 'text' NOT NULL,
+	list varchar(255) DEFAULT '' NOT NULL,
 	FOREIGN KEY (section) REFERENCES sections(section),
 	UNIQUE extra (section,name),
 	PRIMARY KEY (param_id)
