@@ -952,7 +952,7 @@ sub validateComment {
 		}
 	}
 
-	if ($constants->{allow_moderation} && !$user->{is_anon} && !$form->{gotmodwarning} && $slashdb->sqlCount("moderatorlog","uid=$user->{uid} and sid=$form->{sid}") && !$form->{postanon}) {
+	if ($constants->{allow_moderation} && !$user->{is_anon} && !$form->{gotmodwarning} && $slashdb->sqlCount("moderatorlog","uid=$user->{uid} and sid=$form->{sid}") && !$form->{postanon} && !$user->{is_admin}) {
 		$$error_message = getError("moderations to be lost");
 		$form_success = 0;
 		return; 
