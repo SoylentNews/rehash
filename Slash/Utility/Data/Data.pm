@@ -913,12 +913,11 @@ sub breakHtml {
 		;
 	) }xi;
 
-	# Mark off breaking tags
+	# Mark off breaking tags, as we don't want them counted as
+	# part of long words
 	$text =~ s{
-		\s*
 		(</?$break_tag>)
-		\s*
-	}{ $1 }gsx;
+	}{\x00$1\x00}gsx;
 
 	# Temporarily hide whitespace inside tags so that the regex below
 	# won't accidentally catch attributes, e.g. the HREF= of an A tag.
@@ -953,7 +952,14 @@ sub breakHtml {
 	# of the text, eliminate it.
 	$text =~ s{<nobr> <wbr></nobr>\s*$}{};
 
-	# Change the NULs back to whitespace.
+	# Fix breaking tags
+	$text =~ s{
+		\x00
+		(</?$break_tag>)
+		\x00
+	}{$1}gsx;
+	
+	# Change other NULs back to whitespace.
 	$text =~ s{\x00}{ }g;
 
 	return $text;
