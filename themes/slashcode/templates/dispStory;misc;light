@@ -38,9 +38,11 @@ END %]
 
 [% story.introtext %]
 
-[% IF full && (story.bodytext || story.books_publisher) %]<P>
+[% IF full && user.is_admin %]<P><A HREF="[% constants.rootdir -%]/admin.pl?sid=[% story.sid %]">[ Edit ]</A>[% END %]
 
-[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
+[% IF full && (story.bodytext || story.books_publisher) %]
+
+<P>[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 [% story.bodytext %]
 [% ELSE %]
 [% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]

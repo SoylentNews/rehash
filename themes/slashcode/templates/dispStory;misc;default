@@ -75,12 +75,11 @@ END %]
 	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
 	</TABLE>
 
+[% IF full && user.is_admin %]<BR><A HREF="[% constants.rootdir -%]/admin.pl?sid=[% story.sid %]">[ Edit ]</A>[% END %]
 
 [% IF full && story.bodytext %]
 
-<BR>
-
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
+<BR><TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR>
 	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
 	<TR>
 		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
