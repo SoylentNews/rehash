@@ -208,6 +208,11 @@ EOT
 sub saveSection {
 	my $section = shift;
 
+	# Non alphanumerics are not allowed in section names.
+	# And I don't see a reason for underscore either but
+	# I guess dashes are fine.
+	$section =~ s/[^A-Za-z0-9\-]//g;
+
 	my ($rows) = sqlSelect("count(*)","sections","section = '$I{F}{section}'");
 
 	unless ($rows) {
