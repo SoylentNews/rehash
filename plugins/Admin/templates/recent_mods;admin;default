@@ -15,6 +15,7 @@ __template__
 [% USE Slash %]
 <TABLE>
 	<TR><TD ALIGN="CENTER">Latest Moderations</TD></TR>
+	[% mod_options.hours_back = 72 %]
 	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog("global", "", mod_options) %] </TD></TR>
 </TABLE>
 
