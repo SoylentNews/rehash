@@ -81,8 +81,6 @@ slash-1.0.5, 2000.06.xx
 *	Fixed HTTP header for Slash::header() and 404.pl to return
 	proper 404 status code
 
-*	Filter data in Slash::getSectionColors()
-
 *	Close up some little holes in Slash::getSectionColors(),
 	pollbooth routines, search routines
 
