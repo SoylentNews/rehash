@@ -1431,7 +1431,7 @@ sub updateStory {
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
-		category	=> $form->{category},
+		subsection	=> $form->{subsection},
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
@@ -1515,7 +1515,7 @@ sub saveStory {
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		subid		=> $form->{subid},
-		category	=> $form->{category},
+		subsection	=> $form->{subsection},
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
