@@ -1,0 +1,99 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+searchrss
+__template__
+[%
+rss.image = 1;
+rss.items = [];
+
+IF op == 'stories';
+	FOREACH entry = results.records;
+		thisurl  = Slash.db.getSkin(entry.primaryskid).url || gSkin.absolutedir;
+		thislink = thisurl _ '/article.pl?sid=' _ entry.sid;
+		rss.items.push({
+			title => entry.title,
+			description => entry.introtext,
+			link => thislink
+		});
+	END;
+	rss.rdfitemdesc = constants.search_rdfitemdesc;
+	rss.rdfitemdesc_html = constants.search_rdfitemdesc_html;
+
+ELSIF op == 'comments'
+	FOREACH entry = results.records;
+		thislink = gSkin.absolutedir _ '/comments.pl?sid=' _ entry.did _ '&cid=' _ entry.cid;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title => "$entry.subject ($thistime)",
+			link  => thislink
+		});
+	END;
+
+ELSIF op == 'users'
+	FOREACH entry = results.records;
+		thisnick = entry.nickname | fixparam;
+		thislink = gSkin.absolutedir _ '/~' _ thisnick;
+		rss.items.push({
+			title => entry.nickname,
+			link  => thislink
+		});
+	END;
+
+ELSIF op == 'polls'
+	FOREACH entry = results.records;
+		thisurl  = Slash.db.getSkin(entry.primaryskid).url || gSkin.absolutedir;
+		thislink = thisurl _ '/pollBooth.pl?qid=' _ entry.qid;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title => entry.nickname,
+			link  => thislink
+		});
+	END;
+
+ELSIF op == 'journals'
+	FOREACH entry = results.records;
+		thisnick = entry.nickname | fixparam;
+		thislink = gSkin.absolutedir _ '/~' _ thisnick _ '/journal/' _ entry.id;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title => "$entry.description ($thistime)",
+			link  => thislink
+		});
+	END;
+
+ELSIF op == 'submissions'
+	FOREACH entry = results.records;
+		thislink = gSkin.absolutedir _ '/submit.pl?subid=' _ entry.subid;
+		thistime = Slash.timeCalc(entry.date);
+		rss.items.push({
+			title => "$entry.subj ($thistime)",
+			description => entry.story,
+			link  => thislink
+		});
+	END;
+	rss.rdfitemdesc = constants.search_rdfitemdesc;
+	rss.rdfitemdesc_html = constants.search_rdfitemdesc_html;
+
+ELSIF op == 'test'
+	FOREACH entry = results.records;
+		rss.items.push({
+			title => entry,
+			link  => gSkin.absolutedir _ '/search.pl?op=test'
+		});
+	END;
+
+END;
+%]
+__seclev__
+100
+__version__
+$Id$

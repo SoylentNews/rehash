@@ -81,15 +81,15 @@ sub findRecords {
 	my $total	= undef;
 	my $matches	= undef;
 	my $start	= $opts->{records_start} || 0;
-	my $max		= $opts->{records_max} || $constants->{search_default_display};
+	my $max		= $opts->{records_max}   || $constants->{search_default_display};
 	# if we are not getting total number of matches, fetch an extra so we
 	# know if there are more, for pagination purposes
 	$max++ if !defined $matches;
 
 	# sort can be an arrayref, but old API can handle only one
 	my $sort  = ref $opts->{sort} ? $opts->{sort}[0] : $opts->{sort};
-	$sort = $opts->{sort} eq 'date' ? 1 :
-		$opts->{sort} eq 'relevance' ? 2 :
+	$sort = ($opts->{sort} eq 'date'      || $opts->{sort} eq 1) ? 1 :
+		($opts->{sort} eq 'relevance' || $opts->{sort} eq 2) ? 2 :
 		0;
 
 ### options not used in this backend
@@ -162,7 +162,7 @@ sub addRecords {
 #################################################################
 # this is a way of adding extra search thingys; we could call another
 # search method (as defaultSearch calls findRecords), or just make this our
-# search method.  it doesn't implement RSS.
+# search method.
 sub testSearch {
 	my($reader, $constants, $user, $form, $gSkin, $searchDB, $rss, $query, $opts) = @_;
 
@@ -189,3 +189,7 @@ EOT
 
 	return \%return;
 }
+
+1;
+
+__END__

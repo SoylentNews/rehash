@@ -36,7 +36,7 @@ sub main {
 
 	# Set some defaults
 	$form->{query}		||= '';
-	$form->{'sort'}		||= 'date';
+	$form->{'sort'}		||= 1; # 'date';
 	$form->{threshold}	= $user->{threshold} unless defined $form->{threshold};
 	$form->{op}		= 'stories' if !$form->{op} || !exists $ops->{$form->{op}};
 
@@ -78,7 +78,8 @@ sub main {
 		$query{topic} = $topics;
 
 		my %opts = (
-			# XXX not sure how to define yet ... should we use nums or strings?
+			# XXX for now, we accept any value for sort,
+			# and deal with filtering in the API
 			sort		=> $form->{sort},
 			records_start	=> $form->{start},
 			# XXX for now, don't let user define
@@ -102,7 +103,13 @@ sub main {
 		});
 
 		if ($rss) {
-			if ($return->{rss}) {
+			slashDisplay('searchrss', {
+				op	=> $form->{op},
+				rss	=> $return->{rss},
+				results	=> $return->{results},
+			}, { Return => 0 });
+
+			if (@{$return->{rss}{items}}) {
 				xmlDisplay(rss => $return->{rss});
 			} else {
 				# we do this here, because we might not know
@@ -112,7 +119,8 @@ sub main {
 			}
 				
 		} else {
-			slashDisplay('searchform', {});
+			slashDisplay('searchform', { op => $form->{op} });
+
 			if (! @{$return->{results}{records}}) {
 				print $return->{noresults};
 			} else {
@@ -145,7 +153,6 @@ sub defaultSearch {
 	$return{template}  = $singular_name . 'search';
 	$return{noresults} = 'no' . $form->{op};
 
-	# move some RSS processing to templates at some point ...
 	if ($rss) {
 		$return{rss}{channel} = {
 			title		=> getData($form->{op} . '_rss_title'),
@@ -153,80 +160,9 @@ sub defaultSearch {
 		};
 		$return{rss}{description} = getData($form->{op} . '_rss_description')
 			|| $return{rss}{title};
-		$return{rss}{image}       = 1;
-
-		if ($form->{op} eq 'stories') {
-			my @items;
-			for my $entry (@{$return{results}{records}}) {
-				my $time = timeCalc($entry->{time});
-				# Link should be made to be sectional -Brian
-				# so why didn't make it sectional?
-				push @items, {
-					title	=> $entry->{title},
-					'link'	=> ($gSkin->{absolutedir} . '/article.pl?sid=' . $entry->{sid}),
-					description	=> $entry->{introtext}
-				};
-			}
-			$return{rss}{items} = \@items;
-
-			$return{rss}{rdfitemdesc}      = $constants->{search_rdfitemdesc};
-			$return{rss}{rdfitemdesc_html} = $constants->{search_rdfitemdesc_html};
-		}
-
-		elsif ($form->{op} eq 'comments') {
-			my @items;
-			for my $entry (@{$return{results}{records}}) {
-				my $time = timeCalc($entry->{date});
-				push @items, {
-					title	=> "$entry->{subject} ($time)",
-					'link'	=> ($gSkin->{absolutedir} . "/comments.pl?sid=$entry->{did}&cid=$entry->{cid}"),
-				};
-			}
-			$return{rss}{items} = \@items;
-		}
 	}
 
 	return \%return;
-}
-
-#################################################################
-sub _authors {
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $authors = $reader->getDescriptions('all-authors');
-	my %newauthors = %$authors;
-	$newauthors{''} = getData('all_authors');
-
-	return \%newauthors;
-}
-
-#################################################################
-sub _topics {
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-
-	my $topics = $reader->getDescriptions('topics-searchable');
-	my %newtopics = %$topics;
-	$newtopics{''} = getData('all_topics');
-
-	return \%newtopics;
-}
-
-#################################################################
-sub _sort {
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $sort = $reader->getDescriptions('sortorder');
-
-	return $sort;
-}
-
-#################################################################
-sub _skins {
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-
-	my $skins = $reader->getDescriptions('skins-searchable');
-	my %newskins = %$skins;
-	$newskins{''} = getData('all_sections');  # keep Sections name for public
-
-	return \%newskins;
 }
 
 #################################################################
@@ -234,9 +170,6 @@ sub _buildargs {
 	my($query) = @_;
 	my $uri;
 
-	# all possible args ...
-	# XXX we need a better way to do this, maybe vars?
-#	for (qw[threshold query author op tid section sort journal_only submitter uid]) {
 	for (keys %$query) {
 		my $x = "";
 		$x =  $query->{$_} if defined $query->{$_} && $x eq "";

@@ -11,6 +11,15 @@ en_US
 __name__
 searchform
 __template__
+[% IF op == 'comments' || op == 'stories' || op == 'submissions' || op == 'polls';
+	tref = Slash.db.getTopic(form.tid);
+   END;
+   IF op == 'stories' || op == 'submissions';
+	sections = 1;
+	topics   = 1;
+   END;
+%]
+
 <table width="100%" cellpadding="3" cellspacing="0" border="0"><tr><td>
 
 [% IF tref.image %]
@@ -24,10 +33,18 @@ __template__
 	<br>
 	<input type="hidden" name="tid" value="[% form.tid %]">
 	<input type="TEXT" size="40" name="query" value="[% form.query %]">
-	[% IF authors %]
-		[% Slash.createSelect("author", authors, form.author, 1, 0, 1) %]
-	[% END %]
-	[% Slash.createSelect("sort", sort, form.sort, 1) %]
+	[% IF op == 'stories';
+		authors = Slash.db.getDescriptions("all-authors");
+		newauthors = { "" => Slash.getData("all_authors") };
+		FOREACH author = authors.keys;
+			newauthors.$author = authors.$author;
+		END;
+		Slash.createSelect("author", newauthors, form.author, 1, 0, 1);
+	END %]
+
+	[% sort = Slash.db.getDescriptions('sortorder');
+	   Slash.createSelect("sort", sort, form.sort, 1)
+	%]
 
 	<input type="SUBMIT" value="Search"><br>
 
@@ -48,15 +65,19 @@ __template__
 	[% END %]
 	<br>
 
-	[% IF journal_option %]
+	[% IF op == 'users' %]
 	<input type="CHECKBOX" name="journal_only" value="1"[% IF form.journal_only == '1'; constants.markup_checked_attribute; END %]> Users with Journals
 	[% END %]
 
-	[% IF submission_notes %]
-		[% Slash.createSelect("note", submission_notes, form.note, 1, 0, 1) %]
-	[% END %]
+	[% IF op == 'submissions';
+		submission_notes = Slash.db.getDescriptions('submission-notes');
+		Slash.createSelect("note", submission_notes, form.note, 1, 0, 1);
+	END %]
 
-	[% IF threshhold %]
+	[% IF op == 'comments';
+		formats = Slash.db.getDescriptions('threshcodes');
+		threshold_select = Slash.createSelect('threshold', formats, form.threshold, 1);
+	%]
 		Threshold [% threshold_select %]
 		<input type="HIDDEN" name="sid" value="[% form.sid %]">
 	[% END %]

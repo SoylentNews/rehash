@@ -90,3 +90,7 @@ sub findRecords {
 sub addRecords {
 	return;
 }
+
+1;
+
+__END__
