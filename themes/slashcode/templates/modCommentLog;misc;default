@@ -95,7 +95,7 @@ bg_col_2 = user.bg.2;
 			IF prev_index >= 0; prev_mod = mods.${prev_index}; END;
 			IF next_index < mods.size; next_mod = mods.${next_index}; ELSE; next_mod = {}; END;
 			IF moderation.m2_identity == prev_mod.m2_identity && moderation.reason == prev_mod.reason; suppress_mod_head = 1; ELSE; suppress_mod_head = 0; END;
-			IF moderation.m2_identity == next_mod.m2_identity && moderation.reason == next.reason; suppress_m2s = 1; ELSE; suppress_m2s = 0; END;
+			IF moderation.m2_identity == next_mod.m2_identity && moderation.reason == next_mod.reason; suppress_m2s = 1; ELSE; suppress_m2s = 0; END;
 		 END %]
 		[% IF type=="cid";
 			IF !suppress_mod_head; 
