@@ -289,6 +289,12 @@ sub main {
 		$constants->{task_options} = $hash;
 	}
 
+	my $task_name_nopl = $task_name;
+	$task_name_nopl =~ s/\.pl$//;
+	$slashdb->setSlashdStatus($task_name_nopl, {
+		-in_progress    => 'in_progress+1',
+	});
+
 	my $subref = get_task_subref();
 	slashdLog("$task_name begin") if verbosity() >= 2;
 	my $start_time = Time::HiRes::time;
@@ -298,6 +304,9 @@ sub main {
 		my $duration = sprintf("%.2f", Time::HiRes::time - $start_time);
 		slashdLog("$task_name end: $rc (ran in ${duration}s)");
 	}
+	$slashdb->setSlashdStatus($task_name_nopl, {
+		-in_progress    => 'in_progress-1',
+	});
 
 	slashdLogExit();
 }

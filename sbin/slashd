@@ -582,7 +582,7 @@ sub main {
 		# Execute it.
 
 		$slashdb->setSlashdStatus($basename_nopl, {
-			in_progress	=> 1,
+			-in_progress	=> 'in_progress+1',
 			task		=> $basename_nopl,
 		});
 		my $start_time = Time::HiRes::time;
@@ -756,7 +756,7 @@ sub do_child {
 		-last_completed	=> "NOW()",
 		summary		=> $summary_trim,
 		duration	=> $duration,
-		in_progress	=> 0,
+		-in_progress	=> 'in_progress-1',
 	});
 
 	if (verbosity() >= 4) {
