@@ -5,3 +5,4 @@ mysql_dump=mysql_dump
 mysql_schema=mysql_schema
 task=subscribemail.pl
 template=templates/edit;subscribe;default
+template=templates/paypalbut;subscribe;default

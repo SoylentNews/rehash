@@ -29,6 +29,14 @@ sub main {
 			function	=> \&save,
 			seclev		=> 1,
 		},
+		paypal		=> {
+			function	=> \&paypal,
+			seclev		=> 1,
+		},
+		pause		=> {
+			function	=> \&pause,
+			seclev		=> 1,
+		},
 	};
 
 	# subscribe.pl is not yet for regular users
@@ -39,7 +47,7 @@ sub main {
 	}
 	$op = 'default' unless $ops->{$op};
 
-	header("subscribe");
+	header("subscribe") unless $op eq 'pause';
 
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
 
@@ -133,6 +141,49 @@ sub save {
 		user_newvalues => $user_newvalues,
 	});
 	1;
+}
+
+sub paypal {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	if (!$form->{secretword}
+		|| $form->{secretword} ne $constants->{subscribe_secretword}) {
+		sleep 5; # easy way to help defeat brute-force attacks
+		print "<p>Paypal rejected, wrong secretword\n";
+	}
+
+	my @keys = qw( uid email payment_gross payment_net transaction_id data );
+	my $payment = { };
+	for my $key (@keys) {
+		$payment->{$key} = $form->{$key};
+	}
+
+	my $subs = getObject('Slash::Subscribe');
+	my $num_pages = $subs->convertDollarsToPages($payment->{payment_gross});
+	$payment->{pages} = $num_pages;
+	my $rows = $subs->insertPayment($payment);
+	if ($rows != 1) {
+		# What to do here?
+		use Data::Dumper;
+		my $warning = "WARNING: Paypal payment accepted but record "
+			. "not added to database!\n"
+			. Dumper($payment);
+		print STDERR $warning;
+	}
+	$slashdb->setUser($payment->{uid}, {
+		"-hits_paidfor" =>	"hits_paidfor + $num_pages"
+	});
+
+	print "<p>Paypal confirmed\n";
+}
+
+# Wait a moment for Paypal's instant payment notification to take place
+# "behind the scenes," then redirect the user to the main subscribe.pl
+# page where they will see their new subscription options.
+sub pause {
+	my($form, $slashdb, $user, $constants) = @_;
+	sleep 5;
+	redirect("/subscribe.pl");
 }
 
 createEnvironment();

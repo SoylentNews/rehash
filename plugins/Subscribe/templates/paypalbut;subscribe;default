@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+Paypal button to subscribe to this site.
+
+* user
+* constants
+	sitename
+	paypal_business			email of paypal business acct
+	paypal_amount			How much a subscription costs, USD
+	paypal_no_shipping		1=no ship address reqd
+	paypal_return			URL on successful subscribe
+	paypal_cancel_return		URL on cancelled subscribe
+
+__title__
+
+__page__
+subscribe
+__lang__
+en_US
+__name__
+paypalbut
+__template__
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="[% constants.paypal_business %]">
+<input type="hidden" name="undefined_quantity" value="1">
+<input type="hidden" name="item_name" value="Subscription to [% constants.sitename %]">
+<input type="hidden" name="item_number" value="[% user.uid %]">
+<input type="hidden" name="amount" value="[% constants.paypal_amount %]">
+<input type="hidden" name="no_shipping" value="[% constants.paypal_no_shipping %]">
+<input type="hidden" name="return" value="[% constants.paypal_return %]">
+<input type="hidden" name="cancel_return" value="[% constants.paypal_cancel_return %]">
+<input type="image" src="[% constants.paypal_image_src %]" border="0" name="submit" alt="Subscribe With Paypal">
+</form>
+
+__seclev__
+10000
+

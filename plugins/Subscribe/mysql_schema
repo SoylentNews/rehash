@@ -1,2 +1,18 @@
 ALTER TABLE users_hits ADD COLUMN hits_bought INT DEFAULT 0 NOT NULL AFTER hits, ADD COLUMN hits_paidfor INT DEFAULT 0 NOT NULL AFTER hits_bought;
 
+DROP TABLE IF EXISTS subscribe_payments;
+CREATE TABLE subscribe_payments (
+	spid		MEDIUMINT UNSIGNED AUTO_INCREMENT NOT NULL,
+	uid		MEDIUMINT UNSIGNED NOT NULL,
+	email		CHAR(255) NOT NULL,
+	ts		TIMESTAMP,
+	payment_gross	DECIMAL(10,2) NOT NULL,
+	payment_net	DECIMAL(10,2) NOT NULL,
+	pages		MEDIUMINT UNSIGNED NOT NULL,
+	transaction_id	CHAR(255),
+	data		BLOB,
+	PRIMARY KEY(spid),
+	KEY(uid),
+	KEY(ts)
+) TYPE=MYISAM;
+

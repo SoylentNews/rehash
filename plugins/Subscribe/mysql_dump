@@ -1,4 +1,13 @@
+INSERT INTO vars (name, value, description) VALUES ('paypal', 1, 'Use Paypal for subscriptions?');
+INSERT INTO vars (name, value, description) VALUES ('paypal_business', 'yourname@example.com', 'Email of Paypal business acct');
+INSERT INTO vars (name, value, description) VALUES ('paypal_amount', '5.00', 'How much a subscription costs, in U.S. dollars with 2 decimal places');
+INSERT INTO vars (name, value, description) VALUES ('paypal_no_shipping', '1', '0=Shipping address reqd (more secure), 1=No shipping address reqd (more convenient)');
+INSERT INTO vars (name, value, description) VALUES ('paypal_return', 'http://www.example.com/subscribe.pl', 'URL for successful payment completion');
+INSERT INTO vars (name, value, description) VALUES ('paypal_cancel_return', 'http://www.example.com/', 'URL to go to if payment is cancelled before being made');
+INSERT INTO vars (name, value, description) VALUES ('paypal_image_src', 'http://images.paypal.com/images/x-click-but02.gif', 'URL of button image to click on');
+INSERT INTO vars (name, value, description) VALUES ('paypal_num_pages', '1000', 'How many pages your paypal_amount buys');
 INSERT INTO vars (name, value, description) VALUES ('subscribe', 1, 'Subscriptions enabled?');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_seclev', 1000, 'Min seclev to do subscription admin stuff');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_debug', 0, 'Debug plugins/Subscribe?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_defpages', 'index article', 'Space-separated list of default pages (script names)');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_secretword', 'changemenow', 'Secret word to buy pages with');
