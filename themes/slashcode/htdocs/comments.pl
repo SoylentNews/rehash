@@ -369,7 +369,7 @@ sub commentIndexUserCreated {
 			$back = -1;
 		}
 
-		slashDisplay('user_discuss_list', {
+		slashDisplay('udiscuss_list', {
 			discussions	=> $discussions,
 			forward		=> $forward,
 			args		=> _buildargs($form),
