@@ -28,6 +28,7 @@ sub main {
 		slashd		=> {
 			function	=> \&displaySlashd,
 			seclev		=> 500,
+			menu		=> 2,
 		},
 		edit_keyword	=> {
 			function	=> \&editKeyword,
@@ -68,24 +69,29 @@ sub main {
 			function 	=> \&blockEdit,
 
 			seclev		=> 500,
+			menu		=> 1,
 		},
 		colors 		=> {	# colored,colorpreview,colorsave,colorrevert,
 					# colororig,colorsavedef,
 
 			function 	=> \&colorEdit,
 			seclev		=> 10000,
+			menu		=> 1,
 		},
 		listfilters 	=> {
 			function 	=> \&listFilters, # listfilters
 			seclev		=> 100,
+			menu		=> 1,
 		},
 		editfilter	=> {
 			function 	=> \&editFilter, # newfilter,updatefilter,deletefilter,
 			seclev		=> 100,
+			menu		=> 1,
 		},
 		siteinfo	=> {
 			function 	=> \&siteInfo,
 			seclev		=> 10000,
+			menu		=> 2,
 		},
 
 		templates 	=> { 	# templatedelete_confirm,templatesection,
@@ -95,21 +101,25 @@ sub main {
 
 			function 	=> \&templateEdit,
 			seclev		=> 500,
+			menu		=> 1,
 		},
 
 		topics 		=> {	# topiced,topicnew,topicsave,topicdelete
 
 			function 	=>  \&topicEdit,
 			seclev		=> 10000,
+			menu		=> 1,
 		},
 		vars 		=> {	# varsave, varedit
 
 			function 	=> \&varEdit,
 			seclev		=> 10000,
+			menu		=> 1,
 		},
 		recent		=> {
 			function	=> \&displayRecent,
 			seclev		=> 500,
+			menu		=> 2,
 		},
 	};
 
@@ -144,7 +154,7 @@ sub main {
 		? " $gmt_ts"
 		: " $local_ts $user->{tzcode} = $gmt_ts GMT";
 	# "backSlash" needs to be in a template or something -- pudge
-	header("backSlash$time_remark$tbtitle", '', { admin => 1 });
+	header("backSlash$time_remark$tbtitle", '', { admin => 1 , menu => $ops->{$op}{menu} || 0 });
 	# admin menu is printed from within the 'header' template
 
 	# it'd be nice to have a legit retval

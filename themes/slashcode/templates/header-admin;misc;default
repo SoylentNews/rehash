@@ -21,7 +21,13 @@ __template__
 	</TD></TR>
 [% IF user.is_admin %]
 	<TR><TD>
-		[% Slash.createMenu('admin') %]
+		[% IF menu == 1 %]
+			[% Slash.createMenu('config') %]
+		[% ELSIF menu == 2 %]
+			[% Slash.createMenu('info') %]
+		[% ELSE %]
+			[% Slash.createMenu('admin') %]
+		[% END %]
 	</TD></TR>
 [% END %]
 	<TR><TD VALIGN="TOP"><FONT COLOR="#000000">

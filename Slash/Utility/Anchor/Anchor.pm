@@ -155,6 +155,7 @@ sub header {
 
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
+		$data->{menu} = $options->{menu};
 		slashDisplay('header-admin', $data);
 	} else {
 		slashDisplay('header', $data);
