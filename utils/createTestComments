@@ -355,7 +355,7 @@ sub make_werds {
                 } else {
                         $new_werds = $werder->sentence;
                 }
-		if (1) {
+		if ($link_prob and rand(1) < $link_prob) {
 			my @new_werds = split / /, $new_werds;
 			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
 			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
