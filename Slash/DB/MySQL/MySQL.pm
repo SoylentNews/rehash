@@ -10165,15 +10165,6 @@ sub getTemplateByName {
 	my $table_cache_time = '_templates_cache_time';
 	my $table_cache_id   = '_templates_cache_id';
 
-	# First, we get the cache -- read in ALL templates and store their
-	# data in $self
-	# get new cache unless we have a cache already AND we want to use it
-	unless ($self->{$table_cache_id} &&
-		($constants->{cache_enabled} || $constants->{cache_enabled_template})
-	) {
-		$self->{$table_cache_id} = getTemplateNameCache($self);
-	}               
-
 	#Now, lets determine what we are after
 	my($page, $skin) = (@{$options}{qw(page skin)});
 	unless ($page) {
@@ -10186,6 +10177,15 @@ sub getTemplateByName {
 		$skin ||= 'default';
 	}
 
+	# First, we get the cache -- read in ALL templates and store their
+	# data in $self
+	# get new cache unless we have a cache already AND we want to use it
+	unless ($self->{$table_cache_id} &&
+		($constants->{cache_enabled} || $constants->{cache_enabled_template})
+	) {
+		$self->{$table_cache_id} = getTemplateNameCache($self);
+	}               
+
 	#Now, lets figure out the id
 	#name|page|skin => name|page|default => name|misc|skin => name|misc|default
 	# That frat boy march with a paddle
@@ -10193,11 +10193,12 @@ sub getTemplateByName {
 	$id  ||= $self->{$table_cache_id}{$name}{$page }{'default'};
 	$id  ||= $self->{$table_cache_id}{$name}{'misc'}{  $skin  };
 	$id  ||= $self->{$table_cache_id}{$name}{'misc'}{'default'};
+
 	if (!$id) {
+		my @caller_info = ( );
 		if (!$options->{ignore_errors}) {
 			# Not finding a template is reasonably serious.  Let's make the
 			# error log entry pretty descriptive.
-			my @caller_info = ( );
 			for (my $lvl = 1; $lvl < 99; ++$lvl) {
 				my @c = caller($lvl);
 				last unless @c;
@@ -10205,11 +10206,24 @@ sub getTemplateByName {
 				push @caller_info, "$c[0] line $c[2]";
 				last if scalar(@caller_info) >= 3;
 			}
+		}
+
+		# let's refresh cache, just in case, and warn we are doing it ...
+		if (!$options->{ignore_errors}) {
 			errorLog("Failed template lookup on '$name;$page\[misc\];$skin\[default\]'" .
 				", keys: " . scalar(keys %{$self->{$table_cache_id}}) .
-				", callers: " . join(", ", @caller_info));
+				", callers: " . join(", ", @caller_info) .
+				" ... refreshing cache");
 		}
-		return ;
+		$self->{$table_cache_id} = getTemplateNameCache($self);
+
+		if (!$id && !$options->{ignore_errors}) {
+			errorLog("Failed template lookup on '$name;$page\[misc\];$skin\[default\]'" .
+				", keys: " . scalar(keys %{$self->{$table_cache_id}}) .
+				", callers: " . join(", ", @caller_info) .
+				" ... returning false");
+		}
+		return if !$id;
 	}
 
 	my $type;
