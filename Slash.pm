@@ -1445,8 +1445,14 @@ sub fixurl {
 		$url = fixHref($url) || $url;
 		if ($stripauth) {
 			my $uri = new URI $url;
-			if ($uri && $uri->can('host')) {
-				$uri->authority($uri->host);
+			if ($uri && $uri->can('host') && $uri->can('authority')) {
+				# don't need to print the port if we
+				# already have the correct port
+				my $host = $uri->can('host_port') &&
+					$uri->port != $uri->default_port
+					? $uri->host_port
+					: $uri->host;
+				$uri->authority($host);
 				$url = $uri->as_string;
 			}
 		}
