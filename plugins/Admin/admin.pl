@@ -1021,7 +1021,7 @@ sub editStory {
 					future => $future,
 				}, { Return => 1 });
 
-	my $authorbox = fancybox($constants->{fancyboxwidth}, 'Story admin', $authortext, 0, 1);
+	my $authorbox = fancybox($constants->{fancyboxwidth}, 'Story Admin', $authortext, 0, 1);
 	slashDisplay('editStory', {
 		storyref 		=> $storyref,
 		story			=> $story,
