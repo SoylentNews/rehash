@@ -430,7 +430,7 @@ sub set_resources {
 			* $task{$task_filename}{resource_locks}{$resource};
 		$resource_info{$resource} = 0 if abs($resource_info{$resource}) < 0.001;
 		if (verbosity() >= 3) {
-			slashdLog("set resource_info '$resource' to $resource_info{$resource}");
+			slashdLog("$task_filename set resource_info '$resource' to $resource_info{$resource}");
 		}
 	}
 }
