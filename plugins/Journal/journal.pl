@@ -21,7 +21,8 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
-	if ($constants->{journal_soap_enabled}) {
+	# security problem!
+	if (0 && $constants->{journal_soap_enabled}) {
 		my $r = Apache->request;
 		if ($r->header_in('SOAPAction')) {
 			require SOAP::Transport::HTTP;
