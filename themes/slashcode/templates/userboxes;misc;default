@@ -164,7 +164,12 @@ IF !useredit.is_anon;
 <A HREF="[% constants.rootdir %]/~[% user.nickname | fixparam %]/">You</A>
 have moderator access
 [% IF user.is_admin %](because you're an admin)[% END %]
-and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %].
+and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %]
+[%- IF user.points && user.lastgranted %] (expire on [%
+	hours = constants.mod_stir_hours || (constants.stir * 24);
+	hours = hours * 3600;
+	hours = hours + user.off_set;
+	Slash.timeCalc(user.lastgranted, "%Y-%m-%d", hours); %])[% END %].
 [% IF user.points > 0 %]
 Welcome to those of you just joining: <B>please</B>
 read the <A HREF="[% constants.rootdir %]/moderation.shtml">moderator guidelines</A>

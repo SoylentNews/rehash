@@ -843,7 +843,7 @@ sub showInfo {
 	my $commentstruct = [];
 	my $requested_user = {};
 
-	my($points, $lastgranted, $nickmatch_flag, $uid, $nick);
+	my($points, $nickmatch_flag, $uid, $nick);
 	my($mod_flag, $karma_flag, $n) = (0, 0, 0);
 
 	if (! $id && ! $form->{userfield}) {
@@ -1138,20 +1138,6 @@ sub showInfo {
 			$points = $requested_user->{points};
 
 			$mod_flag = 1 if $points > 0;
-
-			if ($points) {
-				$mod_flag = 1;
-				$lastgranted = $reader->getUser($uid, 'lastgranted');
-				if ($lastgranted) {
-					my $hours = $constants->{mod_stir_hours}
-						|| $constants->{stir}*24;
-					$requested_user->{points_expire} = timeCalc(
-						$lastgranted,
-						"%Y-%m-%d",
-						$user->{off_set} + $hours*3600
-					);
-				}
-			}
 
 			$title = getTitle('userInfo_main_title', { nick => $nick, uid => $uid });
 
