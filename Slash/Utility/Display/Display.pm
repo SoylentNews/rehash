@@ -874,17 +874,19 @@ The 'fancybox', 'portalboxtitle', and
 =cut
 
 sub portalbox {
-	my($width, $title, $contents, $bid, $url) = @_;
+	my($width, $title, $contents, $bid, $url, $getblocks) = @_;
 	return unless $title && $contents;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	$getblocks ||= 'index';
 
 	$title = slashDisplay('portalboxtitle', {
 		title	=> $title,
 		url	=> $url,
 	}, { Return => 1, Nocomm => 1 });
 
-	if ($user->{exboxes}) {
+	if (($user->{exboxes} && $getblocks eq 'index') || 
+		($user->{exboxes} && $constants->{slashbox_sections})) {
 		$title = slashDisplay('portalmap', {
 			title	=> $title,
 			bid	=> $bid,

@@ -174,7 +174,9 @@ sub displayStandardBlocks {
 				$constants->{fancyboxwidth},
 				getData('userboxhead'),
 				$user->{mylinks} || getData('userboxdefault'),
-				$bid
+				$bid,
+				'',
+				$getblocks
 			);
 
 		} elsif ($bid =~ /_more$/ && $older_stories_essentials) {
@@ -182,7 +184,9 @@ sub displayStandardBlocks {
 				$constants->{fancyboxwidth},
 				getData('morehead'),
 				getOlderStories($older_stories_essentials, $section),
-				$bid
+				$bid,
+				'',
+				$getblocks
 			) if @$older_stories_essentials;
 
 		} elsif ($bid eq 'userlogin' && ! $user->{is_anon}) {
@@ -194,7 +198,8 @@ sub displayStandardBlocks {
 				$boxBank->{$bid}{title},
 				slashDisplay('userlogin', 0, { Return => 1, Nocomm => 1 }),
 				$boxBank->{$bid}{bid},
-				$boxBank->{$bid}{url}
+				$boxBank->{$bid}{url},
+				$getblocks
 			);
 
 		} elsif ($bid eq 'poll' && !$constants->{poll_cache}) {
@@ -204,7 +209,8 @@ sub displayStandardBlocks {
 				$boxBank->{$bid}{title},
 				pollbooth('_currentqid', 1),
 				$boxBank->{$bid}{bid},
-				$boxBank->{$bid}{url}
+				$boxBank->{$bid}{url},
+				$getblocks
 			);
 		} elsif ($bid eq 'friends_journal' && $constants->{plugin}{Journal} && $constants->{plugin}{Zoo}) {
 			my $journal = getObject("Slash::Journal");
@@ -220,7 +226,8 @@ sub displayStandardBlocks {
 					getData('friends_journal_head'),
 					slashDisplay('friendsview', { articles => $articles}, { Return => 1 }),
 					$bid,
-					"$constants->{rootdir}/my/journal/friends"
+					"$constants->{rootdir}/my/journal/friends",
+					$getblocks
 				);
 			}
 		# this could grab from the cache in the future, perhaps ... ?
@@ -229,7 +236,8 @@ sub displayStandardBlocks {
 			my $data = $reader->getBlock($bid, [qw(title block bid url)]);
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
-				@{$data}{qw(title block bid url)}
+				@{$data}{qw(title block bid url)},
+				$getblocks
 			);
 
 		} else {
@@ -238,7 +246,8 @@ sub displayStandardBlocks {
 				$boxBank->{$bid}{title},
 				$reader->getBlock($bid, 'block'),
 				$boxBank->{$bid}{bid},
-				$boxBank->{$bid}{url}
+				$boxBank->{$bid}{url},
+				$getblocks
 			);
 		}
 	}
