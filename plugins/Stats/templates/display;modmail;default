@@ -14,8 +14,10 @@ __template__
 [% constants.sitename %] Moderation Stats for [% day %]
 
      comments: [% comments %] posted yesterday
-       modlog: [% modlog %] rows total, [% modlog_yest %] yesterday
-   metamodlog: [% metamodlog %] rows total, [% metamodlog_yest %] yesterday ([% xmodlog %] modlog, [% xmodlog_yest %] yesterday)
+   modlog avg: [% modlog %] rows (not counting [% modlog_inactive_percent %]% inactive)
+    m2log avg: [% metamodlog %] rows total ([% xmodlog %] modlog) (not counting [% metamodlog_inactive_percent %]% inactive)
+  modlog yest: [% modlog_yest %] rows (not counting [% modlog_inactive_percent_yest %]% inactive)
+   m2log yest: [% metamodlog_yest %] rows ([% xmodlog_yest %] modlog) (not counting [% metamodlog_inactive_percent_yest %]% inactive)
     consensus: [% consensus %]
    mod points: [% mod_points_pool %] in pool
    used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)

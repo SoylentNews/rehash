@@ -95,6 +95,18 @@ EOT
 		oneday_only	=> 1,
 		m2able_only	=> 1,
 	});
+	my $modlogs_incl_inactive = $stats->countModeratorLog();
+	my $modlogs_incl_inactive_yest = $stats->countModeratorLog({
+		oneday_only     => 1,
+	});
+	my $modlog_inactive_percent =
+		($modlogs_incl_inactive - $modlogs)
+		? ($modlogs_incl_inactive - $modlogs)*100 / $modlogs_incl_inactive
+		: 0;
+	my $modlog_inactive_percent_yest =
+		($modlogs_incl_inactive_yest - $modlogs_yest)
+		? ($modlogs_incl_inactive_yest - $modlogs_yest)*100 / $modlogs_incl_inactive_yest
+		: 0;
 
 	my $metamodlogs = $stats->countMetamodLog({
 		active_only	=> 1,
@@ -110,6 +122,18 @@ EOT
 		val		=> -1,
 	});
 	my $metamodlogs_yest_total = $metamodlogs_yest_fair + $metamodlogs_yest_unfair;
+	my $metamodlogs_incl_inactive = $stats->countMetamodLog();
+	my $metamodlogs_incl_inactive_yest = $stats->countMetamodLog({
+		oneday_only     => 1,
+	});
+	my $metamodlog_inactive_percent =
+		($metamodlogs_incl_inactive - $metamodlogs)
+		? ($metamodlogs_incl_inactive - $metamodlogs)*100 / $metamodlogs_incl_inactive
+		: 0;
+	my $metamodlog_inactive_percent_yest =
+		($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)
+		? ($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)*100 / $metamodlogs_incl_inactive_yest
+		: 0;
 
 	my $oldest_unm2d = $stats->getOldestUnm2dMod();
 	my $youngest_modelig_uid = $stats->getYoungestEligibleModerator();
@@ -141,8 +165,8 @@ EOT
 		$data{"${_}_ipids"} = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
-		# Section is problematic in this definition, going to store the data in all
-	  # "all" till this is resolved. -Brian
+		# Section is problematic in this definition, going to store
+		# the data in "all" till this is resolved. -Brian
 		$statsSave->createStatDaily("${_}_ipids", $uniq);
 		$statsSave->createStatDaily("${_}_bytes", $bytes);
 		$statsSave->createStatDaily("${_}_page", $pages);
@@ -265,9 +289,13 @@ EOT
 
 	$mod_data{comments} = sprintf("%8d", $comments);
 	$mod_data{modlog} = sprintf("%8d", $modlogs);
+	$mod_data{modlog_inactive_percent} = sprintf("%.1f", $modlog_inactive_percent);
 	$mod_data{modlog_yest} = sprintf("%8d", $modlogs_yest);
+	$mod_data{modlog_inactive_percent_yest} = sprintf("%.1f", $modlog_inactive_percent_yest);
 	$mod_data{metamodlog} = sprintf("%8d", $metamodlogs);
+	$mod_data{metamodlog_inactive_percent} = sprintf("%.1f", $metamodlog_inactive_percent);
 	$mod_data{metamodlog_yest} = sprintf("%8d", $metamodlogs_yest_total);
+	$mod_data{metamodlog_inactive_percent_yest} = sprintf("%.1f", $metamodlog_inactive_percent_yest);
 	$mod_data{xmodlog} = sprintf("%.1fx", ($modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0));
 	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0));
 	$mod_data{consensus} = sprintf("%8d", $consensus);
