@@ -262,7 +262,21 @@ sub saveSub {
 		}
 
 		$form->{story} = strip_html(url2html($form->{story}));
-		$slashdb->createSubmission();
+
+		my $uid ||= $form->{from}
+			? getCurrentUser('uid')
+			: getCurrentStatic('anonymous_coward_uid');
+
+		my $submission = {
+			email	=> $form->{email},
+			uid	=> $uid,
+			name	=> $form->{from},
+			story	=> $form->{story},
+			subj	=> $form->{subj},
+			tid	=> $form->{tid},
+			section	=> $form->{section}
+		};
+		$slashdb->createSubmission($submission);
 		$slashdb->formSuccess($form->{formkey}, 0, length($form->{subj}));
 
 		slashDisplay('saveSub', {

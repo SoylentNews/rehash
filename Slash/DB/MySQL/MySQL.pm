@@ -333,26 +333,15 @@ sub createPollVoter {
 
 ########################################################
 sub createSubmission {
-	my($self, $form) = @_;
-	$form ||= getCurrentForm();
+	my($self, $submission) = @_;
+	return unless $submission;
+
 	my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 	my $subid = "$hour$min$sec.$mon$mday$year";
 
-	my $uid = $form->{from}
-		? getCurrentUser('uid')
-		: getCurrentStatic('anonymous_coward_uid');
-
-	$self->sqlInsert("submissions", {
-			email	=> $form->{email},
-			uid	=> $uid,
-			name	=> $form->{from},
-			story	=> $form->{story},
-			-'time'	=> 'now()',
-			subid	=> $subid,
-			subj	=> $form->{subj},
-			tid	=> $form->{tid},
-			section	=> $form->{section}
-	});
+	$submission->{'-time'} = 'now()';
+	$submission->{'subid'} = $subid;
+	$self->sqlInsert('submissions', $submission);
 }
 
 #################################################################
