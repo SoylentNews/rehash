@@ -124,7 +124,7 @@ sub selectComments {
 		# If you don't trust new users
 		if ($user->{new_user_bonus} && $user->{new_user_percent}) {
 			$C->{points} += $user->{new_user_bonus} 
-					if ((($C->{uid}/$max_uid)*100) > $user->{new_user_percent});
+					if ((($C->{uid}/$max_uid)*100) > 100-$user->{new_user_percent});
 		}
 
 		# Adjust reasons. Do we need a reason?
