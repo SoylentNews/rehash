@@ -83,6 +83,7 @@ for my $key (@theme_htdocs_keys) {
 for my $key (qw( tasks misc )) {
 	my $src_key = $key;
 	$src_key =~ s/s$//; # theme "task" becomes theme_subdir_files "tasks"
+	next unless $theme_hr->{$src_key};
 	@{$theme_subdir_files{$key}} =
 		ref($theme_hr->{$src_key}) && ref($theme_hr->{$src_key}) eq 'ARRAY'
 			? @{$theme_hr->{$src_key}}
