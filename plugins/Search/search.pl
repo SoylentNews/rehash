@@ -325,7 +325,7 @@ sub storySearch {
 		}
 
 		for (@$stories) {
-			$_->{introtext} = substr(strip_nohtml($_->{introtext}),0,$constants->{search_text_length});
+			$_->{introtext} = substr(strip_notags($_->{introtext}),0,$constants->{search_text_length});
 			$_->{introtext} =~ s/(.*) .*$/$1.../g;
 		}
 
@@ -618,7 +618,7 @@ sub journalSearch {
 		}
 
 		for (@$entries) {
-			$_->{article} = substr(strip_nohtml($_->{article}),0,$constants->{search_text_length});
+			$_->{article} = substr(strip_notags($_->{article}),0,$constants->{search_text_length});
 			$_->{article} =~ s/(.*) .*$/$1.../g;
 		}
 
@@ -700,7 +700,7 @@ sub submissionSearch {
 		}
 
 		for (@$entries) {
-			$_->{story} = substr(strip_nohtml($_->{story}),0,$constants->{search_text_length});
+			$_->{story} = substr(strip_notags($_->{story}),0,$constants->{search_text_length});
 			$_->{story} =~ s/(.*) .*$/$1.../g;
 		}
 
