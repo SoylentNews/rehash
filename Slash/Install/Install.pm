@@ -236,6 +236,11 @@ sub _install {
 			value           => $hash->{'name'},
 			description     => $hash->{'description'},
 		});
+		$self->create({
+			name            => 'plugin_' . $hash->{name} . '_symlink',
+			value           => $symlink ? 1 : 0,
+			description     => "$hash->{name} plugin files installed symlink?"
+		});
 	} else {
 		# not sure if this is what we want, but leave it
 		# in until someone complains.  really, we should
@@ -251,6 +256,11 @@ sub _install {
 			name            => 'theme',
 			value           => $hash->{'name'},
 			description     => $hash->{'description'},
+		});
+		$self->create({
+			name            => 'theme_' . $hash->{name} . '_symlink',
+			value           => $symlink ? 1 : 0,
+			description     => "$hash->{name} theme files installed symlink?"
 		});
 	}
 	my $driver = $self->getValue('db_driver');
