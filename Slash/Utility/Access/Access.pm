@@ -770,7 +770,7 @@ sub setUserExpired {
 # state of the discussion (takes a discussion and 
 # returns the state -Brian
 sub isDiscussionOpen {
-	my ($discussion) = @_;
+	my($discussion) = @_;
 	return 'archived' 
 		if $discussion->{commentstatus} eq 'disabled';
 	return $discussion->{type}
@@ -784,18 +784,33 @@ sub isDiscussionOpen {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $people = $slashdb->getUser($discussion->{uid}, 'people');
-	if ($discussion->{commentstatus} eq  'friends_only' || $discussion->{commentstatus} eq  'friends_fof_only') {
+	if ($discussion->{commentstatus} eq 'friends_only' || $discussion->{commentstatus} eq 'friends_fof_only') {
 		my $orig = $discussion->{type};
 		$discussion->{type} = 'archived';
-		$discussion->{type} = $orig
-			if $people && $people->{FRIEND()} && $people->{FRIEND()}{$user->{uid}};
-		$discussion->{type} = $orig
-			if $discussion->{commentstatus} eq 'friends_fof_only' && $people && $people->{FOF()} && $people->{FOF()}{$user->{uid}};
-	} elsif (($discussion->{commentstatus} eq  'no_foe' || $discussion->{commentstatus} eq  'no_foe_eof') && $people) {
-		$discussion->{type} = 'archived' 
-			if $people && $people->{FOE()} && $people->{FOE()}{$user->{uid}};
-		$discussion->{type} = 'archived' 
-			if $people && $people->{EOF()} && $discussion->{commentstatus} == 5 && $people->{EOF()}{$user->{uid}};
+		if ($people) {
+			$discussion->{type} = $orig if ($people->{FRIEND()}{$user->{uid}}
+				|| (
+				$discussion->{commentstatus} eq 'friends_fof_only'
+					&&
+				$people->{FOF()}{$user->{uid}}
+				)
+			);
+		}
+	} elsif ($discussion->{commentstatus} eq 'no_foe' || $discussion->{commentstatus} eq 'no_foe_eof') {
+		# there's no sense in allowing anonymous
+		# users if we diallow foes, else foes
+		# can post anonymously
+		if ($user->{is_anon}) {
+			$discussion->{type} = 'archived';
+		} elsif ($people) {
+			$discussion->{type} = 'archived' if ($people->{FOE()}{$user->{uid}}
+				|| (
+					$discussion->{commentstatus} eq 'no_foe_eof'
+						&&
+					$people->{EOF()}{$user->{uid}}
+				)
+			);
+		}
 	}
 	return $discussion->{type};
 }
