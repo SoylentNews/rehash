@@ -314,9 +314,7 @@ sub addPool {
 			"/",
 			$filename,
 			qq{" width=$width height=$height border=0 },
-			qq{alt="random letters - if you are visually impaired, please email us at }
-				. fixparam($constants->{adminmail})
-				. qq{">}
+			qq{alt="} . getData('imgalttext', {}, 'humanconf') . qq{">}
 		);
 	}
 

@@ -18,6 +18,11 @@ __template__
 	<B>Sorry, you failed to prove your humanity. To try again,
 	you have to start over.</B>
 
+[% CASE 'imgalttext' %]
+	[% returnme.data_constant = 1 %]
+	[% "random letters - if you are visually impaired, please email us at "
+		_ constants.adminmail | strip_attribute %]
+
 [% END %]
 __seclev__
 500
