@@ -6,10 +6,12 @@ Edit all those checkboxes for authors, topics, sections, slashboxes
 * title = passed to titlebar
 * tilded_box_msg = some message
 * aidref = hashref of authors
+* aid_order = arrayref of author order
 * tidref = hashref of topics
+* tid_order = arrayref of topic order
 * sectionref = hashref of sections
 * section_descref = hashref of slashboxes
-* order = arrayref of slashbox order
+* box_order = arrayref of slashbox order
 * userspace = text for userspace
 * customize_title = title for "customize" titlebar
 
@@ -33,14 +35,14 @@ __template__
 	<TR BGCOLOR="[% user.bg.2 %]">
 		<TD VALIGN="TOP">
 
-[% FOREACH aid = aidref.keys.sort %]
+[% FOREACH aid = aid_order %]
 		<INPUT TYPE="CHECKBOX" NAME="exaid_[% aid %]"[% aidref.$aid.checked %]>[% aidref.$aid.nickname %]<BR>
 [% END %]
 
 		</TD>
 		<TD VALIGN="TOP"><MULTICOL COLS="3">
 
-[% FOREACH tid = tidref.keys.sort %]
+[% FOREACH tid = tid_order %]
 		<INPUT TYPE="CHECKBOX" NAME="extid_[% tid %]"[% tidref.$tid.checked %]>[% tidref.$tid.alttext %]<BR>
 [% END %]
 
@@ -69,7 +71,7 @@ __template__
 		<P>
 		<MULTICOL COLS="3">
 
-[% FOREACH bid = order %]
+[% FOREACH bid = box_order %]
 	[% IF section_descref.$bid.boldflag %]
 		<B>
 	[% END %]
