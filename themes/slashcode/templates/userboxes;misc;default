@@ -93,6 +93,13 @@ IF !useredit.is_anon;
 			PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
 		END;
 
+		IF user.is_admin AND !constants.subscribe_hits_only;
+			# If we're an admin and we're looking at a user
+			# for which there might be an accurate hit count.
+			'<BR>Hits: ';
+			useredit.hits;
+		END;
+
 		IF useredit.aim;
 			'<BR><B>AOL IM:</B> ';
 			useredit.aim | strip_literal;
