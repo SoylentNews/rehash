@@ -42,6 +42,7 @@ $task{$me}{code} = sub {
 
 	# Set the proper section so log messages will print the right messages.
 	# Remember to set this back as $user is GLOBAL for slashd's context.
+	# (Setting it back shouldn't matter now that tasks fork. - Jamie)
 	my $oldPage = $user->{currentPage};
 	$user->{currentPage} = 'newsvac';
 
@@ -112,7 +113,7 @@ EOT
 		}
 	}
 
-	# We hope this routine is FORKED from slashd, because the only safe
+	# Good thing this is FORKED from slashd, because the only safe
 	# thing to do at this point is to execute each spider that hasn't
 	# been run since the last time it was checked. If this task isn't
 	# executed with a non-blocking fork, it may be a long time before
