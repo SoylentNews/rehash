@@ -22,6 +22,9 @@ __template__
 <A HREF="[% constants.rootdir %]/"><IMG SRC="[% constants.rdfimg %]" BORDER="0"></A>
 
 <P>[% Slash.horizmenu() %]</P>
+[% IF user.is_admin %]
+	<P>[% Slash.createMenu('admin') %]</P>
+[% END %]
 
 __seclev__
 10000

@@ -2,6 +2,7 @@ __section__
 admin
 __description__
 This is the header for the admin section
+
 __title__
 
 __page__
@@ -18,6 +19,11 @@ __template__
 	<TR><TD VALIGN="TOP" BGCOLOR="#505050" ALIGN="RIGHT">
 		<FONT SIZE="4" COLOR="#FFFFFF">[% constants.sitename %] backSlash</FONT>
 	</TD></TR>
+[% IF user.is_admin %]
+	<TR><TD>
+		[% Slash.createMenu('admin') %]
+	</TD></TR>
+[% END %]
 	<TR><TD VALIGN="TOP"><FONT COLOR="#000000">
 
 __seclev__

@@ -159,7 +159,6 @@ sub header {
 
 	slashDisplay('header', $title);
 
-	print createMenu('admin') if $user->{is_admin};
 	if ($constants->{admin_check_clearpass}
 		&& ($user->{state}{admin_clearpass_thisclick} || $user->{admin_clearpass})
 	) {

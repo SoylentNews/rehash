@@ -81,6 +81,9 @@ in this block -->
 		<br>
 		[% text = INCLUDE organisation; Slash.fancybox('120', constants.sitename, text, '', 1) %]
 	</TD><TD>&nbsp;</TD><TD VALIGN="TOP" ALIGN="LEFT"><FONT COLOR="[% user.fg.1 %]">
+[% IF user.is_admin %]
+	<P>[% Slash.createMenu('admin') %]</P>
+[% END %]
 
 __seclev__
 10000
