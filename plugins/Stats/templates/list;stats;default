@@ -58,7 +58,7 @@ __template__
         [% stats_total = 0 %]
         [% FOREACH day = stats_data.${form.stats_section}.keys.sort;
         	NEXT IF day == "names";
-        	stats_num = stats_data.${form.stats_section}.${day}.${myname} + 0;
+        	stats_num = (stats_data.${form.stats_section}.${day}.${myname} || 0) + 0;
         	stats_total = stats_total + stats_num %]
         	[% day %]: [% stats_num %]<BR>
         [% END %]
