@@ -729,7 +729,13 @@ sub sqlUpdate {
 	# (And if we tried to proceed we'd generate an SQL error.)
 	return 0 if !keys %$data;
 
-	my $sql = "UPDATE $table SET ";
+	my $sql = "UPDATE ";
+	# What's inside /*! */ will be treated as a comment by most
+	# other SQL servers, but MySQL will parse it.  Kinda pointless
+	# since we've basically given up on ever supporting DBs other
+	# than MySQL, but what the heck.
+	$sql .= "/*! IGNORE */ " if $options->{ignore};
+	$sql .= "$table SET ";
 
 	my @data_fields = ( );
 	my $order_hr = { };
@@ -789,9 +795,11 @@ sub sqlDelete {
 sub sqlInsert {
 	my($self, $table, $data, $options) = @_;
 	my($names, $values);
-	# oddly enough, this hack seems to work for all DBs -- pudge
-	# Its an ANSI sql comment I believe -Brian
 	# Hmmmmm... we can trust getCurrentStatic here? - Jamie
+	# What's inside /*! */ will be treated as a comment by most
+	# other SQL servers, but MySQL will parse it.  Kinda pointless
+	# since we've basically given up on ever supporting DBs other
+	# than MySQL, but what the heck.
 	my $delayed = ($options->{delayed} && !getCurrentStatic('delayed_inserts_off'))
 		? " /*! DELAYED */" : "";
 	my $ignore = $options->{ignore} ? " /*! IGNORE */" : "";
