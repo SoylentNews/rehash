@@ -1827,6 +1827,7 @@ sub getObject {
 		# see if module has been loaded in already ...
 		(my $file = $class) =~ s|::|/|g;
 		# ... because i really hate eval
+		local $@; # $@ won't get cleared unless eval is performed
 		eval "require $class" unless exists $INC{"$file.pm"};
 
 		if ($@) {
