@@ -80,6 +80,7 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{form_override} = {}; 
 			$new_cfg->{absolutedir} = $_->{url};
 			$new_cfg->{rootdir} = $_->{url};
+			$new_cfg->{defaultsection} = $_->{section};
 			$new_cfg->{basedomain} = $_->{hostname};
 			$new_cfg->{static_section} = $_->{section};
 			$new_cfg->{form_override}{section} = $_->{section};
@@ -159,6 +160,7 @@ sub SlashSectionHost ($$$$) {
 	$new_cfg->{absolutedir} = $url;
 	$new_cfg->{rootdir} = $url;
 	$new_cfg->{basedomain} = $hostname;
+	$new_cfg->{defaultsection} = $section;
 	$new_cfg->{static_section} = $section;
 	$new_cfg->{form_override}{section} = $section;
 	$cfg->{site_constants}{$hostname} = $new_cfg;
