@@ -39,7 +39,7 @@ __template__
 		<TD><B>Nickname/UID/Email</B>
 		<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
 		<BR>
-[% IF constants.hc && constants.hc_sw_mailpasswd && user.state.hc %]
+[% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_mailpasswd && user.state.hc %]
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
 	[% ELSE %]
