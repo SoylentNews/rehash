@@ -65,12 +65,8 @@ cur_time = Slash.db.getTime();
 					[%- CASE 1 -%]
 						Rejected
 					[%- CASE 2 -%]
-						[% IF story_viewable %]
-							Accepted
-							[% approved = approved + 1; %]	
-						[% ELSE %]
-							Pending
-						[% END %]
+						Accepted
+						[% approved = approved + 1; %]	
 				[%- END -%]
 			     [%-  END -%]
 			</TD>
