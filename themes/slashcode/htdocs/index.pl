@@ -289,7 +289,7 @@ sub displayStories {
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
-	my $ls_other   = { reader => $reader , constants => $constants, user => $user};
+	my $ls_other  = { user => $user, reader => $reader, constants => $constants };
 	my($today, $x) = ('', 0);
 	my $cnt = int($user->{maxstories} / 3);
 	my($return, $counter);
