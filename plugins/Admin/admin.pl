@@ -516,7 +516,7 @@ sub blockEdit {
 	my $rss_templates = $slashdb->getTemplateList('','portald');
 	my $rss_ref = { map { ($_, $_) } values %{$rss_templates} };
 
-	$blockref->{rss_template} ||= $constants->{default_rss_template} || 'defaullt';
+	$blockref->{rss_template} ||= $constants->{default_rss_template} || 'default';
 	my $rss_select = createSelect('rss_template', $rss_ref, $blockref->{rss_template}, 1);	
 	my $template_ref = $slashdb->getTemplateByName($blockref->{rss_template}, [ 'template' ], 1 , 'portald', $blockref->{section});
 	my $rss_template_code = $template_ref->{template}; 
