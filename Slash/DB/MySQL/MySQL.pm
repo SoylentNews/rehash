@@ -2940,6 +2940,7 @@ sub countStoriesTopHits {
 sub countStorySubmitters {
 	my($self) = @_;
 
+	# Shouldn't this just be getCurrentStatic('anonymous_coward_uid') ? - Jamie
 	my $ac_uid = getCurrentAnonymousCoward('uid');
 	my $uid = $self->sqlSelectColArrayref('uid', 'authors_cache');
 	push @$uid, $ac_uid;
