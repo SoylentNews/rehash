@@ -117,6 +117,8 @@ $task{$me}{code} = sub {
 			$statsSave->addStatDaily("subscribe_renew_users", $renew_count);
 			$statsSave->addStatDaily("subscribe_renew_pages", $sum_renew_pages);
 			$statsSave->addStatDaily("subscribe_renew_payments", $sum_renew_payments);
+			# If this stat doesn't already exist for yesterday, create it.
+			$statsSave->createStatDaily("subscribe_runout", 0);
 		}
 
 	}
