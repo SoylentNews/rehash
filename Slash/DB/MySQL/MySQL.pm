@@ -7405,6 +7405,9 @@ sub getUser {
 		# about the user, select_clause will contain a list of
 		# every column, but it will be faster to just ask the DB
 		# for "*".
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ getUser miss, about to select: val '$val' all '$gtd->{all}' can '$gtd->{can_use_mcd}'\n";
+		}
 		$answer = $self->_getUser_do_selects(
 			$uid_q,
 			($val ? $gtd->{select_clause} : "*"),
@@ -7414,8 +7417,8 @@ sub getUser {
 
 		# If we just got all the data for the user, and
 		# memcached is active, write it into the cache.
-		if ($mcddebug > 1) {
-			print STDERR scalar(gmtime) . " $$ getUser miss, may write_memcached: val '$val' all '$gtd->{all}' can '$gtd->{can_use_mcd}'\n";
+		if ($mcddebug > 2) {
+			print STDERR scalar(gmtime) . " $$ getUser answer: " . Dumper($answer);
 		}
 		if (!$val && $gtd->{all} && $gtd->{can_use_mcd}) {
 			$self->_getUser_write_memcached($answer);
@@ -7425,7 +7428,7 @@ sub getUser {
 
 	$answer->{uid} ||= $uid;
 
-	if ($mcddebug > 1) {
+	if ($mcddebug > 2) {
 		print STDERR scalar(gmtime) . " $$ getUser answer: " . Dumper($answer);
 	}
 
@@ -7459,6 +7462,9 @@ sub getUser {
 
 sub _getUser_do_selects {
 	my($self, $uid_q, $select, $from, $where, $params) = @_;
+	my $mcd = $self->getMCD();
+	my $constants = getCurrentStatic();
+	my $mcddebug = $mcd && $constants->{memcached_debug};
 
 	# Here's the big select, the one that does something like:
 	# SELECT foo, bar, baz FROM users, users_blurb, users_snork
@@ -7466,6 +7472,9 @@ sub _getUser_do_selects {
 	# Note if we're being asked to get only params, we skip this.
 	my $answer = { };
 	$answer = $self->sqlSelectHashref($select, $from, $where) if $select && $from && $where;
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ mcd gU_ds got answer '$select' '$from' '$where'\n";
+	}
 
 	# Now get the params and the ACLs.  In the special case
 	# where we are being asked to get "all" params (not an
@@ -7476,6 +7485,9 @@ sub _getUser_do_selects {
 			"name, value",
 			"users_param",
 			"uid = $uid_q");
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ mcd gU_ds got all params\n";
+		}
 		my $acl_ar = $self->sqlSelectColArrayref(
 			"acl",
 			"users_acl",
@@ -7483,15 +7495,24 @@ sub _getUser_do_selects {
 		for my $acl (@$acl_ar) {
 			$answer->{acl}{$acl} = 1;
 		}
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ mcd gU_ds got all acls\n";
+		}
 	} elsif (ref($params) eq 'ARRAY' && @$params) {
 		my $param_list = join(",", map { $self->sqlQuote($_) } @$params);
 		$param_ar = $self->sqlSelectAllHashrefArray(
 			"name, value",
 			"users_param",
 			"uid = $uid_q AND name IN ($param_list)");
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ mcd gU_ds got specific params '@$params'\n";
+		}
 	}
 	for my $hr (@$param_ar) {
 		$answer->{$hr->{name}} = $hr->{value};
+	}
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ mcd gU_ds params added to answer\n";
 	}
 
 	# We have a bit of cleanup to do before returning;
@@ -7502,7 +7523,15 @@ sub _getUser_do_selects {
 		$answer->{$key} =~ s/,'[^']+$//;
 		$answer->{$key} =~ s/,'?$//;
 	}
-	$answer->{people} = thaw($answer->{people}) if $answer->{people};
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ mcd gU_ds answer ex-keys done\n";
+	}
+	if ($answer->{people}) {
+		$answer->{people} = thaw($answer->{people});
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ mcd gU_ds answer people thawed\n";
+		}
+	}
 
 	return $answer;
 }
@@ -7595,7 +7624,7 @@ sub _getUser_get_select_from_where {
 		# so we don't have to do that.
 		my %need_table = ( );
 		my $params_needed = [ ];
-		if ($mcddebug > 1) {
+		if ($mcddebug > 2) {
 			print STDERR scalar(gmtime) . " $$ gU_gsfw cache name '$cache_name' cache: " . Dumper($self->{$cache_name});
 		}
 		my $cols_main_needed_sorted = [ ];
@@ -7623,7 +7652,7 @@ sub _getUser_get_select_from_where {
 			from_clause =>		$from_clause,
 			params_needed =>	$params_needed,
 		};
-		if ($mcddebug > 1) {
+		if ($mcddebug > 2) {
 			print STDERR scalar(gmtime) . " $$ gU_gsfw cache_name '$cache_name' gsfwcache: " . Dumper($gsfwcache{$gsfwcachekey});
 		}
 	}
@@ -7670,7 +7699,7 @@ sub _getUser_get_table_data {
 	}
 
 	if ($mcddebug > 1) {
-		print STDERR scalar(gmtime) . " $$ _getU_gtd cols_needed: " . Dumper($cols_needed);
+		print STDERR scalar(gmtime) . " $$ _getU_gtd cols_needed: '@$cols_needed'\n";
 	}
 
 	# Now, check to see if we know all the answers for that exact
@@ -7759,7 +7788,7 @@ sub _getUser_write_memcached {
 	for my $col (@$users_hits_colnames) {
 		delete $userdata->{$col};
 	}
-	if ($mcddebug > 1) {
+	if ($mcddebug > 2) {
 		print STDERR scalar(gmtime) . " $$ _getU_writemcd users_hits_colnames '@$users_hits_colnames' userdata: " . Dumper($userdata);
 	}
 
@@ -7769,10 +7798,9 @@ sub _getUser_write_memcached {
 	$exptime = 1200 if !defined($exptime);
 	$mcd->set("$mcdkey$uid", $userdata, $exptime);
 
-	if ($mcddebug > 1) {
+	if ($mcddebug > 2) {
 		print STDERR scalar(gmtime) . " $$ _getU_writemcd wrote to '$mcdkey$uid' exptime '$exptime': " . Dumper($userdata);
 	}
-	$mcd->set("$mcdkey$uid", $userdata);
 }
 
 }
@@ -7791,7 +7819,7 @@ sub _getUser_delete_memcached {
 	for my $i (@$uid) {
 		my $mcdkey = "$mcd->{keyprefix}u:";
 		# The "1" means "don't accept new writes to this key for 1 second," I believe.
-		$mcd->delete("$mcdkey$uid", 1);
+		$mcd->delete("$mcdkey$i", 1);
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ _getU_deletemcd deleted '$mcdkey$i'\n";
 		}
