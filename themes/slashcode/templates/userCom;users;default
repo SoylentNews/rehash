@@ -1,0 +1,60 @@
+__section__
+default
+__description__
+Display user's info
+
+* title = passed to titlebar
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+userCom
+__template__
+[% USE Slash %]
+[% IF nick_match %]
+	[% title = "Your Comments" %]
+[% ELSE %]
+	[% title = "$nick's Comments" %]
+[% END %]
+[% PROCESS titlebar width="95%" %]
+
+[% IF user.is_admin && (admin_flag || nickmatch_flag)  %]
+        <BR><B>Karma</B> [% useredit.karma %] (mostly the sum of moderation done to users comments)<BR>
+[% END %]
+
+<BR><B>[%IF nick_match %]You have[% ELSE %][% nick %] has[% END %] [% commentcount %] comments.
+[% IF commentcount > commentstruct.size %]Below find
+[% IF min_comment == 0 %]the most recent [% commentstruct.size %] comments.
+[% ELSE %][% commentstruct.size %] of them.
+[% END %][% END %]</B><P>
+
+[% n = min_comment %]
+[% FOREACH comment = commentstruct %]
+	[% n = n + 1 %]
+	[% replies = comment.replies ? " Replies: $comment.replies" : "" %]
+	[% IF comment.type == 'poll';
+		label   = "Poll: $comment.disc_title ";
+	ELSIF comment.type == 'journal';
+		label   = "Journal Discussion: $comment.disc_title";
+	ELSE;
+		label    = comment.disc_title;
+	END %]
+<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
+   [% comment.subj %]</A> posted on [% comment.cdate %]
+        (Score:[% comment.pts %][% replies %])
+      <FONT SIZE="2">
+           <BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
+      </FONT>
+[% END %]
+
+[% IF user.is_admin && commentcount > n %] 
+<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% nick_plain | fixparam %]&amp;min_comment=[% n %]"
+>More Comments...</A><P>
+[% END %]
+
+__seclev__
+500

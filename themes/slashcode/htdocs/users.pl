@@ -56,6 +56,18 @@ sub main {
 			formname	=> $formname,
 			checks		=> [],
 		},
+		usersubmissions	=>  {
+			function	=> \&showSubmissions,
+			#I made this change, not all sites are going to care. -Brian
+			seclev		=> $constants->{users_show_info_seclev},
+			checks		=> [],
+		},
+		usercomments	=>  {
+			function	=> \&showComments,
+			#I made this change, not all sites are going to care. -Brian
+			seclev		=> $constants->{users_show_info_seclev},
+			checks		=> [],
+		},
 		display	=>  {
 			function	=> \&showInfo,
 			#I made this change, not all sites are going to care. -Brian
@@ -477,6 +489,111 @@ sub mailPasswd {
 
 	doEmail($uid, $emailtitle, $msg) if $user_edit->{nickname};
 	print getMessage('mailpasswd_mailed_msg', { name => $user_edit->{nickname} });
+}
+sub showSubmissions {
+	my($id) = @_;
+	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my ($uid, $nickname);
+
+	if ($form->{uid} or $form->{nick}) {
+		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nickname	= $slashdb->getUser($uid, 'nickname');
+	} else {
+		$nickname	= $user->{nickname};
+		$uid		= $user->{uid};
+	}
+
+	my $storycount = $slashdb->countStoriesBySubmitter($uid);
+	my $stories = $slashdb->getStoriesBySubmitter(
+		$uid,
+		$constants->{user_submitter_display_default}
+	) unless !$storycount;
+
+	slashDisplay('userSub', {
+		nick			=> $nickname,
+		uid		=> $uid,
+		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
+		stories 		=> $stories,
+		storycount 		=> $storycount,
+	});
+}
+
+sub showComments {
+	my($id) = @_;
+	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $commentstruct = [];
+	my ($uid, $nickname);
+
+	if ($form->{uid} or $form->{nick}) {
+		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nickname	= $slashdb->getUser($uid, 'nickname');
+	} else {
+		$nickname	= $user->{nickname};
+		$uid		= $user->{uid};
+	}
+
+	my $min_comment = $form->{min_comment} || 0;
+	$min_comment = 0 unless $user->{is_admin};
+	my $comments_wanted = $user->{show_comments_num}
+		|| $constants->{user_comment_display_default};
+	my $commentcount = $slashdb->countCommentsByUID($uid);
+	my $comments = $slashdb->getCommentsByUID(
+		$uid, $comments_wanted, $min_comment
+	) if $commentcount;
+
+	for (@$comments) {
+		my($pid, $sid, $cid, $subj, $cdate, $pts, $uid) = @$_;
+		$uid ||= 0;
+
+		my $type;
+		# This works since $sid is numeric.
+		my $replies = $slashdb->countCommentsBySidPid($sid, $cid);
+
+		# This is ok, since with all luck we will not be hitting the DB
+		# ...however, the "sid" parameter here must be the string
+		# based SID from either the "stories" table or from
+		# pollquestions.
+		my($discussion) = $slashdb->getDiscussion($sid);
+
+		if ($discussion->{url} =~ /journal/i) {
+			$type = 'journal';
+		} elsif ($discussion->{url} =~ /poll/i) {
+			$type = 'poll';
+		} else {
+			$type = 'story';
+		}
+
+		push @$commentstruct, {
+			pid 		=> $pid,
+			url		=> $discussion->{url},
+			type 		=> $type,
+			disc_title	=> $discussion->{title},
+			sid 		=> $sid,
+			cid 		=> $cid,
+			subj		=> $subj,
+			cdate		=> $cdate,
+			pts		=> $pts,
+			uid		=> $uid,
+			replies		=> $replies,
+		};
+	}
+
+	slashDisplay('userCom', {
+		nick			=> $nickname,
+		uid		=> $uid,
+		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
+		points			=> $slashdb->getUser($uid, 'points'),
+		lastgranted		=> $slashdb->getUser($uid, 'lastgranted'),
+		commentstruct		=> $commentstruct || [],
+		commentcount		=> $commentcount,
+		min_comment		=> $min_comment,
+	});
 }
 
 #################################################################

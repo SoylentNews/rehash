@@ -1,0 +1,33 @@
+__section__
+default
+__description__
+Display user's info
+
+* title = passed to titlebar
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+userSub
+__template__
+[% USE Slash %]
+[% IF nick_match %]
+	[% title = "Your Stories" %]
+[% ELSE %]
+	[% title = "$nick's stories" %]
+[% END %]
+[% PROCESS titlebar width="95%" title=title %]
+
+<BR><B>[%IF nick_match %]You have[% ELSE %][% nick %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B><P>
+[% n = 0 %]
+[% FOREACH story = stories %]
+	[% n = n + 1 %]
+		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<br>
+[% END %]
+
+__seclev__
+500

@@ -66,65 +66,28 @@ before you do any moderation.<BR><P>
 Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A>
 [ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
 <BR>
-<A HREF="[% constants.rootdir %]/~[% nick_plain | fixparam %]/friends/">Friends</A>/<A HREF="[% constants.rootdir %]/~[% nick_plain | fixparam %]/fans/">Fans</A>
-<BR>
-	[% UNLESS nickmatch_flag %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% useredit.uid %]">BeFriend User</A><BR>
-	[% END %]
 [% END %]
 </P>
-
-[% IF karma_flag && (admin_flag || nickmatch_flag)  %]
-        <B>Karma</B> [% useredit.karma %] (mostly the sum of moderation done to users comments)<BR>
-[% END %]
-
+[% param_name = nick_plain | fixparam %]
+[
+<A HREF="[% constants.rootdir %]/~[% param_name %]/friends/">Friends</A> 
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/fans/">Fans</A>
+[% UNLESS nickmatch_flag || user.is_anon %] | <A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% useredit.uid %]">Befriend [% nick_plain %]</A>[% END %]
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/comments/">Comments</A>
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/submissions/">Submissions</A>
+[% IF useredit.pubkey %] | <A HREF="[% constants.rootdir %]/~[% param_name %]/pubkey/">Pubkey</A>[% END %]
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/journal/">Journal</A>
+]
+</P>
+<P>
 [% IF useredit.bio %]
  <B>User Bio</B><BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<P>
-[% END %]
-
-[% IF useredit.pubkey %]
-		<B>Public Key</B><BR>
-		<A HREF="[% constants.rootdir %]/~[% nick_plain | fixparam %]/pubkey/">[% constants.absolutedir %]/~[% nick_plain | fixparam %]/pubkey/</A>
-		<P>
-[% END %]
-
-[% IF stories %]
-	<BR><B>[% nick %] has submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B><P>
-	[% n = 0 %]
-	[% FOREACH story = stories %]
-		[% n = n + 1 %]
-			<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<br>
-	[% END %]
-[% END %]
-
-<BR><B>[% nick %] has posted [% commentcount %] comments.
-[% IF commentcount > commentstruct.size %]Below find
-[% IF min_comment == 0 %]the most recent [% commentstruct.size %] comments.
-[% ELSE %][% commentstruct.size %] of them.
-[% END %][% END %]</B><P>
-
-[% n = min_comment %]
-[% FOREACH comment = commentstruct %]
-	[% n = n + 1 %]
-	[% replies = comment.replies ? " Replies: $comment.replies" : "" %]
-	[% IF comment.type == 'poll';
-		label   = "Poll: $comment.disc_title ";
-	ELSIF comment.type == 'journal';
-		label   = "Journal Discussion: $comment.disc_title";
-	ELSE;
-		label    = comment.disc_title;
-	END %]
-<BR><B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">
-   [% comment.subj %]</A> posted on [% comment.cdate %]
-        (Score:[% comment.pts %][% replies %])
-      <FONT SIZE="2">
-           <BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
-      </FONT>
-[% END %]
-
-[% IF admin_flag && commentcount > n %] 
-<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% nick_plain | fixparam %]&amp;min_comment=[% n %]"
->More Comments...</A><P>
+[% ELSE %]
+	<B>[% nick_plain %] has not created a bio.</B>
 [% END %]
 
 
