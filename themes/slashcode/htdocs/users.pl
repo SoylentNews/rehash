@@ -586,6 +586,7 @@ sub newUser {
 			for (qw(tzcode)) {
 				$data->{$_} = $form->{$_} if defined $form->{$_};
 			}
+			$data->{creation_ipid} = $user->{ipid};
 
 			$slashdb->setUser($uid, $data) if keys %$data;
 			$title = getTitle('newUser_title');
