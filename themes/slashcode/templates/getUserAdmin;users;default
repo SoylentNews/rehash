@@ -26,10 +26,10 @@ __template__
 		<P>[ <B><A HREF="[% constants.rootdir %]/users.pl?op=topabusers">Top Abusers</A></B> | <B><A HREF="[% constants.rootdir %]/users.pl?op=listreadonly">Read Only List</A></B> | <B><A HREF="[% constants.rootdir %]/users.pl?op=listbanned">Banned List</A></B> ]</P>
 			[% IF uidstruct %]
 		<BR>
-		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="#CCCCCC">
-			<TR BGCOLOR="#006666">
-				<TD><FONT COLOR="#FFFFFF"><B>UID</B></FONT></TD>
-				<TD><FONT COLOR="#FFFFFF"><B>Nickname</B></FONT></TD>
+		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
+			<TR BGCOLOR="[% user.bg.3 %]">
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>UID</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Nickname</B></FONT></TD>
 			</TR>
 				[% FOREACH tmpuid = uidstruct.keys %]
 			<TR>
@@ -43,11 +43,11 @@ __template__
 		
 			[% IF iplist %]
 		<BR>
-		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="#CCCCCC">
-			<TR BGCOLOR="#006666">
-				<TD><FONT COLOR="#FFFFFF"><B>IPID</B></FONT></TD>
-				<TD><FONT COLOR="#FFFFFF"><B>#</B></FONT></TD>
-				<TD><FONT COLOR="#FFFFFF"><B>Date(s)</B></FONT></TD>
+		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
+			<TR BGCOLOR="[% user.bg.3 %]">
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>IPID</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>#</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Date(s)</B></FONT></TD>
 			</TR>
 				[% FOREACH tmpip = iplist %]
 			<TR>
@@ -63,7 +63,7 @@ __template__
 		
 		[% END %]
 		[% PROCESS titlebar width="100%" title="User Admin" %]
-		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="#CCCCCC" WIDTH="100%">
+		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]" WIDTH="100%">
 			<FORM ACTION="[% env.script_name %]" METHOD="POST">
 			<TR>
 		[% IF form.formkey %]
