@@ -1173,7 +1173,9 @@ sub submitComment {
 		print getError('maxcid exceeded');
 		return(0);
 	} else {
-		slashDisplay('comment_submit') if ! $form->{newdiscussion};
+		slashDisplay('comment_submit', {
+			metamod_elig => scalar $slashdb->metamodEligible($user),
+		}) if ! $form->{newdiscussion};
 		undoModeration($id);
 		printComments($discussion, $maxCid, $maxCid,
 			{ force_read_from_master => 1 }

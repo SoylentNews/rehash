@@ -21,6 +21,11 @@ __template__
 Comment Submitted. There will be a delay before the comment becomes part
 of the static page.  What you submitted appears below.  If there is a
 mistake...well, you should have used the 'Preview' button!<P>
+[% IF metamod_elig %]
+For [% constants.sitename %]'s moderation system to properly function,
+We need as many users as possible to <A href="[% constants.rootdir %]/metamod.pl">Meta-Moderate</A>. You are currently eligible to do so... why not hop over
+and help?
+[% END %]
 
 [% IF !user.is_anon && constants.plugin.Messages %]
 	[% message = Slash.getObject('Slash::Messages');
