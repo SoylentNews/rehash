@@ -101,7 +101,10 @@ sub findComments {
 	if ($form->{section}) {
 		if ($form->{section} ne $constants->{section}) {
 			if ($section->{type} eq 'collected') {
-				if ((scalar(@{$section->{contained}}) == 0) || (grep { $form->{section} eq $_ } @{$section->{contained}})) {
+				if (!$section->{contained}
+					|| scalar(@{$section->{contained}}) == 0
+					|| (grep { $form->{section} eq $_ } @{$section->{contained}})
+				) {
 					$where .= " AND discussions.section = ". $self->sqlQuote($form->{section});
 				} else {
 					# Section doesn't belong to this contained section
