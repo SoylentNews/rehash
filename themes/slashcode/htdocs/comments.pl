@@ -1447,6 +1447,7 @@ sub moderateCid {
 		$changes->{-tokens} = "tokens - $tcost" if $tcost;
 		$changes->{-totalmods} = "totalmods + 1";
 		$slashdb->setUser($user->{uid}, $changes);
+		$user->{points}-- if $user->{points} > 0;
 
 		# Update stats.
 		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
