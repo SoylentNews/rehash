@@ -45,7 +45,7 @@ use Slash::Display::Provider ();
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
 use Slash::Utility::System;
-use Template 2.06;
+use Template 2.07;
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT @EXPORT_OK $CONTEXT %FILTERS);
