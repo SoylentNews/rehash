@@ -123,7 +123,7 @@ END %]
 	<TR><TD> </TD><TD>
 
 [% IF !user.is_anon && user.karma > constants.goodkarma %]
-		<INPUT TYPE="checkbox" NAME="nobonus"[% form.nobonus ? " CHECKED" : "" %]> No Score +1 Bonus
+		<INPUT TYPE="checkbox" NAME="nobonus"[% form.nobonus ? " CHECKED" : "" %]> No Karma Bonus
 [% do_br = 1; END;
 IF constants.allow_anonymous && user.karma > -1 && !user.is_anon %]
 		<INPUT TYPE="checkbox" NAME="postanon"[% form.postanon ? " CHECKED" : "" %]> Post Anonymously

@@ -1619,6 +1619,9 @@ sub editComm {
 			[( 1..19, 20, 25, 30, 35, 40, 45, 50, 55,
 				  60, 65, 70, 75, 80, 85, 90, 95 )], 
 			$user_edit->{new_user_percent} || 100, 1, 1);
+	#Karma bonus
+	my $karma_bonus = createSelect('karma_bonus', \@range, 
+			$user_edit->{karma_bonus} || 0, 1, 1);
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
@@ -1681,6 +1684,7 @@ sub editComm {
 		new_user_percent_select	=> $new_user_percent_select,
 		new_user_bonus_select	=> $new_user_bonus_select,
 		note			=> $note,
+		karma_bonus			=> $karma_bonus,
 	});
 }
 
@@ -2101,6 +2105,7 @@ sub saveComm {
 
 	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $min = -$max;
+	my $karma_bonus = ($form->{karma_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{karma_bonus};
 	my $new_user_bonus = ($form->{new_user_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{new_user_bonus};
 	my $new_user_percent = (($form->{new_user_percent} <= 100 && $form->{new_user_percent} >= 0) 
 			? $form->{new_user_percent}
@@ -2134,6 +2139,8 @@ sub saveComm {
 					? $new_user_percent : undef),
 		new_user_bonus	=> ($new_user_bonus
 					? $new_user_bonus : undef),
+		karma_bonus	=> ($karma_bonus
+					? $karma_bonus : undef),
 		textarea_rows	=> ($form->{textarea_rows} != $constants->{textarea_rows}
 					? $form->{textarea_rows} : undef),
 		textarea_cols	=> ($form->{textarea_cols} != $constants->{textarea_cols}

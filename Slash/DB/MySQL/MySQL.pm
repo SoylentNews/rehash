@@ -4140,7 +4140,7 @@ sub getCommentsForUser {
 	# harder to read/edit variable assignments?  -- pudge
 	my $select = " cid, date, date as time, subject, nickname, homepage, fakeemail, ";
 	$select .= "	users.uid as uid, sig, comments.points as points, pid, pid as original_pid, sid, ";
-	$select .= " lastmod, reason, journal_last_entry_date, ipid, subnetid ";
+	$select .= " lastmod, reason, journal_last_entry_date, ipid, subnetid, karma_bonus ";
 	my $tables = "	comments, users  ";
 	my $where = "	sid=$sid_quoted AND comments.uid=users.uid ";
 

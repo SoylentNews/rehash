@@ -149,6 +149,10 @@ sub selectComments {
 		$C->{points} += $user->{people_bonus_eof}
 			if ($user->{people}{EOF()}{$C->{uid}});
 
+		#Karma bonus time
+		$C->{points} += $user->{karma_bonus}
+			if $user->{karma_bonus} && $C->{karma_bonus} eq 'yes';
+
 		# fix points in case they are out of bounds
 		$C->{points} = $min if $C->{points} < $min;
 		$C->{points} = $max if $C->{points} > $max;

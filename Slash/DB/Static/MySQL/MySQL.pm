@@ -391,13 +391,6 @@ sub deleteDaily {
 	my $delete_time = time() - $constants->{'formkey_timeframe'};
 	$self->sqlDo("DELETE FROM formkeys WHERE ts < $delete_time");
 
-	# Note, on Slashdot, the next line locks the accesslog for several
-	# minutes, up to 10 minutes if traffic has been heavy.
-	unless ($constants->{noflush_accesslog}) {
-		$self->sqlDo("DELETE FROM accesslog
-			WHERE DATE_ADD(ts, INTERVAL 48 HOUR) < NOW()");
-	}
-
 	unless ($constants->{noflush_empty_discussions}) {
 		$self->sqlDo("DELETE FROM discussions
 			WHERE type='recycle' AND commentcount=0");
