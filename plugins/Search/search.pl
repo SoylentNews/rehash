@@ -79,6 +79,22 @@ sub main {
 			unless $constants->{submiss_view};
 	}
 
+	if ($constants->{journal_soap_enabled}) {
+		my $r = Apache->request;
+		if ($r->header_in('SOAPAction')) {
+			require SOAP::Transport::HTTP;
+			# security problem previous to 0.55
+			if (SOAP::Lite->VERSION >= 0.55) {
+				if ($user->{state}{post}) {
+					$r->method('POST');
+				}
+				$user->{state}{packagename} = __PACKAGE__;
+				return SOAP::Transport::HTTP::Apache->dispatch_to
+					('Slash::Search::SOAP')->handle;
+			}
+		}
+	}
+
 	if ($form->{content_type} eq 'rss') {
 		# Here, panic mode is handled within the individual funcs.
 		# We want to return valid (though empty) RSS data even
@@ -105,7 +121,7 @@ sub main {
 	}
 
 	writeLog($form->{query})
-		if $form->{op} =~ /^(?:comments|stories|users)$/;
+		if $form->{op} =~ /^(?:comments|stories|users|polls|journals|submissions|rss)$/;
 }
 
 
@@ -809,4 +825,61 @@ sub rssSearchRSS {
 createEnvironment();
 main();
 
-1;
+#=======================================================================
+package Slash::Search::SOAP;
+use Slash::Utility;
+
+sub findStory {
+	my($class, $id) = (shift, shift);
+	my($slashdb, $searchDB);
+
+	if ($constants->{search_db_user}) {
+		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
+		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
+	} else {
+		$slashdb  = getCurrentDB();
+		$searchDB = Slash::Search->new(getCurrentVirtualUser());
+	}
+	my $constants = getCurrentStatic();
+	my $user      = getCurrentUser();
+	my $slashdb   = getCurrentDB();
+
+	my $entry = $journal->get($id);
+	return unless $entry->{id};
+	my $form = _save_params(1, @_) || {};
+
+	for (keys %$form) {
+		$entry->{$_} = $form->{$_} if defined $form->{$_};
+	}
+
+	no strict 'refs';
+	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
+	my $newid = $saveArticle->($journal, $constants, $user, $entry, $slashdb, 1);
+	return $newid == $id ? $id : undef;
+}
+
+sub findStory {
+	my($class, $id) = @_;
+	my($slashdb, $searchDB);
+	if ($constants->{search_db_user}) {
+		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
+		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
+	} else {
+		$slashdb  = getCurrentDB();
+		$searchDB = Slash::Search->new(getCurrentVirtualUser());
+	}
+	my $constants = getCurrentStatic();
+	my $slashdb   = getCurrentDB();
+
+	my $entry = $journal->get($id);
+	return unless $entry->{id};
+
+	$entry->{nickname} = $slashdb->getUser($entry->{uid}, 'nickname');
+	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($entry->{nickname}) . "/journal/$entry->{id}";
+	$entry->{discussion_id} = delete $entry->{'discussion'};
+	$entry->{discussion_url} = "$constants->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
+		if $entry->{discussion_id};
+	$entry->{body} = delete $entry->{article};
+	$entry->{subject} = delete $entry->{description};
+	return $entry;
+}
