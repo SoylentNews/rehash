@@ -408,7 +408,8 @@ sub linkStory {
 	my($story_link) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	$reader ||= getCurrentDB();
 
 	my $mode = $story_link->{mode} || $user->{mode};
 	my $threshold = undef;
@@ -428,7 +429,7 @@ sub linkStory {
 	} elsif ($mode) {
 		# If we're an AC script, but this is a link to e.g.
 		# mode=nocomment, then we need to have it be dynamic.
-		$dynamic = 1 if $mode ne $slashdb->getUser(
+		$dynamic = 1 if $mode ne $reader->getUser(
 			$constants->{anonymous_coward_uid},
 			'mode',
 		);
@@ -443,10 +444,10 @@ sub linkStory {
 	}
 
 	# We need to make sure we always get the right link -Brian
-	my $section = $slashdb->getSection($story_link->{section});
+	my $section = $reader->getSection($story_link->{section});
 	my $url = $section->{rootdir} || $constants->{real_rootdir} || $constants->{rootdir};
 
-	my $tids = $slashdb->getStoryTopicsJustTids($story_link->{sid}); 
+	my $tids = $reader->getStoryTopicsJustTids($story_link->{sid}); 
 	my $tid_string = join('&amp;tid=', @$tids);
 
 	return _hard_linkStory($story_link, $mode, $threshold, $dynamic, $url, $tid_string)

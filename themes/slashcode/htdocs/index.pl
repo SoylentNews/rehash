@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2002 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
@@ -14,6 +14,8 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	$reader ||= $slashdb;
 
 
 	my($stories, $Stories, $section);
@@ -53,18 +55,7 @@ sub main {
 		$limit = $user->{maxstories};
 	}
 
-	# Old pages which search on issuemode kill the DB performance-wise
-	# so if possible we balance across the two -Brian
-	my $fetchdb;
-	if ($constants->{index_gse_backup_prob}
-		&& $constants->{backup_db_user}
-		&& rand(1) < $constants->{index_gse_backup_prob}) {
-		$fetchdb = getObject('Slash::DB', $constants->{backup_db_user});
-		$fetchdb ||= $slashdb; # In case it fails
-	} else {
-		$fetchdb = $slashdb;
-	}
-	$stories = $fetchdb->getStoriesEssentials(
+	$stories = $reader->getStoriesEssentials(
 		$limit, $form->{section},
 		'',
 	);
