@@ -30,3 +30,11 @@ On Red Hat:
   It's all messy, but at some point you just don't care.
 
 * I then did the same with the perl modules as above.
+
+
+On Mac OS X (10.2, with fink):
+
+* Using fink, installed gd, gd-shlibs, freetype1.
+
+* I then did the same with the perl modules as above, except that I
+  modified GD's Makefile.PL to look in "-I/sw/include" and "-L/sw/lib".
