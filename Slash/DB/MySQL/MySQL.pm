@@ -724,7 +724,7 @@ sub getDiscussionsUserCreated {
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
 
-	my $where = "type = 'recylcled' AND ts <= now() AND users.uid = discussions.uid";
+	my $where = "type = 'recycled' AND ts <= now() AND users.uid = discussions.uid";
 	$where .= " AND section = '$section'"
 		if $section;
 
