@@ -26,19 +26,22 @@ __template__
 	[% PROCESS formLabel value => "Poll Section" comment => "what section this will be visible in" %]
 	[% sections = Slash.db.getDescriptions('sections-all') %]
 	[% Slash.createSelect('section', sections, question.section, 1) %]
-
 	[% PROCESS formLabel value => "Poll Topic" comment => "" %]
 	[% DEFAULT question.topic=constants.discussion_default_topic %]
 	[% Slash.selectTopic('topic', question.topic, '', 1) %]
-	[% polltype.section = "SlashBox Section Poll"; polltype.story = "Story-Related Poll" %]
+        [% polltype.section = "SlashBox Section Poll"; polltype.story = "Story-Related Poll"; polltype.nodisplay = "Never Display" %]
+      	[% PROCESS formLabel value => "Poll Type" comment => "" %]
+[% Slash.createSelect('polltype', polltype, question.polltype, 1) %]
+<font size="-1"><BR>
+Never Display - Poll won't display to regular users until type is changed<BR>
+SlashBox Section Poll - Poll will show up on the side for a given section<BR>
+Story Related Display - Poll is displayed on the specified story's page<BR>
+</font>
 
-	[% PROCESS formLabel value => "Poll Type" comment => "choose SlashBox Section Poll if you want the poll to appear in the selected sections side SlashBox -- Select Story-Related Poll and define the story id you want to link it to below if you want it showing up with a specific article" %]
-	[% Slash.createSelect('polltype', polltype, question.polltype, 1) %]
-
-	[% PROCESS formLabel value => "Poll Time" comment => "choose a time in the future if you want to delay this poll's appearance" %]
+	        [% PROCESS formLabel value => "Poll Time" comment => "choose a time in the future if you want to delay this poll's appearance" %]
         <INPUT TYPE="TEXT" NAME="date" VALUE="[% date %]" size="19"><BR>
-
 	[% PROCESS formLabel value => "The Answers" comment => "voters" %]
+
 [% FOREACH n = [0 .. 7] %]
 	<INPUT TYPE="text" NAME="aid[% n + 1%]" VALUE="[% answers.$n.0 %]" SIZE="40">
 	<INPUT TYPE="text" NAME="votes[% n + 1%]" VALUE="[% answers.$n.1 or 0 %]" SIZE="5"><BR>
@@ -47,8 +50,10 @@ __template__
 
 	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
 
-	[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear with the story" %]
+[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear with the story" %]
         <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20"><BR>
+	
+	
 
         <INPUT TYPE="SUBMIT" NAME="op" VALUE="preview">
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">

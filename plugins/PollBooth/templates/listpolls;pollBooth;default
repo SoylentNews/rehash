@@ -8,6 +8,7 @@ Lists polls
 * admin = boolean for whether current user is admin
 * title = passed to titlebar
 * width = passed to titlebar
+
 __title__
 
 __page__
@@ -25,8 +26,18 @@ __template__
 			[% FOREACH question = questions %]
 				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.
 				[% IF user.is_admin %]
+					[% SWITCH question.5 %]
+					[% CASE 'story' %]
+					(<I>story</I>)
+					[% CASE 'section' %]
+					(<I>section</I>)
+					[% CASE 'nodisplay' %]
+					(<I>nd</I>)
+				[% END %]
+				[% IF question.6 %](<I>future</I>)[% END %]
 					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% question.0 %]">Edit</A>)
 					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=delete&amp;qid=[% question.0 %]">Delete</A>)
+
 				[% END %]
 				<BR>
 			[% END %]
