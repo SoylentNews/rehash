@@ -42,7 +42,7 @@ __template__
      margin-bottom:    4px;
      font-size:        large;
      color:            #ffffff;
-     background-color: #006666;
+     background-color: #[% user.colors.bg_3 %];
      width:            [% width %]px;
   }
 
@@ -58,7 +58,7 @@ __template__
      padding:          3px;
      text-align:       left;
      margin-top:       10px;
-     background-color: #006666;
+     background-color: #[% user.colors.bg_3 %];
      width:            [% width %]px;
   }
 
@@ -507,7 +507,7 @@ __template__
                  <img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %]open_node.png" valign="bottom">
                  <a href="javascript:void(0);">[% leaf.label %]</a>
                  [%- IF slashtopics.${leaf.value}.image %]
-                 <input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% 'http://images.slashdot.org' || constants.imagedir %]/topics/[% slashtopics.${leaf.value}.image %]">
+                 <input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% constants.imagedir %]/topics/[% slashtopics.${leaf.value}.image %]">
                  [%- END %]
                  <input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% thisweight %]">
                  <input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% thisname.join(' :: ') %]">
