@@ -74,6 +74,19 @@ sub slashdLog {
 	doLog('slashd', \@args);
 }
 
+# A command to log an error to a DB table.  This is only for messages
+# that are important enough that the admins should see them (maybe in
+# the admin.pl backend, but definitely in email at the end of the day).
+
+sub slashdErrnote {
+	my($errnote, $moreinfo) = @_;
+	my $taskname = "SLASHD"; # the default if not called from a task
+	if ($pids{$$} && $pids{$$}{forktype} == SLASHD_NOWAIT) {
+		$taskname = $pids{$$}{taskname};
+	}
+	$slashdb->insertErrnoteLog($taskname, $errnote, $moreinfo);
+}
+
 # log children ending
 # We're polling this reaper function, instead of calling it from within
 # a $SIG{CHLD} handler.  "if you're running in a loop, just arrange to

@@ -2038,8 +2038,6 @@ REPLACE INTO string_param (type, code, name) VALUES ('cookie_location','ipid','n
 REPLACE INTO code_param (type, code, name) VALUES ('session_login',0,'lasts forever');
 REPLACE INTO code_param (type, code, name) VALUES ('session_login',1,'closes with browser');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_131, Start of T_2_3_0_132 - 2004/01/27
 
 INSERT INTO vars (name, value, description) VALUES ('common_story_words', 'about above across after again against almost along already also although always among another anyone arise around aside asked available away became because become becomes been before began behind being better between both brought called came can\'t cannot certain certainly come could days didn\'t different does done down during each either else enough especially even ever every fact find following form found from further gave gets give given gives giving going gone hardly have having here himself however http important into it\'s itself just keep kept knew know known largely later least like look made mainly make many maybe might more most mostly much must nearly neither never next none noted nothing obtain obtained often once only other others ought over overall owing particularly past people perhaps please possible present probably quite rather read ready really right said same saying says seem seems seen several shall should show showed shown shows similar similarly since some something sometime sometimes somewhat soon such sure take taken tell than that that\'s their theirs them themselves then there therefore these they thing things think this those though through throughout thus time together told took toward turn under unless until upon used using usually various very want well were what what when where whether which while whole whom whose wide widely will will with within without would year years your', 'Words which are considered too common to be used in detecting "similar" stories');
@@ -2092,9 +2090,9 @@ INSERT INTO vars (name, value, description) VALUES ('istroll_max_halflives', '3'
 
 DROP TABLE IF EXISTS accesslog_artcom;
 CREATE TABLE accesslog_artcom (
-        uid mediumint UNSIGNED NOT NULL,
-        ts datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-        c smallint unsigned NOT NULL DEFAULT '0',
+        uid MEDIUMINT UNSIGNED NOT NULL,
+        ts DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+        c SMALLINT UNSIGNED NOT NULL DEFAULT '0',
         INDEX uid (uid),
         INDEX ts (ts)
 ) TYPE=InnoDB;
@@ -2102,4 +2100,19 @@ CREATE TABLE accesslog_artcom (
 INSERT INTO vars (name, value, description) VALUES ('moderatord_lastmaxid', '0', 'Last accesslog.id seen by run_moderatord');
 INSERT INTO vars (name, value, description) VALUES ('moderatord_maxrows', '50000', 'Max number of accesslog rows to process at once in run_moderatord');
 INSERT INTO vars (name, value, description) VALUES ('accesslog_hoursback', '60', 'Number of hours before accesslog rows are purged');
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_134 - 2004/02/04
+
+DROP TABLE IF EXISTS slashd_errnotes;
+CREATE TABLE slashd_errnotes (
+        ts DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+        taskname VARCHAR(50) NOT NULL DEFAULT 'SLASHD',
+	line MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+        errnote VARCHAR(255) NOT NULL DEFAULT '',
+        moreinfo TEXT DEFAULT NULL,
+        INDEX (ts),
+        INDEX taskname_ts (taskname, ts)
+) TYPE=InnoDB;
 

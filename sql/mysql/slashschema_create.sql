@@ -764,6 +764,16 @@ CREATE TABLE slashd_status (
 	PRIMARY KEY (task)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS slashd_errnotes;
+CREATE TABLE slashd_errnotes (
+	ts DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	taskname VARCHAR(50) NOT NULL DEFAULT 'SLASHD',
+	line MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	errnote VARCHAR(255) NOT NULL DEFAULT '',
+	moreinfo TEXT DEFAULT NULL,
+	INDEX (ts),
+	INDEX taskname_ts (taskname, ts)
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'spamarmors'

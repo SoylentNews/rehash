@@ -128,6 +128,22 @@ sub updateCommentTotals {
 
 ########################################################
 # For slashd
+sub insertErrnoteLog {
+	my($self, $taskname, $errnote, $moreinfo) = @_;
+	my @c = caller(1);
+	my $line = $c[2] || 0;
+	$moreinfo = undef unless $moreinfo;
+	$self->sqlInsert("slashd_errnotes", {
+		-ts =>		'NOW()',
+		taskname =>	$taskname,
+		line =>		$line,
+		errnote =>	$errnote,
+		moreinfo =>	$moreinfo,
+	});
+}
+
+########################################################
+# For slashd
 sub getNewStoryTopic {
 	my($self, $section) = @_;
 

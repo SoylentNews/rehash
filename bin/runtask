@@ -70,6 +70,15 @@ sub slashdLog {
 	doLog('slashd', \@_, 1, 'runtask');
 }
 
+# A command to log an error to a DB table.  This is only for messages
+# that are important enough that the admins should see them (maybe in
+# the admin.pl backend, but definitely in email at the end of the day).
+
+sub slashdErrnote {
+	my($errnote, $moreinfo) = @_;
+	$slashdb->insertErrnoteLog($task_name || 'RUNTASK', $errnote, $moreinfo);
+}
+
 sub slashdLogDie {
 	my $err = join(" ", @_);
 	slashdLog($err);

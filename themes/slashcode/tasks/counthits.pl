@@ -43,6 +43,10 @@ $task{$me}{code} = sub {
 	$lastmaxid = $newmaxid - $maxrows if $lastmaxid < $newmaxid - $maxrows;
         if ($lastmaxid > $newmaxid) {
                 slashdLog("Nothing to do, lastmaxid '$lastmaxid', newmaxid '$newmaxid'");
+		if ($lastmaxid > $newmaxid + 2) {
+			# Something odd is going on... this ID is off.
+			slashdErrnote("counthits_lastmaxid '$lastmaxid' is higher than it should be '$newmaxid', did accesslog maybe get rebuilt?");
+		}
                 return "";
         }
 
