@@ -6835,7 +6835,8 @@ sub _genericSet {
 	}
 
 	my $table_cache = '_' . $table . '_cache';
-	return $ok unless keys %{$self->{$table_cache}};
+	return $ok unless keys %{$self->{$table_cache}}
+		       && keys %{$self->{$table_cache}{$id}};
 
 	my $table_cache_time = '_' . $table . '_cache_time';
 	$self->{$table_cache_time} = time();
