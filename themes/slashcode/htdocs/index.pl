@@ -246,10 +246,17 @@ sub displayStories {
 			section	=> $thissection
 		});
 
+		my $link;
+
+		if ($constants->{body_bytes}) {
+			$link = length($story->{bodytext}) . ' ' .  getData('bytes');
+		} else {
+			my $count = split(/ /, $story->{introtext}) + split(/ /, $story->{bodytext});
+			$link = $count . ' ' .  getData('words');
+		}
 		if ($story->{bodytext} || $cc) {
 			push @links, linkStory({
-				'link'	=> length($story->{bodytext}) . ' ' .
-					   getData('bytes'),
+				'link'	=> $link,
 				sid	=> $sid,
 				mode	=> 'nocomment',
 				section	=> $thissection

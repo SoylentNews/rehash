@@ -35,6 +35,9 @@ __template__
 [% CASE 'bytes' %]
 	bytes in body
 
+[% CASE 'words' %]
+	words in story
+
 [% CASE 'comments' %]
 	<B>[% "$cc.0 of " IF cc.0.defined %][% cc.1 %]</B> comment[% cc.3 != 1 ? 's' : '' %]
 
