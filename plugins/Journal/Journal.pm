@@ -68,11 +68,20 @@ sub getsByUids {
 	my $list = join(",", @$uids);
 	my $order = "ORDER BY journals.date DESC";
 	$order .= " LIMIT $start, $limit" if $limit;
-	my $where = "journals.uid IN ($list) AND journals.id=journals_text.id AND users.uid=journals.uid";
+
+	# Note - if the *.uid table in the where clause is journals, MySQL
+	# does a table scan on journals_text.  Make it users and it
+	# correctly uses an index on uid.  Logically they are the same and
+	# the DB *really* should be smart enough to pick up on that, but no.
+	# At least, not in MySQL 3.23.49a.
+	my $where = "users.uid IN ($list) AND journals.id=journals_text.id AND users.uid=journals.uid";
 
 	my $answer = $self->sqlSelectAll(
-		'journals.date, article, description, journals.id, posttype, tid, discussion, users.uid, users.nickname',
-		'journals,journals_text,users', $where, $order
+		'journals.date, article, description, journals.id,
+		 posttype, tid, discussion, users.uid, users.nickname',
+		'journals, journals_text, users',
+		$where,
+		$order
 	);
 	return $answer;
 }
