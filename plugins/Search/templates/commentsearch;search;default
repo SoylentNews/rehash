@@ -26,7 +26,7 @@ are removed and currently only visible as static HTML.<P>
 			by <A HREF="mailto:[% user_email.fakeemail %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.8) %]<BR>
 			<FONT SIZE="2">attached to 
 			<A HREF="[% constants.rootdir %]/article.pl?sid=[% comment.1 %]">[% comment.3 %]</A> 
-			posted on [% Slash.timeCalc(comment.7) %] by [% Slash.db.getAuthor(comment.2, ['nickname']) %]</FONT><BR>
+			posted on [% Slash.timeCalc(comment.7) %] by [% Slash.db.getAuthor(comment.2, 'nickname') %]</FONT><BR>
 		[% x = x + 1 %]
 	[% END %]
 	[% INCLUDE pagination %]
