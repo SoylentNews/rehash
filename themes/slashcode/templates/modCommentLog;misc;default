@@ -54,7 +54,7 @@ __template__
 		<TD> [% constants.reasons.${moderation.reason} %] </TD>
 [% IF show_modder %]
 		<TD> &nbsp; [% moderation.nickname | strip_literal %] (<A HREF="[%
-			constants.rootdir %]/users.pl?op=userinfo&userfield_flag=uid&userfield=[%
+			constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=[%
 			moderation.uid %]">[% moderation.uid %]</A>) &nbsp; </TD>
 [% END %]
 		<TD> [% moderation.ts %]</TD>

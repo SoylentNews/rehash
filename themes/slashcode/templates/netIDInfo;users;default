@@ -40,7 +40,7 @@ __template__
 <B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">[% comment.subj %]</A>
 posted
 [% IF comment.uid %] by uid
-<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield_flag=uid&amp;userfield=[% comment.uid %]">[% comment.uid %]</A>[% END %]
+<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=[% comment.uid %]">[% comment.uid %]</A>[% END %]
 on [% comment.cdate %] (Score:[% comment.pts %][% replies %])
       <FONT SIZE="2">
            <BR>attached to <A HREF="[% comment.url %]">[% label %]</A>

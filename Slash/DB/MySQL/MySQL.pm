@@ -4764,6 +4764,44 @@ sub getSlashdStatuses {
 }
 
 ##################################################################
+sub getRecentComments {
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+	my($min, $max) = ($constants->{comment_minscore},
+		$constants->{comment_maxscore});
+	$min = $options->{min} if defined $options->{min};
+	$max = $options->{max} if defined $options->{max};
+	my $startat = $options->{startat} || 0;
+	my $num = $options->{num} || 30; # should be a var
+
+	my $max_cid = $self->sqlSelect("MAX(cid)", "comments");
+	my $start_cid = $max_cid - ($startat+($num*5-1));
+	my $end_cid = $max_cid - $startat;
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"comments.sid AS sid, comments.cid AS cid,
+		 date, ipid, subnetid, subject,
+		 comments.uid AS uid, points AS score,
+		 lastmod, comments.reason AS reason,
+		 users.nickname AS nickname,
+		 SUM(val) AS sum_val,
+		 IF(moderatorlog.cid IS NULL, 0, COUNT(*))
+		 	AS num_mods",
+		"comments, users
+		 LEFT JOIN moderatorlog
+		 	ON comments.cid=moderatorlog.cid
+			AND moderatorlog.active=1",
+		"comments.uid=users.uid
+		 AND comments.points BETWEEN $min AND $max
+		 AND comments.cid BETWEEN $start_cid AND $end_cid",
+		"GROUP BY comments.cid
+		 ORDER BY comments.cid DESC
+		 LIMIT $num"
+	);
+
+	return $ar;
+}
+
+##################################################################
 # Probably should make this private at some point
 sub _saveExtras {
 	my($self, $story) = @_;

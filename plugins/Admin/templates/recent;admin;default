@@ -1,0 +1,80 @@
+__section__
+default
+__description__
+* startat - starting offset (0 for top comment)
+* max_cid - highest cid in the DB
+* recent_comments - arrayref of hashrefs, each one comment, each with fields
+	sid, cid, date, ipid, subnetid, subject, uid, score, lastmod, reason, 
+	nickname, sum_val, num_mods
+__title__
+admin interface recent template
+__page__
+admin
+__lang__
+en_US
+__name__
+recent
+__template__
+[% PROCESS titlebar title="Recent Comments and Moderation" width='100%' %]
+
+[% IF startat > 0;
+	next_startat = startat - 30;
+	IF next_startat < 0; next_startat = 0; END; %]
+	<form action="[% constants.rootdir %]/admin.pl" method="GET">
+	<input type="hidden" name="op" value="recent">
+	<input type="hidden" name="startat" value="[% next_startat | strip_attribute %]">
+	<input type="submit" value="&lt;&lt; Next Comments">
+	</form>
+[% END %]
+
+<table>
+	<tr>
+		<th>sid</th>
+		<th>cid</th>
+		<th>ipid</th>
+		<th>poster</th>
+		<th>sc</th>
+		<th>val</th>
+		<th>#m</th>
+		<th>reason</th>
+		<th>time</th>
+		<th>subject</th>
+	</tr>
+
+	<tr><td>&nbsp;</td><td>[% max_cid %]</td><td colspan="8">&nbsp;</td></tr>
+
+	[% FOREACH comm = recent_comments %]
+	<tr>
+		<td align="right">[% comm.sid %]</td>
+		<td align="right"><A HREF="[% constants.rootdir
+			%]/comments.pl?sid=[% comm.sid | strip_attribute
+			%]&amp;cid=[% comm.cid | strip_attribute
+			%]&amp;threshold=-1&amp;commentsort=0&amp;mode=nested">[%
+			comm.cid %]</A></td>
+		<td align="left"><A HREF="[% constants.rootdir
+			%]/users.pl?op=userinfo&amp;userfield_flag=ipid&amp;userfield=[%
+			comm.ipid | strip_attribute %]">[% comm.ipid_vis %]</A></td>
+		<td align="left"> &nbsp; [% comm.nickname | strip_literal %] (<A HREF="[%
+			constants.rootdir
+			%]/users.pl?op=userinfo&amp;userfield_flag=uid&amp;&userfield=[%
+			comm.uid | strip_attribute %]">[% comm.uid %]</A>) &nbsp; </td>
+		<td align="right">[% comm.score %]</td>
+		<td align="right">[% comm.sum_val %]</td>
+		<td align="right">[% comm.num_mods %]</td>
+		<td align="left">[% constants.reasons.${comm.reason} %]</td>
+		<td align="center">[% comm.date %]</td>
+		<td align="left">[% comm.subject_vis | strip_literal %]</td>
+	</tr>
+	[% END %]
+
+</table>
+
+[% prev_startat = startat + 30; %]
+<form action="[% constants.rootdir %]/admin.pl" method="GET">
+<input type="hidden" name="op" value="recent">
+<input type="hidden" name="startat" value="[% prev_startat | strip_attribute %]">
+<input type="submit" value="Prev Comments &gt;&gt;">
+</form>
+
+__seclev__
+100
