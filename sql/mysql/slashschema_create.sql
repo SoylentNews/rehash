@@ -169,8 +169,6 @@ CREATE TABLE comments (
 	KEY display (sid,points,uid),
 	KEY byname (uid,points),
 	KEY ipid (ipid),
-	INDEX (uid),
-	INDEX (sid),
 	KEY subnetid (subnetid),
 	KEY theusual (sid,uid,points,cid),
 	KEY countreplies (sid,pid)
@@ -531,7 +529,7 @@ CREATE TABLE stories (
 	FOREIGN KEY (tid) REFERENCES topics(tid),
 	FOREIGN KEY (section) REFERENCES sections(section),
 	INDEX frontpage (time, displaystatus, writestatus),
-	INDEX time (time),
+	INDEX time (time), /* time > now() shows that this is still valuable, even with frontpage -Brian */
 	INDEX submitter (submitter)
 ) TYPE = myisam;
 
@@ -575,7 +573,6 @@ CREATE TABLE story_topics (
   FOREIGN KEY (sid) REFERENCES stories(sid),
   FOREIGN KEY (tid) REFERENCES topics(tid),
   PRIMARY KEY  (id),
-  INDEX sid (sid),
   INDEX tid (tid),
   INDEX sidtid (sid,tid)
 ) TYPE=MyISAM;
@@ -702,10 +699,8 @@ CREATE TABLE users (
 	journal_last_entry_date datetime,
 	author tinyint DEFAULT 0 NOT NULL,
 	PRIMARY KEY (uid),
-	KEY login (uid,passwd,nickname),
-	KEY chk4user (nickname,realemail),
-	KEY nickname_lookup (nickname),
-	KEY chk4email (realemail),
+	KEY login (nickname,uid,passwd),
+	KEY chk4user (realemail,nickname),
 	KEY chk4matchname (matchname),
 	KEY author_lookup (author)
 ) TYPE = myisam;

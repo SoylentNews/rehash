@@ -35,3 +35,21 @@ ALTER TABLE users_comments DROP anon_comments;
 # slashcode theme. -Brian
 ALTER TABLE sections ADD url char(32) DEFAULT '' NOT NULL;
 ALTER TABLE sections ADD hostname char(32)DEFAULT '' NOT NULL;
+
+# Well we didn't need either of these two indexes. We got the same data from two
+# other rows. -Brian
+ALTER TABLE comments DROP INDEX uid;
+ALTER TABLE comments DROP INDEX sid;
+# More key stuff. We had a number of duplicate keys in 
+# users. I should really spend time and go through the 
+# entire schema. -Brian
+ALTER TABLE users DROP INDEX login;
+ALTER TABLE users ADD INDEX login (nickname,uid,passwd);
+ALTER TABLE users DROP INDEX chk4user;
+ALTER TABLE users ADD INDEX chk4user (realemail,nickname);
+ALTER TABLE users DROP INDEX nickname_lookup;
+ALTER TABLE users DROP INDEX chk4email;
+# Few more.
+ALTER TABLE moderatorlog DROP INDEX sid_2;
+ALTER TABLE moderatorlog ADD INDEX sid_2 (cid,uid,sid);
+ALTER TABLE moderatorlog DROP INDEX cid;
