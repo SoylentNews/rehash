@@ -630,7 +630,10 @@ sub printComments {
 		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
 			print STDERR scalar(gmtime) . " printComments memcached mcdkey '$mcdkey'\n";
 		}
-		my @keys_try = map { "$mcdkey$_" } @$cids_needed_ar;
+		my @keys_try =
+			map { "$mcdkey$_" }
+			grep { $_ != $form->{cid} }
+			@$cids_needed_ar;
 		$comment_text = $slashdb->{_mcd}->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
 		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
