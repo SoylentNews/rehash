@@ -695,6 +695,7 @@ sub createSubmission {
 	$submission->{subnetid} = getCurrentUser('subnetid');
 	$submission->{email} ||= ''; 
 	$submission->{uid} ||= getCurrentStatic('anonymous_coward_uid'); 
+	$submission->{section} ||= getCurrentStatic('defaultsection'); 
 	$submission->{'-time'} = 'now()';
 
 	#my($sec, $min, $hour, $mday, $mon, $year) = localtime;
