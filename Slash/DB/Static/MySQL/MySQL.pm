@@ -1705,6 +1705,18 @@ sub getMetaModerations {
 
 ########################################################
 # For freshenup.pl
+sub getMinCommentcount {
+	my($self, $stoids) = @_;
+	return 0 if !$stoids || !@$stoids;
+	my $stoid_clause = join(",", map { $self->sqlQuote($_) } @$stoids );
+	return $self->sqlSelect(
+		"MIN(commentcount)",
+		"stories",
+		"stoid IN ($stoid_clause)");
+}
+
+########################################################
+# For freshenup.pl
 #
 # We have an index on just 1 char of story_text.rendered, and
 # its only purpose is to make this select into a lookup instead

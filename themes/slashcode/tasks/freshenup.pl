@@ -28,10 +28,13 @@ $task{$me}{code} = sub {
 	my $args = "$vu ssi=yes";
 	my %dirty_skins = ( );
 
-	# Every third invocation, we do a big chunk of work.  But the
-	# other two times, we just update the top three stories and
-	# the front page, skipping sectional stuff and other stories.
-	my $do_all = ($info->{invocation_num} % 3 == 1) || 0;
+	# Every tenth invocation, we do a big chunk of work.  The other
+	# nine times, we update the top three stories and the front
+	# page, skipping all other nexuses and other stories -- and to
+	# preserve the stories table's query cache, we only update
+	# commentcount/hitparades if at least one of those three stories
+	# had a small commentcount.
+	my $do_all = ($info->{invocation_num} % 10 == 1) || 0;
 
 	# If run with runtask, you can specify some options on the comand
 	# line, e.g. to chew through writing .shtml files to disk for up
@@ -221,19 +224,36 @@ $task{$me}{code} = sub {
 			$story_set{$stoid}{hitparade} = $hp;
 		}
 
-		slashdLog($logmsg) if $do_log;
+		slashdLog($logmsg) if $logmsg && $do_log;
 	}
 
 	$do_log = (verbosity() >= 2);
 	$logmsg = "";
-	for my $stoid (sort { $a <=> $b } keys %story_set) {
-		my $set_ok = $slashdb->setStory($stoid, $story_set{$stoid});
-		if (!$set_ok) {
-			$logmsg .= " setStory($stoid) retval is '$set_ok'";
-			$do_log ||= (verbosity() >= 1);
-		}
+	my $min_cc = "";
+	my $do_setstories = $do_all;
+	if (!$do_setstories) {
+		# We may still want to do it:  if one or more of the
+		# stories affected has a small commentcount, we want
+		# to get that updated.  Once numbers get larger,
+		# small increments don't matter as much.
+		my $stoids = [ keys %story_set ];
+		$min_cc = $slashdb->getMinCommentcount($stoids);
+		$do_setstories = 1 if $min_cc <= ($constants->{freshenup_small_cc} || 30);
 	}
-	slashdLog($logmsg) if $do_log;
+	if ($do_setstories) {
+		for my $stoid (sort { $a <=> $b } keys %story_set) {
+			my $set_ok = $slashdb->setStory($stoid, $story_set{$stoid});
+			if (!$set_ok) {
+				$logmsg .= "; setStory($stoid) '$set_ok'";
+				$do_log ||= (verbosity() >= 1);
+			}
+		}
+		my $min_cc_msg = "";
+		if (!$do_all) {
+			$min_cc_msg = " (min_cc was $min_cc)";
+		}
+		slashdLog("setStory on " . scalar(keys %story_set) . " stories$min_cc_msg$logmsg") if $do_log;
+	}
 
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
 

@@ -824,13 +824,13 @@ sub do_parent {
 		# log when next task is running
 		end_log($basename, 0, "", SLASHD_LOG_NEXT_TASK);
 		if (verbosity() >= 4) {
-			slashdLog("Parent $$: sleep for 2 seconds after fork()");
+			slashdLog("Parent $$: sleep for 1 second after fork()");
 		}
 
-		sleep 2;
+		sleep 1;
 
 		if (verbosity() >= 4) {
-			slashdLog("Parent $$: slept for 2 seconds after fork()");
+			slashdLog("Parent $$: slept for 1 second after fork()");
 		}
 
 	} elsif ($forktype == SLASHD_WAIT) {
@@ -875,7 +875,7 @@ sub do_child {
 	$SIG{CHLD} = 'DEFAULT';
 
 	if (verbosity() >= 4) {
-		slashdLog("Child $$ [$me]: sleep for 2 seconds after fork()");
+		slashdLog("Child $$ [$me]: sleep for 1 second after fork()");
 	}
 
 	$pids{$$} = {
@@ -889,11 +889,11 @@ sub do_child {
 	# Give the parent a chance to get into its REAPER loop.  This
 	# shouldn't be necessary now that the parent is not using $SIG{CHLD}
 	# to handle reaping child processes, but it still isn't a bad idea.
-	sleep 2;
+	sleep 1;
 	slashdLog("$basename begin ($$)") if verbosity() >= 2;
 
 	if (verbosity() >= 4) {
-		slashdLog("Child $$: slept for 2 seconds after fork()");
+		slashdLog("Child $$: slept for 1 second after fork()");
 	}
 
 	my $info = {
