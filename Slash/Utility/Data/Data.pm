@@ -2002,7 +2002,7 @@ sub addDomainTags {
 		(.*?)			# $3 is whatever's between <A> and </A>
 		</A\b[^>]*>
 	}{
-		$3	? _url_to_domain_tag($1,$2, $3)
+		$3	? _url_to_domain_tag($1, $2, $3)
 			: ""
 	}gisex;
 
@@ -2016,14 +2016,6 @@ sub addDomainTags {
 	$html =~ s{</A>}{}g;
 
 	return $html;
-}
-
-# Add a title tag to make this all friendly for those with vision and similar issues -Brian
-sub _url_title_tag {
-	my($href, $title) = @_;
-	$href =~ s/>/ TITLE="$title">/is;
-
-	return $href;
 }
 
 sub _url_to_domain_tag {
@@ -2072,7 +2064,9 @@ sub _url_to_domain_tag {
 	} elsif (length($info) >= 25) {
 		$info = substr($info, 0, 10) . "..." . substr($info, -10);
 	}
-	$href =~ s/>/ TITLE="$info">/is;
+	# Add a title tag to make this all friendly for those with vision
+	# and similar issues -Brian
+	$href =~ s/>/ TITLE="$info">/ if $info ne '?';
 	return "$href$body</a $info>";
 }
 
