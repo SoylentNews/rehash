@@ -369,11 +369,7 @@ sub countDailyByPageDistinctIPID {
 	my $where = "op='$op' AND "
 		if $op;
 	$where .= "section='$options->{section}' AND "
-		if $options->{section} && !$options->{index};
-	$where .= "section='index' AND "
-		if $options->{index} && !$options->{section};
-	$where .= "(section='$options->{section}' OR section='index') AND "
-		if $options->{index} && $options->{section};
+		if $options->{section};
 	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog", $where);
 }
