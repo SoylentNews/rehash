@@ -167,6 +167,7 @@ EOT
 	my $accesslog_rows = $logdb->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
 
+	slashdLog("countModeratorLog Begin");
 	my $modlogs = $stats->countModeratorLog({
 		active_only	=> 1,
 	});
@@ -196,6 +197,8 @@ EOT
 		? ($modlogs_incl_inactive_yest - $modlogs_yest)*100 / $modlogs_incl_inactive_yest
 		: 0;
 
+	slashdLog("countModeratorLog End");
+	slashdLog("countMetamodLog Begin");
 	my $metamodlogs = $stats->countMetamodLog({
 		active_only	=> 1,
 	});
@@ -225,6 +228,7 @@ EOT
 		($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)
 		? ($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)*100 / $metamodlogs_incl_inactive_yest
 		: 0;
+	slashdLog("countMetamodLog End");
 
 	my $oldest_unm2d = $stats->getOldestUnm2dMod();
 	my $oldest_unm2d_days = sprintf("%10.1f", $oldest_unm2d ? (time-$oldest_unm2d)/86400 : -1);
@@ -232,11 +236,15 @@ EOT
 	my $youngest_modelig_created = $stats->getUser($youngest_modelig_uid,
 		'created_at');
 
+	slashdLog("Points and Token Pool Begin");
 	my $mod_points_pool = $stats->getPointsInPool();
 	my $mod_tokens_pool_pos = $stats->getTokensInPoolPos();
 	my $mod_tokens_pool_neg = $stats->getTokensInPoolNeg();
+	slashdLog("Points and Token Pool End");
+	
 	my $used = $stats->countModeratorLog();
 	my $modlog_yest_hr = $stats->countModeratorLogByVal();
+	slashdLog("Comment Posting Stats Begin");
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID();
 	my($distinct_comment_ipids_anononly,
 	   $distinct_comment_ipids_loggedinonly,
@@ -247,11 +255,15 @@ EOT
 	my $comments_proxyanon = $stats->countCommentsFromProxyAnon();
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
 	my $comments_discussiontype_hr = $stats->countCommentsByDiscussionType();
+	slashdLog("Comment Posting Stats End");
+	slashdLog("Submissions Stats Begin");
 	my $submissions = $stats->countSubmissionsByDay();
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($distinct_comment_ipids);
+	slashdLog("Submissions Stats End");
 	my $modlog_count_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
 	my $modlog_spent_yest_total = $modlog_yest_hr->{1}{spent} + $modlog_yest_hr->{-1}{spent};
 	my $consensus = $constants->{m2_consensus};
+	slashdLog("Misc Moderation Stats Begin");
 	my $token_conversion_point = $stats->getTokenConversionPoint();
 
 	my $oldest_to_show = int($oldest_unm2d_days) + 7;
@@ -259,9 +271,12 @@ EOT
 	my $m2_text = getM2Text($stats->getModM2Ratios(), {
 		oldest => $oldest_to_show
 	});
+	slashdLog("Misc Moderation Stats End");
 
+	slashdLog("Problem Modders Begin");
 	my $late_modders 		= $stats->getTopModdersNearArchive({limit => 5});
 	my $early_inactive_modders      = $stats->getTopEarlyInactiveDownmodders({limit => 5 });
+	slashdLog("Problem Modders End");
 	foreach my $mod (@$late_modders){
 		$mod_data{late_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
 	}
