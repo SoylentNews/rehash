@@ -552,6 +552,11 @@ EOT
 		# we need the ad wrapped in a fancybox
 		if (defined $user->{state}{ad}{$num}
 			&& $user->{state}{ad}{$num} !~ /^<!-- no pos/) {
+			# if we're called from shtml, we won't have colors
+			# set, so we should get some set before making a
+			# box.				-- Pater
+			getSectionColors() unless $user->{bg};
+
 			return fancybox($constants->{fancyboxwidth}, 'Advertisement', "<CENTER>" . $user->{state}{ad}{$num} . "</CENTER>", 1, 1);
 		} else { return ""; }
 	} else {
