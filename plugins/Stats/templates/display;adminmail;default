@@ -19,14 +19,6 @@ __template__
 [% admin_clearpass_warning %][% backup_lag %]
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
-[% IF constants.mod_stats -%]
-       modlog: [% modlog %] rows total
-   metamodlog: [% metamodlog %] rows total ([% xmodlog %] modlog)
-   mod points: [% mod_points %] in pool
-   used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
-      used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
-      used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
-[% END -%]
      comments: [% comments %] posted yesterday
         Users: [% distinct_comment_posters_uids %] distinct uids posted comments
              : [% comments_uids %] distinct uids used comments
@@ -51,23 +43,6 @@ __template__
   submissions: [% submissions %] submissions 
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
-[% IF constants.mod_stats;
-admin_mods_text;
-IF repeat_mods;
-	FOREACH dir = [ '-1', '1' ];
-		IF repeat_mods.$dir.keys.size >= 1;
-			IF dir == -1; dirword = "DOWN"; ELSE; dirword = "UP"; END %]
-REPEAT [% dirword %]MODS:
-[%			FOREACH orguid = repeat_mods.$dir.keys.nsort;
-				FOREACH destuid = repeat_mods.$dir.$orguid.keys.nsort;
-					hr = repeat_mods.$dir.$orguid.$destuid;
-constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])
-[%				END;
-			END;
-		END;
-	END;
-END;
-END %]
    total hits: [% total_hits %]
      homepage: [% homepage %]
 

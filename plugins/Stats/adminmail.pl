@@ -15,7 +15,7 @@ $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
-	my($stats, $backupdb, %data);
+	my($stats, $backupdb, %data, %mod_data);
 
 	my $statsSave = getObject('Slash::Stats');
 	if ($constants->{backup_db_user}) {
@@ -194,7 +194,7 @@ EOT
 			($num_mods ? $num_admin_mods*100/$num_mods : 0));
 	}
 
-	$data{repeat_mods} = $stats->getRepeatMods({
+	$mod_data{repeat_mods} = $stats->getRepeatMods({
 		min_count => $constants->{mod_stats_min_repeat}
 	});
 
@@ -228,17 +228,20 @@ EOT
 	$data{users} = sprintf("%8d", $count->{unique_users});
 	$data{accesslog} = sprintf("%8d", $accesslog_rows);
 	$data{formkeys} = sprintf("%8d", $formkeys_rows);
-	$data{modlog} = sprintf("%8d", $modlog_rows);
-	$data{metamodlog} = sprintf("%8d", $metamodlog_rows);
-	$data{xmodlog} = sprintf("%.1fx", ($modlog_rows  ? $metamodlog_rows/$modlog_rows  : 0));
-	$data{mod_points} = sprintf("%8d", $mod_points);
-	$data{used_total} = sprintf("%8d", $modlog_total);
-	$data{used_total_pool} = sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0));
-	$data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0));
-	$data{used_minus_1} = sprintf("%8d", $modlog_hr->{-1}{count});
-	$data{used_minus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) );
-	$data{used_plus_1} = sprintf("%8d", $modlog_hr->{1}{count});
-	$data{used_plus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0));
+
+	$mod_data{modlog} = sprintf("%8d", $modlog_rows);
+	$mod_data{metamodlog} = sprintf("%8d", $metamodlog_rows);
+	$mod_data{xmodlog} = sprintf("%.1fx", ($modlog_rows  ? $metamodlog_rows/$modlog_rows  : 0));
+	$mod_data{mod_points} = sprintf("%8d", $mod_points);
+	$mod_data{used_total} = sprintf("%8d", $modlog_total);
+	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0));
+	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0));
+	$mod_data{used_minus_1} = sprintf("%8d", $modlog_hr->{-1}{count});
+	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) );
+	$mod_data{used_plus_1} = sprintf("%8d", $modlog_hr->{1}{count});
+	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0));
+	$mod_data{day} = $yesterday;
+
 	$data{comments} = sprintf("%8d", $comments);
 	$data{IPIDS} = sprintf("%8d", scalar(@$distinct_comment_ipids));
 	$data{submissions} = sprintf("%8d", $submissions);
@@ -269,11 +272,13 @@ EOT
 		)) if $story->{'title'} && $story->{uid} && $value > 100;
 	}
 
+	$mod_data{data} = \%mod_data;
+	$mod_data{admin_mods_text} = $admin_mods_text;
+	
 	$data{data} = \%data;
 #	$data{sections} = \@sections; 
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
-	$data{admin_mods_text} = $admin_mods_text;
 	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today` if $constants->{tailslash_stats};
 
 	$data{backup_lag} = "";
@@ -293,6 +298,10 @@ EOT
 		Return => 1, Page => 'adminmail', Nocomm => 1
 	});
 
+	my $mod_email = slashDisplay('display', \%mod_data, {
+		Return => 1, Page => 'modmail', Nocomm => 1
+	}) if $constants->{mod_stats};
+
 	# Send a message to the site admin.
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
@@ -305,7 +314,26 @@ EOT
 		for (@$message_users) {
 			$messages->create($_, MSG_CODE_ADMINMAIL, \%data);
 		}
+
+		if ($constants->{mod_stats}) {
+			$mod_data{template_name} = 'display';
+			$mod_data{subject} = getData('modmail subject', {
+				day => $mod_data{day}
+			}, 'adminmail');
+			$mod_data{template_page} = 'modmail';
+			my $mod_message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
+			for (@$mod_message_users) {
+				$messages->create($_, MSG_CODE_ADMINMAIL, \%mod_data);
+			}
+		}
 	}
+
+	if ($constants->{mod_stats}) {
+		for (@{$constants->{mod_stats_reports}}) {
+			sendEmail($_, $mod_data{subject}, $mod_email, 'bulk');
+		}
+	}
+
 	for (@{$constants->{stats_reports}}) {
 		sendEmail($_, $data{subject}, $email, 'bulk');
 	}
