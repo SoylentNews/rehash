@@ -43,9 +43,6 @@ slash-1.0.5, 2000.06.xx
 * 	Fixed code to check if formkey for a submission is being
 	submitted  by the IP address that it was initially created under
 
-*	Changed the id column in formkeys to be "uid-$ENV{REMOTE_ADDR}" 
-	(was just uid) for logged in users
-
 *	New function Slash::errorMessage(), prints out whatever 
 	argument it receives
 
@@ -98,9 +95,6 @@ slash-1.0.5, 2000.06.xx
 	to encode every character that is not safe or reserved,
 	according to RFC1738)
 
-*	Changed formkey to be by uid for logged in users, IP address
-	for everyone else
-
 *	Base deletions of newstories in dailyStuff on archive_delay
 
 *	Do stripByMode() of sig in users.pl after getting first 160
@@ -111,6 +105,11 @@ slash-1.0.5, 2000.06.xx
 
 *	Fixed search.pl in stripping of bad chars from query string
 	(Michael Sims)
+
+*	Added submit_categories array to slashdotrc.pl, for adding
+	new categories to submissions (like Hold, Quik, etc.)
+
+*	Fixed bad color of "Moderation totals" text in Slash.pm
 
 *	Plenty of minor code cleanups
 

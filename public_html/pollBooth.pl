@@ -157,7 +157,7 @@ sub savepoll {
 
 		} else {
 			$I{dbh}->do("DELETE from pollanswers WHERE 
-				qid=" . $I{dbh}->quote($qid) . " and aid=$x"); 
+				qid=" . $I{dbh}->quote($I{F}{qid}) . " and aid=$x"); 
 		}
 	}
 }

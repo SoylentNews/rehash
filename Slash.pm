@@ -1335,9 +1335,12 @@ sub approveTag {
 	$tag =~ s/\bstyle\s*=(.*)$//i; # go away please
 
 	# Take care of URL:foo and other HREFs
-	if ($tag =~ /^URL:(.+)$/i || $tag =~ /href\s*=(.+)$/i) {
+	if ($tag =~ /^URL:(.+)$/i) {
 		my $url = fixurl($1);
 		return qq!<A HREF="$url">$url</A>!;
+	} elsif ($tag =~ /href\s*=(.+)$/i) {
+		my $url = fixurl($1);
+		return qq!<A HREF="$url">!;
 	}
 
 	# Validate all other tags
@@ -1356,7 +1359,7 @@ sub fixurl {
 	$url =~ s/([^\w.+!*'(),;?:@=&a-zA-Z0-9\$\/-])/sprintf "%%%02X", ord $1/ge;
 	$url = fixHref($url) || $url;
 	my $decoded_url = decode_entities($url);
-	return undef if $decoded_url =~ s|^\s*\w+script\b.*$||i;
+	return $decoded_url =~ s|^\s*\w+script\b.*$||i ? undef : $url;
 }
 
 ########################################################
@@ -1544,6 +1547,7 @@ sub header {
 <HTML><HEAD><TITLE>$title</TITLE>
 EOT
 
+	# ssi = 1 IS NOT THE SAME as ssi = 'yes'
 	if ($I{F}{ssi} eq 'yes') {
 		ssiHead($section);
 		return;
@@ -2056,7 +2060,7 @@ EOT
 	$c->finish;
 	return unless $reasonTotal;
 
-	print qq!<FONT COLOR="$I{fg}[3]"><B>Moderation Totals</B></FONT>:!;
+	print qq!<FONT COLOR="$I{bg}[3]"><B>Moderation Totals</B></FONT>:!;
 	foreach (0 .. @reasonHist) {
 		print "$I{reasons}->[$_]=$reasonHist[$_], " if $reasonHist[$_];
 	}
@@ -2662,11 +2666,11 @@ sub getFormkeyId {
 	if ($I{query}->param('rlogin') && length($I{F}{upasswd}) > 1) {
 		# id includes '&' to prevent uid's and IPs
 		# from potentially being the same
-		$id = '-1&' . $ENV{REMOTE_ADDR};
+		$id = '-1-' . $ENV{REMOTE_ADDR};
 	} elsif ($uid > 0) {
 		$id = $uid;
 	} else {
-		$id = '-1&' . $ENV{REMOTE_ADDR};
+		$id = '-1-' . $ENV{REMOTE_ADDR};
 	}
 	return($id);
 }
@@ -2838,7 +2842,8 @@ sub checkSubmission {
 	my($last_submitted) = sqlSelect(
 		"max(submit_ts)",
 		"formkeys",
-		"id = '$id' AND formname = '$formname'") || 0;
+		"id = '$id' AND formname = '$formname'");
+	$last_submitted ||= 0;
 
 	my $interval = time() - $last_submitted;
 

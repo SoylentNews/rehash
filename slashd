@@ -260,7 +260,7 @@ sub sectionHeaders {
 	my $section = shift;
 	local *FH;
 
-	$I{F}{ssi} = 'yes';
+	$I{F}{ssi} = 1;
 	open FH,">$I{basedir}/$section/slashhead.inc"
 		or die "Can't open $I{basedir}/$section/slashhead.inc: $!";
 	*STDOUT = *FH;
@@ -274,7 +274,7 @@ sub sectionHeaders {
 	footer();
 	close FH;
 
-	$I{F}{ssi} = 'yes';
+	$I{F}{ssi} = 1;
 	open FH, ">$I{basedir}/$section/slashhead_F.inc"
 		or die "Can't open $I{basedir}/$section/slashhead_F.inc: $!";
 	*STDOUT = *FH;
