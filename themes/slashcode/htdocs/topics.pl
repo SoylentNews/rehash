@@ -17,6 +17,7 @@ sub main {
 
 	header(getData('head'));
 	
+	# i think this should be if ($user->{is_admin}) { ... -- pudge
 	if ($user->{seclev} >= 100) {
 		print createMenu('adv-admin');
 	}
