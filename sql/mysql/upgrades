@@ -1264,7 +1264,6 @@ INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (1
 # update the messaging stats in stats_daily, using the last several weeks
 # of stats in message_log
 
-# USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_72, Start of T_2_3_0_73
@@ -1279,3 +1278,5 @@ ALTER TABLE humanconf_pool ADD COLUMN created_at DATETIME NOT NULL AFTER lastuse
 UPDATE humanconf_pool SET lastused=lastused, created_at=lastused WHERE lastused IS NOT NULL;
 
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');
+
+# USEPERL LAST UPDATED HERE
