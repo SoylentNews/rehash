@@ -14,7 +14,7 @@ __template__
 [% FOREACH file=files %]
 	[% file.description %]<BR>
 	[% FILTER strip_literal %]
-		[% IF file.isimage %]
+		[% IF file.isimage == 'yes' %]
 			<SLASH-IMAGE ID="[% file.file_id %]" TITLE="[% file.description | strip_attribute %]">
 		[% ELSE %]
 			<SLASH-FILE ID="[% file.file_id %]" TITLE="[% file.description | strip_attribute %]">[% file.description %]</SLASH>
@@ -25,3 +25,5 @@ __template__
 
 __seclev__
 10000
+__version__
+$Id$
