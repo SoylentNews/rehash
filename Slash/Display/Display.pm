@@ -48,7 +48,7 @@ use Slash::Utility::System;
 use Template 2.07;
 
 use base 'Exporter';
-use vars qw($VERSION @EXPORT @EXPORT_OK $CONTEXT %FILTERS);
+use vars qw($VERSION @EXPORT @EXPORT_OK $CONTEXT %FILTERS $TEMPNAME);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(slashDisplay);
@@ -188,20 +188,20 @@ sub slashDisplay {
 		$user->{$_} = defined $user->{$_} ? $user->{$_} : '';
 	}
 
-	my $tempname = 'anon';
+	$TEMPNAME = 'anon';
 	unless (ref $name) {
 		# we don't want to have to call this here, but because
 		# it is cached the performance hit is generally light,
 		# and this is the only good way to get the actual name,
 		# page, section, we bite the bullet and do it
 		my $tempdata = $slashdb->getTemplateByName($name, [qw(tpid page section)]);
-		$tempname = "ID $tempdata->{tpid}, " .
+		$TEMPNAME = "ID $tempdata->{tpid}, " .
 			"$name;$tempdata->{page};$tempdata->{section}";
 	}
 
 	my @comments = (
-		"\n\n<!-- start template: $tempname -->\n\n",
-		"\n\n<!-- end template: $tempname -->\n\n"
+		"\n\n<!-- start template: $TEMPNAME -->\n\n",
+		"\n\n<!-- end template: $TEMPNAME -->\n\n"
 	);
 
 	# copy parent data structure so it is not modified,
@@ -216,17 +216,7 @@ sub slashDisplay {
 	my($err, $ret, $out);
 
 	{
-		local $SIG{__WARN__} = sub {
-			my @lines = @_;
-			if ($lines[0] !~ /Use of uninitialized value/) {
-				if ($lines[0] =~ /at \(eval \d+\)/) {
-					chomp($lines[0]);
-					$lines[0] =~ s/\.$//;
-					$lines[0] .= " in template $tempname\n";
-				}
-				warn @lines;
-			}
-		};
+		local $SIG{__WARN__} = \&tempWarn;
 
 		if ($CONTEXT) {
 			$ret = eval { $out = $template->include($name, $data) };
@@ -244,7 +234,7 @@ sub slashDisplay {
 	$out = $comments[0] . $out . $comments[1] unless $Nocomm;
 
 	if ($err) {
-		errorLog("$tempname : $err");
+		errorLog("$TEMPNAME : $err");
 	} else {
 		print $out unless $opt->{Return};
 	}
@@ -498,6 +488,20 @@ my %scalar_ops = (
 
 @{$Template::Stash::LIST_OPS}  {keys %list_ops}   = values %list_ops;
 @{$Template::Stash::SCALAR_OPS}{keys %scalar_ops} = values %scalar_ops;
+
+#========================================================================
+
+sub tempWarn {
+	my @lines = @_;
+	if ($lines[0] !~ /Use of uninitialized value/) {
+		if ($lines[0] =~ /at \(eval \d+\)/) {
+			chomp($lines[0]);
+			$lines[0] =~ s/\.$//;
+			$lines[0] .= " in template $TEMPNAME\n";
+		}
+		warn @lines;
+	}
+}
 
 1;
 
