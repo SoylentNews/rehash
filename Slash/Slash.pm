@@ -316,7 +316,7 @@ sub printComments {
 		lvl		=> $lvl,
 	});
 
-	return if ($user->{state}{nocomment} || $user->{mode} eq 'nocomment');
+	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
 	my($comment, $next, $previous);
 	if ($cid) {
@@ -977,7 +977,7 @@ sub _hard_dispComment {
 	} elsif ($user->{nosigs}) {
 		$comment_to_display = $comment->{comment};
 	} else {
-		$comment_to_display  = "$comment->{comment}$comment->{sig}";
+		$comment_to_display  = "$comment->{comment}<BR>$comment->{sig}";
 	}
 
 	$time_to_display = timeCalc($comment->{date});

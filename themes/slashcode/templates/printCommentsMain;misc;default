@@ -105,7 +105,9 @@ The following comments are owned by whoever posted them.
 We are not responsible for them in any way.
 </FONT></FORM></TD></TR>
 
-</TABLE>
+[% IF user.mode == 'nocomment' %]
+		</TABLE>
+[% END %]
 
 __seclev__
 10000

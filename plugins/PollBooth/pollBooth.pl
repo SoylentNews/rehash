@@ -63,15 +63,7 @@ sub default {
 			my $discussion = 
 				$slashdb->getDiscussion($discussion_id);
 			if ($discussion) {
-				if ($user->{state}{nocomment} || $user->{mode} eq 'nocomment') {
-					slashDisplay('printCommentsNone', {
-						title   => $discussion->{title},
-						'link'    => $discussion->{url},
-						sid   => $discussion->{id},
-					});
-				} else {
-					printComments($discussion);
-				}
+				printComments($discussion);
 			}
 		}
 	}
