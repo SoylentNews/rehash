@@ -2710,7 +2710,7 @@ sub checkStoryInNexus {
 	my $stoid_q = $self->sqlQuote($stoid);
 	my $tid_q = $self->sqlQuote($nexus_tid);
 	return $self->sqlCount("story_topics_rendered",
-		"stoid=$stoid AND tid=$tid_q");
+		"stoid=$stoid_q AND tid=$tid_q");
 }
 
 ########################################################
@@ -4395,6 +4395,16 @@ sub checkExpired {
 }
 
 ##################################################################
+# Just a convenience method, a wrapper around checkReadOnly that is
+# almost as easy to call as $constants->{allow_anonymous} used to be.
+# (This should only be passed a UID known to be anonymous.)
+sub checkAllowAnonymousPosting {
+	my($self, $anon_uid) = @_;
+	$anon_uid ||= getCurrentAnonymousCoward('uid');
+	return ! $self->checkReadOnly('nopost', { uid => $anon_uid });
+}
+
+##################################################################
 sub checkReadOnly {
 	my($self, $access_type, $user_check) = @_;
 	# We munge access_type directly into the SQL so make SURE it is
@@ -4412,15 +4422,36 @@ sub checkReadOnly {
 	# This looks right;  if the {uid} field of %$user_check
 	# is not defined, we ignore uid and put together our
 	# test based on another field. -- Jamie
+	my $anonnopost_ref = undef;
 	if ($user_check->{uid} && $user_check->{uid} =~ /^\d+$/) {
-		if (!isAnon($user_check->{uid})) {
-			$where_ary = [ "uid = $user_check->{uid}" ];
+		my $uid = $user_check->{uid};
+		if (!isAnon($uid)) {
+			$where_ary = [ "uid = $uid" ];
 		} else {
-			# This is probably an error... I don't think
-			# the code ever gets here but we should
-			# probably bail at this point, returning 1
-			# to indicate a problem. - Jamie 2003/03/03
-			$where_ary = [ "ipid = '$user_check->{ipid}'" ];
+			# This is the new allow_anonymous... if an
+			# anonymous user is not to post, it has a
+			# 'now_nopost' entry in accesslist.  Cache this
+			# value for all anonymous users, for speed.
+			my $expire_time = $constants->{banlist_expire};
+			$expire_time += int(rand(60)) if $expire_time;
+			_genericCacheRefresh($self, 'anonnopost', $expire_time);
+			$anonnopost_ref = $self->{_anonnopost_cache} ||= {};
+			if (defined($anonnopost_ref->{$uid})) {
+				# The nopost entry for this anon user
+				# is already cached;  return it.
+				if ($constants->{debug_db_cache}) {
+					print STDERR scalar(gmtime) . " cRO $$ anonnopost cached for $uid: $anonnopost_ref->{$uid}\n";
+				}
+				return $anonnopost_ref->{$uid};
+			}
+
+			# It's not cached;  we're going to find it
+			# and cache it.
+			$where_ary = [ "uid = $uid" ];
+			if ($constants->{debug_db_cache}) {
+				print STDERR scalar(gmtime) . " cRO $$ anonnopost not cached for $uid\n";
+			}
+
 		}
 	} elsif ($user_check->{md5id}) {
 		# To do this with a WHERE is very slow!  Both the ipid
@@ -4455,12 +4486,24 @@ sub checkReadOnly {
 
 	# If any rows in the table match any of the where clauses,
 	# then we're readonly.
+	my $retval = 0;
 	my $where;
 	while ($where = shift @$where_ary) {
-		return 1 if $self->sqlCount("accesslist", $where);
+		if ($self->sqlCount("accesslist", $where)) {
+			$retval = 1;
+			last;
+		}
 	}
-	# Nothing matched, so we're not.
-	return 0;
+
+	if (defined($anonnopost_ref)) {
+		# We need to write our answer into the cache.
+		$anonnopost_ref->{$user_check->{uid}} = $retval;
+		$self->{_anonnopost_cache_time} ||= time();
+		if ($constants->{debug_db_cache}) {
+			print STDERR scalar(gmtime) . " cRO $$ anonnopost cache written for $user_check->{uid}: $retval\n";
+		}
+	}
+	return $retval;
 }
 
 sub getKnownOpenProxy {

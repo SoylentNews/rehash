@@ -421,7 +421,7 @@ sub editComment {
 	my $pid = $form->{pid} || 0; # this is guaranteed numeric, from filter_params
 	my $reply = $slashdb->getCommentReply($sid, $pid);
 
-	if (!$constants->{allow_anonymous} && $user->{is_anon}) {
+	if ($user->{is_anon} && !$slashdb->checkAllowAnonymousPosting($user->{uid})) {
 		print getError('no anonymous posting');
 		return;
 	}
@@ -582,32 +582,39 @@ sub validateComment {
 		});
 		return;
 	}
-	
-	if (!$constants->{allow_anonymous} && ($user->{is_anon} || $form->{postanon})) {
-		$$error_message = getError('anonymous disallowed');
-		return;
+
+	if ($user->{is_anon} || $form->{postanon}) {
+		my $uid_to_check = $user->{uid};
+		if (!$user->{is_anon}) {
+			$uid_to_check = getCurrentAnonymousCoward('uid');
+		}
+		if (!$slashdb->checkAllowAnonymousPosting($uid_to_check)) {
+			$$error_message = getError('anonymous disallowed');
+			return;
+		}
 	}
 
 	if (!$user->{is_anon} && $form->{postanon} && $user->{karma} < 0) {
 		$$error_message = getError('postanon_option_disabled');
 		return;
 	}
-		
+
 	my $post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $user->{subnetid});	
-	if (($user->{is_anon} || $form->{postanon}) && $constants->{allow_anonymous} && $post_restrictions->{no_anon}) {
-		my $logged_in_allowed = ! $post_restrictions->{no_post};
-			$$error_message = getError('troll message', {
-				unencoded_ip 		=> $ENV{REMOTE_ADDR},
-				logged_in_allowed 	=> $logged_in_allowed      
-			});
+	if ($user->{is_anon} || $form->{postanon}) {
+		if ($post_restrictions->{no_anon}) {
+			my $logged_in_allowed = ! $post_restrictions->{no_post};
+				$$error_message = getError('troll message', {
+					unencoded_ip 		=> $ENV{REMOTE_ADDR},
+					logged_in_allowed 	=> $logged_in_allowed      
+				});
 			return;
+		}
 	} elsif ($post_restrictions->{no_post}) {
 		$$error_message = getError('troll message', {
 			unencoded_ip 		=> $ENV{REMOTE_ADDR},
 		});
 		return;
 	}
-	
 
 
 	$$subj =~ s/\(Score(.*)//i;
@@ -641,9 +648,7 @@ sub validateComment {
 	my $kickin = $constants->{comments_min_line_len_kicks_in};
 	if ($constants->{comments_min_line_len} && length($$comm) > $kickin) {
 
-		my $max_comment_len = $slashdb->getUser(
-			$constants->{anonymous_coward_uid},                  
-			'maxcommentsize');
+		my $max_comment_len = getCurrentAnonymousCoward('maxcommentsize');
 		my $check_prefix = substr($$comm, 0, $max_comment_len);
 		my $check_prefix_len = length($check_prefix);
 		my $min_line_len_max = $constants->{comments_min_line_len_max}
@@ -970,8 +975,11 @@ sub submitComment {
 		}
 	}
 	my $posters_uid = $user->{uid};
-	if ($form->{postanon} && $constants->{allow_anonymous} && $user->{karma} > -1 && $discussion->{commentstatus} eq 'enabled') {
-		$posters_uid = $constants->{anonymous_coward_uid} ;
+	if ($form->{postanon}
+		&& $slashdb->checkAllowAnonymousPosting()
+		&& $user->{karma} > -1
+		&& $discussion->{commentstatus} eq 'enabled') {
+		$posters_uid = getCurrentAnonymousCoward('uid');
 	}
 
 #print STDERR scalar(localtime) . " $$ F header_emitted=$header_emitted do_emit_html=$do_emit_html\n";

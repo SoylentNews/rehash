@@ -2538,5 +2538,13 @@ ALTER TABLE skins ADD COLUMN ac_uid mediumint UNSIGNED DEFAULT '0' NOT NULL;
 
 INSERT INTO vars (name, value, description) VALUES ('returnto_passwd',CONCAT('changeme', rand()),'Password used to sign MD5s for returnto URLs from remote sites');
 
-
 ALTER TABLE topics ADD COLUMN submittable ENUM('no', 'yes') DEFAULT 'yes';
+
+# If your 'allow_anonymous' var is 0, then replace __AC_UID__ with
+# the value of your 'anonymous_coward_uid' var and do this.
+INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__AC_UID__, NULL, NULL, NOW(), 'anonymous_coward_uid', 'yes');
+# If it is 1, then do nothing.  If you are using multiple anon cowards
+# with skins.ac_uid, then add rows for those that should not be able to
+# post.  Yes, there will be an admin interface for this eventually.
+
+
