@@ -69,7 +69,8 @@ sub _subscribeDecisionPage {
 	return 0 if !$constants->{run_ads};
 
 	# Has the user exceeded the maximum number of pages they want
-	# to buy *today*?
+	# to buy *today*?  (Here is where the algorithm decides that
+	# "today" is a GMT day.)
 	my @gmt = gmtime;
 	my $today = sprintf("%04d%02d%02d", $gmt[5]+1900, $gmt[4]+1, $gmt[3]);
 	if ($today eq substr($user->{lastclick}, 0, 8)) {
