@@ -121,7 +121,7 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='commentcodes'") },
 
 	'sections'
-		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'isolate=0 AND type="contained"', 'order by title') },
+		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'type="contained"', 'order by title') },
 
 	'sections-contained'
 		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'type="contained"', 'order by title') },
@@ -775,8 +775,7 @@ sub getStoryDiscussions {
 		$where .= " AND discussions.section = '$section'"
 	} else {
 		$tables .= ", sections";
-		$where .= " AND sections.section = discussions.section
-			AND sections.isolate != 1 ";
+		$where .= " AND sections.section = discussions.section ";
 	}
 
 	my $discussion = $self->sqlSelectAll(
@@ -803,7 +802,7 @@ sub getDiscussions {
 		$where .= " AND discussions.section = '$section'"
 	} else {
 		$tables .= ", sections";
-		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+		$where .= " AND sections.section = discussions.section ";
 	}
 
 	my $discussion = $self->sqlSelectAll("discussions.id, discussions.title, discussions.url",
@@ -830,7 +829,7 @@ sub getDiscussionsByCreator {
 		$where .= " AND discussions.section = '$section'"
 	} else {
 		$tables .= ", sections";
-		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+		$where .= " AND sections.section = discussions.section ";
 	}
 
 	my $discussion = $self->sqlSelectAll("id, title, url",
@@ -860,7 +859,7 @@ sub getDiscussionsUserCreated {
 		$where .= " AND discussions.section = '$section'";
 	} else {
 		$tables .= ", sections";
-		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+		$where .= " AND sections.section = discussions.section ";
 	}
 
 	my $discussion = $self->sqlSelectAll("discussions.id, discussions.title, discussions.ts, users.nickname",
@@ -1938,6 +1937,8 @@ sub hasVotedIn {
 # votes cast for those answers, and optionally attaches the
 # poll to a story.  Can we think of a better name than
 # "savePollQuestion"? - Jamie
+# sub saveMuTantSpawnSatanPollCrap {
+#    -Brian
 sub savePollQuestion {
 	my($self, $poll) = @_;
 	$poll->{section} ||= getCurrentStatic('defaultsection');
@@ -1975,9 +1976,6 @@ sub savePollQuestion {
 			qid		=> $poll->{qid}
 		}, "sid = $sid_quoted") if $sid_quoted;
 	}
-
-	$self->setVar("currentqid", $poll->{qid}) if $poll->{currentqid};
-
 	# Loop through 1..8 and insert/update if defined
 	for (my $x = 1; $x < 9; $x++) {
 		if ($poll->{"aid$x"}) {
@@ -1995,6 +1993,10 @@ sub savePollQuestion {
 				WHERE qid=$qid_quoted AND aid=$x");
 		}
 	}
+	if ($poll->{qid} && $poll->{currentqid}) {
+		$self->setSection($poll->{section}, { qid => $poll->{qid} });
+	}
+
 	return $poll->{qid};
 }
 
@@ -2115,9 +2117,6 @@ sub setStory {
 	$cache = _genericGetCacheName($self, $tables);
 	if ($hashref->{displaystatus} == 0) {
 		my $section = $hashref->{section} ? $hashref->{section} : $self->getStory($sid, 'section');
-		my $isolate = $self->getSection($section, 'isolate');
-		$hashref->{displaystatus} = 1
-			if ($isolate);
 	}
 
 	$hashref->{day_published} = $hashref->{'time'}
@@ -3232,10 +3231,8 @@ sub getStoryByTime {
 	$twice_arch_delay = 7 if $twice_arch_delay < 7;
 
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
-	if ($section->{isolate}) {
-		$where  = ' AND displaystatus>=0 AND section=' .
-			  $self->sqlQuote($story->{'section'})
-	} elsif ($user->{sectioncollapse}) {
+
+	if ($user->{sectioncollapse}) {
 		$where .= ' AND displaystatus>=0';
 	} else {
 		$where .= ' AND displaystatus=0';
@@ -4379,11 +4376,6 @@ sub createStory {
 			'subid=' . $self->sqlQuote($story->{subid})
 		);
 	}
-	if ($story->{displaystatus} == 0) {
-		my $isolate = $self->getSection($story->{section}, 'isolate');
-		$story->{displaystatus} = 1
-			if ($isolate);
-	}
 
 	$story->{submitter}	= $story->{submitter} ?
 		$story->{submitter} : $story->{uid};
@@ -4417,13 +4409,6 @@ sub updateStory {
 	my $time = ($story->{fastforward})
 		? $self->getTime()
 		: $story->{'time'};
-
-	if ($story->{displaystatus} == 0) {
-		my $section = $story->{section} ? $story->{section}  : $self->getStory($story->{sid}, 'section');
-		my $isolate = $self->getSection($section, 'isolate');
-		$story->{displaystatus} = 1
-			if ($isolate);
-	}
 
 	my $data = {
 		sid	=> $story->{sid},

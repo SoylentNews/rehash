@@ -1,5 +1,5 @@
 __section__
-admin
+default
 __description__
 This is the header for the admin section
 __title__
@@ -9,7 +9,7 @@ misc
 __lang__
 en_US
 __name__
-header
+header-admin
 __template__
 [% INCLUDE linkrel %]
 </HEAD>

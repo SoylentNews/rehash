@@ -97,7 +97,7 @@ The 'html-header' and 'header' template blocks.
 =cut
 
 sub header {
-	my($title, $section, $status, $noheader) = @_;
+	my($title, $section, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -138,14 +138,14 @@ sub header {
 		$r->send_http_header;
 	}
 
-	$user->{currentSection} = $section || '';
+	$user->{currentSection} = $section || $constants->{section};
 	getSectionColors();
 
 	$title->{title} =~ s/<(.*?)>//g;
 
 	# This is ALWAYS displayed. Let the template handle $title.
 	slashDisplay('html-header', { title => $title->{title} }, { Nocomm => 1 })
-		unless $noheader;
+		unless $options->{noheader};
 
 	# ssi = 1 IS NOT THE SAME as ssi = 'yes'
 	# ...which is silly. - Jamie 2002/06/26
@@ -158,7 +158,11 @@ sub header {
 	#	$adhtml = getAd(1);
 	# }
 
-	slashDisplay('header', $title);
+	if ($options->{admin} && $user->{is_admin}) {
+		slashDisplay('header-admin', $title);
+	} else {
+		slashDisplay('header', $title);
+	}
 
 	if ($constants->{admin_check_clearpass}
 		&& ($user->{state}{admin_clearpass_thisclick} || $user->{admin_clearpass})
@@ -201,9 +205,13 @@ The 'footer' template block.
 =cut
 
 sub footer {
-	my $form = getCurrentForm();
+	my $user = getCurrentUser();
 
-	slashDisplay('footer', {}, { Nocomm => 1 });
+	if ($user->{state}{adminheader}) {
+		slashDisplay('footer-admin');
+	} else {
+		slashDisplay('footer');
+	}
 }
 
 #========================================================================

@@ -35,21 +35,13 @@ sub main {
 		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME}), return if $c;
 	}
 
-	if ($form->{section}) {
-		$section = $slashdb->getSection($form->{section});
-	} else {
-		$section->{section} = 'index';
-		$section->{issue} = 1;
-	}
-
-	$section->{artcount} = $user->{maxstories} unless $user->{is_anon};
-	$section->{mainsize} = int($section->{artcount} / 3);
+	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
 	my $title = getData('head', { section => $section });
-	header($title, $section->{section} ne 'index' ? $section->{section} : '');
+	header($title, $section->{section});
 
-	my $limit = $section->{section} eq 'index' ?
-		$user->{maxstories} : $section->{artcount};
+	my $limit = $section->{type} eq 'collected' ?
+		$user->{maxstories} : $artcount;
 
 	# Old pages which search on issuemode kill the DB performance-wise
 	# so if possible we balance across the two -Brian

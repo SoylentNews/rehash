@@ -514,3 +514,4 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','
 # SLASHCODE LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
+ALTER TABLE sections DROP isolate;

@@ -101,8 +101,6 @@ sub editpoll {
 	}
 	my $slashdb = getCurrentDB();
 
-	my $currentqid = $slashdb->getVar('currentqid', 'value')
-		if $qid;
 	my($question, $answers, $pollbooth);
 	if ($qid) {
 		$question = $slashdb->getPollQuestion($qid, [qw( question voters )]);
@@ -132,13 +130,18 @@ sub editpoll {
 		$question->{sid} = $form->{sid}; 
 	}
 
+	# Copy the HASH, don't use the original
+	my $sections = $slashdb->getDescriptions('sections-all');
+	my %newsections = %$sections;
+	$newsections{''} = " ";
+
 	slashDisplay('editpoll', {
 		title		=> getData('edit_poll_title', { qid=>$qid }),
-		checked		=> $currentqid eq $qid ? ' CHECKED' : '',
 		qid		=> $qid,
 		question	=> $question,
 		answers		=> $answers,
 		pollbooth	=> $pollbooth,
+		sections	=> \%newsections,
 	});
 }
 
@@ -155,7 +158,7 @@ sub savepoll {
 	slashDisplay('savepoll');
 	#We are lazy, we just pass along $form as a $poll
 	my $qid = $slashdb->savePollQuestion($form);
-
+	
 	# we have a problem here.  if you attach the poll to an SID,
 	# and then unattach it, it will still be attached to that SID
 	# until you either change it manually in the DB, or attach it

@@ -467,7 +467,6 @@ CREATE TABLE sections (
 	artcount mediumint UNSIGNED DEFAULT '30' NOT NULL,
 	title varchar(64),
 	qid mediumint,
-	isolate tinyint DEFAULT '0' NOT NULL,
 	issue tinyint DEFAULT '0' NOT NULL,
 	extras mediumint DEFAULT '0',
 	url char(128) DEFAULT '' NOT NULL,

@@ -1057,11 +1057,7 @@ sub getOlderStories {
 
 	$form->{start} ||= 0;
 
-	my $artcount = $section->{artcount} / 3;
-	if ($section->{section} eq 'index') {
-		# XXX Fake it...
-		$artcount = $section->{artcount} = 15;
-	}
+	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
 	slashDisplay('getOlderStories', {
 		stories		=> $newstories,

@@ -94,7 +94,7 @@ sub main {
 	}
 
 
-	header(getData('head'), 'admin');
+	header(getData('head'),'', { admin => 1 } );
 
 	# Next up for dispatch hash conversion!
 	#

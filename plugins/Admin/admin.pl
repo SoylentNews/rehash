@@ -144,7 +144,7 @@ sub main {
 		? " $gmt_ts"
 		: " $local_ts $user->{tzcode} = $gmt_ts GMT";
 	# "backSlash" needs to be in a template or something -- pudge
-	header("backSlash$time_remark$tbtitle", 'admin');
+	header("backSlash$time_remark$tbtitle", '', { admin => 1 });
 	# admin menu is printed from within the 'header' template
 
 	# it'd be nice to have a legit retval

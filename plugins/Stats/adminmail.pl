@@ -99,6 +99,21 @@ EOT
 		$statsSave->createStatDaily($yesterday, "${_}_page", $pages);
 	}
 
+	my $codes = $stats->getMessageCodes($yesterday);
+	for (@$codes) {
+		my $temp->{name} = $_;
+		my $people = $stats->countDailyMessagesByUID($_, $yesterday);
+		my $uses = $stats->countDailyMessagesByCode($_, $yesterday);
+		my $mode = $stats->countDailyMessagesByMode($_, $yesterday);
+		$temp{"people"}  = sprintf("%8d", $people);
+		$temp{"uses"} = sprintf("%8d", $uses);
+		$temp{"mode"} = sprintf("%8d", $mode);
+		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people);
+		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses);
+		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode);
+		push(@{$data{messages}}, $temp);
+	}
+
 	my $sections =  $slashdb->getSections();
 	$sections->{index} = 'index';
 	for my $section (sort keys %$sections) {

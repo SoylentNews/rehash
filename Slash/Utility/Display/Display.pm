@@ -493,10 +493,10 @@ sub pollbooth {
 	my($qid, $no_table, $center) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
-	my $sect = getCurrentUser('currentSection');
+	my $sect = $slashdb->getSection();
 
 	# This special qid means to use the current (sitewide) poll.
-	$qid = $slashdb->getVar('currentqid', 'value') if $qid eq '_currentqid';
+	$qid = $sect->{qid} if $qid eq '_currentqid';
 	# If no qid (or no sitewide poll), short-circuit out.
 	return "" if $qid eq "";
 

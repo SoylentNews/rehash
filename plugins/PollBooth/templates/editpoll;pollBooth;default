@@ -25,6 +25,8 @@ __template__
 	<INPUT TYPE="TEXT" NAME="voters" VALUE="[% question.voters %]" SIZE="5"><BR>
 	[% PROCESS formLabel value => "Poll Topic" comment => "this doesn't do much right now but in the future it will" %]
 	[% DEFAULT question.topic=constants.discussion_default_topic %]
+	[% sections = Slash.db.getDescriptions('sections-all') %]
+	[% Slash.createSelect('section', sections, question.section, 1) %]
 	[% Slash.selectTopic('topic', question.topic, '', 1) %]
 	[% PROCESS formLabel value => "The Answers" comment => "voters" %]
 
@@ -36,7 +38,7 @@ __template__
 	[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID it will appear with the story" %]
 	<INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20">
 	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
-	[% PROCESS formLabel value => "SlashBox Poll" comment => "if checked this will be the poll used in slashboxes" %]
+	[% PROCESS formLabel value => "SlashBox Poll" comment => "if checked this will be the poll used in slashboxes for the selected section" %]
 	<INPUT TYPE="CHECKBOX" NAME="currentqid"[% checked %]> (appears on homepage) <br>
 
 	<INPUT TYPE="SUBMIT" VALUE="Save">
