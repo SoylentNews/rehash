@@ -57,7 +57,7 @@ function selectall (myform) {
 document.write('<INPUT TYPE="button" VALUE="Select All" ONCLICK="selectall(this.form)"> ');
 //-->
 </SCRIPT></TD><TD ALIGN="CENTER">
-<INPUT TYPE="submit" VALUE="Delete Messages"></TD></TR>
+<INPUT TYPE="submit" VALUE="Delete"></TD></TR>
 </TABLE>
 
 <INPUT TYPE="hidden" NAME="op" VALUE="deletemsgs">
