@@ -735,6 +735,7 @@ CREATE TABLE templates (
 	seclev mediumint UNSIGNED NOT NULL,
 	description text,
 	title varchar(128),
+	last_update timestamp,
 	PRIMARY KEY (tpid),
 	UNIQUE true_template (name,page,section,lang)
 ) TYPE = myisam;
