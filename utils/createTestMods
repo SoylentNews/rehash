@@ -7,9 +7,10 @@
 use strict;
 use File::Basename;
 use Getopt::Std;
+use Digest::MD5 'md5_hex';
+use Benchmark;
 use Slash;
 use Slash::Utility;
-use Benchmark;
 
 use vars qw( $slashdb $constants );
 
