@@ -175,14 +175,14 @@ sub installPlugins {
 }
 
 sub _install {
-	my($self, $hash, $symlink, $flag) = @_;
+	my($self, $hash, $symlink, $is_plugin) = @_;
 	# Yes, performance wise this is questionable, if getValue() was
 	# cached.... who cares this is the install. -Brian
 	if ($self->exists('hash', $hash->{name})) {
 		print STDERR "Plugin $hash->{name} has already been installed\n";
 		return;
 	}
-	if ($flag) {
+	if ($is_plugin) {
 		return if $self->exists('plugin', $hash->{name});
 
 		$self->create({
@@ -195,6 +195,10 @@ sub _install {
 		# in until someone complains.  really, we should
 		# have reinstall theme/plugin methods or
 		# something.  -- pudge
+		# Test to see if the theme has been installed or not. 
+		# I suspect this would break things, since I have
+		# never considered it in any of my logic for the 
+		# install stuff -Brian
 		return if $self->exists('theme', $hash->{name});
 
 		$self->create({
@@ -341,6 +345,10 @@ sub _install {
 		for (@{$hash->{'template'}}) {
 			my $id;
 			my $template = $self->readTemplateFile("$hash->{'dir'}/$_");
+			my $key = "$template->{name};$template->{page};$template->{section}";
+			if ($hash->{'no-template'} && ref($hash->{'no-template'}) eq 'ARRAY') {
+				next if (grep { $key eq $_ }  @{$hash->{'no-template'}} );
+			}
 			if ($template and ($id = $self->{slashdb}->existsTemplate($template))) {
 				$self->{slashdb}->setTemplate($id, $template);
 			} elsif ($template) {
@@ -393,6 +401,15 @@ sub _install {
 			warn "Can't open $file: $!";
 		}
 	}
+  # This is where we cleanup any templates that don't belong
+	unless ($is_plugin) {
+		for (@{$hash->{'no-template'}}) {
+			my ($name, $page, $section) = split /;/, $_;
+			my $tpid = $self->{slashdb}->getTemplateByName($name, 'tpid', '', $page, $section);
+			$self->{slashdb}->deleteTemplate($tpid)
+				if $tpid;
+		}
+	}
 }
 
 sub getPluginList {
@@ -412,32 +429,46 @@ sub getThemeList {
 
 sub getSiteTemplates {
 	my($self) = @_;
-	my @files;
-	my @templates;
+	my (%templates, @no_templates, @final);
 	my $prefix = $self->get('base_install_directory');
 	$prefix = $prefix->{value};
-	my $theme = $self->get('theme');
-	$theme = $theme->{value};
-	push(@files, "$prefix/themes/$theme/THEME");
 	my $plugins = $self->get('plugin');
 	my @plugins;
 	for (keys %$plugins) {
-		push @files, "$prefix/plugins/$plugins->{$_}{value}/PLUGIN";
+		_parseFilesForTemplates("$prefix/plugins/$plugins->{$_}{value}/PLUGIN", \%templates, \@no_templates);
 	}
-	for my $file (@files) {
-		my $file_handle = gensym;
-		open($file_handle, "$file");
-		$file =~ s/PLUGIN//;
-		$file =~ s/THEME//;
-		while (my $line = <$file_handle>) {
-			chomp($line);
-			my($key, $val) = split(/=/, $line, 2);
-			$key = lc $key;
-			push @templates, "$file/$val"
-				if ($key eq 'template');
+	#Themes override plugins so this has to run after plugins. -Brian
+	my $theme = $self->get('theme');
+	$theme = $theme->{value};
+	_parseFilesForTemplates("$prefix/themes/$theme/THEME", \%templates, \@no_templates);
+	for my $key (keys %templates) {
+		unless (grep { $key eq $_ }  @no_templates ) {
+			push @final, $templates{$key};
 		}
 	}
-	return \@templates;
+	return \@final;
+}
+
+sub _parseFilesForTemplates {
+	my ($file, $templates, $no_templates) = @_;
+	my $file_handle = gensym;
+	if (!(-e $file)) {
+		print STDERR "Could not open $file\n";
+	} 
+	open($file_handle, "$file");
+	$file =~ s/PLUGIN//;
+	$file =~ s/THEME//;
+	while (my $line = <$file_handle>) {
+		chomp($line);
+		my($key, $val) = split(/=/, $line, 2);
+		$key = lc $key;
+		if ($key eq 'template') {
+			my @parts = split /\//, $val;
+			$templates->{pop(@parts)} = "$file/$val";
+		}
+		push @$no_templates, "$val"
+			if ($key eq 'no-template');
+	}
 }
 
 sub _getList {
@@ -474,7 +505,7 @@ sub _getList {
 			if ($key =~ /^(
 				htdoc | htdoc_code | htdoc_faq | 
 				image | image_award | image_banner | image_faq |
-				task | template | sbin | misc | topic
+				no-template | task | template | sbin | misc | topic
 			)s?$/x) {
 				push @{$hash{$dir}{$1}}, $val;
 			} elsif ($key =~ /^(
