@@ -2306,5 +2306,3 @@ INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'ex
 UPDATE vars SET description='Format for HC images (png, jpeg)' WHERE name='hc_image_format';
 UPDATE vars SET value='jpeg' WHERE name='hc_image_format' AND value='jpg';
 
-# Install Lingua::Stem
-INSERT INTO vars (name, value, description) VALUES ('stem_uncommon_words', '1', 'Use stems of words for detecting similar stories instead of whole words?');
