@@ -206,6 +206,9 @@ sub do_logdatadump {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin,
 		$dilemma_reader, $wait_factor) = @_;
 
+	# XXX really should iterate over tournaments here, setting
+	# $trid and passing it to getLogDataDump
+
 	my $return_str = "";
 	my($compbytes, $uncompbytes) = (0, 0);
 
@@ -248,13 +251,15 @@ sub do_logdatadump {
 	my $start_dump = Time::HiRes::time;
 	my $playlog_hr = { };
 	my $i = 0;
-	while (my($meetlog_meetid, $tick, $foodsize) = $meetlog_sth->fetchrow()) {
+	while (my($meetlog_meetid, $trid, $tick, $foodsize) = $meetlog_sth->fetchrow()) {
 		# Pull rows from the play log into its hashref until
 		# we find one with a meetid higher than the meetid
 		# we just read.
 		if ($playlog_sth) {
 			while (1) {
-				my($playlog_meetid, $daid, $play, $reward) =
+				my($playlog_meetid, $daid,
+					$playtry, $playactual,
+					$reward, $sawdaid) =
 					$playlog_sth->fetchrow();
 				if (!$daid) {
 					# End of the play log.
@@ -276,8 +281,10 @@ sub do_logdatadump {
 			for my $daid (@daids) {
 				$xml .= "<agentplay>";
 				$xml .= "<daid>$daid</daid>";
-				$xml .= "<play>$playlog_hr->{$meetlog_meetid}{$daid}{play}</play>";
+				$xml .= "<playtry>$playlog_hr->{$meetlog_meetid}{$daid}{playtry}</playtry>";
+				$xml .= "<playactual>$playlog_hr->{$meetlog_meetid}{$daid}{playactual}</playactual>";
 				$xml .= "<reward>$playlog_hr->{$meetlog_meetid}{$daid}{reward}</reward>";
+				$xml .= "<sawdaid>$playlog_hr->{$meetlog_meetid}{$daid}{sawdaid}</sawdaid>";
 				$xml .= "</agentplay>";
 			}
 			# Recycle the RAM for each meeting, since there may
@@ -286,7 +293,7 @@ sub do_logdatadump {
 		}
 		$xml .= "</meeting>\n";
 		# Dump the xml to disk, if it's gotten big enough
-		if (length($xml) > 16384) {
+		if (length($xml) > 1024*1024) {
 			do_ldd_gz_dump($gz, $xml);
 			$uncompbytes += length($xml);
 			$xml = "";
