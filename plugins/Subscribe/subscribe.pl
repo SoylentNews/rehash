@@ -39,6 +39,12 @@ sub main {
 		},
 	};
 
+	if ($user->{is_anon}) {
+		my $rootdir = getCurrentStatic('rootdir');
+		redirect("$rootdir/users.pl");
+		return;
+	}
+
 	$op = 'default' unless $ops->{$op};
 
 	header("subscribe") unless $op eq 'pause';
