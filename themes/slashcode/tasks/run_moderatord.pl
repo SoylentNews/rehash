@@ -89,7 +89,8 @@ sub give_out_points {
 			$statsSave->addStatDaily("mod_points_gain_granted", $n_grantees);
 			# Reverse-engineer how many tokens that was.
 			my $tokperpt = $constants->{tokensperpoint} || 8;
-			my $n_tokens = $n_grantees * $tokperpt;
+			my $maxpoints = $constants->{maxpoints} || 5;
+			my $n_tokens = $n_grantees * $tokperpt * $maxpoints;
 			$statsSave->addStatDaily("mod_tokens_lost_converted", $n_tokens);
 		}
 	}
