@@ -22,6 +22,7 @@ __template__
 %]
 
 [% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/zoo.pl">
+[% PROCESS formkey_tag %]
 <INPUT TYPE="hidden" NAME="op" VALUE="delete">
 <INPUT TYPE="hidden" NAME="type" VALUE="friend">[% END %]
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">

@@ -762,6 +762,7 @@ INSERT INTO vars (name, value, description) VALUES ('lenient_formkeys','0','0 - 
 INSERT INTO vars (name, value, description) VALUES ('log_admin','1','This turns on/off entries to the accesslog. If you are a small site and want a true number for your stats turn this off.');
 INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtual user of the database that the code should write accesslog to. If you don\'t know what this is for, you should leave it blank.');
 INSERT INTO vars (name, value, description) VALUES ('logdir','/usr/local/slash/www.example.com/logs','Where should the logs be found?');
+INSERT INTO vars (name, value, description) VALUES ('login_speed_limit', '20', 'How fast a user can create users, etc.'); 
 INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 'Minutes before a temporary login expires');
 INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Tags that don\'t need to be closed');
 INSERT INTO vars (name, value, description) VALUES ('m1_eligible_hitcount','3','Number of hits on comments.pl before user can be considered eligible for moderation');
@@ -817,6 +818,7 @@ INSERT INTO vars (name, value, description) VALUES ('max_discussions_unusedfk','
 INSERT INTO vars (name, value, description) VALUES ('max_expiry_comm','250','Largest value for comment expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('max_expiry_days','365','Largest value for duration expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('max_items','15','max number of rss items by default');
+INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', 'How many forms a user can submit'); 
 INSERT INTO vars (name, value, description) VALUES ('max_submission_size','32000','max size of submission before warning message is displayed');
 INSERT INTO vars (name, value, description) VALUES ('max_submissions_allowed','20','maximum number of submissions per timeframe allowed');
 INSERT INTO vars (name, value, description) VALUES ('max_submissions_unusedfk','10','How many unused formkeys are permitted');

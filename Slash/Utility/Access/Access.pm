@@ -130,6 +130,8 @@ sub formkeyError {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
+	$formname =~ s|/\w+$||;  # remove /nu, /mp, etc.
+
 	my $abuse_reasons = { usedform => 1, invalid => 1, maxposts => 1,
 		invalidhc => 1 };
 	my $hashref = {};

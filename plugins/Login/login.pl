@@ -373,9 +373,9 @@ sub _validFormkey {
 	$return = pop @checks if $checks[-1] eq '1';
 
 	# eventually change s/users/login/g
-	my $formname = $op =~ /^mailpasswd(?:form)?$/ ? 'users/mp'
-		     : $op =~ /^newuser(?:form)?$/ ? 'users/nu'
-		     : 'users'; 
+	my $formname = $op =~ /^mailpasswd(?:form)?$/ ? 'login/mp'
+		     : $op =~ /^newuser(?:form)?$/ ? 'login/nu'
+		     : 'login'; 
 
 	my $options = {};
 	if (   !$constants->{plugin}{HumanConf}
@@ -392,6 +392,7 @@ sub _validFormkey {
 	for (@checks) {
 		warn "$op: $formname: $_\n";
 		my $err = formkeyHandler($_, $formname, 0, \$error, $options);
+		last if $err || $error;
 	}
 
 	if ($error) {

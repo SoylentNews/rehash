@@ -44,13 +44,13 @@ sub main {
 			# just in case we need it for something else, we have it ...
 			checks		=> [ qw (generate_formkey) ],
 		},
-		userlogin	=>  {
-			function	=> \&showInfo,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> [],
-			tab_selected_1	=> 'me',
-		},
+#		userlogin	=>  {
+#			function	=> \&showInfo,
+#			seclev		=> 1,
+#			formname	=> $formname,
+#			checks		=> [],
+#			tab_selected_1	=> 'me',
+#		},
 		no_user	=>  {
 			function	=> \&noUser,
 			seclev		=> 0,
@@ -89,16 +89,16 @@ sub main {
 			tab_selected_1	=> 'me',
 			tab_selected_2	=> 'info',
 		},
-		savepasswd	=> {
-			function	=> \&savePasswd,
-			seclev		=> 1,
-			post		=> 1,
-			formname	=> $formname,
-			checks		=> [ qw (max_post_check valid_check
-						formkey_check regen_formkey) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'password',
-		},
+#		savepasswd	=> {
+#			function	=> \&savePasswd,
+#			seclev		=> 1,
+#			post		=> 1,
+#			formname	=> $formname,
+#			checks		=> [ qw (max_post_check valid_check
+#						formkey_check regen_formkey) ],
+#			tab_selected_1	=> 'preferences',
+#			tab_selected_2	=> 'password',
+#		},
 		saveuseradmin	=> {
 			function	=> \&saveUserAdmin,
 			seclev		=> 10000,
@@ -136,15 +136,15 @@ sub main {
 			tab_selected_1	=> 'preferences',
 			tab_selected_2	=> 'user',
 		},
-		changepasswd	=> {
-			function	=> \&changePasswd,
-			seclev		=> 1,
-			formname	=> $formname,
-			checks		=> $savepass_flag ? [] :
-						[ qw (generate_formkey) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'password',
-		},
+#		changepasswd	=> {
+#			function	=> \&changePasswd,
+#			seclev		=> 1,
+#			formname	=> $formname,
+#			checks		=> $savepass_flag ? [] :
+#						[ qw (generate_formkey) ],
+#			tab_selected_1	=> 'preferences',
+#			tab_selected_2	=> 'password',
+#		},
 		editmiscopts	=> {
 			function	=> \&editMiscOpts,
 			seclev		=> 1,
@@ -191,13 +191,13 @@ sub main {
 			tab_selected_1	=> 'preferences',
 			tab_selected_2	=> 'comments',
 		},
-		newuser		=> {
-			function	=> \&newUser,
-			seclev		=> 0,
-			formname	=> "${formname}/nu",
-			checks		=> [ qw (max_post_check valid_check
-						formkey_check regen_formkey) ],
-		},
+#		newuser		=> {
+#			function	=> \&newUser,
+#			seclev		=> 0,
+#			formname	=> "${formname}/nu",
+#			checks		=> [ qw (max_post_check valid_check
+#						formkey_check regen_formkey) ],
+#		},
 		newuseradmin	=> {
 			function	=> \&newUserForm,
 			seclev		=> 10000,
@@ -210,43 +210,43 @@ sub main {
 			formname	=> $formname,
 			checks		=> [],
 		},
-		mailpasswd	=> {
-			function	=> \&mailPasswd,
-			seclev		=> 0,
-			formname	=> "${formname}/mp",
-			checks		=> [ qw (max_post_check valid_check
-						interval_check formkey_check ) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'password',
-		},
+#		mailpasswd	=> {
+#			function	=> \&mailPasswd,
+#			seclev		=> 0,
+#			formname	=> "${formname}/mp",
+#			checks		=> [ qw (max_post_check valid_check
+#						interval_check formkey_check ) ],
+#			tab_selected_1	=> 'preferences',
+#			tab_selected_2	=> 'password',
+#		},
 		validateuser	=> {
 			function	=> \&validateUser,
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> ['regen_formkey'],
 		},
-		userclose	=>  {
-			function	=> \&displayForm,
-			seclev		=> 0,
-			formname	=> $formname,
-			checks		=> [],
-		},
-		newuserform	=> {
-			function	=> \&displayForm,
-			seclev		=> 0,
-			formname	=> "${formname}/nu",
-			checks		=> [ qw (max_post_check
-						generate_formkey) ],
-		},
-		mailpasswdform 	=> {
-			function	=> \&displayForm,
-			seclev		=> 0,
-			formname	=> "${formname}/mp",
-			checks		=> [ qw (max_post_check
-						generate_formkey) ],
-			tab_selected_1	=> 'preferences',
-			tab_selected_2	=> 'password',
-		},
+#		userclose	=>  {
+#			function	=> \&displayForm,
+#			seclev		=> 0,
+#			formname	=> $formname,
+#			checks		=> [],
+#		},
+#		newuserform	=> {
+#			function	=> \&displayForm,
+#			seclev		=> 0,
+#			formname	=> "${formname}/nu",
+#			checks		=> [ qw (max_post_check
+#						generate_formkey) ],
+#		},
+#		mailpasswdform 	=> {
+#			function	=> \&displayForm,
+#			seclev		=> 0,
+#			formname	=> "${formname}/mp",
+#			checks		=> [ qw (max_post_check
+#						generate_formkey) ],
+#			tab_selected_1	=> 'preferences',
+#			tab_selected_2	=> 'password',
+#		},
 		displayform	=> {
 			function	=> \&displayForm,
 			seclev		=> 0,
@@ -292,6 +292,9 @@ sub main {
 	# change it.  It would require tracing through a fair bit of logic
 	# though and I don't have the time right now. - Jamie
 	$ops->{default} = $ops->{displayform};
+	for (qw(newuser newuserform mailpasswd mailpasswdform changepasswd savepasswd userlogin userclose)) {
+		$ops->{$_} = $ops->{default};
+	}
 
 	my $errornote = "";
 	if ($form->{op} && ! defined $ops->{$op}) {
@@ -307,7 +310,16 @@ sub main {
 	# NOT an isolated section (which has the same rootdir as real_rootdir)
 	} elsif ($op eq 'userclose' && $constants->{rootdir} ne $constants->{real_rootdir}) {
 		redirect($constants->{real_rootdir} . '/login.pl?op=userclose');
+		return;
 
+	} elsif ($op =~ /^(?:newuser|newuserform|mailpasswd|mailpasswdform|changepasswd|savepasswd|userlogin|userclose|displayform)$/) {
+		my $op = $form->{op};
+		$op = 'changeprefs' if $op eq 'changepasswd';
+		$op = 'saveprefs'   if $op eq 'savepasswd';
+		redirect($constants->{real_rootdir} . '/login.pl?op=' . $op);
+		return;
+
+	# never get here now
 	} elsif ($op eq 'savepasswd') {
 		my $error_flag = 0;
 		if ($user->{seclev} < 100) {
@@ -2689,8 +2701,8 @@ sub displayForm {
 		edithome	=> 'loginForm',
 		editcomm	=> 'loginForm',
 		edituser	=> 'loginForm',
-		mailpasswdform 	=> 'sendPasswdForm',
-		newuserform	=> 'newUserForm',
+#		mailpasswdform 	=> 'sendPasswdForm',
+#		newuserform	=> 'newUserForm',
 		userclose	=> 'loginForm',
 		userlogin	=> 'loginForm',
 		editmiscopts	=> 'loginForm',

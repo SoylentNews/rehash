@@ -34,7 +34,8 @@ __template__
 	Unable to save [% field %] [% id %] Admin settings
 
 [% CASE 'bad_op' %]
-	Hey! The opcode '[% op | strip_literal %]' is not a valid op! Quit messing around!
+	'[% op | strip_literal %]' is not a valid op.
+	Please try again, or notify the site admin.
 
 [% CASE 'bad_saveparam' %]
 	That user parameter is not valid.

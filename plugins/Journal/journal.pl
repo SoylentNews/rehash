@@ -141,6 +141,8 @@ sub displayFriends {
 	redirect("$constants->{rootdir}/search.pl?op=journals") 
 		if $user->{is_anon};
 
+	_validFormkey('generate_formkey') or return;
+
 	_printHead("mainhead") or return;
 
 	my $zoo = getObject('Slash::Zoo');
@@ -752,9 +754,16 @@ sub editArticle {
 
 sub _validFormkey {
 	my(@checks) = @_ ? @_ : qw(max_post_check interval_check formkey_check);
+	my $form = getCurrentForm();
 	my $error;
+
+	my $formname = 0;
+	my @caller = caller(1);
+	$formname = 'zoo' if $checks[0] eq 'generate_formkey'
+		&& $caller[3] =~ /\bdisplayFriends$/;
+
 	for (@checks) {
-		last if formkeyHandler($_, 0, 0, \$error);
+		last if formkeyHandler($_, $formname, 0, \$error);
 	}
 
 	if ($error) {
@@ -763,7 +772,7 @@ sub _validFormkey {
 		return 0;
 	} else {
 		# why does anyone care the length?
-		getCurrentDB()->updateFormkey(0, length(getCurrentForm()->{article}));
+		getCurrentDB()->updateFormkey(0, length($form->{article}));
 		return 1;
 	}
 }
