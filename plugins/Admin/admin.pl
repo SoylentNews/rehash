@@ -1767,9 +1767,9 @@ sub displayRecent {
 sub displayRecentRequests {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my $admindb = getObject("Slash::Admin", { db_type => 'log_db_user' });
+	my $admindb = getObject("Slash::Admin", { db_type => 'log_slave' });
 
-	my $logdb = getObject("Slash::DB", { db_type => 'log_db_user' });
+	my $logdb = getObject("Slash::DB", { db_type => 'log_slave' });
 
 	# Note, limit the id passed in by making sure we don't try to do a
 	# select on more than 500,000 rows.  This is an arbitrary number,
@@ -1819,7 +1819,7 @@ sub displayRecentSubs {
 		return;
 	}
 
-	my $admindb = getObject("Slash::Admin", { db_type => 'log_db_user' });
+	my $admindb = getObject("Slash::Admin", { db_type => 'log_slave' });
 
 	my $startat = $form->{startat} || 0;
 	my $subs = $admindb->getRecentSubs($startat);

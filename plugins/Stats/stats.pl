@@ -21,7 +21,6 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
-	# This will need to be changed to "log_db_user"
 	my $stats     = getObject('Slash::Stats', { db_type => 'log_slave' } );
 
 	my $admin      = $user->{seclev} >= ($constants->{stats_admin_seclev} || 100);

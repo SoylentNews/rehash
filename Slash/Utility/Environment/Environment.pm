@@ -1906,7 +1906,7 @@ sub writeLog {
 sub createLog {
 	my($uri, $dat, $status) = @_;
 	my $constants = getCurrentStatic();
-	my $logdb = getObject('Slash::DB', { db_type => 'log_db_user' });
+	my $logdb = getObject('Slash::DB', { db_type => 'log_slave' });
 
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
 

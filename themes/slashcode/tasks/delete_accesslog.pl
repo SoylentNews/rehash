@@ -19,8 +19,7 @@ $task{$me}{timespec_panic_2} = ''; # In a pinch don't do anything
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
-	my $log_user = getCurrentStatic('log_db_user');
-	my $logdb = $log_user ? getObject('Slash::DB', $log_user ) : $slashdb;
+	my $logdb = getObject('Slash::DB', { db_type => 'log' } );
 	my $counter = 0;
 	my $hoursback = 60;
 	my $failures = 10; # This is probably related to a lock failure
