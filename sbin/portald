@@ -95,7 +95,7 @@ sub getWhatsPlayingBox {
 	my $block = '';
 	foreach (@$list) {
 		$block .= "<B>$_->[0]:</B><UL>";
-		my @items = split /|/, $_->[1];
+		my @items = split /\|/, $_->[1];
 		foreach (@items) {
 			$block .= "<LI>$_</LI>";
 		}
