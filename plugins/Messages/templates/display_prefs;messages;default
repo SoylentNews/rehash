@@ -13,7 +13,6 @@ en_US
 __name__
 display_prefs
 __template__
-[% USE Slash %]
 [% messages = Slash.getObject("Slash::Messages") %]
 [% Slash.createMenu("users") %]
 [% Slash.createMenu("messages") %]
@@ -47,6 +46,9 @@ Not all options are available for all message types.
 
       # this is not so bad, it is cached, but could be improved perhaps
       mcode = messages.getMessageCode(code);
+      IF user.seclev < mcode.seclev;
+         NEXT;
+      END;
       IF mcode.modes.length;
          modes = mcode.modes.split(",");
       ELSE;
@@ -69,8 +71,8 @@ Not all options are available for all message types.
 	<INPUT TYPE="submit" VALUE="Save Prefs">
 	</TD>
 </TR>
-
 	</TABLE></TD></TR>
+
 </TABLE>
 
 </FORM>

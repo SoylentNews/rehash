@@ -57,12 +57,6 @@ sub display_prefs {
 	my $deliverymodes = $messages->getDescriptions('deliverymodes');
 	my $messagecodes  = $messages->getDescriptions('messagecodes');
 
-	for my $code (keys %$messagecodes) {
-		my $coderef = $messages->getMessageCode($code);
-		delete $messagecodes->{$code}
-			if $user->{seclev} < $coderef->{seclev};
-	}
-
 	my $prefs = $messages->getPrefs($user->{uid});
 
 	header(getData('header'));
