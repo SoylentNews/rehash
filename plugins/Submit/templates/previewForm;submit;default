@@ -77,6 +77,27 @@ TITLE="[% topic.alttext %]"></A>
 >[% subtext | strip_literal %]</TEXTAREA><BR>
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview"><BR>
 	</FORM>
+[% IF similar_stories.size > 0 %]
+	<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
+		<TR><TD COLSPAN="5" ALIGN="CENTER"><B>Similar Stories:</B></TD></TR>
+		[% FOREACH story = similar_stories %]
+			<TR>
+			<TD VALIGN="TOP">[% IF story.displaystatus == 0;
+				"&nbsp;";
+				ELSIF story.displaystatus == 1;
+					"<I>sect</I>";
+				ELSE;
+					"<I>ND</I>";
+				END; %]</TD>
+			<TD ALIGN="RIGHT" VALIGN="TOP">[% story.weight %]</TD>
+			<TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
+			[% story.title %]</A></TD>
+			<TD VALIGN="TOP">[% Slash.timeCalc(story.time) %]</TD>
+			<TD VALIGN="TOP">[% story.words.join(" ") %]</TD>
+			</TR>
+		[% END %]
+	</TABLE>
+[% END %]
 [% END %]
 
 __seclev__
