@@ -16,6 +16,21 @@ use base 'Slash::DB::Utility';
 # FRY: And where would a giant nerd be? THE LIBRARY!
 
 #################################################################
+sub SelectDataBases {
+	my $search_db_user = getCurrentStatic('search_db_user');
+	my($slashdb, $searchDB);
+	if ($search_db_user) {
+		$slashdb  = getObject('Slash::DB', $search_db_user);
+		$searchDB = getObject('Slash::Search', $search_db_user);
+	} else {
+		$slashdb  = getCurrentDB();
+		$searchDB = Slash::Search->new(getCurrentVirtualUser());
+	}
+
+	return ($slashdb, $searchDB);
+}
+
+#################################################################
 sub new {
 	my($class, $user) = @_;
 	my $self = {};
@@ -38,6 +53,7 @@ sub findComments {
 	my($self, $form, $start, $limit, $sort) = @_;
 	# select comment ID, comment Title, Author, Email, link to comment
 	# and SID, article title, type and a link to the article
+	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $constants = getCurrentStatic();
 	my $columns;
@@ -151,6 +167,7 @@ sub findUsers {
 	my($self, $form, $start, $limit, $sort, $with_journal) = @_;
 	# userSearch REALLY doesn't need to be ordered by keyword since you
 	# only care if the substring is found.
+	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $constants = getCurrentStatic();
 
@@ -189,6 +206,7 @@ sub findStory {
 
 	my $constants = getCurrentStatic();
 
+	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $columns;
 	$columns .= "title, stories.sid as sid, "; 
@@ -270,6 +288,7 @@ sub findJournalEntry {
 	$start ||= 0;
 	my $constants = getCurrentStatic();
 
+	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $columns;
 	$columns .= "users.nickname as nickname, journals.description as description, ";
@@ -309,6 +328,7 @@ sub findPollQuestion {
 	$start ||= 0;
 	my $constants = getCurrentStatic();
 
+	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "qid, question, voters, date";
 	$columns .= ", TRUNCATE( " . $self->_score('question', $form->{query}, $constants->{search_method}) . ", 1) as score "
@@ -347,6 +367,7 @@ sub findSubmission {
 	$start ||= 0;
 	my $constants = getCurrentStatic();
 
+	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "*";
 	$columns .= ", TRUNCATE( " . $self->_score('subj,story', $form->{query}, $constants->{search_method}) . ", 1) as score "
@@ -358,7 +379,7 @@ sub findSubmission {
 	if ($form->{query} && $sort == 2) {
 		$other .= " ORDER BY score DESC";
 	} else {
-		$other .= " ORDER BY time DESC";
+		$other .= " ORDER BY subid DESC";
 	}
 
 	# The big old searching WHERE clause, fear it
@@ -384,6 +405,7 @@ sub findRSS {
 	$start ||= 0;
 	my $constants = getCurrentStatic();
 
+	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "title, link, description, created";
 	$columns .= ", TRUNCATE( " . $self->_score('title,description', $form->{query}, $constants->{search_method}) . ", 1) as score "
@@ -414,10 +436,11 @@ sub findRSS {
 ####################################################################################
 sub findDiscussion {
 	my($self, $form, $start, $limit, $sort) = @_;
+	$form->{query} = $self->_cleanQuery($form->{query});
+	my $query = $self->sqlQuote($form->{query});
 	my $constants = getCurrentStatic();
 	$start ||= 0;
 
-	my $query = $self->sqlQuote($form->{query});
 	my $columns = "*";
 	$columns .= ", TRUNCATE( " . $self->_score('title', $form->{query}, $constants->{search_method}) . ", 1) as score "
 		if $form->{query};
@@ -475,6 +498,9 @@ sub _score {
 		# massage $form->{query} themselves, stripping leading
 		# and trailing spaces before passing it in here, but this
 		# will do for now. - Jamie 2002/10/20
+		# Nope, the caller should be unaware of all of this. We can extend 
+		# and use different methods for searching and never have to modify
+		# all of the above code. -Brian
 		my @terms = ( );
 		for my $term (split / /, $query) {
 			$term =~ /^\s*(.*?)\s*$/;
@@ -490,6 +516,23 @@ sub _score {
 		return "\n(MATCH ($col) AGAINST ($query))\n";
 	}
 }
+
+#################################################################
+sub _cleanQuery {
+	my ($self, $query) = @_;
+	# This next line could be removed -Brian
+	# get rid of bad characters
+	$query =~ s/[^A-Z0-9'. :\/]/ /gi;
+
+	# This should be configurable -Brian
+	# truncate query length
+	if (length($query) > 40) {
+		$query = substr($query, 0, 40);
+	}
+
+	return $query;
+}
+
 
 #################################################################
 sub DESTROY {
