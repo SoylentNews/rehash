@@ -4647,33 +4647,37 @@ sub getSubmissionForUser {
 	);
 
 	# Build note logic and add it to master WHERE array.
-	my $logic = $form->{note} ? 
-		'note=' . $self->sqlQuote($form->{note}) : 'isnull(note)';
-	$logic .= " or note=' ' " unless $form->{note};
-	$logic = "($logic)";
-	push @where, $logic;
+	my $logic = $form->{note}
+		? "note=" . $self->sqlQuote($form->{note})
+		: "ISNULL(note) OR note=' '";
+	push @where, "($logic)";
 
 	push @where, 'tid=' . $self->sqlQuote($form->{tid}) if $form->{tid};
 
-	# What was here before was a bug since you could end up in a section that was different then what
-  # the form was passing in (the result was something like WHERE section="foo" AND section="bar". 
-	# Look in CVS for the previous code. Now, this what we are doing. If form.section is passed in 
-	# we override anything about the section and display what the user asked for. The exception is for 
-	# a section admin. In that case user.section is all they should see (and is all that we let them
-	# see. Now, if the user is not a section admin and form.section is not set we make
-	# a call to getSection() which will pass us back whatever section we are in. Now in the case of
-	# a site with an "index" section that is a collected section that has no members, aka Slashdot,
-	# we will return everything for every section. Otherwise we return just sections from the collection.
-	# In a contained section we just return what is in that section (say like "science" on Slashdot). 
+	# What was here before was a bug since you could end up in a
+	# section that was different then what the form was passing in (the
+	# result was something like WHERE section="foo" AND section="bar").
+	# Look in CVS for the previous code. Now, this what we are doing. If
+	# form.section is passed in we override anything about the section
+	# and display what the user asked for. The exception is for a
+	# section admin. In that case user.section is all they should see
+	# and is all that we let them see. Now, if the user is not a
+	# section admin and form.section is not set we make a call to
+	# getSection() which will pass us back whatever section we are
+	# in. Now in the case of a site with an "index" section that is
+	# a collected section that has no members, aka Slashdot, we will
+	# return everything for every section. Otherwise we return just
+	# sections from the collection.  In a contained section we just
+	# return what is in that section (say like "science" on Slashdot).
 	# Mail me about questions. -Brian
-	my $SECT = $self->getSection($user->{section} ? $user->{section} : $form->{section});
+	my $SECT = $self->getSection($user->{section} || $form->{section});
 	if ($SECT->{type} eq 'collected') {
-		push @where, " section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+		push @where, "section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
 			if $SECT->{contained} && @{$SECT->{contained}};
 	} else {
-		push @where, " section = " . $self->sqlQuote($SECT->{section});
+		push @where, "section = " . $self->sqlQuote($SECT->{section});
 	}
-	
+
 	my $submissions = $self->sqlSelectAllHashrefArray(
 		'submissions.*, karma',
 		'submissions,users_info',
