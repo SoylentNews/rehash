@@ -1063,7 +1063,7 @@ sub getOlderStories {
 		section		=> $section,
 		cur_time	=> time,
 		yesterday	=> $yesterday,
-		start		=> $artcount + $form->{start} + scalar(@$stories),
+		start		=> int($artcount/3)+ $form->{start} + scalar(@$stories),
 	}, 1);
 }
 
