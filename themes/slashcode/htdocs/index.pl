@@ -172,11 +172,6 @@ sub displayStandardBlocks {
 	}
 
 	for my $bid (@boxes) {
-		# sections only get blocks for their own section
-		if ($getblocks ne 'index') {
-			next if $boxBank->{$bid}{section} ne $getblocks;
-		}
-
 		if ($bid eq 'mysite') {
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
