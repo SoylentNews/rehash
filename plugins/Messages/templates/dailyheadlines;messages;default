@@ -14,13 +14,6 @@ __template__
 [% topics = Slash.db.getTopics(); # sigh %]
 [% constants.sitename %] Daily Headline Mailer
 
-[% sponsor = PROCESS emailsponsor; IF sponsor -%]
-======================================================================
-[% sponsor %]
-======================================================================
-
-
-[%- END -%]
 [% FOR story = stories.reverse;
 	topicname = topics.${story.tid}.name;
 	thisurl = Slash.db.getSection(story.section, 'url') || constants.absolutedir;
