@@ -283,7 +283,6 @@ sub selectSection {
 
 	my $seclev = getCurrentUser('seclev');
 	my $sections = $slashdb->getDescriptions('sections');
-	my $sectionbank = $slashdb->getSections();
 
 	createSelect($label, $sections, $default, $return);
 }

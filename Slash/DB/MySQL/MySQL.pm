@@ -103,7 +103,7 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.title', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]->sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
 
 	'section_subsection_names'
-		=> sub { $_[0]->sqlSelectMany('subsections.title, subsections.id', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]->sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
+		=> sub { $_[0]->sqlSelectMany('title, id', 'subsections') },
 
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
@@ -4441,6 +4441,7 @@ sub countStoriesBySubmitter {
 # this method gives for the feature story) -Patrick
 # ..and an exclude sid for excluding and sid should feature
 # stories be enabled
+# misc would be better served by calling it options -Brian
 sub getStoriesEssentials {
 	my($self, $limit, $section, $tid, $misc) = @_;
 	my $user = getCurrentUser();
@@ -5931,8 +5932,10 @@ sub getSubSection {
 }
 
 ########################################################
+# Entire thing needs to be rewritten. Col tables need to
+# be written into the Gets() methods. -Brian
 sub getSections {
-	my $answer = _genericGetsCache('sections', 'section', '', @_);
+	my $answer = _genericGets('sections', 'section', '', @_);
 
 	my $rootdir = getCurrentStatic('rootdir');
 	for my $section (keys %$answer) {

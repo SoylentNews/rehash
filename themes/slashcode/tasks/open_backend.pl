@@ -28,9 +28,8 @@ $task{$me}{code} = sub {
 		newrss(@_, undef, $stories);
 	}
 
-	my $sections = $backupdb->getSections();
-	for (keys %$sections) {
-		my($section) = $sections->{$_}->{section};
+	my $sections = $backupdb->getDescriptions('sections-all');
+	for my $section (keys %$sections) {
 		$stories = $backupdb->getBackendStories($section);
 		if ($stories && @$stories) {
 			newxml(@_, $section, $stories);

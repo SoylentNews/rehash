@@ -192,7 +192,7 @@ EOT
 #		push(@{$data{messages}}, $temp);
 #	}
 
-	my $sections =  $slashdb->getSections();
+	my $sections =  $slashdb->getDescriptions('sections-all');
 	$sections->{index} = 'index';
 	for my $section (sort keys %$sections) {
 		my $index = $constants->{defaultsection} eq $section ? 1 : 0;

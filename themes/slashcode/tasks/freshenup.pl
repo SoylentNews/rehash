@@ -128,7 +128,7 @@ $task{$me}{code} = sub {
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
 	my $dirty_sections;
 	if ($constants->{task_options}{run_all}) {
-		my $sections = $slashdb->getSections();
+		my $sections = $slashdb->getDescriptions('sections-all');
 		for (keys %$sections) {
 			push @$dirty_sections, $_;
 		}
