@@ -3234,6 +3234,7 @@ sub saveTopic {
 	my $rows = $self->sqlCount('topics', "tid=$tid");
 
 	my $image = $topic->{image2} || $topic->{image};
+	my $submittable = $topic->{submittable} || 'no';
 
 	my $data = {
 		keyword		=> $topic->{keyword},
@@ -3242,7 +3243,7 @@ sub saveTopic {
 		image		=> $image,
 		width		=> $topic->{width} || '',
 		height		=> $topic->{height} || '',
-		submittable	=> $topic->{submittable} eq 'no' ? 'no' : 'yes',
+		submittable	=> $submittable eq 'no' ? 'no' : 'yes',
 	};
 
 	if ($rows == 0) {
