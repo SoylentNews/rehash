@@ -623,6 +623,10 @@ Bender:I've gone too far! Who does that guy think I am?
 Bender:Down with Bender!
 Bender:Listen up, cause I got a climactic speech.
 Bender:I choose to not understand these signs!
+Bender:Aw, this bends!
+Bender:Farewell, big blue ball of idiots!
+Bender:This guy's not making any sense.  Can I kill him?  Please?
+Bender:Hooray, we don't have to do anything!
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
@@ -654,6 +658,9 @@ Fry:I'm literally angry with rage!
 Fry:The butter in my pocket is melting!
 Fry:Stop abducting me!
 Fry:What kind of bozos would start a Bender protest group?
+Fry:I can burp the alphabet.  A, B, D ... no, wait ...
+Fry:Why use my own legs like an idiot when I can use a Chickenwalker?
+Fry:Hooray, we don't have to do anything!
 EOT
 
 1;
