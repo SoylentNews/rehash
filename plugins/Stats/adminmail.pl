@@ -775,7 +775,7 @@ EOT
 		my $sum      = $stats->getRelocatedLinkHitsByType($rls);
 		my $rls_tu   = $logdb->getRelocatedLinksSummary({ limit => 10});
 
-		$data{top_relocated_urls} = $logdb->getRelocatedLinkHitsByUrl($rls_tu);
+		$data{top_relocated_urls} = $stats->getRelocatedLinkHitsByUrl($rls_tu);
 
 		my $total;
 		foreach my $type (keys %$sum){
