@@ -15,7 +15,7 @@ __template__
 [% begin %]
 <TABLE WIDTH="[% boxwidth || "95%" %]" ALIGN="CENTER">
 <TR><TD COLSPAN="2">
-[% PROCESS titlebar width => (barwidth || "90%") %]
+[% PROCESS titlebar width => (barwidth || "100%") %]
 </TD></TR>
 [% FOR pair = pairs %]
 <TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="top">

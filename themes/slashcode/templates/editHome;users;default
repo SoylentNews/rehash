@@ -22,7 +22,7 @@ en_US
 __name__
 editHome
 __template__
-[% PROCESS titlebar width="100%" %]
+[% PROCESS prefs_titlebar tab_selected='home' %]
 
 [% admin_block %]
 
@@ -36,7 +36,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="savehome">
 <INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user_edit.uid %]">
 
-<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]">
 	<TR>
 		<TD>
 		<B>Date/Time Format</B>
@@ -78,6 +78,7 @@ __template__
 		</TD>
 	</TR>
 </TABLE>
+
 </FORM>
 __seclev__
 500

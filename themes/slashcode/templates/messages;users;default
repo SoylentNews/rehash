@@ -69,7 +69,7 @@ up top there, where you can customize [% constants.sitename %],
 change your password, or just click pretty widgets to kill time.
 
 [% CASE 'tilded_customize_msg' %]
-<TABLE WIDTH="95%" BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0">
+<TABLE WIDTH="100%" BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0">
 	<TR><TD>
 	<P>Look ma, I'm configurable!
 	<B>Important:</B> If you leave these all unchecked, it means you

@@ -13,7 +13,6 @@ list_messages
 __template__
 [% USE Slash %]
 <P>
-[%# PROCESS titlebar title => "$constants.sitename Messages for $user.nickname", width => "100%" %]
 
 [% IF user.is_anon %]
 

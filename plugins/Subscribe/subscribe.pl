@@ -55,7 +55,8 @@ sub main {
 	print createMenu('users', {
                 style =>	'tabbed',
 		justify =>	'right',
-		tab_selected =>	'subscription',
+		color =>	'colored',
+		tab_selected =>	'preferences',
 	});
 
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
@@ -91,7 +92,10 @@ sub edit {
 		? $user->{hits_bought_today_max}
 		: "";
 
-	titlebar("95%", "Editing Subscription...");
+	titlebar("100%", "Editing Subscription...", {
+		template =>		'prefs_titlebar',
+		tab_selected =>		'subscription',
+	});
 	slashDisplay("edit", {
 		user_edit => $user_edit,
 		user_newvalues => $user_newvalues,
@@ -154,7 +158,10 @@ sub save {
 	$slashdb->setUser($user_edit->{uid}, $user_update);
 
 	print "<p>Subscription options saved.\n<p>";
-	titlebar("95%", "Editing Subscription...");
+	titlebar("100%", "Editing Subscription...", {
+		template =>		'prefs_titlebar',
+		tab_selected =>		'subscription',
+	});
 	slashDisplay("edit", {
 		user_edit => $user_edit,
 		user_newvalues => $user_newvalues,

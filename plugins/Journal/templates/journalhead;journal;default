@@ -1,6 +1,7 @@
 __section__
 default
 __description__
+* tab_selected and style are passed to createMenu
 
 __title__
 
@@ -12,9 +13,26 @@ __name__
 journalhead
 __template__
 [% USE Slash %]
-[% Slash.createMenu("users") %]
-[% Slash.createMenu("journal") %]
-[% PROCESS titlebar width => "100%" %]
+[% IF useredit;
+	Slash.createMenu("users",   {
+		tab_selected => tab_selected,
+		style => style,
+		justify => "right"
+	});
+	PROCESS user_titlebar width => "100%" tab_selected => "journal";
+	Slash.createMenu("journal", {
+		style => 'oldstyle'
+	});
+ELSE;
+	[%# what the hell is this for? %]
+	Slash.createMenu("users",   {
+		tab_selected => tab_selected, style => style
+	});
+	Slash.createMenu("journal", {
+		tab_selected => tab_selected, style => style
+	});
+	PROCESS titlebar width => "100%";
+END %]
 
 __seclev__
 500

@@ -16,7 +16,7 @@ en_US
 __name__
 udiscuss_list
 __template__
-[% PROCESS titlebar title=title width='90%' %]
+[% PROCESS titlebar title=title width='100%' %]
 <MULTICOLS COLS=2>
 [% FOR discussion = discussions %]
 	[% nickname = Slash.db.getUser(discussion.uid, 'nickname') %]

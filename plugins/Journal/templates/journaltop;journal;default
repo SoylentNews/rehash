@@ -27,7 +27,7 @@ ELSE;
 END %]
 
 
-[% PROCESS titlebar width => "90%" %]
+[% PROCESS titlebar width => "100%" %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
   <TR BGCOLOR="[% user.bg.2 %]">
     <TD VALIGN="TOP" WIDTH="40%"><B>User</B></TD>

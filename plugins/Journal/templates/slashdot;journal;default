@@ -16,7 +16,7 @@ __template__
 	[% FOREACH article = articles %]
 		[% FOREACH diatribe = article.article; topic = diatribe.topic %]
   <TR><TD>
-[% PROCESS titlebar title => diatribe.description, width => "90%" %]
+[% PROCESS titlebar title => diatribe.description, width => "100%" %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	<TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
 <I>[% Slash.timeCalc(diatribe.date) %]</I>

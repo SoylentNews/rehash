@@ -13,7 +13,12 @@ zoohead
 __template__
 [% USE Slash %]
 <!-- zoohead page=[% page %] -->
-[% PROCESS user_titlebar selected=page %]
+[% Slash.createMenu("users", {
+	tab_selected => "me",
+	style => "tabbed",
+	justify => "right"
+}) %]
+[% PROCESS user_titlebar tab_selected=tab_selected %]
 [% UNLESS page == 'relation' %]
 	[% IF uid == user.uid && !user.is_anon %]
 		<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">

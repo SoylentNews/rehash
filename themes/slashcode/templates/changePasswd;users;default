@@ -17,9 +17,9 @@ en_US
 __name__
 changePasswd
 __template__
-[% PROCESS titlebar width="100%" %]
+[% PROCESS prefs_titlebar tab_selected='password' %]
 
-<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]">
 	<TR>
 		<TD>
 [% IF constants.offer_insecure_login_link %]

@@ -30,7 +30,7 @@ __template__
 	[% id %] could not be found.</B>
 
 [% CASE 'saveuseradmin_notsaved' %]
-[% PROCESS titlebar width="95%" title="Unable to save" %]
+[% PROCESS titlebar width="100%" title="Unable to save" %]
 	Unable to save [% field %] [% id %] Admin settings
 
 [% CASE 'bad_op' %]
@@ -40,46 +40,46 @@ __template__
 	That user parameter is not valid.
 
 [% CASE 'saveuseradmin_notsaveduser' %]
-[% PROCESS titlebar width="95%" title="Unable to save" %]
+[% PROCESS titlebar width="100%" title="Unable to save" %]
 	Unable to save [% field %] [% id %] User settings
  
 [% CASE 'saveuseradmin_uid_notnumeric' %]
-[% PROCESS titlebar width="95%" title="Unable to save" %]
+[% PROCESS titlebar width="100%" title="Unable to save" %]
 	Unable to save [% field %] [% id %] : a uid must be all numeric 
  
 [% CASE 'cookie_err' %]
 	[% IF titlebar %]
-[% PROCESS titlebar width="95%" title="Cookie Error" %]
+[% PROCESS titlebar width="100%" title="Cookie Error" %]
 	[% END %]
 	<P>Your browser didn't save a cookie properly. This could mean you are behind a filter that
 	eliminates them, you are using a browser that doesn't support them, or you rejected it.
 
 [% CASE 'mailpasswd_notmailed_err' %]
-[% PROCESS titlebar width="95%" title="Nickname not found" %]
+[% PROCESS titlebar width="100%" title="Nickname not found" %]
 	Nickname was not found. No Password was mailed.<BR>
 
 [% CASE 'duplicate_user' %]
-[% PROCESS titlebar width="95%" title="User already exists" %]
+[% PROCESS titlebar width="100%" title="User already exists" %]
 	The nickname [% nick %] or another similar to it has already been taken.        Please try another choice.<BR>
 
 [% CASE 'checklist_err' %]
-[% PROCESS titlebar width="95%" title="Too many options" %]
+[% PROCESS titlebar width="100%" title="Too many options" %]
 	You selected too many options<BR>
 
 [% CASE 'saveuser_passnomatch_err' %]
 	[% IF titlebar %]
-[% PROCESS titlebar width="95%" title="Password fields don't match" %]
+[% PROCESS titlebar width="100%" title="Password fields don't match" %]
 	[% END %]
 	Passwords don't match. Password not changed.<BR>
 
 [% CASE 'saveuser_passtooshort_err' %]
 	[% IF titlebar %]
-[% PROCESS titlebar width="95%" title="Password too short" %]
+[% PROCESS titlebar width="100%" title="Password too short" %]
 	[% END %]
 	Password is too short and was not changed.<BR>
 
 [% CASE 'anon_validation_attempt' %]
-[% PROCESS titlebar width="95%" title="Anonymous User validation attempt" %]
+[% PROCESS titlebar width="100%" title="Anonymous User validation attempt" %]
 	<P>I'm sorry. Anonymous users have no accounts that need to be validated.
 	If you do have an account on [% constants.sitename %] that you would like
 	to re-register, then please log in as that user, first.<BR>
@@ -106,14 +106,14 @@ __template__
 	using fewer links or shorter domain names.<BR>
 
 [% CASE "filter message" %]
-[% PROCESS titlebar width="95%" title="Content filter encountered for $item" %]
+[% PROCESS titlebar width="100%" title="Content filter encountered for $item" %]
 [% IF err_message %]
 <B>Reason: [% err_message %]</B><BR>
 [% END %]
 <B>Saving [% item %] aborted.</B>
 
 [% CASE "compress filter" %]
-[% PROCESS titlebar width="95%" title="Compression filter encountered" %]
+[% PROCESS titlebar width="100%" title="Compression filter encountered" %]
 Your [% item %] violated the "[% ratio %]" compression filter. Try less
 whitespace and/or less repetition.
 <B>Saving [% item %] aborted.</B>

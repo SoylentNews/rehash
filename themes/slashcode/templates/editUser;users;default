@@ -20,9 +20,9 @@ en_US
 __name__
 editUser
 __template__
-[% PROCESS titlebar width="100%" %]
+[% PROCESS prefs_titlebar tab_selected='user' %]
 
-<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]"><TR><TD>
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]"><TR><TD>
 
 [% IF constants.offer_insecure_login_link %]
 You can automatically log in by clicking
@@ -41,7 +41,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
         <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
 [% END %]
 
-<BR>[%# is realname ever used for anything? -- pudge %]
+<BR>[%# realname isn't really used for anything, but we do store it %]
 	<B>Real Name</B> (optional)<BR>
 		<INPUT TYPE="TEXT" NAME="realname" VALUE="[% useredit.realname | strip_attribute %]" SIZE="40"><BR>
 		<INPUT TYPE="HIDDEN" NAME="formname" VALUE="edituser">
@@ -67,11 +67,11 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 
 	[% editkey %]
 
-	</TD></TR></TABLE><P>
-
 	<INPUT TYPE="HIDDEN" NAME="op" VALUE="saveuser">
 	<INPUT TYPE="SUBMIT" VALUE="Save User">
 	</FORM>
+
+	</TD></TR></TABLE><P>
 
 
 __seclev__

@@ -18,13 +18,13 @@ __name__
 newdiscussion
 __template__
 [% IF id %]
-[% PROCESS titlebar width => "95%", title => "New $label.ucfirst Created" %]
+[% PROCESS titlebar width => "100%", title => "New $label.ucfirst Created" %]
 <P>Your [% label %], <A HREF="[% constants.rootdir %]/comments.pl?sid=[% id %]"><B>[% form.title %]</B></A>,
 has been created.  Go to <A HREF="[% constants.rootdir %]/comments.pl?sid=[% id %]">[% constants.absolutedir %]/comments.pl?sid=[% id %]</A> to begin posting.  Remember this URL!</P>
 <P><B>Please note, without a comment your [% label %] will not be listed in any indexes.</B></P>
 <P>
 [% ELSE %]
-[% IF error; error; ELSE; PROCESS titlebar width => "95%", title => "Unknown error" %]
+[% IF error; error; ELSE; PROCESS titlebar width => "100%", title => "Unknown error" %]
 <P>An unknown error has occurred.</P>
 [% END; END %]
 

@@ -60,11 +60,11 @@ sub edit_message {
 
 	my $template = <<EOT;
 [% IF preview %]
-	[% PROCESS titlebar width="95%" title="Preview Message" %]
+	[% PROCESS titlebar width="100%" title="Preview Message" %]
 	[% preview %]
 	<P>
 [% END %]
-	[% PROCESS titlebar width="95%" title="Send Message" %]
+	[% PROCESS titlebar width="100%" title="Send Message" %]
 
 <!-- error message -->
 [% IF error_message %][% error_message %][% END %]
@@ -195,9 +195,21 @@ sub display_prefs {
 	}
 
 	my $prefs = $messages->getPrefs($uid);
-	my $userm = $slashdb->getUser($uid);
+	my $userm = $slashdb->getUser($uid); # what the hell is this for, instead of just $user?
 
 	header(getData('header'));
+	print createMenu('users', {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	'preferences',
+	});
+	slashDisplay('prefs_titlebar', {
+		nickname => $user->{nickname},
+		uid => $user->{uid},
+		tab_selected => 'messages'
+	});
+	print createMenu('messages');
 	slashDisplay('display_prefs', {
 		userm		=> $userm,
 		prefs		=> $prefs,
@@ -245,9 +257,18 @@ sub list_messages {
 
 	header(getData('header'));
 # Spank me, this won't be here for long (aka Pater's cleanup will remove it) -Brian
-	print createMenu('users');
-	slashDisplay('user_titlebar', { nickname => $user->{nickname}, uid => $user->{uid}, page => 'messages' });
-	print createMenu('messages');
+	print createMenu('users', {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	'users',
+	});
+	slashDisplay('user_titlebar', {
+		nickname => $user->{nickname},
+		uid => $user->{uid},
+		tab_selected => 'messages'
+	});
+	print createMenu('messages'); # [ Message Preferences | Inbox ]
 	slashDisplay('list_messages', {
 		note		=> $note,
 		messagecodes	=> $messagecodes,

@@ -23,7 +23,7 @@ __name__
 netIDInfo
 __template__
 [% USE Slash %]
-[% PROCESS titlebar width="95%" %]
+[% PROCESS titlebar width="100%" %]
 
 
 [% n = min_comment %]

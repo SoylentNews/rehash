@@ -15,7 +15,7 @@ en_US
 __name__
 editMiscOpts
 __template__
-[% PROCESS titlebar width="100%" %]
+[% PROCESS prefs_titlebar tab_selected='misc' %]
 
 [%# admin_block %]
 
@@ -28,7 +28,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="formname" VALUE="editmiscopts">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="savemiscopts">
 
-<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]">
 	<TR>
 		<TD>
 

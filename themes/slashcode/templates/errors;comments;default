@@ -62,19 +62,19 @@ CASE "discussions max posts" %]
 
 [% # INVALID FORMKEY
 CASE "invalid formkey" %]
-[% PROCESS titlebar width="95%" title="Invalid form key!" %]
+[% PROCESS titlebar width="100%" title="Invalid form key!" %]
 <BR><P><B>form key: [% formkey %] !</B></P>
  
 [% # RESPONSE LIMIT 
 CASE "comments response limit" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 hitting 'reply' and submitting a comment.</P>
 <P>It's been [% response %] since you hit 'reply'!</P>
 
 [% # POST LIMIT
 CASE "comments post limit" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 each successful posting of a comment to allow everyone a fair chance
 at posting a comment.</P>
@@ -82,14 +82,14 @@ at posting a comment.</P>
 
 [% # POST LIMIT
 CASE "discussions post limit" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 each successful creation of a discussion .</P>
 <P>It's been [% interval %] since you last successfully created a discussion</P>
 
 [% # USED FORM
 CASE "used form" %]
-[% PROCESS titlebar width="95%" title="Form Error!" %]
+[% PROCESS titlebar width="100%" title="Form Error!" %]
 This form has been used already to submit a comment [% interval %] ago.
 You can not use a form and hit the back button to use it again.
 
@@ -99,7 +99,7 @@ CASE "readonly" %]
 
 [% # TOO MANY POSTS
 CASE "comments post limit daily" %]
-[% PROCESS titlebar width="95%" title="Call It A Night, Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Call It A Night, Cowboy!" %]
 <P>[% constants.sitename %] only allows
 [% IF user.is_anon; "anonymous users";
 ELSE; "a user with your karma"; END %]
@@ -146,14 +146,14 @@ Your comment has too few characters per line (currently [% ratio %]).<BR>
 
 [% # FILTER MESSAGE.
 CASE "filter message" %]
-[% PROCESS titlebar width="95%" title="Lameness filter encountered. Post aborted!" %]
+[% PROCESS titlebar width="100%" title="Lameness filter encountered. Post aborted!" %]
 [% IF err_message %]
 <B>Reason: [% err_message %]</B><BR>
 [% END %]
 
 [% # COMPRESS FILTER.
 CASE "compress filter" %]
-[% PROCESS titlebar width="95%" title="Lameness filter encountered." %]
+[% PROCESS titlebar width="100%" title="Lameness filter encountered." %]
 Your comment violated the "[% ratio %]" compression filter. Try less
 whitespace and/or less repetition[%
 IF ratio == 'postersubj' %] in the subject line[% END %].
@@ -184,7 +184,7 @@ CASE "formabuse_usedform" %]
 form [% formname %] [% formkey %] already submitted 
 
 [% CASE "seclevtoolow" %]
-[% PROCESS titlebar width="95%" title="No permissions" %]
+[% PROCESS titlebar width="100%" title="No permissions" %]
 You do not have appropriate permissions to perform that action.
 
 [% CASE %]

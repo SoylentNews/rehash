@@ -17,7 +17,7 @@ dispTheComments
 __template__
 
 [% USE Slash %]
-[% PROCESS titlebar width="99%" title="Meta Moderation" %]
+[% PROCESS titlebar width="100%" title="Meta Moderation" %]
 [% IF !comments.size %]
 <BIG><CENTER>No comments available for meta moderation!</CENTER></BIG>
 [% STOP %]

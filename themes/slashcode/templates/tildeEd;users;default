@@ -4,6 +4,7 @@ __description__
 Edit all those checkboxes for authors, topics, sections, slashboxes
 
 * title = passed to titlebar
+* tilded_customize_msg = some message
 * tilded_box_msg = some message
 * aidref = hashref of authors
 * aid_order = arrayref of author order
@@ -56,20 +57,7 @@ __template__
 	</TR>
 </TABLE>
 [% PROCESS titlebar width='100%' title=customize_title %]
-<TABLE WIDTH="95%" ALIGN="CENTER" BORDER="0">
-	<TR>
-		<TD>
-		<P>Look ma, I'm configurable!
-		<B>Important:</B> If you leave these all unchecked, it means you
-		want the <I>default</I> selection of boxes.  If you start selecting
-		boxes, remember to set <B>all</B> of them that you want because the
-		default selection will be <B>ignored</B>.  Default entries are bolded.
-
-		<P><B>User Space</B> (check 'user space' below and whatever
-		you place here will appear your custom [% constants.sitename %])<BR>
-		<TEXTAREA NAME="mylinks" rows=5 COLS="60" WRAP="VIRTUAL">[% userspace | strip_literal %]</TEXTAREA>
-		<P>
-		<MULTICOL COLS="3">
+[% tilded_customize_msg %]
 
 [% FOREACH bid = box_order %]
 	[% IF section_descref.$bid.boldflag %]
@@ -92,11 +80,6 @@ __template__
 	[% END %]
 
 [% END %]
-
-		</MULTICOL>
-		</TD>
-	</TR>
-</TABLE><P>
 
 [% tilded_box_msg %]
 

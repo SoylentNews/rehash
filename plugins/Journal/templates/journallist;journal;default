@@ -15,7 +15,7 @@ __template__
 [% showopts = !user.is_anon && (uid == user.uid) %]
 [% PROCESS journaloptions IF showopts %]
 
-[% PROCESS titlebar title => "$nickname's Journal Entries", width => "90%" %]
+[% PROCESS titlebar title => "$nickname's Journal Entries", width => "100%" %]
 [% IF showopts %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
 <INPUT TYPE="hidden" NAME="op" VALUE="remove">[% END %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">

@@ -20,7 +20,7 @@ __template__
 [% ELSE %]
 	[% title = "$nick's Comments" %]
 [% END %]
-[% PROCESS titlebar width="95%" %]
+[% PROCESS titlebar width="100%" %]
 
 [% IF user.is_admin && (admin_flag || nickmatch_flag)  %]
         <BR><B>Karma</B> [% useredit.karma %] (mostly the sum of moderation done to users comments)<BR>

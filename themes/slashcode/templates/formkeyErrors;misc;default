@@ -24,7 +24,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE "usedform" %]
-[% PROCESS titlebar width="95%" title="Form Error!" %]
+[% PROCESS titlebar width="100%" title="Form Error!" %]
 [% IF interval %]
 This form has been used already [% interval %] ago.
 You can not use a form and hit the back button to use it again.
@@ -34,24 +34,24 @@ and try again.
 [% END %]
 
 [% CASE "invalid" %]
-[% PROCESS titlebar width="95%" title="Invalid form key!" %]
+[% PROCESS titlebar width="100%" title="Invalid form key!" %]
 <BR><P><B>Invalid form key: [% formkey %] !</B></P>
 
 [% CASE "invalidhc" %]
-[% PROCESS titlebar width="95%" title="Wrong image text!" %]
+[% PROCESS titlebar width="100%" title="Wrong image text!" %]
 <BR><P><B>You failed to confirm you are a human!</B>
 (Assuming you actually <em>are</em> a human, your text appears below
 so you can copy and paste it for another try. Sorry about the
 inconvenience.)</P>
  
 [% CASE "invalidhcretry" %]
-[% PROCESS titlebar width="95%" title="Wrong image text, try again." %]
+[% PROCESS titlebar width="100%" title="Wrong image text, try again." %]
 <BR><P><B>You failed to confirm you are a human. Please double-check
 the [% constants.hc_q1_numchars %]-letter image and make sure you
 typed in what it says.</B></P>
  
 [% CASE "users_maxreads" %]
-[% PROCESS titlebar width="95%" title="Maximum Users Viewings Exceeded!" %]
+[% PROCESS titlebar width="100%" title="Maximum Users Viewings Exceeded!" %]
 <BR><P><B>You've reached the maximum number of times you can access users.pl: [% limit %] accesses over [% interval %].
 </B></P>
 
@@ -62,54 +62,54 @@ typed in what it says.</B></P>
   # Got a problem with that? Huh? Huh? ;) %]
 
 [% CASE "comments_maxposts" %]
-[% PROCESS titlebar width="95%" title="Maximum Comments Exceeded!" %]
+[% PROCESS titlebar width="100%" title="Maximum Comments Exceeded!" %]
 <BR><P><B>You've reached your maximum number of comments you can post: [% limit %] comments over [% interval %].
 </B></P>
 
 [% CASE "discussions_maxposts" %]
-[% PROCESS titlebar width="95%" title="Maximum Discussions Exceeded!" %]
+[% PROCESS titlebar width="100%" title="Maximum Discussions Exceeded!" %]
 <BR><P><B>You've reached your maximum number of discussions you can submit: [% limit %] discussions over [% interval %].
 </B></P>
 
 [% CASE "submissions_maxposts" %]
-[% PROCESS titlebar width="95%" title="Maximum Submissions Exceeded!" %]
+[% PROCESS titlebar width="100%" title="Maximum Submissions Exceeded!" %]
 <BR><P><B>You've reached your maximum number of submissions you can post: [% limit %] submissions over [% interval %].
 The authors can only read so many submissions in a day!
 </B></P>
 
 [% CASE "users_maxposts" %]
-[% PROCESS titlebar width="95%" title="Maximum User Changes Exceeded!" %]
+[% PROCESS titlebar width="100%" title="Maximum User Changes Exceeded!" %]
 <BR><P><B>You've reached your maximum number of user settings you can perform: [% limit %] user modifications over [% interval %].
 </B></P>
 
 [% CASE "comments_response" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 hitting 'reply' and submitting a comment.</P>
 <P>It's been [% interval %] since you hit 'reply'!</P>
 
 [% CASE "comments_unused" %]
-[% PROCESS titlebar width="95%" title="Post or Not?" %]
+[% PROCESS titlebar width="100%" title="Post or Not?" %]
 You have hit reply without submitting [% limit %] times, which 
 the system doesn't permit. Either submit the form, or don't.
 
 [% CASE "users_unused" %]
-[% PROCESS titlebar width="95%" title="Post or Not?" %]
+[% PROCESS titlebar width="100%" title="Post or Not?" %]
 You have pulled up a user modification form without submitting [% limit %] times, which 
 the system doesn't permit. Either submit the form, or don't.
 
 [% CASE "submissions_unused" %]
-[% PROCESS titlebar width="95%" title="Post or Not?" %]
+[% PROCESS titlebar width="100%" title="Post or Not?" %]
 You have brought up the submission form without submitting [% limit %] times, which 
 the system doesn't permit. Either submit your submission, or don't.
 
 [% CASE "discussions_unused" %]
-[% PROCESS titlebar width="95%" title="Post or Not?" %]
+[% PROCESS titlebar width="100%" title="Post or Not?" %]
 You have brought up the discussions form without submitting [% limit %] times, which 
 the system doesn't permit. Either submit your discussion, or don't.
 
 [% CASE "comments_speed" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 each [% IF attempt %] attempt to reply to [% ELSE %] successful posting of [% END %]
  a comment to allow everyone a fair chance at posting a comment.</P>
@@ -119,7 +119,7 @@ each [% IF attempt %] attempt to reply to [% ELSE %] successful posting of [% EN
 	[% END %]
 
 [% CASE "submissions_speed" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 each [% IF attempt %] attempt to post [% ELSE %] successful posting of [% END %]
  a submission to allow everyone a fair chance
@@ -131,7 +131,7 @@ submission!</P>
 	[% END %]
 
 [% CASE "discussions_speed" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 each [% IF attempt %] attempt to create [% ELSE %] successful creation of [% END %]
  a discussion .</P>
@@ -141,7 +141,7 @@ each [% IF attempt %] attempt to create [% ELSE %] successful creation of [% END
 	[% END %]
 
 [% CASE "users_speed" %]
-[% PROCESS titlebar width="95%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <P>[% constants.sitename %] requires you to wait [% limit %] between
 each change of user settings.</P>
 	[% IF interval %]
@@ -177,11 +177,15 @@ An unexpected error has occurred.<BR><B>[% value %]</B><BR>
 [% END %]
 
 [% IF value != "invalidhcretry" %]
-<P>If this error seems to be incorrect, please provide the following in your report to
-<A HREF="http://sf.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421&amp;category_id=354712">SourceForge.net</A>:
+<P>Note: chances are, you're behind a firewall, or proxy, or clicked the
+Back button to accidentally reuse a form. We know about those kinds of
+errors. But if you think you shouldn't be getting this error, feel free to
+<A HREF="http://sf.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421&amp;category_id=354712">file a bug report</A>,
+telling us:
 <UL>
-	<LI>Browser type</LI>
-	<LI>User ID/Nickname or AC</LI>
+	<LI>Your browser type</LI>
+	<LI>[% IF user.uid %]Your userid "[% user.uid %]"
+		[% ELSE %]The fact that you're not logged in[% END %]
 	<LI>What steps caused this error</LI>
 	<LI>Whether you used the Back button on your browser</LI>
 	<LI>Whether or not you know your ISP to be using a proxy,
@@ -190,8 +194,8 @@ An unexpected error has occurred.<BR><B>[% value %]</B><BR>
 	<LI>How many posts to this form you successfully submitted
 	during the day</LI>
 </UL>
-<B>* Please choose 'formkeys' for the category!</B><BR>
-Thank you.
+<P><B>Please set the Category to "Formkeys."</B>
+<P>Thank you.
 [% END %]
 
 __seclev__

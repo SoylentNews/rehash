@@ -25,7 +25,7 @@ en_US
 __name__
 editComm
 __template__
-[% PROCESS titlebar width="100%" %]
+[% PROCESS prefs_titlebar tab_selected='comments' %]
 
 [% admin_block %]
 
@@ -39,7 +39,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="savecomm">
 <INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user_edit.uid %]">
 
-<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]">
 	<TR>
 		<TD VALIGN=MIDDLE>
         	<P><B>Email Display</B>

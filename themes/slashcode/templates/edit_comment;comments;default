@@ -20,16 +20,16 @@ __template__
 [% IF error_message %]<P><B>[% error_message %]</B><P>[% END %]
 <!-- end error message -->
 [% IF form.pid %]
-	[% PROCESS titlebar width="95%" title=reply.subject %]
+	[% PROCESS titlebar width="100%" title=reply.subject %]
 	<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="95%" ALIGN="CENTER">
 	[% Slash.dispComment(reply) %]
 	</TABLE><P>
 [% END %]
 [% IF preview %]
 	[% IF newdiscussion || form.newdiscussion %]
-	[% PROCESS titlebar width="95%" title="Preview $label" %]
+	[% PROCESS titlebar width="100%" title="Preview $label" %]
 	[% ELSE %]
-	[% PROCESS titlebar width="95%" title="Preview Comment" %]
+	[% PROCESS titlebar width="100%" title="Preview Comment" %]
 	[% END %]
 	[% preview %]
 	<P>
@@ -37,9 +37,9 @@ __template__
 [% END %]
 
 [% IF newdiscussion || form.newdiscussion %]
-	[% PROCESS titlebar width="95%" title="Create New $label" %]
+	[% PROCESS titlebar width="100%" title="Create New $label" %]
 [% ELSE %]
-	[% PROCESS titlebar width="95%" title="Post Comment" %]
+	[% PROCESS titlebar width="100%" title="Post Comment" %]
 [% END %]
 
 <FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">

@@ -99,7 +99,7 @@ sub main {
 	} else {
 		# Yep, these are hardcoded, and someday this should change... -Brian 
 		header("$constants->{sitename}: Search $form->{query}");
-		titlebar("99%", "Searching For:  $form->{query}");
+		titlebar("100%", "Searching For:  $form->{query}");
 		$form->{op} = 'stories' if !exists($ops{$form->{op}});
 
 		# Here, panic mode is handled without needing to call the

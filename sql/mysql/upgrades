@@ -845,9 +845,9 @@ ALTER TABLE menus ADD COLUMN sel_label VARCHAR(32) NOT NULL DEFAULT '' AFTER lab
 UPDATE menus SET showanon=1 WHERE seclev=0;
 UPDATE menus SET sel_label=label;
 DELETE FROM menus WHERE menu='users';
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Info', 'info', '/users.pl?op=userinfo', 1, 10, 0);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 20, 0);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl', 1, 30, 0);
+INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users', 'Logout', 'logout', '/my/logout', 1, 0, 10);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl?op=edituser', 1, 20, 0);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 30, 0);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 40, 0);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 50, 0);
 

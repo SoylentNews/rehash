@@ -48,6 +48,7 @@ sub main {
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> [],
+			tab_selected_1	=> 'me',
 		},
 		no_user	=>  {
 			function	=> \&noUser,
@@ -61,19 +62,22 @@ sub main {
 			seclev		=> $constants->{users_show_info_seclev},
 			formname	=> $formname,
 			checks		=> [],
-			tab_selected	=> 'info',
+			tab_selected_1	=> 'me',
+			tab_selected_2	=> 'info',
 		},
 		usersubmissions	=>  {
 			function	=> \&showSubmissions,
 			#I made this change, not all sites are going to care. -Brian
 			seclev		=> $constants->{users_show_info_seclev},
 			checks		=> [],
+			tab_selected_1	=> 'me',
 		},
 		usercomments	=>  {
 			function	=> \&showComments,
 			#I made this change, not all sites are going to care. -Brian
 			seclev		=> $constants->{users_show_info_seclev},
 			checks		=> [],
+			tab_selected_1	=> 'me',
 		},
 		display	=>  {
 			function	=> \&showInfo,
@@ -81,6 +85,8 @@ sub main {
 			seclev		=> $constants->{users_show_info_seclev},
 			formname	=> $formname,
 			checks		=> [],
+			tab_selected_1	=> 'me',
+			tab_selected_2	=> 'info',
 		},
 		savepasswd	=> {
 			function	=> \&savePasswd,
@@ -89,7 +95,8 @@ sub main {
 			formname	=> $formname,
 			checks		=> [ qw (max_post_check valid_check
 						formkey_check regen_formkey) ],
-			tab_selected	=> 'password',
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'password',
 		},
 		saveuseradmin	=> {
 			function	=> \&saveUserAdmin,
@@ -105,6 +112,8 @@ sub main {
 			formname	=> $formname,
 			checks		=> [ qw (valid_check
 						formkey_check regen_formkey) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'home',
 		},
 		savecomm	=> {
 			function	=> \&saveComm,
@@ -113,6 +122,8 @@ sub main {
 			formname	=> $formname,
 			checks		=> [ qw (valid_check
 						formkey_check regen_formkey) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'comments',
 		},
 		saveuser	=> {
 			function	=> \&saveUser,
@@ -121,6 +132,8 @@ sub main {
 			formname	=> $formname,
 			checks		=> [ qw (valid_check
 						formkey_check regen_formkey) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'user',
 		},
 		changepasswd	=> {
 			function	=> \&changePasswd,
@@ -128,26 +141,32 @@ sub main {
 			formname	=> $formname,
 			checks		=> $savepass_flag ? [] :
 						[ qw (generate_formkey) ],
-			tab_selected	=> 'password',
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'password',
 		},
 		editmiscopts	=> {
 			function	=> \&editMiscOpts,
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> [ ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'misc',
 		},
 		savemiscopts	=> {
 			function	=> \&saveMiscOpts,
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> [ ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'misc',
 		},
 		edituser	=> {
 			function	=> \&editUser,
 			seclev		=> 1,
 			formname	=> $formname,
-			checks		=>
-			[ qw (generate_formkey) ],
+			checks		=> [ qw (generate_formkey) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'user',
 		},
 		authoredit	=> {
 			function	=> \&editUser,
@@ -160,12 +179,16 @@ sub main {
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> [ qw (generate_formkey) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'home',
 		},
 		editcomm	=> {
 			function	=> \&editComm,
 			seclev		=> 1,
 			formname	=> $formname,
 			checks		=> [ qw (generate_formkey) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'comments',
 		},
 		newuser		=> {
 			function	=> \&newUser,
@@ -192,6 +215,8 @@ sub main {
 			formname	=> "${formname}/mp",
 			checks		=> [ qw (max_post_check valid_check
 						interval_check formkey_check ) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'password',
 		},
 		validateuser	=> {
 			function	=> \&validateUser,
@@ -218,19 +243,22 @@ sub main {
 			formname	=> "${formname}/mp",
 			checks		=> [ qw (max_post_check
 						generate_formkey) ],
+			tab_selected_1	=> 'preferences',
+			tab_selected_2	=> 'password',
 		},
 		displayform	=> {
 			function	=> \&displayForm,
 			seclev		=> 0,
 			formname	=> $formname,
 			checks		=> [ qw (generate_formkey) ],
+			tab_selected_1	=> 'me',
 		},
 		listreadonly => {
 			function	=> \&listReadOnly,
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'info',
+			adminmenu	=> 'me',
 			page		=> 'readonly',
 		},
 		listbanned => {
@@ -238,7 +266,7 @@ sub main {
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'info',
+			adminmenu	=> 'me',
 			page		=> 'banned',
 		},
 		topabusers 	=> {
@@ -246,7 +274,7 @@ sub main {
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'info',
+			adminmenu	=> 'me',
 			page		=> 'abusers',
 		},
 		listabuses 	=> {
@@ -345,27 +373,33 @@ sub main {
 		$form->{userfield} = $user->{uid};
 	}
 
+	# Print the header and very top stuff on the page.
 	header(getMessage('user_header'));
 	# This is a hardcoded position, bad idea and should be fixed -Brian
+	# Yeah, we should pull this into a template somewhere...
 	print getMessage('note', { note => $errornote }) if defined $errornote;
-	print createMenu($formname, {
-		style =>	'tabbed',
-		justify =>	'right',
-		tab_selected =>	$ops->{$op}{tab_selected} || "",
-	});
 
+	# Figure out what the op really is.
 	$op = 'userinfo' if (! $form->{op} && ($form->{uid} || $form->{nick}));
 	$op ||= $user->{is_anon} ? 'userlogin' : 'userinfo';
-
 	if ($user->{is_anon} && $ops->{$op}{seclev} > 0) {
 		$op = 'default';
 	} elsif ($user->{seclev} < $ops->{$op}{seclev}) {
 		$op = 'userinfo';
 	}
-
 	if ($ops->{$op}{post} && !$postflag) {
 		$op = $user->{is_anon} ? 'default' : 'userinfo';
 	}
+
+	# Print the top tabbed menu.  The op is responsible for printing
+	# its own titlebar (and, usually, second-level tabbed menu).
+print "\n<!-- users.pl main() op='$op' ts1='$ops->{$op}{tab_selected_1}' -->\n";
+	print createMenu($formname, {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$ops->{$op}{tab_selected_1} || "",
+	});
 
 	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
 
@@ -827,6 +861,13 @@ sub showInfo {
 		$requested_user = $slashdb->getUser($uid);
 	}
 
+	my $user_change = { };
+	if ($fieldkey eq 'uid' && $uid != $user->{uid}) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+	}
+
 	my $comments_wanted = $user->{show_comments_num}
 		|| $constants->{user_comment_display_default};
 	my $min_comment = $form->{min_comment} || 0;
@@ -1014,6 +1055,10 @@ sub showInfo {
 			storycount 		=> $storycount,
 		});
 	}
+
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}
 }
 
 #####################################################################
@@ -1198,9 +1243,12 @@ sub tildeEd {
 		$section_descref->{$bid}{title} = $title;
 	}
 
+	my $tilded_customize_msg = getMessage('tilded_customize_msg');
 	my $tilded_box_msg = getMessage('tilded_box_msg');
 	$tilde_ed = slashDisplay('tildeEd', {
 		title			=> $title,
+		customize_title		=> $customize_title,
+		tilded_customize_msg	=> $tilded_customize_msg,
 		tilded_box_msg		=> $tilded_box_msg,
 		aidref			=> $aidref,
 		aid_order		=> $aid_order,
@@ -1210,7 +1258,6 @@ sub tildeEd {
 		section_descref		=> $section_descref,
 		box_order		=> $box_order,
 		userspace		=> $userspace,
-		customize_title		=> $customize_title,
 	}, 1);
 
 	return($tilde_ed);
@@ -2204,7 +2251,7 @@ sub displayForm {
 	my $ops = {
 		displayform 	=> 'loginForm',
 		edithome	=> 'loginForm',
-		editicomm	=> 'loginForm',
+		editcomm	=> 'loginForm',
 		edituser	=> 'loginForm',
 		mailpasswdform 	=> 'sendPasswdForm',
 		newuserform	=> 'newUserForm',
