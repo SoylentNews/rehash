@@ -62,20 +62,19 @@ __template__
 [% userlink = '' %]
 [% IF user.is_anon %]
 <!-- anon login code -->
-	[% userlink = "<A HREF=\"${constants.rootdir}/users.pl\">Create Account</A>" %]
+	[% userlink = "<A HREF=\"${constants.rootdir}/users.pl\">Create an Account</A>" %]
 	<TR><TD> </TD><TD>
 		You are not logged in.  You can log in now using the
 		convenient form below, or
-		<A HREF="[% constants.rootdir %]/users.pl">Create an Account</A>.
-		Posts without proper registration are posted as
-		<B>[% user.nickname %]</B>
+		<A HREF="[% constants.rootdir %]/users.pl">Create an Account</A>,
+		or post as <B>[% user.nickname %]</B>.
 	</TD></TR>
 	<INPUT TYPE="HIDDEN" NAME="rlogin" VALUE="1">
 
-	<TR><TD ALIGN="RIGHT">Nick</TD><TD>
+	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Nick' %]</TD><TD>
 		<INPUT TYPE="TEXT" NAME="unickname" VALUE="[% form.nickname %]">
 
-	</TD></TR><TR><TD ALIGN="RIGHT">Passwd</TD><TD>
+	</TD></TR><TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Password' %]</TD><TD>
 		<INPUT TYPE="PASSWORD" NAME="upasswd">
 
 	</TD></TR>
@@ -83,10 +82,10 @@ __template__
 	userlink = "<A HREF=\"${constants.rootdir}/users.pl?op=userclose\">Log Out</A>";
 END %]
 
-	<TR><TD WIDTH="130" ALIGN="RIGHT">Name: </TD><TD WIDTH="500">
+	<TR><TD WIDTH="130" ALIGN="RIGHT">[% PROCESS formLabel value => 'Name' %]</TD><TD WIDTH="500">
 		<A HREF="[% constants.rootdir %]/users.pl">[% user.nickname %]</A> [ [% userlink %] ]</TD></TR>
 [% IF user.fakeemail %]
-	<TR><TD ALIGN="RIGHT">Email: </TD>
+	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Email' %]</TD>
 		<TD>[% user.fakeemail | strip_literal %]</TD></TR>
 <!-- end anon login code -->
 [% END %]
@@ -110,14 +109,22 @@ END %]
 		</TR>
 	[% END %]
 
-	<TR><TD ALIGN="RIGHT">Subject: </TD>
+	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Subject' %]</TD>
 		<TD><INPUT TYPE="text" NAME="postersubj" VALUE="[% form.postersubj | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
 	</TR>
 	<TR>
-		<TD ALIGN="RIGHT" VALIGN="TOP">Comment</TD>
+		<TD ALIGN="RIGHT" VALIGN="TOP">[% PROCESS formLabel value => 'Comment' %]</TD>
 		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</TEXTAREA>
-		<BR>(Use the Preview Button! Check those URLs!
-		Don't forget the http://!)
+		<BR>(Use the Preview Button! Check those URLs!)
+		[% IF user.is_anon %]
+		[% anon_messages = [
+			"Logged-in users aren't forced to preview their comments.",
+		#	"Logged-in posts are seen by xx as many users.",
+			"Score: 0 (Logged-in users start at Score: 1)."
+		]%]
+		<BR>[% anon_messages.rand %]
+		<B><A HREF="[% constants.rootdir %]/users.pl">Create an Account!</A>
+		[% END %]
 	</TD></TR>
 
 	<TR><TD> </TD><TD>
@@ -152,12 +159,16 @@ IF do_br %]<BR>[% END %]
 			VALUE="[% form.hcanswer | strip_attribute %]"
 			SIZE=8 MAXLENGTH=8></TD>
 		</TR></TABLE>
+		[% IF !user.is_anon || (user.is_anon && preview) %]
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
+		[% END %]
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
 		[% format_select %]
 	[% END %]
 [% ELSE %]
+	[% IF !user.is_anon || (user.is_anon && preview) %]
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
+	[% END %]
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
 	[% format_select %]
 [% END %]
