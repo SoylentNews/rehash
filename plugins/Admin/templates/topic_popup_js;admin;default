@@ -96,21 +96,67 @@ function hpts_release(evt) {
 var [% name %]_selected_id = -1;
 var [% name %]_selected_val;
 var [% name %]_selected_elem;
+var [% name %]_max_id = [% loop.max %];
+
+/* collapse entire tree */
+function [% name %]_collapse_all() {
+	for (var i = 0; i <= [% name %]_max_id; i++) {
+		var obj = document.getElementById("[% name %]-desc-" + i);
+		if (obj) {
+			[% name %]_collapse(i);
+		}
+	}
+
+	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle_all;
+	mybutton.value = "Expand All";
+	mybutton.onmouseup = [% name %]_expand_all;
+}
+
+/* expand entire tree */
+function st_expand_all() {
+	for (var i = 0; i <= [% name %]_max_id; i++) {
+		var obj = document.getElementById("[% name %]-desc-" + i);
+		if (obj) {
+			[% name %]_expand(i);
+		}
+	}
+
+	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle_all;
+	mybutton.value = "Collapse All";
+	mybutton.onmouseup = [% name %]_collapse_all;
+}
 
 /* expand or collapse a sub-tree */
 function [% name %]_toggle_expand(id) {
 	var obj = document.getElementById("[% name %]-desc-" + id);
+
+	if (obj.style.display != 'block') {
+		[% name %]_expand(id);
+	} else {
+		[% name %]_collapse(id);
+	}
+}
+
+/* expand a sub-tree */
+function [% name %]_expand(id) {
+	var obj = document.getElementById("[% name %]-desc-" + id);
 	var plus = document.getElementById("[% name %]-plus-" + id);
 	var node = document.getElementById("[% name %]-node-" + id);
-	if (obj.style.display != 'block') {
-		obj.style.display = 'block';
-		plus.src = "[% image_path %]minus.png";
-		node.src = "[% image_path %]open_node.png";
-	} else {
-		obj.style.display = 'none';
-		plus.src = "[% image_path %]plus.png";
-		node.src = "[% image_path %]closed_node.png";
-	}
+
+	obj.style.display = 'block';
+	plus.src = "[% image_path %]minus.png";
+	node.src = "[% image_path %]open_node.png";
+}
+
+/* collapse a sub-tree */
+function [% name %]_collapse(id) {
+	var obj = document.getElementById("[% name %]-desc-" + id);
+	var plus = document.getElementById("[% name %]-plus-" + id);
+	var node = document.getElementById("[% name %]-node-" + id);
+
+	obj.style.display = 'none';
+	plus.src = "[% image_path %]plus.png";
+	node.src = "[% image_path %]closed_node.png";
 }
 
 /* select or unselect a node */
