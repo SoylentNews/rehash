@@ -137,8 +137,8 @@ sub get_time {
 	my($min, $max);
 	my $now = time;
 	if (!$direction) {
-		$min = $now - 86400*7;
-		$max = $now + 86400*7;
+		$min = $now - 86400*1;
+		$max = $now + 86400*5;
 	} elsif ($direction < 0) {
 		$min = $now + 86400*$direction;
 		$max = $now;
