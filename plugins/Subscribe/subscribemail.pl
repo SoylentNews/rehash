@@ -47,7 +47,7 @@ $task{$me}{code} = sub {
 		for my $uid (keys %$subscribers_hr) {
 			$subscribers_hr->{$uid}{is_new} =
 				($subscribers_hr->{$uid}{pages}
-					> $slashdb->getUser($uid, 'pages_paidfor'))
+					== $slashdb->getUser($uid, 'pages_paidfor'))
 				? 1 : 0;
 		}
 
