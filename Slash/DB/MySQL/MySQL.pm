@@ -2094,6 +2094,14 @@ sub createSubSection {
 		title		=> $subsection,
 		artcount	=> $artcount || 0,
 	});
+
+	my $ssid = $self->sqlSelect('id','subsections',
+		"title='$subsection'");
+
+	$self->sqlInsert('section_subsections', {
+		section		=> $section,
+		subsection	=> $ssid,
+	});
 }
 
 ########################################################
