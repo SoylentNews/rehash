@@ -91,8 +91,8 @@ __template__
 
 [% CASE 'emailexists_err' %]
 [% 
-   IF form.realemail; email = form.realemail | stripliteral;
-   ELSE; email = form.email | stripliteral;
+   IF form.realemail; email = form.realemail | strip_literal;
+   ELSE; email = form.email | strip_literal;
    END;
 -%]
 	Sorry, the email address "[% email %]" already exists in our user
