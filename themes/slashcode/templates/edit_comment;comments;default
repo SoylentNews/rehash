@@ -50,6 +50,7 @@ __template__
 	<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% user.startat %]">
 	<INPUT TYPE="HIDDEN" NAME="threshold" VALUE="[% user.threshold %]">
 	<INPUT TYPE="HIDDEN" NAME="commentsort" VALUE="[% user.commentsort %]">
+        [% IF gotmodwarning %]<INPUT TYPE="HIDDEN" NAME="gotmodwarning" VALUE="1">[% END %]
 
 [% IF newdiscussion || form.newdiscussion %]
 	<INPUT TYPE="HIDDEN" NAME="indextype" VALUE="[% indextype %]">
