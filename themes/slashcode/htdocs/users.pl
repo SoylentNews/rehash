@@ -1174,7 +1174,7 @@ sub showInfo {
 
 		my $lastjournal = _get_lastjournal($uid);
 
-		if($admin_flag) {
+		if ($admin_flag) {
 			$modval = $reader->calcModval("comments.uid = $requested_user->{uid}", $uid_hoursback);
 			$trollpoint = $reader->calcTrollPoint("uid");
 		}
