@@ -180,6 +180,10 @@ sub selectComments {
 		$comments->{0}{totals}[$x] += $comments->{0}{totals}[$x + 1];
 	}
 
+	# get the total visible kids for each comment (the 0 means start
+	# pid 0, or top level comments.	--Pater
+	countTotalVisibleKids(0, $comments);
+
 	_print_cchp($header, $count, $comments->{0}{totals});
 
 	reparentComments($comments, $reader);
@@ -570,8 +574,9 @@ sub printComments {
 	}
 
 	# Flat and theaded mode don't index, even on large stories, so they
-	# need to use more, smaller pages. 		--Pater
-	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested') ? $comments->{0}{totals}[$user->{threshold} - $constants->{comment_minscore}] : $cc;
+	# need to use more, smaller pages. if $cid is 0, then we get the
+	# totalviskids for the story 		--Pater
+	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested') ? $comments->{$cid}{totalvisiblekids} : $cc;
 
 	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
 	my $comment_html = slashDisplay('printCommComments', {
@@ -898,11 +903,8 @@ sub displayThread {
 
 		$skipped++;
 		# since nested and threaded show more comments, we can skip
-		# ahead more, counting the visible kids. Ideally we'd count 
-		# the visible kids of the visible kids, but this is close
-		# enough so that we can break the pages up. If this proves
-		# to be a problem, we can do just that.	--Pater
-		$skipped += $comment->{visiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
+		# ahead more, counting all the visible kids.	--Pater
+		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		$form->{startat} ||= 0;
 		next if $skipped < $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
@@ -942,7 +944,7 @@ sub displayThread {
 
 			# in flat or nested mode, all visible kids will
 			# be shown, so count them.	-- Pater
-			$displayed += $comment->{visiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
+			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		}
 
 		$return .= $const->{commentend} if $finish_list;

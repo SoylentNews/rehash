@@ -2849,6 +2849,23 @@ sub sitename2filename {
 }
 
 ##################################################################
+# counts total visible kids for each parent comment
+sub countTotalVisibleKids {
+	my($pid, $comments) = @_;
+	my $total = 0;
+
+	$total += $comments->{$pid}{visiblekids};
+
+	for my $cid (@{$comments->{$pid}{kids}}) {
+		$total += countTotalKids($cid, $comments);
+	}
+
+	$comments->{$pid}{totalvisiblekids} = $total;
+
+	return $total;
+}
+
+##################################################################
 # Why is this here and not a method in Slash::DB::MySQL? - Jamie 2003/05/13
 sub createStoryTopicData {
 	my($slashdb, $form) = @_;	
