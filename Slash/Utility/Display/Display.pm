@@ -1435,6 +1435,9 @@ sub _slashImage {
 	my $content = slashDisplay('imageLink', {
 		id    => $token->[1]{id},
 		title => $token->[1]{title},
+		align => $token->[1]{align},
+		width => $token->[1]{width},
+		height => $token->[1]{height},
 	}, { Return => 1 });
 	$content ||= getData('SLASH-UNKNOWN-IMAGE');
 

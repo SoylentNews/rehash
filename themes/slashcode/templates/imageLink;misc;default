@@ -13,7 +13,7 @@ __name__
 imageLink
 __template__
 [% IF id %]
-	<IMG SRC="[% constants.real_rootdir %]/blob.pl?id=[% id | strip_attribute %]" TITLE="[% title | strip_attribute %]" ALT="[% title | strip_attribute %]">
+	<IMG SRC="[% constants.real_rootdir %]/blob.pl?id=[% id | strip_attribute %]" TITLE="[% title | strip_attribute %]" ALT="[% title | strip_attribute %]" WIDTH="[% width | strip_attribute %]" HEIGHT="[% height | strip_attribute %]" ALIGN="[% align | strip_attribute %]">
 [% END %]
 __seclev__
 10000
