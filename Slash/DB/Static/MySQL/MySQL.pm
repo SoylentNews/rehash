@@ -57,6 +57,7 @@ sub sqlShowSlaveStatus {
 # For rss, rdf etc feeds, basically used by tasks.
 # Ultimately this should be subsumed into
 # getStoriesEssentials since they serve the same purpose.
+# XXXSECTIONTOPICS let's get the NOW() out of here
 sub getBackendStories {
 	my($self, $options) = @_;
 
@@ -802,6 +803,7 @@ sub getSkinInfo {
 			$child_data{skin}    = $skins->{ $tree->{$child_tid}{skid} };
 			my $rootdir = $child_data{skin}{rootdir};
 			$child_data{rootdir} = set_rootdir($child_data{url}, $rootdir);
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "getSkinInfo tid '$tid' skinname '$skinname' child_data: " . Dumper(\%child_data);
 
 			@child_data{qw(month monthname day)} = $self->sqlSelect(
 				'MONTH(time), MONTHNAME(time), DAYOFMONTH(time)',
@@ -818,15 +820,14 @@ sub getSkinInfo {
 				 AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2"
 			) || 0;
 
-			$child_data{count_sectional} = $self->sqlCount(
-				"stories, story_topics_rendered AS str_sect
-				 LEFT JOIN story_topics_rendered AS str_main
-					ON stories.stoid=str_main.stoid AND str_main.tid='$mp_tid'",
+			my $stoids = $self->sqlSelectColArrayref(
+				"stories.stoid",
+				"stories, story_topics_rendered AS str_sect",
 				"stories.stoid=str_sect.stoid AND str_sect.tid='$child_tid'
-				 AND str_main.stoid IS NULL
 				 AND in_trash = 'no' AND time < NOW()
-				 AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2"
-			);
+				 AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2");
+			my $ds_hr = $self->displaystatusForStories($stoids);
+			$child_data{count_sectional} = scalar(grep { $ds_hr->{$_} == 0 } @$stoids);
 
 			$children{$child_tid} = \%child_data;
 			push @{$index{$skinname}}, $children{$child_tid};
@@ -1048,7 +1049,7 @@ sub fetchEligibleModerators_users {
 		}
 		# If there is more to do, sleep for a moment so we don't
 		# hit the DB too hard.
-		Time::HiRes::sleep(0.2) if @uids;
+		sleep 1 if @uids;
 	}
 
 	my $return_ar = [
