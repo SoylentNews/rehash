@@ -88,6 +88,8 @@ EOT
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
+	my $grand_total = $stats->countDailyByPage('', $yesterday);
+	$data{grand_total} = $grand_total;
 	for (qw|index article search comments palm journal rss|) {
 		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
 		my $pages = $stats->countDailyByPage($_, $yesterday);
@@ -197,6 +199,7 @@ EOT
 	});
 
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
+	$statsSave->createStatDaily($yesterday, "grand_total", $grand_total);
 	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes);
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
 	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});

@@ -13,7 +13,7 @@ display
 __template__
 [% constants.sitename %] Stats for [% day %]
 
-        total: [% total %] ([% total_bytes %])
+        total: [% total %] ([% grand_total %])([% total_bytes %])
        unique: [% unique %]
         users: [% users %]
 [% admin_clearpass_warning %][% backup_lag %]
