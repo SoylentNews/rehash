@@ -490,15 +490,19 @@ sub friendMeta {
 sub addFriend {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
 
-	$journal->add($form->{uid}) if $form->{uid};
+	$journal->add($user->{uid}, $form->{uid}) if $form->{uid};
 	displayFriends(@_);
 }
 
 sub deleteFriend {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
 
-	for my $uid (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
-		$journal->delete($uid);
+	if ($form->{delete}) {
+		$journal->delete($form->{delete});
+	} else {
+		for my $uid (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
+			$journal->delete($uid);
+		}
 	}
 
 	displayFriends(@_);

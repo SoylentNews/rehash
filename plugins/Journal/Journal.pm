@@ -126,19 +126,11 @@ sub friends {
 	my($self) = @_;
 	my $uid = $ENV{SLASH_USER};
 
-# old style that ALMOST worked ...
-# 	my $friends = $self->sqlSelectAll(
-# 		'u.nickname, j.friend, MAX(jo.date) as date, jo.description',
-# 		'journals as jo, journal_friends as j,users as u',
-# 		"j.uid = $uid AND j.friend = u.uid AND j.friend = jo.uid",
-# 		'GROUP BY u.nickname ORDER BY date DESC'
-# 	);
-
 	my($friends, $journals, $ids, %data);
 	$friends = $self->sqlSelectAll(
-		'u.nickname, j.friend, MAX(jo.id) as id',
-		'journals as jo, journal_friends as j, users as u',
-		"j.uid = $uid AND j.friend = u.uid AND j.friend = jo.uid",
+		'u.nickname, j.person, MAX(jo.id) as id',
+		'journals as jo, people as j, users as u',
+		"j.uid = $uid AND j.person = u.uid AND j.person = jo.uid AND type='friend'",
 		'GROUP BY u.nickname'
 	);
 	return [] unless @$friends;
@@ -167,8 +159,8 @@ sub message_friends {
 	my $code  = MSG_CODE_JOURNAL_FRIEND;
 	my $uid   = $ENV{SLASH_USER};
 	my $cols  = "jf.uid";
-	my $table = "journal_friends AS jf, users_param AS up1, users_param AS up2";
-	my $where = "jf.friend=$uid
+	my $table = "people AS jf, users_param AS up1, users_param AS up2";
+	my $where = "jf.person=$uid AND type='friend'
 		AND  jf.uid=up1.uid AND jf.uid=up2.uid
 		AND  up1.name = 'deliverymodes'      AND up1.value >= 0
 		AND  up2.name = 'messagecodes_$code' AND up2.value  = 1";
@@ -178,9 +170,8 @@ sub message_friends {
 }
 
 sub add {
-	my($self, $friend) = @_;
-	my $uid = $ENV{SLASH_USER};
-	$self->sqlDo("INSERT INTO journal_friends (uid,friend) VALUES ($uid, $friend)");
+	my($self, $uid, $friend) = @_;
+	$self->sqlDo("INSERT INTO people (uid,person,type) VALUES ($uid, $friend, 'friend')");
 }
 
 sub is_friend {
@@ -188,8 +179,8 @@ sub is_friend {
 	my $uid   = $ENV{SLASH_USER};
 	return 0 unless $uid && $friend;
 	my $cols  = "jf.uid";
-	my $table = "journal_friends AS jf";
-	my $where = "jf.uid=$uid AND jf.friend=$friend";
+	my $table = "people AS jf";
+	my $where = "jf.uid=$uid AND jf.person=$friend AND type='friend'";
 
 	my $is_friend = $self->sqlSelect($cols, $table, $where);
 	return $is_friend;
@@ -198,7 +189,7 @@ sub is_friend {
 sub delete {
 	my($self, $friend) = @_;
 	my $uid = $ENV{SLASH_USER};
-	$self->sqlDo("DELETE FROM journal_friends WHERE uid=$uid AND friend=$friend");
+	$self->sqlDo("DELETE FROM people WHERE uid=$uid AND person=$friend AND type='friend'");
 }
 
 sub top {
@@ -221,9 +212,9 @@ sub topFriends {
 	my($self, $limit) = @_;
 	$limit ||= getCurrentStatic('journal_top') || 10;
 	my $sql;
-	$sql .= " SELECT count(friend) as c, nickname, friend ";
-	$sql .= " FROM journal_friends, users ";
-	$sql .= " WHERE friend=users.uid ";
+	$sql .= " SELECT count(person) as c, nickname, person ";
+	$sql .= " FROM people, users ";
+	$sql .= " WHERE person=users.uid AND type=\"friend\" ";
 	$sql .= " GROUP BY nickname ";
 	$sql .= " ORDER BY c DESC ";
 	$self->sqlConnect;
