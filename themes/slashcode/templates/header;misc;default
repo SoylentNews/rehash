@@ -56,6 +56,8 @@ in this block -->
 
 &nbsp;
 
+<FONT COLOR="[% user.fg.1 %]">
+
 <TABLE WIDTH="99%" ALIGN="CENTER" CELLPADDING="0" CELLSPACING="0" BORDER="[% constants.debug_maintable_border || 0 %]">
 [% PROCESS maintable_tr %]
 [% PROCESS maintable_td mt_valign="TOP" mt_rowspan="5" mt_width="100" %]
@@ -65,7 +67,6 @@ in this block -->
 	</TD>
 	[% PROCESS maintable_td %]&nbsp;</TD>
 	[% PROCESS maintable_td mt_valign="TOP" mt_align="LEFT" mt_width="100%" mt_height="1" %]
-<FONT COLOR="[% user.fg.1 %]">
 [% IF user.is_admin %]
 	<P>[% Slash.createMenu(adminmenu) %]</P>
 [% END %]
