@@ -5487,6 +5487,7 @@ sub getSlashConf {
 		stats_reports =>		[ $conf{adminmail} ],
 		stats_sfnet_groupids =>		[ 4421 ],
 		submit_categories =>		[ ],
+		sections_recenttopics =>        [ ],
 	);
 	my %conf_fixup_hashes = (
 		# var name			# default hash of keys/values
