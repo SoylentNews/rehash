@@ -1835,13 +1835,13 @@ The parsed HTML.
 =cut
 
 sub parseSlashizedLinks {
-	my($html) = @_;
+	my($html, $options) = @_;
 	$html =~ s{
 		<A[ ]HREF="__SLASHLINK__"
 		([^>]+)
 		>
 	}{
-		_slashlink_to_link($1)
+		_slashlink_to_link($1, $options)
 	}gxe;
 	return $html;
 }
@@ -1849,7 +1849,7 @@ sub parseSlashizedLinks {
 # This function mirrors the behavior of _link_to_slashlink.
 
 sub _slashlink_to_link {
-	my($sl) = @_;
+	my($sl, $options) = @_;
 	my $ssi = getCurrentForm('ssi') || 0;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
@@ -1863,6 +1863,10 @@ sub _slashlink_to_link {
 	my $sect = delete $attr{sect} || "";
 	my $section = $sect ? $slashdb->getSection($sect) : {};
 	my $sect_root = $section->{rootdir} || $root;
+	if ($options && $options->{absolute}) {
+		$sect_root = URI->new_abs($sect_root, $options->{absolute})
+			->as_string;
+	}
 	my $frag = delete $attr{frag} || "";
 	# Generate the return value.
 	my $retval = q{<A HREF="};

@@ -581,8 +581,9 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 # LINUX.COM LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
-ALTER TABLE string_param MODIFY COLUMN code varchar(128) NOT NULL;
-ALTER TABLE subsections ADD COLUMN alttext varchar(40) NOT NULL;
 
 # End of T_2_3_0_37
+
+ALTER TABLE string_param MODIFY COLUMN code VARCHAR(128) NOT NULL;
+ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
