@@ -243,6 +243,7 @@ sub rmSub {
 					delete $sub{note};
 					$sub{-note} = 'NULL';
 				}
+				$sub{comment} =~ s/\"/\'/g if $sub{comment};
 
 				sqlUpdate("submissions", \%sub,
 					"subid=" . $I{dbh}->quote($n));
