@@ -72,6 +72,7 @@ mysql_dump=sql/mysql/datadump.sql
 mysql_prep=sql/mysql/prep.sql
 pg_dump=sql/postgresql/datadump.sql
 pg_prep=sql/postgresql/prep.sql
+task=tasks/counthits.pl
 task=tasks/daily.pl
 task=tasks/daily_archive.pl
 task=tasks/daily_forget.pl
