@@ -74,7 +74,7 @@ sub main {
 	my $future_plug = 0;
 
 	# Just check the first story since they are in order -Brian
-	if ($stories->[0]{is_future} && !$user->{is_subscriber} && $constants->{subscribe_future_plug}) {
+	if ($stories->[0]{is_future} && !$user->{is_subscriber} && !$user->{is_anon} && $constants->{subscribe_future_plug}) {
 		$future_plug = 1;
 	}
 
