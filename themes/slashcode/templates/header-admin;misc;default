@@ -16,14 +16,14 @@ __template__
 <BODY BGCOLOR="[% user.bg.1 %]" LINK="[% user.bg.3 %]" VLINK="[% user.bg.3 %]" TOPMARGIN="0" LEFTMARGIN="0" MARGINHEIGHT="0" MARGINWIDTH="0">
 
 <TABLE WIDTH="100%" ALIGN="CENTER" CELLPADDING="3" CELLSPACING="0" BORDER="0" BGCOLOR="#FFFFFF">
-	<TR><TD VALIGN="TOP" BGCOLOR="#505050" ALIGN="RIGHT">
-		<FONT SIZE="4" COLOR="#FFFFFF">[% constants.sitename %] backSlash</FONT>
-	</TD></TR>
+	<TR>
 [% IF user.is_admin %]
-        <TR><TD>
-		[% Slash.createMenu(adminmenu) %]
-	</TD></TR>
+		<TD>[% Slash.createMenu(adminmenu) %]</TD>
 [% END %]
+		<TD VALIGN="TOP" BGCOLOR="#505050" ALIGN="RIGHT">
+		<FONT SIZE="4" COLOR="#FFFFFF">[% constants.sitename %] backSlash</FONT>
+		</TD>
+	</TR>
 	<TR><TD VALIGN="TOP"><FONT COLOR="#000000">
 
 __seclev__
