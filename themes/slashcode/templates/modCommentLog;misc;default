@@ -68,13 +68,18 @@ __template__
 [% END %]
 
 [% IF reasonTotal %]
-	<FONT COLOR="[% user.bg.3 %]"><B>Moderation Totals</B></FONT>:
-	[% FOREACH i = [0 .. reasonHist.max] %]
-		[% IF reasonHist.$i %]
-			[% reasons.$i.name %]=[% reasonHist.$i %],
+	[% IF constants.comments_mod_totals_exact %]
+		<FONT COLOR="[% user.bg.3 %]"><B>Moderation Totals</B></FONT>:
+		[% FOREACH i = [0 .. reasonHist.max] %]
+			[% IF reasonHist.$i %]
+				[% reasons.$i.name %]=[% reasonHist.$i %],
+			[% END %]
 		[% END %]
+		<B>Total=[% reasonTotal %]</B>.
+	[% ELSE %]
+		<FONT COLOR="[% user.bg.3 %]"><B>Moderations</B></FONT>:
+		[% FOREACH rtop = reasonsTop %][% rtop.percent %]% [% reasons.${rtop.reason}.name %][% UNLESS loop.last %], [% END %][% END %]
 	[% END %]
-	<B>Total=[% reasonTotal %]</B>.
 [% END %]
 
 __seclev__

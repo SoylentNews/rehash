@@ -1190,3 +1190,6 @@ INSERT INTO vars (name, value, description) VALUES ('message_last_deferred','','
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+
+INSERT INTO vars (name, value, description) VALUES ('comments_mod_totals_exact','1','Show exact moderation counts?');
+

@@ -562,6 +562,8 @@ sub moderatorCommentLog {
 		$reasonTotal++;
 	}
 
+	my @reasonsTop = _getTopModReasons($reasonTotal, @reasonHist);
+
 	my $show_cid    = ($type eq 'cid') ? 0 : 1;
 	my $show_modder = $mod_admin ? 1 : 0;
 	my $mod_to_from = ($type eq 'uid') ? 'to' : 'from';
@@ -571,11 +573,58 @@ sub moderatorCommentLog {
 		mods		=> $mods,
 		reasonTotal	=> $reasonTotal,
 		reasonHist	=> \@reasonHist,
+		reasonsTop	=> \@reasonsTop,
 		reasons		=> $reasons,
 		show_cid	=> $show_cid,
 		show_modder	=> $show_modder,
 		mod_to_from	=> $mod_to_from,
 	}, { Return => 1, Nocomm => 1 });
+}
+
+# Takes a reason histogram, a list of counts of each reason mod.
+# So $reasonHist[1] is the number of Offtopic moderations (at
+# least if Offtopic is still reason 1).  Returns a list of hashrefs,
+# the top 3 mods performed and their percentages, rounded to the
+# nearest 10%.
+sub _getTopModReasons{
+	my($reasonTotal, @reasonHist) = @_;
+	return ( ) unless $reasonTotal;
+	my $top_needed = 3;
+	my @reasonsTop = ( );
+
+	# Algorithm by MJD in Perl Quiz of the Week #7
+	# http://perl.plover.com/qotw/r/007
+	my @p = map { $_*10/$reasonTotal } @reasonHist;
+	my @r = map { int($_+0.5) } @p;
+	my @e = map { $p[$_] - $r[$_] } (0..$#r);
+	my $total_error = 0;
+	for (@e) { $total_error += $_ }
+	if ($total_error) {
+		my $sign = $total_error < 0 ? -1 : 1;
+		$total_error *= $sign;
+		for (0..$#r) {
+			next unless $e[$_] * $sign > 0;
+			$r[$_] += $sign;
+			$total_error--;
+			last if $total_error <= 0;
+		}
+	}
+	my @reasonRound = map { $_ * 10 } @r;
+
+	# This part I added, so if it breaks, don't blame MJD :) JRM
+	my @rr_sort = sort { $b <=> $a } @reasonRound;
+	my $min_perc = $rr_sort[-1];
+	$min_perc = $rr_sort[$top_needed-1] if $#rr_sort >= $top_needed-1;
+	for my $reason (0..$#reasonRound) {
+		next if $reasonRound[$reason] < $min_perc;
+		push @reasonsTop, {
+			reason => $reason,
+			percent => $reasonRound[$reason]
+		};
+		last if scalar(@reasonsTop) >= $top_needed;
+	}
+
+	return @reasonsTop;
 }
 
 #========================================================================

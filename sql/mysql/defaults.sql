@@ -659,6 +659,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_forgetip_hours','7
 INSERT INTO vars (name, value, description) VALUES ('comments_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('comments_forgetip_mincid','0','Minimum cid to start forgetting IP at');
 INSERT INTO vars (name, value, description) VALUES ('comments_hardcoded','0','Turns on hardcoded layout (this is a Slashdot only feature)');
+INSERT INTO vars (name, value, description) VALUES ('comments_mod_totals_exact','1','Show exact moderation counts?');
 INSERT INTO vars (name, value, description) VALUES ('comments_more_seclev','100','Seclev required to see More Comments (special: 2 means subscribers)');
 INSERT INTO vars (name, value, description) VALUES ('comments_perday_bykarma','-1=2|25=25|99999=50','Number of comments allowed to be posted per day, by karma score.');
 INSERT INTO vars (name, value, description) VALUES ('comments_perday_anon','10','Number of comments allowed to be posted per day, by any one IPID, anonymously.');
