@@ -27,6 +27,24 @@ __template__
 [% USE Slash %]
 [% PROCESS titlebar width="95%" %]
 
+<P>
+[% param_name = nick_plain | fixparam %]
+[
+<A HREF="[% constants.rootdir %]/~[% param_name %]/friends/">Friends</A> 
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/fans/">Fans</A>
+[% UNLESS nickmatch_flag || user.is_anon %] | <A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% useredit.uid %]">Befriend [% nick_plain %]</A>[% END %]
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/comments/">Comments</A>
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/submissions/">Submissions</A>
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/pubkey/">Pubkey</A>
+ | 
+<A HREF="[% constants.rootdir %]/~[% param_name %]/journal/">Journal</A>
+]
+</P>
+
 [% IF form.formkey %]
         <!-- INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]" -->
 [% END %]
@@ -67,21 +85,6 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 [ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
 <BR>
 [% END %]
-</P>
-[% param_name = nick_plain | fixparam %]
-[
-<A HREF="[% constants.rootdir %]/~[% param_name %]/friends/">Friends</A> 
- | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/fans/">Fans</A>
-[% UNLESS nickmatch_flag || user.is_anon %] | <A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% useredit.uid %]">Befriend [% nick_plain %]</A>[% END %]
- | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/comments/">Comments</A>
- | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/submissions/">Submissions</A>
-[% IF useredit.pubkey %] | <A HREF="[% constants.rootdir %]/~[% param_name %]/pubkey/">Pubkey</A>[% END %]
- | 
-<A HREF="[% constants.rootdir %]/~[% param_name %]/journal/">Journal</A>
-]
 </P>
 <P>
 [% IF useredit.bio %]
