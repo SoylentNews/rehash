@@ -48,6 +48,7 @@ sub main {
 		top		=> [ $top_ok,		\&displayTop		],
 		searchusers	=> [ 1,			\&searchUsers		],
 		friends		=> [ 1,			\&displayFriends	],
+		friendview	=> [ 1,			\&displayArticleFriends	],
 
 		default		=> [ 1,			\&displayFriends	],
 	);
@@ -89,7 +90,8 @@ sub displayTop {
 	}
 
 	if ($constants->{journal_top_friend}) {
-		$journals = $journal->topFriends();
+		my $zoo   = getObject('Slash::Zoo');
+		$journals = $zoo->topFriends();
 		slashDisplay('journaltop', { journals => $journals, type => 'friend' });
 	}
 
@@ -103,7 +105,8 @@ sub displayFriends {
 
 	_printHead("mainhead");
 
-	my $friends = $journal->friends();
+	my $zoo   = getObject('Slash::Zoo');
+	my $friends = $zoo->getFriendsWithJournals();
 	if (@$friends) {
 		slashDisplay('journalfriends', { friends => $friends });
 	} else {
@@ -221,10 +224,85 @@ sub displayTopRSS {
 		items	=> \@items
 	});
 }
+sub displayArticleFriends {
+	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($date, $forward, $back, $nickname, $uid);
+	my @collection;
+	my $zoo   = getObject('Slash::Zoo');
+
+	if ($form->{uid} or $form->{nick}) {
+		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nickname	= $slashdb->getUser($uid, 'nickname');
+	} else {
+		$nickname	= $user->{nickname};
+		$uid		= $user->{uid};
+	}
+
+	_printHead("friendhead", { nickname => $nickname, uid => $uid });
+
+	# clean it up
+	my $start = fixint($form->{start}) || 0;
+	my $uids = $zoo->getFriendsUIDs($uid);
+	my $articles = $journal->getsByUids($uids, $start,
+		$constants->{journal_default_display} + 1, $form->{id}
+	);
+
+	unless ($articles && @$articles) {
+		print getData('noviewfriends');
+		return;
+	}
+
+	# check for extra articles ... we request one more than we need
+	# and if we get the extra one, we know we have extra ones, and
+	# we pop it off
+	if (@$articles == $constants->{journal_default_display} + 1) {
+		pop @$articles;
+		$forward = $start + $constants->{journal_default_display};
+	} else {
+		$forward = 0;
+	}
+
+	# if there are less than journal_default_display remaning,
+	# just set it to 0
+	if ($start > 0) {
+		$back = $start - $constants->{journal_default_display};
+		$back = $back > 0 ? $back : 0;
+	} else {
+		$back = -1;
+	}
+
+	my $topics = $slashdb->getTopics();
+	for my $article (@$articles) {
+		my $commentcount = $article->[6]
+			? $slashdb->getDiscussion($article->[6], 'commentcount')
+			: 0;
+
+		# should get comment count, too -- pudge
+		push @collection, {
+			article		=> strip_mode($article->[1], $article->[4]),
+			date		=> $article->[0],
+			description	=> strip_notags($article->[2]),
+			topic		=> $topics->{$article->[5]},
+			discussion	=> $article->[6],
+			id		=> $article->[3],
+			commentcount	=> $commentcount,
+			uid		=> $article->[7],
+			nickname	=> $article->[8],
+		};
+	}
+
+	slashDisplay('friendsview', {
+		articles	=> \@collection,
+		uid		=> $uid,
+		nickname	=> $nickname,
+		back		=> $back,
+		forward		=> $forward,
+	});
+}
 
 sub displayArticle {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
-	my($date, $forward, $back, @sorted_articles, $nickname, $uid);
+	my($date, $forward, $back, @sorted_articles, $nickname, $uid, $discussion);
 	my $collection = {};
 
 	if ($form->{uid} or $form->{nick}) {
@@ -281,9 +359,17 @@ sub displayArticle {
 			$collection->{day} = $article->[0];
 		}
 
-		my $commentcount = $article->[6]
-			? $slashdb->getDiscussion($article->[6], 'commentcount')
-			: 0;
+		my $commentcount;
+		if ($form->{id}) {
+			$discussion = $slashdb->getDiscussion($article->[6]);
+			$commentcount = $article->[6]
+				? $discussion->{commentcount}
+				: 0;
+		} else {
+			$commentcount = $article->[6]
+				? $slashdb->getDiscussion($article->[6], 'commentcount')
+				: 0;
+		}
 
 		# should get comment count, too -- pudge
 		push @{$collection->{article}}, {
@@ -309,7 +395,11 @@ sub displayArticle {
 		is_friend	=> $zoo->isFriend($user->{uid}, $uid),
 		back		=> $back,
 		forward		=> $forward,
+		show_discussion	=> (($form->{id} && !$constants->{journal_no_comments_item} && $discussion) ? 0 : 1),
 	});
+	if ($form->{id} && !$constants->{journal_no_comments_item} && $discussion) {
+		printComments($discussion);
+	}
 }
 
 sub setPrefs {
@@ -439,7 +529,8 @@ sub saveArticle {
 		# create messages
 		my $messages = getObject('Slash::Messages');
 		if ($messages) {
-			my $friends   = $journal->message_friends;
+			my $zoo   = getObject('Slash::Zoo');
+			my $friends   = $zoo->getFriendsForMessage;
 
 			for (@$friends) {
 				my $data = {

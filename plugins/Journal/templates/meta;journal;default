@@ -11,60 +11,14 @@ en_US
 __name__
 meta
 __template__
-[% SWITCH form.op;
-	CASE "addmeta";
-		title	= "Adding Friend";
-		op	= "add";
-		name	= "uid";
-		val	= friend.uid;
-		submit	= "Yup, I'm positive";
-		text	= BLOCK %]
-[% IF user.uid == friend.uid %]
-<P>Making friends with youself?  Kinda sad, but I'll allow it,
-if you really want to do it.</P>
-[% ELSE %]
-<P>Alright, before we do this thing, I just want to really make
-sure that you want to make <B>[% friend.nickname | strip_literal %]</B>
-([% friend.uid %]) your friend.</P>
-[% END %]
-
-<P><B>Note:</B> Who your friends are is not private; it can and will be used against you.</P>
-		[% END;
-	CASE "deletemeta";
-		title	= "Removing Friend";
-		op	= "delete";
-		name	= "del_$friend.uid";
-		val	= 1;
-		submit	= "Yup, I'm positive";
-		text	= BLOCK %]
-[% IF user.uid == friend.uid %]
-<P>Removing yourself as friend?  Some breakups are much
-harder than others.</P>
-[% ELSE %]
-<P>Alright, before we do this thing, I just want to really make
-sure that you want to remove <B>[% friend.nickname | strip_literal %]</B>
-([% friend.uid %]) as your friend.</P>
-[% END %]
-		[% END;
-	CASE "removemeta";
-		title	= "Deleting Article";
-		op	= "remove";
-		name	= "del_$article.id";
-		val	= 1;
-		submit	= "Yup, I'm positive";
-		text	= BLOCK %]
+[% PROCESS titlebar width => "100%" title = "Deleting Article" %]
+<FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST">
+<INPUT TYPE="hidden" NAME="op" VALUE="remove">
+<INPUT TYPE="hidden" NAME="[% del_$article.id %]" VALUE="1">
 <P>Alright, before we do this thing, I just want to really make
 sure that you want to delete your journal entry
 <B>[% article.description | strip_literal %]</B>.</P>
-		[% END;
-END %]
-
-[% PROCESS titlebar width => "100%" %]
-<FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST">
-<INPUT TYPE="hidden" NAME="op" VALUE="[% op %]">
-<INPUT TYPE="hidden" NAME="[% name %]" VALUE="[% val %]">
-[% text %]
-<P><INPUT TYPE="submit" VALUE="[% submit %]"></P>
+<P><INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
 </FORM>
 
 __seclev__

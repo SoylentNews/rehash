@@ -12,6 +12,7 @@ __name__
 slashdot
 __template__
 [% USE Slash %]
+<br>
 <TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	[% FOREACH article = articles %]
 		[% FOREACH diatribe = article.article; topic = diatribe.topic %]
@@ -23,15 +24,18 @@ __template__
 	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP" ALIGN="RIGHT">
 
 [% IF user.is_anon; IF diatribe.discussion %][
-<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>
-][% END; ELSE %][
+[% IF show_discussion %]<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>
+][% END %][% END; ELSE %][
 [% IF user.uid == uid %]
 <A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</A> |
-<A HREF="[% constants.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</A> |
-[% END; IF is_friend %]
-<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]&amp;type=friend">Remove Friend</A>
-[% ELSE %]
-<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</A>
+<A HREF="[% constants.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</A> 
+[% END %]
+[% user.uid != uid  %]
+	[%IF is_friend %]
+	| <A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]&amp;type=friend">Remove Friend</A>
+	[% ELSE %]
+	| <A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</A>
+	[% END %]
 [% END %]
 [% IF diatribe.discussion %]
 | <A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>

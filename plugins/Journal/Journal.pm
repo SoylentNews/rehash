@@ -63,12 +63,36 @@ sub getsByUid {
 	return $answer;
 }
 
+sub getsByUids {
+	my($self, $uids, $start, $limit) = @_;
+	my $list = join(",", @$uids);
+	my $order = "ORDER BY journals.date DESC";
+	$order .= " LIMIT $start, $limit" if $limit;
+	my $where = "journals.uid IN ($list) AND journals.id=journals_text.id AND users.uid=journals.uid";
+
+	my $answer = $self->sqlSelectAll(
+		'journals.date, article, description, journals.id, posttype, tid, discussion, users.uid, users.nickname',
+		'journals,journals_text,users', $where, $order
+	);
+	return $answer;
+}
+
 sub list {
 	my($self, $uid, $limit) = @_;
 	$uid ||= 0;	# no SQL syntax error
 	my $order = "ORDER BY date DESC";
 	$order .= " LIMIT $limit" if $limit;
 	my $answer = $self->sqlSelectAll('id, date, description', 'journals', "uid = $uid", $order);
+
+	return $answer;
+}
+
+sub listFriends {
+	my($self, $uids, $limit) = @_;
+	my $list = join(",", @$uids);
+	my $order = "ORDER BY date DESC";
+	$order .= " LIMIT $limit" if $limit;
+	my $answer = $self->sqlSelectAll('id, journals.date, description, journals.uid, users.nickname', 'journals,users', "journals.uid in ($list) AND users.uid=journals.uid", $order);
 
 	return $answer;
 }
@@ -135,59 +159,6 @@ sub remove {
 	return $count;
 }
 
-sub friends {
-	my($self) = @_;
-	my $uid = $ENV{SLASH_USER};
-
-	my($friends, $journals, $ids, %data);
-	$friends = $self->sqlSelectAll(
-		'u.nickname, j.person, MAX(jo.id) as id',
-		'journals as jo, people as j, users as u',
-		"j.uid = $uid AND j.person = u.uid AND j.person = jo.uid AND type='friend' AND u.journal_last_entry_date IS NOT NULL ",
-		'GROUP BY u.nickname'
-	);
-	return [] unless @$friends;
-
-	for my $friend (@$friends) {
-		$ids .= "id = $friend->[2] OR ";
-		$data{$friend->[2]} = [ @$friend[0, 1] ];
-	}
-	$ids =~ s/ OR $//;
-
-	$journals = $self->sqlSelectAll(
-		'date, description, id', 'journals', $ids
-	);
-
-	for my $journal (@$journals) {
-		# tack on the extra data
-		@{$data{$journal->[2]}}[2 .. 4] = @{$journal}[0 .. 2];
-	}
-
-	# pull it all back together
-	return [ map { $data{$_} } sort { $b <=> $a } keys %data ];
-}
-
-sub message_friends {
-	my($self) = @_;
-	my $code  = MSG_CODE_JOURNAL_FRIEND;
-	my $uid   = $ENV{SLASH_USER};
-	my $cols  = "pp.uid";
-	my $table = "people AS pp, users_messages as um";
-	my $where = <<SQL;
-    pp.person = $uid AND pp.type = 'friend' AND pp.uid = um.uid 
-AND um.code = $code  AND um.mode >= 0
-SQL
-
-# 	my $table = "people AS jf, users_param AS up1, users_param AS up2";
-# 	my $where = "jf.person=$uid AND type='friend'
-# 		AND  jf.uid=up1.uid AND jf.uid=up2.uid
-# 		AND  up1.name = 'deliverymodes'      AND up1.value >= 0
-# 		AND  up2.name = 'messagecodes_$code' AND up2.value  = 1";
-
-	my $friends  = $self->sqlSelectColArrayref($cols, $table, $where);
-	return $friends;
-}
-
 sub top {
 	my($self, $limit) = @_;
 	$limit ||= getCurrentStatic('journal_top') || 10;
@@ -199,29 +170,6 @@ sub top {
 	$sql .= " LIMIT $limit";
 	$self->sqlConnect;
 	my $losers = $self->{_dbh}->selectall_arrayref($sql);
-
-	return $losers;
-}
-
-sub topFriends {
-	# this should only return users who have journal entries -- pudge
-	# Does now, notice the not null -Brian
-	my($self, $limit) = @_;
-	$limit ||= getCurrentStatic('journal_top') || 10;
-	my $sql;
-	$sql .= " SELECT count(person) as c, nickname, person ";
-	$sql .= " FROM people, users ";
-	$sql .= " WHERE person=users.uid AND type=\"friend\" ";
-	$sql .= " AND users.journal_last_entry_date IS NOT NULL ";
-	$sql .= " GROUP BY nickname ";
-	$sql .= " ORDER BY c DESC ";
-	$self->sqlConnect;
-	my $losers = $self->{_dbh}->selectall_arrayref($sql);
-	$sql = "SELECT max(date) FROM journals WHERE uid=";
-	for (@$losers) {
-		my $date = $self->{_dbh}->selectrow_array($sql . $_->[2]);
-		push @$_, $date;
-	}
 
 	return $losers;
 }

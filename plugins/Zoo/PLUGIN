@@ -1,8 +1,15 @@
 name=Zoo
 description="Friend and Foe system"
 mysql_schema=mysql_schema
+mysql_dump=mysql_prep
 htdoc=zoo.pl
 template=templates/data;zoo;default
 template=templates/plainlist;zoo;default
 template=templates/zoohead;zoo;default
 template=templates/confirm;zoo;default
+template=templates/zoo_icons;misc;default
+image=fan.gif
+image=foe.gif
+image=freak.gif
+image=friend.gif
+image=neutral.gif

@@ -258,7 +258,6 @@ sub authors {
 sub userLogin {
 	my($name, $passwd) = @_;
 	my $r = Apache->request;
-	my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
 	my $slashdb = getCurrentDB();
 
 	# Do we want to allow logins with encrypted passwords? -- pudge
@@ -332,6 +331,10 @@ sub userdir_handler {
 				$r->filename($constants->{basedir} . '/zoo.pl');
 			} elsif ($op eq 'freaks') {
 				$r->args("op=freaks");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
+			} elsif ($op eq 'zoo') {
+				$r->args("op=all");
 				$r->uri('/zoo.pl');
 				$r->filename($constants->{basedir} . '/zoo.pl');
 			} elsif ($op eq 'comments') {
@@ -442,6 +445,11 @@ sub userdir_handler {
 			$r->args("op=foes&nick=$nick&uid=$uid");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
+
+		} elsif ($op eq 'friendview') {
+			$r->args("op=friendview&nick=$nick&uid=$uid");
+			$r->uri('/journal.pl');
+			$r->filename($constants->{basedir} . '/journal.pl');
 
 		} else {
 			$r->args("nick=$nick&uid=$uid");

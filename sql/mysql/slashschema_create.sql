@@ -624,6 +624,20 @@ CREATE TABLE submissions (
 ) TYPE = myisam;
 
 #
+# Table structure for table 'submission_param'
+#
+
+DROP TABLE IF EXISTS submission_param;
+CREATE TABLE submission_param (
+	param_id mediumint UNSIGNED NOT NULL auto_increment,
+	subid varchar(15) NOT NULL,
+	name varchar(32) DEFAULT '' NOT NULL,
+	value text DEFAULT '' NOT NULL,
+	UNIQUE submission_key (subid,name),
+	PRIMARY KEY (param_id)
+) TYPE = myisam;
+
+#
 # Table structure for table 'templates'
 #
 DROP TABLE IF EXISTS templates;

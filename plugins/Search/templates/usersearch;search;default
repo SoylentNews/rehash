@@ -39,8 +39,7 @@ __template__
 		[% END %]
 		[% UNLESS user.is_anon %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% thisuser.2 %]&amp;type=friend">Add Friend</A>/
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% thisuser.2 %]&amp;type=foe">Add Foe</A>
+				[% PROCESS zoo_icons person=thisuser.2 %]
 			</TD>
 		[% END %]
 		</TR>

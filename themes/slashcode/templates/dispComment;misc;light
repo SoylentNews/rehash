@@ -29,6 +29,10 @@ __template__
 				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Friend ]</A>
 			[% ELSIF user.people.$uid == Slash.FOE %]
 				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Foe ]</A>
+			[% ELSIF user.people.$uid == Slash.FAN %]
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Fan ]</A>
+			[% ELSIF user.people.$uid == Slash.FREAK %]
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=foe&amp;uid=[% uid %]">[ Freak ]</A>
 			[% ELSE %]
 				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Neutral ]</A>
 			[% END %]

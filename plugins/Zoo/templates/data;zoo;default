@@ -32,6 +32,9 @@ __template__
 [% CASE 'nofoes' %]
 	[% nickname %] loves everyone or plays their cards very close to their chest.
 
+[% CASE 'noall' %]
+	[% nickname %] is unknown to the world
+
 [% CASE 'yournofriends' %]
 	You are alone in the world.
 
@@ -47,6 +50,9 @@ __template__
 [% CASE 'yournofreaks' %]
 	Everyone loves you, that or they are to afraid to admit otherwise.
 
+[% CASE 'yournoall' %]
+	No one knows you exist.
+
 [% CASE 'friendshead' %]
 	Friends of [% nickname %]
 
@@ -59,6 +65,9 @@ __template__
 [% CASE 'freakshead' %]
 	Freaks of [% nickname %]
 
+[% CASE 'freakshead' %]
+	Everyone who thinks anything about [% nickname %]
+
 [% CASE 'yourfriendshead' %]
 	Your friends	
 
@@ -68,8 +77,11 @@ __template__
 [% CASE 'yourfanshead' %]
 	Your fans
 
-[% CASE 'yourfreakshead' %]
-	Your freaks
+[% case 'yourfreakshead' %]
+	your freaks
+
+[% case 'yourfreakshead' %]
+	This is how you see everyone and how everyone sees you.
 
 [% CASE 'no_go' %]
 	Sorry, this is not an option.

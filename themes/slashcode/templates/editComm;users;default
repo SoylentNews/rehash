@@ -154,8 +154,18 @@ __template__
 			</TR>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
+				<TD>	Fan				</TD>
+				<TD>	[% people_select.fan %]		</TD>
+			</TR>
+			<TR>
+				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
 				<TD>	Foe				</TD>
 				<TD>	[% people_select.foe %]		</TD>
+			</TR>
+			<TR>
+				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
+				<TD>	Freak				</TD>
+				<TD>	[% people_select.freak %]		</TD>
 			</TR>
 		</TABLE>
 

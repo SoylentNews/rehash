@@ -3,7 +3,10 @@ CREATE TABLE people (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	person MEDIUMINT UNSIGNED NOT NULL,
-	type enum("friend","foe") NOT NULL,
+	type enum("friend","foe"),
+	perceive enum("fan","freak"),
+	fof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0, 
+	eof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0,
 	UNIQUE degree_of_separation (uid,person),
 	PRIMARY KEY (id)
 );

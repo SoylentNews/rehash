@@ -115,9 +115,13 @@ sub selectComments {
 		# Keep your friends close but your enemies closer.
 		# Or ignore them, we don't care.
 		$C->{points} += $user->{people_bonus_friend}
-			if ($user->{people}{$C->{uid}} == FRIEND);
+			if ($user->{people}{FRIEND()}{$C->{uid}});
 		$C->{points} += $user->{people_bonus_foe}
-			if ($user->{people}{$C->{uid}} == FOE);
+			if ($user->{people}{FOE()}{$C->{uid}});
+		$C->{points} += $user->{people_bonus_freak}
+			if ($user->{people}{FREAK()}{$C->{uid}});
+		$C->{points} += $user->{people_bonus_fan}
+			if ($user->{people}{FAN()}{$C->{uid}});
 
 		# fix points in case they are out of bounds
 		$C->{points} = $min if $C->{points} < $min;
@@ -1102,12 +1106,26 @@ sub _hard_dispComment {
 
 	my $people_display;
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
-		if ($user->{people}{$comment->{uid}} == FRIEND) {
-			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$comment->{uid}"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/friend.gif" ALT="Friend" TITLE="Friend"></A>|;
-		} elsif ($user->{people}{$comment->{uid}} == FOE) {
-			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$comment->{uid}"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/foe.gif" ALT="Foe" TITLE="Foe"></A> |;
+		my $person = $comment->{uid};
+		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person}) {
+				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=addcheck&amp;type=friend&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/neutral.gif" ALT="Alter Relationship" TITLE="Alter Relationship"></A>|;
 		} else {
-			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=addcheck&amp;type=friend&amp;uid=$comment->{uid}"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/neutral.gif" ALT="Alter Relationship" TITLE="Alter Relationship"></A>|;
+			if ($user->{people}{$person}{FRIEND()}) {
+				my $title = $user->{people}{people_bonus_friend} ? "Friend ($user->{people}{people_bonus_friend})" : "Friend";
+				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/friend.gif" ALT="$title" TITLE="$title"></A>|;
+			} 
+			if ($user->{people}{$person}{FOE()}) {
+				my $title = $user->{people}{people_bonus_foe} ? "Foe ($user->{people}{people_bonus_foe})" : "Foe";
+				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/foe.gif" ALT="$title" TITLE="$title"></A> |;
+			} 
+			if ($user->{people}{$person}{FAN()}) {
+				my $title = $user->{people}{people_bonus_fan} ? "Fan ($user->{people}{people_bonus_fan})" : "Fan";
+				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/fan.gif" ALT="$title" TITLE="$title"></A> |;
+			} 
+			if ($user->{people}{$person}{FREAK()}) {
+				my $title = $user->{people}{people_bonus_freak} ? "Freak ($user->{people}{people_bonus_freak})" : "Freak";
+				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/freak.gif" ALT="$title" TITLE="$title"></A> |;
+			} 
 		}
 	}
 	

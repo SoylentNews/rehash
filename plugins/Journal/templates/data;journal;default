@@ -23,6 +23,9 @@ __template__
 [% CASE 'userhead' %]
 	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/"><FONT COLOR="#FFFFFF">Journal</FONT></A>
 
+
+[% CASE 'friendhead' %]
+	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/"><FONT COLOR="#FFFFFF">Friends</FONT></A>
 [% CASE 'nousers' %]
 	No users with journals found matching "[% form.nickname | strip_literal %]".
 
@@ -34,6 +37,9 @@ __template__
 
 [% CASE 'nofriends' %]
 	You have not made any friends (or all of your friends are losers who have not created entries in their journals).
+
+[% CASE 'noviewfriends' %]
+	Either all of your friends are lame or you just have none. Either way this page is blank.
 
 [% CASE 'create_failed' %]
 	An unknown error occured when you tried to create a journal entry.  Please go back to the beginning and try again.

@@ -1280,10 +1280,27 @@ sub editComm {
 
 	my %reason_select;
 
-# 	my @range = (-6 .. 6);
 	my $hi = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $lo = -$hi;
+	# And this was wrong, see we display +3 not 3. So the display was a bit off :)
 	my @range = ($lo .. $hi);
+	for (0..@range) {
+		if ($range[$_] > 0)	{
+			$range[$_] = "+$range[$_]";	
+		}
+	}
+	# And now we have to fix all of the users :(   -Brian
+	for (qw| friend foe fan freak |) {
+		my $key = "people_bonus_$_";
+		$user->{$key} = "+$user->{$key}"
+			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
+	}
+
+	for (qw| Intersting Troll Insightful Offtopic Flamebait Funny Informative Redundant |) {
+		my $key = "reason_alter_$_";
+		$user->{$key} = "+$user->{$key}"
+			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
+	}
 
 	for (@reasons) {
 		my $key = "reason_alter_$_";
@@ -1293,7 +1310,7 @@ sub editComm {
 	}
 
 	my %people_select;
-	my @people =  qw(friend foe anonymous);
+	my @people =  qw(friend foe anonymous fof eof freak fan);
 	for (@people) {
 		my $key = "people_bonus_$_";
 		$people_select{$_} = createSelect($key, \@range, 
@@ -1733,44 +1750,24 @@ sub saveComm {
 		textarea_cols	=> $form->{textarea_cols} || $constants->{textarea_cols},
 	};
 
-	my($min, $max) = ($constants->{comment_minscore}, 
-			  $constants->{comment_maxscore});
-	my $most_adj = $max-$min;
 	my @reasons = ();
 	@reasons = @{$constants->{reasons}}
 		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
 
 	for (@reasons) {
-		my $answer = $form->{"reason_alter_$_"};
+		my $key = "reason_alter_$_";
+		my $answer = $form->{$key};
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
-# I need to change this to be so that the score
-# would never be great then Max + their
-# score just to make it look pretty.
-# But its a holiday. -Brian
-#		$answer  = $constants->{comment_minscore}
-#			if $answer < $min;
-#		$answer  = $constants->{comment_maxscore}
-#			if $answer > $max;
-# Do you mean this? -Jamie
-#		$answer  = -$most_adj if $answer < -$most_adj;
-#		$answer  =  $most_adj if $answer >  $most_adj;
-		$users_comments_table->{"reason_alter_$_"} = ($answer == 0) ? '' : $answer;
+		# I picked a bad name for a key, filter_params strips the + sign which I need.
+		# This just fixes that. -Brian
+		$answer = "+$user->{$key}"
+			if $answer > 0 && $answer !~ /^\+./;
+		$users_comments_table->{$key} = ($answer == 0) ? '' : $answer;
 	}
 
-	for (qw| friend foe anonymous |) {
+	for (qw| friend foe anonymous fof eof freak fan |) {
 		my $answer = $form->{"people_bonus_$_"};
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
-# I need to change this to be so that the score
-# would never be great then Max + their
-# score just to make it look pretty.
-# But its a holiday. -Brian
-#		$answer  = $constants->{comment_minscore}
-#			if $answer < $min;
-#		$answer  = $constants->{comment_maxscore}
-#			if $answer > $max;
-# Do you mean this? -Jamie
-#		$answer  = -$most_adj if $answer < -$most_adj;
-#		$answer  =  $most_adj if $answer >  $most_adj;
 		$users_comments_table->{"people_bonus_$_"} = ($answer == 0) ? '' : $answer;
 	}
 

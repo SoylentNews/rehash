@@ -376,7 +376,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_hardcoded','0','Tu
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len','10','Minimum minimum average line length');
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len_max','20','Maximum minimum average line length');
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len_kicks_in','100','Num chars at which minimum average line length first takes effect');
-INSERT INTO vars (name, value, description) VALUES ('comments_response_limit','20','interval between reply and submit');
+INSERT INTO vars (name, value, description) VALUES ('comments_response_limit','5','interval between reply and submit');
 INSERT INTO vars (name, value, description) VALUES ('comments_speed_limit','120','seconds delay before repeat posting');
 INSERT INTO vars (name, value, description) VALUES ('commentstatus','0','default comment code');
 INSERT INTO vars (name, value, description) VALUES ('cookiedomain','','Domain for cookie to be active (normally leave blank)');

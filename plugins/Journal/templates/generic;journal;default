@@ -37,7 +37,7 @@ __template__
 								HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.alttext %]"></A>
 				</FONT>
 			</TD> </TR>
-			[% IF diatribe.discussion %]
+			[% IF diatribe.discussion && show_discussion %]
 				<TR><TD VALIGN="RIGHT">
 					<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</A>
 				</TD></TR>

@@ -70,6 +70,10 @@ sub main {
 			check => 1,			
 			function => \&freaks		
 		},
+		all		=> { 
+			check => 1,			
+			function => \&all		
+		},
 		default		=> { 
 			check => 0,			
 			function => \&list	
@@ -259,6 +263,40 @@ sub freaks {
 				print getData('yournofreaks');
 			} else {
 				print getData('nofreaks', { nickname => $nick });
+			}
+		}
+	}
+}
+
+sub all {
+	my($zoo, $constants, $user, $form, $slashdb) = @_;
+
+	my ($uid, $nick);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
+	} else {
+		$uid = $user->{uid};
+		$nick = $user->{nick};
+	}
+	my $editable = ($uid == $user->{uid} ? 1 : 0);
+	my $people = $zoo->getAll($uid);
+
+	if ($form->{content_type} eq 'rss') {
+		_rss($people, $nick, 'people');
+	} else {
+		if ($editable) {
+			_printHead("yourall");
+		} else {
+			_printHead("yourhead",{ nickname => $nick });
+		}
+		if (@$people) {
+			slashDisplay('alllist', { people => $people, editable => $editable });
+		} else {
+			if ($editable) {
+				print getData('yournoall');
+			} else {
+				print getData('noall', { nickname => $nick });
 			}
 		}
 	}

@@ -27,6 +27,7 @@ userInfo
 __template__
 [% USE Slash %]
 [% PROCESS titlebar width="95%" %]
+[% PROCESS zoo_icons person=useredit.uid %]
 
 [% IF form.formkey %]
         <!-- INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]" -->
@@ -75,7 +76,27 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 [% END %]
 
 [% IF useredit.bio %]
- <B>User Bio</B><BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<P>
+ <B>User Bio</B>
+[% uid = useredit.uid %]
+[% UNLESS user.is_anon || uid == user.uid %]
+&nbsp;&nbsp; 
+<FONT FACE="[% constants.mainfontface %]" SIZE="1">
+
+	[% IF user.people.$uid == Slash.FRIEND %]
+		<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Friend ]</A>
+	[% ELSIF user.people.$uid == Slash.FOE %]
+		<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Foe ]</A>
+	[% ELSIF user.people.$uid == Slash.FAN %]
+		<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Fan ]</A>
+	[% ELSIF user.people.$uid == Slash.FREAK %]
+		<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=foe&amp;uid=[% uid %]">[ Freak ]</A>
+	[% ELSE %]
+		<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Neutral ]</A>
+	[% END %]
+
+</FONT>
+[% END %]
+ <BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<P>
 [% END %]
 
 <BR><B>[% nick %] has posted [% commentcount %]

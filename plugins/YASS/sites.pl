@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 use strict;
-use XML::OCS;
 use Slash;
 use Slash::Utility;
 use Slash::Display;
@@ -26,6 +25,8 @@ sub main {
 	# because I am working on rewriting XML::OCS and
 	# until I am done I am going to leave this like this.
 	# -Brian
+		#require XML::OCS;
+		#my $all = $feed->getActive();
 		my $all = $yass->getActive();
 		my $r = Apache->request;
 		$r->header_out('Cache-Control', 'private');

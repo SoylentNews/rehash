@@ -20,30 +20,20 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
 	slashdLog('Rebuilding People Beginning ');
-	my $users = $slashdb->sqlSelectColArrayref('uid', 'people');
+	my $users = $slashdb->sqlSelectColArrayref('DISTINCT uid', 'people');
 
 	for my $uid (@$users) {
 		my $people = $slashdb->getUser($uid, 'people ');
 		# We clean out everuthing but friend and foe
 		for (keys %$people) {  
 			delete $people->{$_} 
-				unless $people->{$_} == FRIEND || $people->{$_} == FOE;
+				if $people->{$_} == FOF || $people->{$_} == EOF;
 		}
 		# The raw SQL code I decided on -Brian
 		# select b.person from people as a, people as b WHERE a.uid=986 AND a.type="friend" AND b.uid = a.person;
 		my $fof = $slashdb->sqlSelectColArrayref('b.person', 'people as a, people as b', "a.uid=$uid AND a.type='friend' AND b.uid=a.person AND b.person!=$uid");
 		my $eof = $slashdb->sqlSelectColArrayref('b.person', 'people as a, people as b', "a.uid=$uid AND a.type='foe' AND b.uid=a.person AND b.person!=$uid");
-		my $fans = $slashdb->getFans($_);
-		my $freaks = $slashdb->getFreaks($_);
 		# FOF and EOF never override friends or foes -Brian
-		for (@$fans) {
-			$people->{$_} = FAN
-				unless $people->{$_};
-		}
-		for (@$freaks) {
-			$people->{$_} = FREAK
-				unless $people->{$_};
-		}
 		for (@$fof) {
 			$people->{$_} = FOF
 				unless $people->{$_};
