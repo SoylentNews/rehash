@@ -1,0 +1,199 @@
+#!/usr/bin/perl
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+###############################################################################
+# excessiveHits 
+# This code generates a report of excessive hitters - mostly robots 
+###############################################################################
+
+use strict;
+use DBI;
+
+my $dsn = 'DBI:mysql:database=slash;host=yoursite.com';
+my $dbuser = 'slash';
+my $dbpass = 'yourpassword';
+
+my $dbh = DBI->connect($dsn,$dbuser,$dbpass);
+
+# 
+my $create_hits = "create table hitters(id int(5) not null auto_increment, host_addr varchar(15) not null, hits int(6) not null default 0, primary key (id), index host_addr (host_addr), index hits (hits))";
+
+my $drop_hits = 'drop table if exists hitters';
+
+my $fill_hits = "insert into hitters (host_addr,hits) select distinct host_addr,count(*) from accesslog group by host_addr";
+
+my $big_hitters_query = 'select * from hitters where hits > 1000 order by hits DESC';
+
+my $day_ref = $dbh->selectall_arrayref("select curdate() + 0");
+my $filename = "/home/slash/public_html/" . $day_ref->[0]->[0] . "_robot.html";
+
+my $sth = $dbh->prepare($drop_hits);
+$sth->execute;
+$sth->finish;
+  
+$sth = $dbh->prepare($create_hits);
+$sth->execute;
+$sth->finish;
+ 
+$sth = $dbh->prepare($fill_hits);
+$sth->execute;
+$sth->finish;
+
+my $ary_ref = $dbh->selectall_arrayref($big_hitters_query);
+
+open(ROBOTS,">$filename") or die "unable to open file $filename $!\n"; 
+select(ROBOTS);
+
+print <<EOTXT;
+<html>
+	<head>
+	<title>Robot Report for Yoursite</title>
+	</head>
+<body bgcolor="white">
+
+<table bgcolor="#b0b0b0" border="0" cellspacing="0">
+	<tr>
+EOTXT
+
+for(@$ary_ref) {
+	my ($ip,$hits) = ($_->[1],$_->[2]);
+	my ($cellbgcolor,$tmp_fontcolor);
+
+	my $tmp_op_ref = $dbh->selectall_arrayref("select distinct op,count(*) from accesslog where host_addr = '$ip' group by op");
+	my $tmp_uid_ref = $dbh->selectall_arrayref("select distinct uid from accesslog where host_addr = '$ip'");
+
+	my $total_uids = $#{$tmp_uid_ref};
+	my $hits_fontcolor = "black";
+
+	if($hits > 8000) {
+		$hits_fontcolor = "red";
+	}
+
+	if($total_uids <= 1) {
+		$cellbgcolor = "#f09090";
+	} else {
+		if($hits > 5000 && $total_uids <= 2) {
+			$cellbgcolor = "#f09090";
+		}
+		elsif($hits > 8000 && $total_uids <= 3) {
+			$cellbgcolor = "#f09090";
+		}
+		else {
+			$cellbgcolor = "#9090f0";
+		}
+	}
+
+	print <<EOTXT;
+	<tr>
+		<td colspan="3" bgcolor="$cellbgcolor">&nbsp;</td>
+	</tr>
+	<tr>
+		<td colspan="2" bgcolor="$cellbgcolor"><b>IP address</b></td>
+		<td bgcolor="$cellbgcolor"><b> Total number of hits </b></td>
+	</tr>
+
+	<tr>
+		<td BGCOLOR="#000000" COLSPAN="3"><img src="dot.gif" height="1"></td>
+	</tr>
+
+	<tr>
+		<td colspan="2">$ip</td>
+		<td><font color="$hits_fontcolor">$hits</font></td>
+	</tr>
+
+	<tr>
+		<td colspan="3">&nbsp;</td>
+	</tr>
+	<tr>
+		<td colspan="3">The pages and number of hits they visited:</td>
+	</tr>
+	
+	<tr>
+
+	<tr>
+		<td BGCOLOR="#000000" COLSPAN="3"><img src="dot.gif" height="1"></td>
+	</tr>
+
+	<tr bgcolor="#808080">	
+		<td><b>Page</b></td><td><b>Hits</b></td><td><b>Percentage</b></td>
+	</tr>
+
+	<tr>
+		<td BGCOLOR="#000000" COLSPAN="3"><img src="dot.gif" height="1"></td>
+	</tr>
+EOTXT
+
+	for(@$tmp_op_ref) {
+	 	my ($op,$count) = ($_->[0],$_->[1]);	
+		my $percentage = sprintf("%3.2f",$count/$hits * 100);
+
+		$tmp_fontcolor = 'black';
+		$tmp_fontcolor = 'red' if($op eq 'pollboot' && $percentage > 2);
+		$tmp_fontcolor = 'red' if($op eq '404' && $percentage > 1.5);
+		$tmp_fontcolor = 'red' if($op eq 'users' && $percentage > 2);
+
+		print <<EOTXT;
+	<tr>
+		<td><font color="$tmp_fontcolor">$op</font></td>
+		<td><font color="$tmp_fontcolor">$count</font></td>
+		<td><font color="$tmp_fontcolor">$percentage \% </font></td>
+	</tr>
+EOTXT
+
+	}
+
+	print <<EOTXT; 
+	<tr>
+		<td colspan="3">&nbsp;</td>
+	<tr>
+		<td colspan="3">The different users this ip accessed the site as:</td>
+	</tr>
+
+	<tr>
+		<td BGCOLOR="#000000" COLSPAN="3"><img src="dot.gif" height="1"></td>
+	</tr>
+
+	<tr bgcolor="#808080">
+		<td>UID</td><td colspan="2">&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td BGCOLOR="#000000" COLSPAN="3"><img src="dot.gif" height="1"></td>
+	</tr>
+EOTXT
+
+	if(@#{$tmp_uid_ref} == 1) {
+		$tmp_fontcolor = "red";
+	} else {	
+		$tmp_fontcolor = "black";
+	}
+
+	for(@$tmp_uid_ref) {
+	 	my $uid = $_->[0];	
+		print "\t<tr>\n\t\t<td><font color=\"$tmp_fontcolor\">$uid</font></td>\n";
+		print "\t\t<td colspan=\"2\">\&nbsp;</td>\n\t</tr>\n";
+	}
+
+	print <<EOTXT;
+	<tr>
+		<td bgcolor="#ffffff" colspan="3">&nbsp;</td>
+	</tr>
+EOTXT
+
+}
+
+print <<EOTXT;
+</table>
+</body>
+</html>
+EOTXT
+
+select(STDOUT);
+close(ROBOTS);
+$dbh->disconnect;
+
+
+exit(0);

@@ -1,0 +1,79 @@
+#!/bin/sh
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# /etc/init.d/slash
+#
+# written by Yazz Atlas for the Slashteam... 
+#
+PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:\
+				/usr/local/sbin:/usr/bin/X11:/usr/X11R6/bin"
+
+# Slash home
+DATADIR=/usr/local/slash
+SLASHD="$DATADIR/sbin/slashd $SERVER_NAME"
+SLASHSITE=$DATADIR/slash.sites
+
+# This is where you store the running PID of the slashd's you start
+# Under Redhat people like to place this in /var/run
+#RUNNING_PID=/var/run
+RUNNING_PID=$DATADIR
+
+# To figure out where things are...
+export TZ=GMT
+WHICH_CAT=`which cat`
+WHICH_CUT=`which cut`
+
+if [ ! -f $SLASHSITE ] ; then
+	echo "[0;31mNOT[1;m Starting slashd:[0;31m No[1;m $SLASHSITE";
+	exit 0;
+fi
+
+GRAB_CONFIG=`$WHICH_CAT $SLASHSITE | $WHICH_CUT -d"#" -f1` 
+
+case "$1" in
+  start)
+    cd $DATADIR
+		for server_name in $GRAB_CONFIG
+		do
+			SERVER_NAME=`echo $server_name |$WHICH_CUT -d":" -f1`
+			USERNAME=`echo $server_name |$WHICH_CUT -d":" -f2`
+			echo -n "Starting slashd $SERVER_NAME: "
+			su - $USERNAME -c "TZ=GMT $SLASHD $SERVER_NAME" &
+			echo $! > $RUNNING_PID/slashd.$SERVER_NAME.pid 
+			echo "ok PID = $! "
+		done
+    ;;
+  stop)
+    cd $DATADIR
+    for server_name in $GRAB_CONFIG
+    do
+			SERVER_NAME=`echo $server_name |$WHICH_CUT -d":" -f1`
+			USERNAME=`echo $server_name |$WHICH_CUT -d":" -f2`
+			if [ -f $RUNNING_PID/slashd.$SERVER_NAME.pid ] ;then
+				echo -n "Stopping slashd $SERVER_NAME: "
+				kill -9 `cat $RUNNING_PID/slashd.$SERVER_NAME.pid`
+				rm -f $RUNNING_PID/slashd.$SERVER_NAME.pid
+				echo "ok."
+			else
+				echo "Slashd $SERVER_NAME has no PID file"
+			fi
+		done
+
+      ;;
+  restart)
+    cd $DATADIR
+		$0 stop
+		$0 start
+    ;;
+  *)
+    echo "Debian Usage: /etc/init.d/$0 {start|stop|restart}"
+    echo "Redhat Usage: /etc/rc.d/init.d/$0 {start|stop|restart}"
+    echo "Other Usage: /usr/local/sbin/$0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0 ;
