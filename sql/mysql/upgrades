@@ -524,9 +524,6 @@ INSERT INTO vars (name, value, description) VALUES ('db_slave_lag_ignore',100000
 
 # End of T_2_3_0_35, Start of T_2_3_0_36
 
-# For plugins/Stats (ignore if you're not using that plugin):
-INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');
-
 # For Sections
 INSERT INTO string_param (type, code, name) VALUES ('section_types','contained','Contained Section');
 INSERT INTO string_param (type, code, name) VALUES ('section_types','collected','Collection of Sections');
@@ -543,6 +540,8 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Recen
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', -1,'Don\'t Display');
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', 1,'Display');
 INSERT INTO vars (name, value, description) VALUES ('discussion_sort_order', '3', 'sort code to feed to findDiscussions');
+
+INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');
 
 # column truncated descriptions fields
 ALTER TABLE rss_raw modify column description text;
