@@ -283,7 +283,7 @@ print "Plugins selected: " . join(" ", sort keys %{$themes->{$theme}{plugin}}) .
 if (!$Config{d_symlink}) {
 	$symlink = 0;
 } elsif ($opts{'L'}) {
-	$symlink = $opts{'L'} =~ /^n/i ? 0 : 1;
+	$symlink = $opts{'L'};
 } else {
 	print "
 Would you like to install all the files as symlinks
