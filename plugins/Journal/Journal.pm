@@ -225,16 +225,17 @@ LIMIT $limit
 EOT
 
 	my $losers = $self->{_dbh}->selectall_arrayref($sql);
+	return [ ] if !$losers || !@$losers;
 
-	my $sql2 = sprintf <<EOT, join (',', map { $_->[4] } @$losers);
-SELECT id, description
-FROM journals
-WHERE id IN (%s)
-EOT
-	my $losers2 = $self->{_dbh}->selectall_hashref($sql2, 'id');
+	my $id_list = join(", ", map { $_->[4] } @$losers);
+	my $loserid_hr = $self->sqlSelectAllHashref(
+		"id",
+		"id, description",
+		"journals",
+		"id IN ($id_list)");
 
-	for (@$losers) {
-		$_->[5] = $losers2->{$_->[4]}{description};
+	for my $loser (@$losers) {
+		$loser->[5] = $loserid_hr->{$loser->[4]}{description};
 	}
 
 	return $losers;
