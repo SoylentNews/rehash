@@ -1077,9 +1077,9 @@ sub createMenu {
 		&& $user->{lastlookuid} != $user->{uid}
 		&& ($user->{lastlooktime} || 0) >= time - ($constants->{lastlookmemory} || 3600)
 	) {
-		my $lastlook_user = $reader->getUser($user->{lastlookuid});
-		my $nick_fix = fixparam($lastlook_user->{nickname});
-		my $nick_attribute = strip_attribute($lastlook_user->{nickname});
+		my $ll_nick = $reader->getUser($user->{lastlookuid}, 'nickname');
+		my $nick_fix = fixparam($ll_nick);
+		my $nick_attribute = strip_attribute($ll_nick);
 		push @$menu_items, {
 			value =>	"$constants->{rootdir}/~$nick_fix",
 			label =>	"~$nick_attribute ($user->{lastlookuid})",
