@@ -93,6 +93,7 @@ use vars qw($VERSION @EXPORT);
 	strip_plaintext
 	strip_paramattr
 	strip_urlattr
+	submitDomainAllowed
 	timeCalc
 	url2abs
 	xmldecode
@@ -170,7 +171,42 @@ sub emailValid {
 	return 1;
 }
 
+#========================================================================
 
+=head2 submitDomainAllowed(DOMAIN)
+
+Returns true if domain is allowed, false otherwise.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item DOMAIN
+
+host domain to check.
+
+=back
+
+=item Return value
+
+True if domain is valid, false otherwise.
+
+=back
+
+=cut
+
+sub submitDomainAllowed {
+        my($domain) = @_;
+
+        my $constants = getCurrentStatic();
+        return 0 if $constants->{submit_domains_invalid}
+                && ref($constants->{submit_domains_invalid})
+                && $domain =~ $constants->{submit_domains_invalid};
+
+        return 1;
+}
 #========================================================================
 
 =head2 root2abs()
