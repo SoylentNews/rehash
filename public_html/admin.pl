@@ -1385,7 +1385,7 @@ EOT
 
 		print qq[\t<TR BGCOLOR="$bgcolor"><TD ALIGN="RIGHT">\n];
 		if ($I{U}{aid} eq $aid || $I{U}{aseclev} > 100) {
-			my $tbtitle = fixurl($title, 1);
+			my $tbtitle = fixparam($title);
 			print qq!\t\t[<A HREF="$ENV{SCRIPT_NAME}?title=$tbtitle&op=edit&sid=$sid">$x</A>\n]!;
 
 		} else {

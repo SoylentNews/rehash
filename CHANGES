@@ -7,6 +7,12 @@ slash-1.0.7, 2000.07.xx
 *	Removed spurious entries for user with uid "7" in users_
 	tables in slashdata_dump.sql
 
+*	Add schema changes for 1.0.6 back into slash_schema.sql
+
+*	Added fixparam() function (same as fixurl($foo, 1)) and
+	cleaned up fixurl() to better handle stuff
+
+
 slash-1.0.6, 2000.07.10
 -----------------------
 
