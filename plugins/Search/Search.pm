@@ -392,7 +392,7 @@ sub findSubmission {
 	my $constants = getCurrentStatic();
 
 	my $query = $self->sqlQuote($form->{query});
-	my $columns = "subid, subj, time, story";
+	my $columns = "*";
 	$columns .= ", TRUNCATE( " . $self->_score('subj,story', $form->{query}, $constants->{search_method}) . ", 1) as score "
 		if $form->{query};
 	my $tables = "submissions";

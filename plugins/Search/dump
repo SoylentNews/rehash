@@ -3,3 +3,4 @@ INSERT INTO vars (name, value, description) VALUES ('search_default_display', '3
 INSERT INTO vars (name, value, description) VALUES ('search_journal_enabled', '1', 'Turns on searching journals.');
 INSERT INTO vars (name, value, description) VALUES ('search_rss_enabled', '1', 'Turns on searching rss.');
 INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method to use to weight scores for search returns (and to narrow down possible matches)');
+INSERT INTO vars (name, value, description) VALUES ('search_text_length','80','This will tell search how many characters should be returned for text bodies in searches (think introtext for stories and article for journals).');

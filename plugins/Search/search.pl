@@ -325,7 +325,7 @@ sub storySearch {
 		}
 
 		for(@$stories) {
-			$_->{introtext} = substr(strip_nohtml($_->{introtext}),0,80);
+			$_->{introtext} = substr(strip_nohtml($_->{introtext}),0,$constants->{search_text_length});
 			$_->{introtext} =~ s/(.*) .*$/$1.../g;
 		}
 
@@ -617,7 +617,7 @@ sub journalSearch {
 			$forward = 0;
 		}
 		for(@$entries) {
-			$_->{article} = substr(strip_nohtml($_->{article}),0,80);
+			$_->{article} = substr(strip_nohtml($_->{article}),0,$constants->{search_text_length});
 			$_->{article} =~ s/(.*) .*$/$1.../g;
 		}
 
@@ -698,7 +698,7 @@ sub submissionSearch {
 			$forward = 0;
 		}
 		for(@$entries) {
-			$_->{story} = substr(strip_nohtml($_->{story}),0,80);
+			$_->{story} = substr(strip_nohtml($_->{story}),0,$constants->{search_text_length});
 			$_->{story} =~ s/(.*) .*$/$1.../g;
 		}
 
@@ -769,7 +769,7 @@ sub rssSearch {
 	if ($entries && @$entries) {
 		for(@$entries) {
 			$_->{title} = strip_plaintext($_->{title});
-			$_->{description} = substr(strip_plaintext($_->{description}),0,80);
+			$_->{description} = substr(strip_plaintext($_->{description}),0,$constants->{search_text_length});
 		}
 		my $forward;
 		if (@$entries == $constants->{search_default_display} + 1) {
