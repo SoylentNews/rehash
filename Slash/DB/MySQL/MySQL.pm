@@ -1181,9 +1181,45 @@ sub undoModeration {
 	return \@removed;
 }
 
+sub getTopicParam {
+	my ($self, $tid_wanted, $val, $force_cache_freshen) = @_;
+	my $constants = getCurrentStatic();
+	my $table_cache		= "_topicparam_cache";
+	my $table_cache_time	= "_topicparam_cache_time";
+	
+	return undef unless $tid_wanted;
+	
+	_genericCacheRefresh($self, 'topicparam', $constants->{block_expire});
+	
+	my $is_in_local_cache = exists $self->{$table_cache}{$tid_wanted};
+	my $use_local_cache = $is_in_local_cache && !$force_cache_freshen;
+
+	if (!$is_in_local_cache || $force_cache_freshen) {
+		my $tid_clause = "tid=".$self->sqlQuote($tid_wanted);
+		my $params = $self->sqlSelectAllKeyValue('name,value', 'topic_param', $tid_clause);	
+		$self->{$table_cache_time} = time() if !$self->{$table_cache_time};
+		$self->{$table_cache}{$tid_wanted} = $params;
+	} 
+	my $hr = $self->{$table_cache}{$tid_wanted};
+	my $retval;
+	if ($val && !ref $val) {
+		if (exists $hr->{$val}) {
+			$retval = $hr->{$val};
+		}
+	} else {
+		my %return = %$hr;
+		$retval = \%return;
+	}
+	return $retval;
+	
+}
+
 ########################################################
 # If no tid is given, returns the whole tree.  Otherwise,
 # returns the data for the topic with that numeric id.
+#
+# Feb 2005 - Topic params no longer kept in tree, should
+# be fetched with getTopicParam
 sub getTopicTree {
 	my($self, $tid_wanted, $options) = @_;
 	my $constants = getCurrentStatic();
@@ -1211,7 +1247,6 @@ sub getTopicTree {
 	my $topic_nexus = $self->sqlSelectAllHashref("tid", "*", "topic_nexus");
 	my $topic_nexus_dirty = $self->sqlSelectAllHashref("tid", "*", "topic_nexus_dirty");
 	my $topic_parents = $self->sqlSelectAllHashrefArray("*", "topic_parents");
-	my $topic_param = $self->sqlSelectAllHashrefArray("*", "topic_param");
 
 	for my $tid (keys %$topics) {
 		$tree_ref->{$tid} = $topics->{$tid};
@@ -1233,14 +1268,7 @@ sub getTopicTree {
 		$tree_ref->{$child}{parent}{$parent} = $m_w;
 		$tree_ref->{$parent}{child}{$child} = $m_w;
 	}
-	for my $tp_hr (@$topic_param) {
-		my($tid, $name, $value) = @{$tp_hr}{qw( tid name value )};
-		if ($tree_ref->{$tid} && !$tree_ref->{$tid}{$name}) {
-			$tree_ref->{$tid}{$name} = $value;
-			$tree_ref->{$tid}{topic_param_keys} ||= [ ];
-			push @{ $tree_ref->{$tid}{topic_param_keys} }, $name;
-		}
-	}
+	
 	for my $tid (keys %$tree_ref) {
 		if (exists $tree_ref->{$tid}{child}) {
 			my $c_hr = $tree_ref->{$tid}{child};
@@ -1282,6 +1310,7 @@ sub getTopicTree {
 		return $tree_ref;
 	}
 }
+
 
 ########################################################
 # Given a topic tree, check it for loops (trees should not have
