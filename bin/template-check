@@ -15,10 +15,9 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('hvu:', \%opts);
+usage('Options used incorrectly') unless getopts('hvb:t:u:', \%opts);
 usage() if $opts{'h'};
 version() if $opts{'v'};
-$opts{'u'} ||= 'slash';
 
 my $dir = shift || curdir();
 my $diff = q{diff -Bu};
@@ -27,16 +26,29 @@ my $less = q{less};
 
 # main program logic (in braces to offset nicely)
 {
-	my $slashdb   = Slash::DB->new($opts{'u'});
-	my $basedir   = $slashdb->getVar('slashdir', 'value');
-	my $siteinfo  = $slashdb->getDescriptions('site_info');
-	my $theme     = catdir($basedir, 'themes', $siteinfo->{theme}, 'templates');
-	my $plugindir = catdir($basedir, 'plugins');
+	usage() if !$opts{'u'} && !($opts{'b'} && $opts{'t'});
 
-	local *D;
-	opendir D, $plugindir or die "Can't open $plugindir: $!";
-	my @plugins = grep !/^(?:CVS|\.{1,2}|Makefile)$/, readdir D;
-	closedir D;
+	my($basedir, $theme, $plugindir);
+
+	if ($opts{'u'}) {
+		my $slashdb   = Slash::DB->new($opts{'u'});
+		my $siteinfo  = $slashdb->getDescriptions('site_info');
+		$basedir      = $slashdb->getVar('slashdir', 'value');
+		$theme        = $siteinfo->{theme};
+	}
+
+	$basedir = $opts{'b'} if $opts{'b'};	
+	$theme   = $opts{'t'} if $opts{'t'};
+
+	die "No basedir" unless $basedir;
+	die "No theme"   unless $theme;
+	
+	$theme     = catdir($basedir, 'themes', $theme, 'templates');
+	$plugindir = catdir($basedir, 'plugins');
+
+	opendir my $dh, $plugindir or die "Can't open $plugindir: $!";
+	my @plugins = grep !/^(?:CVS|\.{1,2}|Makefile)$/, readdir($dh);
+	closedir $dh;
 
 	mydiff($theme);
 
@@ -63,6 +75,8 @@ templates (after they have been dumped to DIRECTORY),
 and templates in the installation directory (usually
 in /usr/local/slash/themes/ and /usr/local/slash/plugins/).
 
+If -u is not specified, -b and -t must be specified.
+
 Dump your templates out using template-tool, then
 run this program on that directory.
 
@@ -70,7 +84,9 @@ Main options:
 		Directory to diff against (default is current dir)
 	-h	Help (this message)
 	-v	Version
-	-u	Virtual user (default is "slash")
+	-u	Virtual user
+	-b      Specify the basedir to compare against
+	-t      Specify the theme to use
 
 EOT
 	exit;
