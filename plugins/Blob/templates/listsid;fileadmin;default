@@ -31,3 +31,5 @@ File to upload: <INPUT TYPE="FILE" NAME="file_content"><BR>
 
 __seclev__
 10000
+__version__
+$Id$
