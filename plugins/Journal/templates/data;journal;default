@@ -39,7 +39,7 @@ __template__
 	An unknown error occured when you tried to create a journal entry.  Please go back to the beginning and try again.
 
 [% CASE 'no_desc_or_article' %]
-	Either the subject or the journal text was empty.  Please go back and try again.
+	Either the subject or the journal text was empty.  Please complete the entry and try again.
 
 [% CASE 'noentries_found' %]
 	Sorry, there are no journal entries found for this user.

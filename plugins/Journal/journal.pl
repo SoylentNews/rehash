@@ -370,6 +370,7 @@ sub saveArticle {
 		unless ($ws) {
 			_printHead("mainhead");
 			print getData('no_desc_or_article');
+			editArticle(@_, 1);
 		}
 		return 0;
 	}
@@ -485,12 +486,12 @@ sub removeArticle {
 }
 
 sub editArticle {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $slashdb, $nohead) = @_;
 	# This is where we figure out what is happening
 	my $article = {};
 	my $posttype;
 
-	_printHead("mainhead");
+	_printHead("mainhead") unless $nohead;
 
 	if ($form->{state}) {
 		$article->{date}	= scalar(localtime(time()));
