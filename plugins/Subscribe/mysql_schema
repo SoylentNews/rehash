@@ -11,6 +11,7 @@ CREATE TABLE subscribe_payments (
 	pages		MEDIUMINT UNSIGNED NOT NULL,
 	transaction_id	VARCHAR(255) NOT NULL,
 	method		VARCHAR(6),
+	memo		VARCHAR(255) NOT NULL,
 	data		BLOB,
 	PRIMARY KEY(spid),
 	KEY(uid),

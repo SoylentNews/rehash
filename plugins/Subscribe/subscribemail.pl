@@ -66,6 +66,11 @@ $task{$me}{code} = sub {
 				)},
 				($subscribers_hr->{$spid_hr->{uid}}{is_new} ? "NEW" : "renew"),
 			);
+			if ($spid_hr->{memo} && $spid_hr->{memo} =~ /\S/) {
+				my $memo = $spid_hr->{memo};
+				$memo = substr($spid_hr->{memo}, 0, 65) . " ..." if length($memo) > 72;
+				$transaction_list .= "\t$memo\n";
+			}
 		}
 		$transaction_list .= sprintf(
 			"%-17s %7.2f %6.2f %6d\n",

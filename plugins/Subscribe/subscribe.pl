@@ -184,10 +184,10 @@ sub makepayment {
 	}
 
 	my @keys = qw( uid email payment_gross payment_net
-		method transaction_id data );
+		method transaction_id data memo );
 	my $payment = { };
 	for my $key (@keys) {
-		$payment->{$key} = $form->{$key};
+		$payment->{$key} = $form->{$key} || '';
 	}
 	if (!defined($payment->{payment_net})) {
 		$payment->{payment_net} = $payment->{payment_gross};

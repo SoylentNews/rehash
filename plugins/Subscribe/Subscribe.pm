@@ -243,6 +243,7 @@ sub convertPagesToDollars {
 #	transaction_id	(optional) any ID you'd use to identify this payment
 #	method		(optional) string representing payment method
 #	data		(optional) any additional data
+#	memo		(optional) subscriber's memo
 sub insertPayment {
 	my($self, $payment) = @_;
 	my $slashdb = getCurrentDB();
