@@ -100,6 +100,16 @@ SubnetID [% netid_vis %] has posted [% commentcount %] comments.
 >More Comments...</A><P>
 [% END %]
 
+<BR><B>
+[% IF fieldname == 'ipid' %]IPID[% ELSIF fieldname == 'subnetid' %]SubnetID[% END %] has posted [% subcount %] submissions.</B><P>
+
+[% IF subcount > 0 %]
+	[% FOREACH sub = submissions %]
+	<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A> on [% Slash.timeCalc(sub.time) %] by <A HREF="[% constants.rootdir %]/users.pl?uid=[% sub.uid %]>[% sub.name %]</A><BR>
+	[% END %]
+	<BR>
+[% END %]
+
 [% admin_block %]
 
 [% IF fieldname == 'ipid' || fieldname == 'subnetid' %]
