@@ -6273,8 +6273,10 @@ sub getSubmissionsByNetID {
 			'submission_param',
 			"subid=".$self->sqlQuote($sub->{subid})." AND name='sid'") if $sub->{del} == 2;
 		if ($sub->{sid}) {
-			my $story_ref = $self->sqlSelectHashref("stoid,title,time", "stories",
-				"sid=".$self->sqlQuote($sub->{sid}));
+			my $sid_q = $self->sqlQuote($sub->{sid});
+			my $story_ref = $self->sqlSelectHashref("stories.stoid, title, time",
+				"stories, story_text",
+				"sid=$sid_q AND stories.stoid=story_text.stoid");
 			$story_ref->{displaystatus} = $self->_displaystatus($story_ref->{stoid});
 			@$sub{'story_title','story_time','displaystatus'} = @$story_ref{'title','time','displaystatus'} if $story_ref;
 		}
@@ -6303,8 +6305,10 @@ sub getSubmissionsByUID {
 			'submission_param', 
 			"subid=" . $self->sqlQuote($sub->{subid}) . " AND name='sid'") if $sub->{del} == 2;
 		if ($sub->{sid}) {
-			my $story_ref = $self->sqlSelectHashref("stoid,title,time", "stories",
-				"sid=".$self->sqlQuote($sub->{sid}));
+			my $sid_q = $self->sqlQuote($sub->{sid});
+			my $story_ref = $self->sqlSelectHashref("stories.stoid, title, time",
+				"stories, story_text",
+				"sid=$sid_q AND stories.stoid=story_text.stoid");
 			$story_ref->{displaystatus} = $self->_displaystatus($story_ref->{stoid});
 			@$sub{'story_title','story_time','displaystatus'} = @$story_ref{'title','time','displaystatus'} if $story_ref;
 		}
@@ -6347,18 +6351,20 @@ sub countSubmissionsByNetID {
 # Be nice if we could just pull certain elements -Brian
 sub getStoriesBySubmitter {
 	my($self, $id, $limit) = @_;
-	
+
+	my $id_q = $self->sqlQuote($id);
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	my $nexuses = $self->getNexusChildrenTids($mp_tid);
 	my $nexus_clause = join ',', @$nexuses, $mp_tid;
 
 	$limit = 'LIMIT ' . $limit if $limit;
 	my $answer = $self->sqlSelectAllHashrefArray(
-		'sid,title,time',
-		'stories,story_topics_rendered',
+		'sid, title, time',
+		'stories, story_text, story_topics_rendered',
 		"stories.stoid = story_topics_rendered.stoid
-		 AND submitter='$id' AND time < NOW()
-		 AND story_topics_rendered.tid IN($nexus_clause) 
+		 AND stories.stoid = story_text.stoid
+		 AND submitter=$id_q AND time < NOW()
+		 AND story_topics_rendered.tid IN ($nexus_clause) 
 		 AND in_trash = 'no'",
 		"GROUP BY stories.stoid ORDER by time DESC $limit");
 	return $answer;
@@ -6368,6 +6374,7 @@ sub getStoriesBySubmitter {
 sub countStoriesBySubmitter {
 	my($self, $id) = @_;
 	
+	my $id_q = $self->sqlQuote($id);
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	my $nexuses = $self->getNexusChildrenTids($mp_tid);
 	my $nexus_clause = join ',', @$nexuses, $mp_tid;
@@ -6375,8 +6382,8 @@ sub countStoriesBySubmitter {
 	my ($count) = $self->sqlSelect('count(*)',
 		'stories, story_topics_rendered',
 		"stories.stoid=story_topics_rendered.stoid',
-		 AND submitter='$id' AND time < NOW()
-		 AND story_topics_rendered.tid IN($nexus_clause) 
+		 AND submitter=$id_q AND time < NOW()
+		 AND story_topics_rendered.tid IN ($nexus_clause) 
 		 AND in_trash = 'no'
 		 GROUP BY stories.stoid");
 
