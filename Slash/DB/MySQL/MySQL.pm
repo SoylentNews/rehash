@@ -1442,9 +1442,16 @@ sub deleteSubmission {
 		$self->sqlUpdate("submissions", { del => 1 },
 			"subid=" . $self->sqlQuote($form->{subid})
 		);
+
+		# Brian mentions that this isn't atomic and that two updates
+		# executing this code with the same UID will cause problems.
+		# I say, that if you have 2 processes executing this code 
+		# at the same time, with the same uid, that you have a SECURITY
+		# BREACH. Caveat User.			- Cliff
 		$self->setUser($uid,
-			{ -deletedsubmissions => 'deletedsubmissions+1' }
-		);
+			{ deletedsubmissions => 
+				getCurrentUser('deletedsubmissions') + 1,
+		});
 		$subid{$form->{subid}}++;
 	}
 
