@@ -1731,7 +1731,9 @@ sub getHeadFootPages {
 	my $list = $self->sqlSelectAll(
 		'page',
 		'templates',
-		"section = '$section' AND name='$headfoot'");
+		"section = '$section' AND name='$headfoot' AND page != 'misc'");
+	push @$list, [qw( misc )];
+
 	return $list;
 }
 
