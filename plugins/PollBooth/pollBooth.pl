@@ -31,36 +31,16 @@ sub main {
 
 	my $op = $form->{op};
 	$op = 'default' unless $ops{$form->{op}};
-	if (defined $form->{'aid'} && $form->{'aid'} !~ /^\-?\d$/) {
-		undef $form->{'aid'};
+
+	if (defined $form->{aid}) {
+		# Only allow a short range of answer ids here.
+		# (aid is used as the uid of an author elsewhere
+		# in the code, so at least as far as filter_param
+		# allows, it can be any integer.)
+		$form->{aid} += 0;
+		undef $form->{aid} if $form->{aid} < -1 || $form->{aid} > 8;
 	}
-# This is unfinished and has been hacked. I don't trust it anymore and
-# the site that it was written for does not use it currently -Brian
-#
-#	# Paranoia is fine, but why can't this be done from the handler 
-#	# rather than hacking in special case code? - Cliff
-#	if ($op eq "vote_return") {
-#		$ops{$op}->($form, $slashdb);
-#		# Why not do this in a more generic manner you say? 
-#		# Because I am paranoid about this being abused. -Brian
-#		#
-#		# This doesn't answer my question. How is doing this here
-#		# any better or worse than doing it at the end of vote_return()
-#		# -Cliff
-#		my $SECT = $slashdb->getSection();
-#		if ($SECT) {
-#			my $url = $SECT->{rootdir} || $constants->{real_rootdir};
-#
-#			# Remove the scheme and authority portions, if present.
-#			$form->{returnto} =~ s{^(?:.+?)?//.+?/}{/};
-#			
-#			# Form new absolute URL based on section URL and then
-#			# redirect the user.
-#			my $refer = URI->new_abs($form->{returnto}, $url);
-#			redirect($refer->as_string);
-#		}
-#	}
-#
+
 	header(getData('title'), $form->{section}, { tab_selected => 'poll'}) or return;
 
 	$ops{$op}->($form, $slashdb, $constants);

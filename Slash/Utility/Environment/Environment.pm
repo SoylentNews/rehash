@@ -1807,9 +1807,6 @@ sub _testExStr {
 # fix parameter input that should be integers
 sub fixint {
 	my($int) = @_;
-# allow + ... should be OK ... ?  -- pudge
-# 	$int =~ s/^\+//;
-# 	$int =~ s/^(-?[\d.]+).*$/$1/s or return;
 	$int =~ s/^([+-]?[\d.]+).*$/$1/s or return;
 	return $int;
 }
