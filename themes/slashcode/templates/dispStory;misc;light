@@ -47,6 +47,7 @@ END %]
 <P>[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 [% story.bodytext %]
 [% ELSE %]
+<P>
 [% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 [% END %]
 __seclev__
