@@ -19,6 +19,7 @@ __template__
                    UIDs      IPIDs      Pages 
         total: [% users %]   [% unique %]   [% total %] ([% total_bytes %])
  static total:        -          -    [% total_static %]
+gstatic total:        -          -    [% grand_total_static %]
   grand total:        -          -    [% grand_total %] ([% grand_total_bytes %])
         posts: [% distinct_comment_posters_uids %]   [% IPIDS %]
      comments: [% comments_uids %]   [% comments_ipids %]   [% comments_page %] ([% comments_bytes %])

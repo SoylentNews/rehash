@@ -48,6 +48,7 @@ __template__
 <PRE>                   UIDs      IPIDs      Pages 
         total: [% ints(stats_data.unique_users) %]   [% ints(stats_data.unique) %]   [% ints(stats_data.total) %] ([% PROCESS mbyte bytes => stats_data.total_bytes %])
  static total:        -          -    [% ints(stats_data.total_static) %]
+gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
   grand total:        -          -    [% ints(stats_data.grand_total) %] ([% PROCESS mbyte bytes => stats_data.grand_total_bytes %])
         posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.distinct_comment_ipids) %]
      comments: [% ints(stats_data.comments_uids) %]   [% ints(stats_data.comments_ipids) %]   [% ints(stats_data.comments_page) %] ([% PROCESS mbyte bytes => stats_data.comments_bytes %])

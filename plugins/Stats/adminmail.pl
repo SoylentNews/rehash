@@ -169,7 +169,7 @@ EOT
 		static => 'yes',
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
-	$data{total_static} = $grand_total_static;
+	$data{total_static} = $total_static;
 	my $total_subscriber = $stats->countDailySubscriber();
 	for (qw|index article search comments palm journal rss|) {
 		my $uniq = $stats->countDailyByPageDistinctIPID($_);
