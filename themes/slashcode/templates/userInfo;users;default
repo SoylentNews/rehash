@@ -24,31 +24,40 @@ en_US
 __name__
 userInfo
 __template__
+[% USE Slash %]
 [% INCLUDE titlebar width="95%" %]
-
-<A HREF="[% userbio.homepage %]">[% userbio.homepage %]</A><BR>
-<A HREF="mailto:[% userbio.fakeemail %]">[% userbio.fakeemail %]</A><BR>
-
 
 [% IF nickmatch_flag %]
 
-     <P>This is <B>your</B> User Info page.  There are thousands more, but this one is yours.
-    You most likely are not so interested in you, and probably would be most interested in
-      clicking the "Edit User Info" and "Customize..." links you see up top there so you can
-  customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
+<P>This is <B>your</B> User Info page.  There are thousands more, but this one is yours.
+You most likely are not so interested in you, and probably would be most interested in
+clicking the "Edit User Info" and "Customize..." links you see up top there so you can
+customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
 
-    [% IF mod_flag %]
-   <P>You're a moderator with [% points %] points[% IF points && lastgranted %] (expire after [% lastgranted %])[% END %]. Please read the
-    <A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
-       before you do any moderation.<BR><P>
-        [%END %]
-
-        <CENTER><IMG SRC="[% constants.imagedir %]/greendot.gif" WIDTH="75%" HEIGHT="1" ALIGN="CENTER"><BR></CENTER>
+[% IF mod_flag %]
+<P>You're a moderator with [% points %] points[% IF points && lastgranted %] (expire after [% lastgranted %])[% END %]. Please read the
+<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
+before you do any moderation.<BR><P>
 [% END %]
 
+<P><HR></P>
 
+[% END %]
 
-[% IF karma_flag %]
+<P>
+[% IF userbio.homepage %]
+<A HREF="[% userbio.homepage %]">[% userbio.homepage %]</A><BR>
+[% END; IF userbio.fakeemail %]
+<A HREF="mailto:[% userbio.fakeemail %]">[% userbio.fakeemail %]</A><BR>
+[% END; IF userbio.journal_last_entry_date %]
+<A HREF="[% constants.rootdir %]/journal.pl?op=display&uid=[% userbio.uid %]">
+Last Journal Entry was [% Slash.timeCalc(userbio.journal_last_entry_date) %]</A>
+[ <A HREF="[% constants.rootdir %]/journal.pl?op=list&uid=[% userbio.uid %]">List</A> ]
+<BR>
+[% END %]
+</P>
+
+[% IF karma_flag && nickmatch_flag %]
         <B>Karma</B> [% userbio.karma %] (mostly the sum of moderation done to users comments)<BR>
 [% END %]
 
@@ -62,7 +71,7 @@ __template__
  </PRE><P>
 [% END %]
 
-<B>[% nick %] has posted [% commentstruct.size %] comments</B> (this only counts the last few weeks)<BR><P>
+<B>[% nick %] has posted [% commentstruct.size %] comments</B><BR><P>
 
 [% n = 0 %]
 [% FOREACH comment = commentstruct %]
