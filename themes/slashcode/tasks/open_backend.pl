@@ -66,7 +66,7 @@ sub _do_rss {
 	my $SECT    = $backupdb->getSection($section);
 	my $link    = ($SECT->{url}  || $constants->{absolutedir}) . '/';
 	my $title   = $constants->{sitename};
-	$title = "$title: $SECT->{title}" if $section ne 'index';
+	$title = "$title: $SECT->{title}" if $SECT->{title} ne 'Index';
 
 	my $rss = xmlDisplay('rss', {
 		channel		=> {
