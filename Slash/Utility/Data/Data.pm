@@ -486,8 +486,6 @@ my %actions = (
 			}{&lt;$1}gx;					},
 	encode_html_quote => sub {
 			${$_[0]} =~ s/"/&#34;/g;			},
-	breakHtml => sub {
-			${$_[0]} = breakHtml(${$_[0]});			},
 	breakHtml_ifwhitefix => sub {
 			${$_[0]} = breakHtml(${$_[0]})
 				unless $action_data{no_white_fix};	},
@@ -527,7 +525,7 @@ my %actions = (
 	remove_newlines => sub {
 			${$_[0]} =~ s/\n+//g;				},
 	debugprint => sub {
-			print STDERR "action debugprint '${$_[0]}'\n";	},
+			print STDERR "stripByMode debug '${$_[0]}'\n";	},
 );
 
 my %mode_actions = (
@@ -585,9 +583,9 @@ my %mode_actions = (
 			newline_to_local
 			encode_html_amp
 			encode_html_ltgt
-			breakHtml_ifwhitefix
 			whitespace_tagify
-			whitespace_and_tt		)],
+			whitespace_and_tt
+			breakHtml_ifwhitefix		)],
 	EXTRANS, [qw(
 			newline_to_local
 			encode_html_amp
@@ -600,94 +598,12 @@ my %mode_actions = (
 sub stripByMode {
 	my($str, $fmode, $no_white_fix) = @_;
 	$fmode ||= NOHTML;
-	$no_white_fix = defined($no_white_fix) ?
-		$no_white_fix : $fmode == LITERAL;
+	$no_white_fix = 1 if !defined($no_white_fix) && $fmode == LITERAL;
+	$action_data{no_white_fix} = $no_white_fix || 0;
 
-	$str =~ s/(?:\015?\012|\015)/\n/g;  # change newline to local newline
-
-	# insert whitespace into long words, convert <>& to HTML entities
-	if ($fmode == LITERAL || $fmode == EXTRANS || $fmode == ATTRIBUTE || $fmode == CODE) {
-		# Encode all HTML tags
-		$str =~ s/&/&amp;/g;
-		$str =~ s/</&lt;/g;
-		$str =~ s/>/&gt;/g;
-		# attributes are inside tags, and don't need to be broken up
-		$str = breakHtml($str) unless $no_white_fix || $fmode == ATTRIBUTE;
-
-	} elsif ($fmode == PLAINTEXT) {
-		$str = processCustomTags($str);
-		$str = stripBadHtml($str);
-		$str = breakHtml($str) unless $no_white_fix;
-	}
-
-	# convert regular text to HTML-ized text, insert P, etc.
-	if ($fmode == PLAINTEXT || $fmode == EXTRANS || $fmode == CODE) {
-		$str =~ s/\n/<BR>/gi;  # pp breaks
-		$str =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
-		# Preserve leading indents / spaces
-		$str =~ s/\t/    /g;  # can mess up internal tabs, oh well
-
-		if ($fmode == CODE) {  # CODE and TT are the same ... ?
-			$str =~ s{((?:  )+)(?: (\S))?} {
-				("&nbsp; " x (length($1)/2)) .
-				(defined($2) ? "&nbsp;$2" : "")
-			}eg;
-			$str = '<TT>' . $str . '</TT>';
-
-		} else {
-			$str =~ s{<BR>\n?( +)} {
-				"<BR>\n" . ("&nbsp; " x length($1))
-			}ieg;
-		}
-
-	# strip out all HTML
-	} elsif ($fmode == NOHTML || $fmode == NOTAGS) {
-		$str =~ s/<.*?>//g;
-		$str =~ s/<//g;
-		$str =~ s/>//g;
-		if ($fmode == NOHTML) {
-			$str =~ s/&/&amp;/g;
-		} elsif ($fmode == NOTAGS) {
-			$str =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g
-		}
-
-	# convert HTML attribute to allowed text (just convert ")
-	} elsif ($fmode == ATTRIBUTE) {
-		$str =~ s/"/&#34;/g;
-
-	# for use in templates to remove whitespace from inside HREF anchors
-	} elsif ($fmode == ANCHOR) {
-		$str =~ s/\n+//g;
-
-	# probably 'html'
-	} else {
-		# $fmode == HTML, hopefully
-		$str = processCustomTags($str);
-		$str = stripBadHtml($str);
-		$str = breakHtml($str) unless $no_white_fix;
-	}
-
-	my $new_str = _new_stripByMode(@_);
-	if ($str ne $new_str) {
-		print STDERR "_new_stripByMode broken: fmode '$fmode' nwf '"
-			. (defined($no_white_fix) ? $no_white_fix : "undef")
-			. "' str '$str' new_str '$new_str'\n";
-	}
-
-	return $str;
-}
-
-sub _new_stripByMode {
-	my($str, $fmode, $no_white_fix) = @_;
-	$fmode ||= NOHTML;
-	$action_data{no_white_fix} = defined($no_white_fix) ?
-		$no_white_fix : $fmode == LITERAL;
 	my @actions = @{$mode_actions{$fmode}};
-#print STDERR "_new_stripByMode fmode '$fmode' actions '@actions'\n";
 	for my $action (@actions) {
-#print STDERR "action '$action' str_begin '$str'\n";
 		$actions{$action}->(\$str);
-#print STDERR "action '$action' str_end   '$str'\n";
 	}
 	return $str;
 }
@@ -947,10 +863,10 @@ sub breakHtml {
 	my $break_tag = join '|', @$approvedtags_break;
 	$break_tag = qr{(?:$break_tag)}i;
 
-	# This is the regex that finds a char that, at the start of
-	# a word, will trigger Microsoft's bug.  It's already been
-	# set up for us, it just needs a shorter name.
-	my $nswcr = $constants->{comment_nonstartwordchars_regex};
+#	# This is the regex that finds a char that, at the start of
+#	# a word, will trigger Microsoft's bug.  It's already been
+#	# set up for us, it just needs a shorter name.
+#	my $nswcr = $constants->{comment_nonstartwordchars_regex};
 
 	# And we also need a regex that will find an HTML entity or
 	# character references, excluding ones that would break words:
@@ -964,33 +880,22 @@ sub breakHtml {
 		;
 	) }xi;
 
-	# First, convert spaces before an IE bug character into a
-	# space followed by a non-breaking-space entity.
-	# This ensures that the standard word-breaking mechanism works
-	# despite the IE 'feature' of making the space before these chars
-	# effectively non-breaking.
-#use Data::Dumper;
-#print STDERR "nswcr '$nswcr'\n";
-#print STDERR "nbe '$nbe'\n";
-#print STDERR "text 1 '$text'\n";
-	$text =~ s{$nswcr}{ &nbsp;$2$3}gs;
-#print STDERR "text 2 '$text'\n";
-
 	# Mark off breaking tags
 	$text =~ s{
 		\s*
 		(</?$break_tag>)
 		\s*
 	}{ $1 }gsx;
-#print STDERR "text 3 '$text'\n";
 
 	# Temporarily hide whitespace inside tags so that the regex below
 	# won't accidentally catch attributes, e.g. the HREF= of an A tag.
+	# (Which I don't think it can do anyway, based on the way the
+	# following regex gobbles <> and the fact that tags should already
+	# be balanced by this point...but this can't hurt - Jamie)
 	1 while $text =~ s{
 		(<[^>\s]*)	# Seek in a tab up to its
 		\s+		# first whitespace
 	}{$1\x00}gsx;		# and replace the space with NUL
-#print STDERR "text 4 '$text'\n";
 
 	# Break up overlong words, treating entities/character references
 	# as single characters and ignoring HTML tags.
@@ -1003,24 +908,21 @@ sub breakHtml {
 			|	\S		# or an ordinary char
 			)
 		){$mwl}			# $mwl non-HTML-tag chars in a row
-	)}{$1 }gsx;
-#print STDERR "text 5 '$text'\n";
+	)}{$1<nobr> <wbr></nobr>}gsx;
 
 	# Change the NULs back to whitespace.
 	$text =~ s{\x00}{ }g;
-#print STDERR "text 6 '$text'\n";
 
-	# If one of our spaces landed before an IE bug character, drop in
-	# an nbsp to work around the IE bug.  This mildly affects rendering
-	# for non-IE readers (grumble), but prevents getting around the
-	# filter by evenly spacing bug characters every $mwl characters.
-	# This could be done less-intrusively (the nbsp doesn't need to
-	# appear in every case, only when it's at exactly the boundary of
-	# the mwl), but the algorithm would be too complicated to
-	# implement in a regex, at least practically speaking, and
-	# walking through the string is also fairly complex.
-	$text =~ s{$nswcr}{$1&nbsp;$2$3}gs;
-#print STDERR "text 7 '$text'\n";
+#	# If one of our spaces landed before an IE bug character, drop in
+#	# an nbsp to work around the IE bug.  This mildly affects rendering
+#	# for non-IE readers (grumble), but prevents getting around the
+#	# filter by evenly spacing bug characters every $mwl characters.
+#	# This could be done less-intrusively (the nbsp doesn't need to
+#	# appear in every case, only when it's at exactly the boundary of
+#	# the mwl), but the algorithm would be too complicated to
+#	# implement in a regex, at least practically speaking, and
+#	# walking through the string is also fairly complex.
+#	$text =~ s{$nswcr}{$1&nbsp;$2$3}gs;
 
 	return $text;
 }
@@ -1330,10 +1232,8 @@ sub approveCharref {
 
 	if ($constants->{draconian_charrefs}) {
 		# Don't mess around trying to guess what to forbid.
-		# Everything is forbidden except a very few known to be
-		# good.  This is unfortunately the only feasible way to
-		# completely stop, on the input side, an HTML rendering
-		# bug in Windows Microsoft Internet Explorer.
+		# Everything is forbidden except a very few known to
+		# be good.
 		$ok = 0 unless $charref =~ /^(amp|lt|gt)$/;
 	}
 

@@ -4551,30 +4551,30 @@ sub getSlashConf {
 		$conf{$key} = $fixup_hash->($conf{$key}) || $conf_fixup_hashes{$key};
 	}
 
-	if ($conf{comment_nonstartwordchars}) {
-		# Expand this into a complete regex.  We catch not only
-		# these chars in their raw form, but also all HTML entities
-		# (because Windows/MSIE refuses to break before any word
-		# that starts with either the chars, or their entities).
-		# Build the regex with qr// and match entities for
-		# optimal speed.
-		my $src = $conf{comment_nonstartwordchars};
-		my @chars = ( );
-		my @entities = ( );
-		for my $i (0..length($src)-1) {
-			my $c = substr($src, $i, 1);
-			push @chars, "\Q$c";
-			push @entities, ord($c);
-			push @entities, sprintf("x%x", ord($c));
-		}
-		my $dotchar =
-			'(?:'
-			       . '[' . join("", @chars) . ']'
-			       . '|&#(?:' . join("|", @entities) . ');'
-		       . ')';
-		my $regex = '(\s+)' . "($dotchar+)" . '(\S)';
-		$conf{comment_nonstartwordchars_regex} = qr{$regex}i;
-	}
+#	if ($conf{comment_nonstartwordchars}) {
+#		# Expand this into a complete regex.  We catch not only
+#		# these chars in their raw form, but also all HTML entities
+#		# (because Windows/MSIE refuses to break before any word
+#		# that starts with either the chars, or their entities).
+#		# Build the regex with qr// and match entities for
+#		# optimal speed.
+#		my $src = $conf{comment_nonstartwordchars};
+#		my @chars = ( );
+#		my @entities = ( );
+#		for my $i (0..length($src)-1) {
+#			my $c = substr($src, $i, 1);
+#			push @chars, "\Q$c";
+#			push @entities, ord($c);
+#			push @entities, sprintf("x%x", ord($c));
+#		}
+#		my $dotchar =
+#			'(?:'
+#			       . '[' . join("", @chars) . ']'
+#			       . '|&#(?:' . join("|", @entities) . ');'
+#		       . ')';
+#		my $regex = '(\s+)' . "((?:<[^>]+>)*$dotchar+)" . '(\S)';
+#		$conf{comment_nonstartwordchars_regex} = qr{$regex}i;
+#	}
 
 	$conf{badreasons} = 4 unless defined $conf{badreasons};
 

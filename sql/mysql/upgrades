@@ -498,7 +498,8 @@ CREATE TABLE sections_contained (
 ALTER TABLE sections ADD rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL;
 ALTER TABLE sections ADD last_update timestamp;
 
-# For siets running Slash::Email ONLY (LC, Slashcode, etc -- NOT SLASHDOT!)
+# For plugins/Email ONLY (LC, Slashcode, etc -- NOT SLASHDOT!)
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, 0);
-# For siets running Slash::Email ONLY (LC, Slashcode, etc -- NOT SLASHDOT!)
+
+DELETE FROM vars WHERE name='comment_nonstartwordchars';
 
