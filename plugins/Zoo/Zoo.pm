@@ -53,14 +53,14 @@ sub getRelationships {
 		}
 	}
 	return [qw()] unless @people;
-	
-	my $rel = $self->sqlSelectAll(
+	@people = sort { $a <=> $b } @people;
+	my $people_str = join(",", @people);
+
+	return $self->sqlSelectAll(
 		'uid, nickname, journal_last_entry_date',
 		'users',
-		" uid IN (" . join(",", @people) .") ",
-		" ORDER BY nickname "
-	);
-	return $rel;
+		"uid IN ($people_str)",
+		'ORDER BY nickname');
 }
 
 # Get the details for relationships
