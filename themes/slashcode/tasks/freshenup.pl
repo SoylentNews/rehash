@@ -56,14 +56,7 @@ $task{$me}{code} = sub {
 
 	if ($do_all) {
 		my $x = 0;
-		# this deletes stories that have a writestatus of 'delete'
-		# XXXSECTIONTOPICS this works, but rewrite it to use the
-		# modern API
-		my $deletable = $slashdb->getStoriesWithFlag(
-			'delete',
-			'ASC',
-			$max_stories
-		);
+		my $deletable = $slashdb->getStoriesToDelete($max_stories);
 		for my $story (@$deletable) {
 			$x++;
 			$dirty_skins{$story->{primaryskid}} = 1;
@@ -167,11 +160,11 @@ $task{$me}{code} = sub {
 	# This means writing the .shtml files.
 
 	$stories = [ ];
-	$stories = $slashdb->getStoriesWithFlag(
-		$do_all ? 'all_dirty' : 'mainpage_dirty',
-		'DESC',
-		$max_stories
-	) if !$task_exit_flag;
+	if (!$task_exit_flag) {
+		my $mp_tid = $constants->{mainpage_nexus_tid};
+		$stories = $slashdb->getStoriesToRefresh($max_stories,
+			$do_all ? 0 : $mp_tid);
+	}
 
 	my $bailed = 0;
 	my $totalChangedStories = 0;
@@ -262,29 +255,6 @@ $task{$me}{code} = sub {
 			}
 		}
 
-		# if we wrote a section page previously replace
-		# old pages with a redirect to the current
-		# article
-
-		my @old_sect = $slashdb->getPrevSectionsForSid($sid);
-		if (@old_sect) {
-			for my $old_sect (@old_sect) {
-				next if $old_sect eq $skinname;
-				my $url = "$gSkin->{rootdir}/$skinname/$sid.shtml";
-				my $fn = "$basedir/$old_sect/$sid.shtml";
-				if (-e $fn) {
-					my $fh = gensym();
-					if (!open($fh, ">", $fn)) {
-						warn("Couldn't open file: $fn for writing");
-					} else {
-						print $fh slashDisplay("articlemoved", { url => $url },
-							{ Return => 1 } );
-						close $fh;
-					}
-				}
-			}
-			$slashdb->clearPrevSectionsForSid($sid);
-		}
 		# Now we extract what we need from the file we created
 		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file, $cchp_param);
 		if (defined($cc)) {
@@ -328,7 +298,8 @@ $task{$me}{code} = sub {
 		if (!$do_all) {
 			$min_cc_msg = " (min_cc was $min_cc)";
 		}
-		slashdLog("setStory on " . scalar(keys %story_set) . " stories$min_cc_msg$logmsg") if $do_log;
+		slashdLog("setStory on " . scalar(keys %story_set) . " stories$min_cc_msg$logmsg")
+			if $do_log && keys %story_set;
 	}
 
 	############################################################

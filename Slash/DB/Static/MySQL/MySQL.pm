@@ -1948,72 +1948,58 @@ sub getStoriesNeedingRender {
 }
 
 ########################################################
-# For freshenup.pl,archive.pl
+# For freshenup.pl
 #
-#XXXSECTIONTOPICS - This is broken, I'm fixing - Jamie
-# displaystatus stuff still needs reworking here
-sub getStoriesWithFlag {
-	my($self, $purpose, $order, $limit) = @_;
+# Returns up to $limit stories that are marked as in_trash,
+# starting with the oldest.
+sub getStoriesToDelete {
+	my($self, $limit) = @_;
+	$limit ||= 10;
+	return $self->sqlSelectAllHashrefArray(
+		"stories.stoid AS stoid, sid, primaryskid, title, time",
+		"stories, story_text",
+		"stories.stoid = story_text.stoid
+		 AND in_trash = 'yes'",
+		"ORDER BY stoid ASC LIMIT $limit");
+}
 
-	my $order_clause = " ORDER BY time $order";
-	my $limit_clause = "";
-	$limit_clause = " LIMIT $limit" if $limit;
+########################################################
+# For freshenup.pl
+#
+# Returns up to $limit stories that need to have their .shtml
+# files rewritted (which mainly means they have a row present
+# in the story_dirty table), starting with the most recent.
+sub getStoriesToRefresh {
+	my($self, $limit, $tid) = @_;
+	$limit ||= 10;
+	my $tid_clause = "";
+	$tid_clause = " AND story_topics_rendered.tid = $tid" if $tid;
 
-	# Currently only used by two tasks and we do NOT want stories
-	# that are marked as "Never Display". If this changes, 
-	# another method will be required. If such is created, I would
-	# suggest getAllStoriesWithFlag() as the method name. We ALSO
-	# don't want to mess with stories that haven't been displayed
-	# yet!  - Cliff 14-Oct-2001
-	# But if writestatus is delete, we want ALL the candidates,
-	# not just the ones that are displaying -- pudge
-	my $returnable = [ ];
-	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
-	if ($purpose eq 'delete') {
-		# Find all stories that are in the trash.
-		$returnable = $self->sqlSelectAllHashrefArray(
-			"stories.stoid AS stoid, sid, primaryskid, title, time",
-			"stories, story_text",
-			"stories.stoid = story_text.stoid
-			 AND in_trash = 'yes'",
-			"$order_clause$limit_clause");
-	} elsif ($purpose eq 'mainpage_dirty') {
-		# Find all stories in the past that are dirty and have
-		# been rendered into the mainpage nexus tid.
-		$returnable = $self->sqlSelectAllHashrefArray(
-			"stories.stoid AS stoid, sid, primaryskid, title, time",
-			"stories, story_text, story_topics_rendered
-			 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
-			"time < NOW()
-			 AND stories.stoid = story_text.stoid
-			 AND story_dirty.stoid IS NOT NULL
-			 AND stories.stoid = story_topics_rendered.stoid
-			 AND story_topics_rendered.tid = '$mp_tid'",
-			"$order_clause$limit_clause");
-	} elsif ($purpose eq 'all_dirty') {
-		# Find all stories in the past that are dirty and have
-		# been rendered into ANY tid (thus excluding "ND"
-		# stories which don't have any nexus tids)..
-		$returnable = $self->sqlSelectAllHashrefArray(
-			"stories.stoid AS stoid, sid, primaryskid, title, time",
-			"stories, story_text, story_topics_rendered
-			 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
-			"time < NOW()
-			 AND stories.stoid = story_text.stoid
-			 AND story_dirty.stoid IS NOT NULL
-			 AND stories.stoid = story_topics_rendered.stoid",
-			"GROUP BY stories.stoid $order_clause$limit_clause");
-		# Now we walk the list and eliminate any stories that
-		# aren't viewable.  Viewable may not be exactly the
-		# same as simply having one or more nexus tids, so the
-		# select may not have excluded all the right ones.
-		for my $story (@$returnable) {
-			$story->{killme} = 1 if !$self->checkStoryViewable($story->{stoid});
-		}
-		$returnable = [ grep { !$_->{killme} } @$returnable ];
+	my $retval = $self->sqlSelectAllHashrefArray(
+		"stories.stoid AS stoid, sid, primaryskid, title, time",
+		"stories, story_text, story_topics_rendered
+		 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
+		"time < NOW()
+		 AND stories.primaryskid != 0
+		 AND stories.stoid = story_text.stoid
+		 AND story_dirty.stoid IS NOT NULL
+		 AND stories.stoid = story_topics_rendered.stoid
+		 $tid_clause",
+		"ORDER BY time DESC LIMIT $limit");
+	return [ ] if !@$retval;
+
+	# Weed out the stories marked as 'never display' -- they don't
+	# get their .shtml files refreshed.  This should have happened
+	# by checking primaryskid (since ND stories don't have a skin)
+	# but just to be thorough, we're going to go through the
+	# official test, checkStoryViewable().
+
+	for my $story (@$retval) {
+		$story->{killme} = 1 if !$self->checkStoryViewable($story->{stoid});
 	}
+	$retval = [ grep { !$_->{killme} } @$retval ];
 
-	return $returnable;
+	return $retval;
 }
 
 ########################################################
