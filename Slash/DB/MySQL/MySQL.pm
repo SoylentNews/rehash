@@ -833,6 +833,17 @@ sub getModeratorCommentLog {
 	} else {
 		$limit = "";
 	}
+	my $cidlist;
+	
+	if($type eq "cidin"){
+		if(ref $value eq "ARRAY" and @$value){
+			$cidlist = join(',', @$value);
+		} elsif(!ref $value and $value){
+			$cidlist = $value;
+		} else {
+			return [];
+		}
+	}
 
 	my $select_extra = (($type =~ /ipid/) || ($type =~ /subnetid/) || ($type =~ /global/)) ? ", comments.uid as uid2, comments.ipid as ipid2" : "";
 
@@ -843,6 +854,7 @@ sub getModeratorCommentLog {
 					$ipid_table = "comments"						    }
 	elsif ($type eq 'cid')       {	$where_clause = "moderatorlog.cid=$vq      AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'cuid')      {	$where_clause = "moderatorlog.cuid=$vq     AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'cidin')      {	$where_clause = "moderatorlog.cid in($cidlist)     AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'subnetid')  {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'ipid')      {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"  }
@@ -903,6 +915,26 @@ sub getMetamodCountsForModsByType {
 	}
  	my $modcounts = $self->sqlSelectAllHashref('mmid', $cols ,'metamodlog', $where, 'group by mmid');
 	return $modcounts;	
+}
+
+
+# Given an arrayref of moderation ids  a hashref
+# keyed by moderation ids is returned.  The moderation ids 
+# point to arrays containing info metamoderations for that 
+# particular moderation id.
+
+sub getMetamodsForMods {
+	my ($self, $ids, $limit ) = @_;
+	my $id_str = join ',', @$ids;
+	return {} unless @$ids;
+	$limit = " limit $limit" if $limit;
+	my $m2s = $self->sqlSelectAllHashrefArray("id,mmid,metamodlog.uid as uid,val,ts,active,nickname","metamodlog,users",
+							"mmid in($id_str) and metamodlog.uid=users.uid order by mmid desc $limit");
+	my $mods_to_m2s={};
+	while(my $m2 = shift @$m2s){
+		push @{$mods_to_m2s->{$m2->{mmid}}}, $m2;
+	}
+	return $mods_to_m2s;
 }
 
 ########################################################
@@ -1840,15 +1872,16 @@ sub getUserEmail {
 	return $uid;
 }
 
+
 #################################################################
 # Corrected all of the above (those messages will go away soon.
 # -Brian, Tue Jan 21 14:49:30 PST 2003
 # 
 sub getCommentsByGeneric {
-	my($self, $where_clause, $num, $min) = @_;
+	my($self, $where_clause, $num, $min, $options) = @_;
 	$min ||= 0;
 	my $limit = " LIMIT $min, $num " if $num;
-
+	$where_clause .= " AND date>date_sub(now(), INTERVAL $options->{limit_days} DAY)" if $options->{limit_days};
 	my $comments = $self->sqlSelectAllHashrefArray('*','comments', $where_clause, " ORDER BY date DESC $limit");
 
 	return $comments;
@@ -1856,20 +1889,20 @@ sub getCommentsByGeneric {
 
 #################################################################
 sub getCommentsByUID {
-	my($self, $uid, $num, $min) = @_;
-	return $self->getCommentsByGeneric("uid=$uid", $num, $min);
+	my($self, $uid, $num, $min, $options) = @_;
+	return $self->getCommentsByGeneric("uid=$uid", $num, $min, $options);
 }
 
 #################################################################
 sub getCommentsByIPID {
-	my($self, $id, $num, $min) = @_;
-	return $self->getCommentsByGeneric("ipid='$id'", $num, $min);
+	my($self, $id, $num, $min, $options) = @_;
+	return $self->getCommentsByGeneric("ipid='$id'", $num, $min, $options);
 }
 
 #################################################################
 sub getCommentsBySubnetID {
-	my($self, $id, $num, $min) = @_;
-	return $self->getCommentsByGeneric("subnetid='$id'", $num, $min);
+	my($self, $id, $num, $min, $options) = @_;
+	return $self->getCommentsByGeneric("subnetid='$id'", $num, $min, $options);
 }
 
 #################################################################
@@ -1877,9 +1910,9 @@ sub getCommentsBySubnetID {
 # whether you have an IPID or a SubnetID, those queries take a
 # fraction of a second, but this "OR" is a table scan.
 sub getCommentsByIPIDOrSubnetID {
-	my($self, $id, $min) = @_;
+	my($self, $id, $num, $min, $options) = @_;
 	return $self->getCommentsByGeneric(
-		"ipid='$id' OR subnetid='$id'", $min);
+		"ipid='$id' OR subnetid='$id'", $num, $min, $options);
 }
 
 
@@ -4816,7 +4849,7 @@ sub _calc_karma_token_loss {
 ##################################################################
 sub metamodEligible {
 	my($self, $user) = @_;
-
+	
 	# Easy tests the user can fail to be ineligible to metamod.
 	return 0 if $user->{is_anon} || !$user->{willing} || $user->{karma} < 0;
 
@@ -4826,7 +4859,7 @@ sub metamodEligible {
 	# and thus Jim Jones really did it with the monkey wrench in the
 	# blue room -Brian
 	#return 1 if $user->{is_admin};
-
+	
 	# Not eligible if metamodded too recently.
 	my $constants = getCurrentStatic();
 	my $m2_freq = $constants->{m2_freq} || 86400;
