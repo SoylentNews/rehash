@@ -69,7 +69,7 @@ sub SlashVirtualUser ($$$) {
 
 	$cfg->{menus} = $cfg->{slashdb}->getMenus();
 	my $sections = $cfg->{slashdb}->getSections();
-	for (@$sections) {
+	for ( values %$sections) {
 		if ($_->{hostname} && $_->{url}) {
 			my $new_cfg;
 			for (keys %{$cfg->{constants}}) {
@@ -82,7 +82,7 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{rootdir} = $_->{url};
 			$new_cfg->{basedomain} = $_->{hostname};
 			$new_cfg->{static_section} = $_->{section};
-			$new_cfg->{form_override}{section} = $$_->{section};
+			$new_cfg->{form_override}{section} = $_->{section};
 			$cfg->{site_constants}{$_->{hostname}} = $new_cfg;
 		}
 	}

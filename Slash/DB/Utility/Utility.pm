@@ -209,14 +209,8 @@ sub sqlConnect {
 	my($self, $restart) = @_;
 	$self->{_dbh}->disconnect if $restart;
 
-	if (defined $self->{_dbh} && $self->{_dbh}->ping) {
-		unless ($self->{_dbh}) {
-			print STDERR "Undefining and calling to reconnect: $@\n";
-			$self->{_dbh}->disconnect;
-			undef $self->{_dbh};
-			$self->sqlConnect();
-		}
-	} else {
+	if (!(defined $self->{_dbh}) || !$self->{_dbh}->ping) {
+	#if (!(defined $self->{_dbh}) || !$self->{_dbh}->can("ping") || !$self->{_dbh}->ping) {
 # Ok, new connection, lets create it
 	#	print STDERR "Having to rebuild the database handle\n";
 		{
@@ -241,6 +235,7 @@ sub sqlConnect {
 			#}
 		}
 	}
+
 	return 1; # We return true that the sqlConnect was ok.
 }
 
