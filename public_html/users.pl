@@ -239,7 +239,8 @@ sub newUser {
 	if ($matchname ne '' && $I{F}{newuser} ne '' && !$cnt && $I{F}{email} =~ /\@/) {
 		titlebar("100%", "User $I{F}{newuser} created.");
 
-		$I{F}{pubkey} = stripByMode($I{F}{pubkey}, "html");
+		# this does nothing ... ?  key is not used ...
+		$I{F}{pubkey} = stripByMode($I{F}{pubkey}, "html", 1);
 
 		sqlInsert("users", {
 			realemail	=> $I{F}{email}, 
@@ -352,7 +353,7 @@ EOT
 		print "<B>User Bio</B><BR>$bio<P>" if $bio;
 
 		my($k) = sqlSelect("pubkey", "users_key", "uid=$uid");
-		$k = stripByMode($k, "html");
+		$k = stripByMode($k, "html", 1);
 		print "<B>Public Key</B><BR><PRE>\n$k</PRE><P>" if $k;
 
 		$I{F}{min} = 0 unless $I{F}{min};
