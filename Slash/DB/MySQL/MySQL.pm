@@ -1345,6 +1345,7 @@ sub getNexusExtras {
 	return $answer;
 }
 
+########################################################
 sub getNexuslistFromChosen {
 	my($self, $chosen_hr) = @_;
 	return [ ] unless $chosen_hr;
@@ -7505,6 +7506,7 @@ sub getTime {
 	return $t;
 }
 
+##################################################################
 sub getTimeAgo {
 	my ($self, $time) = @_;
 	my $q_time = $self->sqlQuote($time);
@@ -7607,7 +7609,7 @@ sub getStoryList {
 	my $tree = $self->getTopicTree();
 	for my $story (@$list) {
 		$story->{skinname} ||= 'mainpage';
-		$story->{topic} = $tree->{$story->{tid}}{keyword};
+		$story->{topic} = $tree->{$story->{tid}}{keyword} if $story->{tid};
 		push @$stoids, $story->{stoid};
 	}
 	# Now set displaystatus.
