@@ -112,21 +112,21 @@ while (1) {
 	$thistotal ||= 1;
 
 	print join(" ",
-		"Total:$sec",
-		"pages:$total",
-		"avg:" . sprintf("%.2f", $total/$sec),
-		"sql:$totalsq",
-		"avg:" . sprintf("%.2f", $totalsq/$sec),
-		"pp:" . sprintf("%.2f", $totalsq/$total)
+		"Total:" . sprintf("%4d", $sec),
+		"pages:" . sprintf("%5d", $total),
+		"avg:" . sprintf("%6.2f", $total/$sec),
+		"sql:" . sprintf("%6d", $totalsq),
+		"avg:" . sprintf("%7.2f", $totalsq/$sec),
+		"pp:" . sprintf("%5.2f", $totalsq/$total)
 	), "\n";
 
 	print join(" ",
-		"  Now:$timepassed",
-		"pages:$thistotal",
-		"avg:" . sprintf("%.2f",$thistotal/$timepassed),
-		"sql:$thissq",
-		"avg:" . sprintf("%.2f",$thissq/$timepassed),
-		"pp:" . sprintf("%.2f",$thissq/$thistotal)
+		"  Now:" . sprintf("%4d", $timepassed),
+		"pages:" . sprintf("%5d", $thistotal),
+		"avg:" . sprintf("%6.2f",$thistotal/$timepassed),
+		"sql:" . sprintf("%6d", $thissq),
+		"avg:" . sprintf("%7.2f",$thissq/$timepassed),
+		"pp:" . sprintf("%5.2f",$thissq/$thistotal)
 	), "\n";
 
         print "  Sql:$active/$rows | $l\n";
