@@ -16,3 +16,5 @@ __template__
 [% INCLUDE titlebar width="100%" title="Processing urls..." %]
 
 <p>Processed URL IDs [% ids %] in [% duration %] seconds.
+__seclev__
+100

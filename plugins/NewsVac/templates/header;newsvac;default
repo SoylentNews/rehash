@@ -27,3 +27,5 @@ __template__
 		<TD VALIGN="TOP"><FONT COLOR="#000000">
 		[% Slash.createMenu('newsvac') -%]
 <!-- end newsvacadmin header -->
+__seclev__
+100

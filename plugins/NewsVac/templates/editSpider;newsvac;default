@@ -94,3 +94,5 @@ t.timespec_id -%]_del">[% END %]<BR>
 <input type="submit" name="deletespider" value="Delete Spider">
 </FORM>
 <!-- end editSpider -->
+__seclev__
+100

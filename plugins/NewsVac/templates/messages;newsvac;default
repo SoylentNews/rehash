@@ -23,3 +23,5 @@ warn "miner rel does not point to a nugget, to '[% url_id %]' from '[% url_id_li
 [% TITLEBAR WIDTH="100%" TITLE="No Op Given" %]
 
 [% END %]
+__seclev__
+100

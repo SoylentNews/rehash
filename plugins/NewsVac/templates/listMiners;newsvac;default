@@ -129,3 +129,5 @@ ELSIF miner.progress=='broken';
 	progress_color='red';
 END -%]
 [% END -%]
+__seclev__
+100

@@ -61,3 +61,5 @@ __template__
 [% IF arrayref.size == max_results -%] 
 <br><i>(Note - results are limited to the first [% max_results %].)</i>
 [% END -%]
+__seclev__
+100

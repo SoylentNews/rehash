@@ -48,3 +48,5 @@ Delete Miner '[% name %]'?
 		END -%]
 [% 	END -%]
 [% END %]
+__seclev__
+100
