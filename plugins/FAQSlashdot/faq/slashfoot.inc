@@ -25,7 +25,7 @@
  All trademarks and copyrights on this
   page are owned by their respective owners.  Comments
   are owned by the Poster.
-  The Rest © 1997-2000 <A href="http://Andover.Net">Andover.Net</A>.
+  The Rest &copy; 1997-2003 <A href="http://www.osdn.com/">OSDN</A>.
 </FONT></CENTER>
              </TD>
             </TR>
@@ -39,7 +39,7 @@
          <A href="http://CmdrTaco.net"><FONT color="#ffffff">rob's homepage</FONT></A> |
          <A href="http://slashdot.org/submit.pl"><FONT color="#ffffff">contribute story</FONT></A> |
          <A href="http://slashdot.org/search.pl"><FONT color="#ffffff">older articles</FONT></A> |
-         <A href="http://Andover.Net"><FONT color="#ffffff">Andover.Net</FONT></A> |
+         <A href="http://www.osdn.com/"><FONT color="#ffffff">OSDN</FONT></A> |
          <A href="http://slashdot.org/advertising.shtml"><FONT color="#ffffff">advertising</FONT></A> |
          <A href="http://slashdot.org/pollBooth.pl"><FONT color="#ffffff">past polls</FONT></A> |
          <A href="http://slashdot.org/about.shtml"><FONT color="#ffffff">about</FONT></A> |

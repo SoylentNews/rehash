@@ -39,12 +39,12 @@
 &nbsp;<A href=/faq.shtml>faq</A> <BR>
 &nbsp;<A href=/code.shtml>code</A> <BR>
 &nbsp;<A href=/awards.shtml>awards</A> <BR>
-&nbsp;<A href=http://Andover.Net/privacy.html>privacy</A> <BR>
+&nbsp;<A href=http://www.osdn.com/privacy.shtml>privacy</A> <BR>
 &nbsp;<A href=http://slashnet.org>slashNET</A> <BR>
 &nbsp;<A href=/search.pl>older stuff</A> <BR>
 &nbsp;<A href=http://cmdrtaco.net>rob's page</A> <BR>
 &nbsp;<A href=/users.pl?op=preferences>preferences</A> <BR>
-&nbsp;<A href=http://Andover.Net>andover.net</A> <BR>
+&nbsp;<A href=http://www.osdn.com/>osdn</A> <BR>
 &nbsp;<A href=/submit.pl>submit story</A> <BR>
 &nbsp;<A href=/advertising.shtml>advertising</A> <BR>
 &nbsp;<A href=/supporters.shtml>supporters</A> <BR>
@@ -95,6 +95,6 @@
 
 <!-- end section index block -->
 
-<TR> <TD><A href=http://andover.net><FONT size=2 color=#000000><B>Andover.Net</B></FONT></A></TD></TR><TR><TD><TABLE border=0 cellspacing=1 cellpadding=1 bgcolor=#FFFFFF><TR><TD><FONT color=#000000 size=2><NOBR><A href=http://www.andovernews.com>AndoverNews</A><BR><A href=http://www.askreggie.com>AskRegister</A><BR><A href=http://www.freecode.com>FreeCode</A><BR><A href=http://www.freshmeat.net>Freshmeat</A><BR><A href=http://www.questionexchange.com>Question<BR>&nbsp;Exchange</A><BR></NOBR></FONT></TD></TR></TABLE></TD></TR></TABLE></P>
+<TR> <TD><A href=http://www.osdn.com/><FONT size=2 color=#000000><B>OSDN</B></FONT></A></TD></TR><TR><TD><TABLE border=0 cellspacing=1 cellpadding=1 bgcolor=#FFFFFF><TR><TD><FONT color=#000000 size=2><NOBR><A href=http://www.andovernews.com>AndoverNews</A><BR><A href=http://www.askreggie.com>AskRegister</A><BR><A href=http://www.freecode.com>FreeCode</A><BR><A href=http://www.freshmeat.net>Freshmeat</A><BR><A href=http://www.questionexchange.com>Question<BR>&nbsp;Exchange</A><BR></NOBR></FONT></TD></TR></TABLE></TD></TR></TABLE></P>
  <P><!-- andovermenu --></P>
 </TD><TD valign=top align=left><FONT color="#000000">
