@@ -76,13 +76,10 @@ sub countPollquestions {
 
 ########################################################
 # Not used currently
-sub countUsersIndexExboxesByBid {
+sub countUsersIndexSlashboxesByBid {
 	my($self, $bid) = @_;
-	my($count) = $self->sqlSelect("count(*)", "users_index",
-		qq!exboxes like "%'$bid'%" !
-	);
-
-	return $count;
+	my $bid_q = $self->sqlQuote("\%$bid\%");
+	return $self->sqlCount("users_index", "slashboxes LIKE $bid_q");
 }
 
 ########################################################

@@ -902,8 +902,10 @@ sub portalbox {
 		url	=> $url,
 	}, { Return => 1, Nocomm => 1 });
 
-	if (($user->{exboxes} && $getblocks == $constants->{mainpage_skid}) ||
-		($user->{exboxes} && $constants->{slashbox_sections})) {
+	if (
+		   ($user->{slashboxes} && $getblocks == $constants->{mainpage_skid})
+		|| ($user->{slashboxes} && $constants->{slashbox_sections})
+	) {
 		$title = slashDisplay('portalmap', {
 			title	=> $title,
 			bid	=> $bid,

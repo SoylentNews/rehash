@@ -1453,7 +1453,7 @@ sub prepareUser {
 	$user->{story_always_topic}	= _testExStrNumeric($user->{story_always_topic}) if $user->{story_always_topic};
 	$user->{story_always_author}	= _testExStrNumeric($user->{story_always_author}) if $user->{story_always_author};
 	$user->{story_always_nexus}	= _testExStrNumeric($user->{story_always_nexus}) if $user->{story_never_nexus};
-	$user->{exboxes}		= _testExStr($user->{exboxes}) if $user->{exboxes};
+	$user->{slashboxes}		= _testExStr($user->{slashboxes}) if $user->{slashboxes};
 	$user->{points}		= 0 unless $user->{willing}; # No points if you dont want 'em
 	$user->{domaintags}	= 2 if !defined($user->{domaintags}) || $user->{domaintags} !~ /^\d+$/;
 

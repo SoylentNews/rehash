@@ -10386,26 +10386,16 @@ sub setUser {
 		users_hits
 	)];
 
-	# special cases for password, exboxes, people
+	# special cases for password, people, and slashboxes
 	if (exists $hashref->{passwd}) {
 		# get rid of newpasswd if defined in DB
 		$hashref->{newpasswd} = '';
 		$hashref->{passwd} = encryptPassword($hashref->{passwd});
 	}
-
-	# Power to the People
 	$hashref->{people} = freeze($hashref->{people}) if $hashref->{people};
-
-	# hm, come back to exboxes later; it works for now
-	# as is, since external scripts handle it -- pudge
-	# a VARARRAY would make a lot more sense for this, no need to
-	# pack either -Brian
-	if (0 && exists $hashref->{exboxes}) {
-		if (ref $hashref->{exboxes} eq 'ARRAY') {
-			$hashref->{exboxes} = sprintf("'%s'", join "','", @{$hashref->{exboxes}});
-		} elsif (ref $hashref->{exboxes}) {
-			$hashref->{exboxes} = '';
-		} # if nonref scalar, just let it pass
+	if (exists $hashref->{slashboxes}) {
+		my @slashboxes = grep /^[\w-]+$/, split /,/, $hashref->{slashboxes};
+		$hashref->{slashboxes} = join ",", @slashboxes;
 	}
 
 	$cache = _genericGetCacheName($self, $tables);

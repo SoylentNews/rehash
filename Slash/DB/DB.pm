@@ -2065,7 +2065,7 @@ new point score is 0, "0 but true" is returned.
 
 =back
 
-=head2 countUsersIndexExboxesByBid(KEY)
+=head2 countUsersIndexSlashboxesByBid(KEY)
 
 I am the default documentation, short and stout.
 
