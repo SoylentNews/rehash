@@ -747,5 +747,6 @@ INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link',
 
 # End of T_2_3_0_47
 
+ALTER TABLE accesslog DROP INDEX op_part;
+ALTER TABLE accesslog ADD INDEX op_part (op(12), section);
 INSERT INTO vars (name, value, description) VALUES ('mod_unm2able_token_cost','1','What is the token cost of performing an un-M2able mod?');
-
