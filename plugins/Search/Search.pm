@@ -249,7 +249,22 @@ sub findStory {
 		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
 	}
 
-	# Here we find the possible sids that could have this tid and then search only those
+	# Here we find the possible sids that could have this tid and
+	# then search only those.
+	# ...but there are two ways to do this.  The proper way is to
+	# do a "LEFT JOIN story_topics ON stories.sid=story_topics.sid" and
+	# put a "story_topics.id IS NOT NULL" into the WHERE clause.  But
+	# my guess is that on the searches by the larger topics, this will
+	# be too slow.  The other way (which we have done so far) is to do
+	# one select to pull out *all* sids with the topic(s) in question,
+	# and then not join on story_topics, just use a "sid IN" clause.
+	# The problem is that, for large topics, this may be very many sids;
+	# on OSDN sites, we're seeing some topics with 4,000 to 13,000
+	# stories in them.  That makes the SELECT too large to be efficient.
+	# So I'm fixing this in a not very good way:  limiting the number
+	# of stories we search, on any search that includes a topic
+	# limitation.  This sucks and should be replaced with a real
+	# solution ASAP -- this is only a stopgap! - Jamie 2003/11/10
 	if ($form->{tid}) {
 		my @tids;
 		if (ref($form->{_multi}{tid}) eq 'ARRAY') {
@@ -258,7 +273,8 @@ sub findStory {
 			push @tids, $form->{tid};
 		}
 		my $string = join(',', @{$self->sqlQuote(\@tids)});
-		my $sids = $self->sqlSelectColArrayref('sid', 'story_topics', "tid IN ($string)");
+		my $sids = $self->sqlSelectColArrayref('sid', 'story_topics', "tid IN ($string)",
+			"ORDER BY sid DESC LIMIT 1000");
 		if ($sids && @$sids) {
 			$string = join(',', @{$self->sqlQuote($sids)});
 			$where .= " AND stories.sid IN ($string) ";
