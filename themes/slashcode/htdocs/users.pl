@@ -1522,10 +1522,10 @@ sub tildeEd {
 
 	@$tid_order = sort { lc $topics->{$a} cmp lc $topics->{$b} } keys %$topics;
 
-	while (my($tid, $alttext) = each %$topics) {
+	while (my($tid, $textname) = each %$topics) {
 		$tidref->{$tid}{checked} = ($extid =~ /'\Q$tid\E'/) ?
 			' CHECKED' : '';
-		$tidref->{$tid}{alttext} = $alttext;
+		$tidref->{$tid}{textname} = $textname;
 	}
 
 	my $sections = $reader->getDescriptions('skins');
