@@ -3120,11 +3120,14 @@ sub getCommentsForUser {
 		$sql .= "     OR cid=$cid" if $cid;
 		$sql .= "	)";
 	}
-	$sql .= "	  ORDER BY ";
-	$sql .= "comments.points DESC, " if $user->{commentsort} eq '3';
-	$sql .= " cid ";
-	$sql .= ($user->{commentsort} == 1 || $user->{commentsort} == 5) ?
-		'DESC' : 'ASC';
+
+	if ( $user->{commentsort} == 1 || $user->{commentsort} == 5 || $user->{commentsort} == '3') {
+		$sql .= "	  ORDER BY ";
+		$sql .= "comments.points DESC, " if $user->{commentsort} == '3';
+		$sql .= " cid ";
+		$sql .= 'DESC' 
+			if ($user->{commentsort} == 1 || $user->{commentsort} == 5);
+	}
 
 	my $thisComment = $self->{_dbh}->prepare_cached($sql) or errorLog($sql);
 	$thisComment->execute or errorLog($sql);
