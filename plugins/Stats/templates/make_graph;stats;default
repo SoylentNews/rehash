@@ -49,7 +49,7 @@ __template__
        statstring = statstring _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
    END;
    statstring = BLOCK -%]
-&amp;type=[% type | fixparam %]&amp;stats_days=[% days | fixparam %]&amp;byweekavg=[% byweekavg | fixparam %][% statstring %][% gtitle %]
+&amp;type=[% type | fixparam %]&amp;stats_days=[% days | fixparam %]&amp;byweekavg=[% byweekavg | fixparam %]&amp;showtotal=[% showtotal | fixparam %][% statstring %][% gtitle %]
 [%- END %]
 
 <P>

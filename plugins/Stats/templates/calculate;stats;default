@@ -108,15 +108,40 @@ __template__
       END;
 
       alldata.push(nums);
-
-      mytype = this.label || this.type;
-      mytype = mytype _ " (" _ Slash.commify(nums.${nums.max}) _ ")";
-      alltypes.push(mytype);
       plotdata.push([]);
-      plotdata.${plotdata.max}.${nums.max} = nums.${nums.max};
+      plotdata.${plotdata.max}.${alldata.0.max} = nums.${alldata.0.max};
+      mytype = this.label || this.type;
+      IF (form.op != 'table');
+         mytype = mytype _ " (" _ Slash.commify(nums.${alldata.0.max}) _ ")";
+      END;
+      alltypes.push(mytype);
    END;
 
-   IF (form.type == 'areastackedindex' && form.op != 'table');
+   IF (form.type != 'areastackedindex' && form.showtotal);
+      nums = [];
+      USE dataloop = iterator(alldata);
+      FOREACH this = dataloop;
+         thisindex = dataloop.index;
+         IF (thisindex > 0);
+            USE thisloop = iterator(this);
+            FOREACH mynum = thisloop;
+               currindex = thisloop.index;
+               nums.${currindex} = nums.${currindex} + mynum;
+            END;
+         END;
+      END;
+
+      CALL alldata.splice(1, 0, [nums]);
+      CALL plotdata.splice(1, 0, []);
+      plotdata.1.${alldata.0.max} = nums.${alldata.0.max};
+      mytype = 'Totals';
+      IF (form.op != 'table');
+         mytype = mytype _ " (" _ Slash.commify(nums.${alldata.0.max}) _ ")";
+      END;
+      CALL alltypes.splice(0, 0, mytype);
+   END;
+
+   IF ((form.type == 'areastackedindex' || form.showtotal) && form.op != 'table');
       USE dataloop = iterator(alldata);
       FOREACH this = dataloop;
          thisindex = dataloop.index;

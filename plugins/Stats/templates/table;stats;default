@@ -24,7 +24,7 @@ __template__
    FOREACH this = alldata;
 	NEXT IF loop.index == 0;
 	myindex = loop.index - 1 %]
-		<TH WIDTH="[% pct %]%">[% data.${myindex}.label || data.${myindex}.type %]</TH>
+		<TH WIDTH="[% pct %]%">[% alltypes.${myindex} %]</TH>
 [% END %]
 	</TR>
 

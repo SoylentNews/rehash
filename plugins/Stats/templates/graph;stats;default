@@ -54,7 +54,7 @@ ELSE;  # default to lines
                              ],
 
       transparent         => 0,
-      show_values         => plotdata
+#      show_values         => plotdata
    );
 
    IF (!hasneg);
@@ -66,7 +66,7 @@ ELSE;  # default to lines
    	my_graph.set(y_max_value => 0);
    END;
 
-   IF (form.type == 'areapercentage' || form.type == 'areastacked');
+   IF (form.type == 'areapercentage' || (form.type == 'areastacked' && !form.showtotal));
    	my_graph.set(cumulate => 1);
    END;
 

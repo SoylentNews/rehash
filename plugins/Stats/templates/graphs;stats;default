@@ -15,6 +15,7 @@ __template__
 
 form.stats_days = form.stats_days || 1;
 byweekavg = 0;
+showtotal = 0;
 
 mygraphs = [
 	'Pages',
@@ -39,40 +40,42 @@ SWITCH gtitle;
   CASE 'Pages';
   IF (form.stats_section && form.stats_section != 'all');
       PROCESS make_graph
-         section  => form.stats_section,
-         type     => 'areastacked',
-         statdata => ['index_page', 'comments_page', 'article_page'];
+         showtotal => 1,
+         section   => form.stats_section,
+         type      => 'areastacked',
+         statdata  => ['index_page', 'comments_page', 'article_page'];
   ELSE;
       PROCESS make_graph
-         section  => 'all',
-         type     => 'areastackedindex',
-         statdata => ['total', 'index_page', 'comments_page', 'article_page'];
+         section   => 'all',
+         type      => 'areastackedindex',
+         statdata  => ['total', 'index_page', 'comments_page', 'article_page'];
   END;
 
   CASE 'Hits';
   IF (form.stats_section && form.stats_section != 'all');
 #      PROCESS make_graph
-#         section  => form.stats_section,
-#         type     => 'areastacked',
-#         statdata => ['rss_page', 'palm_page'];
+#         showtotal => 1,
+#         section   => form.stats_section,
+#         type      => 'areastacked',
+#         statdata  => ['rss_page', 'palm_page'];
   ELSE;
       PROCESS make_graph
-         section  => 'all',
-         type     => 'areastackedindex',
-         statdata => ['grand_total', 'rss_page', 'palm_page'];
+         section   => 'all',
+         type      => 'areastackedindex',
+         statdata  => ['grand_total', 'rss_page', 'palm_page'];
   END;
 
   CASE 'Total Users';
   IF (form.stats_section && form.stats_section != 'all');
       PROCESS make_graph
-         section  => form.stats_section,
-         type     => 'area',
-         statdata => ['ipids', 'users', 'users_subscriber'];
+         section   => form.stats_section,
+         type      => 'area',
+         statdata  => ['ipids', 'users', 'users_subscriber'];
   ELSE;
       PROCESS make_graph
-         section  => 'all',
-         type     => 'area',
-         statdata => [['unique', '', 'ipids'],
+         section   => 'all',
+         type      => 'area',
+         statdata  => [['unique', '', 'ipids'],
                       ['unique_users', '', 'users']
                       ['users_subscriber', '', 'users_subscriber']
                      ];
@@ -80,34 +83,36 @@ SWITCH gtitle;
 
   CASE 'Comments';
       PROCESS make_graph
-         section  => form.stats_section || 'all',
-         type     => 'area',
-         statdata => ['comments'];
+         section   => form.stats_section || 'all',
+         type      => 'area',
+         statdata  => ['comments'];
 
   CASE 'Page Bytes';
   IF (form.stats_section && form.stats_section != 'all');
       PROCESS make_graph
-         section  => form.stats_section,
-         type     => 'areastacked',
-         statdata => ['index_bytes', 'article_bytes', 'comments_bytes'];
+         showtotal => 1,
+         section   => form.stats_section,
+         type      => 'areastacked',
+         statdata  => ['index_bytes', 'article_bytes', 'comments_bytes'];
   ELSE;
       PROCESS make_graph
-         section  => 'all',
-         type     => 'areastackedindex',
-         statdata => ['total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes'];
+         section   => 'all',
+         type      => 'areastackedindex',
+         statdata  => ['total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes'];
   END;
 
   CASE 'Total Bytes';
   IF (form.stats_section && form.stats_section != 'all');
       PROCESS make_graph
-         section  => form.stats_section,
-         type     => 'areastacked',
-         statdata => ['index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
+         showtotal => 1,
+         section   => form.stats_section,
+         type      => 'areastacked',
+         statdata  => ['index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
   ELSE;
       PROCESS make_graph
-         section  => 'all',
-         type     => 'areastackedindex',
-         statdata => ['grand_total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
+         section   => 'all',
+         type      => 'areastackedindex',
+         statdata  => ['grand_total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
   END;
 
   CASE 'Section Pages';
@@ -117,8 +122,8 @@ SWITCH gtitle;
          sect_page.push(['page', section]);
       END;
       PROCESS make_graph
-         type     => 'lines',
-         statdata => sect_page;
+         type      => 'lines',
+         statdata  => sect_page;
 
   CASE 'Section Bytes';
       avail_sections = Slash.db.getDescriptions('sections');
@@ -127,8 +132,8 @@ SWITCH gtitle;
          sect_byte.push(['bytes', section]);
       END;
       PROCESS make_graph
-         type     => 'lines',
-         statdata => sect_byte;
+         type      => 'lines',
+         statdata  => sect_byte;
 
 
   # Messages Report
@@ -152,40 +157,41 @@ SWITCH gtitle;
       END;
 
       PROCESS make_graph
-         type    => 'areastacked'; 
+         type      => 'areastacked'; 
 
   # Moderation Report
   CASE 'Comment Scores';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'areastackedindex',
-         statdata => ['comments_score_5', 'comments_score_4', 'comments_score_3', 'comments_score_2', 'comments_score_1', 'comments_score_0', 'comments_score_-1'];
+         showtotal => 1,
+         section   => 'all',
+         type      => 'areastacked',
+         statdata  => ['comments_score_5', 'comments_score_4', 'comments_score_3', 'comments_score_2', 'comments_score_1', 'comments_score_0', 'comments_score_-1'];
 
   CASE 'Total Comments';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'area',
-         statdata => ['comments'];
+         section   => 'all',
+         type      => 'area',
+         statdata  => ['comments'];
 
   CASE 'Total Moderations';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'area',
-         statdata => ['m1_up_total', 'm1_down_total'];
+         section   => 'all',
+         type      => 'area',
+         statdata  => ['m1_up_total', 'm1_down_total'];
 
   CASE 'Total Metamoderations';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'area',
-         statdata => ['m2_fair_total', 'm2_unfair_total'];
+         section   => 'all',
+         type      => 'area',
+         statdata  => ['m2_fair_total', 'm2_unfair_total'];
 
 
   # Subscription Report
   CASE 'New Subscriptions';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'areastacked',
-         statdata => ['subscribe_new_users', 'subscribe_renew_users'];
+         section   => 'all',
+         type      => 'areastacked',
+         statdata  => ['subscribe_new_users', 'subscribe_renew_users'];
 
   CASE 'Total Subscribers';
       PROCESS make_graph
@@ -203,9 +209,9 @@ SWITCH gtitle;
 
   CASE 'Subscriber Pages';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'area',
-         statdata => ['total_subscriber', 'subscribe_hits_bought', 'total_secure'];
+         section   => 'all',
+         type      => 'area',
+         statdata  => ['total_subscriber', 'subscribe_hits_bought', 'total_secure'];
 
 
   # default

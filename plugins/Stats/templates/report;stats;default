@@ -50,63 +50,6 @@ __template__
       stats_data = stats_data_big.${stats_data_key};
 
 %]
-      
-<PRE>                   UIDs      IPIDs      Pages 
-        total: [% ints(stats_data.unique_users) %]   [% ints(stats_data.unique) %]   [% ints(stats_data.total) %] ([% mbyte(stats_data.total_bytes) %])
- static total:        -          -    [% ints(stats_data.total_static) %]
-gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
-  grand total:        -          -    [% ints(stats_data.grand_total) %] ([% mbyte(stats_data.grand_total_bytes) %])
- secure total:        -          -    [% ints(stats_data.total_secure) %]
-[% IF constants.subscribe %]sbscrbr total:        -          -    [% ints(stats_data.total_subscriber) %]
-[% END %]
-        posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.distinct_comment_ipids) %]
-[% IF stats_data.comments_page > 0 -%]
-     comments: [% ints(stats_data.comments_uids) %]   [% ints(stats_data.comments_ipids) %]   [% ints(stats_data.comments_page) %] ([% mbyte(stats_data.comments_bytes) %])
-[% END -%]
-[% IF stats_data.index_page > 0 -%]
-        index: [% ints(stats_data.index_uids) %]   [% ints(stats_data.index_ipids) %]   [% ints(stats_data.index_page) %]
-[% END -%]
-[% IF stats_data.page_page > 0 -%]
-         page: [% ints(stats_data.page_uids) %]   [% ints(stats_data.page_ipids) %]   [% ints(stats_data.page_page) %]
-[% END -%]
-[% IF stats_data.article_page > 0 -%]
-     articles: [% ints(stats_data.article_uids) %]   [% ints(stats_data.article_ipids) %]   [% ints(stats_data.article_page) %] ([% mbyte(stats_data.article_bytes) %])
-[% END -%]
-[% IF stats_data.search_page > 0 -%]
-       search: [% ints(stats_data.search_uids) %]   [% ints(stats_data.search_ipids) %]   [% ints(stats_data.search_page) %] ([% mbyte(stats_data.search_bytes) %])
-[% END -%]
-[% IF stats_data.journal_page > 0 -%]
-     journals: [% ints(stats_data.journal_uids) %]   [% ints(stats_data.journal_ipids) %]   [% ints(stats_data.journal_page) %] ([% mbyte(stats_data.journal_bytes) %])
-[% END -%]
-[% IF stats_data.users__page > 0 -%]
-        users: [% ints(stats_data.users_uids) %]   [% ints(stats_data.users_ipids) %]   [% ints(stats_data.users_page) %] ([% mbyte(stats_data.users_bytes) %])
-[% END -%]
-[% IF stats_data.palm_page > 0 -%]
-         palm: [% ints(stats_data.palm_uids) %]   [% ints(stats_data.palm_ipids) %]   [% ints(stats_data.palm_page) %] ([% mbyte(stats_data.palm_bytes) %])
-[% END -%]
-[% IF stats_data.rss_ipids > 0 -%]
-          rss: [% ints(stats_data.rss_uids) %]   [% ints(stats_data.rss_ipids) %]   [% ints(stats_data.rss_page) %] ([% mbyte(stats_data.rss_bytes) %])
-[% END -%]
-[% IF stats_data.other_page > 0 -%]
-        other: [% ints(stats_data.other_uids) %]   [% ints(stats_data.other_ipids) %]   [% ints(stats_data.other_page) %] ([% mbyte(stats_data.other_bytes) %])
-[% END -%]
-
-    accesslog: [% ints(stats_data.accesslog) %] rows total
-     formkeys: [% ints(stats_data.formkeys) %] rows total
-     comments: [% ints(stats_data.comments) %] posted yesterday
-  submissions: [% ints(stats_data.submissions) %] submissions 
- sub/comments: [% pcts(stats_data.sub_comments) %]% of the submissions came from comment posters from this day
-[% IF stats_data.error_count > 0 -%]
-       errors: [% ints(stats_data.error_count) %] pages generated errors
-[% END -%]
-[% IF stats_data.not_found > 0 -%]
-    not found: [% ints(stats_data.not_found) %] pages were not found
-[% END -%]
-[% IF stats_data.status_202 > 0 -%]
-   status 202: [% ints(stats_data.status_202) %] pages sent with status 202 (rejected RSS)
-[% END -%]
-
-   total hits: [% ints(stats_data.total_hits) %]</PRE>
 
 [%
       PROCESS graphs gtitle => 'Pages';
@@ -133,23 +76,6 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
       stats_data = stats_data_big.${stats_data_key};
 %]
 
-<PRE>
-     comments: [% ints(stats_data.comments) %] posted yesterday
-   modlog all: [% ints(stats_data.modlogs) %] rows (not counting [% pctsf(stats_data.modlog_inactive_percent) %]% inactive)
-    m2log all: [% ints(stats_data.metamodlogs) %] rows ([% flts(stats_data.xmodlog) %] modlog) (not counting [% pctsf(stats_data.metamodlog_inactive_percent) %]% inactive)
-  modlog yest: [% ints(stats_data.modlog_yest) %] rows (not counting [% pctsf(stats_data.modlog_inactive_percent_yest) %]% inactive)
-   m2log yest: [% ints(stats_data.metamodlog_yest) %] rows ([% flts(stats_data.xmodlog_yest) %]x modlog) (not counting [% pctsf(stats_data.metamodlog_inactive_percent_yest) %]% inactive)
-    consensus: [% ints(stats_data.consensus) %]
-   mod points: [% ints(stats_data.mod_points_pool) %] in pool
-   mods total: [% ints(stats_data.mod_points_lost_spent) %] yesterday ([% pctsf(stats_data.mod_used_total_pool) %]% of pool, [% pctsf(stats_data.mod_used_total_comments) %]% of comments)
-      used -1: [% ints(stats_data.mod_points_lost_spent_minus_1) %] yesterday ([% pctsf(stats_data.mod_points_spent_minus_1_percent) %]%)
-      used +1: [% ints(stats_data.mod_points_lost_spent_plus_1) %] yesterday ([% pctsf(stats_data.mod_points_spent_plus_1_percent)  %]%)
-    avg spent: [% flts(stats_data.mod_points_avg_spent) %]
-token convert: [% ints(stats_data.mod_token_conversion_point) %]
-oldest unM2'd: [% IF stats_data.oldest_unm2d_days > -1 %][% ints(stats_data.oldest_unm2d_days) %] days[% ELSE %](n/a)[% END %]
-youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% stats_data.youngest_modelig_created %]
-</PRE>
-
 [%
       PROCESS graphs gtitle => 'Comment Scores';
       PROCESS graphs gtitle => 'Total Comments';
@@ -168,25 +94,7 @@ youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% st
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data = stats_data_big.${stats_data_key};
 %]
-<PRE>
-   Monthly Stats (Average Per Day)
-   -------------------------------
-            Users   Pages   Payments
-New:        [% flts2(stats_data.subscribe_new_users_last30) %]   [% ints2(stats_data.subscribe_new_pages_last30) %]   $[% dlrs(stats_data.subscribe_new_payments_last30) %]
-Renew:      [% flts2(stats_data.subscribe_renew_users_last30) %]   [% ints2(stats_data.subscribe_renew_pages_last30) %]    [% dlrs(stats_data.subscribe_renew_payments_last30) %]
-[%- total_users = stats_data.subscribe_new_users_last30 + stats_data.subscribe_renew_users_last30;
-    total_pages = stats_data.subscribe_new_pages_last30 + stats_data.subscribe_renew_pages_last30;
-    total_pays  = stats_data.subscribe_new_payments_last30 + stats_data.subscribe_renew_payments_last30; %]
-Total:      [% flts2(total_users) %]   [% flts2(total_pages) %]   $[% dlrs(total_pays) %]
-Used up:            [% ints2(stats_data.subscribe_hits_bought_last30) %]   $[% dlrs(stats_data.subscribe_dollars_bought_last30) %]
-Ran out:    [% flts2(stats_data.subscribe_runout_last30) %]
 
-current subscribers: [% ints3(stats_data.subscribers_current) %]
-[%- former_subs = stats_data.subscribers_total - stats_data.subscribers_current; -%]
- former subscribers: [% ints3(former_subs) %]     
-  total subscribers: [% ints3(stats_data.subscribers_total) %]    
-  new subscriptions: [% ints3(stats_data.subscribe_new_users) %]
-</PRE> 
 [%
       PROCESS graphs gtitle => 'New Subscriptions';
       PROCESS graphs gtitle => 'Total Subscribers';
