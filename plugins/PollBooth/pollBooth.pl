@@ -24,6 +24,7 @@ sub main {
 		vote		=> \&vote,
 		vote_return	=> \&vote_return,
 		get		=> \&poll_booth,
+                preview         => \&editpoll
 	);
 
 	my $op = $form->{op};
@@ -111,13 +112,46 @@ sub editpoll {
 	}
 
 	my($question, $answers, $pollbooth, $checked);
-	if ($qid) {
+        if ($form->{op} eq "preview"){
+		foreach(qw/question voters date section topic polltype/){
+			$question->{$_} = $form->{$_};
+		}
+        $question->{polltype} ||= "section";
+ 
+	my $disp_answers;
+	for my $n(1..8){
+		$answers->[$n-1]=[$form->{"aid$n"},$form->{"votes$n"}];
+		$disp_answers->[$n-1]={aid=>$n, answer=>$form->{"aid$n"}, votes=>$form->{"votes$n"}} if $form->{"aid$n"};
+	}
+	
+	$question->{sid}=$form->{sid};
+	$checked=$form->{currentqid};
+
+
+		my $raw_pollbooth = slashDisplay('pollbooth', {
+			qid		=> -1,
+			voters		=> $question->{voters},
+			poll_open 	=> ($form->{date} le $slashdb->getTime()),
+			question	=> $question->{question},
+			answers		=> $disp_answers,
+			sect		=> $question->{section},
+                        has_activated   => 1 
+		}, 1);
+		$pollbooth = fancybox(
+			$constants->{fancyboxwidth}, 
+			'Poll', 
+			$raw_pollbooth, 
+			0, 1
+                );
+            
+        } elsif ($qid) {
 		$question = $slashdb->getPollQuestion($qid);
 		$question->{sid} = $slashdb->getSidForQID($qid)
 			unless $question->{autopoll};
 		$answers = $slashdb->getPollAnswers(
 			$qid, [qw( answer votes aid )]
 		);
+                $question->{polltype} ||= "section";
 		$checked = ($slashdb->getSection($question->{section}, 'qid', 1) == $qid) ? 1 : 0;
 		my $poll_open = $slashdb->isPollOpen($qid);
 
@@ -132,6 +166,7 @@ sub editpoll {
 			answers		=> $poll->{answers},
 			voters		=> $poll->{pollq}{voters},
 			sect		=> $user->{section} || $question->{section},
+                        has_activated   => $slashdb->hasPollActivated($qid)
 		}, 1);
 		$pollbooth = fancybox(
 			$constants->{fancyboxwidth}, 
@@ -140,14 +175,20 @@ sub editpoll {
 			0, 1
 		);
 	}
+        
 
 	if ($question) {
 		$question->{voters} ||= 0;
 	} else {
 		$question->{voters} ||= 0;
+		$question->{polltype} ||= "section";
 		$question->{question} = $form->{question}; 
 		$question->{sid} = $form->{sid}; 
 	}
+ 	
+	my $date = $question->{date};
+        $date ||= $form->{date};
+        $date ||= $slashdb->getTime();
 
 	slashDisplay('editpoll', {
 		title		=> getData('edit_poll_title', { qid=>$qid }),
@@ -156,6 +197,7 @@ sub editpoll {
 		answers		=> $answers,
 		pollbooth	=> $pollbooth,
 		checked		=> $checked,
+                date            => $date
 	});
 }
 
