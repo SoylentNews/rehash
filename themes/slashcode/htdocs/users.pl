@@ -407,7 +407,8 @@ EOT
 #################################################################
 sub editKey {
 	my($k) = sqlSelect("pubkey", "users_key", "uid=$_[0]");
-	print qq!<P><B>Public Key</B><BR><TEXTAREA NAME="pubkey" ROWS="4" COLS="60">$k</TEXTAREA>!;
+	printf qq!<P><B>Public Key</B><BR><TEXTAREA NAME="pubkey" ROWS="4" COLS="60">%s</TEXTAREA>!,
+		stripByMode($k, 'literal');
 }
 
 #################################################################
@@ -460,13 +461,13 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 EOT
 
 	selectForm("maillist", "maillist", $maillist);
-	print <<EOT;
+	printf <<EOT, stripByMode($sig, 'literal'), stripByMode($bio, 'literal');
 	<P><B>Sig</B> (appended to the end of comments you post, 120 chars)<BR>
-		<TEXTAREA NAME="sig" rows=2 cols=60>$sig</TEXTAREA>
+		<TEXTAREA NAME="sig" ROWS="2" COLS="60">%s</TEXTAREA>
 
 	<P><B>Bio</B> (this information is publicly displayed on your
 		user page.  255 chars)<BR>
-		<TEXTAREA NAME="bio" rows=5 cols=60 wrap=virtual>$bio</TEXTAREA>
+		<TEXTAREA NAME="bio" ROWS="5" COLS="60" WRAP="virtual">%s</TEXTAREA>
 
 EOT
 
@@ -537,6 +538,8 @@ EOT
 	print "</TD></TR></TABLE><P>";
 	
 	titlebar("100%", "Customize Slashboxes");
+
+	$userspace = stripByMode($userspace, 'literal');
 	print <<EOT;
 <TABLE WIDTH="95%" BGCOLOR="$I{bg}[2]" ALIGN="CENTER" BORDER="0">
 	<TR><TD>

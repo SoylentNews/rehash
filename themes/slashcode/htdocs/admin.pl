@@ -278,6 +278,10 @@ sub authorEdit {
 		sqlSelect('name,url,email,quote,copy,pwd,seclev,section', 'authors','aid ='. $I{dbh}->quote($aid)); 
 	}
 
+	for ($quote, $copy) {
+		$_ = stripByMode($_, 'literal');
+	}
+
 	print <<EOT;
 <INPUT TYPE="submit" VALUE="Select Author" NAME="authoredit"><BR>
 <TABLE BORDER="0">
@@ -472,8 +476,12 @@ EOT
 		$saveflag = qq[<INPUT TYPE="HIDDEN" NAME="save_new" VALUE="1">];
 	}
 
-	my($block, $bseclev,$type,$description) = sqlSelect('block,seclev,type,description', 'blocks', "bid='$bid'") if $bid;
-	$block =~ s/&/&amp;/g;
+	my($block, $bseclev, $type, $description) =
+		sqlSelect('block,seclev,type,description', 'blocks', "bid='$bid'") if $bid;
+
+	my $description_ta = stripByMode($description, 'literal');
+	$block = stripByMode($block, 'literal');
+
 	# main table
 	print <<EOT;
 <TABLE BORDER="0">
@@ -493,7 +501,7 @@ EOT
 		</TD>
 	</TR>
 EOT
-	
+
 # print the form if this is a new block, submitted block, or block edit via sections.pl
 	print <<EOT if ( (! $I{F}{blockdelete_confirm} && $bid) || $I{F}{blocknew}) ;
 	<TR>	
@@ -517,7 +525,7 @@ EOT
 	<TR>
 		<TD VALIGN="TOP"><B>Description</B></TD>
 		<TD ALIGN="left" COLSPAN="2">
-		<TEXTAREA ROWS="6" COLS="70" NAME="description">$description</TEXTAREA>
+		<TEXTAREA ROWS="6" COLS="70" NAME="description">$description_ta</TEXTAREA>
 		</TD>
 	</TR>
 	<TR>	
@@ -1206,10 +1214,8 @@ EOT
 	my @extracolumns = sqlSelectColumns($S->{section})
 		if sqlTableExists($S->{section});
 
-	# This may cause problems w/ browsers that don't decode their form
-	# fields.
-	$S->{introtext} =~ s/&/&amp;/g;
-	$S->{bodytext} =~ s/&/&amp;/g;
+	$S->{introtext} = stripByMode($S->{introtext}, 'literal');
+	$S->{bodytext} = stripByMode($S->{bodytext}, 'literal');
 	my $SECT = getSection($S->{section});
 
 	print '<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">';
@@ -1483,6 +1489,7 @@ EOT
 			"content_filters","filter_id=$filter_id");
 
 	# this has to be here - it really screws up the block editor
+	$err_message = stripByMode($err_message, 'literal');
 	my $textarea = <<EOT;
 <TEXTAREA NAME="err_message" COLS="50" ROWS="2">$err_message</TEXTAREA>
 EOT

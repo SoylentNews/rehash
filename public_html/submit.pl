@@ -200,17 +200,16 @@ ADMIN
 	if ($admin) {
 		selectTopic("tid", $tid);
 		selectSection("section", $I{F}{section} || $I{defaultsection});
-	}
 
-	print <<ADMIN if $admin;
-
+		printf <<ADMIN, stripByMode($introtext, 'literal');
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview"><BR>
 		<BR>Intro Copy<BR>
-		<TEXTAREA NAME="introtext" COLS="70" ROWS="10" WRAP="VIRTUAL">$introtext</TEXTAREA><BR>
+		<TEXTAREA NAME="introtext" COLS="70" ROWS="10" WRAP="VIRTUAL">%s</TEXTAREA><BR>
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview"><BR>
 	</FORM>
 
 ADMIN
+	}
 
 	sqlUpdate("sessions", { lasttitle => $title },
 		"aid=" . $I{dbh}->quote($I{U}{aid})
@@ -525,9 +524,9 @@ EOT
 
 	print formLabel("The Scoop",
 		"HTML is fine, but double check those URLs and HTML tags!");
-	print <<EOT;
+	printf <<EOT, stripByMode($I{F}{story}, 'literal');
 
-<TEXTAREA WRAP="VIRTUAL" COLS="70" ROWS="12" NAME="story">$I{F}{story}</TEXTAREA><BR>
+<TEXTAREA WRAP="VIRTUAL" COLS="70" ROWS="12" NAME="story">%s</TEXTAREA><BR>
 <FONT SIZE="2">(Are you sure you included a URL?  Didja test them for typos?)</FONT><P>
 
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="PreviewStory">
