@@ -174,7 +174,11 @@ EOT
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID();
 	my($distinct_comment_ipids_anononly,
 	   $distinct_comment_ipids_loggedinonly,
-	   $distinct_comment_ipids_anonandloggedin) = $stats->countCommentsByDistinctIPIDPerAnon();
+	   $distinct_comment_ipids_anonandloggedin,
+	   $comments_ipids_anononly,
+	   $comments_ipids_loggedinonly,
+	   $comments_ipids_anonandloggedin) = $stats->countCommentsByDistinctIPIDPerAnon();
+	my $comments_proxyanon = $stats->countCommentsFromProxyAnon();
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
 	my $comments_discussiontype_hr = $stats->countCommentsByDiscussionType();
 	my $submissions = $stats->countSubmissionsByDay();
@@ -413,6 +417,10 @@ EOT
 	$statsSave->createStatDaily("distinct_comment_ipids_anononly", $distinct_comment_ipids_anononly);
 	$statsSave->createStatDaily("distinct_comment_ipids_loggedinonly", $distinct_comment_ipids_loggedinonly);
 	$statsSave->createStatDaily("distinct_comment_ipids_anonandloggedin", $distinct_comment_ipids_anonandloggedin);
+	$statsSave->createStatDaily("comments_ipids_anononly", $comments_ipids_anononly);
+	$statsSave->createStatDaily("comments_ipids_loggedinonly", $comments_ipids_loggedinonly);
+	$statsSave->createStatDaily("comments_ipids_anonandloggedin", $comments_ipids_anonandloggedin);
+	$statsSave->createStatDaily("comments_proxyanon", $comments_proxyanon);
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
 	for my $type (sort keys %$comments_discussiontype_hr) {
 		$statsSave->createStatDaily("comments_discussiontype_$type", $comments_discussiontype_hr->{$type});
