@@ -32,12 +32,12 @@ $slashdb->sqlDo("DELETE FROM people_nthdegree");
 for (@$people) {
 	if ($_->[2] eq 'foe') {
 		print "$_->[1] is a foe of $_->[0]\n";
-		$slashdb->sqlDo("INSERT people_nthdegree SELECT person, $_->[1], $_->[0], 'eof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1] AND person != $_->[0]");
+		$slashdb->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT person, $_->[1], $_->[0], 'eof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1] AND person != $_->[0]");
 	} elsif ($_->[2] eq 'friend') {
 		print "$_->[1] is a friend of $_->[0]\n";
-		$slashdb->sqlDo("INSERT people_nthdegree SELECT person, $_->[1], $_->[0], 'fof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1]  AND person != $_->[0]");
-		$slashdb->sqlDo("INSERT people_nthdegree SELECT $_->[0], person, $_->[1], 'fof' from people WHERE uid=$_->[1] AND type='friend' AND $_->[0] != person  AND person != $_->[1]");
-		$slashdb->sqlDo("INSERT people_nthdegree SELECT $_->[0], person, $_->[1], 'eof' from people WHERE uid=$_->[1] AND type='foe' AND $_->[0] != person  AND person != $_->[1]");
+		$slashdb->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT person, $_->[1], $_->[0], 'fof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1]  AND person != $_->[0]");
+		$slashdb->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT $_->[0], person, $_->[1], 'fof' from people WHERE uid=$_->[1] AND type='friend' AND $_->[0] != person  AND person != $_->[1]");
+		$slashdb->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT $_->[0], person, $_->[1], 'eof' from people WHERE uid=$_->[1] AND type='foe' AND $_->[0] != person  AND person != $_->[1]");
 	}
 }
 # See, if we only used MySQL 4.X I would just do a UNION :)
