@@ -4524,8 +4524,8 @@ sub getStoriesEssentials {
 	my $columns;
 	$columns = 'sid, section, title, time, commentcount, hitparade, tid';
 
-	#my $where = "time < NOW() ";
-	my $where = " time + INTERVAL 0 DAY<NOW() ";
+	my $where = "time < NOW() ";
+	#my $where = " time + INTERVAL 0 DAY<NOW() ";
 	# Added this to narrow the query a bit more, I need
 	# see about the impact on this -Brian
 	$where .= "AND writestatus != 'delete' ";
