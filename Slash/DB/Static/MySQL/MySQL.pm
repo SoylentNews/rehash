@@ -589,9 +589,9 @@ sub getDailyMail {
 	my $nexuses = $self->getNexusChildrenTids($mp_tid);
 	my $nexus_clause = join ',', @$nexuses, $mp_tid;
 	if ($user->{sectioncollapse}) {
-		$where .= "AND story_topics_rendered.tid = $mp_tid ";
-	} else {
 		$where .= "AND story_topics_rendered.tid in ($nexus_clause) ";
+	} else {
+		$where .= "AND story_topics_rendered.tid = $mp_tid ";
 	}
 
 	$where .= "AND story_topics_rendered.tid not in ($user->{extid}) "
