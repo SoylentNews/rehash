@@ -420,7 +420,11 @@ sub commentIndexUserCreated {
 	$hashref->{type} = 'recycle'; 
 	$hashref->{approved} = '1'; 
 
-	my $discussions = $searchdb->findDiscussion($hashref, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
+	my $discussions = $searchdb->findDiscussion(
+		$hashref,
+		$constants->{discussion_display_limit} + 1,
+		$start,
+		$constants->{discussion_sort_order});
 
 	if ($discussions && @$discussions) {
 		my $forward;
@@ -587,7 +591,6 @@ sub createDiscussion {
 		$form->{url}	= fudgeurl($newurl);
 		$form->{title}	= strip_notags($form->{title});
 
-
 		# for now, use the postersubj filters; problem is,
 		# the error messages can come out a bit funny.
 		# oh well.  -- pudge
@@ -617,11 +620,11 @@ sub createDiscussion {
 			}
 		}
 
-		my $formats = $slashdb->getDescriptions('postmodes');
-		my $postvar = $form->{posttype} ? $form : $user;
 		my $format_select = createSelect(
-			'posttype', $formats, $postvar->{posttype}, 1
-		);
+			'posttype',
+			$slashdb->getDescriptions('postmodes'),
+			$form->{posttype} || $user->{posttype},
+			1);
 
 		# Update form with the new SID for comment creation and other
 		# variables necessary. See "edit_comment;misc;default".
@@ -682,11 +685,11 @@ sub editComment {
 		$form->{postersubj} = "Re:$form->{postersubj}";
 	}
 
-	my $formats = $slashdb->getDescriptions('postmodes');
-
-	my $format_select = $form->{posttype}
-		? createSelect('posttype', $formats, $form->{posttype}, 1)
-		: createSelect('posttype', $formats, $user->{posttype}, 1);
+	my $format_select = createSelect(
+		'posttype',
+		$slashdb->getDescriptions('postmodes'),
+		$form->{posttype} || $user->{posttype},
+		1);
 
 	if ($form->{op} =~ /^reply$/i) {
 		$form->{nobonus}  = $user->{nobonus};

@@ -34,13 +34,13 @@ __template__
 	Several Active [% label.ucfirst %]s 
 
 [% CASE 'all_discussions' %]
-	All Active [% label.ucfirst  %]s 
+	All Active [% label.ucfirst %]s 
 
 [% CASE 'user_discussions' %]
-	User Created  [% label.ucfirst  %]s
+	User Created [% label.ucfirst %]s
 
 [% CASE 'user_discussion' %]
-	[% label.ucfirst  %]s created by [% name %]
+	[% label.ucfirst %]s created by [% name %]
 
 [% CASE 'archive_error' %]
 	This [% label %] has been archived, no further changes/additions can be made to it.
@@ -52,8 +52,8 @@ __template__
 	[% label.ucfirst %] has been created	
 
 [% CASE 'no_discreate_msg' %]
-	You either aren't <a href="[% constants.rootdir %]/users.pl">logged in
-	</a> or don't have sufficient priveledges to submit a [% label %].
+	You either aren't <a href="[% constants.rootdir %]/users.pl">logged in</a>
+	or don't have sufficient priveledges to submit a [% label %].
 [% END %]
 
 __seclev__
