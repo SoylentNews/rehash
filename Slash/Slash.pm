@@ -1277,6 +1277,7 @@ EOT
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
+			subject_only => 1,
 		}) . " | ") unless $user->{state}{discussion_archived};
 
 		my $parent = linkComment({
@@ -1284,6 +1285,7 @@ EOT
 			cid	=> $comment->{pid},
 			pid	=> $comment->{pid},
 			subject	=> 'Parent',
+			subject_only => 1,
 		}, 1);
 		my $mod_select = '';
 		if ($can_mod) {

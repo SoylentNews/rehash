@@ -22,8 +22,10 @@ __template__
 [% subject = color? "<FONT COLOR=\"$color\">$subject</FONT>" : subject %]
 <A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;op=[% op %]&amp;threshold=[% threshold %]&amp;commentsort=[% commentsort %]&amp;mode=[% mode %][% IF startat %]&amp;startat=[% startat %][% END %][% IF user.state.tid %]&amp;tid=[% user.state.tid %][% END %][% IF comment %]&amp;cid=[% cid %][% ELSE %]&amp;pid=[% pid %][% IF cid %]#[% cid %][% END %][% END %]">[% subject %]</A>
 
+[% IF !comment.subjectonly %]
+
 [% IF nickname %]
-	[% # XXX two questions here: why decide by nickname and not uid; and why admin-only link to nickname? %]
+	[% # XXX why admin-only link to nickname? %]
 	[% IF adminflag %]
 	by <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname %]">[% nickname %]</A>
 
@@ -39,6 +41,8 @@ __template__
 
 [% IF date %]
 	<FONT SIZE="-1">[% Slash.timeCalc(time) %]</FONT>
+[% END %]
+
 [% END %]
 
 __seclev__

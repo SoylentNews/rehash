@@ -22,11 +22,13 @@ __template__
 		pid	=> cid,
 		op	=> 'Reply',
 		subject	=> 'Reply to This',
+		subject_only => 1,
 	}) %] | [% END %][% Slash.linkComment({
 		sid	=> sid,
 		cid	=> pid,
 		pid	=> pid,
 		subject	=> 'Parent',
+		subject_only => 1,
 	}, 1) %]
 
 	[% IF can_mod && (
