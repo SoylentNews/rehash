@@ -2411,5 +2411,5 @@ INSERT INTO story_param (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FRO
 
 # Run this perl script to make sure stories set to Never Display have the
 # appropriate value in story_param.
-# perl -MSlash::Test=YOURVIRTUALUSER -le '$nd_hr = $slashdb->displaystatusForStories($slashdb->sqlSelectColArrayref("stoid", "stories")); @nd = grep { $nd_hr->{$_} == -1 } keys %$nd_hr; for my $stoid (@nd) { $slashdb->sqlInsert("story_param", { name => "neverdisplay", value => "1" }, { ignore => 1 }); }'
+# perl -MSlash::Test=YOURVIRTUALUSER -le '$nd_hr = $slashdb->displaystatusForStories($slashdb->sqlSelectColArrayref("stoid", "stories")); @nd = grep { $nd_hr->{$_} == -1 } keys %$nd_hr; for my $stoid (@nd) { $slashdb->sqlInsert("story_param", { stoid => $stoid, name => "neverdisplay", value => "1" }, { ignore => 1 }); }'
 
