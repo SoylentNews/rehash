@@ -3784,12 +3784,15 @@ EOT
 			email		=> $_->{miner},
 			uid		=> $constants->{anonymous_coward_uid},
 			name		=> $_->{name},
-			story		=> $_->{story},
+			story		=> $_->{story} || '-', # need story text
 			subj		=> $_->{subj},
 			tid		=> $constants->{newsvac_topic},
 			section		=> $constants->{newsvac_section},
 			weight		=> $_->{weight},
 		});
+
+		next if ! $subid;
+
 		$self->setSubmission($subid, {
 			separate	=> 1,
 			storyonly	=> 1,

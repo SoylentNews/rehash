@@ -1034,6 +1034,7 @@ sub createSubmission {
 	my($self, $submission) = @_;
 
 	return unless	$submission && 
+			# um ... what?
 			($submission->{story} || $submission->{story});
 
 	my $data;
