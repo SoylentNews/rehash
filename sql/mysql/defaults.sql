@@ -755,6 +755,14 @@ INSERT INTO vars (name, value, description) VALUES ('index_gse_backup_prob','0',
 INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call for connections to the root of the server.');
 INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home','The shtml page to call if a user is anon and index_noanon is set');
 INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect all anonymous users to index_handler_noanon instead of index.shtml. Set to 1 to activate, 0 to remove.');
+INSERT INTO vars (name, value, description) VALUES ('ircslash','0','Enable the ircslash task and connect to an IRC channel whenever slashd starts');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_channel','#ircslash','Which channel to join');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_ircname','','Name to use on IRC server (defaults to "(slashsite) slashd")');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_nick','','Nick to use on IRC server (has a reasonable default)');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_port','6667','Port to use on IRC server');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_server','irc.slashnet.org','Which IRC server to connect to');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_ssl','0','Try to connect over SSL?');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_username','','Username to use on IRC server (has a reasonable default)');
 INSERT INTO vars (name, value, description) VALUES ('issue_lookback_days','90','Number of days to look back in issue mode');
 INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_ip','4','Downmods at which an IP is considered a troll');
 INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_subnet','6','Downmods at which a subnet is considered a troll');
