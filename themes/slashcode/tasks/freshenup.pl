@@ -107,7 +107,7 @@ $task{$me}{code} = sub {
 			$filename, {
 				args =>		$args,
 				verbosity =>	verbosity(),
-				handle_err =>	1
+				handle_err =>	1,
 		});
 		slashdLog($logmsg) if verbosity() >= 2;
 
@@ -193,7 +193,6 @@ sub _read_and_unlink_cchp_file {
 	my($cc, $hp) = (undef, undef);
 	my $default_hp = join(",", ("0") x
 		($constants->{maxscore}-$constants->{minscore}+1));
-	($cc, $hp) = (0, $default_hp);
 
 	# Now we extract what we need from the file we created
 	if (!open(my $cchp_fh, "<", $cchp_file)) {
@@ -207,6 +206,7 @@ sub _read_and_unlink_cchp_file {
 			slashdLog("Commentcount/hitparade data was not"
 				. " retrieved, reason unknown"
 				. " (cchp: '$cchp')");
+			($cc, $hp) = (undef, undef);
 		}
 	}
 	unlink $cchp_file;

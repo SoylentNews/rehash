@@ -321,15 +321,31 @@ sub prog2file {
 
 	# Two ways of handling data from child programs yet we maintain
 	# backwards compatibility.
-	# Need an alarm() around these.
-	if (! $handle_err) {
-		$data = `$exec`;
-	} else {
-		my($errfh, $errfile) = tempfile();
-		$data = `$exec 2>$errfile`;
-		$stderr_text = join '', <$errfh>;
-		close $errfh;
-		unlink $errfile;
+	# Passing "timeout" as a field to $options does what you'd think.
+	# A timeout of 0 means "never time out".  30 seconds is default.
+	my $timeout = 30;
+	$timeout = $options->{timeout} if defined($options->{timeout});
+	my($errfh, $errfile) = (undef, undef);
+	eval {
+		local $SIG{ALRM} = sub { die "timeout" };
+		alarm $timeout if $timeout;
+		if (!$handle_err) {
+			$data = `$exec`;
+			alarm 0 if $timeout;
+		} else {
+			($errfh, $errfile) = tempfile();
+			$data = `$exec 2>$errfile`;
+			alarm 0 if $timeout;
+			$stderr_text = join '', <$errfh>;
+			close $errfh; $errfh = undef;
+			unlink $errfile; $errfile = undef;
+		}
+	};
+	my $success_str = "";
+	if ($timeout && $@ && $@ =~ /timeout/) {
+		$success_str = " TIMEOUT_HIT";
+		close $errfh if $errfh;
+		unlink $errfile if $errfile;
 	}
 	my $bytes = length $data;
 
@@ -354,7 +370,7 @@ sub prog2file {
 
 	my($command_base) = $command =~ m{([^/]+)$};
 	$command_base ||= $command;
-	my $success_str = $success ? "" : " FAILED:$err_str";
+	$success_str .= $success ? "" : " FAILED:$err_str";
 	$success_str =~ s/\s+/ /g; chomp $success_str;
 
 	if ($verbosity >= 2) {
