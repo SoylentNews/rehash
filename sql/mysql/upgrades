@@ -741,8 +741,6 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes o
 
 INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_47, Start of T_2_3_0_48
 
 ALTER TABLE accesslog DROP INDEX op_part;
@@ -784,6 +782,18 @@ UPDATE stats_daily SET name='m2_points_lost_spent' WHERE name='m2_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent' WHERE name='mod_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_points_spent_plus_1';
 UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_points_spent_minus_1';
+
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+
 ALTER TABLE users_info CHANGE people people MEDIUMBLOB;
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_48
+
+UPDATE stats_daily SET name='mod_tokens_lost_stirred' WHERE name='mod_tokens_stirred';
+# Do this next command with the value of the var "maxpoints" in place of "5"...
+# UPDATE stats_daily SET value=value * 5 WHERE name='mod_tokens_lost_converted';
+
+

@@ -86,12 +86,15 @@ sub give_out_points {
 
 		# Store stats about what we just did.
 		if ($n_grantees and my $statsSave = getObject('Slash::Stats::Writer')) {
-			$statsSave->addStatDaily("mod_points_gain_granted", $n_grantees);
+			my $maxpoints = $constants->{maxpoints} || 5;
+			my $points_gained = $n_grantees * $maxpoints;
+			$statsSave->addStatDaily("mod_points_gain_granted",
+				$points_gained);
 			# Reverse-engineer how many tokens that was.
 			my $tokperpt = $constants->{tokensperpoint} || 8;
-			my $maxpoints = $constants->{maxpoints} || 5;
-			my $n_tokens = $n_grantees * $tokperpt * $maxpoints;
-			$statsSave->addStatDaily("mod_tokens_lost_converted", $n_tokens);
+			my $tokens_converted = $points_gained * $tokperpt;
+			$statsSave->addStatDaily("mod_tokens_lost_converted",
+				$tokens_converted);
 		}
 	}
 
@@ -176,7 +179,7 @@ sub give_out_tokens {
 		# were lost in the stirring.
 		my $tokens_per_pt = $constants->{mod_stir_token_cost} || 0;
 		my $stirredtokens = $stirredpoints * $tokens_per_pt;
-		$statsSave->addStatDaily("mod_tokens_stirred", $stirredtokens);
+		$statsSave->addStatDaily("mod_tokens_lost_stirred", $stirredtokens);
 	}
 
 	# fetchEligibleModerators() returns a list of uids sorted in the
