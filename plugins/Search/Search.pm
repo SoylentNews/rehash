@@ -56,11 +56,12 @@ sub findComments {
 	my $query = $self->sqlQuote($form->{query});
 	my $constants = getCurrentStatic();
 	my $columns;
-	# XXXSKIN - discussions.section needs to be fixed somehow to new system
-	$columns .= "discussions.section as section, discussions.url as url, discussions.uid as author_uid,";
-	$columns .= "discussions.title as title, pid, subject, ts, date, comments.uid as uid, ";
-	$columns .= "comments.cid as cid, discussions.id as did ";
-	$columns .= ", TRUNCATE( " . $self->_score('comments.subject', $form->{query}, $constants->{search_method}) . ", 1) as score "
+	$columns .= "primaryskid, url, discussions.uid AS author_uid, discussions.title AS title, ";
+	$columns .= "pid, subject, ts, date, comments.uid AS uid, cid, ";
+	$columns .= "discussions.id AS did, ";
+	$columns .= "TRUNCATE( "
+		. $self->_score('comments.subject', $form->{query}, $constants->{search_method})
+		. ", 1) AS score "
 		if $form->{query};
 
 	my $tables = "comments, discussions";
@@ -70,14 +71,13 @@ sub findComments {
 	# Welcome to the join from hell -Brian
 	my $where;
 	$where .= " comments.sid = discussions.id ";
-	$where .= "	  AND $key "
-			if $form->{query};
+	$where .= " AND $key " if $form->{query};
 
 	if ($form->{sid}) {
 		if ($form->{sid} !~ /^\d+$/) {
-			$where .= "     AND discussions.sid=" . $self->sqlQuote($form->{sid})
+			$where .= " AND discussions.sid=" . $self->sqlQuote($form->{sid})
 		} else {
-			$where .= "     AND discussions.id=" . $self->sqlQuote($form->{sid})
+			$where .= " AND discussions.id=" . $self->sqlQuote($form->{sid})
 		}
 	}
 	if (defined $form->{threshold}){
@@ -91,7 +91,7 @@ sub findComments {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
 	if ($skin->{skid} != $constants->{mainpage_skid}) {
-		$where .= " AND discussions.primaryskid = $skin->{skid}";
+		$where .= " AND primaryskid = $skin->{skid}";
 	}
 
 	my $other;
@@ -158,8 +158,8 @@ sub findStory {
 	$form->{query} = $self->_cleanQuery($form->{query});
 	my $query = $self->sqlQuote($form->{query});
 	my $columns;
-	$columns .= "title, stories.stoid as stoid, "; 
-	$columns .= "time, commentcount, stories.primaryskid as skid,";
+	$columns .= "title, stories.stoid AS stoid, "; 
+	$columns .= "time, commentcount, stories.primaryskid AS skid,";
 	$columns .= "introtext ";
 	$columns .= ", TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
 		if $form->{query};
@@ -183,18 +183,18 @@ sub findStory {
 		OR MATCH (introtext,bodytext) AGAINST ($query) ) "
 		if $form->{query};
 
-	$where .= " AND time < NOW() AND stories.in_trash = 'no' ";
+	$where .= " AND time < NOW() AND stories.in_trash = 'no' AND primaryskid != 0 ";
 	$where .= " AND stories.uid=" . $self->sqlQuote($form->{author})
 		if $form->{author};
 	$where .= " AND stories.submitter=" . $self->sqlQuote($form->{submitter})
 		if $form->{submitter};
-	$where .= " AND displaystatus != -1";
 
 	my $gSkin = getCurrentSkin();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
 	if ($skin->{skid} != $constants->{mainpage_skid}) {
 		# XXXSKIN this is wrong, we want to join on story_topics_rendered
+		# by putting $skin->{nexus} into the list of tids we demand
 		$where .= " AND stories.primaryskid = $skin->{skid}";
 	}
 
