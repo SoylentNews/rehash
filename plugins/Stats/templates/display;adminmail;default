@@ -102,7 +102,7 @@ Recent top [% top_recent_domains.size %] email domains:
 
 [% IF top_relocated_urls %]
 Top Relocated URLS
-[% FOREACH tru = top_relocated_urls; tru.count; "  "; tru.url; "\n"; END %]
+[% FOREACH tru = top_relocated_urls; tru.count; "  "; tru.stats_type; "  "; tru.url; "\n"; END %]
 [% END %]
 
 -----------------------
