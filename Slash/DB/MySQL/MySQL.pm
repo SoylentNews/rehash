@@ -955,6 +955,7 @@ sub createAccessLog {
 	my $form = getCurrentForm();
 	my $r = Apache->request;
 	my $hostip = $r->connection->remote_ip; 
+	my $bytes = $r->bytes_sent; 
 
 	my $uid;
 	if ($ENV{SLASH_USER}) {
@@ -982,6 +983,7 @@ sub createAccessLog {
 		dat		=> $dat,
 		uid		=> $uid,
 		section		=> $section,
+		bytes		=> $bytes,
 		op		=> $op,
 		-ts		=> 'NOW()',
 		query_string	=> $ENV{QUERY_STRING} || '0',
