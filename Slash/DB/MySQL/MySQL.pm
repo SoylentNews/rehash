@@ -1377,6 +1377,14 @@ sub createAccessLog {
 	$user ||= {};
 	$user->{state} ||= {};
 
+	if ($op eq 'image' && $constants->{accesslog_imageregex}) {
+		return if $constants->{accesslog_imageregex} eq 'NONE';
+		my $uri = $r->uri;
+		print STDERR scalar(localtime) . " createAccessLog image url '" . ($r->uri) . "'\n";
+		return unless $uri =~ $constants->{accesslog_imageregex};
+		$dat ||= $uri;
+	}
+
 	my $uid;
 	if ($ENV{SLASH_USER}) {
 		$uid = $ENV{SLASH_USER};
@@ -6565,8 +6573,12 @@ sub getSlashConf {
 		$conf{comment_nonstartwordchars_regex} = qr{$regex}i;
 	}
 
-	if ($conf{x_forwarded_for_trust_regex}) {
-		$conf{x_forwarded_for_trust_regex} = qr{$conf{x_forwarded_for_trust_regex}};
+	for my $regex (qw(
+		accesslog_imageregex
+		x_forwarded_for_trust_regex
+	)) {
+		next if !$conf{$regex} || $conf{$regex} eq 'NONE';
+		$conf{$regex} = qr{$conf{$regex}};
 	}
 
 	if ($conf{approvedtags_attr}) {
