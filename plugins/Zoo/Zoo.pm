@@ -72,7 +72,7 @@ sub getFriendsUIDs {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $people = $slashdb->getUser($uid, 'people');
-	if ($uid == $uid) {
+	if ($uid == $user->{uid}) {
 		$people = $user->{people};
 	} else {
 		$people = $slashdb->getUser($uid, 'people');
