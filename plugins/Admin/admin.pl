@@ -1016,8 +1016,10 @@ sub editStory {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my($sid, $storylinks);
+	# Added validation of sid -Brian
 	if ($form->{op} eq 'edit') {
-		$sid = $form->{sid};
+		$sid = $slashdb->getStory($form->{sid}, 'sid')
+			if ($form->{sid});
 	}
 
 	my($extracolumn_flag) = (0, 0);
@@ -1070,7 +1072,6 @@ sub editStory {
 		$topic = $slashdb->getTopic($storyref->{tid});
 		$form->{uid} ||= $user->{uid};
 		$author = $slashdb->getAuthor($form->{uid});
-		$sid = $form->{sid};
 		$subid = $form->{subid};
 
 		if (!$form->{'time'} || $form->{fastforward}) {
@@ -1221,7 +1222,6 @@ printf STDERR "getSimilarStories duration: %0.3f\n", $duration;
 		fastforward_check	=> $fastforward_check,
 		shortcuts_check		=> $shortcuts_check,
 		subsection_select	=> $subsection_select,
-		user			=> $user,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
 		multi_topics		=> $multi_topics,

@@ -7,7 +7,6 @@ mysql_prep=mysql_prep
 mysql_schema=mysql_schema
 template=templates/data;events;default
 template=templates/editevent;eventsadmin;default
-template=templates/editStory;admin;default
 template=templates/eventsadmin;misc;default
 template=templates/events;misc;default
 template=templates/index;eventsadmin;default

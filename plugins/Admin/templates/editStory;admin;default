@@ -14,43 +14,38 @@ __name__
 editStory
 __template__
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
-[% IF user.section %]
-<INPUT TYPE="HIDDEN" NAME="user.section" VALUE="[% user.section %]">
+[% IF form.subid %]
+	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid %]">
 [% END %]
 
 [% IF form.title %]
+	<TABLE>
+		<TR VALIGN=TOP>
+			<TD>
+			[% storycontent %]
+			</TD>
 
-	[% IF form.subid %]
-<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid %]">
-	[% END %]
+			<TD WIDTH="220">
+			
+			[% PROCESS fancybox
+				title = "Related Links"
+				contents = storyref.relatedtext
+			%]
+			<INPUT TYPE="HIDDEN" NAME="relatedtext" VALUE="[% relatedtext | strip_attribute %]">
 
-<TABLE>
-	<TR VALIGN=TOP>
-		<TD>
-		[% storycontent %]
-		</TD>
+			[% PROCESS fancybox
+				title = "Story Admin"
+				contents = authortext
+			%]
+			[% PROCESS fancybox
+				title = "Slashd Status"
+				contents = slashdtext
+			%]
 
-		<TD WIDTH="220">
-		
-		[% PROCESS fancybox
-			title = "Related Links"
-			contents = storyref.relatedtext
-		%]
-		<INPUT TYPE="HIDDEN" NAME="relatedtext" VALUE="[% relatedtext | strip_attribute %]">
-
-		[% PROCESS fancybox
-			title = "Story Admin"
-			contents = authortext
-		%]
-		[% PROCESS fancybox
-			title = "Slashd Status"
-			contents = slashdtext
-		%]
-
-		</TD>
-	</TR>
-</TABLE>
-<P><IMG SRC="[% constants.imagedir %]/greendot.gif" WIDTH="80%" ALIGN="CENTER" HSPACE="20" HEIGHT="1"></P>
+			</TD>
+		</TR>
+	</TABLE>
+	<P><IMG SRC="[% constants.imagedir %]/greendot.gif" WIDTH="80%" ALIGN="CENTER" HSPACE="20" HEIGHT="1"></P>
 
 [% ELSIF sid %]
 <TABLE>
@@ -121,9 +116,6 @@ __template__
 			[% section_select %]
 		[% END %]
 
-		<INPUT TYPE="HIDDEN" NAME="writestatus" VALUE="[% storyref.writestatus %]">
-		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter %]">
-
 		[% author_select %]
 
 		[% IF subsection_select %]
@@ -133,7 +125,8 @@ __template__
 		[% IF storyref.sid %]
 			<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% storyref.sid %]">
 		[% END %]
-
+		<INPUT TYPE="HIDDEN" NAME="writestatus" VALUE="[% storyref.writestatus %]">
+		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% storyref.submitter %]">
 		</FONT></TD>
 	</TR>
 	<TR>
