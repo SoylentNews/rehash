@@ -1181,6 +1181,7 @@ sub undoModeration {
 	return \@removed;
 }
 
+########################################################
 sub getTopicParam {
 	my ($self, $tid_wanted, $val, $force_cache_freshen) = @_;
 	my $constants = getCurrentStatic();
@@ -1310,7 +1311,6 @@ sub getTopicTree {
 		return $tree_ref;
 	}
 }
-
 
 ########################################################
 # Given a topic tree, check it for loops (trees should not have
