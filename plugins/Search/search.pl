@@ -338,6 +338,7 @@ sub pollSearch {
 	slashDisplay('searchform', {
 		op		=> $form->{op},
 		topics		=> _topics(),
+		sections	 => _sections(),
 		tref		=> $slashdb->getTopic($form->{tid}),
 		'sort'		=> _sort(),
 	});
