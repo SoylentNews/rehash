@@ -675,6 +675,8 @@ sub main {
 	Slash->import;
 	*I = getSlashConf();
 
+	mkpath "$I{datadir}/logs/", 0, 0755;
+
 	open STDERR, ">> $I{datadir}/logs/slashd.log"
 		or die "Can't open STDERR to $I{datadir}/logs/slashd.log: $!";
 
