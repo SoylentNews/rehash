@@ -2882,3 +2882,21 @@ INSERT INTO vars (name, value, description) VALUES ('daypass_tz', 'PST', 'What t
 
 # SLASHDOT LAST UPDATED HERE
 
+# Changes for plugins/Dilemma (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('dilemma_draw_graph_ticks', '100', 'Draw graph every this many ticks (roughly -- before this tickcount, draw every time; after 20x this tickcount, draw 1/3 as often');
+ALTER TABLE dilemma_agents ADD COLUMN trid INT UNSIGNED NOT NULL AFTER daid, DROP INDEX alive, ADD INDEX trid_alive (trid, alive);
+UPDATE dilemma_agents SET trid=1;
+RENAME TABLE dilemma_info TO dilemma_tournament_info;
+ALTER TABLE dilemma_tournament_info ADD COLUMN trid INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST, CHANGE COLUMN alive active ENUM("no", "yes") DEFAULT "yes" NOT NULL, CHANGE COLUMN max_runtime max_tick INT UNSIGNED DEFAULT 1000 NOT NULL, CHANGE COLUMN food_per_time food_per_tick FLOAT UNSIGNED DEFAULT 1.0 NOT NULL, DROP COLUMN mean_meets, ADD COLUMN min_meets INT UNSIGNED DEFAULT 10 NOT NULL, ADD COLUMN max_meets INT UNSIGNED DEFAULT 30 NOT NULL, ADD COLUMN graph_drawn_tick INT UNSIGNED DEFAULT 0 NOT NULL;
+UPDATE dilemma_tournament_info SET trid=1;
+CREATE TABLE dilemma_stat_names ( dstnmid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT, name CHAR(16) NOT NULL, PRIMARY KEY (dstnmid) ) TYPE=InnoDB;
+INSERT INTO dilemma_stat_names (dstnmid, name) VALUES (1, 'num_alive');
+INSERT INTO dilemma_stat_names (dstnmid, name) VALUES (2, 'sumfood');
+ALTER TABLE dilemma_stats ADD COLUMN trid INT UNSIGNED NOT NULL FIRST, CHANGE COLUMN tick tick INT UNSIGNED DEFAULT 0 NOT NULL, CHANGE COLUMN dsid dsid SMALLINT UNSIGNED DEFAULT 0 NOT NULL, ADD COLUMN dstnmid SMALLINT UNSIGNED DEFAULT 0 NOT NULL, DROP INDEX tick, DROP INDEX dsid, ADD UNIQUE ttdd (trid, tick, dsid, dstnmid), ADD INDEX tdd (trid, dsid, dstnmid);
+UPDATE dilemma_stats SET trid=1;
+UPDATE dilemma_stats SET dstnmid=1 WHERE name='num_alive';
+UPDATE dilemma_stats SET dstnmid=2 WHERE name='sumfood';
+ALTER TABLE dilemma_stats DROP COLUMN name;
+ALTER TABLE dilemma_meetlog ADD COLUMN trid INT UNSIGNED NOT NULL AFTER meetid, DROP INDEX tick, ADD INDEX trid_tick (trid, tick);
+UPDATE dilemma_meetlog SET trid=1;
+

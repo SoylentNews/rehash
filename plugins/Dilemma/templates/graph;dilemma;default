@@ -5,6 +5,7 @@ __description__
 * alldata - the data serieses
 * y_max - max y value
 * set_legend - callback function ref
+* legend - the legend (names of species, plus avgplay)
 
 __title__
 

@@ -20,6 +20,7 @@ CREATE TABLE dilemma_species (
 DROP TABLE IF EXISTS dilemma_agents;
 CREATE TABLE dilemma_agents (
 	daid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	trid INT UNSIGNED NOT NULL,
 	dsid SMALLINT UNSIGNED NOT NULL,
 	alive ENUM("no", "yes") DEFAULT "yes" NOT NULL,
 	born INT UNSIGNED DEFAULT 0 NOT NULL,
@@ -27,40 +28,52 @@ CREATE TABLE dilemma_agents (
 	memory BLOB NOT NULL,
 	PRIMARY KEY (daid),
 	KEY (dsid),
-	KEY (alive)
+	KEY trid_alive (trid, alive)
 ) TYPE=InnoDB;
 
-# this will eventually be a "tournaments" table with multiple rows
-DROP TABLE IF EXISTS dilemma_info;
-CREATE TABLE dilemma_info (
-	alive ENUM("no", "yes") DEFAULT "yes" NOT NULL,
-	max_runtime INT UNSIGNED DEFAULT 100 NOT NULL,
+DROP TABLE IF EXISTS dilemma_tournament_info;
+CREATE TABLE dilemma_tournament_info (
+	trid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	active ENUM("no", "yes") DEFAULT "yes" NOT NULL,
+	max_tick INT UNSIGNED DEFAULT 1000 NOT NULL,
 	last_tick INT UNSIGNED DEFAULT 0 NOT NULL,
-	food_per_time FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
+	food_per_tick FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
 	birth_food FLOAT UNSIGNED DEFAULT 10.0 NOT NULL,
 	idle_food FLOAT UNSIGNED DEFAULT 0.05 NOT NULL,
-	mean_meets INT UNSIGNED DEFAULT 20 NOT NULL
+	min_meets INT UNSIGNED DEFAULT 10 NOT NULL,
+	max_meets INT UNSIGNED DEFAULT 30 NOT NULL,
+	graph_drawn_tick INT UNSIGNED DEFAULT 0 NOT NULL,
+	PRIMARY KEY (trid)
 ) TYPE=InnoDB;
 
-# this will eventually have a column for tournament ID
-# and store more interesting numbers than just name='num_alive','sumfood'
+# this will eventually store more interesting numbers than just name='num_alive','sumfood'
+# and probably we need stats on an other-than-just-species basis
 DROP TABLE IF EXISTS dilemma_stats;
 CREATE TABLE dilemma_stats (
-	tick INT UNSIGNED NOT NULL,
-	dsid SMALLINT UNSIGNED NOT NULL,
-	name CHAR(16) NOT NULL,
+	trid INT UNSIGNED NOT NULL,
+	tick INT UNSIGNED DEFAULT 0 NOT NULL,
+	dsid SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
+	dstnmid SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
 	value FLOAT,
-	UNIQUE (tick, dsid, name),
-	KEY (dsid, name)
+	UNIQUE ttdd (trid, tick, dsid, dstnmid),
+	KEY tdd (trid, dsid, dstnmid)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS dilemma_stat_names;
+CREATE TABLE dilemma_stat_names (
+	dstnmid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	name CHAR(16) NOT NULL,
+	PRIMARY KEY (dstnmid)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS dilemma_meetlog;
 CREATE TABLE dilemma_meetlog (
 	meetid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	trid INT UNSIGNED NOT NULL,
 	tick INT UNSIGNED NOT NULL,
 	foodsize FLOAT UNSIGNED NOT NULL,
 	PRIMARY KEY (meetid),
-	KEY tick (tick)
+	KEY trid_tick (trid, tick)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS dilemma_playlog;

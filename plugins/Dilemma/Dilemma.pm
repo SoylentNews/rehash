@@ -2,6 +2,9 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
+#
+# XXX Every place we have getDilemmaInfo() needs to (a) know the $trid
+# for the tournament and (b) change to getDilemmaTournamentInfo($trid)
 
 package Slash::Dilemma;
 
@@ -34,11 +37,33 @@ sub new {
 }
 
 #################################################################
-# Eventually this will take a param of tournament ID, and return
-# the info specific to that tournament
-sub getDilemmaInfo {
+sub getActiveTournaments {
 	my($self) = @_;
-	return $self->sqlSelectHashref("*", "dilemma_info", "", "LIMIT 1");
+	return $self->sqlSelectAllHashrefArray(
+		"*",
+		"dilemma_tournament_info",
+		"active='yes'",
+		"ORDER BY trid");
+}
+
+#################################################################
+sub getDilemmaTournamentInfo {
+	my($self, $trid) = @_;
+	my $tour_hr = $self->sqlSelectAllHashref(
+		"trid",
+		"*",
+		"dilemma_tournament_info",
+		"trid=$trid");
+	return undef unless $tour_hr && $tour_hr->{$trid};
+	return $tour_hr->{$trid};
+}
+
+#################################################################
+sub getDilemmaStatNameIDs {
+	my($self) = @_;
+	return $self->sqlSelectAllKeyValue(
+		"name, dstnmid",
+		"dilemma_stat_names");
 }
 
 #################################################################
@@ -128,8 +153,19 @@ sub reproduceAgents {
 	my($self, $daids) = @_;
 	return undef unless $daids && @$daids;
 
-	my $info = $self->getDilemmaInfo();
-	my $last_tick = $info->{last_tick};
+	# Find what tournament ID these agents are in (and confirm they're
+	# in the same one!)
+	my $daids_str = join(", ", @$daids);
+	my $trids = $self->sqlSelectAll("DISTINCT trid",
+		"dilemma_agents",
+		"daid IN ($daids_str)");
+	if (!$trids || scalar(@$trids) != 1) {
+		die "daids '$daids_str' in != 1 tournament: '@$trids'";
+	}
+	my $trid = $trids->[0];
+
+	my $tour_info = $self->getDilemmaTournamentInfo($trid);
+	my $last_tick = $tour_info->{last_tick};
 
 	my $species_births_hr = { };
 	for my $daid (@$daids) {
@@ -145,7 +181,9 @@ sub reproduceAgents {
 		next unless $updated;
 
 		# Grab a copy of the agent, with half the food now, and insert
-		# it again.
+		# it again.  We delete its agent id and let the database pick
+		# a unique new one, and we reset its born tick to the most
+		# recent tick count.
 		my $agent_hr = $self->sqlSelectHashref(
 			"*",
 			"dilemma_agents",
@@ -161,22 +199,25 @@ sub reproduceAgents {
 #################################################################
 
 sub countAliveAgents {
-	my($self) = @_;
-	return $self->sqlCount("dilemma_agents", "alive='yes'");
+	my($self, $trid) = @_;
+	die "countAliveAgents bad trid '$trid'" unless $trid && $trid =~ /^\d+$/;
+	return $self->sqlCount("dilemma_agents", "trid=$trid AND alive='yes'");
 }
 
 sub doTickHousekeeping {
-	my($self) = @_;
-	my $info = $self->getDilemmaInfo();
-
-##print STDERR "doTickHousekeeping info: " . Dumper($info);
+	my($self, $trid) = @_;
+	die "doTickHousekeeping bad trid '$trid'" unless $trid && $trid =~ /^\d+$/;
+	my $tour_info = $self->getDilemmaTournamentInfo($trid);
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print STDERR "doTickHousekeeping tour_info: " . Dumper($tour_info);
 
 	# If the info is complete, this is easy.
-	return 0 if $info->{alive} ne 'yes';
+	return 0 if $tour_info->{active} ne 'yes';
 
 	##########
 	# First, all alive agents burn food.
-	my $idle_food_q = $self->sqlQuote($info->{idle_food});
+	my $idle_food_q = $self->sqlQuote($tour_info->{idle_food});
 	$self->sqlUpdate("dilemma_agents",
 		{ -food => "food - $idle_food_q" },
 		"alive = 'yes'");
@@ -205,7 +246,7 @@ sub doTickHousekeeping {
 	##########
 	# Any agents with food stores exceeding the birth_food,
 	# reproduce.
-	my $birth_food_q = $self->sqlQuote($info->{birth_food});
+	my $birth_food_q = $self->sqlQuote($tour_info->{birth_food});
 	my $fat_daids = $self->sqlSelectColArrayref(
 		"daid",
 		"dilemma_agents",
@@ -225,64 +266,97 @@ sub doTickHousekeeping {
 	# If this was the last tick, or if there is one or fewer
 	# agents left alive, we're done.
 	my $retval = 1;
-	$self->sqlUpdate("dilemma_info",
-		{ -last_tick => "last_tick + 1" });
-	$info = $self->getDilemmaInfo();
-	my $count_alive = $self->countAliveAgents();
-	if ($info->{last_tick} >= $info->{max_runtime} || $count_alive <= 1) {
-		$self->sqlUpdate("dilemma_info",
-			{ alive => 'no' });
+	my $rows = $self->sqlUpdate("dilemma_tournament_info",
+		{ -last_tick => "last_tick + 1" },
+		"trid = $trid");
+#print STDERR "incremented last_tick for trid=$trid, rows=$rows\n";
+	# Re-fetch tournament info since we just changed it.
+	$tour_info = $self->getDilemmaTournamentInfo($trid);
+	my $count_alive = $self->countAliveAgents($trid);
+	if ($tour_info->{last_tick} >= $tour_info->{max_tick} || $count_alive <= 1) {
+		$self->sqlUpdate("dilemma_tournament_info",
+			{ alive => 'no' },
+			"trid=$trid");
 		$retval = 0;
 	}
-	my $last_tick = $self->getDilemmaInfo()->{last_tick};
+	my $last_tick = $tour_info->{last_tick};
 
 	# Write count and food info for the species into dilemma_stats.
 	my $species = $self->getDilemmaSpeciesInfo();
+	my $stat_name_ids = $self->getDilemmaStatNameIDs();
+	my $num_alive_id = $stat_name_ids->{num_alive};
+	my $sumfood_id = $stat_name_ids->{sumfood};
 	for my $dsid (keys %$species) {
-		# Should these be sqlReplace instead?
-		$self->sqlInsert("dilemma_stats", {
-			tick => $last_tick,
-			dsid => $dsid,
-			name => "num_alive",
-			value => $species->{$dsid}{alivecount} || 0,
-		}, { ignore => 1 });
-		$self->sqlInsert("dilemma_stats", {
-			tick => $last_tick,
-			dsid => $dsid,
-			name => "sumfood",
-			value => $species->{$dsid}{sumfood} || 0,
-		}, { ignore => 1 });
+		if ($num_alive_id) {
+			$self->sqlInsert("dilemma_stats", {
+				trid =>		$trid,
+				tick =>		$last_tick,
+				dsid =>		$dsid,
+				dstnmid =>	$num_alive_id,
+				value =>	$species->{$dsid}{alivecount} || 0,
+			}, { ignore => 1 });
+		}
+		if ($sumfood_id) {
+			$self->sqlInsert("dilemma_stats", {
+				trid =>		$trid,
+				tick =>		$last_tick,
+				dsid =>		$dsid,
+				dstnmid =>	$sumfood_id,
+				value =>	$species->{$dsid}{sumfood} || 0,
+			}, { ignore => 1 });
+		}
 	}
 
 	return $retval;
 }
 
+# fix this. right now it just returns num_alive and it's meant
+# to pull out more data
 sub getStatsBySpecies {
-	my($self, $dsid) = @_;
-	my $dsid_q = $self->sqlQuote($dsid);
+	my($self, $trid, $dsid) = @_;
+	die "getStatsBySpecies bad trid '$trid'" unless $trid && $trid =~ /^\d+$/;
+	die "getStatsBySpecies bad dsid '$dsid'" unless $dsid && $dsid =~ /^\d+$/;
+	my $stat_names = $self->getDilemmaStatNameIDs();
+	my $dstnmid = $stat_names->{num_alive};
+	return undef unless $dstnmid;
 	return $self->sqlSelectColArrayref(
 		"value",
 		"dilemma_stats",
-		"dsid=$dsid_q AND name='num_alive'",
+		"trid=$trid AND dsid=$dsid AND dstnmid=$dstnmid",
 		"ORDER BY tick");
 }
 
 sub getAveragePlay {
-	my($self, $options) = @_;
+	my($self, $trid, $options) = @_;
+	die "getStatsBySpecies bad trid '$trid'" unless $trid && $trid =~ /^\d+$/;
 	my $max = $options->{max} || 1;
 	return $self->sqlSelectColArrayref(
 		"AVG(playactual) * $max",
 		"dilemma_meetlog, dilemma_playlog",
-		"dilemma_meetlog.meetid=dilemma_playlog.meetid",
+		"trid=$trid
+		 AND dilemma_meetlog.meetid=dilemma_playlog.meetid",
 		"GROUP BY tick ORDER BY tick");
 }
 
 sub getSpecieses {
-	my($self) = @_;
-	return $self->sqlSelectAllHashref(
-		"dsid",
-		"*",
-		"dilemma_species");
+	my($self, $trid) = @_;
+	if (!$trid) {
+		# Return all species.
+		return $self->sqlSelectAllHashref(
+			"dsid",
+			"*",
+			"dilemma_species");
+	} else {
+		# Return only those species that are now or have
+		# even been in play in a given tournament.
+		return $self->sqlSelectAllHashref(
+			"dsid",
+			"dilemma_species.*",
+			"dilemma_species, dilemma_agents",
+			"dilemma_species.dsid=dilemma_agents.dsid
+			 AND dilemma_agents.trid=$trid",
+			"GROUP BY dilemma_species.dsid");
+	}
 }
 
 sub getAgents {
@@ -395,7 +469,7 @@ sub agentPlay {
 	my($self, $play_hr) = @_;
 
 	my $agent_data	= $play_hr->{agent_data};
-	my $info	= $play_hr->{info};
+	my $tour_info	= $play_hr->{tour_info};
 	my $me_daid	= $play_hr->{me_daid};
 	my $it_daid	= $play_hr->{it_daid};
 
@@ -411,7 +485,7 @@ sub agentPlay {
 	# values of its globals afterwards, I don't know.
 	my($response) = $self->runSafeWithGlobals( \@code, {
 		'$memory'	=> $me{memory},
-		'$cur_tick'	=> $info->{last_tick},
+		'$cur_tick'	=> $tour_info->{last_tick},
 		'$foodsize'	=> $play_hr->{foodsize},
 		'$me_id'	=> $me_daid,
 		'$me_food'	=> $me{food},
@@ -487,12 +561,14 @@ sub agentDebrief {
 }
 
 sub agentsMeet {
-	my($self, $meeting_hr, $dilemma_info) = @_;
-	$dilemma_info ||= $self->getDilemmaInfo();
+	my($self, $meeting_hr, $tour_info) = @_;
+	my $trid = $meeting_hr->{trid};
 	my $daids = $meeting_hr->{daids};
 	my $foodsize = $meeting_hr->{foodsize};
 
-	my $info = $self->getDilemmaInfo();
+#use Data::Dumper;
+#print STDERR "agentsMeet tour_info: " . Dumper($tour_info);
+
 	my $agent_data = $self->getAgents($daids);
 
 	# Tweak which agents are reported to each other -- we may
@@ -503,14 +579,14 @@ sub agentsMeet {
 	my @response = ( );
 	$response[0] = $self->agentPlay({
 		agent_data =>	$agent_data,
-		info =>		$info,
+		tour_info =>	$tour_info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[0],
 		it_daid =>	$daids_report->[1],
 	});
 	$response[1] = $self->agentPlay({
 		agent_data =>	$agent_data,
-		info =>		$info,
+		tour_info =>	$tour_info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[1],
 		it_daid =>	$daids_report->[0],
@@ -538,7 +614,7 @@ sub agentsMeet {
 	my @memory = ( );
 	$memory[0] = $self->agentDebrief({
 		agent_data =>	$agent_data,
-		info =>		$info,
+		tour_info =>	$tour_info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[0],
 		me_play =>	$response_tweaked->[0],
@@ -549,7 +625,7 @@ sub agentsMeet {
 	});
 	$memory[1] = $self->agentDebrief({
 		agent_data =>	$agent_data,
-		info =>		$info,
+		tour_info =>	$tour_info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[1],
 		me_play =>	$response_tweaked->[1],
@@ -563,7 +639,8 @@ sub agentsMeet {
 	$self->awardPayoffAndMemory($daids->[1], $payoff[1], $memory[1]);
 
 	$self->logMeeting({
-		tick =>		$dilemma_info->{last_tick},
+		trid =>		$tour_info->{trid},
+		tick =>		$tour_info->{last_tick},
 		foodsize =>	$foodsize,
 		plays =>	[
 			{ daid =>	$daids->[0],
@@ -615,12 +692,19 @@ sub agentsMeet_tweakResponses {
 
 sub logMeeting {
 	my($self, $meeting_hr) = @_;
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print STDERR Dumper($meeting_hr);
 
 	$self->sqlInsert("dilemma_meetlog", {
+		trid =>		$meeting_hr->{trid},
 		tick =>		$meeting_hr->{tick},
 		foodsize =>	$meeting_hr->{foodsize},
 	});
 	my $meetid = $self->getLastInsertId();
+	if (!$meetid) {
+		warn "Dilemma.pm failed dilemma_meetlog insert";
+	}
 	for my $play (@{$meeting_hr->{plays}}) {
 		$self->sqlInsert("dilemma_playlog", {
 			meetid =>	$meetid,

@@ -1,10 +1,15 @@
 INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma', '1', 'Enable dilemma?');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma_cpu_percent_target', '50', 'What target percentage of the CPU to use while running a tournament');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma_draw_graph_ticks', '100', 'Draw graph every this many ticks (roughly -- before this tickcount, draw every time; after 20x this tickcount, draw 1/3 as often');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma_logdatadump', '0', 'Dump gzipped log data to disk every so often? This can be processor/disk/time intensive');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma_errorchange_id', '0.01', 'Fractional chance of an agent not getting told its opponent\'s ID correctly');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma_errorchange_play', '0.03', 'Fractional amount up to which opponent\'s play can get reported incorrectly');
 
 DELETE FROM dilemma_stats WHERE 1=1;
+
+DELETE FROM dilemma_stat_names WHERE 1=1;
+INSERT INTO dilemma_stat_names (dstnmid, name) VALUES (1, 'num_alive');
+INSERT INTO dilemma_stat_names (dstnmid, name) VALUES (2, 'sumfood');
 
 DELETE FROM dilemma_species WHERE 1=1;
 INSERT INTO dilemma_species (dsid, name, uid, code) VALUES ( 1, 'alld',		667, 'sub play { return 0.0 }');
@@ -135,7 +140,9 @@ INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
 INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
 INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
 INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
+UPDATE dilemma_agents SET trid=1;
 
-DELETE FROM dilemma_info WHERE 1=1;
-INSERT INTO dilemma_info (alive, max_runtime, last_tick, food_per_time, birth_food, idle_food, mean_meets) VALUES ('yes', 10000, 0, 2.0, 10.0, 0.04, 60);
+DELETE FROM dilemma_tournament_info WHERE 1=1;
+
+INSERT INTO dilemma_tournament_info (trid, active, max_tick, last_tick, food_per_tick, birth_food, idle_food, min_meets, max_meets, graph_drawn_tick) VALUES (1, 'yes', 1000, 0, 1, 10, 0.05, 10, 30, 0);
 
