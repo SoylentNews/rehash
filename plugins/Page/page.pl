@@ -24,21 +24,15 @@ sub main {
 		return;
 	}
 
-	my $section;
-	if ($form->{section}) {
-		$section = $slashdb->getSection($form->{section});
-	} else {
-		$section->{section} = 'index';
-		$section->{issue} = 1;
-	}
+	my $section = $slashdb->getSection($form->{section});
 
 	my $title = getData('head', { section => $section });
-	header($title, $section->{section} ne 'index' ? $section->{section} : '');
+	header($title, $section->{section});
 	slashDisplay('index', { index => $index});
 
 	footer();
 
-	writeLog($form->{section});
+	writeLog();
 }
 #################################################################
 createEnvironment();
