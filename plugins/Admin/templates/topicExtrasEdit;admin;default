@@ -1,9 +1,9 @@
 __section__
 default
 __description__
-You should describe stuff here.
+
 __title__
-Useless title to template
+
 __page__
 admin
 __lang__
@@ -61,3 +61,5 @@ Editing extras for <b>[% topic.textname %]</b>
 	</tr>
 </table>
 </form>
+__version__
+$Id$
