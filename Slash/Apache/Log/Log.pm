@@ -8,6 +8,7 @@ package Slash::Apache::Log;
 use strict;
 use Slash::Utility;
 use Apache::Constants qw(:common);
+use File::Spec::Functions; # for clampe_stats, remove when done
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -143,6 +144,13 @@ sub UserLog {
 		print STDERR scalar(gmtime) . " $$ mcd UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
 	}
 	$slashdb->setUser($user->{uid}, $user_update) if $user_update && %$user_update;
+
+	# stats for clampe
+        if ($constants->{clampe_stats} && $user->{uid} > 827000 && $user->{uid} < 832000) {
+                my $fname = catfile('clampe', $user->{uid});
+                my $comlog = "URL: $ENV{REQUEST_URI} IPID: $user->{ipid} UID: $user->{uid} Dispmode: $user->{mode} Thresh: $user->{threshold} Karma: $user->{karma}";
+                doClampeLog($fname, [$comlog]);
+        }
 
 	return OK;
 }
