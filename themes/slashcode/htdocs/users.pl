@@ -1577,6 +1577,16 @@ sub tildeEd {
 	my $section_descref = { };
 	my $box_order;
 	my $sections_description = $reader->getSectionBlocks();
+
+	# the names of all the boxes in @{$skinBoxes->{$constants->{mainpage_skid}}}
+	# should be unioned into sections_description.  whether the
+	# values are 0 or 1 is calculated correctly, but we're
+	# missing some 0's that should appear, I think, under
+	# some circumstances.  ah heck, the whole concept of
+	# sectional slashboxes should be redone (why the heck
+	# do we have skinname_more instead of just a block
+	# called olderstories?)
+
 	my $slashboxes_hr = { };
 	my $slashboxes_textlist = $user_edit->{slashboxes};
 	if (!$slashboxes_textlist) {
