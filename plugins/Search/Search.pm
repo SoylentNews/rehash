@@ -10,7 +10,6 @@ use Slash::Utility;
 use Slash::DB::Utility;
 use vars qw($VERSION);
 use base 'Slash::DB::Utility';
-use Data::Dumper;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
