@@ -2386,4 +2386,8 @@ DELETE FROM blocks WHERE bid LIKE '%more' AND skin='mainpage' AND bid != 'mainpa
 
 # SLASHCLUSTER LAST UPDATED HERE
 
-# End of T_2_5_0_5, Start of T_2_5_0_6 - 2004/07/08
+# End of T_2_5_0_6, Start of T_2_5_0_7 - 2004/07/08
+
+UPDATE vars SET description = 'default code for article comments- normally "enabled"' WHERE name = 'defaultcommentstatus';
+UPDATE vars SET value = 'enabled' WHERE name = 'defaultcommentstatus' AND value  = '0';
+
