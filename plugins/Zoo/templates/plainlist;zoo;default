@@ -15,25 +15,25 @@ plainlist
 __template__
 [% USE Slash %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-[% FOREACH person = people %]
+[% FOREACH somebody = people %]
     <TR>
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/">[% person.1 %]</A>
+		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/">[% somebody.1 %]</A>
 	</TD>
 	[% IF editable %]
 		<TD VALIGN="TOP">
-			[% PROCESS zoo_icons person=person.0 %]
+			[% PROCESS zoo_icons person=somebody.0 %]
 		</TD>
 	[% END %]
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/friends/">friends</A>
+		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/friends/">friends</A>
 	</TD>
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/fans/">fans</A>
+		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/fans/">fans</A>
 	</TD>
-	[% IF person.2 %]
+	[% IF somebody.2 %]
 		<TD VALIGN="TOP">
-			<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(person.2) %]</EM></A>
+			<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(somebody.2) %]</EM></A>
 		</TD>
 	[% ELSE %]
 		<TD VALIGN="TOP">&nbsp;</TD>
