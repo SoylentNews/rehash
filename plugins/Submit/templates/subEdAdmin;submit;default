@@ -14,10 +14,10 @@ en_US
 __name__
 subEdAdmin
 __template__
-<META HTTP-EQUIV="Refresh" CONTENT="900; URL=[% env.script_name %]?op=list">
+<META HTTP-EQUIV="Refresh" CONTENT="900; URL=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;section=[% form.section | strip_attribute %]">
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="note" VALUE="[% form.note %]">
-<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% form.section %]">
+<INPUT TYPE="HIDDEN" NAME="note" VALUE="[% form.note | strip_attribute %]">
+<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% form.section | strip_attribute %]">
 
 <TABLE WIDTH="95%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
 
@@ -81,7 +81,7 @@ BLOCK sub_display -%]
 		[% sub.time %]&nbsp;
 	[% END %]
 	</TD><TD>
-		<A HREF="[% env.script_name %]?op=viewsub&amp;table_section=[% form.section %]&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.ssection | strip_attribute %]"
+		<A HREF="[% env.script_name %]?op=viewsub&amp;table_section=[% form.section | strip_attribute %]&amp;table_note=[% form.note | strip_attribute %]&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.ssection | strip_attribute %]"
 		>[% sub.strs.0 %]&nbsp;</A>
 		[% IF constants.submit_show_weight %]
 			[% IF sub.keywords %]<BR><FONT SIZE="2">[% sub.keywords %] [% END %]

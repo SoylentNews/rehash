@@ -54,7 +54,7 @@ TITLE="[% topic.alttext %]"></A>
 <P>[% subtext %]</P>
 
 [% IF admin_flag %]
-	[ <A HREF="[% env.script_name %]?op=Update&amp;subid=[% subid %]&amp;section=[% form.table_section %]">Delete Submission</A> ]<BR>
+	[ <A HREF="[% env.script_name %]?op=Update&amp;subid=[% subid %]&amp;section=[% form.table_section | strip_attribute %]&amp;note=[% form.table_note | strip_attribute %]">Delete Submission</A> ]<BR>
 
 	<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
