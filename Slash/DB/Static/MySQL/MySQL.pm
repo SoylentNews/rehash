@@ -84,9 +84,15 @@ sub getBackendStories {
 			$where .= " AND displaystatus >= 0 ";
 		}
 	}
-	
+
 	$where .= " AND stories.tid=$topic "
 		if ($topic);
+
+	# And finally.... -Brian
+	if (!$section && !$topic) {
+		$where .= " AND displaystatus = 0 ";
+	}
+	
 
 	my $other = "ORDER BY time DESC LIMIT 10";
 
