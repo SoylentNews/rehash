@@ -3779,11 +3779,21 @@ sub getKnownOpenProxy {
 sub setKnownOpenProxy {
 	my($self, $ip, $port) = @_;
 	return 0 unless $ip;
+	my $xff;
+	if ($port) {
+		my $r = Apache->request;
+		$xff = $r->header_in('X-Forwarded-For') if $r;
+#use Data::Dumper; print STDERR "sKOP headers_in: " . Dumper([ $r->headers_in ]) if $r;
+	}
+	$xff ||= undef;
+	$xff = $1 if $xff && length($xff) > 15
+		&& $xff =~ /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
 #print STDERR scalar(localtime) . " setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
 	return $self->sqlReplace("open_proxies", {
 		ip =>	$ip,
 		port =>	$port,
 		-ts =>	'NOW()',
+		xff =>	$xff,
 	});
 }
 

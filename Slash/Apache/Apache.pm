@@ -218,6 +218,7 @@ sub SlashCompileTemplates ($$$) {
 		});
 	}
 
+	# Pudge, any reason we still need this Begin/Done debug log? - Jamie
 	print STDERR "$cfg->{VirtualUser} ($$): Compiling All Templates Done\n";
 
 	$cfg->{template} = Slash::Display::get_template(0, 0, 1);
@@ -254,7 +255,8 @@ sub ProxyRemoteAddr ($) {
 	return OK unless $r->connection->remote_ip =~ $trusted_ip_regex;
 
 	# ...unless the connection comes from a trusted source.
-	if (my($ip) = $r->header_in('X-Forwarded-For') =~ /([^,\s]+)$/) {
+	my $xf = $r->header_in('X-Forward-Pound') || $r->header_in('X-Forwarded-For');
+	if (my($ip) = $xf =~ /([^,\s]+)$/) {
 		$r->connection->remote_ip($ip);
 	}
 
