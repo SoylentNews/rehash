@@ -82,7 +82,7 @@ EOT
 	if ($del_uid2) {
 		for (qw(users users_comments users_info users_index
 			users_prefs users_param)) {
-			$dbh_new->do("delete from $_ where uid=2");
+			$dbh_new->do("DELETE FROM $_ WHERE uid=2");
 		}
 	}
 }
@@ -186,14 +186,7 @@ sub ask {
 sub fill_newstories {
 	print "Processing newstories\n";
 
-	$dbh_new->do('DROP TABLE newstories');
-	$dbh_new->do('CREATE TABLE newstories SELECT * FROM stories');
-	$dbh_new->do(<<'EOT');
-ALTER TABLE	newstories
-ADD PRIMARY KEY	(sid),
-ADD KEY 	time (time),
-ADD KEY		searchform (displaystatus, time)
-EOT
+	$dbh_new->do('INSERT INTO newstories SELECT * FROM stories');
 }
 
 ####################################
@@ -262,8 +255,7 @@ sub copy_blocks {
 		return $data;
 	}, \%skip_blocks);
 
-	$dbh_new->do('DROP TABLE backup_blocks');
-	$dbh_new->do('CREATE TABLE backup_blocks SELECT bid, block FROM blocks');
+	$dbh_new->do('INSERT INTO backup_blocks SELECT bid, block FROM blocks');
 }
 
 ####################################
@@ -703,7 +695,7 @@ a list of available authors.
 
 =item *
 
-The newstories table is dropped and created using the data
+The newstories table is populated using the data
 from the stories table.
 
 =item *
