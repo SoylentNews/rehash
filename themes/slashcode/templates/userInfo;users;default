@@ -93,55 +93,63 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 
 <BR>
 [% IF commentcount > 0 %]
-	[% commenttitle = "$useredit.nickname's "
-		_ ((commentstruct.size == commentcount) ? "" : "Latest $commentstruct.size of $commentcount ")
+	[% commenttitle =
+		  ((min_comment == 0) ? "" : "$commentstruct.size of ")
+		_ "$useredit.nickname's "
+		_ ((commentstruct.size == commentcount || min_comment > 0) ? "" : "Latest $commentstruct.size of $commentcount ")
 		_ "Comment"
 		_ (commentcount == 1 ? "" : "s") %]
 	[% PROCESS titlebar width="100%" title = commenttitle %]
+	<P><TABLE BORDER="0" WIDTH="100%">
+
+	[% n = min_comment %]
+	[% FOREACH comment = commentstruct;
+
+		n = n + 1;
+		replies = comment.replies ? 'Replies:' _ comment.replies : '';
+		score = 'Score:' _ comment.pts;
+		reasonnum = comment.reason;
+		reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
+		IF comment.type == 'poll';
+			label = 'Poll: ';
+		ELSIF comment.type == 'journal';
+			label = 'Journal Discussion: ';
+		ELSE;
+			label = '';
+		END;
+		label = label _ comment.disc_title;
+
+		'<TR>';
+		'<TD VALIGN="TOP">';
+			IF min_comment > 0; '<B>'; n; '</B> '; END;
+			'<A HREF="';
+				constants.rootdir;
+				'/comments.pl?sid='; comment.sid;
+				'&amp;cid='; comment.cid;
+			'">';
+			comment.subj;
+			'</A>&nbsp;';
+		'</TD>';
+		'<TD VALIGN="TOP"><NOBR>&nbsp;'; comment.cdate; '</NOBR></TD>';
+		'<TD VALIGN="TOP"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
+		'<TD VALIGN="TOP"><NOBR>&nbsp;'; score; reasontext; '</NOBR></TD>';
+		'</TR>';
+		'<TR><TD VALIGN="TOP" COLSPAN="4"><FONT SIZE="2">';
+			'&nbsp;&nbsp;&nbsp;attached to <A HREF="';
+				comment.url;
+			'">'; label; '</A>';
+		'</FONT></TD></TR>';
+
+	END %]
+	</TABLE>
+	[% IF admin_flag && commentcount > n %] 
+		<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]"
+		>More Comments...</A>
+	[% END %]
 [% ELSE %]
 	<B>[% useredit.nickname | strip_literal %] has yet to post any comments.</B>
 [% END %]
 <P>
-
-[% n = min_comment %]
-[% FOREACH comment = commentstruct;
-
-	n = n + 1;
-	replies = comment.replies ? 'Replies:' _ comment.replies _ '; ' : '';
-	score = 'Score:' _ comment.pts;
-	reasonnum = comment.reason;
-	reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
-	IF comment.type == 'poll';
-		label = 'Poll: ';
-	ELSIF comment.type == 'journal';
-		label = 'Journal Discussion: ';
-	ELSE;
-		label = '';
-	END;
-	label = label _ comment.disc_title;
-
-	'<BR><B>'; n; '</B> ';
-	'<A HREF="';
-		constants.rootdir;
-		'/comments.pl?sid='; comment.sid;
-		'&amp;cid='; comment.cid;
-	'">';
-	comment.subj;
-	'</A> posted on ';
-	comment.cdate;
-	' ('; replies; score; reasontext; ') ';
-	'<FONT SIZE="2">';
-		'<BR>attached to <A HREF="';
-			comment.url;
-		'">'; label; '</A>';
-	'</FONT>';
-
-END %]
-
-[% IF admin_flag && commentcount > n %] 
-<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]"
->More Comments...</A><P>
-[% END %]
 
 [% IF admin_flag %]
 	<P><TABLE BORDER=0 ALIGN="CENTER">
