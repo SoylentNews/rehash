@@ -4147,7 +4147,7 @@ sub getCommentsForUser {
 	if ($user->{hardthresh}) {
 		$where .= "    AND (";
 		$where .= "	comments.points >= " .
-			$self->whereQuote($user->{threshold});
+			$self->sqlQuote($user->{threshold});
 		$where .= "     OR comments.uid=$user->{uid}"
 			unless $user->{is_anon};
 		$where .= "     OR cid=$cid" if $cid;
