@@ -40,15 +40,25 @@ sub getAccesslogMaxID {
 }
 
 sub getAccesslogAbusersByID {
-	my($self, $id, $threshold) = @_;
-	$threshold ||= 20;
+	my($self, $options) = @_;
+	my $min_id = $options->{min_id} || 0;
+	my $thresh_count = $options->{thresh_count} || 100;
+	my $thresh_secs = $options->{thresh_secs} || 5;
+	my $thresh_hps = $options->{thresh_hps} || 0.1;
 	my $limit = 500;
 	my $ar = $self->sqlSelectAllHashrefArray(
-		"COUNT(id) AS c, host_addr AS ipid, op,
-		 MIN(ts) AS mints, MAX(ts) AS maxts",
+		"COUNT(*) AS c, host_addr AS ipid, op,
+		 MIN(ts) AS mints, MAX(ts) AS maxts,
+		 UNIX_TIMESTAMP(MAX(ts))-UNIX_TIMESTAMP(MIN(ts)) AS secs,
+		 COUNT(*)/GREATEST(UNIX_TIMESTAMP(MAX(ts))-UNIX_TIMESTAMP(MIN(ts)),1) AS hps",
 		"accesslog",
-		"id > $id",
-		"GROUP BY host_addr,op HAVING c >= $threshold ORDER BY c DESC LIMIT $limit"
+		"id >= $min_id",
+		"GROUP BY host_addr,op
+		 HAVING c >= $thresh_count
+			AND secs >= $thresh_secs
+			AND hps >= $thresh_hps
+		 ORDER BY maxts DESC, c DESC
+		 LIMIT $limit"
 	);
 	return $ar;
 }

@@ -1277,8 +1277,9 @@ Hashref of cleaned-up data.
 		maxcommentsize maximum_length maxstories
 		min minimum_length minimum_match next
 		ordernum pid posttype ratio retrieve
-		seclev start startat threshold uid
-		uthreshold voters width
+		seclev start startat threshold
+		thresh_count thresh_secs thresh_hps
+		uid uthreshold voters width
 		textarea_rows textarea_cols tokens
 		subid tpid tid qid aid
 		url_id spider_id miner_id keyword_id

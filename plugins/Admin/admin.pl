@@ -1695,18 +1695,36 @@ sub displayRecentRequests {
 
 	my $admindb = getObject("Slash::Admin",
 		$constants->{backup_db_user} || $constants->{log_db_user});
-	my $id = $form->{id};
-	my $ts = $form->{ts};
-	$id ||= $admindb->getAccesslogMaxID();
-	$ts ||= $slashdb->getAccesslog($id, 'ts');
 
-	my $data = $admindb->getAccesslogAbusersByID($id, $form->{threshold});
+	# Note, limit the id passed in by making sure we don't try to do a
+	# select on more than 200,000 rows.  This is an arbitrary number,
+	# but the intent is to keep from locking up the DB too much.
+	my $min_id = $form->{min_id};
+	my $max_id = $admindb->getAccesslogMaxID();
+	$min_id = $max_id - 10_000 if !$min_id;
+	$min_id = $max_id          if $min_id < $max_id - 200_000;
+
+	my $min_id_ts ||= $slashdb->getAccesslog($min_id, 'ts');
+
+	my $options = { min_id => $min_id };
+	$options->{thresh_count} = defined($form->{thresh_count}) ? $form->{thresh_count} : 100;
+	$options->{thresh_secs}  = defined($form->{thresh_secs} ) ? $form->{thresh_secs}  : 5;
+	$options->{thresh_hps}   = defined($form->{thresh_hps}  ) ? $form->{thresh_hps}   : 0.1;
+
+	my $data = $admindb->getAccesslogAbusersByID($options);
 	vislenify($data); # add {ipid_vis} to each row
+	for my $row (@$data) {
+		# Get constant roundoff decimals.
+		$row->{hps} = sprintf("%0.2f", $row->{hps});
+	}
 
 	slashDisplay('recent_requests', {
-		id		=> $id,
-		ts		=> $ts,
-		threshold	=> $form->{threshold} || 20, # Yes this needs to be a var -Brian
+		min_id		=> $min_id,
+		min_id_ts	=> $min_id_ts,
+		max_id		=> $max_id,
+		thresh_count	=> $options->{thresh_count},
+		thresh_secs	=> $options->{thresh_secs},
+		thresh_hps	=> $options->{thresh_hps},
 		data		=> $data,
 	});
 }
