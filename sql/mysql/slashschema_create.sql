@@ -40,12 +40,15 @@ CREATE TABLE accesslist (
 	isbanned tinyint UNSIGNED DEFAULT 0 NOT NULL,
 	ts datetime default '0000-00-00 00:00:00' NOT NULL, 
 	reason varchar(120), 
+	wasbanned tinyint unsigned DEFAULT 0 NOT NULL,
+	wasreadonly tinyint unsigned DEFAULT 0 NOT NULL,
 	PRIMARY KEY id (id), 
 	key uid (uid), 
 	key ipid (ipid), 
 	key subnetid (subnetid), 
 	key formname (formname), 
-	key ts (ts)
+	key ts (ts),
+	key isbanned (isbanned)
 ) TYPE = myisam;
 
 DROP TABLE IF EXISTS accesslog; 
