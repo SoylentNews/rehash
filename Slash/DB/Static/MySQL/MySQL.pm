@@ -534,7 +534,7 @@ sub updateLastaccess {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 
-	my $splice_count = 2000;
+	my $splice_count = 200;
 	if ($constants->{subscribe} && !$constants->{subscribe_hits_only}) {
 		my @gmt = gmtime();
 		my $today = sprintf "%4d%02d%02d", $gmt[5] + 1900, $gmt[4] + 1, $gmt[3];
