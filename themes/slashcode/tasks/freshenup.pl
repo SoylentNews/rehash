@@ -232,7 +232,7 @@ $task{$me}{code} = sub {
 			my $this_skinname = $skinname eq 'mainpage' ? 'articles' : $skinname;
 			$filename = "$basedir/$this_skinname/$sid.shtml";
 			$args .= " section='$skinname'";
-			$logmsg = "$me updated $skinname:$sid ($title)";
+			$logmsg = "$me updated $stoid $skinname:$sid ($title)";
 			makeDir($basedir, $this_skinname, $sid);
 		} else {
 			$filename = "$basedir/$sid.shtml";
