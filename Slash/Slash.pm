@@ -1185,7 +1185,7 @@ sub displayStory {
 	my $return;
 	my $story = $reader->getStory($sid, "", $options->{get_cacheable});
 	# Sites without an "index" section will never use this, which is probably ok.
-	if (!$user->{no_icons} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable}) {
+	if (!$form->{light} && !$user->{no_icons} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable}) {
 		$return = $story->{rendered};
 	} else {
 		my $author = $reader->getAuthor($story->{uid},
