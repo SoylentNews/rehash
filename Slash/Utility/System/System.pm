@@ -206,6 +206,7 @@ sub bulkEmail {
 		'Message-Id'			=> messageID(),
 	);
 	my $return = $bulk->bulkmail;
+	$bulk->disconnect;
 
 	# end logging
 	for my $fh ($goodfile, $badfile, $errfile) {
