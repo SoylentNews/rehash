@@ -53,20 +53,16 @@ my $stories = $slashdb->sqlSelectAllHashref(
 	'stories'
 );
 
-# CID->UID lookup hash.
-print "Loading comment authors...\n";
-
-# For chosing random discussions.
+# For choosing random discussions.
 print "Loading discussions...\n";
-my $discussions = [
-	map { $_ = $_->[0][0] }
+my $discussions =
 	$slashdb->sqlSelectAll(
-		'sid, count(*) as c',
+		'sid, COUNT(*) AS c',
 		'comments',
 		'',
-		'group by sid having c > 0'
-	)
-];
+		'GROUP BY sid'
+	);
+$discussions = [ map { $_ = $_->[0] } @$discussions ];
 
 my(%comments, %comment_data);
 
@@ -76,9 +72,11 @@ my(%comments, %comment_data);
 	my $story_id = $opts{I} || '';
 	my $discussion_id;
 	if ($story_id =~ /^\d+$/) {
-		$discussion_id = $story_id;
+		$discussion_id = $story_id || 0;
+	} elsif ($story_id) {
+		$discussion_id = $stories->{$story_id}{discussion} || 0;
 	} else {
-		$discussion_id = $stories->{$discussion_id}{discussion}
+		$discussion_id = 0;
 	}
 
 	my $t0 = new Benchmark;
@@ -164,7 +162,7 @@ my(%comments, %comment_data);
 			die if $DBI::errstr;
 
 			printf <<EOT, $comment->{cid}, $comment->{uid}, $modval;
-M($count): Mod=$uid, CID=%s, CUid=%s, R=$reason, V=%s, A=$active
+M($count): Mod=$uid, discussion=$did, CID=%s, CUid=%s, R=$reason, V=%s, A=$active
 EOT
 
 		}

@@ -168,7 +168,8 @@ sub get_time {
 		$min = $now;
 		$max = $now + 86400*$direction;
 	}
-	return int(rand($max-$min)) + $min;
+	my $t = int(rand($max-$min)) + $min;
+	return int($t/60) * 60;
 }
 
 sub getRandomAuthorID {
