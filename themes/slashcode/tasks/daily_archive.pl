@@ -40,7 +40,7 @@ $task{$me}{code} = sub {
 	my $limit = $consts->{task_options}{archive_limit} || 500;
 	my $dir   = $consts->{task_options}{archive_dir}   || 'ASC';
 	my $astories = $slashdb->getArchiveList($limit, $dir);
-	if (@{$astories}) {
+	if ( $astories && @{$astories} ) {
 		slashdLog('Daily Archival Begin');
 		@rc = archiveStories($vuser,$consts,$slashdb,$user,$astories);
 		slashdLog("Daily Archival End ($rc[0] articles in $rc[1]s)");
