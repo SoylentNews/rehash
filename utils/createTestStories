@@ -85,7 +85,6 @@ $constants = getCurrentStatic();
 			"epoch ".get_time($opts{t})),
 			"%Y-%m-%d %H-%M-%S");
 		my $displaystatus = (rand(1) < 0.7) ? 0 : ((rand(1) < 0.9) ? 1 : -1);
-		my $commentstatus = 0;
 		my $tid = getRandomTopicID();
 		my $section = getRandomSection();
 
@@ -98,12 +97,12 @@ $constants = getCurrentStatic();
 			title		=> $title,
 			section		=> $section,
 			displaystatus	=> $displaystatus,
-			commentstatus	=> $commentstatus,
 			submitter	=> $submitter,
 			introtext	=> $introtext,
 			bodytext	=> $bodytext,
 		};
 
+# This logic is not quite right -Brian
 		my $sid = $slashdb->createStory($story);
 		if ($sid) {
 			my $id = $slashdb->createDiscussion( {

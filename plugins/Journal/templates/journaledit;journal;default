@@ -30,8 +30,8 @@ __template__
 
 	[% IF !article.discussion %]
 		[% PROCESS formLabel value => "Comments", comment => "Comments cannot be disabled once enabled" %]
- 		[% jds = Slash.db.getDescriptions("journal_discuss");
- 		   def_jd = form.journal_discuss.defined
+ 		[% jds = Slash.db.getDescriptions("commentcodes");
+ 		   def_jd = form.journal_discuss != 'defined'
  		   	? form.journal_discuss
  		   	: article.id
  		   		? 0

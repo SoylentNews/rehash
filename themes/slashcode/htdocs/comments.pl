@@ -1005,6 +1005,9 @@ sub submitComment {
 	my $id = $form->{sid};
 	my $label = getData('label');
 
+	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
+	$discussion->{type} = isDiscussionOpen($discussion);
+
 	if ($discussion->{type} eq 'archived') {
 		print getData('archive_error');
 		return;

@@ -1097,19 +1097,20 @@ sub editStory {
 		$extracolumns = $slashdb->getSectionExtras($storyref->{section}) || [ ];
 		# Did you know we actually have  var that should set this? -Brian
 		$storyref->{writestatus}   = "dirty";
-		$storyref->{displaystatus} = $SECT->{defaultdisplaystatus};
-		$storyref->{commentstatus} = $SECT->{defaultcommentstatus};
-		$storyref->{subsection}	   = $SECT->{defaultsubsection};
+		$storyref->{displaystatus} = $form->{displaystatus} || $SECT->{defaultdisplaystatus};
+		$storyref->{commentstatus} = $form->{commentstatus} || $SECT->{defaultcommentstatus};
+		$storyref->{subsection}	   = $form->{subsection} || $SECT->{defaultsubsection};
+		$storyref->{section}	   = $form->{section} || $SECT->{defaultsection};
 
 		$storyref->{uid} ||= $user->{uid};
-		$storyref->{section} = $form->{section};
+		#$storyref->{section} = $form->{section};
 
-		$storyref->{writestatus} = $form->{writestatus}
-			if exists $form->{writestatus};
-		$storyref->{displaystatus} = $form->{displaystatus}
-			if exists $form->{displaystatus};
-		$storyref->{commentstatus} = $form->{commentstatus}
-			if exists $form->{commentstatus};
+#		$storyref->{writestatus} = $form->{writestatus}
+#			if exists $form->{writestatus};
+#		$storyref->{displaystatus} = $form->{displaystatus}
+#			if exists $form->{displaystatus};
+#		$storyref->{commentstatus} = $form->{commentstatus}
+#			if exists $form->{commentstatus};
 		$storyref->{dept} =~ s/[-\s]+/-/g;
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
@@ -1162,6 +1163,7 @@ sub editStory {
 		$user->{currentSection} = $slashdb->getStory($sid, 'section', 1);
 		($story, $storyref, $author, $topic) = displayStory($sid, 'Full');
 		$storyref->{writestatus} = 'dirty';
+		$storyref->{commentstatus}  = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
 		$extracolumns = $slashdb->getSectionExtras($user->{currentSection}) || [ ];
 		$user->{currentSection} = $tmp;
 		# Get wordcounts
@@ -1588,7 +1590,6 @@ sub updateStory {
 		dept		=> $form->{dept},
 		'time'		=> $time,
 		displaystatus	=> $form->{displaystatus},
-		commentstatus	=> $form->{commentstatus},
 		writestatus	=> $form->{writestatus},
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
@@ -1611,6 +1612,7 @@ sub updateStory {
 		url	=> "$constants->{rootdir}/article.pl?sid=$data->{sid}",
 		ts	=> $data->{'time'},
 		topic	=> $data->{tid},
+		commentstatus	=> $form->{commentstatus}
 	};
 
 
@@ -1724,7 +1726,6 @@ sub saveStory {
 		dept		=> $form->{dept},
 		'time'		=> $time,
 		displaystatus	=> $form->{displaystatus},
-		commentstatus	=> $form->{commentstatus},
 		writestatus	=> $form->{writestatus},
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
@@ -1767,6 +1768,7 @@ sub saveStory {
 			topic	=> $topic,
 			url	=> "$rootdir/article.pl?sid=$sid&tid=$topic",
 			sid	=> $sid,
+			commentstatus	=> $form->{commentstatus},
 			ts	=> $form->{'time'}
 		});
 		if ($id) {

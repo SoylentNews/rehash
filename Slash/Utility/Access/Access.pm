@@ -30,6 +30,7 @@ use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
 use Slash::Utility::System;
+use Slash::Constants qw(:web :people);
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -47,6 +48,7 @@ use vars qw($VERSION @EXPORT);
 	allowExpiry
 	setUserExpired
 	intervalString
+	isDiscussionOpen
 );
 
 # really, these should not be used externally, but we leave them
@@ -761,6 +763,41 @@ sub setUserExpired {
 			'reg_id'	=> '',
 		});
 	}
+}
+
+####################################################
+# Basically do the discussion logic bit to find the
+# state of the discussion (takes a discussion and 
+# returns the state -Brian
+sub isDiscussionOpen {
+	my ($discussion) = @_;
+	return 'archived' 
+		if $discussion->{commentstatus} eq 'disabled';
+	return $discussion->{type}
+		if $discussion->{type} eq 'archived';
+	return $discussion->{type}
+		if $discussion->{commentstatus} eq 'enabled';
+	return $discussion->{type}
+		if $discussion->{uid} eq getCurrentUser('uid');
+
+	# Now for the more complicated possibilities -Brian
+	my $slashdb = getCurrentDB();
+	my $user = getCurrentUser();
+	my $people = $slashdb->getUser($discussion->{uid}, 'people');
+	if ($discussion->{commentstatus} eq  'friends_only' || $discussion->{commentstatus} eq  'friends_fof_only') {
+		my $orig = $discussion->{type};
+		$discussion->{type} = 'archived';
+		$discussion->{type} = $orig
+			if $people && $people->{FRIEND()} && $people->{FRIEND()}{$user->{uid}};
+		$discussion->{type} = $orig
+			if $discussion->{commentstatus} eq 'friends_fof_only' && $people && $people->{FOF()} && $people->{FOF()}{$user->{uid}};
+	} elsif (($discussion->{commentstatus} eq  'no_foe' || $discussion->{commentstatus} eq  'no_foe_eof') && $people) {
+		$discussion->{type} = 'archived' 
+			if $people && $people->{FOE()} && $people->{FOE()}{$user->{uid}};
+		$discussion->{type} = 'archived' 
+			if $people && $people->{EOF()} && $discussion->{commentstatus} == 5 && $people->{EOF()}{$user->{uid}};
+	}
+	return $discussion->{type};
 }
 
 

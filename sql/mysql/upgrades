@@ -1065,7 +1065,6 @@ INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','T
 # the new stats.pl program
 
 # USEPERL LAST UPDATED HERE
-
 # Set to email address(es) appropriate for your site, of course.
 INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@example.com','All admin mail about comment posting goes here');
 
@@ -1075,3 +1074,24 @@ INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@exam
 
 # should be email-only
 UPDATE message_codes SET modes = 0 WHERE code = 10;
+
+# New Comment codes. Use them or... something -Brian
+ALTER TABLE stories DROP commentstatus;
+
+DELETE FROM code_param WHERE type="commentcodes";
+DELETE FROM code_param WHERE type="journal_discuss";
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes','disabled','Comments Disabled');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes','enabled','Comments Enabled');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','friends_only','Just Friends');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','friends_fof_only','Just Friends and their Friends');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','no_foe','No Foes');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','no_foe_eof','No Foes and No Friend\'s Foes');
+# Only add the following if you want them. They are not to be installed on Slashdot yet. -Brian
+#INSERT INTO code_param (type, code, name) VALUES ('commentcodes',4,'No Foes');
+#INSERT INTO code_param (type, code, name) VALUES ('commentcodes',5,'No Foes and No Friend\'s Foes');
+DELETE FROM vars WHERE name="article_nocomment";
+ALTER TABLE discussions ADD commentstatus enum('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof') DEFAULT 'enabled' NOT NULL;
+ALTER TABLE sections DROP defaultcommentstatus;
+ALTER TABLE sections ADD defaultcommentstatus enum('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof') DEFAULT 'enabled' NOT NULL;
+UPDATE sections SET defaultcommentstatus='enabled';
+UPDATE vars SET value='enabled' WHERE name='defaultcommentstatus';

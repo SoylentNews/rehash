@@ -409,6 +409,8 @@ sub printComments {
 		print getData('no_such_sid', {}, '');
 		return 0;
 	}
+	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
+	$discussion->{type} = isDiscussionOpen($discussion);
 
 	$pid ||= 0;
 	$cid ||= 0;
@@ -445,7 +447,7 @@ sub printComments {
 		# This was named "comment_read_only" but that's not very
 		# descriptive;  let's call it what it is... -Jamie 2002/02/26
 		$user->{state}{discussion_archived} = 1;
-		slashDisplay('printCommNoArchive');
+		slashDisplay('printCommNoArchive', { discussion => $discussion });
 	}
 
 	slashDisplay('printCommentsMain', {

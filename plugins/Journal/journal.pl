@@ -542,7 +542,7 @@ sub saveArticle {
 
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
-		if ($constants->{journal_comments} && $form->{journal_discuss} && !$article->{discussion}) {
+		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
 			my $rootdir = $constants->{'rootdir'};
 			if ($form->{comments_on}) {
 				$description = $article->{description};
@@ -551,6 +551,7 @@ sub saveArticle {
 			my $did = $slashdb->createDiscussion({
 				title	=> $description,
 				topic	=> $form->{tid},
+				commentstatus	=> $form->{journal_discuss},
 				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$form->{id}",
 			});
 			$update{discussion}  = $did;
@@ -584,11 +585,12 @@ sub saveArticle {
 			return 0;
 		}
 
-		if ($constants->{journal_comments} && $form->{journal_discuss}) {
+		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled') {
 			my $rootdir = $constants->{'rootdir'};
 			my $did = $slashdb->createDiscussion({
 				title	=> $description,
 				topic	=> $form->{tid},
+				commentstatus	=> $form->{journal_discuss},
 				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$id",
 			});
 			$journal->set($id, { discussion => $did });
@@ -604,12 +606,12 @@ sub saveArticle {
 				template_name	=> 'messagenew',
 				subject		=> { template_name => 'messagenew_subj' },
 				journal		=> {
-					description	=> $description,
-					article		=> $form->{article},
-					posttype	=> $form->{posttype},
-					id		=> $id,
-					uid		=> $user->{uid},
-					nickname	=> $user->{nickname},
+				description	=> $description,
+				article		=> $form->{article},
+				posttype	=> $form->{posttype},
+				id		=> $id,
+				uid		=> $user->{uid},
+				nickname	=> $user->{nickname},
 				}
 			};
 			for (@$friends) {

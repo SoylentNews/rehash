@@ -31,9 +31,6 @@
 INSERT INTO code_param (type, code, name) VALUES ('blocktype',1,'color');
 INSERT INTO code_param (type, code, name) VALUES ('blocktype',2,'static');
 INSERT INTO code_param (type, code, name) VALUES ('blocktype',3,'portald');
-INSERT INTO code_param (type, code, name) VALUES ('commentcodes',0,'Comments Enabled');
-INSERT INTO code_param (type, code, name) VALUES ('commentcodes',1,'Read-Only');
-INSERT INTO code_param (type, code, name) VALUES ('commentcodes',-1,'Comments Disabled');
 INSERT INTO code_param (type, code, name) VALUES ('discussiontypes',0,'Discussion Enabled');
 INSERT INTO code_param (type, code, name) VALUES ('discussiontypes',1,'Recycle Discussion');
 INSERT INTO code_param (type, code, name) VALUES ('discussiontypes',2,'Read Only Discussion');
@@ -243,6 +240,12 @@ INSERT INTO site_info VALUES ('','form','comments','comments submission form');
 # Dumping data for table 'string_param'
 #
 
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes','disabled','Comments Disabled');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes','enabled','Comments Enabled');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','friends_only','Just Friends');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','friends_fof_only','Just Friends and their Friends');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','no_foe','No Foes');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','no_foe_eof','No Foes and No Friend\'s Foes');
 INSERT INTO string_param (type, code, name) VALUES ('section_topic_type','topic_1','Default');
 INSERT INTO string_param (type, code, name) VALUES ('yes_no','yes','yes');
 INSERT INTO string_param (type, code, name) VALUES ('yes_no','no','no');

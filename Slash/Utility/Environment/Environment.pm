@@ -1271,7 +1271,7 @@ Hashref of cleaned-up data.
 		approved artcount bseclev
 		buymore cid clbig clsmall
 		commentlimit commentsort commentspill
-		commentstatus del displaystatus
+		del displaystatus
 		filter_id hbtm height highlightthresh
 		isolate issue last maillist max
 		maxcommentsize maximum_length maxstories
@@ -1286,7 +1286,7 @@ Hashref of cleaned-up data.
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
-		formkey hcanswer mode op section type
+		formkey commentstatus hcanswer mode op section type
 	);
 
 	# regexes to match dynamically generated numeric fields

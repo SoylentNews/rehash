@@ -75,19 +75,14 @@ sub main {
 			prev			=> $prev,
 		});
 
-		my $discussion = $slashdb->getDiscussion($story->{discussion});
-		# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
-		$user->{state}{tid} = $discussion->{topic};
-		# this should really be done per-story, perhaps with article_nocomment
-		# being a default for the story editor instead of being system-wide; that feature
-		# has been begun, but doesn't work -- pudge
-		if ($constants->{article_nocomment}) {
-			# to report the commentcount and hitparade
-			if ($form->{cchp}) {
-				Slash::selectComments($discussion, 0);
-			}
-		} else {
-			printComments($discussion);
+		#Still not happy with this logic -Brian
+		if ($story->{discussion}) {
+			my $discussion = $slashdb->getDiscussion($story->{discussion});
+			# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
+			$user->{state}{tid} = $discussion->{topic};
+			# If no comments ever have existed just skip the display of the comment header bar -Brian
+			printComments($discussion)
+				if $discussion &&  $discussion->{commentstatus} ne 'disabled' && $discussion->{commentcount} > 0;;
 		}
 	} else {
 		my $message = getData('no_such_sid');

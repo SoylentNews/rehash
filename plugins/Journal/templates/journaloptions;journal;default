@@ -25,8 +25,8 @@ __template__
 
 	<TR VALIGN="TOP"><TD>
 		[% PROCESS formLabel value => "Comments", comment => "Select default for new entries" %]
-		[% jds = Slash.db.getDescriptions("journal_discuss") %]
-		[% def_jd = user.journal_discuss || 0 %]
+		[% jds = Slash.db.getDescriptions("commentcodes") %]
+		[% def_jd = user.journal_discuss || constants.defaultcommentmode %]
 		[% Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
 	</TD></TR>
 </TABLE>

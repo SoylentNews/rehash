@@ -215,8 +215,8 @@ INSERT INTO section_topics (section, tid, type) VALUES ('features', 1, 'topic_1'
 # Dumping data for table 'stories'
 #
 
-INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, commentstatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1430236',4,2,'You\'ve Installed Slash!','congratulations-dude','2000-08-28 20:47:46',0,'articles',0,0,1,2, 'dirty', 2);
-INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, commentstatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1236215',4,2,'Now What?','where-do-you-go-from-here','2000-01-25 08:32:02',0,'articles',0,0,2,2, 'dirty', NULL);
+INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1430236',4,2,'You\'ve Installed Slash!','congratulations-dude','2000-08-28 20:47:46',0,'articles',0,1,2, 'dirty', 2);
+INSERT INTO stories (sid, tid, uid, title, dept, time, hits, section, displaystatus, discussion, submitter, writestatus, qid) VALUES ('00/01/25/1236215',4,2,'Now What?','where-do-you-go-from-here','2000-01-25 08:32:02',0,'articles',0,2,2, 'dirty', NULL);
 
 
 #
