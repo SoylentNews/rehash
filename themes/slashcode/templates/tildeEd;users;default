@@ -52,7 +52,7 @@ __template__
 [% criteria_msg %]
 
 [% story023_data = Slash.db.getDescriptions('story023');
-   DEFAULT checked = ' CHECKED' %]
+   DEFAULT checked = constants.markup_checked_attribute %]
 
 [%-	######################
 	# Sections and Authors

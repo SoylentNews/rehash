@@ -33,25 +33,25 @@ __template__
 
 	<INPUT TYPE="SUBMIT" VALUE="Search"><BR>
 
-	<INPUT TYPE="RADIO" NAME="op" VALUE="stories"[% IF op == 'stories' %] CHECKED[% END %]> Stories
-	<INPUT TYPE="RADIO" NAME="op" VALUE="comments"[% IF op == 'comments' %] CHECKED[% END %]> Comments
-	<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'users' %] CHECKED[% END %]> Users
-	<INPUT TYPE="RADIO" NAME="op" VALUE="polls"[% IF op == 'polls' %] CHECKED[% END %]> Polls
+	<INPUT TYPE="RADIO" NAME="op" VALUE="stories"[% IF op == 'stories'; constants.markup_checked_attribute; END %]> Stories
+	<INPUT TYPE="RADIO" NAME="op" VALUE="comments"[% IF op == 'comments'; constants.markup_checked_attribute; END %]> Comments
+	<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'users'; constants.markup_checked_attribute; END %]> Users
+	<INPUT TYPE="RADIO" NAME="op" VALUE="polls"[% IF op == 'polls'; constants.markup_checked_attribute; END %]> Polls
 	[% IF constants.search_journal_enabled %]
-		<INPUT TYPE="RADIO" NAME="op" VALUE="journals"[% IF op == 'journals' %] CHECKED[% END %]> Journals
+		<INPUT TYPE="RADIO" NAME="op" VALUE="journals"[% IF op == 'journals'; constants.markup_checked_attribute; END %]> Journals
 	[% END %]
 	[% IF constants.rss_store %]
 		[% IF constants.search_rss_enabled || user.is_admin %]
-			<INPUT TYPE="RADIO" NAME="op" VALUE="rss"[% IF op == 'rss' %] CHECKED[% END %]> RSS Headlines
+			<INPUT TYPE="RADIO" NAME="op" VALUE="rss"[% IF op == 'rss'; constants.markup_checked_attribute; END %]> RSS Headlines
 		[% END %]
 	[% END %]
 	[% IF constants.submiss_view || user.is_admin %]
-		<INPUT TYPE="RADIO" NAME="op" VALUE="submissions"[% IF op == 'submissions' %] CHECKED[% END %]> Submissions
+		<INPUT TYPE="RADIO" NAME="op" VALUE="submissions"[% IF op == 'submissions'; constants.markup_checked_attribute; END %]> Submissions
 	[% END %]
 	<br>
 
 	[% IF journal_option %]
-	<INPUT TYPE="CHECKBOX" NAME="journal_only" VALUE="1"[% IF form.journal_only == '1' %] CHECKED[% END %]> Users with Journals
+	<INPUT TYPE="CHECKBOX" NAME="journal_only" VALUE="1"[% IF form.journal_only == '1'; constants.markup_checked_attribute; END %]> Users with Journals
 	[% END %]
 
 	[% IF submission_notes %]

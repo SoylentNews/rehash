@@ -25,7 +25,7 @@ __template__
 				So do you want to remove your relationship with <B><A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B>? 
 			</TD>
 			<TD>
-				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %] CHECKED[% END %]> 
+				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral'; constants.markup_checked_attribute; END %]> 
 			</TD>
 			<TD>
 				&nbsp;&nbsp;<INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
@@ -39,9 +39,9 @@ __template__
 			Change this?
 			</TD>
 			<TD>
-				[% UNLESS over_socialized %] <INPUT TYPE="RADIO" NAME="type" VALUE="friend"[% IF type == 'friend' %] CHECKED[% END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif" ALT="Friend">&nbsp;Friend<br>[% END %]
-				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %] CHECKED[% END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral">&nbsp;Neutral<br>
-				[% UNLESS over_socialized %] <INPUT TYPE="RADIO" NAME="type" VALUE="foe"[% IF type == 'foe' %] CHECKED[% END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif" ALT="Foe">&nbsp;Foe <br> [% END %]
+				[% UNLESS over_socialized %] <INPUT TYPE="RADIO" NAME="type" VALUE="friend"[% IF type == 'friend'; constants.markup_checked_attribute; END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif" ALT="Friend">&nbsp;Friend<br>[% END %]
+				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral'; constants.markup_checked_attribute; END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral">&nbsp;Neutral<br>
+				[% UNLESS over_socialized %] <INPUT TYPE="RADIO" NAME="type" VALUE="foe"[% IF type == 'foe'; constants.markup_checked_attribute; END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif" ALT="Foe">&nbsp;Foe <br> [% END %]
 			</TD>
 			<TD>
 				&nbsp;&nbsp;<INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>

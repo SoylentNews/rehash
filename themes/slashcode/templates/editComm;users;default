@@ -56,7 +56,7 @@ __template__
 			user_edit.emaildisplay = 0;
 		END;
 		IF user_edit.emaildisplay.defined;
-			emaildisplay.${user_edit.emaildisplay} = 'CHECKED';
+			emaildisplay.${user_edit.emaildisplay} = constants.markup_checked_attribute;
 		END %]
                 &nbsp;&nbsp;&nbsp;
 		<INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.0 %] 
@@ -265,7 +265,7 @@ __template__
 
 
 [% UNLESS user_edit.domaintags.defined; user_edit.domaintags=2; END %]
-[% domaintags.${user_edit.domaintags} = 'CHECKED' -%]
+[% domaintags.${user_edit.domaintags} = constants.markup_checked_attribute -%]
 		<P><B>Display Link Domains?</B> (shows the actual domain of any link in brackets)<BR>
 		&nbsp;&nbsp;&nbsp;
 		<INPUT TYPE="RADIO" NAME="domaintags" [% domaintags.0 %] 
@@ -281,7 +281,7 @@ __template__
 		Always show link domains<BR>
 		<P><B>User Page Comment Listing</B></P>
 		[% UNLESS user_edit.user_comment_sort_type.defined; user_edit.user_comment_sort_type=2; END %]
-		[% user_comment_sort_type.${user_edit.user_comment_sort_type} = 'CHECKED' -%]
+		[% user_comment_sort_type.${user_edit.user_comment_sort_type} = constants.markup_checked_attribute -%]
 		&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="user_comment_sort_type" [% user_comment_sort_type.1 %] VALUE="1"> Selected by create time descending<BR>
 		&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="user_comment_sort_type" [% user_comment_sort_type.2 %] VALUE="2"> Selected by create time descending, results grouped by discussion, newest discussion first.
 		[% IF user.is_admin %]

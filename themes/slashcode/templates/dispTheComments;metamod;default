@@ -69,7 +69,7 @@ to do this unless you need more context to fairly meta moderate.<BR><BR></LI>
 		is <B>
 		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.unfairname; ELSE; "Unfair"; END %]
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="-">
-			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="0" CHECKED>
+			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="0"[% constants.markup_checked_attribute %]>
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="+">
 		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.name; ELSE; "Fair"; END %]
 		</B>&nbsp;&nbsp;|&nbsp;

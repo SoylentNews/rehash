@@ -133,10 +133,10 @@ ends. Your day may vary.)
 	<TR>
 	<TD VALIGN="top" ALIGN="center"><INPUT TYPE="RADIO"
 		NAME="buypage_[% page.pagename %]"
-		VALUE="0" [% IF !page.isbought; " CHECKED"; END %]></TD>
+		VALUE="0" [% IF !page.isbought; constants.markup_checked_attribute; END %]></TD>
 	<TD VALIGN="top" ALIGN="center"><INPUT TYPE="RADIO"
 		NAME="buypage_[% page.pagename %]"
-		VALUE="1" [% IF  page.isbought; " CHECKED"; END %]></TD>
+		VALUE="1" [% IF  page.isbought; constants.markup_checked_attribute; END %]></TD>
 	<TD VALIGN="top" ALIGN="left">&nbsp;[% page.descr %]</TD>
 	</TR>
 
