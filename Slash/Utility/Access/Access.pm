@@ -192,7 +192,7 @@ sub formkeyError {
 
 	} elsif ($value eq 'usedform') {
 		if (my $interval = $slashdb->getFormkeyTs($form->{formkey},1)) {
-			$hashref->{interval} = intervalString( time() - $slashdb->getFormkeyTs($form->{formkey},1) );
+			$hashref->{interval} = intervalString( time() - $interval );
 		}
 		$hashref->{value} = $value;
 	} elsif ($value eq 'cantinsert') {

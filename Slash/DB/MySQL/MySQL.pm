@@ -2739,19 +2739,26 @@ sub resetFormkey {
 
 	my $update_ref = {
 		-value          => 0,
-		-idcount        => '(idcount-1)',
-		ts              => time(),
+		-idcount        => 'idcount-1',
+# Since the beginning, ts has been updated here whenever a formkey needs to
+# be reset.  As far as I can tell, this serves no purpose except to reset
+# the 20-second clock before a comment can be posted after a failed attempt
+# to submit.  This has probably been causing numerous reports of spurious
+# 20-second failure errors.  In the core code, comments and submit are the
+# only formnames that check ts, both in response_limit, and
+# comments_response_limit is the only one defined anyway. - Jamie 2002/11/19
+#		ts              => time(),
 		submit_ts       => '0',
 	};
 	$update_ref->{formname} = $formname if $formname;
-	
+
 	# reset the formkey to 0, and reset the ts
 	my $updated = $self->sqlUpdate("formkeys", 
 		$update_ref, 
 		"formkey=" . $self->sqlQuote($formkey));
 
 	print STDERR "RESET formkey $updated\n" if $constants->{DEBUG};
-	return($updated);
+	return $updated;
 }
 
 ##################################################################
@@ -2847,13 +2854,14 @@ sub checkMaxPosts {
 		"COUNT(*) AS count",
 		"formkeys",
 		$where);
+	$limit_reached ||= 0;
 
 	if ($constants->{DEBUG}) {
 		print STDERR "LIMIT REACHED (times posted) $limit_reached\n";
 		print STDERR "LIMIT REACHED limit_reached maxposts $maxposts\n";
 	}
 
-	return $limit_reached ? $limit_reached : 0;
+	return $limit_reached;
 }
 
 ##################################################################
