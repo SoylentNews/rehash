@@ -61,6 +61,23 @@ sub getPointsInPool {
 }
 
 ########################################################
+sub getTokenConversionPoint {
+	my($self) = @_;
+	# We can't actually predict what the exact token value will be
+	# where they get converted to mod points;  we'd have to predict
+	# number of comments posted and run the same logic as
+	# run_moderatord.pl to find that.  But we can make a good
+	# educated guess that's probably off by a maximum of 1 token.
+	my $limit = 100; # XXX need to determine this based off a stat, probably mod_tokens_lost_converted/(24*40)
+	return +(@{$self->sqlSelectColArrayref(
+		"tokens",
+		"users_info",
+		"tokens > 20", # sanity check, also appears in run_moderatord algorithm
+		"ORDER BY tokens DESC LIMIT $limit"
+	)})[-1];
+}
+
+########################################################
 sub getTokensInPoolPos {
 	my($self) = @_;
 	return $self->sqlSelect('SUM(tokens)', 'users_info',

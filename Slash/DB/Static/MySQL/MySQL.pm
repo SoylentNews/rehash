@@ -903,7 +903,8 @@ sub fetchEligibleModerators {
 # "best" with that probability increased (appearing two or more
 # times on the list).
 sub factorEligibleModerators {
-	my($self, $orig_uids, $factor_ratio, $factor_total) = @_;
+	my($self, $orig_uids, $factor_ratio, $factor_total,
+		$info_hr) = @_;
 	return $orig_uids if !$orig_uids || !@$orig_uids || scalar(@$orig_uids) < 10;
 	$factor_ratio = 0 if $factor_ratio == 1;
 	$factor_total = 0 if $factor_total == 1;
@@ -981,6 +982,12 @@ sub factorEligibleModerators {
 			\@new_uids);
 	}
 
+	# If the caller wanted to keep stats, prep some stats.
+	if ($info_hr && %$info_hr) {
+		$info_hr->{factor_lowest} = 1;
+		$info_hr->{factor_highest} = 1;
+	}
+
 	# Now modify the list of uids.  Each uid in the list has the product
 	# of its factors calculated.  If the product is exactly 1, that uid
 	# is left alone.  If less than 1, there is a chance the uid will be
@@ -992,6 +999,13 @@ sub factorEligibleModerators {
 			if defined($u_hr->{$uid}{factor_m2total});
 		$factor *= $u_hr->{$uid}{factor_m2ratio}
 			if defined($u_hr->{$uid}{factor_m2ratio});
+		# If the caller wanted to keep stats, send some stats.
+		$info_hr->{factor_lowest} = $factor
+			if $info_hr && $info_hr->{factor_lowest}
+				&& $factor < $info_hr->{factor_lowest};
+		$info_hr->{factor_highest} = $factor
+			if $info_hr && $info_hr->{factor_highest}
+				&& $factor > $info_hr->{factor_highest};
 		# If the factor is, say, 1.3, then the count of this uid is
 		# at least 1, and there is a 0.3 chance that it goes to 2.
 		my $count = int($factor);

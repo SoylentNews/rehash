@@ -152,6 +152,7 @@ EOT
 	my $modlog_count_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
 	my $modlog_spent_yest_total = $modlog_yest_hr->{1}{spent} + $modlog_yest_hr->{-1}{spent};
 	my $consensus = $constants->{m2_consensus};
+	my $token_conversion_point = $stats->getTokenConversionPoint();
 
 	my $m2_text = getM2Text($stats->getModM2Ratios());
 
@@ -266,6 +267,7 @@ EOT
 	$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
 	$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
 	$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
+	$statsSave->createStatDaily("token_conversion_point", $token_conversion_point);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
@@ -313,6 +315,7 @@ EOT
 	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_count_yest_total : 0));
 	$mod_data{mod_points_avg_spent} = $modlog_count_yest_total ? sprintf("%12.3f", $modlog_spent_yest_total/$modlog_count_yest_total) : "(n/a)";
 	$mod_data{day} = $yesterday;
+	$mod_data{token_conversion_point} = sprintf("%8d", $token_conversion_point);
 	$mod_data{m2_text} = $m2_text;
 
 	$data{comments} = $mod_data{comments};

@@ -24,6 +24,7 @@ __template__
       used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
       used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
     avg spent: [% mod_points_avg_spent %]
+token convert: [% token_conversion_point %]
 oldest unM2'd: [% IF oldest_unm2d_days > -1 %][% oldest_unm2d_days %] days[% ELSE %](n/a)[% END %]
 youngest elig: uid [% youngest_modelig_uid %], created on [% youngest_modelig_created %]
 

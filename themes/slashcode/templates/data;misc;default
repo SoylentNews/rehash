@@ -99,7 +99,7 @@ each submission of [% env.script_name %] in order to allow everyone to have a fa
 [% IF stirredpoints %]Stirred out [% stirredpoints %] points, so 
 [%- ELSE %]So[% END %] the total number of tokens=[% num_tokens %]
 First [% last_user * constants.m1_eligible_percentage %] accounts available.
-Eligible: [% eligible %] (min clicks [% constants.m1_eligible_hitcount %]) / Start at [% start %] ([% least %] clicks, uid [% startuid %]), end at [% end %] ([% most %] clicks, uid [% enduid %])
+Eligible: [% eligible %] (min clicks [% constants.m1_eligible_hitcount %]) / Low factor [% factor_lowest %], High factor [% factor_highest %] / Start at [% start %] ([% least %] clicks, uid [% startuid %]), end at [% end %] ([% most %] clicks, uid [% enduid %])
 Incremented token-count on [% num_updated %] users.
 
 [% CASE 'moderatord_log_footer' %]

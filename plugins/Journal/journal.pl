@@ -326,20 +326,31 @@ sub displayArticle {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
 	my($date, $forward, $back, @sorted_articles, $nickname, $uid, $discussion);
 	my $collection = {};
+	my $user_change = {};
+	my $head_data = {};
 
 	if ($form->{uid} || $form->{nick}) {
 		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
 		$nickname	= $slashdb->getUser($uid, 'nickname');
+		if ($uid && $uid != $user->{uid}) {
+			# Store the fact that this user last looked at that user.
+			# For maximal convenience in stalking.
+			$user_change->{lastlookuid} = $uid;
+			$user->{lastlookuid} = $uid;
+		}
 	} else {
 		$nickname	= $user->{nickname};
 		$uid		= $user->{uid};
 	}
+	$head_data->{nickname} = $nickname;
+	$head_data->{uid} = $uid;
 
 	if (isAnon($uid)) {
+		# Don't write user_change.
 		return displayFriends(@_);
 	}
 
-	_printHead("userhead", { nickname => $nickname, uid => $uid }, 1);
+	_printHead("userhead", $head_data, 1);
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
@@ -349,6 +360,9 @@ sub displayArticle {
 
 	unless ($articles && @$articles) {
 		print getData('noentries_found');
+		if ($user_change && %$user_change) {
+			$slashdb->setUser($user->{uid}, $user_change);
+		}
 		return;
 	}
 
@@ -422,6 +436,10 @@ sub displayArticle {
 
 	if ($show_discussion) {
 		printComments($discussion);
+	}
+
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
 	}
 }
 

@@ -515,9 +515,10 @@ sub _score {
 		# will do for now. - Jamie 2002/10/20
 		my @terms = ( );
 		for my $term (split / /, $query) {
-			$term =~ /^\s*(.*?)\s*$/; $term = $1;
+			$term =~ /^\s*(.*?)\s*$/;
+			$term = $1;
 			next unless $term;
-			push @terms, $self->sqlQuote($_);
+			push @terms, $self->sqlQuote($term);
 		}
 		return "0" if !@terms;
 		my $terms = join(",", @terms);

@@ -284,6 +284,12 @@ sub main {
 			checks		=> [],
 		},
 	} ;
+
+	# Note this is NOT the default op.  "userlogin" or "userinfo" is
+	# the default op, and it's set either 5 lines down or about 100
+	# lines down, depending.  Yes, that's dumb.  Yes, we should
+	# change it.  It would require tracing through a fair bit of logic
+	# though and I don't have the time right now. - Jamie
 	$ops->{default} = $ops->{displayform};
 
 	my $errornote = "";
@@ -1063,12 +1069,6 @@ sub showInfo {
 						"%Y-%m-%d",
 						$user->{off_set} + $hours*3600
 					);
-# Older and much slower way of doing this; required Date::Manip, ick!
-#					$requested_user->{points_expire} = timeCalc(
-#						UnixDate(DateCalc($lastgranted, "+ $hours hours"),
-#							"%C"),
-#						'%Y-%m-%d'
-#					);
 				}
 			}
 

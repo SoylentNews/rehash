@@ -206,10 +206,11 @@ sub give_out_tokens {
 	@eligible_uids = @eligible_uids[$start..$end];
 
 	# Pull off some useful data for logging tidbits.
-	my $startuid = $eligible_uids[0][0],
-	my $enduid = $eligible_uids[-1][0],
-	my $least = $eligible_uids[0][1],
-	my $most = $eligible_uids[-1][1],
+	my $startuid = $eligible_uids[0][0];
+	my $enduid = $eligible_uids[-1][0];
+	my $least = $eligible_uids[0][1];
+	my $most = $eligible_uids[-1][1];
+	my %info = ( );
 
 	# Ignore count now, we only want uid.
 	@eligible_uids = map { $_ = $_->[0] } @eligible_uids;
@@ -221,7 +222,8 @@ sub give_out_tokens {
 	if ($factor_ratio || $factor_total) {
 		my @orig_uids = @eligible_uids;
 		@eligible_uids = @{$read_db->factorEligibleModerators(
-			\@orig_uids, $factor_ratio, $factor_total)};
+			\@orig_uids, $factor_ratio, $factor_total,
+			\%info)};
 	}
 
 	# Decide who's going to get the tokens.
@@ -247,6 +249,8 @@ sub give_out_tokens {
 		least		=> $least,
 		most		=> $most,
 		num_updated	=> $n_update_uids,
+		factor_lowest	=> sprintf("%.3f", $info{factor_lowest} || 0),
+		factor_highest	=> sprintf("%.3f", $info{factor_highest} || 0),
 	}));
 
 	# Give each user her or his tokens.
