@@ -1167,7 +1167,7 @@ sub editStory {
 		autonode_check		=> $autonode_check,
 		fastforward_check	=> $fastforward_check,
 		shortcuts_check		=> $shortcuts_check,
-		subsection_select		=> $subsection_select,
+		subsection_select	=> $subsection_select,
 		user			=> $user,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,
@@ -1526,8 +1526,10 @@ sub saveStory {
 	}
 	my $sid = $slashdb->createStory($data);
 
+	# we can use multiple values in forms now, we don't
+	# need to keep using this idiom -- pudge
 	if ($constants->{multitopics_enabled}) {
-		for my $k(keys %$form) {
+		for my $k (keys %$form) {
 		    if ($k =~ /tid_(.*)/) {
 			push @$tid_ref, $1;
 		    }
