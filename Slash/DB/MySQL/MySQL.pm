@@ -408,16 +408,21 @@ sub getModPointsNeeded {
 # the result will always be rounded to an odd number.
 sub createModeratorLog {
 	my($self, $comment, $user, $val, $reason, $active, $points_spent, $m2needed) = @_;
+	
+	my $constants = getCurrentStatic();
 
 	$active = 1 unless defined $active;
 	$points_spent = 1 unless defined $points_spent;
 
+	my $m2_base += $self->getBaseM2Needed($comment->{cid}, $reason, { count_modifier => $active ? 1 : 0 }) || getCurrentStatic('m2_status');
 	$m2needed ||= 0;
-	$m2needed += getCurrentStatic('m2_consensus');
+	$m2needed += $m2_base;
 	$m2needed = 1 if $m2needed < 1;		# minimum of 1
 	$m2needed = int($m2needed/2)*2+1;	# always an odd number
 
-	$self->sqlInsert("moderatorlog", {
+	$m2needed = 0 unless $active;
+
+	my $ret_val = $self->sqlInsert("moderatorlog", {
 		uid	=> $user->{uid},
 		ipid	=> $user->{ipid} || "",
 		subnetid => $user->{subnetid} || "",
@@ -432,7 +437,59 @@ sub createModeratorLog {
 		points_orig => $comment->{points},
 		m2needed => $m2needed,
 	});
+	#print STDERR "cid: $comment->{cid} reason: $reason m2_base: $m2_base active: $active\n";
+	
+	# cid_reason count changed, update m2needed for related mods
+	if ($constants->{m2_use_sliding_consensus} and $active) {
+		# Note: this only updates m2needed for moderations that have m2status=0 not those that have already reached consensus.
+		# If we're strictly enforcing like mods sharing one group of m2s this behavior might have to change.  If so it's likely to
+		# be var controlled.  A better solution is likely to inherit m2s when a new mod is created of a given cid-reason if we
+		# want to have the same m2s across all like m1s.  If the mod whose m2s we are inheriting from has already reached consensus
+                # we probably just want to inherit those m2s and not up the m2needed value for either mods.
+
+		$self->sqlUpdate("moderatorlog", { m2needed => $m2_base }, "cid=".$self->sqlQuote($comment->{cid})." and reason=".$self->sqlQuote($reason)." and m2status=0" );
+	}
+	return $ret_val;
 }
+
+sub getBaseM2Needed {
+	my ($self, $cid, $reason, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $consensus;
+	if ($constants->{m2_use_sliding_consensus}) {
+		my $count = $self->sqlCount("moderatorlog", "cid=".$self->sqlQuote($cid)." and reason=".$self->sqlQuote($reason)." and active=1");
+		$count += $options->{count_modifier} if defined $options->{count_modifier};
+		#print STDERR " get_m2_base count: $count cid: $cid reason: $reason\n";
+		my $index = $count - 1;
+		$index = 0 if $index < 1;
+		$index = @{$constants->{m2_sliding_consensus}} - 1
+		if $index > (@{$constants->{m2_sliding_consensus}} - 1);
+		$consensus = $constants->{m2_sliding_consensus}[$index];
+	} else {
+		$consensus = $constants->{'m2_consensus'};
+	}
+
+	return $consensus;
+}
+
+
+# Pass the id if we've already created the mod for which we are inheriting mods.
+# If getting the inherited m2s before the mod is created omit passing the id
+# as a parameter. 
+sub getInheritedM2sForMod {
+	my ($self, $cid, $reason, $active, $id) = @_;
+	return [] unless $active;
+	
+	my $id_str = " and id!=".$self->sqlQuote($id) if $id;
+	my ($p_mid) = $self->sqlSelect("min(id)","moderatorlog",
+				"cid=".$self->sqlQuote($cid)." and reason=".$self->sqlQuote($reason).
+				" and active=1 and $id_str"
+			);
+	return [] unless $p_mid;
+	my $m2s = $self->sqlSelectAllHashrefArray("*", "metamodlog", "mmid=$p_mid");
+	return $m2s;
+}
+
 
 ########################################################
 # A friendlier interface to the "mods_saved" param.  Has probably
@@ -751,7 +808,7 @@ EOT
 		$mod_hr = $reader->sqlSelectAllHashref(
 			"id",
 			"id, cid,
-			 m2count + $consensus * $if_expr + RAND() AS rank",
+			 m2count + m2needed * $if_expr + RAND() AS rank",
 			"moderatorlog",
 			"uid != $uid_q AND cuid != $uid_q
 			 AND m2status=0
@@ -896,7 +953,8 @@ sub getModeratorCommentLog {
 		 moderatorlog.ts AS ts,
 		 moderatorlog.active AS active,
 		 moderatorlog.m2status AS m2status,
-		 moderatorlog.id AS id
+		 moderatorlog.id AS id,
+		 moderatorlog.points_orig AS points_orig 
 		 $select_extra",
 		"moderatorlog, users, comments",
 		"$where_clause
@@ -5274,7 +5332,6 @@ sub multiMetaMod {
 		 AND id NOT IN ($orig_mmid_in)",
 		"ORDER BY RAND() LIMIT $max_limit"
 	);
-
 	# If there are none, we're done.
 	return if !$others or !@$others;
 
@@ -5375,18 +5432,6 @@ sub createMetaMod {
 		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
 		my $is_fair = $m2s->{$mmid}{is_fair};
 
-		if ($constants->{m2_use_sliding_consensus}) {
-			my ($cid, $reason ) = $self->sqlSelect("cid,reason", "moderatorlog", "id=$mmid");
-			my $count = $self->sqlCount("moderatorlog", "cid=$cid and reason=$reason");
-			my $index = $count - 1;
-			$index = 0 if $index < 1;
-			$index = @{$constants->{m2_sliding_consensus}} - 1
-				if $index > (@{$constants->{m2_sliding_consensus}} - 1);
-			$consensus = $constants->{m2_sliding_consensus}[$index];
-
-			print STDERR "mmid: $mmid  cid: $cid reason $reason count: $count consensus: $consensus\n";
-		}
-
 		# Increment the m2count on the moderation in question.  If
 		# this increment pushes it to the current consensus threshold,
 		# change its m2status from 0 ("eligible for M2") to 1
@@ -5404,7 +5449,7 @@ sub createMetaMod {
 							1, 0)",
 			},
 			"id=$mmid AND m2status=0
-			 AND m2count < $consensus AND active=1",
+			 AND m2count < m2needed AND active=1",
 			{ assn_order => [qw( -m2count -m2status )] },
 		) unless $m2_user->{tokens} < $self->getVar("m2_mintokens", "value", 1);
 
@@ -5812,7 +5857,7 @@ sub getSubmissionsByNetID {
 	$where .= " AND del = 2" if $options->{accepted_only};
 	
 	my $subs = $self->sqlSelectAllHashrefArray(
-		'uid,name,subid,ipid,subj,time,del',
+		'uid,name,subid,ipid,subj,time,del,section,tid',
 		'submissions', $where,
 		"ORDER BY time DESC $limit");
 
@@ -5840,7 +5885,7 @@ sub getSubmissionsByUID {
 	$where .= " AND del = 2" if $options->{accepted_only};
 
 	my $subs = $self->sqlSelectAllHashrefArray(
-		'uid,name,subid,ipid,subj,time,del',
+		'uid,name,subid,ipid,subj,time,del,section,tid',
 		'submissions', $where,
 		"ORDER BY time DESC $limit");
 	
