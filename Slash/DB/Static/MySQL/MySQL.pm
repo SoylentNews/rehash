@@ -636,6 +636,8 @@ sub getDailyMail {
 	# 1 - want all stories in the mainpage nexus, or any
 	# other nexuses linked to it, mailed
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
+# XXXSKIN - fix this - there is no more "sectioncollapse" and the
+# story_always_* need to be used instead
 	if ($user->{sectioncollapse}) {
 		my $nexuses = $self->getNexusChildrenTids($mp_tid);
 		my $nexus_clause = join ',', @$nexuses, $mp_tid;
@@ -644,13 +646,14 @@ sub getDailyMail {
 		$where .= "AND story_topics_rendered.tid = $mp_tid ";
 	}
 
-	$where .= "AND story_topics_rendered.tid NOT IN ($user->{extid}) "
-		if $user->{extid};
-	$where .= "AND stories.uid NOT IN ($user->{exaid}) "
-		if $user->{exaid};
-# XXXSKIN !!!!
-#	$where .= "AND section not in ($user->{exsect}) "
-#		if $user->{exsect};
+# XXXSKIN - fix this - the "never"s need to be screened out after the
+# sqlSelectAll, not here.
+	$where .= "AND story_topics_rendered.tid NOT IN ($user->{story_never_topic}) "
+		if $user->{story_never_topic};
+	$where .= "AND story_topics_rendered.tid NOT IN ($user->{story_never_nexus}) "
+		if $user->{story_never_nexus};
+	$where .= "AND stories.uid NOT IN ($user->{story_never_author}) "
+		if $user->{story_never_author};
 
 	my $other = " ORDER BY stories.time DESC";
 

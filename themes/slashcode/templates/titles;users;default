@@ -45,7 +45,7 @@ __template__
 	Change password for [% user_edit.nickname | strip_literal %] ( [% user_edit.uid %]) 
 
 [% CASE 'tildeEd_title' %]
-	Exclude Stories from the Homepage
+	Customize Stories on the Homepage
 
 [% CASE 'tildeEd_customize_title' %]
 	Customize Slashboxes

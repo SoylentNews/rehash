@@ -1444,10 +1444,16 @@ sub prepareUser {
 	}
 	$user->{karma_bonus} = '+1' unless defined($user->{karma_bonus});
 
-	# All sorts of checks on user data
-	$user->{exaid}		= _testExStr($user->{exaid}) if $user->{exaid};
-	$user->{exboxes}	= _testExStr($user->{exboxes}) if $user->{exboxes};
-	$user->{extid}		= _testExStr($user->{extid}) if $user->{extid};
+	# All sorts of checks on user data.  The story_{never,always} checks
+	# are important because that data is fed directly into SQL queries
+	# without being quoted.
+	$user->{story_never_topic}	= _testExStrNumeric($user->{story_never_topic}) if $user->{story_never_topic};
+	$user->{story_never_author}	= _testExStrNumeric($user->{story_never_author}) if $user->{story_never_author};
+	$user->{story_never_nexus}	= _testExStrNumeric($user->{story_never_nexus}) if $user->{story_never_nexus};
+	$user->{story_always_topic}	= _testExStrNumeric($user->{story_always_topic}) if $user->{story_always_topic};
+	$user->{story_always_author}	= _testExStrNumeric($user->{story_always_author}) if $user->{story_always_author};
+	$user->{story_always_nexus}	= _testExStrNumeric($user->{story_always_nexus}) if $user->{story_never_nexus};
+	$user->{exboxes}		= _testExStr($user->{exboxes}) if $user->{exboxes};
 	$user->{points}		= 0 unless $user->{willing}; # No points if you dont want 'em
 	$user->{domaintags}	= 2 if !defined($user->{domaintags}) || $user->{domaintags} !~ /^\d+$/;
 
@@ -1763,10 +1769,27 @@ sub filter_param {
 } # see lexical variables above
 
 ########################################################
+sub _testExStrNumeric {
+	my($str) = @_;
+	return "" if !$str;
+	my @n = split ',', $str;
+
+	# Strip off quotes, which were saved earlier and may be present
+	# in old data, leaving only numeric data.
+	for (@n) { tr/0-9//cd }
+
+	# Verify the data is numeric (no empty strings).
+	@n = grep /^\d+$/, @n;
+
+	return join ",", sort @n;
+}
+
+########################################################
 sub _testExStr {
-	local($_) = @_;
-	$_ .= "'" unless m/'$/;
-	return $_;
+	my($str) = @_;
+	return "" if !$str;
+	my @n = split ',', $str;
+	return join ",", sort @n;
 }
 
 ########################################################

@@ -1499,78 +1499,140 @@ sub adminDispatch {
 
 #################################################################
 sub tildeEd {
-	my($extid, $exsect, $exaid, $exboxes, $userspace) = @_;
+	my($user_edit) = @_;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
-	my($aidref, $aid_order, $tidref, $tid_order, $sectionref, $section_descref, $box_order, $tilde_ed, $tilded_msg_box);
 
-	my $title = getTitle('tildeEd_title');
+	my %story023_default = (
+		author	=> { },
+		nexus	=> { },
+		topic	=> { },
+	);
 
-	# Customizable Authors Thingee
-	my $aids = $reader->getDescriptions('all-authors'); #$reader->getAuthorNames();
-	my $n = 0;
-
-	@$aid_order = sort { lc $aids->{$a} cmp lc $aids->{$b} } keys %$aids;
-
-	for my $aid (keys %$aids) { #(@$aids) {
-		$aidref->{$aid}{checked}  = ($exaid =~ /'\Q$aid\E'/) ? ' CHECKED' : '';
-		$aidref->{$aid}{nickname} = $aids->{$aid};
+	my %prefs = ( );
+	for my $field (qw(
+		story_never_topic	story_never_author	story_never_nexus
+		story_always_topic	story_always_author	story_always_nexus
+	)) {
+		for my $id (
+			grep /^\d+$/,
+			split /,/,
+			($user_edit->{field} || "")
+		) {
+			$prefs{$field}{$id} = 1;
+		}
 	}
 
-	my $topics = $reader->getDescriptions('topics');
+	# Set up $author_hr, @aid_order, and $story023_default{author}.
 
-	@$tid_order = sort { lc $topics->{$a} cmp lc $topics->{$b} } keys %$topics;
-
-	while (my($tid, $textname) = each %$topics) {
-		$tidref->{$tid}{checked} = ($extid =~ /'\Q$tid\E'/) ?
-			' CHECKED' : '';
-		$tidref->{$tid}{textname} = $textname;
+	my $author_hr = $reader->getDescriptions('all-authors');
+	my @aid_order = sort { lc $author_hr->{$a} cmp lc $author_hr->{$b} } keys %$author_hr;
+	for my $aid (@aid_order) {
+		     if ($prefs{story_never_author}{$aid}) {
+			$story023_default{author}{$aid} = 0;
+		} elsif ($prefs{story_always_author}{$aid}) {
+			$story023_default{author}{$aid} = 3;
+		} else {
+			$story023_default{author}{$aid} = 2;
+		}
 	}
 
-	my $sections = $reader->getDescriptions('skins');
-	while (my($section, $title) = each %$sections) {
-		next if !$section;
-		$sectionref->{$section}{checked} =
-			($exsect =~ /'\Q$section\E'/) ? ' CHECKED' : '';
-		$sectionref->{$section}{title} = $title;
+	# Set up $topic_hr, @topictid_order, and $story023_default{topic}.
+
+	my $topic_hr = $reader->getDescriptions('non_nexus_topics');
+	my @topictid_order = sort { lc $topic_hr->{$a} cmp lc $topic_hr->{$b} } keys %$topic_hr;
+	for my $tid (@topictid_order) {
+		     if ($prefs{story_never_topic}{$tid}) {
+			$story023_default{topic}{$tid} = 0;
+		} elsif ($prefs{story_always_topic}{$tid}) {
+			$story023_default{topic}{$tid} = 3;
+		} else {
+			$story023_default{topic}{$tid} = 2;
+		}
 	}
 
-	my $tilded_customize_msg = getMessage('tilded_customize_msg',
-		{ userspace => $userspace });
+	# Set up $nexus_hr, @nexustid_order, and $story023_default{nexus}.
 
+	my $nexus_tids_ar = $reader->getNexusChildrenTids($constants->{mainpage_nexus_tid});
+	my $topic_tree = $reader->getTopicTree();
+	my $nexus_hr = { };
+	for my $tid (@$nexus_tids_ar) {
+		$nexus_hr->{$tid} = $topic_tree->{$tid}{textname};
+	}
+	my @nexustid_order = sort { lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b} } keys %$nexus_hr;
+	for my $tid (@nexustid_order) {
+		     if ($prefs{story_never_nexus}{$tid}) {
+			$story023_default{nexus}{$tid} = 0;
+		} elsif ($prefs{story_always_nexus}{$tid}) {
+			$story023_default{nexus}{$tid} = 3;
+		} else {
+			$story023_default{nexus}{$tid} = 2;
+		}
+	}
+
+	# Set up $section_descref and $box_order, used to decide which
+	# slashboxes appear.  Really this doesn't seem to have anything
+	# to do with sections, so I'm not sure why it's called
+	# "section"_descref.
+
+	my $section_descref = { };
+	my $box_order;
 	my $sections_description = $reader->getSectionBlocks();
-
-	my $customize_title = getTitle('tildeEd_customize_title');
-
-	for (sort { lc $b->[1] cmp lc $a->[1]} @$sections_description) {
-		my($bid, $title, $boldflag) = @$_;
-
+	my $user_exbox_hr = { };
+	for my $bid (
+		map { /^'?([^']+)'?$/; $1 }
+		split /,/,
+		($user_edit->{exboxes} || "")
+	) {
+		$user_exbox_hr->{$bid} = 1;
+	}
+	for my $ary (sort { lc $b->[1] cmp lc $a->[1]} @$sections_description) {
+		my($bid, $title, $boldflag) = @$ary;
 		unshift(@$box_order, $bid);
-		$section_descref->{$bid}{checked} = ($exboxes =~ /'$bid'/) ?
-			' CHECKED' : '';
-		$section_descref->{$bid}{boldflag} = $boldflag > 0;
+		$section_descref->{$bid}{checked} = $user_exbox_hr->{$bid}
+			?  ' CHECKED'
+			: '';
+		$section_descref->{$bid}{boldflag} = $boldflag > 0
+			? 1
+			: 0;
 		$title =~ s/<(.*?)>//g;
 		$section_descref->{$bid}{title} = $title;
 	}
 
+	# Userspace.
+
+	my $userspace = $user_edit->{userspace} || "";
+
+	# Titles of stuff.
+
+	my $tildeEd_title = getTitle('tildeEd_title');
+	my $tilded_customize_msg = getMessage('tilded_customize_msg',
+		{ userspace => $userspace });
+	my $customize_title = getTitle('tildeEd_customize_title');
 	my $tilded_box_msg = getMessage('tilded_box_msg');
-	$tilde_ed = slashDisplay('tildeEd', {
-		title			=> $title,
-		customize_title		=> $customize_title,
+
+	my $tilde_ed = slashDisplay('tildeEd', {
+		title			=> $tildeEd_title,
 		tilded_customize_msg	=> $tilded_customize_msg,
+		customize_title		=> $customize_title,
 		tilded_box_msg		=> $tilded_box_msg,
-		aidref			=> $aidref,
-		aid_order		=> $aid_order,
-		tidref			=> $tidref,
-		tid_order		=> $tid_order,
-		sectionref		=> $sectionref,
+
+		story023_default	=> \%story023_default,
+		authorref		=> $author_hr,
+		aid_order		=> \@aid_order,
+		topicref		=> $topic_hr,
+		topictid_order		=> \@topictid_order,
+		nexusref		=> $nexus_hr,
+		nexustid_order		=> \@nexustid_order,
+
 		section_descref		=> $section_descref,
 		box_order		=> $box_order,
+
 		userspace		=> $userspace,
 	}, 1);
 
-	return($tilde_ed);
+	return $tilde_ed;
 }
 
 #################################################################
@@ -1762,10 +1824,7 @@ sub editHome {
 	my $w_check = $user_edit->{willing}		? ' CHECKED' : '';
 	my $s_check = $user_edit->{sectioncollapse}	? ' CHECKED' : '';
 
-	my $tilde_ed = tildeEd(
-		$user_edit->{extid}, $user_edit->{exsect},
-		$user_edit->{exaid}, $user_edit->{exboxes}, $user_edit->{mylinks}
-	);
+	my $tilde_ed = tildeEd($user_edit);
 
 	slashDisplay('editHome', {
 		title			=> $title,
@@ -2371,7 +2430,7 @@ sub saveComm {
 
 	# This has NO BEARING on the table the data goes into now.
 	# setUser() does the right thing based on the key name.
-	my $users_comments_table = {
+	my $user_edits_table = {
 		clsmall			=> $form->{clsmall},
 		clsmall_bonus		=> $clsmall_bonus,
 		clbig			=> $form->{clbig},
@@ -2436,17 +2495,17 @@ sub saveComm {
 		my $key = "reason_alter_$reason_name";
 		my $answer = $form->{$key};
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
-		$users_comments_table->{$key} = ($answer == 0) ? '' : $answer;
+		$user_edits_table->{$key} = ($answer == 0) ? '' : $answer;
 	}
 
 	for (qw| friend foe anonymous fof eof freak fan |) {
 		my $answer = $form->{"people_bonus_$_"};
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
-		$users_comments_table->{"people_bonus_$_"} = ($answer == 0) ? '' : $answer;
+		$user_edits_table->{"people_bonus_$_"} = ($answer == 0) ? '' : $answer;
 	}
-	getOtherUserParams($users_comments_table);
-	setToDefaults($users_comments_table, {}, $defaults) if $form->{restore_defaults};
-	$slashdb->setUser($uid, $users_comments_table);
+	getOtherUserParams($user_edits_table);
+	setToDefaults($user_edits_table, {}, $defaults) if $form->{restore_defaults};
+	$slashdb->setUser($uid, $user_edits_table);
 
 	editComm({ uid => $uid, note => $note });
 }
@@ -2507,7 +2566,7 @@ sub saveHome {
 	$form->{maxstories} = 66 if $form->{maxstories} > 66;
 	$form->{maxstories} = 1 if $form->{maxstories} < 1;
 
-	my $users_index_table = {
+	my $user_edits_table = {
 		extid		=> ($constants->{subscribe} && $user->{is_subscriber}) ? checkList($extid,1024) : checkList($extid),
 		exaid		=> checkList($exaid),
 		exsect		=> checkList($exsect),
@@ -2526,9 +2585,9 @@ sub saveHome {
 	};
 
 	if (defined $form->{tzcode} && defined $form->{tzformat}) {
-		$users_index_table->{tzcode} = $form->{tzcode};
-		$users_index_table->{dfid}   = $form->{tzformat};
-		$users_index_table->{dst}    = $form->{dst};
+		$user_edits_table->{tzcode} = $form->{tzcode};
+		$user_edits_table->{dfid}   = $form->{tzformat};
+		$user_edits_table->{dst}    = $form->{dst};
 	}
 
 	# Force the User Space area to contain only known-good HTML tags.
@@ -2540,19 +2599,17 @@ sub saveHome {
 	# purpose), plus the fact that this could be used to amplify the
 	# seriousness of any future vulnerabilities, means it's way past
 	# time to shut this feature down.  - Jamie 2002/03/06
-	$users_index_table->{mylinks} = strip_html($form->{mylinks} || '');
-	$users_index_table->{mylinks} = '' unless defined $users_index_table->{mylinks};
+	$user_edits_table->{mylinks} = strip_html($form->{mylinks} || '');
+	$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
 
 	# If a user is unwilling to moderate, we should cancel all points, lest
 	# they be preserved when they shouldn't be.
-	my $users_comments = { points => 0 };
-	unless (isAnon($uid)) {
-		$slashdb->setUser($uid, $users_comments)
-			unless $form->{willing};
+	if (!isAnon($uid) && !$form->{willing}) {
+		$slashdb->setUser($uid, { points => 0 });
 	}
 
-	getOtherUserParams($users_index_table);
-	setToDefaults($users_index_table, {}, $defaults) if $form->{restore_defaults};
+	getOtherUserParams($user_edits_table);
+	setToDefaults($user_edits_table, {}, $defaults) if $form->{restore_defaults};
 	if ($form->{restore_exbox_defaults}) {
 		my $exboxdef = "'";
 		my($boxBank, $skinBoxes) = $slashdb->getPortalsCommon();
@@ -2564,10 +2621,10 @@ sub saveHome {
 			exboxes		=> $exboxdef,
 		};
 		
-		setToDefaults($users_index_table, {}, $default_boxes);
+		setToDefaults($user_edits_table, {}, $default_boxes);
 	}
 
-	$slashdb->setUser($uid, $users_index_table);
+	$slashdb->setUser($uid, $user_edits_table);
 
 	editHome({ uid => $uid, note => $note });
 }

@@ -55,8 +55,16 @@ sub daily_generateDailyMailees {
 			my $user = $users->{$uid};
 
 			my $key  = $user->{sectioncollapse};
-			for (@{$user}{qw(exaid extid exsect)}) {
-				$key .= '|' . join(',', sort m/'(.+?)'/g);
+			for my $value (@{$user}{qw(
+				story_never_topic	story_never_author	story_never_nexus
+				story_always_topic	story_always_author	story_always_nexus
+			)}) {
+				# Pudge: I took out the "next unless $_;" that
+				# was here.  I think we need "|||123|||" to
+				# be distinct from "|123|||||" if you see what
+				# I mean.  - Jamie 2004/10/05
+				$value ||= "";
+				$key .= "|$value";
 			}
 			# allow us to make certain emails sent individually,
 			# by including a unique value in users_param for
@@ -75,7 +83,12 @@ sub daily_generateDailyMailees {
 				$mkeys->{$key}{user}  = {
 					uid => $uid,
 					map { ($_ => $user->{$_}) }
-					qw(sectioncollapse exaid extid exsect daily_mail_special)
+					qw(
+						sectioncollapse
+						story_never_topic	story_never_author	story_never_nexus
+						story_always_topic	story_always_author	story_always_nexus
+						daily_mail_special
+					)
 				};
 				$mkeys->{$key}{user}{is_admin} = $is_admin;
 			}

@@ -1,20 +1,35 @@
 __section__
 default
 __description__
-Edit all those checkboxes for authors, topics, sections, slashboxes
+Edit all those checkboxes for authors, topics, nexuses, slashboxes
 
-* title = passed to titlebar
-* tilded_customize_msg = some message
-* tilded_box_msg = some message
-* aidref = hashref of authors
-* aid_order = arrayref of author order
-* tidref = hashref of topics
-* tid_order = arrayref of topic order
-* sectionref = hashref of sections
+* title = passed to top titlebar
+* tilded_customize_msg = any text to display under that titlebar
+* customize_title = title for "customize" titlebar (slashboxes)
+* tilded_box_msg = any text to display under the list of slashboxes
+
+* authorref = hashref of author information
+	$n = nickname for author with uid $n
+* aid_order = list of the fields of authorref to display, in display order
+
+* nexusref = hashref of nexus information
+	$n = name (textname) for nexus with tid $n
+* nexustid_order = list of the fields of nexusref to display, in display order
+
+* topicref = hashref of topic information
+	$n = name (textname) for topic with tid $n
+* topictid_order = list of the fields of topicref to display, in display order
+
+* story023_data = hashref of what the existing settings are
+	author = hashref for author settings
+		$n = existing setting for uid $n
+	nexus = hashref for nexus settings
+		$n = existing setting for tid $n
+	topic = hashref for topic settings
+		$n = existing setting for tid $n
+
 * section_descref = hashref of slashboxes
 * box_order = arrayref of slashbox order
-* userspace = text for userspace
-* customize_title = title for "customize" titlebar
 
 __title__
 
@@ -25,39 +40,129 @@ en_US
 __name__
 tildeEd
 __template__
+<p>
+
 [% PROCESS titlebar title=title width="100%" %]
 
-<TABLE WIDTH="95%" BORDER="0" CELLPADDING="3" CELLSPACING="3" ALIGN="CENTER">
-	<TR BGCOLOR="[% user.colors.bg_3 %]">
-		<TH><FONT COLOR="[% user.colors.fg_3 %]">Authors</FONT></TH>
-		<TH><FONT COLOR="[% user.colors.fg_3 %]">Topics</FONT></TH>
-		<TH><FONT COLOR="[% user.colors.fg_3 %]">Sections</FONT></TH>
+<p>For each author, section, and topic, you may choose to have their stories
+appear on your homepage Always, Often, or Never. The difference between
+Often and Always is that sometimes stories are published to a section
+which may not be of general interest. Unless you have that story's section
+(or its author, or one of its topics) set to Always, you won't see them.
+<b>Never&nbsp;overrides</b> the other two settings. Even if a story falls
+into some Always and Often categories, just one Never category will keep
+you from seeing it on the homepage. So use "Never" carefully.
+<p>
+
+[% story023_data = Slash.db.getDescriptions('story023') %]
+
+<TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
+	<TR>
+		<TH COLSPAN="2" BGCOLOR="[% user.colors.bg_3 %]"><FONT COLOR="[% user.colors.fg_3 %]">Authors</FONT></TH>
+		<TD><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3"></TD>
+		<TH COLSPAN="2" BGCOLOR="[% user.colors.bg_3 %]"><FONT COLOR="[% user.colors.fg_3 %]">Sections</FONT></TH>
 	</TR>
-	<TR BGCOLOR="[% user.colors.bg_2 %]">
-		<TD VALIGN="TOP">
+	<TR><TD COLSPAN="5"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="100" HEIGHT="3"></TD></TR>
 
-[% FOREACH aid = aid_order %]
-		<INPUT TYPE="CHECKBOX" NAME="exaid_[% aid %]"[% aidref.$aid.checked %]>[% aidref.$aid.nickname | strip_literal %]<BR>
+[% max_row = aid_order.max;
+   IF nexustid_order.max > max_row; max_row = nexustid_order.max; END;
+
+# Big ol' loop to display both authors, on the left,
+# and sections, on the right.
+
+i = 0;
+WHILE i <= max_row						-%]
+
+	<TR>
+[%	# Display the author cells for this row, if any.
+
+	IF i > aid_order.max					-%]
+		[%# no more author cells, leave blank space %]
+		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
+		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
+[%-	ELSE;
+		aid = aid_order.$i				-%]
+		<TD VALIGN="TOP" ALIGN="RIGHT" BGCOLOR="[% user.colors.bg_2 %]">
+[%-		authorref.$aid | strip_literal			-%]
+		&nbsp;</TD>
+		<TD VALIGN="TOP" ALIGN="LEFT"  BGCOLOR="[% user.colors.bg_2 %]">
+[%-		optionname = "aid" _ aid;
+		Slash.createSelect(
+			optionname,
+			story023_data,
+			story023_default.author.$aid,
+			1, 1)					-%]
+		</TD>
+[%-	END							-%]
+
+[%-	# center column, a white stripe				-%]
+
+		<TD>&nbsp;</TD>
+
+[%-	# Display the section cells for this row, if any.
+
+	IF i > nexustid_order.max				-%]
+		[%# no more nexustid cells, leave blank space	-%]
+		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
+		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
+[%-	ELSE;
+		nexustid = nexustid_order.$i			-%]
+		<TD VALIGN="TOP" ALIGN="RIGHT" BGCOLOR="[% user.colors.bg_2 %]">
+[%-		nexusref.$nexustid | strip_literal		-%]
+		&nbsp;</TD>
+		<TD VALIGN="TOP" ALIGN="LEFT"  BGCOLOR="[% user.colors.bg_2 %]">
+[%-		optionname = "nexustid" _ nexustid;
+		Slash.createSelect(
+			optionname,
+			story023_data,
+			story023_default.nexus.$nexustid,
+			1, 1)					-%]
+		</TD>
+[%-	END							-%]
+
+	</TR>
+[%
+	i = i + 1;
+	END # "while i"						%]
+
+</TABLE>
+<BR>
+<TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
+	<TR BGCOLOR="[% user.colors.bg_3 %]">
+		<TH COLSPAN="6"><FONT COLOR="[% user.colors.fg_3 %]">Topics</FONT></TH>
+	</TR>
+
+	<TR><TD COLSPAN="6"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="100" HEIGHT="3"></TD></TR>
+
+[% FOREACH topictid = topictid_order %]
+	[% IF loop.index % 3 == 0 %]
+		<TR BGCOLOR="[% user.colors.bg_2 %]">
+	[% END %]
+		<TD VALIGN="TOP" ALIGN="RIGHT">
+	[%	topicref.$topictid | strip_literal	%]
+		&nbsp;</TD><TD VALIGN="TOP" ALIGN="LEFT">
+	[%	optionname = "topictid" _ topictid;
+		Slash.createSelect(
+			optionname,
+			story023_data,
+			story023_default.topic.$topictid,
+			1, 1);					%]
+		</TD>
+	[% IF loop.index % 3 == 2 %]
+		</TR>
+	[% END %]
+[% END %]
+[% remaining_cells = 2 - (topictid_order.max % 3);
+   WHILE remaining_cells;
+   	remaining_cells = remaining_cells - 1; %]
+	<TD>&nbsp;</TD><TD>&nbsp;</TD>
 [% END %]
 
-		</TD>
-		<TD VALIGN="TOP"><MULTICOL COLS="3">
-
-[% FOREACH tid = tid_order %]
-		<INPUT TYPE="CHECKBOX" NAME="extid_[% tid %]"[% tidref.$tid.checked %]>[% tidref.$tid.textname %]<BR>
-[% END %]
-
-		</MULTICOL></TD>
-<!--
-		<TD VALIGN="TOP"><MULTICOL COLS="3">
-[ FOREACH section = sectionref.keys.sort ]
-		<INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]<BR>
-[ END ]
-		</MULTICOL>
-		</TD>
--->
 	</TR>
 </TABLE>
+
+<p>
+
 [% PROCESS titlebar width='100%' title=customize_title %]
 [%- col_max_size = box_order.size / 3; col_size = 0 -%]
 <TABLE BGCOLOR="[% user.colors.bg_2 %]"><TR><TD VALIGN="TOP">

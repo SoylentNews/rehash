@@ -40,6 +40,9 @@ my %descriptions = (
 	'yes_no'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='yes_no'") },
 
+	'story023'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='story023'") },
+
 	'submission-notes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='submission-notes'") },
 
@@ -92,7 +95,10 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics') },
 
 	'non_nexus_topics'
-		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus on topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL") },
+		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL") },
+
+	'nexus_topics'
+		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics, topic_nexus', 'topic_nexus.tid=topics.tid') },
 
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
@@ -3478,21 +3484,23 @@ sub saveColorBlock {
 sub getSectionBlock {
 	my($self, $section) = @_;
 	errorLog("getSectionBlock called");
-	my $block = $self->sqlSelectAllHashrefArray("section,bid,ordernum,title,portal,url,rdf,retrieve",
-		"blocks", "section=" . $self->sqlQuote($section),
-		"ORDER by ordernum"
+	my $section_q = $self->sqlQuote($section);
+	return $self->sqlSelectAllHashrefArray(
+		"section, bid, ordernum, title, portal, url, rdf, retrieve",
+		"blocks",
+		"section=$section_q",
+		"ORDER BY ordernum"
 	);
-
-	return $block;
 }
 
 ########################################################
 sub getSectionBlocks {
 	my($self) = @_;
-
-	my $blocks = $self->sqlSelectAll("bid,title,ordernum", "blocks", "portal=1", "order by title");
-
-	return $blocks;
+	return $self->sqlSelectAll(
+		"bid, title, ordernum",
+		"blocks",
+		"portal=1",
+		"ORDER BY title");
 }
 
 ########################################################
@@ -3560,6 +3568,7 @@ sub hasVotedIn {
 sub savePollQuestion {
 	my($self, $poll) = @_;
 
+	# XXXSKIN should get mainpage_skid, not defaultsection
 	$poll->{section}  ||= getCurrentStatic('defaultsection');
 	$poll->{voters}   ||= "0";
 	$poll->{autopoll} ||= "no";
@@ -4502,7 +4511,7 @@ sub checkTimesPosted {
 
 	my $where = $self->_whereFormkey();
 	my($times_posted) = $self->sqlSelect(
-		"count(*) as times_posted",
+		"COUNT(*) AS times_posted",
 		'formkeys',
 		"$where AND submit_ts >= $formkey_earliest AND formname = '$formname'");
 
@@ -5705,7 +5714,7 @@ sub getSubmissionsPending {
 # currently not used anywhere in code so not implemented for now.
 sub getSubmissionCount {
 	my($self) = @_;
-	return sqlCount("submissions",
+	return $self->sqlCount("submissions",
 		"(LENGTH(note) < 1 OR note IS NULL) AND del=0");
 }
 
@@ -6274,10 +6283,14 @@ sub getStoryByTime {
 	$key .= "|$story->{stoid}";
 
 	if (!$topic && !$section) {
-		$where .= " AND story_topics_rendered.tid NOT IN ($user->{extid})" if $user->{extid};
-		$where .= " AND uid NOT IN ($user->{exaid})" if $user->{exaid};
+		$where .= " AND story_topics_rendered.tid NOT IN ($user->{story_never_topic})" if $user->{story_never_topic};
+		$where .= " AND uid NOT IN ($user->{story_never_author})" if $user->{story_never_author};
 		# don't cache if user has own prefs -- pudge
-		$key = $user->{extid} || $user->{exaid} || $user->{exsect} ? '' : $key . '|';
+		$key = $user->{story_never_topic}
+			|| $user->{story_never_author}
+			|| $user->{story_never_nexus}
+			? ''
+			: "$key|";
 	} elsif ($topic) {
 		$where .= " AND story_topics_rendered.tid = '$topic'";
 		$key .= "|$topic";
@@ -7941,6 +7954,7 @@ sub createDiscussion {
 	return unless $discussion->{title} && $discussion->{url};
 
 	$discussion->{type} ||= 'open';
+	# XXXSKIN this should be pulled from gSkin not constants
 	$discussion->{commentstatus} ||= getCurrentStatic('defaultcommentstatus');
 	$discussion->{primaryskid} ||= 0;
 	$discussion->{topic} ||= 0;
@@ -8259,14 +8273,15 @@ sub getSlashConf {
 	$conf{real_rootdir}	||= $conf{rootdir};  # for when rootdir changes
 	$conf{real_section}	||= $conf{section};  # for when section changes
 	$conf{absolutedir}	||= "http://$conf{basedomain}";
+	$conf{imagedir}		||= "$conf{rootdir}/images";
 		# If absolutedir_secure is not defined, it defaults to the
-		# same as absolutedir.
+		# same as absolutedir.  Same for imagedir_secure.
 	$conf{absolutedir_secure} ||= $conf{absolutedir};
+	$conf{imagedir_secure}	||= $conf{imagedir};
 	$conf{adminmail_mod}	||= $conf{adminmail};
 	$conf{adminmail_post}	||= $conf{adminmail};
 	$conf{adminmail_ban}	||= $conf{adminmail};
 	$conf{basedir}		||= "$conf{datadir}/public_html";
-	$conf{imagedir}		||= "$conf{rootdir}/images";
 	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";
 	$conf{index_handler}	||= 'index.pl';
 	$conf{cookiepath}	||= URI->new($conf{rootdir})->path . '/';
@@ -10792,17 +10807,12 @@ sub _getUser_do_selects {
 		print STDERR scalar(gmtime) . " $$ mcd gU_ds " . scalar(@$param_ar) . " params added to answer, keys now: '" . join(" ", sort keys %$answer) . "'\n";
 	}
 
-	# We have a bit of cleanup to do before returning;
-	# thaw the people element, and clean up possibly broken
-	# exsect/exaid/extid.
-	for my $key (qw( exaid extid exsect )) {
-		next unless $answer->{$key};
-		$answer->{$key} =~ s/,'[^']+$//;
-		$answer->{$key} =~ s/,'?$//;
-	}
 	if ($mcddebug > 1) {
 		print STDERR scalar(gmtime) . " $$ mcd gU_ds answer ex-keys done\n";
 	}
+
+	# We have a bit of cleanup to do before returning:
+	# thaw the people element.
 	if ($answer->{people}) {
 		$answer->{people} = thaw($answer->{people});
 		if ($mcddebug > 1) {
