@@ -211,7 +211,7 @@ sub ident {
 	my ($class, $ident) = @_;
 	return "''" unless @$ident;
 
-	my $types = qr/^(constants|form|user)$/;
+	my $types = qr/^'(constants|form|user|anon)'$/;
 	if ($ident->[0] =~ $types && (my $type = $1) && @$ident == 4 && $ident->[2] =~ /^'(.+)'$/s) {
 		(my $data = $1) =~ s/'/\\'/;
 		return "\$${type}->{'$data'}";
@@ -240,11 +240,12 @@ sub template {
 	return "sub { return '' }" unless $block =~ /\S/;
 
 	my $extra;
+	$extra .= "my \$anon = Slash::getCurrentAnonymousCoward();\n" if $block =~ /\$anon->/;
 	$extra .= "my \$user = Slash::getCurrentUser();\n" if $block =~ /\$user->/;
 	$extra .= "my \$form = Slash::getCurrentForm();\n" if $block =~ /\$form->/;
 	$extra .= "my \$constants = Slash::getCurrentStatic();\n" if $block =~ /\$constants->/;
 
-    return <<EOF;
+	my $template = <<EOF;
 sub {
     my \$context = shift || die "template sub called without context\\n";
     my \$stash   = \$context->stash;
@@ -263,6 +264,8 @@ $block
     return \$output;
 }
 EOF
+
+	return $template;
 }
 
 

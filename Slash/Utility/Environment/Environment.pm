@@ -1216,7 +1216,8 @@ sub filter_params {
 	for (keys %params) {
 		$form{$_} = $params{$_};
 		# We don't filter the multivalue params yet -Brian
-		if (exists $multivalue{$_} && $apr) {
+		# allow any param ending in _multiple to be multiple -- pudge
+		if ($apr && (exists $multivalue{$_} || /_multiple$/)) {
 			my @multi = $apr->param($_);
 			$form{$_} = \@multi;
 			next;

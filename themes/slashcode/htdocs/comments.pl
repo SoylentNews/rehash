@@ -34,19 +34,19 @@ sub main {
 			function		=> \&displayComments,
 			seclev			=> 0,
 			formname		=> 'discussions',
-			checks			=> ($form->{sid} || isAnon($user->{uid})) ? [] : ['generate_formkey'],
+			checks			=> ($form->{sid} || $user->{is_anon}) ? [] : ['generate_formkey'],
 		},
 		change		=> { 
 			function		=> \&displayComments,
 			seclev			=> 0,
 			formname		=> 'discussions',
-			checks			=> ($form->{sid} || isAnon($user->{uid})) ? [] : ['generate_formkey'],
+			checks			=> ($form->{sid} || $user->{is_anon}) ? [] : ['generate_formkey'],
 		},
 		'index'			=> {
 			function		=> \&commentIndex,
 			seclev			=> 0,
 			formname 		=> 'discussions',
-			checks			=> ($form->{sid} || isAnon($user->{uid})) ? [] : ['generate_formkey'],
+			checks			=> ($form->{sid} || $user->{is_anon}) ? [] : ['generate_formkey'],
 		},
 		creator_index			=> {
 			function		=> \&commentIndexCreator,

@@ -2249,40 +2249,40 @@ sub checkExpired {
 
 ##################################################################
 sub checkReadOnly {
-	my($self, $formname, $user) = @_;
+	my($self, $formname, $user_check) = @_;
 
-	$user ||= getCurrentUser();
+	$user_check ||= getCurrentUser();  # might not be actual current user!
 	my $constants = getCurrentStatic();
 
 	my $where = '';
 
 	# please check to make sure this is what you want;
 	# isAnon already checks for numeric uids -- pudge
-	if ($user->{uid} && $user->{uid} =~ /^\d+$/) {
-		if (!isAnon($user->{uid})) {
-			$where = "uid = $user->{uid}";
+	if ($user_check->{uid} && $user_check->{uid} =~ /^\d+$/) {
+		if (!isAnon($user_check->{uid})) {
+			$where = "uid = $user_check->{uid}";
 		} else {
-			$where = "ipid = '$user->{ipid}'";
+			$where = "ipid = '$user_check->{ipid}'";
 		}
-	} elsif ($user->{md5id}) {
+	} elsif ($user_check->{md5id}) {
 		# Note, this is a slow query -- either column by itself is
 		# fast since they're both indexed, but if you OR them, it's
 		# about 10-12 seconds, MySQL is weird sometimes.  Good thing
 		# we rarely (ever?) do this.
-		$where = "(ipid = '$user->{md5id}' OR subnetid = '$user->{md5id}')";
+		$where = "(ipid = '$user_check->{md5id}' OR subnetid = '$user_check->{md5id}')";
 
-	} elsif ($user->{ipid}) {
-		my $tmpid = $user->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
-				md5_hex($user->{ipid}) : $user->{ipid}; 
+	} elsif ($user_check->{ipid}) {
+		my $tmpid = $user_check->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
+				md5_hex($user_check->{ipid}) : $user_check->{ipid}; 
 		$where = "ipid = '$tmpid'";
 
-	} elsif ($user->{subnetid}) {
-		my $tmpid = $user->{subnetid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
-				md5_hex($user->{subnetid}) : $user->{subnetid}; 
+	} elsif ($user_check->{subnetid}) {
+		my $tmpid = $user_check->{subnetid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
+				md5_hex($user_check->{subnetid}) : $user_check->{subnetid}; 
 		$where = "subnetid = '$tmpid'";
 	} else {
-		my $tmpid = $user->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
-				md5_hex($user->{ipid}) : $user->{ipid}; 
+		my $tmpid = $user_check->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
+				md5_hex($user_check->{ipid}) : $user_check->{ipid}; 
 		$where = "ipid = '$tmpid'";
 	}
 
@@ -2384,27 +2384,27 @@ sub getAbuses {
 
 ##################################################################
 sub getAccessListReason {
-	my($self, $formname, $column, $user) = @_;
+	my($self, $formname, $column, $user_check) = @_;
 
 	my $constants = getCurrentStatic();
 	my $ref = {};
 	my($reason,$where) = ('','');
 
-	if ($user) {
-		if ($user->{uid} =~ /^\d+$/ && !isAnon($user->{uid})) {
-			$where = "WHERE uid = $user->{uid}";
-		} elsif ($user->{md5id}) {
-			$where = "WHERE ipid = '$user->{md5id}'";
-		} elsif ($user->{ipid}) {
-			$where = "WHERE ipid = '$user->{ipid}'";
-		} elsif ($user->{subnetid}) {
-			$where = "WHERE subnetid = '$user->{subnetid}'";
+	if ($user_check) {
+		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
+			$where = "WHERE uid = $user_check->{uid}";
+		} elsif ($user_check->{md5id}) {
+			$where = "WHERE ipid = '$user_check->{md5id}'";
+		} elsif ($user_check->{ipid}) {
+			$where = "WHERE ipid = '$user_check->{ipid}'";
+		} elsif ($user_check->{subnetid}) {
+			$where = "WHERE subnetid = '$user_check->{subnetid}'";
 		} else {
 			return "";
 		}
 	} else {
-		$user = $self->getCurrentUser();
-		$where = "WHERE (ipid = '$user->{ipid}' OR subnetid = '$user->{subnetid}')";
+		$user_check = $self->getCurrentUser();
+		$where = "WHERE (ipid = '$user_check->{ipid}' OR subnetid = '$user_check->{subnetid}')";
 	}
 
 	if ($column eq 'isbanned') {
@@ -2431,7 +2431,7 @@ sub getAccessListReason {
 ##################################################################
 sub setAccessList {
 	# do not use this method to set/unset expired
-	my($self, $formname, $user, $setflag, $column, $reason) = @_;
+	my($self, $formname, $user_check, $setflag, $column, $reason) = @_;
 
 	return if $reason eq 'expired';
 
@@ -2443,23 +2443,23 @@ sub setAccessList {
 
 	my $where = "/* setAccessList $column WHERE clause */";
 
-	if ($user) {
-		if ($user->{uid} =~ /^\d+$/ && !isAnon($user->{uid})) {
-			$where .= "uid = $user->{uid}";
-			$insert_hashref->{-uid} = $user->{uid};
+	if ($user_check) {
+		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
+			$where .= "uid = $user_check->{uid}";
+			$insert_hashref->{-uid} = $user_check->{uid};
 
-		} elsif ($user->{ipid}) {
-			$where .= "ipid = '$user->{ipid}'";
-			$insert_hashref->{ipid} = $user->{ipid};
+		} elsif ($user_check->{ipid}) {
+			$where .= "ipid = '$user_check->{ipid}'";
+			$insert_hashref->{ipid} = $user_check->{ipid};
 
-		} elsif ($user->{subnetid}) {
-			$where .= "subnetid = '$user->{subnetid}'";
-			$insert_hashref->{subnetid} = $user->{subnetid};
+		} elsif ($user_check->{subnetid}) {
+			$where .= "subnetid = '$user_check->{subnetid}'";
+			$insert_hashref->{subnetid} = $user_check->{subnetid};
 		}
 
 	} else {
-		$user = getCurrentUser();
-		$where = "(ipid = '$user->{ipid}' OR subnetid = '$user->{subnetid}')";
+		$user_check = getCurrentUser();
+		$where = "(ipid = '$user_check->{ipid}' OR subnetid = '$user_check->{subnetid}')";
 	}
 
 	$where .= " AND formname = '$formname' AND reason != 'expired'" if $column eq 'readonly';
@@ -4679,14 +4679,10 @@ sub getUser {
 		$answer = $self->sqlSelectHashref($values, $table, $where)
 			if $values;
 		for (@param) {
-			if ($_ eq 'is_anon') {
-				$answer->{is_anon} = isAnon($id);
-			} else {
-				# First we try it as an acl param -acs
-				my $val = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$_'");
-				$val = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$_'") if !$val;
-				$answer->{$_} = $val;
-			}
+			# First we try it as an acl param -acs
+			my $val = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$_'");
+			$val = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$_'") if !$val;
+			$answer->{$_} = $val;
 		}
 
 	} elsif ($val) {

@@ -28,8 +28,8 @@ Slash::Test - Command-line Slash testing
 
 Will export everything from Slash, Slash::Utility, Slash::Display,
 Slash::Constants, Slash::XML, and Data::Dumper into the current namespace.
-Will export $user, $form, $constants, and $slashdb as global variables into
-the current namespace.
+Will export $user, $anon, $form, $constants, and $slashdb as global variables
+into the current namespace.
 
 So use it one of three ways (use the default Virtual User,
 or pass it in via the import list, or pass in with slashTest()), and then
@@ -52,7 +52,7 @@ use Data::Dumper;
 
 use strict;
 use base 'Exporter';
-use vars qw($VERSION @EXPORT $vuser);
+use vars qw($VERSION @EXPORT);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT = (
@@ -102,7 +102,7 @@ None.
 
 =item Side effects
 
-Set up the environment with createEnvironment(), export $user,
+Set up the environment with createEnvironment(), export $user, $anon,
 $form, $constants, and $slashdb into current namespace.
 
 =back
@@ -120,6 +120,7 @@ sub slashTest {
 	$::slashdb   = getCurrentDB();
 	$::constants = getCurrentStatic();
 	$::user      = getCurrentUser();
+	$::anon      = getCurrentAnonymousCoward();
 	$::form      = getCurrentForm();
 
 	# auto-create plugin variables ... bwahahaha

@@ -49,7 +49,7 @@ __template__
 
 	[% IF !user.is_anon && uid && uid != user.uid %]
 		<TR VALIGN="TOP"><TD ALIGN="RIGHT" BGCOLOR="#E0E0E0">
-			<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&type=friend">Make a friend</A>
+			<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Make a friend</A>
 		</TD></TR>
 	[% END %]
 </TABLE>

@@ -241,8 +241,8 @@ sub displayArticle {
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
 	my $articles = $journal->getsByUid($uid, $start,
-			$constants->{journal_default_display} + 1, $form->{id}
-		);
+		$constants->{journal_default_display} + 1, $form->{id}
+	);
 
 	unless ($articles && @$articles) {
 		print getData('noentries_found');

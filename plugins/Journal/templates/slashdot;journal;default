@@ -27,9 +27,9 @@ __template__
 <A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</A> |
 <A HREF="[% constants.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</A> |
 [% END; IF is_friend %]
-<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]&type=friend">Remove Friend</A>
+<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]&amp;type=friend">Remove Friend</A>
 [% ELSE %]
-<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&type=friend">Add Friend</A>
+<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</A>
 [% END %]
 [% IF diatribe.discussion %]
 | <A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>
@@ -54,20 +54,20 @@ __template__
 		<TR VALIGN="TOP">
 			<TD ALIGN="RIGHT" COLSPAN="2"><FONT SIZE="1">
 				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&uid=[% uid %]&start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
+					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&uid=[% uid %]&start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
+					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
 				[% END %]
 			</FONT></TD>
 		</TR>
 	[% END %]
 
 	<TR VALIGN="TOP"><TD ALIGN="RIGHT" COLSPAN="2"><FONT SIZE="1">
-		<A HREF="[% constants.rootdir %]/journal.pl?op=list&uid=[% uid %]">List all Journal entries</A>
+		<A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% uid %]">List all Journal entries</A>
 	</FONT></TD></TR>
 </TABLE>
 
