@@ -901,7 +901,6 @@ sub showInfo {
 			$fieldkey = 'md5id';
 			$requested_user->{nonuid} = 1;
 			$requested_user->{md5id} = $id;
-			$requested_user->{md5id_vis} = vislenify($id);
 
 		} elsif ($id =~ /^(\d{1,3}\.\d{1,3}.\d{1,3}\.0)$/ 
 				|| $id =~ /^(\d{1,3}\.\d{1,3}\.\d{1,3})\.?$/) {
@@ -910,14 +909,12 @@ sub showInfo {
 			$requested_user->{subnetid} .= '.0' if $requested_user->{subnetid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}$/; 
 			$requested_user->{nonuid} = 1;
 			$requested_user->{subnetid} = md5_hex($requested_user->{subnetid});
-			$requested_user->{subnetid_vis} = vislenify($requested_user->{subnetid});
 
 		} elsif ($id =~ /^([\d+\.]+)$/) {
 			$fieldkey = 'ipid';
 			$requested_user->{nonuid} = 1;
 			$id ||= $1;
 			$requested_user->{ipid} = md5_hex($1);
-			$requested_user->{ipid_vis} = vislenify($requested_user->{ipid});
 
 		} else {  # go by nickname, but make it by uid
 			$fieldkey = 'uid';
@@ -988,7 +985,7 @@ sub showInfo {
 			id => $id,
 			md5id => $netid,
 		};
-		vislenify($data); # add $data->{md5id_vis}
+		vislenify($data); # add $data->{md5id_vis}, {ipid_vis}, {subnetid_vis}
 		$netid_vis = $data->{md5id_vis};
 
 		$title = getTitle('user_netID_user_title', $data);
