@@ -122,3 +122,14 @@ ALTER TABLE sections CHANGE hostname	hostname varchar(128) DEFAULT '' NOT NULL;
 ALTER TABLE sections ADD	cookiedomain varchar(128) DEFAULT '' NOT NULL;
 # freshenup.pl chunks article .shtml files
 INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100','Maximum number of article.shtml files to write at a time in freshenup.pl');
+
+# New hooks table
+DROP TABLE IF EXISTS hooks;
+CREATE TABLE hooks (
+	id mediumint(5) UNSIGNED NOT NULL auto_increment,
+	param varchar(50) DEFAULT '' NOT NULL,
+	class varchar(100) DEFAULT '' NOT NULL,
+	subroutine varchar(100) DEFAULT '' NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE hook_param (param,class,subroutine)
+) TYPE = myisam;
