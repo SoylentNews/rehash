@@ -6373,6 +6373,7 @@ sub getStoryList {
 
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
 
 	# CHANGE DATE_ FUNCTIONS
 	my $columns = 'hits, stories.commentcount as commentcount, stories.sid, stories.title, stories.uid, '
@@ -6389,7 +6390,7 @@ sub getStoryList {
 		push @where, "stories.section = " . $self->sqlQuote($SECT->{section});
 	}
 	push @where, "time < DATE_ADD(NOW(), INTERVAL 72 HOUR) "
-		if $form->{section} eq "";
+		if $form->{section} eq "" and !$constants->{show_all_future_stories_admin};
 	my $other = "ORDER BY time DESC LIMIT $first_story, $num_stories";
 
 	$where = join ' AND ', @where;
