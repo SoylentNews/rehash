@@ -23,10 +23,22 @@ __template__
 	[% user_uid = Slash.db.getUserUID(form.unickname) %]
 	<tr><td colspan="2">
 	<p>
-	Danger, Will Robinson!  You didn't log in!  You apparently put
-	in the wrong password, or the wrong nickname.  Either try again,
-	or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
-	password mailed to you</a> if you forgot your password.
+	[% IF user.state.login_failed_reason == 'nopost' %]
+		This IP address or network has been used to abuse the system and
+		logins from it have been disabled.  If you feel that this is
+		unwarranted, feel free to include your IP address
+		(<b>[% env.remote_addr %]</b>) in the subject of an email to
+		<a href="mailto:[% constants.adminmail_ban | strip_attribute %]">[% constants.adminmail_ban %]</a>,
+		and we will examine why there is a ban. If you fail to include
+		the IP address (again, <em>in the subject!</em>), then your
+		message will be deleted and ignored. I mean come on, we're good,
+		we're not psychic.
+	[% ELSE %]
+		Danger, Will Robinson!  You didn't log in!  You apparently put
+		in the wrong password, or the wrong nickname.  Either try again,
+		or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have
+		your password mailed to you</a> if you forgot your password.
+	[% END %]
 	</p>
 	[% IF user_uid and Slash.db.getUser(user_uid, "waiting_for_account_verify") %]
 	<p>

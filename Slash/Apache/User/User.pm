@@ -130,6 +130,7 @@ sub handler {
 	# later -- pudge
 	my $user_temp = getCurrentUser();
 	$user_temp->{state}{login_temp} = 'no';
+	$user_temp->{state}{login_failed_reason} = 0;
 
 	if ((($op eq 'userlogin' || $form->{rlogin}) && length($form->{upasswd}) > 1)
 		||
@@ -174,6 +175,7 @@ sub handler {
 			# since $read_only can bring us here..  Maybe set a flag
 			# in $user->{state} that the template reads? - Jamie
 			$uid = 0;
+			$user_temp->{state}{login_failed_reason} = $read_only ? 'nopost' : 1;
 		} else {
 			($uid, $newpass) = userLogin($tmpuid, $passwd, $logtoken);
 			$slashdb->clearAccountVerifyNeededFlags($uid) if $uid;
@@ -341,6 +343,7 @@ sub handler {
 		$user->{state}{_dynamic_page} = 1;
 	}
 	$user->{state}{login_temp} = $user_temp->{state}{login_temp};
+	$user->{state}{login_failed_reason} = $user_temp->{state}{login_failed_reason};
 	$user->{state}{ssl} = $is_ssl;
 	createCurrentUser($user);
 	createCurrentForm($form);
