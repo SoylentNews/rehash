@@ -975,3 +975,7 @@ INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8',
 
 # SLASHDOT LAST UPDATED HERE
 
+# oops
+UPDATE tzcodes SET dst_tz = 'WEDT' WHERE tz = 'WEST';
+UPDATE tzcodes SET dst_tz = 'CEDT' WHERE tz = 'CEST';
+UPDATE tzcodes SET dst_tz = 'EEDT' WHERE tz = 'EEST';
