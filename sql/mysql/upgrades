@@ -2420,5 +2420,8 @@ DELETE FROM templates WHERE name = 'skinindexd' AND skin != 'default';
 ALTER TABLE skins ADD COLUMN submittable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL AFTER issue;
 UPDATE skins SET submittable='no' WHERE name='search';
 
+# Changes for plugins/Admin (which you are almost certainly using)
+INSERT INTO vars (name, value, description) VALUES ('admin_maxdays_divider', '14', 'Max number of days on the admin.pl story list to bother showing the day-dividers');
 
 # End of T_2_5_0_9, Start of T_2_5_0_10 - 2004/07/16
+

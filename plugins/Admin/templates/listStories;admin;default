@@ -28,7 +28,7 @@ __template__
 
 [% IF storylistref && storylistref.size > 0;
 
-IF ndays_represented > 10;
+IF ndays_represented > (constants.admin_maxdays_divider || 10);
 	showdayboundaries = 0;
 ELSE;
 	showdayboundaries = 1;
