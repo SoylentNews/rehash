@@ -2868,3 +2868,5 @@ INSERT INTO misc_user_opts (name, optorder, seclev, default_val, vals_regex, sho
 
 # End of T_2_5_0_52, Start of T_2_5_0_53 - 2005/03/15
 
+INSERT INTO message_codes (code, type, seclev) VALUES (18, 'Invalid HTML Input', 100);
+

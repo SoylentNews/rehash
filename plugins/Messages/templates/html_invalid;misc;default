@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+html_invalid
+__template__
+[% IF msg.mode == 1 %]
+
+<p>Invalid HTML input was detected in [% opts.data_type %] id [% opts.data_id %]:</p>
+
+<blockquote><div>[% html | strip_literal %]</div></blockquote>
+
+[% ELSE %]
+
+Invalid HTML input was detected in [% opts.data_type %] id [% opts.data_id %]:
+
+[% html | strip_literal %]
+
+[% END %]
+
+__seclev__
+500
+__version__
+$Id$
