@@ -1394,7 +1394,7 @@ Hashref of cleaned-up data.
 		thresh_count thresh_secs thresh_hps
 		uid uthreshold voters width
 		textarea_rows textarea_cols tokens
-		subid stid tpid tid qid aid
+		subid stid tpid tid qid aid pagenum
 		url_id spider_id miner_id keyword_id
 	);
 

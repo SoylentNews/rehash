@@ -184,6 +184,7 @@ template=templates/netIDInfo;users;default
 template=templates/newUserForm;users;default
 template=templates/newdiscussion;comments;default
 template=templates/organisation;misc;default
+template=templates/pagemenu;misc;default
 template=templates/pagination;comments;default
 template=templates/portalboxtitle;misc;default
 template=templates/portalmap;misc;default

@@ -1357,15 +1357,28 @@ sub processSlashTags {
 		}
 	}
 
-	if ($user->{stats}{pagebreaks} && !$user->{state}{editing}) {
+	# SLASH-BREAK is only allowed in bodytext, so we pass it in as a
+	# hardcoded option to the processSlashTags call -- pudge
+	if ($options->{break}) {
 		my $form = getCurrentForm();
-# The logic is that if they are on the first page then page will be empty
-# -Brian
-		my @parts = split /<SLASH TYPE="break">/is, $newtext;
-		if ($form->{page}) {
-			$newtext = $parts[$form->{page} - 1];
+		if ($user->{state}{pagebreaks}) {
+			if ($user->{state}{editing}) {
+				$newtext =~ s/<SLASH TYPE="break">/<HR>/gis;
+			} else {
+				my @parts = split /<SLASH TYPE="break">/is, $newtext;
+				if ($form->{pagenum}) {
+					$newtext = $parts[$form->{pagenum} - 1];
+					if ($newtext eq "") { # nonexistent page, reset
+						$newtext = $parts[0];
+						$form->{pagenum} = 0;
+					}
+				} else {
+					$newtext = $parts[0];
+					$form->{pagenum} = 1;
+				}
+			}
 		} else {
-			$newtext = $parts[0];
+			$form->{pagenum} = 0;
 		}
 	}
 
@@ -1474,7 +1487,7 @@ sub _slashPageBreak {
 	my($tokens, $token, $newtext) = @_;
 	my $user = getCurrentUser();
 
-	$user->{stats}{pagebreaks}++;
+	$user->{state}{pagebreaks}++;
 
 	return;
 }
@@ -1488,7 +1501,7 @@ sub _slashJournal {
 }
 
 # sigh ... we had to change one line of TokeParser rather than
-# waste time rewriting the whole thing
+# waste time rewriting the whole thing -- pudge
 package Slash::Custom::TokeParser;
 
 use base 'HTML::TokeParser';

@@ -1272,18 +1272,15 @@ sub editStory {
 		}
 
 		for my $field (qw( introtext bodytext )) {
-			$storyref->{$field} = cleanSlashTags(
-				$storyref->{$field}, {});
+			$storyref->{$field} = cleanSlashTags($storyref->{$field});
 
 			# do some of the processing displayStory()
 			# does, as we are bypassing it by going straight to
 			# dispStory() -- pudge
-			$story_copy{$field} = parseSlashizedLinks(
-				$storyref->{$field}, {});
-			$story_copy{$field} = cleanSlashTags(
-				$storyref->{$field}, {});
-			$story_copy{$field} = processSlashTags(
-				$storyref->{$field}, {});
+			$story_copy{$field} = parseSlashizedLinks($storyref->{$field});
+			$story_copy{$field} = cleanSlashTags($storyref->{$field});
+			my $options = $field eq 'bodytext' ? { break => 1 } : undef;
+			$story_copy{$field} = processSlashTags($storyref->{$field}, $options);
 		}
 
 		my $author  = $slashdb->getAuthor($storyref->{uid});

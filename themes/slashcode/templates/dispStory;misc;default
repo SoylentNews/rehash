@@ -52,6 +52,7 @@ END %]
 							&nbsp;&nbsp;<A HREF="[% constants.rootdir -%]/email.pl?sid=[% story.sid %]"><IMG SRC="[% constants.imagedir -%]/email.gif" BORDER="0"></A>
 						[% END %]<BR>
 					[% IF constants.use_dept && story.dept %]<FONT FACE="[% constants.mainfontface %]" SIZE="1">from the <B>[% story.dept %]</B> dept.</FONT>[% END %]
+					[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">[% mypagemenu %]</FONT>[% END %]
 				</TD>
 			</TR></TABLE>
 		</TD>

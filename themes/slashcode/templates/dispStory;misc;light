@@ -36,6 +36,8 @@ END %]
 <FONT SIZE="2"><B>from the [% story.dept %] dept.</B></FONT><BR>
 [% END %]
 
+[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<FONT SIZE="2">[% mypagemenu %]</FONT><BR>[% END %]
+
 [% story.introtext %]
 
 [% IF full && user.is_admin && !preview %]<P><A HREF="[% constants.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]

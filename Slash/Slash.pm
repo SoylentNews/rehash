@@ -1304,6 +1304,7 @@ sub displayStory {
 	# There are many cases when we'd not want to return the pre-rendered text
 	# from the DB.
 	if (	   !$constants->{no_prerendered_stories}
+		&& $constants->{cache_enabled}
 		&& $story->{rendered} && !$options->{get_cacheable}
 		&& !$form->{light} && !$user->{light}
 		&& (!$form->{ssi} || $form->{ssi} ne 'yes')
@@ -1323,11 +1324,15 @@ sub displayStory {
 		$story->{atstorytime} = "__TIME_TAG__";
 
 		$story->{introtext} = parseSlashizedLinks($story->{introtext});
-		$story->{introtext} = processSlashTags($story->{introtext}, {});
+		$story->{introtext} = processSlashTags($story->{introtext});
 		if ($full) {
 			$story->{bodytext} = parseSlashizedLinks($story->{bodytext});
-			$story->{bodytext} = processSlashTags($story->{bodytext}, {});
+			$story->{bodytext} = processSlashTags($story->{bodytext}, { break => 1 });
 			$options->{stid} = $reader->getStoryTopicsJustTids($story->{sid});
+			# if a secondary page, put bodytext where introtext would normally go
+			# maybe this is not the right thing, but is what we are doing for now;
+			# let me know if you have another idea -- pudge
+			$story->{introtext} = delete $story->{bodytext} if $form->{pagenum} > 1;
 		}
 
 		$return = dispStory($story, $author, $topic, $full, $options);

@@ -1843,3 +1843,6 @@ REPLACE INTO vars (name, value, description) VALUES ('content_type_webpage','tex
 
 # End of T_2_3_0_113, Start of T_2_3_0_114 - 2003/08/12
 
+# run this unless you have a reason not to (like, you have your own html-header;index)
+DELETE FROM templates WHERE name = "html-header" AND page = "index" AND section = "default";
+
