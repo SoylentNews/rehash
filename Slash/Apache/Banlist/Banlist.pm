@@ -31,7 +31,10 @@ sub handler {
 	$cur_subnet =~ s/^(\d+\.\d+\.\d+)\.\d+$/$1.0/;
 	$cur_subnet = md5_hex($cur_subnet);
 
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $slashdb = getCurrentDB();
+	my $reader_user = $slashdb->getDB('reader');
+
+	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
 	$reader->sqlConnect();
 
 	my $is_rss = $r->uri =~ m{(

@@ -1665,6 +1665,16 @@ sub getDBs {
 }
 
 #################################################################
+# get virtual user of a db type, for use when $user->{state}{dbs}
+# not filled in
+sub getDB {
+	my($self, $db_type) = @_;
+	my $users = $self->sqlSelectColArrayref('virtual_user', 'dbs',
+		'type=' . $self->sqlQuote($db_type));
+	return $users->[rand @$users];
+}
+
+#################################################################
 # get list of DBs, never cache
 sub getClasses {
 	my($self) = @_;

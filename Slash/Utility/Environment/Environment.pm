@@ -1205,7 +1205,7 @@ sub prepareUser {
 
 	$uid = $constants->{anonymous_coward_uid} unless defined($uid) && $uid ne '';
 
-	my $reader = getObject('Slash::DB', { db_type => $user_types{'reader'} });
+	my $reader = getObject('Slash::DB', { virtual_user => $user_types{'reader'} });
 
 	if (isAnon($uid)) {
 		if ($ENV{GATEWAY_INTERFACE}) {

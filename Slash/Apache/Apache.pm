@@ -157,7 +157,7 @@ sub SlashSectionHost ($$$$) {
 		exit(1);
 	}
 	# Yes, this looks slower then the other method but I was getting different results.
-	# Bad results, and its Friday. Bad results on Friday is a bad thing.
+	# Bad results, and it's Friday. Bad results on Friday is a bad thing.
 	# -Brian
 	my $new_cfg;
 	for (keys %{$cfg->{constants}}) {
