@@ -147,9 +147,9 @@ __template__
 			<TR>
 				<TD COLSPAN="2" HEIGHT="10"><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% useredit.nickname %]"></TD>
 			</TR>
+		[% END %]
 			</FORM>
 		</TABLE>
-		[% END %]
 		</TD>
 	</TR>
 </TABLE>
