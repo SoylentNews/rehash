@@ -1004,7 +1004,7 @@ sub createMenu {
 	}
 
 	# default to "users" menu template
-	my $nm = $slashdb->getTemplateByName($menu, 0, 0, "menu");
+	my $nm = $slashdb->getTemplateByName($menu, 0, 0, "menu", "", 1);
 	$menu = "users" unless $nm->{page} eq "menu";
 
 	if (@$items) {
