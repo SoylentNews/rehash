@@ -18,10 +18,10 @@ __template__
 [% UNLESS user.noscores %] (Score:[% IF points.defined; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
 		<BR>by
 [% IF !is_anon %]<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
+[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
 [% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
 on [% Slash.timeCalc(time) %]
 [% IF sid && cid %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>[% END %]
-[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
 
 [% has_homepage = homepage && homepage.length > 8;
    has_journal = journal_last_entry_date.search('[1-9]');
