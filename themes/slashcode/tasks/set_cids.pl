@@ -19,7 +19,7 @@ $task{$me}{timespec} = '*/10 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 
-# Handles rotation of fakeemail address of all users.
+# Handles saving useful cids so we can speed up certain selects later.
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $days = $slashdb->getVar("admin_comment_display_days", "value", 1) || 30;
