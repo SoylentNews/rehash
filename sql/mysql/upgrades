@@ -2789,3 +2789,24 @@ ALTER TABLE submissions ADD INDEX time_emaildomain (time, emaildomain);
 
 DELETE FROM users_param WHERE name='sigdash';
 
+
+#   Extra var cleanup below.  Deleting vars that are no longer used in Slash.
+#
+#   Just to be on the safe side you may want to take a dump of all the vars being deleted.  If any unexpected issues arise as a result
+#   you'll have a backup of the previous values.
+#
+#   Replace values in CAPS with values appropriate for your environment
+#
+#   mysqldump -u USER DATABASE -t vars  -w 'name in ( "archive_use_backup_db", "comment_cache_debug", "comment_cache_max_keys", "comment_cache_newstyle", 
+#   "comment_cache_purge_max_frac", "comment_cache_purge_min_comm", "comment_cache_purge_min_req", "currentqid", "daily_last", "daily_tz", 
+#   "discussionrecycle", "get_titles", "m2_if_smoother", "m2_range_offset", "messages_send_maxsize", "mod_elig_hoursback", "paypal", 
+#   "prepuser_backup_prob", "selectcomm_backup_prob", "siteowner", "submissions_listing_page_size", "subnet_karma_comments_needed", "test", "today", "zoo_process_limit", "zoo_timer")'  > VAR_BACKUP.SQL 
+
+
+DELETE FROM vars where name in 
+( "archive_use_backup_db", "comment_cache_debug", "comment_cache_max_keys", "comment_cache_newstyle", 
+"comment_cache_purge_max_frac", "comment_cache_purge_min_comm", "comment_cache_purge_min_req", "currentqid", "daily_last", "daily_tz", 
+"discussionrecycle", "get_titles", "m2_if_smoother", "m2_range_offset", "messages_send_maxsize", "mod_elig_hoursback", "paypal", 
+"prepuser_backup_prob", "selectcomm_backup_prob", "siteowner", "submissions_listing_page_size", "subnet_karma_comments_needed", "test", "today", "zoo_process_limit", "zoo_timer");
+
+

@@ -632,7 +632,6 @@ INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_break','P|LI|OL|UL|BR|BLOCKQUOTE|DIV','Tags that break words (see breakHtml())');
 INSERT INTO vars (name, value, description) VALUES ('archive_delay','60','days to wait for story archiving');
 INSERT INTO vars (name, value, description) VALUES ('archive_delay_mod','60','Days before moderator logs are expired');
-INSERT INTO vars (name, value, description) VALUES ('archive_use_backup_db', '0', 'Should the archival process retrieve data from the backup database?');
 INSERT INTO vars (name, value, description) VALUES ('articles_only','0','show only Articles in submission count in admin menu');
 INSERT INTO vars (name, value, description) VALUES ('article_nocomment','0','Show no comments in article.pl');
 INSERT INTO vars (name, value, description) VALUES ('authors_unlimited','100','Seclev for which authors have unlimited comment-moderation and -deletion power (see also the ACLs)');
@@ -657,13 +656,7 @@ INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_entity','zwnj|
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_numeric','8204|8205|8206|8207|8236|8237|8238','Numeric references that approveCharref should always delete');
 INSERT INTO vars (name, value, description) VALUES ('checklist_length','255','Length of user_index checklist fields (default is VARCHAR(255))');
 INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid','Default for user\'s cookie_location value (also see users_info schema!)');
-INSERT INTO vars (name, value, description) VALUES ('comment_cache_debug','1','Debug _comment_text cache activity to STDERR?');
 INSERT INTO vars (name, value, description) VALUES ('comment_cache_max_hours','96','Discussion age at which comments are no longer cached');
-INSERT INTO vars (name, value, description) VALUES ('comment_cache_max_keys','3000','Maximum number of keys in the _comment_text cache');
-INSERT INTO vars (name, value, description) VALUES ('comment_cache_newstyle','0','Use _getCommentTextNew?');
-INSERT INTO vars (name, value, description) VALUES ('comment_cache_purge_max_frac','0.75','In purging the _comment_text cache, fraction of max_keys to target');
-INSERT INTO vars (name, value, description) VALUES ('comment_cache_purge_min_comm','50','Min number comments in a discussion for it to force a cache purge');
-INSERT INTO vars (name, value, description) VALUES ('comment_cache_purge_min_req','5','Min number times a discussion must be requested to force a cache purge');
 INSERT INTO vars (name, value, description) VALUES ('comment_compress_slice','500','Chars to slice comment into for compressOk');
 INSERT INTO vars (name, value, description) VALUES ('comment_homepage_disp','50','Chars of poster URL to show in comment header');
 INSERT INTO vars (name, value, description) VALUES ('comment_commentlimit','250','Max commentlimit users can set');
@@ -737,7 +730,6 @@ INSERT INTO vars (name, value, description) VALUES ('discussion_approval', '0', 
 INSERT INTO vars (name, value, description) VALUES ('discussion_create_seclev','1','Seclev required to create discussions (yes, this could be an ACL in the future).');
 INSERT INTO vars (name, value, description) VALUES ('discussion_default_topic', '1', 'Default topic of user-created discussions.');
 INSERT INTO vars (name, value, description) VALUES ('discussion_display_limit', '30', 'Number of default discussions to list.');
-INSERT INTO vars (name, value, description) VALUES ('discussionrecycle','0','Default is that recycle never occurs on recycled discussions. This number is valued in days.');
 INSERT INTO vars (name, value, description) VALUES ('discussions_speed_limit','300','seconds delay before repeat discussion');
 INSERT INTO vars (name, value, description) VALUES ('do_expiry','1','Flag which controls whether we expire users.');
 INSERT INTO vars (name, value, description) VALUES ('down_moderations','-6','number of how many comments you can post that get down moderated');
@@ -753,7 +745,6 @@ INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysb
 INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100','Maximum number of article.shtml files to write at a time in freshenup.pl');
 INSERT INTO vars (name, value, description) VALUES ('freshenup_small_cc','30','How many comments is considered a small commentcount, indicating a story needs its commentcount updated frequently?');
 INSERT INTO vars (name, value, description) VALUES ('freshen_homepage_min_minutes','60','Number of minutes between updating the main index.shtml homepage (if 0, disabled, only updates when freshenup.pl believes it is required)');
-INSERT INTO vars (name, value, description) VALUES ('get_titles','0','get the story titles');
 INSERT INTO vars (name, value, description) VALUES ('goodkarma','25','Users get bonus points for posts if karma above this value');
 INSERT INTO vars (name, value, description) VALUES ('gse_precache_mins_ahead','2','How many minutes ahead to precache getStoriesEssentials data in the query cache and memcached?');
 INSERT INTO vars (name, value, description) VALUES ('gse_skip_count_if_no_min_stoid', '0', 'If no min_stoid is available, skip counting the s_t_r rows and go straight to the one-table select? Rule of thumb, set this to true for sites with many stories (say, over 10,000)');
@@ -834,7 +825,6 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consequences_repeats','3
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_freq','86400','In seconds, the maximum frequency which users can metamoderate');
-INSERT INTO vars (name, value, description) VALUES ('m2_if_smoother',5,'Number that acts as multiplier for the if_expr, should probably be around your average m2needed/consensus value');
 INSERT INTO vars (name, value, description) VALUES ('m2_inherit', '0', 'Set to true if you would like to inherit m2s from previous mods with the same cid-reason');
 INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus_karma','12','Usually about half of goodkarma');
 INSERT INTO vars (name, value, description) VALUES ('m2_min_daysbackcushion','2','The minimum days-back cushion');
@@ -844,7 +834,6 @@ INSERT INTO vars (name, value, description) VALUES ('m2_oldest_wanted', '10', 'H
 INSERT INTO vars (name, value, description) VALUES ('m2_oldest_zone_percentile', '2', 'What percentile of the oldest un-M2d mods are to be considered highest priority?');
 INSERT INTO vars (name, value, description) VALUES ('m2_oldest_zone_mult', '2', 'How many times the normal amount of M2s are applied to the oldest un-M2d mods?');
 INSERT INTO vars (name, value, description) VALUES ('m2_oldzone', '0', 'Starting id (youngest) of the old-zone of moderations that still require M2 (the oldest certain percentile)');
-INSERT INTO vars (name, value, description) VALUES ('m2_range_offset','0.9','Offset for M2 assignment ranges');
 INSERT INTO vars (name, value, description) VALUES ('m2_userpercentage','0.9','UID must be below this percentage of the total userbase to metamoderate');
 INSERT INTO vars (name, value, description) VALUES ('m2_wait_hours','12','Number of hours to wait before a mod is available for m2');
 INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.com','All mail addressed from the site looks like it is coming from here');
@@ -882,7 +871,6 @@ INSERT INTO vars (name, value, description) VALUES ('memcached_servers','127.0.0
 INSERT INTO vars (name, value, description) VALUES ('min_expiry_comm','10','Lowest value for comment expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('min_expiry_days','7','Lowest value for duration expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('minkarma','-25','Minimum karma a user can sink to');
-INSERT INTO vars (name, value, description) VALUES ('mod_elig_hoursback','48','Hours back in accesslog to look for mod elig');
 INSERT INTO vars (name, value, description) VALUES ('mod_elig_minkarma','0','The min M1 karma');
 INSERT INTO vars (name, value, description) VALUES ('mod_karma_bonus_max_downmods',2,'How many times can you downmod a comment without it losing its karma bonus? (bonus lost at value+1th downmod) (set very high to disable)');
 INSERT INTO vars (name, value, description) VALUES ('mod_same_subnet_forbid','1','Forbid users from moderating any comments posted by someone in their subnet?');
@@ -909,7 +897,6 @@ INSERT INTO vars (name, value, description) VALUES ('panic','0','0:Normal, 1:No 
 INSERT INTO vars (name, value, description) VALUES ('poll_cache','0','On home page, cache and display default poll for users (if false, is extra hits to database)');
 INSERT INTO vars (name, value, description) VALUES ('poll_discussions','1','Allow discussions on polls');
 INSERT INTO vars (name, value, description) VALUES ('poll_fwdfor','1','Loose proxy management for voting?');
-INSERT INTO vars (name, value, description) VALUES ('prepuser_backup_prob','0','Probability that Environment.pm prepareUser will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('rdfencoding','ISO-8859-1','Site encoding');
 INSERT INTO vars (name, value, description) VALUES ('rdfimg','http://www.example.com/images/topics/topicslash.gif','site icon to be used by RSS subscribers');
 INSERT INTO vars (name, value, description) VALUES ('rdfitemdesc','0','1 == include introtext in item description; 0 == don\'t.  Any other number is substr() of introtext to use');
@@ -934,13 +921,11 @@ INSERT INTO vars (name, value, description) VALUES ('runtask_verbosity','3','How
 INSERT INTO vars (name, value, description) VALUES ('sbindir','/usr/local/slash/sbin','Where are the sbin scripts kept');
 INSERT INTO vars (name, value, description) VALUES ('search_google','0','Turn on to disable local search (and invite users to use google.com)');
 INSERT INTO vars (name, value, description) VALUES ('section','index','This is the current setting for section.');
-INSERT INTO vars (name, value, description) VALUES ('selectcomm_backup_prob','0','Probability that Slash.pm selectComments will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('send_mail','1','Turn On/Off to allow the system to send email messages.');
 INSERT INTO vars (name, value, description) VALUES ('siteadmin','admin','The admin for the site');
 INSERT INTO vars (name, value, description) VALUES ('siteadmin_name','Slash Admin','The pretty name for the admin for the site');
 INSERT INTO vars (name, value, description) VALUES ('siteid','www.example.com','The unique ID for this site');
 INSERT INTO vars (name, value, description) VALUES ('sitename','Slash Site','Name of the site');
-INSERT INTO vars (name, value, description) VALUES ('siteowner','slash','What user this runs as');
 INSERT INTO vars (name, value, description) VALUES ('sitepublisher','Me','The entity that publishes the site');
 INSERT INTO vars (name, value, description) VALUES ('slashbox_sections','0','Allow used-selected slashboxes in sections');
 INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0','Whether or not to turn on the "What\'s Playing" Slashbox.');
@@ -982,7 +967,6 @@ INSERT INTO vars (name, value, description) VALUES ('textarea_cols', '50', 'Defa
 INSERT INTO vars (name, value, description) VALUES ('textarea_rows', '10', 'Default # of rows for content TEXTAREA boxes');
 INSERT INTO vars (name, value, description) VALUES ('tids_in_urls', '0', 'Want tid=1&tid=2 in story and discussion-related URLs?');
 INSERT INTO vars (name, value, description) VALUES ('titlebar_width','100%','The width of the titlebar');
-INSERT INTO vars (name, value, description) VALUES ('today','730512','(Obviated) Today converted to days past a long time ago');
 INSERT INTO vars (name, value, description) VALUES ('tokenspercomment','6','Number of tokens to feed the system for each comment');
 INSERT INTO vars (name, value, description) VALUES ('tokensperpoint','8','Number of tokens per point');
 INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
