@@ -1245,7 +1245,7 @@ sub stripBadHtml  {
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
-	$str =~ s/> </> $1/g;
+	$str =~ s/></> </g;
 
 	return $str;
 }
@@ -1258,7 +1258,7 @@ sub stripBadHtml  {
 		my($comment, $mwl) = @_;
 		my($new, $l, $c, $in_tag, $this_tag, $cwl);
 
-		$mwl = $mwl || 80;
+		$mwl = $mwl || 65;
 		$l = length($comment);
 
 		%is_break_tag = map { uc, 1 } qw(HR BR LI P OL UL BLOCKQUOTE DIV)
