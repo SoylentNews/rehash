@@ -16,7 +16,6 @@ use vars qw(
 	$PROGNAME	$VERSION
 	%opts
 	$virtuser	$width	$height	$sleep	$min_pl_time
-	$weed_out_images
 	@abbreviations	%abbreviations
 	$slashdb	$constants	$logdb
 	@db
@@ -46,7 +45,6 @@ sub init {
 	usage() if $opts{h};
 	version() if $opts{v};
 
-	$weed_out_images = $opts{i} ? 1 : 0;
 	$virtuser = $opts{u} || 'slash';
 	$width = $opts{w} || 106;
 	$height = $opts{r} || 20;
@@ -221,13 +219,9 @@ sub update_db_ary {
 
 sub print_first_line {
 	# First line: stats for the last $time_elapsed seconds
-	if ($weed_out_images) {
-		$pages = $logdb->sqlCount("accesslog",
-			"id BETWEEN " . ($maxlog_last+1) . " AND $maxlog_new"
-			. " AND op != 'image' AND (op != 'rss' OR static = 'no')");
-	} else {
-		$pages = $maxlog_new - $maxlog_last;
-	}
+	$pages = $logdb->sqlCount("accesslog",
+		"id BETWEEN " . ($maxlog_last+1) . " AND $maxlog_new"
+		. " AND op != 'image' AND (op != 'rss' OR static = 'no')");
 	$pages_total += $pages;
 	$comments = $maxcid_new - $maxcid_last;
 	$comments_total = $maxcid_new - $maxcid_first;
@@ -413,8 +407,6 @@ Monitor the Slash site's database.
 Main options:
 	-h	Help (this message)
 	-v	Version
-	-i	Accesslog may contain images; do a SELECT from it to
-		weed them out when counting pages
 
 	-u	Virtual user (default "slash")
 	-w	Width max in columns (default 76)
