@@ -296,7 +296,7 @@ sub IndexHandler {
 
 		# $USER_MATCH defined above
 		if ($dbon && $r->header_in('Cookie') =~ $USER_MATCH) {
-			$r->uri('/' . $constants->{index_handler});
+			$r->uri("/$constants->{index_handler}");
 			$r->filename("$basedir/$constants->{index_handler}");
 			return OK;
 		} else {

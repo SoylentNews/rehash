@@ -25,13 +25,9 @@ sub main {
 	my($tbtitle);
 
 	my $ops = {
-		slashd_log	=> {
+		slashd		=> {
 			function	=> \&displaySlashd,
 			seclev		=> 500,
-		},
-		edit_keyword	=> {
-			function	=> \&editKeyword,
-			seclev		=> 10000,
 		},
 		edit_keyword	=> {
 			function	=> \&editKeyword,
@@ -1387,7 +1383,7 @@ sub updateStory {
 ##################################################################
 sub displaySlashd {
 	my($form, $slashdb, $user, $constants) = @_;
-	slashDisplay('slashd_log', {
+	slashDisplay('slashd_status', {
 		tasks		=> $slashdb->getSlashdStatuses(),
 	});
 }

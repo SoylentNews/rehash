@@ -167,7 +167,7 @@ UPDATE section_topics SET type=1;
 # Autopoll update
 ALTER TABLE pollquestions ADD COLUMN autopoll enum("no","yes") DEFAULT 'no' NOT NULL;
 
-# Submussiosn
+# Submissions
 ALTER TABLE submissions ADD COLUMN weight float DEFAULT '0' NOT NULL;
 
 #New index_handler bits
@@ -176,11 +176,12 @@ ALTER TABLE sections ADD COLUMN	index_handler varchar(30) DEFAULT "index.pl" NOT
 ALTER TABLE sections ADD COLUMN	writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL,
 
 #slashd_log table
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slashd','[% constants.rootdir %]/admin.pl?op=slashd_log',500,17);
-DROP TABLE IF EXISTS slashd_log;
-CREATE TABLE slashd_log (
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slashd','[% constants.rootdir %]/admin.pl?op=slashd',500,17);
+DROP TABLE IF EXISTS slashd_status;
+CREATE TABLE slashd_status (
 	task varchar(50) NOT NULL,
 	time_took float(6,2) DEFAULT '0.00' NOT NULL,
 	last_update timestamp, 
 	PRIMARY KEY (task)
 ) TYPE = myisam;
+
