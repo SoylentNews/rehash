@@ -2900,3 +2900,4 @@ ALTER TABLE dilemma_stats DROP COLUMN name;
 ALTER TABLE dilemma_meetlog ADD COLUMN trid INT UNSIGNED NOT NULL AFTER meetid, DROP INDEX tick, ADD INDEX trid_tick (trid, tick);
 UPDATE dilemma_meetlog SET trid=1;
 
+# End of T_2_5_0_55, Start of T_2_5_0_56 - 2005/04/05
