@@ -236,6 +236,7 @@ sub sqlTransactionCancel {
 # Bad need of rewriting....
 sub createComment {
 	my($self, $comment, $user, $pts, $default_user) = @_;
+	$default_user ||= getCurrentStatic('anonymous_coward_uid');
 	my $header = $comment->{sid};
 	my $cid;
 
