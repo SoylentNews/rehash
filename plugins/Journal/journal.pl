@@ -190,7 +190,7 @@ sub displayRSS {
 			title		=> $article->[2],
 # needs a var controlling this ... what to use as desc?
 #			description	=> timeCalc($article->[0]),
-#			description	=> "$nickname wrote: " . strip_mode($article->[1], $article->[4]),
+			description	=> strip_mode($article->[1], $article->[4]),
 			'link'		=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]"
 		};
 	}

@@ -280,7 +280,14 @@ sub create {
 			}
 
 			for my $key (keys %$item) {
-				$encoded_item->{$key} = $self->encode($item->{$key}, $key);
+				if ($key eq 'description') {
+					if ($version >= 0.91) {
+						my $desc = $self->rss_item_description($item->{$key});
+						$encoded_item->{$key} = $desc if $desc;
+					}
+				} else {
+					$encoded_item->{$key} = $self->encode($item->{$key}, $key);
+				}
 			}
 
 			push @items, $encoded_item if keys %$encoded_item;
@@ -348,7 +355,7 @@ sub rss_story {
 
 	if ($version >= 0.91) {
 		my $desc = $self->rss_item_description($item->{description} || $story->{introtext});
-		$encoded_item->{description} = $self->encode($desc) if $desc;
+		$encoded_item->{description} = $desc if $desc;
 	}
 
 	if ($version >= 1.0) {
