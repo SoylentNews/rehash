@@ -32,7 +32,6 @@ sub new {
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
-print STDERR "HumanConf new user '$user' dbh '$self->{_dbh}'\n";
 
 	return $self;
 }
@@ -40,14 +39,12 @@ print STDERR "HumanConf new user '$user' dbh '$self->{_dbh}'\n";
 sub _formnameNeedsHC {
         my($self, $formname) = @_;            
 	my $regex = getCurrentStatic('hc_formname_regex') || '^comments$';
-print STDERR "HumanConf _formnameNeedsHC '$formname' regex '$regex'\n";
         return 1 if $formname =~ /$regex/;
         return 0;
 }
 
 sub createFormkeyHC {
 	my($self, $formname) = @_;
-print STDERR "HumanConf createFormkeyHC '$formname'\n";
 
 	# Only certain formnames need human confirmation.  From any       
 	# other formname, just return 1, meaning everything is ok
@@ -85,7 +82,7 @@ print STDERR "HumanConf createFormkeyHC '$formname'\n";
 			"ORDER BY RAND() LIMIT 1"
 		);
 		if (!$hcpid) {
-			print STDERR "Empty humanconf_pool\n";
+			print STDERR "Empty humanconf_pool for question $hcqid\n";
 			return 0;
 		}
 
@@ -118,13 +115,11 @@ print STDERR "HumanConf createFormkeyHC '$formname'\n";
 	$user->{state}{hcinvalid} = 0;
 	$user->{state}{hcquestion} = $question;
 	$user->{state}{hchtml} = $html;
-print STDERR "HumanConf createFormkeyHC state: hc '$user->{state}{hc}' question '$user->{state}{hcquestion}' html '$user->{state}{hchtml}'\n";
 	return 1;
 }
 
 sub reloadFormkeyHC {
 	my($self, $formname) = @_;
-print STDERR "HumanConf reloadFormkeyHC '$formname'\n";
 
 	my $user = getCurrentUser();
 
@@ -158,12 +153,10 @@ print STDERR "HumanConf reloadFormkeyHC '$formname'\n";
 		$user->{state}{hcinvalid} = 1;
 		$user->{state}{hcerror} = getData('nomorechances', {}, 'humanconf');
 	}
-print STDERR "HumanConf reloadFormkeyHC state: hc '$user->{state}{hc}' invalid '$user->{state}{hcinvalid}' question '$user->{state}{hcquestion}' html '$user->{state}{hchtml}' error '$user->{state}{hcerror}\n";
 }
 
 sub validFormkeyHC {
 	my($self, $formname) = @_;
-print STDERR "HumanConf validFormkeyHC '$formname'\n";
 
 	# Only certain formnames need human confirmation.  Other formnames
 	# won't even have HC data created for them, so there's no need to
@@ -173,7 +166,6 @@ print STDERR "HumanConf validFormkeyHC '$formname'\n";
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $formkey = $form->{formkey};
-print STDERR "HumanConf validFormkeyHC formkey '$formkey'\n";
 	return 'invalidhc' unless $formkey;
 
 	my $formkey_quoted = $slashdb->sqlQuote($form->{formkey});
@@ -190,7 +182,6 @@ print STDERR "HumanConf validFormkeyHC formkey '$formkey'\n";
                  AND humanconf_pool.hcpid = humanconf.hcpid
 		 AND tries_left > 0"      
         );
-print STDERR "HumanConf validFormkeyHC hcid '$hcid' hcpid '$hcpid' tries_left '$tries_left' answer '$answer' form->hcanswer '$form->{hcanswer}'\n";
         if (!$hcid) {
                 # No humanconf associated with this formkey.  Either there
 		# is a bug somewhere or the answer has had its tries all
