@@ -70,9 +70,20 @@ sub topTopics {
 #################################################################
 sub listTopics {
 	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 
 	my $topics = $slashdb->getTopics();
+	
+	if ($form->{section}) {
+		my %new_topics;
+		my $ids = $slashdb->getDescriptions('topics_section', $form->{section});
+		for (keys %$topics) {
+			$new_topics{$_} = $topics->{$_}
+				if ($ids->{$_});	
+		}
+		$topics = \%new_topics;
+	}
 
 	for (values %$topics) {
 		if ($_->{image} =~ /^\w+\.\w+$/) {
