@@ -455,7 +455,7 @@ sub vote {
 
 	my $question = $reader->getPollQuestion($qid, ['voters', 'question']);
 	my $notes = getData('display');
-	if (getCurrentUser('is_anon') && !getCurrentStatic('allow_anonymous')) {
+	if (getCurrentUser('is_anon') && !getCurrentStatic('allow_anon_poll_voting')) {
 		$notes = getData('anon');
 	} elsif ($aid > 0) {
 		my $poll_open = $reader->isPollOpen($qid);
