@@ -1048,6 +1048,8 @@ sub editStory {
 				$storyref->{$field});
 			$storyref->{$field} = parseSlashizedLinks(
 				$storyref->{$field});
+			$storyref->{$field} = balanceTags(
+				$storyref->{$field});
 		}
 
 		$topic = $slashdb->getTopic($storyref->{tid});
@@ -1455,6 +1457,8 @@ sub updateStory {
 	}
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
+	$form->{introtext} = balanceTags($form->{introtext});
+	$form->{bodytext} =  balanceTags($form->{bodytext});
 
 	my $data = {
 		uid		=> $form->{uid},
@@ -1533,6 +1537,8 @@ sub saveStory {
 	) . otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
+	$form->{introtext} = balanceTags($form->{introtext});
+	$form->{bodytext} =  balanceTags($form->{bodytext});
 
 	my $time = ($form->{fastforward})
 		? $slashdb->getTime()
