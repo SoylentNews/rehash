@@ -22,7 +22,9 @@ __template__
 <I>[% Slash.timeCalc(diatribe.date) %]</I>
 	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP" ALIGN="RIGHT">
 
-[% UNLESS user.is_anon %][
+[% IF user.is_anon; IF diatribe.discussion %][
+<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>
+][% END; ELSE %][
 [% IF user.uid == uid %]
 <A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</A> |
 <A HREF="[% constants.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</A> |

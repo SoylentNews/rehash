@@ -4137,6 +4137,9 @@ sub getSlashConf {
 	$conf{approvedtags} = $fixup->($conf{approvedtags}) ||
 		[qw(B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV)];
 
+	$conf{approvedtags_break} = $fixup->($conf{approvedtags_break}) ||
+		[qw(P LI OL UL BR BLOCKQUOTE DIV HR)];
+
 	$conf{lonetags} = $fixup->($conf{lonetags}) ||
 		[];
 
