@@ -24,7 +24,7 @@ __template__
 		style => 'oldstyle'
 	});
 ELSE;
-	[%# what the hell is this for? %]
+	# what the hell is this for?
 	Slash.createMenu("users",   {
 		tab_selected => tab_selected, style => style
 	});
