@@ -1240,7 +1240,7 @@ sub balanceTags {
 	# on certain editors (vim AND xemacs).  -- Cliff
 	# maybe you should use a REAL editor, like BBEdit.  :) -- pudge
 	while ($html =~ m|(<(\/?)($match)\b[^>]*>)|igo) { # loop over tags
-		($tag, $close, $whole) = ($3, $2, $1);
+		($tag, $close, $whole) = (uc($3), $2, $1);
 
 		if ($close) {
 			if (@stack && $tags{$tag}) {
@@ -1285,6 +1285,7 @@ sub balanceTags {
 	# add on any unclosed tags still on stack
 	$html .= join '', map { "</$_>" } grep {! exists $lone{$_}} reverse @stack;
 
+	return $html;
 }
 
 #========================================================================
