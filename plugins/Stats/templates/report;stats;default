@@ -182,7 +182,8 @@ youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% st
 New:        [% flts2(stats_data.subscribe_new_users_last30) %]   [% ints2(stats_data.subscribe_new_pages_last30) %]   \$[% dlrs(stats_data.subscribe_new_payments_last30) %]
 Renew:      [% flts2(stats_data.subscribe_renew_users_last30) %]   [% ints2(stats_data.subscribe_renew_pages_last30) %]    [% dlrs(stats_data.subscribe_renew_payments_last30) %]
 Total:      [% flts2(stats_data.subscribe_new_users_last30 + stats_data.subscribe_renew_users_last30) %]   [% flts2(stats_data.subscribe_new_pages_last30 + stats_data.subscribe_renew_pages_last30) %]   \$[% dlrs(stats_data.subscribe_new_payments_last30 + stats_data.subscribe_renew_payments_last30) %]
-Ran out:    [% flts2(stats_data.subscribe_runout) %]
+Used up:            [% ints2(stats_data.subscribe_hits_bought_last30) %]   \$[% dlrs(stats_data.subscribe_dollars_bought_last30) %]
+Ran out:    [% flts2(stats_data.subscribe_runout_last30) %]
 
 current subscribers: [% ints3(stats_data.subscribers_current) %]
  former subscribers: [% ints3(stats_data.subscribers_total - stats_data.subscribers_current) %]     
