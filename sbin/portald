@@ -177,7 +177,7 @@ sub getRDF {
 				Page	=> 'portald'
 			});
 
-			last if (++$i >= $items && $items > 0);
+			last if ++$i >= $iterations && $iterations > 0;
 		}
 
 		setblock($bid, "$str$other");
