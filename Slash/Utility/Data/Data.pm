@@ -649,9 +649,31 @@ sub stripBadHtml {
 		)
 	}{&lt;$1}gx;
 
-	$str =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
+	my $re = qr{&(#?[a-zA-Z0-9]+);?};
+	my($newstr, $tmpstr, $open) = ('', '', 0);
+	for my $char (split //, $str) {
+		$tmpstr .= $char;
+		if (!$open && $char eq '<') {
+			$open = 1;
+		} elsif ($open && $char eq '>') {
+			$open = 0;
+		}
 
-	return $str;
+		if (($char eq '<' || $char eq '>') && length $tmpstr) {
+			$tmpstr =~ s/$re/approveCharref($1)/sge if $char eq '<';
+			$newstr .= $tmpstr;
+			$tmpstr = '';
+		}
+	}
+
+	if ($tmpstr) {  # we must be outside <...> here
+		$tmpstr =~ s/$re/approveCharref($1)/sge;
+		$newstr .= $tmpstr;
+	}
+
+#	$str =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
+
+	return $newstr;
 }
 
 #========================================================================
