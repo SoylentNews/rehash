@@ -1,0 +1,1546 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use DBIx::Password;
+use Digest::MD5 'md5_hex';
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my(%opts, %forced_plugins, %sacred_tables);
+my($del_users, $poll_uid, $process_menus);
+my(%topics, %discussions, %polls, %comments, %skip_polls, %poll_data);
+my(%vars, %story_authors);
+
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('IMhvu:U:P:X:', \%opts);
+usage() if $opts{'h'};
+version() if $opts{'v'};
+usage('Need v2 virtual user') unless $opts{'U'};
+usage('Need new virtual user') unless $opts{'u'};
+$process_menus++ if $opts{'M'};
+
+# Determine plugins to force conversion for.
+for (split /,/, ($opts{P} || '')) {
+	$forced_plugins{$_} = 1;
+}
+# Determine tables to be left alone.
+for (split /,/, ($opts{X} || '')) {
+	$sacred_tables{$_} = 1;
+}
+
+####################################
+# disclaimer
+{
+	# We don't ask this if we are in incremental-mode.
+	last if $opts{I};
+
+	my $answer = ask(<<'EOT');
+Slash 2.0.0 (Bender) to Slash 2.2.0 (Fry) Conversion Utility
+
+By running this I realize that there is no warranty, expressed or implied.
+Any data loss as a result of running this program is my responsibility.
+I have read the documentation for this program, I understand it, and I
+have taken the necessary precautions and done the required preparation.
+[yes/No]:
+EOT
+	exit unless $answer eq 'yes';
+}
+
+####################################
+# setup
+
+my $dbh_old = DBIx::Password->connect($opts{'U'});
+die "Can't open connection to old (v2) database!" unless $dbh_old;
+my $dbh_new = DBIx::Password->connect($opts{'u'});
+die "Can't open connection to new database!" unless $dbh_new;
+
+END {
+	$dbh_old->disconnect if $dbh_old;
+	$dbh_new->disconnect if $dbh_new;
+}
+
+my @user_tables = qw(
+	users users_comments users_info users_index users_prefs users_param
+);
+
+# Run ONLY for plugins that were installed on both sites.
+my %plugins = (
+	Journal => {
+		tables => [qw(
+			journals journals_text journal_friends journal_themes
+		)],
+	},
+
+	Search => undef,
+);
+
+# Run ONLY for plugins that were installed on both sites.
+my(%plugin_cleanup) = (
+	Journal => sub {
+		$dbh_new->do(<<EOT);
+UPDATE journals SET tid=$vars{journal_default_topic} WHERE tid=0
+EOT
+
+	},
+);
+
+
+# Run for plugins that are INSTALLED on the NEW site.
+my(%plugin_fixup) = (
+	Messages => sub {
+		my $m_list = $dbh_old->selectcol_arrayref(<<EOT);
+SELECT uid FROM users_info WHERE maillist=1
+EOT
+
+		for (@{$m_list}) {
+			$dbh_new->do(<<EOT)
+INSERT INTO users_param (uid, name, value) VALUES ($_, 'messagecodes_1', 1)
+EOT
+
+		}
+	},
+);
+
+
+my (%conversions) = (
+	# Straight copy tables.
+	'metamodlog'		=> undef,
+	'menus'			=> undef,
+	'tzcodes'		=> undef,
+	'users_comments'	=> undef,
+	'users_info'		=> undef,
+	'users_param'		=> undef,
+	'users_prefs'		=> undef,
+	'vars'			=> undef,
+
+	# This is solely for fixup, we have NON NULL columns that were once 
+	# NULL.
+	'sections'		=> sub {
+		my($data) = @_;
+		
+		delete $data->{artcount} if !defined($data->{artcount});
+		delete $data->{isolate}  if !defined($data->{isolate});
+		delete $data->{issue}    if !defined($data->{issue});
+		
+		return $data;
+	},
+
+	# Plugin tables.
+	'journals'		=> sub {
+		my($data) = @_;
+		
+		$data->{description} ||= '';
+		$data->{discussion} = $data->{comment_header};
+		delete $data->{comment_header};
+
+		return $data;
+	},
+	'journals_text'		=> sub {
+		my($data) = @_;
+
+		$data->{article} ||= '';
+
+		return $data;
+	},
+	'journal_friends'	=> undef,
+	'journal_themes'	=> undef,
+
+	# Processed tables.
+	'blocks'		=> sub {
+		my($data) = @_;
+
+		$data->{seclev} ||= 0;
+		$data->{portal} ||= 0;
+		$data->{retrieve} ||= 0;
+		$data->{title} ||= '';
+		# If it's not an allowed enum, ditch it.
+		delete $data->{type} 
+			if $data->{type} !~ /(static|color|portald)/;
+
+		return $data;
+	},
+
+	'content_filters'	=> sub {
+		my($data) = @_;
+		delete $data->{maximum_length};
+		# Since this used to be "comment_filters" and then evolved into
+		# "comtent_filters", we should be specific about what we
+		# are filtering. The default is for 'comments' as The Beast
+		# didn't have a concept of much more than that.
+		$data->{form} = 'comments';
+		return $data;
+	},
+
+	'topics'		=> sub {
+		my($data) = @_;
+		$data->{name} = $data->{tid};
+		delete $data->{tid};
+		return $data;
+	},
+
+	'discussions'		=> sub {
+		# Convert discussion primary key into a sequence.
+		my($data, $story_hash) = @_;
+		if (! $data->{url}) {
+			printf <<EOT, ($data->{sid}) ? "($data->{sid})":'';
+      Discussion "$data->{title}" %s had null URL; skipping...
+EOT
+
+		 	return;
+		}
+		if (! exists $story_hash->{$data->{sid}} &&
+		    ! exists $polls{$data->{sid}})
+		{
+			print <<EOT;
+      Discussion '$data->{sid}' is not a story or poll; skipping...
+EOT
+
+			return;
+                }
+
+		# Program should accept a default topic for discussions.
+		$data->{'topic'} =
+			(defined($story_hash->{$data->{sid}}{tid})) ?
+				$topics{$story_hash->{$data->{sid}}{tid}} :
+				$vars{defaulttopic};
+		# Admins must disable stories via their own criterion.
+		$data->{type} = 'open';
+
+		$data->{'ALLOWED_FIELDS'} = [qw(
+			id sid title url topic ts type uid commentcount
+		)];
+			
+		return $data;
+	},
+
+	'users'			=> sub {
+		my($data, $maillist) = @_;
+
+		# Handle author flag conversion.
+		$data->{author} = 1 if exists $story_authors{lc($data->{nickname})};
+		return $data;
+	},
+
+	'users_index'		=> sub {
+		my($data) = @_;
+		
+		if ($data->{exaid}) {
+			my @auth_uids;
+			for (split /,/, $data->{exaid}) {
+				push @auth_uids, $story_authors{$_}
+					if $story_authors{$_};
+			}
+			$data->{exaid} = join ',', @auth_uids;
+		}
+
+		return $data;
+	},
+	
+	'stories'		=> sub {
+		my($data, $hitlist, $storylist) = @_;
+	
+		# We need to COPY the data to the story list if writestatus
+		# allows.
+		my $datacopy;
+		while (my($key, $value) = each %{$data}) { 
+			$datacopy->{$key} = $value;
+		}
+		delete $data->{aid};
+		$data->{tid} = $topics{$data->{tid}} || $vars{defaulttopic};
+
+		# Dammit, this relationship becomes CIRCULAR if looked at from
+		# an incremental perspective! So for now we must load this info
+		# somewhere else.
+		#
+		#$data->{discussion} = $discussions{$data->{sid}};
+		$data->{hits} = $hitlist->{$data->{sid}}{hits} || 0;
+		# We only care about accurate representation of writestats when 
+		# we do a full import.
+		if (!$opts{I}) {
+			my $ws = $data->{writestatus};
+
+			$data->{writestatus} = 0;
+			$data->{writestatus} = 'delete' if $ws==5 || $ws==10;
+			$data->{writestatus} = 'dirty' if $ws==1;
+			$data->{writestatus} ||= 'ok';
+		} else {
+			$data->{writestatus} = 'dirty';
+		}
+		push @{$storylist}, $datacopy if $storylist;
+			
+		# Use to properly assign topics to story-based discussions.
+		#$story_topics{$data->{sid}} = $data->{tid};
+		my %newfields;
+		map { $newfields{$_} = $dbh_new->quote($data->{$_}) }
+			qw[sid introtext bodytext relatedtext];
+		$dbh_new->do(<<EOT);
+REPLACE INTO story_text (sid, introtext, bodytext, relatedtext) VALUES
+	($newfields{sid},
+	 $newfields{introtext}, 
+	 $newfields{bodytext},
+	 $newfields{relatedtext})
+EOT
+
+	 	delete $data->{introtext};
+		delete $data->{bodytext};
+		delete $data->{relatedtext};
+		# extratext just goes awaaaayyy.
+		delete $data->{extratext};
+
+		return $data;
+	},
+
+	'pollquestions'		=> sub {
+		my($data, $poll_data) = @_;
+
+		$data->{'discussion'} = $discussions{$data->{qid}};
+		$data->{'topic'} = $vars{defaulttopic};
+		$data->{'uid'} = $poll_uid;
+		# QID is now SID and the new QID is now a serial key.
+		$data->{'sid'} = $data->{'qid'};
+		$poll_data->{$data->{qid}} = $data if $poll_data;
+		delete $data->{qid};
+		return $data;
+	},
+
+	'pollanswers'		=> sub {
+		my($data) = @_;
+		return if exists $skip_polls{$data->{qid}};
+		# Note AID here does means "ANSWER ID", not "author id".
+		my $oldpoll = $data->{qid};
+		$data->{qid} = $polls{$oldpoll};
+		if (! $data->{qid}) {
+			print <<EOT;
+      Skipping answers for deleted poll '$oldpoll'
+EOT
+			$skip_polls{$oldpoll}++;
+			return;
+		}
+		return $data;
+	},
+
+	'pollvoters'		=> sub {
+		my($data) = @_;
+		$data->{qid} = $polls{$data->{qid}};
+		return $data;
+	},
+
+	'moderatorlog'		=> sub {
+		my($data) = @_;
+		my $sid = $data->{sid};
+		$data->{sid} = $discussions{$data->{sid}};
+		# We do not import records for comments without a discussion.
+		return if !$data->{sid};
+		my $oldcid = $data->{cid};
+		$data->{cid} = $comments{$sid}->{$oldcid};
+		return $data if $data->{cid};
+		print <<EOT if !$opts{I};
+      Warning: NULL CID found for '$sid' #$oldcid - record not imported.
+EOT
+
+      		return;
+	},
+
+	'submissions'		=> sub {
+		my($data) = @_;
+
+		$data->{tid} = $topics{$data->{tid}} if $data->{tid};
+		$data->{tid} ||= $vars{defaulttopic};
+		$data->{$_} ||= '' for qw(comment name email note story);
+		return $data;
+	},
+
+);
+
+# List the conditions necessary for incremental updates for all 
+# updatable tables.
+# 
+# Users have the same condition, so we encapsulate it here.
+my $usercond = {
+	cond	=> 'uid  > %ld',
+	field 	=> 'uid',
+	type	=> 'int',
+};
+
+# Each condition is an sprintf format string.
+my (%conditions) = (
+	'abusers'	=> {
+		cond	=> 'abuser_id > %ld',
+		field	=> 'abuser_id',
+		type	=> 'int',
+	},
+	'accesslog' 	=> {
+		cond	=> 'id > %ld',
+		field	=> 'id',
+		type	=> 'int',
+	},
+	'comments'	=> {
+		cond	=> 'date > %s',
+		field	=> 'date',
+		type	=> 'date',
+	},
+	'discussions'	=> {
+		cond	=> 'ts > %s',
+		field	=> 'ts',
+		type	=> 'date',
+	},
+	#Ignoring hitters
+	'metamodlog'	=> {
+		cond	=> 'id > %ld',
+		field	=> 'id',
+		type	=> 'int',
+	},
+	'moderatorlog'	=> {
+		cond	=> 'id > %ld',
+		field	=> 'id',
+		type	=> 'int',
+	},
+	'pollquestions' => {
+                cond    => 'date > %s',
+                field   => 'date',
+                type    => 'date',
+        },
+        #Stories will need special treatment.
+        'submissions'   => {
+                cond    => 'time > %s',
+                field   => 'time',
+                type    => 'date',
+        },
+        'users'		 => $usercond,
+	'users_comments' => $usercond,
+	'users_index'	 => $usercond,
+	'users_info'	 => $usercond,
+	'users_prefs'	 => $usercond,
+);
+ 
+####################################
+# main body
+{
+	my %tmpvars;
+
+	load_vars($dbh_old, \%tmpvars);
+
+	# Populate aid->uid author resolver.
+	get_authors();
+
+	if ($opts{I}) {
+		incremental();
+		# We're done.
+		exit 0;
+	}	
+
+	####################################
+	# Conversion Questions
+	$del_users = ask(<<'EOT') eq 'yes';
+Should we delete all rows from the existing users tables? If not, you should
+take steps to insure that no user collisions will result as the importer
+will otherwise attempt to merge the user databases, and a collision will
+cause a fatal error. [yes/No]: 
+EOT
+
+	if ($del_users) {
+		for (@user_tables) {
+			$dbh_new->do("DELETE FROM $_");
+		}
+	}
+
+	$poll_uid = '';
+	while ($poll_uid !~ /^\d+$/) {
+		$poll_uid = ask(<<EOT);
+What User ID (UID) should be used as owner of your converted polls?
+[Default = UID #$tmpvars{anonymous_coward_uid}->{value}]: 
+EOT
+
+		$poll_uid = $tmpvars{anonymous_coward_uid}->{value}
+			if !length($poll_uid);
+		print "Invalid UID!\n\n" if $poll_uid !~ /^\d+$/;
+	}
+
+	convert();
+}
+
+
+sub incremental {
+	# Load vars from existing 2.2 site.
+	load_vars($dbh_new);
+
+	# Reload topic data for the rest of the show.
+	reload_keys('topics', \%topics, 'tid', 'alttext');
+
+	# Stories.
+	#
+	# Determine list of authors, before story processing.
+	update_stories();
+
+	# Polls.
+	update('pollquestions', \%poll_data);
+	reload_keys('pollquestions', \%polls, 'qid', 'date');
+	update_pollresults(\%poll_data);
+	%skip_polls=(); 
+
+	# If you need to be SURE of consistent comment records, a full import is
+	# your best bet, although incrementals should be "good enough".
+	copy_comments();
+	%polls = (); %poll_data = ();
+
+	# And the rest of the rabble.
+	update('moderatorlog', 'id');
+	%discussions=(); %comments=();
+
+	for my $table (@user_tables, qw(submissions metamodlog)) {
+		update($table);
+	}
+	%topics=();
+	users_keys();
+}
+
+
+sub merge_vars {
+	my (%oldvars, %newvars);
+	local $" = '|';
+
+	print "Processing vars\n";
+	load_vars($dbh_new, \%newvars);
+	load_vars($dbh_old, \%oldvars);
+
+	# These vars are not replaced in the new setup.
+	my @install_vars = qw(
+		logdir
+		basedir
+		datadir
+		siteid
+	);
+	my $search = "^(@install_vars)\$";
+
+	for (keys %oldvars) {
+		next if /$search/;
+	
+		$newvars{$_} = $oldvars{$_};
+	}
+
+	$dbh_new->do('DELETE FROM vars');
+	for my $key (sort keys %newvars) {
+		# Remember to set the global vars on merge!
+		$vars{$key} = $newvars{$key}->{value};
+		map { $newvars{$key}->{$_} = 
+		      $dbh_new->quote($newvars{$key}->{$_})
+		} qw(name value description);
+
+		$dbh_new->do(<<EOT);
+INSERT INTO vars VALUES(
+	$newvars{$key}->{name}, 
+	$newvars{$key}->{value}, 
+	$newvars{$key}->{description}
+)
+EOT
+
+	}
+}
+
+
+# This doesn't yet support incremental mode.
+sub convert_plugins {
+	my($new_plugins, $old_plugins);
+
+	$new_plugins = $dbh_new->selectcol_arrayref(
+		'SELECT value FROM site_info WHERE name="plugin"'
+	);
+	$old_plugins = $dbh_old->selectcol_arrayref(
+		'SELECT value FROM site_info WHERE name="plugin"'
+	);
+
+	my $printed = 0;
+	my $alit;
+	{
+		local $" = '|';
+		$alit = "(@{$old_plugins})";
+	}
+	for my $pi (@{$new_plugins}) {
+
+		# Handle plugin fixup.
+		if ($plugin_fixup{$pi}) {
+			print "\nExecuting '$pi' plugin fixup.\n\n";
+			&{$plugin_fixup{$pi}}();
+		}
+			
+		# Handle plugin conversion and cleanup.
+		if ($forced_plugins{$pi} || $pi =~ /^$alit$/) {
+			if (! $printed) {
+				print "\nConverting PLUGINS...\n";
+				$printed++;
+			}
+			if ($plugins{$pi} && ! $plugins{$pi}{tables}) {
+				print <<EOT;
+Skipping conversion: No conversion tableset for PLUGIN '$pi'!
+EOT
+
+				next;
+			}
+			print "\n=== $pi ===\n";
+			for (@{$plugins{$pi}{tables}}) {
+				duplicate($_, 1);
+			}
+
+			if (exists $plugin_cleanup{$pi} && 
+			    (ref $plugin_cleanup{$pi} eq 'CODE')) 
+			{
+				print "Plugin Cleanup.\n";
+				&{$plugin_cleanup{$pi}}();
+			}
+		}
+	}
+}
+		
+
+sub load_vars {
+	my($db, $varhash) = @_;
+
+	my $sth = $db->prepare('SELECT * FROM vars');
+	$sth->execute;
+	while (my $rec = $sth->fetchrow_hashref) {
+		# If VARHASH is passed, we create a hash of hashrefs based on
+		# var name.
+		if ($varhash) {
+			$varhash->{$rec->{name}} = $rec;
+			next;
+		}
+
+		# Otherwise we populate the global vars hash.
+		$vars{$rec->{name}} = $rec->{value};
+	}
+}
+
+
+# Technically, this will work on any table with a non date/int key that
+# we want to update. Something to think about for the future.
+sub update_stories {
+	my (@stories, %hitlist);
+
+	map { s/^(database=)?([^;]+);?(.+)?$/$2/; }
+		my($old_name, $new_name)=($dbh_old->{Name}, $dbh_new->{Name}); 
+
+	# There should be a DESTQUERY "DELETE FROM stories..." to remove stories
+	# within the last two weeks. Then these stories (remember to grab SIDs!)
+	# should be imported/updated and/or marked dirty for refreshing.
+	my $datecond = <<EOT;
+date_format(date_sub(now(), interval 15 day), '%Y-%m-%d 00:00')
+EOT
+
+	# Load the hits for processing.
+	load_storystuff(\%hitlist);
+	
+	# Remove stale rows.
+	my($deleted_stories, $deleted_discussions) = (0, 0);
+	$deleted_stories =
+		$dbh_new->do("DELETE FROM stories WHERE time>=$datecond")
+	if $opts{I};
+
+	# Update stories.
+	my $sql = 'SELECT * FROM stories';
+	$sql .= " WHERE time >= $datecond" if $opts{I};
+	my $sth_s = $dbh_old->prepare($sql);
+	$sth_s->execute;
+	die "SQL: $sql\n" if $dbh_new->errstr;
+	printf "Processing stories\n";
+	do_handle('stories', $sth_s, !$opts{I}, \%hitlist, \@stories);
+
+	# Now go back and handle discussion updates.
+	print "Reprocessing discussions and hitparade...\n";
+	# Now what we NEED to do here is flatten @stories into a temporary 
+	# hash keyed on SID so when discussions gets processed it doesn't take
+	# forever to get the associated record.
+	my %story_hash;
+	for (@stories) {
+		$story_hash{$_->{sid}} = $_;
+	}
+
+	my $cond = '';
+	if ($opts{I}) {
+		$cond = "WHERE ts >= $datecond";
+
+		# Preserve min discussion ID of deleted records so we can
+		# properly delete discussion_hitparade.
+		my $sth_d = $dbh_new->prepare(<<EOT);
+SELECT min(id) FROM discussions $cond
+EOT
+		$sth_d->execute;
+		my($min_did) = $sth_d->fetchrow_array;
+
+		$deleted_discussions = 
+			$dbh_new->do("DELETE FROM discussions $cond");
+
+		$dbh_new->do(<<EOT) if $min_did;
+DELETE FROM discussion_hitparade WHERE discussion >= $min_did
+EOT
+
+	}
+
+	$sql = <<EOT;
+SELECT * FROM discussions $cond
+EOT
+
+	$sth_s = $dbh_old->prepare($sql);
+	$sth_s->execute;
+	die "SQL: $sql\n" if $dbh_old->errstr;
+	# Need a list of the Discussion SIDs that are updated, here.
+	printf "Processing discussions\n";
+	do_handle('discussions', $sth_s, 0, \%story_hash);
+	reload_keys('discussions', \%discussions, 'sid', 'sid', 'id');
+
+	# Update stories with the proper discussion ID.
+	for my $story (@stories) {
+		# If an ARCHIVED STORY has a non-existant discussion ID, then
+		# we must create one.
+		if (! $discussions{$story->{sid}}) {
+			$sql = <<EOT;
+INSERT INTO discussions (sid, title, url, topic, ts, flags)
+VALUES (
+	@{[$dbh_new->quote($story->{sid})]}, 
+	@{[$dbh_new->quote($story->{title})]},
+	'$vars{rootdir}/article.pl?sid=$story->{sid}',
+	@{[$topics{$story->{tid}} || $vars{defaulttopic}]},
+	'$story->{time}',
+	'dirty'
+)
+EOT
+
+			$dbh_new->do($sql);
+			die "SQL: $sql\n" if $dbh_new->errstr;
+			$discussions{$story->{sid}} = getLastInsertID();
+			print <<EOT;
+      + Inserted missing story data "$story->{title}"
+        ($story->{sid}) as #$discussions{$story->{sid}}
+EOT
+
+		}
+
+		# Make SURE we update stories....damned circular relationships!
+		$dbh_new->do(<<EOT);
+UPDATE stories SET discussion = $discussions{$story->{sid}}
+	WHERE sid=@{[$dbh_new->quote($story->{sid})]}
+EOT
+
+	}
+
+	print <<EOT if $deleted_discussions + $deleted_stories;
+      Deleted $deleted_stories stories, $deleted_discussions discussions 
+EOT
+
+	print <<EOT;
+      Imported @{[scalar @stories]} stories and associated records.
+EOT
+
+}
+
+
+sub update_pollresults {
+	my ($poll_data, $del) = @_;
+	$del ||= 0;
+
+	my $sth_s;
+
+	return if !keys %{$poll_data};
+
+	printf	"Updating results from %d new polls...\n",
+		scalar keys %{$poll_data};
+	for (keys %{$poll_data}) {
+		$sth_s = $dbh_old->prepare(<<EOT);
+SELECT * FROM pollanswers WHERE qid=@{[$dbh_old->quote($_)]}
+EOT
+
+		$sth_s->execute;
+		do_handle('pollanswers', $sth_s, $del);
+
+		$sth_s = $dbh_old->prepare(<<EOT);
+SELECT * FROM pollvoters WHERE qid=@{[$dbh_old->quote($_)]}
+EOT
+
+		$sth_s->execute;
+		do_handle('pollvoters', $sth_s, $del);
+
+		# Create discussion for existing poll if it doesn't already
+		# exist.
+		if (! $discussions{$_}) {
+			my $poll_url = "$vars{rootdir}/pollBooth.pl?qid=$_";
+			my $insert_q = <<EOT;
+INSERT INTO discussions (title, url, topic, ts, flags)
+VALUES (
+	$poll_data{$_}->{question},
+	@{[$dbh_new->quote($poll_url)]},
+	$vars{defaulttopic},
+	$poll_data{$_}->{date},
+	'dirty'
+)
+EOT
+
+			$dbh_new->do($insert_q);
+			die "SQL: $insert_q\n" if $dbh_new->errstr;
+			$discussions{$_} = getLastInsertID();
+
+			# Now have to update the poll!
+			$dbh_new->do(<<EOT);
+UPDATE pollquestions SET discussion = $discussions{$_} WHERE sid = '$_'
+EOT
+
+			print <<EOT;
+      + Created discussion for poll"$poll_data{$_}->{question}" ($_/$discussions{$_})
+EOT
+
+		}
+
+		# Only want del active the first time thru this, if it's active
+		# at all.
+		$del = 0 if $del;
+	}
+
+	# Make sure we get the latest poll. This should only return an array
+	# with one value. Note that this is a TRANSFER of data, so use of
+	# %vars here, is incorrect.
+	my $newpoll_ar = $dbh_old->selectall_arrayref(<<EOT);
+SELECT value FROM vars WHERE name='currentqid'
+EOT
+
+	$dbh_new->do(<<EOT);
+UPDATE vars SET	value=$polls{$newpoll_ar->[0][0]} WHERE name='currentqid'
+EOT
+
+}
+
+
+####################################
+# Full conversion subroutine.
+sub convert {
+	# Remember that the order of processing is CRITICAL.
+
+	# First we merge vars between the two sites. See details in the
+	# subroutine def.
+	merge_vars();
+
+	# These are direct copy tables that don't depend on anything else.
+	duplicate('content_filters', 1);
+	duplicate('tzcodes', 'tz');
+	duplicate('menus', 1) if $process_menus;
+
+	duplicate('topics', 1);
+	reload_keys('topics', \%topics, 'tid', 'alttext');
+
+	duplicate('sections', 1);
+
+	for (@user_tables) {
+		duplicate($_, 0);
+	}
+
+	# Stories: Merge with storiestuff data, uid, aid, sid, tid
+	# removal of all text fields into their own table (story_text).
+	update_stories();
+
+	duplicate('pollquestions', 1, \%poll_data);
+	reload_keys('pollquestions', \%polls, 'qid', 'date');
+	update_pollresults(\%poll_data, 1);
+	# Done with polls by this point.
+	%skip_polls = ();
+
+	copy_comments();
+	%polls = (); %poll_data = ();
+
+	# Moderatorlog: Fix sid, cid.
+	duplicate('moderatorlog', 1);
+	# Desperately needed, if you have a site the size of Slashdot, you're 
+	# probably running out of memory right about now.
+	%discussions = ();
+	%comments = ();
+
+	# Submissions: Fix uid, tid
+	duplicate('submissions', 1);
+
+	# do all the blocks stuff
+	duplicate('blocks', 'bid');
+	$dbh_new->do('INSERT INTO backup_blocks SELECT bid, block FROM blocks');
+
+	# Ignoring: formkeys, accesslog 
+	duplicate('metamodlog', 1);
+
+	convert_plugins();
+
+	# CLEAN UP PHASE -- THE MISCELLANY OF QUERIES
+	#
+	# Deal with section_topics table (new for Fry).
+	print "\nPerforming clean up...\n\n";
+	print "Constructing section_topics\n";
+	$dbh_new->do(<<EOT);
+DELETE FROM section_topics
+EOT
+
+	$dbh_new->do(<<EOT);
+INSERT INTO section_topics 
+	SELECT distinct section, tid FROM topics, sections WHERE LENGTH(section) > 0
+EOT
+
+	# Construct author_cache table (new for Fry).
+	print "Constructing authors_cache\n";
+	$dbh_new->do(<<EOT);
+DELETE FROM authors_cache
+EOT
+
+	$dbh_new->do(<<EOT);
+REPLACE INTO authors_cache
+	SELECT users.uid, nickname, fakeemail, homepage, count(stories.uid), bio, author
+	FROM users, stories, users_info
+	WHERE stories.uid=users.uid AND users.uid=users_info.uid
+	GROUP BY stories.uid
+EOT
+
+	# Delete 'author' entries from users_param.
+	print "Cleaning users_param of all 'author' entries...";
+	{
+		local $" = ',';
+		$dbh_new->do(<<EOT);
+DELETE FROM users_param WHERE name='author' 
+EOT
+
+	}
+	print "Done.\n";
+
+	print "\nConversion completed.\n\n";
+}
+
+
+####################################
+sub ask {
+	local $| = 1;
+
+	chomp(my $question = $_[0]);
+	print "\n", $question, " ";
+
+	chomp(my $answer = <STDIN>);
+	print "\n";
+	return $answer;
+}
+
+
+sub load_storystuff {
+	my ($hitlist) = @_;
+
+	print "Loading hitcounts into story metadata...\n";
+	my $sth_s = $dbh_old->prepare('SELECT sid, hits FROM storiestuff');
+	$sth_s->execute;
+	while (my $data = $sth_s->fetchrow_hashref) {
+		$hitlist->{$data->{sid}}{hits} = $data->{hits};
+	}
+	$sth_s->finish;
+}
+
+
+sub copy_comments {
+	my %dead_discussions;
+	my($lastdate, $cond) = ('', '');
+
+	# Is this sufficient or should this be SID based?
+	my $datecond = <<EOT;
+date_format(date_sub(now(), interval 15 day), '%Y-%m-%d 00:00')
+EOT
+	my $sth_d = $dbh_new->prepare("SELECT $datecond");
+	$sth_d->execute;
+	my($display) = $sth_d->fetchrow_array;
+
+	if ($opts{I}) {
+		$cond = "WHERE date > $datecond";
+		print "Deleting stale comments...\n";
+		my(@delete_sids) = @{$dbh_new->selectall_arrayref(<<EOT)};
+SELECT cid FROM comments $cond
+EOT
+
+		# Flatten resulting list into a list of CIDs to delete.
+                @delete_sids = 	map { $_ = $_->[0] } @delete_sids;
+		my $deleted_comm = $#delete_sids + 1;
+                # We delete in batches to prevent the SQL buffer from
+                # overflowing.
+                my $batchsize = 100;
+		LOOP: { do {
+			my @batch = grep { defined($_) }
+					 @delete_sids[0 .. $batchsize-1];
+			local $" = ',';
+			$dbh_new->do(<<EOT) if @batch;
+DELETE FROM comment_text WHERE cid IN (@batch)
+EOT
+
+			last LOOP if $#delete_sids < $batchsize - 1;
+			@delete_sids = @delete_sids[$batchsize..$#delete_sids];
+		} while (@delete_sids) };
+		
+		$dbh_new->do("DELETE FROM comments $cond");
+		print "Copying comment data and texts from $display...\n";
+	} else {
+		print "Copying comment data and texts...\n";
+	}
+	my $sth_s = $dbh_old->prepare("SELECT * FROM comments $cond");
+	$sth_s->execute;
+
+	LOOP:
+	while (my $data = $sth_s->fetchrow_hashref) {
+		next if exists $dead_discussions{$data->{sid}};
+
+		my $sid = $discussions{$data->{sid}};
+		if (! $sid) {
+			$dead_discussions{$data->{sid}}++;
+			print <<EOT;
+      Skipping deleted discussion '$data->{sid}'
+EOT
+
+			next LOOP;
+		}
+
+		my $insert_d = scalar join(', ', 
+			map { $dbh_new->quote($data->{$_}) }
+			qw [pid date subject uid points lastmod reason]
+		);
+
+		my $insert_q = <<EOT;
+INSERT INTO comments
+(sid, pid, date, subject, uid, points, lastmod, reason)
+VALUES ($sid, $insert_d)
+EOT
+
+		$dbh_new->do($insert_q);
+		die "SQL: $insert_q\n" if $dbh_new->errstr;
+
+		my $new_cid = getLastInsertID();
+		# This only needs to be done for comments that are "live".
+		$comments{$data->{sid}}->{$data->{cid}} = $new_cid
+			if $data->{date} ge $display;		
+	
+		$data->{comment} = $dbh_new->quote($data->{comment});
+		my $sql = <<EOT;
+INSERT INTO comment_text (cid, comment)
+VALUES ($new_cid, $data->{comment})
+EOT
+
+		$dbh_new->do($sql);
+	} 
+	$sth_s->finish;
+
+	# Now update PIDs.
+	print "Updating comment heirarchy.\n";
+	$sth_s = $dbh_old->prepare(<<EOT);
+SELECT DISTINCT sid,pid FROM comments $cond
+EOT
+
+	$sth_s->execute;
+	while (my $data = $sth_s->fetchrow_hashref) {
+		next if !$data->{pid} || exists $dead_discussions{$data->{sid}};
+		my $pid = $comments{$data->{sid}}->{$data->{pid}} || 0;
+
+			my $SQL = <<EOT;
+UPDATE comments SET
+	pid=$pid
+WHERE 	sid=$discussions{$data->{sid}} AND
+	pid=$data->{pid}
+EOT
+
+		$dbh_new->do($SQL);
+		print STDERR <<EOT if $dbh_new->errstr;
+($data->{sid}|$data->{pid}) SQL: $SQL
+EOT
+
+	}
+
+	# We need to grab the lowest discussion ID that we are INSERTING.
+	# circular dependencies again (and the fact that there may be 
+	# dirty hitparade columns from the EXISTING data.
+	$sth_s = $dbh_new->prepare(<<EOT);
+SELECT min(id) FROM discussions WHERE ts >= $datecond
+EOT
+	$sth_s->execute;
+	my($min_did) = $sth_s->fetchrow_array;
+
+	# Now update discussion_hitparade...
+	print "Updating story comment counts...";
+	$sth_d = $dbh_new->prepare(<<EOT);
+SELECT id,sid FROM discussions WHERE flags='dirty'
+EOT
+
+	$sth_d->execute();
+	printf "%s\n", ($sth_d->rows) ? 
+		(sprintf "%d rows", $sth_d->rows) : '';
+	while (my($id, $s_id) = $sth_d->fetchrow_array) {
+		# We COULD take the hitparade from the story, but instead
+		# we take it from COMMENTS because the data from the
+		# story is probably dirty.
+		my $sth_d1 = $dbh_new->prepare(<<EOT);
+SELECT points, count(*) FROM comments WHERE sid=$id GROUP BY points
+ORDER BY points DESC
+EOT
+
+		my $total = 0;
+		my(@hitparade);
+		# Set upper index and initialize.
+		$hitparade[$vars{comment_maxscore} -
+			   $vars{comment_minscore}] = 0;
+		$_ = 0 for (@hitparade);
+		$sth_d1->execute;
+		while (my($val, $count) = $sth_d1->fetchrow_array) {
+			$total += $count;
+			$hitparade[$val - $vars{comment_minscore}] = $total;
+		}
+		$sth_d1->finish;
+		for (qw(discussions stories)) {
+			my $field = (/^stories$/) ? 'sid' : 'id';
+			my $insert_id = ($_ eq 'stories') ?
+				$dbh_new->quote($s_id) : $id;
+			my $hp = '';
+			$hp = ", hitparade='" . join(',', @hitparade) . "'"
+				if $_ eq 'stories';
+			my $sql = <<EOT;
+UPDATE $_ SET 
+	commentcount=$total $hp
+WHERE $field=$insert_id
+EOT
+
+			$dbh_new->do($sql);
+			die "SQL $sql\n" if $dbh_new->errstr;
+		}
+	}
+	
+	# Make sure we update discussion type.
+	$dbh_new->do(<<EOT);
+UPDATE discussions SET type='archived' 
+	WHERE ts < date_sub(now(), interval $vars{archive_delay} day)
+EOT
+
+	# Make sure we clean our flags.
+	$dbh_new->do(
+		"UPDATE discussions SET flags='ok' WHERE flags='dirty'"
+	);
+}
+
+
+sub reload_keys {
+	my($table, $key_tbl, $f1, $f2, $f3) = @_;
+	$f3 ||= $f1;
+	my(%old, %new);
+	my $sth_s = $dbh_old->prepare("SELECT $f1, $f2 FROM $table");
+	$sth_s->execute;
+	while (my $data = $sth_s->fetchrow_hashref) {
+		$old{$data->{$f1}} = $data->{$f2};
+	};
+	$sth_s->finish;
+	my $sth_d = $dbh_new->prepare("SELECT $f3, $f2 FROM $table");
+	$sth_d->execute;
+	while (my $data = $sth_d->fetchrow_hashref) {
+		$new{$data->{$f2}} = $data->{$f3};
+	}
+	$sth_d->finish;
+	for (keys %old) {
+		$key_tbl->{$_} = $new{$old{$_}};
+	}
+}
+
+
+sub get_authors {
+	my $sql = <<EOT;
+SELECT users.uid, nickname FROM users, users_param
+WHERE name='author' AND value=1 AND users.uid=users_param.uid
+EOT
+
+	my $sth_s = $dbh_old->prepare($sql);
+	$sth_s->execute;
+	my $err = $dbh_old->errstr;
+	die "SQL: $sql\n" if $err;
+
+	my @uidlist;
+	while (my($uid, $auth) = $sth_s->fetchrow_array) {
+		$story_authors{lc($auth)} = $uid;
+	}
+}
+
+
+sub update {
+	my($table, @opt) = @_;
+	my($where, $cond);
+
+	return if !$table;
+	if (!exists $conditions{$table}) {
+		print "X == SKIPPING update on '$table': no conditions\n";
+		return;
+	}
+
+	my $sql = <<EOT;
+SELECT max($conditions{$table}->{field}) FROM $table
+EOT
+
+	my $sth_d = $dbh_new->prepare($sql);
+	$sth_d->execute();
+	my $err = $dbh_new->errstr;
+	die "SQL ($table): $sql\n" if $err;
+
+	my($max_id)= $sth_d->fetchrow_array();
+
+	$cond = sprintf $conditions{$table}->{cond}, $max_id
+		if $conditions{$table}->{type} eq 'int';
+
+	$cond = sprintf $conditions{$table}->{cond}, $dbh_old->quote($max_id)
+		if $conditions{$table}->{type} eq 'date';
+
+	my $sth_s = $dbh_old->prepare(<<EOT);
+SELECT * FROM $table WHERE $cond
+EOT
+
+	$sth_s->execute();
+	print "Updating $table...\n" if $sth_s->rows;
+	do_handle($table, $sth_s, 0, @opt);
+}
+
+
+####################################
+# the main function to copy data from old DB to new DB
+# if $opt is 1, delete table contents before inserting
+# if $opt is 0, do nothing with table before inserting
+# if $opt is a string, delete that specific column before inserting
+sub duplicate {
+	my($table, $opt, @extra) = @_;
+	my $filter = $conversions{$table};
+
+	if ($sacred_tables{$table}) {
+		print "Not processing $table, as requested!\n";
+		return;
+	}
+	print "Processing $table\n";
+
+	my $sth_s = $dbh_old->prepare("SELECT * FROM $table");
+	$sth_s->execute;
+
+	do_handle($table, $sth_s, $opt, @extra);
+}
+
+sub do_handle {
+	my ($table, $sth, $opt, @extra) = @_;
+
+	die "No conversion filter for table '$table'!" 
+		unless exists $conversions{$table};
+
+	if ($opt eq 1) {
+		$dbh_new->do("DELETE FROM $table");
+	}
+
+	my $filter = $conversions{$table};
+	while (my $data = $sth->fetchrow_hashref) {
+		$data = $filter->($data, @extra) if ref $filter eq 'CODE';
+		next unless $data;
+
+		# Remove any potential extraneous fields if specified.
+		if (exists $data->{ALLOWED_FIELDS}) {
+			my @fieldlist;
+			push @fieldlist, @{$data->{ALLOWED_FIELDS}};
+			delete $data->{ALLOWED_FIELDS};
+			my $fl = join ('|', @fieldlist);
+			map { delete $data->{$_} }
+				grep { ! /^($fl)$/ } keys %{$data};
+		}
+		
+		map {
+			$data->{$_} = (/^-/) ? $_:$dbh_new->quote($data->{$_});
+		} keys %$data;
+		my $insert = sprintf("INSERT INTO $table (%s) VALUES (%s)",
+			join(', ', map { s/^\-//; $_ } keys %$data),
+			join(', ', values %$data)
+		);
+
+		if ($opt =~ /[a-zA-Z]/) {
+			$dbh_new->do(<<EOT);
+DELETE FROM $table WHERE $opt = $data->{$opt}
+EOT
+
+		}
+
+		$dbh_new->do($insert);
+		my $err = $dbh_new->errstr;
+		die "$table: $err" if $err;
+
+		# This hack might be a better way to do what reload_keys()
+		# does and is required in a few places. 
+		# [unused, but let's leave it for now. It shouldn't hurt
+		# anything as long as nothing refers to it]
+		if (exists $data->{KEY_HASH}) {
+			($data->{KEY_HASH}{$data->{$data->{KEY_OLD}}}) = 
+				getLastInsertID();
+		}
+	}
+}
+
+
+sub getLastInsertID {
+	my($ret) = $dbh_new->selectall_arrayref("SELECT LAST_INSERT_ID()");
+
+	return $ret->[0][0];
+}
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] RCFILE
+
+Converts Slash 2.0 data to Slash 2.2 data.  Type
+"perldoc $PROGNAME" or "perldoc `which $PROGNAME`"
+for instructions on use.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+
+	-u	v2.2 Virtual user (default is "slash") [REQUIRED]
+	-U 	v2.0 Virtual user. 	               [REQUIRED]
+
+	-I	Perform INCREMENTAL conversion
+
+The following are advanced options. Use these ONLY IF YOU KNOW 
+WHAT YOU ARE DOING:
+
+	-M	Use old menus table.
+
+	-P<x>	Force presence (and conversion) of comma separated list 
+		of plugins: <x>
+
+	-X<x>	Do not convert any of the tables listed in comma
+		separated list: <x>
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+1;
+
+__END__
+
+
+=head1 NAME
+
+slash2toslash2 - Convert Slash 2.0 database to Slash 2.2
+
+=head1 SYNOPSIS
+
+	install-slashsite -u slash
+	slash2toslash2 -U old-slash -u slash 
+
+=head1 DESCRIPTION
+
+Please read these instructions before starting a new Slash 2.2
+site.  They are designed to convert a site from scratch; they
+will not work with a Slash 2.2 site that's been used.
+
+This program will copy data from your old Slash 2.0 database
+to your new Slash 2.2 database, making direct connections to
+both databases and copying the data directly between them.
+
+It will copy over your data, but if you've done any customizations to
+display blocks, or code, it will not copy that over. Templates, however, 
+will be preserved.
+
+A detailed description of the work done is below, L<"DETAILS">.
+You might want to read this section before running the program.
+
+Note that this is designed for converting a Slash 2.0.0 database;
+any schema changes you've made, or incompatible changes from
+earlier versions of Slash, may break this program.
+
+Please follow these instructions precisely to convert your Slash 2.0
+site to Slash 2.2.
+
+
+=head2 Requirements
+
+=over 4
+
+=item *
+
+You will need a new database to copy the new data to.  This could be
+on the same database server as the Slash 2.0 data, but because
+the installed modules (specifically, Slash.pm) are not compatible
+between the sites, you will most likely want to have the installed
+code for 2.0 and 2.2 on separate boxes.
+
+=item *
+
+You will need Slash 2.2 installed on some box.
+
+=item *
+
+You will need access to both the 2.0 and 2.2 databases from the same
+box.  The program will be run from the box that has Slash 2.2 installed,
+so if that box does not have access to the Slash 2.0 database, you will
+need to either temporarily edit the mysql.user table of the 2.0 server
+to grant access, or copy the database from the 2.0 server to the 2.2
+server.
+
+=back
+
+
+=head2 BACK UP YOUR DATA
+
+If you lose your data, it is your problem, not ours.  We've deleted data
+from sites, before, while preparing these upgrade programs.  Fortunately
+we had backups ready to go.  Back up your data on your Slash 2.0
+database.  You have been warned.
+
+Also, consider what happens if you have two Slash sites on one machine;
+what if you give this program the wrong virtual user?  Perhaps you
+just deleted a working site!  Back up any existing data on the target
+database server, too.  See, even after writing this warning, we've
+been guilty and typed "slash" as the virtual user instead of the 
+intended name, overwriting some of the existing database on some of
+our test sites!
+
+This program does not write to your Slash 2.0 database, so you should
+be fine, but there are no warranties, expressed or implied.  If you
+are running a Slash site, you should be backing up your database
+nightly anyway, right?
+
+So backup all your data on both boxes, so you don't feel like a moron!
+
+
+=head2 Database Preparation
+
+You probably won't need to change any data.  Here are some things to
+check before starting:
+
+=over 4
+
+=item *
+
+Decide whether or not you want to keep the new admin account created
+in your Slash 2.2 database.  Chances are, you won't want to or need
+to.
+
+However, if you do want to keep it, then you need to delete/modify all
+references to that user's uid in your Slash 2.0 database.  It is easier
+if you just allow this program to delete that uid from your Slash 2.2
+database, though, so there is no conflict.
+
+=back
+
+
+=head2 Install Slash 2.2 Slash Site
+
+Run the C<install-slashsite> program as described in that program's
+documentation.  Remember which I<virtual user> you used to install
+the site.  Do not make any changes to the database.
+
+
+=head2 Run It
+
+Run the program, using the proper value for virtual_user and
+the proper path to the slashdotrc.pl file:
+
+	slash2toslash2 -U old_virtual_user -u virtual_user
+
+You will be asked if you want to delete the new admin user created by 
+C<install-slashsite> (probably yes).
+
+
+=head2 Add Final Touches
+
+Copy over any images or static files you have, and adjust the
+site's templates, blocks, and variables as needed.
+
+
+=head1 DETAILS [Section should be updated!]
+
+This is just a detailed run-down of what the program does, in the
+order it does it.
+
+=over 4
+
+=item *
+
+[ Section to be completed, later. ]
+
+=item *
+
+If you chose to delete the new admin user account created by
+C<install-slashsite>, it is deleted from each of the users*
+tables.  If you choose not to, then UID 2 will not be copied
+from the 2.0 database; however, all stories, comments, etc.
+assigned to UID 2 I<will> still be copied.
+
+We do not bother deleting comments and stories, because
+those will be overwritten later.
+
+=item *
+
+For the following tables, the contents are copied directly from
+the 1.0 database to the 2.2 database:
+
+	[ Complete this list ]
+
+=item *
+
+The existing values from the 2.0 database vars table are copied
+to the 2.2 database.
+
+=item *
+
+Templates are NOT copied, and there is a good reason for this. Templates are 
+going to be the most volatile element of your site's design, it's impossible
+for us to plan for what changes there may be so no specific upgrade path for 
+templates exists except to update them by hand, as necessary. Use the 
+template-check tool to compare templates before upgrading your site, and make
+whatever changes are necessary once you have your converted site back in place.
+I know it's a pain, but you'll be _much_ happier with the results.
+
+=back
+
+=head1 INCREMENTAL UPDATES
+
+If you invoke this program using the -I switch, an incremental conversion will
+be performed. The name implies exactly what it means, each table has a condition
+that will allow for incremental updates to be performed between a Beast site and
+a Fry site, which is useful for sites attempting to upgrade to Fry by using
+another system in tandem.
+
+An incremental update assumes that a previous conversion (or a working Slash site
+already exists at the database referred to by the specified virtual user.
+
+The following tables will remain UNTOUCHED in an incremental update:
+	blocks
+	code_param
+	commentmodes
+	content_filters
+	dateformats
+	menus
+	sections
+	templates
+	topics
+	tzcodes
+
+The above tables are generally part of a theme, and this should allow for a site\
+admin to CHANGE the given theme without needing to reimport the entire dataset, 
+if they so desire.
+
+=head1 VERSION
+
+$Id$

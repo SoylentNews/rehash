@@ -1,0 +1,109 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+###############################################################################
+# dailyStuff - this program runs various housekeeping tasks, sends out the
+# the mailing list, and compiles site statistics report and sends the report
+# to the site admin
+###############################################################################
+
+use strict;
+use File::Basename;
+use File::Path;
+use File::Spec::Functions;
+use Slash;
+use Slash::Display;
+use Slash::Utility;
+
+my $virtual_user = $ARGV[0];
+createEnvironment($ARGV[0]);
+
+my $constants = getCurrentStatic();
+my $slashdb   = getCurrentDB();
+my $messages  = getObject('Slash::Messages');
+
+doLogInit('dailyStuff');
+
+# On a site with a lot of users, this may take hours.
+dailyStuffLog('MailingList Begin');
+mailingList();
+dailyStuffLog('MailingList End');
+
+
+doLogExit('dailyStuff');
+
+sub generateDailyMail {
+	my $data = $slashdb->getDailyMail();
+
+	return unless @$data;
+
+	my @stories;
+	for (@$data) {
+		my(%story, @ref);
+		@story{qw(sid title section author tid time dept
+			introtext bodytext)} = @$_;
+
+		1 while chomp($story{introtext});
+		1 while chomp($story{bodytext});
+
+		my $asciitext = $story{introtext};
+		$asciitext .= "\n\n" . $story{bodytext} if $constants->{newsletter_body};
+		($story{asciitext}, @ref) = html2text($asciitext, 74);
+
+		$story{refs} = \@ref;
+		push @stories, \%story;
+	}
+
+	my $newsletter = slashDisplay("dailynews",
+		{ stories => \@stories, urlize => \&urlize },
+		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
+	);
+
+	my $headlines  = slashDisplay("dailyheadlines",
+		{ stories => \@stories },
+		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
+	);
+
+	return($newsletter, $headlines);
+}
+
+sub mailingList {
+	return unless $messages;
+	my($newsletter, $headlines) = generateDailyMail();
+	return unless $headlines;
+
+	# need to change for specific prefs, later
+	my $n_users = $messages->getNewsletterUsers();
+	my $h_users = $messages->getHeadlineUsers();
+
+	# get addresses from users
+	my @n_email = map { $_->[2] } @$n_users;
+	my @h_email = map { $_->[2] } @$h_users;
+
+	my $n_subj = getData('newsletter subject', {}, 'messages');
+	my $h_subj = getData('headlines subject',  {}, 'messages');
+
+	dailyStuffLog("Daily Newsletter begin");
+	$messages->bulksend(\@n_email, $n_subj, $newsletter, 0);
+	dailyStuffLog("Daily Newsletter end");
+	dailyStuffLog("Daily Headlines begin");
+	$messages->bulksend(\@h_email, $h_subj, $headlines,  1);
+	dailyStuffLog("Daily Headlines end");
+}
+
+sub dailyStuffLog {
+	doLog('dailyStuff', \@_);
+}
+
+sub urlize {
+	local($_) = @_;
+	s/^(.{62})/$1\n/g;
+	s/(\S{74})/$1\n/g;
+	$_ = "<URL:" . $_ . ">";
+	return $_;
+}
+
+1;

@@ -1,0 +1,207 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use URI;
+use Getopt::Std;
+use File::Basename;
+use Digest::MD5 'md5_hex';
+use Benchmark;
+use Slash;
+use Slash::Utility;
+use Slash::DB;
+
+use vars qw( $slashdb $constants $vars $comment_table );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:f:l:F:L:v', \%opts);
+usage() if $opts{'h'};
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+my $vars = $slashdb->sqlSelectAllHashref("name", "name, value", "vars");
+$comment_table = 'comments';
+my($min_cid, $max_cid) = (0, 0);
+if ($opts{'f'} or $opts{'l'}) {
+	# if "-f" specified, do the last day by default
+	$opts{'f'} ||= time-(86400*7);
+	$opts{'l'} ||= time;
+	$min_cid = $slashdb->sqlSelect(
+		"MIN(cid)",
+		$comment_table,
+		"UNIX_TIMESTAMP(date) > " . $slashdb->sqlQuote($opts{'f'})
+	);
+	$max_cid = $slashdb->sqlSelect(
+		"MAX(cid)",
+		$comment_table,
+		"UNIX_TIMESTAMP(date) < " . $slashdb->sqlQuote($opts{'l'})
+	);
+} else {
+	# do the last 100 comments by default
+	$max_cid = $opts{'L'} || $slashdb->sqlSelect("MAX(cid)", $comment_table);
+	$min_cid = $opts{'F'} || $max_cid-100;
+	$min_cid = 0 if $min_cid < 0;
+}
+
+# main program logic (in braces to offset nicely)
+{
+	print "Adding domain tags to comments from $min_cid to $max_cid.\n";
+	print "Caution - this script is largely untested.  If you don't know\n";
+	print "what you're doing, hit ^C in the next 5 seconds.\n";
+	sleep 5;
+
+	my $t0 = new Benchmark;
+	my $count_changed = 0;
+	for (my $cid = $min_cid; $cid <= $max_cid; ++$cid) {
+		my $text = $slashdb->sqlSelect(
+			"comment",
+			"comment_text",
+			"cid=$cid"
+		);
+		next unless $text and length($text) > 15;
+		my $new_text = myAddDomainTags($text);
+		next unless $new_text ne $text;
+		my $new_signature = md5_hex($new_text);
+		$slashdb->sqlUpdate("comment_text", { comment => $new_text }, "cid=$cid");
+		$slashdb->sqlUpdate($comment_table, { signature => $new_signature }, "cid=$cid");
+		$slashdb->sqlUpdate("comments", { signature => $new_signature }, "cid=$cid")
+			if $comment_table ne "comments";
+		++$count_changed;
+		printf "%5d. cid %7d: %5d -> %5d bytes\n",
+			$count_changed, $cid, length($text), length($new_text);
+		sleep 1 if ($count_changed % 100) == 0; # give DB a rest
+	}
+
+	my $t1 = new Benchmark;
+	print "$count_changed comments (of " . ($max_cid-$min_cid) . ")" .
+		" domaintagified in: " .
+        	timestr(timediff($t1, $t0), 'noc') . "\n";
+}
+
+exit 0;
+
+# subroutines
+
+sub myAddDomainTags {
+	my($html) = @_;
+
+	# First step is to eliminate unclosed <A> tags.
+
+	my $in_a = 0;
+	$html =~ s
+	{
+		( < (/?) A \b[^>]* > )
+	}{
+		my $old_in_a = $in_a;
+		my $new_in_a = !$2;
+		$in_a = $new_in_a;
+		(($old_in_a && $new_in_a) ? "</A>" : "") . $1
+	}gixe;
+	$html .= "</A>" if $in_a;
+
+	# Now, since we know that every <A> has a </A>, this pattern will
+	# match and let the subroutine above do its magic properly.
+
+	$html =~ s
+	{
+		(<A[ ]HREF="
+			([^">]+)
+		">[\000-\377]+?)
+		</A\b[^>]*>
+	}{
+		$1 . _url_to_domain_tag($2)
+	}gixe;
+
+	return $html;
+}
+
+sub _url_to_domain_tag {
+	my($link) = @_;
+	my $absolutedir = $vars->{absolutedir}{value};
+	my $uri = URI->new_abs($link, $absolutedir);
+	my($info, $host, $scheme) = ("", "", "");
+	if ($uri->can("host") and $host = $uri->host) {
+		$info = lc $host;
+		if ($info =~ m/^([\d.]+)\.in-addr\.arpa$/) {
+			$info = join(".", reverse split /\./, $1);
+		}
+		if ($info =~ m/^(\d{1,3}\.){3}\d{1,3}$/) {
+			# leave a numeric IP address alone
+		} elsif ($info =~ m/([\w-]+\.[a-z]{3,4})$/) {
+			# a.b.c.d.com -> d.com
+			$info = $1;
+		} elsif ($info =~ m/([\w-]+\.[a-z]{2,4}\.[a-z]{2})$/) {
+			# a.b.c.d.co.uk -> d.co.uk
+			$info = $1;
+		} elsif ($info =~ m/([a-z]+\.[a-z]{2})$/) {
+			# a.b.c.realdomain.gr -> realdomain.gr
+			$info = $1;
+		} else {
+			# any other a.b.c.d.e -> c.d.e
+			my @info = split /\./, $info;
+			my $num_levels = scalar @info;
+			if ($num_levels >= 3) {
+				$info = join(".", @info[-3..-1]);
+			}
+		}
+	} elsif ($uri->can("scheme") and $scheme = $uri->scheme) {
+		# Most schemes, like ftp or http, have a host.  Some,
+		# most notably mailto and news, do not.  For those,
+		# at least give the user an idea of why not, by
+		# listing the scheme.
+		$info = lc $scheme;
+	} else {
+		$info = "?";
+	}
+	if (length($info) >= 25) {
+		$info = substr($info, 0, 10) . "..." . substr($info, -10);
+	}
+	return "</a $info>";
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#comments]
+
+This utility creates test comments for a given Slash site. This program is for
+testing purposes, only, particularly for those ambitious Slash users out there
+who want to try their hand at modifying the comment or moderation systems.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-f	First date (unix timestamp e.g. 987100000)
+	-l	Last date  (unix timestamp e.g. 987500000)
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

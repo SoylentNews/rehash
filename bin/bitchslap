@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash::Utility;
+use Slash::DB;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hvu:', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+usage('Please specify a list of User IDs') if (! scalar @ARGV);
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+
+# We turn off warnings here because it's distracting.
+$^W = 0; createEnvironment($opts{'u'}); $^W = 1;
+
+my $slashdb = getCurrentDB();
+my $constants = getCurrentStatic();
+
+# main program logic (in braces to offset nicely)
+{
+
+	for (@ARGV) {
+		my $user = $slashdb->getUser($_);
+		if (! $user) {
+			print "User ID#$_ is invalid.\n";
+			next;
+		}
+
+		unless ($opts{'f'}) {
+			die <<ERR if $user->{karma} > 10;
+User $_ has a karma of $user->{karma}. Slap aborted. Use -f to forcibly slap.
+ERR
+
+		}
+
+		print "Bitch Slapping #$_...\n";
+		print "Karma Reduced\n";
+		print "Default Score Reduced\n";
+		$slashdb->setUser($_, {
+			-karma		=> $constants->{badkarma},
+			-defaultpoints	=> -1,
+		});
+
+		print "ALL live comments moderated down\n\n";
+		$slashdb->sqlDo("UPDATE comments SET points=-1,reason=1 WHERE uid=$_");
+	}
+}
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] ... [UIDs]
+
+SHORT PROGRAM DESCRIPTION
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-f 	Force slap.
+
+	[UIDs]	Space separated list of IDs to slap.
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

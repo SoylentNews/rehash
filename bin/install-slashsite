@@ -1,0 +1,594 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This is the uber install script.
+# -Brian (brian@tangent.org)
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use File::Copy;
+use File::Find;
+use File::Path;
+use File::Spec::Functions;
+use Slash;
+use Slash::DB;
+use Slash::Install;
+
+use vars qw(
+	$dirname
+);
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hvu:a:e:g:o:p:n:H:L:T:P:R', \%opts);
+usage() if !$opts{'u'} and ($opts{'h'} or !keys %opts);
+# if invoked with both -u and -h, call usage() later, after we load Slash::Install
+version() if $opts{'v'};
+
+$| = 1;
+
+my $prefix_site = "$PREFIX/site";
+my(	$owner, $owner_id, $group, $group_id, $password,
+	$sitename, $username, $realname, $email, $dbh, @create, $sql,
+	@sql, $hostname, $hostname_f, $host_noport, $httpd, %slash_sites,
+	$driver, $theme, $symlink
+);
+
+my %drivers = (
+	Pg	=> 'postgresql',
+	mysql	=> 'mysql',
+	Oracle	=> 'oracle'
+);
+
+unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
+	print "You did not supply a valid DBIx::Password virtual name.\n";
+	exit;
+}
+
+$driver = $drivers{DBIx::Password::getDriver($opts{'u'})};
+my $install = Slash::Install->new($opts{'u'});
+
+usage() if $opts{'u'} and $opts{'h'};
+
+eval { require DBIx::Password };
+
+if ($@) {
+	print "Doesn't look like you have DBIx::Password installed.\n";
+	print "Run the CPAN tool and install DBIx::Password.\n";
+	exit;
+}
+
+eval { require Template };
+
+if ($@) {
+	print <<'EOT';
+Doesn't look like you have Bundle::Slash installed.
+Run the CPAN tool and install Bundle::Slash.  See
+INSTALL for more information.
+EOT
+	exit;
+}
+
+$dbh = DBIx::Password->connect($opts{'u'});
+
+unless ($dbh) {
+	print "Are you sure the database is up and running?\n";
+	exit;
+}
+
+END { $dbh->disconnect if $dbh }
+
+# THIS IS DANGEROUS ... when run as root on a non-GNU
+# system, it can blank out the hostname entirely
+chomp($hostname_f = `hostname -f`);
+unless ($opts{'H'}) {
+	print "
+What is hostname of your Slash site
+(e.g., www.slashdot.org)? [$hostname_f] ";
+	chomp($hostname = <STDIN>);
+	$hostname ||= $hostname_f;
+} else {
+	$hostname = $opts{'H'};
+}
+($host_noport = $hostname) =~ s/:.+$//;
+
+unless ($opts{'o'}) {
+	print "\nWhat user would you like to run your Slash site as? [nobody] ";
+	chomp($owner = <STDIN>);
+	$owner ||= 'nobody';
+} else {
+	$owner = $opts{'o'};
+}
+$owner_id = getpwnam($owner);
+die "$owner is not a valid user name.\n" unless defined $owner_id;
+
+unless ($opts{'g'}) {
+	my $tmpgroup = getgrgid($owner_id);
+	$tmpgroup = defined($tmpgroup) ? $tmpgroup : 'nobody';
+	print "\nWhat group would you like to run your Slash site under? [$tmpgroup] ";
+	chomp($group = <STDIN>);
+	$group ||= $tmpgroup;
+} else {
+	$group = $opts{'g'};
+}
+$group_id = getgrnam($group);
+die "$group is not a valid group name.\n" unless defined $group_id;
+
+if ($opts{'R'}) {
+	$sitename = $host_noport;
+} else {
+	unless ($opts{'n'}) {
+		print "
+OK, I am planning on user $host_noport as the unique name
+for the Slash site.  If this is not ok, you need to fill in
+something else here. [$host_noport] ";
+		chomp($sitename = <STDIN>);
+		$sitename ||= $host_noport;
+	} else {
+		$sitename = $opts{'n'};
+	}
+}
+
+# themes
+my $x;
+#---------------------------------------------------
+$theme = 0;
+my $theme_num = 0;
+my $themes = $install->getThemeList($PREFIX);
+if ($opts{'T'}) {
+	$theme = $opts{'T'};
+	if (!exists $themes->{$theme}) {
+		print "Error: the theme you specified on the command line, '$theme', does not exist. (Note: case matters.)\n";
+		$theme = '';
+	} else {
+		$theme_num = $themes->{$theme}{order};
+	}
+}
+if (!$theme) {
+	print "\nWhich theme do you want to use?\n";
+	for (sort keys %$themes) {
+		if ((keys %$themes) > 1) {
+			print "( )$themes->{$_}{'order'}.\t$_ $themes->{$_}{'description'}\n";
+		} else {
+			print "(*)$themes->{$_}{'order'}.\t$_ $themes->{$_}{'description'}\n";
+		}
+	}
+	if ((keys %$themes) > 1) {
+		chomp($theme_num = <STDIN>);
+		$theme_num ||= '1';
+	} else {
+		print "\nSkipping theme select since you only have one theme!\n";
+		$theme_num = '1';
+	}
+
+	for (keys %$themes) {
+		if ($themes->{$_}{order} == $theme_num) {
+			$theme = $_;
+		}
+	}
+}
+print "Theme selected: $theme\n";
+
+#---------------------------------------------------
+my $plugins = $install->getPluginList($PREFIX);
+my @plugins = ( );
+if ($opts{'P'}) {
+	@plugins = grep { exists $plugins->{$_} }
+		split /\s*,\s*/, $opts{'P'};
+} else {
+	my @default_plugins = ( );
+	my %order_to_name = ( );
+	print "\nPlease select which plugins you would like ('*' marks default).\n";
+	for my $key (sort keys %$plugins) {
+		my $c = " ";
+		if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
+			$c = "*";
+			push @default_plugins, $key;
+		}
+		print "($c) $plugins->{$key}{order}. $key - $plugins->{$key}{description}\n";
+		$order_to_name{$plugins->{$key}{order}} = $key;
+	}
+	my $select = 'a';
+	print "Hit 'a' to select all, otherwise select comma separated numbers or 'q' to quit\n";
+	while ($select ne 'q'){
+		chomp($select = <STDIN>);
+		if ($select =~ /^[\d ,]+$/) {
+			$select =~ s/ +//g;
+			@default_plugins = ( );
+			@plugins = grep { $_ } map { $order_to_name{$_} } split /,/, $select;
+			last;
+		} elsif ($select eq 'a') {
+			@plugins = map { $plugins->{$_}{name} } sort keys %$plugins;
+			last;
+		}
+	}
+	push @plugins, @default_plugins if @default_plugins;
+}
+# Zero out the list of plugins
+%{$themes->{$theme}{plugin}} = ( );
+# Add back in the ones just selected
+for my $plugin (@plugins) {
+	if ($plugins->{$plugin}) {
+		$themes->{$theme}{plugin}{$plugin} = 1;
+	}
+}
+# Show the user what was picked
+print "Plugins selected: " . join(" ", sort keys %{$themes->{$theme}{plugin}}) . "\n\n";
+
+
+if ($opts{'L'}) {
+	$symlink = $opts{'L'} =~ /^n/i ? 0 : 1;
+} else {
+	print "
+Would you like to install all the files as symlinks
+to the original?  (If not, each file will be copied to
+your Slash directories). [Y] ";
+	chomp(my $ans = <STDIN>);
+	$ans ||= 'Y';
+	$symlink = $ans =~ /^\s*[Yy]/;
+}
+
+
+unless ($opts{'a'}) {
+	print "
+Create a name for the site's admin account (8 characters
+or less). [$owner] ";
+	chomp($username = <STDIN>);
+	$username ||= $owner;
+} else {
+	$username = $opts{'a'};
+}
+
+unless ($opts{'p'}) {
+	do {
+		print "\nCreate a password for the site's admin account. ('QUIT' exits):";
+		chomp($password = <STDIN>);
+		die "Cancelled at user request.\n" if $password eq 'QUIT';
+		print "\nYou need to give us a password.\n" unless $password;
+	} until $password;
+} else {
+	$password = $opts{'p'};
+}
+die "You need to give us a password.\n" unless $password;
+
+unless ($opts{'e'}) {
+	print "\nWhat is the email address of the account? [$username\@$host_noport] ";
+	chomp($email = <STDIN>);
+	$email ||= "$username\@$host_noport";
+} else {
+	$email = $opts{'e'};
+}
+
+my $trgst = '';
+
+# Dump in the schema then pepper with a trace of your own theme
+my $create = gensym;
+open($create, "< $PREFIX/sql/$driver/schema.sql\0")
+	or die "Can't open $PREFIX/sql/$driver/schema.sql: $!";
+while (<$create>) {
+	# ugly-as-hell hack to keep Oracle trigger code from getting munged
+	# the syntax is sensitive plus there *has* to be a semicolon at the end
+	# (yes, one that gets passed in the statement, not the EOS delimiter!)
+	if ($driver eq 'oracle' and (/^CREATE OR REPLACE TRIGGER/ or $trgst)) {
+		$trgst .= $_;
+		next unless /^END;$/;
+		$trgst =~ s/;/#/g;
+		$_ = "$trgst;";
+		$trgst = '';
+	}
+	chomp;
+	next if /^#/;
+	next if /^$/;
+	next if /^ $/;
+	push @create, $_;
+}
+close $create;
+
+$sql = join '', @create;
+@sql = split /;/, $sql;
+
+# again with the oracle trigger thing hacking
+if ($driver eq 'oracle') {
+	for (@sql) {
+		s/#/;/g if /^CREATE OR REPLACE TRIGGER/;
+	}
+}
+
+my $dump = gensym;
+open($dump, "< $PREFIX/sql/$driver/defaults.sql\0")
+	or die "Can't open $PREFIX/sql/$driver/defaults.sql: $!";
+while (<$dump>) {
+	next unless /^INSERT/;
+	chomp;
+	s/;$//;
+	s/www\.example\.com/$hostname/g;
+	s/admin\@example\.com/$email/g;
+	if ($driver eq 'oracle') {
+		# With this we can almost use the MySQL dump verbatim
+		# Of course, MySQL could have just compiled with SQL-92, too
+		s/\\r/\r/g;
+		s/\\n/\n/g;
+		s/\\'/''/g;
+		s/\\(["\\])/$1/g;
+	}
+	push @sql, $_;
+}
+
+close $dump;
+for my $cmd (@sql) {
+	next unless $cmd;
+	my $rows_affected = $dbh->do($cmd);
+	if (!$rows_affected) {
+		# It's very bad if a CREATE TABLE does nothing.
+		if ($cmd =~ /^CREATE TABLE/) {
+			die <<EOT;
+The CREATE TABLE command below failed.  This almost certainly means
+the rest of the slashsite installation will fail, so we're aborting.
+This is probably because your SQL user associated with your
+DBIx::Password user '$opts{u}' lacks CREATE and/or DROP permissions.
+Fix this, or whatever the problem is, and rerun $PROGNAME.
+Failed command: $cmd
+EOT
+		}
+		# It's OK if a DROP TABLE does nothing, that just means
+		# the table wasn't there to begin with.
+		print "Failed on '$cmd'\n" unless $cmd =~ /^DROP TABLE/;
+	}
+}
+
+mkpath "$prefix_site/$sitename", 0, 0775;
+mkpath "$prefix_site/$sitename/logs", 0, 0775;
+mkpath "$prefix_site/$sitename/htdocs", 0, 0775;
+mkpath "$prefix_site/$sitename/htdocs/images", 0, 0775;
+mkpath "$prefix_site/$sitename/htdocs/images/topics", 0, 0775;
+mkpath "$prefix_site/$sitename/backups", 0, 0775;
+mkpath "$prefix_site/$sitename/sbin", 0, 0775;
+mkpath "$prefix_site/$sitename/tasks", 0, 0775;
+mkpath "$prefix_site/$sitename/misc", 0, 0775;
+
+my $slashdb = Slash::DB->new($opts{'u'});
+
+my $time = localtime();
+$install->create({ name => 'installed',			value => $time});
+$install->create({ name => 'admin',			value => $username});
+$install->create({ name => 'adminmail',			value => $email});
+$install->create({ name => 'owner',			value => $owner});
+$install->create({ name => 'owner_id',			value => $owner_id});
+$install->create({ name => 'group',			value => $group});
+$install->create({ name => 'group_id',			value => $group_id});
+$install->create({ name => 'siteid',			value => $sitename});
+$install->create({ name => 'basedomain',		value => $hostname});
+$install->create({ name => 'driver',			value => $driver});
+$install->create({ name => 'base_install_directory',	value => $PREFIX});
+$install->create({ name => 'site_install_directory',	value => "$prefix_site/$sitename"});
+$install->create({ name => 'db_driver',			value => "$driver"});
+
+#$install->installPlugins(\@plugins, 0, $symlink);
+$install->installTheme($theme, 0, $symlink);
+
+my $uid = $slashdb->createUser($username, $email, $username);
+$slashdb->setUser($uid, {
+	passwd => $password,
+	author => 1,
+	seclev => 10000
+});
+
+# Now, lets update slash.sites
+my $sites = gensym;
+if (open($sites, "< $PREFIX/slash.sites\0")) {
+	while (<$sites>) {
+		chomp;
+		my($dbuser) = split /:/;
+		$slash_sites{$dbuser} = 1;
+	}
+	close $sites;
+}
+
+unless (exists $slash_sites{$opts{'u'}}) {
+	open($sites, ">> $PREFIX/slash.sites\0")
+		or die "Can't append to $PREFIX/slash.sites: $!";
+	print $sites "$opts{'u'}:$owner:$sitename\n";
+	close $sites;
+}
+
+find(sub { chown $owner_id, $group_id, $_ unless -l $_ }, "$prefix_site/$sitename");
+
+# Install spamarmors for a given site. This can be recoded/moved/whatever
+# if this code is inappropriate, for whatever reason.
+system("$PREFIX/bin/reload_armor -u $opts{'u'} -q");
+apache_site_conf();
+
+$dbh->do("UPDATE vars SET value = " . $dbh->quote("$prefix_site/$sitename/logs") . " WHERE name = 'logdir'");
+$dbh->do("UPDATE vars SET value = " . $dbh->quote("$prefix_site/$sitename/htdocs") . " WHERE name = 'basedir'");
+$dbh->do("UPDATE vars SET value = " . $dbh->quote("$prefix_site/$sitename") . " WHERE name = 'datadir'");
+$dbh->do("UPDATE vars SET value = " . $dbh->quote($sitename) . " WHERE name = 'siteid'");
+$slashdb->createAuthorCache();
+
+$dbh->disconnect;
+install_message();
+
+sub apache_site_conf {
+	my $host_port = $hostname;
+	$host_port .= ":80" unless $host_port =~ /:/;
+	my $text = qq|
+# note that if your site's path is a symlink, the
+# path listed here is most likely the actual path;
+# fix it and DocumentRoot if you want to
+<Directory $prefix_site/$sitename/htdocs>
+    Options FollowSymLinks ExecCGI Includes Indexes
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+<VirtualHost $host_port>
+    ServerAdmin $email
+    DocumentRoot $prefix_site/$sitename/htdocs
+    ServerName $host_noport
+    ErrorLog logs/${sitename}_error_log
+    CustomLog logs/${sitename}_access_log common
+
+    PerlSetupEnv On
+    PerlSetEnv TZ GMT
+
+    SlashVirtualUser $opts{'u'}
+
+    # this directive will compile all the templates
+    # in the database, if cache_enabled is true
+    # and template_cache_size is 0.  Set to On/Off.
+    # Default is off since most sites don't need it
+    # much and startup performance, as well as
+    # memory usage, degrades when it is On.
+    SlashCompileTemplates Off
+    
+    PerlAccessHandler  Slash::Apache::User
+    PerlCleanupHandler Slash::Apache::Log
+    PerlCleanupHandler Slash::Apache::Log::UserLog
+
+    # this directive will redirect non-logged-in users to
+    # index.shtml if they request the home page; turn it
+    # on to help increase performance
+    #PerlTransHandler Slash::Apache::IndexHandler
+
+    # this directive will enable you to display user's pages
+    # with /~username
+    PerlTransHandler Slash::Apache::User::userdir_handler
+
+    DirectoryIndex index.pl index.shtml
+    ErrorDocument 404 /404.pl
+
+    AddType text/xml .rdf
+    AddType text/xml .rss
+    AddType text/xml .xml
+    AddType text/xml .wml
+
+    AddType text/html .shtml
+    AddHandler server-parsed .shtml
+
+    AddType text/html .inc
+    AddHandler server-parsed .inc
+</VirtualHost>
+|;
+	my $file = "$prefix_site/$sitename/$sitename.conf";
+	my $fh = gensym;
+
+	open($fh, ">$file\0") or die "Can't write to $file: $!";
+	print $fh $text;
+	close $fh;
+
+	open($fh, "< $PREFIX/httpd/slash.conf\0")
+		or die "Can't write to $PREFIX/httpd/slash.conf: $!";
+
+	unless (grep /^(?:#\s*)?Include $file$/, <$fh>) {
+		close $fh;
+		open($fh, ">> $PREFIX/httpd/slash.conf\0")
+			or die "Can't open $PREFIX/httpd/slash.conf: $!";
+		print $fh "Include $file\n";
+	}
+	close $fh;
+}
+
+sub install_message {
+	my $text = qq|
+
+
+Unless any errors reported themself during the install you should now
+have a slashsite. You will either need to edit your httpd.conf file
+unless you are have Slash handle it. The correct syntax can be found in:
+
+	$prefix_site/$sitename/$sitename.conf
+
+You may want to take a look at it. If you are using virtual hosting by
+hostname you may also need to add a NameVirtualHost to your httpd.conf.
+
+If you do not have your Slash site in the root of the web server (e.g.,
+"http://www.example.com/mysite/" instead of "http://mysite.example.com/"),
+you will need to adjust the rootdir, rdfimage, imagedir, absolutedir,
+and cookiepath variables, as you also need to change your Apache config
+appropriately.  These are all in the "vars" table of your database.
+
+To restart apache do:
+
+	apachectl stop
+	apachectl start
+
+Have fun with your new site. You should also consider registering it:
+
+	http://slashcode.com/sites.shtml
+
+
+|;
+	print $text
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+
+	# Generate a sample list of plugins which just happens to be
+	# the default list for the first theme.
+	my $sample_plugins = '';
+	my $install = Slash::Install->new('slash') unless $install;
+	if ($install) {
+		my $plugins = $install->getPluginList($PREFIX);
+		my $themes = $install->getThemeList($PREFIX);
+		my $theme = (sort keys %$themes)[0];
+		$sample_plugins = join(",", sort keys %{$themes->{$theme}{plugin}});
+	}
+	$sample_plugins = ", e.g.:\n\t\t\t-P$sample_plugins" if $sample_plugins;
+
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS]
+
+This will create a new Slash site.  You must provide a virtual
+user, which has already been set up in DBIx::Password, and the
+target database must already exist and be accessible by the
+given virtual user.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user
+
+Site options:
+	-H	Hostname
+	-n	Site name
+	-R	Reuse hostname as site name (boolean)
+	-L	Install files in htdocs/ and tasks/ using symlinks [y/n]
+	-P	Comma-separated list of plugin names$sample_plugins
+
+User options:
+	-a	Admin name
+	-e	Admin email
+	-p	Admin password
+	-o	Installation owner
+	-g	Installation group
+
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

@@ -1,0 +1,479 @@
+slash-2.1.1, 2001.10.31
+-----------------------
+
+*	Some slash2toslash2.2 tweaks
+
+*	Make utils/slash use the REAL slashd pid files
+
+*	Bunches of Search fixes
+
+*	Fix attaching polls to stories
+
+*	Bunches of IPID/ban/troll modifications
+
+*	Make plugins return false for getObject if not installed
+	properly
+
+*	Delete web messages after (default) 31 days, queued
+	messages after (default) 7 days
+
+*	Messaging fixes (hashref passed cannot be used again)
+
+*	Add install-theme
+
+*	Make ForumZilla support work again; still needs some polishing up
+
+*	Add feature to not set all AC posts at -1, and another
+	to prefix all sigs with "--", and another to show
+	stories from all sections on homepage, instead of just
+	ones set to show on home page
+
+*	Normalize some seclevs
+
+*	Fix up archiving stories
+
+*	Add basic support for multiple form values (many values to
+	one name)
+
+*	Add support to override constants and form elements via
+	Apache configuration
+
+*	Add LINK REL support (chromatic)
+
+*	Add PNG to topic image types
+
+*	Fix formkeys to not produce duplicate formkeys; add rand
+	seeding to Slash::Apache::User to prevent duplicating seed
+
+*	Tweaking of compression and content filters
+
+*	Lots of small bugfixes (if you don't see it here, we didn't
+	deem it very important ;)
+
+*	Lots of minor fixes to text, markup, filters, formatting,
+	etc. ad nasueam
+
+slash-2.1.0, 2001.10.12
+-----------------------
+
+*	Tons of things.  Too numerous to mention any of it.  We
+	completely rewrote major portions of the code, and changed
+	every file, just about.  That's why it was five months
+	between releases.
+
+slash-2.0.0, 2001.05.09
+-----------------------
+
+*	Fix to count in Search properly from Older Stories box
+
+*	Add substr() scalar op in slashDisplay
+
+*	Doc updates
+
+*	Don't show sig or moderation/link stuff in metamod.pl
+
+*	Show story body in light mode
+
+*	Put proper values in site.conf for port and for hostname
+	(when hostname and site name didn't match, or port was
+	different)
+
+*	Keep journals together by date properly for local timezone
+
+*	Add new DB method, getLastInsertId, to replace
+	MySQL-specific LAST_INSERT_ID() selects
+
+*	Remove more instances of DATE_FORMAT()
+
+*	Fix bug in saving to moderatorlog; see INSTALL for DB
+	fix
+
+*	Add in dump file for Search plugin
+
+*	Collapse illegal characters in search to spaces, instead
+	of just removing them
+
+*	Don't include department and description in RSS file if
+	not included
+
+*	Allow deleting of several fields in users.pl preferences
+	(before, blanking them out left them alone)
+
+
+slash-2.0.0-pre3, 2001.04.25
+----------------------------
+
+*	Fixed syntax error in journal.pl, removed unused getArticle()
+	method
+
+*	Fixed bad method calls in Slash::DB::Static::MySQL
+
+*	Fixed broken bulk mail calls in dailyStuff
+
+*	Fixed colors not displaying after save in color editor
+
+*	Fixed story list times in admin.pl
+
+*	Added Even More upgrade information to INSTALL, regarding
+	what templates to add/delete with each version
+
+*	Makefile fixes
+
+
+slash-2.0.0-pre2, 2001.04.24
+----------------------------
+
+*	Added more information to INSTALL and INSTALL.debian
+
+*	Makefile fixes
+
+*	RPM support
+
+*	Move sendEmail to Slash::Utility
+
+*	Allow createSelect to take an arrayref, in addition to
+	already taking a hashref
+
+*	Fix getData calls in Slash.pm to get proper page/section set
+
+*	Fix Slash::Apache::IndexHandler
+
+*	Added sqlTransaction* functions as placeholders for transaction
+	support, which, for now, do table locking for MySQL
+
+*	Various fixes in Slash::DB::MySQL, including proper saving
+	of description for vars, creation of stories in newstories
+	table, some time calculations
+
+*	Added exists() method to Slash::Install to check for existence
+	of installed plugin
+
+*	Allow passing of time offset to timeCalc()
+
+*	Export fixint() from Slash::Utility
+
+*	Fix template-tool to use -O option for saving templates
+
+*	Added slashstyle.pod and boilerplates to docs/
+
+*	Various minor fixes to admin.pl
+
+*	A bunch of changes to Journal, including fixes and changes
+	for previewing, themes, templates, RSS, top journals, and
+	additions of pagination and viewing recent journal entry
+	on user's info page *
+
+*	Search now works.  XML/RSS search features have been added;
+	use content_type=rss to get data in RSS format
+
+*	Catch links to old .shtml article pages and redirect to the
+	correct location in 404.pl
+
+*	Fixes to story links and story titles on index.pl
+
+*	Fixes to users.pl, including proper saving of slashboxes
+	(exboxes) from editHome page
+
+*	Various minor fixes to templates
+
+*	Change RSS policy to _not_ "HTML-encode" the link elements,
+	added xmlencode_plain function
+
+
+slash-2.0.0-pre1, 2001.03.20
+----------------------------
+
+*	Added utils/slash1toslash2, a program for upgrading from a Slash
+	1.0 installation
+
+*	Added upgrade info and more info to INSTALL and README
+
+*	Changed selectTopic and selectSection in Slash.pm to only
+	return "All Topics" and "All Sections" if specifically
+	requested with optional parameter
+
+*	Fixed bug in Slash::Apache::Log where data was not getting
+	properly passed to writeLog(), so accesslog was not getting
+	proper data, and story hit counts were not getting updated
+
+*	Fix submissions to insert anonymous UID instead of user's UID
+	if submission is submitted anonymously (without a name)
+
+*	Fix totalComments to increment properly
+
+*	Remove code to delete old comments
+
+*	Change Slash::Install to be newline-agnostic in PLUGIN files
+
+*	Change Slash::Utility::isAnon to return true for "bad" UIDs
+	(non-integer, non-positive)
+
+*	Fix Slash::Utility::prepareUser to populate TZ and offset
+	info for anonymous user when not through Apache
+
+*	Add option to install-plugin to install as symlinks (like
+	install-slashsite); fix install-plugin to accept a single
+	plugin
+
+*	Move more info to site.conf from slash.conf; clean up in
+	slash.conf, removing redundant directives
+
+*	Fix singular/plural problem for comment count in index.pl
+	and templates
+
+*	Minor fixed to various templates
+
+
+
+slash-1.1.6-bender, 2001.03.14
+------------------------------
+
+*	Major overhaul of command-line tools; many options have changed;
+	all of the ones (except for the ones in sbin/) have -h (help)
+	and -v (version) options now, so check the help before use
+
+*	Lots of changes to the Makefile to work more smoothly on various
+	platforms, and set hardcoded values for /usr/bin/perl and
+	/usr/local/slash appropriately; changed PREFIX to SLASH_PREFIX
+	to not conflict with perl's Makefiles
+
+*	Move more directives out of slash.conf into site.conf
+
+*	Fix bug with createSelect() returning data when there are
+	no options
+
+*	Update sessions to work properly again
+
+*	Make session-based user logins work properly again
+
+*	Update cookie on every connect, as it was not getting updated
+	when it needed to be; perhaps change in the future, but
+	necessary for now
+
+*	Remove remnants of userMode and archived stories on disk
+
+*	Add disconnect in Slash::Apache initial startup
+
+*	Add "userdir_handler" to allow sites to allow user lookups
+	via http://slashcode.com/~username/
+
+*	Fixes to various Slash::DB::MySQL methods, including
+	getMetamodComments, getSessionInstance, currentAdmin,
+	setUser, _genericSet
+
+*	Name changes to Slash::DB methods setStoriesCount
+	(now setStoryCount), createFormkey (was insertFormkey),
+	createAbuse (was formAbuse), checkForMetaModerator
+	(was checkForModerator)
+
+*	countComments has been split into four methods; *BySid,
+	*BySidUid, *BySidPid, and FindCommentsDuplicate
+
+*	Update story count for newstories more approriately now;
+	setStoryCount and setStory now update newstories as well
+	as stories table
+
+*	Various fixes to time-related calls in DB methods
+
+*	Add "restart" boolean paramater to sqlConnect in
+	Slash::DB::Utility to allow disconnect of db handle,
+	followed by subsequent connect
+
+*	Add public function get_template to Slash::Display, so
+	external programs can get an appropriate Template
+	object
+
+*	Remove "template_trim" option; it needs to be true for some
+	things to work properly
+
+*	Add support for saving compiled templates to disk to
+	Slash::Provider
+
+*	Fix whitespace handling in strip_mode in Slash::Utility
+
+*	Allow _ in sid; properly filter qid like sid in Slash::Utility
+
+*	Various fixes to tools, especially install-slashsite,
+	template-tool, tailslash, dailyStuff, slashd
+
+*	Add HOWTO documents for Themes, Templates, and Plugins
+
+*	Various minor fixes to .pl files, including admin.pl,
+	metamod.pl, search.pl
+
+*	Fix various miscellaneous text/UI thingys in data dumps,
+	templates, and plugins
+
+*	Fix Search to work
+
+*	Added template-check program
+
+
+slash-1.1.5-bender, 2001.03.02
+------------------------------
+
+*	Bunches of changes for Makefiles, version numbers, textual
+	edits
+
+*	Removed CGI and CGI::Cookie for Apache modules and functions
+
+*	Added getCurrentCookie and createCurrentCookie to exported
+	functions from Slash::Utility
+
+*	Added gensym to exported functions from Slash
+
+*	Removed story/comment archiving, newcomments table
+
+*	Removed dispStoryTitle template, rolling into dispStory templates
+
+*	Fixed up error logging
+
+*	Added "X-Powered-By: Slash" HTTP header
+
+*	More fixes to PostgreSQL library
+
+*	Changed DB connect to use connect_cached
+
+*	Make some template options configurable in vars table
+	(template_* vars)
+
+*	Fix circular reference in Slash::Display calling
+	Slash::Display::Plugin unnecessarily
+
+*	Add option (default) to create new files as symlinks to the
+	originals, instead of copying each file, for
+	install-slashsite and install-plugin (and Slash::Install).
+
+*	Added .shtml and .inc to site .conf, for MIME type and
+	handling as server-parsed
+
+*	Updated slash.conf to not include Compress::Zlib
+
+*	Updated Bundle::Slash
+
+*	Various fixes to Admin and Search
+
+*	Added new vars and reworked when dailyStuff is run, using
+	daily_last, daily_attime, daily_tz
+
+*	Made poll on home page optionally display cached block,
+	or hit DB to get current data (poll_cache var)
+
+*	Fixed various bugs with templates
+
+
+slash-1.1.4-bender, 2001.02.16
+------------------------------
+
+*	Fixed admin.pl to list sections in submission editing
+
+*	Minor modifications to the ERD
+
+*	Changed language code from two characters (e.g. "en") to five
+	characters, lang + country (e.g., "en_US"), in templates
+	and user prefs
+
+*	Removed CR from templates; fix to Slash::Display::Provider
+	and template-tool to remove CR from templates
+
+*	Various template bugfixes
+
+*	Various fixes in all code for adding in missing "rootdir" to
+	paths
+
+*	Cleaned up list of included modules in httpd.conf
+
+*	Added various MIME types and DirectoryIndex directive to
+	httpd.conf
+
+*	Fix for modertatordLog() problem in Slash::DB::Static::MySQL
+
+*	Added MAIN2bender preliminary script
+
+
+slash-1.1.3-bender, 2001.02.08
+------------------------------
+
+*	Changed copyright/license info in source files
+
+*	Changed SQL files to be extended INSERTs for increased
+	compatability
+
+*	Added additional paramter to Slash::sendEmail() (called
+	by dailyStuff) to allow for Precedence: bulk header,
+	where mail sent is bulk mail (Alessio Bragadini)
+
+*	Added more documentation in Slash::DB
+
+*	Fix author sessions
+
+*	Save templates into their own directory, as individual
+	files, instead of in a data dump file; disallow ";" in
+	template name/page/section, as template pseudoname
+	(for saving to filesystem and for displaying in comments)
+	will be "name;page;section"
+
+*	Fix to Slash::Display and Slash::Display::Plugin so
+	plugins that call slashDisplay() will use the plugin's
+	context for template processing
+
+*	Fix to Slash::Display so TRIM, PRE_CHOMP and POST_CHOMP
+	are passed to Provider->new instead of Template->new
+
+*	Rework how encoding/decoding escaping/unescaping is handled
+	in slashd and portald; added xmlencode() and xmldecode()
+	to Slash::Utility
+
+*	Added insertion of plugin's description to site_info table
+	on install
+
+*	Added the insertion of plugin description to the site_info
+	table
+
+*	Makefile now defaults INIT to /etc instead of /etc/rc.d
+
+*	Addition to template-tool to save compiled form of
+	template
+
+*	Page and Section pulldowns for templates in admin.pl now
+	work correctly
+
+*	Added editing of site info to admin.pl
+
+*	User admin changes include checkbox for denoting author, and
+	function to create a new user
+
+*	Added two additional colors, one foreground and one background,
+	to color editor in admin.pl
+
+*	Fixes for submit.pl brokenness with email/homepage data
+
+*	Remove excess portald blocks, put into separate plugin
+
+*	Added Ladybug problem tracking system
+
+*	Miscellaneous code and template bugfixes
+
+
+
+slash-1.1.2-bender, 2001.01.16
+------------------------------
+
+First beta for Slash 2.0.  EVERYTHING changed.  We won't even bother
+listing it all.  Just a few highlights:
+
+*	Database functionality moved out into Slash::DB; now
+	database-independent with support for MySQL and initial,
+	alpha-level support for PostgreSQL
+
+*	Use Template Toolkit for displaying text
+
+*	More hooks into Apache
+
+*	Redesigned login and authentication
+
+*	Redesigned paths etc. on the filesystem
+
+*	Simplified installation and configuration
+
+That's all.  See the other docs and appropriate forums for more details.

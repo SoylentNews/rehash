@@ -1,0 +1,6 @@
+name=CheesyPortal
+htdoc=cheesyportal.pl
+task=tasks/p2f_cheesy.pl
+description=CheesyPortal is a script to get an overall look at portal boxes
+template=templates/data;cheesyportal;default
+template=templates/main;cheesyportal;default

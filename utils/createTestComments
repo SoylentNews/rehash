@@ -1,0 +1,450 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+BEGIN {
+	{
+		require Silly::Werder;
+		Silly::Werder->import;
+	}
+	die "Installation of Silly::Werder is required for this util, sorry!\n"
+		if $@;
+}
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Digest::MD5 'md5_hex';
+use Benchmark;
+
+use vars qw( $slashdb $werder $constants $junk );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my (%opts, %family_tree, %deep_tree);
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hI:RTJu:U:tv', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+if ($opts{R}) {
+	usage("Can't specify -U when using -R") if exists $opts{U};
+} else {
+	usage("Must specify either -R, or both -U and -I")
+		if ! exists $opts{U};
+	usage('Invalid UID specified') unless $opts{U} =~ /^\d+$/;
+}
+if ($opts{T} and $opts{t}) {
+	usage("Can't specify both -t and -T, pick one");
+}
+$junk = $opts{'J'} ? 1 : 0;
+$opts{'u'} ||= 'slash';
+$opts{num_comments} = $ARGV[0] || 10;
+usage('Invalid number of comments') 
+	if $opts{num_comments} !~ /^\d+$/ || $opts{num_comments} < 0;
+
+my $story_table = 'stories';
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+$werder = new Silly::Werder;
+
+# main program logic (in braces to offset nicely)
+{
+	# Determine user list size (for -R)
+	my $max_uid = $slashdb->getLastUser();
+	my $min_uid = $slashdb->sqlSelect("MIN(uid)", "users");
+
+	my $story_id = $opts{I} || "";
+
+	my $t0 = new Benchmark;
+	my $count = $opts{num_comments};
+	while ($count) {
+		my($sid, $discussion_id) = ('', '');
+		if ($story_id =~ /^\d+$/) {
+			$discussion_id = $story_id;
+		} else {
+			if ($story_id =~ m{/}) {
+				$sid = $story_id;
+			} else {
+				$sid = getRandomSid();
+			}
+			$discussion_id = $slashdb->sqlSelect("discussion",
+				$story_table, "sid=".$slashdb->sqlQuote($sid));
+		}
+		my $discussion = $slashdb->getDiscussion($discussion_id);
+	 
+		%family_tree = %deep_tree = ( );
+
+		# Initialize the user.
+		my $uid;
+		if ($opts{R}) {
+			if (rand(1) < 0.5) {
+				$uid = getRandomUserID($min_uid, $max_uid);
+			} else {
+				$uid = $constants->{anonymous_coward_uid};
+			}
+		} elsif ($opts{U}) {
+			$uid = $opts{U};
+		} else {
+			$uid = $min_uid;
+		}
+		my $user = $slashdb->getUser($uid);
+		setRandomIPID($user);
+	 
+		# Before we start creating comments, we should take a look at
+		# the thread structure (if we care about threading...)
+		my (@werds);
+		if (!$opts{T}) {
+			my $comments = $slashdb->sqlSelectAllHashref(
+				'cid',
+				'cid, pid',
+				'comments',
+				"sid=$discussion_id",
+			);
+	 
+			print "R: ", ref $comments;
+			map {
+				$family_tree{$comments->{$_}{cid}}
+					= $comments->{$_}{pid}
+			} keys %{$comments};
+		}
+		if ($opts{t}) {
+			for my $cid (keys %family_tree) {
+				my $count = 0;
+				my $cid_back = $cid;
+				while (exists($family_tree{$cid_back}) and ++$count < 1000) {
+					$deep_tree{$cid}++;
+					$cid_back = $family_tree{$cid_back};
+				}
+			}
+		}
+ 
+		my $num_werds = rand(20)*rand(20)+rand(10) + 1;
+		$num_werds += 200 if rand(1) < 0.1;
+		$num_werds += 300 if rand(1) < 0.1;
+		my $comment = make_werds($num_werds, 0.1);
+		$comment = strip_mode($comment, 2); # HTML mode
+		$comment = balanceTags($comment, $constants->{nesting_maxdepth});
+		$comment = addDomainTags($comment);
+
+		my $score = 1;
+		if ($uid == $constants->{anonymous_coward_uid}
+			or $user->{karma} < $constants->{badkarma}) {
+			$score = 0;
+		} elsif ($user->{karma} > $constants->{goodkarma}) {
+			$score = 2;
+		}
+		my $score_rand = rand(1);
+		   if ($score_rand < 0.08 )	{ $score  = -1	}
+		elsif ($score_rand < 0.15 )	{ $score += -1	}
+		elsif ($score_rand < 0.75 )	{		}
+		elsif ($score_rand < 0.90 )	{ $score +=  1	}
+		elsif ($score_rand < 0.94 )	{ $score +=  2	}
+		elsif ($score_rand < 0.98 )	{ $score +=  3	}
+		else				{ $score  =  5	}
+
+		my $subj = make_werds(1 + rand 5);
+		$subj =~ s/\W+$// if rand(1) < 0.1;
+                $subj =~ s/<[^>]+>//g;
+                $subj =~ s/\b(\w)/\U$1/g if rand(1) < 0.2;
+		if (rand(1) < 0.2) {
+			$subj =~ s/\W*$/ +((qw( . ! ? ))[rand 3]) x (2+rand 5) /e;
+		}
+	        my $pid = getRandomParent();
+	        my $cid = $slashdb->createComment(
+			{
+	                        postercomment   => $comment,
+        	                sid             => $discussion_id,
+                	        pid             => $pid,
+	                        postersubj      => $subj,
+        	                postanon        => 0,
+                	},
+	                $user, $score
+        	);
+		$slashdb->setStory($sid, { writestatus => 'dirty' }) if $sid;
+	        $family_tree{$cid} = $pid if ! $opts{T};
+		$deep_tree{$cid} = $deep_tree{$pid}+1 if $opts{t};
+	        print <<EOT;
+($count) Comment created (user=$uid discussion=$discussion_id cid=$cid pid=$pid)
+EOT
+ 
+        	$count--;
+	}
+	my $t1 = new Benchmark;
+	print "$opts{num_comments} comments created in: ",
+        	timestr(timediff($t1, $t0), 'noc'),"\n";
+}
+
+# subroutines
+
+sub getRandomSid {
+	my $sids = $slashdb->sqlSelectAll("sid",
+		$story_table,
+		"discussion > 0");
+	my @sids = map { $_->[0] } @$sids;
+	my $rand_sid = @sids[ rand @sids ];
+	return $rand_sid;
+}
+
+sub getRandomParent {
+        return 0 if $opts{T};
+
+        my @a = keys %family_tree;
+
+	if ($opts{t}) {
+		# Weight toward nesting deeply.
+		my @deepest_cids =
+			sort { $deep_tree{$b} <=> $deep_tree{$a} }
+			keys %deep_tree;
+		if (scalar(@deepest_cids) >= 8) {
+			@a = @deepest_cids[0, 0, 0, 0, 0, 1, 1, 2..5];
+		} elsif (scalar(@deepest_cids) >= 5) {
+			@a = @deepest_cids;
+		} else {
+			# leave @a alone
+		}
+	}
+ 
+	if (!$opts{t}) {
+		# If not very many posts, return 0 for the root.
+		return 0 if rand(@a) < 5;
+		# Always a chance of returning 0.
+		return 0 if rand(1) > 0.75;
+	}
+	# Otherwise pick one.
+	my $pid = $a[ rand @a ];
+	return $pid;
+}
+ 
+sub getRandomUserID {
+        my($min_uid, $max_uid) = @_;
+        my $n_tries = 100;
+        my $rand_uid = 1;
+        my $ok = 0;
+        while (!$ok) {
+                die "can't get random user! $max_uid" if --$n_tries<0;
+                $rand_uid = $min_uid + int(rand($max_uid-$min_uid+1));
+                $ok = 1;
+                $ok = 0 if !$slashdb->sqlSelect("COUNT(*)",
+                        "users", "uid=$rand_uid");
+        }
+        return $rand_uid;
+}
+
+# CLOSURE!
+{
+my(@subnets) = ();
+sub setRandomIPID {
+	my $user = shift;
+
+	if (!@subnets) {
+		# We now generate 10 random subnets which we will use for
+		# the rest of this execution.
+		while (@subnets < 10) {
+			my $subnet = sprintf "%d:%d", rand 256, rand 256;
+			next if $subnet =~ /^0/;
+			push @subnets, $subnet;
+		}
+	}
+
+	my $quad3 = $subnets[rand($#subnets + 1)] . rand 256;
+	$user->{subnetid} = md5_hex($quad3 . '0');
+	$user->{ipid} = md5_hex($quad3 . (rand 254 + 1));
+}
+}
+		
+
+sub make_werds {
+        my($werds, $link_prob) = @_;
+        $werds = int($werds);
+	$link_prob ||= 0;
+        if ($werds > 40) {
+                $werder->set_werds_num(5,20);
+        } elsif ($werds > 20) {
+                $werder->set_werds_num(3,10);
+        } else {
+                $werder->set_werds_num($werds, $werds);
+        }
+	my $min_syl = int(rand(3)+1);
+	$werder->set_syllables_num($min_syl, $min_syl + int(rand(4)+1));
+	my @links = qw(
+		http://slashdot.org/            http://www.brunching.com/
+		http://www.newsforge.com        http://osdn.com
+		http://whitehouse.gov           http://www.whitehouse.gov/
+		http://us.imdb.com/             http://www.kernel.org
+		http://ic.ac.uk                 http://cr.yp.to/
+		http://www.verizonreallyreallyreallysucks.com/
+		ftp://ftp.kernel.org/           ftp://ftp.gnu.org/gnu/Licenses/COPYING-2.0
+		news:news.admin.net-abuse.email gopher://ccat.sas.upenn.edu:3333/11/Fiction/
+		http://List-Etiquette.com/about/
+		http://slashdot.org/features/99/03/31/0137221.shtml
+		http://www.nap.edu/readingroom/books/newpath/chap2.html
+		http://www.forthnet.gr/forthnet/isoc/short.history.of.internet
+		http://www.freenix.fr/unix/linux/HOWTO/French-HOWTO.html
+		http://www.linux.org.mx/        http://www.linux.net.mx/linux.php
+		http://www.linux.org.uk/diary/  http://hepwww.ph.qmw.ac.uk/HEPpc/
+		http://www.w3.org               http://peipa.essex.ac.uk/tp-linux/
+		http://www.crosswinds.net/~tvquotes/futurama/2.html
+		http://www.google.com/search?q=cache:h58W7o4qU-w:www.space.com/sciencefiction/tv/futurama_gore_000516_wg.html+Futurama+Fry&hl=en
+		http://dmoz.org/Regional/Europe/United_Kingdom/Wales/Isle_of_Anglesey/Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch/
+		www.google.com                  bad_link b.a.d l.i.n.k . .. ... ....
+		mailto:jamie@slashdot.org       mailto:pater@slashdot.org
+	);
+	push @links, 'http://directory.google.com/Top/Arts/Literature/Authors/C/Carroll,_Lewis/Works/Hunting_of_the_Snark,_The/';
+	my $comment;
+	my $cur_werds = 0;
+        my $tag = "";
+        my $quote = q{};
+	my $last_p_werd_num = 0;
+        while ($cur_werds < $werds) {
+                my $new_werds = '';
+                if (int(rand(6))==0 or $werds < $cur_werds * 1.1) {
+                        if (int(rand(2))) {
+                                $new_werds = $werder->question;
+                        } else {
+                                $new_werds = $werder->exclaimation; # Dave, you spelled this word wrong
+                        }
+                } else {
+                        $new_werds = $werder->sentence;
+                }
+		if ($link_prob and rand(1) < $link_prob) {
+			my @new_werds = split / /, $new_werds;
+			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
+			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
+			my $insert_start = int(rand(@new_werds-2));
+			my $insert_end = $insert_start + int(rand(4))+1;
+			$insert_end = scalar @new_werds if $insert_end > scalar @new_werds;
+			$new_werds = join(" ",
+				@new_werds[0..$insert_start-1],
+				$a_href . $new_werds[$insert_start],
+				@new_werds[$insert_start+1..$insert_end-1],
+				$new_werds[$insert_end] . $close_a,
+				@new_werds[$insert_end+1..$#new_werds]
+			);
+		}
+		if ($cur_werds and !$tag and rand > 0.9) {
+			if (rand(1) < 0.95) { $tag = "i" }
+			else { $tag = "b" }
+			if (rand(1) < 0.50) { $quote = int(rand(3)) ? q{'} : q{"} };
+			$new_werds = "<$tag>$quote$new_werds";
+		}
+		if ($tag and rand(1) < 0.5) {
+			$new_werds = "$new_werds$quote</$tag>";
+			$tag = ""; $quote = q{};
+                }
+                $comment .= " $new_werds";
+                $comment =~ s{\s+}{ }g;
+                $cur_werds = $comment =~ tr/ / /;
+		if (rand($werds) > 30
+			and rand($cur_werds - $last_p_werd_num) > 20) {
+			$comment .= "<P>";
+			$last_p_werd_num = $cur_werds;
+		}
+        }
+        $comment .= "</$tag>" if $tag;
+        $comment =~ s{</(\w+)>\s+<\1>}{ }g;
+        $comment =~ s/^\s*(.+)\s*$/$1/;
+        $comment =~ s/^\s+//; $comment =~ s/\s+$//;
+	if ($link_prob and $junk) {
+		my @fragments = (
+			"<a", "href=", 'href="', '"', "'", ">", '>">', " > >",
+			"<", " < ", " <<", ">>", " < < <", "< < ", "<? ", "&lt;<",
+			".", "..", "../", "/..", "/../../..", " ", "  ", " \r ",
+			" \n ", "\n ", "\n\n", "\r\n\r", "\n\r\n", "\t \t", "\t",
+			"<i>", "</ i >", "<i >", "< /i >", "< i>", "< / i>",
+			"<i", "</i", "i>", "/i>", "/i/", "i/i", " // ", " / ",
+			"%2e", "%2f", "%3c", "%3e", "&lt;", "&gt;", "&amp;", "&",
+			"&amp", "&amp ", "&&", "&gt ;", "&#000;", "&#127;", "&#amp;",
+			"&#120;", "&#040;", "&#x30;", "&12345;", "&#2345;", "&999 ",
+			"&lt;<%3c", "&gt;>%3e", "%3e&lt; ", "><", "<>", "<><>",
+			"%25%", "%25", "&#046;", "&#26;", "& &", "<&> <", ">&<",
+			'<a hReF="/', '<A href = "//', '<A HREF=http://',
+			'<a href=""http://', '<a HREF="news:', '<a href="ftp:',
+			"<a\thref=\"/", '<a href="///', "<a\rhref=\"http:",
+			"<A\nHREF=\"http:", "<A\nHREF=http:", "<A\nHREF=\"http",
+			'<a href="ftp://ab:xz@', '<a href="ww~w\@foo.com/',
+			'<a href="@bar.com/', '<a href="http://@bar.com/',
+			'<a href="news:a:b@', '<a href="news:a:b:c:d@foo.com',
+			'<a href="ftp://aaa@foo.com', '<a href="http://bbb@bar',
+			'<a href="http://ab:xz@', '<a href="http://www@',
+			'<a href="ftp://www@www/', '<a href="news:new@new/',
+			'<a href="http://@', '<a href="http://:bar@', '%5c',
+			'<a href=http://foo:bar@', '<a href=http://@', '%7f',
+			'<a href="http://foo.com%20%20%20%20%20%20%20@',
+			"<A\nhref=\"HTTP://", "<!-- script ", "<script ",
+			'< a href="', '" <script="', "<script>", "<script",
+			"script>", "/script>", "href=", ' href="', ' HREF="',
+			'<img src="', "<img ", "</img>", "</hr>", "<!-- ",
+			"<!- - ", "<!--", "<! ", "<!", "!>", "-->", " -->",
+			"<a href=\"\r\n", "foo.com", "bar.com", "test.cx",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+		);
+		for (1..$werds) {
+			my $offset = int(rand(length($comment))+1);
+			my $done = 0;
+			while (!$done) {
+				my $fragment = $fragments[rand @fragments];
+				substr($comment, $offset, 0) = $fragment;
+				$done = 1 if rand(1) < 0.8;
+			}
+		}
+	}
+        $comment;
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#comments]
+
+This utility creates test comments for a given Slash site. This program is for
+testing purposes, only, particularly for those ambitious Slash users out there
+who want to try their hand at modifying the comment or moderation systems.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-I	Story ID to post into.
+
+Identity options (specify one): 
+	-U	User to post as.
+	-R	Post as random users.
+
+Posting options:
+	-t	Weight towards nesting deeply.
+	-T	Do NOT post with threads.
+	-J	Post junk links (random text to stress canonicalization)
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

@@ -1,0 +1,852 @@
+#!perl -w
+# run this document through perl to check its syntax
+use Pod::Checker;
+podchecker(\*DATA);
+__END__
+
+=head1 NAME
+
+INSTALL - Slash Installation
+
+=head1 SYNOPSIS
+
+This document describes how to install Slash 2.1/2.2 (where you see
+"2.2" you may safely assume "2.1", except where specified).  For instructions on
+installation or upgrade of previous versions of Slash, see the INSTALL
+document included with those distributions.
+
+These instructions have only been tested on Linux. Installation under
+BSD and other Unix OSes should work similarly, but there are problems
+with the Makefile and installtion under some non-Linux OSes.  Feel free
+to submit bug reports (better, patches) for any such problems.
+We've had reports of the 1.0.x version of Slash running on Windows,
+but have done no testing and have no further information, and have no
+information about Slash 2 running on Windows.
+
+PostgreSQL support in Slash 2 is currently alpha-quality.
+
+Slash can always be downloaded from SourceForge.net, from the FTP site,
+and via CVS.
+
+	http://sf.net/projects/slashcode/
+	ftp://ftp.slashcode.com//pub/slashcode/
+	http://cvs.slashcode.com/
+
+See the SourceForge.net page for patches and bug reports.
+
+
+=head2 Important Note
+
+The software and hardware requirements are listed at the end of the
+document, because we know you want to get right into the installation.
+Please read those requirements if you have B<any> question about
+what might be required.
+
+Upgrading information is also toward the end of the document.
+
+
+=head1 INSTALLATION
+
+=head2 Installation Notes
+
+=over 4
+
+=item *
+
+For slashd (see F<utils/slash>, which starts slashd),
+mod_perl (see F<httpd/httpd.conf>), and MySQL, we set all processes
+to run in GMT.  Then it is easy to convert dates to whatever the
+user's local time is.  If you have date offset problems, check that all of
+these are properly set to run in GMT.
+
+=item *
+
+You cannot have different versions of the Slash modules installed for
+different sites on the same Apache server.  Well, if you want to, you
+can try the Apache::PerlVINC module, but this is B<not> recommended for
+performance reasons. Slash is designed to have one shared core of code
+for all Slash sites on a system.  (This is made easier than it was in
+1.0.x, where to customize a site, you needed to change the module code;
+this should no longer be necessary.)
+
+=item *
+
+All of the installation steps below should be executed as root.
+
+
+=back
+
+
+=head2 Installation Procedure
+
+There are six steps to installation.  Skip the parts you already
+have installed (making sure you have the correct versions).  Make sure
+to read the special note about Apache / mod_perl installation.
+
+=over 4
+
+=item 1.
+
+B<Install MySQL.>
+
+Please refer to MySQL documentation for compilation
+and/or installation notes for any questions with this process.  Find
+the script that runs mysql (probably F<safe_mysqld>) and add these
+lines to the beginning of it:
+
+	TZ=GMT
+	export TZ
+
+Start MySQL (it must be running for the installation of Perl modules
+and Slash).
+
+Create a database to be used by Slash.
+
+Create a username/password that can access that database (by
+default, we normally set the user to have all permissions, but that
+might not be appropriate for your site; make sure that you have
+at least privileges to select, insert, update, delete, create,
+drop, and index).
+
+
+=item 2.
+
+B<Install perl.>
+
+perl is likely already installed on your machine; make sure its
+version is at least the minimum required (see L<"REQUIREMENTS">).
+
+
+=item 3.
+
+B<Install Apache and mod_perl.>
+
+B<You MUST install mod_perl and Apache as directed here>.  OK, that is
+not strictly true, but it is I<mostly> true.  If you already have mod_perl
+installed, it is probably not configured properly to work with Slash
+and you will have to rebuild it.  [If you are using the provided httpd.conf
+file from the slash distribution, and find that Apache is giving you errors,
+chances are mod_perl is not installed correctly, and you need to build it
+from scratch.]  Of course, if you have your own Apache modules or build
+options, you will need to modify the instructions here appropriately.
+
+First, untar apache and mod_perl.  Then, go to the mod_perl directory,
+and have mod_perl build and install apache for you:
+
+	perl Makefile.PL APACHE_SRC=/where_you_have_the_source DO_HTTPD=1 \
+		USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
+		APACHE_PREFIX=/where_apache_will_be_installed
+	make
+	make test
+	make install
+
+B<NOTE>: You may be unsuccessful with C<make test> if the perl modules
+are not yet installed.  However, some Perl modules will not install
+without Apache and mod_perl installed.  If you wish, come back and
+run C<make test> after installing here, and then installing the Perl
+modules, to make sure everything is OK.
+
+=item 4.
+
+B<Install the Perl modules.>
+
+The best way to do this is with the CPAN module.
+
+You might also wish to install each module by hand, using distributions
+found on the CPAN.  See L<perlmodinstall>
+for more information on installing perl modules.
+
+B<IMPORTANT NOTES>:
+
+=over 4
+
+=item B<Overactive CPAN>
+
+With some versions of the CPAN module, the module will try to
+download and install the latest version of Perl.  Watch what
+the module is doing; if it begins to download an entire perl
+distribution, interrupt it (hit ctrl-C) until it stops, then try
+again with the CPAN module.  This should not be an issue in the latest
+version of Bundle::Slash.
+
+=item B<Uninstalling Old Modules>
+
+Sometimes, you will be installing a newer version of a module that
+exists elsewhere on the system.  You might want to tell the CPAN module
+to automatically remove older files.  To do that from the CPAN shell,
+type:
+
+	cpan> o conf make_install_arg UNINST=1
+
+=item B<Old Version>
+
+If you have previously installed Bundle::Slash, you will want
+to install it again, but you will need to delete the existing
+version.  Go to your F<.cpan/Bundle> directory (usually
+F<~/.cpan/Bundle/>) and remove F<Slash.pm>.
+
+=item B<Additional Libraries>
+
+You must have certain libraries existing on your system before
+building, for Compress::Zlib and XML::Parser (see L<"REQUIREMENTS">).
+
+=item B<BSD>
+
+If running BSD, also install the BSD::Resource module.
+
+=item B<Alternate DBs>
+
+If not using MySQL, just allow the installation of its drivers
+to continue, and possibly fail.  Then install the driver you need
+(e.g., for PostgreSQL, use "DBD::Pg") using the CPAN shell.
+
+=item B<DBIx::Password>
+
+When installing DBIx::Password, you will be asked for various
+information, the same information used to create the database
+and database user in Step 1.  You will also be asked for a
+B<virtual user> name, which will be the identifier for all of
+this data.  You can just use the name of your site,
+or any other alphanumeric string.  You will use this virtual
+user name in other places, so do not forget it.
+
+=item B<libnet Broken>
+
+libnet is currently broken somewhat in its tests.  Please use
+C<install Net::Cmd> first, before you install anything else.
+If it fails only tests 8 and 9 of t/require, then it is OK;
+just do C<force install Net::Cmd>, then continue on with the
+rest of the modules installation.
+
+=back
+
+To use the CPAN module, invoke the CPAN shell:
+
+	perl -MCPAN -e shell
+
+After it has been configured, install Bundle::Slash:
+
+	cpan> install Bundle::Slash
+
+To read the README for any module, before or after installing:
+
+	cpan> readme MODULE
+
+If you have problems, feel free to re-run C<install Bundle::Slash>.  It
+will safely skip anything already installed.
+
+To read the documentation of any of the modules, once they have been
+installed, type C<perldoc MODULE> at the command line.
+
+
+=item 5.
+
+B<Install Slash.>
+
+Unpack the distribution and go to the new directory that
+creates, and type:
+
+	make
+	make install
+
+B<Note>: you will want the GNU versions of fileutils (version
+4.0 recommended, for cp and install) and make.  Older versions of
+install, and make and cp from other systems, might not work.
+
+There are a few options to C<make> and C<make install> you may
+want to change.
+
+	option		default			purpose
+	==========================================================
+	SLASH_PREFIX	/usr/local/slash	Location for
+						installed files
+	INIT		/etc or /etc/rc.d	Location for init
+						scripts
+	USER		nobody			User to own files
+	GROUP		nobody			Group to own files
+	CP		cp			Name of or path to
+						alternate `cp`
+	INSTALL		install			Name of or path to
+						alternate `install`
+
+(USER and GROUP will also be changed later on a per-site basis,
+in step 6. while running F<install-slashsite>.)
+
+So, for example, you might type (although the default SLASH_PREFIX
+is I<strongly> recommended):
+
+	make SLASH_PREFIX=/home/slash
+	make install SLASH_PREFIX=/home/slash
+
+When done, a configuration file for Apache will be created at
+F<$SLASH_PREFIX/slash.conf>.  You can put its contents into your
+httpd.conf, or you can just C<Include> it in your httpd.conf.
+
+B<WARNING!>
+
+Please be aware that if you include F<$SLASH_PREFIX/slash.conf>
+or F<$SLASH_PREFIX/sites/sitename/sitename.conf> more than once,
+or if this file shares contents with directives in httpd.conf,
+that your Slash site WILL break. The directives in
+F<$SLASH_PREFIX/slash.conf> should be run only ONCE in any any
+site context.  Read through F<$SLASH_PREFIX/slash.conf> to make
+sure it all looks proper.
+
+=item 6.
+
+B<Install your Slash site.>
+
+Go to your installation directory (by default, F</usr/local/slash>)
+and execute (where C<VIRTUAL_USER> is the name of the virtual
+user given in the DBIx::Password distribution):
+
+	bin/install-slashsite -u VIRTUAL_USER
+
+The program will prompt for answers to several configuration questions.
+Answer the questions.  When done, another configuration
+file will be created at F<$SLASH_PREFIX/$SITENAME/$SITENAME.conf>.
+You can put its contents unto your httpd.conf, or you can just C<Include>
+it in your httpd.conf.
+
+B<NOTE>: Read the message printed at the end of running install_slashsite.
+
+=item 7.
+
+B<Start it up.>
+
+After installation of the site is done, and Apache has been stopped
+and started (do NOT try to restart Apache, but do a full stop and
+start), run slashd.  This should be done via the init script:
+
+	/etc/init.d/slash start
+
+slashd is the daemon that runs routine maintenance on Slash sites,
+including sending out daily mailings, cleaning up the database,
+and updating stories.  The init script above will start up an
+individual slashd daemon process process for each installed site.
+
+=back
+
+
+=head1 INSTALLATION OPTIONS
+
+=head2 Multiple Servers
+
+You can, of course, have a separate database server from your Slash
+server.  Further, you can have multiple web servers for one Slash site.
+Slashdot, for instance, has one primary server with all of the code
+(Apache, perl, etc.), and it runs slashd and NFS.  Each
+web server then mounts the code read-only over NFS.  Some notes:
+
+=over 4
+
+=item *
+
+Make sure the MySQL server allows the user to log in from each web
+server, and the NFS server.
+
+=item *
+
+Make sure, if you use the same httpd tree on all machines, that
+the httpd.conf is listening to the proper IP addresses.  This can be
+done by putting all of the IP addresses in the conf file, or by having
+a separate Listen file on each machine.  Similarly, make sure that
+each web server's logfiles unique to each machine, not written to the
+NFS volumes.
+
+=back
+
+
+=head2 Virtual Hosts
+
+Slash has support for virtual hosts, so you can have multiple
+Slash sites on one machine.  Simply execute step 6 in the install
+process for each Slash site (after adding a new virtual user to
+DBIx::Password for each).
+
+
+=head2 SSL
+
+In Slash, there are two variables for the root URL of the site.
+B<absolutedir> is the full URL, including protocol, while B<rootdir>
+is the URL without protocol:
+
+	absolutedir	http://slashcode.com
+	rootdir		//slashcode.com
+
+B<absolutedir> is used only for creating external links to the site
+(such as in RSS files).  B<rootdir> is used for internal links; that
+way, you can use the same HTML pages for SSL and non-SSL.  You don't
+have to do anything special to the code or preferences to allow it to
+work with SSL by itself, SSL and non-SSL together, or non-SSL by itself.
+
+
+=head2 Non-Root
+
+It is possible to install and run everything here without root.
+
+Describing the process for a non-root install would take up significant
+space and time, having to account for differences in various systems,
+and all the workarounds necessary for it to work.
+
+If you must have a non-root install, consult the various documentation
+for Apache, MySQL, and perl about running and installing without root
+access.  Then, for Slash, you simply need to set the make variables PREFIX,
+SLASH_PREFIX, and INIT appropriately for your needs.
+
+B<Note>: Slash (or, more accurately, Apache + mod_perl and MySQL) take
+up a lot of system resources.  It is I<not advisable> for anyone to
+run Slash at all on a system, without the permission of the administrator
+of that system.
+
+
+=head1 UPGRADING
+
+B<These upgrade procedures are still in testing.  Please read them
+entirely before beginning.  We are not responsible for any loss of
+data or functionality.>
+
+=head2 Slash 2.0 -> Slash 2.2
+
+Slash 2.2 is a major upgrade from Slash 2.0.  It takes a little bit
+of work to get it going.
+
+=over 4
+
+=item 1.
+
+BACK EVERYTHING UP ON THE EXISTING SITE.
+
+=item 2.
+
+Install Bundle::Slash.  If you have done so previously, follow
+the instructions for removing the existing version of
+Bundle::Slash before proceeding.
+
+=item 3.
+
+Apply this patch to your installed Slash::Install module (probably
+easiest to hand-edit the file):
+
+  --- Install.pm~ Wed May  9 15:02:34 2001
+  +++ Install.pm  Fri Sep 28 12:44:41 2001
+  @@ -116,7 +116,7 @@
+   sub writeTemplateFile {
+          my($self, $filename, $template) = @_;
+          open(FILE, '>' . $filename) or die "$! unable to open file $filename to write to";
+  -       for (keys %$template) {
+  +       for (qw(section description title page lang name template seclev)) {
+                  next if ($_ eq 'tpid');
+                  print FILE "__${_}__\n";
+                  $template->{$_} =~ s/\015\012/\n/g;
+
+=item 4.
+
+Run C<template-check> on your site, and make a note of every change
+you've made to the standard templates.  You will need to make those
+changes again, manually, later.
+
+This is unfortunately unavoidable, because templates include code
+that changes significantly between releases.  It is recommended
+that you compile your changes into a THEME so they may easily be
+updated and applied.
+
+=item 5.
+
+Stop Apache and slashd on the target machine(s).
+
+=item 6
+
+Install Slash.
+
+B<If installing on a different machine ...>
+
+=over 4
+
+=item 1
+
+Install slash 2.2 as normal.  Do not yet run install-slashsite.
+
+=item 2
+
+Make sure that from this machine, you can access not only the database
+used for this installation, but the one used for the old installation.
+You may wish to, instead of accessing that database directly if it
+on another machine, dumping it and adding it to your new database server
+under a different name.
+
+=item 3
+
+Add a virtual user to DBIx::Password for the old installation.
+
+=back
+
+
+B<If installing on the same machine ...>
+
+=over 4
+
+=item 1
+
+Create a new database for the new installation.  You cannot
+use the same database for both installations.
+
+=item 2
+
+Add a new virtual user to DBIx::Password for the new database,
+and update (and flush) MySQL privileges appropriately.  You cannot
+use the same virtual user for both installations.
+
+=item 3
+
+It is highly recommended that you move F</usr/local/slash>
+(or whatever your installation directory is) to a new location,
+such as F</usr/local/slash-old>, and install a clean slash 2.2
+installation.  However, this is not necessary to do; you may install
+slash 2.2 on top of the slash 2.0 installation.
+
+The reason to not move anything is that you can keep any customizations
+done (images, additional scripts and plugins, static files, etc.).
+The reason to move it is so that everything is clean.  It is highly
+recommended that you move it, and then manually copy back the pieces
+you want.
+
+=item 4
+
+In any event, either move the old directory, or don't, and
+then install slash 2.2 as normal.  Do not yet run install-slashsite.
+
+=back
+
+
+=item 7.
+
+If you have plugins or themes from the old installation to install,
+copy them over now.  Warning: some plugins and themes might need to be
+ported first.  You may wish to deal with them later if they are not
+yet ported to slash 2.2.
+
+=item 8.
+
+Run install-slashsite.  Use the new virtual user.
+
+=item 9.
+
+Copy over any files (images, FAQs, etc.) that need to be copied, if necessary.
+
+=item 10.
+
+Run update script, F<utils/slash2toslash2.2>.  B<Read its instructions!>
+
+=item 11.
+
+Update templates.
+
+=item 12.
+
+Doublecheck Apache configs (httpd/slash.conf, site/sitename/sitename.conf).
+These configs have changed from the last version.  Read the comments and set
+them up as desired.
+
+=item 13.
+
+Start Apache.
+
+=item 14.
+
+Start slashd.
+
+=back
+
+
+=head2 Slash 2.2.x -> Slash 2.2.y
+
+Read all of this section before doing any of it.
+
+The first thing to do is to, as per the instructions below under
+INSTALLATION, unpack the latest distribution and run make and make
+install with the proper arguments.
+
+=over 4
+
+=item Overwriting Changes
+
+This process will overwrite any customizations of your installed
+modules, or customizations of the installed scripts in
+/usr/local/slash/themes/ and /usr/local/slash/plugins/ (for themes
+and plugins that come with Slash).  If you ran install-slashsite
+with the default option of using symlinks, and made customizations
+to the originals instead of breaking the symlink and copying the file
+over, then this will overwrite your changes.
+
+If you did modify the original instead of a copy, then break the
+symlink, copy over the original (as modified), and then continue.
+The original will be copied over by the new version, and your modified
+copy will remain intact.
+
+=item Templates
+
+With every update, there are changes to templates.  But most people
+will modify their templates.  A relatively simple way to see what
+has changed is to use template-tool and template-check.  This
+procedure should help most users deal with the integration of new
+templates into an existing site (it will only work with the slashcode
+theme, but a simple modification to the code of template-check
+can fix that).
+
+=over 4
+
+=item Dump
+
+Use template-tool to dump your templates into an empty directory.
+
+	% mkdir templates
+	% cd templates
+	% template-tool -u VIRTUAL_USER -d
+
+(Defaults to current directory.)
+
+=item Compare
+
+Use template-check to compare installed templates in
+/usr/local/slash/themes/slashcode/ and /usr/local/slash/plugins/ against
+the templates that have been dumped.
+
+	% template-check -u VIRTUAL_USER
+
+(Defaults to current directory.)
+
+This will use diff to show you the differences.  You can either go
+into the templates with a text editor (in another window) and change
+the dumped ones by hand, edit them by hand in the Template Editor
+via the web browser, or take a note of every template you want to
+copy over your existing template.
+
+After each directory of templates is done, hit "q" to continue to
+the next plugin/theme.
+
+=item Sync
+
+If you made changes by hand via the web, you are done.  Otherwise, take
+the list of templates to update, and pass the full filenames to
+template-tool (this will either be the templates you modified by hand
+in the dump directory, or the unmodified ones in the installation
+directories). You might need to put each filename in quotes because of
+the ";" character in the filenames.  This will overwrite your existing
+template with the new template.
+
+	% template-tool -u VIRTUAL_USER -s LIST
+
+=back
+
+=back
+
+=head2 Slash 1.0 -E<gt> Slash 2.2
+
+Please read the complete documentation of F<utils/slash1toslash2.2>.
+It is a program that will convert your database from Slash 1.0
+to a new Slash 2.2 database.  The program documentation (which can
+be read with F<perldoc>) details exactly what process it follows
+to do the conversion, so you can attempt to do it by hand if you
+prefer.
+
+
+
+=head1 REQUIREMENTS
+
+=head2 Software
+
+Below, the main software components needed are listed.  The
+recommended version is noted, along with the earliest version
+that has been tested (or is expected) to work.  The earliest
+versions are not necessarily supported, but should work.
+perl 5.005_03 is supported, but MySQL 3.22 is not.
+
+
+=over 4
+
+=item perl
+
+Version 5.6.1 (5.005_03).
+
+	http://www.cpan.org/
+
+=item MySQL
+
+Version 3.23.42 (3.23).
+
+	http://www.mysql.com/
+
+=item Apache
+
+Version 1.3.20 (1.3.6).
+
+	http://httpd.apache.org/
+
+=item mod_perl
+
+Versions 1.26 (1.21).
+
+	http://perl.apache.org/
+
+=item Sendmail or other transport daemon
+
+Refer to your OS distribution.
+
+
+=item Perl module distributions
+
+See http://search.cpan.org/ and http://www.cpan.org/
+to get each module individually; however, we recommend
+you download them using the CPAN module.
+
+The latest version of each module is recommended.
+
+For Compress::Zlib, the zlib development library is required.
+For XML::Parser, the expat library is required.
+If they are not present on the system already, download and
+install them before installing the modules.
+
+	http://www.gzip.org/zlib/
+	http://sf.net/projects/expat/
+
+The following required distributions are all included in
+the Bundle::Slash distribution.
+
+=over 4
+
+=item libnet
+
+=item Digest-MD5
+
+=item MD5
+
+=item Compress-Zlib
+
+=item Archive-Tar
+
+=item File-Spec
+
+=item Storable
+
+=item MIME-Base64
+
+=item libwww-perl
+
+=item HTML-Tree
+
+=item Font-AFM
+
+=item HTML-FormatText
+
+=item XML-Parser
+
+=item XML-RSS
+
+=item DBI
+
+=item Data-ShowTable
+
+=item Msql-Mysql-modules
+
+=item DBIx-Password
+
+=item ApacheDBI
+
+=item libapreq
+
+=item AppConfig
+
+=item Template-Toolkit (version 2)
+
+=item Mail-Sendmail
+
+=item MailTools
+
+=item Email-Valid
+
+=item Getopt-Long
+
+=item Image-Size
+
+=item Time-HiRes
+
+=item TimeDate
+
+=item DateManip
+
+=item Time-modules
+
+=item Schedule-Cron
+
+=back
+
+=back
+
+
+=head2 Hardware
+
+There are no specific hardware requirements.  Apache (with mod_perl) and
+MySQL both take up a lot of RAM; running a complete system with 128MB
+might be possible, if you do some tuning of the configuration, but a
+practical minimum 256MB is recommended, though less could be sufficient
+with some tuning.Storage space depends on how busy you expect the site
+to be; 250MB is possible, but a minimum 1GB is recommended.  Necessary
+processor speed is also dependent on how busy the site is; Pentium 133
+or equivalent might work, but less than a Pentium II/200 is not
+recommended.
+
+For the curious, Slashdot (as of September 2001) runs on nine machines:
+nine webservers (each is Pentium III/600, 1GB RAM, 9GB hard drive), one
+NFS server (600MHz PIII, 1GB RAM), and three database servers
+database server (quad 600MHz PIII, 4GB RAM).  One database server is
+live, one is a replicated backup, and a third is for doing live searches
+and performance-intensive SELECTs by daemons etc.
+
+However, this is certainly overkill for most sites (and possibly even
+overkill for Slashdot).  slashcode.com runs on two web servers and one
+NFS/database server.  Many sites can run fine on just one machine for
+everything (we use a minimum of two web server machines on every site
+for load balancing and redundancy).
+
+
+=head1 VERSIONS
+
+Each version of slash has a code name, and the files on CVS for that
+version are tagged with that name.  The current release is always
+MAIN.  The versioning scheme is as Linux and Perl are,
+revision.version.subversion.  version is even for releases, and odd
+for development.  The codename applies to the development version
+and subsequent release.
+
+For example, 1.0.11 is a normal release, while 1.1.0 is the first
+development release for what will be the next release (either 1.2
+or 2.0).
+
+The CVS repository is tagged with version numbers, so to get release
+1.0.3, use tag "v1_0_3_0".  The last number (in this case a zero) will
+be incremented during development ("v1_0_3_1", "v1_0_3_2", etc.) until
+the next release.
+
+=head2 Codenames
+
+=over 4
+
+=item v1.0
+
+beast
+
+=item v2.0
+
+bender
+
+=item v2.2
+
+fry
+
+=back
+
+
+=head1 VERSION
+
+$Id$

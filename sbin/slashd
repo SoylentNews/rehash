@@ -1,0 +1,494 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+############################################################
+#
+# slashd - the daemon that runs tasks from your site's "tasks"
+# directory.  Which tasks are in this directory (probably
+# /usr/local/slash/site/yoursitename/tasks) depends on which
+# theme and plugins (if any) you installed with install-slashsite.
+#
+# If the times showing up in slashd.log are not the times you expect
+# to see, it's because this script uses your database machine
+# to decide when to run scripts, but the machine it runs on when
+# logging timestamps.  This may help you notice unsynched clocks.
+#
+############################################################
+
+use sigtrap;
+use strict;
+use Carp;
+# use Date::Manip;
+use File::Basename;
+use File::Path;
+use File::Spec::Functions;
+use LWP::UserAgent;
+use HTTP::Request;
+use Time::Local;
+use Time::HiRes;
+use URI::Escape;
+use XML::Parser::Expat;
+use XML::RSS 0.95;
+use Schedule::Cron;
+
+use Slash;
+use Slash::Display;
+use Slash::Utility;
+
+use vars qw( %task $me );
+
+my $virtual_user = $ARGV[0];
+createEnvironment($virtual_user);
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+my $user = getCurrentUser();
+
+# i am not sure we need this ... -- pudge
+#sub END { Carp::cluck("Exiting slashd") }
+
+main();
+exit 0;
+
+############################################################
+#
+# Routines meant to be accessible from task scripts.
+#
+############################################################
+
+# The standard log command.
+
+sub slashdLog {
+	doLog('slashd', \@_);
+}
+
+# Log a warning and die.  Since slashd is meant to keep running
+# long-term, this is meant for extreme circumstances such as a
+# security violation;  normal warnings can go to slashdLog.
+
+sub slashdLogDie {
+	my $err = join(" ", @_);
+	slashdLog($err);
+	die $err;
+}
+
+# prog2file executes a command (as the unix user specified in your
+# /usr/local/slash/slash.sites file, of course, since that's how
+# slashd should be running) and puts its output into a file whose
+# name is specified.
+# 
+# Extended: If you are looking for specific data to be returned from the
+# program called, prog2file will return a scalar with all data returned from
+# STDERR
+
+
+# What time does the database think it is?  Our tasks are synched to
+# that time, which may be different from the time that the machine
+# we're running on thinks it is.
+#
+# We use two closure'd variables here and do a little dance just to
+# avoid calling SELECT NOW() more than once every ten minutes.
+# Not that it really matters, this optimization saves just about
+# nothing, but there's just no need, clocks can't possibly drift
+# anywere near that much.
+
+{ my($last_db_time_offset, $last_db_time_confirm) = (undef, undef);
+sub db_time {
+	my $my_time = time;
+	if (!$last_db_time_confirm
+		or $my_time > $last_db_time_confirm + 600) {
+#		my $db_time = UnixDate(ParseDate($slashdb->getTime()), "%s");
+		my $db_time = timeCalc($slashdb->getTime(), "%s", 0);
+		$last_db_time_offset = $db_time - $my_time;
+		$last_db_time_confirm = $my_time;
+	}
+	return $my_time + $last_db_time_offset;
+} }
+
+# Get the logging verbosity from the database.
+#
+# More closure and mini-caching, again to avoid querying the DB every
+# single time we want to do something.
+
+{ my($last_level, $last_level_confirm) = (undef, undef);
+sub verbosity {
+	my $my_time = time;
+	if (!$last_level_confirm
+		or $my_time > $last_level_confirm + 30) {
+		my $new_level = $slashdb->getVar('slashd_verbosity', 'value');
+		$new_level =~ /(\d+)/; $new_level = $1 || 2;
+		if (defined($last_level) and $last_level != $new_level) {
+			slashdLog("verbosity was $last_level, is $new_level");
+		}
+		$last_level = $new_level;
+		$last_level_confirm = $my_time;
+	}
+	return $last_level;
+} }
+
+############################################################
+#
+# And now the internal routines (not that your script can't
+# invoke them, but it probably won't need to).
+#
+############################################################
+
+{ my $last_static_update = $^T;
+sub update_static {
+	my($cron) = @_;
+	my $my_time = time;
+	my $changed = 0;
+	if (!$last_static_update
+		or $my_time > $last_static_update + 30) {
+		my $old_panic = $constants->{panic} || 0;
+		createCurrentStatic($slashdb->getSlashConf());
+		$constants = getCurrentStatic();
+		$last_static_update = $my_time;
+		if ($old_panic != $constants->{panic}) {
+			slashdLog("'panic' was $old_panic, is $constants->{panic}");
+			init_event_ary($cron);
+			$changed = 1;
+		}
+	}
+	return $changed;
+} }
+
+sub slashdLogInit {
+	doLogInit('slashd');
+}
+
+sub init_cron {
+	sub null_dispatcher { die "null_dispatcher called, there's a bug" }
+	my $cron = Schedule::Cron->new(\&null_dispatcher);
+	return $cron;
+}
+
+sub process_tasks {
+	my($cron) = @_;
+	%task = ( );
+
+	# "require" all the task files -- each will put its info into
+	# $task{"filename.pl"}
+	my %success = my %failure = ( );
+	my $dir = catdir($constants->{datadir}, "tasks");
+	if (!-e $dir or !-d _ or !-r _) {
+		slashdLogDie(<<EOT);
+could not process task files in $dir, missing or not readable to $>
+EOT
+	}
+
+	# Go through the files and require them all.  Each file will
+	# store its data and code in %task and execute any necessary
+	# initialization.  We also do some rudimentary checks of whether
+	# an attacker with guest access on this system could be feeding
+	# us bad code (the better solution, of course, is not to let
+	# attackers have local guest access).
+
+	my $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE = 0;
+	if (not $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE
+		and (stat $dir)[2] & 002) {
+		slashdLogDie("you really don't want me to use task files",
+			"from a directory that's world-writable: $dir");
+	}
+	my @files =
+		sort
+		grep { -e $_ and -f _ and -r _ }
+		glob "$dir/[a-zA-Z0-9_-][a-zA-Z0-9_-]*.pl";
+	for my $fullname (@files) {
+		if (not $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE
+			and (stat $fullname)[2] & 002) {
+			slashdLogDie(<<EOT);
+you really don't want me to use a task file that's world-writable: $fullname
+EOT
+		}
+		my $file = basename($fullname);
+		my $ok = 0;
+		eval { local $me = $file; $ok = require $fullname; };
+		if ($@) {
+			slashdLog("requiring '$fullname' raised exception: $@");
+			$ok = 0;
+		}
+		if ($!) {
+			slashdLog("requiring '$fullname' caused error: $!");
+			$ok = 0;
+		}
+		if (!defined($task{$file}{timespec})) {
+			slashdLog("'$fullname' did not set timespec properly");
+			$ok = 0;
+		}
+		if (!$task{$file}{code} or ref $task{$file}{code} ne 'CODE') {
+			slashdLog("'$fullname' did not set code properly");
+			$ok = 0;
+		}
+		# This may be rethought later, but for those useful tasks we 
+		# MAY OR MAY NOT want to run on an automated AND/OR a manual
+		# type basis: this allows the user to decide.
+		if ($task{$file}{standalone}) {
+			slashdLog("'$fullname' available via runtask, only!");
+			$ok = 0;
+		}
+		if ($ok) {
+			$success{$file} = 1;
+		} else {
+			delete $task{$file} if $task{$file};
+			$failure{$file} = 1;
+		}
+	}
+
+	# Log success and failure, and if no successes, abort with die()
+
+	slashdLog(
+		"processed $dir; "
+		. (scalar keys %success) . " successful"
+		. (
+			(scalar keys %success)
+			?  " (" . join(" ", sort keys %success) . ")"
+			: ""
+		)
+		. "; "
+		. (scalar keys %failure) . " failed"
+		. (
+			(scalar keys %failure)
+			?  " (" . join(" ", sort keys %failure) . ")"
+			: ""
+		)
+	);
+	slashdLogDie("aborting: no files successfully processed from $dir")
+		if !%task;
+
+	# The appropriate data is in $task{"filename.pl"} -- write it all into
+	# the $cron object.
+
+	$cron->clean_timetable;
+	for my $file (sort keys %task) {
+		$task{$file}{entry} = $cron->add_entry($task{$file}{timespec},
+						       $task{$file}{code});
+	}
+	$cron->build_initial_queue;
+
+}
+
+# Create an initial array of events with their next-scheduled
+# execution times.
+
+sub init_event_ary {
+	my($cron) = @_;
+	my $event_ary_ref = [ ];
+	for my $file (sort keys %task) {
+		my $immediate = $task{$file}{on_startup} ? 1 : 0;
+		insert_task_event($event_ary_ref, $cron, $file, $immediate);
+	}
+	if (verbosity() >= 2) {
+		my $first_task = basename($event_ary_ref->[0][0]);
+		my $secs_until = $event_ary_ref->[0][1] - db_time();
+		slashdLog("first task will be $first_task in $secs_until secs");
+	}
+	$event_ary_ref;
+}
+
+# Given a task's filename, returns the next time at which that task will
+# run.  The optional second argument is a hashref in which the current
+# database time is cached (to avoid doing SELECT NOW() a bunch of times in
+# rapid succession) and where the next execution time and its file are
+# stored (in case the caller cares, which sometimes it does).
+
+sub calc_next_execution_time {
+	my($cron, $file, $hr) = @_;
+	$hr = { } if !$hr;
+	$hr->{db_time} = db_time();
+	my $timespec = $task{$file}{timespec};
+	if ($constants->{panic} >= 1) {
+		# Check for timespec_panic_n being defined, where n is
+		# the current panic level or, if available, less.
+		my $i = $constants->{panic};
+		while ($i > 0) {
+			if (defined($task{$file}{"timespec_panic_$i"})) {
+				$timespec = $task{$file}{"timespec_panic_$i"};
+				last;
+			}
+			--$i;
+		}
+	}
+
+	my $entry_time;
+	if ($timespec) {
+		# Let Schedule::Cron determine the next execution time.
+		$entry_time = $cron->get_next_execution_time($timespec,
+			$hr->{db_time});
+	} else {
+		# "Never execute" if timespec (at least for this panic level)
+		# is an empty string.  This will break on Jan. 18, 2038.
+		$entry_time = 2**31-1;
+	}
+	if ($entry_time < $hr->{db_time}) {
+		my $min_time = $hr->{min_time} || "none";
+		slashdLog(<<EOT) if verbosity() >= 1;
+error: entry_time in the past, check TZ ($entry_time < $hr->{db_time}) $file $timespec $min_time
+EOT
+		return undef;
+	}
+	if (!$hr->{min_time} or $entry_time < $hr->{min_time}) {
+		$hr->{min_time} = $entry_time;
+		$hr->{min_file} = $file;
+	}
+	$entry_time;
+}
+
+# Given a task filename, calculates its next execution time, and recreates
+# the event array with that task scheduled for that time.  This happens
+# to be always called when the task in question has already been popped
+# off the front (current) end of the list, though this function will also
+# happen to work if the task is already on the list for some reason.
+
+sub insert_task_event {
+	my($event_ary_ref, $cron, $file, $immediate) = @_;
+	my $event_hr = { };
+
+	# Convert the existing array into a hash.
+	for my $file_num (0..$#$event_ary_ref) {
+		my($file, $until_time) = @{$event_ary_ref->[$file_num]};
+		$event_hr->{$file}{until_time} = $until_time;
+	}
+
+	# Add (or replace) the desired task into the hash.
+	my $next_time;
+	if ($immediate and $constants->{panic} < 1) {
+		$next_time = db_time();
+	} else {
+		$next_time = calc_next_execution_time($cron, $file);
+	}
+	$event_hr->{$file}{until_time} = $next_time;
+
+	# Rebuild the array in the proper order.
+	@$event_ary_ref = ( );
+	my @files = sort {
+		$event_hr->{$a}{until_time} <=> $event_hr->{$b}{until_time}
+		||
+		$a cmp $b
+	} keys %$event_hr;
+	for my $file (@files) {
+		push @$event_ary_ref, [ $file, $event_hr->{$file}{until_time} ];
+	}
+}
+
+sub wait_until {
+	my($until_time) = @_;
+	while ((my $cur_time = db_time()) < $until_time) {
+		my $sleep_duration = $until_time - $cur_time;
+		if ($sleep_duration < 1) {
+			$sleep_duration = 1;
+		} elsif ($sleep_duration > 600) {
+			$sleep_duration -= 30;
+		}
+		sleep $sleep_duration;
+	}
+}
+
+sub main {
+
+	# Initialize logging and all the low-level stuff.
+
+	slashdLogInit();
+	slashdLog("Starting up Slashd (verbosity " . verbosity()
+		. ") with pid $$");
+	if ($ENV{TZ} ne 'GMT') {
+		slashdLog(join(" ",
+			"Note: \$ENV{TZ}='$ENV{TZ}' not GMT, this may cause",
+			"'entry_time in the past' errors; did you not start",
+			"slashd with the init script?"
+		));
+	}
+
+	# Initialize the scheduling stuff.
+
+	my $cron = init_cron();
+	process_tasks($cron);
+	my $event_ary = init_event_ary($cron);
+
+	# Here's the main event loop, which never returns (slashd is
+	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
+
+	while (1) {
+
+		# The task which needs to execute next is at the front of
+		# the event array.
+		my($task_filename, $until_time) = @{ shift @$event_ary };
+		my $basename = basename($task_filename);
+
+		# Get its information and wait until it's ready.
+		my $subref = $task{$task_filename}{code};
+		my $fork = $task{$task_filename}{fork} ? 1 : 0;
+		wait_until($until_time);
+
+		# Recheck the vars table to reload $constants if necessary.
+		# If it changed, this may alter our execution schedule, so
+		# repeat the loop from the top.
+		if (update_static($cron)) {
+			next;
+		}
+
+		# Execute it.
+		if (verbosity() >= 2) {
+			slashdLog("$basename begin");
+		}
+		my $summary = "";
+		my $start_time = Time::HiRes::time;
+		if ($fork) {
+			# XXX Right now, tasks that request a fork are
+			# handled the same as those that don't.  Fix this.
+			local $me = $basename;
+			$summary = &$subref($virtual_user,
+				$constants, $slashdb, $user);
+		} else {
+			local $me = $basename;
+			$summary = &$subref($virtual_user,
+				$constants, $slashdb, $user);
+		}
+		my $end_time = Time::HiRes::time;
+
+		# The task we just executed will repeat eventually;  find
+		# out when and reinsert it into the event array.
+		insert_task_event($event_ary, $cron, $task_filename, 0);
+
+		# If desired, log that it's done (and what the next is).
+		$summary = "" if !$summary;
+		$summary =~ s/\s+/ /g; chomp $summary;
+		$summary = ": $summary" if $summary;
+		my $secs_until = $event_ary->[0][1] - db_time();
+		# secs_until can be negative;  that just means we're
+		# behind and will execute the next task immediately to
+		# try to catch up.
+		if (verbosity() >= 2) {
+			my $next_task = basename($event_ary->[0][0]);
+			my $duration = sprintf("%.2f", $end_time - $start_time);
+			slashdLog(join("",
+				"$basename end (${duration}s",
+				(($secs_until < 0)
+					? "; $next_task "
+						. -$secs_until
+						. "s late"
+					: "; $next_task in ${secs_until}s"),
+				")$summary"));
+		} elsif (verbosity() >= 1) {
+			my $next_task = basename($event_ary->[0][0]);
+			my $duration = sprintf("%.2f", $end_time - $start_time);
+			slashdLog(join("",
+				"$basename end (${duration}s",
+				(($secs_until < -30)
+					? "; $next_task "
+						. -$secs_until
+						. "s late"
+					: ""),
+				")$summary"));
+		}
+
+		# Sleep for at least a few seconds between tasks.
+		sleep 2;
+
+	}
+}
+
+1;
+

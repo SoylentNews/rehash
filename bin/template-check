@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use File::Spec::Functions;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash::DB;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hvu:', \%opts);
+usage() if $opts{'h'};
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+
+my $dir = shift || curdir();
+my $diff = q{diff -Bu};
+my $grep = q{grep -v '^Only in '};
+my $less = q{less};
+
+# main program logic (in braces to offset nicely)
+{
+	my $slashdb   = Slash::DB->new($opts{'u'});
+	my $basedir   = $slashdb->getVar('slashdir', 'value');
+	my $siteinfo  = $slashdb->getDescriptions('site_info');
+	my $theme     = catdir($basedir, 'themes', $siteinfo->{theme}, 'templates');
+	my $plugindir = catdir($basedir, 'plugins');
+
+	local *D;
+	opendir D, $plugindir or die "Can't open $plugindir: $!";
+	my @plugins = grep !/^(?:CVS|\.{1,2}|Makefile)$/, readdir D;
+	closedir D;
+
+	mydiff($theme);
+
+	for (@plugins) {
+		mydiff(catdir($plugindir, $_, 'templates'));
+	}
+}
+
+sub mydiff {
+	my $diffdir = $_[0];
+	print "Diffing $diffdir\n";
+	system("$diff $dir $diffdir | $grep | $less");
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [DIRECTORY]
+
+This program will show the differences between installed
+templates (after they have been dumped to DIRECTORY),
+and templates in the installation directory (usually
+in /usr/local/slash/themes/ and /usr/local/slash/plugins/).
+
+Dump your templates out using template-tool, then
+run this program on that directory.
+
+Main options:
+		Directory to diff against (default is current dir)
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
+
+diff -Bu ./ /usr/local/slash/themes/slashcode/templates | grep -v '^Only in ' | less

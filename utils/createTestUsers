@@ -1,0 +1,275 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+BEGIN {
+	{
+		require Silly::Werder;
+		Silly::Werder->import;
+	}
+	die "Installation of Silly::Werder is required for this util, sorry!\n"
+		if $@;
+}
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Benchmark;
+
+use vars qw( $slashdb $werder $constants $junk );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+srand(time() ^ ($$+($$<<15)));
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hJu:v', \%opts);
+usage() if $opts{'h'};
+version() if $opts{'v'};
+$junk = $opts{'J'} ? 1 : 0;
+$opts{'u'} ||= 'slash';
+$opts{num_users} = $ARGV[0] || 10;
+usage('Invalid number of users') 
+	if $opts{num_users} !~ /^\d+$/ || $opts{num_users} < 0;
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+$werder = new Silly::Werder;
+
+# main program logic (in braces to offset nicely)
+{
+	my $kmin = $constants->{minkarma} || -25;
+	my $kmax = $constants->{maxkarma};
+
+	for (1..$opts{num_users}) {
+		$werder->set_syllables_num(2, 4);
+		$werder->set_werds_num(1, 3);
+		my $username = $werder->sentence;
+		$username =~ s{\W+$}{};
+		$username =~ s{\b(\w)}{\U$1}g if rand(1) < 0.5;
+		$username =~ s{\b(\w)}{\L$1}g if rand(1) < 0.2;
+		(my $matchname = lc $username) =~ s/[^a-zA-Z0-9]//g;
+		$werder->set_syllables_num(1, 2);
+		$werder->set_werds_num(3, 5);
+		my $email = $werder->sentence;
+		$email =~ s{\W+$}{};
+		$email =~ s{\s+}{\@};
+		$email =~ s{\s+}{.}g;
+		my $uid = $slashdb->createUser($matchname, $email, $username);
+		next unless $uid;
+
+		my $karma = int(rand(1+$kmax-$kmin)+$kmin);
+		my $hr = { karma => $karma };
+		my $emaildisplay = int(rand(3));
+		$hr->{emaildisplay} = $emaildisplay if $emaildisplay != 0 or rand(1) < 0.3;
+		if ($emaildisplay == 0) {
+			$hr->{fakeemail} = '';
+		} elsif ($emaildisplay == 1) {
+			$hr->{fakeemail} = getArmoredEmail($uid);
+		} else {
+			$hr->{fakeemail} = $email;
+		}
+		$werder->set_syllables_num(1, 3);
+		$werder->set_werds_num(2, 6);
+		my $sig = "";
+		$sig = make_werds(5+int(rand(20)), 0.2) if int(rand(2));
+		$sig = strip_html(substr($sig, 0, 120));
+		$sig = balanceTags($sig);
+		$sig = addDomainTags($sig);
+		if (length($sig) <= 160) {
+			$hr->{sig} = $sig;
+		}
+		my $domaintags = int(rand(3));
+		$hr->{domaintags} = $domaintags if $domaintags != 2 or rand(1) < 0.3;
+		$slashdb->setUser($uid, $hr);
+
+		print "New user: $username (User #$uid) ($email)\n";
+	}
+}
+
+# subroutines
+
+sub make_werds {
+        my($werds, $link_prob) = @_;
+        $werds = int($werds);
+	$link_prob ||= 0;
+        if ($werds > 40) {
+                $werder->set_werds_num(5,20);
+        } elsif ($werds > 20) {
+                $werder->set_werds_num(3,10);
+        } else {
+                $werder->set_werds_num($werds, $werds);
+        }
+	my $min_syl = int(rand(3)+1);
+	$werder->set_syllables_num($min_syl, $min_syl + int(rand(4)+1));
+	my @links = qw(
+		http://slashdot.org/            http://www.brunching.com/
+		http://www.newsforge.com        http://osdn.com
+		http://whitehouse.gov           http://www.whitehouse.gov/
+		http://us.imdb.com/             http://www.kernel.org
+		http://ic.ac.uk                 http://cr.yp.to/
+		http://www.verizonreallyreallyreallysucks.com/
+		ftp://ftp.kernel.org/           ftp://ftp.gnu.org/gnu/Licenses/COPYING-2.0
+		news:news.admin.net-abuse.email gopher://ccat.sas.upenn.edu:3333/11/Fiction/
+		http://List-Etiquette.com/about/
+		http://slashdot.org/features/99/03/31/0137221.shtml
+		http://www.nap.edu/readingroom/books/newpath/chap2.html
+		http://www.forthnet.gr/forthnet/isoc/short.history.of.internet
+		http://www.freenix.fr/unix/linux/HOWTO/French-HOWTO.html
+		http://www.linux.org.mx/        http://www.linux.net.mx/linux.php
+		http://www.linux.org.uk/diary/  http://hepwww.ph.qmw.ac.uk/HEPpc/
+		http://www.w3.org               http://peipa.essex.ac.uk/tp-linux/
+		http://www.crosswinds.net/~tvquotes/futurama/2.html
+		http://www.google.com/search?q=cache:h58W7o4qU-w:www.space.com/sciencefiction/tv/futurama_gore_000516_wg.html+Futurama+Fry&hl=en
+		http://dmoz.org/Regional/Europe/United_Kingdom/Wales/Isle_of_Anglesey/Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch/
+		www.google.com                  bad_link b.a.d l.i.n.k . .. ... ....
+		mailto:jamie@slashdot.org       mailto:pater@slashdot.org
+	);
+	push @links, 'http://directory.google.com/Top/Arts/Literature/Authors/C/Carroll,_Lewis/Works/Hunting_of_the_Snark,_The/';
+	my $comment;
+	my $cur_werds = 0;
+        my $tag = "";
+        my $quote = q{};
+	my $last_p_werd_num = 0;
+        while ($cur_werds < $werds) {
+                my $new_werds = '';
+                if (int(rand(6))==0 or $werds < $cur_werds * 1.1) {
+                        if (int(rand(2))) {
+                                $new_werds = $werder->question;
+                        } else {
+                                $new_werds = $werder->exclaimation; # Dave, you spelled this word wrong
+                        }
+                } else {
+                        $new_werds = $werder->sentence;
+                }
+		if ($link_prob and rand(1) < $link_prob) {
+			my @new_werds = split / /, $new_werds;
+			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
+			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
+			my $insert_start = int(rand(@new_werds-2));
+			my $insert_end = $insert_start + int(rand(4))+1;
+			$insert_end = scalar @new_werds if $insert_end > scalar @new_werds;
+			$new_werds = join(" ",
+				@new_werds[0..$insert_start-1],
+				$a_href . $new_werds[$insert_start],
+				@new_werds[$insert_start+1..$insert_end-1],
+				$new_werds[$insert_end] . $close_a,
+				@new_werds[$insert_end+1..$#new_werds]
+			);
+		}
+		if ($cur_werds and !$tag and rand > 0.9) {
+			if (rand(1) < 0.95) { $tag = "i" }
+			else { $tag = "b" }
+			if (rand(1) < 0.50) { $quote = int(rand(3)) ? q{'} : q{"} };
+			$new_werds = "<$tag>$quote$new_werds";
+		}
+		if ($tag and rand(1) < 0.5) {
+			$new_werds = "$new_werds$quote</$tag>";
+			$tag = ""; $quote = q{};
+                }
+                $comment .= " $new_werds";
+                $comment =~ s{\s+}{ }g;
+                $cur_werds = $comment =~ tr/ / /;
+		if (rand($werds) > 30
+			and rand($cur_werds - $last_p_werd_num) > 20) {
+			$comment .= "<P>";
+			$last_p_werd_num = $cur_werds;
+		}
+        }
+        $comment .= "</$tag>" if $tag;
+        $comment =~ s{</(\w+)>\s+<\1>}{ }g;
+        $comment =~ s/^\s*(.+)\s*$/$1/;
+        $comment =~ s/^\s+//; $comment =~ s/\s+$//;
+	if ($link_prob and $junk) {
+		my @fragments = (
+			"<a", "href=", 'href="', '"', "'", ">", '>">', " > >",
+			"<", " < ", " <<", ">>", " < < <", "< < ", "<? ", "&lt;<",
+			".", "..", "../", "/..", "/../../..", " ", "  ", " \r ",
+			" \n ", "\n ", "\n\n", "\r\n\r", "\n\r\n", "\t \t", "\t",
+			"<i>", "</ i >", "<i >", "< /i >", "< i>", "< / i>",
+			"<i", "</i", "i>", "/i>", "/i/", "i/i", " // ", " / ",
+			"%2e", "%2f", "%3c", "%3e", "&lt;", "&gt;", "&amp;", "&",
+			"&amp", "&amp ", "&&", "&gt ;", "&#000;", "&#127;", "&#amp;",
+			"&#120;", "&#040;", "&#x30;", "&12345;", "&#2345;", "&999 ",
+			"&lt;<%3c", "&gt;>%3e", "%3e&lt; ", "><", "<>", "<><>",
+			"%25%", "%25", "&#046;", "&#26;", "& &", "<&> <", ">&<",
+			'<a hReF="/', '<A href = "//', '<A HREF=http://',
+			'<a href=""http://', '<a HREF="news:', '<a href="ftp:',
+			"<a\thref=\"/", '<a href="///', "<a\rhref=\"http:",
+			"<A\nHREF=\"http:", "<A\nHREF=http:", "<A\nHREF=\"http",
+			'<a href="ftp://ab:xz@', '<a href="ww~w\@foo.com/',
+			'<a href="@bar.com/', '<a href="http://@bar.com/',
+			'<a href="news:a:b@', '<a href="news:a:b:c:d@foo.com',
+			'<a href="ftp://aaa@foo.com', '<a href="http://bbb@bar',
+			'<a href="http://ab:xz@', '<a href="http://www@',
+			'<a href="ftp://www@www/', '<a href="news:new@new/',
+			'<a href="http://@', '<a href="http://:bar@', '%5c',
+			'<a href=http://foo:bar@', '<a href=http://@', '%7f',
+			'<a href="http://foo.com%20%20%20%20%20%20%20@',
+			"<A\nhref=\"HTTP://", "<!-- script ", "<script ",
+			'< a href="', '" <script="', "<script>", "<script",
+			"script>", "/script>", "href=", ' href="', ' HREF="',
+			'<img src="', "<img ", "</img>", "</hr>", "<!-- ",
+			"<!- - ", "<!--", "<! ", "<!", "!>", "-->", " -->",
+			"<a href=\"\r\n", "foo.com", "bar.com", "test.cx",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+		);
+		for (1..$werds) {
+			my $offset = int(rand(length($comment))+1);
+			my $done = 0;
+			while (!$done) {
+				my $fragment = $fragments[rand @fragments];
+				substr($comment, $offset, 0) = $fragment;
+				$done = 1 if rand(1) < 0.8;
+			}
+		}
+	}
+        $comment;
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#users]
+
+This utility creates test users for a given Slash site. This program is for
+testing purposes, only, particularly for those ambitious Slash users out there
+who want to try their hand at modifying the code.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

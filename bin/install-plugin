@@ -1,0 +1,115 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This is the plugin install script.
+# -Brian (brian@tangent.org)
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use File::Copy;
+use Slash::Install;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage() unless getopts('hvlu:L:', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+
+$| = 1;
+
+unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
+	print "You did not supply a valid DBIx::Password virtual name($opts{'u'}).\n";
+	exit;
+}
+
+{
+	my $install = Slash::Install->new($opts{'u'});
+
+	print "\nPlease select which plugins you would like?\n" unless $opts{'l'} ;
+	my $plugins = $install->getPluginList($PREFIX);
+	for (sort keys %$plugins) {
+		print "$plugins->{$_}{'order'}.\t$_ $plugins->{$_}{'description'}\n";
+	}
+	exit 0 if $opts{'l'};
+
+	my @answers;
+	my $select = 'a';
+	print "Hit 'a' to select all, otherwise select comma separated numbers or 'q' to quit\n";
+	while ($select ne 'q'){
+		chomp($select = <STDIN>);
+
+		if ($select =~ /^\d\,/) {
+			@answers = split(/\,/, $select);
+			last;
+		} elsif ($select eq 'a') {
+			for (keys %$plugins) {
+				push @answers, $plugins->{$_}{'order'};
+			}
+			last;
+		} elsif ($select eq "") {
+			last;
+		} elsif ($select ne 'q') {
+			push @answers, $select;
+		}
+	}
+
+	my $symlink;
+	if ($opts{'L'}) {
+		$symlink = $opts{'L'} =~ /^n/i ? 0 : 1;
+	} else {
+		print "
+Would you like to install all the files as symlinks
+to the original?  (If not, each file will be copied to
+your Slash directories). [Y] ";
+		chomp(my $ans = <STDIN>);
+		$ans ||= 'Y';
+		$symlink = $ans =~ /^\s*[Yy]/;
+	}
+
+	$install->installPlugins(\@answers, 0, $symlink);
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS]
+
+Installs Slash plugins.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-l	Does not install plugins, just lists known plugins
+	-L	Install files in htdocs using symlinks [y/n]
+
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

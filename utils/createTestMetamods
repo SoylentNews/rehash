@@ -1,0 +1,235 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Benchmark;
+
+use vars qw( $slashdb $constants );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my (%opts);
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hFD:u:v', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+	
+$opts{'u'} ||= 'slash';
+$opts{num_closed} = $ARGV[0] || 10;
+usage('Invalid number of meta-moderations') 
+	if $opts{num_closed} !~ /^\d+$/ || $opts{num_mods} < 0;
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+
+# Insure we don't exceed the maximum number of moderations that can be made.
+{
+	my $max_mods = $slashdb->sqlCount(
+		'moderatorlog',
+		"m2count < $constants->{m2_consensus}"
+	);
+	if ($opts{num_closed} > $max_mods) {
+		$opts{num_closed} = $max_mods ;
+		print "- Count set to maximum number of mods, $max_mods\n";
+	}
+}
+
+# main program logic (in braces to offset nicely)
+{
+	my $cur_closed = $slashdb->sqlCount(
+		'moderatorlog',
+		"m2count >= $constants->{m2_consensus}"
+	);
+
+	print "Generating meta-moderations...\n";
+
+	my $t0 = new Benchmark;
+	my $startcount = getM2ClosedCount(); 
+	my($curcount, $m2count) = (0, 0);
+	my(@cids);
+	LOOP: { do {{
+		my $m2uid = getRandomUID();
+		my($m2user, $comments);
+		if ($m2uid) {
+			$m2user = $slashdb->getUser($m2uid);
+			$comments = $slashdb->getMetamodComments(
+				$m2user,
+				$constants->{m2_comments}
+			);
+
+			# OK, so this guy is finished as an M2.
+			if (! @{$comments}) {
+				getRandomUID('exclude', $m2user->{uid});
+				next;
+			}
+		}
+		last LOOP if !$m2uid;
+		
+		@cids = @{$comments};
+		{
+			local $" = ', ';
+			$_ = $_->{id} for @cids;
+			printf <<EOT, $#cids + 1;
+M2: UID #$m2user->{uid} metamoderates %d - (@cids)
+EOT
+
+		}
+
+		for (@{$comments}) {
+			# Our M2 "vote" which is randomly determined with a 
+			# heavy bias towards "fair".
+			my $val = (rand 11 > 1) ? '+' : '-';
+			$slashdb->sqlInsert("metamodlog", {
+				-mmid => $_->{id},
+				-uid  => $m2user->{uid},
+				-val  => ($val eq '+') ? '+1' : '-1',
+				-ts   => "now()",
+				-flag => 10,
+			});
+			$slashdb->sqlUpdate('moderatorlog', {
+				-m2count => 'm2count+1',
+			}, "id=$_->{id}");
+			my $m2_count = $slashdb->sqlSelect(
+				'm2count',
+				'moderatorlog',
+				"id=$_->{id}"
+			);
+
+			$m2count++;
+			if ($opts{D} > 2) {
+				printf <<EOT, $m2_count, $constants->{m2_consensus}
+M2($m2count): ID #$_->{id}, M2Mod = $m2user->{uid}, Val = $val, C=%d/%d 
+EOT
+
+			}
+		}
+		# This user has now metamoderated. We should clear the 
+		# lastmmid field.
+		$slashdb->setUser($m2user->{uid}, { lastmmid => 0 });
+
+		$curcount = getM2ClosedCount() if ! $opts{F};
+	}} while (!$opts{F} && $curcount-$startcount < $opts{num_closed}) ||
+		$opts{F};
+	} # LOOP
+		
+	my $now_closed = $slashdb->sqlCount(
+		'moderatorlog',
+		"m2count >= $constants->{m2_consensus}"
+	);
+	my $closed = $now_closed - $cur_closed;
+
+	printf "Exhausted M2 on %d users\n", getRandomUID('size');
+
+	my $t1 = new Benchmark;
+	printf <<EOT, $closed || 0, timestr(timediff($t1, $t0), 'noc');
+$m2count meta-moderations (closing %d mods) created in:
+%s
+EOT
+
+} 
+
+
+# subroutines
+
+sub getM2ClosedCount {
+	return $slashdb->sqlCount(
+		'moderatorlog',
+		"m2count >= $constants->{m2_consensus}"
+	);
+}
+
+# CLOSURE!
+{
+my($list_size);
+my($uid_list);
+sub getRandomUID {
+	my($op, $data) = @_;
+
+	if ($op) {
+		if ($op eq 'exclude') {
+			print "Excluding user #$data\n";
+			@{$uid_list} = grep { $_ != $data} @{$uid_list};
+		}
+
+		if ($op eq 'size') {
+			return $list_size;
+		}
+	}
+
+	if (!$uid_list) {
+		my $max_uid = int(
+			$slashdb->getLastUser() *
+			$constants->{m2_userpercentage}
+		);
+		$uid_list = $slashdb->sqlSelectAll(
+			'users.uid',
+			'users, users_prefs, users_info',
+			"karma > 0 AND willing > 0 AND users.uid < $max_uid AND
+			users.uid=users_prefs.uid AND users.uid=users_info.uid
+			AND users.uid!=$constants->{anonymous_coward_uid}"
+		);
+		$_ = $_->[0] for @{$uid_list};
+		$list_size = scalar @{$uid_list};
+	}
+
+	return $uid_list->[int rand($#{$uid_list} + 1)] if @{$uid_list};
+	return;
+} }
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [# of moderations to close]
+
+This utility creates test moderations for a given Slash site. This program is for
+testing purposes, only, particularly for those ambitious Slash users out there
+who want to try their hand at modifying the comment or moderation systems.
+
+This program is *not* designed to work for large sites, just small test sites
+that have been recently installed.
+
+DO NOT USE THIS ON A PRODUCTION SITE.
+
+You have been warned. :)
+
+Main options:
+	-h	Help (this message)
+	-D <x>	Set debug level to <x>
+	-F	Finish - Create M2s until there are no more valid moderations 
+		left
+	-v	Version
+	-u	Virtual user (default is "slash")
+EOT
+
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

@@ -1,0 +1,136 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+###############################################################################
+# moderatord - the moderation "daemon". Calculates moderation information and
+# assigns results to users
+###############################################################################
+
+use strict;
+use Slash;
+use Slash::Utility;
+
+my $read_db;
+my $virtual_user = $ARGV[0];
+createEnvironment($ARGV[0]);
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+
+
+sub moderatordLog {
+	doLog('moderatord', \@_);
+}
+
+sub fatalErrorToLog {
+	doLog('moderatord', \@_);
+	# Exit with error condition.
+	exit 1;
+}
+
+sub comments2tokens {
+	my $comments = shift;
+	my $tokenpool = $comments * $constants->{tokenspercomment};
+	my $stirredpoints = $slashdb->stirPool();
+	$tokenpool += $stirredpoints * $constants->{tokensperpoint};
+
+	# We only want a list of UIDs. [ACCESSLOG QUERY]
+	my(@eligibleMods) = map { $_ = $_->[0] }
+		@{$read_db->fetchEligibleModerators()};
+	my $eligible = scalar @eligibleMods;
+	my($st, $fi) = (
+		int($eligible * $constants->{m1_pointgrant_start}),
+		int($eligible * $constants->{m1_pointgrant_end})
+	);
+
+	my %updateUIDs;
+	# $tokenpool used to be the amount of tokens to distribute, now it's just
+	# used to provide a method of getting random, unique UIDs since we only
+	# increment per selected UID.
+	for (my $x = 0; $x < $tokenpool; $x++) {
+		$updateUIDs{$eligibleMods[$st + rand ($fi - $st) - 1]}++;
+	}
+
+	# Note that we use the separate read object here to try and stay as 
+	# much in sync as possible.
+	moderatordLog(getData('moderatord_tokenmsg', {
+		new_comments	=> $comments,
+		stirredpoints	=> $stirredpoints,
+		last_user	=> $read_db->getLastUser(),
+		tokenpool	=> $tokenpool,
+		eligible	=> $eligible,
+		st		=> $st,
+		fi		=> $fi,
+		num_updated	=> scalar keys %updateUIDs,
+	}));
+	$slashdb->updateTokens([keys %updateUIDs]);
+}
+
+
+# MAIN CODE #
+doLogInit('moderatord');
+moderatordLog(getData('moderatord_log_header'));
+
+# HIGH LOAD SITES!
+# This is the object which we use to query the accesslog table. If it's not
+# defined, we use the site's DB object.
+$read_db = $slashdb;
+if ($constants->{backup_db_user}) {
+	# How many times we loop.
+	my $count = $constants->{moderatord_catchup_count} || 2;
+	# The user we use.
+	my $rusr = $constants->{backup_db_user};
+	# The number of updates behind, the read database can be.
+	my $lag = $constants->{moderatord_lag_threshold};
+	# How long to wait between loops.
+	my $sleep = $constants->{moderatord_catchup_sleep};
+	while ($count--) {
+		$read_db = new Slash::DB($rusr);
+		fatalErrorLog("Can't open read database using '$rusr'")
+			if ! $read_db;
+		my $master_stat = ($slashdb->sqlShowMasterStatus())->[0];
+		my $slave_stat = ($read_db->sqlShowSlaveStatus())->[0];
+		fatalErrorLog('Replication requested but not active!')
+			if lc($slave_stat->{Slave_running}) eq 'no';
+		fatalErrorLog('Var$moderatord_lag_threshold not set!')
+			if !defined($lag);
+		$read_db = undef
+			if $master_stat->{Position} - $slave_stat->{'pos'} <= 
+			   $lag;
+		sleep $sleep if !$read_db;
+	}
+	fatalErrorLog('Aborting: Replication not sufficiently caught-up.')
+		if !$read_db;
+	moderatordLog("Using replicated database => '$rusr'");
+}
+
+my $tc = $slashdb->getVar('totalComments', 'value');
+my $lc = $slashdb->getVar('lastComments', 'value');
+
+# Maybe we should think about adding in a minimum
+# value here which would affect the minimum # of
+# tokens/points distributed per execution. It would
+# be a way of injecting a certain amount of points
+# into the system without requiring the need to have
+# comments. Something a site admin might want to
+# consider with a small pool of moderatorsm ala...
+#
+#$newcomments += $constants->{moderatord_minnewcomments}
+#$newcomments += $constants->{moderatord_mintokens} /
+#				 $constants->{tokenspercomment}
+#
+# - 5/8/01 Cliff (attempting to make sense of old Slash comments)
+my $newcomments = $tc - $lc;
+moderatordLog("NC: $newcomments");
+if ($newcomments > 0) {
+	$slashdb->setVar('lastComments', $tc);
+	comments2tokens($newcomments);
+	my $log = $slashdb->tokens2points();
+	for (@$log) {
+		moderatordLog($_);
+	}
+}
+moderatordLog(getData('moderatord_log_footer'));
+doLogExit('moderatord');

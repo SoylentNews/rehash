@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+use Slash;
+use Slash::Utility;
+use Slash::DB;
+
+
+die "usage chkuser [ nickname | email ] \n" unless @ARGV;
+
+my %opts;
+$opts{'u'} ||= 'banjo';
+
+createEnvironment($opts{'u'});
+
+my $slashdb = getCurrentDB();
+my $constants = getCurrentStatic();
+
+my $args = join " ", @ARGV;
+$args =~ s/'/''/g;
+$args = "'$args'";
+
+my $U= $slashdb->sqlSelectHashref("*","users","nickname=".$args)
+   || $slashdb->sqlSelectHashref("*","users","realemail=".$args)
+   || $slashdb->sqlSelectHashref("*","users","uid=".$args);
+
+if($U) {
+	$$U{bio}=$$U{sig}=undef;
+	foreach ( sort keys %$U ) {
+		if($$U{$_}) {
+			print substr($_,0,15)."\t";
+			$$U{$_}=~s/\n//g;
+			print "\t" if length $_ < 8;
+			print "'".substr($$U{$_},0,255)."'\n";
+		}
+	}
+} else {
+	print "@ARGV Not found";
+}
+print "\n\n";
+
+

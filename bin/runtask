@@ -1,0 +1,277 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use sigtrap;
+use strict;
+use Carp;
+use Getopt::Std;
+# use Date::Manip; # is this needed?  -- pudge
+use File::Basename;
+use File::Path;
+use File::Spec::Functions;
+use LWP::UserAgent;
+use HTTP::Request;
+use Time::Local;
+use Time::HiRes;
+use URI::Escape;
+use XML::Parser::Expat;
+use XML::RSS 0.95;
+
+use Slash;
+use Slash::Display;
+use Slash::Utility;
+
+use vars qw( %opts %task $me $task_name $virtual_user $constants $slashdb $user $dir );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+(my $SLASH_PREFIX) = '/usr/local/slash';
+my $PROGNAME = basename($0);
+
+main();
+exit 0;
+
+############################################################
+
+sub slashdLog {
+	doLog('slashd', \@_, 1, 'runtask');
+}
+
+sub slashdLogDie {
+	my $err = join(" ", @_);
+	slashdLog($err);
+	die $err;
+}
+
+
+{ my($last_db_time_offset, $last_db_time_confirm) = (undef, undef);
+sub db_time {
+	my $my_time = time;
+	if (!$last_db_time_confirm
+		or $my_time < $last_db_time_confirm + 600) {
+		my $db_time = UnixDate(ParseDate($slashdb->getTime()), "%s");
+		$last_db_time_offset = $db_time - $my_time;
+		$last_db_time_confirm = $my_time;
+	}
+	return $my_time + $last_db_time_offset;
+} }
+
+{ my($last_level, $last_level_confirm) = (undef, undef);
+sub verbosity {
+	my $my_time = time;
+	if (!$last_level_confirm
+		or $my_time < $last_level_confirm + 30) {
+		$slashdb->getVar('runtask_verbosity', 'value') =~ /(\d+)/;
+		my $new_level = $1;
+		if ($new_level eq "") {
+			$slashdb->getVar('slashd_verbosity', 'value') =~ /(\d+)/;
+			$new_level = $1 || 2;
+		}
+		if (defined($last_level) and $last_level != $new_level) {
+			slashdLog("verbosity was $last_level, is $new_level");
+		}
+		$last_level = $new_level;
+		$last_level_confirm = $my_time;
+	}
+	return $last_level;
+} }
+
+############################################################
+
+sub slashdLogInit {
+	doLogInit('slashd', 1, 'runtask');
+}
+
+sub slashdLogExit {
+	doLogExit('slashd', 1, 'runtask');
+}
+
+sub get_task_subref {
+
+	# "require" all the task files -- each will put its info into
+	# $task{"filename.pl"}
+
+	if (!-e $dir or !-d _ or !-r _) {
+		slashdLogDie(<<EOT);
+could not process task files in $dir, not readable to $>
+EOT
+	}
+
+	# Go through the files and require them all.  Each file will
+	# store its data and code in %task and execute any necessary
+	# initialization.  We also do some rudimentary checks of whether
+	# an attacker with guest access on this system could be feeding
+	# us bad code (the better solution, of course, is not to let
+	# attackers have local guest access).
+
+	my $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE = 0;
+	if (not $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE
+		and (stat $dir)[2] & 002) {
+		slashdLogDie("you really don't want me to use task files",
+			"from a directory that's world-writable: $dir");
+	}
+	my $subref = '';
+	my @files =
+		sort
+		grep { -e $_ and -f _ and -r _ }
+		glob "$dir/[a-zA-Z0-9_-][a-zA-Z0-9_-]*.pl";
+ 	# { local $"=' '; print STDERR "F: @files\n"; }
+	for my $fullname (@files) {
+		if (not $I_WANT_SLASHD_TO_BE_A_SILLY_LOCAL_SECURITY_HOLE
+			and (stat $fullname)[2] & 002) {
+			slashdLogDie("you really don't want me to use a task file",
+				"that's world-writable: $fullname");
+		}
+		my $file = basename($fullname);
+		next unless $file eq $task_name or $file eq "$task_name.pl";
+		$task_name = $file;
+		my $ok = 0;
+		eval { local $me = $file; $ok = require $fullname; };
+		if ($@) {
+			slashdLog("requiring '$fullname' raised exception: $@");
+			$ok = 0;
+		}
+		if ($!) {
+			slashdLog("requiring '$fullname' caused error: $!");
+			$ok = 0;
+		}
+		if (!$task{$file}{timespec}) {
+			slashdLog("'$fullname' did not set timespec properly");
+			$ok = 0;
+		}
+		if (!$task{$file}{code} or ref $task{$file}{code} ne 'CODE') {
+			slashdLog("'$fullname' did not set code properly");
+			$ok = 0;
+		}
+		if ($ok) {
+			$subref = $task{$file}{code};
+			last ;
+		}
+	}
+	if (! $subref) {
+		print "No task '$task_name' found in $dir\n";
+		die "No task '$task_name' found in $dir\n";
+	}
+	return $subref;
+}
+
+sub parse_slash_sites {
+	my($wanted_virtual_user) = @_;
+	my $file = "$SLASH_PREFIX/slash.sites";
+	my $line;
+	my($virtual_user, $unix_user, $sitename);
+	my $fh = gensym();
+	open($fh, "< $file\0") or die "can't open $file, $!";
+	while (defined($line = <$fh>)) {
+		chomp $line;
+		($virtual_user, $unix_user, $sitename) = split /:/, $line;
+		if ($virtual_user eq $wanted_virtual_user) {
+			last;
+		}
+	}
+	if ($virtual_user ne $wanted_virtual_user) {
+		die "can't find virtual user '$wanted_virtual_user' in $file";
+	}
+	my($name, $passwd, $uid, $gid) = getpwnam($unix_user);
+	die "unix user '$unix_user' has no valid uid/gid" if !$uid or !$gid;
+	my($orig_euid, $orig_egid) = ( $>, $) );
+	$orig_egid =~ /^(\d+)/; $orig_egid = $1;
+	if ( $uid != $orig_euid or $gid != $orig_egid ) {
+		$) = "$gid $gid";
+		$> = $uid;
+	}
+	($orig_euid, $orig_egid) = ( $>, $) );
+	$orig_egid =~ /^(\d+)/; $orig_egid = $1;
+	if ( $uid != $orig_euid or $gid != $orig_egid ) {
+		die "can't set uid/gid to $uid/$gid ($>/$))";
+	}
+	# If we made it this far, everything's cool
+	return $virtual_user;
+}
+
+sub main {
+	# Remember to doublecheck these match usage()!
+	usage('Options used incorrectly') unless getopts('ho:u:v', \%opts);
+	usage() if $opts{'h'};
+	version() if $opts{'v'};
+	$opts{'u'} ||= 'slash';
+
+	$task_name = $ARGV[0];
+	usage('No task specified') unless $task_name;
+
+	$virtual_user = parse_slash_sites($opts{'u'});
+
+	createEnvironment($virtual_user);
+	$constants = getCurrentStatic();
+	$slashdb = getCurrentDB();
+	$user = getCurrentUser();
+	$dir = "$constants->{datadir}/tasks";
+	$ENV{TZ} = 'GMT' if $ENV{TZ} ne 'GMT';
+	slashdLogInit();
+
+	# Process task specific options, if any.
+	if ($opts{'o'}) {
+		my($hash);
+		for (split /,/, $opts{o}) {
+			my($key, $val) = split /=/; $hash->{$key}=$val;
+		}
+		$constants->{task_options} = $hash;
+	}
+
+	my $subref = get_task_subref();
+	slashdLog("$task_name begin") if verbosity() >= 2;
+	my $start_time = Time::HiRes::time;
+	# runtask doesn't fork, there wouldn't be much point
+	my $rc = $subref->($virtual_user, $constants, $slashdb, $user);
+	if (verbosity() >= 2) {
+		my $duration = sprintf("%.2f", Time::HiRes::time - $start_time);
+		slashdLog("$task_name end: $rc (ran in ${duration}s)");
+	}
+
+	slashdLogExit();
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] task_name
+
+This utility creates test comments for a given Slash site. This program is for
+testing purposes, only, particularly for those ambitious Slash users out there
+who want to try their hand at modifying the comment or moderation systems.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (must exist in /usr/local/slash/slash.sites)
+
+	-o	String of comma separated list of key=value pairs. Each 
+		task can define it's own set of options, see task specific
+		documentation for more details.
+
+task_name	Name of the task in DATADIR/tasks to run
+		(i.e. /usr/local/slash/site/SITENAME/tasks)
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

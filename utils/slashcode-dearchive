@@ -1,0 +1,471 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use Getopt::Std;
+use Slash::DB;
+use Slash::DB::Utility;
+use Date::Manip;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+
+# REGULAR EXPRESSION DEFINITIONS
+
+# Enclosure defs.
+
+my $enclosure_regexps = {
+	"Slash v0.9.2+"	=> {
+		regexp			=>
+'<!-- begin comment block -->(.+?)<!-- end comment block -->',
+		extractors		=> '*',
+		id_extractors 	=> '*'
+	},
+	'Slashdot Jan/00+' => {
+		regexp			=>
+'(?:<TR><TD>.+?)?<TR>(?:<TD bgcolor=cccccc>|<TD bgcolor="#CCCCCC">) ?(<(?i:A NAME).+?</TD></TR>.+?)</TD> ?</TR> ',
+		extractors		=> '*',
+		id_extractors	=> '*',
+	},
+};
+
+# Extractor defs.
+
+my %extractor_regexps = (
+	'Slash v0.9.2+' 	=>
+'<A NAME="(.+?)"><B>(.+?)</B></A>(.+?)</FONT>.+?by (.+?) on (.+?)\(.+?\)</FONT><BR>.+?<FONT.+?>(?:\(.+?User Info</A>\).+?(?:<A HREF="(.+?)">(.+?)</A><BR>)?)?.+?<TR><TD BGCOLOR=.+?>.+?</TD>.+?<TR><TD BGCOLOR=.+?>(.+?)</TD>',
+	'Slashdot Jan/00+'	=>
+'^<(?i:A NAME)="([^>]+?)"><B>(.+?)?</B></A>(.+?)<BR> by (.+?)  ?on ((?:Mon|Tue|Wed|Thur|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+?)<BR>  ?(?:\(.+?User (?:#\d+ )?Info</A>\)  ?(?i:<A HREF="([^>]+?)">(.+?)</A><BR> *)?)?</TD></TR> <TR> ?<TD(?: bgcolor=ffffff)?>(.+)<BR>',
+#'^<A name="([^>]+?)"><B>(.+?)</B></A>(.+?)<BR> by (.+?) on (.+?)<BR> (?:\(.+?User Info</A>\) (?:<A href="([^>]+?)">(.+?)</A><BR>)?)? </TD></TR> <TR><TD bgcolor=ffffff>(.+?)<BR>(.+?)?</TD></TR> (?:<TR><TD> |<LI><FONT size=2><B>.+)?$'
+);
+
+# SID extration defs.
+
+my %idextractor_regexps = (
+	'Slash v0.9.2+'		=>
+'<INPUT (?i:TYPE="?HIDDEN"? NAME)="?returnto"? (?i:VALUE)="?(?:[^>]+?)?article\.pl\?sid=([^>]+?)"?>',
+);
+
+# Think about having regular expressions that can be applied to extracted
+# stories to look for parent information.
+#
+# - Cliff 6/6/01
+
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly')
+	unless getopts('u:I:f:y:E:N:CDV?hv', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+usage("Must specify both -f and -u!") if !$opts{f} || !$opts{u};
+version() if $opts{'v'};
+
+my($virtuser, $year, $infile, $enclosure, $extractor, $sid, $ovrw, $confirm, $debug)=
+	@opts{qw[u y f N E I V C D]};
+$virtuser||= 'slash';
+$year	 ||= UnixDate('now', '%Y');
+
+# Initialize Slash site database object.
+my $slashdb = new Slash::DB($virtuser) ||
+	die "*** Can't open database on Virtual User $virtuser.\n";
+
+# Set our timezone and initialize the date routines.
+$ENV{TZ} = 'EST5EDT';
+&Date_Init();
+
+# Globals.
+my(%data);
+my $ac_uid = $slashdb->getVar('anonymous_coward_uid', 'value');
+my $ac_nickname = $slashdb->getUser($ac_uid, 'nickname');
+
+# We slurp in everything as one big file. This will NOT be pleasant on machines
+# with low amounts of memory (anything < 32M; quite a few Slashdot .shtml files
+# can amass well over one meg in size and that's for a SINGLE scalar.
+my($bigscalar, $test_xdata, $errors);
+
+die "Can't open INFILE '$infile'\n" if ! -f $infile;
+do {
+	local $/ = undef;
+
+	open(INPUT, "<$infile");
+	$bigscalar = <INPUT>;
+	close(INPUT);
+	# Remove newlines, they only get in the way.
+	$bigscalar =~ s/\n/ /g;
+};
+
+# Determine which enclosure and extractor regular expressions to use for the given
+# file; note that choices for enclosures and/or extractors can be forced by command
+# line options.
+if (!$enclosure || !$extractor) {
+	my(@enclosures);
+	push (@enclosures, ($enclosure) ? $enclosure : sort keys %{$enclosure_regexps});
+	$enclosure='';
+	for (@enclosures) {
+		printf STDERR "%s ENCLOSURE '$_'\n", ($enclosure) ? 'Using':'Trying'
+			if $debug;
+		$enclosure = $_ if $bigscalar =~ /$enclosure_regexps->{$_}->{regexp}/s;
+		next if ! $enclosure;
+		if (! $extractor) {
+			$test_xdata = $1;
+
+			my @extractors;
+			if (ref $enclosure_regexps->{$_}->{extractors} eq 'ARRAY') {
+				push @extractors, @{$enclosure_regexps->{$_}->{extractors}};
+			} elsif ($enclosure_regexps->{$_}->{extractors} eq '*') {
+				push @extractors, sort keys %extractor_regexps;
+			}
+			for (@extractors) {
+				print STDERR "\tTrying EXTRACTOR '$_'\n" if $debug;
+				if ($test_xdata =~ /$extractor_regexps{$_}/s) {
+					$extractor = $_;
+					last;
+				}
+			}
+		}
+		last if $enclosure && $extractor;
+	}
+}
+die "$infile: Can't determine enclosure/extractor pair!\n" if !$enclosure && !$extractor;
+die <<EOT if !$extractor;
+$infile: Enclosure '$enclosure' matched, but no extractor found!
+
+Enclosure returned:
+$test_xdata
+EOT
+print "Using Enclosure '$enclosure' and Extractor '$extractor'\n";
+
+if (! $sid) {
+	for (sort keys %idextractor_regexps) {
+		print STDERR "Trying ID EXTRACTOR '$_'..." if $debug;
+		if ($bigscalar =~ /$idextractor_regexps{$_}/s) {
+			print STDERR "found ID " if $debug;
+			$sid = $1;
+			last;
+		} else {
+			print STDERR "\n";
+		}
+	}
+} else {
+	print STDERR 'Using ID ' if $debug;
+}
+die "\n$infile: Can't find ID using any extractor!\n" if !$sid;
+print STDERR "'$sid'\n" if $debug && $sid;
+if ($slashdb->sqlSelect('*', 'comments', 'sid=' . quote($sid))) {
+	if (!$ovrw) {
+		print "Data already exists for article '$sid'!!\n";
+		exit 1;
+	} else {
+		print "Deleting all existing comments from article '$sid'\n";
+		$slashdb->sqlDo('DELETE FROM comments WHERE sid=' . quote($sid));
+	}
+}
+print "Beginning extraction for article '$sid'...\n";
+
+if ($confirm) {
+	print "\n\n<Hit RETURN to begin, ^C to abort execution>\n\n";
+	my $input = <STDIN>;
+}
+
+my($en_regexp, $ex_regexp) = 	($enclosure_regexps->{$enclosure}->{regexp},
+								 $extractor_regexps{$extractor});
+$errors = 0;
+pos $bigscalar = 0;
+while ($bigscalar =~ /$en_regexp/sg) {
+	my($uid, $cid, $email_addy, $uid_s, $x_data, $wait, $result, $resultpos);
+	my($subj, $score_ind, $username, $ts, $url, $url_name, $comment, $sig);
+	my($gmt_time, $score, $posttime, $uname);
+	my(%uid_cache, $gmt_ts, $rc);
+
+	$x_data = $1;
+	$result = 'Unextracted ';
+	$resultpos = '';
+
+	if ($x_data =~ /$ex_regexp/s) {
+		# This is ugly...
+		($cid,
+		 $subj, 
+		 $score_ind, 
+		 $username, 
+		 $ts, 
+		 $url, 
+		 $url_name, 
+		 $comment,
+		 $sig) = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+
+		next if !$cid;
+
+		printf 	STDERR
+			"EXTRACTED: %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+			map { ($_) ? $_ : ''; 1 }
+			($cid, $subj, $score_ind, $username, $ts, $url,
+			 $url_name, $comment, $sig)
+		if $debug;
+
+		# Copy $username.
+		$uname = $username;
+		# Extract and remove email information.
+		if ($uname =~ s/<B><FONT.+?>\((.+?)\)<\/FONT><\/B>//) {
+			$email_addy = $1;
+		}
+
+		# Fix $uname if it is a link.
+		$uname =~ s/<(?i:A HREF)=".*?">(.+?)<\/A>.+$/$1/s;
+		# Remove any and all backtics (`) from the user name since this breaks
+		# the API for some reason.
+		$uname =~ s/\`//g;
+
+		# Grab score from indicator.
+		if ($score_ind =~ /Score:(\d+)/) {
+			$score = $1 if defined $1;
+		}
+
+		# Strip signature of </TD> and </TR> tags (these are part of display
+		# code)
+		$sig =~ s!(?:</TD>|</TR>)!!g if $sig;
+
+		($rc, $result) = ('', '');
+		$uid_s = defined $email_addy ? " <$email_addy>" : '';
+
+		# Use database to see if we can match the nickname to a UID.
+		if ($uname && $uname ne $ac_nickname) {
+			# Check user id cache for hit on the parsed username.
+			$uid = 0;
+			if ($uid_cache{$uname}) {
+				$uid = $uid_cache{$uname};
+			} else {
+				$uid = $slashdb->getUserUID($uname);
+				$uid_cache{$uname} = $uid if $uid;
+			}
+			$uid_s .= " ($uid)" if $uid;
+		} else {
+			$uid = $ac_uid if $uname eq $ac_nickname;
+		}
+
+		# Begin clean up routines....these routines are REAL site specific
+		# so someone should look in to extending the data structures above
+		# to make it less so. I may if I actually get some time to play 
+		# around with this code a bit more, but that's extremely low 
+		# priority right now. Maybe come around 2.2 or 2.4 release time.
+		#
+		#						- Cliff 3/22/2001
+
+		# Convert date to internal representation and then adjust for GMT
+		# time (since all times should be stored as GMT in dB).
+		if ($ts) {
+			# Some versions of dispComment have the a link to the comment
+			# right after the date. This should be removed.
+			$ts =~ s/\(<A (?i:HREF).+?<\/A>\)//i;
+
+			# Get rid of the extraneous commas and '@' symbols which may 
+			# interfere with parsing.
+			$ts =~ s/,\s@/ /g;
+
+			# Date::Manip balks if DoW is present in a datespec which specifies
+			# no year value and does NOT represent a date within the current
+			# year. So the simple solution is to strip the DoW which appears
+			# at the beginning of the string. This really depends on the site
+			# but this is the default for Slashcode and also works on Slashdot.
+			$ts =~ s/(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\s+//;
+
+			# Now we must INSURE that the proper year is set. Note that Date::Manip
+			# will use the CURRENT YEAR if it isn't specified in the string, so
+			# we'll have to carefully insert the year into the timestamp.
+			# 
+			# The following assumes that $ts will always be of the form:
+			#		<Month> <Day> <Time> <Zone>
+			$ts =~ s/(\w+ \d+)/$1, $year/;
+
+			# Now grab the zone associated with the date.
+			$ts =~ /\s([^\ ]+?)$/;
+			
+			# Need $oldPos becuase Date::Manip routines mess with $_.
+			my($oldPos) = pos $_;
+			my($tsdate, $tszone) = (ParseDate($ts), $1);
+			
+			# Insure date is set to the correct year based on parameters.
+			# Could manually set this by SID, but SID isn't really 
+			# Y2K compliant...
+			$tsdate = Date_SetDateField($tsdate, 'y', $year);
+
+			if ($tsdate) {
+				$gmt_ts = Date_ConvTZ($tsdate, $tszone, 'GMT');
+				$ts .= ' (' . UnixDate($gmt_ts, "%A %B %d, %Y \@%r GMT") . ')';
+			}
+			pos $_ = $oldPos;
+		}
+
+		# Attribute comment to the proper nickname in the comment if the 
+		# user doesn't turn up in the database. Be sure to use the 
+		# sanitized user name since $username may contain characters that
+		# will confuse DBI.
+		$comment = "Posted by $uname:<BR><BR>$comment" if (! $uid);
+
+		print	"\n", header("Extracted ${\(length($x_data))} bytes"),
+				($cid ? "#$cid\n" : ""),
+				($subj ? "Subj: $subj\n": ""),
+				($uname ? "User: $uname$uid_s\n" : ""),
+				($ts ? "Date: $ts\n" : ""),
+				($url_name ? "URL: $url_name " : ""),
+				($url ? "($url)\n" : ($url_name ? "\n" : "")),
+				($score ? "Score: $score" : ""),
+				($comment ? "\n--> $comment\n\n" : "\n"),
+				($sig ? "\nSig: $sig\n\n" : "\n")
+		if $debug;
+
+		if ($confirm) {
+			print "<Hit RETURN for Next Comment>";
+			my $input = <STDIN>;
+		}
+
+		# Assign data to hash.
+		$data{$cid}->{subject} = $subj || '';
+		$data{$cid}->{'-uid'} = $uid || $ac_uid;
+		$data{$cid}->{date} = $gmt_ts;
+		$data{$cid}->{comment} = $comment;
+		$data{$cid}->{'-points'} = ($score) ? $score : 0;
+	}
+
+	print header("${result}X-Data$resultpos") . "$x_data\n"
+		if $debug;
+	if ($result eq 'Unextracted ' || $rc || 
+		$comment =~ /<\/?TD>/ || 
+		$comment =~ /<\/?TR>/)
+	{
+		if ($debug) {
+			print '--- Check  data ---';
+			$wait = <STDIN>;
+		}
+		$errors++;
+	}
+}
+
+# Unload massive scalar (would setting $bigscalar to undef be a bad thing here?)
+$bigscalar  = '';
+
+# Now write data to database.
+print "Writing to database...";
+my $nr = 0;
+foreach (keys(%data)) {
+	# We process comments into the database by CID and let it worry about
+	# all of the sorting.
+
+	# Copy and sanitize data for insert into the comments table.
+	my(%sqldata) = %{$data{$_}};
+	$sqldata{sid} = $sid;
+	$sqldata{'-cid'} = $_;
+	# Until nested mode support can be coded in, Parent ID data will be lost.
+	$sqldata{'-pid'} = 0;
+	# Since host_name information is not included in the .shtml, we lose that
+	# information as well.
+	$sqldata{host_name} = '';
+	# This data isn't as important. It would be a pain in the ass to go thru
+	# and collect the moderation data for proper insertion, so it's just
+	# easier to leave it out for now.
+	$sqldata{'-lastmod'} = -1;
+	$sqldata{'-reason'} = 0;
+	$sqldata{'date'} = UnixDate($data{$_}->{date}, '%Y-%m-%d %H:%M');
+
+	# Can $slashdb return meaningful errors if one of its methods fails?
+	#
+	# Use createComments(), here...especially since the comment system
+	# is changing and these details should be behind the API.
+	if ($slashdb->sqlInsert('comments', \%sqldata)) {
+		$nr++;
+	} else {
+		print "\nError occured while inserting comment #$_!\n";
+	}
+}
+
+print "\n$nr records written to COMMENTS for SID '$sid'\n";
+print "*** $errors errors occured during processing.\n" if $errors;
+
+
+0;
+
+
+sub header {
+	my($text) = shift;
+
+	"$text\n${\('-' x length($text))}\n";
+}
+
+
+# It would be nice if the Slash DB API would provide this.
+sub quote {
+	my($text) = shift;
+
+	$text =~ s/([\W\D])/\\$1/g;
+	$text = "'$text'";
+	$text;
+}
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	my (@enlist)	= sort keys %{$enclosure_regexps};
+	my (@exlist)	= sort keys %extractor_regexps;
+	my (@idexlist)	= sort keys %idextractor_regexps;
+	local $" = "\t\t";
+	printf <<EOT, "@enlist", "@exlist", "@idexlist";
+
+Usage: $PROGNAME [options]
+
+	Command line options:
+		-u <virtuser> 
+		-f <filename>
+		-I <discussion ID>
+		-y <year>
+		-N <comment enclosure name>
+		-E <comment extractor name>
+	
+	Command line switches:
+		-C	Confirms all options and provides prompts during 
+			processing operations. Used primarily for debugging.
+		-V	Overwrite any comments for the given discussion ID.
+		-D	Debug mode.
+
+Notes:
+	If -I is not given, then the program will cycle thru all defined ID
+	extractors in an attempt to find a key suitable for database insertion.
+	If no ID can be found, then the program will quit with an error and the
+	use of -I will be required.
+
+Defined comment enclosures:
+	%s
+
+Defined comment extractors:
+	%s
+
+Defined ID extractors:
+	%s
+
+EOT
+
+	exit;
+
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
+

@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+pubkey
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'no_key' %]
+	No key found.
+
+[% CASE 'no_nick' %]
+	You need to supply the name of a user.
+
+[% END %]
+
+__seclev__
+10000

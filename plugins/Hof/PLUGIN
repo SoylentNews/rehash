@@ -1,0 +1,6 @@
+name=Hof
+description="High score stuff"
+htdoc=hof.pl
+template=templates/data;hof;default
+template=templates/main;hof;default
+

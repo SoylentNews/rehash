@@ -1,0 +1,138 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use FindBin '$Bin';
+use Safe;
+use File::Basename;
+use Slash::Install;
+use Getopt::Std;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hvqu:', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+
+# main program logic (in braces to offset nicely)
+{
+	my $inst = new Slash::Install($opts{'u'});
+	my $site_install_dir = ($inst->get("site_install_directory"))->{value};
+	my $default_armor_file = "$site_install_dir/misc/spamarmors";
+
+	# Grab the sitename so we have a reasonable idea as to where the
+	# armor file may reside if it is not given on the commandline.
+	my $filename = $ARGV[0] || $default_armor_file;
+	my $armors = readArmorFile($filename);
+
+	# Perform syntax checks on all armor entries!
+	my $cpt = new Safe;
+	$cpt->permit(qw[:base_core :base_loop :base_math join]);
+	my %success = ( );
+	for my $a (@$armors) {
+		my $ok = 1;
+		local $_ = 'me\@privacy.net';
+		$cpt->reval($a->{code});
+		if ($@) {
+			warn "Error in armor '$a->{name}': $@\n";
+			$ok = 0;
+		} elsif ($_ eq 'me\@privacy.net') {
+			warn "Error in armor '$a->{name}': didn't change test address\n";
+			$ok = 0;
+		}
+		$success{$a} = $ok;
+	}
+	@$armors = grep { $success{$_} } @$armors;
+
+	if (my $n = $inst->reloadArmors($armors)) {
+		print "$n armoring codes loaded into database.\n" unless $opts{'q'};
+	}
+}
+
+
+# Subroutines
+
+# Shamelessly based on Slash::Install::readTemplateFile()
+sub readArmorFile {
+	my($filename) = @_;
+	my(@spam_armors);
+	return unless -f $filename;
+	open(FILE, $filename) or
+		die "$! unable to open file $filename to read from";
+	my $latch;
+	my $val;
+	my @file = <FILE>;
+	for (@file) {
+		chomp($_);
+		# Primitive commenting system. Ignore all lines beginning w/ '#'.
+		# Also ignore blank lines.
+		next if /^\s*(#|$)/;
+		# Insert data based on field break.
+		if (/^__(.*)__$/) {
+			# We only expect $1 to match 2 things here:
+			# "name" or "code". Case is irrelevant.
+			$latch = lc($1);
+			die "Invalid token in file!\n"
+				if $latch !~ /^name|code$/;
+			if ($latch eq 'name') {
+				push @spam_armors, $val if scalar keys %{$val};
+				$val = undef;
+			}
+			next;
+		}
+		$val->{$latch} .= $_  if $latch;
+	}
+	# Remember to store the last $val.
+	push @spam_armors, $val;
+
+	return \@spam_armors;
+}
+
+
+sub usage {
+	return if $opts{'q'};
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] ... {spamarmor_file}
+
+SHORT PROGRAM DESCRIPTION
+
+Main options:
+	-h	Help (this message)
+	-q	Quiet (no output to STDOUT)
+	-v	Version
+	-u	Virtual user (default is "slash")
+
+Note: If {spamarmor_file} is not specified, then the default file for the given
+site will be used. Default = <SLASH_PREFIX>/site/<SITENAME>/spamarmors
+
+EOT
+	exit;
+}
+
+sub version {
+	return if $opts{'q'};
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
+

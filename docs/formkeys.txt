@@ -1,0 +1,319 @@
+Nutshell of using formkeys
+--------------------------
+
+Vars:
+
+These are all limits per the var 'formkey_timeframe' (seconds)
+
+* max_<formname>_allowed  - maximum submissions of a <formname> allowed
+
+* max_<formname>_unusedfk - maximum number of unused formkeys for 
+<formname> allowed
+
+* <formname>_speed_limit  - minimum interval between postings of <formname>
+
+* <formname>_response_limit - minimum interval between access 
+(creation of formkey) to submission (updating formkey value) of <formname>
+
+* max_<formname>_viewings - maximum number of accesses of a form allowed 
+(just accesses, not posts) 
+
+
+Switch values in formkeyErrors
+
+* usedform - unable to increment formkey value because 
+	a. the value has been incremented already (and 'interval' is set)
+	b. a race condition exists where the user somehow got pass the maxposts
+	check and interval check
+
+* invalid - the formkey is invalid because they are trying to submit with
+a key that hasn't even been issued
+
+* <formname>_maxreads - the user has reached their max_<formname>_viewings 
+and is no longer permitted to access <formname> within formkey_timeframe
+
+* <formname>_maxposts - the user has reached their max_<formname>_allowed 
+and is no longer permitted to submit <formname> within formkey_timeframe 
+
+* <formname>_unused - the user has reached thier max_<formname>_unusedfk
+and has created too many formkeys that they have never submitted <formname>
+with
+
+* <formname>_response - the user has tried to submit <formname> too soon
+after replying (when the formkey was created)
+
+* <formname>_speed - the user has tried to submit <formname> too soon
+after submitting <formname> successfully.
+
+Formabuse reasons (set in $abuse_reasons, no need to add when implementing
+formkey code in a script):
+
+* formabuse_invalid - message for 'abusers' table when 'invalid'
+
+* formabuse_usedform - message for 'abusers' table when 'usedform' 
+
+
+
+Sequence:
+
+You have a script, and it does different things. Take something like comments.
+Comments has an editComments function, a submitCommentsFunction. 
+
+1. You hit 'reply' to a comment on the site. The code calls editComment 
+(this is an empty comment form) You want to check first if they haven't
+exceeeded their max posts first, so these checks have to be run:
+
+	I. $error_flag = 
+		formkeyHandler('max_post_check', 'comments', $formkeyid, $formkey)
+
+	* The var you need for this to work is max_<formname>_allowed where
+	<formname> in this example would be 'comments'.
+
+If this check passes, you need to generate a 
+formkey, so you will need to 
+
+	II. $error_flag = 
+		formkeyHandler('generate_formkey', 'comments', $formkeyid, $formkey); 
+
+	* The vars you need for this to work are:
+	 max_<formname>_allowed, max_<formname>_unusedfk, <formname>_speed_limit
+
+So now $form->{formkey} is set, and in the current form the user is 
+entering a story into, and there is a record in the database with this
+formkey, but the value is 0 (not used yet)
+
+If there is no error condition, the call editComment.
+
+2. Next, the user could submit 'preview', in which case, you'd want to check max posts 
+again, just as you did with 'reply' (any time the user submits anything, it should
+be checked), but another thing you need to do, in case the user logs in to post
+the comment under thier uid (and this only happens with preview) is call 
+	I. formkeyHandler('update_formkeyid', 'comments', $formkeyid, $formkey);
+
+If there isn't an error condition, call editComment.
+
+3. The user could have also submitted 'submit', in which case, you perform the folling
+checks
+	I.   $error_flag =
+		formkeyHandler('max_post_check', 'comments', $formkeyid, $formkey);
+	II.  $error_flag =
+		formkeyHandler('valid_check', 'comments', $formkeyid, $formkey);
+
+'valid_check' checks whether the formkey exists (if the user is trying to use 
+a concocted formkey)
+
+	III. $error_flag =
+		formkeyHandler('interval_check', 'comments', $formkeyid, $formkey);
+
+	* The var you need for this to work is <formname>_speed_limit
+
+'interval_check' checks the interval of the last successful submission of the comments
+form
+	   
+	IV.  $error_flag = 
+		formkeyHandler('response_check', 'comments', $formkeyid, $formkey);
+
+	* The var you need for this to work is <formname>_response_limit
+
+'response_check' checks the interval between 'reply' and 'submit'. This isn't 
+necessarily check you'd want to use on other forms.
+
+	V.   $error_flag = 
+		formkeyHandler('formkey_check', 'comments', $formkeyid, $formkey);
+
+	* The vars you need for this to work are:
+	 max_<formname>_allowed, <formname>_speed_limit
+
+This check is the check that updates the formkey value, and if it doesn't occur, 
+it could be one of two reasons: the formkey has been used already (hitting the 
+'back' button and submitting) or there is a race condition that the other 
+checks didn't catch.
+
+If 'formkey_check' doesn't produce an error, set a condtion that says this 
+formkey can be updated after you call submitComment. Then, submitComment can be called.
+
+NOTE: if the sub you call calls the form sub after it submits, you have to 
+have a formkey, and this is done by:
+
+	$error_flag = formkeyHandler('regen_formkey', 'comments', $formkeyid, $formkey);
+
+This ensures that the form method your calling will have a new formkey. Look at createDiscussion
+in comments.pl.
+
+3. Finally... if submitComment succeeded (that is, if there weren't other errors 
+such as filter errors, bad input errors, duplicate comment errors) and if 'formkey_check' 
+didn't produce an error and set the update condition, then run
+
+	$slashdb->updateFormkey($formkey, $field_length);
+
+If the sub you call produces and error (if submitComment fails) then you:
+
+	$slashdb->resetFormkey($formkey);
+
+Otherwise, the formkey will fail when you fix whatever submitComment was 
+complaining about and submit again.
+
+'$field_length' can be the length of your primary field that you're submitting, in 
+this example, $form->{postercomment}.
+
+Final note: there is a fifth parameter you can pass formkeyHandler, as in the case with
+users.pl, when the opcode is 'saveuser'. The formkey checks have to be run, but you
+can print anything yet because 'header' hasn't been called, so what you can do is:
+
+$error_flag = formkeyHandler($check, $formname, $formkeyid, $formkey, \$note);
+
+Getting this all working
+------------------------
+
+In comments, the opcode data structure is used, having a list of checks to perform in 
+an array for each opcode. Loop through the list for each op:
+
+my $ops = {
+	submit                  => {
+                        function                => \&submitComment,
+                        seclev                  => 0,
+                        post                    => 1,
+                        formname                => 'comments',
+                        checks                  =>
+                        [ qw ( max_post_check valid_check interval_check response_check
+                                formkey_check ) ],
+                },
+}
+
+If the opcode is 'submit' :
+
+for my $check (@{$ops->{$op}{checks}}) {
+
+			# NOTE this is where you can set the update_formkey condition
+                        $ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
+                        my $formname = $ops->{$op}{formname};
+                        $error_flag = formkeyHandler($check, $formname, $formkeyid, $formkey);
+
+                        last if $error_flag;
+                }
+}
+
+Then you run your op:
+
+if (! $error_flag) {
+	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $formkeyid);
+
+	if($retval) {
+		$slashdb->updateFormkey($formkey, $field_length);
+	} else {
+		$slashdb->resetFormkey($formkey);
+	}
+	
+}
+
+
+More detailed descriptions
+--------------------------
+
+The formkey checks are handled by formkeyHandler. Formkey handler 
+is called:
+	$error_flag = 
+		formkeyHandler($check, $formname, $formkeyid, $formkey);
+
+		example of what the args would actually be:
+
+		formkeyHandler('max_post_check','comments', 3, 'xd2i2u3o2u45');
+
+in the case such as in users, where you have to check the formkey 
+on 'savepasswd', which happens before "header" is called, you need 
+to save the error message into "$note"
+
+	$error_flag = 
+		formkeyHandler($check, $formname, $formkeyid, $formkey, \$note);
+ 
+This way, since '$note' is being passwd, note gets the error message from the 
+formkey checks (if there's and error) but won't print the error, which happens
+by default without that 5th argument.
+
+
+formkeyHandler Checks:
+
+generate_formkey - generates the formkey by populating $form->{formkey} 
+which automagically shows up in the form.
+Before a formkey is created, formkeyHandler checks how many unused 
+formkeys (<formname>_unusedfk in vars, formkeyErrors message 
+<formname>_unused ) there are (formkeys that have resulted from a 
+user accessing a form but never submitting, potentially be collecting 
+formkeys to use to flood (over the period, default 4 hours). If this 
+number has been exceeded, then the error flag is incremented, 
+error message generated. Next, formkeyHandlers checks the interval 
+of when the last formkey was generated, if this is a 'generate_formkey'
+call ('regen_formkey' would mean that a submission call is done and is
+calling a form call, which doesn't need to be checked for the interval). 
+If this is smaller than the <formname>_speed_limit, then the $error_flag
+is incremented.  Finally, if the error_flag isn't set, createFormkey is 
+called.  createFormkey gets the last submitted time stamp and last 
+idcount of a successful formkey for the user, populates form->{formkey} 
+with the formkey generated by calling getFormkey, and then inserts 
+the new formkey into the formkeys table. 
+
+
+max_read_check - checks how many times the form has been access
+and returns and error if that number has been exceded
+calls checkMaxReads
+the var for the form is max_<formname>_viewings (just make sure it matches 
+the message in formkeyErrors is triggered by '<formname>_maxreads' 
+
+max_post_check - checks how many times formkeyid has successfully 
+posted and returns and error if that number has been exceded
+calls checkMaxPosts
+the var for the form is max_<formname>_allowed (just make sure it matches 
+the message in formkeyErrors is triggered by '<formname>_maxposts' 
+
+interval_check - checks the interval between last successful post
+calls checkPostInterval
+the var for the form is <forname>_speed_limit 
+(check hashref in checkPostInterval) to make sure
+the message in formkeyErrors is triggered by '<formname>_speed'
+
+response_check - check the response between reply and post (only
+used on comments so far)
+calls checkResponseTime
+the var is <formname>_response_limit (check hashref in checkResponseTime) 
+the message in formkeyErrors is triggered by '<formname>_response'
+
+valid_check - checks whether a formkey is valid
+calls validFormkey
+not form specific, no var
+the message in formkeyErrors is triggered by 'invalid', no need to add 
+another message per form. Note: This is a check that if it fails, is
+logged to the 'abusers' table because it's set in $abuse_reasons->{key}. 
+
+formkey_check - updates the formkey val to indicate the formkey has
+been used, if the val is 0, if the idcount is less than <formname>_max_posts,
+and if the last_ts value (last time updateFormkeyVal updated a formkey 
+for this user), then the value is updated. If there is an error, it either 
+failed because the value couldn't be incremented to 1 because it was already 
+1 which means the formkey was already used (which errorMessage then gets the 
+time stamp of when it was used), or the interval and/or the idcount values in 
+the where clause caused it to not increment, and there isn't a time stamp since 
+it wasn't updated.  In formkeyErrors, it gives two messages for this based upon 
+whether [% interval %], is set or not. If interval is not set, "there was an 
+error submitting the form" is generated, otherwise, 
+"this form was used [% interval %] minutes ago" is generated. 
+The message in formkeyErrors is triggered by 'usedform' no need to add
+another message per form. Note: This is a check that if it fails, is
+logged to the 'abusers' table because it's set in $abuse_reasons->{key}. 
+
+regen_formkey - creates a new formkey in the case with functions that 
+regenerate a form after submitting (without going through the op hashref)
+just need to check the calling function and see if it generates a new form
+outside the op hashref
+calls createFormkey which populates $form->{formkey}
+
+generate_formkey - creates a new formkey. make sure this is the last call 
+if your checking max_post_check, update_formkeyid 
+calls createFormkey which populates $form->{formkey}
+if you want the formkey in the form, you'll need to put
+<INPUT TYPE="HIDDEN" NAME="FORMKEY" VALUE="[% form.formkey %]">
+in the template for the form that you want it to be in
+
+update_formkeyid - some forms require the formkey id to be updated
+as in the case with comments where a user might reply as anon and 
+then log in and then post
+calls updateFormkeyID
