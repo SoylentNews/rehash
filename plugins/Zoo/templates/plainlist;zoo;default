@@ -15,6 +15,10 @@ plainlist
 __template__
 [% USE Slash %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+[% UNLESS editable %]
+<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]'s</A> <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/">friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/fans/">fans</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/foes/">foes</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/freaks/">freaks</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/fof/">friends of friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/eof/">foes of friends</A>.
+<P>
+[% END %]
 [% FOREACH somebody = people %]
     <TR>
 	<TD VALIGN="TOP">

@@ -5995,6 +5995,13 @@ sub setUser {
 	return $rows;
 }
 
+# Nicknames
+sub getUsersNicknamesByUID {
+	my ($self, $people) = @_;
+	my $list = join(",", @$people);
+	$self->sqlSelectAllHashref("uid", "uid,nickname", "users", "uid IN ($list)");
+}
+
 ########################################################
 # Now here is the thing. We want getUser to look like
 # a generic, despite the fact that it is not :)

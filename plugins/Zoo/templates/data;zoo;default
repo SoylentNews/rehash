@@ -21,25 +21,25 @@ __template__
 	[% constants.sitename %] Friend/Foe System
 
 [% CASE 'confirm' %]
-	Your Relationship with <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT FACE="[% constants.mainfontface %]" SIZE="4" COLOR="[% user.fg.0 %]"><B>[% nickname %]</B></FONT></A> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Your Relationship with [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'nofriends' %]
-	[% nickname %] is all alone in the world.
+	[% nickname %]([% uid %]) is all alone in the world.
 
 [% CASE 'nofans' %]
-	[% nickname %] is either loved by all or just invisible.
+	[% nickname %]([% uid %]) is either loved by all or just invisible.
 
 [% CASE 'nofreaks' %]
-	[% nickname %] is hated by no one.
+	[% nickname %]([% uid %]) is hated by no one.
 
 [% CASE 'nofoes' %]
-	[% nickname %] loves everyone or plays their cards very close to their chest.
+	[% nickname %]([% uid %]) loves everyone or plays their cards very close to their chest.
 
 [% CASE 'nofriendsoffriends' %]
-	[% nickname %] friend's have no friends, they need better friends.
+	[% nickname %]([% uid %]) friend's have no friends, they need better friends.
 
 [% CASE 'nofriendsenemies' %]
-	[% nickname %] friend's have no foes.
+	[% nickname %]([% uid %]) friend's have no foes.
 
 [% CASE 'noall' %]
 	[% nickname %] is unknown to the world
@@ -69,22 +69,22 @@ __template__
 	No one knows you exist.
 
 [% CASE 'friendshead' %]
-	Friends of [% nickname %]
+	Friends of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'foeshead' %]
-	Foes of [% nickname %]
+	Foes of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'fanshead' %]
-	Fans of [% nickname %]
+	Fans of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'freakshead' %]
-	Freaks of [% nickname %]
+	Freaks of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'friendsenemieshead' %]
-	Foes of the Friends of [% nickname %]
+	Foes of the Friends of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'friendsoffriendshead' %]
-	Friends of the Friends of [% nickname %]
+	Friends of the Friends of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'yourhead' %]
 	Everyone who thinks anything about [% nickname %]

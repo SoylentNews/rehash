@@ -14,7 +14,7 @@ __template__
 [% USE Slash %]
 <FORM ACTION="[% constants.rootdir %]/zoo.pl" METHOD="POST">
 <P>
-[% nickname %]'s <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/">friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/fans/">fans</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/foes/">foes</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/freaks/">freaks</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/fof/">friends of friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/eof/">foes of friends</A>.
+<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]'s</A> <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/">friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/fans/">fans</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/foes/">foes</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/freaks/">freaks</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/fof/">friends of friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/eof/">foes of friends</A>.
 <P>
 [% IF over_socialized %]
 	You have over [% IF user.is_subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] friends and foes at the moment. This puts you over our limit of[% IF constants.subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] relationships that we allow. At this point you may only remove relationships with users. <br>
@@ -51,7 +51,7 @@ __template__
 <P><B>Note:</B> Whom you like and dislike is not private; it can and will be used against you.</P>
 
 <P>
-Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">_what_these_icons_mean_</A> or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">_where_you_change_their_values?</A>
+Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these icons mean </A> or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> where you change their values?</A>
 <P>
 <TABLE WIDTH="100%">
 	<TR>

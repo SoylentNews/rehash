@@ -104,7 +104,7 @@ sub main {
 		# Here, panic mode is handled without needing to call the
 		# individual search subroutines;  we're going to tell the
 		# user the same thing in each case anyway.
-		if ($constants->{panic} >= 1 or $constants->{search_google}) {
+		if ($constants->{panic} >= 1 or $constants->{search_google} or !$searchDB) {
 			slashDisplay('nosearch');
 		} else {
 			if ($ops{$form->{op}}) {

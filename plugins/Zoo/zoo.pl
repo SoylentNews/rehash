@@ -161,11 +161,11 @@ sub friends {
 			_printHead("yourfriendshead");
 			$implied = FRIEND;
 		} else {
-			_printHead("friendshead", { nickname => $nick });
+			_printHead("friendshead", { nickname => $nick, uid => $uid });
 		}
 		
 		if (@$friends) {
-			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied });
+			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied, nickname => $nick });
 		} else {
 			if ($editable) {
 				print getData('yournofriends');
@@ -204,7 +204,7 @@ sub fof {
 		}
 		
 		if (@$friends) {
-			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied });
+			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied, nickname => $nick });
 		} else {
 			if ($editable) {
 				print getData('yournofriendsoffriends');
@@ -239,11 +239,11 @@ sub enof {
 			_printHead("yourfriendsenemieshead");
 			$implied = EOF;
 		} else {
-			_printHead("friendsenemieshead", { nickname => $nick });
+			_printHead("friendsenemieshead", { nickname => $nick, uid => $uid });
 		}
 		
 		if (@$friends) {
-			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied });
+			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied, nickname => $nick });
 		} else {
 			if ($editable) {
 				print getData('yournofriendsenemies');
@@ -278,11 +278,11 @@ sub foes {
 			_printHead("yourfoeshead");
 			$implied = FOE;
 		} else {
-			_printHead("foeshead", { nickname => $nick });
+			_printHead("foeshead", { nickname => $nick, uid => $uid });
 		}
 		
 		if (@$foes) {
-			slashDisplay('plainlist', { people => $foes, editable => $editable, implied => $implied });
+			slashDisplay('plainlist', { people => $foes, editable => $editable, implied => $implied, nickname => $nick });
 		} else {
 			if ($editable) {
 				print getData('yournofoes');
@@ -316,10 +316,10 @@ sub fans {
 			_printHead("yourfanshead");
 			$implied = FAN;
 		} else {
-			_printHead("fanshead",{ nickname => $nick });
+			_printHead("fanshead",{ nickname => $nick, uid => $uid });
 		}
 		if (@$fans) {
-			slashDisplay('plainlist', { people => $fans, editable => $editable, implied => $implied });
+			slashDisplay('plainlist', { people => $fans, editable => $editable, implied => $implied, nickname => $nick });
 		} else {
 			if ($editable) {
 				print getData('yournofans');
@@ -354,10 +354,10 @@ sub freaks {
 			$implied = FREAK;
 			
 		} else {
-			_printHead("freakshead",{ nickname => $nick });
+			_printHead("freakshead",{ nickname => $nick, uid => $uid });
 		}
 		if (@$freaks) {
-			slashDisplay('plainlist', { people => $freaks, editable => $editable, implied => $implied });
+			slashDisplay('plainlist', { people => $freaks, editable => $editable, implied => $implied, nickname => $nick });
 		} else {
 			if ($editable) {
 				print getData('yournofreaks');
@@ -389,10 +389,10 @@ sub all {
 		if ($editable) {
 			_printHead("yourall");
 		} else {
-			_printHead("yourhead",{ nickname => $nick });
+			_printHead("yourhead",{ nickname => $nick, uid => $uid });
 		}
 		if (@$people) {
-			slashDisplay('plainlist', { people => $people, editable => $editable });
+			slashDisplay('plainlist', { people => $people, editable => $editable, nickname => $nick });
 		} else {
 			if ($editable) {
 				print getData('yournoall');
