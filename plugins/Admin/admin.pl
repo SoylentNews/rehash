@@ -1183,7 +1183,7 @@ sub editStory {
 		$user->{currentSection} = $tmp;
 		$storyref->{relatedtext} =
 			getRelated(
-				"$storyref->{title} $storyref->{bodytext} $storyref->{introtext}",
+				"$storyref->{title} $storyref->{introtext} $storyref->{bodytext}",
 				$storyref->{tid}
 			) . otherLinks(
 				$slashdb->getAuthor($storyref->{uid}, 'nickname'),
