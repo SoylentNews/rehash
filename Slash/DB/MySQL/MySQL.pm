@@ -8256,10 +8256,13 @@ sub getUser {
 	}
 
 	# If no such user, we can return now.
+	# 2004/04/02 - we're seeing this message a lot, not sure why so much.
+	# Adding more debug info to check - Jamie
 	if (!$answer || !%$answer) {
 		if ($mcddebug) {
 			my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
-			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed no such user can '$gtd->{can_use_mcd}' rawmcdanswer: " . Dumper($rawmcdanswer);
+			my $rawdump = Dumper($rawmcdanswer); chomp $rawdump;
+			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed no such user can '$gtd->{can_use_mcd}' rawmcdanswer: $rawdump val: " . Dumper($val);
 		}
 		return undef;
 	}
