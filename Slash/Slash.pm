@@ -101,12 +101,6 @@ sub selectComments {
 		return ( {}, 0 );
 	}
 
-	if ($constants->{ubb_like_forums} && $user->{mode} eq 'parents') {
-		# don't display the comment that describes the forums
-		my $forum_desc = $slashdb->getForumFirstPostHashref($header->{id});
-		delete $thisComment->{$forum_desc->{cid}};
-	}
-
 	my $max_uid = $reader->countUsers({ max => 1 });
 	my $reasons = $reader->getReasons();
 	# We first loop through the comments and assign bonuses and
@@ -144,10 +138,23 @@ sub selectComments {
 		} @$thisComment;
 	}
 
+	my $forum_desc;
+	if ($constants->{ubb_like_forums} && $user->{mode} eq 'parents') {
+		# don't display the comment that describes the forums
+		# we get the comment here and save it for later use
+		$forum_desc = $slashdb->getForumFirstPostHashref($header->{id});
+	}
+
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# is in the index of the hash (based on its cid).
 	for my $C (@$thisComment) {
+		# If this is a forum, we skip the first comment in a
+		# discussion, since it's the description
+		next if $constants->{ubb_like_forums}
+			&& ($user->{mode} eq 'parents')
+			&& ($C->{cid} == $forum_desc->{cid});
+
 		# So we save information. This will only have data if we have 
 		# happened through this cid while it was a pid for another
 		# comments. -Brian
