@@ -43,8 +43,10 @@ $task{$me}{code} = sub {
 		# call createVar() but the admin really should be
 		# doing their job :)
 		my $success = $slashdb->setVar('moderatord_lastmaxid', 0);
-		if (!$success) {
-			return "setting var moderatord_lastmaxid failed, create it please";
+		if ($success == 0) {
+			my $err = "setting var moderatord_lastmaxid failed, create it please";
+			slashdErrnote($err);
+			return $err;
 		}
 	}
 	my $newmaxid = $log_db->sqlSelect("MAX(id)", "accesslog");

@@ -1452,14 +1452,27 @@ sub updateTokens {
 	my($self, $uid_hr) = @_;
 	my $constants = getCurrentStatic();
 	my $maxtokens = $constants->{maxtokens} || 60;
-	for my $uid (sort keys %$uid_hr) {
-		next unless $uid
-			&& $uid		   =~ /^\d+$/
-			&& $uid_hr->{$uid} =~ /^\d+$/;
-		my $add = $uid_hr->{$uid};
-		$self->setUser($uid, {
-			-tokens	=> "LEAST(tokens+$add, $maxtokens)",
-		});
+	my %adds = ( map { ($_, 1) } grep /^\d+$/, values %$uid_hr );
+	for my $add (sort { $a <=> $b } keys %adds) {
+		my @uids = sort { $a <=> $b }
+			grep { $uid_hr->{$_} == $add }
+			keys %$uid_hr;
+		# At this points, @uids is the list of uids that need
+		# to have $add tokens added.  Group them into slices
+		# and bulk-add.  This is much more efficient than
+		# calling setUser individually.
+		my $splice_count = 200;
+		while (@uids) {
+			my @uid_chunk = splice @uids, 0, $splice_count;
+			my $uids_in = join(",", @uid_chunk);
+			$self->sqlUpdate("users_info",
+				{ -tokens => "LEAST(tokens+$add, $maxtokens)" },
+				"uid IN ($uids_in)");
+			$self->setUser_delete_memcached(\@uid_chunk);
+			# If there is more to do, sleep for a moment so we don't
+			# hit the DB too hard.
+			Time::HiRes::sleep(0.2) if @uids;
+		}
 	}
 }
 
