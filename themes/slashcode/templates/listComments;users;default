@@ -310,7 +310,7 @@ END %]
 [% END %]
 [% BLOCK state_url;
 	state_url="";
-	state_params = ["show_m2s","show_m1s","min_comment"];
+	state_params = ["show_m2s","show_m1s","min_comment","m2_listing"];
 	FOREACH param = state_params;
 		state_param = "st_" _ param;
 		IF form.${param}.defined || override.${param}.defined;

@@ -98,6 +98,12 @@ lastjournal.description | strip_notags %]</A></B>,
 [% END %]
 
 <P>
+[%
+	m2_title = "${useredit.nickname}'s Recent M2s";
+	m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
+%]
+[% PROCESS listMetamods title = m2_title m2_listing = m2_listing metamods = metamods the_user = useredit %]
+<P>
 [% IF submissions.size > 0  %]
 [% IF admin_flag or useredit.uid == user.uid;
 	title = "${useredit.nickname}'s Recent Submissions";
@@ -106,6 +112,7 @@ lastjournal.description | strip_notags %]</A></B>,
 END %]
 [% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
 [% END %]
+
 
 __seclev__
 500
