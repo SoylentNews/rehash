@@ -718,16 +718,10 @@ sub getMetamodsForUserRaw {
 	# run tests on changes like this before and there's almost no
 	# way to predict accurately what it will do on a live site
 	# without doing it... -Jamie 2002/11/16
-	my($min_old) = $self->sqlSelect("MIN(id)", "moderatorlog");
-	my($max_old) = $self->sqlSelect("MAX(id)", "moderatorlog",
-		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)");
-	$min_old = 0 if !$min_old;
-	$max_old = 0 if !$max_old;
-	my($min_new) = $self->sqlSelect("MIN(id)", "moderatorlog",
-		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY)");
-	my($max_new) = $self->sqlSelect("MAX(id)", "moderatorlog");
-	$min_new = 0 if !$min_new;
-	$max_new = 0 if !$max_new;
+	my $min_old = $self->getVar('m2_modlogid_min_old', 'value', 1) || 0;
+	my $max_old = $self->getVar('m2_modlogid_max_old', 'value', 1) || 0;
+	my $min_new = $self->getVar('m2_modlogid_min_new', 'value', 1) || 0;
+	my $max_new = $self->getVar('m2_modlogid_max_new', 'value', 1) || 0;
 	my $min_mid = $max_old+1;
 	my $max_mid = $min_new-1;
 	my $old_range = $max_old-$min_old; $old_range = 1 if $old_range < 1;

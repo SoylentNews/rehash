@@ -32,8 +32,10 @@ $task{$me}{code} = sub {
 
 #	doLogInit('moderatord');
 
+	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
 	give_out_points($virtual_user, $constants, $slashdb, $user);
 	reconcile_m2($virtual_user, $constants, $slashdb, $user);
+	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
 
 #	doLogExit('moderatord');
 
@@ -45,6 +47,41 @@ $task{$me}{code} = sub {
 sub moderatordLog {
 #	doLog('moderatord', \@_);
 	doLog('slashd', \@_);
+}
+
+sub update_modlog_ids {
+	my($virtual_user, $constants, $slashdb, $user) = @_;
+
+	my $days_back = $constants->{archive_delay_mod};
+	my $days_back_cushion = int($days_back/10);
+	$days_back_cushion = $constants->{m2_min_daysbackcushion} || 2
+		if $days_back_cushion < ($constants->{m2_min_daysbackcushion} || 2);
+	$days_back -= $days_back_cushion;
+
+	# XXX I'm considering adding a 'WHERE m2status=0' clause to the
+	# MIN/MAX selects below.  This might help choose mods more
+	# smoothly and make failure (as archive_delay_mod is approached)
+	# less dramatic too.  On the other hand it might screw things
+	# up, making older mods at N-1 M2's never make it to N.  I've
+	# run tests on changes like this before and there's almost no
+	# way to predict accurately what it will do on a live site
+	# without doing it... -Jamie 2002/11/16
+
+	my($min_old) = $slashdb->sqlSelect("MIN(id)", "moderatorlog");
+	my($max_old) = $slashdb->sqlSelect("MAX(id)", "moderatorlog",
+		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)");
+	$min_old = 0 if !$min_old;
+	$max_old = 0 if !$max_old;
+	my($min_new) = $slashdb->sqlSelect("MIN(id)", "moderatorlog",
+		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY)");
+	my($max_new) = $slashdb->sqlSelect("MAX(id)", "moderatorlog");
+	$min_new = 0 if !$min_new;
+	$max_new = 0 if !$max_new;
+
+	$slashdb->setVar("m2_modlogid_min_old", $min_old);
+	$slashdb->setVar("m2_modlogid_max_old", $max_old);
+	$slashdb->setVar("m2_modlogid_min_new", $min_new);
+	$slashdb->setVar("m2_modlogid_max_new", $max_new);
 }
 
 sub give_out_points {

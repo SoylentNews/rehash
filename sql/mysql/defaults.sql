@@ -614,7 +614,7 @@ INSERT INTO vars (name, value, description) VALUES ('adminmail_mod','admin@examp
 INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@example.com','All admin mail about comment posting goes here');
 INSERT INTO vars (name, value, description) VALUES ('allow_anonymous','1','allow anonymous posters');
 INSERT INTO vars (name, value, description) VALUES ('allow_moderation','1','allows use of the moderation system');
-INSERT INTO vars (name, value, description) VALUES ('allow_nonadmin_ssl','0','Allows users with seclev <= 1 to access the site over Secure HTTP');
+INSERT INTO vars (name, value, description) VALUES ('allow_nonadmin_ssl','0','0=users with seclev <= 1 cannot access the site over Secure HTTP; 1=they all can; 2=only if they are subscribers');
 INSERT INTO vars (name, value, description) VALUES ('anonymous_coward_uid', '1', 'UID to use for anonymous coward');
 INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
 INSERT INTO vars (name, value, description) VALUES ('apache_cache', '3600', 'Default times for the getCurrentCache().');

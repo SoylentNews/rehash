@@ -1143,3 +1143,12 @@ ALTER TABLE moderatorlog ADD INDEX m2stat_act (m2status, active);
 
 ALTER TABLE accesslist ADD wasbanned tinyint unsigned DEFAULT 0 NOT NULL;
 ALTER TABLE accesslist ADD wasreadonly tinyint unsigned DEFAULT 0 NOT NULL;
+ALTER TABLE accesslist ADD INDEX isbanned (isbanned);
+
+REPLACE INTO vars (name, value, description) VALUES ('allow_nonadmin_ssl','0','0=users with seclev <= 1 cannot access the site over Secure HTTP; 1=they all can; 2=only if they are subscribers');
+
+INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_min_old','0','Approximate min moderatorlog id');
+INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_max_old','0','Approximate max moderatorlog id that counts as old');
+INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_min_new','0','Approximate min moderatorlog id that counts as new');
+INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_max_new','0','Approximate max moderatorlog id');
+
