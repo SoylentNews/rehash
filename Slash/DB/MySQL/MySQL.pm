@@ -16,6 +16,9 @@ use vars qw($VERSION);
 use base 'Slash::DB';
 use base 'Slash::DB::Utility';
 
+# for palmlog
+use MIME::Base64;
+
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # Fry: How can I live my life if I can't tell good from evil?
@@ -917,10 +920,75 @@ sub createAccessLog {
 		uid		=> $uid,
 		section		=> $section,
 		op		=> $op,
-		-ts		=> 'now()',
+		-ts		=> 'NOW()',
 		query_string	=> $ENV{QUERY_STRING} || '0',
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
 	}, 1);
+
+=pod
+
+CREATE TABLE palmlog (
+    id                              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    ts                              DATETIME        DEFAULT '0000-00-00 00:00:00' NOT NULL,
+    HTTP_USER_AGENT                 VARCHAR(254)    DEFAULT '' NOT NULL,
+    REQUEST_URI                     VARCHAR(254)    DEFAULT '' NOT NULL,
+    REMOTE_ADDR                     VARCHAR(15)     DEFAULT '' NOT NULL,
+    HTTP_X_FORWARDED_FOR            VARCHAR(15)     DEFAULT '' NOT NULL,
+    HTTP_VIA                        VARCHAR(254)    DEFAULT '' NOT NULL,
+    HTTP_FORWARDED                  VARCHAR(254)    DEFAULT '' NOT NULL,
+
+    HTTP_X_AVANTGO_VERSION          VARCHAR(10)     DEFAULT '' NOT NULL,
+    HTTP_X_AVANTGO_DEVICEOS         VARCHAR(254)    DEFAULT '' NOT NULL,
+    HTTP_X_AVANTGO_DEVICEID         VARCHAR(254)    DEFAULT '' NOT NULL,
+    HTTP_X_AVANTGO_USERID           VARCHAR(254)    DEFAULT '' NOT NULL,
+    HTTP_X_AVANTGO_CLIENTLANGUAGE   VARCHAR(10)     DEFAULT '' NOT NULL,
+    HTTP_X_AVANTGO_SCREENSIZE       VARCHAR(15)     DEFAULT '' NOT NULL,
+    HTTP_X_AVANTGO_COLORDEPTH       VARCHAR(10)     DEFAULT '' NOT NULL,
+
+    INDEX ts (ts),
+    INDEX REMOTE_ADDR (REMOTE_ADDR),
+    INDEX HTTP_X_AVANTGO_DEVICEID (HTTP_X_AVANTGO_DEVICEID),
+    INDEX HTTP_X_AVANTGO_USERID (HTTP_X_AVANTGO_USERID),
+    INDEX HTTP_VIA (HTTP_VIA),
+    INDEX HTTP_X_FORWARDED_FOR (HTTP_X_FORWARDED_FOR),
+    INDEX HTTP_FORWARDED (HTTP_FORWARDED),
+    PRIMARY KEY (id)
+) TYPE = myisam;
+
+=cut
+
+	# this is temporary -- pudge
+	if ($constants->{palmlog} && $op eq 'palm') {
+		my @direct = qw(
+			HTTP_USER_AGENT
+			REQUEST_URI
+			REMOTE_ADDR
+
+			HTTP_VIA
+			HTTP_X_FORWARDED_FOR
+			HTTP_FORWARDED
+
+			HTTP_X_AVANTGO_VERSION
+		);
+
+		my @base64 = qw(
+			HTTP_X_AVANTGO_DEVICEOS
+			HTTP_X_AVANTGO_DEVICEID
+			HTTP_X_AVANTGO_USERID
+			HTTP_X_AVANTGO_CLIENTLANGUAGE
+			HTTP_X_AVANTGO_SCREENSIZE
+			HTTP_X_AVANTGO_COLORDEPTH
+		);
+
+		my %palmlog = (
+			-ts		=> 'NOW()',
+		);
+
+		@palmlog{@direct} = map { defined $_ ? $_ : '' } @ENV{@direct};
+		@palmlog{@base64} = map { decode_base64($_) } @ENV{@base64};
+
+		$self->sqlInsert('palmlog', \%palmlog, 1);
+	}
 }
 
 
