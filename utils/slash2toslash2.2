@@ -621,10 +621,7 @@ sub load_vars {
 # Technically, this will work on any table with a non date/int key that
 # we want to update. Something to think about for the future.
 sub update_stories {
-	my (@stories, %hitlist);
-
-	map { s/^(database=)?([^;]+);?(.+)?$/$2/; }
-		my($old_name, $new_name)=($dbh_old->{Name}, $dbh_new->{Name}); 
+	my(@stories, %hitlist);
 
 	# There should be a DESTQUERY "DELETE FROM stories..." to remove stories
 	# within the last two weeks. Then these stories (remember to grab SIDs!)
