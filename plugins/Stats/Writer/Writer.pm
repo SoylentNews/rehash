@@ -42,10 +42,11 @@ sub createStatDaily {
 	my($self, $name, $value, $options) = @_;
 	$value = 0 unless $value;
 	$options ||= {};
+	my $day = $options->{day} || $self->{_day};
 
 	my $section = $options->{section} || 'all';
 	my $insert = {
-		'day'	=> $self->{_day},
+		'day'	=> $day,
 		'name'	=> $name,
 		'value'	=> $value,
 	};
@@ -53,7 +54,7 @@ sub createStatDaily {
 
 	my $overwrite = $self->{_overwrite} || $options->{overwrite};
 	if ($overwrite) {
-		my $where = "day=" . $self->sqlQuote($self->{_day})
+		my $where = "day=" . $self->sqlQuote($day)
 			. " AND name=" . $self->sqlQuote($name);
 		$where .= " AND section=" . $self->sqlQuote($section);
 		$self->{_dbh}{AutoCommit} = 0;
