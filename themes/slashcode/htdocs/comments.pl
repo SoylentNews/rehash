@@ -946,7 +946,7 @@ sub validateComment {
 
 	if (!$user->{is_anon} && $form->{postanon} && $user->{karma} < 0) {
 		$$error_message = getError('postanon_option_disabled');
-		return
+		return;
 	}
 		
 	my $post_restrictions = $slashdb->getNetIDPostingRestrictions("subnetid", $user->{subnetid});	
@@ -1500,8 +1500,6 @@ sub moderate {
 		return;
 	}
 
-
-
 	if ($discussion->{type} eq 'archived'
 		&& !$constants->{comments_moddable_archived}) {
 		$message .= getData('archive_error');
@@ -1519,7 +1517,7 @@ sub moderate {
 			|| $user->{acl}{modpoints_always};
 
 
-	if($skip_moderation){
+	if ($skip_moderation) {
 		print $message;
 		if ($user->{is_admin}) {
 			$meta_mods_performed = metaModerate();		
@@ -1528,7 +1526,6 @@ sub moderate {
 		return;
 	} else {
 		slashDisplay('mod_header');
-		
 
 		# Handle Deletions, Points & Reparenting
 		# It would be nice to sort these by current score of the comments

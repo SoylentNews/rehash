@@ -64,6 +64,7 @@ Make sure you then CHANGE YOUR PASSWORD!
 We apologize for any inconvenience this may have caused.  If you have any problems
 with or suggestions for improving this procedure feel free to email the 
 administrator ([% constants.adminmail %]).
+
 [% CASE 'mailpasswd_msg' %]
 
 Your new password is [% newpasswd %].  Your old password will still work until

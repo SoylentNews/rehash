@@ -1883,6 +1883,7 @@ sub resetUserAccount {
 	}, 'uid=' . $self->sqlQuote($uid));
 	return $newpasswd;
 }
+
 ########################################################
 # get proper cookie location
 sub _getLogTokenCookieLocation {
@@ -9532,9 +9533,10 @@ sub getRandomSpamArmor {
 	# array index automatically int'd
 	return $ret->{$armor_keys[rand($#armor_keys + 1)]};
 }
+
 ########################################################
 sub clearAccountVerifyNeededFlags {
-	my ($self, $uid) = @_;
+	my($self, $uid) = @_;
 	$self->setUser($uid, {
 		waiting_for_account_verify 	=> "",
 		account_verify_request_time 	=> "" 
