@@ -133,7 +133,7 @@ __template__
 							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>TransID</FONT></TH>
 							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>PUID</FONT></TH>
 							<TH><FONT COLOR="[% user.fg.3 %]" SIZE=-1>Type</FONT></TH>
-						<TR>
+						</TR>
 						[% FOREACH sp = useredit.subscribe_payments %]
 						<TR bgcolor="eeeeee">
 							<TD><font size=-1>&nbsp;[% sp.0 %]&nbsp;</font></TD>
@@ -151,7 +151,7 @@ __template__
 						</TR>
 						[% END %]
 						[% IF useredit.subscribe_purchases.size %]
-							<TR bgcolor="eeeeee"><TD COLSPAN="8" ALIGN="CENTER"><FONT FACE="-1"><B>Subscriptions given by user</B></FONT><TD></TR>
+							<TR bgcolor="eeeeee"><TD COLSPAN="8" ALIGN="CENTER"><FONT FACE="-1"><B>Subscriptions given by user</B></FONT></TD></TR>
 							[% FOREACH sp = useredit.subscribe_purchases %]
 								<TR bgcolor="eeeeee">
 									<TD><font size=-1>&nbsp;[% sp.0 %]&nbsp;</font></TD>
@@ -185,7 +185,7 @@ __template__
 				</TR>
 				[% END %]
 			[% END %]
-				<TR><TD VALIGN=TOP><B>Activity</B>
+				<TR><TD VALIGN=TOP><B>Activity</B></TD>
 				<TD>
 				[% IF uidstruct %]
 					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">

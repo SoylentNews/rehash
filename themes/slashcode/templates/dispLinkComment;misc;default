@@ -59,7 +59,6 @@ __template__
 		[% END %]
 		]
 		</FONT></TD></TR>
-	<TR><TD>
 
 	[% END %]
 [% END %]

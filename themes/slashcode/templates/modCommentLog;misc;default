@@ -54,14 +54,14 @@ bg_col_2 = user.bg.2;
 	[% IF meta_mod_only %]
 		<INPUT TYPE="HIDDEN" name="meta_mod_only" value="1">
 	[% END %]
-	[% total_cols = 5 %]	
+	[% total_cols = 6 %]	
 	<TABLE BORDER=0 ALIGN="CENTER" width="100%" CELLSPACING="0" CELLPADDING="0">
 	[% IF title %]
 		[% show_m2s_op = show_m2s ? 0 : 1;
 		   self_url = PROCESS base_url_mod;
 		   url_tail = PROCESS state_url_mod override = { show_m2s => show_m2s_op};
 		   self_url = self_url  _ url_tail;
-		   extra = "<TD width=\"10\" bgcolor=\"" _ user.bg.3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m2s ? "/contract.gif" : "/expand.gif") _ "\"  BORDER=0></A></TD>";
+		   extra = "<TD width=\"14\" bgcolor=\"" _ user.bg.3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m2s ? "/contract.gif" : "/expand.gif") _ "\"  ALT=\"\" WIDTH=\"14\" HEIGHT=\"14\" BORDER=0></A></TD>";
 		%]
 		<TR><TD ALIGN="CENTER">[% PROCESS titlebar width="100%" title=title td_extra = extra %]</TD></TR>
 	[% END %]
@@ -69,7 +69,8 @@ bg_col_2 = user.bg.2;
 	<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
 	<tr BGCOLOR="[% user.bg.3 %]">
         	<th align=left><font COLOR="[% user.fg.3 %]" size=-1> Datestamp </font></th>
-		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> Score </font></th>
+		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> Was </font></th>
+		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> Now </font></th>
 		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> Val </font></th>
 		<th align=left><font COLOR="[% user.fg.3 %]" size=-1> Reason <font color=AAAAAA> / Metamod</font> </font></th>
 		<th align=right><font COLOR="[% user.fg.3 %]" size=-1> M2 </font></th>
@@ -116,6 +117,7 @@ bg_col_2 = user.bg.2;
 			[% END %]
 			[% IF !moderation.active %]*[% END %]
 		</TD>
+	        <TD>[% IF !suppress_mod_head; moderation.points_orig; END %]</TD>
 		<TD ALIGN="RIGHT">
 			[% IF !suppress_mod_head; moderation.score; END %]
 		</TD>
@@ -161,7 +163,7 @@ bg_col_2 = user.bg.2;
 			[% IF constants.show_m2s_with_mods %]
 			[% FOREACH m2 = mods_to_m2s.${moderation.id} %] 
 			[% IF !suppress_m2s %]
-			<TR bgcolor="[% light_bgcolor %]"><TD><font size=-1 color="[% light_text_color2 %]">[% m2.ts.substr(5,-3)  %][% IF !m2.active %]*[% END %]</font></TD</TD><TD colspan="2"></TD><TD align="right"><font size=-1 color="[% light_text_color2 %]">[% m2.val > 0 ? "Fair" : "Unfair" %]</font></TD><TD ALIGN="RIGHT"><font size=-1 color="[% light_text_color2 %]">[% m2.val > 0 ? "+" : "-" %]</font></TD>
+			<TR bgcolor="[% light_bgcolor %]"><TD><font size=-1 color="[% light_text_color2 %]">[% m2.ts.substr(5,-3)  %][% IF !m2.active %]*[% END %]</font></TD><TD colspan="3"></TD><TD align="right"><font size=-1 color="[% light_text_color2 %]">[% m2.val > 0 ? "Fair" : "Unfair" %]</font></TD><TD ALIGN="RIGHT"><font size=-1 color="[% light_text_color2 %]">[% m2.val > 0 ? "+" : "-" %]</font></TD>
 			[%- IF !both_mods || skip_ip_disp!=1 -%]
 				<TD></TD>
 			[%- END -%]
@@ -186,13 +188,13 @@ bg_col_2 = user.bg.2;
 		[% END %]
 	[% IF count %]
 	<TR><TD colspan="[% total_cols %]">[% PROCESS horiz_rule %]</TD></TR>
-	<TR><TD><B>Total: [% a_count %] </B></TD><TD></TD><TD align="right"><B>[% a_down %]</B></TD><TD><B>[% Slash.getData('percentage', { sum=>a_down, count => a_count},"misc") %] Down</B></TD><TD align="right"><B>[% a_m2_unfair_votes %]</B><TD><B>Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count },"misc") %])</B></TD> 
+	<TR><TD colspan="2"><B>Total: [% a_count %] </B></TD><TD></TD><TD align="right"><B>[% a_down %]</B></TD><TD><B>[% Slash.getData('percentage', { sum=>a_down, count => a_count},"misc") %] Down</B></TD><TD align="right"><B>[% a_m2_unfair_votes %]</B></TD><TD><B>Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count },"misc") %])</B></TD> 
 	[% IF both_mods and skip_ip_disp==1 %]<TD></TD>[% END %]
 	<TD><B>[% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</B></TD>
 </TR>
 	[% END %]
 [% IF type=="uid" %]
-	<TR><TD><B>Lifetime Spent: [% this_user.totalmods %]</B></TD><TD></TD><TD align="right"></TD><TD><B>[% Slash.getData('percentage', { sum = this_user.downmods, count=> this_user.downmods + this_user.upmods },"misc") %] Down</B></TD><TD align="right"><B></B><TD><B>[% this_user.m2unfair %] Unfair [% IF this_user.m2unfairpercent %]([% this_user.m2unfairpercent %])[% END %]</B></TD>
+	<TR><TD colspan="2"><B>Lifetime Spent: [% this_user.totalmods %]</B></TD><TD></TD><TD align="right"></TD><TD><B>[% Slash.getData('percentage', { sum = this_user.downmods, count=> this_user.downmods + this_user.upmods },"misc") %] Down</B></TD><TD></TD><TD><B>[% this_user.m2unfair %] Unfair [% IF this_user.m2unfairpercent %]([% this_user.m2unfairpercent %])[% END %]</B></TD>
 	[% IF both_mods and skip_ip_disp==1 %]<TD></TD>[% END %]
 	<TD><B>[% this_user.stirred %] Stirred</B></TD>
 </TR>
@@ -206,11 +208,11 @@ bg_col_2 = user.bg.2;
 		<INPUT TYPE="submit" name="submit" value="MetaModerate">
 		</TD></TR>
 	[% END %]
+[% END %]
+</TABLE>
 	[% IF need_m2_form %]	
 		</FORM>
 	[% END %]
-[% END %]
-</TABLE>
 [% END %]
 [% END %]
 

@@ -77,7 +77,7 @@ thread_col_2 = user.bg.2;
 		   	self_url = PROCESS base_url;
 		   	url_tail = PROCESS state_url override = { show_m1s => show_m1s_op};
 		   	self_url = self_url  _ url_tail;
-		   	extra = "<TD width=\"10\" bgcolor=\"" _ user.bg.3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  BORDER=0></A></TD>";
+		   	extra = "<TD width=\"14\" bgcolor=\"" _ user.bg.3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  ALT=\"\" WIDTH=\"14\" HEIGHT=\"14\" BORDER=0></A></TD>";
 		   END;
 		%]
 		[% PROCESS titlebar width="100%" title = commenttitle td_extra = extra -%]
@@ -226,7 +226,7 @@ thread_col_2 = user.bg.2;
 						[% IF moddable_items %]<BR><INPUT TYPE="SUBMIT" VALUE="Moderate">[% END %]
 					[% END %]</TD>
 					</TR>
-					<TR><TD colspan="[% total_cols %]" align="center"><font size=-1>
+					<TR><TD colspan="[% total_cols %]" align="center">
 						<font size=-1>Logged in users can choose whether or not they'd like comments shown grouped by discussion on their 
 						[% IF !user.is_anon %]<A HREF="[% constants.rootdir %]/users.pl?op=editcomm">[% END %]comment settings page[% IF !user.is_anon %]</A><BR>[% END %]
 						[% IF constants.subscribe and !user.is_subscriber %]<BR>Subscribers can view entire comment history for all users[% END %]					 
