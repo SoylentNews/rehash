@@ -378,7 +378,7 @@ sub getReverseMods {
 		 ( SUM( IF( moderatorlog.val=-1,
 				IF(points=5, $down5, 0),
 				IF(points<=$upmax, $upsub-points*$upmul, 0) ) )
-		  +SUM( $m2able_score_clause ) )
+		  +SUM( $m2able_score_clause )
 		 )/(COUNT(*)+$denomadd) AS score,
 		 IF(MAX(moderatorlog.ts) > DATE_SUB(NOW(), INTERVAL 24 HOUR),
 			1, 0) AS isrecent",
