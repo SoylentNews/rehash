@@ -1389,8 +1389,6 @@ INSERT INTO vars (name, value, description) VALUES ('adminmail_last_run','2003-0
 
 # End of T_2_3_0_80, Start of T_2_3_0_81
 
-# SLASHDOT LAST UPDATED HERE
-
 ALTER TABLE accesslist ADD COLUMN adminuid mediumint(8) unsigned NOT NULL default '0' AFTER id;
 
 # DEVCHANNEL LAST UPDATED HERE
@@ -1399,3 +1397,7 @@ ALTER TABLE accesslist ADD COLUMN adminuid mediumint(8) unsigned NOT NULL defaul
 #INSERT INTO vars (name, value, description) VALUES ('adminmail_ban','admin@example.com','All admin mail about users being banned goes here');
 
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_81, Start of T_2_3_0_82
+
