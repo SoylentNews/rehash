@@ -192,7 +192,7 @@ sub handler {
 	my $user = prepareUser($uid, $form, $uri, $cookies, $method);
 	# "_dynamic_page" or any hash key name beginning with _ or .
 	# cannot be accessed from templates -- pudge
-	if ($uri =~ /\.pl$/ && $uri =~ /\.tmpl$/) {
+	if ($uri =~ /\.pl$/ || $uri =~ /\.tmpl$/) {
 		$user->{state}{_dynamic_page} = 1;
 	}
 	$user->{state}{ssl} = $is_ssl;
