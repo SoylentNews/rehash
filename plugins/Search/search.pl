@@ -7,7 +7,6 @@
 use strict;
 use Slash;
 use Slash::Display;
-use Slash::Search;
 use Slash::Utility;
 use Slash::XML;
 
@@ -60,7 +59,7 @@ sub main {
 		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
 	} else {
 		$slashdb  = getCurrentDB();
-		$searchDB = Slash::Search->new(getCurrentVirtualUser());
+		$searchDB = getObject('Slash::Search');
 	}
 
 	# Set some defaults
@@ -848,7 +847,7 @@ main();
 #		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
 #	} else {
 #		$slashdb  = getCurrentDB();
-#		$searchDB = Slash::Search->new(getCurrentVirtualUser());
+#		$searchDB = getObject('Slash::Search');
 #	}
 #	return($slashdb, $searchDB);
 #}
