@@ -1139,7 +1139,6 @@ in HREFs through C<fudgeurl>.
 
 sub approveTag {
 	my($wholetag) = @_;
-#print STDERR "BEGIN approveTag <$wholetag>\n";
 
 	$wholetag =~ s/^\s*(.*?)\s*$/$1/; # trim leading and trailing spaces
 	$wholetag =~ s/\bstyle\s*=(.*)$//is; # go away please
@@ -1165,7 +1164,6 @@ sub approveTag {
 	my($taglead, $slash, $t) = $wholetag =~ m{^(\s*(/?)\s*(\w+))};
 	my $t_uc = uc $t;
 	if (!$approved{$t_uc}) {
-#print STDERR "not approved, cancelling: t_uc '$t_uc' wholetag '$wholetag'\n";
 		return "";
 	}
 
@@ -1207,8 +1205,6 @@ sub approveTag {
 			$elem->all_attr_names;
 		my %attr_data  = map { ($_, $elem->attr($_)) } @attr_order;
 		my $num_req_found = 0;
-#use Data::Dumper;
-#print STDERR "rebuilding: t_uc '$t_uc' wholetag '$wholetag' attr_order '@attr_order' attr_data " . Dumper(\%attr_data);
 		$wholetag = "$t_uc";
 		for my $a (@attr_order) {
 			my $a_uc = uc $a;
@@ -1218,7 +1214,6 @@ sub approveTag {
 			next unless $data;
 			$wholetag .= qq{ $a_uc="$data"};
 			++$num_req_found if $required{$a_uc};
-#print STDERR "attr added: '$a_uc' '$data' num_req_found '$num_req_found'\n";
 		}
 		# If the required attributes were not all present, the whole
 		# tag is invalid.
@@ -1232,7 +1227,6 @@ sub approveTag {
 	}
 
 	# If we made it here, the tag is valid.
-#print STDERR "END approveTag <$wholetag>\n";
 	return "<$wholetag>";
 }
 
@@ -1288,10 +1282,8 @@ sub approveCharref {
 	# For more information, see
 	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
 	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
-	my %bad_numeric = map { $_, 1 }
-		qw( 8204 8205 8206 8207 8236 8237 8238 );
-	my %bad_entity = map { $_, 1 }
-		qw( zwnj zwj lrm rlm );
+	my %bad_numeric = map { $_, 1 } @{$constants->{charrefs_bad_numeric}};
+	my %bad_entity = map { $_, 1 } @{$constants->{charrefs_bad_entity}};
 
 	if ($ok == 1 && $charref =~ /^#/) {
 		# Probably a numeric character reference.

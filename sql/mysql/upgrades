@@ -951,3 +951,21 @@ UPDATE menus SET label=CONCAT('~', label, ' ([% user.uid %])') WHERE menu='users
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+
+ALTER TABLE moderatorlog ADD COLUMN spent tinyint DEFAULT '1' NOT NULL AFTER active;
+INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_entity','zwnj|zwj|lrm|rlm','Entities that approveCharref should always delete');
+INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_numeric','8204|8205|8206|8207|8236|8237|8238','Numeric references that approveCharref should always delete');
+INSERT INTO vars (name, value, description) VALUES ('comment_compress_slice','500','Chars to slice comment into for compressOk');
+INSERT INTO vars (name, value, description) VALUES ('comment_homepage_disp','50','Chars of poster URL to show in comment header');
+INSERT INTO vars (name, value, description) VALUES ('mod_elig_hoursback','48','Hours back in accesslog to look for mod elig');
+INSERT INTO vars (name, value, description) VALUES ('mod_elig_minkarma','0','The min M1 karma');
+INSERT INTO vars (name, value, description) VALUES ('mod_up_points_needed','','Need more than 1 point to mod up? Hash');
+INSERT INTO vars (name, value, description) VALUES ('m2_min_daysbackcushion','2','The minimum days-back cushion');
+INSERT INTO vars (name, value, description) VALUES ('m2_mintokens','0','The min M2 tokens');
+INSERT INTO vars (name, value, description) VALUES ('m2_range_offset','0.9','Offset for M2 assignment ranges');
+
+# Change for plugins/Admin (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_bodytext','0.5','The min M1 karma');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_introtext','1','The min M1 karma');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8','The min M1 karma');
+

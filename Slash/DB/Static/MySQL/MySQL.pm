@@ -700,11 +700,20 @@ EOT
 # "trade-in" limit and the token_retention var is obviated.
 # Any user with more than $tokentrade tokens is forced to cash
 # them in for points, but they get to keep any excess tokens.
+# And on 2002/10/23, even newer logic:  the number of desired
+# conversions is passed in and the top that-many token holders
+# get points.
 sub convert_tokens_to_points {
-	my($self) = @_;
+	my($self, $n_wanted) = @_;
 
 	my $constants = getCurrentStatic();
 	my %granted = ( );
+
+	return unless $n_wanted;
+
+	# Sanity check.
+	my $n_users = $self->countUsers();
+	$n_wanted = int($n_users/100) if $n_wanted > int($n_users)/100;
 
 	my $maxtokens = $constants->{maxtokens} || 60;
 	my $tokperpt = $constants->{tokensperpoint} || 8;
@@ -712,12 +721,13 @@ sub convert_tokens_to_points {
 	my $pointtrade = $maxpoints;
 	my $tokentrade = $pointtrade * $tokperpt;
 	$tokentrade = $maxtokens if $tokentrade > $maxtokens; # sanity check
+	my $half_tokentrade = int($tokentrade/2); # another sanity check
 
 	my $uids = $self->sqlSelectColArrayref(
 		"uid",
 		"users_info",
-		"tokens >= $tokentrade",
-		"ORDER BY uid",
+		"tokens >= $half_tokentrade",
+		"ORDER BY tokens DESC, RAND() LIMIT $n_wanted",
 	);
 
 	# Locking tables is no longer required since we're doing the
@@ -728,7 +738,7 @@ sub convert_tokens_to_points {
 		next unless $uid;
 		my $rows = $self->setUser($uid, {
 			-lastgranted	=> 'NOW()',
-			-tokens		=> "tokens - $tokentrade",
+			-tokens		=> "GREATEST(0, tokens - $tokentrade)",
 			-points		=> "LEAST(points + $pointtrade, $maxpoints)",
 		});
 		$granted{$uid} = 1 if $rows;
@@ -852,6 +862,8 @@ sub fetchEligibleModerators {
 	# Whether the var "authors_unlimited" is set or not, it doesn't
 	# much matter whether we return admins in this list.
 
+	my $hoursback = $constants->{mod_elig_hoursback} || 48;
+	my $minkarma = $constants->{mod_elig_minkarma} || 0;
 	my $returnable =
 		$self->sqlSelectAll(
 			"users_info.uid, COUNT(*) AS c",
@@ -861,8 +873,9 @@ sub fetchEligibleModerators {
 			 AND users_info.uid=users_prefs.uid
 			 AND (op='article' OR op='comments')
 			 AND willing=1
-			 AND ts >= DATE_SUB(NOW(), INTERVAL 48 HOUR)
-			 AND karma >= 0",
+			 AND ts >= DATE_SUB(NOW(),
+				INTERVAL $hoursback HOUR)
+			 AND karma >= $minkarma",
 			"GROUP BY users_info.uid
 			 HAVING c >= $hitcount
 			 ORDER BY c, RAND()");
@@ -1327,13 +1340,17 @@ sub refreshUncommonStoryWords {
 		"stories.sid = story_text.sid
 		 AND stories.time >= DATE_SUB(NOW(), INTERVAL $n_days DAY)"
 	);
+	my @weights = (
+		$constants->{uncommon_weight_title} || 8,
+		$constants->{uncommon_weight_introtext} || 1,
+		$constants->{uncommon_weight_bodytext} || 0.5,
+	);
 	my $word_hr = { };
 	for my $ar (@$arr) {
-		findWords($ar->[0], 8  , $word_hr) if $ar->[0];	# title
-		findWords($ar->[1], 1  , $word_hr) if $ar->[1];	# introtext
-		findWords($ar->[2], 0.5, $word_hr) if $ar->[2];	# bodytext
+		findWords($ar->[0], $weights[0], $word_hr) if $ar->[0]; # title
+		findWords($ar->[1], $weights[1], $word_hr) if $ar->[1]; # introtext
+		findWords($ar->[2], $weights[2], $word_hr) if $ar->[2]; # bodytext
 	}
-#use Data::Dumper; print STDERR Dumper($word_hr);
 
 	# The only words that count as uncommon are the ones that appear in
 	# stories less frequently than once every uncommonstoryword_thresh
@@ -1353,7 +1370,6 @@ sub refreshUncommonStoryWords {
 		grep { $word_hr->{$_}{count} <= $ignore_threshold }
 		grep { length($_) > $minlen }
 		keys %$word_hr;
-#print STDERR "@uncommon_words\n";
 	my $uncommon_words = substr(join(" ", @uncommon_words), 0, $maxlen);
 	if (length($uncommon_words) == $maxlen) {
 		$uncommon_words =~ s/\s+\S+\Z//;

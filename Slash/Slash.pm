@@ -1189,8 +1189,11 @@ sub _hard_dispComment {
 
 		my $homepage = $comment->{homepage} || '';
 		$homepage = '' if length($homepage) <= 8;
-		if (length($homepage) > 50) {
-			$homepage = substr($homepage, 0, 20) . "..." . substr($homepage, -20, 20);
+		my $homepage_maxlen = $constants->{comment_homepage_disp} || 50;
+		if (length($homepage) > $homepage_maxlen) {
+			my $halflen = $homepage_maxlen/2 - 5;
+			$halflen = 10 if $halflen < 10;
+			$homepage = substr($homepage, 0, $halflen) . "..." . substr($homepage, -$halflen);
 		}
 		$homepage = strip_literal($homepage);
 		$userinfo_to_display .= qq[ | <A HREF="$comment->{homepage}">$homepage</A>]

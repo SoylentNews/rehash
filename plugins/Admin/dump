@@ -21,6 +21,9 @@ INSERT INTO vars (name, value, description) VALUES ('similarstorydays', '30', 'N
 INSERT INTO vars (name, value, description) VALUES ('similarstorymaxwords', '30', 'Maximum number of top-weighted scores to search for in previous stories');
 INSERT INTO vars (name, value, description) VALUES ('similarstoryminweight', '4', 'Minimum weight necessary for a story to be displayed as similar');
 INSERT INTO vars (name, value, description) VALUES ('similarstorynumshow', '5', 'Maximum number of similar stories to show in admin preview');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_bodytext','0.5','The min M1 karma');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_introtext','1','The min M1 karma');
+INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8','The min M1 karma');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords', '', 'A generated list of uncommon words found in recent stories');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords_maxlen', '65000', 'Maximum length of the uncommon words list');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstoryword_minlen', '3', 'Minimum length of the words in the uncommon words list');

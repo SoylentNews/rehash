@@ -1274,6 +1274,10 @@ sub moderate {
 	slashDisplay('mod_header');
 
 	# Handle Deletions, Points & Reparenting
+	# It would be nice to sort these by current score of the comments
+	# ascending, maybe also by val ascending, or some way to try to
+	# get the single-point-spends first and then to only do the
+	# multiple-point-spends if the user still has points.
 	for my $key (sort keys %{$form}) {
 		if ($user->{seclev} > 100 and $key =~ /^del_(\d+)$/) {
 			$total_deleted += deleteThread($sid, $1);
@@ -1338,7 +1342,6 @@ sub moderateCid {
 	# an unscrupulous user could have faked their submission with
 	# or without us presenting them the menu options.  So do the
 	# tests again.
-
 	unless ($superAuthor) {
 		# Do not allow moderation of any comments with the same UID as the
 		# current user (duh!).
@@ -1356,13 +1359,16 @@ sub moderateCid {
 				|| 24*$constants->{archive_delay});
 	}
 
+	# Start putting together the data we'll need to display to
+	# the user.
+	my $reasons = $slashdb->getReasons();
 	my $dispArgs = {
 		cid	=> $cid,
 		sid	=> $sid,
 		subject => $comment->{subject},
 		reason	=> $reason,
 		points	=> $user->{points},
-		reasons	=> $slashdb->getReasons(),
+		reasons	=> $reasons,
 	};
 
 	unless ($superAuthor) {
@@ -1375,7 +1381,6 @@ sub moderateCid {
 	}
 
 	# Add moderation value to display arguments.
-	my $reasons = $slashdb->getReasons();
 	my $val = $reasons->{$reason}{val};
 	$val = "+1" if $val == 1;
 	$dispArgs->{val} = $val;
@@ -1396,8 +1401,23 @@ sub moderateCid {
 		$dispArgs->{type} = 'score limit';
 	}
 
+	# Find out how many mod points this will really cost us.  As of
+	# Oct. 2002, it might be more than 1.
+	my $pointsneeded = $slashdb->getModPointsNeeded(
+		$comment->{points},
+		$scorecheck,
+		$reason);
+
+	# If more than 1 mod point needed, we might not have enough,
+	# so this might still fail.
+	if ($pointsneeded > $user->{points} && !$superAuthor) {
+		print getError('not enough points');
+		return 0;
+	}
+
 	# Write the proper records to the moderatorlog.
-	$slashdb->setModeratorLog($comment, $user->{uid}, $val, $reason, $active);
+	$slashdb->setModeratorLog($comment, $user->{uid}, $val, $reason, $active,
+		$pointsneeded);
 
 	if ($active) {
 
@@ -1407,13 +1427,14 @@ sub moderateCid {
 
 		# First, update values for the moderator.
 		my $changes = { };
-		$changes->{-points} = "GREATEST(points-1, 0)";
+		$changes->{-points} = "GREATEST(points-$pointsneeded, 0)";
 		my $tcost = $constants->{mod_unm2able_token_cost} || 0;
 		$tcost = 0 if $reasons->{$reason}{m2able};
 		$changes->{-tokens} = "tokens - $tcost" if $tcost;
 		$changes->{-totalmods} = "totalmods + 1";
 		$slashdb->setUser($user->{uid}, $changes);
-		$user->{points}-- if $user->{points} > 0;
+		$user->{points} -= $pointsneeded;
+		$user->{points} = 0 if $user->{points} < 0;
 
 		# Update stats.
 		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {

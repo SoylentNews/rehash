@@ -20,9 +20,10 @@ __template__
    m2log yest: [% metamodlog_yest %] rows ([% xmodlog_yest %] modlog) (not counting [% metamodlog_inactive_percent_yest %]% inactive)
     consensus: [% consensus %]
    mod points: [% mod_points_pool %] in pool
-   used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
+   mods total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
       used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
       used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
+    avg spent: [% mod_points_avg_spent %]
 oldest unM2'd: [% IF oldest_unm2d_days > -1 %][% oldest_unm2d_days %] days[% ELSE %](n/a)[% END %]
 youngest elig: uid [% youngest_modelig_uid %], created on [% youngest_modelig_created %]
 

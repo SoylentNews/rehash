@@ -50,6 +50,10 @@ comment ... like the body or the subject!)
 CASE "no points" %]
 You don't have any moderator points.<BR>
 
+[% # NO POINTS.
+CASE "not enough points" %]
+You don't have enough moderator points.<BR>
+
 [% # COMMENTS MAX POSTS.
 CASE "comments max posts" %]
 <BR><P><B>You've reached your maximum number of comments you can post: [% max_posts %] comments over [% timeframe %].

@@ -384,6 +384,7 @@ CREATE TABLE moderatorlog (
 	cuid mediumint UNSIGNED NOT NULL,
 	reason tinyint UNSIGNED DEFAULT '0',
 	active tinyint DEFAULT '1' NOT NULL,
+	spent tinyint DEFAULT '1' NOT NULL,
 	m2count mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	m2status tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (id),

@@ -66,7 +66,7 @@ my $discussions = [
 	)
 ];
 
-my(%comments, %comment_authors);
+my(%comments, %comment_data);
 
 # main program logic (in braces to offset nicely)
 {
@@ -94,9 +94,9 @@ my(%comments, %comment_authors);
 				)}
 			];
 
-			$comment_authors{$did} = $slashdb->sqlSelectAllHashref(
+			$comment_data{$did} = $slashdb->sqlSelectAllHashref(
 				'cid',
-				'sid, cid, uid',	
+				'sid, cid, uid, points',
 				'comments',
 				"sid=$did"
 			);
@@ -104,7 +104,7 @@ my(%comments, %comment_authors);
 		
 	 	# Determine the moderator.
 		my $uid = ($opts{R}) ? 
-				getRandomUserID($comment_authors{$did}) :
+				getRandomUserID($comment_data{$did}) :
 				$opts{U};
 
 		# Moderators will usually moderate in batches. For now, we 
@@ -138,19 +138,24 @@ my(%comments, %comment_authors);
 			my $comment = {
 				sid => $did,
 				cid => $cid,
-				uid => $comment_authors{$did}->{$cid}{uid},
+				uid => $comment_data{$did}{$cid}{uid},
 			};
 
 			my($modval, $reason, $active);
 			my $reasons = $slashdb->getReasons();
 			$reason = (keys %$reasons)[rand(scalar(keys %$reasons)-1) + 1];
 			$modval = $reasons->{$reason}{val};
+			my $pointsneeded = $slashdb->getModPointsNeeded(
+				$comment_data{$did}{$cid}{points},
+				$comment_data{$did}{$cid}{points} + $reasons->{$reason}{val},
+				$reason);
 			$slashdb->setModeratorLog(
 				$comment,
 				$uid,
 				$modval,
 				$reason,
 				($active = (rand(100) > 95) ? 0 : 1),
+				$pointsneeded,
 			);
 			die if $DBI::errstr;
 

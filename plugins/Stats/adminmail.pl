@@ -149,7 +149,8 @@ EOT
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
 	my $submissions = $stats->countSubmissionsByDay();
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($distinct_comment_ipids);
-	my $modlog_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
+	my $modlog_count_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
+	my $modlog_spent_yest_total = $modlog_yest_hr->{1}{spent} + $modlog_yest_hr->{-1}{spent};
 	my $consensus = $constants->{m2_consensus};
 
 	my $m2_text = getM2Text($stats->getModM2Ratios());
@@ -257,9 +258,9 @@ EOT
 	$statsSave->createStatDaily("mod_tokens_pool_pos", $mod_tokens_pool_pos);
 	$statsSave->createStatDaily("mod_tokens_pool_neg", $mod_tokens_pool_neg);
 	$statsSave->createStatDaily("mod_points_needmeta", $modlogs_needmeta_yest);
-	$statsSave->createStatDaily("mod_points_lost_spent", $modlog_yest_total);
-	$statsSave->createStatDaily("mod_points_lost_spent_plus_1", $modlog_yest_hr->{+1}{count});
-	$statsSave->createStatDaily("mod_points_lost_spent_minus_1", $modlog_yest_hr->{-1}{count});
+	$statsSave->createStatDaily("mod_points_lost_spent", $modlog_spent_yest_total);
+	$statsSave->createStatDaily("mod_points_lost_spent_plus_1", $modlog_yest_hr->{+1}{spent});
+	$statsSave->createStatDaily("mod_points_lost_spent_minus_1", $modlog_yest_hr->{-1}{spent});
 	$statsSave->createStatDaily("m2_freq", $constants->{m2_freq} || 86400);
 	$statsSave->createStatDaily("m2_points_lost_spent", $metamodlogs_yest_total);
 	$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
@@ -303,13 +304,14 @@ EOT
 	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);
 	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created);
 	$mod_data{mod_points_pool} = sprintf("%8d", $mod_points_pool);
-	$mod_data{used_total} = sprintf("%8d", $modlog_yest_total);
-	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points_pool ? $modlog_yest_total*100/$mod_points_pool : 0));
-	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_yest_total*100/$comments : 0));
+	$mod_data{used_total} = sprintf("%8d", $modlog_count_yest_total);
+	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points_pool ? $modlog_spent_yest_total*100/$mod_points_pool : 0));
+	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_count_yest_total*100/$comments : 0));
 	$mod_data{used_minus_1} = sprintf("%8d", $modlog_yest_hr->{-1}{count});
-	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_yest_total ? $modlog_yest_hr->{-1}{count}*100/$modlog_yest_total : 0) );
+	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? $modlog_yest_hr->{-1}{count}*100/$modlog_count_yest_total : 0) );
 	$mod_data{used_plus_1} = sprintf("%8d", $modlog_yest_hr->{1}{count});
-	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_yest_total : 0));
+	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_count_yest_total : 0));
+	$mod_data{mod_points_avg_spent} = $modlog_count_yest_total ? sprintf("%12.3f", $modlog_spent_yest_total/$modlog_count_yest_total) : "(n/a)";
 	$mod_data{day} = $yesterday;
 	$mod_data{m2_text} = $m2_text;
 
@@ -420,6 +422,9 @@ sub getM2Text {
 	# For example, if $mmr->{'2002-01-01'}{5}{c} == 200,
 	# that means that of the moderations performed on
 	# 2002-01-01, there are 200 which have been M2'd 5 times.
+	# Special keys are "X", which substitutes for all mods
+	# which have been completely M2'd, and "_" which is for
+	# mods which cannot be M2'd.
 
 	# Only one option supported for now (pretty trivial :)
 	my $width = 78;
@@ -433,7 +438,6 @@ sub getM2Text {
 		for my $m2c (keys %{$mmr->{$day}}) {
 			$this_day_count += $mmr->{$day}{$m2c}{c};
 		}
-		$this_day_count += $mmr->{$day}{non}{c};
 		$max_day_count = $this_day_count
 			if $this_day_count > $max_day_count;
 	}
@@ -456,23 +460,19 @@ sub getM2Text {
 		# If we have too much data, throw away the oldest.
 		@days = @days[-30..-1];
 	}
+	sub valsort { ($b eq 'X' ? 999 : $b eq '_' ? -999 : $b) <=> ($a eq 'X' ? 999 : $a eq '_' ? -999 : $a) }
 	for my $day (@days) {
 		my $day_display = substr($day, 5); # e.g. '01-01'
 		my $non = $mmr->{$day}{non}{c};
 		$text .= "$day_display: ";
-		for my $m2c (sort { $b <=> $a }
-			grep /^\d+$/,
-			keys %{$mmr->{$day}}) {
-
+		for my $m2c (sort valsort keys %{$mmr->{$day}}) {
 			my $c = $mmr->{$day}{$m2c}{c};
 			my $n = int($c*$mult+0.5);
 			next unless $n;
-			my $char = ($m2c >= $consensus)
-				? "X" : sprintf("%x", $m2c);
+			my $char = $m2c;
+			$char = sprintf("%x", $m2c) if $m2c =~ /^\d+$/;
 			$text .= $char x $n;
-
 		}
-		$text .= "_" x int($non*$mult+0.5);
 		$text .= "\n";
 	}
 

@@ -556,7 +556,7 @@ sub compressOk {
 	# "wsfactor" is the whitespace factor;  normal is 1.0, but the
 	# larger the value the more difficult to accept a comment with lots
 	# of whitespace.  Values between 0.2 and 5 probably make sense.
-	my $slice_size = 500;
+	my $slice_size = $constants->{comment_compress_slice} || 500;
 	my $nbsp_space = " " x (1 + int(11 * $wsfactor));
 	my $breaktag_space = " " x (1 + int(3 * $wsfactor));
 	my $spacerun_min = 1 + int(4 / $wsfactor);

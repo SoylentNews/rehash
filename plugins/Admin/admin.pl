@@ -932,9 +932,9 @@ sub getRelated {
 	if ($rl) {
 		my @matchkeys =
 			sort grep {
-				$rl->{$_}{keyword} =~ /^_topic_$tid(?!\d)/
+				$rl->{$_}{keyword} =~ /^_topic_id_$tid(?!\d)/
 				||
-				$rl->{$_}{keyword} !~ /^_topic_/
+				$rl->{$_}{keyword} !~ /^_topic_id_/
 					&& $story_content =~ /\b$rl->{$_}{keyword}\b/i
 			} @rl_keys;
 		for my $key (@matchkeys) {
@@ -1536,8 +1536,8 @@ sub updateStory {
 	$form->{aid} = $slashdb->getStory($form->{sid}, 'aid', 1)
 		unless $form->{aid};
 
-	$form->{relatedtext} = getRelated("$form->{title} $form->{bodytext} $form->{introtext}")
-		. otherLinks($slashdb->getAuthor($form->{uid}, 'nickname'), $form->{tid}, $form->{uid});
+	$form->{relatedtext} = getRelated("$form->{title} $form->{bodytext} $form->{introtext}", $topic)
+		. otherLinks($slashdb->getAuthor($form->{uid}, 'nickname'), $topic, $form->{uid});
 
 	my $time = ($form->{fastforward})
 		? $slashdb->getTime()
@@ -1589,7 +1589,6 @@ sub updateStory {
 		}
 	}
 
-#use Data::Dumper; print STDERR "updateStory setStory data " . Dumper($data);
 	$slashdb->setStory($form->{sid}, $data);
 	my $dis_data = {
 		sid	=> $data->{sid},
@@ -1727,7 +1726,6 @@ sub saveStory {
 			$data->{$key} = $form->{$key} if $form->{$key};
 		}
 	}
-#use Data::Dumper; print STDERR "saveStory createStory extras '@$extras' data " . Dumper($data);
 	my $sid = $slashdb->createStory($data);
 
 	# we can use multiple values in forms now, we don't

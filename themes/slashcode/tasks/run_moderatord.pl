@@ -72,8 +72,8 @@ sub give_out_points {
 
 		# Here are the two functions that actually do the work.
 
-		give_out_tokens($newcomments, $constants, $slashdb, $read_db);
-		my $granted = $slashdb->convert_tokens_to_points();
+		my $needed = give_out_tokens($newcomments, $constants, $slashdb, $read_db);
+		my $granted = $slashdb->convert_tokens_to_points($needed);
 
 		# Log what we did and tally it up in stats.
 		my @lt = localtime();
@@ -169,7 +169,10 @@ sub give_out_tokens {
 	$read_db = $slashdb if !defined($read_db);
 	my $statsSave = getObject('Slash::Stats::Writer', '');
 
+	my $needed = 0;
+
 	my $num_tokens = $comments * $constants->{tokenspercomment};
+	$statsSave->addStatDaily("mod_tokens_gain_clicks_random", $num_tokens);
 	my $stirredpoints = $slashdb->stirPool();
 	$num_tokens += $stirredpoints * $constants->{tokensperpoint};
 
@@ -177,9 +180,8 @@ sub give_out_tokens {
 		$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
 		# Unfortunately, we reverse-engineer how many tokens
 		# were lost in the stirring.
-		my $tokens_per_pt = $constants->{mod_stir_token_cost} || 0;
-		my $stirredtokens = $stirredpoints * $tokens_per_pt;
-		$statsSave->addStatDaily("mod_tokens_lost_stirred", $stirredtokens);
+		$statsSave->addStatDaily("mod_tokens_lost_stirred", $stirredpoints * ($constants->{mod_stir_token_cost}||0));
+		$statsSave->addStatDaily("mod_tokens_gain_clicks_stirred", $stirredpoints * ($constants->{tokensperpoint}||0));
 	}
 
 	# fetchEligibleModerators() returns a list of uids sorted in the
@@ -250,6 +252,9 @@ sub give_out_tokens {
 	# And keep a running tally of how many tokens we've given out due
 	# to users who clicked the right number of times and got lucky.
 	$statsSave->addStatDaily("mod_tokens_gain_clicks", $n_update_uids);
+
+	# We need to return the number of users we should give points to.
+	return int($n_update_uids / $constants->{tokensperpoint});
 }
 
 ############################################################
@@ -296,14 +301,6 @@ sub reconcile_m2 {
 			print STDERR "M2 fair+unfair=" . ($nunfair+$nfair) . ","
 				. " consensus=$consensus"
 				. " for mod id $mod_hr->{id}\n";
-			# this is unexpected, atomicity must have failed in
-			# setMetaMod(), but we can cope, so this is just a
-			# warning
-			# XXX bug, this is happening, fix this - Jamie 2002/08/30
-			# XXX still happening... but seems to be related to a bug
-			# from Aug. 28 or so that has been fixed.  2002/09/02
-			# XXX at this point I'm assuming a bug in assn_order
-			# - Jamie 2002/09/23
 		}
 
 		my $winner_val = 0;

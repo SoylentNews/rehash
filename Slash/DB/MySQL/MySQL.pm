@@ -336,6 +336,20 @@ sub createComment {
 }
 
 ########################################################
+# Right now, $from and $reason don't matter, but they
+# might someday.
+sub getModPointsNeeded {
+	my($self, $from, $to, $reason) = @_;
+
+	# Always 1 point for a downmod.
+	return 1 if $to < $from;
+
+	my $constants = getCurrentStatic();
+	my $pn = $constants->{mod_up_points_needed} || {};
+	return $pn->{$to} || 1;
+}
+
+########################################################
 # Given a fractional value representing the fraction of fair M2
 # votes, returns the token/karma consequences of that fraction
 # in a hashref.  Makes the very complex var m2_consequences a
@@ -409,9 +423,10 @@ sub _set_csq {
 
 ########################################################
 sub setModeratorLog {
-	my($self, $comment, $uid, $val, $reason, $active) = @_;
+	my($self, $comment, $uid, $val, $reason, $active, $points_spent) = @_;
 
 	$active = 1 unless defined $active;
+	$points_spent = 1 unless defined $points_spent;
 	$self->sqlInsert("moderatorlog", {
 		uid	=> $uid,
 		val	=> $val,
@@ -421,6 +436,7 @@ sub setModeratorLog {
 		reason  => $reason,
 		-ts	=> 'now()',
 		active 	=> $active,
+		spent	=> $points_spent,
 	});
 }
 
@@ -657,7 +673,8 @@ sub getMetamodsForUserRaw {
 
 	my $days_back = $constants->{archive_delay};
 	my $days_back_cushion = int($days_back/10);
-	$days_back_cushion = 2 if $days_back_cushion < 2;
+	$days_back_cushion = $constants->{m2_min_daysbackcushion} || 2
+		if $days_back_cushion < ($constants->{m2_min_daysbackcushion} || 2);
 	$days_back -= $days_back_cushion;
 
 	my($min_old) = $self->sqlSelect("MIN(id)", "moderatorlog");
@@ -713,6 +730,10 @@ sub getMetamodsForUserRaw {
 		my $already_cid_clause = "";
 		$already_cid_clause = " AND cid NOT IN ($already_cid_list)"
 			if $already_cid_list;
+		my $range_offset = 0.9;
+		$range_offset = $constants->{m2_range_offset}
+			if defined($constants->{m2_range_offset});
+		my $twice_range_offset = $range_offset * 2;
 		$mod_hr = { };
 		$mod_hr = $self->sqlSelectAllHashref(
 			"id",
@@ -723,9 +744,11 @@ sub getMetamodsForUserRaw {
 				IF(
 					id BETWEEN $min_old and $max_old,
 					POW((id-$min_old)/$old_range, $waitpow),
-					POW((id-$min_mid)/$mid_range, $waitpow) + 0.9
+					POW((id-$min_mid)/$mid_range, $waitpow)
+						+ $range_offset
 				),
-				POW((id-$min_new)/$new_range, $waitpow) + 1.8
+				POW((id-$min_new)/$new_range, $waitpow)
+					+ $twice_range_offset
 			 )
 			 + RAND()
 			 AS rank",
@@ -3747,7 +3770,7 @@ sub setMetaMod {
 			"id=$mmid AND m2status=0
 			 AND m2count < $consensus AND active=1",
 			{ assn_order => [qw( -m2count -m2status )] },
-		) unless $m2_user->{tokens} < 0;
+		) unless $m2_user->{tokens} < $self->getVar("m2_mintokens", "value", 1);
 
 		$rows += 0; # if no error, returns 0E0 (true!), we want a numeric answer
 		if ($rows) {
@@ -4049,10 +4072,11 @@ sub getCommentsForUser {
 # of 0 or 1 entries, of course.  - Jamie
 sub _getCommentTextOld {
 	my($self, $cid, $archive) = @_;
+	my $constants = getCurrentStatic();
 	# If this is the first time this is called, create an empty comment text
 	# cache (a hashref).
 	$self->{_comment_text} ||= { };
-	if (scalar(keys %{$self->{_comment_text}}) > 5_000) {
+	if (scalar(keys %{$self->{_comment_text}}) > $constants->{comment_cache_max_keys} || 5000) {
 		# Cache too big. Big cache bad. Kill cache. Kludge.
 		undef $self->{_comment_text};
 		$self->{_comment_text} = { };
@@ -5002,6 +5026,8 @@ sub getSlashConf {
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
 		approvedtags =>			[qw( B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV ECODE )],
 		approvedtags_break =>		[qw( P LI OL UL BR BLOCKQUOTE DIV HR )],
+		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
+		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
 		lonetags =>			[qw( P LI BR IMG )],
 		fixhrefs =>			[ ],
 		lonetags =>			[ ],
@@ -5017,6 +5043,7 @@ sub getSlashConf {
 		comments_perday_bykarma =>	[  -1 => 2,		25 => 25,	99999 => 50          ],
 		karma_adj =>			[ -10 => 'Terrible',	-1 => 'Bad',	    0 => 'Neutral',
 						   12 => 'Positive',	25 => 'Good',	99999 => 'Excellent' ],
+		mod_up_points_needed =>		[ ],
 		m2_consequences =>		[ 0.00 => [qw(  0    +2   -100 -1   )],
 						  0.15 => [qw( -2    +1    -40 -1   )],
 						  0.30 => [qw( -0.5  +0.5  -20  0   )],

@@ -239,27 +239,17 @@ sub getModM2Ratios {
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
 	my $reasons_m2able = join(",", @reasons_m2able);
 	my $hr = $self->sqlSelectAllHashref(
-		[qw( day m2count )],
+		[qw( day val )],
 		"SUBSTRING(ts, 1, 10) AS day,
-		 m2count,
+		 IF(m2status=0,
+			IF(reason IN ($reasons_m2able), m2count, '_'),
+			'X'
+		 ) AS val,
 		 COUNT(*) AS c",
 		"moderatorlog",
-		"active=1 AND reason IN ($reasons_m2able)",
-		"GROUP BY day, m2count"
+		"active=1",
+		"GROUP BY day, val"
 	);
-
-	# Also count the number of moderations which are not M2'able.
-	my $non_hr = $self->sqlSelectAllHashref(
-		"day",
-		"SUBSTRING(ts, 1, 10) AS day,
-		 COUNT(*) AS c",
-		"moderatorlog",
-		"active=1 AND reason NOT IN ($reasons_m2able)",
-		"GROUP BY day"
-	);
-	for my $day (keys %$non_hr) {
-		$hr->{$day}{non}{c} = $non_hr->{$day}{c};
-	}
 
 	return $hr;
 }
@@ -505,7 +495,7 @@ sub countModeratorLogByVal {
 
 	my $modlog_hr = $self->sqlSelectAllHashref(
 		"val",
-		"val, COUNT(*) AS count",
+		"val, SUM(spent) AS spent, COUNT(*) AS count",
 		"moderatorlog",
 		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
 		"GROUP BY val"
