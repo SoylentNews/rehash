@@ -6,6 +6,7 @@ CREATE TABLE stats_daily (
     name varchar(32) DEFAULT '' NOT NULL,
     value FLOAT DEFAULT 0 NOT NULL,
     UNIQUE day_key_pair (day,name,section),
+    INDEX name_day (name,day),
     FOREIGN KEY (section) REFERENCES sections(section),
     PRIMARY KEY (id)
 ) TYPE = myisam;

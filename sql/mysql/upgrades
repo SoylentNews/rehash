@@ -1314,3 +1314,6 @@ INSERT INTO vars (name, value, description) VALUES ('subscribe_future_secs','0',
 INSERT INTO vars (name, value, description) VALUES ('subscribe_future_post','0','Can subscribers post to stories in The Mysterious Future?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_future_name','in <B>The Mysterious Future!</B>','Name of the future that subscribers can see stories in');
 
+# Change for plugins/Stats (ignore if not using that plugin)
+ALTER TABLE stats_daily ADD INDEX name_day (name,day);
+
