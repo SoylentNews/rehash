@@ -94,7 +94,7 @@ sub init {
 
 	# We already have a handle to the DB that writes accesslog, but let's get
 	# a separate copy in this special var for it.
-	$logdb = getObject('Slash::DB', { db_type => "logdb" });
+	$logdb = getObject('Slash::DB', { db_type => "log" });
 
 	$lines_since_header = 999999;
 	$num_cycles = 0;
@@ -109,7 +109,9 @@ sub init {
 
 	for my $db (@db) {
 		$db->{status_sth} = $db->{db}->sqlShowStatus();
-		$db->{innostatus_sth} = $db->{db}->sqlShowInnodbStatus() if $db->{version} == 4;
+		$db->{innostatus_sth} = $db->{db}->sqlShowInnodbStatus()
+			if $db->{version} == 4
+				&& $db->{vu} ne 'search'; # hack, hack
 		$db->{proclist_sth} = $db->{db}->sqlShowProcessList();
 		($db->{queries_first}, $db->{slow_queries_first})
 			= ($db->{queries_last}, $db->{slow_queries_last})
@@ -161,7 +163,7 @@ sub print_header {
 	printf("%4s %4s %4s", "", "", "");
 	for my $db (@db) {
 		my $wid = 14;
-		$wid += 2 if $db->{version} == 4;
+		$wid += 2 if $db->{innostatus_sth};
 		my $name = $db->{vu};
 		my $len = length($name);
 		print join("",
@@ -176,7 +178,7 @@ sub print_header {
 	printf("%4s %4s %4s", "time", "load", "pps");
 	for my $db (@db) {
 		printf(" %4s %3s %4s", "qps", "sps", "qpp");
-		print " h" if $db->{version} == 4;
+		print " h" if $db->{innostatus_sth};
 	}
 	print "\n";
 
@@ -217,12 +219,12 @@ sub print_first_line {
 	$pages = 1 if $pages < 1; # Below it's used in a denominator
 	for my $db (@db) {
 		my $slow = sprintf("%4.2f", ($db->{slow_queries_new} - $db->{slow_queries_last}) / $time_elapsed);
-		$slow =~ s/^0\././;
+		$slow =~ s/^0\././; $slow = substr($slow, 0, 3);
 		printf(" %4d $slow %4.1f",
 			($db->{queries_new} - $db->{queries_last}) / $time_elapsed,
 			($db->{queries_new} - $db->{queries_last}) / $pages,
 		);
-		if ($db->{version} == 4) {
+		if ($db->{innostatus_sth}) {
 			if (!defined($db->{hitrate})) {
 				print " ?";
 			} elsif ($db->{hitrate} >= 98) {
@@ -247,7 +249,7 @@ sub print_second_line {
 	);
 	for my $db (@db) {
 		my $slow = sprintf("%4.2f", ($db->{slow_queries_new} - $db->{slow_queries_first}) / $time_elapsed);
-		$slow =~ s/^0\././;
+		$slow =~ s/^0\././; $slow = substr($slow, 0, 3);
 		printf(" %4d $slow %4.1f",
 			($db->{queries_new} - $db->{queries_first}) / $time_elapsed,
 			($db->{queries_new} - $db->{queries_first}) / $pt,
