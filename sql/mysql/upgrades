@@ -2116,10 +2116,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('hc_pool_secs_before_
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_margin', '6', 'For question 1 (images), margin around the image in pixels');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For question 1 (images), maximum number of radians to rotate (positive or negative, so the range is twice this)');
 
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_3_0_136, Start of T_2_3_0_137 - 2004/02/12
 
 # Changes for plugins/Messages (ignore if not using that plugin)
@@ -2131,8 +2127,11 @@ INSERT INTO vars (name, value, description) VALUES ('tids_in_urls', '0', 'Want t
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# End of T_2_3_0_136, Start of T_2_3_0_137 - 2004/02/17
+# SLASHDOT LAST UPDATED HERE
 
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_3_0_137, Start of T_2_3_0_138 - 2004/02/17
 
 INSERT INTO vars (name, value, description) VALUES ('admin_comment_display_days', '30', 'Number of days back worth of comments to show admin on a user page');
 
