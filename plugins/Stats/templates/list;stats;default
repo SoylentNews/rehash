@@ -42,13 +42,17 @@ __template__
     [% END %]
 
 [% ELSIF form.graphname %]
-
 	[% PROCESS graphshead %]
 	<P>
 	[% PROCESS graphs gtitle => form.graphname %]
 
-[% ELSE %]
+[% ELSIF form.op == 'list' && form.type != 'graphs' %]
+	[% PROCESS dumphead %]
 
+[% ELSIF form.op == 'list' && form.type == 'graphs' %]
+	[% PROCESS graphshead %]
+
+[% ELSE %]
 	[% PROCESS report %]
 	<P>
 	[% PROCESS graphshead %]
@@ -75,7 +79,7 @@ __template__
     <FORM METHOD="POST" ACTION="[% env.script_name %]">
         [% select_box %]
 
-        &nbsp;&nbsp;Days: [% PROCESS stats_days %]
+        &nbsp;&nbsp;Range: [% PROCESS stats_days %]
 
         <INPUT TYPE="hidden" NAME="stats_section" VALUE="[% form.stats_section %]">
         <INPUT TYPE="hidden" NAME="op" VALUE="list">
@@ -104,7 +108,7 @@ __template__
 	[% PROCESS formLabel value => "Graphs" %]
 	[% PROCESS graphs # get mygraphs defined %]
 	[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
-	&nbsp;&nbsp;Days: [% PROCESS stats_days %]
+	&nbsp;&nbsp;Range: [% PROCESS stats_days %]
 	&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
 
 	<INPUT TYPE="hidden" NAME="op" VALUE="list">

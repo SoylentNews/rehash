@@ -141,8 +141,7 @@ SWITCH gtitle;
       END;
 
       PROCESS make_graph
-         type    => 'line'; 
-
+         type    => 'areastacked'; 
 
   # Moderation Report
   CASE 'Comment Scores';
