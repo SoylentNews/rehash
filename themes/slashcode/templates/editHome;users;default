@@ -10,7 +10,6 @@ Edit preferences
 * i_check = boolean to check i? noicons
 * w_check = boolean to check w? willing
 * tzformat_select = popup for time format
-* tzcode_select = popup for timezone
 * tilde_ed = checkbox thing for selecting authors, topics, sections, boxes
 
 __title__
@@ -42,13 +41,29 @@ __template__
 	<TR>
 		<TD>
 		<B>Date/Time Format</B>
-		<NOBR>
-
 		[% tzformat_select %]
 
-		[% tzcode_select %]
+		<BR><B>Time Zone / Daylight Savings Time</B>
+		[%
+		USE this_format = format('%+0.4d %s');
+		this_tzdescs = Slash.db.getDescriptions('tzdescription');
+		this_tzcodes = Slash.db.getDescriptions('tzcodes');
+		FOREACH tz = this_tzcodes.keys;
+			this_num = this_tzcodes.$tz / 36;
+			this_tzdescs.$tz = this_format(this_num, this_tzdescs.$tz);
+		END;
 
-		</NOBR>
+		this_tzcode = user_edit.tzcode_orig || user_edit.tzcode;
+		Slash.createSelect('tzcode',
+			this_tzdescs, this_tzcode, 1, 0, this_tzcodes.nsort
+		);
+
+		Slash.createSelect('dst', {
+			''	=> 'Automatic',
+			'on'	=> 'Manual (On)',
+			'off'	=> 'Manual (Off)'
+		}, user_edit.dst, 1);
+		%]
 
 		<P><INPUT TYPE="CHECKBOX" NAME="light"[% l_check %]>
 		<B>Light</B> (reduce the complexity of [% constants.sitename %]'s HTML for

@@ -134,6 +134,15 @@ INSERT INTO dateformats (id, format, description) VALUES (17,'%Y.%m.%d %k:%M','1
 
 
 #
+# Dumping data for table 'dst'
+#
+
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('America',     1, 2,  1, 0, 3, 2, -1, 0, 9);
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Europe',      1, 1, -1, 0, 2, 1, -1, 0, 9);
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Australia',   1, 2, -1, 0, 9, 2, -1, 0, 2);
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('New Zealand', 0, 2,  1, 0, 9, 2,  3, 0, 2);
+
+#
 # Dumping data for table 'formkeys'
 #
 
@@ -507,73 +516,47 @@ INSERT INTO string_param (type, code, name) VALUES ('iso_countries','PY','Paragu
 # Dumping data for table 'tzcodes'
 #
 
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('NDT',-9000,'Newfoundland Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ADT',-10800,'Atlantic Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('EDT',-14400,'Eastern Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CDT',-18000,'Central Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('MDT',-21600,'Mountain Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('PDT',-25200,'Pacific Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('YDT',-28800,'Yukon Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('HDT',-32400,'Hawaii Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('BST',3600,'British Summer');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('MES',7200,'Middle European Summer');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('SST',7200,'Swedish Summer');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('FST',7200,'French Summer');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('NZD',46800,'New Zealand Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('GMT',0,'Greenwich Mean');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('UTC',0,'Universal (Coordinated)');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('WET',0,'Western European');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('WEST',3600,'Western European Summer');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('WAT',-3600,'West Africa');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('AT',-7200,'Azores');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('GST',-10800,'Greenland Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('NFT',-12600,'Newfoundland');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('NST',-12600,'Newfoundland Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('AST',-14400,'Atlantic Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('EST',-18000,'Eastern Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CST',-21600,'Central Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('MST',-25200,'Mountain Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('PST',-28800,'Pacific Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('YST',-32400,'Yukon Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('HST',-36000,'Hawaii Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CAT',-36000,'Central Alaska');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('AHS',-36000,'Alaska-Hawaii Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('NT',-39600,'Nome');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('IDL',-43200,'International Date Line West');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CET',3600,'Central European');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CEST',7200,'Central European Summer');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('MET',3600,'Middle European');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('MEW',3600,'Middle European Winter');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('SWT',3600,'Swedish Winter');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('FWT',3600,'French Winter');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('EET',7200,'Eastern Europe, USSR Zone 1');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('EEST',10800,'Eastern Europe Summer');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('BT',10800,'Baghdad, USSR Zone 2');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('IT',12600,'Iran');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ZP4',14400,'USSR Zone 3');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ZP5',18000,'USSR Zone 4');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('IST',19800,'Indian Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ZP6',21600,'USSR Zone 5');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('JT',27000,'Java (3pm in Cronusland!)');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CCT',28800,'China Coast, USSR Zone 7');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('WAS',28800,'West Australian Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('WAD',32400,'West Australian Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('AWST',28800,'Australian Western Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('AWDT',32400,'Australian Western Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('JST',32400,'Japan Standard, USSR Zone 8');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CAS',34200,'Central Australian Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('CAD',37800,'Central Australian Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ACST',34200,'Australian Central Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ACDT',37800,'Australian Central Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('EAS',36000,'Eastern Australian Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('EAD',39600,'Eastern Australian Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('AEST',36000,'Australian Eastern Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('AEDT',39600,'Australian Eastern Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('NZT',43200,'New Zealand');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('NZS',43200,'New Zealand Standard');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ID2',43200,'International Date Line East');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('IDT',10800,'Israel Daylight');
-INSERT INTO tzcodes (tz, off_set, description) VALUES ('ISS',7200,'Israel Standard');
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('UTC',       0, 'Universal Coordinated',         NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('IDLW', -43200, 'International Date Line West',  NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('IDLE',  43200, 'International Date Line East',  NULL,          NULL,    NULL);
+
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('GMT',       0, 'Greenwich Mean',                NULL,          NULL,    NULL);
+
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('WEST',      0, 'Western European',             'Europe',      'WEST',   3600);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('CEST',   3600, 'Central European',             'Europe',      'CEST',   7200);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('EEST',   7200, 'Eastern European',             'Europe',      'EEST',  10800);
+
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('BT',    10800, 'Baghdad, USSR Zone 2',          NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('IT',    12600, 'Iran',                          NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('ZP4',   14400, 'USSR Zone 3',                   NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('ZP5',   18000, 'USSR Zone 4',                   NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('IST',   19800, 'Indian',                        NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('ZP6',   21600, 'USSR Zone 5',                   NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('ZP7',   25200, 'USSR Zone 6',                   NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('JT',    27000, 'Java',                          NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('CCT',   28800, 'China Coast, USSR Zone 7',      NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('JST',   32400, 'Japan, USSR Zone 8',            NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('KST',   32400, 'Korean',                        NULL,         'KDT',   36000);
+
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('AWST',  28800, 'Western Australian',           'Australia',   'AWDT',  32400);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('ACST',  34200, 'Central Australian',           'Australia',   'ACDT',  37800);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('AEST',  36000, 'Eastern Australian',           'Australia',   'AEDT',  39600);
+
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('NZST',  43200, 'New Zealand',                  'New Zealand', 'NZDT',  46800);
+
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('WAT',   -3600, 'West Africa',                   NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('AT',    -7200, 'Azores',                        NULL,          NULL,    NULL);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('GST',  -10800, 'Greenland',                     NULL,          NULL,    NULL);
+
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('NST',  -12600, 'Newfoundland',                 'America',     'NDT',   -9000);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('AST',  -14400, 'Atlantic',                     'America',     'ADT',  -10800);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('EST',  -18000, 'Eastern',                      'America',     'EDT',  -14400);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('CST',  -21600, 'Central',                      'America',     'CDT',  -18000);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('MST',  -25200, 'Mountain',                     'America',     'MDT',  -21600);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('PST',  -28800, 'Pacific',                      'America',     'PDT',  -25200);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('AKST', -32400, 'Alaska',                       'America',     'AKDT', -28800);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('HAST', -36000, 'Hawaii-Aleutian',              'America',     'HADT', -32400);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('NT',   -39600, 'Nome',                          NULL,          NULL,    NULL);
 
 #
 # Dumping data for table 'users'

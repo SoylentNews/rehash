@@ -195,7 +195,7 @@ sub display_prefs {
 	}
 
 	my $prefs = $messages->getPrefs($uid);
-	my $userm = $slashdb->getUser($uid); # what the hell is this for, instead of just $user?
+	my $userm = $slashdb->getUser($uid); # so we can modify a different user other than ourself
 
 	header(getData('header'));
 	print createMenu('users', {

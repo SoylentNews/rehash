@@ -61,11 +61,8 @@ sub SlashVirtualUser ($$$) {
 		$cfg->{constants}{anonymous_coward_uid}
 	);
 
-	# Lets just do this once
-	my $timezones = $cfg->{slashdb}->getDescriptions('tzcodes');
-	$anonymous_coward->{off_set} = $timezones->{ $anonymous_coward->{tzcode} };
-	my $dateformats = $cfg->{slashdb}->getDescriptions('datecodes');
-	$anonymous_coward->{'format'} = $dateformats->{ $anonymous_coward->{dfid} };
+	# Let's just do this once
+	setUserDate($anonymous_coward);
 
 	createCurrentAnonymousCoward($cfg->{anonymous_coward} = $anonymous_coward);
 	createCurrentUser($anonymous_coward);

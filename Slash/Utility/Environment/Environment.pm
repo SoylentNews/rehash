@@ -62,6 +62,9 @@ use vars qw($VERSION @EXPORT);
 	prepareUser
 	filter_params
 
+	setUserDate
+	isDST
+
 	bakeUserCookie
 	eatUserCookie
 	setCookie
@@ -70,6 +73,11 @@ use vars qw($VERSION @EXPORT);
 	errorLog
 	writeLog
 );
+
+use constant DST_HR  => 0;
+use constant DST_NUM => 1;
+use constant DST_DAY => 2;
+use constant DST_MON => 3;
 
 # These are file-scoped variables that are used when you need to use the
 # set methods when not running under mod_perl
@@ -1130,12 +1138,8 @@ sub prepareUser {
 		$user->{is_anon} = 0;
 	}
 
-	unless ($user->{is_anon} && $ENV{GATEWAY_INTERFACE}) {
-		my $timezones = $slashdb->getDescriptions('tzcodes');
-		$user->{off_set} = $timezones->{ $user->{tzcode} };
-
-		my $dateformats = $slashdb->getDescriptions('datecodes');
-		$user->{'format'} = $dateformats->{ $user->{dfid} };
+	unless ($user->{is_anon} && $ENV{GATEWAY_INTERFACE}) { # already done in Apache.pm
+		setUserDate($user);
 	}
 
 	$user->{state}{post}	= $method eq 'POST' ? 1 : 0;
@@ -1387,6 +1391,186 @@ sub fixint {
 # 	$int =~ s/^(-?[\d.]+).*$/$1/s or return;
 	$int =~ s/^([+-]?[\d.]+).*$/$1/s or return;
 	return $int;
+}
+
+
+#========================================================================
+
+=head2 setUserDate(USER)
+
+Sets some date information for the user, including date format, time zone,
+and time zone offset from GMT.  This is a separate function because the
+logic is a bit complex, and it needs to happen in two different places:
+anonymous coward creation in the httpd creation, and each time a user is
+prepared.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item USER
+
+The user hash reference.
+
+=back
+
+=item Return value
+
+None.
+
+=back
+
+=cut
+
+sub setUserDate {
+	my($user) = @_;
+	my $slashdb = getCurrentDB();
+
+	my $dateformats   = $slashdb->getDescriptions('datecodes');
+	$user->{'format'} = $dateformats->{ $user->{dfid} };
+
+	my $timezones     = $slashdb->getTZCodes;
+	my $tz            = $timezones->{ $user->{tzcode} };
+
+	my $is_dst = 0;
+	if ($user->{dst} eq "on") {  # manual on ("on")
+		$is_dst = 1;
+
+	} elsif (!$user->{dst}) { # automatic (calculate on/off) ("")
+		$is_dst = isDST($tz->{dst_region});
+
+	} # manual off ("off")
+
+	if ($is_dst) {
+		# if tz has no dst_off_set, default to base off_set + 3600 (one hour)
+		$user->{off_set}     = defined $tz->{dst_off_set}
+			? $tz->{dst_off_set}
+			: ($tz->{off_set} + 3600);
+
+		# if tz no dst_tz, fake a new tzcode by appending ' (D)'
+		# (tzcode is rarely used, this shouldn't matter much)
+		$user->{tzcode_orig} = $user->{tzcode};
+		$user->{tzcode}      = defined $tz->{dst_tz}
+			? $tz->{dst_tz}
+			: ($user->{tzcode} . ' (D)');
+	} else {
+		$user->{off_set}     = $tz->{off_set};
+	}
+}
+
+#========================================================================
+
+=head2 isDST(REGION [, TIME, OFFSET])
+
+Returns boolean for whether given time, for given user, is in Daylight
+Savings Time.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item REGION
+
+The name of the current DST region (e.g., America, Europe, Australia).
+It must match the C<region> column of the C<dst> table.
+
+=item TIME
+
+Time in seconds since beginning of epoch, in GMT (which is the default
+for Unix).  Optional; default is current time if undefined.
+
+=item OFFSET
+
+Offset of current timezone in seconds from GMT.  Optional; default is
+current user's C<off_set> if undefined.
+
+=back
+
+=item Return value
+
+Boolean for whether we are currently in DST.
+
+=back
+
+=cut
+
+{
+my %last = (
+	1	=> 28, # yes, i know, February may have 29 days; but barely worth fixing
+	2	=> 31, # barely worth fixing, since we don't even currently have
+	3	=> 30, # a DST region that uses the end of February, though some
+	8	=> 30, # do exist -- pudge
+	9	=> 31,
+	10	=> 30,
+);
+
+# we don't bother trying to figure out exact offset for calculations,
+# since that is what we are changing!  if we are off by an hour per year,
+# oh well, unless someone has a solution.
+
+sub isDST {
+	my($region, $unixtime, $off_set) = @_;
+	my $slashdb = getCurrentDB();
+	my $user    = getCurrentUser();
+
+	my $regions = $slashdb->getDSTRegions;
+
+	return 0 unless $region;
+	my $start = $regions->{$region}{start} or return 0;
+	my $end   = $regions->{$region}{end}   or return 0;
+
+	$unixtime = time unless defined $unixtime;
+	$off_set  = $user->{off_set} unless defined $off_set;
+
+	my($hour, $mday, $month, $wday) = (gmtime($unixtime + $off_set))[2,3,4,6];
+
+
+	# if we are outside the monthly boundaries, the calculations is easy
+	# assume start and end months are different
+	if ($start->[DST_MON] < $end->[DST_MON]) { # up over
+		return 1 if $month > $start->[DST_MON]  &&  $month < $end->[DST_MON];
+		return 0 if $month < $start->[DST_MON]  ||  $month > $end->[DST_MON];
+
+	} else { # down under
+		return 1 if $month > $start->[DST_MON]  ||  $month < $end->[DST_MON];
+		return 0 if $month < $start->[DST_MON]  &&  $month > $end->[DST_MON];
+	}
+
+	# assume, by now, that current month contains either start or end date
+	for my $mon ($start, $end) {
+		if ($month == $mon->[DST_MON]) {
+			my($max_day, $switch_day);
+
+			# 1st, 2d, 3d ${foo}day of month
+			if ($mon->[DST_NUM] > 0) {
+				$max_day = ($mon->[DST_NUM] * 7) - 1;
+			# last, second-to-last $fooday of month
+			} else { # assume != 0
+				$max_day = $last{$month} - ((abs($mon->[DST_NUM]) - 1) * 7);
+			}
+
+			# figure out the day we switch
+			$switch_day = $mday - ($wday - $start->[DST_DAY]);
+
+			$switch_day += 7 while $switch_day < $max_day;
+			$switch_day -= 7 while $switch_day > $max_day;
+
+			my($v1, $v2) = (1, 0);
+			# start/end are the same, except for the reversed values here
+			($v1, $v2) = ($v2, $v1) if $month == $end->[DST_MON];
+
+			return $v1 if	$mday >  $switch_day;
+			return $v1 if	$mday == $switch_day
+					&& $hour >= $start->[DST_HR];
+			return $v2;
+		}
+	}
+	return 0; # we shouldn't ever get here, but if we do, assume not in DST
+}
 }
 
 #========================================================================

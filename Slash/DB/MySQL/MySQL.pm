@@ -5209,6 +5209,29 @@ sub getPollVotesMax {
 	return $answer;
 }
 
+########################################################
+sub getTZCodes {
+	my($self) = @_;
+	my $answer = _genericGetsCache('tzcodes', 'tz', '', @_);
+	return $answer;
+}
+
+########################################################
+sub getDSTRegions {
+	my($self) = @_;
+	my $answer = _genericGetsCache('dst', 'region', '', @_);
+
+	for my $region (keys %$answer) {
+		my $dst = $answer->{$region};
+		$answer->{$region} = {
+			start	=> [ @$dst{map { "start_$_" } qw(hour wnum wday month)} ],
+			end	=> [ @$dst{map { "end_$_" } qw(hour wnum wday month)} ],
+		};
+	}
+
+	return $answer;
+}
+
 ##################################################################
 sub getSlashdStatus {
 	my($self) = @_;
