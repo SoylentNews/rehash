@@ -36,6 +36,19 @@ and try again.
 [% CASE "invalid" %]
 [% PROCESS titlebar width="95%" title="Invalid form key!" %]
 <BR><P><B>Invalid form key: [% formkey %] !</B></P>
+
+[% CASE "invalidhc" %]
+[% PROCESS titlebar width="95%" title="Wrong image text!" %]
+<BR><P><B>You failed to confirm you are a human!</B>
+(Assuming you actually <em>are</em> a human, your text appears below
+so you can copy and paste it for another try. Sorry about the
+inconvenience.)</P>
+ 
+[% CASE "invalidhcretry" %]
+[% PROCESS titlebar width="95%" title="Wrong image text, try again." %]
+<BR><P><B>You failed to confirm you are a human. Please double-check
+the [% constants.hc_q1_numchars %]-letter image and make sure you
+typed in what it says.</B></P>
  
 [% CASE "users_maxreads" %]
 [% PROCESS titlebar width="95%" title="Maximum Users Viewings Exceeded!" %]
@@ -152,22 +165,33 @@ doesn't permit. Please submit the form.
 [% CASE "journal_maxposts" %]
 You can only post [% limit %] posts per [% interval %].
 
+[% CASE "cantinsert" %]
+We are apparently having a problem with our random number generator.
+
+[% CASE "cantinserthc" %]
+We are apparently having a problem with our human-confirmation code.
+
 [% CASE %]
-An unexpected error has occured.<BR><B>[% value %]</B><BR>
+An unexpected error has occurred.<BR><B>[% value %]</B><BR>
 [% END %]
 
+[% IF value != "invalidhcretry" %]
 <P>If this error seems to be incorrect, please provide the following in your report to
 <A HREF="http://sf.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421&amp;category_id=354712">SourceForge.net</A>:
 <UL>
 	<LI>Browser type</LI>
 	<LI>User ID/Nickname or AC</LI>
 	<LI>What steps caused this error</LI>
-	<LI>Whether or not you know your ISP to be using a proxy or some sort of service that gives you an IP that others 
-	are using simultaneously.</LI>
-	<LI>How many posts to this form you successfully submitted during the day</LI>
+	<LI>Whether you used the Back button on your browser</LI>
+	<LI>Whether or not you know your ISP to be using a proxy,
+	or any sort of service that gives you an IP that others 
+	are using simultaneously</LI>
+	<LI>How many posts to this form you successfully submitted
+	during the day</LI>
 </UL>
 <B>* Please choose 'formkeys' for the category!</B><BR>
 Thank you.
+[% END %]
 
 __seclev__
 1000

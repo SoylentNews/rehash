@@ -159,22 +159,60 @@ sub main {
 	$op = 'default' if ( ($user->{seclev} < $ops->{$op}{seclev}) || ! $ops->{$op}{function});
 	$op = 'default' if (! $postflag && $ops->{$op}{post});
 
-	# authors shouldn't jump through formkey hoops? right?	
-	if ($user->{seclev} < 100) {
+	# Admins should only jump through formkey hoops if this var
+	# is set.
+	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
 		$formkey = $form->{formkey};
 
 		# this is needed for formkeyHandler to print the correct messages 
 		# yeah, the next step is to loop through the array of $ops->{$op}{check}
-		for my $check (@{$ops->{$op}{checks}}) {
-			$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
-			my $formname = $ops->{$op}{formname}; 
-			$error_flag = formkeyHandler($check, $formname, $formkey);
+		my $formname;
+		my $options = {};
+		$options->{no_hc} = 1 if !$constants->{hc_sw_comments}
+			|| (!$user->{is_anon}
+			   && $user->{karma} > $constants->{hc_maxkarma});
+ 
+		my $done = 0;
+		DO_CHECKS: while (!$done) {
+			$formname = $ops->{$op}{formname}; 
+			for my $check (@{$ops->{$op}{checks}}) {
+				$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
+				$error_flag = formkeyHandler($check, $formname, $formkey,
+					undef, $options);
+				if ($error_flag == -1) {
+					# Special error:  submit failed, go back to     
+					# previewing.  If the error was retryable,
+					# they get another chance to do human
+					# confirmation right.  Otherwise they still
+					# go through "preview" but after
+					# reloadFormkeyHC gets called below,
+					# {state}{hcinvalid} will be 1 which means
+					# no way to continue.
+					$op = 'preview';
+					$error_flag = 0;
+					next DO_CHECKS;
+				} elsif ($error_flag) {
+					# Genuine error, no need for more checks.
+					$done = 1;
+					last;
+				}
+			}
+			# All checks passed.
+			$done = 1;
+		}
 
-			last if $error_flag;
+		if (!$error_flag && !$options->{no_hc}) {
+			# If this formkey has HC associated, pull its info from the DB
+			# so we can redisplay the question and image (or whatever).
+			# reloadFormkeyHC() sets $form->{question} and $form->{html}
+			# just like validFormkeyHC() does when called from the
+			# generate_formkey op of formkeyHandler().
+			my $hc = getObject("Slash::HumanConf");
+			$hc->reloadFormkeyHC($formname) if $hc;
 		}
 	} 
 
-	if (! $error_flag) {
+	if (!$error_flag) {
 		# CALL THE OP
 		my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants, $discussion);
 

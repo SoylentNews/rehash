@@ -1,0 +1,6 @@
+name=HumanConf
+description="Human Confirmation"
+mysql_dump=mysql_dump
+mysql_schema=mysql_schema
+task=hc_maintain_pool.pl
+template=templates/data;humanconf;default

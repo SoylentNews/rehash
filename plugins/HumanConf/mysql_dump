@@ -1,0 +1,14 @@
+INSERT INTO humanconf_questions (filedir, urlprefix, question) VALUES ('/usr/local/slash/site/www.example.com/htdocs/images/hc', 'http://www.example.com/images/hc', 'To confirm you\'re not a script,<BR>please type the text shown in this image:');
+
+INSERT INTO vars (name, value, description) VALUES ('hc', '0', 'HumanConf master switch, 0=off, 1=on');
+INSERT INTO vars (name, value, description) VALUES ('hc_formname_regex', '^(comments|users/(nu|mp))$', 'Formnames which (may) require HumanConf');
+INSERT INTO vars (name, value, description) VALUES ('hc_maxkarma', '25', 'Maximum karma at which users need HumanConf (beyond this we assume they are human) - set large negative to exempt all logged-in users, set large positive if all users must comply');
+INSERT INTO vars (name, value, description) VALUES ('hc_q1_prefnumpixels', '1000', 'For question 1 (images), preferred number of pixels');
+INSERT INTO vars (name, value, description) VALUES ('hc_q1_numchars', '3', 'For question 1 (images), number of chars of text in the answer');
+INSERT INTO vars (name, value, description) VALUES ('hc_fontpath', '/usr/share/fonts/truetype', 'GD::Text font_path');
+INSERT INTO vars (name, value, description) VALUES ('hc_poolsize', '20000', 'Number of entries desired for the HumanConf pool');
+INSERT INTO vars (name, value, description) VALUES ('hc_poolmaxfill', '2000', 'Number of entries at a time to fill the pool with');
+INSERT INTO vars (name, value, description) VALUES ('hc_sw_comments', '0', 'HumanConf switch for posting comments');
+INSERT INTO vars (name, value, description) VALUES ('hc_sw_mailpasswd', '1', 'HumanConf switch for mailing a password');
+INSERT INTO vars (name, value, description) VALUES ('hc_sw_newuser', '1', 'HumanConf switch for creating a new user');
+

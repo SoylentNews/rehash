@@ -350,6 +350,7 @@ INSERT INTO vars (name, value, description) VALUES ('ad_messaging_prob', '0.5', 
 INSERT INTO vars (name, value, description) VALUES ('ad_messaging_sections', '', 'Vertbar-separated list of sections where messaging ads can appear; if empty, all sections');
 INSERT INTO vars (name, value, description) VALUES ('admin_check_clearpass', '0', 'Check whether admins have sent their Slash passwords in the clear?');
 INSERT INTO vars (name, value, description) VALUES ('admin_clearpass_disable', '0', 'Should admins who send their Slash passwords in the clear have their admin privileges removed until they change their passwords?');
+INSERT INTO vars (name, value, description) VALUES ('admin_formkeys', '0', 'Do admins have to bother with formkeys?');
 INSERT INTO vars (name, value, description) VALUES ('admin_secure_ip_regex', '^127\\.', 'IP addresses or networks known to be secure.');
 INSERT INTO vars (name, value, description) VALUES ('admin_timeout','30','time in minutes before idle admin session ends');
 INSERT INTO vars (name, value, description) VALUES ('adminmail','admin@example.com','All admin mail goes here');

@@ -100,9 +100,28 @@ IF constants.allow_anonymous && user.karma > -1 && !user.is_anon %]
 		<INPUT TYPE="checkbox" NAME="postanon"[% form.postanon ? " CHECKED" : "" %]> Post Anonymously
 [% do_br = 1; END;
 IF do_br %]<BR>[% END %]
+
+[% IF constants.hc && constants.hc_sw_comments && user.state.hc %]
+	[% IF user.state.hcinvalid %]
+		[% user.state.hcerror %]
+	[% ELSE %]
+		<TABLE CELLSPACING=1 BORDER=0><TR VALIGN="MIDDLE">
+		<TD>[% user.state.hcquestion %]</TD>
+		<TD>[% user.state.hchtml %]</TD>
+		<TD><INPUT TYPE="TEXT" NAME="hcanswer"
+			VALUE="[% form.hcanswer | strip_attribute %]"
+			SIZE=8 MAXLENGTH=8></TD>
+		</TR></TABLE>
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
 		[% format_select %]
+	[% END %]
+[% ELSE %]
+	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
+	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
+	[% format_select %]
+[% END %]
+
 	</TD></TR><TR>
 		<TD VALIGN="TOP" ALIGN="RIGHT">Allowed HTML: </TD><TD><FONT SIZE="1">
 			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;

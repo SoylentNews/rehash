@@ -1,0 +1,22 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+humanconf
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'nomorechances' %]
+<B>Sorry, you failed to prove your humanity. To try again,
+you have to start over.</B>
+
+[% END %]
+__seclev__
+500

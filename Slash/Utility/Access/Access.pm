@@ -103,29 +103,31 @@ sub getFormkey {
 	my $user = getCurrentUser();
 
 	my $formkey;
-	my $count = 0;
+#	my $count = 0;
 
 	# for now I am leaving the formkey error code in.  it should
 	# never print, except maybe once in a blue moon, so it doesn't
 	# hurt anything. -- pudge
+	# Duplicate formkeys are now tested for in createFormkey(),
+	# leaving this function pretty small. -- jamie, 2002/04/15
 
-	while (!$formkey || $slashdb->existsFormkey($formkey)) {
-		if ($formkey) {
-			if (++$count > 50) {
-				print STDERR "get formkey failed (count:$count) ",
-					"$user->{uid}/ipid:$user->{ipid}\n";
-				return "a" x 10;
-			}
-
-			print STDERR "$formkey already exists (count:$count) ",
-				"$user->{uid}/ipid:$user->{ipid}\n";
-		}
+#	while (!$formkey || $slashdb->existsFormkey($formkey)) {
+#		if ($formkey) {
+#			if (++$count > 50) {
+#				print STDERR "get formkey failed (count:$count) ",
+#					"$user->{uid}/ipid:$user->{ipid}\n";
+#				return "a" x 10;
+#			}
+#
+#			print STDERR "$formkey already exists (count:$count) ",
+#				"$user->{uid}/ipid:$user->{ipid}\n";
+#		}
 		$formkey = getAnonId(1);
-	}
+#	}
 
 	# only print if we previously failed or something
-	print STDERR "$formkey is good! (count:$count) ",
-		"$user->{uid}/ipid:$user->{ipid}\n" if $count > 0;
+#	print STDERR "$formkey is good! (count:$count) ",
+#		"$user->{uid}/ipid:$user->{ipid}\n" if $count > 0;
 	return $formkey;
 }
 
@@ -154,7 +156,8 @@ sub formkeyError {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
-	my $abuse_reasons = { usedform => 1, invalid => 1, maxposts => 1};
+	my $abuse_reasons = { usedform => 1, invalid => 1, maxposts => 1,
+		invalidhc => 1 };
 	my $hashref = {};
 
 	if ($value eq 'response' || $value eq 'speed' || $value eq 'fkspeed') {
@@ -172,7 +175,9 @@ sub formkeyError {
 		$hashref->{limit} = $limit;	
 		$hashref->{value} = $formname . "_" . $value;
 	
-	} elsif ($value eq 'invalid') {
+	} elsif ($value eq 'invalid'
+		|| $value eq 'invalidhc'
+		|| $value eq 'invalidhcretry') {
 		$hashref->{formkey} = $form->{formkey};
 		$hashref->{value} = $value;
 
@@ -190,6 +195,8 @@ sub formkeyError {
 		if (my $interval = $slashdb->getFormkeyTs($form->{formkey},1)) {
 			$hashref->{interval} = intervalString( time() - $slashdb->getFormkeyTs($form->{formkey},1) );
 		}
+		$hashref->{value} = $value;
+	} elsif ($value eq 'cantinsert') {
 		$hashref->{value} = $value;
 	}
 
@@ -257,7 +264,7 @@ sub intervalString {
 sub formkeyHandler {
 	# ok, I know we don't like refs, but I don't wanna rewrite the 
 	# whole damned system
-	my($formkey_op, $formname, $formkey, $message_ref) = @_;
+	my($formkey_op, $formname, $formkey, $message_ref, $options) = @_;
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
@@ -271,76 +278,78 @@ sub formkeyHandler {
 	if ($formkey_op eq 'max_reads_check') {
 		if (my $limit = $slashdb->checkMaxReads($formname)) {
 			$msg = formkeyError('maxreads', $formname, $limit);
-			$error_flag++;
+			$error_flag = 1;
                 }
 	} elsif ($formkey_op eq 'max_post_check') {
 		if (my $limit = $slashdb->checkMaxPosts($formname)) {
 			$msg = formkeyError('maxposts', $formname, $limit);
-			$error_flag++;
+			$error_flag = 1;
 		}
 	} elsif ($formkey_op eq 'update_formkeyid') {
 		$slashdb->updateFormkeyId($formname, $formkey, $user->{uid}, $form->{rlogin}, $form->{upasswd});
 	} elsif ($formkey_op eq 'valid_check') {
-		if (! $slashdb->validFormkey($formname)) {	
-			$msg = formkeyError('invalid', $formname);
-			$error_flag++;
+		my $valid = $slashdb->validFormkey($formname, $options);
+print STDERR "formkeyHandler valid_check valid '$valid'\n";
+		if ($valid eq 'ok') {
+			# All is well.
+		} else {
+			$msg = formkeyError($valid, $formname);
+print STDERR "formkeyHandler valid_check valid '$valid' formname '$formname' msg '$msg'\n";
+			if ($valid eq 'invalidhcretry'
+				|| $valid eq 'invalidhc') {
+				# It's OK, the user can retry.
+				$error_flag = -1;
+			} else {
+				# No retries from 'invalid'
+				$error_flag = 1;
+			}
 		}
 	} elsif ($formkey_op eq 'response_check') {
 		if (my $interval = $slashdb->checkResponseTime($formname)) {
 			$msg = formkeyError('response', $formname, $interval);
-			$error_flag++;
+			$error_flag = 1;
 		}
 	} elsif ($formkey_op eq 'interval_check') {
 		# check interval from this attempt to last successful post
 		if (my $interval = $slashdb->checkPostInterval($formname)) {	
 			$msg = formkeyError('speed', $formname, $interval);
-			$error_flag++;
+			$error_flag = 1;
 		}
 	} elsif ($formkey_op eq 'formkey_check') {
 		# check if form already used
 		unless (my $increment_val = $slashdb->updateFormkeyVal($formname, $formkey)) {	
 			$msg = formkeyError('usedform', $formname);
-			$error_flag++;
+			$error_flag = 1;
 		}
 	} elsif ($formkey_op eq 'generate_formkey' || $formkey_op eq 'regen_formkey') {
-		# another nobel attempt at trying to prevent abusers from saving up formkeys
-		# more trouble than it's worth. I'll leave it in for now Patrick 8/16/01
-		# if ( my $unused = $slashdb->getUnsetFkCount($formname)) { 
-		#	my $max_unused	= $constants->{"max_${formname}_unusedfk"};
-		#	$msg = formkeyError('unused', $formname, $max_unused);
-		#	$error_flag++;
-		#} 
-
-		# if ($formkey_op eq 'generate_formkey') {
-
-			# screw it. This was a nobel attempt to limit the creation, but too
-			# many people don't like this. Se La Vie
-			# my $last_created =  $slashdb->getLastTs($formname);
-			# my $speedlimit = $constants->{"${formname}_speed_limit"} || 0;
-			# my $interval = time() - $last_created;
-			# if ( $interval < $speedlimit) {
-		# 		$msg = formkeyError('fkspeed', $formname, $interval);
-		# 		$error_flag++;
-		# 	}
-		# }
-
-		if (! $error_flag) {
-			$slashdb->createFormkey($formname);
+		if (!$error_flag) {
+			if (!$slashdb->createFormkey($formname)) {
+				$error_flag = 1;
+				$msg = formkeyError('cantinsert', $formname);
+			}
+		}
+		if (!$error_flag && !$options->{no_hc}) {
+			my $hc = getObject("Slash::HumanConf");
+print STDERR "formkeyHandler op '$formkey_op' hc '$hc'\n";
+			if ($hc && !$hc->createFormkeyHC($formname)) {
+				$error_flag = 1;
+				$msg = formkeyError('cantinserthc', $formname);
+			}
 		}
 	}
-		
-	if ($error_flag == 1) {
+print STDERR "formkeyHandler op '$formkey_op' formkey '$form->{formkey}' statehc '$user->{state}{hc}' error_flag '$error_flag' msg '$msg'\n";
+
+	if ($msg) {
 		if ($message_ref) {
 			$$message_ref .= $msg;
 		} else {
 			print $msg;
 		}
-		return(1);
-	} else {
-		return(0);
 	}
 
+	return $error_flag;
 }
+
 #========================================================================
 sub submittedAlready {
 	my($formkey, $formname, $err_message) = @_;

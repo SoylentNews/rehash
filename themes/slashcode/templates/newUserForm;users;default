@@ -28,9 +28,25 @@ __template__
 	<TR>
 		<TD>
 		<B>Real Email</B> <BR>
-		<INPUT TYPE="TEXT" NAME="email" VALUE="" SIZE="40"><BR>
-		<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account">
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="newuser">
+		<INPUT TYPE="TEXT" NAME="email" VALUE="" SIZE="40"><BR>
+[% IF constants.hc && constants.hc_sw_newuser && user.state.hc %]
+        [% IF user.state.hcinvalid %]
+                [% user.state.hcerror %]
+        [% ELSE %]
+                <TABLE CELLSPACING=1 BORDER=0><TR VALIGN="MIDDLE">
+                <TD>[% user.state.hcquestion %]</TD>
+                <TD>[% user.state.hchtml %]</TD>
+                <TD><INPUT TYPE="TEXT" NAME="hcanswer"
+                        VALUE=""
+                        SIZE=8 MAXLENGTH=8></TD>
+                </TR></TABLE>
+		<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account">
+        [% END %]
+[% ELSE %]
+		<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account">
+[% END %]
+
 		</TD>
 	</TR>
 </TABLE>

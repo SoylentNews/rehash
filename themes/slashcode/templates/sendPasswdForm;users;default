@@ -25,12 +25,12 @@ __template__
 
 <TABLE WIDTH="75%">
 	<TR>
-		<TD COLSPAN="2">
+		<TD>
 [% PROCESS titlebar title="Mail Password" width="100%" %]
 		</TD>
 	</TR>
 	<TR>
-		<TD COLSPAN="2">
+		<TD>
 		<P>
 		Forget your password? Enter your nickname here to 
 		have the system mail your password to you
@@ -38,9 +38,26 @@ __template__
 		</TD>
 	</TR>
 	<TR>
-		<TD><B>Nickname/UID/Email</B></TD>
-		<TD><INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
+		<TD><B>Nickname/UID/Email</B>
+		<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
+		<BR>
+[% IF constants.hc && constants.hc_sw_mailpasswd && user.state.hc %]
+	[% IF user.state.hcinvalid %]
+		[% user.state.hcerror %]
+	[% ELSE %]
+		<TABLE CELLSPACING=1 BORDER=0><TR VALIGN="MIDDLE">
+		<TD>[% user.state.hcquestion %]</TD>
+		<TD>[% user.state.hchtml %]</TD>
+		<TD><INPUT TYPE="TEXT" NAME="hcanswer"
+			VALUE=""
+			SIZE=8 MAXLENGTH=8></TD>
+		</TR></TABLE>
 		<INPUT TYPE="SUBMIT" NAME="mailpasswd" VALUE="Mail Password">
+	[% END %]
+[% ELSE %]
+		<INPUT TYPE="SUBMIT" NAME="mailpasswd" VALUE="Mail Password">
+[% END %]
+
 		</TD>
 	</TR>
 </TABLE>

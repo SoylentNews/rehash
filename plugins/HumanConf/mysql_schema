@@ -1,0 +1,45 @@
+DROP TABLE IF EXISTS humanconf;
+CREATE TABLE humanconf (
+	hcid		MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	hcpid		MEDIUMINT UNSIGNED NOT NULL,
+	formkey		VARCHAR(20) NOT NULL,
+	tries_left	SMALLINT UNSIGNED NOT NULL DEFAULT '3',
+	PRIMARY KEY(hcid),
+	KEY hcpid (hcpid),
+	UNIQUE formkey (formkey)
+) TYPE=MYISAM;
+
+DROP TABLE IF EXISTS humanconf_pool;
+CREATE TABLE humanconf_pool (
+	hcpid		MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	hcqid		SMALLINT UNSIGNED NOT NULL,
+	answer		CHAR(8) NOT NULL,
+	lastused	TIMESTAMP,
+	filename	CHAR(63) NOT NULL,
+	html		CHAR(255) NOT NULL,
+	PRIMARY KEY (hcpid),
+	KEY answer (answer),
+	KEY lastused (lastused)
+) TYPE=MYISAM;
+
+# If you rewrite HumanConf to store your data in the DB rather than
+# on a static webserver, you might want a table something like this.
+# As it is, humanconf_pool.filename (together with "filedir" from
+# the next table) points to the data.
+#
+#DROP TABLE IF EXISTS humanconf_pool_data;
+#CREATE TABLE humanconf_pool_data (
+#	hcpid		MEDIUMINT UNSIGNED NOT NULL,
+#	data		BLOB NOT NULL,
+#	PRIMARY KEY(hcpid)
+#) TYPE=MYISAM;
+
+DROP TABLE IF EXISTS humanconf_questions;
+CREATE TABLE humanconf_questions (
+	hcqid		SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	filedir		CHAR(255) NOT NULL,
+	urlprefix	CHAR(255) NOT NULL,
+	question	TEXT NOT NULL,
+	PRIMARY KEY(hcqid)
+) TYPE=MYISAM;
+

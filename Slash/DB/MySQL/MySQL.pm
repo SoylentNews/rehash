@@ -2139,26 +2139,38 @@ sub createFormkey {
 	my $ipid = getCurrentUser('ipid');
 	my $subnetid = getCurrentUser('subnetid');
 
-	# save in form object for printing to user
-	$form->{formkey} = getFormkey();
-
 	my $last_count = $self->_getLastFkCount($formname);
 	my $last_submitted = $self->getLastTs($formname, 1);
 
-	# print STDERR "createFormkey time() $now\n";
-	# insert the fact that the form has been displayed, but not submitted at this point
-	$self->sqlInsert('formkeys', {
-		formkey		=> $form->{formkey},
-		formname 	=> $formname,
-		uid		=> $ENV{SLASH_USER},
-		ipid		=> $ipid,
-		subnetid	=> $subnetid,
-		value		=> 0,
-		ts		=> time(),
-		last_ts		=> $last_submitted,
-		idcount		=> $last_count,
-	});
-	return(1);
+	my $formkey = "";
+	my $num_tries = 50;
+	while (1) {
+		$formkey = getFormkey();
+		my $rows = $self->sqlInsert('formkeys', {
+			formkey         => $formkey,
+			formname        => $formname,
+			uid             => $ENV{SLASH_USER},
+			ipid            => $ipid,
+			subnetid        => $subnetid,
+			value           => 0,
+			ts              => time(),
+			last_ts         => $last_submitted,
+			idcount         => $last_count,
+		});
+		last if $rows;
+		# The INSERT failed because $formkey is already being
+		# used.  Keep retrying as long as is reasonably possible.
+		if (--$num_tries <= 0) {
+			# Give up!
+			print STDERR scalar(localtime)
+				. "createFormkey failed: $formkey\n";
+			$formkey = "";
+			last;
+		}
+	}
+	# save in form object for printing to user
+	$form->{formkey} = $formkey;
+	return $formkey ? 1 : 0;
 }
 
 ########################################################
@@ -2185,8 +2197,13 @@ sub checkResponseTime {
 }
 
 ########################################################
+# This used to return boolean, 1=valid, 0=invalid.  Now it returns
+# "ok", "invalid", or "invalidhc".  The two "invalid*" responses
+# function somewhat the same (but print different error messages,
+# and "invalidhc" can be retried several times before the formkey
+# is invalidated).
 sub validFormkey {
-	my($self, $formname) = @_;
+	my($self, $formname, $options) = @_;
 
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
@@ -2194,21 +2211,30 @@ sub validFormkey {
 	my $subnetid = getCurrentUser('subnetid');
 
 	undef $form->{formkey} unless $form->{formkey} =~ /^\w{10}$/;
-	return(0) if ! $form->{formkey};
+	return 'invalid' if !$form->{formkey};
+	my $formkey_quoted = $self->sqlQuote($form->{formkey});
 
 	my $formkey_earliest = time() - $constants->{formkey_timeframe};
 
 	my $where = $self->_whereFormkey();
-	$where = "( $where OR subnetid = '$subnetid')" if ($constants->{lenient_formkeys} && isAnon($uid)); 
+	$where = "($where OR subnetid = '$subnetid')"
+		if $constants->{lenient_formkeys} && isAnon($uid);
 	my($is_valid) = $self->sqlSelect(
 		'COUNT(*)',
 		'formkeys',
-		'formkey = ' . $self->sqlQuote($form->{formkey}) .
-			" AND $where" .
-			" AND ts >= $formkey_earliest AND formname = '$formname'");
-
+		"formkey = $formkey_quoted
+		 AND $where
+		 AND ts >= $formkey_earliest AND formname = '$formname'"
+	);
 	print STDERR "ISVALID $is_valid\n" if $constants->{DEBUG};
-	return($is_valid);
+	return 'invalid' if !$is_valid;
+ 
+	# If we're using the HumanConf plugin, check for its validity
+	# as well.
+	return 'ok' if $options->{no_hc};
+	my $hc = getObject("Slash::HumanConf");
+	return 'ok' if !$hc;
+	return $hc->validFormkeyHC($formname);
 }
 
 ##################################################################
@@ -2356,7 +2382,17 @@ sub checkMaxPosts {
 	$formname ||= getCurrentUser('currentPage');
 
 	my $formkey_earliest = time() - $constants->{formkey_timeframe};
-	my $maxposts = $constants->{"max_${formname}_allowed"} || 0;
+	my $maxposts = 0;
+	if ($constants->{"max_${formname}_allowed"}) {
+		$maxposts = $constants->{"max_${formname}_allowed"};
+	} elsif ($formname =~ m{/}) {
+		# If the formname is in the format "users/nu", that means
+		# it also counts as a formname of "users" for this purpose.
+		(my $formname_main = $formname) =~ s{/.*}{};
+		if ($constants->{"max_${formname_main}_allowed"}) {
+			$maxposts = $constants->{"max_${formname_main}_allowed"};
+		}
+	}
 
 	my $where = $self->_whereFormkey();
 	$where .= " AND submit_ts >= $formkey_earliest";

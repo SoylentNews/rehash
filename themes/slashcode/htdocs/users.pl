@@ -177,7 +177,7 @@ sub main {
 		newuser		=> {
 			function	=> \&newUser,
 			seclev		=> 0,
-			formname	=> $formname,
+			formname	=> "${formname}/nu",
 			checks		=>
 			[ qw (max_post_check valid_check
 				formkey_check regen_formkey) ],
@@ -185,7 +185,7 @@ sub main {
 		newuseradmin	=> {
 			function	=> \&newUserForm,
 			seclev		=> 10000,
-			formname	=> $formname,
+			formname	=> "${formname}/nu",
 			checks		=> [],
 		},
 		previewbox	=> {
@@ -197,7 +197,7 @@ sub main {
 		mailpasswd	=> {
 			function	=> \&mailPasswd,
 			seclev		=> 0,
-			formname	=> $formname,
+			formname	=> "${formname}/mp",
 			checks		=>
 			[ qw (max_post_check valid_check
 				interval_check formkey_check ) ],
@@ -217,14 +217,14 @@ sub main {
 		newuserform	=> {
 			function	=> \&displayForm,
 			seclev		=> 0,
-			formname	=> $formname,
+			formname	=> "${formname}/nu",
 			checks		=>
 			[ qw (max_post_check generate_formkey) ],
 		},
 		mailpasswdform 	=> {
 			function	=> \&displayForm,
 			seclev		=> 0,
-			formname	=> $formname,
+			formname	=> "${formname}/mp",
 			checks		=>
 			[ qw (max_post_check generate_formkey) ],
 		},
@@ -273,10 +273,24 @@ sub main {
 # 		my $refer = URI->new_abs($constants->{rootdir},
 		my $refer = URI->new_abs($form->{returnto} || $constants->{rootdir},
 			$constants->{absolutedir});
-		# Tolerate redirection with or without a "www.", this is a little
-		# sloppy but it may help avoid a subtle misbehavior someday. -- anonymous
-		# What misbehavior? It looks to me like it could break a site.
-		# www.foo.com is not necessarily the same as foo.com.  Please explain. -- pudge
+
+		# Tolerate redirection with or without a "www.", this is a
+		# little sloppy but it may help avoid a subtle misbehavior
+		# someday. -- Jamie
+		# What misbehavior? It looks to me like it could break a
+		# site.  www.foo.com is not necessarily the same as foo.com.
+		# Please explain.  -- pudge
+		# The only question here is whether it's allowed to
+		# redirect the user to a particular URL.  The business
+		# logic here is that we don't bounce the user to foreign
+		# sites (otherwise innocuous-looking URLs at foo.com can be
+		# constructed that send the user anywhere on the internet).
+		# But any site on the same domain is considered safe/OK.
+		# If it is, we still redirect the user to the same $refer.
+		# If www.foo.com really thinks it's unsafe to redirect the
+		# user to a URL at foo.com, they need to change this logic
+		# (or find a new web host!) -- Jamie
+
 		my $site_domain = $constants->{basedomain};
 		$site_domain =~ s/^www\.//;
 		$site_domain =~ s/:.+$//;	# strip port, if available
@@ -342,19 +356,56 @@ sub main {
 		$op = $user->{is_anon} ? 'default' : 'userinfo';
 	}
 
-	if ($user->{seclev} < 100) {
-		for my $check (@{$ops->{$op}{checks}}) {
-			last if $op eq 'savepasswd';
-			$error_flag = formkeyHandler($check, $formname, $formkey);
-			$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
-			last if $error_flag;
+	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
+                my $options = {};
+		if ($op eq 'newuserform' && !$constants->{hc_sw_newuser}
+			|| $op eq 'mailpasswdform' && !$constants->{hc_sw_mailpasswd}
+			|| !$user->{is_anon}
+				&& $user->{karma} > $constants->{hc_maxkarma}) {
+			$options->{no_hc} = 1;
 		}
+
+                my $done = 0;
+		$done = 1 if $op eq 'savepasswd'; # special case
+		$formname = $ops->{$op}{formname};
+                DO_CHECKS: while (!$done) {
+                        for my $check (@{$ops->{$op}{checks}}) {
+                                $ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
+                                $error_flag = formkeyHandler($check, $formname, $formkey,
+                                        undef, $options);
+print STDERR "users.pl main op '$op' formname '$formname' handler '$check' error_flag '$error_flag' options '" . join(" ", sort keys %$options) . "'\n";
+                                if ($error_flag == -1) {
+					# Special error:  HumanConf failed.  Go
+					# back to the previous op, start over.
+					if ($op =~ /^(newuser|mailpasswd)$/) {
+						$op .= "form";
+						$error_flag = 0;
+print STDERR "users.pl main op '$op' error_flag reset to 0\n";
+						next DO_CHECKS;
+					}
+print STDERR "users.pl main op '$op' error_flag remains -1\n";
+				} elsif ($error_flag) {
+                                        $done = 1;
+                                        last;
+                                }
+                        }
+                        $done = 1;
+                }
+
+                if (!$error_flag && !$options->{no_hc}) {
+                        my $hc = getObject("Slash::HumanConf");
+print STDERR "users.pl main op '$op' hc '$hc'\n";
+                        $hc->reloadFormkeyHC($formname) if $hc;
+                }
+
 	}
 
 	errorLog("users.pl error_flag '$error_flag'") if $error_flag;
 
 	# call the method
-	my $retval = $ops->{$op}{function}->() if ! $error_flag;
+print STDERR "users.pl main calling op '$op'\n";
+	my $retval = $ops->{$op}{function}->($op) if ! $error_flag;
+print STDERR "users.pl main op '$op' returned '$retval'\n";
 	if ($op eq 'mailpasswd' && $retval) {
 		$ops->{$op}{update_formkey} = 0;
 	}
@@ -2008,15 +2059,16 @@ sub listAbuses {
 
 #################################################################
 sub displayForm {
+	my($op) = @_;
+
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
-	my $op = $form->{op};
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0;
 
-	$op ||= 'displayform';
+	$op ||= $form->{op} || 'displayform';
 
 	my $ops = {
 		displayform 	=> 'loginForm',
