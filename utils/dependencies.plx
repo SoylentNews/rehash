@@ -2,6 +2,9 @@
 # we could probably add these in automatically with some work, but it
 # would be somewhat unreliable, so we need to keep this file up to date
 # just record what module depends on what ... ha ha ha
+#
+# $Id$
+#
 
 use Data::Dumper;
 

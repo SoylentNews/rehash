@@ -3,6 +3,10 @@
 # Host: localhost    Database: dump
 #--------------------------------------------------------
 # Server version	3.23.26-beta-log
+#
+# $Id$
+#
+
 
 #
 # Dumping data for table 'abusers'

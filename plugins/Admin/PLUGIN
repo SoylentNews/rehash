@@ -1,3 +1,4 @@
+# $Id$
 description="Admin Interface"
 name=Admin
 mysql_dump=dump

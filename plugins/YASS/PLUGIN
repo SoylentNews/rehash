@@ -1,3 +1,4 @@
+# $Id$
 name=YASS
 description="YASS lets you keep url lists from links in stories"
 htdoc=sites.pl

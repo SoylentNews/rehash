@@ -15,3 +15,6 @@ __template__
 <A HREF="[% constants.real_rootdir %]/blob.pl?id=[% id | strip_attribute %]" TITLE="[% title | strip_attribute %]">[% text %]</A>
 __seclev__
 10000
+__version__
+$Id$
+

@@ -1,5 +1,8 @@
 Some more info to help RPM users.  Please read the main INSTALL first.
 
+(Note, August 2003:  this file is pretty well out of date, since the RPM
+hasn't been maintained for years.  The main INSTALL file is your best bet.)
+
 Author: Jonathan Pater <pater@slashdot.org>
 
 The RPM for Slash still requires one to build Apache and mod_perl from source
@@ -27,3 +30,7 @@ What to do after installing the RPM to have a working Slash site:
    you configured when installing MySQL.
 2. Modify your httpd.conf to include slash.conf.
 3. Restart Apache.
+
+VERSION
+    $Id$
+

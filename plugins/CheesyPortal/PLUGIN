@@ -1,3 +1,4 @@
+# $Id$
 name=CheesyPortal
 htdoc=cheesyportal.pl
 task=tasks/p2f_cheesy.pl

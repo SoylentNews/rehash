@@ -1,3 +1,4 @@
+# $Id$
 name=SOAP
 description="SOAP API for Plugins"
 mysql_schema=mysql_schema.sql

@@ -1,3 +1,4 @@
+# $Id$
 name=Stats
 description="Stats system"
 htdoc=stats.pl

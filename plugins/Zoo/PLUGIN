@@ -1,3 +1,4 @@
+# $Id$
 name=Zoo
 description="Friend and Foe system"
 mysql_schema=mysql_schema

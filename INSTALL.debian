@@ -1,5 +1,8 @@
 Some more info to help Debian users.  Please read the main INSTALL first.
 
+(Note, August 2003:  this file is pretty well out of date by now.
+The main INSTALL file is becoming more useful for Debian sites.)
+
 Author: Bernard de Rubinat <bernard@netgames.org>
 
 The methods in INSTALL work fine for Debian, but many will prefer the
@@ -50,3 +53,7 @@ Digest-MD5              libdigest-md5-perl
 URI                     liburi-perl
 libwww-perl             libwww-perl
 DateManip               libdate-manip-perl
+
+VERSION
+    $Id$
+

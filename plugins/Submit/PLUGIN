@@ -1,3 +1,4 @@
+# $Id$
 description="Submission System"
 name=Submit
 htdoc=submit.pl

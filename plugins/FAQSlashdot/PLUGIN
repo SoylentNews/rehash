@@ -1,3 +1,4 @@
+# $Id$
 name=FAQSlashdot
 description="Slashdot FAQ"
 htdoc_faq=faq/UI.shtml

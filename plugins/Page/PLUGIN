@@ -1,3 +1,4 @@
+# $Id$
 name=Page
 description="Alternative index page for sites"
 htdoc=page.pl

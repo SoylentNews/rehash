@@ -1,3 +1,4 @@
+# $Id$
 name=Stock
 description="stockquotes block"
 mysql_schema=mysql_schema.sql

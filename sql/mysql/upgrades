@@ -5,6 +5,10 @@
 # and who you are. If your changes occur after a certain release tag
 # then you need to place your changes there.
 
+#
+# $Id$
+#
+
 # BEGIN tf23's additions 
 # for required changes to update a site from fry to devel 
 # this matches cvs diff -r fry -r T_2_3_0_10 -U3 sql/mysql/slashschema_create.sql

@@ -1,6 +1,9 @@
 Some more info to help Solaris users.  Please read this in conjuction with
 the main INSTALL document.
 
+(Note, as of August 2003:  this file is probably pretty out of date,
+but you're welcome to try it anyway.)
+
 Author: Nigel Wetters <nwetters@cpan.org> from pudge's comments about
 installing on Solaris x86. See COPYING for license information.
 
@@ -35,5 +38,8 @@ installing on Solaris x86. See COPYING for license information.
 
 8.  bin/install-slashsite should now work from the installation directory.
     Continue the installation as suggestion in the main INSTALL documentation.
+
+VERSION
+    $Id$
 
 __END__

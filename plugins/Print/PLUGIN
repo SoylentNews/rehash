@@ -1,3 +1,4 @@
+# $Id$
 name=Print
 htdoc=print.pl
 image=images/print.gif

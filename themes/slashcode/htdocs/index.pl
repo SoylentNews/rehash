@@ -304,7 +304,7 @@ sub displayStories {
 	# of for every story
 	my $msg;
 	$msg->{readmore} = getData('readmore');
-	if ($constants->{body_bytes}){
+	if ($constants->{body_bytes}) {
 		$msg->{bytes} = getData('bytes');
 	} else {
 		$msg->{words} = getData('words');

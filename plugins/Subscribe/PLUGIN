@@ -1,3 +1,4 @@
+# $Id$
 name=Subscribe
 description="Subscription system"
 htdoc=subscribe.pl

@@ -1,3 +1,4 @@
+# $Id$
 description="Sections Editor"
 name=Sections
 htdoc=sections.pl

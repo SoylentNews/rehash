@@ -1,3 +1,4 @@
+# $Id$
 name=FAQ
 description="Generic Slash FAQ"
 htdoc=faq.shtml

@@ -1,5 +1,9 @@
 package Bundle::Slash;
 
+#
+# $Id$
+#
+
 $Bundle::Slash::VERSION = '2.32';
 
 1;

@@ -1,3 +1,4 @@
+# $Id$
 name=Email
 description="Allows users to email text versions of articles to someone else."
 

@@ -1,3 +1,4 @@
+# $Id$
 name=NewsVac
 description="Newsforge NewsVac"
 mysql_schema=mysql_schema

@@ -1,3 +1,4 @@
+# $Id$
 name=PollBooth
 description="PollBooth"
 mysql_schema=mysql_schema

@@ -596,6 +596,7 @@ Bender:Well I don't have anything else planned for today, let's get drunk!
 Bender:Oh, so, just 'cause a robot wants to kill humans that makes him a radical?
 Bender:Bite my shiny, metal ass!
 Bender:Lick my frozen, metal ass!
+Bender:Life is hilariously cruel.
 Bender:The laws of science be a harsh mistress.
 Bender:In the event of an emergency, my ass can be used as a flotation device.
 Bender:Like most of life's problems, this one can be solved with bending.

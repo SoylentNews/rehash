@@ -1,3 +1,4 @@
+# $Id$
 name=Messages
 description="Messaging system"
 mysql_schema=mysql_schema

@@ -1,3 +1,4 @@
+# $Id$
 name=PubKey
 description="Just allows a user's pubkey to be displayed"
 htdoc=pubkey.pl

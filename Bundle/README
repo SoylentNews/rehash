@@ -1,3 +1,5 @@
+# $Id$
 This is a Bundle file for Slash, the code that runs Slashdot.  See
 http://slashcode.com/ for more information.  It is geared toward Slash
-2.2.0, but should work fine for older versions of Slash, too.
+2.2.x and later versions, but should work fine for older versions of
+Slash, too.

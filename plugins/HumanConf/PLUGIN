@@ -1,3 +1,4 @@
+# $Id$
 name=HumanConf
 description="Human Confirmation"
 mysql_dump=mysql_dump

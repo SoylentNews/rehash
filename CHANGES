@@ -1,3 +1,9 @@
+# $Id$
+
+(We should update this file before we release a 2.3.0 -- there have been
+six versions since 2.2.0.  I believe 2.2.1 thru 2.2.6 were all bugfix
+and security updates.  - Jamie, August 2003)
+
 slash-2.2.0, 2001.11.07
 -----------------------
 

@@ -1,3 +1,4 @@
+# $Id$
 name=Relocate
 description="redirect your href links"
 mysql_schema=mysql_schema
