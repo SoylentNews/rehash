@@ -25,7 +25,7 @@ __template__
 <P><B>[% note %]</B></P>
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
 <TR><TD>
 
 <P>

@@ -14,7 +14,7 @@ en_US
 __name__
 messages
 __template__
-<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
+<TABLE BGCOLOR="[% user.bg.5 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
 	<TR>
 		<TD><FONT SIZE=-1>
 [ [% needbar = 0; FOR i = items %]

@@ -1235,7 +1235,6 @@ sub tildeEd {
 	my $constants = getCurrentStatic();
 	my($aidref, $aid_order, $tidref, $tid_order, $sectionref, $section_descref, $box_order, $tilde_ed, $tilded_msg_box);
 
-	# users_tilded_title
 	my $title = getTitle('tildeEd_title');
 
 	# Customizable Authors Thingee
@@ -1267,15 +1266,12 @@ sub tildeEd {
 		$sectionref->{$section}{title} = $title;
 	}
 
-	my $customize_title = getTitle('tildeEd_customize_title');
-
-	my $tilded_customize_msg = getMessage('users_tilded_customize_msg',
+	my $tilded_customize_msg = getMessage('tilded_customize_msg',
 		{ userspace => $userspace });
 
 	my $sections_description = $slashdb->getSectionBlocks();
 
-	# repeated from above?
-	$customize_title = getTitle('tildeEd_customize_title');
+	my $customize_title = getTitle('tildeEd_customize_title');
 
 	for (sort { lc $b->[1] cmp lc $a->[1]} @$sections_description) {
 		my($bid, $title, $boldflag) = @$_;
