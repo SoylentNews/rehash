@@ -14,4 +14,9 @@ INSERT IGNORE INTO soap_methods (class, method, seclev, formkeys) VALUES ('Slash
 INSERT IGNORE INTO soap_methods (class, method, seclev, formkeys) VALUES ('Slash::Search::SOAP', 'findSubmission', 100, 'interval_check');
 INSERT IGNORE INTO soap_methods (class, method, seclev, formkeys) VALUES ('Slash::Search::SOAP', 'findRSS', 0, 'interval_check');
 INSERT IGNORE INTO soap_methods (class, method, seclev, formkeys) VALUES ('Slash::Search::SOAP', 'findDiscussion', 0, 'interval_check');
-INSERT INTO vars (name, value) VALUES ('test/get_uid_speed_limit', 10);
+
+# this needs to be something like "${progname}/${method_name}_${formkey_type}"
+# such as "search/findComments_speed_limit"
+# i am hoping to make it so we can just do something like
+# "search/SOAP_speed_limit" instead ... we'll see
+#INSERT INTO vars (name, value) VALUES ('test/get_uid_speed_limit', 10);

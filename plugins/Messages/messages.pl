@@ -114,7 +114,7 @@ sub edit_message {
 		threshold on the User Preferences Page)
 
 <P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
-	<A HREF="mailto:[% constants.adminmail %]">[% constants.siteadmin_name %]</A>.</FONT>
+	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.</FONT>
 
 
 EOT
