@@ -3232,49 +3232,64 @@ sub checkReadOnly {
 	$user_check ||= getCurrentUser();  # might not be actual current user!
 	my $constants = getCurrentStatic();
 
-	my $where = '';
+	my $where_ary = [ ];
 
-	# please check to make sure this is what you want;
+	# Please check to make sure this is what you want;
 	# isAnon already checks for numeric uids -- pudge
+	# This looks right;  if the {uid} field of %$user_check
+	# is not defined, we ignore uid and put together our
+	# test based on another field. -- Jamie
 	if ($user_check->{uid} && $user_check->{uid} =~ /^\d+$/) {
 		if (!isAnon($user_check->{uid})) {
-			$where = "uid = $user_check->{uid}";
+			$where_ary = [ "uid = $user_check->{uid}" ];
 		} else {
-			$where = "ipid = '$user_check->{ipid}'";
+			# This is probably an error... I don't think
+			# the code ever gets here but we should
+			# probably bail at this point, returning 1
+			# to indicate a problem. - Jamie 2003/03/03
+			$where_ary = [ "ipid = '$user_check->{ipid}'" ];
 		}
 	} elsif ($user_check->{md5id}) {
-		# Note, this is a slow query -- either column by itself is
-		# fast since they're both indexed, but if you OR them, it's
-		# about 10-12 seconds, MySQL is weird sometimes.  Good thing
-		# we rarely (ever?) do this.
-		$where = "(ipid = '$user_check->{md5id}' OR subnetid = '$user_check->{md5id}')";
-
+		# To do this with a WHERE is very slow!  Both the ipid
+		# and the subnetid columns are indexed, but if you OR
+		# them, MySQL does a table scan.  So instead of that,
+		# we're going to do two checks and boolean OR the result.
+		$where_ary = [
+			"ipid = '$user_check->{md5id}'",
+			"subnetid = '$user_check->{md5id}'",
+		];
 	} elsif ($user_check->{ipid}) {
 		my $tmpid = $user_check->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
 				md5_hex($user_check->{ipid}) : $user_check->{ipid}; 
-		$where = "ipid = '$tmpid'";
+		$where_ary = [ "ipid = '$tmpid'" ];
 
 	} elsif ($user_check->{subnetid}) {
 		my $tmpid = $user_check->{subnetid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
 				md5_hex($user_check->{subnetid}) : $user_check->{subnetid}; 
-		$where = "subnetid = '$tmpid'";
+		$where_ary = [ "subnetid = '$tmpid'" ];
 	} else {
 		my $tmpid = $user_check->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
 				md5_hex($user_check->{ipid}) : $user_check->{ipid}; 
-		$where = "ipid = '$tmpid'";
+		$where_ary = [ "ipid = '$tmpid'" ];
 	}
 
-	# Setting readonly blocks posting.
-	$where .= " AND readonly = 1";
-	# A blank formname means this entry applies to everything.
-	$where .= " AND (formname = '$formname' OR formname = '')";
-	# For when we get user expiration working.
-	$where .= " AND reason != 'expired'";
+	for my $where (@$where_ary) {
+		# Setting readonly blocks posting.
+		$where .= " AND readonly = 1";
+		# A blank formname means this entry applies to everything.
+		$where .= " AND (formname = '$formname' OR formname = '')";
+		# For when we get user expiration working.
+		$where .= " AND reason != 'expired'";
+	}
 
-	# We used to return the "readonly" value but now we're allowing that
-	# it might be 0... get the id instead and go by that.
-	my $id = $self->sqlSelect("id", "accesslist", $where);
-	return $id ? 1 : 0;
+	# If any rows in the table match any of the where clauses,
+	# then we're readonly.
+	my $where;
+	while ($where = shift @$where_ary) {
+		return 1 if $self->sqlCount("accesslist", $where);
+	}
+	# Nothing matched, so we're not.
+	return 0;
 }
 
 ##################################################################
