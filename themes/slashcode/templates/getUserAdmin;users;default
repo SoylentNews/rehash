@@ -59,7 +59,7 @@ __template__
 				<TD><FONT COLOR="[% user.fg.0 %]"><B>Sub</B></FONT></TD>
 				<TD><FONT COLOR="[% user.fg.0 %]"><B>Mod</B></FONT></TD>
 			</TR>
-				[% FOREACH tmpip = ipstruct.keys %]
+				[% FOREACH tmpip = ipstruct_order %]
 			<TR>
 				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip %]&amp;fieldname=ipid">[% ipstruct.$tmpip.ipid_vis %]</A></TD>
 

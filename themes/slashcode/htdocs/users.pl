@@ -2604,7 +2604,7 @@ sub getUserAdmin {
 	$id ||= $user->{uid};
 
 	my($expired, $uidstruct, $readonly);
-	my($user_edit, $user_editfield, $ipstruct, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
+	my($user_edit, $user_editfield, $ipstruct, $ipstruct_order, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my $accesslist;
@@ -2680,7 +2680,11 @@ sub getUserAdmin {
 		$thresh_select = createSelect('defaultpoints', $threshcodes, $user_edit->{defaultpoints}, 1);
 	}
 
-	undef $ipstruct	if (!ref $ipstruct);
+	if (!ref $ipstruct) {
+		undef $ipstruct;
+	} else {
+		@$ipstruct_order = sort { $ipstruct->{$b}{dmin} cmp $ipstruct->{$a}{dmin} } keys %$ipstruct;
+	}
 
 	my $m2total = ($user_edit->{m2fair} || 0) + ($user_edit->{m2unfair} || 0);
 	if ($m2total) {
@@ -2704,6 +2708,7 @@ sub getUserAdmin {
 		userinfo_flag		=> $user_editinfo_flag,
 		userfield		=> $user_editfield,
 		ipstruct		=> $ipstruct,
+		ipstruct_order		=> $ipstruct_order,
 		uidstruct		=> $uidstruct,
 		seclev_field		=> $seclev_field,
 		expired 		=> $expired,
