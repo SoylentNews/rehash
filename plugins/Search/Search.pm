@@ -467,6 +467,7 @@ sub findRSS {
 ####################################################################################
 sub findDiscussion {
 	my($self, $form, $start, $limit, $sort) = @_;
+	my $constants = getCurrentStatic();
 	$start ||= 0;
 
 	my $query = $self->sqlQuote($form->{query});
