@@ -149,6 +149,9 @@ sub create {
 
 	my $version  = $param->{version}     || '1.0';
 	my $encoding = $param->{rdfencoding} || $constants->{rdfencoding};
+	$self->{rdfitemdesc} = defined $param->{rdfitemdesc}
+		? $param->{rdfitemdesc}
+		: $constants->{rdfitemdesc};
 
 	my $rss = XML::RSS->new(
 		version		=> $version,
@@ -410,16 +413,16 @@ sub rss_item_description {
 
 	my $constants = getCurrentStatic();
 
-	if ($constants->{rdfitemdesc}) {
+	if ($self->{rdfitemdesc}) {
 		# no HTML
 		$desc = strip_notags($desc);
 		$desc =~ s/\s+/ /g;
 		$desc =~ s/ $//;
 
 		# keep $desc as-is if == 1
-		if ($constants->{rdfitemdesc} != 1) {
-			if (length($desc) > $constants->{rdfitemdesc}) {
-				$desc = substr($desc, 0, $constants->{rdfitemdesc});
+		if ($self->{rdfitemdesc} != 1) {
+			if (length($desc) > $self->{rdfitemdesc}) {
+				$desc = substr($desc, 0, $self->{rdfitemdesc});
 				$desc =~ s/\S+$//;
 				$desc .= '...';
 			}
