@@ -6772,7 +6772,7 @@ sub getStory {
 	# just set the value to expire at a particular time because (1) that
 	# would involve converting the story's timestamp to unix epoch, and
 	# (2) we can't expire individual stories, we'd have to expire the
-	# whole story cache, and that would not be good for performance.	
+	# whole story cache, and that would not be good for performance.
 	if ($self->{$table_cache}{$id}{is_future}) {
 		delete $self->{$table_cache}{$id};
 	}
