@@ -983,6 +983,13 @@ sub _calc_percentiles {
 }
 
 ########################################################
+sub getDailyScoreTotal {
+	my($self, $score) = @_;
+
+	return $self->sqlCount('comments', "points=$score AND date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'");
+}
+
+########################################################
 # Note, we are carrying the misspelling of "referrer" over from
 # the HTTP spec.
 sub getTopReferers {

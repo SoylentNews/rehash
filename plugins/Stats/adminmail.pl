@@ -362,6 +362,11 @@ EOT
 	$statsSave->createStatDaily("youngest_modelig_uid", sprintf("%d", $youngest_modelig_uid));
 	$statsSave->createStatDaily("youngest_modelig_created", sprintf("%11s", $youngest_modelig_created));
 
+	foreach my $i ($constants->{comment_minscore}..$constants->{comment_maxscore}) {
+		$statsSave->createStatDaily("comments_score_$i",
+			$stats->getDailyScoreTotal($i));
+	}
+
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
 		# Each stat writes one row into stats_daily for each admin who
