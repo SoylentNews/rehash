@@ -5355,6 +5355,39 @@ sub getRelatedLinks {
 }
 
 ########################################################
+sub getHooksByParam {
+	my ($self, $param) = @_;
+	my $answer = $self->sqlSelectAllHashrefArray('*', 'hooks', 'param =' . $self->sqlQuote($param) );
+	return $answer;
+}
+
+########################################################
+sub getHook {
+	my $answer = _genericGet('hooks', 'id', '', @_);
+	return $answer;
+}
+
+########################################################
+sub createHook {
+	my($self, $hash) = @_;
+
+	$self->sqlInsert('hooks', $hash);
+}
+
+########################################################
+sub deleteHook {
+	my($self, $id) = @_;
+
+	$self->sqlDelete('hooks', 'id =' . $self->sqlQuote($id));  
+}
+
+########################################################
+sub setHook {
+	my($self, $id, $value) = @_;
+	$self->sqlUpdate('hooks', $value, 'id=' . $self->sqlQuote($id));
+}
+
+########################################################
 # single big select for ForumZilla ... if someone wants to
 # improve on this, please go ahead
 sub fzGetStories {
