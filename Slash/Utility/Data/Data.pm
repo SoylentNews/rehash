@@ -684,7 +684,7 @@ sub processCustomTags {
 	my($str) = @_;
 	my $constants = getCurrentStatic();
 
-	## deal with special ECODE tag (Embedded Code).  This tag allows
+	## Deal with special ECODE tag (Embedded Code).  This tag allows
 	## embedding the Code postmode in plain or HTML modes.  It may be
 	## of the form:
 	##    <ECODE>literal text</ECODE>
@@ -705,13 +705,27 @@ sub processCustomTags {
 
 	# ECODE must be in approvedtags
 	if (grep /^ECODE$/, @{$constants->{approvedtags}}) {
-		# first pass to deal with lack of /END="\w+"/
-		my $ecode = 'literal|ecode';  # "LITERAL" is old name
-		$str =~ s[    <\s* (  $ecode) \s*                >     (.*?)     <\s* /\1 \s*>]
-			 [<$1 END="$1">$2</$1>]xsigo;
-		# second pass to convert to code
-		$str =~ s[\n* <\s* (?:$ecode) \s+ END="(\w+)" \s*> \n* (.*?) \n* <\s* /\1 \s*> \n*]
-			 ['<BLOCKQUOTE>' . strip_code($2) . '</BLOCKQUOTE>']xsigeo;
+		my $ecode   = 'literal|ecode';  # "LITERAL" is old name
+		my $open    = qr[\n* <\s* (?:$ecode) (?: \s+ END="(\w+)")? \s*> \n*]xsio;
+		my $close_1 = qr[$open (.*?) \n* <\s* /\2    \s*> \n*]xsio;  # if END is used
+		my $close_2 = qr[$open (.*?) \n* <\s* /ECODE \s*> \n*]xsio;  # if END is not used
+
+		while ($str =~ m[($open)]g) {
+			my $len = length($1);
+			my $end = $2;
+			my $pos = pos($str) - $len;
+
+			my $newlen = 25;  # length('<BLOCKQUOTE></BLOCKQUOTE>')
+			my $close = $end ? $close_1 : $close_2;
+
+			my $ok = $str =~ s[^ (.{$pos}) $close][
+				my $code = strip_code($3);
+				$newlen += length($code);
+				$1 . "<BLOCKQUOTE>$code</BLOCKQUOTE>";
+			]xsie;
+
+			pos($str) = $pos + $newlen if $ok;
+		}
 	}
 
 	return $str;
