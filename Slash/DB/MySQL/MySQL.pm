@@ -332,6 +332,7 @@ sub createComment {
 	$comment->{-date} = 'NOW()';
 	$comment->{len} = length($comment_text);
 	$comment->{pointsorig} = $comment->{points} || 0;
+	$comment->{pointsmax}  = $comment->{points} || 0;
 
 	$self->{_dbh}->{AutoCommit} = 0;
 
@@ -939,33 +940,31 @@ sub undoModeration {
 			"cid=$cid and uid=$uid"
 		);
 
-		my $comm_update = { };
-
-		# Adjust the comment score up or down, but don't push it beyond the
-		# maximum or minimum.
+		# Restore modded user's karma, again within the proper boundaries.
 		my $adjust = -$val;
 		$adjust =~ s/^([^+-])/+$1/;
-		$comm_update->{-points} =
-			$adjust > 0
-			? "LEAST($max_score, points $adjust)"
-			: "GREATEST($min_score, points $adjust)";
-
-		# Recalculate the comment's reason.
-		$comm_update->{reason} = $self->getCommentMostCommonReason($cid)
-			|| 0; # no active moderations? reset reason to empty
-
-		$self->sqlUpdate("comments", $comm_update, "cid=$cid");
-
-		# Restore modded user's karma, again within the proper boundaries.
-		# XXX If we don't care about tracking the Anonymous Coward's karma,
-		# here's a place to take it out.
+		my $adjust_abs = abs($adjust);
 		$self->sqlUpdate(
 			"users_info",
 			{ -karma =>	$adjust > 0
 					? "LEAST($max_karma, karma $adjust)"
 					: "GREATEST($min_karma, karma $adjust)" },
 			"uid=$cuid"
-		);
+		) unless isAnon($cuid);
+
+		# Adjust the comment score up or down, but don't push it
+		# beyond the maximum or minimum.  Also recalculate its reason.
+		# Its pointsmax logically can't change.
+		my $points = $adjust > 0
+			? "LEAST($max_score, points $adjust)"
+			: "GREATEST($min_score, points $adjust)";
+		my $reason = $self->getCommentMostCommonReason($cid)
+			|| 0; # no active moderations? reset reason to empty
+		my $comm_update = {
+			-points =>	$points,
+			reason =>	$reason,
+		};
+		$self->sqlUpdate("comments", $comm_update, "cid=$cid");
 
 		push @removed, {
 			cid	=> $cid,
@@ -1395,12 +1394,12 @@ sub _writeAccessLogCache {
 	my($self) = @_;
 	return unless ref($self->{_accesslog_insert_cache})
 		&& @{$self->{_accesslog_insert_cache}};
-	$self->sqlDo("SET AUTOCOMMIT=0");
+	$self->{_dbh}{AutoCommit} = 0;
 	while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
 		$self->sqlInsert('accesslog', $hr, { delayed => 1 });
 	}
-	$self->sqlDo("COMMIT");
-	$self->sqlDo("SET AUTOCOMMIT=1");
+	$self->{_dbh}->commit;
+	$self->{_dbh}{AutoCommit} = 1;
 }
 
 ##########################################################
@@ -2029,19 +2028,17 @@ sub createUser {
 	#	- Cliff
 	# Initialize the expiry variables...
 	# ...users start out as registered...
-	# ...the default email view is to SHOW email address...
-	#	(not anymore - Jamie)
 	my $constants = getCurrentStatic();
 
-	# editComm;users;default knows that the default emaildisplay is 0...
-	# ...as it should be
+	my $initdomain = fullhost_to_domain($email);
 	$self->setUser($uid, {
 		'registered'		=> 1,
 		'expiry_comm'		=> $constants->{min_expiry_comm},
 		'expiry_days'		=> $constants->{min_expiry_days},
 		'user_expiry_comm'	=> $constants->{min_expiry_comm},
 		'user_expiry_days'	=> $constants->{min_expiry_days},
-#		'emaildisplay'		=> 2,
+		initdomain		=> $initdomain,
+		created_ipid		=> getCurrentUser('ipid'),
 	});
 
 	$self->{_dbh}->commit;
@@ -4669,40 +4666,20 @@ sub moderateComment {
 			$statsSave->addStatDaily("mod_tokens_lost_unm2able", $tcost);
 		}
 
-		# Next, adjust the appropriate values for the user who
-		# posted the comment.
+		# Apply our changes to the comment.  That last argument
+		# is tricky;  we're passing in true for $need_point_change
+		# only if the comment was posted non-anonymously.  (If it
+		# was posted anonymously, we don't need to know the
+		# details of how its point score changed thanks to this
+		# mod, because it won't affect anyone's karma.)
+		my $poster_was_anon = isAnon($comment->{uid});
 		my $karma_change = $reasons->{$reason}{karma};
-		if (!isAnon($comment->{uid})) {
-			my $lost_tokens_per_downmod = 1; # XXX should be a var
-			my $cu_changes = { };
-			if ($val < 0) {
-				$cu_changes->{-downmods} = "downmods + 1";
-			} elsif ($val > 0) {
-				$cu_changes->{-upmods} = "upmods + 1";
-			}
-			if ($karma_change < 0) {
-				$cu_changes->{-karma} = "GREATEST("
-					. "$constants->{minkarma}, karma - 1)";
-				$cu_changes->{-tokens} = "tokens - $lost_tokens_per_downmod";
-			} elsif ($karma_change > 0) {
-				$cu_changes->{-karma} = "LEAST("
-					. "$constants->{maxkarma}, karma + 1)";
-			}
-			if (scalar keys %$cu_changes) {
-				$self->setUser($comment->{uid}, $cu_changes);
-				# Update stats.
-				if ($karma_change < 0 and my $statsSave = getObject('Slash::Stats::Writer')) {
-					$statsSave->addStatDaily("mod_tokens_lost_downmod",
-						$lost_tokens_per_downmod);
-				}
-			}
-		}
-
-		# Make sure our changes get propagated back to the comment.
-		$comment_changed =
-			$self->setCommentCleanup($cid, $val, $reason,
-				$comment->{reason});
-		if (!$comment_changed) {
+		$karma_change = 0 if $poster_was_anon;
+		my $comment_change_hr =
+			$self->setCommentForMod($cid, $val, $reason,
+				$comment->{reason}, $karma_change,
+				!$poster_was_anon);
+		if (!defined($comment_change_hr)) {
 			# This shouldn't happen;  the only way we believe it
 			# could is if $val is 0, the comment is already at
 			# min or max score, the user's already modded this
@@ -4711,6 +4688,45 @@ sub moderateComment {
 			$dispArgs->{type} = 'logic error';
 			Slash::slashDisplay('moderation', $dispArgs);
 			return 0;
+		}
+
+		# Finally, adjust the appropriate values for the user who
+		# posted the comment.
+		my $token_change = 0;
+		if ($karma_change) {
+			# If this was a downmod, it may cost the poster
+			# something other than exactly 1 karma.
+			if ($karma_change < 0) {
+				($karma_change, $token_change) =
+					$self->_calc_karma_token_loss(
+						$karma_change, $comment_change_hr)
+			}
+		}
+		if ($karma_change) {
+			my $cu_changes = { };
+			if ($val < 0) {
+				$cu_changes->{-downmods} = "downmods + 1";
+			} elsif ($val > 0) {
+				$cu_changes->{-upmods} = "upmods + 1";
+			}
+			if ($karma_change < 0) {
+				$cu_changes->{-karma} = "GREATEST("
+					. "$constants->{minkarma}, karma + $karma_change)";
+				$cu_changes->{-tokens} = "tokens + $token_change";
+			} elsif ($karma_change > 0) {
+				$cu_changes->{-karma} = "LEAST("
+					. "$constants->{maxkarma}, karma + $karma_change)";
+			}
+
+			# Make the changes to the poster user.
+			$self->setUser($comment->{uid}, $cu_changes);
+
+			# Update stats.
+			if ($karma_change < 0 and my $statsSave = getObject('Slash::Stats::Writer')) {
+				$statsSave->addStatDaily("mod_tokens_lost_downmod",
+					$token_change);
+			}
+
 		}
 
 		# We know things actually changed, so update points for
@@ -4732,6 +4748,23 @@ sub moderateComment {
 	Slash::slashDisplay('moderation', $dispArgs);
 
 	return 1;
+}
+
+sub _calc_karma_token_loss {
+	my($self, $reason_karma_change, $comment_change_hr) = @_;
+	my $constants = getCurrentStatic();
+	my($kc, $tc); # karma change, token change
+
+	$kc = $reason_karma_change;
+	if ($constants->{mod_down_karmacoststyle}) {
+		if ($constants->{mod_down_karmacoststyle} == 1) {
+			my $change = abs($comment_change_hr->{points_max}
+				- $comment_change_hr->{points_after});
+			$kc *= $change;
+		}
+	}
+	$tc = $kc;
+	return ($kc, $tc);
 }
 
 ##################################################################
@@ -5131,12 +5164,19 @@ sub deleteVar {
 # This is a little better. Most of the business logic
 # has been removed and now resides at the theme level.
 #	- Cliff 7/3/01
-# It now returns a boolean: whether or not the comment was changed. - Jamie
-sub setCommentCleanup {
-	my($self, $cid, $val, $newreason, $oldreason) = @_;
+# It used to return a boolean indicating whether the
+# comment was changed.  Now it returns either undef
+# (if the comment did not change) or a true value (if
+# it did).  If $need_point_change is true, it will
+# query the DB to obtain the comment scores before and
+# after the change and return that data in a hashref.
+# If not, it will just return 1.
+sub setCommentForMod {
+	my($self, $cid, $val, $newreason, $oldreason, $karma,
+		$need_point_change) = @_;
 
 	$val += 0;
-	return 0 if !$val;
+	return undef if !$val;
 	$val = "+$val" if $val > 0;
 
 	my $user = getCurrentUser();
@@ -5149,14 +5189,23 @@ sub setCommentCleanup {
 		"cid=$cid AND active=1",
 		"GROUP BY reason"
 	);
+	my $averagereason = $self->getCommentMostCommonReason($cid,
+		$allreasons_hr,
+		$newreason, $oldreason),
 
-	# Changes we're going to make to this comment.
+	# Changes we're going to make to this comment.  Note
+	# that the pointsmax GREATEST() gets called after
+	# points is assigned, thanks to assn_order.
+	my $karma_val = sprintf("%+d", $karma || 0);
+	my $karma_abs_val = sprintf("%+d", abs($karma) || 0);
 	my $update = {
-		-points => "points$val",
-		reason => $self->getCommentMostCommonReason($cid,
-			$allreasons_hr, $newreason, $oldreason),
-		lastmod => $user->{uid},
+		-points =>	"points$val",
+		-pointsmax =>	"GREATEST(pointsmax, points)",
+		reason =>	$averagereason,
+		lastmod =>	$user->{uid},
 	};
+	$update->{-karma}     = "karma$karma_val"         if $karma_val;
+	$update->{-karma_abs} = "karma_abs$karma_abs_val" if $karma_abs_val;
 
 	# If more than n downmods, a comment loses its karma bonus.
 	my $reasons = $self->getReasons;
@@ -5180,17 +5229,55 @@ sub setCommentCleanup {
 		unless $constants->{authors_unlimited}
 			&& $user->{seclev} >= $constants->{authors_unlimited};
 
-	return $self->sqlUpdate("comments", $update, $where);
+	# We do a two-query transaction here:  one select to get
+	# the old points value, then the update as part of the
+	# same transaction;  that way, we know, based on whether
+	# the update succeeded, what the final points value is.
+	# If this weren't a transaction, another moderation
+	# could happen between the two queries and give us the
+	# wrong answer.  On the other hand, if the caller didn't
+	# want the point change, we don't need to get any of
+	# that data.
+	# We have to select cid here because LOCK IN SHARE MODE
+	# only works when an indexed column is returned.
+	# Of course, this isn't actually going to work at all
+	# since the comments table is MyISAM.  Eventually, though,
+	# we'll pull the indexed blobs out and into comments_text
+	# and make the comments table InnoDB and this will work.
+	# Oh well.  Meanwhile, the worst thing that will happen is
+	# a few wrong points logged here and there.
+	my $hr = { };
+	if ($need_point_change) {
+		$self->{_dbh}->{AutoCommit} = 0;
+		($hr->{cid}, $hr->{points_before}, $hr->{points_orig}, $hr->{points_max}) =
+			$self->sqlSelect("cid, points, pointsorig, pointsmax",
+				"comments", "cid=$cid", "LOCK IN SHARE MODE");
+	}
+	my $changed = $self->sqlUpdate("comments", $update, $where, {
+		assn_order => [ "-points", "-pointsmax" ]
+	});
+	if ($need_point_change) {
+		$self->{_dbh}->commit;
+		$self->{_dbh}->{AutoCommit} = 1;
+		$hr->{points_change} = $changed ? $val : 0;
+		$hr->{points_after} = $hr->{points_before} + $hr->{points_change};
+	}
+	if ($need_point_change) {
+		return $changed ? $hr : undef;
+	} else {
+		return $changed ? 1 : undef;
+	}
 }
 
 ########################################################
-# This gets the mathematical mode, in other words the most common, of the
-# moderations done to a comment.  If no mods, return undef.  Tiebreakers
-# break ties, first tiebreaker found wins.  "cid" is a key in moderatorlog
-# so this is not a table scan.
-# A clever thing to do here would be to take the SUM of all mods; if
-# positive, only consider positive mod reasons, and if negative, only
-# negative.  If zero, use the current logic. XXX - Jamie 2002/08/14
+# This gets the mathematical mode, in other words the most common,
+# of the moderations done to a comment.  If no mods, return undef.
+# Tiebreakers break ties, first tiebreaker found wins.  "cid"
+# is a key in moderatorlog so this is not a table scan.
+# A clever thing to do here would be to check the comment's
+# "points" vs. "pointsorig";  if the score has overall gone
+# up, only consider positive mod reasons, and if down, only
+# negative.  If zero, use the current logic.  Maybe later...
 sub getCommentMostCommonReason {
 	my($self, $cid, $allreasons_hr, @tiebreaker_reasons) = @_;
 

@@ -239,11 +239,14 @@ CREATE TABLE comments (
 	uid mediumint UNSIGNED NOT NULL,
 	points tinyint DEFAULT '0' NOT NULL,
 	pointsorig tinyint DEFAULT '0' NOT NULL,
+	pointsmax tinyint DEFAULT '0' NOT NULL,
 	lastmod mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	reason tinyint UNSIGNED DEFAULT '0' NOT NULL,
 	signature char(32) DEFAULT '' NOT NULL,
 	karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL,
 	len smallint UNSIGNED DEFAULT '0' NOT NULL,
+	karma smallint DEFAULT '0' NOT NULL,
+	karma_abs smallint UNSIGNED DEFAULT '0' NOT NULL,
 	PRIMARY KEY (cid),
 	KEY display (sid,points,uid),
 	KEY byname (uid,points),
@@ -1119,9 +1122,13 @@ CREATE TABLE users_info (
 	expiry_comm smallint UNSIGNED DEFAULT '1' NOT NULL,
 	user_expiry_days smallint UNSIGNED DEFAULT '1' NOT NULL,
 	user_expiry_comm smallint UNSIGNED DEFAULT '1' NOT NULL,
+	initdomain VARCHAR(30) DEFAULT '' NOT NULL,
+	created_ipid VARCHAR(32) DEFAULT '' NOT NULL,
 	created_at datetime DEFAULT '0000-00-00 00:00' NOT NULL,
 	people MEDIUMBLOB,
-	PRIMARY KEY (uid)
+	PRIMARY KEY (uid),
+	KEY (initdomain),
+	KEY (created_ipid)
 ) TYPE=InnoDB;
 
 #

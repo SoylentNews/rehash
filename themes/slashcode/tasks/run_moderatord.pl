@@ -17,7 +17,7 @@ use Data::Dumper;
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '18 0-23/4 * * *';
+$task{$me}{timespec} = '8-58/10 0-23 * * *';
 $task{$me}{timespec_panic_1} = '18 1,10 * * *';		# night only
 $task{$me}{timespec_panic_2} = '';			# don't run
 $task{$me}{resource_locks} = { log_slave => 1 };
@@ -31,14 +31,10 @@ $task{$me}{code} = sub {
 		return ;
 	}
 
-#	doLogInit('moderatord');
-
 	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
 	give_out_points($virtual_user, $constants, $slashdb, $user);
 	reconcile_m2($virtual_user, $constants, $slashdb, $user);
 	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
-
-#	doLogExit('moderatord');
 
 	return ;
 };
@@ -46,7 +42,6 @@ $task{$me}{code} = sub {
 ############################################################
 
 sub moderatordLog {
-#	doLog('moderatord', \@_);
 	doLog('slashd', \@_);
 }
 
@@ -290,8 +285,8 @@ sub reconcile_m2 {
 	# reconciled.
 	my $mods_ar = $slashdb->getModsNeedingReconcile();
 
-	my $both0 = undef;
-	my $tievote = undef;
+	my $both0 = { };
+	my $tievote = { };
 	my %newstats = ( );
 	for my $mod_hr (@$mods_ar) {
 
@@ -302,29 +297,13 @@ sub reconcile_m2 {
 		my $nfair   = scalar(grep { $_->{active} && $_->{val} ==  1 } @$m2_ar);
 
 		# Sanity-checking... what could go wrong?
-		if (!$mod_hr->{uid}) {
-			slashdLog("no uid in \$mod_hr: " . Dumper($mod_hr));
-			next;
-		}
-		if ($nunfair+$nfair == 0) {
-			$both0->{num}++;
-			$both0->{minid} = $mod_hr->{id} if !$both0->{minid} || $mod_hr->{id} < $both0->{minid};
-			$both0->{maxid} = $mod_hr->{id} if !$both0->{maxid} || $mod_hr->{id} > $both0->{maxid};
-			if (verbosity() >= 3) {
-				slashdLog("M2 fair,unfair both 0 for mod id $mod_hr->{id}");
-			}
-			next;
-		}
-		if (($nunfair+$nfair) % 2 == 0) {
-			$tievote->{num}++;
-			$tievote->{minid} = $mod_hr->{id} if !$tievote->{minid} || $mod_hr->{id} < $tievote->{minid};
-			$tievote->{maxid} = $mod_hr->{id} if !$tievote->{maxid} || $mod_hr->{id} > $tievote->{maxid};
-			if (verbosity() >= 3) {
-				slashdLog("M2 fair+unfair=" . ($nunfair+$nfair) . ","
-					. " consensus=$consensus"
-					. " for mod id $mod_hr->{id}");
-			}
-		}
+		next unless rec_sanity_check({
+			mod_hr =>	$mod_hr,
+			nunfair =>	$nunfair,
+			nfair =>	$nfair,
+			both0 =>	$both0,
+			tievote =>	$tievote,
+		});
 
 		my $winner_val = 0;
 		   if ($nfair > $nunfair) {	$winner_val =  1 }
@@ -335,7 +314,7 @@ sub reconcile_m2 {
 		# This uses a complex algorithm to return a fairly
 		# complex data structure but at least its fields are
 		# named reasonably well.
-		my $csq = $slashdb->getM2Consequences($fair_frac);
+		my $csq = $slashdb->getM2Consequences($fair_frac, $mod_hr);
 
 		# First update the moderator's tokens.
 		my $use_possible = $csq->{m1_tokens}{num}
@@ -496,6 +475,39 @@ sub reconcile_m2 {
 		}
 	}
 
+}
+
+sub rec_sanity_check {
+	my($args) = @_;
+	my($mod_hr, $nunfair, $nfair, $both0, $tievote) = (
+		$args->{mod_hr}, $args->{nunfair}, $args->{nfair},
+		$args->{both0}, $args->{tievote}
+	);
+	if (!$mod_hr->{uid}) {
+		slashdLog("no uid in \$mod_hr: " . Dumper($mod_hr));
+		return 0;
+	}
+	if ($nunfair+$nfair == 0) {
+		$both0->{num}++;
+		$both0->{minid} = $mod_hr->{id} if !$both0->{minid} || $mod_hr->{id} < $both0->{minid};
+		$both0->{maxid} = $mod_hr->{id} if !$both0->{maxid} || $mod_hr->{id} > $both0->{maxid};
+		if (verbosity() >= 3) {
+			slashdLog("M2 fair,unfair both 0 for mod id $mod_hr->{id}");
+		}
+		return 0;
+	}
+	if (($nunfair+$nfair) % 2 == 0) {
+		$tievote->{num}++;
+		$tievote->{minid} = $mod_hr->{id} if !$tievote->{minid} || $mod_hr->{id} < $tievote->{minid};
+		$tievote->{maxid} = $mod_hr->{id} if !$tievote->{maxid} || $mod_hr->{id} > $tievote->{maxid};
+		if (verbosity() >= 3) {
+			my $constants = getCurrentStatic();
+			slashdLog("M2 fair+unfair=" . ($nunfair+$nfair) . ","
+				. " consensus=$constants->{m2_consensus}"
+				. " for mod id $mod_hr->{id}");
+		}
+	}
+	return 1;
 }
 
 sub add_m2info {
