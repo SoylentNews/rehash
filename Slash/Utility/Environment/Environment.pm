@@ -1757,11 +1757,15 @@ sub createLog {
 		$uri = 'palm';
 	} elsif ($uri eq '/') {
 		$uri = 'index';
+	} elsif ($uri =~ /\.ico$/) {
+		return; # Getting sick of seeing these in the logs -Brian
 	} elsif ($uri =~ /\.pl$/) {
 		$uri =~ s|^/(.*)\.pl$|$1|;
 	# This is for me, I am getting tired of patching my local copy -Brian
 	} elsif ($uri =~ /\.tar\.gz$/) {
 		$uri =~ s|^/(.*)\.tar\.gz$|$1|;
+	} elsif ($uri =~ /\.tar\.rpm$/) {
+		$uri =~ s|^/(.*)\.rpm$|$1|;
 	} elsif ($uri =~ /\.rss$/ || $uri =~ /\.xml$/ || $uri =~ /\.rdf$/) {
 		$uri = 'rss';
 	} elsif ($uri =~ /\.shtml$/) {

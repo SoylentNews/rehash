@@ -4157,26 +4157,6 @@ sub getCommentsForUser {
 	my $thisComment = $self->{_dbh}->prepare_cached($sql) or errorLog($sql);
 	$thisComment->execute or errorLog($sql);
 
-	if ($constants->{comment_cache_newstyle}) {
-
-		my $comments = [];
-		while (my $comment = $thisComment->fetchrow_hashref) {
-			push @$comments, $comment;
-		}
-		$thisComment->finish;
-
-		# XXX We could significantly speed things up by flagging the
-		# comments whose text we don't need with a special field that is
-		# only read by _getCommentText, and then simply not fetching the
-		# text of those comments.  But, we need to use identical code
-		# both here and in xxx() to decide which comments will be
-		# displayed and which won't.
-		$self->_getCommentTextNew($comments, $sid, $cache_read_only);
-
-		return $comments;
-
-	}
-
 	my $archive = $cache_read_only;
 	my $comments = [];
 	my $cids = [];
@@ -4242,333 +4222,99 @@ sub getCommentsForUser {
 # of 0 or 1 entries, of course.  - Jamie
 sub _getCommentTextOld {
 	my($self, $cid, $archive) = @_;
-	my $constants = getCurrentStatic();
-	# If this is the first time this is called, create an empty comment text
-	# cache (a hashref).
-	$self->{_comment_text} ||= { };
-	if (scalar(keys %{$self->{_comment_text}}) > $constants->{comment_cache_max_keys} || 5000) {
-		# Cache too big. Big cache bad. Kill cache. Kludge.
-		undef $self->{_comment_text};
-		$self->{_comment_text} = { };
-	}
 	if (ref $cid) {
 		if (ref $cid ne "ARRAY") {
 			errorLog("_getCommentText called with ref to non-array: $cid");
 			return { };
 		}
-		#Archive, means it is doubtful this is useful in the cache. -Brian
-		if ($archive) {
-			my %return;
-			my $in_list = join(",", @$cid);
-			my $comment_array;
-			$comment_array = $self->sqlSelectAll(
-				"cid, comment",
-				"comment_text",
-				"cid IN ($in_list)"
-			) if @$cid;
-			# Now we cache them so we never fetch them again
-			for my $comment_hr (@$comment_array) {
-				$return{$comment_hr->[0]} = $comment_hr->[1];
-			}
-
-			return \%return;
-		}
-		# We need a list of comments' text.  First, eliminate the ones we
-		# already have in cache.
-		my @needed = grep { !exists($self->{_comment_text}{$_}) } @$cid;
-		my $num_cache_misses = scalar(@needed);
-		my $num_cache_hits = scalar(@$cid) - $num_cache_misses;
-		if (@needed) {
-			my $in_list = join(",", @needed);
-			my $comment_array = $self->sqlSelectAll(
-				"cid, comment",
-				"comment_text",
-				"cid IN ($in_list)"
-			);
-			# Now we cache them so we never fetch them again
-			for my $comment_hr (@$comment_array) {
-				$self->{_comment_text}{$comment_hr->[0]} = $comment_hr->[1];
-			}
-		}
-#{ use Devel::Size;
-#my $nc = scalar(keys %{$self->{_comment_text}});
-#my $ts = 0; for my $cid (keys %{$self->{_comment_text}}) { $ts += length($self->{_comment_text}{$cid}) }
-#my $DSs = Devel::Size::size($self->{_comment_text});
-#my $DSts = Devel::Size::total_size($self->{_comment_text});
-#print STDERR "slashdb->{_comment_text} cache: $nc comments, text chars $ts, size $DSs, total_size $DSts\n"; }
-		# Now, all the comment texts we need are in cache, return them.
-		return $self->{_comment_text};
-
-	} else {
-		my $num_cache_misses = 0;
-		my $num_cache_hits = 0;
-		# We just need a single comment's text.
-		if (!$self->{_comment_text}{$cid}) {
-			# If it's not already in cache, load it in.
-			$num_cache_misses = 1;
-			$self->{_comment_text}{$cid} =
-				$self->sqlSelect("comment", "comment_text", "cid=$cid");
-		} else {
-			$num_cache_hits = 1;
-		}
-		# Now it's in cache.  Return it.
-		return $self->{_comment_text}{$cid};
-	}
-}
-
-########################################################
-# This is here to hopefully save us a database lookup when drawing
-# comment pages, or to reduce the amount of data we have to fetch.
-#
-# This function has been changed to accept a reference to an array
-# of hashrefs, each of which describes one comment.  All the hashrefs
-# have several fields, including {cid} which is its index, but lack
-# the {comment} field which we're going to write in directly.
-# Because only references are being passed back and forth, we limit
-# how much text gets copied around in RAM.  The disadvantage is that
-# the data structures get more complex.
-sub _getCommentTextNew {
-	my($self, $comment_ar, $sid, $cache_read_only) = @_;
-	my $constants = getCurrentStatic();
-
-	my $start_time = Time::HiRes::time;
-	my $entry_n_keys = scalar keys %{$self->{_comment_text}};
-
-	# If we have debugging turned on, %log will store a bunch of data
-	# that we'll print to STDERR when this method returns.
-	my %log;
-	$log{entry_n_keys} = $entry_n_keys if $constants->{comment_cache_debug};
-	$log{ro1} = $cache_read_only if $constants->{comment_cache_debug} >= 2;
-
-	# If this is the first time this is called, create an empty hashref
-	# for the story LRU comment cache.
-	$self->{_story_comm} ||= { };
-
-	# Update info for this story's LRU cache.  Even if we don't put
-	# anything for this story into the comment cache, we make note of
-	# this request.
-	$self->{_story_comm}{$sid}{last_time} = time;
-	$self->{_story_comm}{$sid}{num_requests}++;
-
-	# If this is the first time this is called, create an empty comment text
-	# cache (a hashref).
-	$self->{_comment_text} ||= { };
-
-	# The caller passes in "1" for $cache_read_only if we are not to
-	# write to the cache.  But we can set it as well, and we will when
-	# the cache is full.
-	my $max_keys = $constants->{comment_cache_max_keys} || 3000;
-	my $keys_left = $max_keys - $entry_n_keys;
-	if ($self->{_comment_text_full}) {
-		$cache_read_only = 1;
-	} elsif ($keys_left <= 0) {
-		$self->{_comment_text_full} = 1;
-		$cache_read_only = 1;
-	}
-	$log{ro2} = $cache_read_only if $constants->{comment_cache_debug} >= 2;
-
-	# We need a list of comments' text.  First, copy over (if necessary)
-	# the ones we already have in the cache, and make a list of those we
-	# don't have.  The %needed hash has keys that are comment cids, and
-	# values that are numeric indexes into @$comment_ar.  Keep track of
-	# how many we need, since the purge subroutine needs that number.
-	my %needed = ( );
-	for my $comment_num (0..$#$comment_ar) {
-		my $comment = $comment_ar->[$comment_num];
-		if (exists $self->{_comment_text}{$comment->{cid}}) {
-			$comment->{comment} = $self->{_comment_text}{$comment->{cid}};
-			++$log{num_exist};
-			++$self->{_comment_text}{hits};
-		} else {
-			# We don't have it, add it to our request list.
-			$needed{$comment->{cid}} = $comment_num;
-			++$self->{_comment_text}{misses};
-		}
-	}
-	my $num_needed = scalar keys %needed;
-	$log{num_needed} = $num_needed if $constants->{comment_cache_debug};
-
-	my $purge_msg = "";
-	my $purge_msg_ref = undef;
-	$purge_msg_ref = \$purge_msg if $constants->{comment_cache_debug} >= 2;
-	if ($self->_purgeCommentTextIfNecessary($sid,
-		$num_needed,
-		$purge_msg_ref)
-	) {
-		$cache_read_only = 0;
-	}
-	if ($constants->{comment_cache_debug} >= 2) {
-		$log{ro3} = $cache_read_only;
-		$log{purge_msg} = $purge_msg if $purge_msg;
-	}
-
-	# Whatever we don't have, get, and copy into the $comment_ar array
-	# that we were passed in.  And if the cache is not read-only, also
-	# copy it into the cache.
-	if ($num_needed) {
-		my %cid_list = ( );
-		%cid_list = map { $_ => 1 } @{$self->{_story_comm}{$sid}{cid_list}}
-			if $self->{_story_comm}{$sid}{cid_list};
-		my $in_list = join(",", keys %needed);
-		my $comment_array = $self->sqlSelectAll(
+		my %return;
+		my $in_list = join(",", @$cid);
+		my $comment_array;
+		$comment_array = $self->sqlSelectAll(
 			"cid, comment",
 			"comment_text",
 			"cid IN ($in_list)"
-		);
-		# Copy the new text data to the $comment_ar array which
-		# our caller will use, and (if appropriate) also cache it.
-		for my $i (@$comment_array) {
-			my($cid, $text) = @$i;
-			$comment_ar->[$needed{$cid}]{comment} = $text;
-			if (!$cache_read_only) {
-				$self->{_comment_text}{$cid} = $text;
-				$cid_list{$cid} = 1;
-				++$log{num_added} if $constants->{comment_cache_debug};
-				--$keys_left;
-				$cache_read_only = 1 if $keys_left <= 0;
-			}
+		) if @$cid;
+		for my $comment_hr (@$comment_array) {
+			$return{$comment_hr->[0]} = $comment_hr->[1];
 		}
-		$self->{_story_comm}{$sid}{cid_list} = [ keys %cid_list ];
-	}
-	$log{ro4} = $cache_read_only if $constants->{comment_cache_debug} >= 2;
 
-	# We're done, $comment_ar contains all the data we need.  Write log,
-	# and store some status info which /86.pl can read.
-	my $duration = Time::HiRes::time - $start_time;
-	$self->{_comment_text}{secs} += $duration;
-	if ($constants->{comment_cache_debug}) {
-		printf STDERR "_getCommentText $$ time %0.3f %s\n",
-			$duration,
-			join(" ", map { "$_:$log{$_}" } sort keys %log );
-	}
-	my $cache = getCurrentCache();
-	my $hits = $self->{_comment_text}{hits};
-	my $misses = $self->{_comment_text}{misses};
-	my $secs = $self->{_comment_text}{secs};
-	# Just to make extra sure we don't divide by zero...
-	if ($hits+$misses and $secs) {
-		$cache->{status}{comment_text} = 
-			sprintf "%d hits on %d comments, %.1f%%, %.1f comments/sec",
-				$hits, $hits+$misses,
-				$hits*100/($hits+$misses),
-				($hits+$misses)/$secs;
+		return \%return;
+	} else {
+		return $self->sqlSelect("comment", "comment_text", "cid=$cid");
 	}
 }
-
-########################################################
-# Called by _getCommentTextNew, this purges the comment cache if and
-# only if it is necessary to do so.
+# Left as a history note. -Brian
+#sub _getCommentTextOld {
+#	my($self, $cid, $archive) = @_;
+#	my $constants = getCurrentStatic();
+#	# If this is the first time this is called, create an empty comment text
+#	# cache (a hashref).
+#	$self->{_comment_text} ||= { };
+#	if (scalar(keys %{$self->{_comment_text}}) > $constants->{comment_cache_max_keys} || 5000) {
+#		# Cache too big. Big cache bad. Kill cache. Kludge.
+#		undef $self->{_comment_text};
+#		$self->{_comment_text} = { };
+#	}
+#	if (ref $cid) {
+#		if (ref $cid ne "ARRAY") {
+#			errorLog("_getCommentText called with ref to non-array: $cid");
+#			return { };
+#		}
+#		#Archive, means it is doubtful this is useful in the cache. -Brian
+#		if ($archive) {
+#			my %return;
+#			my $in_list = join(",", @$cid);
+#			my $comment_array;
+#			$comment_array = $self->sqlSelectAll(
+#				"cid, comment",
+#				"comment_text",
+#				"cid IN ($in_list)"
+#			) if @$cid;
+#			# Now we cache them so we never fetch them again
+#			for my $comment_hr (@$comment_array) {
+#				$return{$comment_hr->[0]} = $comment_hr->[1];
+#			}
 #
-# It does a number of tests to see if we can get away with doing nothing;
-# if so, we do nothing.  If we have to purge the cache, use the last_time
-# data in the _story_comm instance hashref to figure out which story was
-# requested _longest_ ago.  Purge from the comment cache all the cids
-# from that story, then purge the info about the story itself.
-sub _purgeCommentTextIfNecessary {
-	my($self, $sid, $num_needed, $msg_ref) = @_;
-	$num_needed ||= 0;
-	my $constants = getCurrentStatic();
-	my $start_time = Time::HiRes::time;
+#			return \%return;
+#		}
+#		# We need a list of comments' text.  First, eliminate the ones we
+#		# already have in cache.
+#		my @needed = grep { !exists($self->{_comment_text}{$_}) } @$cid;
+#		my $num_cache_misses = scalar(@needed);
+#		my $num_cache_hits = scalar(@$cid) - $num_cache_misses;
+#		if (@needed) {
+#			my $in_list = join(",", @needed);
+#			my $comment_array = $self->sqlSelectAll(
+#				"cid, comment",
+#				"comment_text",
+#				"cid IN ($in_list)"
+#			);
+#			# Now we cache them so we never fetch them again
+#			for my $comment_hr (@$comment_array) {
+#				$self->{_comment_text}{$comment_hr->[0]} = $comment_hr->[1];
+#			}
+#		}
+#		return $self->{_comment_text};
+#
+#	} else {
+#		my $num_cache_misses = 0;
+#		my $num_cache_hits = 0;
+#		# We just need a single comment's text.
+#		if (!$self->{_comment_text}{$cid}) {
+#			# If it's not already in cache, load it in.
+#			$num_cache_misses = 1;
+#			$self->{_comment_text}{$cid} =
+#				$self->sqlSelect("comment", "comment_text", "cid=$cid");
+#		} else {
+#			$num_cache_hits = 1;
+#		}
+#		# Now it's in cache.  Return it.
+#		return $self->{_comment_text}{$cid};
+#	}
+#}
 
-	my $min_comm = $constants->{comment_cache_purge_min_comm} || 50;
-	if ($num_needed < $min_comm) {
-		# This sid doesn't need very many (more) comments, not
-		# important enough to purge for.
-		$$msg_ref = "only $num_needed comments needed on $sid, "
-			. "no purge"
-			if $msg_ref;
-		return 0;
-	}
 
-	if (!$self->{_comment_text_full}) {
-		# Cache can still grow, no need to purge.
-		$$msg_ref = "cache not full, no purge" if $msg_ref;
-		return 0;
-	}
-
-	my $num_requests = $self->{_story_comm}{$sid}{num_requests} || 0;
-	my $min_req = $constants->{comment_cache_purge_min_req} || 10;
-	if ($num_requests < $min_req) {
-		# Not many requests for this story, not important enough
-		# to purge for.
-		$$msg_ref = "only " . $self->{_story_comm}{$sid}{num_requests}
-			. " requests for $sid, no purge"
-			if $msg_ref;
-		return 0;
-	}
-
-	# Now the complex part.  Construct @last_time as an ordered list of the
-	# sids, from least-recently-used to most-recently-used.  Do this by
-	# building a %last_time hash, keys are sids, values are timestamps.
-	my %last_time = ( );
-	for my $lru_sid (keys %{$self->{_story_comm}}) {
-		$last_time{$lru_sid} = $self->{_story_comm}{$lru_sid}{last_time}
-			if $self->{_story_comm}{$lru_sid}{last_time};
-	}
-	if (scalar keys %last_time <= 1) {
-		$$msg_ref = "only one sid in cache, no purge" if $msg_ref;
-		return 0;
-	}
-	my @last_time = sort {
-		($last_time{$a} <=> $last_time{$b}) || ($a <=> $b)
-	} keys %last_time;
-	$$msg_ref = "_purgeCommentText $$ last_time '"
-		. join(",", map { "$_:$last_time{$_}" } @last_time ) . "'"
-		if $msg_ref;
-
-	my $empty_enough = 0;
-	my $max_keys = $constants->{comment_cache_max_keys} || 3000;
-	my $max_frac = $constants->{comment_cache_purge_max_frac} || 0.75;
-	my $max_keys_desired = int($max_keys * $max_frac);
-	$$msg_ref .= " desired $max_keys_desired" if $msg_ref;
-	while (!$empty_enough) {
-		# Keep trying to purge old story comments until we have to
-		# give up or until the cache becomes sufficiently non-full.
-		if (scalar @last_time < 2) {
-			$$msg_ref .= "; giving up on purge attempt, only "
-				. "sid '@last_time' left" if $msg_ref;
-			last;
-		}
-		my $sid_to_purge = shift @last_time;
-		if ($sid_to_purge eq $sid) {
-			$$msg_ref .= "; LOGIC ERROR sid_to_purge=sid='$sid' "
-				. "last_time='@last_time'" if $msg_ref;
-			last;
-		}
-
-		# Purge the data.
-		my $cids_to_purge = $self->{_story_comm}{$sid_to_purge}{cid_list};
-		$$msg_ref .= "; sid_to_purge '$sid_to_purge' "
-			. "cids_to_purge (" . scalar(@$cids_to_purge) . ") "
-			. "'@$cids_to_purge'" if $msg_ref;
-		delete @{$self->{_comment_text}}{@$cids_to_purge};
-		delete $self->{_story_comm}{$sid_to_purge};
-
-		# If the cache is below its max size, it's no longer full.  If it's
-		# below the max size desired, we're done looping.
-		my $keys_left = scalar(keys %{$self->{_comment_text}});
-		$self->{_comment_text_full} = 0
-			if $self->{_comment_text_full}
-				and $keys_left < $max_keys;
-		$empty_enough = ($keys_left < $max_keys_desired) ? 1 : 0;
-		$$msg_ref .= "; after purge '$sid_to_purge', "
-			. scalar(keys %{$self->{_comment_text}})
-			. " keys, $max_keys_desired desired"
-			if $msg_ref;
-	}
-
-	my $duration = sprintf("%.3f", Time::HiRes::time - $start_time);
-	$$msg_ref .= "; duration ${duration}s" if $msg_ref;
-
-	if ($self->{_comment_text_full}) {
-		# Purge attempt failed.
-		return 0;
-	}
-
-	# Purge attempt succeeded, maybe not purged down as far as
-	# we'd like, but success nonetheless.
-	return 1;
-}
 
 ########################################################
 sub getComments {
@@ -4624,7 +4370,8 @@ sub getStoriesEssentials {
 	my $columns;
 	$columns = 'sid, section, title, time, commentcount, hitparade, tid';
 
-	my $where = "time < NOW() ";
+	#my $where = "time < NOW() ";
+	my $where = " time + INTERVAL 0 DAY<NOW() ";
 	# Added this to narrow the query a bit more, I need
 	# see about the impact on this -Brian
 	$where .= "AND writestatus != 'delete' ";
