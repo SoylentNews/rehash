@@ -96,6 +96,17 @@ EOT
 	my $uniq_rss_users = $stats->countDailyByOPDistinctIPID('rss', $yesterday);
 	my $rss_page_views = $stats->countDailyByOP('rss',$yesterday);
 
+	my $admin_mods = $stats->getAdminModsInfo($yesterday);
+	my $admin_mods_text = "";
+	for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
+		$admin_mods_text .= sprintf("%13.13s: %34s %46s\n",
+			$nickname,
+			$admin_mods->{$nickname}{m1},
+			$admin_mods->{$nickname}{m2}
+		);
+	}
+	$admin_mods_text =~ s/ +$//gm;
+
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
 	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
@@ -122,6 +133,7 @@ EOT
 		$count->{total},
 		$count->{unique},
 		$count->{unique_users},
+		$admin_clearpass_warning,
 		$accesslog_rows,
 		$formkeys_rows,
 		$modlog_rows,
@@ -149,10 +161,10 @@ EOT
 		$journal_page_views,
 		$palm_page_views,
 		$rss_page_views,
-		$journal_page_views,
 		$submissions,
 			($submissions ? $submissions_comments_match*100
 						/$submissions		: 0),
+		$admin_mods_text,
 		$sdTotalHits,
 		$count->{index}{index},
 	);
@@ -162,7 +174,7 @@ $constants->{sitename} Stats for yesterday
         total: %8d
        unique: %8d
         users: %8d
-$admin_clearpass_warning
+%s
     accesslog: %8d rows total
      formkeys: %8d rows total
        modlog: %8d rows total
@@ -186,6 +198,7 @@ $admin_clearpass_warning
   submissions: %8d submissions
  sub/comments: %8.1f%% of the submissions came from comment posters from this day
 
+%s
    total hits: %8d
      homepage: %8d
       indexes

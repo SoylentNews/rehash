@@ -90,6 +90,69 @@ sub getCommentsByDistinctIPID {
 }
 
 ########################################################
+sub getAdminModsInfo {
+	my($self, $yesterday) = @_;
+
+	# First get the count of upmods and downmods performed by each admin.
+	my $m1_uid_val_hr = $self->sqlSelectAllHashref(
+		[qw( uid val )],
+		"moderatorlog.uid AS uid, val, nickname, COUNT(*) AS count",
+		"moderatorlog, users",
+		"users.seclev > 1 AND moderatorlog.uid=users.uid
+		 AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"GROUP BY moderatorlog.uid, val"
+	);
+
+	# Now get a count of fair/unfair counts for each admin.
+	my $m2_uid_val_hr = $self->sqlSelectAllHashref(
+		[qw( uid val )],
+		"users.uid AS uid, metamodlog.val AS val, users.nickname AS nickname, COUNT(*) AS count",
+		"metamodlog, moderatorlog, users",
+		"users.seclev > 1 AND moderatorlog.uid=users.uid
+		 AND metamodlog.mmid=moderatorlog.id
+		 AND metamodlog.ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"GROUP BY users.uid, metamodlog.val"
+	);
+
+	# If nothing for either, no data to return.
+	return { } if !%$m1_uid_val_hr && !%$m2_uid_val_hr;
+
+	# Build a hashref with one key for each admin user, and subkeys
+	# that give data we will want for stats.
+	my $hr = { };
+	for my $uid (keys %$m1_uid_val_hr) {
+		my $nickname = $m1_uid_val_hr->{$uid} {1}{nickname}
+			|| $m1_uid_val_hr->{$uid}{-1}{nickname}
+			|| "";
+		next unless $nickname;
+		my $nup   = $m1_uid_val_hr->{$uid} {1}{count} || 0;
+		my $ndown = $m1_uid_val_hr->{$uid}{-1}{count} || 0;
+		my $percent = ($nup+$ndown > 0)
+			? $nup*100/($nup+$ndown)
+			: 0;
+		$hr->{$nickname}{m1} = sprintf("modded %3d up, %3d down (%3.0f%% up)",
+			$nup, $ndown, $percent);
+		$hr->{$nickname}{m2} = "" if !exists($m2_uid_val_hr->{$uid});
+	}
+	for my $uid (keys %$m2_uid_val_hr) {
+		my $nickname = $m2_uid_val_hr->{$uid} {1}{nickname}
+			|| $m2_uid_val_hr->{$uid}{-1}{nickname}
+			|| "";
+		next unless $nickname;
+		my $nfair   = $m2_uid_val_hr->{$uid} {1}{count} || 0;
+		my $nunfair = $m2_uid_val_hr->{$uid}{-1}{count} || 0;
+		my $percent = ($nfair+$nunfair > 0)
+			? $nunfair*100/($nfair+$nunfair)
+			: 0;
+		$hr->{$nickname}{m2} = sprintf("was judged %3d fair, %3d unfair (%3.0f%% unfair)",
+			$nfair, $nunfair, $percent);
+		$hr->{$nickname}{m1} = "" if !exists($m1_uid_val_hr->{$uid});
+	}
+
+	return $hr;
+}
+
+########################################################
 sub countSubmissionsByDay {
 	my($self, $yesterday) = @_;
 
