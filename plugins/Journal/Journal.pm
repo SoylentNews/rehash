@@ -135,7 +135,7 @@ sub create {
 		posttype	=> $posttype,
 	});
 
-	my($id) = $self->getLastInsertId('journals', 'id');
+	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
 	return unless $id;
 
 	$self->sqlInsert("journals_text", {

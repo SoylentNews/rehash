@@ -195,7 +195,7 @@ sub _create {
 		'send'	=> $send || 'now',
 	});
 
-	my($msg_id) = $self->getLastInsertId($table, $prime);
+	my($msg_id) = $self->getLastInsertId({ table => $table, prime => $prime });
 	return $msg_id;
 }
 
