@@ -1,0 +1,296 @@
+__section__
+default
+__description__
+Template handles listing of comments for both IPIDs and UIDS
+Also can interleave moderations performed against the
+comments if they're provided and the user is an admin
+
+* admin_flag    - whether or not the user is an admin
+* commentstruct - array of comments to display
+* commentcount  - total commentcount
+* cids_to_mods   - hashref keyed by cid containing arrays of moderations done to that cid
+* reasons       - hashref from $slashdb->getReasons()
+* type	        - type of listing we're seeing options are user or netid
+* title	        - title to be displayed
+* useredit	- hash for user we're editing if we're in user mode
+* netid		- net_id we're viewing
+* netid_vis	- shortened net_id for display purposes
+* min_comment   - minimum comment we want to see
+* comment_time = number of days back we are limiting the comments shown to.  If 0 or undefined we're showing comments sequentially w/o time limits
+
+__title__
+listComments;users;default
+__page__
+users
+__lang__
+en_US
+__name__
+listComments
+__seclev__
+10000
+__template__
+[% 
+light_text_color = "#AAAAAA";
+light_text_color2 = "#444444";
+light_bgcolor ="#EEEEEE";
+total_cols = 7;
+a_count=0; a_down=0; 
+unanimous=0; unresolved=0;
+a_m2_down=0; a_m2_up=0; a_m2_count=0; a_m2_unfair_votes=0;
+moddable_items=0;
+%]
+[% total_mods_shown=0; %]
+[% IF commentcount > 0 %]
+	[% commenttitle = ((min_comment == 0) ? "" : "$commentstruct.size of ");
+		IF type=="user";
+			 commenttitle = comment_title _"$useredit.nickname's ";
+		ELSIF type=="netid";
+			 commenttitle = comment_title _ "$netid" _ "'s ";
+		END;
+		IF comment_time;
+		ELSE;
+		 commenttitle = commenttitle _ ((commentstruct.size == commentcount || min_comment > 0)
+			? ""
+			: "Latest $commentstruct.size of $commentcount ")
+		_ "Comment"
+		_ (commentcount == 1 ? "" : "s");
+		END;
+		IF comment_time;
+			commenttitle = commenttitle _ " comments for last $comment_time days ";
+		END %]
+	[% IF commentstruct.size > 0 and admin_flag %]
+	<FORM METHOD="POST" ACTION="[% constants.rootdir %]/admin.pl">
+	<INPUT TYPE="hidden" NAME="op" VALUE="moderate_recent">
+	[% END %]
+	[% PROCESS titlebar width="100%" title = commenttitle -%]
+	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.bg.2 %]">
+	<TR bgcolor="[% user.bg.3 %]">
+		[% IF type=="netid"; total_cols = total_cols + 1; %]<TH align=left><FONT color="[% user.fg.3 %]" size=-1>User</FONT></TH>[% END %]
+		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Subject</Font>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1> / Moderator</FONT>[% END %]</TH>
+		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Datestamp</FONT></TH>
+		<TH align=left>[% IF admin_flag and constants.show_mods_with_comments %]<Font color="[% light_text_color %]" size=-1>M2</FONT>[% END %]</TH>
+		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Replies</FONT></TH>
+		<TH align=left>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1>CK</FONT>[% END %]</TH>
+		<TH align=left>[% IF admin_flag %]<FONT color="[% light_text_color %]" size=-1>IPID</FONT>[% END %]</TH>
+		<TH align=left><FONT color="[% user.fg.3 %]" size=-1>Score</FONT></TH>
+	</TR>
+	[% n = min_comment %]
+	[% prev_comm_sid = 0; total_replies=0; total_karma=0; total_score=0; shown_comments=0 %]
+	[% FOREACH comment = commentstruct; %]
+		[% IF comment.type == 'poll';
+			label = 'Poll: ';
+		ELSIF comment.type == 'journal';
+			label = 'Journal Discussion: ';
+		ELSE;
+			label = '';
+		END;
+		label = label _ comment.disc_title;
+		
+		n = n + 1;
+		shown_comments = shown_comments + 1;
+		total_replies = comment.replies + total_replies;
+		replies = comment.replies ? comment.replies : '';
+		score = comment.pts;
+		total_score = comment.pts + total_score;
+		total_karma = comment.karma + total_karma;
+		reasonnum = comment.reason;
+		reasonname = reasons.$reasonnum.name;
+		IF reasonnum;	
+			IF !seen_reasons.$reasonname;  seen_reasons.$reasonname=0; END;
+			seen_reasons.$reasonname = seen_reasons.$reasonname + 1;
+		END;
+		reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
+		%]
+		
+		[% IF prev_comm_sid && prev_comm_sid != comment.sid %][% PROCESS attached_to_row comment = comment label = label colspan=total_cols %] [% END %]
+		[%-
+		'<TR>';
+		IF type == "netid";
+		'<TD valign="TOP"><NOBR>';
+		%]
+		[%- PROCESS nick_and_uid nickname=comment.nickname uid=comment.uid -%]
+		[%-	
+		'</NOBR></TD>';
+		END;
+		IF admin_flag and comment.type!="archived";
+			moddable_items=moddable_items+1;
+		END;
+		'<TD VALIGN="TOP">';
+			IF min_comment > 0; '<B>'; n; '</B> '; END;
+			'<A HREF="';
+				constants.rootdir;
+				'/comments.pl?sid='; comment.sid;
+				'&amp;cid='; comment.cid;
+			'">';
+			comment.subj;
+			'</A>&nbsp;';
+		'</TD>';
+		'<TD VALIGN="TOP"><NOBR>&nbsp;'; IF comment.type == "archived"; "*"; END; Slash.timeCalc(comment.cdate); '</NOBR></TD>';
+		'<TD></TD>';
+		'<TD VALIGN="TOP" align="right"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
+		'<TD align="right">'; IF admin_flag; comment.karma; END; '</TD>';
+		'<TD>'; 
+			IF admin_flag; -%]
+			 	[%- PROCESS link_ipid ipid=comment.ipid ipid_vis=comment.ipid_vis -%]
+			[% END; 
+		'</TD>';
+		'<TD VALIGN="TOP"><NOBR>&nbsp;'; %][% PROCESS make_reason_mod_select text = score _ reasontext reasons = reasons comment=comment admin_flag=admin_flag %][% '</NOBR></TD>';
+		"</TR>\n";
+		%]
+		[% IF admin_flag and constants.show_mods_with_comments %]
+			[%- FOREACH m = cids_to_mods.${comment.cid}; total_mods_shown = total_mods_shown+1; %]
+				[%- IF m.active;
+					a_count=a_count+1;
+					IF m.val< 1;
+						a_down=a_down+1;
+					END;
+					a_m2_count = a_m2_count + m.m2fair + m.m2unfair;
+					a_m2_unfair_votes = a_m2_unfair_votes + m.m2unfair;
+					IF m.m2status>0;
+						IF m.m2fair > m.m2unfair;  a_m2_up = a_m2_up + 1; END;
+						IF m.m2unfair > m.m2fair;  a_m2_down = a_m2_down + 1; END;
+						IF (m.m2unfair == 0) and (m.m2fair>0 ); unanimous=unanimous + 1; END;
+					ELSE;
+						IF reasons.${m.reason}.m2able;
+							unresolved=unresolved + 1;
+						END;
+					END;
+				 END -%]
+				<tr bgcolor="[% light_bgcolor %]">
+				[% IF type=="netid" %]<TD></TD>[% END %]
+				<td align=right><font size=-1  color="[% light_text_color2 %]">[% PROCESS nick_and_uid nickname=m.nickname uid=m.uid %]</font></td>
+				<td><font size=-1 color="[% light_text_color2 %]">[% Slash.timeCalc(m.ts) %][% IF !m.active %]*[% END %]</font></td>
+				<td><font  color="[% light_text_color2 %]" size=-1>[% PROCESS make_m2_string moderation=m reasons=reasons%]</font></td>
+				<td> </td>
+				<td> </td>
+				<td>[% PROCESS link_ipid ipid=m.ipid ipid_vis=Slash.vislenify(m.ipid) %]</td>
+				<td> <font size=-1 color="[% light_text_color2 %]">[% IF m.val > 0; "+"; END; m.val %], [% reasons.${m.reason}.name %] </font></td>
+
+ </tr>
+			[%- END -%]
+		[%- END -%]
+		[%-  prev_comm_sid = comment.sid; -%]
+		[%- END -%]
+		[% IF shown_comments > 0 %]
+				[%- PROCESS attached_to_row comment = commentstruct.${commentstruct.size} label = label colspan=total_cols -%]
+				[%-
+					avg_score = total_score / shown_comments FILTER format('%2.1f');
+					reason_most = ""; reason_most_hits = -1;
+					FOREACH rs = seen_reasons;
+						IF rs.value > reason_most_hits;
+							reason_most = rs.key;
+							reason_most_hits = rs.value;
+						END;
+					END;
+
+					IF admin_flag and constants.show_mods_with_comments and total_mods_shown>0;
+						'<TR bgcolor="' _ light_bgcolor _ '">';
+						IF type=="netid"; 
+							"<TD></TD>"; 
+						END; 
+						'<td align=right><font  color="' _ light_text_color2 _ '" size=-1> Total Moderations: ' _ a_count _ '</font></td>';
+				 	  	'<td align=left><font  color="' _ light_text_color2 _ '" size=-1>';%][% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</font></td>
+						[%-
+ 						'<td align=left colspan=3><font color="' _ light_text_color2 _ '" size=-1>' %][% a_m2_unfair_votes %] Unfair ([% PROCESS percentage sum=> a_m2_unfair_votes, count => a_m2_count %])</font></td> [%
+						'<td></td>';
+				      		'<td align=left><font  color="' _ light_text_color2 _ '" size=-1>';%] [% PROCESS percentage sum=>a_down, count => a_count %] Downmods</a> </td>[%
+						'</tr>';
+					END;
+
+					"<TR><TD "; IF type=="netid"; 'COLSPAN="2"'; END; ">";
+					IF commentcount > n && (user.seclev > constants.comments_more_seclev
+						|| (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
+				 	<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A>
+					[% END %]
+					</TD>
+<TD></TD><TD></TD>
+					<TD align="right">[% IF admin_flag %]<B>[% total_replies %]</B>[% END %]</TD>
+					<TD align="right">[% IF admin_flag %]<B>[% total_karma %]</B>[% END %]</TD>
+					<TD></TD>
+					<TD>[% IF admin_flag %]<B>[% avg_score %][% IF reason_most_hits>0 %], [% reason_most %][% END %]</B>
+						[% IF moddable_items %]<BR><INPUT TYPE="SUBMIT" VALUE="Moderate">[% END %]
+					[% END %]</TD>
+					</TR>	
+		[%- ELSIF n==0 and commentcount> 0 -%]
+			<TR><TD>No comments in selected time period. <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;no_time_restriction=1">Go to latest comments...</A>
+</TD></TR>
+		[%- ELSIF n>0 and commentcount> 0  -%]
+			<TR><TD>No more comments</TD></TR>
+		[%- ELSIF commentcount== 0 -%]
+			<TR><TD>No comments</TD></TR>
+		[%- END -%]
+		</TABLE>
+		[%- IF commentstruct.size > 0 and admin_flag -%]
+			</FORM>
+		[%- END -%]
+[% ELSE;
+	IF type=="user";
+                         "$useredit.nickname has yet to post any comments";
+                ELSIF type=="netid";
+                         "No comments posted by $netid";
+                END;
+
+ END %]
+
+
+[% BLOCK attached_to_row %]
+	<TR><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% comment.url %]">[% label %]</A></FONT></TD></TR>
+[% END %]
+
+[% BLOCK nick_and_uid;
+	nickname | strip_literal;
+	IF uid != constants.anonymous_coward_uid;
+		' (<A HREF="';
+		constants.rootdir;
+		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
+		uid;
+		'">';
+		uid;
+		'</A>)';
+	END;
+END %]
+
+[% BLOCK link_ipid %]
+<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+[% END %]
+
+[% BLOCK make_m2_string; 
+	IF !reasons.${moderation.reason}.m2able || !moderation.active;
+		m2fair_str = "-";
+		m2unfair_str = "-";
+	ELSE;
+		IF moderation.m2status > 0; 
+			m2fair_str = "<B><I>" _ moderation.m2fair _ "</I></B>"; m2unfair_str = "<B><I>" _ moderation.m2unfair _ "</I></B>";
+	        ELSE;
+			m2fair_str = moderation.m2fair; m2unfair_str =  moderation.m2unfair;
+        	END;
+	END;
+	m2fair_str _ " " _ m2unfair_str;
+ END %]
+
+[% BLOCK percentage %]
+[%IF count > 0;
+        pct = (sum / count*100) FILTER format('%2.0f');
+        pct = pct _ "%";
+ELSE;
+pct = "n/a";
+ END; %]
+[%- pct -%]
+[% END %]
+
+[% BLOCK make_reason_mod_select %]
+	[% IF admin_flag and comment.type != "archived";
+	h = { "0" => text };
+	FOREACH r = reasons;
+		h.${r.key} = reasons.${r.key}.name;
+	END;
+	Slash.createSelect("reason_${comment.sid}_${comment.cid}", h, '', 1, 1);
+	ELSE;
+		text;
+	END %]
+[% END %]
+
+__seclev__
+10000
+
+$Id$
