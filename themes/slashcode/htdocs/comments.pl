@@ -700,8 +700,9 @@ sub validateComment {
 	my $form_success = 1;
 	my $message = '';
 
-	$$comm ||= $form->{postercomment};
-	$$subj ||= $form->{postersubj};
+# No reason for these 2 lines, that we can see - pudge (& jamie), 2002/07/01
+#	$$comm ||= $form->{postercomment};
+#	$$subj ||= $form->{postersubj};
 
 	if ($slashdb->checkReadOnly('comments')) {
 		$$error_message = getError('readonly');
