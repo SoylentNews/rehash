@@ -5520,6 +5520,7 @@ sub getAuthorNames {
 
 ##################################################################
 # XXXSKIN - is this going to do something?
+# Not sure what I had meant for this to do.
 sub getUniqueSkinsFromStories {
 	my($self, $stories) = @_;
 
@@ -6485,12 +6486,14 @@ sub _stories_time_clauses {
 }
 
 ########################################################
+# This method may overwrite $options if it wants.
 sub getStoriesEssentials {
 	my($self, $options) = @_;
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
+	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $can_restrict_by_min_stoid = 1;
 #use Data::Dumper;
 #print STDERR "gSE gSkin: " . Dumper($gSkin);
@@ -6512,6 +6515,29 @@ sub getStoriesEssentials {
 	$can_restrict_by_min_stoid = 0 if $limit > 100
 		|| $options->{limit}       > $gSkin->{artcount_max}
 		|| $options->{limit_extra} > $gSkin->{artcount_max};
+
+	# If we're about to be asked to restrict the selection to
+	# just one tid, the mainpage, and sectioncollapse is turned
+	# on, then what's actually wanted is all tids that are
+	# children of the mainpage.  Fake that into place.
+	my $want_mainpage_children = 0;
+	if ($options->{sectioncollapse} && $options->{tid}) {
+		if (ref($options->{tid}) eq 'ARRAY') {
+			if (scalar(@{$options->{tid}}) == 1
+				&& $options->{tid}[0] == $mp_tid) {
+				$want_mainpage_children = 1;
+			}
+		} else {
+			if ($options->{tid} == $mp_tid) {
+				$want_mainpage_children = 1;
+			}
+		}
+	}
+	if ($want_mainpage_children) {
+		my $nexuses = $self->getNexusChildrenTids($mp_tid);
+		unshift @$nexuses, $mp_tid;
+		$options->{tid} = $nexuses;
+	}
 
 	# Restrict the selection to include or exclude based on
 	# up to three types of data.  The data fed to this loop
@@ -6543,13 +6569,13 @@ sub getStoriesEssentials {
 		if ($optname ne 'tid' || $not) {
 			$can_restrict_by_min_stoid = 0;
 		} else {
-			if (ref($options->{tid})) {
-				if (@{$options->{tid}} > 1
-					|| $options->{tid}[0] != $constants->{mainpage_nexus_tid}) {
+			if (ref($options->{tid}) eq 'ARRAY') {
+				if (scalar(@{$options->{tid}}) > 1
+					|| $options->{tid}[0] != $mp_tid) {
 					$can_restrict_by_min_stoid = 0;
 				}
 			} else {
-				if ($options->{tid} != $constants->{mainpage_nexus_tid}) {
+				if ($options->{tid} != $mp_tid) {
 					$can_restrict_by_min_stoid = 0;
 				}
 			}

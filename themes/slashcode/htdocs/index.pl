@@ -95,6 +95,7 @@ my $start_time = Time::HiRes::time;
 	my $gse_hr = { tid => $gSkin->{nexus} };
 	$gse_hr->{limit} = $user_maxstories if !$user->{is_anon} && $user_maxstories;
 	$gse_hr->{issue} = $issue if $issue;
+	$gse_hr->{sectioncollapse} = $user->{sectioncollapse} if $user->{sectioncollapse};
 	$stories = $reader->getStoriesEssentials($gse_hr);
 #use Data::Dumper;
 #print STDERR "index.pl gse_hr: " . Dumper($gse_hr);
