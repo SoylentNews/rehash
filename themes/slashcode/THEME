@@ -146,6 +146,7 @@ template=templates/html-redirect;misc;default
 template=templates/index;index;default
 template=templates/index;index;light
 template=templates/info;menu;default
+template=templates/ipid_display;misc;default
 template=templates/isEligible;metamod;default
 template=templates/karma;misc;default
 template=templates/linkComment;misc;default
