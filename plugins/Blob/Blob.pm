@@ -47,9 +47,8 @@ sub new {
 	my($class, $user) = @_;
 	my $self = {};
 
-	my $slashdb = getCurrentDB();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{'Blob'};
+	my $plugin = getCurrentStatic('plugin');
+	return unless $plugin->{'Blob'};
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;

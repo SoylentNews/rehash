@@ -669,18 +669,8 @@ sub _convertModsToComments {
 
 sub getReasons {
 	my($self) = @_;
-	my $cache_enabled = getCurrentStatic('cache_enabled');
-	my $reasons = $self->{_reasons_cache} || undef;
-	if (!$reasons) {
-		$reasons = $self->sqlSelectAllHashref(
-			"id", "*", "modreasons"
-		);
-		$self->{_reasons_cache} = $reasons if $cache_enabled;
-	}
-	if ($cache_enabled) {
-		# Return a copy of the cache, just in case anyone munges it up.
-		$reasons = {( %$reasons )};
-	}
+	# Return a copy of the cache, just in case anyone munges it up.
+	my $reasons = {( %{getCurrentStatic('reasons')} )};
 	return $reasons;
 }
 
@@ -5392,6 +5382,9 @@ sub getSlashConf {
 	for (@$plugindata) {
 		$conf{plugin}{$_} = 1;
 	}
+	$conf{reasons} = $self->sqlSelectAllHashref(
+		"id", "*", "modreasons"
+	);
 
 	# the rest of this function is where is where we fix up
 	# any bad or missing data in the vars table

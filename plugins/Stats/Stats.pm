@@ -30,9 +30,8 @@ sub new {
 	my($class, $user, $options) = @_;
 	my $self = {};
 
-	my $slashdb = getCurrentDB();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{'Stats'};
+	my $plugin = getCurrentStatic('plugin');
+	return unless $plugin->{'Stats'};
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;

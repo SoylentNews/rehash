@@ -23,9 +23,8 @@ sub new {
 	my($class, $user) = @_;
 	my $self = {};
 
-	my $slashdb = getCurrentDB();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{'Admin'};
+	my $plugin = getCurrentStatic('plugin');
+	return unless $plugin->{'Admin'};
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;

@@ -21,9 +21,8 @@ sub new {
 	my($class) = @_;
 	my $self = { };
 
-	my $slashdb = getCurrentDB();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{Subscribe};
+	my $plugin = getCurrentStatic('plugin');
+	return unless $plugin->{'Subscribe'};
 
 	$self->{defpage} = {
 		map { ( $_, 1 ) }

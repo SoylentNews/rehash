@@ -36,8 +36,8 @@ sub new {
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{'Page'};
+	my $plugin = getCurrentStatic('plugin');
+	return unless $plugin->{'Page'};
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;

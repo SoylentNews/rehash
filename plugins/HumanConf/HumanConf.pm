@@ -22,9 +22,8 @@ sub new {
 	my($class, $user) = @_;
 	my $self = {};
 
-	my $slashdb = getCurrentDB();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return undef unless $plugins->{HumanConf};
+	my $plugin = getCurrentStatic('plugin');
+	return unless $plugin->{'HumanConf'};
 
 	my $constants = getCurrentStatic();
 	return undef unless $constants->{hc};
