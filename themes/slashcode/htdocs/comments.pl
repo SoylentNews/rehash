@@ -109,7 +109,7 @@ sub main {
 			$discussion = $slashdb->getDiscussionBySid($form->{sid});
 			$section = $discussion->{section};
 			if ($constants->{tids_in_urls}) {
-				my $tids = $slashdb->getTopiclistForStory($form->{sid}) || [];
+				my $tids = $slashdb->getTopiclistForStory($form->{sid});
 				my $tid_string = join('&amp;tid=', @$tids);
 				$user->{state}{tid} = $tid_string;
 			}
