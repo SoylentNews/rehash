@@ -1001,10 +1001,6 @@ No value is returned.
 
 =cut
 
-# In the future a secure flag should be set on
-# the cookie for admin users. -- brian
-# well, it should be an option, of course ... -- pudge
-# The option is the var "cookiesecure." - Jamie
 sub setCookie {
 	return unless $ENV{GATEWAY_INTERFACE};
 
@@ -1038,24 +1034,12 @@ sub setCookie {
 		-path    =>  $cookiepath
 	);
 
-	# I cannot get HTTPS here ... I think it is not set until later.
-	# This poses a problem.  -- pudge
-	# Need to scan the connection class to find this information.
-	# (I'll do it later). This may also be in $r->protocol -Brian
-	# Brian advises port() is the best way, yes it's icky -Jamie
-	# This doesn't work yet! I think I want $r->connection->local_addr
-	# (and then unpack it and look at the port) - Jamie
-	# OK, this works:
 	if ($constants->{cookiesecure}) {
 		my $subr = $r->lookup_uri($r->uri);
 		if ($subr && $subr->subprocess_env('HTTPS') eq 'on') {
 			$cookiehash{-secure} = 1;
 		}
 	}
-# And this doesn't work:
-#	if ($constants->{cookiesecure} && $r->port == 443) {
-#		$cookiehash{-secure} = 1;
-#	}
 
 	my $cookie = Apache::Cookie->new($r, %cookiehash);
 
