@@ -101,7 +101,6 @@ prev_com = {};
 		END;
 		reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
 		%]
-		
 		[% IF prev_comm_sid && prev_comm_sid != comment.sid %][% PROCESS attached_to_row the_comment = prev_com colspan=total_cols %] [% END %]
 		[%-
 		'<TR>';
@@ -182,9 +181,12 @@ prev_com = {};
 							reason_most = rs.key;
 							reason_most_hits = rs.value;
 						END;
-					END;
+					END; %]
+					[%
 
-					IF admin_flag and constants.show_mods_with_comments and total_mods_shown>0;
+					IF admin_flag and constants.show_mods_with_comments and total_mods_shown>0; %]
+						<TR><TD colspan="[% total_cols %]">[% PROCESS horiz_rule %]</TD></TR>
+						[%
 						'<TR bgcolor="' _ light_bgcolor _ '">';
 						IF type=="netid"; 
 							"<TD></TD>"; 
@@ -245,9 +247,9 @@ prev_com = {};
 
 
 [% BLOCK attached_to_row;
-	IF the_comment.type == 'poll';
+	IF the_comment.disc_type == 'poll';
 		the_label = 'Poll: ';
-	ELSIF the_comment.type == 'journal';
+	ELSIF the_comment.disc_type == 'journal';
 		the_label = 'Journal Discussion: ';
 	ELSE;
 		the_label = '';
