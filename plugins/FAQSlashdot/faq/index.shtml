@@ -99,6 +99,10 @@ articles for different sites?</a></b></li>
 
 <li>
 <b><a href="editorial.shtml#ed900">"The Omelette"</a></b></li>
+
+<LI><B><A href="editorial.shtml#ed1000">What are the Slashdot Sections for?</A></B>
+</LI>
+
 </ul>
 <!-- UI -->
 <h2>
@@ -113,7 +117,28 @@ articles for different sites?</a></b></li>
 
 <li>
 <b><a href="UI.shtml#ui300">How can I see old stories?</a></b></li>
+
+<li>
+<b><a href="UI.shtml#ui400">Why do I see Some Other User's Nickname in my Menu?</a></b></li>
 </ul>
+
+
+<!-- Interviews -->
+<H2><B><A href="interviews.shtml">Slashdot Interviews</A></B></H2>
+<UL>
+ <LI><B><A HREF="interviews.shtml#int1000">How many questions can I ask?</A></B></LI>
+ <LI><B><A HREF="interviews.shtml#int1100">My question was moderated to +5 -- how come it didn't get passed
+   along for an answer?</A></B></LI>
+ <LI><B><A HREF="interviews.shtml#int1150">Hey, that Eleventh question wasn't even one of the 
+   highly moderated ones!</A></B></LI>
+ <LI><B><A HREF="interviews.shtml#int1200">The questions that were sent to ___ were awful -- How could
+   you ask such idiotic things?!</A></B></LI>
+ <LI><B><A HREF="interviews.shtml#int1300">The answers from ___ were awful -- Why didn't he have
+   better answers?</A></B></LI>
+ <LI><B><A HREF="interviews.shtml#int1400">How do I suggest an interview guest?</A></B></LI>
+</UL>
+
+
 <!-- Comments and Moderation -->
 <h2>
 <b><a href="com-mod.shtml">Comments and Moderation</a></b></h2>
@@ -257,6 +282,7 @@ mean?</a></b></li>
   <li> <b><a href="accounts.shtml#ac800">Do you ban people from Slashdot?</a></b></li>
   <li> <b><a href="accounts.shtml#ac900">Why is my IP banned? </a></b></li>
   <li> <b><a href="accounts.shtml#ac1000">How do I get an IP Unbanned?</a></b></li>
+  <li> <B><a href="accounts.shtml#ac1050">My RSS Headline Reader Tells me I Was Banned!</A></B></LI>
   <li> <b><a href="accounts.shtml#ac1100">Why is someone else's User Name appearing on my User Page's Menu?</a></b></li>
   
 </ul>
