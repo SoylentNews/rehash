@@ -57,7 +57,7 @@ before you do any moderation.<BR><P>
 [% admin_block %]
 [% END %]
 
-<P>
+<BR>
 [% IF useredit.homepage %]
 <A HREF="[% useredit.homepage %]">[% useredit.homepage | strip_literal %]</A><BR>
 [% END; IF useredit.fakeemail %]
@@ -68,7 +68,6 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 [ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
 <BR>
 [% END %]
-</P>
 [% IF karma_flag && (admin_flag || nickmatch_flag)  %]
 	<B>Karma:</B>
 	[% IF constants.karma_obfuscate;
@@ -89,16 +88,18 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 
 [% IF useredit.bio %]
  <B>User Bio</B>
- <BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<P>
+ <BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<BR>
 [% END %]
 
-<BR><B>[% useredit.nickname %] has posted [% commentcount %]
-comment[% IF commentcount == 1; ""; ELSE; "s"; END %].
-[% IF commentcount > 1 %]
-[% IF commentcount > commentstruct.size %]Below find
-[% IF min_comment == 0 %]the most recent [% commentstruct.size %] comments.
-[% ELSE %][% commentstruct.size %] of them.
-[% END %][% END %][% END %]</B><P>
+<BR>
+[% IF commentcount > 0 %]
+[% commenttitle = "$useredit.nickname's Latest $commentstruct.size of $commentcount Comment" %]
+[% IF commentcount > 1; commenttitle = "$commenttitles"; END %]
+[% PROCESS titlebar width="100%" title = commenttitle %]
+[% ELSE %]
+<B>useredit.nickname has yet to post any comments.</B>
+[% END %]
+<P>
 
 [% n = min_comment %]
 [% FOREACH comment = commentstruct;
@@ -150,15 +151,25 @@ END %]
 [% END %]
 
 [% IF stories %]
-<P><B>[% IF nick_match %]You have[% ELSE %][% useredit.nickname %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B>
+<P>
+[% IF storycount > constants.user_submitter_display_default;
+	storytitle = "$useredit.nickname's Latest $form.min Accepted Stories";
+ELSE;
+	storytitle = "$useredit.nickname's $storycount Accepted Stor";
+	IF storycount > 1;
+		storytitle = "$storytitleies";
+	ELSE;
+		storytitle = "$storytitley";
+	END;
+END; %]
+[% PROCESS titlebar width = "100%" title = storytitle %]
 <P>
 [% n = 0 %]
 [% FOREACH story = stories %]
-	[% n = n + 1 %]
-		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
+        [% n = n + 1 %]
+                <A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
 [% END %]
 [% END %]
-
 
 __seclev__
 500
