@@ -451,6 +451,7 @@ Slash::Constants
 slashd and tasks
 	freshenup and the importance of rendered .shtml pages
 	adminmail and stats_daily
+	"task_timespec_foo" vars to override tasks/foo.pl's timespec
 users
 	the users_* tables, why so many?
 	the A.C.
@@ -752,6 +753,10 @@ report.
 =head1 CHANGES
 
 $Log$
+Revision 1.7  2004/10/18 16:56:15  jamiemccarthy
+Allow vars to override task timespecs. Don't know why we didn't do
+this a couple of years ago, this is simple and will work.
+
 Revision 1.6  2003/07/07 22:18:24  jamie
 Filled in skeleton for themes/plugins, templates, page layout and replication.
 

@@ -379,6 +379,19 @@ EOT
 	slashdLogDie("aborting: no files successfully processed from $dir")
 		if !%task;
 
+	# Adjust timespecs for any tasks that have a var to override it.
+	my @adjusted = ( );
+	for my $file (sort keys %task) {
+		(my $file_nopl = $file) =~ s/\.pl$//;
+		my $varname = "task_timespec_$file_nopl";
+		next unless $constants->{$varname};
+		$task{$file}{timespec} = $constants->{$varname};
+		push @adjusted, "$file ($task{$file}{timespec})";
+	}
+	if (@adjusted) {
+		slashdLog("Custom timespecs: @adjusted");
+	}
+
 	# The appropriate data is in $task{"filename.pl"} -- write it all into
 	# the $cron object.
 
@@ -508,7 +521,7 @@ sub insert_task_event {
 	my @files = rebuild_event_ar($event_hr);
 	for my $file (@files) {
 		push @$event_ar, [ $file, $event_hr->{$file}{until_time} ];
-		(my $file_nopl = $file) =~ s/\.pl//;
+		(my $file_nopl = $file) =~ s/\.pl$//;
 		my @u = gmtime($event_hr->{$file}{until_time});
 		my $options = {
 			next_begin => sprintf("%4d-%02d-%02d %02d:%02d:%02d",
