@@ -26,7 +26,7 @@ __template__
 	{ link = "$constants.rootdir/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
 	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "topics" },
 	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Info",			sel_label = "recent" },
-	{ link = "$constants.rootdir/getting_started.shtml",	label = "Help",			sel_label = "help" },
+	{ link = "$constants.rootdir/slashguide.shtml",	label = "Help",			sel_label = "help" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; %]
 __seclev__
