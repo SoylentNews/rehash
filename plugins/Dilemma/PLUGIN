@@ -2,6 +2,7 @@
 name=Dilemma
 description="Prisoner's Dilemma tournaments
 htdoc=dilemma.pl
+htdoc=dilemmalogdump.dtd
 task=dilemma_backend.pl
 mysql_schema=mysql_schema.sql
 mysql_dump=mysql_dump.sql

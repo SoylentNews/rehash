@@ -63,6 +63,15 @@ sub getDilemmaSpeciesInfo {
 }
 
 #################################################################
+sub getDilemmaAgentsInfo {
+	my($self) = @_;
+	return $self->sqlSelectAllHashref(
+		"daid",
+		"daid, dsid, born",
+		"dilemma_agents");
+}
+
+#################################################################
 sub getDilemmaSpecies {
 	my($self) = @_;
 	return $self->sqlSelectAllHashref(
@@ -249,6 +258,16 @@ sub getStatsBySpecies {
 		"dilemma_stats",
 		"dsid=$dsid_q AND name='num_alive'",
 		"ORDER BY tick");
+}
+
+sub getAveragePlay {
+	my($self, $options) = @_;
+	my $max = $options->{max} || 1;
+	return $self->sqlSelectColArrayref(
+		"AVG(play) * $max",
+		"dilemma_meetlog, dilemma_playlog",
+		"dilemma_meetlog.meetid=dilemma_playlog.meetid",
+		"GROUP BY tick ORDER BY tick");
 }
 
 sub getSpecieses {
@@ -461,7 +480,8 @@ sub agentDebrief {
 }
 
 sub agentsMeet {
-	my($self, $meeting_hr) = @_;
+	my($self, $meeting_hr, $dilemma_info) = @_;
+	$dilemma_info ||= $self->getDilemmaInfo();
 	my $daids = $meeting_hr->{daids};
 	my $foodsize = $meeting_hr->{foodsize};
 
@@ -530,17 +550,70 @@ sub agentsMeet {
 #print STDERR "agent_data: " . Dumper($agent_data);
 #print STDERR "daids: " . Dumper($daids);
 #print STDERR "response: '@response' payoff '@payoff' memory '@memory'\n";
-my $memlen0 = $memory[0] ? length(freeze(\$memory[0])) : 0;
-my $memlen1 = $memory[1] ? length(freeze(\$memory[1])) : 0;
-printf STDERR "foodsize %.3f:  %s/%d played %.3f, gained %.3f food, memlen %d; %s/%d played %.3f, gained %.3f food, memlen %d\n",
-	$foodsize,
-	$agent_data->{$daids->[0]}{species_name}, $daids->[0],
-	$response[0], $payoff[0], $memlen0,
-	$agent_data->{$daids->[1]}{species_name}, $daids->[1],
-	$response[1], $payoff[1], $memlen1;
+#my $memlen0 = $memory[0] ? length(freeze(\$memory[0])) : 0;
+#my $memlen1 = $memory[1] ? length(freeze(\$memory[1])) : 0;
+#printf STDERR "foodsize %.3f:  %s/%d played %.3f, gained %.3f food, memlen %d; %s/%d played %.3f, gained %.3f food, memlen %d\n",
+#	$foodsize,
+#	$agent_data->{$daids->[0]}{species_name}, $daids->[0],
+#	$response[0], $payoff[0], $memlen0,
+#	$agent_data->{$daids->[1]}{species_name}, $daids->[1],
+#	$response[1], $payoff[1], $memlen1;
 
 	$self->awardPayoffAndMemory($daids->[0], $payoff[0], $memory[0]);
 	$self->awardPayoffAndMemory($daids->[1], $payoff[1], $memory[1]);
+
+	$self->logMeeting({
+		tick =>		$dilemma_info->{last_tick},
+		foodsize =>	$foodsize,
+		plays =>	[
+			{ daid => $daids->[0], play => $response[0], reward => $payoff[0] },
+			{ daid => $daids->[1], play => $response[1], reward => $payoff[1] },
+		],
+	});
+}
+
+# Would probably improve performance to store these up and write
+# them all at once
+
+sub logMeeting {
+	my($self, $meeting_hr) = @_;
+
+	$self->sqlInsert("dilemma_meetlog", {
+		tick =>		$meeting_hr->{tick},
+		foodsize =>	$meeting_hr->{foodsize},
+	});
+	my $meetid = $self->getLastInsertId();
+	for my $play (@{$meeting_hr->{plays}}) {
+		$self->sqlInsert("dilemma_playlog", {
+			meetid =>	$meetid,
+			daid =>		$play->{daid},
+			play =>		$play->{play},
+			reward =>	$play->{reward},
+		});
+	}
+}
+
+sub getLogDataDump {
+	my($self) = @_;
+
+	my $species_info_hr = $self->getDilemmaSpeciesInfo();
+	my $agents_info_hr = $self->getDilemmaAgentsInfo();
+	my $meetlog_sth = $self->sqlSelectMany(
+		"*",
+		"dilemma_meetlog",
+		"",
+		"ORDER BY meetid");
+	my $playlog_sth = $self->sqlSelectMany(
+		"*",
+		"dilemma_playlog",
+		"",
+		"ORDER BY meetid, daid");
+	return {
+		species_info =>	$species_info_hr,
+		agents_info =>	$agents_info_hr,
+		meetlog_sth =>	$meetlog_sth,
+		playlog_sth =>	$playlog_sth,
+	};
 }
 
 sub determinePayoff {

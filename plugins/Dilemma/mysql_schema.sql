@@ -4,7 +4,7 @@
 
 DROP TABLE IF EXISTS dilemma_species;
 CREATE TABLE dilemma_species (
-	dsid SMALLINT UNSIGNED NOT NULL auto_increment,
+	dsid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	name CHAR(16) NOT NULL,
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	code TEXT NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE dilemma_species (
 
 DROP TABLE IF EXISTS dilemma_agents;
 CREATE TABLE dilemma_agents (
-	daid INT UNSIGNED NOT NULL auto_increment,
+	daid INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	dsid SMALLINT UNSIGNED NOT NULL,
 	alive ENUM("no", "yes") DEFAULT "yes" NOT NULL,
 	born INT UNSIGNED DEFAULT 0 NOT NULL,
@@ -52,5 +52,24 @@ CREATE TABLE dilemma_stats (
 	value FLOAT,
 	UNIQUE (tick, dsid, name),
 	KEY (dsid, name)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS dilemma_meetlog;
+CREATE TABLE dilemma_meetlog (
+	meetid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	tick INT UNSIGNED NOT NULL,
+	foodsize FLOAT UNSIGNED NOT NULL,
+	PRIMARY KEY (meetid),
+	KEY tick (tick)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS dilemma_playlog;
+CREATE TABLE dilemma_playlog (
+	meetid INT UNSIGNED NOT NULL,
+	daid INT UNSIGNED NOT NULL,
+	play FLOAT UNSIGNED NOT NULL,
+	reward FLOAT NOT NULL,
+	UNIQUE meetid_daid (meetid, daid),
+	KEY daid_meetid (daid, meetid)
 ) TYPE=InnoDB;
 

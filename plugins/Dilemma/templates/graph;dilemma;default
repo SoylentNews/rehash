@@ -52,8 +52,6 @@ my_graph.set(
 
       x_label_position    => 0.5,
 
-      x_labels_vertical   => 1,
-
       y_max_value         => y_max,
       y_label_skip        => y_label_skip,
 
@@ -61,11 +59,12 @@ my_graph.set(
 
       line_type_scale     => 10,
       line_width          => 1,
-      line_types          => [	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-      				2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-				3, 3, 3, 3, 3, 3, 3, 3, 3, 3	],
+      line_types          => [	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      				2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	],
 
-      dclrs               => [ 'red', 'lgreen', 'blue', 'lorange', 'purple',
+      dclrs               => [ 'lgray',
+                               'red', 'lgreen', 'blue', 'lorange', 'purple',
                                'gray', 'dbrown', 'marine', 'dred', 'green',
 			       'dgray', 'lred', 'dgreen', 'lbrown', 'dpink' ],
 

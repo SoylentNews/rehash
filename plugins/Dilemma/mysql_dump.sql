@@ -1,4 +1,5 @@
 INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma', '1', 'Enable dilemma?');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('dilemma_logdatadump', '0', 'Dump gzipped log data to disk every so often? This can be processor/disk/time intensive');
 
 DELETE FROM dilemma_stats WHERE 1=1;
 
