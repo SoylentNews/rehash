@@ -132,9 +132,9 @@ $admin_clearpass_warning
       used -1: %8d yesterday (%.1f%%)
       used +1: %8d yesterday (%.1f%%)
      comments: %8d posted yesterday
-uniq comments: %8d distinct IPIDS posted comments today
+uniq comments: %8d distinct IPIDS posted comments
   submissions: %8d submissions
- sub/comments: %8.1f%% of the submissions came from comment posters
+ sub/comments: %8.1f%% of the submissions came from comment posters from this day
 
    total hits: %8d
      homepage: %8d

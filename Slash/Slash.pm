@@ -1122,21 +1122,21 @@ sub _hard_dispComment {
 		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person}) {
 				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=addcheck&amp;type=friend&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/neutral.gif" ALT="Alter Relationship" TITLE="Alter Relationship"></A>|;
 		} else {
-			if ($user->{people}{$person}{FRIEND()}) {
+			if ($user->{people}{FRIEND()}{$person}) {
 				my $title = $user->{people}{people_bonus_friend} ? "Friend ($user->{people}{people_bonus_friend})" : "Friend";
 				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/friend.gif" ALT="$title" TITLE="$title"></A>|;
 			} 
-			if ($user->{people}{$person}{FOE()}) {
+			if ($user->{people}{FOE()}{$person}) {
 				my $title = $user->{people}{people_bonus_foe} ? "Foe ($user->{people}{people_bonus_foe})" : "Foe";
-				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/foe.gif" ALT="$title" TITLE="$title"></A> |;
+				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/foe.gif" ALT="$title" TITLE="$title"></A> |;
 			} 
-			if ($user->{people}{$person}{FAN()}) {
+			if ($user->{people}{FAN()}{$person}) {
 				my $title = $user->{people}{people_bonus_fan} ? "Fan ($user->{people}{people_bonus_fan})" : "Fan";
-				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/fan.gif" ALT="$title" TITLE="$title"></A> |;
+				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/fan.gif" ALT="$title" TITLE="$title"></A> |;
 			} 
-			if ($user->{people}{$person}{FREAK()}) {
+			if ($user->{people}{FREAK()}{$person}) {
 				my $title = $user->{people}{people_bonus_freak} ? "Freak ($user->{people}{people_bonus_freak})" : "Freak";
-				$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/freak.gif" ALT="$title" TITLE="$title"></A> |;
+				$people_display .= qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$person"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/freak.gif" ALT="$title" TITLE="$title"></A> |;
 			} 
 		}
 	}
