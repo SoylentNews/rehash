@@ -195,5 +195,6 @@ plugin=Stats
 plugin=Journal
 plugin=Hof
 plugin=PollBooth
+plugin=Print
 plugin=PubKey
 plugin=Zoo
