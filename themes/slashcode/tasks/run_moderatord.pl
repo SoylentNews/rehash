@@ -90,16 +90,30 @@ sub give_out_points {
 
 	moderatordLog(getData('moderatord_log_header'));
 
-	my $read_db = undef;
+	my $backup_db = undef;
+	my $log_db = undef;
 
 	# If a backup DB is defined, we use that one.
 	my $backup_user = $constants->{backup_db_user} || '';
 	if ($backup_user) {
-		$read_db = get_backup_db($backup_user, $constants, $slashdb);
-		if ($read_db) {
-			moderatordLog("Using replicated database '$backup_user'");
+		$backup_db = getObject('Slash::DB', $backup_user);
+		if ($backup_db) {
+			moderatordLog("Using backup database '$backup_user'");
 		} else {
-			moderatordLog("Skipping run, replicated DB not avail");
+			moderatordLog("Skipping run, backup DB not avail");
+			return ;
+		}
+	}
+
+	# If an accesslog DB is defined, we use that one;  otherwise we
+	# default to the same as the backup DB.
+	my $log_user = $constants->{log_db_user} || '';
+	if ($log_user) {
+		$log_db = getObject('Slash::DB', $log_user);
+		if ($log_db) {
+			moderatordLog("Using accesslog database '$log_user'");
+		} else {
+			moderatordLog("Skipping run, accesslog DB not avail");
 			return ;
 		}
 	}
@@ -109,7 +123,8 @@ sub give_out_points {
 
 		# Here are the two functions that actually do the work.
 
-		my $needed = give_out_tokens($newcomments, $constants, $slashdb, $read_db);
+		my $needed = give_out_tokens($newcomments, $constants,
+			$slashdb, $backup_db, $log_db);
 		my $granted = $slashdb->convert_tokens_to_points($needed);
 
 		# Log what we did and tally it up in stats.
@@ -137,41 +152,6 @@ sub give_out_points {
 
 	moderatordLog(getData('moderatord_log_footer'));
 
-}
-
-sub get_backup_db {
-	my($backup_user, $constants, $slashdb) = @_;
-
-	my $read_db = undef;
-
-#	# How many times we loop.
-#	my $count = $constants->{moderatord_catchup_count} || 2;
-#	# The number of updates behind, the read database can be.
-#	my $lag = $constants->{moderatord_lag_threshold} || 100_000;
-#	# How long to wait between loops.
-#	my $sleep_time = $constants->{moderatord_catchup_sleep};
-
-#	while ($count--) {
-		$read_db = getObject('Slash::DB', $backup_user);
-		if (!$read_db) {
-			moderatordLog("Cannot open read DB: '$backup_user'");
-			return undef;
-		}
-#		my $master_stat = ($slashdb->sqlShowMasterStatus())->[0];
-#		my $slave_stat = ($read_db->sqlShowSlaveStatus())->[0];
-#		if (lc($slave_stat->{Slave_running}) eq 'no') {
-#			moderatordLog('Replication requested but not active');
-#			return undef;
-#		}
-#		if ($master_stat->{Position} - $slave_stat->{Pos} > $lag) {
-#			# The slave is lagging too much to use;  let's wait
-#			# a bit for it to hopefully catch up.
-#			$read_db = undef;
-#			sleep $sleep_time;
-#		}
-#		sleep $sleep_time if !$read_db;
-#	}
-	return $read_db;
 }
 
 sub get_num_new_comments {
@@ -202,8 +182,9 @@ sub get_num_new_comments {
 }
 
 sub give_out_tokens {
-	my($comments, $constants, $slashdb, $read_db) = @_;
-	$read_db = $slashdb if !defined($read_db);
+	my($comments, $constants, $slashdb, $backup_db, $log_db) = @_;
+	$backup_db = $slashdb if !defined($backup_db);
+	$log_db = $slashdb if !defined($log_db);
 	my $statsSave = getObject('Slash::Stats::Writer', '');
 
 	my $needed = 0;
@@ -236,7 +217,8 @@ sub give_out_tokens {
 	# Note:  this is a large array -- on Slashdot, at least tens of
 	# thousands of elements.
 
-	my @eligible_uids = @{$read_db->fetchEligibleModerators()};
+	my $count_hr = $log_db->fetchEligibleModerators_accesslog();
+	my @eligible_uids = @{$backup_db->fetchEligibleModerators_users($count_hr)};
 	my $eligible = scalar @eligible_uids;
 
 	# Chop off the least and most clicks.
@@ -262,7 +244,7 @@ sub give_out_tokens {
 	$wtf->{stirratio} = $constants->{m1_pointgrant_factor_stirratio} || 0;
 	if ($wtf->{fairratio} || $wtf->{fairtotal} || $wtf->{stirratio}) {
 		my @orig_uids = @eligible_uids;
-		@eligible_uids = @{$read_db->factorEligibleModerators(
+		@eligible_uids = @{$backup_db->factorEligibleModerators(
 			\@orig_uids, $wtf, \%info)
 		};
 	}
@@ -280,7 +262,7 @@ sub give_out_tokens {
 	moderatordLog(getData('moderatord_tokenmsg', {
 		new_comments	=> $comments,
 		stirredpoints	=> $stirredpoints,
-		last_user	=> $read_db->countUsers({ max => 1}),
+		last_user	=> $backup_db->countUsers({ max => 1}),
 		num_tokens	=> $num_tokens,
 		recycled_tokens	=> $recycled_tokens,
 		eligible	=> $eligible,

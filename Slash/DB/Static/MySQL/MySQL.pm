@@ -827,39 +827,58 @@ sub getAccessLogInfo {
 
 ########################################################
 # For run_moderatord.pl
+#
 # New as of 2002/09/05:  returns ordered first by hitcount, and
 # second randomly, so when give_out_tokens() chops off the list
 # halfway through the minimum number of clicks, the survivors
 # are determined at random and not by (probably) uid order.
+#
 # New as of 2002/09/11:  limit look-back distance to 48 hours,
 # to make the effects of click-grouping more predictable, and
 # not being erased all at once with accesslog expiration.
-sub fetchEligibleModerators {
+#
+# New as of 2003/01/30:  fetchEligibleModerators() has been
+# split into fetchEligibleModerators_accesslog and
+# fetchEligibleModerators_users.  The first pulls down the data
+# we need from accesslog, which may be a different DBIx virtual
+# user (different database).  The second uses that data to pull
+# down the rest of the data we need from the users tables.
+# Also, the var mod_elig_hoursback is no longer needed.
+# Note that fetchEligibleModerators_accesslog can return a
+# *very* large hashref.
+
+sub fetchEligibleModerators_accesslog {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $hitcount = defined($constants->{m1_eligible_hitcount})
 		? $constants->{m1_eligible_hitcount} : 3;
-	my $youngest_uid = $self->getYoungestEligibleModerator();
 
 	# Whether the var "authors_unlimited" is set or not, it doesn't
 	# much matter whether we return admins in this list.
 
-	my $hoursback = $constants->{mod_elig_hoursback} || 48;
-	my $minkarma = $constants->{mod_elig_minkarma} || 0;
-
-	my $count_hr = $self->sqlSelectAllHashref(
+	return $self->sqlSelectAllHashref(
 		"uid",
 		"uid, COUNT(*) AS c",
 		"accesslog USE INDEX (op_part)",
 		"op='article' OR op='comments'",
 		"GROUP BY uid
 		 HAVING c >= $hitcount");
+}
+
+sub fetchEligibleModerators_users {
+	my($self, $count_hr) = @_;
+	my $constants = getCurrentStatic();
+	my $youngest_uid = $self->getYoungestEligibleModerator();
+	my $minkarma = $constants->{mod_elig_minkarma} || 0;
+
 	my @uids =
 		sort { $a <=> $b } # don't know if this helps MySQL but it can't hurt... much
 		grep { $_ <= $youngest_uid }
 		keys %$count_hr;
 
-	my $splice_count = 5000;
+	# What is a good splice_count?  Well I was seeing entries show
+	# up in the *.slow log for a size of 5000, so smaller is good.
+	my $splice_count = 2000;
 	while (@uids) {
 		my @uid_chunk = splice @uids, 0, $splice_count;
 		my $uid_list = join(",", @uid_chunk);
@@ -873,6 +892,9 @@ sub fetchEligibleModerators {
 		for my $uid (@$uids_disallowed) {
 			delete $count_hr->{$uid};
 		}
+		# If there is more to do, sleep for a moment so we don't
+		# hit the DB too hard.
+		sleep 1 if @uids;
 	}
 
 	my $return_ar = [
@@ -883,7 +905,6 @@ sub fetchEligibleModerators {
 	];
 	return $return_ar;
 }
-
 
 ########################################################
 # For run_moderatord.pl
