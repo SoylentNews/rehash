@@ -216,6 +216,7 @@ to use them on <b>comments, articles, or the homepage</b>.
 <h2>Besides ad-free pages, are there any advantages to being a subscriber?</h2>
 <p>We're adding some "plums" for subscribers, yes.  Please be warned that this list
 is subject to change as necessary. Here's the official list:
+
 <ul>
 
 <li>You can see each story 10-20 minutes before it goes "live." (Assuming we
@@ -259,7 +260,14 @@ they want... or down, if they're prejudiced against subscribers for
 some reason. If you're bashful, you can switch this off (check the
 "No Subscriber Bonus" checkbox while posting).
 
+<li>You get to
+<a href="//slashdot.org/users.pl?op=edithome">exclude more topics</a>
+from the homepage. Yeah, we give our subscribers what they want: Less
+Slashdot!  Non-subscribers can exclude about 17 topics on average,
+subscribers about 60.
+
 </ul>
+
 <p>Note that several of these "plums" require that you pick "No Ads" on
 at least one type of page, and that your limit of the maximum number of
 ads suppressed per day not be decreased (below the default value of 10).
