@@ -89,7 +89,7 @@ sub getEventsByDay {
 	my $user = getCurrentUser();
 	my $section;
 	$section ||= $user->{section};
-	my $where = "((to_days(begin) >= to_days('$date')) AND (to_days(end) <= to_days('$date')))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
+	my $where = "((to_days(begin) <= to_days('$date')) AND (to_days(end) >= to_days('$date')))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
 	$where .= " AND stories.section = '$section'" if $section;
 	my $order = "ORDER BY tid";
 	$order .= " LIMIT $limit "

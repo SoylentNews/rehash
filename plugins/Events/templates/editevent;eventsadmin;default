@@ -17,7 +17,16 @@ __template__
 [% FOREACH event=dates %]
 	<TR>
 		<TD>
-			<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% storytitle %]</A> [% event.begin %] - [% event.end %]
+			<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">[% storytitle %]</A>
+		</TD>
+		<TD>
+			[% IF event.begin == event.end %] 
+				[% event.begin %] 
+			[% ELSE %] 
+				[% event.begin %] - [% event.end %] 
+			[% END %]
+		</TD>
+		<TD>
 			<A HREF="[% constants.rootdir %]/eventsadmin.pl?op=delete&amp;sid=[% sid %]&amp;id=[% event.id %]">[delete]</A>
 		</TD>
 	</TR>

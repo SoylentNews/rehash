@@ -24,7 +24,7 @@ __template__
 [% END %]
 <p>
 [% IF user.is_admin %]
-<A HREF="[% constants.rootdir %]/eventsadmin.pl?sid=[% sid %]">Edit Dates</A>
+<A HREF="[% constants.rootdir %]/eventsadmin.pl?op=edit&amp;sid=[% sid %]">Edit Dates</A>
 [% END %]
 __seclev__
 100
