@@ -1094,11 +1094,8 @@ sub setCookie {
 		-path    =>  $cookiepath
 	);
 
-	if ($constants->{cookiesecure}) {
-		my $subr = $r->lookup_uri($r->uri);
-		if ($subr && $subr->subprocess_env('HTTPS') eq 'on') {
-			$cookiehash{-secure} = 1;
-		}
+	if ($constants->{cookiesecure} && Slash::Apache::ConnectionIsSSL()) {
+		$cookiehash{-secure} = 1;
 	}
 
 	my $cookie = Apache::Cookie->new($r, %cookiehash);
