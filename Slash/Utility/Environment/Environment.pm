@@ -103,10 +103,15 @@ my($static_user, $static_form, $static_constants, $static_site_constants,
 =head2 dbAvailable([TOKEN])
 
 Returns TRUE if (as usual) the DB(s) are available for reading and
-writing.  Returns FALSE if the DB(s) are not available and should
-not be acessed -- either for the specific purpose named in the
-TOKEN or, if no TOKEN, for all purposes.  This should only be FALSE
-if the admins have created the /usr/local/slash/dboff file(s).
+writing.  Returns FALSE if the DB(s) are not available and should not
+be accessed.  If a TOKEN is named, return FALSE if either the DB(s)
+required for that purpose are down or all DBs are down.  If no TOKEN is
+named, return FALSE only if all DBs are down.
+
+Whether or not the DBs are down is determined only by whether files exist
+at /usr/local/slash/dboff or /usr/local/slash/dboff_TOKEN.  For best
+results, admins will want to write their own db-angel scripts that detect
+DBs having gone down and create one or more of those files.
 
 =over 4
 
@@ -129,21 +134,29 @@ empty string.
 
 =cut
 
+{ # closure
+my $dbAvailable_lastcheck = 0;
+my $dbAvailable_lastval;
 sub dbAvailable {
 	# I'm not going to explain exactly how I came up with this
 	# logic... the if's are ordered to reduce computation as
-	# much as possible since this will be called at least twice
-	# per click.
+	# much as possible.
 	my($token) = @_;
 
-	# Until this gets optimized, we don't do it.
-	return 1;
+	if (time < $dbAvailable_lastcheck+5) {
+		return $dbAvailable_lastval;
+	}
 
-	return 0 if -e "/usr/local/slash/dboff";
-	return 1 unless $token && $token =~ /^(\w+)/;
-	return 0 if -e "/usr/local/slash/dboff_$1";
-	return 1;
+	my $newval;
+	   if (-e "/usr/local/slash/dboff")	{ $newval = 0 }
+	elsif (!$token || $token !~ /^(\w+)/)	{ $newval = 1 }
+	elsif (!-e "/usr/local/slash/dboff_$1") { $newval = 0 }
+	else					{ $newval = 1 }
+	$dbAvailable_lastval = $newval;
+	$dbAvailable_lastcheck = time;
+	return $newval;
 }
+} # end closure
 
 #========================================================================
 
