@@ -83,7 +83,9 @@ sub getCommentsByDistinctIPID {
 
 	my $used = $self->sqlSelectColArrayref(
 		'ipid', 'comments', 
-		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",'',{distinct => 1}
+		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		'',
+		{distinct => 1}
 	);
 }
 
@@ -105,8 +107,8 @@ sub countSubmissionsByCommentIPID {
 	my $in_list = join(",", map { $slashdb->sqlQuote($_) } @$ipids);
 
 	my $used = $self->sqlCount(
-		'comments', 
-		"(date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59') AND ipid IN ($in_list)"
+		'submissions', 
+		"(time BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59') AND ipid IN ($in_list)"
 	);
 }
 
