@@ -12,14 +12,14 @@ my $PROGNAME = basename($0);
 
 my %opts;
 
-usage('Options used incorrectly') unless getopts('hvu:w:s:', \%opts);
-usage() if ($opts{'h'} || !keys %opts);
-version() if $opts{'v'};
+usage('Options used incorrectly') unless getopts('hvu:w:r:s:', \%opts);
+usage() if $opts{h};
+version() if $opts{v};
 
 my $virtuser = $opts{u} || 'slashdot';
 my $width = $opts{w} || 76;
+my $height = $opts{r} || 20;
 my $sleep = $opts{s} || 10;
-my $rows = $opts{r} || 20;
 
 createEnvironment($virtuser);
 
@@ -138,7 +138,7 @@ while(1) {
 	my $x=0;
  	foreach (sort{ $b <=> $a }@p ) {
 		$x++;
-		next if $x > $rows;
+		next if $x > $height;
 		print "$_\n";
         }
 	print "\n";
@@ -173,8 +173,8 @@ Main options:
 	-h      Help (this message)
 	-v      Version
 	-u      Virtual user (default "slashdot")
-	-w	Width in columns (default 76)
-	-r	Number of rows max (default 20)
+	-w	Width max in columns (default 76)
+	-r	Height max in (r)ows (default 20)
 	-s	Sleep time (default 10)
 
 EOT
