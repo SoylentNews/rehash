@@ -771,8 +771,12 @@ EOT
 	my $relocate = getObject('Slash::Relocate');
 
 	if($relocate){
-		my $rls = $logdb->getRelocatedLinksSummary();
-		my $sum = $stats->getRelocatedLinkHitsByType($rls);
+		my $rls      = $logdb->getRelocatedLinksSummary();
+		my $sum      = $stats->getRelocatedLinkHitsByType($rls);
+		my $rls_tu   = $logdb->getRelocatedLinksSummary({ limit => 10});
+
+		$data{top_relocated_urls} = $logdb->getRelocatedLinkHitsByUrl($rls_tu);
+
 		my $total;
 		foreach my $type (keys %$sum){
 			my $label = $type eq "" ? "relocate_other" : "relocate_$type";

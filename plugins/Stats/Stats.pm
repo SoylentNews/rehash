@@ -1351,9 +1351,11 @@ sub countSfNetIssues {
 #######################################################
 
 sub getRelocatedLinksSummary {
-	my ($self) = @_;
+	my ($self,$options) = @_;
+	$options ||={};
+	my $limit = "limit $options->{limit}" if $options->{limit};
 	return $self->sqlSelectAllHashrefArray("query_string, count(query_string) as cnt","accesslog_temp_errors","op='relocate-undef' AND dat = '/relocate.pl'",
-		"GROUP by query_string order by cnt desc");
+		"GROUP by query_string order by cnt desc $limit");
 }
 
 ########################################################
@@ -1368,6 +1370,19 @@ sub getRelocatedLinkHitsByType {
 		$summary->{$type} += $l->{cnt}; 
 	}
 	return $summary;
+}
+
+########################################################
+#  expects arrayref returned by getRelocatedLinksSummary
+sub getRelocatedLinkHitsByUrl {
+	my ($self,$ls) = @_;
+	my $top_links = [];
+	foreach my $l(@$ls){
+		my ($id) = $l->{query_string} =~/id=([^&]*)/;
+		my $url = $self->sqlSelect("url","links","id=".$self->sqlQuote($id));
+		push @$top_links, { url => $url, count => $l->{cnt}} ; 
+	}
+	return $top_links;
 }
 
 ########################################################

@@ -100,6 +100,11 @@ Avg Comments Per Article:   [% avg_comments_per_story.0 %]|[% avg_comments_per_s
 Recent top [% top_recent_domains.size %] email domains:
 [% FOREACH trd = top_recent_domains; trd.c; "  "; trd.initdomain; "\n"; END %]
 
+[% IF top_relocated_urls %]
+Top Relocated URLS
+[% FOREACH tru = top_relocated_urls; tru.count; "  "; tru.url; "\n"; END %]
+[% END %]
+
 -----------------------
 [% FOREACH section = sections -%]
 [% IF section.pages < 1 ; NEXT ; END %]
