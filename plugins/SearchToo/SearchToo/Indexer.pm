@@ -299,7 +299,7 @@ sub moveLive {
 	return unless $self->can('_dir') && ($dir || $self->can('_backup_dir'));
 
 	my $backup_dir = $self->_backup_dir($type, $dir);
-	my $dir = $self->_dir($type, '');
+	$dir = $self->_dir($type, '');
 
 	my @time = localtime;
 	my $now = sprintf "-%04d%02d%02d-%02d%02d%02d", $time[5]+1900, $time[4]+1, $time[3], $time[2], $time[1], $time[0];

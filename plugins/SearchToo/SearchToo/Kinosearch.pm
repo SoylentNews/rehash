@@ -97,7 +97,7 @@ slashProf('init search');
 #print Dumper $searcher;
 
 slashProf('search', 'init search');
-	my $status = $searcher->process;
+	my $status = $searcher->process || {};
 
 #	$sopts->{total}   = $searcher->max_doc;
 	$sopts->{matches} = $status->{num_hits};
@@ -126,9 +126,9 @@ print Dumper $records;
 sub _addRecords {
 	my($self, $type, $documents, $opts) = @_;
 
-	my $writer = $self->_writer;
+	my $writer = $opts->{writer} || $self->_writer;
 
-	if (1 || $writer->{_is_new}) { # ???
+	if (!$writer->{_is_old}) { # ???
 		for my $field (keys %{$documents->[0]}) {
 			$writer->define_field(
 				-name   => $field,
@@ -144,6 +144,8 @@ sub _addRecords {
 		my %doc;
 		# start new document by *id
 		$writer->new_document($document->{ $self->_primary });
+
+printf "%d:%s\n", $document->{ $self->_primary }, $document->{date};
 
 		# timestamp is Unix epoch
 		if ($document->{date}) {
@@ -164,13 +166,15 @@ sub _addRecords {
 				$writer->tokenize_field($key);
 				$writer->stem_field($key) if $is_content;
 			}
+#printf "%s:%s\n", $key, $document->{$key};
 		}
 
 		$writer->add_document;
+#printf "%d\n\n", $count;
 		$count++;
 	}
 
-	$writer->finish;
+	$writer->finish unless $opts->{writer};
 
 #	# only optimize if requested (as usual), and changes were made
 #	$self->optimize($type) if $opts->{optimize} && $count;
@@ -297,6 +301,7 @@ sub _reader {
 		-backend		=> $backend,
 		-kindexpath		=> catdir($dir, 'kindex'),
 		-kinodatapath		=> catdir($dir, 'kindex', 'kinodata'),
+		-max_filesize		=> 2 ** 29,
 	);
 }
 
@@ -318,6 +323,7 @@ sub _writer {
 		-temp_directory		=> File::Spec::Functions::tmpdir(),
 		-enable_updates		=> 0,
 		-phrase_matching	=> 0,
+		-max_filesize		=> 2 ** 29,
 	);
 }
 
