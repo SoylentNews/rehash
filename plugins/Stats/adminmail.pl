@@ -30,8 +30,10 @@ $task{$me}{code} = sub {
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 
+	# By setting overwrite to 1, we delete any stats which may have
+	# been written by an earlier run of this task.
 	my $statsSave = getObject('Slash::Stats::Writer',
-		{ nocache => 1 }, { day => $yesterday  });
+		{ nocache => 1 }, { day => $yesterday, overwrite => 1 });
 
 	my $stats = getObject('Slash::Stats', { db_type => 'reader' });
 	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
