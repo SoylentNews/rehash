@@ -72,7 +72,7 @@ sub countStorySubmitters {
 	my $ac_uid = getCurrentAnonymousCoward('uid') ||
 		     getCurrentStatic('anonymous_coward_uid');
 	my $uid = $self->sqlSelectColArrayref('uid', 'authors_cache');
-	my $in_list = join(',', @{$uid});
+	my $in_list = join(',', @{$uid}, $ac_uid);
 
 	my $submitters = $self->sqlSelectAll(
 		'count(*) as c, users.nickname',
