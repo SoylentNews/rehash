@@ -314,7 +314,7 @@ sub displayRSS {
 		# title should be cleaned up
 		push(@items, {
 			title	=> $_->{subj},
-			'link'	=> "$constants->{absolutedir}/submit.pl?op=viewsub&subid=$subid",
+			'link'	=> "$constants->{absolutedir}/submit.pl?op=viewsub&subid=$_->{subid}",
 		});
 	}
 
