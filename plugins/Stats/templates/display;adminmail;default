@@ -11,13 +11,10 @@ en_US
 __name__
 display
 __template__
-[% constants.sitename %] Stats for [% day %]
-
 [% admin_clearpass_warning %][% backup_lag %]
-
                UIDs     | IPIDS    | Pages
         total: [% users %]   [% unique %]   [% total %]
-  grand total:        -          -   [% grand_total %] ([% total_bytes %])
+  grand total:        -          -    [% grand_total %] ([% total_bytes %])
         posts: [% distinct_comment_posters_uids %]   [% IPIDS %]
      comments: [% comments_uids %]   [% comments_ipids %]   [% comments_page %] ([% comments_bytes %])
         index:        -          -   [% homepage %]
