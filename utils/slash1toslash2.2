@@ -64,7 +64,13 @@ END {
 }
 
 my @user_tables = qw(
-	users users_comments users_info users_index users_prefs users_param
+	users
+	users_comments 
+	users_info 
+	users_index 
+	users_prefs 
+	users_param 
+	users_hits
 );
 
 my($vars, $del_users);
@@ -187,7 +193,11 @@ EOT
 		# the MAIN based site uses these fields, they'll get copied
 		# if they don't, no problem.
 
-		# Resolve UID collisions (anonymous user)
+		# Resolve UID collisions (anonymous user). Remember we drop
+		# any records from UID $ac_uid{$ac_uid{-1}}, since they aren't
+		# supposed to exist.
+		return if $ac_uid{$data->{uid}} && 
+			  $data->{uid} == $ac_uid{$data->{uid}};
 		$data->{uid} = $ac_uid{$data->{uid}}
 			if !$opts{I} && exists $ac_uid{$data->{uid}};
 
@@ -200,7 +210,7 @@ EOT
 		$data->{passwd} = md5_hex($data->{passwd})
 			if exists $data->{passwd};
 		
-		if (exists $data->{exaid}) {
+		if ($data->{exaid}) {
 			my @auth_uids;
 			for (split /,/, $data->{exaid}) {
 				push @auth_uids, $story_authors{$_}
@@ -472,6 +482,7 @@ best if it is the lowest positive integer that is unused on the old
 Slash 1.0 site.  Enter the integer here (enter "1" to do no change):
 EOT
 
+	$ac_uid{-1} ||= 1;
 	die "[$ac_uid{-1}] is not an integer.\n" unless $ac_uid{-1} =~ /^\d+$/;
 
 	$del_users = ask(<<'EOT') =~ /^y/i;
@@ -528,8 +539,10 @@ sub incremental {
 	%discussions=(); %comments=();
 
 	for my $table (@user_tables, qw(submissions metamodlog)) {
-		# users_param table does not exist in BEAST's schema.
-		next if $table eq 'users_param';
+		# users_param, users_hits tables does not exist in BEAST's
+		# schema.
+		# 
+		next if $table =~ /^(?:users_param|users_hits)$/;
 		update($table);
 	}
 	%topics=();
@@ -734,7 +747,7 @@ EOT
 	
 	for (@user_tables) {
 		# users_param does not exist in MAIN.
-		next if $_ eq 'users_param';
+		next if $_ =~ /^(?:users_param|users_hits)$/;
 		duplicate($_, 0);
 	}
 
@@ -1850,6 +1863,14 @@ the source of this program.
 
 The existing values from the 1.0 database vars table are copied
 to the 2.2 database.
+
+=item *
+
+The menus table is not converted at all, mainly because it is handled by 
+various plugins and themes that get installed by install-slashsite, or 
+install-plugin. If you've made any custom additions to your 1.x menus, you will
+have to move them over by hand.
+
 
 =back
 
