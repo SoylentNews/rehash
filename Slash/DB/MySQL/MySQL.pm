@@ -7782,7 +7782,13 @@ sub getTopicImageBySection {
 }
 
 ########################################################
-# Brian, make this cache -Brian
+# This really could be folded into getStoryTopics().
+# It effectively returns the same thing as getStoryTopics
+# with no $add_names argument -- the only differences are
+# that this method takes more options, uses a cache, and
+# returns an arrayref instead of hashref.  If those
+# features were added to getStoryTopics, we could get rid
+# of this method.  It only appears in our code four times.
 sub getStoryTopicsJustTids {
 	my($self, $sid, $options) = @_;
 	return $self->{_story_topics}{$sid} if $self->{_story_topics}{$sid} && !$options->{no_parents};
@@ -7796,8 +7802,16 @@ sub getStoryTopicsJustTids {
 }
 
 ########################################################
-# add_names = 1, or any other non-zero/non-two value  -> Topic Alt text.
-# add_names = 2 -> Topic Name.
+# As of 2004/04:
+# $add_names of 1 means to return the alt text, which is the
+# human-readable name of a topic.  This is currently used
+# only in article.pl to add these words and phrases to META
+# information on the webpage.
+# $add_names of 2 means to return the name, which is a
+# (not-guaranteed-unique) short single keyword.  This is
+# currently used only in adminmail.pl to append something
+# descriptive to the numeric tid for the topichits_123_foo
+# stats.
 sub getStoryTopics {
 	my($self, $sid, $add_names) = @_;
 	my($topicdesc);
