@@ -1,3 +1,8 @@
+slash-1.0.7, 2000.07.xx
+-----------------------
+*	Poll booth now checks to insure answers are in range before
+	counting them.
+
 slash-1.0.6, 2000.07.10
 -----------------------
 
