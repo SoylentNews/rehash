@@ -53,6 +53,7 @@ use vars qw($VERSION @EXPORT);
 	balanceTags
 	changePassword
 	chopEntity
+	cleanRedirectUrl
 	commify
 	countTotalVisibleKids
 	countWords
@@ -223,7 +224,7 @@ sub cleanRedirectUrl {
 	# be sure nobody can use the site as a redirection service.
 	# We decide whether to use the secure homepage or not
 	# based on whether the current page is secure.
-	my $base = rootabs();
+	my $base = root2abs();
 	my $clean = URI->new_abs($redirect || $constants->{rootdir}, $base);
 
 	my $site_domain = $constants->{basedomain};
