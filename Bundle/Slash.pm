@@ -4,7 +4,7 @@ package Bundle::Slash;
 # $Id$
 #
 
-$Bundle::Slash::VERSION = '2.50';
+$Bundle::Slash::VERSION = '2.51';
 
 1;
 
@@ -110,6 +110,12 @@ LWP::Parallel
 Lingua::Stem
 
 URI::Find
+
+Config::General		- HTML validator
+
+Set::IntSpan		- HTML validator
+
+Text::Iconv		- HTML validator
 
 
 =head1 DESCRIPTION
