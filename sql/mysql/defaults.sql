@@ -882,6 +882,7 @@ INSERT INTO vars (name, value, description) VALUES ('mod_stir_recycle_fraction',
 INSERT INTO vars (name, value, description) VALUES ('mod_stir_token_cost','2','What is the token cost of having each mod point stirred?');
 INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_days','14','How many days of inactivity before tokens start to decay?');
 INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_perday','1','If inactivity, how many tokens lost per day?');
+INSERT INTO vars (name, value, description) VALUES ('mod_token_assignment_delay', '2', 'Pause in seconds between batches of assigning token changes');
 INSERT INTO vars (name, value, description) VALUES ('mod_unm2able_token_cost','1','What is the token cost of performing an un-M2able mod?');
 INSERT INTO vars (name, value, description) VALUES ('mod_up_points_needed','','Need more than 1 point to mod up? Hash');
 INSERT INTO vars (name, value, description) VALUES ('moderatord_catchup_count','2','The number of times moderatord will loop if replication is used and is too far behind our threshold.');
