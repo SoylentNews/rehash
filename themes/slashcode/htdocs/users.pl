@@ -811,9 +811,16 @@ sub showInfo {
 	my $cid_for_time_period = $reader->getVar("min_cid_for_$time_period\_days",'value', 1) || 0;
 	my $admin_time_period_limit = $constants->{admin_daysback_commentlimit} || 100;
 	my $admin_non_time_limit    = $constants->{admin_comment_subsequent_pagesize} || 24;
-
+	
 	my($points, $nickmatch_flag, $uid, $nick);
 	my($mod_flag, $karma_flag, $n) = (0, 0, 0);
+
+	if($admin_flag and defined $form->{show_m2s} or defined $form->{show_m1s}){
+		my $update_hr = {};
+		$update_hr->{m2_with_mod} = $form->{show_m2s} if defined $form->{show_m2s};
+		$update_hr->{mod_with_comm} = $form->{show_m1s} if defined $form->{show_m1s};
+		$slashdb->setUser($user->{uid}, $update_hr);
+	}
 
 	if (!$id && !$form->{userfield}) {
 		if ($form->{uid} && ! $id) {
