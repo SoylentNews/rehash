@@ -128,7 +128,7 @@ sub updateCommentTotals {
 ########################################################
 # For slashd
 sub getNewStoryTopic {
-	my($self) = @_;
+	my($self, $section) = @_;
 
 	my $constants = getCurrentStatic();
 	my $needed = $constants->{recent_topic_img_count} || 5;
@@ -140,10 +140,16 @@ sub getNewStoryTopic {
 	# work for all sites except those that post tons of duplicate
 	# topic stories.
 	$needed = $needed * 3 + 5;
+	my $clause;	
+	if ($section) {
+		$clause = "stories.section = '$section'";
+	} else {
+		$clause = 'displaystatus = 0';
+	}
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"alttext, stories.tid AS tid",
 		"stories, topics",
-		"stories.tid=topics.tid AND displaystatus = 0
+		"stories.tid=topics.tid AND $clause
 		 AND writestatus != 'delete' AND time < NOW()",
 		"ORDER BY time DESC LIMIT $needed"
 	);
