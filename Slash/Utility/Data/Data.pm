@@ -1161,11 +1161,22 @@ None.
 
 sub approveCharref {
 	my($charref) = @_;
+	my $constants = getCurrentStatic();
 
 	my $ok = 1; # Everything not forbidden is permitted.
 
-	# At the moment, only entities that change the direction of text
-	# are forbidden.  For more information, see
+	if ($constants->{draconian_charrefs}) {
+		# Don't mess around trying to guess what to forbid.
+		# Everything is forbidden except a very few known to be
+		# good.  This is unfortunately the only feasible way to
+		# completely stop, on the input side, an HTML rendering
+		# bug in Windows Microsoft Internet Explorer.
+		$ok = 0 unless $charref =~ /^(amp|lt|gt)$/;
+	}
+
+	# At the moment, unless the "draconian" rule is set, only
+	# entities that change the direction of text are forbidden.
+	# For more information, see
 	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
 	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
 	my %bad_numeric = map { $_, 1 }
@@ -1173,7 +1184,7 @@ sub approveCharref {
 	my %bad_entity = map { $_, 1 }
 		qw( zwnj zwj lrm rlm );
 
-	if ($charref =~ /^#/) {
+	if ($ok == 1 && $charref =~ /^#/) {
 		# Probably a numeric character reference.
 		my $decimal = 0;
 		if ($charref =~ /^#x([0-9a-f]+)$/i) {
@@ -1188,14 +1199,15 @@ sub approveCharref {
 		}
 		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
 		$ok = 0 if $bad_numeric{$decimal};
-	} elsif ($charref =~ /^([a-z0-9]+)$/i) {
+	} elsif ($ok == 1 && $charref =~ /^([a-z0-9]+)$/i) {
 		# Character entity.
 		my $entity = lc $1;
 		$ok = 0 if $bad_entity{$entity};
-	} else {
+	} elsif ($ok == 1) {
 		# Unknown character reference type, assume flawed.
 		$ok = 0;
 	}
+
 	if ($ok) {
 		return "&$charref;";
 	} else {
