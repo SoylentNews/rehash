@@ -78,7 +78,7 @@ INSTALLATION
         default, we normally set the user to have all permissions, but that
         might not be appropriate for your site; make sure that you have at
         least privileges to select, insert, update, delete, create, drop,
-        and index).
+        index and alter).
 
     2.  Install perl.
 
@@ -254,8 +254,9 @@ INSTALLATION
                 make install SLASH_PREFIX=/home/slash
 
         When done, a configuration file for Apache will be created at
-        $SLASH_PREFIX/slash.conf. You can put its contents into your
-        httpd.conf, or you can just "Include" it in your httpd.conf.
+        $SLASH_PREFIX/httpd/slash.conf. You can put its contents into
+	your httpd.conf, or you can just "Include" it in your httpd.conf.
+	You must do one or the other!
 
         WARNING!
 
