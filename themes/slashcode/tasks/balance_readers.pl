@@ -343,10 +343,10 @@ sub delete_old_logs {
 	my $secs_back = $constants->{dbs_reader_expire_secs} || 86400*7;
 	$slashdb->deleteOldDBReaderStatus($secs_back);
 	# How long before we do this again?  Depends on how much log
-	# we're keeping around.  Anywhere from 5 minutes to 8 hours.
+	# we're keeping around.  Anywhere from 5 minutes to 4 hours.
 	my $pause = $secs_back / 60;
 	$pause = 300 if $pause < 300;
-	$pause = 14400 if $pause > 28800;
+	$pause = 14400 if $pause > 14400;
 	return time + $pause;
 }
 
