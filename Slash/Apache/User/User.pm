@@ -70,7 +70,7 @@ sub handler {
 		$uri =~ s/^\Q$path//;
 	}
 
-	if (!$cfg->{auth} && ($uri !~ /\.pl$/ || $uri !~ /\.tmpl$/)) {
+	if (!$cfg->{auth} && $uri !~ /\.pl$/ && $uri !~ /\.tmpl$/) {
 		$r->subprocess_env(SLASH_USER => $constants->{anonymous_coward_uid});
 		createCurrentUser();
 		createCurrentForm();
