@@ -1023,6 +1023,15 @@ sub isAnon {
 		||	$uid =~ /[^0-9]/	# only integers
 		||	$uid < 1		# only positive
 	;
+
+	my $anon_uids = getCurrentStatic('anonymous_coward_uids');
+	if ($anon_uids) {
+		for (@$anon_uids) {
+			return 1 if $uid == $_;
+		}
+		return 0;
+	}
+
 	return $uid == getCurrentStatic('anonymous_coward_uid');
 }
 
@@ -1357,7 +1366,7 @@ sub prepareUser {
 
 	$uid = $constants->{anonymous_coward_uid} unless defined($uid) && $uid ne '';
 
-	if (isAnon($uid)) {
+	if ($uid == $constants->{anonymous_coward_uid}) {
 		if ($ENV{GATEWAY_INTERFACE}) {
 			$user = getCurrentAnonymousCoward();
 		} else {
@@ -1368,7 +1377,7 @@ sub prepareUser {
 	} else {
 		$user = $reader->getUser($uid);
 		$user->{logtoken} = bakeUserCookie($uid, $reader->getLogToken($uid));
-		$user->{is_anon} = 0;
+		$user->{is_anon} = isAnon($uid);
 	}
 
 	# Now store the DB information from above in the user

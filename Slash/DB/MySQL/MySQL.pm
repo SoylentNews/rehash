@@ -8079,6 +8079,7 @@ sub getSlashConf {
 		# var name			# default array value
 		# --------			# -------------------
 						# See <http://www.iana.org/assignments/uri-schemes>
+		anonymous_coward_uids =>	[ $conf{anonymous_coward_uid} ],
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
 		approvedtags =>			[qw( B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV ECODE DL DT DD)],
 		approvedtags_break =>		[qw( P LI OL UL BR BLOCKQUOTE DIV HR DL DT DD)],
