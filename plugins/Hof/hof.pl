@@ -11,11 +11,18 @@ use Slash::Utility;
 
 ##################################################################
 sub main {
-	my $slashdb = getCurrentDB();
 	my $form    = getCurrentForm();
-	my $section = $slashdb->getSection($form->{section});
+	my $constants    = getCurrentStatic();
 
-	header(getData('head'), $section->{section});
+	header(getData('head'), $form->{section});
+
+	my ($hofDB);
+
+	if ($constants->{backup_db_user}) {
+		$hofDB = getObject('Slash::Hof', $constants->{backup_db_user});
+	} else {
+		$hofDB = getObject('Slash::Hof');
+	}
 
 	my @topcomments = ( );
 # getCommentsTop() comes in two versions as of 2001/07/12.  The old
@@ -24,22 +31,22 @@ sub main {
 # commenting this out until the new version is done.  See
 # Slash/DB/MySQL/MySQL.pm getCommentsTop(). - Jamie 2001/07/12
 #	my $topcomments;
-#	$topcomments = $slashdb->getCommentsTop($form->{sid});
+#	$topcomments = $hofDB->getCommentsTop($form->{sid});
 #	for (@$topcomments) {
 #		my $top = $topcomments[@topcomments] = {};
 #		# leave as "aid" for now
 #		@{$top}{qw(section sid anickname title pid subj cdate sdate uid cid score)} = @$_;
-#		my $user_email = $slashdb->getUser($top->{uid}, ['fakeemail', 'nickname']);
+#		my $user_email = $hofDB->getUser($top->{uid}, ['fakeemail', 'nickname']);
 #		@{$top}{'fakeemail', 'nickname'} = @{$user_email}{'fakeemail', 'nickname'};
 #	}
 
 	slashDisplay('main', {
 		width		=> '98%',
-		actives		=> $slashdb->countStories(),
-		visited		=> $slashdb->countStoriesTopHits(),
-		activea		=> $slashdb->countStoriesAuthors(),
-		activep		=> $slashdb->countPollquestions(),
-		activesub	=> $slashdb->countStorySubmitters(),
+		actives		=> $hofDB->countStories(),
+		visited		=> $hofDB->countStoriesTopHits(),
+		activea		=> $hofDB->countStoriesAuthors(),
+		activep		=> $hofDB->countPollquestions(),
+		activesub	=> $hofDB->countStorySubmitters(),
 		currtime	=> timeCalc(scalar localtime),
 		topcomments	=> \@topcomments,
 	});
