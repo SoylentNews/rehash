@@ -51,7 +51,7 @@ END;
 	yesterday = story.td;
 	storiestoday = storiestoday + 1;
 
-	bgcolor = '';
+	bgcolor = '#FFFFFF';
 	IF story.displaystatus > 0;
 		bgcolor = '#CCCCCC';
 	ELSIF story.writestatus == 'delete' || story.displaystatus < 0;
