@@ -703,6 +703,13 @@ sub printComments {
 			$more_comment_text->{$cid} = addDomainTags($text);
 		}
 
+		# Now write the new data into our hashref and write it out to
+		# memcached if appropriate.  For these purposes, if we were
+		# cleared to read from memcached, the data we just got is also
+		# valid to write to memcached.
+		$comment_text->{$cid} = parseDomainTags($more_comment_text->{$cid},
+			$comments->{$cid}{fakeemail});
+
 		# If the comment should have noFollow on its links, apply
 		# them here.
 		my $karma_bonus = $comments->{$cid}{karma_bonus};
@@ -710,12 +717,6 @@ sub printComments {
 			$comment_text->{$cid} = noFollow($comment_text->{$cid});
 		}
 
-		# Now write the new data into our hashref and write it out to
-		# memcached if appropriate.  For these purposes, if we were
-		# cleared to read from memcached, the data we just got is also
-		# valid to write to memcached.
-		$comment_text->{$cid} = parseDomainTags($more_comment_text->{$cid},
-			$comments->{$cid}{fakeemail});
 		if ($mcd && $form->{cid} ne $cid) {
 			my $exptime = $constants->{memcached_exptime_comtext};
 			$exptime = 86400 if !defined($exptime);
@@ -1707,11 +1708,11 @@ sub _hard_dispComment {
 			subject	=> 'Read the rest of this comment...',
 			subject_only => 1,
 		}, 1);
-		$comment_to_display = "$comment->{comment}<P><B>$link</B>";
+		$comment_to_display = "$comment->{comment}<p><b>$link</b>";
 	} elsif ($user->{nosigs}) {
 		$comment_to_display = $comment->{comment};
 	} else {
-		$comment_to_display = "$comment->{comment}<BR>$comment->{sig}";
+		$comment_to_display = "$comment->{comment}<br>$comment->{sig}";
 	}
 
 	$time_to_display = timeCalc($comment->{date});
@@ -1725,7 +1726,7 @@ sub _hard_dispComment {
 	}
 
 	if ($comment->{sid} && $comment->{cid}) {
-		$comment_link_to_display = qq| (<A HREF="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}">#$comment->{cid}</A>)|;
+		$comment_link_to_display = qq| (<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}">#$comment->{cid}</a>)|;
 	} else {
 		$comment_link_to_display = " ";
 	}
@@ -1746,25 +1747,29 @@ sub _hard_dispComment {
 		$homepage = strip_literal($homepage);
 
 		$userinfo_to_display = "";
-		$userinfo_to_display = qq[<A HREF="$comment->{homepage}">$homepage</A>]
+		my $nofollow = '';
+		if (!$comment->{karma_bonus} || $comment->{karma_bonus} eq 'no') {
+			$nofollow = ' rel="nofollow"';
+		}
+		$userinfo_to_display = qq[<a href="$comment->{homepage}"$nofollow>$homepage</a>]
 			if $homepage;
 		if ($comment->{journal_last_entry_date} =~ /[1-9]/) {
 			$userinfo_to_display .= " | " if $userinfo_to_display;
-			$userinfo_to_display .= sprintf('Last Journal: <A HREF="%s/~%s/journal/">%s</A>',
+			$userinfo_to_display .= sprintf('Last Journal: <a href="%s/~%s/journal/">%s</a>',
 				$constants->{real_rootdir},
 				$nick,
 				timeCalc($comment->{journal_last_entry_date})
 			);
 		}
-		$userinfo_to_display = "<BR><FONT SIZE=\"-1\">($userinfo_to_display)</FONT>" if $userinfo_to_display;
+		$userinfo_to_display = "<br><font size=\"-1\">($userinfo_to_display)</font>" if $userinfo_to_display;
 
 		my $nick_literal = strip_literal($comment->{nickname});
 		my $nick_param = fixparam($comment->{nickname});
-		$user_nick_to_display = qq{<A HREF="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</A>};
+		$user_nick_to_display = qq{<a href="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</a>};
 		if ($constants->{plugin}{Subscribe} && $constants->{subscribe}
 			&& $comment->{subscriber_bonus} eq 'yes') {
 			if ($constants->{plugin}{FAQSlashdot}) {
-				$user_nick_to_display .= qq{ <A HREF="/faq/com-mod.shtml#cm2600">*</A>};
+				$user_nick_to_display .= qq{ <a href="/faq/com-mod.shtml#cm2600">*</a>};
 			} else {
 				$user_nick_to_display .= " *";
 			}
@@ -1772,7 +1777,7 @@ sub _hard_dispComment {
 		if ($comment->{fakeemail}) {
 			my $mail_literal = strip_literal($comment->{fakeemail_vis});
 			my $mail_param = fixparam($comment->{fakeemail});
-			$user_email_to_display = qq{ &lt;<A HREF="mailto:$mail_param">$mail_literal</A>&gt;};
+			$user_email_to_display = qq{ &lt;<a href="mailto:$mail_param">$mail_literal</a>&gt;};
 		}
 	}
 
@@ -1780,48 +1785,48 @@ sub _hard_dispComment {
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		my $person = $comment->{uid};
 		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person} && !$user->{people}{FOF()}{$person} && !$user->{people}{EOF()}{$person}) {
-				$zoosphere_display .= qq|<A HREF="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/neutral.gif" ALT="Alter Relationship" TITLE="Alter Relationship"></A>|;
+				$zoosphere_display .= qq|<a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person"><img border="0" src="$constants->{imagedir}/neutral.gif" alt="Alter Relationship" title="Alter Relationship"></a>|;
 		} else {
 			if ($user->{people}{FRIEND()}{$person}) {
 				my $title = $user->{people}{people_bonus_friend} ? "Friend ($user->{people}{people_bonus_friend})" : "Friend";
-				$zoosphere_display .= qq|<A HREF="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/friend.gif" ALT="$title" TITLE="$title"></A>|;
+				$zoosphere_display .= qq|<a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img border="0" src="$constants->{imagedir}/friend.gif" alt="$title" title="$title"></a>|;
 			}
 			if ($user->{people}{FOE()}{$person}) {
 				my $title = $user->{people}{people_bonus_foe} ? "Foe ($user->{people}{people_bonus_foe})" : "Foe";
-				$zoosphere_display .= qq|<A HREF="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/foe.gif" ALT="$title" TITLE="$title"></A>|;
+				$zoosphere_display .= qq|<a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img border="0" src="$constants->{imagedir}/foe.gif" alt="$title" title="$title"></a>|;
 			}
 			if ($user->{people}{FAN()}{$person}) {
 				my $title = $user->{people}{people_bonus_fan} ? "Fan ($user->{people}{people_bonus_fan})" : "Fan";
-				$zoosphere_display .= qq|<A HREF="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/fan.gif" ALT="$title" TITLE="$title"></A>|;
+				$zoosphere_display .= qq|<a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img border="0" src="$constants->{imagedir}/fan.gif" alt="$title" title="$title"></a>|;
 			}
 			if ($user->{people}{FREAK()}{$person}) {
 				my $title = $user->{people}{people_bonus_freak} ? "Freak ($user->{people}{people_bonus_freak})" : "Freak";
-				$zoosphere_display .= qq|<A HREF="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/freak.gif" ALT="$title" TITLE="$title"></A>|;
+				$zoosphere_display .= qq|<a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img border="0" src="$constants->{imagedir}/freak.gif" alt="$title" title="$title"></a>|;
 			}
 			if ($user->{people}{FOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_fof} ? "Friend of a Friend ($user->{people}{people_bonus_fof})" : "Friend of a Friend";
-				$zoosphere_display .= qq|<A HREF="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/fof.gif" ALT="$title" TITLE="$title"></A>|;
+				$zoosphere_display .= qq|<a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img border="0" src="$constants->{imagedir}/fof.gif" alt="$title" title="$title"></a>|;
 			}
 			if ($user->{people}{EOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_eof} ? "Foe of a Friend ($user->{people}{people_bonus_eof})" : "Foe of a Friend";
-				$zoosphere_display .= qq|<A HREF="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><IMG BORDER="0" SRC="$constants->{imagedir}/eof.gif" ALT="$title" TITLE="$title"></A>|;
+				$zoosphere_display .= qq|<a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img border="0" src="$constants->{imagedir}/eof.gif" alt="$title" title="$title"></a>|;
 			}
 		}
 	}
 	
-	my $title = qq|<A NAME="$comment->{cid}"><B>$comment->{subject}</B></A>|;
+	my $title = qq|<a name="$comment->{cid}"><b>$comment->{subject}</b></a>|;
 	my $return = <<EOT;
-			<TR><TD BGCOLOR="$user->{colors}{bg_2}">
-				<FONT SIZE="3" COLOR="$user->{colors}{fg_2}">
+			<tr><td bgcolor="$user->{colors}{bg_2}">
+				<font size="3" color="$user->{colors}{fg_2}">
 				$title $score_to_display
-				</FONT>
-				<BR>by $user_nick_to_display$zoosphere_display$user_email_to_display
+				</font>
+				<br>by $user_nick_to_display$zoosphere_display$user_email_to_display
 				on $time_to_display$comment_link_to_display
 				$userinfo_to_display $comment->{ipid_display}
-			</TD></TR>
-			<TR><TD>
+			</td></tr>
+			<tr><td>
 				$comment_to_display
-			</TD></TR>
+			</td></tr>
 EOT
 
 	# Do not display comment navigation and reply links if we are in
@@ -1862,11 +1867,11 @@ EOT
 
 		if (@link) {
 			$return .= <<EOT;
-				<TR><TD>
-					<FONT SIZE="2">
+				<tr><td>
+					<font size="2">
 					[ $link ]
-					</FONT>
-				</TD></TR>
+					</font>
+				</td></tr>
 EOT
 		}
 
