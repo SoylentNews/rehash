@@ -85,8 +85,11 @@ $task{$me}{code} = sub {
 			if ($constants->{message_delivery_debug} > 0) {
 				use Data::Dumper;
 				foreach my $m (@$coll) {
+					delete $m->{user}{people};
 					messagedLog("Empty message: " . Dumper($m))
 						unless $m->{message};
+					messagedLog("Good message: " . Dumper($m))
+						if $m->{message};
 				}
 			}
 			
