@@ -818,7 +818,7 @@ sub breakHtml {
 		\s*
 		(</?$break_tag>)
 		\s*
-	}{ <$1> }gsx;
+	}{ $1 }gsx;
 #print STDERR "text 3 '$text'\n";
 
 	# Temporarily hide whitespace inside tags so that the regex below
