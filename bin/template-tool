@@ -1,0 +1,421 @@
+#!/usr/bin/perl -w 
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# First version by Brian, brian@tanegnt.org
+# Updated by Patrick Galbraith, capttofu@slashdot.org
+
+# I hope someone takes this over. A TK frontend
+# would be nice. This was Cliff's idea and kudos
+# should go to him. -Brian
+#
+# Cliff++; -CaptTofu
+
+use strict;
+use File::Basename;
+use FindBin '$Bin';
+use File::Spec::Functions;
+use Slash;
+use Slash::Utility;
+use Slash::DB;
+use Slash::Install;
+use Getopt::Std;
+use Cwd;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('cdilrsvg:D:O:P:S:p:f:u:h', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+boiler() if $opts{'B'};
+
+# if deleting, then there should be no other operation or file flags
+usage('deletion with other op flags') if ( $opts{'r'} && ($opts{'d'} || $opts{'l'} || $opts{'f'} || $opts{'s'} || $opts{'e'} )); 
+
+# can't have multiple IDs on a save
+usage('too many ids to save') if (@ARGV > 2 && $opts{'s'} && $opts{'i'});
+
+$opts{'u'} ||= 'slash';  
+
+createEnvironment($opts{'u'});
+my $slashdb = getCurrentDB();
+my $install = Slash::Install->new($opts{'u'});
+
+# datastruct of ALL templates, keyed by uid
+my $templates = $slashdb->getTemplates();
+
+my($sectionpage_flag, $section_flag, $page_flag, $all_flag) = (0, 0, 0, 0);
+
+##################################
+# compile to perl code
+if ($opts{'c'}) {
+	# There is logic in making -i work with -P and -S, but I'm too tired to
+	# implement that right now.
+	die "Can't use -P or -S options with -i and -c!\n" 
+		if $opts{i} && ($opts{P} || $opts{S});
+	# (-i) Sanity check. We only want an @ARGV full of numeric arguments.
+	map {
+		die "Non-numeric options given with -i!\n" unless /^\d+$/;
+	} @ARGV if $opts{i};
+	compile_template();
+	exit();
+}
+
+if ($opts{'O'}) {
+	if ( ! -d $opts{'O'}) {
+		if ($opts{'d'} || $opts{'e'} || ( $opts{'l'} && $opts{'f'})) {
+			# needs to use File::Path::mkpath(); and
+			# even if you wanted mkdir, why not use Perl's
+			# mkdir()?  fix please.
+			system("mkdir $opts{'O'}") 
+		} else {
+			print "Invalid directory $opts{'O'} \n";
+			exit(0);
+		}
+	}
+} 
+
+if ($opts{'S'} and $opts{'P'}) {
+	$sectionpage_flag = 1;
+} elsif ($opts{'S'}) {
+	$section_flag = 1;
+} elsif ($opts{'P'}) {
+	$page_flag = 1;
+} else {
+	$all_flag = 1;
+}
+
+# start the processing
+if ($opts{'s'}) {
+	for(@ARGV) {
+		my $template = $install->readTemplateFile($_);
+		next unless $template;
+		print "Preparing to insert $template->{name} using filename $_\n";
+		my $tpid = $slashdb->getTemplateByName($template->{name}, 'tpid', 1, $template->{page}, $template->{section});
+		if (defined $tpid) {
+			if ($slashdb->setTemplate($tpid, $template)) {
+				print "updated template $_ tpid $tpid\n";
+			} else {
+				print "wasn't able to update template $_ $tpid\n";
+				print "Error: " . $slashdb->{_dbh}->DBI::err_str . "\n";
+			}
+		} else {
+			if ($slashdb->createTemplate($template)) {
+				print "created template $_\n";
+			} else {
+				print "wasn't able to update template $_ $tpid\n";
+				print "Error: " . $slashdb->{_dbh}->DBI::err_str . "\n";
+			}
+		}
+	}
+} else {
+	my $templatelist = {};
+	my($sectionpage_match, $no_sectionpage, $template_counter) = (0, 0, 0);
+	my $filename;
+
+	if ($opts{'f'}) {
+		$filename = $opts{'f'};
+		$filename = catfile($opts{'O'}, $filename) if $opts{'O'};
+	} elsif ($opts{'O'}) {
+		$filename = $opts{'O'};
+	}
+
+	# build a template list of the templates we want to process
+	for my $key (keys %$templates) {
+		if ($opts{'m'}) {
+			next unless $key =~ /$opts{'m'}/;
+		}
+
+		if ( 	($sectionpage_flag && 
+			$opts{'S'} eq $templates->{$key}{section} && 
+			$opts{'P'} eq $templates->{$key}{page}) 
+			|| 
+			($section_flag && $templates->{$key}{section} eq $opts{'S'}) 
+			|| 
+			($page_flag and $templates->{$key}{page} eq $opts{'P'}) ) 
+		{
+			$sectionpage_match = 1;
+			# print "section_flag $section_flag template section $templates->{$key}{section}  opts section $opts{'S'}\n";
+
+		} elsif ($all_flag) {
+			$no_sectionpage = 1;
+		} 
+
+		if ($sectionpage_match || $no_sectionpage) {
+			if (@ARGV) {
+				for (@ARGV) {
+					if ($opts{'i'}) {
+						$templatelist->{$key} = $templates->{$key}
+							if $key == $_;
+
+					} else {
+						my $templatename = $_;
+						if ($templates->{$key}{name} eq $templatename) {
+							$templatelist->{$key} = $templates->{$key};
+							$template_counter++;
+						}
+					}
+				}
+			}  elsif (! $opts{'i'}) {
+				$templatelist->{$key} = $templates->{$key};
+				$template_counter++;
+			}
+			($sectionpage_match, $no_sectionpage) = (0, 0);
+		}
+	}
+
+	if ($opts{'l'}) {
+		list_templates($templatelist, $filename);
+	} elsif ($opts{'d'}) {
+		if ($template_counter > 1 && $opts{'f'}) {
+			usage('too many templates per file');
+		} else {
+			dump_templates($templatelist, $filename);
+		}
+	} elsif ($opts{'r'}) {
+		delete_templates($templatelist);
+	}
+}
+
+###############################################
+sub dump_templates {
+	my($templatelist, $directory) = @_;
+	my $filename;
+	$directory = curdir() unless defined($directory);
+
+	for my $template (keys %$templatelist) {
+		if (! $directory || -d $directory) {
+			$filename = $templatelist->{$template}{'name'} . ';' .  
+				$templatelist->{$template}{'page'} . ';' .  
+				$templatelist->{$template}{'section'};
+
+			$filename = catfile($directory, $filename);
+		} else {
+			$filename = $directory;
+		} 
+
+		print "dumping template to $filename\n";
+
+		$install->writeTemplateFile($filename, $templatelist->{$template});
+	} 
+}
+
+###############################################
+sub list_templates {
+	my($templatelist, $file) = @_;
+
+	# all path creation should use File::Spec::Functions,
+	# File::Basename, etc. -- pudge
+	if ($file) {
+		$file = catfile($file, 'templatelist.txt') if -d $file;
+
+		print "printing template descriptions to $file\n";
+		my $fh = gensym();
+		open($fh, "> $file") or die "$! unable to open file $file to dump to\n";
+		select($fh);
+	}
+
+	for my $template (keys %$templatelist) {
+
+		# stinking lousy control-Ms
+		$templatelist->{$template}{description} =~ s/\015\012/\n/g
+			if $templatelist->{$template}{description};
+
+		print <<EOT; 
+--------------------------------------------------------
+Tpid: $templatelist->{$template}{tpid} Name: $templatelist->{$template}{name}
+Page: $templatelist->{$template}{page} Section: $templatelist->{$template}{section}
+
+EOT
+
+		print <<EOT if $templatelist->{$template}{description};
+Description:\n$templatelist->{$template}{description}
+EOT
+	}
+
+	close(FILE);
+}
+###############################################
+sub delete_templates {
+	my($templatelist) = @_;
+	my $list = join(" ",keys(%$templatelist));
+	print "are you sure you want to delete templates tpid(s) $list ? y/Y ";
+	my $answer = <STDIN>;
+	chomp($answer);
+ 
+	if ($answer eq 'Y' || $answer eq 'y') { 
+		for my $template (keys %$templatelist) {
+			$slashdb->deleteTemplate($template);
+		}
+	} else {
+		print "\n...canceled template deletion.\n";
+	}
+}
+
+###############################################
+sub compile_template {
+	require Slash::Display;
+
+	my $template_provider = Slash::Display::get_template({}, {
+		COMPILE_EXT	=> '.ttc',
+		COMPILE_DIR	=> defined($opts{O}) ? $opts{O} : curdir(),
+	});
+
+	my $page = $opts{P} || 'misc';
+	my $section = $opts{S} || 'default';
+	my $user = getCurrentUser();
+
+	for (@ARGV) { warn $_;
+		my($data, $template, $compiled_template, $error);
+
+		# get template text or pass template data
+		if ($opts{i}) {
+			my $data = $slashdb->getTemplate($_, ['name', 'page', 'section']);
+			@{$user}{qw(currentPage currentSection)} =
+				@{$data}{qw(page section)};	
+			$template = $data->{name};
+
+		# this doesn't work, -f takes arg, filename
+		# is not in @ARGV
+		} elsif ($opts{f}) {
+			# The logic here is that $template would be set to the contents
+			# of the file named $_.
+			local $/ = undef;
+			my $in = gensym();
+			if (open($in, $_)) {
+				$$template = <$in>;
+				close($in) or warn "Can't close file $_: $!\n";
+			} else {
+				warn "Can't open file $_ for reading: $!\n";
+			}
+
+		} else {
+			if (/;/) {
+				($template, @{$user}{qw(currentPage currentSection)}) =
+					split /;/, $_;
+			} else {
+				$template = $_;
+				@{$user}{qw(currentPage currentSection)} =
+					($page, $section);
+			}
+		}
+
+		die "Requested template '$_' ($section|$page) is empty!\n"
+			if !$template;
+
+		my $out;
+		my $ok = $template_provider->process($template, {}, \$out);
+		warn $template_provider->error unless $ok;
+	}
+}
+
+###############################################
+sub usage {
+	print "*** $_[0] \n" if $_[0];
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] <template templateN>
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-B	generates a blank template (specify the name of the file
+		after the option)
+	-d	dump templates
+	-i	use tpid (template id) instead of template name
+	-l	list template(s) and their descriptions
+	-m	only perform list and get actions if the template matches
+		this pattern
+	-f	<templatefilename> filename of template being dumped or
+		created (single template)
+	-s	create/save/update template 
+	-O	directory where templates are saved or created
+	-P	<page> template page
+	-S	<section> template section
+	-r	deletes template(s) (don't shoot yourself in the foot!)
+
+	Save Notes:
+	*	With no args except filename, uses template name to derive
+		section, page and template name from.
+	*	-s <filenames> allows you to save specific templates from
+		the given files. This needs to be a template in a template
+		file format. Use -b to generate blank ones.
+	*	If you don't supply a template name, or leave the section
+		and page unset, the name will try to be derived from the
+		filename.
+	*	If you supply a section and/or page and your reading files
+		out of a directory, those templates will be saved with those
+		sections. If you want to read from a directory and not have
+		your section or page changed, don't provide these arguments.
+
+Section, page, and template args logic for listing and dumping functions:
+	-S	<section> all templates in a section
+	-S	<section> <template templateN> all templates in a section
+		having the name(s)
+	-P	<page> all templates for a page
+	-P	<page> <template templateN> all templates for a page having
+		the name(s)
+	-S	<section> -P <page> all templates for a page and section
+	-S	<section> -P <page> <template templateN> templates for a page
+		and section with the name(s) <template templateN> all
+		templates having the name(s) all other template fields should
+		be modified via web interface
+
+Debugging options:
+	-c	Compiles named template into Perl code for testing
+	-O	<directory> Destination directory of compiled templates
+		(default is ".")
+
+	Compiled templates are saved as <template-name>.ttc in the
+	destination directory.
+
+EOT
+	exit();
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2001 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+sub boiler {
+	my $fh = gensym();
+	open($fh, "> $opts{'B'}") or die "Could not open file for blank template";
+	print $fh <<EOT;
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+generic
+__template__
+This is where you would
+put all of your html and such to be displayed. See
+Template(3) for more information about syntax.
+__seclev__
+10000
+EOT
+	close(FILE);
+	exit;
+}
