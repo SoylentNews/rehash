@@ -259,15 +259,21 @@ sub main {
 
 	if ($op eq 'userlogin' && ! isAnon($user->{uid})) {
 		# why disable "returnto" ?  What's going on? -- pudge
-		# my $refer = URI->new_abs($form->{returnto} || $constants->{rootdir},
-		my $refer = URI->new_abs($constants->{rootdir},
+		# no one responded, so i am changing it back
+# 		my $refer = URI->new_abs($constants->{rootdir},
+		my $refer = URI->new_abs($form->{returnto} || $constants->{rootdir},
 			$constants->{absolutedir});
 		# Tolerate redirection with or without a "www.", this is a little
 		# sloppy but it may help avoid a subtle misbehavior someday. -- anonymous
 		# What misbehavior? It looks to me like it could break a site.
 		# www.foo.com is not necessarily the same as foo.com.  Please explain. -- pudge
-		my $site_domain = $constants->{basedomain}; $site_domain =~ s/^www\.//;
-		my $refer_host = $refer->host(); $refer_host =~ s/^www\.//;
+		my $site_domain = $constants->{basedomain};
+		$site_domain =~ s/^www\.//;
+		$site_domain =~ s/:.+$//;	# strip port, if available
+
+		my $refer_host = $refer->host();
+		$refer_host =~ s/^www\.//;
+
 		if ($site_domain eq $refer_host) {
 			# Cool, it goes to our site.  Send the user there.
 			$refer = $refer->as_string;

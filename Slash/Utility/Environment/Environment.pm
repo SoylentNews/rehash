@@ -1313,18 +1313,24 @@ sub getObject {
 	}
 
 	if ($objects->{$class}) {
-		return $objects->{$class};
+		if ($objects->{$class} eq 'NA') {
+			return undef;
+		} else {
+			return $objects->{$class};
+		}
 	} else {
-		$user    ||= getCurrentVirtualUser();
+		$user ||= getCurrentVirtualUser();
 		return undef unless $user;
 
 		eval "require $class";
 		if ($@) {
 			errorLog($@);
+			$objects->{$class} = 'NA';
 			return undef;
 		} elsif (!$class->can("new")) {
 			errorLog("Class $class is not working properly.  Try " .
 				"`perl -M$class -le '$class->new'` to see why.\n");
+			$objects->{$class} = 'NA';
 			return undef;
 		}
 		return $objects->{$class} = $class->new($user, @args);
