@@ -2283,3 +2283,7 @@ INSERT INTO vars (name, value, description) VALUES ('hc_image_format','jpg','For
 INSERT INTO vars (name, value, description) VALUES ('m2_wait_hours','12','Number of hours to wait before a mod is available for m2');
 
 UPDATE menus SET value='[% constants.rootdir %]/my/password' WHERE menu='users' AND label='Password';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_152, Start of T_2_3_0_153 - 2004/05/04
