@@ -1830,8 +1830,6 @@ UPDATE users_comments SET threshold=0 WHERE threshold IS NULL;
 UPDATE users_comments SET commentsort=0 WHERE commentsort IS NULL;
 ALTER TABLE users_comments CHANGE COLUMN mode mode ENUM('flat', 'nested', 'nocomment', 'thread') DEFAULT 'thread' NOT NULL, CHANGE COLUMN commentsort commentsort TINYINT DEFAULT '0' NOT NULL, CHANGE COLUMN threshold threshold TINYINT DEFAULT '0' NOT NULL;
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('MAGST',  39600, 'Magadan', NULL, 'MAGDT', 43200);
 
 # sigh ... this really needs to be iso-8859-1 ... make it utf-8 if you want
@@ -1841,3 +1839,7 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 REPLACE INTO vars (name, value, description) VALUES ('content_type_webpage','text/html; charset=iso-8859-1','The Content-Type header for webpages');
 
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_113, Start of T_2_3_0_114 - 2003/08/12
+
