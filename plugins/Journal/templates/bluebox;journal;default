@@ -29,7 +29,7 @@ __template__
 						<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]">
 								<IMG SRC="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" WIDTH="[% diatribe.topic.width %]"
 								HEIGHT="[% diatribe.topic.height %]" BORDER="0" ALIGN="RIGHT"
-								HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.alttext %]"></A>
+								HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.textname %]"></A>
 					</TD>
 				</TR>
 				[% IF diatribe.discussion %]

@@ -20,7 +20,9 @@ __template__
    futuretime  = "";
    futurecolor = "#FFFFFF";
 
-   IF story.displaystatus > 0;
+   IF !story.displaystatus;
+        futurecolor = "#FFFFFF";
+   ELSIF story.displaystatus > 0;
 	futurecolor = "#CCCCCC";
    ELSIF story.displaystatus < 0;
 	futurecolor = "#999999";

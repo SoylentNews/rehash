@@ -60,6 +60,7 @@ sub newUserForm {
 
 	header(getData('newuserformhead')) or return;
 	slashDisplay('newUserForm', { note => $note });
+	footer();
 }
 
 #################################################################
