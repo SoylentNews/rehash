@@ -1314,9 +1314,6 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1_percent' WHERE name='
 # End of T_2_3_0_76, Start of T_2_3_0_77
 # End of T_2_3_0_77, Start of T_2_3_0_78
 
-# SLASHDOT LAST UPDATED HERE
-
-
 # First pass at updating accesslist to be simpler and smarter:
 ALTER TABLE accesslist ADD COLUMN now SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL;
 ALTER TABLE accesslist ADD COLUMN was SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL;
@@ -1356,9 +1353,12 @@ ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255) NOT NULL DEFAULT
 # only insert this if you don't already have the value set in vars
 #INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
 
+# End of T_2_3_0_78, Start of T_2_3_0_79
+
 # SLASHCODE LAST UPDATED HERE
 # DEVCHANNEL LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
+
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link','1','Boolean where to use next/prev links for articles');
 
 INSERT INTO vars (name, value, description) VALUES ('accesslog_disable','0','Disable apache writing to accesslog?');
@@ -1367,4 +1367,9 @@ ALTER TABLE comments ADD COLUMN len SMALLINT UNSIGNED NOT NULL DEFAULT '0';
 SELECT CONCAT("UPDATE comments SET len=", LENGTH(comment), " WHERE cid=", cid, ";") INTO OUTFILE "/tmp/comlen" FROM comment_text;
 SOURCE /tmp/comlen;
 
+# End of T_2_3_0_79, Start of T_2_3_0_80
+
+# SLASHDOT LAST UPDATED HERE
+
 ALTER TABLE dbs CHANGE type type enum("writer","reader","log","search", "log_slave") DEFAULT "reader" NOT NULL;
+
