@@ -54,7 +54,7 @@ TITLE="[% topic.textname %]"></A>
 	[% IF submission.uid != constants.anonymous_coward_uid %]
 		[% IF num_from_uid >= 20 %]<B>[% END %]
 		[% num_from_uid %] submission[% IF num_from_uid != 1 %]s[% END %]
-		from [% submitter.nickname %]
+		from [% submitter.nickname %] ([% accepted_from_uid %] accepted)
 		[%- IF num_from_uid >= 20 %]</B>[% END -%]
 		[%- IF submission.emaildomain %]
 			and
@@ -63,7 +63,7 @@ TITLE="[% topic.textname %]"></A>
 	[%- IF submission.emaildomain %]
 		[% IF num_with_emaildomain >= 15 %]<B>[% END %]
 		[% num_with_emaildomain %] submission[% IF num_with_emaildomain != 1 %]s[% END %]
-		from [% submission.emaildomain -%]
+		from [% submission.emaildomain -%] ([% accepted_from_emaildomain %] accepted)
 		[%- IF num_with_emaildomain >= 15 %]</B>[% END -%]
 	[%- END -%]
 	.

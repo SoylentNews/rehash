@@ -208,9 +208,13 @@ sub previewForm {
 	}) if $user->{is_admin};
 
 	my $num_from_uid = 0;
+	my $accepted_from_uid = 0;
 	my $num_with_emaildomain = 0;
+	my $accepted_from_emaildomain = 0;
 	if ($user->{is_admin}) {
+		$accepted_from_uid = $slashdb->countSubmissionsFromUID($sub->{uid}, { del => 2 });
 		$num_from_uid = $slashdb->countSubmissionsFromUID($sub->{uid});
+		$accepted_from_emaildomain = $slashdb->countSubmissionsWithEmaildomain($sub->{emaildomain}, { del => 2 });
 		$num_with_emaildomain = $slashdb->countSubmissionsWithEmaildomain($sub->{emaildomain});
 	}
 
@@ -243,18 +247,20 @@ sub previewForm {
 	}
 
 	slashDisplay('previewForm', {
-		submission	=> $sub,
-		submitter	=> $reader->getUser($sub->{uid}),
-		subid		=> $form->{subid},
-		topic		=> $topic,
-		ipid		=> $sub->{ipid},
-		ipid_vis	=> $sub->{ipid_vis},
-		admin_flag 	=> $admin_flag,
-		extras 		=> $extracolumns,
-		lockTest	=> lockTest($sub->{subj}),
-		similar_stories	=> $similar_stories,
-		num_from_uid	=> $num_from_uid,
-		num_with_emaildomain => $num_with_emaildomain,
+		submission			=> $sub,
+		submitter			=> $reader->getUser($sub->{uid}),
+		subid				=> $form->{subid},
+		topic				=> $topic,
+		ipid				=> $sub->{ipid},
+		ipid_vis			=> $sub->{ipid_vis},
+		admin_flag 			=> $admin_flag,
+		extras 				=> $extracolumns,
+		lockTest			=> lockTest($sub->{subj}),
+		similar_stories			=> $similar_stories,
+		num_from_uid			=> $num_from_uid,
+		num_with_emaildomain 		=> $num_with_emaildomain,
+		accepted_from_uid 	  	=> $accepted_from_uid,
+		accepted_from_emaildomain 	=> $accepted_from_emaildomain
 	});
 }
 
