@@ -380,7 +380,7 @@ $I{adminmail}.  If you are being a troll, now is the time for you to
 either grow up, or change your IP.
 EOT
 
-		return(0);
+		return();
 	}
 
 	if (!$I{allow_anonymous} && ($I{U}{uid} < 1 || $I{F}{postanon})) { 
@@ -389,25 +389,25 @@ Sorry, anonymous posting has been turned off.
 Please <A HREF="$I{rootdir}/users.pl">register and log in</A>.
 EOT
 
-		return(0);
+		return();
 	}
 
-	unless ($comm && $subj) {
+	unless ($$comm && $$subj) {
 		print <<EOT;
 Cat got your tongue? (something important seems to be missing from your
 comment ... like the body or the subject!)
 EOT
-		return(0);
+		return();
 	}
 
-	$subj =~ s/\(Score(.*)//i;
-	$subj =~ s/Score:(.*)//i;
+	$$subj =~ s/\(Score(.*)//i;
+	$$subj =~ s/Score:(.*)//i;
 	
 	{  # fix unclosed tags
 		my %tags;
 		my $match = 'B|I|A|OL|UL|EM|TT|STRONG|BLOCKQUOTE|DIV';
 
-		while ($comm =~ m|(<(/?)($match)\b[^>]*>)|igo) { # loop over tags
+		while ($$comm =~ m|(<(/?)($match)\b[^>]*>)|igo) { # loop over tags
 			my($tag, $close, $whole) = (uc $3, $2, $1);
 
 			if ($close) {
@@ -415,8 +415,8 @@ EOT
 
 				# remove orphaned close tags if count < 0
 				while ($tags{$tag} < 0) {
-					my $p = pos($comm) - length($whole);
-					$comm =~ s|^(.{$p})</$tag>|$1|si;
+					my $p = pos($$comm) - length($whole);
+					$$comm =~ s|^(.{$p})</$tag>|$1|si;
 					$tags{$tag}++;
 				}
 
@@ -430,7 +430,7 @@ You can only post nested lists and blockquotes four levels deep.
 Please fix your UL, OL, and BLOCKQUOTE tags.
 EOT
 
-					return(0);
+					return();
 				}
 			}	
 		}
@@ -438,7 +438,7 @@ EOT
 		for my $tag (keys %tags) {
 			# add extra close tags
 			while ($tags{$tag} > 0) {
-				$comm .= "</$tag>";
+				$$comm .= "</$tag>";
 				$tags{$tag}--;
 			}
 		}
@@ -465,7 +465,7 @@ EOT
 <LI>Let us know if anything exceptionally strange happens</LI>
 </UL>
 EOT
-		return(0);
+		return();
 	}
 
 	if (length($I{F}{postercomment}) > 100) {
@@ -476,7 +476,7 @@ EOT
 
 		if (($w / ($br + 1)) < 7) {
 			editComment() and return unless $preview;
-			return(0);
+			return();
 		}
 	}
 
@@ -522,7 +522,6 @@ EOT
 
 		$regex = $case eq 'i' ? qr/$regex/i : qr/$regex/;
 
-		print "<!-- text_to_test\n$text_to_test\n -->\n";
 		if ($modifier eq 'g') {
 			$isTrollish = 1 if $text_to_test =~ /$regex/g;
 		} else {
@@ -537,9 +536,9 @@ EOT
 
 				editComment() and return unless $preview;
 				print <<EOT;
-<BR>Lameness filter encountered.  Post aborted.<BR><BR><B>$err_message</B><BR>
+<BR>Lameness filter encountered.  Post aborted.<BR><BR><B>Reason: $err_message</B><BR>
 EOT
-				return(0);
+				return();
 			}
 
 		} elsif ($isTrollish) {
@@ -547,7 +546,7 @@ EOT
 			print <<EOT;
 <BR>Lameness filter encountered.  Post aborted.<BR><BR><B>Reason: $err_message</B><BR><BR>
 EOT
-			return(0);
+			return();
 		}
 	}
 
@@ -587,7 +586,7 @@ EOT
 
 <BR>Lameness filter encountered.  Post aborted.<BR><BR>
 EOT
-					return(0);
+					return();
 				}
 
 			}
@@ -607,7 +606,7 @@ sub previewForm {
 		$I{F}{postersubj}, 'nohtml', $I{U}{aseclev}, 'B'
 	);
 
-	validateComment($tempComment, $tempSubject, 1);
+	validateComment(\$tempComment, \$tempSubject, 1);
 
 	$tempComment .= '<BR>' . $I{U}{sig};
 
@@ -640,7 +639,7 @@ sub submitComment {
 	$I{F}{postersubj} = stripByMode($I{F}{postersubj}, 'nohtml');
 	$I{F}{postercomment} = stripByMode($I{F}{postercomment}, $I{F}{posttype});
 
-	validateComment($I{F}{postercomment}, $I{F}{postersubj}) or return;
+	validateComment(\$I{F}{postercomment}, \$I{F}{postersubj}) or return;
 
 	titlebar("95%", "Submitted Comment");
 
