@@ -219,7 +219,7 @@ sub makepayment {
 sub pause {
 	my($form, $slashdb, $user, $constants) = @_;
 	sleep 5;
-	redirect("/subscribe.pl");
+	redirect("$constants->{rootdir}/subscribe.pl");
 }
 
 createEnvironment();

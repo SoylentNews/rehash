@@ -17,13 +17,13 @@ sub main {
 	my $blob = getObject("Slash::Blob", { db_type => 'reader' });
 	
 	unless ($form->{id}) {
-		redirect("/404.pl");
+		redirect("$constants->{rootdir}/404.pl");
 		return;
 	}
 	
 	my $data = $blob->get($form->{id});
 	if (!$data || $user->{seclev} < $data->{seclev}) {
-		redirect("/404.pl");
+		redirect("$constants->{rootdir}/404.pl");
 		return;
 	}
 

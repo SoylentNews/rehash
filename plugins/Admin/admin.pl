@@ -152,8 +152,7 @@ sub main {
 
 	# admin.pl is not for regular users
 	if ($user->{seclev} < 100) {
-		my $rootdir = getCurrentStatic('rootdir');
-		redirect("$rootdir/users.pl");
+		redirect("$constants->{rootdir}/users.pl");
 		return;
 	}
 	# non suadmin users can't perform suadmin ops
