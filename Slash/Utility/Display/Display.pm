@@ -1300,9 +1300,9 @@ sub cleanSlashTags {
 	my($text, $options) = @_;
 	return unless $text;
 
-	my $newtext = $text;
 
 	$text =~ s#<slash-(image|story|user|file|break|link|comment|journal)#<slash type="$1"#gis;
+	my $newtext = $text;
 	my $tokens = HTML::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
 		my $type = lc($token->[1]{type});
