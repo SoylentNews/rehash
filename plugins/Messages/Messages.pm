@@ -211,6 +211,10 @@ The message ID.
 sub create_web {
 	my($self, $msg) = @_;
 
+	# shrug, dunno why this might happen, but sometimes it do ...
+	# not much we can do but bail.
+	return unless $msg->{message} && $msg->{subject};
+
 	my($msg_id) = $self->_create_web(
 		$msg->{user}{uid},
 		$msg->{code},
