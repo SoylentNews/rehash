@@ -2082,8 +2082,6 @@ ALTER TABLE users_info ADD INDEX initdomain (initdomain), ADD INDEX created_ipid
 
 INSERT INTO vars (name, value, description) VALUES ('istroll_max_halflives', '3', 'Max number of times to cut the TrollModval impact of a downmod in half');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_133, Start of T_2_3_0_134 - 2004/02/03
 
 DROP TABLE IF EXISTS accesslog_artcom;
@@ -2101,7 +2099,7 @@ INSERT INTO vars (name, value, description) VALUES ('accesslog_hoursback', '60',
 
 # SLASHDOT LAST UPDATED HERE
 
-# End of T_2_3_0_134 - 2004/02/04
+# End of T_2_3_0_134, Start of T_2_3_0_135 - 2004/02/04
 
 DROP TABLE IF EXISTS slashd_errnotes;
 CREATE TABLE slashd_errnotes (
@@ -2123,3 +2121,6 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For 
 
 ALTER TABLE comments CHANGE COLUMN karma ckarma SMALLINT NOT NULL DEFAULT 0, CHANGE COLUMN karma_abs ckarma_abs SMALLINT UNSIGNED NOT NULL DEFAULT 0;
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_135, Start of T_2_3_0_136 - 2004/02/10
