@@ -290,13 +290,13 @@ sub templateEdit {
 	my($title, $templateref, $template_select, $page_select,
 		$section_select, $savepage_select, $savesection_select);
 
-	my($templatedelete_flag, $templateedit_flag, $templateform_flag) = 0;
+	my($templatedelete_flag, $templateedit_flag, $templateform_flag) = (0, 0, 0);
 	my $pagehashref = {};
 	$title = getTitle('templateEdit-title', {}, 1);
 	#Just to punish those section only admins! -Brian
 	$form->{section} = $user->{section} if $user->{section};
 
-	if ($form->{templatenew} || $form->{templatepage} || $form->{templatesection} || $form->{templatepageandsection}) {
+	if ($form->{templatenew} || $form->{templatepage} || $form->{templatesection} || $form->{templatepageandsection} || $form->{templatesearch}) {
 		$tpid    = '';
 		$page    = $form->{page};
 		$section = $form->{section};
@@ -333,6 +333,7 @@ sub templateEdit {
 	$section ||= 'default';
 
 	$templateref = $slashdb->getTemplate($tpid, '', 1) if $tpid;
+
 	$seclev_flag = 0 if $templateref->{seclev} > $user->{seclev};
 
 	if ($form->{templatedelete}) {
@@ -356,8 +357,7 @@ sub templateEdit {
 		}
 
 		if ($form->{templatesearch}) {
-			$getsection = $getpage = $tpid = '';
-			$templateref = {};
+			$getsection = $getpage = '';
 			$form->{templatelastselect} = 'templatesearch';
 			$templates = $slashdb->getTemplateListByText($form->{'templatesearchtext'});
 		} else {
