@@ -14,6 +14,7 @@ en_US
 __name__
 info
 __template__
+
 [% tabs = [
 	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
 	{ link = "$constants.rootdir/stats.pl",			label = "Stats",		sel_label = "stats" },
@@ -21,7 +22,6 @@ __template__
 	{ link = "$constants.rootdir/users.pl?op=topabusers",	label = "Abusers",		sel_label = "abusers" },
 	{ link = "$constants.rootdir/users.pl?op=listreadonly",	label = "Read&nbsp;Only",	sel_label = "readonly" },
 	{ link = "$constants.rootdir/users.pl?op=listbanned",	label = "Banned",		sel_label = "banned" },
-	{ link = "$constants.rootdir/catfood.pl",		label = "Catfood",		sel_label = "catfood" },
 	{ link = "$constants.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
 	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Recent",		sel_label = "recent" },
 	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
