@@ -150,7 +150,7 @@ sub dbAvailable {
 	my $newval;
 	   if (-e "/usr/local/slash/dboff")	{ $newval = 0 }
 	elsif (!$token || $token !~ /^(\w+)/)	{ $newval = 1 }
-	elsif (!-e "/usr/local/slash/dboff_$1") { $newval = 0 }
+	elsif (-e "/usr/local/slash/dboff_$1")	{ $newval = 0 }
 	else					{ $newval = 1 }
 	$dbAvailable_lastval = $newval;
 	$dbAvailable_lastcheck = time;
