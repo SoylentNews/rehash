@@ -1,0 +1,13 @@
+# This is the upgrade file for SQL. What does this mean to you?
+# If you are a developer you should leave notes here as to what
+# was done and when. Tihs include inserts, alter tables and deletions.
+# The Format is that you add your changes to the end with notes
+# and who you are. If your changes occur after a certain release tag
+# then you need to place your changes there.
+# LCR 2/7, 10PM T_2_3_0_9 
+
+# To fix the data in users to add the + sign to positive values -Brian
+UPDATE users_param SET value = CONCAT("+",value) WHERE (name LIKE "reason%" OR name LIKE "people_bonus%") AND value LIKE "_";
+
+# Upgrade Zoo to latest schema -Brian
+
