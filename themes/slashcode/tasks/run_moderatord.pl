@@ -729,41 +729,62 @@ sub set_new_m2_oldzone {
 sub adjust_m2_freq {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
+	# Decide how far back we're going to look for the
+	# "roughly weekly" factor.  Earlier, this maxxed out at
+	# 10 days but I think it might be better to try 7,
+	# to smooth out any fluctuations from weekday to
+	# weekend.
 	my $t = $constants->{archive_delay};
 	$t = 3 if $t < 3;
-	$t = 10 if $t > 10;
+	$t = 7 if $t > 7;
 
-	my $avg_consensus_t = $slashdb->sqlSelect("avg(m2needed)", "moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL $t day)");
-	my $avg_consensus_day = $slashdb->sqlSelect("avg(m2needed)", "moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL 1 day)");
-	
-	my $m2count_t = $slashdb->sqlCount("metamodlog", "active=1 and ts > date_sub(NOW(), INTERVAL $t day)");
-	my $m1count_t = $slashdb->sqlCount("moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL $t day)");
+	my $avg_consensus_t = $slashdb->sqlSelect("avg(m2needed)", "moderatorlog",
+		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL $t DAY)");
+	my $avg_consensus_day = $slashdb->sqlSelect("avg(m2needed)", "moderatorlog",
+		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL  1 DAY)");
 
-	my $m2count_day = $slashdb->sqlCount("metamodlog", "active=1 and ts > date_sub(NOW(), INTERVAL 1 day)");
-	my $m1count_day = $slashdb->sqlCount("moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL 1 day)");
-	
-	return 1 unless $m1count_t && $m1count_day && $m2count_t && $m2count_day;
+	my $m2count_t = $slashdb->sqlCount("metamodlog",
+		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL $t day)");
+	my $m1count_t = $slashdb->sqlCount("moderatorlog",
+		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL $t day)");
+
+	my $m2count_day = $slashdb->sqlCount("metamodlog",
+		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL  1 day)");
+	my $m1count_day = $slashdb->sqlCount("moderatorlog",
+		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL  1 day)");
+
+	# If this site gets very little moderation/metamoderation,
+	# don't bother adjusting m2_freq.
+	return 1 unless $m1count_t >= 50 && $m2count_t >= 50;
 
 	my $x = $m2count_t / ($m1count_t * $avg_consensus_t);
 	my $y = $m2count_day / ($m1count_day * $avg_consensus_day);
+	my $z = ($y * 2 + $x) / 3;
+	slashdLog(sprintf("m2_freq vars: x: %0.6f y: %0.6f z: %0.6f\n", $x, $y, $z);	
 
-	my $z = ($y * 3 + $x) / 4;
-	slashdLog("m2_freq vars: x: $x y: $y z: $z\n");	
+	# If the daily and the roughly-weekly factors do not agree, we
+	# still adjust the m2_freq, but not nearly as much.  This may
+	# help avoid oscillations where the daily factor can get very
+	# far away from 1.0 while the weekly factor creeps toward it,
+	# causing a sudden change when the weekly factor crosses 1.0
+	# to be on the same side as the daily factor.
+	my $dampen = ($x > 1 && $y < 1) || ($x < 1 && $y > 1) ? 0.2 : 1.0;
 
-	return 1 if ($x > 1 && $y < 1) || ($x < 1 && $y > 1);
 	$z = 3/4 if $z < 3/4;
 	$z = 4/3 if $z > 4/3;
-	slashdLog("m2_freq: adjusted  z: $z\n");	
+	$z = ($z-1)*$dampen + 1;
+	slashdLog(sprintf("m2_freq: adjusted  z: %0.6f\n", $z);	
 
 	my $cur_m2_freq = $slashdb->getVar('m2_freq', 'value', 1) || 86400;
-	my $new_m2_freq = int($cur_m2_freq * $z ** (1/24));
+	my $new_m2_freq = int($cur_m2_freq * $z ** (1/24) + 0.5);
 
-	$new_m2_freq = $constants->{m2_freq_min} if defined $constants->{m2_freq_min} && $new_m2_freq < $constants->{m2_freq_min};
-	$new_m2_freq = $constants->{m2_freq_max} if defined $constants->{m2_freq_max} && $new_m2_freq > $constants->{m2_freq_max};
+	$new_m2_freq = $constants->{m2_freq_min}
+		if defined $constants->{m2_freq_min} && $new_m2_freq < $constants->{m2_freq_min};
+	$new_m2_freq = $constants->{m2_freq_max}
+		if defined $constants->{m2_freq_max} && $new_m2_freq > $constants->{m2_freq_max};
 	slashdLog("adjusting m2_freq from $cur_m2_freq to $new_m2_freq");	
 	$slashdb->setVar('m2_freq', $new_m2_freq);
 }
-	
 
 1;
 
