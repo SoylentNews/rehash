@@ -9,10 +9,11 @@ CREATE TABLE subscribe_payments (
 	payment_gross	DECIMAL(10,2) NOT NULL,
 	payment_net	DECIMAL(10,2) NOT NULL,
 	pages		MEDIUMINT UNSIGNED NOT NULL,
-	transaction_id	CHAR(255),
+	transaction_id	CHAR(255) NOT NULL,
 	data		BLOB,
 	PRIMARY KEY(spid),
 	KEY(uid),
-	KEY(ts)
+	KEY(ts),
+	UNIQUE(transaction_id)
 ) TYPE=MYISAM;
 

@@ -109,7 +109,27 @@ sub convertPagesToDollars {
 sub insertPayment {
 	my($self, $payment) = @_;
 	my $slashdb = getCurrentDB();
-	return $slashdb->sqlInsert("subscribe_payments", $payment);
+	my $success = 1; # set to 0 on insert failure
+
+	# If no transaction id was given, we'll be making up one of our own.
+	# We'll have to make up our own and retry it if it fails.
+	my $create_trans = !defined($payment->{transaction_id});
+	my $num_retries = 50;
+
+	while (1) {
+		if ($create_trans) {    
+			$payment->{transaction_id} = substr(
+				Digest::MD5::md5_hex(join(":",
+					$payment->{uid}, $payment->{data},
+					time, $$, rand(2**30)
+				)), 0, 17
+			);
+		}
+		$success = $slashdb->sqlInsert("subscribe_payments", $payment);
+		last if $success || !$create_trans || --$num_retries <= 0;
+	}
+
+	return $success;
 }
 
 1;
