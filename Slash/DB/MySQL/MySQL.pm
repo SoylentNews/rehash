@@ -6981,7 +6981,6 @@ sub getStoriesEssentials {
 		&& !@$stoid && !@$stoid_x
 	);
 	if ($try_mcd) {
-
 		my $data = $mcd->get($mcdkey);
 #print STDERR "gSE $$ mcdkey '$mcdkey' data element count '" . ($data ? scalar(@$data) : "n/a") . "'\n";
 		return $data if $data;
@@ -6999,8 +6998,9 @@ sub getStoriesEssentials {
 	$min_stoid = 0 if @$tid > 1 || $tid->[0] != $mp_tid;
 	# If the $limit + $limit_extra + $offset is too large, it's not.
 	$min_stoid = 0 if $limit_overly_large;
-	# If we're in issue mode, nope.
-	$min_stoid = 0 if $issue;
+	# If we're in issue mode, and it's an issue more than 3 days old,
+	# then nope.
+	$min_stoid = 0 if $issue && issueAge($issue) > 3;
 	# And of course, if we're being asked to calculate a new one,
 	# ignore the old one.
 	$min_stoid = 0 if $return_min_stoid_only;
@@ -7012,63 +7012,9 @@ sub getStoriesEssentials {
 	# to the mainpage_nexus_tid.  First, get all the stoids
 	# that match that (those) tid(s).
 	my @tid_in = ( );
-	push @tid_in, "tid IN (" . join(",", @$tid) . ")";
-	push @tid_in, "stoid >= '$min_stoid'" if $min_stoid;
+	push @tid_in, "story_topics_rendered.tid IN (" . join(",", @$tid) . ")";
+	push @tid_in, "story_topics_rendered.stoid >= '$min_stoid'" if $min_stoid;
 	my $tid_in_where = join(" AND ", @tid_in);
-
-	# XXX What we should do at this point is a COUNT(*) on how
-	# many rows in story_topics_rendered will match.  If that
-	# value is larger than some var, we should do a JOIN on
-	# stories,story_topics_rendered -- the old way -- instead
-	# of pulling a lot of stoids over the network and then
-	# sending them back as part of the next query.  Yes, the
-	# 2-table JOIN is costly, but since we LIMIT the number of
-	# rows that are ultimately returned, at a certain point,
-	# especially if the query cache hit rate is high, it must
-	# become more efficient to let the DB do the work of
-	# finding those rows entirely internally.
-
-	my $stoids_ar = $self->sqlSelectColArrayref(
-			"DISTINCT stoid",
-			"story_topics_rendered",
-			$tid_in_where);
-#print STDERR "gSE $$ stoids_ar returned: '@$stoids_ar' t_i_w '$tid_in_where' tid '@$tid'\n";
-	# Now, if necessary, do another select to eliminate any
-	# stoids with tids that are unwanted.
-	if (@$stoids_ar && @$tid_x) {
-		my @tid_left_out = ( );
-		push @tid_left_out, "tid IN (" . join(",", @$tid_x) . ")";
-		push @tid_left_out, "stoid >= '$min_stoid'" if $min_stoid;
-		my $tid_left_out_where = join(" AND ", @tid_left_out);
-		my $stoids_x_ar = $self->sqlSelectColArrayref(
-			"DISTINCT stoid",
-			"story_topics_rendered",
-			$tid_left_out_where);
-		# Remove the stoids just found from the ones
-		# found a moment ago.
-		my %stoids_x_hash = ( map { ($_, 1) } @$stoids_x_ar );
-		@$stoids_ar = grep { !$stoids_x_hash{$_} } @$stoids_ar;
-	}
-
-	# Now we have the list of stoids that point to the rows that we
-	# should _consider_ for the stories table.  We haven't narrowed it
-	# down all the way yet.  First thing we can do is check $stoid and
-	# $stoid_x to possibly narrow the list directly.  After that, for
-	# example, if the caller wants only stories posted by a certain
-	# uid, the story_topics_rendered table has no way of knowing which
-	# those are;  we'll add in those limitations when we do the SQL
-	# select on the stories table later.
-	if (@$stoid) {
-		my %stoid_hash = ( map { ($_, 1) } @$stoid );
-		@$stoids_ar = grep {  $stoid_hash{$_}   } @$stoids_ar;
-	} elsif (@$stoid_x) {
-		my %stoid_x_hash = ( map { ($_, 1) } @$stoid_x );
-		@$stoids_ar = grep { !$stoid_x_hash{$_} } @$stoids_ar;
-	}
-
-	# Now we sort the list of stoids, to make sure a random reordering
-	# does not invalidate the MySQL query cache.
-	@$stoids_ar = sort { $a <=> $b } @$stoids_ar;
 
 	# This is the standard utility function that returns the SQL
 	# needed to add both to the columns to select, and to the
@@ -7081,38 +7027,23 @@ sub getStoriesEssentials {
 		fake_secs_ahead =>	$fake_secs_ahead,
 	});
 
-	# Now we're ready to construct the query that we'll use.  First,
-	# determine which columns are needed.
-	my $columns = "stoid";
+	# Determine which columns are needed.
+	my $columns = "stories.stoid";
 	if (!$return_min_stoid_only) {
 		$columns .= ", sid, time, commentcount, hitparade,"
 			. " primaryskid, body_length, word_count, "
 			. " discussion, $column_time";
 	}
 
-	# We're only looking at one table, which makes this part easy.
-	my $table = "stories";
+	# We'll set this later.
+	my $tables;
 
-	# Always return results in descending order, but if the caller
-	# is just looking for the min_stoid, skip straight to that row
-	# so we don't return too much.
-	my $other = "ORDER BY time DESC";
-	if ($return_min_stoid_only) {
-		# In this case, we offset to the end of the list
-		# and then just select a row count of 1.
-		$other .= " LIMIT " . ($limit + $limit_extra + $offset) . ", 1";
-	} else {
-		$other .= " LIMIT $offset, " . ($limit + $limit_extra);
-	}
-
-	# And now the hard part.  The WHERE clause has to limit our
-	# results very carefully, by time (possibly in two ways), and
-	# by the other criteria that have been given).
+	# The WHERE clause will be built up from the @stories_where
+	# list (ANDed together).  This clause has to limit our results
+	# very carefully, by time (possibly in two ways), and by the
+	# other criteria that have been given.
 	my @stories_where = ( );
 	push @stories_where, "in_trash = 'no' AND $where_time";
-	push @stories_where, "stoid IN (" . join(",", @$stoids_ar) . ")";
-
-#print STDERR "gSE $$ stoids_ar, stoid, stoid_x, uid, uid_x: " . Dumper([ $stoids_ar, $stoid, $stoid_x, $uid, $uid_x ]);
 	if (@$uid) {
 		push @stories_where, "uid IN ("       . join(",", @$uid)     . ")";
 	} elsif (@$uid_x) {
@@ -7127,9 +7058,119 @@ sub getStoriesEssentials {
 		push @stories_where, "time BETWEEN '$issue_oldest' AND '$issue_youngest'";
 	}
 
-	my $where = join(" AND ", @stories_where);
+	# Always return results in descending order, but if the caller
+	# is just looking for the min_stoid, skip straight to that row
+	# so we don't return too much.
+	my $other = "ORDER BY time DESC";
+	if ($return_min_stoid_only) {
+		# In this case, we offset to the end of the list
+		# and then just select a row count of 1.
+		$other .= " LIMIT " . ($limit + $limit_extra + $offset) . ", 1";
+	} else {
+		$other .= " LIMIT $offset, " . ($limit + $limit_extra);
+	}
 
-	my $stories = $self->sqlSelectAllHashrefArray($columns, $table, $where, $other);
+	# Now do a COUNT() on how many rows in story_topics_rendered
+	# we are potentially looking at.  If that number is smaller
+	# than the gse_table_join_row_cutoff var, we do multiple
+	# SELECTs to pull out the data we need.  If larger, we let
+	# MySQL do the JOIN itself (so we don't pass an absurd amount
+	# of data over the wire, basically).
+
+	my $stoid_count = $self->sqlSelect(
+		"COUNT(DISTINCT stoid)",
+		"story_topics_rendered",
+		"$tid_in_where");
+	my $cutoff = $constants->{gse_table_join_row_cutoff} || 1000;
+	if ($stoid_count < $cutoff) {
+
+		# We're going to do separate SELECTs.  First we do the 1 or 2
+		# SELECTs on story_topics_rendered which determine for us the
+		# list of stoids we're using.  Then we set some variables and
+		# exit this if clause, where the big ol' final SELECT will
+		# get the data we need.
+
+print STDERR "gSE $$ separate SELECTs, min_stoid=$min_stoid cutoff=$cutoff count=$stoid_count\n";
+
+		my $stoids_ar = $self->sqlSelectColArrayref(
+			"DISTINCT stoid",
+			"story_topics_rendered",
+			$tid_in_where);
+#print STDERR "gSE $$ stoids_ar returned: '@$stoids_ar' t_i_w '$tid_in_where' tid '@$tid'\n";
+		# Now, if necessary, do another select to eliminate any
+		# stoids with tids that are unwanted.
+		if (@$stoids_ar && @$tid_x) {
+			my @tid_left_out = ( );
+			push @tid_left_out, "tid IN (" . join(",", @$tid_x) . ")";
+			push @tid_left_out, "stoid >= '$min_stoid'" if $min_stoid;
+			my $tid_left_out_where = join(" AND ", @tid_left_out);
+			my $stoids_x_ar = $self->sqlSelectColArrayref(
+				"DISTINCT stoid",
+				"story_topics_rendered",
+				$tid_left_out_where);
+			# Remove the stoids just found from the ones
+			# found a moment ago.
+			my %stoids_x_hash = ( map { ($_, 1) } @$stoids_x_ar );
+			@$stoids_ar = grep { !$stoids_x_hash{$_} } @$stoids_ar;
+		}
+
+		# Now we have the list of stoids that point to the rows that we
+		# should _consider_ for the stories table.  We haven't narrowed it
+		# down all the way yet.  First thing we can do is check $stoid and
+		# $stoid_x to possibly narrow the list directly.  After that, for
+		# example, if the caller wants only stories posted by a certain
+		# uid, the story_topics_rendered table has no way of knowing which
+		# those are;  we'll add in those limitations when we do the SQL
+		# select on the stories table later.
+		if (@$stoid) {
+			my %stoid_hash = ( map { ($_, 1) } @$stoid );
+			@$stoids_ar = grep {  $stoid_hash{$_}   } @$stoids_ar;
+		} elsif (@$stoid_x) {
+			my %stoid_x_hash = ( map { ($_, 1) } @$stoid_x );
+			@$stoids_ar = grep { !$stoid_x_hash{$_} } @$stoids_ar;
+		}
+
+		# Now we sort the list of stoids, to make sure a random reordering
+		# does not invalidate the MySQL query cache.
+		@$stoids_ar = sort { $a <=> $b } @$stoids_ar;
+
+		# Add our contribution to the WHERE clause here.
+		push @stories_where, "stoid IN (" . join(",", @$stoids_ar) . ")";
+
+		# We're only looking at one table, which makes this part easy.
+		$tables = "stories";
+
+#print STDERR "gSE $$ stoids_ar, stoid, stoid_x, uid, uid_x: " . Dumper([ $stoids_ar, $stoid, $stoid_x, $uid, $uid_x ]);
+
+	} else {
+
+		# We're going to try to get all the data we need in one
+		# big SELECT.  Prep the variables for the upcoming SELECT
+		# so it does the right thing.
+
+print STDERR "gSE $$ one SELECT, min_stoid=$min_stoid cutoff=$cutoff count=$stoid_count\n";
+
+		# Need both tables.
+		$tables = "stories, story_topics_rendered";
+
+		# If we'd done multiple SELECTs, this logic would have been
+		# done on the story_topics_rendered table;  as it is, these
+		# phrases have to go into the JOIN.
+		push @stories_where, "stories.stoid = story_topics_rendered.stoid";
+		push @stories_where, $tid_in_where;
+
+		# The logic can return multiple story_topics_rendered rows
+		# with the same stoid, and if it does, group them together
+		# so each story only gets returned once.
+		$other = "GROUP BY stories.stoid $other";
+
+	}
+
+	# Pull together the where clauses into one clause.
+	my $where = join(" AND ", map { "($_)" } @stories_where);
+
+	# DO THE SELECT!
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
 	if ($options->{return_min_stoid_only}) {
 		return $stories->[0]{stoid} || 0;
@@ -9543,6 +9584,8 @@ sub getStoryTopics {
 	# All this to avoid a join. :/
 	#
 	# Poor man's hash assignment from an array for the short names.
+	# XXX This really should be done by pulling data from
+	# getTopicTree()
 	$topicdesc =  {
 		map { @{$_} }
 		@{$self->sqlSelectAll(
