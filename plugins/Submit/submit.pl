@@ -465,8 +465,9 @@ sub saveSub {
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		my $users = $messages->getMessageUsers(MSG_CODE_NEW_SUBMISSION);
-
 		for (@$users) {
+			my $user_section = $slashdb->getUser($_,'section');
+			next if ($user_section && $user_section ne $submission->{section});
 			my $data  = {
 				template_name	=> 'messagenew',
 				subject		=> { template_name => 'messagenew_subj' },
