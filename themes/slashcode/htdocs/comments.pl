@@ -514,8 +514,8 @@ sub commentIndexUserCreated {
 	} else {
 		print getData('nodiscussions');
 		slashDisplay('edit_comment', {
-			newdiscussion => 1,
-			label => $label,
+			newdiscussion	=> 1,
+			label		=> $label,
 		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
 }
