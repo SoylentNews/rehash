@@ -4613,8 +4613,8 @@ sub moderateComment {
 		# display and send a message if appropriate.
 		$dispArgs->{points} = $user->{points};
 		$dispArgs->{type} = 'moderated';
-		use Slash::Messages;
-		Slash::Messages::send_mod_msg({
+		my $messages = getObject("Slash::Messages");
+		$messages->send_mod_msg({
 			type	=> 'mod_msg',
 			sid	=> $sid,
 			cid	=> $cid,
