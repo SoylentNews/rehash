@@ -51,6 +51,7 @@ use vars qw($VERSION @EXPORT);
 	balanceTags
 	changePassword
 	chopEntity
+	commify
 	countWords
 	decode_entities
 	ellipsify
@@ -2714,7 +2715,40 @@ sub findWords {
 
 #========================================================================
 
-=head2 inList(list, value)
+=head2 commify(NUMBER)
+
+Returns the number with commas added, so 1234567890 becomes
+1,234,567,890.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item NUMBER
+
+A number.
+
+=back
+
+=item Return value
+
+Commified number.
+
+=back
+
+=cut
+
+sub commify {
+	my($num) = @_;
+	$num =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g;
+	return $num;
+}
+
+#========================================================================
+
+=head2 grepn(list, value)
 
 Returns the 1-based position of the first occurance of $value in @$list.
 
@@ -2745,7 +2779,6 @@ not a 0-based value, like perl arrays.
 =back
 
 =cut
-
 
 sub grepn {
 	my($list, $value) = @_;

@@ -34,6 +34,7 @@ sub main {
 	my %ops = (
 		report	=> [ $admin,		\&report	],
 		graph	=> [ $admin,		\&graph		],
+		table	=> [ $admin,		\&table		],
 		list	=> [ $admin_post,	\&list		],
 
 		default	=> [ $admin,		\&list		]
@@ -56,7 +57,37 @@ sub main {
 	footer() unless $op eq 'graph';
 }
 
-sub graph {
+sub _get_graph_data {
+	my($slashdb, $constants, $user, $form, $stats) = @_;
+
+	my $sections = _get_sections();
+	my @data;
+	for my $namesec (@{$form->{stats_graph_multiple}}) {
+		my($name, $section, $label) = split /,/, $namesec;
+
+		my $stats_data = $stats->getAllStats({
+			section	=> $section,
+			name	=> $name,
+			days	=> $form->{stats_days}  # 0 || 14 || 31*3
+		});
+		my $data;
+		for my $day (keys %{$stats_data->{$section}}) {
+			next if $day eq 'names';
+			$data->{$day} = $stats_data->{$section}{$day}{$name};
+		}
+
+		$label ||= '';
+		push @data, {
+			data  => $data,
+			type  => "$name / $sections->{$section}",
+			label => $label,
+		};
+	}
+
+	return \@data;
+}
+
+sub _get_graph_id {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
 	my @id;
@@ -74,39 +105,35 @@ sub graph {
 	my $id   = join ',', @id;
 	my $day  = $slashdb->getVar('adminmail_last_run', 'value', 1);
 
-	my $image   = $stats->getGraph({ day => $day, id => $id });
+	return($id, $day);
+}
+
+sub table {
+	my($slashdb, $constants, $user, $form, $stats) = @_;
+
+	my($data) = _get_graph_data($slashdb, $constants, $user, $form, $stats);
+
+	slashDisplay('table', {
+		data		=> $data,
+	});
+}
+
+sub graph {
+	my($slashdb, $constants, $user, $form, $stats) = @_;
+
+	my($id, $day) = _get_graph_id($slashdb, $constants, $user, $form, $stats);
+
+	my $image   = {}; #$stats->getGraph({ day => $day, id => $id });
 	my $content = $image->{data};
 	my $type    = $image->{content_type} || 'image/png';
 
 	# make image if we don't have it ...
 	if (! $content) {
-		my $sections = _get_sections();
-		my @data;
-		for my $namesec (@{$form->{stats_graph_multiple}}) {
-			my($name, $section, $label) = split /,/, $namesec;
-
-			my $stats_data = $stats->getAllStats({
-				section	=> $section,
-				name	=> $name,
-				days	=> $form->{stats_days}  # 0 || 14 || 31*3
-			});
-			my $data;
-			for my $day (keys %{$stats_data->{$section}}) {
-				next if $day eq 'names';
-				$data->{$day} = $stats_data->{$section}{$day}{$name};
-			}
-
-			$label ||= '';
-			push @data, {
-				data  => $data,
-				type  => "$name / $sections->{$section}",
-				label => $label,
-			};
-		}
+		my($data) = _get_graph_data($slashdb, $constants, $user, $form, $stats);
 
 		$content = slashDisplay('graph', {
 			set_legend	=> \&_set_legend,
-			data		=> \@data,
+			data		=> $data,
 		}, { Return => 1, Nocomm => 1 });
 
 		$stats->setGraph({
