@@ -18,7 +18,7 @@ en_US
 __name__
 vote
 __template__
-<CENTER><TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="500">
+<CENTER><TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="600">
 	<TR><TD> </TD><TD COLSPAN="1">
 [% PROCESS titlebar %]
 <FONT SIZE="2">[% notes %]</FONT></TD></TR>
@@ -29,7 +29,7 @@ __template__
 		percent    = poll.3
 	%]
 	<TR>
-		<TD WIDTH="100" ALIGN="RIGHT">[% answer %] &nbsp;</TD>
+		<TD WIDTH="150" ALIGN="RIGHT">[% answer %] &nbsp;</TD>
 		<TD WIDTH="450"><NOBR><IMG
 			SRC="[% constants.imagedir %]/leftbar.gif" WIDTH="4" HEIGHT="20" ALT=""><IMG
 			SRC="[% constants.imagedir %]/mainbar.gif" HEIGHT=20
