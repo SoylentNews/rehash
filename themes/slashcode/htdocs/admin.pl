@@ -364,7 +364,7 @@ EOT
 ##################################################################
 # Block Editing and Saving 
 # 020300 PMG modified the heck out of this code to allow editing
-# of sectionblock values retrieve, title, rdf, section 
+# of sectionblock values retrieve, title, url, rdf, section 
 # to display a different form according to the type of block we're dealing with
 # based on value of new column in blocks "type". Added description field to use 
 # as information on the block to help the site editor get a feel for what the block 
@@ -374,7 +374,7 @@ sub blockEdit {
 
 	return if $seclev < 500;
 	my($hidden_bid) = "";
-	my($title,$rdf,$ordernum,$retrieve,$section,$portal,$saveflag,$isabid);
+	my($title,$url,$rdf,$ordernum,$retrieve,$section,$portal,$saveflag,$isabid);
 
         titlebar("100%","Site Block Editor","c");
 
@@ -425,10 +425,11 @@ EOT
 	# or this is a block save and the block is a portald block
 	# or this is a block edit via sections.pl
 	if (! $I{F}{blocknew} && $bid ) {
-		($isabid,$title,$rdf,$ordernum,$retrieve,$section,$portal) = sqlSelect('bid,title,rdf,ordernum,retrieve,section,portal', 'sectionblocks', "bid='$bid'");
+		($isabid,$title,$url,$rdf,$ordernum,$retrieve,$section,$portal) = sqlSelect('bid,title,url,rdf,ordernum,retrieve,section,portal', 'sectionblocks', "bid='$bid'");
 		if ($isabid) {
 			$title = qq[<TR>\n\t\t<TD><B>Title</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="title" VALUE="$title"></TD>\n\t</TR>];
-			$rdf = qq[<TR>\n\t\t<TD><B>RDF/URL</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE="$rdf"></TD>\n\t</TR>];
+			$url = qq[<TR>\n\t\t<TD><B>URL</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="url" VALUE="$url"></TD>\n\t</TR>];
+			$rdf = qq[<TR>\n\t\t<TD><B>RDF</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE="$rdf"></TD>\n\t</TR>];
 			$section = qq[<TR>\n\t\t<TD><B>Section</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="10" NAME="section" VALUE="$section"></TD>\n\t</TR>];
 			$ordernum = "NA" if $ordernum eq '';
 			$ordernum = qq[<TR>\n\t\t<TD><B>Ordernum</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="3" NAME="ordernum" VALUE="$ordernum"></TD>\n\t</TR>];
@@ -444,7 +445,8 @@ EOT
 	# if this is a new block, we want an empty form 
 	else {
 		$title = qq[<TR>\n\t\t<TD><B>Title</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="title" VALUE=""></TD>\n\t</TR>];
-		$rdf = qq[<TR>\n\t\t<TD><B>RDF/URL</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE=""></TD>\n\t</TR>];
+		$url = qq[<TR>\n\t\t<TD><B>URL</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="url" VALUE=""></TD>\n\t</TR>];
+		$rdf = qq[<TR>\n\t\t<TD><B>RDF</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="rdf" VALUE=""></TD>\n\t</TR>];
 		$section = qq[<TR>\n\t\t<TD><B>Section</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="10" NAME="section" VALUE=""></TD>\n\t</TR>];
 		$ordernum = qq[<TR>\n\t\t<TD><B>Ordernum</B></TD><TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="3" NAME="ordernum" VALUE=""></TD>\n\t</TR>];
 		$retrieve = qq[<TR>\n\t\t<TD><B>Retrieve</B></TD><TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="retrieve"></TD>\n\t</TR>];
@@ -491,6 +493,7 @@ EOT
 		$ordernum
 		$portal
 		$retrieve
+		$url
 		$rdf
 		$saveflag
 	<TR>
@@ -611,6 +614,7 @@ sub blockSave {
 		sqlUpdate('sectionblocks', {
 				ordernum=> $I{F}{ordernum}, 
 				title 	=> $I{F}{title},
+				url	=> $I{F}{url},	
 				rdf	=> $I{F}{rdf},	
 				section => $I{F}{section},	
 				retrieve=> $I{F}{retrieve}, 
