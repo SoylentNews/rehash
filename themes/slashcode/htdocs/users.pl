@@ -572,6 +572,11 @@ sub newUser {
 		if ($uid) {
 			my $data = {};
 			getOtherUserParams($data);
+
+			for (qw(tzcode)) {
+				$data->{$_} = $form->{$_} if defined $form->{$_};
+			}
+
 			$slashdb->setUser($uid, $data) if keys %$data;
 			$title = getTitle('newUser_title');
 
@@ -2759,7 +2764,7 @@ sub getOtherUserParams {
 
 	my $user    = getCurrentUser();
 	my $form    = getCurrentForm();
-	my $params = $reader->getDescriptions('otherusersparam');
+	my $params  = $reader->getDescriptions('otherusersparam');
 
 	for my $param (keys %$params) {
 		if (exists $form->{$param}) {
