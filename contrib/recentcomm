@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+# get recent comments
+# pudge@pobox.com, 2000.06.02
+
+use lib '..';
+use Slash;
+*I = getSlashConf;
+
+my $comm = sqlSelectMany(
+	'sid, cid, uid, date',
+	'comments',
+	'', 'ORDER BY date DESC LIMIT ' . (shift || 30)
+);
+
+my $len = 38 + length($I{rootdir});
+my $lines = '-' x $len;
+my $lts = '<' x ($len-3);
+
+init();
+
+while (@a = $comm->fetchrow) {
+	push @a, "$I{rootdir}/article.pl?sid=$a[0]#$a[1]";
+	write;
+}
+
+print <<EOT;  # footer
++------------------+--------+-------+---------------------+$lines+
+EOT
+
+sub init {
+eval <<EOT;
+format STDOUT_TOP =
++------------------+--------+-------+---------------------+$lines+
+| sid              | cid    | uid   | date                | url${\(' ' x ($len-4))}|
++------------------+--------+-------+---------------------+$lines+
+.
+EOT
+
+eval <<EOT;
+format STDOUT =
+| \@<<<<<<<<<<<<<<< | \@<<<<< | \@<<<< | \@<<<<<<<<<<<<<<<<<< | \@$lts |
+\@a
+.
+EOT
+}
