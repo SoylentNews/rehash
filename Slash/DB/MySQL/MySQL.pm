@@ -1620,12 +1620,12 @@ sub createBadPasswordLog {
 		subnet =>       $subnet,
 	} );
 
-	my $warn_interval = $constants->{bad_password_warn_user_interval} || 0;
+	my $warn_limit = $constants->{bad_password_warn_user_limit} || 0;
 	my $bp_count = $self->getBadPasswordCountByUID($uid);
 
 	# We only warn a user at the Xth bad password attempt.  We don't want to
 	# generate a message for every bad attempt over a threshold
-	if ($bp_count && $bp_count == $warn_interval) {
+	if ($bp_count && $bp_count == $warn_limit) {
 
 		my $messages = getObject("Slash::Messages");
 		return unless $messages;
