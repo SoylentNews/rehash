@@ -486,6 +486,7 @@ CREATE TABLE modreasons (
 	m2able tinyint DEFAULT '1' NOT NULL,
 	listable tinyint DEFAULT '1' NOT NULL,
 	val tinyint DEFAULT '0' NOT NULL,
+	karma tinyint DEFAULT '0' NOT NULL,
 	fairfrac float DEFAULT '0.5' NOT NULL,
 	unfairname varchar(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id)

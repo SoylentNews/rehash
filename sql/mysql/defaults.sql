@@ -167,17 +167,17 @@ INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_m
 #
 # Dumping data for table 'modreasons'
 #
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 0, 'Normal',        0, 0,  0, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 1, 'Offtopic',      1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 2, 'Flamebait',     1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 3, 'Troll',         1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 4, 'Redundant',     1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 5, 'Insightful',    1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 6, 'Interesting',   1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 7, 'Informative',   1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 8, 'Funny',         1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, 'Overrated',     0, 0, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',    0, 0,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 0, 'Normal',        0, 0,  0,  0, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 1, 'Offtopic',      1, 1, -1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 2, 'Flamebait',     1, 1, -1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 3, 'Troll',         1, 1, -1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 4, 'Redundant',     1, 1, -1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 5, 'Insightful',    1, 1,  1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 6, 'Interesting',   1, 1,  1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 7, 'Informative',   1, 1,  1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 8, 'Funny',         1, 1,  1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 9, 'Overrated',     0, 0, -1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (10, 'Underrated',    0, 0,  1,  1, 0.5);
 
 
 #

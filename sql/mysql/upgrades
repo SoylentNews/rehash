@@ -1528,3 +1528,7 @@ ALTER TABLE story_text ADD rendered text;
 # do this if you want to use UTF-8, which is recommended ... else don't do this, or
 # use the charset you want
 REPLACE INTO vars (name, value, description) VALUES ('content_type_webpage','text/html; charset=utf-8','The Content-Type header for webpages');
+
+ALTER TABLE modreasons ADD COLUMN karma TINYINT NOT NULL DEFAULT '0' AFTER val;
+UPDATE modreasons SET karma=val;
+
