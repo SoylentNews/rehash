@@ -1972,7 +1972,7 @@ sub displayRecentSubs {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	if (!$constants->{subscribe}) {
-		listStories();
+		listStories(@_);
 		return;
 	}
 
