@@ -64,6 +64,22 @@ Not all options are available for all message types.
 	<TD>[% Slash.createSelect("deliverymodes_$code", moderef, prefs.$code, 1, 1) %]</TD>
 </TR>
 [%- END %]
+	</TABLE></TD></TR>
+
+<TR><TD>
+<P>
+You may select a message threshold for when messages for comments (replies
+to journal entries, replies to comments) are sent to you.
+</P>
+
+<P>[%
+thresh = user.message_threshold.defined ? user.message_threshold : constants.message_threshold;
+Slash.createSelect('message_threshold',
+	Slash.db.getDescriptions('threshcodes'), thresh, 1)
+%]</P>
+
+</TD></TR>
+
 <TR>
 	<TD>&nbsp;</TD>
 	<TD>

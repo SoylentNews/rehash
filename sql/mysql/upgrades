@@ -104,3 +104,4 @@ ALTER TABLE sessions add column last_sid varchar(16);
 
 # add ECODE tag
 INSERT INTO vars (name, value, description) VALUES ('approvedtags','B|I|P|A|LI|OL|UL|EM|BR|TT|STRONG|BLOCKQUOTE|DIV|ECODE','Tags that you can use');
+INSERT INTO vars (name, value, description) VALUES ('message_threshold','1','Default threshold for a comment to trigger a message');

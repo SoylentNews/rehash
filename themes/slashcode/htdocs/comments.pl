@@ -584,7 +584,7 @@ sub editComment {
 	}
 
 	if ($discussion->{type} eq 'archived') {
-		print getError('archive_error');
+		print getData('archive_error');
 		return;
 	}
 
@@ -839,7 +839,7 @@ sub previewForm {
 sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 	if ($discussion->{type} eq 'archived') {
-		print getError('archive_error');
+		print getData('archive_error');
 		return;
 	}
 
@@ -958,7 +958,7 @@ sub submitComment {
 		if ($messages && $form->{pid}) {
 			my $parent = $slashdb->getCommentReply($form->{sid}, $form->{pid});
 			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
-			if (@$users && !$users{$users->[0]}) {
+			if (_send_comment_msg($users->[0], \%users, $pts)) {
 				my $data  = {
 					template_name	=> 'reply_msg',
 					subject		=> { template_name => 'reply_msg_subj' },
@@ -975,7 +975,7 @@ sub submitComment {
 		# reply to journal
 		if ($messages && $discussion->{url} =~ /\bjournal\b/) {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
-			if (@$users && !$users{$users->[0]} && $users->[0] != $user->{uid}) { # don't msg yourself
+			if (_send_comment_msg($users->[0], \%users, $pts)) {
 				my $data  = {
 					template_name	=> 'journrep',
 					subject		=> { template_name => 'journrep_subj' },
@@ -1007,6 +1007,35 @@ sub submitComment {
 	}
 
 	return(1);
+}
+
+
+##################################################################
+# Decide whether or not to send a given message to a given user
+sub _send_comment_msg {
+	my($uid, $uids, $pts) = @_;
+	my $constants	= getCurrentStatic();
+	my $slashdb	= getCurrentDB();
+	my $user	= getCurrentUser();
+
+	return unless $uid;			# no user
+	return if $uids->{$uid};		# user not already being msgd
+	return if $user->{uid} == $uid;		# don't msg yourself
+
+	my $user_message_threshold = $slashdb->getUser($uid, 'message_threshold');
+
+	# use message_threshold in vars, unless user has one
+	# a message_threshold of 0 is valid, but "" is not
+	my $message_threshold = length($user_message_threshold)
+		? $user_message_threshold
+		: length($constants->{message_threshold})
+			? $constants->{message_threshold}
+			: undef;
+
+	# only if reply pts meets message threshold
+	return if defined $message_threshold && $pts < $message_threshold;
+
+	return 1;
 }
 
 

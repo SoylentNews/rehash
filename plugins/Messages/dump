@@ -23,3 +23,5 @@ INSERT INTO vars (name, value, description) VALUES ('message_process_count','100
 INSERT INTO vars (name, value, description) VALUES ('message_send_expire','7','Number of days to hold message in delivery queue');
 INSERT INTO vars (name, value, description) VALUES ('message_web_expire','31','Number of days to keep message on web site');
 INSERT INTO vars (name, value, description) VALUES ('commentnew_msg', '0', 'Allow sending of a message on every posted comment (dangerous)');
+
+INSERT INTO vars (name, value, description) VALUES ('message_threshold','1','Default threshold for a comment to trigger a message');

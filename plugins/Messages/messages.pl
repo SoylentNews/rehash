@@ -35,6 +35,7 @@ sub main {
 		display		=> [ !$user->{is_anon},	\&display_message	],
 		delete_message	=> [ $user_ok,		\&delete_message	],
 		deletemsgs	=> [ $user_ok,		\&delete_messages	],
+
 		# ????
 		default		=> [ 1,			\&list_messages		]
 	);
@@ -72,7 +73,7 @@ sub display_prefs {
 sub save_prefs {
 	my($messages, $constants, $user, $form) = @_;
 
-	my %params;
+	my(%params, %prefs);
 
 	my $messagecodes = $messages->getDescriptions('messagecodes');
 	for my $code (keys %$messagecodes) {
@@ -83,8 +84,13 @@ sub save_prefs {
 			$params{$code} = fixint($form->{"deliverymodes_$code"});
 		}
 	}
-
 	$messages->setPrefs($user->{uid}, \%params);
+
+	for (qw(message_threshold)) {
+		$prefs{$_} = $user->{$_} = $form->{$_};
+	}
+	my $slashdb = getCurrentDB();
+	$slashdb->setUser($user->{uid}, \%prefs);
 
 	display_prefs(@_, getData('prefs saved'));
 }
