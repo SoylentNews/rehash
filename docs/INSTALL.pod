@@ -140,7 +140,7 @@ through the version you're upgrading to.
 
 =item plugins/Journal/templates/pagination;journal;default
 
-=item plugins/Journal/templates/pagination;search;default
+=item plugins/Search/templates/pagination;search;default
 
 =item themes/slashcode/templates/dispLinkComment;misc;default
 
