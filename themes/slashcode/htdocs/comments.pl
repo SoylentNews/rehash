@@ -1291,11 +1291,13 @@ sub submitComment {
 			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
 		}
 
+		$clean_comment->{pointsorig} = $clean_comment->{points};
+
 		# reply to comment
 		if ($messages && $form->{pid}) {
 			my $parent = $slashdb->getCommentReply($id, $form->{pid});
 			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
-			if (_send_comment_msg($users->[0], \%users, $pts)) {
+			if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
 				my $data  = {
 					template_name	=> 'reply_msg',
 					subject		=> { template_name => 'reply_msg_subj' },
@@ -1312,7 +1314,7 @@ sub submitComment {
 		# reply to journal
 		if ($messages && $discussion->{url} =~ /\bjournal\b/) {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
-			if (_send_comment_msg($users->[0], \%users, $pts)) {
+			if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
 				my $data  = {
 					template_name	=> 'journrep',
 					subject		=> { template_name => 'journrep_subj' },
@@ -1374,27 +1376,32 @@ sub submitComment {
 ##################################################################
 # Decide whether or not to send a given message to a given user
 sub _send_comment_msg {
-	my($uid, $uids, $pts) = @_;
+	my($uid, $uids, $pts, $C) = @_;
 	my $constants	= getCurrentStatic();
-	my $slashdb	= getCurrentDB();
+	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 	my $user	= getCurrentUser();
 
 	return unless $uid;			# no user
 	return if $uids->{$uid};		# user not already being msgd
 	return if $user->{uid} == $uid;		# don't msg yourself
 
-	my $user_message_threshold = $slashdb->getUser($uid, 'message_threshold');
+	my $otheruser = $reader->getUser($uid);
 
 	# use message_threshold in vars, unless user has one
 	# a message_threshold of 0 is valid, but "" is not
-	my $message_threshold = length($user_message_threshold)
-		? $user_message_threshold
+	my $message_threshold = length($otheruser->{message_threshold})
+		? $otheruser->{message_threshold}
 		: length($constants->{message_threshold})
 			? $constants->{message_threshold}
 			: undef;
 
+	my $newpts = Slash::_get_points($C, $otheruser,
+		$constants->{comment_minscore}, $constants->{comment_maxscore},
+		$reader->countUsers({ max => 1 }), $reader->getReasons,
+	);
+
 	# only if reply pts meets message threshold
-	return if defined $message_threshold && $pts < $message_threshold;
+	return if defined $message_threshold && $newpts < $message_threshold;
 
 	return 1;
 }
