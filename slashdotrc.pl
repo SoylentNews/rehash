@@ -121,6 +121,8 @@ my %my_conf = (
 		],
 
 	],
+
+	submit_categories => ['Back'],
 );
 
 # these keys dependent on values set above

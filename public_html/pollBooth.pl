@@ -74,11 +74,13 @@ sub main {
 
 #################################################################
 sub editpoll {
-	my ($qid) = @_;
+	my($qid) = @_;
+	my $qid_dbi = $I{dbh}->quote($qid);
+	my $qid_htm = stripByMode($qid, 'attribute');
 
 	# Display a form for the Question
 	my($question, $voters) = sqlSelect(
-		"question, voters", "pollquestions", "qid='$qid'");
+		"question, voters", "pollquestions", "qid=$qid_dbi");
 
 	$voters = 0 if ! defined $voters;
 
@@ -88,7 +90,7 @@ sub editpoll {
 <FORM ACTION="$ENV{SCRIPT_NAME}" METHOD="POST">
 	<B>id</B> (if this matches a story's ID, it will appear with the story,
 		else just pick a unique string)<BR>
-	<INPUT TYPE="TEXT" NAME="qid" VALUE="$qid" SIZE="20">
+	<INPUT TYPE="TEXT" NAME="qid" VALUE="$qid_htm" SIZE="20">
 	<INPUT TYPE="CHECKBOX" NAME="currentqid"%s> (appears on homepage)
 
 	<BR><B>The Question</B> (followed by the total number of voters so far)<BR>
@@ -98,7 +100,7 @@ sub editpoll {
 EOT
 
 
-	my $c = sqlSelectMany("answer,votes", "pollanswers", "qid='$qid' ORDER by aid");
+	my $c = sqlSelectMany("answer,votes", "pollanswers", "qid=$qid_dbi ORDER by aid");
 	my $x = 0;
 	while (my($answers, $votes) = $c->fetchrow) {
 		$x++;
@@ -153,23 +155,27 @@ sub savepoll {
 				votes	=> $I{F}{"votes$x"}
 			});
 
-		} else { 
+		} else {
 			$I{dbh}->do("DELETE from pollanswers WHERE 
-				qid='$I{F}{qid}' and aid=$x"); 
+				qid=" . $I{dbh}->quote($qid) . " and aid=$x"); 
 		}
 	}
 }
 
 #################################################################
 sub vote {
-	my($qid, $aid) =@_;
+	my($qid, $aid) = @_;
+
+	my $qid_dbi = $I{dbh}->quote($qid);
+	my $qid_htm = stripByMode($qid, 'attribute');
+
 	my $notes = "Displaying poll results $aid";
 	if ($I{U}{uid} == -1 && ! $I{allow_anonymous}) {
 		$notes = "You may not vote anonymously.  " .
 		    qq[Please <A HREF="$I{rootdir}/users.pl">log in</A>.];
 	} elsif ($aid > 0) {
 		my($id) = sqlSelect("id","pollvoters",
-			"qid=" . $I{dbh}->quote($qid)." AND 
+			"qid=$qid_dbi AND 
 			 id="  . $I{dbh}->quote($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR}) . " AND
 			 uid=" . $I{dbh}->quote($I{U}{uid})
 		);
@@ -190,28 +196,26 @@ sub vote {
 			});
 
 			$I{dbh}->do("update pollquestions set 
-				voters=voters+1 where qid=".
-				$I{dbh}->quote($qid));
+				voters=voters+1 where qid=$qid_dbi");
 			$I{dbh}->do("update pollanswers set votes=votes+1 where 
-				qid=" . $I{dbh}->quote($qid) . 
-				" and aid=" . $I{dbh}->quote($aid));
+				qid=$qid_dbi and aid=" . $I{dbh}->quote($aid));
 		}
 	} 
 
 	my($totalvotes, $question) = sqlSelect(
-		"voters,question", "pollquestions", "qid='$qid'");
+		"voters,question", "pollquestions", "qid=$qid_dbi");
 
-	my($maxvotes) = sqlSelect("max(votes)", "pollanswers", "qid='$qid'");
+	my($maxvotes) = sqlSelect("max(votes)", "pollanswers", "qid=$qid_dbi");
 
 	print <<EOT;
 <CENTER><TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="500">
 	<TR><TD> </TD><TD COLSPAN="1">
 EOT
 
-	titlebar("99%",$question);
+	titlebar("99%", $question);
 	print qq!\t<FONT SIZE="2">$notes</FONT></TD></TR>!;
 
-	my $a = sqlSelectMany("answer,votes", "pollanswers", "qid='$qid' ORDER by aid");
+	my $a = sqlSelectMany("answer,votes", "pollanswers", "qid=$qid_dbi ORDER by aid");
 
 	while (my($answer, $votes) = $a->fetchrow) {
 		my $imagewidth	= $maxvotes ? int (350 * $votes / $maxvotes) + 1 : 0;
@@ -229,7 +233,7 @@ EOT
 		<FONT SIZE="4"><B>$totalvotes total votes.</B></FONT>
 	</TD></TR><TR><TD COLSPAN="2"><P ALIGN="CENTER">
 		[
-			<A HREF="$ENV{SCRIPT_NAME}?qid=$qid">Voting Booth</A> |
+			<A HREF="$ENV{SCRIPT_NAME}?qid=$qid_htm">Voting Booth</A> |
 			<A HREF="$ENV{SCRIPT_NAME}">Other Polls</A> |
 			<A HREF="$I{rootdir}/">Back Home</A>
 		]

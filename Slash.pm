@@ -25,12 +25,14 @@ package Slash;
 #  $Id$
 ###############################################################################
 use strict;  # ha ha ha ha ha!
+use Apache::SIG ();
 use CGI ();
 use DBI;
 use Date::Manip;
-use Apache::SIG ();
-use Mail::Sendmail;
 use File::Spec::Functions;
+use HTML::Entities;
+use Mail::Sendmail;
+
 Apache::SIG->set;
 
 BEGIN {
@@ -39,7 +41,7 @@ BEGIN {
 
 	require Exporter;
 	use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS %I $CRLF);
-	$VERSION = '1.0.4';
+	$VERSION = '1.0.5';
 	@ISA	 = 'Exporter';
 	@EXPORT  = qw(
 		sqlSelectMany sqlSelect sqlSelectHash sqlSelectAll approveTag
@@ -50,12 +52,11 @@ BEGIN {
 		writelog anonLog pollbooth stripByMode header footer pollItem
 		prepEvalBlock prepBlock nukeBlockCache blockCache formLabel
 		titlebar fancybox portalbox printComments displayStory
-		sendEmail getOlderStories selectStories timeCalc getBlockBank
+		sendEmail getOlderStories selectStories timeCalc
 		getEvalBlock getTopic getAuthor dispStory lockTest getSlashConf
 		getDateFormat dispComment getDateOffset linkComment redirect
-		getFormkey insertFormkey getFormkeyId checkFormkey intervalString
-		checkSubmission checkTimesPosted formSuccess formAbuse
-		submittedAlready formFailure errorMessage
+		insertFormkey getFormkeyId checkSubmission checkTimesPosted
+		formSuccess formAbuse formFailure errorMessage
 	);
 	$CRLF = "\015\012";
 }
@@ -79,7 +80,7 @@ sub getSlashConf {
 		: 'DEFAULT';
 
 	require($Slash::home{$serv} ? catfile($Slash::home{$serv}, 'slashdotrc.pl')
-	    : 'slashdotrc.pl');
+		: 'slashdotrc.pl');
 
 	$serv = exists $Slash::conf{lc $ENV{SERVER_NAME}}
 		? lc $ENV{SERVER_NAME}
@@ -114,12 +115,44 @@ sub getSlash {
 		undef $I{$_} if $I{$_};
 	}
 
-	$I{r} = Apache->request if $ENV{SCRIPT_NAME};
+	$I{r} = Apache->request if $ENV{GATEWAY_INTERFACE} =~ m|^CGI-Perl/|;
 	sqlConnect();
 
-	$I{query} = new CGI; 
+	$I{query} = new CGI;
+
+	# fields that are numeric only
+	my %nums = map {($_ => 1)} qw(
+		last next time artcount bseclev cid clbig clsmall
+		commentlimit commentsort commentspill commentstatus
+		del displaystatus filter_id hardthresh height
+		highlightthresh isolate issue light maillist max
+		maxcommentsize maximum_length maxstories min minimum_length
+		minimum_match noboxes noicons noscores nosigs ordernum pid
+		reparent retrieve seclev startat uid uthreshold voters width
+		willing writestatus ratio
+	);
+
+	# regexes to match dynamically generated numeric fields
+	my @regints = (qr/^reason_.+$/, qr/^votes.+$/);
+
+	# special few
+	my %special = (
+		sid => sub { $_[0] =~ s|[^A-Za-z0-9/.]||g },
+	);
+
 	for ($I{query}->param) {
-		$I{F}{$_} = $I{query}->param($_)
+		$I{F}{$_} = $I{query}->param($_);
+
+		# clean up numbers
+		if (exists $nums{$_}) {
+			$I{F}{$_} = fixint($I{F}{$_});
+		} elsif (exists $special{$_}) {
+			$special{$_}->($I{F}{$_});
+		} else {
+			for my $ri (@regints) {
+				$I{F}{$_} = fixint($I{F}{$_}) if /$ri/;
+			}
+		}
 	}
 
 	$I{F}{ssi} ||= '';
@@ -129,7 +162,7 @@ sub getSlash {
 
 	my $op = $I{query}->param('op') || '';
 
-	if (($op eq 'userlogin' || $I{query}->param('rlogin') ) 
+	if (($op eq 'userlogin' || $I{query}->param('rlogin') )
 		&& length($I{F}{upasswd}) > 1) {
 
 		$I{U} = getUser(userLogin($I{F}{unickname}, $I{F}{upasswd}));
@@ -158,7 +191,7 @@ sub selectGeneric {
 	my($table, $label, $code, $name, $default, $where, $order, $limit) = @_;
 	$default = '' unless defined $default;
 	$code 	 = '' unless defined $code;
-	
+
 	print qq!\n<SELECT name="$label">\n!;
 
 	my $sql	=  " SELECT $code,$name FROM $table ";
@@ -170,7 +203,7 @@ sub selectGeneric {
 	my $c	= $I{dbh}->prepare_cached($sql);
 	$c->execute;
 
-	while(my($code, $name) = $c->fetchrow) {
+	while (my($code, $name) = $c->fetchrow) {
 		my $selected = $default eq $code ? ' SELECTED' : '';
 		print qq!\t<OPTION value="$code"$selected>$name</OPTION>\n!;
 	}
@@ -299,10 +332,10 @@ sub blockCache {
 }
 
 ########################################################
-# Prep for evaling (no \r (\015) allowed)
+# Prep for evaling (no \r allowed)
 sub prepEvalBlock {
 	my($b) = @_;
-	$b =~ s/\015//g;
+	$b =~ s/\r//g;
 	return $b;
 }
 
@@ -310,7 +343,7 @@ sub prepEvalBlock {
 # Preps a block for evaling (escaping out " mostly)
 sub prepBlock {
 	my($b) = @_;
-	$b =~ s/\015//g;
+	$b =~ s/\r//g;
 	$b =~ s/"/\\"/g;
 	$b = qq!"$b";!;
 	return $b;
@@ -410,7 +443,7 @@ sub userLogin {
 # on '::' to get the users info.
 sub userCheckCookie {
 	my($cookie) = @_;
-	$cookie =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack('C', hex($1))/eg;     
+	$cookie =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack('C', hex($1))/eg;
 	my($uid, $passwd) = split('::', $cookie);
 	return(-1, '') if $uid eq ' ';
 	return($uid, $passwd);
@@ -447,17 +480,17 @@ sub getExtraStuff {
 # IF passed a valid uid & passwd, it logs in $U
 # else $U becomes Anonymous Coward (eg UID -1)
 sub getUser {
-	my($uid,$passwd) = @_;
+	my($uid, $passwd) = @_;
 	undef $I{U};
 
-	if($uid > 0) { # Authenticate
+	if ($uid > 0) { # Authenticate
 		$I{U} = sqlSelectHashref('*', 'users',
 			' uid = ' . $I{dbh}->quote($uid) .
 			' AND passwd = ' . $I{dbh}->quote($passwd)
 		);
 	}
 
-	if ($uid > 0 && $I{U}{uid}) { #  registered user 
+	if ($uid > 0 && $I{U}{uid}) { #  registered user
 		# Get User Prefs
 		getExtraStuff('prefs');
 
@@ -484,7 +517,7 @@ sub getUser {
 
 		# Do we want the comments stuff?
 		if (!$ENV{SCRIPT_NAME}
-		    || $ENV{SCRIPT_NAME} =~ /index|article|comments|metamod|search|pollBooth/) { 
+			|| $ENV{SCRIPT_NAME} =~ /index|article|comments|metamod|search|pollBooth/) {
 			getExtraStuff('comments');
 		}
 
@@ -503,7 +536,7 @@ sub getUser {
 				'users_comments.uid=-1 AND users_prefs.uid=-1'
 			);
 
-			# timezone stuff 
+			# timezone stuff
 		 	$I{ACTZ} = sqlSelectHashref('*',
 				'tzcodes,dateformats',
 				"tzcodes.tz='$I{AC}{tzcode}' AND dateformats.id=$I{AC}{dfid}"
@@ -525,7 +558,7 @@ sub getUser {
 		(@{$I{U}}{qw[aid aseclev asection url]}) =
 			getAdminInfo($I{query}->cookie('session'));
 
-	} else { 
+	} else {
 		$I{U}{aid} = '';
 		$I{U}{aseclev} = 0;
 	}
@@ -546,7 +579,7 @@ sub getUser {
 
 	$I{U}{breaking}=0;
 
-	if($I{U}{commentlimit} > $I{breaking} && $I{U}{mode} ne 'archive') {
+	if ($I{U}{commentlimit} > $I{breaking} && $I{U}{mode} ne 'archive') {
 		$I{U}{commentlimit} = int($I{breaking} / 2);
 		$I{U}{breaking} = 1;
 	}
@@ -558,7 +591,7 @@ sub getUser {
 	$I{U}{exaid}	= testExStr($I{U}{exaid}) if $I{U}{exaid};
 	$I{U}{exboxes}	= testExStr($I{U}{exboxes}) if $I{U}{exboxes};
 	$I{U}{extid}	= testExStr($I{U}{extid}) if $I{U}{extid};
-	$I{U}{points}	= 0 unless $I{U}{willing}; # No points if you dont wan 'em
+	$I{U}{points}	= 0 unless $I{U}{willing}; # No points if you dont want 'em
 
 	return $I{U};
 }
@@ -591,7 +624,7 @@ sub getAdminInfo {
 }
 
 ########################################################
-# Initial Administrator Login.  
+# Initial Administrator Login.
 sub setAdminInfo {
 	my($aid, $pwd) = @_;
 
@@ -616,7 +649,7 @@ sub setAdminInfo {
 	}
 }
 
-###############################################################	
+###############################################################
 #  What is it?  Where does it go?  The Random Leftover Shit
 
 ########################################################
@@ -624,7 +657,7 @@ sub setCookie {
 	my($name, $val) = @_;
 
 	# domain must start with a . and have one more .
-	# embedded in it, else we ignore it.
+	# embedded in it, else we ignore it
 	my $domain = $I{cookiedomain} &&
 		$I{cookiedomain} =~ /^\..+\./ ? $I{cookiedomain} : '';
 
@@ -637,11 +670,10 @@ sub setCookie {
 
 	$cookie{-domain} = $domain if $domain;
 
-	return join($CRLF,
-		'Date: ' . CGI::expires(0, 'http'),
-		'Set-Cookie: ' . $I{query}->cookie(%cookie),
-		''
-	);
+	return {
+		-date		=> CGI::expires(0, 'http'),
+		-set_cookie	=> $I{query}->cookie(%cookie)
+	};
 }
 
 
@@ -677,7 +709,7 @@ sub getsiddir {
 # writes error message to apache's error_log if we're running under mod_perl
 # Called wherever we have errors.
 sub apacheLog {
-	if ($ENV{SCRIPT_NAME}) {
+	if ($I{r}) {
 		$I{r}->log_error("$ENV{SCRIPT_NAME}:@_");
 	} else {
 		print @_, "\n";
@@ -728,7 +760,7 @@ sub writelog {
 	}, 2);
 
 	if ($dat =~ m[/]) {
-		sqlUpdate('storiestuff', { -hits => 'hits+1' }, 
+		sqlUpdate('storiestuff', { -hits => 'hits+1' },
 			'sid=' . $I{dbh}->quote($dat)
 		);
 	} elsif ($op eq 'index') {
@@ -743,12 +775,12 @@ sub writelog {
 sub sendEmail {
 	my($addr, $subject, $content) = @_;
 	sendmail(
-		smtp => $I{smtp_server},
-		subject => $subject,
-		to => $addr,
-		body => $content,
-		from => $I{mailfrom}
-	) or apacheLog("mail error: Can't send $subject to $addr: $Mail::Sendmail::error");
+		smtp	=> $I{smtp_server},
+		subject	=> $subject,
+		to	=> $addr,
+		body	=> $content,
+		from	=> $I{mailfrom}
+	) or apacheLog("Can't send mail '$subject' to $addr: $Mail::Sendmail::error");
 }
 
 
@@ -771,18 +803,18 @@ sub linkStory {
 }
 
 ########################################################
-# Sets the appropriate @fg and @bg color pallete's based 
+# Sets the appropriate @fg and @bg color pallete's based
 # on what section you're in.  Used during initialization
 sub getSectionColors {
 	my $color_block = shift;
 	my @colors;
 
 	# they damn well better be legit
-	if($I{F}{colorblock}) {
-		@colors = split m/,/, $I{F}{colorblock};
+	if ($I{F}{colorblock}) {
+		@colors = map { s/[^\w#]+//g ; $_ } split m/,/, $I{F}{colorblock};
 	} else {
 		@colors = split m/,/, getSectionBlock('colors');
-	}	
+	}
 
 	$I{fg} = [@colors[0..3]];
 	$I{bg} = [@colors[4..7]];
@@ -882,20 +914,23 @@ sub pollbooth {
 	my($qid, $notable) = @_;
 
 	($qid) = getvar("currentqid") unless $qid;
+	my $qid_dbi = $I{dbh}->quote($qid);
+	my $qid_htm = stripByMode($qid, 'attribute');
+
 	my $cursor = $I{dbh}->prepare_cached("
 		SELECT question,answer,aid  from pollquestions, pollanswers
 		WHERE pollquestions.qid=pollanswers.qid AND
-			pollquestions.qid='$qid'
+			pollquestions.qid=$qid_dbi
 		ORDER BY pollanswers.aid
 	");
 	$cursor->execute;
 
 	my($x, $tablestuff) = (0);
 	while (my($question, $answer, $aid) = $cursor->fetchrow) {
-		if ($x == 0) { 
+		if ($x == 0) {
 			$tablestuff = <<EOT;
 <FORM ACTION="$I{rootdir}/pollBooth.pl">
-\t<INPUT TYPE="hidden" NAME="qid" VALUE="$qid">
+\t<INPUT TYPE="hidden" NAME="qid" VALUE="$qid_htm">
 <B>$question</B>
 EOT
 			$tablestuff .= <<EOT if $I{currentSection};
@@ -906,12 +941,12 @@ EOT
 		$tablestuff .= qq!<BR><INPUT TYPE="radio" NAME="aid" VALUE="$aid">$answer\n!;
 	}
 
-	my($voters) = sqlSelect('voters', 'pollquestions', " qid='$qid'");
-	my($comments) = sqlSelect('count(*)', 'comments', " sid='$qid'");
+	my($voters) = sqlSelect('voters', 'pollquestions', " qid=$qid_dbi");
+	my($comments) = sqlSelect('count(*)', 'comments', " sid=$qid_dbi");
 	my $sect = "section=$I{currentSection}&" if $I{currentSection};
 
 	$tablestuff .= qq!<BR><INPUT TYPE="submit" VALUE="Vote"> ! .
-		qq![ <A HREF="$I{rootdir}/pollBooth.pl?${sect}qid=$qid&aid=-1"><B>Results</B></A> | !;
+		qq![ <A HREF="$I{rootdir}/pollBooth.pl?${sect}qid=$qid_htm&aid=-1"><B>Results</B></A> | !;
 	$tablestuff .= qq!<A HREF="$I{rootdir}/pollBooth.pl?$sect"><B>Polls</B></A> !
 		unless $notable eq 'rh';
 	$tablestuff .= "Votes:<B>$voters</B>" if $notable eq 'rh';
@@ -957,7 +992,7 @@ sub sqlSelect {
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
-	
+
 	sqlConnect();
 	my $c = $I{dbh}->prepare_cached($sql) or die "Sql has gone away\n";
 	if (!$c->execute) {
@@ -966,6 +1001,7 @@ sub sqlSelect {
 		# kill 9,$$;
 		return undef;
 	}
+
 	my @r = $c->fetchrow;
 	$c->finish;
 	return @r;
@@ -979,7 +1015,7 @@ sub sqlSelectHash {
 
 ##########################################################
 # selectCount 051199
-# inputs: scalar string table, scaler where clause 
+# inputs: scalar string table, scaler where clause
 # returns: via ref from input
 # Simple little function to get the count of a table
 ##########################################################
@@ -1005,29 +1041,29 @@ sub sqlSelectHashref {
 	sqlConnect();
 	my $c = $I{dbh}->prepare_cached($sql);
 	# $c->execute or print "\n<P><B>SQL Hashref Error</B><BR>\n";
-	
+
 	unless ($c->execute) {
 		apacheLog($sql);
 		#kill 9,$$;
-	} 
+	}
 	my $H = $c->fetchrow_hashref;
 	$c->finish;
 	return $H;
 }
 
 ########################################################
-# sqlSelectAll - this function returns the entire 
+# sqlSelectAll - this function returns the entire
 # array ref of all records selected. Use this in the case
 # where you want all the records and have to do a time consuming
-# process that would tie up the db handle for too long.   
-# 
-# inputs: 
-# select - columns selected 
-# from - tables 
-# where - where clause 
+# process that would tie up the db handle for too long.
+#
+# inputs:
+# select - columns selected
+# from - tables
+# where - where clause
 # other - limit, asc ...
 #
-# returns: 
+# returns:
 # array ref of all records
 sub sqlSelectAll {
 	my($select, $from, $where, $other) = @_;
@@ -1043,8 +1079,7 @@ sub sqlSelectAll {
 }
 
 ########################################################
-sub sqlUpdate
-{
+sub sqlUpdate {
 	my($table, $data, $where, $lp) = @_;
 	$lp = 'LOW_PRIORITY' if $lp;
 	$lp = '';
@@ -1053,7 +1088,7 @@ sub sqlUpdate
 		if (/^-/) {
 			s/^-//;
 			$sql .= "\n  $_ = $data->{-$_},";
-		} else { 
+		} else {
 			# my $d=$I{dbh}->quote($data->{$_}) || "''";
 			$sql .= "\n $_ = " . $I{dbh}->quote($data->{$_}) . ',';
 		}
@@ -1098,7 +1133,7 @@ sub sqlInsert {
 		} else {
 			$values .= "\n  " . $I{dbh}->quote($data->{$_}) . ',';
 		}
-		$names .= "$_,";	
+		$names .= "$_,";
 	}
 
 	chop($names);
@@ -1147,7 +1182,7 @@ sub sqlConnect {
 #
 # Some Random Dave Code for HTML validation
 # (pretty much the last legacy of daveCode[tm] by demaagd@imagegroup.com
-# 
+#
 
 ########################################################
 sub stripByMode {
@@ -1155,7 +1190,7 @@ sub stripByMode {
 	my $fmode = shift || 'nohtml';
 
 	$str =~ s/(\S{90})/$1 /g;
-	if ($fmode eq 'literal' || $fmode eq 'exttrans') {
+	if ($fmode eq 'literal' || $fmode eq 'exttrans' || $fmode eq 'attribute') {
 		# Encode all HTML tags
 		$str =~ s/&/&amp;/g;
 		$str =~ s/</&lt;/g;
@@ -1165,15 +1200,20 @@ sub stripByMode {
 	# this "if" block part of patch from Ben Tilly
 	if ($fmode eq 'plaintext' || $fmode eq 'exttrans') {
 		$str = stripBadHtml($str);
-		$str =~ s/\n/<BR>/gi;	     # pp breaks
+		$str =~ s/\n/<BR>/gi;  # pp breaks
 		$str =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
 		# Preserve leading indents
 		$str =~ s/\t/    /g;
 		$str =~ s/<BR>\n?( +)/"<BR>\n" . ("&nbsp; " x length($1))/ieg;
+
 	} elsif ($fmode eq 'nohtml') {
 		$str =~ s/<.*?>//g;
 		$str =~ s/<//g;
 		$str =~ s/>//g;
+
+	} elsif ($fmode eq 'attribute') {
+		$str =~ s/"/&#22;/g;
+
 	} else {
 		$str = stripBadHtml($str);
 	}
@@ -1184,8 +1224,8 @@ sub stripByMode {
 ########################################################
 sub stripBadHtml  {
 	my $str = shift;
-	
-	$str =~ s/<(?!.*?>)//gs; 
+
+	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
 
 	$str =~ s/></> </g;
@@ -1200,10 +1240,10 @@ sub fixHref {
 	my $errnum; # the errnum for 404.pl
 
 	for my $qr (@{$I{fixhrefs}}) {
-	    if ($rel_url =~ $qr->[0]) {
+		if ($rel_url =~ $qr->[0]) {
 		my @ret = $qr->[1]->($rel_url);
 		return $print_errs ? @ret : $ret[0];
-	    }
+		}
 	}
 
 	if ($rel_url =~ /^www\.\w+/) {
@@ -1277,7 +1317,7 @@ sub fixHref {
 		}
 
 	} else {
-		# if we get here, we don't know what to 
+		# if we get here, we don't know what to
 		# $abs_url = $rel_url;
 		return;
 	}
@@ -1288,34 +1328,44 @@ sub fixHref {
 
 ########################################################
 sub approveTag {
-	my $tag = shift; 
+	my $tag = shift;
 
 	$tag =~ s/^\s*?(.*)\s*?$/$1/; # trim leading and trailing spaces
 
-	# Take care of URL:foo
-	if ($tag =~ /url\:(.*)/i) {
-		return qq!<A HREF="$1">$1</A>!;
-	}
+	$tag =~ s/\bstyle\s*=(.*)$//i; # go away please
 
-	$tag =~ s/\bstyle\s*=(.*)$//i;
-
-	# Take care of Links
-	if ($tag =~ /href\s*=(.*)/i) {
-		my $url = $1;
-		$url =~ s/[" ]//g;
-		$url =~ s/^'(.+?)'$/$1/g;
-		$url = fixHref($url) || $url;
-		$url =~ s|^\s*\w+script\b.*$||i;
-		return qq!<A HREF="$url">!;
+	# Take care of URL:foo and other HREFs
+	if ($tag =~ /^URL:(.+)$/i || $tag =~ /href\s*=(.+)$/i) {
+		my $url = fixurl($1);
+		return qq!<A HREF="$url">$url</A>!;
 	}
 
 	# Validate all other tags
 	$tag =~ s|^(/?\w+)|\U$1|;
-
 	foreach my $goodtag (@{$I{approvedtags}}) {
 		return "<$tag>" if $tag =~ /^$goodtag$/ || $tag =~ m|^/$goodtag$|;
 	}
-} 
+}
+
+########################################################
+sub fixurl {
+	my $url = shift;
+	$url =~ s/[" ]//g;
+	$url =~ s/^'(.+?)'$/$1/g;
+	# encode all non-safe, non-reserved characters
+	$url =~ s/([^\w.+!*'(),;?:@=&a-zA-Z0-9\$\/-])/sprintf "%%%02X", ord $1/ge;
+	$url = fixHref($url) || $url;
+	my $decoded_url = decode_entities($url);
+	return undef if $decoded_url =~ s|^\s*\w+script\b.*$||i;
+}
+
+########################################################
+sub fixint {
+	my $int = shift;
+	$int =~ s/^\+//;
+	$int =~ s/^(-?[\d.]+).*$/$1/ or return;
+	return $int;
+}
 
 ###############################################################################
 # Look and Feel Functions Follow this Point
@@ -1449,13 +1499,14 @@ sub redirect {
 		$url =~ s|^/*|$I{rootdir}/|;
 	}
 
-	my $head = join $CRLF, "HTTP/1.1 302 Moved", "Location: $url",
-		"Content-type: text/html",
-		($I{SETCOOKIE} ? $I{SETCOOKIE} : '');
+	my %params = (
+		-type		=> 'text/html',
+		-status		=> '302 Moved',
+		-location	=> $url,
+		($I{SETCOOKIE} ? %{$I{SETCOOKIE}} : ())
+	);
 
-	$head =~ s/[\015\012]+$//;
-
-	print $head, "$CRLF$CRLF", <<EOT;
+	print CGI::header(%params), <<EOT;
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML><HEAD><TITLE>302 Moved</TITLE></HEAD><BODY>
 <P>You really want to be on <A HREF="$url">$url</A> now.</P>
@@ -1470,13 +1521,16 @@ sub header {
 	$title ||= '';
 
 	unless ($I{F}{ssi}) {
-		printf "HTTP/1.0 %s$CRLF", $status ? $status : '200 OK';
-		print $I{SETCOOKIE} if $I{SETCOOKIE};
-		print "Server: $ENV{SERVER_SOFTWARE}$CRLF" if $ENV{SERVER_SOFTWARE};
-		print "Pragma: no-cache$CRLF"
+		my %params = (
+			-cache_control => 'private',
+			-type => 'text/html',
+			($I{SETCOOKIE} ? %{$I{SETCOOKIE}} : ())
+		);
+		$params{-status} = $status if $status;
+		$params{-pragma} = "no-cache"
 			unless $I{U}{aseclev} || $ENV{SCRIPT_NAME} =~ /comments/;
-		print "Cache-control: private$CRLF" .
-			"Content-Type: text/html$CRLF$CRLF";
+
+		print CGI::header(%params);
 	}
 
 	$I{userMode} = $I{currentMode} eq 'flat' ? '_F' : '';
@@ -1622,7 +1676,6 @@ sub portalbox {
 # Behold, the beast that is threaded comments
 sub selectComments {
 	my($sid, $cid) = @_;
-	$cid =~ s/[^0-9]//g; # Damn Fubared Browsers
 	$I{shit} = 0 if $I{F}{ssi};
 	my $sql = "SELECT cid," . getDateFormat('date', 'time' ) . ",
 				subject,comment,
@@ -1637,7 +1690,7 @@ sub selectComments {
 	$sql .= "	    AND comments.cid >= $cid " if $cid && $I{shit}; # BAD
 	$sql .= "	    AND (";
 	$sql .= "		comments.uid=$I{U}{uid} OR " if $I{U}{uid} > 0;
-	$sql .= "		cid=$cid OR " if $cid;		
+	$sql .= "		cid=$cid OR " if $cid;
 	$sql .= "		comments.points >= " . $I{dbh}->quote($I{U}{threshold}) . " OR " if $I{U}{hardthresh};
 	$sql .= "		  1=1 )   ";
 	$sql .= "	  ORDER BY ";
@@ -1665,7 +1718,7 @@ sub selectComments {
 		# fix points in case they are out of bounds
 		$C->{points} = $C->{points} < -1 ? -1 : $C->{points} > 5 ? 5 : $C->{points};
 
-		my $tmpkids = $comments->[$C->{cid}]{kids};	
+		my $tmpkids = $comments->[$C->{cid}]{kids};
 		my $tmpvkids = $comments->[$C->{cid}]{visiblekids};
 		$comments->[$C->{cid}] = $C;
 		$comments->[$C->{cid}]{kids} = $tmpkids;
@@ -1673,7 +1726,7 @@ sub selectComments {
 
 		push @{$comments->[$C->{pid}]{kids}}, $C->{cid};
 		$comments->[0]{totals}[$C->{points} + 1]++;
-		$comments->[$C->{pid}]{visiblekids}++ 
+		$comments->[$C->{pid}]{visiblekids}++
 			if $C->{points} >= $I{U}{threshold};
 
 		$I{U}{points} = 0 if $C->{uid} == $I{U}{uid}; # Mod/Post Rule
@@ -1702,7 +1755,7 @@ sub updateCommentTotals {
 	my($sid, $comments) = @_;
 	my $hp = join ',', @{$comments->[0]{totals}};
 	sqlUpdate("stories", {
-			hitparade	=> $hp, 
+			hitparade	=> $hp,
 			writestatus	=> 0,
 			commentcount	=> $comments->[0]{totals}[0]
 		}, 'sid=' . $I{dbh}->quote($sid)
@@ -1872,7 +1925,7 @@ sub printComments {
 		<FORM ACTION="$I{rootdir}/comments.pl">
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="$sid">
 		<INPUT TYPE="HIDDEN" NAME="cid" VALUE="$cid">
-		<INPUT TYPE="HIDDEN" NAME="pid" VALUE="$pid">	
+		<INPUT TYPE="HIDDEN" NAME="pid" VALUE="$pid">
 		<INPUT TYPE="HIDDEN" NAME="startat" VALUE="$I{F}{startat}">
 EOT
 
@@ -1892,7 +1945,7 @@ EOT
 	<TR><TD BGCOLOR="$I{bg}[3]" ALIGN="CENTER">
 		<FONT COLOR="$I{fg}[3]" SIZE="${\( $I{fontbase} + 2 )}">
 EOT
-	
+
 		print blockCache('commentswarning'), "</FONT></FORM></TD></TR>";
 
 		if ($I{U}{mode} eq 'nocomment') {
@@ -1923,7 +1976,7 @@ EOT
 		my($n, $p);
 		if (my $sibs = $comments->[$C->{pid}]{kids}) {
 			for (my $x=0; $x< @$sibs; $x++) {
-				($n,$p) = ($sibs->[$x+1], $sibs->[$x-1]) 
+				($n,$p) = ($sibs->[$x+1], $sibs->[$x-1])
 					if $sibs->[$x] == $cid;
 			}
 		}
@@ -1945,9 +1998,9 @@ EOT
 
 	print <<EOT if $I{U}{aseclev} || $I{U}{points};
 	<TR><TD>
-		<P>Have you read the 
+		<P>Have you read the
 		<A HREF="$I{rootdir}/moderation.shtml">Moderator Guidelines</A>
-		yet? (<B>Updated 9.9</B>) 
+		yet? (<B>Updated 9.9</B>)
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="moderate">
 	</TD></TR></FORM>
 EOT
@@ -1958,20 +2011,20 @@ EOT
 ########################################################
 sub moderatorCommentLog {
 	my($sid, $cid) = @_;
-	my $c = sqlSelectMany("  comments.sid as sid,
+	my $c = sqlSelectMany(  "comments.sid as sid,
 				 comments.cid as cid,
 				 comments.points as score,
 				 subject, moderatorlog.uid as uid,
 				 users.nickname as nickname,
-				 moderatorlog.val as val, 
+				 moderatorlog.val as val,
 				 moderatorlog.reason as reason",
 				"moderatorlog, users, comments",
 				"moderatorlog.sid='$sid'
 			     AND moderatorlog.cid=$cid
 			     AND moderatorlog.uid=users.uid
 			     AND comments.sid=moderatorlog.sid
-			     AND comments.cid=moderatorlog.cid
-	");
+			     AND comments.cid=moderatorlog.cid"
+	);
 
 	my(@reasonHist, $reasonTotal);
 	if ($c->rows > 0) {
@@ -2004,7 +2057,7 @@ EOT
 	return unless $reasonTotal;
 
 	print qq!<FONT COLOR="$I{fg}[3]"><B>Moderation Totals</B></FONT>:!;
-	foreach (0 .. @reasonHist) { 
+	foreach (0 .. @reasonHist) {
 		print "$I{reasons}->[$_]=$reasonHist[$_], " if $reasonHist[$_];
 	}
 	print "<B>Total=$reasonTotal</B>.";
@@ -2084,7 +2137,7 @@ sub displayThread {
 		$indent = 1;
 		$full = 1;
 	}
-	
+
 
 	foreach my $cid (@{$comments->[$pid]{kids}}) {
 		my $C = $comments->[$cid];
@@ -2094,7 +2147,7 @@ sub displayThread {
 		next if $skipped < $I{F}{startat};
 
 		$I{F}{startat} = 0; # Once We Finish Skipping... STOP
-		
+
 		if ($C->{points} < $I{U}{threshold}) {
 			if ($I{U}{uid} < 0 || $I{U}{uid} != $C->{uid})  {
 				$hidden++;
@@ -2135,7 +2188,7 @@ sub displayThread {
 		print qq!\n<TR><TD BGCOLOR="$I{bg}[2]">\n! if $cagedkids;
 		print qq!<LI><FONT SIZE="${\( $I{fontbase} + 2 )}"><B> !,
 			linkComment({
-				sid => $sid, threshold => -1, pid => $pid, 
+				sid => $sid, threshold => -1, pid => $pid,
 				subject => "$hidden repl" . ($hidden > 1 ? 'ies' : 'y')
 			}) . ' beneath your current threshold.</B></FONT>';
 		print "\n\t</TD></TR>\n" if $cagedkids;
@@ -2157,7 +2210,7 @@ EOT
 
 	(my $nickname  = $C->{nickname}) =~ s/ /+/g;
 	my $userinfo = <<EOT unless $C->{nickname} eq $I{anon_name};
-(<A HREF="$I{rootdir}/users.pl?op=userinfo\&nick=$nickname">User Info</A>)
+(<A HREF="$I{rootdir}/users.pl?op=userinfo&nick=$nickname">User Info</A>)
 EOT
 
 	my $userurl = qq!<A HREF="$C->{homepage}">$C->{homepage}</A><BR>!
@@ -2167,7 +2220,7 @@ EOT
 	unless ($I{U}{noscores}) {
 		$score  = " (Score:$C->{points}";
 		$score .= ", $I{reasons}[$C->{reason}]" if $C->{reason};
-		$score .= ")"; 
+		$score .= ")";
 	}
 
 	$C->{comment} .= "<BR>$C->{sig}" unless $I{U}{nosigs};
@@ -2201,8 +2254,8 @@ EOT
 		}, $pid);
 
 		if ((	   $I{U}{willing}
-			&& $I{U}{points} > 0 
-			&& $C->{uid} ne $I{U}{uid} 
+			&& $I{U}{points} > 0
+			&& $C->{uid} ne $I{U}{uid}
 			&& $C->{lastmod} ne $I{U}{uid})
 		    || ($I{U}{aseclev} > 99 && $I{authors_unlimited})) {
 
@@ -2214,9 +2267,10 @@ EOT
 			$m.= qq! | <SELECT NAME="reason_$C->{cid}">\n$o</SELECT> !;
 		    }
 
-		$m .= qq! | <INPUT TYPE="CHECKBOX" NAME="del_$C->{cid}"> ! 
+		$m .= qq! | <INPUT TYPE="CHECKBOX" NAME="del_$C->{cid}"> !
 			if $I{U}{aseclev} > 99;
-		print qq!\n\t<TR><TD><FONT SIZE="${\( $I{fontbase} + 2 )}">\n[ $m ]\n\t</FONT></TD></TR>\n<TR><TD>!;
+		print qq!\n\t<TR><TD><FONT SIZE="${\( $I{fontbase} + 2 )}">\n! .
+			qq![ $m ]\n\t</FONT></TD></TR>\n<TR><TD>!;
 	}
 }
 
@@ -2227,7 +2281,7 @@ EOT
 sub dispStory {
 	my($S, $A, $T, $full) = @_;
 	my $title = $S->{title};
-	if(!$full && index($S->{title}, ':') == -1
+	if (!$full && index($S->{title}, ':') == -1
 		&& $S->{section} ne 'articles'
 		&& $S->{section} ne $I{F}{section}) {
 
@@ -2282,12 +2336,12 @@ sub displayStory {
 	# process, in raw seconds since 1970
 	$I{storyBank}{timestamp} ||= $I{code_time};
 
-	# set this to 0 if the calling page is index.pl and it's not 
-	# already defined 
+	# set this to 0 if the calling page is index.pl and it's not
+	# already defined
 	# index.pl is the only script that loops through all of the stories
 	# so this is the only script that will allow us to increment an array
 	# to hold the proper count and sequence of the stories and their sids .
-	$I{StoryCount} ||= 0 if $caller eq 'index'; 
+	$I{StoryCount} ||= 0 if $caller eq 'index';
 
 	# this array is to store sids of the stories that are displayed on the front
 	# index page. This is used for anonymous coward in article.pl to get the next
@@ -2296,7 +2350,7 @@ sub displayStory {
 		if !$I{sid_array}[$I{StoryCount}] && $caller eq 'index';
 
 	# difference between the timestamp on storyBank and the time this
-	# code is executing 
+	# code is executing
 	my $diff = $I{code_time} - $I{storyBank}{timestamp};
 
 	# this will force the storyBank to refresh if one of it's members is
@@ -2304,38 +2358,38 @@ sub displayStory {
 	if ($I{code_time} - $I{storyBank}{timestamp} > $I{story_expire} && $I{story_refresh} != 1) {
 		$I{story_refresh} = 1;
 
-		# gotta toast it because there may be sid keys that aren't part 
-		# of the upcoming query (old stories) and it could end up 
+		# gotta toast it because there may be sid keys that aren't part
+		# of the upcoming query (old stories) and it could end up
 		# getting bigger, and bigger, and bigger
 		undef $I{storyBank};
 
 		# smack a time stamp on it with the current time (this is the new timestamp)
-		$I{storyBank}{timestamp} = $I{code_time}; 
+		$I{storyBank}{timestamp} = $I{code_time};
 	}
 
-	# query the database only if there's not member in storyBank with this sid and it's not time to refresh storyBank 
+	# query the database only if there's not member in storyBank with this sid and it's not time to refresh storyBank
 	$I{storyBank}{$sid} = sqlSelectHashref(
 		'title,dept,time as sqltime,time,introtext,sid,commentstatus,bodytext,aid,' .
 		'tid,section,commentcount, displaystatus,writestatus,relatedtext,extratext',
 		'stories', 'stories.sid=' . $I{dbh}->quote($sid)
 	) unless $I{storyBank}{$sid} && $I{story_refresh} != 1;
 
-	# give this member of storyBank the current iteration of 
-	# StoryCount if it's not already defined and the calling page is 
-	# index.pl 
+	# give this member of storyBank the current iteration of
+	# StoryCount if it's not already defined and the calling page is
+	# index.pl
 	$I{storyBank}{$sid}{story_order} = $I{StoryCount}
 		if !$I{storyBank}{$sid}{story_order} && $caller eq 'index';
 
-	# increment if the calling page was index.pl 
+	# increment if the calling page was index.pl
 	$I{StoryCount}++ if $caller eq 'index';
 
 	my $S = $I{storyBank}{$sid};
 
-	# convert the time of the story (this is mysql format) 
-	# and convert it to the user's prefered format 
-	# based on their preferences 
+	# convert the time of the story (this is mysql format)
+	# and convert it to the user's prefered format
+	# based on their preferences
 	$I{U}{storytime} = timeCalc($S->{'time'});
-	
+
 	if ($full && sqlTableExists($S->{section}) && $S->{section}) {
 		my $E = sqlSelectHashref('*', $S->{section}, "sid='$S->{sid}'");
 		foreach (keys %$E) {
@@ -2353,14 +2407,14 @@ sub displayStory {
 #######################################################################
 # timeCalc 051199 PMG
 # inputs: raw date from mysql
-# returns: formatted date string from dateformats in mysql, converted to 
+# returns: formatted date string from dateformats in mysql, converted to
 # time strings that Date::Manip can format
 #######################################################################
-# interpolative hash for converting 
-# from mysql date format to perl 
-# the key is mysql's format, 
-# the value is perl's format	
-# Date::Manip format 
+# interpolative hash for converting
+# from mysql date format to perl
+# the key is mysql's format,
+# the value is perl's format
+# Date::Manip format
 my $timeformats = {
 	'%M' => '%B',
 	'%W' => '%A',
@@ -2399,11 +2453,11 @@ sub timeCalc {
 	my(@dateformats, $err);
 
 	# I put this here because
-	# when they select "6 ish" it 
+	# when they select "6 ish" it
 	# looks really stupid for it to
-	# display "posted by xxx on 6 ish" 
+	# display "posted by xxx on 6 ish"
 	# It looks better for it to read:
-	# "posted by xxx around 6 ish"  
+	# "posted by xxx around 6 ish"
 	# call me anal!
 	if ($I{U}{'format'} eq '%l ish' || $I{U}{'format'} eq '%h ish') {
 		$I{U}{aton} = " around ";
@@ -2424,7 +2478,7 @@ sub timeCalc {
 	# convert the raw date to pretty formatted date
 	$date = UnixDate($date, $I{U}{perlformat});
 
-	# return the new pretty date 
+	# return the new pretty date
 	return $date;
 }
 
@@ -2450,10 +2504,10 @@ sub selectStories {
 
 	my $s = "SELECT sid, section, title, date_format(" .
 		getDateOffset('time') . ',"%W %M %d %h %i %p"),
-			commentcount, to_days(' . getDateOffset('time') . "), 
+			commentcount, to_days(' . getDateOffset('time') . "),
 			hitparade
 		   FROM newstories
-		  WHERE 1=1 "; # Mysql's Optimize gets this.  
+		  WHERE 1=1 "; # Mysql's Optimize gets this.
 
 	$s .= " AND displaystatus=0 " unless $I{F}{section};
 	$s .= " AND time < now() "; # unless $I{U}{aseclev};
@@ -2470,7 +2524,7 @@ sub selectStories {
 
 	# Order
 	$s .= "	ORDER BY time DESC ";
-	
+
 	if ($limit) {
 		$s .= "	LIMIT $limit";
 	} elsif ($I{currentSection} eq 'index') {
@@ -2489,7 +2543,7 @@ sub selectStories {
 sub getOlderStories {
 	my($cursor, $SECT)=@_;
 	my($today, $stuff);
-	
+
 	$cursor ||= selectStories($SECT);
 
 	unless($cursor->{Active}) {
@@ -2513,7 +2567,7 @@ EOT
 		$stuff .= sprintf "<LI>%s ($commentcount)</LI>\n", linkStory({
 			'link' => $title, sid => $sid, section => $section
 		});
-	}	
+	}
 
 	if ($SECT->{issue}) {
 		# KLUDGE:Should really get previous issue with stories;
@@ -2590,21 +2644,23 @@ EOT
 ########################################################
 sub getFormkey {
 	my @rand_array = ( 'a' .. 'z', 'A' .. 'Z', 0 .. 9 );
-	return(join("",map { $rand_array[rand @rand_array] }  0 .. 9));
+	return join("", map { $rand_array[rand @rand_array] }  0 .. 9);
 }
 
 ########################################################
 sub getFormkeyId {
-	my $uid = shift;			
+	my $uid = shift;
 
-	my $id;
 	# this id is the key for the commentkey table, either UID or
 	# unique hash key generated by IP address
-	if($I{query}->param('rlogin') && length($I{F}{upasswd}) > 1) {
+	my $id;
+
+	# if user logs in during submission of form, after getting
+	# formkey as AC, check formkey with user as AC
+	if ($I{query}->param('rlogin') && length($I{F}{upasswd}) > 1) {
 		$id = crypt($ENV{REMOTE_ADDR}, reverse $ENV{REMOTE_ADDR});
-	}
-	elsif ($uid > 0) {
-		$id = $uid ."-" . $ENV{REMOTE_ADDR};
+	} elsif ($uid > 0) {
+		$id = $uid;
 	} else {
 		$id = crypt($ENV{REMOTE_ADDR}, reverse $ENV{REMOTE_ADDR});
 	}
@@ -2613,16 +2669,14 @@ sub getFormkeyId {
 
 ########################################################
 sub insertFormkey {
-	my $formname = shift;
-	my $id = shift;
-	my $sid = shift;
+	my($formname, $id, $sid) = @_;
 
 	$I{F}{formkey} = getFormkey();
 
 	# insert the fact that the form has been displayed, but not submitted at this point
 	sqlInsert("formkeys", {
 		formkey		=> $I{F}{formkey},
-		formname 	=> $formname, 
+		formname 	=> $formname,
 		id 		=> $id,
 		sid		=> $sid,
 		uid		=> $I{U}{uid},
@@ -2633,47 +2687,43 @@ sub insertFormkey {
 }
 ########################################################
 sub checkFormkey {
-	my $formkey_earliest = shift;
-	my $formname = shift;
-	my $formkey_id = shift;
-	my $valid_formkeys;
-	my $is_a_valid_key = 0;
+	my($formkey_earliest, $formname, $formkey_id) = @_;
 
-	# make sure that there's a valid form key, and we only care about the last 4 hours!
-	$valid_formkeys = sqlSelectAll("formkey,id", "formkeys",
-	"ts >= $formkey_earliest AND formname = '$formname'");
+	# make sure that there's a valid form key, and we only care about formkeys
+	# submitted $formkey_earliest seconds ago
+	my($is_valid_formkey) = sqlSelect("count(*)", "formkeys",
+		"ts >= $formkey_earliest AND formname = '$formname' and " .
+		"id='$formkey_id' and formkey=" .
+		$I{dbh}->quote($I{F}{formkey}));
 
-	for (@{$valid_formkeys}) {
-		$is_a_valid_key++ if ($I{F}{formkey} eq $_->[0] && $formkey_id eq $_->[1]);
-	}
-	return($is_a_valid_key);
+	return($is_valid_formkey);
 }
 
 ########################################################
 sub intervalString {
 	# Ok, this isn't necessary, but it makes it look better than saying:
-	#  "blah blah submitted 23333332288 seconds ago" 
+	#  "blah blah submitted 23333332288 seconds ago"
 	# call me anal.
 	my $interval = shift;
 	my $interval_string = "";
 
 	if ($interval > 60) {
-		my ($hours,$minutes) = 0;
+		my($hours, $minutes) = 0;
 		if ($interval > 3600) {
 			$hours = int($interval/3600);
-			if($hours > 1) {
+			if ($hours > 1) {
 				$interval_string = "$hours hours ";
-			} elsif($hours > 0) {
+			} elsif ($hours > 0) {
 				$interval_string = "$hours hour ";
 			}
-			$minutes = int( ($interval % 3600) / 60);
+			$minutes = int(($interval % 3600) / 60);
 
 			} else {
 				$minutes = int($interval / 60);
 			}
-			if($minutes > 0) {
-				$interval_string .= ", " if($hours);
-				if($minutes > 1) {
+			if ($minutes > 0) {
+				$interval_string .= ", " if $hours;
+				if ($minutes > 1) {
 					$interval_string .= " $minutes minutes ";
 				} else {
 					$interval_string .= " $minutes minute ";
@@ -2681,52 +2731,39 @@ sub intervalString {
 			}
 		} else {
 			$interval_string = "$interval seconds ";
-		} 
+		}
 		return($interval_string);
 }
 ##################################################################
 sub checkTimesPosted {
-	my $formname = shift;
-	my $max = shift;
-	my $id = shift;
-	my $formkey_earliest = shift;
-
-	my ($times_posted) = sqlSelect( 
+	my($formname, $max, $id, $formkey_earliest) = @_;
+	my($times_posted) = sqlSelect(
 		"count(*) as times_posted",
 		"formkeys",
 		"id = '$id' AND submit_ts >= $formkey_earliest AND formname = '$formname'");
 
-	if ($times_posted >= $max) {
-		# max form submissions reached 
-		return(0);
-	} else {
-		return(1);
-	}
+	return $times_posted >= $max ? 0 : 1;
 }
 
 ##################################################################
 sub submittedAlready {
-		my $formkey = shift;
-		my $formname = shift;
+	my($formkey, $formname) = @_;
 
-		my ($submitted_already,$submit_ts) = 0;
-
-		my $cant_find_formkey_err = <<EOT;
+	my $cant_find_formkey_err = <<EOT;
 <P><B>We can't find your formkey.</B></P>
 <P>You must fill out a form and submit from that
 form as required.</P>
 EOT
 
-		# find out if this form has been submitted already
-		($submitted_already, $submit_ts) = sqlSelect(
-			"value,submit_ts",
-			"formkeys","formkey='$formkey' and formname = '$formname'")
-			or errorMessage($cant_find_formkey_err) and return(0);
+	# find out if this form has been submitted already
+	my($submitted_already, $submit_ts) = sqlSelect(
+		"value,submit_ts",
+		"formkeys", "formkey='$formkey' and formname = '$formname'")
+		or errorMessage($cant_find_formkey_err) and return(0);
 
-		if($submitted_already) {
+		if ($submitted_already) {
 			# interval of when it was submitted (this won't be used unless it's already been submitted)
-			my $interval = time() - $submit_ts;
-			my $interval_string = intervalString($interval);
+			my $interval_string = intervalString(time() - $submit_ts);
 			my $submitted_already_err = <<EOT;
 <B>Easy does it!</B>
 <P>This comment has been submitted already, $interval_string ago.
@@ -2748,7 +2785,7 @@ sub errorMessage {
 }
 
 ##################################################################
-# logs attempts to break, fool, flood a particular form 
+# logs attempts to break, fool, flood a particular form
 sub formAbuse {
 	my $reason = shift;
 	# logem' so we can banem'
@@ -2762,31 +2799,28 @@ sub formAbuse {
 
 	return;
 }
-		
+
 ##################################################################
 # the form has been submitted, so update the formkey table
 # to indicate so
 sub formSuccess {
-	my $formkey = shift;
-	my $cid = shift;
-	my $length = shift;
+	my($formkey, $cid, $length) = @_;
 
-	# update formkeys to show that there has been a successful pos t,
+	# update formkeys to show that there has been a successful post,
 	# and increment the value from 0 to 1 (shouldn't ever get past 1)
 	# meaning that yes, this form has been submitted, so don't try i t again.
-	sqlUpdate("formkeys", { 
+	sqlUpdate("formkeys", {
 		-value		=> 'value+1',
 		cid		=> $cid,
 		submit_ts	=> time(),
-		content_length	=> $length, 
+		content_length	=> $length,
 	}, "formkey=" . $I{dbh}->quote($formkey));
 }
 
 ##################################################################
-# 
 sub formFailure {
 	my $formkey = shift;
-	sqlUpdate("formkeys", { 
+	sqlUpdate("formkeys", {
 		value 	=> -1,
 	}, "formkey=" . $I{dbh}->quote($formkey));
 }
@@ -2794,24 +2828,16 @@ sub formFailure {
 ##################################################################
 # make sure they're not posting faster than the limit
 sub checkSubmission {
-	my $formname = shift;
-	my $limit = shift;
-	my $max = shift;
-	my $id = shift;
-
-	my($last_submitted, $interval);
-	my($is_a_valid_key) = 0;
-
+	my($formname, $limit, $max, $id) = @_;
 	my $formkey_earliest = time() - $I{formkey_timeframe};
 
-	($last_submitted) = sqlSelect( 
+	my($last_submitted) = sqlSelect(
 		"max(submit_ts)",
 		"formkeys",
-		"id = '$id' AND formname = '$formname'") or ($last_submitted = 0);
+		"id = '$id' AND formname = '$formname'") || 0;
 
-	$interval = time() - $last_submitted;
+	my $interval = time() - $last_submitted;
 
-	# if the interval is less than the post_limit, let them know
 	if ($interval < $limit) {
 		my $limit_string = intervalString($limit);
 		my $interval_string = intervalString($interval);
@@ -2823,39 +2849,33 @@ each submission of $ENV{SCRIPT_NAME} in order to allow everyone to have a fair c
 EOT
 		errorMessage($speed_limit_err);
 		return(0);
-	} else {
-		# check to see if they haven't posted past their limit 
-		if(checkTimesPosted($formname,$max,$id,$formkey_earliest)) {
-			# make sure that there's a valid form key, and we only care about the last 4 hours!
-			$is_a_valid_key = checkFormkey($formkey_earliest,$formname,$id);
 
-			# check the validity of the formkey
-			if ($I{F}{formkey} !~ /\w{10}/ || $I{F}{formkey} =~ /^(.)\1+$/ || ! $is_a_valid_key) {
-				# invalid form key
+	} else {
+		if (checkTimesPosted($formname, $max, $id, $formkey_earliest)) {
+			undef $I{F}{formkey} unless $I{F}{formkey} =~ /^\w{10}$/;
+
+			unless ($I{F}{formkey} && checkFormkey($formkey_earliest, $formname, $id)) {
 				formAbuse("invalid form key");
-				my $invalid_formkey_err = "<P><B>Invalid form key!</B></P>\n"; 
+				my $invalid_formkey_err = "<P><B>Invalid form key!</B></P>\n";
 				errorMessage($invalid_formkey_err);
 				return(0);
-			} 
+			}
 
-			# check to see if the form has been submitted already
-			if(submittedAlready($I{F}{formkey},$formname)) {
-				# form already submitted
+			if (submittedAlready($I{F}{formkey}, $formname)) {
 				formAbuse("form already submitted");
 				return(0);
 			}
-		# they posted past their limit
+
 		} else {
 			formAbuse("max form submissions $max reached");
 			my $timeframe_string = intervalString($I{formkey_timeframe});
 			my $max_posts_err =<<EOT;
-<P><B>You've reached you limit of maximum submissions to $ENV{SCRIPT_NAME} : 
+<P><B>You've reached you limit of maximum submissions to $ENV{SCRIPT_NAME} :
 $max submissions over $timeframe_string!</B></P>
 EOT
 			errorMessage($max_posts_err);
 			return(0);
 		}
-		
 	}
 	return(1);
 }

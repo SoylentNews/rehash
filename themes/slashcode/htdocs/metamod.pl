@@ -79,7 +79,7 @@ sub metaModerate {
 
 	my %m2victims;
 	foreach (keys %{$I{F}}) {
-		if ($y < 10 && /mm(.*)/) { 
+		if ($y < 10 && /^mm(\d+)$/) { 
 			my $id = $1;
 			$y++;
 			my($muid) = sqlSelect("uid","moderatorlog",

@@ -9,9 +9,6 @@ slash-1.0.5, 2000.06.xx
 
 *	Added some fixes for Slash::reparentComments()
 
-*	Fixed HTTP header for Slash::header() and 404.pl to return
-	proper 404 status code
-
 *	Fixed typo s/an <B>valid/a <B>valid/ in users.pl (David-T)
 
 *	Small edits to logging in slashd, adding logging to a file
@@ -55,10 +52,51 @@ slash-1.0.5, 2000.06.xx
 *	Slightly changed regex in submit.pl to not munge submitted
 	URLs that are directly preceded by a > character
 
-*	Strip out all trailing space from $introtext in submit.pl
+*	Strip out all trailing space, better identifying of URLs,
+	in $introtext in submit.pl
 
 *	Send Mail::Sendmail warnings in Slash::sendEmail() to
 	Slash::apacheLog()
+
+*	Fixed typo in admin.pl, \n was in single quotes (garyb)
+
+*	Removed some functions from @Slash::EXPORT that were not
+	being used outside Slash.pm
+
+*	Changed $I{r} in Slash.pm to get Apache->request only if
+	$ENV{GATEWAY_INTERFACE} =~ m|^CGI-Perl/|, instead of looking
+	at $ENV{SCRIPT_NAME}
+
+*	Added code to filter certain form inputs as soon as they are
+	first received in Slash::getSlash() (especially inputs that
+	should be numbers), added new function Slash::fixint()
+
+*	Changed around all the HTTP header stuff to use CGI::header()
+	in Slash.pm; hopefully, this will fix problems and not create
+	new ones
+
+*	Changed Slash::setCookie() to return hashref instead of string
+	for use with new HTTP header scheme
+
+*	Fixed HTTP header for Slash::header() and 404.pl to return
+	proper 404 status code
+
+*	Filter data in Slash::getSectionColors()
+
+*	Close up some little holes in Slash::getSectionColors(),
+	pollbooth routines, search routines
+
+*	Added "attribute" parameter for Slash::stripByMode(), which
+	strips out not only <>& (like "literal" does), but also
+	strips "
+
+*	Added new function Slash::fixurl() to fix up URLs to be
+	good (took code from Slash::approveTag, added some more
+	to encode every character that is not safe or reserved,
+	according to RFC1738)
+
+*	Plenty of minor code cleanups
+
 
 slash-1.0.4, 2000.05.31
 -----------------------
@@ -100,13 +138,13 @@ slash-1.0.4, 2000.05.31
 *	Fixed bugs with the formkey and comment submission and story
 	submission max posting limits
 
-*	Moved redundant code from submit.pl and comments.pl that handled
-	formkey functionality into Slash.pm
+*	Moved redundant code from submit.pl and comments.pl that
+	handled formkey functionality into Slash.pm
 
-*	fixed admin.pl to now have URL field.
+*	Fixed admin.pl to now have URL field
 
-*	changed ratio on content filters 34 and 35 from .4 to .7/.5
-	(respectively).
+*	Changed ratio on content filters 34 and 35 from .4 to .7/.5
+	(respectively)
 
 *	Fixed typo in admin.pl (Nathan Vonnahme)
 

@@ -149,18 +149,24 @@ sub main {
 	} elsif ($op eq 'varsave') {
 		varSave();
 		varEdit($I{F}{name});
-	 } elsif($op eq "listfilters") {
-                titlebar("100%","List of comment filters","c");
-                listFilters();
-        } elsif($I{F}{editfilter}) {
-                titlebar("100%","Edit Comment Filter","c");
-                editFilter($I{F}{filter_id});
-        } elsif($I{F}{updatefilter}) {
-                updateFilter("update");
-        } elsif($I{F}{newfilter}) {
-                updateFilter("new");
-        } elsif($I{F}{deletefilter}) {
-                updateFilter("delete");
+
+	} elsif ($op eq "listfilters") {
+		titlebar("100%","List of comment filters","c");
+		listFilters();
+
+	} elsif ($I{F}{editfilter}) {
+		titlebar("100%","Edit Comment Filter","c");
+		editFilter($I{F}{filter_id});
+
+	} elsif ($I{F}{updatefilter}) {
+		updateFilter("update");
+
+	} elsif ($I{F}{newfilter}) {
+		updateFilter("new");
+
+	} elsif ($I{F}{deletefilter}) {
+		updateFilter("delete");
+
 	} else {
 		titlebar('100%', 'Story List', 'c');
 		listStories();
@@ -213,7 +219,7 @@ sub varEdit {
 		$I{query}->textfield(-name => 'value',-default => $value),
 		formLabel('Description'),
 		$I{query}->textfield(-name => 'desc', -default => $desc, -size => 60),
-		'<INPUT TYPE="SUBMIT" VALUE="varsave" NAME="op">
+		qq'<INPUT TYPE="SUBMIT" VALUE="varsave" NAME="op">
 		</FORM><!-- end variables editor form -->\n';
 }
 
@@ -1438,22 +1444,25 @@ EOT
 
 ##################################################################
 sub editFilter {
-        my $filter_id = shift;
-        $filter_id ||= $I{F}{filter_id};
+	my $filter_id = shift;
+	$filter_id ||= $I{F}{filter_id};
 
-	my ($header);
-
-        print <<EOT;
+	print <<EOT;
 <!-- begin editFilter -->
 <FORM ENCTYPE="multipart/form-data" action="$ENV{SCRIPT_NAME}" method="POST">
 EOT
-        my ($regex,$modifier,$field,$ratio,$minimum_match,$minimum_length,$maximum_length,$err_message) =
-                 sqlSelect("regex,modifier,field,ratio,minimum_match,minimum_length,maximum_length,err_message","content_filters","filter_id=$filter_id");
+	my($regex, $modifier, $field, $ratio, $minimum_match,
+		$minimum_length, $maximum_length, $err_message) =
+	sqlSelect("regex,modifier,field,ratio,minimum_match," .
+		"minimum_length,maximum_length,err_message",
+		"content_filters","filter_id=$filter_id");
 
 	# this has to be here - it really screws up the block editor
-	my $textarea = qq|<TEXTAREA NAME="err_message" cols="50" rows="2">$err_message</TEXTAREA>|;
+	my $textarea = <<EOT;
+<TEXTAREA NAME="err_message" COLS="50" ROWS="2">$err_message</TEXTAREA>
+EOT
 
-	$header = getWidgetBlock('edit_filter');
+	my $header = getWidgetBlock('edit_filter');
 	print eval $header;
 
 	print qq|</FORM>\n<!-- end editFilter -->\n|;
@@ -1462,60 +1471,53 @@ EOT
 
 ##################################################################
 sub updateFilter {
+	my $filter_action = shift;
 
-        my $filter_action = shift;
+	if ($filter_action eq "new") {
+		sqlInsert("content_filters", {
+			regex => "",
+			modifier => "",
+			field => "",
+			ratio => 0,
+			minimum_match => 0,
+			minimum_length => 0,
+			maximum_length => 0,
+			err_message => ""
+		});
 
-        if($filter_action eq "new") {
-                sqlInsert("content_filters",
-                        {
-                        regex => "",
-                        modifier => "",
-                        field => "",
-                        ratio => 0,
-                        minimum_match => 0,
-                        minimum_length => 0,
-                        maximum_length => 0,
-                        err_message => ""
-                        }
-                );
+		# damn damn damn!!!! wish I could use sth->insertid !!!
+		my($filter_id) = sqlSelect("max(filter_id)", "content_filters");
+		titlebar("100%", "New filter# $filter_id.", "c");
+		editFilter($filter_id);
 
-                # damn damn damn!!!! wish I could use sth->insertid !!!
-                my ($filter_id) = sqlSelect("max(filter_id)","content_filters");
-                titlebar("100%","New filter# $filter_id.","c");
-                editFilter($filter_id);
+	} elsif($filter_action eq "update") {
+		if(! $I{F}{regex} || ! $I{F}{regex}) {
+			print "<B>You haven't typed in a regex.</B><BR>\n" if ! $I{F}{regex};
+			print "<B>You haven't typed in a form field.</B><BR>\n" if ! $I{F}{field};
 
-        } elsif($filter_action eq "update") {
-                if(! $I{F}{regex} || ! $I{F}{regex}) {
-                        print "<B>You haven't typed in a regex.</B><BR>\n" if (! $I{F}{regex});
-                        print "<B>You haven't typed in a form field.</B><BR>\n" if (! $I{F}{field});
+			editFilter($I{F}{filter_id});
 
-                        editFilter($I{F}{filter_id});
-                } else {
-                        sqlUpdate("content_filters",
-                                {
-                                regex => $I{F}{regex},
-                                modifier => $I{F}{modifier},
-                                field => $I{F}{field},
-                                ratio => $I{F}{ratio},
-                                minimum_match => $I{F}{minimum_match},
-                                minimum_length => $I{F}{minimum_length},
-                                maximum_length => $I{F}{maximum_length},
-                                err_message => $I{F}{err_message},
-                                },
-                                "filter_id=$I{F}{filter_id}"
-                        );
-                }
+		} else {
+			sqlUpdate("content_filters", {
+				regex => $I{F}{regex},
+				modifier => $I{F}{modifier},
+				field => $I{F}{field},
+				ratio => $I{F}{ratio},
+				minimum_match => $I{F}{minimum_match},
+				minimum_length => $I{F}{minimum_length},
+				maximum_length => $I{F}{maximum_length},
+				err_message => $I{F}{err_message},
+			}, "filter_id=$I{F}{filter_id}");
+		}
 
-                titlebar("100%","Filter# $I{F}{filter_id} saved.","c");
-                editFilter($I{F}{filter_id});
-        } elsif($filter_action eq "delete") {
-                $I{dbh}->do("DELETE from content_filters WHERE filter_id = $I{F}{filter_id}");
+		titlebar("100%", "Filter# $I{F}{filter_id} saved.", "c");
+		editFilter($I{F}{filter_id});
+	} elsif ($filter_action eq "delete") {
+		$I{dbh}->do("DELETE from content_filters WHERE filter_id = $I{F}{filter_id}");
 
-
-                titlebar("100%","<B>Deleted filter# $I{F}{filter_id}!</B>","c");
-                listFilters();
-        }
-
+		titlebar("100%","<B>Deleted filter# $I{F}{filter_id}!</B>","c");
+		listFilters();
+	}7
 }
 
 ##################################################################
@@ -1657,20 +1659,20 @@ sub saveStory {
 
 ##################################################################
 sub prog2file {
-        my($c, $f) = @_;
+	my($c, $f) = @_;
 
-        my $d = `$c`;
+	my $d = `$c`;
 	print "<BR><BR>c is $c<BR>d is $d<BR>\n";
-        if (length($d) > 0) {
-                open F, ">$f" or die "Can't open $f: $!";
-                print F $d;
-                close F;
+	if (length($d) > 0) {
+		open F, ">$f" or die "Can't open $f: $!";
+		print F $d;
+		close F;
 		print "wrote $f<BR>\n";
-                return "1";
+		return "1";
 
-        } else {
-            return "0";
-        }
+	} else {
+		return "0";
+	}
 }
 
 

@@ -157,7 +157,7 @@ EOT
 	$I{F}{min} = int $I{F}{min};
 	my $prev = $I{F}{min} - 20;
 	print linkSearch({
-		'link'	=> "<B>$I{F}{mind} previous matches...</B>",
+		'link'	=> "<B>$I{F}{min} previous matches...</B>",
 		min	=> $prev
 	}), "<P>" if $prev >= 0;
 	
@@ -296,9 +296,9 @@ WHERE ((displaystatus = 0 and "$I{F}{section}"="")
 EOT
 
 	$sqlquery .= "   AND time < now() AND writestatus >= 0  ";
-	$sqlquery .= "   AND aid=\"$I{F}{author}\" " if $I{F}{author};
-	$sqlquery .= "   AND section=\"$I{F}{section}\" " if $I{F}{section};
-	$sqlquery .= "   AND tid=\"$I{F}{topic}\" " if $I{F}{topic};
+	$sqlquery .= "   AND aid="	. $I{dbh}->quote($I{F}{author})  if $I{F}{author};
+	$sqlquery .= "   AND section="	. $I{dbh}->quote($I{F}{section}) if $I{F}{section};
+	$sqlquery .= "   AND tid="	. $I{dbh}->quote($I{F}{topic})   if $I{F}{topic};
 
 	$sqlquery .= " ORDER BY ";
 	$sqlquery .= " kw DESC, " if $I{F}{query};

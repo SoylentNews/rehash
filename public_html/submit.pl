@@ -70,7 +70,7 @@ sub main {
 	} elsif (! $op) {
 		yourPendingSubmissions();
 		titlebar("100%", "$I{sitename} Submissions", "c");
-		displayForm($I{U}{nickname},$I{U}{fakeemail}, $I{F}{section}, $id);
+		displayForm($I{U}{nickname}, $I{U}{fakeemail}, $I{F}{section}, $id);
 
 	} elsif ($op eq "PreviewStory") {
 		titlebar("100%", "$I{sitename} Submission Preview", "c");
@@ -127,13 +127,14 @@ EOT
 #################################################################
 sub previewForm {
 	my($aid, $subid) = @_;
+	my $subid_dbi = $I{dbh}->quote($subid);
 
 	my $admin = $I{U}{aseclev} > 99;
 
 	my($writestatus) = getvars("defaultwritestatus");
-	($subid, my($email, $name, $title, $tid, $introtext,$time,$comment)) =
+	($subid, my($email, $name, $title, $tid, $introtext, $time, $comment)) =
 		sqlSelect("subid,email,name,subj,tid,story,time,comment",
-		"submissions","subid='$subid'");
+		"submissions","subid=$subid_dbi");
 
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
@@ -146,7 +147,7 @@ sub previewForm {
 		# This probably should be a block.
 		print <<EOT;
 <P>Submission Notes:
-<TABLE WIDTH="95%"><TR><TD BGCOLOR="$I{bg}[2]"><FONT SIZE=-1 COLOR="$I{fg}[2]">$comment</FONT></TD></TR></TABLE>
+<TABLE WIDTH="95%"><TR><TD BGCOLOR="$I{bg}[2]"><FONT SIZE="-1" COLOR="$I{fg}[2]">$comment</FONT></TD></TR></TABLE>
 EOT
 	}
 
@@ -364,29 +365,35 @@ EOT
 	$sql .= "		or note=' ' " unless $I{F}{note};
 	$sql .= ")";
 	$sql .= "		and tid='$I{F}{tid}' " if $I{F}{tid};
-	$sql .= "         and section='$I{U}{asection}' " if $I{U}{asection};
-	$sql .= "         and section='$I{F}{section}' " if $I{F}{section};
+	$sql .= "         and section=" . $I{dbh}->quote($I{U}{asection}) if $I{U}{asection};
+	$sql .= "         and section=" . $I{dbh}->quote($I{F}{section})  if $I{F}{section};
 	$sql .= "	  ORDER BY time";
-
-	# print $sql;
 
 	my $cursor = $I{dbh}->prepare($sql);
 	$cursor->execute;
 
-	my %select = (DEFAULT => '', Hold => '', Quik => '');
+	my @select = (qw(DEFAULT Hold Quik),
+		(ref $I{submit_categories} ? @{$I{submit_categories}} : ())
+	);
+	my %select = map { ($_, '') } @select;
+
 
 	print qq!\n\n<TABLE WIDTH="95%" CELLPADDING="0" CELLSPACING="0" BORDER="0">\n!;
 	while (my($subid, $subj, $time, $tid, $note, $email, $name,
 		$section, $comment, $uid, $karma) = $cursor->fetchrow) {
 
-		$select{$note || 'DEFAULT'} = ' SELECTED';
+		local $select{$note || 'DEFAULT'} = ' SELECTED';
+		my $str;
+		for (@select) {
+			my $name = $_ eq 'DEFAULT' ? '' : $_;
+			$str .= "\t\t\t<OPTION$select{$_}>$name</OPTION>\n";
+		}
+
 		print $admin ? <<ADMIN : <<USER;
 	<TR><TD><NOBR>
 		<FONT SIZE="1"><INPUT TYPE="TEXT" NAME="comment_$subid" VALUE="$comment" SIZE="15">
 		<SELECT NAME="note_$subid">
-			<OPTION$select{DEFAULT}></OPTION>
-			<OPTION$select{Hold}>Hold</OPTION>
-			<OPTION$select{Quik}>Quik</OPTION>
+$str
 		</SELECT>
 ADMIN
 	<TR><TD>$comment</TD> <TD>$note</TD>
@@ -400,17 +407,17 @@ USER
 		$karma = $uid > -1 && defined $karma ? " ($karma)" : "";
 
 		my @strs = (substr($subj, 0, 35), substr($name, 0, 20), substr($email, 0, 20));
-		my $s = $section ne $I{defaultsection} ? "&section=$section" : "";
+		my $sec = $section ne $I{defaultsection} ? "&section=$section" : "";
 		printf(($admin ? <<ADMIN : <<USER), @strs);
 
 		</FONT><INPUT TYPE="CHECKBOX" NAME="del_$subid">
 	</NOBR></TD><TD>$ptime</TD><TD>
-		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$sec">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="2">%s$karma<BR>%s</FONT></TD></TR>
 ADMIN
 	<TD>\u$section</TD><TD>$ptime</TD>
 	<TD>
-		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$s">%s&nbsp;</A>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="-1">%s<BR>%s</FONT></TD></TR>
 	<TR><TD COLSPAN="7"><IMG SRC="$I{imagedir}/pix.gif" ALT="" HEIGHT="3"></TD></TR>
 USER
@@ -448,7 +455,7 @@ sub displayForm {
 	my($user, $fakeemail, $section, $id) = @_;
 	my $formkey_earliest = time() - $I{formkey_timeframe};
 
-	if(! checkTimesPosted("submissions",$I{max_submissions_allowed},$id,$formkey_earliest)) {
+	if (!checkTimesPosted("submissions", $I{max_submissions_allowed}, $id, $formkey_earliest)) {
 		my $max_posts_warn = <<EOT;
 <P><B>Warning! you've exceeded max allowed submissions for the day : $I{max_submissions_allowed}</B></P>
 EOT
@@ -524,7 +531,7 @@ sub saveSub {
 	my $id = shift;
 
 	# if formkey works
-	if(checkSubmission("submissions",$I{submission_speed_limit},$I{max_submissions_allowed},$id)) {
+	if (checkSubmission("submissions", $I{submission_speed_limit}, $I{max_submissions_allowed}, $id)) {
 		if (length $I{F}{subj} < 2) {
 			titlebar("100%", "Error:");
 			print "Please enter a reasonable subject.\n";
@@ -547,7 +554,7 @@ sub saveSub {
 
 		my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 
-		my $subid="$hour$min$sec.$mon$mday$year";
+		my $subid = "$hour$min$sec.$mon$mday$year";
 
 		sqlInsert("submissions", {
 			email	=> $I{F}{email},

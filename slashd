@@ -260,28 +260,28 @@ sub sectionHeaders {
 	my $section = shift;
 	local *FH;
 
-	$I{F}{ssi} = 1;
+	$I{F}{ssi} = 'yes';
 	open FH,">$I{basedir}/$section/slashhead.inc"
 		or die "Can't open $I{basedir}/$section/slashhead.inc: $!";
 	*STDOUT = *FH;
 	header("", $section, "thread");
 	close FH;
 
-	$I{F}{ssi} = 0;
+	$I{F}{ssi} = '';
 	open FH, ">$I{basedir}/$section/slashfoot.inc"
 		or die "Can't open $I{basedir}/$section/slashfoot.inc: $!";
 	*STDOUT = *FH;
 	footer();
 	close FH;
 
-	$I{F}{ssi} = 1;
+	$I{F}{ssi} = 'yes';
 	open FH, ">$I{basedir}/$section/slashhead_F.inc"
 		or die "Can't open $I{basedir}/$section/slashhead_F.inc: $!";
 	*STDOUT = *FH;
 	header("", $section, "flat");
 	close FH;
 
-	$I{F}{ssi} = 0;
+	$I{F}{ssi} = '';
 	open FH, ">$I{basedir}/$section/slashfoot_F.inc"
 		or die "Can't open $I{basedir}/$section/slashfoot_F.inc: $!";
 	*STDOUT = *FH;

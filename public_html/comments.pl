@@ -199,9 +199,10 @@ EOT
 		print "\n</TABLE><P>\n\n";
 	}
 
-	if(! checkTimesPosted("comments",$I{max_posts_allowed},$id,$formkey_earliest)) {
+	if (!checkTimesPosted("comments", $I{max_posts_allowed}, $id, $formkey_earliest)) {
 		my $max_posts_warn =<<EOT;
-<br><b>Warning! you've exceeded max allowed submissions for the day : $I{max_submissions_allowed}</b><br>	
+<P><B>Warning! you've exceeded max allowed submissions for the day :
+$I{max_submissions_allowed}</B></P>
 EOT
 		errorMessage($max_posts_warn);
 	}
@@ -687,7 +688,6 @@ EOT
 		my($dtitle) = sqlSelect(
 			'title', 'discussions', "sid=" . $I{dbh}->quote($I{F}{sid})
 		);
-		print "my $dtitle" if $I{U}{uid} == 1;
 
 		unless ($dtitle) {
 			sqlUpdate(
@@ -746,7 +746,7 @@ sub moderate {
 
 	# Handle Deletions, Points & Reparenting
 	foreach (sort keys %{$I{F}}) {
-		if (/\Adel_(\d+)/) { # && $I{U}{points}) {
+		if (/^del_(\d+)$/) { # && $I{U}{points}) {
 			my $delCount = deleteThread($I{F}{sid}, $1);
 			$totalDel += $delCount;
 			sqlUpdate(
@@ -762,7 +762,7 @@ sub moderate {
 	<LI>Deleted $delCount items from story $I{F}{sid} under comment $I{F}{$_}</LI>
 EOT
 
-		} elsif (!$hasPosted && /\Areason_(\d+)/) {
+		} elsif (!$hasPosted && /^reason_(\d+)$/) {
 			moderateCid($I{F}{sid}, $1, $I{F}{"reason_$1"});
 		}
 	}
