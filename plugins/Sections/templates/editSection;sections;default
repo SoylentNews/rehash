@@ -17,43 +17,73 @@ __lang__
 en_US
 __name__
 editSection
+__seclev__
+10000
 __template__
 	[
-		<A HREF="[% constants.rootdir %]/admin.pl?section=[% section %]">Stories</A> |
-		<A HREF="[% constants.rootdir %]/submit.pl?section=[% section %]&op=list">Submissions</A> |
-		<A HREF="[% constants.rootdir %]/index.pl?section=[% section %]">Preview</A>
+		<A HREF="[% constants.rootdir %]/admin.pl?section=[% section
+		%]">Stories</A> |
+		<A HREF="[% constants.rootdir %]/submit.pl?section=[% section
+		%]&op=list">Submissions</A> |
+		<A HREF="[% constants.rootdir %]/index.pl?section=[% section
+		%]">Preview</A>
 	]
 	<TABLE><TR><TD VALIGN="TOP">
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
-	[% PROCESS formLabel value => "Section name", comment => "must be unique" %]
-	<INPUT TYPE="TEXT" NAME="section" VALUE="[% section | strip_attribute %]"><BR><BR>
-	[% PROCESS formLabel value => "Article Count", comment => "how many articles to display on section index" %]
-	<INPUT TYPE="TEXT" NAME="artcount" SIZE="4" VALUE="[% this_section.artcount %]">
-		1/3rd of these will display intro text, 2/3rds just headers<BR><BR>
+	[% PROCESS formLabel
+		value => "Section name"
+		comment => "must be unique" %]
+	<INPUT TYPE="TEXT" NAME="section" VALUE="[% section | strip_attribute
+	%]"><BR><BR>
+	[% PROCESS formLabel
+		value => "Article Count"
+		comment => "how many articles to display on section index" %]
+	<INPUT TYPE="TEXT" NAME="artcount" SIZE="4" VALUE="[% 
+	this_section.artcount %]"> 1/3rd of these will display intro text,
+	2/3rds just headers<BR><BR>
 
-	[% PROCESS formLabel value => "Title", comment => "be descriptive" %]
-	<BR><INPUT TYPE="TEXT" NAME="title" SIZE="30" VALUE="[% this_section.title %]"><BR>
+	[% PROCESS formLabel
+		value => "Title"
+		comment => "be descriptive" %]
+	<BR><INPUT TYPE="TEXT" NAME="title" SIZE="30" VALUE="[% 
+	this_section.title %]"><BR>
 
-	[% PROCESS formLabel value => "Polls for this section", comment => "" %]
+	[% PROCESS formLabel 
+		value => "Polls for this section"
+		comment => "" %]
 	[% qid %]
-	[% PROCESS formLabel value => "Isolate mode", comment => "" %]
+	[% PROCESS formLabel 
+		value => "Isolate mode"
+		comment => "" %]
 	[% isolate %]
-	[% PROCESS formLabel value => "Issue mode", comment => "" %]
+	[% PROCESS formLabel 
+		value => "Issue mode"
+		comment => "" %]
 	[% issue %]
-	[% PROCESS formLabel value => "URL", comment => "if the section has its own url" %]
-	<BR><INPUT TYPE="TEXT" NAME="url" SIZE="30" VALUE="[% this_section.url %]"><BR>
-	[% PROCESS formLabel value => "Hostname", comment => "hostname we should match against" %]
-	<BR><INPUT TYPE="TEXT" NAME="hostname" SIZE="30" VALUE="[% this_section.hostname %]"><BR>
+	[% PROCESS formLabel
+		value => "URL"
+		comment => "if the section has its own url" %]
+	<BR><INPUT TYPE="TEXT" NAME="url" SIZE="30" VALUE="[% 
+	this_section.url %]"><BR>
+	[% PROCESS formLabel 
+		value => "Hostname"
+		comment => "hostname we should match against" %]
+	<BR><INPUT TYPE="TEXT" NAME="hostname" SIZE="30" VALUE="[% 
+	this_section.hostname %]"><BR>
 
-[% IF blocks %]
-	[% PROCESS formLabel value => "Edit Section slashboxes" comment => "blocks" %]
+[% IF blocks;
+	PROCESS formLabel 
+		value => "Edit Section slashboxes" 
+		comment => "blocks" %]
 	<TABLE BORDER="1">
-	[% FOREACH block = blocks %]
+	[% FOREACH block = blocks -%]
 		<TR>
 			<TD>
-			<B><A HREF="[% constants.rootdir %]/admin.pl?op=blocked&bid=[% block.bid %]">[% block.title %]</A></B>
-			<A HREF="[% block.url %]">[% block.url %]</A>[% ' (default)' IF block.ordernum > 0 %]
-			</TD>
+			<B><A HREF="[% constants.rootdir
+			%]/admin.pl?op=blocked&bid=[% block.bid %]">[% 
+			block.title %]</A></B>
+			<A HREF="[% block.url %]">[% block.url %]</A>[% 
+			' (default)' IF block.ordernum > 0 %]</TD>
 		</TR>
 	[% END %]
 	</TABLE>
@@ -65,15 +95,17 @@ __template__
 </FORM>
 </TD>
 <TD VALIGN="TOP">
-	[% PROCESS formLabel value => "Topics", comment => "topics assigned to this section" %]
+	[% PROCESS formLabel
+		value => "Topics"
+		comment => "topics assigned to this section" %]
 	<UL>
-	[% FOREACH tid = topics.keys %]
-		<LI><A HREF="[% constants.rootdir %]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid %]</LI>
-	[% END %]
+	[% FOREACH tid = topics.keys -%]
+		<LI><A HREF="[%
+		constants.rootdir %]/admin.pl?op=topics&nexttid=[% tid
+		%]">[% topics.$tid %]</A></LI>
+	[% END -%]
 	</UL>
 </TD>
 </TR>
 </TABLE>
 
-__seclev__
-10000
