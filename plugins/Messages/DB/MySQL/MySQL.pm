@@ -55,9 +55,9 @@ sub getMessageCode {
 
 	if ($flag) {
 		undef $self->{$cache};
-	} else {
-		return $self->{$cache}{$code}
-			if $self->{$cache} && $self->{$cache}{$code};
+	} elsif ($self->{$cache}) {
+		# don't go back to SQL if $code is undefined but $cache exists
+		return $self->{$cache}{$code};
 	}
 
 	my $row = $self->sqlSelectHashref('code,type,seclev,modes',
@@ -381,8 +381,8 @@ sub _getMessageUsers {
 		$where .= " AND users.uid = users_messages.uid AND seclev >= $seclev";
 	}
 
-	my $users  = $self->sqlSelectColArrayref($cols, $table, $where);
-	return $users;
+	my $users = $self->sqlSelectColArrayref($cols, $table, $where);
+	return $users || [];
 }
 
 1;

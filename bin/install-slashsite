@@ -503,6 +503,11 @@ sub apache_site_conf {
     PerlCleanupHandler Slash::Apache::Log
     PerlCleanupHandler Slash::Apache::Log::UserLog
 
+    # if you have a frontend/backend setup and have X-Forwarded-For
+    # headers (such as from mod_proxy_add_forward), use this
+    # to properly populate remote_ip for formkeys etc.
+    #PerlPostReadRequestHandler Slash::Apache::ProxyRemoteAddr
+
     # this directive will redirect non-logged-in users to
     # index.shtml if they request the home page; turn it
     # on to help increase performance

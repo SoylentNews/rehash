@@ -297,11 +297,12 @@ sub checkMessageCodes {
 	return \@newuids;
 }
 
-
+# must return an array ref
 sub getMessageUsers {
 	my($self, $code) = @_;
-	my $coderef = $self->getMessageCode($code) or return MSG_MODE_NOCODE;
+	my $coderef = $self->getMessageCode($code) or return [];
 	my $users = $self->_getMessageUsers($code, $coderef->{seclev});
+	return $users || [];
 }
 
 

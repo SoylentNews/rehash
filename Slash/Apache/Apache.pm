@@ -128,6 +128,23 @@ sub SlashCompileTemplates ($$$) {
 	$slashdb->{_dbh}->disconnect;
 }
 
+# this can be used in conjunction with mod_proxy_add_forward or somesuch
+# if you use a frontend/backend Apache setup, where all requests come
+# from 127.0.0.1
+sub ProxyRemoteAddr ($) {
+	my($r) = @_;
+
+	# we'll only look at the X-Forwarded-For header if the requests
+	# comes from our proxy at localhost
+	return OK unless $r->connection->remote_ip eq '127.0.0.1';
+
+	if (my($ip) = $r->header_in('X-Forwarded-For') =~ /([^,\s]+)$/) {
+		$r->connection->remote_ip($ip);
+	}
+        
+	return OK;
+}
+
 sub IndexHandler {
 	my($r) = @_;
 

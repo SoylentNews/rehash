@@ -30,9 +30,14 @@ sub handler {
 
 	# Added this so that small sites would not have admin logins 
 	# recorded in their stats. -Brian
-	if (!$constants->{log_admin} &&  $uri !~ /admin/ ) {
-		return OK 
-			if getCurrentUser('is_admin');
+
+	# so it will still log it if the admin DOES request
+	# to admin.pl?  i thought you wanted it to NOT log
+	# requests to admin.pl?  should the !~ be =~ ?
+	# or am i just not thinking clearly? -- pudge
+
+	if (!$constants->{log_admin} && $uri !~ /admin\.pl/ ) {
+		return OK if getCurrentUser('is_admin');
 	}
 
 	createLog($uri, $dat);

@@ -3044,7 +3044,7 @@ sub setCommentCleanup {
 		unless $user->{seclev} >= 100 && $constants->{authors_unlimited};
 
 	my($rc1, $rc2) = (0, 0);
-	$rc2 = $self->sqlDo("UPDATE comments $strsql");
+	$rc2 = 1 if $self->sqlDo("UPDATE comments $strsql") > 0;
 
 	return $rc1 || $rc2;
 }
