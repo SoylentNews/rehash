@@ -36,7 +36,14 @@ __template__
       'mod'       => 'Moderation Report',
       'subscribe' => 'Subscription Report',
       'messages'  => 'Messages Report',
-} %]
+}
+
+relocate_plugin = Slash.getObject('Slash::Relocate');
+IF relocate_plugin;
+	reports.relocate="Relocated Page Report";
+END; 
+
+%]
 
 [% SWITCH form.report;
 
@@ -103,6 +110,32 @@ __template__
       PROCESS graphs gtitle => 'Total Renewing Subscribers';
       PROCESS graphs gtitle => 'Subscriber Pages';
       END;
+   
+   CASE 'relocate';
+      reportblock = BLOCK;
+      type        = 'area';
+      section     = 'all';
+      days        = form.stats_days || 7;
+
+      stats       = Slash.getObject('Slash::Stats');
+      stats_data_big = stats.getAllStats({ section => section, days => days, name_pre => "relocate_" }).${section};
+      stats_data_key = stats_data_big.keys.sort.0;
+      stats_data     = stats_data_big.${stats_data_key};
+%]
+
+[%
+      "Relocated links<BR>";
+      FOREACH key = stats_data_big.names.sort;
+         "$key<BR>";
+         PROCESS make_graph
+            section  => 'all',
+            type     => 'area',
+            statdata => [ key ];
+         "<P>";
+       END;
+
+      END;
+
 END %]
 
 [% PROCESS titlebar title => ((reports.${form.report} || 'Available Reports') _ ' for ' _ constants.sitename), width => '100%' %]
