@@ -1281,7 +1281,7 @@ ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
 ALTER TABLE story_text ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
 ALTER TABLE story_topics_chosen ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 ALTER TABLE story_topics_rendered ADD FOREIGN KEY (tid) REFERENCES topics(tid);
-ALTER TABLE submissions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+#ALTER TABLE submissions ADD FOREIGN KEY (uid) REFERENCES users(uid);
 
 # Commented-out foreign keys are ones which currently cannot be used
 # because they refer to a primary key which is NOT NULL AUTO_INCREMENT
