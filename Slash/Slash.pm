@@ -1374,12 +1374,13 @@ sub displayStory {
 
 	}
 
-	my $storytime = timeCalc($story->{'time'});
+	my $df = $user->{mode} eq "archive" ? $constants->{archive_dateformat} : "";
+	my $storytime = timeCalc($story->{'time'}, $df);
 	my $atstorytime;
 	if ($options->{is_future} && !($user->{author} || $user->{is_admin})) {
 		$atstorytime = $constants->{subscribe_future_name};
 	} else {
-		$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'});
+		$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'}, $df);
 	}
 	$return =~ s/\Q__TIME_TAG__\E/$atstorytime/ unless $options->{get_cacheable};
 
