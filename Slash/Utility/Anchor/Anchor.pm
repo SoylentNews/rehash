@@ -203,11 +203,6 @@ The 'footer' template block.
 sub footer {
 	my $form = getCurrentForm();
 
-	if ($form->{ssi}) {
-		ssiFoot();
-		return;
-	}
-
 	slashDisplay('footer', {}, { Nocomm => 1 });
 }
 
@@ -280,37 +275,6 @@ sub ssiHead {
 	(my $dir = $constants->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
 
 	slashDisplay('ssihead', {
-		dir	=> $dir,
-		section => $user->{currentSection} ? "$user->{currentSection}/" : "",
-	});
-}
-
-#========================================================================
-
-=head2 ssiFoot()
-
-Prints the foot for server-parsed HTML pages.
-
-=over 4
-
-=item Return value
-
-The SSI foot.
-
-=item Dependencies
-
-The 'ssifoot' template block.
-
-=back
-
-=cut
-
-sub ssiFoot {
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-	(my $dir = $constants->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
-
-	slashDisplay('ssifoot', {
 		dir	=> $dir,
 		section => $user->{currentSection} ? "$user->{currentSection}/" : "",
 	});
