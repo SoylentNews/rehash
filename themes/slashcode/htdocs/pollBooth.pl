@@ -199,7 +199,7 @@ sub vote {
 			sqlInsert("pollvoters", {
 				qid	=> $qid, 
 				id	=> $ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR},
-				-time	=> 'now()',
+				-'time'	=> 'now()',
 				uid	=> $I{U}{uid}
 			});
 
