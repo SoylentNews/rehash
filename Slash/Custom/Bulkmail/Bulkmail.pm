@@ -469,7 +469,7 @@ use strict;
 			
 			#get rid of those sendmail-ified carriage returns
 			$value =~ s/\015\012$//g;
-			print $handle $value, $self->lineterm() or cluck "Tried to print: '$value'";
+			print $handle $value, $self->lineterm() or cluck("Tried to print: '$value'");
 		}
 		else {return $self->error("Logging error: Nothing to log to")};
 		
