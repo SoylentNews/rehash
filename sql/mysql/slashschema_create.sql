@@ -271,7 +271,7 @@ CREATE TABLE discussions (
 DROP TABLE IF EXISTS formkeys;
 CREATE TABLE formkeys (
 	formkey varchar(20) DEFAULT '' NOT NULL,
-	formname varchar(20) DEFAULT '' NOT NULL,
+	formname varchar(32) DEFAULT '' NOT NULL,
 	id varchar(30) DEFAULT '' NOT NULL,
 	idcount mediumint UNSIGNED DEFAULT 0 NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
