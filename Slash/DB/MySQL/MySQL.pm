@@ -7460,6 +7460,7 @@ sub getUser {
 	my $rawmcdanswer;
 	my $used_shortcut = 0;
 	if ($gtd->{can_use_mcd}
+		and $mcd
 		and $rawmcdanswer = $mcd->get("$mcdkey$uid")) {
 
 		# Excellent, we can pull some data (maybe all of it)
