@@ -3048,11 +3048,12 @@ sub getPortalsCommon {
 	while (my $SB = $sth->fetchrow_hashref) {
 		$self->{_boxes}{$SB->{bid}} = $SB;  # Set the Slashbox
 		next unless $SB->{ordernum} > 0;  # Set the index if applicable
-		push @{$tmp{$SB->{section}}}, $SB->{bid};
 		if ($SB->{all_sections}) {
 			for my $section (keys %$sections) {
 				push @{$tmp{$section}}, $SB->{bid};
 			}
+		} else {
+			push @{$tmp{$SB->{section}}}, $SB->{bid};
 		}
 	}
 	$self->{_sectionBoxes} = \%tmp;

@@ -168,8 +168,6 @@ sub displayStandardBlocks {
 	} else {
 		@boxes = @{$sectionBoxes->{$getblocks}}
 			if ref $sectionBoxes->{$getblocks};
-#		push(@boxes, @{$sectionBoxes->{'all_sections'}})
-#			if ref $sectionBoxes->{'all_sections'};
 		$boxcache = $cache->{slashboxes}{$getblocks}{$user->{light}} ||= {};
 	}
 
