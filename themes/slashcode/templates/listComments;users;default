@@ -204,7 +204,7 @@ prev_com = {};
 						[% IF type == "user" %]
 						 	<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A>
 						[% ELSIF type == "netid" %]
-						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% fieldname %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A><P>
+						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname | fixparam %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A><P>
 	
 						[% END %]
 					[% END %]
@@ -222,7 +222,7 @@ prev_com = {};
 				[% IF type=="user" %]
 					<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;no_time_restriction=1">Go to latest comments...</A>
 				[% ELSIF type=="netid" %]
-						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% fieldname %]&amp;min_comment=[% n %]&amp;no_time_restriction=1">Go to latest comments...</A><P>
+						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname|fixparam %]&amp;min_comment=[% n %]&amp;no_time_restriction=1">Go to latest comments...</A><P>
 				[% END %]
 			</TD></TR>
 		[%- ELSIF n>0 and commentcount> 0  -%]
