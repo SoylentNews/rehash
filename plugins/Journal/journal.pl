@@ -573,6 +573,7 @@ sub saveArticle {
 				$form->{tid} = $article->{tid};
 			}
 			my $did = $slashdb->createDiscussion({
+				section	=> $constants->{real_section}, # for now, journals should be section-agnostic
 				title	=> $description,
 				topic	=> $form->{tid},
 				commentstatus	=> $form->{journal_discuss},
@@ -612,6 +613,7 @@ sub saveArticle {
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled') {
 			my $rootdir = $constants->{'rootdir'};
 			my $did = $slashdb->createDiscussion({
+				section	=> $constants->{real_section}, # for now, journals should be section-agnostic
 				title	=> $description,
 				topic	=> $form->{tid},
 				commentstatus	=> $form->{journal_discuss},
