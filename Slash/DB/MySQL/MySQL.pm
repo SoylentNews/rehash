@@ -6434,18 +6434,20 @@ sub countStoriesBySubmitter {
 ########################################################
 sub _stories_time_clauses {
 	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	my $try_future =		$options->{try_future}		|| 0;
+	my $future_secs =		defined($options->{future_secs})
+						? $options->{future_secs}
+						: $constants->{subscribe_future_secs};
 	my $must_be_subscriber =	$options->{must_be_subscriber}	|| 0;
 	my $column_name =		$options->{column_name}		|| "time";
 	my $exact_now =			$options->{exact_now}		|| 0;
 	my $timecalc_off_set =		$options->{timecalc_off_set}	|| 0;
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
 
 	my($is_future_column, $where);
 
-	my $secs = $constants->{subscribe_future_secs};
-	# Tweak $secs here somewhat, based on something...?  Nah.
+	# Tweak $future_secs here somewhat, based on something...?  Nah.
 
 	# First decide whether we're looking into the future or not.  If we
 	# are going to try for this sort of thing, then either we must NOT
@@ -6454,7 +6456,7 @@ sub _stories_time_clauses {
 	my $future = 0;
 	$future = 1 if $try_future
 		&& $constants->{subscribe}
-		&& $secs
+		&& $future_secs
 		&& (!$must_be_subscriber
 			|| ($user->{is_subscriber} && $user->{state}{page_plummy}));
 
@@ -6467,8 +6469,8 @@ sub _stories_time_clauses {
 
 	if ($future) {
 		$is_future_column = "IF($column_name <= $now, 0, 1) AS is_future";
-		if ($secs) {
-			$where = "$column_name <= DATE_ADD($now, INTERVAL $secs SECOND)";
+		if ($future_secs) {
+			$where = "$column_name <= DATE_ADD($now, INTERVAL $future_secs SECOND)";
 		} else {
 			$where = "$column_name <= $now";
 		}
@@ -6487,6 +6489,7 @@ sub getStoriesEssentials {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
+	my $can_restrict_by_min_stoid = 1;
 #use Data::Dumper; errorLog("gSE gSkin: " . Dumper($gSkin));
 
 	# Here, limit is how many we want "for the main display"
@@ -6497,11 +6500,15 @@ sub getStoriesEssentials {
 	
 	my $offset = $options->{offset} || 0;
 	$offset = 0 unless $offset =~ /^\d+$/;
-	
+	$can_restrict_by_min_stoid = 0 if $offset;
+
 	my $limit = $options->{limit} || $gSkin->{artcount_max};
 	$limit += $options->{limit_extra}
 		|| int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
 #errorLog("gSE limit '$limit' oplim '$options->{limit}' acmax '$gSkin->{artcount_max}' oplimex '$options->{limit_extra}' acmin '$gSkin->{artcount_min}'");
+	$can_restrict_by_min_stoid = 0 if $limit > 100
+		|| $options->{limit}       > $gSkin->{artcount_max}
+		|| $options->{limit_extra} > $gSkin->{artcount_max};
 
 	# Restrict the selection to include or exclude based on
 	# up to three types of data.  The data fed to this loop
@@ -6521,18 +6528,55 @@ sub getStoriesEssentials {
 			?   $options->{$optname}
 			: [ $options->{$optname} ];
 		push @restrictions, "$table.$col $not IN (" . join(", ", @$opt_ar) . ")";
+
+		# These restrictions may affect whether the
+		# gse_min_stoid var can be used to limit our query.
+		# If we've already given up on using it, no need to
+		# check again.
+		next if !$can_restrict_by_min_stoid;
+		# If we're doing any kind of restriction other than
+		# limiting to precisely one tid which is the
+		# mainpage_nexus_tid, then give up on using it.
+		if ($optname ne 'tid' || $not) {
+			$can_restrict_by_min_stoid = 0;
+		} else {
+			if (ref($options->{tid})) {
+				if (@{$options->{tid}} > 1
+					|| $options->{tid}[0] != $constants->{mainpage_nexus_tid}) {
+					$can_restrict_by_min_stoid = 0;
+				}
+			} else {
+				if ($options->{tid} != $constants->{mainpage_nexus_tid}) {
+					$can_restrict_by_min_stoid = 0;
+				}
+			}
+		}
 	}
 	my $restrict_clause = join(" AND ", @restrictions);
-#print STDERR "gSE restrict_clause '$restrict_clause'\n";
+#print STDERR "gSE restrict_clause '$restrict_clause' can_restrict_by_min_stoid '$can_restrict_by_min_stoid'\n";
 
+	my $future_secs = defined($options->{future_secs}) ? $options->{future_secs} : undef;
 	my($column_time, $where_time) = $self->_stories_time_clauses({
-		try_future => 1, must_be_subscriber => 0
+		try_future => 1,
+		future_secs => $future_secs,
+		must_be_subscriber => 0,
 	});
-	my $columns = "stories.stoid, sid, time, commentcount, hitparade,"
-		. " primaryskid, body_length, word_count, discussion, $column_time";
+	my $columns;
+	if ($options->{return_min_stoid_only}) {
+		$columns = "MIN(stories.stoid) AS minstoid";
+		$can_restrict_by_min_stoid = 0;
+	} else {
+		$columns = "stories.stoid, sid, time, commentcount, hitparade,"
+			. " primaryskid, body_length, word_count, discussion, $column_time";
+	}
 	my $tables = "stories, story_topics_rendered";
-	my $other = "GROUP BY stories.stoid ORDER BY time DESC LIMIT $offset, $limit";
-#errorLog("gSE other '$other' columns '$columns'");
+	my $other;
+	if ($options->{return_min_stoid_only}) {
+		$other = "LIMIT " . ($offset+$limit);
+	} else {
+		$other = "GROUP BY stories.stoid ORDER BY time DESC LIMIT $offset, $limit";
+	}
+#print STDERR "gSE r_m_s_o '$options->{return_min_stoid_only}' other '$other' columns '$columns'\n";
 
 	my $where = "stories.stoid = story_topics_rendered.stoid AND in_trash = 'no' AND $where_time";
 	$where .= " AND ($restrict_clause)" if $restrict_clause;
@@ -6546,8 +6590,17 @@ sub getStoriesEssentials {
 		my $issue_youngest = timeCalc("${issue}235959", "%Y-%m-%d %T",
 			- $user->{off_set});
 		$issue_clause = "time BETWEEN '$issue_youngest' AND '$issue_oldest'";
+		$can_restrict_by_min_stoid = 0;
 	}
 	$where .= " AND $issue_clause" if $issue_clause;
+
+	# Use the min_stoid value, if available and appropriate
+	# to use, to dramatically optimize performance on this query.
+	my $min_stoid = $constants->{gse_min_stoid} || 0;
+	$min_stoid = 0 if !$can_restrict_by_min_stoid;
+	if ($min_stoid) {
+		$where .= " AND stories.stoid >= '$min_stoid' ";
+	}
 
 	my @stories = ( );
 	my $qlid = $self->_querylog_start("SELECT", $tables);
@@ -6561,7 +6614,6 @@ sub getStoriesEssentials {
 
 	return \@stories;
 }
-
 
 ########################################################
 sub getSubmissionsMerge {

@@ -2405,7 +2405,7 @@ INSERT INTO vars (name, value, description) VALUES ('topic_popup_defaultweight',
 
 ALTER TABLE stories_old ADD COLUMN stoid MEDIUMINT UNSIGNED DEFAULT '0';
 UPDATE stories_old, stories SET stories_old.stoid=stories.stoid WHERE stories_old.sid=stories.sid;
-INSERT INTO story_param (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FROM stories_old WHERE displaystatus=-1;
+INSERT IGNORE INTO story_param (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FROM stories_old WHERE displaystatus=-1;
 
 # Run this perl script to make sure stories set to Never Display have the
 # appropriate value in story_param.
@@ -2424,4 +2424,6 @@ INSERT INTO vars (name, value, description) VALUES ('admin_maxdays_divider', '14
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_9, Start of T_2_5_0_10 - 2004/07/16
+
+INSERT INTO vars (name, value, description) VALUES ('gse_min_stoid', '0', 'Minimum stoid that getStoriesEssentials - important index.pl optimization - this value set automatically');
 
