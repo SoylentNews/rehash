@@ -2401,13 +2401,17 @@ sub hasVotedIn {
 #    -Brian
 sub savePollQuestion {
 	my($self, $poll) = @_;
-	$poll->{section} ||= getCurrentStatic('defaultsection');
-	$poll->{voters} ||= "0";
+
+	$poll->{section}  ||= getCurrentStatic('defaultsection');
+	$poll->{voters}   ||= "0";
 	$poll->{autopoll} ||= "no";
+
 	my $qid_quoted = "";
 	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
+
 	my $sid_quoted = "";
 	$sid_quoted = $self->sqlQuote($poll->{sid}) if $poll->{sid};
+
 	if ($poll->{qid}) {
 		$self->sqlUpdate("pollquestions", {
 			question	=> $poll->{question},
@@ -2436,6 +2440,7 @@ sub savePollQuestion {
 			qid		=> $poll->{qid}
 		}, "sid = $sid_quoted") if $sid_quoted;
 	}
+
 	# Loop through 1..8 and insert/update if defined
 	for (my $x = 1; $x < 9; $x++) {
 		if ($poll->{"aid$x"}) {
@@ -2453,10 +2458,12 @@ sub savePollQuestion {
 				WHERE qid=$qid_quoted AND aid=$x");
 		}
 	}
+
 	# Go on and unset any reference to the qid in sections, if it 
 	# needs to exist the next statement will correct this. -Brian
 	$self->sqlUpdate('sections', { qid => ''}, " qid = $poll->{qid} ")	
 		if ($poll->{qid});
+
 	if ($poll->{qid} && $poll->{currentqid}) {
 		$self->setSection($poll->{section}, { qid => $poll->{qid} });
 	}
