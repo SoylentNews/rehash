@@ -5890,17 +5890,21 @@ sub calcModval {
 		"GROUP BY hoursback",
 	);
 
+	my $max_halflives = $constants->{istroll_max_halflives};
 	my $modval = 0;
 	for my $hoursback (keys %$hr) {
 		my $val = $hr->{$hoursback}{valsum};
 		next unless $val;
 		if ($hoursback <= $halflife) {
 			$modval += $val;
-		} elsif ($hoursback > $halflife*10) {
-			# So old it's not worth looking at.
-		} else {
+		} elsif ($hoursback <= $halflife*$max_halflives) {
 			# Logarithmically weighted.
 			$modval += $val / (2 ** ($hoursback/$halflife));
+		} elsif ($hoursback > $halflife*12) {
+			# So old it's not worth looking at.
+		} else {
+			# Half-lives, half-lived...
+			$modval += $val / (2 ** $max_halflives);
 		}
 	}
 
