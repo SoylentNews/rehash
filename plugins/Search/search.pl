@@ -685,7 +685,7 @@ sub submissionSearch {
 	# we pop it off
 	if (@$entries) {
 		for(@$entries) {
-			$_->{story} = substr(strip_plaintext($_->{story}),0,80);
+			$_->{story} = substr(strip_nohtml($_->{story}),0,80);
 		}
 		my $forward;
 		if (@$entries == $constants->{search_default_display} + 1) {
