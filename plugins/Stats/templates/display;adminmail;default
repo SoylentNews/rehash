@@ -34,7 +34,7 @@ __template__
              : [% rss_ipids %] distinct IPIDS used rss pages
     pageviews: [% comments_page %] for comments [% comment_bytes %](K)
              : [% articles_page %] for articles [% article_bytes %](K)
-             : [% journals_page %] for journals [% journal_bytes %(K)
+             : [% journals_page %] for journals [% journal_bytes %](K)
              : [% palm_page %] for palm [% palm_bytes %](K)
              : [% rss_page %] for rss [% rss_bytes %](K)
   submissions: [% submissions %] submissions
