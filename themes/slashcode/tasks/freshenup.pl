@@ -11,49 +11,78 @@ use vars qw( %task $me );
 
 my $total_freshens = 0;
 
-$task{$me}{timespec} = '1-59/3 * * * *';
+$task{$me}{timespec} = '0-59 * * * *';
 $task{$me}{timespec_panic_1} = '1-59/10 * * * *';
 $task{$me}{timespec_panic_2} = '';
 $task{$me}{on_startup} = 1;
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
-	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info) = @_;
+	my $start_time = time;
 	my $basedir = $constants->{basedir};
+	my $vu = "virtual_user=$virtual_user";
+	my $args = "$vu ssi=yes";
 	my %updates;
 
-	my $x = 0;
-	# this deletes stories that have a writestatus of 5 (now delete), 
-	# which is the delete writestatus
-	my $deletable = $slashdb->getStoriesWithFlag('delete');
-	for (@$deletable) {
-		my($sid, $title, $section) = @$_;
-		$x++;
-		$updates{$section} = 1;
-		$slashdb->deleteStoryAll($sid);
-		slashdLog("Deleting $sid ($title)") if verbosity() >= 1;
-	}
-	my $stories = $slashdb->getStoriesWithFlag('dirty');
+	# Every third invocation, we do a big chunk of work.  But the
+	# other two times, we just update the top three stories and
+	# the front page, skipping sectional stuff and other stories.
+	my $do_all = ($info->{invocation_num} % 3 == 1) || 0;
+
 	my $max_stories = defined($constants->{freshenup_max_stories})
 		? $constants->{freshenup_max_stories}
 		: 100;
-	if ($max_stories && scalar(@$stories) > $max_stories) {
-		# There are too many stories marked as dirty.  Just update
-		# some of the most recent ones (sorted by sid, which is
-		# vaguely the same as chronological order), then skip ahead
-		# to the index.shtml's, and pick up the rest of the stories
-		# next time around.
-		@$stories = (sort {
-			$a->[0] cmp $b->[0]		# sort by sid
-		} @$stories)[-$max_stories..-1];
+	$max_stories = 3 unless $do_all;
+
+	if ($do_all) {
+		my $x = 0;
+		# this deletes stories that have a writestatus of 5 (now delete), 
+		# which is the delete writestatus
+		my $deletable = $slashdb->getStoriesWithFlag(
+			'delete',
+			'ASC',
+			$max_stories
+		);
+		for my $story (@$deletable) {
+			$x++;
+			$updates{$story->{section}} = 1;
+			$slashdb->deleteStoryAll($story->{sid});
+			slashdLog("Deleting $story->{sid} ($story->{title})")
+				if verbosity() >= 1;
+		}
 	}
+
+	my $stories = $slashdb->getStoriesWithFlag(
+		$do_all ? 'all_dirty' : 'mainpage_dirty',
+		'DESC',
+		$max_stories
+	);
+
+	my $bailed = 0;
 	my $totalChangedStories = 0;
-	my $vu = "virtual_user=$virtual_user";
+	STORIES: for my $story (@$stories) {
 
-	for (@$stories) {
+		# Don't run forever freshening stories.  Before we
+		# stomp on too many other invocations of freshenup.pl,
+		# quit and let the next invocation get some work done.
+		# Since this task is run every minute, quitting after
+		# 90 seconds of work should mean we only stomp on the
+		# one invocation following.
+		if (time > $start_time + 90) {
+			slashdLog("Aborting stories, too much elapsed time");
+			last STORIES;
+		}
 
-		my($sid, $title, $section) = @$_;
-		slashdLog("Updating $sid") if verbosity() >= 2;
+		my($sid, $title, $section, $displaystatus) =
+			@{$story}{qw( sid title section displaystatus )};
+		slashdLog("Updating $sid") if verbosity() >= 3;
 		$updates{$section} = 1;
+		if ($displaystatus == 0) {
+			# If this story goes on the mainpage, its being
+			# dirty means the main page is dirty too,
+			# regardless of which section the story is in.
+			$updates{$constants->{defaultsection}} = 1;
+		}
 		$totalChangedStories++;
 
 		# We need to pull some data from a file that article.pl will
@@ -62,7 +91,7 @@ $task{$me}{code} = sub {
 		my($cchp_file, $cchp_param) = _make_cchp_file();
 
 		# Now call prog2file().
-		my $args = "$vu ssi=yes sid='$sid'$cchp_param";
+		$args = "$vu ssi=yes sid='$sid'$cchp_param";
 		my($filename, $logmsg);
 		if ($section) {
 			$filename = "$basedir/$section/$sid.shtml";
@@ -94,11 +123,11 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	my $w  = $slashdb->getVar('writestatus', 'value');
+	my $w = $slashdb->getVar('writestatus', 'value');
 	my $dirty_sections = $slashdb->getSectionsDirty();
 	for my $cleanme (@$dirty_sections) { $updates{$cleanme} = 1 }
 
-	my $args = "$vu ssi=yes";
+	$args = "$vu ssi=yes";
 	if ($updates{$constants->{defaultsection}} ne "" || $w ne "ok") {
 		my($base) = split(/\./, $constants->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
@@ -111,21 +140,23 @@ $task{$me}{code} = sub {
 		});
 	}
 
-	for my $key (keys %updates) {
-		my $section = $slashdb->getSection($key);
-		createCurrentHostname($section->{hostname});
-		next unless $key;
-		my $index_handler = $section->{index_handler}
-			|| $constants->{index_handler};
-		my($base) = split(/\./, $index_handler);
-		prog2file(
-			"$basedir/$index_handler", 
-			"$basedir/$key/$base.shtml", {
-				args =>		"$args section='$key'",
-				verbosity =>	verbosity(),
-				handle_err =>	0
-		});
-		$slashdb->setSection($key, { writestatus => 'ok' });
+	if ($do_all) {
+		for my $key (keys %updates) {
+			my $section = $slashdb->getSection($key);
+			createCurrentHostname($section->{hostname});
+			next unless $key;
+			my $index_handler = $section->{index_handler}
+				|| $constants->{index_handler};
+			my($base) = split(/\./, $index_handler);
+			prog2file(
+				"$basedir/$index_handler", 
+				"$basedir/$key/$base.shtml", {
+					args =>		"$args section='$key'",
+					verbosity =>	verbosity(),
+					handle_err =>	0
+			});
+			$slashdb->setSection($key, { writestatus => 'ok' });
+		}
 	}
 
 	return $totalChangedStories ?

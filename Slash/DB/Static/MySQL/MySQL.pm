@@ -884,11 +884,11 @@ sub clearM2Flag {
 #
 #
 sub getStoriesWithFlag {
-	my($self, $writestatus, $order, $limit) = @_;
+	my($self, $purpose, $order, $limit) = @_;
 	
-	my $sqlorder;
-	$sqlorder = "ORDER BY time $order ";
-	$sqlorder .= "LIMIT $limit" if $limit;
+	my $order_clause = " ORDER BY time $order";
+	my $limit_clause = "";
+	$limit_clause = " LIMIT $limit" if $limit;
 
 	# Currently only used by two tasks and we do NOT want stories
 	# that are marked as "Never Display". If this changes, 
@@ -898,15 +898,33 @@ sub getStoriesWithFlag {
 	# yet!  - Cliff 14-Oct-2001
 	# But if writestatus is delete, we want ALL the candidates,
 	# not just the ones that are displaying -- pudge
-	my $displaywhere = $writestatus eq 'delete' ? ''
-		: 'AND displaystatus > -1';
+	my $writestatus_clause;
+	my $displaystatus_clause;
+	if ($purpose eq 'delete') {
+		# We want everything that needs to be deleted.
+		$writestatus_clause = " AND writestatus = 'delete'";
+		$displaystatus_clause = "";
+	} elsif ($purpose eq 'mainpage_dirty') {
+		# We only want mainpage stories that are dirty.
+		$writestatus_clause = " AND writestatus = 'dirty'";
+		$displaystatus_clause = " AND displaystatus = 0";
+	} elsif ($purpose eq 'all_dirty') {
+		# We are updating stories that are dirty, don't
+		# want ND'd stories, do want sectional as well as
+		# mainpage stories.
+		$writestatus_clause = " AND writestatus = 'dirty'";
+		$displaystatus_clause = " AND displaystatus > -1";
+	} else {
+		# Invalid purpose.
+		return [ ];
+	}
 
-	my $returnable = $self->sqlSelectAll(
-		"sid,title,section",
+	my $returnable = $self->sqlSelectAllHashrefArray(
+		"sid, title, section, time, displaystatus",
 		"stories", 
-		"time < now() AND 
-		writestatus='$writestatus' $displaywhere",
-		$sqlorder
+		"time < NOW()
+		$writestatus_clause	$displaystatus_clause
+		$order_clause		$limit_clause"
 	);
 
 	return $returnable;

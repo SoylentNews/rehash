@@ -40,7 +40,7 @@ use Slash::Display;
 use Slash::Utility;
 
 use vars qw(
-	%task $me
+	%task %task_info $me
 	$event_ar
 	$cron
 );
@@ -443,6 +443,10 @@ sub insert_task_event {
 		$next_time = calc_next_execution_time($file);
 	}
 	$event_hr->{$file}{until_time} = $next_time;
+	if (verbosity() >= 4) {
+		slashdLog("insert_task_event decided: '$file' next at "
+			. scalar(localtime($next_time)));
+	}
 
 	# Rebuild the array in the proper order.
 	$event_ar = [ ];
@@ -465,10 +469,15 @@ sub insert_task_event {
 	}
 }
 
-sub wait_until {
-	my($until_time) = @_;
+sub wait_until_task {
+	# The time we need to sleep until will stay at the front of the
+	# event array.  However, it may change after every call to
+	# REAPER(), because REAPER() calls insert_task_event().  As
+	# soon as the current time exceeds the time at the front of the
+	# event array, we're done, so we return that first task.
 	my $max_sleep;
-	while ((my $cur_time = db_time()) < $until_time) {
+	my($task_filename, $until_time) = @{ $event_ar->[0] };
+	WAIT_UNTIL: while ((my $cur_time = db_time()) < $until_time) {
 		# If there are children waiting to be reaped, we loop
 		# frequently to poll REAPER to look for them to die.
 		# If not, there's no need to hit it frequently.
@@ -479,12 +488,27 @@ sub wait_until {
 		} elsif ($sleep_total > $max_sleep) {
 			$sleep_total = $max_sleep;
 		}
-		slashdLog(sprintf "Beginning reap-and-sleep-for-%s-secs: %s < %s",
+		slashdLog(sprintf "Begin reap-and-sleep-for-%s-secs: %s < %s",
 			$sleep_total,
 			scalar(localtime($cur_time)),
 			scalar(localtime($until_time)))
 			if verbosity() >= 3;
 		REAPER();
+		# If the REAPER() call pushed a new event with a new
+		# until_time onto the front of the event array, then
+		# jump right back into this while loop without
+		# sleeping at all (because the new event may trigger
+		# sooner, even need to be triggered immediately).
+		my $new_until_time = $event_ar->[0][1];
+		if ($new_until_time != $until_time) {
+			if (verbosity() >= 4) {
+				slashdLog("REAPER() found new task,"
+					. " cancelling sleep");
+			}
+			$until_time = $new_until_time;
+			next WAIT_UNTIL;
+		}
+		# If not, do the sleep we planned to do.
 		sleep $sleep_total;
 	}
 	slashdLog(sprintf "Finishing sleep: %s >= %s",
@@ -510,6 +534,7 @@ sub main {
 
 	# Initialize the scheduling stuff.
 
+	%task_info = ( );
 	init_cron();
 	process_tasks();
 	init_event_ar();
@@ -532,21 +557,9 @@ sub main {
 			slashdLog("Beginning MAINLOOP");
 		}
 
-		# The task which needs to execute next is at the front of
-		# the event array.  Shift it off here;  it will be
-		# inserted back into the queue when it is reaped.
-		my($task_filename, $until_time) = @{ shift @$event_ar };
-		my $basename = basename($task_filename);
-		(my $basename_nopl = $basename) =~ s/\.pl$//;
-
-		# Get its information and wait until it's ready.
-		my $subref = $task{$task_filename}{code};
-		my $forktype = SLASHD_WAIT; # the default
-		$forktype = SLASHD_NOWAIT
-			if $task{$task_filename}{fork} == SLASHD_NOWAIT;
-
-		# wait_until calls REAPER() periodically.
-		wait_until($until_time);
+		# wait_until_task calls REAPER() periodically;  it will
+		# return when there is a task that needs to be called.
+		my $task_info = wait_until_task();
 
 		# Recheck the vars table to reload $constants if necessary.
 		# If it changed, this may alter our execution schedule, so
@@ -554,6 +567,16 @@ sub main {
 		if (update_static()) {
 			next MAINLOOP;
 		}
+
+		# Get the information about the task at the front of the
+		# event array.
+                my($task_filename, $until_time) = @{ shift @$event_ar };
+                my $basename = basename($task_filename);
+                (my $basename_nopl = $basename) =~ s/\.pl$//;
+                my $subref = $task{$task_filename}{code};
+                my $forktype = SLASHD_WAIT; # the default
+                $forktype = SLASHD_NOWAIT
+                        if $task{$task_filename}{fork} == SLASHD_NOWAIT;
 
 		# Execute it.
 
@@ -569,6 +592,8 @@ sub main {
 			forktype	=> $forktype,
 			subref		=> $subref,
 			start_time	=> $start_time,
+			task_filename	=> $task_filename,
+			invocation_num	=> $task_info{$task_filename}{invocations} || 0
 		};
 
 		REAPER();
@@ -613,6 +638,7 @@ sub main {
 			slashdLog("Ending MAINLOOP");
 		}
 		sleep 2;
+		$task_info{$task_filename}{invocations}++;
 
 	}
 }
@@ -669,8 +695,10 @@ sub do_parent {
 
 sub do_child {
 	my($args) = @_;
-	my($basename, $forktype, $subref, $basename_nopl, $start_time) =
-		@{$args}{qw(basename forktype subref basename_nopl start_time)};
+	my($basename, $forktype, $subref, $basename_nopl,
+		$start_time, $invocation_num) =
+		@{$args}{qw(basename forktype subref basename_nopl
+		start_time invocation_num)};
 
 	# In doLogPid we set a handler for these that deletes the slashd.pid
 	# file;  children don't have the right to do that.
@@ -704,7 +732,13 @@ sub do_child {
 		slashdLog("Child $$: slept for 2 seconds after fork()");
 	}
 
-	my $summary = $subref->($virtual_user, $constants, $slashdb, $user);
+	my $info = {
+		invocation_num => $invocation_num,
+	};
+slashdLog("invocation_num $info->{invocation_num}");
+	my $summary = $subref->($virtual_user, $constants, $slashdb, $user,
+		$info);
+
 	my $end_time = Time::HiRes::time;
 	my $duration = sprintf("%.2f", $end_time - $start_time);
 

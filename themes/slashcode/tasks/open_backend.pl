@@ -13,7 +13,7 @@ $task{$me}{timespec} = '13,43 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
-	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info) = @_;
 
 	my($backupdb);
 	if ($constants->{backup_db_user}) {
@@ -59,7 +59,8 @@ sub site2file {
 }
 
 sub _do_rss {
-	my($virtual_user, $constants, $backupdb, $user, $section, $stories, $version) = @_;
+	my($virtual_user, $constants, $backupdb, $user, $info,
+		$section, $stories, $version) = @_;
 
 	my $file    = site2file($virtual_user, $constants, $backupdb, $user, $section);
 	my $SECT    = $backupdb->getSection($section);
@@ -86,7 +87,8 @@ sub newrdf { _do_rss(@_, "0.9") } # RSS 0.9
 sub newrss { _do_rss(@_, "1.0") } # RSS 1.0
 
 sub newwml {
-	my($virtual_user, $constants, $backupdb, $user, $section, $stories) = @_;
+	my($virtual_user, $constants, $backupdb, $user, $info,
+		$section, $stories) = @_;
 
 	my $x = <<EOT;
 <?xml version="1.0"?>
@@ -125,7 +127,8 @@ EOT
 }
 
 sub newxml {
-	my($virtual_user, $constants, $backupdb, $user, $section, $stories) = @_;
+	my($virtual_user, $constants, $backupdb, $user, $info,
+		$section, $stories) = @_;
 
 	my $x = <<EOT;
 <?xml version="1.0"?><backslash
