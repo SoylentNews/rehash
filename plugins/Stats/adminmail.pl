@@ -20,7 +20,13 @@ $task{$me}{code} = sub {
 	# These are the ops (aka pages) that we scan for.
 	my @PAGES = qw|index article search comments palm journal rss page users|;
 
-	my @yesttime = localtime(time-86400);
+	my $days_back;
+	if (defined $constants->{task_options}{days_back}) {
+		$days_back = $constants->{task_options}{days_back};
+	} else {
+		$days_back = 1;
+	}
+	my @yesttime = localtime(time-86400*$days_back);
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 
@@ -48,7 +54,7 @@ $task{$me}{code} = sub {
 		return;
 	}
 
-	slashdLog('Send Admin Mail Begin');
+	slashdLog("Send Admin Mail Begin for $yesterday");
 	my $articles = $logdb->countDailyStoriesAccess();
 
 	my $reasons = $slashdb->getReasons();
@@ -596,7 +602,7 @@ EOT
 	for (@{$constants->{stats_reports}}) {
 		sendEmail($_, $data{subject}, $email, 'bulk');
 	}
-	slashdLog('Send Admin Mail End');
+	slashdLog("Send Admin Mail End for $yesterday");
 
 	# for stats.pl to know ...
 	$slashdb->setVar('adminmail_last_run', $yesterday);

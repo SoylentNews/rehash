@@ -1388,3 +1388,6 @@ ALTER TABLE dbs CHANGE type type ENUM("writer","reader","log","search","log_slav
 
 ALTER TABLE classes CHANGE db_type db_type ENUM("writer","reader","log","search","log_slave") DEFAULT "writer" NOT NULL, CHANGE fallback fallback ENUM("writer","reader","log","search","log_slave") DEFAULT NULL;
 
+# Change for plugins/Stats (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('adminmail_last_run','2003-03-19','day adminmail last ran');
+
