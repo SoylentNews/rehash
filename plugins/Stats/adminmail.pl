@@ -58,7 +58,7 @@ $task{$me}{code} = sub {
 		if ($clear_admins and keys %$clear_admins) {
 			for my $admin (sort keys %$clear_admins) {
 				$admin_clearpass_warning .=
-					"$admin $clear_admins->{$admin}{value}";
+					"$admin $clear_admins->{$admin}{value}\n";
 			}
 		}
 		if ($admin_clearpass_warning) {
