@@ -1351,8 +1351,8 @@ sub countSfNetIssues {
 #######################################################
 
 sub getRelocatedLinksSummary {
-	my ($self,$options) = @_;
-	$options ||={};
+	my($self, $options) = @_;
+	$options ||= {};
 	my $limit = "limit $options->{limit}" if $options->{limit};
 	return $self->sqlSelectAllHashrefArray("query_string, count(query_string) as cnt","accesslog_temp_errors","op='relocate-undef' AND dat = '/relocate.pl'",
 		"GROUP by query_string order by cnt desc $limit");
@@ -1362,11 +1362,11 @@ sub getRelocatedLinksSummary {
 #  expects arrayref returned by getRelocatedLinksSummary
 
 sub getRelocatedLinkHitsByType {
-	my ($self,$ls) = @_;
+	my($self, $ls) = @_;
 	my $summary;
-	foreach my $l(@$ls){
-		my ($id) = $l->{query_string} =~/id=([^&]*)/;
-		my $type = $self->sqlSelect("stats_type","links","id=".$self->sqlQuote($id));
+	foreach my $l (@$ls) {
+		my($id) = $l->{query_string} =~/id=([^&]*)/;
+		my $type = $self->sqlSelect("stats_type", "links", "id=" . $self->sqlQuote($id));
 		$summary->{$type} += $l->{cnt}; 
 	}
 	return $summary;
@@ -1375,12 +1375,12 @@ sub getRelocatedLinkHitsByType {
 ########################################################
 #  expects arrayref returned by getRelocatedLinksSummary
 sub getRelocatedLinkHitsByUrl {
-	my ($self,$ls) = @_;
+	my($self, $ls) = @_;
 	my $top_links = [];
-	foreach my $l(@$ls){
-		my ($id) = $l->{query_string} =~/id=([^&]*)/;
+	foreach my $l (@$ls) {
+		my($id) = $l->{query_string} =~/id=([^&]*)/;
 		my $url = $self->sqlSelect("url","links","id=".$self->sqlQuote($id));
-		push @$top_links, { url => $url, count => $l->{cnt}} ; 
+		push @$top_links, { url => $url, count => $l->{cnt} }; 
 	}
 	return $top_links;
 }
@@ -1388,14 +1388,14 @@ sub getRelocatedLinkHitsByUrl {
 ########################################################
 
 sub getSubscribersWithRecentHits {
-	my ($self) = @_;
+	my($self) = @_;
 	return $self->sqlSelectColArrayref("uid", "users_hits", "hits_paidfor > hits_bought and lastclick >= date_sub(now(), interval 3 day)", "order by uid");
 }
 
 ########################################################
 
 sub getSubscriberCrawlers {
-	my ($self,$uids) = @_;
+	my($self, $uids) = @_;
 	return [] unless @$uids;
 	my $uid_list = join(',',@$uids);
 	return $self->sqlSelectAllHashrefArray("uid, count(*) as cnt", "accesslog_temp", 
