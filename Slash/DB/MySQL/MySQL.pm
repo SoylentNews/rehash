@@ -194,7 +194,7 @@ my %descriptions = (
 		$_[0]->sqlSelectMany(
 			'code,CONCAT(code," (",name,")") as name',
 			'string_param',
-			'type="countries"',
+			'type="iso_countries"',
 			'ORDER BY name'
 		);
 	},
