@@ -283,9 +283,7 @@ sub storySearch {
 		}
 
 		for (@$stories) {
-			next if length($_->{introtext}) <= $constants->{search_text_length};
-			$_->{introtext} = substr(strip_notags($_->{introtext}),0,$constants->{search_text_length});
-			$_->{introtext} =~ s/(.*) .*$/$1.../g;
+			$_->{introtext} = _shorten(strip_notags($_->{introtext}));
 		}
 
 		# if there are less than search_default_display remaning,
@@ -515,8 +513,7 @@ sub journalSearch {
 		}
 
 		for (@$entries) {
-			$_->{article} = substr(strip_notags($_->{article}),0,$constants->{search_text_length});
-			$_->{article} =~ s/(.*) .*$/$1.../g;
+			$_->{article} = _shorten(strip_notags($_->{article}));
 		}
 
 		# if there are less than search_default_display remaning,
@@ -597,8 +594,7 @@ sub submissionSearch {
 		}
 
 		for (@$entries) {
-			$_->{story} = substr(strip_notags($_->{story}),0,$constants->{search_text_length});
-			$_->{story} =~ s/(.*) .*$/$1.../g;
+			$_->{story} = _shorten(strip_notags($_->{story}));
 		}
 
 		# if there are less than search_default_display remaning,
@@ -667,8 +663,8 @@ sub rssSearch {
 	# we pop it off
 	if ($entries && @$entries) {
 		for (@$entries) {
-			$_->{title} = strip_plaintext($_->{title});
-			$_->{description} = substr(strip_plaintext($_->{description}),0,$constants->{search_text_length});
+			$_->{title} = strip_plaintext($_->{introtext});
+			$_->{description} = _shorten(strip_notags($_->{description}));
 		}
 		my $forward;
 		if (@$entries == $constants->{search_default_display} + 1) {
@@ -726,6 +722,15 @@ sub rssSearchRSS {
 		image	=> 1,
 		items	=> \@items
 	});
+}
+
+sub _shorten {
+	my($text) = @_;
+	my $length = getCurrentStatic('search_text_length');
+	return $text if length($text) <= $length;
+	$text = chopEntity($text, $length);
+	$text =~ s/(.*) .*$/$1.../g;
+	return $text;
 }
 
 #################################################################
