@@ -1134,8 +1134,6 @@ ALTER TABLE moderatorlog ADD INDEX m2stat_act (m2status, active);
 
 # SLASHDOT LAST UPDATED HERE
 
-# USEPERL LAST UPDATED HERE
-
 # this is not a DB command but needs to be done for
 # each installed site:
 # ln -s /usr/local/slash/themes/slashcode/tasks/delete_accesslog.pl /usr/local/slash/site/sitename/tasks/
@@ -1160,3 +1158,5 @@ INSERT INTO vars (name, value, description) VALUES ('lastlookmemory','3600','Amo
 # SOURCE '/tmp/lastlooktime';
 
 # SLASHCODE LAST UPDATED HERE
+
+# USEPERL LAST UPDATED HERE
