@@ -94,6 +94,9 @@ sub generateDailyMail {
 		1 while chomp($story{introtext});
 		1 while chomp($story{bodytext});
 
+		$story{introtext} = parseSlashizedLinks($story{introtext});
+		$story{bodytext} =  parseSlashizedLinks($story{bodytext});
+
 		my $asciitext = $story{introtext};
 		$asciitext .= "\n\n" . $story{bodytext}
 			if $constants->{newsletter_body};

@@ -11,7 +11,6 @@ en_US
 __name__
 dailyheadlines
 __template__
-[% USE Slash %]
 [% topics = Slash.db.getTopics(); # sigh %]
 [% constants.sitename %] Daily Headline Mailer
 
@@ -22,11 +21,13 @@ __template__
 
 
 [%- END -%]
-[% FOR story = stories.reverse; topicname = topics.${story.tid}.name
+[% FOR story = stories.reverse;
+	topicname = topics.${story.tid}.name;
+	thisurl = Slash.db.getSection(story.section, 'url') || constants.absolutedir;
 %][% story.title %][% IF constants.use_dept %]
     from the [% story.dept %] dept.[% END %]
     posted by [% story.author %] on [% Slash.timeCalc(story.time, "%A %B %d, @%H:%M") %] ([% topicname %])
-    [% constants.absolutedir %]/article.pl?sid=[% story.sid %]
+    [% thisurl %]/article.pl?sid=[% story.sid %]
 
 [% END %]
 
