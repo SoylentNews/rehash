@@ -1538,7 +1538,11 @@ UPDATE modreasons SET karma=val;
 # End of T_2_3_0_100, Start of T_2_3_0_101 - 2003/06/12
 
 # This index won't work on InnoDB tables but that's OK;  it doesn't
-# make much of a performance difference anyway.
+# make much of a performance difference anyway.  If you are running
+# replicated DBs and your master DB is Inno, then run this on any
+# slave DBs which are MyISAM (for example, a search db which has the
+# other FULLTEXT indexes on this table).  In any case, if this
+# throws an error, you can ignore it.
 ALTER TABLE story_text ADD INDEX rendered (rendered(1));
 
 # If you have MySQL 4.x, do the next line.  If you're still on 3.x,
@@ -1574,6 +1578,8 @@ CREATE TABLE IF NOT EXISTS soap_methods (
         PRIMARY KEY (id),
         UNIQUE soap_method(class, method)
 );
+
+# End of T_2_3_0_102, Start of T_2_3_0_103 - 2003/06/25
 
 # USEPERL LAST UPDATED HERE
 
