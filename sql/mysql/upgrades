@@ -560,7 +560,6 @@ INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the 
 
 # End of T_2_3_0_36
 
-# USEPERL LAST UPDATED HERE
 # FOUNDRIES TEST SITE LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
@@ -580,3 +579,4 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 # (this template was renamed; the new "listRepos" will be added back
 # in with a "template-tool -U")
 
+# USEPERL LAST UPDATED HERE
