@@ -52,9 +52,9 @@ sub new {
 	if ($options->{create}) {
 		
 		if (getCurrentStatic('adminmail_check_replication')) {
-			my $wait_sec = 30;
+			my $wait_sec = 600;
 			my $num_try = 0;
-			my $max_tries = 3;
+			my $max_tries = 20;
 			
 			my $caught_up = 0;
 			while (!$caught_up) {
@@ -173,14 +173,18 @@ sub new {
 			"host_addr, IF(uid = $constants->{anonymous_coward_uid}, 'yes', 'no')",
 			"accesslog_temp",
 			"",
-			3, 60);
+			3, 60, 
+			{ ignore => 1 }
+			);
 	
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_host_addr",
 			"host_addr, IF(uid = $constants->{anonymous_coward_uid}, 'yes', 'no')",
 			"accesslog_temp_rss",
 			"",
-			3, 60);
+			3, 60, 
+			{ ignore => 1 } 
+			);
 
 
 	}
@@ -1941,11 +1945,12 @@ sub _do_insert_select {
 	my($self, $to_table, $from_cols, $from_table, $where, $retries, $sleep_time, $options) = @_;
 	my $try_num = 0;
 	my $rows = 0;
+	my $ignore = $options->{ignore} ? "IGNORE" : "";
 	I_S_LOOP: while (!$rows) {
 		my $where_clause = "";
 		$where_clause = "WHERE $where " if $where;
 
-		my $sql = "INSERT INTO $to_table"
+		my $sql = "INSERT $ignore INTO $to_table"
 			. " SELECT $from_cols FROM $from_table $where_clause FOR UPDATE";
 		$rows = $self->sqlDo($sql);
 		# Apparently this insert can, under some circumstances,
