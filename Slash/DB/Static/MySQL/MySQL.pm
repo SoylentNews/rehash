@@ -796,6 +796,7 @@ sub fetchEligibleModerators {
 # For run_moderatord.pl
 sub updateTokens {
 	my($self, $uidlist) = @_;
+	my $constants = getCurrentStatic();
 	my $maxtokens = $constants->{maxtokens} || 60;
 	for my $uid (@$uidlist) {
 		next unless $uid;
