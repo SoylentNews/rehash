@@ -77,10 +77,10 @@ __template__
 [% CASE 'yourfanshead' %]
 	Your fans
 
-[% case 'yourfreakshead' %]
-	your freaks
+[% CASE 'yourfreakshead' %]
+	Your freaks
 
-[% case 'yourfreakshead' %]
+[% CASE 'yourfreakshead' %]
 	This is how you see everyone and how everyone sees you.
 
 [% CASE 'no_go' %]
