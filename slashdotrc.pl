@@ -132,6 +132,7 @@ my %my_conf = (
 
 # these keys dependent on values set above
 $my_conf{rootdir}	= "http://$my_conf{basedomain}";
+$my_conf{absolutedir}	= "http://$my_conf{basedomain}";
 $my_conf{basedir}	= $my_conf{datadir} . "/public_html";
 $my_conf{imagedir}	= "$my_conf{rootdir}/images";
 $my_conf{rdfimg}	= "$my_conf{imagedir}/topics/topicslash.gif";

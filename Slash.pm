@@ -153,7 +153,9 @@ sub getSlash {
 	for ($I{query}->param) {
 		$I{F}{$_} = $I{query}->param($_);
 
-		# Paranoia - Clean out any embedded NULs.
+		# Paranoia - Clean out any embedded NULs. -- cbwood
+		# hm.  NULs in a param() value mean multiple values
+		# for that item.  do we use that anywhere? -- pudge
 		$I{F}{$_} =~ s/\0//g;
 
 		# clean up numbers
@@ -1200,11 +1202,11 @@ sub stripByMode {
 	my($str, $fmode, $no_white_fix) = @_;
 	$fmode ||= 'nohtml';
 
-	$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
 	# ASCII only ?
 #	$str =~ s/[^\011\040\033-176]/sprintf '&#%d;', ord $1/ge;
 
 	if ($fmode eq 'literal' || $fmode eq 'exttrans' || $fmode eq 'attribute') {
+		$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
 		# Encode all HTML tags
 		$str =~ s/&/&amp;/g;
 		$str =~ s/</&lt;/g;
@@ -1213,7 +1215,7 @@ sub stripByMode {
 
 	# this "if" block part of patch from Ben Tilly
 	if ($fmode eq 'plaintext' || $fmode eq 'exttrans') {
-		$str = stripBadHtml($str);
+		$str = stripBadHtml($str, $no_white_fix);
 		$str =~ s/\n/<BR>/gi;  # pp breaks
 		$str =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
 		# Preserve leading indents
@@ -1224,6 +1226,7 @@ sub stripByMode {
 		$str =~ s/<.*?>//g;
 		$str =~ s/<//g;
 		$str =~ s/>//g;
+		$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
 
 	} elsif ($fmode eq 'attribute') {
 		$str =~ s/"/&#34;/g;
@@ -1231,7 +1234,7 @@ sub stripByMode {
 					# " consistently
 
 	} else {
-		$str = stripBadHtml($str);
+		$str = stripBadHtml($str, $no_white_fix);
 	}
 
 	return $str;
@@ -1239,12 +1242,14 @@ sub stripByMode {
 
 ########################################################
 sub stripBadHtml  {
-	my $str = shift;
+	my($str, $no_white_fix) = @_;
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
 
 	$str =~ s/></> </g;
+
+	$str =~ s/([^<>\s]{90})/$1 /g unless $no_white_fix;
 
 	return $str;
 }

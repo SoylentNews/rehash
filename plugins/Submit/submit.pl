@@ -199,7 +199,7 @@ ADMIN
 		selectTopic("tid", $tid);
 		selectSection("section", $I{F}{section} || $I{defaultsection});
 
-		printf <<ADMIN, stripByMode($introtext, 'literal');
+		printf <<ADMIN, stripByMode($introtext, 'literal', 1);
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview"><BR>
 		<BR>Intro Copy<BR>
 		<TEXTAREA NAME="introtext" COLS="70" ROWS="10" WRAP="VIRTUAL">%s</TEXTAREA><BR>
@@ -526,7 +526,7 @@ EOT
 
 	print formLabel("The Scoop",
 		"HTML is fine, but double check those URLs and HTML tags!");
-	printf <<EOT, stripByMode($I{F}{story}, 'literal');
+	printf <<EOT, stripByMode($I{F}{story}, 'literal', 1);
 
 <TEXTAREA WRAP="VIRTUAL" COLS="70" ROWS="12" NAME="story">%s</TEXTAREA><BR>
 <FONT SIZE="2">(Are you sure you included a URL?  Didja test them for typos?)</FONT><P>
