@@ -478,7 +478,6 @@ CREATE TABLE sections (
 	type ENUM("contained", "collected") DEFAULT 'contained' NOT NULL,
 	rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL,
 	last_update timestamp,
-	title varchar(64),
 	KEY (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (id)
