@@ -40,12 +40,17 @@ sub main {
 
 	$section = $reader->getSection($form->{section});
 
-	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
-
-	my $limit = $artcount;
+	# Decide what our limit is going to be.
+	my $limit;
 	if ($form->{issue}) {
-		$limit *= 7;
-	} elsif ($section->{type} eq 'collected') {
+		if ($user->{is_anon}) {
+			$limit = $section->{artcount} * 7;
+		} else {
+			$limit = $user->{maxstories} * 7;
+		}
+	} elsif ($user->{is_anon} && $section->{type} ne 'collected') {
+		$limit = $section->{artcount};
+	} else {
 		$limit = $user->{maxstories};
 	}
 

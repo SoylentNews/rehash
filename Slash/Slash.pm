@@ -1316,12 +1316,15 @@ sub getOlderStories {
 
 	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
+	# The template won't display all of what's passed to it (by default
+	# only the first $section->{artcount}).  "start" is just an offset
+	# that gets incremented.
 	slashDisplay('getOlderStories', {
 		stories		=> $newstories,
 		section		=> $section,
 		cur_time	=> time,
 		yesterday	=> $yesterday,
-		start		=> int($artcount/3) + $form->{start} + scalar(@$stories),
+		start		=> int($artcount/3) + $form->{start},
 	}, 1);
 }
 

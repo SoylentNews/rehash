@@ -181,6 +181,12 @@ sub displayStories {
 		$storystruct->[$i]{essentials} = $story 
 			if $other->{retrieve_essentials};
 		$storystruct->[$i++]{sid} = $sid;
+
+		# getStoriesEssentials may have returned more than we
+		# asked for, in case we wanted to display the rest in
+		# the Older Stories slashbox.  Abort once we reach the
+		# number we asked for.
+		last if $i >= $limit;
 	}
 
 	return($storystruct);

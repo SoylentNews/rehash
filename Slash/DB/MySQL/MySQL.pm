@@ -4816,7 +4816,13 @@ sub getStoriesEssentials {
 	my $constants = getCurrentStatic();
 	$section ||= $constants->{section};
 
+	# Default limit value
 	$limit ||= 15;
+	# Make sure that, however many stories the caller wants to display,
+	# there are some left over for the "Older Stories" box, if any.
+	# (It's the caller's responsibility to display only as many stories
+	# as it wants to.)
+	$limit += 15;
 
 	my($column_time, $where_time) = $self->_stories_time_clauses({
 		try_future => 1, must_be_subscriber => 0
