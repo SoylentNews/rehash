@@ -672,7 +672,7 @@ sub saveHome {
 	}
 
 	my($extid, $exaid, $exsect) = '';
-	my $exboxes = $slashdb->getUser($uid, ['exboxes']);
+	my $exboxes = $slashdb->getUser($uid, 'exboxes');
 
 	$exboxes =~ s/'//g;
 	my @b = split m/,/, $exboxes;
