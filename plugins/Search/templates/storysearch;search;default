@@ -21,25 +21,26 @@ __template__
 		'link'	=> story.title
 	}) 
 	%]
-<A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</A>
-	<BR>
-	<FONT SIZE="-1">On [% Slash.timeCalc(story.time, '%B %o, %Y') %] with [% story.commentcount %] comments</FONT><BR>
-	[% story.introtext %] <BR>
-	<FONT SIZE="-1">
-		[% IF skin.name == 'mainpage' %]<A HREF="[% constants.real_rootdir %]/">Main</A>[% ELSE %]<A HREF="[% skin.url ? skin.url : "$gSkin.rootdir/search.pl?section=$skin.name" %]">[% skin.title %]</A>[% END %] &gt;
+<a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
+[% IF user.is_admin %][ <a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">Edit</a> ][% END %]
+	<br>
+	<font size="-1">On [% Slash.timeCalc(story.time, '%B %o, %Y') %] with [% story.commentcount %] comments</font><br>
+	[% story.introtext %]<br>
+	<font size="-1">
+		[% IF skin.name == 'mainpage' %]<a href="[% constants.real_rootdir %]/">Main</a>[% ELSE %]<a href="[% skin.url ? skin.url : "$gSkin.rootdir/search.pl?section=$skin.name" %]">[% skin.title %]</a>[% END %] &gt;
 		[% FOREACH tid = story.tids %]
 			[% topic = Slash.db.getTopic(tid) %]
-			<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</A>[% ",&nbsp;" UNLESS loop.last %]
+			<a href="[% gSkin.rootdir %]/search.pl?tid=[% tid %]">[% topic.textname %]</a>[% ",&nbsp;" UNLESS loop.last %]
 		[% END %]
-		<BR>
+		<br>
 		[% IF story.score %]
-			Score: [% story.score %] <br>
+			Score: [% story.score %]<br>
 		[% END %] 
-	</FONT>
-	<P>
+	</font>
+	<p>
 [% END %]
 [% PROCESS pagination %]
-<P>
+<p>
 
 __seclev__
 100
