@@ -2162,6 +2162,8 @@ my $finder = Slash::Utility::Data::URI::Find->new(sub {
 sub url2html {
 	my($text) = @_;
 
+	return $text if getCurrentStatic('url2html_skip');
+
 	my $scheme_regex = _get_scheme_regex();
 
 	# we know this can break real URLs, but probably will
