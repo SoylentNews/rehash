@@ -4204,40 +4204,34 @@ sub getSlashConf {
 		] if $_[0];
 	};
 
-	$conf{fixhrefs} = [];  # fix later
-	$conf{stats_reports} = $fixup->($conf{stats_reports}) ||
-		[$conf{adminmail}];
-
-	$conf{submit_categories} = $fixup->($conf{submit_categories}) ||
-		[];
-
-	$conf{approvedtags} = $fixup->($conf{approvedtags}) ||
-		[qw(B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV)];
-
-	$conf{approvedtags_break} = $fixup->($conf{approvedtags_break}) ||
-		[qw(P LI OL UL BR BLOCKQUOTE DIV HR)];
-
-	$conf{lonetags} = $fixup->($conf{lonetags}) ||
-		[];
-
-	$conf{reasons} = $fixup->($conf{reasons}) ||
-		[
-			'Normal',	# "Normal"
-			'Offtopic',	# Bad Responses
-			'Flamebait',
-			'Troll',
-			'Redundant',
-			'Insightful',	# Good Responses
-			'Interesting',
-			'Informative',
-			'Funny',
-			'Overrated',	# The last 2 are "Special"
-			'Underrated'
-		];
-
-	# See <http://www.iana.org/assignments/uri-schemes>
-	$conf{approved_url_schemes} = $fixup->($conf{approved_url_schemes}) ||
-		[qw( ftp http gopher mailto news nntp telnet wais https )];
+	my %conf_fixup_arrays = (
+		# var name			# default array value
+		# --------			# -------------------
+						# See <http://www.iana.org/assignments/uri-schemes>
+		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
+		approvedtags =>			[qw( B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV )],
+		approvedtags_break =>		[qw( P LI OL UL BR BLOCKQUOTE DIV HR )],
+		fixhrefs =>			[ ],
+		lonetags =>			[ ],
+		reasons =>			[qw( Normal Offtopic Flamebait Troll Redundant
+						     Insightful Interesting Informative Funny
+						     Overrated Underrated )],
+		stats_reports =>		[ $conf{adminmail} ],
+		submit_categories =>		[ ],
+	);
+	my %conf_fixup_hashes = (
+		# var name			# default list of keys
+		# --------			# --------------------
+		ad_messaging_sections =>	[ ],
+	);
+	for my $key (keys %conf_fixup_arrays) {
+		$conf{$key} = $fixup->($conf{$key}) || $conf_fixup_arrays{$key};
+	}
+	for my $key (keys %conf_fixup_hashes) {
+		$conf{$key} = { map { $_, 1 }
+			@{$fixup->($conf{$key}) || $conf_fixup_hashes{$key}}
+		};
+	}
 
 	$conf{badreasons} = 4 unless defined $conf{badreasons};
 
