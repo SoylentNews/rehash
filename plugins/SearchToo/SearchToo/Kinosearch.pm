@@ -70,7 +70,9 @@ slashProf('init search');
 		-tokenize  => 1,
 		-stem      => 1,
 		-required  => 1,
-		-fields    => join (' ', @{$self->_field_list('content')}),
+		-fields    => {  # ??? adjust weights?
+			map { ( $_ => 1 ) } $self->_field_list('content')
+		}
 	);
 
 
@@ -99,7 +101,7 @@ slashProf('init search');
 slashProf('search', 'init search');
 	my $status = $searcher->process || {};
 
-#	$sopts->{total}   = $searcher->max_doc;
+	$sopts->{total}   = $status->{num_docs};
 	$sopts->{matches} = $status->{num_hits};
 
 slashProf('fetch results', 'search');
@@ -145,7 +147,7 @@ sub _addRecords {
 		# start new document by *id
 		$writer->new_document($document->{ $self->_primary });
 
-printf "%d:%s\n", $document->{ $self->_primary }, $document->{date};
+#printf "%d:%s\n", $document->{ $self->_primary }, $document->{date};
 
 		# timestamp is Unix epoch
 		if ($document->{date}) {
@@ -191,16 +193,11 @@ sub isIndexed { # ???
 
 	my $preader = ($opts->{_reader} || $self->_reader) or return;
 
-	my $term = Plucene::Index::Term->new({
-		field	=> $self->_primary,
-		text	=> $id
-	});
+	my $found = $preader->doc_is_indexed($id);
 
-	my $found = $preader->doc_freq($term);
+#	$preader->close unless $opts->{_reader};
 
-	$preader->close unless $opts->{_reader};
-
-	return($found, $term) if $found;
+	return $found || 0;
 }
 
 #################################################################
@@ -301,7 +298,6 @@ sub _reader {
 		-backend		=> $backend,
 		-kindexpath		=> catdir($dir, 'kindex'),
 		-kinodatapath		=> catdir($dir, 'kindex', 'kinodata'),
-		-max_filesize		=> 2 ** 29,
 	);
 }
 
@@ -312,7 +308,10 @@ sub _writer {
 
 	my $mode = -e catdir($dir, 'kindex') ? 'overwrite' : 'create';
 
+	my $tmp = catdir($dir, 'ktemp');
+
 	mkpath($dir, 0, 0775) unless -e $dir;
+	mkpath($tmp, 0, 0775) unless -e $tmp;
 
 	return Search::Kinosearch::Kindexer->new(
 		-stoplist		=> {},
@@ -320,10 +319,9 @@ sub _writer {
 		-backend		=> $backend,
 		-kindexpath		=> catdir($dir, 'kindex'),
 		-kinodatapath		=> catdir($dir, 'kindex', 'kinodata'),
-		-temp_directory		=> File::Spec::Functions::tmpdir(),
+		-temp_directory		=> catdir($dir, 'ktemp'),
 		-enable_updates		=> 0,
 		-phrase_matching	=> 0,
-		-max_filesize		=> 2 ** 29,
 	);
 }
 

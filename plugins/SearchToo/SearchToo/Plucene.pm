@@ -6,10 +6,9 @@ use strict;
 use File::Spec::Functions;
 use Slash::Utility;
 use Slash::DB::Utility;
+use Slash::SearchToo::Classic;
 use vars qw($VERSION);
-use base 'Slash::DB::Utility';
-use base 'Slash::SearchToo';
-use base 'Slash::SearchToo::Classic';
+use base 'Slash::SearchToo::Indexer';
 
 use Plucene::Document;
 use Plucene::Document::DateSerializer;
@@ -26,55 +25,6 @@ use Plucene::Search::TermQuery;
 our $handled = qr{^(?:comments)$};
 
 #################################################################
-# fields that will be combined into the content field,
-# for indexing and tokenization
-our %content = (
-	comments	=> [qw(comment subject)],
-	stories		=> [qw(introtext bodytext title)],
-);
-
-# additional fields that will be indexed and tokenized
-our %text = (
-	comments	=> [ qw(tids) ],
-	stories		=> [ qw(tids) ],
-);
-
-# fields that will be stored, but not indexed
-# (not planning on storing unindexed data for now, so not used)
-our %stored = ();
-
-our %primary = (
-	comments	=> 'cid',
-);
-
-# content fields don't need to be indexed (just in case we do keep them around)
-for my $type (keys %stored) {
-	unshift @{$stored{$type}}, @{$content{$type}};
-}
-
-# turn into hashes
-for my $hash (\%text, \%stored) {
-	for my $type (keys %$hash) {
-		$hash->{$type} = { map { ($_ => 1) } @{$hash->{$type}} };
-	}
-}
-
-#################################################################
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Search'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
-
-#################################################################
 sub getOps {
 	my %ops = (
 		stories		=> 1,
@@ -88,106 +38,69 @@ sub getOps {
 }
 
 #################################################################
-sub findRecords {
-	my($self, $type, $query, $opts) = @_;
-
-	# let Classic handle for now
-	return Slash::SearchToo::Classic::findRecords(@_) unless $type =~ $handled;
-	$self->_type($type);
+sub _findRecords {
+	my($self, $results, $records, $sopts, $terms, $opts) = @_;
 
 	my $constants = getCurrentStatic();
 
-	my $processed = _fudge_data($query);
-	my $results = {};
-	my $records = [];
-
-	### set up common query terms
-	my %terms = (
-		query	=> $query->{query},
-	);
-
-
-	### set up common options
-	my $total	= 0;
-	my $matches	= 0;
-	my $start	= $opts->{records_start} || 0;
-	my $max		= $opts->{records_max}   || $constants->{search_default_display};
-
-	# sort can be an arrayref, but stick with one for now
-	## no way to sort by date yet
-	my $sort  = ref $opts->{sort} ? $opts->{sort}[0] : $opts->{sort};
-	$sort = ($opts->{sort} eq 'date'      || $opts->{sort} eq 1) ? 1 :
-		($opts->{sort} eq 'relevance' || $opts->{sort} eq 2) ? 2 :
-		0;
-
-	### dispatch to different queries
-	if ($type eq 'comments') {
-		for (qw(section)) {
-			$terms{$_} = $processed->{$_} if $processed->{$_};
-		}
-		%terms = (%terms,
-			sid		=> $query->{sid},
-			points_min	=> $query->{points_min},
-		);
-
-	}
-
-# how to return results sorted by date?
-# remove croaks from QueryParser->parse
+slashProf('init search', 'findRecords setup');
 
 	my $parser = Plucene::QueryParser->new({
 		analyzer => $self->_analyzer,
 		default  => 'content'
 	});
 
-	my $querystring = $terms{query};
+	my $querystring = $terms->{query};
 	# escape special chars
 	$querystring =~ s/([-+&|!{}[\]:\\])~*?/\\$1/g; # allowed: ()"^
 	# normalize to lower case
 	$querystring =~ s/\b(?!AND|NOT|OR)(\w+)\b/\L$1/g;
-	my $newquery = $parser->parse('+(' . $querystring . ')');
+	my $newquery;
+	eval { $newquery = $parser->parse('+(' . $querystring . ')') } or return $results;
 
 	my $filter = 0;
-	if (length $terms{points_min}) {
-		# fall through if it's exact
-		if ($terms{points_min} != $constants->{comment_maxscore}) {
+	if (length $terms->{points_min}) {
+		# no need to bother with adding this to the query, since it's all comments
+		if ($terms->{points_min} == $constants->{comment_minscore}) {
+			delete $terms->{points_min};
+		} else { # ($terms{points_min} != $constants->{comment_maxscore}) {
 			$filter = Slash::SearchToo::Plucene::Filter->new({
 				field => '_points_',
-				from  => _get_points(delete $terms{points_min}),
+				from  => _get_points(delete $terms->{points_min}),
 				to    => _get_points($constants->{comment_maxscore}),
 			});
-		} else {
-			$terms{_points_} = _get_points(delete $terms{points_min});
 		}
 	}
 
-	for my $key (keys %terms) {
-		next if $key eq 'query' || ! length($terms{$key});
+	for my $key (keys %$terms) {
+		next if $key eq 'query' || ! length($terms->{$key});
 		my $term = Plucene::Index::Term->new({
 			field	=> $key,
-			text	=> $terms{$key}
+			text	=> $terms->{$key}
 		}) or next;
 		my $term_query = Plucene::Search::TermQuery->new({ term => $term }) or next;
 		$newquery->add($term_query, 1);
 	}
 #use Data::Dumper;
 #print STDERR Dumper $newquery;
-#print STDERR $newquery->to_string, "\n";
+#print STDERR $newquery->to_string, ":$filter\n";
 
 	my $searcher = $self->_searcher or return $results;
-	my $docs = $searcher->search_top($newquery, $filter, $start + $max);
+slashProf('search', 'init search');
+	my $docs = $searcher->search_top($newquery, $filter, $sopts->{start} + $sopts->{max});
 
-	$total   = $searcher->max_doc;
-	$matches = $docs->total_hits;
+	$sopts->{total}   = $searcher->max_doc;
+	$sopts->{matches} = $docs->total_hits;
 
-	my $skip = $start;
+slashProf('fetch results', 'search');
+	my $skip = $sopts->{start};
 	for my $obj (sort { $b->{score} <=> $a->{score} } $docs->score_docs) {
 		if ($skip > 0) {
 			$skip--;
 			next;
 		}
 
-		last if @$records >= $max;
+		last if @$records >= $sopts->{max};
 
 		my($doc, $score) = @{$obj}{qw(doc score)};
 		my $docobj = $searcher->doc($doc);
@@ -202,71 +115,34 @@ sub findRecords {
 		push @$records, \%data;
 	}
 
-	$self->getRecords($type => $records);
-	$self->prepResults($results, $records, $total, $matches, $start, $max);
-
-	return $results;
+	return 1;
 }
 
 #################################################################
-sub addRecords {
-	my($self, $type, $data, $opts) = @_;
-
-	return unless $type =~ $handled;
-	$self->_type($type);
-
-	$data = [ $data ] unless ref $data eq 'ARRAY';
-
-	my @documents;
-
-	for my $record (@$data) {
-		next unless keys %$record;
-		my $processed = _fudge_data($record);
-		my %document;
-
-		if ($type eq 'comments') {
-			%document = (
-				cid			=> $record->{cid},
-
-				_date_			=> _get_date($record->{date}),
-				_points_		=> _get_points($record->{points}),
-
-				comment			=> $record->{comment},
-				subject			=> $record->{subject},
-				sid			=> $record->{discussion_id},
-				primaryskid		=> $processed->{section},
-				tids			=> join(' ', @{$processed->{topic}}),
-			);
-		}
-
-		push @documents, \%document;
-	}
-
-	# only bother if not adding, i.e., if modifying; if adding we
-	# assume it is new
-	unless ($opts->{add}) {
-		$self->deleteRecords($type => [ map $_->{ $primary{$type} }, @documents ]);
-	}
+sub _addRecords {
+	my($self, $type, $documents, $opts) = @_;
 
 	my $writer = $self->_writer;
+
 	my $count = 0;
-	for my $document (@documents) {
+	for my $document (@$documents) {
 		my $doc = Plucene::Document->new;
 
 		# combine our text fields into one, and then remove them; we
 		# don't need them stored separately
 		# normalize to lower case
-		$document->{content} = lc join ' ', @{$document}{ @{$content{$type}} };
-		delete @{$document}{ @{$content{$type}} };
+		$document->{content} = lc join ' ', @{$document}{ @{$self->_field_list('content')} };
+		delete @{$document}{ @{$self->_field_list('content')} };
+
+		$document->{_date_}   = _get_date(delete $document->{date});
+		$document->{_points_} = _get_points(delete $document->{points});
 
 		for my $key (keys %$document) {
 			next unless length $document->{$key};
 			my $field;
 
-			if ($key eq 'content' || $text{$type}{$key}) {
+			if ($key eq 'content' || $self->_field_exists(text => $key)) {
 				$field = Plucene::Document::Field->Text($key, $document->{$key});
-			} elsif ($stored{$type}{$key}) {
-				$field = Plucene::Document::Field->UnIndexed($key, $document->{$key});
 			} else {
 				$field = Plucene::Document::Field->Keyword($key, $document->{$key});
 			}
@@ -275,7 +151,7 @@ sub addRecords {
 		}
 
 		$writer->add_document($doc);
-		$count += 1;
+		$count++;
 	}
 
 	undef $writer;
@@ -284,68 +160,7 @@ sub addRecords {
 	$self->optimize($type) if $opts->{optimize} && $count;
 
 	return $count;
-}
 
-#################################################################
-sub prepRecord {
-	my($self, $type, $data, $opts) = @_;
-
-	return unless $type =~ $handled;
-	$self->_type($type);
-
-	# default to writer
-	my $db = $opts->{db} || getCurrentDB();
-	my %record;
-
-	$data = { $primary{$type} => $data } unless ref $data;
-
-	if ($type eq 'comments') {
-		my $comment = $db->getComment($data->{cid}) or return {};
-		for (qw(date points cid subject)) {
-			$record{$_} = $comment->{$_};
-		}
-
-		$record{comment} = $data->{comment} || $db->getCommentText($data->{cid});
-
-		my $discussion = $db->getDiscussion($comment->{sid});
-		$record{discussion_id}    = $discussion->{id};
-		$record{section}          = $discussion->{primaryskid};
-		$record{topic}            = $discussion->{stoid}
-			? $db->getStoryTopicsRendered($discussion->{stoid})
-			: $discussion->{topic};
-	}
-
-	return \%record;
-}
-
-#################################################################
-sub getRecords {
-	my($self, $type, $data, $opts) = @_;
-
-	return unless $type =~ $handled;
-	$self->_type($type);
-
-	# default to ... search?  reader?
-	my $db = $opts->{db} || getObject('Slash::DB', { type => 'reader' });
-	my %record;
-
-	if ($type eq 'comments') {
-		for my $datum (@$data) {
-			# just return the whole comment ... why not?
-			my $comment = $db->getComment($datum->{cid});
-			$datum = $comment || {};
-			if ($comment->{sid}) {
-				my $discussion = $db->getDiscussion($comment->{sid});
-				@{$datum}{qw(
-					primaryskid url title
-					author_uid did
-				)} = @{$discussion}{qw(
-					primaryskid url title
-					uid id
-				)};
-			}
-		}
-	}
 }
 
 #################################################################
@@ -353,13 +168,12 @@ sub getRecords {
 sub isIndexed {
 	my($self, $type, $id, $opts) = @_;
 
-	return unless $type =~ $handled;
-	$self->_type($type);
+	return unless $self->_handled($type);
 
 	my $preader = ($opts->{_reader} || $self->_reader) or return;
 
 	my $term = Plucene::Index::Term->new({
-		field	=> $primary{$type},
+		field	=> $self->_primary,
 		text	=> $id
 	});
 
@@ -367,28 +181,57 @@ sub isIndexed {
 
 	$preader->close unless $opts->{_reader};
 
-	return($found, $term) if $found;
+	return $found ? ($found, $term) : 0;
 }
 
 #################################################################
 sub optimize {
 	my($self, $type) = @_;
 
-	return unless $type =~ $handled;
-	$self->_type($type);
+	return unless $self->_handled($type);
+
+slashProf('optimize');
 
 	my $writer = $self->_writer;
-	warn "optimizing\n";
 	$writer->optimize;
 	undef $writer;
+slashProf('', 'optimize');
+
+	return 1;
+}
+
+#################################################################
+sub merge {
+	my($self, $type, $dirs, $opts) = @_;
+
+	return unless $self->_handled($type);
+
+slashProf('merge');
+
+	my @alldirs;
+	for (@$dirs) {
+		push @alldirs, $self->_dir($type => $_);
+	}
+	my $dir = $self->_dir($type => $opts->{dir});
+	## backup $dir?
+
+	if (@alldirs) {
+		my $writer = $self->_writer;
+		$writer->add_indexes(@alldirs);
+	}
+
+slashProf('', 'merge');
+
+	return scalar @alldirs;
 }
 
 #################################################################
 sub deleteRecords {
 	my($self, $type, $ids, $opts) = @_;
 
-	return unless $type =~ $handled;
-	$self->_type($type);
+	return unless $self->_handled($type);
+
+slashProf('deleteRecords');
 
 	my $preader = $self->_reader or return;
 
@@ -408,37 +251,9 @@ sub deleteRecords {
 	# only optimize if requested (as usual), and changes were made
 	$self->optimize($type) if $opts->{optimize} && $count;
 
+slashProf('', 'deleteRecords');
+
 	return $count;
-}
-
-#################################################################
-sub _fudge_data {
-	my($data) = @_;
-
-	my %processed;
-
-	if ($data->{topic}) {
-		my @topics = ref $data->{topic}
-			? @{$data->{topic}}
-			: $data->{topic};
-		$processed{topic} = \@topics;
-	} else {
-		$processed{topic} = [];
-	}
-
-	if ($data->{section}) {
-		# make sure we pass a skid
-		if ($data->{section} =~ /^\d+$/) {
-			$processed{section} = $data->{section};
-		} else {
-			my $reader = getObject('Slash::DB', { db_type => 'reader' });
-			# get section name, for most compatibility with this API
-			my $skid = $reader->getSkidFromName($data->{section});
-			$processed{section} = $skid if $skid;
-		}
-	}
-
-	return \%processed;
 }
 
 #################################################################
@@ -475,47 +290,79 @@ sub _get_points {
 }
 
 #################################################################
-sub _type {
-	my($self, $type) = @_;
-	$self->{_type} = $type if defined $type;
-	return $self->{_type};
-}
-
-#################################################################
-sub _dir {
-	my($self, $type) = @_;
-	return catdir(getCurrentStatic('datadir'), 'plucene', $self->_type($type));
-}
-
-#################################################################
 sub _searcher {
-	my($self, $type) = @_;
-	my $dir = $self->_dir($type);
-	return -e $dir ? Plucene::Search::IndexSearcher->new($dir) : undef;
+	my($self, $type, $dir) = @_;
+	$type = $self->_type($type);
+	$dir = $self->_dir($type, $dir);
+
+	return $self->{_searcher}{$type}{$dir} if $self->{_searcher}{$type}{$dir};
+
+	return -e $dir
+		? ($self->{_searcher}{$type}{$dir} = Plucene::Search::IndexSearcher->new($dir))
+		: undef;
 }
 
 #################################################################
 sub _reader {
-	my($self, $type) = @_;
-	my $dir = $self->_dir($type);
-	return -e $dir ? Plucene::Index::Reader->open($dir) : undef;
+	my($self, $type, $dir) = @_;
+	$type = $self->_type($type);
+	$dir = $self->_dir($type, $dir);
+
+	return $self->{_reader}{$type}{$dir} if $self->{_reader}{$type}{$dir};
+
+	return -e $dir
+		? ($self->{_reader}{$type}{$dir} = Plucene::Index::Reader->open($dir))
+		: undef;
 }
 
 #################################################################
 sub _writer {
-	my($self, $type) = @_;
-	my $dir = $self->_dir($type);
-	return Plucene::Index::Writer->new(
+	my($self, $type, $dir) = @_;
+	$type = $self->_type($type);
+	$dir = $self->_dir($type, $dir);
+
+	return $self->{_writer}{$type}{$dir} if $self->{_writer}{$type}{$dir};
+
+	return $self->{_writer}{$type}{$dir} = Plucene::Index::Writer->new(
 		$dir, $self->_analyzer,
 		-e catfile($dir, 'segments') ? 0 : 1
 	);
 }
 
+#################################################################
+sub close_searcher {
+	my($self, $type, $dir) = @_;
+	$type = $self->_type($type);
+	$dir = $self->_dir($type, $dir);
+
+	my $searcher = delete $self->{_searcher}{$type}{$dir} or return;
+	$searcher->close;
+}
+
+#################################################################
+sub close_reader {
+	my($self, $type, $dir) = @_;
+	$type = $self->_type($type);
+	$dir = $self->_dir($type, $dir);
+
+	my $preader = delete $self->{_reader}{$type}{$dir} or return;
+	$preader->close;
+}
+
+#################################################################
+sub close_writer {
+	my($self, $type, $dir) = @_;
+	$type = $self->_type($type);
+	$dir = $self->_dir($type, $dir);
+
+	my $writer = delete $self->{_writer}{$type}{$dir} or return;
+	undef $writer;
+}
+
 # maybe add our own analyzer ...
-use Plucene::Analysis::Standard::StandardAnalyzer;
+use Plucene::Analysis::StopAnalyzer;
 sub _analyzer {
-	return Plucene::Analysis::Standard::StandardAnalyzer->new;
-#	return Plucene::Analysis::SimpleAnalyzer->new;
+	return Plucene::Analysis::StopAnalyzer->new;
 }
 
 #################################################################
