@@ -424,7 +424,7 @@ CREATE TABLE sections (
 	issue tinyint DEFAULT '0' NOT NULL,
 	extras mediumint DEFAULT '0',
 	KEY (section),
-	FOREIGN KEY (qid) REFERENCES discussions(qid),
+	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 
@@ -553,6 +553,20 @@ CREATE TABLE story_param (
 	name varchar(32) DEFAULT '' NOT NULL,
 	value text DEFAULT '' NOT NULL,
 	UNIQUE story_key (sid,name),
+	PRIMARY KEY (param_id)
+) TYPE = myisam;
+
+#
+# Table structure for table 'string_param'
+#
+
+DROP TABLE IF EXISTS string_param;
+CREATE TABLE string_param (
+	param_id smallint UNSIGNED NOT NULL auto_increment,
+	type varchar(16) NOT NULL,
+	code varchar(16) NOT NULL,
+	name varchar(32) NOT NULL,
+	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)
 ) TYPE = myisam;
 

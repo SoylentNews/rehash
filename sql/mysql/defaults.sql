@@ -342,6 +342,7 @@ INSERT INTO vars (name, value, description) VALUES ('banlist_expire','900','Defa
 INSERT INTO vars (name, value, description) VALUES ('basedir','/usr/local/slash/www.example.com/htdocs','Where should the html/perl files be found?');
 INSERT INTO vars (name, value, description) VALUES ('basedomain','www.example.com','The URL for the site');
 INSERT INTO vars (name, value, description) VALUES ('block_expire','3600','Default expiration time for the block cache');
+INSERT INTO vars (name, value, description) VALUES ('body_bytes','0','Use Slashdot like byte message instead of word count on stories');
 INSERT INTO vars (name, value, description) VALUES ('breaking','100','Establishes the maximum number of comments the system will display when reading comments from a "live" discussion. For stories that exceed this number of comments, there will be "page breaks" printed at the bottom. This setting does not affect "archive" mode.');
 INSERT INTO vars (name, value, description) VALUES ('cache_enabled','1','Simple Boolean to determine if content is cached or not');
 INSERT INTO vars (name, value, description) VALUES ('comment_cache_debug','1','Debug _comment_text cache activity to STDERR?');
