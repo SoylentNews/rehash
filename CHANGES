@@ -1,7 +1,7 @@
 slash-1.0.6, 2000.06.xx
 -----------------------
 
-*	search.pl should now properly count rows in resultset so
+*	search.pl should now properly count rows in result-set so
 	the "more left" link at the bottom now works. This code
 	was initially removed due to performance reasons
 
@@ -33,6 +33,15 @@ slash-1.0.6, 2000.06.xx
 
 *	Fixed bug where authors could moderate if they were logged in as
 	authors, but not logged in as a registered user.
+
+*	Added 'active' field to moderatorlog (yes, it probably could have 
+	been called something better) to track which moderation attempts
+	actually succeed. Done mainly due to the fact that there are some
+	situations where we may want to make certain moderations that don't
+	get applied still applicable to M2 review.
+
+*	Updated comments.pl and article.pl to be aware of the 'active' 
+	field in moderatorlog.
 
 
 slash-1.0.5, 2000.06.13
