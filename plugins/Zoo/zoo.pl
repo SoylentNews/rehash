@@ -653,7 +653,9 @@ sub check {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
 	my $uid = $form->{uid} || "";
-	if (!$uid) {
+	my $nickname = $slashdb->getUser($uid, 'nickname');
+
+	if (!$uid || $nickname eq '') {
         	# See comment in plugins/Journal/journal.pl for its call of
         	# getSectionColors() as well.
                 Slash::Utility::Anchor::getSectionColors();
@@ -664,7 +666,6 @@ sub check {
 		return;
 	}
 
-	my $nickname = $slashdb->getUser($uid, 'nickname');
 	my $user_change = { };
 	if ($uid != $user->{uid} && !isAnon($uid) && !$user->{is_anon}) {
 		# Store the fact that this user last looked at that user.
