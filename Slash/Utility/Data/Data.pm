@@ -1275,19 +1275,19 @@ sub fudgeurl {
 			my $host = $uri->host;
 			$host =~ tr/A-Za-z0-9.-//cd; # per RFC 1035
 			$uri->host($host);
-		}
-		if ($uri->can('authority') && $uri->authority) {
-			# We don't allow anything in the authority except
-			# the host and optionally a port.  This shouldn't
-			# matter since the userinfo portion was zapped
-			# above.  But this is a bit of double security to
-			# ensure nothing nasty in the authority.
-			my $authority = $uri->host;
-			if ($uri->can('host_port')
-				&& $uri->port != $uri->default_port) {
-				$authority = $uri->host_port;
+			if ($uri->can('authority') && $uri->authority) {
+				# We don't allow anything in the authority except
+				# the host and optionally a port.  This shouldn't
+				# matter since the userinfo portion was zapped
+				# above.  But this is a bit of double security to
+				# ensure nothing nasty in the authority.
+				my $authority = $uri->host;
+				if ($uri->can('host_port')
+					&& $uri->port != $uri->default_port) {
+					$authority = $uri->host_port;
+				}
+				$uri->authority($authority);
 			}
-			$uri->authority($authority);
 		}
 		$url = $uri->canonical->as_string;
 	}
