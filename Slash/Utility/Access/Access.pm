@@ -320,19 +320,28 @@ sub formkeyHandler {
 			$msg = formkeyError('usedform', $formname);
 			$error_flag = 1;
 		}
-	} elsif ($formkey_op eq 'generate_formkey' || $formkey_op eq 'regen_formkey') {
+	} elsif ($formkey_op =~ m{^(?:generate|regen)_formkey}) {
+		# These ops can have "/foo" appended to them, in which case
+		# the $formname parameter will be superceded by "foo".
+		# This is for when e.g. the current op is creating a discussion
+		# but we need to generate a new formkey for posting a comment
+		# all in the same action.
+		my $real_formname = $formname;
+		if ($formkey_op =~ m{^(?:generate|regen)_formkey/(\w+)$}) {
+			$real_formname = $1;
+		}
 		if (!$error_flag) {
-			if (!$slashdb->createFormkey($formname)) {
+			if (!$slashdb->createFormkey($real_formname)) {
 				$error_flag = 1;
-				$msg = formkeyError('cantinsert', $formname);
+				$msg = formkeyError('cantinsert', $real_formname);
 			}
 		}
 		if (!$error_flag && !$options->{no_hc}) {
 			my $hc = getObject("Slash::HumanConf");
 #print STDERR "formkeyHandler op '$formkey_op' hc '$hc'\n";
-			if ($hc && !$hc->createFormkeyHC($formname)) {
+			if ($hc && !$hc->createFormkeyHC($real_formname)) {
 				$error_flag = 1;
-				$msg = formkeyError('cantinserthc', $formname);
+				$msg = formkeyError('cantinserthc', $real_formname);
 			}
 		}
 	}

@@ -79,7 +79,7 @@ sub main {
 			formname 		=> 'discussions',
 			checks			=> 
 			[ qw ( max_post_check valid_check interval_check 
-				formkey_check regen_formkey ) ],
+				formkey_check regen_formkey/comments ) ],
 		},
 		reply			=> {
 			function		=> \&editComment,
