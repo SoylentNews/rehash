@@ -1212,6 +1212,8 @@ sub editStory {
 		}
 	}
 
+	$slashdb->setCommonStoryWords();
+
 	my @stid;
 	my($extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $topic, $storycontent, $locktest,
@@ -1762,6 +1764,7 @@ sub updateStory {
 		$topic,
 		$form->{uid}
 	);
+	$slashdb->setCommonStoryWords();
 
 	my $data = {
 		uid		=> $form->{uid},
@@ -2049,6 +2052,7 @@ sub saveStory {
 	$form->{bodytext} =  balanceTags($form->{bodytext});
 
 	my $time = findTheTime();
+	$slashdb->setCommonStoryWords();
 
 	# used to just pass $form to createStory, which is not
 	# a good idea because you end up getting form values 
