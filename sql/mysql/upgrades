@@ -699,3 +699,4 @@ INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Addit
 
 # End of T_2_3_0_43
 
+INSERT INTO vars (name, value, description) VALUES ('mod_stats_reports','admin@example.com|admin2@example.com','Who to send daily moderation stats reports to');
