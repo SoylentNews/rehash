@@ -366,7 +366,7 @@ sub commentSearchRSS {
 		my $time = timeCalc($entry->[3]);
 		push @items, {
 			title	=> "$entry->[5] ($time)",
-			'link'	=> ($constants->{absolutedir} . "/comments.pl?sid=$entry->[1]&pid=$entry->[4]#$entry->[10]"),
+			'link'	=> ($constants->{absolutedir} . "/comments.pl?sid=$entry->[10]&cid=$entry->[4]"),
 		};
 	}
 
