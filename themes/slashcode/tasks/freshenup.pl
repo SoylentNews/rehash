@@ -31,6 +31,8 @@ $task{$me}{code} = sub {
 	#my @updatedsids;
 	my $totalChangedStories = 0;
 	my $vu = "virtual_user=$virtual_user";
+	my $default_hp = join(",", ("0") x
+		($constants->{maxscore}-$constants->{minscore}+1));
 
 	for (@$stories) {
 		my($sid, $title, $section) = @$_;
@@ -63,16 +65,19 @@ $task{$me}{code} = sub {
 		}
 
 		# Now we extract what we need from the error channel.
-		slashdLog("$me *** Update data not in error channel!")
-			unless $rc[1] =~ /count (\d+), hitparade (.+)$/;
+		my($cc, $hp) = (0, $default_hp);
+		if (@rc && $rc[1]
+			&& ($cc, $hp) = $rc[1] =~ /count (\d+), hitparade (.+)$/) {
+			# all is well, data was found
+			$slashdb->setStory($sid, { 
+				writestatus  => 'ok',
+				commentcount => $cc,
+				hitparade    => $hp,
+			});
+		} else {
+			slashdLog("*** Update data not in error channel!");
+		}
 
-		my $cc = $1 || 0;
-		my $hp = $2 || 0;
-		$slashdb->setStory($sid, { 
-			writestatus  => 'ok',
-			commentcount => $cc,
-			hitparade    => $hp,
-		});
 	}
 
 	my $w  = $slashdb->getVar('writestatus', 'value');
