@@ -569,7 +569,11 @@ sub printComments {
 		$previous = $comments->{$previous} if $previous;
 	}
 
-	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $cc);
+	# Flat and theaded mode don't index, even on large stories, so they
+	# need to use more, smaller pages. 		--Pater
+	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested') ? $comments->{0}{totals}[$user->{threshold}] : $cc;
+
+	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
 	my $comment_html = slashDisplay('printCommComments', {
 		can_moderate	=> _can_mod($comment),
 		comment		=> $comment,
@@ -893,6 +897,12 @@ sub displayThread {
 		my $comment = $comments->{$cid};
 
 		$skipped++;
+		# since nested and threaded show more comments, we can skip
+		# ahead more, counting the visible kids. Ideally we'd count 
+		# the visible kids of the visible kids, but this is close
+		# enough so that we can break the pages up. If this proves
+		# to be a problem, we can do just that.	--Pater
+		$skipped += $comment->{visiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		$form->{startat} ||= 0;
 		next if $skipped < $form->{startat};
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
@@ -930,7 +940,9 @@ sub displayThread {
 			$return .= $const->{indentend} if $indent;
 			$return .= $const->{cageend} if $cagedkids;
 
-			$displayed += @{$comment->{kids}} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
+			# in flat or nested mode, all visible kids will
+			# be shown, so count them.	-- Pater
+			$displayed += $comment->{visiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		}
 
 		$return .= $const->{commentend} if $finish_list;
