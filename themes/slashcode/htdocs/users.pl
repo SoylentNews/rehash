@@ -1836,10 +1836,10 @@ sub editHome {
 	$formats = $slashdb->getDescriptions('dateformats');
 	$tzformat_select = createSelect('tzformat', $formats, $user_edit->{dfid}, 1);
 
-	my $l_check = $user_edit->{light}		? $constants->{markup_checked_attribute} : '';
-	my $b_check = $user_edit->{noboxes}		? $constants->{markup_checked_attribute} : '';
-	my $i_check = $user_edit->{noicons}		? $constants->{markup_checked_attribute} : '';
-	my $w_check = $user_edit->{willing}		? $constants->{markup_checked_attribute} : '';
+	my $l_check = $user_edit->{light}	? $constants->{markup_checked_attribute} : '';
+	my $b_check = $user_edit->{noboxes}	? $constants->{markup_checked_attribute} : '';
+	my $i_check = $user_edit->{noicons}	? $constants->{markup_checked_attribute} : '';
+	my $w_check = $user_edit->{willing}	? $constants->{markup_checked_attribute} : '';
 
 	my $tilde_ed = tildeEd($user_edit);
 
