@@ -12,17 +12,44 @@ Slash::Test - Command-line Slash testing
 
 =head1 SYNOPSIS
 
-	% perl -MSlash::Test -wle Display
-	Current user is [% user.nickname %] ([% user.uid %])
-	^DCurrent user is Anonymous Coward (1)
-
 	% perl -MSlash::Test -e 'print Dumper $user'
 
+
+	# virtualuser is assumed to be "slash" if not specified
 	% perl -MSlash::Test=virtualuser -e 'print Dumper $user'
 
+
+	# use freely in test scripts
 	#!/usr/bin/perl -w
 	use Slash::Test qw(virtualuser);
 	print Dumper $user;
+
+
+	# Display, Test by template name
+	% perl -MSlash::Test -we 'Display("motd;misc;default")'
+	% perl -MSlash::Test -we 'Test("motd;misc;default")'
+
+
+	# Display, Test by filename
+	% cat motd\;misc\;default | perl -MSlash::Test -weDisplay
+	% cat motd\;misc\;default | perl -MSlash::Test -weTest
+
+
+	# Display, Test by template text
+	% perl -MSlash::Test -we Display
+	Current user is [% user.nickname %] ([% user.uid %])
+	^DCurrent user is Anonymous Coward (1)
+
+	% perl -MSlash::Test -we Test
+	Current user is [% user.nickname %] ([% user.uid ; END %])
+	^DError in library:Slash::Test:.../Test.pm:216:anon : file error -
+	parse error: anon_1 line 1: unexpected token (END)
+	  [% user.uid ; END %]
+
+	Which was called by:main:-e:1:anon : file error - parse error:
+	anon_1 line 1: unexpected token (END)
+	  [% user.uid ; END %]
+
 
 =head1 DESCRIPTION
 
@@ -52,13 +79,16 @@ etc.  Feel free to do:
 =cut
 
 BEGIN { $ENV{TZ} = 'GMT' }
+
+use Data::Dumper;
+use File::Spec::Functions;
+use Storable qw(freeze thaw);
+
 use Slash;
 use Slash::Constants ':all';
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
-use Data::Dumper;
-use Storable qw(freeze thaw);
 
 use strict;
 use base 'Exporter';
@@ -75,6 +105,7 @@ use vars qw($VERSION @EXPORT);
 	qw(freeze thaw),
 	'slashTest',
 	'Display',
+	'Test',
 );
 
 # "manually" export @EXPORT symbols
@@ -82,8 +113,8 @@ Slash::Test->export_to_level(1, '', @EXPORT);
 
 # allow catching of virtual user in import list
 sub import {
-    slashTest($_[1] || 'slash');
-    createCurrentUser($::user = prepareUser($_[2], $::form, $0)) if $_[2];
+	slashTest($_[1] || 'slash');
+	createCurrentUser($::user = prepareUser($_[2], $::form, $0)) if $_[2];
 }
 
 #========================================================================
@@ -162,11 +193,15 @@ sub slashTest {
 
 =head2 Display(TEMPLATE [, HASHREF, RETURN])
 
-A wrapper for slashDisplay().  Pass in a template string (not a template
-name) and optional hashref of variables.  Nocomm is true.  Default is to
-print (else make third param true).
+A wrapper for slashDisplay().
 
-If first arg is false, then takes template from STDIN.  You can type in
+Pass in the full name of a template (e.g., "motd;misc;default", or just
+"motd" to accept default for page and section), and an optional HASHREF
+of data.
+
+Nocomm is true.  Default is to print (else make RETURN true).
+
+If first arg is false, then takes template from STDIN: you can type in
 your template on the command line, then, and hit ctrl-D or whatever
 to end.
 
@@ -174,14 +209,62 @@ to end.
 
 sub Display {
 	my($template, $hashref, $return) = @_;
+
+	($template, my($data)) = _getTemplate($template);
+	$data = { %$data, Nocomm => 1, Return => $return };
+
+	slashDisplay($template, $hashref, { Nocomm => 1, Return => $return });
+}
+
+#========================================================================
+
+=head2 Test(TEMPLATE [, HASHREF])
+
+Tests a template.
+
+Pass in the full name of a template (e.g., "motd;misc;default", or just
+"motd" to accept default for page and section), and an optional HASHREF
+of data.
+
+No output is produced, only errors.
+
+If first arg is false, then takes template from STDIN: you can type in
+your template on the command line, then, and hit ctrl-D or whatever
+to end.
+
+=cut
+
+sub Test {
+	my($template, $hashref) = @_;
+
+	($template, my($data)) = _getTemplate($template);
+	$data = { %$data, Nocomm => 1, Return => 1 };
+
+	slashDisplay($template, $hashref, $data);
+}
+
+#========================================================================
+# used by Display, Test
+sub _getTemplate {
+	my($template) = @_;
+
+	my($page, $section, $data) = ('', '', {});
 	if (!$template) {
 		$template = '';
 		while (<>) {
 			$template .= $_;
 		}
+		$template = \ "$template";  # anon template should be a reference
+	} elsif ($template =~ /^(\w+);(\w+);(\w+)$/) {
+		($template, $page, $section) = ($1, $2, $3)
 	}
-	slashDisplay(\$template, $hashref, { Nocomm => 1, Return => $return });
+
+	$data->{Page}    = $page if $page;
+	$data->{Section} = $section if $section;
+
+	return($template, $data);
 }
+
 
 1;
 
