@@ -113,7 +113,8 @@ sub deleteOldFromPool {
 		# is a stopgap to prevent us from a cycle of frantic
 		# creating/deleting (which otherwise could happen with
 		# bizarre values of $want_delete_fraction).
-		my $hcpid_clause = $min_hcpid + $max_delete_check*$loop_num;
+		my $hcpid_clause = $min_hcpid
+			+ $max_delete_check * ($loop_num*3+1);
 		if ($hcpid_clause >= $max_hcpid) {
 			$hcpid_clause = "";
 		} else {
@@ -122,7 +123,7 @@ sub deleteOldFromPool {
 		my $rows = $self->sqlUpdate(
 			"humanconf_pool",
 			{ inuse => 2, -lastused => "lastused" },
-			"lastused < DATE_SUB(NOW(), INTERVAL 12 HOUR) 
+			"lastused < DATE_SUB(NOW(), INTERVAL 6 HOUR) 
 			AND inuse = 0
 			$hcpid_clause"
 		);
