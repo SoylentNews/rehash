@@ -15,7 +15,7 @@ en_US
 __name__
 userboxes
 __template__
-[% USE Slash;
+[%
 
 IF !useredit; useredit = user; END;
 
@@ -50,7 +50,7 @@ IF !useredit.is_anon;
 	title = title _ " ($useredit.uid)";
 	contents = BLOCK;
 		'<A HREF="'; constants.rootdir; '/~';
-			FILTER fixparam; useredit.nickname; END; '/">';
+			useredit.nickname | strip_paramattr; '/">';
                         useredit.nickname; '</A> ';
 		IF user.uid != useredit.uid;
 			PROCESS zoo_icons person=useredit.uid implied="";
@@ -58,12 +58,12 @@ IF !useredit.is_anon;
 		IF user.uid == useredit.uid OR user.is_admin;
 			# Looking at ourselves; show our real email info.
 			'<BR><A HREF="mailto:';
-				FILTER fixparam; useredit.realemail; END; '">';
+				useredit.realemail | strip_attribute; '">';
 				Slash.ellipsify(useredit.realemail); '</A>';
 			'<BR>&nbsp;&nbsp;';
 			IF useredit.fakeemail && useredit.fakeemail != useredit.realemail;
 				'shown as <A HREF="mailto:';
-				FILTER fixparam; useredit.fakeemail; END; '">';
+				useredit.fakeemail | strip_attribute; '">';
 				Slash.ellipsify(useredit.fakeemail); '</A>';
 			ELSE;
 				'(email not shown publicly)';
@@ -73,7 +73,7 @@ IF !useredit.is_anon;
 			'<BR>&nbsp;&nbsp;';
 			IF useredit.fakeemail;
 				'<A HREF="mailto:';
-					FILTER fixparam; useredit.fakeemail; END; '">';
+					useredit.fakeemail | strip_attribute; '">';
 					Slash.ellipsify(useredit.fakeemail); '</A>';
 			ELSE;
 				'(email not shown publicly)';
@@ -81,7 +81,7 @@ IF !useredit.is_anon;
 		END;
                 IF useredit.homepage;
                         '<BR><A HREF="';
-			FILTER fixparam; useredit.homepage; END; '">';
+			useredit.homepage | strip_attribute; '">';
                         Slash.ellipsify(useredit.homepage); '</A>';
                 END;
 		IF user.uid == useredit.uid OR user.is_admin;
@@ -104,7 +104,7 @@ IF !useredit.is_anon;
 	IF user.points || user.is_admin;
 		title = "Moderation";
 		contents = BLOCK %]
-<A HREF="[% constants.rootdir %]/~[% FILTER fixparam; user.nickname; END %]/">You</A>
+<A HREF="[% constants.rootdir %]/~[% user.nickname | fixparam %]/">You</A>
 have moderator access
 [% IF user.is_admin %](because you're an admin)[% END %]
 and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %].
@@ -114,7 +114,7 @@ for instructions.
 <P>&middot; You can't post &amp; moderate the same discussion.
 <BR>&middot; Concentrate on promoting more than demoting.
 <BR>&middot; Browse at -1 to keep an eye out for abuses.
-<BR>&middot; <A HREF="mailto:[% constants.adminmail %]">Mail the admin</A>
+<BR>&middot; <A HREF="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</A>
 URLs showing abuse (the cid link please!).
 		[% END;
 		PROCESS fancybox

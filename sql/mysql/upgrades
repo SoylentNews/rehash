@@ -843,7 +843,7 @@ DELETE FROM menus WHERE menu='users';
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Logout', 'logout', '/my/logout', 1, 0, 10);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl?op=edituser', 1, 0, 20);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 0, 40);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 0, 50);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% user.nickname | fixparam %]', 1, 0, 50);
 
 # Change for plugins/Subscribe (ignore if not using that plugin)
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 0, 30);
