@@ -929,6 +929,8 @@ sub displayThread {
 			$return .= displayThread($sid, $cid, $lvl+1, $comments, $const);
 			$return .= $const->{indentend} if $indent;
 			$return .= $const->{cageend} if $cagedkids;
+
+			$displayed += @{$comment->{kids}} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		}
 
 		$return .= $const->{commentend} if $finish_list;
