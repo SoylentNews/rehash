@@ -760,9 +760,13 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash','0','Enable the i
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel','#ircslash','Which channel to join');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel_password','','Password for ircslash_channel');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ircname','','Name to use on IRC server (defaults to "(slashsite) slashd")');
-INSERT INTO vars (name, value, description) VALUES ('ircslash_lastremarktime','','Last time a remark was seen');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_lastremarkid','','Id of the last remark seen');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_nick','','Nick to use on IRC server (has a reasonable default)');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_port','6667','Port to use on IRC server');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_delay','5','How often, in seconds, to poll for new remarks');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_day','10','How many remarks a single user can send, in a day, before we start ignoring them');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_month','20','How many remarks a single user can send, in a month, before we start ignoring them');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_year','100','How many remarks a single user can send, in a year, before we start ignoring them');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_server','irc.slashnet.org','Which IRC server to connect to');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ssl','0','Try to connect over SSL?');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_username','','Username to use on IRC server (has a reasonable default)');

@@ -2660,8 +2660,6 @@ ALTER TABLE topics ADD COLUMN storypickable ENUM('no', 'yes') DEFAULT 'yes' NOT 
 
 INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysback','7','Oldest stories to write a story_text.rendered field for, in days');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_33, Start of T_2_5_0_34 - 2004/10/19
 
 # Changes for plugins/Relocate (ignore if not using that plugin)
@@ -2693,4 +2691,16 @@ ALTER TABLE users TYPE=InnoDB;
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
+
 # End of T_2_5_0_34, Start of T_2_5_0_35 - 2004/10/26
+
+ALTER TABLE remarks ADD COLUMN rid mediumint UNSIGNED NOT NULL auto_increment PRIMARY KEY FIRST;
+DELETE FROM vars WHERE name='ircslash_lastremarktime';
+INSERT INTO vars (name, value, description) VALUES ('ircslash_lastremarkid','','Id of the last remark seen');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_delay','5','How often, in seconds, to poll for new remarks');
+UPDATE vars SET name='ircslash_nextremarkid' WHERE name='ircslash_lastremarkid';
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_day','10','How many remarks a single user can send, in a day, before we start ignoring them');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_month','20','How many remarks a single user can send, in a month, before we start ignoring them');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_max_year','100','How many remarks a single user can send, in a year, before we start ignoring them');
+

@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+Responses that ircslash.pl makes in-channel.
+
+* value = the lowercased text that was said to ircslash.pl
+* data = extra data that may be used
+
+__title__
+
+__page__
+ircslash
+__lang__
+en_US
+__name__
+data
+__template__
+
+[% SWITCH value %]
+
+[% CASE 'exiting' %]
+	Exiting (slashd should restart me within a minute)
+
+[% CASE DEFAULT %]
+	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.
+
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

@@ -648,10 +648,12 @@ CREATE TABLE related_links (
 
 DROP TABLE IF EXISTS remarks;
 CREATE TABLE remarks (
+	rid mediumint UNSIGNED NOT NULL auto_increment,
 	uid mediumint UNSIGNED NOT NULL,
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	time DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	remark varchar(100),
+	PRIMARY KEY (rid),
 	INDEX uid (uid),
 	INDEX stoid (stoid),
 	INDEX time (time)
