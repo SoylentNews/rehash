@@ -190,6 +190,14 @@ my %descriptions = (
 	'otherusersparam',
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='otherusersparam'") },
 
+	countries => sub {
+		$_[0]->sqlSelectMany(
+			'code,CONCAT(code," (",name,")") as name',
+			'string_param',
+			'type="countries"',
+			'ORDER BY name'
+		);
+	},
 );
 
 ########################################################
