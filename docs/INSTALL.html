@@ -1,0 +1,436 @@
+<HTML>
+<HEAD>
+<TITLE>INSTALL - Slash Installation</TITLE>
+<LINK REV="made" HREF="mailto:pudge@pobox.com">
+</HEAD>
+
+<BODY>
+
+<A NAME="__index__"></A>
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#name">NAME</A></LI>
+	<LI><A HREF="#synopsis">SYNOPSIS</A></LI>
+	<LI><A HREF="#installation">INSTALLATION</A>
+	<UL>
+
+		<LI><A HREF="#installation_notes">Installation Notes</A></LI>
+		<LI><A HREF="#installation_procedure">Installation Procedure</A></LI>
+	</UL></LI>
+
+	<LI><A HREF="#installation_options">INSTALLATION OPTIONS</A>
+	<UL>
+
+		<LI><A HREF="#multiple_servers">Multiple Servers</A></LI>
+		<LI><A HREF="#virtual_hosts">Virtual Hosts</A></LI>
+		<LI><A HREF="#ssl">SSL</A></LI>
+		<LI><A HREF="#nonroot">Non-Root</A></LI>
+	</UL></LI>
+
+	<LI><A HREF="#requirements">REQUIREMENTS</A>
+	<UL>
+
+		<LI><A HREF="#software">Software</A></LI>
+		<LI><A HREF="#hardware">Hardware</A></LI>
+	</UL></LI>
+
+	<LI><A HREF="#upgrading">UPGRADING</A>
+	<UL>
+
+		<LI><A HREF="#slash_1.0___slash_2.0">Slash 1.0 -&gt; Slash 2.0</A></LI>
+	</UL></LI>
+
+	<LI><A HREF="#version">VERSION</A></LI>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="name">NAME</A></H1>
+<P>INSTALL - Slash Installation</P>
+<P>
+<HR>
+<H1><A NAME="synopsis">SYNOPSIS</A></H1>
+<P>This document describes how to install Slash 1.1.x / 2.0.x
+(code-named ``bender'').  For instructions on installation
+of previous versions of Slash, see the INSTALL document
+included with those distributions.</P>
+<P>These instructions have only been tested on Linux. Installation under
+BSD and other Unix OSes should work similarly. We've had reports of the
+1.0.x version of Slash running on Windows, but have done no testing and
+have no further information.</P>
+<P>PostgreSQL support in Slash 1.1.x is currently alpha-quality,
+while MySQL support is beta-quality.</P>
+<P>Slash can always be downloaded from SourceForge, and from the
+Slashdot FTP site.</P>
+<PRE>
+        <A HREF="http://sourceforge.net/projects/slashcode/">http://sourceforge.net/projects/slashcode/</A>
+        <A HREF="ftp://ftp.slashdot.org//pub/slash/">ftp://ftp.slashdot.org//pub/slash/</A></PRE>
+<P>The CVS repository (http://cvs.slashcode.com/) is tagged with version
+numbers, so to get release 1.0.3, use tag ``v1_0_3_0''.  The last number
+(in this case a zero) will be incremented during development
+(``v1_0_3_1'', ``v1_0_3_2'', etc.) until the next release.</P>
+<P>The software and hardware requirements are listed at the end of the
+document, because we know you want to get right into the installation.</P>
+<P>
+<HR>
+<H1><A NAME="installation">INSTALLATION</A></H1>
+<P>
+<H2><A NAME="installation_notes">Installation Notes</A></H2>
+<UL>
+<LI>
+For slashd (see <EM>utils/slash</EM>, which starts slashd),
+mod_perl (see <EM>httpd/httpd.conf</EM>), and MySQL, we set all processes
+to run in GMT.  Then it is easy to convert dates to whatever the
+user's local time is.  If you have date offset problems, check that all of
+these are properly set to run in GMT.
+<P></P>
+<LI>
+You cannot have different versions of the Slash modules installed for
+different sites on the same Apache server.  Well, if you want to, you
+can try the Apache::PerlVINC module, but this is <STRONG>not</STRONG> recommended for
+performance reasons. Slash is designed to have one shared core of code
+for all Slash sites on a system.  (This is made easier than it was in
+1.0.x, where to customize a site, you needed to change the module code;
+this should no longer be necessary.)
+<P></P>
+<LI>
+All of the installation steps below should be executed as root.
+<P></P></UL>
+<P>
+<H2><A NAME="installation_procedure">Installation Procedure</A></H2>
+<P>There are six steps to installation.  Skip the parts you already
+have installed (making sure you have the correct versions).  Make sure
+to read the special note about Apache / mod_perl installation.</P>
+<OL>
+<LI>
+<STRONG>Install MySQL.</STRONG>
+<P>Please refer to MySQL documentation for compilation
+and/or installation notes for any questions with this process.  Find
+the script that runs mysql (probably <EM>safe_mysqld</EM>) and add these
+lines to the beginning of it:</P>
+<PRE>
+        TZ=GMT
+        export TZ</PRE>
+<P>Create a database to be used by Slash.</P>
+<P>Create a username/password that can access that database (by
+default, we normally set the user to have all permissions, but that
+might not be appropriate for your site).</P>
+<P></P>
+<LI>
+<STRONG>Install perl.</STRONG>
+<P>perl is likely already installed on your machine; make sure its
+version is 5.005_03 or better.</P>
+<P></P>
+<LI>
+<STRONG>Install Apache and mod_perl.</STRONG>
+<P><STRONG>You MUST install mod_perl and Apache as directed here</STRONG>.  OK, that is
+not strictly true, but it is <EM>mostly</EM> true.  If you already have mod_perl
+installed, it is probably not configured properly to work with Slash
+and you will have to rebuild it.  [If you are using the provided httpd.conf
+file from the slash distribution, and find that Apache is giving you errors,
+chances are mod_perl is not installed correctly, and you need to build it
+from scratch.]  Of course, if you have your own Apache modules or build
+options, you will need to modify the instructions here appropriately.</P>
+<P>First, untar apache and mod_perl.  Then, go to the mod_perl directory,
+and have mod_perl build and install apache for you:</P>
+<PRE>
+        perl Makefile.PL APACHE_SRC=/where_you_have_the_source DO_HTTPD=1 \
+                USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
+                APACHE_PREFIX=/where_apache_will_be_installed
+        make
+        make test
+        make install</PRE>
+<P></P>
+<LI>
+<STRONG>Install the Perl modules.</STRONG>
+<P>The best way to do this is with the CPAN module.</P>
+<P>With older versions of the CPAN module, the module will try to
+download and install the latest version of Perl.  Watch what
+the module is doing; if it begins to download an entire perl
+distribution, hit ctrl-C until it stops, then try again with the
+CPAN module.  (Hopefully, the new CPAN module will have been installed
+by this point in the process.  If not, try installing the latest
+CPAN module by hand, and then repeat the process.)</P>
+<P>Sometimes, you will be installing a newer version of a module that
+exists elsewhere on the system.  You might want to tell the CPAN module
+to automatically remove older files.  To do that from the CPAN shell,
+type:</P>
+<PRE>
+        cpan&gt; o conf make_install_arg UNINST=1</PRE>
+<P>You might also wish to install each module by hand, using distributions
+found on the CPAN.  See <A HREF="http://perldoc.com/m?perlmodinstall">http://perldoc.com/m?perlmodinstall</A>
+for more information on installing perl modules.</P>
+<P><STRONG>Note</STRONG>: You must have certain libraries existing on your system before
+building, for Compress::Zlib and XML::Parser.  See <A HREF="#perl">perl</A>.</P>
+<P>To use the CPAN module, invoke the CPAN shell:</P>
+<PRE>
+        perl -MCPAN -e shell</PRE>
+<P>After it has been configured, install Bundle::Slash:</P>
+<PRE>
+        cpan&gt; install Bundle::Slash</PRE>
+<P>When Bundle::Slash is finished, install the DBIx::Password
+module:</P>
+<PRE>
+        cpan&gt; install DBIx::Password</PRE>
+<P>When asked, give the info for accessing the Slash database created
+in step 1.</P>
+<P>Feel free to re-run ``install Bundle::Slash'' if you get errors, or just
+aren't sure what's been installed, etc.  It will safely skip anything
+already installed.</P>
+<P><STRONG>Note</STRONG>: If running BSD, also install the BSD::Resource module.</P>
+<P></P>
+<LI>
+<STRONG>Install Slash.</STRONG>
+<P>Unpack the distribution and go to the new directory that
+creates, and type:</P>
+<PRE>
+        make
+        make install</PRE>
+<P><STRONG>Note</STRONG>: this depends on a relatively new version of the <STRONG>install</STRONG>
+program that comes with GNU fileutils distribution.  Version 4.0 is
+recommended.  Some older versions of SuSE, for example, come with
+version 3; just install the latest fileutils package, or version 4.0
+of install.</P>
+<P>There are a few options to <CODE>make</CODE> and <CODE>make install</CODE> you may
+want to change.</P>
+<PRE>
+        option          default                 purpose
+        ==========================================================
+        SLASH_PREFIX    /usr/local/slash        Location for
+                                                installed files
+        INIT            /etc or /etc/rc.d       Location for init
+                                                scripts
+        USER            nobody                  User to own files
+        GROUP           nobody                  Group to own files</PRE>
+<P>(USER and GROUP will also be changed later on a per-site basis,
+in step 6. while running <EM>install-slashsite</EM>.)</P>
+<P>So, for example, you might type (although the default SLASH_PREFIX
+is _strongly_ recommended):</P>
+<PRE>
+        make SLASH_PREFIX=/home/slash
+        make install SLASH_PREFIX=/home/slash</PRE>
+<P>When done, a configuration file for Apache will be created at
+<EM>$SLASH_PREFIX/slash.conf</EM>.  You can put its contents into your
+httpd.conf, or you can just <CODE>Include</CODE> it in your httpd.conf.</P>
+<P><STRONG>WARNING!</STRONG></P>
+<P>Please be aware that if you include <EM>$SLASH_PREFIX/slash.conf</EM>
+or <EM>$SLASH_PREFIX/sites/sitename/sitename.conf</EM> more than once,
+or if this file shares contents with directives in httpd.conf,
+that your Slash site WILL break. The directives in
+<EM>$SLASH_PREFIX/slash.conf</EM> should be run only ONCE in any any
+site context.</P>
+<P></P>
+<LI>
+<STRONG>Install your Slash site.</STRONG>
+<P>Go to your installation directory (by default, <EM>/usr/local/slash</EM>)
+and execute (where <CODE>VIRTUAL_USER</CODE> is the name of the virtual
+user given in the DBIx::Password distribution):</P>
+<PRE>
+        bin/install-slashsite VIRTUAL_USER</PRE>
+<P>The program will prompt for answers to several configuration questions.
+Answer the questions.  When done, another configuration
+file will be created at <EM>$SLASH_PREFIX/$SITENAME/$SITENAME.conf</EM>.
+You can put its contents unto your httpd.conf, or you can just <CODE>Include</CODE>
+it in your httpd.conf.</P>
+<P></P></OL>
+<P>
+<HR>
+<H1><A NAME="installation_options">INSTALLATION OPTIONS</A></H1>
+<P>
+<H2><A NAME="multiple_servers">Multiple Servers</A></H2>
+<P>You can, of course, have a separate database server from your Slash
+server.  Further, you can have multiple web servers for one Slash site.
+Slashdot, for instance, has one primary server with all of the code
+(Apache, perl, etc.), and it runs slashd and NFS.  Each
+web server then mounts the code read-only over NFS.  Some notes:</P>
+<UL>
+<LI>
+Make sure the MySQL server allows the user to log in from each web
+server, and the NFS server.
+<P></P>
+<LI>
+Make sure, if you use the same httpd tree on all machines, that
+the httpd.conf is listening to the proper IP addresses.  This can be
+done by putting all of the IP addresses in the conf file, or by having
+a separate Listen file on each machine.  Similarly, make sure that
+each web server's logfiles unique to each machine, not written to the
+NFS volumes.
+<P></P></UL>
+<P>
+<H2><A NAME="virtual_hosts">Virtual Hosts</A></H2>
+<P>Slash has support for virtual hosts, so you can have multiple
+Slash sites on one machine.  Simply execute step 6 in the install
+process for each Slash site (after adding a new virtual user to
+DBIx::Password for each).</P>
+<P>
+<H2><A NAME="ssl">SSL</A></H2>
+<P>In Slash, there are two variables for the root URL of the site.
+<STRONG>absolutedir</STRONG> is the full URL, including protocol, while <STRONG>rootdir</STRONG>
+is the URL without protocol:</P>
+<PRE>
+        absolutedir     <A HREF="http://slashcode.com">http://slashcode.com</A>
+        rootdir         //slashcode.com</PRE>
+<P><STRONG>absolutedir</STRONG> is used only for creating external links to the site
+(such as in RSS files).  <STRONG>rootdir</STRONG> is used for internal links; that
+way, you can use the same HTML pages for SSL and non-SSL.  You don't
+have to do anything special to the code or preferences to allow it to
+work with SSL by itself, SSL and non-SSL together, or non-SSL by itself.</P>
+<P>
+<H2><A NAME="nonroot">Non-Root</A></H2>
+<P>It is possible to install and run everything here without root.</P>
+<P>Describing the process for a non-root install would take up significant
+space and time, having to account for differences in various systems,
+and all the workarounds necessary for it to work.</P>
+<P>If you must have a non-root install, consult the various documentation
+for Apache, MySQL, and perl about running and installing without root
+access.  Then, for Slash, you simply need to set the make variables PREFIX,
+SLASH_PREFIX, and INIT appropriately for your needs.</P>
+<P><STRONG>Note</STRONG>: Slash (or, more accurately, Apache + mod_perl and MySQL) take
+up a lot of system resources.  It is <EM>not advisable</EM> for anyone to
+run Slash at all on a system, without the permission of the administrator
+of that system.</P>
+<P>
+<HR>
+<H1><A NAME="requirements">REQUIREMENTS</A></H1>
+<P>
+<H2><A NAME="software">Software</A></H2>
+<P>Below, the main software components needed are listed.  The
+recommended version is noted, along with the earliest version
+that has been tested (or is expected) to work.  The earliest
+versions are not necessarily supported, but should work.
+perl 5.005_03 is supported, but MySQL 3.22 is not.</P>
+<DL>
+<DT><STRONG><A NAME="item_perl">perl</A></STRONG><BR>
+<DD>
+Version 5.6.0 (5.005_03).
+<PRE>
+        <A HREF="http://www.cpan.org/">http://www.cpan.org/</A></PRE>
+<P></P>
+<DT><STRONG><A NAME="item_MySQL">MySQL</A></STRONG><BR>
+<DD>
+Version 3.23 (3.22).
+<PRE>
+        <A HREF="http://www.mysql.com/">http://www.mysql.com/</A></PRE>
+<P></P>
+<DT><STRONG><A NAME="item_Apache">Apache</A></STRONG><BR>
+<DD>
+Version 1.3.19 (1.3.6).
+<PRE>
+        <A HREF="http://httpd.apache.org/">http://httpd.apache.org/</A></PRE>
+<P></P>
+<DT><STRONG><A NAME="item_mod_perl">mod_perl</A></STRONG><BR>
+<DD>
+Versions 1.25 (1.21).
+<PRE>
+        <A HREF="http://perl.apache.org/">http://perl.apache.org/</A></PRE>
+<P></P>
+<DT><STRONG><A NAME="item_Sendmail_or_other_transport_daemon">Sendmail or other transport daemon</A></STRONG><BR>
+<DD>
+Refer to your OS distribution.
+<P></P>
+<DT><STRONG><A NAME="item_Perl_module_distributions">Perl module distributions</A></STRONG><BR>
+<DD>
+See <A HREF="http://search.cpan.org/">http://search.cpan.org/</A> and <A HREF="http://www.cpan.org/">http://www.cpan.org/</A>
+to get each module individually; however, we recommend
+you download them using the CPAN module.
+<P>The latest version of each module is recommended.</P>
+<P>For Compress::Zlib, the zlib development library is required.
+For XML::Parser, the expat library is required.
+If they are not present on the system already, download and
+install them before installing the modules.</P>
+<PRE>
+        <A HREF="ftp://ftp.freesoftware.com/pub/infozip/zlib/">ftp://ftp.freesoftware.com/pub/infozip/zlib/</A>
+        <A HREF="http://sourceforge.net/projects/expat/">http://sourceforge.net/projects/expat/</A></PRE>
+<P>The following modules are all included in the Bundle::Slash
+distribution.</P>
+<DL>
+<DT><STRONG><A NAME="item_DBI">DBI</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Data%2DShowTable">Data-ShowTable</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_TimeDate">TimeDate</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Msql%2DMysql%2Dmodules">Msql-Mysql-modules</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_ApacheDBI">ApacheDBI</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Apache%2DDBILogConfig">Apache-DBILogConfig</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Apache%2DDBILogger">Apache-DBILogger</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_libnet">libnet</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_HTML%2DParser">HTML-Parser</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_XML%2DParser">XML-Parser</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_XML%2DRSS">XML-RSS</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_MIME%2DBase64">MIME-Base64</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Digest%2DMD5">Digest-MD5</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_URI">URI</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_libwww%2Dperl">libwww-perl</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_DateManip">DateManip</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_File%2DSpec">File-Spec</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Mail%2DSendmail">Mail-Sendmail</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Compress%2DZlib">Compress-Zlib</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Image%2DSize">Image-Size</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Storable">Storable</A></STRONG><BR>
+<DD>
+<DT><STRONG><A NAME="item_Template">Template</A></STRONG><BR>
+<DD>
+</DL>
+<P>Also required:</P>
+<DL>
+<DT><STRONG><A NAME="item_DBIx%2DPassword">DBIx-Password</A></STRONG><BR>
+<DD>
+</DL>
+</DL>
+<P>
+<H2><A NAME="hardware">Hardware</A></H2>
+<P>There are no specific hardware requirements.  Apache (with mod_perl) and
+MySQL both take up a lot of RAM; running a complete system with 128MB
+might be possible, if you do some tuning of the configuration, but a
+practical minimum 256MB is recommended, though less could be sufficient
+with some tuning.Storage space depends on how busy you expect the site
+to be; 250MB is possible, but a minimum 1GB is recommended.  Necessary
+processor speed is also dependent on how busy the site is; Pentium 133
+or equivalent might work, but less than a Pentium II/200 is not
+recommended.</P>
+<P>For the curious, Slashdot (as of January 2001) runs on eight machines:
+six webservers (each is Pentium III/600, 1GB RAM, 9GB hard drive), one
+NFS server (dual PIII/600, 2GB RAM, 2 x 9GB hard drive), and one
+database server (quad Xeon/550, 2GB RAM, 6 x 9GB hard drive).  However,
+this is certainly overkill for most sites (and possibly even overkill
+for Slashdot).</P>
+<P>
+<HR>
+<H1><A NAME="upgrading">UPGRADING</A></H1>
+<P>
+<H2><A NAME="slash_1.0___slash_2.0">Slash 1.0 -&gt; Slash 2.0</A></H2>
+<P>Please read the complete documentation of <EM>utils/slash1toslash2</EM>.
+It is a program that will convert your database from Slash 1.0
+to a new Slash 2.0 database.  The program documentation (which can
+be read with <EM>perldoc</EM>) details exactly what process it follows
+to do the conversion, so you can attempt to do it by hand if you
+prefer.</P>
+<P>
+<HR>
+<H1><A NAME="version">VERSION</A></H1>
+<P>$Id$</P>
+
+</BODY>
+
+</HTML>

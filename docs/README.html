@@ -1,0 +1,179 @@
+<HTML>
+<HEAD>
+<TITLE>README - Slash Readme</TITLE>
+<LINK REV="made" HREF="mailto:pudge@pobox.com">
+</HEAD>
+
+<BODY>
+
+<A NAME="__index__"></A>
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#name">NAME</A></LI>
+	<LI><A HREF="#warning">WARNING</A></LI>
+	<LI><A HREF="#description">DESCRIPTION</A></LI>
+	<LI><A HREF="#documentation">DOCUMENTATION</A></LI>
+	<LI><A HREF="#links">LINKS</A></LI>
+	<LI><A HREF="#copyright_and_license">COPYRIGHT AND LICENSE</A></LI>
+	<LI><A HREF="#version">VERSION</A></LI>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="name">NAME</A></H1>
+<P>README - Slash Readme</P>
+<P>
+<HR>
+<H1><A NAME="warning">WARNING</A></H1>
+<P>This release of Slash is PRERELEASE software.  Run at your own risk. There
+may be bugs, and documentation is not yet finished or wrong.  We feel this
+release is stable for production use, as we use it on <A HREF="http://slashcode.com/">http://slashcode.com/</A>,
+but it may have more problems than one would expect from a final release.</P>
+<P>
+<HR>
+<H1><A NAME="description">DESCRIPTION</A></H1>
+<P>Slash -- Slashdot Like Automated Storytelling Homepage -- is the code
+that runs Slashdot.  More than that, however, Slash is an architecture
+for putting together web sites.  It comes with functionality for posting
+articles, conducting polls, having discussions, and more.  But it can be
+extended in innumerable ways.</P>
+<P>Slash is written in Perl, and is built on top of Apache and mod_perl. It
+requires a database backend, though the only well-supported database
+used with it is MySQL (more databases will become well-supported as time
+goes on; PostgreSQL support is already well on its way).  Slash is
+fast, scalable, and secure (as evidenced by one of the best test cases
+you could have, running Slashdot itself).</P>
+<P>Through a plugin system, developers can add functionality to Slash. 
+Through themes and templates (which are written using Template Toolkit),
+the look and feel of a Slash site can be customized.</P>
+<P>See <EM>INSTALL</EM> for information about installing Slash, including hardware
+and software requirements.  Read that document carefully, and follow the
+instructions as precisely as possible.</P>
+<P>Also see <EM>INSTALL</EM> for information on upgrading from previous versions
+of Slash.</P>
+<P>As noted in the FAQ, please send any bug reports, and subscribe to
+mailing lists, at Slash's SourceForge site.</P>
+<PRE>
+        <A HREF="http://sourceforge.net/projects/slashcode/">http://sourceforge.net/projects/slashcode/</A></PRE>
+<P>
+<HR>
+<H1><A NAME="documentation">DOCUMENTATION</A></H1>
+<P>The <EM>.pod</EM> documentation included with Slash can be read with the
+<CODE>perldoc</CODE> program, included with perl, or translated using one of
+the many <CODE>pod2*</CODE> translators.</P>
+<P>The documentation is also available online on the Slash FAQ.</P>
+<DL>
+<DT><STRONG><A NAME="item_Slash_FAQ">Slash FAQ</A></STRONG><BR>
+<DD>
+Basic information about Slash, how to contact the developers,
+and a lot more.
+<P><A HREF="http://slashcode.com/faq.shtml">http://slashcode.com/faq.shtml</A></P>
+<P></P>
+<DT><STRONG><A NAME="item_Template_Toolkit">Template Toolkit</A></STRONG><BR>
+<DD>
+For more information on how to write templates, see the Template
+Toolkit site.
+<P><A HREF="http://www.template-toolkit.org/">http://www.template-toolkit.org/</A></P>
+<P></P>
+<DT><STRONG><A NAME="item_RSS">RSS</A></STRONG><BR>
+<DD>
+For more information on RSS 1.0, and the RSS Slash module.
+<P><A HREF="http://purl.org/rss/1.0/">http://purl.org/rss/1.0/</A><BR>
+<A HREF="http://slashcode.com/rss/1.0/modules/Slash/">http://slashcode.com/rss/1.0/modules/Slash/</A></P>
+<P></P>
+<DT><STRONG><A NAME="item_Installation">Installation</A></STRONG><BR>
+<DD>
+The details on how to install, and upgrade, Slash.
+<P><EM>INSTALL</EM></P>
+<P></P>
+<DT><STRONG><A NAME="item_API">API</A></STRONG><BR>
+<DD>
+The details of the API available in Slash.
+<PRE>
+        perldoc Slash
+        perldoc Slash::Utility
+        perldoc Slash::Display
+        perldoc Slash::DB</PRE>
+<P>The modules represent the public API of Slash.  The other Slash
+modules have embedded POD to be read with perldoc, too.</P>
+<P></P>
+<DT><STRONG><A NAME="item_HOWTOs">HOWTOs</A></STRONG><BR>
+<DD>
+There are currently the beginnings of HOWTO documents
+for templates, plugins, and themes.
+<P><EM>docs/HOWTO-Plugins.pod</EM></P>
+<P><EM>docs/HOWTO-Templates.pod</EM></P>
+<P><EM>docs/HOWTO-Themes.pod</EM></P>
+<P></P>
+<DT><STRONG><A NAME="item_Schema">Schema</A></STRONG><BR>
+<DD>
+The layout and description of the database.
+<P><EM>docs/slasherd_bender.fig</EM></P>
+<P><EM>docs/slasherd_bender.pdf</EM></P>
+<P><EM>docs/slasherd_bender.ps</EM></P>
+<P><EM>docs/slashtables_bender.pod</EM></P>
+<P></P>
+<DT><STRONG><A NAME="item_Other">Other</A></STRONG><BR>
+<DD>
+We need to upgrade the Getting Started document.
+<P></P>
+<DT><STRONG><A NAME="item_Authors">Authors</A></STRONG><BR>
+<DD>
+The authors and contributors of Slash.
+<P><EM>AUTHORS</EM></P>
+<P></P></DL>
+<P>
+<HR>
+<H1><A NAME="links">LINKS</A></H1>
+<DL>
+<DT><STRONG><A NAME="item_Slashdot">Slashdot</A></STRONG><BR>
+<DD>
+The site that started it all.
+<P><A HREF="http://slashdot.org/">http://slashdot.org/</A></P>
+<P></P>
+<DT><STRONG><A NAME="item_Slash">Slash</A></STRONG><BR>
+<DD>
+The main site for Slash.
+<P><A HREF="http://slashcode.com/">http://slashcode.com/</A></P>
+<P></P>
+<DT><STRONG><A NAME="item_CVS">CVS</A></STRONG><BR>
+<DD>
+The main CVS repository.
+<P><A HREF="http://cvs.slashcode.com/">http://cvs.slashcode.com/</A></P>
+<P></P>
+<DT><STRONG><A NAME="item_SourceForge_Site">SourceForge Site</A></STRONG><BR>
+<DD>
+Access to the code, bug reports, patches, mailing lists, and more.
+<P><A HREF="http://sourceforge.net/projects/slashcode/">http://sourceforge.net/projects/slashcode/</A></P>
+<P></P></DL>
+<P>
+<HR>
+<H1><A NAME="copyright_and_license">COPYRIGHT AND LICENSE</A></H1>
+<P>The information below applies to everything in this distribution,
+except where noted.</P>
+<P>Copyright 1997-2001 by Open Source Development Network.</P>
+<PRE>
+        <A HREF="http://www.osdn.com/">http://www.osdn.com/</A></PRE>
+<P>Slash is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.</P>
+<P>Slash is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</P>
+<P>You should have received a copy of the GNU General Public License
+along with Slash (<EM>COPYING</EM>); if not, go to <A HREF="http://www.fsf.org/">http://www.fsf.org/</A>
+or write to the Free Software Foundation, Inc., 59 Temple Place -
+Suite 330, Boston, MA 02111-1307, USA.</P>
+<P>
+<HR>
+<H1><A NAME="version">VERSION</A></H1>
+<P>$Id$</P>
+
+</BODY>
+
+</HTML>
