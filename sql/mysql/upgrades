@@ -2026,7 +2026,7 @@ INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid'
 UPDATE vars SET value=CONCAT(value,'|DL|DT|DD') WHERE name='approvedtags';
 UPDATE vars SET value=CONCAT(value,'|DL|DT|DD') WHERE name='approvedtags_break';
 
-ALTER TABLE stats_daily ADD INDEX section_day (section, name);
+ALTER TABLE stats_daily ADD INDEX section_day (section, day);
 
 # for plugins/PollBooth set according to your preferences (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('allow_anon_poll_voting', '1', 'Set this to decide whether anonymous users can vote in polls)');
