@@ -233,7 +233,7 @@ sub mailPasswd {
 		return mailPasswdForm(@_, $note);
 	}
 
-	_sendMailPasswd($user_send);
+	_sendMailPasswd(@_, $user_send);
 	mailPasswdForm(@_, getData('mail_mailed_note', { name => $user_send->{nickname} }));
 }
 

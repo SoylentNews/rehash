@@ -13,18 +13,20 @@ en_US
 __name__
 userlogin
 __template__
-<FORM ACTION="/users.pl" METHOD="POST">
-<B>Nickname:</B><BR>
-<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE=""><BR>
-<B>Password:</B><BR>
-<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% FILTER strip_urlattr; return_url ? return_url : "/"; END %]">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="userlogin">
-<INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20"><BR>
-<INPUT TYPE="CHECKBOX" NAME="login_temp" VALUE="yes"> Public Terminal<BR>
-<INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in">
-</FORM>
+[%# we log in via main ("real") rootdir, return to current rootdir %]
+[% IF !return_url; return_url = constants.rootdir _ '/'; END %]
+<form action="[% constants.real_rootdir %]/login.pl" method="POST">
+<b>Nickname:</b><br>
+<input type="TEXT" name="unickname" size="20" value=""><br>
+<b>Password:</b><br>
+<input type="HIDDEN" name="returnto" value="[% return_url | strip_urlattr %]">
+<input type="HIDDEN" name="op" value="userlogin">
+<input type="PASSWORD" name="upasswd" size="20"><br>
+<input type="CHECKBOX" name="login_temp" value="yes"> Public Terminal<br>
+<input type="SUBMIT" name="userlogin" value="Log in">
+</form>
 
-<P>[ <B><A HREF="/users.pl?op=newuserform">Create a new account</A></B> ]
+<p>[ <b><a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a></b> ]
 __seclev__
 10000
 __version__

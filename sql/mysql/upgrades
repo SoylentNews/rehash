@@ -721,8 +721,8 @@ UPDATE section_topics SET type = 'topic_3' where type = 3;
 UPDATE section_topics SET type = 'topic_4' where type = 4;
 
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes/',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks/',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks',1,1);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,1);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,1);
 
@@ -732,10 +732,10 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitpow', '0.8
 # End of T_2_3_0_45, Start of T_2_3_0_46
 
 # One more time!
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% constants.rootdir %]/my/friends/',1,1);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans/',1,2);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes/',1,3);
-REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks/',1,4);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% constants.rootdir %]/my/friends',1,1);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans',1,2);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes',1,3);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks',1,4);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,5);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,6);
 
@@ -851,7 +851,7 @@ UPDATE menus SET sel_label=label;
 DELETE FROM menus WHERE menu='users';
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Logout', 'logout', '/my/logout', 1, 0, 10);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl?op=edituser', 1, 0, 20);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 0, 40);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Password', 'password', '/login.pl?op=changeprefs', 1, 0, 40);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% user.nickname | fixparam %]', 1, 0, 50);
 
 # Change for plugins/Subscribe (ignore if not using that plugin)
@@ -2281,3 +2281,5 @@ UPDATE vars SET value = 10 WHERE name = "hc_pool_secs_before_use";
 INSERT INTO vars (name, value, description) VALUES ('hc_image_format','jpg','Format for HC images (png, jpg, etc.)');
 
 INSERT INTO vars (name, value, description) VALUES ('m2_wait_hours','12','Number of hours to wait before a mod is available for m2');
+
+UPDATE menus SET value='[% constants.rootdir %]/my/password' WHERE menu='users' AND label='Password';

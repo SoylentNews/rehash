@@ -122,7 +122,7 @@ INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flag
 
 INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Logout','logout','/my/logout',1,0,10);
 INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Preferences','preferences','/users.pl?op=edituser',1,0,20);
-INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Password','password','/users.pl?op=changepasswd',1,0,40);
+INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Password','password','[% constants.real_rootdir %]/my/password',1,0,40);
 INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','~[% user.nickname | fixparam %] ([% user.uid %])','me','/~[% user.nickname | fixparam %]',1,0,50);
 
 #

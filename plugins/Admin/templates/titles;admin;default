@@ -15,7 +15,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'adminLogin-title' %]
-back<I>Slash</I> Login
+back<I>Slash</I> Log In
 
 [% CASE 'adminLogout-title' %]
 back<I>Slash</I> Buh Bye

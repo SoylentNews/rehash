@@ -34,7 +34,7 @@ IF constants.plugin.Subscribe; tabs.push(
 	{ link = "/subscribe.pl",		label = "Subscription",	sel_label = "subscription" },
 ); END;
 tabs.push(
-	{ link = "/users.pl?op=changepasswd",	label = "Password",	sel_label = "password" },
+	{ link = "/my/password",		label = "Password",	sel_label = "password" },
 );
 
 PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]

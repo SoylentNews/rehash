@@ -57,7 +57,7 @@ __template__
 Your new password is [% newpasswd %].  Your old password will still work until
 this password is used.  Go to the URL below to log in:
 
-<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Fusers.pl%3Fop=changepasswd>
+<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
 
 Make sure you then CHANGE YOUR PASSWORD!
 

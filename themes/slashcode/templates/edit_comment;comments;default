@@ -85,7 +85,7 @@ __template__
 
 	</TD></TR>
 [% ELSE;
-	userlink = "<A HREF=\"${constants.rootdir}/users.pl?op=userclose\">Log Out</A>";
+	userlink = "<A HREF=\"${constants.rootdir}/login.pl?op=userclose\">Log Out</A>";
 END %]
 	[% UNLESS hide_name %]
 	<TR><TD WIDTH="130" ALIGN="RIGHT">[% PROCESS formLabel value => 'Name' %]</TD><TD WIDTH="500">
@@ -217,7 +217,7 @@ IF do_br %]<BR>[% END %]
 		[% IF user.is_anon %]
 			<LI>If you want replies to your comments sent to you, consider
 			<A HREF="[% constants.rootdir %]/my/">logging in</A> or
-			<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">creating
+			<A HREF="[% constants.rootdir %]/login.pl?op=newuserform">creating
 			an account</A>.
 		[% END %]
 

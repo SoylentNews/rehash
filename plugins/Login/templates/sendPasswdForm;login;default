@@ -13,7 +13,7 @@ sendPasswdForm
 __template__
 [% IF note %][% note %][% END %]
 
-<form action="[% env.script_name %]" method="POST">
+<form action="[% constants.real_rootdir %]/login.pl" method="POST">
 <input type="HIDDEN" name="op" value="mailpasswd">
 [% PROCESS formkey_tag %]
 
@@ -58,8 +58,8 @@ __template__
 </form>
 [% IF user.is_anon %]
 <p>
-<a href="[% env.script_name %]?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
-<a href="[% env.script_name %]?op=newuserform">Create a new account</a>
+<a href="[% constants.real_rootdir %]/login.pl?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
+<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a>
 if you don't have one already.
 </p>
 [% END %]

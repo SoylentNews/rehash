@@ -659,9 +659,9 @@ sub action {
 	}
 	# This is just to make sure the next view gets it right
 	if ($form->{type} eq 'foe') {
-		redirect("$constants->{rootdir}/my/foes/");
+		redirect("$constants->{rootdir}/my/foes");
 	} else {
-		redirect("$constants->{rootdir}/my/friends/");
+		redirect("$constants->{rootdir}/my/friends");
 	}
 
 	return 1;

@@ -88,13 +88,13 @@ __template__
 	<b>nick</b>=[% form.newusernick | strip_literal %]<br>
 	<b>passwd</b>=mailed to [% form.email | strip_literal %]<br>
 	<p>Once you receive your password, you can
-	<a href="[% constants.rootdir %]/login.pl">log in and set your account up.</a>
+	<a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a>
 
 [% CASE 'email_exists' %]
 	The email address "[% (form.realemail || form.email) | strip_literal %]"
 	already exists in our user database. If you've forgotten your password
 	to an existing account, you can
-	<a href="[% env.script_name %]?op=mailpasswdform">have your
+	<a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
 	password mailed to you</a>.
 
 
@@ -132,7 +132,7 @@ __template__
 Your new password is [% newpasswd %].  Your old password will still work until
 this password is used.  Go to the URL below to log in:
 
-<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Fusers.pl%3Fop=changepasswd>
+<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
 
 Make sure you then CHANGE YOUR PASSWORD!
 

@@ -16,7 +16,7 @@ __template__
 <INPUT TYPE="hidden" NAME="op" VALUE="adminlogin">
 <TABLE>
 	<TR>
-		<TD ALIGN="RIGHT">Login</TD>
+		<TD ALIGN="RIGHT">Log In</TD>
 		<TD><INPUT TYPE="TEXT" NAME="aaid"></TD>
 	</TR>
 	<TR>

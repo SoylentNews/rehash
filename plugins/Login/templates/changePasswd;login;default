@@ -24,12 +24,12 @@ END; note %]</h2>
 		<td>
 [% IF constants.offer_insecure_login_link -%]
 		<p>You can automatically log in by clicking
-		 <a href="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | fixparam %]">This Link</a> and Bookmarking the resulting page. 
+		 <a href="[% constants.real_rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | fixparam %]">This Link</a> and Bookmarking the resulting page. 
 		This is totally insecure, but very convenient.
 		</p>
 [%- END %]
 
-		<form action="[% env.script_name %]" method="POST">
+		<form action="[% constants.real_rootdir %]/login.pl" method="POST">
 		[% PROCESS formkey_tag %]
 		<input type="HIDDEN" name="uid" value="[% user.uid %]">
 

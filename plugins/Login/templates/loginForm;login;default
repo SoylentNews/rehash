@@ -16,7 +16,7 @@ __template__
 
 [% PROCESS titlebar width="75%" %]
 
-<form action="[% env.script_name %]" method="POST">
+<form action="[% constants.real_rootdir %]/login.pl" method="POST">
 <input type="HIDDEN" name="op" value="userlogin">
 <table width="75%">
 [% IF form.unickname %]
@@ -24,7 +24,7 @@ __template__
 	<p>
 	Danger, Will Robinson!  You didn't log in!  You apparently put
 	in the wrong password, or the wrong nickname.  Either try again,
-	or <a href="[% env.script_name %]?op=mailpasswdform">have your
+	or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
 	password mailed to you</a> if you forgot your password.
 	</p>
 
@@ -62,9 +62,9 @@ __template__
 </form>
 
 <p>
-Forget your password? <a href="[% env.script_name %]?op=mailpasswdform">Have your
+Forget your password? <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">Have your
 password mailed to you</a> by entering your nickname, uid, or email address.<br>
-<a href="[% env.script_name %]?op=newuserform">Create a new account</a>
+<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a>
 if you don't have one already.<br>
 </p>
 
@@ -72,4 +72,4 @@ if you don't have one already.<br>
 __seclev__
 500
 __version__
-
+$Id$

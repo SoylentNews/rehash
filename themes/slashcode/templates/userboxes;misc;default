@@ -25,7 +25,7 @@ IF user.is_anon;
 	# The user we're displaying this page for is not logged in.
 	# Show the login block.
 
-	title = "$constants.sitename Login";
+	title = "$constants.sitename Log In";
 	IF form.sid;
 		contents = BLOCK %]
 			[% PROCESS userlogin

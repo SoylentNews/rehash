@@ -23,7 +23,7 @@ __template__
    chars = chars.replace('0123456789', '0-9');
 %]
 
-<form action="[% env.script_name %]" method="POST">
+<form action="[% constants.real_rootdir %]/login.pl" method="POST">
 <table align="CENTER" width="95%" bgcolor="[% user.bg.2 %]">
 [% PROCESS formkey_tag %]
 	<tr>
@@ -94,8 +94,8 @@ __template__
 </form>
 
 <p>
-<a href="[% env.script_name %]?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
-Forget your password? <a href="[% env.script_name %]?op=mailpasswdform">Have your
+<a href="[% constants.real_rootdir %]/login.pl?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
+Forget your password? <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">Have your
 password mailed to you</a> by entering your nickname, uid, or email address.
 </p>
 __seclev__

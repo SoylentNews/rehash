@@ -105,7 +105,7 @@ Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="100%" title="User already exists" %]
 	The nickname [% nick %] or another similar to it has already been taken. 
-	<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">Please try another choice</A>.<BR>
+	<A HREF="[% constants.rootdir %]/login.pl?op=newuserform">Please try another choice</A>.<BR>
 
 [% CASE 'checklist_err' %]
 [% PROCESS titlebar width="100%" title="Too many options" %]

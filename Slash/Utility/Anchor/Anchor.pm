@@ -188,8 +188,11 @@ sub header {
 	if ($constants->{admin_check_clearpass}
 		&& ($user->{state}{admin_clearpass_thisclick} || $user->{admin_clearpass})
 	) {
-		if ($user->{currentPage} eq 'users'
-			&& $form->{op} eq 'savepasswd') {
+		if (
+			($user->{currentPage} eq 'login' && $form->{op} eq 'saveprefs')
+				||
+			($user->{currentPage} eq 'users' && $form->{op} eq 'savepasswd')
+		) {
 			# The user is trying to save a new password with this
 			# very click. They may or may not succeed. Their admin
 			# privs for this click were already taken away in
