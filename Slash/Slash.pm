@@ -1192,7 +1192,7 @@ sub displayStory {
 		$story = $reader->getStory($sid);
 	}
 	# Sites without an "index" section will never use this, which is probably ok.
-	if (!$form->{light} && !$user->{no_icons} && !$user->{light} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable} && !$options->{is_future}) {
+	if (!$form->{light} && !$user->{noicons} && !$user->{light} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable} && !$options->{is_future}) {
 		$return = $story->{rendered};
 	} else {
 		my $author = $reader->getAuthor($story->{uid},

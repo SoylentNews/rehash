@@ -1195,13 +1195,6 @@ sub editStory {
 			$storyref->{'time'} = $form->{'time'};
 		}
 
-		# (I presume this wrapped around some other code which
-		# has since been deleted, so we can delete this now,
-		# right?) - Jamie 2003/05/13
-		my $tmp = $user->{currentSection};
-		$user->{currentSection} = $storyref->{section};
-		$user->{currentSection} = $tmp;
-
 		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
 			@stid = grep { $_ } @{$form->{_multi}{stid}};
 		} elsif ($form->{stid}) {
@@ -1680,8 +1673,14 @@ sub updateStory {
 	my $rendered;
 	{
 		local $user->{currentSection} = "index";
-		local $user->{no_icons} = "";
+		local $user->{noicons} = "";
 		local $user->{light} = "";
+
+		# ugly hack, but for now, needed: without it, when an
+		# editor edits in foo.sitename.com, saved stories get
+		# rendered with that section
+		Slash::Utility::Anchor::getSectionColors();
+
 		$rendered =  displayStory($form->{sid}, '', { get_cacheable => 1 });
 	}
 	my $data = {
