@@ -654,7 +654,13 @@ sub check {
 
 	my $uid = $form->{uid} || "";
 	if (!$uid) {
-		print getData("no_uid");
+        	# See comment in plugins/Journal/journal.pl for its call of
+        	# getSectionColors() as well.
+                Slash::Utility::Anchor::getSectionColors();
+
+		my $title = getData("no_uid");
+		header($title);
+		print $title;
 		return;
 	}
 
