@@ -745,7 +745,6 @@ CREATE TABLE users_comments (
 	commentlimit smallint UNSIGNED DEFAULT '100' NOT NULL,
 	commentspill smallint UNSIGNED DEFAULT '50' NOT NULL,
 	commentsort tinyint DEFAULT '0',
-	anon_comments tinyint UNSIGNED DEFAULT '0',
 	noscores tinyint DEFAULT '0' NOT NULL,
 	mode varchar(10) DEFAULT 'thread',
 	threshold tinyint DEFAULT '0',
