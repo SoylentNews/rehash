@@ -114,7 +114,7 @@ sub get_backup_db {
 			moderatordLog('Replication requested but not active');
 			return undef;
 		}
-		if ($master_stat->{Position} - $slave_stat->{'pos'} > $lag) {
+		if ($master_stat->{Position} - $slave_stat->{Pos} > $lag) {
 			# The slave is lagging too much to use;  let's wait
 			# a bit for it to hopefully catch up.
 			$read_db = undef;
