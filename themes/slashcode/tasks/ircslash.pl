@@ -562,7 +562,10 @@ sub possible_check_dbs {
 				my $response = getIRCData('dbs_response', { dbids => \@dbids, dbs => $dbs_data });
 				chomp $response;
 				my @responses = split /\n/, $response;
-				$conn->privmsg($channel, getIRCData('dbalert_prefix'));
+				my $prefix = getIRCData('dbalert_prefix');
+				if ($prefix && $prefix =~ /\S/) {
+					$conn->privmsg($channel, $prefix);
+				}
 				for my $r (@responses) {
 					sleep 1;
 					$conn->privmsg($channel, $r);

@@ -64,6 +64,13 @@ __template__
 
 [% CASE 'dbs_response' %]
 	[% FOREACH dbid = dbids;
+		IF dbs.$dbid.lag < constants.ircslash_dbalert_lagthresh / 2
+			&& dbs.$dbid.bog < constants.ircslash_dbalert_bogthresh / 2
+			&& dbs.$dbid.was_alive
+			&& dbs.$dbid.was_reachable
+			&& dbs.$dbid.was_running;
+			NEXT;
+		END;
 		"lag "; dbs.$dbid.lag;
 		" bog "; dbs.$dbid.bog;
 		IF !dbs.$dbid.was_alive;	" DEAD!";
@@ -74,10 +81,9 @@ __template__
 	END %]
 
 [% CASE 'dbalert_prefix' %]
-	Alert - one or more reader DBs are in trouble:
 
 [% CASE 'dbalert_allclear' %]
-	The DBs are much better now. Yay!
+	The DBs are much better now.
 
 [% CASE 'dbs_nodata' %]
 	Error: no dbs_readerstatus data found within the last minute.
