@@ -2,6 +2,8 @@ __section__
 default
 __description__
 
+Added to storyref, introtext_wordcount and bodytext_wordcount. These fields are inserted by admin.pl
+before this template is displayed.
 __title__
 
 __page__
