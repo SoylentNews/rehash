@@ -409,6 +409,9 @@ EOT
 sub getM2Text {
 	my($mmr, $options) = @_;
 
+	my $constants = getCurrentStatic();
+	my $consensus = $constants->{m2_consensus};
+
 	# %$mmr is a hashref whose keys are dates, "yyyy-mm-dd".
 	# Its values are hashrefs whose keys are M2 counts for
 	# those days.  _Those_ values are also hashrefs of which
@@ -464,7 +467,9 @@ sub getM2Text {
 			my $c = $mmr->{$day}{$m2c}{c};
 			my $n = int($c*$mult+0.5);
 			next unless $n;
-			$text .= sprintf("%x", $m2c) x $n;
+			my $char = ($m2c >= $consensus)
+				? "X" : sprintf("%x", $m2c);
+			$text .= $char x $n;
 
 		}
 		$text .= "_" x int($non*$mult+0.5);
