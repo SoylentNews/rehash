@@ -777,12 +777,13 @@ CREATE TABLE pollquestions_new (
 	PRIMARY KEY (qid)
 ) TYPE=InnoDB;
 
-INSERT INTO pollquestions_new (qid,question,voters,topic,discussion,date,uid,section,autopoll,flags,polltype) SELECT qid, question, voters, topic, discussion, date, uid, section, autopoll, flags, polltype FROM pollquestions;
+INSERT INTO pollquestions_new (qid,question,voters,topic,discussion,date,uid,section,autopoll,polltype) SELECT qid, question, voters, topic, discussion, date, uid, section, autopoll, polltype FROM pollquestions;
 EOT
 
 for my $skid (sort { $a <=> $b } keys %skins) {
-        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
-        print "UPDATE pollquestions_new SET primaryskid=$skid WHERE section=$section_q;\n";
+        my $sec_skid = $slashdb->sqlQuote($skins{$skid}{name});
+	$sec_skid ||= $slashdb->getVar('mainpage_skid', 'value', 1);
+        print "UPDATE pollquestions_new SET primaryskid=$sec_skid WHERE section=$section_q;\n";
 }
 print "ALTER TABLE pollquestions_new DROP COLUMN section;\n";
 #
@@ -993,7 +994,7 @@ print <<EOT;
 # This next command should only be issued on your search DB,
 # which may or may not be the same as the master DB you've
 # been issuing the other commands on:
-# ALTER TABLE story_text_new ADD FULLTEXT title (title), ADD FULLTEXT intro_body (introtext,bodytext);
+# ALTER TABLE story_text ADD FULLTEXT title (title), ADD FULLTEXT intro_body (introtext,bodytext);
 
 # If you don't want to do error checking
 # ALTER TABLE stories DROP COLUMN writestatus;
