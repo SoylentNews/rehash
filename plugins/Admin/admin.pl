@@ -1295,9 +1295,7 @@ sub editStory {
 		$extracolumns, $commentstatus_select, 
 		$subid, $description);
 	my $extracolref = {};
-	my($fixquotes_check, $autonode_check, 
-		$fastforward_check) =
-		('','','');
+	my($fixquotes_check, $autonode_check, $fastforward_check) = ('','','');
 	my $page = 'index';
 	# If the user is a section only admin, we do that, if they have filled out a form we do that but 
 	# if none of these apply we just do defaultsection -Brian

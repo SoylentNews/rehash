@@ -28,7 +28,7 @@ __template__
 	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) is all alone in the world.
 
 [% CASE 'nofans' %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) is either loved by all or just invisible.
+	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) is either loved by all, or just invisible.
 
 [% CASE 'nofreaks' %]
 	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) is hated by no one.
@@ -37,13 +37,13 @@ __template__
 	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) loves everyone or plays their cards very close to their chest.
 
 [% CASE 'nofriendsoffriends' %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) friend's have no friends, they need better friends.
+	The friends of <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) have no friends; they need better friends.
 
 [% CASE 'nofriendsenemies' %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) friend's have no foes.
+	The friends of <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) have no foes.
 
 [% CASE 'noall' %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) is unknown to the world
+	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) is unknown to the world.
 
 [% CASE 'yournofriends' %]
 	[% returnme.data_constant = 1 %]
@@ -51,7 +51,7 @@ __template__
 
 [% CASE 'yournofans' %]
 	[% returnme.data_constant = 1 %]
-	You are either loved by all or just invisible.
+	You are either loved by all, or just invisible.
 
 [% CASE 'yournofriends' %]
 	[% returnme.data_constant = 1 %]
@@ -59,7 +59,7 @@ __template__
 
 [% CASE 'yournofoes' %]
 	[% returnme.data_constant = 1 %]
-	You love everyone, or you play your cards very close to your chest.
+	You love everyone, or play your cards very close to your chest.
 
 [% CASE 'yournofreaks' %]
 	[% returnme.data_constant = 1 %]
@@ -71,7 +71,7 @@ __template__
 
 [% CASE 'yournofriendsenemies' %]
 	[% returnme.data_constant = 1 %]
-	Everyone whom you love seems to be loved by all and has collected no foes.
+	Everyone whom you love seems to be loved by all and hate no one.
 
 [% CASE 'yournoall' %]
 	[% returnme.data_constant = 1 %]

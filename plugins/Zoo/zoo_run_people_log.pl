@@ -26,7 +26,7 @@ $task{$me}{code} = sub {
 	$stats->createStatDaily("zoo_counts", "0");	
 
 	slashdLog('Zoo fof/eof Begin');
-	my $people = $zoo->getZooUsersForProcessing();
+	my $people = $zoo->getZooUsersForProcessing() || [];
 	slashdLog('Zoo fof/eof Processing ' . scalar(@$people) . ' people');
 	# Each job represents someone who has added or removed someone as a friend/foe. -Brian
 	for my $person (@$people) {

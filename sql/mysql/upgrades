@@ -2618,8 +2618,6 @@ INSERT INTO string_param (type, code, name) VALUES ('extra_types','list','List')
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','story','Story');
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','comment','Comment');
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_32, Start of T_2_5_0_33 - 2004/10/12
 
 ############################################################
@@ -2691,6 +2689,8 @@ ALTER TABLE users TYPE=InnoDB;
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_34, Start of T_2_5_0_35 - 2004/10/26
 
