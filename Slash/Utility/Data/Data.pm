@@ -1859,18 +1859,17 @@ sub parseDomainTags {
 
 	my $user = getCurrentUser();
 
-	# default is 2
-	my $udt = exists($user->{domaintags}) ? $user->{domaintags} : 2;
-
-	$udt =~ /^(\d+)$/;			# make sure it's numeric, sigh
-	$udt = 2 if !length($1);
+	# The default is 2 ("always show");  note this default is enforced in
+	# prepareUser().  Note also that if I were being smart I'd use
+	# constants for 0, 1 and 2...
+	my $udt = $user->{domaintags};
 
 	my $want_tags = 1;			# assume we'll be displaying the [domain.tags]
 	$want_tags = 0 if			# but, don't display them if...
 		$udt == 0			# the user has said they never want the tags
 		|| (				# or
 			$udt == 1		# the user leaves it up to us
-			and $recommended	# and we think the poster has earned tagless posting
+			&& $recommended		# and we think the poster has earned tagless posting
 		);
 
 	if ($want_tags && !$notags) {

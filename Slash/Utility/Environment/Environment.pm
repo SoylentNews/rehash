@@ -1269,6 +1269,7 @@ sub prepareUser {
 	$user->{exboxes}	= _testExStr($user->{exboxes}) if $user->{exboxes};
 	$user->{extid}		= _testExStr($user->{extid}) if $user->{extid};
 	$user->{points}		= 0 unless $user->{willing}; # No points if you dont want 'em
+	$user->{domaintags}	= 2 if !defined($user->{domaintags}) || $user->{domaintags} !~ /^\d+$/;
 
 	# This is here so when user selects "6 ish" it
 	# "posted by xxx around 6 ish" instead of "on 6 ish"
@@ -1286,11 +1287,12 @@ sub prepareUser {
 		$user->{currentPage} = 'misc';
 	}
 
-	if (($user->{currentPage} eq 'article'
-		|| $user->{currentPage} eq 'comments')
-		&& ($user->{commentlimit} > $constants->{breaking}
-		&& $user->{mode} ne 'archive'
-		&& $user->{mode} ne 'metamod')) {
+	if (	   ( $user->{currentPage} eq 'article'
+			|| $user->{currentPage} eq 'comments' )
+		&& ( $user->{commentlimit} > $constants->{breaking}
+			&& $user->{mode} ne 'archive'
+			&& $user->{mode} ne 'metamod' )
+	) {
 		$user->{commentlimit} = int($constants->{breaking} / 2);
 		$user->{breaking} = 1;
 	} else {
