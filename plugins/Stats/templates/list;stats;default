@@ -1,0 +1,85 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+list
+__template__
+[% constants.sitename %] Moderation Stats for [% day %]
+[% PROCESS titlebar title => "Available Stats for Dumping" %]
+
+<FORM METHOD="POST" ACTION="[% env.script_name %]">
+
+[% PROCESS formLabel value => "Section" %]
+[% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
+
+<INPUT TYPE="hidden" NAME="op" VALUE="list">
+<INPUT TYPE="submit">
+</FORM>
+
+<P>
+
+[% IF form.stats_section && stats_data.${form.stats_section}.names %]
+    [% PROCESS formLabel value => "Individual Categories" %]
+    <FORM METHOD="POST" ACTION="[% env.script_name %]">
+        [% Slash.createSelect('stats_name', stats_data.${form.stats_section}.names, form.stats_name, 1) %]
+
+        &nbsp;&nbsp;Days: <INPUT TYPE="text"   NAME="stats_days" VALUE="[% form.stats_days || 7 %]" MAXLENGTH="4" SIZE="4">
+        <INPUT TYPE="hidden" NAME="stats_section" VALUE="[% form.stats_section %]">
+        <INPUT TYPE="hidden" NAME="op" VALUE="list">
+        <INPUT TYPE="submit">
+    </FORM>
+
+
+    [% IF form.stats_name %]
+        <P>
+        [% stats_total = 0 %]
+        [% FOREACH day = stats_data.${form.stats_section}.keys.sort;
+        	NEXT IF day == "names";
+        	stats_num = stats_data.${form.stats_section}.${day}.${form.stats_name};
+        	stats_total = stats_total + stats_num %]
+        	[% day %]: [% stats_num %]<BR>
+        [% END %]
+	<B>Total: [% stats_total %]</B>
+    [% END %]
+
+
+    [% stats_name_pre = {} %]
+    [% FOREACH myname = stats_data.${form.stats_section}.names.grep('_');
+        matches = myname.match('^([a-zA-Z0-9]+)_');
+        stats_name_pre.${matches.0} = matches.0;
+    END %]
+
+    [% PROCESS formLabel value => "Grouped Categories" %]
+    <FORM METHOD="POST" ACTION="[% env.script_name %]">
+        [% Slash.createSelect('stats_name_pre', stats_name_pre, form.stats_name_pre, 1) %]
+
+        &nbsp;&nbsp;Days: <INPUT TYPE="text"   NAME="stats_days" VALUE="[% form.stats_days || 7 %]" MAXLENGTH="4" SIZE="4">
+        <INPUT TYPE="hidden" NAME="stats_section" VALUE="[% form.stats_section %]">
+        <INPUT TYPE="hidden" NAME="op" VALUE="list">
+        <INPUT TYPE="submit">
+    </FORM>
+
+
+    [% IF form.stats_name_pre %]
+      [% FOREACH myname = stats_data.${form.stats_section}.names.grep("^${form.stats_name_pre}") %]
+        <P><I>[% myname %]</I><BR>
+        [% stats_total = 0 %]
+        [% FOREACH day = stats_data.${form.stats_section}.keys.sort;
+        	NEXT IF day == "names";
+        	stats_num = stats_data.${form.stats_section}.${day}.${myname};
+        	stats_total = stats_total + stats_num %]
+        	[% day %]: [% stats_num %]<BR>
+        [% END %]
+	<B>Total: [% stats_total %]</B>
+      [% END %]
+    [% END %]
+[% END %]
+__seclev__
+1000

@@ -1,8 +1,10 @@
 name=Stats
 description="Stats system"
-mysql_dump=mysql_dump
+htdoc=stats.pl
+mysql_dump=dump
 mysql_schema=mysql_schema
 task=adminmail.pl
 template=templates/data;adminmail;default
 template=templates/display;adminmail;default
 template=templates/display;modmail;default
+template=templates/list;stats

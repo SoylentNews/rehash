@@ -5,6 +5,12 @@
 
 package Slash::Stats;
 
+=head1 NAME
+
+Slash::Stats - Stats plugin for Slash
+
+=cut
+
 use strict;
 use DBIx::Password;
 use Slash;
@@ -684,6 +690,41 @@ sub countDaily {
 	return \%returnable;
 }
 
+
+sub getAllStats {
+	my($self, $options) = @_;
+	my $table = 'stats_daily';
+	my $sel   = 'name, value, section, day';
+	my $extra = 'ORDER BY section, day, name';
+	my @where;
+
+	if ($options->{section}) {
+		push @where, 'section = ' . $self->sqlQuote($options->{section})
+	}
+
+	if ($options->{days}) {
+		push @where, sprintf(
+				'(day > DATE_SUB(NOW(), INTERVAL %d DAY))',
+				$options->{days} + 1
+			) if $options->{days};
+	}
+
+	my $data = $self->sqlSelectAll($sel, $table, join(' AND ', @where), $extra) or return;
+	my %returnable;
+
+	for my $d (@$data) {
+		# $returnable{SECTION}{DAY}{NAME} = VALUE
+		$returnable{$d->[2]}{$d->[3]}{$d->[0]} = $d->[1];
+
+		$returnable{$d->[2]}{names} ||= [];
+		push @{$returnable{$d->[2]}{names}}, $d->[0]
+			unless grep { $_ eq $d->[0] } @{$returnable{$d->[2]}{names}};
+	}
+
+	return \%returnable;
+}
+
+
 sub DESTROY {
 	my($self) = @_;
 	#$self->sqlDo("DROP TABLE $self->{_table}");
@@ -695,28 +736,10 @@ sub DESTROY {
 
 __END__
 
-# Below is the stub of documentation for your module. You better edit it!
-
-=head1 NAME
-
-Slash::Stats - Stats system splace
-
-=head1 SYNOPSIS
-
-	use Slash::Stats;
-
-=head1 DESCRIPTION
-
-This is the Slash stats system.
-
-Blah blah blah.
-
-=head1 AUTHOR
-
-Brian Aker, brian@tangent.org
-
 =head1 SEE ALSO
 
-perl(1).
+Slash(3).
 
-=cut
+=head1 VERSION
+
+$Id$
