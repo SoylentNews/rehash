@@ -34,21 +34,28 @@ sub new {
 sub getActive {
 	my ($self, $limit) = @_;
 
-	my $all;
+	my $sid;
 
 	unless($limit) {
-		$all = $self->sqlSelectAllHashrefArray(
-			"story_param.sid as sid, story_param.url as url, title", 
-			"story_param, stories", 
-			"name = 'active' AND value = 'yes' AND stories.sid = story_param.sid",
-			"ORDER BY title");
+		$sid = $self->sqlSelectColArrayref(
+			"sid", 
+			"story_param", 
+			"name = 'active' AND value = 'yes'");
 	} else {
-		$all = $self->sqlSelectAllHashrefArray(
-			"story_param.sid as sid, story_param.url as url, title", 
+		$sid = $self->sqlSelectColArrayref(
+			"story_param.sid", 
 			"story_param, stories", 
 			"name = 'active' AND value = 'yes' AND stories.sid = story_param.sid",
-			"ORDER BY date DESC DESC LIMIT $limit");
+			"ORDER BY time DESC LIMIT $limit");
 	}
+	my $in_list = '"';
+	$in_list .= join('","', @$sid);
+	$in_list .= '"';
+	my $all = $self->sqlSelectAllHashrefArray(
+		"story_param.sid as sid, story_param.value as url, title", 
+		"story_param, stories", 
+		"story_param.sid IN ($in_list) AND story_param.name = 'url' AND stories.sid = story_param.sid",
+		"ORDER BY title DESC");
 
 	return $all;
 }
