@@ -186,8 +186,19 @@ sub main {
 
 	$form->{pid} ||= "0";
 
-	my $title = $constants->{ubb_like_forums} ? 'Forums' : 'Comments';
-	header($discussion ? $discussion->{'title'} : $title, $section) or return;
+	my $title = 'Comments';
+
+	if ($discussion && $constants->{ubb_like_forums}
+		&& ($discussion->{type} eq 'recycle')) {
+		$title = $constants->{sitename} . ": Forums - "
+			. $discussion->{'title'};
+	} elsif ($discussion) {
+		$title = $discussion->{'title'};
+	} elsif ((!$discussion) && $constants->{ubb_like_forums}) {
+		$title = 'Forums';
+	}
+
+	header($title, $section) or return;
 
 	if ($user->{is_anon} && length($form->{upasswd}) > 1) {
 		print getError('login error');
