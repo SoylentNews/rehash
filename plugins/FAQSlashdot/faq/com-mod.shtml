@@ -303,17 +303,26 @@ needles. And to keep the children who like to spam Slashdot in check.
 <br><i><font size=-1>Last Modified: 6/19/00</font></i>
 <br><a NAME="cm605"></a>
 <h2>
-Do editors moderate?</h2>
+Do Editors Moderate?</h2>
 The Slashdot Editors have unlimited mod points, and we have no problem
-using them.&nbsp; These moderations represent approximately 8% of all moderation,
-and according to Meta Moderation, the fairness of these comments is statistically
-indistinguishable from the moderation of non admin users (92-93% of moderations
-are ruled 'Fair'). You can argue that this is somehow inherently unfair,
+using them.&nbsp; Our moderations represent about 3% of all moderation,
+and according to Meta Moderation, the fairness of these moderations are either
+statistically indistinguishable from non-admin users, or substantially better.
+95.1% of non admin upmods are fair, and 94.7% of admin mods are fair.
+79.1% of non admin downmods are fair, and 83.6% of admin downmods are fair.
+The editors tend to find crapfloods and moderate them down- a single malicious
+user can post dozens comments which requires several users to moderate them down, 
+but a single admin can do it in seconds.  This tends to 
+remove the obvious garbage from the discussion so that the general population
+can use their mod points to determine good.  Otherwise a few crapfloods and suck
+a lot of moderator points out of the system and throw things out of whack.
+
+<P>You can argue that allowing admins unlimited moderation is somehow inherently unfair,
 but one of the goals of Slashdot is to produce readable content for a variety
-of readers with a variety of reading habits, and this process improves discussions
-for the vast majority of Slashdot Readers, so it will stay this way.
+of readers with a variety of reading habits.  I believe this process improves 
+discussions for the vast majority of Slashdot Readers, so it will stay this way.
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 1/24/02</font></i>
+<br><i><font size=-1>Last Modified: 4/12/03</font></i>
 <br><a NAME="cm610"></a>
 <h2>
 What are thresholds?</h2>
