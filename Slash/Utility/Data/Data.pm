@@ -2995,11 +2995,11 @@ sub countTotalVisibleKids {
 		$total += $num_kids;
 
 		if ($constants->{ubb_like_forums}) {
-			if ($date_test > $last_updated) {
+			if ($date_test gt $last_updated) {
 				$last_updated     = $date_test;
 				$last_updated_uid = $uid;
 			}
-			if ($comments->{$cid}{date} > $last_updated) {
+			if ($comments->{$cid}{date} gt $last_updated) {
 				$last_updated     = $comments->{$cid}{date};
 				$last_updated_uid = $comments->{$cid}{uid};
 			}
