@@ -453,9 +453,7 @@ INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Ta
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
 
-# SLASHDOT LAST UPDATED HERE
-
-# End of T_2_3_0_28
+# End of T_2_3_0_28, Start of T_2_3_0_29
 
 INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus, and goodkarma)');
 INSERT INTO vars (name, value, description) VALUES ('karma_obfuscate','0','Should users see, not their numeric karma score, but instead an adjective describing their approximate karma?');
@@ -473,8 +471,13 @@ UPDATE blocks SET section="index" WHERE section="all_sections";
 
 INSERT INTO vars (name, value, description) VALUES ('draconian_charrefs','0','Enable strictest-possible rules for disallowing HTML entities/character references?');
 
-INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, '0');
-
 # Let's not forget to put the sections_contained table in the upgrades file
 # once it becomes appropriate to do so.
+
+# Forgot this one a little while ago I think.
+INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|http|gopher|mailto|news|nntp|telnet|wais|https','Schemes that can be used in comment links without being stripped of bogus chars');
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_29
 
