@@ -647,11 +647,12 @@ sub getSitesRDF {
 sub getSectionInfo {
 	my($self) = @_;
 	$self->sqlConnect();
+	my $defaultsection = getCurrentStatic('defaultsection');
 	# Make more sense to make this a getDescriptions call -Brian
 	my $sections = $self->sqlSelectAllHashrefArray(
 		"section, url",
 		"sections",
-		"type='contained' ",
+		"type='contained' AND section != '$defaultsection' ",
 		"ORDER BY section"
 	);
 
