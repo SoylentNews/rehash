@@ -218,17 +218,23 @@ __template__
 		[% commentstatus_select %]
 		<INPUT TYPE="TEXT" NAME="time" VALUE="[% storyref.time %]" size="19"><BR>
 
+		[% IF constants.plugin.PollBooth %]
+			[ Poll ID:  [% storyref.qid %]
+			[% IF storyref.qid %] 
+				<A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit">Related Poll</A> | <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=detach">Detach Related Poll</A> | 
+<A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;op=linkstory">Link Story to Different Poll</A>
+			[% ELSE %]
+				<A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=preview&amp;question=[% storyref.title | fixparam %]&amp;polltype=story&amp;date=[% storyref.time | fixparam %]&amp;section=[% storyref.section | fixparam %]&amp;topic=[% storyref.tid | fixparam %]">Create Poll</A>
+| <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;op=linkstory">Link Story to Existing Poll</A>			
+			[% END %] ]<BR>
+		[% END %]
+
 		[ <INPUT TYPE="checkbox" NAME="fixquotes" [% fixquotes_check %]>fixquotes
 		| <INPUT TYPE="checkbox" NAME="autonode" [% autonode_check %]>autonode
 		| <INPUT TYPE="checkbox" NAME="shortcuts" [% shortcuts_check %]>story shortcuts
 
 		[% IF sid %]
-		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward | 
-			[% IF storyref.qid %] 
-				<A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit">Related Poll</A>
-			[% ELSE %]
-				<A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=preview&amp;question=[% storyref.title | fixparam %]&amp;polltype=story&amp;date=[% storyref.time | fixparam %]&amp;section=[% storyref.section | fixparam %]&amp;topic=[% storyref.tid | fixparam %]">Create Poll</A>
-			[% END %]
+		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward  
 			[% IF constants.plugin.Blob && constants.story_files %]
 				| <A HREF="[% constants.real_rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% sid %]">Attach File</A>
 			[% END %]
