@@ -10,3 +10,5 @@ template=templates/listpolls;pollBooth;default
 template=templates/pollbooth;misc;default
 template=templates/savepoll;pollBooth;default
 template=templates/vote;pollBooth;default
+template=templates/detachpoll;pollBooth;default
+template=templates/linkstory;pollBooth;default

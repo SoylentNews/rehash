@@ -24,6 +24,12 @@ __template__
 [% CASE 'edit_poll_title' %]
 	[% IF qid %]Editing Poll #[% qid %][% ELSE %]New Poll[% END %]
 
+[% CASE 'invalid_sid' %]
+	[% returnme.data_constant = 1 %]
+	Invalid Story Id specified.  Please correct and try to save again.
+[% CASE 'attached_to_other' %]
+	[% returnme.data_constant = 1 %]
+	Story is already attatched to a different poll.  Please detach poll from that story before saving.
 [% CASE 'invalid' %]
 	[% returnme.data_constant = 1 %]
 	Invalid poll!<BR>

@@ -40,6 +40,10 @@ __template__
 
 				[% END %]
 				<BR>
+				[% IF type == "story" %]
+				&nbsp;&nbsp;&middot;<A HREF="[% constants.rootdir %]/article.pl?sid=[% question.9 | fixparam %]">[% question.8 %]</A>
+				<BR>
+				[% END %]
 			[% END %]
 		</TD>
 		<TD VALIGN="TOP" ALIGN="RIGHT">

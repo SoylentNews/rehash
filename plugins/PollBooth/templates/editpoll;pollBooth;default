@@ -22,6 +22,9 @@ __template__
 [% USE Slash %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD VALIGN="TOP">
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
+	[% IF warning.invalid_sid %]<B>Story ID specified does not exist invalid</B><BR>[% END %]
+	[% IF warning.attached_to_other %]<B>Story is already attached to another poll -- detach poll from that story before attaching this one</B><BR>[% END %]
+	
 	[% PROCESS formLabel value => "The Question" comment => "followed by the total number of voters so far" %]
 	<INPUT TYPE="TEXT" NAME="question" VALUE="[% question.question %]" SIZE="40">
 	<INPUT TYPE="TEXT" NAME="voters" VALUE="[% question.voters %]" SIZE="5"><BR>
@@ -68,7 +71,7 @@ Story Related Display - Poll is displayed on the specified story's page<BR>
 	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
 
 [% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear on the story's page" %]
-        <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20"> [% IF question.sid %]<A HREF="[% constants.rootdir %]/article.pl?sid=[% question.sid %]">Related story</A> [% END %]<BR>
+        <INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20" >[% IF question.sid %]<A HREF="[% constants.rootdir %]/article.pl?sid=[% question.sid %]">Related story</A> [% END %] [% IF question.sid && story && qid %]| <A HREF="[% constants.rootdir %]/pollBooth.pl?op=detach&amp;sid=[% question.sid | fixparam %]&amp;qid=[% qid %]">Detach Poll from Story</A>[% END %]<BR>
 	<font size="2">(time, section, topic, and polltype will be set based on related story's settings)</font><BR>
 	[% IF story %]
 		*<font size="2">These values set from related story</font><BR>
