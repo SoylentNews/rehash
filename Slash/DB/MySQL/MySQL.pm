@@ -1360,7 +1360,7 @@ sub createAccessLog {
 	$hostip = md5_hex($hostip);
 	my $subnetid = getCurrentUser('subnetid') || $hostip;
 
-	if ($op eq 'index' && $dat =~ /(.*)\/?*/) {
+	if ($op eq 'index' && $dat =~ /^([^\/]*)\/?.*?$/) {
 		$section = $1;
 	}
 
