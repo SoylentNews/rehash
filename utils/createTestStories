@@ -85,8 +85,11 @@ $constants = getCurrentStatic();
 		my $time = UnixDate(ParseDateString(
 			"epoch ".get_time($opts{t})),
 			"%Y-%m-%d %H-%M-%S");
+
+		# 40% of stories have 1 topic ID, 60% have 2
 		my $tid = getRandomTopicID();
-		my $stid = getRandomTopicID();
+		my $stid = rand(1) < 0.4 ? 0 : getRandomTopicID();
+
 		my $section = getRandomSection();
 		my $displaystatus = 0;
 		if ($section =~ /^(articles|index)$/) {
@@ -115,9 +118,8 @@ $constants = getCurrentStatic();
 			rendered	=> undef,
 		};
 
-# This logic is not quite right -Brian
 		my $sid = $slashdb->createStory($story);
-		$slashdb->setStoryTopics($story->{sid}, createStoryTopicData($self, $story);
+		$slashdb->setStoryTopics($story->{sid}, createStoryTopicData($self, $story));
 		my $reloDB = getObject("Slash::Relocate");
 		if ($reloDB && $sid) {
 			$slashdb->setStory($sid, { 
