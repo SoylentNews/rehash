@@ -258,8 +258,8 @@ sub sqlSelectMany {
 	$sql .= "  WHERE $where " if $where;
 	$sql .= "        $other" if $other;
 
+	$self->sqlConnect;
 	my $sth = $self->{_dbh}->prepare_cached($sql);
-	$self->sqlConnect();
 	if ($sth->execute) {
 		return $sth;
 	} else {
