@@ -38,7 +38,7 @@ use Time::HiRes;
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
 
-$VERSION   	= '2.003000';  # v2.3.0
+$VERSION   	= '2.005000';  # v2.5.0
 # note: those last two lines of functions will be moved elsewhere
 @EXPORT		= qw(
 	constrain_score
