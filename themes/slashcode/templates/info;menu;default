@@ -25,7 +25,7 @@ __template__
 	{ link = "$constants.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
 	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Recent",		sel_label = "recent" },
 	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
-	{ link = "$constants.rootdir/slashguide.shtml",	label = "Help",			sel_label = "help" },
+	{ link = "$constants.rootdir/slashguide.shtml",		label = "Help",			sel_label = "help" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; %]
 
