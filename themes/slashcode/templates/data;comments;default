@@ -17,16 +17,12 @@ data
 __template__
 [% 
 	label = 'discussion';
-	labelcap = 'Discussion';
 %]
 
 [% SWITCH value %]
 
 [% CASE 'label' %]
 	[% label %]
-
-[% CASE 'labelcap' %]
-	[% labelcap %]
 
 [% CASE 'users_no_discussions' %]
 	This user has created no [% label %]s.
@@ -35,16 +31,16 @@ __template__
 	There are no [% label %]s listed here.
 
 [% CASE 'active_discussions' %]
-	Several Active [% labelcap %]s 
+	Several Active [% label.ucfirst %]s 
 
 [% CASE 'all_discussions' %]
-	All Active [% labelcap %]s 
+	All Active [% label.ucfirst  %]s 
 
 [% CASE 'user_discussions' %]
-	User Created  [% labelcap %]s
+	User Created  [% label.ucfirst  %]s
 
 [% CASE 'user_discussion' %]
-	[% labelcap %]s created by [% name %]
+	[% label.ucfirst  %]s created by [% name %]
 
 [% CASE 'no_such_sid' %]
 	This is not the [% label %] you are looking for.

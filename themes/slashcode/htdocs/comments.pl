@@ -277,7 +277,6 @@ sub commentIndex {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my $label = getData('label');
-	my $labelcap = getData('labelcap');
 
 	if ($form->{all}) {
 		titlebar("100%", getData('all_discussions'));
@@ -513,7 +512,6 @@ sub createDiscussion {
 	my $id;
 
 	my $label = getData('label');
-	my $labelcap = getData('labelcap');
 
 	if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
 		# if form.url is empty, try the REFERER.  if it
@@ -580,7 +578,6 @@ sub createDiscussion {
 		slashDisplay('newdiscussion', { 
 			error 		=> $error, 
 			'label'		=> $label,
-			'labelcap'	=> $labelcap,
 			form		=> $newform,
 			format_select	=> $format_select,
 			id 		=> $id,

@@ -12,7 +12,7 @@ __name__
 listStories
 __template__
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
-		[% IF constants.label_ui_flag %]
+		[% IF constants.label_ui %]
 	<TR>
 		<TD><B>Edit</B></TD>
 		<TD><B>Preview</B></TD>

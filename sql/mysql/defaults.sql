@@ -556,4 +556,8 @@ INSERT INTO vars (name, value, description) VALUES ('user_submitter_display_defa
 INSERT INTO vars (name, value, description) VALUES ('users_show_info_seclev','0','Minimum seclev to view a user\s info');
 INSERT INTO vars (name, value, description) VALUES ('users_speed_limit','20','How fast a user can change their prefs');
 INSERT INTO vars (name, value, description) VALUES ('writestatus','ok','Simple Boolean to determine if homepage needs rewriting');
+INSERT INTO vars (name, value, description) VALUES ('label_ui','0','Whether to label some things in the admin ui');
+INSERT INTO vars (name, value, description) VALUES ('enable_index_topic','','set this to the value in string param for index topic \(something like "topic_4"\)');
+INSERT INTO vars (name, value, description) VALUES ('get_titles','0','get the story titles');
+INSERT INTO vars (name, value, description) VALUES ('organise_stories','','organise story blocks');
 
