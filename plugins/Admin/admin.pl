@@ -56,10 +56,6 @@ sub main {
 			function 	=> \&editStory,
 			seclev		=> 100,
 		},
-		listtopics	=> {
-			function 	=> \&listTopics,
-			seclev		=> 10000,
-		},
 		blocks 		=> {	# blockdelete_cancel,blockdelete_confirm,
 					# blockdelete1,blockdelete2,blocksave,
 					# blockrevert,blocksavedef,blockdelete,blocknew,
@@ -753,26 +749,6 @@ sub topicSave {
 	}
 
 	$form->{nexttid} = $form->{tid};
-}
-
-##################################################################
-sub listTopics {
-	my($form, $slashdb, $user, $constants) = @_;
-	my $imagedir = $constants->{imagedir};
-
-	my $topics = $slashdb->getTopics();
-
-	for ( keys %$topics) {
-		$_->{image} = "$constants->{imagedir}/topics/$_->{image}" if $_->{image} =~ /^\w+\.\w+$/;
-	}
-
-	my $title = getTitle('listTopics-title');
-
-	slashDisplay('listTopics', {
-			topics 		=> [ values %$topics ],
-			title		=> $title
-		}
-	);
 }
 
 ##################################################################
