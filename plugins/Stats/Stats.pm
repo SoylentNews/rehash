@@ -1379,8 +1379,10 @@ sub getRelocatedLinkHitsByUrl {
 	my $top_links = [];
 	foreach my $l (@$ls) {
 		my($id) = $l->{query_string} =~/id=([^&]*)/;
-		my $url = $self->sqlSelect("url","links","id=".$self->sqlQuote($id));
-		push @$top_links, { url => $url, count => $l->{cnt} }; 
+		my($url, $stats_type) = $self->sqlSelect("url, stats_type","links","id=".$self->sqlQuote($id));
+		push @$top_links, { url => $url,
+				  count => $l->{cnt},
+			     stats_type => $stats_type }; 
 	}
 	return $top_links;
 }
