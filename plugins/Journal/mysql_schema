@@ -20,15 +20,6 @@ CREATE TABLE journals_text (
 	PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS journal_friends;
-CREATE TABLE journal_friends (
-	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-	uid MEDIUMINT UNSIGNED NOT NULL,
-	friend MEDIUMINT UNSIGNED NOT NULL,
-	UNIQUE jackandjill (uid,friend),
-	PRIMARY KEY (id)
-);
-
 DROP TABLE IF EXISTS journal_themes;
 CREATE TABLE journal_themes (
 	id TINYINT UNSIGNED NOT NULL auto_increment,
