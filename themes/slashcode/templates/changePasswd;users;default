@@ -7,6 +7,8 @@ Change password form
 * author_flag = user is author
 * title = passed to titlebar
 * session = popup for session login
+* got_old_pass = set to 1 if you've already been passed the old password correctly 
+
 
 __title__
 
@@ -42,6 +44,14 @@ __template__
 		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
 [% END %]
 		<B>Session Login</B> [% session %]<BR>
+[% IF !admin_flag %]
+		[% IF got_oldpass %]
+			<INPUT TYPE="HIDDEN" NAME="oldpass" VALUE="[% form.oldpass %]">	
+		[% ELSE %]
+			Enter your <b>current</b> password <BR>
+			<INPUT TYPE="PASSWORD" NAME="oldpass" SIZE="20" MAXLENGTH="20" VALUE=""><BR>
+		[% END %]
+[% END %]
 		<B>Password</B> Enter a new password twice to change it.
 		(must be 6-20 chars long)</B><BR>
 		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">

@@ -25,6 +25,7 @@ __template__
 	{ link = "$constants.rootdir/users.pl?op=listbanned",	label = "Banned",		sel_label = "banned" },
 	{ link = "$constants.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
 	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Posting",		sel_label = "recent" },
+	{ link = "$constants.rootdir/admin.pl?op=recent_mods",	label = "Mods",			sel_label = "recent_mods" },
 	{ link = "$constants.rootdir/admin.pl?op=recent_requests", label = "Reqs",		sel_label = "requests" },
 	{ link = "$constants.rootdir/admin.pl?op=recent_subs",	label = "Subs",			sel_label = "subs" },
 	{ link = "$constants.rootdir/admin.pl?op=recent_webheads", label = "Webheads",		sel_label = "webheads" },

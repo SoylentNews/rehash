@@ -16,7 +16,7 @@ Prints table detailing history of moderation of a comment, or a user, or
 	done to; "from" means each nickname/uid is the moderator
 * both_mods = if true (1), this is an ipid or subnetid page, and both
 	moderator and moderatee columns are needed
-
+* timestamp_hr = time to place an <HR> at
 __title__
 
 __page__
@@ -26,9 +26,8 @@ en_US
 __name__
 modCommentLog
 __template__
-
 [% IF mod_admin %]
-
+[% total_mod_val=0; total_mod_score=0 %]
 <TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	[% IF mods.size > 0  %]
 	<TR BGCOLOR="[% user.bg.3 %]">
@@ -44,8 +43,9 @@ __template__
 		<TH><FONT COLOR="[% user.fg.3 %]"> time </FONT></TH>
 		<TH>&nbsp;</FONT></TH>
 	</TR>
-
+		[% hr_shown = 0 %]
 		[% FOREACH moderation = mods %]
+		[% IF (timestamp_hr and timestamp_hr.gt(moderation.ts) and !hr_shown); hr_shown=1 %]<TR><TD COLSPAN="[% IF both_mods %]9[% ELSE %]8[% END %]"><HR></TD></TR>[% END %]
 	<TR>
 [% IF show_cid %]
 		<TD ALIGN="RIGHT">
@@ -67,10 +67,12 @@ __template__
 [% IF both_mods %]<TD> &nbsp; <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% moderation.ipid2 | strip_attribute %]&amp;fieldname=ipid">[% moderation.ipid2_vis %]</A> </TD>
 		<TD> [% moderation.nickname2 | strip_literal %] (<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=[% moderation.uid2 %]">[% moderation.uid2 %]</A>) &nbsp; </TD>[% END %]
 [% END %]
-		<TD> [% moderation.ts %]</TD>
+		<TD> [% moderation.ts.substr(5,-3) %]</TD>
 		<TD>[% IF moderation.active %] &nbsp; [% ELSE %] <i>in</i> [% END %] </TD>
 	</TR>
+		[% total_mod_val = total_mod_val + moderation.val; total_mod_score = total_mod_score + moderation.score %]
 		[% END %]
+		<TR><TD><B>Totals</B></TD><TD ALIGN="RIGHT">[% total_mod_score %]</TD><TD ALIGN="RIGHT"><B>[% IF total_mod_val > 0; "+"; END; total_mod_val %]</B></TD><TD colspan="[% IF both_mods %]6[% ELSE %]5[% END %]"></TD></TR>
 	[% END %]
 
 </TABLE>

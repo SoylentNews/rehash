@@ -104,6 +104,11 @@ __template__
 [% PROCESS titlebar width="100%" title="Password too short" %]
 	[% END %]
 	Password is too short and was not changed.<BR>
+[% CASE 'saveuser_badoldpass_err' %]
+	[% IF titlebar %]
+[% PROCESS titlebar width="100%" title="Incorrect current password" %]
+	[% END %]
+	Current password entered is incorrect.<BR><BR>
 
 [% CASE 'anon_validation_attempt' %]
 [% PROCESS titlebar width="100%" title="Anonymous User validation attempt" %]

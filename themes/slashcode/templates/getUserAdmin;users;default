@@ -158,6 +158,12 @@ __template__
 				[% IF accesslist.adminnick %]<B>By:</B> [% accesslist.adminnick %][% END %]
 				</TD>
 			</TR>
+			[% IF useredit.nonuid %]
+			<TR>
+				<TD VALIGN="TOP"><B>Estimated Users</B></TD>
+				<TD>[% accesslist.estimated_users %]</TD>
+			</TR>
+			[% END %]
 			[% IF ! useredit.nonuid %]
 			<TR>
 				<TD WIDTH="100"><B>Hits<B></TD>
