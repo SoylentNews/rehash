@@ -617,7 +617,12 @@ sub moderatorCommentLog {
 		$reasonTotal++;
 	}
 
-	my @reasonsTop = _getTopModReasons($reasonTotal, @reasonHist);
+	my $listed_reason = 0;
+	if ($type eq 'cid') {
+		my $val_q = $slashdb->sqlQuote($value);
+		$listed_reason = $slashdb->sqlSelect("reason", "comments", "cid=$val_q");
+	}
+	my @reasonsTop = _getTopModReasons($reasonTotal, $listed_reason, \@reasonHist);
 
 	my $show_cid    = ($type eq 'cid') ? 0 : 1;
 	my $show_modder = $mod_admin ? 1 : 0;
@@ -670,14 +675,14 @@ sub moderatorCommentLog {
 # the top 3 mods performed and their percentages, rounded to the
 # nearest 10%, sorted largest to smallest.
 sub _getTopModReasons{
-	my($reasonTotal, @reasonHist) = @_;
+	my($reasonTotal, $listed_reason, $reasonHist_ar) = @_;
 	return ( ) unless $reasonTotal;
 	my $top_needed = 3;
 	my @reasonsTop = ( );
 
 	# Algorithm by MJD in Perl Quiz of the Week #7
 	# http://perl.plover.com/qotw/r/solution/007
-	my @p = map { $_*10/$reasonTotal } @reasonHist;
+	my @p = map { $_*10/$reasonTotal } @$reasonHist_ar;
 	my @r = map { int($_+0.5) } @p;
 	my @e = map { $p[$_] - $r[$_] } (0..$#r);
 	my $total_error = 0;
@@ -723,6 +728,8 @@ sub _getTopModReasons{
 		};
 	}
 	@reasonsTop = sort {
+		($b->{reason} == $listed_reason) <=> ($a->{reason} == $listed_reason)
+		||
 		$b->{percent} <=> $a->{percent}
 		||
 		$a->{reason} <=> $b->{reason}
