@@ -1288,6 +1288,8 @@ sub _csq_bonuses {
 	# already qualify to have that bonus hiked.
 	my $num = $retval->{m1_tokens}{num};
 	return if $num <= 0;
+	my $num_orig = $num;
+	my @applied = qw( );
 
 	# "Slashdot provides an existence proof that the basic idea
 	# of distributed moderation is sound. ... There is still
@@ -1319,6 +1321,7 @@ sub _csq_bonuses {
 	# was already half over."
 	if ($mod_hr->{secs_before_mod} < $constants->{m2_consequences_bonus_earlymod_secs}) {
 		$num *= $constants->{m2_consequences_bonus_earlymod_tokenmult} || 1;
+		push @applied, 'earlymod';
 	}
 
 	# If a Fair moderation was applied to a comment not posted
@@ -1333,14 +1336,19 @@ sub _csq_bonuses {
 	# quintile 1 is the earliest 20%.
 	if ($mod_hr->{cid_percentile} > 80) {
 		$num *= $constants->{m2_consequences_bonus_quintile_5} || 1;
+		push @applied, 'quintile_5';
 	} elsif ($mod_hr->{cid_percentile} > 60) {
 		$num *= $constants->{m2_consequences_bonus_quintile_4} || 1;
+		push @applied, 'quintile_4';
 	} elsif ($mod_hr->{cid_percentile} > 40) {
 		$num *= $constants->{m2_consequences_bonus_quintile_3} || 1;
+		push @applied, 'quintile_3';
 	} elsif ($mod_hr->{cid_percentile} > 20) {
 		$num *= $constants->{m2_consequences_bonus_quintile_2} || 1;
+		push @applied, 'quintile_2';
 	} else {
 		$num *= $constants->{m2_consequences_bonus_quintile_1} || 1;
+		push @applied, 'quintile_1';
 	}
 
 	# If a Fair moderation was applied to a comment that was
@@ -1353,6 +1361,7 @@ sub _csq_bonuses {
 	# 1.40 for responses."
 	if ($mod_hr->{comment_pid}) {
 		$num *= $constants->{m2_consequences_bonus_replypost_tokenmult} || 1;
+		push @applied, 'reply';
 	}
 
 	# If a Fair moderation was applied to a comment while it
@@ -1375,9 +1384,13 @@ sub _csq_bonuses {
 	my $constname = "m2_consequences_bonus_pointsorig_$mod_hr->{points_orig}";
 	if (defined($constants->{$constname})) {
 		$num *= $constants->{$constname};
+		push @applied, "pointsorig_$mod_hr->{points_orig}";
 	}
 
-	return if $num == $retval->{m1_tokens}{num};
+printf STDERR "%s m2_consequences change from '%d' to '%.2f' because '%s' id %d cid %d uid %d\n",
+scalar(localtime), $num_orig, $num, join(" ", @applied), $mod_hr->{id}, $mod_hr->{cid}, $mod_hr->{uid};
+
+	return if $num == $num_orig;
 
 	$retval->{m1_tokens}{num} = sprintf("%+.3f", $num);
 }
