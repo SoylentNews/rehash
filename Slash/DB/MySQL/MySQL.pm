@@ -1342,16 +1342,27 @@ sub getNexusExtras {
 	return $answer;
 }
 
+sub getNexuslistFromChosen {
+	my($self, $chosen_hr) = @_;
+	return [ ] unless $chosen_hr;
+	my $rendered_hr = $self->renderTopics($chosen_hr);
+	my @nexuses = $self->getNexusTids();
+	@nexuses = grep { $rendered_hr->{$_} } @nexuses;
+	return [ @nexuses ];
+}
+
 ########################################################
+# XXXSECTIONTOPICS we should remove duplicates from the list
+# returned.  If 2 or more nexuses have the same extras_keyword,
+# that keyword should only be returned once.
 sub getNexusExtrasForChosen {
 	my($self, $chosen_hr) = @_;
 	return [ ] unless $chosen_hr;
 
-	my $rendered_hr = $self->renderTopics($chosen_hr);
-	my @nexuses = $self->getNexusTids();
-	@nexuses = grep { $rendered_hr->{$_} } @nexuses;
+	my $nexuses = $self->getNexuslistFromChosen($chosen_hr);
+
 	my $extras = [ ];
-	for my $nexusid (@nexuses) {
+	for my $nexusid (@$nexuses) {
 		my $ex_ar = $self->getNexusExtras($nexusid);
 		push @$extras, @$ex_ar;
 	}
