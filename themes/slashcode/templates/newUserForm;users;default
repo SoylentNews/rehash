@@ -18,7 +18,7 @@ __template__
 <TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
 [% PROCESS formkey_tag %]
 	<TR>
-		<TD><P>(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
+		<TD><P>(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-$</TT>, plus space,
 		are allowed in nicknames, and all others will be stripped out.)<BR>
 		</TD>
 	</TR>
