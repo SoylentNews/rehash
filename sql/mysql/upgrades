@@ -781,8 +781,6 @@ UPDATE stats_daily SET name='mod_points_lost_spent' WHERE name='mod_points_spent
 UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_points_spent_plus_1';
 UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_points_spent_minus_1';
 
-# USEPERL LAST UPDATED HERE
-
 ALTER TABLE users_info CHANGE people people MEDIUMBLOB;
 
 # Do not run this on Slashdot, I have already done it for the DB that matters -Brian
@@ -949,8 +947,6 @@ UPDATE menus SET label=CONCAT('~', label, ' ([% user.uid %])') WHERE menu='users
 
 # End of T_2_3_0_52, Start of T_2_3_0_53
 
-# USEPERL LAST UPDATED HERE
-
 ALTER TABLE moderatorlog ADD COLUMN spent tinyint DEFAULT '1' NOT NULL AFTER active;
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_entity','zwnj|zwj|lrm|rlm','Entities that approveCharref should always delete');
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_numeric','8204|8205|8206|8207|8236|8237|8238','Numeric references that approveCharref should always delete');
@@ -985,8 +981,6 @@ UPDATE users_prefs SET tzcode = 'EET' WHERE tzcode = 'EEST';
 # SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE people ADD index(person);
-
-# USEPERL LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('archive_delay_mod', '60', 'Days before moderator logs are expired');
 INSERT INTO vars (name, value, description) VALUES ('mod_stir_recycle_fraction', '1.0', 'What fraction of unused mod points get recycled back into the system?');
@@ -1025,14 +1019,16 @@ UPDATE modreasons SET unfairname='Unfunny' WHERE name='Funny';
 
 ALTER TABLE moderatorlog ADD INDEX ipid (ipid), ADD INDEX subnetid (subnetid);
 
-ALTER TABLE sections ADD	defaultdisplaystatus TINYINT DEFAULT '0' NOT NULL;
-ALTER TABLE sections ADD	defaultcommentstatus TINYINT DEFAULT '0' NOT NULL;
-ALTER TABLE sections ADD	defaulttopic TINYINT DEFAULT '1' NOT NULL;
-ALTER TABLE sections ADD	defaultsection section VARCHAR(30); /* Only set in collected sections */
-ALTER TABLE sections ADD	defaultsubsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
+ALTER TABLE sections ADD defaultdisplaystatus TINYINT DEFAULT '0' NOT NULL;
+ALTER TABLE sections ADD defaultcommentstatus TINYINT DEFAULT '0' NOT NULL;
+ALTER TABLE sections ADD defaulttopic TINYINT DEFAULT '1' NOT NULL;
+ALTER TABLE sections ADD defaultsection VARCHAR(30); /*  Only set in collected sections */
+ALTER TABLE sections ADD defaultsubsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
 UPDATE sections SET defaultsubsection=section WHERE type != "collected";
 # This only fixes it for default Slash sites
 UPDATE sections SET defaultsection='articles' WHERE section='index';
 # For Slashdot do the following, for any other site it will depend on the site:
 # UPDATE sections SET defaulttopic=99;
 ALTER TABLE sections DROP extras;
+
+# USEPERL LAST UPDATED HERE
