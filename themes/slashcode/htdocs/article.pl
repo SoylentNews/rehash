@@ -19,7 +19,15 @@ sub main {
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	$story = $reader->getStory($form->{sid});
+	my $sid = $form->{sid};
+	if ($sid =~ /^\d+$/) {
+		# Don't accept a stoid;  we need to be fed a sid to
+		# get to the right story.  This prevents crawling
+		# through article.pl?sid=1, article.pl?sid=2, etc.
+		$sid = "";
+	}
+
+	$story = $reader->getStory($sid);
 
 	# Set the $future_err flag if a story would be available to be
 	# displayed, except it is in the future, and the user is not
@@ -37,13 +45,15 @@ sub main {
 			$story = '';
 		}
 	}
+	my $stoid = 0;
+	$stoid = $story->{stoid} if $story && $story->{stoid};
 
 	# Yeah, I am being lazy and paranoid  -Brian
 	# Always check the main DB for story status since it will always be accurate -Brian
 	if ($story
 		&& !($user->{author} || $user->{is_admin})
 		#XXXSECTIONTOPICS verify this is still correct 
-		&& !$slashdb->checkStoryViewable($form->{sid})) {
+		&& !$slashdb->checkStoryViewable($stoid)) {
 		$story = '';
 	}
 
@@ -115,7 +125,7 @@ sub main {
 			},
 		};
 
-		my $topics = $reader->getStoryTopics($form->{sid}, 1);
+		my $topics = $reader->getStoryTopics($stoid, 1);
 		my @topic_desc = values %$topics;
 		my $a;
 		if (@topic_desc == 1) {
@@ -158,7 +168,7 @@ sub main {
 			if ($constants->{tids_in_urls}) {
 				# This is to get tid in comments. It would be a mess to
 				# pass it directly to every comment -Brian
-				my $tids = $reader->getTopiclistForStory($story->{sid}); 
+				my $tids = $reader->getTopiclistForStory($stoid); 
 				my $tid_string = join('&amp;tid=', @$tids);
 				$user->{state}{tid} = $tid_string;
 			}
@@ -199,9 +209,9 @@ sub main {
 
 	footer();
 	if ($story) {
-		writeLog($story->{sid} || $form->{sid});
+		writeLog($story->{sid} || $sid);
 	} else {
-		writeLog($form->{sid});
+		writeLog($sid);
 	}
 }
 
