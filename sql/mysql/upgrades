@@ -1141,3 +1141,5 @@ ALTER TABLE moderatorlog ADD INDEX m2stat_act (m2status, active);
 # each installed site:
 # ln -s /usr/local/slash/themes/slashcode/tasks/delete_accesslog.pl /usr/local/slash/site/sitename/tasks/
 
+ALTER TABLE accesslist ADD wasbanned tinyint unsigned DEFAULT 0 NOT NULL;
+ALTER TABLE accesslist ADD wasreadonly tinyint unsigned DEFAULT 0 NOT NULL;

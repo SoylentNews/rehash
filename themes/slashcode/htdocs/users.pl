@@ -2580,11 +2580,9 @@ sub getUserAdmin {
 			{ $form->{fieldname} => $user_edit->{md5id} } : 
 			$user_edit;
 
-		if ($readonly->{$formname}) {
-			my $aclinfo = $slashdb->getAccessListInfo(
-                                	$formname, 'readonly', $user_chk);
-			$readonly_reasons->{$formname} = $aclinfo->{reason};
-		}
+		my $aclinfo = $slashdb->getAccessListInfo(
+                               	$formname, 'readonly', $user_chk);
+		$readonly_reasons->{$formname} = $aclinfo->{reason};
 	}
 	
 	my $banref = $slashdb->getBanList(1);

@@ -3298,9 +3298,9 @@ sub getAccessListInfo {
 	}
 
 	if ($column eq 'isbanned') {
-		$where .= " AND isbanned = 1";
+		$where .= " AND isbanned = 1 OR wasbanned = 1";
 	} else {
-		$where .= " AND readonly = 1 AND formname = '$formname' AND reason != 'expired'";
+		$where .= " AND (readonly = 1 OR wasreadonly = 1) AND formname = '$formname' AND reason != 'expired'";
 	}
 	
 
@@ -3365,14 +3365,21 @@ sub setAccessList {
 	$rows = $self->sqlSelect('count(*)', 'accesslist', " $where AND $column = 1");
 	$rows ||= 0;
 
+	my $newcol;
+        # this could probably be a regex, but I'm erring on
+        # the side of caution --Pater
+        $newcol = 'wasbanned' if $column eq 'isbanned';
+        $newcol = 'wasreadonly' if $column eq 'readonly';
+
 	if ($setflag == 0) {
 		if ($rows > 0) {
-			$self->sqlDo("DELETE from accesslist WHERE $where");
+			$self->sqlDo("UPDATE accesslist SET $column=0, $newcol=1 WHERE $where");
 		}
 	} else {
 		if ($rows > 0) {
 			my $return = $self->sqlUpdate("accesslist", {
 				"-$column" => $setflag,
+				"-$newcol" => 0,
 				reason		=> $reason,
 			}, $where);
 
