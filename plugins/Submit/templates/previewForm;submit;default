@@ -52,6 +52,19 @@ __template__
 	[% IF constants.use_dept %]
 		dept <INPUT TYPE="text" NAME="dept" SIZE="50">
 	[% END %]
+	[% FOR extra = extras %]
+		[% PROCESS formLabel value => extra.1, comment => "" %]
+		[% IF extra.2 == 'text' %]
+			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} %]" SIZE="50">
+		[% ELSIF extra.2 == 'list' %]
+			[% # section:value %]
+			[% pulldown = "$extra.3:$extra.1" %]
+			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), submission.${extra.1}, 1, 1) %]	
+		[% ELSE %]
+			[% type = extra.1 %]
+			[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), submission.$type, 1, 1) %]	
+		[% END %]
+	[% END %]
 		<BR>
 	[% Slash.selectTopic('tid', submission.tid, section, 1) %]
 	[% Slash.selectSection('section', section, 0, 1) %]

@@ -165,8 +165,9 @@ sub previewForm {
 
 	my $admin_flag = $user->{seclev} >= 100 ? 1 : 0;
 
-	my $sub = $slashdb->getSubmission($form->{subid},
-		[qw(email name subj tid story time comment uid)]);
+	my $sub = $slashdb->getSubmission($form->{subid});
+
+	my $extracolumns = $slashdb->getSectionExtras($sub->{section}) || [ ];
 
 	my $email_known = "";
 	$email_known = "mailto" if $sub->{email} eq $user->{fakeemail};
@@ -183,6 +184,7 @@ sub previewForm {
 		submitter	=> $sub->{uid},
 		subid		=> $form->{subid},
 		admin_flag 	=> $admin_flag,
+		extras 	=> $extracolumns,
 		lockTest	=> lockTest($sub->{subj}),
 		section		=> $form->{section} ||
 				   $constants->{defaultsection},
@@ -387,6 +389,7 @@ sub displayForm {
 		# we assume this is like if form.email is passed in
 		$fakeemail = strip_attribute($user->{fakeemail});
 	}
+	my $extracolumns = $slashdb->getSectionExtras($form->{section} || $section || $constants->{defaultsection}) || [ ];
 
 	slashDisplay('displayForm', {
 		fixedstory	=> strip_html(url2html($form->{story})),
@@ -395,6 +398,7 @@ sub displayForm {
 		fakeemail	=> processSub($fakeemail, $known),
 		section		=> $form->{section} || $section || $constants->{defaultsection},
 		uid		=> $user->{uid},
+		extras 	=> $extracolumns,
 		topic		=> $topic,
 		width		=> '100%',
 		title		=> $title,
@@ -447,6 +451,13 @@ sub saveSub {
 		tid	=> $form->{tid},
 		section	=> $form->{section}
 	};
+	my $extras = $slashdb->getSectionExtras($submission->{section});
+	if ($extras && @$extras) {
+		for (@$extras) {
+			my $key = $_->[1];
+			$submission->{$key} = $form->{$key} if $form->{$key};
+		}
+	}
 	$submission->{subid} = $slashdb->createSubmission($submission);
 	# $slashdb->formSuccess($form->{formkey}, 0, length($form->{subj}));
 
