@@ -123,7 +123,7 @@ sub graph {
 
 	my($id, $day) = _get_graph_id($slashdb, $constants, $user, $form, $stats);
 
-	my $image   = {}; #$stats->getGraph({ day => $day, id => $id });
+	my $image   = $stats->getGraph({ day => $day, id => $id });
 	my $content = $image->{data};
 	my $type    = $image->{content_type} || 'image/png';
 
