@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 
 use strict;
 use Slash::Constants qw( :messages :slashd );
@@ -186,21 +186,21 @@ EOT
 	$data{total_static} = $total_static;
 	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
 	my $total_secure = $stats->countDailySecure();
-	for (qw|index article search comments palm journal rss page|) {
-		my $uniq = $logdb->countDailyByPageDistinctIPID($_);
-		my $pages = $logdb->countDailyByPage($_);
-		my $bytes = $logdb->countBytesByPage($_);
-		my $uids = $logdb->countUsersByPage($_);
-		$data{"${_}_uids"} = sprintf("%8d", $uids);
-		$data{"${_}_ipids"} = sprintf("%8d", $uniq);
-		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
-		$data{"${_}_page"} = sprintf("%8d", $pages);
+	for my $op (qw|index article search comments palm journal rss page|) {
+		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
+		my $pages = $logdb->countDailyByPage($op);
+		my $bytes = $logdb->countBytesByPage($op);
+		my $uids = $logdb->countUsersByPage($op);
+		$data{"${op}_uids"} = sprintf("%8d", $uids);
+		$data{"${op}_ipids"} = sprintf("%8d", $uniq);
+		$data{"${op}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
+		$data{"${op}_page"} = sprintf("%8d", $pages);
 		# Section is problematic in this definition, going to store
 		# the data in "all" till this is resolved. -Brian
-		$statsSave->createStatDaily("${_}_uids", $uids);
-		$statsSave->createStatDaily("${_}_ipids", $uniq);
-		$statsSave->createStatDaily("${_}_bytes", $bytes);
-		$statsSave->createStatDaily("${_}_page", $pages);
+		$statsSave->createStatDaily("${op}_uids", $uids);
+		$statsSave->createStatDaily("${op}_ipids", $uniq);
+		$statsSave->createStatDaily("${op}_bytes", $bytes);
+		$statsSave->createStatDaily("${op}_page", $pages);
 	}
 
 # Not yet
@@ -234,29 +234,29 @@ EOT
 		my $users = $logdb->countUsersByPage('',  { section => $section });
 		$temp->{ipids} = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
-		$temp->{page} = sprintf("%8d", $pages);
+		$temp->{pages} = sprintf("%8d", $pages);
 		$temp->{users} = sprintf("%8d", $users);
 		$statsSave->createStatDaily("ipids", $uniq, { section => $section });
 		$statsSave->createStatDaily("bytes", $bytes, { section => $section } );
 		$statsSave->createStatDaily("page", $pages, { section => $section });
 		$statsSave->createStatDaily("users", $users, { section => $section });
 
-		for (qw| index article search comments palm rss page|) {
-			my $uniq = $logdb->countDailyByPageDistinctIPID($_,  { section => $section  });
-			my $pages = $logdb->countDailyByPage($_,  {
+		for my $op (qw| index article search comments palm rss page|) {
+			my $uniq = $logdb->countDailyByPageDistinctIPID($op,  { section => $section  });
+			my $pages = $logdb->countDailyByPage($op,  {
 				section => $section,
 				no_op => $constants->{op_exclude_from_countdaily}
 			} );
-			my $bytes = $logdb->countBytesByPage($_,  { section => $section  });
-			my $users = $logdb->countUsersByPage($_,  { section => $section  });
-			$temp->{$_}{ipids} = sprintf("%8d", $uniq);
-			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
-			$temp->{$_}{page} = sprintf("%8d", $pages);
-			$temp->{$_}{users} = sprintf("%8d", $users);
-			$statsSave->createStatDaily("${_}_ipids", $uniq, { section => $section});
-			$statsSave->createStatDaily("${_}_bytes", $bytes, { section => $section});
-			$statsSave->createStatDaily("${_}_page", $pages, { section => $section});
-			$statsSave->createStatDaily("${_}_user", $users, { section => $section});
+			my $bytes = $logdb->countBytesByPage($op,  { section => $section  });
+			my $users = $logdb->countUsersByPage($op,  { section => $section  });
+			$temp->{$op}{ipids} = sprintf("%8d", $uniq);
+			$temp->{$op}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
+			$temp->{$op}{pages} = sprintf("%8d", $pages);
+			$temp->{$op}{users} = sprintf("%8d", $users);
+			$statsSave->createStatDaily("${op}_ipids", $uniq, { section => $section});
+			$statsSave->createStatDaily("${op}_bytes", $bytes, { section => $section});
+			$statsSave->createStatDaily("${op}_page", $pages, { section => $section});
+			$statsSave->createStatDaily("${op}_user", $users, { section => $section});
 		}
 		push(@{$data{sections}}, $temp);
 	}
