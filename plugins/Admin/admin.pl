@@ -854,7 +854,7 @@ sub getRelated {
 	if ($related_links) {
 		for my $key (values %$related_links) {
 			if ($story_content =~ /\b$key->{keyword}\b/i) {
-				my $str = qq[<LI><A HREF="$key->{link}">$key->{name}</A></LI>\n];
+				my $str = qq[&middot; <A HREF="$key->{link}">$key->{name}</A><BR>\n];
 				$related_text .= $str unless $related_text =~ /\Q$str\E/;
 			}
 		}
@@ -865,7 +865,7 @@ sub getRelated {
 		my($url, $label) = ($1, $2);
 		$label = strip_notags($label);
 		$label =~ s/(\S{30})/$1 /g;
-		my $str = qq[<LI><A$url>$label</A></LI>\n];
+		my $str = qq[&middot; <A$url>$label</A><BR>\n];
 		$related_text .= $str unless $related_text =~ /\Q$str\E/
 			|| $label eq "?" || $label eq "[?]";
 	}
