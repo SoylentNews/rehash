@@ -2933,17 +2933,17 @@ sub getSubmissionCount {
 	my($self, $articles_only) = @_;
 	my($count);
 	my $section = getCurrentUser('section');
-	$section = $self->sqlQuote($section);
 	if ($articles_only) {
-		($count) = $self->sqlSelect('count(*)', 'submissions',
+		$count = $self->sqlSelect('count(*)', 'submissions',
 			"del=0 and section='articles' and note != ''"
 		);
 	} elsif ($section) {
-		($count) = $self->sqlSelect("count(*)", "submissions",
+		$section = $self->sqlQuote($section);
+		$count = $self->sqlSelect("count(*)", "submissions",
 			"(length(note)<1 or isnull(note)) and del=0 AND section = $section"
 		);
 	} else {
-		($count) = $self->sqlSelect("count(*)", "submissions",
+		$count = $self->sqlSelect("count(*)", "submissions",
 			"(length(note)<1 or isnull(note)) and del=0"
 		);
 	}
