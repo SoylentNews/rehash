@@ -1416,6 +1416,8 @@ sub wouldBeSafeToAddTopic {
 sub wouldBeSafeToAddTopicLink {
 	my($self, $parent_tid, $child_tid) = @_;
 
+	return 0 if !$parent_tid || !$child_tid || $parent_tid == $child_tid;
+
 	my %all_parents = ( $parent_tid, 1 );
 	my @new_parents = $self->getAllParentsTids($parent_tid);
 	for my $parent (@new_parents) {
