@@ -34,17 +34,21 @@ Automatically submits news that matches keywords
 
 NewsVac is a powerful and complex system.  It has several components.
 
+
 =head2 URLs
 
 The URL tables store all the URLs, whether they are URLs to be mined for stories, or they are the story URLs themselves.
+
 
 =head2 Miners
 
 Miners take URLs assigned to them and mine them, looking for story URLs.
 
+
 =head2 Nuggets
 
 Nuggets are special URLs that contain the URL, title, slug, and source of a mined URL.  The source is where the data came from (such as "OSDN"); the slug is some additional text apart from the title (like introtext).
+
 
 =head2 Parsers
 
@@ -66,18 +70,124 @@ This parser takes the stories and pulls out the text, to later be matched agains
 
 =back
 
+
 =head2 Spiders
 
-Spiders control the whole flow of processing, executing the miners and calling each parser in order.
+Spiders control the whole flow of processing, executing the miners and calling each parser in order.  It is a data structure of conditions and instructions.
+
+For each stage of the spidering, a group of URLs is fetched from the database.  Each URL is processed: that is, requested, and analyzed.
+
+To request a URL is to fetch it, either from the web, or, in the case of nuggets, by extracting the data from the nugget itself.  Here, the url_info and url_content tables are updated.
+
+To analyze the URL is to processed its data the right parsers.  Here, the url_analysis table is updated (along with url_content for the plaintext data, and rel to store links (???)).
+
 
 =head2 Keywords
 
 Keywords are words, grouped together by tags, to be used to weigh against stories parsed by parse_plaintext.  robosubmit() goes through and matches the stories against the keywords, and if the story meets a certain threshold, submits it to the submission bin.
 
+Is there a relationship between URLs and keywords ... ?
+
+
+=head2 Tables
+
+=over 4
+
+=item url_info
+
+The basic information describing a URL, including the URI, timestamps, status code, content type, what miner it belongs to, etc.
+
+=item url_content
+
+The response header and cookies for a URL.
+
+=item url_ analysis
+
+Information about the URL's analysis: what parser was used, what miner was used, when it was analyzed, how long it took, how many nuggets were produced.
+
+=item url_message_body
+
+The body of the URL.
+
+=item url_plaintext
+
+The plaintext body of the URL.
+
+=item rel table
+
+A parser, when creating a new URL, will form a relationship between the new URL and the parsed URL, and stick that relationship here.  It describes what parser created the relationship, what type of URL the new URL is, etc.
+
+=item miner
+
+Describes each miner, including the various regexes used to trim text and find stories.
+
+=item spider
+
+Describes each spider, including the conditions, group_0 selects, and commands.
+
+=item robosubmitlock
+=item spiderlock
+=item spider_timespec
+
+Something apparently hacked on so certain spiders would only run at certain times.  This really should be changed so one spider can run an entire site, efficiently.  But there might not be time for that.  I am going to reevaluate this when I find out more about how it works.
+
+
+=item nugget_sub
+
+I don't know.  I thought this just listed URLs that can be submitted (submitworthy), but it apparently inserts into the table after creating submissions.  I don't understand when it is used, or what its purpose is.
+
+
+=item newsvac_keywords
+
+All the keywords, consisting of a regular expression (can be literal text), a relative weight in floating point, and what tag (group) it belongs to.
+
+=back
+
+
+=head1 TODO
+
+Relative priorities from 1-10 are in parentheses.  All of these should get done, but will be done in order of priority so NewsVac can be "up and running" as soon as possible.  Other features and fixes can be finished later.  Some of these items may already be completed, though I am unaware of any of them being completed.
+
+=over 4
+
+=item *
+
+Add ability to "mine" RSS.  Shouldn't be difficult to add; just add a new parse code, which will be called for certain content types.  The trick will be making sure that the content type is correct.  (5)
+
+=item *
+
+Trim actual story (plaintext) so we don't match all of page, just the story.  Likely, this will happen in parse_plaintext; the trick is knowing how to trim each individual story, either having generic regexes (not likely) or specific ones per site, like with miners.  But while miners have regexes attached to them, these things don't have any such reasonable relationship.  I can attach the regex to the miner and climb the tree back up, and pick the first miner that matches, or the most recent one.  (9)
+
+=item *
+
+Similar to above, also get first paragraph of story. (8)
+
+=item *
+
+Only check for new stories, since last spider, not all new stories.  Also, possibly improve code to not get duplicates: often, titles slightly change, and so do URLs.  Perhaps match site name + paragraphs/title?  Find degree of matching?  (7)
+
+=item *
+
+Refine how NewsVac submissions are displayed in the submissions bin. (6)
+
+=item *
+
+Allow different keyword sets to apply to different URLs.  Assigned to miners, or spiders? (5)
+
+=item *
+
+Abstract out robosubmitting, allow for possibly emailing results, not just creating submissions.  Defined per site, per spider, per miner?  (3)
+
+=back
 
 =head1 CHANGES
 
 $Log$
+Revision 1.2  2002/09/04 20:29:58  pudge
+Added more information about spiders.
+Added basic information about the purpose of each DB table.
+Added TODO list.
+
 Revision 1.1  2002/09/04 17:07:09  pudge
 Describe basic outline of NewsVac structure.
 
