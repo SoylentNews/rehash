@@ -412,7 +412,7 @@ sub rss_item_description {
 
 	if ($constants->{rdfitemdesc}) {
 		# no HTML
-		$desc = strip_nohtml($desc);
+		$desc = strip_notags($desc);
 		$desc =~ s/\s+/ /g;
 		$desc =~ s/ $//;
 
