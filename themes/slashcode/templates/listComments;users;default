@@ -83,7 +83,7 @@ thread_col_2 = user.colors.bg_2;
 		[% PROCESS titlebar width="100%" title = commenttitle td_extra = extra -%]
 		[% td_extra = "" %]
 	[% END %]
-	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
+	<TABLE width="100%" border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
 	<TR bgcolor="[% user.colors.bg_3 %]">
 		[% IF type=="netid"; total_cols = total_cols + 1; %]<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>User</FONT></TH>[% END %]
 		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Subject</Font>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1> / Moderator</FONT>[% END %]</TH>

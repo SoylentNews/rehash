@@ -32,7 +32,7 @@ cur_time = Slash.db.getTime();
 [% admin_link_ipid = admin_flag && !useredit.ipid %]
 [% IF submissions.size > 0 %]
 	[% PROCESS titlebar width="100%" title = title -%]
-	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
+	<TABLE width="100%" border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
 		<TR bgcolor="[% user.colors.bg_3 %]">
 			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.colors.fg_3 %]">Title</FONT></TH>
 			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_link_user %]User[% END %]</FONT></TH>
