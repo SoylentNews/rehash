@@ -26,8 +26,8 @@ __template__
 </P>
 
 If you'd like to, view or edit your
-<A HREF="[% constants.rootdir %]/~my/friends">friends</A> and 
-<A HREF="[% constants.rootdir %]/~my/foes">foes</A>.
+<A HREF="[% constants.rootdir %]/my/friends">friends</A> and 
+<A HREF="[% constants.rootdir %]/my/foes">foes</A>.
 
 [% ELSE %]
 
