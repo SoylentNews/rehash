@@ -19,11 +19,11 @@ __template__
 	</TR>
 [% FOREACH event=events %]
 	<TR>
-		<TD><A HREF="[% constants.rootdir %]/eventsadmin.pl?op=edit&amp;sid=[% event.0 %]">[% event.1 %]</A>&nbsp;</TD>
-		<TD>[% event.2 %]&nbsp;</TD>
-		<TD>[% event.3 %] - [% event.4 %]&nbsp;</TD>
-		<TD>[% event.5 %]&nbsp;</TD>
-		<TD>[% event.7 %] ([% event.6 %])&nbsp;</TD>
+		<TD><A HREF="[% constants.rootdir %]/eventsadmin.pl?op=edit&amp;sid=[% event.sid %]">[% event.title %]</A>&nbsp;</TD>
+		<TD>[% event.time %]&nbsp;</TD>
+		<TD>[% event.begin %] - [% event.end %]&nbsp;</TD>
+		<TD>[% event.section %]&nbsp;</TD>
+		<TD>[% event.altext %] ([% event.tid %])&nbsp;</TD>
 	</TR>
 [% END %]
 </TABLE>

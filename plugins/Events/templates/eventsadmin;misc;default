@@ -13,12 +13,18 @@ eventsadmin
 __template__
 [% IF dates %]
 	[% FOREACH event=dates %]
-		[% event.begin %] - [% event.end %]<br>
+				[% IF event.begin == event.end %]
+								[% Slash.timeCalc(event.begin,'%A %B %d', 0) %]<br>
+				[% ELSE %]
+								[% Slash.timeCalc(event.begin, '%A %B %d', 0) %] - [% Slash.timeCalc(event.end, '%A %B %d', 0) %]<br>
+				[% END %]
 	[% END %]
 [% ELSE %]
 	None defined
 [% END %]
 <p>
+[% IF user.is_admin %]
 <A HREF="[% constants.rootdir %]/eventsadmin.pl?sid=[% sid %]">Edit Dates</A>
+[% END %]
 __seclev__
 100

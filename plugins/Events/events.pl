@@ -14,12 +14,17 @@ sub main {
 	my $form      = getCurrentForm();
 	my $events   = getObject('Slash::Events');
 
-	$form->{date} ||= timeCalc($slashdb->getTime(), '%Y-%m-%d');
+	$form->{date} ||= timeCalc(0, '%Y-%m-%d');
 
-	my $next = $events->getDayNext($form->{date});
-	my $previous = $events->getDayPrevious($form->{date});
+	my $date = $form->{date};
+	if ($form->{op} eq 'previousDate') {
+		$date = $events->getDayPrevious($date);
+	} elsif ($form->{op} eq 'nextDate') {
+		$date = $events->getDayNext($date);
+	}
 
-	my $stories =  $events->getEventsByDay($form->{date});
+
+	my $stories =  $events->getEventsByDay($date);
 	my $time = timeCalc($form->{date}, '%A %B %d', 0);
 	if ($form->{content_type} eq 'rss') {
 		my @items;
@@ -44,11 +49,10 @@ sub main {
 			slashDisplay('events', {
 				title 			=> $time,
 				events 			=> $stories,
-				next			=> $next,
-				previous		=> $previous,
+				'date'  		=> $date,
 			});
 		} else {
-			my $message = "Sorry, boring day, nothing found for $time";
+			my $message = getData('notfound');
 			header($message);
 			print $message;
 		}

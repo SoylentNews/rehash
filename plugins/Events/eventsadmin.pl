@@ -15,33 +15,35 @@ sub main {
 	my $events   = getObject('Slash::Events');
 
 	my $ops = {
-	    edit     => {
-		function => \&editEvent,
-		seclev	=> 100,
-	    },
-	    'delete'	=> {
-		function => \&editEvent,
-		seclev	=> 100,
-	    },
-	    add	    => {
-		function => \&editEvent,
-		seclev	=> 100,
-	    },
-	    list    => {
-		function => \&listEvents,
-		seclev	=> 100,
-	    },
+					edit     => {
+									function => \&editEvent,
+									seclev	=> 100,
+					},
+					'delete'	=> {
+									function => \&editEvent,
+									seclev	=> 100,
+					},
+					add	    => {
+									function => \&editEvent,
+									seclev	=> 100,
+					},
+					list    => {
+									function => \&listEvents,
+									seclev	=> 100,
+					},
 	};
 	
 
 	my $op = lc($form->{op});
 	chomp($op);
-	print STDERR "op $op\n";
 	$op = exists $ops->{$op} ? $op : 'list';
 
-	print STDERR "op $op\n";
-	redirect("/") 
-		unless $user->{is_admin} || $user->{seclev} < $ops->{$op}{seclev};
+# admin.pl is not for regular users
+	unless ($user->{is_admin}) {
+					my $rootdir = getCurrentStatic('rootdir');
+					redirect("$rootdir/users.pl");
+					return;
+	}
 	header();
 	print createMenu('events');
 

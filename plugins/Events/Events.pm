@@ -84,18 +84,18 @@ sub deleteDates {
 }
 
 sub getEventsByDay {
-	my ($self, $begin, $end, $limit) = @_;
+	my ($self, $date, $limit) = @_;
 
 	my $user = getCurrentUser();
 	my $section;
 	$section ||= $user->{section};
-	my $where = "((to_days(begin) >= to_days('$begin')) AND (to_days(end) <= to_days('$end')))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
+	my $where = "((to_days(begin) >= to_days('$date')) AND (to_days(end) <= to_days('$date')))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
 	$where .= " AND stories.section = '$section'" if $section;
 	my $order = "ORDER BY tid";
 	$order .= " LIMIT $limit "
 		if $limit;
-	my $events = $self->sqlSelectAll(
-		"stories.sid,title,'',topics.tid,alttext",
+	my $events = $self->sqlSelectAllHashrefArray(
+		"stories.sid as sid, title, topics.tid as tid, alttext",
 		"stories, event_dates, topics",
 		$where,
 		$order
@@ -107,7 +107,8 @@ sub getEventsByDay {
 sub getEvents {
 	my ($self, $begin, $end, $limit, $section, $topic)  = @_;
 
-	my $begin ||= timeCalc($self->getTime(), '%Y-%m-%d');
+	#my $begin ||= timeCalc($self->getTime(), '%Y-%m-%d');
+	$begin ||= timeCalc(0, '%Y-%m-%d');
 
 	my $user = getCurrentUser();
 	$section ||= $user->{section};
@@ -123,8 +124,8 @@ sub getEvents {
 	my $order = "ORDER BY tid";
 	$order .= " LIMIT $limit "
 		if $limit;
-	my $events = $self->sqlSelectAll(
-		"stories.sid,title,time,begin,end,section,topics.tid,alttext",
+	my $events = $self->sqlSelectAllHashrefArray(
+		"stories.sid as sid, title, time, begin, end, section, topics.tid as tid, alttext",
 		"stories, event_dates, topics",
 		$where,
 		$order

@@ -17,16 +17,16 @@ __template__
 [% FOREACH event=events %]
 	<TR>
 		<TD>
-			[<A HREF="[% constants.rootdir %]/search.pl?topic=[% event.3 %]">[% event.4 %]</A>] &nbsp;
+			[<A HREF="[% constants.rootdir %]/search.pl?topic=[% event.tid %]">[% event.alttext %]</A>] &nbsp;
 		</TD>
 		<TD>
-			<A HREF="[% constants.rootdir %]/article.pl?sid=[% event.0 %]">[% event.1 %]</A> &nbsp;
+			<A HREF="[% constants.rootdir %]/article.pl?sid=[% event.sid %]">[% event.title %]</A> &nbsp;
 		</TD>
 	</TR>
 [% END %]
 </TABLE>
 <P>
-&lt; <A HREF="[% constants.rootdir %]/events.pl?date=[% previous %]">Previous Day</A> | <A HREF="[% constants.rootdir %]/events.pl?date=[% next %]">Next Day</A> &gt;
+&lt; <A HREF="[% constants.rootdir %]/events.pl?date=[% previous %]&op=previousDate">Previous Day</A> | <A HREF="[% constants.rootdir %]/events.pl?date=[% next %]&op=nextDate">Next Day</A> &gt;
 <P>
 __seclev__
 100
