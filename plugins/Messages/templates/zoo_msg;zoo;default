@@ -1,0 +1,48 @@
+__section__
+default
+__description__
+* type = neutral/friend/foe
+* zoo_user = nickname/uid of user making relationship
+
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+zoo_msg
+__template__
+[% IF msg.mode == Slash.MSG_MODE_WEB %]
+
+<P>
+[% IF type == 'friend' || type == 'foe' || type == 'bitch' %]
+<B><A HREF="[% constants.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
+>[% zoo_user.nickname | strip_literal %]</A></B> ([% zoo_user.uid %]) has made you their <B>[% type %]</B>.
+[% ELSIF type == 'neutral' %]
+<B><A HREF="[% constants.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
+>[% zoo_user.nickname | strip_literal %]</A></B> ([% zoo_user.uid %]) has ceased their relationship with you.
+[% END %]
+</P>
+
+If you'd like to, view or edit your
+<A HREF="[% constants.rootdir %]/~my/friends">friends</A> and 
+<A HREF="[% constants.rootdir %]/~my/foes">foes</A>.
+
+[% ELSE %]
+
+[% IF type == 'friend' || type == 'foe' || type == 'bitch' %]
+[% zoo_user.nickname %] ([% zoo_user.uid %]) has made you their [% type %].
+[% ELSIF type == 'neutral' %]
+[% zoo_user.nickname %] ([% zoo_user.uid %]) has ceased their relationship with you.
+[% END %]
+    [% constants.absolutedir %]/~[% zoo_user.nickname | fixparam %]/
+
+If you'd like to view or edit any of your relationships, go to:
+	[% constants.absolutedir %]/my/friends
+	[% constants.absolutedir %]/my/foes
+
+[% END %]
+
+__seclev__
+500
