@@ -369,7 +369,7 @@ sub findPollQuestion {
 
 	# The big old searching WHERE clause, fear it
 	my $key = " MATCH (question) AGAINST ($query) ";
-	my $where = " 1 = 1 ";
+	my $where = " 1 = 1 AND autopoll = 'no' ";
 	$where .= " AND $key" if $form->{query};
 	$where .= " AND date < now() ";
 	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
