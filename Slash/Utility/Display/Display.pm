@@ -25,7 +25,6 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-# use Date::Manip qw(ParseDate UnixDate);
 use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;

@@ -24,7 +24,6 @@ Slash::XML aids in creating XML.  Right now, only RSS is supported.
 =cut
 
 use strict;
-# use Date::Manip;
 use Time::Local;
 use Slash;
 use Slash::Utility;

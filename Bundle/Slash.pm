@@ -45,11 +45,15 @@ XML::Parser
 
 XML::RSS
 
+XML::Simple
+
 DBI
 
 Data::ShowTable
 
 J/JW/JWIED/Msql-Mysql-modules-1.2219.tar.gz    - instead of Bundle::DBD::mysql (Data::ShowTable)
+
+Bundle::DBD::mysql	- ???
 
 DBIx::Password
 
@@ -77,7 +81,7 @@ Date::Parse		- TimeDate
 
 Date::Manip             - Still needed, but not for long
 
-Date::Calc
+Date::Calc		- Use sparingly, only when necessary
 
 Time::ParseDate         - Time-modules; Needed for Schedule::Cron
 
