@@ -1011,6 +1011,7 @@ sub previewForm {
 
 	my $sig = $user->{sig};
 	if ($user->{sigdash} && $user->{sig}) {
+		$sig =~ s/^\s*-{1,5}\s*<(?:P|BR)>//i;
 		$sig = "--<BR>$sig";
 	}
 
