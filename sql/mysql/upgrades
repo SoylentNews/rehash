@@ -1279,4 +1279,19 @@ UPDATE humanconf_pool SET lastused=lastused, created_at=lastused WHERE lastused 
 
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');
 
-# USEPERL LAST UPDATED HERE
+# This will change all users who have the pref set to get messages for all new comments
+# (bug in users.pl:newUser()) to getting messages for comment replies.  The pref was not
+# used, because new users didn't have the seclev for it.  On a very few
+# sites (low-traffic ones, probably), some admins will have this preference
+# set for themselves.  You'll need to deal with those admin accounts by hand, if they exist.
+# 
+# *** NOTE ***
+# If you have entries in your DB that contain both 4 and 8 for the same UID, this will
+# fail.  So first run this:
+#   SELECT u1.id, u1.uid, u1.code, u1.mode FROM users_messages AS u1, users_messages AS u2 WHERE u1.uid = u2.uid AND u1.code = 8 AND u2.code = 4;
+# 
+# Then by hand, add the returned IDs to this list, and run:
+#   DELETE FROM users_messages WHERE id IN ( ... );
+# 
+# THEN, finally, run the code below.  :-)
+UPDATE users_messages SET code = 4 WHERE code = 8;
