@@ -4824,6 +4824,7 @@ sub getSlashConf {
 		fixhrefs =>			[ ],
 		lonetags =>			[ ],
 		op_exclude_from_countdaily =>   [qw( rss )],
+		mod_stats_reports =>		[ $conf{adminmail_mod} ],
 		stats_reports =>		[ $conf{adminmail} ],
 		submit_categories =>		[ ],
 	);
