@@ -1819,3 +1819,5 @@ INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 4, '640K');
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit', 5, '768K');
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 6, '896K');
 INSERT INTO code_param (type, code, name) VALUES ('bytelimit_sub', 7, '1024K');
+
+INSERT INTO vars (name, value, description) VALUES ('defaultbytelimit', 5, 'The default setting for comment bytelimit');
