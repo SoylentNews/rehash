@@ -109,8 +109,8 @@ slash-1.0.5, 2000.06.xx
 *	Fixed up slashhead image and WIDTH of slashhead.gif and
 	slashslogan.gif (Nathan Vonnahme)
 
-*	Fixed passing of "html_query=" parameter in search.pl for next
-	matches instea of "query_" (Michael Sims)
+*	Fixed search.pl in stripping of bad chars from query string
+	(Michael Sims)
 
 *	Plenty of minor code cleanups
 

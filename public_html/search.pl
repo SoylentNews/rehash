@@ -41,11 +41,11 @@ sub main {
 	$I{F}{max}	||= "30";
 	$I{F}{'last'}	||= $I{F}{min} + $I{F}{max};
 
-	# don't echo bad characters back to browser
-	$I{F}{html_query} = stripByMode($I{F}{query}, 'exttrans');
+	# get rid of bad characters
+	$I{F}{query} =~ s/[^A-Z0-9'. ]//gi;
 
-	header("$I{sitename}: Search $I{F}{html_query}", $I{F}{section});
-	titlebar("99%", "Searching $I{F}{html_query}");
+	header("$I{sitename}: Search $I{F}{query}", $I{F}{section});
+	titlebar("99%", "Searching $I{F}{query}");
 
 	searchForm();
 
@@ -61,17 +61,12 @@ sub linkSearch {
 	my $C = shift;
 	my $r;
 
-	foreach (qw[threshold html_query min author op sid topic section total]) {
+	foreach (qw[threshold query min author op sid topic section total]) {
 		my $x = "";
 		$x =  $C->{$_} if defined $C->{$_};
 		$x =  $I{F}{$_} if defined $I{F}{$_} && !$x;
 		$x =~ s/ /+/g;
-		next if $x eq "";
-		if ($_ eq 'html_query') {
-			$r .= "query=$x&";
-		} else {
-			$r .= "$_=$x&";
-		}
+		$r .= "$_=$x&" unless $x eq "";
 	}
 	$r =~ s/&$//;
 
@@ -83,7 +78,6 @@ sub keysearch {
 	my $keywords = shift;
 	my @columns = @_;
 
-	$keywords =~ s/[^A-Z0-9'\. ]//gi;
 	my @words = split m/ /, $keywords;
 	my $sql;
 	my $x = 0;
@@ -121,7 +115,7 @@ EOT
 
 	print <<EOT;
 <FORM ACTION="$ENV{SCRIPT_NAME}" METHOD="POST">
-	<INPUT TYPE="TEXT" NAME="query" VALUE="$I{F}{html_query}">
+	<INPUT TYPE="TEXT" NAME="query" VALUE="$I{F}{query}">
 	<INPUT TYPE="SUBMIT" VALUE="Search">
 EOT
 
