@@ -21,7 +21,7 @@ __template__
 			</TD>
 		[% END %]
 		<TD VALIGN="TOP">
-			<A HREF="[% constants.rootdir %]/journal.pl?id=[% journal.2 %]">[% journal.1 %]</A> on [% Slash.timeCalc(journal.3) %] by <A HREF="[% constants.rootdir %]~[% journal.0 | fixparam %]/">[% journal.0 %]</A>.
+			<A HREF="[% constants.rootdir %]/journal.pl?id=[% journal.2 %]&amp;[% journal.uid %]&amp;op=display">[% journal.1 %]</A> on [% Slash.timeCalc(journal.3) %] by <A HREF="[% constants.rootdir %]~[% journal.0 | fixparam %]/">[% journal.0 %]</A>.
 		</TD>
 		</TR>
 	[% END %]
