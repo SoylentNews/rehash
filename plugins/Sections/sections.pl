@@ -17,15 +17,15 @@ sub main {
 	my $op = $form->{op};
 	my $seclev = $user->{seclev};
 
-	header(getData('head'), 'admin');
-
 	if ($seclev < 100) {
-		print getData('notadmin');
-		footer();
+		my $rootdir = getCurrentStatic('rootdir');
+		redirect("$rootdir/users.pl");
 		return;
 	}
 
-	if ($op eq 'rmsub' && $seclev > 99) {  # huh?
+	header(getData('head'), 'admin');
+
+	if ($op eq 'rmsub' && $seclev >= 100) {  # huh?
 
 	} elsif ($form->{addsection}) {
 		titlebar('100%', getData('addhead'));
