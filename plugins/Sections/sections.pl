@@ -164,7 +164,7 @@ sub editSection {
 		issue		=> $issue,
 		blocks		=> \@blocks,
 		topics		=> $slashdb->getDescriptions(
-			'topics_section', $section
+		'topics_section', $section
 		),
 		extras		=> $extras,
 	});

@@ -655,6 +655,7 @@ CREATE TABLE templates (
 	PRIMARY KEY (tpid),
 	UNIQUE true_template (name,page,section,lang)
 ) TYPE = myisam;
+
 #
 # Table structure for table 'topics'
 #

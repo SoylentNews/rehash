@@ -31,6 +31,12 @@ my %descriptions = (
 	'statuscodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='statuscodes'") },
 
+	'months'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='months'") },
+
+	'years'
+		=> sub { $_[0]->sqlSelectMany('name,name', 'code_param', "type='years'") },
+
 	'blocktype'
 		=> sub { $_[0]->sqlSelectMany('name,name', 'code_param', "type='blocktype'") },
 
@@ -1391,6 +1397,7 @@ sub setSection {
 ########################################################
 sub createSection {
 	my($self, $hash) = @_;
+
 	$self->sqlInsert('sections', $hash);
 }
 
