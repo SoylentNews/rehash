@@ -25,7 +25,6 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-use Email::Valid;
 use Fcntl qw(:flock :seek);
 use File::Basename;
 use File::Path;
@@ -112,7 +111,7 @@ sub sendEmail {
 	# of verbosity -- pudge
 	my $log_error = defined &main::verbosity ? main::verbosity() >= 3 : 1;
 
-	unless (Email::Valid->rfc822($addr)) {
+	unless (emailValid($addr)) {
 		errorLog("Can't send mail '$subject' to $addr: Invalid address")
 			if $log_error;
 		return 0;
@@ -187,8 +186,7 @@ sub bulkEmail {
 			$subject, scalar localtime;
 	}
 
-	my $valid = Email::Valid->new();
-	my @list = grep { $valid->rfc822($_) } @$addrs;
+	my @list = grep { emailValid($_) } @$addrs;
 
 	my $bulk = Slash::Custom::Bulkmail->new(
 		From    => $constants->{mailfrom},
