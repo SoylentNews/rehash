@@ -10,7 +10,7 @@ use vars qw( %task $me );
 $task{$me}{timespec} = '3,33 * * * *';
 $task{$me}{on_startup} = 1;
 $task{$me}{code} = sub {
-	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info) = @_;
 
 	# shouldn't be necessary, since sectionHeaders() restores STDOUT before
 	# exiting
@@ -30,7 +30,7 @@ $task{$me}{code} = sub {
 };
 
 sub sectionHeaders {
-	my($virtual_user, $constants, $slashdb, $user, $sections) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $info, $sections) = @_;
 	my $section = $sections->{section}
 		if $sections;
 	createCurrentHostname($sections->{hostname})
