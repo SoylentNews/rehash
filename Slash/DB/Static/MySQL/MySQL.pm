@@ -342,6 +342,26 @@ sub forgetUsersLastLookTime {
 
 ########################################################
 # For daily_forget.pl
+sub forgetUsersMailPass {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => "reader" });
+	my $max_hrs = $constants->{mailpass_max_hours} || 48;
+	my $min_mailpass_last_ts = time - ($max_hrs*3600 + 86400*7);
+	my $uids = $reader->sqlSelectColArrayref("uid", "users_param",
+		"name='mailpass_last_ts' AND value < '$min_mailpass_last_ts'");
+
+	my $splice_count = 2000;
+	while (@$uids) {
+		my @uid_chunk = splice @$uids, 0, $splice_count;
+		my $uids_in = join(",", @uid_chunk);
+		$self->sqlDelete("users_param",
+			"name IN ('mailpass_last_ts', 'mailpass_num') AND uid IN ($uids_in)");
+	}
+}
+
+########################################################
+# For daily_forget.pl
 sub forgetCommentIPs {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
