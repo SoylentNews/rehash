@@ -3129,9 +3129,8 @@ sub checkReadOnly {
 		$where = "ipid = '$tmpid'";
 	}
 
-	# Setting readonly blocks posting;  setting isbanned also blocks
-	# posting even if readonly isn't set.
-	$where .= " AND (readonly = 1 OR isbanned = 1)";
+	# Setting readonly blocks posting.
+	$where .= " AND readonly = 1";
 	# A blank formname means this entry applies to everything.
 	$where .= " AND (formname = '$formname' OR formname = '')";
 	# For when we get user expiration working.
