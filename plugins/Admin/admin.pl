@@ -1722,11 +1722,15 @@ sub updateStory {
 		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
 
+	for (qw(dept bodytext relatedtext)) {
+		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
+	}
+
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
 		for (@$extras) {
 			my $key = $_->[1];
-			$data->{$key} = $form->{$key} if $form->{$key};
+			$data->{$key} = $form->{$key};
 		}
 	}
 
@@ -1993,11 +1997,15 @@ sub saveStory {
 		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
 
+	for (qw(dept bodytext relatedtext)) {
+		$data->{$_} = '' unless defined $data->{$_};  # allow to blank out
+	}
+
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
 		for (@$extras) {
 			my $key = $_->[1];
-			$data->{$key} = $form->{$key} if $form->{$key};
+			$data->{$key} = $form->{$key};
 		}
 	}
 	my $sid = $slashdb->createStory($data);

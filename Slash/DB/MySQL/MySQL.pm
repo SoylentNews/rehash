@@ -2903,11 +2903,19 @@ sub setStory {
 	}
 
 	for (@param)  {
-		$self->sqlReplace($param_table, {
-			sid	=> $sid,
-			name	=> $_->[0],
-			value	=> $_->[1]
-		}) if defined $_->[1];
+		if (defined $_->[1] && length $_->[1]) {
+			$self->sqlReplace($param_table, {
+				sid	=> $sid,
+				name	=> $_->[0],
+				value	=> $_->[1]
+			});
+		} else {
+			my $sid_q = $self->sqlQuote($sid);
+			my $name_q = $self->sqlQuote($_->[0]);
+			$self->sqlDelete($param_table,
+				"sid = $sid_q AND name = $name_q"
+			);
+		}
 	}
 
 	return $ok;
