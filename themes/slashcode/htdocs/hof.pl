@@ -142,7 +142,7 @@ sub topComments {
 	$cursor->execute;
 
 	my $x = $I{F}{min};
-	while (my($section, $sid, $aid, $title, $pid, $subj, $sdate, $cdate,
+	while (my($section, $sid, $aid, $title, $pid, $subj, $cdate, $sdate,
 		$uid, $cid, $score) = $cursor->fetchrow) {
 		my($cname, $cemail) = sqlSelect("nickname,fakeemail",
 			"users","uid=$uid");
