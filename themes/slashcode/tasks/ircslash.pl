@@ -6,7 +6,6 @@
 
 use strict;
 
-use Net::IRC;
 use Data::Dumper;
 
 use Slash;
@@ -25,6 +24,7 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 	return unless $constants->{ircslash};
+	require "Net::IRC";
 	my $start_time = time;
 
 	ircinit();
