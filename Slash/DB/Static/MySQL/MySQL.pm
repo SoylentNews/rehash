@@ -783,7 +783,7 @@ sub convert_tokens_to_points {
 
 	# Sanity check.
 	my $n_users = $self->countUsers();
-	$n_wanted = int($n_users/100) if $n_wanted > int($n_users)/100;
+	$n_wanted = int($n_users/10) if $n_wanted > int($n_users)/10;
 
 	my $maxtokens = $constants->{maxtokens} || 60;
 	my $tokperpt = $constants->{tokensperpoint} || 8;
