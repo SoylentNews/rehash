@@ -2290,6 +2290,10 @@ UPDATE menus SET value='[% constants.rootdir %]/my/password' WHERE menu='users' 
 
 # End of T_2_3_0_152, Start of T_2_3_0_153 - 2004/05/04
 
+ALTER TABLE open_proxies ADD COLUMN ipid ipid char(32) DEFAULT '' NOT NULL;
+ALTER TABLE open_proxies ADD INDEX ipid (ipid);
+UPDATE TABLE open_proxies SET ipid=md5(ip);
+
 INSERT INTO vars (name, value, description) VALUES ('login_speed_limit', '20', 'How fast a user can create users, etc.');
 INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', 'How many forms a user can submit');
 # be wary of this, make sure you've not modified it on your own; if so, add 'login' yourself
@@ -2302,3 +2306,5 @@ INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'ex
 UPDATE vars SET description='Format for HC images (png, jpeg)' WHERE name='hc_image_format';
 UPDATE vars SET value='jpeg' WHERE name='hc_image_format' AND value='jpg';
 
+# Install Lingua::Stem
+INSERT INTO vars (name, value, description) VALUES ('stem_uncommon_words', '1', 'Use stems of words for detecting similar stories instead of whole words?');

@@ -526,8 +526,10 @@ CREATE TABLE open_proxies (
 	port	SMALLINT UNSIGNED NOT NULL DEFAULT '0',
 	ts	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	xff	VARCHAR(15) DEFAULT NULL,
+	ipid char(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (ip),
-	KEY ts (ts)
+	KEY ts (ts),
+	KEY ipid (ipid)
 ) TYPE=InnoDB;
 
 #
