@@ -99,7 +99,7 @@ if ($opts{'S'} and $opts{'P'}) {
 # start the processing
 if ($opts{'s'}) {
 	for (@ARGV) {
-		$_ = catfile($dir, $_);
+		$_ = catfile($dir, $_) unless file_name_is_absolute($_);
 		next unless -f $_;
 		my($filename) = (File::Spec->splitpath($_))[2];
 		my $template = $install->readTemplateFile($_);
