@@ -27,23 +27,19 @@ $opts{'u'} ||= 'slash';
 createEnvironment($opts{u});
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
+my $zoo = getObject("Slash::Zoo");
 
-my $users = $slashdb->sqlSelectColArrayref('uid', 'people');
+$slashdb->sqlDo("UPDATE users_info SET people=NULL");
+$slashdb->sqlDo("DELETE FROM people WHERE type='' OR type IS NULL");
+$slashdb->sqlDo("UPDATE people SET eof=0 AND fof=0");
+my $entries = $slashdb->sqlSelectAll('uid, person, type', 'people');
 
-for my $uid (@$users) {
-	my $people;
-	my $friends = $slashdb->sqlSelectColArrayref('person', 'people', "type='friend' AND uid = $uid");
-	my $foes = $slashdb->sqlSelectColArrayref('person', 'people', "type='foe' AND uid = $uid");
-	for (@$friends) {
-		$people->{$_} = FRIEND;
-		print "ADDING $_\n";
+for (@$entries) {
+	if ($_->[2] eq 'friend') {
+		$zoo->setFriend($_->[0], $_->[1]);
+	} elsif ($_->[2] eq 'foe') {
+		$zoo->setFoe($_->[0], $_->[1]);
 	}
-	for (@$foes) {
-		$people->{$_} = FOE;
-		print "ADDING $_\n";
-	}
-	$slashdb->setUser($uid, { people => $people });
-	
 }
 
 
