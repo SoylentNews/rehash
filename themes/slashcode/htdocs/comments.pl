@@ -73,7 +73,7 @@ sub main {
 
 	if ($I{F}{op} eq "Submit") {
 
-		if(checkSubmission("comments",$I{post_limit},$I{max_posts_allowed},$id)) {
+		if (checkSubmission("comments", $I{post_limit}, $I{max_posts_allowed}, $id)) {
 			($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}") if $I{U}{uid} > 0;
 			submitComment();
 		}
@@ -137,8 +137,7 @@ sub commentIndex {
 	titlebar("90%", "Several Active Discussions");
 	print qq!<MULTICOL COLS="2">\n!;
 
-	my $c = sqlSelectMany("discussions.sid,discussions.title,discussions.url",
-						  <<SQL);
+	my $c = sqlSelectMany("discussions.sid,discussions.title,discussions.url", <<SQL);
 discussions,stories where displaystatus > -1 and discussions.sid=stories.sid and time <= now() order by time desc LIMIT 50
 SQL
 
@@ -747,7 +746,7 @@ sub moderate {
 
 	# Handle Deletions, Points & Reparenting
 	foreach (sort keys %{$I{F}}) {
-		if (/\Adel_(.*)/) { # && $I{U}{points}) {
+		if (/\Adel_(\d+)/) { # && $I{U}{points}) {
 			my $delCount = deleteThread($I{F}{sid}, $1);
 			$totalDel += $delCount;
 			sqlUpdate(
@@ -763,7 +762,7 @@ sub moderate {
 	<LI>Deleted $delCount items from story $I{F}{sid} under comment $I{F}{$_}</LI>
 EOT
 
-		} elsif (!$hasPosted && /\Areason_(.*)/) {
+		} elsif (!$hasPosted && /\Areason_(\d+)/) {
 			moderateCid($I{F}{sid}, $1, $I{F}{"reason_$1"});
 		}
 	}
