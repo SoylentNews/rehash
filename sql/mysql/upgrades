@@ -950,3 +950,5 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 # already saw a CVS conflict on Anchor.pm getSectionColors() and figured
 # something was up. :)
 
+UPDATE menus SET label=CONCAT('~', label, ' ([% user.uid %])') WHERE menu='users' AND sel_label='me';
+
