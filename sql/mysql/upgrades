@@ -685,8 +685,6 @@ ALTER TABLE modreasons CHANGE id id TINYINT UNSIGNED NOT NULL PRIMARY KEY;
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 0, 'Normal',        0, 0,  0, 0.5);
 INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 1, 'Offtopic',      1, 1, -1, 0.5);
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_42, Start of T_2_3_0_43
 
 # Set to email address(es) appropriate for your site, of course.
@@ -697,3 +695,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Addit
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_43
+
