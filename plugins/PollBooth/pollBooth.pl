@@ -36,13 +36,11 @@ sub main {
 		$ops{$op}->($slashdb,$form);
 		# Why not do this in a more generic manner you say? 
 		# Because I am paranoid about this being abused. -Brian
-		if ($form->{sid}) {
-			my $section = $slashdb->getSection(
-				$slashdb->getStory($form->{sid}, 'section')
-			);
-			my $url = $section->{rootdir} || $constants->{real_rootdir};
+		my $SECT = $slashdb->getSection($form->{section});
+		if ($SECT) {
+			my $url = $SECT->{rootdir} || $constants->{real_rootdir};
 			
-			redirect($url, "/article.pl?sid=$form->{sid}");
+			redirect($url, "/$form->{returnto}");
 		}
 	}
 
