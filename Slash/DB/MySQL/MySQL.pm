@@ -7883,7 +7883,7 @@ sub getSimilarStories {
 		# they match with the current story.  Include a multiplier
 		# based on the length of the match.
 		my $s = $stories->{$sid};
-		$stories->{$sid}{displaystatus} = $self->_displaystatus($stories->{stoid});
+		$stories->{$sid}{displaystatus} = $self->_displaystatus($stories->{$sid}{stoid});
 		$s->{weight} = 0;
 		for my $word (@text_uncommon_words) {
 			my $word_weight = 0;
