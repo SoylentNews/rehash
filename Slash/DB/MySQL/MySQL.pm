@@ -6432,7 +6432,7 @@ sub _stories_time_clauses {
 	# also round our selection time to the minute, so the query cache
 	# can work for the full 60 seconds.
 	my $now = $exact_now ? 'NOW()'
-		: $self->sqlQuote(timeCalc(0, '%Y-%m-%d %k:%M:00', $timecalc_off_set));
+		: $self->sqlQuote( time2str('%Y-%m-%d %H:%M:00', time, 'GMT') );
 
 	if ($future) {
 		$is_future_column = "IF($column_name <= $now, 0, 1) AS is_future";
