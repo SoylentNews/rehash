@@ -865,6 +865,7 @@ sub getOlderStories {
 	for (@$stories) {
 		my($sid, $sect, $title, $time, $commentcount, $day, $hp, $secs) = @{$_}; 
 		my($w, $m, $d, $h, $min, $ampm) = split m/ /, $time;
+		$d =~ s/^0//;
 		push @$newstories, {
 			sid		=> $sid,
 			section		=> $sect,
