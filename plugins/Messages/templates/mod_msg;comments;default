@@ -16,16 +16,19 @@ __template__
 [% IF msg.mode == 1 %]
 
 <P>
-A user has given a <B>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</B> moderation to
-your comment, <B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid
-%]">[% comment.subject %]</A></B>, attached to
-<B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>.
-Your comment is currently scored <B>[% reasons.${comment.reason}.name %] ([% comment.points %])</B>.
+<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]"
+>[% comment.subject %]</A></B>, posted to
+<B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>, has been moderated
+<B>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</B>.
+</P>
+
+<P>
+It is currently scored <B>[% reasons.${comment.reason}.name %] ([% comment.points %])</B>.
 </P>
 
 [% ELSE %]
 
-A user has given a "[% reasons.${moderation.reason}.name %]" ([% moderation.value %]) moderation to your comment.
+A user has moderated your comment "[% reasons.${moderation.reason}.name %]" ([% moderation.value %]).
     [% comment.subject | decode_entities %]    
     [% constants.absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
 
@@ -33,7 +36,7 @@ Attached to:
     [% discussion.title | decode_entities %]
     [% discussion.realurl %]
 
-Your comment is currently scored [% comment.points %].
+It is currently scored [% reasons.${comment.reason}.name %] ([% comment.points %]).
 [% END %]
 
 __seclev__
