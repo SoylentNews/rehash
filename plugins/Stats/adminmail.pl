@@ -48,6 +48,7 @@ $task{$me}{code} = sub {
 	my $stats = getObject('Slash::Stats', { db_type => 'reader' });
 	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 
+	# 1.5 hours
 	my $logdb = getObject('Slash::Stats', {
 		db_type	=> 'log_slave',
 		nocache		=> 1,
@@ -163,9 +164,13 @@ EOT
 	$data{bad_password_warning} = $bp_warning;
 
 	slashdLog("Moderation Stats Begin");
+
+	# 0.25 hours
+	slashdLog("row counting Begin");
 	my $comments = $stats->countCommentsDaily();
 	my $accesslog_rows = $logdb->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
+	slashdLog("row counting End");
 
 	slashdLog("countModeratorLog Begin");
 	my $modlogs = $stats->countModeratorLog({
@@ -241,10 +246,11 @@ EOT
 	my $mod_tokens_pool_pos = $stats->getTokensInPoolPos();
 	my $mod_tokens_pool_neg = $stats->getTokensInPoolNeg();
 	slashdLog("Points and Token Pool End");
-	
+
+	# 0.25 hours
+	slashdLog("Comment Posting Stats Begin");
 	my $used = $stats->countModeratorLog();
 	my $modlog_yest_hr = $stats->countModeratorLogByVal();
-	slashdLog("Comment Posting Stats Begin");
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID();
 	my($distinct_comment_ipids_anononly,
 	   $distinct_comment_ipids_loggedinonly,
@@ -256,6 +262,7 @@ EOT
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
 	my $comments_discussiontype_hr = $stats->countCommentsByDiscussionType();
 	slashdLog("Comment Posting Stats End");
+
 	slashdLog("Submissions Stats Begin");
 	my $submissions = $stats->countSubmissionsByDay();
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($distinct_comment_ipids);
@@ -288,6 +295,7 @@ EOT
 	
 	slashdLog("Moderation Stats End");
 
+	# 2 hours
 	slashdLog("Page Counting Begin");
 	my $sdTotalHits = $backupdb->getVar('totalhits', 'value', 1);
 	my $daily_total = $logdb->countDailyByPage('', {
@@ -400,6 +408,7 @@ EOT
 #		push(@{$data{messages}}, $temp);
 #	}
 
+	# 1 hour
 	slashdLog("Sectional Stats Begin");
 	my $skins =  $slashdb->getDescriptions('skins');
 	#XXXSECTIONTOPICS - don't think we need this anymore but just making sure
@@ -507,19 +516,21 @@ EOT
 	}
 	slashdLog("Story Comment Counts End");
 
-
+	slashdLog("Byte Counts Begin");
 	my $total_bytes = $logdb->countBytesByPage('', {
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 	my $grand_total_bytes = $logdb->countBytesByPage('');
+	slashdLog("Byte Counts End");
 
+	slashdLog("Mod Info Begin");
 	my $admin_mods = $stats->getAdminModsInfo();
 	my $admin_mods_text = getAdminModsText($admin_mods);
-
 	$mod_data{repeat_mods} = $stats->getRepeatMods({
 		min_count => $constants->{mod_stats_min_repeat}
 	});
 	$mod_data{reverse_mods} = $stats->getReverseMods();
+	slashdLog("Mod Info End");
 
 	slashdLog("Duration Stats Begin");
 	my $static_op_hour = $logdb->getDurationByStaticOpHour({});
