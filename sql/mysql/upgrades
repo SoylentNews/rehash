@@ -695,7 +695,6 @@ INSERT INTO vars (name, value, description) VALUES ('people_max_subscriber','400
 
 INSERT INTO vars (name, value, description) VALUES ('m2_multicount', '5', 'Additional multiplier for M2s performed on duplicate mods (leave 0 to disable)');
 
-# USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_43, Start of T_2_3_0_44
@@ -714,3 +713,5 @@ UPDATE section_topics SET type = 'topic_1' where type = 1;
 UPDATE section_topics SET type = 'topic_2' where type = 2;
 UPDATE section_topics SET type = 'topic_3' where type = 3;
 UPDATE section_topics SET type = 'topic_4' where type = 4;
+
+# USEPERL LAST UPDATED HERE
