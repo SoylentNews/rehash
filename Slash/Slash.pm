@@ -1183,9 +1183,15 @@ sub displayStory {
 	my $form = getCurrentForm();
 	
 	my $return;
-	my $story = $reader->getStory($sid, "", $options->{get_cacheable});
+	my $story;
+	if ($options->{get_cacheable}) {
+		my $slashdb = getCurrentDB();
+		$story = $slashdb->getStory($sid, "", $options->{get_cacheable});
+	} else {
+		$story = $reader->getStory($sid, "", $options->{get_cacheable});
+	}
 	# Sites without an "index" section will never use this, which is probably ok.
-	if (!$form->{light} && !$user->{no_icons} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable}) {
+	if (!$form->{light} && !$user->{no_icons} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable} && !$options->{is_future}) {
 		$return = $story->{rendered};
 	} else {
 		my $author = $reader->getAuthor($story->{uid},
@@ -1206,7 +1212,7 @@ sub displayStory {
 
 	my $storytime = timeCalc($story->{'time'});
 	my $atstorytime;
-	if ($story->{is_future} && !($user->{author} || $user->{is_admin})) {
+	if ($options->{is_future} && !($user->{author} || $user->{is_admin})) {
 		$atstorytime = $constants->{subscribe_future_name};
 	} else {
 		$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'});

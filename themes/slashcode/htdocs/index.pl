@@ -291,6 +291,7 @@ sub displayStories {
 		next if (($story->{is_future} && !$user->{is_subscriber}) || ($story->{is_future} && $constants->{subscribe_future_secs} < 1)) ;
 		my @threshComments = split m/,/, $story->{hitparade};  # posts in each threshold
 
+		$other->{is_future} = 1 if $story->{is_future};
 		my $storytext = displayStory($story->{sid}, '', $other);
 
 		$tmpreturn .= $storytext;
