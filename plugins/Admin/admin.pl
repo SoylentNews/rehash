@@ -890,8 +890,13 @@ sub topicDelete {
 
 	$tid ||= $form->{tid};
 
-#	$slashdb->deleteTopic($tid, $form->{replacementtid});
+	my($success, $errmsg) = $slashdb->deleteTopic($tid, $form->{replacementtid});
 	$form->{tid} = '';
+
+	if (!$success) {
+		# we should dump this to the screen instead
+		warn $errmsg;
+	}
 }
 
 ##################################################################

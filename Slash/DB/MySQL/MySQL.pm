@@ -1305,6 +1305,35 @@ sub getAllChildrenTids {
 }
 
 ########################################################
+# Starting with $start_tid, which may or may not be a nexus,
+# walk up all its parent topics and return their tids.
+# Note that the original tid, $start_tid, is not itself returned.
+sub getAllParentsTids {
+	my($self, $start_tid) = @_;
+	my $tree = $self->getTopicTree();
+	my %all_parents = ( );
+	my @cur_parents = ( $start_tid );
+	my %grandparents;
+	while (@cur_parents) {
+		%grandparents = ( );
+		for my $parent (@cur_parents) {
+			# This topic is a nexus, and a parent of the
+			# start nexus.  Note it so it gets returned.
+			$all_parents{$parent} = 1;
+			# Now walk through all its parents, marking
+			# nexuses as grandparents that must be
+			# walked through on the next pass.
+			for my $gparent (keys %{$tree->{$parent}{parent}}) {
+				$grandparents{$gparent} = 1;
+			}
+		}
+		@cur_parents = keys %grandparents;
+	}
+	delete $all_parents{$start_tid};
+	return sort { $a <=> $b } keys %all_parents;
+}
+
+########################################################
 # Starting with $start_tid, a nexus ID, walk down all its child nexuses
 # and return their tids.  Note that the original tid, $start_tid, is
 # not itself returned.
@@ -2868,83 +2897,113 @@ sub deleteAuthor {
 }
 
 ########################################################
+# Delete a topic.  At least for now (2004/09), we are requiring a
+# replacement topic ID to be specified, so parents and children of
+# the deleted topic can be re-established.
 sub deleteTopic {
 	my($self, $tid, $newtid) = @_;
 	my $tid_q = $self->sqlQuote($tid);
 	my $newtid_q = $self->sqlQuote($newtid);
+	my $tree = $self->getTopicTree();
 
-	return 0;  # too dangerous to use right now
+	my $ok = 1;
+	my $errmsg = "";
 
-	# Abort if $tid == $newtid !
-
-	my @delete_tables = qw(
-		topics topic_nexus topic_nexus_dirty topic_nexus_extras
-	);
-
-	# if we have a replacement tid ($newtid), replace with it, otherwise ... ?
-
-	# i have no idea what discussions.topic or pollquestions.topic
-	# is so i am ignoring them -- pudge
-
-	if ($newtid) {
-		### check to see if this would create a children/parent loop!
-		my @children = $self->getAllChildrenTids($tid);
-		if (grep { $_ == $newtid } @children) {
-			# Houston we have a problem.  Throw an informative
-			# error here. - Jamie
+	if (!$tid) {
+		$ok = 0; $errmsg = "no topic to delete was given";
+	}
+	if ($ok && !$newtid) {
+		$ok = 0; $errmsg = "no replacement topic given";
+	}
+	if ($ok && $tid == $newtid) {
+		$ok = 0; $errmsg = "cannot replace topic with itself";
+	}
+	if ($ok && !$tree->{$tid}) {
+		$ok = 0; $errmsg = "topic to delete not found";
+	}
+	if ($ok && !$tree->{$newtid}) {
+		$ok = 0; $errmsg = "replacement topic not found";
+	}
+	if ($ok) {
+		my @tid_children    = $self->getAllChildrenTids($tid);
+		my @newtid_children = $self->getAllChildrenTids($newtid);
+		my @tid_parents     = $self->getAllParentsTids($tid);
+		my @newtid_parents  = $self->getAllParentsTids($newtid);
+		my %tid_parents     = map { ($_, 1) } @tid_parents;
+		my %newtid_parents  = map { ($_, 1) } @newtid_parents;
+		my $badtid;
+		     if (($badtid) = grep { $tid_parents{$_} } @newtid_children) {
+			$ok = 0; $errmsg = "replacement topic is a (grand,etc.?)parent of deleted topic child $badtid";
+		} elsif (($badtid) = grep { $newtid_parents{$_} } @tid_children) {
+			$ok = 0; $errmsg = "replacement topic is a (grand,etc.?)child of deleted topic parent $badtid";
 		}
-
-		# We have to do two things in the topic_parents table.  In both
-		# cases, we ignore failed UPDATEs, which will happen if the new
-		# tid/parent_tid unique key collides with an existing row, which
-		# would indicate that the topic in question has a relationship
-		# with the new topic already.  Ignoring the failure means that
-		# the already-existing min_weight will be unchanged, which is
-		# what we want.  Afterwards we delete any rows which failed to
-		# UPDATE.
-		# The first thing is to update the to-be-deleted topic's children
-		# to instead point to its replacement.
-		$self->sqlUpdate('topic_parents',
-			{ parent_tid => $newtid },
-			"parent_tid=$tid_q",
-			{ ignore => 1 });
-		$self->sqlDelete('topic_parents', "parent_tid=$tid_q");
-		# Second, update the to-be-deleted topic's parents to instead
-		# be pointed-to by its replacement.  In case one of the topic's
-		# parents _is_ the replacement, don't make it loop to itself
-		# (and the resulting busted row will be deleted, same as above).
-		$self->sqlUpdate('topic_parents',
-			{ tid => $newtid },
-			"tid=$tid_q AND parent_tid != $newtid_q",
-			{ ignore => 1 });
-		$self->sqlDelete('topic_parents', "tid=$tid_q");
-
-		for my $table (qw(stories submissions journals)) {
-			$self->sqlUpdate($table, {
-				tid => $newtid
-			}, "tid=$tid_q");
-		}
-
-		# need to rerender ?
-		for my $table (qw(chosen rendered)) {
-			$self->sqlDelete("story_topics_$table", "tid=$tid_q");
-			$self->sqlInsert('story_topics_$table', {
-				tid => $newtid
-			}, {
-				ignore => 1
-			});
-		}
-
-	} else {  # delete these?
-		# push @delete_tables, qw(story_topics_chosen story_topics_rendered);
-	        # what to do with stories, submissions, journals
 	}
 
-	for my $table (@delete_tables) {
-		$self->sqlDelete($table, "tid=$tid_q");
+	if (!$ok) {
+		return($ok, $errmsg);
 	}
+
+	# We have to do two things in the topic_parents table.  In both
+	# cases, we ignore failed UPDATEs, which will happen if the new
+	# tid/parent_tid unique key collides with an existing row, which
+	# would indicate that the topic in question has a relationship
+	# with the new topic already.  Ignoring the failure means that
+	# the already-existing min_weight will be unchanged, which is
+	# what we want.  Afterwards we delete any rows which failed to
+	# UPDATE.
+	# The first thing is to update the to-be-deleted topic's children
+	# to instead point to its replacement.
+	$self->sqlUpdate('topic_parents',
+		{ parent_tid => $newtid },
+		"parent_tid=$tid_q",
+		{ ignore => 1 });
+	$self->sqlDelete('topic_parents', "parent_tid=$tid_q");
+	# Second, update the to-be-deleted topic's parents to instead
+	# be pointed-to by its replacement.  In case one of the topic's
+	# parents _is_ the replacement, don't make it loop to itself
+	# (and the resulting busted row will be deleted, same as above).
+	$self->sqlUpdate('topic_parents',
+		{ tid => $newtid },
+		"tid=$tid_q AND parent_tid != $newtid_q",
+		{ ignore => 1 });
+	$self->sqlDelete('topic_parents', "tid=$tid_q");
+
+	# Now update existing objects that had the old tid as a topic to
+	# have the new tid.  Stories are a special case so skip those
+	# for now.
+	# These tables have topics stored as 'tid'.
+	$self->sqlUpdate("submissions",   { tid => $newtid },   "tid=$tid_q");
+	$self->sqlUpdate("journals",      { tid => $newtid },   "tid=$tid_q");
+	$self->sqlUpdate("discussions",   { topic => $newtid }, "topic=$tid_q");
+	$self->sqlUpdate("pollquestions", { topic => $newtid }, "topic=$tid_q");
+
+	# OK, for stories, it's a little more complicated because we have
+	# not just a tid column, but two other tables.  First we mark
+	# stories as needing to be re-rendered.
+	$self->markTopicsDirty([ $tid, $newtid ]);
+	# Then change the stories.tid column.
+	$self->sqlUpdate("stories",       { tid => $newtid },   "tid=$tid_q");
+	# Now change everything in the chosen and rendered tables.
+	# Stories with both old and new already existing will have this
+	# fail because (stoid,tid) is a unique index, but that is OK.
+	$self->sqlUpdate("story_topics_chosen",   { tid => $newtid }, "tid=$tid_q", { ignore => 1 });
+	$self->sqlUpdate("story_topics_rendered", { tid => $newtid }, "tid=$tid_q", { ignore => 1 });
+	# Delete any rows that failed to change because of the
+	# unique index.
+	$self->sqlDelete("story_topics_chosen",   "tid=$tid_q");
+	$self->sqlDelete("story_topics_rendered", "tid=$tid_q");
+
+	# Finally, we nuke the topic from the topic tables themselves
+	# (except topic_parents which we have already taken care of).
+	$self->sqlDelete("topics", "tid=$tid_q");
+	$self->sqlDelete("topic_nexus", "tid=$tid_q");
+	$self->sqlDelete("topic_nexus_dirty", "tid=$tid_q");
+	$self->sqlDelete("topic_nexus_extras", "tid=$tid_q");
+	$self->sqlDelete("topic_param", "tid=$tid_q");
 
 	$self->setVar('topic_tree_lastchange', time());
+
+	return (1, "");
 }
 
 ########################################################
