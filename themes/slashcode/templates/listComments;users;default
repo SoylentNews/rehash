@@ -37,6 +37,9 @@ unanimous=0; unresolved=0;
 a_m2_down=0; a_m2_up=0; a_m2_count=0; a_m2_unfair_votes=0;
 moddable_items=0;
 prev_com = {};
+thread_toggle = 0;
+thread_col_1 = "DDDDDD";
+thread_col_2 = user.bg.2;
 %]
 [% total_mods_shown=0; %]
 [% IF commentcount > 0 %]
@@ -58,21 +61,28 @@ prev_com = {};
 			commenttitle = commenttitle _ " comments for last $comment_time days ";
 		END %]
 	[% IF commentstruct.size > 0 and admin_flag %]
-	<FORM METHOD="POST" ACTION="[% constants.rootdir %]/admin.pl">
-	<INPUT TYPE="hidden" NAME="op" VALUE="moderate_recent">
-		[% fp_no_time_restriction =  BLOCK; form.no_time_restriction | fixparam; END %]
-		[% fp_userfield =  BLOCK; form.userfield | fixparam; END %]
-		[% fp_fieldname =  BLOCK; form.fieldname | fixparam; END %]
-		[% fp_show_m2s =  BLOCK; form.show_m2s | fixparam; END %]
-		
-		[% IF type == "user";
-			returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=uid&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction _ "&amp;show_m2s=" _ fp_show_m2s;
-		ELSIF type == "netid";
-			returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=" _ fp_fieldname _ "&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction _ "&amp;show_m2s=" _ fp_show_m2s; 
-		END %]
+		<FORM METHOD="POST" ACTION="[% constants.rootdir %]/admin.pl">
+		<INPUT TYPE="hidden" NAME="op" VALUE="moderate_recent">
+		[%	
+			returnto_base = PROCESS base_url;
+			returnto_tail = PROCESS state_url;
+			returnto = returnto_base _ returnto_url;
+		%]
 		<INPUT TYPE="hidden" name="returnto" value="[% returnto | strip_attribute %]">
 	[% END %]
-	[% PROCESS titlebar width="100%" title = commenttitle -%]
+	[% IF title %]
+		[% show_m1s = form.show_m1s.defined ? form.show_m1s : user.mod_with_comm %]
+		[% show_m1s_op = show_m1s ? 0 : 1;
+		   IF admin_flag;
+		   	self_url = PROCESS base_url;
+		   	url_tail = PROCESS state_url override = { show_m1s => show_m1s_op};
+		   	self_url = self_url  _ url_tail;
+		   	extra = "<TD width=\"10\" bgcolor=\"" _ user.bg.3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  BORDER=0></A></TD>";
+		   END;
+		%]
+		[% PROCESS titlebar width="100%" title = commenttitle td_extra = extra -%]
+		[% td_extra = "" %]
+	[% END %]
 	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.bg.2 %]">
 	<TR bgcolor="[% user.bg.3 %]">
 		[% IF type=="netid"; total_cols = total_cols + 1; %]<TH align=left><FONT color="[% user.fg.3 %]" size=-1>User</FONT></TH>[% END %]
@@ -88,8 +98,7 @@ prev_com = {};
 	[% prev_comm_sid = 0; total_replies=0; total_karma=0; total_score=0; shown_comments=0 %]
 	[% FOREACH comment = commentstruct;  
 		n = n + 1;
-		shown_comments = shown_comments + 1;
-		total_replies = comment.replies + total_replies;
+		shown_comments = shown_comments + 1; total_replies = comment.replies + total_replies;
 		replies = comment.replies ? comment.replies : '';
 		score = comment.pts;
 		total_score = comment.pts + total_score;
@@ -102,9 +111,9 @@ prev_com = {};
 		END;
 		reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
 		%]
-		[% IF prev_comm_sid && prev_comm_sid != comment.sid %][% PROCESS attached_to_row the_comment = prev_com colspan=total_cols %] [% END %]
+		[% IF prev_comm_sid && prev_comm_sid != comment.sid; %][% PROCESS attached_to_row the_comment = prev_com colspan=total_cols %] [% thread_toggle=!thread_toggle; END %]
 		[%-
-		'<TR>';
+		'<TR bgcolor="'; thread_toggle ? thread_col_1 : thread_col_2; '">';
 		IF type == "netid";
 		'<TD valign="TOP"><NOBR>';
 		%]
@@ -195,21 +204,16 @@ prev_com = {};
 						'<td align=right><font  color="' _ light_text_color2 _ '" size=-1> Total Moderations: ' _ a_count _ '</font></td>';
 				 	  	'<td align=left><font  color="' _ light_text_color2 _ '" size=-1>';%][% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</font></td>
 						[%-
- 						'<td align=left colspan=3><font color="' _ light_text_color2 _ '" size=-1>' %][% a_m2_unfair_votes %] Unfair ([% PROCESS percentage sum=> a_m2_unfair_votes, count => a_m2_count %])</font></td> [%
+ 						'<td align=left colspan=3><font color="' _ light_text_color2 _ '" size=-1>' %][% a_m2_unfair_votes %] Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count}, "misc") %])</font></td> [%
 						'<td></td>';
-				      		'<td align=left><font  color="' _ light_text_color2 _ '" size=-1>';%] [% PROCESS percentage sum=>a_down, count => a_count %] Downmods</a> </td>[%
+				      		'<td align=left><font  color="' _ light_text_color2 _ '" size=-1>';%] [% Slash.getData('percentage',{ sum=>a_down, count => a_count},"misc") %] Downmods</a> </td>[%
 						'</tr>';
 					END;
 
 					"<TR><TD "; IF type=="netid"; 'COLSPAN="2"'; END; ">";
 					IF commentcount > n && (user.seclev > constants.comments_more_seclev
 						|| (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
-						[% IF type == "user" %]
-						 	<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]&amp;show_m2s=[% form.show_m2s|fixparam %]">[% commentcount - n %] More Comments...</A>
-						[% ELSIF type == "netid" %]
-						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname | fixparam %]&amp;min_comment=[% n %]&amp;show_m2s=[% form.show_m2s|fixparam %]">[% commentcount - n %] More Comments...</A><P>
-	
-						[% END %]
+						 	<A HREF="[% PROCESS base_url %][% PROCESS state_url override = { min_comment => n } %]">[% commentcount - n %] More Comment[% IF (commentcount-n)>1 %]s[% END %]...</A>
 					[% END %]
 					</TD>
 <TD></TD><TD></TD>
@@ -219,32 +223,19 @@ prev_com = {};
 					<TD>[% IF admin_flag %]<B>[% avg_score %][% IF reason_most_hits>0 %], [% reason_most %][% END %]</B>
 						[% IF moddable_items %]<BR><INPUT TYPE="SUBMIT" VALUE="Moderate">[% END %]
 					[% END %]</TD>
-					</TR>	
-		[%- ELSIF n==0 and commentcount> 0 -%]
-			<TR><TD>No comments in selected time period. 
-				[% IF type=="user" %]
-					<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;no_time_restriction=1">Go to latest comments...</A>
-				[% ELSIF type=="netid" %]
-						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname|fixparam %]&amp;min_comment=[% n %]&amp;no_time_restriction=1&amp;show_m2s=[% form.show_m2s|fixparam %]">Go to latest comments...</A><P>
-				[% END %]
-			</TD></TR>
-		[%- ELSIF n>0 and commentcount> 0  -%]
-			<TR><TD>No more comments</TD></TR>
-		[%- ELSIF commentcount== 0 -%]
-			<TR><TD>No comments</TD></TR>
-		[%- END -%]
+					</TR>
+					<TR><TD colspan="[% total_cols %]" align="center"><font size=-1>
+						<font size=-1>Logged in users can choose whether or not they'd like comments shown grouped by discussion on their 
+						[% IF !user.is_anon %]<A HREF="[% constants.rootdir %]/users.pl?op=editcomm&amp;userfield=[% user.uid %]&amp;fieldname=uid">[% END %]comment settings page[% IF !user.is_anon %]</A><BR>[% END %]
+						[% IF constants.subscribe and !user.is_subscriber %]<BR>Subscribers can view entire comment history for all users[% END %]					 
+						</font> 
+					</TD></TR>
+		[% END %]				
 		</TABLE>
 		[%- IF commentstruct.size > 0 and admin_flag -%]
 			</FORM>
 		[%- END -%]
-[% ELSE;
-	IF type=="user";
-                         "$useredit.nickname has yet to post any comments";
-                ELSIF type=="netid";
-                         "No comments posted by $netid";
-                END;
-
- END %]
+ [% END %]
 
 
 [% BLOCK attached_to_row;
@@ -256,7 +247,7 @@ prev_com = {};
 		the_label = '';
 	END;
 	the_label = the_label _ the_comment.disc_title; %]
-	<TR><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% the_comment.url %]">[% the_label %]</A></FONT></TD></TR>
+	<TR bgcolor="[% thread_toggle ? thread_col_1 : thread_col_2; %]"><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% the_comment.url %]">[% the_label %]</A></FONT></TD></TR>
 [% END %]
 
 [% BLOCK nick_and_uid;
@@ -290,16 +281,6 @@ END %]
 	m2fair_str _ " " _ m2unfair_str;
  END %]
 
-[% BLOCK percentage %]
-[%IF count > 0;
-        pct = (sum / count*100) FILTER format('%2.0f');
-        pct = pct _ "%";
-ELSE;
-pct = "n/a";
- END; %]
-[%- pct -%]
-[% END %]
-
 [% BLOCK make_reason_mod_select %]
 	[% IF admin_flag and comment.type != "archived";
 	h = { "" => text };
@@ -312,7 +293,35 @@ pct = "n/a";
 	END %]
 [% END %]
 
-
+[% BLOCK base_url %]
+	[% base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;fieldname=";
+	IF type == "user";
+		base_url = base_url _ "uid&amp;userfield=" _ useredit.uid;
+	ELSE; 
+		fp_fieldname = BLOCK; form.fieldname | fixparam; END;
+		fp_netid = BLOCK; netid | fixparam; END;
+		base_url = base_url _ fp_fieldname _ "&amp;userfield=" _ fp_netid;
+	END;
+	base_url;
+	%]
+[% END %]
+[% BLOCK state_url;
+	state_url="";
+	state_params = ["show_m2s","show_m1s","min_comment"];
+	FOREACH param = state_params;
+		state_param = "st_" _ param;
+		IF form.${param}.defined || override.${param}.defined;
+			state_url = state_url _ "&amp;" _ param _ "=";
+			IF override.${param}.defined;
+				fp_val = BLOCK; override.${param} | fixparam; END;
+			ELSE;
+				fp_val = BLOCK; form.${param} | fixparam; END;
+			END;
+			state_url = state_url _ fp_val;
+		END;
+	END;
+	state_url;
+END %]
 
 __seclev__
 10000
