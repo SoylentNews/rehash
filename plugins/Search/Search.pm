@@ -210,7 +210,7 @@ sub findStory {
 	my $columns;
 	$columns .= "title, stories.sid as sid, "; 
 	$columns .= "time, commentcount, stories.section as section,";
-	$columns .= "tid, ";
+	$columns .= "stories.tid as tid, ";
 	$columns .= "introtext ";
 	$columns .= ", TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
 		if $form->{query};
@@ -265,6 +265,20 @@ sub findStory {
 	# of stories we search, on any search that includes a topic
 	# limitation.  This sucks and should be replaced with a real
 	# solution ASAP -- this is only a stopgap! - Jamie 2003/11/10
+	#
+	# Changed sorting of story sids by time instead of sid.  This prevents
+	# only dated stories from showing up when there were > 1000 
+        # sids that were created prior to 2000 
+	#
+	# Added support for more correct left join method.  Also added vars
+	# so you can choose to lose left join method or change the limit on
+	# sids returned in the two select method
+	#
+	# Tweak to your site size and performance needs
+	#
+	#-- Vroom 2003/12/08
+	
+
 	if ($form->{tid}) {
 		my @tids;
 		if (ref($form->{_multi}{tid}) eq 'ARRAY') {
@@ -273,13 +287,22 @@ sub findStory {
 			push @tids, $form->{tid};
 		}
 		my $string = join(',', @{$self->sqlQuote(\@tids)});
-		my $sids = $self->sqlSelectColArrayref('sid', 'story_topics', "tid IN ($string)",
-			"ORDER BY sid DESC LIMIT 1000");
-		if ($sids && @$sids) {
-			$string = join(',', @{$self->sqlQuote($sids)});
-			$where .= " AND stories.sid IN ($string) ";
-		} else {
-			return; # No results could possibly match
+		if($constants->{topic_search_use_join}){
+			$tables.= " LEFT JOIN story_topics ON stories.sid = story_topics.sid ";
+			$where .= " AND story_topics.id IS NOT NULL";
+			$where .= " AND story_topics.tid in($string)";
+			$other = "GROUP by sid $other";
+		} else{
+			my $topic_search_sid_limit = $constants->{topic_search_sid_limit} || 1000;
+			my $sids = $self->sqlSelectColArrayref('story_topics.sid', 'story_topics, stories', 
+				"story_topics.sid = stories.sid AND story_topics.tid IN ($string)",
+				"ORDER BY time DESC LIMIT $topic_search_sid_limit");
+			if ($sids && @$sids) {
+				$string = join(',', @{$self->sqlQuote($sids)});
+				$where .= " AND stories.sid IN ($string) ";
+			} else {
+				return; # No results could possibly match
+			}
 		}
 	}
 	
@@ -528,6 +551,8 @@ sub findDiscussion {
 
 sub _score {
 	my ($self, $col, $query, $method) = @_;
+	my $constants = getCurrentStatic();
+	
 	if ($method) {
 		# We were getting malformed SQL queries with the previous
 		# way this was done, so I made it a bit more robust.  If
@@ -547,8 +572,21 @@ sub _score {
 			next unless $term;
 			push @terms, $self->sqlQuote($term);
 		}
-		return "0" if !@terms;
+		my @cols = ();
+		for my $c (split /,/, $col) {
+			$c =~ /^\s*(.*?)\s*$/;
+			$c = $1;
+			next unless $c;
+			push @cols, $c;
+		}
+		return "0" if !@terms or !@cols;
 		my $terms = join(",", @terms);
+		if($method eq "scour" and $constants->{scour_search_modify}){
+			my @scour = map {$_ = "($method($_, $terms))"} @cols;
+			my $scour = join " + ", @scour;
+			$scour = "( $scour / ". scalar @scour .")" if @scour > 1;
+			return $scour;
+		}
 		return "($method($col, $terms))";
 	} else {
 		$query = $self->sqlQuote($query);
