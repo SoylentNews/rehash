@@ -3176,9 +3176,10 @@ sub getNumCommPostedByUID {
 }
 
 ##################################################################
-sub getUIDList {
+sub getUIDStruct {
 	my($self, $column, $id) = @_;
 
+	my $uidstruct;
 	my $where = '';
 	$id = md5_hex($id) if length($id) != 32;
 	if ($column eq 'md5id') {
@@ -3190,7 +3191,41 @@ sub getUIDList {
 		return [ ];
 	}
 
-	return $self->sqlSelectAll("DISTINCT uid ", "comments", $where);
+	my $uidlist = $self->sqlSelectAll("DISTINCT uid ", "comments", $where);
+
+	for (@$uidlist) {
+		my $uid;
+		$uid->{nickname} = $slashdb->getUser($_->[0], 'nickname');
+		$uid->{comments} = 1;
+		$uidstruct->{$_->[0]} = $uid;
+	}
+
+	$uidlist = $self->sqlSelectAll("DISTINCT uid ", "submissions", $where);
+
+	for (@$uidlist) {
+		if (exists $uidstruct->{$_->[0]}) {
+			$uidstruct->{$_->[0]}{submissions} = 1;
+		} else {
+			my $uid;
+			$uid->{nickname} = $slashdb->getUser($_->[0], 'nickname');
+			$uid->{submissions} = 1;
+			$uidstruct->{$_->[0]} = $uid;
+		}
+	}
+
+	$uidlist = $self->sqlSelectAll("DISTINCT uid ", "moderatorlog", $where);
+
+	for (@$uidlist) {
+		if (exists $uidstruct->{$_->[0]}) {
+			$uidstruct->{$_->[0]}{moderatorlog} = 1;
+		} else {
+			my $uid;
+			$uid->{nickname} = $slashdb->getUser($_->[0], 'nickname');
+			$uid->{moderatorlog} = 1;
+			$uidstruct->{$_->[0]} = $uid;
+	}
+
+	return $uidstruct;
 }
 
 ##################################################################
