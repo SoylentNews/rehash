@@ -374,7 +374,7 @@ sub getReverseMods {
 		: "0";
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"moderatorlog.uid AS muid,
-		 nickname, tokens, karma,
+		 nickname, tokens, users_info.karma AS karma,
 		 ( SUM( IF( moderatorlog.val=-1,
 				IF(points=5, $down5, 0),
 				IF(points<=$upmax, $upsub-points*$upmul, 0) ) )
