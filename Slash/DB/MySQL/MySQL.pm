@@ -664,6 +664,7 @@ sub getMetamodsForUserRaw {
 	$max_old = 0 if !$max_old;
 	my $min_new = $max_old+1;
 	my($max_new) = $self->sqlSelect("MAX(id)", "moderatorlog");
+	$max_new = 0 if !$max_new;
 	$min_new = $max_new if $min_new > $max_new;
 	my $old_range = $max_old-$min_old; $old_range = 1 if $old_range < 1;
 	my $new_range = $max_new-$min_new; $new_range = 1 if $new_range < 1;
