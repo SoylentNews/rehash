@@ -240,7 +240,6 @@ CREATE TABLE discussions (
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (topic) REFERENCES topics(tid),
 	INDEX (type,uid,ts),
-	KEY (sid),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 
@@ -522,7 +521,7 @@ CREATE TABLE stories (
 	writestatus ENUM("ok","delete","dirty","archived") DEFAULT 'ok' NOT NULL,
 	PRIMARY KEY (sid),
 	FOREIGN KEY (uid) REFERENCES users(uid),
-	FOREIGN KEY (tid) REFERENCES tid(topic),
+	FOREIGN KEY (tid) REFERENCES topics(tid),
 	FOREIGN KEY (section) REFERENCES sections(section),
 	INDEX frontpage (time, displaystatus, writestatus),
 	INDEX time (time),
