@@ -72,7 +72,7 @@ sub main {
 			formname		=> 'moderate',
 			checks			=> ['generate_formkey'],	
 		},
-		creatediscussion	=> {
+		create_discussion	=> {
 			function		=> \&createDiscussion,
 			seclev			=> 1,
 			post			=> 1,
@@ -577,16 +577,14 @@ sub commentIndexPersonal {
 }
 
 ##################################################################
-# Yep, I changed the l33t method of adding discussions.
-# "The Slash job, keeping trolls on their toes"
+# This is where all of the real discussion creation occurs 
+# Returns the discussion id of the created discussion
 # -Brian
-sub createDiscussion {
+sub _createDiscussion {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $id;
 
-	my $label = getData('label');
-
-	if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
+	if ($user->{seclev} >= $constants->{discussion_create_seclev} || $user->{is_admin}) {
 		# if form.url is empty, try the referrer.  if it
 		# matches comments.pl without any query string,
 		# then (later, down below) set url to point to discussion
@@ -603,6 +601,7 @@ sub createDiscussion {
 		$form->{url}	= fudgeurl($newurl);
 		# $form->{title}	= strip_notags($form->{title});
 		$form->{title}	= strip_notags($form->{postersubj});
+		$form->{topic}  = $constants->{defaulttopic};
 
 
 		# for now, use the postersubj filters; problem is,
@@ -633,39 +632,24 @@ sub createDiscussion {
 				$slashdb->setDiscussion($id, { url => $newurl });
 			}
 		}
-
-		my $formats = $slashdb->getDescriptions('postmodes');
-		my $postvar = $form->{posttype} ? $form : $user;
-		my $format_select = createSelect(
-			'posttype', 
-			$slashdb->getDescriptions('postmodes'),
-			$form->{posttype} || $user->{posttype},
-			1
-		);
-
-		# Update form with the new SID for comment creation and other
-		# variables necessary. See "edit_comment;misc;default".
-		my $newform = {
-			sid	=> $id,
-			pid	=> 0, 
-			label		=> $label,
-			title	=> $form->{title},
-			formkey => $form->{formkey},
-		};
-		# We COULD drop ID from the call below, but not right now.
-		slashDisplay('newdiscussion', { 
-			error 		=> $error, 
-			'label'		=> $label,
-			form		=> $newform,
-			format_select	=> $format_select,
-			id 		=> $id,
-		});
 	} else {
 		slashDisplay('newdiscussion', {
 			error => getError('seclevtoolow'),
 		});
 	}
 
+	return $id;
+}
+
+##################################################################
+# Yep, I changed the l33t method of adding discussions.
+# "The Slash job, keeping trolls on their toes"
+# -Brian
+sub createDiscussion {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	my $label = getData('label');
+	my $id = _createDiscussion($form, $slashdb, $user, $constants);
 	commentIndex(@_);
 }
 
@@ -1006,7 +990,7 @@ sub previewForm {
 sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
-	my $id;
+	my $id = $form->{sid};
 	my $label = getData('label');
 
 	if ($discussion->{type} eq 'archived') {
@@ -1052,28 +1036,10 @@ sub submitComment {
 
 	$tempComment = addDomainTags($tempComment);
 
-	if ($form->{newdiscussion} && $user->{seclev} >= $constants->{discussion_new_seclev} ) {
-
-		my $newurl	= $form->{url} ? $form->{url}
-			: $ENV{HTTP_REFERER} =~ m|\Q$constants->{rootdir}/comments.pl\E$|
-				? ""
-				: $ENV{HTTP_REFERER};
-		$form->{url}	= fudgeurl($newurl);
-
-		$id = $slashdb->createDiscussion({
-			title	=> $tempSubject,
-			topic	=> $form->{tid} ? $form->{tid} : $form->{topic},
-			url	=> $form->{url} || 1,
-			type	=> "recycle"
-		});
-
-		# fix URL to point to discussion if no referrer
-		if (!$form->{url}) {
-			$newurl = $constants->{rootdir} . "/comments.pl?sid=$id";
-			$slashdb->setDiscussion($id, { url => $newurl });
-		}
+	if ($form->{newdiscussion}) {
+		$id = _createDiscussion($form, $slashdb, $user, $constants);
+		return 1 unless $id;
 	}
-	$id ||= $form->{sid};
 
 #	# Slash is not a file exchange system
 #	# still working on this...stay tuned for real commit

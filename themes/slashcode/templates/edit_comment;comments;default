@@ -97,23 +97,19 @@ END %]
 		<TD><A HREF="[% user.homepage %]">[% user.homepage | strip_literal %]</A></TD></TR>
 [% END %]
 
-	<!-- type [% type %] topic [% topic %] form.topic [% form.topic %] topic_types [% topic_types.keys %] -->
-
 	[% IF newdiscussion || form.newdiscussion %]
-
-		[% IF form.tid %]
-		<INPUT TYPE="HIDDEN" NAME="tid" VALUE="[% form.tid %]">
-
-		[% ELSE %]
-	<TR><TD ALIGN="RIGHT">Topic: </TD>
-		<TD>[% 
-		type=constants.enable_discussion_topic || "topic_1";
-		topic_types = Slash.db.getDescriptions('topics_section_type', section, type);
-		topic_select = Slash.createSelect('topic', Slash.db.getDescriptions('topics_section_type', constants.section, type), form.topic, 1, 1); %]
-		[% topic_select %]
-		</TD>
-	</TR>
-		[% END %]
+		<TR>
+			<TD ALIGN="RIGHT">Topic: </TD>
+			<TD>
+				[% Slash.selectTopic('topic', topic, section, 1) %]
+			</TD>
+		</TR>
+		<TR>
+			<TD ALIGN="RIGHT">URL: </TD>
+			<TD>
+				<INPUT TYPE="text" NAME="url" SIZE=60>
+			</TD>
+		</TR>
 	[% END %]
 
 	<TR><TD ALIGN="RIGHT">Subject: </TD>

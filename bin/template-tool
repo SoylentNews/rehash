@@ -200,8 +200,6 @@ if ($opts{'s'}) {
 				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
 			}
 			if ($template->{instructions} =~ /placeholder/) {
-				print "\t$filename is placeholder, skipping\n"
-					unless $opts{'t'};
 				next;
 			}
 			delete $template->{instructions};
