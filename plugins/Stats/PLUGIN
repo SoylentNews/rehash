@@ -5,6 +5,7 @@ mysql_dump=mysql_dump
 mysql_schema=mysql_schema
 requiresplugin=Blob
 task=adminmail.pl
+task=story_count.pl
 task=stats_graphs_delete.pl
 template=templates/calculate;stats;default
 template=templates/csv;stats;default
