@@ -103,6 +103,7 @@ CREATE TABLE topics_new (
         image VARCHAR(100) NOT NULL,
         width SMALLINT UNSIGNED NOT NULL DEFAULT 0,
         height SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+        submittable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
         PRIMARY KEY (tid)
 ) TYPE=InnoDB;
 EOT
