@@ -39,7 +39,7 @@ __template__
 		[% END %]
 		[% UNLESS user.is_anon %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% user.2 %]">Add Friend</A>
+				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% user.2 %]">Add a Friend</A>
 			</TD>
 		[% END %]
 		</TR>
