@@ -6,6 +6,7 @@
 package Slash::DB::Utility;
 
 use strict;
+use Config '%Config';
 use Slash::Utility;
 use DBIx::Password;
 use vars qw($VERSION);
@@ -219,9 +220,9 @@ sub sqlConnect {
 			local @_;
 			eval {
 				local $SIG{'ALRM'} = sub { die "Connection timed out" };
-				alarm $timeout;
+				alarm $timeout if $Config{d_alarm};
 				$self->{_dbh} = DBIx::Password->connect_cached($self->{virtual_user});
-				alarm 0;
+				alarm 0        if $Config{d_alarm};
 			};
 
 			if ($@ || !defined $self->{_dbh}) {
