@@ -662,6 +662,7 @@ sub getTop10Comments {
 		($constants->{comment_minscore}, $constants->{comment_maxscore});
 
 	my $num_wanted = $constants->{top10comm_num} || 10;
+	my $daysback = $constants->{top10comm_days} || 1;
 
 	my $cids = [];
 	my $comments = [];
@@ -682,7 +683,7 @@ sub getTop10Comments {
 			'cid',
 			'comments',
 			"cid >= $min_cid
-				AND date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+				AND date >= DATE_SUB(NOW(), INTERVAL $daysback DAY)
 				AND points >= $max_score",
 			'ORDER BY date DESC');
 

@@ -949,6 +949,7 @@ INSERT INTO vars (name, value, description) VALUES ('titlebar_width','100%','The
 INSERT INTO vars (name, value, description) VALUES ('today','730512','(Obviated) Today converted to days past a long time ago');
 INSERT INTO vars (name, value, description) VALUES ('tokenspercomment','6','Number of tokens to feed the system for each comment');
 INSERT INTO vars (name, value, description) VALUES ('tokensperpoint','8','Number of tokens per point');
+INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('top_sid','','The sid of the most recent story on the homepage');
 INSERT INTO vars (name, value, description) VALUES ('totalComments','0','Total number of comments posted');
