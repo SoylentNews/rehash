@@ -51,7 +51,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 	<B>Your Email Address</B><BR>
 	<SMALL>(required but never displayed publicly, unless you specify so in
 	your comment preferences. This is where your passwd is mailed.  If you
-	change this address, a notification will be sent, and you will need 
+	change this address, a notification will be sent, and you will need to
 	follow the enclosed instructions to re-register)</SMALL><BR>
 	<INPUT TYPE="TEXT" NAME="realemail" VALUE="[% useredit.realemail | strip_attribute %]" SIZE="40"><BR>
 <BR>
