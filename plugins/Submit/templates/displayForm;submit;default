@@ -86,8 +86,7 @@ be deleted.)</FONT>
 
 [% PROCESS formLabel value => "Topic and Section", comment => "" %]
 
-[% tid = form.tid || 'news' %]
-[% Slash.selectTopic('tid', tid, section, 1) %]
+[% Slash.createSelect('tid', topic_values, form.tid) %]	
 [% Slash.selectSection('section', section, 0, 1) %]
 
 <BR><FONT SIZE="2">(Almost everything should go under Articles)</FONT>
@@ -112,7 +111,7 @@ be deleted.)</FONT>
 [% IF savestory %]
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="SubmitStory">
 [% ELSE %]
-(You must preview once before you can submit)
+(You must preview once, provide a subject, some text, and a topic before you can submit)
 [% END %]
 
 </FORM><P>

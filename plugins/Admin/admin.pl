@@ -1237,7 +1237,7 @@ sub editStory {
 	my @topic_select_sec;
 	if ($section) {
 		for (@stid) {
-			my $current_hash = { %$topic_values };
+		my $current_hash = { %$topic_values };
 			$current_hash->{0} = "$current_hash->{$_} (Delete)";
 			push @topic_select_sec, createSelect('stid',
 				$current_hash,

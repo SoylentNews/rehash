@@ -395,7 +395,14 @@ sub displayForm {
 	}
 
 
-	$form->{tid} ||= $constants->{defaulttopic};
+	my $topic_values = $slashdb->getDescriptions('topics_section', $section);
+	$form->{tid} ||= 0;
+	unless ($form->{tid}) {
+		my $current_hash = { %$topic_values };
+		$current_hash->{0} = "Select Topic";
+		$topic_values = $current_hash;
+	}
+
 
 	my $topic = $slashdb->getTopic($form->{tid});
 	$topic->{imageclean} = $topic->{image};
@@ -414,7 +421,7 @@ sub displayForm {
 
 	slashDisplay('displayForm', {
 		fixedstory	=> strip_html(url2html($form->{story})),
-		savestory	=> $form->{story} && $form->{subj},
+		savestory	=> $form->{story} && $form->{subj} && $form->{tid},
 		username	=> $form->{name} || $username,
 		fakeemail	=> processSub($fakeemail, $known),
 		section		=> $form->{section} || $section || $constants->{defaultsection},
@@ -423,6 +430,7 @@ sub displayForm {
 		topic		=> $topic,
 		width		=> '100%',
 		title		=> $title,
+		topic_values	=> $topic_values,
 	});
 }
 
