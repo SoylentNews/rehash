@@ -442,7 +442,7 @@ sub linkStory {
 	}
 
 	# We need to make sure we always get the right link -Brian
-	my ($url);
+	my($url);
 	unless ($url = $slashdb->getSection($story_link->{section}, 'url')) {
 		$url = $constants->{real_rootdir};
 	} 

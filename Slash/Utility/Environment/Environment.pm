@@ -1612,8 +1612,8 @@ sub createEnvironment {
 
 	# If this is a sectional site, we need to set our hostname if one exists.
 	my $hostname = $slashdb->getSection($form->{section}, 'hostname');
-	createCurrentHostname($hostname)
-		if $hostname;
+	createCurrentHostname($hostname) if $hostname;
+
 	# We assume that the user for scripts is the anonymous user
 	createCurrentDB($slashdb);
 	createCurrentStatic($constants, $site_constants);

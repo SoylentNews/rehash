@@ -17,7 +17,7 @@ $task{$me}{code} = sub {
 
 	my $yass = getObject('Slash::YASS');
 
-	unless($yass) {
+	unless ($yass) {
 		slashdLog('No database to run sitecheck against');
 		return;
 	}
@@ -48,7 +48,7 @@ $task{$me}{code} = sub {
 	my $sites = $yass->getActive();
 	my $junk;
 	my $ua = LWP::UserAgent->new();
-	my ($winners, $losers);
+	my($winners, $losers);
 	for (@$sites) {
 		print "$_->{id}\t$_->{url}";
 		my $response = $ua->get($_->{url} . $constants->{yass_extra});
@@ -63,7 +63,7 @@ $task{$me}{code} = sub {
 		}
 	}
 	my $total = $winners + $losers;
-	slashdLog("Total sites $total\tActive Sites $winners\tFailed sites $losers);
+	slashdLog("Total sites $total\tActive Sites $winners\tFailed sites $losers");
 	slashdLog('Checking YASS sites End');
 
 	return ;

@@ -1513,7 +1513,7 @@ sub saveStory {
 		sid		=> $form->{sid},
 		title		=> $form->{title},
 		section		=> $form->{section},
-		submitter		=> $form->{submitter},
+		submitter	=> $form->{submitter},
 		tid		=> $form->{tid},
 		dept		=> $form->{dept},
 		'time'		=> $time,
@@ -1557,9 +1557,9 @@ sub saveStory {
 	}
 
 	if ($sid) {
-		my $rootdir = $slashdb->getSection($form->{section}, 'url');
-		$rootdir = $rootdir ? $rootdir : getCurrentStatic('rootdir');
-		
+		my $rootdir = $slashdb->getSection($form->{section}, 'url')
+			|| $constants->{rootdir};
+
 		my $id = $slashdb->createDiscussion( {
 			title	=> $form->{title},
 			section	=> $form->{section},

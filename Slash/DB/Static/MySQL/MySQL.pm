@@ -1026,6 +1026,7 @@ sub countAccesslogDaily {
 
 sub createRSS {
 	my($self, $bid, $item) = @_;
+	# this will go away once we require Digest::MD5 2.17 or greater
 	$item->{title} =~ /^(.*)$/;
 	my $title = $1;
 	$item->{description} =~ /^(.*)$/;
@@ -1034,6 +1035,9 @@ sub createRSS {
 	my $link = $1;
 
 	$self->sqlInsert('rss_raw', {
+# 		link_signature		=> md5_hex($item->{'link'}),
+# 		title_signature		=> md5_hex($item->{'title'}),
+# 		description_signature	=> md5_hex($item->{'description'}),
 		link_signature		=> md5_hex($link),
 		title_signature		=> md5_hex($title),
 		description_signature	=> md5_hex($description),

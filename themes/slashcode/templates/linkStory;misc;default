@@ -18,10 +18,12 @@ en_US
 __name__
 linkStory
 __template__
+[%# define site_url just in case url is not passed to template %]
+[% site_url = url ? url : constants.rootdir %] 
 [% IF dynamic %]
-	<A HREF="[% url %]/article.pl?sid=[% sid %][% IF mode %]&amp;mode=[% mode %][% END %][% IF tid %]&amp;tid=[% tid %][% END %][% IF threshold %]&amp;threshold=[% threshold %][% END %]">[% text %]</A>
+<A HREF="[% site_url %]/article.pl?sid=[% sid %][% IF mode %]&amp;mode=[% mode %][% END %][% IF tid %]&amp;tid=[% tid %][% END %][% IF threshold %]&amp;threshold=[% threshold %][% END %]">[% text %]</A>
 [% ELSE %]
-		<A HREF="[% url %]/[% section %]/[% sid %].shtml[% IF tid %]?tid=[% tid %][% END %]">[% text %]</A>
+<A HREF="[% site_url %]/[% section %]/[% sid %].shtml[% IF tid %]?tid=[% tid %][% END %]">[% text %]</A>
 [% END %]
 __seclev__
 10000
