@@ -234,9 +234,13 @@ sub doEmail {
 	}
 }
 
+{
+my $exit_func;
 sub doLogPid {
-	my($fname, $nopid, $sname) = @_;
-	$sname ||= $fname;
+	my($fname, $options) = @_;
+	my $nopid = $options->{nopid};
+	my $sname = $options->{sname} || $fname;
+	$exit_func = $options->{exit_func};
 
 	my $fh      = gensym();
 	my $dir     = getCurrentStatic('logdir');
@@ -265,6 +269,7 @@ sub doLogPid {
 
 	# do this for all things, not just ones needing a .pid
 	$SIG{TERM} = $SIG{INT} = sub {
+		&$exit_func() if $exit_func;
 		doLog($fname, ["Exiting $sname ($_[0]) with pid $$"]);
 		# Don't delete the .pid file unless we wrote it.
 		# Yes, this next line does what you'd expect;  $nopid is
@@ -279,23 +284,33 @@ sub doLogPid {
 		exit 0;
 	};
 }
+}
 
 sub doLogInit {
-	my($fname, $nopid, $sname) = @_;
-	$sname ||= $fname;
+	my($fname, $options) = @_;
+	$options ||= { };
+	my $nopid = $options->{nopid};
+	my $sname = $options->{sname} || $fname;
+	my $exit_func = $options->{exit_func};
 
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.log");
 
 	mkpath $dir, 0, 0775;
-	doLogPid($fname, $nopid, $sname);
+	doLogPid($fname, {
+		nopid => $nopid,
+		sname => $sname,
+		exit_func => $exit_func
+	});
 	open(STDERR, ">> $file\0") or die "Can't append STDERR to $file: $!";
 	doLog($fname, ["Starting $sname with pid $$"]);
 }
 
 sub doLogExit {
-	my($fname, $nopid, $sname) = @_;
-	$sname ||= $fname;
+	my($fname, $options) = @_;
+	$options ||= { };
+	my $nopid = $options->{nopid};
+	my $sname = $options->{sname} || $fname;
 
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.pid");

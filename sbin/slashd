@@ -44,6 +44,7 @@ use vars qw(
 	%resource_info
 	$event_ar
 	$cron
+	$task_exit_flag
 );
 
 my $virtual_user = $ARGV[0];
@@ -212,8 +213,26 @@ sub update_static {
 	return $changed;
 } }
 
+sub send_children_usr1 {
+	my @pids = sort { $a <=> $b } keys %pids;
+	if (@pids) {
+		my @info_str = ( );
+		for my $pid (@pids) {
+			my $success = kill USR1, $pid;
+			push @info_str, "pid $pid ($pids{$pid}{taskname})"
+				. ($success ? "" : " (FAILED)");
+		}
+		slashdLog("sent SIGUSR1 to running tasks: @info_str");
+	}
+}
+
 sub slashdLogInit {
-	doLogInit('slashd');
+	doLogInit('slashd', { exit_func => \&send_children_usr1 });
+	# When the parent process gets tapped with a USR1 signal,
+	# pass it along to all the children (it's their cue to exit
+	# at their earliest appropriate opportunity -- they also get
+	# that if the parent gets a TERM or INT).
+	$SIG{USR1} = \&send_children_usr1;
 }
 
 sub init_cron {
@@ -676,9 +695,10 @@ sub main {
 	init_cron();
 	process_tasks();
 	init_event_ar();
+	$task_exit_flag = 0;
 
-	# Here's the main event loop, which never returns (slashd is
-	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
+	# Set some signal handlers.  First, when a child exits, this
+	# handler gets called (right now it does nothing).
 
 	$SIG{CHLD} = sub {
 		# Logging is for debugging only!!  Almost anything you do
@@ -690,6 +710,9 @@ sub main {
 		# slashdLog("SIGCHLD called in $$")
 		# NOTE: perl 5.8 has safe signals.
 	};
+
+	# Here's the main event loop, which never returns (slashd is
+	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
 
 	# daemonize
 	open(STDOUT, '+>' . devnull());
@@ -767,6 +790,10 @@ sub main {
 		FORK: {
 			$args->{pid} = my $pid = fork();
 			if (!dbAvailable()) {
+				# Don't we want to do this _before_ we fork?
+				# (It's not like calling dbAvailable() and
+				# then sqlConnect() is atomic anyway.)
+				# - Jamie
 				slashdLog("DB unavailable waiting to start next task");
 				sleep 5 until dbAvailable();
 				slashdLog("DB available again preparing to start next task");
@@ -864,8 +891,9 @@ sub do_child {
 		@{$args}{qw(basename forktype subref basename_nopl
 		start_time invocation_num)};
 
-	# In doLogPid we set a handler for these that deletes the slashd.pid
-	# file;  children don't have the right to do that.
+	# In doLogPid (which is called by doLogInit, which is called by
+	# slashdLogInit) we had set a handler for these that deletes the
+	# slashd.pid file.  Children don't have the right to do that.
 	$SIG{TERM} = $SIG{INT} = 'DEFAULT';
 
 	# Children may use system(), backticks, or open() pipes, all of which
@@ -873,6 +901,11 @@ sub do_child {
 	# -- whatever it may be, it's inappropriate for the child.  The default
 	# action for SIGCHLD is to ignore it.
 	$SIG{CHLD} = 'DEFAULT';
+
+	# If someone sends this child a SIGUSR1, that means it should exit
+	# at its earliest appropriate opportunity.  It's up to the task code
+	# to check this var and behave accordingly, though.
+	$SIG{USR1} = sub { $task_exit_flag = 1 };
 
 	setUserDBs($user);
 

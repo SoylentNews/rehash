@@ -11,7 +11,7 @@ use Slash::Constants ':slashd';
 
 use strict;
 
-use vars qw( %task $me );
+use vars qw( %task $me $task_exit_flag );
 
 my $total_freshens = 0;
 
@@ -116,6 +116,10 @@ $task{$me}{code} = sub {
 			slashdLog("Aborting stories at render, too much elapsed time");
 			last STORIES_RENDER;
 		}
+		if ($task_exit_flag) {
+			slashdLog("Aborting stories at render, got SIGUSR1");
+			last STORIES_RENDER;
+		}
 
 		my $rendered;
 		{
@@ -140,11 +144,12 @@ $task{$me}{code} = sub {
 	# Freshen the static versions of any stories that have changed.
 	# This means writing the .shtml files.
 
+	$stories = [ ];
 	$stories = $slashdb->getStoriesWithFlag(
 		$do_all ? 'all_dirty' : 'mainpage_dirty',
 		'DESC',
 		$max_stories
-	);
+	) if $task_exit_flag;
 
 	my $bailed = 0;
 	my $totalChangedStories = 0;
@@ -165,6 +170,10 @@ $task{$me}{code} = sub {
 			slashdLog("Aborting stories at freshen, too much elapsed time");
 			last STORIES_FRESHEN;
 		}
+		if ($task_exit_flag) {
+			slashdLog("Aborting stories at freshen, got SIGUSR1");
+			last STORIES_RENDER;
+		}
 
 		my($stoid, $sid, $title, $skid) =
 			@{$story}{qw( stoid sid title primaryskid )};
@@ -180,6 +189,7 @@ $task{$me}{code} = sub {
 		my $displaystatus = $slashdb->_displaystatus($story->{stoid});
 		
 		slashdLog("Updating $sid") if verbosity() >= 3;
+		# XXXSKIN no -- we should dirty *all* skins that this story is on
 		$dirty_skins{$skid} = 1;
 		if ($displaystatus == 0) {
 			# If this story goes on the mainpage, its being
@@ -298,6 +308,8 @@ $task{$me}{code} = sub {
 
 	# Does the homepage need to be freshened whether we think it's
 	# necessary or not?
+	# XXXSKIN I don't think this is useful anymore, with the dirty_skins
+	# loop below.  Should we nuke this and the 'writestatus' var? - Jamie
 	my $min_days = $constants->{freshen_homepage_min_minutes} || 0;
 	if ($min_days) {
 		# It's actually in minutes right now;  convert to days for -M.
@@ -318,6 +330,7 @@ $task{$me}{code} = sub {
 		$slashdb->setVar('top_sid', $new_top_sid);
 	}
 
+	my $skins_logmsg = "";
 	my $skins = $slashdb->getSkins();
 	my $dirty_skins = [ ];
 	if ($constants->{task_options}{run_all}) {
@@ -341,10 +354,11 @@ $task{$me}{code} = sub {
 		});
 		$slashdb->markSkinClean($mp_skid);
 		delete $dirty_skins{$mp_skid};
+		$skins_logmsg = "rewrote static skin pages for $skins->{$mp_skid}{name}";
 	}
 
 	if ($do_all) {
-		for my $key (keys %dirty_skins) {
+		for my $key (sort { $a <=> $b } keys %dirty_skins) {
 			next unless $key;
 			my $skin = $slashdb->getSkin($key);
 			createCurrentHostname($skin->{hostname});
@@ -362,7 +376,12 @@ $task{$me}{code} = sub {
 					handle_err =>	0
 			});
 			$slashdb->markSkinClean($key);
+			$skins_logmsg ||= "rewrote static skin pages for";
+			$skins_logmsg .= " $skins->{$key}{name}";
 		}
+	}
+	if ($skins_logmsg) {
+		slashdLog($skins_logmsg) if verbosity() >= 1;
 	}
 
 	return $totalChangedStories ?

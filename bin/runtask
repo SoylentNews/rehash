@@ -27,6 +27,7 @@ use Slash::Utility;
 use vars qw(
 	%opts %task $me $task_name $hard_verbosity
 	$virtual_user $constants $slashdb $user $dir $gSkin
+	$task_exit_flag
 );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -122,11 +123,15 @@ sub verbosity {
 ############################################################
 
 sub slashdLogInit {
-	doLogInit('slashd', 1, 'runtask');
+	doLogInit('slashd', {
+		nopid => 1,
+		sname => 'runtask',
+	});
+	$SIG{USR1} = sub { $task_exit_flag = 1 };
 }
 
 sub slashdLogExit {
-	doLogExit('slashd', 1, 'runtask');
+	doLogExit('slashd', { nopid => 1, sname => 'runtask' });
 }
 
 sub get_task_subref {
@@ -287,6 +292,7 @@ sub main {
 	setCurrentSkin(determineCurrentSkin());
 	$gSkin = getCurrentSkin();
 	$dir = "$constants->{datadir}/tasks";
+	$task_exit_flag = 0;
 
 	# List what tasks are available
 	if ($opts{'l'}) {
