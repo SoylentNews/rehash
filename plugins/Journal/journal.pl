@@ -834,7 +834,7 @@ sub _save_params {
 			@data{qw(subject body discuss posttype tid)};
 
 	# accept a hashref
-	} elsif ((@_ == 1) && (UNIVERSAL::ISA($_[0], 'HASH'))) {
+	} elsif ((@_ == 1) && (UNIVERSAL::isa($_[0], 'HASH'))) {
 		@form{qw(description article journal_discuss posttype tid)} =
 			@{$_[0]}{qw(subject body discuss posttype tid)};
 	} else {
