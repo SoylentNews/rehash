@@ -5540,21 +5540,23 @@ sub createMetaMod {
 			 !$m2_user->{is_admin};
 
 		$rows += 0; # if no error, returns 0E0 (true!), we want a numeric answer
+
 		my $ui_hr = { };
 		     if ($is_fair  && $m2s->{$mmid}{val} > 0) {
 			++$voted_up_fair if $m2s_orig{$mmid};
-			$ui_hr->{up_fair}	= "up_fair+1"
+			$ui_hr->{-up_fair}	= "up_fair+1";
 		} elsif ($is_fair  && $m2s->{$mmid}{val} < 0) {
 			++$voted_down_fair if $m2s_orig{$mmid};
-			$ui_hr->{down_fair}	= "down_fair+1"
+			$ui_hr->{-down_fair}	= "down_fair+1";
 		} elsif (!$is_fair && $m2s->{$mmid}{val} > 0) {
 			++$voted_up_unfair if $m2s_orig{$mmid};
-			$ui_hr->{up_unfair}	= "up_unfair+1"
+			$ui_hr->{-up_unfair}	= "up_unfair+1";
 		} elsif (!$is_fair && $m2s->{$mmid}{val} < 0) {
 			++$voted_down_unfair if $m2s_orig{$mmid};
-			$ui_hr->{down_unfair}	= "down_unfair+1"
+			$ui_hr->{-down_unfair}	= "down_unfair+1";
 		}
 		$self->sqlUpdate("users_info", $ui_hr, "uid=$mod_uid");
+
 		if ($rows) {
 			# If a row was successfully updated, insert a row
 			# into metamodlog.
