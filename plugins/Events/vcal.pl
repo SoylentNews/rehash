@@ -36,15 +36,13 @@ UID: $story->{sid}
 END: VEVENT
 END: VCALENDAR
 |;
-		my $r = Apache->request;
-		$r->header_out('Cache-Control', 'private');
-		$r->content_type('text/x-vcalendar');
-		$r->status(200);
-		$r->send_http_header;
-		$r->rflush;
-		$r->print($content);
-		$r->status(200);
-		return 1;
+
+		http_send({
+			content_type	=> 'text/x-vcalendar',
+			filename	=> "$story->{sid}.vcal",
+			do_etag		=> 1,
+			content		=> $content
+		});
 	}
 
 }

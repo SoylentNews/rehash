@@ -27,17 +27,12 @@ sub main {
 		return;
 	}
 
-	my $r = Apache->request;
-	$r->content_type($data->{content_type});
-	$r->header_out('Cache-Control', 'private');
-	$r->header_out('Content-Disposition', "filename=$data->{filename}")
-		if $data->{filename};
-	$r->status(200);
-	$r->send_http_header;
-	$r->rflush;
-	$r->print($data->{data});
-	$r->rflush;
-	$r->status(200);
+	http_send({
+		content_type	=> $data->{content_type},
+		filename	=> $data->{filename},
+		do_etag		=> 1,
+		content		=> $data->{data}
+	});
 }
 main();
 

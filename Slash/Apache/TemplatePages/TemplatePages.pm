@@ -28,7 +28,7 @@ sub handler {
 	if ($title) {
 		header($title, $section) or return;
 		my $display = slashDisplay('body', '', { Page => $page, Section => $section, Return => 1 });
-		$r->print($display);
+		print $display;
 		footer();
 	} else {
 		return NOT_FOUND;

@@ -16,28 +16,23 @@ use vars qw($VERSION);
 sub main {
 	my $slashdb   = getCurrentDB();
 	my $user      = getCurrentUser();
-	my $r = Apache->request;
-	$r->header_out('Cache-Control', 'private');
-	$r->content_type('text/plain');
-	$r->status(200);
-	$r->send_http_header;
-	$r->rflush;
-	my $nick = getCurrentForm('nick');
-	unless ($nick) {
-			$r->print(getData('no_nick'));
-			return 1;
-	}
-	my $uid = $slashdb->getUserUID($nick);
-	my $content = $slashdb->getUser($uid, 'pubkey');
+	my $nick      = getCurrentForm('nick');
+	my $content;
 
-	if($content) {
-		$content = strip_nohtml($content);
-		$r->print($content);
+	my $uid;
+	if ($nick) {
+		$uid = $slashdb->getUserUID($nick);
+		$content = $slashdb->getUser($uid, 'pubkey') || getData('no_key');
 	} else {
-		$r->print(getData('no_key'));
+		$content = getData('no_nick');
 	}
 
-	return 1;
+	http_send({
+		content_type	=> 'text/plain',
+		filename	=> "pubkey-$uid.asc",
+		do_etag		=> 1,
+		content		=> $content
+	});
 }
 
 

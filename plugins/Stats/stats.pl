@@ -145,24 +145,18 @@ sub csv {
 		Return		=> 1,
 	});
 
-	my $filename = join '-',
+	my $filename = join('-',
 		$constants->{sitename},
 		$form->{stats_days},
-		$form->{title};
-	$filename =~ s/[^\w_.-]+//g;
+		$form->{title}) . '.csv';
 
-	my $r = Apache->request;
-	$r->content_type('text/csv');
-	$r->header_out('Cache-control', 'private');
-	$r->header_out('Pragma', 'no-cache');
-	$r->header_out('Content-Disposition', "attachment; filename=$filename.csv");
-	$r->status(200);
-	$r->send_http_header;
-	return 1 if $r->header_only;
-	$r->rflush;
-	$r->print($content);
-	$r->status(200);
-	return 1;
+	http_send({
+		content_type	=> 'text/csv',
+		filename	=> $filename,
+		attachment	=> 1,
+		do_etag		=> 1,
+		content		=> $content
+	});
 }
 
 sub graph {
@@ -175,6 +169,7 @@ sub graph {
 		: {};
 	my $content = $image->{data};
 	my $type    = $image->{content_type} || 'image/png';
+	(my $ext    = $type) =~ s|^.+/||;
 
 	# make image if we don't have it ...
 	if (! $content) {
@@ -193,17 +188,17 @@ sub graph {
 		});
 	}
 
-	my $r = Apache->request;
-	$r->content_type($type);
-	$r->header_out('Cache-control', 'private');
-	$r->header_out('Pragma', 'no-cache');
-	$r->status(200);
-	$r->send_http_header;
-	return 1 if $r->header_only;
-	$r->rflush;
-	$r->print($content);
-	$r->status(200);
-	return 1;
+	my $filename = join('-',
+		$constants->{sitename},
+		$form->{stats_days},
+		$form->{title}) . '.' . $ext;
+
+	http_send({
+		content_type	=> $type,
+		filename	=> $filename,
+		do_etag		=> 1,
+		content		=> $content
+	});
 }
 
 sub report {
@@ -218,7 +213,7 @@ sub list {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
 	my $stats_data = {};
-	my ($stats_name,$sep_name_select,$stats_name_pre,$days);
+	my($stats_name, $sep_name_select, $stats_name_pre, $days);
 	my $days = $form->{stats_days} || 1;
 	
 	#############################################################

@@ -24,6 +24,8 @@ Slash::XML aids in creating XML.  Right now, only RSS is supported.
 =cut
 
 use strict;
+use Apache::Constants ':http';
+use Digest::MD5 'md5_hex';
 use Time::Local;
 use Slash;
 use Slash::Utility;
@@ -118,20 +120,21 @@ sub xmlDisplay {
 		return $content;
 	} else {
 		my $r = Apache->request;
-		$r->content_type('text/xml');
-		$r->header_out('Cache-Control', 'private');
-		if ($opt->{filename}) {
-			$opt->{filename} =~ s/[^\w.-]/_/;
-			$opt->{filename} .= '.xml' unless $opt->{filename} =~ /\./;
-			$r->header_out('Content-Disposition', "filename=$opt->{filename}");
+
+		my $temp = $content;
+		# normalize
+		if ($type eq 'rss') {
+			$temp =~ s|[dD]ate>[^<]+</||;
 		}
-		$r->status(200);
-		$r->send_http_header;
-		return 1 if $r->header_only;
-		$r->rflush;
-		$r->print($content);
-		$r->status(200);
-		return 1;
+
+		$opt->{filename} .= '.xml' if $opt->{filename} && $opt->{filename} !~ /\./;
+
+		http_send({
+			content_type	=> 'text/xml',
+			filename	=> $opt->{filename},
+			etag		=> md5_hex($temp),
+			content		=> $content
+		});
 	}
 }
 

@@ -87,10 +87,12 @@ print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . 
 
 sub _send_rss {
 	my($r, $type, $ipid) = @_;
-	$r->content_type('text/xml');
-	$r->status(202);
-	$r->send_http_header;
-	$r->print(_get_rss_msg($type, $ipid));
+	http_send({
+		content_type	=> 'text/xml',
+		status		=> 202,
+		content		=> _get_rss_msg($type, $ipid),
+	});
+
 	return DONE;
 }
 

@@ -26,6 +26,8 @@ LONG DESCRIPTION.
 
 use strict;
 use Apache;
+use Apache::Constants ':http';
+use Digest::MD5 'md5_hex';
 use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Display;
@@ -36,6 +38,7 @@ use vars qw($VERSION @EXPORT);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(
+	http_send
 	header
 	footer
 	redirect
@@ -206,7 +209,79 @@ sub header {
 
 #========================================================================
 
-=head2 footer()
+=head http_send(OPTIONS)
+
+Prints an HTTP header like L<header>, but more generic, and then optionally
+prints content.
+
+=over 4
+
+=item Parameters
+
+=item OPTIONS
+
+=back
+
+=item Return value
+
+True upon success, false upon failure.
+
+=back
+
+=cut
+
+sub http_send {
+	my($opt) = @_;
+
+	$opt->{status}        ||= HTTP_OK;
+	$opt->{content_type}  ||= 'text/plain';
+	$opt->{cache_control} ||= 'private'  unless defined $opt->{cache_control};
+	$opt->{pragma}        ||= 'no-cache' unless defined $opt->{pragma};
+
+	my $r = Apache->request;
+	$r->content_type($opt->{content_type});
+	$r->header_out('Cache-Control', $opt->{cache_control}) if $opt->{cache_control};
+	$r->header_out('Pragma', $opt->{pragma}) if $opt->{pragma};
+
+	if ($opt->{etag} || $opt->{do_etag}) {
+		if ($opt->{do_etag} && $opt->{content}) {
+			$opt->{etag} = md5_hex($opt->{content});
+		}
+		$r->header_out('ETag', $opt->{etag});
+
+		my $match = $r->header_in('If-None-Match');
+		if ($match && $match eq $opt->{etag}) {
+			$r->status(HTTP_NOT_MODIFIED);
+			$r->send_http_header;
+			return 1;
+		}
+	}
+
+	if ($opt->{filename}) {
+		$opt->{filename} =~ s/[^\w_.-]/_/g;
+		my $val = "filename=$opt->{filename}";
+		$val = "attachment; $val" if $opt->{attachment};
+		$r->header_out('Content-Disposition', $val);
+	}
+
+	$r->status($opt->{status});
+	$r->send_http_header;
+	$r->rflush;
+	return 1 if $r->header_only;
+
+	if ($opt->{content}) {
+		print $opt->{content};
+		$r->rflush;
+	}
+
+	return 1;
+}
+
+
+
+#========================================================================
+
+=head2 footer(OPTIONS)
 
 Prints the footer for the document.
 
