@@ -470,7 +470,14 @@ is best to stick with the filter, which is most likely faster anyway.
 
 =cut
 
+sub _ref { ref $_[0] }
+
+my %hash_ops = (
+	'ref'		=> \&_ref,
+);
+
 my %list_ops = (
+	'ref'		=> \&_ref,
 	'rand'		=> sub {
 		my $list = $_[0];
 		return $list->[rand @$list];
@@ -501,6 +508,7 @@ my %list_ops = (
 );
 
 my %scalar_ops = (
+	'ref'		=> \&_ref,
 	'int'		=> sub { int $_[0] },
 	'abs'		=> sub { abs $_[0] },
 	'uc'		=> sub { uc $_[0] },
@@ -522,6 +530,7 @@ my %scalar_ops = (
 	},
 );
 
+@{$Template::Stash::HASH_OPS}  {keys %hash_ops}   = values %hash_ops;
 @{$Template::Stash::LIST_OPS}  {keys %list_ops}   = values %list_ops;
 @{$Template::Stash::SCALAR_OPS}{keys %scalar_ops} = values %scalar_ops;
 
