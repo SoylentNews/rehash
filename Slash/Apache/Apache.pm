@@ -413,8 +413,8 @@ sub IndexHandler {
 				# to handle this situation at the moment, so
 				# instead I'm hardcoding in the solution for the
 				# most common problem. - Jamie 2004/07/17
-				if ($key eq "faq") {
-					$r->uri("/faq/index.shtml");
+				if ($key eq "faq" || $key eq "palm") {
+					$r->uri("/$key/index.shtml");
 				} else {
 					$r->uri("/$index_handler");
 				}
