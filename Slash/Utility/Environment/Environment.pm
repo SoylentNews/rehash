@@ -1307,7 +1307,6 @@ sub filter_params {
 			} else {
 				$form{$_} = $values[0];
 			}
-			# We don't filter the multivalue params yet -Brian
 			# allow any param ending in _multiple to be multiple -- pudge
 			if (exists $multivalue{$_} || /_multiple$/) {
 				my @multi = $apr->param($_);
