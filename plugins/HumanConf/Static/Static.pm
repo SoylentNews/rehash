@@ -38,7 +38,7 @@ sub new {
 	# TTF fonts which could scale, and try to find good point
 	# sizes for them too (names of TTF fonts should be stored
 	# in a var).
-	$self->{imagemargin} = $constants->{hc_q1_maxrad} || 6;
+	$self->{imagemargin} = $constants->{hc_q1_margin} || 6;
 
 	my @possible_fonts = @{$constants->{hc_possible_fonts}};
 	@possible_fonts = ( gdMediumBoldFont, gdLargeFont, gdGiantFont ) if !@possible_fonts;
