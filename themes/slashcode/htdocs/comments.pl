@@ -599,7 +599,7 @@ sub validateComment {
 		return;
 	}
 
-	my $post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $user->{subnetid});	
+	my $post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $user->{subnetid});
 	if ($user->{is_anon} || $form->{postanon}) {
 		if ($post_restrictions->{no_anon}) {
 			my $logged_in_allowed = ! $post_restrictions->{no_post};
@@ -609,7 +609,7 @@ sub validateComment {
 				});
 			return;
 		}
-	} elsif ($post_restrictions->{no_post}) {
+	} elsif (!$user->{is_admin} && $post_restrictions->{no_post}) {
 		$$error_message = getError('troll message', {
 			unencoded_ip 		=> $ENV{REMOTE_ADDR},
 		});
