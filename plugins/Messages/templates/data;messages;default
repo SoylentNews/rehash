@@ -15,46 +15,50 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'header' %]
-[% constants.sitename %] Message Center
+	[% returnme.data_constant = 1 %]
+	[% constants.sitename %] Message Center
 
 [% CASE 'prefs saved' %]
-Preferences Saved
+	[% returnme.data_constant = 1 %]
+	Preferences Saved
 
 [% CASE 'type not found' %]
-Message type [% type %] not found
+	Message type [% type %] not found
 
 [% CASE 'user not found' %]
-User [% uid %] not found
+	User [% uid %] not found
 
 [% CASE 'message not found' %]
-Message [% id %] not found
+	Message [% id %] not found
 
 [% CASE 'no template' %]
-No template name
+	[% returnme.data_constant = 1 %]
+	No template name
 
 [% CASE 'wrong type' %]
-Cannot accept data of type [% type %]
+	Cannot accept data of type [% type %]
 
 [% CASE 'no delivery mode' %]
-No delivery mode for user [% uid %]
+	No delivery mode for user [% uid %]
 
 [% CASE 'no message code' %]
-Not allowed to send message type [% code %] to user [% uid %]
+	Not allowed to send message type [% code %] to user [% uid %]
 
 [% CASE 'send_mail false' %]
-Not allowed to send mail; send_mail variable is false
+	[% returnme.data_constant = 1 %]
+	Not allowed to send mail; send_mail variable is false
 
 [% CASE 'send mail error' %]
-Error sending to '[% addr %]' for user [% uid %]: [% error %]
+	Error sending to '[% addr %]' for user [% uid %]: [% error %]
 
 [% CASE 'newsletter subject' %]
-Stories for [% date.format(date.now, '%Y-%m-%d') %]
+	Stories for [% date.format(date.now, '%Y-%m-%d') %]
 
 [% CASE 'headlines subject' %]
-Headlines for [% date.format(date.now, '%Y-%m-%d') %]
+	Headlines for [% date.format(date.now, '%Y-%m-%d') %]
 
 [% CASE 'unknown mode' %]
-Unknown delivery mode '[% mode %]' for user [% uid %]
+	Unknown delivery mode '[% mode %]' for user [% uid %]
 
 [% END %]
 __seclev__
