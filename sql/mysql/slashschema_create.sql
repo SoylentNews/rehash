@@ -387,7 +387,7 @@ CREATE TABLE moderatorlog (
 
 DROP TABLE IF EXISTS pollanswers;
 CREATE TABLE pollanswers (
-	qid mediumint NOT NULL,
+	qid mediumint UNSIGNED NOT NULL,
 	aid mediumint NOT NULL,
 	answer char(255),
 	votes mediumint,
