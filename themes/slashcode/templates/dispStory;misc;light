@@ -38,7 +38,7 @@ END %]
 
 [% story.introtext %]
 
-[% IF full && user.is_admin %]<P><A HREF="[% constants.rootdir -%]/admin.pl?sid=[% story.sid %]">[ Edit ]</A>[% END %]
+[% IF full && user.is_admin %]<P><A HREF="[% constants.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]
 
 [% IF full && (story.bodytext || story.books_publisher) %]
 

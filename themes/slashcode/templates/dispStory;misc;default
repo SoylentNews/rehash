@@ -75,7 +75,7 @@ END %]
 	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
 	</TABLE>
 
-[% IF full && user.is_admin %]<BR><A HREF="[% constants.rootdir -%]/admin.pl?sid=[% story.sid %]">[ Edit ]</A>[% END %]
+[% IF full && user.is_admin %]<BR><A HREF="[% constants.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]
 
 [% IF full && story.bodytext %]
 
