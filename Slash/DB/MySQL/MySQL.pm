@@ -9800,12 +9800,10 @@ sub getTopics {
 
 ########################################################
 sub getTopicParamsForTid {
-	my ($self, $tid) = @_;
+	my($self, $tid) = @_;
 	my $tid_q = $self->sqlQuote($tid);
 	return $self->sqlSelectAllHashrefArray("*", "topic_param", "tid = $tid_q");
 }
-
-
 
 ########################################################
 # As of 2004/04:
