@@ -1073,6 +1073,7 @@ sub editStory {
 		$form->{uid} ||= $user->{uid};
 		$author = $slashdb->getAuthor($form->{uid});
 		$subid = $form->{subid};
+		$sid = $form->{sid};
 
 		if (!$form->{'time'} || $form->{fastforward}) {
 			$storyref->{'time'} = $slashdb->getTime();
