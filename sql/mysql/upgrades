@@ -978,7 +978,6 @@ UPDATE users_prefs SET tzcode = 'EET' WHERE tzcode = 'EEST';
 
 # End of T_2_3_0_56, Start of T_2_3_0_57
 
-# SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE people ADD index(person);
 
@@ -1107,3 +1106,4 @@ UPDATE stats_daily SET name='mod_token_conversion_point' WHERE name='token_conve
 
 ALTER TABLE accesslog_admin ADD COLUMN secure TINYINT UNSIGNED DEFAULT 0 NOT NULL;
 
+# SLASHCODE LAST UPDATED HERE
