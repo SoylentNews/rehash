@@ -153,7 +153,7 @@ sub displayStandardBlocks {
 	# two variants of box cache: one for index with portalmap,
 	# the other for any other section, or without portalmap
 
-	if ($user->{exboxes} && ($getblocks eq 'index' || $constants->{slashbox_sections}) {
+	if ($user->{exboxes} && ($getblocks eq 'index' || $constants->{slashbox_sections})) {
 		@boxes = getUserBoxes();
 		$boxcache = $cache->{slashboxes}{index_map}{$user->{light}} ||= {};
 	} else {
