@@ -1512,7 +1512,7 @@ sub fudgeurl {
 	# modify scheme:/ to scheme:// for $schemes defined below
 	# need to recreate $uri after doing so to make userinfo
 	# clearing work for something like http:/foo.com...@bar.com
-	my $schemes_to_mod = { http=>1, https=>1, ftp=>1 };
+	my $schemes_to_mod = { http => 1, https => 1, ftp => 1 };
 	if ($scheme && $schemes_to_mod->{$scheme}) {
 		$url = $uri->canonical->as_string;
 		$url =~ s|^$scheme:/([^/])|$scheme://$1|;
