@@ -2181,7 +2181,6 @@ DELETE from vars where name = "submissions_listing_page_size";
 INSERT INTO vars (name, value, description) VALUES ('submissions_accepted_only_page_size', 20, "Number of submissions shown per page when only accepted submissions are shown.  Set to 0 to show all");
 INSERT INTO vars (name, value, description) VALUES ('submissions_all_page_size', 40, "Number of submissions shown per page on a user page when all submission statuses are shown.  Set to 0 to show all");
 
-
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Stories','stories','[% constants.rootdir %]/admin.pl',100,0,1);
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Mods','recent_mods','[% constants.rootdir %]/admin.pl?op=recent_mods',500,0,2);
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Reqs','requests','[% constants.rootdir %]/admin.pl?op=recent_requests',500,0,3);
@@ -2192,7 +2191,25 @@ INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Info','stats','[% constants.rootdir %]/stats.pl',100,0,8);
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Config','config','[% constants.rootdir %]/admin.pl?op=topics',10000,0,9);
 
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_144, Start of T_2_3_0_145 - 2004/03/23
+
+ALTER TABLE users_info ADD COLUMN csq_bonuses FLOAT NOT NULL DEFAULT '0';
+
+ALTER TABLE moderatorlog ADD COLUMN m2needed MEDIUMINT UNSIGNED DEFAULT '0' AFTER m2count;
+UPDATE moderatorlog, vars SET moderatorlog.m2needed = vars.value WHERE vars.name='m2_consensus' AND m2needed=0;
+
+INSERT INTO vars (name, value, description) VALUES ('comments_portscan_anon_for_proxy', '0', 'If true, when anonymous posting is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid posting if successful');
+INSERT INTO vars (name, value, description) VALUES ('comments_portscan_cachehours', '48', 'If comments_portscan_anon_for_proxy is true, hours to cache a result of a portscan for open proxies on a particular IP');
+INSERT INTO vars (name, value, description) VALUES ('comments_portscan_ports', '80 8080 8000 3128', 'If comments_portscan_anon_for_proxy is true, scan these space-separated ports');
+INSERT INTO vars (name, value, description) VALUES ('comments_portscan_timeout', '5', 'If comments_portscan_anon_for_proxy is true, use this as timeout');
+
+CREATE TABLE open_proxies (
+	ip	VARCHAR(15) NOT NULL,
+	port	SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+	ts	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	PRIMARY KEY (ip),
+	KEY ts (ts)
+) TYPE=InnoDB;
+
