@@ -751,6 +751,10 @@ ALTER TABLE accesslog ADD INDEX op_part (op(12), section);
 
 INSERT INTO vars (name, value, description) VALUES ('mod_unm2able_token_cost','1','What is the token cost of performing an un-M2able mod?');
 
+REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friend\'s Journals','[% constants.rootdir %]/journal.pl?op=friends',0,5);
+DELETE FROM menus WHERE menu="journal" AND label="Friends";
+DELETE FROM menus WHERE menu="zoo";
+
 # SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE users_info ADD COLUMN stirred mediumint UNSIGNED DEFAULT '0' NOT NULL AFTER downmods, CHANGE COLUMN lastgranted lastgranted datetime DEFAULT '0000-00-00 00:00' NOT NULL, CHANGE COLUMN lastmm lastmm datetime DEFAULT '0000-00-00 00:00' NOT NULL;
@@ -774,9 +778,7 @@ UPDATE menus SET menuorder=9 WHERE label='Slashd' AND menu='admin';
 UPDATE menus SET menuorder=10 WHERE label='Recent' AND menu='admin';
 
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Advanced', '[% constants.rootdir %]/topics.pl', 500, 11);
-
 UPDATE stats_daily SET name='m2_points_lost_spent' WHERE name='m2_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent' WHERE name='mod_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_points_spent_plus_1';
 UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_points_spent_minus_1';
-

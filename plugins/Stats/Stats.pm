@@ -44,6 +44,7 @@ sub new {
 	$self->{_table} = "accesslog_temp";
 	$self->sqlDo($rows->[1]);
 	$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid(uid)");
+	$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX section(section)");
 	$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'");
 	$self->sqlConnect;
 

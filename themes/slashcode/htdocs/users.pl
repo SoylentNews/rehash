@@ -350,6 +350,7 @@ sub main {
 	}
 
 	header(getMessage('user_header'));
+# This is a hardcoded position, bad idea and should be fixed -Brian
 	print getMessage('note', { note => $note }) if defined $note;
 	print createMenu($formname) if ! $user->{is_anon};
 
@@ -993,6 +994,8 @@ sub showInfo {
 			title			=> $title,
 			nick_plain		=> $nick_plain,
 			nick			=> $nick,
+			nickname			=> $nick,
+			uid			=> $uid,
 			useredit		=> $requested_user,
 			points			=> $points,
 			lastgranted		=> $lastgranted,

@@ -125,16 +125,9 @@ sub main {
 
 sub list {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
-
-	_printHead("mainhead");
-
-	#my $friends = $zoo->getFriends($user->{uid});
-	my $friends = $zoo->getRelationships($user->{uid}, FRIEND);
-	if (@$friends) {
-		slashDisplay('plainlist', { friends => $friends });
-	} else {
-		print getData('nofriends');
-	}
+	# This was never linked to, but basically we send people to search who try to just hit the blank URL
+	# -Brian
+	redirect("$constants->{rootdir}/search.pl?op=users");
 }
 
 sub friends {
@@ -158,10 +151,10 @@ sub friends {
 	} else {
 		my $implied;
 		if ($editable) {
-			_printHead("yourfriendshead");
+			_printHead("yourfriendshead", { nickname => $nick, uid => $uid, page => 'friends' });
 			$implied = FRIEND;
 		} else {
-			_printHead("friendshead", { nickname => $nick, uid => $uid });
+			_printHead("friendshead", { nickname => $nick, uid => $uid, page => 'friends' });
 		}
 		
 		if (@$friends) {
@@ -197,10 +190,10 @@ sub fof {
 	} else {
 		my $implied;
 		if ($editable) {
-			_printHead("yourfriendsoffriendshead");
+			_printHead("yourfriendsoffriendshead", { nickname => $nick, uid => $uid, page => 'friends' });
 			$implied = FOF;
 		} else {
-			_printHead("friendsoffriendshead", { nickname => $nick, uid => $uid });
+			_printHead("friendsoffriendshead", { nickname => $nick, uid => $uid, page => 'friends' });
 		}
 		
 		if (@$friends) {
@@ -236,10 +229,10 @@ sub enof {
 	} else {
 		my $implied;
 		if ($editable) {
-			_printHead("yourfriendsenemieshead");
+			_printHead("yourfriendsenemieshead", { nickname => $nick, uid => $uid, page => 'friends' });
 			$implied = EOF;
 		} else {
-			_printHead("friendsenemieshead", { nickname => $nick, uid => $uid });
+			_printHead("friendsenemieshead", { nickname => $nick, uid => $uid, page => 'friends' });
 		}
 		
 		if (@$friends) {
@@ -275,10 +268,10 @@ sub foes {
 	} else {
 		my $implied;
 		if ($editable) {
-			_printHead("yourfoeshead");
+			_printHead("yourfoeshead", { nickname => $nick, uid => $uid, page => 'foes' });
 			$implied = FOE;
 		} else {
-			_printHead("foeshead", { nickname => $nick, uid => $uid });
+			_printHead("foeshead", { nickname => $nick, uid => $uid, page => 'foes' });
 		}
 		
 		if (@$foes) {
@@ -312,10 +305,10 @@ sub fans {
 	} else {
 		my $implied;
 		if ($editable) {
-			_printHead("yourfanshead");
+			_printHead("yourfanshead", { nickname => $nick, uid => $uid, page => 'fans' });
 			$implied = FAN;
 		} else {
-			_printHead("fanshead",{ nickname => $nick, uid => $uid });
+			_printHead("fanshead",{ nickname => $nick, uid => $uid, page => 'fans' });
 		}
 		if (@$fans) {
 			slashDisplay('plainlist', { people => $fans, editable => $editable, implied => $implied, nickname => $nick });
@@ -349,11 +342,11 @@ sub freaks {
 	} else {
 		my $implied;
 		if ($editable) {
-			_printHead("yourfreakshead");
+			_printHead("yourfreakshead", { nickname => $nick, uid => $uid, page => 'freaks' });
 			$implied = FREAK;
 			
 		} else {
-			_printHead("freakshead",{ nickname => $nick, uid => $uid });
+			_printHead("freakshead",{ nickname => $nick, uid => $uid, page => 'freaks' });
 		}
 		if (@$freaks) {
 			slashDisplay('plainlist', { people => $freaks, editable => $editable, implied => $implied, nickname => $nick });
@@ -386,7 +379,7 @@ sub all {
 		_rss($people, $nick, 'people');
 	} else {
 		if ($editable) {
-			_printHead("yourall");
+			_printHead("yourall", { nickname => $nick, uid => $uid });
 		} else {
 			_printHead("yourhead",{ nickname => $nick, uid => $uid });
 		}
@@ -406,7 +399,7 @@ sub action {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
 	if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
-		_printHead("mainhead");
+		_printHead("mainhead", { nickname => $user->{nick}, uid => $user->{uid} });
 		print getData("no_go");
 		return;
 	} else {
@@ -448,7 +441,7 @@ sub check {
 	if ($form->{uid}) {
 		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
 		#my $compare = $slashdb->getUser($form->{uid}, 'people');
-		_printHead("confirm", { nickname => $nickname, uid => $form->{uid}  });
+		_printHead("confirm", { nickname => $nickname, uid => $form->{uid}, page => 'relation' });
 		if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
 			print getData("no_go");
 			return 0;
@@ -497,7 +490,9 @@ sub _printHead {
 	my($head, $data) = @_;
 	my $title = getData($head, $data);
 	header($title);
-	slashDisplay("zoohead", { title => $title });
+	# Store the title and pass it on to the page -Brian
+	$data->{title} = $title;
+	slashDisplay("zoohead", $data);
 }
 
 sub _rss {

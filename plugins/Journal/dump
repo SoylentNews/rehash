@@ -11,7 +11,7 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','[% 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Write in Journal','[% constants.rootdir %]/journal.pl?op=edit',1,2);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Delete/Edit Entries','[% constants.rootdir %]/journal.pl?op=list',1,3);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Top 10','[% constants.rootdir %]/journal.pl?op=top',0,4);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friends','[% constants.rootdir %]/journal.pl?op=friends',0,5);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friend\'s Journals','[% constants.rootdir %]/journal.pl?op=friends',0,5);
 
 INSERT INTO code_param (type, code, name) VALUES ('journal_discuss', 0, 'Comments Disabled');
 INSERT INTO code_param (type, code, name) VALUES ('journal_discuss', 1, 'Comments Enabled');

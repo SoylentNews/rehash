@@ -1,6 +1,9 @@
 __section__
 default
 __description__
+Display users menu.
+
+* items = arrayref of hashref of menu items (value (link), label)
 
 __title__
 
@@ -11,11 +14,21 @@ en_US
 __name__
 journal
 __template__
-<TABLE BGCOLOR="[% user.bg.2 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
-<TR><TD><FONT SIZE="2">[[% FOR i = items %]
-  <A HREF="[% i.value %]">[% i.label %]</A>
-  [% " | " UNLESS loop.last %]
-[% END %]]</FONT></TD></TR></TABLE>
+<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
+	<TR>
+		<TD><FONT SIZE=-1>
+[ [% needbar = 0; FOR i = items %]
+	[% IF i.label %]
+		[% " | " IF needbar; needbar = 0 %]
+		[% IF i.value; needbar = 1 %]<A HREF="[% i.value %]">[% END
+		%][% i.label
+		%][% IF i.value %]</A>[% END %]
+	[% END %]
+[% END %] ]
+		</FONT>
+		</TD>
+	</TR>
+</TABLE>
 
 __seclev__
-100
+10000

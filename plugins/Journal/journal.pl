@@ -334,7 +334,7 @@ sub displayArticle {
 		return displayFriends(@_);
 	}
 
-	_printHead("userhead", { nickname => $nickname, uid => $uid });
+	_printHead("userhead", { nickname => $nickname, uid => $uid }, 1);
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
@@ -452,7 +452,7 @@ sub listArticle {
 		? $slashdb->getUser($form->{uid}, 'nickname')
 		: $user->{nickname};
 
-	_printHead("userhead", { nickname => $nickname, uid => $form->{uid} || $user->{uid} });
+	_printHead("userhead", { nickname => $nickname, uid => $form->{uid} || $user->{uid} }, 1);
 
 	if (@$list) {
 		slashDisplay('journallist', {
@@ -681,10 +681,17 @@ sub _validFormkey {
 }
 
 sub _printHead {
-	my($head, $data) = @_;
+	my($head, $data, $new_header) = @_;
 	my $title = getData($head, $data);
 	header($title);
-	slashDisplay("journalhead", { title => $title });
+	if ($new_header) {
+		$data->{page} = 'journal';
+		print createMenu("users");
+		slashDisplay("user_titlebar", $data);
+		print createMenu("journal");
+	} else {
+		slashDisplay("journalhead", { title => $title });
+	} 
 }
 
 sub _checkTheme {

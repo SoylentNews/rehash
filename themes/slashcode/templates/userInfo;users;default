@@ -26,7 +26,7 @@ __name__
 userInfo
 __template__
 [% USE Slash %]
-[% PROCESS titlebar width="95%" %]
+[% PROCESS user_titlebar page='info' width="95%" %]
 [% IF form.formkey %]
         <!-- INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]" -->
 [% END %]

@@ -14,8 +14,6 @@ __template__
 [% USE Slash %]
 <FORM ACTION="[% constants.rootdir %]/zoo.pl" METHOD="POST">
 <P>
-<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]'s</A> <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/">friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/fans/">fans</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/foes/">foes</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/freaks/">freaks</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/friends/">friends of friends</A>, <A HREf="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/foes/">foes of friends</A>.
-<P>
 [% IF over_socialized %]
 	You have over [% IF user.is_subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] friends and foes at the moment. This puts you over our limit of[% IF constants.subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] relationships that we allow. At this point you may only remove relationships with users. <br>
 	[% IF constants.subscriber && constants.people_max_subscriber && !user.is_subscriber %]

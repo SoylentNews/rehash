@@ -12,9 +12,8 @@ __name__
 list_messages
 __template__
 [% USE Slash %]
-[% Slash.createMenu("users") %]
-[% Slash.createMenu("messages") %]
-[% PROCESS titlebar title => "$constants.sitename Messages for $user.nickname", width => "100%" %]
+<P>
+[%# PROCESS titlebar title => "$constants.sitename Messages for $user.nickname", width => "100%" %]
 
 [% IF user.is_anon %]
 

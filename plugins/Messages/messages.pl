@@ -244,6 +244,10 @@ sub list_messages {
 	my $message_list = $messages->getWebByUID();
 
 	header(getData('header'));
+# Spank me, this won't be here for long (aka Pater's cleanup will remove it) -Brian
+	print createMenu('users');
+	slashDisplay('user_titlebar', { nickname => $user->{nickname}, uid => $user->{uid}, page => 'messages' });
+	print createMenu('messages');
 	slashDisplay('list_messages', {
 		note		=> $note,
 		messagecodes	=> $messagecodes,
