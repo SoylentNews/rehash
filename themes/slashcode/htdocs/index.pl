@@ -98,7 +98,7 @@ my $start_time = Time::HiRes::time;
 	# current skin is the mainpage, add in the list of story_always_topic
 	# and story_always_nexus tids, and story_always_author uids..
 	$gse_hr->{tid} = [ $gSkin->{nexus} ];
-	if ($gSkin->{skid} = $constants->{mainpage_skid}) {
+	if ($gSkin->{skid} == $constants->{mainpage_skid}) {
 		my $always_tid_str = join ",",
 			$user->{story_always_topic},
 			$user->{story_always_nexus};
