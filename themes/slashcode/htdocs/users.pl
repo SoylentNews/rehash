@@ -2105,7 +2105,6 @@ sub saveComm {
 
 	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $min = -$max;
-	my $karma_bonus = ($form->{karma_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{karma_bonus};
 	my $new_user_bonus = ($form->{new_user_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{new_user_bonus};
 	my $new_user_percent = (($form->{new_user_percent} <= 100 && $form->{new_user_percent} >= 0) 
 			? $form->{new_user_percent}

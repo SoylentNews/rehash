@@ -1168,6 +1168,7 @@ sub prepareUser {
 			$user->{$param} ||= $default || 0;
 		}
 	}
+	$user->{karma_bonus} = '+1' unless defined($user->{karma_bonus});
 
 	if ($user->{commentlimit} > $constants->{breaking}
 		&& $user->{mode} ne 'archive'
