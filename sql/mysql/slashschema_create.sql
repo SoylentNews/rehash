@@ -323,6 +323,7 @@ CREATE TABLE dbs (
 	virtual_user varchar(100) NOT NULL,
 	isalive enum("no","yes") DEFAULT "no" NOT NULL,
 	type enum("writer","reader","log","search", "log_slave","querylog") DEFAULT "reader" NOT NULL,
+	weight tinyint UNSIGNED NOT NULL DEFAULT 1,
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 

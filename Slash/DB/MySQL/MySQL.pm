@@ -2249,7 +2249,8 @@ sub getDBs {
 	for (keys %$dbs) {
 		my $db = $dbs->{$_};
 		$databases{$db->{type}} ||= [];
-		push @{$databases{$db->{type}}}, $db;
+		$db->{weight} = 1 if !$db->{weight} || $db->{weight} < 1;
+		push @{$databases{$db->{type}}}, ($db) x $db->{weight};
 	}
 
 	# The amount of time to cache this has to be hardcoded,
@@ -2282,7 +2283,11 @@ sub getDB {
 
 	my $users = $self->sqlSelectColArrayref('virtual_user', 'dbs',
 		'type=' . $self->sqlQuote($db_type) . " AND isalive='yes'");
-	return $users->[rand @$users];
+	my $weighted = [];
+	for my $db (@$users) {
+		push @$weighted, ($db) x $db->{weight};
+	}
+	return $weighted->[rand @$weighted];
 }
 
 } # end closure surrounding getDBs and getDB
