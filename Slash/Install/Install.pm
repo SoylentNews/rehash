@@ -174,6 +174,52 @@ sub installPlugins {
 	}
 }
 
+# Used internally by the _process_fh_into_sql method (which in
+# turn is used internally by the _install method).
+
+sub _munge_line {
+	my($line, $mldhr) = @_;
+	chomp($line);
+	return "" if $line =~ /^\s*\#/;
+	$line =~ s{www\.example\.com}	{$mldhr->{hostname}}g;
+	$line =~ s{admin\@example\.com}	{$mldhr->{email}}g;
+	$line =~ s{/usr/local/slash}	{$mldhr->{slash_prefix}}g;
+	$line;
+};
+
+# Used internally by the _install method.
+
+sub _process_fh_into_sql {
+	my($fh, $mldhr, $opts) = @_;
+	my @sts = ( ); # new statements
+	my $firstline_regex = $opts->{schema}
+		? qr{^(INSERT|DELETE|REPLACE|UPDATE|ALTER|CREATE)\b}
+		: qr{^(INSERT|DELETE|REPLACE|UPDATE)\b};
+	while (my $line = <$fh>) {
+
+		# We've got the first line of an SQL statement.
+		# First make sure it's a valid statement.
+		next unless $line =~ $firstline_regex;
+		# It's good.  Munge it into the form we want.
+		$line = _munge_line($line, $mldhr);
+
+		my $statement = "";
+
+		# Now continue reading until we hit its ";".
+		# Comments 
+		while ($line !~ /;\s*$/) {
+			$statement .= "$line\n";
+			$line = <$fh>;
+			$line = _munge_line($line, $mldhr);
+		}
+		# We're on the last line now.
+		$statement .= $line;
+
+		push @sts, $statement;
+	}
+	@sts;
+};
+
 sub _install {
 	my($self, $hash, $symlink, $is_plugin) = @_;
 	# Yes, performance wise this is questionable, if getValue() was
@@ -207,11 +253,8 @@ sub _install {
 			description     => $hash->{'description'},
 		});
 	}
-	my $hostname = $self->getValue('basedomain');
-	my $email = $self->getValue('adminmail');
 	my $driver = $self->getValue('db_driver');
 	my $prefix_site = $self->getValue('site_install_directory');
-	my $SLASH_PREFIX = $self->getValue('base_install_directory');
 
 	my %stuff = ( # [relative directory, executable]
 		htdoc		=> ["htdocs",			1],
@@ -276,46 +319,27 @@ sub _install {
 
 	my($sql, @sql, @create);
 
+	my $mldhr = {	# "mungeline data hashref"
+		hostname	=> $self->getValue("basedomain"),
+		email		=> $self->getValue("adminmail"),
+		slash_prefix	=> $self->getValue("base_install_directory"),
+	};
 	if ($hash->{"${driver}_schema"}) {
 		my $schema_file = "$hash->{dir}/" . $hash->{"${driver}_schema"};
 		my $fh = gensym;
 		if (open($fh, "< $schema_file\0")) {
-			while (<$fh>) {
-				chomp;
-				next if /^#/;
-				next if /^$/;
-				next if /^ $/;
-				push @create, $_;
-			}
+			push @sql, _process_fh_into_sql($fh, $mldhr, { schema => 1 });
 			close $fh;
 		} else {
 			warn "Can't open $schema_file: $!";
 		}
-
-		$sql = join '', @create;
-		@sql = split /;/, $sql;
 	}
 
 	if ($hash->{"${driver}_dump"}) {
 		my $dump_file = "$hash->{dir}/" . $hash->{"${driver}_dump"};
 		my $fh = gensym;
 		if (open($fh, "< $dump_file\0")) {
-			while (<$fh>) {
-				# A theme's dump.sql may wish to override
-				# the main defaults.sql, so we should allow
-				# REPLACE and UPDATE here. - Jamie
-				next unless /^(INSERT|DELETE|REPLACE|UPDATE)\b/i;
-				# what is this for?  multiline SQL?
-				# maybe be more explicit, or provide a comment:
-				#   until ($_ =~ /;\s*$/) { $_ .= <$fh> }
-				# The syntax is just subobvious.  -- pudge
-				$_ .= <$fh> while $_ !~ /;\s*$/;
-				chomp;
-				s/www\.example\.com/$hostname/g;
-				s/admin\@example\.com/$email/g;
-				s|/usr/local/slash|$SLASH_PREFIX|g;
-				push @sql, $_;
-			}
+			push @sql, _process_fh_into_sql($fh, $mldhr, { schema => 0 });
 			close $fh;
 		} else {
  			warn "Can't open $dump_file: $!";
@@ -365,19 +389,7 @@ sub _install {
 		my $prep_file = "$hash->{dir}/" . $hash->{"${driver}_prep"};
 		my $fh = gensym;
 		if (open($fh, "< $prep_file\0")) {
-			while (<$fh>) {
-				next unless (/^INSERT/i or /^UPDATE/i or /^DELETE/i or /^REPLACE/i or /^ALTER/i or /^CREATE/i);
-				# what is this for?  multiline SQL?
-				# maybe be more explicit, or provide a comment:
-				#   until ($_ =~ /;\s*$/) { $_ .= <$fh> }
-				# The syntax is just subobvious.  -- pudge
-				$_ .= <$fh> while $_ !~ /;\s*$/;
-				chomp;
-				s/www\.example\.com/$hostname/g;
-				s/admin\@example\.com/$email/g;
-				s|/usr/local/slash|$SLASH_PREFIX|g;
-				push @sql, $_;
-			}
+			push @sql, _process_fh_into_sql($fh, $mldhr, { schema => 1 });
 			close $fh;
 		} else {
  			warn "Can't open $prep_file: $!";
