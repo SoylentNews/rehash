@@ -120,7 +120,6 @@ These constants are used to define different constants in the people system.
 	FRIEND
 	FOE
 	FOF
-	BONUS
 
 =cut
 
@@ -128,7 +127,6 @@ my @people = qw(
 	FRIEND
 	FOE
 	FOF
-	BONUS
 );
 
 @EXPORT_OK = (@messages, @web, @strip, @people);
@@ -179,8 +177,6 @@ BEGIN {
 	use constant FRIEND => 1;
 	use constant FOE => 2;
 	use constant FOF => 3;
-	# Technically this is a type in people.
-	use constant BONUS => 1;
 }
 
 1;
