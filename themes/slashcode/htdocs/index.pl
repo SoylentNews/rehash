@@ -327,8 +327,10 @@ sub displayStories {
 		push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
 
 		my $link_template = $feature ? 'feature_storylink' : 'storylink';
+		# I added sid so that you could set up replies from the front page -Brian
 		$return .= slashDisplay($link_template, {
 			links	=> \@links,
+			sid => $sid,
 		}, { Return => 1});
 
 		my($w) = join ' ', (split m/ /, $time)[0 .. 2];
