@@ -153,6 +153,9 @@ sub getSlash {
 	for ($I{query}->param) {
 		$I{F}{$_} = $I{query}->param($_);
 
+		# Paranoia - Clean out any embedded NULs.
+		$I{F}{$_} =~ s/\0//g;
+
 		# clean up numbers
 		if (exists $nums{$_}) {
 			$I{F}{$_} = fixint($I{F}{$_});
