@@ -240,7 +240,7 @@ sub displayRSS {
 				tid		=> $article->[5],
 			},
 			title		=> $article->[2],
-			description	=> strip_mode($article->[1], $article->[4]),
+			description	=> url2html(strip_mode($article->[1], $article->[4])),
 			'link'		=> root2abs() . '/~' . fixparam($nickname) . "/journal/$article->[3]",
 		};
 	}
@@ -378,7 +378,7 @@ sub displayArticleFriends {
 
 		# should get comment count, too -- pudge
 		push @collection, {
-			article		=> strip_mode($article->[1], $article->[4]),
+			article		=> url2html(strip_mode($article->[1], $article->[4])),
 			date		=> $article->[0],
 			description	=> strip_notags($article->[2]),
 			topic		=> $topics->{$article->[5]},
@@ -401,14 +401,16 @@ sub displayArticleFriends {
 
 sub displayArticle {
 	my($journal, $constants, $user, $form, $reader) = @_;
-	my($date, $forward, $back, @sorted_articles, $nickname, $uid, $discussion);
+	my($date, $forward, $back, @sorted_articles, $nickname, $uid, $karma, $discussion);
 	my $collection = {};
 	my $user_change = {};
 	my $head_data = {};
 
 	if ($form->{uid} || $form->{nick}) {
 		$uid		= $form->{uid} ? $form->{uid} : $reader->getUserUID($form->{nick});
-		$nickname	= $reader->getUser($uid, 'nickname');
+		my $tmpuser	= $reader->getUser($uid, ['nickname', 'karma']);
+		$nickname	= $tmpuser->{nickname};
+		$karma		= $tmpuser->{karma};
 		if ($uid && $uid != $user->{uid}
 			&& !isAnon($uid) && !$user->{is_anon}) {
 			# Store the fact that this user last looked at that user.
@@ -421,6 +423,7 @@ sub displayArticle {
 	} else {
 		$nickname	= $user->{nickname};
 		$uid		= $user->{uid};
+		$karma		= $user->{karma};
 	}
 
 	$head_data->{nickname} = $nickname;
@@ -489,9 +492,13 @@ sub displayArticle {
 				: 0;
 		}
 
+		my $stripped_article = url2html(strip_mode($article->[1], $article->[4]));
+		$stripped_article = noFollow($stripped_article)
+			unless $karma > $constants->{goodkarma};
+
 		# should get comment count, too -- pudge
 		push @{$collection->{article}}, {
-			article		=> strip_mode($article->[1], $article->[4]),
+			article		=> $stripped_article,
 			date		=> $article->[0],
 			description	=> strip_notags($article->[2]),
 			topic		=> $topics->{$article->[5]},
@@ -758,7 +765,7 @@ sub editArticle {
 	$posttype ||= $user->{'posttype'};
 
 	if ($article->{article}) {
-		my $strip_art = strip_mode($article->{article}, $posttype);
+		my $strip_art = url2html(strip_mode($article->{article}, $posttype));
 		my $strip_desc = strip_notags($article->{description});
 
 		my $commentcount = $article->{discussion}

@@ -704,6 +704,7 @@ sub processSub {
 }
 
 #################################################################
+=pod
 sub url2html {
 	my($introtext) = @_;
 	$introtext =~ s/\n\n/\n<P>/gi;
@@ -722,6 +723,7 @@ sub url2html {
 	$introtext =~ s/\s+$//;
 	return $introtext;
 }
+=cut
 
 #################################################################
 

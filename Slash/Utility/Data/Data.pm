@@ -38,6 +38,7 @@ use Safe;
 use Slash::Constants qw(:strip);
 use Slash::Utility::Environment;
 use URI;
+use URI::Find;
 use XML::Parser;
 use Lingua::Stem;
 
@@ -80,6 +81,7 @@ use vars qw($VERSION @EXPORT);
 	issueAge
 	nickFix
 	nick2matchname
+	noFollow
 	regexSid
 	root2abs
 	roundrand
@@ -99,6 +101,7 @@ use vars qw($VERSION @EXPORT);
 	strip_urlattr
 	submitDomainAllowed
 	timeCalc
+	url2html
 	url2abs
 	urlFromSite
 	xmldecode
@@ -2099,6 +2102,47 @@ sub chopEntity {
 	$text =~ s/<[^>]*$//;
 	return $text;
 }
+
+
+
+{
+@Slash::Utility::Data::URI::Find::ISA = 'URI::Find';
+sub Slash::Utility::Data::URI::Find::uri_re {
+	my $self = shift;
+	# ignore URLs beginning with " (i.e., the ones
+	# already inside tags)
+	return '(?<!["a-zA-Z])' . $self->URI::Find::uri_re;
+}
+
+my $finder = Slash::Utility::Data::URI::Find->new(sub {
+	my($uri, $orig_uri) = @_;
+	my($nuri, $extra) = ($uri, '');
+	# URL can only end in / or \w; don't like it? then
+	# use one of the other methods for making an a href tag!
+	# if we don't do this, we get a lot of URLs with
+	# punctuation at the end of them.  we can add more chars
+	# here if necessary, or go the other way and subtract
+	# chars (see rev 1.110 of submit.pl)
+	if ($nuri =~ s/([^\w\/]+)$//) {
+		$extra = $1;
+	}
+	return qq|<a href="$nuri">$nuri</a>$extra|;
+});
+
+sub url2html {
+	my($text) = @_;
+	$finder->find(\$text);
+	return $text;
+}
+}
+
+
+sub noFollow {
+	my($html) = @_;
+	$html =~ s/(<a href=.+?)>/$1 rel="nofollow">/gis;
+	return $html;
+}
+
 
 
 # DOCUMENT after we remove some of this in favor of
