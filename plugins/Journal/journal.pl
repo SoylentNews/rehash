@@ -899,6 +899,8 @@ sub _save_params {
 		return;
 	}
 
+	$form{journal_discuss} = 'discuss' if $form{journal_discuss} == 1;
+
 	return \%form;
 }
 
