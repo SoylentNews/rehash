@@ -1,0 +1,11 @@
+name=PollBooth
+description="PollBooth"
+mysql_schema=mysql_schema
+mysql_dump=mysql_dump
+htdoc=pollBooth.pl
+template=templates/data;pollBooth;default
+template=templates/editpoll;pollBooth;default
+template=templates/listpolls;pollBooth;default
+template=templates/pollbooth;misc;default
+template=templates/savepoll;pollBooth;default
+template=templates/vote;pollBooth;default
