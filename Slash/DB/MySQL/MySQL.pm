@@ -4825,8 +4825,7 @@ sub getContentFilter {
 
 ########################################################
 sub getSubmission {
-	my $answer = _genericGet('submissions', 'subid', '', @_);
-	#my $answer = _genericGet('submissions', 'subid', 'submission_param', @_);
+	my $answer = _genericGet('submissions', 'subid', 'submission_param', @_);
 	return $answer;
 }
 

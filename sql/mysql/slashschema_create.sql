@@ -389,6 +389,7 @@ CREATE TABLE pollquestions (
 	date datetime,
 	uid mediumint UNSIGNED NOT NULL,
 	section varchar(30) NOT NULL,
+	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (discussion) REFERENCES discussions(id),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (qid)

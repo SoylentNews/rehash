@@ -65,8 +65,8 @@ sub default {
 			my $discussion_id = $slashdb->getPollQuestion(
 				$form->{'qid'}, 'discussion'
 			);
-			my $discussion = 
-				$slashdb->getDiscussion($discussion_id);
+			my $discussion = $slashdb->getDiscussion($discussion_id)
+				if $discussion_id;
 			if ($discussion) {
 				printComments($discussion);
 			}
@@ -255,7 +255,7 @@ sub listpolls {
 	my($form) = @_;
 	my $slashdb = getCurrentDB();
 	my $min = $form->{min} || 0;
-	my $questions = $slashdb->getPollQuestionList($min, { section => $form->{section}});
+	my $questions = $slashdb->getPollQuestionList($min, { section => $form->{section} } );
 	my $sitename = getCurrentStatic('sitename');
 
 	# Just me, but shouldn't title be in the template?
