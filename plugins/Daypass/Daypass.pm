@@ -157,7 +157,8 @@ sub getDaypassTZOffset {
 	return 0 if $dptz eq 'GMT';
 
 	my $timezones = $slashdb->getTZCodes();
-	return $timezones->{$dptz} || 0;
+	return 0 unless $timezones && $timezones->{$dptz};
+	return $timezones->{$dptz}{off_set} || 0;
 }
 
 sub getGoodonDay {
@@ -165,7 +166,7 @@ sub getGoodonDay {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
-	my $off_set = $self->getDaypassTZOffset();
+	my $off_set = $self->getDaypassTZOffset() || 0;
 	my $db_time = $slashdb->getTime({ add_secs => $off_set });
 
 	# Cheesy (and easy) way of doing this.  Yank the seconds and
