@@ -223,9 +223,12 @@ __template__
 		| <INPUT TYPE="checkbox" NAME="shortcuts" [% shortcuts_check %]>story shortcuts
 
 		[% IF sid %]
-		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward
-		| <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit&amp;question=[% storyref.title | fixparam %]">
-		Related Poll</A>
+		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward | 
+			[% IF storyref.qid %] 
+				<A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit">Related Poll</A>
+			[% ELSE %]
+				<A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=preview&amp;question=[% storyref.title | fixparam %]&amp;polltype=story&amp;date=[% storyref.time | fixparam %]&amp;section=[% storyref.section | fixparam %]&amp;topic=[% storyref.tid | fixparam %]">Create Poll</A>
+			[% END %]
 			[% IF constants.plugin.Blob && constants.story_files %]
 				| <A HREF="[% constants.real_rootdir %]/fileadmin.pl?op=editBySid&amp;sid=[% sid %]">Attach File</A>
 			[% END %]
