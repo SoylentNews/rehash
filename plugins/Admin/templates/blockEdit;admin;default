@@ -85,6 +85,10 @@ __template__
 		<TD><B>Ordernum</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="3" NAME="ordernum" VALUE="[% blockref.ordernum %]"></TD>
 	</TR>
+	<TR>
+		<TD><B>All Sections</B></TD>
+		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="all_sections" [% all_sections_checked %]></TD>
+	</TR>
 	[% IF blockref.type == 'portald' %]
 	<TR>
 		<TD><B>Portal - check if this is a slashbox.</B></TD>
@@ -93,10 +97,6 @@ __template__
 	<TR>
 		<TD><B>Retrieve</B></TD>
 		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="retrieve" [% retrieve_checked %]></TD>
-	</TR>
-	<TR>
-		<TD><B>All Sections</B></TD>
-		<TD COLSPAN="2"><INPUT TYPE="CHECKBOX" VALUE="1" NAME="all_sections" [% all_sections_checked %]></TD>
 	</TR>
 	<TR>
 		<TD><B>URL</B></TD>
