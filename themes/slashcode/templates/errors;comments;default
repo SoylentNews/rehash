@@ -39,9 +39,8 @@ from an open HTTP proxy.  Please close the proxy or ask your sysadmin
 to do so, because open proxies are used to spam web boards like this
 one. If you really can't close it and still want to post, you'll have to
 <A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
-<p>If you have questions, mention your IP number
-<tt>[% unencoded_ip %]</tt> and that the proxy is on
-port <tt>[% port %]</tt>.
+<p>If you have questions, mention that your proxy is at
+<tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
 
 [% # ALREADY POSTED.
 CASE "already posted" %]
