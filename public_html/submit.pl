@@ -395,7 +395,7 @@ EOT
 $str
 		</SELECT>
 ADMIN
-	<TR><TD>$comment</TD> <TD>$note</TD>
+	<TR><TD>$note</TD>
 USER
 
 		my $ptime = $I{submiss_ts} ? $time : '';
@@ -418,7 +418,7 @@ ADMIN
 	<TD>
 		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="-1">%s<BR>%s</FONT></TD></TR>
-	<TR><TD COLSPAN="7"><IMG SRC="$I{imagedir}/pix.gif" ALT="" HEIGHT="3"></TD></TR>
+	<TR><TD COLSPAN="6"><IMG SRC="$I{imagedir}/pix.gif" ALT="" HEIGHT="3"></TD></TR>
 USER
 	}
 
