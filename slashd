@@ -381,7 +381,7 @@ sub newwml {
 	my $c = getBackendStories($section);
 
 	my $x = <<EOT;
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE wml PUBLIC "-//PHONE.COM//DTD WML 1.1//EN" "http://www.phone.com/dtd/wml11.dtd" > 
 <wml>
                         <head><meta http-equiv="Cache-Control" content="max-age=3600" forua="true"/></head>
@@ -423,7 +423,7 @@ sub newxml {
 	my $c = getBackendStories($section);
 
 	my $x = <<EOT;
-<?xml version="1.0"?><backslash
+<?xml version="1.0" encoding="ISO-8859-1"?><backslash
 xmlns:backslash="$I{rootdir}/backslash.dtd">
 
 EOT
