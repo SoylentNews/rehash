@@ -1202,12 +1202,13 @@ sub editStory {
 		$user->{currentSection} = $storyref->{section};
 		$user->{currentSection} = $tmp;
 
-		# Get the related text.
 		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
 			@stid = grep { $_ } @{$form->{_multi}{stid}};
 		} elsif ($form->{stid}) {
 			@stid = $form->{stid};
 		}
+
+		# Get the related text.
 		$storyref->{relatedtext} =
 			getRelated(
 				"$storyref->{title} $storyref->{introtext} $storyref->{bodytext}",
@@ -1243,6 +1244,12 @@ sub editStory {
 		@stid = grep { $_ != $storyref->{tid} }
 			@{ $slashdb->getStoryTopicsJustTids($sid, { no_parents => 1 }) };
 
+		for my $field (qw( introtext bodytext )) {
+			$storyref->{$field} = parseSlashizedLinks(
+				$storyref->{$field});
+		}
+
+
 	} else { # New Story
 
 		my $SECT = $slashdb->getSection($section);
@@ -1267,12 +1274,14 @@ sub editStory {
 			$story_copy{introtext} = $reloDB->href2SlashTag($story_copy{introtext}, $sid);
 			$story_copy{bodytext} = $reloDB->href2SlashTag($story_copy{bodytext}, $sid);
 		}
-		$story_copy{introtext} = parseSlashizedLinks($story_copy{introtext});
-		$story_copy{bodytext} =  parseSlashizedLinks($story_copy{bodytext});
-		$story_copy{introtext} = cleanSlashTags($story_copy{introtext}, {});
-		$story_copy{bodytext} = cleanSlashTags($story_copy{bodytext}, {});
-		$story_copy{introtext} = processSlashTags($story_copy{introtext}, {});
-		$story_copy{bodytext} = processSlashTags($story_copy{bodytext}, {});
+
+		for my $field (qw( introtext bodytext )) {
+			$storyref->{$field} = cleanSlashTags(
+				$storyref->{$field}, {});
+			$storyref->{$field} = processSlashTags(
+				$storyref->{$field}, {});
+		}
+
 		my $author = $slashdb->getAuthor($storyref->{uid});
 		my $topic = $slashdb->getTopic($storyref->{tid});
 		$storycontent = dispStory(\%story_copy, $author, $topic, 'Full', { stid => \@stid });
