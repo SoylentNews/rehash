@@ -5,7 +5,7 @@ Display the top topics
 
 * title = passed to titlebar
 * width = passed to titlebar
-* topics = arrayref of hashrefs of topics (tid, alttext, image, width, height, cnt, count, stories)
+* topics = arrayref of hashrefs of topics (tid, textname, image, width, height, cnt, count, stories)
 * currtime = current time
 __title__
 
@@ -20,11 +20,11 @@ __template__
 <TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="3">
 [% FOREACH topic = topics %]
 	<TR><TD ALIGN="RIGHT" VALIGN="TOP>
-		<FONT SIZE="6" COLOR="[% user.colors.bg_3 %]">[% topic.alttext %]</FONT>
+		<FONT SIZE="6" COLOR="[% user.colors.bg_3 %]">[% topic.textname %]</FONT>
 		<BR>( [% topic.count %] )
 		<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
 			SRC="[% constants.imagedir %]/topics/[% topic.image %]"
-			BORDER="0" ALT="[% topic.alttext %]" ALIGN="RIGHT" VALIGN="TOP"
+			BORDER="0" ALT="[% topic.textname %]" ALIGN="RIGHT" VALIGN="TOP"
 			HSPACE="0" VSPACE="10" WIDTH="[% topic.width %]"
 			HEIGHT="[% topic.height %]"></A>
 	</TD><TD BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP">

@@ -44,7 +44,7 @@ __template__
 		<TD VALIGN="TOP"><MULTICOL COLS="3">
 
 [% FOREACH tid = tid_order %]
-		<INPUT TYPE="CHECKBOX" NAME="extid_[% tid %]"[% tidref.$tid.checked %]>[% tidref.$tid.alttext %]<BR>
+		<INPUT TYPE="CHECKBOX" NAME="extid_[% tid %]"[% tidref.$tid.checked %]>[% tidref.$tid.textname %]<BR>
 [% END %]
 
 		</MULTICOL></TD>

@@ -18,7 +18,7 @@ __template__
 <TD><A HREF="[% gSkin.rootdir %]/search.pl?topic=[% id %]"><IMG
                 SRC="[% image %]"
                 WIDTH="[% width %]" HEIGHT="[% height %]"
-                BORDER="0" ALT="[% alttext %]" TITLE="[% alttext %]"></A>
+                BORDER="0" ALT="[% textname %]" TITLE="[% textname %]"></A>
 </TD>
 
 __seclev__
