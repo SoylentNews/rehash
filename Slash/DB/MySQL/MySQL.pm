@@ -871,7 +871,8 @@ sub getModeratorCommentLog {
 	$time_clause = " AND ts > DATE_SUB(NOW(), INTERVAL $options->{hours_back} HOUR)" if $options->{hours_back};
 
 	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
-	my $sth = $self->sqlSelectMany("comments.sid AS sid,
+	my $sth = $self->sqlSelectMany(
+		"comments.sid AS sid,
 		 comments.cid AS cid,
 		 comments.points AS score,
 		 users.uid AS uid,
@@ -911,14 +912,18 @@ sub getMetamodCountsForModsByType {
 	return {} unless @$ids;
 
 	my($cols, $where);
-	$cols = "mmid, count(*) as count";
-	$where = "mmid in ($id_str) AND active=1 ";
+	$cols = "mmid, COUNT(*) AS count";
+	$where = "mmid IN ($id_str) AND active=1 ";
 	if ($type eq "fair") {
 		$where .= " AND val > 0 ";
 	} elsif ($type eq "unfair") {
 		$where .= " AND val < 0 ";
 	}
- 	my $modcounts = $self->sqlSelectAllHashref('mmid', $cols ,'metamodlog', $where, 'group by mmid');
+ 	my $modcounts = $self->sqlSelectAllHashref('mmid',
+		$cols,
+		'metamodlog',
+		$where,
+		'GROUP BY mmid');
 	return $modcounts;	
 }
 
@@ -2248,8 +2253,10 @@ sub deleteModeratorlog {
 	return unless @$mmids;
 
 	my $mmid_in = join ',', @$mmids;
-	$self->sqlDelete('moderatorlog', $where);
+	# Delete from metamodlog first since (if built correctly) that
+	# table has a FOREIGN KEY constraint pointing to moderatorlog.
 	$self->sqlDelete('metamodlog', "mmid IN ($mmid_in)");
+	$self->sqlDelete('moderatorlog', $where);
 }
 
 ########################################################
