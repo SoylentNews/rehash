@@ -39,7 +39,7 @@ sub main {
 		},
 	};
 
-	if ($user->{is_anon}) {
+	if ($user->{is_anon} && $op ne 'paypal') {
 		my $rootdir = getCurrentStatic('rootdir');
 		redirect("$rootdir/users.pl");
 		return;
