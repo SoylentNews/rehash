@@ -23,10 +23,11 @@ __template__
 	[% PROCESS formLabel value => "The Question" comment => "followed by the total number of voters so far" %]
 	<INPUT TYPE="TEXT" NAME="question" VALUE="[% question.question %]" SIZE="40">
 	<INPUT TYPE="TEXT" NAME="voters" VALUE="[% question.voters %]" SIZE="5"><BR>
-	[% PROCESS formLabel value => "Poll Topic" comment => "this doesn't do much right now but in the future it will" %]
-	[% DEFAULT question.topic=constants.discussion_default_topic %]
+	[% PROCESS formLabel value => "Poll Section" comment => "what section this will be visable in" %]
 	[% sections = Slash.db.getDescriptions('sections-all') %]
 	[% Slash.createSelect('section', sections, question.section, 1) %]
+	[% PROCESS formLabel value => "Poll Topic" comment => "" %]
+	[% DEFAULT question.topic=constants.discussion_default_topic %]
 	[% Slash.selectTopic('topic', question.topic, '', 1) %]
 	[% PROCESS formLabel value => "The Answers" comment => "voters" %]
 
@@ -39,7 +40,7 @@ __template__
 	<INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20">
 	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
 	[% PROCESS formLabel value => "SlashBox Poll" comment => "if checked this will be the poll used in slashboxes for the selected section" %]
-	<INPUT TYPE="CHECKBOX" NAME="currentqid"[% checked %]> (appears on homepage) <br>
+	<INPUT TYPE="CHECKBOX" NAME="currentqid"[% checked %]> <br>
 
 	<INPUT TYPE="SUBMIT" VALUE="Save">
 	<INPUT TYPE="HIDDEN" NAME="op" VALUE="save">
