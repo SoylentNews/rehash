@@ -205,3 +205,5 @@ sub validFormkeyHC {
 	return $tries_left > 1 ? 'invalidhcretry' : 'invalidhc';
 }
 
+1;
+

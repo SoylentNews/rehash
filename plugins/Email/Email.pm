@@ -77,3 +77,5 @@ sub removeFromOptoutList {
 	);
 }
 
+1;
+
