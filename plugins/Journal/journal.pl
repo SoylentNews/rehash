@@ -208,9 +208,11 @@ sub displayRSS {
 	$user		= $reader->getUser($form->{uid}, ['nickname', 'fakeemail']) if $form->{uid};
 	my $uid		= $form->{uid} || $user->{uid};
 	my $nickname	= $user->{nickname};
+	my $tree	= $reader->getTopicTree;
 
 	my $articles = $journal->getsByUid($uid, 0, 15);
 	my @items;
+	my $usertext = $nickname;
 	for my $article (@$articles) {
 		push @items, {
 			story		=> {
@@ -218,11 +220,12 @@ sub displayRSS {
 			},
 			title		=> $article->[2],
 			description	=> strip_mode($article->[1], $article->[4]),
-			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]"
+			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]",
+			creator		=> $usertext,
+			subject		=> $tree->{$article->[5]}{keyword},
 		};
 	}
 
-	my $usertext = $nickname;
 	$usertext .= " <$user->{fakeemail}>" if $user->{fakeemail};
 	xmlDisplay(rss => {
 		channel => {
