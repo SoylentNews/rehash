@@ -1,0 +1,105 @@
+#!/usr/bin/perl -w
+
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2004 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+# This script checks over the topic tree that has been generated
+# by convertDBto200406, and emits SQL DELETE commands which may
+# produce a higher-quality tree, by eliminating unnecessary
+# topic_parent relationships.  It also outputs which skids are
+# most common with which topics but which aren't yet directly
+# associated with them, so admins can decide whether to add
+# those relationships in manually.
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Data::Dumper;
+use Slash;
+use Slash::Utility;
+
+use vars qw( $slashdb
+        $stoids );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my (%opts, $tree);
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:', \%opts);
+usage() if $opts{h};
+die "Username required" unless $opts{u};
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+
+$tree = $slashdb->getTopicTree();
+
+my $emitted_warning = 0;
+for my $tid (sort { $a <=> $b } keys %$tree) {
+	my @parents = (sort { $a <=> $b } keys %{$tree->{$tid}{parent}});
+	next unless scalar(@parents) > 1;
+	for my $pid (@parents) {
+		my $pid_min_weight = $tree->{$tid}{parent}{$pid};
+		my @other_parents = grep { $_ != $pid } @parents;
+		my $can_delete = 0;
+		for my $other_pid (@other_parents) {
+			my $is = $slashdb->isTopicParent($pid, $other_pid,
+				{ min_min_weight => $pid_min_weight });
+			if ($is) {
+				$can_delete = 1;
+				last;
+			}
+		}
+		if ($can_delete) {
+			if (!$emitted_warning) {
+				print <<EOT;
+# The DELETE(s) below are suggestions to perhaps improve the
+# "quality" of your topic tree by eliminating parent-child
+# relationship(s) that seem to be mathematically unnecessary.
+# Please double-check them before applying and see if they
+# make sense.
+EOT
+				$emitted_warning = 1;
+			}
+			print "DELETE FROM topic_parents WHERE tid=$tid AND parent_tid=$pid;\n";
+		}
+	}
+}
+
+my $skins = $slashdb->getSkins();
+for my $skid (sort { $a <=> $b } keys %$skins) {
+	my $skin = $skins->{$skid};
+	my $child_topics = $slashdb->getAllChildrenTids($skin->{nexus});
+	next unless $child_topics && @$child_topics;
+	my $children_already = join(", ", $skin->{nexus}, @$child_topics);
+	my $popular_tid_hr = $slashdb->sqlSelectAllHashref(
+		[qw( stc_tid )],
+		"story_topics_chosen.tid AS stc_tid, COUNT(*) AS c",
+		"stories, story_topics_chosen",
+		"stories.stoid=story_topics_chosen.stoid
+		 AND story_topics_chosen.tid NOT IN ($children_already)",
+		"GROUP BY std_tid HAVING c >= 3 ORDER BY c DESC LIMIT 5");
+	if (keys %$popular_tid_hr) {
+		print <<EOT;
+# For skin $skid, '$skin->{title}'
+# You may (or may not) want to add links to this (these) topic(s),
+# which appear in existing stories but are not currently linked,
+# directly or otherwise, to the skin's nexus tid $skin->{nexus}.
+# Sample links are given with min_weight 1 linking directly to the
+# nexus;  that may or may not be what you want.
+EOT
+		for my $tid (sort { $a <=> $b } keys %$popular_tid_hr) {
+			my $c = $popular_tid_hr->{$tid}{c};
+			print "# === $c stories with tid $tid '$tree->{$tid}{textname}'\n";
+			print "INSERT INTO topic_parents (tid, parent_tid, min_weight) VALUES (";
+			print "$tid, $skin->{nexus}, 1";
+			print ");\n";
+
+		}
+	}
+}
+
+
