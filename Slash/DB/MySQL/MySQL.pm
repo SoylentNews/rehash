@@ -3010,9 +3010,20 @@ sub getAuthorNames {
 # the database?
 sub getStoryByTime {
 	my($self, $sign, $story, $section, $limit) = @_;
-	my($where);
+	my $where;
+	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	$limit ||= '1';
+
+	# We only do getStoryByTime() for stories that are more recent
+	# than twice the story archiving delay.  If the DB has to scan
+	# back thousands of stories, this can really bog.  We solve
+	# this by having the first clause in the WHERE be an impossible
+	# condition for any stories that are too old (this is more
+	# straightforward than parsing the timestamp in perl).
+	my $time = $story->{time};
+	my $twice_arch_delay = $constants->{archive_delay}*2;
+	$twice_arch_delay = 7 if $twice_arch_delay < 7;
 
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 	if ($section->{isolate}) {
@@ -3028,11 +3039,14 @@ sub getStoryByTime {
 	$where .= "   AND section not in ($user->{'exsect'})" if $user->{'exsect'};
 	$where .= "   AND sid != '$story->{'sid'}'";
 
-	my $time = $story->{'time'};
 	my $returnable = $self->sqlSelectHashref(
 			'title, sid, section, tid',
 			'stories',
-			"time $sign '$time' AND writestatus != 'delete' AND time < now() $where",
+			"'$time' > DATE_SUB(NOW(), INTERVAL $twice_arch_delay DAY)
+			 AND time $sign '$time'
+			 AND time < NOW()
+			 AND writestatus != 'delete'
+			 $where",
 			"ORDER BY time $order LIMIT $limit"
 	);
 
