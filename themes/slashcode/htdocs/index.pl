@@ -526,10 +526,9 @@ sub displayStories {
 		my $link;
 
 		if ($constants->{body_bytes}) {
-			$link = $story->{body_length} . ' ' .
-				$msg->{bytes};
+			$link = "$story->{body_length} $msg->{bytes}";
 		} else {
-			$link = sprintf '%d %s', $story->{word_count}, $msg->{words};
+			$link = "$story->{word_count} $msg->{words}";
 		}
 
 		if ($story->{body_length} || $story->{commentcount}) {
