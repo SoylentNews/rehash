@@ -66,8 +66,7 @@ sub deleteOldFromPool {
 		# way to do this at the moment.  Eventually we'll have
 		# DB-based timespecs and we can read that...
 		my $runs_per_hour = 2;
-		$want_delete_fraction = 1/($runs_per_hour*2.4)
-#		$want_delete_fraction = 1/($runs_per_hour*24)
+		$want_delete_fraction = 1/($runs_per_hour*24)
 	}
 	my $want_delete = int($cursize*$want_delete_fraction);
 		# Don't delete so many that the pool will get too empty,
