@@ -152,9 +152,11 @@ my $start_time = Time::HiRes::time;
 	# Do we want to display the plug saying "there's a future story,
 	# subscribe and you can see it"?  Yes if the user is logged-in
 	# but not a subscriber, but only if the first story is actually
-	# in the future.  Just check the first story;  they're in order.
+	# in the future.  If the user has a daypass, they don't get this
+	# either.  Just check the first story;  they're in order.
 	if ($is_future_story
 		&& !$user->{is_subscriber}
+		&& !$user->{has_daypass}
 		&& !$user->{is_anon}
 		&& $constants->{subscribe_future_plug}) {
 		$future_plug = 1;
