@@ -107,8 +107,10 @@ sub selectComments {
 	# and such.
 	for my $C (@$thisComment) {
 		# By setting pid to zero, we remove the threaded
-		# relationship between the comments
+		# relationship between the comments. Don't ignore threads
+		# in forums, or when viewing a single comment (cid > 0)
 		$C->{pid} = 0 if $user->{commentsort} > 3
+			&& $cid == 0
 			&& $user->{mode} ne 'parents'; # Ignore Threads
 
 		# I think instead we want something like this... (not this
