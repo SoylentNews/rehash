@@ -112,7 +112,7 @@ sub findUsers {
 	}
 
 	if ($form->{query}) {
-		$sql .= ' AND ' if @$users_to_ignore;
+		$sql .= ' AND ';
 		my $kw = $self->_keysearch($form->{query}, ['nickname', 'ifnull(fakeemail,"")']);
 		$kw =~ s/as kw$//;
 		$kw =~ s/\+/ OR /g;

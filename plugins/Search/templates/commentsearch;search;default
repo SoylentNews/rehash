@@ -16,7 +16,7 @@ __template__
 each of the last 30,000 or so comments posted.  Older comments
 are removed and currently only visible as static HTML.<P>
 [% IF comments %]
-	[% x = 0 %]
+	[% x = start ? start : 1 %]
 	[% FOREACH comment=comments %]
 				[% user_email = Slash.db.getUser(comment.9, ['fakeemail', 'nickname']) %]
 		<BR><B>[% x %]</B>

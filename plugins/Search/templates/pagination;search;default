@@ -13,9 +13,6 @@ pagination
 __template__
 	[% back = back || 0;
 	   IF (back > -1) || forward %]
-		</TD></TR>
-		<TR VALIGN="TOP" BGCOLOR="#FFFFFF">
-			<TD ALIGN="RIGHT" BGCOLOR="#FFFFFF">
 				[% IF forward %]
 					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&start=[% forward %]">&lt;Next [% constants.search_default_display %] matches</A>
 				[% END %]
@@ -25,8 +22,6 @@ __template__
 				[% IF (back > -1) %]
 					<A HREF="[% constants.rootdir %]/search.pl?[% args %]&start=[% back %]">Last [% constants.search_default_display %] matches&gt;</A>
 				[% END %]
-			</TD>
-		</TR>
 	[% END %]
 __seclev__
 100

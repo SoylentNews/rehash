@@ -118,6 +118,7 @@ sub commentSearch {
 		back		=> $back,
 		forward		=> $forward,
 		args		=> _buildargs($form),
+		start => $start,
 	});
 }
 
@@ -192,6 +193,7 @@ sub storySearch {
 		back		=> $back,
 		forward		=> $forward,
 		args		=> _buildargs($form),
+		start => $start,
 	});
 }
 

@@ -13,7 +13,7 @@ storysearch
 __template__
 [% USE Slash %]
 [% IF stories %]
-	[% x = 0 %]
+	[% x = start ? start : 1 %]
 	[% FOREACH story=stories %]
 		[% x + form.min %] 
 		[% Slash.linkStory({
