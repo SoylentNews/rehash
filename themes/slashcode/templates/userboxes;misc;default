@@ -202,7 +202,7 @@ URLs showing abuse (the cid link please!).
 	END;
 END %]
 
-<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0">
+<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0" ALT="">
 
 __seclev__
 1000

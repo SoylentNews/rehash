@@ -26,7 +26,7 @@ __template__
 
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	<TR BGCOLOR="[% user.bg.3 %]">
-		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD>
+		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD>
 	</TR>
 	<TR BGCOLOR="[% user.bg.1 %]">
 		<TD ALIGN="LEFT"><IMG SRC="[% constants.imagedir %]/660000.gif" WIDTH="1" HEIGHT="60" ALT=""></TD>
@@ -46,7 +46,7 @@ __template__
 		<TD ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/660000.gif" WIDTH="1" HEIGHT="60" ALT=""></TD>
 	</TR>
 	<TR BGCOLOR="[% user.bg.3 %]">
-		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD>
+		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD>
 	</TR>
 </TABLE>
 
