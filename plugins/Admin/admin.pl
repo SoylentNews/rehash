@@ -1706,16 +1706,16 @@ sub displayRecentRequests {
 	$min_id = $max_id + $min_id			if  $min_id < 0;
 	$min_id = $max_id				if  $min_id < $max_id - 200_000;
 
-	my $start_time = Time::HiRes::time;
 	my $min_id_ts ||= $slashdb->getAccesslog($min_id, 'ts');
-	my $duration = Time::HiRes::time - $start_time;
 
 	my $options = { min_id => $min_id };
 	$options->{thresh_count} = defined($form->{thresh_count}) ? $form->{thresh_count} : 100;
 	$options->{thresh_secs}  = defined($form->{thresh_secs} ) ? $form->{thresh_secs}  : 5;
 	$options->{thresh_hps}   = defined($form->{thresh_hps}  ) ? $form->{thresh_hps}   : 0.1;
 
+	my $start_time = Time::HiRes::time;
 	my $data = $admindb->getAccesslogAbusersByID($options);
+	my $duration = Time::HiRes::time - $start_time;
 	vislenify($data); # add {ipid_vis} to each row
 	for my $row (@$data) {
 		# Get constant roundoff decimals.
