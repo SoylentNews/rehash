@@ -1535,7 +1535,6 @@ sub _slashPageBreak {
 	my $user = getCurrentUser();
 
 	$user->{state}{pagebreaks}++;
-	$$newtext =~ s#\Q$token->[3]\E##is;
 }
 
 sub _slashComment {
