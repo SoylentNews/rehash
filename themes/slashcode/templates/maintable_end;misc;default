@@ -1,0 +1,58 @@
+__section__
+default
+__description__
+Template to close up the maintable.
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+maintable_end
+__template__
+
+[%
+
+num_rows = 0;
+num_cols = user.state.mt.cols.max;
+FOR rowcount = user.state.mt.cols;
+	IF rowcount > num_rows; num_rows = rowcount; END;
+END;
+"<!-- num_rows (max rowcount) '"; num_rows; "' and num_cols '"; num_cols; "' curcol '"; user.state.mt.curcol; "' -->";
+WHILE user.state.mt.curcol < num_cols;
+	user.state.mt.curcol = user.state.mt.curcol + 1;
+	IF user.state.mt.cols.${user.state.mt.curcol} < num_rows;
+		'<TD ROWSPAN="';
+		num_rows - user.state.mt.cols.${user.state.mt.curcol};
+		'">&nbsp;</TD>';
+		user.state.mt.cols.${user.state.mt.curcol} = num_rows;
+	END;
+END;
+"</TR>";
+need_another_row = 0;
+FOR rowcheck = user.state.mt.cols;
+	NEXT IF loop.first;
+	need_another_row = 1 IF rowcheck < num_rows;
+END;
+"<!-- need_another_row '"; need_another_row; "' -->";
+IF need_another_row;
+	"<TR>";
+	user.state.mt.curcol = 0;
+	WHILE user.state.mt.curcol < num_cols;
+		user.state.mt.curcol = user.state.mt.curcol + 1;
+		IF user.state.mt.cols.${user.state.mt.curcol} < num_rows;
+			'<TD ROWSPAN="'; num_rows - user.state.mt.cols.${user.state.mt.curcol};
+			'">&nbsp;</TD>';
+		END;
+	END;
+	"</TR>";
+END;
+
+%]
+
+</TABLE>
+
+__seclev__
+10000

@@ -1,0 +1,33 @@
+__section__
+default
+__description__
+Template to drop in a TR for the maintable (and update state vars).
+
+* valign
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+maintable_tr
+__template__
+
+<TR[% IF valign %] VALIGN="[% valign %]"[% END %]>
+<!-- maintable_tr -->
+
+[%
+min_cols = 999;
+FOR rowcheck = user.state.mt.cols;
+	NEXT IF loop.first;
+	IF rowcheck < min_cols;
+		min_cols = rowcheck;
+		user.state.mt.curcol = loop.index;
+	END;
+END
+%]
+
+__seclev__
+10000
