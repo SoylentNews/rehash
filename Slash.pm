@@ -58,6 +58,7 @@ BEGIN {
 		getDateFormat dispComment getDateOffset linkComment redirect
 		insertFormkey getFormkeyId checkSubmission checkTimesPosted
 		updateFormkeyId formSuccess formAbuse formFailure errorMessage
+		fixurl
 	);
 	$CRLF = "\015\012";
 }
@@ -2334,16 +2335,6 @@ EOT
 
 	$topicicon .= '</A>';
 	$topicicon .= ' ] ' if $I{U}{noicons};
-
-        $S->{introtext} =~ s|__CPANURL__|http://www.perl.com/CPAN|g;
-        $S->{introtext} =~ s|__CPANMOD__|http://search.cpan.org/search?module=|g;
-        $S->{introtext} =~ s|__CPANDIST__|http://search.cpan.org/search?dist=|g;
-
-        if ($S->{bodytext}) {
-            $S->{bodytext} =~ s|__CPANURL__|http://www.perl.com/CPAN|g;
-            $S->{bodytext} =~ s|__CPANMOD__|http://search.cpan.org/search?module=|g;
-            $S->{bodytext} =~ s|__CPANDIST__|http://search.cpan.org/search?dist=|g;
-        }
 
 	my $execme = getWidgetBlock('story');
 	print eval $execme;
