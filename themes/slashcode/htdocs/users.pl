@@ -1884,13 +1884,6 @@ sub saveUser {
 	my $uid;
 	my $user_editfield_flag;
 
-	print createMenu("users", {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	$hr->{tab_selected_1} || "",
-	});
-
 	$uid = $user->{is_admin} && $form->{uid} ? $form->{uid} : $user->{uid};
 	my $user_edit = $slashdb->getUser($uid);
 
