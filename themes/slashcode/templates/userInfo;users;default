@@ -74,9 +74,9 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 [% IF karma_flag && (admin_flag || nickmatch_flag)  %]
 	<B>Karma:</B>
 	[% IF constants.karma_obfuscate;
-		FOREACH adj = constants.karma_adj.keys.nsort;
-			IF useredit.karma <= adj;
-				constants.karma_adj.$adj;
+		FOREACH score = constants.karma_adj.keys.nsort;
+			IF useredit.karma <= score;
+				constants.karma_adj.$score;
 				" (mostly affected by moderation done to your comments)";
 				LAST;
 			END;
