@@ -2814,15 +2814,15 @@ INSERT INTO vars (name, value, description) VALUES ('dbsparklines_width',150,'Pi
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymax',20,'Max bog value (clip higher values to this)');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymin',-20,'Min lag value (clip lower values to this) - should be negative');
 
+# End of T_2_5_0_43, Start of T_2_5_0_44 - 2005/01/04
+
+# End of T_2_5_0_44, Start of T_2_5_0_45 - 2005/01/11
+
 # SLASHCLUSTER LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
-
-# End of T_2_5_0_43, Start of T_2_5_0_44 - 2005/01/04
-
-# End of T_2_5_0_44, Start of T_2_5_0_45 - 2005/01/11
 
 # End of T_2_5_0_45, Start of T_2_5_0_46 - 2005/01/18
 
