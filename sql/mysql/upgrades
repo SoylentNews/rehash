@@ -796,5 +796,12 @@ UPDATE stats_daily SET name='mod_tokens_lost_stirred' WHERE name='mod_tokens_sti
 
 # SLASHDOT LAST UPDATED HERE
 
-# End of T_2_3_0_49
+# End of T_2_3_0_49, Start of T_2_3_0_50
+
+# (This change was actually made about a week ago, but the old var is
+# supported in the code so this is not a vital var update.)
+# For best results, replace "96" with 24 times the value of the var "stir":
+INSERT INTO vars (name, value, description) VALUES ('mod_stir_hours','96','Number of hours before unused moderator points expire');
+# and assuming a clean vars table is important to you:
+DELETE FROM vars WHERE name='stir';
 
