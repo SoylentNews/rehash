@@ -310,6 +310,10 @@ sub action {
 		print getData("over_socialized");
 		return;
 	} else {
+		if ($zoo->count($form->{uid}) > $constants->{people_max}) {
+			print getData("over_socialized");
+			return 0;
+		}
 		if ( $form->{op} eq 'delete' || $form->{type} eq 'neutral') {
 			if ($form->{uid}) {
 				$zoo->delete($user->{uid}, $form->{uid});
