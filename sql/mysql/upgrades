@@ -2713,7 +2713,7 @@ ALTER TABLE users_comments ADD INDEX points (points);
 # varities are the same as the normal ones
 INSERT INTO vars (name, value, description) VALUES ('rdfitemdesc_html','0','1 == include HTML in item description; 0 == strip HTML (plain text only)');
 INSERT INTO vars (name, value, description) VALUES ('journal_rdfitemdesc','0','1 == include introtext in item description; 0 == don\'t.  Any other number is substr() of introtext to use');
-INSERT INTO vars (name, value, description) VALUES ('journal_rdfitemdesc_html','0','1 == include HTML in item description; 0 == strip HTML (plain text only)');
+INSERT INTO vars (name, value, description) VALUES ('journal_rdfitemdesc_html','0','1 == include HTML in item description; 0 == strip HTML (plain text only); 2 == HTML for subscribers only');
 INSERT INTO vars (name, value, description) VALUES ('search_rdfitemdesc','0','1 == include introtext in item description; 0 == don\'t.  Any other number is substr() of introtext to use');
 INSERT INTO vars (name, value, description) VALUES ('search_rdfitemdesc_html','0','1 == include HTML in item description; 0 == strip HTML (plain text only)');
 

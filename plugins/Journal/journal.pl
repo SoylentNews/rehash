@@ -227,6 +227,15 @@ sub displayRSS {
 	}
 
 	$usertext .= " <$user->{fakeemail}>" if $user->{fakeemail};
+
+	my $rss_html = $constants->{journal_rdfitemdesc_html} && (
+		$user->{is_admin}
+			||
+		($constants->{journal_rdfitemdesc_html} == 1)
+			||
+		($constants->{journal_rdfitemdesc_html} > 1 && $user->{is_subscriber})
+	);
+
 	xmlDisplay(rss => {
 		channel => {
 			title		=> "$constants->{sitename} Journals",
@@ -237,7 +246,7 @@ sub displayRSS {
 		image	=> 1,
 		items	=> \@items,
 		rdfitemdesc		=> $constants->{journal_rdfitemdesc},
-		rdfitemdesc_html	=> $constants->{journal_rdfitemdesc_html},
+		rdfitemdesc_html	=> $rss_html,
 	});
 }
 
