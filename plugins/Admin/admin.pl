@@ -1680,6 +1680,8 @@ sub updateStory {
 	my $rendered;
 	{
 		local $user->{currentSection} = "index";
+		local $user->{no_icons} = "";
+		local $user->{light} = "";
 		$rendered =  displayStory($form->{sid}, '', { get_cacheable => 1 });
 	}
 	my $data = {
