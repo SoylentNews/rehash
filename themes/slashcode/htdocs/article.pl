@@ -128,14 +128,6 @@ sub main {
 	}
 }
 
-sub getError {
-	my($value, $hashref, $nocomm) = @_;
-	$hashref ||= {};
-	$hashref->{value} = $value;
-	return slashDisplay('errors', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
-}
-
 createEnvironment();
 main();
 1;
