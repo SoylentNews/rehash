@@ -396,13 +396,21 @@ sub prepAds {
 			|| $ENV{SCRIPT_NAME} =~ m{/(\w+)/slashhead\.inc$}
 		);
 	my $section = "(n/a)";
-	if ($constants->{ad_messaging_sections}
-		&& ref($constants->{ad_messaging_sections} eq 'HASH'
-		&& %{$constants->{ad_messaging_sections}})
+	my $form;
+	if ($use_messaging
+		&& $constants->{ad_messaging_sections}
+		&& ref($constants->{ad_messaging_sections}) eq 'HASH'
+		&& %{$constants->{ad_messaging_sections}}
+		&& ($form = getCurrentForm())
+		&& $form->{sid}
 	) {
-		my $form = getCurrentForm();
 		my $slashdb;
-		if ($form->{sid} && ($slashdb = getCurrentDB())) {
+		if ($slashdb = getCurrentDB()) {
+			# DB available and the form includes "sid=01/23/45/6789"
+			# or "sid=12345".  Query the DB about which section that
+			# sid belongs to, and if it's not one where we want to
+			# deliver messaging ads, turn off that possibility.
+			# That's all cached of course.
 			if ($form->{sid} !~ /^\d+$/) {
 				my $story = $slashdb->getStory($form->{sid});
 				$section = $story->{section};
@@ -410,8 +418,12 @@ sub prepAds {
 				my $discussion = $slashdb->getDiscussion($form->{sid});
 				$section = $discussion->{section};
 			}
+			$use_messaging = 0 if !$constants->{ad_messaging_sections}{$section};
+		} else {
+			# DB is unavailable, no ads.  (We must have been called
+			# from a <!--#perl--> line in an .inc or .shtml file.)
+			$use_messaging = 0;
 		}
-		$use_messaging = $constants->{ad_messaging_sections}{$section} ? 1 : 0;
 	}
 	if ($constants->{ad_debug}) {
 		print STDERR join(" ",
