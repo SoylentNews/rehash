@@ -1,6 +1,10 @@
 slash-1.0.4, 2000.05.31
 -----------------------
 
+*	Section pull-down in submissions editor should now reflect
+	the right section when editing submissions if 'defaultsection'
+	is set in slashdotrc.pl
+
 *	Fixed nickname matching in mailPassword() in users.pl
 	to match case indepently
 
