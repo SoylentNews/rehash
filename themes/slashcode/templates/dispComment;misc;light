@@ -11,6 +11,7 @@ en_US
 __name__
 dispComment
 __template__
+[% USE Slash %]
 	<TR>
 		<TD>
 		<A NAME="[% cid %]"><H4>[% subject %]</H4></A>
@@ -18,9 +19,18 @@ __template__
 		[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% constants.reasons.$reason %][% END %])[% END %]
 		[% UNLESS is_anon %]<BR>(<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">User #[% uid %] Info</A>)
 		[% IF homepage && homepage.length > 8 %]<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
-		[% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
-		<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
+			[% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
+				<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
+			[% END %]
 		[% END %]
+		[% UNLESS user.is_anon || is_anon || uid == user.uid %]
+			[% IF user.people.$uid == Slash.FRIEND %]
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Friend ]"></A>
+			[% ELSIF user.people.$uid == Slash.FOE %]
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[% Foe %]</A>
+			[% ELSE %]
+				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Neutral ]</A>
+			[% END %]
 		[% END %]
 		[% IF user.seclev >= 100 %]
 		<BR>IPID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid %]</A>&nbsp;&nbsp;SubnetID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% subnetid %]&amp;fieldname=ipid">[% subnetid %]</A>
