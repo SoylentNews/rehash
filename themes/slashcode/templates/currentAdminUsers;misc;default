@@ -24,11 +24,11 @@ __template__
 	   uid        = author.3;
 	%]
 
-	<tr><td bgcolor="[% user.colors.bg.3 %]">
-		<a href="[% gSkin.rootdir %]/~[% id | fixparam %]/"><font color="[% user.colors.fg.3 %]" 
+	<tr><td bgcolor="[% user.colors.bg_3 %]">
+		<a href="[% gSkin.rootdir %]/~[% id | fixparam %]/"><font color="[% user.colors.fg_3 %]" 
 		size="2"><B>[% id %]</B></font></a>
-	</td><td bgcolor="[% user.colors.bg.2 %]">
-		<font color="[% user.colors.fg.1 %]" size="2">[% lastsecs %]
+	</td><td bgcolor="[% user.colors.bg_2 %]">
+		<font color="[% user.colors.fg_1 %]" size="2">[% lastsecs %]
 		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;[% lasttitle %]
 		[% END %]
 		</font>&nbsp;
@@ -37,8 +37,8 @@ __template__
 [% END %]
 	[% IF constants.cur_performance_stats_disp %]
 	<tr>
-	<td bgcolor="[% user.bg.3 %]" valign="top"><font color="[% user.fg.3 %]" size="2">Performance</font></td>
-	<td bgcolor="[% user.bg.2 %]" valign="top">[% PROCESS performance_stats %]</td>
+	<td bgcolor="[% user.colors.bg_3 %]" valign="top"><font color="[% user.colors.fg_3 %]" size="2">Performance</font></td>
+	<td bgcolor="[% user.colors.bg_2 %]" valign="top">[% PROCESS performance_stats %]</td>
 	</tr>
 	[% END %]
 </table>
