@@ -572,10 +572,10 @@ CREATE TABLE story_topics (
   tid smallint(5) unsigned default NULL,
   FOREIGN KEY (sid) REFERENCES stories(sid),
   FOREIGN KEY (tid) REFERENCES topics(tid),
-  PRIMARY KEY  (id),
+  PRIMARY KEY (id),
   INDEX tid (tid),
-  INDEX sid (sid),
-) TYPE=MyISAM;
+  INDEX sid (sid)
+) TYPE = myisam;
 
 #
 # Table structure for table 'string_param'
