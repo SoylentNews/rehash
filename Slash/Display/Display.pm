@@ -248,6 +248,10 @@ sub slashDisplayName {
 		$user->{currentSection} = 'default';
 	# admin and light are special cases
 	} elsif ($user->{currentSection} eq 'admin') {
+		# This should never happen, far as I know.  "admin" is
+		# not used as a fake section for some months now, it's
+		# just a page. - Jamie 2004/03/05
+print STDERR scalar(localtime) . " slashDisplayName setting currentSection to 'admin', won't set to '" . (defined($opt->{Section}) ? $opt->{Section} : "undef") . "'\n";
 		$user->{currentSection} = 'admin';
 	} elsif ($user->{light}) {
 		$user->{currentSection} = 'light';
