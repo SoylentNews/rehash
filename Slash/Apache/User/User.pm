@@ -305,6 +305,7 @@ sub authors {
 	$r->header_out('X-Author-Krow' => "You can't grep a dead tree.");
 	$r->header_out('X-Author-Pudge' => "Bite me.");
 	$r->header_out('X-Author-CaptTofu' => "I like Tofu.");
+	$r->header_out('X-Author-Jamie' => "I also enjoy tofu.");
 }
 
 ########################################################
