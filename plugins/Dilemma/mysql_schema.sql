@@ -43,7 +43,7 @@ CREATE TABLE dilemma_info (
 ) TYPE=InnoDB;
 
 # this will eventually have a column for tournament ID
-# and store more interesting numbers than just name='num_alive'
+# and store more interesting numbers than just name='num_alive','sumfood'
 DROP TABLE IF EXISTS dilemma_stats;
 CREATE TABLE dilemma_stats (
 	tick INT UNSIGNED NOT NULL,

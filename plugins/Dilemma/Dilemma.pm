@@ -47,7 +47,7 @@ sub getDilemmaSpeciesInfo {
 	my $species = $self->getDilemmaSpecies();
 	my $count = $self->sqlSelectAllHashref(
 		[qw( dsid alive )],
-		"dsid, alive, COUNT(*) AS c",
+		"dsid, alive, COUNT(*) AS c, SUM(food) AS sumfood",
 		"dilemma_agents",
 		"",
 		"GROUP BY dsid, alive");
@@ -55,6 +55,7 @@ sub getDilemmaSpeciesInfo {
 	for my $dsid (keys %$species) {
 		$species_info->{$dsid}{name} = $species->{$dsid}{name};
 		$species_info->{$dsid}{code} = $species->{$dsid}{code};
+		$species_info->{$dsid}{sumfood} = $species-{$dsid}{sumfood};
 		$species_info->{$dsid}{alivecount} = $count->{$dsid}{yes}{c} || 0;
 		$species_info->{$dsid}{totalcount} = ($count->{$dsid}{yes}{c}
 			+ $count->{$dsid}{no}{c}) || 0;
@@ -235,15 +236,21 @@ sub doTickHousekeeping {
 	}
 	my $last_tick = $self->getDilemmaInfo()->{last_tick};
 
-	# Write count info for the species into dilemma_stats.
+	# Write count and food info for the species into dilemma_stats.
 	my $species = $self->getDilemmaSpeciesInfo();
 	for my $dsid (keys %$species) {
-		# Should this be an sqlReplace instead?
+		# Should these be sqlReplace instead?
 		$self->sqlInsert("dilemma_stats", {
 			tick => $last_tick,
 			dsid => $dsid,
 			name => "num_alive",
 			value => $species->{$dsid}{alivecount} || 0,
+		}, { ignore => 1 });
+		$self->sqlInsert("dilemma_stats", {
+			tick => $last_tick,
+			dsid => $dsid,
+			name => "sumfood",
+			value => $species->{$dsid}{sumfood} || 0,
 		}, { ignore => 1 });
 	}
 
