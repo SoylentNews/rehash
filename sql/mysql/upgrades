@@ -1508,7 +1508,6 @@ ALTER TABLE stories ADD body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL, ADD w
 
 # End of T_2_3_0_96, Start of T_2_3_0_97 - 2003/05/20
 
-# USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 
@@ -1519,3 +1518,4 @@ INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set
 ALTER TABLE accesslist ADD COLUMN now_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER now_norss, ADD COLUMN was_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER was_norss;
 ALTER TABLE accesslist ADD INDEX now_nopalm (now_nopalm);
 
+# USEPERL LAST UPDATED HERE
