@@ -209,12 +209,13 @@ EOT
 
 #################################################################
 sub miniAdminMenu {
+	my $nick = fixNickname($I{F}{nick});
 	print <<EOT;
 <FORM ACTION="$ENV{SCRIPT_NAME}">
 	<FONT SIZE="${\( $I{fontbase} + 1 )}"> [
 		<A HREF="$I{rootdir}/admin.pl">Admin</A> |
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="suedituser">
-		<INPUT TYPE="TEXT" NAME="name" VALUE="$I{F}{nick}">
+		<INPUT TYPE="TEXT" NAME="name" VALUE="$nick">
 		<INPUT TYPE="SUBMIT" VALUE="Edit">
 	</FONT> ]
 </FORM>
@@ -224,11 +225,7 @@ EOT
 #################################################################
 sub newUser {
 	# Check if User Exists
-
-	$I{F}{newuser} =~ s/\s+/ /g;
-	$I{F}{newuser} =~ s/[^ a-zA-Z0-9\$_.+!*'(),-]+//g;
-	$I{F}{newuser} = substr($I{F}{newuser}, 0, 20);
-
+	$I{F}{newuser} = fixNickname($I{F}{newuser});
 	(my $matchname = lc $I{F}{newuser}) =~ s/[^a-zA-Z0-9]//g;
 
 	my($cnt) = sqlSelect(
@@ -306,6 +303,7 @@ sub mailPassword {
 #################################################################
 sub userInfo {
 	my($nick) = @_;
+	$nick = fixNickname($nick);
 
 	my $c = $I{dbh}->prepare(
 		"SELECT homepage,fakeemail,users.uid,bio, seclev,karma
@@ -805,7 +803,7 @@ EOT
 		sendEmail($oldEmail, "$I{sitename} user email change for $name", <<EOT);
 The user account $name on $I{sitename} had this email
 associated with it.  A web user from $ENV{REMOTE_ADDR} has
-just changed it to $I{F}{realemail}.
+just changed it to $H->{realemail}.
 
 If this is wrong, well then we have a problem.	MOST LIKELY THIS IS NO
 BIG DEAL.  It probably means you have a common nickname and someone else
@@ -983,11 +981,12 @@ EOT2
 EOT3
 
 	$I{F}{unickname} ||= $I{F}{newuser};
+	my $nick = fixNickname($I{F}{unickname});
 
 	print <<EOT;
 
 	<P><B>Nick:</B> (maximum 20 characters long)<BR>
-	<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="$I{F}{unickname}"><BR>
+	<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="$nick"><BR>
 
 	<B>Password:</B> (6-12 characters long)<BR>
 	<INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="12" MAXLENGTH="12"><BR>
@@ -1008,6 +1007,8 @@ EOT1
 	What? You don't have an account yet?  Well enter your preferred <B>nick</B> name here:
 EOT2
 
+	my $newnick = fixNickname($I{F}{newuser});
+	my $email = stripByMode($I{F}{email}, 'attribute');
 	print <<EOT;
 	(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
 	are allowed in nicknames, and all others will be stripped out.)
@@ -1024,6 +1025,14 @@ EOT2
 </TD></TR></TABLE>
 
 EOT
+}
+
+sub fixNickname {
+	local($_) = @_;
+	s/\s+/ /g;
+	s/[^ a-zA-Z0-9\$_.+!*'(),-]+//g;
+	$_ = substr($_, 0, 20);
+	return $_;
 }
 
 main();
