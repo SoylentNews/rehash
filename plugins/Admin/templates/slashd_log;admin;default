@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+slashd_log
+__template__
+[% PROCESS titlebar width='100%', title='slashd tasks' %]
+
+<TABLE WIDTH="100%">
+	<TR>
+		<TD>task name</TD>
+		<TD>latest time for execution</TD>
+		<TD>latest run time</TD>
+	</TR>
+	[% FOREACH task = tasks %]
+		<TR>
+			<TD>[% task.0 %]</TD>
+			<TD>[% task.1 %]</TD>
+			<TD>[% Slash.timeCalc(task.2) %]</TD>
+		</TR>
+	[% END %]
+</TABLE>
+
+__seclev__
+500
