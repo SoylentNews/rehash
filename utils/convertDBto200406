@@ -753,6 +753,56 @@ ALTER TABLE stories_new DROP COLUMN section, DROP COLUMN subsection, DROP COLUMN
 EOT
 
 #
+# Convert pollquestions
+#
+
+print <<EOT;
+DROP TABLE IF EXISTS pollquestions_new;
+CREATE TABLE pollquestions_new (
+	qid mediumint UNSIGNED NOT NULL auto_increment,
+	question char(255) NOT NULL,
+	voters mediumint,
+	topic smallint UNSIGNED NOT NULL,
+	discussion mediumint,
+	date datetime,
+	uid mediumint UNSIGNED NOT NULL,
+	section varchar(30) NOT NULL,
+	primaryskid SMALLINT UNSIGNED,
+	autopoll ENUM("no","yes") DEFAULT 'no' NOT NULL,
+	flags ENUM("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
+	polltype enum('nodisplay','section','story') default 'section',
+	PRIMARY KEY (qid)
+) TYPE=InnoDB;
+
+INSERT INTO pollquestions_new(qid,question,voters,topic,discussion,date,uid,section,autopoll,flags,polltype) SELECT qid, question, voters, topic, discussion, date, uid, section, autopoll, flags, polltype);
+EOT
+
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE pollquestions_new SET primaryskid=$skid WHERE section=$section_q;\n";
+}
+print "ALTER TABLE pollquestions_new DROP COLUMN section;\n";
+#
+# Update auto_poll if it exists
+#
+print <<EOT;
+DROP TABLE IF EXISTS auto_poll_new;
+CREATE TABLE auto_poll_new (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	primaryskid SMALLINT UNSIGNED,
+	section varchar(30) NOT NULL,
+	qid mediumint UNSIGNED,
+	PRIMARY KEY (id)
+) TYPE=InnoDB;
+
+INSERT INTO auto_poll_new (id, section, qid) SELECT id, section, qid FROM auto_poll;
+EOT
+for my $skid (sort { $a <=> $b } keys %skins) {
+        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
+        print "UPDATE auto_poll_new SET primaryskid=$skid WHERE section=$section_q;\n";
+}
+print "ALTER TABLE auto_poll_new DROP COLUMN section;\n";
+#
 # Convert accesslog_admin and accesslog
 #
 
@@ -931,9 +981,9 @@ print <<EOT;
 
 # ALTER TABLE sections DROP FOREIGN KEY etc.
 
-# RENAME TABLES accesslog TO accesslog_old, accesslog_admin TO accesslog_admin_old, blocks TO blocks_old, discussions TO discussions_old, stories TO stories_old, story_param TO story_param_old, story_text TO story_text_old, story_topics TO story_topics_old, submissions TO submissions_old, templates TO templates_old, topics TO topics_old, topic_images TO topic_images_old, stats_daily TO stats_daily_old, menus TO menus_old, story_files TO story_files_old;
+# RENAME TABLES accesslog TO accesslog_old, accesslog_admin TO accesslog_admin_old, blocks TO blocks_old, discussions TO discussions_old, stories TO stories_old, story_param TO story_param_old, story_text TO story_text_old, story_topics TO story_topics_old, submissions TO submissions_old, templates TO templates_old, topics TO topics_old, topic_images TO topic_images_old, stats_daily TO stats_daily_old, menus TO menus_old, story_files TO story_files_old, pollquestions TO pollquestions_old, auto_poll TO auto_poll_old;
+# RENAME TABLES accesslog_admin_new TO accesslog_admin, accesslog_new TO accesslog, blocks_new TO blocks, discussions_new TO discussions, skin_colors_new TO skin_colors, skins_new TO skins, stories_new TO stories, story_dirty_new TO story_dirty, story_param_new TO story_param, story_text_new TO story_text, story_topics_chosen_new TO story_topics_chosen, story_topics_rendered_new TO story_topics_rendered, submissions_new TO submissions, templates_new TO templates, topic_nexus_extras_new TO topic_nexus_extras, topic_nexus_new TO topic_nexus, topic_nexus_dirty_new TO topic_nexus_dirty, topic_parents_new TO topic_parents, topics_new TO topics, stats_daily_new TO stats_daily, menus_new TO menus, story_files_new TO story_files, pollquestions_new TO pollquestions, auto_poll_new TO auto_poll;
 
-# RENAME TABLES accesslog_admin_new TO accesslog_admin, accesslog_new TO accesslog, blocks_new TO blocks, discussions_new TO discussions, skin_colors_new TO skin_colors, skins_new TO skins, stories_new TO stories, story_dirty_new TO story_dirty, story_param_new TO story_param, story_text_new TO story_text, story_topics_chosen_new TO story_topics_chosen, story_topics_rendered_new TO story_topics_rendered, submissions_new TO submissions, templates_new TO templates, topic_nexus_extras_new TO topic_nexus_extras, topic_nexus_new TO topic_nexus, topic_nexus_dirty_new TO topic_nexus_dirty, topic_parents_new TO topic_parents, topics_new TO topics, stats_daily_new TO stats_daily, menus_new TO menus, story_files_new TO story_files;
 
 # ALTER TABLE skins ADD FOREIGN KEY etc.
 
