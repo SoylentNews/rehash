@@ -75,14 +75,18 @@ sub give_out_points {
 		give_out_tokens($newcomments, $constants, $slashdb, $read_db);
 		my $granted = $slashdb->convert_tokens_to_points();
 
-		my @gr_0 = sort { $a <=> $b }
-			grep { $granted->{$_} == 0 }
-			keys %$granted;
+		# Log what we did and tally it up in stats.
+		my @lt = localtime();
+		my $today = sprintf "%4d-%02d-%02d", $lt[5] + 1900, $lt[4] + 1, $lt[3];
 		my @gr_1 = sort { $a <=> $b }
 			grep { $granted->{$_} == 1 }
 			keys %$granted;
-		slashdLog("Not giving points to " . scalar(@gr_0) . " users: '@gr_0'");
 		slashdLog("Giving points to " . scalar(@gr_1) . " users: '@gr_1'");
+		my $statsSave = getObject('Slash::Stats::Writer', '');
+		$statsSave->createStatDaily("mod_points_granted", 0);
+		$statsSave->updateStatDaily(
+			"mod_points_granted",
+			"value + " . scalar(@gr_1));
 	}
 
 	moderatordLog(getData('moderatord_log_footer'));
@@ -154,9 +158,21 @@ sub get_num_new_comments {
 sub give_out_tokens {
 	my($comments, $constants, $slashdb, $read_db) = @_;
 	$read_db = $slashdb if !defined($read_db);
+	my @lt = localtime();
+	my $today = sprintf "%4d-%02d-%02d", $lt[5] + 1900, $lt[4] + 1, $lt[3];
+	my $statsSave = getObject('Slash::Stats::Writer', '');
+
 	my $num_tokens = $comments * $constants->{tokenspercomment};
 	my $stirredpoints = $slashdb->stirPool();
 	$num_tokens += $stirredpoints * $constants->{tokensperpoint};
+
+	if ($stirredpoints) {
+		# If already exists, create does an INSERT IGNORE.
+		$statsSave->createStatDaily("mod_points_stirred", 0);
+		$statsSave->updateStatDaily(
+			"mod_points_stirred",
+			"value + $stirredpoints");
+	}
 
 	# fetchEligibleModerators() returns a list of uids sorted in the
 	# order of how many clicks each user has made, from the minimum
@@ -165,6 +181,8 @@ sub give_out_tokens {
 	# to weight token assignment by click count, but for now we just
 	# chop off the top and bottom and assign tokens randomly to
 	# whoever's left in the middle.
+	# Note:  this is a large array -- on Slashdot, at least tens of
+	# thousands of elements.
 
 	my @eligible_uids = @{$read_db->fetchEligibleModerators()};
 	my $eligible = scalar @eligible_uids;
@@ -217,9 +235,15 @@ sub give_out_tokens {
 		num_updated	=> scalar @update_uids,
 	}));
 
-	# Finally, give each user her or his tokens.
+	# Give each user her or his tokens.
 #print STDERR "update_uids: '@update_uids'\n";
 	$slashdb->updateTokens(\@update_uids);
+
+	# And keep a running tally of how many tokens we've given out.
+	$statsSave->createStatDaily("tokensgiven", 0);
+	$statsSave->updateStatDaily(
+		"tokensgiven",
+		"value + " . scalar(@update_uids));
 }
 
 ############################################################
@@ -238,7 +262,7 @@ sub reconcile_m2 {
 
 	# We load the optional plugin objects here, so we save a few cycles.
 	my $messages = getObject('Slash::Messages');
-	my $stats = getObject('Slash::Stats');
+	my $statsSave = getObject('Slash::Stats::Writer', '');
 	my $stats_created = 0;
 	my @lt = localtime();
 	my $today = sprintf "%4d-%02d-%02d", $lt[5] + 1900, $lt[4] + 1, $lt[3];
@@ -338,7 +362,7 @@ sub reconcile_m2 {
 		}
 
 		# Store these stats into the stats_daily table.
-		reconcile_stats($stats, $stats_created, $today,
+		reconcile_stats($statsSave, $stats_created, $today,
 			$mod_hr->{reason}, $nfair, $nunfair);
 		$stats_created = 1;
 
@@ -437,9 +461,9 @@ sub add_m2info {
 }
 
 sub reconcile_stats {
-	my($stats, $stats_created, $today,
+	my($statsSave, $stats_created, $today,
 		$reason, $nfair, $nunfair) = @_;
-	return unless $stats;
+	return unless $statsSave;
 
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
@@ -465,12 +489,10 @@ sub reconcile_stats {
 	}
 	if (!$stats_created) {
 		for my $r (@reasons_m2able) {
-			$stats->createStatDaily($today,
-				"m2_${r}_fair", 0);
-			$stats->createStatDaily($today,
-				"m2_${r}_unfair", 0);
+			$statsSave->createStatDaily("m2_${r}_fair", 0);
+			$statsSave->createStatDaily("m2_${r}_unfair", 0);
 			for my $f (0..$consensus) {
-				$stats->createStatDaily($today,
+				$statsSave->createStatDaily(
 					"m2_${r}_${f}_" . ($consensus-$f),
 					0);
 			}
@@ -478,13 +500,13 @@ sub reconcile_stats {
 	}
 
 	# Now increment the stats values appropriately.
-	$stats->updateStatDaily($today,
+	$statsSave->updateStatDaily(
 		"m2_${reason_name}_fair",
 		"value + $nfair") if $nfair;
-	$stats->updateStatDaily($today,
+	$statsSave->updateStatDaily(
 		"m2_${reason_name}_unfair",
 		"value + $nunfair") if $nunfair;
-	$stats->updateStatDaily($today,
+	$statsSave->updateStatDaily(
 		"m2_${reason_name}_${nfair}_${nunfair}",
 		"value + 1");
 }
