@@ -8,6 +8,7 @@
 use strict;
 
 use vars qw( %task $me );
+use Slash::Constants qw( :people );
 
 # Remember that timespec goes by the database's time, which should be
 # GMT if you installed everything correctly.  So 6:07 AM GMT is a good
@@ -23,16 +24,26 @@ $task{$me}{code} = sub {
 
 	for my $uid (@$users) {
 		my $people = $slashdb->setUser($uid, 'people ');
-		# We clean out all FOF and EOF first
+		# We clean out everuthing but friend and foe
 		for (keys %$people) {  
 			delete $people->{$_} 
-				if $people->{$_} == EOF || $people->{$_} == FOF;
+				unless $people->{$_} == FRIEND || $people->{$_} == FOE;
 		}
 		# The raw SQL code I decided on -Brian
 		# select b.person from people as a, people as b WHERE a.uid=986 AND a.type="friend" AND b.uid = a.person;
 		my $fof = $slashdb->sqlSelectColArrayref('b.person', 'people as a, people as b', "a.uid=$uid AND a.type='friend' AND b.uid=a.person AND b.person!=$uid");
 		my $eof = $slashdb->sqlSelectColArrayref('b.person', 'people as a, people as b', "a.uid=$uid AND a.type='foe' AND b.uid=a.person AND b.person!=$uid");
+		my $fans = $slashdb->getFans($_);
+		my $freaks = $slashdb->getFreaks($_);
 		# FOF and EOF never override friends or foes -Brian
+		for (@$fans) {
+			$people->{$_} = FAN
+				unless $people->{$_};
+		}
+		for (@$freaks) {
+			$people->{$_} = FREAK
+				unless $people->{$_};
+		}
 		for (@$fof) {
 			$people->{$_} = FOF
 				unless $people->{$_};
