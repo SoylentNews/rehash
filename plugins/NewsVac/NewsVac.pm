@@ -2647,7 +2647,10 @@ sub parse_miner {
 
 		for my $item (@{$rss->{items}}) {
 			for (keys %{$item}) {
-			    $item->{$_} = xmldecode($item->{$_});
+				$item->{$_} =~ s/^\s+//;
+				$item->{$_} =~ s/\s+$//;
+				$item->{$_} =~ s/[\n\r]/ /g;
+				$item->{$_} = xmldecode($item->{$_});
 			}
 			next unless $item->{'link'};
 			++$count;
@@ -3217,7 +3220,7 @@ sub spider_by_name {
 
 ############################################################
 
-=head2 spider($condition_ref, $group0_selects_ref, @spider_commants)
+=head2 spider($condition_ref, $group_0_selects_ref, @spider_commands)
 
 Executes a spider. Callers will most likely use spider_by_name() as an
 entry point, as it does most everything for you. This routine depends
@@ -5181,7 +5184,8 @@ sub markTimespecAsRun {
 
 	my $update = {
 		-last_run	=> 'UNIX_TIMESTAMP()',
-		-duration	=> $duration,
+# duration not in schema?
+#		-duration	=> $duration,
 	};
 	$update->{'results'} = $results if $results;
 
@@ -5775,7 +5779,10 @@ None.
 sub errLog {
 	my($self) = shift;
 
-	if ($self->{use_locking}) {
+	# Make sure we print to correct log; if STDERR is
+	# tied from elsewhere, we couldn't reopen it,
+	# so print to log via _doLog
+	if ($self->{use_locking} || tied(*STDERR)) {
 		_doLog([@_]);
 		return;
 	}
