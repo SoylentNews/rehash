@@ -302,7 +302,7 @@ EOT
 
 	my $c = sqlSelectMany("section,note,count(*)", "submissions WHERE del=$I{F}{del} GROUP BY section,note");
 
-	print qq!\n<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3" BGCOLOR="$I{bg}[2]"><TR>\n\t!;
+	print qq!\n<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3" BGCOLOR="$I{bg}[2]">\n\t!;
 
 	my $cur_section_str = $I{F}{section} || 'All Sections'; # Unfortunately, "articles" seems to be hardcoded
 	my $cur_note_str = $I{F}{note} || 'Unclassified';
