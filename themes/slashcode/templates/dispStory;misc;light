@@ -32,7 +32,7 @@ END %]
 <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.alttext %]</A> | 
 <B>Posted by [% author.nickname %] [% user.aton %] [% story.storytime %]</B><BR>
 
-[% IF constants.use_dept %]
+[% IF constants.use_dept && story.dept %]
 <FONT SIZE="2"><B>from the [% story.dept %] dept.</B></FONT><BR>
 [% END %]
 

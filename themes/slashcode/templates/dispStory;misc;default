@@ -44,7 +44,7 @@ END %]
 				<TD BGCOLOR="#E6E6E6">
 					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname %]</A>
 						[% user.aton %] [% story.storytime %]</FONT><BR>
-					[% IF constants.use_dept %]<FONT FACE="[% constants.mainfontface %]" SIZE="1">from the <B>[% story.dept %]</B> dept.</FONT>[% END %]
+					[% IF constants.use_dept && story.dept %]<FONT FACE="[% constants.mainfontface %]" SIZE="1">from the <B>[% story.dept %]</B> dept.</FONT>[% END %]
 				</TD>
 			</TR></TABLE>
 		</TD>
