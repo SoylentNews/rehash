@@ -625,7 +625,7 @@ sub colorEdit {
 
 	if ($form->{colorpreview} || $form->{colorsave}) {
 		$colorblock_clean = $colorblock =
-			join ',', @{$form}{qw[fg0 fg1 fg2 fg3 fg4 bg0 bg1 bg2 bg3 bg4]};
+			join ',', @{$form}{qw[fg0 fg1 fg2 fg3 fg4 fg5 bg0 bg1 bg2 bg3 bg4 bg5]};
 
 		# the #s will break the url
 		$colorblock_clean =~ s/#//g;
@@ -636,8 +636,8 @@ sub colorEdit {
 
 	@colors = split m/,/, $colorblock;
 
-	$user->{fg} = [@colors[0..4]];
-	$user->{bg} = [@colors[5..9]];
+	$user->{fg} = [@colors[0..5]];
+	$user->{bg} = [@colors[6..11]];
 
 	$title = getTitle('colorEdit-title');
 
@@ -657,7 +657,7 @@ sub colorSave {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 
-	my $colorblock = join ',', @{$form}{qw[fg0 fg1 fg2 fg3 fg4 bg0 bg1 bg2 bg3 bg4]};
+	my $colorblock = join ',', @{$form}{qw[fg0 fg1 fg2 fg3 fg4 fg5 bg0 bg1 bg2 bg3 bg4 bg5]};
 
 	$slashdb->saveColorBlock($colorblock);
 }

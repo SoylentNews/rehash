@@ -72,35 +72,47 @@ Select the color block to edit:
 		<TD BGCOLOR="[% colors.4 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD>Background color 0</TD>
-		<TD><INPUT TYPE="TEXT" NAME="bg0" VALUE="[% colors.5 %]" SIZE=7></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.5 %]">Background color 0 </FONT></TD>
+		<TD>Foreground color 5</TD>
+		<TD><INPUT TYPE="TEXT" NAME="fg5" VALUE="[% colors.5 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.5 %]">Foreground color 5</FONT></TD>
 		<TD BGCOLOR="[% colors.5 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD>Background color 1</TD>
-		<TD><INPUT TYPE="TEXT" NAME="bg1" VALUE="[% colors.6 %]" SIZE=7></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.6 %]">Background color 1 </FONT></TD>
+		<TD>Background color 0</TD>
+		<TD><INPUT TYPE="TEXT" NAME="bg0" VALUE="[% colors.6 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.6 %]">Background color 0 </FONT></TD>
 		<TD BGCOLOR="[% colors.6 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD>Background color 2</TD>
-		<TD><INPUT TYPE="TEXT" NAME="bg2" VALUE="[% colors.7 %]" SIZE=7></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.7 %]">Background color 2 </FONT></TD>
+		<TD>Background color 1</TD>
+		<TD><INPUT TYPE="TEXT" NAME="bg1" VALUE="[% colors.7 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.7 %]">Background color 1 </FONT></TD>
 		<TD BGCOLOR="[% colors.7 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD>Background color 3</TD>
-		<TD><INPUT TYPE="TEXT" NAME="bg3" VALUE="[% colors.8 %]" SIZE=7></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.8 %]">Background color 3 </FONT></TD>
+		<TD>Background color 2</TD>
+		<TD><INPUT TYPE="TEXT" NAME="bg2" VALUE="[% colors.8 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.8 %]">Background color 2 </FONT></TD>
 		<TD BGCOLOR="[% colors.8 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD>Background color 4</TD>
-		<TD><INPUT TYPE="TEXT" NAME="bg4" VALUE="[% colors.9 %]" SIZE=7></TD>
-		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.9 %]">Background color 4 </FONT></TD>
+		<TD>Background color 3</TD>
+		<TD><INPUT TYPE="TEXT" NAME="bg3" VALUE="[% colors.9 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.9 %]">Background color 3 </FONT></TD>
 		<TD BGCOLOR="[% colors.9 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 	</TR>
+	<TR>
+		<TD>Background color 4</TD>
+		<TD><INPUT TYPE="TEXT" NAME="bg4" VALUE="[% colors.10 %]" SIZE=7></TD>
+		<TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.10 %]">Background color 4 </FONT></TD>
+		<TD BGCOLOR="[% colors.10 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+	</TR>
+	<TR>
+                <TD>Background color 5</TD>
+                <TD><INPUT TYPE="TEXT" NAME="bg5" VALUE="[% colors.11 %]" SIZE=7></TD>
+                <TD><FONT FACE="ARIAL,HELVETICA" SIZE="+1" COLOR="[% colors.11 %]">Background color 5 </FONT></TD>
+                <TD BGCOLOR="[% colors.11 %]">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        </TR>
 	<TR>
 		<TD><INPUT TYPE="SUBMIT" NAME="colorpreview" VALUE="Preview"></TD>
 		<TD><INPUT TYPE="SUBMIT" NAME="colorsave" VALUE="Save Colors"></TD>
