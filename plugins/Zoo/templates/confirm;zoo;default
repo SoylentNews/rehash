@@ -17,7 +17,7 @@ __template__
 [% IF over_socialized %]
 	You have over [% IF user.is_subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] friends and foes at the moment. This puts you over our limit of[% IF constants.subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] relationships that we allow. At this point you may only remove relationships with users. <br>
 	[% IF constants.subscriber && constants.people_max_subscriber && !user.is_subscriber %]
-		If you would like to up your limit to [% constants.people_max_subscriber %] you might want to consider <A HREF="/subscribe.pl">subscribing</A>. 
+		If you would like to up your limit to [% constants.people_max_subscriber %] you might want to consider <A HREF="[% constants.rootdir %]/subscribe.pl">subscribing</A>. 
 	[% END %]
 	<TABLE>
 		<TR>
@@ -61,11 +61,11 @@ or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200">where you change t
 	<TR>
 		<TD>
 			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Friend</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
-			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</A>
+			&nbsp;<A HREF="[% constants.rootdir %]/my/comments/">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</A>
 		</TD>
 		<TD>
 			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Foe</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
-			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</A>
+			&nbsp;<A HREF="[% constants.rootdir %]/my/comments/">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</A>
 		</TD>
 	</TR>
 	<TR>

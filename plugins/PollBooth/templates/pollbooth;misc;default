@@ -26,7 +26,7 @@ __name__
 pollbooth
 __template__
 [% IF has_activated or user.is_admin %]
-[% IF user.is_admin %]       
+[% IF user.is_admin %]
 	[% IF !has_activated %]
 	(Poll not yet active)<BR>
 	[% END %]

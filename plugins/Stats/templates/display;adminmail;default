@@ -82,7 +82,7 @@ gstatic total:        -          -   [% grand_total_static %]
 
 ------------------------
                             Yesterday   | 2 days ago | 3 days ago
-    Avg Hits Per Article:   [% avg_hits_per_story.0 %]|[% avg_hits_per_story.1 %]|[% avg_hits_per_story.2 %]    
+    Avg Hits Per Article:   [% avg_hits_per_story.0 %]|[% avg_hits_per_story.1 %]|[% avg_hits_per_story.2 %]
 Avg Comments Per Article:   [% avg_comments_per_story.0 %]|[% avg_comments_per_story.1 %]|[% avg_comments_per_story.2 %]
 
 -----------------------
@@ -147,7 +147,7 @@ Page           Status              Count
 
 -----------------------      
 
-[% tailslash %]      
+[% tailslash %]
 
 -----------------------
 

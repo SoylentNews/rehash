@@ -528,7 +528,7 @@ name: 			[% name %]
 form name: 		[% form.name %] 
 form owner_id: 		[% form.owner_aid %]
 
-[% CASE "noop" -%]    
+[% CASE "noop" -%]
 [% INCLUDE titlebar width="100%" title="No Op Given" %]
 
 [% CASE "processing_urls" -%]

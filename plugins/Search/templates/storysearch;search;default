@@ -25,11 +25,11 @@ __template__
 	[% story.introtext %] <BR>
 	<FONT SIZE="-1">
 		[% section = Slash.db.getSection(story.section); tids = Slash.db.getStoryTopicsJustTids(story.sid); topic = Slash.db.getTopic(story.tid) %]
-		Section: [% IF section.section == constants.defaultsection %]<A HREF="/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "/search.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A>
+		Section: [% IF section.section == constants.real_section %]<A HREF="[% constants.real_rootdir %]/">Main</A>[% ELSE %]<A HREF="[% section.url ? section.url : "$constants.rootdir/search.pl?section=$story.section" %]">[% section.title %]</A>[% END %] &gt; <A HREF="[% constants.rootdir %]/search.pl?tid=[% story.tid %]">[% topic.alttext %]</A>
 		[% FOREACH tid = tids %]
 			[% IF tid == story.tid; NEXT; END %]
 			[% topic = Slash.db.getTopic(tid) %]
-			,&nbsp<A HREF="/search.pl?tid=[% tid %]">[% topic.alttext %]</A>
+			,&nbsp<A HREF="[% constants.rootdir %]/search.pl?tid=[% tid %]">[% topic.alttext %]</A>
 		[% END %] 
 		<BR>
 		[% IF story.score %]

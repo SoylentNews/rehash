@@ -25,7 +25,7 @@ Your comment is currently scored <B>[% reasons.${comment.reason}.name %] ([% com
 [% ELSE %]
 
 A user had given a moderation of "[% reasons.${moderation.reason}.name %]" ([% moderation.value %]) to your comment.
-    [% comment.subject | decode_entities %]    
+    [% comment.subject | decode_entities %]
     [% absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
 
 Attached to:
