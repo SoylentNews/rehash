@@ -11,16 +11,16 @@ use Slash::Utility;
 
 ##################################################################
 sub main {
-	my $form = getCurrentForm();
-	my $user = getCurrentUser();
-	my $dbslash = getCurrentDB();
+	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $user      = getCurrentUser();
+	my $form      = getCurrentForm();
 
 	# Let's make ONE call to getStory() and fetch all we need.
 	# - Cliff
-	my $story = $dbslash->getStory($form->{sid});
+	my $story = $slashdb->getStory($form->{sid});
 
-	my $SECT = $dbslash->getSection($story->{section});
+	my $SECT = $slashdb->getSection($story->{section});
 	my $title = $SECT->{isolate} ?
 		"$SECT->{title} | $story->{title}" :
 		"$constants->{sitename} | $story->{title}";
@@ -29,11 +29,11 @@ sub main {
 	slashDisplay('display', {
 		poll			=> pollbooth($story->{sid}, 1),
 		section			=> $SECT,
-		section_block		=> $dbslash->getBlock($SECT->{section}),
-		show_poll		=> $dbslash->getPollQuestion($story->{sid}),
+		section_block		=> $slashdb->getBlock($SECT->{section}),
+		show_poll		=> $slashdb->getPollQuestion($story->{sid}),
 		story			=> $story,
-		'next'			=> $dbslash->getStoryByTime('>', $story, $SECT),
-		prev			=> $dbslash->getStoryByTime('<', $story, $SECT),
+		'next'			=> $slashdb->getStoryByTime('>', $story, $SECT),
+		prev			=> $slashdb->getStoryByTime('<', $story, $SECT),
 	});
 
 	printComments($form->{sid});

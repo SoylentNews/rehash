@@ -15,7 +15,7 @@ __template__
 [% IF stories %]
 	[% x = start ? start : 1 %]
 	[% FOREACH story=stories %]
-		[% x + form.min %] 
+		[% x %] 
 		[% Slash.linkStory({
 			section	=> story.5,
 			sid	=> story.2,

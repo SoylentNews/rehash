@@ -14,14 +14,14 @@ use XML::RSS;
 #################################################################
 sub main {
 	my %ops = (
-		comments => \&commentSearch,
-		users => \&userSearch,
-		stories => \&storySearch
+		comments	=> \&commentSearch,
+		users		=> \&userSearch,
+		stories		=> \&storySearch
 	);
 	my %ops_rss = (
-		comments => \&commentSearchRSS,
-		users => \&userSearchRSS,
-		stories => \&storySearchRSS
+		comments	=> \&commentSearchRSS,
+		users		=> \&userSearchRSS,
+		stories		=> \&storySearchRSS
 	);
 
 	my $constants = getCurrentStatic();
@@ -31,13 +31,10 @@ sub main {
 	# Set some defaults
 	$form->{query}		||= '';
 	$form->{section}	||= '';
-	$form->{min}		||= 0;
-	$form->{max}		||= 30;
 	$form->{threshold}	||= getCurrentUser('threshold');
-	$form->{'last'}		||= $form->{min} + $form->{max};
 
 	# get rid of bad characters
-	$form->{query} =~ s/[^A-Z0-9'. ]//gi;
+	$form->{query} =~ s/[^A-Z0-9'. ]/ /gi;
 
 	if ($form->{content_type} eq 'rss') {
 		my $r = Apache->request;
@@ -46,7 +43,7 @@ sub main {
 		$r->status(200);
 		$r->send_http_header;
 		$r->rflush;
-		if($ops_rss{$form->{op}}) {
+		if ($ops_rss{$form->{op}}) {
 			$r->print($ops_rss{$form->{op}}->($form, $constants));
 		} else {
 			$r->print($ops_rss{'stories'}->($form, $constants));
@@ -60,13 +57,13 @@ sub main {
 		$form->{op} ||= 'stories';
 		my $authors = _authors();
 		slashDisplay('searchform', {
-			section => getSection($form->{section}),
-			tref =>$slashdb->getTopic($form->{topic}),
-			op => $form->{op},
-			authors => $authors
+			section		=> getSection($form->{section}),
+			tref		=> $slashdb->getTopic($form->{topic}),
+			op		=> $form->{op},
+			authors		=> $authors
 		});
 
-		if($ops{$form->{op}}) {
+		if ($ops{$form->{op}}) {
 			$ops{$form->{op}}->($form, $constants);
 		} 
 		footer();	
@@ -134,11 +131,11 @@ sub commentSearch {
 	}
 
 	slashDisplay('commentsearch', {
-		comments => $comments,
+		comments	=> $comments,
 		back		=> $back,
 		forward		=> $forward,
 		args		=> _buildargs($form),
-		start => $start,
+		start		=> $start,
 	});
 }
 
@@ -209,11 +206,11 @@ sub storySearch {
 	}
 
 	slashDisplay('storysearch', {
-		stories => $stories,
+		stories		=> $stories,
 		back		=> $back,
 		forward		=> $forward,
 		args		=> _buildargs($form),
-		start => $start,
+		start		=> $start,
 	});
 }
 
@@ -232,8 +229,8 @@ sub commentSearchRSS {
 	);
 
 	$rss->channel(
-		title	=> xmlencode($constants->{sitename} . ' Search'),
-		'link'	=> xmlencode_plain($constants->{absolutedir} . '/search.pl'),
+		title		=> xmlencode($constants->{sitename} . ' Search'),
+		'link'		=> xmlencode_plain($constants->{absolutedir} . '/search.pl'),
 		description	=> xmlencode($constants->{sitename} . ' Search'),
 	);
 
@@ -267,8 +264,8 @@ sub userSearchRSS {
 	);
 
 	$rss->channel(
-		title	=> xmlencode($constants->{sitename} . ' Search'),
-		'link'	=> xmlencode_plain($constants->{absolutedir} . '/search.pl'),
+		title		=> xmlencode($constants->{sitename} . ' Search'),
+		'link'		=> xmlencode_plain($constants->{absolutedir} . '/search.pl'),
 		description	=> xmlencode($constants->{sitename} . ' Search'),
 	);
 
@@ -303,8 +300,8 @@ sub storySearchRSS {
 	);
 
 	$rss->channel(
-		title	=> xmlencode($constants->{sitename} . ' Search'),
-		'link'	=> xmlencode_plain($constants->{absolutedir} . '/search.pl'),
+		title		=> xmlencode($constants->{sitename} . ' Search'),
+		'link'		=> xmlencode_plain($constants->{absolutedir} . '/search.pl'),
 		description	=> xmlencode($constants->{sitename} . ' Search'),
 	);
 

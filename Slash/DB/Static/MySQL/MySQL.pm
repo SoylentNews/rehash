@@ -462,12 +462,11 @@ sub maxAccessLog {
 ########################################################
 # For tailslash
 sub getAccessLogInfo {
-	my ($self, $id) = @_;
-	my $returnable = $self->sqlSelectAll("host_addr,uid,op,dat,
-				date_format(ts,\"\%H:\%i\") as ts,id",
+	my($self, $id) = @_;
+	my $returnable = $self->sqlSelectAll("host_addr,uid,op,dat,ts,id",
 				"accesslog","id > $id",
 				"ORDER BY ts DESC");
-
+	formatDate($returnable, 4, 4, '%H:%M');
 	return $returnable;
 }
 

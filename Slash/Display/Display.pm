@@ -425,6 +425,15 @@ my %scalar_ops = (
 	'lc'		=> sub { lc $_[0] },
 	'ucfirst'	=> sub { ucfirst $_[0] },
 	'lcfirst'	=> sub { lcfirst $_[0] },
+	'substr'        => sub {
+		if (@_ == 2) {
+			substr($_[0], $_[1]);
+		} elsif (@_ == 3) {
+			substr($_[0], $_[1], $_[2])
+		} else {
+			return $_[0];
+		}
+	},
 );
 
 @{$Template::Stash::LIST_OPS}  {keys %list_ops}   = values %list_ops;

@@ -17,11 +17,13 @@ each of the last 30,000 or so comments posted.  Older comments
 are removed and currently only visible as static HTML.<P>
 [% IF comments %]
 	[% x = start ? start : 1 %]
-	[% FOREACH comment=comments %]
+	[% FOREACH comment=comments;
+	# hm.  don't point to PID (pid=[% comment.4 %]#[% comment.10 %]),
+	# too problematic.  use cid=[% comment.10 %] instead. %]
 				[% user_email = Slash.db.getUser(comment.9, ['fakeemail', 'nickname']) %]
 		<BR><B>[% x %]</B>
 
-			<A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.1 %]&pid=[% comment.4 %]#[% comment.10 %]">[% comment.5 %]</A>
+			<A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.1 %]&cid=[% comment.10 %]">[% comment.5 %]</A>
 
 			by <A HREF="mailto:[% user_email.fakeemail %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.8) %]<BR>
 			<FONT SIZE="2">attached to 

@@ -6,7 +6,7 @@ Print older stories for older stories box
 * stories = arrayref of story hashrefs
 * section = section data structure
 * yesterday = the value to put in the "yesterday's edition" link
-* min = where to start counting from in search.pl return values
+* start = where to start counting from in search.pl return values
 
 Each story has the keys sid, section, title, time, commentcount, day (w, m, d, h, min, ampm), and link (which is a linkStory() value)
 __title__
@@ -35,7 +35,7 @@ __template__
 [% IF section.issue %]
 	<P ALIGN="RIGHT">
 	[% IF section.issue == 1 || section.issue == 3 %]
-<BR><A HREF="[% constants.rootdir %]/search.pl?section=[% section.section %]&min=[% min %]">
+<BR><A HREF="[% constants.rootdir %]/search.pl?section=[% section.section %]&start=[% start %]">
 <B>Older Articles</B></A>
 	[% END %][% IF section.issue == 2 || section.issue == 3 %]
 <BR><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&mode=[% user.currentMode %]&issue=[% yesterday %]">

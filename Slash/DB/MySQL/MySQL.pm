@@ -115,6 +115,7 @@ my %descriptions = (
 
 );
 
+########################################################
 sub _whereFormkey {
 	my($self, $formkey_id) = @_;
 	my $where;
@@ -159,10 +160,9 @@ sub init {
 # Wrapper to get the latest ID from the database
 sub getLastInsertId {
 	my($self,$table,$col) = @_;
- 	my ($answer) = $self->sqlSelect('LAST_INSERT_ID()');
+ 	my($answer) = $self->sqlSelect('LAST_INSERT_ID()');
 	return $answer;
 }
-
 
 ########################################################
 # Yes, this is ugly, and we can ditch it in about 6 months
@@ -2041,6 +2041,7 @@ sub createStory {
 	#Create a sid 
 	my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 	$year = $year % 100;
+	# yes, this format is correct, don't change it :-)
 	my $sid = sprintf('%02d/%02d/%02d/%02d%0d2%02d',
 		$year, $mon+1, $mday, $hour, $min, $sec);
 

@@ -6,7 +6,6 @@
 package Slash::Apache::Log;
 
 use strict;
-use Slash::DB;
 use Slash::Utility;
 use Apache::Constants qw(:common);
 use vars qw($VERSION);

@@ -2520,7 +2520,7 @@ sub filter_params {
 		del displaystatus filter_id height
 		highlightthresh isolate issue maillist max
 		maxcommentsize maximum_length maxstories min minimum_length
-		minimum_match ordernum pid
+		minimum_match ordernum pid start
 		retrieve seclev startat uid uthreshold voters width
 		writestatus ratio posttype
 	);
