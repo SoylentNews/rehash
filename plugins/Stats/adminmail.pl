@@ -149,7 +149,7 @@ EOT
 		$journal_page_views,
 		$palm_page_views,
 		$rss_page_views,
-		$journal_page_views
+		$journal_page_views,
 		$submissions,
 			($submissions ? $submissions_comments_match*100
 						/$submissions		: 0),
