@@ -23,6 +23,7 @@ __template__
 
 [% PROCESS formbox
     title => "Find a User's Journal",
+    boxwidth => '100%',
     begin => begin,
     end   => '</FORM>',
     pairs => [

@@ -18,13 +18,13 @@ __template__
 [% IF search; nickstrip = form.nickname | strip_literal; END %]
 [% PROCESS titlebar
 	title => (search ? "User Search Results for \"$nickstrip\"" : "Your Friends"),
-	width => "90%"
+	width => "100%"
 %]
 
 [% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/zoo.pl">
 <INPUT TYPE="hidden" NAME="op" VALUE="delete">
 <INPUT TYPE="hidden" NAME="type" VALUE="friend">[% END %]
-<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 [% FOREACH friend = friends %]
     <TR><TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/">[% friend.0 %]</A></TD>
 [% IF friend.2 %]
