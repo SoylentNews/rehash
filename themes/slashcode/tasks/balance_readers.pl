@@ -358,11 +358,11 @@ sub adjust_readers {
 
 		# If this DB is marked as isalive='no', it's not our
 		# responsibility, skip it.
-		next VU unless $reader_info->{was_alive};
+		next VU if $reader_info->{dead};
 
 		# If this DB was not reachable, set its weight to 0
 		# immediately.
-		if (!$reader_info->{was_reachable}) {
+		if ($reader_info->{unreachable}) {
 			set_reader_weight_adjust($slashdb, $vu, 0);
 			next VU;
 		}
@@ -373,7 +373,7 @@ sub adjust_readers {
 		# very high lag (which it will be, shortly, unless
 		# the slave process gets restarted!).
 		my $lag = $reader_info->{$vu}{slave_lag_secs};
-		$lag = 9999 if !$reader_info->{$vu}{was_running};
+		$lag = 9999 if $reader_info->{$vu}{stopped};
 
 		# Get the weight_adjust fraction for lag.
 		my $wa_lag = get_adjust_fraction($lag,
@@ -422,7 +422,7 @@ sub get_adjust_fraction {
 sub set_reader_weight_adjust {
 	my($slashdb, $vu, $new_wa) = @_;
 
-	my $dbid = get_reader_dbid($vu);
+	my $dbid = get_reader_dbid($slashdb, $vu);
 	my $constants = getCurrentStatic();
 	my $delay = $constants->{dbs_reader_adjust_delay} || 5;
 	my $reduce_max = $constants->{dbs_reader_weight_reduce_max}*$delay/60;
@@ -432,7 +432,7 @@ sub set_reader_weight_adjust {
 		{ -weight_adjust	=> "GREATEST(0, weight_adjust-$reduce_max,
 						LEAST(1, weight_adjust+$increase_max,
 							$new_wa))" },
-		"dbid=$dbid");
+		"id=$dbid");
 }
 
 sub delete_old_logs {
