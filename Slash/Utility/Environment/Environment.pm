@@ -1574,8 +1574,8 @@ Hashref of cleaned-up data.
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
-		approved artcount bseclev
-		buymore cid clbig clsmall
+		approved artcount art_offset bseclev
+		buymore cid clbig clsmall cm_offset
 		commentlimit commentsort commentspill
 		del displaystatus
 		filter_id hbtm height highlightthresh
@@ -1583,7 +1583,7 @@ Hashref of cleaned-up data.
 		maxcommentsize maximum_length maxstories
 		min min_comment minimum_length minimum_match next
 		nobonus_present
-		nosubscriberbonus_present
+		nosubscriberbonus_present nv_offset 
 		ordernum pid
 		postanon_present posttype ratio retrieve
 		show_m1s show_m2s
