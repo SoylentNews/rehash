@@ -171,6 +171,7 @@ template=templates/html-header;misc;default
 template=templates/html-redirect;misc;default
 template=templates/index;index;default
 template=templates/index;index;light
+template=templates/indexhead;index;default
 template=templates/info;menu;default
 template=templates/ipid_display;misc;default
 template=templates/isEligible;metamod;default
