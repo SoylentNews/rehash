@@ -121,7 +121,7 @@ sub AUTOLOAD {
 		local $Slash::Display::CONTEXT = $self->{_CONTEXT};
 		return $subs{$name}->(@_);
 	} else {
-		warn "Can't find $name";
+		warn "Can't find method '$name'";
 		return;
 	}
 }
