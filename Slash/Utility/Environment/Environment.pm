@@ -2484,8 +2484,10 @@ sub determineCurrentSkin {
 		$hostname =~ s/:\d+$//;
  
 		my $skins = $reader->getSkins;
-		($skin) = grep { lc $skins->{$_}{hostname} eq lc $hostname }
-			sort { $a <=> $b } keys %$skins;
+		($skin) = grep {
+				(my $tmp = lc $skins->{$_}{hostname}) =~ s/:\d+$//;
+				$tmp eq lc $hostname
+			} sort { $a <=> $b } keys %$skins;
 
 		# don't bother warning if $hostname is numeric IP
 		if (!$skin && $hostname !~ /^\d+\.\d+\.\d+\.\d+$/) {
