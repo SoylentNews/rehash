@@ -61,18 +61,15 @@ sub _do_rss {
 
 	my $file    = site2file($virtual_user, $constants, $backupdb, $user, $section);
 	my $SECT    = $backupdb->getSection($section);
-	my $link    = $constants->{absolutedir} .
-		($section ? "/index.pl?section=$section" : '/');
-	my $title   = $section
-		? $SECT->{isolate}
-			? $SECT->{title}
-			: "$constants->{sitename}: $SECT->{title}"
-		: $constants->{sitename};
+	my $link    = ($SECT->{url}  || $constants->{absolutedir}) . '/';
+	my $title   = $SECT->{title} || $constants->{sitename};
 
 	my $rss = xmlDisplay('rss', {
+		channel		=> {
+			title		=> $title,
+			'link'		=> $link,
+		},
 		version		=> $version,
-		title		=> $title,
-		'link'		=> $link,
 		textinput	=> 1,
 		image		=> 1,
 		items		=> [ map { { story => $_ } } @$stories ],
