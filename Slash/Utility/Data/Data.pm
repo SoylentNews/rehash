@@ -2230,9 +2230,9 @@ sub parseDomainTags {
 		);
 
 	if ($want_tags && !$notags) {
-		$html =~ s{</A ([^>]+)>}{</A> [$1]}gi;
+		$html =~ s{</a ([^<>]+)>}{</a> [$1]}gi;
 	} else {
-		$html =~ s{</A[^>]+>}{</A>}gi;
+		$html =~ s{</a[^<>]+>}   {</a>}gi;
 	}
 
 	return $html;
