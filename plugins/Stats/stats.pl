@@ -43,11 +43,11 @@ sub main {
 
 	# from data;SCRIPTNAME;default
 	#getData('head')
-	header('', '', { admin => 1 } ) unless $op eq 'graph'
-		if $ops{$op}[ALLOWED];
+	header('', '', { admin => 1 } ) unless $op eq 'graph';
 
 	# dispatch of op
-	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats);
+	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats)
+		if $ops{$op}[ALLOWED];
 
 	footer() unless $op eq 'graph';
 }
