@@ -435,8 +435,15 @@ sub rss_item_description {
 	my $constants = getCurrentStatic();
 
 	if ($self->{rdfitemdesc}) {
-		# no HTML, unless we specify HTML allowed
-		unless ($self->{rdfitemdesc_html}) {
+		if ($self->{rdfitemdesc_html}) {
+			# this should not hurt things that don't have
+			# slashized links or slash tags ... but if
+			# we do have a problem, we can move this to
+			# rss_story() -- pudge
+			$desc = parseSlashizedLinks($desc);
+			$desc = processSlashTags($desc);
+
+		} else {
 			$desc = strip_notags($desc);
 			$desc =~ s/\s+/ /g;
 			$desc =~ s/ $//;
