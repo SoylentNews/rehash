@@ -174,11 +174,18 @@ sub getRDF {
 	} else {
 		my $str;
 		my $i = 0;
+		my $bd_regex = qr{\Q$constants->{basedomain}};
 		for my $item (@{$rss->{items}}) {
 			# hopefully this xmldecode() will break nothing
 			for (keys %{$item}) {
-			    $item->{$_} = xmldecode($item->{$_});
+				$item->{$_} = xmldecode($item->{$_});
 			}
+			# convert links to sections of our own site
+			# into a non-scheme-specific format
+			my $uri = URI->new($item->{link});
+			my $auth = $uri->authority();
+			$uri->scheme(undef) if $auth =~ /\b$bd_regex\Z/;
+			$item->{link} = $uri->as_string;
 			# this is if you want a nice numbering 
 			# layout in your block <ol> works, but 
 			# is ugly
