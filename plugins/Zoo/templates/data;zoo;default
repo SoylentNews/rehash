@@ -51,19 +51,19 @@ __template__
 	You are either loved by all or just invisible.
 
 [% CASE 'yournofriends' %]
-	These are the people who the voices in your head tell you to worry about.
+	These are the people the voices in your head tell you to worry about.
 
 [% CASE 'yournofoes' %]
-	You love everyone or you play your cards very close to your chest.
+	You love everyone, or you play your cards very close to your chest.
 
 [% CASE 'yournofreaks' %]
-	Everyone loves you, that or they are to afraid to admit otherwise.
+	Everyone loves you, or they are too afraid to admit otherwise.
 
 [% CASE 'yournofriendsoffriends' %]
 	Everyone whom you love, loves no one else. You must be special. 
 
 [% CASE 'yournofriendsenemies' %]
-	Everyone whom you love, seems to be loved by all and have collected no foes.
+	Everyone whom you love seems to be loved by all and has collected no foes.
 
 [% CASE 'yournoall' %]
 	No one knows you exist.
