@@ -44,7 +44,6 @@ __template__
    total hits: [% total_hits %]
      homepage: [% homepage %]
       indexes
-
 [% FOREACH item = sections %]
 	[% item.key %]:[% item.value %]
 [% END %]

@@ -46,7 +46,7 @@ $task{$me}{code} = sub {
 		if ($clear_admins and keys %$clear_admins) {
 			for my $admin (sort keys %$clear_admins) {
 				$admin_clearpass_warning .=
-					"$admin $clear_admins->{$admin}{value}\n";
+					"$admin $clear_admins->{$admin}{value}";
 			}
 		}
 		if ($admin_clearpass_warning) {
@@ -216,10 +216,9 @@ EOT
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{admin_mods_text} = $admin_mods_text;
 
-	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail' });
+	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail', Nocomm => 0 });
 
 	# Send a message to the site admin.
-	print STDERR "EMAIL:\n$email\n";
 	for (@{$constants->{stats_reports}}) {
 		sendEmail($_, "$constants->{sitename} Stats Report", $email, 'bulk');
 	}
