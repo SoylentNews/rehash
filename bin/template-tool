@@ -118,7 +118,7 @@ if ($opts{'s'}) {
 		) {
 			if ($template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
-					unless $opts{'t'};
+					if !$opts{t};
 				next;
 			}
 			delete $template->{instructions};
@@ -176,6 +176,7 @@ if ($opts{'s'}) {
 #Upgrade logic
 	my $templates = $install->getSiteTemplates;
 	my %stats = ( 'new' => 0, 'different' => 0);
+	my $n_changed = 0;
 	for (@$templates) {
 	#stolen logic from above, should probably be made into subroutines
 		next unless -f $_;
@@ -200,6 +201,8 @@ if ($opts{'s'}) {
 				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
 			}
 			if ($template->{instructions} =~ /placeholder/) {
+				print "\t$filename is placeholder, skipping\n"
+					if !$opts{t} && $opts{V};
 				next;
 			}
 			delete $template->{instructions};
@@ -224,6 +227,7 @@ if ($opts{'s'}) {
 					if ($tsemi ne $t2semi || $tsemi ne $filename) {
 						print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
 					}
+					++$n_changed;
 				} else {
 					print "id $temp2->{tpid}\t$filename NOT updated: $_\n";
 					print "\tError: " . $slashdb->{_dbh}->DBI::err_str . "\n";
@@ -259,6 +263,9 @@ if ($opts{'s'}) {
 		if $stats{different};
 	print "New templates: $stats{new}\n"
 		if $stats{'new'};
+	if (!$n_changed) {
+		print "template-tool -U: no template changes necessary\n";
+	}
 
 } else {
 	my $templatelist = {};
