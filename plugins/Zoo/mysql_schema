@@ -8,6 +8,7 @@ CREATE TABLE people (
 	fof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0, 
 	eof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0,
 	UNIQUE degree_of_separation (uid,person),
+	INDEX (person),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (person) REFERENCES users(uid),
 	PRIMARY KEY (id)

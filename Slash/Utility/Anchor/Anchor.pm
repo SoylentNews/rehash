@@ -104,6 +104,7 @@ sub header {
 	my $form = getCurrentForm();
 
 	my $adhtml = '';
+	my $display;
 	$data = { title => $data } unless ref($data) eq 'HASH';
 	$data->{title} = strip_notags($data->{title} || '');
 
@@ -164,11 +165,12 @@ sub header {
 
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
-		slashDisplay('header-admin', $data);
+		$display = slashDisplay('header-admin', $data, { Return => $options->{Return}, Page => $options->{Page} });
 	} else {
-		slashDisplay('header', $data);
+		$display = slashDisplay('header', $data, { Return => $options->{Return}, Page => $options->{Page} });
 	}
 
+	# I bet someday we end up with an SSI bug from this -Brian
 	if ($constants->{admin_check_clearpass}
 		&& ($user->{state}{admin_clearpass_thisclick} || $user->{admin_clearpass})
 	) {
@@ -187,6 +189,8 @@ sub header {
 			);
 		}
 	}
+	
+	return $display;
 }
 
 #========================================================================
@@ -210,12 +214,13 @@ The 'footer' template block.
 =cut
 
 sub footer {
+	my ($options) = @_;
 	my $user = getCurrentUser();
 
 	if ($user->{state}{adminheader}) {
 		slashDisplay('footer-admin');
 	} else {
-		slashDisplay('footer');
+		slashDisplay('footer', { Return => $options->{Return}, Page => $options->{Page} });
 	}
 }
 
