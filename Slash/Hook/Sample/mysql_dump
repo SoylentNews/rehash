@@ -1,0 +1,2 @@
+INSERT INTO hooks (param, class, subroutine) VALUES ('admin::storySave::save_success','Slash::Hook::Sample','sample');
+INSERT INTO hooks (param, class, subroutine) VALUES ('admin::storySave::save_success','Slash::Hook::Sample','ingar');

@@ -10,6 +10,7 @@ use POSIX qw(O_RDWR O_CREAT O_EXCL tmpnam);
 
 use Slash;
 use Slash::Display;
+use Slash::Hook;
 use Slash::Utility;
 
 sub main {
@@ -1466,7 +1467,14 @@ sub saveStory {
 			# for this error, though it should be rare.
 			errorLog("could not create discussion for story '$sid'");
 		}
+		$data->{discussion} = $id;
+		slashHook('admin::storySave::save_success', 
+							[$constants, $slashdb, $user, $form], 
+							{ story => $data });
 	} else {
+		slashHook('admin::storySave::save_failure', 
+							[$constants, $slashdb, $user, $form], 
+							{ story -> $data });
 		titlebar('100%', getData('story_creation_failed'));
 		listStories(@_);
 		return;
