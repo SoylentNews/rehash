@@ -118,6 +118,7 @@ CREATE TABLE blocks (
 	items smallint NOT NULL DEFAULT '0', 
 	autosubmit enum("no","yes") DEFAULT 'no' NOT NULL,
 	rss_cookie varchar(255),
+	all_sections tinyint NOT NULL DEFAULT '0',
 	FOREIGN KEY (rss_template) REFERENCES templates(name),
 	PRIMARY KEY (bid),
 	KEY type (type),
@@ -488,8 +489,24 @@ CREATE TABLE sections (
 	cookiedomain char(128) DEFAULT '' NOT NULL,
 	index_handler varchar(30) DEFAULT "index.pl" NOT NULL,
 	writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL,
+	type ENUM("contained", "collected") DEFAULT 'contained' NOT NULL,
 	KEY (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+#
+# Table structure for table 'sections_contained'
+#
+
+DROP TABLE IF EXISTS sections_contained;
+CREATE TABLE sections_contained (
+	id SMALLINT UNSIGNED NOT NULL auto_increment,
+	container SMALLINT UNSIGNED,
+	section SMALLINT UNSIGNED,
+	UNIQUE (container,section),
+	FOREIGN KEY (container) REFERENCES sections(id),
+	FOREIGN KEY (section) REFERENCES sections(id),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 

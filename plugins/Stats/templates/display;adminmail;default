@@ -70,8 +70,91 @@ For [% section.section_name %]
 [% IF section.search.page > 0 -%]
        search: [% section.search.page %] [% section.search.ipids %] [% section.search.bytes %] [% section.search.users %]
 [% END -%]
-[% IF constants.plugin.Journal && section.journal.page > 0 -%]
-      journal: [% section.journal.page %] [% section.journal.ipids %] [% section.journal.bytes %] [% section.journal.users %]
+[% IF section.palm.page > 0 -%]
+         palm: [% section.palm.page %] [% section.palm.ipids %] [% section.palm.bytes %] [% section.palm.users %]
+[% END -%]
+[% IF section.rss.page > 0 -%]
+          rss: [% section.rss.page %] [% section.rss.ipids %] [% section.rss.bytes %] [% section.rss.users %]
+[% END -%]
+[% END -%]
+
+-----------------------
+
+[% FOREACH item = lazy -%]
+[% item %]
+[% END %]
+
+__section__
+default
+__description__
+
+__title__
+
+__page__
+adminmail
+__lang__
+en_US
+__name__
+display
+__template__
+[% Slash.sitename %] Stats for [% day %]
+
+        total: [% total %] ([% total_bytes %])
+       unique: [% unique %]
+        users: [% users %]
+[% admin_clearpass_warning %]
+    accesslog: [% accesslog %] rows total
+     formkeys: [% formkeys %] rows total
+[% IF constants.mod_stats -%]
+       modlog: [% modlog %] rows total
+   metamodlog: [% metamodlog %] rows total ([% xmodlog %] modlog)
+   mod points: [% mod_points %] in pool
+   used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
+      used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
+      used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
+[% END -%]
+     comments: [% comments %] posted yesterday
+        IPIDS: [% IPIDS %] distinct IPIDS posted comments
+             : [% comments_ipids %] distinct IPIDS used comments
+             : [% article_ipids %] distinct IPIDS used articles
+             : [% search_ipids %] distinct IPIDS used search
+             : [% journal_ipids %] distinct IPIDS used journals
+             : [% palm_ipids %] distinct IPIDS used palm pages
+             : [% rss_ipids %] distinct IPIDS used rss pages
+    pageviews: [% comments_page %] for comments ([% comments_bytes %])
+             : [% article_page %] for articles ([% article_bytes %])
+             : [% search_page %] for searches ([% search_bytes %])
+             : [% journal_page %] for journals ([% journal_bytes %])
+             : [% palm_page %] for palm ([% palm_bytes %])
+             : [% rss_page %] for rss ([% rss_bytes %])
+  submissions: [% submissions %] submissions 
+ sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
+
+[% IF constants.mod_stats %]
+[% admin_mods_text %]
+[% END %]
+
+   total hits: [% total_hits %]
+     homepage: [% homepage %]
+
+-----------------------
+[% FOREACH section = sections -%]
+
+For [% section.section_name %]
+   page views: [% section.page %]
+     visitors: [% section.ipids %]
+     bandwith: [% section.bytes %]
+        users: [% section.users %]
+
+                  Pages      IPs   Bandwidth    Users
+[% IF section.comments.page > 0 -%]
+     comments: [% section.comments.page %] [% section.comments.ipids %] [% section.comments.bytes %] [% section.comments.users %]
+[% END -%]
+[% IF section.article.page > 0 -%]
+     articles: [% section.article.page %] [% section.article.ipids %] [% section.article.bytes %] [% section.article.users %]
+[% END -%]
+[% IF section.search.page > 0 -%]
+       search: [% section.search.page %] [% section.search.ipids %] [% section.search.bytes %] [% section.search.users %]
 [% END -%]
 [% IF section.palm.page > 0 -%]
          palm: [% section.palm.page %] [% section.palm.ipids %] [% section.palm.bytes %] [% section.palm.users %]
@@ -87,6 +170,13 @@ For [% section.section_name %]
 [% item %]
 [% END %]
 
+-----------------------
+
+[% tailslash %]
+
+-----------------------
+__seclev__
+100
 -----------------------
 
 [% tailslash %]

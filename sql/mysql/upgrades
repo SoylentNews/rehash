@@ -461,3 +461,11 @@ INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymou
 INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus, and goodkarma)');
 INSERT INTO vars (name, value, description) VALUES ('karma_obfuscate','0','Should users see, not their numeric karma score, but instead an adjective describing their approximate karma?');
 
+#Section stuff -Brian
+ALTER TABLE sections ADD type ENUM("contained", "collected") DEFAULT 'contained' NOT NULL;
+UPDATE sections SET type="contained";
+INSERT INTO vars (name, value, description) VALUES ('section','index','This is the current setting for section.');
+INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras, type) VALUES ('index',15,'Index','',0,0,0,'collected');
+ALTER TABLE blocks ADD all_sections tinyint NOT NULL DEFAULT '0';
+UPDATE blocks SET all_sections=1 WHERE section="all_sections";
+UPDATE blocks SET section="index" WHERE section="all_sections";

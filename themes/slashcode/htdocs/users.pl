@@ -1117,7 +1117,7 @@ sub tildeEd {
 		$tidref->{$tid}{alttext} = $alttext;
 	}
 
-	my $sections = $slashdb->getDescriptions('sections');
+	my $sections = $slashdb->getDescriptions('sections-contained');
 	while (my($section, $title) = each %$sections) {
 		next if !$section;
 		$sectionref->{$section}{checked} =
@@ -2222,7 +2222,7 @@ sub getUserAdmin {
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my($banned, $banned_reason);
-	my $sectionref = $slashdb->getDescriptions('sections-all');
+	my $sectionref = $slashdb->getDescriptions('sections-contained');
 	$sectionref->{''} = getData('all_sections');
 
 	$field ||= 'uid';

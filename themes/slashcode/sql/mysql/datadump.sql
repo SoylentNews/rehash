@@ -33,7 +33,7 @@ INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, ti
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('mysite','By editing the section called \"User Space\" on the user\r\npreferences page, you can cause this space to be filled\r\nwith some HTML code. Personal URLs?  Your Credit Card\r\nNumbers and Social Security numbers?  Well, maybe you\r\nbetter stick to URLs.\r\n',10000,'static',NULL,'index',-10,'User Space',1,NULL,NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('poll','<FORM ACTION=\"//www.example.com/pollBooth.pl\">\r\n	<INPUT TYPE=\"hidden\" NAME=\"qid\" VALUE=\"1\"\r\n<B>Are you happy?</B>\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"1\">No\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"2\">Yes\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"3\">thorazine\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"4\">apathy\r\n<BR><INPUT TYPE=\"radio\" NAME=\"aid\" VALUE=\"5\">manic depressive\r\n<BR><INPUT TYPE=\"submit\" VALUE=\"Vote\"> [ <A HREF=\"//www.example.com/pollBooth.pl?qid=1&aid=-1\"><B>Results</B></A> | <A HREF=\"//www.example.com/pollBooth.pl?\"><B>Polls</B></A>  ] <BR>\r\nComments:<B>0</B> | Votes:<B>43</B>\r\n</FORM>\r\n',1000,'portald',NULL,'index',2,'Poll',1,NULL,NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('top10comments','',500,'portald','','index',0,'10 Hot Comments',1,'',NULL,0);
-INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('userlogin','',1000,'static','','all_sections',4,'Login',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('userlogin','',1000,'static','','index',4,'Login',1,NULL,NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('newestthree','<!-- newestthree -->',100,'static','','',0,'Newest Three',1,NULL,NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('recenttopics','none yet',500,'static','Recent Topics','index',0,'Recent Topics',1,'',NULL,0);
 
@@ -189,8 +189,8 @@ INSERT INTO related_links (keyword, name, link) VALUES ('perl','Perl','http://us
 # Dumping data for table 'sections'
 #
 
-INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras) VALUES ('articles',30,'Articles','',0,0,0);
-INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras) VALUES ('features',21,'Features','eyesight',0,1,0);
+INSERT INTO sections (section, artcount, title, issue, extras) VALUES ('articles',30,'Articles',0,0);
+INSERT INTO sections (section, artcount, title, issue, extras) VALUES ('features',21,'Features',1,0);
 
 #
 # Dumping data for table 'section_topics'

@@ -116,10 +116,13 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='commentcodes'") },
 
 	'sections'
-		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'isolate=0', 'order by title') },
+		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'isolate=0 AND type="contained"', 'order by title') },
+
+	'sections-contained'
+		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'type="contained"', 'order by title') },
 
 	'sections-all'
-		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', '', 'ORDER BY title') },
+		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', '', 'order by title') },
 
 	'static_block'
 		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type != 'portald'") },
@@ -3034,17 +3037,23 @@ sub getPortalsCommon {
 	$self->{_boxes} = {};
 	$self->{_sectionBoxes} = {};
 	my $sth = $self->sqlSelectMany(
-			'bid,title,url,section,portal,ordernum',
+			'bid,title,url,section,portal,ordernum,all_sections',
 			'blocks',
 			'',
 			'ORDER BY ordernum ASC'
 	);
+	my $sections = $self->getDescriptions('sections-all');
 	# We could get rid of tmp at some point
 	my %tmp;
 	while (my $SB = $sth->fetchrow_hashref) {
 		$self->{_boxes}{$SB->{bid}} = $SB;  # Set the Slashbox
 		next unless $SB->{ordernum} > 0;  # Set the index if applicable
 		push @{$tmp{$SB->{section}}}, $SB->{bid};
+		if ($SB->{all_sections}) {
+			for my $section (keys %$sections) {
+				push @{$tmp{$section}}, $SB->{bid};
+			}
+		}
 	}
 	$self->{_sectionBoxes} = \%tmp;
 	$sth->finish;
