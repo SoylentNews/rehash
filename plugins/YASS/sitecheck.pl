@@ -51,7 +51,7 @@ $task{$me}{code} = sub {
 	for (@$sites) {
 		print "$_->{url} ($constants->{yass_extra}) \n";
 		my $response = $ua->get($_->{url} . $constants->{yass_extra});
-		if($response->is_success) {
+		if ($response->is_success) {
 			$yass->success($_->{id});
 			print "\tactive\t$_->{url}\n";
 		} else {
