@@ -391,6 +391,7 @@ sub handle_remarks {
 		my $stoid = $remark_hr->{stoid};
 		$stoid_count{$stoid}++;
 		$story{$stoid} = $slashdb->getStory($stoid);
+		$story{$stoid}{time_unix} = timeCalc($story{$stoid}{time}, "%s", "");
 		my $uid = $remark_hr->{uid};
 		$uid_count{$uid}++;
 		$max_rid = $remark_hr->{rid} if $remark_hr->{rid} > $max_rid;
@@ -402,7 +403,7 @@ sub handle_remarks {
 		$slashdb->setVar('ircslash_nextremarkid', $next_remark_id);
 		return ;
 	}
-	
+
 	# First pass:  outright strip out remarks from abusive users
 	my %uid_blocked = ( );
 	for my $uid (keys %uid_count) {
@@ -431,6 +432,10 @@ sub handle_remarks {
 	my $regex = regexSid();
 	my $sidprefix = "$constants->{absolutedir_secure}/article.pl?sid=";
 	STORY: for my $stoid (sort { $stoid_count{$a} <=> $stoid_count{$b} } %stoid_count) {
+		# Skip a story that has already been live for a while.
+		my $time_unix = $story{$stoid}{time_unix};
+		next STORY if $time_unix < time - 600;
+
 		my $url = "$sidprefix$story{$stoid}{sid}";
 		my $remarks = "<$url>";
 		my $do_send_msg = 0;
