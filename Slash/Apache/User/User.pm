@@ -357,6 +357,10 @@ sub userdir_handler {
 				$r->args("op=editmiscopts");
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
+			} elsif ($op eq 'amigos') {
+				$r->args("op=friendview");
+				$r->uri('/journal.pl');
+				$r->filename($constants->{basedir} . '/journal.pl');
 			} else {
 				$r->args("op=edituser");
 				$r->uri('/users.pl');
