@@ -542,9 +542,8 @@ sub undoModeration {
 	my @removed;
 	while (my($cid, $val, $active, $cuid) = $cursor->fetchrow){
 
-		# Make the logic a little plainer
-		my $adjust = -$val;
-		$adjust =~ s/^([^+-])/+$1/;
+		# If moderation wasn't actually performed, we skip ahead one.
+		next if ! $active;
 
 		# We undo moderation even for inactive records (but silently for
 		# inactive ones...).  Leave them in the table but inactive, so
@@ -554,27 +553,30 @@ sub undoModeration {
 			"cid=$cid and uid=$uid"
 		);
 
-		# If moderation wasn't actually performed, we skip ahead one.
-		next if ! $active;
+		my $comm_update = { };
 
-		# Make sure the comment's score falls within the proper boundaries
-		my $scorelogic = $adjust < 0
-			? "points > $min_score"
-			: "points < $max_score";
-		$self->sqlUpdate(
-			"comments",
-			{ -points => "points $adjust" },
-			"cid=$cid AND $scorelogic"
-		);
+		# Adjust the comment score up or down, but don't push it beyond the
+		# maximum or minimum.
+		my $adjust = -$val;
+		$adjust =~ s/^([^+-])/+$1/;
+		$comm_update->{-points} =
+			"GREATEST($min_score,"
+			. " LEAST($max_score, points $adjust))";
 
-		# Restore modded user's karma, again within the proper boundaries
-		$scorelogic = $adjust < 0
-			? "karma > $min_karma"
-			: "karma < $max_karma";
+		# Recalculate the comment's reason.
+		$comm_update->{reason} = $self->getCommentMostCommonReason($cid)
+			|| 0; # no active moderations? reset reason to empty
+
+		$self->sqlUpdate("comments", $comm_update, "cid=$cid");
+
+		# Restore modded user's karma, again within the proper boundaries.
+		# XXX If we don't care about tracking the Anonymous Coward's karma,
+		# here's a place to take it out.
 		$self->sqlUpdate(
 			"users_info",
-			{ -karma => "karma $adjust" },
-			"uid=$cuid AND $scorelogic"
+			{ -karma =>	"GREATEST($min_karma,"
+					. " LEAST($max_karma, karma $adjust))" },
+			"uid=$cuid"
 		);
 
 		push(@removed, $cid);
