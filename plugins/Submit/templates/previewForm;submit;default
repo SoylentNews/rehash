@@ -59,6 +59,8 @@ TITLE="[% topic.textname %]"></A>
 		<BR>[% extra.1 %]
 		[% IF extra.2 == 'text' %]
 			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} | strip_attribute %]" SIZE="50">
+		[% ELSIF extra.2 == 'textarea %]
+			<TEXTAREA WRAP="VIRTUAL" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" NAME="[% extra.1 %]">[% submission.${extra.1} | strip_literal %]</TEXTAREA><BR>
 		[% ELSIF extra.2 == 'list' %]
 			[% pulldown = "$extra.1" %]
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), submission.${extra.1}, 1, 1) %]

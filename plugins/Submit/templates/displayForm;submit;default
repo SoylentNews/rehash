@@ -79,7 +79,7 @@ reject the story.</P>
 	[% IF extra.2 == 'text' %]
 		<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% form.${extra.1} | strip_attribute %]" SIZE="50">
 	[% ELSIF extra.2 == 'textarea' %]
-<TEXTAREA WRAP="VIRTUAL" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" NAME="story">[% form.${extra.1} | strip_literal %]</TEXTAREA><BR>
+<TEXTAREA WRAP="VIRTUAL" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" NAME="[% extra.1 %]">[% form.${extra.1} | strip_literal %]</TEXTAREA><BR>
 	[% ELSIF extra.2 == 'list' %]
 		[% # section:value %]
 		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), form.${extra.1}, 1, 1) %]	
@@ -96,16 +96,12 @@ be deleted.)</FONT>
 [% 
 primaryskid_val = form.primaryskid.defined ? form.primaryskid : constants.submission_default_skid;
 IF constants.submission_force_default || (form.primaryskid && form.hss);
-	hide_section_select = 1;
-%]
-	<input type="hidden" name="hss" value="1" />	
-[% END %]
+	hide_section_select = 1; 
+ END %]
 
 [% IF form.hts && form.tid;
 	hide_topic_select = 1;
-%]
-	<input type="hidden" name="hts" value="1" />	
-[% END %]
+ END %]
 
 [% section_topic_title = "" %]
 [% IF hide_section_select && !hide_topic_select;
@@ -122,13 +118,15 @@ END %]
 
 
 [% IF hide_section_select %]
-	<INPUT TYPE="HIDDEN" NAME="primaryskid" value="[% constants.submission_default_skid | strip_attribute %]">
+	<INPUT TYPE="HIDDEN" NAME="primaryskid" value="[% primaryskid_val | strip_attribute %]">
+	<input type="hidden" name="hss" value="1" />	
 [% ELSE %]
 	[% Slash.createSelect('primaryskid', skin_values, primaryskid_val 1, 0, 1) %]
 [% END %]
 
 [% IF hide_topic_select %]
 	<INPUT TYPE="HIDDEN" NAME="tid" value="[% form.tid | strip_attribute %]">
+	<input type="hidden" name="hts" value="1" />	
 [% ELSE %]
 [% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
 [% END %]
