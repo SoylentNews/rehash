@@ -97,6 +97,27 @@ You can not use a form and hit the back button to use it again.
 CASE "readonly" %]
 <BR><B>You can't post to this page.</B><br>
 
+[% # TOO MANY POSTS
+CASE "comments post limit daily" %]
+[% PROCESS titlebar width="95%" title="Call It A Night, Cowboy!" %]
+<P>[% constants.sitename %] only allows
+[% IF user.is_anon; "anonymous users";
+ELSE; "a user with your karma"; END %]
+to post [% limit %] times per day. You've already shared your thoughts
+with us that many times. Take a breather, and come back and see us in
+24 hours or so.
+<P>If you think this is unfair, please email
+[% # Who? The special adminmail contact for moderation, for now; %]
+[% # later just the main adminmail contact. XXX - Jamie 2002/07/12 %]
+[% IF constants.adminmail_mod; constants.adminmail_mod;
+ELSE; constants.adminmail; END %]
+with your
+[% IF user.is_anon %]
+MD5'd IPID, which is <tt>[% user.ipid %]</tt>[%
+ELSE %]
+username "<tt>[% user.nickname %]</tt>"[%
+END %].
+
 [% # TROLL MESSAGE.
 CASE "troll message" %]
 Due to excessive bad posting from this IP or Subnet, comment posting

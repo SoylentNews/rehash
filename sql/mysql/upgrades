@@ -501,3 +501,6 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story',
 # USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
+INSERT INTO vars (name, value, description) VALUES ('comments_perday_bykarma','-1=2|25=25|99999=50','Number of comments allowed to be posted per day, by karma score.');
+INSERT INTO vars (name, value, description) VALUES ('comments_perday_anon','10','Number of comments allowed to be posted per day, by any one IPID, anonymously.');
+

@@ -2675,6 +2675,34 @@ sub checkReadOnly {
 }
 
 ##################################################################
+sub getNumCommPostedAnonByIPID {
+	my($self, $ipid, $hours) = @_;
+	$ipid = $self->sqlQuote($ipid);
+	$hours ||= 24;
+	my $ac_uid = $self->sqlQuote(getCurrentStatic("anonymous_coward_uid"));
+	my $num = $self->sqlCount(
+		"comments",
+		"ipid=$ipid
+		 AND uid=$ac_uid
+		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)"
+	);
+	return $num;
+}
+
+##################################################################
+sub getNumCommPostedByUID {
+	my($self, $uid, $hours) = @_;
+	$uid = $self->sqlQuote($uid);
+	$hours ||= 24;
+	my $num = $self->sqlCount(
+		"comments",
+		"uid=$uid
+		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)"
+	);
+	return $num;
+}
+
+##################################################################
 sub getUIDList {
 	my($self, $column, $id) = @_;
 
@@ -4541,6 +4569,7 @@ sub getSlashConf {
 		# var name			# default hash of keys/values
 		# --------			# --------------------
 		ad_messaging_sections =>	[ ],
+		comments_perday_bykarma =>	[  -1 => 2,		25 => 25,	99999 => 50          ],
 		karma_adj =>			[ -10 => 'Terrible',	-1 => 'Bad',	    0 => 'Neutral',
 						   12 => 'Positive',	25 => 'Good',	99999 => 'Excellent' ],
 	);

@@ -657,6 +657,8 @@ INSERT INTO vars (name, value, description) VALUES ('comments_forgetip_hours','7
 INSERT INTO vars (name, value, description) VALUES ('comments_forgetip_maxrows','100000','Max number of rows to forget IPs of at once');
 INSERT INTO vars (name, value, description) VALUES ('comments_forgetip_mincid','0','Minimum cid to start forgetting IP at');
 INSERT INTO vars (name, value, description) VALUES ('comments_hardcoded','0','Turns on hardcoded layout (this is a Slashdot only feature)');
+INSERT INTO vars (name, value, description) VALUES ('comments_perday_bykarma','-1=2|25=25|99999=50','Number of comments allowed to be posted per day, by karma score.');
+INSERT INTO vars (name, value, description) VALUES ('comments_perday_anon','10','Number of comments allowed to be posted per day, by any one IPID, anonymously.');
 INSERT INTO vars (name, value, description) VALUES ('comments_max_email_len','40','Max num of chars of fakeemail to display in comment header');
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len','10','Minimum minimum average line length');
 INSERT INTO vars (name, value, description) VALUES ('comments_min_line_len_kicks_in','100','Num chars at which minimum average line length first takes effect');
