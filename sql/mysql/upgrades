@@ -1564,3 +1564,13 @@ ALTER TABLE story_topics ADD UNIQUE sid_tid (sid,tid);
 INSERT INTO story_topics SELECT "", sid, tid, "no" FROM stories;
 ALTER TABLE story_topics DROP INDEX sid_tid;
 
+CREATE TABLE IF NOT EXISTS soap_methods (
+        id MEDIUMINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
+        class VARCHAR(100) NOT NULL,
+        method VARCHAR(100) NOT NULL,
+        seclev MEDIUMINT DEFAULT 1000 NOT NULL,
+        subscriber_only TINYINT DEFAULT 0 NOT NULL,
+        formkeys VARCHAR(255) DEFAULT '' NOT NULL,
+        PRIMARY KEY (id),
+        UNIQUE soap_method(class, method)
+);
