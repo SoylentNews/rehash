@@ -30,7 +30,7 @@ bg 0=[% user.bg.0 %] 1=[% user.bg.1 %] 2=[% user.bg.2 %] 3=[% user.bg.3 %] 4=[% 
 [% IF color != 'white'; color = 'colored'; END %]
 [% IF color == 'colored';
 	details = {
-		bg_line_color		=> user.bg.1,
+		bg_line_color		=> user.bg.5,
 		lt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/menu_wwx.gif'  _ '" WIDTH="9" HEIGHT="19"',
 		lt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_wwo.gif'  _ '" WIDTH="9" HEIGHT="19"',
 		bg_tab_sel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_wobg.gif' _ '" BGCOLOR="' _ user.bg.3 _ '"',
