@@ -49,6 +49,12 @@ sub main {
 			formname	=> $formname,
 			checks		=> [],
 		},
+		no_user	=>  {
+			function	=> \&noUser,
+			seclev		=> 0,
+			formname	=> $formname,
+			checks		=> [],
+		},
 		userinfo	=>  {
 			function	=> \&showInfo,
 			#I made this change, not all sites are going to care. -Brian
@@ -605,6 +611,10 @@ sub showComments {
 	});
 }
 
+sub noUser {
+	print getData("no_user");
+}
+
 #################################################################
 # arhgghgh. I love torture. I love pain. This subroutine satisfies
 # these needs of mine
@@ -824,7 +834,6 @@ sub showInfo {
 		});
 
 	} else {
-		#if (! defined $uid && defined $nick && ! $requested_user->{nonuid}) {
 		if (! $requested_user->{uid}) {
 			
 			print getError('userinfo_idnf_err', { id => $id, fieldkey => $fieldkey});

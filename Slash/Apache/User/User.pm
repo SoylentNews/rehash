@@ -361,8 +361,10 @@ sub userdir_handler {
 	if ($uri =~ m[^/~(.+)]) {
 		# this won't work if the nick has a "/" in it ...
 		my($nick, $op) = split /\//, $1, 3;
+		my $slashdb = getCurrentDB();
+		my $uid = $slashdb->getUserUID($nick);
 		$nick = fixparam($nick);	# make safe to pass back to script
-
+		
 		# maybe we should refactor this code a bit ...
 		# have a hash that points op to args and script name -- pudge
 		# e.g.:
@@ -374,53 +376,58 @@ sub userdir_handler {
 		# I would rather prefer it did not turn out like ops have though. -Brian
 		# what do you mean? -- pudge
 
-		if ($op eq 'journal') {
-			$r->args("op=display&nick=$nick");
+		unless ($uid) {
+			$r->args("op=no_user");
+			$r->uri('/users.pl');
+			$r->filename($constants->{basedir} . '/users.pl');
+			return OK;
+		} elsif ($op eq 'journal') {
+			$r->args("op=display&nick=$nick&uid=$uid");
 			$r->uri('/journal.pl');
 			$r->filename($constants->{basedir} . '/journal.pl');
 
 		} elsif ($op eq 'discussions') {
-			$r->args("op=creator_index&nick=$nick");
+			$r->args("op=creator_index&nick=$nick&uid=$uid");
 			$r->uri('/comments.pl');
 			$r->filename($constants->{basedir} . '/comments.pl');
 
 		} elsif ($op eq 'pubkey') {
-			$r->args("nick=$nick");
+			$r->args("nick=$nick&uid=$uid");
 			$r->uri('/pubkey.pl');
 			$r->filename($constants->{basedir} . '/pubkey.pl');
 
 		} elsif ($op eq 'submissions') {
-			$r->args("nick=$nick&op=usersubmissions");
+			$r->args("nick=$nick&op=usersubmissions&uid=$uid");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
 
 		} elsif ($op eq 'comments') {
-			$r->args("nick=$nick&op=usercomments");
+			$r->args("nick=$nick&op=usercomments&uid=$uid");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
 
 		} elsif ($op eq 'friends') {
-			$r->args("op=friends&nick=$nick");
+			$r->args("op=friends&nick=$nick&uid=$uid");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
 
 		} elsif ($op eq 'fans') {
-			$r->args("op=fans&nick=$nick");
+			$r->args("op=fans&nick=$nick&uid=$uid");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
 
 		} elsif ($op eq 'freaks') {
-			$r->args("op=freaks&nick=$nick");
+			$r->args("op=freaks&nick=$nick&uid=$uid");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
 
 		} elsif ($op eq 'foes') {
-			$r->args("op=foes&nick=$nick");
+			$r->args("op=foes&nick=$nick&uid=$uid");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
 
 		} else {
-			$r->args("nick=$nick");
+			$r->args("nick=$nick&uid=$uid");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
 
