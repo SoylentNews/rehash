@@ -92,7 +92,7 @@ sub countSubmissionsByDay {
 	my($self, $yesterday) = @_;
 
 	my $used = $self->sqlCount(
-		'comments', 
+		'submissions', 
 		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'"
 	);
 }
