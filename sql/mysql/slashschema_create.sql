@@ -907,7 +907,9 @@ CREATE TABLE submissions (
 	INDEX del (del),
 	INDEX uid (uid),
 	KEY ipid (ipid),
-	KEY subnetid (subnetid)
+	KEY subnetid (subnetid),
+	KEY primaryskid_tid (primaryskid, tid),
+	KEY tid (tid)
 ) TYPE=InnoDB;
 
 
