@@ -5600,7 +5600,7 @@ sub getSlashConf {
 				$server = [ $1, $2 ];
 			}
 		}
-		use MemCachedClient;
+		require MemCachedClient;
 		$self->{_mcd} = MemCachedClient->new({
 			servers =>	[ @servers ],
 			debug =>	$conf{memcached_debug} > 1 ? 1 : 0,
