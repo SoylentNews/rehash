@@ -1,0 +1,27 @@
+__section__
+default
+__description__
+Prints the bar above each story, containing the actual title of the story.
+
+* width = width of widget
+* title = text for title
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+end_tab
+__template__
+[% IF selected %]
+	<TD BACKGROUND="[% constants.imagedir %]/menu_bgo.gif" BGCOLOR="[% user.bg.1 %]">&nbsp;<A HREF="[% constants.rootdir %][% link %]"><B><FONT COLOR="#000000">[% label %]</FONT></B></A>&nbsp;</TD>
+	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_gog.gif"></TD>
+	<TD BGCOLOR="[% user.bg.3 %]" WIDTH=100%>&nbsp;</TD>
+[% ELSE %]
+	<TD BACKGROUND="[% constants.imagedir %]/menu_bgx.gif">&nbsp;<A HREF="[% constants.rootdir %][% link %]"><FONT COLOR="#000000">[% label %]</FONT></A>&nbsp;</TD>
+	<TD VALIGN="TOP"><IMG SRC="[% constants.imagedir %]/menu_gxg.gif"></TD>
+	<TD VALIGN="TOP" BGCOLOR="[% user.bg.3 %]" WIDTH=100%>&nbsp;</TD>
+[% END %]
+__seclev__
+10000
