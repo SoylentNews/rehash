@@ -30,6 +30,15 @@ use Slash;
 
 *I = getSlashConf();
 
+sub moderatordLog {
+	local *LOG;
+	my $dir = "$I{datadir}/logs";
+	open LOG, ">>$dir/moderatord.log"
+		or die "Can't append to $dir/moderatord.log: $!";
+	print LOG localtime() . "\t", join("\t", @_), "\n";
+	close LOG;
+}
+
 sub tokens2points {
 	my $c = sqlSelectMany("uid,tokens", "users_info", "tokens >= $I{maxtokens}");
 	$I{dbh}->do("LOCK TABLES users READ, 
@@ -37,8 +46,8 @@ sub tokens2points {
 		users_comments WRITE");
 
 	while (my($uid, $tokens) = $c->fetchrow) {
-		print "Giving $I{maxtokens}/$I{tokensperpoint} " .
-			($I{maxtokens}/$I{tokensperpoint}) . " to $uid\n";
+		moderatordLog("Giving $I{maxtokens}/$I{tokensperpoint} " .
+			($I{maxtokens}/$I{tokensperpoint}) . " to $uid");
 		sqlUpdate("users_info", {
 			-lastgranted	=> 'now()',
 			-tokens		=> "tokens - $I{maxtokens}"
@@ -79,7 +88,7 @@ sub stirpool {
 	$I{dbh}->do("LOCK TABLES users_comments WRITE");
 
 	while (my($p, $u) = $c->fetchrow) {
-		print "Taking $p points from $u \n";
+		moderatordLog("Taking $p points from $u");
 		$revoked += $p;
 		sqlUpdate("users_comments", { points => '0' }, "uid=$u");
 	}
@@ -93,16 +102,17 @@ sub stirpool {
 sub comments2tokens {
 	my $comments = shift;
 	my $tokenpool = $comments * $I{tokenspercomment};
-	print "$comments becomes $tokenpool tokens.\n";
+	moderatordLog("$comments becomes $tokenpool tokens.");
 
 	my $stirredpoints = stirpool();
-	print "Stirred out $stirredpoints points, " if $stirredpoints;
 	$tokenpool += $stirredpoints * $I{tokensperpoint};
-	print "So the total token Pool=$tokenpool\n";
+	moderatordLog(
+		($stirredpoints ? "Stirred out $stirredpoints points, " : '')
+		. "So the total token Pool=$tokenpool");
 
 	my($totalusers) = sqlSelect("max(uid)", "users_info");
 	my $eligibleusers = int($totalusers / 5) * 4;
-	print "First $eligibleusers accounts available, ";
+	moderatordLog("First $eligibleusers accounts available");
 
 	my $c=sqlSelectMany("users_info.uid,count(*) as c",
 			"users_info,users_prefs, accesslog",
@@ -124,13 +134,13 @@ sub comments2tokens {
 	my($st, $fi) = (int($eligible / 6), int($eligible / 8) * 7);
 	my $x;
 
-	print "Start at $st end at $fi.  $eligible left. First score is $cnt\n";
+	moderatordLog("Start at $st end at $fi.  $eligible left. First score is $cnt");
 
 	my @eligibles;
 	while (($x++ < $fi) && (($uid, $cnt) = $c->fetchrow)) {
 		next if $x < $st;
 		push @eligibles, $uid;
-		# print "$uid is eligible\n";
+		# moderatordLog("$uid is eligible");
 	}
 	$c->finish;
 
@@ -143,7 +153,7 @@ sub comments2tokens {
 	$I{dbh}->do("LOCK TABLES users_info WRITE");
 	foreach $uid (@eligibles) {
 		next unless $scores[$uid];
-		# print "$uid: ".$scores[$uid].", ";
+		# moderatordLog("$uid: ".$scores[$uid].", ");
 		sqlUpdate("users_info",{ 
 			-tokens	=> "tokens+" . $scores[$uid]
 		}, "uid=$uid");

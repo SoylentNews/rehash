@@ -39,6 +39,7 @@ my $totalChangedStories = 1;
 sub END { Carp::cluck("why am I here?") }
 
 sub slashdPid {
+	local *PID;
 	open PID,">$I{datadir}/logs/slashd.pid"
 		or die "Can't open $I{datadir}/logs/slashd.pid: $!";
 	print PID $$;
@@ -46,11 +47,8 @@ sub slashdPid {
 }
 
 sub slashdLog {
+	local *LOG;
 	my $dir = "$I{datadir}/logs";
-	unless (-e $dir) {
-		mkdir $dir, 0755 or die "Can't mkdir $dir: $!";
-	}
-
 	open LOG, ">>$dir/slashd.log"
 		or die "Can't append to $dir/slashd.log: $!";
 	print LOG localtime() . "\t", join("\t", @_), "\n";
@@ -72,6 +70,7 @@ sub copy {
 		mkdir $d, 0755;
 	}
 
+	local(*FROM, *TO);
 	open FROM, $from or die "Can't open $from: $!";
 	open TO, ">>$to" or die "Can't append to $to: $!";
 	while (<FROM>) { print TO }
@@ -109,6 +108,7 @@ sub prog2file {
 	my $dir = dirname($f);
 	mkpath($dir, 0, 0755) unless -e $dir;
 	if (length($d) > 0) {
+		local *F;
 		open F, ">$f" or die "Can't open $f: $!";
 		print F $d;
 		close F;
@@ -180,6 +180,7 @@ sub getminute {
 #################################
 sub save2file {
 	my($f, $d) = @_;
+	local *FH;
 	open FH,">$f" or die "Can't open $f: $!";
 	print FH $d;
 	close FH;
@@ -676,7 +677,6 @@ sub main {
 	*I = getSlashConf();
 
 	mkpath "$I{datadir}/logs/", 0, 0755;
-
 	open STDERR, ">> $I{datadir}/logs/slashd.log"
 		or die "Can't open STDERR to $I{datadir}/logs/slashd.log: $!";
 
