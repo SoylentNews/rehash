@@ -2014,12 +2014,6 @@ INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 
 
 # End of T_2_3_0_130, Start of T_2_3_0_131 - 2003/12/31
 
-# USEPERL LAST UPDATED HERE
-
-# SLASHCODE LAST UPDATED HERE
-
-# End of T_2_3_0_129, Start of T_2_3_0_130 - 2003/12/29
-
 INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid','Default for user\'s cookie_location value (also see users_info schema!)');
 
 UPDATE vars SET value=CONCAT(value,'|DL|DT|DD') WHERE name='approvedtags';
@@ -2037,4 +2031,11 @@ UPDATE vars set description='Ops to omit from daily counts in adminmail (delimit
 INSERT INTO vars (name, value, description) VALUES ('op_extras_countdaily', '', 'Extra site-specific pagetypes/ops you would like listed (delimiter of |)');
 
 ALTER TABLE moderatorlog ADD COLUMN points_orig tinyint DEFAULT NULL;
+
+
+# USEPERL LAST UPDATED HERE
+
+# SLASHCODE LAST UPDATED HERE
+
+# End of T_2_3_0_131, Start of T_2_3_0_132 - 2004/01/27
 
