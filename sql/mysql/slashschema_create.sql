@@ -1133,8 +1133,8 @@ CREATE TABLE users_logtokens (
 	expires DATETIME NOT NULL DEFAULT '2000-01-01 00:00:00',
 	value CHAR(22) NOT NULL DEFAULT '',
 	PRIMARY KEY (lid),
-	UNIQUE uid_subnetid (uid, subnetid),
-	KEY (subnetid)
+	UNIQUE uid_locationid (uid, locationid),
+	KEY (locationid)
 ) TYPE=InnoDB;
 
 #

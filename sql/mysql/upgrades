@@ -1976,10 +1976,6 @@ INSERT INTO vars (name, value, description) VALUES ('topic_search_sid_limit', 10
 
 # End of T_2_3_0_127, Start of T_2_3_0_128 - 2003/12/11
 
-# USEPERL LAST UPDATED HERE
-
-# SLASHCODE LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -1993,8 +1989,15 @@ CREATE TABLE users_logtokens (
 	expires DATETIME NOT NULL DEFAULT '2000-01-01 00:00:00',
 	value CHAR(22) NOT NULL DEFAULT '',
 	PRIMARY KEY (lid),
-	UNIQUE uid_subnetid (uid, subnetid),
-	KEY (subnetid)
+	UNIQUE uid_locationid (uid, locationid),
+	KEY (locationid)
 ) TYPE=InnoDB;
 
-INSERT INTO vars (name, value, description) VALUES ('rss_allow_index', '0', 'Allow RSS feeds to be served from index.pl (1 = admins, 2 = subscribers, 3 = all logged-in users)';
+INSERT INTO vars (name, value, description) VALUES ('rss_allow_index', '0', 'Allow RSS feeds to be served from index.pl (1 = admins, 2 = subscribers, 3 = all logged-in users)');
+
+# USEPERL LAST UPDATED HERE
+
+# SLASHCODE LAST UPDATED HERE
+
+# End of T_2_3_0_129, Start of T_2_3_0_130 - 2003/12/29
+
