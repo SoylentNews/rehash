@@ -1,4 +1,4 @@
-slash-1.0.9, 2000.09.30
+slash-1.0.9, 2000.10.02
 -----------------------
 
 *	Slash now counts the number of times a user is moderated
@@ -16,9 +16,14 @@ slash-1.0.9, 2000.09.30
 
 *	Change passwd text in users.pl from 20 max chars to 12
 
+*	Add new postmode, "code", for posting code; essentially
+	the same as extrans, but wraps all input in <CODE> HTML
+	tag
+
 * 	Removed default admin users from default db dump, which can be
-	now created with a new script in sql/adminuser_create.pl (due 
-	to hack on slashdot)
+	created now with the new script sql/adminuser_create.pl, due
+	to security hole in knowing admin username/password
+
 
 slash-1.0.8, 2000.08.18
 -----------------------

@@ -353,6 +353,7 @@ INSERT INTO pollquestions VALUES ('happy','Are you happy?',7,'2000-01-19 16:23:0
 INSERT INTO postmodes VALUES ('plaintext','Plain Old Text');
 INSERT INTO postmodes VALUES ('html','HTML Formatted');
 INSERT INTO postmodes VALUES ('exttrans','Extrans (html tags to text)');
+INSERT INTO postmodes VALUES ('code','Code');
 
 #
 # Dumping data for table 'sectionblocks'

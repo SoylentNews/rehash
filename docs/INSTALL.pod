@@ -751,16 +751,17 @@ want to run the script, or whatever.
 
 =head2 Other Upgrades
 
-	From         To         Run Scipts in Dir
-	-------      -------    --------------------
-	0.9.5    ->  1.0.0      sql/updates/1.0.0/
-	1.0.0    ->  1.0.0.1    sql/updates/1.0.0.1/
-	1.0.0.1  ->  1.0.2      sql/updates/1.0.2/
-	1.0.2    ->  1.0.3      sql/updates/1.0.3/
-	1.0.3    ->  1.0.4      sql/updates/1.0.4/
-	1.0.4    ->  1.0.5      sql/updates/1.0.5/
-	1.0.5    ->  1.0.6      sql/updates/1.0.6/
+	From          To         Run Scipts in Dir
+	-------       -------    --------------------
+	0.9.5     ->  1.0.0      sql/updates/1.0.0/
+	1.0.0     ->  1.0.0.1    sql/updates/1.0.0.1/
+	1.0.0.1   ->  1.0.2      sql/updates/1.0.2/
+	1.0.2     ->  1.0.3      sql/updates/1.0.3/
+	1.0.3     ->  1.0.4      sql/updates/1.0.4/
+	1.0.4     ->  1.0.5      sql/updates/1.0.5/
+	1.0.5     ->  1.0.6      sql/updates/1.0.6/
+	1.0.{6-8} ->  1.0.9      sql/updates/1.0.9/
 
 =head1 AUTHOR
 
-Patrick Galbraith and Chris Nandor.  Last Modified August 18, 2000.
+Patrick Galbraith and Chris Nandor.  Last Modified Monday, October 2, 2000.

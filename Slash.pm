@@ -1206,7 +1206,7 @@ sub stripByMode {
 	# ASCII only ?
 #	$str =~ s/[^\011\040\033-176]/sprintf '&#%d;', ord $1/ge;
 
-	if ($fmode eq 'literal' || $fmode eq 'exttrans' || $fmode eq 'attribute') {
+	if ($fmode eq 'literal' || $fmode eq 'exttrans' || $fmode eq 'attribute' || $fmode eq 'code') {
 		$str =~ s/(\S{90})/$1 /g unless $no_white_fix;
 		# Encode all HTML tags
 		$str =~ s/&/&amp;/g;
@@ -1215,13 +1215,14 @@ sub stripByMode {
 	}
 
 	# this "if" block part of patch from Ben Tilly
-	if ($fmode eq 'plaintext' || $fmode eq 'exttrans') {
+	if ($fmode eq 'plaintext' || $fmode eq 'exttrans' || $fmode eq 'code') {
 		$str = stripBadHtml($str, $no_white_fix);
 		$str =~ s/\n/<BR>/gi;  # pp breaks
 		$str =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
 		# Preserve leading indents
 		$str =~ s/\t/    /g;
 		$str =~ s/<BR>\n?( +)/"<BR>\n" . ("&nbsp; " x length($1))/ieg;
+		$str = '<CODE>' . $str . '</CODE>' if $fmode eq 'code';
 
 	} elsif ($fmode eq 'nohtml') {
 		$str =~ s/<.*?>//g;
