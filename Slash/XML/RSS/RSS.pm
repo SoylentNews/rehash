@@ -196,7 +196,7 @@ sub create {
 		my($item) = @{$param->{items}};
 		$rss->add_module(
 			prefix  => 'slash',
-			uri     => 'http://slashcode.com/rss/1.0/modules/Slash/',
+			uri     => 'http://purl.org/rss/1.0/modules/slash/',
 		) if $item->{story};
 
 	} elsif ($version >= 0.91) {
