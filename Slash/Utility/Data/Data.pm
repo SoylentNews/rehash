@@ -2858,7 +2858,7 @@ sub countTotalVisibleKids {
 	$total += $comments->{$pid}{visiblekids};
 
 	for my $cid (@{$comments->{$pid}{kids}}) {
-		$total += countTotalKids($cid, $comments);
+		$total += countTotalVisibleKids($cid, $comments);
 	}
 
 	$comments->{$pid}{totalvisiblekids} = $total;
