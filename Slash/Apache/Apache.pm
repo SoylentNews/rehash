@@ -315,6 +315,33 @@ sub IndexHandler {
 		}
 	}
 
+	if ($uri =~ m|^/(\w+)/$|) {
+		my $key = $1;
+		my $slashdb = getCurrentDB();
+		my $section = $slashdb->getSection($key);
+		if ($section) {
+			my $basedir = $constants->{basedir};
+			my $index_handler = $section->{index_handler}
+				|| $constants->{index_handler};
+
+			# $USER_MATCH defined above
+			if ($dbon && $r->header_in('Cookie') =~ $USER_MATCH) {
+				$r->args("section=$key");
+				$r->uri("/$index_handler");
+				$r->filename("$basedir/$index_handler");
+				return OK;
+			} else {
+				# consider using File::Basename::basename() here
+				# for more robustness, if it ever matters -- pudge
+				my($base) = split(/\./, $index_handler);
+				$r->uri("/$key/$base.shtml");
+				$r->filename("$basedir/$key/$base.shtml");
+				writeLog('shtml');
+				return OK;
+			}
+		}
+	}
+
 	if ($uri eq '/authors.pl') {
 		my $filename = $r->filename;
 		my $basedir  = $constants->{basedir};
