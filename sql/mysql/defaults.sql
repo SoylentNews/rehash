@@ -432,7 +432,7 @@ INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_start', '0.16
 INSERT INTO vars (name, value, description) VALUES ('m2_batchsize', 50, 'Maximum number of moderations processed for M2 reconciliation per execution of moderation daemon.');
 INSERT INTO vars (name, value, description) VALUES ('m2_bonus','+1','Bonus for participating in meta-moderation');
 INSERT INTO vars (name, value, description) VALUES ('m2_comments','10','Number of comments for meta-moderation');
-INSERT INTO vars (name, value, description) VALUES ('m2_consensus', 9, 'Number of M2 votes per M1 before it is reconciled by consensus, best if this is an odd number.')
+INSERT INTO vars (name, value, description) VALUES ('m2_consensus', 9, 'Number of M2 votes per M1 before it is reconciled by consensus, best if this is an odd number.');
 INSERT INTO vars (name, value, description) VALUES ('m2_consensus_trigger', '0.75', 'Weighted average of consensus votes to dissentor votes which determines a "clear victory" in M2.');
 INSERT INTO vars (name, value, description) VALUES ('m2_dissension_penalty', '-1', 'Penalty assessed for each "head" of dissension when M2 penalties are triggered.');
 INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus','12','Usually 1/2 of goodkarma');
