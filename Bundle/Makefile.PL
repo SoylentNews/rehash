@@ -6,4 +6,5 @@ WriteMakefile(
 	'clean'	=> {
 		'FILES'	=> 'Bundle-Slash-*'
 	},
+	'NO_META'		=> 1,
 );
