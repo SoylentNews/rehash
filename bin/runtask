@@ -191,23 +191,49 @@ sub parse_slash_sites {
 	return $virtual_user;
 }
 
+sub list_tasks {
+	my @files =
+		sort
+		grep { -e $_ and -f _ and -r _ }
+		glob "$dir/[a-zA-Z0-9_-][a-zA-Z0-9_-]*.pl";
+ 	# { local $"=' '; print STDERR "F: @files\n"; }
+	for my $fullname (@files) {
+		my $file = basename($fullname);
+		$file =~ s/\.pl$//;
+		print "\t$file \n";
+	}
+}
+
 sub main {
 	# Remember to doublecheck these match usage()!
-	usage('Options used incorrectly') unless getopts('ho:u:v', \%opts);
+	usage('Options used incorrectly') unless (getopts(':hlo:u:v', \%opts));
 	usage() if $opts{'h'};
 	version() if $opts{'v'};
 	$opts{'u'} ||= 'slash';
 
 	$task_name = $ARGV[0];
-	usage('No task specified') unless $task_name;
+	usage('No task specified') if (!$task_name && !$opts{'l'});
 
-	$virtual_user = parse_slash_sites($opts{'u'});
+	if ($opts{'l'}) {	
+		$virtual_user = $opts{'u'};
+		exit unless (DBIx::Password::checkVirtualUser($opts{'u'}));
+	} else {
+		$virtual_user = parse_slash_sites($opts{'u'});
+	}
 
 	createEnvironment($virtual_user);
 	$constants = getCurrentStatic();
 	$slashdb = getCurrentDB();
 	$user = getCurrentUser();
 	$dir = "$constants->{datadir}/tasks";
+
+	# List what tasks are available
+	if ($opts{'l'}) {
+		print "Listing Tasks \n";
+		list_tasks($constants);
+		exit;
+	}
+
 	$ENV{TZ} = 'GMT' if $ENV{TZ} ne 'GMT';
 	slashdLogInit();
 
@@ -247,6 +273,7 @@ who want to try their hand at modifying the comment or moderation systems.
 Main options:
 	-h	Help (this message)
 	-v	Version
+	-l	list tasks for this 
 	-u	Virtual user (must exist in /usr/local/slash/slash.sites)
 
 	-o	String of comma separated list of key=value pairs. Each 
