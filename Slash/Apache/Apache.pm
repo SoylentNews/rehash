@@ -80,6 +80,7 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{form_override} = {}; 
 			$new_cfg->{absolutedir} = $_->{url};
 			$new_cfg->{rootdir} = $_->{url};
+			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
 			$new_cfg->{real_rootdir} = $_->{url} if $_->{isolate};  # you gotta keep 'em separated, unh!
 			$new_cfg->{defaultsection} = $_->{section};
 			$new_cfg->{basedomain} = $_->{hostname};
