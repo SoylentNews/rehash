@@ -646,7 +646,7 @@ sub convert_tokens_to_points {
 	my $tokentrade = $pointtrade * $tokperpt;
 	$tokentrade = $maxtokens if $tokentrade > $maxtokens; # sanity check
 
-	my @uids = $self->sqlSelectColArrayref(
+	my $uids = $self->sqlSelectColArrayref(
 		"uid",
 		"users_info",
 		"tokens >= $tokentrade",
@@ -657,7 +657,7 @@ sub convert_tokens_to_points {
 	# update all at once on just one table and since we're using
 	# + and - instead of using absolute values. - Jamie 2002/08/08
 
-	for my $uid (@uids) {
+	for my $uid (@$uids) {
 		my($tokens, $points);
 
 		$self->setUser($uid, {
@@ -678,7 +678,7 @@ sub convert_tokens_to_points {
 		"points > $maxpoints"
 	);
 	$self->sqlUpdate(
-		"users_comments",
+		"users_info",
 		{ tokens => $maxtokens },
 		"tokens > $maxtokens"
 	);
