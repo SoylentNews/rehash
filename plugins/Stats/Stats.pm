@@ -186,9 +186,6 @@ sub countDaily {
 	$returnable{'unique_users'} = $c->rows;
 	$c->finish;
 
-	$returnable{'journals'}  = $self->sqlSelect("count(*)", "accesslog",
-		"op='journal' AND to_days(now()) - to_days(ts)=1 ");
-
 	$c = $self->sqlSelectMany("dat,count(*)", "accesslog",
 		"to_days(now()) - to_days(ts)=1 AND
 		(op='index' OR dat='index')

@@ -82,25 +82,41 @@ EOT
 	my $comments = $stats->countCommentsDaily($yesterday);
 
 	my $uniq_comment_users = $stats->countDailyByOPDistinctIPID('comments', $yesterday);
-	my $uniq_article_users = $stats->countDailyByOPDistinctIPID('article', $yesterday);
-	my $uniq_palm_users = $stats->countDailyByOPDistinctIPID('palm', $yesterday);
 	my $comment_page_views = $stats->countDailyByOP('comments',$yesterday);
+
+	my $uniq_article_users = $stats->countDailyByOPDistinctIPID('article', $yesterday);
 	my $article_page_views = $stats->countDailyByOP('article',$yesterday);
+
+	my $uniq_palm_users = $stats->countDailyByOPDistinctIPID('palm', $yesterday);
 	my $palm_page_views = $stats->countDailyByOP('palm',$yesterday);
+
+	my $uniq_journal_users = $stats->countDailyByOPDistinctIPID('journal', $yesterday);
+	my $journal_page_views = $stats->countDailyByOP('journal',$yesterday);
+
+	my $uniq_rss_users = $stats->countDailyByOPDistinctIPID('rss', $yesterday);
+	my $rss_page_views = $stats->countDailyByOP('rss',$yesterday);
 
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
 	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
 	$statsSave->createStatDaily($yesterday, "comments", $comments);
 	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
-	$statsSave->createStatDaily($yesterday, "journals", $count->{journals});
 	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
+
 	$statsSave->createStatDaily($yesterday, "uniq_comment_users", $uniq_comment_users);
-	$statsSave->createStatDaily($yesterday, "uniq_article_users", $uniq_article_users);
-	$statsSave->createStatDaily($yesterday, "uniq_palm_users", $uniq_palm_users);
 	$statsSave->createStatDaily($yesterday, "comment_page_views", $comment_page_views);
+
+	$statsSave->createStatDaily($yesterday, "uniq_article_users", $uniq_article_users);
 	$statsSave->createStatDaily($yesterday, "article_page_views", $article_page_views);
+
+	$statsSave->createStatDaily($yesterday, "uniq_palm_users", $uniq_palm_users);
 	$statsSave->createStatDaily($yesterday, "palm_page_views", $palm_page_views);
+
+	$statsSave->createStatDaily($yesterday, "uniq_journal_users", $uniq_journal_users);
+	$statsSave->createStatDaily($yesterday, "journal_page_views", $journal_page_views);
+
+	$statsSave->createStatDaily($yesterday, "uniq_rss_users", $uniq_rss_users);
+	$statsSave->createStatDaily($yesterday, "rss_page_views", $rss_page_views);
 
 	my @numbers = (
 		$count->{total},
@@ -125,11 +141,15 @@ EOT
 		scalar(@$distinct_comment_ipids),
 		$uniq_comment_users,
 		$uniq_article_users,
+		$uniq_journal_users,
 		$uniq_palm_users,
+		$uniq_rss_users,
 		$comment_page_views,
 		$article_page_views,
+		$journal_page_views,
 		$palm_page_views,
-		$count->{journals},
+		$rss_page_views,
+		$journal_page_views
 		$submissions,
 			($submissions ? $submissions_comments_match*100
 						/$submissions		: 0),
@@ -155,11 +175,14 @@ $admin_clearpass_warning
         IPIDS: %8d distinct IPIDS posted comments
              : %8d distinct IPIDS used comments
              : %8d distinct IPIDS used articles
+             : %8d distinct IPIDS used journals
              : %8d distinct IPIDS used palm pages
+             : %8d distinct IPIDS used rss pages
     pageviews: %8d for comments
              : %8d for articles
-             : %8d for palm
              : %8d for journals
+             : %8d for palm
+             : %8d for rss
   submissions: %8d submissions
  sub/comments: %8.1f%% of the submissions came from comment posters from this day
 
