@@ -42,6 +42,7 @@ sub main {
 	# subscribe.pl is not yet for regular users
 	if ($user->{seclev} < 100
 		&& $op ne 'paypal'
+		&& $op ne 'pause'
 		&& $user->{hits_paidfor} == 0) {
 		my $rootdir = getCurrentStatic('rootdir');
 		redirect("$rootdir/users.pl");
@@ -70,14 +71,13 @@ sub edit {
 	}
 	$user_edit ||= $user;
 
+	my $subscribe = getObject('Slash::Subscribe');
+	my @defpages = sort keys %{$subscribe->{defpage}};
+	my $edited_defaults_yet = exists $user->{"buypage_$defpages[0]"};
 	my $user_newvalues = { };
-	my $bought_nothing_yet = ($user_edit->{hits_paidfor} ? 0 : 1);
-	if ($bought_nothing_yet) {
-		if ($constants->{subscribe_defpages}) {
-			my @defpages = split / /, $constants->{subscribe_defpages};
-			for my $page (@defpages) {
-				$user_newvalues->{"buypage_$page"} = 1;
-			}
+	if (!$edited_defaults_yet) {
+		for my $page (@defpages) {
+			$user_newvalues->{"buypage_$page"} = $subscribe->{defpage}{$page};
 		}
 	}
 
@@ -107,9 +107,12 @@ sub save {
 		if $form->{secretword} eq $constants->{subscribe_secretword}
 			or $user->{seclev} >= 100;
 
+	my $subscribe = getObject('Slash::Subscribe');
+	my @defpages = sort keys %{$subscribe->{defpage}};
+	my $edited_defaults_yet = exists $user->{"buypage_$defpages[0]"};
+
 	my $user_update = { };
 	my $user_newvalues = { };
-	my $bought_nothing_yet = ($user_edit->{hits_paidfor} ? 0 : 1);
 	if ($has_buying_permission) {
 		my($buymore) = $form->{buymore} =~ /(\d+)/;
 		if ($buymore) {
@@ -119,20 +122,18 @@ sub save {
 				$user_edit->{hits_paidfor} + $buymore;
 		}
 	}
-	for my $key (grep /^buypage_\w+$/, keys %$form) {
-		# Empty string means delete the row from users_param.
-		$user_newvalues->{$key} =
-			$user_update->{$key} = $form->{$key} ? 1 : "";
-	}
-	if ($bought_nothing_yet) {
-		my @buypage_updates = grep /^buypage_/, keys %$user_update;
-		if (!@buypage_updates && $constants->{subscribe_defpages}) {
-			my @defpages = split / /, $constants->{subscribe_defpages};
-			for my $page (@defpages) {
-				$user_newvalues->{"buypage_$page"} =
-					$user_update->{"buypage_$page"} = 1 if $page;
-			}
+	if (!$edited_defaults_yet) {
+		# Set default values in case some of the form fields
+		# somehow aren't sent to us.
+		for my $page (@defpages) {
+			$user_newvalues->{"buypage_$page"} = $subscribe->{defpage}{$page};
 		}
+	}
+	for my $key (grep /^buypage_\w+$/, keys %$form) {
+		# False value (probably empty string) means set the row to 0
+		# in users_param.
+		$user_newvalues->{$key} =
+			$user_update->{$key} = $form->{$key} ? 1 : 0;
 	}
 	$slashdb->setUser($user_edit->{uid}, $user_update);
 
