@@ -732,8 +732,6 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes o
 
 ### Run rebuildPeople script to rebuild Zoo ###
 
-# SLASHDOT LAST UPDATED HERE
-
 # FOUNDRIES LAST UPDATED HERE 9-12-02 Hey - it's been great 
 # working with all of you - good luck!
 # Best wishes!
@@ -744,3 +742,7 @@ INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link',
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_47
+
