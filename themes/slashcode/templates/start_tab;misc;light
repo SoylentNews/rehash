@@ -1,0 +1,22 @@
+__section__
+light
+__description__
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+start_tab
+__template__
+[
+[% IF tab_is_selected %]
+	<A HREF="[% link %]"><B>[% label %]</B></A>
+[% ELSE %]
+	<A HREF="[% link %]">[% label %]</A>
+[% END %]
+
+__seclev__
+500

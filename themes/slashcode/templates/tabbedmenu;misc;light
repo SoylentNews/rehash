@@ -1,0 +1,31 @@
+__section__
+light
+__description__
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+tabbedmenu
+__template__
+[% save_tab_selected = tab_selected %]
+<P><NOBR>
+[% FOREACH tab = tabs;
+	IF loop.first;
+		tabtmpl = "start_tab";
+	ELSIF !loop.last;
+		tabtmpl = "mid_tab";
+	ELSE;
+		tabtmpl = "end_tab";
+	END;
+	PROCESS $tabtmpl link=tab.link label=tab.label
+		tab_is_selected=(tab.label == save_tab_selected || tab.sel_label == save_tab_selected)
+		next_tab_is_selected=(loop.next && (loop.next.label == save_tab_selected || loop.next.sel_label == save_tab_selected));
+END %]
+</NOBR></P>
+
+__seclev__
+500
