@@ -154,7 +154,7 @@ You can only post [% limit %] posts per [% interval %].
 An unexpected error has occured.<BR><B>[% value %]</B><BR>
 [% END %]
 
-<P>If you this error seems to be incorrect, please provide the following in your report to
+<P>If this error seems to be incorrect, please provide the following in your report to
 <A HREF="http://sf.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421&amp;category_id=354712">SourceForge.net</A>:
 <UL>
 	<LI>Browser type</LI>
