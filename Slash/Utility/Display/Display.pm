@@ -453,6 +453,7 @@ sub linkStory {
 		tid		=> $story_link->{tid},
 		sid		=> $story_link->{sid},
 		section		=> $story_link->{section},
+		url		=> $slashdb->getSection($story_link->{section}, 'url'),
 		text		=> $story_link->{'link'},
 		dynamic		=> $dynamic,
 	}, { Return => 1, Nocomm => 1 });
