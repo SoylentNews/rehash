@@ -472,6 +472,11 @@ sub displayForm {
 		$fixedstory = strip_plaintext(url2html($form->{story}));
 	} else {
 		$fixedstory = strip_html(url2html($form->{story}));
+
+		# some submitters like to add whitespace before and
+		# after their introtext. This is never wanted. --Pater
+		$fixedstory =~ s/^<(?:P|BR)(?:>|\s[^>]*>)//i;
+		$fixedstory =~ s/<(?:P|BR)(?:>|\s[^>]*>)$//i;
 	}
 	$fixedstory = balanceTags($fixedstory);
 
