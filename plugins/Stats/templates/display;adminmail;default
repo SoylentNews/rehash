@@ -106,6 +106,12 @@ Top Relocated URLS
 [% FOREACH tru = top_relocated_urls; tru.count; "  "; tru.stats_type; "  "; tru.url; "\n"; END %]
 [% END %]
 
+Pages From RSS By Section
+[% FOREACH section = skins -%]
+[%- rss_skin_name = section.skin_name FILTER format('%20s') -%]
+[%  rss_skin_name %]  [% section.page_from_rss %]
+[% END %]
+
 [% FOREACH section = skins -%]
 [% IF section.pages < 1 ; NEXT ; END %]
 For [% section.skin_name %]

@@ -39,7 +39,11 @@ mygraphs = [
         'New Subscriptions',
         'Total Subscribers',
         'Total Renewing Subscribers',
-        'Subscriber Pages'
+        'Subscriber Pages',
+
+	'RSS Pages',
+	'Pages From RSS'
+	
 ];
 
 
@@ -256,6 +260,26 @@ SWITCH gtitle;
          type      => 'area',
          statdata  => ['total_subscriber', 'subscribe_hits_bought', 'total_secure'];
 
+  CASE 'RSS Pages';
+        avail_skins = Slash.db.getDescriptions('skins');
+        sect_page = [];
+        FOREACH skin = avail_skins.keys.sort;
+           sect_page.push(['rss_page', skin]);
+        END;
+      PROCESS make_graph
+         type      => 'lines',
+         statdata  => sect_page;
+  
+  CASE 'Pages From RSS';
+        avail_skins = Slash.db.getDescriptions('skins');
+        sect_page = [];
+        FOREACH skin = avail_skins.keys.sort;
+           sect_page.push(['page_from_rss', skin]);
+        END;
+      PROCESS make_graph
+         type      => 'lines',
+         statdata  => sect_page;
+  
 
   # default
   CASE;

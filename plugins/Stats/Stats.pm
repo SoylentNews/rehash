@@ -1001,6 +1001,12 @@ sub countDailyByPages {
 	$self->sqlSelectAllHashref("op", "op,count(*) AS cnt", "accesslog_temp", "", "GROUP BY op");
 }
 
+########################################################
+
+sub countFromRSSBySections {
+	my ($self) = @_;
+	$self->sqlSelectAllHashref("skid", "skid,count(*) AS cnt", "accesslog_temp", 'referer="rss"', "GROUP By skid");
+}
 
 ########################################################
 sub countDailyByPageDistinctIPID {

@@ -411,6 +411,7 @@ EOT
 	# 1 hour
 	slashdLog("Sectional Stats Begin");
 	my $skins =  $slashdb->getDescriptions('skins');
+	my $page_from_rss = $logdb->countFromRSSBySections();
 	#XXXSECTIONTOPICS - don't think we need this anymore but just making sure
 	#$sections->{index} = 'index';
 	for my $skid (sort keys %$skins) {
@@ -448,7 +449,6 @@ EOT
 			my $uniq = $logdb->countDailyByPageDistinctIPID($op, { skid => $skid });
 			my $pages = $logdb->countDailyByPage($op, {
 				skid => $skid,
-				no_op => $constants->{op_exclude_from_countdaily}
 			} );
 			my $bytes = $logdb->countBytesByPage($op, { skid => $skid });
 			my $users = $logdb->countUsersByPage($op, { skid => $skid });
@@ -485,8 +485,12 @@ EOT
 			$statsSave->createStatDaily("${op}_user", $users, { skid => $skid});
 		}
 
+		$statsSave->createStatDaily( "page_from_rss", $page_from_rss->{$skid}->{cnt}, {skid => $skid});
+		$temp->{page_from_rss} = sprintf("%8u", $page_from_rss->{$skid}->{cnt});
+
 		push(@{$data{skins}}, $temp);
 	}
+
 	slashdLog("Sectional Stats End");
 
 	slashdLog("Story Comment Counts Begin");
