@@ -759,6 +759,14 @@ should be centered.
 Boolean for whether to return or print the
 fancybox.
 
+=item CLASS
+
+Value of the HTML 4.0 and up CLASS attribute.
+
+=item ID
+
+Value of the HTML 4.0 and up ID attribute.
+
 =back
 
 =item Return value
@@ -775,7 +783,7 @@ The 'fancybox' template block.
 =cut
 
 sub fancybox {
-	my($width, $title, $contents, $center, $return) = @_;
+	my($width, $title, $contents, $center, $return, $class, $id) = @_;
 	return unless $title && $contents;
 
 	my $tmpwidth = $width;
@@ -797,6 +805,8 @@ sub fancybox {
 		center		=> $center,
 		mainwidth	=> $mainwidth,
 		insidewidth	=> $insidewidth,
+		class           => $class,
+		id              => $id,
 	}, $return);
 }
 
@@ -825,6 +835,12 @@ Title of the portalbox.
 
 Contents of the portalbox.
 
+=item GETBLOCKS
+
+If set to 'index' (or blank), adds the down/X/up arrows to the
+right hand side of the portalbox title (displayed only on an
+index page).
+
 =item BID
 
 The block ID for the portal in question.
@@ -849,7 +865,7 @@ The 'fancybox', 'portalboxtitle', and
 =cut
 
 sub portalbox {
-	my($width, $title, $contents, $bid, $url, $getblocks) = @_;
+	my($width, $title, $contents, $bid, $url, $getblocks, $class, $id) = @_;
 	return unless $title && $contents;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -868,7 +884,7 @@ sub portalbox {
 		}, { Return => 1, Nocomm => 1 });
 	}
 
-	fancybox($width, $title, $contents, 0, 1);
+	fancybox($width, $title, $contents, 0, 1, $class, $id);
 }
 
 #========================================================================
