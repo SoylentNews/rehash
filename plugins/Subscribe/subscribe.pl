@@ -70,13 +70,17 @@ sub edit {
 
 	my $subscribe = getObject('Slash::Subscribe');
 	my @defpages = sort keys %{$subscribe->{defpage}};
-	my $edited_defaults_yet = exists $user->{buypage_index};
+	my $edited_buypage_defaults_yet = exists $user->{buypage_index};
 	my $user_newvalues = { };
-	if (!$edited_defaults_yet) {
+	if (!$edited_buypage_defaults_yet) {
 		for my $page (@defpages) {
 			$user_newvalues->{"buypage_$page"} = $subscribe->{defpage}{$page};
 		}
 	}
+	$user_newvalues->{hits_bought_today_max} =
+		defined($user->{hits_bought_today_max})
+		? $user->{hits_bought_today_max}
+		: "";
 
 	titlebar("95%", "Editing Subscription...");
 	slashDisplay("edit", {
@@ -106,7 +110,7 @@ sub save {
 
 	my $subscribe = getObject('Slash::Subscribe');
 	my @defpages = sort keys %{$subscribe->{defpage}};
-	my $edited_defaults_yet = exists $user->{buypage_index};
+	my $edited_buypage_defaults_yet = exists $user->{buypage_index};
 
 	my $user_update = { };
 	my $user_newvalues = { };
@@ -119,7 +123,7 @@ sub save {
 				$user_edit->{hits_paidfor} + $buymore;
 		}
 	}
-	if (!$edited_defaults_yet) {
+	if (!$edited_buypage_defaults_yet) {
 		# Set default values in case some of the form fields
 		# somehow aren't sent to us.
 		for my $page (@defpages) {
@@ -132,6 +136,12 @@ sub save {
 		$user_newvalues->{$key} =
 			$user_update->{$key} = $form->{$key} ? 1 : 0;
 	}
+	my $hbtm = $form->{hbtm};
+	$hbtm = "" if $hbtm < 0;
+	$hbtm = 65535 if $hbtm > 65535;
+	$user_newvalues->{hits_bought_today_max} =
+		$user_update->{hits_bought_today_max} =
+		$hbtm;
 	$slashdb->setUser($user_edit->{uid}, $user_update);
 
 	print "<p>Subscription options saved.\n<p>";

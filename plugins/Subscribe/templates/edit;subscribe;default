@@ -6,7 +6,7 @@ Edit subscription information
 * user = The user doing the editing, which may or may not be the
 	user being edited (if not, it's an admin).
 * user_edit = The user being edited.  Fields used are buypage_*
-	and hits_{paidfor,bought}.
+	and hits_{paidfor,bought,bought_today_max}.
 * user_newvalues = Also passed in;  supercedes user_edit where its
 	fields are present.
 * pages = Arrayref of hashrefs, each hashref having fields:
@@ -22,17 +22,16 @@ en_US
 __name__
 edit
 __template__
-[% IF user.seclev < 100; user_edit = user; END %]
+[% IF !user.is_admin; user_edit = user; END %]
 
-<P>Hit the paypal link below to subscribe to [% constants.sitename %].
+<P>Hit the PayPal link below to subscribe to [% constants.sitename %].
 You will be able to purchase banner-ad-free pages.
-Currently, payment is only through paypal.
+Currently, payment is only through PayPal.
+(<A HREF="[% constants.rootdir %]/faq/subscribe.shtml#ss400">Why PayPal?</A>)
 
 <CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
 <TD>[% PROCESS paypalbut %]</TD>
 </TR></TABLE></CENTER>
-
-[% anything_to_edit = 0 %]
 
 [%
 	pages = [
@@ -46,8 +45,13 @@ Currently, payment is only through paypal.
 %]
 
 [%
-	hits_paidfor = user_newvalues.hits_paidfor || user_edit.hits_paidfor || 0;
-	hits_bought  = user_newvalues.hits_bought  || user_edit.hits_bought  || 0;
+	hits_paidfor          = user_newvalues.hits_paidfor
+		|| user_edit.hits_paidfor          || 0;
+	hits_bought           = user_newvalues.hits_bought
+		|| user_edit.hits_bought           || 0;
+	hits_bought_today     = user_newvalues.hits_bought_today
+		|| user_edit.hits_bought_today     || 0;
+	hits_bought_today_max = user_newvalues.hits_bought_today_max;
 	FOREACH page = pages;
 		thispagename = "buypage_${page.pagename}";
 		IF user_newvalues.$thispagename.defined;
@@ -58,16 +62,19 @@ Currently, payment is only through paypal.
 	END;
 %]
 
+[% IF user.is_admin || ( hits_paidfor && (hits_paidfor > hits_bought) );
+	can_buy = 1; ELSE; can_buy = 0; END %]
+
 <P>[% IF user.uid == user_edit.uid %]You have[% ELSE %]User "[% user_edit.nickname %]" has[% END %]
 paid for a total of [% hits_paidfor %] pages
-and so far [% hits_bought %] have been used up.
+and so far [% hits_bought %] have been used up
+([% hits_bought_today %] today).
 [% IF hits_paidfor && user.uid == user_edit.uid %]
 	Thank you for supporting [% constants.sitename %]! We appreciate your
 	contribution very much.
 [% END %]
 
-[% IF user.seclev >= 100
-	|| ( hits_paidfor && (hits_paidfor > hits_bought) ) %]
+[% IF can_buy %]
 
 	<FORM ACTION="[% env.script_name %]">
 
@@ -77,16 +84,16 @@ and so far [% hits_bought %] have been used up.
 
 [% END %]
 
-[% IF user.seclev >= 100 %]
+[% IF user.is_admin %]
+
 	<P>Want to buy
 	[% IF user.uid != user_edit.uid %]"[% user_edit.nickname %]"[% END %]
 	some pages? You're an admin, so take as many as you want:
 	<INPUT TYPE="TEXT" NAME="buymore" VALUE="0" SIZE="6">
-	[% anything_to_edit = 1 %]
+
 [% END %]
 
-[% IF user.seclev >= 100
-	|| ( hits_paidfor && (hits_paidfor > hits_bought) ) %]
+[% IF can_buy %]
 
 	<P>We give you some control over deciding where to suppress ads.
 	New subscribers default to suppressing ads everywhere except on
@@ -109,19 +116,40 @@ and so far [% hits_bought %] have been used up.
 		VALUE="1" [% IF  page.isbought; " CHECKED"; END %]></TD>
 	<TD VALIGN="top" ALIGN="left">&nbsp;[% page.descr %]</TD>
 	</TR>
-	[% anything_to_edit = 1 %]
 
 	[% END %]
 
 	<TR><TD>&nbsp;</TD><TD COLSPAN="2" VALIGN="top" ALIGN="left"
 	>&nbsp;Set "No Ads" anywhere, and you'll get ads disabled for
-	free on other pages too.</TD></TR>
+	free on other pages too.
+	(<A HREF="[% constants.rootdir %]/faq/subscribe.shtml#ss1400">More
+	info</A>.)</TD></TR>
 
 	</TABLE>
 
-	[% IF anything_to_edit %]
-		<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
-	[% END %]
+[% END %]
+
+[% IF can_buy %]
+
+	<p>Optionally, if you want to make sure you don't use up
+	your subscription too quickly, you may set a limit of the
+	maximum number of ads you will suppress per day. Beyond
+	this daily limit, pages will not count against your
+	subscription (and ads will begin to appear again). Enter
+	the value here, or 0 to disable the limit, or blank to
+	use the default value
+	[% IF constants.subscribe_hits_btmd %]
+	of [% constants.subscribe_hits_btmd %][% ELSE %]
+	(default is no limit)[% END %]:&nbsp;<INPUT
+	TYPE="TEXT" NAME="hbtm"
+	VALUE="[% hits_bought_today_max %]"
+	SIZE="6">
+
+[% END %]
+
+[% IF can_buy %]
+
+	<P><INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
 
 	</FORM>
 

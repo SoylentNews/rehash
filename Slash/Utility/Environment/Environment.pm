@@ -1227,7 +1227,7 @@ sub filter_params {
 		artcount bseclev buymore cid clbig clsmall
 		commentlimit commentsort commentspill
 		commentstatus del displaystatus
-		filter_id height highlightthresh
+		filter_id hbtm height highlightthresh
 		isolate issue last maillist max
 		maxcommentsize maximum_length maxstories
 		min minimum_length minimum_match next

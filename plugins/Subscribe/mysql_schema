@@ -1,4 +1,4 @@
-ALTER TABLE users_hits ADD COLUMN hits_bought INT DEFAULT 0 NOT NULL AFTER hits, ADD COLUMN hits_paidfor INT DEFAULT 0 NOT NULL AFTER hits_bought;
+ALTER TABLE users_hits ADD COLUMN hits_bought INT DEFAULT 0 NOT NULL AFTER hits, ADD COLUMN hits_bought_today SMALLINT UNSIGNED DEFAULT 0 NOT NULL AFTER hits_bought, ADD COLUMN hits_paidfor INT DEFAULT 0 NOT NULL AFTER hits_bought_today;
 
 DROP TABLE IF EXISTS subscribe_payments;
 CREATE TABLE subscribe_payments (
