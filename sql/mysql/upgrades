@@ -1914,8 +1914,6 @@ ALTER TABLE metamodlog CHANGE id id INT UNSIGNED NOT NULL AUTO_INCREMENT;
 
 # End of T_2_3_0_119, Start of T_2_3_0_120 - 2003/09/28
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 DELETE FROM vars WHERE name='tailslash_stats';
 
 # Change for plugins/Subscribe (ignore if not using that plugin)
@@ -1939,5 +1937,7 @@ INSERT INTO vars (name, value, description) VALUES ('show_all_future_stories_adm
 # USEPERL LAST UPDATED HERE
 
 # SLASHCODE LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_124, Start of T_2_3_0_125 - 2003/11/10
