@@ -39,30 +39,33 @@ sub main {
 	$I{F}{op}	||= "";
 	$I{F}{min}	||= "0";
 	$I{F}{max}	||= "30";
+	$I{F}{threshold} ||= $I{U}{threshold};
 	$I{F}{'last'}	||= $I{F}{min} + $I{F}{max};
 
 	# get rid of bad characters
 	$I{F}{query} =~ s/[^A-Z0-9\'. ]//gi;
 
-	countSearchHits($I{F}{op} || 'stories') if ! $I{F}{hitcount};
-	my $hitcount = "($I{F}{hitcount} total matches)" if $I{F}{hitcount};
+	# Precounting the results, even on fast servers seems to cause severe 
+	# performance problems, especially comment searching, where certain
+	# table locks CAN'T be perform, hence making the httpds very unstable.
+	# Counting is therefore removed until a solution can be determined. 
+	#
+	#countSearchHits($I{F}{op} || 'stories') if ! $I{F}{hitcount};
+	#my $hitcount = "($I{F}{hitcount} total matches)" if $I{F}{hitcount};
 
 	header("$I{sitename}: Search $I{F}{query}", $I{F}{section});
-	titlebar("99%", "Searching $I{F}{query} $hitcount");
+	titlebar("99%", "Searching $I{F}{query}");
 
 	searchForm();
 
-	if ($I{F}{query} && ! $I{F}{hitcount}) {
-		print "No Matches Found for your query.";
-	} else {
-		if		($I{F}{op} eq "comments")	{ commentSearch()	}
-		elsif	($I{F}{op} eq "users")		{ userSearch()		}
-		elsif	($I{F}{op} eq "stories")	{ storySearch()		}
-		else	{
-			print "Invalid operation!<BR>";
-		}
-		writelog("search", $I{F}{query}) if $I{F}{op} =~ /^(comments|stories|users)$/;
+	if		($I{F}{op} eq "comments")	{ commentSearch()	}
+	elsif	($I{F}{op} eq "users")		{ userSearch()		}
+	elsif	($I{F}{op} eq "stories")	{ storySearch()		}
+	else	{
+		print "Invalid operation!<BR>";
 	}
+	writelog("search", $I{F}{query})
+		if $I{F}{op} =~ /^(comments|stories|users)$/;
 	footer();	
 }
 
@@ -117,8 +120,7 @@ sub countSearchHits {
 		$sqlquery .= "FROM newstories, comments WHERE ";
 		$sqlquery .= "newstories.sid=" . $I{dbh}->quote($I{F}{sid}) . " AND "
 			if $I{F}{sid};
-		# There should be a threshhold value for comment searches on the form, yes?
-		$sqlquery .= "points >= $I{U}{threshold} ";
+		$sqlquery .= "points >= $I{F}{threshold} ";
 		$sqlquery .= "AND section=" . $I{dbh}->quote($I{F}{section})
 			if $I{F}{section};
 		$sqlquery .= " AND" if $I{F}{query};
@@ -199,7 +201,7 @@ EOT
 
 	} elsif ($I{F}{op} eq "comments") {
 		print <<EOT;
-	Threshold <INPUT TYPE="TEXT" SIZE="3" NAME="threshold" VALUE="$I{U}{threshold}">
+	Threshold <INPUT TYPE="TEXT" SIZE="3" NAME="threshold" VALUE="$I{F}{threshold}">
 	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="$I{F}{sid}">
 EOT
 	}
@@ -233,7 +235,7 @@ EOT
 	$sqlquery .= " 1 as kw " unless $I{F}{query};
 	$sqlquery .= " FROM newstories, comments WHERE newstories.sid=comments.sid ";
 	$sqlquery .= " AND newstories.sid=" . $I{dbh}->quote($I{F}{sid}) if $I{F}{sid};
-	$sqlquery .= " AND points >= $I{U}{threshold} ";
+	$sqlquery .= " AND points >= $I{F}{threshold} ";
 	$sqlquery .= " AND section=" . $I{dbh}->quote($I{F}{section}) if $I{F}{section};
 	$sqlquery .= " ORDER BY kw DESC, date DESC, time DESC LIMIT $I{F}{min},$I{F}{max} ";
 
@@ -276,13 +278,15 @@ EOT
 
 	$cursor->finish;
 
-#	print "No Matches Found for your query" unless $x > 0 || $I{F}{query};
+	print "No Matches Found for your query" if $x < 1;
 
-	my $remaining = $I{F}{hitcount} - $I{F}{'last'};
+#	Counting has been removed (see comment at top).
+#	my $remaining = $I{F}{hitcount} - $I{F}{'last'};
 	print "<P>", linkSearch({
-		'link'	=> "<B>$remaining Matches Left</B>",
+#		'link'	=> "<B>$remaining Matches Left</B>",
+		'link'	=> "<B>More matches...</B>",
 		min	=> $x
-	}) unless $x - $I{F}{min} < 20;
+	}) unless !$x || $x < $I{F}{max};
 }
 
 #################################################################
@@ -330,15 +334,17 @@ EOT
 
 	$c->finish;
 
-#	print "No Matches Found for your query" if $x < 1;
+	print "No Matches Found for your query" if $x < 1;
 
-	my $remaining = $I{F}{hitcount} - $I{F}{'last'};
+#	Counting has been removed (see comment at top).
+#	my $remaining = $I{F}{hitcount} - $I{F}{'last'};
 	print "<P>";
 	print linkSearch({
-		'link'	=> "<B>$remaining matches left</B>",
+#		'link'	=> "<B>$remaining matches left</B>",
+		'link'	=> "<B>More matches...</B>",
 		min	=> $I{F}{'last'},
-		hitcount => $I{F}{hitcount}
-	}) unless $I{F}{'last'} >= $I{F}{hitcount};
+#		hitcount => $I{F}{hitcount}
+	}) unless !$x || $x < $I{F}{max};
 }
 
 #################################################################
@@ -366,11 +372,13 @@ WHERE ((displaystatus = 0 and "$I{F}{section}"="")
         OR (section="$I{F}{section}" and displaystatus>=0))
 EOT
 
-	$sqlquery .= "   AND time < now() AND writestatus >= 0  ";
-	$sqlquery .= "   AND aid="	. $I{dbh}->quote($I{F}{author})  if $I{F}{author};
-	$sqlquery .= "   AND section="	. $I{dbh}->quote($I{F}{section})
+	$sqlquery .= "   AND time<now() AND writestatus>=0 AND displaystatus>=0";
+	$sqlquery .= "   AND aid=" . $I{dbh}->quote($I{F}{author})
+		if $I{F}{author};
+	$sqlquery .= "   AND section=" . $I{dbh}->quote($I{F}{section})
 		if $I{F}{section};
-	$sqlquery .= "   AND tid="	. $I{dbh}->quote($I{F}{topic})   if $I{F}{topic};
+	$sqlquery .= "   AND tid=" . $I{dbh}->quote($I{F}{topic})
+		if $I{F}{topic};
 
 	$sqlquery .= " ORDER BY ";
 	$sqlquery .= " kw DESC, " if $I{F}{query};
@@ -399,13 +407,14 @@ EOT
 
 	$cursor->finish;
 
-#	print "No Matches Found for your query." if $x < 1;
+	print "No Matches Found for your query." if $x < 1;
 
-	my $remaining = $I{F}{hitcount} - $I{F}{'last'};
+#	Counting has been removed (see comment at top).
+#	my $remaining = $I{F}{hitcount} - $I{F}{'last'};
 	print "<P>", linkSearch({
-		'link'	=> $I{F}{hitcount} ? "<B>$remaining matches left</B>" : "<B>More Articles</B>",
+		'link'	=> "<B>More Articles</B>",
 		min	=> $I{F}{'last'}
-	}) unless $I{F}{'last'} >= $I{F}{hitcount};
+	}) unless !$x || $x < $I{F}{max};
 }
 
 main;

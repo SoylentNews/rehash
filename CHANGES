@@ -65,6 +65,13 @@ slash-1.0.6, 2000.06.xx
 	is displayed and the user is given an input box filled with the
 	current filename
 
+*	Counting has been disabled again in search.pl due to problems
+	with httpd stability. Aparently precounting results, even
+	on fast servers will cause a huge load on MySQL which then
+	flakes out the httpds. Will be analysing this to see if a
+	solution can be found.
+	
+
 
 slash-1.0.5, 2000.06.13
 -----------------------
