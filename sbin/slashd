@@ -425,7 +425,7 @@ EOT
 sub set_resources {
 	my($task_filename, $mult) = @_;
 	return unless $task{$task_filename}{resource_locks};
-	for my $resource (keys %{$task{$task_filename}{resource_locks}}) {
+	for my $resource (sort keys %{$task{$task_filename}{resource_locks}}) {
 		$resource_info{$resource} += $mult
 			* $task{$task_filename}{resource_locks}{$resource};
 		$resource_info{$resource} = 0 if abs($resource_info{$resource}) < 0.001;
@@ -471,11 +471,7 @@ sub insert_task_event {
 
 	# Rebuild the array in the proper order.
 	$event_ar = [ ];
-	my @files = sort {
-		$event_hr->{$a}{until_time} <=> $event_hr->{$b}{until_time}
-		||
-		$a cmp $b
-	} keys %$event_hr;
+	my @files = rebuild_event_ar($event_hr);
 	for my $file (@files) {
 		push @$event_ar, [ $file, $event_hr->{$file}{until_time} ];
 		(my $file_nopl = $file) =~ s/\.pl//;
@@ -488,6 +484,40 @@ sub insert_task_event {
 		};
 		$slashdb->setSlashdStatus($file_nopl, $options);
 	}
+}
+
+# Sort the events from the hash back into an array.  We choose the
+# order carefully.  Obviously the earlier events come before the
+# later ones.  But if several events occur at the same time, we
+# put the event first which demands the fewest number of resource
+# locks.  We hope that will prevent lock contention as much as
+# possible.  If there's a tie for that, go alphabetically by name.
+{ # closure
+my $event_hr;
+sub event_sort {
+	my $a_untiltime = $event_hr->{$a}{until_time};
+	my $b_untiltime = $event_hr->{$b}{until_time};
+	return $a_untiltime <=> $b_untiltime
+		if $a_untiltime <=> $b_untiltime;
+
+	my $a_resourcecount =
+		$event_hr->{$a}{resource_locks} && %{$event_hr->{$a}{resource_locks}}
+			? scalar(keys %{$event_hr->{$a}{resource_locks}})
+			: 0;
+	my $b_resourcecount =
+		$event_hr->{$b}{resource_locks} && %{$event_hr->{$b}{resource_locks}}
+			? scalar(keys %{$event_hr->{$b}{resource_locks}})
+			: 0;
+	return $a_resourcecount <=> $b_resourcecount
+		if $a_resourcecount <=> $b_resourcecount;
+
+	return $a cmp $b;
+}
+
+sub rebuild_event_ar {
+	($event_hr) = @_;
+	return sort event_sort keys %$event_hr;
+}
 }
 
 sub get_next_possible_task {
@@ -506,7 +536,7 @@ sub get_next_possible_task {
 		my($task_filename, $until_time) = @$task_ar;
 		return $task_ar if !$task{$task_filename}{resource_locks};
 		my $ok = 1;
-		for my $resource (keys %{$task{$task_filename}{resource_locks}}) {
+		for my $resource (sort keys %{$task{$task_filename}{resource_locks}}) {
 			# If the sum of what this task needs plus what is
 			# already in use exceeds 1, this task can't yet run.
 			if ($task{$task_filename}{resource_locks}{$resource}
