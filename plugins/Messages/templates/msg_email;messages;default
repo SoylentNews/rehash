@@ -20,7 +20,7 @@ on [% constants.sitename %].  To stop receiving this and other
 messages from [% constants.sitename %], or to add more messages
 or change your preferences, please go to your user page.
 
-	[% constants.absolutedir %]/my/
+	[% constants.absolutedir %]/my/messages/
 
 You can log in and change your preferences from there.
 
