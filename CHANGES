@@ -1,4 +1,4 @@
-slash-1.0.5, 2000.06.xx
+slash-1.0.5, 2000.06.13
 -----------------------
 
 *	Section articles that appear on main page will now have the
@@ -110,6 +110,12 @@ slash-1.0.5, 2000.06.xx
 	new categories to submissions (like Hold, Quik, etc.)
 
 *	Fixed bad color of "Moderation totals" text in Slash.pm
+
+*	Put export TZ=GMT at top of utils/slashd (n8)
+
+*	Took out code to check for matching nicknames against author
+	nicknames; authors should have their user nicknames reserved
+	already
 
 *	Plenty of minor code cleanups
 

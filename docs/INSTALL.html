@@ -18,6 +18,7 @@
 		<LI><A HREF="#Database_webserver_etc_">Database, webserver, etc.</A>
 		<LI><A HREF="#Perl_modules">Perl modules</A>
 		<LI><A HREF="#Slash_Code">Slash Code</A>
+		<LI><A HREF="#Hardware_Requirements">Hardware Requirements</A>
 	</UL>
 
 	<LI><A HREF="#PRE_INSTALLATION_THOUGHTS">PRE-INSTALLATION THOUGHTS</A>
@@ -34,6 +35,7 @@
 		<LI><A HREF="#Upgrade_1_0_0_1_1_0_2">Upgrade 1.0.0.1 -> 1.0.2</A>
 		<LI><A HREF="#Upgrade_1_0_2_1_0_3">Upgrade 1.0.2 -> 1.0.3</A>
 		<LI><A HREF="#Upgrade_1_0_3_1_0_4">Upgrade 1.0.3 -> 1.0.4</A>
+		<LI><A HREF="#Upgrade_1_0_4_1_0_5">Upgrade 1.0.4 -> 1.0.5</A>
 	</UL>
 
 	<LI><A HREF="#AUTHOR">AUTHOR</A>
@@ -384,6 +386,20 @@ Exactly what tag a given release is based on is in <EM>README</EM>.
 There is a separate development branch of Slash. Its branch is ``bender''.
 Primarily small changes and bugfixes will go into the MAIN branch, with
 major changes going into the development branch.
+
+
+<P>
+
+<H2><A NAME="Hardware_Requirements">Hardware Requirements
+
+</A></H2>
+None. Whatever it takes to run the above software and handle the traffic
+you may be getting. You could probably do it on a 486 with 32MB and 250MB
+hard drive space, but we wouldn't recommend it. Minimum setup would
+probably be some sort of Pentium 133 or higher, 128MB, and 1GB HD. I'd
+shoot for at least a Pentium II/200+ MHz, 256MB, 2GB. Consider also that
+the httpd machine might be different from the mysql machine, you can keep
+the number of httpds real low, etc. Do what works.
 
 
 <P>
@@ -1244,10 +1260,17 @@ directory, and make sure you have the latest code.
 </A></H2>
 <P>
 <HR>
+<H2><A NAME="Upgrade_1_0_4_1_0_5_Just_run_">Upgrade 1.0.4 -> 1.0.5
+Just run the udpate script in the <EM>sql/updates/1.0.5/</EM>
+directory, and make sure you have the latest code.  
+
+</A></H2>
+<P>
+<HR>
 <H1><A NAME="AUTHOR">AUTHOR
 
 </A></H1>
-Patrick Galbraith and Chris Nandor. Last Modified June 1, 2000.
+Patrick Galbraith and Chris Nandor. Last Modified June 13, 2000.
 
 <P>
 
