@@ -2765,5 +2765,5 @@ ALTER TABLE dbs ADD COLUMN weight_adjust float UNSIGNED NOT NULL DEFAULT 1.0;
 
 DELETE FROM vars WHERE name='search_db_user';
 
-ALTER TABLE discussions ADD COLUMN archivable enum("no","yes") DEFAULT 'yes';
+ALTER TABLE discussions ADD COLUMN archivable enum("no","yes") DEFAULT 'yes' NOT NULL;
 
