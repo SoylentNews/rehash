@@ -209,7 +209,7 @@ EOT
 
 #################################################################
 sub miniAdminMenu {
-	my $nick = fixNickname($I{F}{nick});
+	my $nick = stripByMode($I{F}{nick}, 'attribute');
 	print <<EOT;
 <FORM ACTION="$ENV{SCRIPT_NAME}">
 	<FONT SIZE="${\( $I{fontbase} + 1 )}"> [
@@ -302,20 +302,21 @@ sub mailPassword {
 
 #################################################################
 sub userInfo {
-	my($nick) = @_;
-	$nick = fixNickname($nick);
+	my($orignick) = @_;
+	my $nick_db = $I{dbh}->quote($orignick);
+	my $nick = stripByMode($orignick, 'literal');
 
 	my $c = $I{dbh}->prepare(
 		"SELECT homepage,fakeemail,users.uid,bio, seclev,karma
 		 FROM users, users_info
-		 WHERE users.uid = users_info.uid AND nickname="
-		. $I{dbh}->quote($nick) . " and users.uid > 0"
+		 WHERE users.uid = users_info.uid AND nickname=$nick_db
+		 and users.uid > 0"
 	);
 	$c->execute;
 
 	if (my($home, $email, $uid, $bio, $useclev, $karma) = $c->fetchrow) {
 		$bio = stripByMode($bio, "html");
-		if ($I{U}{nickname} eq $nick) {
+		if ($I{U}{nickname} eq $orignick) {
 			my $sth = $I{dbh}->prepare("SELECT points FROM users_comments WHERE uid=$uid");
 			$sth->execute;
 			my $points = $sth->fetchrow_array;
@@ -427,12 +428,12 @@ sub editUser {
 
 	$homepage ||= "http://";
  
-	my $tempnick = $nickname;
-	$tempnick =~ s/ /+/g;
+	my $nick_param = fixparam($nickname);
+	my $nick_attr  = stripByMode($nickname, 'attribute');
  
 	print <<EOT;
 You can automatically login by clicking
-<A HREF="$I{rootdir}/index.pl?op=userlogin&upasswd=$passwd&unickname=$tempnick">This Link</A>
+<A HREF="$I{rootdir}/index.pl?op=userlogin&upasswd=$passwd&unickname=$nick_param">This Link</A>
 and Bookmarking the resulting page. This is totally insecure, but very convenient.
 
 <FORM ACTION="$ENV{SCRIPT_NAME}" METHOD="POST">
@@ -441,7 +442,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 		<INPUT TYPE="TEXT" NAME="realname" VALUE="$realname" SIZE="40"><BR>
 		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="$uid">
 		<INPUT TYPE="HIDDEN" NAME="passwd" VALUE="$passwd">
-		<INPUT TYPE="HIDDEN" NAME="name" VALUE="$nickname">
+		<INPUT TYPE="HIDDEN" NAME="name" VALUE="$nick_attr">
 
 	<B>Real Email</B> (required but never displayed publicly. 
 		This is where your passwd is mailed.  If you change your
@@ -981,7 +982,7 @@ EOT2
 EOT3
 
 	$I{F}{unickname} ||= $I{F}{newuser};
-	my $nick = fixNickname($I{F}{unickname});
+	my $nick = stripByMode($I{F}{unickname}, 'attribute');
 
 	print <<EOT;
 

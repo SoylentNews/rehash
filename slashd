@@ -333,9 +333,9 @@ sub newrdf {
 	my $c = getBackendStories($section);
 
 	my $SECT = getSection($section);
-	$SECT->{title} = "$I{sitename}: $SECT->{title}" unless $SECT->{isolate};
+	my $title = $SECT->{isolate} ? $SECT->{title} : "$I{sitename}: $SECT->{title}";
 
-	my @fs = (xmlEncodeStr($SECT->{title}),
+	my @fs = (xmlEncodeStr($title),
 		$section ? "/index.pl?section=$section" : '',
 		xmlEncodeStr($I{sitename})
 	);
