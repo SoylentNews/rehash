@@ -8977,6 +8977,9 @@ sub _getMCDStats_percentify {
 # It's ugly, but performs many necessary functions, and anything
 # that replaces it to perform those functions won't be any prettier
 # -- pudge
+# Putting the left-hand side of the s///'s into an array, and the
+# right-hand side into a data template, would be a slightly-
+# prettier compromise.  I'm just saying. - Jamie
 sub autoUrl {
 	my $self = shift;
 	my $section = shift;
@@ -8998,10 +9001,6 @@ sub autoUrl {
 	s|<update>|<B>Update: <date></B> by <author>|ig;
 	s|<date>|$now|g;
 	s|<author>|<B><A HREF="$user->{homepage}">$initials</A></B>:|ig;
-
-	# The delimiters below were once "[%...%]" but that's legacy code from
-	# before Template, and we've since changed it to what you see below.
-	s/\{%\s*(.*?)\s*%\}/$self->getUrlFromTitle($1)/eg if $form->{shortcuts};
 
 	# Assorted ways to add files:
 	s|<import>|importText()|ex;
