@@ -9,7 +9,7 @@
 # To fix the data in users to add the + sign to positive values -Brian
 UPDATE users_param SET value = CONCAT("+",value) WHERE (name LIKE "reason%" OR name LIKE "people_bonus%") AND value LIKE "_";
 
-# Upgrade Zoo to latest schema, once your do this run the rebuildPeople script 
+# Upgrade Zoo to latest schema, once you do this run the rebuildPeople script 
 # in the plugin. -Brian
 CREATE TABLE temp_zoo SELECT * FROM people;
 DROP TABLE IF EXISTS people;
@@ -66,4 +66,7 @@ CREATE TABLE story_topics (
   INDEX sid (sid),
   INDEX tid (tid)
 ) TYPE=MyISAM;
+
+# New var to regulate comment display - Jamie
+INSERT INTO vars (name, value, description) VALUES ('comments_max_email_len','40','Max num of chars of fakeemail to display in comment header');
 

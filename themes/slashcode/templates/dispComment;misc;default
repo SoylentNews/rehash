@@ -9,6 +9,8 @@ Display a comment
 * is_anon = boolean for whether or not comment user is anonymous
 
 Also included are all the individual elements of the comment and its poster: sid, cid, pid, date, subject, comment, uid, points, lastmod, reason, nickname, fakeemail, homepage, sig
+also fakeemail_vis which is a possibly-truncated version of fakeemail
+
 __title__
 
 __page__
@@ -37,7 +39,7 @@ __template__
 			<TD BGCOLOR="#E6E6E6" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#E6E6E6">
 				<FONT FACE="[% constants.mainfontface %]" SIZE="1">by
 [% IF fakeemail %]<A HREF="mailto:[% fakeemail | fixparam %]">[% nickname | strip_literal %]</A>
-<B><FONT SIZE="2">([% fakeemail | strip_literal %])</FONT></B>[% ELSE %][% nickname | strip_literal %][% END %]
+<B><FONT SIZE="2">([% fakeemail_vis | strip_literal %])</FONT></B>[% ELSE %][% nickname | strip_literal %][% END %]
  on [% Slash.timeCalc(time) %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>
 [% UNLESS is_anon %]
 <BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">
