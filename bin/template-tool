@@ -200,7 +200,8 @@ if ($opts{'s'}) {
 			if (length($filename) > 31) {
 				print "\tWARNING: length of filename ($filename) is over 31 chars (Mac-unfriendly)\n";
 			}
-			if ($template->{instructions} =~ /placeholder/) {
+			if ($template->{instructions}
+				&& $template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
 					if !$opts{t} && $opts{V};
 				next;
@@ -209,7 +210,7 @@ if ($opts{'s'}) {
 			my @diffs;
 			for (qw| template seclev description title |) {
 				push (@diffs, $_)
-					if ( $template->{$_} ne $temp2->{$_});
+					if $template->{$_} && ($template->{$_} ne $temp2->{$_});
 			}
 			my $changes = join(" ", sort(@diffs))
 				if scalar(@diffs);

@@ -149,7 +149,7 @@ sub header {
 
 	# ssi = 1 IS NOT THE SAME as ssi = 'yes'
 	# ...which is silly. - Jamie 2002/06/26
-	if ($form->{ssi} eq 'yes') {
+	if ($form->{ssi} && $form->{ssi} eq 'yes') {
 		ssiHead($section, $options);
 		return;
 	}

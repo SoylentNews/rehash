@@ -1114,6 +1114,7 @@ sub prepareUser {
 	my($slashdb, $constants, $user, $hostip);
 
 	$cookies ||= {};
+	$method ||= "";
 	$slashdb = getCurrentDB();
 	$constants = getCurrentStatic();
 
@@ -1437,7 +1438,7 @@ sub setUserDate {
 	$user->{off_set}  = $tz->{off_set};  # we need for calculation
 
 	my $is_dst = 0;
-	if ($user->{dst} eq "on") {  # manual on ("on")
+	if ($user->{dst} && $user->{dst} eq "on") {  # manual on ("on")
 		$is_dst = 1;
 
 	} elsif (!$user->{dst}) { # automatic (calculate on/off) ("")
