@@ -2751,6 +2751,8 @@ sub getUserAdmin {
 	if ($constants->{subscribe} and my $subscribe = getObject('Slash::Subscribe')) {
 		$user_edit->{subscribe_payments} =
 			$subscribe->getSubscriptionsForUser($user_edit->{uid});
+		$user_edit->{subscribe_purchases} =
+			$subscribe->getSubscriptionsPurchasedByUser($user_edit->{uid});
 	}
 
 	return slashDisplay('getUserAdmin', {
