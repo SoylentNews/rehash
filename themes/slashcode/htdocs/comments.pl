@@ -81,6 +81,12 @@ sub main {
 			[ qw ( max_post_check valid_check interval_check 
 				formkey_check regen_formkey ) ],
 		},
+		delete_forum		=> {
+			function		=> \&deleteForum,
+			seclev			=> 1000,
+			formname		=> 'discussions',
+			checks			=> ['generate_formkey'],
+		},
 		reply			=> {
 			function		=> \&editComment,
 			formname 		=> 'comments',
@@ -646,6 +652,17 @@ sub commentIndexPersonal {
 	} else {
 		print getData('users_no_discussions');
 	}
+}
+
+##################################################################
+# for ubb_like_forums
+sub deleteForum {
+	my($form, $slashdb, $user, $constants, $error_message) = @_;
+
+	$slashdb->deleteDiscussion($form->{sid}) if $constants->{ubb_like_forums};
+	commentIndexUserCreated(@_);
+
+	return;
 }
 
 ##################################################################
