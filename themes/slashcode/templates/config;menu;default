@@ -14,15 +14,23 @@ en_US
 __name__
 config
 __template__
-<TABLE BGCOLOR="[% user.bg.2 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
-	<TR>
-		<TD>
-[ [% FOR i = items %]
-		<FONT SIZE="2"><A HREF="[% i.value %]">[% i.label %]</A></FONT>
-	[% " | " UNLESS loop.last %]
-[% END %] ]	</TD>
+<NOBR>
+<TABLE WIDTH="100%" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">
+	<TR BGCOLOR="[% user.bg.2 %]">
+	[% PROCESS start_tab link="/" label="Home" selected=( page == 'home' ) next=( page == 'stories' ) %]
+	[% PROCESS mid_tab link="/admin.pl" label="Stories" selected=( page == 'stories' ) next=( page == 'topics' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=topics" label="Topics" selected=( page == 'topics' ) next=( page == 'blocks' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=blocks" label="Blocks" selected=( page == 'blocks' ) next=( page == 'colors' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=colors" label="Colors" selected=( page == 'blocks' ) next=( page == 'filters' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=listfilters" label="Filters" selected=( page == 'filters' ) next=( page == 'sections' ) %]
+	[% PROCESS mid_tab link="/sections.pl?op=list" label="Sections" selected=( page == 'sections' ) next=( page == 'templates' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=templates" label="Templates" selected=( page == 'templates' ) next=( page == 'vars' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=vars" label="Vars" selected=( page == 'vars' ) next=( page == 'info' ) %]
+	[% PROCESS mid_tab link="/admin.pl?op=recent" label="Info" selected=( page == 'info' ) next=( page == 'help' ) %]
+	[% PROCESS end_tab link="/getting_started.shtml" label="Help" selected=( page == 'help' ) %]
 	</TR>
 </TABLE>
+</NOBR>
 
 __seclev__
 10000
