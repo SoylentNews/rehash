@@ -60,6 +60,10 @@ __template__
 		[% END %]
 		</FONT>
 	</TD></TR>
+	<tr>
+		<td valign="top" align="right"><font color="[% user.colors.bg_3 %]"><b>URLs</b></font></td>
+		<td><code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL</td>
+	</tr>
 </TABLE>
 
 __seclev__
