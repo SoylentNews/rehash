@@ -334,7 +334,13 @@ sub IndexHandler {
 			$r->uri("/$constants->{index_handler}");
 			$r->filename("$basedir/$constants->{index_handler}");
 			return OK;
+		} elsif(!$dbon) {
+			# no db
+			$r->uri("/index.shtml");
+			return DECLINED;
 		} else {
+			# user not logged in
+	
 			# consider using File::Basename::basename() here
 			# for more robustness, if it ever matters -- pudge
 			my($base) = split(/\./, $constants->{index_handler});
@@ -356,6 +362,12 @@ sub IndexHandler {
 	# match /section/ or /section
 	if ($uri =~ m|^/(\w+)/?$|) {
 		my $key = $1;
+		
+		if (!$dbon) {
+			$r->uri("/index.shtml");
+			return DECLINED;
+		}
+
 		my $slashdb = getCurrentDB();
 		my $section = $slashdb->getSection($key);
 		my $index_handler = $section->{index_handler}
@@ -370,6 +382,8 @@ sub IndexHandler {
 				$r->filename("$basedir/$index_handler");
 				return OK;
 			} else {
+				# user not logged in
+
 				# consider using File::Basename::basename() here
 				# for more robustness, if it ever matters -- pudge
 				my($base) = split(/\./, $index_handler);
@@ -429,14 +443,13 @@ sub IndexHandler {
 		}
 	}
 
-	if (!$dbon && $uri !~ /\.shtml/) {
-		my $basedir  = $constants->{basedir};
-
+	if (!$dbon && $uri !~ /\.(?:shtml|jpg|gif|png)$/) {
+		# if db is off we don't necessarily have access to constants
+		# this means we change the URI and return DECLINED which lets
+		# Apache do the URI to filename translation
 		$r->uri('/index.shtml');
-		$r->filename("$basedir/index.shtml");
 		writeLog('shtml');
 		$r->notes('SLASH_FAILURE' => "db"); # You should be able to find this in other processes
-		return OK;
 	}
 
 	return DECLINED;
