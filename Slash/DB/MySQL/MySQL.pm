@@ -4150,6 +4150,10 @@ sub getSlashConf {
 			'Underrated'
 		];
 
+	# See <http://www.iana.org/assignments/uri-schemes>
+	$conf{approved_url_schemes} = $fixup->($conf{approved_url_schemes}) ||
+		[qw( ftp http gopher mailto news nntp telnet wais https )];
+
 	$conf{badreasons} = 4 unless defined $conf{badreasons};
 
 	# for fun ... or something
