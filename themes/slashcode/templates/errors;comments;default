@@ -105,7 +105,12 @@ sit in the timeout corner. If it's someone else, this is a chance to
 hunt them down.
 If you think this is unfair, please email
 [% IF constants.adminmail_mod; constants.adminmail_mod;
-ELSE; constants.adminmail; END %].
+ELSE; constants.adminmail; END %]
+with your MD5'd IPID and SubnetID, which are
+"<tt>[% user.ipid %]</tt>" and "<tt>[% user.subnetid %]</tt>"[%
+IF !user.is_anon %]
+and (optionally) your username, "<tt>[% user.nickname %]</tt>"[%
+END %].
 
 [% # NESTING TOO DEEP
 CASE "nesting too deep" %]
