@@ -237,7 +237,7 @@ sub displayStories {
 			print ' | <B>' if $cc;
 
 			if ($cc && $I{U}{threshold} > -1
-				&& $cc ne $threshComments[$I{U}{threshold}]+1) {
+				&& $cc ne $threshComments[$I{U}{threshold} + 1]) {
 
 				print linkStory({
 					sid	  => $sid,
