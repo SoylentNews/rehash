@@ -3781,6 +3781,7 @@ EOT
 		});
 		$self->setSubmission($subid, {
 			separate	=> 1,
+			storyonly	=> 1,
 			keywords	=> $_->{keywords},
 			url		=> $_->{url},
 			url_title	=> $_->{url_title},
