@@ -1403,16 +1403,23 @@ sub createAccessLog {
 		push @{$self->{_accesslog_insert_cache}}, $insert;
 		my $size = scalar(@{$self->{_accesslog_insert_cache}});
 		if ($size >= $constants->{accesslog_insert_cachesize}) {
-			$self->sqlDo("SET AUTOCOMMIT=0");
-			while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
-				$self->sqlInsert('accesslog', $hr, { delayed => 1 });
-			}
-			$self->sqlDo("COMMIT");
-			$self->sqlDo("SET AUTOCOMMIT=1");
+			$self->_writeAccessLogCache;
 		}
 	} else {
 		$self->sqlInsert('accesslog', $insert, { delayed => 1 });
 	}
+}
+
+sub _writeAccessLogCache {
+	my($self) = @_;
+	return unless ref($self->{_accesslog_insert_cache})
+		&& @{$self->{_accesslog_insert_cache}};
+	$self->sqlDo("SET AUTOCOMMIT=0");
+	while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
+		$self->sqlInsert('accesslog', $hr, { delayed => 1 });
+	}
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 }
 
 ##########################################################
@@ -7311,7 +7318,7 @@ sub _genericGetsCache {
 # scripts directly.
 sub _genericGets {
 	my($table, $table_prime, $param_table, $self, $values) = @_;
-	my(%return, $sth, $params);
+	my(%return, $sth, $params, $qlid);
 
 	if (ref($values) eq 'ARRAY') {
 		my $get_values;
@@ -7335,6 +7342,7 @@ sub _genericGets {
 		if ($get_values) {
 			my $val = join ',', @$get_values;
 			$val .= ",$table_prime" unless grep $table_prime, @$get_values;
+			$qlid = $self->_querylog_start('SELECT', $table);
 			$sth = $self->sqlSelectMany($val, $table);
 		}
 	} elsif ($values) {
@@ -7345,6 +7353,7 @@ sub _genericGets {
 
 			if ($use_table) {
 				$values .= ",$table_prime" unless $values eq $table_prime;
+				$qlid = $self->_querylog_start('SELECT', $table);
 				$sth = $self->sqlSelectMany($values, $table);
 			} else {
 				my $val = $self->sqlSelectAll("$table_prime, name, value", $param_table, "name=$values");
@@ -7354,13 +7363,15 @@ sub _genericGets {
 			}
 		} else {
 			$values .= ",$table_prime" unless $values eq $table_prime;
+			$qlid = $self->_querylog_start('SELECT', $table);
 			$sth = $self->sqlSelectMany($values, $table);
 		}
 	} else {
-		$sth = $self->sqlSelectMany('*', $table);
 		if ($param_table) {
 			$params = $self->sqlSelectAll("$table_prime, name, value", $param_table);
 		}
+		$qlid = $self->_querylog_start('SELECT', $table);
+		$sth = $self->sqlSelectMany('*', $table);
 	}
 
 	if ($sth) {
@@ -7368,12 +7379,11 @@ sub _genericGets {
 			$return{ $row->{$table_prime} } = $row;
 		}
 		$sth->finish;
+		$self->_querylog_finish($qlid);
 	}
 
 	if ($params) {
 		for (@$params) {
-			# this is not right ... perhaps the other is? -- pudge
-#			${return->{$_->[0]}->{$_->[1]}} = $_->[2]
 			$return{$_->[0]}{$_->[1]} = $_->[2]
 		}
 	}
@@ -7684,18 +7694,14 @@ sub sqlShowInnodbStatus {
 sub DESTROY {
 	my($self) = @_;
 
-	# flush accesslog insert cache
-	if (ref $self->{_accesslog_insert_cache}) {
+	# Flush accesslog insert cache, if necessary.
+	$self->_writeAccessLogCache;
 
-		$self->sqlDo("SET AUTOCOMMIT=0");
-		while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
-			$self->sqlInsert('accesslog', $hr, { delayed => 1 });
-		}
-		$self->sqlDo("commit");
-		$self->sqlDo("SET AUTOCOMMIT=1");
-	}
+	# Flush the querylog cache too, if necessary (see
+	# Slash::DB::Utility).
+	$self->_querylog_writecache;
 
-	$self->SUPER::DESTROY; # up up up up up up
+	$self->SUPER::DESTROY if $self->can("SUPER::DESTROY"); # up up up up up up
 }
 
 
