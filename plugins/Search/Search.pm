@@ -82,8 +82,13 @@ sub findComments {
 	$where .= "	  AND $key "
 			if $form->{query};
 
-	$where .= "     AND discussions.sid=" . $self->sqlQuote($form->{sid})
-			if $form->{sid};
+	if ($form->{sid}) {
+		if ($form->{sid} !~ /^\d+$/) {
+			$where .= "     AND discussions.sid=" . $self->sqlQuote($form->{sid})
+		} else {
+			$where .= "     AND discussions.id=" . $self->sqlQuote($form->{sid})
+		}
+	}
 	$where .= "     AND points >= " .  $self->sqlQuote($form->{threshold})
 			if $form->{threshold};
 	$where .= "     AND section=" . $self->sqlQuote($form->{section})

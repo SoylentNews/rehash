@@ -4,4 +4,4 @@ ALTER TABLE comments add fulltext (subject);
 ALTER TABLE comment_text add fulltext (comment);
 # ALTER TABLE blocks add fulltext (description,title,block);
 ALTER TABLE users add fulltext (nickname);
-ALTER TABLE pollquestions add fulltext (questions);
+ALTER TABLE pollquestions add fulltext (question);

@@ -77,7 +77,15 @@ sub main {
 		});
 
 		my $discussion = $slashdb->getDiscussionBySid($story->{sid});
-		printComments($discussion, '', '', 1);
+		if ($user->{state}{nocomment} || $user->{mode} eq 'nocomment') {
+			slashDisplay('printCommentsNone', {
+				title   => $discussion->{title},
+				'link'    => $discussion->{url},
+				sid   => $discussion->{id},
+			});
+		} else {
+			printComments($discussion);
+		}
 	} else {
 		my $message = getData('no_such_sid');
 		header($message);
