@@ -23,5 +23,7 @@ __template__
 		</TD>
 	</TR>
 
+[% INCLUDE dispLinkComment %]
+
 __seclev__
 10000

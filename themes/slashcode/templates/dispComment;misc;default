@@ -71,35 +71,7 @@ __template__
 	</TABLE>
 	</TD></TR>
 
-[% IF user.mode != 'archive' %]
-	[% pid = realpid || pid %]
-	<TR><TD><FONT SIZE="2">
-
-	[ [% Slash.linkComment({
-		sid	=> sid,
-		pid	=> cid,
-		op	=> 'Reply',
-		subject	=> 'Reply to This',
-	}) %] | [% Slash.linkComment({
-		sid	=> sid,
-		cid	=> pid,
-		pid	=> pid,
-		subject	=> 'Parent',
-	}, 1) %]
-
-	[% IF can_mod %]
-	| [% Slash.createSelect("reason_$cid", reasons, '', 1, 1);
-	   END
-	%]
-
-	[% IF user.is_admin %]
-| <INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
-	[% END %]
-	]
-	</FONT></TD></TR>
-<TR><TD>
-
-[% END %]
+[% INCLUDE dispLinkComment %]
 
 __seclev__
 10000
