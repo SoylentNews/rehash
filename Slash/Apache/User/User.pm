@@ -68,15 +68,12 @@ sub handler {
 		$uri =~ s/^\Q$path//;
 	}
 
-	unless ($cfg->{auth}) {
-		#unless ($uri =~ m[(?:^/$)|(?:\.pl$)])
-		unless ($uri =~ m[(?:\.pl$)]) {
-			$r->subprocess_env(SLASH_USER => $constants->{anonymous_coward_uid});
-			createCurrentUser();
-			createCurrentForm();
-			createCurrentCookie();
-			return OK;
-		}
+	if (!$cfg->{auth} && $uri !~ /\.pl$/) {
+		$r->subprocess_env(SLASH_USER => $constants->{anonymous_coward_uid});
+		createCurrentUser();
+		createCurrentForm();
+		createCurrentCookie();
+		return OK;
 	}
 
 	$slashdb->sqlConnect;
