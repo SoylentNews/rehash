@@ -62,24 +62,51 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
 [% IF constants.subscribe %]sbscrbr total:        -          -    [% ints(stats_data.total_subscriber) %]
 [% END %]
         posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.distinct_comment_ipids) %]
+[% IF stats_data.comments_page > 0 -%]
      comments: [% ints(stats_data.comments_uids) %]   [% ints(stats_data.comments_ipids) %]   [% ints(stats_data.comments_page) %] ([% PROCESS mbyte bytes => stats_data.comments_bytes %])
-        index:        -          -   [% ints(stats_data.homepage) %]
+[% END -%]
+[% IF stats_data.index_page > 0 -%]
+        index: [% ints(stats_data.index_uids) %]   [% ints(stats_data.index_ipids) %]   [% ints(stats_data.index_page) %]
+[% END -%]
+[% IF stats_data.page_page > 0 -%]
          page: [% ints(stats_data.page_uids) %]   [% ints(stats_data.page_ipids) %]   [% ints(stats_data.page_page) %]
+[% END -%]
+[% IF stats_data.article_page > 0 -%]
      articles: [% ints(stats_data.article_uids) %]   [% ints(stats_data.article_ipids) %]   [% ints(stats_data.article_page) %] ([% PROCESS mbyte bytes => stats_data.article_bytes %])
+[% END -%]
+[% IF stats_data.search_page > 0 -%]
        search: [% ints(stats_data.search_uids) %]   [% ints(stats_data.search_ipids) %]   [% ints(stats_data.search_page) %] ([% PROCESS mbyte bytes => stats_data.search_bytes %])
+[% END -%]
+[% IF stats_data.journal_page > 0 -%]
      journals: [% ints(stats_data.journal_uids) %]   [% ints(stats_data.journal_ipids) %]   [% ints(stats_data.journal_page) %] ([% PROCESS mbyte bytes => stats_data.journal_bytes %])
+[% END -%]
+[% IF stats_data.users__page > 0 -%]
+        users: [% ints(stats_data.users_uids) %]   [% ints(stats_data.users_ipids) %]   [% ints(stats_data.users_page) %] ([% PROCESS mbyte bytes => stats_data.users_bytes %])
+[% END -%]
+[% IF stats_data.palm_page > 0 -%]
          palm: [% ints(stats_data.palm_uids) %]   [% ints(stats_data.palm_ipids) %]   [% ints(stats_data.palm_page) %] ([% PROCESS mbyte bytes => stats_data.palm_bytes %])
+[% END -%]
+[% IF stats_data.rss_ipids > 0 -%]
           rss: [% ints(stats_data.rss_uids) %]   [% ints(stats_data.rss_ipids) %]   [% ints(stats_data.rss_page) %] ([% PROCESS mbyte bytes => stats_data.rss_bytes %])
+[% END -%]
+[% IF stats_data.other_page > 0 -%]
         other: [% ints(stats_data.other_uids) %]   [% ints(stats_data.other_ipids) %]   [% ints(stats_data.other_page) %] ([% PROCESS mbyte bytes => stats_data.other_bytes %])
+[% END -%]
 
     accesslog: [% ints(stats_data.accesslog) %] rows total
      formkeys: [% ints(stats_data.formkeys) %] rows total
      comments: [% ints(stats_data.comments) %] posted yesterday
   submissions: [% ints(stats_data.submissions) %] submissions 
  sub/comments: [% pcts(stats_data.sub_comments) %]% of the submissions came from comment posters from this day
+[% IF stats_data.error_count > 0 -%]
        errors: [% ints(stats_data.error_count) %] pages generated errors
+[% END -%]
+[% IF stats_data.not_found > 0 -%]
     not found: [% ints(stats_data.not_found) %] pages were not found
+[% END -%]
+[% IF stats_data.status_202 > 0 -%]
    status 202: [% ints(stats_data.status_202) %] pages sent with status 202 (rejected RSS)
+[% END -%]
 
    total hits: [% ints(stats_data.total_hits) %]</PRE>
 
