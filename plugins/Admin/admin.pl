@@ -1111,9 +1111,9 @@ sub get_ispell_comments {
 	$ok =~ s/\s+/\n/g;
 
 	local *ISPELL;
-	my $tmptext = write_to_temp_file(lc($text));
+	my $tmptext = write_to_temp_file($text);
 	my $tmpok = "";
-	$tmpok = write_to_temp_file(lc($ok)) if $ok;
+	$tmpok = write_to_temp_file($ok) if $ok;
 	my $tmpok_flag = "";
 	$tmpok_flag = " -p $tmpok" if $tmpok;
 	if (!open(ISPELL, "$ispell -a -B -S -W 3$tmpok_flag < $tmptext 2> /dev/null |")) {
