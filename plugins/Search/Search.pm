@@ -10,6 +10,7 @@ use Slash::Utility;
 use Slash::DB::Utility;
 use vars qw($VERSION);
 use base 'Slash::DB::Utility';
+use Data::Dumper;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -245,35 +246,12 @@ sub findStory {
 	$where .= " AND displaystatus != -1";
 
 	my $slashdb = getCurrentDB();
-	my $section = $slashdb->getSection(); 
-	if ($form->{section}) {
-		if ($form->{section} ne $constants->{section}) {
-			if ($section->{type} eq 'collected') {
-				if (!$section->{contained}
-					|| scalar(@{$section->{contained}}) == 0
-					|| (grep { $form->{section} eq $_ } @{$section->{contained}})
-				) {
-					$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
-				} else {
-					# Section doesn't belong to this contained section
-					# Tecnically we should return nothing but users are too dumb for that :)  -Brian
-					$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
-				}
-			} else  {
-				# Means we are dealing with a contained section and this is not the contained section
-				# Tecnically we should return nothing but users are too dumb for that :)  -Brian
-				$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
-			}
-		} else {
-			$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
-		}
+	my $SECT = $slashdb->getSection($form->{section});
+	if ($SECT->{type} eq 'collected') {
+		$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
 	} else {
-		if ($section->{type} eq 'collected') {
-			$where .= " AND stories.section IN ('" . join("','", @{$section->{contained}}) . "')" 
-				if $section->{contained} && @{$section->{contained}};
-		} else {
-			$where .= " AND stories.section = " . $self->sqlQuote($section->{section});
-		}
+		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
 	}
 
 	if (ref($form->{_multi}{tid}) eq 'ARRAY') {
