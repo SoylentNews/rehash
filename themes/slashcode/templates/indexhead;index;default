@@ -51,6 +51,8 @@ There's another story coming up soon, stay tuned.
 and we'll let you read it! :)<BR>
 [% END %]
 
+[% daypass_plug_text %]
+
 	[% group    = ['Flock', 'Swarm', 'Barrel', 'Team', 'Squadron',
 	               'Group', 'Cadre'];
 	   modifier = ['Rabid', 'Uber', 'Psycho', 'Attack', 'Circus',

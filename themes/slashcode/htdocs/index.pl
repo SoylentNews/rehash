@@ -155,6 +155,16 @@ my $start_time = Time::HiRes::time;
 		$future_plug = 1;
 	}
 
+	# Do we want to display the plug offering the user a daypass?
+	my $daypass_plug_text = "";
+	if ($constants->{daypass}) {
+		my $daypass_db = getObject('Slash::Daypass', { db_type => 'reader' });
+		my $do_offer = $daypass_db->doOfferDaypass();
+		if ($do_offer) {
+			$daypass_plug_text = $daypass_db->getOfferText();
+		}
+	}
+
 	return do_rss($reader, $constants, $user, $form, $stories, $skin_name) if $rss;
 
 #	# See comment in plugins/Journal/journal.pl for its call of
@@ -208,6 +218,7 @@ my $start_time = Time::HiRes::time;
 	slashDisplay('index', {
 		metamod_elig	=> scalar $reader->metamodEligible($user),
 		future_plug	=> $future_plug,
+		daypass_plug_text => $daypass_plug_text,
 		stories		=> $Stories,
 		boxes		=> $StandardBlocks,
 	});
@@ -215,6 +226,24 @@ my $start_time = Time::HiRes::time;
 	footer();
 
 	writeLog($skin_name);
+
+#	{
+#		use Proc::ProcessTable;
+#		my $t = new Proc::ProcessTable;
+#		my $procs = $t->table();
+#		PROC: for my $proc (@$procs) {
+#			my $pid = $proc->pid();
+#			next unless $pid == $$;
+#			my $size = $proc->size();
+#
+#			if ($size > 10_000_000) {
+#				my $mb = sprintf("%.2f", $size/1_000_000);
+#				print STDERR "pid $$ VSZ $mb MB: just finished op '$form->{op}' sid '$form->{sid}' issue '$form->{issue}' skid '$gSkin->{skid}' uid '$user->{uid}'\n";
+#				last PROC;
+#			}
+#		}
+#	}
+
 }
 
 sub getSidFromRemark {
@@ -493,8 +522,21 @@ sub displayStories {
 
 		# This user may not be authorized to see future stories;  if so,
 		# skip them.
-		next if $story->{is_future}
-			&& (!$user->{is_subscriber} || !$constants->{subscribe_future_secs});
+		if ($story->{is_future}) {
+			# If the user is a subscriber or has a daypass, the
+			# is_subscriber field will be set.  If that field is
+			# not set, future stories are off-limits.
+			next if !$user->{is_subscriber};
+			# If the user is only an honorary subscriber because
+			# they have a daypass, and honorary subscribers don't
+			# get to see The Mysterious Future, future stories are
+			# off-limits.
+			next if $user->{is_subscriber} && $user->{has_daypass}
+				&& !$constants->{daypass_seetmf};
+			# If subscribers are allowed to see 0 seconds into the
+			# future, future stories are off-limits.
+			next if !$constants->{subscribe_future_secs};
+		}
 
 		# Check the day this story was posted (in the user's timezone).
 		# Compare it to what we believe "today" is (which will be the

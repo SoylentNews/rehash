@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+* adnum = ad number to display
+* dpk = daypasskey text string
+
+__title__
+
+__page__
+daypass
+__lang__
+en_US
+__name__
+main
+__template__
+
+<p>When done viewing our ad, you may
+<a href="/daypass.pl?dpk=[% daypasskey | strip_attribute %]">continue</a>
+with your honorary subscription for the day.
+
+<p>[% Slash.getAd(adnum) %]
+
+__seclev__
+10000
+__version__
+$Id$
