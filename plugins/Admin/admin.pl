@@ -296,24 +296,18 @@ sub templateEdit {
 	#Just to punish those section only admins! -Brian
 	$form->{section} = $user->{section} if $user->{section};
 
-	if ($form->{templatenew} || $form->{templatepage} || $form->{templatesection}) {
-		$tpid = '';
-		$page = $form->{page};
+	if ($form->{templatenew} || $form->{templatepage} || $form->{templatesection} || $form->{templatepageandsection}) {
+		$tpid    = '';
+		$page    = $form->{page};
 		$section = $form->{section};
 
 	} elsif ($form->{templatesave} || $form->{templatesavedef}) {
-		if ($form->{save_new}) {
-			$section = $form->{newS} ? $form->{newsection} : $form->{section};
-			$page = $form->{newP} ? $form->{newpage} : $form->{page};
-		} else {
-			$section = $form->{newS} ? $form->{newsection} : $form->{savesection};
-			$page = $form->{newP} ? $form->{newpage} : $form->{savepage};
-		}
-
+		$page    = $form->{newP} ? $form->{newpage}    : $form->{savepage};
+		$section = $form->{newS} ? $form->{newsection} : $form->{savesection};
 	
 		my $templateref = $slashdb->getTemplate($form->{thistpid}, '', 1);
-		if ( $templateref->{seclev} <= $user->{seclev}) {
-			templateSave($form->{thistpid}, $form->{name},  $page, $section);
+		if ($templateref->{seclev} <= $user->{seclev}) {
+			templateSave($form->{thistpid}, $form->{name}, $page, $section);
 		} else {
 			print getData('seclev-message', { name => $form->{name}, tpid => $form->{thistpid} });
 		}
@@ -330,12 +324,12 @@ sub templateEdit {
 		}
 
 	} else {
-		$tpid = $form->{tpid};
-		$page = $form->{page};
+		$tpid    = $form->{tpid};
+		$page    = $form->{page};
 		$section = $form->{section};
 	}
 
-	$page ||= 'misc';
+	$page    ||= 'misc';
 	$section ||= 'default';
 
 	$templateref = $slashdb->getTemplate($tpid, '', 1) if $tpid;
@@ -346,27 +340,37 @@ sub templateEdit {
 	} else {
 		my $templates = {};
 
-		if ($form->{templatesection}) {
-			if ($section eq 'All') {
-				$templates = $slashdb->getTemplateList('', $page);
-			} else {
-				$templates = $slashdb->getTemplateList($section);
-			}
-		} else {
-			if ($page eq 'All') {
-				$templates = $slashdb->getTemplateList();
-			} else {
-				$templates = $slashdb->getTemplateList('', $page);
-			}
+		my $getpage    = $page    eq 'All' ? '' : $page;
+		my $getsection = $section eq 'All' ? '' : $section;
+
+		unless ($form->{templatesection} || $form->{templatepage} || $form->{templatesearch}) {
+			$form->{ $form->{templatelastselect} } = 1;
 		}
 
-		my $pages = $slashdb->getDescriptions('pages', $page, 1);
+		if ($form->{templatesection}) {
+			$getpage    = '';
+			$form->{templatelastselect} = 'templatesection';
+		} elsif ($form->{templatepage}) {
+			$getsection = '';
+			$form->{templatelastselect} = 'templatepage';
+		}
+
+		if ($form->{templatesearch}) {
+			$getsection = $getpage = $tpid = '';
+			$templateref = {};
+			$form->{templatelastselect} = 'templatesearch';
+			$templates = $slashdb->getTemplateListByText($form->{'templatesearchtext'});
+		} else {
+			$templates = $slashdb->getTemplateList($getsection, $getpage);
+		}
+
+		my $pages    = $slashdb->getDescriptions('pages', $page, 1);
 		my $sections = $slashdb->getDescriptions('templatesections', $section, 1);
 
-		$pages->{All} = 'All';
-		$pages->{misc} = 'misc';
+		$pages->{All}        = 'All';
+		$pages->{misc}       = 'misc';
+		$sections->{All}     = 'All';
 		$sections->{default} = 'default';
-		$sections->{All} = 'All';
 
 		# put these in alpha order by label, and add tpid to label
 		my @ordered;
@@ -375,13 +379,11 @@ sub templateEdit {
 			$templates->{$_} = $templates->{$_} . " ($_)";
 		}
 
-		$page_select = createSelect('page', $pages, $page, 1);
-		$savepage_select = createSelect('savepage', $pages, $templateref->{page}, 1)
-			if $templateref->{tpid};
-		$template_select = createSelect('tpid', $templates, $tpid, 1, 0, \@ordered);
-		$section_select = createSelect('section', $sections, $section, 1);
-		$savesection_select = createSelect('savesection', $sections, $templateref->{section}, 1)
-			if $templateref->{tpid};
+		$template_select    = createSelect('tpid',        $templates, $tpid,    1, 0, \@ordered);
+		$page_select        = createSelect('page',        $pages,     $page,    1);
+		$savepage_select    = createSelect('savepage',    $pages,     $templateref->{page}    || $form->{page}, 1);
+		$section_select     = createSelect('section',     $sections,  $section, 1);
+		$savesection_select = createSelect('savesection', $sections,  $templateref->{section} || $form->{section}, 1);
 	}
 
 	if (!$form->{templatenew} && $tpid && $templateref->{tpid}) {

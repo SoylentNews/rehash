@@ -45,32 +45,35 @@ __template__
 
 [% ELSE %]
 
-<P>Select a template to edit.
-</P>
+<H2>Select a template to edit.</H2>
+<INPUT TYPE="HIDDEN" NAME="templatelastselect" VALUE="[% form.templatelastselect | strip_attribute %]">
 <TABLE>
 	<TR>
-		<TD><B>Section</B></TD>
-		<TD>[% section_select %]</TD>
-		<TD><INPUT TYPE="SUBMIT" VALUE="Select section" NAME="templatesection">
-		</TD>
+		<TD>[% PROCESS formLabel value => "Search for template text" %]</TD>
+		<TD><INPUT TYPE="TEXT" VALUE="[% form.templatesearchtext | strip_attribute %]" NAME="templatesearchtext"></TD>
+		<TD COLSPAN="2"><INPUT TYPE="SUBMIT" VALUE="Search for text" NAME="templatesearch"></TD>
 	</TR>
 	<TR>
-		<TD><B>Page</B></TD>
+		<TD>[% PROCESS formLabel value => "Section" %]</TD>
+		<TD>[% section_select %]</TD>
+		<TD COLSPAN="2"><INPUT TYPE="SUBMIT" VALUE="Select section" NAME="templatesection"></TD>
+	</TR>
+	<TR>
+		<TD>[% PROCESS formLabel value => "Page" %]</TD>
 		<TD>[% page_select %]</TD>
 		<TD><INPUT TYPE="SUBMIT" VALUE="Select page" NAME="templatepage"></TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Select page and section" NAME="templatepageandsection"></TD>
 	</TR>
 	<TR>
-		<TD><B>Templates</B></TD>
+		<TD>[% PROCESS formLabel value => "Templates" %]</TD>
 		<TD>[% template_select %]</TD>
 		<TD><INPUT TYPE="SUBMIT" VALUE="Edit Template" NAME="templateed"></TD>
 		<TD><INPUT TYPE="SUBMIT" VALUE="Delete Template" NAME="templatedelete"></TD>
 	</TR>
 [% IF ! form.templatenew %]
 	<TR>
-		<td><b>Create a new template:</b></td>
-		<TD>
-		<INPUT TYPE="SUBMIT" VALUE="Create a new template" NAME="templatenew"></P>
-		</TD>
+		<TD>[% PROCESS formLabel value => "Create a new template " %]</TD>
+		<TD COLSPAN="3"><INPUT TYPE="SUBMIT" VALUE="Create a new template" NAME="templatenew"></TD>
 	</TR>
 [% END %]
 </TABLE>
@@ -94,40 +97,37 @@ __template__
 	</TR>
 	[% END %]
 
-	[% IF templateedit_flag %]
 	<TR>
-		<TD><b>Save template in section: </b></td>
-		<td>[% savesection_select %]</TD>
+		<TD>[% PROCESS formLabel value => "Save template in section" %]</TD>
+		<TD>[% savesection_select %]</TD>
 	</TR>
-	[% END %]	
-
-	<tr>
-		<td><B>Template section </b> ( new template section? <input type="checkbox" name="newS"> )</td>
-		<TD><INPUT TYPE="TEXT" NAME="newsection" VALUE="[% form.section %]"></TD>
-	</tr>
-	
-	[% IF templateedit_flag %]
-	<tr>	
-		<TD><b>Save template in page: </b></td>
-		<td>[% savepage_select %]</td>
-	</tr>
-	[% END %]
-	
-	<tr>
-		<td><b>Template page </b> (new template page? <input type="checkbox" name="newP"> )</td>
-		<TD><INPUT TYPE="TEXT" NAME="newpage" VALUE="[% form.page %]"></TD>
-	</tr>
 
 	<TR>
-		<TD><B>Template Name</B></TD>
+		<TD>[% PROCESS formLabel value => "Template section", comment => 'new template section <INPUT TYPE="checkbox" NAME="newS">' %]</TD>
+		<TD><INPUT TYPE="TEXT" NAME="newsection" VALUE="[% form.section %]"></TD>
+	</TR>
+	
+	<TR>	
+		<TD>[% PROCESS formLabel value => "Save template in page", comment => '' %]</TD>
+		<TD>[% savepage_select %]</TD>
+	</TR>
+	
+	<TR>
+		<TD>[% PROCESS formLabel value => "Template page", comment => 'new template page <INPUT TYPE="checkbox" NAME="newP">' %]</TD>
+		<TD><INPUT TYPE="TEXT" NAME="newpage" VALUE="[% form.page %]"></TD>
+	</TR>
+
+	<TR>
+		<TD>[% PROCESS formLabel value => "Template Name", comment => '' %]</TD>
 		<TD><INPUT TYPE="TEXT" NAME="name" VALUE="[% templateref.name %]"><INPUT TYPE="HIDDEN" NAME="thistpid" VALUE="[% tpid %]"></TD>
 	</TR>
 	<TR>
-		<TD><B>Title</B></TD>
+		<TD>[% PROCESS formLabel value => "Title" %]</TD>
 		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="70" NAME="title" VALUE="[% FILTER strip_attribute %][% templateref.title %][% END %]"></TD>
 	</TR>
 	<TR>
-		<TD><B>Seclev</B></TD><TD><INPUT TYPE="TEXT" NAME="seclev" VALUE="[% templateref.seclev %]" SIZE="6"></TD>
+		<TD>[% PROCESS formLabel value => "Seclev" %]</TD>
+		<TD><INPUT TYPE="TEXT" NAME="seclev" VALUE="[% templateref.seclev %]" SIZE="6"></TD>
 	</TR>
 
 	[% IF templateedit_flag %]
@@ -137,20 +137,17 @@ __template__
 	[% END %]
 
 	<TR>
-		<TD VALIGN="TOP"><B>Description</B></TD>
-		<TD ALIGN="left" COLSPAN="2">
+		<TD VALIGN="TOP">[% PROCESS formLabel value => "Description" %]</TD>
+		<TD ALIGN="LEFT" COLSPAN="2">
 		<TEXTAREA ROWS="6" COLS="70" NAME="description">[% templateref.description | strip_literal %]</TEXTAREA>
 		</TD>
 	</TR>
 	<TR>
-		<TD VALIGN="TOP"><B>Template</B><BR>
-		<P>
-			<INPUT TYPE="SUBMIT" VALUE="Save Template" NAME="templatesave"><BR>
-		</P>
+		<TD VALIGN="TOP">[% PROCESS formLabel value => "Template" %]
+			<P><INPUT TYPE="SUBMIT" VALUE="Save Template" NAME="templatesave"></P>
 		</TD>
-		<TD ALIGN="left" COLSPAN="2">
-
-		<TEXTAREA ROWS="15" COLS="100" NAME="template">[% templateref.template | strip_literal %]</TEXTAREA>
+		<TD ALIGN="LEFT" COLSPAN="2">
+			<TEXTAREA ROWS="15" COLS="100" NAME="template">[% templateref.template | strip_literal %]</TEXTAREA>
 		</TD>
 	</TR>
 [% ELSIF seclev_flag == 0 %]
@@ -159,25 +156,20 @@ You don't have privileges to edit the template [% templateref.name %], TPID [% t
 
 [% IF form.templatedelete_cancel %]
 	<TR>
-		<TD COLSPAN="3">
-		<INPUT TYPE="SUBMIT" VALUE="Delete template" NAME="templatedelete"></P>
-		</TD>
+		<TD COLSPAN="3"><INPUT TYPE="SUBMIT" VALUE="Delete template" NAME="templatedelete"></P></TD>
 	</TR>
 [% END %]
 
 [% IF ! form.templatenew && templateform_flag %]
 	<TR>
-		<td><b>Create a new template:</b></td>
-		<TD>
-		<INPUT TYPE="SUBMIT" VALUE="Create a new template" NAME="templatenew"></P>
-		</TD>
+		<TD>[% PROCESS formLabel value => "Create a new template" %]</TD>
+		<TD><INPUT TYPE="SUBMIT" VALUE="Create a new template" NAME="templatenew"></TD>
 	</TR>
 [% END %]
 
 
 </TABLE>
 </FORM>
-<B>
 
 __seclev__
 500

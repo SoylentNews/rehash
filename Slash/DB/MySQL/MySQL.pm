@@ -6136,6 +6136,21 @@ sub getTemplate {
 }
 
 ########################################################
+sub getTemplateListByText {
+	my($self, $text) = @_;
+
+	my %templatelist;
+	my $where = 'template LIKE ' . $self->sqlQuote("%${text}%");
+	my $templates =	$self->sqlSelectMany('tpid, name', 'templates', $where); 
+	while (my($tpid, $name) = $templates->fetchrow) {
+		$templatelist{$tpid} = $name;
+	}
+
+	return \%templatelist;
+}
+
+
+########################################################
 # This is a bit different
 sub getTemplateByName {
 	my($self, $name, $values, $cache_flag, $page, $section, $ignore_errors) = @_;
