@@ -220,7 +220,6 @@ __template__
 
 		[ <INPUT TYPE="checkbox" NAME="fixquotes" [% fixquotes_check %]>fixquotes
 		| <INPUT TYPE="checkbox" NAME="autonode" [% autonode_check %]>autonode
-		| <INPUT TYPE="checkbox" NAME="shortcuts" [% shortcuts_check %]>story shortcuts
 
 		[% IF sid %]
 		| <INPUT TYPE="checkbox" NAME="fastforward" [% fastforward_check %]>fastforward  
