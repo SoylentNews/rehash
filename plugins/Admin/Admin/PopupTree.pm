@@ -74,6 +74,7 @@ sub getPopupTree {
 	for my $tid (map  { $_->[0] }
 	             sort { $a->[1] cmp $b->[1] }
 	             map  { [ $_, lc $tree->{$_}{textname} ] } keys %$tree) {
+		next unless $tid; # just in case someone added a bad tid
 		my $top = $tree->{$tid};
 		@{$topics{$tid}}{qw(value label height width image)} = (
 			$tid, @{$top}{qw(textname height width image)}
