@@ -72,7 +72,7 @@ to do this unless you need more context to fairly meta moderate.<BR><BR></LI>
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="0" CHECKED>
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="+">
 		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.name; ELSE; "Fair"; END %]
-		</B>&nbsp;&nbsp|&nbsp;
+		</B>&nbsp;&nbsp;|&nbsp;
 		<A HREF="[% context_url %]">See Context</A><HR>
 	</TD></TR>
 [% END %]
