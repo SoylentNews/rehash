@@ -987,6 +987,73 @@ sub messagedLog {
 	goto &errorLog;
 }
 
+
+##################################################################
+# Send messages regarding this moderation to user who posted
+# comment if they have that bit set.
+#
+# This piece of code moved here so both admin.pl and comments.pl
+# could use it
+
+sub send_mod_msg {
+	my($mod) = @_;
+
+	my $messages	= getObject('Slash::Messages') or return;
+
+	my $constants	= getCurrentStatic();
+	my $slashdb	= getCurrentDB();
+	my $user	= getCurrentUser();
+
+	my $sid		= $mod->{sid};
+	my $cid		= $mod->{cid};
+	my $val		= $mod->{val};
+	my $reason	= $mod->{reason};
+	my $type	= $mod->{type}    || 'mod_msg';
+	my $comment	= $mod->{comment} || $slashdb->getComment($cid);
+
+	my $comm	= $slashdb->getCommentReply($sid, $cid);
+	my $users	= $messages->checkMessageCodes(
+		MSG_CODE_COMMENT_MODERATE, [$comment->{uid}]
+	);
+
+	if (@$users) {
+		my $discussion = $slashdb->getDiscussion($sid);
+		if ($discussion->{sid}) {
+			# Story discussion, link to it.
+			$discussion->{realurl} = "/article.pl?sid=$discussion->{sid}";
+		} else {
+			# Some other kind of discussion,
+			# probably poll, journal entry, or
+			# user-created;  don't trust its url. -- jamie
+			# I really don't like this.  I want users
+			# to be able to go to the poll or journal
+			# directly.  we could consider matching a pattern
+			# for journal.pl or pollBooth.pl etc.,
+			# but that is not great.  maybe a field in discussions
+			# for whether or not url is trusted. -- pudge
+			$discussion->{realurl} = "/comments.pl?sid=$discussion->{id}";
+		}
+
+		my $data  = {
+			template_name	=> $type,
+			subject		=> {
+				template_name => $type . '_subj'
+			},
+			comment		=> $comm,
+			discussion	=> $discussion,
+			moderation	=> {
+				user	=> $user,
+				value	=> $val,
+				reason	=> $reason,
+			},
+			reasons		=> $slashdb->getReasons(),
+		};
+		$messages->create($users->[0],
+			MSG_CODE_COMMENT_MODERATE, $data, 0, '', 'collective'
+		);
+	}
+}
+
 1;
 
 __END__
