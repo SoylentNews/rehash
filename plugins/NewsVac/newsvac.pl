@@ -182,9 +182,8 @@ sub updateMiner {
 	my $miner_id = $form->{miner_id} || 0;
 
 	if ($form->{op} eq 'newminer') {
-		# Get miner name from the form, or set an appropriate default.
-		my $name = $form->{newname} ||
-	 'miner' . time . int(rand(900)+100);
+		 # Get miner name from the form, or set an appropriate default.
+		my $name = $form->{newname} || 'miner' . time . int(rand(900)+100);
 		$name = substr($name, 0, 20);
 		$name =~ s/\W+//g;
 		$miner_id = $udbt->minername_to_id($name);
@@ -260,7 +259,7 @@ EOT
 				url_ar	=> $urls_ar 
 			});
 
-			editMiner(@_,$miner_id);
+			editMiner(@_, $miner_id);
 		} else {
 			$udbt->delMiner($miner_id);
 			slashDisplay('updateMiner', {
@@ -422,7 +421,7 @@ sub show_miner_rel_info {
 	my ($slashdb, $form, $user, $udbt, @url_ids) = @_;
 
 	return if !@url_ids;
-	my $ar = $udbt->getURLRelationships(\@url_ids);
+	my $ar = $udbt->getURLRelationships(\@url_ids, 100);
 
 	for (@{$ar}) {
 		if ($_->{url} =~ /^nugget:/) {
@@ -452,7 +451,7 @@ sub editUrl {
 	my($new_url, $titlebar_type);
         $urlid ||= $form->{url_id};
 
-	if ($urlid eq "new") {
+	if ($urlid eq 'new' || $urlid eq 'newurl') {
 		$new_url = $form->{newurl};
 		$new_url = $udbt->canonical($new_url);
 		$urlid = $udbt->url_to_id($new_url);
@@ -463,6 +462,7 @@ sub editUrl {
 			$urlid = $udbt->url_to_id($new_url);
 			$udbt->correlate_miner_to_urls('none', $new_url)
 				if $urlid;
+		} else {
 			$titlebar_type = 'existing';
 		} 
 	} else {
@@ -471,7 +471,7 @@ sub editUrl {
 
 	my ($url_id, $url, $title, $miner_id, $last_attempt, $last_success,
 	    $status_code, $reason_phrase, $message_body_length) =
-				$udbt->getURLData($urlid);
+		$udbt->getURLData($urlid);
 
 	my $miner_name;
 	$miner_name = $udbt->id_to_minername($miner_id) if $miner_id;
@@ -496,6 +496,13 @@ sub editUrl {
 	});
 			
 	show_miner_rel_info(@_, $url_id);
+}
+
+##################################################################
+sub newUrl {
+	my ($slashdb, $form, $user, $udbt) = @_;
+
+	editUrl(@_, 'newurl');
 }
 
 ##################################################################
@@ -604,7 +611,45 @@ sub editSpider {
 sub updateSpider {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
-	if ($form->{updatespider}) {
+	# OK, this is kind of a whacked way to do this, but in the interest of time,
+	# I'm going to hack this back to how the original code intended this to work.
+	# MOST of the form handling performed by this code should probably be
+	# redone if problems persist.
+	if ($form->{runspider}) {
+		# THIS block is for force-executing a spider.
+		my $spider_id = $form->{spider_id};
+		my $spider_name = $udbt->getSpiderName($spider_id);
+
+		if ($spider_name) {
+			$udbt->{debug} = 1;
+			$udbt->spider_by_name($spider_name);
+			$udbt->{debug} = 0;
+		}
+		print getData('update_spider_runspider', {
+			spider_name => $spider_name 
+		});
+
+		editSpider(@_, $spider_id);
+	} elsif ($form->{newspider}) {
+		# THIS block is for creating a new spider.
+		if (!$form->{newname}) {
+			print getData('update_spider_noname');
+		} else {
+			# If successful, $rc contains the id of the newly created spider.
+			my $rc = $udbt->add_spider($form->{newname});
+
+			print getData('update_spider_add_results', {
+				success => $rc,
+			});
+
+			if ($rc) {
+				editSpider(@_, $rc);
+			} else {
+				listSpiders(@_);
+			}
+		}
+	} else {
+		# THIS block is where spider data is saved.
 		my $spider_id = $form->{spider_id};
 		my %set_clause;
 
@@ -616,25 +661,22 @@ sub updateSpider {
 			group_0_selects 
 			commands
 		);
-
 		$udbt->setSpider($spider_id, \%set_clause);
 
-		slashDisplay('updateSpider');
-                editSpider(@_, $spider_id);
-	} elsif ($form->{runspider}) {
-		my $spider_id = $form->{spider_id};
-		my $spider_name = $udbt->getSpiderName($spider_id);
+		print getData('update_spider_savedspider', {
+			spider_name => $form->{name},
+		});
 
-		if ($spider_name) {
-			$udbt->{debug} = 1;
-			$udbt->spider_by_name($spider_name);
-			$udbt->{debug} = 0;
-		}
-		slashDisplay('updateSpider', { spider_name => $spider_name });
-				editSpider(@_,$spider_id);
-		}
+		editSpider(@_, $spider_id);
+	}
 }
 
+##################################################################
+sub timingDump {
+	my ($slashdb, $form, $user, $udbt) = @_;
+
+	$udbt->timing_dump();
+}
 
 ##################################################################
 sub main {
@@ -655,6 +697,10 @@ sub main {
 			function=> \&listMiners,
 			seclev	=> $required_seclev,
 		},
+		newminer  => {
+			function=> \&updateMiner,
+			seclev	=> $required_seclev,
+		},
 		editminer => {
 			function=> \&editMiner,
 			seclev	=> $required_seclev,
@@ -672,7 +718,7 @@ sub main {
 			seclev	=> $required_seclev,
 		},
 		newurl => {
-			function=> \&editUrl,
+			function=> \&newUrl,
 			seclev	=> $required_seclev,
 		},
 		editurl => {
@@ -696,17 +742,32 @@ sub main {
 			seclev	=> $required_seclev,
 		},
 		timingdump => {
-			function=> \$udbt->timing_dump,
+			function=> \&timingDump,
 			seclev	=> $required_seclev,
 		},
+
+		default => {
+			function=> \&listMiners,
+			seclev  => $required_seclev,
+		}
 	};
 
-	$op ||= 'listminers';
+	$op ||= '';
+	$op = 'default' if !($op && exists $ops->{$op});
 	if ($op) {
-		$op = '' unless $user->{seclev} >= $ops->{$op}{seclev};
-		# Currently $slashdb isn't used in any of our dispatchers, but
-		# this may not always be the case.
-		$ops->{$op}{function}->($slashdb, $form, $user, $udbt) if $op;
+		my @args = ($slashdb, $form, $user, $udbt);
+		if (exists $ops->{$op}) {
+			# Currently $slashdb isn't used in any of our dispatchers, but
+			# this may not always be the case.
+			if ($user->{seclev} >= $ops->{$op}{seclev}) {
+				$ops->{$op}{function}->(@args);
+			} else {
+				print getData('invalid_seclev');
+			}
+		} else {
+			print getData('invalid_op');
+			$ops->{default}{function}->(@args);
+		}
 	}
 	print getData('noop') if ! $op;
 

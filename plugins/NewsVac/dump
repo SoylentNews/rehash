@@ -8,29 +8,24 @@ INSERT INTO code_param (type, code, name) VALUES ('progress', 2, 'great');
 #
 
 
-# MySQL dump 7.1
-#
-# Host: cpu86    Database: nfslash
-#--------------------------------------------------------
-# Server version	3.22.32-log
-
 #
 # Dumping data for table 'spider'
 #
 
 INSERT INTO spider VALUES (1,'allminers',20000822190727,'jamie','','[ \'url_info.miner_id > 0\' ]','[\r\n[ 0, 1, q{ rel.parse_code = \'miner\' }, \"LIMIT 5000\" ],\r\n[ 1, 2, q{ rel.parse_code = \'nugget\' }, \"LIMIT 5000\" ],\r\n[ 2, 3, q{ 1 = 0 }, \"LIMIT 0\" ]\r\n]');
 
-# MySQL dump 7.1
-#
-# Host: cpu86    Database: nfslash
-#--------------------------------------------------------
-# Server version	3.22.32-log
-
 #
 # Dumping data for table 'miner'
 #
 
-INSERT INTO miner VALUES (20,'none',20000629201648,'jamie','jamie','broken','','','','','','ThisTextIsNotExpectedToMatchAnything','','Please don\'t edit this miner. -Jamie');
+INSERT INTO miner VALUES (2,'none',20000629201648,'God','God','broken','','','','','','ThisTextIsNotExpectedToMatchAnything','','This is a placeholder, do not edit this. -Slashteam');
+INSERT INTO miner VALUES (1,'osdn',20020409034422,'God','Gof','ok','','','(?i)^(.+)<!-- begin osdnpress -->','(?i)<!-- end osdnpress -->(.+)$','url title','(?i)<li><a[ ]HREF=\"\r\n(.+?)\r\n\">\r\n(.+?)\r\n</a></li>','$source = \"OSDN\";','This is the default miner for NewsVac which checks OSDN\'s website.');
+
+#
+# Dumping data for table 'url_info'
+#
+
+INSERT INTO url_info (url_id, url_digest, url, url_base, is_success, last_attempt, last_success, believed_fresh_until, status_code, reason_phrase, content_type, title, miner_id) VALUES (1,'ltbapcrhN90oj3TKp/wPyg','http://www.osdn.com/',NULL,1,'2002-04-09 07:39:41','2002-04-09 07:39:41','2002-04-09 08:39:41',200,'OK','text/html; charset=ISO-8859-1','OSDN: Open Source Development Network',1);
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin', 'NewsVac', '[% constants.rootdir %]/newsvac.pl', 5000, 100);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Miners','[% constants.rootdir %]/newsvac.pl?op=listminers',10000,9);

@@ -44,7 +44,13 @@ __template__
 </table>
 <table border="0" width=900>
         <tr>
-                <td colspan="8">&nbsp;</td>
+		<td colspan=8>
+	[%- IF urls_total != urls_with_miners -%]
+		<i>[% urls_total %] URLs in database, 
+		[% urls_with_miners %] have an associated miner.
+		</i>
+	[%- ELSE %]&nbsp;[% END -%]
+		</td>
         </tr>
         <tr>
                 <td width="5%"><b>ID</b></td>
@@ -55,15 +61,6 @@ __template__
                 <td width="10%"><b>Miner&nbsp;Name</b></td>
                 <td width="45%"><b>URL</b></td>
         </tr>
-	[%- IF urls_total != urls_with_miners -%]
-	<tr>
-		<td colspan=8>
-		<i><% n_urls_total %> URLs in database, 
-		<% n_urls_with_miners %> have an associated miner.
-		</i>
-		</td>
-	</tr>
-	[%- END -%]
 	[%- IF !urls -%]
 	<tr>
 		<td colspan=8><i>no urls found [%-
@@ -76,11 +73,15 @@ __template__
 		[%- DEFAULT 
 			u.last_success_formatted = '<I>n/a</I>',
 			u.message_body_length = 0,
-			u.referencing = 0
+			u.referencing = 0;
+
+			YesNo = { '0' => 'N', '1' => 'Y' }; 
+			IF u.is_success.defined;
+		   		success = YesNo.${u.is_success}; 
+			ELSE; 
+		   		success = '<I>n/a</I>'; 
+			END
 		-%]
-		[%- YesNo = { '0' => 'N', '1' => 'Y' }; 
-		   IF u.success; success = YesNo.${u.success}; 
-		   ELSE; success = '<I>n/a</I>'; END -%]
         <TR>
                 <td><A HREF="[% env.script_name
 		    %]?op=editurl&url_id=[% u.url_id %]">[% u.url_id %]</a></td>

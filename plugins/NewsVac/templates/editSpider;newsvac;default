@@ -15,47 +15,47 @@ __template__
 
 <!-- begin editSpider -->
 <FORM action="[% env.script_name %]" method="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
+<INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
 
 [% INCLUDE titlebar width="100%" title="Editing spider '$name'" %]
 
 <table border="0">
 	<tr valign=top>
-		<td width="40"><b>ID</b>&nbsp;&nbsp;<input type="hidden" name="spider_id" value="[% spider_id %]"></td>
+		<td width="40"><b>ID</b></td>
 		<td>[% spider_id %]</td>
 	</tr>
 	<tr valign=top>
-		<td width="40"><b>Name</b>&nbsp;&nbsp;</td>
-		<td><input type="text" size="20" name="name" value="[% name %]"></td>
+		<td width="40"><b>Name</b></td>
+		<td><input type="text" size="20" name="name" value="[% name
+		-%]"></td>
 	</tr>
 	<tr valign=top>
-		<td width="40"><b>Last Edit</b>&nbsp;&nbsp;</td>
+		<td width="40"><b>Last Edit</b></td>
 		<td>[% last_edit %] by [% last_edit_aid %]</td>
 	</tr>
 	<tr valign=top>
-		<td width="40"><b>Conditions</b>&nbsp;&nbsp;</td>
+		<td width="40"><b>Conditions</b></td>
 		<td>
-		<textarea TYPE="text" cols=80 rows=3 NAME="conditions">[% conditions %]</textarea>
+		<textarea TYPE="text" cols=80 rows=3 NAME="conditions">[%
+		conditions -%]</textarea>
 		</td>
 	</tr>
 	<tr valign=top>
-		<td width="40"><b>Group 0 Selects</b>&nbsp;&nbsp;</td>
-		<td><textarea TYPE="text" cols=80 rows=3 NAME="group_0_selects">[% group_0_selects %]</textarea></td>
+		<td width="40"><b>Group 0 Selects</b></td>
+		<td>
+		<textarea TYPE="text" cols=80 rows=3 NAME="group_0_selects">[% 
+		group_0_selects -%]</textarea></td>
 	</tr>
 	<tr valign=top>
 		<td width="40"><b>Commands</b>&nbsp;&nbsp;</td>
-		<td><textarea TYPE="text" cols=80 rows=6 NAME="commands">[% commands %]</textarea></td>
+		<td><textarea TYPE="text" cols=80 rows=6 NAME="commands">[%
+		commands -%]</textarea></td>
 	</tr>
-	<tr valign=top>
-		<input type="submit" name="op" value="updatespider">
-		<input type="submit" name="updatespider" value="Save spider">
-		<input type="submit" name="runspider" value="Run spider">
-		<input type="submit" name="deletespider" value="Delete spider"><br>&nbsp;</td>
-	</tr>
-	<tr valign=top>
-		<td colspan=2><input type="submit" name="newspider" value="Create a new spider named:">
-		<input type="text" size="20" name="newname" value=""></td>
-	</tr>
-</table> 
+</table>
+
+<input type="submit" value="Save Spider">
+<input type="submit" name="runspider" value="Run Spider">
+<input type="submit" name="deletespider" value="Delete Spider">
 </FORM>
-<p>&nbsp;<p>
 <!-- end editSpider -->

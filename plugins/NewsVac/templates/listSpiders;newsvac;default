@@ -17,6 +17,7 @@ __template__
 
 <!-- begin list spiders section -->
 <form action="[% env.script_name %]" method="GET">
+
 <table>
         <TR>
                 <TD>
@@ -27,7 +28,9 @@ __template__
         </TR>
 </table>
 </form>
+
 <form enctype="multipart/form-data" action="[% env.script_name %]" method="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
 <table>
         <tr>
                 <td>
@@ -76,7 +79,7 @@ __template__
         <TR>
                 <TD>
 		<input type="submit" name="newspider" value="Add Spider:">
-		<input type="text" size="60" name="name" value="">
+		<input type="text" size="60" name="newname" value="">
 		</TD>
         </TR>
 </TABLE>

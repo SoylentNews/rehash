@@ -36,19 +36,19 @@ NewsVac returned the following error when attempting to obtain a lock:
 "[% error_message %]"
 
 [% CASE "timing_dump" -%]
-[% title = BLOCK %][% timestamp %] Timing Dump[% END -%]
+[% d='-'; title = BLOCK %][% IF show_ts; "$timestamp "; END %]Timing Dump[%
+END -%]
 [% title %]
-[% repeat('-', title.size) %]
+[% d.repeat(title.length) %]
 [% IF durations.size -%]
 [% FOR d=durations -%]
-[% "$d.0\n"; # Command
-	FOR c=d.1 -%]
+[% d.0 %][%# Command %]
+[% 	FOR c=d.1 -%]
 	[% c.0 %]	[% c.1 %]	[% c.2 %]
 	
-	[%- END -%]
+[%-	END -%]
 		[% d.2 %]	[% d.3 %]	total
-		[% d.4 %]			mean
-
+		[% d.4 %]	[%# -- %]	mean
 
 [% END %]
 [% ELSE -%]
@@ -268,7 +268,7 @@ Message Body Contents
 [% CASE "analyze_results" -%]
 -- Analyzed URL ID #[% url_id %] using parse code '[% parse_code %]'
 [% success = { '0' => 'FAILED', '1' => 'Success' } -%]
-	success.$is_success in [% duration %] seconds
+	[% success.$is_success %] in [% duration %] seconds
 	Miner ID #[% miner_id %], [% num_nuggets %] nuggets.
 
 [% CASE "analyze_noparse" -%]
@@ -528,9 +528,6 @@ name: 			[% name %]
 form name: 		[% form.name %] 
 form owner_id: 		[% form.owner_aid %]
 
-[% CASE "update_content_length" -%]
-length(update_content{message_body}): [% content_length %]
-
 [% CASE "noop" -%]    
 [% INCLUDE titlebar width="100%" title="No Op Given" %]
 
@@ -545,5 +542,27 @@ length(update_content{message_body}): [% content_length %]
 
 [% CASE "formatted_excerpt" -%]
 <a href="[% url %]">url</a> [% slug %] ... [% excerpts.join(' ... ') %]
+
+[% CASE "update_spider_noname" -%]
+Can't add spider since its name is undefined!
+
+[% CASE "update_spider_add_results" -%]
+[% IF rc %]Added spider '[% form.newname | strip_html %]' (#[% rc %])<BR>
+[% ELSE %]Failed adding spider '[% form.newname | strip_html %]'!<BR>
+Either the name given already exists or another error has occured. Please
+contact the administrator.
+[% END -%]
+
+[% CASE "update_spider_runspider" -%]
+Spider '[% spider_name %]' executed.
+
+[% CASE "update_spider_savedspider" -%]
+Spider '[% spider_name %]' saved.
+
+[% CASE "invalid_seclev" -%]
+Access denied. Your security level isn't high enough. Sorry.
+
+[% CASE "invalid_op" -%]
+Invalid Operation '[% form.op %]' specified. No such operation exists.
 
 [% END %]

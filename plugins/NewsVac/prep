@@ -1,0 +1,1 @@
+UPDATE spider_timespec SET last_run=now() WHERE last_run=0;
