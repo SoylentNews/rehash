@@ -57,6 +57,12 @@ gstatic total:        -          -   [% grand_total_static %]
 [% IF other_page > 0 -%]
         other: [% other_uids %]   [% other_ipids %]   [% other_page %] ([% other_bytes %])
 [% END -%]
+[%- FOREACH pagetype = extra_pagetypes -%]
+[% pt_uids = pagetype _ "_uids"; pt_ipids = pagetype _ "_ipids" ; pt_page = pagetype _ "_page" ; pt_bytes = pagetype _ "_bytes"; pt_label = pagetype _ "_label"; -%]
+[% IF $pt_page > 0 -%]
+     [% $pt_label %]: [% $pt_uids %]   [% $pt_ipids %]   [% $pt_page %] ([% $pt_bytes %])
+[% END -%]
+[% END %]
 
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
@@ -124,6 +130,11 @@ For [% section.section_name %]
 [% IF section.other.pages > 0 -%]
         other: [% section.other.pages %] [% section.other.ipids %] [% section.other.bytes %] [% section.other.users %]
 [% END -%]
+[%- FOREACH pagetype = extra_pagetypes -%]
+[% IF section.${pagetype}.pages > 0 -%]
+     [% section.${pagetype}.label %]: [% section.${pagetype}.pages %] [% section.${pagetype}.ipids %] [% section.${pagetype}.bytes %] [% section.${pagetype}.users %]
+[% END -%]
+[% END %]
 [% END -%]
 
 -----------------------
@@ -166,13 +177,28 @@ Page           Status              Count
                 " total\n";
         END;
 END %]
------------------------
 [% IF crawling_subscribers %]
+---------------------------------
 Possible Subscriber Comment Crawlers
 
 Count  Nickname
 [% crawling_subscribers %]
 
+[% END %]
+[% IF late_modders_report %]
+---------------------------------
+Top Moderators Near Archive Time
+
+UID     Nickname              Count
+[% late_modders_report %]
+[% END %]
+
+[% IF early_inactive_modders_report %]
+---------------------------------
+Top Early Down Moderators with Inactive Mods
+
+UID     Nickname              Count
+[% early_inactive_modders_report %]
 [% END %]
 __seclev__
 100
