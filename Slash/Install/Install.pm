@@ -366,7 +366,7 @@ sub _install {
 	}
 
 	unless ($is_plugin) {
-		my (%templates, @no_templates);
+		my(%templates, @no_templates);
 		for my $name (@{$hash->{'include_theme'}}) {
 			my $slash_prefix = $self->get('base_install_directory')->{value};
 			_parseFilesForTemplates("$slash_prefix/themes/$name/THEME", \%templates, \@no_templates);

@@ -84,7 +84,6 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{absolutedir} = $_->{url};
 			$new_cfg->{rootdir} = set_rootdir($_->{url}, $cfg->{constants}{rootdir});
 			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
-			$new_cfg->{real_rootdir} = $_->{url} if $_->{isolate};  # you gotta keep 'em separated, unh!
 			$new_cfg->{defaultsection} = $_->{section};
 			$new_cfg->{section} = $_->{section};
 			$new_cfg->{basedomain} = $_->{hostname};

@@ -38,6 +38,10 @@ just use the Slash API in your one-liners.
 It is recommended that you change the hardcoded default to whatever
 Virtual User you use most.
 
+You can also pass in a UID to use instead of anonymous coward:
+
+	% perl -MSlash::Test=virtualuser,2 -e 'print Dumper $user'
+
 =head1 EXPORTED FUNCTIONS
 
 =cut
@@ -72,6 +76,7 @@ Slash::Test->export_to_level(1, '', @EXPORT);
 # allow catching of virtual user in import list
 sub import {
     slashTest($_[1] || 'slash');
+    createCurrentUser($::user = $::slashdb->getUser($_[2])) if $_[2];
 }
 
 #========================================================================
@@ -113,8 +118,9 @@ $form, $constants, and $slashdb into current namespace.
 sub slashTest {
 	my($VirtualUser, $noerr) = @_;
 
-	die "No virtual user" unless defined $VirtualUser and $VirtualUser ne "";
-	eval { createEnvironment($VirtualUser) };
+	die 'No virtual user' unless defined $VirtualUser and $VirtualUser ne '';
+	push @ARGV, 'virtual_user=' . $VirtualUser;
+	eval { createEnvironment() };
 	die $@ if $@ && !$noerr;
 
 	$::slashdb   = getCurrentDB();
