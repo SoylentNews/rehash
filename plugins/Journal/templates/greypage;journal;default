@@ -37,7 +37,7 @@ __template__
 				</DIV>
 			</TD>
 		</TR>
-		[% IF diatribe.discussion && show_discussion %]
+		[% IF diatribe.discussion && !show_discussion %]
 			<TR><TD VALIGN="RIGHT">
 				<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">Discussion</A>
 			</TD></TR>

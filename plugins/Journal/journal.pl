@@ -21,14 +21,16 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
-	my $r = Apache->request;
-	if ($r->header_in('SOAPAction')) {
-		require SOAP::Transport::HTTP;
-		if ($user->{state}{post}) {
-			$r->method('POST');
+	if ($constants->{journal_soap_enabled}) {
+		my $r = Apache->request;
+		if ($r->header_in('SOAPAction')) {
+			require SOAP::Transport::HTTP;
+			if ($user->{state}{post}) {
+				$r->method('POST');
+			}
+			$user->{state}{packagename} = __PACKAGE__;
+			return SOAP::Transport::HTTP::Apache->dispatch_to('Journal')->handle;
 		}
-		$user->{state}{packagename} = __PACKAGE__;
-		return SOAP::Transport::HTTP::Apache->dispatch_to('Journal')->handle;
 	}
 
 	# require POST and logged-in user for these ops
@@ -398,6 +400,7 @@ sub displayArticle {
 	my $theme = $slashdb->getUser($uid, 'journal_theme');
 	$theme ||= $constants->{journal_default_theme};
 
+	my $show_discussion = $form->{id} && !$constants->{journal_no_comments_item} && $discussion;
 	my $zoo   = getObject('Slash::Zoo');
 	slashDisplay($theme, {
 		articles	=> \@sorted_articles,
@@ -406,10 +409,10 @@ sub displayArticle {
 		is_friend	=> $zoo->isFriend($user->{uid}, $uid),
 		back		=> $back,
 		forward		=> $forward,
-		show_discussion	=> (($form->{id} && !$constants->{journal_no_comments_item} && $discussion) ? 0 : 1),
+		show_discussion	=> $show_discussion,
 	});
 
-	if ($form->{id} && !$constants->{journal_no_comments_item} && $discussion) {
+	if ($show_discussion) {
 		printComments($discussion);
 	}
 }
