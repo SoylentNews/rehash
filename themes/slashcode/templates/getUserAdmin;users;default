@@ -177,8 +177,7 @@ __template__
 			<TR>
 				<TD WIDTH="100"><B>Moderation:</B></TD>
 				<TD ALIGN="LEFT" WIDTH="100">Fair: [% useredit.m2fair %], Unfair: [% useredit.m2unfair %]
-				[% IF useredit.m2fair+useredit.m2unfair > 0 %]([%
-				useredit.m2unfair*100/(useredit.m2fair+useredit.m2unfair) %]%)[% END %]
+				[% IF useredit.m2unfairpercent %]([% useredit.m2unfairpercent %]%)[% END %]
 			</TR>
 			<TR>
 				<TD WIDTH="100"><B>Tokens</B></TD>

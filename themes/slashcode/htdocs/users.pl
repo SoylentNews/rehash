@@ -2383,6 +2383,12 @@ sub getUserAdmin {
 		undef $iplist;
 	}
 
+	my $m2total = ($user_edit->{m2fair} || 0) + ($user_edit->{m2unfair} || 0);
+	if ($m2total) {
+		$user_edit->{m2unfairpercent} = sprintf("%.2f",
+			$user_edit->{m2unfair}*100/$m2total);
+	}
+
 	return slashDisplay('getUserAdmin', {
 		field			=> $field,
 		useredit		=> $user_edit,
