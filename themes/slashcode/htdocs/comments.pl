@@ -1146,7 +1146,7 @@ sub submitComment {
 		}
 	}
 	my $posters_uid = $user->{uid};
-	if ($form->{postanon} && $constants->{allow_anonymous} && $user->{karma} > -1 && $discussion->{commentstatus} == 'enabled') {
+	if ($form->{postanon} && $constants->{allow_anonymous} && $user->{karma} > -1 && $discussion->{commentstatus} eq 'enabled') {
 		$posters_uid = $constants->{anonymous_coward_uid} ;
 	}
 
