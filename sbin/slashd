@@ -197,6 +197,7 @@ sub update_static {
 	if (!$last_static_update
 		or $my_time > $last_static_update + 30) {
 		my $old_panic = $constants->{panic} || 0;
+		sleep 5 until dbAvailable();
 		createCurrentStatic($slashdb->getSlashConf());
 		$constants = getCurrentStatic();
 		$last_static_update = $my_time;
@@ -757,13 +758,16 @@ sub main {
 
 		# kill the dbh, we have too many problems
 		# if it sticks around during a fork -- pudge
-
 		$slashdb->{_dbh}->disconnect;
 		undef $slashdb->{_dbh};
 
 		FORK: {
 			$args->{pid} = my $pid = fork();
-
+			if(!dbAvailable()) {
+				slashdLog("DB unavailable waiting to start next task");
+				sleep 5 until dbAvailable();
+				slashdLog("DB available again preparing to start next task");
+			};
 			# Parent and child now separately reconnect.
 			$slashdb->sqlConnect();
 
