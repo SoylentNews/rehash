@@ -20,6 +20,7 @@ INSERT INTO dilemma_species (dsid, name, uid, code) VALUES (14, 'grudge_sq',	667
 INSERT INTO dilemma_species (dsid, name, uid, code) VALUES (15, 'tft_zg',	667, 'sub debrief { $memory->{$it_id} = $it_play; my $zg = $memory->{zg}; push @$zg, $it_play; shift @$zg if @$zg > 10; } sub zeitgeist { my $zg = $memory->{zg}; return 1 unless $zg && @$zg; my $sum = 0; for (@$zg) { $sum += $_ } return $sum / @$zg; } sub play { return exists($memory->{$it_id}) ? $memory->{$it_id} : zeitgeist() }');
 INSERT INTO dilemma_species (dsid, name, uid, code) VALUES (16, 'tft_zgns',	667, 'sub debrief { $memory->{$it_id} = $it_play; my $zg = $memory->{zg}; push @$zg, $it_play; shift @$zg if @$zg > 10; } sub zeitgeist { my $zg = $memory->{zg}; return 1 unless $zg && @$zg; my $sum = 0; for (@$zg) { $sum += $_ } return $sum / @$zg; } sub noisify { my($n) = @_; $n += rand(1) * 0.1 - 0.05; $n = 0 if $n < 0; $n = 1 if $n > 1; } sub play { return exists($memory->{$it_id}) ? noisify($memory->{$it_id}) : noisify(zeitgeist()) }');
 INSERT INTO dilemma_species (dsid, name, uid, code) VALUES (17, 'tft_zgnsfs',	667, 'sub debrief { $memory->{$it_id} = $it_play; my $zg = $memory->{zg}; push @$zg, $it_play; shift @$zg if @$zg > 10; $memory->{minfs} = $foodsize if !exists($memory->{minfs}) || $foodsize < $memory->{minfs}; $memory->{maxfs} = $foodsize if $foodsize > $memory->{maxfs}; } sub zeitgeist { my $zg = $memory->{zg}; return 1 unless $zg && @$zg; my $sum = 0; for (@$zg) { $sum += $_ } return $sum / @$zg; } sub foodgreedfactor { return 0 unless $memory->{maxfs}; if ($foodsize < $memory->{minfs} * 1.25) { return 0.1 } elsif ($foodsize > $memory->{maxfs} * 0.8) { return -0.1 } else { return 0 } } sub noisify { my($n) = @_; $n += rand(1) * 0.1 - 0.05; $n = 0 if $n < 0; $n = 1 if $n > 1; } sub play { return exists($memory->{$it_id}) ? noisify($memory->{$it_id} + foodgreedfactor()) : noisify(zeitgeist() + foodgreedfactor()) }');
+INSERT INTO dilemma_species (dsid, name, uid, code) VALUES (18, 'wslc',		667, 'sub abs { $_[0] < 0 ? -$_[0] : $_[0] } sub debrief { $memory->{$it_id} = 1 - abs($me_play-$it_play) } sub play { return exists($memory->{$it_id}) ? $memory->{$it_id} : 1 }');
 
 DELETE FROM dilemma_agents WHERE 1=1;
 INSERT INTO dilemma_agents (dsid, food) VALUES (1, 5);
@@ -124,6 +125,12 @@ INSERT INTO dilemma_agents (dsid, food) VALUES (17, 5);
 INSERT INTO dilemma_agents (dsid, food) VALUES (17, 5);
 INSERT INTO dilemma_agents (dsid, food) VALUES (17, 5);
 INSERT INTO dilemma_agents (dsid, food) VALUES (17, 5);
+INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
+INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
+INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
+INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
+INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
+INSERT INTO dilemma_agents (dsid, food) VALUES (18, 5);
 
 DELETE FROM dilemma_info WHERE 1=1;
 INSERT INTO dilemma_info (alive, max_runtime, last_tick, food_per_time, birth_food, idle_food, mean_meets) VALUES ('yes', 10000, 0, 2.0, 10.0, 0.04, 60);
