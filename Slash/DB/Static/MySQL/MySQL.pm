@@ -583,6 +583,7 @@ sub getSectionInfo {
 	my $sections = $self->sqlSelectAllHashrefArray(
 		"section, url",
 		"sections",
+		"",
 		" ORDER BY section"
 	);
 
@@ -612,6 +613,14 @@ WHERE section='$_->{section}'
 	AND displaystatus > 0
 EOT
 
+	}
+
+	my $rootdir = getCurrentStatic('rootdir');
+	for my $section (@$sections) {
+		# add rootdir, form figured dynamically -- pudge
+		$section->{rootdir} = set_rootdir(
+			$section->{url}, $rootdir
+		);
 	}
 
 	return $sections;
