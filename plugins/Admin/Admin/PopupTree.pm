@@ -101,7 +101,7 @@ sub getPopupTree {
 		stid			=> $stid,
 		stid_names		=> $stid_names,
 		slashorig		=> $tree,
-		title			=> 'Select a Category',
+		title			=> 'Select Topics',
 		button_label		=> 'Choose',
 		onselect		=> 'st_main_add',
 		form_field_form		=> 'slashstoryform',
