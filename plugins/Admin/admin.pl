@@ -889,26 +889,21 @@ sub getRelated {
 	my $constants = getCurrentStatic();
 	my $related_links = "";
 
+	# These really should be in the DB somewhere.
 	my %relatedLinks = (
 		intel		=> "Intel;http://www.intel.com",
 		linux		=> "Linux;http://www.linux.com",
-		lycos		=> "Lycos;http://www.lycos.com",
 		redhat		=> "Red Hat;http://www.redhat.com",
-		'red hat'	=> "Red Hat;http://www.redhat.com",
-		wired		=> "Wired;http://www.wired.com",
-		netscape	=> "Netscape;http://www.netscape.com",
 		lc $constants->{sitename}	=> "$constants->{sitename};$constants->{rootdir}",
-		malda		=> "Rob Malda;http://CmdrTaco.net",
 		cmdrtaco	=> "Rob Malda;http://CmdrTaco.net",
-		apple		=> "Apple;http://www.apple.com",
 		debian		=> "Debian;http://www.debian.org",
 		zdnet		=> "ZDNet;http://www.zdnet.com",
 		'news.com'	=> "News.com;http://www.news.com",
 		cnn		=> "CNN;http://www.cnn.com"
 	);
 
-	foreach my $key (keys %relatedLinks) {
-		if (exists $relatedLinks{$key} && /\W$key\W/i) {
+	foreach my $key (sort keys %relatedLinks) {
+		if ($story_content =~ /\b$key\b/i) {
 			my($label,$url) = split m/;/, $relatedLinks{$key};
 			$label =~ s/(\S{20})/$1 /g;
 			$related_links .= qq[<LI><A HREF="$url">$label</A></LI>\n];
