@@ -57,6 +57,12 @@ $task{$me}{code} = sub {
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
+	$stats->create($yesterday, "total", $count->{total});
+	$stats->create($yesterday, "unique", $count->{unique});
+	$stats->create($yesterday, "unique_users", $count->{unique_users});
+	$stats->create($yesterday, "comments", $comments);
+	$stats->create($yesterday, "homepage", $count->{index}{index});
+	$stats->create($yesterday, "journals", $count->{journals});
 	my @numbers = (
 		$count->{total},
 		$count->{unique},
@@ -105,7 +111,8 @@ total hits: %8d
 EOT
 
 	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
-		$email .= "\t   $_=$count->{index}{$_}\n"
+		$email .= "\t   $_=$count->{index}{$_}\n";
+		$stats->create($yesterday, "index_$_", $count->{index}{$_});
 	}
 
 	$email .= "\n-----------------------\n";

@@ -36,16 +36,12 @@ sub new {
 
 ########################################################
 sub createStatDaily {
-	my($self, $day,  $hash) = @_;
+	my($self, $day, $name, $value) = @_;
 
-	$self->sqlInsert(
+	$self->sqlInsert('stats_daily',
 			day => $day,
-			total => $hash->{key},
-			unique => $hash->{key},
-			users => $hash->{key},
-			comments => $hash->{key},
-			homepage => $hash->{key},
-			journals => $hash->{key},
+			name => $name,
+			value => $value,
 	);
 }
 
@@ -66,7 +62,7 @@ sub countModeratorLog {
 }
 
 ########################################################
-sub countModeratorLog {
+sub countModeratorLogHour {
 	my($self, $yesterday) = @_;
 
 	my $modlog_hr = $self->sqlSelectAllHashref(
