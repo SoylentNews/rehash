@@ -1246,13 +1246,16 @@ sub _set_factor {
 ########################################################
 # For run_moderatord.pl
 sub updateTokens {
-	my($self, $uidlist) = @_;
+	my($self, $uid_hr) = @_;
 	my $constants = getCurrentStatic();
 	my $maxtokens = $constants->{maxtokens} || 60;
-	for my $uid (@$uidlist) {
-		next unless $uid;
+	for my $uid (sort keys %$uid_hr) {
+		next unless $uid
+			&& $uid		   =~ /^\d+$/
+			&& $uid_hr->{$uid} =~ /^\d+$/;
+		my $add = $uid_hr->{$uid};
 		$self->setUser($uid, {
-			-tokens	=> "LEAST(tokens+1, $maxtokens)",
+			-tokens	=> "LEAST(tokens+$add, $maxtokens)",
 		});
 	}
 }

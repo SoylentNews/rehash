@@ -223,13 +223,14 @@ sub give_out_tokens {
 	}
 
 	# Decide who's going to get the tokens.
+	my $maxtokens_add = $constants->{maxtokens_add} || 3;
 	my %update_uids = ( );
 	for (my $x = 0; $x < $num_tokens; $x++) {
 		my $uid = $eligible_uids[rand @eligible_uids];
-		$update_uids{$uid} = 1;
+		next if $update_uids{$uid} >= $maxtokens_add;
+		$update_uids{$uid}++;
 	}
-	my @update_uids = sort keys %update_uids;
-	my $n_update_uids = scalar(@update_uids);
+	my $n_update_uids = scalar(keys %update_uids);
 
 	# Log info about what we're about to do.
 	moderatordLog(getData('moderatord_tokenmsg', {
@@ -251,7 +252,7 @@ sub give_out_tokens {
 	}));
 
 	# Give each user her or his tokens.
-	$slashdb->updateTokens(\@update_uids);
+	$slashdb->updateTokens(\%update_uids);
 
 	# And keep a running tally of how many tokens we've given out due
 	# to users who clicked the right number of times and got lucky.
