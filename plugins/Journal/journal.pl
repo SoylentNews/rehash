@@ -170,7 +170,9 @@ sub displayArticle {
 		$nickname = getCurrentUser('nickname');
 		$uid = getCurrentUser('uid');
 	}
-	my $articles = $journal->getsByUid($uid, $constants->{journal_default_display});
+	my $articles = $journal->getsByUid($uid,
+		$constants->{journal_default_display}, $form->{id}
+	);
 	my @sorted_articles;
 	my $date;
 	my $collection = {};
@@ -212,6 +214,7 @@ sub listArticle {
 		articles	=> $list,
 		default		=> $theme,
 		themes		=> $themes,
+		uid		=> $form->{uid},
 	});
 }
 

@@ -1446,7 +1446,7 @@ sub stripByMode {
 		$str =~ s/\n/<BR>/gi;  # pp breaks
 		$str =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
 		# Preserve leading indents / spaces
-		$str =~ s/\t/    /g;
+		$str =~ s/\t/    /g;  # can mess up internal tabs, oh well
 
 		if ($fmode == CODE) {
 			$str =~ s{((?:  )+)(?: (\S))?} {

@@ -13,7 +13,7 @@ journallist
 __template__
 [% USE Slash %]
 <TABLE>
-	[% IF !user.is_anon && uid && uid != user.uid %]
+	[% IF !user.is_anon && (!uid || uid == user.uid) %]
 	<TR VALIGN="TOP"><TD COLSPAN="2">
 		<FORM ACTION="[% constants.rootdir %]/journal.pl" METHOD="POST" ENCTYPE="application/x-www-form-urlencoded">
 			<INPUT TYPE="hidden" NAME="op" VALUE="list">
@@ -33,9 +33,11 @@ __template__
 		<TR VALIGN="TOP" BGCOLOR="[% color %]">
 			<TD>[% Slash.timeCalc(article.1) %]</TD>
 			<TD>
-				<A HREF="[% constants.rootdir %]/journal.pl?op=edit&id=[% article.0 %]">[% article.2 %]</A>
-			[% IF !user.is_anon && uid && uid != user.uid %]
-				<A HREF="[% constants.rootdir %]/journal.pl?op=remove&id=[% article.0 %]">[delete]</A>
+			[% IF !user.is_anon && (!uid || uid == user.uid) %]
+				<A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[% article.2 %]</A>
+				<A HREF="[% constants.rootdir %]/journal.pl?op=remove&amp;id=[% article.0 %]">[delete]</A>
+			[% ELSE %]
+				<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;id=[% article.0 %]">[% article.2 %]</A>
 			[% END %]
 			</TD>
 		</TR>

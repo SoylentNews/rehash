@@ -44,10 +44,16 @@ sub set {
 }
 
 sub getsByUid {
-	my($self, $uid, $limit) = @_;
+	my($self, $uid, $limit, $id) = @_;
 	my $order = "ORDER BY date DESC";
-	$order .= " LIMIT $limit" if $limit; 
-	my $answer = $self->sqlSelectAll('date, article, description, journals.id', 'journals, journals_text', "uid = $uid AND journals.id = journals_text.id", $order);
+	$order .= " LIMIT $limit" if $limit;
+	my $where = "uid = $uid AND journals.id = journals_text.id";
+	$where .= " AND journals.id = $id" if $id;
+
+	my $answer = $self->sqlSelectAll(
+		'date, article, description, journals.id',
+		'journals, journals_text', $where, $order
+	);
 	return $answer;
 }
 

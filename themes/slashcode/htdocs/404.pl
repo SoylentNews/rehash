@@ -13,6 +13,12 @@ sub main {
 	my $constants = getCurrentStatic();
 	$ENV{REQUEST_URI} ||= '';
 
+	# catch old .shtml links ... need to check for other schemes, too?
+        if ($ENV{REQUEST_URI} =~ m|^/?\w+/(\d\d/\d\d/\d\d/\d+)\.shtml$|) {
+		redirect("$constants->{rootdir}/article.pl?sid=$1");
+		return;
+        }
+
 	my $url = strip_literal(substr($ENV{REQUEST_URI}, 1));
 	my $admin = $constants->{adminmail};
 
