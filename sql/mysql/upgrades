@@ -1881,8 +1881,6 @@ CREATE TABLE badpasswords (
 	INDEX subnet (subnet)
 ) TYPE=InnoDB;
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_115, Start of T_2_3_0_116 - 2003/09/03
 
 # This is probably not necessary for your site, but Slashdot has
@@ -1905,5 +1903,6 @@ INSERT INTO vars (name, value, description) VALUES ('relocate_href2slash', 0, 'A
 
 # USEPERL LAST UPDATED HERE
 
-# End of T_2_3_0_116, Start of T_2_3_0_117 - 2003/09/12
+# SLASHDOT LAST UPDATED HERE
 
+# End of T_2_3_0_116, Start of T_2_3_0_117 - 2003/09/12
