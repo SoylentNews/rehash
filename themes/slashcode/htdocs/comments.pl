@@ -671,26 +671,40 @@ sub validateComment {
 		return unless $preview;
 	}
 
-	if ($constants->{comments_min_line_len}
-		&& length($$comm) > $constants->{comments_min_line_len_kicks_in}) {
+	my $kickin = $constants->{comments_min_line_len_kicks_in};
+	if ($constants->{comments_min_line_len} && length($$comm) > $kickin) {
 
-		my $comment_notags = strip_nohtml($$comm);
+		my $max_comment_len = $slashdb->getUser(
+			$constants->{anonymous_coward_uid},                  
+			'maxcommentsize');
+		my $check_prefix = substr($$comm, 0, $max_comment_len);
+		my $check_prefix_len = length($check_prefix);
+		my $min_line_len_max = $constants->{comments_min_line_len_max}
+			|| $constants->{comments_min_line_len}*2;
+		my $min_line_len = $constants->{comments_min_line_len}
+			+ ($min_line_len_max - $constants->{comments_min_line_len})
+				* ($check_prefix_len - $kickin)
+				/ ($max_comment_len - $kickin);
+
+		my $check_notags = strip_nohtml($check_prefix);
 		# Don't count & or other chars used in entity tags;  don't count
 		# chars commonly used in ascii art.  Not that it matters much.
 		# Do count chars commonly used in source code.
-		my $num_chars = $comment_notags =~ tr/A-Za-z0-9?!(){}[]-+='"@$//;
+		my $num_chars = $check_notags =~ tr/A-Za-z0-9?!(){}[]-+='"@$//;
 
 		# Note that approveTags() has already been called by this point,
 		# so all tags present are legal and uppercased.
 		my $breaktags = $constants->{'approvedtags_break'}
 			|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
-		my $breaktags_regex = "</?(?:" . join("|", @$breaktags) . ")>";
+		my $breaktags_1_regex = "</?(?:" . join("|", @$breaktags) . ")>";
+		my $breaktags_2_regex = "</?(?:" . join("|", grep /^(P|BLOCKQUOTE)$/, @$breaktags) . ")>";
 		my $num_lines = 0;
-		$num_lines++ while $$comm =~ /$breaktags_regex/g;
+		$num_lines++ while $check_prefix =~ /$breaktags_1_regex/g;
+		$num_lines++ while $check_prefix =~ /$breaktags_2_regex/g;
 
 		if ($num_lines > 3) {
 			my $avg_line_len = $num_chars/$num_lines;
-			if ($avg_line_len < $constants->{comments_min_line_len}) {
+			if ($avg_line_len < $min_line_len) {
 				$$error_message = getError('low chars-per-line', {
 					ratio 	=> sprintf("%0.1f", $avg_line_len),
 				});
