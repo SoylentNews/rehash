@@ -2276,3 +2276,6 @@ INSERT INTO vars (name, value, description) VALUES ('maxtokens_add','3','Max tok
 
 # End of T_2_3_0_151, Start of T_2_3_0_152 - 2004/04/27
 
+# only if using HumanConf, and you want to have a better value ...
+UPDATE vars SET value = 10 WHERE name = "hc_pool_secs_before_use";
+INSERT INTO vars (name, value, description) VALUES ('hc_image_format','jpg','Format for HC images (png, jpg, etc.)');

@@ -247,12 +247,13 @@ sub fillPool {
 
 sub addPool {
 	my($self, $question) = @_;
-	my $answer;
-	my $extension;
-	my $retval;
+	my($answer, $extension, $method, $retval);
+	my $image_format = getCurrentStatic('hc_image_format') || 'jpeg';
+	$image_format =~ s/\W+//g;
 
 	if ($question == 1) {
-		$extension = ".jpg";
+		$extension = $image_format =~ /^jpe?g$/ ? '.jpg' : ".$image_format";
+		$method = $image_format;
 		($answer, $retval) = $self->drawImage();
 	} else {
 		warn "HumanConf warning: addPool called with"
@@ -298,7 +299,7 @@ sub addPool {
 			warn "HumanConf warning: addPool could not create"
 				. " '$full_filename', '$!'";
 		} else {
-			print $fh $retval->jpeg;
+			print $fh $retval->$method;
 			close $fh;
 		}
 		my($width, $height) = $retval->getBounds();
@@ -485,4 +486,3 @@ sub writeBlankIndexes {
 }
 
 1;
-

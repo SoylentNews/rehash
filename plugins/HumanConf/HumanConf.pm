@@ -69,7 +69,7 @@ sub createFormkeyHC {
 
 	# Loop until we successfully get an answer/html pair (one time
 	# in a zillion we'll have to try more than once).
-	my $secs = $constants->{hc_pool_secs_before_use} || 3600;
+	my $secs = $constants->{hc_pool_secs_before_use} || 10;
 	my($hcpid, $html) = ('', '');
 	while (1) {
 
@@ -205,4 +205,3 @@ sub validFormkeyHC {
 }
 
 1;
-
