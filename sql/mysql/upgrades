@@ -615,12 +615,12 @@ ALTER TABLE sections ADD UNIQUE section (section);
 
 DROP TABLE IF EXISTS people_log;
 CREATE TABLE people_log (
-	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-	uid MEDIUMINT UNSIGNED NOT NULL,
-	person MEDIUMINT UNSIGNED NOT NULL,
-	type enum("friend","foe"),
-	action enum("add","delete"),
-	PRIMARY KEY (id)
+    id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+    uid MEDIUMINT UNSIGNED NOT NULL,
+    person MEDIUMINT UNSIGNED NOT NULL,
+    type enum("friend","foe"),
+    action enum("add","delete"),
+    PRIMARY KEY (id)
 );
 
 
@@ -645,26 +645,26 @@ ALTER TABLE users_info ADD COLUMN m2info VARCHAR(64) DEFAULT '' NOT NULL AFTER l
 ALTER TABLE users_info ADD COLUMN mods_saved VARCHAR(120) DEFAULT '' NOT NULL AFTER lastmm;
 DROP TABLE IF EXISTS modreasons;
 CREATE TABLE modreasons (
-	id tinyint UNSIGNED NOT NULL,
-	name char(32) DEFAULT '' NOT NULL,
-	m2able tinyint DEFAULT '1' NOT NULL,
-	listable tinyint DEFAULT '1' NOT NULL,
-	val tinyint DEFAULT '0' NOT NULL,
-	fairfrac float DEFAULT '0.5' NOT NULL,
-	PRIMARY KEY (id)
+    id tinyint UNSIGNED NOT NULL,
+    name char(32) DEFAULT '' NOT NULL,
+    m2able tinyint DEFAULT '1' NOT NULL,
+    listable tinyint DEFAULT '1' NOT NULL,
+    val tinyint DEFAULT '0' NOT NULL,
+    fairfrac float DEFAULT '0.5' NOT NULL,
+    PRIMARY KEY (id)
 ) TYPE=myisam;
 # Insert your site's reasons, of course, if they differ.
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 0, 'Normal',	0, 0,  0, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 1, 'Offtopic',	1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 2, 'Flamebait',	1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 3, 'Troll',		1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 4, 'Redundant',	1, 1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 5, 'Insightful',	1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 6, 'Interesting',	1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 7, 'Informative',	1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 8, 'Funny',		1, 1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, 'Overrated',	0, 0, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',	0, 0,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 0, 'Normal',        0, 0,  0, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 1, 'Offtopic',      1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 2, 'Flamebait',     1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 3, 'Troll',         1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 4, 'Redundant',     1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 5, 'Insightful',    1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 6, 'Interesting',   1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 7, 'Informative',   1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 8, 'Funny',         1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, 'Overrated',     0, 0, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',    0, 0,  1, 0.5);
 
 # this is not a DB command but needs to be done for
 # each installed site that uses plugins/Zoo:
@@ -858,17 +858,17 @@ DELETE FROM users_param WHERE name='anon_comments';
 # you may wish to take note of them so you can re-add them appropriately.
 DROP TABLE IF EXISTS dst;
 CREATE TABLE dst (
-	region        VARCHAR(32)   NOT NULL,
-	selectable    TINYINT       DEFAULT 0 NOT NULL,
-	start_hour    TINYINT       NOT NULL,
-	start_wnum    TINYINT       NOT NULL,
-	start_wday    TINYINT       NOT NULL,
-	start_month   TINYINT       NOT NULL,
-	end_hour      TINYINT       NOT NULL,
-	end_wnum      TINYINT       NOT NULL,
-	end_wday      TINYINT       NOT NULL,
-	end_month     TINYINT       NOT NULL,
-	PRIMARY KEY (region)
+    region        VARCHAR(32)   NOT NULL,
+    selectable    TINYINT       DEFAULT 0 NOT NULL,
+    start_hour    TINYINT       NOT NULL,
+    start_wnum    TINYINT       NOT NULL,
+    start_wday    TINYINT       NOT NULL,
+    start_month   TINYINT       NOT NULL,
+    end_hour      TINYINT       NOT NULL,
+    end_wnum      TINYINT       NOT NULL,
+    end_wday      TINYINT       NOT NULL,
+    end_month     TINYINT       NOT NULL,
+    PRIMARY KEY (region)
 ) TYPE = myisam;
 
 INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('America',     1, 2,  1, 0, 3, 2, -1, 0, 9);
@@ -878,13 +878,13 @@ INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_m
 
 DROP TABLE IF EXISTS tzcodes;
 CREATE TABLE tzcodes (
-	tz            CHAR(4)	    NOT NULL,
-	off_set       MEDIUMINT     NOT NULL,
-	description   VARCHAR(64),
-	dst_region    VARCHAR(32),
-	dst_tz        CHAR(4),
-	dst_off_set   MEDIUMINT,
-	PRIMARY KEY (tz)
+    tz            CHAR(4)	    NOT NULL,
+    off_set       MEDIUMINT     NOT NULL,
+    description   VARCHAR(64),
+    dst_region    VARCHAR(32),
+    dst_tz        CHAR(4),
+    dst_off_set   MEDIUMINT,
+    PRIMARY KEY (tz)
 ) TYPE = myisam;
 
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('UTC',       0, 'Universal Coordinated',         NULL,          NULL,    NULL);
@@ -987,11 +987,11 @@ INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_stirra
 # Subsection stuff -Brian
 DROP TABLE IF EXISTS section_subsections;
 CREATE TABLE section_subsections (
-	section varchar(30) NOT NULL,
-	subsection smallint UNSIGNED NOT NULL,
-	FOREIGN KEY (section) REFERENCES sections(section),
-	FOREIGN KEY (subsection) REFERENCES subsections(subsection),
-	PRIMARY KEY (section,subsection)
+    section varchar(30) NOT NULL,
+    subsection smallint UNSIGNED NOT NULL,
+    FOREIGN KEY (section) REFERENCES sections(section),
+    FOREIGN KEY (subsection) REFERENCES subsections(subsection),
+    PRIMARY KEY (section,subsection)
 ) TYPE = myisam;
 INSERT INTO section_subsections SELECT section, id from subsections;
 ALTER TABLE subsections DROP section;
@@ -1034,24 +1034,22 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Edi
 
 # End of T_2_3_0_60, Start of T_2_3_0_61
 
-# SLASHDOT LAST UPDATED HERE
-
 DROP TABLE IF EXISTS accesslog_admin; 
 CREATE TABLE accesslog_admin (
-	id int UNSIGNED NOT NULL auto_increment,
-	host_addr char(15)	DEFAULT '' NOT NULL,
-	op varchar(254),
-	dat varchar(254),
-	uid mediumint UNSIGNED NOT NULL,
-	ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	query_string varchar(50),
-	user_agent varchar(50),
-	section varchar(30) DEFAULT 'index' NOT NULL,
-	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
-	form MEDIUMBLOB NOT NULL,
-	INDEX host_addr (host_addr),
-	INDEX ts (ts),
-	PRIMARY KEY (id)
+    id int UNSIGNED NOT NULL auto_increment,
+    host_addr char(15)	DEFAULT '' NOT NULL,
+    op varchar(254),
+    dat varchar(254),
+    uid mediumint UNSIGNED NOT NULL,
+    ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+    query_string varchar(50),
+    user_agent varchar(50),
+    section varchar(30) DEFAULT 'index' NOT NULL,
+    bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
+    form MEDIUMBLOB NOT NULL,
+    INDEX host_addr (host_addr),
+    INDEX ts (ts),
+    PRIMARY KEY (id)
 ) TYPE = myisam;
 
 # This was missed sometime in the past -Brian
@@ -1128,8 +1126,6 @@ ALTER TABLE moderatorlog ADD INDEX m2stat_act (m2status, active);
 
 # End of T_2_3_0_66, Start of T_2_3_0_67
 
-# SLASHDOT LAST UPDATED HERE
-
 # this is not a DB command but needs to be done for
 # each installed site:
 # ln -s /usr/local/slash/themes/slashcode/tasks/delete_accesslog.pl /usr/local/slash/site/sitename/tasks/
@@ -1162,15 +1158,15 @@ ALTER TABLE people add  last_update timestamp;
 
 DROP TABLE IF EXISTS people_nthdegree;
 CREATE TABLE people_nthdegree (
-	uid MEDIUMINT UNSIGNED NOT NULL, /* The person who owns the relationship */
-	person MEDIUMINT UNSIGNED NOT NULL, /* Who the relationship is against */
-	friend MEDIUMINT UNSIGNED NOT NULL, /* Which friend is responsible for the relationship */
-	type enum("fof","eof"),
-	last_update timestamp,
-	UNIQUE degree_of_separation (uid,person,friend),
-	INDEX (person),
-	INDEX (uid),
-	INDEX (friend)
+    uid MEDIUMINT UNSIGNED NOT NULL, /* The person who owns the relationship */
+    person MEDIUMINT UNSIGNED NOT NULL, /* Who the relationship is against */
+    friend MEDIUMINT UNSIGNED NOT NULL, /* Which friend is responsible for the relationship */
+    type enum("fof","eof"),
+    last_update timestamp,
+    UNIQUE degree_of_separation (uid,person,friend),
+    INDEX (person),
+    INDEX (uid),
+    INDEX (friend)
 ) TYPE = Innodb;
 
 INSERT INTO vars (name,value,description) VALUES ('zoo_timer',NOW(),'Last time the Zoo task ran.');
@@ -1328,15 +1324,15 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1_percent' WHERE name='
 ALTER TABLE accesslist ADD COLUMN now SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL;
 ALTER TABLE accesslist ADD COLUMN was SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL;
 ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255);
-UPDATE accesslist SET now='nopost' 			WHERE    readonly=1 AND formname='comments';
-UPDATE accesslist SET was='nopost'			WHERE wasreadonly=1 AND formname='comments';
-UPDATE accesslist SET now=CONCAT(now, ',nosubmit')	WHERE    readonly=1 AND formname='submit';
-UPDATE accesslist SET now=CONCAT(was, ',nosubmit')	WHERE wasreadonly=1 AND formname='submit';
-UPDATE accesslist SET now='nopost,nosubmit'		WHERE    readonly=1 AND (formname IS NULL OR formname = '');
-UPDATE accesslist SET was='nopost,nosubmit'		WHERE wasreadonly=1 AND (formname IS NULL OR formname = '');
-UPDATE accesslist SET now='ban' 			WHERE    isbanned=1;
-UPDATE accesslist SET was='ban'				WHERE   wasbanned=1;
-UPDATE accesslist SET now=CONCAT(now, ',proxy')		WHERE isproxy='yes';
+UPDATE accesslist SET now='nopost'                      WHERE    readonly=1 AND formname='comments';
+UPDATE accesslist SET was='nopost'                      WHERE wasreadonly=1 AND formname='comments';
+UPDATE accesslist SET now=CONCAT(now, ',nosubmit')      WHERE    readonly=1 AND formname='submit';
+UPDATE accesslist SET now=CONCAT(was, ',nosubmit')      WHERE wasreadonly=1 AND formname='submit';
+UPDATE accesslist SET now='nopost,nosubmit'             WHERE    readonly=1 AND (formname IS NULL OR formname = '');
+UPDATE accesslist SET was='nopost,nosubmit'             WHERE wasreadonly=1 AND (formname IS NULL OR formname = '');
+UPDATE accesslist SET now='ban'                         WHERE    isbanned=1;
+UPDATE accesslist SET was='ban'                         WHERE   wasbanned=1;
+UPDATE accesslist SET now=CONCAT(now, ',proxy')         WHERE isproxy='yes';
 ALTER TABLE accesslist DROP COLUMN formname, DROP COLUMN readonly, DROP COLUMN wasreadonly, DROP COLUMN isbanned, DROP COLUMN wasbanned, DROP COLUMN isproxy;
 ALTER TABLE accesslist ADD INDEX now_was (now,was);
 UPDATE accesslist SET uid=0 WHERE uid IS NULL;
@@ -1362,4 +1358,5 @@ ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255) NOT NULL DEFAULT
 
 # only insert this if you don't already have the value set in vars
 #INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
+
 # DEVCHANNEL LAST UPDATED HERE
