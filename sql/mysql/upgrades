@@ -2481,4 +2481,4 @@ CREATE TABLE topic_param (
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
 
-INSERT INTO vars (name, value, description) VALUES ('qps_sample_time','15','How many seconds to sample qps and accesslog to log qps and qpp based on');
+INSERT INTO vars (name, value, description) VALUES ('accesslog_logs_images','1','Does your accesslog log image requests?');

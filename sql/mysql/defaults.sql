@@ -600,6 +600,7 @@ INSERT INTO vars (name, value, description) VALUES ('absolutedir_secure','','Abs
 INSERT INTO vars (name, value, description) VALUES ('accesslog_disable','0','Disable apache writing to accesslog?');
 INSERT INTO vars (name, value, description) VALUES ('accesslog_imageregex', '^/images/hc/', 'Image hits will only be written into accesslog if their URL path matches this regex, empty string for all, NONE for none');
 INSERT INTO vars (name, value, description) VALUES ('accesslog_insert_cachesize','0','Cache accesslog inserts and do this many all at once (0 to disable, if enabled, suggest value of 5 or so)');
+INSERT INTO vars (name, value, description) VALUES ('accesslog_logs_images','1','Does your accesslog log image requests?');
 INSERT INTO vars (name, value, description) VALUES ('ad_max', '6', 'Maximum ad number (must be at least ad_messaging_num)');
 INSERT INTO vars (name, value, description) VALUES ('ad_messaging_num', '6', 'Which ad (env var AD_BANNER_x) is the "messaging ad"?');
 INSERT INTO vars (name, value, description) VALUES ('ad_messaging_prob', '0.5', 'Probability that the messaging ad will be shown, if the circumstances are right');
@@ -879,7 +880,6 @@ INSERT INTO vars (name, value, description) VALUES ('panic','0','0:Normal, 1:No 
 INSERT INTO vars (name, value, description) VALUES ('poll_cache','0','On home page, cache and display default poll for users (if false, is extra hits to database)');
 INSERT INTO vars (name, value, description) VALUES ('poll_discussions','1','Allow discussions on polls');
 INSERT INTO vars (name, value, description) VALUES ('poll_fwdfor','1','Loose proxy management for voting?');
-INSERT INTO vars (name, value, description) VALUES ('qps_sample_time','15','How many seconds to sample qps and accesslog to log qps and qpp based on');
 INSERT INTO vars (name, value, description) VALUES ('prepuser_backup_prob','0','Probability that Environment.pm prepareUser will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('rdfencoding','ISO-8859-1','Site encoding');
 INSERT INTO vars (name, value, description) VALUES ('rdfimg','http://www.example.com/images/topics/topicslash.gif','site icon to be used by RSS subscribers');
