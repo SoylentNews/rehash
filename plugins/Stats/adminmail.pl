@@ -518,8 +518,7 @@ EOT
 	}
 	
 	foreach my $day (@ah_days){
-		my $avg = $stats->sqlSelect("value", "stats_daily",
-			"day='$day' AND skid='0' AND name='avg_comments_per_story'");
+		my $avg = $stats->getStat("avg_comments_per_story", $day, 0);
 		push @{$data{avg_comments_per_story}}, sprintf("%12.1f", $avg);
 	}
 	slashdLog("Story Comment Counts End");
@@ -679,7 +678,7 @@ EOT
 	}
 	
 	foreach my $day (@ah_days){
-		my $avg = $stats->sqlSelect("value", "stats_daily", "day='$day' and skid='0' and name='avg_hits_per_story'");
+		my $avg = $stats->getStat("avg_hits_per_story", $day, 0);
 		push @{$data{avg_hits_per_story}}, sprintf("%12.1f", $avg);
 	}
 

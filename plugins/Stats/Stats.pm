@@ -1091,6 +1091,17 @@ sub countDailySubscribers {
 }
 
 ########################################################
+sub getStat {
+	my($self, $name, $day, $skid) = @_;
+	$skid ||= 0;
+	my $name_q = $self->sqlQuote($name);
+	my $day_q =  $self->sqlQuote($day);
+	my $skid_q = $self->sqlQuote($skid);
+	return $self->sqlSelect("value", "stats_daily",
+		"name=$name_q AND day=$day_q AND skid=$skid_q");
+}
+
+########################################################
 sub getStatToday {
 	my($self, $name) = @_;
 	my $name_q = $self->sqlQuote($name);
