@@ -166,32 +166,32 @@ __template__
 		<TABLE>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Friend				</TD>
+				<TD>	Friend <IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif">				</TD>
 				<TD>	[% people_select.friend %]	</TD>
 			</TR>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Fan				</TD>
+				<TD>	Fan <IMG BORDER=0 SRC="[% constants.imagedir %]/fan.gif">				</TD>
 				<TD>	[% people_select.fan %]		</TD>
 			</TR>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Foe				</TD>
+				<TD>	Foe <IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif">				</TD>
 				<TD>	[% people_select.foe %]		</TD>
 			</TR>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Freak				</TD>
+				<TD>	Freak <IMG BORDER=0 SRC="[% constants.imagedir %]/freak.gif">				</TD>
 				<TD>	[% people_select.freak %]		</TD>
 			</TR>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Friends of Friends				</TD>
+				<TD>	Friends of Friends <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif">				</TD>
 				<TD>	[% people_select.fof %]		</TD>
 			</TR>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
-				<TD>	Foes of Friends				</TD>
+				<TD>	Foes of Friends <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif">				</TD>
 				<TD>	[% people_select.eof %]		</TD>
 			</TR>
 		</TABLE>
