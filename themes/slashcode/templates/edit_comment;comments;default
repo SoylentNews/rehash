@@ -179,7 +179,10 @@ IF do_br %]<BR>[% END %]
 		moderated. (You can read everything, even moderated posts, by adjusting your
 		threshold on the User Preferences Page)
 	[% IF user.is_anon %]
-		<LI>If you want replies to your comments sent to you consider <A HREF="[% constants.rootdir %]/my/">loging in</A> or <A HREF="[% constants.rootdir %]/users.pl?op=newuserform">creating an account.</A>.
+		<LI>If you want replies to your comments sent to you, consider
+		<A HREF="[% constants.rootdir %]/my/">logging in</A> or
+		<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">creating
+		an account</A>.
 	[% END %]
 
 <P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
