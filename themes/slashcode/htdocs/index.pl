@@ -251,7 +251,11 @@ sub displayStories {
 		if ($constants->{body_bytes}) {
 			$link = length($story->{bodytext}) . ' ' .  getData('bytes');
 		} else {
-			my $count = split(/ /, $story->{introtext}) + split(/ /, $story->{bodytext});
+			# Kooky aye? Gets rid of the warning. -Brian
+			my @temp;
+			my $count = @temp =  split / /, $story->{introtext};
+			$count += @temp = split / /, $story->{bodytext} 
+				if $story->{bodytext};
 			$link = $count . ' ' .  getData('words');
 		}
 		if ($story->{bodytext} || $cc) {
