@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Slash::Constants ':messages';
+use Slash::Constants ':messages' ':slashd';
 use Slash::Display;
 
 use vars qw( %task $me );
@@ -12,7 +12,7 @@ use vars qw( %task $me );
 # your audience and admins.
 $task{$me}{timespec} = '27 6 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
-$task{$me}{'fork'} = 1;			# If allowed, fork this task from 
+$task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my($stats, $backupdb, %data);

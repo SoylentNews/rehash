@@ -7,6 +7,7 @@
 use strict;
 use File::Spec::Functions;
 use Slash::Utility;
+use Slash::Constants ':slashd';
 
 my $me = 'message_delivery.pl';
 
@@ -14,6 +15,7 @@ use vars qw( %task );
 
 $task{$me}{timespec} = '5-59/5 * * * *';
 $task{$me}{timespec_panic_1} = '5-59/15 * * * *'; # less often
+$task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
