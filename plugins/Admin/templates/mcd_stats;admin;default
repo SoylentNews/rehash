@@ -1,0 +1,71 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+admin
+__lang__
+en_US
+__name__
+mcd_stats
+__template__
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
+
+	<TR>
+		<TH>Server</TH>
+		<TH>Bytes</TH>
+		<TH>Sets</TH>
+		<TH>Gets, Hit</TH>
+		<TH>Gets, Miss</TH>
+		<TH>Gets, Hit %</TH>
+		<TH>Connections</TH>
+		<TH>Read</TH>
+		<TH>Written</TH>
+		<TH>Items</TH>
+		<TH>Alloc</TH>
+		<TH>Arena Size</TH>
+		<TH>Alloc %</TH>
+	</TR>
+
+[% FOREACH server = stats.hosts.keys.sort %]
+	<TR>
+		<TD ALIGN="LEFT"> [% server %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.bytes.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.cmd_set.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.get_hits.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.get_misses.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.get_hit_percent %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.total_connections.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.bytes_read.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.bytes_written.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.curr_items.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.malloc.total_alloc.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.malloc.arena_size.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.hosts.$server.malloc.total_alloc_percent %]</TD>
+	</TR>
+[% END %]
+
+	<TR>
+		<TD ALIGN="LEFT"><B>Total</B></TD>
+		<TD ALIGN="RIGHT">[% stats.total.bytes.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.cmd_set.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.get_hits.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.get_misses.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.get_hit_percent %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.total_connections.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.bytes_read.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.bytes_written.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.curr_items.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.malloc_total_alloc.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.malloc_arena_size.size2si %]</TD>
+		<TD ALIGN="RIGHT">[% stats.total.malloc_total_alloc_percent %]</TD>
+	</TR>
+
+</TABLE>
+
+__seclev__
+500
+__version__
+$Id$
