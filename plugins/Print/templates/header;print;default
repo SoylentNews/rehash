@@ -23,5 +23,6 @@ __template__
 <!-- add code. You can use your own ad system - we use one that 
 sets a env variable in apache that contains the ad itself and just put it
 in this block -->
+[% Slash.getAd(1) %]
 <!-- end ad code -->
 [% END -%]
