@@ -54,6 +54,18 @@ $task{$me}{code} = sub {
 			$next_check_slashd = time() + 20;
 			my($not_ok, $response) = check_slashd();
 			if ($not_ok) {
+				# Parent slashd process seems to be gone.  Maybe
+				# it just got killed and sent us the SIGUSR1 and
+				# our $task_exit_flag is already set.  Pause a
+				# moment and check that.
+				sleep 1;
+				if ($task_exit_flag) {
+					# OK, forget this warning, just exit
+					# normally.
+					$not_ok = 0;
+				}
+			}
+			if ($not_ok) {
 				# Parent slashd process is gone, that's not good,
 				# but the channel doesn't need to hear about it
 				# every 20 seconds.
