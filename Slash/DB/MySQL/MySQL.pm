@@ -7446,6 +7446,16 @@ sub getUser {
 		
 	}
 
+	# If no such user, we can return now.
+	if (!$answer || !%$answer) {
+		if ($mcddebug) {
+			my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
+			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed no such user can '$gtd->{can_use_mcd}' rawmcdanswer: " . Dumper($rawmcdanswer);
+		}
+		return undef;
+	}
+
+	# Fill in the uid field.
 	$answer->{uid} ||= $uid;
 
 	if ($mcddebug > 2) {
