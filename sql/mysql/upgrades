@@ -2446,8 +2446,6 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', '
 INSERT INTO vars (name, value, description) VALUES ('submission_default_skid', '0', 'Skid you would like selected by default for submissions, 0 or empty string for none');
 INSERT INTO vars (name, value, description) VALUES ('submission_force_default', '0', 'Force selection of default skid for all submissions, takes away menu of options');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_17, Start of T_2_5_0_18 - 2004/08/01
 
 ALTER TABLE dbs ADD COLUMN weight tinyint UNSIGNED NOT NULL DEFAULT 1;
@@ -2460,4 +2458,8 @@ INSERT INTO vars (name, value, description) VALUES ('debughash_getTopicTree','',
 
 ALTER TABLE story_topics_chosen ADD INDEX tid_stoid (tid, stoid), DROP INDEX tid;
 ALTER TABLE story_topics_rendered ADD INDEX tid_stoid (tid, stoid), DROP INDEX tid;
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_5_0_19, Start of T_2_5_0_20 - 2004/08/05
 
