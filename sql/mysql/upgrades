@@ -1159,5 +1159,8 @@ ALTER TABLE comments ADD karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL;
 
 # End of T_2_3_0_67, Start of T_2_3_0_68
 
+# End of T_2_3_0_68, Start of T_2_3_0_69
+
 # SLASHDOT LAST UPDATED HERE
+
 
