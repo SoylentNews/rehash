@@ -2369,7 +2369,8 @@ sub determineCurrentSkin {
 		($skin) = grep { lc $skins->{$_}{hostname} eq lc $hostname }
 			sort { $a <=> $b } keys %$skins;
 
-		if (!$skin) {
+		# don't bother warning if $hostname is numeric IP
+		if (!$skin && $hostname !~ /^\d+\.\d+\.\d+\.\d+$/) {
 			$skin = getCurrentStatic('mainpage_skid');
 			if (!$skin) {
 				errorLog("determineCurrentSkin called but no skin found (even default) for $hostname\n");
