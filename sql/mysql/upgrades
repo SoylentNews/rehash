@@ -2268,8 +2268,6 @@ INSERT INTO vars (name, value, description) VALUES ('subnet_karma_comments_neede
 
 INSERT INTO vars (name, value, description) VALUES ('maxtokens_add','3','Max tokens to give any one user per pass');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -2290,9 +2288,9 @@ UPDATE menus SET value='[% constants.rootdir %]/my/password' WHERE menu='users' 
 
 # End of T_2_3_0_152, Start of T_2_3_0_153 - 2004/05/04
 
-ALTER TABLE open_proxies ADD COLUMN ipid ipid char(32) DEFAULT '' NOT NULL;
+ALTER TABLE open_proxies ADD COLUMN ipid char(32) DEFAULT '' NOT NULL;
 ALTER TABLE open_proxies ADD INDEX ipid (ipid);
-UPDATE TABLE open_proxies SET ipid=md5(ip);
+UPDATE open_proxies SET ipid=md5(ip);
 
 INSERT INTO vars (name, value, description) VALUES ('login_speed_limit', '20', 'How fast a user can create users, etc.');
 INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', 'How many forms a user can submit');
