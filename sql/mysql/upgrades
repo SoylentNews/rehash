@@ -275,6 +275,7 @@ INSERT INTO vars (name, value, description) VALUES ('admin_formkeys', '0', 'Do a
 # Add signature column to submissions. Be aware that this column's final
 # state does not have a default.
 ALTER TABLE submissions ADD COLUMN signature varchar(32) DEFAULT '' NOT NULL;
+ALTER TABLE submissions ADD UNIQUE story_signature(signature);
 UPDATE submissions SET signature=MD5(story);
 ALTER TABLE submissions MODIFY COLUMN signature varchar(32) NOT NULL;
 
