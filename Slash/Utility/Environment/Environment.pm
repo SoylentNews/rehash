@@ -576,7 +576,7 @@ Returns the current anonymous corward (or value from that object).
 
 =item MEMBER
 
-A member from the AC redcord to be returned.
+A member from the AC record to be returned.
 
 =back
 
