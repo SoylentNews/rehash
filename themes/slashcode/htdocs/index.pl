@@ -73,17 +73,21 @@ sub main {
 	#    to be made aware of this story's existence, so ignore it.
 	my $future_plug = 0;
 	if (!$user->{is_anon} && $user->{is_subscriber} && $constants->{subscribe_future_secs} > 0) {
-		for my $story (@$stories) {
-			if ($story->[10]) {
-				$story->[3] =
-					$story->[5] =
-					$story->[7] = $constants->{subscribe_future_name};
-			}
-		}
-	} elsif (scalar grep { $_->[10] } @$stories) {
+	# So the deal is that story is no longer an array and position 3,5,7 were never used in dispStory in the first place :)
+	# The only problem I see is if there were more future stories then the user had positions for on the frontpage,
+	# this would cause stories to get shoved into older stories were they would become corrupted.
+	# Which really won't harm anything at all :) -Brian
+#		for my $story (@$stories) {
+#			if ($story->[10]) {
+#				$story->[3] =
+#					$story->[5] =
+#					$story->[7] = $constants->{subscribe_future_name};
+#			}
+#		}
+	} elsif (scalar grep { $_->{is_future} } @$stories) {
 		# There are future stories but we don't get to read them.
 		# Wipe them so we don't see them:
-		@$stories = grep { !$_->[10] } @$stories;
+		@$stories = grep { !$_->{is_future} } @$stories;
 		# Now, if the user is permitted to know about future
 		# stories, set the var so we'll tell them in the template.
 		if (!$user->{is_anon}
@@ -300,89 +304,88 @@ sub displayStories {
 	# shift them off, so we do not display them in the Older
 	# Stuff block later (simulate the old cursor-based
 	# method)
-	while ($_ = shift @{$stories}) {
-		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid) = @{$_};
+	my $story;
+	while ($story = shift @{$stories}) {
 		my($tmpreturn, $other, @links);
-		my @threshComments = split m/,/, $hp;  # posts in each threshold
+		my @threshComments = split m/,/, $story->{hitparade};  # posts in each threshold
 
-		my($storytext, $story) = displayStory($sid, '', $other);
+		my $storytext = displayStory($story->{sid}, '', $other);
 
 		$tmpreturn .= $storytext;
 	
 		push @links, linkStory({
 			'link'	=> getData('readmore'),
-			sid	=> $sid,
-			tid	=> $tid,
-			section	=> $thissection
+			sid	=> $story->{sid},
+			tid	=> $story->{tid},
+			section	=> $story->{section}
 		});
 
 		my $link;
 
 		if ($constants->{body_bytes}) {
-			$link = length($story->{bodytext}) . ' ' .
+			$link = $story->{body_length} . ' ' .
 				getData('bytes');
 		} else {
-			my $count = countWords($story->{introtext}) +
-				countWords($story->{bodytext});
-			$link = sprintf '%d %s', $count, getData('words');
+			$link = sprintf '%d %s', $story->{word_count}, getData('words');
 		}
 
-		if ($story->{bodytext} || $cc) {
+		if ($story->{body_length} || $story->{commentcount}) {
 			push @links, linkStory({
 				'link'	=> $link,
-				sid	=> $sid,
-				tid	=> $tid,
+				sid	=> $story->{sid},
+				tid	=> $story->{tid},
 				mode	=> 'nocomment',
-				section	=> $thissection
-			}) if $story->{bodytext};
+				section	=> $story->{section}
+			}) if $story->{body_length};
 
-			my @cclink;
+			my @commentcount_link;
 			my $thresh = $threshComments[$user->{threshold} + 1];
 
-			if ($cc = $threshComments[0]) {
-				if ($user->{threshold} > -1 && $cc ne $thresh) {
-					$cclink[0] = linkStory({
-						sid		=> $sid,
-						tid		=> $tid,
+			if ($story->{commentcount} = $threshComments[0]) {
+				if ($user->{threshold} > -1 && $story->{commentcount} ne $thresh) {
+					$commentcount_link[0] = linkStory({
+						sid		=> $story->{sid},
+						tid		=> $story->{tid},
 						threshold	=> $user->{threshold},
 						'link'		=> $thresh,
-						section		=> $thissection
+						section		=> $story->{section}
 					});
 				}
 			}
 
-			$cclink[1] = linkStory({
-				sid		=> $sid,
-				tid		=> $tid,
+			$commentcount_link[1] = linkStory({
+				sid		=> $story->{sid},
+				tid		=> $story->{tid},
 				threshold	=> -1,
-				'link'		=> $cc || 0,
-				section		=> $thissection
+				'link'		=> $story->{commentcount} || 0,
+				section		=> $story->{section}
 			});
 
-			push @cclink, $thresh, ($cc || 0);
-			push @links, getData('comments', { cc => \@cclink })
-				if $cc || $thresh;
+			push @commentcount_link, $thresh, ($story->{commentcount} || 0);
+			push @links, getData('comments', { cc => \@commentcount_link })
+				if $story->{commentcount} || $thresh;
 		}
 
-		if ($thissection ne $constants->{defaultsection} && (!$form->{section} || $form->{section} eq 'index')) {
-			my($section) = $reader->getSection($thissection);
+		if ($story->{section} ne $constants->{defaultsection} && (!$form->{section} || $form->{section} eq 'index')) {
+			my $SECT  = $reader->getSection($story->{section});
 			push @links, getData('seclink', {
-				name	=> $thissection,
-				section	=> $section
+				name	=> $story->{section},
+				section	=> $SECT
 			});
 		}
 
-		push @links, getData('editstory', { sid => $sid }) if $user->{seclev} > 100;
+		push @links, getData('editstory', { sid => $story->{sid} }) if $user->{seclev} > 100;
 
 		# I added sid so that you could set up replies from the front page -Brian
 		$tmpreturn .= slashDisplay('storylink', {
 			links	=> \@links,
-			sid	=> $sid,
+			sid	=> $story->{sid},
 		}, { Return => 1});
 
 		$return .= $tmpreturn;
 
-		my($w) = join ' ', (split m/ /, $time)[0 .. 2];
+		my $day = timeCalc($story->{time},'%A %B %d');
+		my($w) = join ' ', (split m/ /, $day)[0 .. 2];
 		$today ||= $w;
 		last if ++$x > $cnt && $today ne $w;
 	}

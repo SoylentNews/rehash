@@ -1167,8 +1167,7 @@ alternate template name, or titlebar magic.
 
 =item Return value
 
-A list of story to display, hashref of story data,
-hashref of author data, and hashref of topic data.
+Rendered story
 
 =back
 
@@ -1180,6 +1179,12 @@ sub displayStory {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $cache = getCurrentCache();
+
+	# Sites without an "index" section will never use this, which is probably ok.
+#	if (!$user->{no_icons} && $constants->{section} eq 'index' && $cache{$constants->{section}, $sid}) {
+#		$story->{atstorytime} = $user->{aton} . " " . timeCalc($story->{'time'});
+#	}
 	my $story = $reader->getStory($sid, '', $other->{force_cache});
 	my $author = $reader->getAuthor($story->{uid},
 		['nickname', 'fakeemail', 'homepage']);
@@ -1188,18 +1193,6 @@ sub displayStory {
 	# convert the time of the story (this is database format)
 	# and convert it to the user's prefered format
 	# based on their preferences
-
-	# An interesting note... this is pretty much the
-	# only reason this function is even needed.
-	# Everything else can easily be done with
-	# dispStory(). Even this could be worked
-	# into the logic for the template Display
-	#  -Brian
-
-	# well, also, dispStory needs a story reference, not an SID,
-	# though that could be changed -- pudge
-
-	# And now we're also calling parseSlashizedLinks. - 2002/05/24 Jamie
 
 	$story->{storytime} = timeCalc($story->{'time'});
 	if ($story->{is_future} && !($user->{author} || $user->{is_admin})) {
@@ -1217,7 +1210,9 @@ sub displayStory {
 	}
 
 	my $return = dispStory($story, $author, $topic, $full, $other);
-	return($return, $story, $author, $topic);
+
+	#$story->{introtext} =~ s/__TIME_TAG__/$story->{atstorytime}/g;# = $user->{aton} . " " . timeCalc($story->{'time'});
+	return $return;
 }
 
 
@@ -1264,31 +1259,20 @@ sub getOlderStories {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
-	for (@$stories) {
-		my($sid, $sect, $title, $time, $commentcount, $day, $hp, $secs, $tid) = @{$_}; 
-		my($w, $m, $d, $h, $min, $ampm) = split m/ /, $time;
-		$d =~ s/^0//;
-		push @$newstories, {
-			sid		=> $sid,
-			section		=> $sect,
-			title		=> $title,
-			'time'		=> $time,
-			commentcount	=> $commentcount,
-			day		=> $day,
-			w		=> $w,
-			'm'		=> $m,
-			d		=> $d,
-			h		=> $h,
-			min		=> $min,
-			ampm		=> $ampm,
-			secs		=> $secs,
-			'link'		=> linkStory({
-				'link'	=> $title,
-				sid	=> $sid,
-				tid	=> $tid,
-				section	=> $sect
-			})
-		};
+	for my $story (@$stories) {
+		#Use one call and parse it, its cheaper :) -Brian
+		my($day_of_week, $month, $day, $secs) = split m/ /, timeCalc($story->{time}, "%A %B %d %s");
+		$day =~ s/^0//;
+		$story->{day_of_week} = $day_of_week;
+		$story->{month} = $month;
+		$story->{day} = $day;
+		$story->{secs} = $secs;
+		$story->{'link'} = linkStory({
+				'link'  => $story->{title},
+				sid     => $story->{sid},
+				tid     => $story->{tid},
+				section => $story->{section},
+				});
 	}
 
 	my $yesterday;
@@ -1309,7 +1293,7 @@ sub getOlderStories {
 	# only the first $section->{artcount}).  "start" is just an offset
 	# that gets incremented.
 	slashDisplay('getOlderStories', {
-		stories		=> $newstories,
+		stories		=> $stories,
 		section		=> $section,
 		cur_time	=> time,
 		yesterday	=> $yesterday,

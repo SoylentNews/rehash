@@ -1496,3 +1496,7 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Dump
 ALTER TABLE subscribe_payments ADD COLUMN memo VARCHAR(255) NOT NULL AFTER method;
 
 # USEPERL LAST UPDATED HERE
+ALTER TABLE stories ADD body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL;
+UPDATE stories,story_text SET body_length=length(bodytext) WHERE stories.sid=story_text.sid;
+ALTER TABLE stories ADD word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL;
+# Honestly, something should go here to set word_count

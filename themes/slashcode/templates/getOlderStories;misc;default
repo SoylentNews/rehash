@@ -28,21 +28,22 @@ __template__
    c = 0;
    max_older_stories = section.artcount / 2 || 15;
    FOREACH story = stories;
-	IF today != "$story.w $story.m $story.d";
-		today = "$story.w $story.m $story.d";
+   	day = "$story.day_of_week $story.month $story.day";
+	IF today != day;
+		today = day;
 		IF !section or section.section == 'index' %]
 			<P><B>[% IF cur_time && story.secs && cur_time-story.secs > 7*86400
-				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&amp;mode=[% user.currentMode %]"
-				>[% story.m %] [% story.d %]</A></FONT>[%
+				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
+				>[% story.month %] [% story.day %]</A></FONT>[%
 			ELSE
-				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&amp;mode=[% user.currentMode %]"
-				>[% story.w %]</A></FONT> [% story.m %] [% story.d %][%
+				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
+				>[% story.day_of_week %]</A></FONT> [% story.month %] [% story.day %][%
 			END %]</B></P>
 		[% ELSIF section.issue && section.issue > 1 %]
-			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&amp;issue=[% story.day %]&amp;mode=[% user.currentMode %]"
-				>[% story.w %]</A></FONT> [% story.m %] [% story.d %]</B></P>
+			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&amp;issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
+				>[% story.day_of_week %]</A></FONT> [% story.month %] [% story.day %]</B></P>
 		[% ELSE %]
-			<P><B><FONT SIZE="4">[% story.w %]</FONT> [% story.m %] [% story.d %]</B></P>
+			<P><B><FONT SIZE="4">[% story.day_of_week %]</FONT> [% story.month %] [% story.day %]</B></P>
 		[% END;
 	END %]
 	&middot; [% story.link %] ([% story.commentcount %])<BR>

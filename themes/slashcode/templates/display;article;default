@@ -20,11 +20,7 @@ en_US
 __name__
 display
 __template__
-[% USE Slash;
-
-data = Slash.displayStory(story.sid, 'Full'); data.0;
-
-%]
+[% Slash.displayStory(story.sid, 'Full') %]
 
 <P>
 

@@ -4794,8 +4794,6 @@ sub getStoriesEssentials {
 			'DATE_FORMAT(DATE_SUB(time, INTERVAL 1 DAY),"%Y%m%d")';
 		my $ahead_one_week_str =
 			'DATE_FORMAT(DATE_ADD(time, INTERVAL 7 DAY),"%Y%m%d")';
-#		$where .=
-#			"AND day_published = '$form->{issue}' ";
 		$where .=" AND '$form->{issue}' BETWEEN $back_one_day_str AND
 			$ahead_one_week_str ";
 	} else {
@@ -4813,28 +4811,13 @@ error in getStoriesEssentials
 	other: $other
 EOT
 
-	while (my $data = $cursor->fetchrow_arrayref) {
-		# Rather than have MySQL/DBI return us "time" three times
-		# because we'd want three different representations, we
-		# just get it once in position 3 and then drop it into
-		# its traditional other locations in the array.
-		# annoying time format breaks timeCalc in the 
-		# storyTitleOnly template for the index page plugin
-		# I just need the raw time that's in the db
-		$data = [
-			@$data[0..4],
-			$data->[3],
-			$data->[5],
-			$data->[3],
-			$data->[6],
-			$data->[3],
-			$data->[7],
-		];
-		formatDate([$data], 3, 3, '%A %B %d %I %M %p');
-		formatDate([$data], 5, 5, '%Y%m%d'); # %Q
-		formatDate([$data], 7, 7, '%s');
-		next if $form->{issue} && $data->[5] > $form->{issue};
-		push @stories, [@$data];
+	while (my $story = $cursor->fetchrow_hashref) {
+		if ($form->{issue}) {
+			my $issue= timeCalc($story->{time}, '%Y%m%d');
+			next if timeCalc($story->{time}, '%Y%m%d') ne $form->{issue};
+			$story->{issue} = $issue;
+		}
+		push @stories, $story;
 		last if ++$count >= $limit;
 	}
 	$cursor->finish;
@@ -5184,6 +5167,8 @@ sub createStory {
 		print STDERR "Failed to Insert story Text\n";
 		goto error;
 	}
+	$story->{body_length} = length($story->{bodytext});
+	$story->{word_count} = countWords($story->{introtext}) + countWords($story->{bodytext});
 	unless ($self->setStory($story->{sid}, $story)) {
 		print STDERR "Failed to Insert most of story\n";
 		goto error;
@@ -5232,6 +5217,9 @@ sub updateStory {
 	my($self, $sid, $data) = @_;
 	my $constants = getCurrentStatic();
 	$self->{_dbh}{AutoCommit} = 0;
+
+	$data->{body_length} = length($data->{bodytext});
+	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 
 	unless ($self->setStory($sid, $data)) {
 		print STDERR "Failed to set topics for story\n";
@@ -6224,6 +6212,7 @@ sub getTopicImageBySection {
 }
 
 ########################################################
+# Brian, make this cache -Brian
 sub getStoryTopicsJustTids {
 	my($self, $sid, $options) = @_;
 	my $where = "1=1";
