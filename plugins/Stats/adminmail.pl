@@ -40,6 +40,9 @@ $task{$me}{code} = sub {
 	my $overwrite = 0;
 	$overwrite = 1 if $constants->{task_options}{overwrite};
 
+	my $create = 1;
+	$create = 0 if $constants->{task_options}{nocreate};
+
 	# If overwrite is set to 1, we delete any stats which may have
 	# been written by an earlier run of this task.
 	my $statsSave = getObject('Slash::Stats::Writer',
@@ -54,7 +57,7 @@ $task{$me}{code} = sub {
 		nocache		=> 1,
 	}, {
 		day		=> $yesterday,
-		create		=> 1
+		create		=> $create,
 	});
 
 	unless ($logdb) {
