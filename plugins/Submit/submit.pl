@@ -179,7 +179,9 @@ sub previewForm {
 
 	my $sub = $slashdb->getSubmission($form->{subid});
 
+	my $topic = $slashdb->getTopic($sub->{tid});
 	my $extracolumns = $slashdb->getSectionExtras($sub->{section}) || [ ];
+	my $ipid_vis = $constants->{id_md5_vislength} ? substr($sub->{ipid}, 0, $constants->{id_md5_vislength}) : $sub->{ipid};
 
 	my $email_known = "";
 	$email_known = "mailto" if $sub->{email} eq $user->{fakeemail};
@@ -195,6 +197,9 @@ sub previewForm {
 		submission	=> $sub,
 		submitter	=> $sub->{uid},
 		subid		=> $form->{subid},
+		topic		=> $topic,
+		ipid		=> $ipid,
+		ipid_vis	=> $ipid_vis,
 		admin_flag 	=> $admin_flag,
 		extras 		=> $extracolumns,
 		lockTest	=> lockTest($sub->{subj}),
