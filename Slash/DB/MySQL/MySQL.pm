@@ -5675,14 +5675,22 @@ sub calcTrollPoint {
 sub calcModval {
 	my($self, $where_clause, $halflife, $minicache) = @_;
 
+	return undef unless $where_clause;
+
 	# There's just no good way to do this with a join; it takes
 	# over 1 second and if either comment posting or moderation
 	# is reasonably heavy, the DB can get bogged very fast.  So
 	# let's split it up into two queries.  Dagnabbit.
+	# And in case we're being asked about a user who has posted
+	# many many comments (or heaven forfend, some bug lets this
+	# method be called for the anonymous coward), put a couple
+	# of sanity check limits on this query.
+	my $min_cid = $self->sqlSelect("MIN(cid)", "moderatorlog") || 0;
 	my $cid_ar = $self->sqlSelectColArrayref(
 		"cid",
 		"comments",
-		$where_clause,
+		"cid >= $min_cid AND $where_clause",
+		"ORDER BY cid DESC LIMIT 250"
 	);
 	return 0 if !$cid_ar or !@$cid_ar;
 

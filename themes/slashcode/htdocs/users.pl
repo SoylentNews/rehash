@@ -1172,7 +1172,7 @@ sub showInfo {
 
 		my $lastjournal = _get_lastjournal($uid);
 
-		$modval = $reader->calcModval("comments.uid = $user->{uid}", $uid_hoursback);
+		$modval = $reader->calcModval("comments.uid = $requested_user->{uid}", $uid_hoursback);
 		$trollpoint = $reader->calcTrollPoint("uid");
 
 		slashDisplay('userInfo', {
