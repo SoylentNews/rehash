@@ -1012,7 +1012,7 @@ sub editStory {
 	$fastforward_check	= 'CHECKED' if $form->{fastforward};
 	$shortcuts_check	= 'CHECKED' if $form->{shortcuts};
 	# $feature_story_check	= 'CHECKED' if $form->{feature_story};
-	$feature_story_check	= 'CHECKED' if $slashdb->isFeatureStory($storyref->{section}, $storyref->{sid});
+	$feature_story_check	= 'CHECKED' if ($slashdb->getSection($storyref->{section}, 'feature_story') eq $storyref->{sid});
 
 	$slashdb->setSession($user->{uid}, { lasttitle => $storyref->{title} });
 
@@ -1155,7 +1155,7 @@ sub listStories {
 			$canedit = 1;
 		}
 
-		my $feature_story_flag = $slashdb->isFeatureStory($section,$sid) ? 1 : 0; 
+		my $feature_story_flag = ($slashdb->getSection($section,'sid') eq $sid) ? 1 : 0; 
 		$storylistref->[$i] = {
 			'x'		=> $i + $first_story + 1,
 			hits		=> $hits,
@@ -1285,11 +1285,11 @@ sub updateStory {
 
 	if ($constants->{feature_story_enabled}) {
 		if ($form->{feature_story}) {
-		    $slashdb->setFeatureStory($form->{section}, $form->{sid});
+		    $slashdb->setSection($form->{section}, {feature_story => $form->{sid}});
 	
-		} elsif ($slashdb->isFeatureStory($form->{section}, $form->{sid})) {
-			$slashdb->setFeatureStory($form->{section});
-	        }
+		} elsif ($slashdb->getSection($form->{section}, 'sid') eq $form->{sid}) {
+			$slashdb->setSetion($form->{section}, { feature_story => ''});
+		}
 	}
 
 	$slashdb->updateStory();
@@ -1323,11 +1323,11 @@ sub saveStory {
 
 	if ($constants->{feature_story_enabled}) {
 		if ($form->{feature_story}) {
-		    $slashdb->setFeatureStory($form->{section}, $sid);
+		    $slashdb->setSection($form->{section}, { feature_story => $sid});
 	
-		} elsif ($slashdb->isFeatureStory($form->{section}, $sid)) {
-			$slashdb->setFeatureStory($form->{section});
-	        }
+		} elsif ($slashdb->getSection($form->{section}, 'sid') eq  $sid) {
+			$slashdb->setSection($form->{section} , {'feature_story' => ''});
+		}
 	}
 
 	if ($sid) {

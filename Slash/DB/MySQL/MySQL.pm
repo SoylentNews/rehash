@@ -609,23 +609,6 @@ sub getSectionExtras {
 }
 
 ########################################################
-sub setFeatureStory {
-	my ($self, $section, $sid) = @_;
-
-	$self->sqlUpdate('sections', { feature_story => $sid }, 
-				"section = '$section'"
-	);
-}
-    
-########################################################
-sub isFeatureStory {
-	my ($self, $section, $sid) = @_;
-
-	my($rows) = $self->sqlSelect('count(*)', 'sections', "feature_story = '$sid' AND section = '$section'");
-
-	return($rows);
-}
-########################################################
 sub getContentFilters {
 	my($self, $formname, $field) = @_;
 
