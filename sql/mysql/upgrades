@@ -972,8 +972,6 @@ INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8',
 # End of T_2_3_0_54, Start of T_2_3_0_55
 # End of T_2_3_0_55, Start of T_2_3_0_56
 
-# SLASHDOT LAST UPDATED HERE
-
 # oops: make sure you restart httpds after this
 UPDATE tzcodes SET tz = 'WET' WHERE tz = 'WEST';
 UPDATE tzcodes SET tz = 'CET' WHERE tz = 'CEST';
@@ -981,6 +979,11 @@ UPDATE tzcodes SET tz = 'EET' WHERE tz = 'EEST';
 UPDATE users_prefs SET tzcode = 'WET' WHERE tzcode = 'WEST';
 UPDATE users_prefs SET tzcode = 'CET' WHERE tzcode = 'CEST';
 UPDATE users_prefs SET tzcode = 'EET' WHERE tzcode = 'EEST';
+
+# End of T_2_3_0_56, Start of T_2_3_0_57
+
+# SLASHDOT LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+
 ALTER TABLE people ADD index(person);
 
