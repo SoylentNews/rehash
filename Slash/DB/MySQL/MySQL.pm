@@ -3556,7 +3556,7 @@ sub getAccessListInfo {
 
 ##################################################################
 sub setAccessList {
-	# do not use this method to set/unset expired
+	# do not use this method to set/unset expired or isproxy
 	my($self, $formname, $user_check, $setflag, $column, $reason) = @_;
 
 	return if $reason eq 'expired';
@@ -3626,6 +3626,44 @@ sub setAccessList {
 			my $return = $self->sqlInsert("accesslist", $insert_hashref);
 			return $return ? 1 : 0;
 		}
+	}
+}
+
+#################################################################
+sub checkIsProxy {
+	my($self, $ipid);
+
+	$rows = $self->sqlSelect('count(*)', 'accesslist', "ipid='$ipid' AND isproxy='yes'";
+	$rows ||= 0;
+
+	return $rows ? 'yes' : 'no';
+}
+
+#################################################################
+sub setIsProxy {
+	my($self, $ipid, $isproxy);
+
+	if ($isproxy ne 'yes' && $isproxy ne 'no') {
+		$isproxy = $isproxy ? 'yes' : 'no';
+	}
+
+	$rows = $self->sqlSelect('count(*)', 'accesslist', "ipid='$ipid'";
+        $rows ||= 0;
+
+	if ($rows > 0) {
+		my $return = $self->sqlUpdate('accesslist', {
+			'-isproxy' => $isproxy,
+		}, "ipid='$ipid'");
+
+		return $return ? 1 : 0;
+	} else {
+		my $return = $self->sqlInsert('accesslist', {
+			'-ipid'    => $ipid,
+			'-isproxy' => $isproxy,
+			'-ts'      => 'now()',
+		});
+
+		return $return ? 1 : 0;
 	}
 }
 
