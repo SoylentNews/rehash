@@ -72,9 +72,6 @@ reject the story.</P>
 		[% # section:value %]
 		[% pulldown = "$extra.3:$extra.1" %]
 		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), form.${extra.1}, 1, 1) %]	
-	[% ELSE %]
-		[% type = extra.1 %]
-		[% Slash.createSelect(type, Slash.db.getDescriptions('topics'), form.$type, 1, 1) %]	
 	[% END %]
 [% END %]
 
@@ -88,7 +85,7 @@ be deleted.)</FONT>
 [% Slash.createSelect('skid', skin_values, 0, 1, 0, 1) %]
 [% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
 
-<BR><FONT SIZE="2">(In general, submit to Main Page)</FONT>
+<BR><FONT SIZE="2">(In general, submit to [% skins.${constants.mainpage_skid}.title || 'the main section' %])</FONT>
 
 [% IF savestory %]
 <P>[% PROCESS titlebar width => "100%", title => form.subj %]

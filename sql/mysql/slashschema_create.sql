@@ -683,6 +683,7 @@ CREATE TABLE skins (
 	name VARCHAR(30) NOT NULL,
 	title VARCHAR(64) DEFAULT '' NOT NULL,
 	issue ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
+	submittable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
 	url VARCHAR(255) DEFAULT '' NOT NULL,
 	hostname VARCHAR(128) DEFAULT '' NOT NULL,
 	cookiedomain VARCHAR(128) DEFAULT '' NOT NULL,

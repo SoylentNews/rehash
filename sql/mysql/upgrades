@@ -2416,3 +2416,7 @@ INSERT INTO story_param (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FRO
 # perl -MSlash::Test=YOURVIRTUALUSER -le '$nd_hr = $slashdb->displaystatusForStories($slashdb->sqlSelectColArrayref("stoid", "stories")); @nd = grep { $nd_hr->{$_} == -1 } keys %$nd_hr; for my $stoid (@nd) { $slashdb->sqlInsert("story_param", { stoid => $stoid, name => "neverdisplay", value => "1" }, { ignore => 1 }); }'
 
 DELETE FROM templates WHERE name = 'skinindexd' AND skin != 'default';
+
+ALTER TABLE skins ADD COLUMN submittable ENUM('no', 'yes') DEFAULT 'yes' NOT NULL AFTER issue;
+UPDATE skins SET submittable='no' WHERE name='search';
+

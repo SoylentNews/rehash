@@ -273,7 +273,7 @@ sub submissionEd {
 	$def_note = getData('defaultnote');
 	$cur_skin = $form->{skin} || $def_skin;
 	$cur_note = $form->{note} || $def_note;
-	$skins    = $slashdb->getSubmissionsSkins;
+	$skins    = $slashdb->getSubmissionsSkins();
 
 	for (@$skins) {
 		my($skin, $note, $cnt) = @$_;
@@ -430,9 +430,9 @@ sub displayForm {
 		}
 	}
 
-
+	my $skins = $slashdb->getSkins();
 	my $topic_values = $slashdb->getDescriptions('non_nexus_topics');
-	my $skin_values = $slashdb->getDescriptions('skins');
+	my $skin_values = $slashdb->getDescriptions('skins-submittable');
 
 	$form->{tid} ||= 0;
 	unless ($form->{tid}) {
@@ -488,6 +488,7 @@ sub displayForm {
 		title		=> $title,
 		topic_values	=> $topic_values,
 		skin_values	=> $skin_values,
+		skins		=> $skins,
 	});
 }
 

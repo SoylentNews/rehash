@@ -124,6 +124,9 @@ my %descriptions = (
 	'skins-all'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins') },
 
+	'skins-submittable'
+		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "submittable='yes'") },
+
 	'static_block'
 		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type != 'portald'") },
 
@@ -1612,17 +1615,20 @@ sub createAccessLog {
 		($ipid, $subnetid) = get_ipids($r->connection->remote_ip);
 	}
 
-	if ($op eq 'index' && $dat =~ m|^([^/]*)/|) {
-		$skin_name = $1;
+	if ( $op eq 'index' && $dat =~ m|^([^/]*)| ) {
+		my $firstword = $1;
+		if ($self->getSkinFromName($firstword)) {
+			$skin_name = $1;
+		}
 	}
 
 	if ($dat =~ /(.*)\/(\d{2}\/\d{2}\/\d{2}\/\d{4,7}).*/) {
-		$skin_name = $1;
 		$dat = $2;
 		$op = 'article';
-#		$self->sqlUpdate('stories', { -hits => 'hits+1' },
-#			'sid=' . $self->sqlQuote($dat)
-#		);
+		my $firstword = $1;
+		if ($self->getSkinFromName($firstword)) {
+			$skin_name = $1;
+		}
 	}
 
 	my $duration;
@@ -4976,7 +4982,8 @@ sub getSubmissionsSkins {
 
 	my $hash = $self->sqlSelectAll("skins.name, note, COUNT(*)",
 		'submissions LEFT JOIN skins ON skins.skid = submissions.primaryskid',
-		"del=$del $skin_clause GROUP BY primaryskid, note");
+		"del=$del AND submittable='yes' $skin_clause",
+		"GROUP BY primaryskid, note");
 
 	return $hash;
 }
