@@ -173,9 +173,9 @@ sub previewForm {
 	$sub->{email} = processSub($sub->{email}, $email_known);
 
 	$slashdb->setSession(getCurrentUser('uid'), {
-		lasttitle => $sub->{subj},
-		last_subid=> $form->{subid},
-		last_sid  => '',
+		lasttitle	=> $sub->{subj},
+		last_subid	=> $form->{subid},
+		last_sid	=> '',
 	}) if $user->{is_admin};
 
 	slashDisplay('previewForm', {

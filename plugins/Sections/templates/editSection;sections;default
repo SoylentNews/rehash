@@ -103,7 +103,7 @@ __template__
 	<UL>
 	[% FOREACH tid = topics.keys -%]
 		<LI><A HREF="[%
-		constants.rootdir %]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid %]</A></LI>
+		constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% tid %]">[% topics.$tid %]</A></LI>
 	[% END -%]
 	</UL>
 </TD>

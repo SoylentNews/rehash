@@ -894,6 +894,7 @@ sub otherLinks {
 	}, { Return => 1, Nocomm => 1 });
 }
 
+##################################################################
 sub get_slashd_box {
 	my $slashdb = getCurrentDB();
 	my $sldst = $slashdb->getSlashdStatuses();
@@ -1409,11 +1410,10 @@ sub updateStory {
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
-	    for (@$extras) {
-		my $key = $_->[1];
-		$data->{$key} = $form->{$key}
-		if $form->{$key};
-	    }
+		for (@$extras) {
+			my $key = $_->[1];
+			$data->{$key} = $form->{$key} if $form->{$key};
+		}
 	}
 
 	$slashdb->setStory($form->{sid}, $data);
@@ -1472,10 +1472,10 @@ sub saveStory {
 	# a good idea because you end up getting form values 
 	# such as op and apache_request saved into story_param
 	my $data = {
-		uid	=> $form->{uid},
-		sid	=> $form->{sid},
-		title	=> $form->{title},
-		section	=> $form->{section},
+		uid		=> $form->{uid},
+		sid		=> $form->{sid},
+		title		=> $form->{title},
+		section		=> $form->{section},
 		tid		=> $form->{tid},
 		dept		=> $form->{dept},
 		'time'		=> $time,
@@ -1489,11 +1489,10 @@ sub saveStory {
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
-	    for (@$extras) {
-		my $key = $_->[1];
-		$data->{$key} = $form->{$key}
-		if $form->{$key};
-	    }
+		for (@$extras) {
+			my $key = $_->[1];
+			$data->{$key} = $form->{$key} if $form->{$key};
+		}
 	}
 	my $sid = $slashdb->createStory($data);
 
@@ -1536,11 +1535,9 @@ sub saveStory {
 			errorLog("could not create discussion for story '$sid'");
 		}
 		$data->{discussion} = $id;
-		slashHook('admin_save_story_success', 
-							{ story => $data });
+		slashHook('admin_save_story_success', { story => $data });
 	} else {
-		slashHook('admin_save_story_failed', 
-							{ story => $data });
+		slashHook('admin_save_story_failed', { story => $data });
 		titlebar('100%', getData('story_creation_failed'));
 		listStories(@_);
 		return;
