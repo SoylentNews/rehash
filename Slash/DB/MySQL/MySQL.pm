@@ -589,7 +589,7 @@ sub undoModeration {
 	my $constants = getCurrentStatic();
 
 	# SID here really refers to discussions.id, NOT stories.sid
-	my $cursor = $self->sqlSelectMany("cid,val,active,cuid",
+	my $cursor = $self->sqlSelectMany("cid,val,active,cuid,reason",
 			"moderatorlog",
 			"moderatorlog.uid=$uid and moderatorlog.sid=$sid"
 	);
@@ -600,7 +600,7 @@ sub undoModeration {
 	my $max_karma = $constants->{maxkarma};
 
 	my @removed;
-	while (my($cid, $val, $active, $cuid) = $cursor->fetchrow){
+	while (my($cid, $val, $active, $cuid, $reason) = $cursor->fetchrow){
 
 		# If moderation wasn't actually performed, we skip ahead one.
 		next if ! $active;
@@ -641,7 +641,11 @@ sub undoModeration {
 			"uid=$cuid"
 		);
 
-		push(@removed, $cid);
+		push @removed, {
+			cid	=> $cid,
+			reason	=> $reason,
+			val	=> $val,
+		};
 	}
 
 	return \@removed;

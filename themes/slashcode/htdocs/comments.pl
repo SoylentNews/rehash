@@ -1390,51 +1390,14 @@ sub moderateCid {
 		$dispArgs->{points} = $user->{points};
 		$dispArgs->{type} = 'moderated';
 
-		# Send messages regarding this moderation to user who posted
-		# comment if they have that bit set.
-		my $messages = getObject('Slash::Messages');
-		if ($messages) {
-			my $comm = $slashdb->getCommentReply($sid, $cid);
-			my $users   = $messages->checkMessageCodes(
-				MSG_CODE_COMMENT_MODERATE, [$comment->{uid}]
-			);
-			if (@$users) {
-				my $discussion = $slashdb->getDiscussion($sid);
-				if ($discussion->{sid}) {
-					# Story discussion, link to it.
-					$discussion->{realurl} =
-						"$constants->{absolutedir}/article.pl?sid=$discussion->{sid}";
-				} else {
-					# Some other kind of discussion,
-					# probably poll, journal entry, or
-					# user-created;  don't trust its url. -- jamie
-					# I really don't like this.  I want users
-					# to be able to go to the poll or journal
-					# directly.  we could consider matching a pattern
-					# for journal.pl or pollBooth.pl etc.,
-					# but that is not great.  maybe a field in discussions
-					# for whether or not url is trusted. -- pudge
-					$discussion->{realurl} =
-						"$constants->{absolutedir}/comments.pl?sid=$discussion->{id}";
-				}
-				my $data  = {
-					template_name	=> 'mod_msg',
-					subject		=> {
-						template_name => 'mod_msg_subj'
-					},
-					comment		=> $comm,
-					discussion	=> $discussion,
-					moderation	=> {
-						user	=> $user,
-						value	=> $val,
-						reason	=> $reason,
-					},
-				};
-				$messages->create($users->[0],
-					MSG_CODE_COMMENT_MODERATE, $data
-				);
-			}
-		}
+		send_mod_msg({
+			type	=> 'mod_msg',
+			sid	=> $sid,
+			cid	=> $cid,
+			val	=> $val,
+			reason	=> $reason,
+			comment	=> $comment
+		});
 	}
 
 	# Now display the template with the moderation results.
@@ -1491,6 +1454,68 @@ sub deleteThread {
 	return $count;
 }
 
+##################################################################
+# Send messages regarding this moderation to user who posted
+# comment if they have that bit set.
+sub send_mod_msg {
+	my($mod) = @_;
+
+	my $messages	= getObject('Slash::Messages') or return;
+
+	my $constants	= getCurrentStatic();
+	my $slashdb	= getCurrentDB();
+	my $user	= getCurrentUser();
+
+	my $sid		= $mod->{sid};
+	my $cid		= $mod->{cid};
+	my $val		= $mod->{val};
+	my $reason	= $mod->{reason};
+	my $type	= $mod->{type}    || 'mod_msg';
+	my $comment	= $mod->{comment} || $slashdb->getComment($cid);
+
+	my $comm	= $slashdb->getCommentReply($sid, $cid);
+	my $users	= $messages->checkMessageCodes(
+		MSG_CODE_COMMENT_MODERATE, [$comment->{uid}]
+	);
+
+	if (@$users) {
+		my $discussion = $slashdb->getDiscussion($sid);
+		if ($discussion->{sid}) {
+			# Story discussion, link to it.
+			$discussion->{realurl} =
+				"$constants->{absolutedir}/article.pl?sid=$discussion->{sid}";
+		} else {
+			# Some other kind of discussion,
+			# probably poll, journal entry, or
+			# user-created;  don't trust its url. -- jamie
+			# I really don't like this.  I want users
+			# to be able to go to the poll or journal
+			# directly.  we could consider matching a pattern
+			# for journal.pl or pollBooth.pl etc.,
+			# but that is not great.  maybe a field in discussions
+			# for whether or not url is trusted. -- pudge
+			$discussion->{realurl} =
+				"$constants->{absolutedir}/comments.pl?sid=$discussion->{id}";
+		}
+
+		my $data  = {
+			template_name	=> $type,
+			subject		=> {
+				template_name => $type . '_subj'
+			},
+			comment		=> $comm,
+			discussion	=> $discussion,
+			moderation	=> {
+				user	=> $user,
+				value	=> $val,
+				reason	=> $reason,
+			},
+		};
+		$messages->create($users->[0],
+			MSG_CODE_COMMENT_MODERATE, $data
+		);
+	}
+}
 
 ##################################################################
 # If you moderate, and then post, all your moderation is undone.
@@ -1513,6 +1538,17 @@ sub undoModeration {
 		$sid = $slashdb->getDiscussionBySid($sid, 'header');
 	}
 	my $removed = $slashdb->undoModeration($user->{uid}, $sid);
+
+	for my $mod (@$removed) {
+		$mod->{val} =~ s/^(\d)/+$1/;  # put "+" in front if necessary
+		send_mod_msg({
+			type	=> 'unmod_msg',
+			sid	=> $sid,
+			cid	=> $mod->{cid},
+			val	=> $mod->{val},
+			reason	=> $mod->{reason}
+		});
+	}	
 
 	slashDisplay('undo_mod', {
 		removed	=> $removed,

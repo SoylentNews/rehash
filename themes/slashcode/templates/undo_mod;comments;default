@@ -15,7 +15,7 @@ __name__
 undo_mod
 __template__
 [% FOR r = removed %]
-Undoing moderation to Comment #[% r %]<BR>
+Undoing moderation to Comment #[% r.cid %]<BR>
 [% END %]
 __seclev__
 1000
