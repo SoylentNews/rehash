@@ -172,7 +172,7 @@ sub getRDF {
 	if ($@) {
 		my $err = $@;
 		$err =~ s/\n/ /;
-		portaldLog("$bid did not parse properly:$@");
+		portaldLog("$bid did not parse properly:$err");
 		return;
 	} else {
 		my $str;
