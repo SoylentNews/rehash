@@ -838,7 +838,7 @@ EOT
 }
 
 ########################################################
-# ok, I was tired of trying to mould getDescriptions into 
+# ok, I was tired of trying to mold getDescriptions into 
 # taking more args.
 sub getTemplateList {
 	my($self, $section, $page) = @_;
