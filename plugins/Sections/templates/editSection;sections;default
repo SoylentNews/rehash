@@ -78,7 +78,7 @@ __template__
 		<TR>
 			<TD>
 			<B><A HREF="[% constants.rootdir
-			%]/admin.pl?op=blocked&bid=[% block.bid %]">[% 
+			%]/admin.pl?op=blocks&amp;blocked1=1&amp;bid1=[% block.bid %]">[% 
 			block.title %]</A></B>
 			<A HREF="[% block.url %]">[% block.url %]</A>[% 
 			' (default)' IF block.ordernum > 0 %]</TD>
