@@ -1105,8 +1105,10 @@ sub showInfo {
 		$constants->{user_submitter_display_default}
 	) unless !$storycount || $requested_user->{nonuid};
 
-	my $subcount = $slashdb->countSubmissionsByNetID($netid, $fieldkey) if $requested_user->{nonuid};
-	my $submissions = $slashdb->getSubmissionsByNetID($netid, $fieldkey) if $requested_user->{nonuid};
+	my $subcount = $slashdb->countSubmissionsByNetID($netid, $fieldkey)
+		if $requested_user->{nonuid};
+	my $submissions = $slashdb->getSubmissionsByNetID($netid, $fieldkey)
+		if $requested_user->{nonuid};
 
 	if ($requested_user->{nonuid}) {
 		slashDisplay('netIDInfo', {
@@ -1867,23 +1869,14 @@ sub saveUserAdmin {
 		return ;
 	}
 
-	for my $field (qw( readonly_comments readonly_submit banned isproxy )) {
-		$form->{$field} = 0 unless $form->{$field} eq 'on';
-	}
 	my @access_add = ( );
-	push @access_add, 'nopost'	if $form->{readonly_nopost};
-	push @access_add, 'nosubmit'	if $form->{readonly_nosubmit};
-	push @access_add, 'ban'		if $form->{banned};
-	push @access_add, 'proxy'	if $form->{isproxy};
-	my $reason = "";
-	$reason ||= $form->{nopost_ro_reason}	if $form->{readonly_nopost};
-	$reason ||= $form->{nosubmit_ro_reason}	if $form->{readonly_nosubmit};
-	$reason ||= $form->{banned_reason}	if $form->{banned};
-	$reason ||= $form->{isproxy_reason}	if $form->{isproxy};
-
+	for my $now (qw( nopost nosubmit ban proxy )) {
+		push @access_add, $now if $form->{"accesslist_$now"} eq 'on';
+	}
+	my $reason = $form->{accesslist_reason};
 	$slashdb->setAccessList($user_edit, \@access_add, $reason);
 
-	if ($form->{banned} eq 'on') {
+	if ($form->{accesslist_ban} eq 'on') {
 		$slashdb->getBanList(1); # reload the list
 	}
 
@@ -2623,12 +2616,11 @@ sub getUserAdmin {
 	my $constants	= getCurrentStatic();
 	$id ||= $user->{uid};
 
-	my($checked, $uidstruct, $readonly, $readonly_reasons);
+	my($expired, $uidstruct, $readonly);
 	my($user_edit, $user_editfield, $ipstruct, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
-	my($isproxy, $isproxy_reason, $isproxy_time);
-	my($banned, $banned_reason, $banned_time);
+	my $accesslist;
 	my $sectionref = $slashdb->getDescriptions('sections-contained');
 	$sectionref->{''} = getData('all_sections');
 
@@ -2636,14 +2628,14 @@ sub getUserAdmin {
 	if ($field eq 'uid') {
 		$user_edit = $slashdb->getUser($id);
 		$user_editfield = $user_edit->{uid};
-		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
+		$expired = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'nickname') {
 		$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
 		$user_editfield = $user_edit->{nickname};
-		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
+		$expired = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
@@ -2680,33 +2672,20 @@ sub getUserAdmin {
 		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 	}
 
-	if ($field eq 'ipid' || $field eq 'md5id' && $form->{fieldname} eq 'ipid') {
-		my $aclinfo = $slashdb->getAccessListInfo('proxy', { ipid => $id });
-		$isproxy = $aclinfo ? ' CHECKED' : '';
-		$isproxy_reason = $aclinfo->{reason} || '';
-		$isproxy_time = $aclinfo->{datetime} || '';
+	for my $access_type (qw( ban nopost nosubmit norss proxy )) {
+		$accesslist->{$access_type} = "";
+		my $info_hr = $slashdb->getAccessListInfo($access_type, $user_edit);
+		next if !$info_hr; # no match
+		$accesslist->{reason}	||= $info_hr->{reason};
+		$accesslist->{ts}	||= $info_hr->{ts};
+		$accesslist->{adminuid}	||= $info_hr->{adminuid};
+		$accesslist->{$access_type} = " CHECKED";
 	}
-
-	for my $access_type ('nopost', 'nosubmit') {
-		$readonly->{$access_type} =
-			$slashdb->checkReadOnly($access_type, $user_edit) ? 
-				' CHECKED' : '';
-
-		# This is WACKY, but it should fix the problem.
-		my $user_chk = $user_edit->{md5id} ? 
-			{ $form->{fieldname} => $user_edit->{md5id} } : 
-			$user_edit;
-
-		my $aclinfo = $slashdb->getAccessListInfo($access_type, $user_chk);
-		$readonly_reasons->{$access_type} = $aclinfo->{reason} || "";
+	if (exists $accesslist->{adminuid}) {
+		$accesslist->{adminnick} = $accesslist->{adminuid}
+			? $slashdb->getUser($accesslist->{adminuid}, 'nickname')
+			: '(unknown)';
 	}
-
-	my $banref = $slashdb->getBanList(1);
-
-	$banned = $banref->{$id} ? ' CHECKED' : '';
-	my $aclinfo = $slashdb->getAccessListInfo('ban', $user_edit);
-	$banned_reason = $aclinfo->{reason} || "";
-	$banned_time = $aclinfo->{datetime} || "";
 
 	$user_edit->{author} = ($user_edit->{author} == 1) ? ' CHECKED' : '';
 	if (! $user->{nonuid}) {
@@ -2734,22 +2713,16 @@ sub getUserAdmin {
 	return slashDisplay('getUserAdmin', {
 		field			=> $field,
 		useredit		=> $user_edit,
-		banned 			=> $banned,
-		banned_reason		=> $banned_reason,
-		banned_time		=> $banned_time,
-		isproxy			=> $isproxy,
-		isproxy_reason		=> $isproxy_reason,
-		isproxy_time		=> $isproxy_time,
+		accesslist		=> $accesslist,
 		userinfo_flag		=> $user_editinfo_flag,
 		userfield		=> $user_editfield,
 		ipstruct		=> $ipstruct,
 		uidstruct		=> $uidstruct,
 		seclev_field		=> $seclev_field,
-		checked 		=> $checked,
+		expired 		=> $expired,
 		topabusers		=> $topabusers,
 		readonly		=> $readonly,
 		thresh_select		=> $thresh_select,
-		readonly_reasons 	=> $readonly_reasons,
 		authoredit_flag 	=> $authoredit_flag,
 		section_select		=> $section_select,
 	}, 1);

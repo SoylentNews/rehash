@@ -3139,9 +3139,12 @@ sub createAbuse {
 }
 
 ##################################################################
+# Instead of setting nopost directly, with a goofy reason, the
+# accesslist table should have a column "now_expired", which
+# checkReadOnly knows to check.  But the expired-user code has
+# other problems to fix first... - Jamie 2003/03/23
 sub setExpired {
 	my($self, $uid) = @_;
-
 	if  ($uid && !$self->checkExpired($uid)) {
 		$self->setUser($uid, { expired => 1 });
 		$self->setAccessList({ uid => $uid }, [qw( nopost )], 'expired');
@@ -3151,7 +3154,6 @@ sub setExpired {
 ##################################################################
 sub setUnexpired {
 	my($self, $uid) = @_;
-
 	if ($uid && $self->checkExpired($uid)) {
 		$self->setUser($uid, { expired => 0 });
 		$self->setAccessList({ uid => $uid }, [ ], '');
@@ -3162,7 +3164,6 @@ sub setUnexpired {
 sub checkExpired {
 	my($self, $uid) = @_;
 	return 0 if !$uid;
-
 	my $rows = $self->sqlCount(
 		"accesslist",
 		"uid = '$uid' AND now_nopost = 'yes' AND reason = 'expired'"
@@ -3538,7 +3539,44 @@ sub getAbuses {
 }
 
 ##################################################################
-# returns a hashref with reason and datetime fields
+# Pass this private utility method a user hashref and, based on the
+# uid/ipid/subnetid fields, it returns:
+# 1. an arrayref of WHERE clauses that can be used to select rows
+#    from accesslist that apply to this user;
+# 2. a hashref meant to be passed to sqlUpdate() if it is desired
+#    to create a row in accesslist for this user.
+sub _get_insert_and_where_accesslist {
+	my($self, $user_check) = @_;
+
+	my($where_ary, $insert_hr);
+
+	$user_check ||= getCurrentUser();
+	if ($user_check) {
+		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
+			$where_ary = [ "uid = $user_check->{uid}" ];
+			$insert_hr->{uid} = $user_check->{uid};
+		} elsif ($user_check->{ipid}) {
+			$where_ary = [ "ipid = '$user_check->{ipid}'" ];
+			$insert_hr->{ipid} = $user_check->{ipid};
+		} elsif ($user_check->{subnetid}) {
+			$where_ary = [ "subnetid = '$user_check->{subnetid}'" ];
+			$insert_hr->{subnetid} = $user_check->{subnetid};
+		} elsif ($user_check->{md5id}) {
+			$where_ary = [
+				"ipid = '$user_check->{md5id}'",
+				"subnetid = '$user_check->{md5id}'",
+			];
+			$insert_hr->{ipid} = $user_check->{ipid};
+		} else {
+			return undef;
+		}
+	}
+
+	return($where_ary, $insert_hr);
+}
+
+##################################################################
+# returns a hashref with reason and ts fields
 sub getAccessListInfo {
 	my($self, $access_type, $user_check) = @_;
 	$access_type = 'nopost' if !$access_type
@@ -3546,65 +3584,68 @@ sub getAccessListInfo {
 
 	my $constants = getCurrentStatic();
 	my $ref = {};
-	my $where_ary;
-
-	if ($user_check) {
-		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
-			$where_ary = [ "uid = $user_check->{uid}" ];
-		} elsif ($user_check->{md5id}) {
-			$where_ary = [
-				"ipid = '$user_check->{md5id}'",
-				"subnetid = '$user_check->{md5id}'",
-			];
-		} elsif ($user_check->{ipid}) {
-			$where_ary = [ "ipid = '$user_check->{ipid}'" ];
-		} elsif ($user_check->{subnetid}) {
-			$where_ary = [ "subnetid = '$user_check->{subnetid}'" ];
-		} else {
-			return {};
-		}
-	} else {
-		$user_check = $self->getCurrentUser();
-		$where_ary = [
-			"ipid = '$user_check->{ipid}'",
-			"subnetid = '$user_check->{subnetid}'",
-		];
-	}
-
+	my($where_ary) = $self->_get_insert_and_where_accesslist($user_check);
 	for my $where (@$where_ary) {
 		$where .= " AND now_$access_type = 'yes'";
 	}
-	
-	my $aclinfo = undef;
+
+	my $info = undef;
 	for my $where (@$where_ary) {
-		$ref = $self->sqlSelectAll("reason, ts", 'accesslist', $where);
+		$ref = $self->sqlSelectAll("reason, ts, adminuid", 'accesslist', $where);
 		for my $row (@$ref) {
-			$aclinfo ||= { };
-			if (!exists($aclinfo->{reason}) || $aclinfo->{reason} eq '') {
-				$aclinfo->{reason}   = $row->[0];
-				$aclinfo->{datetime} = $row->[1];
-			} elsif ($aclinfo->{reason} ne $row->[0]) {
-				$aclinfo->{reason}   = 'multiple';
-				$aclinfo->{datetime} = 'multiple';
+			$info ||= { };
+			if (!exists($info->{reason}) || $info->{reason} eq '') {
+				$info->{reason}	= $row->[0];
+				$info->{ts}	= $row->[1];
+				$info->{adminuid} = $row->[2];
+			} elsif ($info->{reason} ne $row->[0]) {
+				$info->{reason}	= 'multiple';
+				$info->{ts}	= 'multiple';
+				$info->{adminuid} = 0;
 				# At this point we're done, since the
 				# reason and time can't change anymore,
 				# so short-circuit out of the loop.
-				return $aclinfo;
+				return $info;
 			}
 		}
 	}
 
-	return $aclinfo;
+	return $info;
 }
 
 ##################################################################
-sub addAccessList {
-	my($self, $now_here, $reason) = @_;
-}
+# Add (set to "yes") zero or more columns in accesslist for a particular
+# user, and remove (set to "no") zero or more columns.  Note that "user"
+# can be identified by uid, ipid, or subnetid.  The old reason will be
+# overwritten with whatever's passed in.
+sub changeAccessList {
+	my($self, $user_check, $now_here, $now_gone, $reason) = @_;
 
-##################################################################
-sub removeAccessList {
-	my($self, $now_gone, $reason) = @_;
+	my($where_ary) = $self->_get_insert_and_where_accesslist($user_check);
+	my $where = join(" OR ", @$where_ary);
+	my $ar = $self->sqlSelectAllHashrefArray("*", "accesslist", $where);
+
+	if (!@$ar) {
+		# No existing columns;  just add what has to be added.
+		return $self->setAccessList($user_check, $now_here, $reason);
+	}
+
+	# We have existing columns.  Pull out the union of the "yes"
+	# columns, change that by the $now_here and $now_gone we were
+	# passed, and write it back.
+	my @cols = map { /^now_(\w+)$/; $1 } grep { /^now_/ } @{$ar->[0]};
+	my %new_now = ( );
+	for my $col (@cols) {
+		$new_now{$col} = 'no';
+	}
+	for my $col (@cols) {
+		for my $row (@$ar) {
+			$new_now{$col} = 'yes' if $row->{"now_$col"} eq 'yes';
+		}
+	}
+	for my $col (@$now_here) { $new_now{$col} = 'yes' }
+	for my $col (@$now_gone) { $new_now{$col} = 'no'  }
+	return $self->setAccessList($user_check, [ keys %new_now ], $reason);
 }
 
 ##################################################################
@@ -3613,26 +3654,19 @@ sub setAccessList {
 	# New comment: Feel free to use this method to set isproxy.  "Expired"
 	# is still not functional. - Jamie 2003/03/04
 	my($self, $user_check, $new_now, $reason) = @_;
+	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
 	# "Expired" isn't implemented yet.
 	return if $reason eq 'expired';
 
-	my $insert_hr = {};
 	my $where = "reason != 'expired'";
-	my $rows;
 
-	$user_check ||= getCurrentUser();
-	if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
-		$where .= " AND uid = $user_check->{uid}";
-		$insert_hr->{uid} = $user_check->{uid};
-	} elsif ($user_check->{ipid}) {
-		$where .= " AND ipid = '$user_check->{ipid}'";
-		$insert_hr->{ipid} = $user_check->{ipid};
-	} elsif ($user_check->{subnetid}) {
-		$where .= " AND subnetid = '$user_check->{subnetid}'";
-		$insert_hr->{subnetid} = $user_check->{subnetid};
-	}
+	my($where_ary, $insert_hr) = $self->_get_insert_and_where_accesslist($user_check);
+	# Hopefully the $user_check we're given will specify its data type
+	# but in case we're passed just an {md5id}, we will get two clauses
+	# returned in $where_ary and we'll need to join them.
+	$where .= " AND (" . join(" OR ", @$where_ary) . ")";
 
 	# Set up the update hashref and the assignment order for it.
 	my $update_hr = { -ts => "NOW()" };
@@ -3644,11 +3678,14 @@ sub setAccessList {
 		$update_hr->{"now_$col"} = $new_now_hash{$col} ? "yes" : "no";
 		push @assn_order, "now_$col";
 	}
-	$update_hr->{reason} = $reason if $reason ne '';
+	$update_hr->{reason} = $reason;
+
+	my $adminuid = getCurrentUser('uid');
+	$adminuid = 0 if isAnon($adminuid);
+	$insert_hr->{adminuid} = $update_hr->{adminuid} = $adminuid;
 
 	# Insert if necessary, then do the update.
-	$rows = $self->sqlCount("accesslist", $where);
-	$rows ||= 0;
+	my $rows = $self->sqlCount("accesslist", $where) || 0;
 	if ($rows == 0) {
 		# No row currently exists for this uid, ipid or subnetid.
 		# If we are setting anything to "yes" or have a reason,

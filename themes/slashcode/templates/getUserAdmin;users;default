@@ -9,6 +9,8 @@ Template for editing user
 * nickname_checked = whether or not nickname is checked
 * author_flag = current user is author
 * authoredit_flag = current user can edit authors
+* accesslist = hashref of fields from user/id's accesslist entry
+
 __title__
 users admin
 __page__
@@ -90,8 +92,10 @@ __template__
 				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid | strip_attribute %]">
 				[%- END -%]
 
-				<TD VALIGN="MIDDLE"><B>User</B></TD>
-				<TD><INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]">
+				<TD VALIGN="TOP"><B>User</B></TD>
+				<TD>
+					<INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]" SIZE="32">
+					<BR>
 					[% IF form.fieldname %]<INPUT TYPE="HIDDEN" NAME="fieldname" VALUE="[% form.fieldname | strip_attribute %]">[% END %]
 					<INPUT TYPE="SUBMIT" NAME="userinfo" VALUE="Info">
 					<INPUT TYPE="SUBMIT" NAME="edituser" VALUE="Edit">
@@ -101,7 +105,7 @@ __template__
 				</TD>
 			</TR>
 		[% IF userinfo_flag %]
-			[% IF authoredit_flag && seclev_field && ! useredit.nonuid  %]
+			[% IF authoredit_flag && seclev_field && !useredit.nonuid  %]
 				[% IF user.seclev >= 10000 %]
 			<TR>
 				<TD><B>Seclev</B></TD>
@@ -117,36 +121,32 @@ __template__
 				<TD>[% section_select %]</TD>
                         </TR>
 			[% END %]
+			[% IF !useredit.nonuid %]
 			<TR>
 				<TD><B>Default points</B></TD>
 				<TD>[% thresh_select %]</TD>
 			</TR>
-			<TR>
-				<TD COLSPAN="2"><B>Restrictions</B></TD>
-			</TR>
-			<TR>
-				<TD ALIGN="RIGHT" WIDTH="100">Comments</TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_nopost" [% readonly.nopost | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="nopost_ro_reason" VALUE="[% readonly_reasons.nopost | strip_attribute %]"></TD>
-			</TR>
-			<TR>
-				<TD ALIGN="RIGHT" WIDTH="100">Submissions</TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_nosubmit" [% readonly.nosubmit | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="nosubmit_ro_reason" VALUE="[% readonly_reasons.nosubmit | strip_attribute %]"></TD>
-			</TR>
-			<TR>
-				<TD ALIGN="RIGHT" WIDTH="100">Banned</TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="banned_reason" VALUE="[% banned_reason | strip_attribute %]">&nbsp;[% banned_time %]</TD>
-			</TR>
-			[% IF field == 'ipid' || field == 'md5id' %]
-			<TR>
-				<TD ALIGN="RIGHT" WIDTH="100">Is Proxy</TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="isproxy" [% isproxy %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="isproxy_reason" VALUE="[% isproxy_reason | strip_attribute %]">&nbsp;[% isproxy_time %]</TD>
-			</TR>
 			[% END %]
-			[% IF ! useredit.nonuid %]
 			<TR>
-				<TD ALIGN="RIGHT" WIDTH="100">Expired</TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="expired" [% checked.expired %]>&nbsp;</TD>
+				<TD VALIGN="TOP"><B>Restrictions</B></TD>
+				<TD>
+				<INPUT TYPE="checkbox" NAME="accesslist_ban" [% accesslist.ban | strip_attribute %]>&nbsp;Banned &nbsp;
+				<INPUT TYPE="checkbox" NAME="accesslist_nopost" [% accesslist.nopost | strip_attribute %]>&nbsp;Comments &nbsp;
+				<INPUT TYPE="checkbox" NAME="accesslist_nosubmit" [% accesslist.nosubmit | strip_attribute %]>&nbsp;Submissions &nbsp;
+				<INPUT TYPE="checkbox" NAME="accesslist_norss" [% accesslist.norss | strip_attribute %]>&nbsp;No&nbsp;RSS &nbsp;
+				[% IF field == 'ipid' || field == 'md5id' %]
+					<INPUT TYPE="checkbox" NAME="accesslist_proxy" [% accesslist.proxy | strip_attribute %]>&nbsp;Proxy &nbsp;
+				[% END %]
+				[% IF !useredit.nonuid %]
+					<-- INPUT TYPE="checkbox" NAME="accesslist_expired" [% accesslist.expired | strip_attribute %]&nbsp;Expired &nbsp; -->
+				[% END %]
+				<BR><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="255" NAME="accesslist_reason" VALUE="[% accesslist.reason | strip_attribute %]">
+				<BR>
+				[% IF accesslist.ts %]<B>Time:</B> [% accesslist.ts %][% END %]
+				[% IF accesslist.adminnick %]<B>By:</B> [% accesslist.adminnick %][% END %]
+				</TD>
 			</TR>
+			[% IF ! useredit.nonuid %]
 			<TR>
 				<TD WIDTH="100"><B>Hits<B></TD>
 				<TD ALIGN="LEFT">Last access:
@@ -227,10 +227,8 @@ __template__
 			</TR>
 			[% END %]
 			<TR>
-				<TD COLSPAN="2" HEIGHT="10"></TD>
-			</TR>
-			<TR>
-				<TD COLSPAN="2" HEIGHT="10"><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% useredit.nickname %]"></TD>
+				<TD>&nbsp;</TD>
+				<TD><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save[% IF useredit.nickname; useredit.nickname | strip_attribute; END %]"></TD>
 			</TR>
 		[% END %]
 			</FORM>
