@@ -120,7 +120,8 @@ sub getAdminModsInfo {
 	# Get the history of moderation fairness for all admins from the
 	# last month.  This reads the last 30 days worth of stats_daily
 	# data (not counting today, which will be added to that table
-	# shortly).
+	# shortly).  Set up both the {count} and {nickname} fields for
+	# each combination of uid and 1/-1 fairness.
 	my $m2_history_mo_hr = $self->sqlSelectAllHashref(
 		"name",
 		"name, SUM(value)",
@@ -133,7 +134,23 @@ sub getAdminModsInfo {
 		my($fairness, $uid) = $name =~ /^m2_((?:un)?fair)_admin_(\d+)$/;
 		next unless defined($fairness);
 		$fairness = ($fairness eq 'unfair') ? -1 : 1;
-		$m2_uid_val_mo_hr->{$uid}{$fairness} = $m2_history_mo_hr->{$name};
+		$m2_uid_val_mo_hr->{$uid}{$fairness}{count} = $m2_history_mo_hr->{$name};
+	}
+	if (%$m2_uid_val_mo_hr) {
+		my $m2_uid_nickname = $self->sqlSelectAllHashref(
+			"uid",
+			"uid, nickname",
+			"users",
+			"uid IN (" . join(",", keys %$m2_uid_val_mo_hr) . ")"
+		);
+		for my $uid (keys %$m2_uid_nickname) {
+			for my $fairness (qw( -1 1 )) {
+				$m2_uid_val_mo_hr->{$uid}{$fairness}{nickname} =
+					$m2_uid_nickname->{$uid}{nickname};
+				$m2_uid_val_mo_hr->{$uid}{$fairness}{count} +=
+					$m2_uid_val_hr->{$uid}{$fairness}{count};
+			}
+		}
 	}
 
 	# For comparison, get the same stats for all users on the site and
@@ -223,8 +240,8 @@ sub getAdminModsInfo {
 			$hr->{$nickname}{m2_text} .= " " x  12;
 		}
 		# Also calculate overall-month percentage.
-		my $nfair_mo   = $m2_uid_val_mo_hr->{$uid} {1} || 0;
-		my $nunfair_mo = $m2_uid_val_mo_hr->{$uid}{-1} || 0;
+		my $nfair_mo   = $m2_uid_val_mo_hr->{$uid} {1}{count} || 0;
+		my $nunfair_mo = $m2_uid_val_mo_hr->{$uid}{-1}{count} || 0;
 		$percent = ($nfair_mo+$nunfair_mo > 0)
 			? $nunfair_mo*100/($nfair_mo+$nunfair_mo)
 			: 0;
