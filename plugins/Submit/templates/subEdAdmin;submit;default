@@ -26,7 +26,7 @@ __template__
 [% FOREACH sub = submissions %]
 	[% this_note = sub.note || '' %]
 	<TR><TD><NOBR>
-		<FONT SIZE="1"><INPUT TYPE="text" NAME="comment_[% sub.subid %]" VALUE="[% sub.comment %]" SIZE="15">
+		<FONT SIZE="1"><INPUT TYPE="text" NAME="comment_[% sub.subid | strip_attribute %]" VALUE="[% sub.comment | strip_attribute %]" SIZE="15">
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
 		[% Slash.selectSection("section_$sub.subid", sub.section, 0, 1) %]
 
@@ -36,7 +36,7 @@ __template__
 		[% sub.time %]&nbsp;
 	[% END %]
 	</TD><TD>
-		<A HREF="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid %]&amp;note=[% form.note %][% sub.stitle%][% sub.ssection %]"
+		<A HREF="[% env.script_name %]?op=viewsub&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.ssection | strip_attribute %]"
 		>[% sub.strs.0 %]&nbsp;</A>
 	</TD><TD><FONT SIZE="2">[% sub.strs.1 %]
 	[% UNLESS sub.is_anon %]
