@@ -476,6 +476,9 @@ sub getModeratorCommentLog {
 # Probably by accident. -Brian
 #
 # I've replaced it. - Cliff
+#
+# No, on purpose;  modCommentLog;misc;default now displays that data.
+# Removing it again. - Jamie
 
 	# We no longer need SID as CID is now unique.
 	my $comments = $self->sqlSelectMany("comments.sid as sid,
@@ -490,8 +493,7 @@ sub getModeratorCommentLog {
 				"moderatorlog, users, comments",
 				"moderatorlog.cid=$cid
 			     AND moderatorlog.uid=users.uid
-			     AND comments.cid=$cid
-			     AND moderatorlog.active=1",
+			     AND comments.cid=$cid",
 				"ORDER BY ts"
 	);
 	my(@comments, $comment);
