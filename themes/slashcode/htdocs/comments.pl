@@ -180,7 +180,8 @@ sub main {
 
 	$form->{pid} ||= "0";
 
-	header($discussion ? $discussion->{'title'} : 'Comments', $section) or return;
+	my $title = $constants->{ubb_like_forums} ? 'Forums' : 'Comments';
+	header($discussion ? $discussion->{'title'} : $title, $section) or return;
 
 	if ($user->{is_anon} && length($form->{upasswd}) > 1) {
 		print getError('login error');
