@@ -456,7 +456,7 @@ sub getDaysOfUnarchivedStories {
 	my $days = $self->sqlSelectColArrayref(
 		"day_published",
 		"stories",
-		"is_archived = 'no' AND displaystatus != -1",
+		"is_archived = 'no' AND primaryskid != 0",
 		"GROUP BY day_published ORDER BY day_published DESC LIMIT $max_days");
 	return $days;
 }
