@@ -1194,6 +1194,8 @@ sub fudgeurl {
 		}
 	}
 
+	# These entities can crash browsers and don't belong in URLs.
+	$url =~ s/&#(.+?);//g;
 	# we don't like SCRIPT at the beginning of a URL
 	my $decoded_url = decode_entities($url);
 	return $decoded_url =~ /^[\s\w]*script\b/i ? undef : $url;
