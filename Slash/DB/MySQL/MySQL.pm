@@ -1676,6 +1676,7 @@ sub getDB {
 
 #################################################################
 # get list of DBs, never cache
+# (do caching in getSlashConf)
 sub getClasses {
 	my($self) = @_;
 	my $classes = $self->sqlSelectAllHashref('class', '*', 'classes');
