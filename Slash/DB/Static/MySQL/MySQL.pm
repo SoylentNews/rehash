@@ -990,7 +990,7 @@ sub createAuthorCache {
 	$sql .= "SELECT users.uid, nickname, GREATEST(fakeemail, ''),
 		GREATEST(homepage, ''), 0, GREATEST(bio, ''), author ";
 	$sql .= "FROM users, users_info ";
-	$sql .= "WHERE users.author=1";
+	$sql .= "WHERE users.author=1 ";
 	$sql .= "AND users.uid=users_info.uid";
 
 	$self->sqlDo($sql);
