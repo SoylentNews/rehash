@@ -224,21 +224,38 @@ sub SlashCompileTemplates ($$$) {
 	$slashdb->{_dbh}->disconnect;
 }
 
-# this can be used in conjunction with mod_proxy_add_forward or somesuch
+# This can be used in conjunction with mod_proxy_add_forward or somesuch,
 # if you use a frontend/backend Apache setup, where all requests come
-# from 127.0.0.1
+# from 127.0.0.1 or some other predictable IP number(s).  For speed, we
+# use a closure to store the regex that matches incoming IP number.
+{
+my $trusted_ip_regex = undef;
 sub ProxyRemoteAddr ($) {
 	my($r) = @_;
 
-	# we'll only look at the X-Forwarded-For header if the requests
-	# comes from our proxy at localhost
-	return OK unless $r->connection->remote_ip eq '127.0.0.1';
+	if (!defined($trusted_ip_regex)) {
+		$trusted_ip_regex = getCurrentStatic("x_forwarded_for_trust_regex")
+			|| '127.0.0.1';
+		if ($trusted_ip_regex) {
+			# Avoid a little processing each time by doing
+			# the regex parsing just once.
+			$trusted_ip_regex = qr{$trusted_ip_regex};
+		} else {
+			$trusted_ip_regex = '0';
+		}
+	}
+	return OK if $trusted_ip_regex eq '0';
 
+	# Since any client can forge X-Forwarded-For, we ignore it...
+	return OK unless $r->connection->remote_ip =~ $trusted_ip_regex;
+
+	# ...unless the connection comes from a trusted source.
 	if (my($ip) = $r->header_in('X-Forwarded-For') =~ /([^,\s]+)$/) {
 		$r->connection->remote_ip($ip);
 	}
-        
+
 	return OK;
+}
 }
 
 sub ConnectionIsSSL {

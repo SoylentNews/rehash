@@ -6147,6 +6147,10 @@ sub getSlashConf {
 		$conf{comment_nonstartwordchars_regex} = qr{$regex}i;
 	}
 
+	if ($conf{x_forwarded_for_trust_regex}) {
+		$conf{x_forwarded_for_trust_regex} = qr{$conf{x_forwarded_for_trust_regex}};
+	}
+
 	# for fun ... or something
 	$conf{colors} = $self->sqlSelect("block", "blocks", "bid='colors'");
 
