@@ -772,7 +772,7 @@ EOT
 		- $slashdb->getNumNewUsersSinceDaysback(0);
 	$statsSave->createStatDaily('users_created', $new_users_yest);
 	$data{rand_users_yest} = $slashdb->getRandUsersCreatedYest(10, $yesterday);
-	$data{top_recent_domains} = $slashdb->getTopRecentRealemailDomains($yesterday);
+	($data{top_recent_domains}, $data{top_recent_domains_daysback}, $data{top_recent_domains_newaccounts} = $slashdb->getTopRecentRealemailDomains($yesterday);
 
 	my $relocate = getObject('Slash::Relocate');
 
