@@ -2219,7 +2219,7 @@ sub _logtoken_delete_memcached {
 			"users_logtokens",
 			"uid=$uid_q");
 		for my $data (@$logtokens_ar) {
-			my($temp_str, $locationid) = @$data;
+			my($temp_str, $locationid) = ($data->{temp}, $data->{locationid});
 			my $lt_str = $uid
 				. ":" . ($temp_str eq 'yes' ? 1 : 0)
 				. ":" . $locationid;
