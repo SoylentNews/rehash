@@ -21,7 +21,8 @@ __template__
 
 <TABLE WIDTH="95%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
 
-[% IF weighted.size -%]
+[%# # temporarily disable %]
+[% IF 0 && weighted.size -%]
 	<TR><TD COLSPAN=4 ALIGN="CENTER"><NOBR>
 	Top Submissions by Weight
 	</NOBR></TD></TR>
