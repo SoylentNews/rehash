@@ -32,10 +32,10 @@ use Slash::Utility;
 use Slash::Display;
 
 my $virtual_user = $ARGV[0];
-setCurrentSkin(determineCurrentSkin());
-createEnvironment($ARGV[0]);
+createEnvironment($virtual_user);
 my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
+setCurrentSkin(determineCurrentSkin());
 my $gSkin = getCurrentSkin();
 my $totalChangedStories = 1;
 
