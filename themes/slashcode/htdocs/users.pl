@@ -313,7 +313,7 @@ sub main {
 			$slashdb->updateFormkey($formkey, length($ENV{QUERY_STRING}));
 		}
 		$op = $error_flag ? 'changepasswd' : 'userinfo';
-		$form->{userfield} = $form->{uid};
+		$form->{userfield} = $user->{uid};
 	}
 
 	header(getMessage('user_header'), $form->{section});
