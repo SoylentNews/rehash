@@ -2516,8 +2516,6 @@ INSERT INTO vars (name, value, description) VALUES ('gse_skip_count_if_no_min_st
 
 ALTER TABLE topic_nexus_extras MODIFY COLUMN type ENUM('text', 'list') NOT NULL DEFAULT 'text';
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_25, Start of T_2_5_0_26 - 2004/09/09
 
 ALTER TABLE story_topics_rendered DROP COLUMN weight;
@@ -2547,4 +2545,7 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 # with skins.ac_uid, then add rows for those that should not be able to
 # post.  Yes, there will be an admin interface for this eventually.
 
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_27, Start of T_2_5_0_28 - 2004/09/21
 
