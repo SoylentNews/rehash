@@ -19,7 +19,7 @@ use base 'Slash::DB::MySQL';
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub new {
-	my($class, $user) = @_;
+	my($class, $vuser) = @_;
 	my $self = { };
 
 	my $slashdb = getCurrentDB();
@@ -29,8 +29,7 @@ sub new {
 	bless($self, $class);
 
 	my $constants = getCurrentStatic();
-	$self->{virtual_user} = $constants->{backup_db_user}
-		|| $slashdb->{virtual_user};
+	$self->{virtual_user} = $vuser;
 	$self->sqlConnect();
 
 	return $self;

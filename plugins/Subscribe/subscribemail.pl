@@ -16,7 +16,7 @@ $task{$me}{code} = sub {
 	} else {
 		$backupdb = $slashdb;
 	}
-	my $sub_static = getObject("Slash::Subscribe::Static");
+	my $sub_static = getObject("Slash::Subscribe::Static", { db_type => 'reader' });
 
 	slashdLog('Send Subscribe Mail Begin');
 
