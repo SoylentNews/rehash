@@ -1435,7 +1435,8 @@ sub getTopModdersNearArchive {
 	my $top_users = $self->sqlSelectAllHashrefArray("count(moderatorlog.uid) as count, moderatorlog.uid as uid, nickname",
 							"discussions,moderatorlog,users_info,users",
 							"moderatorlog.sid=discussions.id and type='archived' and users_info.uid = moderatorlog.uid 
-							and moderatorlog.ts > date_add(discussions.ts, interval $archive_delay - 3 day) and tokens >= $token_cutoff",
+							and moderatorlog.ts > date_add(discussions.ts, interval $archive_delay - 3 day) and tokens >= $token_cutoff
+							and users_info.uid = users.uid",
                                 			"group by moderatorlog.uid order by count desc $limit_clause");
 	return $top_users;
 
