@@ -193,7 +193,7 @@ sub _process_fh_into_sql {
 	my($fh, $mldhr, $opts) = @_;
 	my @sts = ( ); # new statements
 	my $firstline_regex = $opts->{schema}
-		? qr{^(INSERT|DELETE|REPLACE|UPDATE|ALTER|CREATE)\b}
+		? qr{^(INSERT|DELETE|REPLACE|UPDATE|ALTER|CREATE|DROP)\b}
 		: qr{^(INSERT|DELETE|REPLACE|UPDATE)\b};
 	while (my $line = <$fh>) {
 
