@@ -596,6 +596,18 @@ ALTER TABLE metamodlog ADD INDEX mmid (mmid);
 ALTER TABLE sections DROP INDEX section;
 ALTER TABLE sections ADD UNIQUE section (section);
 
+# Ok, you will have a few new things you need to do at this point
+# 1) If you use zoo images make sure the eof/fof gifs are installed.
+# 2) You will also need to make sure the new task for zoo is in place if you want FOF/EOF
+# 3) If number two is true then you need to run the rebuild script for users.
+#    WARNING number three may take an hour or so depending on the size of  your database 
+#    (like Slashdot will probably be an hour or so). This won't hurt anything but during 
+#    the process users will not have their friends till the script gets to their account.
+#    FOF/EOF will show up slowly as the task works its way through them. Never run multiple
+#    copies of the task at once. It does 2000 entries at a time so it may take some time 
+#    to catch up if you have a large DB. This means it will only process as shipped 2K*24 
+#    entries per-day. This is far more then what even Slashdot does in a give day.
+#    -Brian
 DROP TABLE IF EXISTS people_log;
 CREATE TABLE people_log (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
