@@ -9,7 +9,7 @@ use strict;
 use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
-
+use Time::HiRes qw(tv_interval gettimeofday);
 # Remember that timespec goes by the database's time, which should be
 # GMT if you installed everything correctly.  So 6:07 AM GMT is a good
 # sort of midnightish time for the Western Hemisphere.  Adjust for
@@ -41,8 +41,23 @@ $task{$me}{code} = sub {
 	
 	my $start_id = $slashdb->getVar('cur_performance_stats_lastid','value', 1) || 0;
 	my ($cur_results, $hist_results);
+
 	
-	my ($max_id) = $logdb->sqlSelect("MAX(id)", "accesslog");
+	my ($start_id) = $logdb->sqlSelect("MAX(id)","accesslog") || 0;
+	my $t0 = [gettimeofday];
+	Time::HiRes::sleep(5);
+	my ($max_id) = $logdb->sqlSelect("MAX(id)", "accesslog") || 0;
+	my $elapsed = tv_interval($t0, [gettimeofday]);
+	my $pages = $logdb->sqlCount("accesslog", "id > $start_id AND id<= $max_id AND op!='image'");
+	my $pps;
+	if ($pages and $elapsed) {
+		$pps = sprintf("%4.2f", $pages / $elapsed );
+	} else {
+		$pps = "0";
+	}
+	
+	$slashdb->setVar("cur_performance_pps", $pps);
+	
 	if ($start_id) {
 		$hist_results = $slashdb->avgDynamicDurationForHour($ops, \@dates, $cur_hour);
 		$cur_results  = $logdb->avgDynamicDurationForMinutesBack($ops, 1, $start_id);
@@ -78,9 +93,12 @@ $task{$me}{code} = sub {
 		$abs_percent_diff = abs($percent_diff);
 		$type = $percent_diff <= 0 ? "fast" : "slow";
 		push @results, $percent_diff, $abs_percent_diff, $type;
+		
 	} else {
 		push @results, "", "No past performance data for comparison";
 	}
+
+	
 	$slashdb->setVar('cur_performance_stats', join('|', @results));
 
 };
