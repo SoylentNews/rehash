@@ -35,22 +35,8 @@ __template__
 		[% END %]
 	[% END %]
 
-	[% IF (back > -1) || forward %]
-		</TD></TR>
-		<TR VALIGN="TOP" BGCOLOR="#FFFFFF">
-			<TD ALIGN="RIGHT" BGCOLOR="#FFFFFF" >
-				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&uid=[% uid %]&start=[% forward %]">&lt;Next [% constants.journal_default_display %] entries</A>
-				[% END %]
-				[% IF (back > -1) && forward %]
-					|
-				[% END %]
-				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&uid=[% uid %]&start=[% back %]">Last [% constants.journal_default_display %] entries&gt;</A>
-				[% END %]
-			</TD>
-		</TR>
-	[% END %]
+[% INCLUDE pagination %]
+
 	[% IF !user.is_anon && uid && uid != user.uid %]
 		<TR VALIGN="TOP"><TD ALIGN="RIGHT" BGCOLOR="#E0E0E0">
 			<A HREF="[% constants.rootdir %]/journal.pl?op=add&uid=[% uid %]">Make a friend</A>

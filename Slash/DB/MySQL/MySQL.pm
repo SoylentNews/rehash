@@ -2200,13 +2200,13 @@ sub autoUrl {
 	$more =~ s/[a-z]//g;
 	$initials = uc($initials . $more);
 	# CHANGE DATE_ FUNCTION
-	my($now) = $self->sqlSelect('date_format(now(),"m/d h:i p")');
+	my($now) = timeCalc('epoch ' . time(), '%m/%d %H:%M %p %Z', 0);
 
 	# Assorted Automatic Autoreplacements for Convenience
-	s|<disclaimer:(.*)>|<B><A HREF="/about.shtml#disclaimer">disclaimer</A>:<A HREF="$user->{url}">$user->{nickname}</A> owns shares in $1</B>|ig;
+	s|<disclaimer:(.*)>|<B><A HREF="/about.shtml#disclaimer">disclaimer</A>:<A HREF="$user->{homepage}">$user->{nickname}</A> owns shares in $1</B>|ig;
 	s|<update>|<B>Update: <date></B> by <author>|ig;
 	s|<date>|$now|g;
-	s|<author>|<B><A HREF="$user->{url}">$initials</A></B>:|ig;
+	s|<author>|<B><A HREF="$user->{homepage}">$initials</A></B>:|ig;
 	s/\[%(.*?)%\]/$self->getUrlFromTitle($1)/exg;
 
 	# Assorted ways to add files:

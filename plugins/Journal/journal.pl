@@ -111,7 +111,7 @@ sub displayFriends {
 sub displayRSS {
 	my($form, $journal, $constants) = @_;
 	my $rss = XML::RSS->new(
-		version		=> '0.91',
+		version		=> '1.0',
 		encoding	=> $constants->{rdfencoding},
 	);
 	my $slashdb = getCurrentDB();
@@ -162,7 +162,9 @@ sub displayArticle {
 		$nickname = getCurrentUser('nickname');
 		$uid = getCurrentUser('uid');
 	}
-	my $start = $form->{start} ? $form->{start} : 0;
+
+	# clean it up
+	my $start = fixint($form->{start}) || 0;
 	my $articles = $journal->getsByUid($uid, $start,
 		$constants->{journal_default_display}, $form->{id}
 	);
@@ -195,8 +197,14 @@ sub displayArticle {
 	slashDisplay($theme, {
 		articles	=> \@sorted_articles,
 		uid		=> $form->{uid},
-		back => (($start > 0) ? ($start - $constants->{journal_default_display}) : -1),
-		forward => ((scalar(@$articles) == $constants->{journal_default_display}) ? ($start + $constants->{journal_default_display}) : 0),
+		back		=> ($start > 0
+			? $start - $constants->{journal_default_display}
+			: -1
+		),
+		forward		=> ($constants->{journal_default_display} == @$articles
+			? $start + $constants->{journal_default_display}
+			: 0
+		),
 	});
 }
 
@@ -292,6 +300,8 @@ sub editArticle {
 		slashDisplay($theme, {
 			articles	=> [{ day => $article->{date}, article => [ $disp_article ] }],
 			uid		=> $article->{uid},
+			back		=> -1,
+			forward		=> 0,
 		});
 	}
 
@@ -314,6 +324,8 @@ sub getArticle {
 	slashDisplay($theme, {
 		articles	=> [{ day => $article->{date}, article => [ $article ] }],
 		uid		=> $article->{uid},
+		back		=> -1,
+		forward		=> 0,
 	});
 }
 

@@ -154,9 +154,9 @@ plugins/Journal/templates/greypage;journal;default
 plugins/Journal/templates/journal;menu;default
 plugins/Journal/templates/journaledit;journal;default
 plugins/Journal/templates/journalfriends;journal;default
-plugins/Journal/templates/journalitem;journal;default
 plugins/Journal/templates/journallist;journal;default
 plugins/Journal/templates/journaltop;journal;default
+plugins/Journal/templates/pagination;journal;default
 plugins/Journal/test.pl
 plugins/Ladybug/Ladybug.pm
 plugins/Ladybug/MANIFEST

@@ -148,7 +148,7 @@ sub topFriends {
 	$self->sqlConnect;
 	my $losers = $self->{_dbh}->selectall_arrayref($sql);
 	$sql = "SELECT max(date) FROM journals WHERE uid=";
-	for(@$losers) {
+	for (@$losers) {
 		my $date = $self->{_dbh}->selectrow_array($sql . $_->[2]);
 		push @$_, $date;
 	}

@@ -33,6 +33,7 @@ use Apache::ModuleConfig;
 use Date::Manip;
 use Digest::MD5 'md5_hex';
 use HTML::Entities;
+use Mail::Sendmail;
 use URI;
 use XML::Parser;
 require Exporter;
@@ -59,6 +60,7 @@ use vars qw($VERSION @ISA @EXPORT);
 	errorLog
 	filter_params
 	fixHref
+	fixint
 	fixparam
 	fixurl
 	formatDate
@@ -75,6 +77,7 @@ use vars qw($VERSION @ISA @EXPORT);
 	isAnon
 	prepareUser
 	root2abs
+	sendEmail
 	setCookie
 	setCurrentForm
 	setCurrentUser
@@ -1347,6 +1350,80 @@ sub setCookie {
 
 #========================================================================
 
+=head2 sendEmail(ADDR, SUBJECT, CONTENT [, FROM, PRECEDENCE])
+
+Takes the address, subject and an email, and does what it says.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item ADDR
+
+Mail address to send to.
+
+=item SUBJECT
+
+Subject of mail.
+
+=item CONTENT
+
+Content of mail.
+
+=item FROM
+
+Optional separate "From" address instead of "mailfrom" constant.
+
+=item PRECEDENCE
+
+Optional, set to "bulk" for "bulk" precedence.  Not standard,
+but widely supported.
+
+=item
+
+=back
+
+=item Return value
+
+True if successful, false if not.
+
+=item Dependencies
+
+Need From address and SMTP server from vars table,
+'mailfrom' and 'smtp_server'.
+
+=back
+
+=cut
+
+sub sendEmail {
+	my($addr, $subject, $content, $from, $pr) = @_;
+	my $constants = getCurrentStatic();
+
+	my %data = (
+		smtp	=> $constants->{smtp_server},
+		subject	=> $subject,
+		to	=> $addr,
+		body	=> $content,
+		from	=> $from || $constants->{mailfrom}
+	);
+
+	if ($pr && $pr eq 'bulk') {
+		$data{precedence} = 'bulk';
+	}
+
+	if (sendmail(%data)) {
+		return 1;
+	} else {
+		errorLog("Can't send mail '$subject' to $addr: $Mail::Sendmail::error");
+		return 0;
+	}
+}
+
+#========================================================================
+
 =head2 stripByMode(STRING [, MODE, NO_WHITESPACE_FIX])
 
 Private function.  Fixes up a string based on what the mode is.  This
@@ -2428,12 +2505,12 @@ sub filter_params {
 
 		# clean up numbers
 		if (exists $nums{$_}) {
-			$form{$_} = _fixint($form{$_});
+			$form{$_} = fixint($form{$_});
 		} elsif (exists $special{$_}) {
 			$special{$_}->($form{$_});
 		} else {
 			for my $ri (@regints) {
-				$form{$_} = _fixint($form{$_}) if /$ri/;
+				$form{$_} = fixint($form{$_}) if /$ri/;
 			}
 		}
 	}
@@ -2444,10 +2521,10 @@ sub filter_params {
 
 ########################################################
 # fix parameter input that should be integers
-sub _fixint {
+sub fixint {
 	my($int) = @_;
 	$int =~ s/^\+//;
-	$int =~ s/^(-?[\d.]+).*$/$1/ or return;
+	$int =~ s/^(-?[\d.]+).*$/$1/s or return;
 	return $int;
 }
 

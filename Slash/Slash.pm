@@ -34,7 +34,6 @@ use Exporter ();
 use File::Spec::Functions;
 use Symbol 'gensym';
 use HTML::Entities;
-use Mail::Sendmail;
 use URI;
 use Date::Manip qw( ParseDate UnixDate );
 
@@ -57,7 +56,7 @@ $VERSION = '2.000000';	# v2.0.0
 	header horizmenu linkComment linkStory lockTest
 	moderatorCommentLog pollbooth portalbox printComments
 	redirect selectMode selectSection selectSortcode
-	selectThreshold selectTopic sendEmail titlebar gensym
+	selectThreshold selectTopic titlebar gensym
 );  # anonLog
 
 # BENDER: Fry, of all the friends I've had ... you're the first.
@@ -391,67 +390,6 @@ sub getsiddir {
 	$year = $year % 100;
 	my $sid = sprintf('%02d/%02d/%02d/', $year, $mon+1, $mday);
 	return $sid;
-}
-
-
-#========================================================================
-
-=head2 sendEmail(ADDR, SUBJECT, CONTENT)
-
-Takes the address, subject and an email, and does what it says.
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item ADDR
-
-Mail address to send to.
-
-=item SUBJECT
-
-Subject of mail.
-
-=item CONTENT
-
-Content of mail.
-
-=back
-
-=item Return value
-
-True if successful, false if not.
-
-=item Dependencies
-
-Need From address and SMTP server from vars table,
-'mailfrom' and 'smtp_server'.
-
-=back
-
-=cut
-
-sub sendEmail {
-	my($addr, $subject, $content, $pr) = @_;
-	my $constants = getCurrentStatic();
-
-	my %data = (
-		smtp	=> $constants->{smtp_server},
-		subject	=> $subject,
-		to	=> $addr,
-		body	=> $content,
-		from	=> $constants->{mailfrom}
-	);
-
-	if ($pr && $pr eq 'bulk') {
-		$data{precedence} = 'bulk';
-	}
-
-	sendmail(%data) or errorLog(
-		"Can't send mail '$subject' to $addr: $Mail::Sendmail::error"
-	);
 }
 
 
