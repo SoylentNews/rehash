@@ -35,7 +35,8 @@ sub main {
 		delSection($form->{section});
 		listSections($user);
 
-	} elsif ($op eq 'editsection' || $form->{editsection}) {
+	} elsif ($op eq 'editsection' ||
+		 $form->{editsection} || $form->{addextra}) {
 		titlebar('100%', getData('edithead'));
 		editSection($form->{section});
 
@@ -125,6 +126,8 @@ sub editSection {
 	my $issue = createSelect('issue', $slashdb->getDescriptions('issuemodes'),
 		$this_section->{issue}, 1);
 
+	my @extras = $slashdb->getSectionExtras();
+
 	slashDisplay('editSection', {
 		section		=> $section,
 		this_section	=> $this_section,
@@ -132,7 +135,10 @@ sub editSection {
 		isolate		=> $isolate,
 		issue		=> $issue,
 		blocks		=> \@blocks,
-		topics		=> $slashdb->getDescriptions('topics_section', $section),
+		topics		=> $slashdb->getDescriptions(
+			'topics_section', $section
+		),
+		extras		=> \@extras,
 	});
 }
 
@@ -146,6 +152,17 @@ sub saveSection {
 	# And I don't see a reason for underscores either, but
 	# dashes should be allowed.
 	$section =~ s/[^A-Za-z0-9\-]//g;
+
+	my(@extras);
+	for (grep { /^extraname_(\d+)/ } keys %{$form}) {
+		$form->{"extraname_$1"} =~ s/\s//g;
+		next if !$form->{"extraname_$1"};
+
+		push @extras,
+			[$form->{"extraname_$1"},
+			 $form->{"extraval_$1"} || $form->{"extraname_$1"}]
+		unless $form->{"extradel_$1"};
+	}
 
 	my $found = $slashdb->getSection($form->{section}, 'section', 1);
 	if ($found) {
@@ -180,6 +197,8 @@ sub saveSection {
 			print getData('failed', { section => $section });
 		}
 	} 
+	$slashdb->setSectionExtras($section, \@extras) if @extras;
+
 }
 
 #################################################################
