@@ -186,6 +186,8 @@ $task{$me}{code} = sub {
 	if ($extra_minutes) {
 		$extra_minutes = 5 if $extra_minutes > 5;
 		$timeout_shtml += 60 * $extra_minutes;
+		slashdLog("Will process for $extra_minutes extra minutes, "
+			. scalar(@$stories) . " stories");
 	}
 
 	STORIES_FRESHEN: for my $story (@$stories) {
