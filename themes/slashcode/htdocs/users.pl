@@ -991,20 +991,33 @@ sub showInfo {
 
 	# Grab the nicks of the uids we have, we're going to be adding them
 	# into the struct.
-	my @extra_cols_wanted = qw( nickname );
+	my @users_extra_cols_wanted     = qw( nickname );
+	my @discussions_extra_cols_wanted = qw( type );
 	my $uid_hr = { };
+	my $sid_hr = { };
 	if ($comments && @$comments) {
 		my %uids = ();
+		my %sids = ();
 		for my $c (@$comments) {
 			$uids{$c->{uid}}++;
+			$sids{$c->{sid}}++;
 		}
 		my $uids = join(", ", sort { $a <=> $b } keys %uids);
+		my $sids = join(", ", sort { $a <=> $b } keys %sids);
 		$uid_hr = $reader->sqlSelectAllHashref(
 			"uid",
-			"uid, " . join(", ", @extra_cols_wanted),
+			"uid, " . join(", ", @users_extra_cols_wanted),
 			"users",
 			"uid IN ($uids)"
 		);
+		
+		$sid_hr = $reader->sqlSelectAllHashref(
+			"id",
+			"id, " . join(", ", @discussions_extra_cols_wanted),
+			"discussions",
+			"id IN ($sids)"
+		);
+		
 	}
 
 	for my $comment (@$comments) {
@@ -1033,7 +1046,7 @@ sub showInfo {
 		# fix points in case they are out of bounds
 		$comment->{points} = $constants->{comment_minscore} if $comment->{points} < $constants->{comment_minscore};
 		$comment->{points} = $constants->{comment_maxscore} if $comment->{points} > $constants->{comment_maxscore};
-
+		vislenify($comment);
 		my $data = {
 			pid 		=> $comment->{pid},
 			url		=> $discussion->{url},
@@ -1047,14 +1060,24 @@ sub showInfo {
 			reason		=> $comment->{reason},
 			uid		=> $comment->{uid},
 			replies		=> $replies,
+			ipid		=> $comment->{ipid},
+			ipid_vis	=> $comment->{ipid_vis},
+			karma		=> $comment->{karma}
+		
 		};
 		#Karma bonus time
 
-		for my $col (@extra_cols_wanted) {
+		for my $col (@users_extra_cols_wanted) {
 			$data->{$col} = $uid_hr->{$comment->{uid}}{$col} if defined $uid_hr->{$comment->{uid}}{$col};
+		}
+		for my $col(@discussions_extra_cols_wanted) {
+			$data->{$col} = $sid_hr->{$comment->{sid}}{$col} if defined $sid_hr->{$comment->{sid}}{$col};
 		}
 		push @$commentstruct, $data;
 	}
+
+
+
 	my $storycount =
 		$reader->countStoriesBySubmitter($requested_user->{uid})
 	unless $requested_user->{nonuid};
@@ -1068,21 +1091,10 @@ sub showInfo {
 	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey)
 		if $requested_user->{nonuid};
 
-	my $modval = 0;
-	my $trollpoint = 0;
         my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
 	if ($requested_user->{nonuid}) {
-		if ($admin_flag) {
-			if ($form->{fieldname} eq "ipid") {
-				$modval = $reader->calcModval("ipid = '$id'", $ipid_hoursback, {});
-				$trollpoint = $reader->calcTrollPoint("ipid");
-			} elsif ($form->{fieldname} eq "subnetid") {
-				$modval = $reader->calcModval("subnetid = '$id'", $ipid_hoursback, {});
-				$trollpoint = $reader->calcTrollPoint("subnetid");
-			}
-		}
 		slashDisplay('netIDInfo', {
 			title			=> $title,
 			id			=> $id,
@@ -1097,8 +1109,6 @@ sub showInfo {
 			reasons			=> $reader->getReasons(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
-			modval			=> sprintf("%0.3f", $modval),
-			trollpoint		=> sprintf("%0.3f", $trollpoint),
 			hr_hours_back		=> $ipid_hoursback
 		});
 
@@ -1127,11 +1137,6 @@ sub showInfo {
 
 		my $lastjournal = _get_lastjournal($uid);
 
-		if ($admin_flag) {
-			$modval = $reader->calcModval("comments.uid = $requested_user->{uid}", $uid_hoursback);
-			$trollpoint = $reader->calcTrollPoint("uid");
-		}
-
 		slashDisplay('userInfo', {
 			title			=> $title,
 			uid			=> $uid,
@@ -1149,9 +1154,7 @@ sub showInfo {
 			storycount 		=> $storycount,
 			reasons			=> $reader->getReasons(),
 			lastjournal		=> $lastjournal,
-			modval			=> $modval,
-			trollpoint		=> $trollpoint,
-			hr_hours_back		=> $ipid_hoursback
+			hr_hours_back		=> $ipid_hoursback,
 		});
 	}
 
@@ -2792,7 +2795,6 @@ sub getUserAdmin {
 
 	my $all_acls = $reader->getAllACLs();
 	my $all_acls_hr = { map { ( $_, $_ ) } keys %$all_acls };
-
 	return slashDisplay('getUserAdmin', {
 		field			=> $field,
 		useredit		=> $user_edit,
