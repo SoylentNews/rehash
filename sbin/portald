@@ -89,23 +89,6 @@ EOT
 }
 
 #################################################################
-sub getWhatsPlayingBox {
-	my $list = $slashdb->getWhatsPlaying();
-
-	my $block = '';
-	foreach (@$list) {
-		$block .= "<B>$_->[0]:</B><UL>";
-		my @items = split /\|/, $_->[1];
-		foreach (@items) {
-			$block .= "<LI>$_</LI>";
-		}
-		$block .= "</UL><BR>";
-	}
-
-	setblock("whatsplaying", $block);
-}
-
-#################################################################
 sub getSlashdotPoll {
 	setblock("poll", pollbooth('_currentqid', 1));
 }
@@ -251,7 +234,6 @@ for (@{$RDFlist}) {
 }
 
 getTop10Comments();
-getWhatsPlayingBox() if $constants->{slashbox_whatsplaying};
 getSlashdotPoll();
 getUptime();
 
@@ -267,6 +249,8 @@ foreach (keys %savedBlocks) {
 
 # from 'portald-site'
 newSemiRandomBlock($slashdb) if defined &newSemiRandomBlock;
+getWhatsPlayingBox($slashdb) if $constants->{slashbox_whatsplaying}
+	&& defined &getWhatsPlayingBox;
 
 portaldLog("Sucessfully Saved Portals");
 
