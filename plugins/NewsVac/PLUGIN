@@ -1,6 +1,6 @@
 # $Id$
 name=NewsVac
-description="Newsforge NewsVac"
+description="NewsForge NewsVac"
 mysql_schema=mysql_schema
 mysql_dump=dump
 mysql_prep=prep
