@@ -33,6 +33,7 @@ __template__
 		pid	=> pid,
 		color	=> user.fg.3,
 		subject	=> 'Top',
+		subject_only => 1,
 	}) %]
 [% END %]
 
@@ -53,6 +54,7 @@ __template__
 			pid	=> 0,
 			color	=> user.fg.3,
 			subject	=> 'Top',
+			subject_only => 1,
 		}) %]
 
 [% IF user.points %]
