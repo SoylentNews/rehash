@@ -46,7 +46,6 @@ INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastdraw', '1', 
 INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_bodytext','0.5','Relative weight for uncommon words found in bodytext of stories');
 INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_introtext','1','Relative weight for uncommon words found in introtext of stories');
 INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8','Relative weight for uncommon words found in titles of stories');
-INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords', '', 'A generated list of uncommon words found in recent stories');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstorywords_maxlen', '65000', 'Maximum length of the uncommon words list');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstoryword_minlen', '3', 'Minimum length of the words in the uncommon words list');
 INSERT INTO vars (name, value, description) VALUES ('uncommonstoryword_thresh', '2', 'Words occurring more often than once every this-many days are considered common');

@@ -2550,3 +2550,16 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_28, Start of T_2_5_0_29 - 2004/09/28
+
+# Changes for plugins/Admin (which you are almost certainly using)
+DROP TABLE IF EXISTS uncommonstorywords;
+CREATE TABLE uncommonstorywords (
+	word VARCHAR(255) NOT NULL,
+	PRIMARY KEY (word)
+) TYPE=InnoDB;
+
+# Run this perl script
+perl -MSlash::Test=virtusername -e '@usw = split / /, $constants->{uncommonstorywords}; for $w (@usw) { $slashdb->sqlInsert("uncommonstorywords", { word => $w }) }'
+
+DELETE FROM vars WHERE name='uncommonstorywords';
+

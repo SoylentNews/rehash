@@ -2131,8 +2131,15 @@ sub refreshUncommonStoryWords {
 	if (length($uncommon_words) == $maxlen) {
 		$uncommon_words =~ s/\s+\S+\Z//;
 	}
+	@uncommon_words = split / /, $uncommon_words;
 
-	$self->setVar("uncommonstorywords", $uncommon_words);
+	$self->sqlDo("LOCK TABLE uncommonstorywords");
+	$self->sqlDelete("uncommonstorywords");
+	for my $word (@uncommon_words) {
+		$self->sqlInsert("uncommonstorywords", { word => $word },
+			{ delayed => 1 });
+	}
+	$self->sqlDo("UNLOCK TABLE uncommonstorywords");
 }
 
 ########################################################
