@@ -3495,14 +3495,15 @@ sub getComments {
 }
 
 ########################################################
-# Needs to be more generic in the long run. -Brian
+# Needs to be more generic in the long run. 
+# Be nice if we could just pull certain elements -Brian
 sub getStoriesBySubmitter {
 	my($self, $id, $limit) = @_;
 
 	$limit = 'LIMIT ' . $limit if $limit;
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'sid,title,time',
-		'stories', "submitter='$id'",
+		'stories', "submitter='$id' AND time < NOW() AND (writestatus == 'ok' OR writestatus == 'dirty') and displaystatus >= 0' ",
 		"ORDER by time DESC $limit");
 	return $answer;
 }
@@ -3517,6 +3518,8 @@ sub countStoriesBySubmitter {
 }
 
 ########################################################
+# Be nice if we could control more of what this 
+# returns -Brian
 sub getStoriesEssentials {
 	my($self, $limit, $section, $tid) = @_;
 	my $user = getCurrentUser();
