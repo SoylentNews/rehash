@@ -4585,6 +4585,48 @@ sub getComments {
 	);
 }
 
+#######################################################
+sub getSubmissionsByNetID {
+        my($self, $id, $field, $limit) = @_;
+
+        $limit = 'LIMIT ' . $limit if $limit;
+	my $where;
+	
+	if ($field eq 'ipid') {
+		$where = "ipid='$id'";
+	} elsif ($field eq 'subnetid') {
+		$where = "subnetid='$id'";
+	} else {
+		$where = "ipid='$id' OR subnetid='$id'";
+	}
+
+        my $answer = $self->sqlSelectAllHashrefArray(
+                'subid,title,time',
+                'submissions', $where,
+		"ORDER BY time DESC $limit");
+
+	return $answer;
+}
+
+########################################################
+sub countSubmissionsByNetID {
+	my($self, $id, $field) = @_;
+
+	my $where;
+
+	if ($field eq 'ipid') {
+		$where = "ipid='$id'";
+	} elsif ($field eq 'subnetid') {
+		$where = "subnetid='$id'";
+	} else {
+		$where = "ipid='$id' OR subnetid='$id'";
+	}
+
+	my $count = $self->sqlCount('submissions', $where);
+
+	return $count;
+}
+
 ########################################################
 # Needs to be more generic in the long run. 
 # Be nice if we could just pull certain elements -Brian
@@ -4607,6 +4649,8 @@ sub countStoriesBySubmitter {
 
 	return $count;
 }
+
+
 
 ########################################################
 # Be nice if we could control more of what this 
