@@ -252,7 +252,7 @@ sub newUser {
 		});
 
 		my($uid) = sqlSelect("LAST_INSERT_ID()");
-		sqlInsert("users_info", { uid => $uid, lastaccess=>'now()' } );
+		sqlInsert("users_info", { uid => $uid, -lastaccess=>'now()' } );
 		sqlInsert("users_prefs", { uid => $uid } );
 		sqlInsert("users_comments", { uid => $uid } );
 		sqlInsert("users_index", { uid => $uid } );
