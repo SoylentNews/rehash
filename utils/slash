@@ -12,8 +12,7 @@
 #		Cliff Wood
 #		... and a cast of several.
 
-PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:\
-			/usr/local/sbin:/usr/bin/X11:/usr/X11R6/bin";
+PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin/X11:/usr/X11R6/bin";
 
 # Slash home
 PROGNAME="slashd";
