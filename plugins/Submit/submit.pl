@@ -28,6 +28,7 @@ use strict;
 use lib '../';
 use vars '%I';
 use Slash;
+use URI;
 
 #################################################################
 sub main {
@@ -143,8 +144,13 @@ sub previewForm {
 
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
-	$introtext =~  s{(?<!"|=|>)(http|ftp|gopher|telnet)://(.*?)(\W\s)?[\s]}
-			{<A HREF="$1://$2">$1://$2</A> }gi;
+	$introtext =~  s{(?<!["=>])(http|ftp|gopher|telnet)://([$URI::uric#]+)}{
+		my($proto, $url) = ($1, $2);
+		my $extra = '';
+		$extra = ',' if $url =~ s/,$//;
+		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
+		qq[<A HREF="$proto://$url">$proto://$url</A>$extra];
+	}ogie;
 	$introtext =~ s/\s+$//;
 	$introtext = qq!<I>"$introtext"</I>! if $name;
 

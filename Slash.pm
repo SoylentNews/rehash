@@ -1390,20 +1390,14 @@ sub fixparam {
 sub fixurl {
 	my($url, $parameter) = @_;
 
-	# RFC 2396
-	my $mark = quotemeta(q"-_.!~*'()");
-	my $alphanum = 'a-zA-Z0-9';
-	my $unreserved = $alphanum . $mark;
-	my $reserved = quotemeta(';|/?:@&=+$,');
-	my $extra = quotemeta('%#');
-
 	if ($parameter) {
-		$url =~ s/([^$unreserved])/sprintf "%%%02X", ord $1/ge;
+		$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/oge;
 		return $url;
 	} else {
 		$url =~ s/[" ]//g;
 		$url =~ s/^'(.+?)'$/$1/g;
-		$url =~ s/([^$unreserved$reserved$extra])/sprintf "%%%02X", ord $1/ge;
+		# add '#' to allowed characters
+		$url =~ s/([^$URI::uric#])/$URI::Escape::escapes{$1}/oge;
 		$url = fixHref($url) || $url;
 		my $decoded_url = decode_entities($url);
 		return $decoded_url =~ s|^\s*\w+script\b.*$||i ? undef : $url;
