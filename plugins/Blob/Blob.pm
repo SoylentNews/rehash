@@ -117,10 +117,10 @@ sub createFileForStory {
 	return unless $values->{sid} && $values->{data};
 
 	my $content = {
-		seclev       => $values->{seclev},
-		filename     => $values->{filename},
-		content_type => $values->{content_type},
-		data         => $values->{data},
+		seclev		=> $values->{seclev},
+		filename	=> $values->{filename},
+		content_type	=> $values->{content_type},
+		data		=> $values->{data},
 	};
 
 	my $id = $self->create($content);
@@ -134,7 +134,7 @@ sub createFileForStory {
 	};
 	$self->sqlInsert('story_files', $file_content);
 
-	return $self->getLastInsertId();
+	return $self->getLastInsertId;
 }
 
 sub deleteStoryFile {
