@@ -75,6 +75,10 @@ on [% Slash.timeCalc(time) %]
 			<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 			<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
 [% comment %]
+[% UNLESS user.nosigs %]
+	<BR>[% sig %]
+[% END %]
+
 [% IF comment_shrunk;
 	linkComment = Slash.linkComment({
 		sid	=> sid,
@@ -96,4 +100,4 @@ on [% Slash.timeCalc(time) %]
 __seclev__
 10000
 __version__
-$Id$
+
