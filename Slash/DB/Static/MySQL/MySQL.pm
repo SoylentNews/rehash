@@ -1637,6 +1637,7 @@ sub getRandUsersCreatedYest {
 		"SUBSTRING(created_at, 1, 10) >= SUBSTRING(DATE_SUB(
 			NOW(), INTERVAL 1 DAY
 		 ), 1, 10)");
+	$min ||= 0;
 	my $users_ar = $self->sqlSelectAllHashrefArray(
 		"uid, nickname, realemail",
 		"users",
