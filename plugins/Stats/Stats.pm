@@ -1217,9 +1217,6 @@ sub getDailyScoreTotal {
 }
 
 
-
-
-
 ########################################################
 sub getTopBadPasswordsByUID{
 	my($self, $options) = @_;
@@ -1396,7 +1393,7 @@ sub getSubscriberCrawlers {
 ########################################################
 
 sub getTopEarlyInactiveDownmodders {
-	my ($self, $options) = @_;
+	my($self, $options) = @_;
 	$options ||= {};
 	my $constants = getCurrentStatic();
 	my %user_hits;
@@ -1406,9 +1403,9 @@ sub getTopEarlyInactiveDownmodders {
 				"moderatorlog,comments,users_info",
 				"comments.cid=moderatorlog.cid and moderatorlog.uid=users_info.uid AND points<=1 AND active=0 AND val=-1 AND tokens>=$token_cutoff");
 
-	foreach my $m(@$mods){
-		my $first_mod = $self->sqlSelectColArrayref("id","moderatorlog","cid=$m->{cid}","order by ts asc limit 2");
-		for my $id(@$first_mod){
+	foreach my $m (@$mods) {
+		my $first_mod = $self->sqlSelectColArrayref("id", "moderatorlog", "cid=$m->{cid}", "order by ts asc limit 2");
+		for my $id (@$first_mod) {
 			$user_hits{$m->{uid}}++ if $id == $m->{id};
 		}
 	}
@@ -1417,7 +1414,7 @@ sub getTopEarlyInactiveDownmodders {
 	@uids = splice(@uids, 0, $limit) if $limit;
 
 	my $top_users;
-	foreach(@uids){
+	foreach (@uids) {
         	push @$top_users, { uid => $_, count=> $user_hits{$_}, nickname=> $self->getUser($_, "nickname")};
 
 	}
@@ -1425,15 +1422,15 @@ sub getTopEarlyInactiveDownmodders {
 }
 
 sub getTopModdersNearArchive {
-	my ($self,$options) = @_;
+	my($self, $options) = @_;
 	$options ||= {};
 	my $constants = getCurrentStatic();
 	my $archive_delay = $constants->{archive_delay};
 	return [] unless $archive_delay;
-	my ($token_cutoff,$limit_clause);
+
+	my($token_cutoff, $limit_clause);
 	$token_cutoff = $constants->{m2_mintokens} || 0;
 	$limit_clause = " limit $options->{limit}" if $options->{limit};
-		
 
 	my $top_users = $self->sqlSelectAllHashrefArray("count(moderatorlog.uid) as count, moderatorlog.uid as uid, nickname",
 							"discussions,moderatorlog,users_info,users",
@@ -1560,8 +1557,8 @@ sub getAllStats {
 		push @name_where, 'name = ' . $self->sqlQuote($options->{name});
 	}
 
-	if ($options->{name_pre}){
-		push @name_where, 'name like '. $self->sqlQuote($options->{name_pre}."%");
+	if ($options->{name_pre}) {
+		push @name_where, 'name like '. $self->sqlQuote($options->{name_pre} . '%');
 	}
 	
 	my $sep_name_select = $options->{separate_name_select};
@@ -1590,14 +1587,14 @@ sub getAllStats {
 	for my $d (@$data) {
 		# $returnable{SECTION}{DAY}{NAME} = VALUE
 		$returnable{$d->[2]}{$d->[3]}{$d->[0]} = $d->[1];
-		if(!$sep_name_select){
+		if (!$sep_name_select) {
 			$returnable{$d->[2]}{names} ||= [];
 			push @{$returnable{$d->[2]}{names}}, $d->[0]
 				unless grep { $_ eq $d->[0] } @{$returnable{$d->[2]}{names}};
 		}
 	}
 	
-	if($sep_name_select){
+	if ($sep_name_select) {
 		my $names = $self->sqlSelectAll("DISTINCT name, section", $table, join(' AND ', @where));
 		foreach my $name (@$names){
 			$returnable{$name->[1]}{names} ||= [];

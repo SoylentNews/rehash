@@ -2036,7 +2036,7 @@ sub getOpAndDatFromStatusAndURI {
 	# for linux.com -- maps things like /howtos/HOWTO-INDEX/ to howtos which is what we want
 	# if this isn't desirable for other sites we can add a var to control this on a per-site
 	# basis.  --vroom 2004/01/27
-	} elsif ($uri =~ m|^/([^/]*)/([^/]*/)+$|){
+	} elsif ($uri =~ m|^/([^/]*)/([^/]*/)+$|) {
 		$uri = $1;
 	}
 	($uri, $dat);

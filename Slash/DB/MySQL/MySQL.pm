@@ -936,30 +936,31 @@ sub getModeratorCommentLog {
 		"ORDER BY ts $asc_desc $limit"
 	);
 	my(@comments, $comment,@ml_ids);
-	while($comment = $sth->fetchrow_hashref){
+	while ($comment = $sth->fetchrow_hashref) {
 		push @ml_ids, $comment->{id};
 		push @comments, $comment;
 	}
 	$self->_querylog_finish($qlid);
-	my $m2_fair = $self->getMetamodCountsForModsByType("fair",\@ml_ids);
-	my $m2_unfair = $self->getMetamodCountsForModsByType("unfair",\@ml_ids);
-	foreach my $c(@comments){
-		$c->{m2fair} =   $m2_fair->{$c->{id}}->{count} || 0;
+	my $m2_fair = $self->getMetamodCountsForModsByType("fair", \@ml_ids);
+	my $m2_unfair = $self->getMetamodCountsForModsByType("unfair", \@ml_ids);
+	foreach my $c (@comments) {
+		$c->{m2fair}   = $m2_fair->{$c->{id}}{count} || 0;
 		$c->{m2unfair} = $m2_unfair->{$c->{id}}->{count} || 0;
 	}
 	return \@comments;
 }
 
 sub getMetamodCountsForModsByType {
-	my ($self, $type, $ids) = @_;
+	my($self, $type, $ids) = @_;
 	my $id_str = join ',', @$ids;
 	return {} unless @$ids;
-	my ($cols,$where);
+
+	my($cols, $where);
 	$cols = "mmid, count(*) as count";
 	$where = "mmid in ($id_str)";
-	if($type eq "fair"){
+	if ($type eq "fair") {
 		$where .= " AND val > 0 ";
-	} elsif($type eq "unfair"){
+	} elsif ($type eq "unfair") {
 		$where .= " AND val < 0 ";
 	}
  	my $modcounts = $self->sqlSelectAllHashref('mmid', $cols ,'metamodlog', $where, 'group by mmid');
@@ -6780,9 +6781,10 @@ sub getStory {
 	# Now return what we need to return.
 	return $retval;
 }
+
 ########################################################
 sub setCommonStoryWords {
-	my ($self) = @_;
+	my($self) = @_;
 	my $form      = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $words;
@@ -6792,10 +6794,10 @@ sub setCommonStoryWords {
 	} elsif ($form->{set_common_word}) {
 		$words = $form->{set_common_word};
 	}
-	if($words){
+	if ($words) {
 		my %common_words = map { $_ => 1 } split " ", ($self->getVar('common_story_words', 'value', 1) || "");
 
-		if(ref $words eq "ARRAY"){
+		if (ref $words eq "ARRAY") {
 			$common_words{$_} = 1 foreach @$words;
 		} else {
 			$common_words{$words} = 1;
