@@ -3605,7 +3605,13 @@ sub setAccessList {
 
 	if ($setflag == 0) {
 		if ($rows > 0) {
-			$self->sqlDo("UPDATE accesslist SET $column=0, $newcol=1 WHERE $where");
+			my $return = $self->sqlUpdate("accesslist", {
+				"-$column" => $setflag,
+				"-$newcol" => 1,
+				reason     => $reason,
+			}, $where);
+
+			return $return ? 1 : 0;
 		}
 	} else {
 		if ($rows > 0) {
