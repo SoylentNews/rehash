@@ -85,18 +85,21 @@ $werder = new Silly::Werder;
 
 		# Initialize the user.
 		my $uid;
-		if ($opts{R}) {
-			if (rand(1) < 0.5) {
-				$uid = getRandomUserID($min_uid, $max_uid);
+		my $user = undef;
+		while (!$user) {
+			if ($opts{R}) {
+				if (rand(1) < 0.5) {
+					$uid = getRandomUserID($min_uid, $max_uid);
+				} else {
+					$uid = $constants->{anonymous_coward_uid};
+				}
+			} elsif ($opts{U}) {
+				$uid = $opts{U};
 			} else {
-				$uid = $constants->{anonymous_coward_uid};
+				$uid = $min_uid;
 			}
-		} elsif ($opts{U}) {
-			$uid = $opts{U};
-		} else {
-			$uid = $min_uid;
+			$user = $slashdb->getUser($uid);
 		}
-		my $user = $slashdb->getUser($uid);
 		setRandomIPID($user);
 	 
 		# Before we start creating comments, we should take a look at
@@ -167,7 +170,9 @@ $werder = new Silly::Werder;
 	                        postersubj      => $subj,
         	                postanon        => 0,
                 	},
-	                $user, $score
+	                $user,
+			$score,
+			$constants->{anonymous_coward_uid}
         	);
 		$slashdb->setStory($sid, { writestatus => 'dirty' }) if $sid;
 	        $family_tree{$cid} = $pid if ! $opts{T};
@@ -244,20 +249,37 @@ sub getRandomUserID {
 my(@subnets) = ();
 sub setRandomIPID {
 	my $user = shift;
+	my $seed = int(rand(65536));
 
 	if (!@subnets) {
 		# We now generate 10 random subnets which we will use for
 		# the rest of this execution.
+		srand(12345);
 		while (@subnets < 10) {
-			my $subnet = sprintf "%d:%d", rand 256, rand 256;
-			next if $subnet =~ /^0/;
+			my $subnet = sprintf "%d.%d.%d",
+				1+rand 254, 1+rand 254, 1+rand 254;
 			push @subnets, $subnet;
 		}
 	}
 
-	my $quad3 = $subnets[rand($#subnets + 1)] . rand 256;
-	$user->{subnetid} = md5_hex($quad3 . '0');
-	$user->{ipid} = md5_hex($quad3 . (rand 254 + 1));
+	srand($user->{uid} + (time % 5));
+	my $uid10 = $user->{uid} % 10;
+	my $quad3;
+	my $fourth;
+	if ($uid10 < rand(10)) {
+		$quad3 = $subnets[$uid10];
+		if ($uid10 < rand(10)) {
+			$fourth = $uid10 + 1 + (int($user->{uid}/50) % 254);
+		} else {
+			$fourth = 1+int(rand(4))*int(rand(4))*int(rand(12));
+		}
+	} else {
+		$quad3 = $subnets[rand($#subnets + 1)];
+		$fourth = 1+int(rand(16))*int(rand(16));
+	}
+	$user->{subnetid} = md5_hex("$quad3.0");
+	$user->{ipid} = md5_hex("$quad3.$fourth");
+	srand($$ + time + $seed);
 }
 }
 		
