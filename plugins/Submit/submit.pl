@@ -97,8 +97,7 @@ sub main {
 	$op ||= 'default';
 	$op = 'default' if ( ($user->{seclev} < $ops->{$op}{seclev}) || ! $ops->{$op}{function});
 
-	$section = 'admin' if $user->{is_admin};
-	header(getData('header', { tbtitle => $tbtitle }), $section);
+	header(getData('header', { tbtitle => $tbtitle }), $section, { admin => 1 });
 
 	if ($user->{seclev} < 100) {
 		if ($ops->{$op}{checks}) {
