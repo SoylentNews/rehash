@@ -61,7 +61,7 @@ REPEAT [% dirword %]MODS:
 [%			FOREACH orguid = repeat_mods.$dir.keys.nsort;
 				FOREACH destuid = repeat_mods.$dir.$orguid.keys.nsort;
 					hr = repeat_mods.$dir.$orguid.$destuid;
-constants.absolutedir %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])
+constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])
 [%				END;
 			END;
 		END;
