@@ -6298,7 +6298,7 @@ sub getTopicImage {
 
 ########################################################
 sub getTopicImageBySection {
-	my ($self, $topic, $section, $values, $cache) = @_;
+	my($self, $topic, $section, $values, $cache) = @_;
 	my $image_sections = $self->getDescriptions("topic_images_section");
 	my $image_id = $image_sections->{"$topic->{tid}|$section"} || $topic->{default_image};	
 #	print STDERR "TOPIC $topic->{tid}|$section:$topic->{default_image}:$image_id\n";
