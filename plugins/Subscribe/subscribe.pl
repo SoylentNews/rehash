@@ -49,10 +49,6 @@ sub main {
 			function	=> \&confirm,
 			seclev		=> 1
 		},
-		msg 	=> {
-			function	=> \&message,
-			seclev		=> 1
-		}
 	};
 
 	if ($user->{is_anon} && $op !~ /^(paypal|makepayment)$/) {
