@@ -422,7 +422,7 @@ sub newvar {
 sub userLogin {
 	my($name, $passwd) = @_;
 
-	$passwd = substr $passwd, 0, 12;
+	$passwd = substr $passwd, 0, 20;
 	my($uid) = sqlSelect('uid', 'users',
 		'passwd=' . $I{dbh}->quote($passwd) .
 		' AND nickname=' . $I{dbh}->quote($name)
