@@ -7630,7 +7630,7 @@ sub getMCD {
 			memcached_keyprefix memcached_servers
 			sitename );
 		my $in_clause = join ",", map { $self->sqlQuote($_) } @needed;
-		$constants = $self->sqlSelectKeyValue(
+		$constants = $self->sqlSelectAllKeyValue(
 			"name, value",
 			"vars",
 			"name IN ($in_clause)");
