@@ -508,13 +508,6 @@ sub printComments {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 
-        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME}) {
-                my $fname = catfile('clampe', $user->{ipid});
-		my $sc = defined $form->{'savechanges'} ? 1 : 0;
-                my $savelog = "IPID: $user->{ipid} UID: $user->{uid} Thresh: $user->{threshold} Dispmode: $user->{mode} Sort: $user->{commentsort} SaveChanges: $sc";
-                doClampeLog($fname, [$savelog]);
-         }
-
 	if (!$discussion || !$discussion->{id}) {
 		print getData('no_such_sid', {}, '');
 		return 0;
@@ -1256,13 +1249,6 @@ EOT
 	# we need a display-friendly fakeemail string
 	$comment->{fakeemail_vis} = ellipsify($comment->{fakeemail});
 	push @{$user->{state}{cids}}, $comment->{cid};
-
-	# stats for clampe
-	if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME}) {
-		my $fname = catfile('clampe', $user->{ipid});
-		my $comlog = "IPID: $user->{ipid} UID: $user->{uid} SID: $comment->{sid} CID: $comment->{cid} Dispmode: $user->{mode} Thresh: $user->{threshold} CIPID: $comment->{ipid} CUID: $comment->{uid}";
-		doClampeLog($fname, [$comlog]);	
-	}
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
