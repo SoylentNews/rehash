@@ -30,6 +30,19 @@ sub handler {
 	# Added this so that small sites would not have admin logins 
 	# recorded in their stats. -Brian
 
+	my $slashdb = getCurrentDB();
+	my $SECT;
+	$SECT = $slashdb->{"_sections_cache"}{$constants->{section}}
+		if exists($slashdb->{"_sections_cache"})
+		&& exists($slashdb->{"_sections_cache"}{$constants->{section}});
+	$SECT ||= {};
+
+	printf STDERR ("sections : %d : %d : %s : %s : %s : %s : %s : %s\n",
+		$$, scalar(keys %$SECT), $constants->{section}, $ENV{REQUEST_URI},
+		$uri, $dat, $r->status,
+		join('|', %{ getCurrentForm() })
+	);
+
 	# so it will still log it if the admin DOES request
 	# to admin.pl?  i thought you wanted it to NOT log
 	# requests to admin.pl?  should the !~ be =~ ?
