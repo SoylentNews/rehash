@@ -235,7 +235,7 @@ IF extras.size;
 
 	<UL>
 
-	[%- FOREACH tid = topic_order -%]
+	[%- FOREACH tid = topics.sort -%]
 		<LI><A HREF="[% constants.rootdir
 		%]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid
 		%]</A></LI>

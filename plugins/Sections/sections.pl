@@ -25,16 +25,27 @@ sub main {
 
 	# Loop thru %$form once, at this time, and pull out all the necessary
 	# elements, rather than pulling from it multiple times, later.
-	$form->{section_extras} = [];
+	#
+	# These keys are local to the script. No forms for the Groups plugin
+	# should EVER name a form element from the following list:
+	#
+	#	SUBSECTIONS
+	#	SECTION_EXTRAS
+	#	NEW_subsection
+	#	DEL_subsection
+	#
+	# so it should be fairly safe, if not completely kosher.
+	$form->{'SUBSECTIONS'} = {};
+	$form->{'SECTION_EXTRAS'} = [];
 	for (keys %{$form}) {
-	SWITCH: {
+		# Poor Man's Switch syntax. It's better than if-else's. :p
 
 		/^extraname_(\d+)/ && do {
-			last SWITCH if !($1 && !$form->{"extradel_$1"});
+			next if !($1 && !$form->{"extradel_$1"});
 			$form->{"extraname_$1"} =~ s/\s//g;
-			last SWITCH if !$form->{"extraname_$1"};
+			next if !$form->{"extraname_$1"};
 
-			push @{$form->{section_extras}}, [
+			push @{$form->{'SECTION_EXTRAS'}}, [
 				# Field label
 				$form->{"extraval_$1"} ||
 				$form->{"extraname_$1"},
@@ -43,12 +54,12 @@ sub main {
 				$form->{"extraname_$1"}
 			];
 			
-			last SWITCH;
+			next;
 		};
 
 		($_ eq 'new_subsection') && !$form->{savesection} && do {
 			$op = 'editsection';
-			last SWITCH if !$form->{new_subsection};
+			next if !$form->{new_subsection};
 
 			# Set up parameters for call to 
 			# Slash::DB::createSubSection
@@ -58,29 +69,29 @@ sub main {
 				0
 			];
 
-			last SWITCH;
+			next;
 		};
 
+		# Handles fields like:
+		# 	del_subsection_*
 		/^del_subsection_(\d+)/ && do {
 			$form->{'DEL_subsection'} = $1;
 			$op = 'editsection';
 			
-			last SWITCH;
+			next;
 		};
 
 		# This handles form fields like:
 		# 	subsection_title_*, subsection_artcount_*
 		/^subsection_title_(\d+)/ && do {
-			$form->{'SUBSECTIONS'} = {} 
-				unless $form->{'SUBSECTIONS'};
 			$form->{'SUBSECTIONS'}{$1} = {
-				title => $form->{"subsection_title_$1"},
-				artcount => $form->{"subsection_artcount_$1"},
+				title	=> $form->{"subsection_title_$1"},
+				artcount=> $form->{"subsection_artcount_$1"},
 			};
 
-			last SWITCH;
+			next;
 		}
-	}}
+	}
 
 
 	header(getData('head'), 'admin');
@@ -102,7 +113,7 @@ sub main {
 		 $form->{addextra}) {
 
 		saveSection($form->{section}) 
-			if $form->{addextra} && @{$form->{section_extras}};
+			if $form->{addextra} && @{$form->{'SECTION_EXTRAS'}};
 		titlebar('100%', getData('edithead'));
 		editSection($form->{section});
 
@@ -214,7 +225,7 @@ sub editSection {
 		1
 	);
 
-	my $extras = $form->{section_extras};
+	my $extras = $form->{'SECTION_EXTRAS'};
 	$extras = $slashdb->getSectionExtras($form->{section})
 		unless @{$extras};
 	my $extra_types = $slashdb->getDescriptions('section_extra_types');
@@ -231,9 +242,6 @@ sub editSection {
 		issue		=> $issue,
 		blocks		=> \@blocks,
 		topics		=> $topics,
-		topic_order	=> [
-			sort { $topics->{$a} cmp $topics->{$b} } keys %{$topics}
-		],
 		extras		=> $extras,
 		extra_types	=> $extra_types,
 		subsections	=> $subsections,
@@ -252,13 +260,10 @@ sub saveSection {
 	($section = $form->{section}) =~ s/[^A-Za-z0-9\-]//g;
 
 	# Before we insert, give some reasonable defaults.
-	$form->{url} 	  ||= '';
-	$form->{cookiedomain} 	  ||= '';
-	$form->{hostname} ||= '';
-	$form->{artcount} ||= 0;
-
-	print STDERR "url $form->{url}\n";
-	print STDERR "hostname $form->{hostname}\n";
+	$form->{url}		||= '';
+	$form->{cookiedomain}	||= '';
+	$form->{hostname}	||= '';
+	$form->{artcount}	||= 0;
 
 	my $found = $slashdb->getSection($section, 'section', 1);
 	if ($found) {
@@ -296,8 +301,8 @@ sub saveSection {
 	} 
 
 	# Set section extras.
-	$slashdb->setSectionExtras($section, $form->{section_extras}) 
-		if @{$form->{section_extras}};
+	$slashdb->setSectionExtras($section, $form->{'SECTION_EXTRAS'}) 
+		if @{$form->{'SECTION_EXTRAS'}};
 
 	# Set subsections.
 	for (keys %{$form->{'SUBSECTIONS'}}) {
