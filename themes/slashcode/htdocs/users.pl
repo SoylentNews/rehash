@@ -26,7 +26,6 @@
 use strict;
 use lib '../';
 use vars '%I';
-use Email::Valid;
 use Slash;
 
 #################################################################
