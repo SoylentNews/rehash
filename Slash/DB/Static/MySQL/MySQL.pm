@@ -2172,13 +2172,13 @@ sub refreshUncommonStoryWords {
 	}
 	@uncommon_words = split / /, $uncommon_words;
 
-	$self->sqlDo("LOCK TABLES uncommonstorywords");
+	$self->sqlDo("LOCK TABLES uncommonstorywords LOW_PRIORITY WRITE");
 	$self->sqlDelete("uncommonstorywords");
 	for my $word (@uncommon_words) {
 		$self->sqlInsert("uncommonstorywords", { word => $word },
 			{ delayed => 1 });
 	}
-	$self->sqlDo("UNLOCK TABLES uncommonstorywords");
+	$self->sqlDo("UNLOCK TABLES");
 }
 
 ########################################################
