@@ -14,7 +14,8 @@ sub main {
 	my $form    = getCurrentForm();
 	my $user    = getCurrentUser();
 
-	header(getData('head'), $form->{section});
+	my $data = ($form->{op} eq 'hierarchy') ? { admin => 1, adminmenu => 'info', tab_selected => 'hierarchy' } : {};
+	header(getData('head'), $form->{section}, $data);
 	
 	print createMenu('topics');
 
