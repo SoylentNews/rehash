@@ -292,7 +292,7 @@ sub _print_cchp {
 	my($header, $count, $hp_ar) = @_;
 	return unless $header->{sid};
 	my $form = getCurrentForm();
-	return unless $form->{ssi} && $form->{cchp};
+	return unless $form->{ssi} eq 'yes' && $form->{cchp};
 	$count ||= 0;
 	$hp_ar ||= [ ];
 	my $constants = getCurrentStatic();
@@ -1211,6 +1211,7 @@ sub displayStory {
 	# from the DB.
 	if (	   $story->{rendered} && !$options->{get_cacheable}
 		&& !$form->{light} && !$user->{light}
+		&& (!$form->{ssi} || $form->{ssi} ne 'yes')
 		&& !$user->{noicons}
 		&& !$form->{issue}
 		&& $constants->{section} eq 'index'
