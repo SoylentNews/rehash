@@ -628,7 +628,6 @@ CREATE TABLE people_log (
 
 INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Number of FOF/FOE to process during job run');
 
-# LINUX.COM LAST UPDATED HERE
 
 DELETE FROM vars WHERE name IN ('badreasons', 'm2_bonus', 'm2_consensus_trigger', 'm2_dissension_penalty', 'm2_maxunfair', 'm2_mincheck', 'm2_minority_trigger', 'm2_modlog_cycles', 'm2_modlog_pos', 'm2_penalty', 'm2_reward_pool', 'm2_toomanyunfair', 'reasons', 'token_retention');
 INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitmult', '1', 'How long should old M2-needing mods wait for the fresh blood?');
@@ -838,5 +837,6 @@ INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method
 # your site.  In any case, then run the SOURCE line.
 #SELECT CONCAT('INSERT INTO site_info (name, value, description) VALUES ("', name, '_', value, '_symlink", 1, "', value, ' ', name, ' files installed symlink?");') INTO OUTFILE '/tmp/site_symlinks' FROM site_info WHERE name IN ('theme', 'plugin') ORDER BY name;
 #SELECT CONCAT('INSERT INTO site_info (name, value, description) VALUES ("', name, '_', value, '_symlink", 0, "', value, ' ', name, ' files installed symlink?");') INTO OUTFILE '/tmp/site_symlinks' FROM site_info WHERE name IN ('theme', 'plugin') ORDER BY name;
-SOURCE /tmp/site_symlinks;
+#SOURCE /tmp/site_symlinks;
 
+# LINUX.COM LAST UPDATED HERE
