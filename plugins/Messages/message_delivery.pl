@@ -30,7 +30,8 @@ $task{$me}{code} = sub {
 	my @time = localtime();
 	$time[5] += 1900;
 	$time[4] += 1;
-	my $now = sprintf "%04d-%02d-%02d", @time[5, 4, 3];
+	my $date = sprintf "%04d%02d%02d%02d%02d%02d", @time[5, 4, 3, 2, 1, 0];
+	my $now  = sprintf "%04d-%02d-%02d", @time[5, 4, 3];
 	my $last_deferred = $slashdb->getVar('message_last_deferred', 'value') || 0;
 
 	my($successes, $failures) = (0, 0);
@@ -38,25 +39,23 @@ $task{$me}{code} = sub {
 
 	my $msgs;
 	if ($last_deferred ne $now) {
-		$msgs = $messages->gets($count);
+		$msgs = $messages->gets();  # do it all, baby
 		$slashdb->setVar('message_last_deferred', $now);
 	} else {
 		$msgs = $messages->gets($count, { 'send' => 'now' });
 	}
 
-
-	my %collective;
-	my %to_delete;
-	# perhaps put collective msg types as a field in message_codes?
-	for my $code (MSG_CODE_M2, MSG_CODE_COMMENT_MODERATE) {
-		my $c = 0;
-		for my $msg (@$msgs) {
-			if ($msg->{code} == $code) {
-				push @{ $collective{ $code }{ $msg->{user}{uid} } }, $msg;
-				$msgs->[$c] = undef;
-			}
-			$c++;
+	# handle collective msgs
+	my(%collective, %to_delete, %codes);
+	my $c = 0;
+	for my $msg (@$msgs) {
+		my $code = $msg->{code};
+		$codes{$code} ||= $messages->getMessageCode($code);
+		if ($codes{$code}{'send'} eq 'collective') {
+			push @{ $collective{ $code }{ $msg->{user}{uid} } }, $msg;
+			$msgs->[$c] = undef;
 		}
+		$c++;
 	}
 
 	for my $code (keys %collective) {
@@ -90,14 +89,15 @@ $task{$me}{code} = sub {
 
 			$msg->{message} = $message;
 			$msg->{subject} = $type;
+			$msg->{date}    = $date;
 			push @$msgs, $msg;
 		}
 	}
 
 	@$msgs = grep { $_ } @$msgs;
-	my @good  = $messages->process(@$msgs);
+	my @good = $messages->process(@$msgs);
 
-	my %msgs  = map { ($_->{id}, $_) } @$msgs;
+	my %msgs = map { ($_->{id}, $_) } @$msgs;
 
 	for my $id (@good) {
 		messagedLog("msg \#$id sent successfully.");
