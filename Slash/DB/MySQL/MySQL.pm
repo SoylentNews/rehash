@@ -4209,7 +4209,7 @@ sub getSlashConf {
 		# --------			# -------------------
 						# See <http://www.iana.org/assignments/uri-schemes>
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
-		approvedtags =>			[qw( B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV )],
+		approvedtags =>			[qw( B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV ECODE )],
 		approvedtags_break =>		[qw( P LI OL UL BR BLOCKQUOTE DIV HR )],
 		fixhrefs =>			[ ],
 		lonetags =>			[ ],

@@ -82,6 +82,7 @@ use vars qw($VERSION @EXPORT);
 # 	approveTag
 # 	breakHtml
 # 	stripBadHtml
+# 	processCustomTags
 # 	stripByMode
 # );
 
@@ -475,6 +476,7 @@ sub stripByMode {
 		$str = breakHtml($str) unless $no_white_fix || $fmode == ATTRIBUTE;
 
 	} elsif ($fmode == PLAINTEXT) {
+		$str = processCustomTags($str);
 		$str = stripBadHtml($str);
 		$str = breakHtml($str) unless $no_white_fix;
 	}
@@ -521,6 +523,7 @@ sub stripByMode {
 	# probably 'html'
 	} else {
 		# $fmode == HTML, hopefully
+		$str = processCustomTags($str);
 		$str = stripBadHtml($str);
 		$str = breakHtml($str) unless $no_white_fix;
 	}
@@ -617,22 +620,6 @@ C<approveTag> function.
 sub stripBadHtml {
 	my($str) = @_;
 
-	## deal with special ECODE tag (Embedded Code).  This tag allows
-	## embedding the Code postmode in plain or HTML modes.  It may be
-	## of the form:
-	##    <ECODE>literal text</ECODE>
-	## or, for the case where "</ECODE>" is needed in the text:
-	##    <ECODE END="SOMETAG">literal text</SOMETAG>
-	## -- pudge
-
-	# first pass to deal with lack of /END="\w+"/
-	my $ecode = 'literal|ecode';  # "LITERAL" is old name
-	$str =~ s[<\s* ($ecode) \s*> (.*?) <\s* /\1 \s*>]
-		 [<$1 END="$1">$2</$1>]xsig;
-	# second pass to convert to code
-	$str =~ s[<\s* (?:$ecode) \s+ END="(\w+)" \s*> (.*?) <\s* /\1 \s*>]
-		 ['<P>' . strip_code($2) . '</P>']xegis;
-
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
 	$str =~ s/></> </g;
@@ -657,6 +644,75 @@ sub stripBadHtml {
 					# end of string
 		)
 	}{&lt;$1}gx;
+
+	return $str;
+}
+
+#========================================================================
+
+=head2 processCustomTags(STRING)
+
+Private function.  It does processing of special custom tags
+(so far, just ECODE, and its deprecated synonym, LITERAL).
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item STRING
+
+String to be processed.
+
+=back
+
+=item Return value
+
+Processed string.
+
+=item Dependencies
+
+It is meant to be used before C<stripBadHtml> is called, only
+from regular posting modes, HTML and PLAINTEXT.
+
+=back
+
+=cut
+
+sub processCustomTags {
+	my($str) = @_;
+	my $constants = getCurrentStatic();
+
+	## deal with special ECODE tag (Embedded Code).  This tag allows
+	## embedding the Code postmode in plain or HTML modes.  It may be
+	## of the form:
+	##    <ECODE>literal text</ECODE>
+	## or, for the case where "</ECODE>" is needed in the text:
+	##    <ECODE END="SOMETAG">literal text</SOMETAG>
+	##
+	## SOMETAG must match /^\w+$/.
+	##
+	##
+	## Note that we also strip out leading and trailing newlines
+	## surrounding the tags, because in plain text mode this can
+	## be hard to manage, so we manage it for the user.
+	##
+	## Also note that this won't work if the site disallows TT
+	## or BLOCKQUOTE tags.
+	##
+	## -- pudge
+
+	# ECODE must be in approvedtags
+	if (grep /^ECODE$/, @{$constants->{approvedtags}}) {
+		# first pass to deal with lack of /END="\w+"/
+		my $ecode = 'literal|ecode';  # "LITERAL" is old name
+		$str =~ s[    <\s* (  $ecode) \s*                >     (.*?)     <\s* /\1 \s*>]
+			 [<$1 END="$1">$2</$1>]xsigo;
+		# second pass to convert to code
+		$str =~ s[\n* <\s* (?:$ecode) \s+ END="(\w+)" \s*> \n* (.*?) \n* <\s* /\1 \s*> \n*]
+			 ['<BLOCKQUOTE>' . strip_code($2) . '</BLOCKQUOTE>']xsigeo;
+	}
 
 	return $str;
 }
@@ -915,7 +971,8 @@ sub approveTag {
 	# Validate all other tags
 	my $approvedtags = getCurrentStatic('approvedtags');
 	$tag =~ s|^(/?\w+)|\U$1|;
-	foreach my $goodtag (@$approvedtags) {
+	# ECODE is an exception, to be handled elsewhere
+	foreach my $goodtag (grep !/^ECODE$/, @$approvedtags) {
 		return "<$tag>" if $tag =~ /^$goodtag$/ || $tag =~ m|^/$goodtag$|;
 	}
 }
@@ -1251,10 +1308,12 @@ sub balanceTags {
 
 	# set up / get preferences
 	if (@{$constants->{lonetags}}) {
-		$match = join '|', @{$constants->{approvedtags}};
+		# ECODE is an exception, to be handled elsewhere
+		$match = join '|', grep !/^ECODE$/,
+			@{$constants->{approvedtags}};
 	} else {
 		$constants->{lonetags} = [qw(P LI BR)];
-		$match = join '|', grep !/^(?:P|LI|BR)$/,
+		$match = join '|', grep !/^(?:P|LI|BR|ECODE)$/,
 			@{$constants->{approvedtags}};
 	}
 	%lone = map { ($_, 1) } @{$constants->{lonetags}};
