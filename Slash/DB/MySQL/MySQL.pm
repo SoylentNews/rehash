@@ -4473,7 +4473,6 @@ sub getCommentsForUser {
 #	$sql .= ($user->{commentsort} == 1 || $user->{commentsort} == 5) ?
 #			'DESC' : 'ASC';
 
-
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where);
 
 	my $archive = $cache_read_only;
@@ -4495,20 +4494,20 @@ sub getCommentsForUser {
 	# ($comment->{points} < $user->{threshold}). - Jamie
 	# That has side effects and doesn't do that much good anyway,
 	# see SF bug 452558. - Jamie
-  #	my $start_time = Time::HiRes::time;
-	my $comment_texts = $self->_getCommentTextOld($cids, $archive);
-	# Now distribute those texts into the $comments hashref.
-
-	for my $comment (@$comments) {
-		# we need to check for *existence* of the hash key,
-		# not merely definedness; exists is faster, too -- pudge
-		if (!exists($comment_texts->{$comment->{cid}})) {
-			errorLog("no text for cid " . $comment->{cid});
-		} else {
-			$comment->{comment} = $comment_texts->{$comment->{cid}};
-		}
-	}
-
+	# OK, now we're not getting the comment texts here, we'll get
+	# them later. - Jamie 2003/03/20
+#	my $start_time = Time::HiRes::time;
+#	my $comment_texts = $self->getCommentTextOld($cids, $archive);
+#	# Now distribute those texts into the $comments hashref.
+#	for my $comment (@$comments) {
+#		# we need to check for *existence* of the hash key,
+#		# not merely definedness; exists is faster, too -- pudge
+#		if (!exists($comment_texts->{$comment->{cid}})) {
+#			errorLog("no text for cid " . $comment->{cid});
+#		} else {
+#			$comment->{comment} = $comment_texts->{$comment->{cid}};
+#		}
+#	}
 
 	return $comments;
 }
@@ -4523,7 +4522,7 @@ sub getCommentsForUser {
 # gets into cache.  But passing it an arrayref of 100 cids is faster
 # than calling it 100 times with one cid.  Works fine with an arrayref
 # of 0 or 1 entries, of course.  - Jamie
-sub _getCommentTextOld {
+sub getCommentTextOld {
 	my($self, $cid, $archive) = @_;
 	if (ref $cid) {
 		if (ref $cid ne "ARRAY") {

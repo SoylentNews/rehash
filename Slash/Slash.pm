@@ -70,13 +70,13 @@ sub selectComments {
 			  $constants->{comment_maxscore});
 	my $num_scores = $max - $min + 1;
 
-	my $comments; # One bigass struct full of comments
+	my $comments; # One bigass hashref full of comments
 	for my $x (0..$num_scores-1) {
 		$comments->{0}{totals}[$x] = 0;
 	}
 	my $y = 0;
 	for my $x ($min..$max) {
-		$comments->{0}{total_keys}{$x}= $y;
+		$comments->{0}{total_keys}{$x} = $y;
 		$y++;
 	}
 
@@ -123,11 +123,17 @@ sub selectComments {
 
 	# If we are sorting by highest score we resort to figure in bonuses
 	if ($user->{commentsort} == 3) {
-		@$thisComment = sort { $b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid} } @$thisComment;
+		@$thisComment = sort {
+			$b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid}
+		} @$thisComment;
 	} elsif ($user->{commentsort} == 1 || $user->{commentsort} == 5) {
-		@$thisComment = sort { $b->{cid} <=> $a->{cid} } @$thisComment;
+		@$thisComment = sort {
+			$b->{cid} <=> $a->{cid}
+		} @$thisComment;
 	} else {
-		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
+		@$thisComment = sort {
+			$a->{cid} <=> $b->{cid}
+		} @$thisComment;
 	}
 
 	# This loop mainly takes apart the array and builds 
@@ -164,6 +170,22 @@ sub selectComments {
 		$user->{points} = 0 if $C->{uid} == $user->{uid}; # Mod/Post Rule
 	}
 
+	# Now that we know all the point scores, we pull out the comment
+	# text that we might possibly need.
+	my @cids_over_thresh;
+	if ($user->{threshold} <= $min) {
+		@cids_over_thresh = keys %$comments;
+	} else {
+		@cids_over_thresh =
+			grep { $comments->{$_}{points} >= $user->{threshold} }
+			keys %$comments;
+	}
+	my $comment_text_hr = $slashdb->getCommentTextOld(\@cids_over_thresh);
+	for my $cid (@cids_over_thresh) {
+		next if !$cid; # "0" is a key but not a cid
+		$comments->{$cid}{comment} = $comment_text_hr->{$cid};
+	}
+
 	my $count = @$thisComment;
 
 	# Cascade comment point totals down to the lowest score, so
@@ -189,12 +211,20 @@ sub _get_points {
 	my $points = $hr->{score_start};
 
 	# User can setup to give points based on size.
-	my $len = length($C->{comment});
-	if ($user->{clbig} && $user->{clbig_bonus} && $len > $user->{clbig}) {
-		$hr->{clbig} = $user->{clbig_bonus};
-	}
-	if ($user->{clsmall} && $user->{clsmall_bonus} && $len < $user->{clsmall}) {
-		$hr->{clsmall} = $user->{clsmall_bonus};
+#	my $len = length($C->{comment});
+	my $len = $C->{len};
+	if ($len) {
+		# comments.len should always be > 0, because Slash doesn't
+		# accept zero-length comments.  If it is = 0, something is
+		# wrong;  don't apply these score modifiers.  (What is
+		# likely is that the admin hasn't properly updated the
+		# comments table with this new column. - Jamie 2003/03/20)
+		if ($user->{clbig} && $user->{clbig_bonus} && $len > $user->{clbig}) {
+			$hr->{clbig} = $user->{clbig_bonus};
+		}
+		if ($user->{clsmall} && $user->{clsmall_bonus} && $len < $user->{clsmall}) {
+			$hr->{clsmall} = $user->{clsmall_bonus};
+		}
 	}
 
 	# If the user is AC and we give AC's a penalty/bonus
@@ -967,6 +997,7 @@ sub dispComment {
 	}
 
 	if ($user->{sigdash} && $comment->{sig} && !isAnon($comment->{uid})) {
+		$comment->{sig} =~ s/^\s*-{1,5}\s*<(?:P|BR)>//i;
 		$comment->{sig} = "--<BR>$comment->{sig}";
 	}
 
