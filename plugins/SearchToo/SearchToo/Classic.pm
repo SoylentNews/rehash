@@ -9,7 +9,7 @@ use base 'Slash::SearchToo';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-# FRY: And where would a giant nerd be? THE LIBRARY!
+# FRY: I did it!  And it's all thanks to the books at my local library.
 
 #################################################################
 sub new {
@@ -78,6 +78,7 @@ sub findRecords {
 
 	### set up common options
 	# old API cannot tell us total or matches
+	# undef if we cannot find for sure, or if not applicable
 	my $total	= undef;
 	my $matches	= undef;
 	my $start	= $opts->{records_start} || 0;
