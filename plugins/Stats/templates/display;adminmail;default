@@ -11,7 +11,7 @@ en_US
 __name__
 display
 __template__
-[% Slash.sitename %] Stats for yesterday
+[% Slash.sitename %] Stats for [% day %]
 
         total: [% total %]  [% total_bytes %](M)
        unique: [% unique %]

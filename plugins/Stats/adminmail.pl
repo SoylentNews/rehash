@@ -214,6 +214,7 @@ EOT
 		sub_comments => sprintf("%8.1f", ($submissions ? $submissions_comments_match*100/$submissions : 0)),
 		total_hits => sprintf("%8d", $sdTotalHits),
 		homepage => sprintf("%8d", $count->{index}{index}),
+		day => $yesterday,
 	);
 
 	my @sections;
@@ -247,8 +248,10 @@ EOT
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
 		my $message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
+		$data{template_name} = 'display';
+		$data{subject} = { template_name => 'subj' };
 		for (@$message_users) {
-			$messages->create($_, MSG_CODE_ADMINMAIL, $email);
+			$messages->create($_, MSG_CODE_ADMINMAIL, \%data);
 		}
 	}
 	for (@{$constants->{stats_reports}}) {
