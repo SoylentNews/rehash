@@ -113,7 +113,7 @@ sub main {
 			} else {
 				# we redirect here, because we might not know
 				# if the op can do RSS until we get the result
-				redirect("$constants->{rootdir}/$ENV{SCRIPT_NAME}?start=$opts{records_start}&$args");
+				redirect("$constants->{rootdir}$ENV{SCRIPT_NAME}?start=$opts{records_start}&$args");
 				return;
 			}
 				
