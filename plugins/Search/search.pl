@@ -50,8 +50,11 @@ sub main {
 	# is specified. If someone needs to search on all sections, they
 	# shouldn't be in one.				--Pater
 	$form->{section}	||= $user->{currentSection} || '';
-	if ($user->{currentSection} eq 'poll') {
-		$form->{op} = 'poll';
+
+        # switch search mode to poll if in polls section and other
+	# search type isn't specified
+	if ($user->{currentSection} eq 'polls' and !$form->{op}) {
+		$form->{op} = 'polls';
 		$form->{section} = '';
 	}
          
@@ -146,7 +149,7 @@ sub _sections {
 	my $sections = $reader->getDescriptions('sections');
 	my %newsections = %$sections;
 	$newsections{''} = getData('all_sections');
-	delete $newsections{'poll'};
+	delete $newsections{'polls'};
 	return \%newsections;
 }
 
