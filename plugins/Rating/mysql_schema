@@ -7,7 +7,7 @@ CREATE TABLE comment_rating (
 	val tinyint DEFAULT '0' NOT NULL,
 	active tinyint DEFAULT '1' NOT NULL,
 	ts DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-	PRIMARY KEY rating_id (rating_id),
+	PRIMARY KEY vote_id (vote_id),
 	KEY uid_sid (uid,sid),
 	KEY ipid_sid (ipid,sid)
 );
