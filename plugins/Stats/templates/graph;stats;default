@@ -17,7 +17,7 @@ IF form.type == 'pie';
    USE my_graph = GD.Graph.pie(600, 400);
 
 ELSE;  # default to lines
-   IF (form.type == 'area' || form.type == 'areapercentage' || form.type == 'areastacked' || form.type == 'areastackedindex');
+   IF form.type.search('^area');
       USE my_graph = GD.Graph.area(600, 400);
    ELSE;
       USE my_graph = GD.Graph.lines(600, 400);

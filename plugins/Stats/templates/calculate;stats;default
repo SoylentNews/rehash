@@ -56,6 +56,11 @@ __template__
                NEXT;
             ELSIF (byweek);
                mytotal.${day} = daytotal;
+               IF (form.byweekavg);
+                  thisday = daycount mod 7;
+                  thisday = thisday || 7;
+                  mytotal.${day} = mytotal.${day} div thisday;
+               END;
                daytotal = 0;
             END;
          END;
@@ -75,6 +80,11 @@ __template__
             NEXT;
          ELSIF (byweek);
             mynum = daytotal;
+            IF (form.byweekavg);
+               thisday = daycount mod 7;
+               thisday = thisday || 7;
+               mynum = mynum div thisday;
+            END;
             daytotal = 0;
          END;
 

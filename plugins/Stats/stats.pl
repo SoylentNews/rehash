@@ -110,7 +110,7 @@ sub _get_graph_id {
 		push @id, join '-', map { uri_escape($_, '\W') } ($name, $section, $label);
 	}
 
-	for ($form->{stats_days}, $form->{title}, $form->{type}) {
+	for ($form->{stats_days}, $form->{title}, $form->{type}, $form->{byweekavg}) {
 		my $val = uri_escape($_, '\W');
 		$val = '0' unless length $val;
 		unshift @id, $val;

@@ -14,6 +14,7 @@ __template__
 [% 
 
 form.stats_days = form.stats_days || 1;
+byweekavg = 0;
 
 mygraphs = [
 	'Pages',
@@ -50,10 +51,10 @@ SWITCH gtitle;
 
   CASE 'Hits';
   IF (form.stats_section && form.stats_section != 'all');
-      PROCESS make_graph
-         section  => form.stats_section,
-         type     => 'areastacked',
-         statdata => ['rss_page', 'palm_page'];
+#      PROCESS make_graph
+#         section  => form.stats_section,
+#         type     => 'areastacked',
+#         statdata => ['rss_page', 'palm_page'];
   ELSE;
       PROCESS make_graph
          section  => 'all',
@@ -72,8 +73,8 @@ SWITCH gtitle;
          section  => 'all',
          type     => 'area',
          statdata => [['unique', '', 'ipids'],
-                      ['unique_users', '', 'users'],
-                      ['total_subscriber', '', 'users_subscriber']
+                      ['unique_users', '', 'users']
+                      ['users_subscriber', '', 'users_subscriber']
                      ];
   END;
 
@@ -188,15 +189,17 @@ SWITCH gtitle;
 
   CASE 'Total Subscribers';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'area',
-         statdata => ['subscribers_total', 'subscribers_current'];
+         byweekavg => 1,
+         section   => 'all',
+         type      => 'area',
+         statdata  => ['subscribers_total', 'subscribers_current'];
 
   CASE 'Total Renewing Subscribers';
       PROCESS make_graph
-         section  => 'all',
-         type     => 'area',
-         statdata => ['subscribers_renewing_total', 'subscribers_renewing_current'];
+         byweekavg => 1,
+         section   => 'all',
+         type      => 'area',
+         statdata  => ['subscribers_renewing_total', 'subscribers_renewing_current'];
 
   CASE 'Subscriber Pages';
       PROCESS make_graph
