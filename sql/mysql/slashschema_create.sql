@@ -669,7 +669,7 @@ CREATE TABLE string_param (
 	param_id smallint UNSIGNED NOT NULL auto_increment,
 	type varchar(32) NOT NULL,
 	code varchar(32) NOT NULL,
-	name varchar(32) NOT NULL,
+	name varchar(64) NOT NULL,
 	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)
 ) TYPE = myisam;
