@@ -6049,6 +6049,20 @@ sub getComment {
 }
 
 ########################################################
+sub getRSS {
+	my $answer = _genericGet({
+		table           => 'rss_raw',
+		arguments       => \@_,
+	});
+	return $answer;
+}
+
+########################################################
+sub setRSS {
+	_genericSet('rss_raw', 'id', '', @_);
+}
+
+########################################################
 sub getPollQuestion {
 	my $answer = _genericGet({
 		table		=> 'pollquestions',
