@@ -1522,11 +1522,11 @@ sub getTopBadPasswordsByUID{
 	my $min = $options->{min};
 
 	my $other = "GROUP BY uid ";
-	$other .= " HAVING count(*) >= $options->{min}" if $min;
+	$other .= " HAVING count(DISTINCT password) >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 
 	return $self->sqlSelectAllHashrefArray(
-		"nickname, users.uid AS uid, count(*) AS count",
+		"nickname, users.uid AS uid, count(DISTINCT password) AS count",
 		"badpasswords, users",
 		"ts $self->{_ts_between_clause} AND users.uid = badpasswords.uid",
 		$other);
@@ -1539,11 +1539,11 @@ sub getTopBadPasswordsByIP{
 	my $min = $options->{min};
 
 	my $other = "GROUP BY ip";
-	$other .= " HAVING count(*) >= $options->{min}" if $min;
+	$other .= " HAVING count(DISTINCT password) >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 	
 	return $self->sqlSelectAllHashrefArray(
-		"ip, count(*) AS count",
+		"ip, count(DISTINCT password) AS count",
 		"badpasswords",
 		"ts $self->{_ts_between_clause}",
 		$other);
@@ -1556,11 +1556,11 @@ sub getTopBadPasswordsBySubnet{
 	my $min = $options->{min};
 
 	my $other = "GROUP BY subnet";
-	$other .= " HAVING count(*) >= $options->{min}" if $min;
+	$other .= " HAVING count(DISTINCT password) >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 
 	return $self->sqlSelectAllHashrefArray(
-		"subnet, count(*) AS count",
+		"subnet, count(DISTINCT password) AS count",
 		"badpasswords",
 		"ts $self->{_ts_between_clause}",
 		$other);
