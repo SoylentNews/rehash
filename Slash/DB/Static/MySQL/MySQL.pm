@@ -777,7 +777,8 @@ sub getSkinInfo {
 
 	my $tree  = $self->getTopicTree;
 	my $skins = $self->getSkins;
-	my $rootdir = getCurrentSkin('rootdir');
+	my $constants = getCurrentStatic();
+
 	# in case one child nexus has more than one parent nexus,
 	# cache the data in %children so we don't need to fetch it all
 	# more than once
@@ -787,6 +788,7 @@ sub getSkinInfo {
 
 		my $skinname = $skins->{ $tree->{$tid}{skid} }{name};
 		$index{$skinname} = { };
+		my $mp_tid = $constants->{mainpage_nexus_tid};
 		for my $child_tid (keys %{$tree->{$tid}{child}}) {
 			next unless $tree->{$child_tid}{nexus} && $tree->{$child_tid}{skid};
 			if ($children{$child_tid}) {
@@ -799,27 +801,31 @@ sub getSkinInfo {
 			@child_data{keys %{$tree->{$child_tid}}} = values %{$tree->{$child_tid}};
 
 			$child_data{skin}    = $skins->{ $tree->{$child_tid}{skid} };
+			my $rootdir = $child_data{skin}{rootdir};
 			$child_data{rootdir} = set_rootdir($child_data{url}, $rootdir);
 
 			@child_data{qw(month monthname day)} = $self->sqlSelect(
 				'MONTH(time), MONTHNAME(time), DAYOFMONTH(time)',
 				'stories, story_topics_rendered',
-				'stories.stoid=story_topics_rendered.stoid AND ' .
-				"tid='$child_tid' AND in_trash = 'no' AND time < NOW()"
+				"stories.stoid=story_topics_rendered.stoid AND
+				 story_topics_rendered.tid='$child_tid' AND in_trash = 'no' AND time < NOW()"
 			);
 
 			$child_data{count} = $self->sqlCount(
 				'stories, story_topics_chosen',
-				'stories.stoid=story_topics_rendered.stoid AND ' .
-				"tid='$child_tid' AND in_trash = 'no' AND time < NOW() AND " .
-				'TO_DAYS(NOW()) - TO_DAYS(time) <= 2'
+				"stories.stoid=story_topics_rendered.stoid AND
+				 story_topics_rendered.tid='$child_tid' AND in_trash = 'no' AND time < NOW()
+				 AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2"
 			) || 0;
 
 			$child_data{count_sectional} = $self->sqlCount(
-				'stories, story_topics_rendered AS str1 LEFT JOIN story_topics_rendered AS str2 ON stories.stoid=str2.stoid',
-				'stories.stoid=str1.stoid AND str2.stoid IS NULL AND ' .
-				"tid='$child_tid' AND in_trash = 'no' AND time < NOW() AND " .
-				'TO_DAYS(NOW()) - TO_DAYS(time) <= 2'
+				"stories, story_topics_rendered AS str_sect
+				 LEFT JOIN story_topics_rendered AS str_main
+					ON stories.stoid=str_main.stoid AND str_main.tid='$mp_tid'",
+				"stories.stoid=str_sect.stoid AND str_sect.tid='$child_tid'
+				 AND str_main.stoid IS NULL
+				 AND in_trash = 'no' AND time < NOW()
+				 AND TO_DAYS(NOW()) - TO_DAYS(time) <= 2"
 			);
 
 			$children{$child_tid} = \%child_data;
