@@ -1714,6 +1714,20 @@ sub getSectionsDirty {
 }
 
 ########################################################
+# for new_headfoot.pl
+sub getHeadFootPages {
+	my($self, $section, $headfoot) = @_;
+
+	return () unless $headfoot eq 'header' || $headfoot eq 'footer';
+
+	my $list = $self->sqlSelectAll(
+		'page',
+		'templates',
+		"section = '$section' AND name='$headfoot'");
+	return $list;
+}
+
+########################################################
 # Was once used in template-tool's check_site_templates()
 # but is now deprecated. Left here in case another 
 # application has need of it, but can be removed if

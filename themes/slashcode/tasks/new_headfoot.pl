@@ -35,11 +35,23 @@ sub sectionHeaders {
 
 	setCurrentForm('ssi', 1);
 	my $fh = gensym();
-	open $fh, ">$constants->{basedir}/$section/slashhead.inc"
-		or die "Can't open $constants->{basedir}/$section/slashhead.inc: $!";
-	my $header = header("", $section, { noheader => 1, Return => 1 });
-	print $fh $header;
-	close $fh;
+
+	my $head_pages = $slashdb->getHeadFootPages($section, 'header');
+
+	foreach (@$head_pages) {
+		my $file;
+
+		if ($_->[0] eq 'misc') {
+			$file = "$constants->{basedir}/$section/slashhead.inc";
+		} else {
+			$file = "$constants->{basedir}/$section/slashhead-$_->[0].inc";
+		}
+
+		open $fh, ">$file" or die "Can't open $file : $!";
+		my $header = header("", $section, { noheader => 1, Return => 1, Page => $_->[0] });
+		print $fh $header;
+		close $fh;
+	}
 
 	setCurrentForm('ssi', 0);
 	open $fh, ">$constants->{basedir}/$section/slashfoot.inc"
