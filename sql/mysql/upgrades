@@ -2825,3 +2825,6 @@ INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymax',20,'Max 
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymin',-20,'Min lag value (clip lower values to this) - should be negative');
 
 # SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_43, Start of T_2_5_0_44 - 2005/01/04
+
