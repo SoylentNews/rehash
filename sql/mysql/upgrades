@@ -2401,10 +2401,6 @@ UPDATE story_topics_rendered SET weight = weight * 10         WHERE weight < 10;
 # Changes for plugins/Admin (which you are almost certainly using)
 INSERT INTO vars (name, value, description) VALUES ('topic_popup_defaultweight', '10', 'Default weight for new topics in the popup menu (should probably match default for topic_parents.min_weight)');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_8, Start of T_2_5_0_9 - 2004/07/13
 
 ALTER TABLE stories_old ADD COLUMN stoid MEDIUMINT UNSIGNED DEFAULT '0';
@@ -2422,6 +2418,10 @@ UPDATE skins SET submittable='no' WHERE name='search';
 
 # Changes for plugins/Admin (which you are almost certainly using)
 INSERT INTO vars (name, value, description) VALUES ('admin_maxdays_divider', '14', 'Max number of days on the admin.pl story list to bother showing the day-dividers');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_9, Start of T_2_5_0_10 - 2004/07/16
 
