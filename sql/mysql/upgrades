@@ -2781,3 +2781,5 @@ INSERT INTO vars (name, value, description) VALUES ('dbs_reader_lag_weight_min',
 INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_reduce_max','2.0','The maximum number of units per minute to reduce weight down to the minimum');
 INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_increase_max','1.0','The maximum number of units per minute to restore weight back up to 1');
 
+# run `perl utils/users_index_cleanup.plx VIRTUAL_USER`
+
