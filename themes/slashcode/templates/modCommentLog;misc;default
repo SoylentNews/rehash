@@ -53,7 +53,7 @@ __template__
 		<TD ALIGN="RIGHT"> <B>[% moderation.val %]</B> </TD>
 		<TD> [% constants.reasons.${moderation.reason} %] </TD>
 [% IF show_modder %]
-		<TD> &nbsp; [% moderation.nickname %] (<A HREF="[%
+		<TD> &nbsp; [% moderation.nickname | strip_literal %] (<A HREF="[%
 			constants.rootdir %]/users.pl?op=userinfo&userfield_flag=uid&userfield=[%
 			moderation.uid %]">[% moderation.uid %]</A>) &nbsp; </TD>
 [% END %]
