@@ -420,7 +420,7 @@ CREATE TABLE users_param (
 	param_id SERIAL,
 	uid int4 NOT NULL,
 	name varchar(32) NOT NULL,
-	value text NOT NUL,
+	value text NOT NULL,
 	UNIQUE (uid, name),
 	PRIMARY KEY (param_id)
 );
