@@ -507,7 +507,7 @@ sub newUser {
 
 			$title = getTitle('newUser_title');
 
-			$form->{pubkey} = $plugins->{'Pubkey'} ? strip_nohtml($form->{pubkey}, 1) : '';
+			$form->{pubkey} = $plugins->{'PubKey'} ? strip_nohtml($form->{pubkey}, 1) : '';
 			print getMessage('newuser_msg', { 
 				suadmin_flag	=> $suadmin_flag, 
 				title		=> $title, 
@@ -1252,7 +1252,7 @@ sub editUser {
 		useredit 		=> $user_edit,
 		admin_flag		=> $admin_flag,
 		title			=> $title,
-		editkey 		=> $plugins->{'Pubkey'} ? editKey($user_edit->{uid}) : '',
+		editkey 		=> $plugins->{'PubKey'} ? editKey($user_edit->{uid}) : '',
 		admin_block		=> $admin_block
 	});
 }
@@ -1734,7 +1734,7 @@ sub saveUser {
 	# We should do some conformance checking on a user's pubkey,
 	# make sure it looks like one of the known types of public
 	# key.  Until then, just make sure it doesn't have HTML.
-	$form->{pubkey} = $plugins->{'Pubkey'} ? strip_nohtml($form->{pubkey}, 1) : '';
+	$form->{pubkey} = $plugins->{'PubKey'} ? strip_nohtml($form->{pubkey}, 1) : '';
 
 	my $homepage = $form->{homepage};
 	$homepage = '' if $homepage eq 'http://';
