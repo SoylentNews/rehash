@@ -33,20 +33,20 @@ __template__
 	<TR BGCOLOR="[% user.bg.2 %]">
 		<TD VALIGN="TOP">
 
-[% FOREACH aid = aidref.keys %]
+[% FOREACH aid = aidref.keys.sort %]
 		<INPUT TYPE="CHECKBOX" NAME="exaid_[% aid %]"[% aidref.$aid.checked %]>[% aidref.$aid.nickname %]<BR>
 [% END %]
 
 		</TD>
 		<TD VALIGN="TOP"><MULTICOL COLS="3">
 
-[% FOREACH tid = tidref.keys %]
+[% FOREACH tid = tidref.keys.sort %]
 		<INPUT TYPE="CHECKBOX" NAME="extid_[% tid %]"[% tidref.$tid.checked %]>[% tidref.$tid.alttext %]<BR>
 [% END %]
 
 		</MULTICOL></TD>
 		<TD VALIGN="TOP"><MULTICOL COLS="3">
-[% FOREACH section = sectionref.keys %]
+[% FOREACH section = sectionref.keys.sort %]
 		<INPUT TYPE="CHECKBOX" NAME="exsect_[% section %]"[% sectionref.$section.checked %]>[% sectionref.$section.title %]<BR>
 [% END %]
 		</MULTICOL>
