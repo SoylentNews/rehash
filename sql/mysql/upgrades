@@ -2541,12 +2541,12 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 # with skins.ac_uid, then add rows for those that should not be able to
 # post.  Yes, there will be an admin interface for this eventually.
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_27, Start of T_2_5_0_28 - 2004/09/21
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_28, Start of T_2_5_0_29 - 2004/09/28
