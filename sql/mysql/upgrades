@@ -1325,6 +1325,7 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1_percent' WHERE name='
 
 # SLASHCODE LAST UPDATED HERE
 
+# First pass at updating accesslist to be simpler and smarter:
 ALTER TABLE accesslist ADD COLUMN now SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL;
 ALTER TABLE accesslist ADD COLUMN was SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL;
 ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255);
@@ -1341,4 +1342,22 @@ ALTER TABLE accesslist DROP COLUMN formname, DROP COLUMN readonly, DROP COLUMN w
 ALTER TABLE accesslist ADD INDEX now_was (now,was);
 UPDATE accesslist SET uid=0 WHERE uid IS NULL;
 ALTER TABLE accesslist CHANGE COLUMN uid uid MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0';
+
+# Second pass at updating accesslist (apply these changes after applying
+# the above changes, just like you'd expect):
+ALTER TABLE accesslist ADD COLUMN now_ban ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN now_nopost ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN now_nosubmit ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN now_norss ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN now_proxy ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN was_ban ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN was_nopost ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN was_nosubmit ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN was_norss ENUM("no", "yes") NOT NULL DEFAULT "no", ADD COLUMN was_proxy ENUM("no", "yes") NOT NULL DEFAULT "no";
+UPDATE accesslist SET now_ban     ='yes' WHERE FIND_IN_SET('ban',      now);
+UPDATE accesslist SET now_nopost  ='yes' WHERE FIND_IN_SET('nopost',   now);
+UPDATE accesslist SET now_nosubmit='yes' WHERE FIND_IN_SET('nosubmit', now);
+UPDATE accesslist SET now_norss   ='yes' WHERE FIND_IN_SET('norss',    now);
+UPDATE accesslist SET now_proxy   ='yes' WHERE FIND_IN_SET('proxy',    now);
+UPDATE accesslist SET was_ban     ='yes' WHERE FIND_IN_SET('ban',      was);
+UPDATE accesslist SET was_nopost  ='yes' WHERE FIND_IN_SET('nopost',   was);
+UPDATE accesslist SET was_nosubmit='yes' WHERE FIND_IN_SET('nosubmit', was);
+UPDATE accesslist SET was_norss   ='yes' WHERE FIND_IN_SET('norss',    was);
+UPDATE accesslist SET was_proxy   ='yes' WHERE FIND_IN_SET('proxy',    was);
+ALTER TABLE accesslist ADD INDEX now_ban (now_ban), ADD INDEX now_nopost (now_nopost), ADD INDEX now_nosubmit (now_nosubmit), ADD INDEX now_norss (now_norss), ADD INDEX now_proxy (now_proxy);
+ALTER TABLE accesslist DROP COLUMN now, DROP COLUMN was;
+UPDATE accesslist SET reason="" WHERE reason IS NULL;
+ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255) NOT NULL DEFAULT "";
 

@@ -21,15 +21,15 @@ __template__
                 <TD BGCOLOR="[% user.fg.4 %]"><B>uid</B></TD>
                 <TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
                 <TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
-                <TD BGCOLOR="[% user.fg.4 %]"><B>Now</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Reason</B></TD>
         </TR>
                 [% FOREACH banned = bannedlist %]
         <TR>
-                <TD>[% banned.0 %]</TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.1 %]">[% banned.1 %]</A></TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.2 %]">[% banned.2 %]</A></TD>
-                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.3 %]">[% banned.3 %]</A></TD>
-                <TD>[% banned.4 %]</TD>
+                <TD>[% banned.ts %]</TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.uid %]">[% banned.uid %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.ipid %]">[% banned.ipid %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.subnetid %]">[% banned.subnetid %]</A></TD>
+                <TD>[% banned.reason %]</TD>
         </TR>
                 [% END %]
 </TABLE>

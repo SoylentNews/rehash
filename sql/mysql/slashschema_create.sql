@@ -30,22 +30,34 @@ CREATE TABLE abusers (
 ) TYPE = myisam;
 
 DROP TABLE IF EXISTS accesslist; 
-CREATE TABLE accesslist ( 
-	id mediumint NOT NULL auto_increment, 
-	uid mediumint UNSIGNED NOT NULL,
-	ipid char(32),
-	subnetid char(32),
-	now SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL,
-	was SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL,
-	ts datetime default '0000-00-00 00:00:00' NOT NULL, 
-	reason varchar(255), 
-	PRIMARY KEY id (id), 
-	key uid (uid), 
-	key ipid (ipid), 
-	key subnetid (subnetid), 
-	key now_was (now,was),
-	key ts (ts),
-) TYPE = myisam;
+CREATE TABLE accesslist (
+	id mediumint(9) NOT NULL auto_increment,
+	uid mediumint(8) unsigned NOT NULL default '0',
+	ipid varchar(32) default NULL,
+	subnetid varchar(32) default NULL,
+	ts datetime NOT NULL default '0000-00-00 00:00:00',
+	reason varchar(255) NOT NULL default '',
+	now_ban enum('no','yes') NOT NULL default 'no',
+	now_nopost enum('no','yes') NOT NULL default 'no',
+	now_nosubmit enum('no','yes') NOT NULL default 'no',
+	now_norss enum('no','yes') NOT NULL default 'no',
+	now_proxy enum('no','yes') NOT NULL default 'no',
+	was_ban enum('no','yes') NOT NULL default 'no',
+	was_nopost enum('no','yes') NOT NULL default 'no',
+	was_nosubmit enum('no','yes') NOT NULL default 'no',
+	was_norss enum('no','yes') NOT NULL default 'no',
+	was_proxy enum('no','yes') NOT NULL default 'no',
+	PRIMARY KEY  (id),
+	KEY uid (uid),
+	KEY ipid (ipid),
+	KEY subnetid (subnetid),
+	KEY ts (ts),
+	KEY now_ban (now_ban),
+	KEY now_nopost (now_nopost),
+	KEY now_nosubmit (now_nosubmit),
+	KEY now_norss (now_norss),
+	KEY now_proxy (now_proxy)
+) TYPE=MyISAM;
 
 DROP TABLE IF EXISTS accesslog; 
 CREATE TABLE accesslog (

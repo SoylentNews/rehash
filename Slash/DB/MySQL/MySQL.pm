@@ -3179,8 +3179,12 @@ sub checkExpired {
 ##################################################################
 sub checkReadOnly {
 	my($self, $access_type, $user_check) = @_;
-	$access_type ||= 'nopost';
-	$user_check ||= getCurrentUser();  # might not be actual current user!
+	# We munge access_type directly into the SQL so make SURE it is
+	# one of the supported columns.
+	$access_type = 'nopost' if !$access_type
+		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy)$/;
+
+	$user_check ||= getCurrentUser();
 	my $constants = getCurrentStatic();
 
 	my $where_ary = [ ];
@@ -3226,7 +3230,7 @@ sub checkReadOnly {
 
 	for my $where (@$where_ary) {
 		# Setting nopost blocks posting, nosubmit blocks submitting.
-		$where .= " AND FIND_IN_SET('$access_type', now)";
+		$where .= " AND now_$access_type = 'yes'";
 		# For when we get user expiration working.
 		$where .= " AND reason != 'expired'";
 	}
@@ -3446,7 +3450,7 @@ sub getBanList {
 		my $list = $self->sqlSelectAll(
 			"ipid, subnetid, uid",
 			"accesslist",
-			"FIND_IN_SET('ban', now)");
+			"now_ban = 'yes'");
 		for (@$list) {
 			$banlist_ref->{$_->[0]} = 1 if $_->[0];
 			$banlist_ref->{$_->[1]} = 1 if $_->[1];
@@ -3483,7 +3487,7 @@ sub getNorssList {
 		my $list = $self->sqlSelectAll(
 			"ipid, subnetid, uid",
 			"accesslist",
-			"FIND_IN_SET('norss', now)");
+			"now_norss = 'yes'");
 		for (@$list) {
 			$norsslist_ref->{$_->[0]} = 1 if $_->[0];
 			$norsslist_ref->{$_->[1]} = 1 if $_->[1];
@@ -3502,15 +3506,16 @@ sub getNorssList {
 
 ##################################################################
 sub getAccessList {
-	my($self, $min, $flag) = @_;
+	my($self, $min, $access_type) = @_;
 	$min ||= 0;
 	my $max = $min + 100;
 
-	my $where = "FIND_IN_SET('$flag', now)";
-	$self->sqlSelectAll(
-		'ts, uid, ipid, subnetid, now',
+	$access_type = 'nopost' if !$access_type
+		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy)$/;
+	$self->sqlSelectAllHashrefArray(
+		'*',
 		'accesslist',
-		$where,
+		"now_$access_type = 'yes'",
 		"ORDER BY ts DESC LIMIT $min, $max");
 }
 
@@ -3539,7 +3544,9 @@ sub getAbuses {
 ##################################################################
 # returns a hashref with reason and datetime fields
 sub getAccessListInfo {
-	my($self, $now, $user_check) = @_;
+	my($self, $access_type, $user_check) = @_;
+	$access_type = 'nopost' if !$access_type
+		|| $access_type !~ /^(ban|nopost|nosubmit|norss|proxy)$/;
 
 	my $constants = getCurrentStatic();
 	my $ref = {};
@@ -3569,7 +3576,7 @@ sub getAccessListInfo {
 	}
 
 	for my $where (@$where_ary) {
-		$where .= " AND FIND_IN_SET('$now', now)";
+		$where .= " AND now_$access_type = 'yes'";
 	}
 	
 	my $aclinfo = undef;
@@ -3616,7 +3623,7 @@ sub setAccessList {
 	return if $reason eq 'expired';
 
 	my $insert_hr = {};
-	my $where = "(reason IS NULL OR reason != 'expired')";
+	my $where = "reason != 'expired'";
 	my $rows;
 
 	$user_check ||= getCurrentUser();
@@ -3631,13 +3638,19 @@ sub setAccessList {
 		$insert_hr->{subnetid} = $user_check->{subnetid};
 	}
 
-	my $update_hr = {
-		-ts	=> 'NOW()',			# reset the timestamp
-		-was	=> 'now',			# move the "now" column to the "was" column
-		now	=> join(",", @$new_now),	# set the new "now" column
-	};
+	# Set up the update hashref and the assignment order for it.
+	my $update_hr = { -ts => "NOW()" };
+	my %new_now_hash = map { ($_, 1) } @$new_now;
+	my @assn_order = ( );
+	for my $col (qw( ban nopost nosubmit norss proxy )) {
+		$update_hr->{"-was_$col"} = "now_$col";
+		push @assn_order, "-was_$col";
+		$update_hr->{"now_$col"} = $new_now_hash{$col} ? "yes" : "no";
+		push @assn_order, "now_$col";
+	}
 	$update_hr->{reason} = $reason if $reason ne '';
 
+	# Insert if necessary, then do the update.
 	$rows = $self->sqlCount("accesslist", $where);
 	$rows ||= 0;
 	if ($rows == 0) {
@@ -3646,7 +3659,7 @@ sub setAccessList {
 		$self->sqlInsert("accesslist", $insert_hr);
 	}
 	$rows = $self->sqlUpdate("accesslist", $update_hr, $where,
-		{ assn_order => [( '-was', 'now' )] });
+		{ assn_order => [ @assn_order ] });
 	return $rows ? 1 : 0;
 }
 
@@ -3655,7 +3668,7 @@ sub checkIsProxy {
 	my($self, $ipid) = @_;
 
 	my $rows = $self->sqlCount("accesslist",
-		"ipid='$ipid' AND FIND_IN_SET('proxy', now)");
+		"ipid='$ipid' AND now_proxy = 'yes'");
 	$rows ||= 0;
 
 	return $rows ? 'yes' : 'no';
