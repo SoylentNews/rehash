@@ -521,7 +521,11 @@ sub sqlInsert {
 	my($names, $values);
 	# oddly enough, this hack seems to work for all DBs -- pudge
 	# Its an ANSI sql comment I believe -Brian
-	my $delayed = $options->{delayed} ? " /*! DELAYED */" : "";
+	my $delayed;
+	if ($options->{delayed}) {
+		$delayed = $options->{delayed} ? " /*! DELAYED */" : ""
+				unless getCurrentStatic('delayed_inserts_off');
+	}
 	my $ignore = $options->{ignore} ? " /*! IGNORE */" : "";
 
 	for (keys %$data) {
