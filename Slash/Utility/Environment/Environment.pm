@@ -1748,8 +1748,14 @@ sub writeLog {
 
 sub createLog {
 	my($uri, $dat) = @_;
-	my $log_user = getCurrentStatic('log_db_user');
-	my $logdb = $log_user ? getObject('Slash::DB', $log_user ) : getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $log_user = $constants->{log_db_user} || $constants->{backup_db_user} || "";
+	my $logdb;
+	if ($log_user) {
+		$logdb = getObject('Slash::DB', $log_user);
+	} else {
+		$logdb = getCurrentDB();
+	}
 
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
 

@@ -1182,15 +1182,11 @@ INSERT INTO vars (name, value, description) VALUES ('mod_karma_bonus_max_downmod
 ALTER TABLE message_drop ADD COLUMN send ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('message_last_deferred','','The last date that deferred messages were sent');
 
-
 INSERT INTO vars (name, value, description) VALUES ('comments_mod_totals_exact','1','Show exact moderation counts?');
 
 # End of T_2_3_0_69, Start of T_2_3_0_70
 
-# SLASHDOT LAST UPDATED HERE
-
 ALTER TABLE string_param MODIFY COLUMN type VARCHAR(32) NOT NULL;
-
 
 UPDATE message_codes SET type = 'Comment Moderation' WHERE code = 3;
 UPDATE message_codes SET type = 'Comment Reply' WHERE code = 4;
@@ -1211,4 +1207,10 @@ ALTER TABLE accesslist ADD isproxy enum("no","yes") DEFAULT "no" NOT NULL;
 # SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE accesslog ADD secure TINYINT DEFAULT 0 NOT NULL;
+
+# End of T_2_3_0_70, Start of T_2_3_0_71
+
+# SLASHDOT LAST UPDATED HERE
+
+INSERT INTO vars (name, value, description) VALUES ('accesslog_insert_cachesize','0','Cache accesslog inserts and do this many all at once (0 to disable, if enabled, suggest value of 5 or so)');
 
