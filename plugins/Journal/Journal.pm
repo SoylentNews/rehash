@@ -111,7 +111,8 @@ sub remove {
 	my $journal = $self->get($id);
 	return unless $journal->{uid} == $uid;
 
-	if ($self->sqlDelete("journals", "uid=$uid AND id=$id") == 0) {
+	my $count = $self->sqlDelete("journals", "uid=$uid AND id=$id");
+	if ($count == 0) {
 		# Return value 0E0 means "no rows deleted" (i.e. this user owns
 		# no such journal) and undef means "error."  Either way, abort.
 		return;
@@ -131,6 +132,7 @@ sub remove {
 	}
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($uid, { -journal_last_entry_date => $date });
+	return $count;
 }
 
 sub friends {

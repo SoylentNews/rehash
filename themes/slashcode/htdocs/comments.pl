@@ -898,7 +898,7 @@ sub submitComment {
 		});
 
 		my($messages, $reply, %users);
-		if ($form->{pid} || $discussion->{url} =~ /\bjournal\.pl\b/ || $constants->{commentnew_msg}) {
+		if ($form->{pid} || $discussion->{url} =~ /\bjournal\b/ || $constants->{commentnew_msg}) {
 			$messages = getObject('Slash::Messages');
 			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
 		}
@@ -922,7 +922,7 @@ sub submitComment {
 		}
 
 		# reply to journal
-		if ($messages && $discussion->{url} =~ /\bjournal\.pl\b/) {
+		if ($messages && $discussion->{url} =~ /\bjournal\b/) {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
 			if (@$users && !$users{$users->[0]}) {
 				my $data  = {

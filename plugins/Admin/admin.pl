@@ -703,6 +703,8 @@ sub topicEdit {
 	}
 
 	# we can change topic->{image} because it's cached and it'll hose it sitewide
+	# non non-alphanumerics in the name?  this is sorta ill-conceived.  there
+	# should be a flag, or something ...
 	$image = $topic->{image};
 	if ($image =~ /^\w+\.\w+$/) {
 		$image = "$constants->{imagedir}/topics/$image";
@@ -901,7 +903,7 @@ sub editStory {
 		$sections, $topic_select, $section_select, $author_select,
 		$extracolumns, $displaystatus_select, $commentstatus_select, $description);
 	my $extracolref = {};
-	my ($fixquotes_check, $autonode_check, 
+	my($fixquotes_check, $autonode_check, 
 		$fastforward_check, $shortcuts_check, $feature_story_check) =
 		('','','','','');
 
@@ -1155,7 +1157,7 @@ sub listStories {
 			$canedit = 1;
 		}
 
-		my $feature_story_flag = ($slashdb->getSection($section,'sid') eq $sid) ? 1 : 0; 
+		my $feature_story_flag = ($slashdb->getSection($section,'sid') eq $sid) ? 1 : 0;
 		$storylistref->[$i] = {
 			'x'		=> $i + $first_story + 1,
 			hits		=> $hits,
@@ -1170,7 +1172,7 @@ sub listStories {
 			td		=> $td,
 			td2		=> $td2,
 			writestatus	=> $writestatus,
-			feature_story_flag	=> $feature_story_flag,
+			feature_story_flag => $feature_story_flag,
 			displaystatus	=> $displaystatus,
 			tbtitle		=> $tbtitle,
 		};
@@ -1285,10 +1287,9 @@ sub updateStory {
 
 	if ($constants->{feature_story_enabled}) {
 		if ($form->{feature_story}) {
-		    $slashdb->setSection($form->{section}, {feature_story => $form->{sid}});
-	
+			$slashdb->setSection($form->{section}, { feature_story => $form->{sid} });
 		} elsif ($slashdb->getSection($form->{section}, 'sid') eq $form->{sid}) {
-			$slashdb->setSetion($form->{section}, { feature_story => ''});
+			$slashdb->setSection($form->{section}, { feature_story => '' });
 		}
 	}
 
@@ -1318,15 +1319,13 @@ sub saveStory {
 		"$form->{title} $form->{bodytext} $form->{introtext}"
 	) . otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
 
-
 	my $sid = $slashdb->createStory($form);
 
 	if ($constants->{feature_story_enabled}) {
 		if ($form->{feature_story}) {
-		    $slashdb->setSection($form->{section}, { feature_story => $sid});
-	
+			$slashdb->setSection($form->{section}, { feature_story => $sid });
 		} elsif ($slashdb->getSection($form->{section}, 'sid') eq  $sid) {
-			$slashdb->setSection($form->{section} , {'feature_story' => ''});
+			$slashdb->setSection($form->{section}, { feature_story => '' });
 		}
 	}
 

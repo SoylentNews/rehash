@@ -50,18 +50,17 @@ sub main {
 	my $limit = $section->{section} eq 'index' ?
 	    $user->{maxstories} : $section->{artcount};
 
-	my ($stories, $feature, $Feature, $other);
-
+	my($stories, $feature, $Feature, $other);
 	if ($constants->{feature_story_enabled} && $section->{feature_story}) {
-	    # ok, I extended it to take an sid so I could get just one particlar story
-	    $other->{sid} = $section->{feature_story};
-	    $feature = $slashdb->getStoriesEssentials(1,$section->{section},'', $other);
-	    $other->{sid} = '';
-	    # this is the 'feature_story' flag in displayStories
-	    $feature->[0][9] = 1;
-	    $Feature = displayStories($feature,1);
+		# ok, I extended it to take an sid so I could get just one particlar story
+		$other->{sid} = $section->{feature_story};
+		$feature = $slashdb->getStoriesEssentials(1,$section->{section},'', $other);
+		$other->{sid} = '';
+		# this is the 'feature_story' flag in displayStories
+		$feature->[0][9] = 1;
+		$Feature = displayStories($feature,1);
 
-	    $other->{exclude_sid} = $section->{feature_story};
+		$other->{exclude_sid} = $section->{feature_story};
 	}
 
 	$stories = $slashdb->getStoriesEssentials(
@@ -250,12 +249,12 @@ sub displayStories {
 	# Stuff block later (simulate the old cursor-based
 	# method)
 	while ($_ = shift @{$stories}) {
-		my ($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid, $feature) = @{$_};
+		my($sid, $thissection, $title, $time, $cc, $d, $hp, $secs, $tid, $feature) = @{$_};
 		my @links;
 		my @threshComments = split m/,/, $hp;  # posts in each threshold
 		my $other;
 		$other->{story_template} = 'dispFeature' if $feature;
-		my ($storytext, $story) = displayStory($sid,'',$other);
+		my($storytext, $story) = displayStory($sid, '', $other);
 
 		$return .= $storytext;
 

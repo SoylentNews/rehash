@@ -172,7 +172,7 @@ sub displayRSS {
 # needs a var controlling this ... what to use as desc?
 #			description	=> timeCalc($article->[0]),
 #			description	=> "$nickname wrote: " . strip_mode($article->[1], $article->[4]),
-			'link'		=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]/"
+			'link'		=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]"
 		};
 	}
 
@@ -207,7 +207,7 @@ sub displayTopRSS {
 		my $time = timeCalc($entry->[3]);
 		push @items, {
 			title	=> "$entry->[1] ($time)",
-			'link'	=> "$constants->{absolutedir}/~" . fixparam($entry->[1]) . "/journal/$entry->[2]/"
+			'link'	=> "$constants->{absolutedir}/~" . fixparam($entry->[1]) . "/journal/"
 		};
 	}
 
@@ -363,16 +363,20 @@ sub listArticle {
 }
 
 sub saveArticle {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $slashdb, $ws) = @_;
 	my $description = strip_notags($form->{description});
 
 	unless ($description ne "" && $form->{article} ne "") {
-		_printHead("mainhead");
-		print getData('no_desc_or_article');
+		unless ($ws) {
+			_printHead("mainhead");
+			print getData('no_desc_or_article');
+		}
 		return 0;
 	}
 
-	return unless _validFormkey();
+	unless ($ws) {
+		return 0 unless _validFormkey();
+	}
 
 	if ($form->{id}) {
 		my %update;
@@ -389,7 +393,7 @@ sub saveArticle {
 			my $did = $slashdb->createDiscussion({
 				title	=> $description,
 				topic	=> $form->{tid},
-				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$form->{id}/",
+				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$form->{id}",
 			});
 			$update{discussion}  = $did;
 
@@ -407,13 +411,17 @@ sub saveArticle {
 
 		$journal->set($form->{id}, \%update);
 
+		return $form->{id} if $ws;
+
 	} else {
 		my $id = $journal->create($description,
 			$form->{article}, $form->{posttype}, $form->{tid});
 
 		unless ($id) {
-			_printHead("mainhead");
-			print getData('create_failed');
+			unless ($ws) {
+				_printHead("mainhead");
+				print getData('create_failed');
+			}
 			return 0;
 		}
 
@@ -422,7 +430,7 @@ sub saveArticle {
 			my $did = $slashdb->createDiscussion({
 				title	=> $description,
 				topic	=> $form->{tid},
-				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$id/",
+				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$id",
 			});
 			$journal->set($id, { discussion => $did });
 		}
@@ -448,6 +456,7 @@ sub saveArticle {
 				$messages->create($_, MSG_CODE_JOURNAL_FRIEND, $data);
 			}
 		}
+		return $id if $ws;
 	}
 
 	listArticle(@_);
@@ -566,4 +575,5 @@ sub _printHead {
 
 createEnvironment();
 main();
+
 1;

@@ -4104,8 +4104,6 @@ sub updateStory {
 		? $self->getTime()
 		: $form->{'time'};
 
-
-
 	$self->sqlUpdate('discussions', {
 		sid	=> $form->{sid},
 		title	=> $form->{title},

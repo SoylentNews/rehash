@@ -12,7 +12,7 @@ __name__
 commentsearch
 __template__
 [% USE Slash %]
-<P>This search covers the name, email, subject and contents of comments that are posted.<P>
+<P>This search covers only subjects of comments that are posted.<P>
 [% x = start ? start : 1 %]
 [% FOREACH comment=comments %]
 	[% user_email = Slash.db.getUser(comment.8, ['fakeemail', 'nickname']) %]

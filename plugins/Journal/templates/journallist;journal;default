@@ -21,7 +21,7 @@ __template__
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 [% FOREACH article = articles %]
   <TR>
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]/"><B>[% article.2 %]</B></A></TD>
+    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]"><B>[% article.2 %]</B></A></TD>
     <TD VALIGN="TOP"><EM>[% Slash.timeCalc(article.1) %]</EM></TD>
 [%- IF showopts %]
     <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</A></TD>

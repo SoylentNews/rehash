@@ -60,7 +60,7 @@ __template__
 paid for a total of [% hits_paidfor %] pages
 and so far [% hits_bought %] have been used up.
 [% IF hits_paidfor && user.uid == user_edit.uid %]
-	Thank you for supporting Slashdot! We very much appreciate your
+	Thank you for supporting [% constants.sitename %]! We very much appreciate your
 	contribution.
 [% END %]
 
