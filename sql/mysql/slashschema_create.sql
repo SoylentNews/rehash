@@ -547,7 +547,7 @@ CREATE TABLE querylog (
 	KEY caller (package, line),
 	KEY ts (ts),
 	KEY type (type)
-} TYPE=InnoDB;
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'rss_raw'
