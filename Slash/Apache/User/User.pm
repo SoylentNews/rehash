@@ -214,7 +214,7 @@ sub handler {
                 )
 	) {
 		my $ans = $constants->{allow_nonadmin_ssl};
-		     if ($ans == 1) {
+		if ($ans == 1) {
 			# It's OK, anyone is allowed to use the SSL server.
 		} elsif ($ans == 0) {
 			# Only admins are allowed in -- but note the special
