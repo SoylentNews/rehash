@@ -972,7 +972,7 @@ sub linkComment {
 	# don't inherit these ...
 	for (qw(sid cid pid date subject comment uid points lastmod
 		reason nickname fakeemail homepage sig)) {
-		$comment->{$_} = '' unless exists $comment->{$_};
+		$comment->{$_} = undef unless exists $comment->{$_};
 	}
 
 	$comment->{pid} = $comment->{original_pid} || $comment->{pid};
