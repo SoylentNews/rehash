@@ -1211,6 +1211,7 @@ sub dispComment {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $gSkin = getCurrentSkin();
 
 	my($comment_shrunk, %reasons);
 
@@ -1799,8 +1800,8 @@ sub _hard_dispComment {
 	
 	my $title = qq|<A NAME="$comment->{cid}"><B>$comment->{subject}</B></A>|;
 	my $return = <<EOT;
-			<TR><TD BGCOLOR="$user->{bg}[2]">
-				<FONT SIZE="3" COLOR="$user->{fg}[2]">
+			<TR><TD BGCOLOR="$user->{colors}{bg_2}">
+				<FONT SIZE="3" COLOR="$user->{colors}{fg_2}">
 				$title $score_to_display
 				</FONT>
 				<BR>by $user_nick_to_display$zoosphere_display$user_email_to_display
