@@ -430,19 +430,21 @@ sub linkStory {
 
 	# if we REALLY want dynamic
 	my $dynamic = $story_link->{dynamic} || 0;
+	# takes precedence over dynamic
+	my $static  = $story_link->{static}  || 0;
 
-	if ($ENV{SCRIPT_NAME} || !$user->{is_anon}) {
+	if (!$static && ($ENV{SCRIPT_NAME} || !$user->{is_anon})) {
 		# Whenever we're invoked from Apache, use dynamic links.
 		# This test will be true 99% of the time we come through
 		# here, so it's first.
 		$dynamic = 1;
-	} elsif ($params{mode}) {
+	} elsif (!$static && $params{mode}) {
 		# If we're an AC script, but this is a link to e.g.
 		# mode=nocomment, then we need to have it be dynamic.
 		$dynamic = 1 if $params{mode} ne getCurrentAnonymousCoward('mode');
 	}
 
-	if (!$dynamic && defined($params{threshold})) {
+	if (!$static && (!$dynamic && defined($params{threshold}))) {
 		# If we still think we can get away with a nondynamic link,
 		# we need to check one more thing.  Even an AC linking to
 		# an article needs to make the link dynamic if it's the
@@ -468,7 +470,7 @@ sub linkStory {
 	my $skin = $reader->getSkin($story_link->{skin});
 	$url = $skin->{rootdir} || $constants->{real_rootdir} || $gSkin->{rootdir};
 
-	if ($dynamic) {
+	if (!$static && $dynamic) {
 		$url .= "/$script?";
 		sub _paramsort { return -1 if $a eq 'sid'; return 1 if $b eq 'sid'; $a cmp $b }
 		for my $key (sort _paramsort keys %params) {
