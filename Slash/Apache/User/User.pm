@@ -307,11 +307,15 @@ sub userdir_handler {
 	if (($uri =~ m[^/~/(.+)]) or ($uri =~ m[^/my (?: /(.*) | /? ) $]x)) {
 		my $match = $1;
 		if ($r->header_in('Cookie') =~ $USER_MATCH) {
-			my($toss, $op) = split /\//, $match, 3;
-			# Its past five, and the below makes it go -Brian
-			$op ||= $toss;
+			my($op, $extra) = split /\//, $match, 2;
 			if ($op eq 'journal') {
-				$r->args("op=list");
+				my $args;
+				if ($extra && $extra =~ /^\d+$/) {
+					$args = "id=$extra&op=edit";
+				} else {
+					$args = "op=list";
+				}
+				$r->args($args);
 				$r->uri('/journal.pl');
 				$r->filename($constants->{basedir} . '/journal.pl');
 			} elsif ($op eq 'discussions') {
@@ -327,9 +331,19 @@ sub userdir_handler {
 				$r->uri('/messages.pl');
 				$r->filename($constants->{basedir} . '/messages.pl');
 			} elsif ($op eq 'friends') {
-				$r->args("op=friends");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
+				if ($extra eq 'friends') {
+					$r->args("op=fof");
+					$r->uri('/zoo.pl');
+					$r->filename($constants->{basedir} . '/zoo.pl');
+				} elsif ($extra eq 'foes') {
+					$r->args("op=eof");
+					$r->uri('/zoo.pl');
+					$r->filename($constants->{basedir} . '/zoo.pl');
+				} else {
+					$r->args("op=friends");
+					$r->uri('/zoo.pl');
+					$r->filename($constants->{basedir} . '/zoo.pl');
+				}
 			} elsif ($op eq 'foes') {
 				$r->args("op=foes");
 				$r->uri('/zoo.pl');

@@ -99,10 +99,10 @@ __template__
 	Your freaks
 
 [% CASE 'yourfriendsoffriendshead' %]
-	Your friend's friends.
+	Your friends' friends
 
 [% CASE 'yourfriendsenemieshead' %]
-	Your friend's foes.
+	Your friends' foes
 
 [% CASE 'yourall' %]
 	This is how you see everyone and how everyone sees you.
