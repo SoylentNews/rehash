@@ -42,7 +42,7 @@ sub sectionHeaders {
 	header("", $section, "thread", 1);
 	close $fh;
 
-#	setCurrentForm('ssi', 0);
+	setCurrentForm('ssi', 0);
 	open $fh, ">$constants->{basedir}/$section/slashfoot.inc"
 		or die "Can't open $constants->{basedir}/$section/slashfoot.inc: $!";
 	*STDOUT = $fh;
