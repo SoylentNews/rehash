@@ -58,6 +58,7 @@ sub getBackendStories {
 	my($self, $section, $topic) = @_;
 	# right now it is only topic OR section, because i am lazy;
 	# section overrides topic -- pudge
+	# Fixed it so that it now pays attention to both. --Brian
 
 	my $select;
 	$select .= "stories.sid, stories.title, time, dept, stories.uid,";
@@ -73,12 +74,20 @@ sub getBackendStories {
 	$where .= " AND stories.writestatus != 'delete'";
 
 	if ($section) {
-		$where .= " AND stories.section=\"$section\" AND displaystatus > -1";
-	} elsif ($topic) {
-		$where .= " AND stories.tid=$topic AND displaystatus = 0";
-	} else {
-		$where .= " AND displaystatus = 0";
+		my $SECT = $self->getSection($section);
+		if ($SECT->{type} eq 'collected') {
+			$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+				if $SECT->{contained} && @{$SECT->{contained}};
+			$where .= " AND displaystatus = 0 ";
+		} else {
+			$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
+			$where .= " AND displaystatus >= 0 ";
+		}
 	}
+	
+	$where .= " AND stories.tid=$topic "
+		if ($topic);
+
 	my $other = "ORDER BY time DESC LIMIT 10";
 
 	my $returnable = $self->sqlSelectAllHashrefArray($select, $from, $where, $other);
