@@ -10101,7 +10101,7 @@ sub getTopiclistForStory {
 
 	# Grandfather in an old-style sid.
 	my $stoid = $self->getStoidFromSidOrStoid($id);
-	return undef unless $stoid;
+	return [] unless $stoid;
 
 	my $chosen_hr = $options->{topics_chosen} || $self->getStoryTopicsChosen($stoid);
 	return $self->getTopiclistFromChosen($chosen_hr, $options);
