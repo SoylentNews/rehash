@@ -703,6 +703,13 @@ sub printComments {
 			$more_comment_text->{$cid} = addDomainTags($text);
 		}
 
+		# If the comment should have noFollow on its links, apply
+		# them here.
+		my $karma_bonus = $comments->{$cid}{karma_bonus};
+		if (!$karma_bonus || $karma_bonus eq 'no') {
+			$comment_text->{$cid} = noFollow($comment_text->{$cid});
+		}
+
 		# Now write the new data into our hashref and write it out to
 		# memcached if appropriate.  For these purposes, if we were
 		# cleared to read from memcached, the data we just got is also
@@ -717,11 +724,6 @@ sub printComments {
 				my $exp_at = $exptime ? scalar(gmtime(time + $exptime)) : "never";
 				print STDERR scalar(gmtime) . " printComments memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";
 			}
-		}
-
-		my $karma_bonus = $comments->{$cid}{karma_bonus};
-		if (!$karma_bonus || $karma_bonus eq 'no') {
-			$comment_text->{$cid} = noFollow($comment_text->{$cid});
 		}
 	}
 

@@ -7198,6 +7198,7 @@ sub setCommentForMod {
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $clear_ctp = 0;
 
 	my $allreasons_hr = $self->sqlSelectAllHashref(
 		"reason",
@@ -7229,6 +7230,13 @@ sub setCommentForMod {
 	}
 	if ($num_downmods > $constants->{mod_karma_bonus_max_downmods}) {
 		$update->{karma_bonus} = "no";
+		# If we remove a karma_bonus, we must invalidate the
+		# comment_text (because the noFollow changes).  Sadly
+		# at this point we don't know (due to performance
+		# requirements and atomicity) whether we are actually
+		# changing the value of this column, but we have to
+		# invalidate the cache anyway.
+		$clear_ctp = 1;
 	}
 
 	# Make sure we apply this change to the right comment :)
@@ -7312,11 +7320,22 @@ sub setCommentForMod {
 		});
 	}
 	$changed += 0;
+	if (!$changed) {
+		# If the row in the comments table didn't change, then
+		# the karma_bonus didn't change, so we know there is
+		# no need to clear the comment text cache.
+		$clear_ctp = 0;
+	}
 
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
+
+	if ($clear_ctp and my $mcd = $self->getMCD()) {
+		my $mcdkey = "$self->{_mcd_keyprefix}:ctp:";
+		$mcd->delete("$mcdkey$cid", 3);
+	}
 
 	return $changed ? $hr : undef;
 }
