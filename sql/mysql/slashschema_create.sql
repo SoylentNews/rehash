@@ -1154,7 +1154,7 @@ CREATE TABLE users_hits (
 DROP TABLE IF EXISTS users_index;
 CREATE TABLE users_index (
 	uid mediumint UNSIGNED NOT NULL,
-	extid varchar(255),
+	extid text,
 	exaid varchar(100),
 	exsect varchar(255),
 	exboxes varchar(255),
