@@ -2549,8 +2549,6 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 
 # End of T_2_5_0_27, Start of T_2_5_0_28 - 2004/09/21
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_28, Start of T_2_5_0_29 - 2004/09/28
 
 # Changes for plugins/Admin (which you are almost certainly using)
@@ -2622,5 +2620,7 @@ INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','comme
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_32, Start of T_2_5_0_33 - 2004/10/12
