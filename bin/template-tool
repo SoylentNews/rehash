@@ -150,11 +150,6 @@ if ($opts{'s'}) {
 			} else {
 				if (my($tpid) = $slashdb->createTemplate($template)) {
 					my $temp2 = $slashdb->getTemplate($tpid,'',1);
-	#				my $temp2 = $slashdb->sqlSelectHashref(
-	#					"tpid, name, page, section",
-	#					"templates",
-	#					"tpid=" . $slashdb->sqlQuote($tpid)
-	#				);
 					if ($temp2) {
 						my $t2semi = join(";", @$temp2{'name','page','section'});
 						print "id $tpid\t$filename CREATED\n";
@@ -214,12 +209,39 @@ if ($opts{'s'}) {
 					$stats{different}++;
 				}
 			} else {
+				if (!scalar(@diffs)) {
+				# Do nothing here -Brian
+				} elsif ($slashdb->setTemplate($temp2->{tpid}, $template)) {
+					my $t2semi = join(";", @$temp2{'name','page','section'});
+					print "id $temp2->{tpid}\t$filename updated ($changes)\n";
+					if ($tsemi ne $t2semi || $tsemi ne $filename) {
+						print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
+					}
+				} else {
+					print "id $temp2->{tpid}\t$filename NOT updated: $_\n";
+					print "\tError: " . $slashdb->{_dbh}->DBI::err_str . "\n";
+				}
 			}
 		} else {
 			if ($opts{'t'}) {
 				print "\t$filename is new\n";
 				$stats{new}++;
 			} else {
+				if (my($tpid) = $slashdb->createTemplate($template)) {
+					my $temp2 = $slashdb->getTemplate($tpid,'',1);
+					if ($temp2) {
+						my $t2semi = join(";", @$temp2{'name','page','section'});
+						print "id $tpid\t$filename CREATED\n";
+						if ($tsemi ne $t2semi || $tsemi ne $filename) {
+							print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
+						}
+					} else {
+						print "\tWARNING: unknown error, cannot tell whether '$tsemi' was successfully created from '$_', id may be $tpid\n";
+					}
+				} else {
+					print "wasn't able to update template $_\n";
+					print "Error: " . $slashdb->{_dbh}->DBI::err_str . "\n";
+				}
 			}
 		}
 	}
