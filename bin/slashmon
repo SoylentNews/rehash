@@ -16,14 +16,15 @@ use vars qw(
 	$PROGNAME	$VERSION
 	%opts
 	$virtuser	$width	$height	$sleep	$min_pl_time
+	$weed_out_images
 	@abbreviations	%abbreviations
 	$slashdb	$constants	$logdb
 	@db
 	$time_last	$maxlog_last
 	$time_first	$maxlog_first
 	$time_new	$maxlog_new
-	$num_cycles	$loadavg
-	$pages		$loadavg_sum
+	$pages		$loadavg	$num_cycles
+	$pages_total	$loadavg_sum
 	$lines_since_header
 );
 
@@ -40,10 +41,11 @@ sub init {
 
 	$PROGNAME = basename($0);
 
-	usage('Options used incorrectly') unless getopts('hvu:w:r:s:t:', \%opts);
+	usage('Options used incorrectly') unless getopts('hviu:w:r:s:t:', \%opts);
 	usage() if $opts{h};
 	version() if $opts{v};
 
+	$weed_out_images = $opts{i} ? 1 : 0;
 	$virtuser = $opts{u} || 'slashdot';
 	$width = $opts{w} || 106;
 	$height = $opts{r} || 20;
@@ -92,14 +94,12 @@ sub init {
 
 	# We already have a handle to the DB that writes accesslog, but let's get
 	# a separate copy in this special var for it.
-	my $log_user = $constants->{log_db_user}
-		|| $constants->{backup_db_user}
-		|| $slashdb->{virtual_user};
-	$logdb = getObject('Slash::DB', $log_user);
+	$logdb = getObject('Slash::DB', { db_type => "logdb" });
 
 	$lines_since_header = 999999;
 	$num_cycles = 0;
 	$loadavg_sum = 0;
+	$pages_total = 0;
 
 	$maxlog_first = $logdb->sqlSelect("MAX(id)", "accesslog");
 	$maxlog_last = $maxlog_first;
@@ -160,8 +160,8 @@ sub print_header {
 	# First line of header: spaces over the global stuff, headers for DBs
 	printf("%4s %4s %4s", "", "", "");
 	for my $db (@db) {
-		my $wid = 18;
-		$wid += 6 if $db->{version} == 4;
+		my $wid = 14;
+		$wid += 2 if $db->{version} == 4;
 		my $name = $db->{vu};
 		my $len = length($name);
 		print join("",
@@ -175,8 +175,8 @@ sub print_header {
 	# Second line of header: names for the globals, names for DB columns
 	printf("%4s %4s %4s", "time", "load", "pps");
 	for my $db (@db) {
-		printf(" %5s %3s %4s %2s", "qps", "sps", "qpp", "at");
-		printf(" %5s", "hit%") if $db->{version} == 4;
+		printf(" %4s %3s %4s", "qps", "sps", "qpp");
+		print " h" if $db->{version} == 4;
 	}
 	print "\n";
 
@@ -199,43 +199,60 @@ sub update_db_ary {
 
 sub print_first_line {
 	# First line: stats for the last $time_elapsed seconds
-	$pages = ($maxlog_new - $maxlog_last) || 1;
+	if ($weed_out_images) {
+		$pages = $logdb->sqlCount("accesslog",
+			"id BETWEEN " . ($maxlog_last+1) . " AND $maxlog_new"
+			. " AND op != 'image'");
+	} else {
+		$pages = $maxlog_new - $maxlog_last;
+	}
+	$pages_total += $pages;
 	my $time_elapsed = $time_new - $time_last;
 	$time_elapsed = 0.01 if $time_elapsed < 0.01;
 	printf("%4s %4.2f %4.1f",
 		"",
 		$loadavg,
-		($maxlog_new - $maxlog_last) / $time_elapsed
+		$pages / $time_elapsed
 	);
+	$pages = 1 if $pages < 1; # Below it's used in a denominator
 	for my $db (@db) {
-		printf(" %5.1f %3.1f %4.1f %2d",
+		my $slow = sprintf("%4.2f", ($db->{slow_queries_new} - $db->{slow_queries_last}) / $time_elapsed);
+		$slow =~ s/^0\././;
+		printf(" %4d $slow %4.1f",
 			($db->{queries_new} - $db->{queries_last}) / $time_elapsed,
-			($db->{slow_queries_new} - $db->{slow_queries_last}) / $time_elapsed,
 			($db->{queries_new} - $db->{queries_last}) / $pages,
-			$db->{threads_active}
 		);
-		printf(" %5.1f", $db->{hitrate}) if $db->{version} == 4;
+		if ($db->{version} == 4) {
+			if (!defined($db->{hitrate})) {
+				print " ?";
+			} elsif ($db->{hitrate} >= 98) {
+				print " +";
+			} else {
+				print " -";
+			}
+		}
 	}
 	print "\n"; ++$lines_since_header;
 }
 
 sub print_second_line {
 	# Second line: stats since slashmon started running
-	$pages = ($maxlog_new - $maxlog_first) || 1;
+	my $pt = $pages_total || 1;
 	my $time_elapsed = $time_new - $time_first;
 	$time_elapsed = 0.01 if $time_elapsed < 0.01;
 	printf("%4d %4.2f %4.1f",
 		$time_new - $time_first,
 		$loadavg_sum / $num_cycles,
-		$pages / $time_elapsed,
+		$pt / $time_elapsed,
 	);
 	for my $db (@db) {
-		printf(" %5.1f %3.1f %4.1f %2s",
+		my $slow = sprintf("%4.2f", ($db->{slow_queries_new} - $db->{slow_queries_first}) / $time_elapsed);
+		$slow =~ s/^0\././;
+		printf(" %4d $slow %4.1f",
 			($db->{queries_new} - $db->{queries_first}) / $time_elapsed,
-			($db->{slow_queries_new} - $db->{slow_queries_first}) / $time_elapsed,
-			($db->{queries_new} - $db->{queries_first}) / $pages,
+			($db->{queries_new} - $db->{queries_first}) / $pt,
 		);
-		print " " x 6 if $db->{version} == 4;
+		print "  " if $db->{version} == 4;
 	}
 	print "\n"; ++$lines_since_header;
 }
@@ -273,8 +290,12 @@ sub getQueries {
 }
 
 sub getHitRate {
-	my($db) = @_;
-	# parse the text from SHOW INNODB STATUS
+	my($sth) = @_;
+	$sth->execute();
+	my($text) = $sth->fetchrow();
+	my($num, $denom) = $text =~ /Buffer pool hit rate (\d+)[ \/]+(\d+)/;
+	return undef unless $denom;
+	return 100*$num/$denom;
 }
 
 sub getProclist {
@@ -341,6 +362,9 @@ Monitor the Slash site's database.
 Main options:
 	-h      Help (this message)
 	-v      Version
+	-i	Accesslog may contain images; do a SELECT from it to
+		weed them out when counting pages
+
 	-u      Virtual user (default "slashdot")
 	-w	Width max in columns (default 76)
 	-r	Height max in (r)ows (default 20)
@@ -356,8 +380,8 @@ For each DB, the data is:
 	qps	Queries per second
 	sps	Slow queries per second
 	qpp	Queries per page
-	th	Threads active
-	hit%	Cache hit rate percent (MySQL 4.x only)
+	h	Cache hit rate percent (MySQL 4.x only)
+		("+" means 98% or better, "-" means not)
 EOT
 	exit 0;
 }
