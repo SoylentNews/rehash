@@ -8389,8 +8389,12 @@ sub getPrimarySkidFromRendered {
 	# Eliminate any nexuses not in this set of rendered topics.
 	@nexuses = grep { $rendered_hr->{$_} } @nexuses;
 
-	# No rendered nexuses, none at all, means primaryskid 0,
-	# which means "none".
+	# Nexuses that don't have (at least) one skin that points
+	# to them aren't in the running to influence primaryskid.
+	@nexuses = grep { $self->getSkidFromNexus($_) } @nexuses;
+
+	# No rendered nexuses with associated skins, none at all,
+	# means primaryskid 0, which means "none".
 	return 0 if !@nexuses;
 
 	# Eliminate the mainpage's nexus.
