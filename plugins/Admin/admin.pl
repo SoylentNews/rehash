@@ -1513,6 +1513,7 @@ sub saveStory {
 		sid		=> $form->{sid},
 		title		=> $form->{title},
 		section		=> $form->{section},
+		submitter		=> $form->{submitter},
 		tid		=> $form->{tid},
 		dept		=> $form->{dept},
 		'time'		=> $time,
