@@ -1,0 +1,46 @@
+__section__
+default
+__description__
+HTML skeleton for the 'stockquotes' block
+
+* last_update = text of last update time
+* stocks = array of 'stock' elements:
+	stock.exchange = name of the exchange the stock is traded on
+	stock.symbol = the stock's symbol
+	stock.name = the stock's name
+	stock.url = the stock's url
+	stock.X = and whatever else we give ya
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+stockquotes
+__template__
+<TABLE border=0 width="100%" cellspacing=1 cellpadding=0>
+<TR>
+<TD><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>Corp.</b></font></TD>
+<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>$now</b></font></TD>
+<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>$year</b></font></TD>
+<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>$cap</b></font></TD>
+</TR>
+[% FOR stock = stocks %]
+<TR>
+<TD><FONT FACE="verdana,helvetica,arial" SIZE="1"><a href="[% stock.url %]">[% stock.name %]</a></font></TD>
+<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1">&nbsp;[% stock.last %]</font></TD>
+<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1">&nbsp;[% stock.year_lo %]-[% stock.year_hi %]</font></TD>
+<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1">&nbsp;[% stock.cap %]</font></TD>
+</TR>
+[% END %]
+</TABLE>
+<br><FONT FACE="verdana,helvetica,arial" SIZE="1"><i>Last update:
+[% last_update %] (15+ min delay).  For informational purposes
+only. Not intended for trading purposes. If you're silly enough to do
+something based on this data, we're not liable.</i><br><i>Data courtesy
+<a href="http://search.cpan.org/search?dist=Finance-Quote">Finance::Quote</a>.</i></font>
+
+__seclev__
+500

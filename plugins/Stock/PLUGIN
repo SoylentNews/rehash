@@ -1,0 +1,6 @@
+name=Stock
+description="stockquotes block"
+mysql_schema=mysql_schema.sql
+mysql_dump=mysql_dump.sql
+task=stockquotes.pl
+template=stockquotes;misc;default
