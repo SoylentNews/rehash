@@ -8678,14 +8678,16 @@ sub getSkins {
 			errorLog("skin_colors row but no skins row for skid '$skid'");
 			next;
 		}
-		# Convert an index_handler of foo.pl to an index_static of
-		# foo.shtml, for convenience.
-		($skins_ref->{$skid}{index_static} = $skins_ref->{$skid}{index_handler}) =~ s/\.pl$/.shtml/;
 		# Massage the skin_colors data into this hashref in an
 		# appropriate place.
 		for my $name (keys %{$colors->{$skid}}) {
 			$skins_ref->{$skid}{hexcolors}{$name} = $colors->{$skid}{$name}{hexcolor};
 		}
+	}
+	for my $skid (keys %$skins_ref) {
+		# Convert an index_handler of foo.pl to an index_static of
+		# foo.shtml, for convenience.
+		($skins_ref->{$skid}{index_static} = $skins_ref->{$skid}{index_handler}) =~ s/\.pl$/.shtml/;
 
 		# Set rootdir etc., based on hostname/url, or mainpage's if none
 		my $host_skid = $skins_ref->{$skid}{hostname} ? $skid : $constants->{mainpage_skid};
