@@ -1117,7 +1117,10 @@ sub listStories {
 
 	for (@$storylist) {
 		($hits, $comments, $sid, $title, $aid, $time, $tid, $section,
-			$displaystatus, $writestatus, $td, $td2) = @$_;
+			$displaystatus, $writestatus) = @$_;
+		$time = timeCalc($time, '%H:%M');
+		my $td = timeCalc($time, '%A %B %d');
+		my $td2 = timeCalc($time, '%m/%d');
 
 		$substrtid = substr($tid, 0, 5);
 		

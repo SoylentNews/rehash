@@ -78,13 +78,13 @@ sub setStoryIndex {
 	for my $sid (@sids) {
 		$stories{$sid} = $self->sqlSelectHashref("*","stories","sid='$sid'");
 	}
-	$self->{_dbh}->do("LOCK TABLES newstories WRITE");
+	$self->{_dbh}->sqlTransactionStart("LOCK TABLES newstories WRITE");
 
 	foreach my $sid (keys %stories) {
 		$self->sqlReplace("newstories", $stories{$sid}, "sid='$sid'");
 	}
 
-	$self->{_dbh}->do("UNLOCK TABLES");
+	$self->{_dbh}->sqlTransactionFinish();
 }
 
 ########################################################
@@ -213,13 +213,13 @@ sub updateStamps {
 
 	my $E = $self->sqlSelectAll($columns, $tables, $where, $other);
 
-	$self->sqlDo("LOCK TABLES users_info WRITE");
+	$self->sqlTransactionStart("LOCK TABLES users_info WRITE");
 
 	for (@{$E}) {
 		my $uid=$_->[0];
 		$self->setUser($uid, {-lastaccess=>'now()'});
 	}
-	$self->sqlDo("UNLOCK TABLES");
+	$self->sqlTransactionFinish();
 }
 
 ########################################################
@@ -371,9 +371,7 @@ sub tokens2points {
 	my $constants = getCurrentStatic();
 	my @log;
 	my $c = $self->sqlSelectMany("uid,tokens", "users_info", "tokens >= $constants->{maxtokens}");
-	$self->sqlDo("LOCK TABLES users READ, 
-		users_info WRITE, 
-		users_comments WRITE");
+	$self->sqlTransactionStart("LOCK TABLES users READ, users_info WRITE, users_comments WRITE");
 
 	while (my($uid, $tokens) = $c->fetchrow) {
 		push @log, ("Giving $constants->{maxtokens}/$constants->{tokensperpoint} " .
@@ -393,13 +391,13 @@ sub tokens2points {
 		 seclev < 100 AND
 		 users.uid=users_comments.uid AND
 		 users.uid=users_info.uid");
-	$self->sqlDo("UNLOCK TABLES");
+	$self->sqlTransactionFinish();
 
-	$self->sqlDo("LOCK TABLES users_comments WRITE");
+	$self->sqlTransactionStart("LOCK TABLES users_comments WRITE");
 	while (my($uid) = $c->fetchrow) {
 		$self->sqlUpdate("users_comments", { points => 5 } ,"uid=$uid");
 	}
-	$self->sqlDo("UNLOCK TABLES");
+	$self->sqlTransactionFinish();
 
 	return \@log;
 }
@@ -419,14 +417,14 @@ sub stirPool {
 
 	my $revoked = 0;
 
-	$self->sqlDo("LOCK TABLES users_comments WRITE");
+	$self->sqlTransactionStart("LOCK TABLES users_comments WRITE");
 
 	while (my($p, $u) = $c->fetchrow) {
 		$revoked += $p;
 		$self->sqlUpdate("users_comments", { points => '0' }, "uid=$u");
 	}
 
-	$self->sqlDo("UNLOCK TABLES");
+	$self->sqlTransactionFinish();
 	$c->finish;
 	return 0;
 }
@@ -512,14 +510,14 @@ sub giveKarma {
 	}
 
 
-	$self->sqlDo("LOCK TABLES users_info WRITE");
+	$self->sqlTransactionStart("LOCK TABLES users_info WRITE");
 	for (@eligibles) {
 		next unless $scores[$uid];
 		$self->setUser($uid, { 
 			-tokens	=> "tokens+" . $scores[$uid]
 		});
 	}
-	$self->sqlDo("UNLOCK TABLES");
+	$self->sqlTransactionFinish();
 
 	return("Start at $st end at $fi.  $eligible left. First score is $cnt");
 }
