@@ -1094,27 +1094,8 @@ sub setCookie {
 		-path    =>  $cookiepath
 	);
 
-	# This old code may be wrong, says Pudge.
-	my $secure_old = 0;
-	if ($constants->{cookiesecure}) {
-		my $subr = $r->lookup_uri($r->uri);
-		if ($subr && $subr->subprocess_env('HTTPS') eq 'on') {
-			$secure_old = 1;
-#			$cookiehash{-secure} = 1;
-		}
-	}
-	# And this new (old) code is right, says Pudge.
-	my $secure_new = 0;
-	if ($constants->{cookiesecure} && Slash::Apache::ConnectionIsSSL()) {
-		$secure_new = 1;
-#		$cookiehash{-secure} = 1;
-	}
-	if ($secure_old || $secure_new) {
-		my $uid = getCurrentUser('uid');
-		print STDERR scalar(gmtime) . " uid '$uid' secure_old '$secure_old' secure_new '$secure_new'\n"
-			if $secure_old xor $secure_new;
-		$cookiehash{-secure} = 1;
-	}
+	$cookiehash{-secure} = 1
+		if $constants->{cookiesecure} && Slash::Apache::ConnectionIsSSL();
 
 	my $cookie = Apache::Cookie->new($r, %cookiehash);
 
