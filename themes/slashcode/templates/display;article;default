@@ -24,9 +24,8 @@ __template__
 
 data = Slash.displayStory(story.sid, 'Full'); data.0;
 
-IF form.refresh %]
-<FONT COLOR="white" SIZE="1">How Refreshing! ([% form.sid %]) </FONT>
-[% END %]
+%]
+
 <P>
 
 [% n = BLOCK; PROCESS nextStory s=next; END %]
@@ -36,7 +35,7 @@ IF form.refresh %]
 <P>&nbsp;</TD>
 
 [% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_align="RIGHT" mt_valign="TOP" %]
+[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_align="CENTER" mt_valign="TOP" %]
 
 [% PROCESS userboxes;
 

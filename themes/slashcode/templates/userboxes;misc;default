@@ -36,7 +36,7 @@ IF user.is_anon;
 			[% PROCESS userlogin %]
 		[% END;
 	END;
-	Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
+	Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
 
 END;
 
@@ -152,7 +152,7 @@ IF !useredit.is_anon;
 			useredit.bio;
                 END;
 	END;
-	Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
+	Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
 
 	# Second box:  info about moderation, if applicable
 	# Note this applies to the current user, not the user
@@ -176,7 +176,7 @@ for instructions.
 URLs showing abuse (the cid link please!).
 [% END %]
 		[% END;
-		Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
+		Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
 	END;
 
 	# Third box:  user space, if applicable
@@ -185,7 +185,7 @@ URLs showing abuse (the cid link please!).
 	IF user.mylinks;
 		title = "User Space";
 		contents = user.mylinks;
-		Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
+		Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
 	END;
 END %]
 
