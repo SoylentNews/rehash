@@ -152,34 +152,17 @@ sub countCommentsDaily {
 }
 
 ########################################################
-sub countDailyComments {
-	my($self, $yesterday) = @_;
+sub countDailyByOP {
+	my($self, $op, $yesterday) = @_;
 	$self->sqlSelect("count(*)", "accesslog",
-		"op='comments' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
+		"op='$op' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
 }
 
 ########################################################
-sub countDailyArticles {
-	my($self, $yesterday) = @_;
-	$self->sqlSelect("count(*)", "accesslog",
-		"op='article' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
-	 '');
-}
-
-########################################################
-sub countDailyCommentsByDistinctIPID {
-	my($self, $yesterday) = @_;
+sub countDailyByOPDistinctIPID {
+	my($self, $op, $yesterday) = @_;
 	$self->sqlSelect("count(host_addr)", "accesslog",
-		"op='comments' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'", 
-		'',
-		{distinct => 1});
-}
-
-########################################################
-sub countDailyArticlesByDistinctIPID {
-	my($self, $yesterday) = @_;
-	$self->sqlSelect("count(host_addr)", "accesslog",
-		"op='article' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"op='$op' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'", 
 		'',
 		{distinct => 1});
 }

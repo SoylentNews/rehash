@@ -81,10 +81,10 @@ EOT
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
-	my $uniq_comment_users = $stats->countDailyCommentsByDistinctIPID($yesterday);
-	my $uniq_article_users = $stats->countDailyArticlesByDistinctIPID($yesterday);
-	my $comment_page_views = $stats->countDailyComments($yesterday);
-	my $article_page_views = $stats->countDailyArticles($yesterday);
+	my $uniq_comment_users = $stats->countDailyByOPDistinctIPID('comments', $yesterday);
+	my $uniq_article_users = $stats->countDailyByOPDistinctIPID('article', $yesterday);
+	my $comment_page_views = $stats->countDailyByOP('comments',$yesterday);
+	my $article_page_views = $stats->countDailyByOP('article',$yesterday);
 
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
