@@ -4886,6 +4886,11 @@ sub getSubmission {
 }
 
 ########################################################
+sub setSubmission {
+	_genericSet('submissions', 'subid', 'submission_param', @_);
+}
+
+########################################################
 sub getSection {
 	my($self, $section) = @_;
 	if (!$section) {
