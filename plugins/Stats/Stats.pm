@@ -20,7 +20,7 @@ use base 'Slash::DB::MySQL';
 # On a side note, I am not sure if I liked the way I named the methods either.
 # -Brian
 sub new {
-	my($class, $user) = @_;
+	my($class, $user, $options) = @_;
 	my $self = {};
 
 	my $slashdb = getCurrentDB();
@@ -29,42 +29,22 @@ sub new {
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;
+	my @time = localtime();
+	$self->{_day} = $options->{day} ? $options->{day} : sprintf "%4d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
+	$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
+	my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
+	$sth->execute();
+	my $rows = $sth->fetchrow_arrayref;
+	$rows->[1] =~ s/accesslog/accesslog_temp/;
+	$self->{_table} = "accesslog_temp";
+	$self->sqlDo($rows->[1]);
+	$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid(uid)");
+	$self->sqlDo("INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'");
 	$self->sqlConnect;
 
 	return $self;
 }
 
-########################################################
-sub createStatDaily {
-	my($self, $day, $name, $value, $options) = @_;
-	$value = 0 unless $value;
-	$options ||= {};
-
-	my $insert = {
-		'day'	=> $day,
-		'name'	=> $name,
-		'value'	=> $value,
-	};
-
-	$insert->{section} = $options->{section} if $options->{section};
-	$insert->{section} ||= 'all';
-
-	$self->sqlInsert('stats_daily', $insert, { ignore => 1 });
-}
-
-########################################################
-sub updateStatDaily {
-	my($self, $day, $name, $update_clause, $options) = @_;
-
-	my $where = "day = " . $self->sqlQuote($day);
-	$where .= " AND name = " . $self->sqlQuote($name);
-	my $section = $options->{section} || 'all';
-	$where .= " AND section = " . $self->sqlQuote($section);
-
-	return $self->sqlUpdate('stats_daily', {
-		-value =>	$update_clause,
-	}, $where);
-}
 
 ########################################################
 sub getPointsInPool {
@@ -89,11 +69,10 @@ sub getAdminsClearpass {
 
 ########################################################
 sub countModeratorLog {
-	my($self, $yesterday) = @_;
+	my($self) = @_;
 
 	my $used = $self->sqlCount(
-		'moderatorlog', 
-		"ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'"
+		'moderatorlog'
 	);
 }
 
@@ -121,7 +100,7 @@ sub getSlaveDBLagCount {
 	# Master_Log_File and Read_Master_Log_Pos but other possible
 	# candidates are Relay_Master_Log_File and Exec_master_log_pos
 	# respectively.
-	my $master = ($slashdb ->sqlShowMasterStatus())->[0];
+	my $master = ($slashdb->sqlShowMasterStatus())->[0];
 	my $slave  = ($backupdb->sqlShowSlaveStatus())->[0];
 	my $master_filename = $master->{File};
 	my $slave_filename  = $slave ->{Log_File} || $slave->{Master_Log_File};
@@ -200,9 +179,9 @@ sub getModM2Ratios {
 
 ########################################################
 sub getCommentsByDistinctIPID {
-	my($self, $yesterday, $options) = @_;
+	my($self, $options) = @_;
 
-	my $section_where = "";
+	my $section_where = "1=1 ";
 	$section_where .= " AND discussions.id = comments.sid
 			    AND discussions.section = '$options->{section}'"
 		if $options->{section};
@@ -212,8 +191,7 @@ sub getCommentsByDistinctIPID {
 
 	my $used = $self->sqlSelectColArrayref(
 		'ipid', $tables, 
-		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
-		 $section_where",
+		$section_where,
 		'',
 		{ distinct => 1 }
 	);
@@ -221,9 +199,9 @@ sub getCommentsByDistinctIPID {
 
 ########################################################
 sub getCommentsByDistinctUIDPosters {
-	my($self, $yesterday, $options) = @_;
+	my($self, $options) = @_;
 
-	my $section_where = "";
+	my $section_where = " 1=1 ";
 	$section_where .= " AND discussions.id = comments.sid
 			    AND discussions.section = '$options->{section}'"
 		if $options->{section};
@@ -233,8 +211,7 @@ sub getCommentsByDistinctUIDPosters {
 
 	my $used = $self->sqlSelect(
 		'count(DISTINCT uid)', $tables, 
-		"date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
-		 $section_where",
+		$section_where,
 		'',
 		{ distinct => 1 }
 	);
@@ -242,15 +219,14 @@ sub getCommentsByDistinctUIDPosters {
 
 ########################################################
 sub getAdminModsInfo {
-	my($self, $yesterday, $weekago) = @_;
+	my($self, $weekago) = @_;
 
 	# First get the count of upmods and downmods performed by each admin.
 	my $m1_uid_val_hr = $self->sqlSelectAllHashref(
 		[qw( uid val )],
 		"moderatorlog.uid AS uid, val, nickname, COUNT(*) AS count",
 		"moderatorlog, users",
-		"users.seclev > 1 AND moderatorlog.uid=users.uid
-		 AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"users.seclev > 1 AND moderatorlog.uid=users.uid",
 		"GROUP BY moderatorlog.uid, val"
 	);
 
@@ -261,7 +237,7 @@ sub getAdminModsInfo {
 		"metamodlog, moderatorlog, users",
 		"users.seclev > 1 AND moderatorlog.uid=users.uid
 		 AND metamodlog.mmid=moderatorlog.id
-		 AND metamodlog.ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		 AND metamodlog.ts ",
 		"GROUP BY users.uid, metamodlog.val"
 	);
 
@@ -313,7 +289,7 @@ sub getAdminModsInfo {
 		"val",
 		"val, COUNT(*) AS count",
 		"moderatorlog",
-		"ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"",
 		"GROUP BY val"
 	);
 	$m1_uid_val_hr->{$total_uid} = {
@@ -325,7 +301,7 @@ sub getAdminModsInfo {
 		"val",
 		"val, COUNT(*) AS count",
 		"metamodlog",
-		"ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"",
 		"GROUP BY val"
 	);
 	$m2_uid_val_hr->{$total_uid} = {
@@ -403,10 +379,9 @@ sub getAdminModsInfo {
 
 ########################################################
 sub countSubmissionsByDay {
-	my($self, $yesterday, $options) = @_;
+	my($self, $options) = @_;
 
-	my $where = "time BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
-	$where .= " AND section = '$options->{section}'" if $options->{section};
+	my $where = " section = '$options->{section}'" if $options->{section};
 
 	my $used = $self->sqlCount(
 		'submissions', 
@@ -416,12 +391,12 @@ sub countSubmissionsByDay {
 
 ########################################################
 sub countSubmissionsByCommentIPID {
-	my($self, $yesterday, $ipids, $options) = @_;
+	my($self, $ipids, $options) = @_;
 	return unless @$ipids;
 	my $slashdb = getCurrentDB();
 	my $in_list = join(",", map { $slashdb->sqlQuote($_) } @$ipids);
 
-	my $where = "(time BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59') AND ipid IN ($in_list)";
+	my $where = "ipid IN ($in_list)";
 	$where .= " AND section = '$options->{section}'" if $options->{section};
 
 	my $used = $self->sqlCount(
@@ -438,7 +413,7 @@ sub countModeratorLogHour {
 		"val",
 		"val, COUNT(*) AS count",
 		"moderatorlog",
-		"ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"",
 		"GROUP BY val"
 	);
 	
@@ -447,12 +422,12 @@ sub countModeratorLogHour {
 
 ########################################################
 sub countCommentsDaily {
-	my($self, $yesterday, $options) = @_;
+	my($self, $options) = @_;
 
 	my $tables = 'comments';
 	$tables .= ", submissions" if $options->{section};
 
-	my $section_where = "";
+	my $section_where = "1=1 ";
 	$section_where .= " AND discussions.id = comments.sid
 			    AND discussions.section = '$options->{section}'"
 		if $options->{section};
@@ -472,18 +447,16 @@ sub countCommentsDaily {
 	my $comments = $self->sqlSelect(
 		"COUNT(*)",
 		"comments",
-		"$cid_limit_clause
-		 date BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
-		 $section_where"
+		"$cid_limit_clause $section_where"
 	);
 
 	return $comments; 
 }
 ########################################################
 sub countBytesByPage {
-	my($self, $op, $yesterday, $options) = @_;
+	my($self, $op, $options) = @_;
 
-	my $where = "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
+	my $where = "1=1 ";
 	$where .= " AND op='$op'"
 		if $op;
 	$where .= " AND section='$options->{section}'"
@@ -498,25 +471,25 @@ sub countBytesByPage {
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
 
-	$self->sqlSelect("sum(bytes)", "accesslog", $where);
+	$self->sqlSelect("sum(bytes)", "accesslog_temp", $where);
 }
 
 ########################################################
 sub countUsersByPage {
-	my($self, $op, $yesterday, $options) = @_;
-	my $where = "op='$op' AND "
+	my($self, $op, $options) = @_;
+	my $where = "1=1 ";
+	$where .= "AND op='$op' "
 		if $op;
-	$where .= "section='$options->{section}' AND "
+	$where .= " AND section='$options->{section}' "
 		if $options->{section};
-	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
-	$self->sqlSelect("count(DISTINCT uid)", "accesslog", $where);
+	$self->sqlSelect("count(DISTINCT uid)", "accesslog_temp", $where);
 }
 
 ########################################################
 sub countDailyByPage {
-	my($self, $op, $yesterday, $options) = @_;
+	my($self, $op, $options) = @_;
 
-	my $where = "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
+	my $where = "1=1 ";
 	$where .= " AND op='$op'"
 		if $op;
 	$where .= " AND section='$options->{section}'"
@@ -531,19 +504,19 @@ sub countDailyByPage {
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
 
-	$self->sqlSelect("count(*)", "accesslog", $where);
+	$self->sqlSelect("count(*)", "accesslog_temp", $where);
 }
 
 ########################################################
 sub countDailyByPageDistinctIPID {
 	# This is so lame, and so not ANSI SQL -Brian
-	my($self, $op, $yesterday, $options) = @_;
-	my $where = "op='$op' AND "
+	my($self, $op, $options) = @_;
+	my $where = "1=1 ";
+	$where .= "AND op='$op' "
 		if $op;
-	$where .= "section='$options->{section}' AND "
+	$where .= " AND section='$options->{section}' "
 		if $options->{section};
-	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
-	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog", $where);
+	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog_temp", $where);
 }
 
 ########################################################
@@ -552,17 +525,6 @@ sub countDaily {
 	my %returnable;
 
 	my $constants = getCurrentStatic();
-	my $section_where = $options->{section}
-		? " AND section = '$options->{section}'"
-		: '';
-
-	my($min_day_id, $max_day_id) = $self->sqlSelect(
-		"MIN(id), MAX(id)",
-		"accesslog",
-		"TO_DAYS(NOW()) - TO_DAYS(ts)=1 $section_where"
-	);
-	$min_day_id ||= 1; $max_day_id ||= 1;
-	my $yesterday_clause = "(id BETWEEN $min_day_id AND $max_day_id) $section_where";
 
 	# For counting the total, we used to just do a COUNT(*) with the
 	# TO_DAYS clause.  If we separate out the count of each op, we can
@@ -571,8 +533,8 @@ sub countDaily {
 	my $totals_op = $self->sqlSelectAllHashref(
 		"op",
 		"op, COUNT(*) AS count",
-		"accesslog",
-		$yesterday_clause,
+		"accesslog_temp",
+		"",
 		"GROUP BY op"
 	);
 	$returnable{total} = 0;
@@ -584,26 +546,18 @@ sub countDaily {
 		$returnable{total} += $totals_op->{$op}{count};
 	}
 
-	my $c = $self->sqlSelectMany("COUNT(*)", "accesslog",
-		$yesterday_clause, "GROUP BY host_addr $section_where");
+	my $c = $self->sqlSelectMany("COUNT(*)", "accesslog_temp",
+		"", "GROUP BY host_addr");
 	$returnable{unique} = $c->rows;
 	$c->finish;
 
-	$c = $self->sqlSelectMany("COUNT(*)", "accesslog",
-		$yesterday_clause, "GROUP BY uid $section_where");
+	$c = $self->sqlSelectMany("COUNT(*)", "accesslog_temp",
+		"", "GROUP BY uid");
 	$returnable{unique_users} = $c->rows;
 	$c->finish;
 
-#	# This code doesn't work yet, I think because of the commented-out
-#	# article .shtml logging code in Slash::Apache::IndexHandler.
-#	# - Jamie 2002/07/12
-#	$returnable{total_static} = $self->sqlCount(
-#		"accesslog",
-#		"$yesterday_clause AND dat='shtml'");
-#	$returnable{total_dynamic} = $returnable{total} - $returnable{static};
-
-	$c = $self->sqlSelectMany("dat, COUNT(*)", "accesslog",
-		"$yesterday_clause AND (op='index' OR dat='index') $section_where",
+	$c = $self->sqlSelectMany("dat, COUNT(*)", "accesslog_temp",
+		"(op='index' OR dat='index')",
 		"GROUP BY dat");
 
 	my(%indexes, %articles, %commentviews);
@@ -613,8 +567,8 @@ sub countDaily {
 	}
 	$c->finish;
 
-	$c = $self->sqlSelectMany("dat, COUNT(*), op", "accesslog",
-		"$yesterday_clause AND op='article' $section_where",
+	$c = $self->sqlSelectMany("dat, COUNT(*), op", "accesslog_temp",
+		"op='article'",
 		"GROUP BY dat");
 
 	while (my($sid, $cnt) = $c->fetchrow) {
@@ -631,6 +585,7 @@ sub countDaily {
 
 sub DESTROY {
 	my($self) = @_;
+	#$self->sqlDo("DROP TABLE $self->{_table}");
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
 }
 

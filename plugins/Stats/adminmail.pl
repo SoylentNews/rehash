@@ -17,9 +17,14 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my($stats, $backupdb, %data, %mod_data);
 
-	my $statsSave = getObject('Slash::Stats');
+	my @yesttime = localtime(time-86400);
+	my $yesterday = sprintf "%4d-%02d-%02d", 
+		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
+
+	my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday  });
+	# This will need to be changed to "log_db_user"
 	if ($constants->{backup_db_user}) {
-		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
+		$stats = getObject('Slash::Stats', $constants->{backup_db_user}, { day => $yesterday  });
 		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
 	} else {
 		$stats = getObject('Slash::Stats');
@@ -101,6 +106,19 @@ EOT
 	my $metamodlogs_yest = $stats->sqlCount('metamodlog',
 		'active=1 AND ts >= DATE_SUB(NOW(), INTERVAL 2 DAY)');
 
+#<<<<<<< adminmail.pl
+	my $mod_points = $stats->getPoints;
+	my @weekagotime = localtime(time-86400*7);
+	my $weekago = sprintf "%4d-%02d-%02d", 
+		$weekagotime[5] + 1900, $weekagotime[4] + 1, $weekagotime[3];
+	my $used = $stats->countModeratorLog();
+	my $modlog_hr = $stats->countModeratorLogHour();
+	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID();
+	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
+	my $submissions = $stats->countSubmissionsByDay();
+	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID( $distinct_comment_ipids);
+	my $modlog_total = $modlog_hr->{1}{count} + $modlog_hr->{-1}{count};
+#=======
 	my $mod_points_pool = $stats->getPointsInPool();
 	my $used = $stats->countModeratorLog($yesterday);
 	my $modlog_yest_hr = $stats->countModeratorLogHour($yesterday);
@@ -110,42 +128,44 @@ EOT
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($yesterday, $distinct_comment_ipids);
 	my $modlog_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
 	my $consensus = $constants->{m2_consensus};
+#>>>>>>> 1.82
 
+	my $comments = $stats->countCommentsDaily();
 	my $m2_text = getM2Text($stats->getModM2Ratios());
 
-	my $grand_total = $stats->countDailyByPage('', $yesterday);
+	my $grand_total = $stats->countDailyByPage('', );
 	$data{grand_total} = $grand_total;
 	for (qw|index article search comments palm journal rss|) {
-		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
-		my $pages = $stats->countDailyByPage($_, $yesterday);
-		my $bytes = $stats->countBytesByPage($_, $yesterday);
-		my $uids = $stats->countUsersByPage($_, $yesterday);
+		my $uniq = $stats->countDailyByPageDistinctIPID($_, );
+		my $pages = $stats->countDailyByPage($_, );
+		my $bytes = $stats->countBytesByPage($_, );
+		my $uids = $stats->countUsersByPage($_, );
 		$data{"${_}_uids"} = sprintf("%8d", $uniq);
 		$data{"${_}_ipids"} = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
 		# Section is problematic in this definition, going to store the data in all
 	  # "all" till this is resolved. -Brian
-		$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq);
-		$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes);
-		$statsSave->createStatDaily($yesterday, "${_}_page", $pages);
+		$statsSave->createStatDaily("${_}_ipids", $uniq);
+		$statsSave->createStatDaily("${_}_bytes", $bytes);
+		$statsSave->createStatDaily("${_}_page", $pages);
 	}
 
-	$statsSave->createStatDaily($yesterday, "distinct_comment_posters", $distinct_comment_posters_uids);
+	$statsSave->createStatDaily("distinct_comment_posters", $distinct_comment_posters_uids);
 
 # Not yet
-#	my $codes = $stats->getMessageCodes($yesterday);
+#	my $codes = $stats->getMessageCodes();
 #	for (@$codes) {
 #		my $temp->{name} = $_;
-#		my $people = $stats->countDailyMessagesByUID($_, $yesterday);
-#		my $uses = $stats->countDailyMessagesByCode($_, $yesterday);
-#		my $mode = $stats->countDailyMessagesByMode($_, $yesterday);
+#		my $people = $stats->countDailyMessagesByUID($_, );
+#		my $uses = $stats->countDailyMessagesByCode($_, );
+#		my $mode = $stats->countDailyMessagesByMode($_, );
 #		$temp->{people} = sprintf("%8d", $people);
 #		$temp->{uses} = sprintf("%8d", $uses);
 #		$temp->{mode} = sprintf("%8d", $mode);
-#		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people);
-#		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses);
-#		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode);
+#		$statsSave->createStatDaily("message_${_}_people", $people);
+#		$statsSave->createStatDaily("message_${_}_uses", $uses);
+#		$statsSave->createStatDaily("message_${_}_mode", $mode);
 #		push(@{$data{messages}}, $temp);
 #	}
 
@@ -155,70 +175,91 @@ EOT
 		my $index = $constants->{defaultsection} eq $section ? 1 : 0;
 		my $temp = {};
 		$temp->{section_name} = $section;
-		my $uniq = $stats->countDailyByPageDistinctIPID('', $yesterday, { section => $section });
-		my $pages = $stats->countDailyByPage('', $yesterday, {
+		my $uniq = $stats->countDailyByPageDistinctIPID('',  { section => $section });
+		my $pages = $stats->countDailyByPage('',  {
 			section => $section,
 			no_op => $constants->{op_exclude_from_countdaily}
 		} );
-		my $bytes = $stats->countBytesByPage('', $yesterday, { section => $section });
-		my $users = $stats->countUsersByPage('', $yesterday, { section => $section });
+		my $bytes = $stats->countBytesByPage('',  { section => $section });
+		my $users = $stats->countUsersByPage('',  { section => $section });
 		$temp->{ipids} = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
 		$temp->{users} = sprintf("%8d", $users);
-		$statsSave->createStatDaily($yesterday, "ipids", $uniq, { section => $section });
-		$statsSave->createStatDaily($yesterday, "bytes", $bytes, { section => $section } );
-		$statsSave->createStatDaily($yesterday, "page", $pages, { section => $section });
+		$statsSave->createStatDaily("ipids", $uniq, { section => $section });
+		$statsSave->createStatDaily("bytes", $bytes, { section => $section } );
+		$statsSave->createStatDaily("page", $pages, { section => $section });
 
 		for (qw| index article search comments palm rss|) {
-			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section  });
-			my $pages = $stats->countDailyByPage($_, $yesterday, {
+			my $uniq = $stats->countDailyByPageDistinctIPID($_,  { section => $section  });
+			my $pages = $stats->countDailyByPage($_,  {
 				section => $section,
 				no_op => $constants->{op_exclude_from_countdaily}
 			} );
-			my $bytes = $stats->countBytesByPage($_, $yesterday, { section => $section  });
-			my $users = $stats->countUsersByPage($_, $yesterday, { section => $section  });
+			my $bytes = $stats->countBytesByPage($_,  { section => $section  });
+			my $users = $stats->countUsersByPage($_,  { section => $section  });
 			$temp->{$_}{ipids} = sprintf("%8d", $uniq);
 			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
 			$temp->{$_}{users} = sprintf("%8d", $users);
-			$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq, { section => $section});
-			$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes, { section => $section});
-			$statsSave->createStatDaily($yesterday, "${_}_page", $pages, { section => $section});
-			$statsSave->createStatDaily($yesterday, "${_}_user", $users, { section => $section});
+			$statsSave->createStatDaily("${_}_ipids", $uniq, { section => $section});
+			$statsSave->createStatDaily("${_}_bytes", $bytes, { section => $section});
+			$statsSave->createStatDaily("${_}_page", $pages, { section => $section});
+			$statsSave->createStatDaily("${_}_user", $users, { section => $section});
 		}
 		push(@{$data{sections}}, $temp);
 	}
 
 
-	my $total_bytes = $stats->countBytesByPage('', $yesterday, {
+	my $total_bytes = $stats->countBytesByPage('',  {
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 
-	my $admin_mods = $stats->getAdminModsInfo($yesterday, $weekago);
-	my $admin_mods_text = getAdminModsText($admin_mods);
+	my $admin_mods = $stats->getAdminModsInfo( $weekago);
+	my $admin_mods_text = "";
+	my($num_admin_mods, $num_mods) = (0, 0);
+	if ($admin_mods) {
+		for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
+			$admin_mods_text .= sprintf("%13.13s: %26s %-46s\n",
+				$nickname,
+				$admin_mods->{$nickname}{m1_text},
+				$admin_mods->{$nickname}{m2_text}
+			);
+			if ($nickname eq '~Day Total') {
+				$num_mods += $admin_mods->{$nickname}{m1_up};
+				$num_mods += $admin_mods->{$nickname}{m1_down};
+			} else {
+				$num_admin_mods += $admin_mods->{$nickname}{m1_up};
+				$num_admin_mods += $admin_mods->{$nickname}{m1_down};
+			}
+		}
+		$admin_mods_text =~ s/ +$//gm;
+		$admin_mods_text .= sprintf("%13.13s: %4d of %4d (%6.2f%%)\n",
+			"Admin Mods", $num_admin_mods, $num_mods,
+			($num_mods ? $num_admin_mods*100/$num_mods : 0));
+	}
 
 	$mod_data{repeat_mods} = $stats->getRepeatMods({
 		min_count => $constants->{mod_stats_min_repeat}
 	});
 
-	$statsSave->createStatDaily($yesterday, "total", $count->{total});
-	$statsSave->createStatDaily($yesterday, "grand_total", $grand_total);
-	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes);
-	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
-	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
-	$statsSave->createStatDaily($yesterday, "comments", $comments);
-	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
-	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
-	$statsSave->createStatDaily($yesterday, "distinct_comment_posters_uids", $distinct_comment_posters_uids);
-	$statsSave->createStatDaily($yesterday, "consensus", $consensus);
-	$statsSave->createStatDaily($yesterday, "mod_points_pool", $mod_points_pool);
-	$statsSave->createStatDaily($yesterday, "mod_points_needmeta", $modlogs_needmeta_yest);
-	$statsSave->createStatDaily($yesterday, "mod_points_spent", $modlog_yest_total);
-	$statsSave->createStatDaily($yesterday, "mod_points_spent_plus_1", $modlog_yest_hr->{+1}{count});
-	$statsSave->createStatDaily($yesterday, "mod_points_spent_minus_1", $modlog_yest_hr->{-1}{count});
-	$statsSave->createStatDaily($yesterday, "m2_points_spent", $metamodlogs_yest);
-	$statsSave->createStatDaily($yesterday, "oldest_unm2d", $oldest_unm2d);
+	$statsSave->createStatDaily("total", $count->{total});
+	$statsSave->createStatDaily("grand_total", $grand_total);
+	$statsSave->createStatDaily("total_bytes", $total_bytes);
+	$statsSave->createStatDaily("unique", $count->{unique});
+	$statsSave->createStatDaily("unique_users", $count->{unique_users});
+	$statsSave->createStatDaily("comments", $comments);
+	$statsSave->createStatDaily("homepage", $count->{index}{index});
+	$statsSave->createStatDaily("distinct_comment_ipids", $distinct_comment_ipids);
+	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
+	$statsSave->createStatDaily("consensus", $consensus);
+	$statsSave->createStatDaily("mod_points_pool", $mod_points_pool);
+	$statsSave->createStatDaily("mod_points_needmeta", $modlogs_needmeta_yest);
+	$statsSave->createStatDaily("mod_points_spent", $modlog_yest_total);
+	$statsSave->createStatDaily("mod_points_spent_plus_1", $modlog_yest_hr->{+1}{count});
+	$statsSave->createStatDaily("mod_points_spent_minus_1", $modlog_yest_hr->{-1}{count});
+	$statsSave->createStatDaily("m2_points_spent", $metamodlogs_yest);
+	$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
@@ -230,7 +271,7 @@ EOT
 				? "_admin_$uid"
 				: "_total";
 			my $val = $admin_mods->{$nickname}{$stat};
-			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val);
+			$statsSave->createStatDaily("$stat$suffix", $val);
 		}
 	}
 
@@ -250,6 +291,17 @@ EOT
 	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest/$modlogs_needmeta_yest : 0));
 	$mod_data{consensus} = sprintf("%8d", $consensus);
 	$mod_data{oldest_unm2d_days} = sprintf("%.1f", (time-$oldest_unm2d)/86400);
+#<<<<<<< adminmail.pl
+	$mod_data{mod_points} = sprintf("%8d", $mod_points);
+	$mod_data{used_total} = sprintf("%8d", $modlog_total);
+	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0));
+	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0));
+	$mod_data{used_minus_1} = sprintf("%8d", $modlog_hr->{-1}{count});
+	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) );
+	$mod_data{used_plus_1} = sprintf("%8d", $modlog_hr->{1}{count});
+	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0));
+	$mod_data{day} = $yesterday ;
+#=======
 	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);
 	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created);
 	$mod_data{mod_points_pool} = sprintf("%8d", $mod_points_pool);
@@ -262,6 +314,7 @@ EOT
 	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_yest_total : 0));
 	$mod_data{day} = $yesterday;
 	$mod_data{m2_text} = $m2_text;
+#>>>>>>> 1.82
 
 	$data{comments} = $mod_data{comments};
 	$data{IPIDS} = sprintf("%8d", scalar(@$distinct_comment_ipids));
@@ -269,14 +322,8 @@ EOT
 	$data{sub_comments} = sprintf("%8.1f", ($submissions ? $submissions_comments_match*100/$submissions : 0));
 	$data{total_hits} = sprintf("%8d", $sdTotalHits);
 	$data{homepage} = sprintf("%8d", $count->{index}{index});
-	$data{day} = $yesterday;
+	$data{day} = $yesterday ;
 	$data{distinct_comment_posters_uids} = sprintf("%8d", $distinct_comment_posters_uids);
-
-#	my @sections;
-#	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
-#		push(@sections, { key => $_, value => $count->{index}{$_} });
-#		$statsSave->createStatDaily($yesterday, "$_", $count->{index}{$_});
-#	}
 
 	my @lazy;
 	for my $key (sort
@@ -297,7 +344,6 @@ EOT
 	$mod_data{admin_mods_text} = $admin_mods_text;
 	
 	$data{data} = \%data;
-#	$data{sections} = \@sections; 
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today` if $constants->{tailslash_stats};
