@@ -10496,12 +10496,12 @@ sub getSkins {
 		my $color_skid = $colors->{$skid}              ? $skid : $constants->{mainpage_skid};
 
 		# Blank index_handler defaults to index.pl.
-		$skins_ref->{$skin}{index_handler} ||= 'index.pl';
+		$skins_ref->{$skid}{index_handler} ||= 'index.pl';
 
 		# Adjust min and max and warn if wacky value.
-		$skins_ref->{$skin}{artcount_max} = $skins_ref->{$skin}{artcount_min}
-			if $skins_ref->{$skin}{artcount_max} < $skins_ref->{$skin}{artcount_min};
-		warn "skin $skid has artcount_max of 0" if !$skins_ref->{$skin}{artcount_max};
+		$skins_ref->{$skid}{artcount_max} = $skins_ref->{$skid}{artcount_min}
+			if $skins_ref->{$skid}{artcount_max} < $skins_ref->{$skid}{artcount_min};
+		warn "skin $skid has artcount_max of 0" if !$skins_ref->{$skid}{artcount_max};
 
 		# Convert an index_handler of foo.pl to an index_static of
 		# foo.shtml, for convenience.
