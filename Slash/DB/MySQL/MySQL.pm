@@ -663,7 +663,7 @@ sub getStoryDiscussions {
 	$limit ||= 50; # Sanity check in case var is gone
 	$start ||= 0; # Sanity check in case var is gone
 	my $where = "displaystatus != -1 AND discussions.sid=stories.sid AND time <= NOW() AND writestatus != 'delete' AND writestatus != 'archived'";
-	$where .= " AND section = '$section'"
+	$where .= " AND discussions.section = '$section'"
 		if $section;
 
 	my $discussion = $self->sqlSelectAll("discussions.sid, discussions.title, discussions.url",
