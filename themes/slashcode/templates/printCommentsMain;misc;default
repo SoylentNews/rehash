@@ -40,7 +40,7 @@ __template__
 
 [% IF user.is_anon %]
 		<A HREF="[% constants.rootdir %]/users.pl">
-			<FONT COLOR="[% user.fg.3 %]">Login/Create an Account</FONT>
+			<FONT COLOR="[% user.fg.3 %]">Log in/Create an Account</FONT>
 		</A>
 [% ELSE %]
 		<A HREF="[% constants.rootdir %]/my/comments/">

@@ -39,7 +39,7 @@ After you have logged in as an author, you will now see a navigation bar, or nav
 
 =head2 Logging out
 
-To log out, go to preferences and click the "Logout" link.
+To log out, go to preferences and click the "Log out" link.
 
 =head2 Overview of Slash concepts
 
@@ -292,6 +292,9 @@ report.
 =head1 CHANGES
 
 $Log$
+Revision 1.3  2002/04/22 14:01:50  pudge
+Various login fixes: s/(log)(in|out)/$1 $2/gi for @verbs; add proper links to creating accounts etc. on login forms; fix ~$nickname URIs for when $nickname contains some encoded characters (like "/").
+
 Revision 1.2  2001/11/03 04:22:45  brian
 Fry :)
 

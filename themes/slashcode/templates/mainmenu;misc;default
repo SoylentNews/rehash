@@ -26,7 +26,7 @@ __template__
 		<A HREF="[% constants.rootdir %]/submit.pl">Submit Story</A><BR>
 		<HR NOSHADE SIZE="1">
 		[% IF user.is_anon %]
-			- <A HREF="[% constants.rootdir %]/my/">Create Account/Login</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/">Create Account/Log in</A><BR>
 		[% ELSE %]
 		You<br>
 			- <A HREF="[% constants.rootdir %]/my/info">Info</A><BR>
@@ -43,7 +43,7 @@ __template__
 			- <A HREF="[% constants.rootdir %]/my/fans">Fans</A><BR>
 			<br>
 			- <A HREF="[% constants.rootdir %]/my/password">Change Password</A><BR>
-			- <A HREF="[% constants.rootdir %]/my/logout">Logout</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/logout">Log out</A><BR>
 		[% END %]
 
 __seclev__

@@ -116,7 +116,7 @@ INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flag
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','New User','[% constants.rootdir %]/users.pl?op=newuseradmin',10000,1);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Your Info','[% constants.rootdir %]/~[% user.nickname | fixparam %]/',1,10);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Logout','[% constants.rootdir %]/my/logout/',1,20);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Log out','[% constants.rootdir %]/my/logout/',1,20);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','<b>Preferences:</b>','',1,30);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Homepage','[% constants.rootdir %]/my/homepage/',1,40);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Comments','[% constants.rootdir %]/my/comments/',1,50);

@@ -25,7 +25,7 @@ DIV.pod TD {
 <P>After you have logged in as an author, you will now see a navigation bar, or navigation list on the top of the page. This is the admin menu. In this list there are the URLs to the various functions of the admin interface. This admin navigation bar will only show links to the admin tasks that the user you're logged in has access to (the ``seclev'' value for this author).</P>
 <P>
 <H2><A NAME="logging out">Logging out</A></H2>
-<P>To log out, go to preferences and click the ``Logout'' link.</P>
+<P>To log out, go to preferences and click the ``Log out'' link.</P>
 <P>
 <H2><A NAME="overview of slash concepts">Overview of Slash concepts</A></H2>
 <DL>
@@ -212,6 +212,9 @@ report.</P>
 <HR>
 <H1><A NAME="changes">CHANGES</A></H1>
 <P>$Log$
+<P>Revision 1.3  2002/04/22 14:01:50  pudge
+<P>Various login fixes: s/(log)(in|out)/$1 $2/gi for @verbs; add proper links to creating accounts etc. on login forms; fix ~$nickname URIs for when $nickname contains some encoded characters (like "/").
+<P>
 <P>Revision 1.2  2001/11/03 03:05:02  brian
 <P>Fry
 <P>

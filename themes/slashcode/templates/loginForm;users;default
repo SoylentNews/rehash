@@ -37,7 +37,7 @@ __template__
 
 [% IF form.unickname %]
 		<P>
-		Danger, Will Robinson!  You didn't login!  You apparently put
+		Danger, Will Robinson!  You didn't log in!  You apparently put
 		in the wrong password, or the wrong nickname, or else space
 		aliens have infested the server.  I'd suggest trying again,
 		or clicking that mail password button if you forgot your password.
@@ -46,12 +46,12 @@ __template__
 	[% IF constants.allow_anonymous %]
 		<P>
 	   	Logging in will allow you to post comments as yourself.  If you
-		don't login, you will only be able to post as [% constants.anon_name %].
+		don't log in, you will only be able to post as [% Slash.db.getUser(1, "nickname") %].
 		</P>
 
 	[% ELSE %]
 		<P>
-	     You can only post comments if you have a valid account
+	     You can only post comments if you have a valid account.
 		</P>
 
 	[% END %]
@@ -71,7 +71,7 @@ __template__
 	<TR>
 		<TD><B>Password:</B> (6-20 characters long)</TD>
 		<TD><INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20">
-		<INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Login"></TD>
+		<INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in"></TD>
 	</TR>
 	[% IF msg1 %]
 	<TR>
@@ -84,8 +84,11 @@ __template__
 </FORM>
 
 <P>
-Lost your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Click here</A> to enter your email address, nickname or uid to get your password mailed to you.<BR>
-</P?
+Forget your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Have your
+password mailed to you</A> by entering your email address, nickname, or uid.<BR>
+<A HREF="[% env.script_name %]?op=newuserform">Create a new account</A>
+if you don't have one already.<BR>
+</P>
 [% IF ! logged_in %]
 <P>
 </P>

@@ -293,6 +293,7 @@ sub userdir_handler {
 	$uri =~ s/^\S+\s+//;
 	$uri =~ s/\s+\S+$//;
 	$uri =~ s/\+/ /g;
+	my $saveuri = $uri;
 	$uri =~ s/%([a-fA-F0-9]{2})/pack('C', hex($1))/ge;
 
 	if ($constants->{rootdir}) {
@@ -384,9 +385,13 @@ sub userdir_handler {
 	# returning it, we have to re-encode it with fixparam().  that
 	# will change if somehow Apache/mod_perl no longer decodes before
 	# returning the data. -- pudge
-	if ($uri =~ m[^/~(.+)]) {
+	if ($saveuri =~ m[^/~(.+)]) {
 		# this won't work if the nick has a "/" in it ...
 		my($nick, $op, $extra) = split /\//, $1, 4;
+		for ($nick, $op, $extra) {
+			s/%([a-fA-F0-9]{2})/pack('C', hex($1))/ge;
+		}
+
 		my $slashdb = getCurrentDB();
 		my $uid = $slashdb->getUserUID($nick);
 		$nick = fixparam($nick);	# make safe to pass back to script

@@ -20,9 +20,21 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
 [% END %]
 	<TR>
+		<TD><P>(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
+		are allowed in nicknames, and all others will be stripped out.)<BR>
+		</TD>
+	</TR>
+	<TR>
 		<TD>
 		<B>Nick Name</B><BR>
 		<INPUT TYPE="TEXT" NAME="newusernick" VALUE="">
+		</TD>
+	</TR>
+	<TR>
+	 	<TD>
+		<P>Email address to send your registration information to.
+		This address will <B>not</B> be displayed on [% constants.sitename %]
+		without you setting your preferences to display it.</P>
 		</TD>
 	</TR>
 	<TR>
@@ -41,6 +53,7 @@ __template__
                         VALUE=""
                         SIZE=8 MAXLENGTH=8></TD>
                 </TR></TABLE>
+		<P>Click the button to create your account and be mailed a password.</P>
 		<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account">
         [% END %]
 [% ELSE %]
@@ -52,14 +65,13 @@ __template__
 </TABLE>
 </FORM>
 
+<P>
 [% IF ! suadmin_flag %]
 	[% IF ! logged_in %]
-<P>
-Login to <A HREF="[% env.script_name %]?op=userlogin">[% constants.sitename %]</A><BR>
-</P>
+<A HREF="[% env.script_name %]?op=userlogin">Log in to [% constants.sitename %]</A>.<BR>
 	[% END %]
-<P>
-Lost your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Click here</A> to enter your email address, nickname or uid to get your password mailed to you.<BR>
+Forget your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Have your
+password mailed to you</A> by entering your nickname, uid, or email address.
 </P>
 [% END %]
 __seclev__

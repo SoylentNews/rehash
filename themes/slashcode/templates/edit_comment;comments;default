@@ -51,7 +51,7 @@ __template__
 [% IF user.is_anon %]
 	[% userlink = "<A HREF=\"${constants.rootdir}/users.pl\">Create Account</A>" %]
 	<TR><TD> </TD><TD>
-		You are not logged in.  You can login now using the
+		You are not logged in.  You can log in now using the
 		convenient form below, or
 		<A HREF="[% constants.rootdir %]/users.pl">Create an Account</A>.
 		Posts without proper registration are posted as

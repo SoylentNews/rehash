@@ -3,7 +3,7 @@ default
 __description__
 The block that has the login fields for the user
 
-* return_url = specific URL to return to after login (default is rootdir/)
+* return_url = specific URL to return to after log-in (default is rootdir/)
 __title__
 
 __page__
@@ -20,7 +20,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% FILTER fixurl; return_url ? return_url : "/"; END %]">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="userlogin">
 <INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20"><BR>
-<INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Login">
+<INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in">
 </FORM>
 
 <P>[ <B><A HREF="/users.pl?op=newuserform">Create a new account</A></B> ]

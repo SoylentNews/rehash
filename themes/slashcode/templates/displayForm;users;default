@@ -30,7 +30,7 @@ __template__
 
 [% IF form.unickname %]
 		<P>
-		Danger, Will Robinson!  You didn't login!  You apparently put
+		Danger, Will Robinson!  You didn't log in!  You apparently put
 		in the wrong password, or the wrong nickname, or else space
 		aliens have infested the server.  I'd suggest trying again,
 		or clicking that mail password button if you forgot your password.
@@ -39,12 +39,12 @@ __template__
 	[% IF constants.allow_anonymous %]
 		<P>
 	   	Logging in will allow you to post comments as yourself.  If you
-		don't login, you will only be able to post as [% constants.anon_name %].
+		don't log in, you will only be able to post as [% Slash.db.getUser(1, "nickname") %].
 		</P>
 
 	[% ELSE %]
 		<P>
-	     You can only post comments if you have a valid account
+	     You can only post comments if you have a valid account.
 		</P>
 
 	[% END %]
@@ -82,7 +82,7 @@ __template__
 		<TD COLSPAN="2">
 		<P>
 		Forget your password? Enter your nickname here to 
-		have the system mail your password to you
+		have the system mail your password to you.
 		</P>
 		</TD>
 	</TR>
