@@ -158,8 +158,18 @@ sub main {
 	$op = 'default' if ( ($user->{seclev} < $ops->{$op}{seclev}) || ! $ops->{$op}{function});
 	$op = 'default' if (! $postflag && $ops->{$op}{post});
 
-	# Admins should only jump through formkey hoops if this var
-	# is set.
+	# Admins don't jump through these formkey hoops.
+	if ($user->{is_admin}) {
+		my @checks = @{$ops->{$op}{checks}};
+		@checks = grep
+			!/^(response|interval|max_post)_check$/,
+			@checks;
+		@{$ops->{$op}{checks}} = @checks;
+	}
+
+	# Admins should only jump through the remaining formkey hoops
+	# if this var is set.  (Should we leave this as a seclev<100
+	# check, or just check {is_admin}?)
 	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
 		$formkey = $form->{formkey};
 
@@ -699,10 +709,6 @@ sub validateComment {
 	my $form_success = 1;
 	my $message = '';
 
-# No reason for these 2 lines, that we can see - pudge (& jamie), 2002/07/01
-#	$$comm ||= $form->{postercomment};
-#	$$subj ||= $form->{postersubj};
-
 	my $read_only;
 	for (qw(ipid subnetid uid)) {
 		# We skip the UID test for anonymous users.
@@ -728,7 +734,8 @@ sub validateComment {
 	# controls it (that var is turned into a hashref in MySQL.pm when
 	# the vars table is read in, whose keys we loop over to find the
 	# appropriate level).
-	if ($user->{is_anon} && $constants->{comments_perday_anon}) {
+	if ($user->{is_anon} && $constants->{comments_perday_anon}
+		&& !$user->{is_admin}) {
 		my $num_comm_posted = $slashdb->getNumCommPostedAnonByIPID(
 			$user->{ipid}, 24);
 		if ($num_comm_posted >= $constants->{comments_perday_anon}) {
@@ -738,7 +745,8 @@ sub validateComment {
 			$form_success = 0;
 			return;
 		}
-	} elsif (!$user->{is_anon} && $constants->{comments_perday_bykarma}) {
+	} elsif (!$user->{is_anon} && $constants->{comments_perday_bykarma}
+		&& !$user->{is_admin}) {
 		my $num_comm_posted = $slashdb->getNumCommPostedByUID(
 			$user->{uid}, 24);
 		my $num_allowed = 9999;
