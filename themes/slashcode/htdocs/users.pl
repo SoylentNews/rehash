@@ -1175,6 +1175,7 @@ sub changePasswd {
 		}
 	} else {
 		$id = $user->{uid};
+		$user_edit = $user;
 	}
 
 	# print getMessage('note', { note => $form->{note}}) if $form->{note};
