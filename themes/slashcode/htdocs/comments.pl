@@ -895,9 +895,10 @@ sub validateComment {
 	# controls it (that var is turned into a hashref in MySQL.pm when
 	# the vars table is read in, whose keys we loop over to find the
 	# appropriate level).
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	if ($user->{is_anon} && $constants->{comments_perday_anon}
 		&& !$user->{is_admin}) {
-		my($num_comm, $sum_mods) = $slashdb->getNumCommPostedAnonByIPID(
+		my($num_comm, $sum_mods) = $reader->getNumCommPostedAnonByIPID(
 			$user->{ipid}, 24);
 		my $num_allowed = $constants->{comments_perday_anon};
 		if ($sum_mods - $num_comm + $num_allowed <= 0) {
@@ -911,7 +912,7 @@ sub validateComment {
 		}
 	} elsif (!$user->{is_anon} && $constants->{comments_perday_bykarma}
 		&& !$user->{is_admin}) {
-		my($num_comm, $sum_mods) = $slashdb->getNumCommPostedByUID(
+		my($num_comm, $sum_mods) = $reader->getNumCommPostedByUID(
 			$user->{uid}, 24);
 		my $num_allowed = 9999;
 		K_CHECK: for my $k (sort { $a <=> $b }
@@ -949,7 +950,7 @@ sub validateComment {
 		return;
 	}
 		
-	my $post_restrictions = $slashdb->getNetIDPostingRestrictions("subnetid", $user->{subnetid});	
+	my $post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $user->{subnetid});	
 	if (($user->{is_anon} || $form->{postanon}) && $constants->{allow_anonymous} && $post_restrictions->{no_anon}) {
 		my $logged_in_allowed = ! $post_restrictions->{no_post};
 			$$error_message = getError('troll message', {
