@@ -73,7 +73,7 @@ sub topTopics {
 	my $user      = getCurrentUser();
 
 	my $section   = $user->{currentSection};
-        $section ||= $constants->{section};
+	$section ||= $constants->{section};
 	my $limit = $form->{limit}
 		? $form->{limit}
 		: $form->{all}
