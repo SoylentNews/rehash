@@ -432,37 +432,38 @@ for my $duple (@$old_section_subsections_ar) {
         $parents{$child_nexus}{$parent_nexus} ||= $min_weight;
 }
 
-#
-# The section_topics table turns into topic_parents binding sections and
-# topics.  min_weight 1 unless the parent section is mainpage.
-# Note, I am ignoring 'type' -- this really seems NEVER to have been used.
-#
-
-print <<EOT;
-
-##########
-# These are the inserts from the section_topics table.  Check them.
-EOT
-
-for my $duple (@$old_section_topics_ar) {
-        my($section, $child_tid) = @$duple;
-        $section = 'mainpage' if $section =~ /^(articles|index)$/;
-        my $parent_skid = getSkidFromName($section);
-        if (!$parent_skid || !$section) {
-                warn "missing data somehow in section_topics: '$section' '$parent_skid' '$child_tid'\n";
-                next;
-        }
-        my $parent_nexus = $skins{$parent_skid}{nexus};
-        my $min_weight = $section eq 'mainpage' ? 3 : 1;
-        print "INSERT IGNORE INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
-        print "$child_tid, $parent_nexus, $min_weight";
-        print ");\n";
-        $parents{$child_tid}{$parent_nexus} ||= $min_weight;
-}
-
-print <<EOT;
-##########
-EOT
+# #
+# # The section_topics table turns into topic_parents binding sections and
+# # topics.  min_weight 1 unless the parent section is mainpage.
+# # Note, I am ignoring 'type' -- this really seems NEVER to have been used.
+# # -- Argh! no, it doesn't create any links.
+# #
+# 
+# print <<EOT;
+# 
+# ##########
+# # These are the inserts from the section_topics table.  Check them.
+# EOT
+# 
+# for my $duple (@$old_section_topics_ar) {
+#         my($section, $child_tid) = @$duple;
+#         $section = 'mainpage' if $section =~ /^(articles|index)$/;
+#         my $parent_skid = getSkidFromName($section);
+#         if (!$parent_skid || !$section) {
+#                 warn "missing data somehow in section_topics: '$section' '$parent_skid' '$child_tid'\n";
+#                 next;
+#         }
+#         my $parent_nexus = $skins{$parent_skid}{nexus};
+#         my $min_weight = $section eq 'mainpage' ? 3 : 1;
+#         print "INSERT IGNORE INTO topic_parents_new (tid, parent_tid, min_weight) VALUES (";
+#         print "$child_tid, $parent_nexus, $min_weight";
+#         print ");\n";
+#         $parents{$child_tid}{$parent_nexus} ||= $min_weight;
+# }
+# 
+# print <<EOT;
+# ##########
+# EOT
 
 #
 # Any topic with no parents is assigned to 'mainpage', min_weight 3
@@ -581,7 +582,9 @@ CREATE TABLE submissions_new (
         INDEX del (del),
         INDEX uid (uid),
         KEY ipid (ipid),
-        KEY subnetid (subnetid)
+        KEY subnetid (subnetid),
+	KEY primaryskid_tid (primaryskid, tid),
+	KEY tid (tid)
 ) TYPE=InnoDB;
 INSERT INTO submissions_new ( subid, email, name, time, subj, story, tid, note, section, primaryskid, comment, uid, ipid, subnetid, del, weight, signature ) SELECT subid, email, name, time, subj, story, tid, note, section, $mainpage_skid, comment, uid, ipid, subnetid, del, weight, signature FROM submissions;
 EOT
@@ -930,6 +933,7 @@ print <<EOT;
 # ALTER TABLE sections DROP FOREIGN KEY etc.
 
 # RENAME TABLES accesslog TO accesslog_old, accesslog_admin TO accesslog_admin_old, blocks TO blocks_old, discussions TO discussions_old, stories TO stories_old, story_param TO story_param_old, story_text TO story_text_old, story_topics TO story_topics_old, submissions TO submissions_old, templates TO templates_old, topics TO topics_old, topic_images TO topic_images_old, stats_daily TO stats_daily_old, menus TO menus_old, story_files TO story_files_old;
+
 # RENAME TABLES accesslog_admin_new TO accesslog_admin, accesslog_new TO accesslog, blocks_new TO blocks, discussions_new TO discussions, skin_colors_new TO skin_colors, skins_new TO skins, stories_new TO stories, story_dirty_new TO story_dirty, story_param_new TO story_param, story_text_new TO story_text, story_topics_chosen_new TO story_topics_chosen, story_topics_rendered_new TO story_topics_rendered, submissions_new TO submissions, templates_new TO templates, topic_nexus_extras_new TO topic_nexus_extras, topic_nexus_new TO topic_nexus, topic_nexus_dirty_new TO topic_nexus_dirty, topic_parents_new TO topic_parents, topics_new TO topics, stats_daily_new TO stats_daily, menus_new TO menus, story_files_new TO story_files;
 
 # ALTER TABLE skins ADD FOREIGN KEY etc.
