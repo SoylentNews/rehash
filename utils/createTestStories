@@ -176,7 +176,7 @@ sub getRandomTopicID {
 
 sub getRandomSection {
 	# Yes, inefficient.  I do not care.
-	my $sections = $slashdb->sqlSelectAll("section", "sections", "1=1", "ORDER BY id");
+	my $sections = $slashdb->sqlSelectAll("section", "sections", "1=1 AND section='contained'", "ORDER BY id");
 	my @sections = map { $_->[0] } @$sections;
 	my $num = rand @sections;
 	$num = 0 if rand(1) < 1/3;
