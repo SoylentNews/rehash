@@ -2363,6 +2363,5 @@ INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontname', 
 INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontsize', '10', 'Size of font used for labels in the topic tree');
 INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastchange', '1', 'Unix timestamp of last change to the topic tree');
 INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastdraw', '1', 'Unix timestamp of last time topic_tree_draw.pl redrew images/topic_tree.png');
-INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Tree','Tree','[% gSkin.rootdir %]/
-admin.pl?op=topictree',100,9);
+INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Tree','Tree','[% gSkin.rootdir %]/admin.pl?op=topictree',100,9);
 
