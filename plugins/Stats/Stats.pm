@@ -780,8 +780,9 @@ sub getAllStats {
 
 	# today is no good
 	my $offset = 1;
-	# yesterday no good either, early in the day
-	$offset++ if (localtime)[2] < 8;
+	# yesterday no good either, early in the GMT day
+	# (based on standard task timespec's)
+	$offset++ if (gmtime)[2] < 8;
 
 	push @where, sprintf(
 		'(day <= DATE_SUB(NOW(), INTERVAL %d DAY))',
