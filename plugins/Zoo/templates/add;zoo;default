@@ -18,7 +18,7 @@ if you really want to do it.</P>
 [% ELSE %]
 <P>Alright, before we do this thing, I just want to really make
 sure that you want to make <B>[% nickname | strip_literal %]</B>
-([% uid %]) your friend.</P>
+([% uid %]) your [% type %].</P>
 [% END %]
 
 <P><B>Note:</B> Who your [% type %]s are is not private; it can and will be used against you.</P>

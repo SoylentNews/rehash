@@ -267,7 +267,8 @@ sub _validFormkey {
 sub check {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	if ($form->{uid} && $form->{type}) {
+	if ($form->{uid} && $form->{type}
+		&& $form->{type} =~ /^(friend|foe)$/) {
 		if ($zoo->count() > $constants->{people_max}) {
 			_printHead("mainhead");
 			print getData("over_socialized");
