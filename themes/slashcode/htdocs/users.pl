@@ -994,7 +994,7 @@ sub showInfo {
 			title			=> $title,
 			nick_plain		=> $nick_plain,
 			nick			=> $nick,
-			nickname			=> $nick,
+			nickname		=> $nick,
 			uid			=> $uid,
 			useredit		=> $requested_user,
 			points			=> $points,
