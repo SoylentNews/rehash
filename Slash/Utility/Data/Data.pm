@@ -1252,31 +1252,44 @@ sub fudgeurl {
 	if ($scheme && $scheme !~ $scheme_regex) {
 
 		$url =~ s/^$scheme://i;
-		$url =~ tr/A-Za-z0-9-//cd; # allow only a few chars
+		$url =~ tr/A-Za-z0-9-//cd; # allow only a few chars, for security
 		$url = "$scheme:$url";
 
-	} elsif (1) {
+	} elsif ($uri) {
+
 		# Strip the authority, if any.
 		# This prevents annoying browser-display-exploits
 		# like "http://cnn.com%20%20%20...%20@baddomain.com".
 		# In future we may set up a package global or a field like
 		# getCurrentUser()->{state}{fixurlauth} that will allow
-		# this behavior to be turned off -- it's wrapped in
-		# "if (1)" to remind us of this...
+		# this behavior to be turned off.
 
-		if ($uri && $uri->can('host') && $uri->can('authority')) {
-			# Make sure the host and port are legit, then zap
-			# the port if it's the default port.
+		if ($uri->can('userinfo') && $uri->userinfo) {
+			$uri->userinfo(undef);
+		}
+		if ($uri->can('host') && $uri->host) {
+			# If this scheme has an authority (which means a
+			# username and/or password and/or host and/or port)
+			# then make sure the host and port are legit, and
+			# zap the port if it's the default port.
 			my $host = $uri->host;
 			$host =~ tr/A-Za-z0-9.-//cd; # per RFC 1035
 			$uri->host($host);
-			my $authority = $uri->can('host_port') &&
-				$uri->port != $uri->default_port
-				? $uri->host_port
-				: $host;
-			$uri->authority($authority);
-			$url = $uri->canonical->as_string;
 		}
+		if ($uri->can('authority') && $uri->authority) {
+			# We don't allow anything in the authority except
+			# the host and optionally a port.  This shouldn't
+			# matter since the userinfo portion was zapped
+			# above.  But this is a bit of double security to
+			# ensure nothing nasty in the authority.
+			my $authority = $uri->host;
+			if ($uri->can('host_port')
+				&& $uri->port != $uri->default_port) {
+				$authority = $uri->host_port;
+			}
+			$uri->authority($authority);
+		}
+		$url = $uri->canonical->as_string;
 	}
 
 	# These entities can crash browsers and don't belong in URLs.
