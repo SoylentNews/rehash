@@ -70,6 +70,14 @@ sub main {
 			check => 1,			
 			function => \&freaks		
 		},
+		fof		=> { 
+			check => 1,			
+			function => \&fof		
+		},
+		'eof'		=> { 
+			check => 1,			
+			function => \&eof		
+		},
 		all		=> { 
 			check => 1,			
 			function => \&all		
@@ -159,6 +167,78 @@ sub friends {
 				print getData('yournofriends');
 			} else {
 				print getData('nofriends', { nickname => $nick });
+			}
+		}
+	}
+}
+
+sub fof {
+	my($zoo, $constants, $user, $form, $slashdb) = @_;
+
+	my ($uid, $nick);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
+	} else {
+		$uid = $user->{uid};
+		$nick = $user->{nick};
+	}
+
+	my $editable = ($uid == $user->{uid} ? 1 : 0);
+	my $friends = $zoo->getFof($uid); 
+		
+	if ($form->{content_type} eq 'rss') {
+		_rss($friends, $nick, 'fof');
+	} else {
+		if ($editable) {
+			_printHead("yourfriendsoffriendshead");
+		} else {
+			_printHead("friendsoffriendshead", { nickname => $nick });
+		}
+		
+		if (@$friends) {
+			slashDisplay('plainlist', { people => $friends, editable => $editable });
+		} else {
+			if ($editable) {
+				print getData('yournofriendsoffriends');
+			} else {
+				print getData('nofriendsoffriends', { nickname => $nick });
+			}
+		}
+	}
+}
+
+sub eof {
+	my($zoo, $constants, $user, $form, $slashdb) = @_;
+
+	my ($uid, $nick);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
+	} else {
+		$uid = $user->{uid};
+		$nick = $user->{nick};
+	}
+
+	my $editable = ($uid == $user->{uid} ? 1 : 0);
+	my $friends = $zoo->getEof($uid); 
+		
+	if ($form->{content_type} eq 'rss') {
+		_rss($friends, $nick, 'friends');
+	} else {
+		if ($editable) {
+			_printHead("yourfriendsenemieshead");
+		} else {
+			_printHead("friendsenemieshead", { nickname => $nick });
+		}
+		
+		if (@$friends) {
+			slashDisplay('plainlist', { people => $friends, editable => $editable });
+		} else {
+			if ($editable) {
+				print getData('yournofriendsenemies');
+			} else {
+				print getData('nofriendsenemies', { nickname => $nick });
 			}
 		}
 	}

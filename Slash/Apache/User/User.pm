@@ -444,10 +444,19 @@ sub userdir_handler {
 			$r->filename($constants->{basedir} . '/users.pl');
 
 		} elsif ($op eq 'friends') {
-			$r->args("op=friends&nick=$nick&uid=$uid");
-			$r->uri('/zoo.pl');
-			$r->filename($constants->{basedir} . '/zoo.pl');
-
+			if ($extra eq 'friends') {
+				$r->args("op=fof&nick=$nick&uid=$uid");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
+			} elsif ($extra eq 'foes') {
+				$r->args("op=eof&nick=$nick&uid=$uid");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
+			} else {
+				$r->args("op=friends&nick=$nick&uid=$uid");
+				$r->uri('/zoo.pl');
+				$r->filename($constants->{basedir} . '/zoo.pl');
+			}
 		} elsif ($op eq 'fans') {
 			$r->args("op=fans&nick=$nick&uid=$uid");
 			$r->uri('/zoo.pl');

@@ -29,6 +29,7 @@ my $zoo = getObject("Slash::Zoo");
 
 $slashdb->sqlDo("UPDATE users_info SET people=NULL");
 $slashdb->sqlDo("DELETE FROM people WHERE type='' OR type IS NULL");
+$slashdb->sqlDo("DELETE FROM people_log");
 $slashdb->sqlDo("UPDATE people SET eof=0 AND fof=0");
 my $entries = $slashdb->sqlSelectAll('uid, person, type', 'people');
 

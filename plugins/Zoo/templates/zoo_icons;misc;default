@@ -37,6 +37,14 @@ __template__
 			[% IF bonus && user.people_bonus_freak; title = "Freak ($user.people_bonus_freak)"; ELSE; title = "Freak"; END; %]
 			<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/freak.gif" ALT="[% title %]" TITLE="[% title %]"></A>
 		[% END %]
+		[% IF user.people.${Slash.FOF}.$person %]
+			[% IF bonus && user.people_bonus_freak; title = "Friend of Friend ($user.people_bonus_fof)"; ELSE; title = "Friend of Friend"; END; %]
+			<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="[% title %]" TITLE="[% title %]"></A>
+		[% END %]
+		[% IF user.people.${Slash.EOF}.$person %]
+			[% IF bonus && user.people_bonus_freak; title = "Foe of Friend ($user.people_bonus_eof)"; ELSE; title = "Foe of Friend"; END; %]
+			<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="[% title %]" TITLE="[% title %]"></A>
+		[% END %]
 	[% END %]
 [% END %]
 __seclev__
