@@ -227,7 +227,8 @@ sub getAdminModsInfo {
 		[qw( uid val )],
 		"moderatorlog.uid AS uid, val, nickname, COUNT(*) AS count",
 		"moderatorlog, users",
-		"users.seclev > 1 AND moderatorlog.uid=users.uid",
+		"users.seclev > 1 AND moderatorlog.uid=users.uid 
+		 AND ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
 		"GROUP BY moderatorlog.uid, val"
 	);
 
@@ -237,8 +238,8 @@ sub getAdminModsInfo {
 		"users.uid AS uid, metamodlog.val AS val, users.nickname AS nickname, COUNT(*) AS count",
 		"metamodlog, moderatorlog, users",
 		"users.seclev > 1 AND moderatorlog.uid=users.uid
-		 AND metamodlog.mmid=moderatorlog.id
-		 AND metamodlog.ts ",
+		 AND metamodlog.mmid=moderatorlog.id 
+		 AND metamodlog.ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' ",
 		"GROUP BY users.uid, metamodlog.val"
 	);
 
@@ -290,7 +291,7 @@ sub getAdminModsInfo {
 		"val",
 		"val, COUNT(*) AS count",
 		"moderatorlog",
-		"",
+		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
 		"GROUP BY val"
 	);
 	$m1_uid_val_hr->{$total_uid} = {
@@ -302,7 +303,7 @@ sub getAdminModsInfo {
 		"val",
 		"val, COUNT(*) AS count",
 		"metamodlog",
-		"",
+		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'",
 		"GROUP BY val"
 	);
 	$m2_uid_val_hr->{$total_uid} = {
