@@ -68,10 +68,20 @@ my $plugin_list = $install->_getList(
 my %subdir_files = ( );
 my @theme_htdocs_keys = grep /^(htdoc|image|topic)/, keys %$theme_hr;
 for my $key (@theme_htdocs_keys) {
-	push @{$subdir_files{htdocs}}, @{$theme_hr->{$key}};
+	next unless $key && $theme_hr->{$key};
+	push @{$subdir_files{htdocs}},
+		ref($theme_hr->{$key}) && ref($theme_hr->{$key}) eq 'ARRAY'
+			? @{$theme_hr->{$key}}
+			: $theme_hr->{$key};
 }
-@{$subdir_files{tasks}} = @{$theme_hr->{task}};
-@{$subdir_files{misc}} = @{$theme_hr->{misc}};
+for my $key (qw( tasks misc )) {
+	my $src_key = $key;
+	$src_key =~ s/s$//; # theme "task" becomes subdir_files "tasks"
+	@{$subdir_files{$key}} =
+		ref($theme_hr->{$src_key}) && ref($theme_hr->{$src_key}) eq 'ARRAY'
+			? @{$theme_hr->{$src_key}}
+			: $theme_hr->{$src_key};
+}
 
 my $theme_dir = $theme_hr->{dir};
 my $site_dir = $constants->{datadir};
