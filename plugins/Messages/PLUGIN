@@ -13,6 +13,7 @@ template=templates/data;messages;default
 template=templates/display;messages;default
 template=templates/display_prefs;messages;default
 template=templates/emailsponsor;messages;default
+template=templates/footer;messages;default
 template=templates/journrep;comments;default
 template=templates/journrep_subj;comments;default
 template=templates/journuserboxes;misc;default
