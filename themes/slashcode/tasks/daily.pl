@@ -54,7 +54,7 @@ sub daily_generateDailyMailees {
 		for my $uid (keys %$users) {
 			my $user = $users->{$uid};
 
-			my $key  = $user->{sectioncollapse};
+			my $key  = $user->{sectioncollapse} || "";
 			for my $value (@{$user}{qw(
 				story_never_topic	story_never_author	story_never_nexus
 				story_always_topic	story_always_author	story_always_nexus

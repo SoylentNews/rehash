@@ -2580,3 +2580,11 @@ INSERT INTO vars (name, value, description) VALUES ('issue_lookback_days','90','
 
 INSERT INTO vars (name, value, description) VALUES ('slashd_errnote_lastrun','','Last time slashd_errnote ran');
 
+# Changed my mind :)
+DELETE FROM string_param WHERE type='story023';
+INSERT INTO string_param (type, code, name) VALUES ('story023','0','None');
+INSERT INTO string_param (type, code, name) VALUES ('story023','2','Best');
+INSERT INTO string_param (type, code, name) VALUES ('story023','3','All');
+
+# run `perl utils/sectioncollapse_convert.plx VIRTUAL_USER`
+

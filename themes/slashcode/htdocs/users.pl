@@ -2594,21 +2594,30 @@ sub saveHome {
 	# Topics are either present (value=2) or absent (value=0).  If absent,
 	# push them onto the never list.  Otherwise, do nothing.  (There's no
 	# way to have an "always" topic, at the moment.)
-	for my $tid (grep { !$tree->{$_}{nexus} } keys %$tree) {
+	for my $tid (
+		sort { $a <=> $b }
+		grep { !$tree->{$_}{nexus} }
+		keys %$tree
+	) {
 		my $key = "topictid$tid";
 		if (!$form->{$key}) {			push @story_never_topic, $tid	}
 	}
 	# Authors are either present (value=2) or absent (value=0).  If
 	# absent, push them onto the never list.  Otherwise, do nothing.
 	# (There's no way to have an "always" author, at the moment.)
-	for my $aid (keys %$author_hr) {
+	for my $aid (sort { $a <=> $b } keys %$author_hr) {
 		my $key = "aid$aid";
 		if (!$form->{$key}) {			push @story_never_author, $aid	}
 	}
 	# Nexuses can have value 0, 2 or 3.  0 means the never list,
 	# and 3 means the always list.
-	for my $key (sort grep /^nexustid\d+$/, keys %$form) {
-		my($tid) = $key =~ /^nexustid(\d+)$/;
+	for my $tid (
+		sort { $a <=> $b }
+		map { /^nexustid(\d+)$/; $1 }
+		grep { /^nexustid\d+$/ }
+		keys %$form
+	) {
+		my $key = "nexustid$tid";
 		next unless $tid && $tree->{$tid} && $tree->{$tid}{nexus};
 		   if (!$form->{$key}) {		push @story_never_nexus, $tid	}
 		elsif ($form->{$key} == 3) {		push @story_always_nexus, $tid	}

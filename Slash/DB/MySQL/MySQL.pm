@@ -7388,7 +7388,7 @@ sub getStoriesEssentials {
 
 	# Now, if sectioncollapse is set, expand the tid to include all of
 	# its nexus children.
-	$tid = $self->_gse_sectioncollapse($tid) if $sectioncollapse;
+	$tid = $self->_gse_sectioncollapse($tid, $tid_x) if $sectioncollapse;
 
 	# Figure out whether min_stoid is usable.
 	# If we're not looking just at the mainpage tid, it's not (yet --
@@ -7652,14 +7652,18 @@ sub _gse_canonicalize {
 }
 
 sub _gse_sectioncollapse {
-	my($self, $opt_ar) = @_;
+	my($self, $opt_ar, $tid_x_ar) = @_;
 	my %nexuses = map { ($_, 1) } @$opt_ar;
 	for my $tid (@$opt_ar) {
 		for my $new (@{ $self->getNexusChildrenTids($tid) }) {
 			$nexuses{$new} = 1;
 		}
 	}
-	my @all = sort { $a <=> $b } keys %nexuses;
+	my %tid_x = ( );
+	%tid_x = map {( $_, 1 )} @$tid_x_ar if $tid_x_ar;
+	my @all = sort { $a <=> $b }
+		grep !$tid_x{$_}
+		keys %nexuses;
 	return \@all;
 }
 

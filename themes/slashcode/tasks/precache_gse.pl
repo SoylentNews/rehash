@@ -61,9 +61,9 @@ $task{$me}{code} = sub {
 	my @gse_1min = (
 		{ fake_secs_ahead =>  45,
 		  tid => $mp_tid		},
-		{ fake_secs_ahead =>  45,
-		  tid => $mp_tid,
-		  sectioncollapse => 1		},
+#		{ fake_secs_ahead =>  45,
+#		  tid => $mp_tid,
+#		  sectioncollapse => 1		},
 	);
 	my @gse_hrs = ( );
 	for my $i (0..$mins_ahead-1) {

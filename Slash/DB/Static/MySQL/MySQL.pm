@@ -636,8 +636,9 @@ sub getDailyMail {
 	# 1 - want all stories in the mainpage nexus, or any
 	# other nexuses linked to it, mailed
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
-# XXXSKIN - fix this - there is no more "sectioncollapse" and the
-# story_always_* need to be used instead
+# XXXSKIN - improve this - "sectioncollapse" is going to be replaced
+# by just having users pick which sections they always want to see,
+# so the story_always_* fields need to be used instead
 	if ($user->{sectioncollapse}) {
 		my $nexuses = $self->getNexusChildrenTids($mp_tid);
 		my $nexus_clause = join ',', @$nexuses, $mp_tid;
