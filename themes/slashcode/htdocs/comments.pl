@@ -868,10 +868,19 @@ sub moderateCid {
 			-ts	=> 'now()'
 		});
 
+
 		# Adjust comment posters karma
-		sqlUpdate("users_info", { -karma => "karma$val" }, 
-			"uid=$cuid AND karma<$I{maxkarma}"
-		) if $val && $cuid > 0;
+		if ($cuid > 0) {
+			if ($val > 0) {
+				sqlUpdate("users_info", { -karma => "karma$val" },
+					"uid=$cuid AND karma<$I{maxkarma}"
+				);
+			} elsif ($val < 0) {
+				sqlUpdate("users_info", { -karma => "karma$val" },
+					"uid=$cuid"
+				);
+			}
+		}
 
 		# Adjust moderators total mods
 		sqlUpdate(
