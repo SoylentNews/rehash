@@ -1858,7 +1858,8 @@ sub saveUserAdmin {
 
 	} elsif ($form->{md5id}) {
 		$user_editfield_flag = 'md5id';
-		($id, $user_edit->{$form->{fieldname}})
+		my $fieldname = $form->{fieldname} || 'md5id';
+		($id, $user_edit->{$fieldname})
 			= ($form->{md5id}, $form->{md5id});
 
 	} else {
