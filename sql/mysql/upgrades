@@ -1367,4 +1367,4 @@ ALTER TABLE comments ADD COLUMN len SMALLINT UNSIGNED NOT NULL DEFAULT '0';
 SELECT CONCAT("UPDATE comments SET len=", LENGTH(comment), " WHERE cid=", cid, ";") INTO OUTFILE "/tmp/comlen" FROM comment_text;
 SOURCE /tmp/comlen;
 
-ALTER TABLE dbs CHANGE type type enum("writer","reader","log","search", "log-slave") DEFAULT "reader" NOT NULL;
+ALTER TABLE dbs CHANGE type type enum("writer","reader","log","search", "log_slave") DEFAULT "reader" NOT NULL;
