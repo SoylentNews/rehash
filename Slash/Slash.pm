@@ -135,8 +135,13 @@ sub selectComments {
 	}
 
 	# If we are sorting by highest score we resort to figure in bonuses
-	@$thisComment = sort { $b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid} } @$thisComment
-		if $user->{commentsort} == 3;
+	if ($user->{commentsort} == 3) {
+		@$thisComment = sort { $b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid} } @$thisComment;
+	} elsif ($user->{commentsort} == 1 || $user->{commentsort} == 5) {
+		@$thisComment = sort { $b->{cid} <=> $a->{cid} } @$thisComment;
+	} else {
+		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
+	}
 
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is

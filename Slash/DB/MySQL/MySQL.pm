@@ -3159,11 +3159,12 @@ sub getCommentsForUser {
 		$sql .= "	)";
 	}
 
-	$sql .= "         ORDER BY ";
-	$sql .= "comments.points DESC, " if $user->{commentsort} == 3;
-	$sql .= " cid ";
-	$sql .= ($user->{commentsort} == 1 || $user->{commentsort} == 5) ?
-			'DESC' : 'ASC';
+# We are now doing this in the webserver not in the DB
+#	$sql .= "         ORDER BY ";
+#	$sql .= "comments.points DESC, " if $user->{commentsort} == 3;
+#	$sql .= " cid ";
+#	$sql .= ($user->{commentsort} == 1 || $user->{commentsort} == 5) ?
+#			'DESC' : 'ASC';
 
 
 	my $thisComment = $self->{_dbh}->prepare_cached($sql) or errorLog($sql);
