@@ -22,11 +22,13 @@ version() if $opts{'v'};
 $opts{'u'} ||= 'slash';
 
 {
-	my $slashdb = Slash::DB->new($opts{'u'});
+	my $virtuser = $opts{u} || 'slashdot';
+	createEnvironment($virtuser);
+	my $log_db = getObject("Slash::DB", { db_type => "log_slave" });
 
 	if ($opts{'y'} eq "today") {
 		my($total, $today, $hour, $count);
-		my $pages = $slashdb->pagesServed();
+		my $pages = $log_db->pagesServed();
 
 		print "| Hour  | Total for hour | Total for day | Per second\n";
 
@@ -55,13 +57,13 @@ $opts{'u'} ||= 'slash';
 		exit;
 	}
 
-	my $id = $slashdb->maxAccessLog();
+	my $id = $log_db->maxAccessLog();
 	my $total;
 	my $starttime = time;
 
 	while (1) {
 		sleep 3;
-		my $info = $slashdb->getAccessLogInfo($id);
+		my $info = $log_db->getAccessLogInfo($id);
 
 		my $sec = time - $starttime;
 		$total += @$info;
