@@ -348,29 +348,33 @@ sub prepAds {
 	# Let's lay out some representative possibilities so we
 	# get the logic right:
 	#
-	# case	messads ok?	$ENV{SCRIPT_NAME}	$ENV{DOCUMENT_URI}
-	# 1	no		/index.pl		/index.pl
-	# 2	yes		/article.pl		/article.pl
-	# 3	no		/slashhead.inc		/index.shtml
-	# 4	no		/slashhead.inc		/faq/foo.shtml (or similar)
-	# 5	yes		/articles/slashhead.inc	/articles/12/34/56/7890.shtml
-	# 6	no		/articles/slashhead.inc	/articles/index.shtml
-	# 7	n/a		/index.shtml		/index.shtml
-	# 8	n/a		/faq/foo.shtml		/faq/foo.shtml
+	# case	messads ok?	$ENV{SCRIPT_NAME}	$ENV{REQUEST_URI}
+	# 1	no		/index.pl		/
+	# 2	no		/index.pl		/index.pl
+	# 3	yes		/article.pl		/article.pl
+	# 4	no		/slashhead.inc		/
+	# 5	no		/slashhead.inc		/index.shtml
+	# 6	no		/slashhead.inc		/faq/foo.shtml (or similar)
+	# 7	yes		/articles/slashhead.inc	/articles/12/34/56/7890.shtml
+	# 8	no		/articles/slashhead.inc	/articles/
+	# 9	no		/articles/slashhead.inc	/articles/index.shtml
+	# 10	n/a		/index.shtml		/
+	# 11	n/a		/index.shtml		/index.shtml
+	# 12	n/a		/faq/foo.shtml		/faq/foo.shtml
 	#
-	# Cases 7 and 8 (and many others similar) don't matter, since
+	# Cases 8 thru 10 (and many others similar) don't matter, since
 	# prepAds() will be called in their .inc header, so the
-	# decision will be made in cases 3 and 4.
+	# decision will be made in cases 4, 5 and 6.
 	#
-	# Note that distinguishing 4 from 5 is nontrivial:  we can't tell
+	# Note that distinguishing 6 from 7 is nontrivial:  we can't tell
 	# the difference between "faq" and "articles", since we can't
 	# rely on the DB being available at this stage.  Any alphanumeric
 	# first-level directory may be a valid section name.  And we
 	# don't want to limit ourselves by looking for the "12/34/56"
 	# subdirectories within genuine article directories, that gets
-	# hackish very fast.  What we *can* do is assume that case 4
-	# and case 5 will continue to be distinguished by 4's use of
-	# the root-level /slashhead.inc and 5's use of section-specific
+	# hackish very fast.  What we *can* do is assume that case 6
+	# and case 7 will continue to be distinguished by 6's use of
+	# the root-level /slashhead.inc and 7's use of section-specific
 	# /articles/slashhead.inc.  So if e.g. /faq/slashhead.inc is
 	# created in future, this logic will need to be revisited.
 	#
@@ -382,12 +386,13 @@ sub prepAds {
 		&& $ENV{"AD_BANNER_$ad_messaging_num"}
 		&& rand(1) < $ad_messaging_prob
 		&& $ENV{SCRIPT_NAME}
-		&& $ENV{DOCUMENT_URI}
-		&& $ENV{DOCUMENT_URI} !~ m{\bindex\.\b} # disable case 6 (also 1,3)
+		&& $ENV{REQUEST_URI}
+		&& $ENV{REQUEST_URI} !~ m{\bindex\.\b}	# disable case 9 (also 2,5)
+		&& $ENV{REQUEST_URI} !~ m{/$}		# disable case 8 (also 1,4,10)
 		&& (
-				# enable case 2
+				# enable case 3
 			   $ENV{SCRIPT_NAME} =~ m{\barticle\.pl\b}
-				# enable cases 5 and 6 (but 6 was eliminated above)
+				# enable cases 7,8,9 (but 8,9 eliminated above)
 			|| $ENV{SCRIPT_NAME} =~ m{/(\w+)/slashhead\.inc$}
 		);
 
