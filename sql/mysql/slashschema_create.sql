@@ -1147,16 +1147,6 @@ CREATE TABLE users_comments (
 ) TYPE=InnoDB;
 
 #
-# Table structure for table 'users_count'
-#
-
-DROP TABLE IF EXISTS users_count;
-CREATE TABLE users_count (
-	uid mediumint UNSIGNED NOT NULL,
-	PRIMARY KEY (uid)
-) TYPE=MyISAM;
-
-#
 # Table structure for table 'users_hits'
 #
 

@@ -27,6 +27,7 @@ $task{$me}{code} = sub {
 	my $vu = "virtual_user=$virtual_user";
 	my $args = "$vu ssi=yes";
 	my %dirty_skins = ( );
+	my $stories;
 
 	# Every tenth invocation, we do a big chunk of work.  The other
 	# nine times, we update the top three stories and the front
@@ -66,7 +67,11 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	my $stories;
+	############################################################
+	# users_count update (memcached and var)
+	############################################################
+
+	$slashdb->countUsers({ write_actual => 1 });
 
 	############################################################
 	# story_topics_rendered updates

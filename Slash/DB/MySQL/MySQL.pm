@@ -6379,8 +6379,8 @@ sub metamodEligible {
 		time() - $m2_freq, 'GMT');
 	return 0 if $user->{lastmm} ge $cutoff_str;
 
-	# Last test, have to hit the DB for this one.
-	my($maxuid) = $self->countUsers({ max => 1 });
+	# Last test, have to hit the DB for this one (but it's very quick).
+	my $maxuid = $self->countUsers({ max => 1 });
 	return 0 if $user->{uid} >
 		  $maxuid * $constants->{m2_userpercentage};
 
@@ -6798,13 +6798,48 @@ sub createMetaMod {
 ########################################################
 sub countUsers {
 	my($self, $options) = @_;
-	my $users;
-	if ($options && $options->{max}) {
-		$users = $self->sqlSelect("MAX(uid)", "users_count");
-	} else {
-		$users = $self->sqlCount("users_count");
+	my $max = $options && $options->{max};
+	my $actual = $options && $options->{write_actual};
+	if ($max) {
+		# Caller wants the maximum uid we've assigned so far.
+		# This is extremely fast, InnoDB doesn't even look at
+		# the table.
+		return $self->sqlSelect("MAX(uid)", "users");
 	}
-	return $users;
+
+	# Caller wants the actual count of all users (which may be
+	# smaller, due to gaps).  First see if we can pull the data
+	# from memcached.
+	my $count = undef;
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:uc";
+	if (!$actual && $mcd) {
+		if ($count = $mcd->get($mcdkey)) {
+			return $count;
+		}
+	}
+	# Nope, wasn't in memcached.  Next see whether we need to
+	# actually do the count, or if we can use the var (which
+	# is faster than COUNT(*) on an InnoDB table).
+	if ($actual) {
+		$count = $self->sqlCount('users');
+	} else {
+		$count = $self->getVar('users_count', 'value', 1) || 1;
+	}
+	# We have the value now.  Since either memcached failed us
+	# or we now have a more authoritative (actual) value,
+	# overwrite memcached with this.  Also, if we just got the
+	# actual value, write it into the var.
+	if ($mcd) {
+		# Let's pretend this value's going to be accurate
+		# for about a day.  Since we only really need the
+		# user count approximately, that's about right.
+		$mcd->set($mcdkey, $count, 86400);
+	}
+	if ($actual) {
+		$self->setVar('users_count', $count);
+	}
+	return $count;
 }
 
 ########################################################
@@ -7691,7 +7726,7 @@ sub getStoriesEssentials {
 		# exit this if clause, where the big ol' final SELECT will
 		# get the data we need.
 
-print STDERR "gSE $$ separate SELECTs, min_stoid=$min_stoid\n";
+#print STDERR "gSE $$ separate SELECTs, min_stoid=$min_stoid\n";
 
 		my $stoids_ar = $self->sqlSelectColArrayref(
 			"DISTINCT stoid",
@@ -7760,7 +7795,7 @@ print STDERR "gSE $$ separate SELECTs, min_stoid=$min_stoid\n";
 		# big SELECT.  Prep the variables for the upcoming SELECT
 		# so it does the right thing.
 
-print STDERR "gSE $$ one SELECT, min_stoid=$min_stoid\n";
+#print STDERR "gSE $$ one SELECT, min_stoid=$min_stoid\n";
 
 		# Need both tables.
 		$tables = "stories, story_topics_rendered";
