@@ -1375,12 +1375,13 @@ sub createAccessLog {
 		push @{$self->{_accesslog_insert_cache}}, $insert;
 		my $size = scalar(@{$self->{_accesslog_insert_cache}});
 		if ($size >= $constants->{accesslog_insert_cachesize}) {
-			$self->{_dbh}->{AutoCommit} = 0;
+			$self->sqlDo("SET AUTOCOMMIT=0");
 			while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
 				$self->sqlInsert('accesslog', $hr, { delayed => 1 });
 			}
 			$self->{_dbh}->commit;
-			$self->{_dbh}->{AutoCommit} = 1;
+			$self->sqlDo("commit");
+			$self->sqlDo("SET AUTOCOMMIT=1");
 		}
 	} else {
 		$self->sqlInsert('accesslog', $insert, { delayed => 1 });
