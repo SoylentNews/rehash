@@ -26,6 +26,7 @@ __template__
 		}) %][% END %]
 
 		[% IF user.mode == 'parents' %]
+			|
 			[% Slash.linkComment({
 			sid	=> sid,
 			pid	=> cid,
