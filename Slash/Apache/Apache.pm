@@ -350,7 +350,8 @@ sub IndexHandler {
 		}
 	}
 
-	if ($uri =~ m|^/(\w+)/$|) {
+	# match /section/ or /section
+	if ($uri =~ m|^/(\w+)/?$|) {
 		my $key = $1;
 		my $slashdb = getCurrentDB();
 		my $section = $slashdb->getSection($key);
