@@ -1,0 +1,63 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+admin
+__lang__
+en_US
+__name__
+topicExtrasEdit
+__seclev__
+10000
+__template__
+<p>
+<b>Topic Extras Edit Page</b><br />
+[% topic = Slash.db.getTopic(form.tid) %]
+Editing extras for <b>[% topic.textname %]</b>
+</p>
+<form action="[% gSkin.rootdir %]/admin.pl" method="post">
+<input type="hidden" name="tid" value=[% form.tid | strip_attribute %]" />
+<table>
+	<tr>
+		<td><b>Id</b></td>
+		<td><b>Label</b></td>
+		<td><b>Keyword</b></td>
+		<td><b>Type</b></td>
+		<td><b>Content Type</b></td>
+		<td><b>Required?</b></td>
+		<td><b>Ordering</b></td>
+		<td><b>Remove</b></td>
+	</tr>
+	[% FOREACH extra = extras %]
+		[% id = extra.6 %]
+		<tr>
+			<td>[% id %]</td>
+			<td><input type="text" name="ex_tn_[% id %]" value="[% extra.0 | strip_attribute %]" size="50"></td>
+			<td><input type="text" name="ex_kw_[% id %]" value="[% extra.1 | strip_attribute %]"></td>
+			<td>[% Slash.createSelect("ex_ty_$id", Slash.db.getDescriptions("genericstring","extra_types"), extra.2, 1, 0, 1) %]</td>
+			<td>[% Slash.createSelect("ex_cn_ty_$id", Slash.db.getDescriptions("genericstring","extra_content_types"), extra.3, 1, 0, 1) %]</td>
+			<td>[% Slash.createSelect("ex_rq_$id", Slash.db.getDescriptions("genericstring","yes_no"), extra.4, 1, 0, 1) %]</td>
+			<td><input type="text" name="ex_ordering_[% id %]" value="[% extra.5 | strip_attribute %]" size="2"></td>
+			<td><input type="checkbox" name="ex_del_[% id %]"></td>
+		</tr>
+	[% END %]
+	<tr>
+		<td><b>Add New Extra</b></td>
+		<td><input type="text" name="ex_tn_new" value="" size="50"></td>
+		<td><input type="text" name="ex_kw_new" value=""></td>
+		<td>[% Slash.createSelect("ex_ty_new", Slash.db.getDescriptions("genericstring","extra_types"), "text", 1, 0, 1) %]</td>
+		<td>[% Slash.createSelect("ex_cn_ty_new", Slash.db.getDescriptions("genericstring","extra_content_types"), "story", 1, 0, 1) %]</td>
+		<td>[% Slash.createSelect("ex_rq_new", Slash.db.getDescriptions("genericstring","yes_no"), "no", 1, 0, 1) %]</td>
+		<td><input type="text" name="ex_ordering_new" value="" size="2"></td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td colspan="8" align="right">
+			<input type="submit" name="op" value="update_extras">
+		</td>
+	</tr>
+</table>
+</form>
