@@ -268,11 +268,12 @@ EOT
 	$statsSave->createStatDaily("mod_points_lost_spent_minus_1", $modlog_yest_hr->{-1}{spent});
 	$statsSave->createStatDaily("m2_freq", $constants->{m2_freq} || 86400);
 	$statsSave->createStatDaily("m2_consensus", $constants->{m2_consensus} || 0);
+	$statsSave->createStatDaily("m2_mintokens", $self->getVar("m2_mintokens", "value", 1) || 0);
 	$statsSave->createStatDaily("m2_points_lost_spent", $metamodlogs_yest_total);
 	$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
 	$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
 	$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
-	$statsSave->createStatDaily("token_conversion_point", $token_conversion_point);
+	$statsSave->createStatDaily("mod_token_conversion_point", $token_conversion_point);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
