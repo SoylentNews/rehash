@@ -1260,7 +1260,9 @@ sub createAccessLog {
 	my $section = $constants->{section};
 	# The following two are special cases
 	if ($op eq 'index' || $op eq 'article') {
-		$section = $form->{section} ? $form->{section} : $constants->{section};
+		$section = ($form && $form->{section})
+			? $form->{section}
+			: $constants->{section};
 	}
 
 	my $ipid = getCurrentUser('ipid') || md5_hex($hostip);
