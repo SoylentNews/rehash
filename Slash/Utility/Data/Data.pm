@@ -25,7 +25,6 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-use POSIX ();
 use Date::Format qw(time2str);
 use Date::Language;
 use Date::Parse qw(str2time);
@@ -33,6 +32,7 @@ use Digest::MD5 qw(md5_hex md5_base64);
 use HTML::Entities;
 use HTML::FormatText;
 use HTML::TreeBuilder;
+use POSIX qw(UINT_MAX);
 use Safe;
 use Slash::Constants qw(:strip);
 use Slash::Utility::Environment;
@@ -431,7 +431,7 @@ sub createLogToken {
 			srand();
 			$need_srand = 0;
 		}
-		my $r = rand(POSIX::UINT_MAX()) . ":" . rand(POSIX::UINT_MAX());
+		my $r = rand(UINT_MAX) . ":" . rand(UINT_MAX);
 		my $md5 = md5_base64($r);
 		$md5 =~ tr/A-Za-z0-9//cd;
 		$str .= substr($md5, int(rand 8) + 5, 3);
