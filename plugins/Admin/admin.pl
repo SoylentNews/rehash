@@ -1540,6 +1540,16 @@ sub extractChosenFromForm {
 				= $form->{st_main_select_ids}[$i];
 		}
 	}
+
+	# save the user's topic popup settings
+	if (exists $form->{st_saved_tree}) {
+		my $user = getCurrentUser();
+		$user->{st_saved_tree} = $form->{st_saved_tree};
+		$slashdb->setUser($user->{uid}, {
+			st_saved_tree	=> $form->{st_saved_tree}
+		});
+	}
+
 	return($chosen_hr, $chosen_names_hr);
 }
 

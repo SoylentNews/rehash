@@ -98,6 +98,38 @@ var [% name %]_selected_val;
 var [% name %]_selected_elem;
 var [% name %]_max_id = [% loop.max %];
 
+/* get saved list */
+function [% name %]_get_saved_tree() {
+	var list = new Array;
+	for (var i = 0; i <= [% name %]_max_id; i++) {
+		var obj = document.getElementById("[% name %]-desc-" + i);
+		if (obj && obj.style.display != 'block') {
+			list.push(i);
+		}
+	}
+	return(list.join(','));
+}
+
+/* reset saved */
+function [% name %]_reset_saved_tree(list) {
+	// convert array of integers to indexes
+	var saved = new Array;
+	for (var i = 0; i <= list.length; i++) {
+		saved[ list[i] ] = 1;
+	}
+
+	for (var i = 0; i <= [% name %]_max_id; i++) {
+		var obj = document.getElementById("[% name %]-desc-" + i);
+		if (obj) {
+			if (saved[i]) {
+				[% name %]_collapse(i);
+			} else {
+				[% name %]_expand(i);
+			}
+		}
+	}
+}
+
 /* collapse entire tree */
 function [% name %]_collapse_all() {
 	for (var i = 0; i <= [% name %]_max_id; i++) {
@@ -436,9 +468,12 @@ function [% name %]_submit() {
 		myselectw.style.display = 'none';
 		myselecti.style.display = 'none';
 	}
+
+	var mysaved   = document.[% form_field_form %].[% name %]_saved_tree;
+	mysaved.value = [% name %]_get_saved_tree();
 }
 
-function [% name %]_load_names () {
+function [% name %]_load_names() {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
 	var myselecti = document.[% form_field_form %].[% name %]_main_select_ids;
@@ -449,11 +484,13 @@ function [% name %]_load_names () {
 		}
 	}
 
-	myselect[0].selected  = true;
-	[% name %]_select_weight();
+	if (myselect[0]) {
+		myselect[0].selected  = true;
+		[% name %]_select_weight();
+	}
 }
 
-function useragent_opera () {
+function useragent_opera() {
 	var agent = navigator.userAgent;
 	if (agent.indexOf('Opera') != -1) {
 		return 1;

@@ -116,7 +116,7 @@ sub getPopupTree {
 		hide_selects		=> 0,
 		scrollbars		=> 1,
 		width			=> 300,
-		height			=> 300,
+		height			=> 450,
 		image_path		=> $constants->{imagedir} . '/',
 	);
 
