@@ -110,14 +110,14 @@ EOT
 				$num_mods += $admin_mods->{$nickname}{m1_up};
 				$num_mods += $admin_mods->{$nickname}{m1_down};
 			} else {
-				$num_admin_mods += $admin_mods->{$nickname}{m1_up}
-				$num_admin_mods += $admin_mods->{$nickname}{m1_down}
+				$num_admin_mods += $admin_mods->{$nickname}{m1_up};
+				$num_admin_mods += $admin_mods->{$nickname}{m1_down};
 			}
 		}
 		$admin_mods_text =~ s/ +$//gm;
 		$admin_mods_text .= sprintf("%13.13s: %4d of %4d (%6.2f%%)\n",
 			"Admin Mods", $num_admin_mods, $num_mods,
-			($num_mods ? $num_admin_mods*100/$num_mods : 0);
+			($num_mods ? $num_admin_mods*100/$num_mods : 0));
 	}
 
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
