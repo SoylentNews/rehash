@@ -1457,9 +1457,12 @@ sub _set_factor {
 ########################################################
 # For run_moderatord.pl
 sub updateTokens {
-	my($self, $uid_hr) = @_;
+	my($self, $uid_hr, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $maxtokens = $constants->{maxtokens} || 60;
+	my $splice_count = $options->{splice_count} || 200;
+	my $sleep_time = defined($options->{sleep_time}) ? $options->{sleep_time} : 0.5;
+
 	my %adds = ( map { ($_, 1) } grep /^\d+$/, values %$uid_hr );
 	for my $add (sort { $a <=> $b } keys %adds) {
 		my @uids = sort { $a <=> $b }
@@ -1469,7 +1472,6 @@ sub updateTokens {
 		# to have $add tokens added.  Group them into slices
 		# and bulk-add.  This is much more efficient than
 		# calling setUser individually.
-		my $splice_count = 200;
 		while (@uids) {
 			my @uid_chunk = splice @uids, 0, $splice_count;
 			my $uids_in = join(",", @uid_chunk);
@@ -1479,7 +1481,7 @@ sub updateTokens {
 			$self->setUser_delete_memcached(\@uid_chunk);
 			# If there is more to do, sleep for a moment so we don't
 			# hit the DB too hard.
-			Time::HiRes::sleep(0.2) if @uids;
+			Time::HiRes::sleep($sleep_time) if @uids && $sleep_time;
 		}
 	}
 }

@@ -269,7 +269,7 @@ sub give_out_tokens {
 	}));
 
 	# Give each user her or his tokens.
-	$slashdb->updateTokens(\%update_uids);
+	$slashdb->updateTokens(\%update_uids, { sleep_time => 0.5 });
 
 	# And keep a running tally of how many tokens we've given out due
 	# to users who clicked the right number of times and got lucky.
