@@ -223,6 +223,8 @@ sub findStory {
 	# This should handle multiple topics now that var$multitopics_enabled
 	# has been added.
 
+	my $constants = getCurrentStatic();
+
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "users.nickname, stories.title, stories.sid as sid, time, commentcount, stories.section";
 	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as score "
@@ -230,7 +232,7 @@ sub findStory {
 
 	my $tables = "stories,users";
 	$tables .= ",story_topics"
-		if getCurrentStatic('multitopics_enabled') && 
+		if $constants->{multitopics_enabled} && 
 		   $form->{selected_topics};
 	$tables .= ",story_text" if $form->{query};
 
@@ -265,7 +267,7 @@ sub findStory {
 		$where .= " AND sections.section = stories.section AND sections.isolate != 1 ";
 	}
 
-	if (getCurrentStatic('multitopics_enabled') && $form->{selected_topics}) {
+	if ($constants->{multitopics_enabled} && $form->{selected_topics}) {
 		local $" = ',';
 		$where .= <<EOT if %{$form->{selected_topics}};
 AND story_topics.tid in (@{[keys %{$form->{selected_topics}}]})

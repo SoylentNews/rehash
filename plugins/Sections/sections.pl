@@ -198,7 +198,6 @@ sub saveSection {
 		}
 	} 
 	$slashdb->setSectionExtras($section, \@extras) if @extras;
-
 }
 
 #################################################################

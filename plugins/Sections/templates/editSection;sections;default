@@ -17,8 +17,6 @@ __lang__
 en_US
 __name__
 editSection
-__seclev__
-10000
 __template__
 	[
 		<A HREF="[% constants.rootdir %]/admin.pl?section=[% section
@@ -109,3 +107,5 @@ __template__
 </TR>
 </TABLE>
 
+__seclev__
+10000
