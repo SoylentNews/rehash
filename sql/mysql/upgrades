@@ -2680,9 +2680,11 @@ INSERT INTO vars (name, value, description) VALUES ('topic_popup_weights', '40=0
 # These next five changes should not be done if you have the Search plugin
 # installed (you almost certainly do), on your _search_ database.  If you
 # have multiple databases, you might issue these commands on your master,
-# and they will probably simply not have an effect (throw harmless errors)
-# on your search DB.  If you have only one DB, skip these next five lines
-# (or just ignore their errors).
+# and then check your slave DBs to see if your search DB or others had
+# replication stopped by a (harmless) error.  Restarting it is simple:
+# "SET GLOBAL SQL_SLAVE_SKIP_COUNTER=1; SLAVE START;"
+# If you have only one DB, skip these next five lines (or just ignore
+# their errors).
 ALTER TABLE comments TYPE=InnoDB;
 ALTER TABLE comment_text TYPE=InnoDB;
 ALTER TABLE pollquestions TYPE=InnoDB;
