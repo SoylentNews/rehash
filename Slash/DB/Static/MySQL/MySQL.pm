@@ -683,6 +683,7 @@ sub getTop10Comments {
 	$num_top10_comments = 0;
 
 	while (@$cids
+		&& $cids->[$num_top10_comments]
 		&& @{$cids->[$num_top10_comments]}
 		&& $num_top10_comments < $num_wanted
 	) {
