@@ -152,7 +152,8 @@ __template__
 		<FONT COLOR="[% user.colors.fg_3 %]">
 		[% IF topic_select %]
 			[% topic_select %]
-		[% END %]
+		[% END %]<BR>
+		[% shown_in_desc %]
 		</FONT></TD>
 	</TR>
 

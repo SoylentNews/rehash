@@ -1486,6 +1486,7 @@ sub editStory {
 		$attached_files = slashDisplay('attached_files', { files => $files }, { Return => 1});
 	}
 
+	my $shown_in_desc = getDescForTopicsRendered($storyref->{topics_rendered}, $storyref->{primaryskid});
 	# We probably should just pass the raw data instead of the formatted
 	# <SELECT> into this template and let the template deal with the
 	# HTML, here. Formatting these elements outside of the template
@@ -1512,6 +1513,7 @@ sub editStory {
 		extras			=> $extracolumns,
 		similar_stories		=> $similar_stories,
 		attached_files		=> $attached_files,
+		shown_in_desc		=> $shown_in_desc
 	});
 }
 
@@ -1534,6 +1536,52 @@ sub extractChosenFromForm {
 		}
 	}
 	return($chosen_hr, $chosen_names_hr);
+}
+
+##################################################################
+sub getDescForTopicsRendered {
+	my ($topics_rendered, $primaryskid) = @_;
+	my $slashdb = getCurrentDB();
+	my $topic_tree = $slashdb->getTopicTree();
+	my $mainpage_nexus_tid = getCurrentStatic("mainpage_nexus_tid");
+	my $primary_nexus_tid  = $slashdb->getNexusFromSkid($primaryskid);
+	my @story_nexuses        = grep { $topic_tree->{$_}{nexus} } keys %$topics_rendered;
+
+	my @sorted_nexuses = 	map { $_->[1] } 
+				sort {
+			     		$b->[0] <=> $a->[0] ||
+					$topic_tree->{$a}{textname} cmp $topic_tree->{$b}{textname}
+				} map { 
+			     		my $val = 0;
+					$val = 2 if $_ == $mainpage_nexus_tid;
+					$val = 1 if !$val and $_ == $primary_nexus_tid;
+					[$val, $_]
+				} @story_nexuses;
+	
+	return "This story will not appear." unless @sorted_nexuses;
+	my $first_nexus = shift @sorted_nexuses;
+	my $desc = "This story will be ";
+	if ($first_nexus == $mainpage_nexus_tid) {
+		$desc .= "on the $topic_tree->{$first_nexus}{textname}";
+	} elsif ($first_nexus == $primary_nexus_tid) {
+		$desc .= "in $topic_tree->{$first_nexus}{textname}";
+	}
+	if (@sorted_nexuses) {
+		$desc .= ", and linked from ";
+		if (@sorted_nexuses == 1) {
+			$desc .= "$topic_tree->{$sorted_nexuses[0]}{textname}.";
+		} else {
+			my $last_nexus = pop @sorted_nexuses;
+			my $next_to_last_nexus = pop @sorted_nexuses;
+			foreach (@sorted_nexuses) {
+				$desc .= "$topic_tree->{$_}{textname}, ";
+			}
+			$desc .= "$topic_tree->{$next_to_last_nexus}{textname} and $topic_tree->{$last_nexus}{textname}.";
+		}
+	} else {
+		$desc .= ".";
+	}
+	return $desc;
 }
 
 ##################################################################
