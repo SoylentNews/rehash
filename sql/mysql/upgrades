@@ -1481,3 +1481,9 @@ INSERT INTO vars (name, value, description) VALUES ('subscribe_future_plug','0',
 # SLASHCODE LAST UPDATED HERE
 
 # USEPERL LAST UPDATED HERE
+
+INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('info','Stats','Stats','[% constants.rootdir %]/stats.pl',1,2);
+
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Reports', '[% constants.rootdir %]/stats.pl?op=report', 1, 1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Graphs',  '[% constants.rootdir %]/stats.pl?op=list&amp;type=graphs', 1, 2);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('stats', 'Dumps',   '[% constants.rootdir %]/stats.pl?op=list', 1, 3);
