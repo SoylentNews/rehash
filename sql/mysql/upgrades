@@ -74,9 +74,8 @@ CREATE TABLE story_topics (
 # New var to regulate comment display - Jamie
 INSERT INTO vars (name, value, description) VALUES ('comments_max_email_len','40','Max num of chars of fakeemail to display in comment header');
 
-#______________________________________________________________________
-# End of T_2_3_0_10
-#______________________________________________________________________
+# End of T_2_3_0_10, Start of T_2_3_0_11
+
 # New attribute for stories
 ALTER TABLE stories ADD day_published date DEFAULT '0000-00-00' NOT NULL;
 ALTER TABLE stories ADD INDEX published (day_published);
@@ -84,9 +83,7 @@ UPDATE stories SET day_published=time;
 INSERT INTO vars (name, value, description) VALUES ('comments_moddable_archived','0','Are comments in discussions that have been archived moderatable?');
 INSERT INTO vars (name, value, description) VALUES ('comments_moddable_hours','336','Num hours after being posted that a comment may be moderated');
 
-#
-# Start of R_2_3_0_13
-#
+# End of T_2_3_0_?, Start of R_2_3_0_13
 
 # This was added to sql/mysql/slashschema_create.sql ... but is NOT yet live.
 # Brian says "list" is being yanked and "type" is part of code that PatG
@@ -97,18 +94,13 @@ INSERT INTO vars (name, value, description) VALUES ('comments_moddable_hours','3
 ALTER TABLE section_extras add column type enum("text","list") DEFAULT 'text' NOT NULL;
 ALTER TABLE string_param modify column code varchar(32) NOT NULL; 
 
-# End of R_2_3_0_13
-
-# Start of T_2_3_0_14
+# End of R_2_3_0_13, Start of T_2_3_0_14
 
 ALTER TABLE users_hits ADD COLUMN hits_bought_today SMALLINT UNSIGNED DEFAULT 0 NOT NULL AFTER hits_bought;
 ALTER TABLE sessions add column last_subid varchar(15);
 ALTER TABLE sessions add column last_sid varchar(16);
 
-# End of R_2_3_0_14
-
-
-# Start of T_2_3_0_15
+# End of R_2_3_0_14, Start of T_2_3_0_15
 
 # add ECODE tag ...
 UPDATE vars SET value=CONCAT(value,'|ECODE') WHERE name='approvedtags';
@@ -116,9 +108,7 @@ UPDATE vars SET value=CONCAT(value,'|ECODE') WHERE name='approvedtags';
 # Message threshold
 INSERT INTO vars (name, value, description) VALUES ('message_threshold','1','Default threshold for a comment to trigger a message');
 
-# End of R_2_3_0_15
-
-# Start of T_2_3_0_16
+# End of R_2_3_0_15, Start of T_2_3_0_16
 
 # Browser bug workaround
 INSERT INTO vars (name, value, description) VALUES ('comment_nonstartwordchars','.,;:/','Chars which cannot start a word (will be forcibly separated from the rest of the word by a space) - this works around a Windows/MSIE "widening" bug - set blank for no action');
@@ -154,7 +144,7 @@ source /tmp/pollquestions.sql
 # (and, once we're convinced everything works)
 ALTER TABLE pollquestions DROP COLUMN sid;
 
-# Start of T_2_3_0_21
+# End of T_2_3_0_20, Start of T_2_3_0_21
 
 # New submission_param table
 DROP TABLE IF EXISTS submission_param;
@@ -264,8 +254,7 @@ CREATE TABLE rss_raw (
 # A nice useful var.
 INSERT INTO vars (name, value, description) VALUES ('admin_formkeys', '0', 'Do admins have to bother with formkeys?');
 
-
-# End of T_2_3_0_21
+# End of T_2_3_0_21, Start of T_2_3_0_22
 
 # Install GD.pm and associated libraries for plugins/HumanConf.
 # GD/Text and GD/Text/Align.pm are needed too.
@@ -287,7 +276,7 @@ UPDATE submissions SET signature=MD5(story);
 ALTER TABLE submissions MODIFY COLUMN signature varchar(32) NOT NULL;
 
 # This expands blocks to get data from sites that require logins via a cookie
-ALTER TABLE blocks ADD COLUMN rss_cookie varchar(255),
+ALTER TABLE blocks ADD COLUMN rss_cookie varchar(255);
 
 #We ran into URLs that were longer then 50 characters 
 ALTER TABLE submissions MODIFY COLUMN email varchar(255) DEFAULT '' NOT NULL;
@@ -315,7 +304,7 @@ CREATE TABLE subsections (
   PRIMARY KEY (id)
 ) TYPE = myisam;
 
-# End of T_2_3_0_22
+# End of T_2_3_0_22, Start of T_2_3_0_23
 
 # If using HumanConf...
 ALTER TABLE humanconf_pool ADD COLUMN inuse TINYINT DEFAULT '0' NOT NULL AFTER lastused;
@@ -331,3 +320,7 @@ ALTER TABLE stories ADD last_update timestamp;
 # SLASHCODE LAST UPDATED HERE
 # OSDN LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_23
+
