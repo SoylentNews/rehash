@@ -1411,8 +1411,6 @@ ALTER TABLE accesslist ADD INDEX now_trusted (now_trusted);
 # End of T_2_3_0_84, Start of T_2_3_0_85 - 2003/04/10
 # End of T_2_3_0_85, Start of T_2_3_0_86 - 2003/04/10
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_86, Start of T_2_3_0_87 - 2003/04/16
 
 # End of T_2_3_0_87, Start of T_2_3_0_88 - 2003/04/16
@@ -1465,4 +1463,11 @@ CREATE TABLE users_acl (
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 
+# End of T_2_3_0_88, Start of T_2_3_0_89 - 2003/04/23
+
 # USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_89, Start of T_2_3_0_90 - 2003/04/24
+
+# SLASHDOT LAST UPDATED HERE
+

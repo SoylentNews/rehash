@@ -2234,6 +2234,7 @@ sub saveComm {
 		no_spell	=> ($form->{no_spell}   ? 1 : undef),
 		sigdash		=> ($form->{sigdash} ? 1 : undef),
 		nobonus		=> ($form->{nobonus} ? 1 : undef),
+		nosubscriberbonus => ($form->{nosubscriberbonus} ? 1 : undef),
 		postanon	=> ($form->{postanon} ? 1 : undef),
 		new_user_percent => ($new_user_percent && $new_user_percent != 100
 					? $new_user_percent : undef),
