@@ -149,12 +149,25 @@ $task{$me}{code} = sub {
 		$report_link = "\n$constants->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
 		if (my $stats = getObject('Slash::Stats')) {
 			my @stats = ( );
-			push @stats, $stats->getStatLastNDays("subscribe_new_users",		30) || 0;
-			push @stats, $stats->getStatLastNDays("subscribe_new_pages",		30) || 0;
-			push @stats, $stats->getStatLastNDays("subscribe_new_payments",		30) || 0;
-			push @stats, $stats->getStatLastNDays("subscribe_renew_users",		30) || 0;
-			push @stats, $stats->getStatLastNDays("subscribe_renew_pages",		30) || 0;
-			push @stats, $stats->getStatLastNDays("subscribe_renew_payments",	30) || 0;
+
+			my $tmp = $stats->getStatLastNDays("subscribe_new_users", 30) || 0;
+			$statsSave->createStatDaily('subscribe_new_users_last30', $tmp);
+			push @stats, $tmp;
+			$tmp = $stats->getStatLastNDays("subscribe_new_pages", 30) || 0;
+			$statsSave->createStatDaily('subscribe_new_pages_last30', $tmp);
+			push @stats, $tmp;
+			$tmp = $stats->getStatLastNDays("subscribe_new_payments", 30) || 0;
+			$statsSave->createStatDaily('subscribe_new_payments_last30', $tmp);
+			push @stats, $tmp;
+			$tmp = $stats->getStatLastNDays("subscribe_renew_users", 30) || 0;
+			$statsSave->createStatDaily('subscribe_renew_users_last30', $tmp);
+			push @stats, $tmp;
+			$tmp = $stats->getStatLastNDays("subscribe_renew_pages", 30) || 0;
+			$statsSave->createStatDaily('subscribe_renew_pages_last30', $tmp);
+			push @stats, $tmp;
+			$tmp = $stats->getStatLastNDays("subscribe_renew_payments", 30) || 0;
+			$statsSave->createStatDaily('subscribe_renew_payments_last30', $tmp);
+			push @stats, $tmp;
 			push @stats, $stats[0]+$stats[3];
 			push @stats, $stats[1]+$stats[4];
 			push @stats, $stats[2]+$stats[5];
