@@ -72,7 +72,10 @@ sub main {
 		my $discussion = $slashdb->getDiscussionBySid($story->{sid});
 		# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
 		$user->{state}{tid} = $discussion->{topic};
-		printComments($discussion);
+		# this should really be done per-story, perhaps with article_nocomment
+		# being a default for the story editor instead of being system-wide; that feature
+		# has been begun, but doesn't work -- pudge
+		printComments($discussion) unless $constants->{article_nocomment};
 	} else {
 		my $message = getData('no_such_sid');
 		header($message, $form->{section});
