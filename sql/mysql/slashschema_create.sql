@@ -125,20 +125,6 @@ CREATE TABLE blocks (
 	KEY section (section)
 ) TYPE = myisam;
 
-#
-# Table structure for table 'subsections'
-#
-
-DROP TABLE IF EXISTS subsections;
-CREATE TABLE subsections (
-	id smallint UNSIGNED NOT NULL auto_increment,
-	title varchar(30) NOT NULL,
-	section varchar(30) NOT NULL,
-	artcount mediumint DEFAULT '30' NOT NULL,
-	UNIQUE code_key (title,section),
-	FOREIGN KEY (section) REFERENCES sections(section),
-	PRIMARY KEY (id)
-) TYPE = myisam;
 
 #
 # Table structure for table 'code_param'
@@ -539,6 +525,21 @@ CREATE TABLE section_topics (
 	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (tid) REFERENCES topics(tid),
 	PRIMARY KEY (section,type,tid)
+) TYPE = myisam;
+
+#
+# Table structure for table 'subsections'
+#
+
+DROP TABLE IF EXISTS subsections;
+CREATE TABLE subsections (
+	id smallint UNSIGNED NOT NULL auto_increment,
+	title varchar(30) NOT NULL,
+	section varchar(30) NOT NULL,
+	artcount mediumint DEFAULT '30' NOT NULL,
+	UNIQUE code_key (title,section),
+	FOREIGN KEY (section) REFERENCES sections(section),
+	PRIMARY KEY (id)
 ) TYPE = myisam;
 
 #

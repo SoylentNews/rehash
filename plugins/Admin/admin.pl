@@ -947,6 +947,17 @@ sub otherLinks {
 sub get_slashd_box {
 	my $slashdb = getCurrentDB();
 	my $sldst = $slashdb->getSlashdStatuses();
+	for my $task (keys %$sldst) {
+		$sldst->{$task}{last_completed_hhmm} =
+			substr($sldst->{$task}{last_completed}, 11, 5)
+			if defined($sldst->{$task}{last_completed});
+		$sldst->{$task}{next_begin_hhmm} =
+			substr($sldst->{$task}{next_begin}, 11, 5)
+			if defined($sldst->{$task}{next_begin});
+		$sldst->{$task}{summary_trunc} =
+			substr($sldst->{$task}{summary}, 0, 30)
+			if $sldst->{$task}{summary};
+	}
 	# Yes, this really is the easiest way to do this.
 	# Yes, it is quite complicated.
 	# Sorry.  - Jamie
@@ -1510,8 +1521,20 @@ sub updateStory {
 ##################################################################
 sub displaySlashd {
 	my($form, $slashdb, $user, $constants) = @_;
+	my $answer = $slashdb->getSlashdStatuses();
+	for my $task (keys %$answer) {
+		$answer->{$task}{last_completed_hhmm} =
+			substr($answer->{$task}{last_completed}, 11, 5)
+			if defined($answer->{$task}{last_completed});
+		$answer->{$task}{next_begin_hhmm} =
+			substr($answer->{$task}{next_begin}, 11, 5)
+			if defined($answer->{$task}{next_begin});
+		$answer->{$task}{summary_trunc} =
+			substr($answer->{$task}{summary}, 0, 30)
+			if $answer->{$task}{summary};
+	}
 	slashDisplay('slashd_status', {
-		tasks => $slashdb->getSlashdStatuses(),
+		tasks => $answer,
 	});
 }
 
