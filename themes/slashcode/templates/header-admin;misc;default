@@ -19,7 +19,7 @@ __template__
 	<TR>
 		<TD VALIGN="BOTTOM" BGCOLOR="[% user.bg.3 %]">[% Slash.createMenu(adminmenu, { color => 'white' } ) %]</TD>
 		<TD VALIGN="TOP" BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT">
-		<FONT SIZE="4" COLOR="[% user.fg.3 %]">[% constants.sitename %]&nbsp;</FONT>
+		<A HREF="[% constants.real_rootdir %]"><FONT COLOR="[% user.fg.3 %]">[% constants.sitename %]</FONT></A>&nbsp;
 		</TD>
 	</TR>
 	<TR><TD VALIGN="TOP" COLSPAN="2"><FONT COLOR="[% user.fg.1 %]">
