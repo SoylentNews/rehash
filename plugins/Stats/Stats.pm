@@ -396,36 +396,38 @@ sub getReverseMods {
 
 	return $ar;
 }
+
 ########################################################
 sub countErrorStatuses {
 	my($self, $options) = @_;
 
-	my $where = " status BETWEEN 500 AND 600 ";
+	my $where = "status BETWEEN 500 AND 599";
 
-	$self->sqlSelect("count(id)", "accesslog_temp_errors", $where);
+	$self->sqlSelect("COUNT(id)", "accesslog_temp_errors", $where);
 }
 
 ########################################################
 sub countByStatus {
 	my($self, $status, $options) = @_;
 
-	my $where = " status = $status  ";
+	my $where = "status = '$status'";
 
-	$self->sqlSelect("count(id)", "accesslog_temp_errors", $where);
+	$self->sqlSelect("COUNT(id)", "accesslog_temp_errors", $where);
 }
 
 ########################################################
 sub getErrorStatuses {
 	my($self, $op, $options) = @_;
 
-	my $where = "1=1 ";
-	$where .= " AND op='$op' "
-		if $op;
-	$where .= " AND section='$options->{section}' "
-		if $options->{section};
-	$where .= " AND status BETWEEN 500 AND 600 ";
+	my $where = "status BETWEEN 500 AND 599";
+	$where .= " AND op='$op'"			if $op;
+	$where .= " AND section='$options->{section}'"	if $options->{section};
 
-	$self->sqlSelectAllHashrefArray("status, count(op) as count, op", "accesslog_temp_errors", $where, " GROUP BY status ORDER BY status ");
+	$self->sqlSelectAllHashrefArray(
+		"status, COUNT(op) AS count, op",
+		"accesslog_temp_errors",
+		$where,
+		"GROUP BY status ORDER BY status");
 }
 
 ########################################################

@@ -67,10 +67,10 @@ gstatic total:        -          -   [% grand_total_static %]
                           
 
 [% IF error_count > 0 -%]
-       errors: [% error_count %] pages generated errors
+       errors: [% error_count %] pages logged 5xx errors
 [% END -%]
 [% IF not_found > 0 -%]
-    not found: [% not_found %] pages were not found
+    not found: [% not_found %] pages sent with status 404 (not found)
 [% END -%]
 [% IF status_202 > 0 -%]
    status 202: [% status_202 %] pages sent with status 202 (rejected RSS)
