@@ -395,11 +395,22 @@ sub countCommentsDaily {
 ########################################################
 sub countBytesByPage {
 	my($self, $op, $yesterday, $options) = @_;
-	my $where = "op='$op' AND "
+
+	my $where = "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
+	$where .= " AND op='$op'"
 		if $op;
-	$where .= "section='$options->{section}' AND "
+	$where .= " AND section='$options->{section}'"
 		if $options->{section};
-	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
+
+	# The "no_op" option can take either a scalar for one op to exclude,
+	# or an arrayref of multiple ops to exclude.
+	my $no_op = $options->{no_op} || [ ];
+	$no_op = [ $no_op ] if $options->{no_op} && !ref($no_op);
+	if (@$no_op) {
+		my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
+		$where .= " AND op NOT IN ($op_not_in)";
+	}
+
 	$self->sqlSelect("sum(bytes)", "accesslog", $where);
 }
 
@@ -423,8 +434,15 @@ sub countDailyByPage {
 		if $op;
 	$where .= " AND section='$options->{section}'"
 		if $options->{section};
-	$where .= " AND op !='$options->{no_op}'"
-		if $options->{no_op} && !$op;
+
+	# The "no_op" option can take either a scalar for one op to exclude,
+	# or an arrayref of multiple ops to exclude.
+	my $no_op = $options->{no_op} || [ ];
+	$no_op = [ $no_op ] if $options->{no_op} && !ref($no_op);
+	if (@$no_op) {
+		my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
+		$where .= " AND op NOT IN ($op_not_in)";
+	}
 
 	$self->sqlSelect("count(*)", "accesslog", $where);
 }

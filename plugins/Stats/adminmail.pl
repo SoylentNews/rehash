@@ -91,7 +91,7 @@ EOT
 		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
 		my $pages = $stats->countDailyByPage($_, $yesterday);
 		my $bytes = $stats->countBytesByPage($_, $yesterday);
-		$data{"${_}_ipids"}  = sprintf("%8d", $uniq);
+		$data{"${_}_ipids"} = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
 		$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq, { section => 'index'});
@@ -106,9 +106,9 @@ EOT
 #		my $people = $stats->countDailyMessagesByUID($_, $yesterday);
 #		my $uses = $stats->countDailyMessagesByCode($_, $yesterday);
 #		my $mode = $stats->countDailyMessagesByMode($_, $yesterday);
-#		$temp->{"people"}  = sprintf("%8d", $people);
-#		$temp->{"uses"} = sprintf("%8d", $uses);
-#		$temp->{"mode"} = sprintf("%8d", $mode);
+#		$temp->{people} = sprintf("%8d", $people);
+#		$temp->{uses} = sprintf("%8d", $uses);
+#		$temp->{mode} = sprintf("%8d", $mode);
 #		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people, { section => 'index'});
 #		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses, { section => 'index'});
 #		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode, { section => 'index'});
@@ -122,10 +122,13 @@ EOT
 		my $temp = {};
 		$temp->{section_name} = $section;
 		my $uniq = $stats->countDailyByPageDistinctIPID('', $yesterday, { section => $section });
-		my $pages = $stats->countDailyByPage('', $yesterday, { section => $section, no_op => 'rss'  });
+		my $pages = $stats->countDailyByPage('', $yesterday, {
+			section => $section,
+			no_op => $constants->{op_exclude_from_countdaily}
+		} );
 		my $bytes = $stats->countBytesByPage('', $yesterday, { section => $section });
 		my $users = $stats->countUsersByPage('', $yesterday, { section => $section });
-		$temp->{ipids}  = sprintf("%8d", $uniq);
+		$temp->{ipids} = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
 		$temp->{users} = sprintf("%8d", $users);
@@ -135,10 +138,13 @@ EOT
 
 		for (qw| index article search comments palm rss|) {
 			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section  });
-			my $pages = $stats->countDailyByPage($_, $yesterday, { section => $section, no_op => 'rss' });
+			my $pages = $stats->countDailyByPage($_, $yesterday, {
+				section => $section,
+				no_op => $constants->{op_exclude_from_countdaily}
+			} );
 			my $bytes = $stats->countBytesByPage($_, $yesterday, { section => $section  });
 			my $users = $stats->countUsersByPage($_, $yesterday, { section => $section  });
-			$temp->{$_}{ipids}  = sprintf("%8d", $uniq);
+			$temp->{$_}{ipids} = sprintf("%8d", $uniq);
 			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
 			$temp->{$_}{users} = sprintf("%8d", $users);
@@ -151,7 +157,9 @@ EOT
 	}
 
 
-	my $total_bytes = $stats->countBytesByPage('', $yesterday, { no_op => 'rss' });
+	my $total_bytes = $stats->countBytesByPage('', $yesterday, {
+		no_op => $constants->{op_exclude_from_countdaily}
+	} );
 
 	my $admin_mods = $stats->getAdminModsInfo($yesterday, $weekago);
 	my $admin_mods_text = "";
