@@ -22,7 +22,7 @@ __template__
 	   IF varsection.value == constants.section;
 	      constants.sitename %]: [% constants.slogan;
 	   ELSE;
-	      section.title;
+	      constants.sitename %]: [% section.title %] - [% constants.slogan;
 	   END;
 	%]
 
