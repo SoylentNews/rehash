@@ -6829,16 +6829,16 @@ sub _genericSet {
 		# need for a fully sql92 database.
 		# transactions baby, transactions... -Brian
 		for (@param)  {
-			$self->sqlReplace($param_table, { $table_prime => $id, name => $_->[0], value => $_->[1]});
+			$self->sqlReplace($param_table, { $table_prime => $id, name => $_->[0], value => $_->[1] });
 		}
 	} else {
 		$ok = $self->sqlUpdate($table, $value, $table_prime . '=' . $self->sqlQuote($id));
 	}
 
-	my $table_cache= '_' . $table . '_cache';
+	my $table_cache = '_' . $table . '_cache';
 	return $ok unless keys %{$self->{$table_cache}};
 
-	my $table_cache_time= '_' . $table . '_cache_time';
+	my $table_cache_time = '_' . $table . '_cache_time';
 	$self->{$table_cache_time} = time();
 	for (keys %$value) {
 		$self->{$table_cache}{$id}{$_} = $value->{$_};
