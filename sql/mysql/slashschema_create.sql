@@ -728,7 +728,7 @@ CREATE TABLE users_count (
 ) TYPE = myisam;
 
 #
-# Table structure for table 'users_index'
+# Table structure for table 'users_hits'
 #
 
 DROP TABLE IF EXISTS users_hits;
