@@ -25,7 +25,8 @@ sub main {
 	# for now ... writer
 	my $stats     = getObject('Slash::Stats', { db_type => 'writer' } );
 
-	my $admin      = $user->{acl}{stats}; #$user->{seclev} >= ($constants->{stats_admin_seclev} || 100);
+	# maybe eventually make this acl-only
+	my $admin      = ($user->{acl}{stats} || ($user->{seclev} >= ($constants->{stats_admin_seclev} || 100)));
 	my $admin_post = $admin && $user->{state}{post};
 
 	# possible value of "op" parameter in form
