@@ -2390,8 +2390,8 @@ sub isPollOpen {
 
 #####################################################
 sub hasPollActivated{
-	my ($self, $qid) = @_;
-	return $self->sqlCount("pollquestions","qid='$qid' and date <= now()");
+	my($self, $qid) = @_;
+	return $self->sqlCount("pollquestions", "qid='$qid' and date <= now()");
 }
 
 
