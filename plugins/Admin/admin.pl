@@ -1743,6 +1743,11 @@ sub displayRecentRequests {
 sub displayRecentSubs {
 	my($form, $slashdb, $user, $constants) = @_;
 
+	if (!$constants->{subscribe}) {
+		listStories();
+		return;
+	}
+
 	my $admindb = getObject("Slash::Admin",
 		$constants->{backup_db_user} || $constants->{log_db_user});
 
