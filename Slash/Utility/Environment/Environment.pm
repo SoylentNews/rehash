@@ -1611,11 +1611,11 @@ sub createEnvironment {
 	my($virtual_user) = @_;
 	my %form;
 	unless ($virtual_user) {
-		for (@ARGV) {
-			my($key, $val) = split /=/;
-			last if ! defined $val; # stop processing if key=val stops
+		while (my $pair = shift @ARGV) {
+			my($key, $val) = split /=/, $pair;
+			# stop processing if key=val stops, and put last arg back on
+			unshift(@ARGV, $pair), last if ! defined $val;
 			$form{$key} = $val;
-			shift @ARGV;  # remove it
 		}
 		$virtual_user = $form{'virtual_user'};
 	}
