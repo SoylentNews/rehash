@@ -784,7 +784,6 @@ UPDATE stats_daily SET name='m2_points_lost_spent' WHERE name='m2_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent' WHERE name='mod_points_spent';
 UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_points_spent_plus_1';
 UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_points_spent_minus_1';
-
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
-
+ALTER TABLE users_info CHANGE people people MEDIUMBLOB;
