@@ -2135,7 +2135,7 @@ sub saveStory {
 	$form->{dept} =~ s/ /-/g;
 
 	my($chosen_hr) = extractChosenFromForm($form);
-	my $tids = $slashdb->getTopiclistFromChosen($chosen_hr);
+	my($tids) = $slashdb->getTopiclistFromChosen($chosen_hr);
 
 	my $story_text = "$form->{title} $form->{bodytext} $form->{introtext}";
 	$form->{relatedtext} = getRelated($story_text, $tids)
