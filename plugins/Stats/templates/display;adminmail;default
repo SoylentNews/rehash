@@ -24,7 +24,7 @@ __template__
    mod points: [% mod_points %] in pool
    used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
       used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
-      used +1: [% used_minus_1_percent %] yesterday ([% used_plus_1_persecent %]%)
+      used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
      comments: [% comments %] posted yesterday
         IPIDS: [% IPIDS %] distinct IPIDS posted comments
              : [% comments_ipids %] distinct IPIDS used comments

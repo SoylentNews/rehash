@@ -173,7 +173,7 @@ EOT
 		used_minus_1 => sprintf("%8.1f", $modlog_hr->{-1}{count}),
 		used_minus_1_percent => sprintf("%8.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) ),
 		used_plus_1 => sprintf("%8d", $modlog_hr->{1}{count}),
-		used_plus_1_persecent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0)),
+		used_plus_1_percent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0)),
 		comments => sprintf("%8d", $comments),
 		IPIDS => sprintf("%8d", scalar(@$distinct_comment_ipids)),
 		comments_ipids => sprintf("%8d", $uniq_comment_users),
