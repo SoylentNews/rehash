@@ -6,7 +6,7 @@ Form for previewing a user's submission
 * submission = submission hashref (email, name, subj, tid, story, time, comment)
 * subid = submission id
 * lockTest = string describing other admins looking at similar submissions
-* section = name of section
+* skin = name of skin
 
 __title__
 
