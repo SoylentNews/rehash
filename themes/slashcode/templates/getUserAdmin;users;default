@@ -143,7 +143,7 @@ __template__
 				<TD WIDTH="100">&nbsp;</TD>
 				<TD ALIGN="LEFT">Subscriber pages - "Bought" (Used): [% useredit.hits_bought %], Bought Today: [% useredit.hits_bought_today %], Paid For: [% useredit.hits_paidfor %]</TD>
 			</TR>
-[% IF useredit.subscribe_payments %]
+[% IF useredit.subscribe_payments.size %]
 			<TR>
 				<TD WIDTH="100">&nbsp;</TD>
 				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]">
