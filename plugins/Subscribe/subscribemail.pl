@@ -105,7 +105,8 @@ $task{$me}{code} = sub {
 	my @yesttime = localtime(time-86400);
 	my $yesterday = sprintf "%4d-%02d-%02d",
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
-	if (my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday })) {
+	my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday });
+	if ($statsSave) {
 		my($new_count, $sum_new_pages, $sum_new_payments) = (0, 0, 0);
 		my($renew_count, $sum_renew_pages, $sum_renew_payments) = (0, 0, 0);
 		for my $uid (keys %$subscribers_hr) {
@@ -147,7 +148,7 @@ $task{$me}{code} = sub {
 	my($report_link, $monthly_stats) = ("", "");
 	if ($constants->{plugin}{Stats}) {
 		$report_link = "\n$constants->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
-		if (my $stats = getObject('Slash::Stats')) {
+		if ($statsSave and my $stats = getObject('Slash::Stats')) {
 			my @stats = ( );
 
 			my $tmp = $stats->getStatLastNDays("subscribe_new_users", 30) || 0;
