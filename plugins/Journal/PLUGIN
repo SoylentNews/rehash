@@ -23,5 +23,6 @@ template=templates/messagenew;journal;default
 template=templates/messagenew_subj;journal;default
 template=templates/meta;journal;default
 template=templates/pagination;journal;default
+template=templates/rsslink_journal;journal;default
 template=templates/searchusers;journal;default
 template=templates/slashdot;journal;default

@@ -80,7 +80,7 @@ ELSIF env.script_name.search('journal\.pl');
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
 <LINK REL="alternate" TITLE="[% link.nickname | strip_attribute %]'s Journal RSS" HREF="[% PROCESS rsslink rsslink_style = 'journal' %]" TYPE="application/rss+xml">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="[% link.nickname | strip_attribute %]'s Friends' Journalsd the B RSS" HREF="[% PROCESS rsslink rsslink_style = 'journalfriends' %]" TYPE="application/rss+xml">
+<LINK REL="alternate" TITLE="[% link.nickname | strip_attribute %]'s Friends' Journals RSS" HREF="[% PROCESS rsslink rsslink_style = 'journalfriends' %]" TYPE="application/rss+xml">
 	[%- END; linkrels.push(tmp); END;
 
 	IF constants.journal_top;
