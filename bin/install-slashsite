@@ -529,6 +529,25 @@ sub apache_site_conf {
     # with /~username
     PerlTransHandler Slash::Apache::User::userdir_handler
 
+    # this can be used to preload your .pl scripts in the parent,
+    # saving both startup time and memory in the child
+    # add/remove scripts from \@pls (normally best to include only
+    # and all commonly used scripts)
+    PerlModule Apache::RegistryLoader;
+    <Perl>
+        # if you need to debug, temporarily turn this on
+        # \$Apache::Registry::Debug = 4;
+        my \@pls     = qw(index comments article users journal search metamod);
+        my \$vhost   = '\$host_noport';
+        my \$docroot = '\$prefix_site/\$sitename/htdocs';
+        my \$r       = Apache::RegistryLoader->new;
+
+        for my \$u (\@pls) {
+                my \$f = "\$docroot/\$u.pl";
+                \$r->handler("/\$u.pl", \$f, \$vhost) if -e \$f;
+        }
+    </Perl>
+
     DirectoryIndex index.pl index.shtml
     ErrorDocument 404 /404.pl
 
