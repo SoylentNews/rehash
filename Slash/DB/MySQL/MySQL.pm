@@ -3142,15 +3142,9 @@ sub createAbuse {
 sub setExpired {
 	my($self, $uid) = @_;
 
-	if  (! $self->checkExpired($uid)) {
-		$self->setUser($uid, { expired => 1});
-		$self->sqlInsert('accesslist', {
-			-uid		=> $uid,
-			formname 	=> 'comments',
-			-readonly	=> 1,
-			-ts		=> 'now()',
-			reason		=> 'expired'
-		}) if $uid ;
+	if  ($uid && !$self->checkExpired($uid)) {
+		$self->setUser($uid, { expired => 1 });
+		$self->setAccessList({ uid => $uid }, [qw( nopost )], 'expired');
 	}
 }
 
@@ -3158,10 +3152,9 @@ sub setExpired {
 sub setUnexpired {
 	my($self, $uid) = @_;
 
-	if ($self->checkExpired($uid)) {
-		$self->setUser($uid, { expired => 0});
-		my $sql = "WHERE uid = $uid AND reason = 'expired' AND formname = 'comments'";
-		$self->sqlDo("DELETE from accesslist $sql") if $uid;
+	if ($uid && $self->checkExpired($uid)) {
+		$self->setUser($uid, { expired => 0 });
+		$self->setAccessList({ uid => $uid }, [ ], '');
 	}
 }
 
@@ -3170,12 +3163,11 @@ sub checkExpired {
 	my($self, $uid) = @_;
 	return 0 if !$uid;
 
-	my $where = "uid = $uid AND readonly = 1 AND reason = 'expired'";
-
-	$self->sqlSelect(
-		"readonly",
-		"accesslist", $where
+	my $rows = $self->sqlCount(
+		"accesslist",
+		"uid = '$uid' AND now_nopost = 'yes' AND reason = 'expired'"
 	);
+	return $rows ? 1 : 0;
 }
 
 ##################################################################
