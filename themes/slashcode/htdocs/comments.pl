@@ -602,14 +602,16 @@ sub validateComment {
 	my $post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $user->{subnetid});
 	if ($user->{is_anon} || $form->{postanon}) {
 		if ($post_restrictions->{no_anon}) {
-			my $logged_in_allowed = ! $post_restrictions->{no_post};
-				$$error_message = getError('troll message', {
-					unencoded_ip 		=> $ENV{REMOTE_ADDR},
-					logged_in_allowed 	=> $logged_in_allowed      
-				});
+			my $logged_in_allowed = !$post_restrictions->{no_post};
+			$$error_message = getError('troll message', {
+				unencoded_ip 		=> $ENV{REMOTE_ADDR},
+				logged_in_allowed 	=> $logged_in_allowed      
+			});
 			return;
 		}
-	} elsif (!$user->{is_admin} && $post_restrictions->{no_post}) {
+	}
+
+	if (!$user->{is_admin} && $post_restrictions->{no_post}) {
 		$$error_message = getError('troll message', {
 			unencoded_ip 		=> $ENV{REMOTE_ADDR},
 		});
