@@ -1956,3 +1956,14 @@ ALTER TABLE accesslist ADD estimated_users SMALLINT UNSIGNED DEFAULT 1;
 
 REPLACE INTO vars SET description='Seclev for which authors have unlimited comment-moderation and -deletion power (see also the ACLs)' WHERE name='authors_unlimited';
 
+# set to whatever date_format you'd like to use for archived stories, you can set the value to be an empty string if you want it to work as it
+# currently does
+INSERT INTO vars (name, value, description) VALUES ('archive_dateformat',' %I:%M %p  %B %o, %Y','format for dates when stories are archived to shtml');
+
+# currently set to previous defaults -- set as appropriate for your site
+# to rewrite archived stories with a new datestamp you will want to set writestatus to dirty for a manageable number of previously archived story
+# set your archive_limit var appropriately and probably set your archive_dir to DESC so stories set to be handled newly archived are handled first
+# and then older stories are rearchived with the new date format.  You only need to do this if you want to change the date_format of archived stories
+INSERT INTO vars (name, value, description) VALUES ('archive_dir','ASC','direction we want items to be archived ordered and handled');
+INSERT INTO vars (name, value, description) VALUES ('archive_limit','500','maximum number of articles to archive at a time');
+
