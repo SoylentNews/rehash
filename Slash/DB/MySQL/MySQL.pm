@@ -219,8 +219,14 @@ my %descriptions = (
 	'section-types'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='section_types'") },
 
-	'otherusersparam',
+	'otherusersparam'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='otherusersparam'") },
+
+	'bytelimit'
+		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='bytelimit'") },
+
+	'bytelimit_sub'
+		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='bytelimit' OR type='bytelimit_sub'") },
 
 	countries => sub {
 		$_[0]->sqlSelectMany(
