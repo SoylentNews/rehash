@@ -20,9 +20,9 @@ __template__
 IF constants.panic %]
 	<P ALIGN="CENTER"><B>**&nbsp;PANIC&nbsp;LEVEL&nbsp;[% constants.panic %]&nbsp;**</B></P>[% END
 %][ [% FOR i = items %]
-		<FONT SIZE="2"><A HREF="[% i.value %]">[% i.label %]</A>
+		<FONT SIZE="2"><A HREF="[% i.value %]">[% i.label %]</A></FONT>
 	[% " | " UNLESS loop.last %]
-[% END %] ]	<FONT></TD>
+[% END %] ]	</TD>
 	</TR>
 </TABLE>
 
