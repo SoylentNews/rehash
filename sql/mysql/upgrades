@@ -1,6 +1,6 @@
 # This is the upgrade file for SQL. What does this mean to you?
 # If you are a developer you should leave notes here as to what
-# was done and when. Tihs include inserts, alter tables and deletions.
+# was done and when. This includes inserts, alter tables and deletions.
 # The Format is that you add your changes to the end with notes
 # and who you are. If your changes occur after a certain release tag
 # then you need to place your changes there.
