@@ -418,7 +418,7 @@ sub rss_item_description {
 			}
 		}
 
-		$desc = xmlEscapeStr($desc);		
+		$desc = $self->encode($desc);		
 	} else {
 		undef $desc;
 	}
