@@ -17,20 +17,20 @@ use vars qw( %task $me );
 # 	archive_limit	=> max. number of archived stories to process
 # 	archive_dir	=> direction of progression, one of: ASC, or DESC
 
-$task{$me}{timespec} = '7 7 * * *';
+$task{$me}{timespec} = '7 8 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $basedir = $constants->{basedir};
 
-	# Takes approx. 6 seconds on Slashdot
+	# Takes approx. 10 seconds on Slashdot
 	# (approx. 6 minutes if subscribe_hits_only is set)
 	slashdLog('Updating User Logins Begin');
 	$slashdb->updateLastaccess();
 	slashdLog('Updating User Logins End');
 
-	# Takes approx. ? on Slashdot
+	# Takes approx. 2 seconds on Slashdot
 	slashdLog('Decaying User Tokens Begin');
 	my $decayed = $slashdb->decayTokens();
 	slashdLog("Decaying User Tokens End ($decayed decayed)");
@@ -38,19 +38,19 @@ $task{$me}{code} = sub {
 		$statsSave->addStatDaily("mod_tokens_lost_decayed", $decayed);
 	}
 
-	# Takes approx. 30 seconds on Slashdot
+	# Takes approx. 60 seconds on Slashdot
 	slashdLog('Update Total Counts Begin');
 	my $totalHits = $slashdb->getVar("totalhits", '', 1);
 	my $count = $slashdb->countAccesslogDaily();
 	$slashdb->setVar("totalhits", $totalHits);
 	slashdLog('Update Total Counts End');
 
-	# Takes approx. 45 minutes on Slashdot
+	# Takes approx. 70 minutes on Slashdot
 	slashdLog('Daily Deleting Begin');
 	$slashdb->deleteDaily();
 	slashdLog('Daily Deleting End');
 
-	# Mark discussions as archived.
+	# Mark discussions as archived.  Less than 1 second.
 	$slashdb->updateArchivedDiscussions();
 
 	# Archive stories.
@@ -65,7 +65,7 @@ $task{$me}{code} = sub {
 		slashdLog("Daily Archival End ($count[0] articles in $count[1]s)");
 	}
 
-	# Takes approx. 5 seconds on Slashdot
+	# Takes approx. 15 seconds on Slashdot
 	slashdLog('Begin Daily Comment Recycle');
 	my $msg = $slashdb->deleteRecycledComments();
 	slashdLog("End Daily Comment Recycle ($msg recycled)");
