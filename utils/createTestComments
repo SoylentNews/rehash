@@ -38,7 +38,7 @@ if ($opts{R}) {
 		if ! exists $opts{U};
 	usage('Invalid UID specified') unless $opts{U} =~ /^\d+$/;
 }
-if ($opts{T} and $opts{t}) {
+if ($opts{T} && $opts{t}) {
 	usage("Can't specify both -t and -T, pick one");
 }
 $junk = $opts{'J'} ? 1 : 0;
@@ -46,8 +46,6 @@ $opts{'u'} ||= 'slash';
 $opts{num_comments} = $ARGV[0] || 10;
 usage('Invalid number of comments') 
 	if $opts{num_comments} !~ /^\d+$/ || $opts{num_comments} < 0;
-
-my $story_table = 'stories';
 
 createEnvironment($opts{u});
 $slashdb = getCurrentDB();
@@ -65,17 +63,16 @@ $werder = new Silly::Werder;
 	my $t0 = new Benchmark;
 	my $count = $opts{num_comments};
 	while ($count) {
-		my($sid, $discussion_id) = ('', '');
+		my($stoid, $discussion_id) = ('', '');
 		if ($story_id =~ /^\d+$/) {
 			$discussion_id = $story_id;
 		} else {
 			if ($story_id =~ m{/}) {
-				$sid = $story_id;
+				$stoid = $story_id;
 			} else {
-				$sid = getRandomSid();
+				$stoid = getRandomStoid();
 			}
-			$discussion_id = $slashdb->sqlSelect("discussion",
-				$story_table, "sid=".$slashdb->sqlQuote($sid));
+			$discussion_id = $slashdb->getStory($stoid, 'discussion');
 		}
 		my $discussion = $slashdb->getDiscussion($discussion_id);
 		if (!$discussion_id || !$discussion) {
@@ -125,7 +122,7 @@ $werder = new Silly::Werder;
 			for my $cid (keys %family_tree) {
 				my $count = 0;
 				my $cid_back = $cid;
-				while (exists($family_tree{$cid_back}) and ++$count < 1000) {
+				while (exists($family_tree{$cid_back}) && ++$count < 1000) {
 					$deep_tree{$cid}++;
 					$cid_back = $family_tree{$cid_back};
 				}
@@ -181,7 +178,7 @@ $werder = new Silly::Werder;
 		my $cid = $slashdb->createComment($clean_comment);
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
-		$slashdb->setStory($sid, { is_dirty => 1 }) if $sid;
+		$slashdb->setStory($stoid, { is_dirty => 1 }) if $stoid;
 	        $family_tree{$cid} = $pid if ! $opts{T};
 		$deep_tree{$cid} = $deep_tree{$pid}+1 if $opts{t};
 	        print <<EOT;
@@ -197,33 +194,40 @@ EOT
 
 # subroutines
 
-sub getRandomSid {
-	my $ds_clause = "displaystatus = 0";
-	if (rand(1) < 0.3) {
-		# A minority of comments are posted to sectional stories.
-		$ds_clause = "displaystatus > -1";
+sub getRandomStoid {
+	# A minority of comments are posted to sectional stories.
+	my $sectional = rand(1) < 0.3 ? 1 : 0;
+	my $nexus_ar;
+	if ($sectional) {
+		$nexus_ar = $slashdb->getNexusChildrenTids($constants->{mainpage_nexus_tid});
+	} else {
+		$nexus_ar = [ $constants->{mainpage_nexus_tid} ];
 	}
-	my $sids = $slashdb->sqlSelectAll("sid",
-		$story_table,
-		"discussion > 0
-		 AND $ds_clause
+	my $nexus_list = join(", ", @$nexus_ar);
+	my $stoids = $slashdb->sqlSelectColArrayref(
+		"stories.stoid",
+		"stories, story_topics_rendered",
+		"stories.stoid=story_topics_rendered.stoid
+		 AND discussion > 0
+		 AND story_topics_rendered.tid IN ($nexus_list)
 		 AND is_archived = 'no'
+		 AND in_trash = 'no'
 		 AND time < NOW()",
 		"ORDER BY time DESC");
-	my @sids = map { $_->[0] } @$sids;
-	# Try to pick a random sid to post to that weights toward the
+	return undef unless $stoids && @$stoids;
+	# Try to pick a random stoid to post to that weights toward the
 	# most recent sids.
 	my $r;
-	if (rand(1) < 0.05 or scalar(@sids) < 15) {
-		$r = rand(@sids);
+	if (rand(1) < 0.05 || scalar(@$stoids) < 15) {
+		$r = rand(@$stoids);
 	} elsif (rand(1) < 0.8) {
 		$r = rand(1) * rand(1) * 15;
-	} elsif (rand(1) < 0.5 or scalar(@sids) < 30) {
+	} elsif (rand(1) < 0.5 || scalar(@$stoids) < 30) {
 		$r = rand(1) * rand(1) * 10;
 	} else {
 		$r = rand(1) * rand(1) * 30;
 	}
-	return $sids[$r];
+	return $stoids->[$r];
 }
 
 sub getRandomParent {
@@ -356,7 +360,7 @@ sub make_werds {
 	my $last_p_werd_num = 0;
         while ($cur_werds < $werds) {
                 my $new_werds = '';
-                if (int(rand(6))==0 or $werds < $cur_werds * 1.1) {
+                if (int(rand(6))==0 || $werds < $cur_werds * 1.1) {
                         if (int(rand(2))) {
                                 $new_werds = $werder->question;
                         } else {
@@ -365,7 +369,7 @@ sub make_werds {
                 } else {
                         $new_werds = $werder->sentence;
                 }
-		if ($link_prob and rand(1) < $link_prob) {
+		if ($link_prob && rand(1) < $link_prob) {
 			my @new_werds = split / /, $new_werds;
 			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
 			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
@@ -380,13 +384,13 @@ sub make_werds {
 				@new_werds[$insert_end+1..$#new_werds]
 			);
 		}
-		if ($cur_werds and !$tag and rand > 0.9) {
+		if ($cur_werds && !$tag && rand > 0.9) {
 			if (rand(1) < 0.95) { $tag = "i" }
 			else { $tag = "b" }
 			if (rand(1) < 0.50) { $quote = int(rand(3)) ? q{'} : q{"} };
 			$new_werds = "<$tag>$quote$new_werds";
 		}
-		if ($tag and rand(1) < 0.5) {
+		if ($tag && rand(1) < 0.5) {
 			$new_werds = "$new_werds$quote</$tag>";
 			$tag = ""; $quote = q{};
                 }
@@ -403,7 +407,7 @@ sub make_werds {
         $comment =~ s{</(\w+)>\s+<\1>}{ }g;
         $comment =~ s/^\s*(.+)\s*$/$1/;
         $comment =~ s/^\s+//; $comment =~ s/\s+$//;
-	if ($link_prob and $junk) {
+	if ($link_prob && $junk) {
 		my @fragments = (
 			"<a", "href=", 'href="', '"', "'", ">", '>">', " > >",
 			"<", " < ", " <<", ">>", " < < <", "< < ", "<? ", "&lt;<",
