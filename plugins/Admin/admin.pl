@@ -469,7 +469,7 @@ sub blockEdit {
 		$blockdelete_flag = 1;
 	} else {
 		# get the static blocks
-		my ($static_blocks, $portal_blocks);
+		my($static_blocks, $portal_blocks);
 		if ($user->{section}) {
 			$static_blocks = $slashdb->getDescriptions('static_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
 			$static_blocks = $slashdb->getDescriptions('portald_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);

@@ -371,7 +371,7 @@ sub main {
                 my $done = 0;
 		$done = 1 if $op eq 'savepasswd'; # special case
 		$formname = $ops->{$op}{formname};
-		     if ($formname eq 'users/nu' && !$constants->{hc_sw_newuser}) {
+		if ($formname eq 'users/nu' && !$constants->{hc_sw_newuser}) {
 			$options->{no_hc} = 1;
 		} elsif ($formname eq 'users/mp' && !$constants->{hc_sw_mailpasswd}) {
 			$options->{no_hc} = 1;
@@ -1635,8 +1635,7 @@ sub savePasswd {
 		$slashdb->setUser($uid, $user_edits_table) ;
 		$$note .= getMessage('saveuser_passchanged_msg',
 			{ nick => $user_edit->{nickname}, uid => $user_edit->{uid} },
-			0, 1)
-			if $note;
+		0, 1) if $note;
 	}
 
 	return $error_flag;
@@ -1944,6 +1943,7 @@ sub saveHome {
 	# seriousness of any future vulnerabilities, means it's way past
 	# time to shut this feature down.  - Jamie 2002/03/06
 	$users_index_table->{mylinks} = strip_html($form->{mylinks} || '');
+	$users_index_table->{mylinks} = '' unless defined $users_index_table->{mylinks};
 
 	# If a user is unwilling to moderate, we should cancel all points, lest
 	# they be preserved when they shouldn't be.
