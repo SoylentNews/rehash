@@ -8525,6 +8525,24 @@ sub getForumDescription {
 }
 
 ########################################################
+# for ubb_like_forums
+sub getForumParents {
+	my($self, $forum_id) = @_;
+
+	my $num_parents = $self->sqlSelect('count(*)', 'comments', "sid=$forum_id AND pid=0");
+
+	return $num_parents;
+}
+
+########################################################
+# for ubb_like_forums
+sub getForumLastPostHashref {
+	my($self, $forum_id) = @_;
+
+	return $self->sqlSelectHashref("*", 'comments', "sid=$forum_id", 'ORDER BY comments.cid DESC LIMIT 1');
+}
+
+########################################################
 sub sqlReplace {
 	my($self, $table, $data) = @_;
 	my($names, $values);

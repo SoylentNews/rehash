@@ -496,6 +496,8 @@ sub commentIndexUserCreated {
 		$section_select = createSelect('section', $sections, $form->{section}, 1);
 		for (my $i=0; $i < @$discussions; $i++) {
 			$discussions->[$i]{comment} = $slashdb->getForumDescription($discussions->[$i]{id});
+			$discussions->[$i]{num_parents} = $slashdb->getForumParents($discussions->[$i]{id});
+			$discussions->[$i]{last_comment} = $slashdb->getForumLastPostHashref($discussions->[$i]{id});
 		}
 	}
 
