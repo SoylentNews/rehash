@@ -323,7 +323,7 @@ sub sqlTransactionCancel {
 # Bad need of rewriting....
 sub createComment {
 	my($self, $comment) = @_;
-
+	return -1 unless dbAvailable("write_comments");
 	my $comment_text = $comment->{comment};
 	delete $comment->{comment};
 	$comment->{signature} = md5_hex($comment_text);
@@ -982,6 +982,11 @@ sub getModeratorLogID {
 sub undoModeration {
 	my($self, $uid, $sid) = @_;
 	my $constants = getCurrentStatic();
+
+	# The chances of getting here when comments are slim 
+	# since comment posting and moderation should be halted.  
+	# Regardless check just in case.
+	return [] unless dbAvailable("write_comments");
 
 	# querylog isn't going to work for this sqlSelectMany, since
 	# we do multiple other queries while the cursor runs over the
@@ -5360,6 +5365,17 @@ sub createMetaMod {
 		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
 		my $is_fair = $m2s->{$mmid}{is_fair};
 
+		if($constants->{m2_use_sliding_consensus}){
+			my ($cid, $reason ) = $self->sqlSelect("cid,reason","moderatorlog","id=$mmid");
+			my $count = $self->sqlCount("moderatorlog","cid=$cid and reason=$reason");
+			my $index = $count - 1;
+			$index = 0 if $index < 1;
+			$index = @{$constants->{m2_sliding_consensus}} - 1 if $index > @{$constants->{m2_sliding_consensus}} -1;
+			$consensus = $constants->{m2_sliding_consensus}[$index];
+
+			print STDERR "mmid: $mmid  cid: $cid reason $reason count: $count consensus: $consensus\n";
+		}
+
 		# Increment the m2count on the moderation in question.  If
 		# this increment pushes it to the current consensus threshold,
 		# change its m2status from 0 ("eligible for M2") to 1
@@ -6701,6 +6717,7 @@ sub getSlashConf {
 		fixhrefs =>			[ ],
 		hc_possible_fonts =>		[ ],
 		lonetags =>			[ ],
+		m2_sliding_consensus =>		[ ],
 		op_exclude_from_countdaily =>   [qw( rss )],
 		op_extras_countdaily =>   	[ ],
 		mod_stats_reports =>		[ $conf{adminmail_mod} ],
