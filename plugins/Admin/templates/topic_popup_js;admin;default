@@ -93,9 +93,12 @@ function hpts_release(evt) {
 	hpts_locked_obj = null;
 }
 
+[% names = name; name = name.0 %]
+
 var [% name %]_selected_id = -1;
-var [% name %]_selected_val;
-var [% name %]_selected_elem;
+[%- FOR quickname = names %]
+var [% quickname %]_selected_val;
+[%- END %]
 var [% name %]_max_id = [% loop.max %];
 
 /* get saved list */
@@ -145,7 +148,7 @@ function [% name %]_collapse_all() {
 }
 
 /* expand entire tree */
-function st_expand_all() {
+function [% name %]_expand_all() {
 	for (var i = 0; i <= [% name %]_max_id; i++) {
 		var obj = document.getElementById("[% name %]-desc-" + i);
 		if (obj) {
@@ -209,7 +212,9 @@ function [% name %]_toggle_select(id, val) {
 		var new_obj = document.getElementById("[% name %]-line-" + id);
 		new_obj.className = "hpts-label-selected";
 		[% name %]_selected_id  = id;
-		[% name %]_selected_val = val;
+		[%- FOR quickname = names %]
+		[% quickname %]_selected_val = val;
+		[%- END %]
 
 		/* make topic image appear/disappear */
 		var img_obj	 = document.getElementById("[% name %]-img-" + id);
@@ -262,20 +267,6 @@ function [% name %]_show() {
 	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
 	mybutton.value = "Close Window";
 	mybutton.onmouseup = [% name %]_close;
-}
-
-/* user clicks the ok button */
-function [% name %]_ok() {
-	if ([% name %]_selected_id == -1) {
-		alert("Please select an item and click Add Topic, or Close Window when you're done.");
-		return;
-	}
-
-	/* fill in a form field if they spec'd one */
-	[% IF form_field %][% IF form_field_form %]document.forms["[% form_field_form %]"][% ELSE %]document.forms[0][% END %].elements["[% form_field %]"].value = [% name %]_selected_val;[% END %]
-
-	/* trigger onselect */
-	[% IF onselect %][% onselect %]([% name %]_selected_val);[% END %]
 }
 
 function [% name %]_cancel() {
@@ -331,6 +322,24 @@ function [% name %]_get_weight (id) {
 	}
 }
 
+[% FOR name = names %]
+
+/* user clicks the ok button */
+function [% name %]_ok() {
+	if ([% names.0 %]_selected_id == -1) {
+		alert("Please select an item and click Add Topic, or Close Window when you're done.");
+		return;
+	}
+
+	/* fill in a form field if they spec'd one */
+	[% IF form_field %][% IF form_field_form %]document.forms["[% form_field_form %]"][% ELSE %]document.forms[0][% END %].elements["[% form_field %]"].value = [% name %]_selected_val;[% END %]
+
+	/* trigger onselect */
+	[% IF onselect == "st_main_add" %][% name %]_main_add([% name %]_selected_val);
+	[% ELSIF onselect %][% onselect %]([% name %]_selected_val);
+	[% END %]
+}
+
 function [% name %]_select_weight () {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
@@ -373,8 +382,8 @@ function [% name %]_change_weight_really (i, val) {
 }
 
 function [% name %]_main_add (val) {
-	var name   = [% name %]_get_all_names([% name %]_selected_id);
-	var weight = [% name %]_get_weight([% name %]_selected_id);
+	var name   = [% names.0 %]_get_all_names([% names.0 %]_selected_id);
+	var weight = [% names.0 %]_get_weight([% names.0 %]_selected_id);
 	[% name %]_main_add_really(val, name, weight);
 }
 
@@ -469,8 +478,12 @@ function [% name %]_submit() {
 		myselecti.style.display = 'none';
 	}
 
+	[% IF name == names.1 -%]
+	[% names.0 %]_submit();
+	[% ELSE -%]
 	var mysaved   = document.[% form_field_form %].[% name %]_saved_tree;
 	mysaved.value = [% name %]_get_saved_tree();
+	[% END -%]
 }
 
 function [% name %]_load_names() {
@@ -489,6 +502,22 @@ function [% name %]_load_names() {
 		[% name %]_select_weight();
 	}
 }
+
+function [% name %]_visit() {
+	var myselect  = document.[% form_field_form %].[% name %]_main_select;
+
+	if (myselect.selectedIndex == -1) {
+		if (!noerr) {
+			alert("Please select an topic to visit.");
+		}
+		return;
+	}
+
+	document.location = '[% gSkin.rootdir %]/admin.pl?op=topics&nexttid='
+		+ myselect.options[myselect.selectedIndex].value;
+}
+
+[% END %]
 
 function useragent_opera() {
 	var agent = navigator.userAgent;

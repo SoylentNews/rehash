@@ -64,10 +64,13 @@ Foooooooo.
 =cut
 
 sub getPopupTree {
-	my($stid, $stid_names, $options) = @_;
+	my($stid, $stid_names, $options, $param) = @_;
 	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 	my $constants	= getCurrentStatic();
 	my $tree	= $reader->getTopicTree;
+
+	$param   ||= {};
+	$options ||= {};
 
 	$constants->{topic_popup_open} = 1 unless defined $constants->{topic_popup_open};
 
@@ -98,15 +101,19 @@ sub getPopupTree {
 		}
 	}
 
+	# children
+	my $stcid = delete $param->{stcid};
+
 	HTML::PopupTreeSelect::reset_id();
 
 	# most of the stuff below (name, title, etc.) should be in vars or getData
 	my $select = Slash::Admin::PopupTree->new(
-		_template_options	=> $options || {},
-		name			=> 'st',
+		_template_options	=> $options,
+		name			=> ['st', 'stc'],
 		data			=> $data,
 		slashtopics		=> \%topics,
 		stid			=> $stid,
+		stcid			=> $stcid,
 		stid_names		=> $stid_names,
 		slashorig		=> $tree,
 		title			=> 'Select Topics',
@@ -131,11 +138,12 @@ sub output {
 sub _output_generate {
 	my($self, $template, $param) = @_;
 	$param->{slashtopics} = $self->{slashtopics};
-	$param->{stid}        = $self->{stid};
-	$param->{stid_names}  = $self->{stid_names};
+	$param->{stid}        = $self->{stid} || {};
+	$param->{stcid}       = $self->{stcid} || {};
+	$param->{stid_names}  = $self->{stid_names} || {};
 
 	$self->{_template_options}{type} = 'ui' if
-		!$self->{_template_options}{type} || $self->{_template_options}{type} !~ /^tree|js|css|ui$/;
+		!$self->{_template_options}{type} || $self->{_template_options}{type} !~ /^tree|js|css|ui(?:_\w+)?$/;
 
 	my $template_name = sprintf('topic_popup_%s', $self->{_template_options}{type});
 	my $nocomm = $self->{_template_options}{Nocomm} || 0;

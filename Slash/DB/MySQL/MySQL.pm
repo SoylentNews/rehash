@@ -3132,24 +3132,42 @@ sub saveTopic {
 	}
 
 
-	my @parents;
-	if ($topic->{_multi}{parent_topic} && ref($topic->{_multi}{parent_topic}) eq 'ARRAY') {
-		@parents = grep { $_ } @{$topic->{_multi}{parent_topic}};
-	} elsif ($topic->{parent_topic}) {
-		if (ref($topic->{parent_topic}) eq 'ARRAY') {
-			@parents = grep { $_ } @{$topic->{parent_topic}};
-		} else {
-			@parents = ($topic->{parent_topic});
-		}
-	}
-	my $parent_str = join ',', @parents;
+	for my $x (qw(parent child)) {
+		my %relations;
+		my $name = $x . '_topic';
+		if ($topic->{_multi}{$name} && ref($topic->{_multi}{$name}) eq 'ARRAY') {
+			%relations = map { $_ => undef } grep { $_ } @{$topic->{_multi}{$name}};
 
-	$self->sqlDelete('topic_parents', "tid=$tid AND parent_tid NOT IN ($parent_str)") if $parent_str;
-	for my $parent (@parents) {
-		$self->sqlInsert('topic_parents', {
-			tid		=> $tid,
-			parent_tid	=> $parent
-		}, { ignore => 1 });
+		} elsif ($topic->{$name}) {
+			if (ref($topic->{$name}) eq 'HASH') {
+				%relations = map { $_ => $topic->{$name}{$_} } grep { $_ } keys %{$topic->{$name}};
+			} elsif (ref($topic->{$name}) eq 'ARRAY') {
+				%relations = map { $_ => undef } grep { $_ } @{$topic->{$name}};
+			} else {
+				%relations = ($topic->{$name} => undef);
+			}
+		}
+
+		my $del_str = join ',', keys %relations;
+		if ($x eq 'parent') {
+			$self->sqlDelete('topic_parents', "tid=$tid AND parent_tid NOT IN ($del_str)") if $del_str;
+		} elsif ($x eq 'child') {
+			$self->sqlDelete('topic_parents', "parent_tid=$tid AND tid NOT IN ($del_str)") if $del_str;
+		}
+
+		for my $thistid (keys %relations) {
+			my %relation = (
+				tid		=> $tid,
+				parent_tid	=> $thistid,
+			);
+			$relation{min_weight} = $relations{$thistid} if defined $relations{$thistid};
+
+			if ($x eq 'child') {
+				@relation{qw(tid parent_tid)} = @relation{qw(parent_tid tid)};
+			}
+
+			$self->sqlInsert('topic_parents', \%relation, { ignore => 1 });
+		}
 	}
 
 	if ($topic->{nexus}) {

@@ -9,13 +9,24 @@ admin
 __lang__
 en_US
 __name__
-topic_popup_ui
+topic_popup_ui_topiced
 __template__
-[% name = name.0 %]
+[% USE Dumper; Dumper.dump(stid, stcid) | stderr %]
+[% names = name; stpid = stid %]
 [% IF include_css %]
 <link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
 [%- END %]
 <script src="./admin-topic-popup.js" type="text/javascript"></script>
+
+<table cellpadding=5><tr>
+[% FOR name = names;
+	IF name == names.0;
+		stid = stpid;
+	ELSIF name == names.1;
+		stid = stcid;
+	END %]
+<td valign="top" bgcolor="#cccccc">
+<font color="[% user.colors.bg_3 %]"><b>[% IF name == "st" %]Parents[% ELSE %]Children[% END %]</b></font><br>
 
 <select name="[% name %]_main_select" size=5 multiple onchange="[% name %]_select_weight()">
 [%- FOREACH this_stid = stid.sort %]
@@ -24,7 +35,7 @@ __template__
 
 <select name="[% name %]_main_select_weights" multiple class="hpts-no-display">
 [%- FOREACH this_stid = stid.sort %]
-<option value="[% stid.$this_stid %]">[% stid.$this_stid %]</option>
+<option value="[% stid.$this_stid %]">[% stids.$this_stid %]</option>
 [%- END %]</select>
 
 <select name="[% name %]_main_select_weights_orig" multiple class="hpts-no-display">
@@ -37,24 +48,36 @@ __template__
 <option value="[% stid_names.$this_stid %]">[% stid_names.$this_stid %]</option>
 [%- END %]</select>
 
-<select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
-<option value="40">40 - Mainpageworthy (priority)</option>
-<option value="30">30 - Mainpageworthy</option>
-<option value="20">20 - Sectionworthy (priority)</option>
-<option value="10">10 - Sectionworthy</option>
-<option value="0">0 - Ignore Topic</option>
-</select>
 <br>
-<input type="button" value="Choose Topics"  onmouseup="[% name %]_show()" name="[% name %]_topic_toggle">
-<input type="button" value="Remove Topic"   onmouseup="[% name %]_remove()">
-<input type="button" value="Collapse All"   onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+
+<select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
+<option value="40">40</option>
+<option value="30">30</option>
+<option value="20">20</option>
+<option value="10">10</option>
+<option value="0">0</option>
+</select>
+
+<input type="button" value="Add"   onmouseup="[% name %]_ok()">
+<input type="button" value="Del"   onmouseup="[% name %]_remove()">
+<input type="button" value="Visit" onmouseup="[% name %]_visit()">
+
+</td>
+[% END %]
+</tr><tr><td align="center" bgcolor="#cccccc" colspan="[% names.size %]">
+[% name = names.0 %]
 <input type="hidden" value="" name="[% name %]_saved_tree">
 
 <script language="javascript">
 	[% name %]_load_names();
-	var list = new Array ([% user.st_saved_tree %]);
+	[% mykey = name _ "_saved_tree" %]
+	var list = new Array ([% user.$mykey %]);
 	[% name %]_reset_saved_tree(list);
 </script>
+
+<input type="button" value="Choose Topics"  onmouseup="[% name %]_show()" name="[% name %]_topic_toggle">
+<input type="button" value="Collapse All"   onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+</td></tr></table>
 
 __seclev__
 10000

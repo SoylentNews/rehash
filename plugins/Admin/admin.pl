@@ -816,11 +816,7 @@ sub saveKeyword {
 sub topicEdit {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $basedir = $constants->{basedir};
-	my($image, $image2);
-
-	my($topic, $topics_menu, $topics_select);
-	my $available_images = {};
-	my $image_select = "";
+	my($image, $image2, $topic, $image_select, $images_flag);
 
 	if ($form->{topicdelete} && $form->{tid}) {
 		topicDelete($form->{tid});
@@ -831,28 +827,27 @@ sub topicEdit {
 		print getData('topicSave-message');
 	}
 
-	my($imageseen_flag, $images_flag) = (0, 0);
-
 	opendir(my($dh), "$basedir/images/topics");
 	# this should be a preference at some point, image
 	# extensions ... -- pudge
-	# and case insensitive :)  -Brian
-	$available_images = { map { ($_, $_) } grep /\.(?:gif|jpe?g|png)$/, readdir $dh };
+	my $available_images = { map { ($_, $_) } grep /\.(?:gif|jpe?g|png)$/i, readdir $dh };
 	closedir $dh;
-
 	$available_images->{""} = "None";
 
-	$topics_select = createSelect('nexttid', 
+	my $topics_select = createSelect('nexttid', 
 		$slashdb->getDescriptions('topics', '', 1),
 		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 
 		1, 0, 1
 	);
 
 	my $topic_param = [];
+	my($parents, $children);
 	if (!$form->{topicdelete}) {
 		if (!$form->{topicnew} && $form->{nexttid}) {
-			my $tree = $slashdb->getTopicTree(undef, { no_cache => 1 });
-			$topic = $tree->{ $form->{nexttid} };
+			my $tree  = $slashdb->getTopicTree(undef, { no_cache => 1 });
+			$topic    = $tree->{ $form->{nexttid} };
+			$parents  = $topic->{parent};
+			$children = $topic->{child};
 			# We could get this by reading $topic->{topic_param_keys}
 			# but getTopicParamsForTid() works too.  For that matter,
 			# the topicEdit template could read it directly out of
@@ -860,8 +855,14 @@ sub topicEdit {
 			$topic_param = $slashdb->getTopicParamsForTid($form->{nexttid});
 		} else {
 			$topic = {};
+			$parents = {};
+			$children = {};
 		}
 	}
+
+	my $topic_select = Slash::Admin::PopupTree::getPopupTree(
+		$parents, {}, { type => 'ui_topiced' }, { stcid => $children }
+	);
 
 	if ($available_images) {
 		$images_flag = 1;
@@ -885,9 +886,10 @@ sub topicEdit {
 		image			=> $image2 ? $image2 : $image,
 		image2			=> $image2,
 		topic			=> $topic,
+		topic_select		=> $topic_select,
 		topics_select		=> $topics_select,
 		image_select		=> $image_select,
-		topic_param		=> $topic_param
+		topic_param		=> $topic_param,
 	});
 }
 
@@ -913,6 +915,10 @@ sub topicDelete {
 sub topicSave {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $basedir = $constants->{basedir};
+
+	my($chosen_hr, $chosen_names_hr, $chosenc_hr, $chosenc_names_hr) = extractChosenFromForm($form);
+	$form->{parent_topic} = $chosen_hr;
+	$form->{child_topic} = $chosenc_hr;
 
 	if (!$form->{width} && !$form->{height} && ! $form->{image2}) {
 		@{ $form }{'width', 'height'} = imgsize("$basedir/images/topics/$form->{image}");
@@ -1539,8 +1545,12 @@ sub extractChosenFromForm {
 	my($form) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+
 	my $chosen_hr = { };
 	my $chosen_names_hr = { };
+	my $chosenc_hr = { };   # c is for child, in topic editor
+	my $chosenc_names_hr = { };
+
 	if (defined $form->{topic_source} && $form->{topic_source} eq "submission"
 		&& $form->{subid}) {
 		my @topics = ($form->{tid});
@@ -1558,11 +1568,22 @@ sub extractChosenFromForm {
 				if $chosen_topic && $chosen_topic->{tid};
 		}
 	} else {
-		for my $i (0..$#{$form->{st_main_select}}) {
-			$chosen_hr->{$form->{st_main_select}[$i]}
-				= $form->{st_main_select_weights}[$i];
-			$chosen_names_hr->{$form->{st_main_select}[$i]}
-				= $form->{st_main_select_ids}[$i];
+		my(%chosen, %chosen_names);
+		for my $x (qw(st stc)) {
+			my $input = $x . '_main_select';
+			next unless $form->{$input};
+
+			for my $i (0..$#{$form->{$input}}) {
+				$chosen{$x}{$form->{$input}[$i]}
+					= $form->{$input . '_weights'}[$i];
+				$chosen_names{$x}{$form->{$input}[$i]}
+					= $form->{$input . '_ids'}[$i];
+			}
+
+			$chosen_hr = $chosen{st};
+			$chosenc_hr = $chosen{stc};
+			$chosen_names_hr = $chosen_names{st};
+			$chosenc_names_hr = $chosen_names{stc};
 		}
 	}
 
@@ -1575,7 +1596,7 @@ sub extractChosenFromForm {
 		});
 	}
 
-	return($chosen_hr, $chosen_names_hr);
+	return($chosen_hr, $chosen_names_hr, $chosenc_hr, $chosenc_names_hr);
 }
 
 ##################################################################

@@ -11,6 +11,7 @@ en_US
 __name__
 topic_popup_tree
 __template__
+[% name = name.0 %]
 <div id="[% name %]-outer" class="hpts-outer">
   <div class="hpts-title" id="[% name %]-title">[% title %]</div>
   <div class="hpts-inner">

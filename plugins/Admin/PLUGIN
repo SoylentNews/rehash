@@ -44,5 +44,6 @@ template=templates/topic_popup_css;admin;default
 template=templates/topic_popup_js;admin;default
 template=templates/topic_popup_tree;admin;default
 template=templates/topic_popup_ui;admin;default
+template=templates/topic_popup_ui_topiced;admin;default
 template=templates/varEdit;admin;default
 template=templates/topicEdit;admin;default
