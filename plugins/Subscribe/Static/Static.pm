@@ -114,6 +114,27 @@ sub countCurrentRenewingGiftSubs {
         } );
 }
 
+sub getLowRunningSubs {
+	my ($self) = @_;
+	my $low_val = int ((getCurrentStatic('paypal_num_pages') || 1000) / 20);
+	print STDERR "low_val: $low_val\n";
+	return $self->sqlSelectColArrayref(
+		'users_hits.uid',
+		'users_hits',
+		"hits_paidfor > 0 and (hits_paidfor - hits_bought) BETWEEN 1 AND $low_val"
+	);
+}
+
+sub getExpiredSubs {
+	my ($self) = @_;
+	return $self->sqlSelectColArrayref(
+		'users_hits.uid',
+		'users_hits',
+		'hits_paidfor > 0 and (hits_paidfor - hits_bought) = 0'
+	);
+}
+																		
+
 sub _getUidsForPaymentType {
 	my ($self, $type) = @_;
 	my $ar = $self->sqlSelectColArrayref("DISTINCT uid", "subscribe_payments","payment_type = ".$self->sqlQuote($type));

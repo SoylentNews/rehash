@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 
+
 # $Id$
 
 use strict;
+use Slash::Constants qw(:messages);
 
 use vars qw( %task $me );
 
@@ -315,6 +317,58 @@ EOT
 	}
 	slashdLog('Send Subscribe Mail End');
 
+	slashdLog("Low Subscription and Expiration Warnings Begin");
+	my $low_run    = $sub_static->getLowRunningSubs();
+	my $expire_sub = $sub_static->getExpiredSubs();
+	my $messages = getObject("Slash::Messages");
+	if ($messages) {
+		foreach my $uid (@$low_run) {
+			my $low_user = $slashdb->getUser($uid);
+
+			my $last_warn = $low_user->{subscription_low_last_ts} || 0;
+			my $last_payment = $slashdb->sqlSelect("MAX(UNIX_TIMESTAMP(ts))", "subscribe_payments", "uid=$uid");
+			unless ($last_warn > $last_payment) {
+				# send message
+				my $users = $messages->checkMessageCodes(
+					MSG_CODE_SUBSCRIPTION_LOW, [$uid]	
+				);
+				my $low_val = int (( getCurrentStatic('paypal_num_pages') || 1000) / 20);
+				if (@$users) {
+					my $data = {
+						template_name 	=> 'sub_low_msg',
+						subject 	=> 'Subscription Running Low',
+						sub_low_value 	=> $low_val
+					};
+					$messages->create($users->[0], MSG_CODE_SUBSCRIPTION_LOW, $data, 0, '', 'now');
+				}
+				$slashdb->setUser($uid, { subscription_low_last_ts => time() });
+			
+			} 
+		}
+	
+		foreach my $uid (@$expire_sub) {
+			my $expire_user = $slashdb->getUser($uid);
+	
+			my $last_expire = $expire_user->{subscription_expire_last_ts} || 0;
+			my $last_payment = $slashdb->sqlSelect("MAX(UNIX_TIMESTAMP(ts))", "subscribe_payments", "uid=$uid");
+			unless ($last_expire > $last_payment) {
+				# send message
+				my $users = $messages->checkMessageCodes(
+					MSG_CODE_SUBSCRIPTION_OUT, [$uid]	
+				);
+				if (@$users) {
+					my $data = {
+						template_name 	=> 'sub_out_msg',
+						subject 	=> 'Subscription Expired'
+					};
+					$messages->create($users->[0], MSG_CODE_SUBSCRIPTION_OUT, $data, 0, '', 'now');
+				}
+				$slashdb->setUser($uid, { subscription_expire_last_ts => time() });
+			}
+		}
+	}
+	slashdLog("Low Subscription and Expiration Warnings End");
+
 	return ;
 };
 
@@ -323,6 +377,9 @@ sub _do_last30 {
 	$value ||= $stats->getStatLastNDays($name, 30) || 0;
 	$statsSave->createStatDaily("${name}_last30", $value);
 	push @$stats_ar, $value;
+
+
+
 }
 
 1;
