@@ -1,1 +1,2 @@
 INSERT INTO vars (name, value, description) VALUES ('yass_failures', '14', 'If you have failures for this many days, deactive the site.');
+INSERT INTO vars (name, value, description) VALUES ('yass_extra', '', 'If you need to find anything beyond the url add it here, it will be appended to the URL.');

@@ -21,7 +21,7 @@ __template__
 		<TD>
 			<H2>New Sites:</H2>
 			[% FOREACH site = new_sites %]
-				<li><A HREF="[% site.url %]">[% site.title %]</A></li>
+				<A HREF="[% site.url %]">[% site.title %]</A><br>
 			[% END %]
 		</TD>
 	</TR>
@@ -29,7 +29,8 @@ __template__
 		<TD>
 			<H2>All Sites:</H2>
 			[% FOREACH site = all_sites %]
-				<li><A HREF="[% site.url %]">[% site.title %]</A> ([% IF user.is_admin %]<A HREF="[% constants.rootdir %]/admin.pl?op=edit&sid=[% site.sid %]">Edit</A>|[% END %]<A HREF="[% constants.rootdir %]/article.pl?sid=[% site.sid %]">original announcement</A>)</li>
+				<A HREF="[% site.url %]">[% site.title %]</A> ([% IF user.is_admin %]<A HREF="[% constants.rootdir %]/admin.pl?op=edit&sid=[% site.sid %]">Edit</A>|[% END %]<A HREF="[% constants.rootdir %]/article.pl?sid=[% site.sid %]">original announcement</A>[% IF form.all && site.failures %]|<B>FAILURE</B>[% END %])<br>
+				<FONT size="-1">[% site.url %]</FONT><br><br>
 			[% END %]
 		</TD>
 	</TR>

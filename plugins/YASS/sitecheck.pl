@@ -25,32 +25,37 @@ $task{$me}{code} = sub {
 	slashdLog('Checking YASS sites Begin');
 	my $sids = $yass->getSidsURLs();
 	for (@$sids) {
+		print "checking \t$_->[1]\n";
 		my $value = $yass->exists($_->[0], $_->[1]);
 		if ($value == 1) {
+			print "\texists\n";
 		} elsif ($value) {
 			my $rdf = $slashdb->getStory($_->[0], 'rdf');
 			$yass->setURL($value, $_->[1], $rdf);
+			print "\tupdating\n";
 		} else {
 			my $rdf = $slashdb->getStory($_->[0], 'rdf');
 			my $time = $slashdb->getStory($_->[0], 'time');
-			$yass->create({
-										 sid => $_->[0],
-										 url => $_->[1],
-										 rdf => $rdf,
-										 created => $time,
-										 });
+			my $return = $yass->create({
+				 sid => $_->[0],
+				 url => $_->[1],
+				 rdf => $rdf ? $rdf : '',
+				 created => $time,
+			 });
+			print "\tadding\n";
 		}
 	}
-#	my $junk;
-#	for (@$sids) {
-#		if(is_success(getstore($_->[0] . "/index.pl", $junk)))	{
-#			$slashdb->setStory($_->[1], { active => 'yes'});
-#			print "active\t$_->[0]\n";
-#		} else {
-#			$slashdb->setStory($_->[1], { active => 'no'});
-#			print "dead\t$_->[0]\n";
-#		}
-#	}
+	my $sites = $yass->getActive();
+	my $junk;
+	for (@$sites) {
+		if(is_success(getstore($_->{url} . $constants->{yass_extra}, $junk))) {
+			$yass->success($_->{id});
+			print "active\t$_->{url}\n";
+		} else {
+			$yass->failed($_->{id});
+			print "dead\t$_->{url}\n";
+		}
+	}
 	slashdLog('Checking YASS sites End');
 
 	return ;
