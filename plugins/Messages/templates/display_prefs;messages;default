@@ -18,30 +18,32 @@ __template__
 [% Slash.createMenu("users") %]
 [% Slash.createMenu("messages") %]
 [% PROCESS titlebar title => "Message Preferences", width => "100%" %]
-[% nomode = Slash.MSG_MODE_NONE %]
+[% modenone = Slash.MSG_MODE_NONE %]
+[% modemail = Slash.MSG_MODE_EMAIL %]
+[% modeweb  = Slash.MSG_MODE_WEB %]
 
 <P><B>[% note %]</B></P>
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 <TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
-<TR><TD></TD><TD></TD><TD ROWSPAN="[% messagecodes.keys.size %]">
+<TR><TD>
 
-For each message type, select how you would like to receive it
-(or select [% messagecodes.$nomode %] to not receive it at all).
-
-<P>Currently, your options for receiving messages are either via e-mail,
-or via the web interface.  If you don't have your e-mail address registered
-with the system, you will receive messages via the web, regardless of how
-your preference is set here.  Some messages can only be sent via e-mail.
-Messages delivered via the web will be kept in the system for only
-<B>[% constants.message_web_expire || 31 %] days</B>, whether they
-have been read or not.  After [% constants.message_web_expire || 31 %] days, they
-<B>will be deleted</B>.
+<P>
+From this page you can configure various messages that
+[% constants.sitename %] can optionally send to you.  The primary
+options are [% deliverymodes.$modenone %],
+[% deliverymodes.$modemail %], and [% deliverymodes.$modeweb %].
+Not all options are available for all message types.
+[% deliverymodes.$modeweb %] messages <B>will be deleted</B> after
+<B>[% constants.message_web_expire || 31 %] days</B>.
+</P>
 
 </TD></TR>
+
+	<TR><TD><TABLE ALIGN="LEFT" BGCOLOR="[% user.bg.2 %]">
 [%
    FOR code = messagecodes.sort;
-      moderef = { $nomode => deliverymodes.$nomode };
+      moderef = { $modenone => deliverymodes.$modenone };
 
       # this is not so bad, it is cached, but could be improved perhaps
       mcode = messages.getMessageCode(code);
@@ -56,17 +58,21 @@ have been read or not.  After [% constants.message_web_expire || 31 %] days, the
       END;
 %]
 <TR>
-   <TD><B>[% messagecodes.$code %]</B></TD>
-   <TD>[% Slash.createSelect("deliverymodes_$code", moderef, prefs.$code, 1, 1) %]</TD>
+	<TD><B>[% messagecodes.$code %]</B></TD>
+	<TD>[% Slash.createSelect("deliverymodes_$code", moderef, prefs.$code, 1, 1) %]</TD>
 </TR>
 [%- END %]
+<TR>
+	<TD>&nbsp;</TD>
+	<TD>
+	<INPUT TYPE="hidden" NAME="op" VALUE="save_prefs">
+	<INPUT TYPE="submit" VALUE="Save Prefs">
+	</TD>
+</TR>
 
-	<TR><TD COLSPAN="2" ALIGN="RIGHT">
-		<INPUT TYPE="hidden" NAME="op" VALUE="save_prefs">
-		<INPUT TYPE="submit" VALUE="Save Prefs">
-	</TD></TR>
-
+	</TABLE></TD></TR>
 </TABLE>
+
 </FORM>
 __seclev__
 500

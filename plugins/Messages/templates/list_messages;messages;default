@@ -16,6 +16,14 @@ __template__
 [% Slash.createMenu("messages") %]
 [% PROCESS titlebar title => "$constants.sitename Messages for $user.nickname", width => "100%" %]
 
+[% IF user.is_anon %]
+
+<P>
+You are not <A HREF="[% constants.rootdir %]/users.pl">logged in</A> to the system.
+</P>
+
+[% ELSE %]
+
 [% IF note %]<H2>[% note %]</H2>[% END %]
 
 [% IF message_list.size %]
@@ -66,8 +74,6 @@ the system, or they have been sent via another delivery
 method.
 </P>
 
-[% END %]
-
-
+[% END ; END %]
 __seclev__
 500
