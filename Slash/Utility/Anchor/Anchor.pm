@@ -110,7 +110,7 @@ sub header {
 	unless ($form->{ssi}) {
 		my $r = Apache->request;
 
-		$r->content_type('text/html');
+		$r->content_type($constants->{content_type_webpage} || 'text/html');
 
 		# Caching used to be Cache-Control: private but that doesn't
 		# seem to be correct; let's hope switching to no-cache
@@ -243,10 +243,11 @@ The 'html-redirect' template block.
 
 sub redirect {
 	my($url) = @_;
+	my $constants = getCurrentStatic();
 	$url = url2abs($url);
 	my $r = Apache->request;
 
-	$r->content_type('text/html');
+	$r->content_type($constants->{content_type_webpage} || 'text/html');
 	$r->header_out(Location => $url);
 	$r->status(302);
 	$r->send_http_header;

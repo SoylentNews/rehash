@@ -822,6 +822,8 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'No
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Info', '[% constants.rootdir %]/admin.pl?op=recent', 500, 10);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Normal', '[% constants.rootdir %]/admin.pl', 500, 12);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Config', '[% constants.rootdir %]/admin.pl?op=topics', 500, 13);
-p
+INSERT INTO vars (name, value, description) VALUES ('content_type_webpage','text/html','The Content-Type field for webpages');
+
 #This needs to be set for all OSDN sites, and we should make sure that sites are using the right DB. -Brian
-INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtual user of the database that the code should use for logging stats. If you don\'t know what this is for, you should leave it blank.');
+INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtual user of the database that the code should write accesslog to. If you don\'t know what this is for, you should leave it blank.');
+
