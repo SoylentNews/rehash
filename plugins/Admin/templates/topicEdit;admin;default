@@ -28,11 +28,11 @@ __template__
 			[% END %]
 
 			<br><input type="HIDDEN" name="tid" value="[% topic.tid %]"><br>
-			[% PROCESS formLabel value => "Short Name" comment => "used in admin interface" %]
+			[% PROCESS formLabel value => "Short Name" comment => "used for DNS and admin interface" %]
 			<input type="TEXT" name="keyword" value="[% FILTER strip_attribute %][% topic.keyword %][% END %]">
 			[% PROCESS formLabel value => "Alt Text", comment => "" %]
 			<input type="TEXT" name="textname" value="[% FILTER strip_attribute %][% topic.textname %][% END %]">
-			[% PROCESS formLabel value => "Parent Topic", comment => "" %]
+			[% PROCESS formLabel value => "Add Parent Topic", comment => "" %]
 			[% Slash.createSelect('parent_topic', Slash.db.getDescriptions('topics'), topic.parent, 1, 0, 1, 1)%]	
 
 			[% PROCESS formLabel value => "Is a Series", comment => "denotes a group of stories in a series, and this topic must be selected first for each story in the series" %]
