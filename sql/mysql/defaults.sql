@@ -421,8 +421,8 @@ INSERT INTO vars (name, value, description) VALUES ('lastsrandsec','awards','Las
 INSERT INTO vars (name, value, description) VALUES ('lenient_formkeys','0','0 - only ipid, 1 - ipid OR subnetid, in formkey validation check');
 INSERT INTO vars (name, value, description) VALUES ('log_admin','1','This turns on/off entries to the accesslog. If you are a small site and want a true number for your stats turn this off.');
 INSERT INTO vars (name, value, description) VALUES ('logdir','/usr/local/slash/www.example.com/logs','Where should the logs be found?');
-INSERT INTO vars (name, value, description) VALUES ('m1_eligible_hitcount','3','the percentage of users eligible to moderate');
-INSERT INTO vars (name, value, description) VALUES ('m1_eligible_percentage','0.8','Number of hits on comments.pl before user can be considered eligible for moderation');
+INSERT INTO vars (name, value, description) VALUES ('m1_eligible_hitcount','3','Number of hits on comments.pl before user can be considered eligible for moderation');
+INSERT INTO vars (name, value, description) VALUES ('m1_eligible_percentage','0.8','Percentage of users eligible to moderate');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_end', '0.8888', 'Ending percentage into the pool of eligible moderators (used by moderatord)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_start', '0.167', 'Starting percentage into the pool of eligible moderators (used by moderatord)');
 INSERT INTO vars (name, value, description) VALUES ('m2_batchsize', 50, 'Maximum number of moderations processed for M2 reconciliation per execution of moderation daemon.');
