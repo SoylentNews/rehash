@@ -34,7 +34,7 @@ sub main {
 
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
-	my $user = getCurrentForm();
+	my $user = getCurrentUser();
 
 	my($slashdb, $searchDB);
 
