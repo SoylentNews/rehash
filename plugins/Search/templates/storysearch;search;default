@@ -20,7 +20,7 @@ __template__
 		'link'	=> story.title
 	}) 
 	%]</B><BR>
-	<FONT SIZE="-1">On [% Slash.timeCalc(story.time) %] with [% story.commentcount %] comments</FONT><BR>
+	<FONT SIZE="-1">On [% Slash.timeCalc(story.time, '%B %o, %Y') %] with [% story.commentcount %] comments</FONT><BR>
 	[% story.introtext %] <BR>
 	<FONT SIZE="-1">
 		[% section = Slash.db.getSection(story.section); topic = Slash.db.getTopic(story.tid) %]

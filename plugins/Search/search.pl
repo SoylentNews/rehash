@@ -6,6 +6,7 @@
 
 use strict;
 use Slash;
+use Slash::Search;
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
@@ -37,30 +38,7 @@ sub main {
 	# Backwards compatibility, we now favor tid over topic 
 	$form->{tid} ||= $form->{topic};
 
-	if ($constants->{search_soap_enabled}) {
-		my $r = Apache->request;
-		if ($r->header_in('SOAPAction')) {
-			require SOAP::Transport::HTTP;
-			# security problem previous to 0.55
-			if (SOAP::Lite->VERSION >= 0.55) {
-				if ($user->{state}{post}) {
-					$r->method('POST');
-				}
-				$user->{state}{packagename} = __PACKAGE__;
-				return SOAP::Transport::HTTP::Apache->dispatch_to
-					('Slash::Search::SOAP')->handle;
-			}
-		}
-	}
-
-	my($slashdb, $searchDB);
-	if ($constants->{search_db_user}) {
-		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
-		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
-	} else {
-		$slashdb  = getCurrentDB();
-		$searchDB = getObject('Slash::Search');
-	}
+	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
 
 	# Set some defaults
 	$form->{query}		||= '';
@@ -68,16 +46,9 @@ sub main {
 	# this makes it so *no* results get returned, so i changed it back
 	#$form->{section}	||= $constants->{section}; # Set to our current section if section is not passed in
 	$form->{section}	||= '';
+	# This next line could be removed -Brian
 	$form->{section}	= '' if $form->{section} eq 'index';
 	$form->{threshold}	= getCurrentUser('threshold') if !defined($form->{threshold});
-
-	# get rid of bad characters
-	$form->{query} =~ s/[^A-Z0-9'. :\/]/ /gi;
-
-	# truncate query length
-	if (length($form->{query}) > 40) {
-		$form->{query} = substr($form->{query}, 0, 40);
-	}
 
 	# The default search operation is to search stories.
 	$form->{op} ||= 'stories';
@@ -97,8 +68,9 @@ sub main {
 		$ops_rss{$form->{op}}->($form, $constants, $slashdb, $searchDB);
 	} else {
 		# Yep, these are hardcoded, and someday this should change... -Brian 
-		header("$constants->{sitename}: Search $form->{query}");
-		titlebar("100%", "Searching For:  $form->{query}");
+		my $text = strip_notags($form->{query});
+		header("$constants->{sitename}: Search  $text");
+		titlebar("100%", "Searching For:  $text");
 		$form->{op} = 'stories' if !exists($ops{$form->{op}});
 
 		# Here, panic mode is handled without needing to call the
