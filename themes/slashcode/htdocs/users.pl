@@ -1242,10 +1242,6 @@ sub editComm {
 	my($formats, $commentmodes_select, $commentsort_select, $title,
 		$uthreshold_select, $highlightthresh_select, $posttype_select);
 
-	my @reasons = ();
-	@reasons = @{$constants->{reasons}}
-		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
-
 	my $admin_block = '';
 	my $fieldkey;
 
@@ -1263,6 +1259,31 @@ sub editComm {
 	} else {
 		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
 		$fieldkey = 'uid';
+	}
+
+	my @reasons = ();
+	@reasons = @{$constants->{reasons}}
+		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
+
+	my %reason_select;
+	my @range;
+	for(-6..6) {
+		push @range, $_;
+	}
+	for (@reasons) {
+		my $key = "reason_alter_$_";
+		$reason_select{$_} = createSelect($key, \@range, 
+																			($user_edit->{$key} ? $user_edit->{$key} : 0), 
+																			1,1);
+	}
+
+	my %people_select;
+	my @people =  qw| friend foe anonymous|;
+	for (@people) {
+		my $key = "people_bonus_$_";
+		$people_select{$_} = createSelect($key, \@range, 
+																			($user_edit->{$key} ? $user_edit->{$key} : 0), 
+																			1,1);
 	}
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
@@ -1316,6 +1337,9 @@ sub editComm {
 		uthreshold_select	=> $uthreshold_select,
 		posttype_select		=> $posttype_select,
 		reasons			=> \@reasons,
+		reason_select			=> \%reason_select,
+		people			=> \@people,
+		people_select			=> \%people_select,
 	});
 }
 
@@ -1705,6 +1729,24 @@ sub saveComm {
 #		$answer  = -$most_adj if $answer < -$most_adj;
 #		$answer  =  $most_adj if $answer >  $most_adj;
 		$users_comments_table->{"reason_alter_$_"} = ($answer == 0) ? '' : $answer;
+	}
+
+	for (qw| friend foe anonymous |) {
+		my $answer = $form->{"people_bonus_$_"};
+		$answer  = 0
+			if $answer !~ /^[\-+]?\d+$/;
+# I need to change this to be so that the score
+# would never be great then Max + their
+# score just to make it look pretty.
+# But its a holiday. -Brian
+#		$answer  = $constants->{comment_minscore}
+#			if $answer < $min;
+#		$answer  = $constants->{comment_maxscore}
+#			if $answer > $max;
+# Do you mean this? -Jamie
+#		$answer  = -$most_adj if $answer < -$most_adj;
+#		$answer  =  $most_adj if $answer >  $most_adj;
+		$users_comments_table->{"people_bonus_$_"} = ($answer == 0) ? '' : $answer;
 	}
 
 	# Update users with the $users_comments_table hash ref
