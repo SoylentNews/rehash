@@ -31,7 +31,7 @@ __template__
 		<TH><FONT COLOR="[% user.fg.3 %]"> score </FONT></TH>[% END %]
 		<TH><FONT COLOR="[% user.fg.3 %]"> val </FONT></TH>
 		<TH><FONT COLOR="[% user.fg.3 %]"> reason </FONT></TH>
-[% IF show_modder %]<TH><FONT COLOR="[% user.fg.3 %]"> 
+[% IF show_modder %]<TH COLSPAN="2"><FONT COLOR="[% user.fg.3 %]"> 
 		[% IF mod_to_from == 'to' %]moderatee[% ELSE %]moderator[% END %]
 </FONT></TH> [% END %]
 		<TH><FONT COLOR="[% user.fg.3 %]"> time </FONT></TH>
@@ -53,7 +53,8 @@ __template__
 		<TD ALIGN="RIGHT"> <B>[% IF moderation.val > 0; "+"; END; moderation.val %]</B> </TD>
 		<TD> [% reasons.${moderation.reason}.name %] </TD>
 [% IF show_modder %]
-		<TD> &nbsp; [% moderation.nickname | strip_literal %] (<A HREF="[%
+		<TD> &nbsp; <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% moderation.ipid | strip_attribute %]&amp;fieldname=ipid">[% moderation.ipid_vis %]</A> </TD>
+		<TD> [% moderation.nickname | strip_literal %] (<A HREF="[%
 			constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=[%
 			moderation.uid %]">[% moderation.uid %]</A>) &nbsp; </TD>
 [% END %]
