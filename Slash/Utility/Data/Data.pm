@@ -2641,7 +2641,6 @@ sub _link_to_slashlink {
 	# virtual user, thus "urlavu".
 	my $urlavu = $urla{$virtual_user};
 
-use Data::Dumper; print STDERR "_link_to_slashlink vu '$virtual_user' gskid '$gSkin->{skid}' url, abs: " . Dumper([$url, $abs]);
 	my $canon_url = URI->new_abs($url, $abs)->canonical;
 	my $frag = $canon_url->fragment() || "";
 
