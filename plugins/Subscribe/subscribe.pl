@@ -40,7 +40,9 @@ sub main {
 	};
 
 	# subscribe.pl is not yet for regular users
-	if ($user->{seclev} < 100) {
+	if ($user->{seclev} < 100
+		&& $op ne 'paypal'
+		&& $user->{hits_paidfor} == 0) {
 		my $rootdir = getCurrentStatic('rootdir');
 		redirect("$rootdir/users.pl");
 		return;

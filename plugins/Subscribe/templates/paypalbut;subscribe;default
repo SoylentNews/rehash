@@ -25,7 +25,7 @@ __template__
 <input type="hidden" name="cmd" value="_xclick">
 <input type="hidden" name="business" value="[% constants.paypal_business %]">
 <input type="hidden" name="undefined_quantity" value="1">
-<input type="hidden" name="item_name" value="Subscription to [% constants.sitename %]">
+<input type="hidden" name="item_name" value="[% constants.paypal_num_pages %]-Page Subscription to [% constants.sitename %]">
 <input type="hidden" name="item_number" value="[% user.uid %]">
 <input type="hidden" name="amount" value="[% constants.paypal_amount %]">
 <input type="hidden" name="no_shipping" value="[% constants.paypal_no_shipping %]">
