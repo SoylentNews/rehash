@@ -23,42 +23,40 @@ subEdTable
 __template__
 [% PROCESS titlebar %]
 
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3" BGCOLOR="[% user.colors.bg_2 %]">
-<TR ALIGN="RIGHT"><TD></TD>
+<form action="[% env.script_name %]" method="POST">
+<input type="hidden" name="op" value="list">
+<table bgcolor="[% user.colors.bg_2 %]" width="100%"><tr><td>
 
-[% # print skin headers %]
-[% FOREACH skin = skins %]
-	<TD>&nbsp;<B><A HREF="[% constants.real_rootdir %]/submit.pl?skin=[% skin.1 %]&amp;op=list">[% skin.0 %]</A></B>&nbsp;</TD>
-	[% IF skin.0 == def_skin %]
-	<TD></TD>
-	[% END %]
-[% END %]
-
-
-</TR>
-
-
-[% # print individual rows and counts %]
+Classification
+<select name="note">
 [% FOREACH note = notes %]
-
-<TR ALIGN="RIGHT">
-	<TD>&nbsp;<B><A HREF="[% constants.real_rootdir %]/submit.pl?note=[% note.1 %]&amp;op=list">[% note.0 %]</A></B>&nbsp;</TD>
-	[% FOREACH skin = skins %]
-		[% s = skin.0;
-		   n = note.0;
-		   count = sn.$s.$n || 0;
-		   bgcolor = " BGCOLOR=\"$user.colors.bg_1\"" IF n == cur_note && s == cur_skin;
-		%]
-	<TD[% bgcolor %]><A HREF="[% constants.real_rootdir %]/submit.pl?skin=[% skin.1 %]&amp;op=list&amp;note=[% note.1 %]">[% count %]</A>&nbsp;</TD>
-		[% IF skin.0 == def_skin %]
-	<TD></TD>
-		[% END %]
-	[% END %]
-</TR>
-
+<option value="[% note.1 %]"[% IF note.1 == cur_note %] selected[% END %]>[% s = skins.0.0; n = note.0; sn.$s.$n || '0'; ' '; note.0 %]</option>
 [% END %]
+</select>
 
-</TABLE>
+Section
+<select name="skin">
+[% FOREACH skin = skins %]
+	<option value="[% skin.1 %]"[% IF skin.1 == cur_skin %] selected[% END %]>[% s = skin.0; n = notes.0.0; sn.$s.$n || '0'; ' '; skin.0 %]</option>
+[% END %]
+</select>
+
+Filter
+<input name="filter" value="[% form.filter %]" size="30">
+
+Results	
+<select name="limit">
+<option value="all"[% IF form.limit == 'all' %] selected[% END %]>All</option>
+<option value="10"[% IF form.limit == 10 %] selected[% END %]>10</option>
+<option value="25"[% IF form.limit == 25 %] selected[% END %]>25</option>
+<option value="50"[% IF form.limit == 50 %] selected[% END %]>50</option>
+</select>
+
+<input type="SUBMIT" value="Filter Submissions">
+</td></tr>
+
+</table>
+</form>
 
 __seclev__
 10000
