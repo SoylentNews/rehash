@@ -318,8 +318,8 @@ sub make_werds {
         } else {
                 $werder->set_werds_num($werds, $werds);
         }
-	my $min_syl = int(rand(3)+1);
-	$werder->set_syllables_num($min_syl, $min_syl + int(rand(4)+1));
+	my $min_syl = int(rand(2)+1);
+	$werder->set_syllables_num($min_syl, $min_syl + int(rand(5)+1));
 	my @links = qw(
 		http://slashdot.org/            http://www.brunching.com/
 		http://www.newsforge.com        http://osdn.com
