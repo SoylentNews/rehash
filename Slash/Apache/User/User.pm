@@ -183,7 +183,9 @@ sub handler {
 	# This is only used if you have used the directive
 	# to disallow logins to your site.
 	# I need to complete this as a feature. -Brian
-	return DECLINED if $cfg->{auth} && isAnon($uid);
+	# This is not the way to abort processing... we can take a look
+	# at this later maybe. -Jamie 2002/10/02
+#	return DECLINED if $cfg->{auth} && isAnon($uid);
 
 	# this needs to get called once per child ... might as well
 	# have it called here. -- pudge
