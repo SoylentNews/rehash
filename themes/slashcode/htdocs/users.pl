@@ -2566,7 +2566,7 @@ sub displayForm {
 	}
 
 	slashDisplay($ops->{$op}, {
-		newnick		=> fixNickname($form->{newusernick}),
+		newnick		=> nickFix($form->{newusernick}),
 		suadmin_flag 	=> $suadmin_flag,
 		title 		=> $title,
 		title2 		=> $title2,
