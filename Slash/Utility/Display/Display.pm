@@ -267,11 +267,11 @@ true/false if operation is successful.
 
 sub selectTopic {
 	my($label, $default, $section, $return) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	$section ||= getCurrentStatic('defaultsection');
 	$default ||= getCurrentStatic('defaulttopic');
 
-	my $topics = $slashdb->getDescriptions('topics_section', $section);
+	my $topics = $reader->getDescriptions('topics_section', $section);
 
 	createSelect($label, $topics, $default, $return, 0, 1);
 }
@@ -327,10 +327,10 @@ The 'sectionisolate' template block.
 
 sub selectSection {
 	my($label, $default, $SECT, $return, $all) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $seclev = getCurrentUser('seclev');
-	my $sections = $slashdb->getDescriptions('sections');
+	my $sections = $reader->getDescriptions('sections');
 
 	createSelect($label, $sections, $default, $return);
 }
@@ -353,8 +353,8 @@ The created list.
 =cut
 
 sub selectSortcode {
-	my $slashdb = getCurrentDB();
-	createSelect('commentsort', $slashdb->getDescriptions('sortcodes'),
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	createSelect('commentsort', $reader->getDescriptions('sortcodes'),
 		getCurrentUser('commentsort'), 1);
 }
 
@@ -376,9 +376,9 @@ The created list.
 =cut
 
 sub selectMode {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	createSelect('mode', $slashdb->getDescriptions('commentmodes'),
+	createSelect('mode', $reader->getDescriptions('commentmodes'),
 		getCurrentUser('mode'), 1);
 }
 
@@ -573,22 +573,22 @@ The 'pollbooth' template block.
 
 sub pollbooth {
 	my($qid, $no_table, $center, $returnto) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
-	my $sect = $slashdb->getSection();
+	my $sect = $reader->getSection();
 
 	# This special qid means to use the current (sitewide) poll.
 	$qid = $sect->{qid} if $qid eq '_currentqid';
 	# If no qid (or no sitewide poll), short-circuit out.
 	return '' if $qid eq '';
 
-	my $poll = $slashdb->getPoll($qid);
+	my $poll = $reader->getPoll($qid);
 	return '' unless %$poll;
 
-	my $n_comments = $slashdb->countCommentsBySid(
+	my $n_comments = $reader->countCommentsBySid(
 		$poll->{pollq}{discussion});
-	my $poll_open = $slashdb->isPollOpen($qid);
-	my $has_voted = $slashdb->hasVotedIn($qid);
+	my $poll_open = $reader->isPollOpen($qid);
+	my $has_voted = $reader->hasVotedIn($qid);
 	my $can_vote = !$has_voted && $poll_open;
 
 	return slashDisplay('pollbooth', {
@@ -1050,7 +1050,7 @@ template blocks for menus, along with all the data in the
 
 sub createMenu {
 	my($menu, $options) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
@@ -1077,7 +1077,7 @@ sub createMenu {
 		&& $user->{lastlookuid} != $user->{uid}
 		&& ($user->{lastlooktime} || 0) >= time - ($constants->{lastlookmemory} || 3600)
 	) {
-		my $lastlook_user = $slashdb->getUser($user->{lastlookuid});
+		my $lastlook_user = $reader->getUser($user->{lastlookuid});
 		my $nick_fix = fixparam($lastlook_user->{nickname});
 		my $nick_attribute = strip_attribute($lastlook_user->{nickname});
 		push @$menu_items, {
@@ -1143,7 +1143,7 @@ sub createMenu {
 		# with that name is available (or $menu;misc;default,
 		# or $menu;menu;light or whatever the fallbacks are)
 		# then punt and go with "users;menu;default".
-		my $nm = $slashdb->getTemplateByName($menu, 0, 0, "menu", "", 1);
+		my $nm = $reader->getTemplateByName($menu, 0, 0, "menu", "", 1);
 		$menu = "users" unless $nm->{page} eq "menu";
 		if (@$items) {
 			$menu_text .= slashDisplay($menu,
@@ -1215,7 +1215,6 @@ sub lockTest {
 sub _hard_linkStory {
 	my($story_link, $mode, $threshold, $dynamic, $url, $tid_string, $title) = @_;
 	my $constants = getCurrentStatic();
-	my $slashdb = getCurrentDB();
 	my $f_title = sprintf 'TITLE="%s"', strip_attribute($story_link->{title});
 
 	if ($dynamic) {

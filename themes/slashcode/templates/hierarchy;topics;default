@@ -57,6 +57,19 @@ __template__
 											[% END %]
 										</LI>
 									[% END %]
+									[% IF topic.child %]
+										<UL>
+											[% FOREACH topic = topic.child %]
+												<LI>
+													[% IF user.is_admin %]
+														<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]">[% topic.alttext %]</A>
+													[% ELSE %]
+														[% topic.alttext %]
+													[% END %]
+												</LI>
+											[% END %]
+										</UL>
+									[% END %]
 								</UL>
 							[% END %]
 						[% END %]

@@ -509,12 +509,12 @@ sub checkList {
 
 #################################################################
 sub previewSlashbox {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
-	my $block = $slashdb->getBlock($form->{bid}, ['title', 'block', 'url']);
+	my $block = $reader->getBlock($form->{bid}, ['title', 'block', 'url']);
 	my $is_editable = $user->{seclev} >= 1000;
 
 	my $title = getTitle('previewslashbox_title', { blocktitle => $block->{title} });
@@ -703,7 +703,7 @@ sub mailPasswd {
 #################################################################
 sub showSubmissions {
 	my($hr) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -717,15 +717,15 @@ sub showSubmissions {
 	});
 
 	if ($form->{uid} or $form->{nick}) {
-		$uid		= $form->{uid} || $slashdb->getUserUID($form->{nick});
-		$nickname	= $slashdb->getUser($uid, 'nickname');
+		$uid		= $form->{uid} || $reader->getUserUID($form->{nick});
+		$nickname	= $reader->getUser($uid, 'nickname');
 	} else {
 		$nickname	= $user->{nickname};
 		$uid		= $user->{uid};
 	}
 
-	my $storycount = $slashdb->countStoriesBySubmitter($uid);
-	my $stories = $slashdb->getStoriesBySubmitter(
+	my $storycount = $reader->countStoriesBySubmitter($uid);
+	my $stories = $reader->getStoriesBySubmitter(
 		$uid,
 		$constants->{user_submitter_display_default}
 	) unless !$storycount;
@@ -742,7 +742,7 @@ sub showSubmissions {
 #################################################################
 sub showComments {
 	my($hr) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -751,8 +751,8 @@ sub showComments {
 
 	my $user_edit;
 	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} || $slashdb->getUserUID($form->{nick});
-		$user_edit = $slashdb->getUser($uid);
+		$uid = $form->{uid} || $reader->getUserUID($form->{nick});
+		$user_edit = $reader->getUser($uid);
 	} else {
 		$uid = $user->{uid};
 		$user_edit = $user;
@@ -771,8 +771,8 @@ sub showComments {
 		|| $constants->{comments_more_seclev} == 2 && $user->{is_subscriber};
 	my $comments_wanted = $user->{show_comments_num}
 		|| $constants->{user_comment_display_default};
-	my $commentcount = $slashdb->countCommentsByUID($uid);
-	my $comments = $slashdb->getCommentsByUID(
+	my $commentcount = $reader->countCommentsByUID($uid);
+	my $comments = $reader->getCommentsByUID(
 		$uid, $comments_wanted, $min_comment
 	) if $commentcount;
 
@@ -782,13 +782,13 @@ sub showComments {
 
 		my $type;
 		# This works since $sid is numeric.
-		my $replies = $slashdb->countCommentsBySidPid($sid, $cid);
+		my $replies = $reader->countCommentsBySidPid($sid, $cid);
 
 		# This is ok, since with all luck we will not be hitting the DB
 		# ...however, the "sid" parameter here must be the string
 		# based SID from either the "stories" table or from
 		# pollquestions.
-		my($discussion) = $slashdb->getDiscussion($sid);
+		my($discussion) = $reader->getDiscussion($sid);
 
 		if ($discussion->{url} =~ /journal/i) {
 			$type = 'journal';
@@ -821,7 +821,7 @@ sub showComments {
 		commentstruct		=> $commentstruct || [],
 		commentcount		=> $commentcount,
 		min_comment		=> $min_comment,
-		reasons			=> $slashdb->getReasons(),
+		reasons			=> $reader->getReasons(),
 		karma_flag		=> 0,
 		admin_flag		=> $user->{is_admin},
 	});
@@ -838,7 +838,7 @@ sub showInfo {
 	my($hr) = @_;
 	my $id = $hr->{uid} || 0;
 
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -857,26 +857,26 @@ sub showInfo {
 		if ($form->{uid} && ! $id) {
 			$fieldkey = 'uid';
 			($uid, $id) = ($form->{uid}, $form->{uid});
-			$requested_user = isAnon($uid) ? $user : $slashdb->getUser($id);
+			$requested_user = isAnon($uid) ? $user : $reader->getUser($id);
 			$nick = $requested_user->{nickname};
 			$form->{userfield} = $nick if $admin_flag;
 
 		} elsif ($form->{nick} && ! $id) {
 			$fieldkey = 'nickname';
 			($nick, $id) = ($form->{nick}, $form->{nick});
-			$uid = $slashdb->getUserUID($id);
+			$uid = $reader->getUserUID($id);
 			if (isAnon($uid)) {
 				$requested_user = $user;
 				($nick, $uid, $id) = @{$user}{qw(nickname uid nickname)};
 			} else {
-				$requested_user = $slashdb->getUser($uid);
+				$requested_user = $reader->getUser($uid);
 			}
 			$form->{userfield} = $uid if $admin_flag;
 
 		} else {
 			$fieldkey = 'uid';
 			($id, $uid) = ($user->{uid}, $user->{uid});
-			$requested_user = $slashdb->getUser($uid);
+			$requested_user = $reader->getUser($uid);
 			$form->{userfield} = $uid if $admin_flag;
 		}
 
@@ -884,10 +884,10 @@ sub showInfo {
 		$id ||= $form->{userfield} || $user->{uid};
 		if ($id =~ /^\d+$/) {
 			$fieldkey = 'uid';
-			$requested_user = $slashdb->getUser($id);
+			$requested_user = $reader->getUser($id);
 			$uid = $requested_user->{uid};
 			$nick = $requested_user->{nickname};
-			if ((my $conflict_id = $slashdb->getUserUID($id)) && $form->{userinfo}) {
+			if ((my $conflict_id = $reader->getUserUID($id)) && $form->{userinfo}) {
 				slashDisplay('showInfoConflict', {
 					op		=> 'userinfo',
 					id		=> $uid,
@@ -923,15 +923,15 @@ sub showInfo {
 
 		} else {  # go by nickname, but make it by uid
 			$fieldkey = 'uid';
-			$id = $uid = $slashdb->getUserUID($id);
-			$requested_user = $slashdb->getUser($uid);
+			$id = $uid = $reader->getUserUID($id);
+			$requested_user = $reader->getUser($uid);
 			$nick = $requested_user->{nickname};
 		}
 		
 	} else {
 		$fieldkey = 'uid';
 		($id, $uid) = ($user->{uid}, $user->{uid});
-		$requested_user = $slashdb->getUser($uid);
+		$requested_user = $reader->getUser($uid);
 	}
 
 	# Can't get user data for the anonymous user.
@@ -1000,14 +1000,14 @@ sub showInfo {
 
 		if ($form->{fieldname}) {
 			if ($form->{fieldname} eq 'ipid') {
-				$commentcount = $slashdb->countCommentsByIPID(
+				$commentcount = $reader->countCommentsByIPID(
 					$netid, $comments_wanted, $min_comment);
-				$comments = $slashdb->getCommentsByIPID(
+				$comments = $reader->getCommentsByIPID(
 					$netid, $comments_wanted, $min_comment);
 			} elsif ($form->{fieldname} eq 'subnetid') {
-				$commentcount = $slashdb->countCommentsBySubnetID(
+				$commentcount = $reader->countCommentsBySubnetID(
 					$netid, $comments_wanted, $min_comment);
-				$comments = $slashdb->getCommentsBySubnetID(
+				$comments = $reader->getCommentsBySubnetID(
 					$netid, $comments_wanted, $min_comment);
 			} else {
 				delete $form->{fieldname};
@@ -1015,9 +1015,9 @@ sub showInfo {
 		}
 		if (!defined($comments)) {
 			# Last resort; here for backwards compatibility mostly.
-			$commentcount = $slashdb->countCommentsByIPIDOrSubnetID(
+			$commentcount = $reader->countCommentsByIPIDOrSubnetID(
 				$netid, $comments_wanted, $min_comment);
-			$comments = $slashdb->getCommentsByIPIDOrSubnetID(
+			$comments = $reader->getCommentsByIPIDOrSubnetID(
 				$netid, $comments_wanted, $min_comment
 			);
 		}
@@ -1026,8 +1026,8 @@ sub showInfo {
 		$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
 		$commentcount =
-			$slashdb->countCommentsByUID($requested_user->{uid});
-		$comments = $slashdb->getCommentsByUID(
+			$reader->countCommentsByUID($requested_user->{uid});
+		$comments = $reader->getCommentsByUID(
 			$requested_user->{uid}, $comments_wanted, $min_comment
 		) if $commentcount;
 		$netid = $requested_user->{uid};
@@ -1043,7 +1043,7 @@ sub showInfo {
 			$uids{$c->{uid}}++;
 		}
 		my $uids = join(", ", sort { $a <=> $b } keys %uids);
-		$uid_hr = $slashdb->sqlSelectAllHashref(
+		$uid_hr = $reader->sqlSelectAllHashref(
 			"uid",
 			"uid, " . join(", ", @extra_cols_wanted),
 			"users",
@@ -1054,13 +1054,13 @@ sub showInfo {
 	for my $comment (@$comments) {
 		my $type;
 		# This works since $sid is numeric.
-		my $replies = $slashdb->countCommentsBySidPid($comment->{sid}, $comment->{cid});
+		my $replies = $reader->countCommentsBySidPid($comment->{sid}, $comment->{cid});
 
 		# This is ok, since with all luck we will not be hitting the DB
 		# ...however, the "sid" parameter here must be the string
 		# based SID from either the "stories" table or from
 		# pollquestions.
-		my($discussion) = $slashdb->getDiscussion($comment->{sid});
+		my($discussion) = $reader->getDiscussion($comment->{sid});
 
 		if ($discussion->{url} =~ /journal/i) {
 			$type = 'journal';
@@ -1098,16 +1098,16 @@ sub showInfo {
 		push @$commentstruct, $data;
 	}
 	my $storycount =
-		$slashdb->countStoriesBySubmitter($requested_user->{uid})
+		$reader->countStoriesBySubmitter($requested_user->{uid})
 	unless $requested_user->{nonuid};
-	my $stories = $slashdb->getStoriesBySubmitter(
+	my $stories = $reader->getStoriesBySubmitter(
 		$requested_user->{uid},
 		$constants->{user_submitter_display_default}
 	) unless !$storycount || $requested_user->{nonuid};
 
-	my $subcount = $slashdb->countSubmissionsByNetID($netid, $fieldkey)
+	my $subcount = $reader->countSubmissionsByNetID($netid, $fieldkey)
 		if $requested_user->{nonuid};
-	my $submissions = $slashdb->getSubmissionsByNetID($netid, $fieldkey)
+	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey)
 		if $requested_user->{nonuid};
 
 	if ($requested_user->{nonuid}) {
@@ -1122,7 +1122,7 @@ sub showInfo {
 			admin_block		=> $admin_block,
 			netid			=> $netid,
 			netid_vis		=> $netid_vis,
-			reasons			=> $slashdb->getReasons(),
+			reasons			=> $reader->getReasons(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
 		});
@@ -1146,7 +1146,7 @@ sub showInfo {
 
 			if ($points) {
 				$mod_flag = 1;
-				$lastgranted = $slashdb->getUser($uid, 'lastgranted');
+				$lastgranted = $reader->getUser($uid, 'lastgranted');
 				if ($lastgranted) {
 					my $hours = $constants->{mod_stir_hours}
 						|| $constants->{stir}*24;
@@ -1181,12 +1181,13 @@ sub showInfo {
 			admin_flag 		=> $admin_flag,
 			stories 		=> $stories,
 			storycount 		=> $storycount,
-			reasons			=> $slashdb->getReasons(),
+			reasons			=> $reader->getReasons(),
 			lastjournal		=> $lastjournal,
 		});
 	}
 
 	if ($user_change && %$user_change) {
+		my $slashdb = getCurrentDB();
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
 }
@@ -1408,14 +1409,14 @@ sub adminDispatch {
 sub tildeEd {
 	my($extid, $exsect, $exaid, $exboxes, $userspace) = @_;
 
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my($aidref, $aid_order, $tidref, $tid_order, $sectionref, $section_descref, $box_order, $tilde_ed, $tilded_msg_box);
 
 	my $title = getTitle('tildeEd_title');
 
 	# Customizable Authors Thingee
-	my $aids = $slashdb->getDescriptions('all-authors'); #$slashdb->getAuthorNames();
+	my $aids = $reader->getDescriptions('all-authors'); #$reader->getAuthorNames();
 	my $n = 0;
 
 	@$aid_order = sort { lc $aids->{$a} cmp lc $aids->{$b} } keys %$aids;
@@ -1425,7 +1426,7 @@ sub tildeEd {
 		$aidref->{$aid}{nickname} = $aids->{$aid};
 	}
 
-	my $topics = $slashdb->getDescriptions('topics');
+	my $topics = $reader->getDescriptions('topics');
 
 	@$tid_order = sort { lc $topics->{$a} cmp lc $topics->{$b} } keys %$topics;
 
@@ -1435,7 +1436,7 @@ sub tildeEd {
 		$tidref->{$tid}{alttext} = $alttext;
 	}
 
-	my $sections = $slashdb->getDescriptions('sections-contained');
+	my $sections = $reader->getDescriptions('sections-contained');
 	while (my($section, $title) = each %$sections) {
 		next if !$section;
 		$sectionref->{$section}{checked} =
@@ -1446,7 +1447,7 @@ sub tildeEd {
 	my $tilded_customize_msg = getMessage('tilded_customize_msg',
 		{ userspace => $userspace });
 
-	my $sections_description = $slashdb->getSectionBlocks();
+	my $sections_description = $reader->getSectionBlocks();
 
 	my $customize_title = getTitle('tildeEd_customize_title');
 
@@ -2444,9 +2445,9 @@ sub saveMiscOpts {
 
 #################################################################
 sub listReadOnly {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $readonlylist = $slashdb->getAccessList(0, 'nopost');
+	my $readonlylist = $reader->getAccessList(0, 'nopost');
 
 	slashDisplay('listReadOnly', {
 		readonlylist => $readonlylist,
@@ -2456,9 +2457,9 @@ sub listReadOnly {
 
 #################################################################
 sub listBanned {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $bannedlist = $slashdb->getAccessList(0, 'ban');
+	my $bannedlist = $reader->getAccessList(0, 'ban');
 
 	slashDisplay('listBanned', {
 		bannedlist => $bannedlist,
@@ -2468,9 +2469,9 @@ sub listBanned {
 
 #################################################################
 sub topAbusers {
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $topabusers = $slashdb->getTopAbusers();
+	my $topabusers = $reader->getTopAbusers();
 
 	slashDisplay('topAbusers', {
 		topabusers => $topabusers,
@@ -2481,10 +2482,10 @@ sub topAbusers {
 sub listAbuses {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 
-	my $abuses = $slashdb->getAbuses($form->{key}, $form->{abuseid});
+	my $abuses = $reader->getAbuses($form->{key}, $form->{abuseid});
 
 	slashDisplay('listAbuses', {
 		abuseid	=> $form->{abuseid},
@@ -2609,8 +2610,8 @@ sub getTitle {
 # containing fields for admin users
 sub getUserAdmin {
 	my($id, $field, $seclev_field) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $slashdb	= getCurrentDB();
 	my $user	= getCurrentUser();
 	my $form	= getCurrentForm();
 	my $constants	= getCurrentStatic();
@@ -2621,38 +2622,38 @@ sub getUserAdmin {
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my $accesslist;
-	my $sectionref = $slashdb->getDescriptions('sections-contained');
+	my $sectionref = $reader->getDescriptions('sections-contained');
 	$sectionref->{''} = getData('all_sections');
 
 	$field ||= 'uid';
 	if ($field eq 'uid') {
-		$user_edit = $slashdb->getUser($id);
+		$user_edit = $reader->getUser($id);
 		$user_editfield = $user_edit->{uid};
-		$expired = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
-		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
+		$expired = $reader->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
+		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'nickname') {
-		$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
+		$user_edit = $reader->getUser($reader->getUserUID($id));
 		$user_editfield = $user_edit->{nickname};
-		$expired = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
-		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
+		$expired = $reader->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
+		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'md5id') {
 		$user_edit->{nonuid} = 1;
 		$user_edit->{md5id} = $id;
 		if ($form->{fieldname} and $form->{fieldname} =~ /^(ipid|subnetid)$/) {
-			$uidstruct = $slashdb->getUIDStruct($form->{fieldname}, $user_edit->{md5id});
+			$uidstruct = $reader->getUIDStruct($form->{fieldname}, $user_edit->{md5id});
 		} else {
-			$uidstruct = $slashdb->getUIDStruct('md5id', $user_edit->{md5id});
+			$uidstruct = $reader->getUIDStruct('md5id', $user_edit->{md5id});
 		}
 
 	} elsif ($field eq 'ipid') {
 		$user_edit->{nonuid} = 1;
 		$user_edit->{ipid} = $id;
 		$user_editfield = $id;
-		$uidstruct = $slashdb->getUIDStruct('ipid', $user_edit->{ipid});
+		$uidstruct = $reader->getUIDStruct('ipid', $user_edit->{ipid});
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
@@ -2664,17 +2665,17 @@ sub getUserAdmin {
 		}
 
 		$user_editfield = $id;
-		$uidstruct = $slashdb->getUIDStruct('subnetid', $user_edit->{subnetid});
+		$uidstruct = $reader->getUIDStruct('subnetid', $user_edit->{subnetid});
 
 	} else {
-		$user_edit = $id ? $slashdb->getUser($id) : $user;
+		$user_edit = $id ? $reader->getUser($id) : $user;
 		$user_editfield = $user_edit->{uid};
-		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
+		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
 	}
 
 	for my $access_type (qw( ban nopost nosubmit norss proxy )) {
 		$accesslist->{$access_type} = "";
-		my $info_hr = $slashdb->getAccessListInfo($access_type, $user_edit);
+		my $info_hr = $reader->getAccessListInfo($access_type, $user_edit);
 		next if !$info_hr; # no match
 		$accesslist->{reason}	||= $info_hr->{reason};
 		$accesslist->{ts}	||= $info_hr->{ts};
@@ -2683,13 +2684,13 @@ sub getUserAdmin {
 	}
 	if (exists $accesslist->{adminuid}) {
 		$accesslist->{adminnick} = $accesslist->{adminuid}
-			? $slashdb->getUser($accesslist->{adminuid}, 'nickname')
+			? $reader->getUser($accesslist->{adminuid}, 'nickname')
 			: '(unknown)';
 	}
 
 	$user_edit->{author} = ($user_edit->{author} == 1) ? ' CHECKED' : '';
 	if (! $user->{nonuid}) {
-		my $threshcodes = $slashdb->getDescriptions('threshcode_values','',1);
+		my $threshcodes = $reader->getDescriptions('threshcode_values','',1);
 		$thresh_select = createSelect('defaultpoints', $threshcodes, $user_edit->{defaultpoints}, 1);
 	}
 
@@ -2737,10 +2738,11 @@ sub getUserAdmin {
 # user creation -- pudge
 sub getOtherUserParams {
 	my($data) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+
 	my $user    = getCurrentUser();
 	my $form    = getCurrentForm();
-	my $params = $slashdb->getDescriptions('otherusersparam');
+	my $params = $reader->getDescriptions('otherusersparam');
 
 	for my $param (keys %$params) {
 		if (exists $form->{$param}) {

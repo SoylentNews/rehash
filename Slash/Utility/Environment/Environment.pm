@@ -141,8 +141,8 @@ sub getCurrentMenu {
 		@menus = @{$cfg->{menus}{$menu}};
 	} else {
 		# Load menus direct from the database.
-		my $slashdb = getCurrentDB();
-		my $menus = $slashdb->getMenus();
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $menus = $reader->getMenus();
 
 		@menus = @{$menus->{$menu}} if exists $menus->{$menu};
 	}
@@ -1615,10 +1615,10 @@ my %last = (
 
 sub isDST {
 	my($region, $user, $unixtime, $off_set) = @_;
-	my $slashdb = getCurrentDB();
-	$user     ||= getCurrentUser();
 
-	my $regions = $slashdb->getDSTRegions;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	$user     ||= getCurrentUser();
+	my $regions = $reader->getDSTRegions;
 
 	return 0 unless $region;
 	my $start = $regions->{$region}{start} or return 0;

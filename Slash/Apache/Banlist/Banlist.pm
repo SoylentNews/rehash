@@ -31,8 +31,8 @@ sub handler {
 	$cur_subnet =~ s/^(\d+\.\d+\.\d+)\.\d+$/$1.0/;
 	$cur_subnet = md5_hex($cur_subnet);
 
-	my $slashdb = getCurrentDB();
-	$slashdb->sqlConnect();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	$reader->sqlConnect();
 
 	my $is_rss = $r->uri =~ m{(
 		\.(?:xml|rss|rdf)$
@@ -41,7 +41,7 @@ sub handler {
 	)}x;  # also check for content_type in POST?
 
 	# check for ban
-	my $banlist = $slashdb->getBanList();
+	my $banlist = $reader->getBanList();
 	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnet}) {
 		return _send_rss($r, 'ban') if $is_rss;
 
@@ -55,7 +55,7 @@ sub handler {
 	}
 
 	# check for RSS abuse
-	my $rsslist = $slashdb->getNorssList();
+	my $rsslist = $reader->getNorssList();
 	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnet})) {
 		return _send_rss($r, 'abuse');
 	}

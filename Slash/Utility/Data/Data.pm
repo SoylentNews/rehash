@@ -1893,7 +1893,7 @@ sub parseSlashizedLinks {
 sub _slashlink_to_link {
 	my($sl, $options) = @_;
 	my $ssi = getCurrentForm('ssi') || 0;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $root = $constants->{rootdir};
 	my %attr = $sl =~ / (\w+)="([^"]+)"/g;
@@ -1903,7 +1903,7 @@ sub _slashlink_to_link {
 	# Load up special values and delete them from the attribute list.
 	my $sn = delete $attr{sn} || "";
 	my $sect = delete $attr{sect} || "";
-	my $section = $sect ? $slashdb->getSection($sect) : {};
+	my $section = $sect ? $reader->getSection($sect) : {};
 	my $sect_root = $section->{rootdir} || $root;
 	if ($options && $options->{absolute}) {
 		$sect_root = URI->new_abs($sect_root, $options->{absolute})
@@ -2002,7 +2002,7 @@ sub addDomainTags {
 		(.*?)			# $3 is whatever's between <A> and </A>
 		</A\b[^>]*>
 	}{
-		$3	? $1 . $3 . _url_to_domain_tag($2)
+		$3	? _url_to_domain_tag($1,$2, $3)
 			: ""
 	}gisex;
 
@@ -2018,8 +2018,16 @@ sub addDomainTags {
 	return $html;
 }
 
+# Add a title tag to make this all friendly for those with vision and similar issues -Brian
+sub _url_title_tag {
+	my($href, $title) = @_;
+	$href =~ s/>/ TITLE="$title">/is;
+
+	return $href;
+}
+
 sub _url_to_domain_tag {
-	my($link) = @_;
+	my($href, $link, $body) = @_;
 	my $absolutedir = getCurrentStatic('absolutedir');
 	my $uri = URI->new_abs($link, $absolutedir);
 	my($info, $host, $scheme) = ("", "", "");
@@ -2064,7 +2072,8 @@ sub _url_to_domain_tag {
 	} elsif (length($info) >= 25) {
 		$info = substr($info, 0, 10) . "..." . substr($info, -10);
 	}
-	return "</a $info>";
+	$href =~ s/>/ TITLE="$info">/is;
+	return "$href$body</a $info>";
 }
 
 #========================================================================
@@ -2118,7 +2127,7 @@ sub slashizeLinks {
 my %urla;
 sub _link_to_slashlink {
 	my($pre, $url, $post) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $virtual_user = getCurrentVirtualUser();
 	my $retval = "$pre$url$post";
@@ -2129,7 +2138,7 @@ sub _link_to_slashlink {
 		# URLs may show up in any section, which means when absolutized
 		# their host may be either the main one or a sectional one.
 		# We have to allow for any of those possibilities.
-		my $sections = $slashdb->getSections();
+		my $sections = $reader->getSections();
 		my @sect_urls = grep { $_ }
 			map { $sections->{$_}{rootdir} }
 			sort keys %$sections;
@@ -2193,15 +2202,15 @@ sub _link_to_slashlink {
 		# Section and topic attributes get thrown in too.
 		if ($attr{sn} eq 'comments') {
 			# sid is actually a discussion id!
-			$attr{sect} = $slashdb->getDiscussion(
+			$attr{sect} = $reader->getDiscussion(
 				$attr{sid}, 'section');
-			$attr{tid} = $slashdb->getDiscussion(
+			$attr{tid} = $reader->getDiscussion(
 				$attr{sid}, 'topic');
 		} else {
 			# sid is a story id
-			$attr{sect} = $slashdb->getStory( 
+			$attr{sect} = $reader->getStory( 
 				$attr{sid}, 'section', 1);
-			$attr{tid} = $slashdb->getStory(
+			$attr{tid} = $reader->getStory(
 				$attr{sid}, 'tid', 1);
 		}
 		$attr{frag} = $frag if $frag;
@@ -2546,14 +2555,14 @@ sub getArmoredEmail {
 	# If the caller knows realemail, pass it in to maybe save a DB query
 	$realemail ||= '';
 
-	my $slashdb = getCurrentDB();
-	my $armor = $slashdb->getRandomSpamArmor();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $armor = $reader->getRandomSpamArmor();
 
 	# Execute the retrieved code in a Safe compartment. We do this
 	# in an anonymous block to enable local scoping for some variables.
 	{
 		local $_ = $realemail;
-		$_ ||= $slashdb->getUser($uid, 'realemail');
+		$_ ||= $reader->getUser($uid, 'realemail');
 
 		# maybe this should be cached, something like the template
 		# cache in Slash::Display?  it has some significant

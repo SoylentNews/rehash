@@ -257,6 +257,7 @@ clean:
 	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; make clean)
 	(rm Slash/Apache/Apache.xs Slash/Apache/User/User.xs)
 	(cd plugins; make clean)
+	find ./ | grep \# | xargs rm
 
 dist: $(DISTVNAME).tar$(SUFFIX)
 
