@@ -113,13 +113,32 @@ my @strip = qw(
 	ANCHOR
 );
 
-@EXPORT_OK = (@messages, @web, @strip);
+=head2 people
+
+These constants are used to define different constants in the people system.
+
+	FRIEND
+	FOE
+	FOF
+	BONUS
+
+=cut
+
+my @people = qw(
+	FRIEND
+	FOE
+	FOF
+	BONUS
+);
+
+@EXPORT_OK = (@messages, @web, @strip, @people);
 
 %EXPORT_TAGS = (
 	all		=> [@EXPORT_OK],
 	messages	=> [@messages],
 	web		=> [@web],
 	strip		=> [@strip],
+	people		=> [@people],
 );
 
 BEGIN {
@@ -155,6 +174,13 @@ BEGIN {
 	use constant EXTRANS	=> 3;
 	use constant CODE	=> 4;
 	use constant ANCHOR	=> 5;
+
+	# people
+	use constant FRIEND => 1;
+	use constant FOE => 2;
+	use constant FOF => 3;
+	# Technically this is a type in people.
+	use constant BONUS => 1;
 }
 
 1;
