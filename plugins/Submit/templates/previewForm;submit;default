@@ -18,14 +18,6 @@ __name__
 previewForm
 __template__
 [% PROCESS formatSub %]
-
-[% IF submission.comment && admin_flag %]
-<P>Submission Notes:
-<TABLE WIDTH="95%"><TR><TD BGCOLOR="[% user.colors.bg_2 %]">
-	<FONT SIZE="-1" COLOR="[% user.colors.fg_2 %]">[% submission.comment | strip_literal %]</FONT>
-</TD></TR></TABLE>
-[% END %]
-
 [% IF submission.sid %]
 	<P><A HREF="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</A>
 [% ELSIF submission.del == 2 %]
@@ -39,20 +31,26 @@ WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
 ALIGN="RIGHT" HSPACE="20" VSPACE="10"
 ALT="[% topic.textname %]"
 TITLE="[% topic.textname %]"></A>
+
+[% UNLESS admin_flag -%]
 [% submission_state = Slash.db.getDescriptions('submission-state') %]
 [% del = submission.del; submission_state.$del %] submission by <B>[% submission.name %] <A HREF="[% submission.email %]">[% submission.email %]</A></B>
-	at [% submission.time %] [% IF admin_flag %]<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</A>[% END %]
+	at [% submission.time %]
+[% END -%]
 
-[% IF admin_flag && (submission.uid != constants.anonymous_coward_uid || submission.emaildomain) %]
-	<p>In the last [% constants.submission_count_days %] days, there
-	[% IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
-		|| submission.uid == constants.anonymous_coward_uid && num_with_emaildomain != 1 %]
+<P>[% subtext %]</P>
+
+[% IF admin_flag -%]
+[% IF submission.uid != constants.anonymous_coward_uid || submission.emaildomain -%]
+	<p>In the last [% constants.submission_count_days -%] days, there
+	[%- IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
+		|| submission.uid == constants.anonymous_coward_uid && num_with_emaildomain != 1 -%]
 		have been
-	[% ELSE %]
+	[%- ELSE -%]
 		has been
-	[% END %]
-	[% IF submission.uid != constants.anonymous_coward_uid %]
-		[% IF num_from_uid >= 20 %]<B>[% END %]
+	[%- END -%]
+	[%- IF submission.uid != constants.anonymous_coward_uid -%]
+		[%- IF num_from_uid >= 20 %]<B>[% END -%]
 		[% num_from_uid %] submission[% IF num_from_uid != 1 %]s[% END %]
 		from [% submitter.nickname %]
 		[% IF submitter.realemail %]
@@ -60,31 +58,62 @@ TITLE="[% topic.textname %]"></A>
 		[% END %]
 		([% accepted_from_uid %] accepted)
 		[%- IF num_from_uid >= 20 %]</B>[% END -%]
-		[%- IF submission.emaildomain %]
+		[%- IF submission.emaildomain -%]
 			and
-		[% END -%]
+		[%- END -%]
 	[%- END -%]
-	[%- IF submission.emaildomain %]
-		[% IF num_with_emaildomain >= 15 %]<B>[% END %]
+	[%- IF submission.emaildomain -%]
+		[%- IF num_with_emaildomain >= 15 %]<B>[% END -%]
 		[% num_with_emaildomain %] submission[% IF num_with_emaildomain != 1 %]s[% END %]
 		from [% submission.emaildomain -%] ([% accepted_from_emaildomain %] accepted)
 		[%- IF num_with_emaildomain >= 15 %]</B>[% END -%]
 	[%- END -%]
-	.
-[% END %]
+	.</p>
+[%- END %]
+	<FORM ACTION="[% gSkin.rootdir %]/submit.pl" METHOD="POST">
+	<INPUT TYPE="HIDDEN" NAME="op" VALUE="changesubmission">
+	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
 
-<P>[% subtext %]</P>
+	<TABLE WIDTH="99%" ALIGN="LEFT" BGCOLOR="[% user.colors.bg_1 %]">
+	<TR><TD>
+[% submission_state = Slash.db.getDescriptions('submission-state'); del = submission.del -%]
+[% submission_state.$del %] submission by <B>[% submission.name %]
+[%- IF submission.email %] <A HREF="[% submission.email %]">[% submission.email %]</A>[% END -%]
+</B> at [% submission.time %]
+	<A HREF="[% gSkin.rootdir 
+		-%]/users.pl?op=userinfo&amp;userfield=[% ipid 
+		-%]&amp;fieldname=ipid">[% ipid_vis 
+		-%]</A><BR>
+	</TD></TR>
+	<TR><TD>
+		<INPUT TYPE="TEXT" NAME="comment_[% subid %]" VALUE="[% submission.comment %]" SIZE=70><BR>
+	[% 
+		this_note = submission.note || '';
+		Slash.createSelect(
+			"note_$subid", note_options, this_note, 1
+		);
+		Slash.createSelect(
+			"skid_$subid", 
+			Slash.db.getDescriptions('skins'),
+			submission.primaryskid, 1, 0, 1
+		);
+	-%]
+	
+		<INPUT TYPE="SUBMIT" NAME="update" VALUE="Update">
+		<INPUT TYPE="SUBMIT" NAME="del_[% subid %]" VALUE="Delete">
+	</TD></TR>
+	</TABLE>
+	</FORM>
 
-[% IF admin_flag %]
-	[ <A HREF="[% env.script_name %]?op=Delete&amp;subid=[% subid %]&amp;skin=[% form.table_skin | strip_attribute %]&amp;note=[% form.table_note | strip_attribute %]">Delete Submission</A> ]<BR>
+	<BR><BR><BR><BR>
 
 	<FORM ACTION="[% gSkin.rootdir %]/admin.pl" METHOD="POST">
 		<INPUT TYPE="HIDDEN" NAME="firstpreview" VALUE="1">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
 		<INPUT TYPE="HIDDEN" NAME="topic_source" VALUE="submission">
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter.uid %]">
-		<BR>title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50" MAXLENGTH="50">
-		<BR>[% lockTest %]
+		<br />title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50" MAXLENGTH="50">
+		<br />[% lockTest %]
 	[% IF constants.use_dept %]
 		dept <INPUT TYPE="text" NAME="dept" SIZE="50">
 	[% END %]
@@ -98,8 +127,7 @@ TITLE="[% topic.textname %]"></A>
 			[% pulldown = "$extra.1" %]
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), submission.${extra.1}, 1, 1) %]
 		[% END %]
-	[% END %]
-		<BR>
+	[% END %]<BR>
 	[% Slash.createSelect('primaryskid', Slash.db.getDescriptions('skins'), submission.primaryskid, 1, 0, 1) %]
 	[% Slash.createSelect('tid', Slash.db.getDescriptions('highlighted-topics-submittable'), submission.tid, 1, 0, 1) %]
 
