@@ -188,7 +188,7 @@ You can get the Slash code in these locations:
 
 =item HTTP, CVS
 
-	http://sourceforge.net/project/?group_id=4421
+	http://sourceforge.net/projects/slashcode/
 
 The CVS repository is tagged with versions, so to get release
 1.0.3, get tag "v1_0_3_0".  The last number will be incremented
@@ -259,6 +259,12 @@ exported to web servers
 
 There are many ways this can be done. The key is to think about how the
 site will be put together before starting the installation.
+
+B<Note>: If your site is going to be very busy, you may wish to
+consider having a separate images server.  For instance, Slashdot has
+images.slashdot.org, which handles all the images.  Just set the
+imagedir variable in slashdotrc.pl appropriately, like
+C<http://images.example.com>.
 
 
 =head1 INSTALLATION AND SETUP
@@ -751,4 +757,4 @@ want to run the script, or whatever.
 
 =head1 AUTHOR
 
-Patrick Galbraith and Chris Nandor.  Last Modified July 10, 2000.
+Patrick Galbraith and Chris Nandor.  Last Modified August 18, 2000.

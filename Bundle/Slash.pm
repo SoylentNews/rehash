@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$Bundle::Slash::VERSION = '1.0.7';
+$Bundle::Slash::VERSION = '1.0.8';
 
 1;
 
@@ -9,6 +9,7 @@ __END__
 =head1 NAME
 
 Bundle::Slash - A bundle to install all modules used for Slash
+
 
 =head1 SYNOPSIS
 
