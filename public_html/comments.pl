@@ -803,13 +803,15 @@ sub moderateCid {
 		"cid=$cid and sid='$sid'"
 	);
 
-	my($mid) = sqlSelect(
-		"id", "moderatorlog",
-		"uid=$I{U}{uid} and cid=$cid and sid='$sid'"
-	);
-	if ($mid) {
-		print "<LI>$subj ($sid-$cid, <B>Already moderated</B>)</LI>";
-		return;
+	unless ($I{U}{aseclev} > 99 && $I{authors_unlimited}) {
+		my($mid) = sqlSelect(
+			"id", "moderatorlog",
+			"uid=$I{U}{uid} and cid=$cid and sid='$sid'"
+		);
+		if ($mid) {
+			print "<LI>$subj ($sid-$cid, <B>Already moderated</B>)</LI>";
+			return;
+		}
 	}
 
 	my $modreason = $reason;
