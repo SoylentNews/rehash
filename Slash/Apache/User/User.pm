@@ -329,6 +329,14 @@ sub userdir_handler {
 				$r->args("op=changepasswd");
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
+			} elsif ($op eq 'logout') {
+				$r->args("op=userclose");
+				$r->uri('/users.pl');
+				$r->filename($constants->{basedir} . '/users.pl');
+			} elsif ($op eq 'misc') {
+				$r->args("op=editmiscopts");
+				$r->uri('/users.pl');
+				$r->filename($constants->{basedir} . '/users.pl');
 			} else {
 				$r->args("op=edituser");
 				$r->uri('/users.pl');
