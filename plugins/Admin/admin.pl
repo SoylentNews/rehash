@@ -1456,7 +1456,11 @@ sub updateStory {
 
 
 	$slashdb->setDiscussionBySid($data->{sid}, $dis_data);
-	$slashdb->setVar('writestatus', 'dirty') if $data->{displaystatus} < 1;
+	if ($data->{displaystatus} < 1) {
+		$slashdb->setVar('writestatus', 'dirty');
+		$slashdb->setSection($data->{section}, { writestatus => 'dirty' });
+	}
+
 	titlebar('100%', getTitle('updateStory-title'));
 	# make sure you pass it the goods
 	listStories(@_);
