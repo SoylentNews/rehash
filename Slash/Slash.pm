@@ -272,7 +272,7 @@ and 'printCommComments' template blocks.
 =cut
 
 sub printComments {
-	my($discussion, $pid, $cid) = @_;
+	my($discussion, $pid, $cid, $honor_no_display) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -316,7 +316,7 @@ sub printComments {
 		lvl		=> $lvl,
 	});
 
-	return if (($user->{state}{nocomment} || $user->{mode} eq 'nocomment') && !$form->{comment_override_display});
+	return if (($user->{state}{nocomment} || $user->{mode} eq 'nocomment') && $honor_no_display);
 
 	my($comment, $next, $previous);
 	if ($cid) {
@@ -977,7 +977,7 @@ sub _hard_dispComment {
 	} elsif ($user->{nosigs}) {
 		$comment_to_display = $comment->{comment};
 	} else {
-		$comment_to_display  = "$comment->{comment}<BR>--<BR>$comment->{sig}";
+		$comment_to_display  = "$comment->{comment}$comment->{sig}";
 	}
 
 	$time_to_display = timeCalc($comment->{date});
