@@ -1559,8 +1559,21 @@ sub saveUserAdmin {
 		$user_edits_table->{author} = $form->{author} ? 1 : 0 ;
 		$user_edits_table->{defaultpoints} = $form->{defaultpoints};
 
+		my $was_author = ($slashdb->getAuthor($id)->{author}) ? 1 : 0;
+
 		$slashdb->setUser($id, $user_edits_table);
 		$note .= getMessage('saveuseradmin_saveduser', { field => $user_editfield_flag, id => $id });
+		if ($was_author xor $user_edits_table->{author}) {
+			# A frequently-asked question for new Slash admins is
+			# why their authors aren't showing up immediately.
+			# Give them some help here with an informative message.
+			$note .= getMessage('saveuseradmin_authorchg', {
+				basedir =>	$slashdb->getDescriptions("site_info")
+					->{base_install_directory},
+				virtuser =>	$slashdb->{virtual_user},
+			});
+					
+		}
 	}
 
 	if (!$user_edit->{nonuid}) {

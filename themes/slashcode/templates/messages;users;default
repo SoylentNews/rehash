@@ -110,6 +110,13 @@ please contact the site administrator immediately.
 [% CASE 'saveuseradmin_saveduser' %]
 	Saved [% field %] [% id %] User settings
 
+[% CASE 'saveuseradmin_authorchg' %]
+	<p>Since you changed the author status of this user, you will probably
+	want to rebuild the authors cache at your earliest convenience. To do
+	so, run this at the command line: <tt>[% basedir %]/bin/runtask -u
+	[% virtuser %] refresh_authors_cache</tt> and then restart your
+	webserver.</p>
+
 [% CASE 'dispform_new_msg_1' %]
 	If your registration attempt is failing, it is most likely because
 	you tried to register with a <B>duplicate nickname</B>, a <B>duplicate
