@@ -32,7 +32,9 @@ sub main {
 				}
 				$user->{state}{packagename} = __PACKAGE__;
 				return SOAP::Transport::HTTP::Apache->dispatch_to
-					('Slash::Journal::SOAP')->handle;
+					('Slash::Journal::SOAP')->handle(
+						Apache->request->pnotes('filterobject')
+					);
 			}
 		}
 	}

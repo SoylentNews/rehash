@@ -7,6 +7,9 @@
 # where include directives don't work for mixing with Apache::Compress
 # patch comes from author of Apache::SSI and Apache::Compress
 
+# this also overrides run() so it sets content_type!
+# and to get rid of warnings.
+
 package Slash::Custom::ApacheRegistryFilter;
 
 use strict;
@@ -22,6 +25,29 @@ sub handler ($$) {
   my $status = $class->SUPER::handler($r);
   $r->status($status);
   return OK;
+}
+
+sub run {
+  my $pr = shift;
+  my $r = $pr->{r};
+
+  # If the script was read & compiled in this child in a previous run,
+  # we won't have called filter_input().  Call it now.
+  unless ($r->notes('FilterRead') eq 'this_time') {
+    $r->filter_input(handle => {}) 
+  }
+
+  # We temporarily override the header-sending routines to make them
+  # noops.  This lets people leave these methods in their scripts.
+  my $warn = $^W;
+  undef $^W;
+  local *Apache::send_http_header = sub {
+	$r->content_type($_[0]) if @_;
+  };
+  local *Apache::send_cgi_header = sub {};
+  $^W = $warn;
+
+  $pr->SUPER::run(@_);
 }
 
 1;
