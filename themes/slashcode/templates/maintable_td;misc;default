@@ -31,7 +31,7 @@ IF mt_height %] HEIGHT="[% mt_height %]"[% END %]>
 [%
 IF !mt_rowspan; mt_rowspan = 1; END;
 IF !mt_colspan; mt_colspan = 1; END;
-user.state.mt.cols = [] UNLESS user.state.mt.cols;
+UNLESS user.state.mt.cols; user.state.mt.cols = []; END;
 curcol = user.state.mt.curcol;
 WHILE mt_colspan > 0;
 	curcol = curcol + 1;
