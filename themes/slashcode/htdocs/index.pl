@@ -413,6 +413,8 @@ sub displayStories {
 # right now we need all the edge we can get.  Hopefully we can get this 
 # back on soon. - Jamie 2004/07/17
 #       my $user_maxstories = $user->{maxstories};
+# Here, maxstories should come from the skin, and $cnt should be
+# named minstories and that should come from the skin too.
 	my $user_maxstories = getCurrentAnonymousCoward("maxstories");
 	my $cnt = int($user_maxstories / 3);
 	my($return, $counter);
