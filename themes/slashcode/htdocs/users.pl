@@ -2543,10 +2543,10 @@ sub saveHome {
 	my $slashboxes = $edit_user->{slashboxes};
 	# Only go through all this if the user clicked save,
 	# not "Restore Slashbox Defaults"!
+	my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
 	my $default_slashboxes_textlist = join ",",
 		@{$skinBoxes->{$constants->{mainpage_skid}}};
 	if (!$form->{restore_slashbox_defaults}) {
-		my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
 		$slashboxes = $default_slashboxes_textlist if !$slashboxes;
 		my @slashboxes = split /,/, $slashboxes;
 		my %slashboxes = ( );
