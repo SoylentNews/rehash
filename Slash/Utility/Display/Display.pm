@@ -28,7 +28,6 @@ use strict;
 use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
-use HTML::TokeParser ();
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -1305,20 +1304,18 @@ sub cleanSlashTags {
 
 	$text =~ s#<slash-(image|story|user|file|break|link|comment|journal)#<slash type="$1"#gis;
 	my $newtext = $text;
-	my $tokens = HTML::TokeParser->new(\$text);
+	my $tokens = Slash::Custom::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
 		my $type = lc($token->[1]{type});
-		if (ref($cleanSlashTags->{$type}) eq 'CODE') {
-			$cleanSlashTags->{$type}($tokens, $token,\$newtext);
-		} elsif ($token->[1]{href}) {
-			$cleanSlashTags->{'link'}($tokens, $token,\$newtext);
-		} elsif ($token->[1]{story}) {
-			$cleanSlashTags->{'story'}($tokens, $token,\$newtext);
-		} elsif ($token->[1]{nickname}) {
-			$cleanSlashTags->{'user'}($tokens, $token,\$newtext);
-		} elsif ($token->[1]{user}) {
-			$cleanSlashTags->{'user'}($tokens, $token,\$newtext);
+		if (ref($cleanSlashTags->{$type}) ne 'CODE') {
+			$type = $token->[1]{href}     ? 'link'  :
+				$token->[1]{story}    ? 'story' :
+				$token->[1]{nickname} ? 'user'  :
+				$token->[1]{user}     ? 'user'  :
+				undef;
 		}
+		$cleanSlashTags->{$type}($tokens, $token, \$newtext)
+			if $type;
 	}
 
 	return $newtext;
@@ -1400,13 +1397,13 @@ sub processSlashTags {
 
 	my $newtext = $text;
 	my $user = getCurrentUser();
-	my $tokens = HTML::TokeParser->new(\$text);
+	my $tokens = Slash::Custom::TokeParser->new(\$text);
 
 	return $newtext unless $tokens;
 	while (my $token = $tokens->get_tag('slash')) {
 		my $type = lc($token->[1]{type});
 		if (ref($slashTags->{$type}) eq 'CODE') {
-			$slashTags->{$type}($tokens, $token,\$newtext);
+			$slashTags->{$type}($tokens, $token, \$newtext);
 		} else {
 			my $content = getData('SLASH-UNKNOWN-TAG', { tag => $token->[0] });
 			print STDERR "BAD TAG $token->[0]:$type\n";
@@ -1438,7 +1435,10 @@ sub _slashImage {
 		align	=> $token->[1]{align},
 		width	=> $token->[1]{width},
 		height	=> $token->[1]{height},
-	}, { Return => 1 });
+	}, {
+		Return => 1,
+		Nocomm => 1,
+	});
 	$content ||= getData('SLASH-UNKNOWN-IMAGE');
 
 	$$newtext =~ s/\Q$token->[3]\E/$content/;
@@ -1465,7 +1465,10 @@ sub _slashUser {
 	my $content = slashDisplay('userLink', {
 		uid      => $token->[1]{uid},
 		nickname => $token->[1]{nickname}, 
-	}, { Return => 1 });
+	}, {
+		Return => 1,
+		Nocomm => 1,
+	});
 	$content ||= getData('SLASH-UNKNOWN-USER');
 
 	$$newtext =~ s/\Q$token->[3]\E/$content/;
@@ -1482,7 +1485,10 @@ sub _slashFile {
 		id    => $id,
 		title => $title,
 		text  => $text,
-	}, { Return => 1 });
+	}, {
+		Return => 1,
+		Nocomm => 1,
+	});
 	$content ||= getData('SLASH-UNKNOWN-FILE');
 
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;
@@ -1499,7 +1505,10 @@ sub _slashLink {
 			id    => $token->[1]{id},
 			title => $token->[1]{title} || $token->[1]{href} || $text,
 			text  => $text,
-		}, { Return => 1 });
+		}, {
+			Return => 1,
+			Nocomm => 1,
+		});
 	}
 	$content ||= getData('SLASH-UNKNOWN-LINK');
 
@@ -1521,6 +1530,51 @@ sub _slashComment {
 
 sub _slashJournal {
 	my($tokens, $token, $newtext) = @_;
+}
+
+# sigh ... we had to change one line of TokeParser rather than
+# waste time rewriting the whole thing
+package Slash::Custom::TokeParser;
+
+use base 'HTML::TokeParser';
+
+sub get_text
+{
+    my $self = shift;
+    my $endat = shift;
+    my @text;
+    while (my $token = $self->get_token) {
+	my $type = $token->[0];
+	if ($type eq "T") {
+	    my $text = $token->[1];
+# this is the one changed line
+#	    decode_entities($text) unless $token->[2];
+	    push(@text, $text);
+	} elsif ($type =~ /^[SE]$/) {
+	    my $tag = $token->[1];
+	    if ($type eq "S") {
+		if (exists $self->{textify}{$tag}) {
+		    my $alt = $self->{textify}{$tag};
+		    my $text;
+		    if (ref($alt)) {
+			$text = &$alt(@$token);
+		    } else {
+			$text = $token->[2]{$alt || "alt"};
+			$text = "[\U$tag]" unless defined $text;
+		    }
+		    push(@text, $text);
+		    next;
+		}
+	    } else {
+		$tag = "/$tag";
+	    }
+	    if (!defined($endat) || $endat eq $tag) {
+		 $self->unget_token($token);
+		 last;
+	    }
+	}
+    }
+    join("", @text);
 }
 
 1;
