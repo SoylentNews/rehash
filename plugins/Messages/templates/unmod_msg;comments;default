@@ -14,7 +14,7 @@ __template__
 [% IF msg.mode == 1 %]
 
 <P>
-A user <I>had</I> given a <B>[% constants.reasons.${moderation.reason} %] ([% moderation.value %])</B> moderation to
+A user <I>had</I> given a moderation of <B>[% constants.reasons.${moderation.reason}.name %] ([% moderation.value %])</B> to
 your comment, <B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid
 %]">[% comment.subject %]</A></B>, attached to
 <B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>.  That moderation has now been undone,
@@ -24,7 +24,7 @@ Your comment is currently scored <B>[% constants.reasons.${comment.reason} %] ([
 
 [% ELSE %]
 
-A user had given a "[% constants.reasons.${moderation.reason} %]" ([% moderation.value %]) moderation to your comment.
+A user had given a moderation of "[% constants.reasons.${moderation.reason}.name %]" ([% moderation.value %]) to your comment.
     [% comment.subject | decode_entities %]    
     [% constants.absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
 
