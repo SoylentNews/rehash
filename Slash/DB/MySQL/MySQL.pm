@@ -7747,13 +7747,15 @@ sub _stories_time_clauses {
 	# First decide whether we're looking into the future or not.  If we
 	# are going to try for this sort of thing, then either we must NOT
 	# be limiting it to subscribers only, OR the user must be a subscriber
-	# and this page must be plummy (able to have plums).
+	# and this page must be plummy (able to have plums), OR the user must
+	# have a daypass.
 	my $future = 0;
 	$future = 1 if $try_future
 		&& $constants->{subscribe}
 		&& $future_secs
 		&& (!$must_be_subscriber
-			|| ($user->{is_subscriber} && $user->{state}{page_plummy}));
+			|| ( $user->{is_subscriber} && $user->{state}{page_plummy} )
+			|| $user->{has_daypass} );
 
 	# If we have NOW() in the WHERE clause, the query cache can't hold
 	# onto this.  Since story times are rounded to the minute, we can
