@@ -62,10 +62,6 @@ __template__
 [%- col_max_size = box_order.size / 3; col_size = 0 -%]
 <TABLE BGCOLOR="[% user.colors.bg_2 %]"><TR><TD VALIGN="TOP">
 [% FOREACH bid = box_order %]
-	[% IF section_descref.$bid.boldflag %]
-		<B>
-	[% END %]
-
 		<INPUT TYPE="CHECKBOX" NAME="exboxes_[% bid %]"[% section_descref.$bid.checked %]>
 		<A HREF="[% env.script_name %]?op=previewbox&amp;bid=[% bid %]">
 
@@ -77,9 +73,6 @@ __template__
 
 	 	</A><BR>
 
-	[% IF section_descref.$bid.boldflag %]
-		</B>
-	[% END %]
 	[%- col_size = col_size + 1; IF col_size > col_max_size; -%]
 		</TD><TD VALIGN="TOP">
 	[%- col_size = 0; END -%]
