@@ -169,7 +169,7 @@ sub countDailyArticles {
 ########################################################
 sub countDailyCommentsByDistinctIPID {
 	my($self, $yesterday) = @_;
-	$self->sqlSelect("count(*)", "accesslog",
+	$self->sqlSelect("count(host_addr)", "accesslog",
 		"op='comments' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'", 
 		'',
 		{distinct => 1});
@@ -178,7 +178,7 @@ sub countDailyCommentsByDistinctIPID {
 ########################################################
 sub countDailyArticlesByDistinctIPID {
 	my($self, $yesterday) = @_;
-	$self->sqlSelect("count(*)", "accesslog",
+	$self->sqlSelect("count(host_addr)", "accesslog",
 		"op='article' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
 		'',
 		{distinct => 1});
