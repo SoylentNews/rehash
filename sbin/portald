@@ -144,7 +144,7 @@ sub getRDF {
 
 	my($bid, $url, $other) = @_;
 	my $rss = new XML::RSS;
-	my $template_name ||= $slashdb->getBlock($bid, 'rss_template');
+	my $template_name = $slashdb->getBlock($bid, 'rss_template');
 	my $items ||= $slashdb->getBlock($bid, 'items');
 	$items ||= $constants->{max_items};
 	$template_name ||= $constants->{default_rss_template};
@@ -203,6 +203,15 @@ sub getRDF {
 
 			last if ++$i >= $items && $items > 0;
 		}
+
+		# If the template that displays the items (as
+		# determined by the rss_template field in the
+		# blocks table) seems to be putting <li> tags
+		# around the items, then it probably wants a
+		# <ul></ul> around the list.  This is a bit
+		# hacky but should help make strictly parsed
+		# versions of HTML work better.
+		$str = "<ul>\n$str\n</ul>" if $str && $str =~ /^\s*<li>/;
 
 		setblock($bid, "$str$other");
 		return 1;
