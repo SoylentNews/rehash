@@ -1437,7 +1437,7 @@ CREATE TABLE topic_images (
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 
-INSERT INTO topic_images SELECT "", name,image,width,height  FROM topics;
+INSERT INTO topic_images SELECT "", name,image,width,height FROM topics;
 ALTER TABLE topics ADD default_image mediumint UNSIGNED DEFAULT 0 NOT NULL;
 
 # You must pick one of the following two options.  Actually, running them
@@ -1548,4 +1548,19 @@ ALTER TABLE story_text ADD INDEX rendered (rendered(1));
 INSERT INTO vars (name, value, description) VALUES ('freshen_homepage_min_minutes','60','Number of minutes between updating the main index.shtml homepage (if 0, disabled, only updates when freshenup.pl believes it is required)');
 
 # End of T_2_3_0_101, Start of T_2_3_0_102 - 2003/06/18
+
+ALTER TABLE rss_raw ADD INDEX processed (processed);
+
+# This should have been done a while ago... if you ran a build
+# from mid-March for a while, you might have ended up with
+# duplicate sid,tid rows in story_topics.  This will remove
+# those rows.  If you didn't, this is harmless.  As usual with
+# OUTFILE/SOURCE, if you have multiple sites, pick a different
+# filename for each one, and if speed is a concern, try the
+# command line "mysql dbname < /tmp/foo" instead.
+SELECT CONCAT("DELETE FROM story_topics WHERE id='", st1.id, "';") INTO OUTFILE "/tmp/del-extra-story-topics.sql" FROM story_topics AS st1, story_topics AS st2 WHERE st1.sid=st2.sid AND st1.tid=st2.tid AND st1.id < st2.id;
+SOURCE /tmp/del-extra-story-topics.sql;
+ALTER TABLE story_topics ADD UNIQUE sid_tid (sid,tid);
+INSERT INTO story_topics SELECT "", sid, tid, "no" FROM stories;
+ALTER TABLE story_topics DROP INDEX sid_tid;
 

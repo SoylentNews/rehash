@@ -563,7 +563,8 @@ CREATE TABLE rss_raw (
 	UNIQUE uber_signature (link_signature, title_signature, description_signature),
 	FOREIGN KEY (subid) REFERENCES submissions(subid),
 	FOREIGN KEY (bid) REFERENCES blocks(bid),
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	KEY processed (processed)
 ) TYPE=InnoDB;
 
 #
