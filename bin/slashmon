@@ -11,26 +11,36 @@ use Slash::DB;
 my $PROGNAME = basename($0);
 
 my %opts;
-$opts{'u'} ||= $ARGV[0] || 'slashdot';
 
-createEnvironment($opts{'u'});
+usage('Options used incorrectly') unless getopts('hvu:w:s:', \%opts);
+usage() if ($opts{'h'} || !keys %opts);
+version() if $opts{'v'};
+
+my $virtuser = $opts{u} || 'slashdot';
+my $width = $opts{w} || 76;
+my $sleep = $opts{s} || 10;
+my $rows = $opts{r} || 20;
+
+createEnvironment($virtuser);
+
+# Why is the word "abbreviation" so long?
+# And why do we drive on parkways, but park on driveways?
+my @abbreviations = qw( SELECT FROM WHERE INSERT DELETE UPDATE );
+my %abbreviations = map { ( $_, uc substr($_,0,1) ) } @abbreviations;
 
 my $slashdb = getCurrentDB();
 my $constants = getCurrentStatic();
 
-my $sleep = $ARGV[1] || 10;
-my $rows = $ARGV[2] || 50;
-
 
 my $log=$slashdb->sqlSelectMany("host_addr,uid,op,dat,
-                     date_format(ts,\"\%H:\%i\") as ts,id",
+                     DATE_FORMAT(ts,\"\%H:\%i\") AS ts,id",
                      "accesslog","id > ?",
                      "ORDER BY ts DESC");
 
 my $proc=$slashdb->sqlShowProcessList();
 
 
-my ($id)=$slashdb->sqlSelect("max(id)","accesslog"); 
+my ($id)=$slashdb->sqlSelect("MAX(id)","accesslog"); 
 my $starttime=time;
 my $startsq=getQuestions();
 
@@ -52,15 +62,18 @@ while(1) {
 		my $o=$$S{Time}." ";
 		$o.=" " if $$S{Time} < 10;
 
-		$$S{Info}=~s/\n//g;
+		$$S{Info}=~s/\s+/ /g;
              	$$S{Info}=~s/[^_\'\-\+\.A-Z0-9\(\)<> ,=\|]//gi;
-		$$S{Info}=~s/(\s)+/ /g;
+		$$S{Info}=~s/ +/ /g;
 		$$S{Info}=~s/, /,/g;
 		$$S{Info}=~s/\) /\)/g;
 		$$S{Info}=~s/DATE_ADD\((.*)\)//g;
 		$$S{Info}=~s/DATE_FORMAT\((.*)\)//g;
-		$$S{Info}=~s/SELECT/S/;
-		$o.=substr($$S{Info},0,76);
+		for my $abbr (@abbreviations) {
+			$$S{Info} =~ s/\b$abbr\b/$abbreviations{$abbr}/gi;
+		}
+		$$S{Info}=~s/\bSELECT\b/S/i;
+		$o.=substr($$S{Info},0,$width);
 		push @p,$o;
 
 	}
@@ -109,7 +122,6 @@ while(1) {
 		
         print "  Sql:$active/".$proc->rows()." | $l\n";
         	
-
     	while(my $U=$log->fetchrow_hashref()) {
 	        my $w="$$U{ts} $$U{host_addr} ($$U{uid})";
 	        $w.= "\t" if length $w < 24;
@@ -118,6 +130,7 @@ while(1) {
 	        $w.= "\t$$U{dat}\n";
 	        # print $w unless $ARGV[0] eq "sec";
 	        $id=$$U{id} if $$U{id} > $id;
+		++$num;
     	}
     	$proc->finish();
 
@@ -146,3 +159,38 @@ sub getQuestions
 	return $r;
 
 }
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] ... [UIDs]
+
+Monitor the Slash site's database.
+
+Main options:
+	-h      Help (this message)
+	-v      Version
+	-u      Virtual user (default "slashdot")
+	-w	Width in columns (default 76)
+	-r	Number of rows max (default 20)
+	-s	Sleep time (default 10)
+
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2002 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
