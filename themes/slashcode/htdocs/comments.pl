@@ -941,12 +941,11 @@ sub submitComment {
 
 #print STDERR scalar(localtime) . " $$ E header_emitted=$header_emitted do_emit_html=$do_emit_html redirect_to=" . (defined($redirect_to) ? $redirect_to : "undef") . "\n";
 
-	my $pts = 0;
+	my $pts = $user->{defaultpoints};
 	my $karma_bonus = 0;
 	my $subscriber_bonus = 0;
 	my $tweak = 0;
 	if (!$user->{is_anon} && !$form->{postanon}) {
-		$pts = $user->{defaultpoints};
 
 		if ($constants->{karma_posting_penalty_style} == 0) {
 			$pts-- if $user->{karma} < 0;
