@@ -3676,6 +3676,31 @@ sub getAbuses {
 }
 
 ##################################################################
+# grabs the number of rows in the last X rows of accesslog, in order
+# to get an idea of recent hits
+sub countAccessLogHitsInLastX {
+	my($self, $field, $check, $x) = @_;
+	$x ||= 10000;
+	$check = md5hex($check) if length($check) != 32 && $field ne 'uid';
+	my $where = '';
+
+	my($max) = $self->sqlSelect("MAX(id)", "accesslog");
+	my $min = $max - $x;
+
+	if ($field eq 'uid') {
+		$where = "uid=$check ";
+	} elsif ($field eq 'md5id') {
+		$where = "(host_addr='$check' OR subnetid='$check') ";
+	} else {
+		$where = "$field='$check' ";
+	}
+
+	$where .= "AND id BETWEEN $min AND $max";
+
+	return $self->sqlCount("accesslog", $where);
+}
+
+##################################################################
 # Pass this private utility method a user hashref and, based on the
 # uid/ipid/subnetid fields, it returns:
 # 1. an arrayref of WHERE clauses that can be used to select rows

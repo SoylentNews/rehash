@@ -25,6 +25,16 @@ __template__
 	<TR>
 		<TD>
 		[% IF userinfo_flag %]
+		[%- IF field == 'uid' -%]
+                UID [% useredit.uid | strip_attribute %]
+                [%- ELSIF field == 'ipid' -%]
+                IPID [% useredit.ipid | strip_attribute %]
+                [%- ELSIF field == 'md5id' -%]
+                md5ID [% useredit.md5id | strip_attribute %]
+                [%- ELSIF field == 'subnetid' -%]
+                SubnetID [% useredit.subnetid | strip_attribute %]
+                [%- END -%] has requested [% accesshits %] pages of the last 10K pages.
+
 			[% IF uidstruct %]
 		<BR>
 		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
