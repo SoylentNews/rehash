@@ -522,9 +522,9 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('GMT',       0, 'Greenwich Mean',                NULL,          NULL,    NULL);
 
-INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('WEST',      0, 'Western European',             'Europe',      'WEST',   3600);
-INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('CEST',   3600, 'Central European',             'Europe',      'CEST',   7200);
-INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('EEST',   7200, 'Eastern European',             'Europe',      'EEST',  10800);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('WEST',      0, 'Western European',             'Europe',      'WEDT',   3600);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('CEST',   3600, 'Central European',             'Europe',      'CEDT',   7200);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('EEST',   7200, 'Eastern European',             'Europe',      'EEDT',  10800);
 
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('BT',    10800, 'Baghdad, USSR Zone 2',          NULL,          NULL,    NULL);
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('IT',    12600, 'Iran',                          NULL,          NULL,    NULL);
