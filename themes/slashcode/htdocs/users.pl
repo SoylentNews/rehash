@@ -1120,11 +1120,11 @@ sub showInfo {
         my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
-	if($requested_user->{nonuid}){
-		if($form->{fieldname} eq "ipid"){
+	if ($requested_user->{nonuid}) {
+		if ($form->{fieldname} eq "ipid") {
 			$modval = $reader->calcModval("ipid = '$id'", $ipid_hoursback, {});
 			$trollpoint = $reader->calcTrollPoint("ipid");
-		} elsif($form->{fieldname} eq "subnetid"){
+		} elsif ($form->{fieldname} eq "subnetid") {
 			$modval = $reader->calcModval("subnetid = '$id'", $ipid_hoursback, {});
 			$trollpoint = $reader->calcTrollPoint("subnetid");
 		}
@@ -1545,7 +1545,7 @@ sub changePasswd {
 	my $session_select = createSelect('session_login', $session, $user_edit->{session_login}, 1);
 
 	my $got_oldpass = 0;
-	if($form->{oldpass}){
+	if ($form->{oldpass}) {
 		my $return_uid = $slashdb->getUserAuthenticate($id, $form->{oldpass});
 		$got_oldpass = 1 if $id == $return_uid;
 	}
@@ -2030,7 +2030,7 @@ sub savePasswd {
 	if (!$user->{is_admin}){
 		# not an admin -- check old password before changing passwd
 		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass});
-		if( $return_uid != $uid ){
+		if ($return_uid != $uid) {
 			$$note .= getError('saveuser_badoldpass_err', { titlebar => 0 }, 0, 1) 
 				if $note;
 			$error_flag++;

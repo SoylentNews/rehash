@@ -165,7 +165,7 @@ sub handler {
 				? "$constants->{rootdir}/users.pl?op=changepasswd" .
 					# XXX This "note" field is ignored now...
 					# right?  - Jamie 2002/09/17
-				  "&note=Please+change+your+password+now!&oldpass=$form->{upasswd}"
+				  "&note=Please+change+your+password+now!&oldpass=" . fixparam($form->{upasswd})
 				: $form->{returnto}
 					? $form->{returnto}
 					: $uri),

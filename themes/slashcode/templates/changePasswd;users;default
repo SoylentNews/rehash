@@ -46,7 +46,7 @@ __template__
 		<B>Session Login</B> [% session %]<BR>
 [% IF !admin_flag %]
 		[% IF got_oldpass %]
-			<INPUT TYPE="HIDDEN" NAME="oldpass" VALUE="[% form.oldpass %]">	
+			<INPUT TYPE="HIDDEN" NAME="oldpass" VALUE="[% form.oldpass | strip_attribute %]">	
 		[% ELSE %]
 			Enter your <b>current</b> password <BR>
 			<INPUT TYPE="PASSWORD" NAME="oldpass" SIZE="20" MAXLENGTH="20" VALUE=""><BR>

@@ -45,20 +45,20 @@ sub create {
 	if (!$found) {
 		$values->{$prime} = $id;
 		$self->sqlInsert($table, {
-				id => $id,
-				-last_seen => 'now()',
-				url => $values->{url},
-				stats_type => $values->{stats_type}
-				});
+			id		=> $id,
+			-last_seen	=> 'now()',
+			url		=> $values->{url},
+			stats_type	=> $values->{stats_type}
+		});
 	}
 
 	if ($values->{sid}) {
 		my $where = "$prime='$id' AND sid='$values->{sid}'";
 		my $found  = $self->sqlSelect($prime, 'links_for_stories', $where);
 		$self->sqlInsert('links_for_stories', {
-				id => $id,
-				sid => $values->{sid},
-				}) unless $found;
+			id	=> $id,
+			sid	=> $values->{sid},
+		}) unless $found;
 	}
 
 	return $id ;

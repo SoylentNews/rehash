@@ -25,7 +25,7 @@ __template__
 			subject_only => 1,
 		}) %][% END %]
 
-		[% IF user.mode == 'parents' && !form.pid%]
+		[% IF user.mode == 'parents' && !form.pid %][% should this be in a template? -- pudge %]
 			| <a href="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;threshold=[% user.threshold %]&amp;commentsort=[% user.commentsort %]&amp;mode=[% user.mode %]&amp;cid=[% cid %]&amp;pid=[% cid %]">View this thread</a>
 		[% END %]
 
