@@ -627,7 +627,6 @@ CREATE TABLE people_log (
 
 INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Number of FOF/FOE to process during job run');
 
-# SLASHCODE LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
 
 DELETE FROM vars WHERE name IN ('badreasons', 'm2_bonus', 'm2_consensus_trigger', 'm2_dissension_penalty', 'm2_maxunfair', 'm2_mincheck', 'm2_minority_trigger', 'm2_modlog_cycles', 'm2_modlog_pos', 'm2_penalty', 'm2_reward_pool', 'm2_toomanyunfair', 'reasons', 'token_retention');
@@ -669,3 +668,4 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 8, '
 INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, 'Overrated',	0, 0, -1, 0.5);
 INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',	0, 0,  1, 0.5);
 
+# SLASHCODE LAST UPDATED HERE
