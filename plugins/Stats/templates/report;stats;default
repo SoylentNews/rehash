@@ -64,15 +64,22 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
         posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.distinct_comment_ipids) %]
      comments: [% ints(stats_data.comments_uids) %]   [% ints(stats_data.comments_ipids) %]   [% ints(stats_data.comments_page) %] ([% PROCESS mbyte bytes => stats_data.comments_bytes %])
         index:        -          -   [% ints(stats_data.homepage) %]
+         page: [% ints(stats_data.page_uids) %]   [% ints(stats_data.page_ipids) %]   [% ints(stats_data.page_page) %]
      articles: [% ints(stats_data.article_uids) %]   [% ints(stats_data.article_ipids) %]   [% ints(stats_data.article_page) %] ([% PROCESS mbyte bytes => stats_data.article_bytes %])
        search: [% ints(stats_data.search_uids) %]   [% ints(stats_data.search_ipids) %]   [% ints(stats_data.search_page) %] ([% PROCESS mbyte bytes => stats_data.search_bytes %])
      journals: [% ints(stats_data.journal_uids) %]   [% ints(stats_data.journal_ipids) %]   [% ints(stats_data.journal_page) %] ([% PROCESS mbyte bytes => stats_data.journal_bytes %])
          palm: [% ints(stats_data.palm_uids) %]   [% ints(stats_data.palm_ipids) %]   [% ints(stats_data.palm_page) %] ([% PROCESS mbyte bytes => stats_data.palm_bytes %])
           rss: [% ints(stats_data.rss_uids) %]   [% ints(stats_data.rss_ipids) %]   [% ints(stats_data.rss_page) %] ([% PROCESS mbyte bytes => stats_data.rss_bytes %])
+        other: [% ints(stats_data.other_uids) %]   [% ints(stats_data.other_ipids) %]   [% ints(stats_data.other_page) %] ([% PROCESS mbyte bytes => stats_data.other_bytes %])
+
+    accesslog: [% ints(stats_data.accesslog) %] rows total
+     formkeys: [% ints(stats_data.formkeys) %] rows total
      comments: [% ints(stats_data.comments) %] posted yesterday
   submissions: [% ints(stats_data.submissions) %] submissions 
  sub/comments: [% pcts(stats_data.sub_comments) %]% of the submissions came from comment posters from this day
-
+       errors: [% ints(stats_data.error_count) %] pages generated errors
+    not found: [% ints(stats_data.not_found) %] pages were not found
+   status 202: [% ints(stats_data.status_202) %] pages sent with status 202 (rejected RSS)
    total hits: [% ints(stats_data.total_hits) %]</PRE>
 
 [%
