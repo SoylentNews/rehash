@@ -471,13 +471,35 @@ sub getMailingList {
 # For portald
 sub getTop10Comments {
 	my($self) = @_;
-	my $c = $self->sqlSelectMany("stories.sid, title, cid, subject, date, nickname, comments.points",
-		"comments, stories, users",
-		"comments.points >= 4 AND users.uid=comments.uid AND comments.sid=stories.discussion",
-		"ORDER BY date DESC LIMIT 10");
+	my $constants = getCurrentStatic();
+	my $archive_delay = $constants->{archive_delay} || 14;
+	$archive_delay = 365 if $archive_delay > 365;
+	my($min_points, $max_points) =
+		($constants->{minpoints}, $constants->{maxpoints});
 
-	my $comments = $c->fetchall_arrayref;
-	$c->finish;
+	my $comments;
+	my $num_top10_comments = 0;
+	while (1) {
+		# Select the latest comments with high scores.  If we
+		# can't get 10 of them, our standards are too high;
+		# lower our minimum score requirement and re-SELECT.
+		my $c = $self->sqlSelectMany(
+			"stories.sid, title, cid, subject, date, nickname, comments.points",
+			"comments, stories, users",
+			"stories.time >= DATE_SUB(NOW(), INTERVAL $archive_delay DAY)
+				AND comments.points >= $max_points
+				AND users.uid=comments.uid
+				AND comments.sid=stories.discussion",
+			"ORDER BY date DESC LIMIT 10");
+		$comments = $c->fetchall_arrayref;
+		$c->finish;
+		$num_top10_comments = scalar(@$comments);
+		last if $num_top10_comments >= 10;
+		# Didn't get 10... try again with lower standards.
+		--$max_points;
+		# If this is as low as we can get... take what we have.
+		last if $max_points <= $min_points;
+	}
 
 	formatDate($comments, 4, 4);
 
@@ -510,9 +532,12 @@ sub randomBlock {
 ########################################################
 # For portald
 # ugly method name
-sub getAccesLogCountTodayAndYestarday {
+sub getAccesslogCountTodayAndYesterday {
 	my($self) = @_;
-	my $c = $self->sqlSelectMany("count(*), to_days(now()) - to_days(ts) as d", "accesslog", "", "GROUP by d order by d asc");
+	my $c = $self->sqlSelectMany("count(*), to_days(now()) - to_days(ts) as d",
+		"accesslog",
+		"",
+		"GROUP by d order by d asc");
 
 	my($today) = $c->fetchrow;
 	my($yesterday) = $c->fetchrow;

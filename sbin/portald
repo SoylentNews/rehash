@@ -36,6 +36,13 @@ my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
 my $totalChangedStories = 1;
 
+my $backupdb;
+if ($constants->{backup_db_user}) {
+	$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
+} else {
+	$backupdb = $slashdb;
+}
+
 ################################################################################
 sub geturl {
 	my $ua = new LWP::UserAgent;
@@ -55,7 +62,7 @@ sub geturl {
 ################################################################################
 
 sub getTop10Comments {
-	my $A =	$slashdb->getTop10Comments();
+	my $A =	$backupdb->getTop10Comments();
 
 	my $block;
 	foreach (@$A) {
@@ -103,9 +110,9 @@ sub getUptime {
 
 	my $stats = $x;
 
-	my($today, $yesterday) = $slashdb->getAccesLogCountTodayAndYestarday();
-	my $th = $slashdb->getVar('totalhits', 'value');
-	my $tc = $slashdb->getVar('totalComments', 'value');
+	my($today, $yesterday) = $backupdb->getAccesslogCountTodayAndYesterday();
+	my $th = $constants->{totalhits};
+	my $tc = $constants->{totalComments};
 
 	$stats .= "<B>yesterday:</B> $yesterday<BR>
 		<B>today:</B> $today<BR>
@@ -197,7 +204,7 @@ portaldLog("Updating Portal Box Thingees");
 #getSectionMenu2();
 
 # loop through all the RDF sites
-my $RDFlist = $slashdb->getSitesRDF();
+my $RDFlist = $backupdb->getSitesRDF();
 
 for (@{$RDFlist}) {
 	my($bid, $url, $rdf) = ($_->[0], $_->[1], $_->[2]);
@@ -205,11 +212,12 @@ for (@{$RDFlist}) {
 }
 
 getTop10Comments();
-setblock("rand", $slashdb->randomBlock());
 getSlashdotPoll();
 getUptime();
+setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
 
 foreach (keys %savedBlocks) {
+	# NOT backupdb!
 	$slashdb->setBlock($_, { block => $savedBlocks{$_} });
 }
 
