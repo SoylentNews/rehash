@@ -904,7 +904,7 @@ as of this writing (June 2003) is 2.2.6.
 
 =head2 CVS tags
 
-Our development of 2.3/2.4 has gone on exceptionally long without an
+Our development of 2.3/2.4 has gone on exceptionally long without a
 tarball release of 2.3.0.  Many Slash hosting sites are choosing to
 follow CVS instead of waiting.
 
@@ -927,8 +927,6 @@ you may have to use judgement and issue command-line commands and so on.
 upgraded to, or have installed, a given CVS tag, upgrading to later
 CVS tags is simply a matter of following along in that file -- we append
 as we go, and each T_* tag is clearly marked.
-
-=head2 Important Note
 
 =head1 COMMON INSTALLATION PROBLEMS
 
