@@ -4784,6 +4784,12 @@ sub getSimilarStories {
 	$not_original_sid = " AND stories.sid != "
 		. $self->sqlQuote($not_original_sid)
 		if $not_original_sid;
+	my $backupdb;
+	if ($constants->{backup_db_user}) {
+		$backupdb = getObject('Slash::DB', $constants->{backup_db_user})
+	} else {
+		$backupdb = getCurrentDB();
+	}
 
 	my $text = "$title $introtext $bodytext";
 	# Find a list of all the words in the current story.
@@ -4820,7 +4826,7 @@ sub getSimilarStories {
 	}
 	$where = join(" OR ", @where_clauses);
 	my $n_days = $constants->{similarstorydays} || 30;
-	my $stories = $self->sqlSelectAllHashref(
+	my $stories = $backupdb->sqlSelectAllHashref(
 		"sid",
 		"stories.sid AS sid, title, introtext, bodytext,
 			time, displaystatus",
