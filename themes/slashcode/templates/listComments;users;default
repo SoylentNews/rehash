@@ -63,11 +63,12 @@ prev_com = {};
 		[% fp_no_time_restriction =  BLOCK; form.no_time_restriction | fixparam; END %]
 		[% fp_userfield =  BLOCK; form.userfield | fixparam; END %]
 		[% fp_fieldname =  BLOCK; form.fieldname | fixparam; END %]
+		[% fp_show_m2s =  BLOCK; form.show_m2s | fixparam; END %]
 		
 		[% IF type == "user";
-			returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=uid&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction;
+			returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=uid&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction _ "&amp;show_m2s=" _ fp_show_m2s;
 		ELSIF type == "netid";
-			returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=" _ fp_fieldname _ "&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction; 
+			returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=" _ fp_fieldname _ "&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction _ "&amp;show_m2s=" _ fp_show_m2s; 
 		END %]
 		<INPUT TYPE="hidden" name="returnto" value="[% returnto | strip_attribute %]">
 	[% END %]
@@ -204,9 +205,9 @@ prev_com = {};
 					IF commentcount > n && (user.seclev > constants.comments_more_seclev
 						|| (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
 						[% IF type == "user" %]
-						 	<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A>
+						 	<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]&amp;show_m2s=[% form.show_m2s|fixparam %]">[% commentcount - n %] More Comments...</A>
 						[% ELSIF type == "netid" %]
-						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname | fixparam %]&amp;min_comment=[% n %]">[% commentcount - n %] More Comments...</A><P>
+						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname | fixparam %]&amp;min_comment=[% n %]&amp;show_m2s=[% form.show_m2s|fixparam %]">[% commentcount - n %] More Comments...</A><P>
 	
 						[% END %]
 					[% END %]
@@ -224,7 +225,7 @@ prev_com = {};
 				[% IF type=="user" %]
 					<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;no_time_restriction=1">Go to latest comments...</A>
 				[% ELSIF type=="netid" %]
-						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname|fixparam %]&amp;min_comment=[% n %]&amp;no_time_restriction=1">Go to latest comments...</A><P>
+						<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname|fixparam %]&amp;min_comment=[% n %]&amp;no_time_restriction=1&amp;show_m2s=[% form.show_m2s|fixparam %]">Go to latest comments...</A><P>
 				[% END %]
 			</TD></TR>
 		[%- ELSIF n>0 and commentcount> 0  -%]
