@@ -415,7 +415,7 @@ CREATE TABLE metamodlog (
 	active tinyint DEFAULT '1' NOT NULL,
 	INDEX byuser (uid),
 	INDEX mmid (mmid),
-	PRIMARY KEY (id),
+	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
 #
@@ -794,7 +794,7 @@ CREATE TABLE story_text (
 	bodytext text,
 	relatedtext text,
 	rendered text,
-	PRIMARY KEY (sid),
+	PRIMARY KEY (sid)
 ) TYPE=MyISAM;
 
 #
