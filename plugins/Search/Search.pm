@@ -100,16 +100,26 @@ sub findComments {
 	my $section = $slashdb->getSection(); 
 	if ($form->{section}) {
 		if ($form->{section} ne $constants->{section}) {
-			return;
+			if ($section->{type} eq 'collected') {
+				if ((scalar(@{$section->{contained}}) == 0) || (grep { $form->{section} eq $_ } @{$section->{contained}})) {
+					$where .= " AND discussions.section = ". $self->sqlQuote($form->{section});
+				} else {
+					# Section doesn't belong to this contained section
+					return;
+				}
+			} else  {
+				# Means we are dealing with a contained section and this is not the contained section
+				return;
+			}
 		} else {
-			$where .= " AND discussions.section = '$form->{section}'"
+			$where .= " AND discussions.section = ". $self->sqlQuote($form->{section});
 		}
 	} else {
 		if ($section->{type} eq 'collected') {
 			$where .= " AND discussions.section IN ('" . join("','", @{$section->{contained}}) . "')" 
 				if (@{$section->{contained}});
 		} else {
-			$where .= " AND discussions.section = '$section->{section}'"
+			$where .= " AND discussions.section = " . $self->sqlQuote($section->{section});
 		}
 	}
 
@@ -258,16 +268,26 @@ sub findStory {
 	my $section = $slashdb->getSection(); 
 	if ($form->{section}) {
 		if ($form->{section} ne $constants->{section}) {
-			return;
+			if ($section->{type} eq 'collected') {
+				if ((scalar(@{$section->{contained}}) == 0) || (grep { $form->{section} eq $_ } @{$section->{contained}})) {
+					$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
+				} else {
+					# Section doesn't belong to this contained section
+					return;
+				}
+			} else  {
+				# Means we are dealing with a contained section and this is not the contained section
+				return;
+			}
 		} else {
-			$where .= " AND stories.section = '$form->{section}'"
+			$where .= " AND stories.section = " . $self->sqlQuote($form->{section});
 		}
 	} else {
 		if ($section->{type} eq 'collected') {
 			$where .= " AND stories.section IN ('" . join("','", @{$section->{contained}}) . "')" 
 				if (@{$section->{contained}});
 		} else {
-			$where .= " AND stories.section = '$section->{section}' "
+			$where .= " AND stories.section = " . $self->sqlQuote($section->{section});
 		}
 	}
 
