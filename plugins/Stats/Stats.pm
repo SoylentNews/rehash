@@ -117,15 +117,24 @@ sub getAdminModsInfo {
 	# If nothing for either, no data to return.
 	return { } if !%$m1_uid_val_hr && !%$m2_uid_val_hr;
 
-	my $m2_uid_val_wk_hr = $self->sqlSelectAllHashref(
-		[qw( uid val )],
-		"users.uid AS uid, metamodlog.val AS val, users.nickname AS nickname, COUNT(*) AS count",
-		"metamodlog, moderatorlog, users",
-		"users.seclev > 1 AND moderatorlog.uid=users.uid
-		 AND metamodlog.mmid=moderatorlog.id
-		 AND metamodlog.ts BETWEEN '$weekago 00:00' AND '$yesterday 23:59:59'",
-		"GROUP BY users.uid, metamodlog.val"
+	# Get the history of moderation fairness for all admins from the
+	# last month.  This reads the last 30 days worth of stats_daily
+	# data (not counting today, which will be added to that table
+	# shortly).
+	my $m2_history_mo_hr = $self->sqlSelectAllHashref(
+		"name",
+		"name, SUM(value)",
+		"stats_daily",
+		"name LIKE 'm%fair_%' AND day > DATE_SUB(NOW(), INTERVAL 732 HOUR)",
+		"GROUP BY name"
 	);
+	my $m2_uid_val_mo_hr = { };
+	for my $name (keys %$m2_history_mo_hr) {
+		my($fairness, $uid) = $name =~ /^m2_((?:un)?fair)_admin_(\d+)$/;
+		next unless defined($fairness);
+		$fairness = ($fairness eq 'unfair') ? -1 : 1;
+		$m2_uid_val_mo_hr->{$uid}{$fairness} = $m2_history_mo_hr->{$name};
+	}
 
 	# For comparison, get the same stats for all users on the site and
 	# add them in as a phony admin user that sorts itself alphabetically
@@ -194,8 +203,8 @@ sub getAdminModsInfo {
 		my $nickname =
 			   $m2_uid_val_hr->{$uid} {1}{nickname}
 			|| $m2_uid_val_hr->{$uid}{-1}{nickname}
-			|| $m2_uid_val_wk_hr->{$uid} {1}{nickname}
-			|| $m2_uid_val_wk_hr->{$uid}{-1}{nickname}
+			|| $m2_uid_val_mo_hr->{$uid} {1}{nickname}
+			|| $m2_uid_val_mo_hr->{$uid}{-1}{nickname}
 			|| "";
 		next unless $nickname;
 		$nfair   = $m2_uid_val_hr->{$uid} {1}{count} || 0;
@@ -213,14 +222,14 @@ sub getAdminModsInfo {
 		} else {
 			$hr->{$nickname}{m2_text} .= " " x  12;
 		}
-		# Also calculate overall-week percentage.
-		my $nfair_wk   = $m2_uid_val_wk_hr->{$uid} {1}{count} || 0;
-		my $nunfair_wk = $m2_uid_val_wk_hr->{$uid}{-1}{count} || 0;
-		$percent = ($nfair_wk+$nunfair_wk > 0)
-			? $nunfair_wk*100/($nfair_wk+$nunfair_wk)
+		# Also calculate overall-month percentage.
+		my $nfair_mo   = $m2_uid_val_mo_hr->{$uid} {1} || 0;
+		my $nunfair_mo = $m2_uid_val_mo_hr->{$uid}{-1} || 0;
+		$percent = ($nfair_mo+$nunfair_mo > 0)
+			? $nunfair_mo*100/($nfair_mo+$nunfair_mo)
 			: 0;
-		if ($nfair_wk+$nunfair_wk >= 20) { # again, pretty arbitrary
-			$hr->{$nickname}{m2_text} .= sprintf(" (wk: %5.1f%%)",
+		if ($nfair_mo+$nunfair_mo >= 20) { # again, pretty arbitrary
+			$hr->{$nickname}{m2_text} .= sprintf(" (mo: %5.1f%%)",
 				$percent);
 		}
 		# Trim off whitespace at the end;
