@@ -505,8 +505,7 @@ sub getModeratorCommentLog {
 				"moderatorlog, users, comments",
 				"$where_clause
 				 AND moderatorlog.cid=comments.cid",
-				"ORDER BY ts $asc_desc",
-				$limit
+				"ORDER BY ts $asc_desc $limit"
 	);
 	my(@comments, $comment);
 	push @comments, $comment while ($comment = $comments->fetchrow_hashref);
