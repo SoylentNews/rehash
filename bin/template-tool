@@ -29,9 +29,9 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('cdilrstvg:D:O:P:S:p:f:u:B:h', \%opts);
+usage('Options used incorrectly') unless getopts('cdilrstvUg:D:O:P:S:p:f:u:B:h', \%opts);
 usage() if ($opts{'h'} || !keys %opts);
-usage('Option -t requires -s') if ($opts{'t'} && !$opts{'s'});
+usage('Option -t requires -s or -U') if ($opts{'t'} && (!$opts{'s'} && !$opts{'U'}));
 version() if $opts{'v'};
 boiler() if $opts{'B'};
 
@@ -171,6 +171,63 @@ if ($opts{'s'}) {
 			}
 		}
 	}
+} elsif ($opts{'U'}) {
+#Upgrade logic
+	my $templates = $install->getSiteTemplates;
+	my %stats = ( 'new' => 0, 'different' => 0);
+	for (@$templates) {
+	#stolen logic from above, should probably be made into subroutines
+		next unless -f $_;
+		my($filename) = (File::Spec->splitpath($_))[2];
+		my $template = $install->readTemplateFile($_);
+		if (!$template
+			|| !$template->{name}
+			|| !$template->{page}
+			|| !$template->{section}) {
+			print STDERR "WARNING: could not readTemplateFile at $_\n";
+			next;
+		}
+		my $tsemi = join(";", @$template{'name','page','section'});
+#		print "Preparing $template->{name} using $filename: $_\n";
+		my $temp2 = $slashdb->getTemplateByName($template->{name},'', 1,
+			$template->{page}, $template->{section}, 1);
+
+		if (defined $temp2 && $temp2->{page} eq $template->{page}
+			&& $temp2->{section} eq $template->{section}
+		) {
+			if ($template->{instructions} =~ /placeholder/) {
+				print "\t$filename is placeholder, skipping\n"
+					unless $opts{'t'};
+				next;
+			}
+			delete $template->{instructions};
+			my @diffs;
+			for (qw| template seclev description title |) {
+				push (@diffs, $_)
+					if ( $template->{$_} ne $temp2->{$_});
+			}
+			my $changes = join(" ", sort(@diffs))
+				if scalar(@diffs);
+			if ($opts{'t'}) {
+				if (scalar(@diffs)) {
+					print "id $temp2->{tpid}\t$filename is different ($changes)\n";
+					$stats{different}++;
+				}
+			} else {
+			}
+		} else {
+			if ($opts{'t'}) {
+				print "\t$filename is new\n";
+				$stats{new}++;
+			} else {
+			}
+		}
+	}
+	print "Different templates: $stats{different}\n"
+		if $stats{different};
+	print "New templates: $stats{new}\n"
+		if $stats{'new'};
+
 } else {
 	my $templatelist = {};
 	my($sectionpage_match, $no_sectionpage, $template_counter) = (0, 0, 0);
@@ -399,6 +456,7 @@ Main options:
 	-P	<page> template page
 	-S	<section> template section
 	-r	deletes template(s) (don't shoot yourself in the foot!)
+	-U	upgrade your templates to the latest for your theme (way alpha)
 
 	Save Notes:
 	*	With no args except filename, uses filename to derive

@@ -410,6 +410,36 @@ sub getThemeList {
 	return $theme_list;
 }
 
+sub getSiteTemplates {
+	my($self) = @_;
+	my @files;
+	my @templates;
+	my $prefix = $self->get('base_install_directory');
+	$prefix = $prefix->{value};
+	my $theme = $self->get('theme');
+	$theme = $theme->{value};
+	push(@files, "$prefix/themes/$theme/THEME");
+	my $plugins = $self->get('plugin');
+	my @plugins;
+	for(keys %$plugins) {
+		push @files, "$prefix/plugins/$plugins->{$_}{value}/PLUGIN";
+	}
+	for my $file (@files) {
+		my $file_handle = gensym;
+		open($file_handle, "$file");
+		$file =~ s/PLUGIN//;
+		$file =~ s/THEME//;
+		while(my $line = <$file_handle>) {
+			chomp($line);
+			my($key, $val) = split(/=/, $line, 2);
+			$key = lc $key;
+			push @templates, "$file/$val"
+				if ($key eq 'template');
+		}
+	}
+	return \@templates;
+}
+
 sub _getList {
 	my($self, $prefix, $subdir, $type) = @_;
 	$self->{'_install_dir'} = $prefix;
