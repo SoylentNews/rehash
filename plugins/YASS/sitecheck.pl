@@ -49,7 +49,7 @@ $task{$me}{code} = sub {
 	my $junk;
 	my $ua = LWP::UserAgent->new();
 	for (@$sites) {
-		print "$_->{url} ($constants->{yass_extra}) \n"
+		print "$_->{url} ($constants->{yass_extra}) \n";
 		my $response = $ua->get($_->{url} . $constants->{yass_extra});
 		if($response->is_success) {
 			$yass->success($_->{id});
