@@ -605,6 +605,12 @@ Bender:Nothing like a warm fire and a super-soaker of fine cognac.
 Bender:Yes! I got the most! I win X-Mas!
 Bender:I'm one of those lazy, homeless bums I've been hearing about.
 Bender:Shooting DNA at each other to make babies. I find it offensive!
+Bender:We're both expressible as the sum of two cubes!
+Bender:Stupid anti-pimping laws!
+Bender:Float like a floatbox, sting like an automatic stingin' machine.
+Bender:Crippling pain? That's not covered by my insurance fraud.
+Bender:Let's commence preparations for rumbling!
+Bender:Woohoo, I'm popular!
 Fry:There's a lot about my face you don't know.
 Fry:Drugs are for losers. And hypnosis is for losers with big weird eyebrows.
 Fry:These new hands are great. I'm gonna break them in tonight.
@@ -633,6 +639,7 @@ Fry:Hardy Boys: too easy. Nancy Drew: too hard!
 Fry:I'm going to continue never washing this cheek again.
 Fry:I haven't had time off since I was twenty-one through twenty-four.
 Fry:The spoon's in the foot powder.
+Fry:You mean Bender is the evil Bender? I'm shocked! Shocked! Well not that shocked.
 EOT
 
 1;
