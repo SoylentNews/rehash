@@ -4908,11 +4908,10 @@ error in getStoriesEssentials
 EOT
 
 	while (my $story = $cursor->fetchrow_hashref) {
-		if ($form->{issue}) {
-			my $issue= timeCalc($story->{time}, '%Y%m%d');
-			next if timeCalc($story->{time}, '%Y%m%d') ne $form->{issue};
-			$story->{issue} = $issue;
-		}
+#		if ($form->{issue}) {
+#			my $issue= timeCalc($story->{time}, '%Y%m%d');
+#			$story->{issue} = $issue;
+#		}
 		push @stories, $story;
 		last if ++$count >= $limit;
 	}
