@@ -5827,6 +5827,9 @@ None.
 sub _doLogInit {
 	my($fname) = 'newsvac';
 
+	# Don't reopen STDERR if already tied (see slashd)
+	return if tied(*STDERR);
+
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.log");
 
