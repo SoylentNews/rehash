@@ -348,6 +348,11 @@ sub userLogin {
 			$slashdb->getUser($uid, 'session_login'));
 		return($uid, $newpass);
 	} else {
+		my $hostip = $r->connection->remote_ip;
+		my $subnet = $hostip;
+		$subnet =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+		my $name_uid = $slashdb->getUserUID($name);
+		$slashdb->sqlInsert("badpasswords", { uid => $name, password => $passwd, subnet => $subnet, ip => $hostip } );
 		return getCurrentStatic('anonymous_coward_uid');
 	}
 }

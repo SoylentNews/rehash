@@ -424,6 +424,8 @@ sub deleteDaily {
 		|| 14;
 
 	# Now for some random stuff
+	$self->sqlDo("DELETE from badpasswords
+		WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > 2");
 	$self->sqlDo("DELETE FROM pollvoters");
 	$self->sqlDo("DELETE FROM moderatorlog
 		WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
