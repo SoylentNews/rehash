@@ -2218,7 +2218,8 @@ sub saveTopic {
 			image	=> $image,
 			alttext	=> $topic->{alttext},
 			width	=> $topic->{width},
-			height	=> $topic->{height}
+			height	=> $topic->{height},
+			parent_topic	=> $topic->{parent_topic},
 		});
 		$tid = $self->getLastInsertId();
 	} else {
@@ -2228,6 +2229,7 @@ sub saveTopic {
 			width	=> $topic->{width},
 			height	=> $topic->{height},
 			name	=> $topic->{name},
+			parent_topic	=> $topic->{parent_topic},
 		}, "tid=$tid");
 	}
 
@@ -6313,6 +6315,7 @@ sub setUser {
 # Nicknames
 sub getUsersNicknamesByUID {
 	my ($self, $people) = @_;
+	return unless (ref($people) eq 'ARRAY') && scalar(@$people);
 	my $list = join(",", @$people);
 	$self->sqlSelectAllHashref("uid", "uid,nickname", "users", "uid IN ($list)");
 }

@@ -211,21 +211,14 @@ true/false if operation is successful.
 =cut
 
 sub selectTopic {
-	my($label, $default, $section, $return, $all) = @_;
+	my($label, $default, $section, $return) = @_;
 	my $slashdb = getCurrentDB();
 	$section ||= getCurrentStatic('defaultsection');
 	$default ||= getCurrentStatic('defaulttopic');
 
 	my $topics = $slashdb->getDescriptions('topics_section', $section);
 
-	my $ordered = [
-		map  { $_->[0] }
-		sort { $a->[1] cmp $b->[1] }
-		map  { [$_, lc $topics->{$_}] }
-		keys %$topics
-	];
-
-	createSelect($label, $topics, $default, $return, 0, $ordered);
+	createSelect($label, $topics, $default, $return, 0, 1);
 }
 
 #========================================================================

@@ -32,6 +32,8 @@ __template__
 			<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute %][% topic.name %][% END %]">
 			[% PROCESS formLabel value => "Alt Text", comment => "" %]
 			<INPUT TYPE="TEXT" NAME="alttext" VALUE="[% FILTER strip_attribute %][% topic.alttext %][% END %]">
+			[% PROCESS formLabel value => "Parent Topic", comment => "" %]
+			[% Slash.createSelect('parent_topic', parent_topic_values, form.parent_topic, 1, 0, 1)%]	
 
 			[% PROCESS formLabel value => "Dimensions", comment => "leave blank to determine automatically" %]
 			Width: <INPUT TYPE="TEXT" NAME="width" VALUE="[% topic.width %]" SIZE="4">
