@@ -590,13 +590,18 @@ sub check {
 sub _printHead {
 	my($head, $data) = @_;
 	my $slashdb = getCurrentDB();
+	# See comment in plugins/Journal/journal.pl for its call of
+	# getSectionColors() as well.
+	Slash::Utility::Anchor::getSectionColors();
+	my $user = getCurrentUser();
 	my $useredit = $data->{uid}
 		? $slashdb->getUser($data->{uid})
-		: getCurrentUser();
-	my $title = getData($head, $data);
-	header($title);
-	$data->{title} = $title;
+		: $user;
+	$data->{user} = $user;
 	$data->{useredit} = $useredit;
+	my $title = getData($head, $data);
+	$data->{title} = $title;
+	header($title);
 	$data->{tab_selected_1} ||= 'me';
 	slashDisplay("zoohead", $data);
 }

@@ -682,6 +682,10 @@ sub _validFormkey {
 	my(@checks) = @_ ? @_ : qw(max_post_check interval_check formkey_check);
 	my $error;
 	# this is a hack, think more on it, OK for now -- pudge
+	# I think this needs to be part of cramming all possible
+	# user init code into getUser(). Saving a few nanoseconds
+	# here and there is not worth my staying up until 11 PM
+	# trying to figure out what fields get set where. - Jamie
 	Slash::Utility::Anchor::getSectionColors();
 	for (@checks) {
 		last if formkeyHandler($_, 0, 0, \$error);

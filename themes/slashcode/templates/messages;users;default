@@ -24,7 +24,7 @@ __template__
 [% END %]
 
 [% CASE 'user_header' %]
-	[% constants.sitename %] Users
+	[% useredit.nickname | strip_notags %] - [% constants.sitename %] User
 
 [% CASE 'userclose' %]
 	you are now logged out.

@@ -373,12 +373,6 @@ sub main {
 		$form->{userfield} = $user->{uid};
 	}
 
-	# Print the header and very top stuff on the page.
-	header(getMessage('user_header'));
-	# This is a hardcoded position, bad idea and should be fixed -Brian
-	# Yeah, we should pull this into a template somewhere...
-	print getMessage('note', { note => $errornote }) if defined $errornote;
-
 	# Figure out what the op really is.
 	$op = 'userinfo' if (! $form->{op} && ($form->{uid} || $form->{nick}));
 	$op ||= $user->{is_anon} ? 'userlogin' : 'userinfo';
@@ -389,6 +383,14 @@ sub main {
 	}
 	if ($ops->{$op}{post} && !$postflag) {
 		$op = $user->{is_anon} ? 'default' : 'userinfo';
+	}
+
+	# Print the header and very top stuff on the page.
+	if ($op ne 'userinfo' && $op ne 'display') {
+		header(getMessage('user_header'));
+		# This is a hardcoded position, bad idea and should be fixed -Brian
+		# Yeah, we should pull this into a template somewhere...
+		print getMessage('note', { note => $errornote }) if defined $errornote;
 	}
 
 	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
@@ -447,7 +449,8 @@ sub main {
 	# call the method
 	my $retval = $ops->{$op}{function}->({
 		op		=> $op,
-		tab_selected_1	=> $ops->{$op}{tab_selected_1} || ""
+		tab_selected_1	=> $ops->{$op}{tab_selected_1} || "",
+		note		=> $errornote,
 	}) if !$error_flag;
 
 	if ($op eq 'mailpasswd' && $retval) {
@@ -886,6 +889,13 @@ sub showInfo {
 		$user->{lastlookuid} = $uid;
 		$hr->{tab_selected_1} = 'otheruser';
 	}
+
+	# showInfo's header information is delayed until here, because
+	# the target user's info is not available until here.
+	header(getMessage('user_header', { useredit => $requested_user }));
+	# This is a hardcoded position, bad idea and should be fixed -Brian
+	# Yeah, we should pull this into a template somewhere...
+	print getMessage('note', { note => $hr->{note} }) if defined $hr->{note};
 
 	print createMenu("users", {
 		style =>	'tabbed',
