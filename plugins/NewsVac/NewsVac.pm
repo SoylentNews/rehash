@@ -2343,7 +2343,7 @@ Foooooooo.
 =cut
 
 sub get_parse_code_method {
-	my $self, $code) = @_;
+	my ($self, $code) = @_;
 
 	return \&parse_html_linkextor	if $code eq 'html_linkextor';
 	return \&parse_miner		if $code eq 'miner';
