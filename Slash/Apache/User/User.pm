@@ -499,7 +499,7 @@ sub userdir_handler {
 			} elsif ($extra && $extra =~ /^rss$/) {
 				$args .= "&content_type=rss";
 			} elsif ($extra && $extra =~ /^friends$/) {
-				$args = "op=friendview";
+				$args =~ s/display/friendview/;
 			}
 			$r->args($args);
 			$r->uri('/journal.pl');
