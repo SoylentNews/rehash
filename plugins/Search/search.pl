@@ -36,15 +36,23 @@ sub main {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 
-	my($slashdb, $searchDB);
-
-	if ($constants->{search_db_user}) {
-		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
-		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
-	} else {
-		$slashdb  = getCurrentDB();
-		$searchDB = Slash::Search->new(getCurrentVirtualUser());
+	if ($constants->{search_soap_enabled}) {
+		my $r = Apache->request;
+		if ($r->header_in('SOAPAction')) {
+			require SOAP::Transport::HTTP;
+			# security problem previous to 0.55
+			if (SOAP::Lite->VERSION >= 0.55) {
+				if ($user->{state}{post}) {
+					$r->method('POST');
+				}
+				$user->{state}{packagename} = __PACKAGE__;
+				return SOAP::Transport::HTTP::Apache->dispatch_to
+					('Slash::Search::SOAP')->handle;
+			}
+		}
 	}
+
+	my($slashdb, $searchDB) = Slash::DB::getDBUsers();
 
 	# Set some defaults
 	$form->{query}		||= '';
@@ -77,22 +85,6 @@ sub main {
 	} elsif ($form->{op} eq 'submissions' && !$user->{is_admin}) {
 		$form->{op} = 'stories'
 			unless $constants->{submiss_view};
-	}
-
-	if ($constants->{search_soap_enabled}) {
-		my $r = Apache->request;
-		if ($r->header_in('SOAPAction')) {
-			require SOAP::Transport::HTTP;
-			# security problem previous to 0.55
-			if (SOAP::Lite->VERSION >= 0.55) {
-				if ($user->{state}{post}) {
-					$r->method('POST');
-				}
-				$user->{state}{packagename} = __PACKAGE__;
-				return SOAP::Transport::HTTP::Apache->dispatch_to
-					('Slash::Search::SOAP')->handle;
-			}
-		}
 	}
 
 	if ($form->{content_type} eq 'rss') {
@@ -574,7 +566,7 @@ sub findRetrieveSiteRSS {
 	# I am aware that the link has to be improved.
 	my @items;
 	for my $entry (@$feeds) {
-		my $time = timeCalc($entry->{time});
+		my $time = timeCalc($entry->{'time'});
 		push @items, {
 			title	=> "$entry->{title} ($time)",
 			'link'	=> ($constants->{absolutedir} . "/users.pl?op=preview&bid=entry->{bid} %]"),
@@ -826,12 +818,10 @@ createEnvironment();
 main();
 
 #=======================================================================
-package Slash::Search::SOAP;
+package Slash::Search;
 use Slash::Utility;
 
-sub findStory {
-	my($class, $query) = @_;
-	my($slashdb, $searchDB);
+sub getDBUsers {
 	my $constants = getCurrentStatic();
 	if ($constants->{search_db_user}) {
 		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
@@ -840,6 +830,19 @@ sub findStory {
 		$slashdb  = getCurrentDB();
 		$searchDB = Slash::Search->new(getCurrentVirtualUser());
 	}
+	return($slashdb, $searchDB);
+}
+
+
+#=======================================================================
+package Slash::Search::SOAP;
+use Slash::Utility;
+
+sub findStory {
+	my($class, $query) = @_;
+	my $user      = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my($slashdb, $searchDB) = Slash::Search::getDBUsers();
 
 	my $stories;
 	if ($constants->{panic} >= 1 or $constants->{search_google}) {
@@ -850,3 +853,6 @@ sub findStory {
 
 	return $stories;
 }
+
+#################################################################
+1;
