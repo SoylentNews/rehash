@@ -19,7 +19,7 @@ en_US
 __name__
 display
 __template__
-[% Slash.displayStory(story.sid, 'Full') %]
+[% Slash.displayStory(story.sid, 'Full', { is_future => story.is_future }) %]
 
 <P>
 
