@@ -151,7 +151,7 @@ sub editpoll {
         } elsif ($qid) {
 		$question = $slashdb->getPollQuestion($qid);
 		$question->{sid} = $slashdb->getSidForQID($qid)
-			unless $question->{autopoll};
+			unless $question->{autopoll} eq "yes";
 		$answers = $slashdb->getPollAnswers(
 			$qid, [qw( answer votes aid )]
 		);
@@ -394,7 +394,8 @@ sub listpolls {
 		startat		=> $min + @$questions,
 		admin		=> getCurrentUser('seclev') >= 100,
 		title		=> "$sitename Polls",
-		width		=> '99%'
+		width		=> '99%',
+                curtime         => $reader->getTime()
 	});
 }
 
