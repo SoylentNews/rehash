@@ -1151,28 +1151,30 @@ sub tildeEd {
 
 #################################################################
 sub changePasswd {
-	my $id = 0;
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	# return if (! $user->{is_admin} && $id != $user->{uid});
-
 	my $user_edit = {};
-	my $title ;
+	my $title;
 	my $suadmin_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 
-	if ($form->{userfield}) {
-		$id ||= $form->{userfield};
-		if ($id =~ /^\d+$/) {
-			$user_edit = $slashdb->getUser($id);
+	my $id = '';
+	if ($user->{is_admin}) {
+		if ($form->{userfield}) {
+			$id ||= $form->{userfield};
+			if ($id =~ /^\d+$/) {
+				$user_edit = $slashdb->getUser($id);
+			} else {
+				$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
+			}
 		} else {
-			$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
+			$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
+			$id = $user_edit->{uid};
 		}
 	} else {
-		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
-		$id = $user_edit->{uid};
+		$id = $user->{uid};
 	}
 
 	# print getMessage('note', { note => $form->{note}}) if $form->{note};
@@ -1193,7 +1195,7 @@ sub changePasswd {
 #################################################################
 sub editUser {
 	my($hr) = @_;
-	my $id = $hr->{uid} || 0;
+	my $id = $hr->{uid} || '';
 
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -1244,7 +1246,7 @@ sub editUser {
 #################################################################
 sub editHome {
 	my($hr) = @_;
-	my $id = $hr->{uid} || 0;
+	my $id = $hr->{uid} || '';
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -1314,7 +1316,7 @@ sub editHome {
 #################################################################
 sub editComm {
 	my($hr) = @_;
-	my $id = $hr->{uid} || 0;
+	my $id = $hr->{uid} || '';
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
