@@ -190,7 +190,7 @@ sub metaMod {
 			sqlUpdate("users_info", { -m2unfair => "m2unfair+1" },
 				"uid=$muid");
 			sqlUpdate("users_info", { -karma => "karma-1" },
-				"$muid=uid and karma>$I{badkarma_limit}");
+				"$muid=uid and karma>$I{badkarma}");
 		}
 	}
 	# Time is now fixed at form submission time to ease 'debugging'
