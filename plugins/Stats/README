@@ -1,0 +1,32 @@
+For using stats.pl and getting pretty graphs, you need GD::Graph, which
+relies on GD::Text::Align and GD.  If you have HumanConf working, then
+all you need is GD::Graph (and if you have this working, HumanConf is
+set up to work fine, with the one caveat that HumanConf uses JPEGs, and
+GD::Graph uses PNG; JPEG support in GD is optional).
+
+We use GD v1.  This is untested with v2.
+
+How I did installed it on Debian:
+
+* Using apt-get, installed libgd-dev and its dependencies.
+
+* Using CPAN shell, installed GD 1.x.  The latest as of this writing is
+  1.84, so at the cpan prompt typed "install L/LD/LDS/GD-1.84.tar.gz".
+
+* Using CPAN shell, installed GD::Text::Align.  Several testing errors
+  occur, but they don't seem to affect the module use for our purposes;
+  use "force install GD::Text::Align" if necessary.
+
+* Using CPAN shell, installed GD::Graph.  Feel free to cd to "samples"
+  in GD-Graph and type "make", and then look at the .png output
+  files.  Your GD library may think you have GIF support when you don't;
+  if so, edit save.pl to set "my $ext = 'png'" and type "make EXT=png".
+
+On Red Hat:
+
+* I fetched the sources jpegsrc.v6b, freetype-2.1.0, libpng-1.2.2,
+  and gd-1.8.4.  I configured and installed them in that order.  I
+  had to manually copy the headers for libpng and gd to /usr/local/include.
+  It's all messy, but at some point you just don't care.
+
+* I then did the same with the perl modules as above.
