@@ -1379,7 +1379,6 @@ sub createAccessLog {
 			while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
 				$self->sqlInsert('accesslog', $hr, { delayed => 1 });
 			}
-			$self->{_dbh}->commit;
 			$self->sqlDo("commit");
 			$self->sqlDo("SET AUTOCOMMIT=1");
 		}
