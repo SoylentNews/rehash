@@ -1031,19 +1031,22 @@ sub setCookie {
 		? $cookiedomain
 		: '';
 
-# I cannot get HTTPS here ... I think it is not set until later.
-# This poses a problem.  -- pudge
-# Need to scan the connection class to find this information.
-# (I'll do it later). This may also be in $r->protocol -Brian
-# 	if ($constants->{cookiesecure} && $r->subprocess_env->{HTTPS}) {
-# 		$cookie{-secure} = 1;
-# 	}
-
-	my $cookie = Apache::Cookie->new($r,
+	my %cookiehash = (
 		-name    =>  $name,
 		-value   =>  $val || 'nobody',
 		-path    =>  $cookiepath
 	);
+
+# I cannot get HTTPS here ... I think it is not set until later.
+# This poses a problem.  -- pudge
+# Need to scan the connection class to find this information.
+# (I'll do it later). This may also be in $r->protocol -Brian
+# Brian advises port() is the best way, yes it's icky -Jamie
+	if ($constants->{cookiesecure} && $r->port == 443) {
+		$cookiehash{-secure} = 1;
+	}
+
+	my $cookie = Apache::Cookie->new($r, %cookiehash);
 
 	$cookie->expires('+1y') unless $session;
 	$cookie->bake;
