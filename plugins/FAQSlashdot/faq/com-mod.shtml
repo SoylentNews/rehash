@@ -752,7 +752,7 @@ page.
 <p><i><font size=-1>Updated by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i> 
   <br>
   <i><font size=-1>Last Modified: 07/16/02</font></i> <br>
-  <a name="cm2000"></a> 
+  <a name="cm2400"></a> 
 <h2> A comment I posted shows a different score on my user page than in the <br>
   comments page.</h2>
 Your user page displays the comments' "Natural" score.  That is the base
@@ -768,6 +768,78 @@ and any reason modifiers you may have defined.
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
   <br>
   <i><font size=-1>Last Modified: 7/15/02</font></i> 
+
+<a name="cm2500"></a>
+<h2>What do the choices in the moderation drop-down boxes mean?</h2>
+<ul>
+
+<li><b>Normal</b> -- This is the default setting attached to every comment when
+you have moderation privileges. Normally, you should not need to actually
+select this option, but if your mouse slips and you accidentally moderate up or
+down a comment you didn't mean to, you can undo that mistake by choosing Normal
+before you hit the "Moderate" button.
+
+<li><b>Offtopic</b> -- A comment which has nothing to do with the story it's
+linked to (song lyrics, obscene ascii art, comments about another topic
+entirely) is Offtopic.
+
+<li><b>Flamebait</b> -- Flamebait refers to comments whose sole purpose is to
+insult and enrage. If someone is not-so-subtly picking a fight (racial insults
+are a dead giveaway), it's Flamebait.
+
+<li><b>Troll</b> -- A Troll is similar to Flamebait, but slightly more refined.
+This is a prank comment intended to provoke indignant (or just confused)
+responses.  A Troll might mix up vital facts or otherwise distort reality, to
+make other readers react with helpful "corrections." Trolling is the online
+equivalent of intentionally dialing wrong numbers just to waste other people's
+time.
+
+<li><b>Redundant</b> -- Redundant posts are ones which add no new information,
+but instead take up space with repeating information either in the Slashdot
+post, the attached links, or lots of previous comments. For instance, some
+posters cut and paste otherwise legitimate comments in multiple places in the
+same discussion; the pasted versions are Redundant.
+
+<li><b>Insightful</b> -- An Insightful statement makes you think, puts a new
+spin on a given story (or aspect of a story). An analogy you hadn't thought of,
+or a telling counterexample, are examples of Insightful comments.
+
+<li><b>Interesting</b> -- If you believe a comment to be Interesting (and it's
+not mostly Redundant, Offtopic, or otherwise lame), it is.
+
+<li><b>Informative</b> -- Often comments add new information to explain the
+circumstances hinted at by a particular story, fill in "The Other Side" of an
+argument, provide specifications to a product described too vaguely elsewhere,
+etc. Such comments are Informative.
+
+<li><b>Funny</b> -- Think of Funny as being a good moderation choice if you
+actually think the comment <i>is</i> funny, not just because it seems intended
+to be.  Not every knock-knock joke is Funny.
+
+<li><b>Overrated</b> -- Sometimes you'll run into a comment which for whatever
+reason has been moderated out of proportion -- this probably means several
+moderators saw it at nearly the same time, thought it was Funny, Insightful
+etc, and their scores added together exaggerate its relative merit. (A
+knock-knock joke at +5, Funny) Such a comment is Overrated.  It's not knocking
+the original poster to say so, but it's probably better to spend your mod
+points on comments which are deserving of being moderated up.
+
+<li><b>Underrated</b> -- Likewise, some comments get smashed lower than they
+perhaps deserve by overzealous moderators. If you moderate a comment as
+Underrated, you're saying that it deserves to be read by more people than will
+see it at its current score. As with Overrated, if you can think of a more
+specific moderation reason, do so -- if a comment has already been moderated
+with an appropriate label though, and you just want to indicate that it
+deserves greater visibility, that's what Underrated is for.  However, if a
+comment is labeled with a fitting (negative) label, choosing Underrated isn't
+such a great idea, because you could end up with contradictions like "+5,
+Flamebait."
+<ul>
+
+<p><i><font size=-1>Answered by: <a
+href="mailto:timothy@slashdot.org">timothy</a></font></i> <br> <i><font
+size=-1>Last Modified: 2/17/03</font></i>
+
 <p>
 <hr>
 <table>
