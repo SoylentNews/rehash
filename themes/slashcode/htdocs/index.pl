@@ -148,7 +148,8 @@ my $start_time = Time::HiRes::time;
 	# subscribe and you can see it"?  Yes if the user is logged-in
 	# but not a subscriber, but only if the first story is actually
 	# in the future.  Just check the first story;  they're in order.
-	if ($stories->[0]{is_future}
+	if (@$stories # damn you, autovivification!
+		&& $stories->[0]{is_future}
 		&& !$user->{is_subscriber}
 		&& !$user->{is_anon}
 		&& $constants->{subscribe_future_plug}) {
