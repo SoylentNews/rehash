@@ -20,7 +20,7 @@ $task{$me}{code} = sub {
 	for (keys %$sections) {
 		my($section) = $sections->{$_}{section};
 		mkpath "$constants->{basedir}/$section", 0, 0755;
-		sectionHeaders(@_, $section);
+		sectionHeaders(@_, $sections->{$_});
 	}
 
 	*STDOUT = *SO;
@@ -29,7 +29,11 @@ $task{$me}{code} = sub {
 };
 
 sub sectionHeaders {
-	my($virtual_user, $constants, $slashdb, $user, $section) = @_;
+	my($virtual_user, $constants, $slashdb, $user, $sections) = @_;
+	my $section = $sections->{section}
+		if $sections;
+	createCurrentHostname($sections->{hostname})
+		if $sections;
 
 	my $form = getCurrentForm();
 	local(*STDOUT);

@@ -37,6 +37,7 @@ use vars qw($VERSION @EXPORT);
 	createCurrentCookie
 	createCurrentDB
 	createCurrentForm
+	createCurrentHostname
 	createCurrentStatic
 	createCurrentUser
 	createCurrentVirtualUser
@@ -72,9 +73,9 @@ use vars qw($VERSION @EXPORT);
 
 # These are file-scoped variables that are used when you need to use the
 # set methods when not running under mod_perl
-my($static_user, $static_form, $static_constants, $static_db,
-	$static_anonymous_coward, $static_cookie,
-	$static_virtual_user, $static_objects, $static_cache);
+my($static_user, $static_form, $static_constants, $static_site_constants, 
+	$static_db, $static_anonymous_coward, $static_cookie,
+	$static_virtual_user, $static_objects, $static_cache, $static_hostname);
 
 # FRY: I don't regret this.  But I both rue and lament it.
 
@@ -537,7 +538,11 @@ sub getCurrentStatic {
 			$constants = $const_cfg->{'constants'};
 		}
 	} else {
-		$constants = $static_constants;
+		if ($static_site_constants->{$static_hostname}) {
+			$constants = $static_site_constants->{$static_hostname};
+		} else {
+			$constants = $static_constants;
+		}
 	}
 
 	if ($value) {
@@ -577,7 +582,37 @@ Returns no value.
 =cut
 
 sub createCurrentStatic {
-	($static_constants) = @_;
+	($static_constants, $static_site_constants) = @_;
+}
+
+#========================================================================
+
+=head2 createCurrentHostname(HOSTNAME)
+
+Allows you to set a host so that constants will behave properly.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item HOSTNAME
+
+A name of a host to use to force constants to think it is being used by a host.
+
+=back
+
+=item Return value
+
+Returns no value.
+
+=back
+
+=cut
+
+sub createCurrentHostname {
+	($static_hostname) = @_;
 }
 
 #========================================================================
@@ -1547,11 +1582,34 @@ sub createEnvironment {
 
 	my $slashdb = Slash::DB->new($virtual_user);
 	my $constants = $slashdb->getSlashConf();
+	my $site_constants;
+	my $sections = $slashdb->getSections();
+	for (values %$sections) {
+		if ($_->{hostname} && $_->{url}) {
+			my $new_cfg;
+			for (keys %{$constants}) {
+				$new_cfg->{$_} = $constants->{$_}
+					unless $_ eq 'form_override';
+			}
+			# Must not just copy the form_override info
+			$new_cfg->{form_override} = {}; 
+			$new_cfg->{absolutedir} = $_->{url};
+			$new_cfg->{rootdir} = $_->{url};
+			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
+			$new_cfg->{real_rootdir} = $_->{url} if $_->{isolate};  # you gotta keep 'em separated, unh!
+			$new_cfg->{defaultsection} = $_->{section};
+			$new_cfg->{basedomain} = $_->{hostname};
+			$new_cfg->{static_section} = $_->{section};
+			$new_cfg->{index_handler} = $_->{index_handler};
+			$new_cfg->{form_override}{section} = $_->{section};
+			$site_constants->{$_->{hostname}} = $new_cfg;
+		}
+	}
 	my $form = getCurrentForm();
 
 	# We assume that the user for scripts is the anonymous user
 	createCurrentDB($slashdb);
-	createCurrentStatic($constants);
+	createCurrentStatic($constants, $site_constants);
 
 	$ENV{SLASH_USER} = $constants->{anonymous_coward_uid};
 	my $user = prepareUser($constants->{anonymous_coward_uid}, $form, $0);
