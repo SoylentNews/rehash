@@ -386,6 +386,10 @@ ALTER TABLE stories ADD last_update timestamp;
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_img_count','5','Number of recent topics to store in the template "recentTopics"');
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_txt_count','5','Number of recent topics to store in the block "recenttopics"');
 
+INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', -1,'Don't Display');
+INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', 1,'Display');
+INSERT INTO vars (name, value, description) VALUES ('discussion_sort_order', '3', 'sort code to feed to findDiscussions');
+
 
 # For plugins/Admin (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('similarstorydays', '30', 'Number of days to look back for uncommon words');
@@ -515,6 +519,17 @@ ALTER TABLE sections DROP isolate;
 
 # For plugins/Stats (ignore if you're not using that plugin):
 INSERT INTO vars (name, value, description) VALUES ('db_slave_lag_ignore',10000000,'Bytes of lag between master and slave DB to ignore');
+
+INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');
+
+# column truncated descriptions fields
+ALTER TABLE rss_raw modify column description text;
+
+# adding section column and index 
+ALTER TABLE stats_daily DROP INDEX day_key_pair;
+ALTER TABLE stats_daily ADD COLUMN section varchar(30) DEFAULT 'index' NOT NULL;
+ALTER TABLE stats_daily ADD UNIQUE day_key_pair (day,name,section);
+ALTER TABLE stats_daily ADD FOREIGN KEY (section) REFERENCES sections(section);
 
 # For Sections
 INSERT INTO string_param (type, code, name) VALUES ('section_types','contained','Contained Section');
