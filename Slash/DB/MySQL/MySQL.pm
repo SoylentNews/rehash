@@ -1448,6 +1448,13 @@ sub deleteSubmission {
 		# I say, that if you have 2 processes executing this code 
 		# at the same time, with the same uid, that you have a SECURITY
 		# BREACH. Caveat User.			- Cliff
+
+		# I don't understand what would be a security
+		# breach.  If someone has two windows open and
+		# deletes from one, and while that request is
+		# pending does it from the other, that's no
+		# security breach. -- pudge
+
 		$self->setUser($uid,
 			{ deletedsubmissions => 
 				getCurrentUser('deletedsubmissions') + 1,
