@@ -673,7 +673,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_wsfactor','1.0','W
 INSERT INTO vars (name, value, description) VALUES ('commentstatus','0','default comment code');
 INSERT INTO vars (name, value, description) VALUES ('cookiedomain','','Domain for cookie to be active (normally leave blank)');
 INSERT INTO vars (name, value, description) VALUES ('cookiepath','/','Path on server for cookie to be active');
-INSERT INTO vars (name, value, description) VALUES ('cookiesecure','0','Whether or not to set secure flag in cookies if SSL is on (not working)');
+INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the secure flag in cookies if SSL is on?');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
 INSERT INTO vars (name, value, description) VALUES ('daily_attime','00:00:00','Time of day to run dailyStuff (in TZ daily_tz; 00:00:00-23:59:59)');
 INSERT INTO vars (name, value, description) VALUES ('daily_last','2000-01-01 01:01:01','Last time dailyStuff was run (GMT)');
