@@ -105,7 +105,7 @@ __template__
 
 [% IF similar_stories.size > 0 %]
 	<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
-		<TR><TD COLSPAN="5" ALIGN="CENTER"><B>Similar Stories:</B></TD></TR>
+		<TR><TD COLSPAN="5" ALIGN="CENTER"><B>Similar Stories</B> -- <FONT SIZE="-1">check words below before submitting or previewing to mark words as common and not for use in determining similar stories</FONT></TD></TR>
 		[% FOREACH story = similar_stories %]
 			<TR>
 			<TD VALIGN="TOP">[% IF story.displaystatus == 0;
@@ -119,7 +119,12 @@ __template__
 			<TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
 			[% story.title %]</A></TD>
 			<TD VALIGN="TOP">[% Slash.timeCalc(story.time) %]</TD>
-			<TD VALIGN="TOP">[% story.words.join(" ") %]</TD>
+			<TD VALIGN="TOP">
+			[% FOREACH word = story.words %]
+				[%- word -%][% UNLESS words_seen.$word %]<INPUT TYPE="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
+				[% words_seen.$word = 1; %]
+			[% END %]
+			</TD>
 			</TR>
 		[% END %]
 	</TABLE>
