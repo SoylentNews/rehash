@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+Displays people.
+
+* people = arrayref of people (nickname, uid, last entry time, last entry description, last entry id)
+__title__
+
+__page__
+zoo
+__lang__
+en_US
+__name__
+alllist
+__template__
+[% USE Slash %]
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+[% FOREACH item = people %]
+    <TR>
+	<TD VALIGN="TOP">
+		<A HREF="[% constants.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</A>
+	</TD>
+	<TD VALIGN="TOP">
+		[% PROCESS zoo_icons person=item.0 %]
+	</TD>
+</TR>
+[% END %]
+</TABLE>
+<BR><BR>
+__seclev__
+100
