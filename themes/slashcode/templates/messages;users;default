@@ -31,10 +31,10 @@ __template__
 
 [% CASE 'newuser_msg' %]
 	[% PROCESS titlebar title=title width="100%" %]
-	<B>email</B>=[% form.email %]<BR>
+	<B>email</B>=[% form.email | strip_literal %]<BR>
 	<B>user id</B>=[% uid %]<BR>
 	<B>nick</B>=[% form.newusernick %]<BR>
-	<B>passwd</B>=mailed to [% form.email %]<BR>
+	<B>passwd</B>=mailed to [% form.email | strip_literal %]<BR>
 	[% IF suadmin_flag %]
 		<P>Now you can edit the newly created user  
 		<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&userfield=[% uid %]">
@@ -96,7 +96,8 @@ change your password, or just click pretty widgets to kill time.
 [% CASE 'saveuser_email_msg' %]
 	The user account [% nickname %] on [% constants.sitename %]
 	had this email associated with it.  A web user from
-	[% env.remote_addr %] has just changed it to [% realemail %].
+	[% env.remote_addr %] has just changed it to
+	[% realemail | strip_literal %].
 
 	If this is not correct, if you did not request this change,
 	please contact the site administrator immediately.
@@ -133,8 +134,9 @@ change your password, or just click pretty widgets to kill time.
 	<P>Saving [% nickname.substr(0,20) %].<BR>
 
 [% CASE 'changeemail_msg' %]
-	Notifying [% realemail %] of the change to their account.<BR>
-	E-mail address changed and re-registration information sent to: [% form.realemail %]<BR>
+	Notifying [% realemail | strip_literal %] of the change to their account.<BR>
+	E-mail address changed and re-registration information sent to:
+	[% form.realemail | strip_literal %]<BR>
 
 [% CASE 'saveuser_passchanged_msg' %]
 	Password changed for [% nick %], UID [% uid %].<BR>
