@@ -142,7 +142,7 @@ sub getNewStoryTopic {
 	$needed = $needed * 3 + 5;
 	my $clause;	
 	if ($section) {
-		$clause = "stories.section = '$section'";
+		$clause = "stories.section = '$section' AND displaystatus != 1";
 	} else {
 		$clause = 'displaystatus = 0';
 	}
