@@ -25,8 +25,8 @@ __template__
 			[% FOREACH question = questions %]
 				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc($question.1, '%A, %B %e, %Y') %] with [% question.3 %] votes.
 				[% IF user.is_admin %]
-					(<A HREF=[% constants.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% question.0 %]">Edit</A>)
-					(<A HREF=[% constants.rootdir %]/pollBooth.pl?op=delete&amp;qid=[% question.0 %]">Delete</A>)
+					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% question.0 %]">Edit</A>)
+					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=delete&amp;qid=[% question.0 %]">Delete</A>)
 				[% END %]
 				<BR>
 			[% END %]
