@@ -206,7 +206,7 @@ sub check_readers {
 		# Now find the query that's the most bogged-down, and how
 		# bogged it is.  The "most bogged-down" is the query that,
 		# of its processes running it that have been running for
-		# 3 seconds or more, has the largest sum of times.
+		# 1 second or more, has the largest sum of times.
 		my $bog_query = undef;
 		my @queries = sort keys %{ $process{$vu}{query} };
 		my $max_bog_time = 0;
@@ -214,7 +214,7 @@ sub check_readers {
 		for my $query (@queries) {
 			my @bog_times =
 				sort { $a <=> $b }
-				grep { $_ >= 3 }
+				grep { $_ >= 1 }
 				@{ $process{$vu}{query}{$query} };
 			# There must be at least 3 similar queries for us
 			# to care about it.  Otherwise we assume it's a
