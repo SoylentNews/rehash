@@ -14,19 +14,19 @@ __template__
 [% USE Slash %]
 [% x = start ? start : 1 %]
 [% FOREACH story=stories %]
-	[% IF story.7 %]
-		[% story.7 %] 
+	[% IF story.score %]
+		[% story.score %] 
 	[% ELSE %]
 		[% x %] 
 	[% END %] 
 	[% Slash.linkStory({
-		section	=> story.5,
-		tid	=> story.6,
-		sid	=> story.2,
-		'link'	=> story.1
+		section	=> story.section,
+		tid	=> story.tid,
+		sid	=> story.sid,
+		'link'	=> story.title
 	}) 
 	%]
-	by [% story.0 %] with [% story.4 %] comments <FONT SIZE="2">on [% Slash.timeCalc(story.3) %]</FONT><BR>
+	by [% story.nickname %] with [% story.commentcount %] comments <FONT SIZE="2">on [% Slash.timeCalc(story.time) %]</FONT><BR>
 [% x = x + 1 %]
 [% END %]
 [% PROCESS pagination %]

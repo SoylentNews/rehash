@@ -14,13 +14,13 @@ __template__
 [% USE Slash %]
 [% x = start ? start : 1 %]
 [% FOREACH journal=entries %]
-	[% IF journal.5 %]
-		[% journal.5 %]
+	[% IF journal.score %]
+		[% journal.score %]
 	[% ELSE %]
 		[% x %] 
 	[% END %]
-	<A HREF="[% constants.rootdir %]/~[% journal.0 | fixparam %]/journal/[% journal.2 %]">[% journal.1 %]</A> by <A HREF="[% constants.rootdir %]/~[% journal.0 | fixparam %]/">[% journal.0 %]</A>
-	<FONT SIZE="2">on [% Slash.timeCalc(journal.3) %]</FONT><BR>
+	<A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</A> by <A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname %]</A>
+	<FONT SIZE="2">on [% Slash.timeCalc(journal.date) %]</FONT><BR>
 [% x = x + 1 %]
 [% END %]
 [% PROCESS pagination %]

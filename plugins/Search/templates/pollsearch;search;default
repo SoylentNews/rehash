@@ -17,14 +17,14 @@ __template__
 	[% FOREACH poll=polls %]
 		<TR>
 		<TD VALIGN="TOP">
-		[% IF poll.4 %]
-				[% poll.4 %]
+		[% IF poll.score %]
+				[% poll.score %]
 		[% ELSE %]
 			[% x %] 
 		[% END %]
 		</TD>
 		<TD VALIGN="TOP">
-			<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% poll.0 %]">[% poll.1 %]</A> on [% Slash.timeCalc(poll.3) %] with [% poll.2 %] voters.
+			<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</A> on [% Slash.timeCalc(poll.date) %] with [% poll.voters %] voters.
 		</TD>
 		</TR>
 	[% x = x + 1 %]

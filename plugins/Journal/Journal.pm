@@ -221,7 +221,7 @@ sub searchUsers {
 	);
 	return unless @$find;
 
-	$uids   = join(" OR ", map { "uid=$_->[2]" } @$find);
+	$uids   = join(" OR ", map { "uid=$_->{uid}" } @$find);
 	$jusers = $self->sqlSelectAllHashref(
 		'uid', 'uid, MAX(id) as id', 'journals', $uids, 'GROUP BY uid'
 	);
@@ -231,7 +231,7 @@ sub searchUsers {
 		'uid', 'uid, id, date, description', 'journals', $ids
 	);
 
-	for my $user (sort { lc $a->[1] cmp lc $b->[1] } @$find) {
+	for my $user (sort { lc $a->{nickname} cmp lc $b->{nickname} } @$find) {
 		my $uid  = $user->[2];
 		my $nick = $user->[1];
 		if (exists $journals->{$uid}) {

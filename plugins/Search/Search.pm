@@ -68,7 +68,10 @@ sub findComments {
 	# select comment ID, comment Title, Author, Email, link to comment
 	# and SID, article title, type and a link to the article
 	my $query = $self->sqlQuote($form->{query});
-	my $columns = "discussions.section, discussions.url, discussions.uid, discussions.title, pid, subject, ts, date, comments.uid as uid, comments.cid as cid, discussions.id ";
+	my $columns;
+	$columns .= "discussions.section as section, discussions.url as url, discussions.uid as uid,";
+	$columns .= "discussions.title as title, pid, subject, ts, date, comments.uid as uid, ";
+	$columns .= "comments.cid as cid, discussions.id as did ";
 	$columns .= ", TRUNCATE((MATCH (comments.subject) AGAINST($query)), 1) as score "
 		if ($form->{query} && $sort == 2);
 
@@ -109,7 +112,7 @@ sub findComments {
 
 
 	$other .= " LIMIT $start, $limit" if $limit;
-	my $search = $self->sqlSelectAll($columns, $tables, $where, $other );
+	my $search = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $search;
 }
@@ -174,9 +177,8 @@ sub findUsers {
 	# userSearch REALLY doesn't need to be ordered by keyword since you
 	# only care if the substring is found.
 	my $query = $self->sqlQuote($form->{query});
-	$limit = " LIMIT $start, $limit" if $limit;
 
-	my $columns = 'fakeemail,nickname,users.uid,journal_last_entry_date ';
+	my $columns = 'fakeemail,nickname,users.uid as uid,journal_last_entry_date ';
 	$columns .= ", TRUNCATE((MATCH (nickname) AGAINST($query)), 1) as score "
 		if ($form->{query} && $sort == 2);
 
@@ -197,7 +199,7 @@ sub findUsers {
 	}
 
 	$other .= " LIMIT $start, $limit" if $limit;
-	my $users = $self->sqlSelectAll($columns, $tables, $where, $other );
+	my $users = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $users;
 }
@@ -217,8 +219,11 @@ sub findStory {
 	my $constants = getCurrentStatic();
 
 	my $query = $self->sqlQuote($form->{query});
-	my $columns = "users.nickname, stories.title, stories.sid as sid, time, commentcount, stories.section";
-	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as score, stories.tid "
+	my $columns;
+	$columns .= "users.nickname as nickname, stories.title as title, stories.sid as sid, "; 
+	$columns .= "time, commentcount, stories.section as section,";
+	$columns .= "stories.tid as tid ";
+	$columns .= "TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as scored, "
 		if ($form->{query} && $sort == 2);
 
 	my $tables = "stories,users";
@@ -274,27 +279,28 @@ EOT
 	}
 	
 	$other .= " LIMIT $start, $limit" if $limit;
-	my $stories = $self->sqlSelectAll($columns, $tables, $where, $other );
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $stories;
 }
 
 ################################################################################
+# DEad code at the moment -Brian
 sub findRetrieveSite {
-	my($self, $query, $start, $limit, $sort) = @_;
-	$query = $self->sqlQuote($query);
-	$limit = " LIMIT $start, $limit" if $limit;
-
-	# Welcome to the join from hell -Brian
-	my $sql = " SELECT bid,title, MATCH (description,title,block) AGAINST($query) as score  FROM blocks WHERE rdf IS NOT NULL AND url IS NOT NULL and retrieve=1 AND MATCH (description,title,block) AGAINST ($query) $limit";
-
-
-	$self->sqlConnect();
-	my $cursor = $self->{_dbh}->prepare($sql);
-	$cursor->execute;
-
-	my $search = $cursor->fetchall_arrayref;
-	return $search;
+#	my($self, $query, $start, $limit, $sort) = @_;
+#	$query = $self->sqlQuote($query);
+#	$limit = " LIMIT $start, $limit" if $limit;
+#
+#	# Welcome to the join from hell -Brian
+#	my $sql = " SELECT bid,title, MATCH (description,title,block) AGAINST($query) as score  FROM blocks WHERE rdf IS NOT NULL AND url IS NOT NULL and retrieve=1 AND MATCH (description,title,block) AGAINST ($query) $limit";
+#
+#
+#	$self->sqlConnect();
+#	my $cursor = $self->{_dbh}->prepare($sql);
+#	$cursor->execute;
+#
+#	my $search = $cursor->fetchall_arrayref;
+#	return $search;
 }
 
 ####################################################################################
@@ -303,7 +309,9 @@ sub findJournalEntry {
 	$start ||= 0;
 
 	my $query = $self->sqlQuote($form->{query});
-	my $columns = "users.nickname, journals.description, journals.id as id, date, users.uid";
+	my $columns;
+	$columns .= "users.nickname as nickname, journals.description as description, ";
+	$columns .= "journals.id as id, date, users.uid as uid";
 	$columns .= ", TRUNCATE((((MATCH (description) AGAINST($query) + (MATCH (article) AGAINST($query)))) / 2), 1) as score "
 		if ($form->{query} && $sort == 2);
 	my $tables = "journals, journals_text, users";
@@ -326,7 +334,7 @@ sub findJournalEntry {
 		if $form->{topic};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
-	my $stories = $self->sqlSelectAll($columns, $tables, $where, $other );
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $stories;
 }
@@ -361,7 +369,7 @@ sub findPollQuestion {
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
 
 	$other .= " LIMIT $start, $limit" if $limit;
-	my $stories = $self->sqlSelectAll($columns, $tables, $where, $other );
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
 
 	return $stories;
 }

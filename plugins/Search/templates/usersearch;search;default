@@ -15,22 +15,22 @@ __template__
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	[% FOREACH thisuser=users %]
 		<TR>
-		[% IF thisuser.4 %]
+		[% IF thisuser.score %]
 			<TD VALIGN="TOP">
-				[% thisuser.4 %]
+				[% thisuser.score %]
 			</TD>
 		[% END %]
 		<TD VALIGN="TOP">
-			<A HREF="[% constants.rootdir %]/~[% thisuser.1 | fixparam %]/">[% thisuser.1 %]</A> &nbsp;
-			[% IF thisuser.0 %]
-				([% thisuser.2 %]) email: <A HREF="mailto:[% thisuser.0 | fixparam %]">[% thisuser.0 | strip_literal %]</A> <BR>
+			<A HREF="[% constants.rootdir %]/~[% thisuser.nickname | fixparam %]/">[% thisuser.nickname %]</A> &nbsp;
+			[% IF thisuser.fakeemail %]
+				([% thisuser.uid %]) email: <A HREF="mailto:[% thisuser.fakeemail | fixparam %]">[% thisuser.fakeemail | strip_literal %]</A> <BR>
 			[% ELSE %]
-				([% thisuser.2 %])<BR>
+				([% thisuser.uid %])<BR>
 			[% END %]
 		</TD>
-		[% IF thisuser.3 %]
+		[% IF thisuser.journal_last_entry_date %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/~[% thisuser.1 | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(thisuser.3) %]</EM></A>
+				<A HREF="[% constants.rootdir %]/~[% thisuser.nickname | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</EM></A>
 			</TD>
 		[% ELSE %]
 			<TD VALIGN="TOP">
@@ -39,7 +39,7 @@ __template__
 		[% END %]
 		[% UNLESS user.is_anon %]
 			<TD VALIGN="TOP">
-				[% PROCESS zoo_icons person=thisuser.2 %]
+				[% PROCESS zoo_icons person=thisuser.uid %]
 			</TD>
 		[% END %]
 		</TR>

@@ -830,33 +830,6 @@ main();
 #use Slash::Utility;
 #
 #sub findStory {
-#	my($class, $id) = (shift, shift);
-#	my $constants = getCurrentStatic();
-#	my $user      = getCurrentUser();
-#	my($slashdb, $searchDB);
-#	if ($constants->{search_db_user}) {
-#		$slashdb  = getObject('Slash::DB', $constants->{search_db_user});
-#		$searchDB = getObject('Slash::Search', $constants->{search_db_user});
-#	} else {
-#		$slashdb  = getCurrentDB();
-#		$searchDB = Slash::Search->new(getCurrentVirtualUser());
-#	}
-#
-#	my $entry = $journal->get($id);
-#	return unless $entry->{id};
-#	my $form = _save_params(1, @_) || {};
-#
-#	for (keys %$form) {
-#		$entry->{$_} = $form->{$_} if defined $form->{$_};
-#	}
-#
-#	no strict 'refs';
-#	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
-#	my $newid = $saveArticle->($journal, $constants, $user, $entry, $slashdb, 1);
-#	return $newid == $id ? $id : undef;
-#}
-#
-#sub findStory {
 #	my($class, $id) = @_;
 #	my($slashdb, $searchDB);
 #	if ($constants->{search_db_user}) {
@@ -869,15 +842,21 @@ main();
 #	my $constants = getCurrentStatic();
 #	my $slashdb   = getCurrentDB();
 #
-#	my $entry = $journal->get($id);
-#	return unless $entry->{id};
+#	my $start = $form->{start} || 0;
+#	my $stories;
+#	if ($constants->{panic} >= 1 or $constants->{search_google}) {
+#		$stories = [ ];
+#	} else {
+#		$stories = $searchDB->findStory($form, $start, 15, $form->{sort});
+#	}
 #
-#	$entry->{nickname} = $slashdb->getUser($entry->{uid}, 'nickname');
-#	$entry->{url} = "$constants->{absolutedir}/~" . fixparam($entry->{nickname}) . "/journal/$entry->{id}";
-#	$entry->{discussion_id} = delete $entry->{'discussion'};
-#	$entry->{discussion_url} = "$constants->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
-#		if $entry->{discussion_id};
-#	$entry->{body} = delete $entry->{article};
-#	$entry->{subject} = delete $entry->{description};
+#	my @items;
+#	for my $entry (@$stories) {
+#		my $time = timeCalc($entry->[3]);
+#		push @items, {
+#			title	=> "$entry->[1] ($time)",
+#			'link'	=> ($constants->{absolutedir} . '/article.pl?sid=' . $entry->[2]),
+#		};
+#	}
 #	return $entry;
 #}
