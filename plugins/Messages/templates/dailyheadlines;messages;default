@@ -15,7 +15,7 @@ __template__
 [% constants.sitename %] Daily Headline Mailer
 
 [% FOR story = stories.reverse;
-	topicname = topics.${story.tid}.name;
+	topicname = topics.${story.tid}.textname;
 	thisurl = Slash.url2abs(Slash.db.getSection(story.section, 'rootdir'), absolutedir) || absolutedir;
 %][% story.title %][% IF constants.use_dept %]
     from the [% story.dept %] dept.[% END %]

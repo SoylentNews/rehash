@@ -19,7 +19,7 @@ __template__
 In this issue:[% FOR story = stories.reverse %]
     * [% story.title %][% END %]
 
-[% FOR story = stories.reverse; topicname = topics.${story.tid}.name;
+[% FOR story = stories.reverse; topicname = topics.${story.tid}.textname;
 %]+--------------------------------------------------------------------+
 [% 
 	box(story.title);
