@@ -283,7 +283,7 @@ sub displayStories {
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
-	my $ls_other  = { user => $user, reader => $reader, constants => $constants};
+	my $ls_other  = { user => $user, reader => $reader, constants => $constants };
 
 	my($today, $x) = ('', 0);
 	my $cnt = int($user->{maxstories} / 3);
@@ -390,14 +390,16 @@ sub displayStories {
 		if ($story->{section} ne $constants->{defaultsection} && (!$form->{section} || $form->{section} eq 'index')) {
 			my $SECT = $reader->getSection($story->{section});
 			my $url;
+
 			if ($SECT->{rootdir}) {
-				my $url = $SECT->{rootdir} . '/';
+				$url = $SECT->{rootdir} . '/';
 			} elsif ($user->{is_anon}) {
 				$url = $constants->{rootdir} . '/' . $story->{section} . '/';
 			} else {
 				$url = $constants->{rootdir} . '/index.pl?section=' . $story->{section};
 			}
-			push @links, [ $url, $SECT->{title} ];
+
+			push @links, [ $url, $SECT->{hostname} || $SECT->{title} ];
 		}
 
 		if ($user->{seclev} >= 100) {

@@ -28,7 +28,7 @@ use base 'Slash::DB::MySQL';
 #################################################################
 
 sub new {
-	my ($class, $user) = @_;
+	my($class, $user) = @_;
 
 	my $self = {};
 
@@ -49,7 +49,7 @@ sub new {
 #################################################################
 
 sub displayStoriesByTitle {
-	my ($self, $section, $other) = @_;
+	my($self, $section, $other) = @_;
 
 	$other->{titles_only} = 1;
 	my $storystruct = $self->displayStories($section,$other);
@@ -70,7 +70,7 @@ sub displayStoriesByTitle {
 # until someone has the time to do it. 	- Cliff 2002/08/10
 
 sub displayStoryList {
-	my ($self, $list, $other) = @_;
+	my($self, $list, $other) = @_;
 
 	my $returnable = [];
 	for (@{$list}) {
@@ -119,7 +119,7 @@ sub displayStoryList {
 #################################################################
 
 sub displayStories {
-	my ($self, $section, $other) = @_;
+	my($self, $section, $other) = @_;
 
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
@@ -299,6 +299,7 @@ sub getLinksContent {
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $SECT = $reader->getSection($storyref->{section});
 		my $url;
+
 		if ($SECT->{rootdir}) {
 			$url = "$SECT->{rootdir}/";
 		} elsif ($user->{is_anon}) {
@@ -306,7 +307,8 @@ sub getLinksContent {
 		} else {
 			$url = "$constants->{rootdir}/index.pl?section=$storyref->{section}";
 		}
-		push @links, [ $url, $SECT->{title} ];
+
+		push @links, [ $url, $SECT->{hostname} || $SECT->{title} ];
 	}
 
 	if ($user->{seclev} >= 100) {
