@@ -9208,10 +9208,10 @@ sub autoUrl {
 	my($now) = timeCalc(scalar localtime, '%m/%d %H:%M %Z', 0);
 
 	# Assorted Automatic Autoreplacements for Convenience
-	s|<disclaimer:(.*)>|<B><A HREF="/about.shtml#disclaimer">disclaimer</A>:<A HREF="$user->{homepage}">$user->{nickname}</A> owns shares in $1</B>|ig;
-	s|<update>|<B>Update: <date></B> by <author>|ig;
+	s|<disclaimer:(.*)>|<b><a href="/about.shtml#disclaimer">disclaimer</a>:<a href="$user->{homepage}">$user->{nickname}</a> owns shares in $1</b>|ig;
+	s|<update>|<b>Update: <date></b> by <author>|ig;
 	s|<date>|$now|g;
-	s|<author>|<B><A HREF="$user->{homepage}">$initials</A></B>:|ig;
+	s|<author>|<b><a href="$user->{homepage}">$initials</a></b>:|ig;
 
 	# Assorted ways to add files:
 	s|<import>|importText()|ex;
