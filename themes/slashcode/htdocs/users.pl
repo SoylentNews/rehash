@@ -815,7 +815,9 @@ sub showInfo {
 	my($points, $nickmatch_flag, $uid, $nick);
 	my($mod_flag, $karma_flag, $n) = (0, 0, 0);
 
-	if($admin_flag and defined $form->{show_m2s} or defined $form->{show_m1s}){
+	if ($admin_flag
+		&& (defined($form->{show_m2s}) || defined($form->{show_m1s}))
+	) {
 		my $update_hr = {};
 		$update_hr->{m2_with_mod} = $form->{show_m2s} if defined $form->{show_m2s};
 		$update_hr->{mod_with_comm} = $form->{show_m1s} if defined $form->{show_m1s};

@@ -1491,6 +1491,7 @@ Hashref of cleaned-up data.
 		nosubscriberbonus_present
 		ordernum pid
 		postanon_present posttype ratio retrieve
+		show_m1s show_m2s
 		seclev start startat threshold
 		thresh_count thresh_secs thresh_hps
 		uid uthreshold voters width

@@ -372,8 +372,9 @@ sub displayComments {
 		});
 	}
 
-	if(defined $form->{show_m2s} and $user->{is_admin}){
-		$slashdb->setUser($user->{uid}, { m2_with_comm_mod => $form->{show_m2s}} );
+	if (defined($form->{show_m2s}) && $user->{is_admin}) {
+		$slashdb->setUser($user->{uid},
+			{ m2_with_comm_mod => $form->{show_m2s} });
 	}
 
 	if ($form->{cid}) {
