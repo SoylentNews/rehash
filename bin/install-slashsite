@@ -282,7 +282,7 @@ print "Plugins selected: " . join(" ", sort keys %{$themes->{$theme}{plugin}}) .
 
 if (!$Config{d_symlink}) {
 	$symlink = 0;
-if ($opts{'L'}) {
+} elsif ($opts{'L'}) {
 	$symlink = $opts{'L'} =~ /^n/i ? 0 : 1;
 } else {
 	print "
@@ -328,7 +328,7 @@ unless ($opts{'e'}) {
 my $trgst = '';
 
 # Dump in the schema then pepper with a trace of your own theme
-my $create = gensym;
+my $create = gensym();
 open($create, "< $SLASH_PREFIX/sql/$driver/schema.sql\0")
 	or die "Can't open $SLASH_PREFIX/sql/$driver/schema.sql: $!";
 while (<$create>) {
@@ -360,7 +360,7 @@ if ($driver eq 'oracle') {
 	}
 }
 
-my $dump = gensym;
+my $dump = gensym();
 open($dump, "< $SLASH_PREFIX/sql/$driver/defaults.sql\0")
 	or die "Can't open $SLASH_PREFIX/sql/$driver/defaults.sql: $!";
 while (<$dump>) {
@@ -441,7 +441,7 @@ $slashdb->setUser($uid, {
 });
 
 # Now, lets update slash.sites
-my $sites = gensym;
+my $sites = gensym();
 if (open($sites, "< $SLASH_PREFIX/slash.sites\0")) {
 	while (<$sites>) {
 		chomp;
@@ -543,7 +543,7 @@ sub apache_site_conf {
 </VirtualHost>
 |;
 	my $file = "$prefix_site/$sitename/$sitename.conf";
-	my $fh = gensym;
+	my $fh = gensym();
 
 	open($fh, ">$file\0") or die "Can't write to $file: $!";
 	print $fh $text;
