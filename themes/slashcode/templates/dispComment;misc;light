@@ -17,6 +17,7 @@ __template__
 		<A NAME="[% cid %]"><H4>[% subject %]</H4></A>
 		by [% nickname | strip_literal %] on [% Slash.timeCalc(time) %]
 		[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% constants.reasons.$reason %][% END %])[% END %]
+		(<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)
 		[% UNLESS is_anon %]<BR>(<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">User #[% uid %] Info</A>)
 		[% IF homepage && homepage.length > 8 %]<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
 			[% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
