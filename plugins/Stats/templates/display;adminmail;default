@@ -11,7 +11,6 @@ en_US
 __name__
 display
 __template__
-[% admin_clearpass_warning %][% backup_lag %]
                UIDs     | IPIDS    | Pages
         total: [% users %]   [% unique %]   [% total %]
   grand total:        -          -    [% grand_total %] ([% total_bytes %])
@@ -30,6 +29,8 @@ __template__
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
    total hits: [% total_hits %]
+
+[% admin_clearpass_warning %][% backup_lag %]
 
 -----------------------
 [% FOREACH section = sections -%]
