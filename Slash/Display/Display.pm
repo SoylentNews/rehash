@@ -177,7 +177,7 @@ sub slashDisplay {
 		name data opt origSection origPage tempdata
 	)};
 
-	$TEMPNAME = 'anon';
+	local $TEMPNAME = 'anon';
 	unless (ref $name) {
 		# we don't want to have to call this here, but because
 		# it is cached the performance hit is generally light,
