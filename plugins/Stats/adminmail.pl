@@ -103,10 +103,10 @@ EOT
 	for my $section (keys %$sections) {
 		my $temp = {};
 		$temp->{section_name} = $section;
-		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $_ });
-		my $pages = $stats->countDailyByPage($_ ,$yesterday, { section => $_});
-		my $bytes = $stats->countBytesByPage($_ ,$yesterday, { section => $_ });
-		my $users = $stats->countUsersByPage($_ ,$yesterday, { section => $_ });
+		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section });
+		my $pages = $stats->countDailyByPage('' ,$yesterday, { section => $section });
+		my $bytes = $stats->countBytesByPage('' ,$yesterday, { section => $section });
+		my $users = $stats->countUsersByPage('' ,$yesterday, { section => $section });
 		$temp->{ipids}  = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
@@ -115,10 +115,10 @@ EOT
 		$statsSave->createStatDaily($yesterday, "section_${section}_bytes", $$bytes);
 		$statsSave->createStatDaily($yesterday, "section_${section}_page", $pages);
 		for (qw| article search comments palm journal rss|) {
-			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $_ });
-			my $pages = $stats->countDailyByPage($_ ,$yesterday, { section => $_ });
-			my $bytes = $stats->countBytesByPage($_ ,$yesterday, { section => $_ });
-			my $users = $stats->countUsersByPage($_ ,$yesterday, { section => $_ });
+			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section });
+			my $pages = $stats->countDailyByPage($_ ,$yesterday, { section => $section });
+			my $bytes = $stats->countBytesByPage($_ ,$yesterday, { section => $section });
+			my $users = $stats->countUsersByPage($_ ,$yesterday, { section => $section });
 			$temp->{$_}{ipids}  = sprintf("%8d", $uniq);
 			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
