@@ -25,6 +25,7 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
+use POSIX ();
 use Date::Format qw(time2str);
 use Date::Language;
 use Date::Parse qw(str2time);
@@ -422,24 +423,21 @@ randomness.
 
 =cut
 
-{
-	my $maxint = 2**32-1;
-	sub createLogToken {
-		my $str = "";
-		my $need_srand = 0;
-		while (length($str) < 22) {
-			if ($need_srand) {
-				srand();
-				$need_srand = 0;
-			}
-			my $r = rand($maxint) . ":" . rand($maxint);
-			my $md5 = md5_base64($r);
-			$md5 =~ s/\W//g;
-			$str .= substr($md5, int(rand 8) + 5, 3);
-			$need_srand = 1 if rand() < 0.3;
+sub createLogToken {
+	my $str = "";
+	my $need_srand = 0;
+	while (length($str) < 22) {
+		if ($need_srand) {
+			srand();
+			$need_srand = 0;
 		}
-		return substr($str, 0, 22);
+		my $r = rand(POSIX::UINT_MAX()) . ":" . rand(POSIX::UINT_MAX());
+		my $md5 = md5_base64($r);
+		$md5 =~ tr/A-Za-z0-9//cd;
+		$str .= substr($md5, int(rand 8) + 5, 3);
+		$need_srand = 1 if rand() < 0.3;
 	}
+	return substr($str, 0, 22);
 }
 
 #========================================================================
