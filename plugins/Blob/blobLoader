@@ -21,7 +21,7 @@ my %opts;
 usage('Options used incorrectly') unless getopts('hu:f:c:vs:', \%opts);
 usage() if $opts{'h'};
 $opts{'u'} ||= 'slash';
-usage("You must supply a filename and a content/type") unless $opts{'f'} && $opts{'c'};
+usage("You must supply a filename") unless $opts{'f'};
 
 createEnvironment($opts{u});
 $constants = getCurrentStatic();
@@ -38,11 +38,16 @@ while (<$file>) {
 	$data .= $_;
 }
 close($file);
-my $id = $blobs->create({ 
-												 seclev => $opts{s},
-												 content_type => $opts{c},
-												 data => $data,
-												 });
+
+my $content = {
+	seclev => $opts{s},
+	content_type => $opts{c},
+	data => $data,
+};
+
+$content->{filename} = $opts{f} unless $opts{c};
+
+my $id = $blobs->create($content);
 print "Stored in $id\n";
 
 

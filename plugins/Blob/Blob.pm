@@ -17,8 +17,32 @@ use base 'Slash::DB::Utility';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-# On a side note, I am not sure if I liked the way I named the methods either.
-# -Brian
+# Mime/Type hash (couldn't find a module that I liked that would do this -Brian
+my %mimetypes = (
+	jpeg => 'image/jpeg',
+	jpg => 'image/jpeg',
+	gif => 'image/gif',
+	png => 'image/png',
+	tiff => 'image/tiff',
+	tif => 'image/tiff',
+	ps => 'application/postscript',
+	eps => 'application/postscript',
+	zip => 'application/zip',
+	doc => 'application/msword',
+	pdf => 'application/pdf',
+	gz => 'application/x-gzip',
+	bz2 => 'application/x-bzip2',
+	rpm => 'application/x-rpm',
+	mp3 => 'audio/mp3',
+	ra => 'audio/x-realaudio',
+	html => 'text/html',
+	htm => 'text/html',
+	txt => 'text/plain',
+	text => 'text/plain',
+	xml => 'text/xml',
+	rtf => 'text/rtf',
+);
+
 sub new {
 	my($class, $user) = @_;
 	my $self = {};
@@ -42,6 +66,14 @@ sub create {
 	my $prime = $self->{'_prime'};
 
 	$values->{seclev} ||= 0;
+	# Couldn't find a module that did this
+	if (!$values->{content_type} && $values->{filename}) {
+		my $filename = lc($values->{filename});
+		$filename =~ s/.*\.(.*)$/$1/g;
+		$values->{content_type} = $mimetypes{$filename};
+	}
+	delete($values->{filename});
+	$values->{content_type} ||= 'application/octet-stream';
 
 	my $id = md5_hex($values->{data});
 
