@@ -52,6 +52,18 @@ __template__
 	<A HREF="[% constants.rootdir %]/users.pl">log in and set your account up.</A>
 	[% END %]
 
+[% CASE 'reset_acct_msg' %]
+This message has been sent to to verify your registration and the associated email address.
+
+Your password has been set to: [% newpasswd %].  Go to the URL below to log in:
+
+<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick | fixparam %]&returnto=%2Flogin.pl%3Fop=changeprefs>
+
+Make sure you then CHANGE YOUR PASSWORD!
+
+We apologize for any inconvenience this may have caused.  If you have any problems
+with or suggestions for improving this procedure feel free to email the 
+administrator ([% constants.adminmail %]).
 [% CASE 'mailpasswd_msg' %]
 
 Your new password is [% newpasswd %].  Your old password will still work until
@@ -129,6 +141,15 @@ please contact the site administrator immediately.
 	so, run this at the command line: <tt>[% basedir %]/bin/runtask -u
 	[% virtuser %] refresh_authors_cache</tt> and then restart your
 	webserver.</p>
+
+[% CASE 'reset_acct_complete' %]
+	[% IF useredit.uid %]
+	<p>The account for user [% useredit.nickname %] has been reset.  The password
+	has been changed and an e-mail has been sent with the new password to verify
+	the e-mail account associated with this account. 
+	[% ELSE %]
+	<p><b>Error:</b> Non-existent UID given.  Account could not be reset.
+	[% END %]
 
 [% CASE 'dispform_new_msg_1' %]
 	If your registration attempt is failing, it is most likely because
