@@ -1,0 +1,131 @@
+#!perl -w
+# run this document through perl to check its syntax
+use Pod::Checker;
+podchecker(\*DATA);
+__END__
+
+=head1 NAME
+
+sectiontopics - Information about the section-topics rewrite, June 2004
+
+=head1 DESCRIPTION
+
+In June 2004, the way Slash handles categorization of stories into topics
+was changed.  The confusing relationship between topics, sections, and
+subsections, which limited choices, was bolted on to the old system as
+our needs evolved.
+
+The "section-topics" rewrite, as it's being called, took a look at those
+needs with the perspective of hindsight, and developed a new system which
+will be less confusing in the long run.  It provides the flexibility
+that large sites' admins will need, while still retaining ease of use
+for smaller sites' admins.
+
+This document attempts to explain the changes for Slash administrators,
+and it may be informative reading for Slash authors and editors too.
+
+=head1 OVERVIEW
+
+I'm not going to bother explaining exactly how the old system worked,
+because it's dead now.  Suffice it to say that every story had one
+section and one or more topics, those being two distinct and disjoint
+categorizations.  Subsections were invented to allow finer-grained
+control than what sections permitted, and there were ways to constrain
+certain topics to only being available in certain sections.
+
+The "section" data type was always confused about whether it wanted to
+be a categorization and descriptor, or a visual display modifier.
+In other words, regarding an object that it was assigned to like a
+story, "section" implied facts about both its data and how it should
+be viewed.  Being in the "Book Reviews" section on Slashdot, for
+example, implied that additional data like ISBN would be stored along
+with the rest of the story's data.  Being in the "Developers" section
+meant that it would be grouped with other developer-related stories
+and that it would appear blue instead of green.  If a story was a
+book review for developers, there was no way to put it in both places;
+having that blue color meant that no ISBN data could be stored.
+
+So "section" has been split into two:  "skin" and "nexus".  I<Most>
+of the information that went with a section was used to describe
+appearances, and that went over to skin.  So a skin now controls color
+(through the skin_colors table), it controls which templates are used
+(the final part of a template's three-part name is now skin, not section),
+and it controls with which other stories a story is grouped (on which
+index page).  And the non-display aspects of sections -- mainly, the
+"section_extras" data which ensured that stories in Book Reviews stored
+a field for ISBN -- were sent over to nexuses.
+
+Each skin has precisely one nexus;  you can think of a skin as drawing its
+stories from its nexus.  The clever part is that a nexus is just a special
+kind of topic (which we call a topic_nexus when we want to emphasize that
+it is both).  So if a story has both the Developers topic_nexus, and the
+Book Reviews topic_nexus, then it will appear on both books.slashdot.org
+and developers.slashdot.org.  And the additional data stored with the
+story will include the union of all the "extras" data -- not only ISBN
+and so on, but also any "extras" data that may be in the Developers nexus.
+There don't actually happen to be any extras for Developers on Slashdot,
+so maybe this isn't the best example, but if there were, a story that was
+categorized into both nexuses would include that data too.
+
+Authors are no longer restricted from choosing any topic with any story.
+Since a nexus is a topic like any other, an author who wishes to make sure
+a story shows up in the Apple skin can pick the Apple nexus specifically.
+But what's more likely to happen is that an author will pick topics that
+make sense for the story (like "Mac OS X") and that the weights assigned
+to those topics will propagate upwards into the correct nexus(es) where
+the story should appear.
+
+Each topic picked for a story now must have a weight assigned to it.
+Weights are floating-point non-negative numbers.  The templates shipped
+with the stock theme assume that authors will be assigning weights from
+0 to 5, but the only weight value that the core code treats specially
+is 0 (which means "ignore this topic").  How positive weights affect
+the categorization of stories depends entirely on the topic_parents table.
+
+Even in the old system, topics could be arranged into a tree -- but
+to properly represent section-specific topics one would have to layer
+additional data on top of the tree, confusing matters somewhat.  Now,
+topics (including nexuses) really do form a tree, which is to say a
+directed graph.  All topic-related data is loaded into a $slashd object
+at once, when getTopicTree is called.
+
+One key difference between the old system and the new is that, previously,
+a topic had at most one parent.  Now, a topic may have zero or more
+parents.  This allows a topic of "Darwin" to be a child of both "Apple"
+and "BSD," which conceptually means that it is a subcategory of both,
+and which practically means that assigning "Darwin" a weight will allow
+that weight to propagate up to both.
+
+[To be continued...]
+
+weights and their meanings
+
+rendering: turning topics_chosen into topics_rendered
+
+multiple skins and how index.pl uses stories.primaryskid
+
+the Topiclist
+
+the mainpage skid/nexus, and why it's (sadly?) still relevant
+
+the topic chooser
+
+no admin.pl interface to edit topic tree yet, but op=topictree
+	(and GraphViz, see plugins/Admin/README)
+
+suggestions for a clean topic tree
+	(use min_weight 1 to connect many/most topics to logical
+	 categorizations, which could/should be nexuses, then
+	 connect those to mainpage with min_weight 3, finally
+	 bring loose topics to mainpage with min_weight 3)
+
+utils/convertDBto200406
+
+and _suggest and how it can be used to advise on a better
+	topic tree
+
+and _render which needs to be run
+
+=head1 VERSION
+
+$Id$
