@@ -274,6 +274,8 @@ EOT
 	$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
 	$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
 	$statsSave->createStatDaily("mod_token_conversion_point", $token_conversion_point);
+	$statsSave->createStatDaily("submissions", $submissions);
+	$statsSave->createStatDaily("submissions_comments_match", $submissions_comments_match);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
