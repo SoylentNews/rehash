@@ -52,6 +52,21 @@ constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]): 
 	END;
 END; %]
 
+[% IF late_modders_report %]
+---------------------------------
+Top Moderators Near Archive Time
+
+UID     Nickname              Count
+[% late_modders_report %]
+[% END %]
+
+[% IF early_inactive_modders_report %]
+---------------------------------
+Top Early Down Moderators with Inactive Mods
+
+UID     Nickname              Count
+[% early_inactive_modders_report %]
+[% END %]
 __seclev__
 100
 __version__
