@@ -65,6 +65,7 @@ sub getsByUid {
 
 sub getsByUids {
 	my($self, $uids, $start, $limit, $options) = @_;
+	return unless @$uids;
 	my $list = join(",", @$uids);
 	my $answer;
 	my $order = "ORDER BY journals.date DESC";
