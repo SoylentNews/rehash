@@ -1222,16 +1222,20 @@ sub getTopicTree {
 # Given two topic IDs, returns 1 if the first is a parent
 # (or grandparent, etc.) and 0 if it is not.  For this
 # method's purposes, a topic is not a parent of itself.
-# If an optional weight is specified, all links followed
-# must be of that weight or greater.
+# If an optional 'weight' is specified, all links followed
+# must have a min_weight less than or equal to that weight.
+# Or if an optional 'min_min_weight' is specified, all
+# links followed must have a min_weight greater than or
+# equal to it.  Both implies both, of course.
 # XXXSECTIONTOPICS this could be cached for efficiency, no idea how much time that would save
 sub isTopicParent {
-	my($self, $parent, $child, $weight) = @_;
+	my($self, $parent, $child, $options) = @_;
 	my $tree = $self->getTopicTree();
 	return 0 unless $tree->{$parent} && $tree->{$child};
 	return 0 if $parent == $child;
 
-	$weight ||= 0;
+	my $max_min_weight = $options->{weight}         || 2**31-1;
+	my $min_min_weight = $options->{min_min_weight} || 0;
 	my @topics = ( $child );
 	my %new_topics;
 	while (@topics) {
@@ -1242,9 +1246,11 @@ sub isTopicParent {
 			# them to the list we're following up, but
 			# only if the link from this topic to the
 			# parent does not specify a minimum weight
-			# higher than the weight demanded.
+			# higher or lower than required.
 			my $p_hr = $tree->{$tid}{parent};
-			my @parents = grep { $p_hr->{$_} >= $weight }
+			my @parents =
+				grep { $p_hr->{$_} >= $min_min_weight }
+				grep { $p_hr->{$_} <= $max_min_weight }
 				keys %$p_hr;
 			for my $p (@parents) {
 				return 1 if $p == $parent;
@@ -8318,7 +8324,7 @@ sub getPrimarySkidFromRendered {
 		||
 		$a <=> $b
 	} @nexuses;
-print STDERR "getPrimarySkidFromRendered finds nexuses '@nexuses' for: " . Dumper($rendered_hr);
+#print STDERR "getPrimarySkidFromRendered finds nexuses '@nexuses' for: " . Dumper($rendered_hr);
 
 	# Top answer is ours.
 	return $self->getSkidFromNexus($nexuses[0]);
@@ -8344,7 +8350,8 @@ sub getTopiclistFromChosen {
 	if ($skid) {
 		my $nexus = $self->getNexusFromSkid($skid);
 		%in_skid = map { $_, 1 }
-			grep { $self->isTopicParent($nexus, $_, $chosen_hr->{$_}) }
+			grep { $self->isTopicParent($nexus, $_,
+				{ weight => $chosen_hr->{$_} }) }
 			keys %$chosen_hr;
 	}
 
