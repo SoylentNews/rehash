@@ -26,8 +26,6 @@ __lang__
 en_US
 __name__
 listComments
-__seclev__
-10000
 __template__
 [% 
 light_text_color = "#AAAAAA";
@@ -61,6 +59,16 @@ moddable_items=0;
 	[% IF commentstruct.size > 0 and admin_flag %]
 	<FORM METHOD="POST" ACTION="[% constants.rootdir %]/admin.pl">
 	<INPUT TYPE="hidden" NAME="op" VALUE="moderate_recent">
+		[% fp_no_time_restriction =  BLOCK; form.no_time_restriction | fixparam; END %]
+		[% fp_userfield =  BLOCK; form.userfield | fixparam; END %]
+		[% fp_fieldname =  BLOCK; form.fieldname | fixparam; END %]
+		
+		[% IF type=="user";
+			returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=uid&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction;
+		ELSIF type == "netid";
+				returnto = constants.rootdir _ "/users.pl?op=userinfo&amp;userfield=" _ fp_userfield _ "&amp;fieldname=" _ fp_fieldname _ "&amp;min_comment=" _ min_comment _ "&amp;no_time_restriction=" _ fp_no_time_restriction; 
+		END %]
+		<INPUT TYPE="hidden" name="returnto" value="[% returnto | strip_attribute %]">
 	[% END %]
 	[% PROCESS titlebar width="100%" title = commenttitle -%]
 	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.bg.2 %]">
@@ -280,7 +288,7 @@ pct = "n/a";
 
 [% BLOCK make_reason_mod_select %]
 	[% IF admin_flag and comment.type != "archived";
-	h = { "0" => text };
+	h = { "" => text };
 	FOREACH r = reasons;
 		h.${r.key} = reasons.${r.key}.name;
 	END;
@@ -292,5 +300,5 @@ pct = "n/a";
 
 __seclev__
 10000
-
+__version__
 $Id$
