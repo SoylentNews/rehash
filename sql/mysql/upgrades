@@ -1867,8 +1867,19 @@ ALTER TABLE sections CHANGE COLUMN title title VARCHAR(64) DEFAULT '' NOT NULL, 
 # UPDATE sections SET issue=3 WHERE issue=1 AND artcount > 0 AND section NOT IN ('polls', 'search');
 
 # USEPERL LAST UPDATED HERE
+
 # SLASHDOT LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_114, Start of T_2_3_0_115 - 2003/08/28
 
+CREATE TABLE `badpasswords` (
+  `uid` mediumint(8) default NULL,
+  `ip` varchar(15) default NULL,
+  `subnet` varchar(15) default NULL,
+  `password` varchar(20) default NULL,
+  `ts` timestamp(14) NOT NULL,
+  INDEX uid (uid),
+  INDEX ip (ip),
+  INDEX subnet (subnet)
+);
