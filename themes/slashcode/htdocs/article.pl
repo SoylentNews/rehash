@@ -82,8 +82,10 @@ sub main {
 		# being a default for the story editor instead of being system-wide; that feature
 		# has been begun, but doesn't work -- pudge
 		if ($constants->{article_nocomment}) {
-			# to do the error channel
-			Slash::selectComments($discussion, 0) if $form->{ssi};
+			# to report the commentcount and hitparade
+			if ($form->{cchp}) {
+				Slash::selectComments($discussion, 0);
+			}
 		} else {
 			printComments($discussion);
 		}

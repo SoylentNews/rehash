@@ -30,6 +30,8 @@ use Slash::Constants ':people';
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
+use Fcntl;
+use File::Spec;
 use Time::Local;
 
 use base 'Exporter';
@@ -91,10 +93,7 @@ sub selectComments {
 		$cache_read_only
 	);
 	if (!$thisComment) {
-		if ($form->{ssi} && $header->{sid}) {
-			my $fake_hp = join(",", (("0") x ($max-$min)));
-			print STDERR "count 0, hitparade $fake_hp\n";
-		}
+		_print_cchp($header);
 		return ( {}, 0 );
 	}
 
@@ -191,21 +190,49 @@ sub selectComments {
 		$comments->{0}{totals}[$x] += $comments->{0}{totals}[$x + 1];
 	}
 
-	if ($form->{ssi} && $header->{sid}) {
-	# DEPRECATED!
-	#	$slashdb->updateCommentTotals($header->{sid}, $comments)
-	#		if $form->{mode} ne 'archive';
-	
-		# If we are refreshing, PRINT the totals so freshenup/archive 
-		# tasks can update without having to redo all of the work.
-		push @{$comments->{0}{totals}}, 0
-			while scalar(@{$comments->{0}{totals}}) < $max-$min;
-		my $hp = join ',', @{$comments->{0}{totals}};
-		print STDERR "count $count, hitparade $hp\n";
-	}
+	_print_cchp($header, $count, $comments->{0}{totals});
 
 	reparentComments($comments, $header);
 	return($comments, $count);
+}
+
+sub _print_cchp {
+	my($header, $count, $hp_ar) = @_;
+	return unless $header->{sid};
+	my $form = getCurrentForm();
+	return unless $form->{ssi} && $form->{cchp};
+	$count ||= 0;
+	$hp_ar ||= [ ];
+	my $constants = getCurrentStatic();
+
+	my($min, $max) = ($constants->{comment_minscore}, 
+			  $constants->{comment_maxscore});
+	my $num_scores = $max - $min + 1;
+	push @$hp_ar, 0 while scalar(@$hp_ar) < $num_scores;
+	my $hp_str = join(",", @$hp_ar);
+
+	# If these totals are wanted, print them to the file, so
+	# the freshenup.pl task (or whatever) can update without
+	# having to redo the work we just did.  Make sure the
+	# file exists first (if a malicious web user is able to
+	# pass in a cchp value without having created a file that
+	# we can write to, it will be ignored).
+	my $filename = File::Spec->catfile($constants->{logdir},
+		"cchp.$form->{cchp}");
+	if (!-e $filename || !-w _
+		|| ((stat _)[2] & 0007)) {
+		warn "_print_cchp not trying to open '$filename': "
+			. "missing, unwriteable or insecure\n";
+	} else {
+		if (!sysopen(my $fh, $filename,
+			O_WRONLY # file must already exist
+		)) {
+			warn "_print_cchp cannot open '$filename', $!\n";
+		} else {
+			print $fh "count $count, hitparade $hp_str\n";
+			close $fh;
+		}
+	}
 }
 
 ########################################################

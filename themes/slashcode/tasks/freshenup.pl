@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 use File::Path;
+use File::Temp;
+use Fcntl;
+use Slash::Constants ':slashd';
 
 use strict;
 
@@ -12,6 +15,7 @@ $task{$me}{timespec} = '1-59/3 * * * *';
 $task{$me}{timespec_panic_1} = '1-59/10 * * * *';
 $task{$me}{timespec_panic_2} = '';
 $task{$me}{on_startup} = 1;
+$task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my %updates;
@@ -47,26 +51,48 @@ $task{$me}{code} = sub {
 		($constants->{maxscore}-$constants->{minscore}+1));
 
 	for (@$stories) {
+
 		my($sid, $title, $section) = @$_;
 		slashdLog("Updating $sid") if verbosity() >= 2;
 		$updates{$section} = 1;
 		$totalChangedStories++;
 
-		my @rc;
+		# We need to pull some data from a file that article.pl will
+		# write to.  But first it needs us to create the file and
+		# tell it where it will be.
+		my $logdir = $constants->{logdir};
+		my $basedir = $constants->{basedir};
+		my $cchp_prefix = catfile($logdir, "cchp.");
+		my $cchp_fh = undef;
+		my($cchp_file, $cchp_suffix, $cchp_param);
+		while (!$cchp_fh) {
+			$cchp_file = File::Temp::mktemp("${cchp_prefix}XXXXXXXX");
+			($cchp_suffix) = $cchp_file =~ /^\Q$cchp_prefix\E(.+)$/;
+			$cchp_param = " cchp='$cchp_suffix'";
+			if (!sysopen($cchp_fh, $cchp_file,
+				O_WRONLY | O_EXCL | O_CREAT, # we must create it
+				0600 # this must be 0600 for mild security reasons
+			)) {
+				$cchp_fh = undef; # just to be sure we repeat
+				warn "could not create '$cchp_file', $!, retrying";
+				Time::HiRes::sleep(0.2);
+			}
+		}
+		close $cchp_fh;
 		if ($section) {
 			makeDir($constants->{basedir}, $section, $sid);
-			@rc = prog2file(
+			prog2file(
 				"$constants->{basedir}/article.pl",
-				"$vu ssi=yes sid='$sid' section='$section'",
+				"$vu ssi=yes sid='$sid' section='$section'$cchp_param",
 				"$constants->{basedir}/$section/$sid.shtml",
 				verbosity(), 1
 			);
 			slashdLog("$me updated $section:$sid ($title)")
 				if verbosity() >= 2;
 		} else {
-			@rc = prog2file(
+			prog2file(
 				"$constants->{basedir}/article.pl",
-				"$vu ssi=yes sid='$sid'",
+				"$vu ssi=yes sid='$sid'$cchp_param",
 				"$constants->{basedir}/$sid.shtml",
 				verbosity(), 1
 			);
@@ -74,19 +100,29 @@ $task{$me}{code} = sub {
 				if verbosity() >= 2;
 		}
 
-		# Now we extract what we need from the error channel.
-		my($cc, $hp) = (0, $default_hp);
-		if (@rc && $rc[1]
-			&& (($cc, $hp) = $rc[1] =~ /count (\d+), hitparade (.+)$/m)) {
-			# all is well, data was found
-			$slashdb->setStory($sid, { 
-				writestatus  => 'ok',
-				commentcount => $cc,
-				hitparade    => $hp,
-			});
+		# Now we extract what we need from the file we created
+		if (!open($cchp_fh, "<", $cchp_file)) {
+			warn "cannot open $cchp_file for reading, $!";
+			$cchp_param = "";
 		} else {
-			slashdLog("*** Update data not in error channel: '@rc'");
+			my $cchp = <$cchp_fh>;
+			close $cchp_fh;
+			my($cc, $hp) = (0, $default_hp);
+			if ($cchp && (($cc, $hp) = $cchp =~
+				/count (\d+), hitparade (.+)$/m)) {
+				# all is well, data was found
+				$slashdb->setStory($sid, { 
+					writestatus  => 'ok',
+					commentcount => $cc,
+					hitparade    => $hp,
+				});
+			} else {
+				slashdLog("Commentcount/hitparade data was not"
+					. " retrieved, reason unknown"
+					. " (cchp: '$cchp')");
+			}
 		}
+		unlink $cchp_file;
 
 	}
 
