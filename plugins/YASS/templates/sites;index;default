@@ -29,7 +29,7 @@ __template__
 		<TD>
 			<H2>All Sites:</H2>
 			[% FOREACH site = all_sites %]
-				<li><A HREF="[% site.url %]">[% site.title %]</A> ([% IF user.is_admin %]<A HREF="[% constants.rootdir %]/feed.pl?op=edit&id=[% site.id %]">Edit</A>|[% END %]<A HREF="[% constants.rootdir %]/article.pl?sid=[%  %]">original announcement</A>)</li>
+				<li><A HREF="[% site.url %]">[% site.title %]</A> ([% IF user.is_admin %]<A HREF="[% constants.rootdir %]/feed.pl?op=edit&id=[% site.sid %]">Edit</A>|[% END %]<A HREF="[% constants.rootdir %]/article.pl?sid=[% site.sid %]">original announcement</A>)</li>
 			[% END %]
 		</TD>
 	</TR>
