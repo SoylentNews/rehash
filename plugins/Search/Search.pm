@@ -94,9 +94,10 @@ sub findComments {
 
 	if ($form->{section}) {
 		$where .= " AND discussions.section = '$form->{section}'"
-	} else {
-		$tables .= ", sections";
-		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
+# Bad code, kills Slashdot's Search database -Brian
+#	} else {
+#		$tables .= ", sections";
+#		$where .= " AND sections.section = discussions.section AND sections.isolate != 1 ";
 	}
 
 	my $other;
@@ -227,7 +228,7 @@ sub findStory {
 
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "users.nickname, stories.title, stories.sid as sid, time, commentcount, stories.section";
-	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as score "
+	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as score, stories.tid "
 		if ($form->{query} && $sort == 2);
 
 	my $tables = "stories,users";

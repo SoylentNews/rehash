@@ -14,13 +14,14 @@ __template__
 [% USE Slash %]
 [% x = start ? start : 1 %]
 [% FOREACH story=stories %]
-	[% IF story.6 %]
-		[% story.6 %] 
+	[% IF story.7 %]
+		[% story.7 %] 
 	[% ELSE %]
 		[% x %] 
 	[% END %] 
 	[% Slash.linkStory({
 		section	=> story.5,
+		tid	=> story.6,
 		sid	=> story.2,
 		'link'	=> story.1
 	}) 
