@@ -20,7 +20,8 @@ __template__
 		[% entry.story %]<BR>
 		<FONT SIZE="-1">
 		[% submission_state = Slash.db.getDescriptions('submission-state') %]
-		[% IF section.section == constants.defaultsection %]<A HREF="/submit.pl?op=list">Main</A>[% ELSE %]<A HREF="/section.pl?section=$entry.section&amp;op=list" %]">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% story.tid %]&amp;op=submissions">[% topic.alttext %]</A><BR>
+		[% section = Slash.db.getSection(entry.section); topic = Slash.db.getTopic(entry.tid) %]
+		[% IF section.section == constants.defaultsection %]<A HREF="/submit.pl?op=list">Main</A>[% ELSE %]<A HREF="/submit.pl?section=[% entry.section %]&amp;op=list">[% section.title %]</A>[% END %] &gt; <A HREF="/search.pl?tid=[% entry.tid %]&amp;op=submissions">[% topic.alttext %]</A><BR>
 		State: [% del = entry.del; submission_state.$del %]<BR>
 		Note: [% entry.note %]<BR>
 		[% IF entry.score %]

@@ -19,10 +19,11 @@ __template__
 	[% journal.article %]<BR>
 	<FONT SIZE="-1">
 	Author: <A HREF="[% constants.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname %]</A>
-	[% IF journal.score %]
+	[% IF journal.score %]<BR>
 	Score: ([% journal.score %])
 	[% END %]
 	</FONT>
+	<P>
 </LI>
 [% END %]
 </OL>
