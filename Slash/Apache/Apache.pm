@@ -41,7 +41,7 @@ sub SlashVirtualUser ($$$) {
 
 	createCurrentVirtualUser($cfg->{VirtualUser} = $user);
 	createCurrentDB		($cfg->{slashdb} = Slash::DB->new($user));
-	createCurrentStatic	($cfg->{constants} = $cfg->{slashdb}->getSlashConf($user));
+	createCurrentStatic	($cfg->{constants} = $cfg->{slashdb}->getSlashConf());
 	$cfg->{constants}{section} = 'index'; # This is in here till I finish up some work -Brian
 
 	# placeholders ... store extra placeholders in DB?  :)

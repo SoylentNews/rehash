@@ -819,6 +819,7 @@ sub convert_tokens_to_points {
 	# it only limited points to maxpoints for users with karma >= 0
 	# and seclev < 100.  These aren't meaningful limitations, so these
 	# updates should work as well.  - Jamie 2002/08/08
+	# Actually I don't think these are needed at all. - Jamie 2003/09/09
 	$self->sqlUpdate(
 		"users_comments",
 		{ points => $maxpoints },
