@@ -53,7 +53,7 @@ __template__
 					|
 				[% END %]
 				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
+					<A HREF="[% constants.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
 				[% END %]
 			</FONT></TD>
 		</TR>
