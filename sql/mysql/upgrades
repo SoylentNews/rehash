@@ -1361,3 +1361,5 @@ ALTER TABLE accesslist DROP COLUMN now, DROP COLUMN was;
 UPDATE accesslist SET reason="" WHERE reason IS NULL;
 ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255) NOT NULL DEFAULT "";
 
+# only insert this if you don't already have the value set in vars
+#INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
