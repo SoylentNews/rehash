@@ -951,6 +951,7 @@ INSERT INTO vars (name, value, description) VALUES ('story_never_topic_allow','0
 INSERT INTO vars (name, value, description) VALUES ('submiss_ts','1','print timestamp in submissions view');
 INSERT INTO vars (name, value, description) VALUES ('submiss_view','1','allow users to view submissions queue');
 INSERT INTO vars (name, value, description) VALUES ('submission_bonus','3','Bonus given to user if submission is used');
+INSERT INTO vars (name, value, description) VALUES ('submission_count_days','60','Number of days back to count submissions made by the same UID or domain');
 INSERT INTO vars (name, value, description) VALUES ('submission_default_skid', '0', 'Skid you would like selected by default for submissions, 0 or empty string for none');
 INSERT INTO vars (name, value, description) VALUES ('submission_force_default', '0', 'Force selection of default skid for all submissions, takes away menu of options');
 INSERT INTO vars (name, value, description) VALUES ('submissions_speed_limit','300','How fast they can submit');

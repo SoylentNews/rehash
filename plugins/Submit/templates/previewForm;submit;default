@@ -25,6 +25,7 @@ __template__
 	<FONT SIZE="-1" COLOR="[% user.colors.fg_2 %]">[% submission.comment | strip_literal %]</FONT>
 </TD></TR></TABLE>
 [% END %]
+
 [% IF submission.sid %]
 	<P><A HREF="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</A>
 [% END %]
@@ -39,6 +40,32 @@ TITLE="[% topic.textname %]"></A>
 [% submission_state = Slash.db.getDescriptions('submission-state') %]
 [% del = submission.del; submission_state.$del %] submission by <B>[% submission.name %] <A HREF="[% submission.email %]">[% submission.email %]</A></B>
 	at [% submission.time %] [% IF admin_flag %]<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid_vis %]</A>[% END %]
+
+[% IF admin_flag && (submission.uid != constants.anonymous_coward_uid || submission.emaildomain) %]
+	<p>In the last [% constants.submission_count_days %] days, there
+	[% IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
+		|| submission.uid == constants.anonymous_coward_uid && num_with_emaildomain != 1 %]
+		have been
+	[% ELSE %]
+		has been
+	[% END %]
+	[% IF submission.uid != constants.anonymous_coward_uid %]
+		[% IF num_from_uid >= 20 %]<B>[% END %]
+		[% num_from_uid %] submission[% IF num_from_uid != 1 %]s[% END %]
+		from this user
+		[%- IF num_from_uid >= 20 %]</B>[% END -%]
+		[%- IF submission.emaildomain %]
+			and
+		[% END -%]
+	[%- END -%]
+	[%- IF submission.emaildomain %]
+		[% IF num_with_emaildomain >= 15 %]<B>[% END %]
+		[% num_with_emaildomain %] submission[% IF num_with_emaildomain != 1 %]s[% END %]
+		with this link domain
+		[%- IF num_with_emaildomain >= 15 %]</B>[% END -%]
+	[%- END -%]
+	.
+[% END %]
 
 <P>[% subtext %]</P>
 

@@ -1788,8 +1788,11 @@ sub createSubmission {
 	$data->{subj} = delete $submission->{subj};
 	$data->{ipid} = getCurrentUser('ipid');
 	$data->{subnetid} = getCurrentUser('subnetid');
-	$data->{email} ||= delete $submission->{email} || '';
-	$data->{uid} ||= delete $submission->{uid} || getCurrentStatic('anonymous_coward_uid'); 
+	$data->{email} = delete $submission->{email} || '';
+	my $emailuri = URI->new($data->{email});
+	my $emailhost = $emailuri ? $emailuri->host() : "";
+	$data->{emaildomain} = fullhost_to_domain($emailhost);
+	$data->{uid} = delete $submission->{uid} || getCurrentStatic('anonymous_coward_uid'); 
 	$data->{'-time'} = delete $submission->{'time'};
 	$data->{'-time'} ||= 'NOW()';
 	$data->{primaryskid} = delete $submission->{primaryskid} || $constants->{mainpage_skid};
@@ -1803,7 +1806,7 @@ sub createSubmission {
 	my $subid = $self->getLastInsertId;
 
 	# The next line makes sure that we get any section_extras in the DB - Brian
-	$self->setSubmission($subid, $submission) if keys %$submission;
+	$self->setSubmission($subid, $submission) if $subid && keys %$submission;
 
 	return $subid;
 }
@@ -5639,6 +5642,27 @@ sub getAccessList {
 		'accesslist',
 		"now_$access_type = 'yes'",
 		"ORDER BY ts DESC LIMIT $min, $max");
+}
+
+##################################################################
+sub countSubmissionsFromUID {
+	my($self, $uid, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $days_back = $options->{days_back} || $constants->{submission_count_days};
+	my $uid_q = $self->sqlQuote($uid);
+	return $self->sqlCount("submissions",
+		"uid=$uid_q
+		 AND time >= DATE_SUB(NOW(), INTERVAL $days_back DAY)");
+}
+
+sub countSubmissionsWithEmaildomain {
+	my($self, $emaildomain, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $days_back = $options->{days_back} || $constants->{submission_count_days};
+	my $emaildomain_q = $self->sqlQuote($emaildomain);
+	return $self->sqlCount("submissions",
+		"emaildomain=$emaildomain_q
+		 AND time >= DATE_SUB(NOW(), INTERVAL $days_back DAY)");
 }
 
 ##################################################################

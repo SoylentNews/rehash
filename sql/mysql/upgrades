@@ -2754,3 +2754,10 @@ INSERT INTO vars (name, value, description) VALUES ('mod_token_assignment_delay'
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_37, Start of T_2_5_0_38 - 2004/11/16
+
+ALTER TABLE submissions ADD COLUMN emaildomain varchar(255) DEFAULT '' NOT NULL AFTER email;
+#perl -MSlash::Test=virtusername -le '$e = $slashdb->sqlSelectAllKeyValue("subid, email", "submissions"); for my $subid (sort { $a <=> $b } keys %$e) { $u = URI->new($e->{$subid}) or next; next unless $u->can("host"); $slashdb->sqlUpdate("submissions", { emaildomain => fullhost_to_domain($u->host()) }, "subid=$subid") }'
+ALTER TABLE submissions ADD INDEX emaildomain (emaildomain);
+
+INSERT INTO vars (name, value, description) VALUES ('submission_count_days','60','Number of days back to count submissions made by the same UID or domain');
+
