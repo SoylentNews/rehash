@@ -257,7 +257,9 @@ sub cmd_daddypants {
 		$args{time} = $info->{text};
 	}
 
-	return Slash::DaddyPants::daddypants(\%args);
+	my $result = Slash::DaddyPants::daddypants(\%args);
+	$self->privmsg($channel, $result);
+	slashdLog("daddypants: $result");
 }
 }
 
