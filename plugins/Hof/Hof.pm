@@ -67,13 +67,17 @@ sub countUsersIndexExboxesByBid {
 sub countStorySubmitters {
 	my($self) = @_;
 
-	my $ac_uid = getCurrentAnonymousCoward('uid');
+	# Sometimes getCurrentAnonymousCoward() is missing data when it is
+	# called, so we drop in an appropriate default.
+	my $ac_uid = getCurrentAnonymousCoward('uid') ||
+		     getCurrentStatic('anonymous_coward_uid');
 	my $uid = $self->sqlSelectColArrayref('uid', 'authors_cache');
-	push @$uid, $ac_uid;
-	my $in_list = join(",", @$uid);
+	my $in_list = join(',', @{$uid});
 
-	my $submitters = $self->sqlSelectAll('count(*) as c, users.nickname',
-		'stories, users', "users.uid=stories.submitter AND submitter NOT IN ($in_list)",
+	my $submitters = $self->sqlSelectAll(
+		'count(*) as c, users.nickname',
+		'stories, users', 
+		"users.uid=stories.submitter AND submitter NOT IN ($in_list)",
 		'GROUP BY users.uid ORDER BY c DESC LIMIT 10'
 	);
 
