@@ -804,6 +804,9 @@ sub getAccessLogInfo {
 # second randomly, so when give_out_tokens() chops off the list
 # halfway through the minimum number of clicks, the survivors
 # are determined at random and not by (probably) uid order.
+# New as of 2002/09/11:  limit look-back distance to 48 hours,
+# to make the effects of click-grouping more predictable, and
+# not being erased all at once with accesslog expiration.
 sub fetchEligibleModerators {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
@@ -824,6 +827,7 @@ sub fetchEligibleModerators {
 			 AND users_info.uid=users_prefs.uid
 			 AND (op='article' OR op='comments')
 			 AND willing=1
+			 AND ts >= DATE_SUB(NOW(), INTERVAL 48 HOUR)
 			 AND karma >= 0",
 			"GROUP BY users_info.uid
 			 HAVING c >= $hitcount
