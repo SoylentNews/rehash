@@ -32,6 +32,7 @@ $task{$me}{code} = sub {
 	for my $person (@$people) {
 		my $new_people = $zoo->rebuildUser($person);
 		$slashdb->setUser($person, { people => $new_people, people_status => 'ok'});
+		sleep 2; # don't tax the DB too much, this isn't high-priority
 	}
 	$stats->updateStatDaily("zoo_counts", "value+" . @$people);	
 	slashdLog('Zoo fof/eof End');
@@ -40,3 +41,4 @@ $task{$me}{code} = sub {
 };
 
 1;
+
