@@ -1171,6 +1171,7 @@ sub getTopicTree {
 	my $topic_nexus = $self->sqlSelectAllHashref("tid", "*", "topic_nexus");
 	my $topic_nexus_dirty = $self->sqlSelectAllHashref("tid", "*", "topic_nexus_dirty");
 	my $topic_parents = $self->sqlSelectAllHashrefArray("*", "topic_parents");
+	my $topic_param = $self->sqlSelectAllHashrefArray("*", "topic_param");
 
 	for my $tid (keys %$topics) {
 		$tree_ref->{$tid} = $topics->{$tid};
@@ -1188,6 +1189,10 @@ sub getTopicTree {
 		my($parent, $child, $m_w) = @{$tp_hr}{qw( parent_tid tid min_weight )};
 		$tree_ref->{$child}{parent}{$parent} = $m_w;
 		$tree_ref->{$parent}{child}{$child} = $m_w;
+	}
+	for my $tp_hr (@$topic_param) {
+		my($tid, $name, $value) = @{$tp_hr}{qw( tid name value )};
+		$tree_ref->{$tid}{$name} = $value if $tree_ref->{$tid} && !$tree_ref->{$tid}{$name};
 	}
 	for my $tid (keys %$tree_ref) {
 		next unless exists $tree_ref->{$tid}{child};
@@ -2933,7 +2938,10 @@ sub deleteContentFilter {
 
 ########################################################
 sub saveTopic {
-	my($self, $topic) = @_;
+	# this is designed to take lots of data and filter it,
+	# so we can't just take additional params and put them in
+	# the param table; for now, put them in $options -- pudge
+	my($self, $topic, $options) = @_;
 	my($tid) = $topic->{tid} || 0;
 
 	# This seems like a wasted query to me... *shrug* -Cliff
@@ -2946,16 +2954,67 @@ sub saveTopic {
 		textname	=> $topic->{textname},
 		series		=> $topic->{series} eq 'yes' ? 'yes' : 'no',
 		image		=> $image,
-		width		=> $topic->{width},
-		height		=> $topic->{height},
+		width		=> $topic->{width} || '',
+		height		=> $topic->{height} || '',
 	};
 
 	if ($rows == 0) {
-		$self->sqlInsert('topics', $data);
-		$tid = $self->getLastInsertId;
+		### tids under 10000 are reserved for "normal" tids, where > 10000
+		### are for tids where we want to have a specific tid, such as
+		### for topics groups that might be moved between sites
+		my $where = 'tid < 10000';
+		my $default_tid = 0;
+		if ($options->{lower_limit}) {
+			$where = "tid > $options->{lower_limit}";
+			if ($options->{upper_limit}) {
+				$where .= " AND tid < $options->{upper_limit}";
+			}
+			$default_tid = $options->{lower_limit};
+		}
+
+		# we could do a LOCK TABLE, because this will be used so seldom, but
+		# OTOH, if tasks use this to dump a lot of data, it could mean a lot
+		# of locks.  this is a little bit trickier, but should be fine. -- pudge
+		my $tries = 0;
+		RETRY: {
+			$self->sqlDo("SET AUTOCOMMIT=0");
+			$tid = $self->sqlSelect('MAX(tid)', 'topics', $where);
+			$tid ||= $default_tid;
+			$data->{tid} = ++$tid;
+			if ($self->sqlInsert('topics', $data)) {
+				$self->sqlDo("COMMIT");
+				$self->sqlDo("SET AUTOCOMMIT=1");
+			} else {
+				$self->sqlDo("ROLLBACK");
+				$self->sqlDo("SET AUTOCOMMIT=1");
+				errorLog("$DBI::errstr");
+				# only try a few times before giving up
+				return -1 if ++$tries > 5;
+				goto RETRY;
+			}
+		}
 	} else {
 		$self->sqlUpdate('topics', $data, "tid=$tid");
 	}
+
+	if ($options->{param}) {
+		my $params = $options->{param};
+		for my $name (keys %$params) {
+			if (defined $params->{$name} && length $params->{$name}) {
+				$self->sqlReplace('topic_param', {
+					tid	=> $tid,
+					name	=> $name,
+					value	=> $params->{$name}
+				});
+			} else {
+				my $name_q = $self->sqlQuote($name);
+				$self->sqlDelete('topic_param',
+					"tid = $tid AND name = $name_q"
+				);
+			}
+		}
+	}
+
 
 	my @parents;
 	if ($topic->{_multi}{parent_topic} && ref($topic->{_multi}{parent_topic}) eq 'ARRAY') {
@@ -2965,7 +3024,7 @@ sub saveTopic {
 	}
 	my $parent_str = join ',', @parents;
 
-	$self->sqlDelete('topic_parents', "tid=$tid AND parent_tid NOT IN ($parent_str)");
+	$self->sqlDelete('topic_parents', "tid=$tid AND parent_tid NOT IN ($parent_str)") if $parent_str;
 	for my $parent (@parents) {
 		$self->sqlInsert('topic_parents', {
 			tid		=> $tid,

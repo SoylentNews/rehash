@@ -1003,6 +1003,20 @@ CREATE TABLE topic_nexus_extras (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'topic_param'
+#
+
+DROP TABLE IF EXISTS topic_param;
+CREATE TABLE topic_param (
+	param_id mediumint UNSIGNED NOT NULL auto_increment,
+	tid SMALLINT UNSIGNED NOT NULL,
+	name varchar(32) DEFAULT '' NOT NULL,
+	value text DEFAULT '' NOT NULL,
+	UNIQUE topic_key (tid,name),
+	PRIMARY KEY (param_id)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'topic_parents'
 #
 
