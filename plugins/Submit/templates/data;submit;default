@@ -44,16 +44,20 @@ __template__
 	[% END %]
 
 [% CASE 'previewhead' %]
+	[% returnme.data_constant = 1 %]
 	[% constants.sitename %] Submission Preview
 
 [% CASE 'defaulthead' %]
+	[% returnme.data_constant = 1 %]
 	[% constants.sitename %] Submissions
 
 [% CASE 'maxallowed' %]
+	[% returnme.data_constant = 1 %]
 	<P><B>Warning! you've exceeded max allowed submissions for the day : 
 	[% constants.max_submissions_allowed %]</B></P>
 
 [% CASE 'max_submissionsize_title' %]
+	[% returnme.data_constant = 1 %]
 	<B>Submission too large!</B>
 
 [% CASE 'max_submissionsize_err' %]
@@ -62,21 +66,26 @@ __template__
 	<P>If you try to save your submission as it is, it could be truncated</P>
 
 [% CASE 'error' %]
+	[% returnme.data_constant = 1 %]
 	Error
 
 [% CASE 'filtererror' %]
 	<P>Lameness filter: <B>[% err_message %]</B></P>
 
 [% CASE 'compresserror' %]
+	[% returnme.data_constant = 1 %]
 	<B>compression has detected something wrong with your submission</B>
 
 [% CASE 'badsubject' %]
+	[% returnme.data_constant = 1 %]
 	Please enter a reasonable subject.
 
 [% CASE 'defaultsection' %]
+	[% returnme.data_constant = 1 %]
 	All Sections
 
 [% CASE 'defaultnote' %]
+	[% returnme.data_constant = 1 %]
 	Unclassified
 
 [% END %]

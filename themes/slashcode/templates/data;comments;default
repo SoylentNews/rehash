@@ -22,37 +22,47 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'label' %]
+	[% returnme.data_constant = 1 %] 
 	[% label %]
 
 [% CASE 'users_no_discussions' %]
+	[% returnme.data_constant = 1 %] 
 	This user has created no [% label %]s.
 
 [% CASE 'nodiscussions' %]
+	[% returnme.data_constant = 1 %] 
 	There are no [% label %]s listed here.
 
 [% CASE 'active_discussions' %]
+	[% returnme.data_constant = 1 %] 
 	Several Active [% label.ucfirst %]s 
 
 [% CASE 'all_discussions' %]
+	[% returnme.data_constant = 1 %] 
 	All Active [% label.ucfirst %]s 
 
 [% CASE 'user_discussions' %]
+	[% returnme.data_constant = 1 %] 
 	User Created [% label.ucfirst %]s
 
 [% CASE 'user_discussion' %]
+	[% returnme.data_constant = 1 %] 
 	[% label.ucfirst %]s created by [% name %]
 
 [% CASE 'archive_error' %]
+	[% returnme.data_constant = 1 %] 
 	This [% label %] has been archived, no further changes/additions can be made to it.
 
 [% CASE 'submitted_comment' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	Submitted Comment
 
 [% CASE 'created_discussion' %]
+	[% returnme.data_constant = 1 %] 
 	[% label.ucfirst %] has been created	
 
 [% CASE 'no_discreate_msg' %]
+	[% returnme.data_constant = 1 %] 
 	You either aren't <a href="[% constants.rootdir %]/users.pl">logged in</a>
 	or don't have sufficient privileges to submit a [% label %].
 [% END %]

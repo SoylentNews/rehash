@@ -18,9 +18,11 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'no_key' %]
+	[% returnme.data_constant = 1 %]
 	No key found.
 
 [% CASE 'no_nick' %]
+	[% returnme.data_constant = 1 %]
 	You need to supply the name of a user.
 
 [% END %]

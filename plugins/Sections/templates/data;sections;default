@@ -18,11 +18,12 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'head' %]
+	[% returnme.data_constant = 1 %]
 	Section Editor
 
 [% CASE 'notadmin' %]
-<PRE>
-         I woke up in the Soho bar when a policeman knew my name. He said,
+	[% returnme.data_constant = 1 %]
+	<PRE>I woke up in the Soho bar when a policeman knew my name. He said,
          "You can go sleep at home tonite if you can get up and walk away."
          I staggered back to the underground and a breeze threw back my
          head. I remember throwing punches around and preachin' from my chair.
@@ -38,9 +39,11 @@ __template__
 	Failed to create/update [% section %]<BR>
 
 [% CASE 'addhead' %]
+	[% returnme.data_constant = 1 %]
 	Add Section
 
 [% CASE 'listhead' %]
+	[% returnme.data_constant = 1 %]
 	Sections
 
 [% CASE 'edithead' %]

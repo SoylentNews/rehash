@@ -14,8 +14,9 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'nomorechances' %]
-<B>Sorry, you failed to prove your humanity. To try again,
-you have to start over.</B>
+	[% returnme.data_constant = 1 %]
+	<B>Sorry, you failed to prove your humanity. To try again,
+	you have to start over.</B>
 
 [% END %]
 __seclev__

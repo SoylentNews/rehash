@@ -18,69 +18,57 @@ __template__
 [% SWITCH value;
 
 CASE 'header';
-
-"Email Story to a Friend!";
+	returnme.data_constant = 1;
+	"Email Story to a Friend!";
 
 CASE 'invalid_email';
-
-"I'm sorry. The e-mail address that you have entered is invalid!<BR>";
+	returnme.data_constant = 1;
+	"I'm sorry. The e-mail address that you have entered is invalid!<BR>";
 
 CASE 'optout_email';
-
-"I'm sorry. The e-mail address that you have entered has opted-out of this
-service.<BR>";
-
+	returnme.data_constant = 1;
+	"I'm sorry. The e-mail address that you have entered has opted-out of this service.<BR>";
 
 CASE 'optout_added';
 	email = form.email | strip_attribute;
-
-"$email added to story emailing opt-out list.<BR>";
+	"$email added to story emailing opt-out list.<BR>";
 
 CASE 'optout_removed';
 	email = form.email | strip_attribute;
+	"$email removed from story emailing opt-out list.<BR>";
 
-"$email removed from story emailing opt-out list.<BR>";
-
-# Deprecated (see email_subj;email;defalt)
+# Deprecated (see email_subj;email;default)
 CASE 'email_subject';
-
-"Emailed Story: \"$story.title\" from $constants.sitename";
+	"Emailed Story: \"$story.title\" from $constants.sitename";
 
 # Deprecated (see optout_subj;email;default)
 CASE 'optout_email_subject';
-
-"[CONFIRM] Story Email Opt-out Request for $constants.sitename";
+	"[CONFIRM] Story Email Opt-out Request for $constants.sitename";
 
 CASE 'mail_result';
 	UNLESS rc;
-	
-"Story emailed successfully!";
-
+		"Story emailed successfully!";
 	ELSE;
-	
 "Error occured while attempting to email the story! Please insure that
 your email address is valid. If you believe this error to be due to a mistake
 or a bug, please send email to $constants.adminemail";
-	
 	END;
 
-CASE 'plugin_not_installed'
+CASE 'plugin_not_installed' %]
+	<H2>The plugin you have requested <B>Slash::Email</B>, was not properly
+	installed.</H2>
+	<P>
+	Please contact your site administrator ([% constants.adminmail %]) so that
+	this problem can be investigated and proper functionality restored.
+	[%
 
--%]
-<H2>The plugin you have requested <B>Slash::Email</B>, was not properly
-installed.</H2>
-<P>
-Please contact your site administrator ([% constants.adminmail %]) so that
-this problem can be investigated and proper functionality restored.
-[%
-
-CASE 'formkeyError';
-	linkop = 'email_send' ? 'email_form' : 'optout_form';
--%]
-<P>Please return back to the <A HREF="[% constants.rootdir
--%]/email.pl?op=[% linkop %]">originating form</A> and try again.
-<P>op=[% operation %], check=[% check %]</P>
-[%-
+	CASE 'formkeyError';
+		linkop = 'email_send' ? 'email_form' : 'optout_form';
+	-%]
+	<P>Please return back to the <A HREF="[% constants.rootdir
+	-%]/email.pl?op=[% linkop %]">originating form</A> and try again.
+	<P>op=[% operation %], check=[% check %]</P>
+	[%
 
 END  # SWITCH / CASE
 

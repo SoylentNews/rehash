@@ -18,36 +18,47 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'nousers' %]
+	[% returnme.data_constant = 1 %]
 	No usernames were found that match your query.
 
 [% CASE 'nostories' %]
+	[% returnme.data_constant = 1 %]
 	No stories were found that match your query.
 
 [% CASE 'nocomments' %]
+	[% returnme.data_constant = 1 %]
 	No comments were found that match your query.
 
 [% CASE 'nopolls' %]
+	[% returnme.data_constant = 1 %]
 	No poll questions were found that match your query.
 
 [% CASE 'nojournals' %]
+	[% returnme.data_constant = 1 %]
 	No journals were found to match your query.
 
 [% CASE 'nosubmissions' %]
+	[% returnme.data_constant = 1 %]
 	No submissions were found to match your query.
 
 [% CASE 'norss' %]
+	[% returnme.data_constant = 1 %]
 	No rss entries were found to match your query.
 
 [% CASE 'all_sections' %]
+	[% returnme.data_constant = 1 %]
 	All Sections
 
 [% CASE 'all_topics' %]
+	[% returnme.data_constant = 1 %]
 	All Topics
 
 [% CASE 'all_authors' %]
+	[% returnme.data_constant = 1 %]
 	All Authors
 
 [% CASE 'all_subsections' %]
+	[% returnme.data_constant = 1 %]
 	All Subsections
 
 [% END %]

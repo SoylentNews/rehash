@@ -18,6 +18,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'head' %]
+	[% returnme.data_constant = 1 %]
 	[% constants.sitename %]: Hall of Fame
 
 [% END %]

@@ -18,83 +18,89 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'tablebegin' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	<TABLE>
 [% CASE 'tableend' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	</TABLE>
 [% CASE 'cagebegin' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	<TR><TD>
 [% CASE 'cageend' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	</TD></TR>
 [% CASE 'commentbegin' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	<LI>
 [% CASE 'commentend' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	</LI>
 [% CASE 'indentbegin' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	<UL>
 [% CASE 'indentend' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	</UL>
 [% CASE 'cagebigbegin' %]
 	<TR><TD BGCOLOR="[% user.bg.2 %]">
 [% CASE 'cagebigend' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	</TD></TR>
 [% CASE 'displayThreadLink' %]
 	[% foo = hidden == 1 ? 'y' : 'ies'; hidden %] repl[% foo %]
 [% CASE 'atonish' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	around
 [% CASE 'aton' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	on
 [% CASE 'hour' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	hour
 [% CASE 'hours' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	hours
 [% CASE 'minute' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	minute
 [% CASE 'minutes' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	minutes
 [% CASE 'second' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	second
 [% CASE 'seconds' %]
-	[% returnme.data_constant=1; %] 
+	[% returnme.data_constant = 1 %] 
 	seconds
 
 [% CASE 'SLASH-UNKNOWN-TAG' %]
 <b>[Unknown Slash Tag [% tag %]]</b>
 
 [% CASE 'SLASH-UNKNOWN-IMAGE' %]
-<b>[Unknown Image]</b>
+	[% returnme.data_constant = 1 %] 
+	<b>[Unknown Image]</b>
 
 [% CASE 'SLASH-UNKNOWN-STORY' %]
-<b>[Unknown Story]</b>
+	[% returnme.data_constant = 1 %] 
+	<b>[Unknown Story]</b>
 
 [% CASE 'SLASH-UNKNOWN-USER' %]
-<b>[Unknown User]</b>
+	[% returnme.data_constant = 1 %] 
+	<b>[Unknown User]</b>
 
 [% CASE 'SLASH-UNKNOWN-FILE' %]
-<b>[Unknown File]</b>
+	[% returnme.data_constant = 1 %] 
+	<b>[Unknown File]</b>
 
 [% CASE 'SLASH-UNKNOWN-LINK' %]
-<b>[Unknown Link]</b>
+	[% returnme.data_constant = 1 %] 
+	<b>[Unknown Link]</b>
 
 [% CASE 'noformkey' %]
-<P><B>We can't find your formkey.</B></P>
-<P>You must fill out a form and submit from that
-form as required.</P>
+	[% returnme.data_constant = 1 %] 
+	<P><B>We can't find your formkey.</B></P>
+	<P>You must fill out a form and submit from that
+	form as required.</P>
 
 [% CASE 'submitalready' %]
 <P>This comment has been submitted already, [% interval_string %] ago.
@@ -106,7 +112,8 @@ each submission of [% env.script_name %] in order to allow everyone to have a fa
 <P>It's been [% interval_string %] since your last submission.</P>
 
 [% CASE 'invalidformkey' %]
-<P><B>Invalid form key.</B>  Please go back to the beginning and try again.</P>
+	[% returnme.data_constant = 1 %] 
+	<P><B>Invalid form key.</B>  Please go back to the beginning and try again.</P>
 
 [% CASE 'maxposts' %]
 <P><B>You've reached you limit of maximum submissions to [% env.script_name %] :
@@ -125,6 +132,7 @@ each submission of [% env.script_name %] in order to allow everyone to have a fa
 	or from an external site, this link is just invalid -- sorry.
 
 [% CASE 'no_such_sid' %]
+	[% returnme.data_constant = 1 %] 
 	Nothing for you to see here.  Please move along.
 
 [% CASE 'moderatord_log_header' %]
@@ -143,18 +151,20 @@ Incremented token-count on [% num_updated %] users.
 ---------------- END MODERATORD EXECUTION ----------------
 
 [% CASE 'rereg_email_subject' %]
-Your [% constants.sitename %] account has expired.
+	[% returnme.data_constant = 1 %] 
+	Your [% constants.sitename %] account has expired.
 
 [% CASE 'article_nosubscription' %]
-[% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" %]
-You can't see this story because it's scheduled in the future,
-where only subscribers can see it.<P>
-Either you are not a subscriber to [% constants.sitename %], or you
-have indicated you don't want Stories pages ad-free, or you have
-set your daily limit of ad-free pages to lower than
-the default [% constants.subscribe_hits_btmd %].
-Any of these three possible issues can be resolved at
-<A HREF="[% constants.rootdir %]/subscribe.pl">your subscription page</A>.<P>
+	[% returnme.data_constant = 1 %] 
+	[% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" %]
+	You can't see this story because it's scheduled in the future,
+	where only subscribers can see it.<P>
+	Either you are not a subscriber to [% constants.sitename %], or you
+	have indicated you don't want Stories pages ad-free, or you have
+	set your daily limit of ad-free pages to lower than
+	the default [% constants.subscribe_hits_btmd %].
+	Any of these three possible issues can be resolved at
+	<A HREF="[% constants.real_rootdir %]/subscribe.pl">your subscription page</A>.<P>
 
 [% CASE DEFAULT %]
 ---- MISSING MISCELLANEOUS DATA SEGMENT --- [[% value %]] block not found.

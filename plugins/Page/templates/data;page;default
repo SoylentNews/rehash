@@ -30,18 +30,23 @@ __template__
 	[% user.nickname %]'s Slashbox
 
 [% CASE 'userboxdefault' %]
+	[% returnme.data_constant = 1 %]
 	This is your user space.  Love it.
 
 [% CASE 'morehead' %]
+	[% returnme.data_constant = 1 %]
 	Older Stuff
 
 [% CASE 'readmore' %]
+	[% returnme.data_constant = 1 %]
 	<B>Read More...</B>
 
 [% CASE 'bytes' %]
+	[% returnme.data_constant = 1 %]
 	bytes in body
 
 [% CASE 'words' %]
+	[% returnme.data_constant = 1 %]
 	words in story
 
 [% CASE 'comments' %]

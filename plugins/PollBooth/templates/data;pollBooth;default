@@ -18,19 +18,24 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'title' %]
+	[% returnme.data_constant = 1 %]
 	[% constants.sitename %] Poll
 
 [% CASE 'edit_poll_title' %]
 	[% IF qid %]Editing Poll #[% qid %][% ELSE %]New Poll[% END %]
 
 [% CASE 'invalid' %]
+	[% returnme.data_constant = 1 %]
 	Invalid poll!<BR>
 
 [% CASE 'display' %]
+	[% returnme.data_constant = 1 %]
 	Displaying poll results.
 
 [% CASE 'anon' %]
-	You may not vote anonymously.  Please <A HREF="[% constants.rootdir %]/users.pl">log in</A>.
+	[% returnme.data_constant = 1 %]
+	You may not vote anonymously.  Please
+	<A HREF="[% constants.real_rootdir %]/users.pl">log in</A>.
 
 [% CASE 'uid_voted' %]
 	[% user.nickname %] at [% env.remote_addr %] has already voted.
@@ -39,6 +44,7 @@ __template__
 	[% END %]
 
 [% CASE 'poll_closed' %]
+	[% returnme.data_constant = 1 %]
 	Voting is closed on this poll.
 
 [% CASE 'success' %]
@@ -48,9 +54,11 @@ __template__
 	Your vote ([% aid %]) was rejected.
 
 [% CASE 'noquestion' %]
+	[% returnme.data_constant = 1 %]
 	You must provide a question.
 
 [% CASE 'noanswer' %]
+	[% returnme.data_constant = 1 %]
 	You must provide one or more answers.
 
 [% END %]

@@ -18,9 +18,11 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'keywordDelete-message' %]
+	[% returnme.data_constant = 1 %]
 	Keyword has been deleted
 
 [% CASE 'keywordSave-message' %]
+	[% returnme.data_constant = 1 %]
 	Keyword has been saved
 
 [% CASE 'varSave-message' %]

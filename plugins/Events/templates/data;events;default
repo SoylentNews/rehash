@@ -19,6 +19,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'notfound' %]
+	[% returnme.data_constant = 1 %]
 	That was not found.
 
 [% END %]

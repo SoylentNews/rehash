@@ -18,6 +18,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'mainhead' %]
+	[% returnme.data_constant = 1 %]
 	[% constants.sitename %] Friend/Foe System
 
 [% CASE 'confirm' %]
@@ -45,27 +46,35 @@ __template__
 	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</A> ([% uid %]) is unknown to the world
 
 [% CASE 'yournofriends' %]
+	[% returnme.data_constant = 1 %]
 	You are alone in the world.
 
 [% CASE 'yournofans' %]
+	[% returnme.data_constant = 1 %]
 	You are either loved by all or just invisible.
 
 [% CASE 'yournofriends' %]
+	[% returnme.data_constant = 1 %]
 	These are the people the voices in your head tell you to worry about.
 
 [% CASE 'yournofoes' %]
+	[% returnme.data_constant = 1 %]
 	You love everyone, or you play your cards very close to your chest.
 
 [% CASE 'yournofreaks' %]
+	[% returnme.data_constant = 1 %]
 	Everyone loves you, or they are too afraid to admit otherwise.
 
 [% CASE 'yournofriendsoffriends' %]
+	[% returnme.data_constant = 1 %]
 	Everyone whom you love, loves no one else. You must be special. 
 
 [% CASE 'yournofriendsenemies' %]
+	[% returnme.data_constant = 1 %]
 	Everyone whom you love seems to be loved by all and has collected no foes.
 
 [% CASE 'yournoall' %]
+	[% returnme.data_constant = 1 %]
 	No one knows you exist.
 
 [% CASE 'friendshead' %]
@@ -90,33 +99,43 @@ __template__
 	Everyone who thinks anything about <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="[% user.fg.0 %]">[% nickname | strip_literal %]</FONT></A>
 
 [% CASE 'yourfriendshead' %]
+	[% returnme.data_constant = 1 %]
 	Your friends	
 
 [% CASE 'yourfoeshead' %]
+	[% returnme.data_constant = 1 %]
 	Your foes
 
 [% CASE 'yourfanshead' %]
+	[% returnme.data_constant = 1 %]
 	Your fans
 
 [% CASE 'yourfreakshead' %]
+	[% returnme.data_constant = 1 %]
 	Your freaks
 
 [% CASE 'yourfriendsoffriendshead' %]
+	[% returnme.data_constant = 1 %]
 	Your friends' friends
 
 [% CASE 'yourfriendsenemieshead' %]
+	[% returnme.data_constant = 1 %]
 	Your friends' foes
 
 [% CASE 'yourall' %]
+	[% returnme.data_constant = 1 %]
 	This is how you see everyone and how everyone sees you.
 
 [% CASE 'no_go' %]
+	[% returnme.data_constant = 1 %]
 	Sorry, this is not an option.
 
 [% CASE 'no_uid' %]
+	[% returnme.data_constant = 1 %]
 	Sorry, you did not specify a valid user.
 
 [% CASE 'over_socialized' %]
+	[% returnme.data_constant = 1 %]
 	You are over the limit for the number of friends and foes you can have.
 	Please remove some from your list before adding any more.
 

@@ -18,6 +18,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'mainhead' %]
+	[% returnme.data_constant = 1 %]
 	[% constants.sitename %] Journal System
 
 [% CASE 'userhead' %]
@@ -44,18 +45,27 @@ __template__
 	[% nickname ? "$nickname has" : "You have" %] not created any journal entries.
 
 [% CASE 'nofriends' %]
-	You have not made any friends (or all of your friends are losers who have not created entries in their journals).
+	[% returnme.data_constant = 1 %]
+	You have not made any friends (or all of your friends are losers
+	who have not created entries in their journals).
 
 [% CASE 'noviewfriends' %]
-	Either all of your friends are lame or you just have none. Either way this page is blank.
+	[% returnme.data_constant = 1 %]
+	Either all of your friends are lame or you just have none. Either
+	way this page is blank.
 
 [% CASE 'create_failed' %]
-	An unknown error occured when you tried to create a journal entry.  Please go back to the beginning and try again.
+	[% returnme.data_constant = 1 %]
+	An unknown error occured when you tried to create a journal entry.
+	Please go back to the beginning and try again.
 
 [% CASE 'no_desc_or_article' %]
-	Either the subject or the journal text was empty.  Please complete the entry and try again.
+	[% returnme.data_constant = 1 %]
+	Either the subject or the journal text was empty.  Please complete
+	the entry and try again.
 
 [% CASE 'noentries_found' %]
+	[% returnme.data_constant = 1 %]
 	Sorry, the requested journal entries were not found.
 
 [% END %]

@@ -18,6 +18,7 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'head' %]
+	[% returnme.data_constant = 1 %]
 	Cheesy Portal
 
 [% CASE 'mysite' %]

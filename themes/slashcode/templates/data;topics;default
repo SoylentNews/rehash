@@ -18,7 +18,8 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'head' %]
-	[% constants.sitename %]: Topics
+	[% returnme.data_constant = 1 %]
+ 	[% constants.sitename %]: Topics
 
 [% END %]
 
