@@ -786,11 +786,12 @@ for my $skid (sort { $a <=> $b } keys %skins) {
 }
 my $mainpage_skid = $slashdb->getVar('mainpage_skid','value',1);
 print "UPDATE pollquestions_new SET primaryskid=$mainpage_skid WHERE primaryskid IS NULL;\n";
-
 print "ALTER TABLE pollquestions_new DROP COLUMN section;\n";
+
 #
 # Update auto_poll if it exists
 #
+
 print <<EOT;
 DROP TABLE IF EXISTS auto_poll_new;
 CREATE TABLE auto_poll_new (
@@ -808,6 +809,7 @@ for my $skid (sort { $a <=> $b } keys %skins) {
         print "UPDATE auto_poll_new SET primaryskid=$skid WHERE section=$section_q;\n";
 }
 print "ALTER TABLE auto_poll_new DROP COLUMN section;\n";
+
 #
 # Convert accesslog_admin and accesslog
 #
