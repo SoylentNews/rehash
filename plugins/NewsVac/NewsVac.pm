@@ -1,48 +1,50 @@
 #!/usr/bin/perl -w
-
-############################################################
-
-# NewsVac.pm - the URL database tree class
-
-# Implements a database handle that has some extra functionality.
-# That functionality allows for clean and easy insertion to,
-# updating of, and selection from the database of URLs and the
-# relationships between them.
-
-# Important terms:  process, request, analyze, parse, spider.
-#
-# To request a URL is to retrieve its data from the net and to
-# update the url_info and url_content SQL tables.
-#
-# To analyze a URL is to determine which parse modules need to
-# be called and then to call them, updating the url_analysis
-# table and other tables as appropriate (url_content to store
-# plaintext data, rel to store links).  Only done if request is
-# successful.
-#
-# A parse module is identified by a text keyword which
-# associates to a method.  The method does some (possibly
-# computation-intensive) work to update other tables and fields
-# in the database.
-#
-# To process a URL is to request it and then analyze it.
-#
-# The spider method takes a hash of conditions, an SQL query to
-# determine an initial URL set, and then a series of tuples that
-# define which "rel" links to follow to expand the URL set.
-#
-# BUGS:
-#
-# Sometimes a cookie that's the single-line LWP comment gets
-# stored; the regex should weed these out. Doesn't do much harm
-# but is a little annoying.
-#
-############################################################
+# Copyright 1997-2002 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
 # $Id$
-############################################################
-
 
 package Slash::NewsVac;
+
+=head1 NewsVac 
+
+Slash::NewsVac - The URL database tree class
+
+=head1 DESCRIPTION
+
+Implements a database handle that has some extra functionality.
+That functionality allows for clean and easy insertion to,
+updating of, and selection from the database of URLs and the
+relationships between them.
+
+Important terms:  process, request, analyze, parse, spider.
+
+To request a URL is to retrieve its data from the net and to
+update the url_info and url_content SQL tables.
+
+To analyze a URL is to determine which parse modules need to
+be called and then to call them, updating the url_analysis
+table and other tables as appropriate (url_content to store
+plaintext data, rel to store links).  Only done if request is
+successful.
+
+A parse module is identified by a text keyword which
+associates to a method.  The method does some (possibly
+computation-intensive) work to update other tables and fields
+in the database.
+
+To process a URL is to request it and then analyze it.
+
+The spider method takes a hash of conditions, an SQL query to
+determine an initial URL set, and then a series of tuples that
+define which "rel" links to follow to expand the URL set.
+
+=head1 BUGS
+
+Sometimes a cookie that's the single-line LWP comment gets
+stored; the regex should weed these out. Doesn't do much harm
+but is a little annoying.
+
+=cut
 
 use strict;
 use vars qw($VERSION @EXPORT);
@@ -142,12 +144,43 @@ sub DESTROY {
 	doLogExit('newsvac') if $self->{using_lock}; 
 }
 
-# The caller determins whether or not to put NewsVac into this mode, and it
-# is an all or nothing affair, at this time. If you can't get a lock, your code
-# dies. Once a lock has been obtained, NewsVac is locked and any other code
-# that needs to lock NewsVac will gracefully drop until the lock is removed
-# (either by graceful code termination, or the forceful fingers of your nearest 
-# BOFH).
+=head2 lockNewsVac
+
+The caller determins whether or not to put NewsVac into this mode, and it
+is an all or nothing affair, at this time. If you can't get a lock, your code
+dies. Once a lock has been obtained, NewsVac is locked and any other code
+that needs to lock NewsVac will gracefully drop until the lock is removed
+(either by graceful code termination, or the forceful fingers of your nearest 
+BOFH).
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item None.
+
+=back
+
+=item Return value
+
+If the lock succeeds, this routine returns logical true. Any other situation
+returns logical false. If logical false is returned, caller should be able
+to gracefully back out of whatever operation was in progress (caller will
+need to use eval {} to catch the die() calls).
+
+=item Side effects
+
+If lock succeeds, a newsvac.pid file will be created in the site's log
+diretory.
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub lockNewsVac {
 	my($self) = @_;
 
@@ -169,6 +202,32 @@ sub lockNewsVac {
 	return ($self->{using_lock} = 1);
 }
 
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub getNVDescriptions {
 	my($self, $code) = @_;
 
@@ -176,6 +235,32 @@ sub getNVDescriptions {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub timing {
 	my($self, $cmd, $duration) = @_;
 
@@ -204,6 +289,32 @@ sub timing {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub timing_clear {
     my($self) = @_;
 
@@ -212,6 +323,32 @@ sub timing_clear {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub timing_dump {
 	my($self) = @_;
 	my(@timing_data, @durations);
@@ -246,6 +383,32 @@ sub timing_dump {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub canonical {
 	my($self, $url) = @_;
 
@@ -257,6 +420,32 @@ sub canonical {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub add_url {
 	my ($self, $url) = @_;
 
@@ -285,6 +474,32 @@ sub add_url {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub url_to_id {
 	# This should keep a cache for efficiency.
 	my($self, $url) = @_;
@@ -299,6 +514,32 @@ sub url_to_id {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub urls_to_ids {
 	my ($self, @urls) = @_;
 
@@ -324,6 +565,32 @@ sub urls_to_ids {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub id_to_url {
 	# This should keep a cache for efficiency.
 	my ($self, $url_id) = @_;
@@ -336,6 +603,32 @@ sub id_to_url {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub ids_to_urls {
 	my ($self, @url_ids) = @_;
 	my %hash;
@@ -365,6 +658,32 @@ sub ids_to_urls {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub add_urls_return_ids {
 	my ($self, @urls) = @_;
 
@@ -380,6 +699,32 @@ sub add_urls_return_ids {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub add_rels_mark_valid {
 	my ($self, @rels) = @_;
 			
@@ -406,6 +751,32 @@ sub add_rels_mark_valid {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub add_rel {
 	my ($self, $from_url_id, $to_url_id, $parse_code, $type,
 	    $first_verified) = @_;
@@ -439,6 +810,32 @@ sub add_rel {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub rels_to_ids {
 	# This isn't actually used anywhere!
 	#
@@ -474,6 +871,32 @@ sub rels_to_ids {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub id_to_rel {
 	# This should keep a cache for efficiency.
 	my ($self, $rel_id) = @_;
@@ -498,6 +921,32 @@ EOT
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub add_miner_and_urls {
  	# This parameter list needs to be simplified, somehow.
 	my ($self, $minername, $last_edit_aid, $pre_stories_text, 
@@ -524,6 +973,32 @@ sub add_miner_and_urls {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub correlate_miner_to_urls {
 	my ($self, $minername, @urls) = @_;
 
@@ -559,6 +1034,32 @@ sub correlate_miner_to_urls {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub minername_to_id {
 	# This should keep a cache for efficiency.
 	my ($self, $minername) = @_;
@@ -576,6 +1077,32 @@ sub minername_to_id {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub id_to_minername {
 	# This should keep a cache for efficiency.
 	my ($self, $miner_id) = @_;
@@ -591,6 +1118,32 @@ sub id_to_minername {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub delete_url_ids {
 	my($self) = @_;
 
@@ -612,6 +1165,32 @@ EOT
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub delete_rel_ids {
 	my($self) = @_;
 
@@ -624,6 +1203,32 @@ sub delete_rel_ids {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub info_to_nugget_url {
     my ($self, $dest_url, $title, $source, $slug) = @_;
 
@@ -648,6 +1253,32 @@ sub info_to_nugget_url {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub nugget_url_to_info {
     my ($self, $nugget_url) = @_;
     my %info = ( );
@@ -661,6 +1292,32 @@ sub nugget_url_to_info {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub add_nuggets_return_ids {
 	my ($self, $miner_name, @nugget_hashes) = @_;
     
@@ -735,6 +1392,32 @@ sub add_nuggets_return_ids {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub process_urls {
 	my($self, $conditions_ref, @urls) = @_;
 	my @url_ids = $self->urls_to_ids(@urls);
@@ -748,6 +1431,32 @@ sub process_urls {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub process_url_ids {
 	my ($self, $conditions_ref, @url_ids) = @_;
 	my @urls = $self->ids_to_urls(@url_ids);
@@ -760,6 +1469,32 @@ sub process_url_ids {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub process_urls_and_ids {
 	my ($self, $conditions_ref, $urls_ar, $ids_ar) = @_;
 	my $start_time;
@@ -819,6 +1554,32 @@ sub process_urls_and_ids {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub request {
 	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
 	    $conditions_ref) = @_;
@@ -1123,6 +1884,32 @@ sub request {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub analyze {
 	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
 	    $conditions_ref) = @_;
@@ -1227,6 +2014,32 @@ EOT
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub get_parse_codes {
     my ($self, $url_id, $url, $update_info_ref, $update_content_ref,
         $response_timestamp) = @_;
@@ -1264,6 +2077,32 @@ sub get_parse_codes {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub get_parse_code_method {
 	my ($self, $code) = @_;
 
@@ -1276,6 +2115,32 @@ sub get_parse_code_method {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub get_rel_types {
 	my($self, $parse_code) = @_;
 	my(@types);
@@ -1302,6 +2167,32 @@ sub get_rel_types {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 # You know, I don't think this is even used. See get_parse_codes
 # which is basically a straight port from UDBT.pm
 sub parse_html_linkextor {
@@ -1366,6 +2257,32 @@ sub parse_html_linkextor {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub parse_html_linkextor_callback {
 	my ($self, $tagname, %attr) = @_;
 
@@ -1380,6 +2297,32 @@ sub parse_html_linkextor_callback {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub trim_body {
 	my ($self, $miner_id, $body_ref, $pre_text, $pre_regex, $post_text,
 	    $post_regex) = @_;
@@ -1443,6 +2386,32 @@ sub trim_body {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub parse_miner {
 	my ($self, $url_id, $url_orig, $info_ref, $content_ref, $other_ref,
 	    $conditions_ref) = @_;
@@ -1760,6 +2729,32 @@ sub parse_miner {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub parse_plaintext {
 	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
 	   $conditions_ref) = @_;
@@ -1850,6 +2845,31 @@ sub parse_plaintext {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 
 sub parse_nugget {
 	my ($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
@@ -1884,6 +2904,32 @@ sub parse_nugget {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub spider_by_name {
 	my($self, $name) = @_;
 	my $name_quoted = $self->sqlQuote($name);
@@ -1932,19 +2978,46 @@ sub spider_by_name {
 }
 
 ############################################################
-# SUB spider
-#
-# Parameters: 
-#
-# $conditions_ref
-# 	ref to hash of conditions for this spider (timeout, max depth, etc.)
-# 	
-# $group_0_selects_ref
-# 	ref to array of SQL SELECT statements to collect url_id's for group 0
-# 	("SELECT url_id FROM " prefixed to all statements)
-#
-# @spider_commands
-# 	one or more spider_commands (see below for format)
+=head2 spider($condition_ref, $group0_selects_ref, @spider_commants)
+
+Executes a spider. Callers will most likely use spider_by_name() as an 
+entry point, as it does most everything for you. This routine depends
+on the actual data associated with the spider. 
+
+Given a certain set of initial data, we start looking across a list of sites 
+(using miners) searching for nuggets of data that match keywords in NewsVac's
+tables.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $conditions_ref
+ 	Ref to hash of conditions for this spider (timeout, max depth, etc.)
+ 	
+=item $group_0_selects_ref
+ 	Ref to array of SQL SELECT statements to collect url_id's for group 0
+ 	("SELECT url_id FROM " prefixed to all statements)
+
+=item @spider_commands
+ 	One or more spider_commands (see below for format)
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 sub spider {
 	my($self, $conditions_ref, $group_0_selects_ref, @spider_commands) = @_;
     
@@ -2057,6 +3130,31 @@ sub spider {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub spider_init {
 	my ($self, $conditions_ref, $group_0_wheres_ref) = @_;
     
@@ -2085,6 +3183,31 @@ sub spider_init {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub garbage_collect {
 	my($self) = @_;
 
@@ -2156,6 +3279,31 @@ sub garbage_collect {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub robosubmit {
 	my($self) = @_;
 
@@ -2399,6 +3547,31 @@ EOT
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub load_keywords {
 	my ($self, $kw_ref, $keys_ref, $m_regex_ref, $m_regex_enc_ref) = @_;
 
@@ -2421,6 +3594,32 @@ sub load_keywords {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
+
 # Unused routine. Possibly deprecated.
 sub source_name {
 	my($self, $long_form) = @_;
@@ -2432,6 +3631,31 @@ sub source_name {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub check_regex {
 	my ($self, $regex, $flags) = @_;
 
@@ -2451,6 +3675,32 @@ sub check_regex {
 	return $err;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getWeekCounts {
 	my($self) = @_;
 	my($results, $returnable);
@@ -2470,6 +3720,32 @@ sub getWeekCounts {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getDayCounts {
 	my($self) = @_;
 	my(@days) = (1,3,7);
@@ -2495,6 +3771,32 @@ sub getDayCounts {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getMinerList {
 	my($self) = @_;
 
@@ -2509,6 +3811,32 @@ sub getMinerList {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getMiner {
 	my($self, $miner_id) = @_;
 
@@ -2519,6 +3847,32 @@ sub getMiner {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getMinerURLs {
 	my($self, $miner_id) = @_;
 
@@ -2532,6 +3886,32 @@ sub getMinerURLs {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub setMiner {
 	my($self, $miner_id, $data) = @_;
 
@@ -2540,6 +3920,32 @@ sub setMiner {
 	);
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub delMiner {
 	my($self, $miner_id) = @_;
 
@@ -2548,6 +3954,32 @@ sub delMiner {
 	);
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getUrlList {
 	my($self, $match, $owner, $start, $limit) = @_;
 
@@ -2595,6 +4027,32 @@ sub getUrlList {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getMinerURLIds {
 	my($self, $miner_id) = @_;
 
@@ -2607,6 +4065,32 @@ sub getMinerURLIds {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getMinerRegexps {
 	my($self, $miner_id) = @_;
 
@@ -2619,6 +4103,32 @@ sub getMinerRegexps {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getURLRelationships {
 	my($self, $url_ids, $max_results) = @_;
 	$max_results ||= 100;
@@ -2644,6 +4154,32 @@ sub getURLRelationships {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getURLData {
 	my($self, $url_id) = @_;
 	my $returnable;
@@ -2669,6 +4205,32 @@ EOT
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getURLRelationCount {
 	my($self, $url_id) = @_;
 
@@ -2682,6 +4244,32 @@ sub getURLRelationCount {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getURLCounts {
 	my($self) = @_;
 
@@ -2693,6 +4281,32 @@ sub getURLCounts {
 	return @returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getURLBody {
 	my($self, $url_id) = @_;
 
@@ -2708,6 +4322,32 @@ sub getURLBody {
 }
 
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getSpiderList {
 	my($self, $match) = @_;
 
@@ -2734,6 +4374,32 @@ sub getSpiderList {
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getSpider {
 	my($self, $spider_id) = @_;
 	my $returnable;
@@ -2751,6 +4417,32 @@ EOT
 	return $returnable;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub setSpider {
 	my($self, $spider_id, $data) = @_;
 
@@ -2759,6 +4451,32 @@ sub setSpider {
 	);
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub getSpiderName {
 	my($self, $spider_id) = @_;
 
@@ -2770,8 +4488,48 @@ sub getSpiderName {
 }
 
 ############################################################
-# Overrides Slash::DB::Utility::sqlInsert()
-# 
+=head2 sqlInsert($table, $data, [, $extra])
+
+Overrides Slash::DB::Utility::sqlInsert() to allow for the 
+	INSERT INTO x IGNORE ...
+Format, specific to MySQL. This should be back-ported to 
+Slash::DB::MySQL if it hasn't been, already.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $table
+
+Name of table to insert into.
+
+=item $data
+
+Hashref of insert data where the keys are the fieldnames.
+
+=item $extra
+
+Hashref containing booleans, the following keys are valid:
+	delayed	- Use a delayed insert.
+	ignore	- Ignore any errors resulting from insert.
+
+=back
+
+=item Return value
+
+None.
+
+=item Side effects
+
+Inserts rows into the table specified.
+
+=item Dependencies
+
+=back
+
+=cut
 sub sqlInsert {
 	my($self, $table, $data, $extra) = @_;
 	my($names, $values);
@@ -2802,9 +4560,45 @@ sub sqlInsert {
 }
 
 ############################################################
-# Overrides Slash::DB::MySQL::setSubmission
-# 
-# This may eventually get backported to the core. I hope so.
+=head2 setSubmission($subid, $data)
+
+Overrides Slash::DB::MySQL::setSubmission
+
+This may eventually get backported to the core. I hope so.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $subid
+
+The submission ID to update.
+
+=item $data
+
+Hashref containing the data to update, with keys in the hash matching to the
+fieldnames of the 'submission' table. Any element in the hashref that does
+not match a field name in that table will be an assumed parameter and stored
+in the 'submissions_param' table.
+
+=back
+
+=item Return value
+
+None.
+
+=item Side effects
+
+Changes the associated record in the 'submissions' and/or 'submission_param'
+tables.
+
+=item Dependencies
+
+=back
+
+=cut
 sub setSubmission {
 	my($self, $subid, $data) = @_;
 	my(@param, %update_tables, $cache);
@@ -2844,6 +4638,34 @@ sub setSubmission {
 	}
 }
 
+############################################################
+=head2 _genericGetCacheName($tables)
+
+This re-implements the private Slash::DB necessary for cache
+access for our overrides, above. See Slash::DB::_getGenericCacheName()
+for more details
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 
 # I don't know why this wasn't inherited, but it might be due to the fact that
 # it's "private" in Slash::DB::MySQL.
@@ -2875,17 +4697,38 @@ sub _genericGetCacheName {
 
 
 ##############################################################
-# Giving this its own logfile: newsvac.log
-#
-# Hey! Maybe we can use the bloody PID behavior to
-# our advantage? Hmmm....
-#
-# Well, we have to watch out because when the webheads
-# use NewsVac, they SHOULD be using STDERR, yet static
-# files should if they need to do things like...well
-# run spiders, for example!
-#
-# So we need to be a little clever, here.
+=head2 errLog(message_list)
+
+Writes an error message to the proper log file. If this module
+has been locked, the messages will go to a private NewsVac
+log, if unlocked, these messages will go to STDERR.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item message_list
+
+Either a list (which will be joined) or a scalar containing the message to
+output.
+
+=back
+
+=item Return value
+
+None
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+=back
+
+=cut
 sub errLog {
 	my($self) = @_;
 
@@ -2905,6 +4748,33 @@ sub errLog {
 # These are not methods, but utility functions.  Don't pass them $self!
 # These should probably be private.
 ############################################################
+
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub find_matches {
 	my($match_ref, $weight_ref, $keywords_ref, $keyword_keys_ref,
 	   $plaintext) = @_;
@@ -2936,6 +4806,32 @@ sub find_matches {
 	return $weight_total;
 }
 
+############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub tag_space_squeeze {
 	my($text) = @_;
 
@@ -2947,6 +4843,31 @@ sub tag_space_squeeze {
 }
 
 ############################################################
+=head2 foo( [, ])
+
+Foooooooo.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item
+
+=back
+
+=item Return value
+
+
+=item Side effects
+
+
+=item Dependencies
+
+=back
+
+=cut
 sub unix_to_sql_datetime {
 	my($time) = @_;
 	my($sec, $min, $hour, $mday, $mon, $year) = gmtime($time);
@@ -2962,6 +4883,37 @@ sub unix_to_sql_datetime {
 }
 
 ############################################################
+=head2 sql_to_unix_datetime($string)
+
+Given a date in database format, convert it into a format acceptable by the
+code, in this case epoch-seconds.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $string
+
+The date to convert (which is usually 'YYYY-MM-DD min:sec', but may vary across
+implementations) 
+
+=back
+
+=item Return value
+
+The given date as epoch-seconds.
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+=back
+
+=cut
 sub sql_to_unix_datetime {
 	my($string) = @_;
 	return 0 if !$string;
@@ -2974,6 +4926,43 @@ sub sql_to_unix_datetime {
 	return timegm($sec, $min, $hour, $mday, $mon - 1, $year);
 }
 
+############################################################
+=head2 round($num , $sig)
+
+Rounds number to the nearest given significant digit.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $num
+
+The number to be rounded.
+
+=item $sig
+
+This could be done a little better, if $sig is not given, we'll attempt to round
+to the nearest one. If $sig is 2, we'll attempt to round to the nearest 10, 
+if 3, the nearest 100 and so on. Negative values are accepted, but results
+have not been tested yet. If it's broken, please submit diffs. :)
+
+=back
+
+=item Return value
+
+The rounded value.
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+=back
+
+=cut
 sub round {
 	my($num, $sig) = @_;
 	$sig = 1 if !defined $sig;
@@ -2989,3 +4978,14 @@ sub round {
 
 
 1;
+
+__END__
+
+
+=head1 SEE ALSO
+
+Slash(3).
+
+=head1 VERSION
+
+$Id$
