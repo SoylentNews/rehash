@@ -43,6 +43,7 @@ __template__
        ELSE;
           nstat = stat | fixparam;
           nsection = section;
+          nlabel = '';
        END;
 
        statstring = statstring _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
