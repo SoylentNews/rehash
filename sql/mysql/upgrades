@@ -787,6 +787,12 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_poin
 # SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE users_info CHANGE people people MEDIUMBLOB;
+<<<<<<< upgrades
+
+# Do not run this on Slashdot, I have already done it for the DB that matters -Brian
+ALTER TABLE accesslog DROP INDEX op_part;
+ALTER TABLE accesslog ADD INDEX op_part (op, section);
+=======
 
 # End of T_2_3_0_48, Start of T_2_3_0_49
 
@@ -818,3 +824,6 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'No
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Info', '[% constants.rootdir %]/admin.pl?op=recent', 500, 10);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Normal', '[% constants.rootdir %]/admin.pl', 500, 12);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Config', '[% constants.rootdir %]/admin.pl?op=topics', 500, 13);
+p
+#This needs to be set for all OSDN sites, and we should make sure that sites are using the right DB. -Brian
+INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtual user of the database that the code should use for logging stats. If you don\'t know what this is for, you should leave it blank.');
