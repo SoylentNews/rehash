@@ -784,6 +784,7 @@ The 'modCommentLog' template block.
 sub moderatorCommentLog {
 	my($type, $value, $options) = @_;
 	$options ||= {};
+	my $title = $options->{title};
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
@@ -822,8 +823,10 @@ sub moderatorCommentLog {
 	# in this template were moderations, and if there were none,
 	# we could short-circuit here if @$mods was empty.  But now,
 	# the template handles that decision.
-
+	
+	my $seen_mods={};
 	for my $mod (@$mods) {
+		$seen_mods->{$mod->{id}}++;
 		vislenify($mod); # add $mod->{ipid_vis}
 		#$mod->{ts} = substr($mod->{ts}, 5, -3);
 		$mod->{nickname2} = $slashdb->getUser($mod->{uid2},
@@ -872,7 +875,13 @@ sub moderatorCommentLog {
 	}
 
 	my $this_user;
-	$this_user = $slashdb->getUser($value) if $type eq "uid";
+	$this_user = $slashdb->getUser($value) if $type eq "uid";	
+	my $mod_ids = [keys %$seen_mods];
+	my $mods_to_m2s;
+	if($constants->{show_m2s_with_mods}){
+		$mods_to_m2s = $slashdb->getMetamodsForMods($mod_ids, $constants->{m2_limit_with_mods});
+	}
+	
 
 	my $data = {
 		type		=> $type,
@@ -890,7 +899,9 @@ sub moderatorCommentLog {
 		both_mods	=> $both_mods,
 		timestamp_hr	=> $timestamp_hr,
 		skip_ip_disp    => $skip_ip_disp,
-		this_user	=> $this_user
+		this_user	=> $this_user,
+		title		=> $title,
+		mods_to_m2s	=> $mods_to_m2s
 	};
 	slashDisplay('modCommentLog', $data, { Return => 1, Nocomm => 1 });
 }
