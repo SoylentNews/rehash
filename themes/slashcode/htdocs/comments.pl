@@ -5,7 +5,6 @@
 # $Id$
 
 use strict;
-use HTML::Entities;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:messages :strip);
 use Slash::Display;

@@ -15,7 +15,6 @@ use Slash::Display;
 use Slash::Utility;
 use Slash::Constants ':messages';
 use Email::Valid;
-use HTML::Entities;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;

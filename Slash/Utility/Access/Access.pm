@@ -26,7 +26,6 @@ LONG DESCRIPTION.
 
 use strict;
 use Digest::MD5 'md5_hex';
-use HTML::Entities;
 use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;

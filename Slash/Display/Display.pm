@@ -298,6 +298,7 @@ my $strip_mode = sub {
 # for a template and you don't want your tags running
 # up against each other.		- Cliff 8/1/01
 %FILTERS = (
+	decode_entities	=> \&decode_entities,
 	fixparam	=> \&fixparam,
 	fixurl		=> \&fixurl,
 	fudgeurl	=> \&fudgeurl,

@@ -52,6 +52,7 @@ use vars qw($VERSION @EXPORT);
 	changePassword
 	chopEntity
 	countWords
+	decode_entities
 	encryptPassword
 	findWords
 	fixHref

@@ -6,7 +6,6 @@
 package Slash::DB::MySQL;
 use strict;
 use Digest::MD5 'md5_hex';
-use HTML::Entities;
 use Time::HiRes;
 use Date::Format qw(time2str);
 use Slash::Utility;
