@@ -12,11 +12,13 @@ use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:web :messages);
 use Slash::Display;
 use Slash::Utility;
+use Time::HiRes;
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub main {
+my $start_time = Time::HiRes::time;
 	my $messages  = getObject('Slash::Messages');
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
@@ -50,7 +52,9 @@ sub main {
 	}
 
 	# dispatch of op
+printf STDERR scalar(localtime) . " messages.pl before $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 	$ops{$op}[FUNCTION]->($messages, $constants, $user, $form);
+printf STDERR scalar(localtime) . " messages.pl after  $$ op $op uid $user->{uid} elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 
 	# writeLog('SOME DATA');	# if appropriate
 }

@@ -8,8 +8,10 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Time::HiRes;
 
 sub main {
+my $start_time = Time::HiRes::time;
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
@@ -24,6 +26,7 @@ sub main {
 		|| $form->{upasswd} || $form->{unickname}
 	) {
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
+printf STDERR scalar(localtime) . " index.pl $$ redirect returnto $refer elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 		redirect($refer); return;
 	}
 
@@ -35,6 +38,7 @@ sub main {
 		upBid($form->{bid}), $c++ if /^u$/;
 		dnBid($form->{bid}), $c++ if /^d$/;
 		rmBid($form->{bid}), $c++ if /^x$/;
+printf STDERR scalar(localtime) . " index.pl $$ redirect since op=$form->{op} c=$c elapsed %5.3f\n", (Time::HiRes::time - $start_time) if $c;
 		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME}), return if $c;
 	}
 
@@ -54,6 +58,7 @@ sub main {
 		$limit = $user->{maxstories};
 	}
 
+printf STDERR scalar(localtime) . " index.pl $$ pre elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 	$stories = $reader->getStoriesEssentials(
 		$limit, $form->{section},
 		'',
@@ -88,6 +93,8 @@ sub main {
 		$future_plug = 1;
 	}
 
+printf STDERR scalar(localtime) . " index.pl $$ pre-displays elapsed %5.3f\n", (Time::HiRes::time - $start_time);
+
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
 	# index_more block (aka Older Stuff).
@@ -103,10 +110,12 @@ sub main {
 		stories		=> $Stories,
 		boxes		=> $StandardBlocks,
 	});
+printf STDERR scalar(localtime) . " index.pl $$ after slashDisplay elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 
 	footer();
 
 	writeLog($form->{section});
+printf STDERR scalar(localtime) . " index.pl $$ after writeLog elapsed %5.3f\n", (Time::HiRes::time - $start_time);
 }
 
 #################################################################

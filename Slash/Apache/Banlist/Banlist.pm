@@ -26,6 +26,9 @@ sub handler {
 	# Ok, this will make it so that we can reliably use Apache->request
 	Apache->request($r);
 	my $cur_ip = $r->connection->remote_ip;
+
+print STDERR scalar(localtime) . " Banlist.pm $$ $cur_ip " . $r->method . " " . $r->uri . "\n";
+
 	my $cur_ipid = md5_hex($cur_ip);
 	my $cur_subnet = $cur_ip;
 	$cur_subnet =~ s/^(\d+\.\d+\.\d+)\.\d+$/$1.0/;
