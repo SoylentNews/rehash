@@ -3747,6 +3747,7 @@ sub setMetaMod {
 			{ assn_order => [qw( -m2count -m2status )] },
 		) unless $m2_user->{tokens} < 0;
 
+		$rows += 0; # if no error, returns 0E0 (true!), we want a numeric answer
 		if ($rows) {
 			# If a row was successfully updated, then there are
 			# other updates we need to do too.  First, tally the
