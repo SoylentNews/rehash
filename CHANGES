@@ -1,5 +1,10 @@
-slash-1.0.6, 2000.06.xx
+slash-1.0.6, 2000.07.10
 -----------------------
+
+*	Don't let BLOCKQUOTEs nest more than 4 in comments.pl (same
+	as UL and OL)
+
+*	Added Bundle::CPAN to Bundle::Slash (see INSTALL)
 
 *	Don't let users edit authors without seclev >= 500 (ttyp0)
 
@@ -37,8 +42,9 @@ slash-1.0.6, 2000.06.xx
 
 *	Submission titles are now shown on the browser's titlebar
 
-*	Section articles appearing on the main index now also have a link
-	to the section's home page by the "Read More" link (Russ Nelson)
+*	Section articles appearing on the main index now also have a
+	link to the section's home page by the "Read More" link
+	(Russ Nelson)
 
 *	Fixed bug where authors could moderate if they were logged in as
 	authors, but not logged in as a registered user
@@ -49,81 +55,93 @@ slash-1.0.6, 2000.06.xx
 	fact that there are some situations where we may want to make
 	certain moderations that don't get applied still applicable to
 	M2 review. comments.pl and article.pl have been made aware of
-	this new field
+	this new field/
 
 *	Metamoderation results are now counted. The number of times a 
 	user's moderation is voted fair or unfair is now counted in
 	users_info (columns m2fair and m2unfair)
 
-*	Fixed small bug in admin.pl which would result in bugs while saving
-	and editing topics if $I{basedir} was not derived from $I{datadir}
-	(ie, if the 2 directories were on different partitions)
+*	Fixed small bug in admin.pl which would result in bugs while
+	saving and editing topics if $I{basedir} was not derived from
+	$I{datadir} (i.e., if the 2 directories were on different
+	partitions)
 
-*	If there were no images in the topic images directory, the topic 
+*	If there were no images in the topic images directory, the topic
 	editor would display a select list with no items. Now, a warning
 	is displayed and the user is given an input box filled with the
 	current filename
 
-*	Hit counting has been disabled (again) in search.pl due to problems
-	with httpd stability. Aparently precounting results, even
-	on fast servers will cause a huge load on MySQL which then
+*	Hit counting has been disabled (again) in search.pl due to
+	problems with httpd stability. Aparently precounting results,
+	even on fast servers will cause a huge load on MySQL which then
 	flakes out the httpds. Will be analysing this to see if a
-	solution can be found. Until then, we will only count the number
-	of matches we've encountered and the bottom link will say
-	"More matches..." as opposed to "x more matches"
+	solution can be found. Until then, we will only count the
+	number of matches we've encountered and the bottom link will
+	say "More matches..." as opposed to "x more matches"
 
-*	More counts added for M2, now in addition to counting the number of
-	times a user is voted fair or unfair, we also count the times a user VOTES
-	fair or unfair. The last pair of numbers can be used to determine if 
-	your Slash metamoderation system is being abused. (This adds 2 new columns
-	to users_info: m2fairvotes and m2unfairvotes)
+*	More counts added for M2, now in addition to counting the
+	number of times a user is voted fair or unfair, we also count
+	the times a user VOTES fair or unfair. The last pair of numbers
+	can be used to determine if your Slash metamoderation system is
+	being abused. (This adds 2 new columns to users_info:
+	m2fairvotes and m2unfairvotes)
 
 *	Changes to the moderation system, these can be summed up by 
 	describing the following new variables added to slashdotrc.pl:
 
-		m2_maxunfair: Float from 0 to 1. This number determines the percentage
-                      of unfair votes that indicates abuse. The user performing
-                      M2 will quietly be assessed a karma penalty and their 
-                      votes will be ignored if their percentage of unfair
-                      votes equals or exceeds this value.
-					
-		m2_toomanyunfair: Float from 0 to 1. This number determines the
-                          percentage of unfair votes that indicates POSSIBLE
-                          abuse of the system. If the percentage of unfair
-                          votes exceeds this value then these votes are
-                          ignored. No penalty is assessed.
+		m2_maxunfair: Float from 0 to 1. This number determines
+			the percentage of unfair votes that indicates
+			abuse. The user performing M2 will quietly be
+			assessed a karma penalty and their votes will
+			be ignored if their percentage of unfair votes
+			equals or exceeds this value.
 
-		m2_mincheck: Integer. Number of comments which have to be voted on
-                     before the above checks are performed.
+		m2_toomanyunfair: Float from 0 to 1. This number
+			determines the percentage of unfair votes that
+			indicates POSSIBLE abuse of the system. If the
+			percentage of unfair votes exceeds this value
+			then these votes are ignored. No penalty is
+			assessed.
 
-		m2_comments: Number of comment moderations to be displayed in a single
-                     M2 session.
+		m2_mincheck: Integer. Number of comments which have to
+			be voted on before the above checks are
+			performed.
 
-		m2_bonus: Amount of karma to be awarded upon completion of M2.
+		m2_comments: Number of comment moderations to be
+			displayed in a single M2 session.
 
-		m2_penalty: Amount of karma to be subtracted if M2 is abused.
+		m2_bonus: Amount of karma to be awarded upon completion
+			of M2.
 
-		m2_maxbonus: Karma maximum from M2. If a user's karma exceeds this
-                     value, then said user receives no further bonus
-                     for his participation.
+		m2_penalty: Amount of karma to be subtracted if M2 is
+			abused.
 
-*	Added the 'flag' column in metamodlog. This indicates how an M2 session 
-	was treated and is a good way to check for possible M2 problems. Currently
-	flag can be the following values:
-        0 - No detected problems with M2.
-        1 - Questionable M2. Votes ignored.
-        2 - Abuse of M2. Votes ignored and UID penalized.
+		m2_maxbonus: Karma maximum from M2. If a user's karma
+			exceeds this value, then said user receives no
+			further bonus or his participation.
+
+*	Added the 'flag' column in metamodlog; this indicates how an M2
+	session was treated and is a good way to check for possible M2
+	problems. Currently flag can be the following values:
+        	0 - No detected problems with M2
+        	1 - Questionable M2. Votes ignored
+        	2 - Abuse of M2. Votes ignored and UID penalized
 
 *	Renamed slashdotrc.pl variables:
-        'goodkarma_limit' is now 'goodkarma'
-        'badkarma_limit' is now 'badkarma'
+	        'goodkarma_limit' is now 'goodkarma'
+        	'badkarma_limit' is now 'badkarma'
 
-*	User's ID (UID) added to comment headers.
+*	User's ID (UID) added to comment headers
 
-*	Names of the comment poster have been removed during metamoderation.
+*	Names of the comment poster have been removed during
+	metamoderation
 
-*	Fixed a minor bug in metamod.pl that inadvertantly stopped the injection
-	of new eligible users into the metamoderation pool.
+*	Fixed a minor bug in metamod.pl that inadvertantly stopped the
+	injection of new eligible users into the metamoderation pool
+
+*	Added "<rss> ... </rss>" to .rdf file, and added encoding
+	of "ISO-8859-1" (will later be configurable) in slashd
+	(Roger Carneiro Soares)
 
 
 slash-1.0.5, 2000.06.13
