@@ -52,6 +52,7 @@ sub moderatordLog {
 sub update_modlog_ids {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
+	my $reader = getObject("Slash::DB", { db_type => "reader" });
 	my $days_back = $constants->{archive_delay_mod};
 	my $days_back_cushion = int($days_back/10);
 	$days_back_cushion = $constants->{m2_min_daysbackcushion} || 2
@@ -67,14 +68,14 @@ sub update_modlog_ids {
 	# way to predict accurately what it will do on a live site
 	# without doing it... -Jamie 2002/11/16
 
-	my($min_old) = $slashdb->sqlSelect("MIN(id)", "moderatorlog");
-	my($max_old) = $slashdb->sqlSelect("MAX(id)", "moderatorlog",
+	my($min_old) = $reader->sqlSelect("MIN(id)", "moderatorlog");
+	my($max_old) = $reader->sqlSelect("MAX(id)", "moderatorlog",
 		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)");
 	$min_old = 0 if !$min_old;
 	$max_old = 0 if !$max_old;
-	my($min_new) = $slashdb->sqlSelect("MIN(id)", "moderatorlog",
+	my($min_new) = $reader->sqlSelect("MIN(id)", "moderatorlog",
 		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY)");
-	my($max_new) = $slashdb->sqlSelect("MAX(id)", "moderatorlog");
+	my($max_new) = $reader->sqlSelect("MAX(id)", "moderatorlog");
 	$min_new = 0 if !$min_new;
 	$max_new = 0 if !$max_new;
 
@@ -91,7 +92,7 @@ sub give_out_points {
 	moderatordLog(getData('moderatord_log_header'));
 
 	my $backup_db = getObject('Slash::DB', { db_type => 'reader' });
-	my $log_db = getObject('Slash::DB', 'log_slave');
+	my $log_db = getObject('Slash::DB', { db_type => 'log_slave' });
 
 	my $newcomments = get_num_new_comments($constants, $slashdb);
 	if ($newcomments > 0) {
