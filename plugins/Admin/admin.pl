@@ -1013,11 +1013,12 @@ sub editStory {
 	};
 
 	my $future = $slashdb->getStoryByTimeAdmin('>', $storyref, "3");
+	$future = [ reverse(@$future) ];
 	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
 
 	my $authortext = slashDisplay('futurestorybox', {
 					past => $past,
-					future => $future
+					future => $future,
 				}, { Return => 1 });
 
 	my $authorbox = fancybox($constants->{fancyboxwidth}, 'Story admin', $authortext, 0, 1);
