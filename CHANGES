@@ -5,6 +5,17 @@ slash-1.0.4, 2000.0x.xx
 
 *	Added mkpth call to slashd, to create logs dir
 
+*	Removed the use of IPC for speed limit (in comments.pl
+	and submit.pl. Now using the submit_ts column in formkeys,
+	which has been made into an integer (set to the value of 
+	that the perl function time() outputs) 
+
+*	Fixed bugs with the formkey and comment submission and story
+	submission max posting limits
+
+*	Moved redundant code from submit.pl and comments.pl that handled
+	formkey functionality into Slash.pm
+
 
 slash-1.0.3, 2000.05.22
 -----------------------
