@@ -3,6 +3,7 @@ default
 __description__
 Display a comment
 
+* comment_shrunk = comment was too long; this is the stripped down version
 * reasons = hashref of moderation "reasons"
 * can_mod = boolean for whether or not current user can moderate
 * is_anon = boolean for whether or not comment user is anonymous
