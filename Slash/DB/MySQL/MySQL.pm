@@ -2857,9 +2857,11 @@ sub getStoryByTime {
 
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 	if ($section->{isolate}) {
-		$where = 'AND section=' . $self->sqlQuote($story->{'section'})
+		$where  = ' AND displaystatus>=0 AND section=' . $self->sqlQuote($story->{'section'})
+	} elsif ($user->{sectioncollapse}) {
+		$where .= ' AND displaystatus>=0';
 	} else {
-		$where = 'AND displaystatus=0';
+		$where .= ' AND displaystatus=0';
 	}
 
 	$where .= "   AND tid not in ($user->{'extid'})" if $user->{'extid'};
@@ -4172,7 +4174,7 @@ sub getSlashConf {
 	$conf{maxkarma}		= 999  unless defined $conf{maxkarma};
 	$conf{minkarma}		= -999 unless defined $conf{minkarma};
 	$conf{expiry_exponent}	= 1 unless defined $conf{expiry_exponent};
-	$conf{panic}		||=0;
+	$conf{panic}		||= 0;
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {
