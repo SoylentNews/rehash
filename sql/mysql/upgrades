@@ -96,7 +96,6 @@ CREATE TABLE people (
 );
 INSERT INTO people (uid,person,type) SELECT uid, person, type from temp_zoo;
 
-
 # This was removed from the bonus system a while ago. -Brian
 ALTER TABLE users_comments DROP anon_comments;
 
@@ -854,4 +853,11 @@ INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showano
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 50, 0);
 
 DELETE FROM vars WHERE name='commentsPerPoint';
+
+# Due to a bug, the old "hide anonymous comments at -1" feature was
+# never fully removed and replaced with people_bonus_anonymous.
+# Any users who still have that set, move them to an appropriate
+# value on the new system.
+UPDATE users_param SET name='people_bonus_anonymous', value='-3' WHERE name='anon_comments' AND value='1';
+DELETE FROM users_param WHERE name='anon_comments';
 

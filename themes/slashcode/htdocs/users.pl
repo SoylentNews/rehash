@@ -1476,7 +1476,6 @@ sub editComm {
 	my $r_check = $user_edit->{reparent}		? ' CHECKED' : '';
 	my $n_check = $user_edit->{noscores}		? ' CHECKED' : '';
 	my $s_check = $user_edit->{nosigs}		? ' CHECKED' : '';
-	my $a_check = $user_edit->{anon_comments}	? ' CHECKED' : '';
 	my $d_check = $user_edit->{sigdash}		? ' CHECKED' : '';
 	my $b_check = $user_edit->{nobonus}		? ' CHECKED' : '';
 	my $p_check = $user_edit->{postanon}		? ' CHECKED' : '';
@@ -1495,7 +1494,6 @@ sub editComm {
 		r_check			=> $r_check,
 		n_check			=> $n_check,
 		s_check			=> $s_check,
-		a_check			=> $a_check,
 		d_check			=> $d_check,
 		b_check			=> $b_check,
 		p_check			=> $p_check,
@@ -1938,7 +1936,6 @@ sub saveComm {
 		noscores	=> ($form->{noscores}   ? 1 : 0),
 		hardthresh	=> ($form->{hardthresh} ? 1 : 0),
 		no_spell	=> ($form->{no_spell}   ? 1 : undef),
-		anon_comments	=> ($form->{anon_comments} ? 1 : undef),
 		sigdash		=> ($form->{sigdash} ? 1 : undef),
 		nobonus		=> ($form->{nobonus} ? 1 : undef),
 		postanon	=> ($form->{postanon} ? 1 : undef),
