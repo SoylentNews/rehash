@@ -2023,6 +2023,7 @@ sub _url_to_domain_tag {
 	my($href, $link, $body) = @_;
 	my $absolutedir = getCurrentStatic('absolutedir');
 	my $uri = URI->new_abs($link, $absolutedir);
+	my $uri_str = $uri->as_string;
 	my($info, $host, $scheme) = ("", "", "");
 	if ($uri->can("host") and $host = $uri->host) {
 		$info = lc $host;
@@ -2052,8 +2053,16 @@ sub _url_to_domain_tag {
 		# Most schemes, like ftp or http, have a host.  Some,
 		# most notably mailto and news, do not.  For those,
 		# at least give the user an idea of why not, by
-		# listing the scheme.
-		$info = lc $scheme;
+		# listing the scheme.  Or, if this URL is malformed
+		# in a particular way ("scheme:host/path", missing
+		# the "//"), treat it the way that many browsers will
+		# (rightly or wrongly) treat it.
+		if ($uri_str =~ m{^$scheme:([\w-]+)}) {
+			$uri_str =~ s{^$scheme:}{$scheme://};
+			return _url_to_domain_tag($href, $uri_str, $body);
+		} else {
+			$info = lc $scheme;
+		}
 	} else {
 		$info = "?";
 	}
