@@ -101,9 +101,9 @@ and so far [% hits_bought %] have been used up.
 
 	[% END %]
 
-	<TR><TD>&nbsp;</TD><TD>&nbsp;</TD>
-	<TD VALIGN="top" ALIGN="left">&nbsp;Set "No Ads" for any of these, and
-	you'll get ads disabled for free on other types of pages too.</TD></TR>
+	<TR><TD>&nbsp;</TD><TD COLSPAN="2" VALIGN="top" ALIGN="left"
+	>&nbsp;Set "No Ads" anywhere, and you'll get ads disabled for
+	free on other pages too.</TD></TR>
 
 </TABLE>
 
