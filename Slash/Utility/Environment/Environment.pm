@@ -1240,7 +1240,7 @@ sub setCookie {
 	# We need to actually determine domain from preferences,
 	# not from the server, so the site admin can specify
 	# special preferences if they want to. -- pudge
-	my $cookiedomain = $gSkin->{cookiedomain};
+	my $cookiedomain = $gSkin->{cookiedomain} || $constants->{cookiedomain};
 	my $cookiepath   = $constants->{cookiepath};
 
 	# note that domain is not a *host*, it is a *domain*,
