@@ -36,12 +36,6 @@ moderator access in the future.
 link back to the comment page through the parent link, or the #XXX cid
 link.</LI>
 
-<LI><B><FONT SIZE="5">Duplicates are fine</FONT></B> (Big because over
-<B>100</B> people have emailed me to tell me about this even though it is
-explained <B>right here</B>.)  You are not moderating a "Comment" you
-are moderating a "Moderation".  Therefore, if a comment is moderated
-more than once, it can appear multiple times below.  Don't worry about it.</LI>
-
 <LI>If you are unsure, feel free to leave it unchanged.</LI>
 
 <LI>Please read the <A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
