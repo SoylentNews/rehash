@@ -170,40 +170,6 @@ sub selectComments {
 		$user->{points} = 0 if $C->{uid} == $user->{uid}; # Mod/Post Rule
 	}
 
-	# Now that we know all the point scores, we pull out the comment
-	# text that we might possibly need.  Note that we exclude cid 0
-	# which stores other data.
-	my @cids_over_thresh = grep { $_ } keys %$comments;
-	if ($user->{threshold} <= $min) {
-		# Do nothing; we need them all.
-	} else {
-		if ($user->{is_anon}) {
-			# Only load comment text for comments scored at or
-			# above our threshold, plus the one comment we
-			# specifically asked for.
-			@cids_over_thresh = grep {
-				$comments->{$_}{points} >= $user->{threshold}
-				||
-				$_ == $cid
-			} @cids_over_thresh;
-		} else {
-			# Load comments text for those, plus any comments
-			# posted by us no matter what their score or cid.
-			@cids_over_thresh = grep {
-				$comments->{$_}{points} >= $user->{threshold}
-				||
-				$comments->{$_}{uid} == $user->{uid}
-				||
-				$_ == $cid
-			} @cids_over_thresh;
-		}
-	}
-	my $comment_text_hr = $slashdb->getCommentTextOld(\@cids_over_thresh);
-	for my $cid (@cids_over_thresh) {
-		next if !$cid; # "0" is a key but not a cid
-		$comments->{$cid}{comment} = $comment_text_hr->{$cid};
-	}
-
 	my $count = @$thisComment;
 
 	# Cascade comment point totals down to the lowest score, so
@@ -510,6 +476,7 @@ sub printComments {
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
 
 	if (!$discussion || !$discussion->{id}) {
 		print getData('no_such_sid', {}, '');
@@ -602,7 +569,7 @@ sub printComments {
 	}
 
 	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $cc);
-	slashDisplay('printCommComments', {
+	my $comment_html = slashDisplay('printCommComments', {
 		can_moderate	=> _can_mod($comment),
 		comment		=> $comment,
 		comments	=> $comments,
@@ -614,7 +581,32 @@ sub printComments {
 		cc		=> $cc,
 		lcp		=> $lcp,
 		lvl		=> $lvl,
-	});
+	}, { Return => 1 });
+
+	# Now we get fresh with the comment text. We take all of the cids that we have found and we then 
+	# speed through the text replacing the tags that were there to hold them.
+	my $comment_text = $slashdb->getCommentText($user->{state}{cids});
+	for my $cid (keys %$comment_text) {
+		if ($form->{mode} ne 'archive'
+			&& $comments->{$cid}->{len} > $user->{maxcommentsize}
+			&& $form->{cid} ne $cid)
+		{
+			# We remove the domain tags so that strip_html will not
+			# consider </a blah> to be a non-approved tag.  We'll
+			# add them back at the last step.  In-between, we chop
+			# the comment down to size, then massage it to make sure
+			# we still have good HTML after the chop.
+			$comment_text->{$cid} =~ s{</A[^>]+>}{</A>}gi;
+			$comment_text->{$cid} = chopEntity($comment_text->{$cid}, $user->{maxcommentsize});
+			$comment_text->{$cid} = strip_html($comment_text->{$cid});
+			$comment_text->{$cid} = balanceTags($comment_text->{$cid});
+			$comment_text->{$cid} = addDomainTags($comment_text->{$cid});
+		}
+
+		$comment_text->{$cid} = parseDomainTags($comment_text->{$cid}, $comments->{$cid}->{fakeemail});
+	}
+	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|$comment_text->{$1}|g;
+	print $comment_html;
 }
 
 #========================================================================
@@ -875,9 +867,6 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
-	# Archive really doesn't exist anymore -Brian 
-	# Yes it does! - Cliff 9/18/01
-	# 
 	# FYI: 'archive' means we're to write the story to .shtml at the close
 	# of the discussion without page breaks.  'metamod' means we're doing
 	# metamoderation.
@@ -1011,26 +1000,13 @@ sub dispComment {
 	my($comment_shrunk, %reasons);
 
 	if ($form->{mode} ne 'archive'
-		&& length($comment->{comment}) > $user->{maxcommentsize}
+		&& $comment->{len} > $user->{maxcommentsize}
 		&& $form->{cid} ne $comment->{cid})
 	{
-		# We remove the domain tags so that strip_html will not
-		# consider </a blah> to be a non-approved tag.  We'll
-		# add them back at the last step.  In-between, we chop
-		# the comment down to size, then massage it to make sure
-		# we still have good HTML after the chop.
-		$comment_shrunk = $comment->{comment};
-		$comment_shrunk =~ s{</A[^>]+>}{</A>}gi;
-		$comment_shrunk = chopEntity($comment_shrunk, $user->{maxcommentsize});
-		$comment_shrunk = strip_html($comment_shrunk);
-		$comment_shrunk = balanceTags($comment_shrunk);
-		$comment_shrunk = addDomainTags($comment_shrunk);
+		$comment_shrunk = 1;
 	}
 
-	for my $html ($comment->{comment}, $comment->{sig}, $comment_shrunk) {
-		$html = parseDomainTags($html, $comment->{fakeemail});
-	}
-
+	$comment->{sig} = parseDomainTags($comment->{sig}, $comment->{fakeemail});
 	if ($user->{sigdash} && $comment->{sig} && !isAnon($comment->{uid})) {
 		$comment->{sig} =~ s/^\s*-{1,5}\s*<(?:P|BR)>//i;
 		$comment->{sig} = "--<BR>$comment->{sig}";
@@ -1066,6 +1042,7 @@ EOT
 
 	# we need a display-friendly fakeemail string
 	$comment->{fakeemail_vis} = ellipsify($comment->{fakeemail});
+	push @{$user->{state}{cids}}, $comment->{cid};
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
@@ -1412,7 +1389,7 @@ sub _hard_dispComment {
 			subject	=> 'Read the rest of this comment...',
 			subject_only => 1,
 		}, 1);
-		$comment_to_display = "$comment_shrunk<P><B>$link</B>";
+		$comment_to_display = "$comment->{comment}<P><B>$link</B>";
 	} elsif ($user->{nosigs}) {
 		$comment_to_display = $comment->{comment};
 	} else {

@@ -3,7 +3,6 @@ default
 __description__
 Display a comment
 
-* comment_shrunk = comment was too long; this is the stripped down version
 * reasons = hashref of moderation "reasons"
 * can_mod = boolean for whether or not current user can moderate
 * is_anon = boolean for whether or not comment user is anonymous
@@ -74,19 +73,16 @@ on [% Slash.timeCalc(time) %]
 		<TR>
 			<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 			<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+[% comment %]
 [% IF comment_shrunk;
 	linkComment = Slash.linkComment({
 		sid	=> sid,
 		cid	=> cid,
 		pid	=> cid,
 		subject	=> 'Read the rest of this comment...'
-	}, 1);
-	comment = "$comment_shrunk<P><B>$linkComment</B>";
-	ELSIF not user.nosigs && sig;
-	comment = "$comment$sig";
-	END
-%]
-[% comment %]
+	}, 1) %]
+	<P><B>[% linkComment %]</B>
+[% END %]
 			</TD></TR></TABLE></TD>
 			<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		</TR>

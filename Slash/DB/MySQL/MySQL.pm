@@ -4521,7 +4521,8 @@ sub getCommentsForUser {
 		. "comments.points AS points, pointsorig, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
-		. "karma_bonus";
+		. "karma_bonus, "
+		. "len, CONCAT('<SLASH type=\"COMMENT-TEXT\">', cid ,'</SLASH>') as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
 	}
@@ -4541,11 +4542,11 @@ sub getCommentsForUser {
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where);
 
 	my $archive = $cache_read_only;
-	my $cids = [];
-	for my $comment (@$comments) {
-		$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
-		push @$cids, $comment->{cid};# if $comment->{points} >= $user->{threshold};
-	}
+#	my $cids = [];
+#	for my $comment (@$comments) {
+#		$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
+#		push @$cids, $comment->{cid};# if $comment->{points} >= $user->{threshold};
+#	}
 
 	# We have a list of all the cids in @$comments.  Get the texts of
 	# all these comments, all at once.
@@ -4577,8 +4578,8 @@ sub getCommentsForUser {
 # of 0 or 1 entries, of course.  - Jamie
 # Note that this does NOT store all its answers into cache anymore.
 # - Jamie 2003/04
-sub getCommentTextOld {
-	my($self, $cid, $archive) = @_;
+sub getCommentText {
+	my($self, $cid) = @_;
 	if (ref $cid) {
 		if (ref $cid ne "ARRAY") {
 			errorLog("_getCommentText called with ref to non-array: $cid");
@@ -4601,76 +4602,6 @@ sub getCommentTextOld {
 		return $self->sqlSelect("comment", "comment_text", "cid=$cid");
 	}
 }
-# Left as a history note. -Brian
-#sub _getCommentTextOld {
-#	my($self, $cid, $archive) = @_;
-#	my $constants = getCurrentStatic();
-#	# If this is the first time this is called, create an empty comment text
-#	# cache (a hashref).
-#	$self->{_comment_text} ||= { };
-#	if (scalar(keys %{$self->{_comment_text}}) > $constants->{comment_cache_max_keys} || 5000) {
-#		# Cache too big. Big cache bad. Kill cache. Kludge.
-#		undef $self->{_comment_text};
-#		$self->{_comment_text} = { };
-#	}
-#	if (ref $cid) {
-#		if (ref $cid ne "ARRAY") {
-#			errorLog("_getCommentText called with ref to non-array: $cid");
-#			return { };
-#		}
-#		#Archive, means it is doubtful this is useful in the cache. -Brian
-#		if ($archive) {
-#			my %return;
-#			my $in_list = join(",", @$cid);
-#			my $comment_array;
-#			$comment_array = $self->sqlSelectAll(
-#				"cid, comment",
-#				"comment_text",
-#				"cid IN ($in_list)"
-#			) if @$cid;
-#			# Now we cache them so we never fetch them again
-#			for my $comment_hr (@$comment_array) {
-#				$return{$comment_hr->[0]} = $comment_hr->[1];
-#			}
-#
-#			return \%return;
-#		}
-#		# We need a list of comments' text.  First, eliminate the ones we
-#		# already have in cache.
-#		my @needed = grep { !exists($self->{_comment_text}{$_}) } @$cid;
-#		my $num_cache_misses = scalar(@needed);
-#		my $num_cache_hits = scalar(@$cid) - $num_cache_misses;
-#		if (@needed) {
-#			my $in_list = join(",", @needed);
-#			my $comment_array = $self->sqlSelectAll(
-#				"cid, comment",
-#				"comment_text",
-#				"cid IN ($in_list)"
-#			);
-#			# Now we cache them so we never fetch them again
-#			for my $comment_hr (@$comment_array) {
-#				$self->{_comment_text}{$comment_hr->[0]} = $comment_hr->[1];
-#			}
-#		}
-#		return $self->{_comment_text};
-#
-#	} else {
-#		my $num_cache_misses = 0;
-#		my $num_cache_hits = 0;
-#		# We just need a single comment's text.
-#		if (!$self->{_comment_text}{$cid}) {
-#			# If it's not already in cache, load it in.
-#			$num_cache_misses = 1;
-#			$self->{_comment_text}{$cid} =
-#				$self->sqlSelect("comment", "comment_text", "cid=$cid");
-#		} else {
-#			$num_cache_hits = 1;
-#		}
-#		# Now it's in cache.  Return it.
-#		return $self->{_comment_text}{$cid};
-#	}
-#}
-
 
 ########################################################
 sub getComments {
