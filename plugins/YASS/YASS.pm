@@ -33,30 +33,24 @@ sub new {
 
 sub getActive {
 	my ($self, $limit) = @_;
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
 
-	my $sids;
+	my $all;
+
 	unless($limit) {
-		$sids = $self->sqlSelectAll(
-			"sid", 
-			"story_param", 
-			"name = 'active' AND value = 'yes'",
+		$all = $self->sqlSelectAllHashrefArray(
+			"story_param.sid as sid, story_param.url as url, title", 
+			"story_param, stories", 
+			"name = 'active' AND value = 'yes' AND stories.sid = story_param.sid",
 			"ORDER BY title");
 	} else {
-		$sids = $self->sqlSelectAll(
-			"story_param.sid", 
+		$all = $self->sqlSelectAllHashrefArray(
+			"story_param.sid as sid, story_param.url as url, title", 
 			"story_param, stories", 
 			"name = 'active' AND value = 'yes' AND stories.sid = story_param.sid",
 			"ORDER BY date DESC LIMIT $limit");
 	}
 
-	my @all;
-	for (@$sids) {
-		push @all, $slashdb->getStory($_->[0]);
-	}
-
-	return \@all;
+	return $all;
 }
 
 sub DESTROY {

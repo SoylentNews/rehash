@@ -20,46 +20,46 @@ sub main {
 			items   => $yass->getActive(15),
 		});
 
-	} elsif ($form->{'content_type'} eq 'ocs') {
-	# Yuck! SQL!  The reason that this is like this is
-	# because I am working on rewriting XML::OCS and
-	# until I am done I am going to leave this like this.
-	# -Brian
-		#require XML::OCS;
-		#my $all = $feed->getActive();
-		my $all = $yass->getActive();
-		my $r = Apache->request;
-		$r->header_out('Cache-Control', 'private');
-		$r->content_type('text/xml');
-		$r->status(200);
-		$r->send_http_header;
-		$r->rflush;
-		my $ocs = XML::OCS->new(
-		    title => xmlencode($constants->{sitename}),
-		    creator => xmlencode($constants->{siteadmin}),
-		    description => 'Known feeds.',
-		    url => xmlencode('{absolutedir}/sites.pl?content_type=ocs'),
-		  );
-
-		my @sites;
-		for (@$all) {
-			my $format = XML::OCS::Format->new(
-				  url => xmlencode($_->{rdf}),
-				  language => xmlencode($_->{language}),
-				  format => xmlencode($_->{format}),
-				  contentType => xmlencode($_->{contenttype}),
-			);
-			my $site = XML::OCS::Channel->new(
-				title => xmlencode($_->{title}),
-				url => xmlencode($_->{url}),
-				description => xmlencode($_->{introtext}),
-				formats => [$format],
-			);
-			push @sites, $site;
-		}
-		$ocs->channels(\@sites);
-		$r->print($ocs->output);
-		$r->status(200);
+#	} elsif ($form->{'content_type'} eq 'ocs') {
+#	# Yuck! SQL!  The reason that this is like this is
+#	# because I am working on rewriting XML::OCS and
+#	# until I am done I am going to leave this like this.
+#	# -Brian
+#		#require XML::OCS;
+#		#my $all = $feed->getActive();
+#		my $all = $yass->getActive();
+#		my $r = Apache->request;
+#		$r->header_out('Cache-Control', 'private');
+#		$r->content_type('text/xml');
+#		$r->status(200);
+#		$r->send_http_header;
+#		$r->rflush;
+#		my $ocs = XML::OCS->new(
+#		    title => xmlencode($constants->{sitename}),
+#		    creator => xmlencode($constants->{siteadmin}),
+#		    description => 'Known feeds.',
+#		    url => xmlencode('{absolutedir}/sites.pl?content_type=ocs'),
+#		  );
+#
+#		my @sites;
+#		for (@$all) {
+#			my $format = XML::OCS::Format->new(
+#				  url => xmlencode($_->{rdf}),
+#				  language => xmlencode($_->{language}),
+#				  format => xmlencode($_->{format}),
+#				  contentType => xmlencode($_->{contenttype}),
+#			);
+#			my $site = XML::OCS::Channel->new(
+#				title => xmlencode($_->{title}),
+#				url => xmlencode($_->{url}),
+#				description => xmlencode($_->{introtext}),
+#				formats => [$format],
+#			);
+#			push @sites, $site;
+#		}
+#		$ocs->channels(\@sites);
+#		$r->print($ocs->output);
+#		$r->status(200);
 	} else {
 
 		header("$constants->{sitename} Sites");

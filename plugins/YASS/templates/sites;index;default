@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+sites
+__lang__
+en_US
+__name__
+index
+__template__
+<TABLE>
+	<TR>
+		<TD>
+		Here is a small list of the sites we know about. This list represents just a small number of the slash sites that are out there. The sites list is updated nightly and sites that are not found to be working are removed (in theory that is).
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<H2>New Sites:</H2>
+			[% FOREACH site = new_sites %]
+				<li><A HREF="[% site.url %]">[% site.title %]</A></li>
+			[% END %]
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<H2>All Sites:</H2>
+			[% FOREACH site = all_sites %]
+				<li><A HREF="[% site.url %]">[% site.title %]</A> ([% IF user.is_admin %]<A HREF="[% constants.rootdir %]/feed.pl?op=edit&id=[% site.id %]">Edit</A>|[% END %]<A HREF="[% constants.rootdir %]/article.pl?sid=[%  %]">(original announcement)</A></li>
+			[% END %]
+		</TD>
+	</TR>
+</TABLE>
+
+__seclev__
+100
