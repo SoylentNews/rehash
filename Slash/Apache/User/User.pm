@@ -596,6 +596,11 @@ Bender:I'm tired of this room and everyone in it!
 Bender:Wait!  My cheating unit malfunctioned!  You gotta give me a do-over!
 Bender:Gimme your biggest, strongest, cheapest drink.
 Bender:I'm a fraud.  A poor, lazy, sexy fraud.
+Bender:Ahhh, functional.
+Bender:Since I love you all so much, I'd like to give everyone hugs.
+Bender:There!  That oughtta convert a few tailgaters.
+Bender:But-- those girls don't wear cases!  You can see their bare circuits!
+Bender:They're tormenting me with uptempo singing and dancing!
 Fry:Why couldn't she be the other kind of mermaid, with the fish part on the top and the human part on the bottom?
 Fry:There's a lot about my face you don't know.
 Fry:Drugs are for losers.  And hypnosis is for losers with big weird eyebrows.
@@ -637,6 +642,7 @@ Fry:Hardy Boys: too easy.  Nancy Drew: too hard!
 Fry:And then when I feel so stuffed I can't eat any more, I just use the restroom, and then I *can* eat more!
 Fry:I'm going to continue never washing this cheek again.
 Fry:I haven't had time off since I was twenty-one through twenty-four.
+Fry:I know Big Vinny said he was giving me the kiss of death, but I still think he was gay.
 EOT
 
 1;
