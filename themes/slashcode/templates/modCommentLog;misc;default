@@ -78,7 +78,6 @@ __template__
 [% END %]
 
 [% modifiers = [
-	{ label = "score_start",		edit = 0,	name = "Starting Score:" },
 	{ label = "moderations",		edit = 0,	name = "Moderation" },
 	{ label = "reason_bonus",		edit = 1,	name = "Extra '" _ reasons.$reason.name _ "' Modifier" },
 	{ label = "clbig",			edit = 1,	name = "Long Comment Modifier" },
@@ -93,18 +92,31 @@ __template__
 	{ label = "people_bonus_eof",		edit = 1,	name = "Foe-of-Friend Modifier" },
 	{ label = "karma_bonus",		edit = 1,	name = "Karma-Bonus Modifier" },
 	{ label = "score_end",			edit = 0,	name = "Total Score:" },
-] %]
+];
+num_modifiers = 0;
+IF type == 'cid' && (reasonTotal > 0 || reason);
+	num_modifiers = 1;
+ELSE;
+	FOREACH modifier = modifiers;
+		IF modifier.label != 'score_end' && modifier_hr.${modifier.label};
+			num_modifiers = num_modifiers + 1;
+		END;
+	END;
+END;
+
+IF num_modifiers > 0 %]
 
 <TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="300">
 
 	<TR BGCOLOR="[% user.bg.3 %]">
-		<TH COLSPAN="3" ALIGN="RIGHT"><FONT COLOR="[% user.fg.3 %]"> points</FONT></TH>
-		<TH>&nbsp;</TH>
+		<TH ALIGN="LEFT"><FONT COLOR="[% user.fg.3 %]">Starting Score:&nbsp;&nbsp;&nbsp;</FONT></TH>
+		<TH COLSPAN="2" ALIGN="RIGHT"><FONT COLOR="[% user.fg.3 %]">[% modifier_hr.score_start || 0 %]</FONT></TH>
+		<TH ALIGN="LEFT"><FONT COLOR="[% user.fg.3 %]">&nbsp;point[% IF modifier_hr.score_start != 1 %]s[% END %]</FONT></TH>
 	</TR>
 
 [% FOREACH modifier = modifiers %]
 	[% IF type == 'cid' && (
-		modifier.label.match('^score_')
+			    modifier.label == 'score_end'
 			|| (modifier.label == 'moderations' && reasonTotal > 0)
 			|| (modifier.label == 'reason_bonus' && reason)
 	)	|| modifier_hr.${modifier.label} %]
@@ -112,11 +124,13 @@ __template__
 		<TD ALIGN="LEFT">[% modifier.name %]</TD>
 		<TD>&nbsp;</TD>
 		<TD ALIGN="RIGHT">[% modifier_hr.${modifier.label} || 0 %]</TD>
-		<TD><FONT SIZE="-1">
-		[%- IF modifier.edit -%]
-			(<A HREF="/my/comments/#[% modifier.label | strip_attribute %]">Edit</A>)
+		<TD>
+		[%- IF modifier.edit && !user.is_anon -%]
+			<FONT SIZE="-1">(<A HREF="/my/comments/#[% modifier.label | strip_attribute %]">Edit</A>)</FONT>
+		[%- ELSE -%]
+			&nbsp;
 		[%- END -%]
-		</FONT></TD>
+		</TD>
 
 		[% IF modifier.label == 'moderations' && reasonTotal > 0 %]
 			</TR><TR><TD COLSPAN="4"><FONT SIZE="-1">
@@ -139,10 +153,12 @@ __template__
 		[% END %]
 
 	</TR>
-	[% END %]
-[% END %]
+	[% END;
+END %]
 
 </TABLE>
+
+[% END %]
 
 __seclev__
 10000
