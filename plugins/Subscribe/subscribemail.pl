@@ -63,13 +63,16 @@ $task{$me}{code} = sub {
 			$total_net/$num_new_subscriptions,
 			$total_pages_bought/$num_new_subscriptions
 		);
+		my $running_total_gross = 0;
 		for my $gross (sort { $a <=> $b } keys %gross_count) {
+			$running_total_gross += $gross*$gross_count{$gross};
 			$transaction_list .= sprintf(
-				"subscriptions at \$%6.2f: %4d (%4.1f%%#/%4.1f%%\$)\n",
+				"subscriptions at \$%6.2f: %4d ( %4.1f  %4.1f  %5.1f)\n",
 				$gross,
 				$gross_count{$gross},
-				$gross_count{$gross}/$total_pages_bought,
-				$gross*$gross_count{$gross}/$total_gross
+				100*$gross_count{$gross}/$num_new_subscriptions,
+				100*$gross*$gross_count{$gross}/$total_gross,
+				100*$running_total_gross/$total_gross
 			);
 		}
 	}
