@@ -9,6 +9,7 @@ Edit all those checkboxes for authors, topics, sections, slashboxes
 * tidref = hashref of topics
 * sectionref = hashref of sections
 * section_descref = hashref of slashboxes
+* order = arrayref of slashbox order
 * userspace = text for userspace
 * customize_title = title for "customize" titlebar
 
@@ -68,7 +69,7 @@ __template__
 		<P>
 		<MULTICOL COLS="3">
 
-[% FOREACH bid = section_descref.keys.sort %]
+[% FOREACH bid = order %]
 	[% IF section_descref.$bid.boldflag %]
 		<B>
 	[% END %]

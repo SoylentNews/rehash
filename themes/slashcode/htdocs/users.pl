@@ -1097,7 +1097,7 @@ sub tildeEd {
 
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
-	my($aidref, $tidref, $sectionref, $section_descref, $tilde_ed, $tilded_msg_box);
+	my($aidref, $tidref, $sectionref, $section_descref, $order, $tilde_ed, $tilded_msg_box);
 
 	# users_tilded_title
 	my $title = getTitle('tildeEd_title');
@@ -1138,6 +1138,7 @@ sub tildeEd {
 	for (sort { lc $b->[1] cmp lc $a->[1]} @$sections_description) {
 		my($bid, $title, $boldflag) = @$_;
 
+		push(@$order, $bid);
 		$section_descref->{$bid}{checked} = ($exboxes =~ /'$bid'/) ?
 			' CHECKED' : '';
 		$section_descref->{$bid}{boldflag} = $boldflag > 0;
@@ -1153,6 +1154,7 @@ sub tildeEd {
 		tidref			=> $tidref,
 		sectionref		=> $sectionref,
 		section_descref		=> $section_descref,
+		order			=> $order,
 		userspace		=> $userspace,
 		customize_title		=> $customize_title,
 	}, 1);
