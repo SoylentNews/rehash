@@ -42,9 +42,6 @@ __template__
 [% CASE 'user_discussion' %]
 	[% label.ucfirst  %]s created by [% name %]
 
-[% CASE 'no_such_sid' %]
-	This is not the [% label %] you are looking for.
-
 [% CASE 'archive_error' %]
 	This [% label %] has been archived, no further changes/additions can be made to it.
 
