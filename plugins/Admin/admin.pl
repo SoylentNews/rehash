@@ -5,9 +5,9 @@
 # $Id$
 
 use strict;
-use Time::HiRes;
+use File::Temp 'tempfile';
 use Image::Size;
-use POSIX qw(O_RDWR O_CREAT O_EXCL tmpnam);
+use Time::HiRes;
 
 use Slash;
 use Slash::Display;
@@ -1347,16 +1347,21 @@ sub editStory {
 ##################################################################
 sub write_to_temp_file {
 	my($data) = @_;
-	local *TMP;
-	my $tmp;
-	do {
-		# Note: don't mount /tmp over NFS, it's a security risk
-		# See Camel3, p. 574
-		$tmp = tmpnam();
-	} until sysopen(TMP, $tmp, O_RDWR|O_CREAT|O_EXCL, 0600);
-	print TMP $data;
-	close TMP;
-	$tmp;
+	my($fh, $file) = tempfile();
+	print $fh $data;
+	close $fh;
+	return $file;
+
+#	local *TMP;
+#	my $tmp;
+#	do {
+#		# Note: don't mount /tmp over NFS, it's a security risk
+#		# See Camel3, p. 574
+#		$tmp = tmpnam();
+#	} until sysopen(TMP, $tmp, O_RDWR|O_CREAT|O_EXCL, 0600);
+#	print TMP $data;
+#	close TMP;
+#	$tmp;
 }
 
 ##################################################################
