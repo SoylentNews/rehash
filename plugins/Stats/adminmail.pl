@@ -216,7 +216,7 @@ EOT
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{admin_mods_text} = $admin_mods_text;
 
-	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail', Nocomm => 0 });
+	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail', Nocomm => 1 });
 
 	# Send a message to the site admin.
 	for (@{$constants->{stats_reports}}) {
