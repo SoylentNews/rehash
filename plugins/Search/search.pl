@@ -477,8 +477,9 @@ sub storySearchRSS {
 	my @items;
 	for my $entry (@$stories) {
 		my $time = timeCalc($entry->{time});
+		# Link should be made to be sectional -Brian
 		push @items, {
-			title	=> "$entry->{title} ($time)",
+			title	=> $entry->{title},
 			'link'	=> ($constants->{absolutedir} . '/article.pl?sid=' . $entry->{sid}),
 			description	=> $entry->{introtext}
 		};

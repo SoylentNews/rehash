@@ -68,33 +68,12 @@ sub findComments {
 			if defined($form->{threshold});
 
 	my $slashdb = getCurrentDB();
-	my $section = $slashdb->getSection(); 
-	if ($form->{section}) {
-		if ($form->{section} ne $constants->{section}) {
-			if ($section->{type} eq 'collected') {
-				if (!$section->{contained}
-					|| scalar(@{$section->{contained}}) == 0
-					|| (grep { $form->{section} eq $_ } @{$section->{contained}})
-				) {
-					$where .= " AND discussions.section = ". $self->sqlQuote($form->{section});
-				} else {
-					# Section doesn't belong to this contained section
-					return;
-				}
-			} else  {
-				# Means we are dealing with a contained section and this is not the contained section
-				return;
-			}
-		} else {
-			$where .= " AND discussions.section = ". $self->sqlQuote($form->{section});
-		}
+	my $SECT = $slashdb->getSection($form->{section});
+	if ($SECT->{type} eq 'collected') {
+		$where .= " AND discussions.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
 	} else {
-		if ($section->{type} eq 'collected') {
-			$where .= " AND discussions.section IN ('" . join("','", @{$section->{contained}}) . "')" 
-				if $section->{contained} && @{$section->{contained}};
-		} else {
-			$where .= " AND discussions.section = " . $self->sqlQuote($section->{section});
-		}
+		$where .= " AND discussions.section = " . $self->sqlQuote($SECT->{section});
 	}
 
 	my $other;
@@ -464,8 +443,14 @@ sub findDiscussion {
 		if $form->{type};
 	$where .= " AND topic=" . $self->sqlQuote($form->{tid})
 		if $form->{tid};
-	$where .= " AND section=" . $self->sqlQuote($form->{section})
-		if $form->{section};
+	my $slashdb = getCurrentDB();
+	my $SECT = $slashdb->getSection($form->{section});
+	if ($SECT->{type} eq 'collected') {
+		$where .= " AND section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
+	} else {
+		$where .= " AND section = " . $self->sqlQuote($SECT->{section});
+	}
 	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
 		if $form->{uid};
 	$where .= " AND approved = " . $self->sqlQuote($form->{approved})
