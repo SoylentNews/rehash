@@ -158,8 +158,6 @@ install: slash plugins
 
 	$(CP) sql/mysql/slashschema_create.sql $(SLASH_PREFIX)/sql/mysql/schema.sql
 	$(CP) sql/mysql/defaults.sql $(SLASH_PREFIX)/sql/mysql/defaults.sql
-	$(CP) sql/oracle/slashschema_create.sql $(SLASH_PREFIX)/sql/oracle/schema.sql
-	$(CP) sql/postgresql/slashschema_create.sql $(SLASH_PREFIX)/sql/postgresql/schema.sql
 
 	# This needs BSD support (and Solaris)...
 	# ... and the $(SLASH_PREFIX) section is a really ugly hack, too.
