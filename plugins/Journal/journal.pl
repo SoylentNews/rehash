@@ -146,7 +146,7 @@ sub displayRSS {
 	for my $article (@$articles) {
 			$rss->add_item(
 				title		=> xmlencode($article->[2]),
-				description	=> xmlencode("$nickname wrote: " . strip_mode($article->[1], $article->[4]))
+				description	=> xmlencode("$nickname wrote: " . strip_mode($article->[1], $article->[4])),
 				'link'		=> xmlencode_plain("$constants->{absolutedir}/journal.pl?op=get&id=$article->[3]"),
 		);
 	}

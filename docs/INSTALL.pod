@@ -122,6 +122,43 @@ between versions of Slash 2.0.
 
 =back
 
+Listed below are additions/deletions of templates from version to version.
+Feel free to delete (or not) ones that are no longer used, but please do
+add to your site templates that have been added to the distribution.  Add
+or delete, for your site, all the changes from your current version up
+through the version you're upgrading to.
+
+=over 4
+
+=item Slash 2.0.0-pre2
+
+=over 4
+
+=item Added
+
+=over 4
+
+=item plugins/Journal/templates/pagination;journal;default
+
+=item plugins/Journal/templates/pagination;search;default
+
+=item themes/slashcode/templates/dispLinkComment;misc;default
+
+=back
+
+=item Deleted
+
+=over 4
+
+=item plugins/Journal/templates/journalitem;journal;default
+
+=item plugins/Search/templates/linksearch;search;default
+
+=back
+
+=back
+
+=back
 
 =head2 Slash 1.0 -> Slash 2.0
 
