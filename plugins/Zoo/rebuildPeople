@@ -27,22 +27,27 @@ createEnvironment($opts{u});
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 
-my $people = $slashdb->sqlSelectAll("uid, person, type", "people");
-$slashdb->sqlDo("DELETE FROM people_nthdegree");
-for (@$people) {
-	if ($_->[2] eq 'foe') {
-		print "$_->[1] is a foe of $_->[0]\n";
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $_->[1], $_->[0], 'eof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1] AND person != $_->[0]");
-	} elsif ($_->[2] eq 'friend') {
-		print "$_->[1] is a friend of $_->[0]\n";
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $_->[1], $_->[0], 'fof' from people WHERE uid=$_->[0] AND type='friend' AND person != $_->[1]  AND person != $_->[0]");
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $_->[0], person, $_->[1], 'fof' from people WHERE uid=$_->[1] AND type='friend' AND $_->[0] != person  AND person != $_->[1]");
-		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $_->[0], person, $_->[1], 'eof' from people WHERE uid=$_->[1] AND type='foe' AND $_->[0] != person  AND person != $_->[1]");
+$slashdb->sqlDo("TRUNCATE people_nthdegree");
+print "Cleaned nthdegree!\n";
+my $sth = $slashdb->sqlSelectMany("uid, person, type", "people");
+my $count = 0;
+my $rows = $sth->rows;
+while (my $row = $sth->fetchrow_arrayref) {
+	$count++;
+	if ($row->[2] eq 'foe') {
+		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $row->[1], $row->[0], 'eof' from people WHERE uid=$row->[0] AND type='friend' AND person != $row->[1] AND person != $row->[0]");
+	} elsif ($row->[2] eq 'friend') {
+		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $row->[1], $row->[0], 'fof' from people WHERE uid=$row->[0] AND type='friend' AND person != $row->[1]  AND person != $row->[0]");
+		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $row->[0], person, $row->[1], 'fof' from people WHERE uid=$row->[1] AND type='friend' AND $row->[0] != person  AND person != $row->[1]");
+		$slashdb->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $row->[0], person, $row->[1], 'eof' from people WHERE uid=$row->[1] AND type='foe' AND $row->[0] != person  AND person != $row->[1]");
 	}
+	print "$count out of $rows\n" if $count < 1000 && (($count % 100) == 0);
+	print "$count out of $rows\n" if $count < 10000 && (($count % 1000) == 0);
+	print "$count out of $rows\n" if (($count % 10000) == 0);
 }
 # See, if we only used MySQL 4.X I would just do a UNION :)
-$people = $slashdb->sqlSelectAll('uid', 'people');
-my $people2 = $slashdb->sqlSelectAll('uid', 'people_nthdegree');
+my $people = $slashdb->sqlSelectAll('DISTINCT uid', 'people');
+my $people2 = $slashdb->sqlSelectAll('DISTINCT uid', 'people_nthdegree');
 
 my %people;
 
@@ -58,6 +63,7 @@ my @people = keys %people;
 my $zoo = getObject("Slash::Zoo");
 for (@people) {
 	$zoo->rebuildUser($_);
+	print "Rebuilding $_\n";
 }
 
 $slashdb->sqlUpdate('vars', { -value => 'now()'}, 'name="zoo_timer"');
@@ -94,5 +100,3 @@ and COPYING for more information, or see http://slashcode.com/.
 EOT
 	exit;
 }
-
-__END__
