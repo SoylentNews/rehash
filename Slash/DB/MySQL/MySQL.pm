@@ -2384,14 +2384,14 @@ sub getAuthorDescription {
 # may return 0 sometimes.
 sub isPollOpen {
 	my($self, $qid) = @_;
-        return 0 unless $self->hasPollActivated($qid);
+	return 0 unless $self->hasPollActivated($qid);
 	return 1;
 }
 
 #####################################################
 sub hasPollActivated{
 	my ($self, $qid) = @_;
-        return $self->sqlCount("pollquestions","qid='$qid' and date <= now()");
+	return $self->sqlCount("pollquestions","qid='$qid' and date <= now()");
 }
 
 
@@ -2451,7 +2451,7 @@ sub savePollQuestion {
 			autopoll	=> $poll->{autopoll},
 			section		=> $poll->{section},
 			date		=> $poll->{date},
-                        polltype        => $poll->{polltype}
+			polltype        => $poll->{polltype}
 		}, "qid	= $qid_quoted");
 		$self->sqlUpdate("stories", {
 			qid		=> $poll->{qid}
@@ -2465,7 +2465,7 @@ sub savePollQuestion {
 			autopoll	=> $poll->{autopoll},
 			uid		=> getCurrentUser('uid'),
 			date		=> $poll->{date},
-                        polltype        => $poll->{polltype}
+			polltype        => $poll->{polltype}
 		});
 		$poll->{qid} = $self->getLastInsertId();
 		$qid_quoted = $self->sqlQuote($poll->{qid});
@@ -2556,7 +2556,7 @@ sub getPollQuestionList {
 		if $other->{section};
 	$where .= sprintf ' AND section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
-        $where .= " AND date <= NOW() ";
+	$where .= " AND date <= NOW() ";
 
 
 	my $questions = $self->sqlSelectAll(
@@ -4802,6 +4802,14 @@ sub _stories_time_clauses {
 		&& (!$must_be_subscriber
 			|| ($user->{is_subscriber} && $user->{state}{page_plummy}));
 
+	# XXX Would we be well-served here to, by default, only scan back
+	# n days?  This would mean a quicker check of the table because
+	# the time index is the one being used and if we have it BETWEEN
+	# n days ago and now, it will be much faster.  Of course if that
+	# fails to return enough rows we would have to re-run the query,
+	# passing in an option to _stories_time_clauses that means "don't
+	# limit the front end of time, give me everything before the time
+	# given." - Jamie
 	if ($future) {
 		$is_future_column = "IF($column_name < NOW(), 0, 1) AS is_future";
 		if ($secs) {
@@ -5580,6 +5588,24 @@ sub getSlashConf {
 
 	# We only need to do this on startup.
 	$conf{classes} = $self->getClasses();
+
+	# Let's try memcached.  The memcached_servers var is in the format
+	# "10.0.0.15:11211 10.0.0.15:11212 10.0.0.17:11211=3".
+	# It would be best to write a Slash::MemCached class, preferably as
+	# a plugin, but let's just do this for now.
+	if ($conf{memcached} && $conf{memcached_servers}) {
+		my @servers = split / /, $conf{memcached_servers};
+		for my $server (@servers) {
+			if ($server =~ /(.+)=(\d+)$/) {
+				$server = [ $1, $2 ];
+			}
+		}
+		use MemCachedClient;
+		$self->{_mcd} = MemCachedClient->new({
+			servers =>	[ @servers ],
+			debug =>	$conf{memcached_debug} > 1 ? 1 : 0,
+		});
+	}
 
 	return \%conf;
 }

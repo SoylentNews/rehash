@@ -33,6 +33,7 @@ use Slash::Utility;
 use Fcntl;
 use File::Spec;
 use Time::Local;
+use Time::HiRes;
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -593,13 +594,62 @@ sub printComments {
 		lvl		=> $lvl,
 	}, { Return => 1 });
 
-	# Now we get fresh with the comment text. We take all of the cids that we have found and we then 
-	# speed through the text replacing the tags that were there to hold them.
-	my $comment_text = $slashdb->getCommentText($user->{state}{cids}) || {};
+	# We have to get the comment text we need (later we'll search/replace
+	# them into the text).
+	my $comment_text = { };
 
-	for my $cid (keys %$comment_text) {
+	# Should we read/write the parsed comments to/from memcached?
+	# This will be possible only if some particular prefs of this user
+	# are set to the standard values.  If this is possible, then for
+	# almost every comment, we can pull fully rendered text directly
+	# from memcached and not have to touch the DB.
+	# Currently, the only user prefs that affect comment rendering at
+	# this level are whether domaintags are the default, and whether
+	# maxcommentsize is the default.
+	my $try_memcached =
+		   $constants->{memcached}
+		&& $slashdb->{_mcd}
+		&& $form->{mode} ne 'archive'
+		&& $user->{domaintags} == 2
+		&& $user->{maxcommentsize} == $constants->{default_maxcommentsize}
+		? 1 : 0;
+
+	# loop here, pull what cids we can
+	my $cids_needed_ar = $user->{state}{cids};
+	my $mcd_debug = { start_time => Time::HiRes::time }
+		if $constants->{memcached_debug};
+	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
+	if ($try_memcached) {
+		# MemCached key prefix "cpt" means "comment_text, parsed"
+		my @keys_try = map { "ctp:$_" } @$cids_needed_ar;
+		$comment_text = $slashdb->{_mcd}->get_multi(@keys_try);
+		my @old_keys = keys %$comment_text;
+		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+			print STDERR scalar(gmtime) . " printComments memcached got keys '@old_keys' tried for '@keys_try'\n"
+		}
+		$mcd_debug->{hits} = scalar @old_keys if keys %$mcd_debug;
+		for my $old_key (@old_keys) {
+			my $new_key = substr($old_key, 4); # length("ctp:") == 4
+			$comment_text->{$new_key} = delete $comment_text->{$old_key};
+		}
+		@$cids_needed_ar = grep { !exists $comment_text->{$_} } @$cids_needed_ar;
+	}
+	if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+		print STDERR scalar(gmtime) . " printComments memcached try_memcached '$try_memcached' con '$constants->{memcached}' s->m '$slashdb->{_mcd}' dt '$user->{domaintags}' mcs '$user->{maxcommentsize}' still needed: '@$cids_needed_ar'\n";
+	}
+
+	# Now we get fresh with the comment text. We take all of the cids
+	# that we have found and we then speed through the text replacing
+	# the tags that were there to hold them.
+	my $more_comment_text = $slashdb->getCommentText($cids_needed_ar) || {}
+		if @$cids_needed_ar;
+	if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+		print STDERR scalar(gmtime) . " more_comment_text keys: '" . join(" ", sort keys %$more_comment_text) . "'\n";
+	}
+
+	for my $cid (keys %$more_comment_text) {
 		if ($form->{mode} ne 'archive'
-			&& $comments->{$cid}->{len} > $user->{maxcommentsize}
+			&& $comments->{$cid}{len} > $user->{maxcommentsize}
 			&& $form->{cid} ne $cid)
 		{
 			# We remove the domain tags so that strip_html will not
@@ -607,16 +657,45 @@ sub printComments {
 			# add them back at the last step.  In-between, we chop
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
-			$comment_text->{$cid} =~ s{</A[^>]+>}{</A>}gi;
-			$comment_text->{$cid} = chopEntity($comment_text->{$cid}, $user->{maxcommentsize});
-			$comment_text->{$cid} = strip_html($comment_text->{$cid});
-			$comment_text->{$cid} = balanceTags($comment_text->{$cid});
-			$comment_text->{$cid} = addDomainTags($comment_text->{$cid});
+			$more_comment_text->{$cid} =~ s{</A[^>]+>}{</A>}gi;
+			my $text = chopEntity($more_comment_text->{$cid},
+				$user->{maxcommentsize});
+			$text = strip_html($text);
+			$text = balanceTags($text);
+			$more_comment_text->{$cid} = addDomainTags($text);
 		}
 
-		$comment_text->{$cid} = parseDomainTags($comment_text->{$cid}, $comments->{$cid}->{fakeemail});
+		# Now write the new data into our hashref and write it out to
+		# memcached if appropriate.  For these purposes, if we were
+		# cleared to read from memcached, the data we just got is also
+		# valid to write to memcached.
+		$comment_text->{$cid} = parseDomainTags($more_comment_text->{$cid},
+			$comments->{$cid}{fakeemail});
+		if ($try_memcached && $form->{cid} ne $cid) {
+			my $retval = $slashdb->{_mcd}->set("ctp:$cid", $comment_text->{$cid});
+			if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+				print STDERR scalar(gmtime) . " printComments memcached writing 'ctp:$cid' length " . length($comment_text->{$cid}) . " retval=$retval\n";
+			}
+		}
 	}
+
+	if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+		print STDERR scalar(gmtime) . " comment_text keys: '" . join(" ", sort keys %$comment_text) . "'\n";
+	}
+
+	if ($mcd_debug) {
+		$mcd_debug->{hits} ||= 0;
+		printf STDERR scalar(gmtime) . " printComments memcached"
+			. " tried=$try_memcached total_cids=%d hits=%d misses=%d elapsed=%6.4f\n",
+			$mcd_debug->{total} , $mcd_debug->{hits},
+			$mcd_debug->{total} - $mcd_debug->{hits},
+			Time::HiRes::time - $mcd_debug->{start_time};
+	}
+
+	# OK we have all the comment data in our hashref, so the search/replace
+	# on the nearly-fully-rendered page will work now.
 	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|$comment_text->{$1}|g;
+
 	print $comment_html;
 }
 
