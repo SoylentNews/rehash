@@ -71,7 +71,7 @@ __template__
 [% END %]
 
 [% IF form.startat %]
-		| Starting at #[% form.startat %]"
+		| Starting at #[% form.startat %]
 [% END %]
 
 		| <A HREF="[% constants.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">
