@@ -54,7 +54,9 @@ sub sqlShowSlaveStatus {
 # for slashd
 # This method is used in a pretty wasteful way
 sub getBackendStories {
-	my($self, $section) = @_;
+	my($self, $section, $topic) = @_;
+	# right now it is only topic OR section, because i am lazy;
+	# section overrides topic -- pudge
 
 	my $select;
 	$select .= "stories.sid, stories.title, time, dept, stories.uid,";
@@ -69,7 +71,9 @@ sub getBackendStories {
 	$where .= " AND stories.writestatus != 'delete'";
 
 	if ($section) {
-		$where .= " AND stories.section=\"$section\" and displaystatus > -1";
+		$where .= " AND stories.section=\"$section\" AND displaystatus > -1";
+	} elsif ($topic) {
+		$where .= " AND stories.tid=$topic AND displaystatus = 0";
 	} else {
 		$where .= " AND displaystatus = 0";
 	}
