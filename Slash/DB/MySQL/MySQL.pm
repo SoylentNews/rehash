@@ -103,7 +103,7 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.title', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]->sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
 
 	'section_subsection_names'
-		=> sub { $_[0]->sqlSelectMany('subsections.title, subsections.id', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]>sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
+		=> sub { $_[0]->sqlSelectMany('subsections.title, subsections.id', 'subsections, section_subsections', 'section_subsections.section=' . $_[0]->sqlQuote($_[2]) . ' AND subsections.id = section_subsections.subsection') },
 
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
