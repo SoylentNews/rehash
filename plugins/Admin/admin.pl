@@ -482,7 +482,7 @@ sub blockEdit {
 		my($static_blocks, $portal_blocks);
 		if ($user->{section}) {
 			$static_blocks = $slashdb->getDescriptions('static_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
-			$static_blocks = $slashdb->getDescriptions('portald_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
+			$portal_blocks = $slashdb->getDescriptions('portald_block_section', { seclev => $user->{seclev}, section => $user->{section} }, 1);
 		} else {
 			$static_blocks = $slashdb->getDescriptions('static_block', $user->{seclev}, 1);
 			$portal_blocks = $slashdb->getDescriptions('portald_block', $user->{seclev}, 1);

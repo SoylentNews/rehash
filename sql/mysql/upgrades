@@ -625,6 +625,7 @@ CREATE TABLE people_log (
 	PRIMARY KEY (id)
 );
 
+
 INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Number of FOF/FOE to process during job run');
 
 # LINUX.COM LAST UPDATED HERE
@@ -709,3 +710,7 @@ INSERT INTO vars (name, value, description) VALUES ('mod_stats_reports','admin@e
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_fairratio', '1.3', 'Factor of fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_fairtotal', '1.3', 'Factor of fairness total in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
 
+UPDATE section_topics SET type = 'topic_1' where type = 1;
+UPDATE section_topics SET type = 'topic_2' where type = 2;
+UPDATE section_topics SET type = 'topic_3' where type = 3;
+UPDATE section_topics SET type = 'topic_4' where type = 4;

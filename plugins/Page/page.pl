@@ -26,9 +26,9 @@ sub main {
 
 	my $section = $slashdb->getSection();
 
-	my $title = getData('head', { section => $section });
+	my $title = getData('head', { section => $section->{section} });
 	header($title, $section->{section});
-	slashDisplay('index', { 'index' => $index });
+	slashDisplay('index', { 'index' => $index, section => $section->{section} });
 
 	footer();
 

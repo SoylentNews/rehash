@@ -16,8 +16,8 @@ en_US
 __name__
 edit_comment
 __template__
-[% USE Slash %]
 <!-- error message -->
+<!-- newdiscussion [% newdiscussion %] form.newdiscussion [% form.newdiscussion %] -->
 [% IF error_message %]<P><B>[% error_message %]</B><P>[% END %]
 <!-- end error message -->
 [% IF form.pid %]
@@ -27,12 +27,21 @@ __template__
 	</TABLE><P>
 [% END %]
 [% IF preview %]
+	[% IF newdiscussion || form.newdiscussion %]
+	[% PROCESS titlebar width="95%" title="Preview $label" %]
+	[% ELSE %]
 	[% PROCESS titlebar width="95%" title="Preview Comment" %]
+	[% END %]
 	[% preview %]
 	<P>
 
 [% END %]
+
+[% IF newdiscussion || form.newdiscussion %]
+	[% PROCESS titlebar width="95%" title="Create New $label" %]
+[% ELSE %]
 	[% PROCESS titlebar width="95%" title="Post Comment" %]
+[% END %]
 
 <FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
 
@@ -42,6 +51,12 @@ __template__
 	<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% user.startat %]">
 	<INPUT TYPE="HIDDEN" NAME="threshold" VALUE="[% user.threshold %]">
 	<INPUT TYPE="HIDDEN" NAME="commentsort" VALUE="[% user.commentsort %]">
+
+[% IF newdiscussion || form.newdiscussion %]
+	<INPUT TYPE="HIDDEN" NAME="indextype" VALUE="[% indextype %]">
+	<INPUT TYPE="HIDDEN" NAME="newdiscussion" VALUE="[% newdiscussion %]">
+[% END %]
+
 [% IF form.formkey %]
 	<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
 [% END %]
@@ -49,6 +64,7 @@ __template__
 	<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1">
 [% userlink = '' %]
 [% IF user.is_anon %]
+<!-- anon login code -->
 	[% userlink = "<A HREF=\"${constants.rootdir}/users.pl\">Create Account</A>" %]
 	<TR><TD> </TD><TD>
 		You are not logged in.  You can log in now using the
@@ -75,11 +91,31 @@ END %]
 [% IF user.fakeemail %]
 	<TR><TD ALIGN="RIGHT">Email: </TD>
 		<TD>[% user.fakeemail | strip_literal %]</TD></TR>
+<!-- end anon login code -->
 [% END %]
 [% IF user.homepage %]
 	<TR><TD ALIGN="RIGHT">URL</TD>
 		<TD><A HREF="[% user.homepage %]">[% user.homepage | strip_literal %]</A></TD></TR>
 [% END %]
+
+	<!-- type [% type %] topic [% topic %] form.topic [% form.topic %] topic_types [% topic_types.keys %] -->
+
+	[% IF newdiscussion || form.newdiscussion %]
+
+		[% IF form.tid %]
+		<INPUT TYPE="HIDDEN" NAME="tid" VALUE="[% form.tid %]">
+
+		[% ELSE %]
+	<TR><TD ALIGN="RIGHT">Topic: </TD>
+		<TD>[% 
+		type=constants.enable_discussion_topic || "topic_1";
+		topic_types = Slash.db.getDescriptions('topics_section_type', section, type);
+		topic_select = Slash.createSelect('topic', Slash.db.getDescriptions('topics_section_type', constants.section, type), form.topic, 1, 1); %]
+		[% topic_select %]
+		</TD>
+	</TR>
+		[% END %]
+	[% END %]
 
 	<TR><TD ALIGN="RIGHT">Subject: </TD>
 		<TD><INPUT TYPE="text" NAME="postersubj" VALUE="[% form.postersubj | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
@@ -101,6 +137,14 @@ IF constants.allow_anonymous && user.karma > -1 && !user.is_anon %]
 [% do_br = 1; END;
 IF do_br %]<BR>[% END %]
 
+[% 
+	formats = Slash.db.getDescriptions('postmodes');
+	
+	format_select = form.posttype ?
+	Slash.createSelect('posttype', formats, form.posttype, 1, 1)
+	:
+	Slash.createSelect('posttype', formats, user.posttype, 1);
+%]
 [% IF constants.hc && constants.hc_sw_comments && user.state.hc %]
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
@@ -119,6 +163,7 @@ IF do_br %]<BR>[% END %]
 [% ELSE %]
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
+	
 	[% format_select %]
 [% END %]
 

@@ -197,11 +197,15 @@ INSERT INTO sections (section, artcount, title, issue, extras, qid) VALUES ('fea
 # Dumping data for table 'section_topics'
 #
 
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 1, 1);
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 2, 1);
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 3, 1);
-INSERT INTO section_topics (section, tid, type) VALUES ('articles', 4, 1);
-INSERT INTO section_topics (section, tid, type) VALUES ('features', 1, 1);
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 1, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('index', 1, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 2, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('index', 2, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 3, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('index', 3, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('articles', 4, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('index', 4, 'topic_1');
+INSERT INTO section_topics (section, tid, type) VALUES ('features', 1, 'topic_1');
 
 #
 # Dumping data for table 'sessions'

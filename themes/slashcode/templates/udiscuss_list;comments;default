@@ -16,7 +16,7 @@ en_US
 __name__
 udiscuss_list
 __template__
-[% USE Slash %]
+[% PROCESS titlebar title=title width='90%' %]
 <MULTICOLS COLS=2>
 [% FOR discussion = discussions %]
 	[% nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
@@ -31,7 +31,8 @@ IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]<
 <P>
 
 [% IF user.seclev >= constants.discussion_create_seclev && !supress_create;
-    PROCESS discreate topic=constants.discussion_default_topic label=label; 
+    # PROCESS discreate topic=constants.discussion_default_topic label=label; 
+    PROCESS edit_comment indextype='udiscuss' newdiscussion=1 topic=constants.discussion_default_topic label=label; 
 END %]
 
 

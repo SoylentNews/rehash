@@ -79,7 +79,7 @@ sub main {
 			formname 		=> 'discussions',
 			checks			=> 
 			[ qw ( max_post_check valid_check interval_check 
-				formkey_check regen_formkey/comments ) ],
+				formkey_check regen_formkey ) ],
 		},
 		reply			=> {
 			function		=> \&editComment,
@@ -95,25 +95,25 @@ sub main {
 			checks			=> 
 			[ qw ( max_post_check update_formkeyid generate_formkey ) ],
 		},
-		preview			=> {
+		preview => {
 			function		=> \&editComment,
 			seclev			=> 0,
-			formname 		=> 'comments',
+			formname 		=> $form->{newdiscussion} ? 'discussions' : 'comments',
 			checks			=> 
 			[ qw ( update_formkeyid max_post_check ) ], 
 		},
 		post 			=> {
 			function		=> \&editComment,
 			seclev			=> 0,
-			formname 		=> 'comments',
+			formname 		=> $form->{newdiscussion} ? 'discussions' : 'comments',
 			checks			=> 
 			[ qw ( update_formkeyid max_post_check generate_formkey	) ],
 		},
-		submit			=> {
+		submit => {
 			function		=> \&submitComment,
 			seclev			=> 0,
 			post			=> 1,
-			formname 		=> 'comments',
+			formname 		=> $form->{newdiscussion} ? 'discussions' : 'comments',
 			checks			=> 
 			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check formkey_check ) ],
 		},
@@ -320,7 +320,7 @@ sub displayComments {
 # Index of recent discussions: Used if comments.pl is called w/ no
 # parameters
 sub commentIndex {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $error_message) = @_;
 
 	my $label = getData('label');
 
@@ -350,6 +350,7 @@ sub commentIndex {
 
 			slashDisplay('discuss_list', {
 				discussions	=> $discussions,
+				error_message	=> $error_message,
 				label		=> $label,
 				forward		=> $forward,
 				args		=> _buildargs($form),
@@ -388,6 +389,7 @@ sub commentIndex {
 
 			slashDisplay('discuss_list', {
 				discussions	=> $discussions,
+				error_message	=> $error_message,
 				label		=> $label,
 				forward		=> $forward,
 				args		=> _buildargs($form),
@@ -408,10 +410,11 @@ sub commentIndex {
 # Index of recent discussions: Used if comments.pl is called w/ no
 # parameters
 sub commentIndexUserCreated {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $error_message) = @_;
 	my $label = getData('label');
 
-	titlebar("90%", getData('user_discussions'));
+	# um, let's put this in the template
+	# titlebar("90%", getData('user_discussions'));
 	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
 	my $start = $form->{start} || 0;
 	my $hashref = {};
@@ -421,10 +424,9 @@ sub commentIndexUserCreated {
 	$hashref->{approved} = '1'; 
 
 	my $discussions = $searchdb->findDiscussion(
-		$hashref,
-		$constants->{discussion_display_limit} + 1,
-		$start,
-		$constants->{discussion_sort_order});
+		$hashref, 
+		$constants->{discussion_display_limit} + 1, 
+		$start, $constants->{discussion_sort_order});
 
 	if ($discussions && @$discussions) {
 		my $forward;
@@ -445,8 +447,14 @@ sub commentIndexUserCreated {
 			$back = -1;
 		}
 
+# REMOVE ?
+
+#		$title .= ": " . $slashdb->getTopic($form->{tid},'alttext') . " ($form->{tid})" if $form->{tid};
+	
 		slashDisplay('udiscuss_list', {
 			discussions	=> $discussions,
+			error_message	=> $error_message,
+			title 		=> getData('user_discussions'),
 			'label'		=> $label,
 			forward		=> $forward,
 			args		=> _buildargs($form),
@@ -455,8 +463,8 @@ sub commentIndexUserCreated {
 		});
 	} else {
 		print getData('nodiscussions');
-		slashDisplay('discreate', {
-			topic => $constants->{discussion_default_topic},
+		slashDisplay('edit_comment', {
+			newdiscussion => 1,
 			label => $label,
 		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
@@ -466,7 +474,7 @@ sub commentIndexUserCreated {
 # Index of recent discussions: Used if comments.pl is called w/ no
 # parameters
 sub commentIndexCreator {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $error_message) = @_;
 
 	my $label = getData('label');
 	my($uid, $nickname);
@@ -507,6 +515,8 @@ sub commentIndexCreator {
 
 		slashDisplay('discuss_list', {
 			discussions	=> $discussions,
+			indextype	=> 'creator',
+			error_message	=> $error_message,
 			'label'		=> $label,
 			forward		=> $forward,
 			args		=> _buildargs($form),
@@ -523,7 +533,7 @@ sub commentIndexCreator {
 # Index of recent discussions: Used if comments.pl is called w/ no
 # parameters
 sub commentIndexPersonal {
-	my($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants, $error_message) = @_;
 
 	my $label = getData('label');
 
@@ -552,6 +562,8 @@ sub commentIndexPersonal {
 
 		slashDisplay('discuss_list', {
 			discussions	=> $discussions,
+			indextype	=> 'personal', 
+			error_message	=> $error_message,
 			'label'		=> $label,
 			forward		=> $forward,
 			args		=> _buildargs($form),
@@ -589,7 +601,9 @@ sub createDiscussion {
 				? ""
 				: $ENV{HTTP_REFERER};
 		$form->{url}	= fudgeurl($newurl);
-		$form->{title}	= strip_notags($form->{title});
+		# $form->{title}	= strip_notags($form->{title});
+		$form->{title}	= strip_notags($form->{postersubj});
+
 
 		# for now, use the postersubj filters; problem is,
 		# the error messages can come out a bit funny.
@@ -620,24 +634,28 @@ sub createDiscussion {
 			}
 		}
 
+		my $formats = $slashdb->getDescriptions('postmodes');
+		my $postvar = $form->{posttype} ? $form : $user;
 		my $format_select = createSelect(
-			'posttype',
+			'posttype', 
 			$slashdb->getDescriptions('postmodes'),
 			$form->{posttype} || $user->{posttype},
-			1);
+			1
+		);
 
 		# Update form with the new SID for comment creation and other
 		# variables necessary. See "edit_comment;misc;default".
 		my $newform = {
 			sid	=> $id,
 			pid	=> 0, 
+			label		=> $label,
 			title	=> $form->{title},
 			formkey => $form->{formkey},
 		};
 		# We COULD drop ID from the call below, but not right now.
 		slashDisplay('newdiscussion', { 
 			error 		=> $error, 
-			label		=> $label,
+			'label'		=> $label,
 			form		=> $newform,
 			format_select	=> $format_select,
 			id 		=> $id,
@@ -659,6 +677,7 @@ sub editComment {
 
 	my $preview;
 	my $error_flag = 0;
+	my $label = getData('label');
 
 	# Get the comment we may be responding to. Remember to turn off
 	# moderation elements for this instance of the comment.
@@ -685,11 +704,12 @@ sub editComment {
 		$form->{postersubj} = "Re:$form->{postersubj}";
 	}
 
-	my $format_select = createSelect(
-		'posttype',
-		$slashdb->getDescriptions('postmodes'),
-		$form->{posttype} || $user->{posttype},
-		1);
+# trying to do this in the template
+#	my $formats = $slashdb->getDescriptions('postmodes');
+
+#	my $format_select = $form->{posttype}
+#		? createSelect('posttype', $formats, $form->{posttype}, 1)
+#		: createSelect('posttype', $formats, $user->{posttype}, 1);
 
 	if ($form->{op} =~ /^reply$/i) {
 		$form->{nobonus}  = $user->{nobonus};
@@ -698,7 +718,10 @@ sub editComment {
 
 	slashDisplay('edit_comment', {
 		error_message 	=> $error_message,
-		format_select	=> $format_select,
+		label		=> $label,
+		newdiscussion	=> $form->{newdiscussion},
+		indextype	=> $form->{indextype},
+		# format_select	=> $format_select,
 		preview		=> $preview,
 		reply		=> $reply,
 	});
@@ -908,6 +931,7 @@ sub previewForm {
 	my $constants = getCurrentStatic();
 
 	$user->{sig} = "" if $form->{postanon};
+	my $label = getData('label');
 
 	my $tempSubject = strip_notags($form->{postersubj});
 	my $tempComment = $form->{postercomment};
@@ -957,8 +981,13 @@ sub previewForm {
 	my $tm = $user->{mode};
 	$user->{mode} = 'archive';
 	my $previewForm;
-	if ($tempSubject && $tempComment) {
+	if ($form->{newdiscussion} && $user->{seclev} < $constants->{discussion_create_seclev}) { 
+		$previewForm = slashDisplay('newdiscussion', {
+			error => getError('seclevtoolow'),
+		});
+	} elsif ($tempSubject && $tempComment) {
 		$previewForm = slashDisplay('preview_comm', {
+			label	=> $label,
 			preview => $preview,
 		}, 1);
 	}
@@ -973,6 +1002,10 @@ sub previewForm {
 # story id.
 sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
+
+	my $id;
+	my $label = getData('label');
+
 	if ($discussion->{type} eq 'archived') {
 		print getData('archive_error');
 		return;
@@ -995,18 +1028,56 @@ sub submitComment {
 			: $constants->{comments_wsfactor} || 1) )
 	) {
 		$slashdb->resetFormkey($form->{formkey});
-		editComment(@_, $error_message);
+		if (! $form->{newdiscussion}) {
+			editComment(@_, $error_message);
+		} else {
+			if ($form->{indextype} eq 'udiscuss') {
+				commentIndexUserCreated(@_, $error_message);
+			} elsif ($form->{indextype} eq 'personal') {
+				commentIndexPersonal(@_, $error_message);
+			} elsif ($form->{indextype} eq 'creator') {
+				commentIndexCreator(@_, $error_message);
+			} else {
+				commentIndex(@_,$error_message);
+			}
+		}
 		return(0);
 	}
 
 	$tempComment = addDomainTags($tempComment);
 
+	if ($form->{newdiscussion} && $user->{seclev} >= $constants->{discussion_new_seclev} ) {
+
+		my $newurl	= $form->{url} ? $form->{url}
+			: $ENV{HTTP_REFERER} =~ m|\Q$constants->{rootdir}/comments.pl\E$|
+				? ""
+				: $ENV{HTTP_REFERER};
+		$form->{url}	= fudgeurl($newurl);
+
+		$id = $slashdb->createDiscussion({
+			title	=> $tempSubject,
+			topic	=> $form->{tid} ? $form->{tid} : $form->{topic},
+			url	=> $form->{url} || 1,
+			type	=> "recycle"
+		});
+
+		# fix URL to point to discussion if no referrer
+		if (!$form->{url}) {
+			$newurl = $constants->{rootdir} . "/comments.pl?sid=$id";
+			$slashdb->setDiscussion($id, { url => $newurl });
+		}
+	}
+	$id ||= $form->{sid};
+
 #	# Slash is not a file exchange system
 #	# still working on this...stay tuned for real commit
 #	# (maybe in 2.x... sigh)
+# 	# maybe during the next glacial cycle.
 #	$tempComment = distressBinaries($tempComment);
 
-	titlebar("95%", getData('submitted_comment'));
+	unless ($form->{newdiscussion}) {
+		titlebar("95%", getData('submitted_comment'));
+	}
 
 	my $pts = 0;
 
@@ -1023,8 +1094,8 @@ sub submitComment {
 		$pts = $maxScore if $pts > $maxScore;
 	}
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
-	unless ($user->{is_admin}) {
-		unless ($slashdb->checkDiscussionPostable($form->{sid})) {
+	unless ($user->{is_admin} || $form->{newdiscussion}) {
+		unless ($slashdb->checkDiscussionPostable($id)) {
 			print getError('submission error');
 			return(0);
 		}
@@ -1033,8 +1104,8 @@ sub submitComment {
 	my $clean_comment = {
 		subject		=> $tempSubject,
 		comment		=> $tempComment,
-		sid		=> $form->{sid},
-		pid		=> $form->{pid},
+		sid		=> $id , 
+		pid		=> $form->{pid} ,
 		ipid		=> $user->{ipid},
 		subnetid	=> $user->{subnetid},
 		uid		=> $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
@@ -1063,9 +1134,9 @@ sub submitComment {
 		print getError('maxcid exceeded');
 		return(0);
 	} else {
-		slashDisplay('comment_submit');
-		undoModeration($form->{sid});
-		printComments($discussion, $maxCid, $maxCid);
+		slashDisplay('comment_submit') if ! $form->{newdiscussion};
+		undoModeration($id);
+		printComments($discussion, $maxCid, $maxCid) if ! $form->{newdiscussion};
 
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
@@ -1091,7 +1162,7 @@ sub submitComment {
 
 		# reply to comment
 		if ($messages && $form->{pid}) {
-			my $parent = $slashdb->getCommentReply($form->{sid}, $form->{pid});
+			my $parent = $slashdb->getCommentReply($id, $form->{pid});
 			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
 			if (_send_comment_msg($users->[0], \%users, $pts)) {
 				my $data  = {
@@ -1137,6 +1208,30 @@ sub submitComment {
 				next if $users{$usera};
 				$messages->create($usera, MSG_CODE_NEW_COMMENT, $data);
 				$users{$usera}++;
+			}
+		}
+		if ($form->{newdiscussion}) {
+			if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
+				slashDisplay('newdiscussion', { 
+					error 		=> $error_message, 
+					'label'		=> $label,
+					id 		=> $id,
+				});
+			} else {
+				slashDisplay('newdiscussion', {
+					error => getError('seclevtoolow'),
+				});
+			}
+			undef $form->{postersubj};
+			undef $form->{postercomment};
+			if ($form->{indextype} eq 'udiscuss') {
+				commentIndexUserCreated(@_, $error_message);
+			} elsif ($form->{indextype} eq 'personal') {
+				commentIndexPersonal(@_, $error_message);
+			} elsif ($form->{indextype} eq 'creator') {
+				commentIndexCreator(@_, $error_message);
+			} else {
+				commentIndex(@_,$error_message);
 			}
 		}
 	}
