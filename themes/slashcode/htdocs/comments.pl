@@ -637,21 +637,21 @@ sub submitComment {
 	my $error_message;
 
 	$form->{postersubj} = strip_notags($form->{postersubj});
-	$form->{postercomment} = strip_mode($form->{postercomment}, $form->{posttype});
 
 	my $tempComment = $form->{postercomment};
 
-	unless (validateComment(\$form->{postercomment}, \$form->{postersubj}, \$error_message)) {
+	unless (validateComment(\$tempComment, \$form->{postersubj}, \$error_message)) {
 		$slashdb->resetFormkey($form->{formkey});
 		editComment(@_, $error_message);
 		return(0);
 	}
 
-	$tempComment = strip_mode($form->{postercomment}, $form->{posttype});
+	$tempComment = strip_mode($tempComment, $form->{posttype});
 	$form->{postercomment} = addDomainTags($tempComment);
 
 #	# Slash is not a file exchange system
 #	# still working on this...stay tuned for real commit
+#	# (maybe in 2.2.1... sigh)
 #	$form->{postercomment} = distressBinaries($form->{postercomment});
 
 	# this has to be a template -- pudge
@@ -662,7 +662,8 @@ sub submitComment {
 	if (!$user->{is_anon} && !$form->{postanon}) {
 		$pts = ($user->{karma} < 0) ? 0 : $user->{defaultpoints};
 		$pts-- if $user->{karma} < $constants->{badkarma};
-		$pts++ if $user->{karma} > $constants->{goodkarma} && !$form->{nobonus};
+		$pts++ if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
+			&& !$form->{nobonus};
 		# Enforce proper ranges on comment points.
 		my($minScore, $maxScore) =
 			($constants->{comment_minscore}, $constants->{comment_maxscore});
@@ -670,7 +671,6 @@ sub submitComment {
 		$pts = $maxScore if $pts > $maxScore;
 	}
 
-	# It would be nice to have an arithmetic if right here
 	my $maxCid = $slashdb->createComment(
 		$form, 
 		$user, 
