@@ -119,20 +119,37 @@ for my $tz (sort keys %tzs) {
 	next if $tz eq $dat->[0] && !$dat->[1];
 
 	if ($dat->[1]) {
-		print "Converting users for $tz to manual DST ($dat->[1])\n" if $DEBUG;
+#		print "Converting users for $tz to manual DST ($dat->[1])\n" if $DEBUG;
+		my @converted = ( );
 		$sth1->execute($tz);
 		my @uids = map { $_->[0] } @{ $sth1->fetchall_arrayref };
 		for my $uid (grep { !exists $users{$_} } @uids) {
-			print "  $uid\n" if $DEBUG;
+#			print "  $uid\n" if $DEBUG;
+			push @converted, $uid;
 			$slashdb->setUser($uid, { dst => $dat->[1] });
 			$users{$uid}++;
 		}
+		my $num = scalar(@converted);
+		my $uidlist = "";
+		if ($num) {
+			my @converted_short = @converted;
+			if ($#converted_short > 5) {
+				$#converted_short = 5;
+				push @converted_short, "...";
+			}
+			$uidlist = ": @converted_short" if @converted_short;
+		}
+		print "Converted $num users from $tz to manual DST ($dat->[1])$uidlist\n";
 	}
 
 	if ($tz ne $dat->[0]) {
-		print "Converting users for $tz to $dat->[0]\n" if $DEBUG;
-		$sth2->execute($dat->[0], $tz);
+#		print "Converting users for $tz to $dat->[0]\n" if $DEBUG;
+		my $rows = $sth2->execute($dat->[0], $tz);
+		$rows += 0; # convert 0E0 to 0
+		print "Converted $rows users from $tz to $dat->[0]\n";
 	}
 }
+
+1 if $DEBUG; # avoid possible "used only once" error
 
 __END__
