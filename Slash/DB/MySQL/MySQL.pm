@@ -414,7 +414,18 @@ sub createModeratorLog {
 	$active = 1 unless defined $active;
 	$points_spent = 1 unless defined $points_spent;
 
-	my $m2_base += $self->getBaseM2Needed($comment->{cid}, $reason, { count_modifier => $active ? 1 : 0 }) || getCurrentStatic('m2_status');
+	my $m2_base;
+	if ($constants->{m2_inherit}) {
+		my $mod = $self->getModForM2Inherit($user->{uid}, $comment->{cid}, $reason);
+		if ($mod) {
+			$m2_base = $mod->{m2needed};
+		} else {
+			$m2_base = $self->getBaseM2Needed($comment->{cid}, $reason) || getCurrentStatic('m2_status');
+		}
+	} else {
+		$m2_base = $self->getBaseM2Needed($comment->{cid}, $reason) || getCurrentStatic('m2_status');
+	}
+
 	$m2needed ||= 0;
 	$m2needed += $m2_base;
 	$m2needed = 1 if $m2needed < 1;		# minimum of 1
@@ -437,8 +448,14 @@ sub createModeratorLog {
 		points_orig => $comment->{points},
 		m2needed => $m2needed,
 	});
-	#print STDERR "cid: $comment->{cid} reason: $reason m2_base: $m2_base active: $active\n";
+
+	my $mod_id = $self->getLastInsertId();
 	
+	# inherit and apply m2s if necessary
+	if ($constants->{m2_inherit}) {
+		my $i_m2s = $self->getInheritedM2sForMod($user->{uid}, $comment->{cid}, $reason, $active, $mod_id);
+		$self->applyInheritedM2s($mod_id, $i_m2s);
+	}	
 	# cid_reason count changed, update m2needed for related mods
 	if ($constants->{m2_use_sliding_consensus} and $active) {
 		# Note: this only updates m2needed for moderations that have m2status=0 not those that have already reached consensus.
@@ -447,7 +464,9 @@ sub createModeratorLog {
 		# want to have the same m2s across all like m1s.  If the mod whose m2s we are inheriting from has already reached consensus
                 # we probably just want to inherit those m2s and not up the m2needed value for either mods.
 
-		$self->sqlUpdate("moderatorlog", { m2needed => $m2_base }, "cid=".$self->sqlQuote($comment->{cid})." and reason=".$self->sqlQuote($reason)." and m2status=0" );
+		my $post_m2_base = $self->getBaseM2Needed($comment->{cid}, $reason);
+
+		$self->sqlUpdate("moderatorlog", { m2needed => $post_m2_base }, "cid=".$self->sqlQuote($comment->{cid})." and reason=".$self->sqlQuote($reason)." and m2status=0 and active=1" );
 	}
 	return $ret_val;
 }
@@ -459,7 +478,6 @@ sub getBaseM2Needed {
 	if ($constants->{m2_use_sliding_consensus}) {
 		my $count = $self->sqlCount("moderatorlog", "cid=".$self->sqlQuote($cid)." and reason=".$self->sqlQuote($reason)." and active=1");
 		$count += $options->{count_modifier} if defined $options->{count_modifier};
-		#print STDERR " get_m2_base count: $count cid: $cid reason: $reason\n";
 		my $index = $count - 1;
 		$index = 0 if $index < 1;
 		$index = @{$constants->{m2_sliding_consensus}} - 1
@@ -477,17 +495,52 @@ sub getBaseM2Needed {
 # If getting the inherited m2s before the mod is created omit passing the id
 # as a parameter. 
 sub getInheritedM2sForMod {
-	my ($self, $cid, $reason, $active, $id) = @_;
+	my ($self, $mod_uid, $cid, $reason, $active, $id) = @_;
 	return [] unless $active;
-	
-	my $id_str = " and id!=".$self->sqlQuote($id) if $id;
-	my ($p_mid) = $self->sqlSelect("min(id)","moderatorlog",
-				"cid=".$self->sqlQuote($cid)." and reason=".$self->sqlQuote($reason).
-				" and active=1 and $id_str"
-			);
+	my $mod = $self->getModForM2Inherit($mod_uid, $cid, $reason, $id);
+	my $p_mid = defined $mod ? undef : $mod->{id};
 	return [] unless $p_mid;
-	my $m2s = $self->sqlSelectAllHashrefArray("*", "metamodlog", "mmid=$p_mid");
+	my $m2s = $self->sqlSelectAllHashrefArray("*", "metamodlog", "mmid=$p_mid ");
 	return $m2s;
+}
+
+sub getModForM2Inherit {
+	my ($self, $mod_uid, $cid, $reason, $id) = @_;
+	my $mod_uid_q = $self->sqlQuote($mod_uid);
+	my $reasons = $self->getReasons();
+	my $m2able_reasons = join(",",
+		sort grep { $reasons->{$_}{m2able} }
+		keys %$reasons);
+	return [] if !$m2able_reasons;
+	
+	my $id_str = $id ? " AND id!=".$self->sqlQuote($id) : "";
+
+	# Find the earliest active moderation that we can inherit m2s from
+        # which isn't the mod we are inheriting them into.  This uses the
+	# same criteria as multiMetaMod for determining which mods we can
+	# propagate m2s to, or from in the case of inheriting
+	my ($mod) = $self->sqlSelectHashref("*","moderatorlog",
+				"cid=".$self->sqlQuote($cid).
+				" AND reason=".$self->sqlQuote($reason).
+				" AND uid!=$mod_uid_q AND cuid!=$mod_uid_q".
+				" AND reason in($m2able_reasons)".
+				" AND active=1 $id_str",
+				" ORDER BY id ASC LIMIT 1"
+			);
+	return $mod;
+}
+
+sub applyInheritedM2s {
+	my ($self, $mod_id, $m2s) = @_;
+	
+	foreach my $m2(@$m2s){
+		my $m2_user=$self->getUser($m2->{uid});
+		my $cur_m2 = { 
+				$mod_id => 	{ is_fair => $m2->{val} == 1 ? 1 : 0 }
+			     };
+		$self->createMetaMod($m2_user, $cur_m2, 0, { inherited => 1});
+	}	
+
 }
 
 
@@ -945,6 +998,8 @@ sub getModeratorCommentLog {
 		 comments.pid AS pid,
 		 comments.points AS score,
 		 comments.karma AS karma,
+		 comments.tweak AS tweak,
+		 comments.tweak_orig AS tweak_orig,
 		 users.uid AS uid,
 		 users.nickname AS nickname,
 		 $ipid_table.ipid AS ipid,
@@ -954,7 +1009,7 @@ sub getModeratorCommentLog {
 		 moderatorlog.active AS active,
 		 moderatorlog.m2status AS m2status,
 		 moderatorlog.id AS id,
-		 moderatorlog.points_orig AS points_orig 
+		 moderatorlog.points_orig AS points_orig, 
 		 $select_extra",
 		"moderatorlog, users, comments",
 		"$where_clause
@@ -4910,6 +4965,8 @@ sub moderateComment {
 	}
 
 	my $comment = $self->getComment($cid);
+	
+
 	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
 
 	# The user should not have been been presented with the menu
@@ -4958,6 +5015,7 @@ sub moderateComment {
 
 	# Add moderation value to display arguments.
 	my $val = $reasons->{$reason}{val};
+	my $raw_val = $val;
 	$val = "+1" if $val == 1;
 	$dispArgs->{val} = $val;
 
@@ -4967,7 +5025,7 @@ sub moderateComment {
 	# actions need be performed.
 	# Should we return here and go no further?
 	if (	$scorecheck < $constants->{comment_minscore} ||
-		$scorecheck > $constants->{comment_maxscore})
+		($scorecheck > $constants->{comment_maxscore} && $val + $comment->{tweak} > 0 ))
 	{
 		# We should still log the attempt for M2, but marked as
 		# 'inactive' so we don't mistakenly undo it. Mods get modded
@@ -5025,6 +5083,7 @@ sub moderateComment {
 		my $poster_was_anon = isAnon($comment->{uid});
 		my $karma_change = $reasons->{$reason}{karma};
 		$karma_change = 0 if $poster_was_anon;
+
 		my $comment_change_hr =
 			$self->setCommentForMod($cid, $val, $reason,
 				$comment->{reason});
@@ -5083,15 +5142,19 @@ sub moderateComment {
 		# display and send a message if appropriate.
 		$dispArgs->{points} = $user->{points};
 		$dispArgs->{type} = 'moderated';
-		my $messages = getObject("Slash::Messages");
-		$messages->send_mod_msg({
-			type	=> 'mod_msg',
-			sid	=> $sid,
-			cid	=> $cid,
-			val	=> $val,
-			reason	=> $reason,
-			comment	=> $comment
-		}) unless $options->{no_message};
+		if (($comment->{points} + $comment->{tweak} + $raw_val) >= $constants->{comment_minscore} &&
+		    ($comment->{points} + $comment->{tweak}) >= $constants->{comment_minscore}) {
+
+			my $messages = getObject("Slash::Messages");
+			$messages->send_mod_msg({
+				type	=> 'mod_msg',
+				sid	=> $sid,
+				cid	=> $cid,
+				val	=> $val,
+				reason	=> $reason,
+				comment	=> $comment
+			}) unless $options->{no_message};
+		}
 	}
 
 	# Now display the template with the moderation results.
@@ -5326,9 +5389,9 @@ sub multiMetaMod {
 	my $others = $self->sqlSelectAllHashrefArray(
 		"id, cid, reason",
 		"moderatorlog",
-		"($cr_clause)
-		 AND uid != $uid_q AND cuid != $uid_q
-		 AND m2status=0
+		"($cr_clause)".
+		" AND uid != $uid_q AND cuid != $uid_q ".
+		" AND m2status=0
 		 AND reason IN ($m2able_reasons)
 		 AND active=1
 		 AND id NOT IN ($orig_mmid_in)",
@@ -5380,14 +5443,14 @@ sub multiMetaMod {
 # Note that karma and token changes as a result of metamod are
 # done in the run_moderatord task.
 sub createMetaMod {
-	my($self, $m2_user, $m2s, $multi_max) = @_;
+	my($self, $m2_user, $m2s, $multi_max, $options) = @_;
 	my $constants = getCurrentStatic();
-	my $consensus = $constants->{m2_consensus};
+	$options ||= {}; 
 	my $rows;
 
 	# If this user has no saved mods, by definition nothing they try
 	# to M2 is valid, unless of course they're an admin.
-	return if !$m2_user->{mods_saved} && !$m2_user->{is_admin};
+	return if !$m2_user->{mods_saved} && !$m2_user->{is_admin} && !$options->{inherited};
 
 	# The user is only allowed to metamod the mods they were given.
 	my @mods_saved = $self->getModsSaved($m2_user);
@@ -5395,7 +5458,7 @@ sub createMetaMod {
 	my $saved_mods_encountered = 0;
 	my @m2s_mmids = sort { $a <=> $b } keys %$m2s;
 	for my $mmid (@m2s_mmids) {
-		delete $m2s->{$mmid} if !$mods_saved{$mmid} && !$m2_user->{is_admin};
+		delete $m2s->{$mmid} if !$mods_saved{$mmid} && !$m2_user->{is_admin} &!$options->{inherited};
 		$saved_mods_encountered++ if $mods_saved{$mmid};
 	}
 	return if !keys %$m2s;
@@ -5424,8 +5487,13 @@ sub createMetaMod {
 
 	# Whatever happens below, as soon as we get here, this user has
 	# done their M2 for the day and gets their list of OK mods cleared.
-	# The one exception is admins who didn't metamod any of their saved mods.
-	if (!$m2_user->{is_admin}
+	# The only exceptions are admins who didn't metamod any of their saved mods
+	# also we don't clear a users mods if the m2s being applied are inherited.
+	# In the case of inherited mods the m2_user isn't actively m2ing, their
+	# m2s are just being applied to another mod
+
+	if (!$options->{inherited} &&
+		!$m2_user->{is_admin}
 		|| ($m2_user->{is_admin} && $saved_mods_encountered)) {
 		$rows = $self->sqlUpdate("users_info", {
 			-lastmm =>	'NOW()',
@@ -5563,7 +5631,7 @@ sub deleteVar {
 # If not, it will just return 1.
 sub setCommentForMod {
 	my($self, $cid, $val, $newreason, $oldreason) = @_;
-
+	my $raw_val = $val;
 	$val += 0;
 	return undef if !$val;
 	$val = "+$val" if $val > 0;
@@ -5604,11 +5672,12 @@ sub setCommentForMod {
 	}
 
 	# Make sure we apply this change to the right comment :)
-	my $where = "cid=$cid AND points ";
+	my $where = "cid=$cid ";
+	my $points_extra_where="";
 	if ($val < 0) {
-		$where .= " > $constants->{comment_minscore}";
+		$points_extra_where .= " AND points > $constants->{comment_minscore}";
 	} else {
-		$where .= " < $constants->{comment_maxscore}";
+		$points_extra_where .= " AND points < $constants->{comment_maxscore}";
 	}
 	$where .= " AND lastmod <> $user->{uid}"
 		unless $constants->{authors_unlimited}
@@ -5667,9 +5736,19 @@ sub setCommentForMod {
 		$update->{-karma_abs} = sprintf("karma_abs%+d", $karma_abs_val);
 	}
 
-	my $changed = $self->sqlUpdate("comments", $update, $where, {
+	my $changed = $self->sqlUpdate("comments", $update, $where.$points_extra_where, {
 		assn_order => [ "-points", "-pointsmax" ]
 	});
+	$changed += 0;
+	if(!$changed and $raw_val > 0) {
+		$update->{-points}="points";
+		$update->{-tweak}="tweak$val";
+		my $tweak_extra = " AND tweak$val <= 0";
+		$changed = $self->sqlUpdate("comments", $update, $where.$tweak_extra, {
+			assn_order => [ "-points", "-pointsmax" ]
+		});
+	}
+	$changed+=0;
 
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;
@@ -5753,7 +5832,7 @@ sub getCommentReply {
 	my($self, $sid, $pid) = @_;
 	my $sid_quoted = $self->sqlQuote($sid);
 	my $reply = $self->sqlSelectHashref(
-		"date,date as time,subject,comments.points as points,
+		"date,date as time,subject,comments.points as points,comments.tweak as tweak,
 		comment_text.comment as comment,realname,nickname,
 		fakeemail,homepage,comments.cid as cid,sid,
 		users.uid as uid,reason",
@@ -5791,6 +5870,7 @@ sub getCommentsForUser {
 	my $select = " cid, date, date as time, subject, nickname, "
 		. "homepage, fakeemail, users.uid AS uid, sig, "
 		. "comments.points AS points, pointsorig, "
+		. "tweak, tweak_orig, "
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
 		. "karma_bonus, "
