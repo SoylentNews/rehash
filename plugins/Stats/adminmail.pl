@@ -163,8 +163,9 @@ EOT
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
-		# How many of these stats do we want to store?  Each stat writes
-		# one row into stats_daily for each admin who did anything.
+		# Each stat writes one row into stats_daily for each admin who
+		# modded anything, which is a lot of rows, but we want all the
+		# data.
 		for my $stat (qw( m1_up m1_down m2_fair m2_unfair )) {
 			my $suffix = $uid
 				? "_admin_$uid"

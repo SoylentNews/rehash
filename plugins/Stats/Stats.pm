@@ -124,7 +124,7 @@ sub getAdminModsInfo {
 	# each combination of uid and 1/-1 fairness.
 	my $m2_history_mo_hr = $self->sqlSelectAllHashref(
 		"name",
-		"name, SUM(value)",
+		"name, SUM(value) AS count",
 		"stats_daily",
 		"name LIKE 'm%fair_%' AND day > DATE_SUB(NOW(), INTERVAL 732 HOUR)",
 		"GROUP BY name"
@@ -134,7 +134,8 @@ sub getAdminModsInfo {
 		my($fairness, $uid) = $name =~ /^m2_((?:un)?fair)_admin_(\d+)$/;
 		next unless defined($fairness);
 		$fairness = ($fairness eq 'unfair') ? -1 : 1;
-		$m2_uid_val_mo_hr->{$uid}{$fairness}{count} = $m2_history_mo_hr->{$name};
+		$m2_uid_val_mo_hr->{$uid}{$fairness}{count} =
+			$m2_history_mo_hr->{$name}{count};
 	}
 	if (%$m2_uid_val_mo_hr) {
 		my $m2_uid_nickname = $self->sqlSelectAllHashref(
