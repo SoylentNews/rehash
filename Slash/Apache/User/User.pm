@@ -191,11 +191,12 @@ sub handler {
 	# Weird hack for getCurrentCache() till I can code up proper logic for it
 	{
 		my $cache = getCurrentCache();
-		if (!exists($cache->{_cache_time}) or ((time() - $cache->{_cache_time}) > $constants->{apache_cache})) {
-			$cache = {};
+		if (!$cache->{_cache_time} || ((time() - $cache->{_cache_time}) > $constants->{apache_cache})) {
+			# we can't do $cache = {}, because that won't
+			# overwrite the actual ref stored in $cfg->{cache}
+			%{$cache} = ();
 			$cache->{_cache_time} = time();
 		}
-
 	}
 
 	return OK;
