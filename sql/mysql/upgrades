@@ -2330,8 +2330,6 @@ INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index',
 
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_156, Start of T_2_3_0_157 - 2004/06/01
 
 ######################################################################
@@ -2426,4 +2424,11 @@ INSERT INTO vars (name, value, description) VALUES ('admin_maxdays_divider', '14
 # End of T_2_5_0_9, Start of T_2_5_0_10 - 2004/07/16
 
 INSERT INTO vars (name, value, description) VALUES ('gse_min_stoid', '0', 'Minimum stoid that getStoriesEssentials - important index.pl optimization - this value set automatically');
+
+# End of T_2_5_0_10, Start of T_2_5_0_11 - 2004/07/17
+
+# SLASHDOT LAST UPDATED HERE, to T_2_5_0_11
+
+# End of T_2_5_0_11, Start of T_2_5_0_12 - 2004/07/19
+
 

@@ -70,6 +70,7 @@ $task{$me}{code} = sub {
 	# by admin.pl;  now admin.pl just sets story_text.rendered=NULL
 	# and lets this task do it.
 
+	my %story_set = ( );
 	$stories = $slashdb->getStoriesNeedingRender(
 		$do_all ? 10 : 3
 	);
@@ -96,10 +97,8 @@ $task{$me}{code} = sub {
 			$rendered = displayStory($stoid,
 				'', { get_cacheable => 1 });
 		}
-		$slashdb->setStory($stoid, {
-			rendered =>	$rendered,
-			writestatus =>	'dirty',
-		});
+		$story_set{$stoid}{rendered} = $rendered;
+		$story_set{$stoid}{writestatus} = 'dirty';
 
 	}
 
@@ -114,7 +113,12 @@ $task{$me}{code} = sub {
 
 	my $bailed = 0;
 	my $totalChangedStories = 0;
+	my $do_log;
+	my $logmsg;
 	STORIES_FRESHEN: for my $story (@$stories) {
+
+		$do_log = (verbosity() >= 2);
+		$logmsg = "";
 
 		# Don't run forever freshening stories.  Before we
 		# stomp on too many other invocations of freshenup.pl,
@@ -127,8 +131,8 @@ $task{$me}{code} = sub {
 			last STORIES_FRESHEN;
 		}
 
-		my($sid, $title, $skid) =
-			@{$story}{qw( sid title primaryskid )};
+		my($stoid, $sid, $title, $skid) =
+			@{$story}{qw( stoid sid title primaryskid )};
 		my $skinname = '';
 		$skinname = $slashdb->getSkin($skid)->{name} if $skid;
 
@@ -152,7 +156,7 @@ $task{$me}{code} = sub {
 
 		# Now call prog2file().
 		$args = "$vu ssi=yes sid='$sid'$cchp_param";
-		my($filename, $logmsg);
+		my $filename;
 		if ($skid) {
 			# XXXSKIN - more hardcoding (see Slash::Utility::Display)
 			my $this_skinname = $skinname eq 'mainpage' ? 'articles' : $skinname;
@@ -172,7 +176,6 @@ $task{$me}{code} = sub {
 				verbosity =>	verbosity(),
 				handle_err =>	1,
 			} );
-		my $do_log = (verbosity() >= 2);
 		if (!$success) {
 			$logmsg .= " success='$success'";
 			$do_log ||= (verbosity() >= 1);
@@ -207,23 +210,26 @@ $task{$me}{code} = sub {
 			$slashdb->clearPrevSectionsForSid($sid);
 		}
 		# Now we extract what we need from the file we created
-		my $set_ok = 0;
 		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file, $cchp_param);
 		if (defined($cc)) {
-			# all is well, data was found
-			$set_ok = $slashdb->setStory($sid, { 
-				writestatus  => 'ok',
-				commentcount => $cc,
-				hitparade    => $hp,
-			});
-			$logmsg .= " setStory retval is '$set_ok'" if !$set_ok;
-		}
-		if (!$set_ok) {
-			$do_log ||= (verbosity() >= 1);
+			$story_set{$stoid}{writestatus} = 'ok';
+			$story_set{$stoid}{commentcount} = $cc;
+			$story_set{$stoid}{hitparade} = $hp;
 		}
 
 		slashdLog($logmsg) if $do_log;
 	}
+
+	$do_log = (verbosity() >= 2);
+	$logmsg = "";
+	for my $stoid (sort { $a <=> $b } keys %story_set) {
+		my $set_ok = $slashdb->setStory($stoid, $story_set{$stoid});
+		if (!$set_ok) {
+			$logmsg .= " setStory($stoid) retval is '$set_ok'";
+			$do_log ||= (verbosity() >= 1);
+		}
+	}
+	slashdLog($logmsg) if $do_log;
 
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
 

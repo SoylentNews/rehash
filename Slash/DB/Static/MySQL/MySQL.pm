@@ -1753,7 +1753,7 @@ sub getStoriesWithFlag {
 	if ($purpose eq 'delete') {
 		# Find all stories that are in the trash.
 		$returnable = $self->sqlSelectAllHashrefArray(
-			"stories.stoid, sid, primaryskid, title, time",
+			"stories.stoid AS stoid, sid, primaryskid, title, time",
 			"stories, story_text",
 			"stories.stoid = story_text.stoid
 			 AND in_trash = 'yes'",
@@ -1762,7 +1762,7 @@ sub getStoriesWithFlag {
 		# Find all stories in the past that are dirty and have
 		# been rendered into the mainpage nexus tid.
 		$returnable = $self->sqlSelectAllHashrefArray(
-			"stories.stoid, sid, primaryskid, title, time",
+			"stories.stoid AS stoid, sid, primaryskid, title, time",
 			"stories, story_text, story_topics_rendered
 			 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
 			"time < NOW()
@@ -1776,7 +1776,7 @@ sub getStoriesWithFlag {
 		# been rendered into ANY tid (thus excluding "ND"
 		# stories which don't have any nexus tids)..
 		$returnable = $self->sqlSelectAllHashrefArray(
-			"stories.stoid, sid, primaryskid, title, time",
+			"stories.stoid AS stoid, sid, primaryskid, title, time",
 			"stories, story_text, story_topics_rendered
 			 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
 			"time < NOW()
@@ -1789,7 +1789,7 @@ sub getStoriesWithFlag {
 		# same as simply having one or more nexus tids, so the
 		# select may not have excluded all the right ones.
 		for my $story (@$returnable) {
-			$story->{killme} = 1 if !$self->checkStoryViewable($story->{sid});
+			$story->{killme} = 1 if !$self->checkStoryViewable($story->{stoid});
 		}
 		$returnable = [ grep { !$_->{killme} } @$returnable ];
 	}

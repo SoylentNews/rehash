@@ -4448,7 +4448,11 @@ sub getBanList {
 	my $constants = getCurrentStatic();
 	my $debug = $constants->{debug_db_cache};
 
-	_genericCacheRefresh($self, 'banlist', $constants->{banlist_expire});
+	# Randomize the expire time a bit;  it's not good for the DB
+	# to have every process re-ask for this at the exact same time.
+	my $expire_time = $constants->{banlist_expire};
+	$expire_time += int(rand(60)) if $expire_time;
+	_genericCacheRefresh($self, 'banlist', $expire_time);
 	my $banlist_ref = $self->{_banlist_cache} ||= {};
 
 	%$banlist_ref = () if $refresh;
@@ -7886,6 +7890,7 @@ sub getStory {
 	if (!$is_in_cache || $force_cache_freshen) {
 		# We avoid the join here. Sure, it's two calls to the db,
 		# but why do a join if it's not needed?
+#print STDERR "getStory cache miss for $$ '$id_style' '$id'\n";
 		my($append, $answer, $id_clause);
 		if ($id_style eq "sid") {
 			$id_clause = "sid=" . $self->sqlQuote($id);
