@@ -1,12 +1,12 @@
 DROP TABLE IF EXISTS blobs;
 CREATE TABLE blobs (
-	id VARCHAR(32) NOT NULL,
-	content_type VARCHAR(80) NOT NULL,
-	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
-	reference_count mediumint UNSIGNED NOT NULL DEFAULT '1',
-	data LONGBLOB NOT NULL,
-	PRIMARY KEY (id)
-);
+		id VARCHAR(32) NOT NULL,
+		content_type VARCHAR(80) NOT NULL,
+		seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
+		reference_count mediumint UNSIGNED NOT NULL DEFAULT '1',
+		data LONGBLOB NOT NULL,
+		PRIMARY KEY (id)
+		);
 
 # 
 # Table structure for table 'story_files'
@@ -14,10 +14,12 @@ CREATE TABLE blobs (
 
 DROP TABLE IF EXISTS story_files;
 CREATE TABLE story_files (
-	id int(5) NOT NULL auto_increment,
-	sid varchar(16) NOT NULL default '',
-	description varchar(80) NOT NULL default '',
-	file_id varchar(32) NOT NULL default '',
-	isimage enum("yes","no") DEFAULT "no" NOT NULL,
-	PRIMARY KEY (id)
-) TYPE = myisam;
+		id int(5) NOT NULL auto_increment,
+		sid varchar(16) NOT NULL default '',
+		description varchar(80) NOT NULL default '',
+		file_id varchar(32) NOT NULL default '',
+		isimage enum("yes","no") DEFAULT "no" NOT NULL,
+		INDEX sid_index (sid),
+		INDEX file_id_index (file_id),
+		PRIMARY KEY (id)
+		) TYPE = myisam;

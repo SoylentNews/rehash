@@ -1,10 +1,7 @@
 __section__
 default
 __description__
-Display a link to a user.
-
-Either pass in a nickname or a uid. 
-Also will take the "bonus" flag which will print out the bonus for the user.
+Display a link to a file in Slash::Blob
 
 __title__
 
@@ -15,11 +12,6 @@ en_US
 __name__
 fileLink
 __template__
-[% IF !title %]
-	[% title = "Slash File" %]
-[% END %]
-[% IF id && title %]
-	<A HREF="[% constants.real_rootdir %]/blob.pl?id=[% id | fixparam %]">[% title %]</A>
-[% END %]
+<A HREF="[% constants.real_rootdir %]/blob.pl?id=[% id | strip_attribute %]" TITLE="[% title | strip_attribute %]">[% text %]</A>
 __seclev__
 10000

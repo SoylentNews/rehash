@@ -1376,7 +1376,7 @@ sub createAccessLog {
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
 		secure		=> Slash::Apache::ConnectionIsSecure(),
-		referer		=> $ENV{HTTP_REFERER},
+		referer		=> $r->header_in("Referer"),
 		status		=> $status,
 	};
 	if ($constants->{accesslog_insert_cachesize} && !$user->{is_admin}) {

@@ -15,17 +15,7 @@ en_US
 __name__
 userLink
 __template__
-[% IF !nickname %]
-	[% nickname = Slash.db.getUser(uid, 'nickname') %]
-[% END %]
-[% IF !uid %]
-	[% uid = Slash.db.getUserUID(nickname) %]
-[% END %]
-[% IF nickname && uid %]
-	<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% nickname | strip_literal %] ([% uid %])</A>
-	[% IF !user.is_anon %][% PROCESS zoo_icons person=uid bonus=bonus %][% END %]
-[% ELSE %]
-	<B>[ Unknown User ]</B>
-[% END %]
+<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% nickname | strip_literal %] ([% uid %])</A>
+[% IF !user.is_anon %][% PROCESS zoo_icons person=uid bonus=bonus %][% END %]
 __seclev__
 10000

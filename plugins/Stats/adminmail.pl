@@ -181,7 +181,7 @@ EOT
 	$data{total_static} = $total_static;
 	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
 	my $total_secure = $stats->countDailySecure();
-	for (qw|index article search comments palm journal rss|) {
+	for (qw|index article search comments palm journal rss page|) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($_);
 		my $pages = $logdb->countDailyByPage($_);
 		my $bytes = $logdb->countBytesByPage($_);
@@ -236,7 +236,7 @@ EOT
 		$statsSave->createStatDaily("page", $pages, { section => $section });
 		$statsSave->createStatDaily("users", $users, { section => $section });
 
-		for (qw| index article search comments palm rss|) {
+		for (qw| index article search comments palm rss page|) {
 			my $uniq = $logdb->countDailyByPageDistinctIPID($_,  { section => $section  });
 			my $pages = $logdb->countDailyByPage($_,  {
 				section => $section,

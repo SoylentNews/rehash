@@ -71,6 +71,7 @@ sub getStoriesForLinks {
 #========================================================================
 sub href2SlashTag {
 	my($self, $text, $sid, $options) = @_;
+	my $user = getCurrentUser();
 	return $text unless $text && $sid;
 	my $tokens = HTML::TokeParser->new(\$text);
 	if ($tokens) {
@@ -81,12 +82,16 @@ sub href2SlashTag {
 				next unless $token->[1]->{href};
 				if (!$token->[1]->{id}) {
 					my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
-					$text =~ s#$token->[3]#<SLASH href="$token->[1]->{href}" id="$link">#gis;
+					my $href = strip_attribute($token->[1]->{href});
+					my $title = strip_attribute($token->[1]->{title});
+					$text =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 				} else {
 					my $url = $self->get($token->[1]->{id}, 'url');
 					next if $url eq $token->[1]->{href};
 					my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
-					$text =~ s#$token->[3]#<SLASH href="$token->[1]->{href}" id="$link">#gis;
+					my $href = strip_attribute($token->[1]->{href});
+					my $title = strip_attribute($token->[1]->{title});
+					$text =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 				}
 			# New links to convert!!!!
 			} else {
@@ -94,9 +99,13 @@ sub href2SlashTag {
 				next if $token->[1]->{name};
 				next if $token->[1]->{href} eq '__SLASHLINK__';
 				next if ($token->[1]->{href} =~ /^mailto/i);
+				#This allows you to have a link bypass this system
+				next if ($token->[1]->{FORCE} && $user->{is_admin});
 				my $link = $self->create({ sid => $sid, url => $token->[1]->{href}});
 				my $data = $tokens->get_text("/a");
-				$text =~ s#$token->[3]$data</a>#<SLASH href="$token->[1]->{href}" id="$link">$data</SLASH>#gis;
+				my $href = strip_attribute($token->[1]->{href});
+				my $title = strip_attribute($token->[1]->{title});
+				$text =~ s#$token->[3]$data</a>#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">$data</SLASH>#gis;
 			}
 		}
 		# Let's make sure someone hasn't updated

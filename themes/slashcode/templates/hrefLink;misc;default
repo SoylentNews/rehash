@@ -1,10 +1,7 @@
 __section__
 default
 __description__
-Display a link to a user.
-
-Either pass in a nickname or a uid. 
-Also will take the "bonus" flag which will print out the bonus for the user.
+Display a link that uses Slash::Relocate
 
 __title__
 
@@ -15,8 +12,6 @@ en_US
 __name__
 hrefLink
 __template__
-[% IF id && text %]
-<A HREF="[% constants.real_rootdir%]/relocate.pl?id=[% id | fixparam %]" TITLE="[% title %]">[% text %]</A>
-[% END %]
+<A HREF="[% constants.real_rootdir%]/relocate.pl?id=[% id | fixparam %]" TITLE="[% title | strip_attribute %]">[% text %]</A>
 __seclev__
 10000

@@ -1001,16 +1001,13 @@ sub getTopReferers {
 		$where = "";
 	} else {
 		my $constants = getCurrentStatic();
-		my $regexp = $constants->{basedomain};
-		$regexp =~ s/\./[.]/g;
-		$regexp = "^https?://([a-z]*[.])?$regexp";
-		$where = " AND referer NOT REGEXP '$regexp'";
+		$where = " AND referer NOT REGEXP '$constants->{basedomain}'";
 	}
 
 	return $self->sqlSelectAll(
-		"referer, COUNT(*) AS c",
+		"distinct SUBSTRING_INDEX(referer,'/',3) as referer, COUNT(id) AS c",
 		"accesslog_temp",
-		"LENGTH(referer) > 0 $where",
+		"referer IS NOT NULL AND LENGTH(referer) > 0 AND referer REGEXP '^http' $where ",
 		"GROUP BY referer ORDER BY c DESC, referer LIMIT $count"
 	);
 }
