@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+journuserboxes
+__template__
+[% USE Slash %]
+
+</TD>
+
+<TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
+</TR>
+
+<TR><TD>&nbsp;</TD>
+
+<TD COLSPAN="2" VALIGN="TOP">
+
+__seclev__
+500
