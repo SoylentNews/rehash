@@ -292,6 +292,7 @@ sub main {
 		# (or find a new web host!) -- Jamie
 		# So you're saying SourceForge.net domains are
 		# messed up?  :)  -- pudge
+		# I have no comment at this time -- Jamie
 
 		my $site_domain = $constants->{basedomain};
 		$site_domain =~ s/^www\.//;
@@ -329,7 +330,7 @@ sub main {
 		}
 
 		if (! $error_flag) {
-			$error_flag = savePasswd(\$note) ;
+			$error_flag = savePasswd({ noteref => \$note }) ;
 		}
 		# change op to edituser and let fall through;
 		# we need to have savePasswd set the cookie before
@@ -406,7 +407,7 @@ print STDERR "users.pl main op '$op' hc '$hc'\n";
 
 	# call the method
 print STDERR "users.pl main calling op '$op'\n";
-	my $retval = $ops->{$op}{function}->($op) if ! $error_flag;
+	my $retval = $ops->{$op}{function}->({ op => $op }) if ! $error_flag;
 print STDERR "users.pl main op '$op' returned '$retval'\n";
 	if ($op eq 'mailpasswd' && $retval) {
 		$ops->{$op}{update_formkey} = 0;
@@ -507,7 +508,7 @@ sub newUser {
 				title => $title, 
 				uid => $uid });
 
-			mailPasswd($uid);
+			mailPasswd({ uid => $uid });
 
 			return;
 		} else {
@@ -524,7 +525,8 @@ sub newUser {
 
 #################################################################
 sub mailPasswd {
-	my($uid) = @_;
+	my($hr) = @_;
+	my $uid = $hr->{uid} || 0;
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -569,7 +571,6 @@ sub mailPasswd {
 
 #################################################################
 sub showSubmissions {
-	my($id) = @_;
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
@@ -601,7 +602,6 @@ sub showSubmissions {
 
 #################################################################
 sub showComments {
-	my($id) = @_;
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
@@ -683,7 +683,8 @@ sub noUser {
 # arhgghgh. I love torture. I love pain. This subroutine satisfies
 # these needs of mine
 sub showInfo {
-	my($id) = @_;
+	my($hr) = @_;
+	my $id = $hr->{uid} || 0;
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -985,7 +986,7 @@ sub validateUser {
 		} else {
 			print getMessage('no_registration_needed')
 				if !$user->{reg_id};
-			showInfo($user->{uid});
+			showInfo({ uid => $user->{uid} });
 			return;
 		}
 	# Maybe this should be taken care of in a more centralized location?
@@ -1047,10 +1048,12 @@ sub editKey {
 
 #################################################################
 sub adminDispatch {
+	my($hr) = @_;
 	my $form = getCurrentForm();
+	my $op = $hr->{op} || $form->{op};
 
-	if ($form->{op} eq 'authoredit') {
-		editUser($form->{authoruid});
+	if ($op eq 'authoredit') {
+		editUser({ uid => $form->{authoruid} });
 
 	} elsif ($form->{saveuseradmin}) {
 		saveUserAdmin();
@@ -1148,8 +1151,7 @@ sub tildeEd {
 
 #################################################################
 sub changePasswd {
-	my($id) = @_;
-
+	my $id = 0;
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
@@ -1190,7 +1192,8 @@ sub changePasswd {
 
 #################################################################
 sub editUser {
-	my($id) = @_;
+	my($hr) = @_;
+	my $id = $hr->{uid} || 0;
 
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -1240,7 +1243,8 @@ sub editUser {
 
 #################################################################
 sub editHome {
-	my($id) = @_;
+	my($hr) = @_;
+	my $id = $hr->{uid} || 0;
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -1309,7 +1313,8 @@ sub editHome {
 
 #################################################################
 sub editComm {
-	my($id) = @_;
+	my($hr) = @_;
+	my $id = $hr->{uid} || 0;
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -1552,12 +1557,13 @@ sub saveUserAdmin {
 
 	print getMessage('note', { note => $note }) if defined $note;
 
-	showInfo($id);
+	showInfo({ uid => $id });
 }
 
 #################################################################
 sub savePasswd {
-	my($note) = @_;
+	my($hr) = @_;
+	my $note = $hr->{noteref} || undef;
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -1579,17 +1585,20 @@ sub savePasswd {
 	$user_edit = $slashdb->getUser($uid);
 
 	if (!$user_edit->{nickname}) {
-		$$note .= getError('cookie_err', { titlebar => 0 }, 0, 1);
+		$$note .= getError('cookie_err', { titlebar => 0 }, 0, 1)
+			if $note;
 		$error_flag++;
 	}
 
 	if ($form->{pass1} ne $form->{pass2}) {
-		$$note .= getError('saveuser_passnomatch_err', { titlebar => 0 }, 0, 1);
+		$$note .= getError('saveuser_passnomatch_err', { titlebar => 0 }, 0, 1)
+			if $note;
 		$error_flag++;
 	}
 
 	if (length $form->{pass1} < 6 && $form->{pass1} && $form->{pass1} ne "") {
-		$$note .= getError('saveuser_passtooshort_err', { titlebar => 0 }, 0, 1);
+		$$note .= getError('saveuser_passtooshort_err', { titlebar => 0 }, 0, 1)
+			if $note;
 		$error_flag++;
 	}
 
@@ -1618,7 +1627,8 @@ sub savePasswd {
 		$slashdb->setUser($uid, $user_edits_table) ;
 		$$note .= getMessage('saveuser_passchanged_msg',
 			{ nick => $user_edit->{nickname}, uid => $user_edit->{uid} },
-		0, 1);
+			0, 1)
+			if $note;
 	}
 
 	return $error_flag;
@@ -1753,7 +1763,7 @@ sub saveUser {
 
 	print getMessage('note', { note => $note}) if $note;
 
-	editUser($uid);
+	editUser({ uid => $uid });
 }
 
 
@@ -1842,7 +1852,7 @@ sub saveComm {
 	# Update users with the $users_comments_table hash ref
 	$slashdb->setUser($uid, $users_comments_table);
 
-	editComm($uid);
+	editComm({ uid => $uid });
 }
 
 #################################################################
@@ -1939,7 +1949,7 @@ sub saveHome {
 	# for this whole damn sub
 	$slashdb->setUser($uid, $users_index_table);
 
-	editHome($uid);
+	editHome({ uid => $uid });
 }
 
 #################################################################
@@ -2061,7 +2071,7 @@ sub listAbuses {
 
 #################################################################
 sub displayForm {
-	my($op) = @_;
+	my($hr) = @_;
 
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -2070,7 +2080,7 @@ sub displayForm {
 
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0;
 
-	$op ||= $form->{op} || 'displayform';
+	my $op = $hr->{op} || $form->{op} || 'displayform';
 
 	my $ops = {
 		displayform 	=> 'loginForm',
