@@ -2822,7 +2822,7 @@ sub deleteTopic {
 
 	if ($newtid) {
 		### check to see if this would create a children/parent loop!
-		my @children = $slashdb->getAllChildrenTids($tid);
+		my @children = $self->getAllChildrenTids($tid);
 		if (grep { $_ == $newtid } @children) {
 			# Houston we have a problem.  Throw an informative
 			# error here. - Jamie
