@@ -84,7 +84,7 @@ $task{$me}{code} = sub {
 
 			$rendered = displayStory($sid, '', { get_cacheable => 1 });
 		}
-		$slashdb->updateStory($sid, {
+		$slashdb->setStory($sid, {
 			rendered =>	$rendered,
 			writestatus =>	'dirty',
 		});
