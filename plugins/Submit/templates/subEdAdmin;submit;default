@@ -59,10 +59,8 @@ __template__
 
 <P>
 
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="Update">
-[% IF form.note == 'Quik' %]
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="GenQuickies">
-[% END %]
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="Delete">
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="Merge">
 
 </FORM>
 

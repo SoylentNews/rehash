@@ -2216,7 +2216,7 @@ Fixed KEY.
 
 =back
 
-=head2 getQuickies(KEY)
+=head2 getSubmissionsMerge(KEY)
 
 I am the default documentation, short and stout.
 
@@ -2238,7 +2238,7 @@ Fixed KEY.
 
 =back
 
-=head2 setQuickies(KEY)
+=head2 setSubmissionsMerge(KEY)
 
 I am the default documentation, short and stout.
 

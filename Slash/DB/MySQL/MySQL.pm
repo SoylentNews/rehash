@@ -1103,7 +1103,8 @@ sub createSubmission {
 	$data->{signature} = md5_hex($submission->{story});
 
 	$self->sqlInsert('submissions', $data);
-	my $subid = $self->getLastInsertId();
+	my $subid = $self->getLastInsertId;
+
 	# The next line makes sure that we get any section_extras in the DB - Brian
 	$self->setSubmission($subid, $submission);
 
@@ -2048,7 +2049,7 @@ sub deleteSubmission {
 	my($self, $subid) = @_;
 	my $uid = getCurrentUser('uid');
 	my $form = getCurrentForm();
-	my %subid;
+	my @subid;
 
 	if ($form->{subid}) {
 		$self->sqlUpdate("submissions", { del => 1 },
@@ -2071,13 +2072,13 @@ sub deleteSubmission {
 			{ deletedsubmissions => 
 				getCurrentUser('deletedsubmissions') + 1,
 		});
-		$subid{$form->{subid}}++;
+		push @subid, $form->{subid};
 	}
 
 	for (keys %{$form}) {
 		# $form has several new internal variables that match this regexp, so 
 		# the logic below should always check $t.
-		next unless /(.*)_(.*)/;
+		next unless /^(\w+)_(\d+)$/;
 		my($t, $n) = ($1, $2);
 		if ($t eq "note" || $t eq "comment" || $t eq "section") {
 			$form->{"note_$n"} = "" if $form->{"note_$n"} eq " ";
@@ -2102,11 +2103,11 @@ sub deleteSubmission {
 			$self->setUser($uid,
 				{ -deletedsubmissions => 'deletedsubmissions+1' }
 			);
-			$subid{$n}++;
+			push @subid, $n;
 		}
 	}
 
-	return keys %subid;
+	return @subid;
 }
 
 ########################################################
@@ -4384,7 +4385,7 @@ sub setCommentCleanup {
 	};
 
 	# If more than n downmods, a comment loses its karma bonus.
-	my $reasons = $self->getReasons();
+	my $reasons = $self->getReasons;
 	my $num_downmods = 0;
 	for my $reason (keys %$allreasons_hr) {
 		$num_downmods += $allreasons_hr->{$reason}{c}
@@ -4827,36 +4828,61 @@ EOT
 
 
 ########################################################
-# This makes me nervous... we grab, and they get
-# deleted? I may move the delete to the setQuickies();
-# 
-# (That would make sense to me too. - Jamie)
-sub getQuickies {
+sub getSubmissionsMerge {
 	my($self) = @_;
-# This is doing nothing (unless I am just missing the point). We grab
-# them and then null them? -Brian
-#  my($stuff) = $self->sqlSelect("story", "submissions", "subid='quickies'");
-#	$stuff = "";
-	my $submission = $self->sqlSelectAll("subid,subj,email,name,story",
-		"submissions", "note='Quik' and del=0"
-	);
+	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+	my(@submissions);
 
-	return $submission;
+	my $uid = getCurrentUser('uid');
+
+	# get submissions
+	# from deleteSubmission
+	for (keys %{$form}) {
+		# $form has several new internal variables that match this regexp, so 
+		# the logic below should always check $t.
+		next unless /^del_(\d+)$/;
+		my $n = $1;
+
+		my $sub = $self->getSubmission($n);
+		push @submissions, $sub;
+
+		# update karma
+		# from createStory
+		if (!isAnon($sub->{uid})) {
+			my($userkarma) =
+				$self->sqlSelect('karma', 'users_info', "uid=$sub->{uid}");
+			my $newkarma = (($userkarma + $constants->{submission_bonus})
+				> $constants->{maxkarma})
+					? $constants->{maxkarma}
+					: "karma+$constants->{submission_bonus}";
+			$self->sqlUpdate('users_info', {
+				-karma => $newkarma },
+			"uid=$sub->{uid}");
+		}
+	}
+
+	return \@submissions;
 }
 
 ########################################################
-sub setQuickies {
+sub setSubmissionsMerge {
 	my($self, $content) = @_;
-	$self->sqlInsert("submissions", {
-		#subid	=> 'quickies',
-		subj	=> 'Generated Quickies',
-		email	=> '',
-		name	=> '',
-		-'time'	=> 'now()',
-		section	=> 'articles',
-		tid	=> 'quickies',
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+
+	my $time = timeCalc(scalar localtime, "%m/%d %H:%M %Z", 0);
+	my $subid = $self->createSubmission({
+		subj	=> "Merge: $user->{nickname} ($time)",
+		tid	=> $constants->{defaulttopic},
 		story	=> $content,
-		uid	=> getCurrentUser('uid'),
+		name	=> $user->{nickname},
+		section => $form->{section} || $constants->{section},
+	});
+	$self->setSubmission($subid, {
+		storyonly => 1,
+		separate  => 1,
 	});
 }
 
@@ -5129,15 +5155,17 @@ sub createStory {
 		);
 
 		# i think i got this right -- pudge
-		my($userkarma) =
-			$self->sqlSelect('karma', 'users_info', "uid=$suid");
-		my $newkarma = (($userkarma + $constants->{submission_bonus})
-			> $constants->{maxkarma})
-				? $constants->{maxkarma}
-				: "karma+$constants->{submission_bonus}";
-		$self->sqlUpdate('users_info', {
-			-karma => $newkarma },
-		"uid=$suid") if !isAnon($suid);
+ 		if (!isAnon($suid)) {
+	 		my($userkarma) =
+				$self->sqlSelect('karma', 'users_info', "uid=$suid");
+			my $newkarma = (($userkarma + $constants->{submission_bonus})
+				> $constants->{maxkarma})
+					? $constants->{maxkarma}
+					: "karma+$constants->{submission_bonus}";
+			$self->sqlUpdate('users_info', {
+				-karma => $newkarma },
+			"uid=$suid");
+		}
 
 		$self->setSubmission($story->{subid}, {
 			del	=> 2,

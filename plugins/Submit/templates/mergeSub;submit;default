@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Generate a merged submission from other submissions
+
+* submissions = arrayref of submissions to generate merged submission from
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+mergeSub
+__template__
+[% fullsubtext = "";
+   FOREACH submission = submissions;
+	PROCESS formatSub;
+	fullsubtext = fullsubtext _ "\n\n" _ subtext;
+   END;
+fullsubtext %]
+
+__seclev__
+10000
+__version__
+$Id$

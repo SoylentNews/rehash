@@ -32,8 +32,16 @@ __template__
 		[%- IF subids.size <= 3 %]( [% subids.join(', ') %] )[% END %]
 	[% END %]
 
-[% CASE 'quickieshead' %]
-	Quickies Generated
+[% CASE 'mergehead' %]
+	[% IF subids.size > 0 %]
+		Deleting [% subids.size -%]
+		[%- IF subids.size == 1 %] submission [%
+		ELSE -%] submissions [% END -%]
+		[%- IF subids.size <= 3 %]( [% subids.join(', ') %] )[% END %]
+		- Submissions Merged
+	[% ELSE %]
+		No Submissions
+	[% END %]
 
 [% CASE 'previewhead' %]
 	[% constants.sitename %] Submission Preview
