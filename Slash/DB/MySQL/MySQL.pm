@@ -852,6 +852,8 @@ sub getModeratorCommentLog {
 		? ", comments.uid AS uid2, comments.ipid AS ipid2"
 		: "";
 
+	$select_extra .= ", comments.karma as karma" if $t eq "cid";
+
 	my $vq = $self->sqlQuote($value);
 	my $where_clause = "";
 	my $ipid_table = "moderatorlog";
