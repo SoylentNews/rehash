@@ -791,7 +791,7 @@ sub breakHtml {
 		} elsif ($in_tag)		{ $this_tag .= $c }
 		  elsif ($c =~ /\s/)		{
 			my $nsc;
-			if (($nsc) = substr($text, $i) =~ $cnswcr) {
+			if ($cnswcr && ($nsc) = substr($text, $i) =~ $cnswcr) {
 				# This space doesn't count as a wordbreak because of
 				# a Windows/MSIE bug. The regex puts everything up to
 				# and including the non-start-char(s) into $nsc.
