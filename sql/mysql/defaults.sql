@@ -636,6 +636,10 @@ INSERT INTO vars (name, value, description) VALUES ('authors_unlimited','100','S
 INSERT INTO vars (name, value, description) VALUES ('backup_db_user','','The virtual user of the database that the code should use for intensive database access that may bring down the live site. If you don\'t know what this is for, you should leave it blank.');
 INSERT INTO vars (name, value, description) VALUES ('badkarma','-10','Users get penalized for posts if karma is below this value');
 INSERT INTO vars (name, value, description) VALUES ('badreasons','4','number of \"Bad\" reasons in \"reasons\", skip 0 (which is neutral)');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_ip','40','Warn admin if an ip specifies password incorrectly this many times in one day');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_subnet','60','Warn admin if a subnet specifies password incorrectly this many times in one day');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_uid','40','Warn admin if user specifies password incorrectly this many times in one day');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_user_interval','30','Warn a user on the Nth bad password attempt within 24 hours. Set to 0 if you do not want users to be warned');
 INSERT INTO vars (name, value, description) VALUES ('banlist_expire','900','Default expiration time for the banlist cache');
 INSERT INTO vars (name, value, description) VALUES ('basedir','/usr/local/slash/www.example.com/htdocs','Where should the html/perl files be found?');
 INSERT INTO vars (name, value, description) VALUES ('basedomain','www.example.com','The URL for the site');
