@@ -883,7 +883,7 @@ sub otherLinks {
 sub editStory {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my($sid, $storylinks, $authorbox);
+	my($sid, $storylinks);
 
 	if ($form->{op} eq 'edit') {
 		$sid = $form->{sid};
@@ -977,19 +977,6 @@ sub editStory {
 		$storyref->{$key} = $form->{$key} || $storyref->{$key};
 	}
 
-	my $newestthree = $slashdb->getBlock('newestthree','block');
-	my $nextthree = $slashdb->getNextThree($storyref->{time});
-	my $nextstories = {};
-
-	for (@$nextthree) {
-		my $tmpstory = $slashdb->getStory($_->[0], ['title', 'uid', 'time']);
-		my $author = $slashdb->getUser($tmpstory->{uid},'nickname');
-		$nextstories->{$_->[0]}{title} = $tmpstory->{title};
-	}
-
-	my $nextblock = slashDisplay('three', { stories => $nextstories }, { Return => 1, Page => 'misc', Section => 'default' });
-	$storylinks = $newestthree . $nextblock;
-
 	$sections = $slashdb->getDescriptions('sections');
 
 	$topic_select = selectTopic('tid', $storyref->{tid}, $storyref->{section}, 1);
@@ -1025,7 +1012,15 @@ sub editStory {
 		bodytext =>     get_ispell_comments($storyref->{bodytext}),
 	};
 
-	$authorbox = fancybox($constants->{fancyboxwidth}, 'Story admin', $storylinks, 0, 1);
+	my $future = $slashdb->getStoryByTimeAdmin('>', $storyref, "3");
+	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, "3");
+
+	my $authortext = slashDisplay('futurestorybox', {
+					past => $past,
+					future => $future
+				}, { Return => 1 });
+
+	my $authorbox = fancybox($constants->{fancyboxwidth}, 'Story admin', $authortext, 0, 1);
 	slashDisplay('editStory', {
 		storyref 		=> $storyref,
 		story			=> $story,
@@ -1322,20 +1317,6 @@ sub saveStory {
 		listStories(@_);
 		return;
 	}
-
-	my $newestthree = $slashdb->getNewestThree();
-	my $newstories = {};
-	for (@$newestthree) {
-		my $tmpstory = $slashdb->getStory($_->[0], ['title' ]);
-		$newstories->{$_->[0]}{title} = $tmpstory->{title};
-	}
-	my $newblock = slashDisplay('three', { stories => $newstories },
-		{ Return => 1, Page => 'misc', Section => 'default' }
-	);
-	$slashdb->sqlUpdate('blocks', {
-                        block => $newblock,
-    		}, "bid='newestthree'"
-	);  
 
 	titlebar('100%', getTitle('saveStory-title'));
 	listStories(@_);
