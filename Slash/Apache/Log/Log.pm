@@ -43,7 +43,7 @@ sub handler {
 
 	if ($constants->{debug_loghandler}) {
 		my $slashdb = getCurrentDB();
-		print STDERR "Pid $$ Kids $slashdb->{_dbh}->{Kids} ";
+		print STDERR "Pid $$ Time " . time . " Kids $slashdb->{_dbh}->{Kids} ";
 		print STDERR "AKids $slashdb->{_dbh}{ActiveKids} CKids ";
 		print STDERR scalar keys %{$slashdb->{_dbh}{CachedKids}};
 		print STDERR "\n";
