@@ -36,35 +36,30 @@ sub new {
 sub create_comment_vote {
 	my ($data) = @_;
 	my $slashdb = getCurrentDB();
+	my $ratings_reader = getObject('Slash::Rating', { db_type => 'reader' });
+	my $form = getCurrentForm();
 	my $comment = $data->{comment};
 
-	my $active = 1;
+	return unless defined $form->{comment_vote};
+
+	my $active = "yes";
 	my $val = 0;
-	if ($comment->{comment_vote} =~/^\d+$/) {
-		$val = $comment->{comment_vote};
+	if ($form->{comment_vote} =~/^\d+$/) {
+		$val = $form->{comment_vote};
 	} else {
-		$active = 0;
+		$active = "no";
 	}
 	
-	my $sid_q = $slashdb->sqlQuote($comment->{sid});
-	my $uid_q = $slashdb->sqlQuote($comment->{uid});
-	
-	my $count = $slashdb->sqlCount("comment_vote", "uid=$uid_q AND sid=$sid_q");
-	$active = 0 if $count;
+	my $count = $ratings_reader->getDiscussionVoteCountForUser($comment->{uid}, $comment->{sid});
+	$active = "no" if $count;
 	
 	my $comment_vote = {
-		uid => $comment->{uid},
-		ipid => $comment->{ipid},
 		val  => $val,
 		cid => $comment->{cid},
-		sid => $comment->{sid},
-		-ts => 'NOW()',
 		active => $active
 	};
-	print STDERR "comment_vote\n";
 	
 	my $success = $slashdb->sqlInsert("comment_vote", $comment_vote);
-	print STDERR "SUCCESS = $success\n";
 
 }
 
@@ -78,6 +73,13 @@ sub getUniqueDiscussionsBetweenCids {
 	return $discussions;
 }
 
+sub getDiscussionVoteCountForUser {
+	my ($self, $uid, $sid) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	my $sid_q = $self->sqlQuote($sid);
+	return $self->sqlCount("comments,comment_vote", "comments.cid=comment_vote.cid AND active='yes' AND uid=$uid_q AND sid=$sid_q");
+}
+
 sub updateDiscussionRatingStats {
 	my($self, $discussions) = @_;
 	return 0 unless $discussions && @$discussions;
@@ -88,7 +90,8 @@ sub updateDiscussionRatingStats {
 		"comments, comment_vote",
 		"comments.cid=comment_vote.cid
 		 AND $sid_clause",
-		"GROUP BY sid");
+		"GROUP BY sid, active");
+	
 	my $rows = 0;
 	for my $sid (keys %$hr) {
 		my $sid_hr = $hr->{$sid};
@@ -99,6 +102,19 @@ sub updateDiscussionRatingStats {
 		$rows += $self->sqlReplace("discussion_rating", $replace_hr);
 	}
 	return $rows;
+}
+
+sub getCommentVoteForCid {
+	my ($self, $cid) = @_;
+	my $cid_q = $self->sqlQuote($cid);
+	return $self->sqlSelectHashref("comment_vote", "cid=$cid_q");
+}
+
+sub getDiscussionRating {
+	my ($self, $sid) = @_;
+	my $siq_q = $self->sqlQuote($sid);
+	return $self->sqlSelectHashref("discussion_rating", "discussion=$cid_q");
+	
 }
 
 sub DESTROY {
