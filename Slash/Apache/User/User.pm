@@ -52,6 +52,13 @@ sub handler {
 
 	return DECLINED unless $r->is_main;
 
+	my $uri = $r->uri;
+
+	# Exclude any URL that matches the environment variable regex
+	if ($ENV{SLASH_EXCLUDE_URL}) {
+		return OK if $uri =~ /$ENV{SLASH_EXCLUDE_URL}/;
+	}
+
 	$request_start_time ||= Time::HiRes::time;
 
 	# Ok, this will make it so that we can reliably use Apache->request
@@ -68,7 +75,6 @@ sub handler {
 	random($r);
 
 	# let pass unless / or .pl
-	my $uri = $r->uri;
 	if ($gSkin->{rootdir}) {
 		my $path = URI->new($gSkin->{rootdir})->path;
 		$uri =~ s/^\Q$path//;
