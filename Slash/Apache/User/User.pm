@@ -16,6 +16,7 @@ use Apache::ModuleConfig;
 use AutoLoader ();
 use DynaLoader ();
 use Slash::Apache ();
+use Slash::Display;
 use Slash::Utility;
 use URI ();
 use vars qw($REVISION $VERSION @ISA @QUOTES $USER_MATCH $request_start_time);
