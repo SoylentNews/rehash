@@ -1,0 +1,102 @@
+__section__
+default
+__description__
+Edit subscription information
+
+* user = passed in by default.  Fields used are boughtpage_*
+	and hits_{paidfor,bought}.
+* user_update = also passed in;  supercedes user where its
+	fields are present.
+* pages = arrayref of hashrefs, each hashref having fields:
+	pagename = name of the page type to append to "boughtpage_"
+	descr = description to print for page name
+
+__title__
+
+__page__
+subscribe
+__lang__
+en_US
+__name__
+edit
+__template__
+<FORM ACTION="[% env.script_name %]">
+
+[%
+	pages = [
+		{ pagename => "ALL",
+		  descr	   => "<b>All pages</b><br>&nbsp;&nbsp;&nbsp;'Ads' permits options below
+				<br>&nbsp;&nbsp;&nbsp;'No&nbsp;Ads' overrides options below" },
+		{ pagename => "index",
+		  descr	   => "<b>Homepage</b>" },
+		{ pagename => "articles",
+		  descr	   => "<b>Stories</b> (usually with reader comments)" },
+		{ pagename => "comments",
+		  descr	   => "<b>Comments</b>" },
+		{ pagename => "users",
+		  descr	   => "<b>Users</b> (usually your preferences)" },
+	];
+%]
+
+[%
+	hits_paidfor = user_update.hits_paidfor || user.hits_paidfor || 0;
+	hits_bought  = user_update.hits_bought  || user.hits_bought  || 0;
+	FOREACH page = pages;
+		thispagename = "boughtpage_${page.pagename}";
+		IF user_update.$thispagename.defined;
+			page.isbought = user_update.$thispagename;
+		ELSE;
+			page.isbought = user.$thispagename;
+		END;
+	END;
+%]
+
+<P>You have paid for a total of [% hits_paidfor %] pages
+and have so far used up [% hits_bought %] of them.
+[% IF hits_paidfor %] Thanks, we appreciate your support! [% END %]
+
+<P>Want to buy more?
+[% IF user.seclev >= 100 %]
+	You're an admin, so buy as many as you want:
+	<INPUT TYPE="TEXT" NAME="buymore" VALUE="0" SIZE="6">
+[% ELSE %]
+	You're not an admin, so you can't buy pages at the moment.
+	Sorry.
+[% END %]
+
+[% IF user.seclev >= 100
+	|| (hits_paidfor && ( hits_paidfor > hits_bought ) ) %]
+
+	<P>We give you some control over deciding which pages
+	you want your money to sponsor.  To shut off all ads, click
+	"No&nbsp;Ads"-"All&nbsp;Pages."  For finer-grained control, click
+	"Ads"-"All&nbsp;Pages" and then shut them off explicitly, for
+	whatever pages you want to sponsor.
+
+	<P><TABLE BORDER=0 CELLSPACING=1 WIDTH="100%">
+	<TR><TH>Ads</TH><TH>&nbsp;No&nbsp;Ads&nbsp;</TH><TH WIDTH="100%">&nbsp;</TH></TR>
+
+	[% FOREACH page = pages %]
+
+	<TR>
+	<TD VALIGN="top" ALIGN="center"><INPUT TYPE="RADIO"
+		NAME="boughtpage_[% page.pagename %]"
+		VALUE="0" [% IF !page.isbought; " CHECKED"; END %]></TD>
+	<TD VALIGN="top" ALIGN="center"><INPUT TYPE="RADIO"
+		NAME="boughtpage_[% page.pagename %]"
+		VALUE="1" [% IF  page.isbought; " CHECKED"; END %]></TD>
+	<TD VALIGN="top" ALIGN="left">&nbsp;[% page.descr %]</TD>
+	</TR>
+
+	[% END %]
+
+</TABLE>
+
+[% END %]
+
+	<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
+</FORM>
+
+__seclev__
+10000
+

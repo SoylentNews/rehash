@@ -1,0 +1,6 @@
+name=Subscribe
+description="Subscription system"
+htdoc=subscribe.pl
+mysql_schema=mysql_schema
+task=subscribemail.pl
+template=edit;subscribe;default
