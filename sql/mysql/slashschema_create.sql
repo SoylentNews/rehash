@@ -198,6 +198,7 @@ CREATE TABLE comments (
 	lastmod mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	reason tinyint UNSIGNED DEFAULT '0' NOT NULL,
 	signature char(32) DEFAULT '' NOT NULL,
+	karma_bonus enum('yes', 'no') DEFAULT 'no' NOT NULL;
 	PRIMARY KEY (cid),
 	KEY display (sid,points,uid),
 	KEY byname (uid,points),
