@@ -114,19 +114,19 @@ __template__
 			</TR>
 			<TR>
 				<TD ALIGN="RIGHT" WIDTH="100">Comments</TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_comments" [% readonly.comments | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" NAME="comments_ro_reason" VALUE="[% readonly_reasons.comments | strip_attribute %]"></TD>
+				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_comments" [% readonly.comments | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="comments_ro_reason" VALUE="[% readonly_reasons.comments | strip_attribute %]"></TD>
 			</TR>
 			<TR>
 				<TD ALIGN="RIGHT" WIDTH="100">Submissions</TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_submit" [% readonly.submit | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" NAME="submit_ro_reason" VALUE="[% readonly_reasons.submit | strip_attribute %]"></TD>
+				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="readonly_submit" [% readonly.submit | strip_attribute %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="submit_ro_reason" VALUE="[% readonly_reasons.submit | strip_attribute %]"></TD>
 			</TR>
 			<TR>
-				<TD ALIGN="RIGHT" WIDTH="100"><B>Banned</B></TD>
-				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;<INPUT TYPE="TEXT" NAME="banned_reason" VALUE="[% banned_reason | strip_attribute %]">&nbsp;</TD>
+				<TD ALIGN="RIGHT" WIDTH="100">Banned</TD>
+				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;<INPUT TYPE="TEXT" SIZE="40" NAME="banned_reason" VALUE="[% banned_reason | strip_attribute %]">&nbsp;</TD>
 			</TR>
 			[% IF ! useredit.nonuid %]
 			<TR>
-				<TD ALIGN="RIGHT" WIDTH="100"><B>Expired</B></TD>
+				<TD ALIGN="RIGHT" WIDTH="100">Expired</TD>
 				<TD ALIGN="LEFT"><INPUT TYPE="checkbox" NAME="expired" [% checked.expired %]>&nbsp;</TD>
 			</TR>
 			<TR>
