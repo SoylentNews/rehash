@@ -350,8 +350,11 @@ sub userdir_handler {
 		$uri =~ s/^\Q$path//;
 	}
 
-	# /my/ or /my can match, but not /mything
-	if (($saveuri =~ m[^/(?:%7[eE]|~)/] && $uri =~ m[^/~/(.+)]) or ($uri =~ m[^/my (?: /(.*) | /? ) $]x)) {
+	# for self-references (/~/ and /my/)
+	if (($saveuri =~ m[^/(?:%7[eE]|~)] && $uri =~ m[^/~ (?: /(.*) | /? ) $]x)
+		# /my/ or /my can match, but not /mything
+		or ($uri =~ m[^/my (?: /(.*) | /? ) $]x)
+	) {
 		my $match = $1;
 		if ($r->header_in('Cookie') =~ $USER_MATCH) {
 			my($op, $extra) = split /\//, $match, 2;
@@ -571,6 +574,7 @@ Bender:Oh, so, just 'cause a robot wants to kill humans that makes him a radical
 Bender:Bite my shiny, metal ass!
 Bender:Lick my frozen, metal ass!
 Bender:The laws of science be a harsh mistress.
+Bender:In the event of an emergency, my ass can be used as a flotation device.
 Bender:Like most of life's problems, this one can be solved with bending.
 Bender:A woman like that you gotta romance first!
 Bender:OK, but I don't want anyone thinking we're robosexuals.
@@ -611,6 +615,8 @@ Bender:Curse you, merciful Poseidon!
 Bender:I am a hideous triumph of form and function.
 Bender:I'm an outdated piece of junk.
 Bender:The modern world can bite my splintery, wooden ass!
+Bender:Who does that guy think I am?
+Bender:Down with Bender!
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
@@ -635,6 +641,7 @@ Fry:Hey look, it's that guy you are!
 Fry:That doesn't look like an "L", unless you count lower case.
 Fry:Hardy Boys: too easy. Nancy Drew: too hard!
 Fry:I'm going to continue never washing this cheek again.
+Fry:I haven't had time off since I was twenty-one through twenty-four.
 Fry:The spoon's in the foot powder.
 Fry:You mean Bender is the evil Bender? I'm shocked! Shocked! Well not that shocked.
 Fry:I'm literally angry with rage!
