@@ -28,7 +28,7 @@ __template__
 			<TD BGCOLOR="[% user.bg.3 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
 			<TD BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD>
 				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]"><A NAME="[% cid %]"><B>[% subject %]</B></A>
-[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
+[% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
 </FONT>
 			</TD></TR></TABLE></TD>
 			<TD BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
@@ -37,25 +37,32 @@ __template__
 		<TR>
 			<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 			<TD BGCOLOR="#E6E6E6" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#E6E6E6">
-				<FONT FACE="[% constants.mainfontface %]" SIZE="1">by
-[% IF fakeemail %]<A HREF="mailto:[% fakeemail | fixparam %]">[% nickname | strip_literal %]</A>
-<B><FONT SIZE="2">([% fakeemail_vis | strip_literal %])</FONT></B>[% ELSE %][% nickname | strip_literal %][% END %]
- on [% Slash.timeCalc(time) %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>
-[% UNLESS is_anon %]
-<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">
-<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">User #[% uid %] Info</A>
-[% IF homepage && homepage.length > 8 %] | <A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
-[% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
-<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
-[% END %]
-</FONT>
-[% END %]
 
-[% UNLESS is_anon %]
-	[% PROCESS zoo_icons person=uid bonus=1 %]
+<FONT FACE="[% constants.mainfontface %]" SIZE="1">by
+[% IF !is_anon %]<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
+[% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
+on [% Slash.timeCalc(time) %]
+[% IF sid && cid %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>[% END %]
+[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
+
+[% has_homepage = homepage && homepage.length > 8;
+   has_journal = journal_last_entry_date.search('[1-9]');
+   IF !is_anon && (has_homepage || has_journal) %]
+	<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">(
+	[% IF has_homepage %]
+		<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>
+		[% IF has_journal %] | [% END %]
+	[% END %]
+	[% IF has_journal %]
+		Last Journal:
+		<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[%
+			Slash.timeCalc(journal_last_entry_date) %]</A>
+	[% END %]
+	)</FONT>
 [% END %]
 
 [% ipid_display %]
+
 			</TD></TR></TABLE></TD>
 			<TD BACKGROUND="[% constants.imagedir %]/gr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		</TR>

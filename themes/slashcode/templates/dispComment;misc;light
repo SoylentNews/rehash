@@ -14,19 +14,31 @@ __template__
 [% USE Slash %]
 	<TR>
 		<TD>
-		<A NAME="[% cid %]"><H4>[% subject %]</H4></A>
-		by [% nickname | strip_literal %] on [% Slash.timeCalc(time) %]
-		[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
-		(<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)
-		[% UNLESS is_anon %]<BR>(<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">User #[% uid %] Info</A>)
-		[% IF homepage && homepage.length > 8 %]<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
-			[% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
-				<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
-			[% END %]
-		[% END %]
-		[% UNLESS is_anon %]
-			[% PROCESS zoo_icons person=uid bonus=1 %]
-		[% END %]
+		<BR><A NAME="[% cid %]"><B>[% subject %]</B></A>
+[% UNLESS user.noscores %] (Score:[% IF points.defined; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
+		<BR>by
+[% IF !is_anon %]<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
+[% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
+on [% Slash.timeCalc(time) %]
+[% IF sid && cid %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>[% END %]
+[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
+
+[% has_homepage = homepage && homepage.length > 8;
+   has_journal = journal_last_entry_date.search('[1-9]');
+   IF !is_anon && (has_homepage || has_journal) %]
+	<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">(
+	[% IF has_homepage %]
+		<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>
+		[% IF has_journal %] | [% END %]
+	[% END %]
+	[% IF has_journal %]
+		Last Journal:
+		<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[%
+			Slash.timeCalc(journal_last_entry_date) %]</A>
+	[% END %]
+	)</FONT>
+[% END %]
+
 		[% IF user.seclev >= 100 %]
 		<BR>IPID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid %]</A>&nbsp;&nbsp;SubnetID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% subnetid %]&amp;fieldname=ipid">[% subnetid %]</A>
 		[% END %]

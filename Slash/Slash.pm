@@ -1162,28 +1162,29 @@ sub _hard_dispComment {
 	} elsif ($user->{nosigs}) {
 		$comment_to_display = $comment->{comment};
 	} else {
-		$comment_to_display  = "$comment->{comment}<BR>$comment->{sig}";
+		$comment_to_display = "$comment->{comment}<BR>$comment->{sig}";
 	}
 
 	$time_to_display = timeCalc($comment->{date});
 	unless ($user->{noscores}) {
-		$score_to_display .= "(Score:$comment->{points}";
-
+		$score_to_display .= "(Score:";
+		$score_to_display .= length($comment->{points}) ? $comment->{points} : "?";
 		if ($comment->{reason}) {
 			$score_to_display .= ", $reasons->{$comment->{reason}}{name}";
 		}
-
 		$score_to_display .= ")";
 	}
 
-	$comment_link_to_display = qq|<A HREF="$constants->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}">#$comment->{cid}</A>|;
+	if ($comment->{sid} && $comment->{cid}) {
+		$comment_link_to_display = qq| (<A HREF="$constants->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}">#$comment->{cid}</A>)|;
+	} else {
+		$comment_link_to_display = " ";
+	}
 
 	if (isAnon($comment->{uid})) {
-		$user_to_display = $comment->{nickname};
+		$user_to_display = strip_literal($comment->{nickname});
 	} else {
 		my $nick = fixparam($comment->{nickname});
-
-		$userinfo_to_display = qq|<BR><FONT SIZE="-1">(<A HREF="$constants->{rootdir}/~$nick/">User #$comment->{uid} Info</A>|;
 
 		my $homepage = $comment->{homepage} || '';
 		$homepage = '' if length($homepage) <= 8;
@@ -1194,24 +1195,27 @@ sub _hard_dispComment {
 			$homepage = substr($homepage, 0, $halflen) . "..." . substr($homepage, -$halflen);
 		}
 		$homepage = strip_literal($homepage);
-		$userinfo_to_display .= qq[ | <A HREF="$comment->{homepage}">$homepage</A>]
+
+		$userinfo_to_display = "";
+		$userinfo_to_display = qq[<A HREF="$comment->{homepage}">$homepage</A>]
 			if $homepage;
+		if ($comment->{journal_last_entry_date} =~ /[1-9]/) {
+			$userinfo_to_display .= " | " if $userinfo_to_display;
+			$userinfo_to_display .= sprintf('Last Journal: <A HREF="%s/~%s/journal/">%s</A>',
+				$constants->{rootdir},
+				$nick,
+				timeCalc($comment->{journal_last_entry_date})
+			);
+		}
+		$userinfo_to_display = "<BR><FONT SIZE=\"-1\">($userinfo_to_display)</FONT>" if $userinfo_to_display;
 
-		$userinfo_to_display .= sprintf(' | Last Journal: <A HREF="%s/~%s/journal/">%s</A>',
-			$constants->{rootdir}, $nick, timeCalc($comment->{journal_last_entry_date})
-		) if $comment->{journal_last_entry_date} =~ /[1-9]/;
-
-		$userinfo_to_display .= ')</FONT>';
-
-		# This is wrong, must be fixed before we ship -Brian
-		# i think it is right now -- pudge
+		my $nick_literal = strip_literal($comment->{nickname});
+		my $nick_param = fixparam($comment->{nickname});
+		$user_to_display = qq{<A HREF="$constants->{rootdir}/~$nick_param">$nick_literal ($comment->{uid})</A>};
 		if ($comment->{fakeemail}) {
 			my $mail_literal = strip_literal($comment->{fakeemail_vis});
 			my $mail_param = fixparam($comment->{fakeemail});
-			my $nick_literal = strip_literal($comment->{nickname});
-			$user_to_display = qq| <A HREF="mailto:$mail_param">$nick_literal</A> (<B><FONT SIZE="2">$mail_literal</FONT></B>)|;
-		} else {
-			$user_to_display = strip_literal($comment->{nickname});
+			$user_to_display .= qq{ &lt;<A HREF="mailto:$mail_param">$mail_literal</A>&gt;};
 		}
 	}
 
@@ -1254,7 +1258,7 @@ sub _hard_dispComment {
 				<FONT SIZE="3" COLOR="$user->{fg}[2]">
 				$title $score_to_display
 				</FONT>
-				<BR>by $user_to_display on $time_to_display ($comment_link_to_display) $people_display
+				<BR>by $user_to_display on $time_to_display$comment_link_to_display $people_display
 				$userinfo_to_display $comment->{ipid_display}
 			</TD></TR>
 			<TR><TD>

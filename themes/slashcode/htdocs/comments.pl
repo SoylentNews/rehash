@@ -967,8 +967,10 @@ sub previewForm {
 					? getCurrentAnonymousCoward('nickname')
 					: $user->{nickname},
 		pid		=> $form->{pid},
+		uid		=> $form->{postanon} ? '' : $user->{uid},
 		homepage	=> $form->{postanon} ? '' : $user->{homepage},
 		fakeemail	=> $form->{postanon} ? '' : $user->{fakeemail},
+		journal_last_entry_date => $user->{journal_last_entry_date} || '',
 		'time'		=> $slashdb->getTime(),
 		subject		=> $tempSubject,
 		comment		=> $tempComment,
