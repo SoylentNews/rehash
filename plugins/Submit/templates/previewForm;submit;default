@@ -53,7 +53,7 @@ TITLE="[% topic.alttext %]"></A>
 
 <P>[% subtext %]</P>
 
-[% IF admin_flag && submission.del = 0 %]
+[% IF admin_flag && submission.del == 0 %]
 	[ <A HREF="[% env.script_name %]?op=Update&amp;subid=[% subid %]">Delete Submission</A> ]<BR>
 
 	<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST">
