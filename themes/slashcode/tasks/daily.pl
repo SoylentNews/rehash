@@ -59,7 +59,7 @@ sub daily_generateDailyMailees {
 				story_always_topic	story_always_author	story_always_nexus
 			)) {
 				my $value = $user->{$cust_key};
-				my @values = sort split /[,']+/, $value;
+				my @values = sort grep /^\d+$/, split /[,']+/, $value;
 				$key .= '|' . join(',', @values);
 			}
 			# allow us to make certain emails sent individually,
