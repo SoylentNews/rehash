@@ -60,10 +60,6 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 [ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
 <BR>
 [% END %]
-[% IF karma_flag && (admin_flag || nickmatch_flag)  %]
-	<B>Karma:</B> [% PROCESS karma karma=useredit.karma admin_flag=admin_flag %]
-	(mostly affected by moderation done to your comments)<BR>
-[% END %]
 
 <P>
 
@@ -102,9 +98,7 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 <TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
 </TR>
 
-<TR><TD>&nbsp;</TD>
-
-<TD COLSPAN="2">
+<TR><TD VALIGN="TOP" COLSPAN="2">
 
 [% IF commentcount > 0 %]
 	[% commenttitle =

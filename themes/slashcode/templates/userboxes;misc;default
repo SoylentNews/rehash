@@ -61,7 +61,7 @@ IF !useredit.is_anon;
 				FILTER fixparam; useredit.realemail; END; '">';
 				Slash.ellipsify(useredit.realemail); '</A>';
 			'<BR>&nbsp;&nbsp;';
-			IF useredit.fakeemail;
+			IF useredit.fakeemail && useredit.fakeemail != useredit.realemail;
 				'shown as <A HREF="mailto:';
 				FILTER fixparam; useredit.fakeemail; END; '">';
 				Slash.ellipsify(useredit.fakeemail); '</A>';
