@@ -76,11 +76,11 @@ sub getTop10Comments {
 
 	my $block;
 	foreach (@$A) {
-		my($sid, $title, $cid, $subj, $d, $nickname, $points) = @$_;
+		my($sid, $title, $cid, $subj, $d, $nickname, $points, $reason) = @$_;
 		$block .= <<EOT;
 
 &middot; <B><A HREF="$constants->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</A>
-	($points points) by $nickname</B> on $d <FONT SIZE="1">attached to
+	($points points, $constants->{reasons}[$reason]) by $nickname</B> on $d <FONT SIZE="1">attached to
 	<A HREF="$constants->{rootdir}/article.pl?sid=$sid">$title</A></FONT><BR>
 EOT
 	}

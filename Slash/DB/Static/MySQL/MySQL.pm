@@ -451,7 +451,7 @@ sub getTop10Comments {
 		# can't get 10 of them, our standards are too high;
 		# lower our minimum score requirement and re-SELECT.
 		my $c = $self->sqlSelectMany(
-			"stories.sid, title, cid, subject, date, nickname, comments.points",
+			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason",
 			"comments, stories, users",
 			"stories.time >= DATE_SUB(NOW(), INTERVAL $archive_delay DAY)
 				AND comments.points >= $max_points
