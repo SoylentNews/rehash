@@ -2774,7 +2774,7 @@ sub getDB {
 	# it does something reasonable.
 	for my $i (0 .. $n_usable-2) {
 		my $dbid = $dbids_usable[$i];
-		$x -= $dbs->{$dbid}{weight_total};
+		$x -= $dbs->{$dbid}{weight_final};
 		if ($x <= 0) {
 #print STDERR "returning $i of $n_usable, dbid=$dbid\n";
 			return $dbs->{$dbid}{virtual_user};
