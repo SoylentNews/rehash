@@ -8437,6 +8437,7 @@ sub getUser {
 	# If no such user, we can return now.
 	# 2004/04/02 - we're seeing this message a lot, not sure why so much.
 	# Adding more debug info to check - Jamie
+	# I'm guessing it's the "com_num_X_at_or_after_cid" check.
 	if (!$answer || !%$answer) {
 		if ($mcddebug) {
 			my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
