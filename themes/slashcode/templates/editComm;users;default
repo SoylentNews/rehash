@@ -126,7 +126,7 @@ __template__
 		    not just loop over the reasons already existing,
 		    like it did before?
 		 %]
-		<P><B>Reason Modifier</B> (assign a modifier to different moderation reasons)<br>
+		<P><B><A NAME="reason_bonus">Reason Modifier</A></B> (assign a modifier to different moderation reasons)<br>
 		<TABLE>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
@@ -162,7 +162,7 @@ __template__
 			</TR>
 		</TABLE>
 
-		<P><B>People Modifier</B> (assign a modifier to different people)<br>
+		<P><B><A NAME="people_bonus_friend">P</A>e<A NAME="people_bonus_foe">o</A>p<A NAME="people_bonus_freak">l</A>e <A NAME="people_bonus_fan">M</A>o<A NAME="people_bonus_fof">d</A>i<A NAME="people_bonus_eof">f</A>ier</B> (assign a modifier to different people)<br>
 		<TABLE>
 			<TR>
 				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
@@ -196,13 +196,13 @@ __template__
 			</TR>
 		</TABLE>
 
-		<P><B>Anonymous Modifier</B> (modifier assigned to anonymous posts)<BR>
+		<P><B><A NAME="people_bonus_anonymous">Anonymous Modifier</A></B> (modifier assigned to anonymous posts)<BR>
 		[% people_select.anonymous %]<br>
 
-		<P><B>Karma Bonus</B> (modifier assigned to posts where the user has good karma)<BR>
+		<P><B><A NAME="karma_bonus">Karma Bonus</A></B> (modifier assigned to posts where the user has good karma)<BR>
 		[% karma_bonus %]<br>
 
-		<P><B>New User Modifier</B> (assign modifiers to recently created accounts)<BR>
+		<P><B><A NAME="new_user_bonus">New User Modifier</A></B> (assign modifiers to recently created accounts)<BR>
 		[% new_user_percent_select %]% (new users in the last X percentage of the userbase)<br>
 		[% new_user_bonus_select %] (modifier assigned to new user posts)<br>
 
@@ -214,11 +214,11 @@ __template__
 		it switches to indexed mode)<BR>
 		<INPUT TYPE="TEXT" NAME="commentspill" VALUE="[% user_edit.commentspill %]" SIZE="3">
 
-		<P><B>Small Comment Penalty</B> (Assign -1 to comments smaller
+		<P><B><A NAME="clsmall">Small Comment Penalty</A></B> (Assign -1 to comments smaller
 		than this many characters)<BR>
 		<INPUT TYPE="TEXT" NAME="clsmall" VALUE="[% user_edit.clsmall %]" SIZE="6">
 
-		<P><B>Long Comment Bonus </B> (Assign +1 to lengthy comments)<BR>
+		<P><B><A NAME="clbig">Long Comment Bonus</A></B> (Assign +1 to lengthy comments)<BR>
 		<INPUT TYPE="TEXT" NAME="clbig" VALUE="[% user_edit.clbig %]" SIZE="6">
 
 		<P><B>Max Comment Size</B> (Truncates long comments, and

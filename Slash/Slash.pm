@@ -43,7 +43,7 @@ $VERSION   	= '2.003000';  # v2.3.0
 	getData
 	gensym
 
-	dispComment displayStory displayThread dispStory
+	bonusReasonLog dispComment displayStory displayThread dispStory
 	getOlderStories moderatorCommentLog printComments
 );
 
@@ -98,64 +98,22 @@ sub selectComments {
 	}
 
 	my $max_uid = $slashdb->countUsers({ max => 1 });
+	my $reasons = $slashdb->getReasons();
 	# We first loop through the comments and assign bonuses and
 	# and such.
 	for my $C (@$thisComment) {
 		# By setting pid to zero, we remove the threaded
 		# relationship between the comments
 		$C->{pid} = 0 if $user->{commentsort} > 3; # Ignore Threads
+
 		# I think instead we want something like this... (not this
 		# precisely, it munges up other things).
 		# I'm still looking into how to get parent links and
 		# children to show up properly in flat mode. - Jamie 2002/07/30
 #		$user->{state}{noreparent} = 1 if $user->{commentsort} > 3;
 
-		# User can setup to give points based on size.
-		$C->{points}++ if length($C->{comment}) > $user->{clbig}
-			&& $C->{points} < $max && $user->{clbig} != 0;
+		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons);
 
-		# User can setup to give points based on size.
-		$C->{points}-- if length($C->{comment}) < $user->{clsmall}
-			&& $C->{points} > $min && $user->{clsmall};
-
-		# If the user is AC and we give AC's a penalty/bonus
-		$C->{points} += $user->{people_bonus_anonymous}
-			if isAnon($C->{uid}) && $user->{people_bonus_anonymous};
-
-		# If you don't trust new users
-		if ($user->{new_user_bonus} && $user->{new_user_percent}) {
-			$C->{points} += $user->{new_user_bonus} 
-					if ((($C->{uid}/$max_uid)*100) > 100-$user->{new_user_percent});
-		}
-
-		# Adjust reasons. Do we need a reason?
-		# Are you threatening me?
-		my $reason_name = $slashdb->getReasons()->{$C->{reason}}{name};
-		$C->{points} += $user->{"reason_alter_$reason_name"} 
-				if ($user->{"reason_alter_$reason_name"});
-
-		# Keep your friends close but your enemies closer.
-		# Or ignore them, we don't care.
-		$C->{points} += $user->{people_bonus_friend}
-			if ($user->{people}{FRIEND()}{$C->{uid}});
-		$C->{points} += $user->{people_bonus_foe}
-			if ($user->{people}{FOE()}{$C->{uid}});
-		$C->{points} += $user->{people_bonus_freak}
-			if ($user->{people}{FREAK()}{$C->{uid}});
-		$C->{points} += $user->{people_bonus_fan}
-			if ($user->{people}{FAN()}{$C->{uid}});
-		$C->{points} += $user->{people_bonus_fof}
-			if ($user->{people}{FOF()}{$C->{uid}});
-		$C->{points} += $user->{people_bonus_eof}
-			if ($user->{people}{EOF()}{$C->{uid}});
-
-		#Karma bonus time
-		$C->{points} += $user->{karma_bonus}
-			if $user->{karma_bonus} && $C->{karma_bonus} eq 'yes';
-
-		# fix points in case they are out of bounds
-		$C->{points} = $min if $C->{points} < $min;
-		$C->{points} = $max if $C->{points} > $max;
 		# Let us fill the hash range for hitparade
 		$comments->{0}{totals}[$comments->{0}{total_keys}{$C->{points}}]++;  
 	}
@@ -217,6 +175,92 @@ sub selectComments {
 
 	reparentComments($comments, $header);
 	return($comments, $count);
+}
+
+sub _get_points {
+	my($C, $user, $min, $max, $max_uid, $reasons) = @_;
+	my $points = $C->{points};
+	my $hr = { };
+
+	# User can setup to give points based on size.
+	if ($user->{clbig} && length($C->{comment}) > $user->{clbig}) {
+		$hr->{clbig} = 1;
+	}
+
+	# User can setup to give points based on size.
+	if ($user->{clsmall} && length($C->{comment}) < $user->{clsmall}) {
+		$hr->{clsmall} = -1;
+	}
+
+	# If the user is AC and we give AC's a penalty/bonus
+	if ($user->{people_bonus_anonymous} && isAnon($C->{uid})) {
+		$hr->{people_bonus_anonymous} =
+			$user->{people_bonus_anonymous};
+	}
+
+	# If you don't trust new users
+	if ($user->{new_user_bonus} && $user->{new_user_percent}) {
+		my $perc = 100*$C->{uid}/$max_uid;
+		if ($perc > $user->{new_user_percent}) {
+			$hr->{new_user_bonus} =
+				$user->{new_user_bonus};
+		}
+	}
+
+	# Adjust reasons. Do we need a reason?
+	# Are you threatening me?
+	my $reason_name = $reasons->{$C->{reason}}{name};
+	if ($user->{"reason_alter_$reason_name"}) {
+		$hr->{reason_bonus} =
+			$user->{"reason_alter_$reason_name"};
+	}
+
+	# Keep your friends close but your enemies closer.
+	# Or ignore them, we don't care.
+	if ($user->{people}{FRIEND()}{$C->{uid}}) {
+		$hr->{people_bonus_friend} =
+			$user->{people_bonus_friend};
+	}
+	if ($user->{people}{FOE()}{$C->{uid}}) {
+		$hr->{people_bonus_foe} =
+			$user->{people_bonus_foe}
+	}
+	if ($user->{people}{FREAK()}{$C->{uid}}) {
+		$hr->{people_bonus_freak} =
+			$user->{people_bonus_freak}
+	}
+	if ($user->{people}{FAN()}{$C->{uid}}) {
+		$hr->{people_bonus_fan} =
+			$user->{people_bonus_fan}
+	}
+	if ($user->{people}{FOF()}{$C->{uid}}) {
+		$hr->{people_bonus_fof} =
+			$user->{people_bonus_fof}
+	}
+	if ($user->{people}{EOF()}{$C->{uid}}) {
+		$hr->{people_bonus_eof} =
+			$user->{people_bonus_eof}
+	}
+
+	# Karma bonus time
+	if ($user->{karma_bonus} && $C->{karma_bonus} eq 'yes') {
+		$hr->{karma_bonus} =
+			$user->{karma_bonus};
+	}
+
+	for my $val (values %$hr) { $points += $val }
+	$points = $max if $points > $max;
+	$points = $min if $points < $min;
+
+	if (wantarray) {
+		for my $key (keys %$hr) {
+			my $val = $hr->{$key} + 0;
+			$hr->{$key} = "+$val" if $val > 0;
+		}
+		return ($points, $hr);
+	} else {
+		return $points;
+	}
 }
 
 sub _print_cchp {
@@ -500,7 +544,68 @@ sub printComments {
 
 #========================================================================
 
-=head2 moderatorCommentLog(SID, CID)
+=head2 bonusReasonLog(CID)
+
+Prints a table detailing the bonuses that affect this user's score
+for a particular comment.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item CID
+
+Comment's ID.
+
+=back
+
+=item Return value
+
+The HTML.
+
+=item Dependencies
+
+The 'bonusReasonLog' template block.
+
+=back
+
+=cut
+
+sub bonusReasonLog {
+	my($cid) = @_;
+	my $user = getCurrentUser();
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $cid_q = $slashdb->sqlQuote($cid);
+	my($min, $max) = ($constants->{comment_minscore}, 
+			  $constants->{comment_maxscore});
+	my $max_uid = $slashdb->countUsers({ max => 1 });
+	my $reasons = $slashdb->getReasons();
+
+	my $comment = $slashdb->sqlSelectHashref(
+		"cid, uid, karma_bonus, reason",
+		"comments",
+		"cid=$cid_q");
+	$comment->{comment} = $slashdb->sqlSelect(
+		"comment",
+		"comment_text",
+		"cid=$cid_q");
+
+	my($points, $bonus_hr) = _get_points($comment, $user, $min, $max, $max_uid, $reasons);
+
+	slashDisplay('bonusReasonLog', {
+		reasons		=> $reasons,
+		reason		=> $comment->{reason},
+		bonus_hr	=> $bonus_hr,
+	}, { Return => 1, Nocomm => 1 });
+}
+
+#========================================================================
+
+=head2 moderatorCommentLog(TYPE, ID)
 
 Prints a table detailing the history of moderation of
 a particular comment.
@@ -511,13 +616,14 @@ a particular comment.
 
 =over 4
 
-=item SID
+=item TYPE
 
-Comment's story ID.
+String describing type of the ID data:  cid, uid, cuid, ipid, subnetid,
+bipid or bsubnetid.
 
-=item CID
+=item ID
 
-Comment's ID.
+Cid or IPID.
 
 =back
 
