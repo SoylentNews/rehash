@@ -3,7 +3,7 @@
 # Copyright 1997-2003 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
-# Based on Cliff's createTestComments, bugs are probably his fault
+# Based on Cliff's createTestComments, bugs are probably his fault :)
 
 BEGIN {
 	{
@@ -85,9 +85,18 @@ $constants = getCurrentStatic();
 		my $time = UnixDate(ParseDateString(
 			"epoch ".get_time($opts{t})),
 			"%Y-%m-%d %H-%M-%S");
-		my $displaystatus = (rand(1) < 0.7) ? 0 : ((rand(1) < 0.9) ? 1 : -1);
 		my $tid = getRandomTopicID();
 		my $section = getRandomSection();
+		my $displaystatus = 0;
+		if ($section =~ /^(articles|index)$/) {
+			if (rand(1) < 0.1) {
+				$displaystatus = -1;
+			}
+		} elsif (rand(1) < 0.7) {
+			$displaystatus = 1;
+		} elsif (rand(1) < 0.1) {
+			$displaystatus = -1;
+		}
 
 		my $story = {
 			subid		=> '',
@@ -170,12 +179,22 @@ sub getRandomTopicID {
 
 sub getRandomSection {
 	# Yes, inefficient.  I do not care.
-	my $sections = $slashdb->sqlSelectAll("section", "sections", "1=1 AND type='contained'", "ORDER BY RAND()");
-	my @sections = map { $_->[0] } @$sections;
-	my $num = rand @sections;
-	$num = 0 if rand(1) < 1/3;
-        my $rand_section = $sections[$num];
-        return $rand_section;
+	my $sections = $slashdb->sqlSelectAll(
+		"section, hostname",
+		"sections",
+		"type='contained' AND index_handler='index.pl'");
+	my @sections = ( );
+	for my $sect (@$sections) {
+		push @sections, $sect->[0];
+		if (!$sect->[1]) {
+			# Sections with no hostname are probably 'articles'
+			# and are more likely to be chosen.
+			for (1..8) {
+				push @sections, $sect->[0];
+			}
+		}
+	}
+	return $sections[rand @sections];
 }
 
 sub getRandomUserID {

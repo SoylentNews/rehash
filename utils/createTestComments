@@ -198,12 +198,17 @@ EOT
 # subroutines
 
 sub getRandomSid {
+	my $ds_clause = "displaystatus = 0";
+	if (rand(1) < 0.3) {
+		# A minority of comments are posted to sectional stories.
+		$ds_clause = "displaystatus > -1";
+	}
 	my $sids = $slashdb->sqlSelectAll("sid",
 		$story_table,
 		"discussion > 0
-		AND displaystatus > -1
-		AND writestatus != 'archived'
-		AND time < NOW()",
+		 AND $ds_clause
+		 AND writestatus != 'archived'
+		 AND time < NOW()",
 		"ORDER BY time DESC");
 	my @sids = map { $_->[0] } @$sids;
 	# Try to pick a random sid to post to that weights toward the
