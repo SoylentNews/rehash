@@ -104,7 +104,7 @@ EOT
 	my($num_admin_mods, $num_mods) = (0, 0);
 	if ($admin_mods) {
 		for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
-			$admin_mods_text .= sprintf("%13.13s: %26s %-48s\n",
+			$admin_mods_text .= sprintf("%13.13s: %26s %-46s\n",
 				$nickname,
 				$admin_mods->{$nickname}{m1_text},
 				$admin_mods->{$nickname}{m2_text}

@@ -201,7 +201,7 @@ sub getAdminModsInfo {
 		$hr->{$nickname}{m2_text} = sprintf("\@ %5d fair, %5d un",
 			$nfair, $nunfair);
 		if ($nfair+$nunfair >= 20) { # this number is pretty arbitrary
-			$hr->{$nickname}{m2_text} .= sprintf(" (%6.2f%% un)",
+			$hr->{$nickname}{m2_text} .= sprintf(" (%5.1f%% un)",
 				$percent);
 		}
 		# Also calculate overall-week percentage.
@@ -211,7 +211,7 @@ sub getAdminModsInfo {
 			? $nunfair_wk*100/($nfair_wk+$nunfair_wk)
 			: 0;
 		if ($nfair_wk+$nunfair_wk >= 20) { # again, pretty arbitrary
-			$hr->{$nickname}{m2_text} .= sprintf(" (wk: %6.2f%%)",
+			$hr->{$nickname}{m2_text} .= sprintf(" (wk: %5.1f%%)",
 				$percent);
 		}
 		$hr->{$nickname}{m2_fair} = $nfair;
