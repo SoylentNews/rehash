@@ -495,7 +495,7 @@ sub getBaseM2Needed {
 # If getting the inherited m2s before the mod is created omit passing the id
 # as a parameter. 
 sub getInheritedM2sForMod {
-	my ($self, $mod_uid, $cid, $reason, $active, $id) = @_;
+	my($self, $mod_uid, $cid, $reason, $active, $id) = @_;
 	return [] unless $active;
 	my $mod = $self->getModForM2Inherit($mod_uid, $cid, $reason, $id);
 	my $p_mid = defined $mod ? $mod->{id} : undef;
@@ -505,7 +505,7 @@ sub getInheritedM2sForMod {
 }
 
 sub getModForM2Inherit {
-	my ($self, $mod_uid, $cid, $reason, $id) = @_;
+	my($self, $mod_uid, $cid, $reason, $id) = @_;
 	my $mod_uid_q = $self->sqlQuote($mod_uid);
 	my $reasons = $self->getReasons();
 	my $m2able_reasons = join(",",
@@ -531,7 +531,7 @@ sub getModForM2Inherit {
 }
 
 sub applyInheritedM2s {
-	my ($self, $mod_id, $m2s) = @_;
+	my($self, $mod_id, $m2s) = @_;
 	
 	foreach my $m2(@$m2s){
 		my $m2_user=$self->getUser($m2->{uid});
@@ -5674,7 +5674,7 @@ sub setCommentForMod {
 
 	# Make sure we apply this change to the right comment :)
 	my $where = "cid=$cid ";
-	my $points_extra_where="";
+	my $points_extra_where = "";
 	if ($val < 0) {
 		$points_extra_where .= " AND points > $constants->{comment_minscore}";
 	} else {
@@ -5741,7 +5741,7 @@ sub setCommentForMod {
 		assn_order => [ "-points", "-pointsmax" ]
 	});
 	$changed += 0;
-	if(!$changed and $raw_val > 0) {
+	if (!$changed && $raw_val > 0) {
 		$update->{-points}="points";
 		$update->{-tweak}="tweak$val";
 		my $tweak_extra = " AND tweak$val <= 0";
@@ -5749,7 +5749,7 @@ sub setCommentForMod {
 			assn_order => [ "-points", "-pointsmax" ]
 		});
 	}
-	$changed+=0;
+	$changed += 0;
 
 #	$self->{_dbh}->commit;
 #	$self->{_dbh}{AutoCommit} = 1;

@@ -1240,7 +1240,7 @@ sub submitComment {
 	if (!$user->{is_anon} && !$form->{postanon}) {
 		$pts = $user->{defaultpoints};
 
-		if($constants->{karma_posting_penalty_style} == 0){
+		if ($constants->{karma_posting_penalty_style} == 0) {
 			$pts-- if $user->{karma} < 0;
 			$pts-- if $user->{karma} < $constants->{badkarma};
                 } else {
