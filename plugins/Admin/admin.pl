@@ -1028,7 +1028,7 @@ sub editStory {
 			my $temp_body;
 			$form->{bodytext} = '';
 			my $fh = $upload->fh;
-			while(<$fh>) {
+			while (<$fh>) {
 				$form->{bodytext} .= $_;
 			}
 		}
