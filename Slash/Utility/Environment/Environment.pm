@@ -1273,10 +1273,14 @@ sub prepareUser {
 
 	# This is here so when user selects "6 ish" it
 	# "posted by xxx around 6 ish" instead of "on 6 ish"
+	## this does not call Slash::getData right now because
+	## it is just so early in the code that the AC user does
+	## not even exist yet in static mode, and it causes problems
+	## with slashDisplay.  -- pudge
 	if ($user->{'format'} eq '%l ish') {	# %i
-		$user->{aton} = 'around'; # getData('atonish');
+		$user->{aton} = 'around'; # Slash::getData('atonish');
 	} else {
-		$user->{aton} = 'on'; # getData('aton');
+		$user->{aton} = 'on'; # Slash::getData('aton');
 	}
 
 	if ($uri =~ m[^/$]) {
