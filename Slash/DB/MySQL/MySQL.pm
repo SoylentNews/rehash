@@ -757,6 +757,36 @@ sub getMetamodsForUserRaw {
 	my $getmods_loops = 0;
 	my @ids = ( );
 	my $mod_hr;
+	my $range_offset = 0.9;
+	$range_offset = $constants->{m2_range_offset}
+		if defined($constants->{m2_range_offset});
+	my $twice_range_offset = $range_offset * 2;
+	my $if_expr = "";
+	if ($waitpow != 1) {
+		$if_expr = <<EOT;
+			IF(	id BETWEEN $min_old AND $max_mid,
+				IF(
+					id BETWEEN $min_old and $max_old,
+					POW(         (id-$min_old)/$old_range,     $waitpow),
+					POW(GREATEST((id-$min_mid)/$mid_range, 0), $waitpow)
+						+ $range_offset
+				),
+				POW(GREATEST((id-$min_new)/$new_range, 0), $waitpow)
+					+ $twice_range_offset			)
+EOT
+	} else {
+		$if_expr = <<EOT;
+			IF(	id BETWEEN $min_old AND $max_mid,
+				IF(
+					id BETWEEN $min_old and $max_old,
+					(id-$min_old)/$old_range,
+					(id-$min_mid)/$mid_range
+						+ $range_offset
+				),
+				(id-$min_new)/$new_range
+					+ $twice_range_offset			)
+EOT
+	}
 	GETMODS: while ($num_needed > 0 && ++$getmods_loops <= 5) {
 		my $limit = $num_needed*2+10; # get more, hope it's enough
 		my $already_id_clause = "";
@@ -765,28 +795,11 @@ sub getMetamodsForUserRaw {
 		my $already_cid_clause = "";
 		$already_cid_clause = " AND cid NOT IN ($already_cid_list)"
 			if $already_cid_list;
-		my $range_offset = 0.9;
-		$range_offset = $constants->{m2_range_offset}
-			if defined($constants->{m2_range_offset});
-		my $twice_range_offset = $range_offset * 2;
 		$mod_hr = { };
 		$mod_hr = $self->sqlSelectAllHashref(
 			"id",
 			"id, cid,
-			 m2count
-			 + $consensus * IF(
-				id BETWEEN $min_old AND $max_mid,
-				IF(
-					id BETWEEN $min_old and $max_old,
-					POW((id-$min_old)/$old_range, $waitpow),
-					POW((id-$min_mid)/$mid_range, $waitpow)
-						+ $range_offset
-				),
-				POW((id-$min_new)/$new_range, $waitpow)
-					+ $twice_range_offset
-			 )
-			 + RAND()
-			 AS rank",
+			 m2count + $consensus * $if_expr + RAND() AS rank",
 			"moderatorlog",
 			"uid != $uid_q AND cuid != $uid_q
 			 AND m2status=0
