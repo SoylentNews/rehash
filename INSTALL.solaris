@@ -1,0 +1,39 @@
+Some more info to help Solaris users.  Please read this in conjuction with
+the main INSTALL document.
+
+Author: Nigel Wetters <nwetters@cpan.org> from pudge's comments about
+installing on Solaris x86. See COPYING for license information.
+
+1.  Install a new version of Perl.
+
+2.  Set up MySQL, Apache, mod_perl etc. Find details in the main INSTALL
+    and maintainers' installation documentation. You will need to install
+    the GNU version of 'tar' and maybe also 'make' to install MySQL. 
+
+3.  Unpack slash.
+
+4.  The Makefile supplied with slash doesn't work. It won't work even if
+    you update to the latest GNU tools.  Sorry.
+      cd slash-2.x.x/Slash/
+      perl Makefile.PL
+      make
+      make install
+
+5.  Make and install plugins by cd'ing into the ../plugins directory, then
+    looking for each subdirectory with a Makefile.PL. In each of these
+    subdirectories, use the usual method to install the plugin module:
+      perl Makefile.PL
+      make
+      make install
+
+6.  Hostname lookups are problematic under Solaris using `hostname -f`.
+    Edit the bin/install-slashsite script, replacing occurrences of
+    `hostname -f` with `hostname`.
+
+7.  Copy by hand the bin, httpd, plugins, sbin, sql, themes and utils
+    directories to your installation directory (e.g. /usr/local/slash). 
+
+8.  bin/install-slashsite should now work from the installation directory.
+    Continue the installation as suggestion in the main INSTALL documentation.
+
+__END__
