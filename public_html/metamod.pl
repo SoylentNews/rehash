@@ -129,7 +129,7 @@ sub metaModerate {
 	}
 	$I{dbh}->do("UNLOCK TABLES");
 
-	print "<BR><BR>" if $y && $I{U}{aseclev} > 10;		# Break properly.
+	print "<BR><BR>" if $y && $I{U}{aseclev} > 10;		# Break HTML properly.
 	print <<EOT;
 $y comments have been meta moderated.  Thanks for participating.
 You may wanna go back <A HREF="$I{rootdir}/">home</A> or perhaps to
@@ -202,7 +202,10 @@ sub metaMod {
 		-ts   => "from_unixtime($ts)",
 		-flag => $flag
 	});
-	print "<BR>Updating $muid with $val" if $I{U}{aseclev} > 10;
+
+	# We used to pring UID, instead now it might be better to print the
+	# moderation ID if we print anything at all (which might be an option).
+	print "<BR>Updating moderation #$mmid with $val" if $I{U}{aseclev} > 10;
 }
 
 #################################################################
