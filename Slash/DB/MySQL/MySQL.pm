@@ -5723,7 +5723,7 @@ sub countSubmissionsWithEmaildomain {
 	my $constants = getCurrentStatic();
 	my $days_back = $options->{days_back} || $constants->{submission_count_days};
 	my $emaildomain_q = $self->sqlQuote($emaildomain);
-	return $self->sqlCount("submissions",
+	return $self->sqlCount("submissions USE INDEX (time_emaildomain)",
 		"emaildomain=$emaildomain_q
 		 AND time >= DATE_SUB(NOW(), INTERVAL $days_back DAY)");
 }
