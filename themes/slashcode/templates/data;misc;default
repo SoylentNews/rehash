@@ -96,8 +96,8 @@ each submission of [% env.script_name %] in order to allow everyone to have a fa
 [% CASE 'moderatord_tokenmsg' %]
 
 [% new_comments %] comments becomes [% new_comments * constants.tokenspercomment %] tokens.
-[% IF stirredpoints %]Stirred out [% stirredpoints %] points, so 
-[%- ELSE %]So[% END %] the total number of tokens=[% num_tokens %]
+[% IF stirredpoints %]Stirred out [% stirredpoints %] points, recycle [% recycled_tokens %] tokens, so
+[%- ELSE %]So[% END %] total tokens=[% num_tokens %]
 First [% last_user * constants.m1_eligible_percentage %] accounts available.
 Eligible: [% eligible %] (min clicks [% constants.m1_eligible_hitcount %]) / Low factor [% factor_lowest %], High factor [% factor_highest %] / Start at [% start %] ([% least %] clicks, uid [% startuid %]), end at [% end %] ([% most %] clicks, uid [% enduid %])
 Incremented token-count on [% num_updated %] users.
@@ -106,7 +106,7 @@ Incremented token-count on [% num_updated %] users.
 ---------------- END MODERATORD EXECUTION ----------------
 
 [% CASE 'rereg_email_subject' %]
-You're [% constants.sitename %] account has expired.
+Your [% constants.sitename %] account has expired.
 
 [% CASE DEFAULT %]
 ---- MISSING MISCELLANEOUS DATA SEGMENT --- [[% value %]] block not found.

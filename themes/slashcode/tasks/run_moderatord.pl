@@ -177,7 +177,9 @@ sub give_out_tokens {
 	my $num_tokens = $comments * $constants->{tokenspercomment};
 	$statsSave->addStatDaily("mod_tokens_gain_clicks_random", $num_tokens);
 	my $stirredpoints = $slashdb->stirPool();
-	$num_tokens += $stirredpoints * $tokperpt;
+	my $recycle_fraction = $constants->{mod_stir_recycle_fraction} || 1.0;
+	my $recycled_tokens = int($stirredpoints * $tokperpt * $recycle_fraction + 0.5);
+	$num_tokens += $recycled_tokens;
 
 	if ($stirredpoints and my $statsSave = getObject('Slash::Stats::Writer')) {
 		$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
@@ -217,13 +219,15 @@ sub give_out_tokens {
 
 	# If the appropriate vars are set, give tokens preferentially to
 	# users who are better-qualified to have them.
-	my $factor_ratio = $constants->{m1_pointgrant_factor_fairratio} || 0;
-	my $factor_total = $constants->{m1_pointgrant_factor_fairtotal} || 0;
-	if ($factor_ratio || $factor_total) {
+	my $wtf = { };
+	$wtf->{fairratio} = $constants->{m1_pointgrant_factor_fairratio} || 0;
+	$wtf->{fairtotal} = $constants->{m1_pointgrant_factor_fairtotal} || 0;
+	$wtf->{stirratio} = $constants->{m1_pointgrant_factor_stirratio} || 0;
+	if ($wtf->{fairratio} || $wtf->{fairtotal} || $wtf->{stirratio}) {
 		my @orig_uids = @eligible_uids;
 		@eligible_uids = @{$read_db->factorEligibleModerators(
-			\@orig_uids, $factor_ratio, $factor_total,
-			\%info)};
+			\@orig_uids, $wtf, \%info)
+		};
 	}
 
 	# Decide who's going to get the tokens.
@@ -241,6 +245,7 @@ sub give_out_tokens {
 		stirredpoints	=> $stirredpoints,
 		last_user	=> $read_db->countUsers({ max => 1}),
 		num_tokens	=> $num_tokens,
+		recycled_tokens	=> $recycled_tokens,
 		eligible	=> $eligible,
 		start		=> $start,
 		end		=> $end,

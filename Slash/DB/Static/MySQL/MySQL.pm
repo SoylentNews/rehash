@@ -375,14 +375,17 @@ sub deleteDaily {
 	my $constants = getCurrentStatic();
 
 	$self->updateStoriesCounts();
-	my $archive_delay = $constants->{archive_delay} || 14;
+	my $archive_delay_mod =
+		   $constants->{archive_delay_mod}
+		|| $constants->{archive_delay}
+		|| 14;
 
 	# Now for some random stuff
-	$self->sqlDo("DELETE from pollvoters");
-	$self->sqlDo("DELETE from moderatorlog WHERE
-		to_days(now()) - to_days(ts) > $archive_delay");
-	$self->sqlDo("DELETE from metamodlog WHERE
-		to_days(now()) - to_days(ts) > $archive_delay");
+	$self->sqlDo("DELETE FROM pollvoters");
+	$self->sqlDo("DELETE FROM moderatorlog
+		WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
+	$self->sqlDo("DELETE FROM metamodlog
+		WHERE TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
 
 	# Formkeys
 	my $delete_time = time() - $constants->{'formkey_timeframe'};
@@ -391,11 +394,13 @@ sub deleteDaily {
 	# Note, on Slashdot, the next line locks the accesslog for several
 	# minutes, up to 10 minutes if traffic has been heavy.
 	unless ($constants->{noflush_accesslog}) {
-		$self->sqlDo("DELETE FROM accesslog WHERE date_add(ts,interval 48 hour) < now()");
+		$self->sqlDo("DELETE FROM accesslog
+			WHERE DATE_ADD(ts, INTERVAL 48 HOUR) < NOW()");
 	}
 
 	unless ($constants->{noflush_empty_discussions}) {
-		$self->sqlDo("DELETE FROM discussions WHERE type='recycle' AND commentcount = 0");
+		$self->sqlDo("DELETE FROM discussions
+			WHERE type='recycle' AND commentcount=0");
 	}
 }
 
@@ -893,22 +898,27 @@ sub fetchEligibleModerators {
 # Longer explanation:
 # This method takes a list of uids who are eligible to be moderators
 # (i.e., eligible to receive tokens which may end up giving them mod
-# points).  It also takes two numeric values, positive numbers that
-# are almost certainly slightly greater than 1 (e.g. 1.3 or so).
-# For each uid, two values are calculated, the total number of times
-# the user has been M2'd "fair," and the ratio of fair-to-unfair M2s
-# for the user.  Two lists of the uids are made, from "worst" to
-# "best," the "worst" user in each case having the probability of
-# being eligible for tokens (remaining on the list) reduced and the
-# "best" with that probability increased (appearing two or more
-# times on the list).
+# points).  It also takes several numeric values, positive numbers
+# that are almost certainly slightly greater than 1 (e.g. 1.3 or so).
+# For each uid, several values are calculated:  the total number of
+# times the user has been M2'd "fair," the ratio of fair-to-unfair M2s,
+# and the ratio of spent-to-stirred modpoints.  Multiple lists of
+# the uids are made, from "worst" to "best," the "worst" user in each
+# case having the probability of being eligible for tokens (remaining
+# on the list) reduced and the "best" with that probability increased
+# (appearing two or more times on the list).
+# The list of which factors to use and the numeric values of those
+# factors is in $wtf_hr ("what to factor");  its currently-defined
+# keys are factor_ratio, factor_total and factor_stirred.
 sub factorEligibleModerators {
-	my($self, $orig_uids, $factor_ratio, $factor_total,
-		$info_hr) = @_;
+	my($self, $orig_uids, $wtf, $info_hr) = @_;
 	return $orig_uids if !$orig_uids || !@$orig_uids || scalar(@$orig_uids) < 10;
-	$factor_ratio = 0 if $factor_ratio == 1;
-	$factor_total = 0 if $factor_total == 1;
-	return $orig_uids if !$factor_ratio || !$factor_total;
+
+	$wtf->{fairratio} ||= 0;	$wtf->{fairratio} = 0	if $wtf->{fairratio} == 1;
+	$wtf->{fairtotal} ||= 0;	$wtf->{fairtotal} = 0	if $wtf->{fairtotal} == 1;
+	$wtf->{stirratio} ||= 0;	$wtf->{stirratio} = 0	if $wtf->{stirratio} == 1;
+
+	return $orig_uids if !$wtf->{fairratio} || !$wtf->{fairtotal} || !$wtf->{stirratio};
 
 	my $start_time = Time::HiRes::time;
 
@@ -917,30 +927,38 @@ sub factorEligibleModerators {
 	my $uids_in = join(",", @$orig_uids);
 	my $u_hr = $self->sqlSelectAllHashref(
 		"uid",
-		"uid, m2fair, m2unfair",
+		"uid, m2fair, m2unfair, totalmods, stirred",
 		"users_info",
 		"uid IN ($uids_in)",
 	);
 
-	# Assign one of the ratio values that will be used in the sorts
-	# in a moment.  We precalculate this because it's used in several
-	# places.  Note that we only calculate the fairness *ratio* if
-	# there are a decent number of votes, otherwise we leave it undef.
+	# Assign ratio values that will be used in the sorts in a moment.
+	# We precalculate these because they're used in several places.
+	# Note that we only calculate the *ratio* if there are a decent
+	# number of votes, otherwise we leave it undef.
 	for my $uid (keys %$u_hr) {
+		# Fairness ratio.
 		my $ratio = undef;
 		if ($u_hr->{$uid}{m2fair}+$u_hr->{$uid}{m2unfair} >= 5) {
 			$ratio = $u_hr->{$uid}{m2fair}
 				/ ($u_hr->{$uid}{m2fair}+$u_hr->{$uid}{m2unfair});
 		}
 		$u_hr->{$uid}{m2fairratio} = $ratio;
+		# Spent-to-stirred ratio.
+		$ratio = undef;
+		if ($u_hr->{$uid}{totalmods}+$u_hr->{$uid}{stirred} >= 10) {
+			$ratio = $u_hr->{$uid}{totalmods}
+				/ ($u_hr->{$uid}{totalmods}+$u_hr->{$uid}{stirred});
+		}               
+		$u_hr->{$uid}{stirredratio} = $ratio;
 	}
 
-	if ($factor_total) {
+	if ($wtf->{fairtotal}) {
 		# Assign a token likeliness factor based on the absolute
 		# number of "fair" M2s assigned to each user's moderations.
 		# Sort by total m2fair first (that's the point of this
 		# code).  If there's a tie in that, the secondary sort is
-		# by ratio, and tertiary is by uid (newest first).
+		# by ratio, and tertiary is random.
 		my @new_uids = sort {
 				$u_hr->{$a}{m2fair} <=> $u_hr->{$b}{m2fair}
 				||
@@ -949,16 +967,16 @@ sub factorEligibleModerators {
 				  ? $u_hr->{$a}{m2fairratio} <=> $u_hr->{$b}{m2fairratio}
 				  : 0 )
 				||
-				$b <=> $a
+				int(rand(1)*2)*2-1
 			} @$orig_uids;
 		# Assign the factors in the hashref according to this
 		# sort order.  Those that sort first get the lowest value,
 		# the approximate middle gets 1, the last get highest.
-		_set_factor($u_hr, $factor_total, 'factor_m2total',
+		_set_factor($u_hr, $wtf->{fairtotal}, 'factor_m2total',
 			\@new_uids);
 	}
 
-	if ($factor_ratio) {
+	if ($wtf->{fairratio}) {
 		# Assign a token likeliness factor based on the ratio of
 		# "fair" to "unfair" M2s assigned to each user's
 		# moderations.  In order not to be "prejudiced" against
@@ -966,19 +984,43 @@ sub factorEligibleModerators {
 		# their factor (i.e. 1) by simply being left out of the
 		# list.  Sort by ratio first (that's the point of this
 		# code);  if there's a tie in ratio, the secondary sort
-		# order is total m2fair, and tertiary is uid (newest first).
+		# order is total m2fair, and tertiary is random.
 		my @new_uids = sort {
 			  	$u_hr->{$a}{m2fairratio} <=> $u_hr->{$b}{m2fairratio}
 				||
 				$u_hr->{$a}{m2fair} <=> $u_hr->{$b}{m2fair}
 				||
-				$b <=> $a
+				int(rand(1)*2)*2-1
 			} grep { defined($u_hr->{$_}{m2fairratio}) }
 			@$orig_uids;
 		# Assign the factors in the hashref according to this
 		# sort order.  Those that sort first get the lowest value,
 		# the approximate middle gets 1, the last get highest.
-		_set_factor($u_hr, $factor_ratio, 'factor_m2ratio',
+		_set_factor($u_hr, $wtf->{fairratio}, 'factor_m2ratio',
+			\@new_uids);
+	}
+
+	if ($wtf->{stirratio}) {
+		# Assign a token likeliness factor based on the ratio of
+		# stirred to spent mod points.  In order not to be
+		# "prejudiced" against users with little or not mod history,
+		# those users get no change in their factor (i.e. 1) by
+		# simply being left out of the list.  Sort by ratio first
+		# (that's the point of this code); if there's a tie in
+		# ratio, the secondary sort order is total spent, and
+		# tertiary is random.
+		my @new_uids = sort {
+			  	$u_hr->{$a}{stirredratio} <=> $u_hr->{$b}{stirredratio}
+				||
+				$u_hr->{$a}{totalmods} <=> $u_hr->{$b}{totalmods}
+				||
+				int(rand(1)*2)*2-1
+			} grep { defined($u_hr->{$_}{stirredratio}) }
+			@$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $wtf->{stirratio}, 'factor_stirredratio',
 			\@new_uids);
 	}
 
@@ -995,10 +1037,12 @@ sub factorEligibleModerators {
 	# be doubled up in the list (or more than doubled for large factors).
 	for my $uid (@$orig_uids) {
 		my $factor = 1;
-		$factor *= $u_hr->{$uid}{factor_m2total}
-			if defined($u_hr->{$uid}{factor_m2total});
-		$factor *= $u_hr->{$uid}{factor_m2ratio}
-			if defined($u_hr->{$uid}{factor_m2ratio});
+		for my $field (qw(
+			factor_m2total factor_m2ratio factor_stirredratio
+		)) {
+			$factor *= $u_hr->{$uid}{$field}
+				if defined($u_hr->{$uid}{$field});
+		}
 		# If the caller wanted to keep stats, send some stats.
 		$info_hr->{factor_lowest} = $factor
 			if $info_hr && $info_hr->{factor_lowest}
@@ -1025,9 +1069,15 @@ sub factorEligibleModerators {
 #	print STDERR "factorEligibleModerators orig   end: '@$orig_uids[-10..-1]' now   end: '@return_uids[-10..-1]'\n";
 #	for my $uid (sort { $u_hr->{$a}{factor_m2total} <=> $u_hr->{$b}{factor_m2total} }
 #		keys %$u_hr) {
-#		print STDERR "m2total "
-#			. sprintf("%0.4f %6d %6d", $u_hr->{$uid}{factor_m2total}, $uid, $u_hr->{$uid}{m2fair})
-#			. "\n";
+#		print STDERR
+#			sprintf("m2total %0.4f m2ratio %0.4f stirredratio %0.4f uid %6d m2fair %6d stirred %6d",
+#				$u_hr->{$uid}{factor_m2total} || 1,
+#				$u_hr->{$uid}{factor_m2ratio} || 1,
+#				$u_hr->{$uid}{factor_stirredratio} || 1,
+#				$uid,
+#				$u_hr->{$uid}{m2fair},
+#				$u_hr->{$uid}{stirred}
+#			) . "\n";
 #	}
 #use Data::Dumper;
 #	print STDERR "factorEligibleModerators u_hr: " . Dumper($u_hr);
