@@ -1,0 +1,77 @@
+__section__
+default
+__description__
+Template handles listing of comments for both IPIDs and UIDS
+Also can interleave moderations performed against the
+comments if they're provided and the user is an admin
+
+* admin_flag    - whether or not the user is an admin
+* title         - title to display
+* submissions   - structure containing submissions
+
+__title__
+listSubmissions;users;default
+__page__
+users
+__lang__
+en_US
+__name__
+listSubmissions
+__template__
+[%
+light_text_color = "#AAAAAA";
+%]
+[% IF submissions.size > 0 %]
+	[% PROCESS titlebar width="100%" title = title -%]
+	<TABLE width=100% border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.bg.2 %]">
+		<TR bgcolor="[% user.bg.3 %]">
+			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.fg.3 %]">Title</FONT></TH>
+			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_flag %]User[% END %]</FONT></TH>
+			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_flag %]IPID[% END %]</FONT></TH>
+			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.fg.3 %]">Datestamp</FONT></TH>
+			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_flag %]State[% END %]</FONT></TH>
+		</TR>
+		[% FOREACH sub = submissions %]
+		<TR>
+			<TD>[% sub.subj %]</TD>
+			<TD>[% IF admin_flag %][% PROCESS nick_and_uid uid=sub.uid nickname=Slash.db.getUser(sub.uid, 'nickname'); %][% END %]</TD>
+			<TD>[% IF admin_flag %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</TD>
+			<TD>[% Slash.timeCalc(time) %]</TD>
+			<TD>[% IF admin_flag || user.uid == sub.uid %]
+				[% SWITCH sub.del %]
+					[%- CASE 0 -%]
+						Pending
+					[%- CASE 1 -%]
+						Rejected
+					[%- CASE 2 -%]
+						Approved	
+				[%- END -%]
+			     [%-  END -%]
+			</TD>
+		</TR>
+		[% END %]
+	</TABLE>
+[% END %]
+
+
+[% BLOCK nick_and_uid;
+	nickname | strip_literal;
+	IF uid != constants.anonymous_coward_uid;
+		' (<A HREF="';
+		constants.rootdir;
+		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
+		uid;
+		'">';
+		uid;
+		'</A>)';
+	END;
+END %]
+
+[% BLOCK link_ipid %]
+<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+[% END %]
+__seclev__
+10000
+__version__
+$Id$
+
