@@ -43,6 +43,20 @@ $task{$me}{code} = sub {
 sub save2file {
 	my($f, $d) = @_;
 	my $fh = gensym();
+
+	# don't rewrite the file if it is has not changed, so clients don't
+	# re-FETCH the file; if they send an If-Modified-Since, Apache
+	# will just return a header saying the file has not been modified
+	# -- pudge
+	open $fh, "<$f" or die "Can't open $f: $!";
+	my $current = do { local $/; <$fh> };
+	close $fh;
+
+	my $new = $d;
+	# normalize ...
+	s|<dc:date>[^<]*</dc:date>|| for $current, $new;
+	return if $current eq $new;
+
 	open $fh, ">$f" or die "Can't open $f: $!";
 	print $fh $d;
 	close $fh;
