@@ -44,5 +44,14 @@ ELSE;
 	});
 END %]
 
+</TD>
+
+<TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
+</TR>
+
+<TR><TD>&nbsp;</TD>
+
+<TD COLSPAN="2" VALIGN="TOP">
+
 __seclev__
 500

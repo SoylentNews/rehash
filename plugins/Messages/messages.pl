@@ -210,6 +210,7 @@ sub display_prefs {
 		tab_selected => 'messages'
 	});
 	print createMenu('messages');
+	slashDisplay('journuserboxes');
 	slashDisplay('display_prefs', {
 		userm		=> $userm,
 		prefs		=> $prefs,
@@ -269,6 +270,7 @@ sub list_messages {
 		tab_selected => 'messages'
 	});
 	print createMenu('messages'); # [ Message Preferences | Inbox ]
+	slashDisplay('journuserboxes');
 	slashDisplay('list_messages', {
 		note		=> $note,
 		messagecodes	=> $messagecodes,

@@ -70,9 +70,11 @@ IF !useredit.is_anon;
 			END;
 		ELSE;
 			# Looking at someone else; show fake email info.
-			'<BR><A HREF="mailto:';
-				FILTER fixparam; useredit.fakeemail; END; '">';
-				Slash.ellipsify(useredit.fakeemail); '</A>';
+			IF useredit.fakeemail;
+				'<BR><A HREF="mailto:';
+					FILTER fixparam; useredit.fakeemail; END; '">';
+					Slash.ellipsify(useredit.fakeemail); '</A>';
+			END;
 		END;
                 IF useredit.homepage;
                         '<BR><A HREF="';

@@ -88,11 +88,6 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
  <A HREF="webcal://[% useredit.calendar_url | strip_attribute %]">Subscribe</A> <A HREF="http://[% useredit.calendar_url | strip_attribute %]">Download</A><BR>
 [% END %]
 
-[% IF useredit.bio %]
- <B>User Bio</B>
- <BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<BR>
-[% END %]
-
 </TD>
 
 <TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
