@@ -7750,11 +7750,17 @@ sub getSubmissionForUser {
 		push @where, "primaryskid = $skin->{skid}";
 	}
 
+	if ($form->{filter}) {
+		push @where, "subj LIKE '%" . $form->{filter}. "%'";
+	}
+
+	my $limit = ($form->{limit} =~ /\d+/) ? 'LIMIT ' . $form->{limit} : '';
+
 	my $submissions = $self->sqlSelectAllHashrefArray(
 		'submissions.*, karma',
 		'submissions,users_info',
 		join(' AND ', @where),
-		'ORDER BY time'
+		"ORDER BY time $limit"
 	);
 
 	for my $sub (@$submissions) {
