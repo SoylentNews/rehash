@@ -1478,30 +1478,38 @@ sub approveTag {
 	if (!$approved{$t_uc}) {
 		return "";
 	}
+	
+	# These are now stored in a var approvedtags_attr
+	#
+	# A string in the format below:
+	# a:href_RU img:src_RU,alt,width,height,longdesc_U
+	# 
+	# Is decoded into the following data structure for attribute
+	# approval
+	#
+	# {
+	#	A =>	{ HREF =>	{ ord => 1, req => 1, url => 1 } },
+	#	IMG =>	{ SRC =>	{ ord => 1, req => 1, url => 1 },
+	#		  ALT =>	{ ord => 2                     },
+	#		  WIDTH =>	{ ord => 3                     },
+	#		  HEIGHT =>	{ ord => 4                     },
+	#		  LONGDESC =>	{ ord => 5,           url => 1 }, },
+	# }
+	# this is decoded in Slash/DB/MySQL.pm geSlashConf
 
-	# Some tags allow attributes, or require attributes to be useful.
-	# These tags go through a secondary, fancier approval process.
-	# Note that approvedtags overrides what is/isn't allowed here.
-	# (At some point we should put this hash into a var, maybe
-	# like "a:href_RU img:src_RU,alt,width,height,longdesc_U"?)
-	my %attr = (
-		A =>	{ HREF =>	{ ord => 1, req => 1, url => 1 } },
-		IMG =>	{ SRC =>	{ ord => 1, req => 1, url => 1 },
-			  ALT =>	{ ord => 2                     },
-			  WIDTH =>	{ ord => 3                     },
-			  HEIGHT =>	{ ord => 4                     },
-			  LONGDESC =>	{ ord => 5,           url => 1 }, },
-	);
+	my $attr = getCurrentStatic("approvedtags_attr") || {};
+
+
 	if ($slash) {
 
 		# Close-tags ("</A>") never get attributes.
 		$wholetag = "/$t";
 
-	} elsif ($attr{$t_uc}) {
+	} elsif ($attr->{$t_uc}) {
 
 		# This is a tag with attributes, verify them.
 
-		my %allowed = %{$attr{$t_uc}};
+		my %allowed = %{$attr->{$t_uc}};
 		my %required =
 			map  { $_, $allowed{$_}  }
 			grep { $allowed{$_}{req} }

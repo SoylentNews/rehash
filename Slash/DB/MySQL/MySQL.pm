@@ -5634,7 +5634,7 @@ sub getStoriesBySubmitter {
 sub countStoriesBySubmitter {
 	my($self, $id) = @_;
 
-	my $count = $self->sqlCount('stories', "submitter='$id'  AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty') and displaystatus >= 0");
+	my $count = $self->sqlCount('stories', "submitter='$id'  AND time < NOW() AND (writestatus = 'ok' OR writestatus = 'dirty' OR writestatus='archived') and displaystatus >= 0");
 
 	return $count;
 }
@@ -6523,6 +6523,27 @@ sub getSlashConf {
 
 	if ($conf{x_forwarded_for_trust_regex}) {
 		$conf{x_forwarded_for_trust_regex} = qr{$conf{x_forwarded_for_trust_regex}};
+	}
+
+	if ($conf{approvedtags_attr}) {
+		my $approvedtags_attr = $conf{approvedtags_attr};
+		$conf{approvedtags_attr} = {};
+		my @tags = split(/\s+/, $approvedtags_attr);
+		foreach my $tag(@tags){
+			my ($tagname,$attr_info) = $tag=~/([^:]*):(.*)$/;
+			my @attrs = split( ",", $attr_info );
+			my $ord=1;
+			foreach my $attr(@attrs){
+				my($at,$extra) = split( /_/, $attr );
+				$at = uc($at);
+				$tagname = uc($tagname);
+				$conf{approvedtags_attr}->{$tagname}{$at}{ord}=$ord;
+				$conf{approvedtags_attr}->{$tagname}{$at}{req}=1 if $extra=~/R/;
+				$conf{approvedtags_attr}->{$tagname}{$at}{url}=1 if $extra=~/U/;
+				$ord++
+			}
+		}   
+
 	}
 
 	# for fun ... or something
