@@ -9628,7 +9628,7 @@ sub setStoryRenderedFromChosen {
 	if (!$info->{neverdisplay}) {
 		for my $key (sort keys %$rendered_hr) {
 			unless ($self->sqlInsert("story_topics_rendered", 
-				{ stoid => $stoid, tid => $key, weight => $rendered_hr->{$key} }
+				{ stoid => $stoid, tid => $key }
 			)) {
 				# and we should ROLLBACK here
 				return undef;
