@@ -1856,7 +1856,7 @@ sub getPollQuestionList {
 	for (qw(section exclude_section)) {
 		# Usage issue. Some folks may add an "s" to the key name.
 		$other->{$_} ||= $other->{"${_}s"} if exists $other->{"${_}s"};
-		if (exists $other->{$_}) {
+		if (exists $other->{$_} && $other->{$_}) {
 			if (!ref $other->{$_}) {
 				$other->{$_} = [$other->{$_}];
 			} elsif (ref $other->{$_} eq 'HASH') {
@@ -1868,16 +1868,10 @@ sub getPollQuestionList {
 		}
 	}
 
-	if ($other->{section}) {
-		if (ref ${$other->{section}} ne "ARRAY") {
-			$where = 'section = ' . $self->sqlQuote($other->{section});
-		} else {
-			$where = sprintf 'section IN (%s)', join(',', @{$other->{section}});
-		}
-	}
-
+	$where = sprintf 'section IN (%s)', join(',', @{$other->{section}})
+		if $other->{section};
 	$where = sprintf 'section NOT IN (%s)', join(',', @{$other->{exclude_section}})
-		if $other->{exclude_section};
+		if $other->{exclude_section} && @{$other->{section}};
 
 	my $questions = $self->sqlSelectAll(
 		'qid, question, date',
