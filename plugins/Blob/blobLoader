@@ -40,7 +40,7 @@ while (<$file>) {
 close($file);
 my $id = $blobs->create({ 
 												 seclev => $opts{s},
-												 mime_type => $opts{c},
+												 content_type => $opts{c},
 												 data => $data,
 												 });
 print "Stored in $id\n";
