@@ -24,18 +24,8 @@ __template__
 				<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[% Slash.timeCalc(journal_last_entry_date) %]</A>
 			[% END %]
 		[% END %]
-		[% UNLESS user.is_anon || is_anon || uid == user.uid %]
-			[% IF user.people.$uid == Slash.FRIEND %]
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Friend ]</A>
-			[% ELSIF user.people.$uid == Slash.FOE %]
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% uid %]">[ Foe ]</A>
-			[% ELSIF user.people.$uid == Slash.FAN %]
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Fan ]</A>
-			[% ELSIF user.people.$uid == Slash.FREAK %]
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=foe&amp;uid=[% uid %]">[ Freak ]</A>
-			[% ELSE %]
-				<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;type=friend&amp;uid=[% uid %]">[ Neutral ]</A>
-			[% END %]
+		[% UNLESS is_anon %]
+			[% PROCESS zoo_icons person=uid bonus=1 %]
 		[% END %]
 		[% IF user.seclev >= 100 %]
 		<BR>IPID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid %]</A>&nbsp;&nbsp;SubnetID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% subnetid %]&amp;fieldname=ipid">[% subnetid %]</A>
