@@ -75,7 +75,7 @@ sub main {
 		printComments($discussion);
 	} else {
 		my $message = getData('no_such_sid');
-		header($message);
+		header($message, $form->{section});
 		print $message;
 	}
 

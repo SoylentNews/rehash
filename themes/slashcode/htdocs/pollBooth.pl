@@ -29,7 +29,12 @@ sub main {
 		undef $form->{'aid'};
 	}
 
-	header(getData('title'), $form->{section});
+	if ($form->{qid}) {
+		my $section = $slashdb->getPollQuestion($form->{qid}, 'section');
+		header(getData('title'), $section);
+	} else {
+		header(getData('title'), $form->{section});
+	}
 
 	$op = 'default' unless $ops{$form->{op}};
 	$ops{$op}->($form);

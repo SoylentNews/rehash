@@ -16,8 +16,9 @@ sub main {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $op = getCurrentForm('op');
+	my $section = $slashdb->getSection($form->{section});
 
-	header(getData('header'));
+	header(getData('header'), $section->{section});
 
 	my $ineligible = $user->{is_anon} || $user->{rtbl} ||
 			 !$slashdb->checkForMetaModerator($user);		
