@@ -3807,6 +3807,7 @@ sub checkForOpenProxy {
 	my @ports = grep /^\d+$/, split / /, $ports;
 	return 0 if !@ports;
 	my $timeout = $constants->{comments_portscan_timeout} || 5;
+	my $connect_timeout = int($timeout/scalar(@ports)+0.2);
 	my $ok_url = "$constants->{absolutedir}/ok.txt";
 
 	my $pua = Slash::Custom::ParUserAgent->new();
@@ -3814,10 +3815,13 @@ sub checkForOpenProxy {
 	$pua->max_redirect(3);
 	$pua->max_hosts(scalar(@ports));
 	$pua->max_req(scalar(@ports));
+	$pua->timeout($connect_timeout);
 
 #use LWP::Debug;
 #use Data::Dumper;
 #LWP::Debug::level("+trace"); LWP::Debug::level("+debug");
+
+	my $start_time = time;
 
 	local $_proxy_port = undef;
 	sub _cfop_callback {
@@ -3849,7 +3853,10 @@ sub checkForOpenProxy {
 		$pua->register($req, \&_cfop_callback);
 	}
 #print STDERR scalar(localtime) . "pua: " . Dumper($pua);
-	$pua->wait($timeout);
+	my $elapsed = time - $start_time;
+	my $wait_timeout = $timeout - $elapsed;
+	$wait_timeout = 1 if $wait_timeout < 1;
+	$pua->wait($wait_timeout);
 #print STDERR scalar(localtime) . " cfop done with wait, returning " . (defined $_proxy_port ? 'undef' : "'$port'") . "\n";
 	$_proxy_port = 0 if !$_proxy_port;
 
