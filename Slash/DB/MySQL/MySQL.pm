@@ -2716,26 +2716,10 @@ sub getDBs {
 sub getDB {
 	my($self, $db_type) = @_;
 
-	my $cache = getCurrentCache();
-	my $found = [];
-	if ($cache->{'dbs'} && (($_getDBs_cached_nextcheck || 0) > time)) {
-		$found = $cache->{'dbs'}{$db_type};
-		return "" if !$found || !@$found;
-	} else {
-		# XXX No. This is wrong, it's making us do unnecessary
-		# "SELECT FROM dbs" calls.  If the cache is expired,
-		# the proper action is to refill the cache and pull
-		# the data we want out of it with perl. - Jamie 2004/10/09
-		my $dbs = $self->sqlSelectAllHashref('id', '*', 'dbs',
-			'type=' . $self->sqlQuote($db_type) . " AND isalive='yes'"
-		);
-		for (keys %$dbs) {
-			my $db = $dbs->{$_};
-			push @$found, ($db) x $db->{weight};
-		}
-	}
+	my $dbs = $self->getDBs;
+	my @found = [ grep { $_->{isalive} eq 'yes'} @{$dbs->{$db_type}} ];
 
-	return $found->[rand @$found]{virtual_user};
+	return $found[rand @found]{virtual_user};
 }
 
 } # end closure surrounding getDBs and getDB
