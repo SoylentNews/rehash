@@ -802,6 +802,7 @@ sub moderatorCommentLog {
 	}
 	my $gmcl_opts = {};
 	$gmcl_opts->{hours_back} = $options->{hours_back} if $options->{hours_back};
+	$gmcl_opts->{order_col} = "reason" if $type eq "cid";
 
 	my $mods = $slashdb->getModeratorCommentLog($asc_desc, $limit,
 		$type, $value, $gmcl_opts);
@@ -874,14 +875,27 @@ sub moderatorCommentLog {
 	}
 
 	my $this_user;
-	$this_user = $slashdb->getUser($value) if $type eq "uid";	
+	$this_user = $slashdb->getUser($value) if $type eq "uid";
+	my $cur_uid;
+	$cur_uid = $value if $type eq "uid" or $type eq "cuid";
+	
+	
 	my $mod_ids = [keys %$seen_mods];
 	my $mods_to_m2s;
-	if ($constants->{show_m2s_with_mods}) {
+	if ($constants->{show_m2s_with_mods} and $options->{show_m2s}) {
 		$mods_to_m2s = $slashdb->getMetamodsForMods($mod_ids, $constants->{m2_limit_with_mods});
 	}
 	
-
+	# Do the work to determine which moderations share the same m2s
+	if($type eq "cid" and $constants->{show_m2s_with_mods} and $constants->{m2_multicount} and $options->{show_m2s}){
+		foreach my $m(@$mods){
+			my $key = "$m->{reason}:";
+			foreach my $m2 (@{$mods_to_m2s->{$m->{id}}}){
+				$key.="$m2->{uid} $m2->{val},";
+			}
+			$m->{m2_identity} = $key;
+		}
+	}
 	my $data = {
 		type		=> $type,
 		mod_admin	=> $mod_admin, 
@@ -900,7 +914,13 @@ sub moderatorCommentLog {
 		skip_ip_disp    => $skip_ip_disp,
 		this_user	=> $this_user,
 		title		=> $title,
-		mods_to_m2s	=> $mods_to_m2s
+		mods_to_m2s	=> $mods_to_m2s,
+		show_m2s	=> $options->{show_m2s},
+		cur_uid		=> $cur_uid,
+		value		=> $value,
+		need_m2_form	=> $options->{need_m2_form},
+		need_m2_button	=> $options->{need_m2_button},
+		meta_mod_only	=> $options->{meta_mod_only},
 	};
 	slashDisplay('modCommentLog', $data, { Return => 1, Nocomm => 1 });
 }
@@ -1179,7 +1199,7 @@ sub dispComment {
 	}
 
 	$comment->{sig} = parseDomainTags($comment->{sig}, $comment->{fakeemail});
-	if ($user->{sigdash} && $comment->{sig} && !isAnon($comment->{uid})) {
+	if ($user->{sigdash} && $comment->{sig}) {
 		$comment->{sig} =~ s/^\s*-{1,5}\s*<(?:P|BR)>//i;
 		$comment->{sig} = "--<BR>$comment->{sig}";
 	}
