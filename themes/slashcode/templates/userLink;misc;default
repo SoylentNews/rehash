@@ -24,6 +24,8 @@ __template__
 [% IF nickname && uid %]
 	<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% nickname | strip_literal %] ([% uid %])</A>
 	[% IF !user.is_anon %][% PROCESS zoo_icons person=uid bonus=bonus %][% END %]
+[% ELSE %]
+	<B>[ Unknown User ]</B>
 [% END %]
 __seclev__
 10000
