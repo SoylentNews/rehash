@@ -1303,7 +1303,7 @@ sub cleanSlashTags {
 	return unless $text;
 
 
-	$text =~ s#<slash-(image|story|user|file|break|link|comment|journal)#<slash type="$1"#gis;
+	$text =~ s#<slash-(image|story|user|file|break|link|comment|journal)#<SLASH TYPE="\L$1\E"#gis;
 	my $newtext = $text;
 	my $tokens = Slash::Custom::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
@@ -1340,7 +1340,7 @@ sub _cleanSlashUser {
 
 	$uid = strip_attribute($uid);
 	$nickname = strip_attribute($nickname);
-	my $content = qq|<slash nickname="$nickname" uid="$uid" type="user">|;
+	my $content = qq|<SLASH NICKNAME="$nickname" UID="$uid" TYPE="user">|;
 	$$newtext =~ s#\Q$token->[3]\E#$content#is;
 }
 
@@ -1361,7 +1361,7 @@ sub _cleanSlashStory {
 		: strip_attribute($slashdb->getStory($token->[1]{story}, 'title', 1));
 	my $sid = strip_attribute($token->[1]{story});
 
-	my $content = qq|<SLASH STORY="$sid" TITLE="$title" TYPE="STORY">$text</SLASH>|;
+	my $content = qq|<SLASH STORY="$sid" TITLE="$title" TYPE="story">$text</SLASH>|;
 	if ($token->[1]{text}) {
 		$$newtext =~ s#\Q$token->[3]\E#$content#is;
 	} else {
@@ -1377,13 +1377,13 @@ sub _cleanSlashLink {
 		my $link  = $relocateDB->create({ url => $token->[1]{href} });
 		my $href  = strip_attribute($token->[1]{href});
 		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
+		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
 	} else {
 		my $url   = $relocateDB->get($token->[1]{id}, 'url');
 		my $link  = $relocateDB->create({ url => $token->[1]{href} });
 		my $href  = strip_attribute($token->[1]{href});
 		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
+		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
 	}
 }
 
@@ -1416,7 +1416,7 @@ sub processSlashTags {
 		my $form = getCurrentForm();
 # The logic is that if they are on the first page then page will be empty
 # -Brian
-		my @parts = split /<slash type="break">/is, $newtext;
+		my @parts = split /<SLASH TYPE="break">/is, $newtext;
 		if ($form->{page}) {
 			$newtext = $parts[$form->{page} - 1];
 		} else {
