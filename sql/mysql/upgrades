@@ -2593,3 +2593,7 @@ INSERT INTO string_param (type, code, name) VALUES ('story023','3','All');
 
 INSERT INTO vars (name, value, description) VALUES ('story_never_topic_allow','0','Allow story_never_topic data to be edited and passed to getStoriesEssentials? 0=no, 1=subscriber-only, 2=yes');
 
+# Don't do this on Slashdot just yet.
+UPDATE users_index SET slashboxes = INSERT(slashboxes, LOCATE('index_more', slashboxes), LENGTH('index_more'), 'mainpage_more') WHERE LOCATE('index_more', slashboxes) > 0;
+
+
