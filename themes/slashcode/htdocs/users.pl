@@ -638,8 +638,7 @@ sub mailPasswd {
 	if (!$err_name) {
 		$user_edit = $slashdb->getUser($uid);
 		$err_name = 'mailpasswd_readonly_err'
-			if $slashdb->checkReadOnly('ipid')
-				|| $slashdb->checkReadOnly('subnetid');
+			if $slashdb->checkReadOnly;
 	}
 	if (!$err_name) {
 		$err_name = 'mailpasswd_toooften_err'
@@ -2839,7 +2838,7 @@ sub getUserAdmin {
 		@accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
 
 		if ($form->{userfield} =~/^\d+\.\d+\.\d+\.(\d+)$/) {
-			if($1 ne "0"){
+			if ($1 ne "0"){
 				$proxy_check->{available} = 1;
 				$proxy_check->{results} = $slashdb->checkForOpenProxy($form->{userfield}) if $form->{check_proxy};
 			}
