@@ -1045,6 +1045,7 @@ sub editStory {
 
 	my $authortext = slashDisplay('futurestorybox', {
 					past => $past,
+					present => $storyref,
 					future => $future,
 				}, { Return => 1 });
 
@@ -1472,7 +1473,7 @@ sub saveStory {
 							{ story => $data });
 	} else {
 		slashHook('admin_save_story_failed', 
-							{ story -> $data });
+							{ story => $data });
 		titlebar('100%', getData('story_creation_failed'));
 		listStories(@_);
 		return;

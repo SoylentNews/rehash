@@ -33,21 +33,22 @@ __template__
 <TABLE>
 	<TR VALIGN=TOP>
 		<TD>
-			[% storycontent %]
+		[% storycontent %]
 		</TD>
 
-		<TD>
+		<TD WIDTH="220">
 		
-		<BR>
-		[% INCLUDE titlebar width="100%" TITLE="Related Links" %]
-		[% storyref.relatedtext %] 
+		[% PROCESS fancybox
+			title = "Related Links"
+			contents = storyref.relatedtext
+		%]
 		<INPUT TYPE="HIDDEN" NAME="relatedtext" VALUE="[% relatedtext | strip_attribute %]">
-		
-		<BR>
-		<BR>
-		[% INCLUDE titlebar width="100%" TITLE="Story Admin" %]
-		[% authortext %]
-		<BR>
+
+		[% PROCESS fancybox
+			title = "Story Admin"
+			contents = authortext
+		%]
+
 		</TD>
 	</TR>
 </TABLE>
@@ -59,25 +60,26 @@ __template__
 		<TD>
 		[% story %]
 		</TD>
-		<TD>
-		[% 
-			IF Slash.getObject('Slash::Events'); %]
-		[% INCLUDE titlebar width="100%" title="Set an Event for this Story" %]		
-		<A HREF="[% constants.rootidir %]/eventsadmin.pl?op=edit&amp;sid=[% sid %]">Make Event</A>
-			[% END;
+		<TD WIDTH="220">
+
+		[% IF Slash.getObject('Slash::Events'); %]
+			[% PROCESS fancybox
+				title = "Set an Event for this Story"
+				contents = "<A HREF=\"$constants.rootdir/eventsadmin.pl?op=edit&amp;sid=$sid\">Make Event</A>"
+			%]
+		[% END %]
+
+		[% PROCESS fancybox
+			title = "Related Links"
+			contents = storyref.relatedtext
+		%]
+		<INPUT TYPE="HIDDEN" NAME="relatedtext" VALUE="[% relatedtext | strip_attribute %]">
+
+		[% PROCESS fancybox
+			title = "Story Admin"
+			contents = authortext
 		%]
 
-		<BR>
-		<BR>
-		[% INCLUDE titlebar width="100%" title="Related Links" %]
-		[% storyref.relatedtext %] 
-
-		<INPUT TYPE="HIDDEN" NAME="relatedtext" VALUE="[% relatedtext | strip_attribute %]">
-		<BR>
-		<BR>
-		[% INCLUDE titlebar width="100%" title="Story Admin" %]
-		[% authortext %]
-		<BR>
 		</TD>
 	</TR>
 </TABLE>
