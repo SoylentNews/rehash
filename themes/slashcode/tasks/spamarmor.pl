@@ -6,7 +6,6 @@
 
 use strict;
 use vars qw( %task $me );
-use Safe;
 use Slash;
 use Slash::DB;
 use Slash::Display;
