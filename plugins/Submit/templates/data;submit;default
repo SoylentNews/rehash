@@ -22,9 +22,10 @@ __template__
 
 [% CASE 'updatehead' %]
 	[% IF subids.size > 0 %]
-		Deleting [% subids.size %]
-		[% IF subids.size == 1 %] submission [% ELSE %] submissions [% END %]
-		[% IF subids.size <= 3 %] ( [% subids.join(', ') %] ) [% END %]
+		Deleting [% subids.size -%]
+		[%- IF subids.size == 1 %] submission [%
+		ELSE -%] submissions [% END -%]
+		[%- IF subids.size <= 3 %]( [% subids.join(', ') %] )[% END %]
 	[% END %]
 
 [% CASE 'quickieshead' %]

@@ -255,15 +255,10 @@ sub submissionEd {
 		width		=> '100%',
 	});
 
-	my(@submissions, $submissions, %selection);
+	my($submissions, %selection);
 	$submissions = $slashdb->getSubmissionForUser();
 
-	for (@$submissions) {
-		my $sub = $submissions[@submissions] = {};
-		@{$sub}{qw(
-			subid subj time tid note email
-			name section comment uid karma weight
-		)} = @$_;
+	for my $sub (@$submissions) {
 		$sub->{name}  =~ s/<(.*)>//g;
 		$sub->{email} =~ s/<(.*)>//g;
 		$sub->{is_anon} = isAnon($sub->{uid});
@@ -279,7 +274,8 @@ sub submissionEd {
 		$sub->{ssection} = $sub->{section} ne $constants->{defaultsection}
 			? "&section=$sub->{section}" : '';
 		$sub->{stitle}  = '&title=' . fixparam($sub->{subj});
-		$sub->{section} = ucfirst($sub->{section}) unless $user->{is_admin};
+		$sub->{section} = ucfirst($sub->{section})
+			unless $user->{is_admin};
 	}
 
 	%selection = map { ($_, $_) }
@@ -296,12 +292,12 @@ sub submissionEd {
 		# Note, descending order. Is there a way to make this more
 		# flexible? A var that chooses between ascending or descending
 		# order?
-		@weighted = sort { $b->{$key} <=> $a->{$key} } @submissions;
+		@weighted = sort { $b->{$key} <=> $a->{$key} } @{$submissions};
 	}
 
 	my $template = $user->{is_admin} ? 'Admin' : 'User';
 	slashDisplay('subEd' . $template, {
-		submissions	=> \@submissions,
+		submissions	=> $submissions,
 		selection	=> \%selection,
 		weighted	=> \@weighted,
 	});
