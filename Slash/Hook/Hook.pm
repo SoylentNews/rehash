@@ -39,7 +39,7 @@ sub slashHook {
 							# even if it has already succeeded or
 							# failed, just by doing the eval -- pudge
 			if ($@) {			# failed
-				$classes{$class} eq 'NA';
+				$classes{$class} = 'NA';
 				next;
 			} else {			# success!
 				$classes{$class} = 1;
