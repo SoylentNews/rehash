@@ -2543,9 +2543,9 @@ INSERT INTO accesslist (uid, ipid, subnetid, ts, reason, now_nopost) values (__A
 
 # End of T_2_5_0_27, Start of T_2_5_0_28 - 2004/09/21
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_28, Start of T_2_5_0_29 - 2004/09/28
 
@@ -2574,8 +2574,6 @@ INSERT INTO string_param (type, code, name) VALUES ('story023','3','Always');
 
 INSERT INTO vars (name, value, description) VALUES ('issue_lookback_days','90','Number of days to look back in issue mode');
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_29, Start of T_2_5_0_30 - 2004/10/06
 
 INSERT INTO vars (name, value, description) VALUES ('slashd_errnote_lastrun','','Last time slashd_errnote ran');
@@ -2588,3 +2586,6 @@ INSERT INTO string_param (type, code, name) VALUES ('story023','3','All');
 
 # run `perl utils/sectioncollapse_convert.plx VIRTUAL_USER`
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_30, Start of T_2_5_0_31 - 2004/10/07
