@@ -55,7 +55,7 @@ sub save2file {
 		close $fh;
 		my $new = $d;
 		# normalize ...
-		s|<dc:date>[^<]*</dc:date>|| for $current, $new;
+		s|[dD]ate>[^<]+</|| for $current, $new;
 		return if $current eq $new;
 	}
 
