@@ -606,9 +606,32 @@ sub getSectionExtras {
 	my($self, $section) = @_;
 	return unless $section;
 
-	my $answer = $self->sqlSelectAll('name,value', 'section_extras', " section = '$section'");
+	my $answer = $self->sqlSelectAll(
+		'name,value', 
+		'section_extras', 
+		'section=' . $self->sqlQuote($section)
+	);
 
 	return $answer;
+}
+
+
+########################################################
+sub setSectionExtras {
+	my($self, $section, $extras) = @_;
+	return unless $section;
+
+	$self->sqlDo('DELETE FROM section_extras
+			WHERE section=' . $self->sqlQuote($section)
+	);
+	
+	for (@{$extras}) {
+		$self->sqlInsert('section_extras', {
+			section	=> $section,
+			name 	=> $_->[0],
+			value	=> $_->[1],
+		});
+	}
 }
 
 ########################################################
@@ -798,17 +821,25 @@ sub getSessionInstance {
 		}
 	}
 	if (!$session_out) {
-		my($title) = $self->sqlSelect('lasttitle', 'sessions',
+		my($title, $last_sid, $last_subid) = $self->sqlSelect(
+			'lasttitle, last_sid, last_subid', 
+			'sessions',
 			"uid=$uid"
 		);
-		$title ||= "";
+		$_ ||= '' for ($title, $last_sid, $last_subid);
 
+		# Why not have sessions have UID be unique and use 
+		# sqlReplace() here? Minor quibble, just curious.
+		# - Cliff
 		$self->sqlDo("DELETE FROM sessions WHERE uid=$uid");
 
 		$self->sqlInsert('sessions', { -uid => $uid,
-			-logintime => 'now()', -lasttime => 'now()',
-			lasttitle => $title }
-		);
+			-logintime	=> 'now()',
+			-lasttime	=> 'now()',
+			lasttitle	=> $title,
+			last_sid	=> $last_sid,
+			last_subid	=> $last_subid
+		});
 		$session_out = $self->getLastInsertId('sessions', 'session');
 	}
 	return $session_out;
@@ -837,6 +868,7 @@ sub setContentFilter {
 
 ########################################################
 # Only Slashdot uses this method
+# not for long... - Cliff
 sub setSectionExtra {
 	my($self, $full, $story) = @_;
 
@@ -1560,7 +1592,8 @@ sub deleteContentFilter {
 ########################################################
 sub saveTopic {
 	my($self, $topic) = @_;
-	my($rows) = $self->sqlSelect('count(*)', 'topics', "tid=$topic->{tid}");
+	my($tid) = $topic->{tid} || 0;
+	my($rows) = $self->sqlSelect('count(*)', 'topics', "tid=$tid");
 	my $image = $topic->{image2} ? $topic->{image2} : $topic->{image};
 
 	if ($rows == 0) {
@@ -1571,19 +1604,18 @@ sub saveTopic {
 			width	=> $topic->{width},
 			height	=> $topic->{height}
 		});
-		$topic->{tid} = $self->getLastInsertId();
+		$tid = $self->getLastInsertId();
 	} else {
 		$self->sqlUpdate('topics', {
-				image	=> $image,
-				alttext	=> $topic->{alttext},
-				width	=> $topic->{width},
-				height	=> $topic->{height},
-				name	=> $topic->{name},
-			}, "tid=$topic->{tid}"
-		);
+			image	=> $image,
+			alttext	=> $topic->{alttext},
+			width	=> $topic->{width},
+			height	=> $topic->{height},
+			name	=> $topic->{name},
+		}, "tid=$tid");
 	}
 
-	return $topic->{tid};
+	return $tid;
 }
 
 ##################################################################
@@ -1793,6 +1825,7 @@ sub savePollQuestion {
 # still having a poll attached to it (orphan issue)
 sub deletePoll {
 	my($self, $qid) = @_;
+	return if !$qid;
 
 	my $qid_quoted = $self->sqlQuote($qid);
 	my $did = $self->sqlSelect(
@@ -1926,6 +1959,7 @@ sub setStory {
 			$minihash{$key} = $hashref->{$key}
 				if defined $hashref->{$key};
 		}
+		# Why the trailing "1" parameter, here? 
 		$self->sqlUpdate($table, \%minihash, 'sid=' . $self->sqlQuote($sid), 1);
 	}
 
@@ -2651,7 +2685,9 @@ sub checkForm {
 # Current admin users
 sub currentAdmin {
 	my($self) = @_;
-	my $aids = $self->sqlSelectAll('nickname,lasttime,lasttitle,sessions.uid', 'sessions,users',
+	my $aids = $self->sqlSelectAll(
+		'nickname,lasttime,lasttitle,last_subid,last_sid,sessions.uid',
+		'sessions,users',
 		'sessions.uid=users.uid GROUP BY sessions.uid'
 	);
 
@@ -3736,7 +3772,13 @@ EOT
 		# because we'd want three different representations, we
 		# just get it once in position 3 and then drop it into
 		# its traditional other locations in the array.
-		$data = [ @$data[0..4], $data->[3], $data->[5], $data->[3], $data->[6] ];
+		$data = [
+			@$data[0..4], 
+			$data->[3], 
+			$data->[5], 
+			$data->[3], 
+			$data->[6] 
+		];
 		formatDate([$data], 3, 3, '%A %B %d %I %M %p');
 		formatDate([$data], 5, 5, '%Y%m%d'); # %Q
 		formatDate([$data], 7, 7, '%s');
@@ -4629,17 +4671,40 @@ sub getTopics {
 }
 
 ########################################################
+# add_names = 1, or any other non-zero/non-two value  -> Topic Alt text.
+# add_names = 2 -> Topic Name.
 sub getStoryTopics {
-	my($self, $sid) = @_;
+	my($self, $sid, $add_names) = @_;
+	my($topicdesc);
+
+	my $topics = $self->sqlSelectAll(
+		'tid',
+		'story_topics',
+		'sid=' . $self->sqlQuote($sid)
+	);
+
+	# All this to avoid a join. :/
+	#
+	# Poor man's hash assignment from an array for the short names.
+	$topicdesc =  {
+		map { @{$_} }
+		@{$self->sqlSelectAll(
+			'tid, name',
+			'topics'
+		)}
+	} if $add_names == 2;
+
+	# We use a Description for the long names. 
+	$topicdesc = $self->getDescriptions('topics') 
+		if !$topicdesc && $add_names;
 
 	my $answer;
-	my $topics = $self->sqlSelectAll('tid','story_topics', "sid = '$sid'");
-	for (@{$topics}) {
-	    $answer->{$_->[0]} = 1;
-	}
+	$answer->{$_->[0]} = $add_names && $topicdesc ? $topicdesc->{$_->[0]}:1
+		for @{$topics};
 
 	return $answer;
 }
+
 ########################################################
 sub setStoryTopics {
 	my($self, $sid, $topic_ref) = @_;
