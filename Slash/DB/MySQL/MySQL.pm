@@ -4770,6 +4770,8 @@ sub getStoryByTimeAdmin {
 	my $user = getCurrentUser();
 	$limit ||= 1;
 
+	# '=' is also sometimes used for $sign; in that case,
+	# order is irrelevant -- pudge
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 
 	$where .= " AND sid != '$story->{sid}'";

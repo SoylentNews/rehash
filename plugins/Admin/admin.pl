@@ -1375,6 +1375,8 @@ sub editStory {
 	my $future = $slashdb->getStoryByTimeAdmin('>', $storyref, 3);
 	$future = [ reverse @$future ];
 	my $past = $slashdb->getStoryByTimeAdmin('<', $storyref, 3);
+	my $current = $slashdb->getStoryByTimeAdmin('=', $storyref, 20);
+	unshift @$past, @$current;
 
 	my $num_sim = $constants->{similarstorynumshow} || 5;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });

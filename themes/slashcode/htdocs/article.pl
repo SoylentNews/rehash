@@ -49,6 +49,8 @@ sub main {
 			my $future = $reader->getStoryByTimeAdmin('>', $story, 3);
 			$future = [ reverse @$future ];
 			my $past = $reader->getStoryByTimeAdmin('<', $story, 3);
+			my $current = $reader->getStoryByTimeAdmin('=', $story, 20);
+			unshift @$past, @$current;
 
 			$authortext = slashDisplay('futurestorybox', {
 				past	=> $past,

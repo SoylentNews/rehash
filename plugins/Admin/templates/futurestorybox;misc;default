@@ -52,6 +52,9 @@ __template__
 	futurestorywrite(story);
 END;
 futurestorywrite(present, 1);
+FOREACH story = otherpresent;
+	futurestorywrite(story);
+END;
 FOREACH story = past;
 	futurestorywrite(story);
 END %]
