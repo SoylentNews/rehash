@@ -371,20 +371,22 @@ sub rss_story {
 	$encoded_item->{title}  = $self->encode($story->{title})
 		if $story->{title};
 	if ($story->{sid}) {
+		my $edit = "admin.pl?op=edit&sid=$story->{sid}";
 		if ($story->{primaryskid}) {
 			my $dir = url2abs(
 				$reader->getSkin($story->{primaryskid})->{rootdir},
 				$channel->{'link'}
 			);
-			$encoded_item->{'link'} = $self->encode(
-                                _tag_link("$dir/article.pl?sid=$story->{sid}"),
-                                'link'
-                        );
+			$encoded_item->{'link'} = _tag_link("$dir/article.pl?sid=$story->{sid}");
+			$edit = "$dir/$edit";
 		} else {
-			$encoded_item->{'link'} = $self->encode(
-				_tag_link("$channel->{'link'}article.pl?sid=$story->{sid}"),
-				'link'
-			);
+			$encoded_item->{'link'} = _tag_link("$channel->{'link'}article.pl?sid=$story->{sid}");
+			$edit = "$channel->{'link'}$edit";
+		}
+		$_ = $self->encode($_, 'link') for ($encoded_item->{'link'}, $edit);
+
+		if (getCurrentUser('is_admin')) {
+			$story->{introtext} .= qq[\n\n<p><a href="$edit">[ Edit ]</a></p>];
 		}
 	}
 
