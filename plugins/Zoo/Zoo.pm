@@ -39,6 +39,7 @@ sub new {
 # Get the details for relationships
 sub getRelationships {
 	my ($self, $uid, $type) = @_;
+	return unless $uid;
 
 	my $slashdb = getCurrentDB();
 	my $people = $slashdb->getUser($uid, 'people');
@@ -66,6 +67,7 @@ sub getRelationships {
 # Get the details for relationships
 sub getFriendsUIDs {
 	my($self, $uid) = @_;
+	return unless $uid;
 
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
@@ -92,29 +94,28 @@ sub setFoe {
 sub _set {
 	my($self, $uid, $person, $type, $const) = @_;
 	my $slashdb = getCurrentDB();
-
-	# Lets see if we need to wipe out a relationship first....
-	my $current_standing = $self->sqlSelectHashref('uid, type', 'people', "uid = $uid AND person = $person");
-	# We need to check to see if type has value to make sure we are not looking at fan or freak
-	$self->delete($uid, $person, $current_standing->{type})
-		if ($current_standing && $current_standing->{type});
+#Removed this, since when we make the relationship it will now swap whatever bits we 
+#need swapped, this no longer matters. -Brian
+#	# Lets see if we need to wipe out a relationship first....
+#	my $current_standing = $self->sqlSelectHashref('uid, type', 'people', "uid = $uid AND person = $person");
+#	# We need to check to see if type has value to make sure we are not looking at fan or freak
+#	$self->delete($uid, $person, $current_standing->{type})
+#		if ($current_standing && $current_standing->{type});
 	# First we do the main person
-	if ($current_standing && $current_standing->{uid}) {
-		$self->sqlUpdate('people', { type => $type }, "uid = $uid AND person = $person");
-	} else {
-		$self->sqlInsert('people', { uid => $uid,  person => $person, type => $type });
-	}
+	# We insert to make sure a position exists for this relationship and then we update.
+	# If I ever removed freak/fan from the table this could be done as a replace.
+	$self->sqlInsert('people', { uid => $uid,  person => $person }, { ignore => 1});
+	$self->sqlUpdate('people', { type => $type }, "uid = $uid AND person = $person");
 	my $people = $self->rebuildUser($uid);
 	$slashdb->setUser($uid, { people => $people });
 
 	# Now we do the Fan/Foe
+	# We insert to make sure a position exists for this relationship and then we update.
+	# If I ever removed freak/fan from the table this could be done as a replace.
 	my $s_type = $type eq 'foe' ? 'freak' : 'fan';
 	my $s_const = $type eq 'foe' ? FREAK : FAN;
-	if ($self->sqlSelect('uid', 'people', "uid = $person AND person = $uid")) {
-		$self->sqlUpdate('people', { perceive => $s_type }, "uid = $person AND person = $uid");
-	} else {
-		$self->sqlInsert('people', { uid => $person,  person => $uid, perceive => $s_type });
-	}
+	$self->sqlInsert('people', { uid => $person,  person => $uid }, { ignore => 1});
+	$self->sqlUpdate('people', { perceive => $s_type }, "uid = $person AND person = $uid");
 
 	my $data = $self->sqlSelectColArrayref('uid', 'people', "person=$uid AND type='friend'");
 	push @$data, $person;
