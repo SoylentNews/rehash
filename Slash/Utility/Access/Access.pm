@@ -788,6 +788,9 @@ sub isDiscussionOpen {
 			);
 		}
 	}
+
+	$discussion->{user_nopost} = 1 if $discussion->{type} eq 'archived';
+
 	return $discussion->{type};
 }
 

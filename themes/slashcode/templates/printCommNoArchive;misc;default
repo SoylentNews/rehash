@@ -40,9 +40,9 @@ This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname |
 			[% snark = "They and their friends think you suck." %]
 		[% END %]
 
-		[% IF discussion.type != 'archived' %]
+		[% IF discussion.user_nopost %]
 			[% msg %] [% type %].  [% snark %]
-		[% ELSE %]
+		[% ELSIF discussion.type == 'archived' %]
 			[% IF discussion.commentstatus == 'friends_only'
 			|| discussion.commentstatus == 'friends_fof_only'
 			|| discussion.commentstatus == 'no_foe'
@@ -52,6 +52,8 @@ This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname |
 				This discussion has been archived.
 			[% END %]
 			No new comments can be posted.
+		[% ELSE %]
+			[% msg %] [% type %].
 		[% END %]
 	[% END %]
 </FONT></TD></TR>
