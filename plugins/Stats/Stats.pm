@@ -852,7 +852,7 @@ sub countSfNetIssues {
 sub getAllStats {
 	my($self, $options) = @_;
 	my $table = 'stats_daily';
-	my $sel   = 'name, value, section, day';
+	my $sel   = 'name, value+0 as value, section, day';
 	my $extra = 'ORDER BY section, day, name';
 	my @where;
 
