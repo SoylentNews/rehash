@@ -362,7 +362,7 @@ sub getMetamodComments {
 			AND moderatorlog.reason < 8
 			AND moderatorlog.id > $modpos
 			AND moderatorlog.m2count < $thresh";
-		{ 
+		{
 			local $" = ',';
 			$cond .= " AND id NOT IN (@excluded)"
 				if scalar @excluded;
@@ -432,6 +432,7 @@ EOT
 		) if @comments;
 	}
 
+	my @finalM2mods;
 	for my $m2Mod (@{$M2mods}) {
 		while (my($key, $val) = each %{$comments->{$m2Mod->{mcid}}}) {
 
@@ -466,6 +467,8 @@ EOT
 		$m2Mod->{no_moderation} = 1;
 
 		delete $m2Mod->{mcid};
+		# make sure we have a good moderation for an existing comment
+		push @finalM2mods, $m2Mod if $m2Mod->{cid} && $m2Mod->{sid};
 	}
 	#my $t1 = new Benchmark;
 	#printf STDERR "M2 Time: %s\n", 
@@ -473,7 +476,7 @@ EOT
 
 # format in the template instead
 #	formatDate($M2mods);
-	return $M2mods
+	return \@finalM2mods;
 }
 
 ########################################################
@@ -1424,6 +1427,7 @@ sub deleteComment {
 	for my $table (@comment_tables) {
 		$total_rows += $self->sqlDo("DELETE FROM $table WHERE cid=$cid");
 	}
+	$self->deleteModeratorlog({ cid => $cid });
 	if ($total_rows != scalar(@comment_tables)) {
 		# Here is the thing, an orphaned comment with no text blob
 		# would fuck up the comment count.
@@ -1433,6 +1437,29 @@ sub deleteComment {
 		return 0;
 	}
 	return 1;
+}
+
+########################################################
+sub deleteModeratorlog {
+	my($self, $opts) = @_;
+	my $where;
+
+	if ($opts->{cid}) {
+		$where = 'cid=' . $self->sqlQuote($opts->{cid});
+	} elsif ($opts->{sid}) {
+		$where = 'sid=' . $self->sqlQuote($opts->{sid});
+	} else {
+		return;
+	}
+
+	my $mmids = $slashdb->sqlSelectColArrayref(
+		'id', 'moderatorlog', $where
+	);
+	return unless @$mmids;
+
+	my $mmid_in = join ',', @$mmids;
+	$self->sqlDelete('moderatorlog', $where);
+	$self->sqlDelete('metamodlog', "mmid IN ($mmid_in)");
 }
 
 ########################################################
@@ -1594,6 +1621,7 @@ sub deleteDiscussion {
 	$self->sqlDo("DELETE FROM comment_text WHERE cid IN ("
 		. join(",", map { $_->[0] } @$comment_ids)
 		. ")") if @$comment_ids;
+	$self->deleteModeratorlog({ sid => $did });
 }
 
 ########################################################
