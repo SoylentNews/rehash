@@ -217,7 +217,7 @@ __template__
 
 		<P><B>Comment Byte Limit</B> (number of bytes of comments
 		to display. If this is reached before comment limit, break
-		break the page, else use above comment limit)<BR>
+		the page, else use above comment limit)<BR>
 		<INPUT TYPE="TEXT" NAME="bytelimit" SIZE="6" VALUE="[% user_edit.bytelimit %]">
 
 		<P><B>Index Spill</B> (When an article has this many comments,
