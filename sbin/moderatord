@@ -24,7 +24,7 @@ sub moderatordLog {
 	doLog('moderatord', \@_);
 }
 
-sub fatalErrorToLog {
+sub fatalErrorLog {
 	doLog('moderatord', \@_);
 	# Exit with error condition.
 	exit 1;
