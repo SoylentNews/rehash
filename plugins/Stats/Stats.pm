@@ -302,16 +302,22 @@ sub countCommentsDaily {
 
 	return $comments; 
 }
+########################################################
+sub countBytesByPage {
+	my($self, $op, $yesterday) = @_;
+	$self->sqlSelect("sum(bytes)", "accesslog",
+		"op='$op' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
+}
 
 ########################################################
-sub countDailyByOP {
+sub countDailyByPage {
 	my($self, $op, $yesterday) = @_;
 	$self->sqlSelect("count(*)", "accesslog",
 		"op='$op' AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
 }
 
 ########################################################
-sub countDailyByOPDistinctIPID {
+sub countDailyByPageDistinctIPID {
 	# This is so lame, and so not ANSI SQL -Brian
 	my($self, $op, $yesterday) = @_;
 	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog",

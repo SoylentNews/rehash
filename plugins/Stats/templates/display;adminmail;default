@@ -32,11 +32,11 @@ __template__
              : [% journals_ipids %] distinct IPIDS used journals
              : [% palm_ipids %] distinct IPIDS used palm pages
              : [% rss_ipids %] distinct IPIDS used rss pages
-    pageviews: [% comments_page %] for comments
-             : [% articles_page %] for articles
-             : [% journals_page %] for journals
-             : [% palm_page %] for palm
-             : [% rss_page %] for rss
+    pageviews: [% comments_page %] for comments [% comment_bytes %](K)
+             : [% articles_page %] for articles [% article_bytes %](K)
+             : [% journals_page %] for journals [% journal_bytes %(K)
+             : [% palm_page %] for palm [% palm_bytes %](K)
+             : [% rss_page %] for rss [% rss_bytes %](K)
   submissions: [% submissions %] submissions
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 

@@ -86,20 +86,25 @@ EOT
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
-	my $uniq_comment_users = $stats->countDailyByOPDistinctIPID('comments', $yesterday);
-	my $comment_page_views = $stats->countDailyByOP('comments',$yesterday);
+	my $uniq_comment_users = $stats->countDailyByPageDistinctIPID('comments', $yesterday);
+	my $comment_page_views = $stats->countDailyByPage('comments',$yesterday);
+	my $comment_bytes = $stats->countBytesByPage('comments',$yesterday);
 
-	my $uniq_article_users = $stats->countDailyByOPDistinctIPID('article', $yesterday);
-	my $article_page_views = $stats->countDailyByOP('article',$yesterday);
+	my $uniq_article_users = $stats->countDailyByPageDistinctIPID('article', $yesterday);
+	my $article_page_views = $stats->countDailyByPage('article',$yesterday);
+	my $article_bytes = $stats->countBytesByPage('article',$yesterday);
 
-	my $uniq_palm_users = $stats->countDailyByOPDistinctIPID('palm', $yesterday);
-	my $palm_page_views = $stats->countDailyByOP('palm',$yesterday);
+	my $uniq_palm_users = $stats->countDailyByPageDistinctIPID('palm', $yesterday);
+	my $palm_page_views = $stats->countDailyByPage('palm',$yesterday);
+	my $palm_bytes = $stats->countBytesByPage('palm',$yesterday);
 
-	my $uniq_journal_users = $stats->countDailyByOPDistinctIPID('journal', $yesterday);
-	my $journal_page_views = $stats->countDailyByOP('journal',$yesterday);
+	my $uniq_journal_users = $stats->countDailyByPageDistinctIPID('journal', $yesterday);
+	my $journal_page_views = $stats->countDailyByPage('journal',$yesterday);
+	my $journal_bytes = $stats->countBytesByPage('journal',$yesterday);
 
-	my $uniq_rss_users = $stats->countDailyByOPDistinctIPID('rss', $yesterday);
-	my $rss_page_views = $stats->countDailyByOP('rss',$yesterday);
+	my $uniq_rss_users = $stats->countDailyByPageDistinctIPID('rss', $yesterday);
+	my $rss_page_views = $stats->countDailyByPage('rss',$yesterday);
+	my $rss_bytes = $stats->countBytesByPage('rss',$yesterday);
 
 	my $admin_mods = $stats->getAdminModsInfo($yesterday, $weekago);
 	my $admin_mods_text = "";
@@ -134,18 +139,23 @@ EOT
 
 	$statsSave->createStatDaily($yesterday, "uniq_comment_users", $uniq_comment_users);
 	$statsSave->createStatDaily($yesterday, "comment_page_views", $comment_page_views);
+	$statsSave->createStatDaily($yesterday, "comment_bytes", $comment_bytes);
 
 	$statsSave->createStatDaily($yesterday, "uniq_article_users", $uniq_article_users);
 	$statsSave->createStatDaily($yesterday, "article_page_views", $article_page_views);
+	$statsSave->createStatDaily($yesterday, "article_bytes", $article_bytes);
 
 	$statsSave->createStatDaily($yesterday, "uniq_palm_users", $uniq_palm_users);
 	$statsSave->createStatDaily($yesterday, "palm_page_views", $palm_page_views);
+	$statsSave->createStatDaily($yesterday, "palm_bytes", $palm_bytes);
 
 	$statsSave->createStatDaily($yesterday, "uniq_journal_users", $uniq_journal_users);
 	$statsSave->createStatDaily($yesterday, "journal_page_views", $journal_page_views);
+	$statsSave->createStatDaily($yesterday, "journal_bytes", $journal_bytes);
 
 	$statsSave->createStatDaily($yesterday, "uniq_rss_users", $uniq_rss_users);
 	$statsSave->createStatDaily($yesterday, "rss_page_views", $rss_page_views);
+	$statsSave->createStatDaily($yesterday, "rss_bytes", $rss_bytes);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
@@ -186,6 +196,13 @@ EOT
 		comments_page => sprintf("%8d", $comment_page_views ),
 		articles_page => sprintf("%8d", $article_page_views ),
 		journals_page => sprintf("%8d", $journal_page_views),
+
+		palm_bytes => ($palm_bytes/1024),
+		rss_bytes => ($rss_bytes/1024),
+		comment_bytes => ($comment_bytes/1024 ),
+		article_bytes => ($article_bytes/1024 ),
+		journal_bytes => ($journal_bytes/1024),
+		
 		palm_page => sprintf("%8d", $palm_page_views),
 		rss_page => sprintf("%8d", $rss_page_views),
 		submissions => sprintf("%8d", $submissions),
