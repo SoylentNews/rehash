@@ -134,9 +134,9 @@ my %descriptions = (
 
 	'commentcodes'
 		=> sub { my $user = getCurrentUser(); 
-						my $where = " OR type='commentcodes_extended'" if ($user->{is_admin} || $user->{is_subscriber}); 
-						$_[0]->sqlSelectMany('code,name', 'string_param', "type='commentcodes'" . $where) 
-			},
+			my $where = " OR type='commentcodes_extended'" if $user->{is_admin} || $user->{is_subscriber};
+			$_[0]->sqlSelectMany('code,name', 'string_param', "type='commentcodes'" . $where) 
+		},
 
 	'sections'
 		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'type="contained"', 'order by title') },

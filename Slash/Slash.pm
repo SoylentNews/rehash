@@ -43,7 +43,7 @@ $VERSION   	= '2.003000';  # v2.3.0
 	getData
 	gensym
 
-	bonusReasonLog dispComment displayStory displayThread dispStory
+	dispComment displayStory displayThread dispStory
 	getOlderStories moderatorCommentLog printComments
 );
 
@@ -112,22 +112,6 @@ sub selectComments {
 		# children to show up properly in flat mode. - Jamie 2002/07/30
 #		$user->{state}{noreparent} = 1 if $user->{commentsort} > 3;
 
-		# User can setup to give points based on size.
-		my $length = length($C->{comment});
-		$C->{points} += $user->{clsmall_bonus}
-			if $length < $user->{clsmall} && $user->{clsmall} != 0 && $user->{clsmall_bonus};
-		$C->{points} += $user->{clbig_bonus}
-			if $length > $user->{clbig} && $user->{clbig} != 0 && $user->{clbig_bonus};
-
-		# If the user is AC and we give AC's a penalty/bonus
-		$C->{points} += $user->{people_bonus_anonymous}
-			if isAnon($C->{uid}) && $user->{people_bonus_anonymous};
-
-		# If you don't trust new users
-		if ($user->{new_user_bonus} && $user->{new_user_percent}) {
-			$C->{points} += $user->{new_user_bonus} 
-					if ((($C->{uid}/$max_uid)*100) > 100-$user->{new_user_percent});
-		}
 		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons);
 
 		# Let us fill the hash range for hitparade
@@ -195,17 +179,19 @@ sub selectComments {
 
 sub _get_points {
 	my($C, $user, $min, $max, $max_uid, $reasons) = @_;
-	my $points = $C->{points};
-	my $hr = { };
+	my $hr = {
+		score_start => $C->{pointsorig},
+		moderations => $C->{points} - $C->{pointsorig},
+	};
+	my $points = $hr->{score_start};
 
 	# User can setup to give points based on size.
-	if ($user->{clbig} && length($C->{comment}) > $user->{clbig}) {
-		$hr->{clbig} = 1;
+	my $len = length($C->{comment});
+	if ($user->{clbig} && $user->{clbig_bonus} && $len > $user->{clbig}) {
+		$hr->{clbig} = $user->{clbig_bonus};
 	}
-
-	# User can setup to give points based on size.
-	if ($user->{clsmall} && length($C->{comment}) < $user->{clsmall}) {
-		$hr->{clsmall} = -1;
+	if ($user->{clsmall} && $user->{clsmall_bonus} && $len < $user->{clsmall}) {
+		$hr->{clsmall} = $user->{clsmall_bonus};
 	}
 
 	# If the user is AC and we give AC's a penalty/bonus
@@ -264,12 +250,13 @@ sub _get_points {
 			$user->{karma_bonus};
 	}
 
-	for my $val (values %$hr) { $points += $val }
+	for my $key (grep !/^score_/, keys %$hr) { $points += $hr->{$key} }
 	$points = $max if $points > $max;
 	$points = $min if $points < $min;
+	$hr->{score_end} = $points;
 
 	if (wantarray) {
-		for my $key (keys %$hr) {
+		for my $key (grep !/^score_/, keys %$hr) {
 			my $val = $hr->{$key} + 0;
 			$hr->{$key} = "+$val" if $val > 0;
 		}
@@ -560,71 +547,13 @@ sub printComments {
 
 #========================================================================
 
-=head2 bonusReasonLog(CID)
-
-Prints a table detailing the bonuses that affect this user's score
-for a particular comment.
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item CID
-
-Comment's ID.
-
-=back
-
-=item Return value
-
-The HTML.
-
-=item Dependencies
-
-The 'bonusReasonLog' template block.
-
-=back
-
-=cut
-
-sub bonusReasonLog {
-	my($cid) = @_;
-	my $user = getCurrentUser();
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-
-	my $cid_q = $slashdb->sqlQuote($cid);
-	my($min, $max) = ($constants->{comment_minscore}, 
-			  $constants->{comment_maxscore});
-	my $max_uid = $slashdb->countUsers({ max => 1 });
-	my $reasons = $slashdb->getReasons();
-
-	my $comment = $slashdb->sqlSelectHashref(
-		"cid, uid, karma_bonus, reason",
-		"comments",
-		"cid=$cid_q");
-	$comment->{comment} = $slashdb->sqlSelect(
-		"comment",
-		"comment_text",
-		"cid=$cid_q");
-
-	my($points, $bonus_hr) = _get_points($comment, $user, $min, $max, $max_uid, $reasons);
-
-	slashDisplay('bonusReasonLog', {
-		reasons		=> $reasons,
-		reason		=> $comment->{reason},
-		bonus_hr	=> $bonus_hr,
-	}, { Return => 1, Nocomm => 1 });
-}
-
-#========================================================================
-
 =head2 moderatorCommentLog(TYPE, ID)
 
-Prints a table detailing the history of moderation of
-a particular comment.
+Prints a table detailing the history of moderation of a particular
+comment and/or the reasons why a comment is scored like it is.
+(The template name is modCommentLog and this shows info about not
+just moderation but modifiers;  this function should probably be
+renamed the same.)
 
 =over 4
 
@@ -692,19 +621,45 @@ sub moderatorCommentLog {
 	my $show_cid    = ($type eq 'cid') ? 0 : 1;
 	my $show_modder = $mod_admin ? 1 : 0;
 	my $mod_to_from = ($type eq 'uid') ? 'to' : 'from';
-	slashDisplay('modCommentLog', {
-		# modviewseclev
+
+	my $modifier_hr = { };
+	my $reason = 0;
+	if ($type eq 'cid') {
+		my $cid_q = $slashdb->sqlQuote($value);
+		my($min, $max) = ($constants->{comment_minscore}, 
+				  $constants->{comment_maxscore});
+		my $max_uid = $slashdb->countUsers({ max => 1 });
+
+		my $comment = $slashdb->sqlSelectHashref(
+			"cid, uid, karma_bonus, reason, points, pointsorig",
+			"comments",
+			"cid=$cid_q");
+		$comment->{comment} = $slashdb->sqlSelect(
+			"comment",
+			"comment_text",
+			"cid=$cid_q");
+		$reason = $comment->{reason};
+
+		my $user = getCurrentUser();
+		my $points;
+		($points, $modifier_hr) = _get_points($comment, $user, $min, $max, $max_uid, $reasons);
+	}
+
+	my $data = {
 		mod_admin	=> $mod_admin, 
 		mods		=> $mods,
 		reasonTotal	=> $reasonTotal,
 		reasonHist	=> \@reasonHist,
 		reasonsTop	=> \@reasonsTop,
 		reasons		=> $reasons,
+		reason		=> $reason,
+		modifier_hr	=> $modifier_hr,
 		show_cid	=> $show_cid,
 		show_modder	=> $show_modder,
 		mod_to_from	=> $mod_to_from,
 		both_mods	=> $both_mods,
-	}, { Return => 1, Nocomm => 1 });
+	};
+	slashDisplay('modCommentLog', $data, { Return => 1, Nocomm => 1 });
 }
 
 # Takes a reason histogram, a list of counts of each reason mod.
@@ -737,20 +692,33 @@ sub _getTopModReasons{
 			last if $total_error <= 0;
 		}
 	}
-	my @reasonRound = map { $_ * 10 } @r;
 
 	# This part I added, so if it breaks, don't blame MJD :) JRM
-	my @rr_sort = sort { $b <=> $a } @reasonRound;
-	my $min_perc = $rr_sort[-1];
-	$min_perc = $rr_sort[$top_needed-1] if $#rr_sort >= $top_needed-1;
-	$min_perc = 10 if $min_perc < 10; # Need at least 10% to list
-	for my $reason (1..$#reasonRound) {
-		next if $reasonRound[$reason] < $min_perc;
+	my %reasonRound = map { ($_, $r[$_]*10) } (0..$#r);
+	my @rr_keys = sort { $a <=> $b } keys %reasonRound;
+	my $min = (sort { $b <=> $a } values %reasonRound)[$top_needed-1];
+	for my $key (0..$#r) {
+		$reasonRound{$key} = 0 if $reasonRound{$key} < $min;
+	}
+	my $have = 0;
+	for my $key (0..$#r) {
+		++$have if $reasonRound{$key} > $min;
+	}
+	for my $key (0..$#r) {
+		if ($reasonRound{$key} == $min) {
+			if ($have >= $top_needed) {
+				$reasonRound{$key} = 0;
+			} else {
+				++$have;
+			}
+		}
+	}
+	for my $reason (1..$#r) {
+		next unless $reasonRound{$reason};
 		push @reasonsTop, {
 			reason => $reason,
-			percent => $reasonRound[$reason]
+			percent => $reasonRound{$reason},
 		};
-		last if scalar(@reasonsTop) >= $top_needed;
 	}
 
 	return @reasonsTop;
