@@ -753,6 +753,8 @@ sub lc_domain {
 
 
 # Why not use Email::Valid here? - Jamie
+# Because I don't have the time or inclination to test it, as long as
+# it is working.  if it barfs again, i will.  or someone else can.  -- pudge
 sub valid_email {
 	
 	my $self = shift || undef;
