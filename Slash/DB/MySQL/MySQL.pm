@@ -104,7 +104,8 @@ my %descriptions = (
 				} else {
 					$where = " section = " . $_[0]->sqlQuote($SECT->{section});
 				}
-				$_[0]->sqlSelectMany('topics.tid,topics.alttext', 'topics, section_topics', "$where AND section_topics.tid=topics.tid") 
+				$where .= " AND " if $where;
+				$_[0]->sqlSelectMany('topics.tid,topics.alttext', 'topics, section_topics', "$where section_topics.tid=topics.tid") 
 			},
 
 	'topics_section_type'
@@ -2447,7 +2448,7 @@ sub getPollQuestionList {
 		if $other->{exclude_section} && @{$other->{section}};
 
 	my $questions = $self->sqlSelectAll(
-		'qid, question, date',
+		'qid, question, date, voters',
 		'pollquestions',
 		$where,
 		"ORDER BY date DESC LIMIT $offset,20"

@@ -324,6 +324,8 @@ sub userdir_handler {
 				my $args;
 				if ($extra && $extra =~ /^\d+$/) {
 					$args = "id=$extra&op=edit";
+				} elsif ($extra && $extra =~ /^friends$/) {
+					$args = "op=friendview";
 				} else {
 					$args = "op=list";
 				}
@@ -444,6 +446,8 @@ sub userdir_handler {
 			my $args = "op=display&nick=$nick&uid=$uid";
 			if ($extra && $extra =~ /^\d+$/) {
 				$args .= "&id=$extra";
+			} elsif ($extra && $extra =~ /^friends$/) {
+				$args = "op=friendview";
 			}
 			$r->args($args);
 			$r->uri('/journal.pl');

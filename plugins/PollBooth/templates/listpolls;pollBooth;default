@@ -19,15 +19,32 @@ listpolls
 __template__
 [% PROCESS titlebar %]
 
-[% FOREACH question = questions %]
-	[% IF admin %]
-	[% edit = " (<A HREF=\"$env.script_name?op=edit&qid=$question.0\">Edit</A>)" %]
-	[% delete = " (<A HREF=\"$env.script_name?op=delete&qid=$question.0\">Delete</A>)" %]
-	[% END %]
-<BR><LI><A HREF="[% env.script_name %]?qid=[% question.0 %]">[% question.1 %]</A> [% question.2 %][% edit %][% delete %]</LI>
-[% END %]
+<TABLE width="99%">
+	<TR>
+		<TD VALIGN="TOP" ALIGN="LEFT">
+			[% FOREACH question = questions %]
+				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc($question.1, '%A, %B %e, %Y') %] with [% question.3 %] votes.
+				[% IF user.is_admin %]
+					(<A HREF=[% constants.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% question.0 %]">Edit</A>)
+					(<A HREF=[% constants.rootdir %]/pollBooth.pl?op=delete&amp;qid=[% question.0 %]">Delete</A>)
+				[% END %]
+				<BR>
+			[% END %]
+		</TD>
+		<TD VALIGN="TOP" ALIGN="RIGHT">
+			[% Slash.fancybox(
+				constants.fancyboxwidth,
+				Slash.db.getBlock('poll', 'title'),
+				Slash.pollbooth('_currentqid', 1),
+				0,
+				1	
+			); %]
+		</TD>
+	</TR>
+</TABLE>
 
-<P><FONT SIZE="4"><B><A HREF="[% env.script_name %]?min=[% startat %]">More Polls</A></B></FONT>
+<P><FONT SIZE="4"><B><A HREF="[% constants.rootdir %]/search.pl?op=polls">More Polls</A></B></FONT>
+<BR><FONT SIZE="4"><B><A HREF="[% constants.rootdir %]/submit.pl">Submit Poll</A></B></FONT>
 
 __seclev__
 10000

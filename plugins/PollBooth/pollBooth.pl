@@ -31,37 +31,34 @@ sub main {
 	if (defined $form->{'aid'} && $form->{'aid'} !~ /^\-?\d$/) {
 		undef $form->{'aid'};
 	}
-
-	# Paranoia is fine, but why can't this be done from the handler 
-	# rather than hacking in special case code? - Cliff
-	if ($op eq "vote_return") {
-		$ops{$op}->($form, $slashdb);
-		# Why not do this in a more generic manner you say? 
-		# Because I am paranoid about this being abused. -Brian
-		#
-		# This doesn't answer my question. How is doing this here
-		# any better or worse than doing it at the end of vote_return()
-		# -Cliff
-		my $SECT = $slashdb->getSection();
-		if ($SECT) {
-			my $url = $SECT->{rootdir} || $constants->{real_rootdir};
-
-			# Remove the scheme and authority portions, if present.
-			$form->{returnto} =~ s{^(?:.+?)?//.+?/}{/};
-			
-			# Form new absolute URL based on section URL and then
-			# redirect the user.
-			my $refer = URI->new_abs($form->{returnto}, $url);
-			redirect($refer->as_string);
-		}
-	}
-
-	if ($form->{qid}) {
-		my $section = $slashdb->getPollQuestion($form->{qid}, 'section');
-		header(getData('title'), $section, { tab_selected => 'poll'});
-	} else {
-		header(getData('title'), $form->{section}, { tab_selected => 'poll'});
-	}
+# This is unfinished and has been hacked. I don't trust it anymore and
+# the site that it was written for does not use it currently -Brian
+#
+#	# Paranoia is fine, but why can't this be done from the handler 
+#	# rather than hacking in special case code? - Cliff
+#	if ($op eq "vote_return") {
+#		$ops{$op}->($form, $slashdb);
+#		# Why not do this in a more generic manner you say? 
+#		# Because I am paranoid about this being abused. -Brian
+#		#
+#		# This doesn't answer my question. How is doing this here
+#		# any better or worse than doing it at the end of vote_return()
+#		# -Cliff
+#		my $SECT = $slashdb->getSection();
+#		if ($SECT) {
+#			my $url = $SECT->{rootdir} || $constants->{real_rootdir};
+#
+#			# Remove the scheme and authority portions, if present.
+#			$form->{returnto} =~ s{^(?:.+?)?//.+?/}{/};
+#			
+#			# Form new absolute URL based on section URL and then
+#			# redirect the user.
+#			my $refer = URI->new_abs($form->{returnto}, $url);
+#			redirect($refer->as_string);
+#		}
+#	}
+#
+	header(getData('title'), $form->{section}, { tab_selected => 'poll'});
 
 	$ops{$op}->($form, $slashdb, $constants);
 
@@ -321,7 +318,7 @@ sub listpolls {
 	my($form) = @_;
 	my $slashdb = getCurrentDB();
 	my $min = $form->{min} || 0;
-	my $questions = $slashdb->getPollQuestionList($min, { section => $form->{section} } );
+	my $questions = $slashdb->getPollQuestionList($min);
 	my $sitename = getCurrentStatic('sitename');
 
 	# Just me, but shouldn't title be in the template?
