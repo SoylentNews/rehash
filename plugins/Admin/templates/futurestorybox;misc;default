@@ -6,7 +6,7 @@ by the subroutine getMessages in admin.pl
 __title__
 
 __page__
-admin
+misc
 __lang__
 en_US
 __name__
@@ -14,11 +14,11 @@ futurestorybox
 __template__
 [% USE Slash %]
 [% FOREACH story = future %]
-	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M") %] <br>
+	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M", 0) %] <br>
 [% END %]
 <HR noshade width="100%" size="1" color="#FFFFFF">
 [% FOREACH story = past %]
-	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M") %] <br>
+	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M", 0) %] <br>
 [% END %]
 __seclev__
 10000
