@@ -98,7 +98,7 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', 'isolate=0', 'order by title') },
 
 	'sections-all'
-		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', '', 'order by title') },
+		=> sub { $_[0]->sqlSelectMany('section,title', 'sections', '', 'ORDER BY title') },
 
 	'static_block'
 		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type != 'portald'") },
@@ -593,15 +593,6 @@ sub createSectionTopic {
 	my($self, $section, $tid) = @_;
 
 	$self->sqlDo("INSERT INTO section_topics (section, tid) VALUES ('$section',$tid)");
-}
-
-########################################################
-sub getSectionTopicsNamesBySection {
-	my($self, $section) = @_;
-
-	my $answer = $self->sqlSelectColArrayref('topics.alttext', 'topics,section_topics', " section_topics.section = '$section' AND section_topics.tid = topics.tid");
-
-	return $answer;
 }
 
 ########################################################
@@ -1365,31 +1356,14 @@ sub checkDiscussionPostable {
 
 ########################################################
 sub setSection {
-# We should perhaps be passing in a reference to F here. More
-# thought is needed. -Brian
-	my($self, $section, $qid, $title, $issue, $isolate, $artcount) = @_;
-	my $section_dbh = $self->sqlQuote($section);
-	my($count) = $self->sqlSelect("count(*)", "sections", "section=$section_dbh");
-	my($ok1, $ok2);
+	_genericSet('sections', 'section', '', @_);
+}
 
-	# This is a poor attempt at a transaction I might add. -Brian
-	# I need to do this diffently under Oracle
-	unless ($count) {
-		$self->sqlDo("INSERT into sections (section) VALUES($section_dbh)");
-		$ok1++ unless $self->{_dbh}->errstr;
-	}
-
-	$self->sqlUpdate('sections', {
-			qid		=> $qid,
-			title		=> $title,
-			issue		=> $issue,
-			isolate		=> $isolate,
-			artcount	=> $artcount
-		}, "section=$section_dbh"
-	);
-	$ok2++ unless $self->{_dbh}->errstr;
-
-	return($count, $ok1, $ok2);
+########################################################
+sub createSection {
+	my($self, $hash) = @_;
+	_genericSet('sections', 'section', '', @_);
+	$self->sqlInsert('topics', $hash);
 }
 
 ########################################################
@@ -1411,17 +1385,6 @@ sub setDiscussionDelCount {
 		},
 		$where
 	);
-}
-
-########################################################
-sub getSectionTitle {
-	my($self) = @_;
-	my $sth = $self->{_dbh}->prepare("SELECT section,title FROM sections ORDER BY section");
-	$sth->execute;
-	my $sections = $sth->fetchall_arrayref;
-	$sth->finish;
-
-	return $sections;
 }
 
 ########################################################
@@ -2914,18 +2877,6 @@ sub getStoryByTimeAdmin {
 }
 
 ########################################################
-sub countStories {
-	my($self) = @_;
-	my $stories = $self->sqlSelectAll(
-		'stories.sid, stories.title, stories.section as section, stories.commentcount, nickname',
-		'stories, users, discussions',
-		'stories.uid=users.uid AND stories.discussion=discussions.id',
-		'ORDER BY commentcount DESC LIMIT 10'
-	);
-	return $stories;
-}
-
-########################################################
 sub setModeratorVotes {
 	my($self, $uid, $metamod) = @_;
 	$self->sqlUpdate("users_info", {
@@ -3032,53 +2983,6 @@ sub countUsers {
 }
 
 ########################################################
-sub countStoriesTopHits {
-	my($self) = @_;
-	my $stories = $self->sqlSelectAll('sid,title,section,hits,users.nickname',
-		'stories,users', 'stories.uid=users.uid',
-		'ORDER BY hits DESC LIMIT 10'
-	);
-	return $stories;
-}
-
-########################################################
-sub countStorySubmitters {
-	my($self) = @_;
-
-	my $ac_uid = getCurrentAnonymousCoward('uid');
-	my $uid = $self->sqlSelectColArrayref('uid', 'authors_cache');
-	push @$uid, $ac_uid;
-	my $in_list = join(",", @$uid);
-
-	my $submitters = $self->sqlSelectAll('count(*) as c, users.nickname',
-		'stories, users', "users.uid=stories.submitter AND submitter NOT IN ($in_list)",
-		'GROUP BY users.uid ORDER BY c DESC LIMIT 10'
-	);
-
-	return $submitters;
-}
-
-########################################################
-# Just used for Hof
-sub countStoriesAuthors {
-	my($self) = @_;
-	my $authors = $self->sqlSelectAll('storycount, nickname, homepage',
-		'authors_cache', '',
-		'GROUP BY uid ORDER BY storycount DESC LIMIT 10'
-	);
-	return $authors;
-}
-
-########################################################
-sub countPollquestions {
-	my($self) = @_;
-	my $pollquestions = $self->sqlSelectAll("voters,question,qid", "pollquestions",
-		"1=1", "ORDER by voters DESC LIMIT 10"
-	);
-	return $pollquestions;
-}
-
-########################################################
 sub createVar {
 	my($self, $name, $value, $desc) = @_;
 	$self->sqlInsert('vars', {name => $name, value => $value, description => $desc});
@@ -3165,16 +3069,6 @@ sub getCommentMostCommonReason {
 	return $sorted_keys[0];
 }
 
-
-########################################################
-sub countUsersIndexExboxesByBid {
-	my($self, $bid) = @_;
-	my($count) = $self->sqlSelect("count(*)", "users_index",
-		qq!exboxes like "%'$bid'%" !
-	);
-
-	return $count;
-}
 
 ########################################################
 sub getCommentReply {
@@ -3772,58 +3666,6 @@ EOT
 	return \@stories;
 }
 
-########################################################
-# This is going to blow chunks -Brian
-# To be precise it locks the DB every two hours when hof.pl is run
-# by slashd.  I've commented out the 3-way join and STARTED coding
-# up a replacement (it should select the comments first, then pull
-# from story_heap and users without doing a join).  I don't have
-# time to finish this right now so I've also commented out the code
-# that calls this method, see themes/slashcode/htdocs/hof.pl.
-# - Jamie 2001/07/12
-sub getCommentsTop {
-	my($self, $sid) = @_;
-	my $user = getCurrentUser();
-
-	my $where = 'stories.sid=comments.sid AND stories.uid=users.uid';
-	$where .= ' AND stories.sid=' . $self->sqlQuote($sid) if $sid;
-	my $stories = $self->sqlSelectAll(
-		'section, stories.sid, users.nickname, title,
-		pid, subject, date, time, comments.uid, cid, points',
-		'stories, comments, users',
-		$where,
-		' ORDER BY points DESC, date DESC LIMIT 10 '
-	);
-
-	# First select the top scoring comments (which on Slashdot or
-	# any big site will just be the latest score:5 comments).
-	my $columns = "sid, pid, cid, uid, points, date, subject";
-	my $tables = 'comments';
-	$where = "1=1";
-	my $other = "ORDER BY points DESC, date DESC LIMIT 10";
-	my $top_comments = $self->sqlSelectAll($columns,$tables,$where,$other);
-	formatDate($top_comments, 5);
-
-	# Then we want to match the sids against story_heap.discussion
-	# and then the uids against users.nickname.  But I have not
-	# written that code yet because there are bigger bugs to kill.
-	# Meanwhile...
-	return $top_comments;
-
-#	my $where = "comments.points >= 2 AND stories.discussion=comments.sid AND comments.uid=users.uid";
-#	$where .= " AND stories.sid=" . $self->sqlQuote($sid) if $sid;
-#	my $stories = $self->sqlSelectAll(
-#		"section, stories.sid, users.nickname, title, pid,
-#		subject, date, time, comments.uid, cid, points",
-#		"stories, comments, users",
-#		$where,
-#		" ORDER BY points DESC, date DESC LIMIT 10"
-#	);
-#
-#	formatDate($stories, 6);
-#	formatDate($stories, 7);
-#	return $stories;
-}
 
 ########################################################
 # This makes me nervous... we grab, and they get
@@ -4733,8 +4575,7 @@ sub getSection {
 	if (!$section) {
 		my $constants = getCurrentStatic();
 		return {
-			title    =>
-				"$constants->{sitename}: $constants->{slogan}",
+			title    => "$constants->{sitename}: $constants->{slogan}",
 			artcount => getCurrentUser('maxstories') || 30,
 			issue    => 3
 		};

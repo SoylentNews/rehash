@@ -40,6 +40,10 @@ __template__
 	[% isolate %]
 	[% PROCESS formLabel value => "Issue mode", comment => "" %]
 	[% issue %]
+	[% PROCESS formLabel value => "URL", comment => "if the section has its own url" %]
+	<BR><INPUT TYPE="TEXT" NAME="url" SIZE="30" VALUE="[% this_section.url %]"><BR>
+	[% PROCESS formLabel value => "Hostname", comment => "hostname we should match against" %]
+	<BR><INPUT TYPE="TEXT" NAME="hostname" SIZE="30" VALUE="[% this_section.hostname %]"><BR>
 
 [% IF blocks %]
 	[% PROCESS formLabel value => "Edit Section slashboxes" comment => "blocks" %]
@@ -63,8 +67,8 @@ __template__
 <TD VALIGN="TOP">
 	[% PROCESS formLabel value => "Topics", comment => "topics assigned to this section" %]
 	<UL>
-	[% FOREACH topic = topics %]
-	<LI>[% topic %]</LI>
+	[% FOREACH tid = topics.keys %]
+		<LI><A HREF="[% constants.rootdir %]/admin.pl?op=topics&nexttid=[% tid %]">[% topics.$tid %]</LI>
 	[% END %]
 	</UL>
 </TD>

@@ -34,6 +34,9 @@ __template__
 [% CASE 'update' %]
 	Updated [% section %]<BR>
 
+[% CASE 'failed' %]
+	Failed to create/update [% section %]<BR>
+
 [% CASE 'addhead' %]
 	Add Section
 

@@ -29,3 +29,7 @@ INSERT INTO people (uid,person,type) SELECT uid, person, type from temp_zoo;
 
 # This was removed from the bonus system a while ago. -Brian
 ALTER TABLE users_comments DROP anon_comments;
+
+# Changes for sections
+ALTER TABLE sections ADD url char(32) DEFAULT '' NOT NULL;
+ALTER TABLE sections ADD hostname char(32)DEFAULT '' NOT NULL;

@@ -61,9 +61,14 @@ sub listSections {
 		editSection($user->{section});
 		return;
 	}
+	my $section_titles = $slashdb->getDescriptions('sections-all');
+	my @values;
+	for (keys %$section_titles) {
+		push @values, [ $_ , $section_titles->{$_}] ;
+	}
 
 	slashDisplay('listSections', {
-		sections => $slashdb->getSectionTitle()
+		sections => \@values,
 	});
 }
 
@@ -127,7 +132,7 @@ sub editSection {
 		isolate		=> $isolate,
 		issue		=> $issue,
 		blocks		=> \@blocks,
-		topics		=> $slashdb->getSectionTopicsNamesBySection($section),
+		topics		=> $slashdb->getDescriptions('topics_section', $section),
 	});
 }
 
@@ -142,17 +147,39 @@ sub saveSection {
 	# dashes should be allowed.
 	$section =~ s/[^A-Za-z0-9\-]//g;
 
-	my($count, $ok1, $ok2) = $slashdb->setSection(
-		@{$form}{qw(section qid title issue isolate artcount)}
-	);
-
-	unless ($ok1) {
-		print getData('insert', { section => $section });
-	}
-
-	unless ($ok2) {
-		print getData('update', { section => $section });
-	}
+	my $found = $slashdb->getSection($form->{section}, 'section');
+	if ($found) {
+		my $return = $slashdb->setSection($form->{section}, {
+			qid => $form->{qid},
+			title => $form->{section},
+			issue => $form->{issue},
+			isolate	=> $form->{isolate},
+			artcount => $form->{artcount},
+			url => $form->{url},
+			hostname => $form->{hostname},
+		});
+		if ($return) {
+			print getData('update', { section => $section });
+		} else {
+			print getData('failed', { section => $section });
+		}
+	} else {
+		my $return = $slashdb->createSection({
+			section => $form->{section},
+			qid => $form->{qid},
+			title => $form->{section},
+			issue => $form->{issue},
+			isolate	=> $form->{isolate},
+			artcount => $form->{artcount},
+			url => $form->{url},
+			hostname => $form->{hostname},
+		});
+		if ($return) {
+			print getData('insert', { section => $section });
+		} else {
+			print getData('failed', { section => $section });
+		}
+	} 
 }
 
 #################################################################

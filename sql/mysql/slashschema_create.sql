@@ -427,6 +427,8 @@ CREATE TABLE sections (
 	issue tinyint DEFAULT '0' NOT NULL,
 	extras mediumint DEFAULT '0',
 	feature_story char(16) NOT NULL,
+	url char(32) DEFAULT '' NOT NULL,
+	hostname char(32)DEFAULT '' NOT NULL,
 	KEY (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	FOREIGN KEY (feature_story) REFERENCES stories(sid),
