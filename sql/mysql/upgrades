@@ -2453,3 +2453,5 @@ INSERT INTO vars (name, value, description) VALUES ('submission_force_default', 
 # End of T_2_5_0_17, Start of T_2_5_0_18 - 2004/08/01
 
 ALTER TABLE dbs ADD COLUMN weight tinyint UNSIGNED NOT NULL DEFAULT 1;
+INSERT INTO vars (name, value, description) VALUES ('debughash_getSkins','','false = no debugging; default regex = ^\d+$');
+INSERT INTO vars (name, value, description) VALUES ('debughash_getTopicTree','','false = no debugging; default regex = ^\d+$');
