@@ -478,6 +478,7 @@ sub countSubmissionsByDay {
 		'submissions', 
 		$where
 	);
+	return $used;
 }
 
 ########################################################
@@ -493,9 +494,9 @@ sub countSubmissionsByCommentIPID {
 
 	my $used = $self->sqlCount(
 		'submissions', 
-		"date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'
-		$where "
+		$where
 	);
+	return $used;
 }
 
 ########################################################
