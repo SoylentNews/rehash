@@ -1,6 +1,9 @@
 slash-1.0.5, 2000.06.xx
 -----------------------
 
+*	Section articles that appear on main page will now have the section
+	part of the titles as a link to that section's index.
+
 *	Now shows author comments while viewing the submission as opposed to
 	trying to scroll through the small input box in the submissions list.
 
