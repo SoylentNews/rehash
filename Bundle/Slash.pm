@@ -79,7 +79,7 @@ Time::HiRes
 
 Date::Parse		- TimeDate
 
-Date::Manip             - Still needed, but not for long
+Date::Manip             - Still needed, but only in utils/
 
 Date::Calc		- Use sparingly, only when necessary
 
