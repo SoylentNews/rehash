@@ -345,7 +345,6 @@ INSERT INTO vars (name, value, description) VALUES ('discussion_approval', '0', 
 # For pudge -brian
 ALTER TABLE templates ADD last_update timestamp;
 
-# USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 
 # Added for some Calendar stuff I am working on -Brian
@@ -380,3 +379,4 @@ source /tmp/dis2;
 
 ALTER TABLE pollanswers CHANGE COLUMN qid qid MEDIUMINT UNSIGNED NOT NULL;
 
+# USEPERL LAST UPDATED HERE
