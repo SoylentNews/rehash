@@ -639,7 +639,7 @@ sub printComments {
 		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
 			print STDERR scalar(gmtime) . " printComments memcached got keys '@old_keys' tried for '@keys_try'\n"
 		}
-		$mcd_debug->{hits} = scalar @old_keys if keys %$mcd_debug;
+		$mcd_debug->{hits} = scalar @old_keys if $mcd_debug;
 		for my $old_key (@old_keys) {
 			my $new_key = substr($old_key, $mcdkeylen);
 			$comment_text->{$new_key} = delete $comment_text->{$old_key};
