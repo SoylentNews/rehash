@@ -342,8 +342,11 @@ sub handler {
 			# allowed to make the attempt on the SSL server.
 			# Logging in means the users.pl script and either
 			# an empty op or the 'userlogin' op.
-                        $uri =~ m{^/users\.pl}
-                        && (!$form->{op} || $form->{op} eq 'userlogin')
+			(
+			$uri =~ m{^/osdn-test/}
+			||
+			$uri =~ m{^/(?:users|login)\.pl}
+			) && (!$form->{op} || $form->{op} eq 'userlogin')
                 )
 	) {
 		my $ans = $constants->{allow_nonadmin_ssl};
