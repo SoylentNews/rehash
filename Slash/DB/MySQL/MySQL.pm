@@ -6035,12 +6035,15 @@ sub countSubmissionsByNetID {
 	} elsif ($field eq 'subnetid') {
 		$where = "subnetid='$id'";
 	} else {
-		$where = "ipid='$id' OR subnetid='$id'";
+		my $ipid_cnt = $self->sqlCount("submissions", "ipid='$id'");
+		return wantarray ? ($ipid_cnt, "ipid") : $ipid_cnt if $ipid_cnt;
+		my $subnetid_cnt = $self->sqlCount("submissions", "subnetid='$id'");
+		return wantarray ? ($subnetid_cnt, "subnetid") : $subnetid_cnt;
 	}
 
 	my $count = $self->sqlCount('submissions', $where);
 
-	return $count;
+	return wantarray ? ($count, $field) : $count;
 }
 
 ########################################################
@@ -7272,6 +7275,12 @@ sub getSlashdStatuses {
 sub getMaxCid {
 	my($self) = @_;
 	return $self->sqlSelect("MAX(cid)", "comments");
+}
+
+##################################################################
+sub getMaxModeratorlogId {
+	my($self) = @_;
+	return $self->sqlSelect("MAX(id)", "moderatorlog");
 }
 
 ##################################################################
