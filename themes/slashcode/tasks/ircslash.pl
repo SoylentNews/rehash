@@ -499,6 +499,7 @@ my $next_report_bad_dbs = $^T + 60;
 sub possible_check_dbs {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	return if $hushed;
 	if (!$task_exit_flag && time() >= $next_check_dbs) {
 		$next_check_dbs = time() + 20;
 		my $dbs = $slashdb->getDBs();
