@@ -1,4 +1,5 @@
 INSERT INTO vars (name, value, description) VALUES ('db_slave_lag_ignore',10000000,'Bytes of lag between master and slave DB to ignore');
 INSERT INTO vars (name, value, description) VALUES ('mod_stats','1','Include stats on moderation in the daily admin mail?');
+INSERT INTO vars (name, value, description) VALUES ('mod_stats_min_repeat','2','Minimum number repeat mods to appear in mod stats');
 INSERT INTO vars (name, value, description) VALUES ('op_exclude_from_countdaily','rss','Ops to omit from daily counts in adminmail');
 INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');

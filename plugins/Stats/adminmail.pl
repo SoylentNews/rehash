@@ -185,6 +185,10 @@ EOT
 			($num_mods ? $num_admin_mods*100/$num_mods : 0));
 	}
 
+	$data{repeat_mods} = $stats->getRepeatMods({
+		min_count => $constants->{mod_stats_min_repeat}
+	});
+
 	$statsSave->createStatDaily($yesterday, "total", $count->{total}, { section => 'index'});
 	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes, { section => 'index'});
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique}, { section => 'index'});

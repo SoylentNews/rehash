@@ -44,10 +44,23 @@ __template__
   submissions: [% submissions %] submissions 
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
-[% IF constants.mod_stats %]
-[% admin_mods_text %]
-[% END %]
-
+[% IF constants.mod_stats;
+admin_mods_text;
+IF repeat_mods;
+	FOREACH dir = [ '-1', '1' ];
+		IF repeat_mods.$dir.keys.size >= 1;
+			IF dir == -1; dirword = "DOWN"; ELSE; dirword = "UP"; END %]
+REPEAT [% dirword %]MODS:
+[%			FOREACH orguid = repeat_mods.$dir.keys.nsort;
+				FOREACH destuid = repeat_mods.$dir.$orguid.keys.nsort;
+					hr = repeat_mods.$dir.$orguid.$destuid;
+constants.absolutedir %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])
+[%				END;
+			END;
+		END;
+	END;
+END;
+END %]
    total hits: [% total_hits %]
      homepage: [% homepage %]
 
@@ -62,7 +75,7 @@ For [% section.section_name %]
 
                   Pages      IPs   Bandwidth    Users
 [% IF section.index.page > 0 -%]
-     index: [% section.index.page %] [% section.index.ipids %] [% section.index.bytes %] [% section.index.users %]
+        index: [% section.index.page %] [% section.index.ipids %] [% section.index.bytes %] [% section.index.users %]
 [% END -%]
 [% IF section.comments.page > 0 -%]
      comments: [% section.comments.page %] [% section.comments.ipids %] [% section.comments.bytes %] [% section.comments.users %]
