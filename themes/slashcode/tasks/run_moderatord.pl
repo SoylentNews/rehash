@@ -627,17 +627,19 @@ sub adjust_m2_freq {
 	my $y = $m2count_day / ($m1count_day * $avg_consensus_day);
 
 	my $z = ($y * 3 + $x) / 4;
+	slashdLog("m2_freq vars: x: $x y: $y z: $z\n");	
 
 	return 1 if ($x > 1 && $y < 1) || ($x < 1 && $y > 1);
 	$z = 3/4 if $z < 3/4;
 	$z = 4/3 if $z > 4/3;
+	slashdLog("m2_freq: adjusted  z: $z\n");	
 
 	my $cur_m2_freq = $slashdb->getVar('m2_freq', 'value', 1) || 86400;
 	my $new_m2_freq = int($cur_m2_freq * $z ** (1/24));
 
 	$new_m2_freq = $constants->{m2_freq_min} if defined $constants->{m2_freq_min} && $new_m2_freq < $constants->{m2_freq_min};
 	$new_m2_freq = $constants->{m2_freq_max} if defined $constants->{m2_freq_max} && $new_m2_freq > $constants->{m2_freq_max};
-	slashdLog("adjusting m2_freq to $new_m2_freq");	
+	slashdLog("adjusting m2_freq from $cur_m2_freq to $new_m2_freq");	
 	$slashdb->setVar('m2_freq', $new_m2_freq);
 }
 	
