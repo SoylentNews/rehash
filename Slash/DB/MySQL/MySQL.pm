@@ -2199,7 +2199,6 @@ sub autoUrl {
 	my $more = substr $user->{nickname}, 1;
 	$more =~ s/[a-z]//g;
 	$initials = uc($initials . $more);
-	# CHANGE DATE_ FUNCTION
 	my($now) = timeCalc('epoch ' . time(), '%m/%d %H:%M %p %Z', 0);
 
 	# Assorted Automatic Autoreplacements for Convenience

@@ -30,6 +30,7 @@ __template__
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 
+
 [% IF templatedelete_flag %]
 
 <INPUT TYPE="HIDDEN" NAME="deletetpid" VALUE="[% tpid %]">
