@@ -132,7 +132,7 @@ sub countMetamodLog {
 	}
 
 	my $where = join(" AND ", @clauses) || "";
-	my $count = $self->sqlCount("moderatorlog", $where);
+	my $count = $self->sqlCount("metamodlog", $where);
 	return $count;
 }
 
@@ -268,17 +268,18 @@ sub getModM2Ratios {
 sub getCommentsByDistinctIPID {
 	my($self, $options) = @_;
 
-	my $section_where = "1=1 ";
-	$section_where .= " AND discussions.id = comments.sid
-			    AND discussions.section = '$options->{section}'"
+	my $where = "date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'";
+	$where .= " AND discussions.id = comments.sid
+		    AND discussions.section = '$options->{section}'"
 		if $options->{section};
 
 	my $tables = 'comments';
 	$tables .= ", discussions" if $options->{section};
 
 	my $used = $self->sqlSelectColArrayref(
-		'ipid', $tables, 
-		$section_where,
+		'ipid',
+		$tables, 
+		$where,
 		'',
 		{ distinct => 1 }
 	);

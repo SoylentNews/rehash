@@ -11,7 +11,9 @@ en_US
 __name__
 display
 __template__
-               UIDs     | IPIDS    | Pages
+[% constants.sitename %] Stats for [% day %]
+
+                   UIDs      IPIDs      Pages
         total: [% users %]   [% unique %]   [% total %]
   grand total:        -          -    [% grand_total %] ([% total_bytes %])
         posts: [% distinct_comment_posters_uids %]   [% IPIDS %]

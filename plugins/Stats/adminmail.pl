@@ -133,11 +133,11 @@ EOT
 	my $grand_total = $stats->countDailyByPage('', );
 	$data{grand_total} = $grand_total;
 	for (qw|index article search comments palm journal rss|) {
-		my $uniq = $stats->countDailyByPageDistinctIPID($_, );
-		my $pages = $stats->countDailyByPage($_, );
-		my $bytes = $stats->countBytesByPage($_, );
-		my $uids = $stats->countUsersByPage($_, );
-		$data{"${_}_uids"} = sprintf("%8d", $uniq);
+		my $uniq = $stats->countDailyByPageDistinctIPID($_);
+		my $pages = $stats->countDailyByPage($_);
+		my $bytes = $stats->countBytesByPage($_);
+		my $uids = $stats->countUsersByPage($_);
+		$data{"${_}_uids"} = sprintf("%8d", $uids);
 		$data{"${_}_ipids"} = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
