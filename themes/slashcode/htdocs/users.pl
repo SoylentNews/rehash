@@ -364,7 +364,7 @@ sub main {
 
 	if ($constants->{admin_formkeys} || $user->{seclev} < 100) {
 
-                my $done = 0;
+		my $done = 0;
 		$done = 1 if $op eq 'savepasswd'; # special case
 		$formname = $ops->{$op}{formname};
 
@@ -373,7 +373,7 @@ sub main {
 		# to get out of it.  (But for "newuserform," the current
 		# user's karma doesn't get them out of having to prove
 		# they're a human for creating a *new* user.)
-                my $options = {};
+		my $options = {};
 		if (	   !$constants->{plugin}{HumanConf}
 			|| !$constants->{hc}
 			|| !$constants->{hc_sw_newuser}
@@ -387,12 +387,12 @@ sub main {
 			$options->{no_hc} = 1;
 		}
 
-                DO_CHECKS: while (!$done) {
-                        for my $check (@{$ops->{$op}{checks}}) {
-                                $ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
-                                $error_flag = formkeyHandler($check, $formname, $formkey,
-                                        undef, $options);
-                                if ($error_flag == -1) {
+		DO_CHECKS: while (!$done) {
+			for my $check (@{$ops->{$op}{checks}}) {
+				$ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
+				$error_flag = formkeyHandler($check, $formname, $formkey,
+					undef, $options);
+				if ($error_flag == -1) {
 					# Special error:  HumanConf failed.  Go
 					# back to the previous op, start over.
 					if ($op =~ /^(newuser|mailpasswd)$/) {
@@ -401,17 +401,17 @@ sub main {
 						next DO_CHECKS;
 					}
 				} elsif ($error_flag) {
-                                        $done = 1;
-                                        last;
-                                }
-                        }
-                        $done = 1;
-                }
+					$done = 1;
+					last;
+				}
+			}
+			$done = 1;
+		}
 
-                if (!$error_flag && !$options->{no_hc}) {
-                        my $hc = getObject("Slash::HumanConf");
-                        $hc->reloadFormkeyHC($formname) if $hc;
-                }
+		if (!$error_flag && !$options->{no_hc}) {
+			my $hc = getObject("Slash::HumanConf");
+			$hc->reloadFormkeyHC($formname) if $hc;
+		}
 
 	}
 

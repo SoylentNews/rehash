@@ -4371,7 +4371,7 @@ sub getTopNewsstoryTopics {
 
 	$limit =~ s/\D+//g;
 	$limit = 10 if !$limit || $limit == 1;
-	my $sect_clause =" AND section='$section' " if $section;
+	my $sect_clause = " AND section='$section' " if $section;
 	my $other  = $all ? '' : "LIMIT $limit";
 	my $topics = $self->sqlSelectAllHashrefArray(
 		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(time) AS tme",

@@ -891,13 +891,17 @@ sub moderatorCommentLog {
 		&& $constants->{m2_multicount}
 		&& $options->{show_m2s}){
 		foreach my $m (@$mods){
-			my $key="";
+			my $key = '';
 			foreach my $m2 (@{$mods_to_m2s->{$m->{id}}}) {
-				$key.="$m2->{uid} $m2->{val},";
+				$key .= "$m2->{uid} $m2->{val},";
 			}
 			$m->{m2_identity} = $key;
 		}
-		@$mods = sort {$a->{reason} <=> $b->{reason} || $a->{m2_identity} cmp $b->{m2_identity}} @$mods;
+		@$mods = sort {
+			$a->{reason} <=> $b->{reason}
+				||
+			$a->{m2_identity} cmp $b->{m2_identity}
+		} @$mods;
 	}
 	my $data = {
 		type		=> $type,

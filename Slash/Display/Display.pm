@@ -212,7 +212,7 @@ sub slashDisplay {
 	}
 
 	# template_show_comments == 0		never show HTML comments
-	# template_show_comments == 1		show them iff $opt->{Nocomm}
+	# template_show_comments == 1		show them if !$opt->{Nocomm}
 	# template_show_comments == 2		always show them - debug only!
 
 	my $show_comm = $constants->{template_show_comments} ? 1 : 0;
