@@ -2,11 +2,12 @@
 name=slashcode
 description="Slashcode.com theme"
 topic=htdocs/images/topics/topicbug.jpg
+topic=htdocs/images/topics/topiceditorial.gif
 topic=htdocs/images/topics/topiclinux.gif
 topic=htdocs/images/topics/topicnews.gif
+topic=htdocs/images/topics/topicprogramming.gif
 topic=htdocs/images/topics/topicslash.gif
 topic=htdocs/images/topics/topicslashdot.gif
-topic=htdocs/images/topics/topiceditorial.gif
 image=htdocs/images/menu_bgo.gif
 image=htdocs/images/menu_bgx.gif
 image=htdocs/images/menu_ggo.gif
