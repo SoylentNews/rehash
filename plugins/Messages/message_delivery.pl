@@ -31,15 +31,15 @@ $task{$me}{code} = sub {
 	$time[5] += 1900;
 	$time[4] += 1;
 	my $now = sprintf "%04d-%02d-%02d", @time[5, 4, 3];
-	my $last_deferred = $slashdb->getVar('messages_last_deferred', 'value') || 0;
+	my $last_deferred = $slashdb->getVar('message_last_deferred', 'value') || 0;
 
 	my($successes, $failures) = (0, 0);
 	my $count = $constants->{message_process_count} || 10;
 
 	my $msgs;
-	if ($last_deferred != $now) {
+	if ($last_deferred ne $now) {
 		$msgs = $messages->gets($count);
-		$slashdb->setVar('messages_last_deferred', $now);
+		$slashdb->setVar('message_last_deferred', $now);
 	} else {
 		$msgs = $messages->gets($count, { 'send' => 'now' });
 	}
