@@ -527,7 +527,7 @@ sub saveSub {
 		title		=> 'Saving',
 		width		=> '100%',
 		missingemail	=> length($form->{email}) < 3,
-		anonsubmit	=> isAnon($uid), #length($form->{name}) < 3,
+		anonsubmit	=> isAnon($uid) && length($form->{name}) < 3 && length($form->{email}) < 3,
 	});
 	yourPendingSubmissions(@_);
 
