@@ -182,9 +182,8 @@ sub selectComments {
 		$comments->{0}{totals}[$x] += $comments->{0}{totals}[$x + 1];
 	}
 
-	# get the total visible kids for each comment (the 0 means start
-	# pid 0, or top level comments.	--Pater
-	countTotalVisibleKids(0, $comments);
+	# get the total visible kids for each comment --Pater
+	countTotalVisibleKids($comments);
 
 	_print_cchp($header, $count, $comments->{0}{totals});
 

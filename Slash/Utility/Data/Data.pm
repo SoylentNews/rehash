@@ -2975,18 +2975,45 @@ sub sitename2filename {
 ##################################################################
 # counts total visible kids for each parent comment
 sub countTotalVisibleKids {
-	my($pid, $comments) = @_;
-	my $total = 0;
+	my($comments, $pid) = @_;
+
+	my $constants        = getCurrentStatic();
+	my $total            = 0;
+	my $last_updated     = '';
+	my $last_updated_uid = 0;
+	$pid               ||= 0;
 
 	$total += $comments->{$pid}{visiblekids};
+	if ($constants->{ubb_like_forums}) {
+		$last_updated     = $comments->{$pid}{date};
+		$last_updated_uid = $comments->{$pid}{uid};
+	}
 
 	for my $cid (@{$comments->{$pid}{kids}}) {
-		$total += countTotalVisibleKids($cid, $comments);
+		my($num_kids, $date_test, $uid) =
+			countTotalVisibleKids($comments, $cid);
+		$total += $num_kids;
+
+		if ($constants->{ubb_like_forums}) {
+			if ($date_test > $last_updated) {
+				$last_updated     = $date_test;
+				$last_updated_uid = $uid;
+			}
+			if ($comments->{$cid}{date} > $last_updated) {
+				$last_updated     = $comments->{$cid}{date};
+				$last_updated_uid = $comments->{$cid}{uid};
+			}
+		}
 	}
 
 	$comments->{$pid}{totalvisiblekids} = $total;
+	# don't do the next two if pid=0
+	if ($pid && $constants->{ubb_like_forums}) {
+		$comments->{$pid}{last_updated}     = $last_updated;
+		$comments->{$pid}{last_updated_uid} = $last_updated_uid;
+	}
 
-	return $total;
+	return($total, $last_updated, $last_updated_uid);
 }
 
 ##################################################################
