@@ -131,7 +131,7 @@ sub writeTemplateFile {
 	my($self, $filename, $template) = @_;
 	my $fh = gensym;
 	open($fh, "> $filename\0") or die "Can't open $filename to write to: $!";
-	for (qw(section description title page lang name template seclev version)) { #(keys %$template) {
+	for (qw(skin description title page lang name template seclev version)) { #(keys %$template) {
 		next if $_ eq 'tpid';
 		print $fh "__${_}__\n";
 		$template->{$_} =~ s/\015\012/\n/g;
@@ -411,7 +411,7 @@ sub _install {
 			    warn "Template file $hash->{'dir'}/$_ could not be opened: $!\n";
 			    next;
 			}
-			my $key = "$template->{name};$template->{page};$template->{section}";
+			my $key = "$template->{name};$template->{page};$template->{skin}";
 			# This is not actually needed since cleanup occurs at the end -Brian
 			if ($hash->{'no-template'} && ref($hash->{'no-template'}) eq 'ARRAY') {
 				next if (grep { $key eq $_ }  @{$hash->{'no-template'}} );
