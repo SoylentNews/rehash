@@ -2004,6 +2004,8 @@ sub getOpAndDatFromStatusAndURI {
 		$uri = 'image';
 	} elsif ($uri =~ /\.png$/) {
 		$uri = 'image';
+	} elsif ($uri =~ /\.rss$/ || $uri =~ /\.xml$/ || $uri =~ /\.rdf$/ || $ENV{QUERY_STRING} =~ /\bcontent_type=rss\b/) {
+		$uri = 'rss';
 	} elsif ($uri =~ /\.pl$/) {
 		$uri =~ s|^/(.*)\.pl$|$1|;
 	# This is for me, I am getting tired of patching my local copy -Brian
@@ -2013,8 +2015,6 @@ sub getOpAndDatFromStatusAndURI {
 		$uri =~ s|^/(.*)\.rpm$|$1|;
 	} elsif ($uri =~ /\.dmg$/) {
 		$uri =~ s|^/(.*)\.dmg$|$1|;
-	} elsif ($uri =~ /\.rss$/ || $uri =~ /\.xml$/ || $uri =~ /\.rdf$/) {
-		$uri = 'rss';
 	} elsif ($uri =~ /\.css$/) {
 		$uri = 'css';
 	} elsif ($uri =~ /\.shtml$/) {
