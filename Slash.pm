@@ -2291,9 +2291,18 @@ sub dispStory {
 
 		# Need Header
 		my $SECT = getSection($S->{section});
-		$title = <<EOT;
+
+		# Until something better can be done we manually
+		# fix title for the appropriate mode. This is an
+		# UGLY hack, but until something more configurable
+		# comes along (and using a block, here might be an
+		# even uglier hack...but would solve the immediate
+		# problem.
+		$title = $I{U}{light} ? <<LIGHT : <<NORMAL;
+\t\t\t<A HREF="$I{rootdir}/$S->{section}/">$SECT->{title}</A>: $S->{title}
+LIGHT
 \t\t\t<A HREF="$I{rootdir}/$S->{section}/"><FONT COLOR="$I{fg}[3]">$SECT->{title}</FONT></A>: $S->{title}
-EOT
+NORMAL
 	}
 
 	titlebar($I{titlebar_width}, $title);
