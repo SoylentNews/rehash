@@ -1003,6 +1003,8 @@ CREATE TABLE users (
 
 #
 # Table structure for table 'users_acl'
+# (The redundant key on uid is there for when FOREIGN KEY starts
+# working with InnoDB...)
 #
 
 DROP TABLE IF EXISTS users_acl;
@@ -1012,6 +1014,7 @@ CREATE TABLE users_acl (
 	acl varchar(32) NOT NULL,
 	UNIQUE uid_key (uid,acl),
 	KEY uid (uid),
+	KEY acl (acl),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 

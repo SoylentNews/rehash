@@ -2526,30 +2526,33 @@ sub saveColorBlock {
 	my($self, $colorblock) = @_;
 	my $form = getCurrentForm();
 
-	my $db_bid = $self->sqlQuote($form->{color_block} || 'colors');
+	my $bid_q = $self->sqlQuote($form->{color_block} || 'colors');
 
 	if ($form->{colorsave}) {
 		# save into colors and colorsback
 		$self->sqlUpdate('blocks', {
 				block => $colorblock,
-			}, "bid = $db_bid"
+			}, "bid = $bid_q"
 		);
 
 	} elsif ($form->{colorsavedef}) {
 		# save into colors and colorsback
 		$self->sqlUpdate('blocks', {
 				block => $colorblock,
-			}, "bid = $db_bid"
+			}, "bid = $bid_q"
 		);
 		$self->sqlUpdate('backup_blocks', {
 				block => $colorblock,
-			}, "bid = $db_bid"
+			}, "bid = $bid_q"
 		);
 
 	} elsif ($form->{colororig}) {
 		# reload original version of colors
-		my $block = $self->{_dbh}->selectrow_array("SELECT block FROM backup_blocks WHERE bid = $db_bid");
-		$self->sqlDo("UPDATE blocks SET block = $block WHERE bid = $db_bid");
+		my $block = $self->sqlSelect("block", "backup_blocks", "bid = $bid_q");
+		$self->sqlUpdate('blocks', {
+				block => $block
+			}, "bid = $bid_q"
+		);
 	}
 }
 
@@ -7336,7 +7339,8 @@ sub setUser {
 			} 
 			if (@delete) {
 				my $string = join(',', @{$self->sqlQuote(\@delete)});
-				$self->sqlDelete("users_acl", "acl IN ($string)");
+				$self->sqlDelete("users_acl", "acl IN ($string) AND uid=$uid");
+				$mcd_need_delete = 1;
 			}
 			if (@add) {
 				# Doing all the inserts at once is cheaper than
@@ -7347,7 +7351,10 @@ sub setUser {
 					$string .= qq| ($uid, $qacl),|
 				}
 				chop($string); # remove trailing comma
+				my $qlid = $self->_querylog_start('INSERT', 'users_acl');
 				$self->sqlDo("INSERT IGNORE INTO users_acl (uid, acl) VALUES $string");
+				$self->_querylog_finish($qlid);
+				$mcd_need_delete = 1;
 			}
 		} else {
 			$rows += $self->sqlReplace('users_param', {
@@ -7359,6 +7366,7 @@ sub setUser {
 	}
 
 	# And delete from memcached again after we update the DB
+	$mcd_need_delete = 1 if $rows;
 	$self->setUser_delete_memcached($uid) if $mcd_need_delete;
 
 	return $rows;
@@ -7382,12 +7390,31 @@ sub setUser_delete_memcached {
 	}
 }
 
-# Nicknames
+########################################################
+# Get a list of nicknames
 sub getUsersNicknamesByUID {
-	my ($self, $people) = @_;
+	my($self, $people) = @_;
 	return unless (ref($people) eq 'ARRAY') && scalar(@$people);
 	my $list = join(",", @$people);
-	$self->sqlSelectAllHashref("uid", "uid,nickname", "users", "uid IN ($list)");
+	return $self->sqlSelectAllHashref("uid", "uid,nickname", "users", "uid IN ($list)");
+}
+
+########################################################
+# Get the complete list of all acl/uid pairs used on this site.
+# (We assume this to be on the order of < 10K rows returned.)
+# The list is returned as a hashref whose keys are the acl names
+# and whose values are an arrayref of uids that have that acl
+# permission.
+sub getAllACLs {
+	my($self) = @_;
+	my $ar = $self->sqlSelectAll("uid, acl", "users_acl");
+	return undef unless $ar && @$ar;
+	my $hr = { };
+	for my $row (@$ar) {
+		my($uid, $acl) = @$row;
+		push @{$hr->{$acl}}, $uid;
+	}
+	return $hr;
 }
 
 ########################################################
@@ -7430,6 +7457,7 @@ sub getUser {
 	}
 
 	my $rawmcdanswer;
+	my $used_shortcut = 0;
 	if ($gtd->{can_use_mcd}
 		and $rawmcdanswer = $mcd->get("$mcdkey$uid")) {
 
@@ -7437,47 +7465,75 @@ sub getUser {
 		# from memcached.  The data at this point is already
 		# in $rawmcdanswer, now we just need to determine
 		# which portion of it to use.
-		# XXX An optimization here would be, when we're
-		# getting the entire user, to not bother with this
-		# for loop, just set $mcdanswer=$rawmcdanswer.
 		my $cols_still_need = [ ];
-		for my $col (@{$gtd->{cols_needed_ar}}) {
-			if (exists($rawmcdanswer->{$col})) {
-				# This column we can pull from mcd.
-				$mcdanswer->{$col} = $rawmcdanswer->{$col};
-				# If we get anything from mcd, we should
-				# get all the params data, so we no longer
-				# need to get them later.
-				$gtd->{all} = 0;
-			} else {
-				# This one we'll need from DB.
-				push @$cols_still_need, $col;
+		if ($gtd->{all}) {
+
+			# Quick shortcut.  Everything comes from
+			# memcached except the users_hits table.
+			# users_param and users_acl tables.
+			$answer = \%{ $rawmcdanswer };
+			my $users_hits = $self->sqlSelectAllHashref(
+				"uid", "*", "users_hits",
+				"uid=$uid_q")->{uid};
+#			my $users_param = $self->sqlSelectAll(
+#				"name, value", "users_param",
+#				"uid=$uid_q");
+#			my $users_acl = $self->sqlSelectColArrayref(
+#				"acl", "users_acl",
+#				"uid=$uid_q");
+			for my $col (keys %$users_hits) {
+				$answer->{$col} = $users_hits->{$col};
 			}
+#			for my $duple (@$users_param) {
+#				$answer->{$duple->[0]} = $duple->[1];
+#			}
+#			for my $acl (@$users_acl) {
+#				push @{$answer->{acl}}, $acl;
+#			}
+			$used_shortcut = 1;
+
+		} else {
+
+			for my $col (@{$gtd->{cols_needed_ar}}) {
+				if (exists($rawmcdanswer->{$col})) {
+					# This column we can pull from mcd.
+					$mcdanswer->{$col} = $rawmcdanswer->{$col};
+					# If we get anything from mcd, we should
+					# get all the params data, so we no longer
+					# need to get them later.
+					$gtd->{all} = 0;
+				} else {
+					# This one we'll need from DB.
+					push @$cols_still_need, $col;
+				}
+			}
+
+			# Now whatever's left, we get from the DB.  If all went
+			# well, this will just be the data from the users_hits
+			# table (but we don't make that assumption, it works
+			# the same whatever data was stored in memcached).
+			if (@$cols_still_need) {
+				my $table_hr = $self->_getUser_get_select_from_where(
+					$uid_q, $cols_still_need);
+				if ($mcddebug > 1) {
+					print STDERR scalar(gmtime) . " $$ getUser still_need: '@$cols_still_need' table_hr: " . Dumper($table_hr);
+				}
+				$answer = $self->_getUser_do_selects(
+					$uid_q,
+					$table_hr->{select_clause},
+					$table_hr->{from_clause},
+					$table_hr->{where_clause},
+					$gtd->{all} ? "all" : $table_hr->{params_needed});
+			}
+
+			# Now merge the memcached and DB data.
+			for my $col (keys %$answer) {
+				$mcdanswer->{$col} = $answer->{$col};
+			}
+			$answer = $mcdanswer;
+
 		}
 
-		# Now whatever's left, we get from the DB.  If all went
-		# well, this will just be the data from the users_hits
-		# table (but we don't make that assumption, it works
-		# the same whatever data was stored in memcached).
-		if (@$cols_still_need) {
-			my $table_hr = $self->_getUser_get_select_from_where(
-				$uid_q, $cols_still_need);
-			if ($mcddebug > 1) {
-				print STDERR scalar(gmtime) . " $$ getUser still_need: '@$cols_still_need' table_hr: " . Dumper($table_hr);
-			}
-			$answer = $self->_getUser_do_selects(
-				$uid_q,
-				$table_hr->{select_clause},
-				$table_hr->{from_clause},
-				$table_hr->{where_clause},
-				$gtd->{all} ? "all" : $table_hr->{params_needed});
-		}
-
-		# Now merge the memcached and DB data.
-		for my $col (keys %$answer) {
-			$mcdanswer->{$col} = $answer->{$col};
-		}
-		$answer = $mcdanswer;
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ getUser hit, won't write_memcached\n";
 		}
@@ -7543,8 +7599,8 @@ sub getUser {
 
 	if ($mcddebug) {
 		my $elapsed = sprintf("%6.4f", Time::HiRes::time - $start_time);
-		if (defined $mcdanswer) {
-			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache HIT\n";
+		if (defined($mcdanswer) || $used_shortcut) {
+			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache HIT" . ($used_shortcut ? " shortcut" : "") . "\n";;
 		} else {
 			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache MISS can '$gtd->{can_use_mcd}' rawmcdanswer: " . Dumper($rawmcdanswer);
 		}

@@ -5,9 +5,13 @@ Create drop-down HTML list
 
 * label = the FORM name for the select element
 * items = hash reference of keys (key is value, value is label)
-* default = default key to be selected
+* default = default key(s) to be selected - this can be a single string,
+	or a hashref where the hash keys with true values are the keys
+	that are selected (this would really only be useful when
+	"multiple" is also true, I believe)
 * numeric = boolean to sort keys numerically
 * ordered = an already sorted arrayref of the keys in items
+* multiple = boolean, whether MULTIPLE is specified in the <SELECT>
 
 __title__
 
@@ -18,8 +22,9 @@ en_US
 __name__
 select
 __template__
-<SELECT NAME="[% label %]">[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
-[% FOREACH item = mylist %]	[% selected = default == item ? ' SELECTED' : '' %]<OPTION VALUE="[% item %]"[% selected %]>[% items.$item %]</OPTION>
+[% IF default.ref == 'HASH'; default_hr = default; ELSE; default_hr = { $default = 1 }; END %]
+<SELECT NAME="[% label %]"[% IF multiple %] MULTIPLE[% END %]>[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
+[% FOREACH item = mylist %]	<!-- item=[% item %] default_hr.$item=[% default_hr.$item %] -->[% IF default_hr.$item; selected = ' SELECTED'; ELSE; selected = ''; END %]<OPTION VALUE="[% item %]"[% selected %]>[% items.$item %]</OPTION>
 [% END %]</SELECT>
 
 __seclev__

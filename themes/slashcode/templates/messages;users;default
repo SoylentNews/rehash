@@ -120,11 +120,8 @@ please contact the site administrator immediately.
 	[% constants.siteadmin_name %]
 	[% constants.adminmail %]
 
-[% CASE 'saveuseradmin_saved' %]
-	Saved [% field %] [% id %] Admin settings
-
 [% CASE 'saveuseradmin_saveduser' %]
-	Saved [% field %] [% id %] User settings
+	Saved [% field %] [% id %] user settings
 
 [% CASE 'saveuseradmin_authorchg' %]
 	<p>Since you changed the author status of this user, you will probably

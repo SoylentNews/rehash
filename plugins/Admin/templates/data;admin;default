@@ -25,6 +25,9 @@ __template__
 	[% returnme.data_constant = 1 %]
 	Keyword has been saved
 
+[% CASE 'aclSave-message' %]
+Created new user ACL <tt>[% form.thisname %]</tt><BR>
+
 [% CASE 'varSave-message' %]
 Saved [% form.thisname %]<BR>
 

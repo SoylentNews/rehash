@@ -1933,3 +1933,6 @@ INSERT INTO vars VALUES ('subscribe_gift_testing','1','When this is on only admi
 # USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_122, Start of T_2_3_0_123 - 2003/10/28
+
+ALTER TABLE users_acl ADD INDEX acl (acl);
+

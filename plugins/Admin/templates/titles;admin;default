@@ -95,6 +95,9 @@ Site Template Editor
 [% CASE 'varEdit-title' %]
 Variable Editor
 
+[% CASE 'aclEdit-title' %]
+ACL Editor
+
 [% END %]
 
 __seclev__

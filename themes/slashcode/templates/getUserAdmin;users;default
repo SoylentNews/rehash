@@ -282,6 +282,14 @@ __template__
 				<TD ALIGN="LEFT"><INPUT TYPE="TEXT" NAME="tokens" SIZE="6" VALUE="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
 				<B>Latest M2 Info:</B> <INPUT TYPE="TEXT" NAME="m2info" VALUE="[% useredit.m2info | strip_attribute %]"></TD>
 			</TR>
+
+[% IF all_acls %]
+			<TR>
+				<TD WIDTH="100"><B>ACLs</B></TD>
+				<TD ALIGN="LEFT">[% Slash.createSelect("newacls_multiple", all_acls, useredit.acl, 1, '', 1, 1) %]</TD>
+			</TR>
+[% END %]
+
 			[% END %]
 			<TR>
 				<TD>&nbsp;</TD>

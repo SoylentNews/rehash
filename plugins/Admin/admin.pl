@@ -136,6 +136,12 @@ sub main {
 			adminmenu	=> 'config',
 			tab_selected	=> 'vars',
 		},
+		acls		=> {
+			function	=> \&aclEdit,
+			seclev		=> 10000,
+			adminmenu	=> 'config',
+			tab_selected	=> 'acls',
+		},
 		recent		=> {
 			function	=> \&displayRecent,
 			seclev		=> 500,
@@ -259,13 +265,54 @@ sub varSave {
 
 		if ($form->{desc}) {
 			print getData('varSave-message');
-		} else {
-# please don't delete this by just removing comment,
-# since we don't even warn the admin this will happen.
-#			$slashdb->deleteVar($form->{thisname});
-#			print getData('varDelete-message');
 		}
 	}
+}
+
+##################################################################
+# ACLs Edit
+# This is for editing the list of ACLs that are defined on your
+# Slash site.  To edit which users have those ACLs, see users.pl.
+sub aclEdit {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $all_acls_hr;
+
+	# If we need to create an ACL, do so.  By doing this before we
+	# get the list of all ACLs in use, we make sure that when we
+	# get that list, it will include the ACL we just created.
+	if ($form->{aclsave}) {
+		aclSave(@_, $all_acls_hr);
+		# We go to the master DB for the definitive list,
+		# because the ACL we created moments ago may not
+		# have replicated to the reader DBs yet.
+		$all_acls_hr = $slashdb->getAllACLs();
+	} else {
+		# Not creating any ACLs with this click, so trust
+		# that the readers have the correct list.
+		$all_acls_hr = $reader->getAllACLs();
+	}
+
+	slashDisplay('aclEdit', {
+		title		=> getTitle('aclEdit-title'),
+		acls		=> $all_acls_hr,
+	});
+}
+
+##################################################################
+sub aclSave {
+	my($form, $slashdb, $user, $constants, $all_acls_hr) = @_;
+
+	return unless $form->{thisname};
+
+	# Set the current user (the admin) to have this acl.  Creating
+	# a single acl entry makes it exist.
+	$slashdb->setUser($user->{uid}, {
+		acl => { $form->{thisname}, 1 }
+	});
+
+	print getData('aclSave-message');
 }
 
 ##################################################################

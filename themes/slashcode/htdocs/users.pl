@@ -1847,9 +1847,9 @@ sub saveUserAdmin {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my($user_edits_table, $user_edit) = ({}, {});
-	my $save_success = 0;
 	my $author_flag;
 	my $note = '';
 	my $id;
@@ -1902,8 +1902,6 @@ sub saveUserAdmin {
 		$slashdb->getBanList(1); # reload the list
 	}
 
-	$note .= getMessage('saveuseradmin_saved', { field => $user_editfield_flag, id => $id}) if $save_success;
-
 	if ($user->{is_admin} && ($user_editfield_flag eq 'uid' ||
 		$user_editfield_flag eq 'nickname')) {
 
@@ -1914,11 +1912,24 @@ sub saveUserAdmin {
 		$user_edits_table->{tokens} = $form->{tokens};
 		$user_edits_table->{m2info} = $form->{m2info};
 
+		# As far as ACLs, first we set all the ACLs that we're
+		# setting, to 1.
+		$user_edits_table->{acl} = { map { ($_, 1) } @{$form->{newacls_multiple}} };
+		# Then we run through all the ACLs, and any that we're not
+		# setting, go to 0 so they get deleted..
+		my $all_acls_hr = $reader->getAllACLs();
+		my @all_acls = sort keys %$all_acls_hr;
+		for my $acl (@all_acls) {
+			$user_edits_table->{acl}{$acl} ||= 0;
+		}
+
 		my $author = $slashdb->getAuthor($id);
 		my $was_author = ($author && $author->{author}) ? 1 : 0;
 
 		$slashdb->setUser($id, $user_edits_table);
+
 		$note .= getMessage('saveuseradmin_saveduser', { field => $user_editfield_flag, id => $id });
+
 		if ($was_author xor $user_edits_table->{author}) {
 			# A frequently-asked question for new Slash admins is
 			# why their authors aren't showing up immediately.
@@ -2634,8 +2645,11 @@ sub getTitle {
 }
 
 #################################################################
-# getUserAdmin - returns a block of text
-# containing fields for admin users
+# getUserAdmin - returns a block of HTML text that provides
+# information and editing capabilities for admin users.
+# Most of this data is already in the getUserAdmin template,
+# but really, we should try to get more of this logic into
+# that template.
 sub getUserAdmin {
 	my($id, $field, $seclev_field) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -2755,6 +2769,9 @@ sub getUserAdmin {
 			$subscribe->getSubscriptionsPurchasedByUser($user_edit->{uid});
 	}
 
+	my $all_acls = $reader->getAllACLs();
+	my $all_acls_hr = { map { ( $_, $_ ) } keys %$all_acls };
+
 	return slashDisplay('getUserAdmin', {
 		field			=> $field,
 		useredit		=> $user_edit,
@@ -2772,6 +2789,7 @@ sub getUserAdmin {
 		thresh_select		=> $thresh_select,
 		authoredit_flag 	=> $authoredit_flag,
 		section_select		=> $section_select,
+		all_acls		=> $all_acls_hr,
 	}, 1);
 }
 

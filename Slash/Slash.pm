@@ -420,7 +420,7 @@ sub _can_mod {
 	$comment->{time_unixepoch} = time unless $comment;
 	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0)
 		unless $comment->{time_unixepoch};
-	return
+	my $retval =
 		   !$user->{is_anon}
 		&& $constants->{allow_moderation}
 		&& !$comment->{no_moderation}
@@ -440,7 +440,11 @@ sub _can_mod {
 		) || (
 		       $constants->{authors_unlimited}
 		    && $user->{seclev} >= $constants->{authors_unlimited}
+		) || (
+		       $user->{acl}{alwaysmodpoints}
 		) );
+use Data::Dumper; print STDERR "_can_mod returning '$retval' for: " . Dumper($user);
+	return $retval;
 }
 
 #========================================================================
