@@ -1692,7 +1692,7 @@ sub updateStory {
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		subsection	=> $form->{subsection},
-		rendered        => undef, # freshenup.pl will write this
+		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
@@ -1887,7 +1887,7 @@ sub saveStory {
 		subid		=> $form->{subid},
 		subsection	=> $form->{subsection},
 		commentstatus	=> $form->{commentstatus},
-		rendered        => undef, # freshenup.pl will write this
+		-rendered	=> 'NULL', # freshenup.pl will write this
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {
