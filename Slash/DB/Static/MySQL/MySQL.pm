@@ -285,11 +285,12 @@ sub forgetCommentIPs {
 	my $maxcid = 0;
 	my $min_remember_sid = $self->sqlSelect("MIN(id)",
 		"discussions",
-		"ts > DATE_SUB(NOW(), INTERVAL $hours1 HOUR)");
+		"ts > DATE_SUB(NOW(), INTERVAL $hours1 HOUR)
+		 AND commentcount > 0");
 	if ($min_remember_sid) {
 		$maxcid = $self->sqlSelect("MIN(cid)",
 			"comments",
-			"sid=$min_remember_sid");
+			"sid=$min_remember_sid") || 0;
 	}
 	if ($maxcid < $mincid) {
 		# Shouldn't happen, but just in case
