@@ -236,9 +236,6 @@ sub newUser {
 		"matchname","users",
 		"matchname=" . $I{dbh}->quote($matchname)
 	) || sqlSelect(
-		"matchname","authors",
-		"matchname=" . $I{dbh}->quote($matchname)
-	) || sqlSelect(
 		"realemail","users",
 		" realemail=" . $I{dbh}->quote($I{F}{email})
 	);
