@@ -160,6 +160,7 @@ sub header {
 		$data->{adminmenu} = $options->{adminmenu};
 		slashDisplay('header-admin', $data);
 	} else {
+		$data->{adminmenu} = $options->{adminmenu} || 'admin';
 		slashDisplay('header', $data);
 	}
 

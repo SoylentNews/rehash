@@ -23,7 +23,7 @@ __template__
 
 <P>[% Slash.horizmenu() %]</P>
 [% IF user.is_admin %]
-	<P>[% Slash.createMenu('admin') %]</P>
+	<P>[% Slash.createMenu(adminmenu) %]</P>
 [% END %]
 
 __seclev__
