@@ -315,6 +315,10 @@ sub deleteDaily {
 	unless ($constants->{noflush_accesslog}) {
 		$self->sqlDo("DELETE FROM accesslog WHERE date_add(ts,interval 48 hour) < now()");
 	}
+
+	unless ($constants->{noflush_empty_discussions}) {
+		$self->sqlDo("DELETE FROM discussions WHERE type='recycle' AND commentcount = 0");
+	}
 }
 
 ########################################################
