@@ -198,31 +198,9 @@ sub handler {
 	# If this uid is marked as banned, deny them access.
 	my $banlist = $slashdb->getBanList();
 	if ($banlist->{$uid}) {
-		# This is hardcoded text instead of a template because
-		# the uid may be still using a script, and we want to
-		# get rid of them as cheaply as possible.  Still...
-		# we probably should pull this into a template...
-		my $bug_off =<<EOT;
-<HTML>
-<HEAD><TITLE>BANNED!</TITLE></HEAD>
-<BODY BGCOLOR="pink">
-<H1>Your user account has been banned from $constants->{sitename}</H1><BR>
-Due to questionable activity from this user account, it has been
-temporarily disabled.  Actions that would cause this ban are posting
-comments designed to intentionally break comment rendering for other
-users, or running some sort of script or program that loaded an
-unacceptable number of pages in a short time frame.
-<p>If you feel that this is unwarranted, feel free to include your UID
-(<b>$uid</b>) in the subject of an email, and we will examine why
-there is a ban. If you fail to include the UID (again,
-<em>in the Subject!</em>), then
-your message will be deleted and ignored. I mean come
-on, we're good, we're not psychic. Send your email to
-<a href="mailto:banned\@$constants->{basedomain}">banned\@$constants->{basedomain}</a>.
-</BODY>
-</HTML>
-EOT
-		$r->custom_response(FORBIDDEN, $bug_off);
+		$r->custom_response(FORBIDDEN,
+			slashDisplay('bannedtext_uid', { }, { Return => 1} )
+		);
 		return FORBIDDEN;
 	}
 

@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+Text to display to users banned by IPID/SubnetID.
+
+* ip = their (un-encoded) IP number
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+bannedtext_ipid
+__template__
+<HTML>
+<HEAD><TITLE>BANNED!</TITLE></HEAD>
+<BODY BGCOLOR="pink">
+<H1>Either your network or ip address has been banned
+from this site</H1><BR>
+due to script flooding that originated
+from your network or ip address
+-- or this IP might have been used to post comments designed to break
+web browser rendering.
+If you feel that this is unwarranted, feel free to include your IP address
+(<b>[% ip %]</b>) in the subject of an email, and we will examine why
+there is a ban. If you fail to include the IP address (again,
+<em>in the subject!</em>), then
+your message will be deleted and ignored. I mean come on,
+we're good, we're not psychic.
+</BODY>
+</HTML>
+
+__seclev__
+500
