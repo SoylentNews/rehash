@@ -89,6 +89,8 @@ END %]
 	<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
 </TABLE>
 
+[% ELSE %]
+[% IF constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 [% END %]
 
 __seclev__
