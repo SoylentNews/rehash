@@ -250,19 +250,19 @@ sub cleanRedirectUrl {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
-	# We absolutize the return-to URL to our homepage just to
+	# We absolutize the return-to URL to our domain just to
 	# be sure nobody can use the site as a redirection service.
 	# We decide whether to use the secure homepage or not
 	# based on whether the current page is secure.
 	my $base = root2abs();
 	my $clean = URI->new_abs($redirect || $constants->{rootdir}, $base);
 
-	my $site_domain = $constants->{basedomain};
-	$site_domain =~ s/^www\.//;
+	my @site_domain = split m/\./, $constants->{basedomain};
+	my $site_domain = join '.', @site_domain[-2, -1];
 	$site_domain =~ s/:.+$//;	# strip port, if available
 
-	my $host = $clean->can('host') ? $clean->host : '';
-	$host =~ s/^www\.//;
+	my @host = split m/\./, ($clean->can('host') ? $clean->host : '');
+	my $host = join '.', @host[-2, -1];
 
 	if ($site_domain eq $host) {
 		# Cool, it goes to our site.  Send the user there.
