@@ -111,7 +111,7 @@ sub init {
 	$maxlog_first = $logdb->sqlSelect("MAX(id)", "accesslog");
 	$maxlog_last = $maxlog_first;
 
-	$maxcid_first = $slashdb->sqlSelect("MAX(cid)", "comments");
+	$maxcid_first = $slashdb->getMaxCid();
 	$maxcid_last = $maxcid_first;
 
 	$time_first = Time::HiRes::time;
@@ -148,7 +148,7 @@ sub run {
 
 		$time_new = Time::HiRes::time;
 		$maxlog_new = $logdb->sqlSelect("MAX(id)", "accesslog");
-		$maxcid_new = $slashdb->sqlSelect("MAX(cid)", "comments");
+		$maxcid_new = $slashdb->getMaxCid();
 
 		update_db_ary();
 
