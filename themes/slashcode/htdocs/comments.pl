@@ -1140,7 +1140,7 @@ sub submitComment {
 		slashDisplay('comment_submit') if ! $form->{newdiscussion};
 		undoModeration($id);
 		printComments($discussion, $maxCid, $maxCid,
-			{ force_read_from_master => 1}
+			{ force_read_from_master => 1 }
 		) if !$form->{newdiscussion};
 
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
@@ -1332,7 +1332,8 @@ sub moderate {
 			comment_count	=> $slashdb->countCommentsBySid($sid),
 		});
 	}
-	printComments($discussion, $form->{pid}, $form->{cid});
+	printComments($discussion, $form->{pid}, $form->{cid},
+		{ force_read_from_master => 1 } );
 
 	if ($was_touched) {
 		# This is for stories. If a sid is only a number
