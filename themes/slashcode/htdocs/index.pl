@@ -59,6 +59,11 @@ sub main {
 		'',
 	);
 
+	my ($first_date,$last_date)=($stories->[0]->{time},$stories->[-1]->{time});
+	$first_date=~s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
+	$last_date=~s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
+
+
 	my $title = getData('head', { section => $section });
 	header($title, $section->{section}) or return;
 
@@ -89,8 +94,8 @@ sub main {
 	# index_more block (aka Older Stuff).
 	$Stories = displayStories($stories);
 
-	my $StandardBlocks = displayStandardBlocks($section, $stories);
-
+	my $StandardBlocks = displayStandardBlocks($section, $stories, {first_date=> $first_date, last_date=>$last_date});
+	
 	slashDisplay('index', {
 		metamod_elig	=> scalar $reader->metamodEligible($user),
 		future_plug	=> $future_plug,
@@ -164,7 +169,7 @@ sub rmBid {
 
 #################################################################
 sub displayStandardBlocks {
-	my($section, $older_stories_essentials) = @_;
+	my($section, $older_stories_essentials, $other) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -203,7 +208,8 @@ sub displayStandardBlocks {
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
 				getData('morehead'),
-				getOlderStories($older_stories_essentials, $section),
+				getOlderStories($older_stories_essentials, $section,
+						{first_date => $other->{first_date}, last_date => $other->{last_date} }),
 				$bid,
 				'',
 				$getblocks
@@ -283,8 +289,7 @@ sub displayStories {
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
-	my $ls_other  = { user => $user, reader => $reader, constants => $constants };
-
+	my $ls_other   = { reader => $reader , constants => $constants, user => $user};
 	my($today, $x) = ('', 0);
 	my $cnt = int($user->{maxstories} / 3);
 	my($return, $counter);
@@ -339,7 +344,7 @@ sub displayStories {
 			sid	=> $story->{sid},
 			tid	=> $story->{tid},
 			section	=> $story->{section}
-		}, "", $ls_other);
+		}, "",$ls_other);
 
 		my $link;
 
@@ -380,7 +385,7 @@ sub displayStories {
 				threshold	=> -1,
 				'link'		=> $story->{commentcount} || 0,
 				section		=> $story->{section}
-			},"", $ls_other);
+			}, "", $ls_other);
 
 			push @commentcount_link, $thresh, ($story->{commentcount} || 0);
 			push @links, getData('comments', { cc => \@commentcount_link })
