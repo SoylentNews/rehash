@@ -55,7 +55,8 @@ sub main {
 		return;
 	}
 
-	my $sect_title = $user->{currentSection}{title};
+	my $sect_title = 
+		$slashdb->getSection($user->{currentSection}, 'title');
 	my $story;
 	#Yeah, I am being lazy and paranoid  -Brian
 	if (!($user->{author} or $user->{is_admin}) and 
