@@ -13,7 +13,6 @@ use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-
 sub main {
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
@@ -30,6 +29,7 @@ sub main {
 
 	# possible value of "op" parameter in form
 	my %ops = (
+		graph	=> [ $user->{is_admin},	\&graph		],
 		list	=> [ $admin_post,	\&list		],
 
 		default	=> [ $user->{is_admin},	\&list		]
@@ -43,15 +43,55 @@ sub main {
 
 	# from data;SCRIPTNAME;default
 	#getData('head')
-	header('', '', { admin => 1 } );
-
-	# dispatch of op
-	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats)
+	header('', '', { admin => 1 } ) unless $op eq 'graph'
 		if $ops{$op}[ALLOWED];
 
-	footer();
+	# dispatch of op
+	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats);
+
+	footer() unless $op eq 'graph';
 }
 
+sub graph {
+	my($slashdb, $constants, $user, $form, $stats) = @_;
+
+	my $sections = _get_sections();
+	my @data;
+	for my $namesec (@{$form->{stats_graph_multiple}}) {
+		my($name, $section) = split /\|/, $namesec;
+		my $stats_data = $stats->getAllStats({
+			section	=> $section,
+			name	=> $name,
+			days	=> $form->{stats_days}  # 0 || 14 || 31*3
+		});
+		my $data;
+		for my $day (keys %{$stats_data->{$section}}) {
+			next if $day eq 'names';
+			$data->{$day} = $stats_data->{$section}{$day}{$name};
+		}
+		push @data, { data => $data, type => "$name ($sections->{$section})" };
+	}
+
+	my $type = 'image/png';
+	my $date;  # for when we save to disk
+
+	my $r = Apache->request;
+	$r->content_type($type);
+	$r->header_out('Cache-control', 'private');
+	$r->header_out('Pragma', 'no-cache');
+	$r->set_last_modified($date) if $date;
+	$r->status(200);
+	$r->send_http_header;
+	$r->rflush;
+
+	slashDisplay('graph', {
+		set_legend	=> \&_set_legend,
+		data		=> \@data,
+	}, { Return => 1, Nocomm => 1 });
+
+	$r->status(200);
+	return 1;
+}
 
 sub list {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
@@ -61,16 +101,26 @@ sub list {
 		days	=> $form->{stats_days} || 1,
 	});
 
-	# don't modify the data, copy it
-	my %sections = %{$slashdb->getDescriptions('sections')};
-	$sections{all} = 'All';
-
 	slashDisplay('list', {
 		stats_data	=> $stats_data,
-		sections	=> \%sections,
+		sections	=> _get_sections(),
 	});
 }
 
+# helper method for graph(), because GD->set_legend doesn't
+# take a reference, and TT can only pass a reference -- pudge
+sub _set_legend {
+	my($gd, $legend) = @_;
+	$gd->set_legend(@$legend);
+}
+
+sub _get_sections {
+	my $slashdb = getCurrentDB();
+	# don't modify the data, copy it
+	my %sections = %{$slashdb->getDescriptions('sections')};
+	$sections{all} = 'All';
+	return \%sections;
+}
 
 createEnvironment();
 main();

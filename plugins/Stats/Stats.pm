@@ -691,6 +691,7 @@ sub countDaily {
 }
 
 
+########################################################
 sub getAllStats {
 	my($self, $options) = @_;
 	my $table = 'stats_daily';
@@ -699,10 +700,14 @@ sub getAllStats {
 	my @where;
 
 	if ($options->{section}) {
-		push @where, 'section = ' . $self->sqlQuote($options->{section})
+		push @where, 'section = ' . $self->sqlQuote($options->{section});
 	}
 
-	if ($options->{days}) {
+	if ($options->{name}) {
+		push @where, 'name = ' . $self->sqlQuote($options->{name});
+	}
+
+	if ($options->{days} && $options->{days} > 0) {
 		push @where, sprintf(
 				'(day > DATE_SUB(NOW(), INTERVAL %d DAY))',
 				$options->{days} + 1

@@ -1,0 +1,64 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+graph
+__template__
+[% FILTER null;
+   USE my_graph = GD.Graph.lines(400, 300);
+
+   period  = form.stats_days ==  93 ? 'Quarterly' :
+             form.stats_days ==  14 ? 'Biweekly' :
+             form.stats_days ==   7 ? 'Weekly' :
+             'Forever';
+
+   days = data.0.data.keys.sort;
+   alldata = [days];
+   alltypes = [];
+
+   FOREACH this = data;
+      nums = [];
+      FOREACH day = this.data.keys.sort;
+           nums.push(this.data.${day});
+      END;
+      alldata.push(nums);
+      alltypes.push(this.type);
+   END;
+
+   x_label_skip = days.size / 10;
+   x_label_skip = x_label_skip.int;
+
+   my_graph.set(
+#      x_label             => period.ucfirst,
+#      y_label             => 'Number',
+      title               => "$period Report for $constants.sitename",
+
+      x_label_position    => 0.5,
+#      y_max_value         => nums.highval,
+#      y_min_value         => nums.lowval,
+      y_min_value         => 0,
+
+      x_labels_vertical   => 1,
+      x_label_skip        => x_label_skip,
+
+#      line_types          => [ 1, 2, 3, 4 ],
+#      line_type_scale     => 8,
+      line_width          => 2,
+
+      transparent         => 1,
+      show_values         => 0
+   );
+
+   set_legend(my_graph, alltypes);
+   my_graph.plot(alldata).png | stdout(1);
+   END;
+-%]
+__seclev__
+1000
