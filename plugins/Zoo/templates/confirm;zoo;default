@@ -16,7 +16,7 @@ __template__
 <TABLE>
 	<TR>
 		<TD>
-		So how do you perceive <B>[% nickname | strip_literal %]</B>?
+		So how do you perceive <B>[% nickname | strip_literal %]</B>?  [% PROCESS zoo_icons person=uid %]
 		</TD>
 		<TD>
 			<INPUT TYPE="RADIO" NAME="type" VALUE="friend"[% IF type == 'friend' %]CHECKED[% END %]> Friend <br>
