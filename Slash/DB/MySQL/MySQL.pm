@@ -2409,17 +2409,23 @@ sub updateFormkeyVal {
 # use this in case the function you call fails prior to updateFormkey
 # but after updateFormkeyVal
 sub resetFormkey {
-	my($self, $formkey) = @_;
+	my($self, $formkey, $formname) = @_;
 
 	my $constants = getCurrentStatic();
 
 	# reset the formkey to 0, and reset the ts
-	my $updated = $self->sqlUpdate("formkeys", {
-		-value		=> 0,
-		-idcount	=> '(idcount -1)',
-		ts		=> time(),
-		submit_ts	=> '0',
-	}, "formkey=" . $self->sqlQuote($formkey));
+
+	my $update_ref = {
+		-value          => 0,
+		-idcount        => '(idcount -1)',
+		ts              => time(),
+		submit_ts       => '0',
+	};
+	$update_ref->{formname} = $formname if $formname;
+	
+	my $updated = $self->sqlUpdate("formkeys", 
+		$update_ref, 
+		"formkey=" . $self->sqlQuote($formkey));
 
 	print STDERR "RESET formkey $updated\n" if $constants->{DEBUG};
 	return($updated);

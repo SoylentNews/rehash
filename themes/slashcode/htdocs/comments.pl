@@ -114,15 +114,13 @@ sub main {
 			seclev			=> 0,
 			post			=> 1,
 			formname 		=> $form->{new_discussion} ? 'discussions' : 'comments',
-			checks			=> 
+			checks			=> $form->{new_discussion} ? [] : 
 			[ qw ( response_check update_formkeyid max_post_check valid_check interval_check 
 				formkey_check ) ],
 		},
 	};
 	$ops->{default} = $ops->{display} ;
 	
-	# This is here to save a function call, even though the
-	# function can handle the situation itself
 	my ($discussion, $section);
 
 	if ($form->{sid}) {

@@ -16,7 +16,7 @@ sub main {
 	my $form      = getCurrentForm();
 
 
-	my($stories, $Feature, $Stories, $storystruct, $section);
+	my($stories, $Stories, $section);
 	if ($form->{op} eq 'userlogin' && !$user->{is_anon}) {
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
 		redirect($refer);
