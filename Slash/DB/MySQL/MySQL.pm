@@ -5291,10 +5291,10 @@ sub getSection {
 	my($self, $section, $value) = @_;
 	$section ||= getCurrentStatic('section');
 	my $answer = _genericGet({
-		table => 'sections',
-		table_prime => 'section',
-		arguments => [($self, $section, $value)],
-		col_table => { label => 'contained', table => 'sections_contained', table_index => 'container', key => 'section'},
+		table		=> 'sections',
+		table_prime	=> 'section',
+		arguments	=> [($self, $section, $value)],
+		col_table 	> { label => 'contained', table => 'sections_contained', table_index => 'container', key => 'section'},
 	});
 	return $answer;
 }
