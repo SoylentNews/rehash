@@ -82,7 +82,13 @@ sub main {
 	my $info = $dilemma_reader->getDilemmaInfo();
 	my $species_hr = $dilemma_reader->getDilemmaSpeciesInfo();
 	my $species_order = [
-		sort { $species_hr->{$b}{alivecount} <=> $species_hr->{$a}{alivecount} }
+		sort {
+			$species_hr->{$b}{alivecount} <=> $species_hr->{$a}{alivecount}
+			||
+			$species_hr->{$b}{totalcount} <=> $species_hr->{$a}{totalcount}
+			||
+			$a cmp $b
+		}
 		keys %$species_hr
 	];
 
