@@ -918,7 +918,7 @@ sub getRelated {
 	if ($rl) {
 		my @matchkeys =
 			sort grep {
-				$rl->{$_}{keyword} =~ /^_topic_$tid/
+				$rl->{$_}{keyword} =~ /^_topic_$tid(?!\d)/
 				||
 				$rl->{$_}{keyword} !~ /^_topic_/
 					&& $story_content =~ /\b$rl->{$_}{keyword}\b/i
