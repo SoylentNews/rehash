@@ -124,7 +124,7 @@ sub selectComments {
 	}
 
 	# If we are sorting by highest score we resort to figure in bonuses
-	@$thisComment = sort {$b->{points} == $a->{points} ? $b->{cid} <=> $a->{cid} : $b->{points} <=> $a->{points} } @$thisComment
+	@$thisComment = sort { $b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid} } @$thisComment
 		if $user->{commentsort} == 3;
 
 	# This loop mainly takes apart the array and builds 
