@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 Don't forget to modify the display;article;default template to add a link to
 the printable version of the story.  Lacking good taste and style, I use
 something like this: 

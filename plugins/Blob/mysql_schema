@@ -1,3 +1,11 @@
+#
+# $Id$
+#
+
+# 
+# Table structure for table 'blobs'
+# 
+
 DROP TABLE IF EXISTS blobs;
 CREATE TABLE blobs (
 	id VARCHAR(32) NOT NULL,

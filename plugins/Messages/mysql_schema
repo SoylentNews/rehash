@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 # As of July 2003 we don't have any reason I can see to ever want
 # to search all message blobs in the system, so we don't need a
 # FULLTEXT index, so InnoDB is fine. - Jamie

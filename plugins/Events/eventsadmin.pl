@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+# $Id$
+
 use strict;
 use Slash;
 use Slash::Display;
@@ -15,34 +17,33 @@ sub main {
 	my $events   = getObject('Slash::Events');
 
 	my $ops = {
-					edit     => {
-									function => \&editEvent,
-									seclev	=> 100,
-					},
-					'delete'	=> {
-									function => \&editEvent,
-									seclev	=> 100,
-					},
-					add	    => {
-									function => \&editEvent,
-									seclev	=> 100,
-					},
-					list    => {
-									function => \&listEvents,
-									seclev	=> 100,
-					},
+		edit     => {
+			function => \&editEvent,
+			seclev	=> 100,
+		},
+		'delete'	=> {
+			function => \&editEvent,
+			seclev	=> 100,
+		},
+		add	    => {
+			function => \&editEvent,
+			seclev	=> 100,
+		},
+		list    => {
+			function => \&listEvents,
+			seclev	=> 100,
+		},
 	};
-	
 
 	my $op = lc($form->{op});
 	chomp($op);
 	$op = exists $ops->{$op} ? $op : 'list';
 
-# admin.pl is not for regular users
+# eventsadmin.pl is not for regular users
 	unless ($user->{is_admin}) {
-					my $rootdir = getCurrentStatic('rootdir');
-					redirect("$rootdir/users.pl");
-					return;
+		my $rootdir = getCurrentStatic('rootdir');
+		redirect("$rootdir/users.pl");
+		return;
 	}
 	header() or return;
 	print createMenu('events');

@@ -4,7 +4,6 @@ description="Events System"
 htdoc=events.pl
 htdoc=eventsadmin.pl
 mysql_dump=dump
-mysql_prep=mysql_prep
 mysql_schema=mysql_schema
 template=templates/data;events;default
 template=templates/editevent;eventsadmin;default

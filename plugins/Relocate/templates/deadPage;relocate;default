@@ -16,3 +16,6 @@ Sorry, the url [% link.url %] that you wished to connect to is currently down (w
 You might consider trying to access a cached version of it on google.
 __seclev__
 10000
+__version__
+$Id$
+

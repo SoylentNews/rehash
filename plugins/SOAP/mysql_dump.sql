@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 INSERT INTO vars (name, value) VALUES ('soap_enabled', 1);
 
 # examples for use with test package Slash::SOAP::Test

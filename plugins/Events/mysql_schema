@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 DROP TABLE IF EXISTS event_dates;
 CREATE TABLE event_dates (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,

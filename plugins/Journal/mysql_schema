@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 DROP TABLE IF EXISTS journals;
 CREATE TABLE journals (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,

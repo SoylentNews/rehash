@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 # put this shit into sql dump (for select)
 INSERT INTO code_param (type, code, name) VALUES ('nvprogress', 0, 'broken');
 INSERT INTO code_param (type, code, name) VALUES ('nvprogress', 1, 'ok');

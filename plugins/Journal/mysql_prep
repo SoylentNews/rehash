@@ -1,2 +1,6 @@
+#
+# $Id$
+#
+
 ALTER TABLE journals add fulltext (description);
 ALTER TABLE journals_text add fulltext (article);

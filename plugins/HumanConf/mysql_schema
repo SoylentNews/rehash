@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 DROP TABLE IF EXISTS humanconf;
 CREATE TABLE humanconf (
 	hcid		MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,

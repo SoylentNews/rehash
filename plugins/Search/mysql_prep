@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 ALTER TABLE stories add fulltext (title);
 ALTER TABLE story_text add fulltext (introtext,bodytext);
 ALTER TABLE comments add fulltext (subject);

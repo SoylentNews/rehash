@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 # this should be inserted, but Zoo might not be installed ... ?
 #INSERT INTO people (uid, person, type) VALUES (1,2,"friend");
 #INSERT INTO people (uid, person, type) VALUES (2,2,"friend");

@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+# $Id$
+
 use strict;
 
 use Slash::Constants ':slashd';

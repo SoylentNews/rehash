@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('stockquotes','',500,'static','','index',8,'Stock Quotes',1,'','',0);
 
 INSERT INTO stocks (name, stockorder, exchange, symbol, url) VALUES ('currency',-1,'_DATA','USD','Preferred currency.');

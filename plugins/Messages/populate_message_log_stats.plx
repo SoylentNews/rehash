@@ -5,6 +5,8 @@
 #
 # you probably only want to run it once, but running it multiple times
 # shouldn't hurt anything
+#
+# $Id$
 
 use strict;
 use Slash::Test shift;

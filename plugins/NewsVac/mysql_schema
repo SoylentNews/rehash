@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 DROP TABLE IF EXISTS newsvac_keywords;
 CREATE TABLE newsvac_keywords (
   id SMALLINT UNSIGNED NOT NULL auto_increment,

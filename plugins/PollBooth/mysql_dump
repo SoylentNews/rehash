@@ -1,1 +1,5 @@
+#
+# $Id$
+#
+
 INSERT INTO hooks (param, class, subroutine) VALUES ('admin_save_story_success','Slash::PollBooth','createAutoPollFromStory');

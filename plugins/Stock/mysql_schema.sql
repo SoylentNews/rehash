@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 DROP TABLE IF EXISTS stocks;
 CREATE TABLE stocks (
   name varchar(40) NOT NULL DEFAULT '',

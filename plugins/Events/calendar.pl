@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 
+# $Id$
+
 use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
 use HTML::CalendarMonth;
 use HTML::AsSubs;
-
-
 
 ##################################################################
 sub main {

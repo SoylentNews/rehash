@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('admin','Home','Home','[% constants.rootdir %]/',1,2);
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('admin','Stories','Stories','[% constants.rootdir %]/admin.pl',100,5);
 INSERT INTO menus (menu, label, sel_label, value, seclev, menuorder) VALUES ('admin','New','New','[% constants.rootdir %]/admin.pl?op=edit',100,6);

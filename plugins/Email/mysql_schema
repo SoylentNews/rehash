@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 DROP TABLE IF EXISTS email_optout;
 CREATE TABLE email_optout (
 	id		mediumint UNSIGNED NOT NULL auto_increment,

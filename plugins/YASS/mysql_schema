@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 DROP TABLE IF EXISTS yass_sites;
 CREATE TABLE yass_sites (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,

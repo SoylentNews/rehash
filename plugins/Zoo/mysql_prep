@@ -1,3 +1,7 @@
+#
+# $Id$
+#
+
 INSERT INTO vars (name,value,description) VALUES ('people_max','200','Maximum number of friends/foes you can have');
 INSERT INTO vars (name,value,description) VALUES ('people_max_subscriber','400','Maximum number of friends/foes you can have');
 INSERT INTO vars (name,value,description) VALUES ('zoo_timer',now(),'Last time the Zoo task ran.');
