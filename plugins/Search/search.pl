@@ -411,10 +411,10 @@ sub commentSearchRSS {
 
 	my @items;
 	for my $entry (@$comments) {
-		my $time = timeCalc($entry->[3]);
+		my $time = timeCalc($entry->{date});
 		push @items, {
-			title	=> "$entry->[5] ($time)",
-			'link'	=> ($constants->{absolutedir} . "/comments.pl?sid=$entry->[10]&cid=$entry->[4]"),
+			title	=> "$entry->{subject} ($time)",
+			'link'	=> ($constants->{absolutedir} . "/comments.pl?sid=$entry->{did}&cid=$entry->{cid}"),
 		};
 	}
 
@@ -443,10 +443,10 @@ sub userSearchRSS {
 
 	my @items;
 	for my $entry (@$users) {
-		my $time = timeCalc($entry->[3]);
+		my $time = timeCalc($entry->{journal_last_entry_date});
 		push @items, {
-			title	=> $entry->[1],
-			'link'	=> ($constants->{absolutedir} . '/users.pl?nick=' . $entry->[1]),
+			title	=> $entry->{nickname},
+			'link'	=> ($constants->{absolutedir} . '/users.pl?nick=' . $entry->{nickname}),
 		};
 	}
 
@@ -475,10 +475,10 @@ sub storySearchRSS {
 
 	my @items;
 	for my $entry (@$stories) {
-		my $time = timeCalc($entry->[3]);
+		my $time = timeCalc($entry->{time});
 		push @items, {
-			title	=> "$entry->[1] ($time)",
-			'link'	=> ($constants->{absolutedir} . '/article.pl?sid=' . $entry->[2]),
+			title	=> "$entry->{title} ($time)",
+			'link'	=> ($constants->{absolutedir} . '/article.pl?sid=' . $entry->{sid}),
 		};
 	}
 
@@ -507,10 +507,10 @@ sub pollSearchRSS {
 
 	my @items;
 	for my $entry (@$stories) {
-		my $time = timeCalc($entry->[3]);
+		my $time = timeCalc($entry->{date});
 		push @items, {
-			title	=> "$entry->[1] ($time)",
-			'link'	=> ($constants->{absolutedir} . 'pollBooth.pl?qid=' . $entry->[0]),
+			title	=> "$entry->{question} ($time)",
+			'link'	=> ($constants->{absolutedir} . 'pollBooth.pl?qid=' . $entry->{qid}),
 		};
 	}
 
@@ -574,10 +574,10 @@ sub findRetrieveSiteRSS {
 	# I am aware that the link has to be improved.
 	my @items;
 	for my $entry (@$feeds) {
-		my $time = timeCalc($entry->[8]);
+		my $time = timeCalc($entry->{time});
 		push @items, {
-			title	=> "$entry->[2] ($time)",
-			'link'	=> ($constants->{absolutedir} . "/users.pl?op=preview&bid=entry->[0] %]"),
+			title	=> "$entry->{title} ($time)",
+			'link'	=> ($constants->{absolutedir} . "/users.pl?op=preview&bid=entry->{bid} %]"),
 		};
 	}
 
@@ -646,10 +646,10 @@ sub journalSearchRSS {
 
 	my @items;
 	for my $entry (@$entries) {
-		my $time = timeCalc($entry->[3]);
+		my $time = timeCalc($entry->{date});
 		push @items, {
-			title	=> "$entry->[1] ($time)",
-			'link'	=> ($constants->{absolutedir} . '/~' . fixparam($entry->[0]) . '/journal/' . $entry->[2]),
+			title	=> "$entry->{description} ($time)",
+			'link'	=> ($constants->{absolutedir} . '/~' . fixparam($entry->{nickname}) . '/journal/' . $entry->{id}),
 		};
 	}
 
