@@ -33,6 +33,7 @@
 # $Id$
 
 use strict;
+use HTML::TreeBuilder;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
@@ -85,20 +86,34 @@ sub main {
 	header($sect_title, 'print');
 	$user->{is_admin} = $adm;
 
-	# this will fail on several types of links, and assumes certain
-	# link formatting; html2text() in Slash::Utility is more robust,
-	# though it will reformat as text, which isn't desirable, but
-	# perhaps it could be modified somewhat for use here. -- pudge
+	# To print the links, we extract all <A..> tags from the introtext and 
+	# the bodytext and properly separate out URL and the text of the tag.
+	# Before this was a regexp against the related text, but pudge 
+	# convinced me that was an insane way to do it so we're doing it this
+	# way, instead.
 	my @story_links;
-	push @story_links, [$1, $2] while
-		$story->{relatedtext} =~
-		m!<A HREF="?([^"<]+?)"?>([^<]+?)</A>!ig;
-	# Drop the last two links, "More on <topic>", "Also by <author>", as 
-	# they don't appear in the story. 
+	my $tree = new HTML::TreeBuilder;
+        $tree->parse($story->{introtext} . $story->{bodytext});
+        $tree->eof;
+        my $links = $tree->extract_links('a');  # get "A" tags only
+
+        for (@{$links}) {
+                my $content = get_content($_->[1]);
+		my $url = URI->new_abs($_->[0], $constants->{absolutedir});
+                push @story_links, [$url, $content] if $content;
+        }
+
+	# This was the insane part, which won't work for everything.
 	#
-	# Plugin/Theme writers. If you change how story_text.relatedtext works,
-	# you may have to adust either the regexp, the slice below, or both!
-	@story_links = @story_links[0 .. $#story_links - 2];
+	#X push @story_links, [$1, $2] while
+	#X	$story->{relatedtext} =~
+	#X	m!<A HREF="?([^"<]+?)"?>([^<]+?)</A>!ig;
+	#X Drop the last two links, "More on <topic>", "Also by <author>", as 
+	#X they don't appear in the story. 
+	#X
+	#X Plugin/Theme writers. If you change how story_text.relatedtext works,
+	#X you may have to adust either the regexp, the slice below, or both!
+	#X @story_links = @story_links[0 .. $#story_links - 2];
 
 	slashDisplay('dispStory', {
 		user		=> $user,
@@ -113,6 +128,16 @@ sub main {
 		time		=> $slashdb->getTime(),
 		story		=> $story,
 	}, { Nocomm => 1 });
+}
+
+# Thanks for the assist here, pudge!
+sub get_content {
+	my($ref) = @_;
+	my $content;
+
+	$content .= (ref) ? get_content($_) : $_ for @{$ref->{_content}};
+	
+	return $content;
 }
 
 createEnvironment();
