@@ -157,107 +157,69 @@ EOT
 			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val);
 		}
 	}
-
-	my @numbers = (
-		$count->{total},
-		$count->{unique},
-		$count->{unique_users},
-		$admin_clearpass_warning,
-		$accesslog_rows,
-		$formkeys_rows,
-		$modlog_rows,
-		$metamodlog_rows,
-			($modlog_rows  ? $metamodlog_rows/$modlog_rows	: 0),
-		$mod_points,
-		$modlog_total,
-			($mod_points   ? $modlog_total*100/$mod_points	: 0),
-			($comments     ? $modlog_total*100/$comments	: 0),
-		$modlog_hr->{-1}{count},
-			($modlog_total ? $modlog_hr->{-1}{count}*100
-						/$modlog_total		: 0),
-		$modlog_hr->{1}{count},
-			($modlog_total ? $modlog_hr->{1}{count}*100
-						/$modlog_total		: 0),
-		$comments,
-		scalar(@$distinct_comment_ipids),
-		$uniq_comment_users,
-		$uniq_article_users,
-		$uniq_journal_users,
-		$uniq_palm_users,
-		$uniq_rss_users,
-		$comment_page_views,
-		$article_page_views,
-		$journal_page_views,
-		$palm_page_views,
-		$rss_page_views,
-		$submissions,
-			($submissions ? $submissions_comments_match*100
-						/$submissions		: 0),
-		$admin_mods_text,
-		$sdTotalHits,
-		$count->{index}{index},
+	my %data = (
+		total => sprintf("%8d", $count->{total}),
+		unique => sprintf("%8d", $count->{unique}), 
+		users => sprintf("%8d", $count->{unique_users}),
+		accesslog => sprintf("%8d", $accesslog_rows),
+		formkeys => sprintf("%8d", $formkeys_rows),
+		modlog => sprintf("%8d", $modlog_rows),
+		metamodlog => sprintf("%8d", $metamodlog_rows),
+		xmodlog	=> sprintf("%.1fx", ($modlog_rows  ? $metamodlog_rows/$modlog_rows  : 0)),
+		mod_points => sprintf("%8d", $mod_points),
+		used_total => sprintf("%8d", $modlog_total),
+		used_total_pool => sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0)),
+		used_total_comments => sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0)),
+		used_minus_1 => sprintf("%.1f", $modlog_hr->{-1}{count}),
+		used_minus_1_percent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) ),
+		used_plus_1 => sprintf("%8d", $modlog_hr->{1}{count}),
+		used_plus_1_persecent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0)),
+		comments => sprintf("%8d", $comments),
+		IPIDS => sprintf("%8d", scalar(@$distinct_comment_ipids)),
+		comments_ipids => sprintf("%8d", $uniq_comment_users),
+		articles_ipids => sprintf("%8d", $uniq_article_users),
+		journals_ipids => sprintf("%8d", $uniq_journal_users),
+		palm_ipids => sprintf("%8d", $palm_page_views),
+		rss_ipids => sprintf("%8d", $rss_page_views),
+		comments_page => sprintf("%8d", $comment_page_views ),
+		articles_page => sprintf("%8d", $article_page_views ),
+		journals_page => sprintf("%8d", $journal_page_views),
+		palm_page => sprintf("%8d", $palm_page_views),
+		rss_page => sprintf("%8d", $rss_page_views),
+		submissions => sprintf("%8d", $submissions),
+		sub_comments => sprintf("%8.1f", ($submissions ? $submissions_comments_match*100/$submissions : 0)),
+		total_hits => sprintf("%8d", $sdTotalHits),
+		homepage => sprintf("%8d", $count->{index}{index}),
 	);
-	my $email = sprintf(<<"EOT", @numbers);
-$constants->{sitename} Stats for yesterday
 
-        total: %8d
-       unique: %8d
-        users: %8d
-%s
-    accesslog: %8d rows total
-     formkeys: %8d rows total
-       modlog: %8d rows total
-   metamodlog: %8d rows total (%.1fx modlog)
-   mod points: %8d in pool
-   used total: %8d yesterday (%.1f%% of pool, %.1f%% of comments)
-      used -1: %8d yesterday (%.1f%%)
-      used +1: %8d yesterday (%.1f%%)
-     comments: %8d posted yesterday
-        IPIDS: %8d distinct IPIDS posted comments
-             : %8d distinct IPIDS used comments
-             : %8d distinct IPIDS used articles
-             : %8d distinct IPIDS used journals
-             : %8d distinct IPIDS used palm pages
-             : %8d distinct IPIDS used rss pages
-    pageviews: %8d for comments
-             : %8d for articles
-             : %8d for journals
-             : %8d for palm
-             : %8d for rss
-  submissions: %8d submissions
- sub/comments: %8.1f%% of the submissions came from comment posters from this day
-
-%s
-   total hits: %8d
-     homepage: %8d
-      indexes
-EOT
-
+	my @sections;
 	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
-		$email .= "\t   $_=$count->{index}{$_}\n";
+		push(@sections, { key => $_, value => $count->{index}{$_} });
 		$statsSave->createStatDaily($yesterday, "index_$_", $count->{index}{$_});
 	}
 
-	$email .= "\n-----------------------\n";
-
-
+	my @lazy;
 	for my $key (sort { $count->{'articles'}{$b} <=> $count->{'articles'}{$a} } keys %{$count->{'articles'}}) {
 		my $value = $count->{'articles'}{$key};
 
  		my $story = $backupdb->getStory($key, ['title', 'uid']);
 
-		$email .= sprintf("%6d %-16s %-30s by %s\n",
+		push(@lazy, sprintf("%6d %-16s %-30s by %s",
 			$value, $key, substr($story->{'title'}, 0, 30),
 			($slashdb->getUser($story->{uid}, 'nickname') || $story->{uid})
-		) if $story->{'title'} && $story->{uid} && $value > 100;
+		)) if $story->{'title'} && $story->{uid} && $value > 100;
 	}
 
-	$email .= "\n-----------------------\n";
-	$email .= `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
+	$data{data} = \%data;
+	$data{sections} = \@sections; 
+	$data{lazy} = \@lazy; 
+	$data{admin_clearpass_warning} = $admin_clearpass_warning;
+	$data{admin_mods_text} = $admin_mods_text;
 
-	$email .= "\n-----------------------\n";
+	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail' });
 
 	# Send a message to the site admin.
+	print STDERR "EMAIL:\n$email\n";
 	for (@{$constants->{stats_reports}}) {
 		sendEmail($_, "$constants->{sitename} Stats Report", $email, 'bulk');
 	}

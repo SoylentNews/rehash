@@ -1,0 +1,60 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+adminmail
+__lang__
+en_US
+__name__
+display
+__template__
+[% Slash.sitename %] Stats for yesterday
+
+        total: [% total %]
+       unique: [% unique %]
+        users: [% users %]
+[% admin_clearpass_warning %]
+    accesslog: [% accesslog %] rows total
+     formkeys: [% formkeys %] rows total
+       modlog: [% modlog %] rows total
+   metamodlog: [% metamodlog %] rows total ([% xmodlog %] modlog)
+   mod points: [% mod_points %] in pool
+   used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
+      used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
+      used +1: [% used_minus_1_percent %] yesterday ([% used_plus_1_persecent %]%)
+     comments: [% comments %] posted yesterday
+        IPIDS: [% IPIDS %] distinct IPIDS posted comments
+             : [% comments_ipids %] distinct IPIDS used comments
+             : [% articles_ipids %] distinct IPIDS used articles
+             : [% journals_ipids %] distinct IPIDS used journals
+             : [% palm_ipids %] distinct IPIDS used palm pages
+             : [% rss_ipids %] distinct IPIDS used rss pages
+    pageviews: [% comments_page %] for comments
+             : [% articles_page %] for articles
+             : [% journals_page %] for journals
+             : [% palm_page %] for palm
+             : [% rss_page %] for rss
+  submissions: [% submissions %] submissions
+ sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
+
+[% admin_mods_text %]
+   total hits: [% total_hits %]
+     homepage: [% homepage %]
+      indexes
+
+[% FOREACH item = sections %]
+	[% item.key %]:[% item.value %]
+[% END %]
+
+-----------------------
+
+
+[% FOREACH item = lazy %]
+[% item %]
+[% END %]
+
+__seclev__
+100
