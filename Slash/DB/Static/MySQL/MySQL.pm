@@ -492,7 +492,7 @@ sub forgetErrnotes {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $interval = $constants->{slashd_errnote_expire} || 90;
-	return $slashdb->sqlDelete('slashd_errnotes',
+	return $self->sqlDelete('slashd_errnotes',
 		"ts < DATE_SUB(NOW(), INTERVAL $interval DAY)");
 }
 
