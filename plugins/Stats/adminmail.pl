@@ -258,7 +258,7 @@ EOT
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{admin_mods_text} = $admin_mods_text;
-	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today` if $constants->{tailslash};
+	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today` if $constants->{tailslash_stats};
 
 	$data{backup_lag} = "";
 	for my $slave_name (qw( backup search )) {
