@@ -127,7 +127,13 @@ sub displayStories {
 	my $gSkin = getCurrentSkin();
 
 	my $misc = {};
-	my $tid = $other->{tid} || $gSkin->{nexus} || '';
+	my $tid = $other->{tid};
+	if ($section) {
+		my $skin = $self->getSkin($section);
+		$tid ||= $self->getNexusFromSkid($skin->{skid});
+	}
+
+	$tid ||= $gSkin->{nexus} || '';
 
 	my $limit = $other->{count};
 	$limit ||= $self->getSection($section, 'artcount');
