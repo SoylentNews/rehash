@@ -49,7 +49,7 @@ sub main {
 	header($title, $section->{section} ne 'index' ? $section->{section} : '');
 
 	my $limit = $section->{section} eq 'index' ?
-	    $user->{maxstories} : $section->{artcount};
+		$user->{maxstories} : $section->{artcount};
 
 	# Old pages which search on issuemode kill the DB performance-wise
 	# so if possible we balance across the two -Brian
