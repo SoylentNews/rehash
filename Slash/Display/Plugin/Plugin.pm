@@ -96,7 +96,7 @@ sub new {
 	}, $class;
 }
 
-sub db { Slash::Utility::getCurrentDB() }
+sub db  { Slash::Utility::getObject('Slash::DB', { db_type => 'reader' }) }
 
 # not to be confused with Slash::Test::Display(); that may only be
 # called from Slash::Test, this may only be called from plugins
