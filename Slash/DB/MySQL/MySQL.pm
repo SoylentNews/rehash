@@ -8378,7 +8378,7 @@ sub setStoryRenderedFromChosen {
 		}
 	}
 
-	return ($primaryskid, $tids);
+	return($primaryskid, $tids);
 }
 
 sub getPrimarySkidFromRendered {
@@ -8647,8 +8647,8 @@ sub getSection {
 	$skin->{rewrite} = $skin->{max_rewrite_secs};
 	$skin->{section} = $skin->{name};
 	$skin->{type} = $skin->{name} =~ /^(index|mainpage)$/ ? 'collected' : 'contained'; # XXXSECTIONTOPICS this is a hack guess and probably wrong in at least one case
-	my $topic_tree = $self->getTopicTree();
-	$skin->{writestatus} = $topic_tree->{$skin->{nexus}}{nexus_dirty} ? 'dirty' : 'ok'; # XXXSECTIONTOPICS check this
+	my $tree = $self->getTopicTree();
+	$skin->{writestatus} = $tree->{$skin->{nexus}}{nexus_dirty} ? 'dirty' : 'ok'; # XXXSECTIONTOPICS check this
 
 	return $skin->{$value} if $value;
 	return $skin;
