@@ -399,7 +399,7 @@ sub saveArticle {
 
 		# update description if changed
 		} elsif (!$form->{comments_on} && $article->{discussion} && $article->{description} ne $description) {
-			$slashdb->setDiscussion($article->{discussion}, { description => $description });
+			$slashdb->setDiscussion($article->{discussion}, { title => $description });
 		}
 
 		unless ($form->{comments_on}) {
