@@ -19,6 +19,7 @@ use vars qw($VERSION @EXPORT);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(slashHook);
 
+my %classes;
 
 sub slashHook {
 	my($param, $options) = @_;
@@ -26,18 +27,36 @@ sub slashHook {
 
 	my $hooks = $slashdb->getHooksByParam($param);
 	for my $hook (@$hooks) {
-		eval "require $hook->{class}";
+		my $class = $hook->{class};
+		my $function = $class . '::' . $hook->{subroutine};
+
+		if ($classes{$class}) {			# already require'd
+			if ($classes{$class} eq 'NA') {	# already failed
+				next;
+			}
+		} else {
+			eval "require $class";		# we cache because this is expensive,
+							# even if it has already succeeded or
+							# failed, just by doing the eval -- pudge
+			if ($@) {			# failed
+				$classes{$class} eq 'NA';
+				next;
+			} else {			# success!
+				$classes{$class} = 1;
+			}
+		}
+
 		my $code;
 		{
 			no strict 'refs';
-			$code = \&{ $hook->{class} . '::' . $hook->{subroutine} };
+			$code = \&{ $function };
 		}
 		if (defined (&$code)) {
 			unless ($code->($options)) {
-					errorLog("Failed executing hook ($param) - $hook->{class}::$hook->{subroutine}");
+				errorLog("Failed executing hook ($param) - $function");
 			}
 		} else {
-			errorLog("Failed trying to do hook ($param) - $hook->{class}::$hook->{subroutine}");
+			errorLog("Failed trying to do hook ($param) - $function");
 		}
 	}
 }
