@@ -2541,7 +2541,7 @@ sub getUserAdmin {
 	$id ||= $user->{uid};
 
 	my($checked, $uidstruct, $readonly, $readonly_reasons);
-	my($user_edit, $user_editfield, $iplist, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
+	my($user_edit, $user_editfield, $ipstruct, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my($banned, $banned_reason, $banned_time);
@@ -2553,14 +2553,14 @@ sub getUserAdmin {
 		$user_edit = $slashdb->getUser($id);
 		$user_editfield = $user_edit->{uid};
 		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
-		$iplist = $slashdb->getNetIDList($user_edit->{uid});
+		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'nickname') {
 		$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
 		$user_editfield = $user_edit->{nickname};
 		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
-		$iplist = $slashdb->getNetIDList($user_edit->{uid});
+		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'md5id') {
@@ -2593,7 +2593,7 @@ sub getUserAdmin {
 	} else {
 		$user_edit = $id ? $slashdb->getUser($id) : $user;
 		$user_editfield = $user_edit->{uid};
-		$iplist = $slashdb->getNetIDList($user_edit->{uid});
+		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 	}
 
 	for my $formname ('comments', 'submit') {
@@ -2624,9 +2624,7 @@ sub getUserAdmin {
 		$thresh_select = createSelect('defaultpoints', $threshcodes, $user_edit->{defaultpoints}, 1);
 	}
 
-	if (!ref $iplist or scalar(@$iplist) < 1) {
-		undef $iplist;
-	}
+	undef $ipstruct	if (!ref $ipstruct);
 
 	my $m2total = ($user_edit->{m2fair} || 0) + ($user_edit->{m2unfair} || 0);
 	if ($m2total) {
@@ -2651,7 +2649,7 @@ sub getUserAdmin {
 		banned_time		=> $banned_time,
 		userinfo_flag		=> $user_editinfo_flag,
 		userfield		=> $user_editfield,
-		iplist			=> $iplist,
+		ipstruct		=> $ipstruct,
 		uidstruct		=> $uidstruct,
 		seclev_field		=> $seclev_field,
 		checked 		=> $checked,

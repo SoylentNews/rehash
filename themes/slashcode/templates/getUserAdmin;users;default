@@ -46,20 +46,26 @@ __template__
 		<P>
 			[% END %]
 		
-			[% IF iplist %]
+			[% IF ipstruct %]
 		<BR>
 		<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
 			<TR BGCOLOR="[% user.bg.3 %]">
 				<TD><FONT COLOR="[% user.fg.0 %]"><B>IPID</B></FONT></TD>
 				<TD><FONT COLOR="[% user.fg.0 %]"><B>#</B></FONT></TD>
 				<TD><FONT COLOR="[% user.fg.0 %]"><B>Date(s)</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Com</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Sub</B></FONT></TD>
+				<TD><FONT COLOR="[% user.fg.0 %]"><B>Mod</B></FONT></TD>
 			</TR>
-				[% FOREACH tmpip = iplist %]
+				[% FOREACH tmpip = ipstruct.keys %]
 			<TR>
-				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip.0 %]&amp;fieldname=ipid">[% tmpip.4 %]</A></TD>
+				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip %]&amp;fieldname=ipid">[% ipstruct.$tmpip.ipid_vis %]</A></TD>
 
-				<TD>[% tmpip.3 %]</TD>
-				<TD>[% tmpip.1; IF tmpip.1 != tmpip.2 %] to [% tmpip.2; END %]</TD>
+				<TD>[% ipstruct.$tmpip.count %]</TD>
+				<TD>[% ipstruct.$tmpip.dmin; IF ipstruct.$tmpip.dmin != ipstruct.$tmpip.dmax %] to [% ipstruct.$tmpip.dmax; END %]</TD>
+				<TD>[% IF ipstruct.$tmpip.comments %]X[% END %]&nbsp;</TD>
+                                <TD>[% IF ipstruct.$tmpip.submissions %]X[% END %]&nbsp;</TD>
+                                <TD>[% IF ipstruct.$tmpip.moderatorlog %]X[% END %]&nbsp;</TD>
 			</TR>
 				[% END %]
 		</TABLE>
