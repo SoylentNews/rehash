@@ -59,8 +59,9 @@ __template__
 <P>[% IF user.uid == user_edit.uid %]You have[% ELSE %]User "[% user_edit.nickname %]" has[% END %]
 paid for a total of [% hits_paidfor %] pages
 and so far [% hits_bought %] have been used up.
-[% IF hits_paidfor && user.uid == user_edit.uid && user.seclev < 100 %]
-	Thanks, we appreciate your support!
+[% IF hits_paidfor && user.uid == user_edit.uid %]
+	Thank you for supporting Slashdot! We very much appreciate your
+	contribution.
 [% END %]
 
 [% IF user.seclev >= 100 %]
