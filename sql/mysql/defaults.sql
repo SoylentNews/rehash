@@ -630,6 +630,7 @@ INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymou
 INSERT INTO vars (name, value, description) VALUES ('apache_cache', '3600', 'Default times for the getCurrentCache().');
 INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|http|gopher|mailto|news|nntp|telnet|wais|https','Schemes that can be used in comment links without being stripped of bogus chars');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags','B|I|P|A|LI|OL|UL|EM|BR|TT|STRONG|BLOCKQUOTE|DIV|ECODE','Tags that you can use');
+INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt,width,height,longdesc_U', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_break','P|LI|OL|UL|BR|BLOCKQUOTE|DIV','Tags that break words (see breakHtml())');
 INSERT INTO vars (name, value, description) VALUES ('archive_delay','60','days to wait for story archiving');
 INSERT INTO vars (name, value, description) VALUES ('archive_delay_mod','60','Days before moderator logs are expired');

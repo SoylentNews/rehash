@@ -2150,3 +2150,6 @@ INSERT INTO vars (name, value, description) VALUES ('anchortags_bridge_breaks', 
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_139, Start of T_2_3_0_140 - 2004/02/26
+
+
+INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt,width,height,longdesc_U', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
