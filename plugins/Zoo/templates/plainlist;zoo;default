@@ -22,7 +22,7 @@ __template__
 	</TD>
 	[% IF editable %]
 		<TD VALIGN="TOP">
-			[% PROCESS zoo_icons person=item.0 %]
+			[% PROCESS zoo_icons person=person.0 %]
 		</TD>
 	[% END %]
 	<TD VALIGN="TOP">
