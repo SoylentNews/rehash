@@ -566,7 +566,7 @@ sub newUser {
 	if (!$form->{email} || $form->{email} !~ /\@/) {
 		print getError('email_invalid', 0, 1);
 		return;
-	} elsif($form->{email} ne $form->{email2}){
+	} elsif ($form->{email} ne $form->{email2}) {
 		print getError('email_do_not_match', 0, 1);
 		return;	
 	} elsif ($slashdb->existsEmail($form->{email})) {
