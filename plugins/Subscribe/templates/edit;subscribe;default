@@ -163,6 +163,8 @@ or other subscription-related issues, please contact
 <A HREF="mailto:[% constants.subscribe_email %]">[% constants.subscribe_email %]</A>.
 If your question is about your daily headlines email, you can edit that at
 <A HREF="[% constants.rootdir %]/my/messages">[% constants.absolutedir %]/my/messages</A>.
+For a list of subscriber-only benefits, see
+<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss1600">the FAQ</a>.
 
 __seclev__
 10000
