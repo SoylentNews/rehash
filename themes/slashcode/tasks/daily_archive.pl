@@ -63,8 +63,8 @@ $task{$me}{code} = sub {
 	$slashdb->updateArchivedDiscussions();
 
 	# Archive stories.
-	my $limit = $constants->{task_options}{archive_limit} || 500;
-	my $dir   = $constants->{task_options}{archive_dir}   || 'ASC';
+	my $limit = $constants->{task_options}{archive_limit} || $constants->{archive_limit} || 500;
+	my $dir   = $constants->{task_options}{archive_dir}   || $constants->{archive_dir} || 'ASC';
 	my $astories = $slashdb->getArchiveList($limit, $dir);
 	if ($astories && @{$astories}) {
 		# Takes approx. 2 minutes on Slashdot
