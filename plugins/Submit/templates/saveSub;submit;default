@@ -7,7 +7,7 @@ Save a submission
 * width = passed to titlebar
 * missingemail = boolean for whether email is missing
 * anonsubmit = boolean for whether submission is anonymous
-* submissioncount = totoal submissions pending
+* submissioncount = total submissions pending
 __title__
 
 __page__
