@@ -42,7 +42,7 @@ other [% constants.sitename %] readers. Here are the exciting results:
 		END;
 	-%]
 	<LI> "[% m2item.subj %]" from the discussion [% discussion %] which you
-	moderated as <B>[% m2item.reason %]</B> was voted 
+	moderated as <B>[% m2item.reason.name %]</B> was voted 
 	<B>[% vote_result.${m2item.vote} %]</B>
 
 [% END %]
@@ -51,7 +51,7 @@ other [% constants.sitename %] readers. Here are the exciting results:
 [% FOREACH m2item = m2 -%]
 	[%- reason = m2item.reason -%]
 	- "[% m2item.subj | decode_entities %]" from the discussion [% discussion | decode_entities %]
-	which you moderated as "[% reason %]" was voted [% vote_result.${m2item.vote} %]
+	which you moderated as "[% reason.name %]" was voted [% vote_result.${m2item.vote} %]
 [% url=m2item.url; IF url; IF !m2item.url.search('^http:'); url="http:$url"; END -%]
 	<[% url %]>
 
