@@ -2218,8 +2218,6 @@ CREATE TABLE open_proxies (
    KEY ts (ts)
 ) TYPE=InnoDB;
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_3_0_145, Start of T_2_3_0_146 - 2004/03/24
 
 # End of T_2_3_0_146, Start of T_2_3_0_147 - 2004/03/25
@@ -2247,13 +2245,15 @@ INSERT INTO vars (name, value, description) VALUES ('newuser_portscan', '0', 'If
 
 ALTER TABLE open_proxies ADD COLUMN xff VARCHAR(15) DEFAULT NULL;
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('adjust_m2_freq', '0', 'If true, m2_freq will be automatically adjusted to match rates of m1s and m2s');
 #Set these to suitable mins and maxes for your site.  These are only applied if adjust_m2_freq is true
 INSERT INTO vars (name, value, description) VALUES ('m2_freq_min', '42300', 'Min value m2_freq will be automatically adjusted to');
 INSERT INTO vars (name, value, description) VALUES ('m2_freq_max', '172800', 'Max value m2_freq will be automatically adjusted to');
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_148, Start of T_2_3_0_149 - 2004/04/06
