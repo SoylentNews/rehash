@@ -568,13 +568,10 @@ Bender:Oh no! Not the magnet!
 Bender:Bender's a genius!
 Bender:Well I don't have anything else planned for today, let's get drunk!
 Bender:Oh, so, just 'cause a robot wants to kill humans that makes him a radical?
-Bender:There's nothing wrong with murder, just as long as you let Bender whet his beak.
 Bender:Bite my shiny, metal ass!
 Bender:Lick my frozen, metal ass!
 Bender:The laws of science be a harsh mistress.
-Bender:In the event of an emergency, my ass can be used as a flotation device.
 Bender:Like most of life's problems, this one can be solved with bending.
-Bender:Honey, I wouldn't talk about taste if I was wearing a lime green tank top.
 Bender:A woman like that you gotta romance first!
 Bender:OK, but I don't want anyone thinking we're robosexuals.
 Bender:Hey Fry, I'm steering with my ass!
@@ -609,18 +606,19 @@ Bender:I'm not allowed to sing. Court order.
 Bender:Boy, who knew a cooler could also make a handy wang coffin?
 Bender:I'm so embarrassed. I wish everybody else was dead.
 Bender:Professor! Make a women out of me!
+Bender:An upgrade? I thought we all agreed I was perfect.
+Bender:Curse you, merciful Poseidon!
+Bender:I am a hideous triumph of form and function.
+Bender:I'm an outdated piece of junk.
 Bender:The modern world can bite my splintery, wooden ass!
 Fry:There's a lot about my face you don't know.
-Fry:Drugs are for losers. And hypnosis is for losers with big weird eyebrows.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
 Fry:Leela, there's nothing wrong with anything.
-Fry:Augh, I am so unlucky. I've run over black cats that were luckier than me.
 Fry:Leela, Bender, we're going grave-robbing.
 Fry:Where's Captain Bender? Off catastrophizing some other planet?
 Fry:People said I was dumb but I proved them!
 Fry:It's like a party in my mouth and everyone's throwing up.
-Fry:Nowadays people aren't interested in art that's not tattooed on fat guys.
 Fry:I don't regret this, but I both rue and lament it.
 Fry:I'm never gonna get used to the thirty-first century. Caffeinated bacon?
 Fry:They're great! They're like sex except I'm having them.
@@ -630,14 +628,13 @@ Fry:That's a chick show. I prefer programs of the genre: World's Blankiest Blank
 Fry:But this is HDTV. It's got better resolution than the real world.
 Fry:I'm gonna be a science fiction hero, just like Uhura, or Captain Janeway, or Xena!
 Fry:Make up some feelings and tell her you have them.
-Fry:I'm not a robot like you. I don't like having disks crammed into me... unless they're Oreos, and then only in the mouth.
+Fry:I'm not a robot like you -- I don't like having disks crammed into me. Unless they're Oreos. And then only in the mouth.
 Fry:Sweet justice! Sweet, juicy justice!
 Fry:I must be a robot. Why else would human women refuse to date me?
 Fry:Hey look, it's that guy you are!
 Fry:That doesn't look like an "L", unless you count lower case.
 Fry:Hardy Boys: too easy. Nancy Drew: too hard!
 Fry:I'm going to continue never washing this cheek again.
-Fry:I haven't had time off since I was twenty-one through twenty-four.
 Fry:The spoon's in the foot powder.
 Fry:You mean Bender is the evil Bender? I'm shocked! Shocked! Well not that shocked.
 Fry:I'm literally angry with rage!
