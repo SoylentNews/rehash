@@ -8,7 +8,7 @@ Template which renders the comment editor.
 * reply = hashref of comment replying to
 * hide_name = hide name / log out link
 * hide_email = hide email display
-
+* extras = array of any extras associated with this comment
  
 __title__
 
@@ -129,6 +129,19 @@ END %]
 	<TR><TD ALIGN="RIGHT">[% PROCESS formLabel value => 'Subject' %]</TD>
 		<TD><INPUT TYPE="text" NAME="postersubj" VALUE="[% form.postersubj | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
 	</TR>
+	[% FOR extra = extras %]
+	<TR>
+		<TD ALIGN="RIGHT"> <B>[% extra.0 %]</TD>
+		<TD>
+		[% IF extra.2 == 'text' %]
+			<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% form.${extra.1} | strip_attribute %]" SIZE="50">
+		[% ELSIF extra.2 == 'list' %]
+			[% pulldown = extra.1 %]
+			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), form.${extra.1}, 1, 1) %]	
+		[% END %]
+		</TD>
+	</TR>
+	[% END %]
 	<TR>
 		<TD ALIGN="RIGHT" VALIGN="TOP">[% PROCESS formLabel value => 'Comment' %]</TD>
 		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</TEXTAREA>
