@@ -16,7 +16,7 @@ __template__
 [% fullsubtext = "";
    FOREACH submission = submissions;
 	PROCESS formatSub;
-	fullsubtext = fullsubtext _ "\n\n" _ subtext;
+	fullsubtext = fullsubtext _ "\n\n<h3>" _ submission.subj _ "</h3>\n\n" _ subtext;
    END;
 fullsubtext %]
 
