@@ -72,6 +72,24 @@ use Slash::Utility;
 
 use vars qw($VERSION $callback_ref);
 
+# We use custom descriptions with derivative names since we are using
+# variants based on the 1.x scheme, for now.
+my %nvdescriptions = (
+	'authornames' => sub {
+		$_[0]->sqlSelectMany(
+			'nickname,nickname', 
+			'authors_cache'
+		) 
+	},
+
+	'progresscodes' => sub {
+		$_[0]->sqlSelectMany(
+			'name,name', 'code_param', "type='nvprogress'"
+		)
+	},
+);
+
+
 ############################################################
 sub new {
 	my ($class, $user, %conf) = @_;
@@ -151,10 +169,15 @@ sub lockNewsVac {
 	return ($self->{using_lock} = 1);
 }
 
+sub getNVDescriptions {
+	my($self, $code) = @_;
+
+	return $self->getDescriptions($code, '', 1, \%nvdescriptions);
+}
 
 ############################################################
 sub timing {
-	my ($self, $cmd, $duration) = @_;
+	my($self, $cmd, $duration) = @_;
 
 	$self->{timing_data}{$cmd}{total} += $duration;
     
@@ -2426,6 +2449,324 @@ sub check_regex {
 	}
 
 	return $err;
+}
+
+sub getWeekCounts {
+	my($self) = @_;
+	my($results, $returnable);
+
+	$results = $self->sqlSelectAll(
+		"miner.miner_id, count(rel.rel_id)",
+                "miner, rel",
+                "rel.type = miner.name
+                AND rel.parse_code = 'miner'
+                AND rel.first_verified > DATE_SUB(NOW(), INTERVAL 7 DAY)",
+                "GROUP BY miner.miner_id
+                ORDER BY name"
+        );
+
+	$returnable->{$_->[0]} = $_->[1] for @{$results};
+
+	return $returnable;
+}
+
+sub getDayCounts {
+	my($self) = @_;
+	my(@days) = (1,3,7);
+	my($results, $returnable);
+	
+	for my $day (@days) {
+		$results = $self->sqlSelectAll(
+			'miner.miner_id, AVG(url_analysis.nuggets)',
+
+			'miner, url_info, url_analysis',
+			
+			"url_info.miner_id = miner.miner_id AND
+			 url_info.url_id = url_analysis.url_id AND
+			 url_analysis.ts > DATE_SUB(NOW(), INTERVAL $day DAY)",
+
+			'GROUP BY miner.miner_id ORDER BY miner.name'
+		);
+
+		$returnable->{$_->[0]}{$day} =
+			int($_->[1] + 0.5) for @{$results};
+	}
+
+	return $returnable;
+}
+
+sub getMinerList {
+	my($self) = @_;
+
+	my $returnable = $self->sqlSelectAllHashrefArray(
+                "miner.miner_id, name, last_edit, last_edit_aid, owner_aid,
+                 progress, comment, count(url_info.url_id) as url_count", 
+                "miner, url_info",
+                "url_info.miner_id = miner.miner_id",
+                "GROUP BY miner.miner_id ORDER BY name"
+        );
+
+	return $returnable;
+}
+
+sub getMiner {
+	my($self, $miner_id) = @_;
+
+	my $returnable = $self->sqlSelectHashref(
+		'*', 'miner', 'miner_id=' . $self->sqlQuote($miner_id)
+	);
+
+	return $returnable;
+}
+
+sub getMinerURLs {
+	my($self, $miner_id) = @_;
+
+	my $returnable = $self->sqlSelectAll(
+		'url_id, url',
+		'url_info',
+		'miner_id=' . $self->sqlQuote($miner_id),
+		'ORDER BY url'
+	);
+
+	return $returnable;
+}
+
+sub setMiner {
+	my($self, $miner_id, $data) = @_;
+
+	$self->sqlUpdate(
+		'miner', $data, 'miner_id=' . $self->sqlQuote($miner_id)
+	);
+}
+
+sub delMiner {
+	my($self, $miner_id) = @_;
+
+	$self->sqlDo(
+		'DELETE FROM miner WHERE miner_id=' . $self->sqlQuote($miner_id)
+	);
+}
+
+sub getUrlList {
+	my($self, $match, $owner, $start, $limit) = @_;
+
+	my @where = ('miner.miner_id = url_info.miner_id');
+	push @where, 'url_info.url LIKE ' .  $self->sqlQuote("%$match%")
+		if $match;
+	push @where, "miner.owner_aid = '$1'"
+		if $owner and $owner =~ /(\w{1,20})/;
+	my $qwhere = join ' AND ', @where;
+	
+	my($qstart, $qlimit) = (0, 500);
+	$qlimit = $1   if $limit and $limit =~ /(\d+)/;
+	$qlimit = 1    if $qlimit < 1;
+	$qlimit = 9999 if $qlimit > 9999;
+	$qstart = $1   if $start and $start =~ /^(\d+)$/;
+	
+	$qlimit = "$qstart,$qlimit" if $qstart;
+        my $returnable = $self->sqlSelectAllHashrefArray(
+	        'url_info.url_id, url_info.url, url_info.is_success,
+		url_info.last_success, miner.miner_id, miner.name,
+	        length(url_message_body.message_body)',
+		
+		'url_info, miner LEFT JOIN url_message_body
+	        ON url_info.url_id = url_message_body.url_id',
+
+	        $qwhere,
+
+	        "ORDER BY url_info.url LIMIT $qlimit"
+        );
+
+	for (@{$returnable}) {
+		$_->{is_success} = $_->{is_success} == 0;
+		$_->{last_success_formatted} = timeCalc($_->{last_success})
+			if $_->{last_success};
+
+                $_->{referencing} = $self->sqlCount(
+                	'rel',
+			"from_url_id=$_->{url_id} AND
+			 parse_code='miner'",
+			'GROUP BY to_url_id'
+                );
+	}
+
+
+	return $returnable;
+}
+
+sub getMinerURLIds {
+	my($self, $miner_id) = @_;
+
+	my $returnable = $self->sqlSelectCollArrayref(
+		'url_id',
+		'url_info',
+		'miner_id=' . $self->sqlQuote($miner_id)
+	);
+
+	return $returnable;
+}
+
+sub getMinerRegexps {
+	my($self, $miner_id) = @_;
+
+	my $returnable = $self->sqlSelectHashref(
+		'pre_stories_text, pre_stories_regex,
+		 post_stories_text, post_stories_regex',
+		'miner', 'miner_id=' . $self->sqlQuote($miner_id)
+	);
+
+	return $returnable;
+}
+
+sub getURLRelationships {
+	my($self, $url_ids, $max_results) = @_;
+	$max_results ||= 100;
+
+	my $where_clause = sprintf "(%s) AND
+		 	 	    rel.to_url_id = url_info.url_id AND
+				    parse_code = 'miner'",
+
+				    join ' OR ', map { "rel.from_url_id=$_" } 
+				    		 @{$url_ids};
+
+	my $returnable = $self->sqlSelectAllHashrefArray(
+		"url_info.url_id, url_info.url, url_info.title,
+		 url_info.last_attempt, url_info.last_success",
+		 
+		'url_info, rel',
+
+		$where_clause,
+
+		"ORDER BY rel.from_url_id, url_info.url_id LIMIT $max_results"
+	);
+
+	return $returnable;
+}
+
+sub getURLData {
+	my($self, $url_id) = @_;
+	my $returnable;
+
+	my $columns = <<EOT;
+url_info.url_id, url_info.url, url_info.title,
+url_info.miner_id, url_info.last_attempt, 
+url_info.last_success, url_info.status_code, 
+url_info.reason_phrase, length(url_message_body.message_body)
+EOT
+	
+	my $tables = <<EOT;
+url_info LEFT JOIN url_message_body ON
+url_info.url_id = url_message_body.url_id
+EOT
+
+	my $where = 'url_info.url_id = ' . $self->sqlQuote($url_id);
+
+	$returnable = wantarray ?
+		$self->sqlSelect($columns, $tables, $where) :
+		$self->sqlSelectHashref($columns, $tables, $where);
+
+	return $returnable;
+}
+
+sub getURLRelationCount {
+	my($self, $url_id) = @_;
+
+	my $returnable = $self->sqlSelectColArrayref(
+		'count(*)', 'rel', 
+		'from_url_id=' . $self->sqlQuote($url_id) . " AND
+		 parse_code = 'miner'",
+		'GROUP BY to_url_id'
+	);
+
+	return $returnable;
+}
+
+sub getURLCounts {
+	my($self) = @_;
+
+	my @returnable = (
+		$self->sqlCount('url_info'),
+		$self->sqlCount('url_info', 'miner_id=0')
+	);
+
+	return @returnable;
+}
+
+sub getURLBody {
+	my($self, $url_id) = @_;
+
+	# Previously this was a sqlSelectAll(). We only use one record 
+	# anyways, so why not give the dB a break.
+	my $returnable = $self->sqlSelectArrayRef(
+		'url, message_body',
+		'url_info, url_message_body',
+		"url_info.url_id=$url_id and url_message_body.url_id=$url_id"
+	);
+
+	return $returnable;
+}
+
+
+sub getSpiderList {
+	my($self, $match) = @_;
+
+	my $where;
+	$where = "name LIKE " . $self->sqlQuote("%$match%")
+		if $match;
+
+        my $returnable = $self->sqlSelectAllHashrefArray(
+	        'spider_id, name, last_edit, last_edit_aid, conditions, 
+		 group_0_selects, commands',
+	        'spider',
+	        $where,
+	        'LIMIT 50'
+        );
+
+        for (@{$returnable}) {
+        	my $a = $_->{last_edit} =~
+			/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
+
+                $_->{last_edit_formatted} = timeCalc("$1-$2-$3 $4:$5:$6")
+			if $a
+        }
+
+	return $returnable;
+}
+
+sub getSpider {
+	my($self, $spider_id) = @_;
+	my $returnable;
+
+	my $table = 'spider';
+	my $where = 'spider_id=' . $self->sqlQuote($spider_id);
+	my $columns = <<EOT;
+name, last_edit, last_edit_aid, conditions, group_0_selects, commands
+EOT
+
+	$returnable = wantarray ?
+		$self->sqlSelect($columns, $where, $table) :
+		$self->sqlSelectHashref($columns, $where, $table);
+
+	return $returnable;
+}
+
+sub setSpider {
+	my($self, $spider_id, $data) = @_;
+
+	$self->sqlUpdate(
+		'spider', $data, 'spider_id=' . $self->sqlQuote($spider_id)
+	);
+}
+
+sub getSpiderName {
+	my($self, $spider_id) = @_;
+
+	my $returnable = $self->sqlSelect(
+		'name', 'spider', 'spider_id=' . $self->sqlQuote($spider_id)
+	);
+
+	return $returnable;
 }
 
 ############################################################

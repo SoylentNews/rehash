@@ -39,83 +39,46 @@ $| = 1;
 ##################################################################
 sub listMiners {
 	my ($slashdb, $form, $user, $udbt) = @_;
+        my ($miner_ar, $miner_arrayref, $rel_week_count, $nuggets_day_count);
 
 	$udbt->timing_clear();
-
-        my ($miner_ar, $miner_arrayref, %rel_week_count, %nuggets_day_count);
-
-        $miner_arrayref = $slashdb->sqlSelectAll(
-                "miner.miner_id, count(rel.rel_id)",
-                "miner, rel",
-                "rel.type = miner.name
-                AND rel.parse_code = 'miner'
-                AND rel.first_verified > DATE_SUB(NOW(), INTERVAL 7 DAY)",
-                "GROUP BY miner.miner_id
-                ORDER BY name"
-        );
-        $rel_week_count{$_->[0]} = $_->[1] for @{$miner_arrayref};
-
-	for (1, 3, 7) {
-		$miner_arrayref = $slashdb->sqlSelectAll(
-			'miner.miner_id, AVG(url_analysis.nuggets)',
-
-			'miner, url_info, url_analysis',
-			
-			"url_info.miner_id = miner.miner_id AND
-			 url_info.url_id = url_analysis.url_id AND
-			 url_analysis.ts > DATE_SUB(NOW(), INTERVAL $_ DAY)",
-
-			'GROUP BY miner.miner_id ORDER BY miner.name'
-		);
-
-		for $miner_ar (@$miner_arrayref) {
-			my ($miner_id, $nuggets_day_count) = @{$miner_ar};
-			$nuggets_day_count{$miner_id}{$_} =
-				int($nuggets_day_count + 0.5);
-		}
-	}
-
-        $miner_arrayref = $slashdb->sqlSelectAllHashrefArray(
-                "miner.miner_id, name, last_edit, last_edit_aid, owner_aid,
-                progress, comment, count(url_info.url_id) as url_count", 
-                "miner, url_info",
-                "url_info.miner_id = miner.miner_id",
-                "GROUP BY miner.miner_id ORDER BY name"
-        );
+        $rel_week_count = $udbt->getWeekCounts();
+	$nuggets_day_count = $udbt->getDayCounts();
+        $miner_arrayref = $udbt->getMinerList();
 
 	my $i = 0;
-	for my $href (@{$miner_arrayref}) {
-		my $mi = $href->{miner_id};
+	for (@{$miner_arrayref}) {
+		my $mi = $_->{miner_id};
 
-		$href->{url_number_highlite} = 
-			$rel_week_count{$mi} > $href->{url_count} * 60;
+		$_->{url_number_highlite} = 
+			$rel_week_count->{$mi} > $_->{url_count} * 60;
 		
-		$href->{nugget_numbers} = join(",",
-			map { $_ || 0 } @{$nuggets_day_count{$mi}}{1,3,7},
+		$_->{nugget_numbers} = join(",",
+			map { $_ || 0 } @{$nuggets_day_count->{$mi}}{1,3,7},
 		);
 
-        	$href->{last_edit} =~ 
+        	$_->{last_edit} =~ 
 			/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
-        	my ($yyyy, $mon, $dd, $hh, $min, $ss) = 
+        	my($yyyy, $mon, $dd, $hh, $min, $ss) =
 			($1, $2, $3, $4, $5, $6);
-		$href->{last_edit_formatted} = "$yyyy-$mon-$dd $hh:$min";
+		$_->{last_edit_formatted} = "$yyyy-$mon-$dd $hh:$min";
 
-		$href->{week_count} = $rel_week_count{$mi} || 0;
+		$_->{week_count} = $rel_week_count->{$mi} || 0;
 
-                $href->{comment} = substr($href->{comment}, 0, 25) . "..."
-			if length($href->{comment}) > 30;
-		$href->{comment} = HTML::Entities::encode($href->{comment});
+                $_->{comment} = substr($_->{comment}, 0, 25) . "..."
+			if length($_->{comment}) > 30;
+		$_->{comment} = HTML::Entities::encode($_->{comment});
 
-		$href->{newrow} = 1 if $i % 5 == 4 and 
-				       $i++ < $#{$miner_arrayref} - 2;
+		$_->{newrow} = 1 if $i % 5 == 4 and 
+				    $i++ < $#{$miner_arrayref} - 2;
         }
 
 	slashDisplay('listMiners', { 
 		miners 			=> $miner_arrayref,
-		nugget_day_count	=> \%nuggets_day_count,
+		nugget_day_count	=> $nuggets_day_count,
 	});
 
-	warn "doing timing_dump after listMiners";
+	errorLog("doing timing_dump after listMiners");
 	$udbt->timing_dump();
 }
 
@@ -127,9 +90,7 @@ sub editMiner {
         my $name = $udbt->id_to_minername($miner_id);
 
 	# This is a mess. Convert it to use a hashref.
-       	my $miner = $slashdb->sqlSelectHashref(
-		'*', 'miner', 'miner_id=' . $slashdb->sqlQuote($miner_id)
-        );
+       	my $miner = $udbt->getMiner($miner_id);
 
       	$miner->{last_edit} =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
         $miner->{last_edit} = timeCalc("$1-$2-$3 $4:$5:$6");
@@ -184,29 +145,23 @@ sub editMiner {
         
 	my $progress_select = createSelect(
 		'progress', 
-		$slashdb->getDescriptions(
-			'progresscodes', '', 1, \%nvdescriptions
-		),
+		$udbt->getNVDescriptions('progresscodes'),
 		$miner->{progress}, 
 		1
 	);   
 
-	my $authors = $slashdb->getDescriptions(
-		'authornames', '', 1, \%nvdescriptions
-	);
+	my $authors = $udbt->getNVDescriptions('authornames');
 	my $owner_aid_menu = createSelect(
-		'owner_aid', $authors, $miner->{owner_aid}, 1, 0, 1
+		'owner_aid',
+		$authors, 
+		$miner->{owner_aid}, 
+		1, 0, 1
 	);   
 
-        my $url_ar = $slashdb->sqlSelectAll(
-		'url_id, url',
-		'url_info',
-		"miner_id='$miner_id'", 
-		'ORDER BY url'
-        );
+        my $url_ar = $udbt->getMinerURLs($miner_id);
 
 	if ($udbt->{debug} > 0) {
-		warn "doing timing_dump after editMiner";
+		errorLog("doing timing_dump after editMiner");
 		$udbt->timing_dump();
 	}
 
@@ -251,6 +206,7 @@ sub updateMiner {
 
         } elsif ($form->{updateminer}) {
         	my $name = $udbt->id_to_minername($miner_id);
+
 		my(%update_fields);
 		my(@field_names) = qw(
 			name last_edit_aid
@@ -266,50 +222,52 @@ sub updateMiner {
 			comment
 		);
 
+		errorLog(getData('miner_update_warning', {
+			id => $miner_id, name => $name
+		})) if $udbt->{debug} > 0;
+
        		# Prepend the "(?i)" unless this field is marked case_sensitive.
         	for my $field (grep /_(text|regex)$/, keys %{$form}) {
         		$form->{$field} = "(?i)$form->{$field}"
 				if $form->{$field} and !$form->{"${field}_cs"};
         	}
         	$form->{last_edit_aid} = $user->{nickname};
-		warn getData('miner_update_warning', {
-			id => $miner_id, name => $name
-		}) if $udbt->{debug} > 0;
         	for (@field_names) { 
 			$update_fields{$_} = $form->{$_} if exists $form->{$_};
 		}
-		$slashdb->sqlUpdate(
-			'miner', 
-			\%update_fields, 
-			"miner_id=$miner_id"
-		);
+		$udbt->setMiner($miner_id, \%update_fields);
 
 		slashDisplay('updateMiner', { name => $name });
 
-		warn "editMiner '$miner_id' forceupdate '$form->{forceupdate}'";
+		# Template.
+		errorLog(<<EOT);
+editMiner '$miner_id' forceupdate '$form->{forceupdate}'
+EOT
+
                 editMiner(@_, $miner_id, $form->{forceupdate});
 
         } elsif ($form->{deleteminer}) {
         	my $miner_id = $miner_id;
         	my $name = $udbt->id_to_minername($miner_id);
-	        my $url_ar = $slashdb->sqlSelectAll(
-			"url_id, url",
-	        	"url_info",
-	        	"miner_id = '$miner_id'",
-	        	"ORDER BY url"
-	        );
+	        my $urls_ar = $udbt->getMinerURLs($miner_id);
 
-	        if (@$url_ar) {
-	        	# This should probably just say "Are you sure?" and then the
-	        	# "delete2" action should zero out all the URLs that use it.
-	        	# But for now, just forbid this.
-			slashDisplay('updateMiner', { name => $name, num => scalar(@$url_ar), url_ar => $url_ar });
+	        if (@{$urls_ar}) {
+	        	# This should probably just say "Are you sure?" and then
+			# the "delete2" action should zero out all the URLs that 
+			# use it. For now, just forbid this.
+			slashDisplay('updateMiner', {
+				name	=> $name, 
+				num	=> scalar(@{$urls_ar}), 
+				url_ar	=> $urls_ar 
+			});
 
 	        	editMiner(@_,$miner_id);
 	        } else {
-	        	$slashdb->sqlDo("DELETE FROM miner WHERE miner_id = '$miner_id'");
-
-			slashDisplay('updateMiner', { name => $name, miner_id => $miner_id });
+			$udbt->delMiner($miner_id);
+			slashDisplay('updateMiner', {
+				name	=> $name, 
+				miner_id=> $miner_id
+			});
 
 	                listMiners();
 	        }
@@ -320,59 +278,20 @@ sub updateMiner {
 sub listUrls {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
-	my ($n_urls_total, $n_urls_with_miners) = (
-		$slashdb->sqlCount('url_info'),
-		$slashdb->sqlCount('url_info', 'miner_id=0')
+	my ($n_urls_total, $n_urls_with_miners) = $udbt->getURLCounts;
+
+	my $url_arrayref = $udbt->getUrlList(
+		$form->{match}, 
+		$form->{owner},
+		$form->{start},
+		$form->{limit}
 	);
 
-	my @where = ('miner.miner_id = url_info.miner_id');
-	push @where, 'url_info.url LIKE ' .
-		     $slashdb->sqlQuote("%$form->{like}%")
-	if $form->{like};
-	push @where, "miner.owner_aid = '$1'"
-		if $form->{owner} and $form->{owner} =~ /(\w{1,20})/;
-	my $where = join ' AND ', @where;
-	
-	my $limit = 500;
-	$limit = $1 if $form->{limit} and $form->{limit} =~ /(\d+)/;
-	$limit = 1 if $limit < 1; $limit = 9999 if $limit > 9999;
-	my $start = 0;
-	$start = $1 if $form->{start} and $form->{start} =~ /(\d+)/;
-	$limit = "$start,$limit" if $start;
-
-        my $url_arrayref = $slashdb->sqlSelectAllHashrefArray(
-	        'url_info.url_id, url_info.url, url_info.is_success,
-		url_info.last_success, miner.miner_id, miner.name,
-	        length(url_message_body.message_body)',
-		
-		'url_info, miner LEFT JOIN url_message_body
-	        ON url_info.url_id = url_message_body.url_id',
-
-	        $where,
-
-	        "ORDER BY url_info.url LIMIT $limit"
-        );
-
-        for (@{$url_arrayref}) {
-		$_->{is_success} = $_->{is_success} == 0;
-		$_->{last_success_formatted} = timeCalc($_->{last_success})
-			if $_->{last_success};
-
-                my $ref_cnt = $slashdb->sqlCount(
-                	'rel',
-			"from_url_id=$_->{url_id} AND
-			 parse_code='miner'",
-			'GROUP BY to_url_id'
-                );
-                $_->{referencing} = $ref_cnt,
-	}
-	
 	slashDisplay('listUrls', { 
 		urls_total		=> $n_urls_total,
 		urls_with_miners	=> $n_urls_with_miners,
 		urls			=> $url_arrayref,
 	});
-		
 }
 
 ##################################################################
@@ -393,11 +312,8 @@ sub processUrls {
 sub show_miner_url_info {
 	my ($slashdb, $form, $user, $udbt, $miner_id, $force) = @_;
 
-	my $urls_ar = $slashdb->sqlSelectColArrayref(
-		'url_id',
-		'url_info',
-		'miner_id=' . $slashdb->sqlQuote($miner_id)
-	);
+	my $urls_ar   = $udbt->getMinerURLIds($miner_id);
+	my $miner_ref = $udbt->getMinerRegexps($miner_id);
 
 	my $start_time = Time::HiRes::time();
 	my %conditions;
@@ -419,23 +335,12 @@ sub show_miner_url_info {
 	my $duration = int((Time::HiRes::time() - $start_time)*1000+0.5)/1000;
 	print getData('processed_urls', { 
 		url_ids => $urls_ar, 
-		dur => $duration,
+		dur	=> $duration,
 	});
 
-	my $miner_ref = $slashdb->sqlSelectHashref(
-		'pre_stories_text, pre_stories_regex,
-		 post_stories_text, post_stories_regex',
-		'miner', 'miner_id=' . $slashdb->sqlQuote($miner_id)
-	);
-
 	for (@{$urls_ar}) {
-		# Previously this was a sqlSelectAll(). We only use one record 
-		# anyways, so why not give the dB a break.
-		my $ar = $slashdb->sqlSelectArrayRef(
-			'url, message_body',
-			'url_info, url_message_body',
-			"url_info.url_id=$_ and url_message_body.url_id=$_"
-		);
+		my $ar = $udbt->getURLBody($_);
+		
 		# We should report when we don't retrieve a URL, eventually.
 		next unless $ar && @{$ar};
 		my($url, $message_body) = @{$ar};
@@ -515,29 +420,10 @@ sub show_miner_url_info {
 
 #################################################
 sub show_miner_rel_info {
-	# 1.x code never passes more than one url_id. Why the array?
 	my ($slashdb, $form, $user, $udbt, @url_ids) = @_;
 
 	return if !@url_ids;
-	my $max_results = 100;
-
-	my $where_clause = sprintf "(%s) AND
-		 	 	    rel.to_url_id = url_info.url_id AND
-				    parse_code = 'miner'",
-
-				    join ' OR ', map { "rel.from_url_id=$_" } 
-				    		 @url_ids;
-
-	my $ar = $slashdb->sqlSelectAllHashrefArray(
-		"url_info.url_id, url_info.url, url_info.title,
-		 url_info.last_attempt, url_info.last_success",
-		 
-		'url_info, rel',
-
-		$where_clause,
-
-		"ORDER BY rel.from_url_id, url_info.url_id LIMIT $max_results"
-	);
+	my $ar = $udbt->getURLRelationships(\@url_ids);
 
 	for (@{$ar}) {
 		if ($_->{url} =~ /^nugget:/) {
@@ -558,7 +444,6 @@ sub show_miner_rel_info {
 
 	slashDisplay('show_miner_rel_info', { 
 		arrayref 	=> $ar,
-		max_results	=> $max_results,
 	});
 }
 
@@ -586,32 +471,14 @@ sub editUrl {
 	}
 
 	my ($url_id, $url, $title, $miner_id, $last_attempt, $last_success,
-	$status_code, $reason_phrase, $message_body_length ) =
-		$slashdb->sqlSelect(
-        		'url_info.url_id, url_info.url, url_info.title,
-			 url_info.miner_id, url_info.last_attempt, 
-			 url_info.last_success, url_info.status_code, 
-			 url_info.reason_phrase,
-			 length(url_message_body.message_body)',
-
-        		'url_info
-        		LEFT JOIN url_message_body ON
-			url_info.url_id = url_message_body.url_id',
-
-        		'url_info.url_id = ' . $slashdb->sqlQuote($urlid)
-		);
+	    $status_code, $reason_phrase, $message_body_length) =
+	$udbt->getURLData($urlid);
 
 	my $miner_name;
 	$miner_name = $udbt->id_to_minername($miner_id) if $miner_id;
 
-	my $ar = $slashdb->sqlSelectColArrayref(
-		'count(*)', 'rel', 
-		'from_url_id=' . $slashdb->sqlQuote($url_id) . " AND
-		 parse_code = 'miner'",
-		'GROUP BY to_url_id'
-	);
-
-	my $referencing = ($ar ? scalar(@$ar) : 0);
+	my $ar = $udbt->getURLRelationCount($url_id);
+	my $referencing = $ar ? scalar(@$ar) : 0;
 
 	slashDisplay('editUrl',{ 
 		new_url 		=> $new_url, 
@@ -637,13 +504,13 @@ sub updateUrl {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
         if ($form->{deleteurl}) {
-
+	
 		my $url_id = $form->{url_id};
 		my $url = $udbt->id_to_url($url_id);
         	$udbt->delete_url_ids($url_id) if $url_id;
 		
 		slashDisplay('updateUrl', { url_id => $url_id, url => $url });	
-
+		
         } elsif ($form->{requesturl}) {
 
 		my $url_id = $form->{url_id};
@@ -689,7 +556,7 @@ sub updateUrl {
 			miner_name => $miner_name
 		});	
 
-		editUrl(@_,$url_id);
+		editUrl(@_, $url_id);
 	}
 }
 
@@ -697,49 +564,26 @@ sub updateUrl {
 sub listSpiders {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
-	my $where;
-	$where = "name LIKE " . $slashdb->sqlQuote("%$form->{like}%")
-		if $form->{like};
+	# We may need to work on the classing here, some punctuation may be
+	# allowed in minor names.
+	$form->{like} =~ s/\W//g;
 
-        my $spider_arrayref = $slashdb->sqlSelectAllHashrefArray(
-	        'spider_id, name, last_edit, last_edit_aid, conditions, 
-		 group_0_selects, commands',
-	        'spider',
-	        $where,
-	        'LIMIT 50'
-        );
-
-        for (@$spider_arrayref) {
-        	my $a = $_->{last_edit} =~
-			/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
-
-                $_->{last_edit_formatted} = timeCalc("$1-$2-$3 $4:$5:$6")
-			if $a
-        }
-	slashDisplay('listSpiders', { arrayref => $spider_arrayref });
+	slashDisplay('listSpiders', {
+		arrayref => $udbt->getSpiderList($form->{like})
+	});
 }
 
 ##################################################################
 sub editSpider {
 	my ($slashdb, $form, $user, $udbt, $spider_id) = @_;
+        ($spider_id ||= $form->{spider_id}) =~ s/\D//g;
 
-        $spider_id ||= $form->{spider_id};
+       	my($name, $last_edit, $last_edit_aid, $conditions, $group_0_selects,
+	   $commands) = $udbt->getSpider($spider_id);
 
-        my $spider_arrayref = $slashdb->sqlSelectAll(
-        	"name, last_edit, last_edit_aid,
-            	conditions, group_0_selects, commands",
-        	"spider",
-        	"spider_id = '$spider_id'"
-        );
-
-        my $spider_ar = $spider_arrayref->[0];
-
-       	my ($name, $last_edit, $last_edit_aid,
-       		$conditions, $group_0_selects, $commands) = @$spider_ar;
-
-	$conditions =~ s{^\s+}{}gm;		$conditions =~ s{\s+$}{}gm;
-	$group_0_selects =~ s{^\s+}{}gm;	$group_0_selects =~ s{\s+$}{}gm;
-	$commands =~ s{^\s+}{}gm;		$commands =~ s{\s+$}{}gm;
+	$conditions	=~ s{^\s+}{}gm;	$conditions 	=~ s{\s+$}{}gm;
+	$group_0_selects=~ s{^\s+}{}gm;	$group_0_selects=~ s{\s+$}{}gm;
+	$commands 	=~ s{^\s+}{}gm;	$commands 	=~ s{\s+$}{}gm;
 
       	my ($yyyy, $mon, $dd, $hh, $min, $ss) = 
 		$last_edit =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
@@ -755,7 +599,6 @@ sub editSpider {
 		group_0_selects	=> $group_0_selects,
 		commands	=> $commands,
 	});
-				
 }
 
 ##################################################################
@@ -775,19 +618,13 @@ sub updateSpider {
 			commands
 		);
 
-        	$slashdb->sqlUpdate('spider',
-			\%set_clause, "spider_id = '$spider_id'"
-        	);
+		$udbt->setSpider($spider_id, \%set_clause);
 
 		slashDisplay('updateSpider');
                 editSpider(@_, $spider_id);
         } elsif ($form->{runspider}) {
         	my $spider_id = $form->{spider_id};
-        	my ($spider_name) = $slashdb->sqlSelect(
-			'name', 
-			'spider', 
-			"spider_id=$spider_id"
-		);
+        	my $spider_name = $udbt->getSpiderName($spider_id);
 
         	if ($spider_name) {
         		$udbt->{debug} = 1;
@@ -800,106 +637,11 @@ sub updateSpider {
 }
 
 ##################################################################
-# Not part of NewsVac, should be pulled into it's own plugin.
-#
-#  Archive Editor
-sub archEdit {
-	my ($slashdb, $form, $user, $udbt, $name) = @_;
-
-	my ($archItem);
-	$form->{name} = '' if $form->{newarchive};
-	$name ||= $form->{name};
-
-	my $names = $slashdb->sqlSelectMany('name, name','archives');
-	my $archive_select = createSelect('name', $names, $name, 1);
-
-	# Determine next operation based on current one.
-	my $nextop = 'savearchive';
-	$nextop = 'editarchive' if !$name && !$form->{newarchive};
-
-	$archItem = $slashdb->sqlSelectHashref('*', 'archives', 'name=' . $slashdb->sqlQuote($name)) if $name;
-
-	$archItem = {} if $form->{newarchive};
-
-	slashDisplay('archEdit', {
-			archItem	=> $archItem,
-			nextop		=> $nextop,
-	});
-}
-
-##################################################################
-# Not part of NewsVac, should be pulled into it's own plugin.
-#
-# Save Archive data.
-sub archSave {
-	my ($slashdb, $form, $user, $udbt) = @_;
-
-	$form->{thisname} = '' if $form->{newarchive};
-	if ($form->{editarchive}) {
-		$form->{savearchive} = '';
-		$form->{thisname} = $form->{name};
-	}
-
-	if ($form->{newarchive} || $form->{editarchive}) {
-		return;
-	} elsif ($form->{thisname}) {
-		my ($exists) = $slashdb->sqlSelect(
-			'1', 'archives',
-			'name=' . $slashdb->sqlQuote($form->{thisname})
-		);
-
-		if (!$exists && !$form->{delarch_confirm}) {
-			$slashdb->sqlInsert('archives', { 
-				name => $form->{thisname},
-			});
-		}
-
-		if ($form->{delarch_confirm}) {
-			$slashdb->sqlDo(
-				'DELETE from archives WHERE name=' . 
-				$slashdb->sqlQuote($form->{thisname})
-			);
-		} else {
-			$slashdb->sqlUpdate('archives', {
-				title 		=> $form->{title},
-				image_regexp 	=> $form->{image_regexp},
-				location	=> $form->{location},
-				url_location	=> $form->{url_location},
-				year		=> $form->{year_backref},
-				month		=> $form->{month_backref},
-				'date'		=> $form->{day_backref},
-				template	=> $form->{template}
-			}, 'name=' . $slashdb->sqlQuote($form->{thisname}));
-			$form->{editarchive} = 1;
-		}
-	}
-	archEdit(@_, $form->{thisname});
-}
-
-
-##################################################################
 sub main {
 	my $udbt	= getObject('Slash::NewsVac');
 	my $slashdb	= getCurrentDB();
 	my $user	= getCurrentUser();
 	my $form	= getCurrentForm();
-
-	# We use custom descriptions with derivative names since we are using
-	# variants based on the 1.x scheme, for now.
-	%nvdescriptions = (
-		'authornames' => sub {
-			$_[0]->sqlSelectMany(
-				'nickname,nickname', 
-				'authors_cache'
-			) 
-		},
-
-		'progresscodes' => sub {
-			$_[0]->sqlSelectMany(
-				'name,name', 'code_param', "type='nvprogress'"
-			)
-		},
-	);
 
 	$slashdb->getSection('newsvacadmin');
 
@@ -983,6 +725,8 @@ sub main {
 	$op ||= 'listminers';
 	if ($op) {
 		$op = '' unless $user->{seclev} >= $ops->{$op}{seclev};
+		# Currently $slashdb isn't used in any of our dispatchers, but
+		# this may not always be the case.
 		$ops->{$op}{function}->($slashdb, $form, $user, $udbt) if $op;
 	}
 	print getData('noop') if ! $op;
