@@ -502,7 +502,7 @@ EOT
 
 EOT
 
-		print processSub($fakeemail, $user,
+		print scalar processSub($fakeemail, $user,
 			stripByMode(url2html($I{F}{story}), 'html')
 		);
 	}
