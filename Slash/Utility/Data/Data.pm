@@ -2545,78 +2545,82 @@ sub countWords {
 # precise.  Also, this counts occurrences of each word -- which
 # is different than counting the overall number of words.)
 sub findWords {
-	my($text, $weight_factor, $wordcount) = @_;
+	my($args_hr) = @_;
 	my $constants = getCurrentStatic();
 
-	# The default amount to add is 1.
-	$weight_factor ||= 1;
+	# Return a hashref;  keys are the words, values are hashrefs
+	# with the number of times they appear and so on.
+	my $wordcount = { };
 
-	# Return a hashref;  keys are the words, values are the
-	# number of times they appear.  If a hashref was passed
-	# in, add to it, otherwise make our own.
-	$wordcount ||= { };
+	for my $key (keys %$args_hr) {
 
-	# Pull out linked URLs from $text and treat them specially.
-	# We only recognize the two most common types of link.
-	# Actually, we could use HTML::LinkExtor here, which might
-	# be more robust...
-	my @urls_ahref = $text =~ m{
-		<a[^>]+href\s*=\s*"?
-		([^"<>]+)
-	}gxi;
-	my @urls_imgsrc = $text =~ m{
-		<img[^>]+src\s*=\s*"?
-		([^"<>]+)
-	}gxi;
-	foreach my $url (@urls_ahref, @urls_imgsrc) {
-		$url = URI->new_abs($url, $constants->{absolutedir})
-			->canonical
-			->as_string;
-		# Tiny URLs don't count.
-		next unless length($url) > 8;
-		# All URLs get a high weight so they are almost
-		# guaranteed to get into the list.
-		$wordcount->{$url}{weight} += $weight_factor * 10;
-		$wordcount->{$url}{count}++;
+		# The default weight for each chunk of text is 1.
+		my $weight_factor = $args_hr->{$key}{weight} || 1;
+
+		my $text = $args_hr->{$key}{text};
+
+		# Pull out linked URLs from $text and treat them specially.
+		# We only recognize the two most common types of link.
+		# Actually, we could use HTML::LinkExtor here, which might
+		# be more robust...
+		my @urls_ahref = $text =~ m{
+			<a[^>]+href\s*=\s*"?
+			([^"<>]+)
+		}gxi;
+		my @urls_imgsrc = $text =~ m{
+			<img[^>]+src\s*=\s*"?
+			([^"<>]+)
+		}gxi;
+		foreach my $url (@urls_ahref, @urls_imgsrc) {
+			my $uri = URI->new_abs($url, $constants->{absolutedir})
+				->canonical;
+			$url = $uri->as_string;
+			# Tiny URLs don't count.
+			next unless length($url) > 8;
+			# All URLs get a high weight so they are almost
+			# guaranteed to get into the list.
+			$wordcount->{$url}{weight} += $weight_factor * 10;
+			$wordcount->{$url}{count}++;
+			$wordcount->{$url}{is_url} = 1;
+			$wordcount->{$url}{is_url_with_path} = 1 if length($uri->path) > 2;
+		}
+
+		# Now remove the text's HTML tags and find and count the
+		# words remaining in the text.  For our purposes, words
+		# can include character references (entities) and the '
+		# and - characters as well as \w.  This regex is a bit
+		# messy.  I've tried to reduce backtracking as much as
+		# possible but it's still a concern.
+		$text = strip_notags($text);
+		my $entity = qr{(?:&(?:(?:#x[0-9a-f]+|\d+)|[a-z0-9]+);)};
+		my @words = $text =~ m{
+			(
+				# Start with a non-apostrophe, non-dash char.
+				(?: $entity | \w )
+				# Followed by, optionally, any valid char.
+				[\w'-]?
+				# Followed by zero or more sequence of entities,
+				# character references, or normal chars.  The
+				# ' and - must alternate with the other types,
+				# so '' and -- break words.
+				(?:
+					(?: $entity | \w ) ['-]?
+				)*
+				# And end with a non-apostrophe, non-dash char.
+				(?: $entity | \w )
+			)
+		}gxi;
+		for my $word (@words) {
+			# Ignore all words less than 4 chars.
+			next unless length($word) > 3;
+			$wordcount->{lc $word}{weight} += $weight_factor;
+		}
+		my %uniquewords = map { ( lc($_), 1 ) } @words;
+		for my $word (keys %uniquewords) {
+			$wordcount->{$word}{count}++;
+		}
 	}
 
-	# Now remove the text's HTML tags and find and count the
-	# words remaining in the text.  For our purposes, words
-	# can include character references (entities) and the '
-	# and - characters as well as \w.  This regex is a bit
-	# messy.  I've tried to reduce backtracking as much as
-	# possible but it's still a concern.
-	$text = strip_notags($text);
-	my $entity = qr{(?:&(?:(?:#x[0-9a-f]+|\d+)|[a-z0-9]+);)};
-	my @words = $text =~ m{
-		(
-			# Start with a non-apostrophe, non-dash char.
-			(?: $entity | \w )
-			# Followed by, optionally, any valid char.
-			[\w'-]?
-			# Followed by zero or more sequence of entities,
-			# character references, or normal chars.  The
-			# ' and - must alternate with the other types,
-			# so '' and -- break words.
-			(?:
-				(?: $entity | \w ) ['-]?
-			)*
-			# And end with a non-apostrophe, non-dash char.
-			(?: $entity | \w )
-		)
-	}gxi;
-	for my $word (@words) {
-		# Ignore all words less than 4 chars.
-		next unless length($word) > 3;
-		$wordcount->{lc $word}{weight} += $weight_factor;
-	}
-	my %uniquewords = map { ( lc($_), 1 ) } @words;
-	for my $word (keys %uniquewords) {
-		$wordcount->{$word}{count}++;
-	}
-
-	# Return the hashref (the same one passed in, if one was
-	# passed in).
 	return $wordcount;
 }
 
