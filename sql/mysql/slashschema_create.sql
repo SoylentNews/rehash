@@ -764,6 +764,7 @@ CREATE TABLE users_info (
 	user_expiry_days smallint UNSIGNED DEFAULT '1' NOT NULL,
 	user_expiry_comm smallint UNSIGNED DEFAULT '1' NOT NULL,
 	created_at datetime DEFAULT '0000-00-00 00:00' NOT NULL,
+	people blob,
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (uid)
 ) TYPE = myisam;
