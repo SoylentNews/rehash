@@ -837,7 +837,6 @@ INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method
 #SOURCE /tmp/site_symlinks;
 
 # LINUX.COM LAST UPDATED HERE
-# SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_51, Start of T_2_3_0_52
 
@@ -951,3 +950,4 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 UPDATE menus SET label=CONCAT('~', label, ' ([% user.uid %])') WHERE menu='users' AND sel_label='me';
 
 # USEPERL LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
