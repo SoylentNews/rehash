@@ -27,7 +27,7 @@ __template__
 		<TD BGCOLOR="#CCCCCC" ALIGN="CENTER"><FONT SIZE="2">[% Slash.horizmenu() %]</FONT></TD>
 		<TD BGCOLOR="#505050" VALIGN="CENTER">
 			<FONT SIZE="2" COLOR="#FFFFFF"><FORM METHOD="GET" ACTION="[% constants.rootdir %]/search.pl">
-				&nbsp;<INPUT TYPE="TEXT" NAME="query" VALUE="" WIDTH="15" SIZE="15">
+				&nbsp;<INPUT TYPE="TEXT" NAME="query" VALUE="" SIZE="15">
 				<INPUT TYPE="SUBMIT" VALUE="Search">&nbsp;
 			</FORM></FONT>
 		</TD>

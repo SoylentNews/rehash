@@ -30,7 +30,7 @@ __template__
 				<TD BGCOLOR="505050" VALIGN="CENTER">
 				<FONT SIZE="2" COLOR="#FFFFFF">
 				<FORM METHOD="GET" ACTION="[% constants.rootdir %]/search.pl">
-				&nbsp;<INPUT TYPE="TEXT" NAME="query" VALUE="" WIDTH="15" SIZE="15" LENGTH="15">
+				&nbsp;<INPUT TYPE="TEXT" NAME="query" VALUE="" SIZE="15">
 				<INPUT TYPE="SUBMIT" VALUE="Search">&nbsp;
 				</FORM></FONT>
 				</TD>   
