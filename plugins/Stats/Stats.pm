@@ -600,6 +600,7 @@ sub countCommentsDaily {
 
 	return $comments; 
 }
+
 ########################################################
 sub countBytesByPage {
 	my($self, $op, $options) = @_;
@@ -732,6 +733,26 @@ sub countDaily {
 
 
 	return \%returnable;
+}
+
+########################################################
+sub getDurationByStaticOpHour {
+	my($self, $options) = @_;
+
+	my @ops = qw( index article comments users rss );
+	@ops = @{$options->{ops}} if $options->{ops} && @{$options->{ops}};
+	my $ops = join(", ", map { $self->sqlQuote($_) } @ops);
+
+	return $self->sqlSelectAllHashref(
+		[qw( static op hour )],
+		"static,
+		 op,
+		 SUBSTRING(ts, 12, 2) AS hour,
+		 AVG(duration) AS dur_avg, STDDEV(duration) AS dur_stddev",
+		"accesslog_temp",
+		"op IN ($ops)",
+		"GROUP BY static, op, hour"
+	);
 }
 
 ########################################################

@@ -256,6 +256,21 @@ EOT
 		min_count => $constants->{mod_stats_min_repeat}
 	});
 
+	my $op_hour_static = $stats->getDurationByStaticOpHour({});
+	for my $is_static (keys %$op_hour_static) {
+		for my $op (keys %{$op_hour_static->{$is_static}}) {
+			for my $hour (keys %{$op_hour_static->{$is_static}{$op}}) {
+				my $prefix = "duration_";
+				$prefix .= $is_static eq 'yes' ? 'st_' : 'dy_';
+				$prefix .= "${op}_${hour}_";
+				for my $statname (qw( avg stddev )) {
+					my $value = $op_hour_static->{$is_static}{$op}{$hour}{"dur_$statname"};
+					$statsSave->createStatDaily("$prefix$statname", $value);
+				}
+			}
+		}
+	}
+
 	$statsSave->createStatDaily("total", $count->{total});
 	$statsSave->createStatDaily("total_static", $total_static);
 	$statsSave->createStatDaily("grand_total", $grand_total);
