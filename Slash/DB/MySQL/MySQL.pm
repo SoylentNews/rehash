@@ -7374,6 +7374,7 @@ sub getStoriesEssentials {
 		&& $fake_secs_ahead == 0
 		&& !defined($future_secs)
 		&& !$issue && !$sectioncollapse && !$return_min_stoid_only
+		&& !@$tid_x
 		&& !@$uid && !@$uid_x
 		&& !@$stoid && !@$stoid_x
 	);
