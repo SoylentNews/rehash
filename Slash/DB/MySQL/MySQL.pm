@@ -1897,6 +1897,8 @@ sub setPollQuestion {
 sub setTemplate {
 	# Instructions don't get passed to the DB.
 	delete $_[2]->{instructions};
+	# Nor does a version (yet).
+	delete $_[2]->{version};
 
 	for (qw| page name section |) {
 		next unless $_[2]->{$_};
@@ -7079,6 +7081,8 @@ sub createTemplate {
 	}
 	# Instructions field does not get passed to the DB.
 	delete $hash->{instructions};
+	# Neither does the version field (for now).
+	delete $hash->{version};
 
 	$self->sqlInsert('templates', $hash);
 	my $tpid  = $self->getLastInsertId('templates', 'tpid');
