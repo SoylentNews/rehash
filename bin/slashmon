@@ -4,13 +4,11 @@
 # and COPYING for more information, or see http://slashcode.com/.
 
 use File::Basename;
-use FindBin '$Bin';
 use Getopt::Std;
 use Slash::Utility;
 use Slash::DB;
 
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 $opts{'u'} ||= $ARGV[0] || 'slashdot';

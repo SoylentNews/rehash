@@ -25,7 +25,7 @@ use vars qw(
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+(my $SLASH_PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 # Remember to doublecheck these match usage()!
@@ -36,7 +36,7 @@ version() if $opts{'v'};
 
 $| = 1;
 
-my $prefix_site = "$PREFIX/site";
+my $prefix_site = "$SLASH_PREFIX/site";
 my(	$owner, $owner_id, $group, $group_id, $password,
 	$sitename, $username, $realname, $email, $dbh, @create, $sql,
 	@sql, $hostname, $hostname_f, $host_noport, $httpd, %slash_sites,
@@ -146,7 +146,7 @@ my $x;
 #---------------------------------------------------
 $theme = 0;
 my $theme_num = 0;
-my $themes = $install->getThemeList($PREFIX);
+my $themes = $install->getThemeList($SLASH_PREFIX);
 if ($opts{'T'}) {
 	$theme = $opts{'T'};
 	if (!exists $themes->{$theme}) {
@@ -186,7 +186,7 @@ if (!$theme) {
 print "Theme selected: $theme\n";
 
 #---------------------------------------------------
-my $plugins = $install->getPluginList($PREFIX);
+my $plugins = $install->getPluginList($SLASH_PREFIX);
 my @plugins = ( );
 my @default_plugins = ( );
 my @all_plugins = sort {
@@ -323,8 +323,8 @@ my $trgst = '';
 
 # Dump in the schema then pepper with a trace of your own theme
 my $create = gensym;
-open($create, "< $PREFIX/sql/$driver/schema.sql\0")
-	or die "Can't open $PREFIX/sql/$driver/schema.sql: $!";
+open($create, "< $SLASH_PREFIX/sql/$driver/schema.sql\0")
+	or die "Can't open $SLASH_PREFIX/sql/$driver/schema.sql: $!";
 while (<$create>) {
 	# ugly-as-hell hack to keep Oracle trigger code from getting munged
 	# the syntax is sensitive plus there *has* to be a semicolon at the end
@@ -355,14 +355,15 @@ if ($driver eq 'oracle') {
 }
 
 my $dump = gensym;
-open($dump, "< $PREFIX/sql/$driver/defaults.sql\0")
-	or die "Can't open $PREFIX/sql/$driver/defaults.sql: $!";
+open($dump, "< $SLASH_PREFIX/sql/$driver/defaults.sql\0")
+	or die "Can't open $SLASH_PREFIX/sql/$driver/defaults.sql: $!";
 while (<$dump>) {
 	next unless /^INSERT/;
 	chomp;
 	s/;$//;
 	s/www\.example\.com/$hostname/g;
 	s/admin\@example\.com/$email/g;
+	s|/usr/local/slash|$SLASH_PREFIX|g;
 	if ($driver eq 'oracle') {
 		# With this we can almost use the MySQL dump verbatim
 		# Of course, MySQL could have just compiled with SQL-92, too
@@ -419,7 +420,7 @@ $install->create({ name => 'group_id',			value => $group_id});
 $install->create({ name => 'siteid',			value => $sitename});
 $install->create({ name => 'basedomain',		value => $hostname});
 $install->create({ name => 'driver',			value => $driver});
-$install->create({ name => 'base_install_directory',	value => $PREFIX});
+$install->create({ name => 'base_install_directory',	value => $SLASH_PREFIX});
 $install->create({ name => 'site_install_directory',	value => "$prefix_site/$sitename"});
 $install->create({ name => 'db_driver',			value => "$driver"});
 
@@ -435,7 +436,7 @@ $slashdb->setUser($uid, {
 
 # Now, lets update slash.sites
 my $sites = gensym;
-if (open($sites, "< $PREFIX/slash.sites\0")) {
+if (open($sites, "< $SLASH_PREFIX/slash.sites\0")) {
 	while (<$sites>) {
 		chomp;
 		my($dbuser) = split /:/;
@@ -445,8 +446,8 @@ if (open($sites, "< $PREFIX/slash.sites\0")) {
 }
 
 unless (exists $slash_sites{$opts{'u'}}) {
-	open($sites, ">> $PREFIX/slash.sites\0")
-		or die "Can't append to $PREFIX/slash.sites: $!";
+	open($sites, ">> $SLASH_PREFIX/slash.sites\0")
+		or die "Can't append to $SLASH_PREFIX/slash.sites: $!";
 	print $sites "$opts{'u'}:$owner:$sitename\n";
 	close $sites;
 }
@@ -455,7 +456,7 @@ find(sub { chown $owner_id, $group_id, $_ unless -l $_ }, "$prefix_site/$sitenam
 
 # Install spamarmors for a given site. This can be recoded/moved/whatever
 # if this code is inappropriate, for whatever reason.
-system("$PREFIX/bin/reload_armor -u $opts{'u'} -q");
+system("$SLASH_PREFIX/bin/reload_armor -u $opts{'u'} -q");
 apache_site_conf();
 
 $dbh->do("UPDATE vars SET value = " . $dbh->quote("$prefix_site/$sitename/logs") . " WHERE name = 'logdir'");
@@ -542,13 +543,13 @@ sub apache_site_conf {
 	print $fh $text;
 	close $fh;
 
-	open($fh, "< $PREFIX/httpd/slash.conf\0")
-		or die "Can't write to $PREFIX/httpd/slash.conf: $!";
+	open($fh, "< $SLASH_PREFIX/httpd/slash.conf\0")
+		or die "Can't write to $SLASH_PREFIX/httpd/slash.conf: $!";
 
 	unless (grep /^(?:#\s*)?Include $file$/, <$fh>) {
 		close $fh;
-		open($fh, ">> $PREFIX/httpd/slash.conf\0")
-			or die "Can't open $PREFIX/httpd/slash.conf: $!";
+		open($fh, ">> $SLASH_PREFIX/httpd/slash.conf\0")
+			or die "Can't open $SLASH_PREFIX/httpd/slash.conf: $!";
 		print $fh "Include $file\n";
 	}
 	close $fh;
@@ -601,8 +602,8 @@ sub usage {
 		$install = undef if !$install or ref $install ne 'Slash::Install';
 	}
 	if ($install) {
-		my $plugins = $install->getPluginList($PREFIX);
-		my $themes = $install->getThemeList($PREFIX);
+		my $plugins = $install->getPluginList($SLASH_PREFIX);
+		my $themes = $install->getThemeList($SLASH_PREFIX);
 		my $theme = (sort keys %$themes)[0];
 		$sample_plugins = join(",", sort keys %{$themes->{$theme}{plugin}});
 	}

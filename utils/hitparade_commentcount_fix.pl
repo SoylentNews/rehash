@@ -6,7 +6,6 @@
 
 use strict;
 use vars qw( %task );
-use FindBin '$Bin';
 use File::Basename;
 use Slash;
 use Slash::DB;
@@ -17,7 +16,6 @@ use Getopt::Std;
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 #my $PROGNAME = basename($0);
 my $PROGNAME = 'hitparade_commentcount_fix.pl';
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 $task{$PROGNAME}{timespec} = '0,5,10,15,20,25,30,35,40,45,50,55 * * * *';
 

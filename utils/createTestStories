@@ -16,7 +16,6 @@ BEGIN {
 
 use strict;
 use File::Basename;
-use FindBin '$Bin';
 use Getopt::Std;
 use Data::Dumper;
 use Date::Manip qw( UnixDate ParseDateString );
@@ -28,7 +27,6 @@ use vars qw( $slashdb $werder $constants );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my (%opts, %family_tree);
 # Remember to doublecheck these match usage()!

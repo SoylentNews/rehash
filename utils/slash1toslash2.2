@@ -6,7 +6,6 @@
 
 use strict;
 use File::Basename;
-use FindBin '$Bin';
 use Getopt::Std;
 use DBIx::Password;
 use Digest::MD5 'md5_hex';
@@ -14,7 +13,6 @@ use vars qw(%my_conf);
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 # Remember to doublecheck these match usage()!

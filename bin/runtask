@@ -8,10 +8,10 @@ use sigtrap;
 use strict;
 use Carp;
 use Getopt::Std;
-# use Date::Manip; # is this needed?  -- pudge
 use File::Basename;
 use File::Path;
 use File::Spec::Functions;
+use FindBin '$Bin';
 use LWP::UserAgent;
 use HTTP::Request;
 use Time::Local;
@@ -27,8 +27,8 @@ use Slash::Utility;
 use vars qw( %opts %task $me $task_name $virtual_user $constants $slashdb $user $dir );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-(my $SLASH_PREFIX) = '/usr/local/slash';
 my $PROGNAME = basename($0);
+(my $SLASH_PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 main();
 exit 0;

@@ -16,7 +16,7 @@ use Slash::Install;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+(my $SLASH_PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 # Remember to doublecheck these match usage()!
@@ -36,7 +36,7 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 	my $install = Slash::Install->new($opts{'u'});
 
 	print "\nPlease select which themes you would like?\n" unless $opts{'l'} ;
-	my $themes = $install->getThemeList($PREFIX);
+	my $themes = $install->getThemeList($SLASH_PREFIX);
 	for (sort keys %$themes) {
 		print "$themes->{$_}{'order'}.\t$_ $themes->{$_}{'description'}\n";
 	}

@@ -6,7 +6,6 @@
 
 use strict;
 use File::Basename;
-use FindBin '$Bin';
 use Getopt::Std;
 use Slash::DB;
 use Slash::DB::Utility;
@@ -14,7 +13,6 @@ use Date::Manip;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 
 # REGULAR EXPRESSION DEFINITIONS

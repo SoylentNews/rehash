@@ -16,7 +16,7 @@ use Slash::Install;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
+(my $SLASH_PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 # Remember to doublecheck these match usage()!
@@ -36,7 +36,7 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 	my $install = Slash::Install->new($opts{'u'});
 
 	print "\nPlease select which plugins you would like?\n" unless $opts{'l'} ;
-	my $plugins = $install->getPluginList($PREFIX);
+	my $plugins = $install->getPluginList($SLASH_PREFIX);
 	for (sort keys %$plugins) {
 		print "$plugins->{$_}{order}.\t$_ $plugins->{$_}{'description'}\n";
 	}

@@ -5,7 +5,6 @@
 # $Id$
 
 use strict;
-use FindBin '$Bin';
 use Safe;
 use File::Basename;
 use Slash::Install;
@@ -13,7 +12,6 @@ use Getopt::Std;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 # Remember to doublecheck these match usage()!
@@ -24,7 +22,7 @@ $opts{'u'} ||= 'slash';
 
 # main program logic (in braces to offset nicely)
 {
-	my $inst = new Slash::Install($opts{'u'});
+	my $inst = Slash::Install->new($opts{'u'});
 	my $site_install_dir = ($inst->get("site_install_directory"))->{value};
 	my $default_armor_file = "$site_install_dir/misc/spamarmors";
 

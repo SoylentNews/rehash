@@ -6,14 +6,12 @@
 
 use strict;
 use File::Basename;
-use FindBin '$Bin';
 use Getopt::Std;
 use DBIx::Password;
 use Digest::MD5 'md5_hex';
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my(%opts, %forced_plugins, %sacred_tables);
 my($del_users, $poll_uid, $process_menus);

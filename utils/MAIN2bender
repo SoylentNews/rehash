@@ -6,12 +6,10 @@
 
 use strict;
 use Getopt::Std;
-use FindBin '$Bin';
 use File::Basename;
 
 (my $PROGNAME) = basename($0);
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 # Remember to doublecheck these match usage()!

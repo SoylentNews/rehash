@@ -207,6 +207,7 @@ sub _install {
 	my $email = $self->getValue('adminmail');
 	my $driver = $self->getValue('db_driver');
 	my $prefix_site = $self->getValue('site_install_directory');
+	my $SLASH_PREFIX = $self->getValue('base_install_directory');
 
 	my %stuff = ( # [relative directory, executable]
 		htdoc		=> ["htdocs",			1],
@@ -308,6 +309,7 @@ sub _install {
 				chomp;
 				s/www\.example\.com/$hostname/g;
 				s/admin\@example\.com/$email/g;
+				s|/usr/local/slash|$SLASH_PREFIX|g;
 				push @sql, $_;
 			}
 			close $fh;
@@ -363,6 +365,7 @@ sub _install {
 				chomp;
 				s/www\.example\.com/$hostname/g;
 				s/admin\@example\.com/$email/g;
+				s|/usr/local/slash|$SLASH_PREFIX|g;
 				push @sql, $_;
 			}
 			close $fh;

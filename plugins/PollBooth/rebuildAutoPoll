@@ -6,7 +6,6 @@
 
 use strict;
 use File::Basename;
-use FindBin '$Bin';
 use Getopt::Std;
 use Slash;
 use Slash::Utility;
@@ -16,7 +15,6 @@ use vars qw( $slashdb $werder $constants $junk );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
-(my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
 
 my %opts;
 # Remember to doublecheck these match usage()!
