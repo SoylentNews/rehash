@@ -203,6 +203,11 @@ the default [% constants.subscribe_hits_btmd %].
 Any of these three possible issues can be resolved at
 <A HREF="[% constants.rootdir %]/subscribe.pl">your subscription page</A>.<P>
 
+[% CASE "moderations to be lost" %]
+[% PROCESS titlebar width="100%" title="You've Already Moderated this Discussion" %]
+If you continue to post this comment, all moderations done to this discussion will
+be undone!  Are you sure you want to post?
+
 [% CASE %]
 An unexpected error has occurred.<BR><B>[% value %]</B><BR>
 [% END %]
@@ -211,3 +216,4 @@ __seclev__
 1000
 __version__
 $Id$
+
