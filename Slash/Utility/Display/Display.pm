@@ -594,6 +594,7 @@ sub pollbooth {
 		question	=> $poll->{pollq}{question},
 		answers		=> $poll->{answers},
 		qid		=> $qid,
+                has_activated   => $reader->hasPollActivated($qid),
 		poll_open	=> $poll_open,
 		has_voted	=> $has_voted,
 		can_vote	=> $can_vote,
