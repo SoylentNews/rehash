@@ -29,7 +29,7 @@ use Date::Format qw(time2str);
 use Date::Language;
 use Date::Parse qw(str2time);
 use Digest::MD5 qw(md5_hex md5_base64);
-use HTML::Entities;
+use HTML::Entities qw(:DEFAULT %char2entity);
 use HTML::FormatText;
 use HTML::TreeBuilder;
 use POSIX qw(UINT_MAX);
@@ -766,6 +766,52 @@ my %latin1_to_ascii = (
 	255	=> 'y',
 );
 
+# protect the hash by just returning it, for external use only
+sub _latin1_to_ascii { %latin1_to_ascii }
+
+sub _charsetConvert {
+	my($char, $constants) = @_;
+	$constants ||= getCurrentStatic();
+
+	my $str = '';
+	if ($constants->{draconian_charset_convert}) {
+		if ($constants->{draconian_charrefs}) {
+			if ($constants->{good_numeric}{$char}) {
+				$str = sprintf("&#%u;", $char);
+			} else { # see if char is in %good_entity
+				my $ent = $char2entity{chr $char};
+				if ($ent) {
+					(my $data = $ent) =~ s/^&(\w+);$/$1/;
+					$str = $ent if $constants->{good_entity}{$data};
+				}
+			}
+		}
+		# fall back
+		$str ||= $latin1_to_ascii{$char};
+	}
+
+	# fall further back
+	$str ||= sprintf("&#%u;", $char);
+	return $str;
+}
+
+sub _fixupCharrefs {
+	my $constants = getCurrentStatic();
+
+	return if $constants->{bad_numeric};
+
+	# At the moment, unless the "draconian" rule is set, only
+	# entities that change the direction of text are forbidden.
+	# For more information, see
+	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
+	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
+	$constants->{bad_numeric}  = { map { $_, 1 } @{$constants->{charrefs_bad_numeric}} };
+	$constants->{bad_entity}   = { map { $_, 1 } @{$constants->{charrefs_bad_entity}} };
+
+	$constants->{good_numeric} = { map { $_, 1 } @{$constants->{charrefs_good_numeric}}, keys %latin1_to_ascii };
+	$constants->{good_entity}  = { map { $_, 1 } @{$constants->{charrefs_good_entity}},
+		grep { s/^&(\w+);$/$1/ } map { $char2entity{decode_entities("&#$_;")} } keys %latin1_to_ascii };
+}
 
 my %action_data = ( );
 
@@ -836,12 +882,14 @@ my %actions = (
 
 	encode_high_bits => sub {
 			# !! assume Latin-1 !!
-			if (getCurrentStatic('draconian_charset')) {
-				my $convert = getCurrentStatic('draconian_charset_convert');
+			my $constants = getCurrentStatic();
+			if ($constants->{draconian_charset}) {
+				my $convert = $constants->{draconian_charset_convert};
 				# anything not CRLF tab space or ! to ~ in Latin-1
 				# is converted to entities, where approveCharrefs or
 				# encode_html_amp takes care of them later
-				${$_[0]} =~ s/([^\n\r\t !-~])/($convert && $latin1_to_ascii{ord($1)}) || sprintf("&#%u;", ord($1))/ge;
+				_fixupCharrefs();
+				${$_[0]} =~ s[([^\n\r\t !-~])][ _charsetConvert(ord($1), $constants)]ge;
 			}						},
 );
 
@@ -1590,20 +1638,7 @@ sub approveCharref {
 
 	my $ok = 1; # Everything not forbidden is permitted.
 
-	if ($constants->{draconian_charrefs}) {
-		# Don't mess around trying to guess what to forbid.
-		# Everything is forbidden except a very few known to
-		# be good.
-		$ok = 0 unless $charref =~ /^(amp|lt|gt)$/;
-	}
-
-	# At the moment, unless the "draconian" rule is set, only
-	# entities that change the direction of text are forbidden.
-	# For more information, see
-	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
-	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
-	my %bad_numeric = map { $_, 1 } @{$constants->{charrefs_bad_numeric}};
-	my %bad_entity  = map { $_, 1 } @{$constants->{charrefs_bad_entity}};
+	_fixupCharrefs();
 
 	if ($ok == 1 && $charref =~ /^#/) {
 		# Probably a numeric character reference.
@@ -1619,11 +1654,19 @@ sub approveCharref {
 			$ok = 0;
 		}
 		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
-		$ok = 0 if $bad_numeric{$decimal};
+		if ($constants->{draconian_charrefs}) {
+			$ok = 0 unless $constants->{good_numeric}{$decimal};
+		} else {
+			$ok = 0 if $constants->{bad_numeric}{$decimal};
+		}
 	} elsif ($ok == 1 && $charref =~ /^([a-z0-9]+)$/i) {
 		# Character entity.
 		my $entity = lc $1;
-		$ok = 0 if $bad_entity{$entity};
+		if ($constants->{draconian_charrefs}) {
+			$ok = 0 unless $constants->{good_entity}{$entity};
+		} else {
+			$ok = 0 if $constants->{bad_entity}{$entity};
+		}
 	} elsif ($ok == 1) {
 		# Unknown character reference type, assume flawed.
 		$ok = 0;
