@@ -9,6 +9,7 @@ use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:messages :strip);
 use Slash::Display;
 use Slash::Utility;
+use Slash::Hook;
 
 ##################################################################
 sub main {
@@ -392,6 +393,11 @@ sub editComment {
 		$form->{postersubj} =~ s/\s\s/ /g;
 		$form->{postersubj} = "Re:$form->{postersubj}";
 	}
+	
+	my $extras = [];	
+	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
+	
+	$extras =  $slashdb->getNexusExtrasForChosen({$disc_skin->{nexus} => 1}, {content_type => "comment"}) if $disc_skin && $disc_skin->{nexus};
 
 	my $gotmodwarning;
 	$gotmodwarning = 1 if (($error_message eq getError("moderations to be lost")) || $form->{gotmodwarning});
@@ -404,6 +410,7 @@ sub editComment {
 		reply		=> $reply,
 		gotmodwarning	=> $gotmodwarning,
 		newdiscussion	=> $form->{newdiscussion},
+		extras		=> $extras
 	});
 }
 
@@ -724,6 +731,11 @@ sub previewForm {
 		$sig =~ s/^\s*-{1,5}\s*<(?:P|BR)>//i;
 		$sig = "--<BR>$sig";
 	}
+	my $discussion = $slashdb->getDiscussion($form->{sid}) || 0;	
+	my $extras = [];	
+	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
+	
+	$extras =  $slashdb->getNexusExtrasForChosen({$disc_skin->{nexus} => 1}, {content_type => "comment"}) if $disc_skin && $disc_skin->{nexus};
 
 	my $preview = {
 		nickname		=> $form->{postanon}
@@ -739,6 +751,10 @@ sub previewForm {
 		comment			=> $tempComment,
 		sig			=> $sig,
 	};
+
+	foreach my $extra (@$extras) {
+		$preview->{$extra->[1]} = $form->{$extra->[1]};
+	}
 
 	if ($constants->{plugin}{Subscribe}) {
 		$preview->{subscriber_bonus} = $user->{is_subscriber} && $form->{nosubscriberbonus} ne 'on'
@@ -889,6 +905,7 @@ sub submitComment {
 		tweak_orig	=> $tweak,
 		karma_bonus	=> $karma_bonus ? 'yes' : 'no',
 	};
+	
 	if ($constants->{plugin}{Subscribe}) {
 		$clean_comment->{subscriber_bonus} = $subscriber_bonus ? 'yes' : 'no';
 	}
@@ -918,6 +935,10 @@ sub submitComment {
 		slashDisplay('comment_submit', {
 			metamod_elig => scalar $slashdb->metamodEligible($user),
 		}) if ! $form->{newdiscussion};
+
+		my $saved_comment = $slashdb->getComment($maxCid);
+		slashHook('comment_save_success', { comment => $saved_comment });
+		
 		undoModeration($id);
 		printComments($discussion, $maxCid, $maxCid,
 			{ force_read_from_master => 1, just_submitted => 1 }
