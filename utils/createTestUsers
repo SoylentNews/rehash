@@ -103,8 +103,8 @@ $werder = new Silly::Werder;
 		if (length($sig) <= 160) {
 			$hr->{sig} = $sig;
 		}
-		my $domaintags = int(rand(3));
-		$hr->{domaintags} = $domaintags if $domaintags != 2 or rand(1) < 0.3;
+		my $domaintags = rand(1) < 0.5 ? 2 : int(rand(3));
+		$hr->{domaintags} = $domaintags if $domaintags != 2;
 		$slashdb->setUser($uid, $hr);
 
 		if ($zoo && $opts{'a'}) {
