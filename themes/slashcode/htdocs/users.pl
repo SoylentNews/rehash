@@ -989,6 +989,24 @@ sub showInfo {
 		$netid = $requested_user->{uid};
 	}
 
+	# Grab the nicks of the uids we have, we're going to be adding them
+	# into the struct.
+	my @extra_cols_wanted = qw( nickname );
+	my $uid_hr = { };
+	if ($comments && @$comments) {
+		my %uids = ();
+		for my $c (@$comments) {
+			$uids{$c->[6]}++;
+		}
+		my $uids = join(", ", sort { $a <=> $b } keys %uids);
+		$uid_hr = $slashdb->sqlSelectAllHashref(
+			"uid",
+			"uid, " . join(", ", @extra_cols_wanted),
+			"users",
+			"uid IN ($uids)"
+		);
+	}
+
 	for (@$comments) {
 		my($pid, $sid, $cid, $subj, $cdate, $pts, $uid, $reason) = @$_;
 		$uid ||= 0;
@@ -1011,7 +1029,7 @@ sub showInfo {
 			$type = 'story';
 		}
 
-		push @$commentstruct, {
+		my $data = {
 			pid 		=> $pid,
 			url		=> $discussion->{url},
 			type 		=> $type,
@@ -1025,6 +1043,10 @@ sub showInfo {
 			uid		=> $uid,
 			replies		=> $replies,
 		};
+		for my $col (@extra_cols_wanted) {
+			$data->{$col} = $uid_hr->{$uid}{$col} if defined $uid_hr->{$uid}{$col};
+		}
+		push @$commentstruct, $data;
 	}
 	my $storycount =
 		$slashdb->countStoriesBySubmitter($requested_user->{uid})
