@@ -99,10 +99,10 @@ EOT
 	my $admin_mods = $stats->getAdminModsInfo($yesterday);
 	my $admin_mods_text = "";
 	for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
-		$admin_mods_text .= sprintf("%13.13s: %34s %46s\n",
+		$admin_mods_text .= sprintf("%13.13s: %29s %45s\n",
 			$nickname,
-			$admin_mods->{$nickname}{m1},
-			$admin_mods->{$nickname}{m2}
+			$admin_mods->{$nickname}{m1_text},
+			$admin_mods->{$nickname}{m2_text}
 		);
 	}
 	$admin_mods_text =~ s/ +$//gm;
@@ -128,6 +128,19 @@ EOT
 
 	$statsSave->createStatDaily($yesterday, "uniq_rss_users", $uniq_rss_users);
 	$statsSave->createStatDaily($yesterday, "rss_page_views", $rss_page_views);
+
+	for my $nickname (keys %$admin_mods) {
+		my $uid = $admin_mods->{$nickname}{uid};
+		# How many of these stats do we want to store?  Each stat writes
+		# one row into stats_daily for each admin who did anything.
+		for my $stat (qw( m1_up m1_down m2_fair m2_unfair )) {
+			my $suffix = $uid
+				? "_admin_$uid"
+				: "_total";
+			my $val = $admin_mods->{$nickname}{$stat};
+			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val);
+		}
+	}
 
 	my @numbers = (
 		$count->{total},

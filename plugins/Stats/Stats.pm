@@ -117,36 +117,89 @@ sub getAdminModsInfo {
 	# If nothing for either, no data to return.
 	return { } if !%$m1_uid_val_hr && !%$m2_uid_val_hr;
 
+	# For comparison, get the same stats for all users on the site and
+	# add them in as a phony admin user that sorts itself alphabetically
+	# last.  Hack, hack.
+	my($total_nick, $total_uid) = ("~Day Total", 0);
+	my $m1_val_hr = $self->sqlSelectAllHashref(
+		"val",
+		"val, COUNT(*) AS count",
+		"moderatorlog",
+		"ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"GROUP BY val"
+	);
+	$m1_uid_val_hr->{$total_uid} = {
+		uid =>	$total_uid,
+		  1 =>	{ nickname => $total_nick, count => $m1_val_hr-> {1}{count} },
+		 -1 =>	{ nickname => $total_nick, count => $m1_val_hr->{-1}{count} },
+	};
+	my $m2_val_hr = $self->sqlSelectAllHashref(
+		"val",
+		"val, COUNT(*) AS count",
+		"metamodlog",
+		"ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'",
+		"GROUP BY val"
+	);
+	$m2_uid_val_hr->{$total_uid} = {
+		uid =>	$total_uid,
+		  1 =>	{ nickname => $total_nick, count => $m2_val_hr-> {1}{count} },
+		 -1 =>	{ nickname => $total_nick, count => $m2_val_hr->{-1}{count} },
+	};
+
 	# Build a hashref with one key for each admin user, and subkeys
 	# that give data we will want for stats.
+	my($nup, $ndown, $nfair, $nunfair, $percent);
 	my $hr = { };
 	for my $uid (keys %$m1_uid_val_hr) {
 		my $nickname = $m1_uid_val_hr->{$uid} {1}{nickname}
 			|| $m1_uid_val_hr->{$uid}{-1}{nickname}
 			|| "";
 		next unless $nickname;
-		my $nup   = $m1_uid_val_hr->{$uid} {1}{count} || 0;
-		my $ndown = $m1_uid_val_hr->{$uid}{-1}{count} || 0;
-		my $percent = ($nup+$ndown > 0)
+		$nup   = $m1_uid_val_hr->{$uid} {1}{count} || 0;
+		$ndown = $m1_uid_val_hr->{$uid}{-1}{count} || 0;
+		$percent = ($nup+$ndown > 0)
 			? $nup*100/($nup+$ndown)
 			: 0;
-		$hr->{$nickname}{m1} = sprintf("modded %3d up, %3d down (%3.0f%% up)",
+		# Add the m1 data for this admin.
+		$hr->{$nickname}{m1_text} = sprintf("%4d up, %4d dn (%3.0f%% up)",
 			$nup, $ndown, $percent);
-		$hr->{$nickname}{m2} = "" if !exists($m2_uid_val_hr->{$uid});
+		$hr->{$nickname}{m2_text} = "" if !exists($m2_uid_val_hr->{$uid});
+		$hr->{$nickname}{uid} = $uid;
+		$hr->{$nickname}{m1_up} = $nup;
+		$hr->{$nickname}{m1_down} = $ndown;
+		# If this admin had m1 activity today but no m2 activity,
+		# blank out that field.
+		if (!exists($m2_uid_val_hr->{$uid})) {
+			$hr->{$nickname}{m2_text} = "";
+			# Not really necessary
+			# $hr->{$nickname}{m2_fair} = 0;
+			# $hr->{$nickname}{m2_unfair} = 0;
+		}
 	}
 	for my $uid (keys %$m2_uid_val_hr) {
 		my $nickname = $m2_uid_val_hr->{$uid} {1}{nickname}
 			|| $m2_uid_val_hr->{$uid}{-1}{nickname}
 			|| "";
 		next unless $nickname;
-		my $nfair   = $m2_uid_val_hr->{$uid} {1}{count} || 0;
-		my $nunfair = $m2_uid_val_hr->{$uid}{-1}{count} || 0;
-		my $percent = ($nfair+$nunfair > 0)
+		$nfair   = $m2_uid_val_hr->{$uid} {1}{count} || 0;
+		$nunfair = $m2_uid_val_hr->{$uid}{-1}{count} || 0;
+		$percent = ($nfair+$nunfair > 0)
 			? $nunfair*100/($nfair+$nunfair)
 			: 0;
-		$hr->{$nickname}{m2} = sprintf("was judged %3d fair, %3d unfair (%3.0f%% unfair)",
+		# Add the m2 data for this admin.
+		$hr->{$nickname}{uid} = $uid;
+		$hr->{$nickname}{m2_text} = sprintf("was judged %5d fair, %5d un (%6.2f%% un)",
 			$nfair, $nunfair, $percent);
-		$hr->{$nickname}{m1} = "" if !exists($m1_uid_val_hr->{$uid});
+		$hr->{$nickname}{m2_fair} = $nfair;
+		$hr->{$nickname}{m2_unfair} = $nunfair;
+		# If this admin had m2 activity today but no m1 activity,
+		# blank out that field.
+		if (!exists($m1_uid_val_hr->{$uid})) {
+			$hr->{$nickname}{m1_text} = "";
+			# Not really necessary
+			# $hr->{$nickname}{m1_up} = 0;
+			# $hr->{$nickname}{m1_down} = 0;
+		}
 	}
 
 	return $hr;
