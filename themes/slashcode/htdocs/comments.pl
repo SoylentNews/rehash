@@ -1450,7 +1450,8 @@ sub moderateCid {
 		# appropriate tables directly, to be atomic and all
 		# that good stuff.  Faster too. XXX - Jamie 2002/09/13
 		if ($comment->{uid} != $constants->{anonymous_coward_uid}) {
-			my $cuser = $slashdb->getUser($comment->{uid}, [ qw| downmods upmods karma | ]);
+			my $cuser = $slashdb->getUser($comment->{uid},
+				[ qw| downmods upmods karma tokens | ]);
 			my $newkarma = $cuser->{karma} + $val;
 			$cuser->{tokens}-- if $val < 0;
 			$cuser->{downmods}++ if $val < 0;
