@@ -28,3 +28,4 @@ CREATE TABLE subscribe_payments (
 
 ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;
 
+
