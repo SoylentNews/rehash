@@ -1367,6 +1367,19 @@ ALTER TABLE comments ADD COLUMN len SMALLINT UNSIGNED NOT NULL DEFAULT '0';
 SELECT CONCAT("UPDATE comments SET len=", LENGTH(comment), " WHERE cid=", cid, ";") INTO OUTFILE "/tmp/comlen" FROM comment_text;
 SOURCE /tmp/comlen;
 
+# Change for plugins/Blob (ignore if not using that plugin)
+DROP TABLE IF EXISTS story_files;
+CREATE TABLE story_files (
+	id int(5) NOT NULL auto_increment,
+	sid varchar(16) NOT NULL default '',
+	description varchar(80) NOT NULL default '',
+	file_id varchar(32) NOT NULL default '',
+	isimage enum("yes","no") DEFAULT "no" NOT NULL,
+	INDEX sid_index (sid),
+	INDEX file_id_index (file_id),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
 # End of T_2_3_0_79, Start of T_2_3_0_80
 
 # SLASHDOT LAST UPDATED HERE
