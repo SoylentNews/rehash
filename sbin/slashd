@@ -18,7 +18,6 @@
 #
 ############################################################
 
-use sigtrap;
 use strict;
 use Carp;
 use File::Basename;
@@ -48,9 +47,6 @@ my $slashdb = getCurrentDB();
 my $user = getCurrentUser();
 my %pids;
 
-# i am not sure we need this ... -- pudge
-#sub END { Carp::cluck("Exiting slashd") }
-
 main();
 exit 0;
 
@@ -75,6 +71,7 @@ sub slashdLog {
 sub REAPER {
 	while (my $pid = waitpid(-1, WNOHANG)) {
 		last if $pid < 1 || !exists $pids{$pid};
+
 		if ($pids{$pid}[1] == SLASHD_NOWAIT) {
 			if (verbosity() >= 2) {
 				slashdLog("$pids{$pid}[0] reaped ($pid)");
@@ -82,6 +79,15 @@ sub REAPER {
 			delete $pids{$pid};
 		} elsif ($pids{$pid}[1] == SLASHD_WAIT) {
 			$pids{$pid}[2] = 1; # mark as reaped
+		}
+
+		my $status = $? >> 8;
+		my $signal = $? & 127;
+		if ($status || $signal) {
+			slashdLog(sprintf
+				"$pids{$pid}[0] exited oddly (status %d; signal %d)",
+				$status, $signal
+			);
 		}
 	}
 	$SIG{CHLD} = \&REAPER;
@@ -501,6 +507,7 @@ sub main {
 		my $fork = $task{$task_filename}{fork};
 		$fork = undef unless defined($fork) &&
 			($fork == SLASHD_WAIT || $fork == SLASHD_NOWAIT);
+		$fork = SLASHD_WAIT unless defined $fork;
 		wait_until($until_time);
 
 		# Recheck the vars table to reload $constants if necessary.
@@ -520,17 +527,26 @@ sub main {
 
 		if (defined $fork) {
 			local $me = $basename;
+
+			# kill the dbh, we have too many problems
+			# if it sticks around during a fork -- pudge
+			$slashdb->{_dbh}->disconnect;
+			undef $slashdb->{_dbh};
+
 			my $pid = fork();
+
+			# get a new dbh in both parent and child
+			$slashdb->sqlConnect();
+
 			if (!defined $pid) {
 				slashdLog("error: cannot Cannot fork '$me': $!");
 				next;  # task not reinserted into $event_ary
 			} elsif ($pid == 0) {
 				$pids{$$} = [$basename, $fork];
 
-				if ($fork == SLASHD_NOWAIT) {
-					tie *STDERR, 'Slash::Tie::STDERR';
-					$slashdb->sqlConnect(2); # rebuild connection
-				}
+				tie *STDERR, 'Slash::Tie::STDERR'
+					if $fork == SLASHD_NOWAIT;
+				$SIG{TERM} = $SIG{INT} = undef;
 
 				if (verbosity() >= 2) {
 					slashdLog("$basename begin ($$)");
@@ -539,6 +555,7 @@ sub main {
 					$constants, $slashdb, $user);
 			} else {
 				$pids{$pid} = [$basename, $fork];
+
 				if ($fork == SLASHD_NOWAIT) {
 					# log when next task is running
 					end_log($basename, 0, 0, $event_ary,
@@ -552,6 +569,7 @@ sub main {
 					slashdLog("unknown error in fork");
 					next;
 				}
+
 				# we need to do something to prevent
 				# a task from running if a copy is still
 				# running -- pudge

@@ -207,12 +207,8 @@ sub sqlConnect {
 # the database connection.
 # Ok, first lets see if we already have a connection
 	my($self, $restart) = @_;
-	if ($restart == 2) {
-		# don't disconnect, undef and get new connection -- pudge
-		$self->{_dbh}{InactiveDestroy} = 0;
-		undef $self->{_dbh};
-	} elsif ($restart) {
-		$self->{_dbh}->disconnect if $restart;
+	if ($restart) {
+		$self->{_dbh}->disconnect;
 	}
 
 	if (!(defined $self->{_dbh}) || !$self->{_dbh}->ping) {

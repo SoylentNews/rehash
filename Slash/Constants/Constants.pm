@@ -179,7 +179,7 @@ These constants are used to define different constants in the people system.
 
 =cut
 
-# -1 0 1
+# -1 2 1
 
 __END__
 
