@@ -76,13 +76,12 @@ sub getPopupTree {
 	for my $tid (map  { $_->[0] }
 	             sort { $a->[1] cmp $b->[1] }
 	             map  { [ $_, lc $tree->{$_}{textname} ] } keys %$tree) {
-		next unless $tid && $tid < 10000; # just in case someone added a bad tid.  
-		                                  # We also filter out tids 10000
-						  # Currently these are special tids in the
-						  # system that we don't want available in
-						  # the editor.  Should probably make this
-						  # more configurable with a var or something
-						  # in the future.
+		next unless $tid && (	# just in case someone added a bad tid
+			# filter out product guide topics
+			$tid < ($constants->{product_guide_tid_lower_limit} || 10_000)
+				||
+			$tid > ($constants->{product_guide_tid_upper_limit} || 20_000)
+		);
 		my $top = $tree->{$tid};
 		@{$topics{$tid}}{qw(value label height width image open)} = (
 			$tid, @{$top}{qw(textname height width image)},

@@ -2522,3 +2522,5 @@ INSERT INTO vars (name, value, description) VALUES ('gse_skip_count_if_no_min_st
 
 ALTER TABLE topic_nexus_extras MODIFY COLUMN type ENUM('text', 'list') NOT NULL DEFAULT 'text';
 
+# End of T_2_5_0_25, Start of T_2_5_0_26 - 2004/09/09
+
