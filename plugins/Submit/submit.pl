@@ -473,6 +473,7 @@ sub displayForm {
 	} else {
 		$fixedstory = strip_html(url2html($form->{story}));
 	}
+	$form->{story} = balanceTags($form->{story});
 
 	slashDisplay('displayForm', {
 		fixedstory	=> $fixedstory,
@@ -524,7 +525,7 @@ sub saveSub {
 	} else {
 		$form->{story} = strip_html(url2html($form->{story}));
 	}
-	# Maybe $form->{story} = balanceTags($form->{story}) here?
+	$form->{story} = balanceTags($form->{story});
 
 	my $uid ||= $form->{name}
 		? getCurrentUser('uid')
