@@ -1,10 +1,10 @@
 slash-1.0.3, 2000.05.18
 -----------------------
 
-*	Fixed 404.pl to strip HTML that may have been passed in
-	through the URL; this had been identified as a way to
-	redirect a user to a bad URL with a SCRIPT that would
-	be executed once displayed in the browser (drwiii)
+*	Fixed 404.pl and search.pl to strip HTML that may have been
+	passed in through the URL; this had been identified as a way
+	to redirect a user to a bad URL with a SCRIPT that would
+	be executed once displayed in the browser (drwiii, eithkay)
 
 *	Changed $admin mail in 404.pl to $I{adminmail}
 

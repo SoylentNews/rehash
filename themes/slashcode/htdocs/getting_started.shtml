@@ -214,7 +214,9 @@ form. This form has these elements:
 		right side of the page. These are the default blocks for all users. If
 		the ordernumber is -1, it's a user selectable slashbox, if the ordernum
 		is 0, it doesn't appear at all. If the number is 1 or greater, this is
-		the order that it appears on the right side of the page.
+		the order that it appears on the right side of the page for Anonymous
+		Cowards and users that have not specified their own preferences for
+		slashboxes.
 		</td>	
 	</tr>
 	<tr>

@@ -584,7 +584,7 @@ Just run the script update_db-1.0.2.sql in the sql/updates/1.0.2/
 directory, and make sure you have the latest code.
 
   Upgrade 1.0.2 -> 1.0.3
-Just run the script formkeys.sql in the sql/updates/1.0.2/
+Just run the script formkeys.sql in the sql/updates/1.0.3/
 directory, and make sure you have the latest code.  Note that the
 commentkey table is no longer used; feel free to delete if you want to.
 
