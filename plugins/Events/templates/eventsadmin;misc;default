@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+"sid,title,dept,topics.tid,alttext"
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+eventsadmin
+__template__
+[% IF dates %]
+	[% FOREACH event=dates %]
+		[% event.begin %] - [% event.end %]<br>
+	[% END %]
+[% ELSE %]
+	None defined
+[% END %]
+<p>
+<A HREF="[% constants.rootdir %]/eventsadmin.pl?sid=[% sid %]">Edit Dates</A>
+__seclev__
+100

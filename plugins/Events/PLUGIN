@@ -1,0 +1,4 @@
+name=Events
+description="Events System"
+htdoc=events.pl
+template=templates/index;events;default

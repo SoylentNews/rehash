@@ -1,0 +1,41 @@
+__section__
+default
+__description__
+"sid,title,dept,topics.tid,alttext"
+__title__
+
+__page__
+eventsadmin
+__lang__
+en_US
+__name__
+index
+__template__
+[% USE Slash %]
+[% PROCESS titlebar %]
+<TABLE>
+[% FOREACH event=dates %]
+	<TR>
+		<TD>
+			[% event.begin %] - [% event.end %]
+			<A HREF="[% constants.rootdir %]/eventsadmin.pl?op=delete&amp;id=[% event.id %]">[delete]</A>
+		</TD>
+	</TR>
+[% END %]
+</TABLE>
+<P>
+<FORM ACTION="[% constants.rootdir %]/eventsadmin.pl" METHOD="POST">
+		Begin Date: 
+		<INPUT TYPE="TEXT" NAME="begin" VALUE="[% Slash.db.getTime() %]">
+		<BR>
+		End Date: 
+		<INPUT TYPE="TEXT" NAME="end" VALUE="[% Slash.db.getTime() %]">
+		<BR>
+<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="add">
+<INPUT TYPE="SUBMIT" VALUE="Save">
+<BR>
+<A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid %]">Edit Story</A>
+</FORM>
+__seclev__
+100

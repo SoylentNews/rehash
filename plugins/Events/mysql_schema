@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS event_dates;
+CREATE TABLE event_dates (
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	# WRONG # sid mediumint UNSIGNED NOT NULL,
+	begin DATE NOT NULL,
+	end DATE NOT NULL,
+	PRIMARY KEY (id),
+	INDEX uidarticle (id,sid)
+);

@@ -1,0 +1,2 @@
+ALTER TABLE stories add BeginDate date;
+ALTER TABLE stories add EndDate date;

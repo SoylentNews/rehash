@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+"sid,title,dept,topics.tid,alttext"
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+events
+__template__
+[% USE Slash %]
+[% PROCESS titlebar %]
+<TABLE>
+[% FOREACH event=events %]
+	<TR>
+		<TD>
+			[<A HREF="[% constants.rootdir %]/search.pl?topic=[% event.3 %]">[% event.4 %]</A>] &nbsp;
+		</TD>
+		<TD>
+			<A HREF="[% constants.rootdir %]/article.pl?sid=[% event.0 %]">[% event.1 %]</A> &nbsp;
+		</TD>
+	</TR>
+[% END %]
+</TABLE>
+<P>
+&lt; <A HREF="[% constants.rootdir %]/events.pl?date=[% previous %]">Previous Day</A> | <A HREF="[% constants.rootdir %]/events.pl?date=[% next %]">Next Day</A> &gt;
+<P>
+__seclev__
+100
