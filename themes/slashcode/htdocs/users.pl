@@ -490,6 +490,7 @@ sub main {
 #################################################################
 sub checkList {
 	my $string = shift;
+        my $len = shift; 
 	my $constants = getCurrentStatic();
 	# what is this supposed to be for? -- pudge
 	$string = substr($string, 0, -1);
@@ -497,7 +498,7 @@ sub checkList {
 	$string =~ s/[^\w,-]//g;
 	my @e = split m/,/, $string;
 	$string = sprintf "'%s'", join "','", @e;
-	my $len = $constants->{checklist_length} || 255;
+	$len ||= $constants->{checklist_length} || 255;
 
 	if (length($string) > $len) {
 		print getError('checklist_err');
@@ -2275,6 +2276,7 @@ sub saveHome {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
 	my $uid;
 	my($extid, $exaid, $exsect) = '';
 
@@ -2325,7 +2327,7 @@ sub saveHome {
 	$form->{maxstories} = 1 if $form->{maxstories} < 1;
 
 	my $users_index_table = {
-		extid		=> checkList($extid),
+		extid		=> ($constants->{subscribe} && $user->{is_subscriber}) ? checkList($extid,1024) : checkList($extid),
 		exaid		=> checkList($exaid),
 		exsect		=> checkList($exsect),
 		exboxes		=> checkList($exboxes),
