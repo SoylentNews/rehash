@@ -86,10 +86,38 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 	END; %]<BR>
 [% END %]
 
+<P>
+
+[% IF useredit.aim %]
+ <B>AOL IM</B> : 
+ [% useredit.aim | strip_html %] (<B><A HREF="aim:addbuddy?screenname=[% useredit.aim | strip_html %]">Add Buddy</A>, <A HREF="aim:goim?screenname=[% useredit.aim | strip_html %]&amp;message=Greetings!.+How+is+it+going?">Send Message</A></B>)<BR>
+[% END %]
+
+[% IF useredit.yahoo %]
+ <B>Yahoo! ID</B> : 
+ <A HREF="http://profiles.yahoo.com/[% useredit.yahoo | strip_html %]">[% useredit.yahoo | strip_html %]</A> (<B><A HREF="http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=[% useredit.yahoo | strip_html %]">Add User</a>, <A HREF="http://edit.yahoo.com/config/send_webmesg?.target=[% useredit.yahoo | strip_html %]">Send Message</A></B>) <BR>
+[% END %]
+
+[% IF useredit.icq %]
+ <B>ICQ UIN</B> : 
+ <IMG SRC="http://web.icq.com/whitepages/online?icq=[% useredit.icq | strip_html %]&amp;img=5" height='18' width='18'> [% useredit.icq | strip_html %] (<B><A HREF="http://wwp.icq.com/scripts/search.dll?to=[% useredit.icq | strip_html %]">Add User</a>, <A HREF="http://wwp.icq.com/scripts/contact.dll?msgto=[% useredit.icq | strip_html %]">Send Message</a></b>)<BR>
+[% END %]
+
+[% IF useredit.jabber %]
+ <B>Jabber</B> : 
+ [% useredit.jabber | strip_html %]<BR>
+[% END %]
+
+[% IF useredit.calendar_url %]
+ <B>Public Calendar</B> : 
+ <A HREF="webcal://[% useredit.calendar_url %]">Subscribe</A> <A HREF="http://[% useredit.calendar_url %]">Download</A><BR>
+[% END %]
+
 [% IF useredit.bio %]
  <B>User Bio</B>
  <BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<BR>
 [% END %]
+
 
 <BR>
 [% IF commentcount > 0 %]

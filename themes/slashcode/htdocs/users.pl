@@ -1961,6 +1961,14 @@ sub saveUser {
 			->as_string if $homepage ne '';
 	$homepage = substr($homepage, 0, 100) if $homepage ne '';
 
+	my $calendar_url = $form->{calendar_url};
+	if ($calendar_url) {
+		$calendar_url =~ s/^http:\/\///g;
+		$calendar_url =~ s/^webcal:\/\///g;
+		$calendar_url =~ s/^\/\///g;
+		$calendar_url = substr($calendar_url, 0, 200) if $calendar_url ne '';
+	}
+
 	# for the users table
 	my $user_edits_table = {
 		homepage	=> $homepage,
@@ -1968,6 +1976,11 @@ sub saveUser {
 		pubkey		=> $form->{pubkey},
 		copy		=> $form->{copy},
 		quote		=> $form->{quote},
+		calendar_url	=> $calendar_url,
+		yahoo	=> $form->{yahoo},
+		jabber	=> $form->{jabber},
+		aim	=> $form->{aim},
+		icq	=> $form->{icq},
 	};
 	for (keys %extr) {
 		$user_edits_table->{$_} = $extr{$_} if defined $extr{$_};
