@@ -1200,17 +1200,18 @@ The 'dispComment' template block.
 =cut
 
 sub dispComment {
-	my($comment) = @_;
+	my($comment, $options) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
+	my $maxcommentsize = $options->{maxcommentsize} || $user->{maxcommentsize};
 
 	my($comment_shrunk, %reasons);
 
 	if ($form->{mode} ne 'archive'
-		&& $comment->{len} > $user->{maxcommentsize}
+		&& $comment->{len} > $maxcommentsize
 		&& $form->{cid} ne $comment->{cid})
 	{
 		$comment_shrunk = 1;
