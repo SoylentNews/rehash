@@ -1893,3 +1893,10 @@ UPDATE sections SET artcount=0 WHERE artcount IS NULL;
 UPDATE sections SET issue=0 WHERE issue IS NULL;
 ALTER TABLE sections CHANGE artcount artcount MEDIUMINT NOT NULL DEFAULT 30, CHANGE issue issue TINYINT NOT NULL DEFAULT 0;
 
+# New codes and constants to handle bad login attempts
+# For users and admins.
+INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (13, 'Bad login attempt warnings', 1, 1, 'now', 0);
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_uid','10','Warn admin if user specifies password incorrectly this many times in one day');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_ip','20','Warn admin if an ip specifies password incorrectly this many times in one day');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_subnet','50','Warn admin if a subnet specifies password incorrectly this many times in one day');
+INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_user_interval','10','Warn users every Nth bad password attempt within 24 hours.  Set to 0 if you do not want to allow users to be warned');
