@@ -19,7 +19,7 @@ $task{$me}{code} = sub {
 	slashdLog('Zoo fof/eof Begin');
 	my $jobs = $zoo->getZooJobs($constants->{zoo_process_limit});
 	for my $job (@$jobs) {
-		my $friends = $friends_cache->{$job->{uid}} ? $friends_cache->{$job->{uid}} : $zoo->getFriendsUIDs($job->{uid});
+		my $friends = $friends_cache->{$job->{uid}} ? $friends_cache->{$job->{uid}} : $zoo->getFriendsConsideredUIDs($job->{uid});
 		for(@$friends) {
 			if ($job->{type} eq 'friend') {
 				if ($job->{action} eq 'add') {

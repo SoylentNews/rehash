@@ -52,6 +52,10 @@ sub getFriendsUIDs {
 	_getUIDs(@_, "friend");
 }
 
+sub getFriendsConsideredUIDs {
+	_getConsiderUIDs(@_, "friend");
+}
+
 sub getFoes {
 	_get(@_, "foe");
 }
@@ -127,6 +131,17 @@ sub _getUIDs {
 		'person',
 		'people',
 		"people.uid = $uid AND type ='$type' "
+	);
+	return $people;
+}
+
+sub _getConsiderUIDs {
+	my($self, $uid, $type) = @_;
+
+	my $people = $self->sqlSelectColArrayref(
+		'uid',
+		'people',
+		"people.person = $uid AND type ='$type' "
 	);
 	return $people;
 }
