@@ -94,9 +94,9 @@ EOT
 		$data{"${_}_ipids"}  = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
 		$data{"${_}_page"} = sprintf("%8d", $pages);
-		$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq);
-		$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes);
-		$statsSave->createStatDaily($yesterday, "${_}_page", $pages);
+		$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq, { section => 'index'});
+		$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes, { section => 'index'});
+		$statsSave->createStatDaily($yesterday, "${_}_page", $pages, { section => 'index'});
 	}
 
 # Not yet
@@ -109,9 +109,9 @@ EOT
 #		$temp->{"people"}  = sprintf("%8d", $people);
 #		$temp->{"uses"} = sprintf("%8d", $uses);
 #		$temp->{"mode"} = sprintf("%8d", $mode);
-#		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people);
-#		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses);
-#		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode);
+#		$statsSave->createStatDaily($yesterday, "message_${_}_people", $people, { section => 'index'});
+#		$statsSave->createStatDaily($yesterday, "message_${_}_uses", $uses, { section => 'index'});
+#		$statsSave->createStatDaily($yesterday, "message_${_}_mode", $mode, { section => 'index'});
 #		push(@{$data{messages}}, $temp);
 #	}
 
@@ -121,17 +121,17 @@ EOT
 		my $index = $constants->{defaultsection} eq $section ? 1 : 0;
 		my $temp = {};
 		$temp->{section_name} = $section;
-		my $uniq = $stats->countDailyByPageDistinctIPID('', $yesterday, { section => $section  });
+		my $uniq = $stats->countDailyByPageDistinctIPID('', $yesterday, { section => $section });
 		my $pages = $stats->countDailyByPage('', $yesterday, { section => $section, no_op => 'rss'  });
-		my $bytes = $stats->countBytesByPage('', $yesterday, { section => $section  });
-		my $users = $stats->countUsersByPage('', $yesterday, { section => $section  });
+		my $bytes = $stats->countBytesByPage('', $yesterday, { section => $section });
+		my $users = $stats->countUsersByPage('', $yesterday, { section => $section });
 		$temp->{ipids}  = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
 		$temp->{users} = sprintf("%8d", $users);
-		$statsSave->createStatDaily($yesterday, "section_${section}_ipids", $uniq);
-		$statsSave->createStatDaily($yesterday, "section_${section}_bytes", $bytes);
-		$statsSave->createStatDaily($yesterday, "section_${section}_page", $pages);
+		$statsSave->createStatDaily($yesterday, "ipids", $uniq, { section => $section });
+		$statsSave->createStatDaily($yesterday, "bytes", $bytes, { section => $section } );
+		$statsSave->createStatDaily($yesterday, "page", $pages, { section => $section });
 
 		for (qw| index article search comments palm rss|) {
 			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday, { section => $section  });
@@ -142,10 +142,10 @@ EOT
 			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
 			$temp->{$_}{users} = sprintf("%8d", $users);
-			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_ipids", $uniq);
-			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_bytes", $bytes);
-			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_page", $pages);
-			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_user", $users);
+			$statsSave->createStatDaily($yesterday, "${_}_ipids", $uniq, { section => $section});
+			$statsSave->createStatDaily($yesterday, "${_}_bytes", $bytes, { section => $section});
+			$statsSave->createStatDaily($yesterday, "${_}_page", $pages, { section => $section});
+			$statsSave->createStatDaily($yesterday, "${_}_user", $users, { section => $section});
 		}
 		push(@{$data{sections}}, $temp);
 	}
@@ -177,13 +177,13 @@ EOT
 			($num_mods ? $num_admin_mods*100/$num_mods : 0));
 	}
 
-	$statsSave->createStatDaily($yesterday, "total", $count->{total});
-	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes);
-	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
-	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
-	$statsSave->createStatDaily($yesterday, "comments", $comments);
-	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
-	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
+	$statsSave->createStatDaily($yesterday, "total", $count->{total}, { section => 'index'});
+	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes, { section => 'index'});
+	$statsSave->createStatDaily($yesterday, "unique", $count->{unique}, { section => 'index'});
+	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users}, { section => 'index'});
+	$statsSave->createStatDaily($yesterday, "comments", $comments, { section => 'index'});
+	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index}, { section => 'index'});
+	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids, { section => 'index'});
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
@@ -195,7 +195,7 @@ EOT
 				? "_admin_$uid"
 				: "_total";
 			my $val = $admin_mods->{$nickname}{$stat};
-			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val);
+			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val, { section => 'index'});
 		}
 	}
 
@@ -227,7 +227,7 @@ EOT
 #	my @sections;
 #	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
 #		push(@sections, { key => $_, value => $count->{index}{$_} });
-#		$statsSave->createStatDaily($yesterday, "index_$_", $count->{index}{$_});
+#		$statsSave->createStatDaily($yesterday, "$_", $count->{index}{$_}, {section => 'index'});
 #	}
 
 	my @lazy;
@@ -250,7 +250,7 @@ EOT
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{admin_mods_text} = $admin_mods_text;
-	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
+	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today` if $constants->{tailslash};
 
 	$data{backup_lag} = "";
 	for my $slave_name (qw( backup search )) {
@@ -268,7 +268,6 @@ EOT
 	my $email = slashDisplay('display', \%data, {
 		Return => 1, Page => 'adminmail', Nocomm => 1
 	});
-#print "\n$email\n";
 
 	# Send a message to the site admin.
 	my $messages = getObject('Slash::Messages');
