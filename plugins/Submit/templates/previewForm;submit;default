@@ -39,14 +39,6 @@ __template__
 	<A HREF="[% submission.email %]">[% submission.email %]</A></B>
 	at [% submission.time %]
 
-	<BR><B>title</B> [% title %] </BR>
-
-[% FOREACH extra = extras %]
-	[% IF submission.${extra.1} %]
-		<BR><B>[% extra.0 %]</B> submission.${extra.1} </BR>
-	[% END %]
-[$ END %]
-
 <P>[% subtext %]</P>
 
 [% IF admin_flag %]
@@ -55,18 +47,12 @@ __template__
 	<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter %]">
-		<BR><B>title</B> <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50">
+		<BR>title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50">
 		<BR>[% lockTest %]
 	[% IF constants.use_dept %]
-		<B>dept</B> <INPUT TYPE="text" NAME="dept" SIZE="50">
+		dept <INPUT TYPE="text" NAME="dept" SIZE="50">
 	[% END %]
 		<BR>
-	[% FOREACH extra = extras %]
-		[% IF submission.${extra.1} %]
-			<BR><B>extra.0</B> <INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} %]"></BR>
-		[% END %]
-
-	[$ END %]
 	[% Slash.selectTopic('tid', submission.tid, section, 1) %]
 	[% Slash.selectSection('section', section, 0, 1) %]
 
