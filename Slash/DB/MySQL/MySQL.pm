@@ -8585,14 +8585,20 @@ sub getTopiclistFromChosen {
 	}
 
 	my @tids = sort {
-			# Highest priority is whether this topic (at this
-			# weight) is in the preferred skid.
-		   $in_skid{$b} <=> $in_skid{$a}
-			# Second priority is the topic's weight
+			# Highest priority is whether this topic is
+			# NOT a nexus (nexus topics go at the end).
+		   (exists $tree->{$a}{nexus} ? 0 : 1) <=> (exists $tree->{$b}{nexus} ? 0 : 1)
+			# Next highest priority is whether this topic
+			# has an icon.
+		|| ($tree->{$a}{image} ? 1 : 0) <=> ($tree->{$b}{image} ? 1 : 0)
+			# Next highest priority is whether this topic
+			# (at this weight) is in the preferred skid.
+		|| $in_skid{$b} <=> $in_skid{$a}
+			# Next priority is the topic's weight
 		|| $chosen_hr->{$b} <=> $chosen_hr->{$a}
-			# Third priority is alphabetical sort
+			# Next priority is alphabetical sort
 		|| $tree->{$a}{textname} cmp $tree->{$b}{textname}
-			# Last priority is primary key sory
+			# Last priority is primary key sort
 		|| $a <=> $b
 	} keys %$chosen_hr;
 	return \@tids;
