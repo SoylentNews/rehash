@@ -4,7 +4,6 @@ __description__
 Template which renders the comment editor.
 
 * error_message = error message if there is an error
-* format_select = post type popup list
 * preview = preview of comment, if applicable
 * reply = hashref of comment replying to
 __title__
@@ -145,6 +144,7 @@ IF do_br %]<BR>[% END %]
 	:
 	Slash.createSelect('posttype', formats, user.posttype, 1);
 %]
+
 [% IF constants.hc && constants.hc_sw_comments && user.state.hc %]
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
@@ -163,7 +163,6 @@ IF do_br %]<BR>[% END %]
 [% ELSE %]
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="Preview">
-	
 	[% format_select %]
 [% END %]
 
