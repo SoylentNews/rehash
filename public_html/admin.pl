@@ -1382,8 +1382,7 @@ EOT
 
 		print qq[\t<TR BGCOLOR="$bgcolor"><TD ALIGN="RIGHT">\n];
 		if ($I{U}{aid} eq $aid || $I{U}{aseclev} > 100) {
-			$HTML::Entities::char2entity{' '} = '+';
-			my($tbtitle) = encode_entities($title, '<>&" ');
+			my $tbtitle = fixurl($title);
 			print qq!\t\t[<A HREF="$ENV{SCRIPT_NAME}?title=$tbtitle&op=edit&sid=$sid">$x</A>\n]!;
 
 		} else {
