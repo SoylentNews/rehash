@@ -151,7 +151,7 @@ sub friends {
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $friends = $zoo->getFriends($uid); 
-	my $friends = $zoo->getRelationships($user->{uid}, FRIEND);
+	my $friends = $zoo->getRelationships($uid, FRIEND);
 		
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'friends');
@@ -188,7 +188,7 @@ sub fof {
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $friends = $zoo->getFof($uid); 
-	my $friends = $zoo->getRelationships($user->{uid}, FOF);
+	my $friends = $zoo->getRelationships($uid, FOF);
 		
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'fof');
@@ -225,7 +225,7 @@ sub enof {
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $friends = $zoo->getEof($uid); 
-	my $friends = $zoo->getRelationships($user->{uid}, EOF);
+	my $friends = $zoo->getRelationships($uid, EOF);
 		
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'friends');
@@ -262,7 +262,7 @@ sub foes {
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $foes = $zoo->getFoes($uid); 
-	my $foes = $zoo->getRelationships($user->{uid}, FOE);
+	my $foes = $zoo->getRelationships($uid, FOE);
 
 	if ($form->{content_type} eq 'rss') {
 		_rss($foes, $nick, 'foes');
@@ -298,7 +298,7 @@ sub fans {
 	}
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $fans = $zoo->getFans($uid);
-	my $fans = $zoo->getRelationships($user->{uid}, FAN);
+	my $fans = $zoo->getRelationships($uid, FAN);
 
 	if ($form->{content_type} eq 'rss') {
 		_rss($fans, $nick, 'fans');
@@ -333,7 +333,7 @@ sub freaks {
 	}
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $freaks = $zoo->getFreaks($uid);
-	my $freaks = $zoo->getRelationships($user->{uid}, FREAK);
+	my $freaks = $zoo->getRelationships($uid, FREAK);
 
 	if ($form->{content_type} eq 'rss') {
 		_rss($freaks, $nick, 'freaks');
