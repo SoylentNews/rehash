@@ -166,7 +166,8 @@ doesn't permit. Please submit the form.
 You can only post [% limit %] posts per [% interval %].
 
 [% CASE "cantinsert" %]
-We are apparently having a problem with our random number generator.
+We are apparently having a temporary problem with our database (or maybe
+our random number generator). Please try again later.
 
 [% CASE "cantinserthc" %]
 We are apparently having a problem with our human-confirmation code.
