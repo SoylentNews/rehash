@@ -23,7 +23,7 @@ __template__
 [% PROCESS titlebar width="95%" title=title %]
 
 <P>
-[% param_name = nick_plain | fixparam %]
+[% param_name = nick | fixparam %]
 [
 <A HREF="[% constants.rootdir %]/~[% param_name %]/friends/">Friends</A> 
  | 
