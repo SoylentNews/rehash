@@ -92,11 +92,39 @@ my $start_time = Time::HiRes::time;
 	# Slashdot, normalized such that the median request takes 1 second.
 	# Times listed are elapsed time from the previous markpoint.
 
-	my $gse_hr = { tid => $gSkin->{nexus} };
+	my $gse_hr = { };
+	# Set the characteristics that stories can be in to appear.  This
+	# is a simple list:  the current skin's nexus, and then if the
+	# current skin is the mainpage, add in the list of story_always_topic
+	# and story_always_nexus tids, and story_always_author uids..
+	$gse_hr->{tid} = [ $gSkin->{nexus} ];
+	if ($gSkin->{skid} = $constants->{mainpage_skid}) {
+		my $always_tid_str = join ",",
+			$user->{story_always_topic},
+			$user->{story_always_nexus};
+		push @{$gse_hr->{tid}}, split /,/, $always_tid_str
+			if $always_tid_str;
+		$gse_hr->{uid} = [ split /,/, $user->{story_always_author} ]
+			if $user->{story_always_author};
+	}
+	# Now exclude characteristics.  The only tricky thing here is that
+	# we never exclude the nexus for the current skin -- if the user
+	# went to foo.sitename.com explicitly, then they're going to see
+	# stories about foo, regardless of their prefs.
+	my $never_tid_str = join ",",
+		$user->{story_never_topic},
+		$user->{story_never_nexus};
+	my @never_tids =
+		grep { $_ != $gSkin->{nexus} }
+		split /,/, $never_tid_str;
+	$gse_hr->{tid_exclude} = [ @never_tids ] if @never_tids;
+	$gse_hr->{uid_exclude} = [ split /,/, $user->{story_never_author} ]
+		if $user->{story_never_author};
+
 # For now, all users get the same number of maxstories.
 #	$gse_hr->{limit} = $user_maxstories if $user_maxstories;
+
 	$gse_hr->{issue} = $issue if $issue;
-	$gse_hr->{sectioncollapse} = $user->{sectioncollapse} if $user->{sectioncollapse};
 	if (rand(1) < $constants->{index_gse_backup_prob}) {
 		$stories = $reader->getStoriesEssentials($gse_hr);
 	} else {

@@ -6283,6 +6283,7 @@ sub getStoryByTime {
 	$key .= "|$story->{stoid}";
 
 	if (!$topic && !$section) {
+		# XXXSECTIONTOPICS this is almost right, but not quite
 		$where .= " AND story_topics_rendered.tid NOT IN ($user->{story_never_topic})" if $user->{story_never_topic};
 		$where .= " AND uid NOT IN ($user->{story_never_author})" if $user->{story_never_author};
 		# don't cache if user has own prefs -- pudge
@@ -7441,8 +7442,11 @@ sub getStoriesEssentials {
 	my @stories_where = ( );
 	push @stories_where, "in_trash = 'no' AND $where_time";
 	if (@$uid) {
+		# XXXSECTIONTOPIC This is wrong, this clause should be OR'd
+		# with the rest if it is present.
 		push @stories_where, "uid IN ("       . join(",", @$uid)     . ")";
 	} elsif (@$uid_x) {
+		# This is correct, this should be AND'd.
 		push @stories_where, "uid NOT IN ("   . join(",", @$uid_x)   . ")";
 	}
 	if ($issue) {
@@ -7559,6 +7563,11 @@ print STDERR "gSE $$ one SELECT, min_stoid=$min_stoid\n";
 
 		# Need both tables.
 		$tables = "stories, story_topics_rendered";
+
+		# XXXSECTIONTOPICS if $tid_x is defined, this needs to do a
+		# LEFT JOIN on another copy of story_topics_rendered and
+		# eliminate any stoids which have a corresponding row with
+		# an unwanted tid.
 
 		# If we'd done multiple SELECTs, this logic would have been
 		# done on the story_topics_rendered table;  as it is, these
