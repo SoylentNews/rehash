@@ -57,6 +57,11 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 <BR>
 	<B>Homepage</B> (optional: you must enter a fully qualified URL)<BR>
 		<INPUT TYPE="TEXT" NAME="homepage" VALUE="[% useredit.homepage | strip_attribute %]" SIZE="60"><BR>
+	[%- IF admin_flag -%]
+	<B>What I'm Playing</B><BR>
+	<SMALL>(optional: a &lt;BR&gt;a separated list of games you're currently enthralled with. This'll be used for the "What We're Playing" Slashbox, and linking the titles somewhere is encouraged.)</SMALL><BR>
+		<INPUT TYPE="TEXT" NAME="playing" VALUE="[% useredit.playing | strip_attribute %]" SIZE="60"><BR>
+	[%- END - %]
 	<B>AOL IM</B> (optional)<BR>
 		<INPUT TYPE="TEXT" NAME="aim" VALUE="[% useredit.aim | strip_attribute %]" SIZE="60"><BR>
 	<B>ICQ UIN</B> (optional)<BR>

@@ -2091,6 +2091,7 @@ sub saveUser {
 		jabber		=> $form->{jabber},
 		aim		=> $form->{aim},
 		icq		=> $form->{icq},
+		playing		=> $form->{playing},
 	};
 	for (keys %extr) {
 		$user_edits_table->{$_} = $extr{$_} if defined $extr{$_};
