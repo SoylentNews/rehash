@@ -282,7 +282,7 @@ sub findJournalEntry {
 	$start ||= 0;
 
 	my $query = $self->sqlQuote($form->{query});
-	my $columns = "users.nickname, journals.description, journals.id as id, users.uid,  date";
+	my $columns = "users.nickname, journals.description, journals.id as id, date, users.uid";
 	$columns .= ", TRUNCATE((((MATCH (description) AGAINST($query) + (MATCH (article) AGAINST($query)))) / 2), 1) as score "
 		if ($form->{query} && $sort == 2);
 	my $tables = "journals, journals_text, users";
