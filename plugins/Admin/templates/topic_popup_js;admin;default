@@ -149,9 +149,12 @@ function [% name %]_search(type, searchstring) {
 	if (type == [% name %]_selected_type && [% name %]_selected_id != -1) {
 		[% name %]_toggle_select([% name %]_selected_id, 0, type);
 	}
-		
+
 	var thistext = '';
-	tids.sort([% name %]_search_sort);
+	/* Mozilla can't take sort routine, apparently */
+	tids.sort();
+	//tids.sort([% name %]_search_sort);
+
 	for (var i = 0; i <= tids.length; i++) {
 		if (tids[i]) {
 			thistext = thistext +
@@ -596,8 +599,6 @@ function [% name %]_submit() {
 [% ELSE -%]
 	var mysaved   = document.[% form_field_form %].[% name %]_saved_tree;
 	mysaved.value = [% name %]_get_saved_tree();
-
-	document.[% form_field_form %].submit();
 [% END -%]
 }
 
