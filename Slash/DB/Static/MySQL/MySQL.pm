@@ -809,7 +809,7 @@ sub getSkinInfo {
 			);
 
 			$child_data{count} = $self->sqlCount(
-				'stories, stories_topics_chosen',
+				'stories, story_topics_chosen',
 				'stories.stoid=story_topics_rendered.stoid AND ' .
 				"tid='$child_tid' AND in_trash = 'no' AND time < NOW() AND " .
 				'TO_DAYS(NOW()) - TO_DAYS(time) <= 2'
