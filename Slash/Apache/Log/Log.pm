@@ -23,8 +23,8 @@ use vars qw($VERSION);
 
 sub handler {
 	my($r) = @_;
+	return OK unless dbAvailable("write_accesslog");
 	my $constants = getCurrentStatic();
-	return OK unless dbAvailable("accesslog");
 
 	# Notes has a bug (still in apache 1.3.17 at
 	# last look). Apache's directory sub handler
