@@ -1577,7 +1577,7 @@ sub getUserAuthenticate {
 			$self->sqlUpdate('users', {
 				newpasswd	=> '',
 				passwd		=> $cryptpasswd
-			}, "uid=$uid_try_db");
+			}, "uid=$uid_try_q");
 			$newpass = 1;
 
 			$uid_verified = $pass[$UID];
@@ -1598,11 +1598,11 @@ sub getUserAuthenticate {
 ########################################################
 # Log a bad password in a login attempt.
 sub createBadPasswordLog {
-	my($uid, $password_wrong) = @_;
+	my($self, $uid, $password_wrong) = @_;
 	my $constants = getCurrentStatic();
 
 	# Failed login attempts as the anonymous coward don't count.
-	return if $uid == $constants->{anonymous_coward_uid};
+	return if !$uid || $uid == $constants->{anonymous_coward_uid};
 
 	# Bad passwords that don't come through the web,
 	# we don't bother to log.
@@ -1612,7 +1612,7 @@ sub createBadPasswordLog {
 	my $hostip = $r->connection->remote_ip;
 	my $subnet = $hostip;
 	$subnet =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
-	$slashdb->sqlInsert("badpasswords", {
+	$self->sqlInsert("badpasswords", {
 		uid =>          $uid,
 		password =>     $password_wrong,
 		ip =>           $hostip,
