@@ -367,6 +367,11 @@ usage:
 	<INPUT NAME="subject" VALUE="[% FILTER strip_attribute;
 		subject; END %]">
 
+Or the more concise, and Unix-like:
+
+	<INPUT NAME="subject" VALUE="[% subject | strip_attribute %]">
+
+
 You should not ever need to think about what data will be in "$subject"
 in these examples.  Just use the functions/filters, and you won't need
 to care or worry about it.  The only time you can reasonably NOT use
@@ -1047,6 +1052,9 @@ get/gets/set/sets/create/exists/delete
 =head1 CHANGES
 
 	$Log$
+	Revision 1.8  2002/11/04 18:40:48  pudge
+	Add notes about pipes for filters
+	
 	Revision 1.7  2002/04/15 14:42:17  pudge
 	Add note about 31-char limit
 	
