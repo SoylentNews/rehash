@@ -136,9 +136,7 @@ sub main {
 		: " $local_ts $user->{tzcode} = $gmt_ts GMT";
 	# "backSlash" needs to be in a template or something -- pudge
 	header("backSlash$time_remark$tbtitle", 'admin');
-
-	# Admin Menu
-	print "<P>&nbsp;</P>" unless $user->{seclev};
+	# admin menu is printed by header(), like always
 
 	# it'd be nice to have a legit retval
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
@@ -1335,6 +1333,7 @@ sub getTitle {
 ##################################################################
 sub getLinks {
 # huh? who did this?
+# "getLinks" appears nowhere else in the codebase - Jamie 2002/01/09
 }
 
 createEnvironment();
