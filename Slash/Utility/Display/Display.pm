@@ -1518,35 +1518,6 @@ sub _slashJournal {
 	my($tokens, $token, $newtext) = @_;
 }
 
-sub _slashSlash {
-	my($tokens, $token, $newtext) = @_;
-
-	my($content, $data);
-	if ($token->[1]{href}) {
-		my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
-		$data = $tokens->get_text("/slash");
-		if ($reloDB) {
-			$content = slashDisplay('hrefLink', {
-				id    => $token->[1]{id},
-				title => $token->[1]{href},
-				text  => $data,
-			}, { Return => 1 });
-		}
-		$content ||= getData('SLASH-UKNOWN-LINK');
-	} elsif ($token->[1]{story}) {
-		$data = $tokens->get_text("/slash");
-		my $reader = getObject('Slash::DB', { db_type => 'reader' });
-		$content = linkStory({
-			'link'	=> $data,
-			sid	=> $token->[1]{story},
-			title	=> $reader->getStory($token->[1]{story}, 'title'),
-		});
-		$content ||= getData('SLASH-UKNOWN-STORY');
-	} # More of these type can go here.
-
-	$$newtext =~ s#\Q$token->[3]$data</SLASH>\E#$content#is;
-}
-
 1;
 
 __END__
