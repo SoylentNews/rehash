@@ -48,6 +48,7 @@ $task{$me}{code} = sub {
 			$total += $rows;
 			last if $rows eq "0E0";
 			slashdLog("deleted so far $total of $limit rows");
+			sleep 10;
 		}
 		my $err = "";
 		if ( $counter >= $failures || !($err = $logdb->sqlError()) ) {
