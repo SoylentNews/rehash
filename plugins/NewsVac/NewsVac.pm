@@ -603,7 +603,7 @@ EOT
 
 	my $rc = $self->sqlInsert('spider', $spider_data);
 
-	return $rc ? $self->getLastInsertId('spider') : 0;
+	return $rc ? $self->getLastInsertId() : 0;
 }
 
 ############################################################
@@ -5125,8 +5125,18 @@ None.
 sub setSpider {
 	my($self, $spider_id, $data) = @_;
 
+	my $clean_data;
+	$clean_data->{$_} = $data->{$_} for qw(
+		name
+		last_edit
+		last_edit_aid
+		conditions
+		group_0_selects
+		commands
+	);
+
 	$self->sqlUpdate(
-		'spider', $data, 'spider_id=' . $self->sqlQuote($spider_id)
+		'spider', $clean_data, 'spider_id=' . $self->sqlQuote($spider_id)
 	);
 }
 
@@ -5299,7 +5309,260 @@ sub getSpiderName {
 	return $returnable;
 }
 
+############################################################
 
+=head2 getKeywordTags( )
+
+Obtain a list of distinct tags used in NewsVac keywords.
+
+=over 4
+
+=item Parameters
+
+None.
+
+=item Return value
+
+Array containing the list of tags.
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub getKeywordTags {
+	my($self) = @_;
+
+	my $returnable = $self->sqlSelectColArrayref(
+		'distinct tag',
+		'newsvac_keywords'
+	);
+
+	return $returnable;
+}
+
+############################################################
+
+=head2 getTagKeywords(tag)
+
+Obtain the list of keyword data associated with a given arbitrary tag.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $tag
+
+String containing the tag we wish to match with keyword data.
+
+=back
+
+=item Return value
+
+List of hashrefs containing keyword data matching the given tag. Each hash reference
+contains the fields of the 'newsvac_keywords' table as keys:
+
+	id
+	regex
+	weight
+	tag
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub getTagKeywords {
+	my($self, $tag) = @_;
+
+	my $returnable = $self->sqlSelectAllHashrefArray(
+		'*',
+
+		'newsvac_keywords',
+
+		'tag=' . $self->sqlQuote($tag),
+
+		'order by weight desc'
+	);
+
+	return $returnable;
+}
+
+############################################################
+
+=head2 getKeyword(kw_id)
+
+Obtain the keyword data associated with a given NewsVac keyword ID.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $kw_id
+
+Numeric value representing the ID of the keyword.
+
+=item Return value
+
+Hashref containing the keyword data. The keys are the fields of the 'newsvac_keywords'
+table.
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub getKeyword {
+	my($self, $kw_id) = @_;
+
+	my $returnable = $self->sqlSelectHashref(
+		'*',
+
+		'newsvac_keywords',
+
+		'id=' . $self->sqlQuote($kw_id)
+	);
+
+	return $returnable;
+}
+
+############################################################
+
+=head2 setKeyword(kw_id, data)
+
+Sets keyword data. If kw_id is non-zero, an update operation is implied, if the 
+keyword is zero, then an insert operation is performed instead and the new
+ID is returned to the caller.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $kw_id
+
+Numeric value representing the ID of the keyword to update.
+
+=item $data
+
+Hash reference containing update data for the keyword. Expected keys are:
+	regex
+	tag
+	weight
+
+=item Return value
+
+If the given $kw_id is zero, then the returned value is the ID of the inserted row.
+If $kw_id is non-zero, then the returned value is the result of the update
+operation.
+
+=item Side effects
+
+Updates the corresponding row (if any) of the 'newsvac_keywords' table.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub setKeyword {
+	my($self, $kw_id, $data) = @_;
+
+	# Insure we pass only the right data to sqlUpdate().
+	my $clean_data;
+	$clean_data->{$_} = $data->{$_} for qw(
+		regex
+		tag
+		weight
+	);
+
+	if (!$kw_id) {
+		$self->sqlInsert(
+			'newsvac_keywords',
+			$clean_data
+		);
+
+		return $self->getLastInsertId();
+	} else {
+		$self->sqlUpdate(
+			'newsvac_keywords', 
+			$clean_data, 
+			'id=' . $self->sqlQuote($kw_id)
+		); 
+
+		return;
+	}
+}
+
+############################################################
+
+=head2 deleteKeyword(kw_id)
+
+Deletes the keyword of the given ID from the NewsVac database.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $kw_id
+
+Numeric value containing the ID of the keyword to be deleted.
+
+=back
+
+=item Return value
+
+Result of the call to C<Slash::DB::sqlDelete()>.
+
+=item Side effects
+
+If the given ID exists, the corresponding row is deleted from the 'newsvac_keywords'
+table.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub deleteKeyword {
+	my($self, $kw_id) = @_;
+
+	$self->sqlDelete('newsvac_keywords', 'id=' . $self->sqlQuote($kw_id));
+}
 
 ############################################################
 =head2 sqlInsert($table, $data, [, $extra])

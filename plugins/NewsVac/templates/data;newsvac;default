@@ -578,6 +578,37 @@ Delete Spider '[% spider_name %]'?
 <INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
 </FORM>
 
+[% CASE "updateKeyword_emptyfields" -%]
+Not all fields filled! Save aborted. Please fill all empty fields before
+attempting to save/update.
+
+[% CASE "updateKeyword_kwsaved" -%]
+[% IF new_id %]
+New Keyword #[% new_id %] in tag '[% form.keyword_tag %]', added.
+[% ELSE -%]
+Keyword #[% form.keyword_id %], saved.
+[% END -%]
+
+[% CASE "addKeyword_notag" -%]
+Add operation cancelled, no tag given!
+
+[% CASE "deleteKeyword_noconfirm" -%]
+Deletion of this keyword has been cancelled.
+
+[% CASE "deleteKeyword_confirm" -%]
+<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% form.keyword_id %]">
+<INPUT TYPE="HIDDEN" NAME="keyword_tag" VALUE="[% 
+form.keyword_tag | strip_html -%]">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="deletekeyword">
+Delete this Keyword, #[% form.keyword_id %]'?
+<INPUT TYPE="SUBMIT" NAME="noconfirm" VALUE="Cancel">&nbsp;&nbsp;
+<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
+</FORM>
+
+[% CASE "deleteKeyword_deleted" -%]
+Keyword #[% form.keyword_id %], deleted.
+
 [% CASE "invalid_seclev" -%]
 Access denied. Your security level isn't high enough. Sorry.
 

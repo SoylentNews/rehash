@@ -28,11 +28,12 @@ INSERT INTO miner VALUES (1,'osdn',20020409034422,'God','God','ok','','','(?i)^(
 INSERT INTO url_info (url_id, url_digest, url, url_base, is_success, last_attempt, last_success, believed_fresh_until, status_code, reason_phrase, content_type, title, miner_id) VALUES (1,'ltbapcrhN90oj3TKp/wPyg','http://www.osdn.com/',NULL,1,'2002-04-09 07:39:41','2002-04-09 07:39:41','2002-04-09 08:39:41',200,'OK','text/html; charset=ISO-8859-1','OSDN: Open Source Development Network',1);
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin', 'NewsVac', '[% constants.rootdir %]/newsvac.pl', 5000, 100);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Miners','[% constants.rootdir %]/newsvac.pl?op=listminers',10000,9);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','URLs','[% constants.rootdir %]/newsvac.pl?op=listurls',10000,9);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Spiders','[% constants.rootdir %]/newsvac.pl?op=listspiders',10000,9);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Miners','[% constants.rootdir %]/newsvac.pl?op=listminers',10000,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','URLs','[% constants.rootdir %]/newsvac.pl?op=listurls',10000,2);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Spiders','[% constants.rootdir %]/newsvac.pl?op=listspiders',10000,3);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Keywords','[% constants.rootdir %]/newsvac.pl?op=listkeywords',10000,4);
 # This functionality was planned but never finished. Maybe someday?
-#INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Nuggets','[% constants.rootdir %]/newsvac.pl?op=listnuggets',10000,9);
+#INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Nuggets','[% constants.rootdir %]/newsvac.pl?op=listnuggets',10000,10);
 
 INSERT into sections (section, artcount, title, isolate, issue, extras) VALUES ('newsvac', 0, 'NewsVac Links', 0, 0, 0);
 

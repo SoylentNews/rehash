@@ -787,6 +787,117 @@ sub timingDump {
 }
 
 ##################################################################
+sub listKeywords {
+	my($slashdb, $form, $user, $udbt, $tag) = @_;
+	my($keywords);
+	$tag ||= $form->{keyword_tag};
+	
+	my $valid_tags	= $udbt->getKeywordTags();
+	$keywords = $udbt->getTagKeywords($tag) if $tag;
+
+	slashDisplay('listKeywords', {
+		valid_tags	=> $valid_tags,
+		keywords	=> $keywords,
+	});
+}
+
+##################################################################
+sub editKeyword {
+	my($slash, $form, $user, $udbt, $kw_id) = @_;
+	my($keyword_data);
+	$kw_id = $form->{keyword_id} if !defined $kw_id;
+
+	if ($kw_id) {
+		$keyword_data = $udbt->getKeyword($kw_id) if $kw_id;
+	} else {
+		$keyword_data = {
+			tag	=> $form->{keyword_tag},
+		};
+	}
+	
+	slashDisplay('editKeyword', {
+		kw_id	=> $kw_id,
+		data	=> $keyword_data,
+	});
+}
+
+##################################################################
+sub updateKeyword {
+	my($slash, $form, $user, $udbt) = @_;
+
+	my $kw_id = $form->{keyword_id};
+
+	if (!(	$form->{keyword_weight} && 
+		$form->{keyword_tag} &&
+		$form->{keyword_regex} ))
+	{
+		print getData('updateKeyword_emptyfields');
+
+		editKeyword(@_, $kw_id);
+	}
+
+	# Pass off to proper op handler if certain form targets are set.
+	if ($form->{deletekeyword} or $form->{addkeyword}) {
+		deleteKeyword(@_) if $form->{deletekeyword};
+		addKeyword(@_)	  if $form->{addkeyword};
+
+		return;
+	}
+
+	# Basic update logic.
+	my $new_id = $udbt->setKeyword($kw_id, {
+		regex	=> $form->{keyword_regex},
+		tag	=> $form->{keyword_tag},
+		weight	=> $form->{keyword_weight},
+	});
+
+	print getData('updateKeyword_kwsaved', { new_id => $new_id });
+	editKeyword(@_, $new_id || $kw_id);
+}
+
+##################################################################
+sub addKeyword {
+	my($slash, $form, $user, $udbt) = @_;
+
+	# Must have a tag for keyword adding.
+	if (!$form->{keyword_tag}) {
+		print getData('addKeyword_notag');
+
+		listKeywords(@_);
+		return;
+	}
+
+	editKeyword(@_, 0);
+}
+
+##################################################################
+sub deleteKeyword {
+	my($slash, $form, $user, $udbt) = @_;
+	(my $kw_id = $form->{keyword_id}) =~ s/\D//g;
+
+	if ($form->{noconfirm}) {
+		print getData('deleteKeyword_noconfirm');
+
+		editKeyword(@_, $kw_id);
+		return;
+	}
+
+	if (!$form->{confirm}) {
+		print getData('deleteKeyword_confirm');
+
+		editKeyword(@_, $kw_id);
+		return;
+	}
+
+	if ($form->{confirm} eq 'Yes') {
+		$udbt->deleteKeyword($kw_id);
+
+		print getData('deleteKeyword_deleted');
+	}
+	listKeywords(@_, $form->{keyword_tag});
+}
+
+##################################################################
 sub main {
 	my $udbt	= getObject('Slash::NewsVac');
 	my $slashdb	= getCurrentDB();
@@ -801,6 +912,7 @@ sub main {
 	my $required_seclev = getCurrentStatic('newsvac_admin_seclev');
 
 	my $ops = {
+
 		listminers => {
 			function=> \&listMiners,
 			seclev	=> $required_seclev,
@@ -817,6 +929,7 @@ sub main {
 			function=> \&updateMiner,
 			seclev	=> $required_seclev,
 		},
+
 		listurls => {
 			function=> \&listUrls,
 			seclev	=> $required_seclev,
@@ -837,6 +950,7 @@ sub main {
 			function=> \&updateUrl,
 			seclev	=> $required_seclev,
 		},
+
 		listspiders => {
 			function=> \&listSpiders,
 			seclev	=> $required_seclev,
@@ -849,8 +963,30 @@ sub main {
 			function=> \&updateSpider,
 			seclev	=> $required_seclev,
 		},
+
 		timingdump => {
 			function=> \&timingDump,
+			seclev	=> $required_seclev,
+		},
+
+		listkeywords => {
+			function=> \&listKeywords,
+			sevlev 	=> $required_seclev,
+		},
+		editkeyword	=> {
+			function=> \&editKeyword,
+			seclev	=> $required_seclev,
+		},
+		updatekeyword	=> {
+			function=> \&updateKeyword,
+			seclev	=> $required_seclev,
+		},
+		deletekeyword	=> {
+			function=> \&deleteKeyword,
+			seclev	=> $required_seclev,
+		},
+		addkeyword	=> {
+			function=> \&addKeyword,
 			seclev	=> $required_seclev,
 		},
 

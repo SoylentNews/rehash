@@ -61,7 +61,7 @@ errkey = "timespec_0_err";
 IF form.addtimespec || form.$errkey; timespecs.push({ timespec_id=>0 }); END;
 IF timespecs.size -%]
 <P>
-[% INCLUDE titlebar width="75%" title="Time Specifications" %]
+[% INCLUDE titlebar width="75%" title="Time Specifications" -%]
 <P>
 [%
 	no_insert_ID=1;
