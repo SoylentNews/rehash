@@ -95,7 +95,7 @@ TITLE="[% topic.textname %]"></A>
 	[% END %]
 		<BR>
 	[% Slash.createSelect('primaryskid', Slash.db.getDescriptions('skins'), submission.primaryskid, 1, 0, 1) %]
-	[% Slash.createSelect('tid', Slash.db.getDescriptions('topics-submittable'), submission.tid, 1, 0, 1) %]
+	[% Slash.createSelect('tid', Slash.db.getDescriptions('highlighted-topics-submittable'), submission.tid, 1, 0, 1) %]
 
 		<INPUT TYPE="submit" NAME="op" VALUE="preview"><BR>
 		<BR>Intro Copy<BR>
