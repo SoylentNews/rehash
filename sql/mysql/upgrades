@@ -89,10 +89,9 @@ INSERT INTO vars (name, value, description) VALUES ('comments_moddable_hours','3
 # hasn't yet committed, so I'm ignoring it for now... this is here in
 # upgrades as a reminder.
 ALTER TABLE section_extras ADD type ENUM("text","list") DEFAULT 'text' NOT NULL, ADD list VARCHAR(255) DEFAULT '' NOT NULL;
-
 # End of R_2_3_0_13
 
 # Start of T_2_3_0_14
 
 ALTER TABLE users_hits ADD COLUMN hits_bought_today SMALLINT UNSIGNED DEFAULT 0 NOT NULL AFTER hits_bought;
-
+ALTER TABLE sessions add column last_subid varchar(15), last_sid varchar(16);
