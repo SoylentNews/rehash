@@ -2553,6 +2553,25 @@ sub saveHome {
 
 	getOtherUserParams($users_index_table);
 	setToDefaults($users_index_table, {}, $defaults) if $form->{restore_defaults};
+	if ($form->{restore_exbox_defaults}) {
+		my $exboxdef = "'";
+		my @exboxlist;
+		my($boxBank, $skinBoxes) = $slashdb->getPortalsCommon();
+
+		foreach my $bid (keys %$boxBank) {
+			push @exboxlist, $bid;
+		}		
+
+		$exboxdef .= join "','", @exboxlist;
+		$exboxdef .= "'";
+
+		my $default_boxes = {
+			exboxes		=> $exboxdef,
+		};
+		
+		setToDefaults($users_index_table, {}, $default_boxes);
+	}
+
 	$slashdb->setUser($uid, $users_index_table);
 
 	editHome({ uid => $uid, note => $note });
