@@ -403,12 +403,22 @@ sub rss_item_description {
 
 	my $constants = getCurrentStatic();
 
-	if ($constants->{rdfitemdesc} == 1) {
-		# keep $desc as-is
-	} elsif ($constants->{rdfitemdesc}) {
-		# limit length of $desc
-		$desc = balanceTags(chopEntity($desc, $constants->{rdfitemdesc}));
-		return $desc;
+	if ($constants->{rdfitemdesc}) {
+		# no HTML
+		$desc = strip_nohtml($desc);
+		$desc =~ s/\s+/ /g;
+		$desc =~ s/ $//;
+
+		# keep $desc as-is if == 1
+		if ($constants->{rdfitemdesc} != 1) {
+			if (length($desc) > $constants->{rdfitemdesc}) {
+				$desc = substr($desc, 0, $constants->{rdfitemdesc});
+				$desc =~ s/\S+$//;
+				$desc .= '...';
+			}
+		}
+
+		$desc = xmlEscapeStr($desc);		
 	} else {
 		undef $desc;
 	}
