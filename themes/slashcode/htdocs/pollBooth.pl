@@ -250,7 +250,7 @@ sub listpolls {
 	my($form) = @_;
 	my $slashdb = getCurrentDB();
 	my $min = $form->{min} || 0;
-	my $questions = $slashdb->getPollQuestionList($min);
+	my $questions = $slashdb->getPollQuestionList($min, { section => $form->{section}});
 	my $sitename = getCurrentStatic('sitename');
 
 	# Just me, but shouldn't title be in the template?

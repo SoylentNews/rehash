@@ -1868,10 +1868,17 @@ sub getPollQuestionList {
 		}
 	}
 
-	$where = sprintf 'section IN (%s)', join(',', @{$other->{section}})
-		if $other->{section};
+	if ($other->{section}) {
+		if (ref ${$other->{section}} ne "ARRAY") {
+			$where = 'section = ' . $self->sqlQuote($other->{section});
+		} else {
+			$where = sprintf 'section IN (%s)', join(',', @{$other->{section}});
+		}
+	}
+
 	$where = sprintf 'section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section};
+
 	my $questions = $self->sqlSelectAll(
 		'qid, question, date',
 		'pollquestions',
@@ -2186,8 +2193,6 @@ sub updateFormkeyVal {
 	# my $min = time() - $speed_limit;
 	# $where .= " AND idcount < $maxposts";
 	# $where .= " AND last_ts <= $min";
-
-	my $where .= "value = 0";
 
 	# print STDERR "MIN $min MAXPOSTS $maxposts WHERE $where\n" if $constants->{DEBUG};
 
