@@ -517,8 +517,9 @@ sub getSectionColors {
 		@colors = split m/,/, getSectionBlock('colors') || $constants->{colors};
 	}
 
-	$user->{fg} = [@colors[0..4]];
-	$user->{bg} = [@colors[5..9]];
+	my $n_colors = scalar(@colors);
+	$user->{fg} = [@colors[0..$n_colors/2-1]];
+	$user->{bg} = [@colors[$n_colors/2..$n_colors-1]];
 }
 
 1;

@@ -37,7 +37,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="savehome">
 <INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user_edit.uid %]">
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
 	<TR>
 		<TD>
 		<B>Date/Time Format</B>

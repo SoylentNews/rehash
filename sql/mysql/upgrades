@@ -845,13 +845,13 @@ ALTER TABLE menus ADD COLUMN sel_label VARCHAR(32) NOT NULL DEFAULT '' AFTER lab
 UPDATE menus SET showanon=1 WHERE seclev=0;
 UPDATE menus SET sel_label=label;
 DELETE FROM menus WHERE menu='users';
-INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users', 'Logout', 'logout', '/my/logout', 1, 0, 10);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl?op=edituser', 1, 20, 0);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 40, 0);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 50, 0);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Logout', 'logout', '/my/logout', 1, 0, 10);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl?op=edituser', 1, 0, 20);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 0, 40);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 0, 50);
 
 # Change for plugins/Subscribe (ignore if not using that plugin)
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 30, 0);
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 0, 30);
 
 DELETE FROM vars WHERE name='commentsPerPoint';
 
@@ -942,3 +942,11 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 # VERY IMPORTANT: run `utils/dst-update.plx VIRTUAL_USER` after running upgrades
 # here, to convert the user timezones to the new timezones, plus to the new
 # DST stuff.
+
+# ALSO IMPORTANT: run `utils/colors-update.plx VIRTUAL_USER` too, to insert the
+# new colors used for tabbed menus.  If you've hacked the code to handle more
+# fg/bg colors, you'll want to edit your templates to bump up by one everything
+# from your numbers 5 on up.  (But if you've hacked the code, you probably
+# already saw a CVS conflict on Anchor.pm getSectionColors() and figured
+# something was up. :)
+

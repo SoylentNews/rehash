@@ -22,7 +22,7 @@ editUser
 __template__
 [% PROCESS prefs_titlebar tab_selected='user' %]
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]"><TR><TD>
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]"><TR><TD>
 
 [% note %]
 

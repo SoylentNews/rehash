@@ -20,11 +20,10 @@ en_US
 __name__
 tabbedmenu
 __template__
-<!-- tabbedmenu fg/bg
-bg 0=[% user.bg.0 %] 1=[% user.bg.1 %] 2=[% user.bg.2 %] 3=[% user.bg.3 %] 4=[% user.bg.4 %]
-fg 0=[% user.fg.0 %] 1=[% user.fg.1 %] 2=[% user.fg.2 %] 3=[% user.fg.3 %] 4=[% user.fg.4 %]
-fg 0=#FFFFFF 1=#000000 2=#000000 3=#FFFFFF 4=#CCCCCC
-bg 0=#000000 1=#FFFFFF 2=#CCCCCC 3=#006666 4=#CCCCCC
+<!--
+tabbedmenu fg/bg
+fg 0=[% user.fg.0 %] 1=[% user.fg.1 %] 2=[% user.fg.2 %] 3=[% user.fg.3 %] 4=[% user.fg.4 %] 5=[% user.fg.5 %]
+bg 0=[% user.bg.0 %] 1=[% user.bg.1 %] 2=[% user.bg.2 %] 3=[% user.bg.3 %] 4=[% user.bg.4 %] 5=[% user.bg.5 %]
 -->
 [% save_tab_selected = tab_selected %]
 [% IF justify != 'right'; justify = 'left'; END %]
@@ -49,9 +48,9 @@ ELSE;
 		bg_line_color		=> user.bg.3,
 		lt_corner_sel		=> 'SRC="' _ constants.imagedir _ '/menu_ggo.gif'  _ '" WIDTH="9" HEIGHT="19"',
 		lt_corner_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_ggx.gif'  _ '" WIDTH="9" HEIGHT="19"',
-		bg_tab_sel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_bgo.gif' _ '" BGCOLOR="' _ user.bg.1 _ '"',
+		bg_tab_sel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_bgo.gif' _ '" BGCOLOR="' _ user.bg.5 _ '"',
 		bg_tab_unsel		=> 'BACKGROUND="' _ constants.imagedir _ '/menu_bgx.gif' _ '" BGCOLOR="' _ user.bg.2 _ '"',
-		fg_tab_sel_color	=> user.fg.1,
+		fg_tab_sel_color	=> user.fg.5,
 		fg_tab_unsel_color	=> user.fg.2,
 		lt_sel_rt_unsel		=> 'SRC="' _ constants.imagedir _ '/menu_gox.gif'  _ '" WIDTH="9" HEIGHT="19"',
 		lt_unsel_rt_unsel	=> 'SRC="' _ constants.imagedir _ '/menu_gxx.gif'  _ '" WIDTH="9" HEIGHT="19"',

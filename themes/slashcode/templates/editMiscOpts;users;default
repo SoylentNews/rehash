@@ -30,7 +30,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="formname" VALUE="editmiscopts">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="savemiscopts">
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]">
+<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
 	<TR>
 		<TD>
 

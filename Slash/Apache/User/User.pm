@@ -335,7 +335,7 @@ sub userdir_handler {
 				$r->args("op=list");
 				$r->uri('/messages.pl');
 				$r->filename($constants->{basedir} . '/messages.pl');
-			} elsif ($op eq 'messages') { # change to be same as /inbox, move this to /my/preferences/messages
+			} elsif ($op eq 'messages') { # XXX change to be same as /inbox, move this to /my/preferences/messages
 				$r->args("op=display_prefs");
 				$r->uri('/messages.pl');
 				$r->filename($constants->{basedir} . '/messages.pl');
