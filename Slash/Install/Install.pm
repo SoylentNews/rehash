@@ -106,7 +106,15 @@ sub readTemplateFile {
 		$val{$latch} .= $_ if $latch;
 	}
 	$val{'tpid'} = undef if $val{'tpid'};
-	for (qw| name page section lang seclev description title template |) {
+	{
+		# Make chomp() remove all newlines, not just 1.  These fields
+		# are used in ways sensitive to extraneous whitespace.
+		local $/ = "";
+		for (qw| name page section lang seclev |) {
+			chomp($val{$_}) if $val{$_};
+		}
+	}
+	for (qw| description title template |) {
 		chomp($val{$_}) if $val{$_};
 	}
 
