@@ -121,6 +121,7 @@ sub updateArchivedDiscussions {
 	my($self) = @_;
 
 	my $days_to_archive = getCurrentStatic('archive_delay');
+	return unless $days_to_archive;
 	# Close discussions.
 	$self->sqlDo(
 		"UPDATE discussions SET type='archived'
@@ -138,6 +139,7 @@ sub getArchiveList {
 	$dir = 'ASC' if $dir ne 'ASC' || $dir ne 'DESC';
 
 	my $days_to_archive = getCurrentStatic('archive_delay');
+	return unless $days_to_archive;
 
 	# Close associated story so that final archival .shtml is written
 	# to disk. This is accomplished by the archive.pl task.
@@ -158,6 +160,7 @@ sub deleteRecycledComments {
 	my($self) = @_;
 
 	my $days_to_archive = getCurrentStatic('archive_delay');
+	return unless $days_to_archive;
 
 	my $comments = $self->sqlSelectAll(
 		'cid, discussions.id',
@@ -298,13 +301,14 @@ sub deleteDaily {
 	my $constants = getCurrentStatic();
 
 	$self->updateStoriesCounts();
+	my $archive_delay = $constants->{archive_delay} || 14;
 
 	# Now for some random stuff
 	$self->sqlDo("DELETE from pollvoters");
 	$self->sqlDo("DELETE from moderatorlog WHERE
-		to_days(now()) - to_days(ts) > $constants->{archive_delay}");
+		to_days(now()) - to_days(ts) > $archive_delay");
 	$self->sqlDo("DELETE from metamodlog WHERE
-		to_days(now()) - to_days(ts) > $constants->{archive_delay}");
+		to_days(now()) - to_days(ts) > $archive_delay");
 
 	# Formkeys
 	my $delete_time = time() - $constants->{'formkey_timeframe'};
