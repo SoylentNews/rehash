@@ -69,7 +69,10 @@ sub generateDailyMailees {
 				push @{$mkeys->{$key}{mails}}, $user->{realemail};
 			} else {
 				$mkeys->{$key}{mails} = [$user->{realemail}];
-				$mkeys->{$key}{user}  = $user;
+				$mkeys->{$key}{user}  = {
+					map { ($_ => $user->{$_}) }
+					qw(sectioncollapse exaid extid exsect)
+				};
 			}
 		}
 	}
@@ -119,12 +122,11 @@ sub mailingList {
 		my $subj  = $mailings->{$mailing}{subj};
 		my $code  = $mailings->{$mailing}{code};
 		my $mkeys = $mailings->{$mailing}{mkeys};
-		my $user  = $mailings->{$mailing}{user};
 
 		dailyStuffLog("Daily Mail ($mailing) begin");
 		for my $key (keys %$mkeys) {
+			my $user  = $mkeys->{$key}{user};
 			my $text = generateDailyMail($mailing, $user) or next;
-# 			dailyStuffLog("Daily Mail ($mailing) begin: $key");
 			$messages->bulksend(
 				$mkeys->{$key}{mails}, $subj, $text, $code
 			);
