@@ -183,10 +183,13 @@ EOT
 # Yes. I am getting a little silly with these. But it's nice not having.
 # them clutter scope elsewhere, when they are only needed here.
 {
+my $depth = 0;
 my($min_uid, $max_uid);
 my(%exception_list);
 sub getRandomUserID {
 	my ($key,$val) = each %{$_[0]};
+	++$depth;
+	die "sorry, not enough activity on site to do a random mod" if $depth > 10;
 	if (!exists $exception_list{$val->{sid}}) {
 		LOOP:
 		for my $cid (keys %{$_[0]}) {
@@ -211,8 +214,9 @@ sub getRandomUserID {
 	$min_uid ||= $slashdb->sqlSelect('MIN(uid)', 'users');
 	my $ret = $min_uid + int(rand($max_uid - $min_uid + 1));  
 	for (@{$exception_list{$val->{sid}}}) {
-		return getRandomUserID(@_) if $_ == $ret;
+		$ret = getRandomUserID(@_), last if $_ == $ret;
 	}
+	--$depth;
         return $ret;
 } }
 
