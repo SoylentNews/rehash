@@ -233,6 +233,13 @@ and
 instead of being limited to 200.
 
 </ul>
+<p>Note that several of these "plums" require that you pick "No Ads" on
+at least one type of page, and that your limit of the maximum number of
+ads suppressed per day not be decreased (below the default value of 10).
+If you don't seem to be able to take advantage of the features listed
+above, go to your
+<a href="/subscribe.pl">Edit Subscription</a>
+page, and doublecheck your settings.
 <p>If you have any questions, please email
 <a href="mailto:subscriptions@slashdot.org">subscriptions@slashdot.org</a>.
 <p><i><font size=-1>Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i> 
