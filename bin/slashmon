@@ -8,160 +8,294 @@ use File::Basename;
 use Getopt::Std;
 use Slash::Utility;
 use Slash::DB;
+use Time::HiRes;
 
-my $PROGNAME = basename($0);
+use vars qw(
+	$PROGNAME
+	%opts
+	$virtuser	$width	$height	$sleep
+	@abbreviations	%abbreviations
+	$slashdb	$constants	$logdb
+	@db
+	$time_last	$maxlog_last
+	$time_first	$maxlog_first
+	$time_new	$maxlog_new
+	$num_cycles	$loadavg_sum
+	$pages		$loadavg
+);
 
-my %opts;
+init();
+run();
 
-usage('Options used incorrectly') unless getopts('hvu:w:r:s:', \%opts);
-usage() if $opts{h};
-version() if $opts{v};
+exit 0;
 
-my $virtuser = $opts{u} || 'slashdot';
-my $width = $opts{w} || 76;
-my $height = $opts{r} || 20;
-my $sleep = $opts{'s'} || 10;
+############################################################
 
-createEnvironment($virtuser);
+sub init {
 
-# Why is the word "abbreviation" so long?
-# And why do we drive on parkways, but park on driveways?
-my @abbreviations = qw( SELECT FROM WHERE INSERT DELETE UPDATE );
-my %abbreviations = map { ( $_, uc substr($_,0,1) ) } @abbreviations;
+	$PROGNAME = basename($0);
 
-my $slashdb = getCurrentDB();
-my $constants = getCurrentStatic();
+	usage('Options used incorrectly') unless getopts('hvu:w:r:s:', \%opts);
+	usage() if $opts{h};
+	version() if $opts{v};
 
-my $logdb = getObject("Slash::DB",
-	$constants->{log_db_user} || $constants->{backup_db_user});
-$logdb ||= $slashdb;
+	$virtuser = $opts{u} || 'slashdot';
+	$width = $opts{w} || 76;
+	$height = $opts{r} || 20;
+	$sleep = int($opts{s}); $sleep = 10 if $sleep < 1;
 
-my $log = $logdb->sqlSelectMany("host_addr,uid,op,dat,
-	DATE_FORMAT(ts,\"\%H:\%i\") AS ts,id",
-	"accesslog",
-	"id > ?",
-	"ORDER BY ts DESC");
+	createEnvironment($virtuser);
 
-my $proc = $slashdb->sqlShowProcessList();
+	# Why is the word "abbreviation" so long?
+	# And why do we drive on parkways, but park on driveways?
+	@abbreviations = qw( SELECT FROM WHERE INSERT DELETE UPDATE );
+	%abbreviations = map { ( $_, uc substr($_,0,1) ) } @abbreviations;
 
-my $id = $logdb->sqlSelect("MAX(id)", "accesslog");
-my $starttime = time;
-my $startsq = getQuestions();
+	$slashdb = getCurrentDB();
+	$constants = getCurrentStatic();
 
-while (1) {
-	$proc->execute();
-	print "\n\n";
-	$active = 0;
-	undef @p;
-	while (my $S = $proc->fetchrow_hashref()) {
-		next if $$S{Info} eq "accesslog";
-		next if $$S{Command} eq "Sleep";
-		next if $$S{Info} eq "SHOW PROCESSLIST";
-		next unless $$S{Info};
+	my $vus = [ (
+		$slashdb->{virtual_user},
+		sort { $a cmp $b }
+		grep { $_ ne $slashdb->{virtual_user} }
+		@{$slashdb->sqlSelectColArrayref('virtual_user', 'dbs')}
+	)];
+	my $log_db = $slashdb->getDBs()->{log}[0]{virtual_user} || '';
 
-		$active++;
-		my $o = "$$S{Time} ";
-		$o .= " " if $$S{Time} < 10;
+	# Set up the @db array based on what virtual users we have.
+	@db = ( );
+	for my $vu (@$vus) {
+		my $db = getObject("Slash::DB", $vu);
+		my($version) = $db->sqlSelect("VERSION()") =~ /(\d)/;
+		push @db, {
+			vu => $vu,
+			db => $db,
+			version => $version,
+		};
+	}
 
-		$$S{Info} =~ s/\s+/ /g;
-             	$$S{Info} =~ s/[^_\'\-\+\.A-Z0-9\(\)<> ,=\|]//gi;
-		$$S{Info} =~ s/ +/ /g;
-		$$S{Info} =~ s/, /,/g;
-		$$S{Info} =~ s/\) /\)/g;
-		$$S{Info} =~ s/DATE_ADD\((.*)\)//g;
-		$$S{Info} =~ s/DATE_FORMAT\((.*)\)//g;
-		for my $abbr (@abbreviations) {
-			$$S{Info} =~ s/\b$abbr\b/$abbreviations{$abbr}/gi;
+	# If no virtual users are defined, we have just the one.
+	if (!@db) {
+		my($version) = $slashdb->sqlSelect("VERSION()") =~ /(\d)/;
+		@db = ( {
+			vu => $virtuser,
+			db => $slashdb,
+			version => $version,
+		} );
+	}
+
+	# We already have a handle to the DB that writes accesslog, but let's get
+	# a separate copy in this special var for it.
+	my $log_user = $constants->{log_db_user}
+		|| $constants->{backup_db_user}
+		|| $slashdb->{virtual_user};
+	$logdb = getObject('Slash::DB', $log_user);
+
+	$num_cycles = 0;
+	$loadavg_sum = 0;
+
+	$maxlog_first = $logdb->sqlSelect("MAX(id)", "accesslog");
+	$maxlog_last = $maxlog_first;
+
+	$time_first = Time::HiRes::time;
+	$time_last = $time_first;
+
+	for my $db (@db) {
+		$db->{status_sth} = $db->{db}->sqlShowStatus();
+		$db->{innostatus_sth} = $db->{db}->sqlShowInnodbStatus() if $db->{version} == 4;
+		$db->{proclist_sth} = $db->{db}->sqlShowProcessList();
+		($db->{queries_first}, $db->{slow_queries_first})
+			= ($db->{queries_last}, $db->{slow_queries_last})
+			= getQueries($db->{status_sth});
+	}
+
+}
+
+sub run {
+
+	while (1) {
+
+		print_header() if $num_cycles % 5 == 0;
+		++$num_cycles;
+		sleep_until();
+
+		$time_new = Time::HiRes::time;
+		$maxlog_new = $logdb->sqlSelect("MAX(id)", "accesslog");
+
+		update_db_ary();
+
+		my $loadavg = getLoadavg();
+		$loadavg_sum += $loadavg;
+
+		print_first_line($time_new);
+		print_second_line($time_new);
+		print_proclist();
+
+		print "\n";
+
+		$time_last = $time_new;
+		$maxlog_last = $maxlog_new;
+		for my $db (@db) {
+			$db->{queries_last} = $db->{queries_new};
+			$db->{slow_queries_last} = $db->{slow_queries_new};
 		}
-		$$S{Info} =~ s/\bSELECT\b/S/i;
-		$o .= substr($$S{Info},0,$width);
-		push @p,$o;
-
-	}
-	$proc->finish();
-	my $rows = $proc->rows();
-
-	if (open(P, "/proc/loadavg")) {
-		@la = split " ",<P>;
-		$l = "$la[0] $la[1] $la[2]";
-		close P;
-	} else {
-		$l = "could not read /proc/loadavg, $!";
 	}
 
-	my $oldsec = $sec;
+}
 
-	$oldsq = $sq;
-	$oldsq ||= 1;
-	$sq = getQuestions();
-	$thissq = $sq - $oldsq;
-	$totalsq = $sq - $startsq;
+############################################################
 
-    	$sec = time - $starttime;
-	my $timepassed = $sec - $oldsec;
-	$sec ||= 1;
-	$timepassed ||= 1;
-
-	$log->bind_param(1, $id);
-	$log->execute;
-
-	my $oldtotal = $total;
-    	$total += $log->rows();
-	my $thistotal = $total - $oldtotal;
-	$total ||= 1;
-	$thistotal ||= 1;
-
-	print join(" ",
-		"Total:" . sprintf("%4d", $sec),
-		"pages:" . sprintf("%5d", $total),
-		"avg:" . sprintf("%6.2f", $total/$sec),
-		"sql:" . sprintf("%6d", $totalsq),
-		"avg:" . sprintf("%7.2f", $totalsq/$sec),
-		"pp:" . sprintf("%5.2f", $totalsq/$total)
-	), "\n";
-
-	print join(" ",
-		"  Now:" . sprintf("%4d", $timepassed),
-		"pages:" . sprintf("%5d", $thistotal),
-		"avg:" . sprintf("%6.2f",$thistotal/$timepassed),
-		"sql:" . sprintf("%6d", $thissq),
-		"avg:" . sprintf("%7.2f",$thissq/$timepassed),
-		"pp:" . sprintf("%5.2f",$thissq/$thistotal)
-	), "\n";
-
-        print "  Sql:$active/$rows | $l\n";
-
-    	while (my $U = $log->fetchrow_hashref()) {
-	        my $w = "$$U{ts} $$U{host_addr} ($$U{uid})";
-	        $w .= "\t" if length $w < 24;
-	        $w .= "\t$$U{op}";
-       	 	$w .= "\t" if length($$U{op}) < 8;
-	        $w .= "\t$$U{dat}\n";
-	        # print $w unless $ARGV[0] eq "sec";
-	        $id = $$U{id} if $$U{id} > $id;
-		# ++$num;
-    	}
-
-	my $x = 0;
- 	foreach (sort { $b <=> $a } @p) {
-		$x++;
-		next if $x > $height;
-		print "$_\n";
-        }
+sub print_header {
+	# First line of header: spaces over the global stuff, headers for DBs
+	printf("%4s %4s %4s", "", "", "");
+	for my $db (@db) {
+		my $wid = 17;
+		$wid += 6 if $db->{version} == 4;
+		my $name = $db->{vu};
+		my $len = length($name);
+		print join("",
+			" ",
+			"-" x (int(($wid-$len-1)/2)),
+			$name,
+			"-" x (int(($wid-$len-0)/2)));
+	}
 	print "\n";
 
-	sleep $sleep;
+	# Second line of header: names for the globals, names for DB columns
+	printf("%4s %4s %4s", "time", "load", "pps");
+	for my $db (@db) {
+		printf(" %4s %3s %4s %2s", "qps", "sps", "qpp", "at");
+		printf(" %5s", "hit%") if $db->{version} == 4;
+	}
+	print "\n";
 }
 
-sub getQuestions {
-	my $c = $slashdb->sqlShowStatus();
-	$c->execute();
-	while (my($q,$a) = $c->fetchrow()) {
-		$r = $a if $q eq "Questions";
-	}
-	$c->finish();
-	return $r;
+sub sleep_until {
+	Time::HiRes::sleep($sleep * $num_cycles - (Time::HiRes::time - $time_first));
 }
+
+sub update_db_ary {
+	for my $db (@db) {
+		($db->{queries_new}, $db->{slow_queries_new}) = getQueries($db->{status_sth});
+		($db->{hitrate}) = getHitRate($db->{innostatus_sth}) if $db->{innostatus_sth};
+		($db->{threads}, $db->{threads_active}, $db->{proclist})
+			= getProclist($db->{proclist_sth});
+	}
+}
+
+sub print_first_line {
+	# First line: stats for the last $time_elapsed seconds
+	$pages = ($maxlog_new - $maxlog_last) || 1;
+	my $time_elapsed = $time_new - $time_last;
+	$time_elapsed = 0.01 if $time_elapsed < 0.01;
+	printf("%4s %4.2f %4.1f",
+		"",
+		$loadavg,
+		($maxlog_new - $maxlog_last) / $time_elapsed
+	);
+	for my $db (@db) {
+		printf(" %4.1f %3.1f %4.1f %2d",
+			($db->{queries_new} - $db->{queries_last}) / $time_elapsed,
+			($db->{slow_queries_new} - $db->{slow_queries_last}) / $time_elapsed,
+			($db->{queries_new} - $db->{queries_last}) / $pages,
+			$db->{threads_active}
+		);
+		printf(" %5.1f", $db->{hitrate}) if $db->{version} == 4;
+	}
+	print "\n";
+}
+
+sub print_second_line {
+	# Second line: stats since slashmon started running
+	$pages = ($maxlog_new - $maxlog_first) || 1;
+	my $time_elapsed = $time_new - $time_first;
+	$time_elapsed = 0.01 if $time_elapsed < 0.01;
+	printf("%4d %4.2f %4.1f",
+		$time_new - $time_first,
+		$loadavg_sum / $num_cycles,
+		$pages / $time_elapsed,
+	);
+	for my $db (@db) {
+		printf(" %4.1f %3.1f %4.1f %2s",
+			($db->{queries_new} - $db->{queries_first}) / $time_elapsed,
+			($db->{slow_queries_new} - $db->{slow_queries_first}) / $time_elapsed,
+			($db->{queries_new} - $db->{queries_first}) / $pages,
+		);
+		print " " x 6 if $db->{version} == 4;
+	}
+	print "\n";
+}
+
+sub print_proclist {
+	# output $db->{proclist}s here
+}
+
+############################################################
+
+sub getLoadavg {
+	open(my $fh, "</proc/loadavg") || return -1;
+	my $line = <$fh>;
+	my($loadavg) = split / /, $line;
+	$loadavg;
+}
+
+sub getQueries {
+	my($sth) = @_;
+	$sth->execute();
+	my($q, $sq);
+	while (my($key, $val) = $sth->fetchrow()) {
+		$q = $val, next	if $key eq "Questions";
+		$sq = $val	if $key eq "Slow_queries";
+	}
+	$sth->finish();
+	return($q, $sq);
+}
+
+sub getHitRate {
+	my($db) = @_;
+}
+
+sub getProclist {
+	my($sth) = @_;
+	my $threads = 0;
+	my $active = 0;
+	my $proclist = [ ];
+
+	$sth->execute();
+	while (my $S = $sth->fetchrow_hashref()) {
+
+		++$threads;
+
+		my $info = $$S{Info};
+		next if $info =~ /SHOW.*PROCESSLIST/i;
+		next if $$S{Command} eq "Sleep";
+		next unless $info;
+
+		++$active;
+
+		my $o = sprintf("%4d", $$S{Time});
+
+		$info =~ s/\s+/ /g;
+		$info =~ s/[^_\'\-\+\.A-Z0-9\(\)<> ,=\|]//gi;
+		$info =~ s/ +/ /g;
+		$info =~ s/, /,/g;
+		$info =~ s/\) /\)/g;
+		$info =~ s/DATE_ADD\((.*)\)/DA($1)/g;
+		$info =~ s/DATE_FORMAT\((.*)\)/DF($1)/g;
+		for my $abbr (@abbreviations) {
+			$info =~ s/\b$abbr\b/$abbreviations{$abbr}/gi;
+		}
+		$info =~ s/\bSELECT\b/S/i;
+		$o .= substr($info, 0, $width);
+		push @$proclist, $o;
+
+	}
+	$sth->finish();
+
+	return ($threads, $active, $proclist);
+}
+
+############################################################
 
 sub usage {
 	print "*** $_[0]\n" if $_[0];
@@ -180,8 +314,19 @@ Main options:
 	-r	Height max in (r)ows (default 20)
 	-s	Sleep time (default 10)
 
+Global stats are the left 3 columns:
+	time	Elapsed seconds
+	load	CPU load on this machine
+	pps	Pages per second
+
+For each DB, the data is:
+	qps	Queries per second
+	sps	Slow queries per second
+	qpp	Queries per page
+	th	Threads active
+	hit%	Cache hit rate percent (MySQL 4.x only)
 EOT
-	exit;
+	exit 0;
 }
 
 sub version {
@@ -194,6 +339,6 @@ Copyright 1997-2002 by Open Source Development Network. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT
-	exit;
+	exit 0;
 }
 
