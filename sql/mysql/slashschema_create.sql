@@ -562,14 +562,16 @@ CREATE TABLE pollquestions (
 	question char(255) NOT NULL,
 	voters mediumint,
 	topic smallint UNSIGNED NOT NULL,
-	discussion mediumint,
+	discussion mediumint UNSIGNED NOT NULL,
 	date datetime,
 	uid mediumint UNSIGNED NOT NULL,
 	primaryskid SMALLINT UNSIGNED,
 	autopoll ENUM("no","yes") DEFAULT 'no' NOT NULL,
 	flags ENUM("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
 	polltype enum('nodisplay','section','story') default 'section',
-	PRIMARY KEY (qid)
+	PRIMARY KEY (qid),
+	KEY uid (uid),
+	KEY discussion (discussion)
 ) TYPE=InnoDB;
 
 #
