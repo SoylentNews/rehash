@@ -1589,3 +1589,134 @@ INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect
 INSERT INTO vars (name, value, description) VALUES ('nick_chars', ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*\'(),-', 'Characters allowed in user nicknames');
 INSERT INTO vars (name, value, description) VALUES ('nick_maxlen', '20', 'Max length of nickname, should correspond with schema for users.nickname');
 
+# The great Inno'ing!  You don't have to do this if you don't want to.
+# It will probably help performance.  Tables that use features that
+# are not supported by Inno (FULLTEXT indexes) are left as MyISAM:
+# comments, comment_text, journals, journals_text, pollquestions,
+# stories, story_text, submissions, users, and also users_count.
+# if you have a separate, slaved, search DB where those indexes are
+# used, feel free to go TYPE=InnoDB on your other DB(s) and just
+# leave the search DB as MyISAM.
+
+ALTER TABLE abusers TYPE=InnoDB;
+ALTER TABLE accesslist TYPE=InnoDB;
+ALTER TABLE accesslog TYPE=InnoDB;
+ALTER TABLE accesslog_admin TYPE=InnoDB;
+ALTER TABLE authors_cache TYPE=InnoDB;
+ALTER TABLE backup_blocks TYPE=InnoDB;
+ALTER TABLE blocks TYPE=InnoDB;
+ALTER TABLE classes TYPE=InnoDB;
+ALTER TABLE code_param TYPE=InnoDB;
+ALTER TABLE commentmodes TYPE=InnoDB;
+ALTER TABLE content_filters TYPE=InnoDB;
+ALTER TABLE dateformats TYPE=InnoDB;
+ALTER TABLE dbs TYPE=InnoDB;
+ALTER TABLE discussions TYPE=InnoDB;
+ALTER TABLE dst TYPE=InnoDB;
+ALTER TABLE formkeys TYPE=InnoDB;
+ALTER TABLE hooks TYPE=InnoDB;
+ALTER TABLE menus TYPE=InnoDB;
+ALTER TABLE metamodlog TYPE=InnoDB;
+ALTER TABLE misc_user_opts TYPE=InnoDB;
+ALTER TABLE moderatorlog TYPE=InnoDB;
+ALTER TABLE modreasons TYPE=InnoDB;
+ALTER TABLE pollanswers TYPE=InnoDB;
+ALTER TABLE pollvoters TYPE=InnoDB;
+ALTER TABLE rss_raw TYPE=InnoDB;
+ALTER TABLE related_links TYPE=InnoDB;
+ALTER TABLE sections TYPE=InnoDB;
+ALTER TABLE sections_contained TYPE=InnoDB;
+ALTER TABLE section_extras TYPE=InnoDB;
+ALTER TABLE section_subsections TYPE=InnoDB;
+ALTER TABLE section_topics TYPE=InnoDB;
+ALTER TABLE soap_methods TYPE=InnoDB;
+ALTER TABLE subsections TYPE=InnoDB;
+ALTER TABLE sessions TYPE=InnoDB;
+ALTER TABLE site_info TYPE=InnoDB;
+ALTER TABLE slashd_status TYPE=InnoDB;
+ALTER TABLE spamarmors TYPE=InnoDB;
+ALTER TABLE story_param TYPE=InnoDB;
+ALTER TABLE story_topics TYPE=InnoDB;
+ALTER TABLE string_param TYPE=InnoDB;
+ALTER TABLE submission_param TYPE=InnoDB;
+ALTER TABLE templates TYPE=InnoDB;
+ALTER TABLE topics TYPE=InnoDB;
+ALTER TABLE topic_image_sections TYPE=InnoDB;
+ALTER TABLE topic_images TYPE=InnoDB;
+ALTER TABLE tzcodes TYPE=InnoDB;
+ALTER TABLE users_acl TYPE=InnoDB;
+ALTER TABLE users_comments TYPE=InnoDB TYPE=InnoDB;
+ALTER TABLE users_hits TYPE=InnoDB TYPE=InnoDB;
+ALTER TABLE users_index TYPE=InnoDB;
+ALTER TABLE users_info TYPE=InnoDB;
+ALTER TABLE users_param TYPE=InnoDB;
+ALTER TABLE users_prefs TYPE=InnoDB;
+ALTER TABLE vars TYPE=InnoDB;
+
+# Change for plugins/Subscribe (ignore if not using that plugin)
+# plugins/Blob (ignore if not using that plugin)
+ALTER TABLE blobs TYPE=InnoDB;
+ALTER TABLE story_files TYPE=InnoDB;
+
+# plugins/Email (ignore if not using that plugin)
+ALTER TABLE email_optout TYPE=InnoDB;
+
+# plugins/Events (ignore if not using that plugin)
+ALTER TABLE event_dates TYPE=InnoDB;
+
+# plugins/HumanConf (ignore if not using that plugin)
+ALTER TABLE humanconf TYPE=InnoDB;
+ALTER TABLE humanconf_pool TYPE=InnoDB;
+ALTER TABLE humanconf_questions TYPE=InnoDB;
+
+# plugins/Journal (ignore if not using that plugin)
+ALTER TABLE journal_themes TYPE=InnoDB;
+
+# plugins/Messages (ignore if not using that plugin)
+AFTER TABLE message_codes TYPE=InnoDB;
+AFTER TABLE message_drop TYPE=InnoDB;
+AFTER TABLE message_log TYPE=InnoDB;
+AFTER TABLE message_web TYPE=InnoDB;
+AFTER TABLE message_web_text TYPE=InnoDB;
+AFTER TABLE users_messages TYPE=InnoDB;
+
+# plugins/NewsVac (ignore if not using that plugin)
+ALTER TABLE miner TYPE=InnoDB;
+ALTER TABLE newsvac_keywords TYPE=InnoDB;
+ALTER TABLE nugget_sub TYPE=InnoDB;
+ALTER TABLE rel TYPE=InnoDB;
+ALTER TABLE robosubmitlock TYPE=InnoDB;
+ALTER TABLE spider TYPE=InnoDB;
+ALTER TABLE spiderlock TYPE=InnoDB;
+ALTER TABLE spider_timespec TYPE=InnoDB;
+ALTER TABLE url_analysis TYPE=InnoDB;
+ALTER TABLE url_content TYPE=InnoDB;
+ALTER TABLE url_info TYPE=InnoDB;
+ALTER TABLE url_message_body TYPE=InnoDB;
+ALTER TABLE url_plaintext TYPE=InnoDB;
+
+# plugins/PollBooth (ignore if not using that plugin)
+ALTER TABLE auto_poll TYPE=InnoDB;
+
+# plugins/Relocate (ignore if not using that plugin)
+ALTER TABLE links TYPE=InnoDB;
+ALTER TABLE links_for_stories TYPE=InnoDB;
+
+# plugins/Stats (ignore if not using that plugin)
+ALTER TABLE stats_daily TYPE=InnoDB;
+ALTER TABLE stats_graphs_index TYPE=InnoDB;
+
+# plugins/Stock (ignore if not using that plugin)
+ALTER TABLE stocks TYPE=InnoDB;
+
+# plugins/Subscribe (ignore if not using that plugin)
+ALTER TABLE subscribe_payments TYPE=InnoDB;
+
+# plugins/YASS (ignore if not using that plugin)
+ALTER TABLE yass_sites TYPE=InnoDB;
+
+# plugins/Zoo (ignore if not using that plugin)
+ALTER TABLE people TYPE=InnoDB;
+
+# End of T_2_3_0_103, Start of T_2_3_0_104 - 2003/07/01
+

@@ -140,20 +140,6 @@ CREATE TABLE backup_blocks (
 ) TYPE=InnoDB;
 
 #
-# Table structure for table 'classes'
-#
-
-DROP TABLE IF EXISTS classes;
-CREATE TABLE classes (
-	id mediumint UNSIGNED NOT NULL auto_increment,
-	class varchar(255) NOT NULL,
-	db_type enum("writer","reader","log","search") DEFAULT "writer" NOT NULL,
-	fallback enum("writer","reader","log","search"),
-	UNIQUE class_key (class),
-	PRIMARY KEY (id)
-) TYPE=InnoDB;
-
-#
 # Table structure for table 'blocks'
 #
 
@@ -183,6 +169,19 @@ CREATE TABLE blocks (
 	KEY section (section)
 ) TYPE=InnoDB;
 
+#
+# Table structure for table 'classes'
+#
+
+DROP TABLE IF EXISTS classes;
+CREATE TABLE classes (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	class varchar(255) NOT NULL,
+	db_type enum("writer","reader","log","search") DEFAULT "writer" NOT NULL,
+	fallback enum("writer","reader","log","search"),
+	UNIQUE class_key (class),
+	PRIMARY KEY (id)
+) TYPE=InnoDB;
 
 #
 # Table structure for table 'code_param'
@@ -238,7 +237,7 @@ CREATE TABLE comments (
 	KEY subnetid (subnetid),
 	KEY theusual (sid,uid,points,cid),
 	KEY countreplies (pid,sid)
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'comment_text'
@@ -250,7 +249,7 @@ CREATE TABLE comment_text (
 	comment text NOT NULL,
 	FOREIGN KEY (cid) REFERENCES comments(cid),
 	PRIMARY KEY (cid)
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'content_filters'
@@ -526,7 +525,7 @@ CREATE TABLE pollquestions (
 	FOREIGN KEY (discussion) REFERENCES discussions(id),
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	PRIMARY KEY (qid)
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'pollvoters'
@@ -794,7 +793,7 @@ CREATE TABLE stories (
 	INDEX time (time), /* time > now() shows that this is still valuable, even with frontpage -Brian */
 	INDEX submitter (submitter),
 	INDEX published (day_published)
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'story_text'
@@ -809,7 +808,7 @@ CREATE TABLE story_text (
 	rendered text,
 	FOREIGN KEY (sid) REFERENCES stories(sid),
 	PRIMARY KEY (sid),
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'story_param'

@@ -7,4 +7,5 @@ CREATE TABLE auto_poll (
 	FOREIGN KEY (section) REFERENCES sections(section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	PRIMARY KEY (id)
-);
+) TYPE=InnoDB;
+
