@@ -2710,7 +2710,6 @@ sub deleteSubmission {
 				my %sub = (
 					note	=> $form->{"note_$n"},
 					comment	=> $form->{"comment_$n"},
-					section	=> $form->{"section_$n"}
 				);
 
 				if (!$sub{note}) {
