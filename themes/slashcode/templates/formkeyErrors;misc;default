@@ -177,25 +177,10 @@ An unexpected error has occurred.<BR><B>[% value %]</B><BR>
 [% END %]
 
 [% IF value != "invalidhcretry" %]
-<P>Note: chances are, you're behind a firewall, or proxy, or clicked the
-Back button to accidentally reuse a form. We know about those kinds of
-errors. But if you think you shouldn't be getting this error, feel free to
-<A HREF="http://sf.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421&amp;category_id=354712">file a bug report</A>,
-telling us:
-<UL>
-	<LI>Your browser type</LI>
-	<LI>[% IF user.uid %]Your userid "[% user.uid %]"
-		[% ELSE %]The fact that you're not logged in[% END %]
-	<LI>What steps caused this error</LI>
-	<LI>Whether you used the Back button on your browser</LI>
-	<LI>Whether or not you know your ISP to be using a proxy,
-	or any sort of service that gives you an IP that others 
-	are using simultaneously</LI>
-	<LI>How many posts to this form you successfully submitted
-	during the day</LI>
-</UL>
-<P><B>Please set the Category to "Formkeys."</B>
-<P>Thank you.
+<P>Chances are, you're behind a firewall or proxy, or clicked the
+Back button to accidentally reuse a form.  Please try again.
+If the problem persists, and all other options have been tried, contact the
+<A HREF="mailto:[% constants.adminmail | strip_attribute %]">site administrator</A>.
 [% END %]
 
 __seclev__
