@@ -371,6 +371,11 @@ sub main {
                 my $done = 0;
 		$done = 1 if $op eq 'savepasswd'; # special case
 		$formname = $ops->{$op}{formname};
+		     if ($formname eq 'users/nu' && !$constants->{hc_sw_newuser}) {
+			$options->{no_hc} = 1;
+		} elsif ($formname eq 'users/mp' && !$constants->{hc_sw_mailpasswd}) {
+			$options->{no_hc} = 1;
+		}
                 DO_CHECKS: while (!$done) {
                         for my $check (@{$ops->{$op}{checks}}) {
                                 $ops->{$op}{update_formkey} = 1 if $check eq 'formkey_check';
