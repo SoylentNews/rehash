@@ -966,7 +966,7 @@ sub submitComment {
 		# reply to journal
 		if ($messages && $discussion->{url} =~ /\bjournal\b/) {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
-			if (@$users && !$users{$users->[0]}) {
+			if (@$users && !$users{$users->[0]} && $users->[0] != $user->{uid}) { # don't msg yourself
 				my $data  = {
 					template_name	=> 'journrep',
 					subject		=> { template_name => 'journrep_subj' },
