@@ -1913,9 +1913,13 @@ sub countWords {
 	return scalar @words / 2;
 }
 
+#========================================================================
+
 =head2 inList(list, value)
 
 Returns the 1-based position of the first occurance of $value in @$list.
+
+[ That is not actually the case at all! ]
 
 =over 4
 
@@ -1935,9 +1939,9 @@ The value you wish to search for.
 
 =item Return value
 
-The position in the list of the first occurance of $value or undef if $value is not in
-the list. Please note that the returned list is a 1-based value, not a 0-based value
-ala perl arrays.
+The position in the list of the first occurance of $value or undef if $value
+is not in the list. Please note that the returned list is a 1-based value,
+not a 0-based value, like perl arrays.
 
 =back
 
@@ -1954,7 +1958,6 @@ sub grepn {
 	}
 	return;
 }
-
 
 1;
 

@@ -379,7 +379,7 @@ Slash::Display::Plugin can be referenced by simply "Slash".
 
 Additional scalar ops (which are global, so they are in effect
 for every Template object created, from this or any other module)
-include C<uc>, C<lc>, C<ucfirst>, and C<lcfirst>,
+include C<int>, C<abs>, C<uc>, C<lc>, C<ucfirst>, and C<lcfirst>,
 which all do what you think.
 
 	[% myscalar.uc %]  # return upper case myscalar
@@ -390,7 +390,8 @@ perl function C<substr>.
 	[% myscalar.substr(2)    # all but first two characters %]
 	[% myscalar.substr(2, 1) # third character %]
 
-Additional list ops include C<rand>, C<lowval>, C<highval>, C<grepn> and C<remove>.
+Additional list ops include C<rand>, C<lowval>, C<highval>,
+C<grepn> and C<remove>.
 
 C<rand> returns a random value from the list.
 
@@ -455,19 +456,20 @@ my %list_ops = (
 	},
 
 	'grepn'		=> sub {
-		my($list, $searchval) = @_;
+		my($list, $search_val) = @_;
 		
-		return grepn($list, $searchval);
+		return grepn($list, $search_val);
 	},
 
 	'remove'	=> sub {
 		my($list, $remove_val) = @_;
-
 		return [ grep { $_ ne $remove_val } @$list ];
 	},
 );
 
 my %scalar_ops = (
+	'int'		=> sub { int $_[0] },
+	'abs'		=> sub { abs $_[0] },
 	'uc'		=> sub { uc $_[0] },
 	'lc'		=> sub { lc $_[0] },
 	'ucfirst'	=> sub { ucfirst $_[0] },
