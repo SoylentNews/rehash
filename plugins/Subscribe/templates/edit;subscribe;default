@@ -24,6 +24,14 @@ edit
 __template__
 [% IF user.seclev < 100; user_edit = user; END %]
 
+<P>Hit the paypal link below to subscribe to [% constants.sitename %].
+You will be able to purchase banner-ad-free pages.
+Currently, payment is only through paypal.
+
+<CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
+<TD>[% PROCESS paypalbut %]</TD>
+</TR></TABLE></CENTER>
+
 <FORM ACTION="[% env.script_name %]">
 
 [% IF user.uid != user_edit.uid %]

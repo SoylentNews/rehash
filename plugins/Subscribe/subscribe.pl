@@ -39,15 +39,6 @@ sub main {
 		},
 	};
 
-	# subscribe.pl is not yet for regular users
-	if ($user->{seclev} < 100
-		&& $op ne 'paypal'
-		&& $op ne 'pause'
-		&& $user->{hits_paidfor} == 0) {
-		my $rootdir = getCurrentStatic('rootdir');
-		redirect("$rootdir/users.pl");
-		return;
-	}
 	$op = 'default' unless $ops->{$op};
 
 	header("subscribe") unless $op eq 'pause';

@@ -145,6 +145,10 @@ sub convertPagesToDollars {
 sub insertPayment {
 	my($self, $payment) = @_;
 	my $slashdb = getCurrentDB();
+
+	# Can't buy pages for an Anonymous Coward.
+	return 0 if isAnon($payment->{uid});
+
 	my $success = 1; # set to 0 on insert failure
 
 	# If no transaction id was given, we'll be making up one of our own.
