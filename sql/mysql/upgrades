@@ -317,7 +317,6 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site St
 
 ALTER TABLE discussions ADD last_update timestamp;
 ALTER TABLE stories ADD last_update timestamp;
-# OSDN LAST UPDATED HERE
 
 # End of R_2_3_0_23, Start of T_2_3_0_25
 # (we skipped _24 due to an earlier glitch)
@@ -348,7 +347,6 @@ ALTER TABLE templates ADD last_update timestamp;
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
-# OSDNTEST LAST UPDATED HERE
 
 # Added for some Calendar stuff I am working on -Brian
 INSERT INTO code_param (type, code, name) VALUES ('months',1,'January');
@@ -377,6 +375,8 @@ select concat("UPDATE stories SET commentcount=", discussions.commentcount, " WH
 source /tmp/dis2;
 
 # SLASHDOT LAST UPDATED HERE
+# OSDNTEST LAST UPDATED HERE
+# OSDN LAST UPDATED HERE
 
 ALTER TABLE pollanswers CHANGE COLUMN qid qid MEDIUMINT UNSIGNED NOT NULL;
 
