@@ -2431,6 +2431,14 @@ sub saveComm {
 	$form->{commentlimit} = $cl_max if $cl_max > 0 && $form->{commentlimit} > $cl_max;
 	$form->{commentspill} = 0 if $form->{commentspill} < 1;
 
+	# For some of these values, namely the ones that we happen to
+	# know get stored in users_param, we change them to 'undef'
+	# if they are the default value.  This deletes them from the
+	# users_param table, which has the same effect as storing the
+	# default except it's faster all around.  If we ever change
+	# the schema to promote these fields from params into a
+	# proper users_* table, then this will no longer be correct.
+	# See prepareUser().
 	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $min = -$max;
 	my $karma_bonus = ($form->{karma_bonus} !~ /^[\-+]?\d+$/) ? "+1" : $form->{karma_bonus};
@@ -2442,13 +2450,11 @@ sub saveComm {
 	my $clsmall_bonus = ($form->{clsmall_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clsmall_bonus};
 	my $clbig_bonus = ($form->{clbig_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clbig_bonus};
 
-	# This has NO BEARING on the table the data goes into now.
-	# setUser() does the right thing based on the key name.
 	my $user_edits_table = {
 		clsmall			=> $form->{clsmall},
-		clsmall_bonus		=> $clsmall_bonus,
+		clsmall_bonus		=> ($clsmall_bonus || undef),
 		clbig			=> $form->{clbig},
-		clbig_bonus		=> $clbig_bonus,
+		clbig_bonus		=> ($clbig_bonus || undef),
 		commentlimit		=> $form->{commentlimit},
 		bytelimit		=> $form->{bytelimit},
 		commentsort		=> $form->{commentsort},
@@ -2472,10 +2478,9 @@ sub saveComm {
 		postanon		=> ($form->{postanon} ? 1 : undef),
 		new_user_percent	=> ($new_user_percent && $new_user_percent != 100
 						? $new_user_percent : undef),
-		new_user_bonus		=> ($new_user_bonus
-						? $new_user_bonus : undef),
-		karma_bonus		=> $karma_bonus,
-		subscriber_bonus	=> $subscriber_bonus,
+		new_user_bonus		=> ($new_user_bonus || undef),
+		karma_bonus		=> ($karma_bonus ne '+1' ? $karma_bonus : undef),
+		subscriber_bonus	=> ($subscriber_bonus || undef),
 		textarea_rows		=> ($form->{textarea_rows} != $constants->{textarea_rows}
 						? $form->{textarea_rows} : undef),
 		textarea_cols		=> ($form->{textarea_cols} != $constants->{textarea_cols}

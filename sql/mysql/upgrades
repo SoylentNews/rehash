@@ -2595,6 +2595,7 @@ INSERT INTO string_param (type, code, name) VALUES ('story023','3','All');
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# use of _30 is not recommended
 # End of T_2_5_0_30, Start of T_2_5_0_31 - 2004/10/07
 
 INSERT INTO vars (name, value, description) VALUES ('story_never_topic_allow','0','Allow story_never_topic data to be edited and passed to getStoriesEssentials? 0=no, 1=subscriber-only, 2=yes');
@@ -2603,4 +2604,10 @@ INSERT INTO vars (name, value, description) VALUES ('story_never_topic_allow','0
 UPDATE users_index SET slashboxes = INSERT(slashboxes, LOCATE('index_more', slashboxes), LENGTH('index_more'), 'mainpage_more') WHERE LOCATE('index_more', slashboxes) > 0;
 
 INSERT INTO vars (name, value, description) VALUES ('slashboxes_maxnum','25','Maximum number of slashboxes to allow');
+
+DELETE FROM users_param WHERE value =  0  AND name IN ('clbig_bonus', 'clsmall_bonus', 'postanon', 'subscriber_bonus');
+DELETE FROM users_param WHERE value ='+1' AND name IN ('karma_bonus');
+DELETE FROM users_param WHERE value =  2  AND name IN ('domaintags');
+
+# End of T_2_5_0_31, Start of T_2_5_0_32 - 2004/10/10
 

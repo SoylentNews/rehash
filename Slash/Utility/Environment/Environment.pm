@@ -1355,7 +1355,11 @@ The prepared user data.
 =item Side effects
 
 Sets some cookies in Apache mode, sets currentPage (for templates) and
-bunches of other user datum.
+bunches of other user datum.  If the default values or the schema for
+fields like karma_bonus or domaintags ever changes, such that writing
+'undef' to delete a users_param row is no longer an acceptable
+alternative to writing out the default value, then the code both here
+and in users.pl save*() should be re-examined.
 
 =back
 
