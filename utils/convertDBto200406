@@ -336,7 +336,7 @@ print <<EOT;
 
 DROP TABLE IF EXISTS topic_nexus_extras_new;
 CREATE TABLE topic_nexus_extras_new (
-        extras_id MEDIUMINT UNSIGNED NOT NULL,
+        extras_id MEDIUMINT UNSIGNED NOT NULL auto_increment,
         tid SMALLINT UNSIGNED NOT NULL,
         extras_keyword VARCHAR(100) NOT NULL,
         extras_textname VARCHAR(100) NOT NULL,
@@ -587,7 +587,7 @@ CREATE TABLE submissions_new (
         KEY subnetid (subnetid),
 	KEY primaryskid_tid (primaryskid, tid),
 	KEY tid (tid)
-) TYPE=InnoDB;
+) TYPE=MyISAM;
 INSERT INTO submissions_new ( subid, email, name, time, subj, story, tid, note, section, primaryskid, comment, uid, ipid, subnetid, del, weight, signature ) SELECT subid, email, name, time, subj, story, tid, note, section, $mainpage_skid, comment, uid, ipid, subnetid, del, weight, signature FROM submissions;
 EOT
 for my $skid (sort { $a <=> $b } keys %skins) {
@@ -784,7 +784,7 @@ for my $skid (sort { $a <=> $b } keys %skins) {
 	my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
 	print "UPDATE pollquestions_new SET primaryskid=$skid WHERE section=$section_q;\n";
 }
-$mainpage_skid = getSkidFromName('mainpage');
+my $mainpage_skid = $slashdb->getVar('mainpage_skid','value',1);
 print "UPDATE pollquestions_new SET primaryskid=$mainpage_skid WHERE primaryskid IS NULL;\n";
 print "ALTER TABLE pollquestions_new DROP COLUMN section;\n";
 
@@ -917,7 +917,8 @@ for my $skid (sort { $a <=> $b } keys %skins) {
         my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
         print "UPDATE stats_daily_new SET skid=$skid WHERE section=$section_q;\n";
 }
-#print "ALTER TABLE stats_daily_new DROP COLUMN section;\n";
+print "UPDATE stats_daily_new set skid=0 where section='all';\n";
+print "ALTER TABLE stats_daily_new DROP COLUMN section;\n";
 #print "ALTER TABLE stats_daily_new ADD UNIQUE skid_day_name (skid,day,name), ADD UNIQUE day_key_pair (day,name,skid);\n";
 
 #
@@ -995,10 +996,11 @@ print <<EOT;
 
 # ALTER TABLE skins ADD FOREIGN KEY etc.
 
-# This next command should only be issued on your search DB,
+# The next two commands should only be issued on your search DB,
 # which may or may not be the same as the master DB you've
 # been issuing the other commands on:
 # ALTER TABLE story_text ADD FULLTEXT title (title), ADD FULLTEXT intro_body (introtext,bodytext);
+# ALTER TABLE submissions ADD FULLTEXT subj (subj,story);
 
 # If you don't want to do error checking
 # ALTER TABLE stories DROP COLUMN writestatus;
