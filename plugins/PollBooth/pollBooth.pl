@@ -22,7 +22,7 @@ sub main {
 		list		=> \&listpolls,
 		default		=> \&default,
 		vote		=> \&vote,
-		vote_return		=> \&vote_return,
+		vote_return	=> \&vote_return,
 		get		=> \&poll_booth,
 	);
 
@@ -175,16 +175,16 @@ sub savepoll {
 			$discussion = $slashdb->getStory($form->{sid}, 'discussion');
 		} elsif (!$poll->{discussion}) {
 			$discussion = $slashdb->createDiscussion({
-				title	=> $form->{question},
-				topic	=> $form->{topic},
-				approved  => 1, # Story discussions are always approved -Brian
-				url	=> "$constants->{rootdir}/pollBooth.pl?qid=$qid&aid=-1",
+				title		=> $form->{question},
+				topic		=> $form->{topic},
+				approved	=> 1, # Story discussions are always approved -Brian
+				url		=> "$constants->{rootdir}/pollBooth.pl?qid=$qid&aid=-1",
 			});
 		} elsif ($poll->{discussion}) {
 			# Yep, this is lazy -Brian
 			$slashdb->setDiscussion($poll->{discussion}, {
-				title => $form->{question},
-				topic => $form->{topic}
+				title	=> $form->{question},
+				topic	=> $form->{topic}
 			});
 		}
 		# if it already has a discussion (so $discussion is not set),

@@ -550,6 +550,7 @@ sub main {
 		# coredumps and other bad stuff.  For more, see the
 		# comment at the top of the REAPER function.
 		# slashdLog("SIGCHLD called in $$")
+		# NOTE: perl 5.8 has safe signals.
 	};
 
 	MAINLOOP: while (1) {
