@@ -11,7 +11,6 @@ en_US
 __name__
 journalsearch
 __template__
-[% USE Slash %]
 [% FOREACH journal=entries %]
 	<B><A HREF="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</A></B><BR>
 	<FONT SIZE="-1">On [% Slash.timeCalc(journal.date) %]</FONT><BR>
