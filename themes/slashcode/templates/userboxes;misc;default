@@ -182,7 +182,8 @@ URLs showing abuse (the cid link please!).
 	# Third box:  user space, if applicable
 	# Again, this is for the current user, not the edited user.
 
-	IF user.mylinks;
+	IF user.mylinks
+		&& (!user.exboxes || user.exboxes.search("mysite"));
 		title = "User Space";
 		contents = user.mylinks;
 		Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
