@@ -21,6 +21,7 @@ __template__
 			([% user.2 %])<BR>
 		[% END %]
 	[% END %]
+	[% INCLUDE pagination %]
 [% ELSE %]
 	No Matches Found for your query
 [% END %]

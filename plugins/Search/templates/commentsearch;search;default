@@ -29,6 +29,7 @@ are removed and currently only visible as static HTML.<P>
 			posted on [% comment.7 %] by [% comment.2 %]</FONT><BR>
 		[% x = x + 1 %]
 	[% END %]
+	[% INCLUDE pagination %]
 [% ELSE %]
 	No Matches Found for your query
 [% END %]

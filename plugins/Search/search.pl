@@ -48,7 +48,7 @@ sub main {
 	#searchForm($form);
 
 	if($ops{$form->{op}}) {
-		$ops{$form->{op}}->($form);
+		$ops{$form->{op}}->($form, $constants);
 	} 
 
 	writeLog($form->{query})
@@ -68,82 +68,112 @@ sub _authors {
 }
 
 #################################################################
-sub linkSearch {
-	my ($count) = @_;
-	my $form = getCurrentForm();
-	my $r;
-
-	foreach (qw[threshold query min author op sid topic section total hitcount]) {
-		my $x = "";
-		$x =  $count->{$_} if defined $count->{$_};
-		$x =  $form->{$_} if defined $form->{$_} && $x eq "";
-		$x =~ s/ /+/g;
-		$r .= "$_=$x&" unless $x eq "";
-	}
-	$r =~ s/&$//;
-
-	$r = qq!<A HREF="$ENV{SCRIPT_NAME}?$r">$count->{'link'}</A>!;
-}
-
-
-#################################################################
 sub commentSearch {
-	my ($form) = @_;
+	my ($form, $constants) = @_;
 	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $comments = $searchDB->findComments($form);
-	slashDisplay('commentsearch', {
-		comments => $comments
-	});
+	my $start = fixint($form->{start}) || 0;
+	my $comments = $searchDB->findComments($form, $start, $constants->{search_default_display} + 1);
 
-	my $prev = $form->{min} - $form->{max};
-	slashDisplay('linksearch', {
-		prev => $prev,
-		linksearch => \&linksearch
-	}) if $prev >= 0;
+	# check for extra articles ... we request one more than we need
+	# and if we get the extra one, we know we have extra ones, and
+	# we pop it off
+	my $forward;
+	if (@$comments == $constants->{search_default_display} + 1) {
+		pop @$comments;
+		$forward = $start + $constants->{search_default_display};
+	} else {
+		$forward = 0;
+	}
+
+	# if there are less than search_default_display remaning,
+	# just set it to 0
+	my $back;
+	if ($start > 0) {
+		$back = $start - $constants->{search_default_display};
+		$back = $back > 0 ? $back : 0;
+	} else {
+		$back = -1;
+	}
+
+	slashDisplay('commentsearch', {
+		comments => $comments,
+		back		=> $back,
+		forward		=> $forward,
+	});
 }
 
 #################################################################
 sub userSearch {
-	my ($form) = @_;
-	my $constants = getCurrentStatic();
+	my ($form, $constants) = @_;
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
-	my $users = $searchDB->findUsers($form);
+	my $start = fixint($form->{start}) || 0;
+	my $users = $searchDB->findUsers($form, $start, $constants->{search_default_display} + 1);
+
+	# check for extra articles ... we request one more than we need
+	# and if we get the extra one, we know we have extra ones, and
+	# we pop it off
+	my $forward;
+	if (@$users == $constants->{search_default_display} + 1) {
+		pop @$users;
+		$forward = $start + $constants->{search_default_display};
+	} else {
+		$forward = 0;
+	}
+
+	# if there are less than search_default_display remaning,
+	# just set it to 0
+	my $back;
+	if ($start > 0) {
+		$back = $start - $constants->{search_default_display};
+		$back = $back > 0 ? $back : 0;
+	} else {
+		$back = -1;
+	}
+
 	slashDisplay('usersearch', {
-		users => $users
+		users => $users,
+		back		=> $back,
+		forward		=> $forward,
 	});
-	
-	my $x = @$users;
-
-	my $prev = ($form->{min} - $form->{max});
-
-	slashDisplay('linksearch', {
-		prev => $prev,
-		linksearch => \&linksearch
-	}) if $prev >= 0;
 }
 
 #################################################################
 sub storySearch {
-	my ($form) = @_;
+	my ($form, $constants) = @_;
 	my $searchDB = Slash::Search->new(getCurrentVirtualUser());
 
+	my $start = fixint($form->{start}) || 0;
+	my $stories = $searchDB->findStory($form, $start, $constants->{search_default_display} + 1);
 
-	my($x, $cnt) = 0;
+	# check for extra articles ... we request one more than we need
+	# and if we get the extra one, we know we have extra ones, and
+	# we pop it off
+	my $forward;
+	if (@$stories == $constants->{search_default_display} + 1) {
+		pop @$stories;
+		$forward = $start + $constants->{search_default_display};
+	} else {
+		$forward = 0;
+	}
 
-	my $stories = $searchDB->findStory($form);
+	# if there are less than search_default_display remaning,
+	# just set it to 0
+	my $back;
+	if ($start > 0) {
+		$back = $start - $constants->{search_default_display};
+		$back = $back > 0 ? $back : 0;
+	} else {
+		$back = -1;
+	}
+
 	slashDisplay('storysearch', {
-		stories => $stories
+		stories => $stories,
+		back		=> $back,
+		forward		=> $forward,
 	});
-
-	my $prev = $form->{min} - $form->{max};
-	slashDisplay('linksearch', {
-		prev => $prev,
-		linksearch => \&linksearch
-	}) if $prev >= 0;
 }
 
 #################################################################

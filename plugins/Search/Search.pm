@@ -59,10 +59,11 @@ sub _keysearch {
 # This has been changed. Since we no longer delete comments
 # it is safe to have this run against stories.
 sub findComments {
-	my($self, $form) = @_;
+	my($self, $form, $start, $limit) = @_;
 	# select comment ID, comment Title, Author, Email, link to comment
 	# and SID, article title, type and a link to the article
 	my $sql;
+	my $limit = " LIMIT $start, $limit" if $limit;
 
 	my $key = $self->_keysearch($form->{query}, ['subject', 'comment']);
 
@@ -80,7 +81,7 @@ sub findComments {
 			if $form->{threshold};
 	$sql .= "     AND section=" . $self->{_dbh}->quote($form->{section}) 
 			if $form->{section};
-	$sql .= " ORDER BY date DESC, time DESC LIMIT $form->{min},20 ";
+	$sql .= " ORDER BY date DESC, time DESC $limit ";
 
 
 	my $cursor = $self->{_dbh}->prepare($sql);
@@ -92,10 +93,12 @@ sub findComments {
 
 ####################################################################################
 sub findUsers {
-	my($self, $form, $users_to_ignore) = @_;
+	my($self, $form, $start, $limit, $users_to_ignore) = @_;
 	# userSearch REALLY doesn't need to be ordered by keyword since you
 	# only care if the substring is found.
 	my $sql;
+	my $limit = " LIMIT $start, $limit" if $limit;
+
 	$sql .= 'SELECT fakeemail,nickname,uid ';
 	$sql .= ' FROM users ';
 	$sql .= ' WHERE seclev > 0 ';
@@ -113,7 +116,7 @@ sub findUsers {
 		$kw =~ s/\+/ OR /g;
 		$sql .= " ($kw) ";
 	}
-	$sql .= " ORDER BY uid LIMIT $form->{min}, $form->{max}";
+	$sql .= " ORDER BY uid $limit";
 	my $sth = $self->{_dbh}->prepare($sql);
 	$sth->execute;
 
@@ -124,8 +127,9 @@ sub findUsers {
 
 ####################################################################################
 sub findStory {
-	my($self, $form) = @_;
+	my($self, $form, $start, $limit) = @_;
 	my $sql;
+	my $limit = " LIMIT $start, $limit" if $limit;
 	my $key = $self->_keysearch($form->{query}, ['title', 'introtext']);
 
 	$sql .= "SELECT nickname,title,sid, time, commentcount,section ";
@@ -151,7 +155,7 @@ sub findStory {
 	$sql .= " AND stories.uid=users.uid ";
 
 	$sql .= " ORDER BY ";
-	$sql .= " time DESC LIMIT $form->{min},$form->{max}";
+	$sql .= " time DESC $limit";
 
 	my $cursor = $self->{_dbh}->prepare($sql);
 	$cursor->execute;

@@ -25,6 +25,7 @@ __template__
 		by [% story.0 %] with [% story.4 %] comments <FONT SIZE="2">on [% Slash.timeCalc(story.3) %]</FONT><BR>
 	[% x = x + 1 %]
 	[% END %]
+	[% INCLUDE pagination %]
 [% ELSE %]
 	No Matches Found for your query
 [% END %]
