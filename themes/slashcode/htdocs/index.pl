@@ -239,7 +239,7 @@ sub displayStories {
 
 	my($today, $x) = ('', 1);
 	my $cnt = int($user->{maxstories} / 3);
-	my ($return,$counter,$feature_retrieved);
+	my($return, $counter, $feature_retrieved);
 
 	# shift them off, so we do not display them in the Older
 	# Stuff block later (simulate the old cursor-based
@@ -351,9 +351,9 @@ sub displayStories {
 
 		$return->{$category}{full} .= $tmpreturn;
 
-	    my($w) = join ' ', (split m/ /, $time)[0 .. 2];
-	    $today ||= $w;
-	    last if ++$counter->{$category} > $cnt && $today ne $w;
+		my($w) = join ' ', (split m/ /, $time)[0 .. 2];
+		$today ||= $w;
+		last if ++$counter->{$category} > $cnt && $today ne $w;
 	}
 
 	return $return;
