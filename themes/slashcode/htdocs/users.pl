@@ -259,7 +259,7 @@ sub main {
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'info',
+			adminmenu	=> 'security',
 			tab_selected	=> 'readonly',
 		},
 		listbanned => {
@@ -267,7 +267,7 @@ sub main {
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'info',
+			adminmenu	=> 'security',
 			tab_selected	=> 'banned',
 		},
 		topabusers 	=> {
@@ -275,7 +275,7 @@ sub main {
 			seclev		=> 100,
 			formname	=> $formname,
 			checks		=> [],
-			adminmenu	=> 'info',
+			adminmenu	=> 'security',
 			tab_selected	=> 'abusers',
 		},
 		listabuses 	=> {
@@ -1120,8 +1120,7 @@ sub showInfo {
 
 	my $cid_list = [ keys %$cids_seen ];
 	my $cids_to_mods = {};
-	if ($admin_flag && $constants->{show_mods_with_comments} && 
-		(defined $form->{show_m1s} ? $form->{show_m1s} : $user->{mod_with_comm})) {
+	if ($admin_flag && $constants->{show_mods_with_comments}) {
 		my $comment_mods = $reader->getModeratorCommentLog("DESC",
 			$constants->{mod_limit_with_comments}, "cidin", $cid_list);
 	
@@ -1131,19 +1130,15 @@ sub showInfo {
 		}
 	}
 
-	my $storycount =
-		$reader->countStoriesBySubmitter($requested_user->{uid})
-	unless $requested_user->{nonuid};
-	my $stories = $reader->getStoriesBySubmitter(
-		$requested_user->{uid},
-		$constants->{user_submitter_display_default}
-	) unless !$storycount || $requested_user->{nonuid};
-
-	my $sub_limit = $constants->{submissions_listing_page_size} || "";
+	my $sub_limit = ((($admin_flag || $user->{uid} == $requested_user->{uid}) ? $constants->{submissions_all_page_size} : $constants->{submissions_accepted_only_page_size}) || "");
+	
+	my $sub_options = { limit_days => 365 };
+	$sub_options->{accepted_only} = 1 if !$admin_flag && $user->{uid} != $requested_user->{uid};
+	
 
 	my $subcount = $reader->countSubmissionsByNetID($netid, $fieldkey)
 		if $requested_user->{nonuid};
-	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey, $sub_limit)
+	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey, $sub_limit, $sub_options)
 		if $requested_user->{nonuid};
 
         my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
@@ -1153,7 +1148,7 @@ sub showInfo {
 		slashDisplay('netIDInfo', {
 			title			=> $title,
 			id			=> $id,
-			user			=> $requested_user,
+			useredit		=> $requested_user,
 			commentstruct		=> $commentstruct || [],
 			commentcount		=> $commentcount,
 			min_comment		=> $min_comment,
@@ -1194,9 +1189,9 @@ sub showInfo {
 
 		my $lastjournal = _get_lastjournal($uid);
 		
-		my $sub_limit = $constants->{submissions_listing_page_size} || "";
 		my $subcount = $reader->countSubmissionsByUID($uid);
-		my $submissions = $reader->getSubmissionsByUID($uid, $sub_limit);
+	
+		my $submissions = $reader->getSubmissionsByUID($uid, $sub_limit, $sub_options);
 
 		slashDisplay('userInfo', {
 			title			=> $title,
@@ -1211,8 +1206,6 @@ sub showInfo {
 			karma_flag		=> $karma_flag,
 			admin_block		=> $admin_block,
 			admin_flag 		=> $admin_flag,
-			stories 		=> $stories,
-			storycount 		=> $storycount,
 			reasons			=> $reader->getReasons(),
 			lastjournal		=> $lastjournal,
 			hr_hours_back		=> $ipid_hoursback,
