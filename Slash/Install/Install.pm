@@ -364,6 +364,21 @@ sub _install {
 			$self->installPlugin($_, 0, $symlink);
 		}
 	}
+	unless ($is_plugin) {
+		my (%templates, @no_templates);
+		for my $name (@{$hash->{'include_theme'}}) {
+			_parseFilesForTemplates("/usr/local/slash/themes/$name/THEME", \%templates, \@no_templates);
+			for (keys %templates) {
+				my $template = $self->readTemplateFile("$templates{$_}");
+				my $id;
+				if ($id = $self->{slashdb}->existsTemplate($template)) {
+					$self->{slashdb}->setTemplate($id, $template);
+				} else {
+					$self->{slashdb}->createTemplate($template);
+				}
+			}
+		}
+	}
 
 	if ($hash->{'template'}) {
 		for (@{$hash->{'template'}}) {
@@ -374,6 +389,7 @@ sub _install {
 			    next;
 			}
 			my $key = "$template->{name};$template->{page};$template->{section}";
+			# This is not actually needed since cleanup occurs at the end -Brian
 			if ($hash->{'no-template'} && ref($hash->{'no-template'}) eq 'ARRAY') {
 				next if (grep { $key eq $_ }  @{$hash->{'no-template'}} );
 			}
@@ -415,8 +431,8 @@ sub _install {
 			warn "Can't open $file: $!";
 		}
 	}
-  # This is where we cleanup any templates that don't belong
 	unless ($is_plugin) {
+		# This is where we cleanup any templates that don't belong
 		for (@{$hash->{'no-template'}}) {
 			my ($name, $page, $section) = split /;/, $_;
 			my $tpid = $self->{slashdb}->getTemplateByName($name, 'tpid', '', $page, $section);
@@ -453,6 +469,16 @@ sub getSiteTemplates {
 	}
 	#Themes override plugins so this has to run after plugins. -Brian
 	my $theme = $self->get('theme');
+	my $include_themes = $self->get('include_theme');
+	if ($include_themes) {
+		if (ref($include_themes)) { 
+			for (keys %$include_themes) {
+				_parseFilesForTemplates("$prefix/themes/$include_themes->{$_}{value}/THEME", \%templates, \@no_templates);
+			}
+		} else {
+			_parseFilesForTemplates("$prefix/themes/$include_themes->{$_}{value}/THEME", \%templates, \@no_templates);
+		}
+	}
 	$theme = $theme->{value};
 	_parseFilesForTemplates("$prefix/themes/$theme/THEME", \%templates, \@no_templates);
 	for my $key (keys %templates) {
