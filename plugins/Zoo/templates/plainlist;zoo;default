@@ -15,17 +15,20 @@ plainlist
 __template__
 [% USE Slash %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-[% FOREACH friend = friends %]
+[% FOREACH person = people %]
     <TR>
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% friend.1 | fixparam %]/">[% friend.1 %]</A>
+		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/">[% person.1 %]</A>
 	</TD>
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% friend.1 | fixparam %]/friends/">friends</A>
+		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/friends/">friends</A>
 	</TD>
-	[% IF friend.2 %]
+	<TD VALIGN="TOP">
+		<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/fans/">fans</A>
+	</TD>
+	[% IF person.2 %]
 		<TD VALIGN="TOP">
-			<A HREF="[% constants.rootdir %]/~[% friend.1 | fixparam %]/journal/"><B><EM> Last Journal enty [% Slash.timeCalc(friend.2) %]</EM></A>
+			<A HREF="[% constants.rootdir %]/~[% person.1 | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(person.2) %]</EM></A>
 		</TD>
 	[% ELSE %]
 		<TD VALIGN="TOP">&nbsp;</TD>
@@ -34,9 +37,11 @@ __template__
 	[% IF editable %]
 		<TD VALIGN="TOP">
 			[% IF form.op == "fans" %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% friend.0 %]">Add Friend</A>
+					<A HREF="[% constants.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% person.0 %]&type=friend">Add Friend</A>
 			[% ELSIF form.op == "friends" %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=deletemeta&amp;delete=[% friend.0 %]">Remove Friend</A>
+					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&type=friend">Remove Friend</A>
+			[% ELSIF form.op == "foes" %]
+					<A HREF="[% constants.rootdir %]/zoo.pl?op=deletecheck&amp;uid=[% person.0 %]&type=foe">Remove Foe</A>
 			[% END %]
 		</TD>
 	[% END %]

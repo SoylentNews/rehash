@@ -26,11 +26,35 @@ __template__
 [% CASE 'nofans' %]
 	[% nickname %]  is either loved by all or just invisible.
 
+[% CASE 'nofoes' %]
+	[% nickname %]  loves everyone or plays their cards very close to their chest.
+
+[% CASE 'yournofriends' %]
+	You are alone in the world.
+
+[% CASE 'yournofans' %]
+	You are either loved by all or just invisible.
+
+[% CASE 'yournofoes' %]
+	You love everyone or you play your cards very close to your chest.
+
 [% CASE 'friendshead' %]
 	Friends of [% nickname %]
 
+[% CASE 'foeshead' %]
+	Foes of [% nickname %]
+
 [% CASE 'fanshead' %]
 	Fans of [% nickname %]
+
+[% CASE 'yourfriendshead' %]
+	Your friends	
+
+[% CASE 'yourfoeshead' %]
+	Your foes
+
+[% CASE 'yourfanshead' %]
+	Your fans
 
 [% END %]
 

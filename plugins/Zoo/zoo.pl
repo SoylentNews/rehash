@@ -27,12 +27,13 @@ sub main {
 
 	# possible value of "op" parameter in form
 	my %ops = (
-		confirm		=> [ 1,		\&confirm		], # formkey?
 		add		=> [ $user_ok,		\&add		], # formkey?
-		'delete'		=> [ $user_ok,		\&dekete		], # formkey?
+		'delete'		=> [ $user_ok,		\&delete		], # formkey?
+		addcheck		=> [ $user->{seclev},		\&check		], # formkey?
+		'deletecheck'		=> [ $user->{seclev},		\&check		], # formkey?
 		friends		=> [ 1,			\&friends		],
 		fans		=> [ 1,			\&fans		],
-		foes		=> [ 0,			\&list		],
+		foes		=> [ 1,			\&foes		],
 		freaks		=> [ 0,			\&list		],
 		editfriend		=> [ $user_ok,			\&edit		],
 		editfoe		=> [ $user_ok,			\&edit		],
@@ -71,49 +72,134 @@ sub list {
 sub friends {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	_printHead("friendshead", { nickname => $form->{nick} });
-	
-	my $uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-	my $friends = $zoo->getFriends($uid);
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	if (@$friends) {
-		slashDisplay('plainlist', { friends => $friends, editable => $editable });
+	my ($uid, $nick);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
 	} else {
-		print getData('nofriends', { nickname => $form->{nick}});
+		$uid = $user->{uid};
+		$nick = $user->{nick};
+	}
+
+	my $editable = ($uid == $user->{uid} ? 1 : 0);
+	if ($editable) {
+		_printHead("yourfriendshead");
+	} else {
+		_printHead("friendshead", { nickname => $nick });
+	}
+	
+	my $friends = $zoo->getFriends($uid); 
+	if (@$friends) {
+		slashDisplay('plainlist', { people => $friends, editable => $editable });
+	} else {
+		if ($editable) {
+			print getData('yournofriends');
+		} else {
+			print getData('nofriends', { nickname => $nick });
+		}
+	}
+}
+
+sub foes {
+	my($zoo, $constants, $user, $form, $slashdb) = @_;
+
+	my ($uid, $nick);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
+	} else {
+		$uid = $user->{uid};
+		$nick = $user->{nick};
+	}
+
+	my $editable = ($uid == $user->{uid} ? 1 : 0);
+	if ($editable) {
+		_printHead("yourfoeshead");
+	} else {
+		_printHead("foeshead", { nickname => $nick });
+	}
+	
+	my $foes = $zoo->getFoes($uid); 
+	if (@$foes) {
+		slashDisplay('plainlist', { people => $foes, editable => $editable });
+	} else {
+		if ($editable) {
+			print getData('yournofoes');
+		} else {
+			print getData('nofoes', { nickname => $nick });
+		}
 	}
 }
 
 sub fans {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	_printHead("fanshead",{ nickname => $form->{nick} });
-
-	my $uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-	my $friends = $zoo->getFans($uid);
-	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	if (@$friends) {
-		slashDisplay('plainlist', { friends => $friends, editable => $editable });
+	my ($uid, $nick);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
+		$nick = $form->{nick} ? $form->{nick} : $slashdb->getUser($uid, 'nickname');
 	} else {
-		print getData('nofans', { nickname => $form->{nick}});
+		$uid = $user->{uid};
+		$nick = $user->{nick};
+	}
+	my $editable = ($uid == $user->{uid} ? 1 : 0);
+	if ($editable) {
+		_printHead("yourfanshead");
+	} else {
+		_printHead("fanshead",{ nickname => $nick });
+	}
+
+	my $fans = $zoo->getFans($uid);
+	if (@$fans) {
+		slashDisplay('plainlist', { people => $fans, editable => $editable });
+	} else {
+		if ($editable) {
+			print getData('yournofans');
+		} else {
+			print getData('nofans', { nickname => $nick });
+		}
 	}
 }
 
 
-sub addFriend {
+sub add {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	$zoo->addFriend($user->{uid}, $form->{uid}) if $form->{uid};
-	displayFriends(@_);
+	if ($form->{uid}) {
+		if ($form->{type} eq 'foe') {
+			$zoo->setFoe($user->{uid}, $form->{uid});
+		} elsif ($form->{type} eq 'friend') {
+			$zoo->setFriend($user->{uid}, $form->{uid});
+		}
+	}
+	# This is just to make sure the next view gets it right
+	if ($form->{type} eq 'foe') {
+		redirect($constants->{rootdir} . "/my/foes/");
+		return;
+	} else {
+		redirect($constants->{rootdir} . "/my/friends/");
+		return;
+	}
 }
 
-sub deleteFriend {
+sub delete {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	for my $uid (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
-		$zoo->deleteFriend($user->{uid}, $uid);
+	if ($form->{uid}) {
+		$zoo->delete($user->{uid}, $form->{uid});
+	} else {
+		for my $uid (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
+			$zoo->delete($user->{uid}, $uid);
+		}
 	}
-
-	displayFriends(@_);
+	# This is just to make sure the next view gets it right
+	if ($form->{type} eq 'foe') {
+		redirect($constants->{rootdir} . "/my/foes/");
+		return;
+	} else {
+		redirect($constants->{rootdir} . "/my/friends/");
+		return;
+	}
 }
 
 
@@ -135,6 +221,22 @@ sub _validFormkey {
 		return 1;
 	}
 }
+
+sub check {
+	my($journal, $constants, $user, $form, $slashdb) = @_;
+
+	if ($form->{uid}) {
+		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
+		_printHead("mainhead");
+		my $template = ($form->{op} eq 'addcheck') ? 'add' : 'delete';
+		slashDisplay($template, { 
+			uid => $form->{uid},
+			nickname => $nickname,
+			type => $form->{type}
+			 });
+	} 
+}
+
 
 sub _printHead {
 	my($head, $data) = @_;

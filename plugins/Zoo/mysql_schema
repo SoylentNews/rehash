@@ -4,6 +4,6 @@ CREATE TABLE people (
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	person MEDIUMINT UNSIGNED NOT NULL,
 	type enum("friend","foe") NOT NULL,
-	UNIQUE degree_of_seperation (uid,person,type),
+	UNIQUE degree_of_seperation (uid,person),
 	PRIMARY KEY (id)
 );

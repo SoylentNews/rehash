@@ -8,6 +8,7 @@ package Slash::Zoo;
 use strict;
 use DBIx::Password;
 use Slash;
+use Slash::Constants ':people';
 use Slash::Utility;
 use Slash::DB::Utility;
 
@@ -56,7 +57,7 @@ sub _get {
 	my($self, $uid, $type) = @_;
 
 	my $people = $self->sqlSelectAll(
-		'people.uid, nickname, journal_last_entry_date',
+		'users.uid, nickname, journal_last_entry_date',
 		'people, users',
 		"people.uid = $uid AND type =\"$type\" AND person = users.uid"
 	);
@@ -75,17 +76,21 @@ sub _getOpposite {
 }
 
 sub setFriend {
-	_set(@_, 'friend');
+	_set(@_, 'friend', FRIEND);
 }
 
 sub setFoe {
-	_set(@_, 'foe');
+	_set(@_, 'foe', FOE);
 }
 
 sub _set {
-	my($self, $uid, $person, $type) = @_;
+	my($self, $uid, $person, $type, $const) = @_;
 
-	$self->sqlDo("REPLACE INTO people (uid,person,type) VALUES ($uid, $person, $type)");
+	$self->sqlDo("REPLACE INTO people (uid,person,type) VALUES ($uid, $person, '$type')");
+	my $slashdb = getCurrentDB();
+	my $people = $slashdb->getUser($uid, 'people');
+	$people->{$person} = {$const};
+	$slashdb->setUser($uid, { people => $people })
 }
 
 sub isFriend {
@@ -113,6 +118,12 @@ sub isFoe {
 sub delete {
 	my($self, $uid, $person) = @_;
 	$self->sqlDo("DELETE FROM people WHERE uid=$uid AND person=$person");
+	my $slashdb = getCurrentDB();
+	my $people = $slashdb->getUser($uid, 'people');
+	if ($people) {
+		delete $people->{$person};
+		$slashdb->setUser($uid, { people => $people })
+	}
 }
 
 
