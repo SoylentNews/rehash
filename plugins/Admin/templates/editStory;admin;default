@@ -21,7 +21,7 @@ __template__
 [% IF storyref.title %]
 	<TABLE>
 		<TR VALIGN=TOP>
-			<TD>
+			<TD WIDTH="100%">
 			[% storycontent %]
 			</TD>
 
