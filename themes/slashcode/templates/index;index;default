@@ -4,7 +4,7 @@ __description__
 This is the main block of html and code that gets evaled to create the main
 index page.
 
-* is_moderator = boolean for whether current user has moderator access
+* metamod_elig = boolean for whether current user is eligible to metamod
 * stories = string containing all the stories
 * boxes = string containing all the slashboxes
 __title__
@@ -19,8 +19,13 @@ __template__
 [% USE Slash %]
 
 [% UNLESS user.is_anon %]
-[% IF is_moderator %]
+[% IF metamod_elig %]
 Have you <B><A HREF="[% constants.rootdir %]/metamod.pl">Meta Moderated</A></B> recently?<BR>
+[% END %]
+[% IF user.points > 0 %]
+You have <B>[% user.points %]
+<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator</A>
+Points!</B> Use 'em or lose 'em!<BR>
 [% END %]
 
 [% messages = Slash.getObject("Slash::Messages");
