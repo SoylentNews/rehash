@@ -1473,21 +1473,23 @@ sub moderateCid {
 		# Next, adjust the appropriate values for the user who
 		# posted the comment.
 		if ($comment->{uid} != $constants->{anonymous_coward_uid}) {
+			my $lost_tokens_per_downmod = 1; # XXX should be a var
 			my $cu_changes = { };
-			$cu_changes->{-tokens} = "tokens - 1" if $val < 0;
-			$cu_changes->{-downmods} = "downmods + 1" if $val < 0;
-			$cu_changes->{-upmods}   =   "upmods + 1" if $val > 0;
 			if ($val < 0) {
 				$cu_changes->{-karma} = "GREATEST("
 					. "$constants->{minkarma}, karma - 1)";
+				$cu_changes->{-tokens} = "tokens - $lost_tokens_per_downmod";
+				$cu_changes->{-downmods} = "downmods + 1";
 			} elsif ($val > 0) {
 				$cu_changes->{-karma} = "LEAST("
 					. "$constants->{maxkarma}, karma + 1)";
+				$cu_changes->{-upmods} = "upmods + 1";
 			}
 			$slashdb->setUser($comment->{uid}, $cu_changes);
 			# Update stats.
 			if ($val < 0 and my $statsSave = getObject('Slash::Stats::Writer')) {
-				$statsSave->addStatDaily("mod_tokens_lost_downmod", 1);
+				$statsSave->addStatDaily("mod_tokens_lost_downmod",
+					$lost_tokens_per_downmod);
 			}
 		}
 
