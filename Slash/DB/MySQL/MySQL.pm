@@ -5605,11 +5605,11 @@ sub _genericGets {
 		if ($param_table) {
 			my $cache = _genericGetCacheName($self, $table);
 			for (@$values) {
-				(my $clean_val = $values) =~ s/^-//;
+				(my $clean_val = $_) =~ s/^-//;
 				if ($self->{$cache}{$clean_val}) {
 					push @$get_values, $_;
 				} else {
-					my $val = $self->sqlSelectAll('$table_prime, name, value', $param_table, "name='$_'");
+					my $val = $self->sqlSelectAll("$table_prime, name, value", $param_table, "name='$_'");
 					for my $row (@$val) {
 						push @$params, $row;
 					}
@@ -5618,9 +5618,11 @@ sub _genericGets {
 		} else {
 			$get_values = $values;
 		}
-		my $val = join ',', @$get_values;
-		$val .= ",$table_prime" unless grep $table_prime, @$get_values;
-		$sth = $self->sqlSelectMany($val, $table);
+		if ($get_values) {
+			my $val = join ',', @$get_values;
+			$val .= ",$table_prime" unless grep $table_prime, @$get_values;
+			$sth = $self->sqlSelectMany($val, $table);
+		}
 	} elsif ($values) {
 		if ($param_table) {
 			my $cache = _genericGetCacheName($self, $table);
@@ -5669,6 +5671,7 @@ sub _genericGets {
 # This is only called by Slash/DB/t/story.t and it doesn't even serve much purpose
 # there...I assume we can kill it?  - Jamie
 # Actually, we should keep it around since it is a generic method -Brian
+# I am using it for something on OSDN.com
 sub getStories {
 	my $answer = _genericGets('stories', 'sid', 'story_param', @_);
 	return $answer;
