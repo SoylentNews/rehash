@@ -575,7 +575,6 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 # (this template was renamed; the new "listRepos" will be added back
 # in with a "template-tool -U")
 
-# FOUNDRIES TEST SITE LAST UPDATED HERE
 
 # End of T_2_3_0_37, Start of T_2_3_0_38
 
@@ -731,7 +730,6 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes o
 # For plugins/Zoo (ignore if you're not using that plugin)
 # Run the script "plugins/Zoo/rebuildPeople"
 
-# FOUNDRIES LAST UPDATED HERE 9-12-02 Hey - it's been great 
 # working with all of you - good luck!
 # Best wishes!
 
@@ -1198,6 +1196,7 @@ INSERT INTO vars (name, value, description) VALUES ('comments_mod_totals_exact',
 ALTER TABLE string_param MODIFY COLUMN type VARCHAR(32) NOT NULL;
 
 # DEVCHANNEL LAST UPDATED HERE
+# FOUNDRIES LAST UPDATED
 
 UPDATE message_codes SET type = 'Comment Moderation' WHERE code = 3;
 UPDATE message_codes SET type = 'Comment Reply' WHERE code = 4;
