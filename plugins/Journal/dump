@@ -33,3 +33,6 @@ INSERT INTO vars (name, value, description) VALUES ('max_journal_allowed','30','
 INSERT INTO vars (name, value, description) VALUES ('max_journals_unusedfk','2000','How many unused formkeys are permitted');
 
 INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('top10journals','',1000,'portald','Top 10 Journals for slashboxes.','mainpage',3,'Most Recent Journal Entries',1,'http://www.example.com/journal.pl?op=top','http://www.example.com/journal.pl?op=top&content_type=rss',1);
+
+INSERT INTO vars (name, value, description) VALUES ('journal_rdfitemdesc','0','1 == include introtext in item description; 0 == don\'t.  Any other number is substr() of introtext to use');
+INSERT INTO vars (name, value, description) VALUES ('journal_rdfitemdesc_html','0','1 == include HTML in item description; 0 == strip HTML (plain text only)');

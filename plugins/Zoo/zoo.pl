@@ -788,7 +788,8 @@ sub _rss {
 			description	=> "$constants->{sitename} $nick's ${type}",
 		},
 		image	=> 1,
-		items	=> \@items
+		items	=> \@items,
+		rdfitemdesc => 1,
 	});
 }
 

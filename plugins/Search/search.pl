@@ -452,7 +452,9 @@ sub storySearchRSS {
 			description	=> "$constants->{sitename} Story Search",
 		},
 		image	=> 1,
-		items	=> \@items
+		items	=> \@items,
+		rdfitemdesc		=> $constants->{search_rdfitemdesc},
+		rdfitemdesc_html	=> $constants->{search_rdfitemdesc_html},
 	});
 }
 
@@ -563,7 +565,9 @@ sub journalSearchRSS {
 			description	=> "$constants->{sitename} Journal Search"
 		},
 		image	=> 1,
-		items	=> \@items
+		items	=> \@items,
+		rdfitemdesc		=> $constants->{search_rdfitemdesc},
+		rdfitemdesc_html	=> $constants->{search_rdfitemdesc_html},
 	});
 }
 
@@ -644,7 +648,9 @@ sub submissionSearchRSS {
 			description	=> "$constants->{sitename} Submission Search",
 		},
 		image	=> 1,
-		items	=> \@items
+		items	=> \@items,
+		rdfitemdesc		=> $constants->{search_rdfitemdesc},
+		rdfitemdesc_html	=> $constants->{search_rdfitemdesc_html},
 	});
 }
 
@@ -721,7 +727,9 @@ sub rssSearchRSS {
 			description	=> "$constants->{sitename} RSS Search",
 		},
 		image	=> 1,
-		items	=> \@items
+		items	=> \@items,
+		rdfitemdesc		=> $constants->{search_rdfitemdesc},
+		rdfitemdesc_html	=> $constants->{search_rdfitemdesc_html},
 	});
 }
 

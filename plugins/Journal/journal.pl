@@ -235,7 +235,9 @@ sub displayRSS {
 			creator		=> $usertext,
 		},
 		image	=> 1,
-		items	=> \@items
+		items	=> \@items,
+		rdfitemdesc		=> $constants->{journal_rdfitemdesc},
+		rdfitemdesc_html	=> $constants->{journal_rdfitemdesc_html},
 	});
 }
 

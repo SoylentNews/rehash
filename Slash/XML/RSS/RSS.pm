@@ -159,10 +159,6 @@ sub create {
 		? $param->{rdfitemdesc_html}
 		: $constants->{rdfitemdesc_html};
 
-	# since we do substr if rdfitemdesc != 1, and that would break HTML,
-	# do it for that too (can be fixed later) -- pudge
-	$self->{rdfitemdesc_html} = 0 unless $self->{rdfitemdesc} == 1;
-
 	my $rss = XML::RSS->new(
 		version		=> $version,
 		encoding	=> $encoding,
@@ -452,6 +448,7 @@ sub rss_item_description {
 				$desc = substr($desc, 0, $self->{rdfitemdesc});
 				$desc =~ s/\S+$//;
 				$desc .= '...';
+				$desc = balanceTags($desc) if $self->{rdfitemdesc_html};
 			}
 		}
 
