@@ -6490,7 +6490,8 @@ sub getStoriesEssentials {
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
 	my $can_restrict_by_min_stoid = 1;
-#use Data::Dumper; errorLog("gSE gSkin: " . Dumper($gSkin));
+#use Data::Dumper;
+#print STDERR "gSE gSkin: " . Dumper($gSkin);
 
 	# Here, limit is how many we want "for the main display"
 	# and limit_extra is how many we want "spillover into the
@@ -6505,7 +6506,7 @@ sub getStoriesEssentials {
 	my $limit = $options->{limit} || $gSkin->{artcount_max};
 	$limit += $options->{limit_extra}
 		|| int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
-#errorLog("gSE limit '$limit' oplim '$options->{limit}' acmax '$gSkin->{artcount_max}' oplimex '$options->{limit_extra}' acmin '$gSkin->{artcount_min}'");
+#print STDERR "gSE limit '$limit' oplim '$options->{limit}' acmax '$gSkin->{artcount_max}' oplimex '$options->{limit_extra}' acmin '$gSkin->{artcount_min}'\n";
 	$can_restrict_by_min_stoid = 0 if $limit > 100
 		|| $options->{limit}       > $gSkin->{artcount_max}
 		|| $options->{limit_extra} > $gSkin->{artcount_max};
@@ -6576,15 +6577,16 @@ sub getStoriesEssentials {
 	my $where = "stories.stoid = story_topics_rendered.stoid AND in_trash = 'no' AND $where_time";
 	$where .= " AND ($restrict_clause)" if $restrict_clause;
 
+	my $issue = $options->{issue} || "";
+	$issue = "" if $issue !~ /^\d{8}$/;
 	my $issue_clause = "";
-	if ($options->{issue} && $options->{issue} =~ /^\d{8}$/) {
+	if ($issue) {
 		my $issue_lookback_days = $constants->{issue_lookback_days} || 7;
-		my $issue = $options->{issue};
 		my $issue_oldest =   timeCalc("${issue}000000", "%Y-%m-%d %T",
-			- $user->{off_set} - 84600*7);
+			- $user->{off_set} - 84600*$issue_lookback_days);
 		my $issue_youngest = timeCalc("${issue}235959", "%Y-%m-%d %T",
 			- $user->{off_set});
-		$issue_clause = "time BETWEEN '$issue_youngest' AND '$issue_oldest'";
+		$issue_clause = "time BETWEEN '$issue_oldest' AND '$issue_youngest'";
 		$can_restrict_by_min_stoid = 0;
 	}
 	$where .= " AND $issue_clause" if $issue_clause;
@@ -6596,6 +6598,7 @@ sub getStoriesEssentials {
 	if ($min_stoid) {
 		$where .= " AND stories.stoid >= '$min_stoid' ";
 	}
+#print STDERR "gSE final where: '$where'\n";
 
 	my @stories = ( );
 	my $qlid = $self->_querylog_start("SELECT", $tables);

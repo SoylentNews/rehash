@@ -72,7 +72,9 @@ my $start_time = Time::HiRes::time;
 
 	# Decide what our limit is going to be.
 	my $limit;
-	if ($form->{issue}) {
+	my $issue = $form->{issue} || "";
+	$issue = "" if $issue !~ /^\d{8}$/;
+	if ($issue) {
 		if ($user->{is_anon}) {
 			$limit = $gSkin->{artcount_max} * 3;
 		} else {
@@ -92,7 +94,11 @@ my $start_time = Time::HiRes::time;
 
 	my $gse_hr = { tid => $gSkin->{nexus} };
 	$gse_hr->{limit} = $user_maxstories if !$user->{is_anon} && $user_maxstories;
+	$gse_hr->{issue} = $issue if $issue;
 	$stories = $reader->getStoriesEssentials($gse_hr);
+#use Data::Dumper;
+#print STDERR "index.pl gse_hr: " . Dumper($gse_hr);
+#print STDERR "index.pl gSE stories: " . Dumper($stories);
 
 	# We may, in this listing, have a story from the Mysterious Future.
 	# If so, there are three possibilities:
@@ -129,6 +135,9 @@ my $start_time = Time::HiRes::time;
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
 	# index_more block (aka Older Stuff).
+	# We really should make displayStories() _return_ the leftover
+	# stories as well, instead of modifying $stories in place to just
+	# suddenly mean something else.
 	my $linkrel = {};
 	$Stories = displayStories($stories, $linkrel);
 
