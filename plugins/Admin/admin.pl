@@ -760,10 +760,10 @@ sub topicSave {
 	my $basedir = getCurrentStatic('basedir');
 
 	if ($form->{tid}) {
-		$slashdb->saveTopic();
 		if (!$form->{width} && !$form->{height}) {
 		    @{ $form }{'width', 'height'} = imgsize("$basedir/images/topics/$form->{image}");
 		}
+		$slashdb->saveTopic();
 	}
 	
 	$form->{nexttid} = $form->{tid};
