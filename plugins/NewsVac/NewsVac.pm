@@ -1268,7 +1268,8 @@ DELETE FROM rel WHERE from_url_id IN $id_list OR to_url_id IN $id_list
 EOT
 
 	# Yes, we want to delete url IDs, but NOT ones associated with a miner.
-	# That would be bad.
+	# That would be bad (since as long as this record is in place, all 
+	# content in the remaining NewsVac tables can be refreshed if need be).
 	$self->sqlDo(<<EOT);
 DELETE FROM url_info WHERE url_id IN $id_list AND miner_id=0
 EOT
@@ -2464,6 +2465,7 @@ sub trim_body {
 		# What the hell are THESE for? The sole purpose, as I see it, is to
 		# break any pre regexp entered!
 		#$the_reg =~ s{^(\(\?i\))?(.*)}{$1\\A[\\000-\\377]*$2};
+
 		$self->errLog(getData('trim_body_thereg', {
 			the_reg => $the_reg,
 			miner_id=> $miner_id,
@@ -2685,148 +2687,154 @@ sub parse_miner {
 		$nugget{$key}++;
 	}
 
-	if (%nugget) {
-		my @nugget_keys = keys %nugget;
-		$self->errLog("nugget keys: @nugget_keys") if $self->{debug} > 1;
+	# If the hash is empty, time to bail, but the success flag is still
+	# set.
+	return {
+		is_success 	=> 1,
+		n_nuggets 	=> 0,
+		miner_id	=> $info_ref->{miner_id}
+	} if !%nugget;
+
+	my @nugget_keys = keys %nugget;
+	$self->errLog("nugget keys: @nugget_keys") if $self->{debug} > 1;
+	for (@nugget_keys) {
+		delete $nugget{$_};
+		($count, $url, $title, $source, $slug, $body) =
+			split("\n", $_);
+		$url =~ s/\s+//g;
+		if ($url) {
+			$self->errLog(getData('parse_miner_showurl', {
+				url		=> $url,
+				base_url	=> $base_url,
+				url_base	=> $info_ref->{url_base},
+				url_orig	=> $url_orig,
+			})) if $self->{debug} > 1;
+
+			$url = URI->new_abs(
+				$url, 
+				$base_url
+			)->canonical()->as_string();
+		}
+		if ($url !~ /^(http|ftp):/) {
+			my($origurl, $etc) = split("\n", $_);
+
+			$self->errLog(getData('parse_miner_badproto', {
+				url	=> $url,
+				url_orig=> $origurl,
+				base_url=> $base_url,
+			})) if $self->{debug} > 1;
+			next ;
+		}
+		$title  = tag_space_squeeze($title);
+		$source = tag_space_squeeze($source);
+		$slug   = tag_space_squeeze($slug);
+		$body   = tag_space_squeeze($body);
+		$key    = join "\n",
+			($count, $url, $title, $source, $slug, $body);
+		$nugget{$key}++;
+       	}
+
+	@nugget_keys =  map { $_->[0] } 
+			sort { $a->[1] <=> $b->[1] }
+			map { [ $_, (split "\n", $_)[0] ] }
+			keys %nugget;
+
+	my %seen_url = ( );
+	$self->errLog(getData('parse_miner_nuggetkeys', {
+		nugget_keys => \@nugget_keys,
+	})) if $self->{debug} > 1;
+	if ($tweak_code) {
+		die "tweak_code contains attempted system call!!!"
+			if $tweak_code =~ /`|(system|exec|open) /;
 		for (@nugget_keys) {
-			delete $nugget{$_};
-			($count, $url, $title, $source, $slug, $body) =
+			my $cancel = 0;
+
+			($count, $url, $title, $source, $slug, $body) = 
 				split("\n", $_);
-			$url =~ s/\s+//g;
-			if ($url) {
-				$self->errLog(getData('parse_miner_showurl', {
-					url		=> $url,
-					base_url	=> $base_url,
-					url_base	=> $info_ref->{url_base},
-					url_orig	=> $url_orig,
-				})) if $self->{debug} > 1;
-
-				$url = URI->new_abs(
-					$url, 
-					$base_url
-				)->canonical()->as_string();
-			}
-			if ($url !~ /^(http|ftp):/) {
-				my($origurl, $etc) = split("\n", $_);
-
-				$self->errLog(getData('parse_miner_badproto', {
-					url	=> $url,
-					url_orig=> $origurl,
-					base_url=> $base_url,
-				})) if $self->{debug} > 1;
-				next ;
-			}
-			$title  = tag_space_squeeze($title);
-			$source = tag_space_squeeze($source);
-			$slug   = tag_space_squeeze($slug);
-			$body   = tag_space_squeeze($body);
-			$key    = join "\n",
-				($count, $url, $title, $source, $slug, $body);
-			$nugget{$key}++;
-        	}
-
-		@nugget_keys =  map { $_->[0] } 
-				sort { $a->[1] <=> $b->[1] }
-				map { [ $_, (split "\n", $_)[0] ] }
-				keys %nugget;
-
-		my %seen_url = ( );
-		$self->errLog(getData('parse_miner_nuggetkeys', {
-			nugget_keys => \@nugget_keys,
-		})) if $self->{debug} > 1;
-		if ($tweak_code) {
-			die "tweak_code contains attempted system call!!!"
-				if $tweak_code =~ /`|(system|exec|open) /;
-			for (@nugget_keys) {
-				my $cancel = 0;
-
-				($count, $url, $title, $source, $slug, $body) = 
-					split("\n", $_);
-				my $seen_url = defined($seen_url{$url}) ? 1 : 0;
-				eval $tweak_code;
-				delete $nugget{$_};
-				if (!$cancel) {
-					$nugget{$_}++;
-					$seen_url{$url} = 1;
-				}
-			}
-		}
-	
-		# From this point on, we don't want the "count" because all hits
-		# with the same data should be counted only once.
-		@nugget_keys = keys %nugget;
-		for (@nugget_keys) {
+			my $seen_url = defined($seen_url{$url}) ? 1 : 0;
+			eval $tweak_code;
 			delete $nugget{$_};
-			# "$count\n$title\n$source\n$slug\n$body"
-			s/^(\d+)\n//;
-			$nugget{$_}++;
+			if (!$cancel) {
+				$nugget{$_}++;
+				$seen_url{$url} = 1;
+			}
 		}
+	}
 
-		@nugget_keys = sort keys %nugget;
-		$self->errLog(getData('parse_miner_nuggetinfo', {
-			miner_id	=> $info_ref->{miner_id},
-			miner_name	=> $hr->{name},
-			nugget_keys	=> \@nugget_keys,
-		})) if $self->{debug} > 1;
-		if ($self->{debug} > 0) {
-			$self->errLog(getData('parse_miner_preaddnugget'));
+	# From this point on, we don't want the "count" because all hits
+	# with the same data should be counted only once.
+	@nugget_keys = keys %nugget;
+	for (@nugget_keys) {
+		delete $nugget{$_};
+		# "$count\n$title\n$source\n$slug\n$body"
+		s/^(\d+)\n//;
+		$nugget{$_}++;
+	}
+
+	@nugget_keys = sort keys %nugget;
+	$self->errLog(getData('parse_miner_nuggetinfo', {
+		miner_id	=> $info_ref->{miner_id},
+		miner_name	=> $hr->{name},
+		nugget_keys	=> \@nugget_keys,
+	})) if $self->{debug} > 1;
+	if ($self->{debug} > 0) {
+		$self->errLog(getData('parse_miner_preaddnugget'));
+		$self->timing_dump();
+	}
+
+	my(@nugget_hashes, @bodies);
+	for (@nugget_keys) {
+		($url, $title, $source, $slug, $body) = split("\n", $_);
+		
+		push @nugget_hashes, {
+			source_url_id		=> $url_id,
+			source_url		=> $url_orig,
+			dest_url		=> $url,
+			title			=> $title,
+			source			=> $source,
+			slug			=> $slug,
+			response_timestamp	=> $response_timestamp,
+		};
+		push @bodies, $body;
+	}
+	$self->errLog(getData('parse_miner_shownuggets', {
+		nuggets	=> \@nugget_hashes,
+		bodies	=> \@bodies,
+	})) if $self->{debug} > 1;
+	@bodies = ();
+
+	$mid_time_1 = Time::HiRes::time() - $start_time;
+	$self->errLog(getData('parse_miner_addnuggetstart', {
+		miner_id	=> $info_ref->{miner_id},
+		url_id		=> $url_id,
+		num		=> scalar @nugget_hashes,
+	})) if $self->{debug} > 1;
+	my @nugget_url_ids = $self->add_nuggets_return_ids(
+		$hr->{name}, @nugget_hashes
+	);
+	$self->errLog(getData('parse_miner_addnuggetend', {
+		nugget_url_ids	=> \@nugget_url_ids,
+	})) if $self->{debug} > 1;
+	$mid_time_2 = Time::HiRes::time() - $start_time;
+
+	$self->errLog(getData('parse_miner_processurlstart', {
+		miner_id	=> $info_ref->{miner_id},
+		url_id		=> $url_id,
+	})) if $self->{debug} > 1;
+	# This is kinda unusual.  Adding a nugget means processing it
+	# automatically. This is computationally cheap because there's
+	# no need to hit the network or do a ton of processing; 
+	# basically this is the canonical way to go ahead and add the
+	# dest_url and link the nugget_url to it.
+
+	# Let's try not doing this...
+#	$self->process_url_ids(
+#		{ use_current_time => $response_timestamp },
+#		@nugget_url_ids
+#	);
+	if ($self->{debug} > 0) {
+		$self->errLog(getData('parse_miner_processurlend'));
 			$self->timing_dump();
-		}
-
-		my(@nugget_hashes, @bodies);
-		for (@nugget_keys) {
-			($url, $title, $source, $slug, $body) = split("\n", $_);
-			
-			push @nugget_hashes, {
-				source_url_id		=> $url_id,
-				source_url		=> $url_orig,
-				dest_url		=> $url,
-				title			=> $title,
-				source			=> $source,
-				slug			=> $slug,
-				response_timestamp	=> $response_timestamp,
-			};
-			push @bodies, $body;
-		}
-		$self->errLog(getData('parse_miner_shownuggets', {
-			nuggets	=> \@nugget_hashes,
-			bodies	=> \@bodies,
-		})) if $self->{debug} > 1;
-		@bodies = ();
-
-		$mid_time_1 = Time::HiRes::time() - $start_time;
-		$self->errLog(getData('parse_miner_addnuggetstart', {
-			miner_id	=> $info_ref->{miner_id},
-			url_id		=> $url_id,
-			num		=> scalar @nugget_hashes,
-		})) if $self->{debug} > 1;
-		my @nugget_url_ids = $self->add_nuggets_return_ids(
-			$hr->{name}, @nugget_hashes
-		);
-		$self->errLog(getData('parse_miner_addnuggetend', {
-			nugget_url_ids	=> \@nugget_url_ids,
-		})) if $self->{debug} > 1;
-		$mid_time_2 = Time::HiRes::time() - $start_time;
-
-		$self->errLog(getData('parse_miner_processurlstart', {
-			miner_id	=> $info_ref->{miner_id},
-			url_id		=> $url_id,
-		})) if $self->{debug} > 1;
-		# This is kinda unusual.  Adding a nugget means processing it
-		# automatically. This is computationally cheap because there's
-		# no need to hit the network or do a ton of processing; 
-		# basically this is the canonical way to go ahead and add the
-		# dest_url and link the nugget_url to it.
-
-		# Let's try not doing this...
-#		$self->process_url_ids(
-#			{ use_current_time => $response_timestamp },
-#			@nugget_url_ids
-#		);
-		if ($self->{debug} > 0) {
-			$self->errLog(getData('parse_miner_processurlend'));
-				$self->timing_dump();
-		}
 	}
 
 	my $duration = Time::HiRes::time() - $start_time;
@@ -3257,6 +3265,7 @@ sub spider {
 }
 
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -3282,6 +3291,7 @@ Foooooooo.
 =back
 
 =cut
+
 sub spider_init {
 	my ($self, $conditions_ref, $group_0_wheres_ref) = @_;
     
@@ -3335,27 +3345,35 @@ sub spider_init {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 garbage_collect( )
+
+Removes stale data from the NewsVac data, based on time-based
+criterion.
 
 =over 4
 
 =item Parameters
 
-=over 4
-
-=item
-
-=back
+No parameters.
 
 =item Return value
 
+None.
 
 =item Side effects
 
+Deletes the first 10,000 rows from the following tables that are older than a
+certain age or satisfy a condition:
+
+	'rel' 		- older than 45 days.
+	'url_info'	- not associated with any miner or relationship
+	
+	All tables 	- refers to a non-miner URL ID that is over a week old
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -3420,6 +3438,7 @@ sub garbage_collect {
 }
 
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -3445,6 +3464,7 @@ Foooooooo.
 =back
 
 =cut
+
 sub robosubmit {
 	my($self) = @_;
 
@@ -3915,43 +3935,68 @@ sub getDayCounts {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 getMinerList( )
+
+Returns the lists of defined miners. Two lists are returned 
+becuase we need to separate miners that are using any
+of the defined URLs from new or unused miners that may not
+have any assigned.
 
 =over 4
 
 =item Parameters
 
-=over 4
-
-=item
-
-=back
+None.
 
 =item Return value
 
-
+A list containing 2 array references, they are respectively:
+	List of miners with referneced URLs
+	List of miners with NO refernenced URLs
+	
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getMinerList {
 	my($self) = @_;
 
-	my $returnable = $self->sqlSelectAllHashrefArray(
-                "miner.miner_id, name, last_edit, last_edit_aid, owner_aid,
-                 progress, comment, count(url_info.url_id) as url_count", 
-                "miner, url_info",
-                "url_info.miner_id = miner.miner_id",
-                "GROUP BY miner.miner_id ORDER BY name"
+        my $columns = <<EOT;
+miner.miner_id, name, last_edit, last_edit_aid, owner_aid,
+progress, comment, count(url_info.url_id) as url_count
+EOT
+
+	my $returnable1 = $self->sqlSelectAllHashrefArray(
+		$columns, 
+
+                'miner, url_info',
+
+                'url_info.miner_id = miner.miner_id',
+
+                'GROUP BY miner.miner_id ORDER BY name'
         );
 
-	return $returnable;
+	my $returnable2 = $self->sqlSelectAllHashrefArray(
+		$columns,
+
+		'miner LEFT JOIN url_info ON
+		 miner.miner_id=url_info.miner_id',
+
+		 'url_info.miner_id IS NULL',
+
+		 'GROUP BY miner.miner_id ORDER BY name'
+	);
+
+	return ($returnable1, $returnable2);
 }
 
 ############################################################
@@ -4030,6 +4075,7 @@ sub getMinerURLs {
 }
 
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -4055,6 +4101,7 @@ Foooooooo.
 =back
 
 =cut
+
 sub setMiner {
 	my($self, $miner_id, $data) = @_;
 
@@ -4064,9 +4111,10 @@ sub setMiner {
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 deleteMiner(miner_id)
+
+Removes the given miner from the NewsVac database.
 
 =over 4
 
@@ -4074,30 +4122,134 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $miner_id - Numeric ID associated with the miner to be removed.
 
 =back
 
 =item Return value
 
+Result of Slash::DB::sqlDelete() call.
 
 =item Side effects
 
+If successful, removes a row from the 'miner' table.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
-sub delMiner {
+
+sub deleteMiner {
 	my($self, $miner_id) = @_;
 
-	$self->sqlDo(
-		'DELETE FROM miner WHERE miner_id=' . $self->sqlQuote($miner_id)
-	);
+	$self->sqlDelete('miner', 'miner_id=' . $self->sqlQuote($miner_id));
 }
 
 ############################################################
+
+=head2 deleteSpider(spider_id)
+
+Removes the given spider from the NewsVac
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+item $spider_id - Numeric ID associated with the spider to be removed.
+
+=back
+
+=item Return value
+
+Result of Slash::DB::sqlDelete() call.
+
+=item Side effects
+
+If successful, removes a row from the 'spider' table.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub deleteSpider {
+	my($self, $spider_id) = @_;
+
+	$self->sqlDelete('spider', 'spider_id=' . $self->sqlQuote($spider_id));
+}
+
+############################################################
+
+=head2 deleteURL(miner_id)
+
+Removes the given URL from the NewsVac database. Unlike delete_url_ids(), no
+checks are performed on the URL to be deleted and only one URL is deleted at 
+a time.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $url_id - Numeric ID associated with the URL to be removed.
+
+=back
+
+=item Return value
+
+Result of the FINAL Slash::DB::sqlDelete() call, which is to the 'url_info'
+table. Better error checking here would be a good thing, however, what would
+be the best way to handle them?
+
+=item Side effects
+
+If successful, removes all rows from the following table that reference the
+given URL ID:
+	url_analysis
+	url_content
+	url_info
+	url_message_body
+	url_plaintext
+	rel
+	nugget_sub
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub deleteURL {
+	my ($self, $url_id) = @_;
+
+	my $q_id = $self->sqlQuote($url_id);
+	my $where = "url_id=$q_id";
+	my $where2 = "from_url_id=$q_id or to_url_id=$q_id";
+
+	$self->sqlDelete('url_analysis', $where);
+	$self->sqlDelete('url_content', $where);
+    	$self->sqlDelete('url_message_body', $where);
+	$self->sqlDelete('url_plaintext', $where);
+	$self->sqlDelete('nugget_sub', $where);
+
+	$self->sqlDelete('rel', $where2);
+
+	$self->sqlDelete('url_info', $where);
+}
+
+############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -4379,8 +4531,10 @@ sub getURLRelationCount {
 
 	my $returnable = $self->sqlSelectColArrayref(
 		'count(*)', 'rel', 
-		'from_url_id=' . $self->sqlQuote($url_id) . " AND
-		 parse_code = 'miner'",
+		
+		'from_url_id=' . $self->sqlQuote($url_id) .
+		" AND parse_code='miner'",
+
 		'GROUP BY to_url_id'
 	);
 
@@ -4559,9 +4713,10 @@ EOT
 }
 
 ############################################################
-=head2 foo( [, ])
 
-Foooooooo.
+=head2 setSpider(spider_id, data)
+
+Update's the data for a given spider in the NewsVac database.
 
 =over 4
 
@@ -4569,21 +4724,28 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $spider_id - ID associated with the spider to update.
+
+=item $data - Hashref containing spider data.
 
 =back
 
 =item Return value
 
+Result of Slash::DB::sqlUpdate() call that sets the spider data.
 
 =item Side effects
 
+Updates the 'spider' table with new information.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub setSpider {
 	my($self, $spider_id, $data) = @_;
 
@@ -4593,7 +4755,131 @@ sub setSpider {
 }
 
 ############################################################
-=head2 foo( [, ])
+
+=head2 setSpiderTimespecs(spider_id, timespecs)
+
+Update's the data for a given spider in the NewsVac database.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $spider_id
+ID associated with the spider to update.
+
+=item %$data
+Hashref of hasrefs containing the timespec data. Each element of the hashref 
+is arranged as follows:
+
+	timespec_id =>	{
+		timespec	=> string containing time specification
+		spider name	=> name of spider associated with this spec
+		del 		=> Logical true if this timespec is to be
+				   removed.
+	}
+
+If a timespec_id of 0 is given, then the data for that key is inserted into 
+the 'spider_timespec' table. Only one insert per call to this method is
+performed.
+
+=back
+
+=item Return value
+
+None.
+
+=item Side effects
+
+Updates the 'spider_timespec' table with new information.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub setSpiderTimespecs {
+	my($self, $spider_id, $timespecs) = @_;
+	return if !$timespecs || !%{$timespecs};
+
+	for (keys %{$timespecs}) {
+		if ($timespecs->{$_}{del}) {
+			$self->sqlDelete(
+				'spider_timespec', 
+				'timespec_id=' . $self->sqlQuote($_)
+			);
+		} elsif (!$_) {
+			# If the timespec_id is 0, this is a new record to be 
+			# inserted. There can only be one insert per call 
+			# to this routine.
+			$self->sqlInsert('spider_timespec', {
+				name 		=> $timespecs->{$_}{name},
+				timespec	=> $timespecs->{$_}{timespec},
+				-last_run	=> 'now()',
+			});
+		} else {
+			$self->sqlReplace('spider_timespec', {
+				timespec_id	=> $_,
+				name		=> $timespecs->{$_}{name},
+				timespec	=> $timespecs->{$_}{timespec},
+			});
+		}
+	}
+}
+
+############################################################
+
+=head2 getSpiderTimespecs(spider_id)
+
+Retrieves time specifications associated with a given spider ID.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $spider_id - ID associated with the spider of inquiry.
+
+=back
+
+=item Return value
+
+Returns an array of hashrefs containing timespec information.
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub getSpiderTimespecs {
+	my($self, $spider_id) = @_;
+
+	my $spider_name = $self->getSpiderName($spider_id);
+	my $returnable = $self->sqlSelectAllHashrefArray(
+		'*',
+		'spider_timespec',
+		'name=' . $self->sqlQuote($spider_name)
+	);
+
+	return $returnable;
+}
+
+
+############################################################
+
+=head2 getSpiderName(spider_id)
 
 Foooooooo.
 
@@ -4603,21 +4889,27 @@ Foooooooo.
 
 =over 4
 
-=item
+=item $spider_id - ID associated with the spider of inquiry.
 
 =back
 
 =item Return value
 
+String containing the name of the spider. The return value is undefined if
+no spider is associated with the given ID.
 
 =item Side effects
 
+None.
 
 =item Dependencies
+
+None.
 
 =back
 
 =cut
+
 sub getSpiderName {
 	my($self, $spider_id) = @_;
 
@@ -5106,6 +5398,9 @@ None.
 =back
 
 =cut
+
+# Might be better if this becomes part of Slash::Utility::Data, that way 
+# other things (like newsvac.pl) can use it.
 sub round {
 	my($num, $sig) = @_;
 	return 0 if $num == 0;

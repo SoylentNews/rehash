@@ -11,8 +11,6 @@ en_US
 __name__
 show_miner_rel_info
 __template__
-[% # show_miner_rel_info %]
-
 <p>
 <table width="100%">
 	<tr>
@@ -43,7 +41,9 @@ __template__
 
 	<tr valign="top">
 		<td align=right>
-		<A HREF="[% env.script_name %]?op=editurl&url_id=[% hashref.url_id %]">[% hashref.url_id %]</a>
+		<A HREF="[% constants.rootdir
+		-%]/newsvac.pl?op=editurl&url_id=[% hashref.url_id %]">[% 
+		hashref.url_id -%]</a>
 		</td>
 		<td>[% hashref.last_attempt %]</td>
 		<td>[% hashref.last_success %]</td>

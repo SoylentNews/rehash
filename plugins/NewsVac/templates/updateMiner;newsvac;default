@@ -11,37 +11,40 @@ en_US
 __name__
 updateMiner
 __template__
-[% # updateMiner %]
-
-[% IF form.op == 'newminer' %]
+[% IF form.op == 'newminer' -%]
 [% INCLUDE titlebar width="100%" title="new miner" %]
         
-[% ELSIF form.updateminer %]
+[% ELSIF form.updateminer -%]
 [% INCLUDE titlebar width="100%" title="Miner '$name' saved." %]
 
-[% ELSIF form.deleteminer %]
-
-	[% IF num > 0 %]
-[% INCLUDE titlebar
-	width="100%" 
-	title="<B>Cannot delete miner '$name', in use by $url_ar.size URLs</B>"
-%]
-
+[% ELSIF form.deleteminer;
+	IF urls && urls.size > 0;
+		title= BLOCK -%]<B>Cannot delete miner '[% 
+		name -%]'. It is in use by [% urls.size %] URLs</B>[% END;
+		INCLUDE titlebar width="100%";
+-%]
 <p>You can't delete that miner, it's being used by the following URL(s):
 <UL>
-	[% FOREACH url = url_ar -%]
-<LI>$url_id <a href="$url">$url</a></LI>
-	[% END %]
+[% 		FOREACH u = urls -%]
+<LI>[% u.0 %]&nbsp;&nbsp;<a href="[% u.1 %]">[% IF u.1.length > 35 %][% 
+u.1.substr(0,35) -%]...[% ELSE %][% u.1 %][% END %]</a></LI>
+[% 		END -%]
+
 </UL>
-	
 <p>If you really want to delete it, edit each URL to stop using it.
-
-	[% ELSE %] 
-[% INCLUDE titlebar
-	width="100%" 
-	title="<B>Deleted miner '$name' (id $miner_id)!</B>"
-%]
-
-	[% END %]
-
+[% 	ELSE;
+		IF need_confirm -%]
+<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="miner_id" VALUE="[% miner_id %]">
+<INPUT TYPE="HIDDEN" NAME="deleteminer" value=1>
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="updateminer">
+Delete Miner '[% name %]'? 
+<INPUT TYPE="SUBMIT" NAME="noconfirm" VALUE="Cancel">&nbsp;&nbsp;
+<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
+</FORM>
+[%		ELSE;
+			title="<B>Deleted miner '$name' (#$miner_id)!</B>";
+			INCLUDE titlebar width="100%";
+		END -%]
+[% 	END -%]
 [% END %]

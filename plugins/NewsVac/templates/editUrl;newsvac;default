@@ -11,49 +11,47 @@ en_US
 __name__
 editUrl
 __template__
-[% # editUrl %]
-
-[% SWITCH titlebar_type %]
+[% SWITCH titlebar_type -%]
 
 [% CASE 'added';
    INCLUDE titlebar
 	width="100%" 
 	title="Added URL '$new_url', id '$url_id', assigned miner 'none'" 
-%]
+-%]
 
 [% CASE 'existing';
    INCLUDE titlebar
 	width="100%" 
 	title="URL '$new_url' already exists, id '$url_id'" 
-%]
+-%]
 
 [% CASE 'editing';
    INCLUDE titlebar
    	width="100%"
 	title="Editing URL '$url_id'"
-%]
-
-[% END %]
-
+-%]
+[% END -%]
 
 <!-- begin editUrl -->
-<FORM action="[% env.script_name %]" method="GET">
+<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
 
-[% IF !url_id %] 
+[% IF !url_id -%] 
 <p>no URL found with ID '[% url_id %]'
 
-[% ELSE %] 
-[% IF miner_id;
-	miner_id = "<a href=\"$env.script_name?op=editminer&miner_id=$miner_id\">$miner_id</a>";
-   END -%]
-[% DEFAULT 
-	miner_id = "<I>n/a</I>",
-	title = "<I>n/a</I>",
-	last_attempt = "<I>n/a</I>",
-	last_success = "<I>n/a</I>",
-	status_code = "<I>n/a</I>",
-	reason_phrase = "<I>n/a</I>",
-	message_body_length = "<I>n/a</I>"
+[% ELSE -%] 
+[%	IF miner_id;
+		miner_id = BLOCK %]<a href="[% constants.rootdir -
+		%]/newsvac.pl?op=editminer&miner_id=[% miner_id %]">[%
+		miner_id -%]</a>[% END;
+   	END -%]
+[%	DEFAULT 
+		miner_id = "<I>n/a</I>",
+		title = "<I>n/a</I>",
+		last_attempt = "<I>n/a</I>",
+		last_success = "<I>n/a</I>",
+		status_code = "<I>n/a</I>",
+		reason_phrase = "<I>n/a</I>",
+		message_body_length = "<I>n/a</I>"
 -%]
 
 <table border="0">
@@ -79,7 +77,8 @@ __template__
                 <td width="40"><b>Miner name</b>&nbsp;&nbsp;</td>
                 <td>
 		<input type="hidden" name="op" value="updateurl">
-		<input type="text" size="20" name="miner_name" value="[% miner_name %]">
+		<input type="text" size="20" name="miner_name" value="[%
+		miner_name -%]">
 		</td>
         </tr>
         <tr valign=top>
@@ -106,7 +105,8 @@ __template__
                 <td colspan=2 align=center>
 		<input type="submit" name="updateurl" value="Save URL">
                 <input type="submit" name="requesturl" value="Request URL">
-                <input type="submit" name="deleteurl" value="Delete URL"><br>&nbsp;</td>
+                <input type="submit" name="deleteurl" value="Delete URL">
+		<br>&nbsp;</td>
         </tr>
         <tr valign=top>
                 <td colspan=2>
@@ -116,7 +116,6 @@ __template__
         </tr>
 </table>
 [% END %]
-		
 </FORM>
 <p>&nbsp;<p>
 <!-- end editUrl -->

@@ -11,14 +11,12 @@ en_US
 __name__
 editSpider
 __template__
-[% # editSpider %]
-
 <!-- begin editSpider -->
-<FORM action="[% env.script_name %]" method="POST">
+<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
 <INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
 
-[% INCLUDE titlebar width="100%" title="Editing spider '$name'" %]
+[%- INCLUDE titlebar width="100%" title="Editing spider '$name'" -%]
 
 <table border="0">
 	<tr valign=top>
@@ -37,22 +35,55 @@ __template__
 	<tr valign=top>
 		<td width="40"><b>Conditions</b></td>
 		<td>
-		<textarea TYPE="text" cols=80 rows=3 NAME="conditions">[%
+		<textarea cols=80 rows=3 NAME="conditions">[%
 		conditions -%]</textarea>
 		</td>
 	</tr>
 	<tr valign=top>
 		<td width="40"><b>Group 0 Selects</b></td>
 		<td>
-		<textarea TYPE="text" cols=80 rows=3 NAME="group_0_selects">[% 
+		<textarea cols=80 rows=3 NAME="group_0_selects">[% 
 		group_0_selects -%]</textarea></td>
 	</tr>
 	<tr valign=top>
 		<td width="40"><b>Commands</b>&nbsp;&nbsp;</td>
-		<td><textarea TYPE="text" cols=80 rows=6 NAME="commands">[%
+		<td><textarea cols=80 rows=6 NAME="commands">[%
 		commands -%]</textarea></td>
 	</tr>
 </table>
+
+[% 
+DEFAULT timespecs=[];
+IF form.addtimespec; timespecs.push({ timespec_id=>0 }); END;
+IF timespecs.size -%]
+<P>
+[% INCLUDE titlebar width="75%" title="Time Specifications" %]
+<P>
+[%
+	no_insert_ID=1;
+	FOR t=timespecs;
+		IF t.timespec_id == 0; no_insert_ID = 0; END;
+		errkey = "timespec_${t.timespec_id}_err";
+		IF form.$errkey -%]
+<font color="red">[% form.$errkey %]</font><br>
+[%		END -%]
+<input type="text" size=30 NAME="timespec_[% t.timespec_id 
+-%]_timespec" VALUE="[% t.timespec %]">&nbsp;&nbsp;
+[% IF t.timespec_id != 0 %]<input type="checkbox" NAME="timespec_[% 
+t.timespec_id -%]_del">[% END %]<BR>
+[% 
+	END;	# FOR t=timespecs
+	insert_errkey = "timespec_0_err";
+	IF form.$insert_errkey && no_insert_ID -%]
+<font color="red">[% form.$insert_errkey %]</font><br>
+[%	END -%]
+
+<BR><BR>
+<input type="submit" NAME="addtimespec" VALUE="Add Time Specification">
+<BR><BR>
+[% ELSE -%]
+<input type="submit" NAME="addtimespec" VALUE="Add Time Specification">
+[% END -%]
 
 <input type="submit" value="Save Spider">
 <input type="submit" name="runspider" value="Run Spider">

@@ -30,7 +30,9 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+
 use Image::Size;
+use Schedule::Cron;
 
 use vars qw(%nvdescriptions);
 
@@ -39,12 +41,12 @@ $| = 1;
 ##################################################################
 sub listMiners {
 	my ($slashdb, $form, $user, $udbt) = @_;
-        my ($miner_ar, $miner_arrayref, $rel_week_count, $nuggets_day_count);
+        my ($miners_nourl, $miner_arrayref, $rel_week_count, $nuggets_day_count);
 
 	$udbt->timing_clear();
         $rel_week_count = $udbt->getWeekCounts();
 	$nuggets_day_count = $udbt->getDayCounts();
-        $miner_arrayref = $udbt->getMinerList();
+        ($miner_arrayref, $miners_nourl) = $udbt->getMinerList();
 
 	my $i = 0;
 	for (@{$miner_arrayref}) {
@@ -73,8 +75,12 @@ sub listMiners {
 				    $i++ < $#{$miner_arrayref} - 2;
         }
 
+	# Remember, we now list miners with no URLs, otherwise, user-created
+	# miners would remain UNDISPLAYED. 1.x code had this problem, no need
+	# to propagate it here.
 	slashDisplay('listMiners', { 
 		miners 			=> $miner_arrayref,
+		miners_nourl		=> $miners_nourl,
 		nugget_day_count	=> $nuggets_day_count,
 	});
 
@@ -173,17 +179,21 @@ sub editMiner {
 		url_ar			=> $url_ar,
 	});
 
-	show_miner_url_info($slashdb, $form, $user, $udbt, $miner_id, $force);
+	show_miner_url_info($slashdb, $form, $user, $udbt, $miner_id, $force)
+		if @{$url_ar};
 }
 
 ##################################################################
+# This little routine is pulling way too much duty, it probably should
+# be split up into different handlers in the long run.
 sub updateMiner {
 	my ($slashdb, $form, $user, $udbt) = @_;
 	my $miner_id = $form->{miner_id} || 0;
-
+	
 	if ($form->{op} eq 'newminer') {
 		 # Get miner name from the form, or set an appropriate default.
-		my $name = $form->{newname} || 'miner' . time . int(rand(900)+100);
+		my $name = $form->{newname} || 'miner' . time .
+			int(rand(900)+100);
 		$name = substr($name, 0, 20);
 		$name =~ s/\W+//g;
 		$miner_id = $udbt->minername_to_id($name);
@@ -224,10 +234,19 @@ sub updateMiner {
 			id => $miner_id, name => $name
 		}) if $udbt->{debug} > 0;
 
-       		# Prepend the "(?i)" unless this field is marked case_sensitive.
+       		# Prepend the "(?i)" unless this field is marked as 
+		# case sensitive. Remember to grab the "^" anchor
+		# if it appears at the beginning of the pre-regex field.
 		for my $field (grep /_(text|regex)$/, keys %{$form}) {
+			$form->{$field} =~ s/^(^)?/$1(?i)/
+				if	$form->{$field} and 
+					!$form->{"${field}_cs"} and
+					/^pre_regex/;
+
 			$form->{$field} = "(?i)$form->{$field}"
-					if $form->{$field} and !$form->{"${field}_cs"};
+				if	$form->{$field} and
+					!$form->{"${field}_cs"} and
+					/_text$/;
 		}
 		$form->{last_edit_aid} = $user->{nickname};
 		for (@field_names) { 
@@ -237,37 +256,54 @@ sub updateMiner {
 
 		slashDisplay('updateMiner', { name => $name });
 
-		# Template.
-		warn <<EOT;
-editMiner '$miner_id' forceupdate '$form->{forceupdate}'
-EOT
-
                 editMiner(@_, $miner_id, $form->{forceupdate});
-
 	} elsif ($form->{deleteminer}) {
-		my $miner_id = $miner_id;
+		# Deletion has been aborted by the user if this form element is
+		# set.
+		if ($form->{nonconfirm}) {
+			listMiners(@_);
+			return;
+		}
+
 		my $name = $udbt->id_to_minername($miner_id);
+		if ($name eq 'none') {
+			print getData('update_miner_nonedelete');
+
+			editMiner(@_, $miner_id);
+			return;
+		}
+
+		# Check for any URLs that use this miner.
 		my $urls_ar = $udbt->getMinerURLs($miner_id);
 
 		if (@{$urls_ar}) {
-			# This should probably just say "Are you sure?" and then
-			# the "delete2" action should zero out all the URLs that 
-			# use it. For now, just forbid this.
+			# If URLs are present, miner can not be deleted. Say so.
 			slashDisplay('updateMiner', {
 				name	=> $name, 
-				num	=> scalar(@{$urls_ar}), 
-				url_ar	=> $urls_ar 
+				urls	=> $urls_ar,
 			});
 
 			editMiner(@_, $miner_id);
 		} else {
-			$udbt->delMiner($miner_id);
-			slashDisplay('updateMiner', {
-				name	=> $name, 
-				miner_id=> $miner_id
-			});
+			# Otherwise confirm the deletion before performing it.
+			if (! $form->{confirm}) { 
+				slashDisplay('updateMiner', {
+					name		=> $name, 
+					miner_id	=> $miner_id,
+					need_confirm	=> 1,
+				});
 
-			listMiners();
+				editMiner(@_, $miner_id);
+			} else {
+				$udbt->deleteMiner($miner_id);
+
+				slashDisplay('updateMiner', {
+					name	=> $name,
+					miner_id=> $miner_id,
+				});
+
+				listMiners(@_);
+			}
 		}
 	}
 }
@@ -276,7 +312,7 @@ EOT
 sub listUrls {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
-	my ($n_urls_total, $n_urls_with_miners) = $udbt->getURLCounts;
+	my ($n_urls_total, $n_urls_no_miners) = $udbt->getURLCounts();
 
 	my $url_arrayref = $udbt->getUrlList(
 		$form->{match}, 
@@ -286,9 +322,9 @@ sub listUrls {
 	);
 
 	slashDisplay('listUrls', { 
-		urls_total		=> $n_urls_total,
-		urls_with_miners	=> $n_urls_with_miners,
-		urls			=> $url_arrayref,
+		urls_total	=> $n_urls_total,
+		urls_no_miners	=> $n_urls_no_miners,
+		urls		=> $url_arrayref,
 	});
 }
 
@@ -322,7 +358,7 @@ sub show_miner_url_info {
 		);
 	} else {
 		%conditions = (
-			use_current_time	=> time()-3600,
+			use_current_time	=> time() - 3600,
 			force_analyze_miner	=> 1,
 			timeout			=> 5,
 		);
@@ -412,7 +448,7 @@ sub show_miner_url_info {
 
 		show_miner_rel_info(
 			$slashdb, $form, $user, $udbt, $_
-		);
+		) if $_;
 	}
 }
 
@@ -477,7 +513,6 @@ sub editUrl {
 	$miner_name = $udbt->id_to_minername($miner_id) if $miner_id;
 
 	my $ar = $udbt->getURLRelationCount($url_id);
-	my $referencing = $ar ? scalar(@$ar) : 0;
 
 	slashDisplay('editUrl',{ 
 		new_url 		=> $new_url, 
@@ -491,7 +526,7 @@ sub editUrl {
 		status_code		=> $status_code,
 		reason_phrase		=> $reason_phrase,
 		message_body_length	=> $message_body_length,
-		referencing		=> $referencing,
+		referencing		=> $ar ? scalar @{$ar} : 0,
 		titlebar_type		=> $titlebar_type,
 	});
 			
@@ -510,12 +545,17 @@ sub updateUrl {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
 	if ($form->{deleteurl}) {
+
+		(my $url_id = $form->{url_id}) =~ s/\D//g;
+		if ($url_id) {
+			my $url = $udbt->id_to_url($url_id);
+	        	$udbt->deleteURL($url_id) if $url_id;
 	
-		my $url_id = $form->{url_id};
-		my $url = $udbt->id_to_url($url_id);
-        	$udbt->delete_url_ids($url_id) if $url_id;
-		
-		slashDisplay('updateUrl', { url_id => $url_id, url => $url });	
+			slashDisplay('updateUrl', { 
+				url_id => $url_id, url => $url 
+			});	
+		}
+		listUrls(@_);
 		
 	} elsif ($form->{requesturl}) {
 
@@ -536,8 +576,8 @@ sub updateUrl {
 		);
 
 		slashDisplay('updateUrl', {
-			url_id => $url_id, 
-			duration => $duration
+			url_id	=> $url_id, 
+			duration=> $duration
 		});	
 
 		editUrl(@_,$url_id);
@@ -558,8 +598,8 @@ sub updateUrl {
 		}
 
 		slashDisplay('updateUrl', {
-			url_id => $url_id, 
-			miner_name => $miner_name
+			url_id		=> $url_id, 
+			miner_name	=> $miner_name
 		});	
 
 		editUrl(@_, $url_id);
@@ -587,6 +627,8 @@ sub editSpider {
 	my($name, $last_edit, $last_edit_aid, $conditions, $group_0_selects,
 	   $commands) = $udbt->getSpider($spider_id);
 
+	my $timespecs = $udbt->getSpiderTimespecs($spider_id);
+
 	$conditions	=~ s{^\s+}{}gm;	$conditions 	=~ s{\s+$}{}gm;
 	$group_0_selects=~ s{^\s+}{}gm;	$group_0_selects=~ s{\s+$}{}gm;
 	$commands 	=~ s{^\s+}{}gm;	$commands 	=~ s{\s+$}{}gm;
@@ -604,6 +646,7 @@ sub editSpider {
 		conditions	=> $conditions,
 		group_0_selects	=> $group_0_selects,
 		commands	=> $commands,
+		timespecs	=> $timespecs,
 	});
 }
 
@@ -611,13 +654,13 @@ sub editSpider {
 sub updateSpider {
 	my ($slashdb, $form, $user, $udbt) = @_;
 
-	# OK, this is kind of a whacked way to do this, but in the interest of time,
-	# I'm going to hack this back to how the original code intended this to work.
-	# MOST of the form handling performed by this code should probably be
-	# redone if problems persist.
+	# This form processing should be redone in the VERY near future 
+	# for flexibility. It should be working now, but adding on
+	# to this list will be painful. Maybe $op separate handlers, 
+	# but maybe helper functions might be a better solution?
+	(my $spider_id = $form->{spider_id}) =~ s/\D//g;
 	if ($form->{runspider}) {
 		# THIS block is for force-executing a spider.
-		my $spider_id = $form->{spider_id};
 		my $spider_name = $udbt->getSpiderName($spider_id);
 
 		if ($spider_name) {
@@ -635,7 +678,8 @@ sub updateSpider {
 		if (!$form->{newname}) {
 			print getData('update_spider_noname');
 		} else {
-			# If successful, $rc contains the id of the newly created spider.
+			# If successful, $rc contains the id of the newly
+			# created spider.
 			my $rc = $udbt->add_spider($form->{newname});
 
 			print getData('update_spider_add_results', {
@@ -648,9 +692,34 @@ sub updateSpider {
 				listSpiders(@_);
 			}
 		}
+	} elsif ($form->{deletespider}) {
+		my $spider_name = $udbt->getSpiderName($spider_id);
+
+		if ($form->{noconfirm}) {
+			print getData('update_spider_nodelete');
+
+			editSpider(@_, $spider_id);
+			return;
+		}
+
+		if ($form->{confirm} eq 'Yes') {
+			$udbt->deleteSpider($form->{spider_id});
+
+			print getData('update_spider_deletedspider', {
+				spider_name	=> $spider_name
+			});
+
+			listSpiders(@_);
+		} else {
+			print getData('update_spider_confirmdelete', {
+				spider_name 	=> $spider_name,
+				spider_id	=> $spider_id,
+			});
+
+			editSpider(@_, $spider_id);
+		}
 	} else {
 		# THIS block is where spider data is saved.
-		my $spider_id = $form->{spider_id};
 		my %set_clause;
 
         	$form->{last_edit_aid} = $user->{nickname};
@@ -662,6 +731,45 @@ sub updateSpider {
 			commands
 		);
 		$udbt->setSpider($spider_id, \%set_clause);
+
+		# Handle the timespecs.
+		my %timespecs;
+		for (grep { /^timespec_(\d+)_timespec$/ } keys %{$form}) {
+			/^timespec_(\d+)_timespec$/;
+			next if !defined $1;
+			my $id = $1;
+
+			# Test the given timespec.
+			eval {
+				sub dispatch { };
+				
+				my $cron = new Schedule::Cron(\&dispatch);
+				$cron->get_next_execution_time(
+					$form->{"timespec_${id}_timespec"}
+				);
+			};
+			if ($@) {
+				my $err = <<EOT;
+Error in '$form->{"timespec_${id}_timespec"}': $@
+EOT
+
+				# Remove unimportant kruft. I don't know
+				# why this regexp doesn't work HERE and works
+				# fine when I test it outside of Slash. 
+				#
+				# $(#%^&* thing!	-- Cliff
+				$err =~ s{ at .+? line \d+\.$}{};
+				$form->{"timespec_${id}_err"} = $err;
+				next;
+			}
+
+			$timespecs{$id} = {
+				timespec=> $form->{"timespec_${id}_timespec"},
+				name 	=> $form->{name},
+				del	=> $form->{"timespec_${id}_del"},
+			};
+		}
+		$udbt->setSpiderTimespecs($spider_id, \%timespecs);
 
 		print getData('update_spider_savedspider', {
 			spider_name => $form->{name},
@@ -757,8 +865,8 @@ sub main {
 	if ($op) {
 		my @args = ($slashdb, $form, $user, $udbt);
 		if (exists $ops->{$op}) {
-			# Currently $slashdb isn't used in any of our dispatchers, but
-			# this may not always be the case.
+			# Currently $slashdb isn't used in any of our
+			# dispatchers, but this may not always be the case.
 			if ($user->{seclev} >= $ops->{$op}{seclev}) {
 				$ops->{$op}{function}->(@args);
 			} else {

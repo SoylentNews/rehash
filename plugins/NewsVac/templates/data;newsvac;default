@@ -543,6 +543,9 @@ form owner_id: 		[% form.owner_aid %]
 [% CASE "formatted_excerpt" -%]
 <a href="[% url %]">url</a> [% slug %] ... [% excerpts.join(' ... ') %]
 
+[% CASE "update_miner_nonedelete" -%]
+Miner 'none' is a placeholder and can not be deleted!
+
 [% CASE "update_spider_noname" -%]
 Can't add spider since its name is undefined!
 
@@ -558,6 +561,22 @@ Spider '[% spider_name %]' executed.
 
 [% CASE "update_spider_savedspider" -%]
 Spider '[% spider_name %]' saved.
+
+[% CASE "update_spider_nodelete" -%]
+Deletion of this spider has been cancelled.
+
+[% CASE "update_spider_deletedspider" -%]
+Spider '[% spider_name %]' deleted.
+
+[% CASE "update_spider_confirmdelete" -%]
+<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
+<INPUT TYPE="HIDDEN" NAME="deletespider" value="1">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
+Delete Spider '[% spider_name %]'?
+<INPUT TYPE="SUBMIT" NAME="noconfirm" VALUE="Cancel">&nbsp;&nbsp;
+<INPUT TYPE="SUBMIT" NAME="confirm" VALUE="Yes">
+</FORM>
 
 [% CASE "invalid_seclev" -%]
 Access denied. Your security level isn't high enough. Sorry.

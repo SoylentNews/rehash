@@ -11,11 +11,9 @@ en_US
 __name__
 listMiners
 __template__
-[% # listMiners %]
-
 [% INCLUDE titlebar width="100%" title="List of miners" %]
 
-<FORM action=[% env.script_name %] method="GET">
+<FORM action="[% constants.rootdir %]/newsvac.pl" method="GET">
 <TABLE>
 	<TR>
 		<TD><input type="submit" value="Create a new miner named:">
@@ -23,7 +21,7 @@ __template__
 		<input type="hidden" name="op" value="newminer"> </TD>
 	</TR>
 </TABLE>
-<TABLE BORDER="0" cellspacing=0 cellpadding=0>
+<TABLE BORDER="0">
 	<TR>
 		<TD COLSPAN="8">&nbsp;</TD>
 	</TR>
@@ -38,38 +36,30 @@ __template__
 		<TD><B>&nbsp; Comment &nbsp; </B></TD>
 	</TR>
 
-
-[% FOR m = miners %]
-	[% DEFAULT m.comment='&nbsp;' -%]
-
-	[% 
-	   counttest = (nuggets_day_count.${m.miner_id}.1 || 0) * 5;
-	   threeday = nuggets_day_count.${m.miner_id}.3;
-	   sevenday = nuggets_day_count.${m.miner_id}.7;
-	   nugget_numbers = m.nugget_numbers;
-	   IF m.name != 'none' && (!counttest || (counttest < threeday) || 
-				   (counttest < sevenday));
-	   	nugget_numbers = 
-			"<font color=\"red\">$nugget_numbers</font>";
-	   END;
-	   progress_color = 'green';
-	   IF m.progress=='ok';
-	   	progress_color = 'olive';
-	   ELSIF m.progress=='broken';
-	   	progress_color='red';
-	   END;
-	-%]
-	[% url_number = BLOCK %]
+[% FOR m = miners -%]
+[%
+	DEFAULT m.comment='&nbsp;';
+	counttest = (nuggets_day_count.${m.miner_id}.1 || 0) * 5;
+	threeday = nuggets_day_count.${m.miner_id}.3;
+	sevenday = nuggets_day_count.${m.miner_id}.7;
+	nugget_numbers = m.nugget_numbers;
+	IF m.name != 'none' &&	(!counttest || (counttest < threeday) || 
+				(counttest < sevenday));
+		nugget_numbers = "<font color=\"red\">$nugget_numbers</font>";
+	END;
+	url_number = BLOCK -%]
 		[% IF m.url_number_highlite %]<font color="red">[% END 
 		%][% m.url_count %]:&nbsp;[% m.week_count %][% 
 		IF m.url_number_highlite %]</font>[% END %]
-	[% END %]
-	[% progress_text = BLOCK %]
+[%	END -%]
+[%	progress_text = BLOCK -%]
+		[% PROCESS color_progress miner=m -%]
 		<b><font color="[% progress_color %]">[% m.progress 
 		%]</font></b>
-	[% END %]
-	<TR [% IF m.owner_aid==user.aid %]bgcolor="#ffffff"[% END %]> 
-                <td><A HREF="[% env.script_name%]?op=editminer&miner_id=[% 
+[%	END -%]
+	<TR [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %]> 
+                <td><A HREF="[% constants.rootdir
+		-%]/newsvac.pl?op=editminer&miner_id=[% 
 		m.miner_id %]">[% m.name %]</A>&nbsp;</td>
 		<td align=right>&nbsp;[% url_number %]&nbsp;</td> 
 		<td align=right>&nbsp;[% nugget_numbers %]&nbsp;</td>
@@ -79,17 +69,48 @@ __template__
 		<td align=center>&nbsp;[% progress_text %]&nbsp;</td>
 		<td>&nbsp;[% m.comment %]</td>
 	</TR>                           
-
-	[% IF m.newrow %]
-	<tr>
-		<td colspan=8>&nbsp;</td>
-	</tr> 
-	[% END %]
-[% END %]
-
+[%	IF m.newrow -%]
+	<tr><td colspan=8>&nbsp;</td></tr> 
+[%	END -%]
+[% END -%]
 </TABLE>
+
+[% IF miners_nourl.size -%]
+<TABLE BORDER=0 WIDTH="90%">
+<TR>
+	<TD COLSPAN="6" ALIGN="CENTER">
+		<BR><B>Miners with no referenced URLs</B><BR>
+	</TD>
+</TR>
+<TR ALIGN="CENTER"">
+	<TH ALIGN="LEFT">Name</TH>
+	<TH>Owner</TH>
+	<TH>Last&nbsp;Editor</TH>
+	<TH>Last&nbsp;Edited</TH>
+	<TH>Progress</TH>
+	<TH>Comment</TH>
+</TR>
+[% FOR m=miners_nourl -%]
+[% progress_text = BLOCK -%]
+	[% PROCESS color_progress miner=m -%]
+	<b><font color="[% progress_color %]">[% m.progress 
+	%]</font></b>
+[% END %]
+<TR [% IF m.owner_aid==user.nickname %]bgcolor="#ffffff"[% END %] ALIGN="LEFT"> 
+	<td><A HREF="[% constants.rootdir %]/newsvac.pl?op=editminer&miner_id=[% 
+	m.miner_id -%]">[% m.name %]</A>&nbsp;</td>
+	<td align=center>&nbsp;[% m.owner_aid %]&nbsp;</td>
+	<td align=center>&nbsp;[% m.last_edit_aid %]&nbsp;</td>
+	<td align=center>&nbsp;[% m.last_edit_formatted %]&nbsp;</td>
+	<td align=center>&nbsp;[% progress_text %]&nbsp;</td>
+	<td>&nbsp;[% m.comment %]</td>
+</TR>
+[% END -%]
+</TABLE>
+[% END -%]
+
 </FORM>
-<FORM action="[% env.script_name %]" method="GET">
+<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
 <TABLE>
 	<TR>
 		<TD><input type="submit" value="Create a new miner named:">
@@ -99,3 +120,12 @@ __template__
 	</TR>
 </TABLE>
 </FORM>
+
+[% BLOCK color_progress -%][%
+progress_color = 'green';
+IF miner.progress=='ok';
+	progress_color = 'olive';
+ELSIF miner.progress=='broken';
+	progress_color='red';
+END -%]
+[% END -%]

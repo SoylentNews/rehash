@@ -19,7 +19,7 @@ INSERT INTO spider VALUES (1,'allminers',20000822190727,'jamie','','[ \'url_info
 #
 
 INSERT INTO miner VALUES (2,'none',20000629201648,'God','God','broken','','','','','','ThisTextIsNotExpectedToMatchAnything','','This is a placeholder, do not edit this. -Slashteam');
-INSERT INTO miner VALUES (1,'osdn',20020409034422,'God','Gof','ok','','','(?i)^(.+)<!-- begin osdnpress -->','(?i)<!-- end osdnpress -->(.+)$','url title','(?i)<li><a[ ]HREF=\"\r\n(.+?)\r\n\">\r\n(.+?)\r\n</a></li>','$source = \"OSDN\";','This is the default miner for NewsVac which checks OSDN\'s website.');
+INSERT INTO miner VALUES (1,'osdn',20020409034422,'God','God','ok','','','(?i)^(.+)<!-- begin osdnpress -->','(?i)<!-- end osdnpress -->(.+)$','url title','(?i)<li><a[ ]HREF=\"\r\n(.+?)\r\n\">\r\n(.+?)\r\n</a></li>','$source = \"OSDN\";','This is the default miner for NewsVac which checks OSDN\'s website.');
 
 #
 # Dumping data for table 'url_info'
@@ -38,3 +38,4 @@ INSERT into sections (section, artcount, title, isolate, issue, extras) VALUES (
 
 INSERT INTO vars (name, value, description) VALUES ('newsvac_topic', 1, 'Default topic for NewsVac items that have been robo-submitted');
 INSERT INTO vars (name, value, description) VALUES ('newsvac_section', 'newsvac', 'Default section for NewsVac items that have been robo-submitted');
+INSERT INTO vars (name, value, description) VALUES ('newsvac_admin_seclev', 1000, 'Minimum security level a user must have to be considered a NewsVac admin.');

@@ -11,12 +11,10 @@ en_US
 __name__
 editMiner
 __template__
-[% # editMiner %]
-
-[% INCLUDE titlebar width="100%" title="Editing miner $miner.name" %]
+[% INCLUDE titlebar width="100%" title="Editing miner $miner.name" -%]
 
 <!-- begin editMiner -->
-<FORM action="[% env.script_name %]" method="POST">
+<FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
 
 <table border="0">
         <tr valign=top>
@@ -31,7 +29,7 @@ __template__
                 <td width="40"><b>Name</b>&nbsp;&nbsp;</td>
                 <td>
 			<input type="text" size="20" name="name" value="[% 
-			miner.name %]">
+			miner.name -%]">
 		</td>
                 <td></td>
         </tr>
@@ -54,7 +52,7 @@ __template__
 		</td>
                 <td>
 			<input type="checkbox" name="pre_stories_text_cs"[% 
-			checkboxes.pre_stories_text %]>Case-sensitive?
+			checkboxes.pre_stories_text -%]>Case-sensitive?
 		</td>
         </tr>
         <tr valign=top>
@@ -62,35 +60,35 @@ __template__
                 <td>
 			<textarea TYPE="text" cols=80 rows=3 
 			NAME="post_stories_text">[% miner.post_stories_text 
-			%]</textarea>
+			-%]</textarea>
 		</td>
                 <td>
 			<input type="checkbox" name="post_stories_text_cs"[% 
-			checkboxes.post_stories_text %]>Case-sensitive?
+			checkboxes.post_stories_text -%]>Case-sensitive?
 		</td>
         </tr>
         <tr valign=top>
                 <td width="40"><b>Pre-stories (regex)</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.pre_regex -%]
-			<b><font color=\"red\">Regex error: '[% errs.pre_regex
-			%]'</font></b><br>
+			<b><font color="red">Regex error: '[% errs.pre_regex
+			-%]'</font></b><br>
 			[% END -%]
 
 			<textarea TYPE="text" cols=80 rows=6 
 			NAME="pre_stories_regex">[% miner.pre_stories_regex
-			%]</textarea>
+			-%]</textarea>
 		</td>
                 <td>
 			<input type="checkbox" name="pre_stories_regex_cs"[% 
-			checkboxes.pre_stories_regex %]>Case-sensitive?</td>
+			checkboxes.pre_stories_regex -%]>Case-sensitive?</td>
         </tr>
         <tr valign=top>
                 <td width="40"><b>Post-stories (regex)</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.post_regex -%]
-			<b><font color=\"red\">Regex error: '[% 
-			errs.post_regex %]'</font></b><br>
+			<b><font color="red">Regex error: '[% 
+			errs.post_regex -%]'</font></b><br>
 			[% END -%]
 
 			<textarea TYPE="text" cols=80 rows=6 
@@ -106,23 +104,23 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Vars</b>&nbsp;&nbsp;</td>
                 <td><input type="text" size="60" name="extract_vars" value="[% 
-		miner.extract_vars %]"></td>
+		miner.extract_vars -%]"></td>
         </tr>
         <tr valign=top>
                 <td width="40"><b>Extraction Regex</b>&nbsp;&nbsp;</td>
                 <td>
 			[% IF errs.extract_regex -%]
 			<b><font color="red">Regex error: '[% 
-			errs.extract_regex %]'</font></b><br>
+			errs.extract_regex -%]'</font></b><br>
 			[% END -%]
 
 			<textarea TYPE="text" cols=80 rows=6 
 			NAME="extract_regex">[% miner.extract_regex 
-			%]</textarea>
+			-%]</textarea>
 		</td>
                 <td>
 		<input type="checkbox" name="extract_regex_cs"[% 
-		checkboxes.extract_regex %]>Case-sensitive?
+		checkboxes.extract_regex -%]>Case-sensitive?
 		</td>
         </tr>
         <tr valign=top>
@@ -142,7 +140,7 @@ __template__
                 <td width="40"><b>Comment</b>&nbsp;&nbsp;</td>
                 <td>
 			<textarea TYPE="text" cols=80 rows=3 NAME="comment">[% 
-			miner.comment %]</textarea>
+			miner.comment -%]</textarea>
 		</td>
         </tr>
         <tr valign=top>
@@ -159,37 +157,35 @@ __template__
                 <input type="text" size="20" name="newname" value=""></td>
         </tr>
 </table>
-
-
 </FORM>
 
-	[% IF miner.pre_stories_text && miner.pre_stories_regex -%]
+[% 	IF miner.pre_stories_text && miner.pre_stories_regex -%]
 <p><b>NOTE: This miner has both its pre-stories text and pre-stories regex
 defined.  Only the regex will be used; you probably want to empty out one or
 the other to avoid confusion!</b>
-	[% END -%]
+[% 	END -%]
 
-	[% IF miner.post_stories_text && miner.post_stories_regex -%]
+[% 	IF miner.post_stories_text && miner.post_stories_regex -%]
 <p><b>NOTE: This miner has both its post-stories text and post-stories regex
 defined.  Only the regex will be used; you probably want to empty out one or
 the other to avoid confusion!</b>
-	[% END -%]
+[% 	END -%]
 
-       	[% IF url_ar.size == 0 -%]
+[%	IF url_ar.size == 0 -%]
 	<p><b>No URLs are currently using this miner.</b>
 
-	[% ELSIF url_ar.size == 1 -%]
+[%	ELSIF url_ar.size == 1 -%]
 	<p><b>One URL is currently using this miner:</b>
 
-	[% ELSE -%]
+[%	ELSE -%]
        	<p><b>[% url_ar.size %] URLs are currently using this miner:</b>
-	[% END -%]
+[%	END -%]
 
-	[% FOREACH url = url_ar -%]
+[%	FOREACH url = url_ar -%]
 	<br>[% url.0 %]<b>
-	<a href="[% env.script_name %]?op=editurl&url_id=[% url.0 
-	%]" target="_new">[% url.1 %]</a></b>
-	[% END -%]
+	<a href="[% constants.rootdir %]/newsvac.pl?op=editurl&url_id=[% url.0 
+	-%]" target="_new">[% url.1 %]</a></b>
+[%	END -%]
 
 	<p>&nbsp;<p>
 <!-- end editMiner -->

@@ -16,7 +16,7 @@ __template__
 [% INCLUDE titlebar width="100%" title="List of spiders" %]
 
 <!-- begin list spiders section -->
-<form action="[% env.script_name %]" method="GET">
+<form action="[% constants.rootdir %]/newsvac.pl" method="GET">
 
 <table>
         <TR>
@@ -29,7 +29,8 @@ __template__
 </table>
 </form>
 
-<form enctype="multipart/form-data" action="[% env.script_name %]" method="POST">
+<form enctype="multipart/form-data" action="[% constants.rootdir 
+-%]/newsvac.pl" method="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
 <table>
         <tr>
@@ -53,16 +54,18 @@ __template__
                 <td><b>Commands &nbsp;&nbsp;&nbsp; <b></td>
         </tr>
 
-[% IF ! arrayref %]
+[% IF ! arrayref -%]
 	<tr>
-		<td colspan=7><i>no spiders found</i></td>
+		<td colspan=7><i>No spiders found</i></td>
 	</tr>
 
-[% ELSE %]
-	[% FOREACH hashref = arrayref %]
+[% ELSE -%]
+	[% FOREACH hashref = arrayref -%]
         <TR>
                 <td align=right>
-		<A HREF="[% env.script_name %]?op=editspider&spider_id=[% hashref.spider_id %]">[% hashref.spider_id %]</a>
+		<A HREF="[% constants.rootdir 
+		-%]/newsvac.pl?op=editspider&spider_id=[% hashref.spider_id 
+		-%]">[% hashref.spider_id %]</a>
 		</td>
                 <td>[% hashref.name %]</td>
                 <td>[% hashref.last_edit_formatted %]</td>
@@ -72,7 +75,7 @@ __template__
                 <td>[% hashref.commands %]</td>
         </TR>
 	[% END %]
-[% END %]
+[% END -%]
 
 </TABLE>
 <TABLE>
