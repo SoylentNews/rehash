@@ -1768,7 +1768,7 @@ sub createLog {
 
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
 
-	if ($uri eq 'palm') {
+	if ($uri =~ '^/palm') {
 		($dat = $ENV{REQUEST_URI}) =~ s|\.shtml$||;
 		$uri = 'palm';
 	} elsif ($uri eq '/') {
