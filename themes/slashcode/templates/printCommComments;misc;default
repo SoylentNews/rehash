@@ -24,8 +24,10 @@ __name__
 printCommComments
 __template__
 [% USE Slash %]
+[% moderate_form   = can_moderate %]
+[% moderate_button = (can_moderate && user.mode != 'archive' && ( !user.state.discussion_archived || constants.comments_moddable_archived)) %]
 
-[% IF can_moderate %]
+[% IF moderate_form %]
 	<FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
 	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
 	<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
@@ -60,7 +62,7 @@ __template__
 
 	</TD></TR>
 	<TR><TD ALIGN="CENTER">
-	[% Slash.moderatorCommentLog('cid', cid); %]
+	[% Slash.moderatorCommentLog('cid', cid, { show_m2s => 1, need_m2_form => !moderate_form, need_m2_button => !moderate_button }); %]
 	</TD></TR>
 [% END %]
 
@@ -74,22 +76,21 @@ __template__
 	[% END %]
 	[% lcp %]
 
-[% IF (can_moderate && user.mode != 'archive'
-	&& (
-		!user.state.discussion_archived
-		|| constants.comments_moddable_archived
-)) %]
-	<TR><TD>
-		<P>Have you read the
-		<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
-		yet?
-		<INPUT TYPE="HIDDEN" NAME="op" VALUE="moderate">
-		<INPUT TYPE="SUBMIT" VALUE="moderate">
-	[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
-		|| user.acl.candelcomments_always %]
-		<BR><B>NOTE: Checked comments will be deleted.</B>
+[% IF moderate_form %]
+	[% IF moderate_button %]
+		<TR><TD>
+			<P>Have you read the
+			<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
+			yet?
+			<INPUT TYPE="HIDDEN" NAME="op" VALUE="moderate">
+			<INPUT TYPE="SUBMIT" VALUE="moderate">
+		[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
+			|| user.acl.candelcomments_always %]
+			<BR><B>NOTE: Checked comments will be deleted.</B>
+		[% END %]
+		</TD></TR>
 	[% END %]
-	</TD></TR></FORM>
+	</FORM>
 [% END %]
 
 </TABLE>
