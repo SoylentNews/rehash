@@ -2361,6 +2361,7 @@ sub parseSlashizedLinks {
 
 sub _slashlink_to_link {
 	my($sl, $options) = @_;
+	my $constants = getCurrentStatic();
 	my $ssi = getCurrentForm('ssi') || 0;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my %attr = $sl =~ / (\w+)="([^"]+)"/g;
@@ -2369,8 +2370,17 @@ sub _slashlink_to_link {
 
 	# Load up special values and delete them from the attribute list.
 	my $sn = delete $attr{sn} || "";
-	my $skin_name = delete $attr{sect} || "";
-	my $skin = $skin_name ? $reader->getSkin($skin_name) : {};
+	my $skin_id = delete $attr{sect} || "";
+
+	# skin_id could be a name, a skid, or blank, or invalid.
+	# In any case, get its skin hashref and its name.
+	my $skin;
+	if ($skin_id) {
+		$skin = $reader->getSkin($skin_id);
+	} else {
+		$skin = $reader->getSkin($constants->{mainpage_skid});
+	}
+	my $skin_name = $skin->{name};
 	my $skin_root = $skin->{rootdir};
 	if ($options && $options->{absolute}) {
 		$skin_root = URI->new_abs($skin_root, $options->{absolute})
@@ -2630,13 +2640,13 @@ sub _link_to_slashlink {
 	my $virtual_user = getCurrentVirtualUser();
 	my $retval = "$pre$url$post";
 	my $abs = $gSkin->{absolutedir};
+	my $skins = $reader->getSkins();
 #print STDERR "_link_to_slashlink begin '$url'\n";
 
 	if (!defined($urla{$virtual_user})) {
 		# URLs may show up in any skins, which means when absolutized
 		# their host may be either the main one or a sectional one.
 		# We have to allow for any of those possibilities.
-		my $skins = $reader->getSkins();
 		my @skin_urls = grep { $_ }
 			map { $skins->{$_}{rootdir} }
 			sort keys %$skins;
@@ -2702,15 +2712,17 @@ sub _link_to_slashlink {
 		if ($attr{sn} eq 'comments') {
 			# sid is actually a discussion id!
 			# XXXSECTIONTOPICS
-			$attr{sect} = $reader->getDiscussion(
+			my $primaryskid = $reader->getDiscussion(
 				$attr{sid}, 'primaryskid');
+			$attr{sect} = $skins->{$primaryskid}{name};
 			$attr{tid} = $reader->getDiscussion(
 				$attr{sid}, 'topic');
 		} else {
 			# sid is a story id
 			# XXXSECTIONTOPICS
-			$attr{sect} = $reader->getStory( 
+			my $primaryskid = $reader->getStory( 
 				$attr{sid}, 'primaryskid', 1);
+			$attr{sect} = $skins->{$primaryskid}{name};
 			$attr{tid} = $reader->getStory(
 				$attr{sid}, 'tid', 1);
 		}
