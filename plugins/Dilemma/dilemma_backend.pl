@@ -200,14 +200,14 @@ sub do_logdatadump {
 		$xml .= "<tick>$tick</tick>";
 		$xml .= "<foodsize>$foodsize</foodsize>";
 		if ($playlog_hr->{$meetlog_meetid} && %{$playlog_hr->{$meetlog_meetid}}) {
-			$xml .= "<agentplay>";
 			my @daids = sort { $a <=> $b } keys %{$playlog_hr->{$meetlog_meetid}};
 			for my $daid (@daids) {
+				$xml .= "<agentplay>";
 				$xml .= "<daid>$daid</daid>";
 				$xml .= "<play>$playlog_hr->{$meetlog_meetid}{$daid}{play}</play>";
 				$xml .= "<reward>$playlog_hr->{$meetlog_meetid}{$daid}{reward}</reward>";
+				$xml .= "</agentplay>";
 			}
-			$xml .= "</agentplay>";
 			# Recycle the RAM for each meeting, since there may
 			# be millions of 'em.
 			delete $playlog_hr->{$meetlog_meetid};

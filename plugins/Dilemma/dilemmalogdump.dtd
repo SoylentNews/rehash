@@ -7,7 +7,7 @@
 	<!ELEMENT agent (daid, dsid, born)>
         <!ELEMENT daid (#PCDATA)>
         <!ELEMENT born (#PCDATA)>
-        <!ELEMENT meeting (meetid, tick, foodsize, agentplay)>
+        <!ELEMENT meeting (meetid, tick, foodsize, agentplay*)>
         <!ELEMENT meetid (#PCDATA)>
         <!ELEMENT tick (#PCDATA)>
         <!ELEMENT foodsize (#PCDATA)>
