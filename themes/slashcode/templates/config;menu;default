@@ -4,6 +4,7 @@ __description__
 Display admin menu.
 
 * items = arrayref of hashref of menu items (value (link), label)
+* lightfontcolor = optional value for the font color of in the light mode menu
 
 __title__
 
@@ -26,7 +27,7 @@ __template__
 	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Info",		sel_label = "info" },
 	{ link = "$constants.rootdir/slashguide.shtml",		label = "Help",		sel_label = "help" },
 ];
-PROCESS tabbedmenu tabs=tabs color=color selected=page; %]
+PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]
 
 __seclev__
 10000
