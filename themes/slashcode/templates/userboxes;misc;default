@@ -98,14 +98,14 @@ IF !useredit.is_anon;
 			useredit.aim | strip_attribute;
 			'">Add Buddy</A>, ';
 			'<A HREF="aim:goim?screenname=';
-			useredit.aim | atrip_attribute;
+			useredit.aim | strip_attribute;
 			'&amp;message=Greetings!">Send Message</A></B>)';
 		END;
 
 		IF useredit.yahoo;
 			'<BR><B>Yahoo! ID:</B> ';
 			'<A HREF="http://profiles.yahoo.com/';
-			useredit.yahoo | atrip_attribute;
+			useredit.yahoo | strip_attribute;
 			'">';
 			useredit.yahoo | strip_literal;
 			'</A> (<B><A HREF="http://edit.yahoo.com/config/set_buddygrp?';
