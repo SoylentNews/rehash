@@ -1138,7 +1138,7 @@ sub tildeEd {
 	for (sort { lc $b->[1] cmp lc $a->[1]} @$sections_description) {
 		my($bid, $title, $boldflag) = @$_;
 
-		push(@$order, $bid);
+		unshift(@$order, $bid);
 		$section_descref->{$bid}{checked} = ($exboxes =~ /'$bid'/) ?
 			' CHECKED' : '';
 		$section_descref->{$bid}{boldflag} = $boldflag > 0;
