@@ -2611,9 +2611,13 @@ sub findWords {
 			)
 		}gxi;
 		for my $word (@words) {
-			# Ignore all words less than 4 chars.
-			next unless length($word) > 3;
-			$wordcount->{lc $word}{weight} += $weight_factor;
+			my $cap = $word =~ /^[A-Z]/ ? 1 : 0;
+			# Ignore all uncapitalized words less than 4 chars.
+			next if length($word) < 4 && !$cap;
+			# Ignore *all* words less than 3 chars.
+			next if length($word) < 3;
+			my $ww = $weight_factor * ($cap ? 1.3 : 1);
+			$wordcount->{lc $word}{weight} += $ww;
 		}
 		my %uniquewords = map { ( lc($_), 1 ) } @words;
 		for my $word (keys %uniquewords) {
