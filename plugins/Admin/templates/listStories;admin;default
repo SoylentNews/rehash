@@ -68,7 +68,7 @@ END %]
 		<TD>
 		<FONT SIZE="2">
 		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">
-		[% story.title %]&nbsp;</A>
+		[% IF story.writestatus == 'delete' %]<S>[% END; story.title; IF story.writestatus == 'delete' %]</S>[% END %]&nbsp;</A>
 		</FONT>
 		</TD>
 		<TD><FONT SIZE="2"><B>[% story.aid %]</B></FONT></TD>
