@@ -348,7 +348,7 @@ sub userdir_handler {
 	}
 
 	# /my/ or /my can match, but not /mything
-	if (($uri =~ m[^/~/(.+)]) or ($uri =~ m[^/my (?: /(.*) | /? ) $]x)) {
+	if (($saveuri =~ m[^/(?:%7[eE]|~)/] && $uri =~ m[^/~/(.+)]) or ($uri =~ m[^/my (?: /(.*) | /? ) $]x)) {
 		my $match = $1;
 		if ($r->header_in('Cookie') =~ $USER_MATCH) {
 			my($op, $extra) = split /\//, $match, 2;
@@ -448,7 +448,6 @@ sub userdir_handler {
 	# will change if somehow Apache/mod_perl no longer decodes before
 	# returning the data. -- pudge
 	if ($saveuri =~ m[^/(?:%7[eE]|~)(.+)]) {
-		# this won't work if the nick has a "/" in it ...
 		my($nick, $op, $extra) = split /\//, $1, 4;
 		for ($nick, $op, $extra) {
 			s/%([a-fA-F0-9]{2})/pack('C', hex($1))/ge;
