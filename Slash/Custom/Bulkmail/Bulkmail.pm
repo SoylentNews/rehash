@@ -752,6 +752,7 @@ sub lc_domain {
 };
 
 
+# Why not use Email::Valid here? - Jamie
 sub valid_email {
 	
 	my $self = shift || undef;
