@@ -121,7 +121,9 @@ sub graph {
 
 	my($id, $day) = _get_graph_id($slashdb, $constants, $user, $form, $stats);
 
-	my $image   = $stats->getGraph({ day => $day, id => $id });
+	my $image   = $constants->{cache_enabled} 
+		? $stats->getGraph({ day => $day, id => $id })
+		: {};
 	my $content = $image->{data};
 	my $type    = $image->{content_type} || 'image/png';
 
@@ -158,16 +160,18 @@ sub report {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
 	slashDisplay('report', {
+		sections	=> _get_sections(),
 	});
 }
 
 sub list {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
-	my $stats_data = $stats->getAllStats({
+	my $stats_data = {};
+	$stats_data = $stats->getAllStats({
 		section	=> $form->{stats_section},
 		days	=> $form->{stats_days} || 1,
-	});
+	}) unless $form->{type} eq 'graphs';
 
 	slashDisplay('list', {
 		stats_data	=> $stats_data,

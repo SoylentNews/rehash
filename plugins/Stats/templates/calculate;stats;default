@@ -29,7 +29,7 @@ __template__
       newdays = [];
       FOREACH day = days;
          daycount = daycount + 1;
-         IF (!(daycount mod 7) || (loop.index == loop.max));
+         IF (!(daycount mod 7)); # || (loop.index == loop.max));
             newdays.push(day);
          END;
       END;

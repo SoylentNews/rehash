@@ -16,44 +16,44 @@ __template__
    END;
 
    IF (gtitle);
-      gtitle = gtitle | strip_attribute;
+      gtitle = gtitle | fixparam;
       gtitle = '&amp;title=' _ gtitle;
    END;
 
    UNLESS section;
       section = form.stats_section;
    END;
-   section = section | strip_attribute;
-   statdata = '';
+   section = section | fixparam;
+   statstring = '';
 
-   FOREACH stat = stats;
+   FOREACH stat = statdata;
        IF (stat.0);
-          nstat = stat.0 | strip_attribute;
+          nstat = stat.0 | fixparam;
 
-          nsection = stat.1 | strip_attribute;
+          nsection = stat.1 | fixparam;
           IF (!nsection);
              nsection = section;
           END;
 
-          nlabel = stat.2 | strip_attribute;
+          nlabel = stat.2 | fixparam;
           IF (!nsection);
              nlabel = '';
           END;
 
        ELSE;
-          nstat = stat | strip_attribute;
+          nstat = stat | fixparam;
           nsection = section;
        END;
 
-       statdata = statdata _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
+       statstring = statstring _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
    END;
-   graphparams = BLOCK %]
-&amp;type=[% type | strip_attribute %]&amp;stats_days=[% days | strip_attribute %][% statdata %][% gtitle %]
-[% END %]
+   statstring = BLOCK -%]
+&amp;type=[% type | fixparam %]&amp;stats_days=[% days | fixparam %][% statstring %][% gtitle %]
+[%- END %]
 
 <P>
-<A HREF="[% constants.rootdir %]/stats.pl?op=table[% graphparams %]"
-><IMG SRC="[% constants.rootdir %]/stats.pl?op=graph[% graphparams %]"></A>
+<A HREF="[% constants.rootdir %]/stats.pl?op=table[% statstring %]"
+><IMG SRC="[% constants.rootdir %]/stats.pl?op=graph[% statstring %]"></A>
 </P>
 __seclev__
 1000

@@ -11,20 +11,10 @@ en_US
 __name__
 list
 __template__
-[% PROCESS titlebar title => "Available Stats for Dumping" %]
 
-<FORM METHOD="POST" ACTION="[% env.script_name %]">
-
-[% PROCESS formLabel value => "Section" %]
-[% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
-
-<INPUT TYPE="hidden" NAME="op" VALUE="list">
-<INPUT TYPE="submit">
-</FORM>
-
-<P>
-
-[% IF form.stats_section && stats_data.${form.stats_section}.names %]
+[% IF form.stats_section && form.type != 'graphs' && stats_data.${form.stats_section}.names %]
+    [% PROCESS dumphead %]
+    <P>
     [% PROCESS doform label => "Individual Categories", select_box =>
        Slash.createSelect('stats_name', stats_data.${form.stats_section}.names, form.stats_name, 1)
      %]
@@ -50,6 +40,20 @@ __template__
     	[% PROCESS dostats myname => myname %]
       [% END %]
     [% END %]
+
+[% ELSIF form.graphname %]
+
+	[% PROCESS graphshead %]
+	<P>
+	[% PROCESS graphs gtitle => form.graphname %]
+
+[% ELSE %]
+
+	[% PROCESS report %]
+	<P>
+	[% PROCESS graphshead %]
+	<P>
+	[% PROCESS dumphead %]
 
 [% END %]
 
@@ -78,6 +82,37 @@ __template__
         <INPUT TYPE="submit">
     </FORM>
 [% END %]
+
+[% BLOCK dumphead %]
+	[% PROCESS titlebar title => "Available Raw Stats for $constants.sitename", width => '100%' %]
+
+	<FORM METHOD="POST" ACTION="[% env.script_name %]">
+
+	[% PROCESS formLabel value => "Section" %]
+	[% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
+
+	<INPUT TYPE="hidden" NAME="op" VALUE="list">
+	<INPUT TYPE="submit">
+	</FORM>
+[% END %]
+
+[% BLOCK graphshead %]
+	[% PROCESS titlebar title => "Available Graphs for $constants.sitename", width => '100%' %]
+
+	<FORM METHOD="POST" ACTION="[% env.script_name %]">
+
+	[% PROCESS formLabel value => "Graphs" %]
+	[% PROCESS graphs # get mygraphs defined %]
+	[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
+	&nbsp;&nbsp;Days: [% PROCESS stats_days %]
+	&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
+
+	<INPUT TYPE="hidden" NAME="op" VALUE="list">
+	<INPUT TYPE="hidden" NAME="type" VALUE="graphs">
+	<INPUT TYPE="submit">
+	</FORM>
+[% END %]
+
 __seclev__
 1000
 __version__
