@@ -1672,12 +1672,12 @@ ALTER TABLE humanconf_questions TYPE=InnoDB;
 ALTER TABLE journal_themes TYPE=InnoDB;
 
 # plugins/Messages (ignore if not using that plugin)
-AFTER TABLE message_codes TYPE=InnoDB;
-AFTER TABLE message_drop TYPE=InnoDB;
-AFTER TABLE message_log TYPE=InnoDB;
-AFTER TABLE message_web TYPE=InnoDB;
-AFTER TABLE message_web_text TYPE=InnoDB;
-AFTER TABLE users_messages TYPE=InnoDB;
+ALTER TABLE message_codes TYPE=InnoDB;
+ALTER TABLE message_drop TYPE=InnoDB;
+ALTER TABLE message_log TYPE=InnoDB;
+ALTER TABLE message_web TYPE=InnoDB;
+ALTER TABLE message_web_text TYPE=InnoDB;
+ALTER TABLE users_messages TYPE=InnoDB;
 
 # plugins/NewsVac (ignore if not using that plugin)
 ALTER TABLE miner TYPE=InnoDB;
