@@ -22,11 +22,11 @@ $task{$me}{code} = sub {
 
 	my $num_total_subscribers = $slashdb->sqlCount('users_hits', 'hits_paidfor > 0');
 	my $new_subscriptions_hr = $subscribe->getSubscriberList();
-{ use Data::Dumper; print STDERR Dumper($new_subscriptions_hr) }
 	my $num_new_subscriptions = scalar(keys %$new_subscriptions_hr);
 
 	my $transaction_list = "";
 	my($total_gross, $total_net, $total_pages_bought, $total_karma) = (0, 0, 0, 0);
+	my %gross_count = ( );
 	if ($num_new_subscriptions > 0) {
 		$transaction_list = sprintf(
 			"%7s %3s %6s %6s %6s %5s %6s %-20s\n", qw(
@@ -35,6 +35,7 @@ $task{$me}{code} = sub {
 		my @spids = sort { $a <=> $b } keys %$new_subscriptions_hr;
 		for my $spid (@spids) {
 			my $spid_hr = $new_subscriptions_hr->{$spid};
+			$gross_count{$spid_hr->{payment_gross}}++;
 			$total_gross += $spid_hr->{payment_gross};
 			$total_net += $spid_hr->{payment_net};
 			$total_pages_bought += $spid_hr->{pages};
@@ -55,13 +56,19 @@ $task{$me}{code} = sub {
 			$total_pages_bought
 		);
 		$transaction_list .= sprintf(
-			"%-7s %3d %6.2f %6.2f %6d",
+			"%-7s %3d %6.2f %6.2f %6d\n\n",
 			"mean:",
 			$total_karma/$num_new_subscriptions,
 			$total_gross/$num_new_subscriptions,
 			$total_net/$num_new_subscriptions,
 			$total_pages_bought/$num_new_subscriptions
 		);
+		for my $gross (sort { $a <=> $b } keys %gross_count) {
+			$transaction_list .= sprintf(
+				"subscriptions at \$%6.2f: %4d\n",
+				$gross, $gross_count{$gross}
+			);
+		}
 	}
 
 	my @numbers = (
