@@ -84,8 +84,8 @@ __template__
 
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="100%" title="User already exists" %]
-	The nickname [% nick %] or another similar to it has already been taken.
-	Please try another choice.<BR>
+	The nickname [% nick %] or another similar to it has already been taken. 
+	<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">Please try another choice</A>.<BR>
 
 [% CASE 'checklist_err' %]
 [% PROCESS titlebar width="100%" title="Too many options" %]
