@@ -1155,9 +1155,9 @@ sub submitComment {
 			$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
 		}
 
-		$slashdb->setUser($user->{uid}, {
+		$slashdb->setUser($clean_comment->{uid}, {
 			-totalcomments => 'totalcomments+1',
-		});
+		}) if !isAnon($clean_comment->{uid});
 
 		my($messages, $reply, %users);
 		if ($form->{pid} || $discussion->{url} =~ /\bjournal\b/ || $constants->{commentnew_msg}) {
@@ -1477,7 +1477,7 @@ sub moderateCid {
 
 		# Next, adjust the appropriate values for the user who
 		# posted the comment.
-		if ($comment->{uid} != $constants->{anonymous_coward_uid}) {
+		if (!isAnon($comment->{uid})) {
 			my $lost_tokens_per_downmod = 1; # XXX should be a var
 			my $cu_changes = { };
 			if ($val < 0) {
