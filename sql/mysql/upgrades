@@ -2017,4 +2017,21 @@ INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 
 # USEPERL LAST UPDATED HERE
 
 # SLASHCODE LAST UPDATED HERE
+
+# End of T_2_3_0_129, Start of T_2_3_0_130 - 2003/12/29
+
 INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid','Default for user\'s cookie_location value (also see users_info schema!)');
+
+
+UPDATE vars SET value=CONCAT(value,'|DL|DT|DD') WHERE name='approvedtags';
+UPDATE vars SET value=CONCAT(value,'|DL|DT|DD') WHERE name='approvedtags_break';
+
+ALTER TABLE stats_daily ADD INDEX section_day (section, name);
+
+# for plugins/PollBooth set according to your preferences (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('allow_anon_poll_voting', '1', 'Set this to decide whether anonymous users can vote in polls)');
+
+
+UPDATE vars set description='Ops to omit from daily counts in adminmail (delimiter of |)' where "op_exclude_from_countdaily";
+INSERT INTO vars (name, value, description) VALUES ('op_extras_countdaily', '', 'Extra site-specific pagetypes/ops you would like listed (delimiter of |)');
+
