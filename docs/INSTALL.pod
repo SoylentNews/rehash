@@ -12,9 +12,10 @@ INSTALL - Slash Installation
 
 =head1 SYNOPSIS
 
-This document describes how to install Slash 2.2.  For instructions on
-installation or upgrade of previous versions of Slash, see the INSTALL
-document included with those distributions.
+This document describes how to install Slash, versions 2.2 and
+pre-releases of 2.3.  For instructions on installation or upgrade of
+previous versions of Slash, see the INSTALL document included with
+those distributions.
 
 These instructions have only been tested on Linux. Installation under
 BSD and other Unix OSes should work similarly, but there are problems
@@ -47,15 +48,18 @@ versions.  You should not install previous versions.
 As of this writing (June 2003), our last official release (2.2.6) was
 some time ago and many features have been added since.  We have not
 yet released 2.3.0.  If you want to use more recent code, check out CVS
-versions from cvs.slashcode.com.  You probably do not want to use the
-very latest CVS.  See "CVS tags" below for advice on choosing and
-maintaining a CVS installation.
+versions from cvs.slashcode.com.  If you are installing a new Slash site,
+you probably do not want to use the very latest CVS, but you probably
+do want to use the latest "R_" tag available in CVS.  See L<"VERSIONS">,
+"CVS tags", below, for advice on choosing and maintaining a CVS installation.
 
 =head2 Important Note
 
 We know you want to get right into the installation, but you probably
 want to read this whole document first.  Notably, the software and
-hardware requirements are given later on.
+hardware requirements are given later on in the L<"REQUIREMENTS">
+section, which you probably want to go read now, to check for potential
+problems.
 
 Also, you will find information on upgrading a Slash site (which can be
 tricky);  uninstalling;  and troubleshooting for common problems.
@@ -184,15 +188,37 @@ mod_perl and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
 
 B<Install the Perl modules.>
 
-The best way to do this is with the CPAN module.
+Slash is powerful and complex, and, rather than reinvent the wheel, it
+often relies on CPAN modules.  Open-source code reuse has many advantages.
+One disadvantage is that installing all those modules can be tricky,
+as you may be about to find out.
 
-You might also wish to install each module by hand, using distributions
-found on the CPAN.  See L<perlmodinstall>
-for more information on installing perl modules.
-
-B<IMPORTANT NOTES>:
+You could install each module in F<Bundle/Slash.pm> by hand, but this
+would be time-consuming.  Instead, you'll want to install the bundle
+C<Bundle::Slash> using CPAN.
 
 =over 4
+
+B<IMPORTANT NOTES (read through these first)>:
+
+=over 4
+
+=item B<Overall comment about CPAN module failure>
+
+It is possible that upon typing "install Bundle::Slash", you will have
+one or more modules fail to install on the first try.  The rest of the
+modules will be successfully installed but some won't.  In that case
+you will want to fix the problems and retype "install Bundle::Slash"
+to make sure everything proceeds smoothly.  Once that command gives you
+just a long list of "Foo::Bar is up to date," you are done.  Until that
+point, you are not done;  you must resolve the errors.
+
+=item B<Old Version of Bundle::Slash>
+
+If you have previously installed Bundle::Slash, you will want
+to install it again, but you will need to delete the existing
+version.  Go to your F<.cpan/Bundle> directory (usually
+F<~/.cpan/Bundle/>) and remove F<Slash.pm>.
 
 =item B<Overactive CPAN>
 
@@ -205,26 +231,45 @@ version of Bundle::Slash.
 
 =item B<Uninstalling Old Modules>
 
-Sometimes, you will be installing a newer version of a module that
-exists elsewhere on the system.  You might want to tell the CPAN module
-to automatically remove older files.  To do that from the CPAN shell,
-type:
+Sometimes, you will be installing a newer version of a module that exists
+elsewhere on the system.  You probably want to tell the CPAN module to
+automatically remove older files.  To do that from the CPAN shell, type:
 
 	cpan> o conf make_install_arg UNINST=1
 
-=item B<Old Version>
+And if you want that to be CPAN's default from now on, add:
 
-If you have previously installed Bundle::Slash, you will want
-to install it again, but you will need to delete the existing
-version.  Go to your F<.cpan/Bundle> directory (usually
-F<~/.cpan/Bundle/>) and remove F<Slash.pm>.
+	cpan> o conf commit
+
+=item B<Automatically Installing Dependencies>
+
+Some of the modules in Bundle::Slash require other modules.  We have
+not put some of those other modules in Bundle::Slash because, if those
+requirements change in the future, we don't want to make future Slash
+sites install more than they have to.
+
+If you see this:
+
+	---- Unsatisfied dependencies detected during [FOO/Bar-1.23.tar.gz] -----
+	    Foobar::Baz
+	Shall I follow them and prepend them to the queue
+	of modules we are processing right now? [yes] 
+
+That's normal;  just hit return.
+
+If it annoys you to have to do this, edit the C<prerequisites_policy>
+field of your CPAN/Config.pm file.  Or, just do this to change it to
+automatically follow dependencies and commit the change:
+
+	cpan> o conf prerequisites_policy follow
+	cpan> o conf commit
 
 =item B<Additional Libraries>
 
 You must have certain libraries existing on your system before
 building, for Compress::Zlib and XML::Parser (see L<"REQUIREMENTS">).
 
-=item B<BSD>
+=item B<BSD Systems>
 
 If running BSD, also install the BSD::Resource module.  We have
 heard reports of problems running Slash on BSD, but you are
@@ -252,34 +297,97 @@ user name in other places, so do not forget it. If you don't
 understand what you're doing here, don't fake it; this is a
 common reason we see for Slash installations failing.
 
-=item B<libnet Broken>
-
-libnet is currently broken somewhat in its tests.  Please use
-C<install Net::Cmd> first, before you install anything else.
-If it fails only tests 8 and 9 of t/require, then it is OK;
-just do C<force install Net::Cmd>, then continue on with the
-rest of the modules installation.
-
-=back
-
-To use the CPAN module, invoke the CPAN shell:
-
-	perl -MCPAN -e shell
-
-After it has been configured, install Bundle::Slash:
-
-	cpan> install Bundle::Slash
+=item B<Documentation>
 
 To read the README for any module, before or after installing:
 
 	cpan> readme MODULE
 
-If you have problems, feel free to re-run C<install Bundle::Slash>.  It
-will safely skip anything already installed.
-
 To read the documentation of any of the modules, once they have been
 installed, type C<perldoc MODULE> at the command line.
 
+See L<perlmodinstall> for more information on installing perl modules.
+
+=back
+
+=back
+
+Now that you have read the above notes, you're ready to install the
+perl modules.
+
+To use the CPAN module, invoke the CPAN shell:
+
+	perl -MCPAN -e shell
+
+(Or, you may have the unix command "cpan" already available, which
+does the same thing.)
+
+If this is the first time you've invoked CPAN, you will be asked to
+configure it.
+
+Next, install some important networking modules.  Doing this first is
+optional but, if there are problems with these modules, you'll want to
+resolve them before moving on to the rest of the installation:
+
+	cpan> install Bundle::LWP
+
+Make sure all those modules are installed and up to date before
+proceeding.  Note that Net::Cmd has a history of being a little broken
+in its tests;  if it fails on tests 8 and 9 of t/require, then it's OK;
+just do C<force install Net::Cmd> and repeat C<install Bundle::LWP>.
+
+After the LWP has been installed and configured successfully, C<exit>
+the CPAN, reinvoke it with the C<perl -MCPAN -e shell> command, and
+install Bundle::Slash:
+
+	cpan> install Bundle::Slash
+
+This will be a long process.  Several modules will ask to be configured
+during this process.  Here are some tips:
+
+=over 4
+
+=item B<DBI>
+
+Don't worry about the threading warning.
+
+=item B<DBIx::Password>
+
+See IMPORTANT NOTES above.
+
+=item B<Apache::Test> and B<Apache::Cookie>
+
+You will need C<httpd> and C<apxs> in your $PATH, and even if they
+are there, you will probably see the lengthy error that starts "Apache
+cannot spawn child processes as 'root'".  This is because, ironically,
+Apache::Test's self-tests are a colossal pain to actually run.
+Personally I just C<force install Apache::Cookie> which is lame but
+solves the problem.
+
+=item B<Template>
+
+The Template Toolkit is a complex install.  Try accepting all the
+defaults and see if it works.  It has 90 test scripts with over 2000
+tests, and installation will be halted if just 1 of these tests fails.
+Do a C<look Template> and try your best to resolve the issues.
+The F<README> includes a URL to the mailing list archives, where you
+may find help.  If you're getting 100 errors, you need to fix them,
+but if you're down to 1 or 2 you can't fix, we suggest you make a note
+of what the failures were and just C<force install Template>.
+
+=back
+
+If you have problems, feel free to re-run C<install Bundle::Slash>.  It
+will safely skip anything already installed.
+
+If you are feeling lucky and are in a big hurry, you might try C<force
+install Bundle::Slash>, which will skip all tests for all modules --
+but if you do this and later things start to fail, you're on your own,
+don't complain.
+
+Again:  once you are able to do C<install Bundle::Slash> and see nothing
+but a long list of modules that are "up to date," you are done.  Until you
+see that, you are not done with this step!
 
 =item 5.
 
@@ -430,18 +538,22 @@ work with SSL by itself, SSL and non-SSL together, or non-SSL by itself.
 
 It is possible to install and run everything here without root.
 
+It is not easy.  If you don't know your flavor of unix intimately, we
+don't recommend trying this.
+
 Describing the process for a non-root install would take up significant
 space and time, having to account for differences in various systems,
-and all the workarounds necessary for it to work.
+and all the workarounds necessary for it to work.  We don't support it,
+and we're not going to document it.
 
 If you must have a non-root install, consult the various documentation
 for Apache, MySQL, and perl about running and installing without root
-access.  Then, for Slash, you simply need to set the make variables PREFIX,
+access.  Then, for Slash, you need to set the make variables PREFIX,
 SLASH_PREFIX, and INIT appropriately for your needs.
 
-B<Note>: Slash (or, more accurately, Apache + mod_perl and MySQL) take
+B<Note>: Slash sites (or, more accurately, Apache + mod_perl and MySQL) take
 up a lot of system resources.  It is I<not advisable> for anyone to
-run Slash at all on a system, without the permission of the administrator
+run Slash on any system, without the permission of the administrator
 of that system.
 
 
@@ -745,7 +857,7 @@ template with the new template.
 
 =head2 Slash 2.2.6 -E<gt> Slash CVS
 
-Use the sql/mysql/upgrades file;  see "CVS tags" below.
+Use the sql/mysql/upgrades file;  see L<"VERSIONS">, "CVS tags", below.
 
 =head2 Slash 1.0 -E<gt> Slash 2.2
 
@@ -760,9 +872,9 @@ prefer.
 
 =head1 REQUIREMENTS
 
-=head2 Software
+=head2 Software Requirements
 
-Below, the main software components needed are listed.  The
+Below, we list the main software components needed.  The
 recommended version is noted, along with the earliest version
 that has been tested (or is expected) to work.  The earliest
 versions are not necessarily supported, but should work.
@@ -774,11 +886,14 @@ perl 5.6.0 is supported, but MySQL 3.22 is not.
 =item perl
 
 Version 5.6.1 (5.6.0). [NOTE: perl 5.6.0 may have some problems.
-5.6.1 is recommended. We have found no problems with 5.8.0, but
-we haven't tested Unicode thoroughly; if you have 5.8, we don't
-suggest you downgrade just for us.]
+5.6.1 is recommended.]
 
 	http://www.cpan.org/
+
+We believe everything works fine with perl 5.8.x, and have several small
+Slash installations on it, but we have not tested Unicode thoroughly,
+nor have we run Slashdot on it yet.  If you're going with 5.8.x, we
+suggest 5.8.1 or later, as there are numerous small bugs in 5.8.0.
 
 =item MySQL
 
@@ -788,13 +903,13 @@ Version 4.0.12 (3.23.42).
 
 =item Apache
 
-Version 1.3.27 (1.3.6).
+Version 1.3.29 (1.3.6).
 
 	http://httpd.apache.org/
 
 =item mod_perl
 
-Versions 1.27 (1.21).
+Version 1.29 (1.21).
 
 	http://perl.apache.org/
 
@@ -807,7 +922,8 @@ Refer to your OS distribution.
 
 See http://search.cpan.org/ and http://www.cpan.org/
 to get each module individually; however, we recommend
-you download them using the CPAN module.
+you download them using the CPAN module.  (See L<"INSTALLATION">,
+item 4, "Install the Perl modules.")
 
 The latest version of each module is recommended.
 
@@ -819,90 +935,35 @@ install them before installing the modules.
 	http://www.gzip.org/zlib/
 	http://sf.net/projects/expat/
 
-The following required distributions are all included in
-the Bundle::Slash distribution.
+On Debian Linux, try:
 
-=over 4
+	apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
 
-=item libnet
-
-=item Digest-MD5
-
-=item MD5
-
-=item Compress-Zlib
-
-=item Archive-Tar
-
-=item File-Spec
-
-=item Storable
-
-=item MIME-Base64
-
-=item libwww-perl
-
-=item HTML-Tree
-
-=item Font-AFM
-
-=item HTML-FormatText
-
-=item XML-Parser
-
-=item XML-RSS
-
-=item DBI
-
-=item Data-ShowTable
-
-=item Msql-Mysql-modules
-
-=item DBIx-Password
-
-=item ApacheDBI
-
-=item libapreq
-
-=item AppConfig
-
-=item Template-Toolkit (version 2)
-
-=item Mail-Sendmail
-
-=item MailTools
-
-=item Email-Valid
-
-=item Getopt-Long
-
-=item Image-Size
-
-=item Time-HiRes
-
-=item TimeDate
-
-=item DateManip
-
-=item Time-modules
-
-=item Schedule-Cron
-
-=back
+The current list of required perl modules can be found in the
+F<Bundle/Slash.pm> file.
 
 =back
 
 
-=head2 Hardware
+=head2 Hardware Requirements
 
-There are no specific hardware requirements.  Apache (with mod_perl)
-and MySQL both take up a lot of RAM. Running a complete system with
-128MB might be possible, if you do some tuning of the configuration,
-but a practical minimum of 256MB is recommended.  Storage space depends
-on how busy you expect the site to be; a minimum 1GB is recommended.
-Necessary processor speed is also dependent on how busy the site is;
-Pentium 133 or equivalent might work, but less than a Pentium II/200 is
-not recommended.
+There are no specific hardware requirements.
+
+Apache (with mod_perl) and MySQL both take up a lot of RAM. Running a
+complete system with 128MB might be possible, if you do some tuning of
+the configuration, but a practical minimum of 256MB is recommended, and
+you will be much happier with at least 1GB of RAM.  See L<"INSTALLATION
+OPTIONS">, "Separate Image Server" for tips on saving some RAM.
+
+Disk space depends on how busy you expect the site to be.  Slash keeps
+a small database -- even Slashdot.org's DB compresses down to under 2 GB.
+The disk files as installed are under 0.5 GB, and grow predictably as
+stories and comments are added (keep an eye on the F<site/foo/logs/>
+directory, too).  A minimum of 1 GB of disk is recommended.
+
+Necessary processor speed is also dependent on how busy the site is.
+Pentium 133 or equivalent might work, but a Pentium II/400 or better
+is recommended.
 
 For the curious, Slashdot (as of September 2001) runs on nine machines:
 nine webservers (each is Pentium III/600, 1GB RAM, 9GB hard drive), one
@@ -966,8 +1027,8 @@ as of this writing (June 2003) is 2.2.6.
 =head2 CVS tags
 
 Our development of 2.3/2.4 has gone on exceptionally long without a
-tarball release of 2.3.0.  Many Slash hosting sites are choosing to
-follow CVS instead of waiting.
+tarball release of 2.3.0.  Most Slash hosting sites are choosing to
+follow CVS instead of waiting, and we encourage this.
 
 Installation of the latest CVS (as of June 2003) is almost identical
 to the installation of 2.2.
@@ -976,9 +1037,9 @@ You probably do not want to use the
 very latest CVS, as the Slash developers are constantly updating it.
 If you wish to live on the edge, try a T_2_3_0_x tag ("Testing in 2.3.0
 branch" -- one or two of these are added every week, Slashdot uses them,
-but they may have bugs).  If you are content to just hang out near the
-edge, look for one of the R_2_3_0_x cvs tags ("Release candidates for
-2.3.0" -- these have been tested and are believed free of major bugs).
+but they may have bugs).  If you are content with recent code that the
+developers believe is likely to be free of major bugs, look for a recent
+R_2_3_0_x cvs tag ("Release candidates for 2.3.0").
 
 To upgrade from 2.2.x to the CVS tree, you will need to follow the
 instructions in the sql/mysql/upgrades file.  At the moment, these are
@@ -989,7 +1050,7 @@ upgraded to, or have installed, a given CVS tag, upgrading to later
 CVS tags is simply a matter of following along in that file -- we append
 as we go, and each T_* tag is clearly marked.
 
-=head1 COMMON INSTALLATION PROBLEMS
+=head1 TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
 
 Here are some common reasons why Slash installations fail.
 
@@ -1019,9 +1080,6 @@ We list perl 5.6.0 as supported, but 5.6.1 is recommended.
 If you're having CPAN installation troubles, upgrading to the
 latest version will make life easier. Note that you'll want to
 recompile mod_perl/Apache after upgrading perl.
-
-We believe everything works fine with perl 5.8.0, but have not
-run Slashdot on it yet.
 
 =item *
 

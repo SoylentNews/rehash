@@ -36,14 +36,16 @@ SYNOPSIS
     As of this writing (June 2003), our last official release (2.2.6) was
     some time ago and many features have been added since. We have not yet
     released 2.3.0. If you want to use more recent code, check out CVS
-    versions from cvs.slashcode.com. You probably do not want to use the
-    very latest CVS. See "CVS tags" below for advice on choosing and
-    maintaining a CVS installation.
+    versions from cvs.slashcode.com. If you are installing a new Slash site,
+    you probably do not want to use the very latest CVS, but you probably do
+    want to use the latest "R_" tag available in CVS. See "VERSIONS", "CVS
+    tags", below, for advice on choosing and maintaining a CVS installation.
 
   Important Note
     We know you want to get right into the installation, but you probably
     want to read this whole document first. Notably, the software and
-    hardware requirements are given later on.
+    hardware requirements are given later on in the "REQUIREMENTS" section,
+    which you probably want to go read now, to check for potential problems.
 
     Also, you will find information on upgrading a Slash site (which can be
     tricky); uninstalling; and troubleshooting for common problems.
@@ -144,89 +146,190 @@ INSTALLATION
 
     4.  Install the Perl modules.
 
-        The best way to do this is with the CPAN module.
+        Slash is powerful and complex, and, rather than reinvent the wheel,
+        it often relies on CPAN modules. Open-source code reuse has many
+        advantages. One disadvantage is that installing all those modules
+        can be tricky, as you may be about to find out.
 
-        You might also wish to install each module by hand, using
-        distributions found on the CPAN. See perlmodinstall for more
-        information on installing perl modules.
+        You could install each module in Bundle/Slash.pm by hand, but this
+        would be time-consuming. Instead, you'll want to install the bundle
+        "Bundle::Slash" using CPAN.
 
-        IMPORTANT NOTES:
+            IMPORTANT NOTES (read through these first):
 
-        Overactive CPAN
-            With some versions of the CPAN module, the module will try to
-            download and install the latest version of Perl. Watch what the
-            module is doing; if it begins to download an entire perl
-            distribution, interrupt it (hit ctrl-C) until it stops, then try
-            again with the CPAN module. This should not be an issue in the
-            latest version of Bundle::Slash.
+            Overall comment about CPAN module failure
+                It is possible that upon typing "install Bundle::Slash", you
+                will have one or more modules fail to install on the first
+                try. The rest of the modules will be successfully installed
+                but some won't. In that case you will want to fix the
+                problems and retype "install Bundle::Slash" to make sure
+                everything proceeds smoothly. Once that command gives you
+                just a long list of "Foo::Bar is up to date," you are done.
+                Until that point, you are not done; you must resolve the
+                errors.
 
-        Uninstalling Old Modules
-            Sometimes, you will be installing a newer version of a module
-            that exists elsewhere on the system. You might want to tell the
-            CPAN module to automatically remove older files. To do that from
-            the CPAN shell, type:
+            Old Version of Bundle::Slash
+                If you have previously installed Bundle::Slash, you will
+                want to install it again, but you will need to delete the
+                existing version. Go to your .cpan/Bundle directory (usually
+                ~/.cpan/Bundle/) and remove Slash.pm.
 
-                    cpan> o conf make_install_arg UNINST=1
+            Overactive CPAN
+                With some versions of the CPAN module, the module will try
+                to download and install the latest version of Perl. Watch
+                what the module is doing; if it begins to download an entire
+                perl distribution, interrupt it (hit ctrl-C) until it stops,
+                then try again with the CPAN module. This should not be an
+                issue in the latest version of Bundle::Slash.
 
-        Old Version
-            If you have previously installed Bundle::Slash, you will want to
-            install it again, but you will need to delete the existing
-            version. Go to your .cpan/Bundle directory (usually
-            ~/.cpan/Bundle/) and remove Slash.pm.
+            Uninstalling Old Modules
+                Sometimes, you will be installing a newer version of a
+                module that exists elsewhere on the system. You probably
+                want to tell the CPAN module to automatically remove older
+                files. To do that from the CPAN shell, type:
 
-        Additional Libraries
-            You must have certain libraries existing on your system before
-            building, for Compress::Zlib and XML::Parser (see
-            "REQUIREMENTS").
+                        cpan> o conf make_install_arg UNINST=1
 
-        BSD If running BSD, also install the BSD::Resource module. We have
-            heard reports of problems running Slash on BSD, but you are
-            welcome to try; patches would be lovely.
+                And if you want that to be CPAN's default from now on, add:
 
-        Alternate DBs
-            Slash currently requires MySQL. While our design allows for
-            supporting multiple DBs, actually supporting anything other than
-            MySQL has fallen by the wayside since the release of Slash
-            version 2.0. We have heard almost zero demand for any other
-            database, and this isn't a feature we need ourselves, so it's
-            not a high priority. Patches and feedback are, of course, always
-            welcome.
+                        cpan> o conf commit
 
-        DBIx::Password
-            When installing DBIx::Password, you will be asked for various
-            information, the same information used to create the database
-            and database user in Step 1. You will also be asked for a
-            virtual user name, which will be the identifier for all of this
-            data. You can just use the name of your site, or any other
-            alphanumeric string. You will use this virtual user name in
-            other places, so do not forget it. If you don't understand what
-            you're doing here, don't fake it; this is a common reason we see
-            for Slash installations failing.
+            Automatically Installing Dependencies
+                Some of the modules in Bundle::Slash require other modules.
+                We have not put some of those other modules in Bundle::Slash
+                because, if those requirements change in the future, we
+                don't want to make future Slash sites install more than they
+                have to.
 
-        libnet Broken
-            libnet is currently broken somewhat in its tests. Please use
-            "install Net::Cmd" first, before you install anything else. If
-            it fails only tests 8 and 9 of t/require, then it is OK; just do
-            "force install Net::Cmd", then continue on with the rest of the
-            modules installation.
+                If you see this:
+
+                        ---- Unsatisfied dependencies detected during [FOO/Bar-1.23.tar.gz] -----
+                            Foobar::Baz
+                        Shall I follow them and prepend them to the queue
+                        of modules we are processing right now? [yes] 
+
+                That's normal; just hit return.
+
+                If it annoys you to have to do this, edit the
+                "prerequisites_policy" field of your CPAN/Config.pm file.
+                Or, just do this to change it to automatically follow
+                dependencies and commit the change:
+
+                        cpan> o conf prerequisites_policy follow
+                        cpan> o conf commit
+
+            Additional Libraries
+                You must have certain libraries existing on your system
+                before building, for Compress::Zlib and XML::Parser (see
+                "REQUIREMENTS").
+
+            BSD Systems
+                If running BSD, also install the BSD::Resource module. We
+                have heard reports of problems running Slash on BSD, but you
+                are welcome to try; patches would be lovely.
+
+            Alternate DBs
+                Slash currently requires MySQL. While our design allows for
+                supporting multiple DBs, actually supporting anything other
+                than MySQL has fallen by the wayside since the release of
+                Slash version 2.0. We have heard almost zero demand for any
+                other database, and this isn't a feature we need ourselves,
+                so it's not a high priority. Patches and feedback are, of
+                course, always welcome.
+
+            DBIx::Password
+                When installing DBIx::Password, you will be asked for
+                various information, the same information used to create the
+                database and database user in Step 1. You will also be asked
+                for a virtual user name, which will be the identifier for
+                all of this data. You can just use the name of your site, or
+                any other alphanumeric string. You will use this virtual
+                user name in other places, so do not forget it. If you don't
+                understand what you're doing here, don't fake it; this is a
+                common reason we see for Slash installations failing.
+
+            Documentation
+                To read the README for any module, before or after
+                installing:
+
+                        cpan> readme MODULE
+
+                To read the documentation of any of the modules, once they
+                have been installed, type "perldoc MODULE" at the command
+                line.
+
+                See perlmodinstall for more information on installing perl
+                modules.
+
+        Now that you have read the above notes, you're ready to install the
+        perl modules.
 
         To use the CPAN module, invoke the CPAN shell:
 
                 perl -MCPAN -e shell
 
-        After it has been configured, install Bundle::Slash:
+        (Or, you may have the unix command "cpan" already available, which
+        does the same thing.)
+
+        If this is the first time you've invoked CPAN, you will be asked to
+        configure it.
+
+        Next, install some important networking modules. Doing this first is
+        optional but, if there are problems with these modules, you'll want
+        to resolve them before moving on to the rest of the installation:
+
+                cpan> install Bundle::LWP
+
+        Make sure all those modules are installed and up to date before
+        proceeding. Note that Net::Cmd has a history of being a little
+        broken in its tests; if it fails on tests 8 and 9 of t/require, then
+        it's OK; just do "force install Net::Cmd" and repeat "install
+        Bundle::LWP".
+
+        After the LWP has been installed and configured successfully, "exit"
+        the CPAN, reinvoke it with the "perl -MCPAN -e shell" command, and
+        install Bundle::Slash:
 
                 cpan> install Bundle::Slash
 
-        To read the README for any module, before or after installing:
+        This will be a long process. Several modules will ask to be
+        configured during this process. Here are some tips:
 
-                cpan> readme MODULE
+        DBI Don't worry about the threading warning.
+
+        DBIx::Password
+            See IMPORTANT NOTES above.
+
+        Apache::Test and Apache::Cookie
+            You will need "httpd" and "apxs" in your $PATH, and even if they
+            are there, you will probably see the lengthy error that starts
+            "Apache cannot spawn child processes as 'root'". This is
+            because, ironically, Apache::Test's self-tests are a colossal
+            pain to actually run. Personally I just "force install
+            Apache::Cookie" which is lame but solves the problem.
+
+        Template
+            The Template Toolkit is a complex install. Try accepting all the
+            defaults and see if it works. It has 90 test scripts with over
+            2000 tests, and installation will be halted if just 1 of these
+            tests fails. Do a "look Template" and try your best to resolve
+            the issues. The README includes a URL to the mailing list
+            archives, where you may find help. If you're getting 100 errors,
+            you need to fix them, but if you're down to 1 or 2 you can't
+            fix, we suggest you make a note of what the failures were and
+            just "force install Template".
 
         If you have problems, feel free to re-run "install Bundle::Slash".
         It will safely skip anything already installed.
 
-        To read the documentation of any of the modules, once they have been
-        installed, type "perldoc MODULE" at the command line.
+        If you are feeling lucky and are in a big hurry, you might try
+        "force install Bundle::Slash", which will skip all tests for all
+        modules -- but if you do this and later things start to fail, you're
+        on your own, don't complain.
+
+        Again: once you are able to do "install Bundle::Slash" and see
+        nothing but a long list of modules that are "up to date," you are
+        done. Until you see that, you are not done with this step!
 
     5.  Install Slash.
 
@@ -351,19 +454,23 @@ INSTALLATION OPTIONS
   Non-Root
     It is possible to install and run everything here without root.
 
+    It is not easy. If you don't know your flavor of unix intimately, we
+    don't recommend trying this.
+
     Describing the process for a non-root install would take up significant
     space and time, having to account for differences in various systems,
-    and all the workarounds necessary for it to work.
+    and all the workarounds necessary for it to work. We don't support it,
+    and we're not going to document it.
 
     If you must have a non-root install, consult the various documentation
     for Apache, MySQL, and perl about running and installing without root
-    access. Then, for Slash, you simply need to set the make variables
-    PREFIX, SLASH_PREFIX, and INIT appropriately for your needs.
+    access. Then, for Slash, you need to set the make variables PREFIX,
+    SLASH_PREFIX, and INIT appropriately for your needs.
 
-    Note: Slash (or, more accurately, Apache + mod_perl and MySQL) take up a
-    lot of system resources. It is *not advisable* for anyone to run Slash
-    at all on a system, without the permission of the administrator of that
-    system.
+    Note: Slash sites (or, more accurately, Apache + mod_perl and MySQL)
+    take up a lot of system resources. It is *not advisable* for anyone to
+    run Slash on any system, without the permission of the administrator of
+    that system.
 
   Separate Image Server
     Those of you with infinite RAM will have no problems hosting as many
@@ -591,7 +698,7 @@ UPGRADING
                     % template-tool -u VIRTUAL_USER -s LIST
 
   Slash 2.2.6 -> Slash CVS
-    Use the sql/mysql/upgrades file; see "CVS tags" below.
+    Use the sql/mysql/upgrades file; see "VERSIONS", "CVS tags", below.
 
   Slash 1.0 -> Slash 2.2
     Please read the complete documentation of utils/slash1toslash2.2. It is
@@ -601,8 +708,8 @@ UPGRADING
     attempt to do it by hand if you prefer.
 
 REQUIREMENTS
-  Software
-    Below, the main software components needed are listed. The recommended
+  Software Requirements
+    Below, we list the main software components needed. The recommended
     version is noted, along with the earliest version that has been tested
     (or is expected) to work. The earliest versions are not necessarily
     supported, but should work. perl 5.6.0 is supported, but MySQL 3.22 is
@@ -610,11 +717,15 @@ REQUIREMENTS
 
     perl
         Version 5.6.1 (5.6.0). [NOTE: perl 5.6.0 may have some problems.
-        5.6.1 is recommended. We have found no problems with 5.8.0, but we
-        haven't tested Unicode thoroughly; if you have 5.8, we don't suggest
-        you downgrade just for us.]
+        5.6.1 is recommended.]
 
                 http://www.cpan.org/
+
+        We believe everything works fine with perl 5.8.x, and have several
+        small Slash installations on it, but we have not tested Unicode
+        thoroughly, nor have we run Slashdot on it yet. If you're going with
+        5.8.x, we suggest 5.8.1 or later, as there are numerous small bugs
+        in 5.8.0.
 
     MySQL
         Version 4.0.12 (3.23.42).
@@ -622,12 +733,12 @@ REQUIREMENTS
                 http://www.mysql.com/
 
     Apache
-        Version 1.3.27 (1.3.6).
+        Version 1.3.29 (1.3.6).
 
                 http://httpd.apache.org/
 
     mod_perl
-        Versions 1.27 (1.21).
+        Version 1.29 (1.21).
 
                 http://perl.apache.org/
 
@@ -637,7 +748,8 @@ REQUIREMENTS
     Perl module distributions
         See http://search.cpan.org/ and http://www.cpan.org/ to get each
         module individually; however, we recommend you download them using
-        the CPAN module.
+        the CPAN module. (See "INSTALLATION", item 4, "Install the Perl
+        modules.")
 
         The latest version of each module is recommended.
 
@@ -649,50 +761,30 @@ REQUIREMENTS
                 http://www.gzip.org/zlib/
                 http://sf.net/projects/expat/
 
-        The following required distributions are all included in the
-        Bundle::Slash distribution.
+        On Debian Linux, try:
 
-        libnet
-        Digest-MD5
-        MD5
-        Compress-Zlib
-        Archive-Tar
-        File-Spec
-        Storable
-        MIME-Base64
-        libwww-perl
-        HTML-Tree
-        Font-AFM
-        HTML-FormatText
-        XML-Parser
-        XML-RSS
-        DBI
-        Data-ShowTable
-        Msql-Mysql-modules
-        DBIx-Password
-        ApacheDBI
-        libapreq
-        AppConfig
-        Template-Toolkit (version 2)
-        Mail-Sendmail
-        MailTools
-        Email-Valid
-        Getopt-Long
-        Image-Size
-        Time-HiRes
-        TimeDate
-        DateManip
-        Time-modules
-        Schedule-Cron
+                apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
 
-  Hardware
-    There are no specific hardware requirements. Apache (with mod_perl) and
-    MySQL both take up a lot of RAM. Running a complete system with 128MB
-    might be possible, if you do some tuning of the configuration, but a
-    practical minimum of 256MB is recommended. Storage space depends on how
-    busy you expect the site to be; a minimum 1GB is recommended. Necessary
-    processor speed is also dependent on how busy the site is; Pentium 133
-    or equivalent might work, but less than a Pentium II/200 is not
+        The current list of required perl modules can be found in the
+        Bundle/Slash.pm file.
+
+  Hardware Requirements
+    There are no specific hardware requirements.
+
+    Apache (with mod_perl) and MySQL both take up a lot of RAM. Running a
+    complete system with 128MB might be possible, if you do some tuning of
+    the configuration, but a practical minimum of 256MB is recommended, and
+    you will be much happier with at least 1GB of RAM. See "INSTALLATION
+    OPTIONS", "Separate Image Server" for tips on saving some RAM.
+
+    Disk space depends on how busy you expect the site to be. Slash keeps a
+    small database -- even Slashdot.org's DB compresses down to under 2 GB.
+    The disk files as installed are under 0.5 GB, and grow predictably as
+    stories and comments are added (keep an eye on the site/foo/logs/
+    directory, too). A minimum of 1 GB of disk is recommended.
+
+    Necessary processor speed is also dependent on how busy the site is.
+    Pentium 133 or equivalent might work, but a Pentium II/400 or better is
     recommended.
 
     For the curious, Slashdot (as of September 2001) runs on nine machines:
@@ -745,8 +837,8 @@ VERSIONS
 
   CVS tags
     Our development of 2.3/2.4 has gone on exceptionally long without a
-    tarball release of 2.3.0. Many Slash hosting sites are choosing to
-    follow CVS instead of waiting.
+    tarball release of 2.3.0. Most Slash hosting sites are choosing to
+    follow CVS instead of waiting, and we encourage this.
 
     Installation of the latest CVS (as of June 2003) is almost identical to
     the installation of 2.2.
@@ -755,9 +847,9 @@ VERSIONS
     developers are constantly updating it. If you wish to live on the edge,
     try a T_2_3_0_x tag ("Testing in 2.3.0 branch" -- one or two of these
     are added every week, Slashdot uses them, but they may have bugs). If
-    you are content to just hang out near the edge, look for one of the
-    R_2_3_0_x cvs tags ("Release candidates for 2.3.0" -- these have been
-    tested and are believed free of major bugs).
+    you are content with recent code that the developers believe is likely
+    to be free of major bugs, look for a recent R_2_3_0_x cvs tag ("Release
+    candidates for 2.3.0").
 
     To upgrade from 2.2.x to the CVS tree, you will need to follow the
     instructions in the sql/mysql/upgrades file. At the moment, these are
@@ -768,7 +860,7 @@ VERSIONS
     simply a matter of following along in that file -- we append as we go,
     and each T_* tag is clearly marked.
 
-COMMON INSTALLATION PROBLEMS
+TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
     Here are some common reasons why Slash installations fail.
 
     *   Failure to build mod_perl with PERL_MARK_WHERE=1 EVERYTHING=1.
@@ -791,9 +883,6 @@ COMMON INSTALLATION PROBLEMS
         having CPAN installation troubles, upgrading to the latest version
         will make life easier. Note that you'll want to recompile
         mod_perl/Apache after upgrading perl.
-
-        We believe everything works fine with perl 5.8.0, but have not run
-        Slashdot on it yet.
 
     *   Multiple Perls installed.
 
