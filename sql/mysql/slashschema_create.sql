@@ -1019,10 +1019,10 @@ CREATE TABLE users_comments (
 	nosigs tinyint DEFAULT '0' NOT NULL,
 	commentlimit smallint UNSIGNED DEFAULT '100' NOT NULL,
 	commentspill smallint UNSIGNED DEFAULT '50' NOT NULL,
-	commentsort tinyint DEFAULT '0',
+	commentsort tinyint DEFAULT '0' NOT NULL,
 	noscores tinyint DEFAULT '0' NOT NULL,
-	mode varchar(10) DEFAULT 'thread',
-	threshold tinyint DEFAULT '0',
+	mode ENUM('flat', 'nested', 'nocomment', 'thread') DEFAULT 'thread' NOT NULL,
+	threshold tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)
 ) TYPE=InnoDB;
 
