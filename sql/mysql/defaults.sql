@@ -641,6 +641,7 @@ INSERT INTO vars (name, value, description) VALUES ('body_bytes','0','Use Slashd
 INSERT INTO vars (name, value, description) VALUES ('breakhtml_wordlength','50','Maximum word length before whitespace is inserted in comments');
 INSERT INTO vars (name, value, description) VALUES ('breaking','100','Establishes the maximum number of comments the system will display when reading comments from a "live" discussion. For stories that exceed this number of comments, there will be "page breaks" printed at the bottom. This setting does not affect "archive" mode.');
 INSERT INTO vars (name, value, description) VALUES ('cache_enabled','1','Simple Boolean to determine if content is cached or not');
+INSERT INTO vars (name, value, description) VALUES ('cache_enabled_template','1','If set, then template caching is still active even if var cache_enabled is turned off.');
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_entity','zwnj|zwj|lrm|rlm','Entities that approveCharref should always delete');
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_numeric','8204|8205|8206|8207|8236|8237|8238','Numeric references that approveCharref should always delete');
 INSERT INTO vars (name, value, description) VALUES ('checklist_length','255','Length of user_index checklist fields (default is VARCHAR(255))');
@@ -687,6 +688,7 @@ INSERT INTO vars (name, value, description) VALUES ('daily_last','2000-01-01 01:
 INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','This turns off delayed inserts (which you probably want to do)');
 INSERT INTO vars (name, value, description) VALUES ('daily_tz','EST','Base timezone for running dailyStuff');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
+INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');
 INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
 INSERT INTO vars (name, value, description) VALUES ('defaultcommentstatus','0','default code for article comments- normally 0=posting allowed');
