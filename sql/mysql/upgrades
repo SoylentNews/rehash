@@ -2574,3 +2574,5 @@ INSERT INTO string_param (type, code, name) VALUES ('story023','0','Never');
 INSERT INTO string_param (type, code, name) VALUES ('story023','2','Often');
 INSERT INTO string_param (type, code, name) VALUES ('story023','3','Always');
 
+INSERT INTO vars (name, value, description) VALUES ('issue_lookback_days','7','Number of days to look back in issue mode');
+
