@@ -2151,8 +2151,6 @@ ALTER TABLE message_drop CHANGE COLUMN message message MEDIUMBLOB DEFAULT '' NOT
 
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt,width,height,longdesc_U', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_140, Start of T_2_3_0_141 - 2004/03/03
 
 UPDATE vars SET description='Show HTML comments before and after template? (see Slash::Display) 0=no 1=yes unless Nocomm 2=ALWAYS (debugging only!)' WHERE name='template_show_comments';
@@ -2164,3 +2162,8 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_si
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_141, Start of T_2_3_0_142 - 2004/03/09
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_142, Start of T_2_3_0_143 - 2004/03/10
+
