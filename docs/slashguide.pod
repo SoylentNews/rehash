@@ -51,47 +51,399 @@ to have one for you).
 This guide is for the Slash code as of mid-2003, and much of what is here
 will not apply to version 2.0.  Some may not apply to 2.2.
 
-the regime of themes and plugins
-	Slash::Install makes it happen
-	themes can inherit from other themes
-	plugins modify themes by adding htdocs files, adding tasks, adding templates,
-		changing schemas, 
-basic page layout
-	left column
-	middle column
-	right column (usually present, sometimes not)
-	differences between slashcode and slashdot themes (xoxox vs. xxoxo, mainly)
-installation
-	symlinks and side effects of using them
-	template-tool and symlink-tool
-	my preferred method of customizing a theme (cp -a themes/foo themes/bar)
-	the other way (the slashdot theme way) of customizing a theme (override slashcode where necessary)
-Templates
-	1;2;3 and search order
-	how template-tool lets themes override plugins (needed rarely, but sometimes)
-	hard-rendering
-		Slash/Slash.pm:sub _hard_dispComment {
-		Slash/Utility/Display/Display.pm:sub _hard_linkStory {
-		Slash/Utility/Display/Display.pm:sub _hard_linkComment {
-	speed and RAM concerns
+=head2 Preparing for Installation: Themes and Plugins
+
+Since the Slash site you will want to run probably doesn't look exactly
+like the default "slashcode" theme, you will have to customize it.
+You'll first need to know what themes and plugins are and how they work.
+
+"Theme" is commonly used to mean a skin, a swappable module that affects
+only the look of a site or program.  Slash's themes do control almost
+every aspect of how a site looks, but it ends there:  our themes run
+much deeper.  They are the base code that generates pages, the base code
+that runs in the background, and they include variables that control
+most tunable parameters.
+
+The .pm files live outside of themes, providing an API that any theme
+can use for basic functionality:  accessing the database in useful ways,
+generating data, and so on.  (The conceptual distinction is that any
+"business logic" -- code that might be customized differently for
+different Slash sites -- belongs in the .pl files, while the .pm
+modules provide an API that will be general enough for many sites'
+.pl files to use.)
+
+When you design your own site, you will want to start with our "slashcode"
+theme (since it's the only one provided at the moment -- submissions
+welcome!) and modify it to suit your needs.
+
+Since we recommend working from a CVS checkout, you will want a way to
+keep your modified theme up to date when you upgrade to later releases
+(whether for features we add, or security fixes that may be necessary).
+
+Once you get a cvs checkout of the slashcode module from
+cvs.slashcode.com, do a "cp -a themes/slashcode themes/mytheme".
+By duplicating the associated CVS files, you get a sister directory
+that CVS will be just as happy to upgrade with your future "cvs
+update" commands.  (Some cvs clients will automatically recurse into that
+directory with a "cvs update" from the checkout root, which is handy.)
+The sister starts out as a twin, but you'll be customizing her in the
+days to come.
+
+The important thing here is that, if you change a file in your customized
+version, a "cvs update" will properly import new patches to that file
+while leaving your changes alone;  this is part of what CVS is all about,
+of course.  By keeping themes/slashcode in place you will have a reference
+point to compare again.  And our "make install" is set up to copy
+all subdirectories of the themes directory into place, with each of them
+becoming a new theme recognized by Slash -- notably by the Slash::Install
+module, and by the install-slashsite, template-tool and symlink-tool
+scripts (more on those later).
+
+Our recommended procedure for doing an install of a CVS checkout is not
+to issue the "make install" from within the checkout, but instead to do a
+slightly-cleaner copy of the checkout to a new directory and then
+"make install" from there.  The make can leave a few files around that
+CVS doesn't know what to do with.
+
+If you are installing multiple Slash sites, you probably want to create
+multiple subdirectories, one theme for each site.
+
+Plugins modify the behavior of themes by installing extra code and data.
+They commonly have a .pl script which becomes a webpage.  They often
+include one or more .pl scripts which run as background tasks (via
+slashd).  They frequently include templates which provide data, and
+sometimes include a class, in the Slash:: hierarchy, providing an API to
+something specialized.  They can also include changes to the DB schema,
+and data to load into the DB, both applied when the plugin is installed.
+
+Normally you will install a theme and most plugins together, using the
+bin/install-slashsite script.  Occasionally, when a site has already
+been installed, you may add a plugin with the bin/install-plugin script.
+
+These scripts use Slash::Install to determine which files will be used.
+That module reads the THEME or PLUGIN file at the root of the relevant
+subdirectory, so e.g., themes/slashcode/THEME or plugins/Admin/PLUGIN.
+The file format should be obvious on examination.
+
+The first thing you'll want to do with your new theme is to edit its
+THEME file and edit its name and description.  Any templates you add
+need to be added here, ditto htdocs, images, tasks, and so on.
+
+When you run install-slashsite (or -plugin), we strongly recommend that
+you do use symlinks.  Again, this makes upgrading much easier.
+
+There is an alternate way to write your own theme, and it is to use
+the include_theme directive in your THEME file.  We use this for
+the slashdot theme that is customized for Slashdot.org but we're not
+going to go into a lot of detail here about how to use this feature.
+Essentially it pulls in the templates from another theme (slashcode)
+and only overrides them where specifically listed -- other files besides
+templates are still done the same way.  This is mostly just useful for
+us, because we often develop on both themes at the same time and don't
+want our templates stepping on each other.  Read the Slash::Install
+source if you really want to know more.
+
+=head2 Templates
+
+Slash makes extensive use of the Template Toolkit, a collection of
+CPAN modules.  Do a perldoc on Template and Template::Manual for details.
+
+Slash loads its templates from the DB;  template files on disk are parsed
+and written into the DB by the template-tool script.  We have a three-tier
+naming system by which any given template is identified.  The second and
+third parts of the name are the page and section, respectively.  The page
+is basically the script name as pulled from the current URI, so when
+viewing index.pl it's "index".  Section is a property of data like
+stories or polls (and there are two fake sections, "admin" and "light").
+
+On disk, the three parts of the name are separated by semicolons, thus:
+"themes/slashcode/templates/header;misc;default".  Note that on Unix, the
+semicolon must usually be backslash-escaped on the command line.
+Inside the file, you will find the "__section__" token followed by the
+name of the section on the next line.  (If you ever goof up and write a
+file whose name and internal data disagrees, template-tool will let you
+know next time you run it.)
+
+When retrieving a template, often for display of HTML to the reader,
+your site will usually just specify the name of the template ("header")
+and allow getTemplateByName() to figure out which is meant.  Usually this
+is done through a call to Slash::Display::slashDisplay() which takes
+the name of the template, the data to pass to it, and optional arguments
+(which, among other things, can override the current page and section).
+
+When you update a site, the template-tool script, when invoked
+with -U, will read your site's site_info table to find which one
+theme and zero-or-more plugins you are using;  it will scan the
+/usr/local/slash/{themes,plugins} hierarchy to find the THEME and PLUGIN
+files needed;  then it will scan the /usr/local/slash hierarchy again to
+find the template files you need.  It will write them into the templates
+table of your site's database (except those marked placeholder, which
+means template-tool -U ignores them).
+
+Note that if, in writing your theme, you decide you want to override a
+plugin's template, you can do so by just adding a template of the same
+name.  template-tool -U will overwrite plugins' versions with themes'.
+Of course, if you really want to change around a plugin a lot, do the
+"cp -a" trick, rename it, edit it, and edit your THEME file to include
+your new version instead of our stock version.
+
+After you update templates in your DB, you will want to stop/start both
+slashd and Apache.
+
+We enjoy the power of the Template Toolkit, it is an effective way to
+store data mixed with a bit of logic.  But for speed, you'll probably
+want to cache compiled templates [and RAM concerns, etc.]
+
+Even with all templates compiled, TT can be too slow for a very busy
+production site.  For three key functions, Slashdot uses a hardcoded
+workaround.  Grep the code for 'sub _hard_' to see where.
+
+=head2 Quasi-Globals: Constants, SlashDB, User, Form
+
+Let's just get this out of the way:  in the code, for historical reasons,
+we have silly names for things related to our four main global variables.
+
+It's these four from which our code gets most of its connection-specific
+"global" data, in other words, the data which applies only for this one
+click and can be accessed from anywhere in the codebase (even templates!).
+
+(They are "globals" in the sense that they can be accessed from anywhere.
+They're actually stored as fields in the Apache request object, see e.g.
+getCurrentUser() in Environment.pm.  The access functions are plain
+functions, not methods.)
+
+=head3 Constants
+
+Our constants are not entirely constant;  95% of them you will never
+need to change, but 5% you may want to tweak from day to day or month
+to month -- and there is also a handful of vars that are written-to
+by the code itself.  By convention they are always stored in a hashref
+named $constants.
+
+That hashref is returned by the function getCurrentStatic(), NOT as
+you might expect getCurrentConstants() -- and to make matters worse
+its data is primarily loaded from the table named "vars".  OK?  Vars,
+Static, Constants, three names for the same data, and yes we realize
+they are contradictory.  (Some constants are loaded from other places,
+see MySQL.pm getSlashConf() for details.)
+
+=head3 SlashDB
+
+$slashdb is the standard name for an object of class Slash::DB::MySQL,
+which has a dbh (DB handle) pointing to the main (aka writer) DB.
+Note that in slashd tasks it will be of class Slash::DB::Static::MySQL
+which is the same thing plus a few extra methods.  This is returned
+by getCurrentDB().
+
+(Handles to other DBs, and/or object wrappers around those handles of
+different classes, will be returned by getObject().  Yes, we called it
+getObject() even though the only objects it ever returns are wrappers
+around DB handles.  Anyway, by passing getObject() different arguments,
+you can get an object of type Slash::Stats, for example, which gives
+you extra methods to access the DB in addition to the usual ones in
+Slash::DB::MySQL.  Or you can get a handle to a read-only replicated DB,
+see "MySQL Replication" below for more.)
+
+=head3 User
+
+getCurrentUser() returns you the current user object.  It has fields
+for every column in the user* tables associated with the current user,
+plus a number of other calculated fields based mostly on that data.
+For example, $user->{is_admin} and $user->{is_subscriber} are booleans
+calculated based on other data.
+
+In particular, $user->{state} contains data calculated to be part of the
+current state of this user for this particular page.  Your code shouldn't
+write to any part of $user except the state field, because it might be
+the Anonymous Coward and might be reused on the next click.
+
+=head3 Form
+
+getCurrentForm() returns you the current form object.  This is all the
+data submitted on the current click.  URL parameters from a GET show up
+here, e.g. $form->{sid}.  And POST data appears here too, all processed
+for your code in the way you'd expect.
+
+If you want multiple values, e.g. Slashdot's use of &tid=1&tid=2 in its
+URLs, you can find them in an arrayref at $form->{_multi}{tid}.
+
+An important part of Slash's security is in the filter_param() function
+in Environment.pm.  This function knows the names of several dozen params
+and ensures that the data passed in matches a regex before being stored
+in $form.  For example, everywhere in the Slash code, $form->{cid} is
+guaranteed to be numeric (if it exists).  That means it can be inserted
+into SQL strings without being quoted, which closes off one particular
+avenue of attack.
+
+In your code, if a param is not on filter_param's list, remember to wrap
+$slashdb->sqlQuote() around its data before inserting into an SQL string.
+Every param NOT on the list is untrustworthy.  You must be vigilant about
+quoting data from untrusted sources -- as a programmer, that is your
+responsibility -- and all that filter_param allows you to do is relax
+your guard on the more common inputs.
+
+=head3 Others
+
+There are other quasi-globals defined in Environment.pm, but they
+aren't used nearly as much.  For example, getCurrentAnonymousCoward,
+getCurrentCookie...
+
+=head2 Basic Page Layout
+
+All Slash pages have a header, the main body of the page, and a footer.
+
+The header and footer look much the same across the entire site.
+(Except for admin.pl pages which don't have much of a header.)
+The header and footer will be loaded from an include file on
+disk for static pages (slashhead.inc, slashfoot.inc, generated by
+tasks/new_headfoot.pl) and generated by a template for dynamic pages
+(templates named header and footer).
+
+The header starts at the top of the page and runs down to include the
+left column with its menus and links (again, except for admin.pl).
+The leftmost column of what is called the "maintable" contains a fairly
+standard menu and some slashboxes with a bit of information about your
+site.  In the stock slashcode distribution you will find the organisation
+[sic] template there, for example.
+
+The next column over, still part of the header template or slashhead.inc
+file, is a spacer.
+
+The next column over, in the maintable, will be the main body of the page.
+Actually its <TD> tag is still created by the header, then what's inside
+the <TD> is generated by the rest of the page.  On index.pl it is the list
+of most current stories.  On users.pl it is the information requested for
+that hit.  On article.pl it is the introtext and bodytext of the story,
+plus comments.  And so on.
+
+The 4th column, where it exists, is another spacer.  This is still part
+of the main body of the page (not header or footer, and generated by
+whichever page script is running).
+
+And the rightmost column, where it exists, typically contains more
+slashboxes.  On index.pl it is highly user-customizable but typically
+contains older stories, sectional slashboxes, the current poll, RSS
+feeds, etc.  On users.pl it will contain information about the user
+being looked at (the userboxes template).
+
+There the main body of the page ends.  The footer of the page takes
+care of closing the </TD> tag, and then having a final table row which
+typically includes a pithy quote or a search box or what-have-you.
+
+Because different pages have different numbers of columns -- and on
+Slashdot, the five columns are not the same as the slashcode theme's
+five columns, the spacers are in different places -- we use a system of
+processed templates to handle the <TD> and </TD> tags.  If you customize
+templates that require you to open and close those tags, instead
+of putting the <TD> in the template directly, insert a [% PROCESS
+maintable_td %].  That keeps track of the rows and columns in your
+maintable, so when the footer template finally is reached, it knows
+how many table tags to close up, leaving a nice compliant HTML table.
+For more on how the maintable is dynamically rendered, grep the templates
+directory on 'PROCESS maintable'.
+
+
+
+
 Blocks
 	static, portald, and color
-Vars
-	getCurrentStatic = constants
-The other quasi-globals
-	getCurrentDB
-	getCurrentUser
-	getCurrentForm
-	and the lesser-knowns like getCurrentAnonymousCoward
 Apache configuration
 	PerlAccessHandlers, PerlCleanupHandlers, PerlTransHandlers
 Slash::DB::Utility
 Slash::DB::MySQL
 	and Slash::DB::Static::MySQL
 	no more postgres
-MySQL replication
-	tips for setting it up...?
-	fulltext indexes, (only) necessary on search db which should be a slave
+
+
+
+=head2 MySQL Replication
+
+This is a bit of a speciality topic, but if you're interested in
+running a Slash site, you're probably concerned about performance.
+One of Slash's key selling points is that it has been proven to scale
+well to communities of hundreds of thousands of users and millions of
+largely-dynamic pageviews per day -- and given proper hardware, can
+probably scale well beyond that.
+
+MySQL supports master-slave replication and it would be wise to use it
+to achieve best performance.  Slash has support built in.
+
+Designate one DB your master ("writer") and create a DBIx::Password
+virtual_user for it like you would normally do.  Then, create one or
+more DBs which slave off it ("reader"s), start them replicating, and
+create DBIx::Password virtual_users for them as well.
+
+Then, to take advantage of your new readers and offload a great deal
+of work from your writer, all you have to do is create entries in your
+table named "dbs".  The format should be obvious:  type is either writer
+or reader, and if you have multiple readers, you will have multiple rows
+with type="reader".  For each such row, the virtual_user column points
+to a DBIx::Password virtual user, which points to one of your DBs.
+
+If isalive="no", then that reader will not be used until it gets set
+back to "yes" -- and that setting is not cached, so changes will take
+effect starting with the next click.  If you want to write an "angel"
+script to turn off this feature when a reader DB goes down, just write
+values into isalive.  Of course, assuming you have just one writer,
+
+The "log" and "log_slave" types are special.  Slash writes a lot of
+data about each click, which lets us keep really detailed stats -- and
+we scan that log hourly to decide who to give moderator points to.
+In fact, the I/O load for the accesslog table is several times the I/O
+of all other database writes combined.  And that's assuming you don't
+log image hits!  (Slashdot's load balancer sets image hits to static
+web servers which don't have the PerlCleanupHandler Slash::Apache::Log.)
+
+There are two ways you can reduce your accesslog load.  The first is
+to just create a type="log_slave" row in the dbs table, pointing to a
+virtual_user, that points to a DB which replicates only the accesslog
+table from your main writer DB.  That will take the accesslog reads,
+the hourly moderatorlog scan and the daily stats scan, off your main DB.
+
+The second is to create a separate DB which has only two tables,
+accesslog and accesslog_admin.  This becomes a second writer DB, but a
+writer which handles only logging.  Point a row in the dbs table to it
+and Slash will automatically direct writes there.  For best results,
+replicate another DB off your type="log" and point a type="log_slave"
+at it;  this ensures that even while moderatorlog and stats are churning
+away on the slave, the master log DB still have maximum I/O throughput.
+
+All this work with the dbs table is handled through getObject(), which,
+as mentioned earlier, is only for making database objects.  Almost every
+time we instantiate a DB object which can use a DB other than the master,
+we call getObject() with the db_type option.  If you have set up your
+dbs table, getObject() will transparently take advantage of all your DBs.
+
+One last comment on replication.  Some MySQL table types have advantages
+over others.  As of this writing (summer 2003), we greatly prefer the
+InnoDB table type for its row-level locking, faster I/O and quicker
+crash recovery.  But the MyISAM table type has FULLTEXT indexing on
+BLOB columns, which InnoDB does not currently support.
+
+The Slash code doesn't much care what table types you use -- except
+the Search plugin.  Search will try to do MATCH() on columns which it
+expects to have FULLTEXT indexes; if they don't, for example if you
+changed that table to InnoDB, it will (as of this writing, and yes
+we know this is bad) crash.  In future, we will fix this so it falls
+back on a slower search method, but the point is that if you are using
+master-slave replication, you can gain some additional speed advantage
+by manipulating table types, but you do have to keep track of them.
+
+The type="search" option in the dbs table is for this purpose.  You can
+have your story_text table as InnoDB on your writer, and replicate it to a
+slave DB which is for searching only -- your slave will be TYPE=MyISAM on
+that table (and the half-dozen others that require it).  Replication can
+easily mix types in this way, just read the plugins/Search/mysql_prep
+file, realize that those changes were probably already applied to your
+master, then either go undo them on the master or do them only on your
+search reader DB(s).
+
+In future, MySQL may support better ways of distributing reader load,
+and when they do we'll look at enabling support in Slash, but for now,
+this is the best way to do this.
+
+
+
 Slash::Utility::Anchor, headers and footers and ads
 hooks, not really implemented
 Slash::Test
@@ -400,6 +752,9 @@ report.
 =head1 CHANGES
 
 $Log$
+Revision 1.6  2003/07/07 22:18:24  jamie
+Filled in skeleton for themes/plugins, templates, page layout and replication.
+
 Revision 1.5  2003/06/30 19:06:30  jamie
 MySQL notes.
 
