@@ -480,7 +480,7 @@ sub sqlSelectAllHashrefArray {
 sub sqlUpdate {
 	my($self, $table, $data, $where) = @_;
 	my $sql = "UPDATE $table SET ";
-	foreach (keys %$data) {
+	for (keys %$data) {
 		if (/^-/) {
 			s/^-//;
 			$sql .= "\n  $_ = $data->{-$_},";
@@ -517,7 +517,7 @@ sub sqlInsert {
 	# Its an ANSI sql comment I believe -Brian
 	$delayed = $delayed ? " /*! DELAYED */" : "";
 
-	foreach (keys %$data) {
+	for (keys %$data) {
 		if (/^-/) {
 			$values .= "\n  $data->{$_},";
 			s/^-//;
