@@ -1901,6 +1901,14 @@ sub saveStory {
 	if ($sid) {
 		slashHook('admin_save_story_success', { story => $data });
 		titlebar('100%', getTitle('saveStory-title'));
+
+		# if the story isn't section-only, and the editor isn't
+		# restricted to one section (or edituser), clear out
+		# $form->{section} and display the storylist normally
+		# --Pater
+		$form->{section} = '' if $form->{displaystatus} != 1
+			&& !($user->{section} || $edituser->{section});
+
 		listStories(@_);
 	} else {
 		slashHook('admin_save_story_failed', { story => $data });
