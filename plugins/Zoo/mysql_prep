@@ -2,5 +2,3 @@ INSERT INTO vars (name,value,description) VALUES ('people_max','200','Maximum nu
 INSERT INTO vars (name,value,description) VALUES ('people_max_subscriber','400','Maximum number of friends/foes you can have');
 INSERT INTO vars (name,value,description) VALUES ('zoo_timer',now(),'Last time the Zoo task ran.');
 
-ALTER TABLE users_info ADD people_status ENUM ("ok","dirty") DEFAULT "ok" NOT NULL;
-ALTER TABLE users_info ADD index people_status(people_status);

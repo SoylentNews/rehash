@@ -13,3 +13,7 @@ CREATE TABLE people (
 	FOREIGN KEY (person) REFERENCES users(uid),
 	PRIMARY KEY (id)
 );
+
+ALTER TABLE users_info ADD people_status ENUM ("ok","dirty") DEFAULT "ok" NOT NULL;
+ALTER TABLE users_info ADD index people_status(people_status);
+
