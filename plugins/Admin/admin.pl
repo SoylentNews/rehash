@@ -1131,7 +1131,7 @@ sub editStory {
 	my $ispell_comments = {
 		introtext =>    get_ispell_comments($storyref->{introtext}),
 		bodytext =>     get_ispell_comments($storyref->{bodytext}),
-	};
+	} unless $user->{no_spell};
 
 	my $future = $slashdb->getStoryByTimeAdmin('>', $storyref, "3");
 	$future = [ reverse(@$future) ];

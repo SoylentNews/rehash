@@ -63,6 +63,11 @@ __template__
 		<P><B>Disable Sigs</B> (strip sig quotes from comments)
 		<INPUT TYPE="CHECKBOX" NAME="nosigs"[% s_check %]>
 
+		[% IF user.is_admin %]
+		<P><B>Spellchecker</B> (disable spellchecker)
+		<INPUT TYPE="CHECKBOX" NAME="no_spell"[% spell_check %]>
+		[% END %]
+
 		<P><B>Display Mode</B>
 
 		[% commentmodes_select %]

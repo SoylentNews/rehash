@@ -179,6 +179,9 @@ __template__
 		| <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit&amp;question=[% storyref.title | fixparam %]">
 		Related Poll</A>
 		[% END %]
+		[% IF subid %]
+		| <A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% subid %]"></A>
+		[% END %]
 
 		]
 
