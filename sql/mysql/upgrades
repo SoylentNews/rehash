@@ -1838,7 +1838,6 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 # -- pudge
 REPLACE INTO vars (name, value, description) VALUES ('content_type_webpage','text/html; charset=iso-8859-1','The Content-Type header for webpages');
 
-# USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_113, Start of T_2_3_0_114 - 2003/08/12
@@ -1865,3 +1864,4 @@ ALTER TABLE sections CHANGE COLUMN title title VARCHAR(64) DEFAULT '' NOT NULL, 
 # Stuff slashboxes will have a "Yesterday's Edition" link at the bottom.
 # UPDATE sections SET issue=3 WHERE issue=1 AND artcount > 0 AND section NOT IN ('polls', 'search');
 
+# USEPERL LAST UPDATED HERE
