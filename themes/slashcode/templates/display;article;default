@@ -51,13 +51,6 @@ IF story.relatedtext;
 		center		= 1;
 END;
 
-IF authortext;
-	PROCESS fancybox
-		title		= 'Story Admin'
-		contents	= authortext
-		center		= 1;
-END;
-
 IF section_block.block;
 	PROCESS fancybox
 		title		= section.title
