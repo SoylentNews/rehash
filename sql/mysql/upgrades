@@ -636,7 +636,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min',
 UPDATE vars SET name='m2_maxbonus_karma' WHERE name='m2_maxbonus';
 UPDATE vars SET description='Number of comments for meta-moderation - if more than about 15, doublecheck that users_info.mods_saved is large enough' WHERE name='m2_comments';
 UPDATE vars SET description='Number of M2 votes per M1 before it is reconciled by consensus - if not odd, will be forced to next highest odd number' WHERE name='m2_consensus';
-UPDATE vars SET value='300' WHERE name='m2_batchsize';
+UPDATE vars SET value='2000' WHERE name='m2_batchsize';
 
 ALTER TABLE moderatorlog ADD COLUMN m2status TINYINT DEFAULT '0' NOT NULL;
 ALTER TABLE metamodlog DROP COLUMN flag;
