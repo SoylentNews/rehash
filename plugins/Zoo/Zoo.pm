@@ -259,11 +259,13 @@ SQL
 }
 
 sub getZooUsersForProcessing {
-	my ($self, $time) = @_;
+	my($self, $time) = @_;
+	my $slashdb = getCurrentDB();
+
 	my $people = $slashdb->sqlSelectAll('uid', 'people', "last_update > '$time' ");
 	my $people2 = $slashdb->sqlSelectAll('uid', 'people_nthdegree', "last_update > '$time' ");
 
-	my %people;
+	my %people = ( );
 
 	for (@$people) {
 		$people{$_->[0]} = 1;
