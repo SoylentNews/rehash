@@ -1008,15 +1008,15 @@ EOT1
 EOT2
 
 	my $newnick = fixNickname($I{F}{newuser});
-	my $email = stripByMode($I{F}{email}, 'attribute');
+	my $newmail = stripByMode($I{F}{email}, 'attribute');
 	print <<EOT;
 	(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
 	are allowed in nicknames, and all others will be stripped out.)
 
-	<INPUT TYPE="TEXT" NAME="newuser" SIZE="20" MAXLENGTH="20" VALUE="$I{F}{newuser}">
+	<INPUT TYPE="TEXT" NAME="newuser" SIZE="20" MAXLENGTH="20" VALUE="$newnick">
 	<BR> and a <B>valid email address</B> address to send your registration
 	information. This address will <B>not</B> be displayed on $I{sitename}.
-	<INPUT TYPE="TEXT" NAME="email" SIZE="20" VALUE="$I{F}{email}"><BR>
+	<INPUT TYPE="TEXT" NAME="email" SIZE="20" VALUE="$newmail"><BR>
 	<INPUT TYPE="SUBMIT" NAME="op" VALUE="newuser"> Click the button to
 	be mailed a password.<BR>
 
