@@ -209,16 +209,17 @@ sub displayRSS {
 	if ($form->{uid} || $form->{nick}) {
 		my $uid = $form->{uid} ? $form->{uid} : $reader->getUserUID($form->{nick});
 		$juser  = $reader->getUser($uid);
-	} else {
-		$juser  = $user;
 	}
+	$juser ||= $user;
 
 	if ($form->{op} eq 'friendview') {
 		my $zoo   = getObject('Slash::Zoo');
 		my $uids  = $zoo->getFriendsUIDs($juser->{uid});
-		$articles = $journal->getsByUids($uids, 0, $constants->{journal_default_display});
+		$articles = $journal->getsByUids($uids, 0, $constants->{journal_default_display} * 3);
 	} else {
-		$articles = $journal->getsByUid($juser->{uid}, 0, $constants->{journal_default_display});
+		# give an extra 3 * the normal HTML default display ... we can
+		# make a new var if we really need one -- pudge
+		$articles = $journal->getsByUid($juser->{uid}, 0, $constants->{journal_default_display} * 3);
 	}
 
 	my @items;
