@@ -43,14 +43,12 @@ $task{$me}{code} = sub {
 	# But again for a safety margin, we want more.
 	$future_secs = $future_secs * 3 + 86400;
 
-	my $retval = $slashdb->getStoriesEssentials({
+	my $min_stoid = $slashdb->getStoriesEssentials({
 		return_min_stoid_only	=> 1,
 		try_future		=> 1,
 		limit_extra		=> $limit_extra,
 		future_secs		=> $future_secs,
 	});
-#use Data::Dumper; print STDERR "gSE retval: " . Dumper($retval);
-	my $min_stoid = $retval->[0]{minstoid};
 
 	# More safety margin.
 	$min_stoid -= 100;

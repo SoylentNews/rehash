@@ -6563,19 +6563,14 @@ sub getStoriesEssentials {
 	});
 	my $columns;
 	if ($options->{return_min_stoid_only}) {
-		$columns = "MIN(stories.stoid) AS minstoid";
+		$columns = "stories.stoid";
 		$can_restrict_by_min_stoid = 0;
 	} else {
 		$columns = "stories.stoid, sid, time, commentcount, hitparade,"
 			. " primaryskid, body_length, word_count, discussion, $column_time";
 	}
 	my $tables = "stories, story_topics_rendered";
-	my $other;
-	if ($options->{return_min_stoid_only}) {
-		$other = "LIMIT " . ($offset+$limit);
-	} else {
-		$other = "GROUP BY stories.stoid ORDER BY time DESC LIMIT $offset, $limit";
-	}
+	my $other = "GROUP BY stories.stoid ORDER BY time DESC LIMIT $offset, $limit";
 #print STDERR "gSE r_m_s_o '$options->{return_min_stoid_only}' other '$other' columns '$columns'\n";
 
 	my $where = "stories.stoid = story_topics_rendered.stoid AND in_trash = 'no' AND $where_time";
@@ -6611,6 +6606,15 @@ sub getStoriesEssentials {
 	}
 	$cursor->finish;
 	$self->_querylog_finish($qlid);
+
+	if ($options->{return_min_stoid_only}) {
+		my $min = $stories[0]{stoid} || 0;
+		return 0 if !$min;
+		for my $story (@stories) {
+			$min = $story->{stoid} if $story->{stoid} < $min;
+		}
+		return $min;
+	}
 
 	return \@stories;
 }
