@@ -66,8 +66,9 @@ sub findRecords {
 	}
 
 	if ($query->{section}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		# get section name, for most compatibility with this API
-		my $skin = $self->getSkin($query->{section});
+		my $skin = $reader->getSkin($query->{section});
 		$processed{section} = $skin->{name} if $skin && $skin->{name};
 	}
 
