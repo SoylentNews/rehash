@@ -287,14 +287,37 @@ sub deleteMessages {
 
 	# set defaults
 	my $constants = getCurrentStatic();
-	my $sendx = $constants->{message_send_expire} || 7;
-	my $webx  = $constants->{message_web_expire}  || 31;
+	my $sendx = $constants->{message_send_expire}  || 7;
+	my $webx  = $constants->{message_web_expire}   || 31;
+	my $webmx = $constants->{message_web_maxtotal} || 50;
+	my $logx  = $constants->{archive_delay}        || 14;
 
+	# delete message log entries
+	$self->sqlDo("DELETE FROM $self->{_log_table} " .
+		"WHERE TO_DAYS(NOW()) - TO_DAYS(date) > $logx");
+
+	# delete web messages over certain date
 	my $ids = $self->sqlSelectColArrayref($prime, $table,
 		"TO_DAYS(NOW()) - TO_DAYS(date) > $webx"
 	);
 	$self->_delete_web($_, 0, 1) for @$ids;
 
+	# delete user's web messages over certain total #
+	$ids = $self->sqlSelectAll("user,count(*)", $table,
+		"", "group by user"
+	);
+	for (@$ids) {
+		if ($_->[1] > $webmx) {
+			my $c = $_->[1] - $webmx;
+			my $delids = $self->sqlSelectColArrayref(
+				"id", "message_web", "user=$_->[0]",
+				"ORDER BY date DESC LIMIT $c"
+			);
+			$self->_delete_web($_, 0, 1) for @$delids;
+		}
+	}
+
+	# delete unsent messages in queue over certain date
 	$self->_delete(0, "TO_DAYS(NOW()) - TO_DAYS(date) > $sendx");
 }
 
