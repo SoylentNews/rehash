@@ -67,8 +67,10 @@ DROP TABLE IF EXISTS dilemma_playlog;
 CREATE TABLE dilemma_playlog (
 	meetid INT UNSIGNED NOT NULL,
 	daid INT UNSIGNED NOT NULL,
-	play FLOAT UNSIGNED NOT NULL,
+	playtry FLOAT UNSIGNED NOT NULL,
+	playactual FLOAT UNSIGNED NOT NULL,
 	reward FLOAT NOT NULL,
+	sawdaid INT UNSIGNED NOT NULL,
 	UNIQUE meetid_daid (meetid, daid),
 	KEY daid_meetid (daid, meetid)
 ) TYPE=InnoDB;

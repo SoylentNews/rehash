@@ -264,7 +264,7 @@ sub getAveragePlay {
 	my($self, $options) = @_;
 	my $max = $options->{max} || 1;
 	return $self->sqlSelectColArrayref(
-		"AVG(play) * $max",
+		"AVG(playactual) * $max",
 		"dilemma_meetlog, dilemma_playlog",
 		"dilemma_meetlog.meetid=dilemma_playlog.meetid",
 		"GROUP BY tick ORDER BY tick");
@@ -488,33 +488,39 @@ sub agentsMeet {
 	my $info = $self->getDilemmaInfo();
 	my $agent_data = $self->getAgents($daids);
 
-	# For each agent, get its play by calling its play() function.
+	# Tweak which agents are reported to each other -- we may
+	# lie to their code, mwoohahaha.
+	my $daids_report = $self->agentsMeet_tweakDaids($daids);
 
+	# For each agent, get its play by calling its play() function.
 	my @response = ( );
 	$response[0] = $self->agentPlay({
 		agent_data =>	$agent_data,
 		info =>		$info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[0],
-		it_daid =>	$daids->[1],
+		it_daid =>	$daids_report->[1],
 	});
 	$response[1] = $self->agentPlay({
 		agent_data =>	$agent_data,
 		info =>		$info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[1],
-		it_daid =>	$daids->[0],
+		it_daid =>	$daids_report->[0],
 	});
+
+	# Tweak the responses randomly.
+	my $response_tweaked = $self->agentsMeet_tweakResponses(\@response);
 
 	# For each agent, calculate the payoffs (aka who "won" if you
 	# are in a zero-sum mentality).
 
 	my @payoff = ( );
 	$payoff[0] = $self->determinePayoff(
-		$response[0], $response[1],
+		$response_tweaked->[0], $response_tweaked->[1],
 		{ foodsize => $foodsize });
 	$payoff[1] = $self->determinePayoff(
-		$response[1], $response[0],
+		$response_tweaked->[1], $response_tweaked->[0],
 		{ foodsize => $foodsize });
 
 	# Then call each species' debrief() function with $me_play and
@@ -528,10 +534,10 @@ sub agentsMeet {
 		info =>		$info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[0],
-		me_play =>	$response[0],
+		me_play =>	$response_tweaked->[0],
 		me_gain =>	$payoff[0],
-		it_daid =>	$daids->[1],
-		it_play =>	$response[1],
+		it_daid =>	$daids_report->[1],
+		it_play =>	$response_tweaked->[1],
 		it_gain =>	$payoff[1],
 	});
 	$memory[1] = $self->agentDebrief({
@@ -539,25 +545,12 @@ sub agentsMeet {
 		info =>		$info,
 		foodsize =>	$foodsize,
 		me_daid =>	$daids->[1],
-		me_play =>	$response[1],
+		me_play =>	$response_tweaked->[1],
 		me_gain =>	$payoff[1],
-		it_daid =>	$daids->[0],
-		it_play =>	$response[0],
+		it_daid =>	$daids_report->[0],
+		it_play =>	$response_tweaked->[0],
 		it_gain =>	$payoff[0],
 	});
-
-#use Data::Dumper;
-#print STDERR "agent_data: " . Dumper($agent_data);
-#print STDERR "daids: " . Dumper($daids);
-#print STDERR "response: '@response' payoff '@payoff' memory '@memory'\n";
-#my $memlen0 = $memory[0] ? length(freeze(\$memory[0])) : 0;
-#my $memlen1 = $memory[1] ? length(freeze(\$memory[1])) : 0;
-#printf STDERR "foodsize %.3f:  %s/%d played %.3f, gained %.3f food, memlen %d; %s/%d played %.3f, gained %.3f food, memlen %d\n",
-#	$foodsize,
-#	$agent_data->{$daids->[0]}{species_name}, $daids->[0],
-#	$response[0], $payoff[0], $memlen0,
-#	$agent_data->{$daids->[1]}{species_name}, $daids->[1],
-#	$response[1], $payoff[1], $memlen1;
 
 	$self->awardPayoffAndMemory($daids->[0], $payoff[0], $memory[0]);
 	$self->awardPayoffAndMemory($daids->[1], $payoff[1], $memory[1]);
@@ -566,10 +559,48 @@ sub agentsMeet {
 		tick =>		$dilemma_info->{last_tick},
 		foodsize =>	$foodsize,
 		plays =>	[
-			{ daid => $daids->[0], play => $response[0], reward => $payoff[0] },
-			{ daid => $daids->[1], play => $response[1], reward => $payoff[1] },
+			{ daid =>	$daids->[0],
+			  playtry =>	$response[0],
+			  playactual =>	$response_tweaked->[0],
+			  reward =>	$payoff[0],
+			  sawdaid =>	$daids_report->[1],	},
+			{ daid =>	$daids->[1],
+			  playtry =>	$response[1],
+			  playactual =>	$response_tweaked->[1],
+			  reward =>	$payoff[1],
+			  sawdaid =>	$daids_report->[0],	},
 		],
 	});
+}
+
+sub agentsMeet_tweakDaids {
+	my($self, $real_daids) = @_;
+	my $constants = getCurrentStatic();
+	my $daids_report = [ @$real_daids ];
+	for my $i (0..$#$daids_report) {
+		next unless rand(1) < $constants->{dilemma_errorchange_id};
+		my $unique_agents = $self->getUniqueRandomAgents(1);
+		next unless $unique_agents; # just make sure request succeeded
+		$daids_report->[$i] = $unique_agents->[0];
+	}
+	return $daids_report;
+}
+
+sub agentsMeet_tweakResponses {
+	my($self, $response_ar) = @_;
+	return [ ] if !$response_ar || !@$response_ar;
+	my $constants = getCurrentStatic();
+	my @resp = @$response_ar;
+	my $ec_play = $constants->{dilemma_errorchange_play} || 0;
+	return \@resp if !$ec_play;
+	for my $i (0..$#resp) {
+		my $val = $resp[$i];
+		$val += rand(1) * $ec_play * 2 - $ec_play;
+		$val = 0 if $val < 0;
+		$val = 1 if $val > 1;
+		$resp[$i] = $val;
+	}
+	return \@resp;
 }
 
 # Would probably improve performance to store these up and write
@@ -587,8 +618,10 @@ sub logMeeting {
 		$self->sqlInsert("dilemma_playlog", {
 			meetid =>	$meetid,
 			daid =>		$play->{daid},
-			play =>		$play->{play},
+			playtry =>	$play->{playtry},
+			playactual =>	$play->{playactual},
 			reward =>	$play->{reward},
+			sawdaid =>	$play->{sawdaid},
 		});
 	}
 }

@@ -11,8 +11,10 @@
         <!ELEMENT meetid (#PCDATA)>
         <!ELEMENT tick (#PCDATA)>
         <!ELEMENT foodsize (#PCDATA)>
-        <!ELEMENT agentplay (daid, play, reward)>
-        <!ELEMENT play (#PCDATA)>
+        <!ELEMENT agentplay (daid, playtry, playactual, reward, sawdaid)>
+        <!ELEMENT playtry (#PCDATA)>
+        <!ELEMENT playactual (#PCDATA)>
         <!ELEMENT reward (#PCDATA)>
+        <!ELEMENT sawdaid (#PCDATA)>
 ]>
 
