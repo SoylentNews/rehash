@@ -61,8 +61,19 @@ __template__
 	[% returnme.data_constant = 1 %]
 	All Subsections
 
-[% CASE 'search_result' %]
-	Searching For: [% text %]
+[% CASE 'search_titlebar_title' %]
+	[% IF text.length > 0 %]
+		Searching For: [% text %]
+	[% ELSE %]
+		Search [% constants.sitename %]
+	[% END %]
+
+[% CASE 'search_header_title' %]
+	[% IF text.length > 0 %]
+		Search '[% text %]'
+	[% ELSE %]
+		Search [% constants.sitename %]
+	[% END %]
 
 [% END %]
 
