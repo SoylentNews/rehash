@@ -1316,7 +1316,6 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1_percent' WHERE name='
 
 # SLASHDOT LAST UPDATED HERE
 
-# SLASHCODE LAST UPDATED HERE
 
 # First pass at updating accesslist to be simpler and smarter:
 ALTER TABLE accesslist ADD COLUMN now SET('ban', 'nopost', 'nosubmit', 'norss', 'proxy') DEFAULT '' NOT NULL;
@@ -1356,6 +1355,6 @@ ALTER TABLE accesslist CHANGE COLUMN reason reason VARCHAR(255) NOT NULL DEFAULT
 
 # only insert this if you don't already have the value set in vars
 #INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
-
+# SLASHCODE LAST UPDATED HERE
 # DEVCHANNEL LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE

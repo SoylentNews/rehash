@@ -50,7 +50,7 @@ gstatic total:        -          -    [% grand_total_static %]
 
 -----------------------
 [% FOREACH section = sections -%]
-
+[% IF section.pages == 0 ; NEXT ; END %]
 For [% section.section_name %]
                   Pages      IPs   Bandwidth    Users
         total: [% section.pages %] [% section.ipids %] [% section.bytes %] [% section.users %]
