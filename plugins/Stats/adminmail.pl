@@ -106,6 +106,8 @@ EOT
 	my $rss_page_views = $stats->countDailyByPage('rss',$yesterday);
 	my $rss_bytes = $stats->countBytesByPage('rss',$yesterday);
 
+	my $total_bytes = $stats->countBytesByPage('',$yesterday);
+
 	my $admin_mods = $stats->getAdminModsInfo($yesterday, $weekago);
 	my $admin_mods_text = "";
 	my($num_admin_mods, $num_mods) = (0, 0);
@@ -131,6 +133,7 @@ EOT
 	}
 
 	$statsSave->createStatDaily($yesterday, "total", $count->{total});
+	$statsSave->createStatDaily($yesterday, "total_bytes", $total_bytes);
 	$statsSave->createStatDaily($yesterday, "unique", $count->{unique});
 	$statsSave->createStatDaily($yesterday, "unique_users", $count->{unique_users});
 	$statsSave->createStatDaily($yesterday, "comments", $comments);
@@ -156,6 +159,7 @@ EOT
 	$statsSave->createStatDaily($yesterday, "uniq_rss_users", $uniq_rss_users);
 	$statsSave->createStatDaily($yesterday, "rss_page_views", $rss_page_views);
 	$statsSave->createStatDaily($yesterday, "rss_bytes", $rss_bytes);
+	$statsSave->createStatDaily($yesterday, "rss_bytes", $rss_bytes);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
@@ -171,6 +175,7 @@ EOT
 	}
 	my %data = (
 		total => sprintf("%8d", $count->{total}),
+		total_bytes => sprintf("%0.1f",$total_bytes/1024),
 		unique => sprintf("%8d", $count->{unique}), 
 		users => sprintf("%8d", $count->{unique_users}),
 		accesslog => sprintf("%8d", $accesslog_rows),
@@ -183,7 +188,7 @@ EOT
 		used_total_pool => sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0)),
 		used_total_comments => sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0)),
 		used_minus_1 => sprintf("%8.1f", $modlog_hr->{-1}{count}),
-		used_minus_1_percent => sprintf("%8.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) ),
+		used_minus_1_percent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) ),
 		used_plus_1 => sprintf("%8d", $modlog_hr->{1}{count}),
 		used_plus_1_percent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0)),
 		comments => sprintf("%8d", $comments),

@@ -13,7 +13,7 @@ display
 __template__
 [% Slash.sitename %] Stats for yesterday
 
-        total: [% total %]
+        total: [% total %]  [% total_bytes %](K)
        unique: [% unique %]
         users: [% users %]
 [% admin_clearpass_warning %]
