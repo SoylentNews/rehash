@@ -2409,3 +2409,7 @@ ALTER TABLE stories_old ADD COLUMN stoid MEDIUMINT UNSIGNED DEFAULT '0';
 UPDATE stories_old, stories SET stories_old.stoid=stories.stoid WHERE stories_old.sid=stories.sid;
 INSERT INTO story_param (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FROM stories_old WHERE displaystatus=-1;
 
+# Run this perl script to make sure stories set to Never Display have the
+# appropriate value in story_param.
+# perl -MSlash::Test=YOURVIRTUALUSER -le '$nd_hr = $slashdb->displaystatusForStories($slashdb->sqlSelectColArrayref("stoid", "stories")); @nd = grep { $nd_hr->{$_} == -1 } keys %$nd_hr; for my $stoid (@nd) { $slashdb->sqlInsert("story_param", { name => "neverdisplay", value => "1" }, { ignore => 1 }); }'
+

@@ -2544,6 +2544,10 @@ sub checkStoryViewable {
 	}
 	return 0 unless $stoid;
 
+	return 0 if $self->sqlCount(
+		"story_param",
+		"stoid = '$stoid' AND name='neverdisplay' AND value > 0");
+
 	my @nexuses;
 	if ($start_tid) {
 		push @nexuses, $start_tid;
@@ -5383,7 +5387,6 @@ sub displaystatusForStories {
 		"stories.stoid=str.stoid AND str.tid=$constants->{mainpage_nexus_tid} " .
 		"AND stories.stoid IN ($stoid_list)",
 	);
-
 	my $sectional = $self->sqlSelectAllHashref(
 		'stoid',
 		'DISTINCT stories.stoid',
@@ -5391,8 +5394,15 @@ sub displaystatusForStories {
 		"stories.stoid=str.stoid AND str.tid in($section_nexus_list) " .
 		"AND stories.stoid IN ($stoid_list)",
 	);
+	my $nd = $self->sqlSelectAllKeyValue(
+		"stoid, value",
+		"story_param",
+		"name='neverdisplay' AND stoid IN ($stoid_list)");
+
 	foreach (@$stoids) {
-		if ($mainpage->{$_}) {
+		if ($nd->{$_}) {
+			$ds->{$_} = -1;
+		} elsif ($mainpage->{$_}) {
 			$ds->{$_} = 0;
 		} elsif ($sectional->{$_} ) {
 			$ds->{$_} = 1;
@@ -5415,11 +5425,9 @@ sub _displaystatus {
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	if (!$mp_tid) { warn "no mp_tid"; $mp_tid = 1 }
 	my $viewable = $self->checkStoryViewable($stoid, "", $options);
+	return -1 if !$viewable;
 	my $mainpage = $self->checkStoryViewable($stoid, $mp_tid, $options);
-	my $displaystatus = -1; # No display by default
-	if ($viewable) {
-		$displaystatus = $mainpage ? 0 : 1;
-	}
+	my $displaystatus = $mainpage ? 0 : 1;
 	return $displaystatus;
 }
 
