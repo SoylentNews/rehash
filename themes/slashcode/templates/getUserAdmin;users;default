@@ -92,6 +92,27 @@ __template__
 				[% IF accesslist.adminnick %]<font size=-1>  by [% accesslist.adminnick %]</font>[% END %]
 				</TD>
 			</TR>
+			[% IF subnet_karma.defined %]
+			<TR>
+				<TD></TD><TD><font size="-1"><b>[% IF ipid_karma.defined %]IPID Karma: [% ipid_karma %] [% END %]Subnet Karma: [% subnet_karma %] [% IF post_restrictions.no_post %]All posting disabled[% ELSIF post_restrictions.no_anon%]Anonymous Posting Disabled[% END %]</b></font></TD>
+			</TR>
+			[% END %]
+			[% IF proxy_check.available %]
+			<TR>
+				<TD></TD>
+				<TD><A HREF="[% constants.rootdir %]/users.pl?userfield=[% form.userfield | fixparam %]&amp;check_proxy=1"><font size="-1">Check [% form.userfield %] for open proxy</font></A> 
+				[% IF proxy_check.results.defined %]
+					<font size="-1"><b>
+					[% IF proxy_check.results %]
+						Open proxy found at port: [% proxy_check.results %]
+					[% ELSE %]
+						No proxy detected
+					[% END %]
+					</b></font>
+				[% END %]
+				</TD>
+			</TR>
+			[% END %]
 			[% IF useredit.nonuid && accesslist.estimate_users %]
 			<TR>
 				<TD VALIGN="TOP"><B>Estimated Users</B></TD>

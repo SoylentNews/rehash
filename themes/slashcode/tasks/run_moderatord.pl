@@ -432,29 +432,31 @@ sub reconcile_m2 {
 
 		# Store data for the message we may send.
 		if ($messages) {
+			# Only send message if the moderation was deemed unfair
+			if ($winner_val < 0) {
+				# Get discussion metadata without caching it.
+				my $discuss = $slashdb->getDiscussion(
+					$mod_hr->{sid}
+				);
 
-			# Get discussion metadata without caching it.
-			my $discuss = $slashdb->getDiscussion(
-				$mod_hr->{sid}
-			);
+				# Get info on the comment.
+				my $comment_subj = ($slashdb->getComments(
+					$mod_hr->{sid}, $mod_hr->{cid}
+				))[2];
+				my $comment_url = "/comments.pl?sid=$mod_hr->{sid}&cid=$mod_hr->{cid}";
+	
+				$m2_results{$mod_hr->{uid}}{change} ||= 0;
+				$m2_results{$mod_hr->{uid}}{change} += $csq->{m1_karma}{sign}
+					if $m1_karma_changed;
 
-			# Get info on the comment.
-			my $comment_subj = ($slashdb->getComments(
-				$mod_hr->{sid}, $mod_hr->{cid}
-			))[2];
-			my $comment_url = "/comments.pl?sid=$mod_hr->{sid}&cid=$mod_hr->{cid}";
-
-			$m2_results{$mod_hr->{uid}}{change} ||= 0;
-			$m2_results{$mod_hr->{uid}}{change} += $csq->{m1_karma}{sign}
-				if $m1_karma_changed;
-
-			push @{$m2_results{$mod_hr->{uid}}{m2}}, {
-				title	=> $discuss->{title},
-				url	=> $comment_url,
-				subj	=> $comment_subj,
-				vote	=> $winner_val,
-				reason  => $reasons->{$mod_hr->{reason}}
-			};
+				push @{$m2_results{$mod_hr->{uid}}{m2}}, {
+					title	=> $discuss->{title},
+					url	=> $comment_url,
+					subj	=> $comment_subj,
+					vote	=> $winner_val,
+					reason  => $reasons->{$mod_hr->{reason}}
+				};
+			}
 		}
 
 		# This mod has been reconciled.
@@ -501,6 +503,7 @@ sub reconcile_m2 {
 			if (@{$msg_user}) {
 				$data->{m2} = $m2_results{$_}{m2};
 				$data->{change} = $m2_results{$_}{change};
+				$data->{m2_summary} = $slashdb->getModResolutionSummaryForUser($_, 20);
 				$messages->create($_, MSG_CODE_M2, $data, 0, '', 'collective');
 			}
 		}
