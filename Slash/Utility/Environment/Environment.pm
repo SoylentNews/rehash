@@ -1687,7 +1687,8 @@ Hashref of cleaned-up data.
 	my %special = (
 		logtoken	=> sub { $_[0] = '' unless
 					 $_[0] =~ m|^\d+::[A-Za-z0-9]{22}$|	},
-		sid		=> sub { $_[0] =~ s|[^A-Za-z0-9/._]||g		},
+		sid		=> sub { $_[0] = '' unless
+					 $_[0] =~ regexSid()			},
 		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g		},
 		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
 			        	 $_[0] =~ s|\s+| |g;			},

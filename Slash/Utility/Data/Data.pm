@@ -139,6 +139,8 @@ sub nick2matchname {
 
 #========================================================================
 # If you change createSid() for your site, change regexSid() too.
+# If your site will have multiple formats of sids, you'll want this
+# to continue matching the old formats too.
 sub regexSid {
 	return qr{\b(\d{2}/\d{2}/\d{2}/\d{6,8})\b};
 }
