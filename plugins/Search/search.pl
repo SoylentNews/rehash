@@ -67,7 +67,7 @@ sub main {
 	$form->{query}		||= '';
 	$form->{section}	||= '';
 	$form->{'sort'}		||= 1;
-	$form->{section}	= '' if $form->{section} eq 'index'; # XXX fix this right, do a {realsection}
+	$form->{section}	= $constants->{section} unless $form->{section}; # Set to our current section if section is not passed in
 	$form->{threshold}	= getCurrentUser('threshold') if !defined($form->{threshold});
 
 	# get rid of bad characters
