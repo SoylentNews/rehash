@@ -2722,3 +2722,6 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks','0','Bool
 UPDATE pollquestions SET discussion=0 WHERE discussion IS NULL;
 ALTER TABLE pollquestions CHANGE COLUMN discussion discussion mediumint UNSIGNED NOT NULL, ADD INDEX uid (uid), ADD INDEX discussion (discussion);
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_36, Start of T_2_5_0_37 - 2004/11/08
