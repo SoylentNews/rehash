@@ -22,8 +22,9 @@ sub handler {
 
 	# Ok, this will make it so that we can reliably use Apache->request
 	Apache->request($r);
-	my $cur_ipid = md5_hex($r->connection->remote_ip);
-	my $cur_subnet = $r->connection->remote_ip;
+	my $cur_ip = $r->connection->remote_ip;
+	my $cur_ipid = md5_hex($cur_ip);
+	my $cur_subnet = $cur_ip;
 	$cur_subnet =~ s/^(\d+\.\d+\.\d+)\.\d+$/$1.0/;
 	$cur_subnet = md5_hex($cur_subnet);
 
@@ -39,10 +40,13 @@ sub handler {
 <BODY BGCOLOR="pink">
 <H1>Either your network or ip address has been banned
 from this site</H1><BR>
-due to script flooding that originated 
-from your network or ip address. If you feel that this 
-is unwarrented, feel free to include your ip address 
-in an email, and we will examine why there is a ban.
+due to script flooding that originated
+from your network or ip address. If you feel that this
+is unwarranted, feel free to include your IP address
+(<b>$cur_ip</b>) in an email, and we will examine why
+there is a ban. If you fail to include the IP address,
+your message will be deleted and ignored. I mean come
+on, we're good, we're not psychic.
 </BODY>
 </HTML>
 EOT
