@@ -200,6 +200,17 @@ __template__
 
 		[% posttype_select %]
 
+[% IF user.karma > constants.goodkarma %]
+		<P><B>No Score +1 Bonus</B>
+		<INPUT TYPE="checkbox" NAME="nobonus"[% b_check %]>
+[% END %]
+
+[% IF constants.allow_anonymous && user.karma > -1 %]
+		<P><B>Post Anonymously</B>
+		<INPUT TYPE="checkbox" NAME="postanon"[% p_check %]>
+[% END %]
+
+
 [% UNLESS user_edit.domaintags.defined; user_edit.domaintags=2; END %]
 [% domaintags.${user_edit.domaintags} = 'CHECKED' -%]
 		<P><B>Display Link Domains?</B> (shows the actual domain of any link in brackets)<BR>

@@ -1348,6 +1348,8 @@ sub editComm {
 	my $s_check = $user_edit->{nosigs}		? ' CHECKED' : '';
 	my $a_check = $user_edit->{anon_comments}	? ' CHECKED' : '';
 	my $d_check = $user_edit->{sigdash}		? ' CHECKED' : '';
+	my $b_check = $user_edit->{nobonus}		? ' CHECKED' : '';
+	my $p_check = $user_edit->{postanon}		? ' CHECKED' : '';
 
 	$formats = $slashdb->getDescriptions('postmodes');
 	$posttype_select = createSelect(
@@ -1364,6 +1366,8 @@ sub editComm {
 		s_check			=> $s_check,
 		a_check			=> $a_check,
 		d_check			=> $d_check,
+		b_check			=> $b_check,
+		p_check			=> $p_check,
 		commentmodes_select	=> $commentmodes_select,
 		commentsort_select	=> $commentsort_select,
 		highlightthresh_select	=> $highlightthresh_select,
@@ -1747,6 +1751,8 @@ sub saveComm {
 		hardthresh	=> ($form->{hardthresh} ? 1 : 0),
 		anon_comments	=> ($form->{anon_comments} ? 1 : 0),
 		sigdash		=> ($form->{sigdash} ? 1 : 0),
+		nobonus		=> ($form->{nobonus} ? 1 : 0),
+		postanon	=> ($form->{postanon} ? 1 : 0),
 		textarea_rows	=> $form->{textarea_rows} || $constants->{textarea_rows},
 		textarea_cols	=> $form->{textarea_cols} || $constants->{textarea_cols},
 	};

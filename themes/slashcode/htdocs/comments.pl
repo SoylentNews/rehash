@@ -605,6 +605,11 @@ sub editComment {
 		? createSelect('posttype', $formats, $form->{posttype}, 1)
 		: createSelect('posttype', $formats, $user->{posttype}, 1);
 
+	if ($form->{op} =~ /^reply$/i) {
+		$form->{nobonus}  = $user->{nobonus};
+		$form->{postanon} = $user->{postanon};
+	}
+
 	slashDisplay('edit_comment', {
 		error_message 	=> $error_message,
 		format_select	=> $format_select,
@@ -649,13 +654,17 @@ sub validateComment {
 		return;
 	}
 
-	unless ($$comm && $$subj) {
-		$$error_message = getError('no body');
-		return;
-	}
-
 	$$subj =~ s/\(Score(.*)//i;
 	$$subj =~ s/Score:(.*)//i;
+
+	for ($$comm, $$subj) {
+		my $d = decode_entities($_);
+		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
+		if ($d !~ /\w/) {		# require SOME non-whitespace
+			$$error_message = getError('no body');
+			return;
+		}
+	}
 
 	unless (defined($$comm = balanceTags($$comm, $constants->{nesting_maxdepth}))) {
 		# If we didn't return from right here, one or more later
