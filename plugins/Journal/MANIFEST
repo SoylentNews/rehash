@@ -4,8 +4,8 @@ Makefile.PL
 MANIFEST
 PLUGIN
 dump
+images/topics/journaltopic.png
 journal.pl
-journaltopic.png
 mysql_prep
 mysql_schema
 templates/bluebox;journal;default
