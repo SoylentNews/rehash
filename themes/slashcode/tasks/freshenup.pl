@@ -91,6 +91,8 @@ $task{$me}{code} = sub {
 	}
 
 	my $w  = $slashdb->getVar('writestatus', 'value');
+	my $dirty_sections = $slashdb->getSectionsDirty();
+	for my $cleanme (@$dirty_sections) { $updates{$cleanme} = 1 }
 
 	if ($updates{$constants->{defaultsection}} ne "" || $w ne "ok") {
 		my($base) = split(/\./, $constants->{index_handler});
@@ -103,8 +105,6 @@ $task{$me}{code} = sub {
 		);
 	}
 
-	my $dirty_sections = $slashdb->getSectionsDirty();
-	%updates = map { $_ => $_ } @$dirty_sections;
 	for my $key (keys %updates) {
 		next unless $key;
 		my $index_handler = $slashdb->getSection($key, 'index_handler');
