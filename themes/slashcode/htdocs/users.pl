@@ -1523,7 +1523,7 @@ sub tildeEd {
 
 	# Set up $author_hr, @aid_order, and $story023_default{author}.
 
-	my $author_hr = $reader->getDescriptions('all-authors');
+	my $author_hr = $reader->getDescriptions('authors');
 	my @aid_order = sort { lc $author_hr->{$a} cmp lc $author_hr->{$b} } keys %$author_hr;
 	for my $aid (@aid_order) {
 		     if ($prefs{story_never_author}{$aid}) {
