@@ -70,7 +70,7 @@ CREATE TABLE formkeys (
   formname varchar(20) DEFAULT '' NOT NULL,
   id varchar(30) DEFAULT '' NOT NULL,
   sid varchar(30) DEFAULT '' NOT NULL,
-  uid int(1) DEFAULT '-1' NOT NULL,
+  uid int(11) DEFAULT '-1' NOT NULL,
   host_name varchar(30) DEFAULT '0.0.0.0' NOT NULL,
   value int(1) DEFAULT '0' NOT NULL,
   cid int(15) DEFAULT '0' NOT NULL,
