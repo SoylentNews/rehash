@@ -90,12 +90,13 @@ to read the special note about Apache / mod_perl installation.
 B<Install MySQL.>
 
 Please refer to MySQL documentation for compilation
-and/or installation notes for any questions with this process.  Find
-the script that runs mysql (probably F<safe_mysqld>) and add these
-lines to the beginning of it:
+and/or installation notes for any questions with this process.
 
-	TZ=GMT
-	export TZ
+Slash requires that your MySQL server run in the GMT timezome.  Find your
+global my.cnf file (probably C</etc/my.cnf> or C</etc/mysql/my.cnf>),
+locate the C<[safe_mysqld]> group, and add this line to it:
+
+	timezone = GMT
 
 Start MySQL (it must be running for the installation of Perl modules
 and Slash).
