@@ -15,6 +15,7 @@ CREATE TABLE humanconf_pool (
 	hcqid		SMALLINT UNSIGNED NOT NULL,
 	answer		CHAR(8) NOT NULL,
 	lastused	TIMESTAMP,
+	created_at	DATETIME NOT NULL,
 	inuse		TINYINT DEFAULT '0' NOT NULL,
 	filename	CHAR(63) NOT NULL,
 	html		CHAR(255) NOT NULL,

@@ -108,6 +108,7 @@ sub deleteOldFromPool {
 	my $delrows = 0;
 	my $loop_num = 1;
 	my $remaining_to_delete = $want_delete;
+	my $secs = $constants->{hc_pool_secs_before_del} || 21600;
 	my $q_hr = $self->sqlSelectAllHashref(
 		"hcqid",
 		"hcqid, filedir",
@@ -130,9 +131,9 @@ sub deleteOldFromPool {
 		my $rows = $self->sqlUpdate(
 			"humanconf_pool",
 			{ inuse => 2, -lastused => "lastused" },
-			"lastused < DATE_SUB(NOW(), INTERVAL 6 HOUR) 
-			AND inuse = 0
-			$hcpid_clause"
+			"lastused < DATE_SUB(NOW(), INTERVAL $secs SECOND) 
+			 AND inuse = 0
+			 $hcpid_clause"
 		);
 		next if !$rows;
 
@@ -316,6 +317,7 @@ sub addPool {
 		filename =>	$filename,
 		html =>		$html,
 		inuse =>	0,
+		-created_at =>	'NOW()',
 	}, "hcpid=$hcpid");
 }
 

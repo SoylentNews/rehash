@@ -1274,4 +1274,7 @@ INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (1
 UPDATE stats_daily SET name='subscribers_total' WHERE name='subscribe_subscribers_ever';
 UPDATE stats_daily SET name='subscribers_current' WHERE name='subscribe_subscribers_current';
 
+# Change for plugins/HumanConf (ignore if not using that plugin)
+ALTER TABLE humanconf_pool ADD COLUMN created_at DATETIME NOT NULL AFTER lastused;
+UPDATE humanconf_pool SET lastused=lastused, created_at=lastused WHERE lastused IS NOT NULL;
 

@@ -70,6 +70,7 @@ sub createFormkeyHC {
 
 	# Loop until we successfully get an answer/html pair (one time
 	# in a zillion we'll have to try more than once).
+	my $secs = $constants->{hc_pool_secs_before_use} || 3600;
 	my($hcpid, $html) = ('', '');
 	while (1) {
 
@@ -79,6 +80,7 @@ sub createFormkeyHC {
 			"humanconf_pool",
 			"hcqid=" . $slashdb->sqlQuote($hcqid)
 				. " AND filename != ''"
+				. " AND created_at < DATE_SUB(NOW(), INTERVAL $secs SECOND)"
 				. " AND inuse = 0",
 			"ORDER BY RAND() LIMIT 1"
 		);
