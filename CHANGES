@@ -1,11 +1,11 @@
-slash-1.0.8, 2000.07.xx
+slash-1.0.8, 2000.08.18
 -----------------------
 
 *	Fixed pollBooth not displaying comments (T Caleb Fauver)
 
-*	Fixed admin.pl messing up some story text, added a new parameter
-	to Slash::stripByMode so the "extra whitespace" won't be added
-	if $no_white_fix is true (T Caleb Fauver)
+*	Fixed admin.pl messing up some story text, added a new
+	parameter to Slash::stripByMode so the "extra whitespace" won't
+	be added if $no_white_fix is true (T Caleb Fauver)
 
 *	Remove <rss> tag in RDF file / slashd for now (address
 	more fully in bender)
@@ -15,6 +15,57 @@ slash-1.0.8, 2000.07.xx
 
 *	Fix users.pl to filter realemail, fakeemail, and homepage
 	more reasonably
+
+*	Add Slash::chopEntity() to chop out incomplete HTML entities
+	at the end of some text
+
+*	Added fancyboxwidth, m2_userpercentage, submission_bonus,
+	maxkarma to slashdotrc.pl
+
+*	Fixed bug in slashdotrc.pl referencing m2_goodkarma instead of
+	goodkarma
+
+*	Change Slash::getAd() to not return HTML surrounding ad but
+	only ad itself, and to accept a number identifying specific
+	banners
+
+*	Fix dailyStuff to not die on unlink failure, and to create
+	missing paths with File::Path::mkpath()
+
+*	Removed newmega() from slashd
+
+*	Added DBI::FAQ to Bundle::Slash
+
+*	contrib/recentcomm rewritten, allow sorting by sid and printing
+	"&cid=$cid" instead of "#$cid"
+
+*	contrib/pdaGen.pl added for generating stripped-down HTML
+	for PDAs
+
+*	Fixed incorrect color editor identifiers in admin.pl
+
+*	Lengthened second story editing box ("bodytext"), commented
+	out image upload HTML, in admin.pl
+
+*	Allow authors to moderate the same post twice if
+	authors_unlimited set
+
+*	Change in index.pl where clicking a slashbox up or down or
+	close icon will redirect the user's browser back to index.pl,
+	so reloading the resulting page won't redo the same action
+
+*	Fixed odd bug with threshholds and not printing the correct
+	comment counts in index.pl
+
+*	Bunches of metamod.pl changes
+
+*	Allow slashboxes to contain '-' in users.pl
+
+*	Fixed setting of lastaccess field in users.pl
+
+*	Changed mysite.com to example.com and added missing columns
+	for users_info in slashdata_dump.sql
+
 
 
 slash-1.0.7, 2000.07.12

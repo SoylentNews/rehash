@@ -321,6 +321,12 @@ beginning of it:
 	TZ=GMT
 	export TZ
 
+B<Note>: For slashd (see F<utils/slashd>, which starts slashd),
+mod_perl (see F<httpd/httpd.conf>), and MySQL, we set all processes
+to run in GMT.  Then it is easy to convert dates to whatever the
+user's local time is.  If you have date problems, check that all of
+these are properly set to run in GMT.
+
 =item 7.
 
 Create the slash mysql user and database.

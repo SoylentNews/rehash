@@ -242,7 +242,8 @@ opinions heard, you are trying to help promote a rational discussion.
 Play fairly and help make $I{sitename} a little better for everyone.</LI>
 
 <LI>Scores and information identifying the posters of these comments have been
-removed to help prevent bias in meta moderation. You can click thru and get themif you really need to know, you can click through and see the original message,
+removed to help prevent bias in meta moderation.
+If you really need to know, you can click through and see the original message,
 but we encourage you not to do this unless you need more context to fairly
 meta moderate.</LI> 
 </UL>
@@ -280,7 +281,7 @@ EOT
 		# The '-' in place of nickname -may- be a problem, though. And we
 		# Probably shouldn't assume a score of 0, here either but we'll leave
 		# it for now.
-		@{%{$C}}{qw(nickname uid fakeemail homepage points sig)} =
+		@{$C}{qw(nickname uid fakeemail homepage points sig)} =
 			('-', -1, '', '', 0, '');
 		dispComment($C);
 		printf <<EOT, linkStory({ 'link' => $C->{title}, sid => $C->{sid} });
