@@ -148,8 +148,26 @@ You might also wish to install each module by hand, using distributions
 found on the CPAN.  See http://perldoc.com/m?perlmodinstall
 for more information on installing perl modules.
 
-B<Note>: You must have certain libraries existing on your system before
+B<Important Notes>:
+
+=over 4
+
+=item *
+
+You must have certain libraries existing on your system before
 building, for Compress::Zlib and XML::Parser.  See L<"perl">.
+
+=item *
+
+If running BSD, also install the BSD::Resource module.
+
+=item *
+
+If not using MySQL, just allow the installation of its drivers
+to continue, and possibly fail.  Then install the driver you need
+(e.g., for PostgreSQL, use "DBD::Pg") using the CPAN shell.
+
+=back
 
 To use the CPAN module, invoke the CPAN shell:
 
@@ -159,19 +177,25 @@ After it has been configured, install Bundle::Slash:
 
 	cpan> install Bundle::Slash
 
+To read the README for any module, before or after installing:
+
+	cpan> readme MODULE
+
 When Bundle::Slash is finished, install the DBIx::Password
 module:
 
 	cpan> install DBIx::Password
 
 When asked, give the info for accessing the Slash database created
-in step 1.
+in step 1.  This is your B<virtual user> information; it is a single
+name that is used to refer to a configuration for connecting to your
+database.
 
-Feel free to re-run "install Bundle::Slash" if you get errors, or just
-aren't sure what's been installed, etc.  It will safely skip anything
-already installed.
+If you have problems, feel free to re-run "install Bundle::Slash".  It
+will safely skip anything already installed.
 
-B<Note>: If running BSD, also install the BSD::Resource module.
+To read the documentation of any of the modules, once they have been
+installed, type "perldoc MODULE" at the command line.
 
 
 =item 5.
@@ -240,6 +264,20 @@ file will be created at F<$SLASH_PREFIX/$SITENAME/$SITENAME.conf>.
 You can put its contents unto your httpd.conf, or you can just C<Include>
 it in your httpd.conf.
 
+=item 7.
+
+B<Start it up.>
+
+After installation of the site is done, and Apache has been stopped
+and started (do NOT try to restart Apache, but do a full stop and
+start), run slashd.  This should be done via the init script:
+
+	/etc/init.d/slash start
+
+slashd is the daemon that runs routine maintenance on Slash sites,
+including sending out daily mailings, cleaning up the database,
+and updating stories.  The init script above will start up an
+individual slashd daemon process process for each installed site.
 
 =back
 
@@ -337,7 +375,7 @@ Version 5.6.0 (5.005_03).
 
 =item MySQL
 
-Version 3.23 (3.22).
+Version 3.23 (3.22; 3.23 will be required in Slash 2.2).
 
 	http://www.mysql.com/
 

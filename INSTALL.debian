@@ -7,7 +7,13 @@ apt-get method.  For each package below, you can use:
 
     apt-get install PACKAGE
 
-Unlisted packages do not exist; install those using other methods.
+Some packages do not exist; install those using other methods.
+
+NOTES:
+
+* Apache and mod_perl packages might not work.  If not, install from
+  the source, as per the instructions in INSTALL.
+* perl 5.6 should work fine too, in place of perl 5.005.
 
 Software                Package
 ------------------------------------------
