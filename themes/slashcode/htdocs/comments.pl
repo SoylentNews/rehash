@@ -1139,7 +1139,7 @@ sub submitComment {
 	} else {
 		slashDisplay('comment_submit') if ! $form->{newdiscussion};
 		undoModeration($id);
-		printComments($discussion, $maxCid, $maxCid) if ! $form->{newdiscussion};
+		printComments($discussion, $maxCid, $maxCid, { use_writer => 1}) if ! $form->{newdiscussion};
 
 		my $tc = $slashdb->getVar('totalComments', 'value', 1);
 		$slashdb->setVar('totalComments', ++$tc);
