@@ -20,6 +20,7 @@ __template__
 <table>
 	<tr>
 		<td align="left">
+<UL>
 [% FOR discussion = discussions %]
 	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
 IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A>
