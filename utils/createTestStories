@@ -49,7 +49,7 @@ $constants = getCurrentStatic();
 {
  
 	# Determine user list size (for -R)
-	my $max_uid = $slashdb->getLastUser();
+	my $max_uid = $slashdb->countUsers({ max => 1});
 	my $min_uid = $slashdb->sqlSelect("MIN(uid)", "users");
 
 	my $rootdir = getCurrentStatic("rootdir");

@@ -195,7 +195,7 @@ sub getRandomUserID {
 #
 #		}
 	}
-	$max_uid ||= $slashdb->getLastUser();
+	$max_uid ||= $slashdb->countUsers({ max => 1});
 	$min_uid ||= $slashdb->sqlSelect('MIN(uid)', 'users');
 	my $ret = $min_uid + int(rand($max_uid - $min_uid + 1));  
 	for (@{$exception_list{$val->{sid}}}) {

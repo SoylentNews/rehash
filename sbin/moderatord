@@ -58,7 +58,7 @@ sub comments2tokens {
 	moderatordLog(getData('moderatord_tokenmsg', {
 		new_comments	=> $comments,
 		stirredpoints	=> $stirredpoints,
-		last_user	=> $read_db->getLastUser(),
+		last_user	=> $read_db->countUsers({ max => 1}),
 		tokenpool	=> $tokenpool,
 		eligible	=> $eligible,
 		st		=> $st,

@@ -3468,16 +3468,19 @@ sub metamodEligible {
 	my($self, $user) = @_;
 
 	# Easy tests the user can fail to be ineligible to metamod.
-	return 0 if $user->{is_anon} || !$user->{willing} ||  $user->{karma} < 0;
+	return 0 if $user->{is_anon} || !$user->{willing} || $user->{karma} < 0;
 
-	# Not eligible if has already metamodded today.
-	my $current_date = time2str("%Y-%m-%d", time, 'GMT');
-	return 0 if $user->{lastmm} eq $current_date;
+	# Not eligible if metamodded too recently.
+	my $constants = getCurrentStatic();
+	my $m2_freq = $constants->{m2_freq} || 86400;
+	my $cutoff_str = time2str("%Y-%m-%d %H:%M:%S",
+		time() - $m2_freq, 'GMT');
+	return 0 if $user->{lastmm} ge $cutoff_str;
 
 	# Last test, have to hit the DB for this one.
-	my($tuid) = $self->sqlSelect('max(uid)', 'users_count');
+	my($maxuid) = $self->countUsers({ max => 1 });
 	return 0 if $user->{uid} >
-		  $tuid * $self->getVar('m2_userpercentage', 'value');
+		  $maxuid * $constants->{m2_userpercentage};
 
 	# User is OK to metamod.
 	return 1;
@@ -3673,18 +3676,15 @@ sub setMetaMod {
 
 	# If this user has no saved mods, by definition nothing they try
 	# to M2 is valid.
-#print STDERR "mods_saved: '$m2_user->{mods_saved}'\n";
 	return if !$m2_user->{mods_saved};
 
 	# The user is only allowed to metamod the mods they were given.
 	my @mods_saved = $self->getModsSaved($m2_user);
 	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
 	my @m2s_mmids = sort { $a <=> $b } keys %$m2s;
-#print STDERR "m2s keys before: '@m2s_mmids', mods_saved '@mods_saved'\n";
 	for my $mmid (@m2s_mmids) {
 		delete $m2s->{$mmid} if !$mods_saved{$mmid};
 	}
-#print STDERR "m2s keys  after: '" . join(" ", keys %$m2s) . "'\n";
 
 	# If we are allowed to multiply these M2's to apply to other
 	# mods, go ahead.  multiMetaMod changes $m2s in place.  Note
@@ -3694,7 +3694,6 @@ sub setMetaMod {
 	# possibly affect more.
 	if ($multi_max) {
 		$self->multiMetaMod($m2_user, $m2s, $multi_max);
-#print STDERR "m2s keys after mMM: '" . join(" ", keys %$m2s) . "'\n";
 	}
 
 	# Whatever happens below, as soon as we get here, this user has
@@ -3710,18 +3709,13 @@ sub setMetaMod {
 		# on our awesome powers of atomicity:  only one of those
 		# clicks got to set mods_saved to empty.  That one wasn't
 		# us, so we do nothing.
-#print STDERR "no rows updated in setting mods_saved empty for uid $m2_user->{uid}\n";
 		return ;
 	}
 
-#print STDERR "mods_saved rows '$rows'\n";
-
 	my($voted_fair, $voted_unfair) = (0, 0);
 	for my $mmid (keys %$m2s) {
-#print STDERR "looping for $mmid\n";
 		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
 		my $is_fair = $m2s->{$mmid}{is_fair};
-#print STDERR "mod_uid '$mod_uid' is_fair '$is_fair'\n";
 
 		# Increment the m2count on the moderation in question.  If
 		# this increment pushes it to the current consensus threshold,
@@ -3790,9 +3784,9 @@ sub countUsers {
 	my($self, $options) = @_;
 	my $users;
 	if ($options && $options->{max}) {
-		$users = $self->sqlSelect("max(uid)", "users");
+		$users = $self->sqlSelect("MAX(uid)", "users_count");
 	} else {
-		$users = $self->sqlCount('users_count');
+		$users = $self->sqlCount("users_count");
 	}
 	return $users;
 }
@@ -5467,17 +5461,9 @@ sub getSimilarStories {
 sub getYoungestEligibleModerator {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
-	my $youngest_uid = $self->getLastUser()
+	my $youngest_uid = $self->countUsers({ max => 1 })
 		* ($constants->{m1_eligible_percentage} || 0.8);
 	return int($youngest_uid);
-}
-
-########################################################
-# For run_moderatord.pl and some utils
-sub getLastUser {
-	my($self) = @_;
-	my $totalusers = $self->sqlSelect("MAX(uid)", "users_count");
-	return $totalusers;
 }
 
 ########################################################

@@ -24,10 +24,19 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $basedir = $constants->{basedir};
 
-	# Takes approx. 6 minutes on Slashdot
+	# Takes approx. 6 seconds on Slashdot
+	# (approx. 6 minutes if subscribe_hits_only is set)
 	slashdLog('Updating User Logins Begin');
 	$slashdb->updateLastaccess();
 	slashdLog('Updating User Logins End');
+
+	# Takes approx. ? on Slashdot
+	slashdLog('Decaying User Tokens Begin');
+	my $decayed = $slashdb->decayTokens();
+	slashdLog("Decaying User Tokens End ($decayed decayed)");
+	if ($decayed and my $statsSave = getObject('Slash::Stats::Writer')) {
+		$statsSave->addStatDaily("mod_tokens_lost_decayed", $decayed);
+	}
 
 	# Takes approx. 30 seconds on Slashdot
 	slashdLog('Update Total Counts Begin');

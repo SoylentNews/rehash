@@ -164,7 +164,7 @@ sub getRandomUID {
 
 	if (!$uid_list) {
 		my $max_uid = int(
-			$slashdb->getLastUser() *
+			$slashdb->countUsers({ max => 1}) *
 			$constants->{m2_userpercentage}
 		);
 		$uid_list = $slashdb->sqlSelectAll(

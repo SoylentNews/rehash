@@ -740,6 +740,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitpow', '1',
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences','0.00=0,+2,-100,-1|0.15=-2,+1,-40,-1|0.30=-0.5,+0.5,-20,0|0.35=0,0,-10,0|0.49=0,0,-4,0|0.60=0,0,+1,0|0.70=0,0,+2,0|0.80=+0.01,-1,+3,0|0.90=+0.02,-2,+4,0|1.00=+0.05,0,+5,+0.5','Rewards and penalties for M2ers and moderator, up to the given amount of fairness (0.0-1.0): numbers are 1, tokens to fair-voters, 2, tokens to unfair-voters, 3, tokens to moderator, and 4, karma to moderator');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
+INSERT INTO vars (name, value, description) VALUES ('m2_freq','86400','In seconds, the maximum frequency which users can metamoderate');
 INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus_karma','12','Usually about half of goodkarma');
 INSERT INTO vars (name, value, description) VALUES ('m2_userpercentage','0.9','UID must be below this percentage of the total userbase to metamoderate');
 INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.com','All mail addressed from the site looks like it is coming from here');
@@ -767,6 +768,9 @@ INSERT INTO vars (name, value, description) VALUES ('min_expiry_days','7','Lowes
 INSERT INTO vars (name, value, description) VALUES ('minkarma','-25','Minimum karma a user can sink to');
 INSERT INTO vars (name, value, description) VALUES ('mod_same_subnet_forbid','1','Forbid users from moderating any comments posted by someone in their subnet?');
 INSERT INTO vars (name, value, description) VALUES ('mod_stats_reports','admin@example.com','Who to send daily moderation stats reports to');
+INSERT INTO vars (name, value, description) VALUES ('mod_stir_token_cost','2','What is the token cost of having each mod point stirred?');
+INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_days','14','How many days of inactivity before tokens start to decay?');
+INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_perday','1','If inactivity, how many tokens lost per day?');
 INSERT INTO vars (name, value, description) VALUES ('mod_unm2able_token_cost','1','What is the token cost of performing an un-M2able mod?');
 INSERT INTO vars (name, value, description) VALUES ('moderatord_catchup_count','2','The number of times moderatord will loop if replication is used and is too far behind our threshold.');
 INSERT INTO vars (name, value, description) VALUES ('moderatord_catchup_sleep','2','The number of seconds moderatord will wait each time it loops if replication is behind.');

@@ -78,15 +78,20 @@ sub give_out_points {
 		# Log what we did and tally it up in stats.
 		my @lt = localtime();
 		my $today = sprintf "%4d-%02d-%02d", $lt[5] + 1900, $lt[4] + 1, $lt[3];
-		my @gr_1 = sort { $a <=> $b }
+		my @grantees = sort { $a <=> $b }
 			grep { $granted->{$_} == 1 }
 			keys %$granted;
-		slashdLog("Giving points to " . scalar(@gr_1) . " users: '@gr_1'");
-		my $statsSave = getObject('Slash::Stats::Writer', '');
-		$statsSave->createStatDaily("mod_points_granted", 0);
-		$statsSave->updateStatDaily(
-			"mod_points_granted",
-			"value + " . scalar(@gr_1));
+		my $n_grantees = scalar @grantees;
+		slashdLog("Giving points to $n_grantees users: '@grantees'");
+
+		# Store stats about what we just did.
+		if ($n_grantees and my $statsSave = getObject('Slash::Stats::Writer')) {
+			$statsSave->addStatDaily("mod_points_gain_granted", $n_grantees);
+			# Reverse-engineer how many tokens that was.
+			my $tokperpt = $constants->{tokensperpoint} || 8;
+			my $n_tokens = $n_grantees * $tokperpt;
+			$statsSave->addStatDaily("mod_tokens_lost_converted", $n_tokens);
+		}
 	}
 
 	moderatordLog(getData('moderatord_log_footer'));
@@ -158,20 +163,19 @@ sub get_num_new_comments {
 sub give_out_tokens {
 	my($comments, $constants, $slashdb, $read_db) = @_;
 	$read_db = $slashdb if !defined($read_db);
-	my @lt = localtime();
-	my $today = sprintf "%4d-%02d-%02d", $lt[5] + 1900, $lt[4] + 1, $lt[3];
 	my $statsSave = getObject('Slash::Stats::Writer', '');
 
 	my $num_tokens = $comments * $constants->{tokenspercomment};
 	my $stirredpoints = $slashdb->stirPool();
 	$num_tokens += $stirredpoints * $constants->{tokensperpoint};
 
-	if ($stirredpoints) {
-		# If already exists, create does an INSERT IGNORE.
-		$statsSave->createStatDaily("mod_points_stirred", 0);
-		$statsSave->updateStatDaily(
-			"mod_points_stirred",
-			"value + $stirredpoints");
+	if ($stirredpoints and my $statsSave = getObject('Slash::Stats::Writer')) {
+		$statsSave->addStatDaily("mod_points_lost_stirred", $stirredpoints);
+		# Unfortunately, we reverse-engineer how many tokens
+		# were lost in the stirring.
+		my $tokens_per_pt = $constants->{mod_stir_token_cost} || 0;
+		my $stirredtokens = $stirredpoints * $tokens_per_pt;
+		$statsSave->addStatDaily("mod_tokens_stirred", $stirredtokens);
 	}
 
 	# fetchEligibleModerators() returns a list of uids sorted in the
@@ -218,12 +222,13 @@ sub give_out_tokens {
 		$update_uids{$uid} = 1;
 	}
 	my @update_uids = sort keys %update_uids;
+	my $n_update_uids = scalar(@update_uids);
 
 	# Log info about what we're about to do.
 	moderatordLog(getData('moderatord_tokenmsg', {
 		new_comments	=> $comments,
 		stirredpoints	=> $stirredpoints,
-		last_user	=> $read_db->getLastUser(),
+		last_user	=> $read_db->countUsers({ max => 1}),
 		num_tokens	=> $num_tokens,
 		eligible	=> $eligible,
 		start		=> $start,
@@ -232,18 +237,15 @@ sub give_out_tokens {
 		enduid		=> $enduid,
 		least		=> $least,
 		most		=> $most,
-		num_updated	=> scalar @update_uids,
+		num_updated	=> $n_update_uids,
 	}));
 
 	# Give each user her or his tokens.
-#print STDERR "update_uids: '@update_uids'\n";
 	$slashdb->updateTokens(\@update_uids);
 
-	# And keep a running tally of how many tokens we've given out.
-	$statsSave->createStatDaily("tokensgiven", 0);
-	$statsSave->updateStatDaily(
-		"tokensgiven",
-		"value + " . scalar(@update_uids));
+	# And keep a running tally of how many tokens we've given out due
+	# to users who clicked the right number of times and got lucky.
+	$statsSave->addStatDaily("mod_tokens_gain_clicks", $n_update_uids);
 }
 
 ############################################################
@@ -475,7 +477,15 @@ sub reconcile_stats {
 		keys %$reasons;
 	my $reason_name = $reasons->{$reason}{name};
 
-	# Update the stats.  First create the rows if necessary.
+	# Update the stats.
+
+	# We could just use addStatDaily() for these values.  But
+	# this function may be called many times (hundreds) in
+	# quick succession and we will save many pointless
+	# INSERT IGNOREs if we cache some information about which
+	# values have already been added.
+
+	# First create the rows if necessary.
 	if (!$stats_created) {
 		# Test... has this first item has been created
 		# already today?

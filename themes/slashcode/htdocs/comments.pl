@@ -1442,11 +1442,16 @@ sub moderateCid {
 		# First, update values for the moderator.
 		my $changes = { };
 		$changes->{-points} = "GREATEST(points-1, 0)";
-		my $tcost = $constants->{mod_unm2able_token_cost};
-		$changes->{-tokens} = "tokens - $tcost" if $tcost
-			&& !$reasons->{$reason}{m2able};
+		my $tcost = $constants->{mod_unm2able_token_cost} || 0;
+		$tcost = 0 if $reasons->{$reason}{m2able};
+		$changes->{-tokens} = "tokens - $tcost" if $tcost;
 		$changes->{-totalmods} = "totalmods + 1";
 		$slashdb->setUser($user->{uid}, $changes);
+
+		# Update stats.
+		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
+			$statsSave->addStatDaily("mod_tokens_lost_unm2able", $tcost);
+		}
 
 		# Next, adjust the appropriate values for the user who
 		# posted the comment.
@@ -1463,6 +1468,10 @@ sub moderateCid {
 					. "$constants->{maxkarma}, karma + 1)";
 			}
 			$slashdb->setUser($comment->{uid}, $cu_changes);
+			# Update stats.
+			if ($val < 0 and my $statsSave = getObject('Slash::Stats::Writer')) {
+				$statsSave->addStatDaily("mod_tokens_lost_downmod", 1);
+			}
 		}
 
 		# Make sure our changes get propagated back to the comment.

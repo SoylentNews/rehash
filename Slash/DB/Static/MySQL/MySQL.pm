@@ -400,7 +400,7 @@ sub deleteDaily {
 }
 
 ########################################################
-# For dailystuff
+# For daily_archive.pl
 # If the Subscribe plugin is enabled and a certain var is set,
 # we're already writing "lastclick" to users_hits so this gets a
 # lot easier.  If not, we use the old method of a table scan on
@@ -453,6 +453,35 @@ sub updateLastaccess {
 			"uid IN ($uids_in) AND lastaccess < '$yesterday'"
 		);
 	}
+}
+
+########################################################
+# For daily_archive.pl
+sub decayTokens {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $days = $constants->{mod_token_decay_days} || 14;
+	my $perday = int($constants->{mod_token_decay_perday} || 0);
+
+	# If no decay wanted, nothing need be done.
+	return if !$perday;
+
+	# We know that the lastaccess field will be accurate, because
+	# this method is called right after updateLastaccess().
+	my $uids_ar = $self->sqlSelectColArrayref(
+		"uid",
+		"users_info",
+		"lastaccess < DATE_SUB(NOW(), INTERVAL $days DAY)
+		 AND tokens > 0"
+	);
+	my $uids_in = join(",", sort @$uids_ar);
+	my $rows = $self->sqlUpdate(
+		"users_info",
+		{ -tokens => "GREATEST(0, tokens - $perday)" },
+		"uid IN ($uids_in) AND tokens > 0"
+	);
+	my $decayed = $rows * $perday;
+	return $decayed;
 }
 
 ########################################################
@@ -724,35 +753,48 @@ sub convert_tokens_to_points {
 }
 
 ########################################################
-# For moderatord
+# For run_moderatord
 sub stirPool {
 	my($self) = @_;
-	my $stir = getCurrentStatic('stir');
-	# Note that this query should not affect editors, although it used
-	# to, hence we've removed seclev, and the users table from this 
-	# query, entirely.
-	my $cursor = $self->sqlSelectMany("points,users_comments.uid AS uid",
-			"users_comments,users_info",
-			"users_info.uid=users_comments.uid AND
-			 points > 0 AND
-			 TO_DAYS(now())-TO_DAYS(lastgranted) > $stir");
 
-	my $revoked = 0;
+	# Old var "stir" still works, its value is in days.
+	# But "mod_stir_hours" is preferred.
+	my $constants = getCurrentStatic();
+	my $stir_hours = $constants->{mod_stir_hours}
+		|| $constants->{stir} * 24
+		|| 96;
+	my $tokens_per_pt = $constants->{mod_stir_token_cost} || 0;
 
-	$self->sqlTransactionStart("LOCK TABLES users_info WRITE,users_comments WRITE");
+	# This isn't atomic.  But it doesn't need to be.  We could lock the
+	# tables during this operation, but all that happens if we don't
+	# is that a user might use up a mod point that we were about to stir,
+	# and it gets counted twice, later, in stats.  No big whup.
 
-	while (my($p, $u) = $cursor->fetchrow) {
-		$revoked += $p;
-		$self->setUser($u, {
-			points 		=> '0',
-			-lastgranted 	=> 'now()',
-		});
+	my $stir_ar = $self->sqlSelectAllHashrefArray(
+		"users_info.uid AS uid, points",
+		"users_info, users_comments",
+		"users_info.uid = users_comments.uid
+		 AND points > 0
+		 AND DATE_SUB(NOW(), INTERVAL $stir_hours HOUR) > lastgranted"
+	);
+
+	my $n_stirred = 0;
+	for my $user_hr (@$stir_ar) {
+		my $uid = $user_hr->{uid};
+		my $pts = $user_hr->{points};
+
+		my $change = { };
+		$change->{points} = 0;
+		$change->{-lastgranted} = "NOW()";
+		$change->{-stirred} = "stirred + $pts";
+		$change->{-tokens} = "tokens - " . ($tokens_per_pt * $pts)
+			if $tokens_per_pt;
+		$self->setUser($uid, $change);
+
+		$n_stirred += $pts;
 	}
 
-	$self->sqlTransactionFinish();
-	$cursor->finish;
-
-	return $revoked;
+	return $n_stirred;
 }
 
 ########################################################

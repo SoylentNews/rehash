@@ -54,7 +54,7 @@ if (exists $opts{'U'}) {
 
 # main program logic (in braces to offset nicely)
 {
-	my $max_uid = $slashdb->getLastUser();
+	my $max_uid = $slashdb->countUsers({ max => 1});
 	my $min_uid = $slashdb->sqlSelect("MIN(uid)", "users");
 
 	my $user_name = $user->{nickname} if $opts{'U'};
