@@ -2,8 +2,6 @@ __section__
 default
 __description__
 
-The multitopic portion of the search form is stored in the template:
-	topicsearch;search;<section>
 __title__
 
 __page__

@@ -15,5 +15,4 @@ template=templates/rsssearch;search;default
 template=templates/searchform;search;default
 template=templates/storysearch;search;default
 template=templates/subsearch;search;default
-template=templates/topicsearch;search;default
 template=templates/usersearch;search;default
