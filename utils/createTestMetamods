@@ -86,13 +86,13 @@ EOT
 
 		for (@{$comments}) {
 			# Our M2 vote starts off with a bias towards "fair".
-			my $unfair_frac = 0.15;
-			$unfair_frac = 0.50 if $reasons->{$_->{reason}}{val} == -1;
+			my $unfair_frac = 0.10;
+			$unfair_frac = 0.30 if $reasons->{$_->{reason}}{val} == -1;
 			# Some mods are more likely to be unfair than others.
 			# They are just bad mods.  Don't hold it against them.
 			my $old_rand = rand(2**30);
 			srand($_->{id});
-			my $mod_bias = rand(2)*rand(2);
+			my $mod_bias = rand(3)*rand(3);
 			$unfair_frac *= $mod_bias;
 			# And some users are more likely to vote fair or unfair
 			# than others:  about 10 percentage points (up or down)

@@ -391,8 +391,9 @@ sub reconcile_stats {
 	my $consensus = $constants->{m2_consensus};
 	my $reasons = $slashdb->getReasons();
 	my @reasons_m2able =
-		sort grep { $reasons->{$_}{m2able} }
-		map { $reasons->{$_}{name} } keys %$reasons;
+		sort map { $reasons->{$_}{name} }
+		grep { $reasons->{$_}{m2able} }
+		keys %$reasons;
 	my $reason_name = $reasons->{$reason}{name};
 
 	# Update the stats.  First create the rows if necessary.
