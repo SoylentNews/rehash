@@ -104,13 +104,17 @@ __template__
 	<TR>
 		<TD>&nbsp;</TD>
 		<TD ALIGN="left" COLSPAN="2">
-		<TABLE BORDER="1">
+		<TABLE BORDER="1" BGCOLOR="FFFFFF">
 			<TR>
 				<TD><CODE> [% rss_template_code | strip_literal %] </CODE></TD>
 			</TR>
 		</TABLE>
 		<BR>
 		</TD>
+	</TR>
+	<TR>
+		<TD><B>Iterations</B> (max number of links from a rss feed, 0 for all)</TD>
+		<TD COLSPAN="2"><INPUT TYPE="TEXT" SIZE="5" NAME="iterations" VALUE="[% blockref.iterations %]"><BR></TD>
 	</TR>
 
 	[% IF blockedit_flag %]

@@ -114,6 +114,7 @@ CREATE TABLE blocks (
 	retrieve tinyint NOT NULL DEFAULT '0',
 	last_update timestamp,
 	rss_template varchar(30),
+	iterations smallint NOT NULL DEFAULT '0', 
 	FOREIGN KEY (rss_template) REFERENCES templates(name),
 	PRIMARY KEY (bid),
 	KEY type (type),

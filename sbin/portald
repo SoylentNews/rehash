@@ -144,6 +144,7 @@ sub getRDF {
 	my($bid, $url, $other) = @_;
 	my $rss = new XML::RSS;
 	my $template_name ||= $slashdb->getBlock($bid, 'rss_template');
+	my $iterations ||= $slashdb->getBlock($bid, 'iterations');
 	# $template_name ||= $constants->{default_rss_template};
 
 	my $d = geturl($url);
@@ -161,13 +162,9 @@ sub getRDF {
 		return;
 	} else {
 		my $str;
+		my $i = 0;
 		for my $item (@{$rss->{items}}) {
 			# hopefully this xmldecode() will break nothing
-
-			# my($link, $title) = map { xmldecode($_) } @{$item}{'link', 'title'};
-			# $str .= qq!<LI><A HREF="$link">$title</A></LI>\n!;
-
-			   # "<a href=\"[% item.link %]\">([% item.description %]) [% item.title %]</a>\n"; 
 			for (keys %{$item}) {
 			    $item->{$_} = xmldecode($item->{$_});
 			}
@@ -178,6 +175,8 @@ sub getRDF {
 				Return	=> 1,
 				Page	=> 'portald'
 			});
+
+			last if (++$i >= $iterations && $iterations > 0);
 		}
 
 		setblock($bid, "$str$other");
