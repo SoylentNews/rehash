@@ -103,48 +103,51 @@ if ($opts{'s'}) {
 		next unless -f $_;
 		my($filename) = (File::Spec->splitpath($_))[2];
 		my $template = $install->readTemplateFile($_);
-		if (!$template) {
+		if (!$template
+			|| !$template->{name}
+			|| !$template->{page}
+			|| !$template->{section}) {
 			print STDERR "WARNING: could not readTemplateFile at $_\n";
 			next;
 		}
-		print "Preparing $template->{name} using $filename: $_\n";
+		my $tsemi  = join(";", @$template{'name','page','section'});
+#		print "Preparing $template->{name} using $filename: $_\n";
 		my $temp2 = $slashdb->getTemplateByName($template->{name},
 			[qw(tpid name page section)], 1,
-			$template->{page}, $template->{section});
+			$template->{page}, $template->{section}, 1);
 		if (defined $temp2 && $temp2->{page} eq $template->{page}
 			&& $temp2->{section} eq $template->{section}
 		) {
 			if ($template->{instructions} =~ /placeholder/) {
-				print "Not overwriting template $filename with placeholder.\n";
+				print "\t$filename is placeholder, skipping\n";
 				next;
 			}
 			delete $template->{instructions};
-
 			if ($slashdb->setTemplate($temp2->{tpid}, $template)) {
-				my $tsemi  = join(";", @$template{'name','page','section'});
 				my $t2semi = join(";", @$temp2   {'name','page','section'});
-				print "updated template $t2semi tpid $temp2->{tpid}\n";
+				print "id $temp2->{tpid}\t$filename updated\n";
 				if ($tsemi ne $t2semi || $tsemi ne $filename) {
-					print "WARNING: name of file '$filename' is not name of template it contains '$t2semi'\n";
+					print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
 				}
 			} else {
-				print "WARNING: wasn't able to update template $_ tpid $temp2->{tpid}\n";
-				print "Error: " . $slashdb->{_dbh}->DBI::err_str . "\n";
+				print "id $temp2->{tpid}\t$filename NOT updated: $_\n";
+				print "\tError: " . $slashdb->{_dbh}->DBI::err_str . "\n";
 			}
 		} else {
 			if (my($tpid) = $slashdb->createTemplate($template)) {
-				my $temp2 = $slashdb->getTemplateByName($template->{name},
-					[qw(tpid name page section)], 1,
-					$template->{page}, $template->{section});
+				my $temp2 = $slashdb->sqlSelectHashref(
+					"tpid, name, page, section",
+					"templates",
+					"tpid=" . $slashdb->sqlQuote($tpid)
+				);
 				if ($temp2) {
-					print join("",
-						"created template ",
-						$temp2->{name}, ";",
-						$temp2->{page}, ";",
-						$temp2->{section},
-						" tpid $temp2->{tpid}\n");
+					my $t2semi = join(";", @$temp2{'name','page','section'});
+					print "id $tpid\t$filename CREATED\n";
+					if ($tsemi ne $t2semi || $tsemi ne $filename) {
+						print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
+					}
 				} else {
-					print "created template tpid $tpid -- WARNING name of file apparently does not match name of template\n";
+					print "\tWARNING: unknown error, cannot tell whether '$tsemi' was successfully created from '$_', id may be $tpid\n";
 				}
 			} else {
 				print "wasn't able to update template $_\n";
