@@ -95,6 +95,7 @@ use vars qw($VERSION @ISA @EXPORT);
 	writeLog
 	xmldecode
 	xmlencode
+	xmlencode_plain
 );
 
 # LEELA: We're going to deliver this crate like professionals.
@@ -2148,6 +2149,41 @@ sub balanceTags {
 
 #========================================================================
 
+=head2 xmlencode_plain(TEXT)
+
+Same as xmlencode(TEXT), but does not encode for use in HTML.  This is
+currently ONLY for use for E<lt>linkE<gt> elements.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item TEXT
+
+Whatever text it is you want to encode.
+
+=back
+
+=item Return value
+
+The encoded string.
+
+=item Dependencies
+
+XML::Parser::Expat(3).
+
+=back
+
+=cut
+
+sub xmlencode_plain {
+	xmlencode($_[0], 1);
+}
+
+#========================================================================
+
 =head2 xmlencode(TEXT)
 
 Encodes / escapes a string for putting into XML.
@@ -2191,11 +2227,12 @@ XML::Parser::Expat(3).
 =cut
 
 sub xmlencode {
-	my($text) = @_;
+	my($text, $nohtml) = @_;
 
 	# if there is an & that is not part of an entity, convert it
 	# to &amp;
-	$text =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g;
+	$text =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g
+		unless $nohtml;
 
 	# convert & < > to XML entities
 	$text = XML::Parser::Expat->xml_escape($text, ">");

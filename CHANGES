@@ -1,4 +1,60 @@
-slash-2.0.0-pre1, 2000.03.20
+slash-2.0.0, 2001.04.xx
+-----------------------
+
+*	Added more information to INSTALL and INSTALL.debian
+
+*	Makefile fixes
+
+*	RPM support
+
+*	Move sendEmail to Slash::Utility
+
+*	Allow createSelect to take an arrayref, in addition to
+	already taking a hashref
+
+*	Fix getData calls in Slash.pm to get proper page/section set
+
+*	Fix Slash::Apache::IndexHandler
+
+*	Various fixes in Slash::DB::MySQL, including proper saving
+	of description for vars, creation of stories in newstories
+	table, some time calculations
+
+*	Added exists() method to Slash::Install to check for existence
+	of installed plugin
+
+*	Allow passing of time offset to timeCalc()
+
+*	Export fixint() from Slash::Utility
+
+*	Fix template-tool to use -O option for saving templates
+
+*	Added slashstyle.pod and boilerplates to docs/
+
+*	Various minor fixes to admin.pl
+
+*	A bunch of changes to Journal, including fixes and changes
+	for previewing, themes, templates, RSS, top journals, and
+	additions of pagination and viewing recent journal entry
+	on user's info page *
+
+*	Search ... ???
+
+*	Catch links to old .shtml article pages and redirect to the
+	correct location in 404.pl
+
+*	Fixes to story links and story titles on index.pl
+
+*	Fixes to users.pl, including proper saving of slashboxes
+	(exboxes) from editHome page
+
+*	Various minor fixes to templates
+
+*	Change RSS policy to _not_ "HTML-encode" the link elements,
+	added xmlencode_plain function
+
+
+slash-2.0.0-pre1, 2001.03.20
 ----------------------------
 
 *	Added utils/slash1toslash2, a program for upgrading from a Slash
@@ -43,7 +99,7 @@ slash-2.0.0-pre1, 2000.03.20
 
 
 
-slash-1.1.6-bender, 2000.03.14
+slash-1.1.6-bender, 2001.03.14
 ------------------------------
 
 *	Major overhaul of command-line tools; many options have changed;
@@ -127,7 +183,7 @@ slash-1.1.6-bender, 2000.03.14
 *	Added template-check program
 
 
-slash-1.1.5-bender, 2000.03.02
+slash-1.1.5-bender, 2001.03.02
 ------------------------------
 
 *	Bunches of changes for Makefiles, version numbers, textual
@@ -180,7 +236,7 @@ slash-1.1.5-bender, 2000.03.02
 *	Fixed various bugs with templates
 
 
-slash-1.1.4-bender, 2000.02.16
+slash-1.1.4-bender, 2001.02.16
 ------------------------------
 
 *	Fixed admin.pl to list sections in submission editing
@@ -209,7 +265,7 @@ slash-1.1.4-bender, 2000.02.16
 *	Added MAIN2bender preliminary script
 
 
-slash-1.1.3-bender, 2000.02.08
+slash-1.1.3-bender, 2001.02.08
 ------------------------------
 
 *	Changed copyright/license info in source files
@@ -274,7 +330,7 @@ slash-1.1.3-bender, 2000.02.08
 
 
 
-slash-1.1.2-bender, 2000.01.16
+slash-1.1.2-bender, 2001.01.16
 ------------------------------
 
 First beta for Slash 2.0.  EVERYTHING changed.  We won't even bother

@@ -130,24 +130,24 @@ sub displayRSS {
 	}
 
 	$rss->channel(
-		title	=> xmlencode($constants->{sitename} . " Journals"),
-		'link'	=> xmlencode($constants->{absolutedir} . "/journal.pl?op=display&uid=$uid"),
-		description => xmlencode("${nickname}'s Journal"),
+		title		=> xmlencode("$constants->{sitename} Journals"),
+		description	=> xmlencode("${nickname}'s Journal"),
+		'link'		=> xmlencode_plain("$constants->{absolutedir}/journal.pl?op=display&uid=$uid"),
 	);
 
 	$rss->image(
 		title	=> xmlencode($constants->{sitename}),
 		url	=> xmlencode($constants->{rdfimg}),
-		'link'	=> $constants->{absolutedir} . '/',
+		'link'	=> xmlencode_plain("$constants->{absolutedir}/"),
 	);
 
 
 	my $articles = $journal->getsByUid($uid, 0, 15);
 	for my $article (@$articles) {
 			$rss->add_item(
-				title	=> xmlencode($article->[2]),
-				'link'	=> xmlencode("$constants->{absolutedir}/journal.pl?op=get&id=$article->[3]"),
-				description => xmlencode("$nickname wrote: " . strip_mode($article->[1], $article->[4]))
+				title		=> xmlencode($article->[2]),
+				description	=> xmlencode("$nickname wrote: " . strip_mode($article->[1], $article->[4]))
+				'link'		=> xmlencode_plain("$constants->{absolutedir}/journal.pl?op=get&id=$article->[3]"),
 		);
 	}
 	return $rss->as_string;
@@ -171,15 +171,15 @@ sub displayTopRSS {
 	}
 
 	$rss->channel(
-		title	=> xmlencode($constants->{sitename} . " Top $constants->{journal_top} Journals"),
-		'link'	=> xmlencode($constants->{absolutedir} . "/journal.pl?op=top"),
-		description	=> xmlencode($constants->{sitename} . " Top $constants->{journal_top} Journals"),
+		title		=> xmlencode("$constants->{sitename} Top $constants->{journal_top} Journals"),
+		description	=> xmlencode("$constants->{sitename} Top $constants->{journal_top} Journals"),
+		'link'		=> xmlencode_plain("$constants->{absolutedir}/journal.pl?op=top"),
 	);
 
 	$rss->image(
 		title	=> xmlencode($constants->{sitename}),
 		url	=> xmlencode($constants->{rdfimg}),
-		'link'	=> $constants->{absolutedir} . '/',
+		'link'	=> xmlencode_plain("$constants->{absolutedir}/"),
 	);
 
 
@@ -187,8 +187,7 @@ sub displayTopRSS {
 			my $time = timeCalc($entry->[3]);
 			$rss->add_item(
 				title	=> xmlencode("$entry->[1] ($time)"),
-				'link'	=> xmlencode($constants->{absolutedir}
-					. '/journal.pl?op=display&uid=' . $entry->[2]),
+				'link'	=> xmlencode_plain("$constants->{absolutedir}/journal.pl?op=display&uid=$entry->[2]"),
 			);
 	}
 	return $rss->as_string;

@@ -16,6 +16,7 @@ __name__
 data
 __template__
 [% SWITCH value %]
+
 [% CASE 'tablebegin' %]
 	<TABLE>
 [% CASE 'tableend' %]
@@ -75,33 +76,6 @@ each submission of [% env.script_name %] in order to allow everyone to have a fa
 [% CASE 'maxposts' %]
 <P><B>You've reached you limit of maximum submissions to [% env.script_name %] :
 [% max %] submissions over [% timeframe %].</B></P>
-
-[% CASE 'head' %]
-	[% IF section.isolate %][% constants.sitename %]: [% section.title %][% ELSE %][% section.title %][% END %]
-
-[% CASE 'userboxhead' %]
-	[% user.nickname %]'s Slashbox
-
-[% CASE 'userboxdefault' %]
-	This is your user space.  Love it.
-
-[% CASE 'morehead' %]
-	Older Stuff
-
-[% CASE 'readmore' %]
-	<B>Read More...</B>
-
-[% CASE 'bytes' %]
-	bytes in body
-
-[% CASE 'comments' %]
-	<B>[% "$cc.0 of " IF cc.0.defined %][% cc.1 %]</B> comment[% cc.3 != 1 ? 's' : '' %]
-
-[% CASE 'seclink' %]
-	<A HREF="[% constants.rootdir %]/[% name %]/">[% section.title %]</A>
-
-[% CASE 'editstory' %]
-	<A HREF="[% constants.rootdir %]/admin.pl?op=edit&sid=[% sid %]">Edit</A>
 
 [% END %]
 
