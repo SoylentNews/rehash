@@ -809,7 +809,6 @@ sub submitComment {
 		return(0);
 	}
 
-
 	$tempComment = strip_mode($tempComment, $form->{posttype});
 	$form->{postercomment} = addDomainTags($tempComment);
 
@@ -843,14 +842,14 @@ sub submitComment {
 	}
 
 	my $clean_comment = {
-		comment	=>  $form->{postercomment},
-		sid => $form->{sid} , 
-		pid => $form->{pid} ,
-		ipid => $user->{ipid},
-		subnetid => $user->{subnetid},
-		subject => $form->{postersubj},
-		uid => $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
-		points => $pts,
+		comment		=> $form->{postercomment},
+		sid		=> $form->{sid} , 
+		pid		=> $form->{pid} ,
+		ipid		=> $user->{ipid},
+		subnetid	=> $user->{subnetid},
+		subject		=> $form->{postersubj},
+		uid		=> $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
+		points		=> $pts,
 	};
 
 	my $maxCid = $slashdb->createComment($clean_comment);

@@ -122,6 +122,8 @@ my @strip = qw(
 These constants are used to define different constants in the people system.
 
 	FRIEND
+	FREAK
+	FAN
 	FOE
 	FOF
 	EOF
@@ -130,9 +132,9 @@ These constants are used to define different constants in the people system.
 
 my @people = qw(
 	FRIEND
-	FOE
-	FAN
 	FREAK
+	FAN
+	FOE
 	FOF
 	EOF
 );
