@@ -198,38 +198,45 @@ to use them on <b>comments, articles, or the homepage</b>.
 <p>We're adding some "plums" for subscribers, yes.  Please be warned that this list
 is subject to change as necessary. Here's the official list:
 <ul>
-<li>You get a "More Comments" link on
-<a href="/users.pl?op=userinfo">your user page</a>
-and on
-<a href="/~CmdrTaco/">other users' pages</a>.
-Going through comment history might be a bit DB-intensive but we trust
-subscribers not to abuse the privilege.
-<li>You can add up to 400
-<a href="/my/friends/">friends</a>
-and
-<a href="/my/foes/">foes</a>,
-instead of being limited to 200.
+
+<li>You can see each story 10-20 minutes before it goes "live." (Assuming we
+posted it that far in advance, which usually we do.) Look for the red
+titlebar and a timestamp from "The Mysterious Future." More information
+is available in
+<a href="/article.pl?sid=03/03/06/1548245&tid=124">this story</a>.
+
+<li>You can get a message sent to you when people change their relationship
+to you (friend or foe). Go to your
+<a href="/my/messages">message prefs</a>
+page and edit the "Relationship Change" setting. Don't worry, you'll get at
+most one message per day, summarizing that day's changes.
+
 <li>When
 <a href="/journal.pl?op=edit">writing a journal entry</a>,
 your choices for comments are not just "Comments Disabled" and "Comments
 Enabled." You can also limit commenting to just your friends; just your
 friends and their friends; to exclude just your foes; or to exclude
 your foes and your friends' foes.
-<li>You can get a message sent to you when people change their relationship
-to you (friend or foe). Go to your
-<a href="/my/messages">message prefs</a>
-page and edit the "Relationship Change" setting.
-<li>You can see each story 10-20 minutes before it goes "live." (Assuming we
-posted it that far in advance, which usually we do.) Look for the red
-titlebar and a timestamp from "The Mysterious Future." More information
-is available in
-<a href="/article.pl?sid=03/03/06/1548245&tid=124">this story</a>.
+
+<li>You get a "More Comments" link on
+<a href="/users.pl?op=userinfo">your user page</a>
+and on
+<a href="/~CmdrTaco/">other users' pages</a>.
+Going through comment history might be a bit DB-intensive but we trust
+subscribers not to abuse the privilege.
+
+<li>You can add up to 400
+<a href="/my/friends/">friends</a>
+and
+<a href="/my/foes/">foes</a>,
+instead of being limited to 200.
+
 </ul>
 <p>If you have any questions, please email
 <a href="mailto:subscriptions@slashdot.org">subscriptions@slashdot.org</a>.
 <p><i><font size=-1>Answered by: <a href="mailto:jamie@slashdot.org">Jamie</a></font></i> 
   <br>
-  <i><font size=-1>Last Modified: 01/07/03</font></i> </p>
+  <i><font size=-1>Last Modified: 03/07/03</font></i> </p>
 <p>
 <p>&nbsp; 
 <hr>
