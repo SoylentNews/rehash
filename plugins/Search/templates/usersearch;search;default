@@ -13,24 +13,24 @@ usersearch
 __template__
 [% USE Slash %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-	[% FOREACH user=users %]
+	[% FOREACH thisuser=users %]
 		<TR>
-		[% IF user.4 %]
+		[% IF thisuser.4 %]
 			<TD VALIGN="TOP">
-				[% user.4 %]
+				[% thisuser.4 %]
 			</TD>
 		[% END %]
 		<TD VALIGN="TOP">
-			<A HREF="[% constants.rootdir %]/~[% user.1 | fixparam %]/">[% user.1 %]</A> &nbsp;
-			[% IF user.0 %]
-				([% user.2 %]) email: <A HREF="mailto:[% user.0 | fixparam %]">[% user.0 | strip_literal %]</A> <BR>
+			<A HREF="[% constants.rootdir %]/~[% thisuser.1 | fixparam %]/">[% thisuser.1 %]</A> &nbsp;
+			[% IF thisuser.0 %]
+				([% thisuser.2 %]) email: <A HREF="mailto:[% thisuser.0 | fixparam %]">[% thisuser.0 | strip_literal %]</A> <BR>
 			[% ELSE %]
-				([% user.2 %])<BR>
+				([% thisuser.2 %])<BR>
 			[% END %]
 		</TD>
-		[% IF user.3 %]
+		[% IF thisuser.3 %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/~[% user.1 | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(user.3) %]</EM></A>
+				<A HREF="[% constants.rootdir %]/~[% thisuser.1 | fixparam %]/journal/"><B><EM> Last Journal entry [% Slash.timeCalc(thisuser.3) %]</EM></A>
 			</TD>
 		[% ELSE %]
 			<TD VALIGN="TOP">
@@ -39,7 +39,7 @@ __template__
 		[% END %]
 		[% UNLESS user.is_anon %]
 			<TD VALIGN="TOP">
-				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% user.2 %]">Add a Friend</A>
+				<A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% thisuser.2 %]">Add a Friend</A>
 			</TD>
 		[% END %]
 		</TR>
