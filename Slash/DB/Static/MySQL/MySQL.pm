@@ -2190,13 +2190,29 @@ sub getTopRecentRealemailDomains {
 
 	my $min_uid = $self->getFirstUIDCreatedDaysBack($daysback, $yesterday);
 	my $newaccounts = $self->sqlSelect('max(uid)','users') - $min_uid;
+	my $newnicks = {};
 	return [ ] unless $min_uid;
-	return $self->sqlSelectAllHashrefArray(
+	my $domains = $self->sqlSelectAllHashrefArray(
 		"initdomain, COUNT(*) AS c",
 		"users_info",
 		"uid >= $min_uid",
-		"GROUP BY initdomain ORDER BY c DESC, initdomain LIMIT $num"),
-	       $daysback, $newaccounts;
+		"GROUP BY initdomain ORDER BY c DESC, initdomain LIMIT $num");
+
+	foreach my $domain (@$domains) {
+		my $nicks = $self->sqlSelectAll('nickname','users, users_info',"users.uid=users_info.uid AND users_info.uid >= $min_uid AND initdomain=".$self->sqlQuote($domain->{initdomain}),'ORDER BY users.uid DESC');
+		my $length = 5 + length($domain->{initdomain});
+		my $i = 0;
+		$newnicks->{$domain->{initdomain}} = "";
+
+		while ($length + length($nicks->[$i]) + 2 < 78) {
+			$newnicks->{$domain->{initdomain}} .= ', ' unless !$i;
+			$newnicks->{$domain->{initdomain}} .= $nicks->[$i];
+			$length += length($nicks->[$i]) + 2;
+			$i++;
+		}
+	}
+
+	return $domains, $daysback, $newaccounts, $newnicks;
 }
 
 ########################################################
