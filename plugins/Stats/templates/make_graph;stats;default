@@ -20,33 +20,33 @@ __template__
       gtitle = '&amp;title=' _ gtitle;
    END;
 
-   UNLESS section;
-      section = form.stats_section;
+   UNLESS skid.defined;
+      skid = form.stats_skid;
    END;
-   section = section | fixparam;
+   skid = skid | fixparam;
    statstring = '';
 
    FOREACH stat = statdata;
        IF (stat.0);
           nstat = stat.0 | fixparam;
 
-          nsection = stat.1 | fixparam;
-          IF (!nsection);
-             nsection = section;
+          nskid = stat.1 | fixparam;
+          IF (!nskid);
+             nskid = skid;
           END;
 
           nlabel = stat.2 | fixparam;
-          IF (!nsection);
+          IF (!nskid);
              nlabel = '';
           END;
 
        ELSE;
           nstat = stat | fixparam;
-          nsection = section;
+          nskid = skid;
           nlabel = '';
        END;
 
-       statstring = statstring _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection _ ',' _ nlabel;
+       statstring = statstring _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nskid _ ',' _ nlabel;
    END;
    statstring = BLOCK -%]
 &amp;type=[% type | fixparam %]&amp;stats_days=[% days | fixparam %]&amp;byweekavg=[% byweekavg | fixparam %]&amp;showtotal=[% showtotal | fixparam %][% statstring %][% gtitle %]

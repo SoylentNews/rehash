@@ -63,45 +63,45 @@ SWITCH gtitle;
 	section_pages.push("${cur_page}_page");
   END;
 
-  IF (form.stats_section && form.stats_section != 'all');
+  IF (form.stats_skid && form.stats_skid != 0);
       PROCESS make_graph
          showtotal => 1,
-         section   => form.stats_section,
+         skid   => form.stats_skid,
          type      => 'areastacked',
          statdata  => section_pages;
   ELSE;
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'areastackedindex',
          statdata  => all_pages;
   END;
 
   CASE 'Hits';
-  IF (form.stats_section && form.stats_section != 'all');
-      %] <B>[% gtitle %]</B> graph for [% form.stats_section %] is unavailable.
+  IF (form.stats_skid && form.stats_skid != 0);
+      %] <B>[% gtitle %]</B> graph for [% form.stats_skid %] is unavailable.
 	Try the <B>Pages</B> graph instead.
      [%
 #      PROCESS make_graph
 #         showtotal => 1,
-#         section   => form.stats_section,
+#         skid   => form.stats_skid,
 #         type      => 'areastacked',
 #         statdata  => ['rss_page', 'palm_page'];
   ELSE;
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'areastackedindex',
          statdata  => ['grand_total', 'rss_page', 'palm_page'];
   END;
 
   CASE 'Total Users';
-  IF (form.stats_section && form.stats_section != 'all');
+  IF (form.stats_skid && form.stats_skid != 0);
       PROCESS make_graph
-         section   => form.stats_section,
+         skid   => form.stats_skid,
          type      => 'area',
          statdata  => ['ipids', 'users', 'users_subscriber'];
   ELSE;
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'area',
          statdata  => [['unique', '', 'ipids'],
                       ['unique_users', '', 'users']
@@ -111,53 +111,53 @@ SWITCH gtitle;
 
   CASE 'Comments';
       PROCESS make_graph
-         section   => form.stats_section || 'all',
+         skid   => form.stats_skid || 0,
          type      => 'area',
          statdata  => ['comments'];
 
   CASE 'Page Bytes';
-  IF (form.stats_section && form.stats_section != 'all');
+  IF (form.stats_skid && form.stats_skid != 0);
       PROCESS make_graph
          showtotal => 1,
-         section   => form.stats_section,
+         skid   => form.stats_skid,
          type      => 'areastacked',
          statdata  => ['index_bytes', 'article_bytes', 'comments_bytes'];
   ELSE;
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'areastackedindex',
          statdata  => ['total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes'];
   END;
 
   CASE 'Total Bytes';
-  IF (form.stats_section && form.stats_section != 'all');
+  IF (form.stats_skid && form.stats_skid != 0);
       PROCESS make_graph
          showtotal => 1,
-         section   => form.stats_section,
+         skid   => form.stats_skid,
          type      => 'areastacked',
          statdata  => ['index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
   ELSE;
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'areastackedindex',
          statdata  => ['grand_total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes', 'rss_bytes', 'palm_bytes'];
   END;
 
   CASE 'Section Pages';
-      avail_sections = Slash.db.getDescriptions('skins');
+      avail_skins = Slash.db.getDescriptions('skins');
       sect_page = [];
-      FOREACH section = avail_sections.keys.sort;
-         sect_page.push(['page', section]);
+      FOREACH skin = avail_skins.keys.sort;
+         sect_page.push(['page', skin]);
       END;
       PROCESS make_graph
          type      => 'lines',
          statdata  => sect_page;
 
   CASE 'Section Bytes';
-      avail_sections = Slash.db.getDescriptions('skins');
+      avail_skins = Slash.db.getDescriptions('skins');
       sect_byte = [];
-      FOREACH section = avail_sections.keys.sort;
-         sect_byte.push(['bytes', section]);
+      FOREACH skid = avail_skins.keys.sort;
+         sect_byte.push(['bytes', skid]);
       END;
       PROCESS make_graph
          type      => 'lines',
@@ -167,9 +167,9 @@ SWITCH gtitle;
   # Messages Report
   CASE 'Message Types';
       stats = Slash.getObject('Slash::Stats');
-      section => 'all';
+      skid => 0;
 
-      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_big = stats.getAllStats({ skid => skid, days => 1}).${skin};
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data = stats_data_big.${stats_data_key};
 
@@ -192,38 +192,38 @@ SWITCH gtitle;
   CASE 'Comment Scores';
       PROCESS make_graph
          showtotal => 1,
-         section   => 'all',
+         skid   => 0,
          type      => 'areastacked',
          statdata  => ['comments_score_5', 'comments_score_4', 'comments_score_3', 'comments_score_2', 'comments_score_1', 'comments_score_0', 'comments_score_-1'];
 
   CASE 'Total Comments';
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'area',
          statdata  => ['comments'];
 
   CASE 'Total Comments By Source';
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'areastacked',
          statdata  => ['comments_ipids_anononly', 'comments_ipids_loggedinonly', 'comments_ipids_anonandloggedin', 'comments_proxyanon'];
 
   CASE 'Comment IPIDs';
       PROCESS make_graph
          showtotal => 1,
-         section   => 'all',
+         skid   => 0,
          type      => 'areastacked',
          statdata  => ['distinct_comment_ipids_anononly', 'distinct_comment_ipids_loggedinonly', 'distinct_comment_ipids_anonandloggedin'];
 
   CASE 'Total Moderations';
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'area',
          statdata  => ['m1_up_total', 'm1_down_total'];
 
   CASE 'Total Metamoderations';
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'area',
          statdata  => ['m2_fair_total', 'm2_unfair_total'];
 
@@ -232,27 +232,27 @@ SWITCH gtitle;
   CASE 'New Subscriptions';
       PROCESS make_graph
          showtotal => 1,
-         section   => 'all',
+         skid   => 0,
          type      => 'areastacked',
          statdata  => ['subscribe_new_users', 'subscribe_renew_users'];
 
   CASE 'Total Subscribers';
       PROCESS make_graph
          byweekavg => 1,
-         section   => 'all',
+         skid   => 0,
          type      => 'area',
          statdata  => ['subscribers_total', 'subscribers_current'];
 
   CASE 'Total Renewing Subscribers';
       PROCESS make_graph
          byweekavg => 1,
-         section   => 'all',
+         skid   => 0,
          type      => 'area',
          statdata  => ['subscribers_renewing_total', 'subscribers_renewing_current'];
 
   CASE 'Subscriber Pages';
       PROCESS make_graph
-         section   => 'all',
+         skid   => 0,
          type      => 'area',
          statdata  => ['total_subscriber', 'subscribe_hits_bought', 'total_secure'];
 

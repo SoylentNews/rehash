@@ -12,11 +12,11 @@ __name__
 list
 __template__
 
-[% IF form.stats_section && form.type != 'graphs' && stats_data.${form.stats_section}.names %]
+[% IF form.stats_skid.defined && form.type != 'graphs' && stats_data.${form.stats_skid}.names %]
     [% PROCESS dumphead %]
     <P>
     [% PROCESS doform label => "Individual Categories", select_box =>
-       Slash.createSelect('stats_name', stats_data.${form.stats_section}.names, form.stats_name, 1)
+       Slash.createSelect('stats_name', stats_data.${form.stats_skid}.names, form.stats_name, 1)
      %]
 
     [% IF form.stats_name %]
@@ -25,7 +25,7 @@ __template__
 
 
     [% stats_name_pre = {} %]
-    [% FOREACH myname = stats_data.${form.stats_section}.names.grep('_');
+    [% FOREACH myname = stats_data.${form.stats_skid}.names.grep('_');
         matches = myname.match('^([a-zA-Z0-9]+)_');
         stats_name_pre.${matches.0} = matches.0;
     END %]
@@ -36,7 +36,7 @@ __template__
      %]
 
     [% IF form.stats_name_pre %]
-      [% FOREACH myname = stats_data.${form.stats_section}.names.grep("^${form.stats_name_pre}") %]
+      [% FOREACH myname = stats_data.${form.stats_skid}.names.grep("^${form.stats_name_pre}") %]
     	[% PROCESS dostats myname => myname %]
       [% END %]
     [% END %]
@@ -64,9 +64,9 @@ __template__
 [% BLOCK dostats %]
         <P><I>[% myname %]</I><BR>
         [% stats_total = 0 %]
-        [% FOREACH day = stats_data.${form.stats_section}.keys.sort;
+        [% FOREACH day = stats_data.${form.stats_skid}.keys.sort;
         	NEXT IF day == "names";
-        	stats_num = stats_data.${form.stats_section}.${day}.${myname} + 0;
+        	stats_num = stats_data.${form.stats_skid}.${day}.${myname} + 0;
         	stats_total = stats_total + stats_num %]
         	[% day %]: [% stats_num %]<BR>
         [% END %]
@@ -81,7 +81,7 @@ __template__
 
         &nbsp;&nbsp;Range: [% PROCESS stats_days %]
 
-        <INPUT TYPE="hidden" NAME="stats_section" VALUE="[% form.stats_section %]">
+        <INPUT TYPE="hidden" NAME="stats_skid" VALUE="[% form.stats_skid %]">
         <INPUT TYPE="hidden" NAME="op" VALUE="list">
         <INPUT TYPE="submit">
     </FORM>
@@ -93,7 +93,7 @@ __template__
 	<FORM METHOD="POST" ACTION="[% env.script_name %]">
 
 	[% PROCESS formLabel value => "Section" %]
-	[% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
+	[% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
 
 	<INPUT TYPE="hidden" NAME="op" VALUE="list">
 	<INPUT TYPE="submit">
@@ -109,7 +109,7 @@ __template__
 	[% PROCESS graphs # get mygraphs defined %]
 	[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
 	&nbsp;&nbsp;Range: [% PROCESS stats_days %]
-	&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
+	&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
 
 	<INPUT TYPE="hidden" NAME="op" VALUE="list">
 	<INPUT TYPE="hidden" NAME="type" VALUE="graphs">

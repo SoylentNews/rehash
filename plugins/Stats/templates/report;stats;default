@@ -49,10 +49,10 @@ END;
 
    CASE 'main';
       reportblock = BLOCK;
-      section     = form.stats_section || 'all';
+      skid     = form.stats_skid || '0';
 
       stats = Slash.getObject('Slash::Stats');
-      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_big = stats.getAllStats({ skid => skid, days => 1}).${skid};
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data = stats_data_big.${stats_data_key};
 
@@ -75,10 +75,10 @@ END;
 
    CASE 'mod';
       reportblock = BLOCK;
-      section     = form.stats_section || 'all';
+      skid     = form.stats_skid || '0';
 
       stats = Slash.getObject('Slash::Stats');
-      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_big = stats.getAllStats({ skid => skid, days => 1}).${skid};
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data = stats_data_big.${stats_data_key};
 %]
@@ -95,11 +95,11 @@ END;
    CASE 'subscribe';
       reportblock = BLOCK;
       type        = 'area';
-      section     = 'all';
+      skid     = '0';
       form.stats_days = form.stats_days || 1;
 
       stats = Slash.getObject('Slash::Stats');
-      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_big = stats.getAllStats({ skid => skid, days => 1}).${skid};
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data = stats_data_big.${stats_data_key};
 %]
@@ -114,11 +114,11 @@ END;
    CASE 'relocate';
       reportblock = BLOCK;
       type        = 'area';
-      section     = 'all';
+      skid     = '0';
       days        = form.stats_days || 7;
 
       stats       = Slash.getObject('Slash::Stats');
-      stats_data_big = stats.getAllStats({ section => section, days => days, name_pre => "relocate_" }).${section};
+      stats_data_big = stats.getAllStats({ skid => skid, days => days, name_pre => "relocate_" }).${skid};
       stats_data_key = stats_data_big.keys.sort.0;
       stats_data     = stats_data_big.${stats_data_key};
 %]
@@ -128,7 +128,7 @@ END;
       FOREACH key = stats_data_big.names.sort;
          "$key<BR>";
          PROCESS make_graph
-            section  => 'all',
+            skid  => '0',
             type     => 'area',
             statdata => [ key ];
          "<P>";
@@ -144,7 +144,7 @@ END %]
    [% PROCESS formLabel value => "Reports" %]
    [% Slash.createSelect('report', reports, form.report, 1) %]
    &nbsp;&nbsp;Range: [% PROCESS stats_days %]
-   &nbsp;&nbsp;Sections: [% Slash.createSelect('stats_section', sections, form.stats_section, 1) %]
+   &nbsp;&nbsp;Sections: [% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
 
    <INPUT TYPE="hidden" NAME="op" VALUE="report">
    <INPUT TYPE="submit">
