@@ -293,23 +293,43 @@ sub countDaily {
 
 	my $constants = getCurrentStatic();
 
-	($returnable{'total'}) = $self->sqlSelect("count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1");
+	my($min_day_id, $max_day_id) = $self->sqlSelect(
+		"MIN(id), MAX(id)",
+		"accesslog",
+		"TO_DAYS(NOW()) - TO_DAYS(ts)=1"
+	);
+	my $yesterday_clause = "(id BETWEEN $min_day_id AND $max_day_id)";
 
-	my $c = $self->sqlSelectMany("count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1 GROUP BY host_addr");
-	$returnable{'unique'} = $c->rows;
+	# For counting the total, we used to just do a COUNT(*) with the
+	# TO_DAYS clause.  If we separate out the count of each op, we can
+	# in perl be a little more specific about what we're counting.
+	# And it's about as fast for the DB.
+	my $totals_op = $self->sqlSelectAllHashref(
+		"op",
+		"op, COUNT(*) AS count",
+		"accesslog",
+		$yesterday_clause,
+		"GROUP BY op"
+	);
+	$returnable{total} = 0;
+	for my $op (keys %$totals_op) {
+		$returnable{total} += $totals_op->{$op}{count}
+			unless $op eq 'rss';		# doesn't count in total
+	}
+
+	my $c = $self->sqlSelectMany("COUNT(*)", "accesslog",
+		$yesterday_clause, "GROUP BY host_addr");
+	$returnable{unique} = $c->rows;
 	$c->finish;
 
-	$c = $self->sqlSelectMany("count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1 GROUP BY uid");
-	$returnable{'unique_users'} = $c->rows;
+	$c = $self->sqlSelectMany("COUNT(*)", "accesslog",
+		$yesterday_clause, "GROUP BY uid");
+	$returnable{unique_users} = $c->rows;
 	$c->finish;
 
-	$c = $self->sqlSelectMany("dat,count(*)", "accesslog",
-		"to_days(now()) - to_days(ts)=1 AND
-		(op='index' OR dat='index')
-		GROUP BY dat");
+	$c = $self->sqlSelectMany("dat, COUNT(*)", "accesslog",
+		"$yesterday_clause AND (op='index' OR dat='index')",
+		"GROUP BY dat");
 
 	my(%indexes, %articles, %commentviews);
 
@@ -318,8 +338,8 @@ sub countDaily {
 	}
 	$c->finish;
 
-	$c = $self->sqlSelectMany("dat,count(*),op", "accesslog",
-		"to_days(now()) - to_days(ts)=1 AND op='article'",
+	$c = $self->sqlSelectMany("dat, COUNT(*), op", "accesslog",
+		"$yesterday_clause AND op='article'",
 		"GROUP BY dat");
 
 	while (my($sid, $cnt) = $c->fetchrow) {
