@@ -1832,7 +1832,7 @@ UPDATE users_comments SET threshold=0 WHERE threshold IS NULL;
 UPDATE users_comments SET commentsort=0 WHERE commentsort IS NULL;
 ALTER TABLE users_comments CHANGE COLUMN mode mode ENUM('flat', 'nested', 'nocomment', 'thread') DEFAULT 'thread' NOT NULL, CHANGE COLUMN commentsort commentsort TINYINT DEFAULT '0' NOT NULL, CHANGE COLUMN threshold threshold TINYINT DEFAULT '0' NOT NULL;
 
-INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('MAGST',  39600, 'Magadan', NULL, 'MAGDT', 43200);
+INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('MAGS',  39600, 'Magadan', NULL, 'MAGD', 43200);
 
 # sigh ... this really needs to be iso-8859-1 ... make it utf-8 if you want
 # make sure you also put the right thing in your Apache confs for something like:
