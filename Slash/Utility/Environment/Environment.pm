@@ -1770,8 +1770,8 @@ sub getObject {
 
 	# if plain string, use it as vuser
 	elsif (!ref $data) {
-		$vuser = $data;
-		$data = { virtual_user => $vuser };
+		$data = { virtual_user => $data };
+		$vuser = $data->{virtual_user};
 	}
 
 	# in the future, we may default to something else, but for now it is the writer
