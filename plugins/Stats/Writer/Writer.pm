@@ -68,6 +68,16 @@ sub updateStatDaily {
 	}, $where);
 }
 
+########################################################
+sub addStatDaily {
+	my($self, $name, $add) = @_;
+	$add += 0;
+	return 0 if !$add;
+	$add = "+$add" if $add !~ /^[-+]/;
+	$self->createStatDaily($name, 0);
+	return $self->updateStatDaily($name, "value $add");
+}
+
 
 sub DESTROY {
 	my($self) = @_;

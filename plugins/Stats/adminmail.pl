@@ -84,7 +84,7 @@ EOT
 	my $modlogs_needmeta = $stats->sqlCount('moderatorlog',
 		"active=1 AND reason IN ($reasons_m2able)");
 	my $modlogs_needmeta_yest = $stats->sqlCount('moderatorlog',
-		"active=1 AND ts >= DATE_SUB(NOW(), INTERVAL 2 DAY)
+		"active=1 AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
 		 AND reason IN ($reasons_m2able)");
 	my($oldest_unm2d) = $stats->sqlSelect(
 		"UNIX_TIMESTAMP(MIN(ts))",
@@ -367,7 +367,7 @@ sub getM2Text {
 	# 2002-01-01, there are 200 which have been M2'd 5 times.
 
 	# Only one option supported for now (pretty trivial :)
-	my $width = 80;
+	my $width = 78;
 	$width = $options->{width} if $options->{width};
 	$width = 10 if $width < 10;
 
@@ -378,6 +378,7 @@ sub getM2Text {
 		for my $m2c (keys %{$mmr->{$day}}) {
 			$this_day_count += $mmr->{$day}{$m2c}{c};
 		}
+		$this_day_count += $mmr->{$day}{non}{c};
 		$max_day_count = $this_day_count
 			if $this_day_count > $max_day_count;
 	}
@@ -386,9 +387,12 @@ sub getM2Text {
 	return "" if $max_day_count == 0;
 
 	# Prepare to build the $text data.
-	my $text = "Moderations and their M2 counts:\n";
 	my $prefix_len = 7;
-	my $mult = ($width-$prefix_len)/$max_day_count;
+	my $width_histo = $width-$prefix_len;
+	$width_histo = 5 if $width_histo < 5;
+	my $mult = $width_histo/$max_day_count;
+	my $per = sprintf("%.0f", 1/$mult);
+	my $text = "Moderations and their M2 counts (each char represents $per mods):\n";
 
 	# Build the $text data, one line at a time.
 	my @days = sort keys %$mmr;
@@ -398,13 +402,19 @@ sub getM2Text {
 	}
 	for my $day (@days) {
 		my $day_display = substr($day, 5); # e.g. '01-01'
+		my $non = $mmr->{$day}{non}{c};
 		$text .= "$day_display: ";
-		for my $m2c (sort { $b <=> $a } keys %{$mmr->{$day}}) {
+		for my $m2c (sort { $b <=> $a }
+			grep /^\d+$/,
+			keys %{$mmr->{$day}}) {
+
 			my $c = $mmr->{$day}{$m2c}{c};
 			my $n = int($c*$mult+0.5);
 			next unless $n;
-			$text .= $m2c x $n;
+			$text .= sprintf("%x", $m2c) x $n;
+
 		}
+		$text .= "_" x int($non*$mult+0.5);
 		$text .= "\n";
 	}
 

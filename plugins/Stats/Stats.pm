@@ -175,6 +175,19 @@ sub getModM2Ratios {
 		"GROUP BY day, m2count"
 	);
 
+	# Also count the number of moderations which are not M2'able.
+	my $non_hr = $self->sqlSelectAllHashref(
+		"day",
+		"SUBSTRING(ts, 1, 10) AS day,
+		 COUNT(*) AS c",
+		"moderatorlog",
+		"active=1 AND reason NOT IN ($reasons_m2able)",
+		"GROUP BY day"
+	);
+	for my $day (keys %$non_hr) {
+		$hr->{$day}{non}{c} = $non_hr->{$day}{c};
+	}
+
 	return $hr;
 }
 
