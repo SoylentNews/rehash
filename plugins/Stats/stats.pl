@@ -46,7 +46,8 @@ sub main {
 	header('', '', { admin => 1 } );
 
 	# dispatch of op
-	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats);
+	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $stats)
+		if $ops{$op}[ALLOWED];
 
 	footer();
 }
