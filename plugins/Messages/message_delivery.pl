@@ -69,23 +69,24 @@ $task{$me}{code} = sub {
 
 			# perhaps put these formatting things in templates?
 			if ($mode == MSG_MODE_EMAIL) {
-				$message = join "\n\n" . ('=' x 80) . "\n\n", grep{ $_ } map {
-					$_->{message}
-				} @$coll;
-
+				$message = join "\n\n" . ('=' x 80) . "\n\n",
+					grep { $_ }
+					map { $_->{message} }
+					@$coll;
 			} elsif ($mode == MSG_MODE_WEB) {
-				$message = join "\n\n<P><HR><P>\n\n", grep { $_ } map {
-					$_->{message}
-				} @$coll;
-
+				$message = join "\n\n<P><HR><P>\n\n",
+					grep { $_ }
+					map { $_->{message} }
+					@$coll;
 			} else {
 				next;
 			}
 
-			if($constants->{message_delivery_debug} > 0 ){
+			if ($constants->{message_delivery_debug} > 0) {
 				use Data::Dumper;
-				foreach my $m(@$coll){
-					messagedLog("Empty message: ".Dumper($m)) unless $m->{message};
+				foreach my $m (@$coll) {
+					messagedLog("Empty message: " . Dumper($m))
+						unless $m->{message};
 				}
 			}
 			
