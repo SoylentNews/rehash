@@ -774,7 +774,7 @@ CREATE TABLE pollquestions_new (
 	PRIMARY KEY (qid)
 ) TYPE=InnoDB;
 
-INSERT INTO pollquestions_new(qid,question,voters,topic,discussion,date,uid,section,autopoll,flags,polltype) SELECT qid, question, voters, topic, discussion, date, uid, section, autopoll, flags, polltype);
+INSERT INTO pollquestions_new (qid,question,voters,topic,discussion,date,uid,section,autopoll,flags,polltype) SELECT qid, question, voters, topic, discussion, date, uid, section, autopoll, flags, polltype FROM pollquestions;
 EOT
 
 for my $skid (sort { $a <=> $b } keys %skins) {
