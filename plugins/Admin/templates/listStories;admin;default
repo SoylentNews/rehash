@@ -30,7 +30,8 @@ __template__
 	</TR>
 		[% END %]
 
-[% storiestoday = 0;
+[% IF storylistref && storylistref.count > 0;
+storiestoday = 0;
 FOREACH story = storylistref %]
 
 [% IF story.td != yesterday && !form.section;
@@ -114,6 +115,9 @@ END %]
 		<FONT SIZE="2">[% story.time %]</TD>
 	</TR>
 
+[% END %]
+[% ELSE %]
+<TR><TD><B>No stories.</B></TD></TR>
 [% END %]
 
 </TABLE>
