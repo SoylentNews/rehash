@@ -33,125 +33,14 @@ $slashdb = getCurrentDB();
 
 $stoids = $slashdb->sqlSelectColArrayref("stoid", "stories");
 
-# now render into story_topics_rendered
-# but as for the primaryskid and tid returned: just compare those against what's already there.
-# emit errors, but I bet most errors can be ignored.
-
-#         render into story_topics_rendered and back
-#                 into stories.primaryskid and stories.tid
-#         check what the new code thinks displaystatus is,
-#                 vs. what the displaystatus column says! (build this into new code??)
-
-print <<EOT;
-DROP TABLE IF EXISTS stories_new;
-CREATE TABLE stories_new (
-        stoid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        sid CHAR(16) NOT NULL,
-        uid MEDIUMINT UNSIGNED NOT NULL,
-        title VARCHAR(100) DEFAULT '' NOT NULL,
-        dept VARCHAR(100),
-        time DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
-        hits MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
-        section VARCHAR(30) DEFAULT '' NOT NULL,
-        displaystatus TINYINT DEFAULT '0' NOT NULL,
-        discussion MEDIUMINT UNSIGNED,
-        primaryskid SMALLINT UNSIGNED,
-        tid SMALLINT UNSIGNED,
-        submitter MEDIUMINT UNSIGNED NOT NULL,
-        commentcount SMALLINT UNSIGNED DEFAULT '0' NOT NULL,
-        hitparade VARCHAR(64) DEFAULT '0,0,0,0,0,0,0' NOT NULL,
-        writestatus ENUM("ok","delete","dirty","archived") DEFAULT 'ok' NOT NULL,
-        is_archived ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
-        in_trash ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
-        day_published DATE DEFAULT '0000-00-00' NOT NULL,
-        qid MEDIUMINT UNSIGNED DEFAULT NULL,
-        subsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
-        last_update TIMESTAMP NOT NULL,
-        body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
-        word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
-        PRIMARY KEY (stoid),
-        UNIQUE sid (sid),
-        INDEX uid (uid),
-        INDEX is_archived (is_archived),
-        INDEX time (time),
-        INDEX submitter (submitter),
-        INDEX day_published (day_published),
-        INDEX skidtid (primaryskid, tid)
-) TYPE=InnoDB;
-INSERT INTO stories_new (sid, uid, title, dept, time, hits, section, displaystatus, discussion, primaryskid, tid, submitter, commentcount, hitparade, writestatus, is_archived, in_trash, day_published, qid, subsection, last_update, body_length, word_count) SELECT sid, uid, title, dept, time, hits, section, displaystatus, discussion, 1, tid, submitter, commentcount, hitparade, writestatus, IF(writestatus='archived', 'yes', 'no'), IF(writestatus='delete', 'yes', 'no'), day_published, qid, subsection, last_update, body_length, word_count FROM stories ORDER BY time, sid;
-DROP TABLE IF EXISTS story_dirty_new;
-CREATE TABLE story_dirty_new (
-        stoid MEDIUMINT UNSIGNED NOT NULL,
-        PRIMARY KEY (stoid)
-) TYPE=InnoDB;
-INSERT INTO story_dirty_new (stoid) SELECT stoid FROM stories_new WHERE writestatus='dirty';
-DROP TABLE IF EXISTS story_param_new;
-CREATE TABLE story_param_new (
-        param_id mediumint UNSIGNED NOT NULL auto_increment,
-        stoid MEDIUMINT UNSIGNED NOT NULL,
-        name varchar(32) DEFAULT '' NOT NULL,
-        value text DEFAULT '' NOT NULL,
-        UNIQUE story_key (stoid,name),
-        PRIMARY KEY (param_id)
-) TYPE=InnoDB;
-INSERT INTO story_param_new (stoid, name, value) SELECT stories_new.stoid, story_param.name, story_param.value FROM stories_new, story_param WHERE stories_new.sid=story_param.sid ORDER BY stories_new.stoid, name;
-DROP TABLE IF EXISTS story_text_new;
-CREATE TABLE story_text_new (
-        stoid MEDIUMINT UNSIGNED NOT NULL,
-        title VARCHAR(100) DEFAULT '' NOT NULL,
-        introtext text,
-        bodytext text,
-        relatedtext text,
-        rendered text,
-        PRIMARY KEY (stoid)
-) TYPE=MyISAM;
-INSERT INTO story_text_new (stoid, title, introtext, bodytext, relatedtext, rendered) SELECT stories_new.stoid, stories.title, introtext, bodytext, relatedtext, rendered) FROM stories_new, story_text WHERE stories_new.sid=story_text.sid;
-ALTER TABLE stories_new DROP COLUMN title, DROP COLUMN writestatus;
-DROP TABLE IF EXISTS story_topics_chosen_new;
-CREATE TABLE story_topics_chosen_new (
-        stoid MEDIUMINT UNSIGNED NOT NULL,
-        tid SMALLINT(5) UNSIGNED NOT NULL,
-        weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
-        UNIQUE story_topic (stoid, tid),
-        INDEX tid (tid)
-) TYPE=InnoDB;
-EOT
-
-print "INSERT  INTO story_topics_chosen_new (stoid, tid, weight) SELECT stories.stoid, story_topics.tid, 1 FROM stories, story_topics WHERE stories.sid=story_topics.sid AND is_parent='no' AND displaystatus=1;\n";
-for my $skid (sort { $a <=> $b } keys %skins) {
-        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
-        my $nexus_tid = $skins{$skid}{nexus};
-        print "REPLACE INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $nexus_tid, 2 FROM stories WHERE displaystatus=1 AND section=$section_q;\n";
+for my $stoid (@$stoids) {
+	my($primaryskid, $tids) = $slashdb->setStoryRenderedFromChosen($stoid);
+	my $tid = $tids->[0] || 0;
+	my $update_hr = {
+		tid => $tid,
+		primaryskid => $primaryskid,
+		is_dirty => 1,
+	};
+	$slashdb->setStory($stoid, $update_hr);
 }
-print "INSERT  INTO story_topics_chosen_new (stoid, tid, weight) SELECT stories.stoid, story_topics.tid, 3 FROM stories, story_topics WHERE stories.sid=story_topics.sid AND is_parent='no' AND displaystatus=0;\n";
-for my $skid (sort { $a <=> $b } keys %skins) {
-        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
-        my $nexus_tid = $skins{$skid}{nexus};
-        print "REPLACE INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $nexus_tid, 4 FROM stories WHERE displaystatus=0 AND section=$section_q;\n";
-}
-print "REPLACE INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, tid, 4 FROM stories WHERE displaystatus=0;\n";
-
-for my $skid (sort { $a <=> $b } keys %skins) {
-        my $section_q = $slashdb->sqlQuote($skins{$skid}{name});
-        print "UPDATE stories_new SET primaryskid=$skid WHERE section=$section_q;\n";
-}
-
-for my $subsection (sort { $a <=> $b } keys %subsections) {
-        my $subsection_q = $slashdb->sqlQuote($subsection);
-        my $tid_q = $slashdb->sqlQuote($subsections{$subsection});
-        print "INSERT INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $tid_q, 1 FROM stories WHERE subsection=$subsection_q AND displaystatus=0;\n";
-        print "INSERT INTO story_topics_chosen_new (stoid, tid, weight) SELECT stoid, $tid_q, 3 FROM stories WHERE subsection=$subsection_q AND displaystatus=1;\n";
-}
-
-print <<EOT;
-ALTER TABLE stories_new DROP COLUMN section, DROP COLUMN subsection, DROP COLUMN title, DROP COLUMN displaystatus;
-# keeping displaystatus around for error checking
-# ALTER TABLE stories_new DROP COLUMN writestatus;
-EOT
-
-# now render into story_topics_rendered
-# but as for the primaryskid and tid returned: just compare those against what's already there.
-# emit errors, but I bet most errors can be ignored.
-
-
 
