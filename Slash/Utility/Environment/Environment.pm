@@ -1504,7 +1504,8 @@ sub prepareUser {
 		# Make other decisions about subscriber-related attributes
 		# of this page.  Note that we still have $r lying around,
 		# so we can save Subscribe.pm a bit of work.
-		if (my $subscribe = getObject('Slash::Subscribe', { db_type => 'reader' })) {
+		# we don't need or want to do this if not in Apache ...
+		if ($ENV{GATEWAY_INTERFACE} && (my $subscribe = getObject('Slash::Subscribe', { db_type => 'reader' }))) {
 			$user->{state}{page_plummy} = $subscribe->plummyPage($r, $user);
 			$user->{state}{page_buying} = $subscribe->buyingThisPage($r, $user);
 			$user->{state}{page_adless} = $subscribe->adlessPage($r, $user);
