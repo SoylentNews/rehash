@@ -576,14 +576,12 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 # in with a "template-tool -U")
 
 # FOUNDRIES TEST SITE LAST UPDATED HERE
-# LINUX.COM LAST UPDATED HERE
 
 # End of T_2_3_0_37, Start of T_2_3_0_38
 
 ALTER TABLE string_param MODIFY COLUMN code VARCHAR(128) NOT NULL;
 ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
-# SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_38, Start of T_2_3_0_39
 
@@ -607,3 +605,7 @@ CREATE TABLE people_log (
 	action enum("add","delete"),
 	PRIMARY KEY (id)
 );
+
+INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Number of FOF/FOE to process during job run');
+# SLASHCODE LAST UPDATED HERE
+# LINUX.COM LAST UPDATED HERE
