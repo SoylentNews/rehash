@@ -94,7 +94,17 @@ my %descriptions = (
 		=> sub { $_[0]->sqlSelectMany('tid,alttext', 'topics') },
 
 	'topics_section'
-		=> sub { $_[0]->sqlSelectMany('topics.tid,topics.alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid") },
+		=> sub {
+				my $SECT = $_[0]->getSection($_[2]);
+				my $where;
+				if ($SECT->{type} eq 'collected') {
+					$where = " section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+						if $SECT->{contained} && @{$SECT->{contained}};
+				} else {
+					$where = " section = " . $_[0]->sqlQuote($SECT->{section});
+				}
+				$_[0]->sqlSelectMany('topics.tid,topics.alttext', 'topics, section_topics', "$where AND section_topics.tid=topics.tid") 
+			},
 
 	'topics_section_type'
 		=> sub { $_[0]->sqlSelectMany('topics.tid as tid,topics.alttext as alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid AND type= '$_[3]'") },
