@@ -17,6 +17,7 @@ my $uid_ar = $slashdb->sqlSelectColArrayref("uid", "users_index",
 	"story_always_nexus != '' OR story_never_nexus != '' OR story_never_topic != ''",
 	"ORDER BY uid");
 
+my $changed = 0;
 for my $i (0..$#$uid_ar) {
 	my $uid = $uid_ar->[$i];
 	my($san, $snn, $sna) = $slashdb->sqlSelect(
@@ -35,7 +36,7 @@ for my $i (0..$#$uid_ar) {
 	my $snn_new = join ",", sort { $a <=> $b } keys %snn;
 	my $san_new = join ",", sort { $a <=> $b } keys %san;
 	my $sna_new = join ",", sort { $a <=> $b } keys %sna;
-	$slashdb->sqlUpdate(
+	$changed += $slashdb->sqlUpdate(
 		"users_index",
 		{ story_never_nexus   => $snn_new,
 		  story_always_nexus  => $san_new,
@@ -46,6 +47,7 @@ for my $i (0..$#$uid_ar) {
 	print "." if $i % 100 == 99;
 }
 print "\n";
+print "$changed rows changed\n";
 
 $slashdb->sqlDo("COMMIT");
 $slashdb->sqlDo("SET AUTOCOMMIT=1");
