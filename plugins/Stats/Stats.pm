@@ -45,20 +45,37 @@ sub new {
 
 	my $count = 0;
 	if ($options->{create}) {
+
 		# Why not just truncate? If we did we would never pick up schema changes -Brian
+		# Create "accesslog_temp" and "accesslog_temp_errors" from the
+		# schema of "accesslog".
+
+		# First, drop them (if they exist).
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_errors");
+
+		# Then, get the schema in its CREATE TABLE statement format.
 		my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
 		$sth->execute();
 		my $rows = $sth->fetchrow_arrayref;
-		$rows->[1] =~ s/accesslog/accesslog_temp/;
 		$self->{_table} = "accesslog_temp";
-		$self->sqlDo($rows->[1]);
-		$rows->[1] =~ s/accesslog_temp/accesslog_temp_errors/;
-		$self->sqlDo($rows->[1]);
+		my $create_sql = $rows->[1];
+
+		# Now, munge the schema to do the two new tables, and execute it.
+		$create_sql =~ s/accesslog/accesslog_temp/;
+		$self->sqlDo($create_sql);
+		$create_sql =~ s/accesslog_temp/accesslog_temp_errors/;
+		$self->sqlDo($create_sql);
+
+		# Add in the indexes we need.
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid(uid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX section(section)");
-		# The status line =200 is temp till I can go through and fix more of this to make use of if -Brian
+		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX status(status)");
+
+		# The status line =200 is temp till I can go through and fix more of this
+		# to make use of if -Brian
+		# Having put errors into the _errors table, this is fine the way it is,
+		# now, right? -Jamie 2003/05/20
 		my $sql = "INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' AND status=200 FOR UPDATE";
 		$self->sqlDo($sql);
 		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp"))) {
@@ -69,7 +86,6 @@ sub new {
 			}
 		}
 
-		# Now everything that wasn't ok
 		$sql = "INSERT INTO accesslog_temp_errors SELECT * FROM accesslog WHERE ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' AND status != 200 FOR UPDATE";
 		$self->sqlDo($sql);
 		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp_errors"))) {
@@ -89,7 +105,7 @@ sub new {
 sub getAccesslistCounts {
 	my($self) = @_;
 	my $hr = { };
-	for my $key (qw( ban nopost nosubmit norss proxy trusted )) {
+	for my $key (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
 		$hr->{$key} = $self->sqlCount('accesslist',
 			"now_$key = 'yes'") || 0;
 	}

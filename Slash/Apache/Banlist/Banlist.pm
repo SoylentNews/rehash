@@ -43,11 +43,17 @@ sub handler {
 		content_type=rss
 	)}x;  # also check for content_type in POST?
 
+	my $is_palm = $r->uri =~ /^\/palm/;
+
 	# check for ban
 	my $banlist = $reader->getBanList();
 	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
+		# Send a special "you are banned" page if the user is
+		# hitting RSS.
 		return _send_rss($r, 'ban') if $is_rss;
-
+		# Send our usual "you are banned" page, whether the user
+		# is on palm or not.  It's mostly text so palm users
+		# should not have a problem with it.
 		$r->custom_response(FORBIDDEN,
 			slashDisplay('bannedtext_ipid',
 				{ ip => $cur_ip },
@@ -63,9 +69,20 @@ sub handler {
 		return _send_rss($r, 'abuse', $cur_ipid);
 	}
 
+	# check for Palm abuse
+	my $palmlist = $reader->getNopalmList();
+	if ($is_palm && ($palmlist->{$cur_ipid} || $palmlist->{$cur_subnet})) {
+		$r->custom_response(FORBIDDEN,
+			slashDisplay('bannedtext_palm',
+				{ ip => $cur_ip },
+				{ Return => 1   }
+			)
+		);
+		return FORBIDDEN;
+	}
+
 	return OK;
 }
-
 
 sub _send_rss {
 	my($r, $type, $ipid) = @_;

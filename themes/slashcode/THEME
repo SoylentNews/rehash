@@ -91,6 +91,7 @@ task=tasks/set_recent_topics.pl
 task=tasks/spamarmor.pl
 template=templates/admin;menu;default
 template=templates/bannedtext_ipid;misc;default
+template=templates/bannedtext_palm;misc;default
 template=templates/bannedtext_rss;misc;default
 template=templates/bannedtext_uid;misc;default
 template=templates/changePasswd;users;default

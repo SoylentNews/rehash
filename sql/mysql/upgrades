@@ -1510,3 +1510,9 @@ SOURCE "/tmp/storieslength";
 INSERT INTO vars (name, value, description) VALUES ('cache_enabled_template','1','If set, then template caching is still active even if var cache_enabled is turned off.');
 INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
 
+ALTER TABLE accesslist ADD COLUMN now_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER now_norss, ADD COLUMN was_nopalm ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER was_norss;
+ALTER TABLE accesslist ADD INDEX now_nopalm (now_nopalm);
+
+# This table has never been used for anything.
+DROP TABLE IF EXISTS rss_raw;
+

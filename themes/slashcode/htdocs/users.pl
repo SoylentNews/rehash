@@ -1877,7 +1877,7 @@ sub saveUserAdmin {
 
 	my @access_add = ( );
 	my @access_remove = ( );
-	for my $now (qw( ban nopost nosubmit norss proxy trusted )) {
+	for my $now (qw( ban nopost nosubmit nopalm norss nopalm proxy trusted )) {
 		# To affect the "now_trusted" bit, you need a seclev of 10000
 		# or higher.
 		next if $now eq 'trusted' && $user->{seclev} < 10000;
@@ -2691,7 +2691,7 @@ sub getUserAdmin {
 		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
 	}
 
-	for my $access_type (qw( ban nopost nosubmit norss proxy trusted )) {
+	for my $access_type (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
 		$accesslist->{$access_type} = "";
 		my $info_hr = $reader->getAccessListInfo($access_type, $user_edit);
 		next if !$info_hr; # no match

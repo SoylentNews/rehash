@@ -19,9 +19,10 @@ __template__
 <BODY BGCOLOR="pink">
 <H1>Either your network or IP address has been banned from [% constants.sitename %]</H1><BR>
 Either your network or IP address has been banned from [% constants.sitename %],
-due to script flooding, or the posting of comments designed to break web browser
-rendering, that originated from your network or IP address.  If you feel that
-this is unwarranted, feel free to include your IP address (<b>[% ip %]</b>) in the
+due to script flooding, excessive robot crawling, or the posting of
+comments designed to break web browser rendering, that originated from
+your network or IP address.  If you feel that this is unwarranted,
+feel free to include your IP address (<b>[% ip %]</b>) in the
 subject of an email to
 <A HREF="mailto:[% constants.adminmail_ban | strip_attribute %]">[% constants.adminmail_ban %]</A>,
 and we will examine why there is a ban. If you fail to include the IP address (again,
