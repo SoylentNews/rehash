@@ -152,24 +152,22 @@ Compiles templates and caches them.
 
 sub slashDisplay {
 	my($name, $data, $opt) = @_;
-	my(@comments, $err, $ret, $out, $origSection, $origPage,
-		$tempdata, $tempname, $user, $slashdb, $constants);
 	return unless $name;
 
-	$constants = getCurrentStatic();
-	$slashdb = getCurrentDB();
-	$user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $slashdb   = getCurrentDB();
+	my $user      = getCurrentUser();
 
 	# save for later (local() seems not to work ... ?)
-	$origSection = $user->{currentSection};
-	$origPage = $user->{currentPage};
+	my $origSection = $user->{currentSection};
+	my $origPage = $user->{currentPage};
 
 	# allow slashDisplay(NAME, DATA, RETURN) syntax
 	if (! ref $opt) {
 		$opt = $opt == 1 ? { Return => 1 } : {};
 	}
 
-	if ($opt->{Section} eq 'NONE') {
+	if ($opt->{Section} && $opt->{Section} eq 'NONE') {
 		$user->{currentSection} = 'default';
 	# admin and light are special cases
 	} elsif ($user->{currentSection} eq 'admin') {
@@ -180,7 +178,7 @@ sub slashDisplay {
 		$user->{currentSection} = $opt->{Section};
 	}
 
-	if ($opt->{Page} eq 'NONE') {
+	if ($opt->{Page} && $opt->{Page} eq 'NONE') {
 		$user->{currentPage} = 'misc';
 	} elsif ($opt->{Page}) {
 		$user->{currentPage} = $opt->{Page};
@@ -190,32 +188,21 @@ sub slashDisplay {
 		$user->{$_} = defined $user->{$_} ? $user->{$_} : '';
 	}
 
-
-	if (ref $name) {
-		@comments = (
-			"\n\n<!-- start template: anon -->\n\n",
-			"\n\n<!-- end template: anon -->\n\n"
-		);
-	} else {
+	my $tempname = 'anon';
+	unless (ref $name) {
 		# we don't want to have to call this here, but because
 		# it is cached the performance hit is generally light,
 		# and this is the only good way to get the actual name,
 		# page, section, we bite the bullet and do it
-		$tempdata = $slashdb->getTemplateByName($name, [qw(tpid page section)]);
-
-		# we could, at this point, just return from the
-		# function if $tempdata->{tpid} is undef ...
-		# do we want to try?  for now leave it in.
-		# Returning from here would be a bad idea unless
-		# $user->{current*} are restored to original values.
-
+		my $tempdata = $slashdb->getTemplateByName($name, [qw(tpid page section)]);
 		$tempname = "ID $tempdata->{tpid}, " .
 			"$name;$tempdata->{page};$tempdata->{section}";
-		@comments = (
-			"\n\n<!-- start template: $tempname -->\n\n",
-			"\n\n<!-- end template: $tempname -->\n\n"
-		);
 	}
+
+	my @comments = (
+		"\n\n<!-- start template: $tempname -->\n\n",
+		"\n\n<!-- end template: $tempname -->\n\n"
+	);
 
 	# copy parent data structure so it is not modified,
 	# so it is left alone on return back to caller
@@ -226,12 +213,28 @@ sub slashDisplay {
 
 	# we only populate $err if !$ret ... still, if $err
 	# is false, then we assume everything is OK
-	if ($CONTEXT) {
-		$ret = eval { $out = $template->include($name, $data) };
-		$err = $@ if !$ret;
-	} else {
-		$ret = $template->process($name, $data, \$out);
-		$err = $template->error if !$ret;
+	my($err, $ret, $out);
+
+	{
+		local $SIG{__WARN__} = sub {
+			my @lines = @_;
+			if ($lines[0] !~ /Use of uninitialized value/) {
+				if ($lines[0] =~ /at \(eval \d+\)/) {
+					chomp($lines[0]);
+					$lines[0] =~ s/\.$//;
+					$lines[0] .= " in template $tempname\n";
+				}
+				warn @lines;
+			}
+		};
+
+		if ($CONTEXT) {
+			$ret = eval { $out = $template->include($name, $data) };
+			$err = $@ if !$ret;
+		} else {
+			$ret = $template->process($name, $data, \$out);
+			$err = $template->error if !$ret;
+		}
 	}
 
 	my $Nocomm = defined $opt->{Nocomm}
