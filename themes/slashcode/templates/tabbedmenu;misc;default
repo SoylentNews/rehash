@@ -20,11 +20,6 @@ en_US
 __name__
 tabbedmenu
 __template__
-<!--
-tabbedmenu fg/bg
-fg 0=[% user.fg.0 %] 1=[% user.fg.1 %] 2=[% user.fg.2 %] 3=[% user.fg.3 %] 4=[% user.fg.4 %] 5=[% user.fg.5 %]
-bg 0=[% user.bg.0 %] 1=[% user.bg.1 %] 2=[% user.bg.2 %] 3=[% user.bg.3 %] 4=[% user.bg.4 %] 5=[% user.bg.5 %]
--->
 [% save_tab_selected = tab_selected %]
 [% IF justify != 'right'; justify = 'left'; END %]
 [% IF color != 'white'; color = 'colored'; END %]
@@ -70,7 +65,6 @@ END %]
 	ELSE;
 		tabtmpl = "end_tab";
 	END;
-	"<!-- tablabel $tab.label tabsellabel $tab.sel_label tabtmpl $tabtmpl tl '" _ (tab.label == save_tab_selected) _ "' tsl '" _ (tab.sel_label == save_tab_selected) _ "' ns '" _ (loop.next && (loop.next.label == save_tab_selected || loop.next.sel_label == save_tab_selected)) _ "' -->";
 	PROCESS $tabtmpl link=tab.link label=tab.label
 		justify=justify color=color details=details
 		tab_is_selected=(tab.label == save_tab_selected || tab.sel_label == save_tab_selected)

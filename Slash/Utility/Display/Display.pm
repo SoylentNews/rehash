@@ -1031,7 +1031,8 @@ sub createMenu {
 	}
 
 	if (!$menu_items || !@$menu_items) {
-		return "<!-- createMenu($menu, $style, $color), no items -->\n"; # DEBUG
+		return "";
+#		return "<!-- createMenu($menu, $style, $color), no items -->\n"; # DEBUG
 	}
 
 	# Now convert each item in the list into a hashref that can
@@ -1066,7 +1067,7 @@ sub createMenu {
 	}
 
 	my $menu_text = "";
-	$menu_text .= "<!-- createMenu($menu, $style, $color), " . scalar(@$items) . " items -->\n"; # DEBUG
+#	$menu_text .= "<!-- createMenu($menu, $style, $color), " . scalar(@$items) . " items -->\n"; # DEBUG
 
 	if ($style eq 'tabbed') {
 		# All menus in the tabbed style use the same template.
