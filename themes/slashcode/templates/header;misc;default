@@ -61,7 +61,7 @@ in this block -->
 		[% text = INCLUDE mainmenu; Slash.fancybox('120', "Navigation", text, '', 1) %]
 		<br>
 		[% text = INCLUDE organisation; Slash.fancybox('120', constants.sitename, text, '', 1) %]
-	</TD><TD>&nbsp;</TD><TD VALIGN="TOP" ALIGN="LEFT"><FONT COLOR="[% user.fg.1 %]" WIDTH="100%">
+	</TD><TD>&nbsp;</TD><TD VALIGN="TOP" ALIGN="LEFT" WIDTH="100%"><FONT COLOR="[% user.fg.1 %]">
 [% IF user.is_admin %]
 	<P>[% Slash.createMenu(adminmenu) %]</P>
 [% END %]
