@@ -51,7 +51,7 @@ sub main {
 	# shouldn't be in one.				--Pater
 	$form->{section}	||= $user->{currentSection} || '';
 
-        # switch search mode to poll if in polls section and other
+	# switch search mode to poll if in polls section and other
 	# search type isn't specified
 	if ($user->{currentSection} eq 'polls' and !$form->{op}) {
 		$form->{op} = 'polls';
