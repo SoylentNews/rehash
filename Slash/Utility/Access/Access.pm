@@ -450,8 +450,8 @@ sub filterOk {
 	for my $f (@$filters) {
 		my $number_match	= '';
 		my $regex		= $f->[2];
-		my $modifier		= 'g' if $f->[3] =~ /g/;
-		my $case		= 'i' if $f->[3] =~ /i/;
+		my $modifier		= $f->[3] =~ /g/ ? 'g' : '';
+		my $case		= $f->[3] =~ /i/ ? 'i' : '';
 		my $field		= $f->[4];
 		my $ratio		= $f->[5];
 		my $minimum_match	= $f->[6];
