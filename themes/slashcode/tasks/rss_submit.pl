@@ -29,13 +29,17 @@ $task{$me}{code} = sub {
 		$time_long_ago[5] + 1900, $time_long_ago[4] + 1, $time_long_ago[3];
 
 	my $added_submissions = 0;
+	my $non_autosubmit = 0;
 	# First, we grab as many submissions as possible
 	my $rss_ar = $slashdb->getRSSNotProcessed($constants->{rss_process_number});
+	my $num_not_processed = $rss_ar ? scalar(@$rss_ar) : 0;
 	for my $rss (@$rss_ar) {
 		my $subid;
 		my $block = $slashdb->getBlock($rss->{bid});
 		my $description = $rss->{description} ? $rss->{description} : $rss->{title};
-		if ($block->{autosubmit} eq 'yes') {
+		if ($block->{autosubmit} eq 'no') {
+			++$non_autosubmit;
+		} else {
 			my $blockskin = $slashdb->getSkin($block->{skin});
 			my $submission = {
 				email	=> $rss->{link},
@@ -46,8 +50,7 @@ $task{$me}{code} = sub {
 			};
 			$subid = $slashdb->createSubmission($submission);
 			if (!$subid) {
-				use Data::Dumper;
-				slashdLog("failed to createSubmission, rss: " . Dumper($rss) . "submission: " . Dumper($submission));
+				slashdLog("failed to createSubmission, rss title '$rss->{title}' from bid '$block->{bid}'");
 			} else {
 				$added_submissions++;
 			}
@@ -57,8 +60,11 @@ $task{$me}{code} = sub {
 
 	$slashdb->expireRSS($constants->{rss_process_number});
 
-	return $added_submissions ?
-		"totaladded Submissions $added_submissions" : '';
+	my $ret = "";
+	if ($added_submissions || $non_autosubmit) {
+		$ret = "totaladded Submissions $added_submissions; non-autosubmits $non_autosubmit; of $num_not_processed not processed";
+	}
+	return $ret;
 };
 
 1;
