@@ -15,3 +15,4 @@ image=images/fof.gif
 image=images/freak.gif
 image=images/friend.gif
 image=images/neutral.gif
+task=zoo_run_people_log.pl

@@ -10,6 +10,7 @@ use Digest::MD5 'md5_hex';
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Slash::Constants qw(:messages);
 
 #################################################################
 sub main {
@@ -534,6 +535,18 @@ sub newUser {
 				title		=> $title, 
 				uid		=> $uid
 			});
+
+			if ($form->{newsletter} || $form->{comment_reply} || $form->{headlines}) {
+				my $messages  = getObject('Slash::Messages');
+				my %params;
+				$params{MSG_CODE_NEW_COMMENT} = MSG_MODE_EMAIL
+					if $form->{comment_reply};
+				$params{MSG_CODE_NEWSLETTER} = MSG_MODE_EMAIL
+					if $form->{newsletter};
+				$params{MSG_CODE_HEADLINES} = MSG_MODE_EMAIL
+					if $form->{headlines};
+				$messages->setPrefs($uid, \%params);
+			}
 
 			mailPasswd({ uid => $uid });
 
@@ -1396,24 +1409,6 @@ sub editComm {
 	my $lo = -$hi;
 	# And this was wrong, see we display +3 not 3. So the display was a bit off :)
 	my @range = map { $_ > 0 ? '+' . $_ : $_ } ($lo .. $hi);
-
-# Commented out, will be removed later  -Brian
-#	# And now we have to fix all of the users :(   -Brian
-#	# is this temporary, to fix bad DB entries?
-#	# if so, we should just change the DB; the code's not
-#	# been released yet, so we don't have to worry about
-#	# other sites. -- pudge
-#	for (qw| friend foe fan freak |) {
-#		my $key = "people_bonus_$_";
-#		$user->{$key} = "+$user->{$key}"
-#			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
-#	}
-#
-#	for (qw| Intersting Troll Insightful Offtopic Flamebait Funny Informative Redundant |) {
-#		my $key = "reason_alter_$_";
-#		$user->{$key} = "+$user->{$key}"
-#			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
-#	}
 
 	for (@reasons) {
 		my $key = "reason_alter_$_";

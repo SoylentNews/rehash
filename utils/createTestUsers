@@ -28,7 +28,7 @@ my $PROGNAME = basename($0);
 my %opts;
 srand(time() ^ ($$+($$<<15)));
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('hJu:v', \%opts);
+usage('Options used incorrectly') unless getopts('hJu:va:', \%opts);
 usage() if $opts{'h'};
 version() if $opts{'v'};
 $junk = $opts{'J'} ? 1 : 0;
@@ -89,6 +89,15 @@ $werder = new Silly::Werder;
 		my $domaintags = int(rand(3));
 		$hr->{domaintags} = $domaintags if $domaintags != 2 or rand(1) < 0.3;
 		$slashdb->setUser($uid, $hr);
+
+		if ($zoo && $opts{'a'}) {
+			print "Setting $opts{'a'}\n";
+			if ((rand() * 10)%2) {
+				$zoo->setFriend($opts{'a'}, $uid);
+			} else {
+				$zoo->setFoe($opts{'a'}, $uid);
+			}
+		}
 
 		print "New user: $username (User #$uid) ($email)";
 		if ($zoo && rand(1) < 0.3) {
@@ -277,6 +286,7 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user (default is "slash")
+	-a	Additional user for testing
 
 EOT
 	exit;

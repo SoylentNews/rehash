@@ -1,4 +1,5 @@
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% constants.rootdir %]/my/friends/',1,1);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans/',1,1);
 INSERT INTO vars (name,value,description) VALUES ('people_max','200','Maximum number of friends/foes you can have');
+INSERT INTO vars (name,value,description) VALUES ('people_max_subscriber','400','Maximum number of friends/foes you can have');
 INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Number of FOF/FOE to process during job run');

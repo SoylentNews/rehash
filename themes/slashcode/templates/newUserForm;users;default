@@ -42,6 +42,9 @@ __template__
 		<B>Real Email</B> <BR>
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="newuser">
 		<INPUT TYPE="TEXT" NAME="email" VALUE="" SIZE="40"><BR>
+		<INPUT TYPE="CHECKBOX" NAME="comment_reply" VALUE="1" CHECKED> Replies to my comments will be mailed to me<BR>
+		<INPUT TYPE="CHECKBOX" NAME="newsletter" VALUE="1" > Send me the newsletter<BR>
+		<INPUT TYPE="CHECKBOX" NAME="headlines" VALUE="1" > Send me the daily headlines<BR>
 [% IF constants.hc && constants.hc_sw_newuser && user.state.hc %]
         [% IF user.state.hcinvalid %]
                 [% user.state.hcerror %]

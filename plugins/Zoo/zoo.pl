@@ -6,7 +6,7 @@
 
 use strict;
 use Slash 2.003;	# require Slash 2.3.x
-use Slash::Constants qw(:web);
+use Slash::Constants qw(:web :people);
 use Slash::Display;
 use Slash::Utility;
 use Slash::Zoo;
@@ -387,11 +387,11 @@ sub action {
 
 	if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
 		_printHead("mainhead");
-		print getData("over_socialized");
+		print getData("no_go");
 		return;
 	} else {
-		if ($zoo->count($user->{uid}) > $constants->{people_max}) {
-			print getData("over_socialized");
+		if (testSocialized($zoo, $constants, $user) && ($form->{op} ne 'delete' || $form->{op} ne 'neutral')) {
+			print getData("no_go");
 			return 0;
 		}
 		if ( $form->{op} eq 'delete' || $form->{type} eq 'neutral') {
@@ -427,22 +427,18 @@ sub check {
 
 	_printHead("mainhead");
 	if ($form->{uid}) {
-		if ($zoo->count($user->{uid}) > $constants->{people_max}) {
-			print getData("over_socialized");
-			return 0;
-		}
-		
 		if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
 			print getData("no_go");
 			return 0;
 		}
 
-		my $type =  $form->{op} eq 'deletecheck' ? 'neutral' : ($form->{type} eq 'foe' ? 'foe' : 'friend');
+		my $type = $user->{people}{FOE()}{$form->{uid}} ? 'foe': ($user->{people}{FRIEND()}{$form->{uid}}? 'friend' :'neutral');
 		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
 		slashDisplay('confirm', { 
 			uid => $form->{uid},
 			nickname => $nickname,
 			type => $type,
+			over_socialized => testSocialized($zoo, $constants, $user),
 		});
 	} else {
 		print getData("no_uid");
@@ -476,6 +472,17 @@ sub _rss {
 		image	=> 1,
 		items	=> \@items
 	});
+}
+
+sub testSocialized {
+	my ($zoo, $constants, $user) = @_;
+	return 0 
+		if $user->{is_admin};
+	if ($user->{is_subscriber} && $constants->{people_max_subscriber}) {
+		return ($zoo->count($user->{uid}) > $constants->{people_max_subscriber}) ? 1 : 0;
+	} else {
+		return ($zoo->count($user->{uid}) > $constants->{people_max}) ? 1 : 0;
+	}
 }
 
 createEnvironment();

@@ -184,6 +184,16 @@ __template__
 				<TD>	Freak				</TD>
 				<TD>	[% people_select.freak %]		</TD>
 			</TR>
+			<TR>
+				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
+				<TD>	Friends of Friends				</TD>
+				<TD>	[% people_select.fof %]		</TD>
+			</TR>
+			<TR>
+				<TD>	&nbsp; &nbsp; &nbsp;		</TD>
+				<TD>	Foes of Friends				</TD>
+				<TD>	[% people_select.eof %]		</TD>
+			</TR>
 		</TABLE>
 
 		<P><B>Anonymous Modifier</B> (modifier assigned to anonymous posts)<BR>

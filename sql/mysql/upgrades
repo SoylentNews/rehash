@@ -61,6 +61,7 @@ CREATE TABLE users_hits (
        hits int DEFAULT '0' NOT NULL,
        PRIMARY KEY (uid)
 ) TYPE = myisam;
+INSERT into users_hits (uid) select uid from users;
 
 ALTER TABLE users_index CHANGE COLUMN exsect exsect varchar(255);
 
@@ -692,4 +693,4 @@ INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES
 
 # Set to email address(es) appropriate for your site, of course.
 INSERT INTO vars (name, value, description) VALUES ('adminmail_mod','admin@example.com','All admin mail about moderation goes here');
-
+INSERT INTO vars (name,value,description) VALUES ('people_max_subscriber','400','Maximum number of friends/foes you can have');
