@@ -1287,9 +1287,9 @@ sub saveStory {
 	my $rootdir = getCurrentStatic('rootdir');
 
 	# In the previous form of this, a section only
-  # editor could assign a story to a different user
-  # and bypass their own restrictions for what section
-  # they could post to. -Brian
+	# editor could assign a story to a different user
+	# and bypass their own restrictions for what section
+	# they could post to. -Brian
 	$form->{displaystatus} ||= 1 if ($user->{section} || $edituser->{section});
 	if ($user->{section} || $edituser->{section}) {
 		$form->{section} = $user->{section} ? $user->{section} : $edituser->{section};

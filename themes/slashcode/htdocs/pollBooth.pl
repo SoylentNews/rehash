@@ -82,7 +82,7 @@ sub editpoll {
 
 	my $currentqid = $slashdb->getVar('currentqid', 'value')
 		if $qid;
-	my ($question, $answers, $pollbooth);
+	my($question, $answers, $pollbooth);
 	if ($qid) {
 		$question = $slashdb->getPollQuestion($qid, ['question', 'voters', 'sid']);
 		$answers = $slashdb->getPollAnswers($qid, ['answer', 'votes', 'aid']);

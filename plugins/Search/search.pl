@@ -42,7 +42,7 @@ sub main {
 	# Set some defaults
 	$form->{query}		||= '';
 	$form->{section}	||= '';
-	$form->{sort}	||= 1;
+	$form->{'sort'}		||= 1;
 	$form->{section}	= '' if $form->{section} eq 'index'; # XXX fix this right, do a {realsection}
 	$form->{threshold}	||= getCurrentUser('threshold');
 
@@ -378,7 +378,7 @@ sub userSearchRSS {
 	for my $entry (@$users) {
 		my $time = timeCalc($entry->[3]);
 		push @items, {
-			title	=> "$entry->[1]",
+			title	=> $entry->[1],
 			'link'	=> ($constants->{absolutedir} . '/users.pl?nick=' . $entry->[1]),
 		};
 	}
