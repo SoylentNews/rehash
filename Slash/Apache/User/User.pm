@@ -622,6 +622,7 @@ Bender:Try this, kids at home!
 Bender:I've gone too far! Who does that guy think I am?
 Bender:Down with Bender!
 Bender:Listen up, cause I got a climactic speech.
+Bender:I choose to not understand these signs!
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
