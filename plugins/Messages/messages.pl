@@ -36,6 +36,9 @@ sub main {
 		delete_message	=> [ $user_ok,		\&delete_message	],
 		deletemsgs	=> [ $user_ok,		\&delete_messages	],
 
+# 		send_message	=> [ $user_ok,		\&send_message		],
+# 		edit_message	=> [ !$user->{is_anon},	\&edit_message		],
+
 		# ????
 		default		=> [ 1,			\&list_messages		]
 	);
@@ -52,16 +55,151 @@ sub main {
 	# writeLog('SOME DATA');	# if appropriate
 }
 
+sub edit_message {
+	my($messages, $constants, $user, $form, $error_message) = @_;
+
+	my $template = <<EOT;
+[% IF preview %]
+	[% PROCESS titlebar width="95%" title="Preview Message" %]
+	[% preview %]
+	<P>
+[% END %]
+	[% PROCESS titlebar width="95%" title="Send Message" %]
+
+<!-- error message -->
+[% IF error_message %][% error_message %][% END %]
+<!-- end error message -->
+
+<FORM ACTION="[% constants.rootdir %]/messages.pl" METHOD="POST">
+	<INPUT TYPE="HIDDEN" NAME="op" VALUE="send_message">
+[% IF form.formkey %]
+	<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+	<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1">
+	<TR><TD ALIGN="RIGHT">User: </TD>
+		<TD><INPUT TYPE="text" NAME="to_user" VALUE="[% form.to_user | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
+	</TR>
+	<TR><TD ALIGN="RIGHT">Subject: </TD>
+		<TD><INPUT TYPE="text" NAME="postersubj" VALUE="[% form.postersubj | strip_attribute %]" SIZE=50 MAXLENGTH=50></TD>
+	</TR>
+	<TR>
+		<TD ALIGN="RIGHT" VALIGN="TOP">Comment</TD>
+		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</TEXTAREA>
+		<BR>(Use the Preview Button! Check those URLs!
+		Don't forget the http://!)
+	</TD></TR>
+
+	<TR><TD> </TD><TD>
+
+		<INPUT TYPE="SUBMIT" NAME="which" VALUE="Submit">
+		<INPUT TYPE="SUBMIT" NAME="which" VALUE="Preview">
+	</TD></TR><TR>
+		<TD VALIGN="TOP" ALIGN="RIGHT">Allowed HTML: </TD><TD><FONT SIZE="1">
+			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+		</FONT>
+	</TD></TR>
+</TABLE>
+
+</FORM>
+
+<B>Important Stuff:</B>
+	<LI>Please try to keep posts on topic.
+	<LI>Try to reply to other people comments instead of starting new threads.
+	<LI>Read other people's messages before posting your own to avoid simply duplicating
+		what has already been said.
+	<LI>Use a clear subject that describes what your message is about.
+	<LI>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be
+		moderated. (You can read everything, even moderated posts, by adjusting your
+		threshold on the User Preferences Page)
+
+<P><FONT SIZE="2">Problems regarding accounts or comment posting should be sent to
+	<A HREF="mailto:[% constants.adminmail %]">[% constants.siteadmin_name %]</A>.</FONT>
+
+
+EOT
+
+	header(getData('header'));
+	# print edit screen
+	slashDisplay(\$template, {error_message => $error_message});
+	footer();
+}
+
+sub send_message {
+	my($messages, $constants, $user, $form) = @_;
+	my $slashdb = getCurrentDB();
+
+
+	# edit_message if errors
+	if ($form->{which} eq 'Preview') {
+		edit_message(@_);
+	}
+
+	# check for user
+	my $to_uid = $slashdb->getUserUID($form->{to_user});
+	if (!$to_uid) {
+		edit_message(@_, "UID for $form->{to_user} not found");
+	}
+	my $to_user = $slashdb->getUser($to_uid);
+	if (!$to_user) {  # should never happen
+		edit_message(@_, "$form->{to_user} ($to_uid) not found");
+	}
+
+	# check for user availability
+	my $users = $messages->checkMessageCodes(MSG_CODE_INTERUSER, [$to_uid]);
+	my $ium = $user->{messages_interuser_receive};
+	if ($users->[0] != $to_uid || !$ium) {
+		edit_message(@_, "$form->{to_user} ($to_uid) is not accepting interuser messages");
+	}
+
+	if ($ium != MSG_IUM_ANYONE) {
+		my $zoo = getObject('Slash::Zoo');
+		if ($ium == MSG_IUM_FRIENDS && !$zoo->isFriend($user->{uid}, $to_uid)) {
+			edit_message(@_, "$form->{to_user} ($to_uid) only accepts messages from friends");
+		} elsif ($ium == MSG_IUM_NOFOES && $zoo->isFoe($user->{uid}, $to_uid)) {
+			edit_message(@_, "$form->{to_user} ($to_uid) does not accept messages from foes");
+		}
+	}
+
+	$messages->create($to_uid, MSG_CODE_INTERUSER, {
+		template_name	=> 'interuser',
+		subject		=> {
+			template_name	=> 'interuser_subj',
+			subject		=> $form->{postersubj},
+		},
+		comment		=> {
+			subject		=> $form->{postersubj},
+			comment		=> $form->{postercomment},
+		},
+	}, $user->{uid});
+
+
+	header();
+	footer();	
+
+	# print success screen
+}
+
+
+
 sub display_prefs {
 	my($messages, $constants, $user, $form, $note) = @_;
+	my $slashdb = getCurrentDB();
 
 	my $deliverymodes = $messages->getDescriptions('deliverymodes');
 	my $messagecodes  = $messages->getDescriptions('messagecodes');
 
-	my $prefs = $messages->getPrefs($user->{uid});
+	my $uid = $user->{uid};
+	if ($user->{seclev} >= 1000 && $form->{uid}) {
+		$uid = $form->{uid};
+	}
+
+	my $prefs = $messages->getPrefs($uid);
+	my $userm = $slashdb->getUser($uid);
 
 	header(getData('header'));
 	slashDisplay('display_prefs', {
+		userm		=> $userm,
 		prefs		=> $prefs,
 		note		=> $note,
 		messagecodes	=> $messagecodes,
@@ -72,8 +210,13 @@ sub display_prefs {
 
 sub save_prefs {
 	my($messages, $constants, $user, $form) = @_;
+	my $slashdb = getCurrentDB();
 
 	my(%params, %prefs);
+	my $uid = $user->{uid};
+	if ($user->{seclev} >= 1000 && $form->{uid}) {
+		$uid = $form->{uid};
+	}
 
 	my $messagecodes = $messages->getDescriptions('messagecodes');
 	for my $code (keys %$messagecodes) {
@@ -84,13 +227,12 @@ sub save_prefs {
 			$params{$code} = fixint($form->{"deliverymodes_$code"});
 		}
 	}
-	$messages->setPrefs($user->{uid}, \%params);
+	$messages->setPrefs($uid, \%params);
 
-	for (qw(message_threshold)) {
-		$prefs{$_} = $user->{$_} = $form->{$_};
+	for (qw(message_threshold messages_interuser_receive)) {
+		$prefs{$_} = $form->{$_};
 	}
-	my $slashdb = getCurrentDB();
-	$slashdb->setUser($user->{uid}, \%prefs);
+	$slashdb->setUser($uid, \%prefs);
 
 	display_prefs(@_, getData('prefs saved'));
 }

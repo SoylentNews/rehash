@@ -13,13 +13,19 @@ en_US
 __name__
 display_prefs
 __template__
-[% messages = Slash.getObject("Slash::Messages") %]
-[% Slash.createMenu("users") %]
-[% Slash.createMenu("messages") %]
-[% PROCESS titlebar title => "Message Preferences", width => "100%" %]
-[% modenone = Slash.MSG_MODE_NONE %]
-[% modemail = Slash.MSG_MODE_EMAIL %]
-[% modeweb  = Slash.MSG_MODE_WEB %]
+[% messages = Slash.getObject("Slash::Messages");
+
+   Slash.createMenu("users");
+   Slash.createMenu("messages");
+
+   userm = userm ? userm : user;
+   usernick = userm.nickname | strip_literal;
+   PROCESS titlebar title => "Message Preferences for $usernick", width => "100%";
+
+   modenone = Slash.MSG_MODE_NONE;
+   modemail = Slash.MSG_MODE_EMAIL;
+   modeweb  = Slash.MSG_MODE_WEB;
+%]
 
 <P><B>[% note %]</B></P>
 
@@ -46,7 +52,7 @@ Not all options are available for all message types.
 
       # this is not so bad, it is cached, but could be improved perhaps
       mcode = messages.getMessageCode(code);
-      IF user.seclev < mcode.seclev;
+      IF userm.seclev < mcode.seclev;
          NEXT;
       END;
       IF mcode.modes.length;
@@ -73,21 +79,51 @@ to journal entries, replies to comments) are sent to you.
 </P>
 
 <P>[%
-thresh = user.message_threshold.defined ? user.message_threshold : constants.message_threshold;
+thresh = userm.message_threshold.defined ? userm.message_threshold : constants.message_threshold;
 Slash.createSelect('message_threshold',
 	Slash.db.getDescriptions('threshcodes'), thresh, 1)
 %]</P>
 
 </TD></TR>
 
+
+<!--
+[[TR]][[TD]]
+
+[[P]]
+If you have [[B]][%# messagecodes.${Slash.MSG_CODE_INTERUSER} %][[/B]] enabled,
+you can receive messages from other users.  Please select whom you would
+like to be able to receive messages from.  To not receive any interuser
+messages, disable it above.
+[[/P]]
+
+[[/TD]][[/TR]]
+
+	[%# default_ium = user.messages_interuser_receive || Slash.MSG_IUM_FRIENDS %]
+
+	[[TR]][[TD]][[TABLE ALIGN="LEFT" BGCOLOR="[%# user.bg.2 %]"]]
+[[TR]]
+	[[TD]][[B]]Only Your Friends[[/B]][[/TD]]
+	[[TD]][[INPUT TYPE="radio" NAME="messages_interuser_receive" VALUE="[%# Slash.MSG_IUM_FRIENDS %]"[%# default_ium == Slash.MSG_IUM_FRIENDS ? 'CHECKED' : '' %]]][[/TD]]
+[[/TR]]
+[[TR]]
+	[[TD]][[B]]Anyone[[/B]][[/TD]]
+	[[TD]][[INPUT TYPE="radio" NAME="messages_interuser_receive" VALUE="[%# Slash.MSG_IUM_ANYONE %]"[%# default_ium == Slash.MSG_IUM_ANYONE ? 'CHECKED' : '' %]]][[/TD]]
+[[/TR]]
+[[TR]]
+	[[TD]][[B]]Anyone except for foes[[/B]][[/TD]]
+	[[TD]][[INPUT TYPE="radio" NAME="messages_interuser_receive" VALUE="[%# Slash.MSG_IUM_NOFOES %]"[%# default_ium == Slash.MSG_IUM_NOFOES ? 'CHECKED' : '' %]]][[/TD]]
+[[/TR]]
+	[[/TABLE]][[/TD]][[/TR]]
+-->
+
 <TR>
-	<TD>&nbsp;</TD>
 	<TD>
+	<INPUT TYPE="hidden" NAME="uid" VALUE="[% userm.uid %]">
 	<INPUT TYPE="hidden" NAME="op" VALUE="save_prefs">
 	<INPUT TYPE="submit" VALUE="Save Prefs">
 	</TD>
 </TR>
-	</TABLE></TD></TR>
 
 </TABLE>
 
