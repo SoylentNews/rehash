@@ -228,6 +228,7 @@ CREATE TABLE metamodlog (
   val int(11) DEFAULT '0' NOT NULL,
   ts datetime,
   id int(11) DEFAULT '0' NOT NULL auto_increment,
+  flag int(11) NOT NULL,
   PRIMARY KEY (id)
 );
 
@@ -242,6 +243,7 @@ CREATE TABLE moderatorlog (
   ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
   cid int(1) DEFAULT '0' NOT NULL,
   reason int(11) DEFAULT '0',
+  active int(1) DEFAULT '1' NOT NULL,
   PRIMARY KEY (id),
   KEY sid (sid,cid),
   KEY sid_2 (sid,uid,cid)
@@ -548,6 +550,10 @@ CREATE TABLE users_info (
   lastmm date DEFAULT '0000-00-00' NOT NULL,
   lastaccess date DEFAULT '0000-00-00' NOT NULL,
   lastmmid int(11) DEFAULT '0' NOT NULL,
+  m2fair int(11) DEFAULT '0' NOT NULL,
+  m2unfair int(11) DEFAULT '0' NOT NULL,
+  m2fairvotes int(11) DEFAULT '0' NOT NULL,
+  m2unfairvotes int(11) DEFAULT '0' NOT NULL,
   PRIMARY KEY (uid)
 );
 
