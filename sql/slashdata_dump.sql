@@ -216,8 +216,8 @@ INSERT INTO content_filters VALUES (30,'\\\'','gi','postersubj',0.2000,0,10,'Asc
 INSERT INTO content_filters VALUES (31,'\\\'','gi','postercomment',0.2000,0,10,'Ascii Art. How creative. Not here though.',0);
 INSERT INTO content_filters VALUES (32,'\\\"','gi','postercomment',0.2000,0,10,'Ascii Art. How creative. Not here though.',0);
 INSERT INTO content_filters VALUES (33,'\\\"','gi','postersubj',0.2000,0,10,'Ascii Art. How creative. Not here though.',0);
-INSERT INTO content_filters VALUES (34,'\\.','gi','postersubj',0.4000,0,10,'Ascii Art. How creative. Not here though.',0);
-INSERT INTO content_filters VALUES (35,'\\.','gi','postercomment',0.4000,0,10,'Ascii Art. How creative. Not here though.',0);
+INSERT INTO content_filters VALUES (34,'\\.','gi','postersubj',0.7000,0,10,'Ascii Art. How creative. Not here though.',0);
+INSERT INTO content_filters VALUES (35,'\\.','gi','postercomment',0.5000,0,10,'Ascii Art. How creative. Not here though.',0);
 INSERT INTO content_filters VALUES (36,'\\=','gi','postercomment',0.2000,0,10,'Ascii Art. How creative. Not here though.',0);
 INSERT INTO content_filters VALUES (37,'\\=','gi','postersubj',0.2000,0,10,'Ascii Art. How creative. Not here though.',0);
 INSERT INTO content_filters VALUES (38,'\\{','gi','postersubj',0.2000,0,10,'Ascii Art. How creative. Not here though.',0);
