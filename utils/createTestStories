@@ -101,6 +101,7 @@ $constants = getCurrentStatic();
 			submitter	=> $submitter,
 			introtext	=> $introtext,
 			bodytext	=> $bodytext,
+			rendered	=> undef,
 		};
 
 # This logic is not quite right -Brian
