@@ -27,7 +27,7 @@ sub main {
 	my $gSkin     = getCurrentSkin();
 	my $schedule  = getObject('Slash::ScheduleShifts');
 
-	my $admin  = $user->{seclev} >= 10000;
+	my $admin  = $user->{seclev} >= 500;
 	my $shifts = $user->{seclev} >= 100 || $user->{acl}{shifts};
 
 	my %ops = (
