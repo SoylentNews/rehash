@@ -216,7 +216,14 @@ sub parse_slash_sites {
 	}
 	($orig_euid, $orig_egid) = ( $>, $) );
 	$orig_egid =~ /^(\d+)/; $orig_egid = $1;
-	if ( $uid != $orig_euid or $gid != $orig_egid ) {
+
+	# Mac OS X likes to have signed UIDs, so e.g. user
+	# nobody will get UID 4294967294 from the system,
+	# but $> will be -2.  fun fun fun!  but getpwuid(-2)
+	# will give us 4294967294, so let's get it that way. -- pudge
+	my($c_name, $c_pass, $c_uid, $c_gid) = getpwuid($uid);
+	if ( $uid != $c_uid || $gid != $c_gid ) {
+#	if ( $uid != $orig_euid or $gid != $orig_egid ) {
 		die "can't set uid/gid to $uid/$gid ($>/$))";
 	}
 	# If we made it this far, everything's cool
