@@ -18,42 +18,59 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'tablebegin' %]
+	[% returnme.data_constant=1; %] 
 	<TABLE>
 [% CASE 'tableend' %]
+	[% returnme.data_constant=1; %] 
 	</TABLE>
 [% CASE 'cagebegin' %]
+	[% returnme.data_constant=1; %] 
 	<TR><TD>
 [% CASE 'cageend' %]
+	[% returnme.data_constant=1; %] 
 	</TD></TR>
 [% CASE 'commentbegin' %]
+	[% returnme.data_constant=1; %] 
 	<LI>
 [% CASE 'commentend' %]
+	[% returnme.data_constant=1; %] 
 	</LI>
 [% CASE 'indentbegin' %]
+	[% returnme.data_constant=1; %] 
 	<UL>
 [% CASE 'indentend' %]
+	[% returnme.data_constant=1; %] 
 	</UL>
 [% CASE 'cagebigbegin' %]
 	<TR><TD BGCOLOR="[% user.bg.2 %]">
 [% CASE 'cagebigend' %]
+	[% returnme.data_constant=1; %] 
 	</TD></TR>
 [% CASE 'displayThreadLink' %]
 	[% foo = hidden == 1 ? 'y' : 'ies'; hidden %] repl[% foo %]
 [% CASE 'atonish' %]
+	[% returnme.data_constant=1; %] 
 	around
 [% CASE 'aton' %]
+	[% returnme.data_constant=1; %] 
 	on
 [% CASE 'hour' %]
+	[% returnme.data_constant=1; %] 
 	hour
 [% CASE 'hours' %]
+	[% returnme.data_constant=1; %] 
 	hours
 [% CASE 'minute' %]
+	[% returnme.data_constant=1; %] 
 	minute
 [% CASE 'minutes' %]
+	[% returnme.data_constant=1; %] 
 	minutes
 [% CASE 'second' %]
+	[% returnme.data_constant=1; %] 
 	second
 [% CASE 'seconds' %]
+	[% returnme.data_constant=1; %] 
 	seconds
 
 [% CASE 'SLASH-UNKNOWN-TAG' %]

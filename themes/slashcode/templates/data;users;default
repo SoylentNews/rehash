@@ -18,9 +18,11 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'no_user' %]
+	[% returnme.data_constant=1; %]
 	The user you requested does not exist, no matter how much you wish this might be the case.
 
 [% CASE 'all_sections' %]
+	[% returnme.data_constant=1; %]
 	All Sections
 
 [% END %]
