@@ -348,9 +348,9 @@ function [% name %]_show(type) {
 			mybutton.alt = "close";
 			mybutton.title = "Close Topics Window";
 			if (type) {
-				mybutton.onclick = new Function ('[% name %]_close("' + type + '")');
+				mybutton.onmouseup = new Function ('[% name %]_close("' + type + '")');
 			} else {
-				mybutton.onclick = function () { [% name %]_close() };
+				mybutton.onmouseup = function () { [% name %]_close() };
 			}
 		}
 	}
@@ -428,9 +428,9 @@ function [% name %]_close(type) {
 			mybutton.alt = "open";
 			mybutton.title = "Open Topics Window";
 			if (type) {
-				mybutton.onclick = new Function ('[% name %]_show("' + type + '")');
+				mybutton.onmouseup = new Function ('[% name %]_show("' + type + '")');
 			} else {
-				mybutton.onclick = function () { [% name %]_show() };
+				mybutton.onmouseup = function () { [% name %]_show() };
 			}
 		}
 	}
