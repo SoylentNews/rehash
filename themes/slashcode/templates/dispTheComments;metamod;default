@@ -57,7 +57,9 @@ to do this unless you need more context to fairly meta moderate.<BR><BR></LI>
 [% FOR C = comments %]
 [%
 	Slash.dispComment(C);
-	context_url="$constants.rootdir/comments.pl?sid=$C.sid&amp;cid=$C.pid&amp;threshold=-1&amp;mode=nested"
+	context_url="$constants.rootdir/comments.pl?sid=$C.sid&amp;cid="
+		_ (C.pid || C.cid)
+		_ "&amp;threshold=-1&amp;mode=nested"
 %]
 	<TR><TD>
 		Original Discussion: <B><A HREF="[% C.url %]">[% C.title %]</A></B><BR>
