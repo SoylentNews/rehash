@@ -14,7 +14,7 @@ use vars qw( %task $me );
 # GMT if you installed everything correctly.  So 6:07 AM GMT is a good
 # sort of midnightish time for the Western Hemisphere.  Adjust for
 # your audience and admins.
-$task{$me}{timespec} = '50 6 * * *';
+$task{$me}{timespec} = '50 4 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
 $task{$me}{resource_locks} = { log_slave => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -50,7 +50,8 @@ $task{$me}{code} = sub {
 
 	my $stats = getObject('Slash::Stats', { db_type => 'reader' });
 	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
-
+	
+	
 	# 1.5 hours
 	my $logdb = getObject('Slash::Stats', {
 		db_type	=> 'log_slave',
@@ -58,7 +59,9 @@ $task{$me}{code} = sub {
 	}, {
 		day		=> $yesterday,
 		create		=> $create,
+		other_no_op	=> [@PAGES]
 	});
+
 
 	unless ($logdb) {
 		slashdLog('No database to run adminmail against');
@@ -171,7 +174,6 @@ EOT
 	# 0.25 hours
 	slashdLog("row counting Begin");
 	my $comments = $stats->countCommentsDaily();
-	my $accesslog_rows = $logdb->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
 	slashdLog("row counting End");
 
@@ -323,33 +325,36 @@ EOT
 		no_op   => $constants->{op_exclude_from_countdaily},
 	});
 
-	my $unique_users = $logdb->countUsersByPage();
-	my $unique_ips = $logdb->countDailyByPageDistinctIPID();
-	my $anon_ips = $logdb->countDailyByPageDistinctIPID("", { user_type => 'anonymous'});
-	my $logged_in_ips = $logdb->countDailyByPageDistinctIPID("", { user_type => 'logged-in'});
+	my $unique_users = $logdb->countUsersMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)]});
+	
+	my $unique_ips   = $logdb->countDistinctIPIDMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)]});   
+	
+	my $anon_ips =  $logdb->countDistinctIPIDMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)], user_type => "anonymous"});
+	my $logged_in_ips = $logdb->countDistinctIPIDMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)], user_type => 'logged-in' });
 
 	my $grand_total = $logdb->countDailyByPage('');
+	$grand_total   += $logdb->countDailyByPage('', { table_suffix => "_rss"});
 	$data{grand_total} =  sprintf("%8u", $grand_total);
 	my $grand_total_static = $logdb->countDailyByPage('',{ static => 'yes' } );
+	$grand_total_static   += $logdb->countDailyByPage('',{ static => 'yes', table_suffix => "_rss" } );
 	$data{grand_total_static} = sprintf("%8u", $grand_total_static);
 	my $total_static = $logdb->countDailyByPage('', {
 		static => 'yes',
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 	$data{total_static} = sprintf("%8u", $total_static);
-	my $recent_subscribers = $stats->getRecentSubscribers();
-	my $recent_subscriber_uidlist = "";
-	$recent_subscriber_uidlist = join(", ", @$recent_subscribers)
-		if $recent_subscribers && @$recent_subscribers;
-	my $total_subscriber = $logdb->countDailySubscribers($recent_subscribers);
+	my $total_subscriber = $logdb->countDailySubscribers();
 	my $unique_users_subscriber = 0;
 	$unique_users_subscriber = $logdb->countUsersByPage('', {
-		extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
-	}) if $recent_subscriber_uidlist;
+		table_suffix => "_subscriber"
+	});
 	my $total_secure = $logdb->countDailySecure();
 
 	for my $op (@PAGES) {
-		my $summary = $logdb->getSummaryStats({ op => $op });
+		my $summary;
+		my $options = { op => $op };
+		$options->{table_suffix} = "_rss" if $op eq "rss";
+		$summary = $logdb->getSummaryStats($options);
 		my $uniq  = $summary->{cnt};
 		my $pages = $summary->{pages};
 		my $bytes = $summary->{bytes};
@@ -373,7 +378,7 @@ EOT
 	}
 	#Other not recorded
 	{
-		my $options = { no_op => \@PAGES};
+		my $options = { table_suffix => "_other"};
 		my $uniq = $logdb->countDailyByPageDistinctIPID('', $options);
 		my $pages = $logdb->countDailyByPage('', $options);
 		my $bytes = $logdb->countBytesByPage('', $options);
@@ -416,7 +421,7 @@ EOT
 	
 	slashdLog("Other Section Summary Stats Begin");
 	my $other_section_summary_stats = $logdb->getSectionSummaryStats({
-			no_op		=> [@PAGES]
+		table_suffix => "_other" 
 	});
 	slashdLog("Other Section Summary Stats End");
 	
@@ -432,8 +437,8 @@ EOT
 		my $users_subscriber = 0;
 		$users_subscriber = $logdb->countUsersByPage('', {
 			skid			=> $skid,
-			extra_where_clause	=> "uid IN ($recent_subscriber_uidlist)"
-		}) if $recent_subscriber_uidlist;
+			table_suffix		=> "_subscriber"
+		});
 		$temp->{ipids} = sprintf("%8u", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{pages} = sprintf("%8u", $pages);
@@ -451,7 +456,10 @@ EOT
 		}
 
 		for my $op (@PAGES) {
-			my $summary = $logdb->getSummaryStats({ skid => $skid, op => $op });
+			my $summary;
+			my $options = { skid => $skid, op => $op };
+			$options->{table_suffix} = "_rss" if $op eq "rss";
+			$summary = $logdb->getSummaryStats($options);
 			my $uniq  = $summary->{cnt}	|| 0;
 			my $pages = $summary->{pages}	|| 0;
 			my $bytes = $summary->{bytes}	|| 0;
@@ -532,6 +540,7 @@ EOT
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 	my $grand_total_bytes = $logdb->countBytesByPage('');
+	$grand_total_bytes   += $logdb->countBytesByPage('', { table_suffix => "_rss" });
 	slashdLog("Byte Counts End");
 
 	slashdLog("Mod Info Begin");
@@ -693,7 +702,6 @@ EOT
 	$data{total_secure} = sprintf("%8u", $total_secure);
 	$data{unique} = sprintf("%8u", $unique_ips), 
 	$data{users} = sprintf("%8u", $unique_users);
-	$data{accesslog} = sprintf("%8u", $accesslog_rows);
 	$data{formkeys} = sprintf("%8u", $formkeys_rows);
 	$data{error_count} = sprintf("%8u", $data{error_count});
 	$data{not_found} = sprintf("%8u", $data{not_found});

@@ -64,7 +64,6 @@ gstatic total:        -          -   [% grand_total_static %]
 [% END -%]
 [% END %]
 
-    accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
      comments: [% comments %] posted yesterday
   submissions: [% submissions %] submissions 

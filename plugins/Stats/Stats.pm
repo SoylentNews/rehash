@@ -29,6 +29,7 @@ sub new {
 	my $self = {};
 
 	my $plugin = getCurrentStatic('plugin');
+	my $constants = getCurrentStatic();
 	return unless $plugin->{'Stats'};
 
 	bless($self, $class);
@@ -44,6 +45,9 @@ sub new {
 	($self->{_ts} = $self->{_day}) =~ s/-//g;
 	$self->{_ts_between_clause}  = " BETWEEN '$self->{_ts}000000' AND '$self->{_ts}235959' ";
 
+	my @today_lt = localtime(time);
+	my $today = sprintf("%4d-%02d-%02d", $today_lt[5] + 1900, $today_lt[4] + 1, $today_lt[3]);
+	
 	my $count = 0;
 	if ($options->{create}) {
 
@@ -54,6 +58,14 @@ sub new {
 		# First, drop them (if they exist).
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_errors");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_subscriber");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_other");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_rss");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_host_addr");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_host_uid");
+
+		$self->sqlDo("CREATE TABLE accesslog_build_unique_host_addr ( host_addr char(32) UNIQUE NOT NULL, PRIMARY KEY (host_addr)) TYPE = InnoDB");
+		$self->sqlDo("CREATE TABLE accesslog_build_unique_uid ( uid MEDIUMINT UNSIGNED NOT NULL, PRIMARY KEY (uid)) TYPE = InnoDB");
 
 		# Then, get the schema in its CREATE TABLE statement format.
 		my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
@@ -67,23 +79,63 @@ sub new {
 		$self->sqlDo($create_sql);
 		$create_sql =~ s/accesslog_temp/accesslog_temp_errors/;
 		$self->sqlDo($create_sql);
+		$create_sql =~ s/accesslog_temp_errors/accesslog_temp_other/;
+		$self->sqlDo($create_sql);
+		$create_sql =~ s/accesslog_temp_other/accesslog_temp_subscriber/;
+		$self->sqlDo($create_sql);
+		$create_sql =~ s/accesslog_temp_subscriber/accesslog_temp_rss/;
+		$self->sqlDo($create_sql);
 
 		# Add in the indexes we need.
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid (uid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX skid_op (skid,op)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_uid_skid (op, uid, skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX referer (referer(4))");
 		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX status_op_skid (status, op, skid)");
-		# It might be worth adding an index on referer(4) too.  We use it
-		# only twice, though.  Probably take more time to index than we'd
-		# save in the queries.
-
+		$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX skid (skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_other ADD INDEX skid (skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_rss ADD INDEX skid (skid)");
+	
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp",
-			"ts $self->{_day_between_clause} AND status  = 200",
+			"accesslog",
+			"ts $self->{_day_between_clause} AND status  = 200 AND op != 'rss'",
+			3, 60);
+		return undef unless $self->_do_insert_select(
+			"accesslog_temp_rss",
+			"accesslog",
+			"ts $self->{_day_between_clause} AND status  = 200 AND op = 'rss'",
 			3, 60);
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_errors",
+			"accesslog",
 			"ts $self->{_day_between_clause} AND status != 200",
+			3, 60);
+	
+		my $recent_subscribers = $self->getRecentSubscribers();
+		if ($recent_subscribers && @$recent_subscribers) {
+			my $recent_subscriber_uidlist = join(", ", @$recent_subscribers);
+		
+			return undef unless $self->_do_insert_select(
+				"accesslog_temp_subscriber",
+				"accesslog_temp",
+				"uid IN ($recent_subscriber_uidlist)",
+				3, 60);
+		}
+		my @PAGES;
+		if ($options->{other_no_op}) {
+			@PAGES = @{$options->{other_no_op}};
+		} else {
+			@PAGES = qw|index article search comments palm journal rss page users|;
+			@PAGES, @{$constants->{op_extras_countdaily}};
+		}
+
+		
+		my $page_list = join ',', map {$self->sqlQuote($_)} @PAGES;
+		return undef unless $self->_do_insert_select(
+			"accesslog_temp_other",
+			"accesslog_temp",
+			"op NOT in($page_list)",
 			3, 60);
 	}
 
@@ -934,7 +986,9 @@ sub getSummaryStats {
 	push @where, "skid = ".$self->sqlQuote($options->{skid}) if $options->{skid};
 
 	my $where = join ' AND ', @where;
-	$self->sqlSelectHashref("COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) as uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp", $where);
+	my $table_suffix = $options->{table_suffix};
+	
+	$self->sqlSelectHashref("COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) as uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp$table_suffix", $where);
 }
 
 
@@ -950,9 +1004,11 @@ sub getSectionSummaryStats {
 		my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
 		push @where,  "op NOT IN ($op_not_in)";
 	}
+
+	my $table_suffix = $options->{table_suffix};
 	
 	my $where_clause = join ' AND ', @where;
-	$self->sqlSelectAllHashref("skid", "skid, COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) AS uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp", $where_clause, "GROUP BY skid");
+	$self->sqlSelectAllHashref("skid", "skid, COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) AS uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp$table_suffix", $where_clause, "GROUP BY skid");
 }
 
 ########################################################
@@ -992,8 +1048,10 @@ sub countBytesByPage {
 		my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
+	
+	my $table_suffix = $options->{table_suffix};
 
-	$self->sqlSelect("SUM(bytes)", "accesslog_temp", $where);
+	$self->sqlSelect("SUM(bytes)", "accesslog_temp$table_suffix", $where);
 }
 
 ########################################################
@@ -1002,6 +1060,34 @@ sub countBytesByPages {
 	$self->sqlSelectAllHashref("op","op, SUM(bytes) as bytes", "accesslog_temp", '', "GROUP BY op");
 }
 
+########################################################
+sub countUsersMultiTable {
+	my ($self, $options) = @_;
+	$self->sqlDo("DELETE FROM accesslog_build_unique_uid");
+	my $tables = $options->{tables} || [];
+
+	foreach my $table (@$tables) {
+		$self->sqlDo("INSERT IGNORE INTO accesslog_build_unique_uid SELECT DISTINCT uid FROM $table");
+	}
+	$self->sqlCount("accesslog_build_unique_uid");
+}
+########################################################
+sub countDistinctIPIDMultiTable {
+	my ($self, $options) = @_;
+	my $constants = getCurrentStatic;
+	my $tables = $options->{tables} || [];
+
+	my $where;
+	$where = "WHERE uid = $constants->{anonymous_coward_uid} " if $options->{user_type} eq "anonymous";
+	$where = "WHERE  uid != $constants->{anonymous_coward_uid} " if $options->{user_type} eq "logged-in";
+
+	$self->sqlDo("DELETE FROM accesslog_build_unique_host_addr");
+
+	foreach my $table (@$tables) {
+		$self->sqlDo("INSERT IGNORE INTO accesslog_build_unique_host_addr SELECT DISTINCT host_addr FROM $table $where");
+	}
+	$self->sqlCount("accesslog_build_unique_host_addr");
+}
 ########################################################
 sub countUsersByPage {
 	my($self, $op, $options) = @_;
@@ -1018,9 +1104,10 @@ sub countUsersByPage {
 		my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
+	my $table_suffix = $options->{table_suffix};
 		
 
-	$self->sqlSelect("COUNT(DISTINCT uid)", "accesslog_temp", $where);
+	$self->sqlSelect("COUNT(DISTINCT uid)", "accesslog_temp$table_suffix", $where);
 }
 
 ########################################################
@@ -1054,7 +1141,9 @@ sub countDailyByPage {
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
 
-	$self->sqlSelect("count(*)", "accesslog_temp", $where);
+	my $table_suffix = $options->{table_suffix};
+
+	$self->sqlSelect("count(*)", "accesslog_temp$table_suffix", $where);
 }
 
 ########################################################
@@ -1096,8 +1185,9 @@ sub countDailyByPageDistinctIPID {
 		my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
+	my $table_suffix = $options->{table_suffix};
 	
-	$self->sqlSelect("COUNT(DISTINCT host_addr)", "accesslog_temp", $where);
+	$self->sqlSelect("COUNT(DISTINCT host_addr)", "accesslog_temp$table_suffix", $where);
 }
 
 ########################################################
@@ -1156,10 +1246,10 @@ sub getRecentSubscribers {
 
 ########################################################
 sub countDailySubscribers {
-	my($self, $subscribers) = @_;
-	return 0 unless $subscribers && @$subscribers;
-	my $uid_list = join(", ", @$subscribers);
-	my $count = $self->sqlCount("accesslog_temp", "uid IN ($uid_list)");
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	return 0 unless $constants->{subscribe};
+	my $count = $self->sqlCount("accesslog_temp_subscriber");
 	return $count;
 }
 
@@ -1443,14 +1533,31 @@ sub getTailslash {
                 "accesslog_temp",
                 "",
                 "GROUP BY hour ORDER BY hour ASC");
+		
+       
+	my $rss_ar = $self->sqlSelectAllHashrefArray(
+		"HOUR(ts) AS hour, COUNT(*) AS c",
+		"accesslog_temp_rss",
+		"",
+		"GROUP BY hour ORDER BY hour ASC");
+
+	my $total = {};
+
+	foreach my $item (@$page_ar) {
+		$total->{$item->{hour}} += $item->{c};		
+	}
+
+	foreach my $item (@$rss_ar) {
+		$total->{$item->{hour}} += $item->{c};		
+	}
 
 	my $max_count = 0;
-	for my $hr (@$page_ar) {
-		$max_count = $hr->{c} if $hr->{c} > $max_count;
+	for my $hr (keys %$total) {
+		$max_count = $total->{$hr} if $total->{$hr} > $max_count;
 	}
-	for my $hr (@$page_ar) {
-		my $hour = $hr->{hour};
-		my $count = $hr->{c};
+	for my $hr (sort {$a <=> $b} keys %$total) {
+		my $hour = $hr;
+		my $count = $total->{$hr};
 		$retval .= sprintf( $sprintf_format,
 			$hour, $count, $count/3600,
 			("#" x (40*$count/$max_count)) );
@@ -1793,13 +1900,13 @@ sub getAllStats {
 
 ########################################################
 sub _do_insert_select {
-	my($self, $table, $where_clause, $retries, $sleep_time) = @_;
+	my($self, $to_table, $from_table, $where_clause, $retries, $sleep_time) = @_;
 	my $try_num = 0;
 	my $rows = 0;
 	I_S_LOOP: while (!$rows) {
 
-		my $sql = "INSERT INTO $table"
-			. " SELECT * FROM accesslog WHERE $where_clause FOR UPDATE";
+		my $sql = "INSERT INTO $to_table"
+			. " SELECT * FROM $from_table WHERE $where_clause FOR UPDATE";
 		$rows = $self->sqlDo($sql);
 		# Apparently this insert can, under some circumstances,
 		# including mismatched lib versions, succeed but return
@@ -1809,9 +1916,9 @@ sub _do_insert_select {
 
 		# This should be a more reliable test, try it too.
 		sleep 1;
-		my $any_rows = $self->sqlSelect("1", $table, $where_clause, "LIMIT 1");
+		my $any_rows = $self->sqlSelect("1", $to_table, $where_clause, "LIMIT 1");
 		if ($any_rows) {
-			print STDERR scalar(localtime) . " INSERT-SELECT $table reported 0 rows inserted, but apparently succeeded with '$any_rows' rows, proceeding\n";
+			print STDERR scalar(localtime) . " INSERT-SELECT $to_table reported 0 rows inserted, but apparently succeeded with '$any_rows' rows, proceeding\n";
 			last I_S_LOOP;
 		}
 
@@ -1819,16 +1926,16 @@ sub _do_insert_select {
 		# a known bug in at least one version of MySQL under some
 		# circumstance.  If appropriate, sleep and try it again.
 		if (++$try_num < $retries) {
-			print STDERR scalar(localtime) . " INSERT-SELECT $table failed on attempt $try_num, sleeping $sleep_time and retrying\n";
+			print STDERR scalar(localtime) . " INSERT-SELECT $to_table failed on attempt $try_num, sleeping $sleep_time and retrying\n";
 			sleep $sleep_time;
 		} else {
-			print STDERR scalar(localtime) . " INSERT-SELECT $table still failed, giving up\n";
+			print STDERR scalar(localtime) . " INSERT-SELECT $to_table still failed, giving up\n";
 			return undef;
 		}
 
-		$any_rows = $self->sqlSelect("1", $table, "", "LIMIT 1");
+		$any_rows = $self->sqlSelect("1", $to_table, "", "LIMIT 1");
 		if ($any_rows) {
-			print STDERR scalar(localtime) . " after mere sleep, INSERT-SELECT $table now says it succeeded with '$any_rows' rows, proceeding\n";
+			print STDERR scalar(localtime) . " after mere sleep, INSERT-SELECT $to_table now says it succeeded with '$any_rows' rows, proceeding\n";
 			last I_S_LOOP;
 		}
 	}
