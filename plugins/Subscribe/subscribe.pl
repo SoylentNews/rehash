@@ -29,7 +29,7 @@ sub main {
 			function	=> \&save,
 			seclev		=> 1,
 		},
-		paypal		=> {	# left in for historical reasons
+		paypal		=> {	# deprecated, left in for historical reasons
 			function	=> \&makepayment,
 			seclev		=> 1,
 		},
@@ -51,13 +51,18 @@ sub main {
 
 	$op = 'default' unless $ops->{$op};
 
-	header("subscribe") unless $op eq 'pause';
-	print createMenu('users', {
-                style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	'preferences',
-	});
+	if ($op ne 'pause') {
+		# "pause" is special, it does a 302 redirect so we need
+		# to not output any HTML.  Everything else gets this,
+		# header and menu.
+		header("subscribe");
+		print createMenu('users', {
+			style =>	'tabbed',
+			justify =>	'right',
+			color =>	'colored',
+			tab_selected =>	'preferences',
+		});
+	}
 
 	my $retval = $ops->{$op}{function}->($form, $slashdb, $user, $constants);
 
