@@ -1278,3 +1278,4 @@ UPDATE stats_daily SET name='subscribers_current' WHERE name='subscribe_subscrib
 ALTER TABLE humanconf_pool ADD COLUMN created_at DATETIME NOT NULL AFTER lastused;
 UPDATE humanconf_pool SET lastused=lastused, created_at=lastused WHERE lastused IS NOT NULL;
 
+INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');

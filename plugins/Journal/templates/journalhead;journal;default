@@ -48,13 +48,13 @@ END %]
 
 [% PROCESS maintable_td %]&nbsp;</TD>
 
-[% PROCESS maintable_td mt_valign="TOP" mt_width=(constants.fancyboxwidth + 10) mt_height="1" %]
+[% PROCESS maintable_td mt_rowspan="2" mt_valign="TOP" mt_width=(constants.fancyboxwidth + 10) mt_height="1" %]
 [% PROCESS userboxes %]</TD>
 </TR>
 
 [% PROCESS maintable_tr mt_height="100%" %]
 
-[% PROCESS maintable_td mt_colspan="3" mt_valign="TOP" %]
+[% PROCESS maintable_td mt_colspan="1" mt_valign="TOP" %]
 
 __seclev__
 500

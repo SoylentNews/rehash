@@ -48,13 +48,13 @@ __template__
 </TD>
 
 [% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_valign="TOP" %]
+[% PROCESS maintable_td mt_rowspan="2" mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_valign="TOP" %]
 [% PROCESS userboxes %]</TD>
 
 </TR>
 
 [% PROCESS maintable_tr %]
-[% PROCESS maintable_td mt_colspan="3" mt_valign="TOP" %]
+[% PROCESS maintable_td mt_colspan="1" mt_valign="TOP" %]
 
 __seclev__
 500
