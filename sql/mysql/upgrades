@@ -867,7 +867,9 @@ DELETE FROM users_param WHERE name='anon_comments';
 
 # very important: run `utils/dst-update.plx VIRTUAL_USER` after running upgrades
 # here, to convert the user timezones to the new timezones, plus to the new
-# DST stuff
+# DST stuff.
+# BEFORE running this, if you have any existing tzcodes not in the defaults,
+# you may wish to take note of them so you can re-add them appropriately.
 DROP TABLE IF EXISTS dst;
 CREATE TABLE dst (
 	region        VARCHAR(32)   NOT NULL,
