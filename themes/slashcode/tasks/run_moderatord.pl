@@ -250,32 +250,32 @@ sub reconcile_m2 {
 			next;
 		}
 		if ($nunfair+$nfair == 0) {
-			print STDERR "M2 fair,unfair both 0 for mod id '$mod_hr->{id}'\n";
+			print STDERR "M2 fair,unfair both 0 for mod id $mod_hr->{id}\n";
 			next;
 		}
-		if (int(($nunfair+$nfair)/2) == ($nunfair+$nfair)/2) {
-			if ($nfair == $nunfair) {
-				# Can't have this!
-				print STDERR "M2 fair+unfair is even and fair==unfair,"
-					. " for mod id '$mod_hr->{id}'\n";
-				next;
-			}
-		}
-		if ($nunfair+$nfair != $consensus) {
+		if ($nunfair+$nfair != $consensus
+			&& (($nunfair+$nfair) % 2 == 0)) {
 			print STDERR "M2 fair+unfair=" . ($nunfair+$nfair) . ","
-				. " consensus=$consensus\n";
+				. " consensus=$consensus"
+				. " for mod id $mod_hr->{id}\n";
 			# this is unexpected, atomicity must have failed in
 			# setMetaMod(), but we can cope, so this is just a
 			# warning
 			# XXX bug, this is happening, fix this - Jamie 2002/08/30
+			# XXX still happening... but seems to be related to a bug
+			# from Aug. 28 or so that has been fixed.  2002/09/02
 		}
 
-		my $winner_val = 1; $winner_val = -1 if $nunfair > $nfair;
+		my $winner_val = 0;
+		   if ($nfair > $nunfair) {	$winner_val =  1 }
+		elsif ($nunfair > $nfair) {	$winner_val = -1 }
 		my $fair_frac = $nfair/($nunfair+$nfair);
 
 		# Get the token and karma consequences of this vote.
+		# This uses a complex algorithm to return a fairly
+		# complex data structure but at least its fields are
+		# named reasonably well.
 		my $csq = $slashdb->getM2Consequences($fair_frac);
-#print STDERR "fair_frac $fair_frac mod_hr->id $mod_hr->{id} csq " . Dumper($csq);
 
 		# First update the moderator's tokens.
 		$sql = ($csq->{m1_tokens}{num}

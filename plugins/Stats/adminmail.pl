@@ -68,8 +68,8 @@ EOT
 
 	my $accesslog_rows = $stats->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
-	my $modlog_rows = $stats->sqlCount('moderatorlog');
-	my $metamodlog_rows = $stats->sqlCount('metamodlog');
+	my $modlog_rows = $stats->sqlCount('moderatorlog', 'active=1');
+	my $metamodlog_rows = $stats->sqlCount('metamodlog', 'active=1');
 
 	my $mod_points = $stats->getPoints;
 	my @yesttime = localtime(time-86400);

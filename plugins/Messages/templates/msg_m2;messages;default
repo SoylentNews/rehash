@@ -25,7 +25,7 @@ __name__
 msg_m2
 __template__
 
-[% vote_result = { '-1' => 'Unfair', '1' => 'Fair' }; %]
+[% vote_result = { '-1' => 'Unfair', '0' => 'Half-Fair (a tie)', '1' => 'Fair' }; %]
 
 [% IF msg.mode == 1 %]<P>[% END %]
 Some of your past moderations have been meta-moderated by other
