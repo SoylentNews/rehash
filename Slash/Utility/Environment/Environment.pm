@@ -1315,8 +1315,6 @@ sub prepareUser {
 			$user->{state}{page_adless} = $subscribe->adlessPage($r, $user);
 		}
 	}
-	print STDERR scalar(localtime) . " user->currentPage '$user->{currentPage}' user->state->page_ plummy='$user->{state}{page_plummy}' buying='$user->{state}{page_buying}' adless='$user->{state}{page_adless}'\n";
-
 	if ($user->{seclev} >= 100) {
 		$user->{is_admin} = 1;
 		my $sid;
