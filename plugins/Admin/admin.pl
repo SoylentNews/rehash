@@ -1256,17 +1256,18 @@ sub editStory {
 		$storyref->{$key} = $form->{$key} || $storyref->{$key};
 	}
 
+	$storyref->{section} ||= $section;
 	$sections = $slashdb->getDescriptions('sections');
-
 
 	$multi_topics = $slashdb->getDescriptions(
 		'topics_section', 
 		$storyref->{section}
 	);
+
 	$story_topics = $slashdb->getStoryTopics($storyref->{sid});
 	$story_topics->{$storyref->{tid}} ||= 1 ; 
 
-	my $topic_values = $slashdb->getDescriptions('topics_section', $section);
+	my $topic_values = $slashdb->getDescriptions('topics_section', $storyref->{section});
 	$topic_select = createSelect('tid',
 		$topic_values,
 		$storyref->{tid}, 1, 0, 1
