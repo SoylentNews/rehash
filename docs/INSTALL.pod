@@ -1029,6 +1029,67 @@ directions, and it still doesn't work, stop in IRC #slash on
 irc.slashcode.com and ask your question. Someone there may know
 the answer.
 
+=head1 UNINSTALLING
+
+If you want to uninstall a site, there are two steps you must
+follow:
+
+=over 4
+
+=item 1.
+
+Stop slashd with C</etc/init.d/slash stop> (C</etc/rc.d/init.d/slash stop>
+for Red Hat systems).  Edit C</usr/local/slash/slash.sites> to remove
+the line referencing the site you wish to uninstall.  Restart slashd
+with C</etc/init.d/slash start>.
+
+=item 2.
+
+Edit your Apache httpd.conf file so that the directives for the site's
+VirtualHost are not included. This may mean deleting or commenting out
+the actual lines in C</usr/local/apache/conf/httpd.conf>, or perhaps
+just commenting out an C<Include yoursitename.conf> in that file or in
+C</usr/local/slash/httpd/slash.conf>, depending on how you set it up
+after the C<install-slashsite> command in step 6.  Restart
+Apache with C</usr/local/apache/bin/apachectl stop ; sleep 10 ;
+/usr/local/apache/bin/apachectl start>.
+
+=back
+
+There are also five optional steps you may follow:
+
+=over 4
+
+=item 3.
+
+Back up your site's database, if it has anything you care
+about: C<mysqldump -umysqlusername -p sitedatabasename E<gt>
+/some/dir/sitedb.sql>.
+
+=item 4.
+
+Drop your site's database: C<echo DROP DATABASE sitedatabasename |
+mysql -umysqlusername -p>.
+
+=item 5.
+
+Remove the virtual user for your site's database from the DBIx::Password
+file, whose location you can probably find with:
+
+# perl -MDBIx::Password -le 'print $INC{"DBIx/Password.pm"}'
+
+=item 6.
+
+Back up your site's html documents, if you care about any of them:
+C<cp -pvR /usr/local/slash/site/yoursitename/htdocs /some/dir/htdocs>.
+
+=item 7.
+
+Delete your site's directory tree: C<rm -rf
+/usr/local/slash/site/yoursitename>.
+
+=back
+
 =head1 VERSION
 
 $Id$
