@@ -2833,3 +2833,11 @@ INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymin',-20,'Min
 ALTER TABLE skin_colors CHANGE COLUMN hexcolor skincolor CHAR(12) DEFAULT '' NOT NULL;
 UPDATE skin_colors SET skincolor=CONCAT("#", skincolor);
 
+
+# Turn this on if you have a separate log_slave database 
+INSERT INTO vars (name, value, description) VALUES ('adminmail_check_replication', 0, 'Check replication if is caught up before starting adminmail');
+
+# This only needs to be run on your log_slave DB
+DROP TABLE IF EXISTS accesslog_build_unique_host_addr;
+
+ALTER TABLE users MODIFY sig varchar(200);
