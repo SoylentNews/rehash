@@ -92,7 +92,7 @@ __template__
 				[% IF accesslist.adminnick %]<font size=-1>  by [% accesslist.adminnick %]</font>[% END %]
 				</TD>
 			</TR>
-			[% IF useredit.nonuid %]
+			[% IF useredit.nonuid && accesslist.estimate_users%]
 			<TR>
 				<TD VALIGN="TOP"><B>Estimated Users</B></TD>
 				<TD>[% accesslist.estimated_users %]</TD>
@@ -185,6 +185,7 @@ __template__
 					</TD>
 				</TR>
 				[% END %]
+			[% END %]
 				<TR><TD VALIGN=TOP><B>Activity</B>
 				<TD>
 				[% IF uidstruct %]
@@ -207,6 +208,7 @@ __template__
 					[% END %]
 					</TABLE>
 				[% END %]
+				
 		
 				[% IF ipstruct %]
 					<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" BGCOLOR="[% user.bg.2 %]">
@@ -232,21 +234,24 @@ __template__
 					</TABLE>
 				[% END %]
 				[% IF userinfo_flag %]
-			                Requested <B>[% accesshits.0 %]</B> of the last 10K pages[% IF accesshits.0 > 0 %] (2xx: [% accesshits.2 %], 4xx: [% accesshits.4 %])[% END %].<BR>
-					Last access <B>[% IF useredit.lastaccess == '0000-00-00 00:00:00'; "never";
-					ELSE; useredit.lastaccess; END %]</B>
+					[% IF accesshits.0 > 0 %]
+			                	Requested <B>[% accesshits.0 %]</B> of the last 10K pages (2xx: [% accesshits.2 %], 4xx: [% accesshits.4 %]).<BR>
+					[% END %]
+					[% IF !useredit.nonuid %]
+						Last access <B>[% IF useredit.lastaccess == '0000-00-00 00:00:00'; "never";
+						ELSE; useredit.lastaccess; END %]</B>
+					[% END %]
 				[% END %]
 				</TD>
 			</TR>
 
 
-			[% END %]
 		[% END %]
 		</TABLE>
 		</TD>
 	</TR>
 </TABLE>
-<HR>
+[% PROCESS horiz_rule %]
 
 __seclev__
 10000
