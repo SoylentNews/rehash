@@ -847,9 +847,11 @@ UPDATE menus SET sel_label=label;
 DELETE FROM menus WHERE menu='users';
 INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users', 'Logout', 'logout', '/my/logout', 1, 0, 10);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Preferences', 'preferences', '/users.pl?op=edituser', 1, 20, 0);
-INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 30, 0);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Password', 'password', '/users.pl?op=changepasswd', 1, 40, 0);
 INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', '[% USE Slash; user.nickname | strip_literal %]', 'me', '/~[% USE Slash; user.nickname | strip_literal %]', 1, 50, 0);
+
+# Change for plugins/Subscribe (ignore if not using that plugin)
+INSERT INTO menus (id, menu, label, sel_label, value, seclev, menuorder, showanon) VALUES (NULL, 'users', 'Subscription', 'subscription', '/subscribe.pl', 1, 30, 0);
 
 DELETE FROM vars WHERE name='commentsPerPoint';
 
