@@ -6,10 +6,14 @@
 package Slash::Apache::Banlist;
 
 use strict;
-use Slash::Utility;
-use Slash::Display;
-use Digest::MD5 'md5_hex';
 use Apache::Constants qw(:common);
+use Digest::MD5 'md5_hex';
+
+use Slash;
+use Slash::Display;
+use Slash::Utility;
+use Slash::XML;
+
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -29,18 +33,71 @@ sub handler {
 
 	my $slashdb = getCurrentDB();
 	$slashdb->sqlConnect();
-	
-	my $banlist = $slashdb->getBanList();
 
+	my $is_rss = $r->uri =~ m{(
+		\.(?:xml|rss|rdf)$
+			|
+		content_type=rss
+	)}x;  # also check for content_type in POST?
+
+	# check for ban
+	my $banlist = $slashdb->getBanList();
 	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnet}) {
+		return _send_rss($r, 'ban') if $is_rss;
+
 		$r->custom_response(FORBIDDEN,
-			slashDisplay('bannedtext_ipid', { ip => $cur_ip },
-				{ Return => 1} )
+			slashDisplay('bannedtext_ipid',
+				{ ip => $cur_ip },
+				{ Return => 1   }
+			)
 		);
 		return FORBIDDEN;
 	}
 
+	# check for RSS abuse
+	my $rsslist = $slashdb->getNorssList();
+	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnet})) {
+		return _send_rss($r, 'abuse');
+	}
+
 	return OK;
+}
+
+
+sub _send_rss {
+	my($r, $type) = @_;
+	$r->content_type('text/xml');
+	$r->status(200);
+	$r->send_http_header;
+	$r->print(_get_rss_msg($type));
+	return DONE;
+}
+
+{
+# templates don't work with Slash::XML right now,
+# and redirecting will cause *more* traffic than
+# just spitting it out here; so cache it in $RSS_*
+my(%RSS);
+
+sub _get_rss_msg {
+	my($type) = @_;
+	$type ||= 'abuse';
+
+	return $RSS{$type} if exists $RSS{$type};
+
+	# template puts data in $items
+	my $items = [];
+	slashDisplay('bannedtext_rss', {
+		items	=> $items,
+		type	=> $type,
+	}, { Return => 1 });
+
+	return $RSS{$type} = xmlDisplay(rss => {
+		rdfitemdesc => 1,
+		items => $items,
+	}, { Return => 1 } );
+}
+
 }
 
 sub DESTROY { }

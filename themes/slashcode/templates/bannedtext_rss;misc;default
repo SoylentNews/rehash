@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+Set RSS items to display to users banned either for
+RSS abuse ('abuse') or by IPID/SubnetID ('ban').
+
+* type = 'abuse' or 'ban'
+* items = data structure to modify, for use by Perl
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+bannedtext_rss
+__template__
+[% SWITCH type;
+	CASE 'abuse';
+	items.push({
+		title       => "Why Do I Not Get the Latest Stories in RSS?",
+		link        => "$constants.absolutedir/faq/",
+		description => "Your RSS reader is abusing the $constants.sitename server.  You are requesting pages more often than our terms of service allow.  Please see the FAQ for more information, or email $constants.adminmail_ban."
+	});
+
+	CASE 'ban';
+	items.push({
+		title       => "Why is My IP Banned?",
+		link        => "$constants.absolutedir/faq/accounts.shtml#ac900",
+		description => "Perhaps your IP was used to abuse the web site or perform a DoS attack, or you share a proxy server with someone who has.  Please see the FAQ for more information."
+	});
+
+	items.push({
+		title       => "How do I unban my IP?",
+		link        => "$constants.absolutedir/faq/accounts.shtml#ac1000",
+		description => "Email $constants.adminmail_ban.  Make sure to include the IP in question, and any other pertinent information.  If you are connecting through a proxy server, you might need to have your proxy server's admin contact us instead of you.  Please see the FAQ for more information."
+	});
+
+END %]
+
+__seclev__
+500
+__version__
+$Id$

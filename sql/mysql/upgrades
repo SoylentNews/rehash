@@ -1395,3 +1395,6 @@ INSERT INTO vars (name, value, description) VALUES ('adminmail_last_run','2003-0
 ALTER TABLE accesslist ADD COLUMN adminuid mediumint(8) unsigned NOT NULL default '0' AFTER id;
 
 # DEVCHANNEL LAST UPDATED HERE
+
+# CHANGE THIS TO YOUR OWN ADMIN EMAIL ADDRESS
+#INSERT INTO vars (name, value, description) VALUES ('adminmail_ban','admin@example.com','All admin mail about users being banned goes here');
