@@ -23,7 +23,7 @@ $task{$me}{code} = sub {
 	if ($stories && @$stories) {
 		newxml(@_, undef, $stories);
 		newrdf(@_, undef, $stories);
-		newwml(@_, undef, $stories);
+		#newwml(@_, undef, $stories);
 		newrss(@_, undef, $stories);
 	}
 
