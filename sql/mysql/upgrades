@@ -2619,8 +2619,6 @@ INSERT INTO string_param (type, code, name) VALUES ('extra_types','list','List')
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','story','Story');
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','comment','Comment');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -2664,3 +2662,6 @@ ALTER TABLE topics ADD COLUMN storypickable ENUM('no', 'yes') DEFAULT 'yes' NOT 
 
 INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysback','7','Oldest stories to write a story_text.rendered field for, in days');
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_33, Start of T_2_5_0_34 - 2004/10/19
