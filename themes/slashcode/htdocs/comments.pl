@@ -1377,7 +1377,20 @@ sub moderate {
 		if ($user->{seclev} > 100 and $key =~ /^del_(\d+)$/) {
 			$total_deleted += deleteThread($sid, $1);
 		} elsif (!$hasPosted and $key =~ /^reason_(\d+)$/) {
-			$was_touched += moderateCid($sid, $1, $form->{$key});
+			my $ret_val = $slashdb->moderateComment($sid, $1, $form->{$key});
+			
+			# error conditions -- need to call getError
+			if($ret_val < 0){
+				if ($ret_val == -1) {
+					print getError('no points');
+				} elsif ($ret_val == -2){
+					print getError('not enough points');
+				}
+			
+			} else {
+				$was_touched += $ret_val;
+			}
+			
 		}
 	}
 	$slashdb->setDiscussionDelCount($sid, $total_deleted);
@@ -1411,198 +1424,6 @@ sub moderate {
 	}
 }
 
-
-##################################################################
-# Handles moderation
-# Moderates a specific comment. Returns whether the comment score changed.
-sub moderateCid {
-	my($sid, $cid, $reason) = @_;
-	return 0 unless $reason;
-
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-
-	my $comment_changed = 0;
-	my $superAuthor = $constants->{authors_unlimited}
-		&& $user->{seclev} >= $constants->{authors_unlimited};
-
-	if ($user->{points} < 1 && !$superAuthor) {
-		print getError('no points');
-		return 0;
-	}
-
-	my $comment = $slashdb->getComment($cid);
-	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
-
-	# The user should not have been been presented with the menu
-	# to moderate if any of the following tests trigger, but,
-	# an unscrupulous user could have faked their submission with
-	# or without us presenting them the menu options.  So do the
-	# tests again.
-	unless ($superAuthor) {
-		# Do not allow moderation of any comments with the same UID as the
-		# current user (duh!).
-		return if $user->{uid} == $comment->{uid};
-		# Do not allow moderation of any comments (anonymous or otherwise)
-		# with the same IP as the current user.
-		return if $user->{ipid} eq $comment->{ipid};
-		# If the var forbids it, do not allow moderation of any comments
-		# with the same *subnet* as the current user.
-		return if $constants->{mod_same_subnet_forbid}
-			and $user->{subnetid} eq $comment->{subnetid};
-		# Do not allow moderation of comments that are too old.
-		return unless $comment->{time_unixepoch} >= time() - 3600*
-			($constants->{comments_moddable_hours}
-				|| 24*$constants->{archive_delay});
-	}
-
-	# Start putting together the data we'll need to display to
-	# the user.
-	my $reasons = $slashdb->getReasons();
-	my $dispArgs = {
-		cid	=> $cid,
-		sid	=> $sid,
-		subject => $comment->{subject},
-		reason	=> $reason,
-		points	=> $user->{points},
-		reasons	=> $reasons,
-	};
-
-	unless ($superAuthor) {
-		my $mid = $slashdb->getModeratorLogID($cid, $user->{uid});
-		if ($mid) {
-			$dispArgs->{type} = 'already moderated';
-			slashDisplay('moderation', $dispArgs);
-			return 0;
-		}
-	}
-
-	# Add moderation value to display arguments.
-	my $val = $reasons->{$reason}{val};
-	$val = "+1" if $val == 1;
-	$dispArgs->{val} = $val;
-
-	my $scorecheck = $comment->{points} + $val;
-	my $active = 1;
-	# If the resulting score is out of comment score range, no further
-	# actions need be performed.
-	# Should we return here and go no further?
-	if (	$scorecheck < $constants->{comment_minscore} ||
-		$scorecheck > $constants->{comment_maxscore})
-	{
-		# We should still log the attempt for M2, but marked as
-		# 'inactive' so we don't mistakenly undo it. Mods get modded
-		# even if the action didn't "really" happen.
-		#
-		$active = 0;
-		$dispArgs->{type} = 'score limit';
-	}
-
-	# Find out how many mod points this will really cost us.  As of
-	# Oct. 2002, it might be more than 1.
-	my $pointsneeded = $slashdb->getModPointsNeeded(
-		$comment->{points},
-		$scorecheck,
-		$reason);
-
-	# If more than 1 mod point needed, we might not have enough,
-	# so this might still fail.
-	if ($pointsneeded > $user->{points} && !$superAuthor) {
-		print getError('not enough points');
-		return 0;
-	}
-
-	# Write the proper records to the moderatorlog.
-	$slashdb->createModeratorLog($comment, $user, $val, $reason, $active,
-		$pointsneeded);
-
-	if ($active) {
-
-		# If we are here, then the user either has mod points, or
-		# is an admin (and 'author_unlimited' is set).  So point
-		# checks should be unnecessary here.
-
-		# First, update values for the moderator.
-		my $changes = { };
-		$changes->{-points} = "GREATEST(points-$pointsneeded, 0)";
-		my $tcost = $constants->{mod_unm2able_token_cost} || 0;
-		$tcost = 0 if $reasons->{$reason}{m2able};
-		$changes->{-tokens} = "tokens - $tcost" if $tcost;
-		$changes->{-totalmods} = "totalmods + 1";
-		$slashdb->setUser($user->{uid}, $changes);
-		$user->{points} -= $pointsneeded;
-		$user->{points} = 0 if $user->{points} < 0;
-
-		# Update stats.
-		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
-			$statsSave->addStatDaily("mod_tokens_lost_unm2able", $tcost);
-		}
-
-		# Next, adjust the appropriate values for the user who
-		# posted the comment.
-		my $karma_change = $reasons->{$reason}{karma};
-		if (!isAnon($comment->{uid})) {
-			my $lost_tokens_per_downmod = 1; # XXX should be a var
-			my $cu_changes = { };
-			if ($val < 0) {
-				$cu_changes->{-downmods} = "downmods + 1";
-			} elsif ($val > 0) {
-				$cu_changes->{-upmods} = "upmods + 1";
-			}
-			if ($karma_change < 0) {
-				$cu_changes->{-karma} = "GREATEST("
-					. "$constants->{minkarma}, karma - 1)";
-				$cu_changes->{-tokens} = "tokens - $lost_tokens_per_downmod";
-			} elsif ($karma_change > 0) {
-				$cu_changes->{-karma} = "LEAST("
-					. "$constants->{maxkarma}, karma + 1)";
-			}
-			if (scalar keys %$cu_changes) {
-				$slashdb->setUser($comment->{uid}, $cu_changes);
-				# Update stats.
-				if ($karma_change < 0 and my $statsSave = getObject('Slash::Stats::Writer')) {
-					$statsSave->addStatDaily("mod_tokens_lost_downmod",
-						$lost_tokens_per_downmod);
-				}
-			}
-		}
-
-		# Make sure our changes get propagated back to the comment.
-		$comment_changed =
-			$slashdb->setCommentCleanup($cid, $val, $reason,
-				$comment->{reason});
-		if (!$comment_changed) {
-			# This shouldn't happen;  the only way we believe it
-			# could is if $val is 0, the comment is already at
-			# min or max score, the user's already modded this
-			# comment, or some other reason making this mod invalid.
-			# This is really just here as a safety check.
-			$dispArgs->{type} = 'logic error';
-			slashDisplay('moderation', $dispArgs);
-			return 0;
-		}
-
-		# We know things actually changed, so update points for
-		# display and send a message if appropriate.
-		$dispArgs->{points} = $user->{points};
-		$dispArgs->{type} = 'moderated';
-
-		send_mod_msg({
-			type	=> 'mod_msg',
-			sid	=> $sid,
-			cid	=> $cid,
-			val	=> $val,
-			reason	=> $reason,
-			comment	=> $comment
-		});
-	}
-
-	# Now display the template with the moderation results.
-	slashDisplay('moderation', $dispArgs);
-
-	return 1;
-}
 
 
 ##################################################################
@@ -1649,67 +1470,6 @@ sub deleteThread {
 	return $count;
 }
 
-##################################################################
-# Send messages regarding this moderation to user who posted
-# comment if they have that bit set.
-sub send_mod_msg {
-	my($mod) = @_;
-
-	my $messages	= getObject('Slash::Messages') or return;
-
-	my $constants	= getCurrentStatic();
-	my $slashdb	= getCurrentDB();
-	my $user	= getCurrentUser();
-
-	my $sid		= $mod->{sid};
-	my $cid		= $mod->{cid};
-	my $val		= $mod->{val};
-	my $reason	= $mod->{reason};
-	my $type	= $mod->{type}    || 'mod_msg';
-	my $comment	= $mod->{comment} || $slashdb->getComment($cid);
-
-	my $comm	= $slashdb->getCommentReply($sid, $cid);
-	my $users	= $messages->checkMessageCodes(
-		MSG_CODE_COMMENT_MODERATE, [$comment->{uid}]
-	);
-
-	if (@$users) {
-		my $discussion = $slashdb->getDiscussion($sid);
-		if ($discussion->{sid}) {
-			# Story discussion, link to it.
-			$discussion->{realurl} = "/article.pl?sid=$discussion->{sid}";
-		} else {
-			# Some other kind of discussion,
-			# probably poll, journal entry, or
-			# user-created;  don't trust its url. -- jamie
-			# I really don't like this.  I want users
-			# to be able to go to the poll or journal
-			# directly.  we could consider matching a pattern
-			# for journal.pl or pollBooth.pl etc.,
-			# but that is not great.  maybe a field in discussions
-			# for whether or not url is trusted. -- pudge
-			$discussion->{realurl} = "/comments.pl?sid=$discussion->{id}";
-		}
-
-		my $data  = {
-			template_name	=> $type,
-			subject		=> {
-				template_name => $type . '_subj'
-			},
-			comment		=> $comm,
-			discussion	=> $discussion,
-			moderation	=> {
-				user	=> $user,
-				value	=> $val,
-				reason	=> $reason,
-			},
-			reasons		=> $slashdb->getReasons(),
-		};
-		$messages->create($users->[0],
-			MSG_CODE_COMMENT_MODERATE, $data, 0, '', 'collective'
-		);
-	}
-}
 
 ##################################################################
 # If you moderate, and then post, all your moderation is undone.
@@ -1735,7 +1495,8 @@ sub undoModeration {
 
 	for my $mod (@$removed) {
 		$mod->{val} =~ s/^(\d)/+$1/;  # put "+" in front if necessary
-		send_mod_msg({
+		use Slash::Messages;
+		Slash::Messages::send_mod_msg({
 			type	=> 'unmod_msg',
 			sid	=> $sid,
 			cid	=> $mod->{cid},
