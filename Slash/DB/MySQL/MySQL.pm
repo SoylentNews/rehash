@@ -6548,6 +6548,7 @@ sub getCommentReply {
 ########################################################
 sub getCommentsForUser {
 	my($self, $sid, $cid, $options) = @_;
+	$options ||= {};
 
 	# Note that the "cache_read_only" option is not used at the moment.
 	# Slash has done comment caching in the past but does not do it now.
@@ -6560,6 +6561,13 @@ sub getCommentsForUser {
 	my $sid_quoted = $self->sqlQuote($sid);
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $other = "";
+	
+	my $order_dir = "";
+	$order_dir = uc($options->{order_dir}) eq "DESC" ? "DESC" : "ASC" if $options->{order_dir};
+	
+	$other.= "ORDER BY $options->{order_col} $order_dir" if $options->{order_col};
+	$other.= " LIMIT $options->{limit}" if $options->{limit};
 
 	my $select = " cid, date, date as time, subject, nickname, "
 		. "homepage, fakeemail, users.uid AS uid, sig, "
@@ -6585,7 +6593,7 @@ sub getCommentsForUser {
 		$where .= ")";
 	}
 
-	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where);
+	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where, $other);
 
 	my $archive = $cache_read_only;
 
