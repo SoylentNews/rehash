@@ -1954,7 +1954,7 @@ ALTER TABLE links add stats_type VARCHAR(24);
 
 ALTER TABLE accesslist ADD estimated_users SMALLINT UNSIGNED DEFAULT 1;
 
-REPLACE INTO vars SET description='Seclev for which authors have unlimited comment-moderation and -deletion power (see also the ACLs)' WHERE name='authors_unlimited';
+UPDATE vars SET description='Seclev for which authors have unlimited comment-moderation and -deletion power (see also the ACLs)' WHERE name='authors_unlimited';
 
 # set to whatever date_format you'd like to use for archived stories, you can set the value to be an empty string if you want it to work as it
 # currently does
