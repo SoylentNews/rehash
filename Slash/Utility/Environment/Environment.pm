@@ -135,25 +135,31 @@ empty string.
 =cut
 
 { # closure
-my $dbAvailable_lastcheck = 0;
-my $dbAvailable_lastval;
+my $dbAvailable_lastcheck = {};
+my $dbAvailable_lastval = {};
 sub dbAvailable {
 	# I'm not going to explain exactly how I came up with this
 	# logic... the if's are ordered to reduce computation as
 	# much as possible.
 	my($token) = @_;
 
-	if (time < $dbAvailable_lastcheck+5) {
-		return $dbAvailable_lastval;
+	# if we're doing a general check for dbAvailability we set
+	# the token to empty-string and store the lastchecked status
+	# and lastval check in the hashrefs with that as the key
+	$token ||="";
+
+	if (defined $dbAvailable_lastcheck->{$token} && time < $dbAvailable_lastcheck->{$token} +5) {
+		return $dbAvailable_lastval->{$token};
 	}
 
+
 	my $newval;
-	   if (-e "/usr/local/slash/dboff")	{ $newval = 0 }
-	elsif (!$token || $token !~ /^(\w+)/)	{ $newval = 1 }
-	elsif (-e "/usr/local/slash/dboff_$1")	{ $newval = 0 }
-	else					{ $newval = 1 }
-	$dbAvailable_lastval = $newval;
-	$dbAvailable_lastcheck = time;
+	   if (-e "/usr/local/slash/dboff")		{ $newval = 0 }
+	elsif (!$token || $token !~ /^(\w+)/)		{ $newval = 1 }
+	elsif (-e "/usr/local/slash/dboff_$token")	{ $newval = 0 }
+	else						{ $newval = 1 }
+	$dbAvailable_lastval->{$token} = $newval;
+	$dbAvailable_lastcheck->{$token} = time;
 	return $newval;
 }
 } # end closure
