@@ -2068,11 +2068,12 @@ sub _link_to_slashlink {
 	my($pre, $url, $post) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $virtual_user = getCurrentVirtualUser();
 	my $retval = "$pre$url$post";
 	my $abs = $constants->{absolutedir};
 #print STDERR "_link_to_slashlink begin '$url'\n";
 
-	if (!%urla) {
+	if (!defined($urla{$virtual_user})) {
 		# URLs may show up in any section, which means when absolutized
 		# their host may be either the main one or a sectional one.
 		# We have to allow for any of those possibilities.
@@ -2082,12 +2083,11 @@ sub _link_to_slashlink {
 			sort keys %$sections;
 		my %all_urls = ( );
 		for my $url ($abs, @sect_urls) {
-			for my $scheme (undef, "http", "https") {
-				my $new_url = URI->new($url);
-				$new_url->scheme($scheme);
-				$new_url = $new_url->as_string;
-				$all_urls{$new_url} = 1;
-			}
+			my $new_url = URI->new($url);
+			# Remove the scheme to make it relative (schemeless).
+			$new_url->scheme(undef);
+			my $new_url_q = quotemeta($new_url->as_string);
+			$all_urls{"(?:https?:)?$new_url"} = 1;
 		}
 		my $any_host = "(?:"
 			. join("|", sort keys %all_urls)
@@ -2101,7 +2101,7 @@ sub _link_to_slashlink {
 		# wouldn't help with the .shtml regex so we might as well
 		# do it this way.)  If we ever want to extend slash-linking
 		# to cover other tags, here's the place to start.
-		%urla = (
+		%{$urla{$virtual_user}} = (
 			qr{^$any_host/article\.pl\?} =>
 				{ _sn => 'article',
 				  sid => qr{\bsid=([\w/]+)} },
@@ -2115,6 +2115,9 @@ sub _link_to_slashlink {
 		);
 #use Data::Dumper; print STDERR Dumper(\%urla);
 	}
+	# Get a reference to the URL argument hash for this
+	# virtual user, thus "urlavu".
+	my $urlavu = $urla{$virtual_user};
 
 	my $canon_url = URI->new_abs($url, $abs)->canonical;
 	my $frag = $canon_url->fragment() || "";
@@ -2122,19 +2125,19 @@ sub _link_to_slashlink {
 	# %attr is the data structure storing the attributes of the <a>
 	# tag that we will use.
 	my %attr = ( );
-	URLA: for my $regex (sort keys %urla) {
+	URLA: for my $regex (sort keys %$urlavu) {
 		# This loop only applies to the regex that matches this
 		# URL (if any).
 		next unless $canon_url =~ $regex;
 
 		# The non-underscore keys are regexes that we need to
 		# pull from the URL.
-		for my $arg (sort grep !/^_/, keys %{$urla{$regex}}) {
-			($attr{$arg}) = $canon_url =~ $urla{$regex}{$arg};
+		for my $arg (sort grep !/^_/, keys %{$urlavu->{$regex}}) {
+			($attr{$arg}) = $canon_url =~ $urlavu->{$regex}{$arg};
 			delete $attr{$arg} if !$attr{$arg};
 		} 
 		# The _sn key is special, it gets copied into sn.
-		$attr{sn} = $urla{$regex}{_sn}; 
+		$attr{sn} = $urlavu->{$regex}{_sn}; 
 		# Section and topic attributes get thrown in too.
 		if ($attr{sn} eq 'comments') {
 			# sid is actually a discussion id!
