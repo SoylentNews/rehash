@@ -142,7 +142,7 @@ sub nick2matchname {
 # If your site will have multiple formats of sids, you'll want this
 # to continue matching the old formats too.
 sub regexSid {
-	return qr{\b(\d{2}/\d{2}/\d{2}/\d{3,8}\|\d{1,8})\b};
+	return qr{\b(\d{2}/\d{2}/\d{2}/\d{3,8}|\d{1,8})\b};
 }
 
 #========================================================================
