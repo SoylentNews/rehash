@@ -372,7 +372,6 @@ source /tmp/dis;
 select concat("UPDATE stories SET commentcount=", discussions.commentcount, " WHERE discussion=", id, ";") INTO OUTFILE "/tmp/dis2" from discussions;
 source /tmp/dis2;
 
-# OSDNTEST LAST UPDATED HERE
 # OSDN LAST UPDATED HERE
 
 ALTER TABLE pollanswers CHANGE COLUMN qid qid MEDIUMINT UNSIGNED NOT NULL;
@@ -389,3 +388,4 @@ ALTER TABLE formkeys CHANGE COLUMN formname formname varchar(32) DEFAULT '' NOT 
 ALTER TABLE vars CHANGE COLUMN name name varchar(48) DEFAULT '' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Tags that don\'t need to be closed');
 
+# OSDNTEST LAST UPDATED HERE
