@@ -32,7 +32,7 @@ sub main {
 		upBid($form->{bid}), $c++ if /^u$/;
 		dnBid($form->{bid}), $c++ if /^d$/;
 		rmBid($form->{bid}), $c++ if /^x$/;
-		redirect($ENV{SCRIPT_NAME}), return if $c;
+		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME}), return if $c;
 	}
 
 	if ($form->{section}) {
@@ -153,7 +153,7 @@ sub displayStandardBlocks {
 	# two variants of box cache: one for index with portalmap,
 	# the other for any other section, or without portalmap
 
-	if ($user->{exboxes} && $getblocks eq 'index') {
+	if ($user->{exboxes} && ($getblocks eq 'index' || $constants->{slashbox_sections}) {
 		@boxes = getUserBoxes();
 		$boxcache = $cache->{slashboxes}{index_map}{$user->{light}} ||= {};
 	} else {
@@ -165,6 +165,11 @@ sub displayStandardBlocks {
 	}
 
 	for my $bid (@boxes) {
+		# sections only get blocks for their own section
+		if ($getblocks ne 'index') {
+			next if $boxBank->{$bid}{section} ne $getblocks;
+		}
+
 		if ($bid eq 'mysite') {
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
