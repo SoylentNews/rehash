@@ -6,11 +6,8 @@
 
 use strict;
 use Slash;
-use Slash::Search;
 use Slash::Blob;
-use Slash::Display;
 use Slash::Utility;
-use Slash::XML;
 
 #################################################################
 sub main {
@@ -40,6 +37,7 @@ sub main {
 	$r->rflush;
 	$r->status(200);
 }
+main();
 
 #################################################################
 1;
