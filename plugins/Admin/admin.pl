@@ -62,7 +62,7 @@ sub main {
 
 			function 	=> \&blockEdit,
 
-			seclev		=> 10000,
+			seclev		=> 500,
 		},
 		colors 		=> {	# colored,colorpreview,colorsave,colorrevert,
 					# colororig,colorsavedef,
