@@ -156,7 +156,7 @@ Slash::Rating - Rating system
 
 =head1 DESCRIPTION
 
-This allows user reviews/ratings to accompany a disucssion.  Users vote/rate the discussion when
+This allows user reviews/ratings to accompany a discussion.  Users vote/rate the discussion when
 they create a comment.  The averages are then totalled by a task for display as you choose.
 
 Blah blah blah.
