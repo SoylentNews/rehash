@@ -26,7 +26,7 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('hvu:a:e:g:o:p:n:H:L:T:P:R', \%opts);
+usage('Options used incorrectly') unless getopts('hvu:H:n:xRL:i:T:P:a:e:p:o:g:', \%opts);
 usage() if !$opts{'u'} and ($opts{'h'} or !keys %opts);
 # if invoked with both -u and -h, call usage() later, after we load Slash::Install
 version() if $opts{'v'};
@@ -37,7 +37,7 @@ my $prefix_site = "$SLASH_PREFIX/site";
 my(	$owner, $owner_id, $group, $group_id, $password,
 	$sitename, $username, $realname, $email, $dbh, @create, $sql,
 	@sql, $hostname, $hostname_f, $host_noport, $httpd, %slash_sites,
-	$driver, $theme, $symlink
+	$driver, $theme, $symlink, $include
 );
 
 my %drivers = (
@@ -442,6 +442,17 @@ $slashdb->setUser($uid, {
 	seclev => 10000
 });
 
+if ($opts{'i'}) {
+	$include = $opts{'i'};
+	my @stats = stat($include);
+	if ($stats[7] eq '') {
+		print "Warning: Requested include '$include' does not appear to exist";
+	}
+	$include = "\n    Include $include\n";
+} else {
+	$include = '';
+}
+
 # Now, lets update slash.sites
 my $sites = gensym();
 if (open($sites, "< $SLASH_PREFIX/slash.sites\0")) {
@@ -477,8 +488,9 @@ $dbh->disconnect;
 install_message();
 
 sub apache_site_conf {
-	my $host_port = $hostname;
-	$host_port .= ":80" unless $host_port =~ /:/;
+	my $host_port = '';
+	$host_port = $opts{'x'} ? '*' : $hostname;
+	$host_port .= ':80' unless $host_port =~ /:/;
 	my $text = qq|
 # note that if your site's path is a symlink, the
 # path listed here is most likely the actual path;
@@ -499,7 +511,7 @@ sub apache_site_conf {
 
     PerlSetupEnv On
     PerlSetEnv TZ GMT
-
+$include
     SlashVirtualUser $opts{'u'}
 
     # this directive will compile all the templates
@@ -668,8 +680,11 @@ Main options:
 Site options:
 	-H	Hostname
 	-n	Site name
+	-x	Use '*' as VirtualHost name (boolean)
 	-R	Reuse hostname as site name (boolean)
-	-L	Install files in htdocs/ and tasks/ using symlinks [y/n]
+	-L	Install files in htdocs/ and tasks/ using symlinks (boolean)
+	-i	Include the specified file into the site configuration
+	-T	Theme to use
 	-P	Comma-separated list of plugin names$sample_plugins
 		("ALL"/"DEFAULT" avoid prompt, do what you'd expect)
 
