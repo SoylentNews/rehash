@@ -26,9 +26,10 @@ __template__
 				</TR>
 				<TR VALIGN="TOP">
 					<TD> [% diatribe.article %]
-						<A HREF="[% constants.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]"
-							><IMG SRC="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" WIDTH="[% diatribe.topic.width %]"
-								HEIGHT="[% diatribe.topic.height %]" BORDER="0" ALIGN="RIGHT"
+						[% image = Slash.db.getTopicImageBySection(diatribe.topic, constants.section) %]
+						<A HREF="[% constants.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]">
+								<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" WIDTH="[% image.width %]"
+								HEIGHT="[% image.height %]" BORDER="0" ALIGN="RIGHT"
 								HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.alttext %]"></A>
 					</TD>
 				</TR>

@@ -45,7 +45,8 @@ __template__
 
 	</TD></TR><TR><TD COLSPAN="2">
 [%# at some point, this needs to be linked to the topic lookup by discussion %]
-<IMG SRC="[% constants.imagedir %]/topics/[% topic.image %]" ALT="[% topic.alttext %]" WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" ALIGN="RIGHT">
+[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
+<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]" ALIGN="RIGHT">
 [% diatribe.article %]
 	</TD></TR>
 </TABLE>

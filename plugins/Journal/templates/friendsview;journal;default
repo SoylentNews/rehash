@@ -16,6 +16,7 @@ __template__
 <TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 [% FOREACH diatribe = articles %]
 	[% topic = diatribe.topic %]
+	[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 	<TR><TD>
 		[% PROCESS titlebar title => diatribe.description, width => "90%" %]
 		<TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0"> <TR>
@@ -33,7 +34,7 @@ __template__
 		<TR>
 			<TD COLSPAN="2">
 			[%# at some point, this needs to be linked to the topic lookup by discussion %]
-			<IMG SRC="[% constants.imagedir %]/topics/[% topic.image %]" ALT="[% topic.alttext %]" WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" ALIGN="RIGHT">
+			<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]" ALIGN="RIGHT">
 			[% diatribe.article %]
 			</TD>
 		</TR>

@@ -260,7 +260,7 @@ sub sqlSelectMany {
 	$sql .= "        $other" if $other;
 
 	$self->sqlConnect;
-	my $sth = $self->{_dbh}->prepare_cached($sql);
+	my $sth = $self->{_dbh}->prepare($sql);
 	if ($sth->execute) {
 		return $sth;
 	} else {
@@ -282,7 +282,7 @@ sub sqlSelect {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
-	my $sth = $self->{_dbh}->prepare_cached($sql);
+	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
 		errorLog($sql);
 		$self->sqlConnect;
@@ -307,7 +307,7 @@ sub sqlSelectArrayRef {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
-	my $sth = $self->{_dbh}->prepare_cached($sql);
+	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
 		errorLog($sql);
 		$self->sqlConnect;
@@ -355,7 +355,7 @@ sub sqlSelectHashref {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
-	my $sth = $self->{_dbh}->prepare_cached($sql);
+	my $sth = $self->{_dbh}->prepare($sql);
 
 	unless ($sth->execute) {
 		errorLog($sql);
@@ -378,7 +378,7 @@ sub sqlSelectColArrayref {
 	$sql .= "$other" if $other;
 
 	$self->sqlConnect();
-	my $sth = $self->{_dbh}->prepare_cached($sql);
+	my $sth = $self->{_dbh}->prepare($sql);
 
 	my $array = $self->{_dbh}->selectcol_arrayref($sth);
 	unless (defined($array)) {
