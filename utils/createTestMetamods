@@ -46,11 +46,6 @@ my $reasons = $slashdb->getReasons();
 
 # main program logic (in braces to offset nicely)
 {
-	my $cur_closed = $slashdb->sqlCount(
-		'moderatorlog',
-		"m2count >= $constants->{m2_consensus}"
-	);
-
 	print "Generating meta-moderations...\n";
 
 	my $t0 = new Benchmark;
@@ -120,8 +115,8 @@ EOT
 
 			$m2count++;
 			if ($opts{D} > 2) {
-				printf <<EOT, $m2_count, $constants->{m2_consensus}
-M2($m2count): ID #$_->{id}, M2Mod = $m2user->{uid}, is_fair = $is_fair, C=%d/%d 
+				printf <<EOT, $m2_count, $constants->{m2_consensus}, ($m2_count == $constants->{m2_consensus} ? " *" : "");
+M2($m2count): ID #$_->{id}, M2Mod = $m2user->{uid}, is_fair = $is_fair, C=%d/%d%s
 EOT
 
 			}
@@ -133,7 +128,7 @@ EOT
 	} # LOOP
 
 	my $now_closed = getM2ClosedCount();
-	my $closed = $now_closed - $cur_closed;
+	my $closed = $now_closed - $startcount;
 
 	printf "Exhausted M2 on %d users\n", getRandomUID('size');
 
@@ -149,10 +144,7 @@ EOT
 # subroutines
 
 sub getM2ClosedCount {
-	return $slashdb->sqlCount(
-		'moderatorlog',
-		"m2count >= $constants->{m2_consensus}"
-	);
+	return $slashdb->sqlCount('moderatorlog', 'm2status=1');
 }
 
 # CLOSURE!

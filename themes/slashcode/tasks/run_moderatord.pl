@@ -17,7 +17,7 @@ use Data::Dumper;
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '18 0-23/2 * * *';
+$task{$me}{timespec} = '18 0-23 * * *';
 $task{$me}{timespec_panic_1} = '18 0-10/2 * * *';	# night only
 $task{$me}{timespec_panic_2} = '';			# don't run
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -294,6 +294,14 @@ sub reconcile_m2 {
 			{ and_where => $csq->{m1_karma}{sql_and_where} }
 		) if $sql;
 
+		# Now update the moderator's m2info.
+		my $old_m2info = $slashdb->getUser($mod_hr->{uid}, 'm2info');
+		my $new_m2info = add_m2info($old_m2info, $nfair, $nunfair);
+		$slashdb->setUser(
+			$mod_hr->{uid},
+			{ m2info => $new_m2info }
+		) if $new_m2info ne $old_m2info;
+
 		# Now update the tokens of each M2'er.
 		for my $m2 (@$m2_ar) {
 			if (!$m2->{uid}) {
@@ -379,6 +387,31 @@ sub reconcile_m2 {
 		}
 	}
 
+}
+
+sub add_m2info {
+	my($old, $nfair, $nunfair) = @_;
+
+	my @lt = localtime;
+	my $thismonth = sprintf("%02d%02d", $lt[5] % 100, $lt[4]+1);
+	my @old = split /\s*;\s*/, $old;
+	my %val = ( );
+	for my $item (@old, "$thismonth $nfair$nunfair") {
+		my($date, $more) = $item =~ /^(\w+)\s+(.+)$/;
+		$val{$date} = [ ] if !defined($val{$date});
+		push @{$val{$date}}, $more;
+	}
+	my @combined = sort { $b cmp $a } keys %val;
+	my $combined = "";
+	for my $item (@combined) {
+		$combined .= "; " if $combined;
+		$combined .= "$item @{$val{$item}}";
+		if (length($combined) > 63) {
+			$combined = substr($combined, 0, 63);
+			last;
+		}
+	}
+	return $combined;
 }
 
 sub reconcile_stats {

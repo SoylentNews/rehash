@@ -1267,7 +1267,7 @@ Hashref of cleaned-up data.
 		ordernum pid posttype ratio retrieve
 		seclev start startat threshold uid
 		uthreshold voters width
-		textarea_rows textarea_cols
+		textarea_rows textarea_cols tokens
 		subid tpid tid qid aid
 		url_id spider_id miner_id keyword_id
 	);

@@ -742,7 +742,7 @@ INSERT INTO vars (name, value, description) VALUES ('m1_eligible_hitcount','3','
 INSERT INTO vars (name, value, description) VALUES ('m1_eligible_percentage','0.8','Percentage of users eligible to moderate');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_end', '0.8888', 'Ending percentage into the pool of eligible moderators (used by moderatord)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_start', '0.167', 'Starting percentage into the pool of eligible moderators (used by moderatord)');
-INSERT INTO vars (name, value, description) VALUES ('m2_batchsize', 50, 'Maximum number of moderations processed for M2 reconciliation per execution of moderation daemon.');
+INSERT INTO vars (name, value, description) VALUES ('m2_batchsize', '300', 'Maximum number of moderations processed for M2 reconciliation per execution of moderation daemon.');
 INSERT INTO vars (name, value, description) VALUES ('m2_comments','10','Number of comments for meta-moderation - if more than about 15, doublecheck that users_info.mods_saved is large enough');
 INSERT INTO vars (name, value, description) VALUES ('m2_consensus', '9', 'Number of M2 votes per M1 before it is reconciled by consensus - if not odd, will be forced to next highest odd number');
 INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitmult', '1', 'How long should old M2-needing mods wait for the fresh blood?');
