@@ -1182,7 +1182,6 @@ CREATE TABLE people_nthdegree (
 INSERT INTO vars (name,value,description) VALUES ('zoo_timer',NOW(),'Last time the Zoo task ran.');
 DROP TABLE IF EXISTS people_log;
 
-# SLASHCODE LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('mod_karma_bonus_max_downmods',2,'How many times can you downmod a comment without it losing its karma bonus? (bonus lost at value+1th downmod) (set very high to disable)');
 
@@ -1190,3 +1189,4 @@ ALTER TABLE message_drop ADD COLUMN send ENUM('now', 'defer', 'collective') DEFA
 INSERT INTO vars (name, value, description) VALUES ('message_last_deferred','','The last date that deferred messages were sent');
 
 # USEPERL LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
