@@ -3798,7 +3798,7 @@ sub getTopNewsstoryTopics {
 	my($self, $all) = @_;
 	my $when = "AND to_days(now()) - to_days(time) < 14" unless $all;
 	my $order = $all ? "ORDER BY alttext" : "ORDER BY cnt DESC";
-	my $topics = $self->sqlSelectAllHashrefArray("topics.tid as tid, alttext, count(*) as cnt",
+	my $topics = $self->sqlSelectAllHashrefArray("topics.tid as tid, alttext, count(*) as cnt, default_image",
 		'topics,stories',
 		"topics.tid=stories.tid
 		$when
