@@ -495,7 +495,7 @@ sub prepAds {
 
 ########################################################
 sub getAd {
-	my($num, $log) = @_;
+	my($num) = @_;
 	$num ||= 1;
 	my $user = getCurrentUser();
 
@@ -504,9 +504,8 @@ sub getAd {
 		# general), don't generate the actual ad, just generate some
 		# shtml code which *will* generate the actual ad when it's
 		# executed later.
-		$log = $log ? " Slash::createLog('$log');" : "";
 		return <<EOT;
-<!--#perl sub="sub { use Slash;$log print Slash::getAd($num); }" -->
+<!--#perl sub="sub { use Slash; print Slash::getAd($num); }" -->
 EOT
 	}
 
