@@ -1515,11 +1515,12 @@ sub tildeEd {
 		for my $id (
 			grep /^\d+$/,
 			split /,/,
-			($user_edit->{field} || "")
+			($user_edit->{$field} || "")
 		) {
 			$prefs{$field}{$id} = 1;
 		}
 	}
+#print STDERR scalar(localtime) . " prefs: " . Dumper(\%prefs);
 
 	# Set up $author_hr, @aid_order, and $story023_default{author}.
 
@@ -1600,6 +1601,8 @@ sub tildeEd {
 		$section_descref->{$bid}{title} = $title;
 	}
 
+#print STDERR scalar(localtime) . " tildeEd story023_default: " . Dumper(\%story023_default);
+
 	# Userspace.
 
 	my $userspace = $user_edit->{userspace} || "";
@@ -1607,15 +1610,17 @@ sub tildeEd {
 	# Titles of stuff.
 
 	my $tildeEd_title = getTitle('tildeEd_title');
+	my $criteria_msg = getMessage('tilded_criteria_msg');
+	my $customize_title = getTitle('tildeEd_customize_title');
 	my $tilded_customize_msg = getMessage('tilded_customize_msg',
 		{ userspace => $userspace });
-	my $customize_title = getTitle('tildeEd_customize_title');
 	my $tilded_box_msg = getMessage('tilded_box_msg');
 
 	my $tilde_ed = slashDisplay('tildeEd', {
 		title			=> $tildeEd_title,
-		tilded_customize_msg	=> $tilded_customize_msg,
+		criteria_msg		=> $criteria_msg,
 		customize_title		=> $customize_title,
+		tilded_customize_msg	=> $tilded_customize_msg,
 		tilded_box_msg		=> $tilded_box_msg,
 
 		story023_default	=> \%story023_default,
@@ -1807,6 +1812,7 @@ sub editHome {
 		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
 		$fieldkey = 'uid';
 	}
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR scalar(localtime) . " user_edit: " . Dumper($user_edit);
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
@@ -2581,28 +2587,33 @@ sub saveHome {
 	}
 
 	# Set the story_never and story_always fields.
-	my $author_hr = $slashdb->getDescriptions('all-authors');
+	my $author_hr = $slashdb->getDescriptions('authors');
 	my $tree = $slashdb->getTopicTree();
 	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
 	my(@story_always_topic, @story_always_author, @story_always_nexus);
-	for my $key (sort grep /^topictid\d+$/, keys %$form) {
-		my($tid) = $key =~ /^topictid(\d+)$/;
-		next unless $tid && $tree->{$tid} && !$tree->{$tid}{nexus};
-		   if (!$form->{$key}) {		push @story_never_topic, $tid	}
-		elsif ($form->{$key} == 3) {		push @story_always_topic, $tid }
+	# Topics are either present (value=2) or absent (value=0).  If absent,
+	# push them onto the never list.  Otherwise, do nothing.  (There's no
+	# way to have an "always" topic, at the moment.)
+	for my $tid (grep { !$tree->{$_}{nexus} } keys %$tree) {
+		my $key = "topictid$tid";
+		if (!$form->{$key}) {			push @story_never_topic, $tid	}
 	}
-	for my $key (sort grep /^aid\d+$/, keys %$form) {
-		my($aid) = $key =~ /^aid(\d+)$/;
-		next unless $aid && $author_hr->{$aid};
-		   if (!$form->{$key}) {		push @story_never_author, $aid	}
-		elsif ($form->{$key} == 3) {		push @story_always_author, $aid }
+	# Authors are either present (value=2) or absent (value=0).  If
+	# absent, push them onto the never list.  Otherwise, do nothing.
+	# (There's no way to have an "always" author, at the moment.)
+	for my $aid (keys %$author_hr) {
+		my $key = "aid$aid";
+		if (!$form->{$key}) {			push @story_never_author, $aid	}
 	}
+	# Nexuses can have value 0, 2 or 3.  0 means the never list,
+	# and 3 means the always list.
 	for my $key (sort grep /^nexustid\d+$/, keys %$form) {
 		my($tid) = $key =~ /^nexustid(\d+)$/;
 		next unless $tid && $tree->{$tid} && $tree->{$tid}{nexus};
 		   if (!$form->{$key}) {		push @story_never_nexus, $tid	}
-		elsif ($form->{$key} == 3) {		push @story_always_nexus, $tid }
+		elsif ($form->{$key} == 3) {		push @story_always_nexus, $tid	}
 	}
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR scalar(localtime) . " s_n_t '@story_never_topic' s_n_a '@story_never_author' s_n_n '@story_never_nexus' s_a_n '@story_always_nexus' form: " . Dumper($form);
 	# Sanity check.
 	$#story_never_topic   = 299 if $#story_never_topic   > 299;
 	$#story_never_author  = 299 if $#story_never_author  > 299;
@@ -2677,6 +2688,7 @@ sub saveHome {
 		setToDefaults($user_edits_table, {}, { slashboxes => "" });
 	}
 
+#print scalar(localtime) . " uet: " . Dumper($user_edits_table);
 	$slashdb->setUser($uid, $user_edits_table);
 
 	editHome({ uid => $uid, note => $note });

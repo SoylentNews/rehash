@@ -97,6 +97,14 @@ and probably would be more interested in the Preferences links you see
 up top there, where you can customize [% constants.sitename %],
 change your password, or just click pretty widgets to kill time.
 
+[% CASE 'tilded_criteria_msg' %]
+	<p>[% constants.sitename %] posts stories into topical groups
+	we call Sections. Many of these sections include extra content
+	not normally displayed when you visit [% constants.sitename %].
+	Here is where you can choose to ignore subjects you have no
+	interest in, or to include all that extra sectional content
+	right alongside the rest of our stories.<p>
+
 [% CASE 'tilded_customize_msg' %]
 	<TABLE WIDTH="100%" BGCOLOR="[% user.colors.bg_2 %]" BORDER="0"><TR><TD>
 	<P><P>You can choose at most 20 boxes.

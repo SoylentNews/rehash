@@ -4,10 +4,14 @@ __description__
 Edit all those menus and checkboxes for authors, topics,
 sections (nexuses), and slashboxes.
 
-* title = passed to top titlebar
-* tilded_customize_msg = any text to display under that titlebar
-* customize_title = title for "customize" titlebar (slashboxes)
-* tilded_box_msg = any text to display under the list of slashboxes
+* title = passed to top titlebar, just above the section, author,
+  and topic selection
+* criteria_msg = a note to appear between that titlebar and the
+  section, author, and topic selection itself
+* customize_title = title for the titlebar just above the slashboxes
+* tilded_customize_msg = a note to appear between
+  the list of slashboxes and the User Space textbox
+* tilded_box_msg = any text to display under the User Space textbox
 
 * authorref = hashref of author information
 	$n = nickname for author with uid $n
@@ -45,93 +49,66 @@ __template__
 
 [% PROCESS titlebar title=title width="100%" %]
 
-<p>For each author, section, and topic, you may choose to have their stories
-appear on your homepage Always, Often, or Never. The difference between
-Often and Always is that sometimes stories are published to a section
-which may not be of general interest. Unless you have that story's section
-(or its author, or one of its topics) set to Always, you won't see them.
-<b>Never&nbsp;overrides</b> the other two settings. Even if a story falls
-into some Always and Often categories, just one Never category will keep
-you from seeing it on the homepage. So use "Never" carefully.
-<p>
+[% criteria_msg %]
 
-[% story023_data = Slash.db.getDescriptions('story023') %]
+[% story023_data = Slash.db.getDescriptions('story023');
+   DEFAULT checked = ' CHECKED' %]
 
 [%-	######################
-	# Authors and Sections
+	# Sections and Authors
 	######################
 -%]
 
-<TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="100%">
+<TR>
+
+[%-	# Sections (nexuses)
+-%]
+
+<TD VALIGN="TOP">
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	<TR>
-		<TH COLSPAN="2" BGCOLOR="[% user.colors.bg_3 %]"><FONT COLOR="[% user.colors.fg_3 %]">Authors</FONT></TH>
-		<TD><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3"></TD>
-		<TH COLSPAN="2" BGCOLOR="[% user.colors.bg_3 %]"><FONT COLOR="[% user.colors.fg_3 %]">Sections</FONT></TH>
+		<TH>Sections</TH>
+		<TH>&nbsp;All&nbsp;</TH>
+		<TH>Best</TH>
+		<TH>None</TH>
 	</TR>
-	<TR><TD COLSPAN="5"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="100" HEIGHT="3"></TD></TR>
-
-[% max_row = aid_order.max;
-   IF nexustid_order.max > max_row; max_row = nexustid_order.max; END;
-
-# Big ol' loop to display both authors, on the left,
-# and sections, on the right.
-
-i = 0;
-WHILE i <= max_row						-%]
-
-	<TR>
-[%	# Display the author cells for this row, if any.
-
-	IF i > aid_order.max					-%]
-		[%# no more author cells, leave blank space %]
-		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
-		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
-[%-	ELSE;
-		aid = aid_order.$i				-%]
-		<TD VALIGN="TOP" ALIGN="RIGHT" BGCOLOR="[% user.colors.bg_2 %]">
-[%-		authorref.$aid | strip_literal			-%]
-		&nbsp;</TD>
-		<TD VALIGN="TOP" ALIGN="LEFT"  BGCOLOR="[% user.colors.bg_2 %]">
-[%-		optionname = "aid" _ aid;
-		Slash.createSelect(
-			optionname,
-			story023_data,
-			story023_default.author.$aid,
-			1, 1)					-%]
-		</TD>
-[%-	END							-%]
-
-[%-	# center column, a white stripe				-%]
-
-		<TD>&nbsp;</TD>
-
-[%-	# Display the section cells for this row, if any.
-
-	IF i > nexustid_order.max				-%]
-		[%# no more nexustid cells, leave blank space	-%]
-		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
-		<TD BGCOLOR="[% user.colors.bg_2 %]">&nbsp;</TD>
-[%-	ELSE;
-		nexustid = nexustid_order.$i			-%]
-		<TD VALIGN="TOP" ALIGN="RIGHT" BGCOLOR="[% user.colors.bg_2 %]">
-[%-		nexusref.$nexustid | strip_literal		-%]
-		&nbsp;</TD>
-		<TD VALIGN="TOP" ALIGN="LEFT"  BGCOLOR="[% user.colors.bg_2 %]">
-[%-		optionname = "nexustid" _ nexustid;
-		Slash.createSelect(
-			optionname,
-			story023_data,
-			story023_default.nexus.$nexustid,
-			1, 1)					-%]
-		</TD>
-[%-	END							-%]
-
+[% FOREACH nexustid = nexustid_order %]
+	<TR ALIGN="CENTER">
+		[%-	# really should have nexusref have another field for the
+			# url of the (first) skin that uses it, and link this in
+			# here, but ... I'm in a hurry
+		-%]
+		<TD ALIGN="LEFT">[% nexusref.$nexustid | strip_literal %]</TD>
+[% FOREACH value = [ 3 2 0 ] -%]
+		<TD><INPUT TYPE="RADIO" NAME="nexustid[% nexustid %]" VALUE="[% value %]"
+			[%- IF story023_default.nexus.$nexustid == value; checked; END %]></TD>
+[%- END %]
 	</TR>
-[%
-	i = i + 1;
-	END # "while i"						%]
-
+[% END %]
 </TABLE>
+</TD>
+
+[%-	# Authors
+-%]
+
+<TD VALIGN="TOP">
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
+	<TR>
+		<TH>Authors</TH>
+	</TR>
+[% FOR aid = aid_order %]
+	<TR>
+		<TD><INPUT TYPE="CHECKBOX" NAME="aid[% aid %]"
+			[%- IF story023_default.author.$aid > 0; checked; END %]>
+			[% authorref.$aid | strip_literal %]</TD>
+	</TR>
+[% END %]
+</TABLE>
+</TD>
+
+</TR></TABLE>
+
 <BR>
 
 [%-	######################
@@ -139,7 +116,7 @@ WHILE i <= max_row						-%]
 	######################
 -%]
 
-<TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
 	<TR BGCOLOR="[% user.colors.bg_3 %]">
 		<TH COLSPAN="6"><FONT COLOR="[% user.colors.fg_3 %]">Topics</FONT></TH>
 	</TR>
@@ -150,15 +127,10 @@ WHILE i <= max_row						-%]
 	[%- IF loop.index % 3 == 0 -%]
 		<TR BGCOLOR="[% user.colors.bg_2 %]">
 	[%- END -%]
-		<TD VALIGN="TOP" ALIGN="RIGHT">
+		<TD VALIGN="TOP"><INPUT TYPE="CHECKBOX" NAME="topictid[% topictid %]"
+			[%- IF story023_default.topic.$topictid > 0; checked; END %]></TD>
+		<TD VALIGN="TOP" ALIGN="LEFT">&nbsp;
 	[%-	topicref.$topictid | strip_literal	-%]
-		&nbsp;</TD><TD VALIGN="TOP" ALIGN="LEFT">
-	[%-	optionname = "topictid" _ topictid;
-		Slash.createSelect(
-			optionname,
-			story023_data,
-			story023_default.topic.$topictid,
-			1, 1);					-%]
 		</TD>
 	[%- IF loop.index % 3 == 2 -%]
 		</TR>
