@@ -2014,7 +2014,7 @@ INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 
 
 # End of T_2_3_0_130, Start of T_2_3_0_131 - 2003/12/31
 
-INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid','Default for user\'s cookie_location value (also see users_info schema!)');
+INSERT INTO vars (name, value, description) VALUES ('cookie_location','none','Default for user\'s cookie_location value (also see users_info schema!)');
 
 UPDATE vars SET value=CONCAT(value,'|DL|DT|DD') WHERE name='approvedtags';
 UPDATE vars SET value=CONCAT(value,'|DL|DT|DD') WHERE name='approvedtags_break';
@@ -2032,6 +2032,20 @@ ALTER TABLE moderatorlog ADD COLUMN points_orig tinyint DEFAULT NULL;
 # USEPERL LAST UPDATED HERE
 
 # SLASHCODE LAST UPDATED HERE
+
+
+### do these ONLY IF you want cookies to work everywhere by default ...
+### it may invalidate existing user cookies if you've previously
+### been using logtokens, so beware -- pudge
+ALTER TABLE users_info MODIFY COLUMN cookie_location enum("classbid","subnetid","ipid","none") DEFAULT "none" NOT NULL AFTER session_login;
+REPLACE INTO vars (name, value, description) VALUES ('cookie_location','none','Default for user\'s cookie_location value (also see users_info schema!)');
+
+REPLACE INTO string_param (type, code, name) VALUES ('cookie_location','none','follows me everywhere');
+REPLACE INTO string_param (type, code, name) VALUES ('cookie_location','classbid','moves within a subnet');
+REPLACE INTO string_param (type, code, name) VALUES ('cookie_location','ipid','never moves');
+
+REPLACE INTO code_param (type, code, name) VALUES ('session_login',0,'lasts forever');
+REPLACE INTO code_param (type, code, name) VALUES ('session_login',1,'closes with browser');
 
 # End of T_2_3_0_131, Start of T_2_3_0_132 - 2004/01/27
 

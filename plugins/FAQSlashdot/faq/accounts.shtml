@@ -278,6 +278,33 @@ web browser rendering. <br>
     <br>
     <i><small> Answered by: <A href="mailto:malda@slashdot.org">CmdrTaco</a> <br>
     Last Modified: 1/06/03<br>
+    </small></i>
+
+<a name="ac1200"></A>
+    <H2>What are Login Sessions?</H2>
+    <P> A login session is a glorified cookie.  To provide some added
+    security, we you to determine the location and time duration for
+    your session.  The duration choices are 'Lasts Forever' and 'Closes
+    With Browser' and should be pretty self-explanatory.  The former is
+    good if you are the only person using your computer.  The latter is
+    nice if you are slightly paranoid, or often log in from remote
+    terminals.
+
+    <P>The second decision is your location.  The first choice is
+    'Never Moves' which basically means you have a static IP and you
+    never log out of Slashdot or share your computer.  The second
+    choice is 'Moves within Subnet' which is useful if you have a
+    desktop and never log out, but your ISP likes to change your IP
+    on you occasionally.  The last choice is 'Follows me Everywhere'
+    which is the choice for machines that move from network
+    to network.  This last option is the least secure, but oh-so
+    convenient.  It is also the default.<BR>
+
+    <BR>
+    <I><SMALL>Answered by: <A href="mailto:malda@slashdot.org">CmdrTaco</A> <br>
+    Last Modified: 1/25/04<BR>
+    </small></i>
+
   <P><BR>
   <HR>
   <TABLE>
