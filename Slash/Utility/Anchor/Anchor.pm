@@ -519,8 +519,10 @@ sub prepAds {
 
 ########################################################
 sub getAd {
-	my($num) = @_;
+	my($num, $need_box) = @_;
 	$num ||= 1;
+	$need_box ||= 0;
+	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
 	unless ($ENV{SCRIPT_NAME}) {
@@ -536,7 +538,6 @@ EOT
 	# If this is the first time that getAd() is being called, we have
 	# to set up all the ad data at once before we can return anything.
 	if (!defined $user->{state}{ad}) {
-		my $constants = getCurrentStatic();
 		if ($constants->{use_minithin} && $constants->{plugin}{MiniThin}) {
 			# new way
 			my $minithin = getObject('Slash::MiniThin', { db_type => 'reader' });
@@ -547,7 +548,14 @@ EOT
 		}
 	}
 
-	return $user->{state}{ad}{$num} || "";
+	if ($num == 2 && $need_box) {
+		# we need the ad wrapped in a fancybox
+		if ($user->{state}{ad}{$num}) {
+			return fancybox($constants->{fancyboxwidth}, 'Advertisement', $user->{state}{ad}{$num}, 1, 1);
+		} else { return ""; }
+	} else {
+		return $user->{state}{ad}{$num} || "";
+	}
 }
 
 
