@@ -1,4 +1,4 @@
-slash-1.0.5, 2000.06.05
+slash-1.0.5, 2000.06.xx
 -----------------------
 
 *	Added some fixes for Slash::reparentComments()
@@ -14,35 +14,45 @@ slash-1.0.5, 2000.06.05
 *	Added /'s before links in mainmenu block in slashdata_dump.sql
 	(David-T)
 
-*	Took form checking code out of .pl files and put into methods
-	in Slash.pm - 
-		insertFormkey - inserts new formkey
-		checkSubmission - checks to see if a form submission is valid
-		checkTimesPosted - checks to see if max posts reached
-		submittedAlready - checks to see if a form with a given 
-		formkey has been posted already
-		formAbuse - logs attempts to fook, break, or flood a 
-		particlar form
-		formSuccess - updates formkeys table with a submit time 
-		for a given formkey and increments value to 1 (submitted).	
-		
+*	Took form checking code out of .pl files and put into functions
+	in Slash.pm:
+
+		insertFormkey:	    inserts new formkey
+		checkSubmission:    checks to see if a form submission
+				    is valid
+		checkTimesPosted:   checks to see if max posts reached
+		submittedAlready:   checks to see if a form with a given 
+				    formkey has been posted already
+		formAbuse:	    logs attempts to fook, break, or
+				    flood a particlar form
+		formSuccess:	    updates formkeys table with a submit
+				    time for a given formkey and
+				    increments value to 1 (submitted)
+
 *	Warn user before they try to submit that max submissions has
 	been reached (comments.pl and submit.pl)
 
-* 	Fixed code to check if formkey for a submission is being submitted 
-	by the IP address that it was initially created under.
- 
+* 	Fixed code to check if formkey for a submission is being
+	submitted  by the IP address that it was initially created under
+
 *	Changed the id column in formkeys to be "uid-$ENV{REMOTE_ADDR}" 
 	(was just uid) for logged in users
 
-*	New method in Slash.pm - errorMessage. Prints out whatever 
-	argument it receives 
+*	New function Slash::errorMessage(), prints out whatever 
+	argument it receives
 
-* 	Added/modified tables 
-		abusers - added columns reason, query_string 
-		formkey - changed comment_length to content length
-		host_name - changed to varchar(30) - was varchar(15) 
-		
+* 	Added/modified tables:
+		abusers:    added columns reason, query_string 
+		formkey:    changed comment_length to content length
+		host_name:  changed to varchar(30) - was varchar(15) 
+
+*	Slightly changed regex in submit.pl to not munge submitted
+	URLs that are directly preceded by a > character
+
+*	Strip out all trailing space from $introtext in submit.pl
+
+*	Send Mail::Sendmail warnings in Slash::sendEmail() to
+	Slash::apacheLog()
 
 slash-1.0.4, 2000.05.31
 -----------------------
@@ -174,12 +184,12 @@ slash-1.0.3, 2000.05.22
 	only be displayed at depth of max_depth from the parent comment
 	on any given page
 
-*	Fixed comment HTML in ULs by putting sub-lists properly wrapped in
-	the parent LI tags (ToastyKen)
+*	Fixed comment HTML in ULs by putting sub-lists properly wrapped
+	in the parent LI tags (ToastyKen)
 
-*	To slashd, added sigtrap to slashd (so if something kills slashd,
-	it will be logged), automatic directory creation to prog2file(),
-	bare-bones WML creation
+*	To slashd, added sigtrap to slashd (so if something kills
+	slashd, it will be logged), automatic directory creation to
+	prog2file(), bare-bones WML creation
 
 *	Background dailyStuff when running from slashd
 
@@ -282,15 +292,17 @@ slash-1.0.2, 2000.04.12
 
 *	Removed spurious '";' text in pollBooth.pl
 
-*	Added maximum posts per IP address via $I{max_posts_allowed} in 
-	slashdotrc.pl and modified comments.pl to use it. Also created table 
-	"abusers" to log anyone who exceeds the maximum postings for the day.
+*	Added maximum posts per IP address via $I{max_posts_allowed}
+	in slashdotrc.pl and modified comments.pl to use it; created
+	table "abusers" to log anyone who exceeds the maximum postings
+	for the day
 
 
 slash-1.0.1, 2000.04.03
 -----------------------
 
-* 	small fix to fancybox,titlebar blocks. Included in dump and update script
+* 	small fix to fancybox, titlebar blocks; included in dump
+	and update scripts
 
 
 slash-1.0.0, 2000.03.30
@@ -338,11 +350,12 @@ slash-1.0.0, 2000.03.30
 	site color editor
 
 *	Added a document that walks a user through the admin interface
-	that is also accessable from the help admin menu "getting_started.shtml".
+	that is also accessable from the help admin menu
+	"getting_started.shtml"
 
 *	Fixed utils/slashd to not have to "su". It now runs setuser, and
 	modified slashd to open a pid file in logs, which is used to get
-	the pid to start/stop/restart the slashd daemon.
+	the pid to start/stop/restart the slashd daemon
 
 
 slash-0.9.5, 2000.03.23
@@ -512,19 +525,20 @@ slash-0.9.4, 2000.03.15
 	if submiss_view set to true in slashdotrc.pl
 
 *	Various fixes and enhancements to admin.pl. 
-		- Fixed blocks and sectionblocks table to have 1:1 relation
-		This is in the dump or fix_blocks.sql and alter_blocks.sql 
-		for those who aren't using the full dump.
-		- Changed various submit buttons to have various form names 
-		instead of "op" to allow buttons to display discriptive
-		action names. 
-		- Added block deletion to the blocks editing page. 
-		- Added form element for "portal" value
-		- Cleaned up code to work the same for all types of blocks
-		and to work with both tables correctly
-		- Cleaned up the filter editing blocks 
-		- Fixed broken topics and section editing. 
-		- Fixes to sections.pl
+		* Fixed blocks and sectionblocks table to have 1:1
+		  relation, put in the dump, or fix_blocks.sql and
+		  alter_blocks.sql for those who aren't using the
+		  full dump
+		* Changed various submit buttons to have various form
+		  names instead of "op" to allow buttons to display
+		  descriptive action names
+		* Added block deletion to the blocks editing page
+		* Added form element for "portal" value
+		* Cleaned up code to work the same for all types of
+		  blocks and to work with both tables correctly
+		* Cleaned up the filter editing blocks
+		* Fixed broken topics and section editing
+		* Fixes to sections.pl
 
 *	Added vhost.httpd.conf example configuration for multiple Slash
 	instances running as virtual hosts

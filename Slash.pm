@@ -54,8 +54,8 @@ BEGIN {
 		getEvalBlock getTopic getAuthor dispStory lockTest getSlashConf
 		getDateFormat dispComment getDateOffset linkComment redirect
 		getFormkey insertFormkey getFormkeyId checkFormkey intervalString
-		checkSubmission checkTimesPosted formSuccess formAbuse submittedAlready
-		formFailure errorMessage
+		checkSubmission checkTimesPosted formSuccess formAbuse
+		submittedAlready formFailure errorMessage
 	);
 	$CRLF = "\015\012";
 }
@@ -748,7 +748,7 @@ sub sendEmail {
 		to => $addr,
 		body => $content,
 		from => $I{mailfrom}
-	) or warn $Mail::Sendmail::error;
+	) or apacheLog("mail error: Can't send $subject to $addr: $Mail::Sendmail::error");
 }
 
 
@@ -1465,12 +1465,12 @@ EOT
 
 ########################################################
 sub header {
-	my($title, $section) = @_;
+	my($title, $section, $status) = @_;
 	my $adhtml = '';
 	$title ||= '';
 
 	unless ($I{F}{ssi}) {
-		print "HTTP/1.1 200 OK$CRLF";
+		printf "HTTP/1.0 %s$CRLF", $status ? $status : '200 OK';
 		print $I{SETCOOKIE} if $I{SETCOOKIE};
 		print "Server: $ENV{SERVER_SOFTWARE}$CRLF" if $ENV{SERVER_SOFTWARE};
 		print "Pragma: no-cache$CRLF"
@@ -2708,7 +2708,7 @@ sub submittedAlready {
 
 		my ($submitted_already,$submit_ts) = 0;
 
-		my $cant_find_formkey_err =<<EOT;
+		my $cant_find_formkey_err = <<EOT;
 <P><B>We can't find your formkey.</B></P>
 <P>You must fill out a form and submit from that
 form as required.</P>
@@ -2724,7 +2724,7 @@ EOT
 			# interval of when it was submitted (this won't be used unless it's already been submitted)
 			my $interval = time() - $submit_ts;
 			my $interval_string = intervalString($interval);
-			my $submitted_already_err =<<EOT;
+			my $submitted_already_err = <<EOT;
 <B>Easy does it!</B>
 <P>This comment has been submitted already, $interval_string ago.
 No need to try again.</P>
@@ -2749,12 +2749,12 @@ sub errorMessage {
 sub formAbuse {
 	my $reason = shift;
 	# logem' so we can banem'
-       	sqlInsert("abusers", {
-       		host_name => $ENV{REMOTE_ADDR},
-              	pagename => $ENV{SCRIPT_NAME},
-		querystring => $ENV{QUERY_STRING},
-		reason => $reason,
-               	-ts => 'now()',
+	sqlInsert("abusers", {
+		host_name	=> $ENV{REMOTE_ADDR},
+		pagename	=> $ENV{SCRIPT_NAME},
+		querystring	=> $ENV{QUERY_STRING},
+		reason		=> $reason,
+		-ts		=> 'now()',
 	});
 
 	return;
@@ -2812,11 +2812,11 @@ sub checkSubmission {
 	if ($interval < $limit) {
 		my $limit_string = intervalString($limit);
 		my $interval_string = intervalString($interval);
-		my $speed_limit_err =<<EOT;
+		my $speed_limit_err = <<EOT;
 <B>Slow down cowboy!</B><BR>
 <P>$I{sitename} requires you to wait $limit_string between
 each submission of $ENV{SCRIPT_NAME} in order to allow everyone to have a fair chance to post.</P>
-It's been $interval_string since your last submission!<BR>
+<P>It's been $interval_string since your last submission!</P>
 EOT
 		errorMessage($speed_limit_err);
 		return(0);
@@ -2830,7 +2830,7 @@ EOT
 			if ($I{F}{formkey} !~ /\w{10}/ || $I{F}{formkey} =~ /^(.)\1+$/ || ! $is_a_valid_key) {
 				# invalid form key
 				formAbuse("invalid form key");
-				my $invalid_formkey_err = "<br><b>Invalid form key!</b><br>\n"; 
+				my $invalid_formkey_err = "<P><B>Invalid form key!</B></P>\n"; 
 				errorMessage($invalid_formkey_err);
 				return(0);
 			} 
@@ -2846,8 +2846,8 @@ EOT
 			formAbuse("max form submissions $max reached");
 			my $timeframe_string = intervalString($I{formkey_timeframe});
 			my $max_posts_err =<<EOT;
-<b>You've reached you limit of maximum submissions to $ENV{SCRIPT_NAME} : 
-$max submissions over $timeframe_string!</b><br>
+<P><B>You've reached you limit of maximum submissions to $ENV{SCRIPT_NAME} : 
+$max submissions over $timeframe_string!</B></P>
 EOT
 			errorMessage($max_posts_err);
 			return(0);
