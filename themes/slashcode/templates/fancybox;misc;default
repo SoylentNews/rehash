@@ -20,7 +20,7 @@ __name__
 fancybox
 __template__
 [% IF center %]<CENTER>[% END %]
-[% width = width || 200 %]
+[% width = width || constants.fancyboxwidth || 200 %]
 
 	<TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 		<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">
