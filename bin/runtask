@@ -299,7 +299,7 @@ sub main {
 	slashdLog("$task_name begin") if verbosity() >= 2;
 	my $start_time = Time::HiRes::time;
 	# runtask doesn't fork, there wouldn't be much point
-	my $rc = $subref->($virtual_user, $constants, $slashdb, $user);
+	my $rc = $subref->($virtual_user, $constants, $slashdb, $user, {});
 	if (verbosity() >= 2) {
 		my $duration = sprintf("%.2f", Time::HiRes::time - $start_time);
 		slashdLog("$task_name end: $rc (ran in ${duration}s)");
