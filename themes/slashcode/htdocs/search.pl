@@ -66,8 +66,14 @@ sub linkSearch {
 		$x =  $C->{$_} if defined $C->{$_};
 		$x =  $I{F}{$_} if defined $I{F}{$_} && !$x;
 		$x =~ s/ /+/g;
-		$r .= "$_=$x&" if defined $x;
+		next if $x eq "";
+		if ($_ eq 'html_query') {
+			$r .= "query=$x&";
+		} else {
+			$r .= "$_=$x&";
+		}
 	}
+	$r =~ s/&$//;
 
 	$r = qq!<A HREF="$ENV{SCRIPT_NAME}?$r">$C->{'link'}</A>!;
 }
