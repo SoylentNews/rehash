@@ -206,7 +206,9 @@ sub prepareStory {
 	}
 
 	$storyref->{introtext} = parseSlashizedLinks($storyref->{introtext});
+	$storyref->{introtext} = processSlashTags($storyref->{introtext});
 	$storyref->{bodytext} =  parseSlashizedLinks($storyref->{bodytext});
+	$storyref->{bodytext} =  processSlashTags($storyref->{bodytext});
 
 	$storyref->{authorref} = $self->getAuthor($storyref->{uid});
 
