@@ -69,6 +69,7 @@ sub main {
 	# this makes it so *no* results get returned, so i changed it back
 	#$form->{section}	||= $constants->{section}; # Set to our current section if section is not passed in
 	$form->{section}	||= '';
+	$form->{section}	= '' if $form->{section} eq 'index';
 	$form->{threshold}	= getCurrentUser('threshold') if !defined($form->{threshold});
 
 	# get rid of bad characters
