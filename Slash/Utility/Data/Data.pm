@@ -1467,15 +1467,15 @@ sub breakHtml {
 		(?:^|\G|\s)		# Must start at a word bound
 		(?:
 			(?>(?:<[^>]+>)*)	# Eat up HTML tags
-			(?:			# followed by either
+			(			# followed by either
 				$nbe		# an entity (char. ref.)
-			|	\S		# or an ordinary char
+			|	(?!$nbe)\S	# or an ordinary char
 			)
 		){$mwl}			# $mwl non-HTML-tag chars in a row
 	)}{
-		substr($1, 0, -1)
+		substr($1, 0, -length($2))
 		. $workaround_start
-		. substr($1, -1)
+		. substr($1, -length($2))
 		. $workaround_end
 	}gsex;
 
@@ -2257,7 +2257,7 @@ sub balanceTags {
 			} else {
 				# Close tag not on stack; just delete it
 				my $p = pos($html) - length($whole);
-				$html =~ s|^(.{$p})\Q$whole\E|$1|si;
+				substr($html, $p, length($whole)) = '';
 				pos($html) = $p;
 			}
 
