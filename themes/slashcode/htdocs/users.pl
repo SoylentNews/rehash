@@ -1601,8 +1601,8 @@ sub saveUser {
 	$homepage = fudgeurl($homepage);
 	$homepage = URI->new_abs($homepage, $constants->{absolutedir})
 			->canonical
-			->as_string;
-	$homepage = substr($homepage, 0, 100) if $homepage;
+			->as_string if $homepage ne '';
+	$homepage = substr($homepage, 0, 100) if $homepage ne '';
 
 	# for the users table
 	my $user_edits_table = {

@@ -46,7 +46,7 @@ if ($constants->{backup_db_user}) {
 
 ################################################################################
 # really tired of deleting the thing if portald pukes ;)
-sub END {
+END {
     doLogExit('portald');
 }
 
@@ -164,11 +164,20 @@ sub getRDF {
 		for my $item (@{$rss->{items}}) {
 			# hopefully this xmldecode() will break nothing
 
+			# my($link, $title) = map { xmldecode($_) } @{$item}{'link', 'title'};
+			# $str .= qq!<LI><A HREF="$link">$title</A></LI>\n!;
+
 			   # "<a href=\"[% item.link %]\">([% item.description %]) [% item.title %]</a>\n"; 
-			for(keys %{$item}) {
+			for (keys %{$item}) {
 			    $item->{$_} = xmldecode($item->{$_});
 			}
-			$str .= slashDisplay($template_name, { item => $item }, { Nocomm => 1, Return => 1, Page => 'portald' });
+			$str .= slashDisplay($template_name, {
+				item	=> $item,
+			}, {
+				Nocomm	=> 1,
+				Return	=> 1,
+				Page	=> 'portald'
+			});
 		}
 
 		setblock($bid, "$str$other");
@@ -229,7 +238,7 @@ for (@{$RDFlist}) {
 getTop10Comments();
 getSlashdotPoll();
 getUptime();
-# setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
+setblock("rand", $slashdb->randomBlock()); # NOT backupdb!
 
 foreach (keys %savedBlocks) {
 	# NOT backupdb!

@@ -1065,6 +1065,7 @@ sub _hard_linkStory {
 	    $link .= qq[">$story_link->{link}</A>];
 	    return $link;
 	} else {
+	    # this looks wrong ... tid=$tid won't have much effect on .shtml -- pudge
 	    return qq[<A HREF="$constants->{rootdir}/$story_link->{section}/$story_link->{sid}.shtml?tid=$story_link->{tid}">$story_link->{link}</A>];
 	}
 }
@@ -1082,23 +1083,23 @@ sub _hard_linkComment {
 		: $comment->{subject};
 
 	my $display = qq|<A HREF="$constants->{rootdir}/comments.pl?sid=$comment->{sid}|;
-	$display .= "&op=$comment->{op}" if $comment->{op};
+	$display .= "&amp;op=$comment->{op}" if $comment->{op};
 		# $comment->{threshold}? Hmm. I'm not sure what it
 		# means for a comment to have a threshold. If it's 0,
 		# does the following line do the right thing? - Jamie
 		# You know, I think this is a bug that comes up every so often. But in 
 		# theory when you go to the comment link "threshhold" should follow 
 		# with you. -Brian
-	$display .= "&threshold=" . ($comment->{threshold} || $user->{threshold});
-	$display .= "&commentsort=$user->{commentsort}";
-	$display .= "&tid=$user->{state}{tid}" if $user->{state}{tid};
-	$display .= "&mode=$user->{mode}";
-	$display .= "&startat=$comment->{startat}" if $comment->{startat};
+	$display .= "&amp;threshold=" . ($comment->{threshold} || $user->{threshold});
+	$display .= "&amp;commentsort=$user->{commentsort}";
+	$display .= "&amp;tid=$user->{state}{tid}" if $user->{state}{tid};
+	$display .= "&amp;mode=$user->{mode}";
+	$display .= "&amp;startat=$comment->{startat}" if $comment->{startat};
 
 	if ($printcomment) {
-		$display .= "&cid=$comment->{cid}";
+		$display .= "&amp;cid=$comment->{cid}";
 	} else {
-		$display .= "&pid=" . ($comment->{realpid} || $comment->{pid});
+		$display .= "&amp;pid=" . ($comment->{realpid} || $comment->{pid});
 		$display .= "#$comment->{cid}" if $comment->{cid};
 	}
 

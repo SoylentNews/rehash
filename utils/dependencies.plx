@@ -7,6 +7,7 @@ use Data::Dumper;
 
 my %data = (
 	'Slash' => [qw(
+		Slash::Constants
 		Slash::DB
 		Slash::Display
 		Slash::Utility
@@ -24,6 +25,8 @@ my %data = (
 		Slash
 		Slash::Apache
 		Slash::Utility
+	)],
+	'Slash::Constants' => [qw(
 	)],
 	'Slash::DB' => [qw(
 		Slash::DB::Utility
@@ -58,6 +61,13 @@ my %data = (
 		Slash::DB
 		Slash::DB::Utility
 	)],
+	'Slash::Test' => [qw(
+		Slash
+		Slash::Constants
+		Slash::Display
+		Slash::Utility
+		Slash::XML
+	)],
 	'Slash::Utility' => [qw(
 		Slash::Utility::Access
 		Slash::Utility::Anchor
@@ -79,6 +89,7 @@ my %data = (
 		Slash::Utility::Environment
 	)],
 	'Slash::Utility::Data' => [qw(
+		Slash::Constants
 		Slash::Utility::Environment
 	)],
 	'Slash::Utility::Display' => [qw(

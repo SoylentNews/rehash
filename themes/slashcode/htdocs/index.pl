@@ -275,7 +275,7 @@ sub displayStories {
 				if ($user->{threshold} > -1 && $cc ne $thresh) {
 					$cclink[0] = linkStory({
 						sid		=> $sid,
-						tid	=> $tid,
+						tid		=> $tid,
 						threshold	=> $user->{threshold},
 						'link'		=> $thresh,
 						section		=> $thissection
@@ -285,7 +285,7 @@ sub displayStories {
 
 			$cclink[1] = linkStory({
 				sid		=> $sid,
-				tid	=> $tid,
+				tid		=> $tid,
 				threshold	=> -1,
 				'link'		=> $cc || 0,
 				section		=> $thissection

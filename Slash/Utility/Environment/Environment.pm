@@ -966,6 +966,12 @@ sub setCookie {
 	my $cookiedomain = $constants->{cookiedomain};
 	my $cookiepath   = $constants->{cookiepath};
 
+	# note that domain is not a *host*, it is a *domain*,
+	# so "slashdot.org" is an invalid domain, but
+	# ".slashdot.org" is OK.  the only way to set a cookie
+	# to a *host* is to leave the domain blank, which is
+	# why we set the first cookie with no domain. -- pudge
+
 	# domain must start with a '.' and have one more '.'
 	# embedded in it, else we ignore it
 	my $domain = ($cookiedomain && $cookiedomain =~ /^\..+\./)
@@ -987,8 +993,8 @@ sub setCookie {
 	);
 
 	$cookie->expires('+1y') unless $session;
-
 	$cookie->bake;
+
 	if ($domain) {
 		$cookie->domain($domain);
 		$cookie->bake;
