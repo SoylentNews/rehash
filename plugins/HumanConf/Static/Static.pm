@@ -33,13 +33,9 @@ sub new {
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
 
-	# Use trial and error to find a "fallback" font we like.
-	# If we want to get fancy, we could do the same with some
-	# TTF fonts which could scale, and try to find good point
-	# sizes for them too (names of TTF fonts should be stored
-	# in a var).
 	$self->{imagemargin} = $constants->{hc_q1_margin} || 6;
 
+	# Use a bit of randomness and fallback to find a font we like.
 	my @possible_fonts = @{$constants->{hc_possible_fonts}};
 	@possible_fonts = ( gdMediumBoldFont, gdLargeFont, gdGiantFont ) if !@possible_fonts;
 	@possible_fonts = sort { int(rand(3))-1 } @possible_fonts;
