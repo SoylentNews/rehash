@@ -67,7 +67,7 @@ sub handler {
 sub _send_rss {
 	my($r, $type) = @_;
 	$r->content_type('text/xml');
-	$r->status(200);
+	$r->status(202);
 	$r->send_http_header;
 	$r->print(_get_rss_msg($type));
 	return DONE;
