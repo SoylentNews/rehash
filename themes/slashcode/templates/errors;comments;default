@@ -114,7 +114,7 @@ ELSE; "You've already shared your thoughts"; END %]
 with us that many times. Take a breather, and come back and see us in
 24 hours or so.
 <P>If you think this is unfair, please email
-[% IF constants.adminmail_mod; constants.adminmail_mod;
+[% IF constants.adminmail_post; constants.adminmail_post;
 ELSE; constants.adminmail; END %]
 with your
 [% IF user.is_anon %]

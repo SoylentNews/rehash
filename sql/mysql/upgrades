@@ -1057,10 +1057,15 @@ CREATE TABLE accesslog_admin (
 	INDEX ts (ts),
 	PRIMARY KEY (id)
 ) TYPE = myisam;
-#This was missed sometime in the past -Brian
+
+# This was missed sometime in the past -Brian
 INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','This turns off delayed inserts (which you probably want to do)');
 
 # You need to manually copy/symlink stats.pl from plugins/Stats into htdocs to use
 # the new stats.pl program
 
 # USEPERL LAST UPDATED HERE
+
+# Set to email address(es) appropriate for your site, of course.
+INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@example.com','All admin mail about comment posting goes here');
+

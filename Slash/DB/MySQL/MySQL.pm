@@ -5090,6 +5090,7 @@ sub getSlashConf {
 		# same as absolutedir.
 	$conf{absolutedir_secure} ||= $conf{absolutedir};
 	$conf{adminmail_mod}	||= $conf{adminmail};
+	$conf{adminmail_post}	||= $conf{adminmail};
 	$conf{basedir}		||= "$conf{datadir}/public_html";
 	$conf{imagedir}		||= "$conf{rootdir}/images";
 	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";
