@@ -241,7 +241,7 @@ sub displayRSS {
 			},
 			title		=> $article->[2],
 			description	=> strip_mode($article->[1], $article->[4]),
-			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]",
+			'link'		=> root2abs() . '/~' . fixparam($nickname) . "/journal/$article->[3]",
 		};
 	}
 
@@ -270,7 +270,7 @@ sub displayRSS {
 		channel => {
 			title		=> "$title $journals",
 			description	=> "$title $constants->{sitename} $journals",
-			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($juser->{nickname}) . $link,
+			'link'		=> root2abs() . '/~' . fixparam($juser->{nickname}) . $link,
 			creator		=> $juser->{nickname},
 		},
 		image	=> 1,
