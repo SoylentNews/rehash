@@ -845,11 +845,6 @@ sub showInfo {
 			$form->{userfield} = $uid if $admin_flag;
 		}
 
-		# no can do boss-man
-		if (isAnon($uid)) {
-			return displayForm();
-		}
-
 	} elsif ($user->{is_admin}) {
 		$id ||= $form->{userfield} || $user->{uid};
 		if ($id =~ /^\d+$/) {
@@ -899,8 +894,14 @@ sub showInfo {
 		$requested_user = $slashdb->getUser($uid);
 	}
 
+	# Can't get user data for the anonymous user.
+	if (isAnon($uid)) {
+		header(getMessage('user_header'));
+		return displayForm();
+	}
+
 	my $user_change = { };
-	if ($fieldkey eq 'uid' && $uid != $user->{uid}) {
+	if ($fieldkey eq 'uid' && !$user->{is_anon} && $uid != $user->{uid}) {
 		# Store the fact that this user last looked at that user.
 		# For maximal convenience in stalking.
 		$user_change->{lastlookuid} = $uid;
@@ -2422,6 +2423,8 @@ sub displayForm {
 		savemiscopts	=> 'loginForm',
 		default		=> 'loginForm'
 	};
+
+	$op = 'default' if !defined($ops->{$op});
 
 	my($title, $title2, $msg1, $msg2) = ('', '', '', '');
 
