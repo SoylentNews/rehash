@@ -1722,19 +1722,16 @@ INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder
 
 # DEVCHANNEL LAST UPDATED HERE
 
-
-
 INSERT INTO vars (name, value, description) VALUES ('no_prerendered_stories','0','Turn off use of prerendered stories in display');
 
-#added to allow for more excluded topics for subscribers
-alter table users_index modify column extid text;
+ALTER TABLE users_index CHANGE COLUMN extid extid text;
 
 # added the following to allow for date released polls. "nodisplay" polltype currently not-used 
 # but will likely be soon defaults to set all polls to be section polls -- you'll want to make 
 # sure this is set correctly for all polls currently showing, and it's probably best to update 
 # old ones which are story based to the correct type
 
-alter table pollquestions add polltype enum ("nodisplay","section","story") default 'section';
+ALTER TABLE pollquestions ADD COLUMN polltype ENUM("nodisplay", "section", "story") DEFAULT 'section';
 
 # some sql to help fix old question polls-- if you're using MySQL 4.0.2 or higher and have 
 # multi-table updates:
@@ -1745,4 +1742,11 @@ alter table pollquestions add polltype enum ("nodisplay","section","story") defa
 # select qid from stories where qid is not null;
 #   followed by the statement below--you'll have to fill in the qids yourself
 #  update pollquestions set polltype='story' where qid in( qids from previous query )
+
+# memcached, see http://www.danga.com/memcached/
+INSERT INTO vars (name, value, description) VALUES ('default_maxcommentsize','4096','Default user pref value, if you change the schema default for users_comments.maxcommentsize, change this too');
+INSERT INTO vars (name, value, description) VALUES ('memcached','0','Use memcached?');
+INSERT INTO vars (name, value, description) VALUES ('memcached_debug','0','Turn on debugging for memcached?');
+INSERT INTO vars (name, value, description) VALUES ('memcached_servers','127.0.0.1:11211','Space-sep list of servers for memcached in host:port format; to weight a server append =n');
+
 

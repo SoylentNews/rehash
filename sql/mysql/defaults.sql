@@ -690,6 +690,7 @@ INSERT INTO vars (name, value, description) VALUES ('daily_tz','EST','Base timez
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
 INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');
+INSERT INTO vars (name, value, description) VALUES ('default_maxcommentsize','4096','Default user pref value, if you change the schema default for users_comments.maxcommentsize, change this too');
 INSERT INTO vars (name, value, description) VALUES ('default_rss_template','default','name of default rss template used by portald');
 INSERT INTO vars (name, value, description) VALUES ('defaultcommentstatus','0','default code for article comments- normally 0=posting allowed');
 INSERT INTO vars (name, value, description) VALUES ('defaultdisplaystatus','0','Default display status ...');
@@ -777,6 +778,9 @@ INSERT INTO vars (name, value, description) VALUES ('max_users_viewings','30','h
 INSERT INTO vars (name, value, description) VALUES ('maxkarma','50','Maximum karma a user can accumulate');
 INSERT INTO vars (name, value, description) VALUES ('maxpoints','5','The maximum number of points any moderator can have');
 INSERT INTO vars (name, value, description) VALUES ('maxtokens','40','Token threshold that must be hit to get any points');
+INSERT INTO vars (name, value, description) VALUES ('memcached','0','Use memcached?');
+INSERT INTO vars (name, value, description) VALUES ('memcached_debug','0','Turn on debugging for memcached?');
+INSERT INTO vars (name, value, description) VALUES ('memcached_servers','127.0.0.1:11211','Space-sep list of servers for memcached in host:port format; to weight a server append =n');
 INSERT INTO vars (name, value, description) VALUES ('metamod_sum','3','sum of moderations 1 for release (deprecated)');
 INSERT INTO vars (name, value, description) VALUES ('min_expiry_comm','10','Lowest value for comment expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('min_expiry_days','7','Lowest value for duration expiry trigger.');
