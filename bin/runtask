@@ -24,11 +24,16 @@ use Slash;
 use Slash::Display;
 use Slash::Utility;
 
-use vars qw( %opts %task $me $task_name $virtual_user $constants $slashdb $user $dir );
+use vars qw(
+	%opts %task $me $task_name $hard_verbosity
+	$virtual_user $constants $slashdb $user $dir
+);
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
 (my $SLASH_PREFIX = $Bin) =~ s|/[^/]+/?$||;
+$SLASH_PREFIX = "/usr/local/slash"
+	if !-e "$SLASH_PREFIX/slash.sites" || !-f _ || !-r _;
 
 main();
 exit 0;
@@ -60,6 +65,7 @@ sub db_time {
 
 { my($last_level, $last_level_confirm) = (undef, undef);
 sub verbosity {
+	return $hard_verbosity if defined($hard_verbosity);
 	my $my_time = time;
 	if (!$last_level_confirm
 		or $my_time < $last_level_confirm + 30) {
@@ -214,7 +220,7 @@ sub init_cron {
 
 sub main {
 	# Remember to doublecheck these match usage()!
-	usage('Options used incorrectly') unless (getopts(':hlo:u:v', \%opts));
+	usage('Options used incorrectly') unless (getopts('hvlV:o:u:', \%opts));
 	usage() if $opts{'h'};
 	version() if $opts{'v'};
 	$opts{'u'} ||= 'slash';
@@ -227,6 +233,12 @@ sub main {
 		exit unless (DBIx::Password::checkVirtualUser($opts{'u'}));
 	} else {
 		$virtual_user = parse_slash_sites($opts{'u'});
+	}
+
+	if (defined($opts{V}) && $opts{V} =~ /^([0123])$/) {
+		$hard_verbosity = $opts{V};
+	} else {
+		$hard_verbosity = undef;
 	}
 
 	createEnvironment($virtual_user);
@@ -274,22 +286,27 @@ sub usage {
 
 Usage: $PROGNAME [OPTIONS] task_name
 
-This utility creates test comments for a given Slash site. This program is for
-testing purposes, only, particularly for those ambitious Slash users out there
-who want to try their hand at modifying the comment or moderation systems.
+This utility runs an individual slashd task from the command line;
+it's useful when you don't want to have to wait for its timespec to
+come around on slashd, when another task is occupying slashd's time,
+or just for testing purposes.  Output is sent to both slashd.log and
+the console.
 
 Main options:
 	-h	Help (this message)
 	-v	Version
-	-l	list tasks for this 
 	-u	Virtual user (must exist in /usr/local/slash/slash.sites)
 
+	-l	List tasks for this virtual user
+
+	-V	Verbosity (overrides the vars {runtask,slashd}_verbosity)
+
 	-o	String of comma separated list of key=value pairs. Each 
-		task can define it's own set of options, see task specific
+		task can define its own set of options, see task specific
 		documentation for more details.
 
 task_name	Name of the task in DATADIR/tasks to run
-		(i.e. /usr/local/slash/site/SITENAME/tasks)
+		(usually /usr/local/slash/site/SITENAME/tasks/)
 
 EOT
 	exit;
