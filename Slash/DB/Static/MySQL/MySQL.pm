@@ -53,6 +53,7 @@ sub sqlShowSlaveStatus {
 	return $statlist;
 }
 
+########################################################
 sub showQueryCount {
 	my ($self) = @_;
 	$self->sqlConnect();

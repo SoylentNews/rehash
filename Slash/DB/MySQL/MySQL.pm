@@ -2300,8 +2300,9 @@ sub getDB {
 
 } # end closure surrounding getDBs and getDB
 
+#################################################################
 sub getDBVirtualUsers {
-	my ($self) = @_;
+	my($self) = @_;
 	return $self->sqlSelectColArrayref('virtual_user', 'dbs')
 }
 
@@ -2994,7 +2995,8 @@ sub saveTopic {
 				errorLog("$DBI::errstr");
 				# only try a few times before giving up
 				# Don't we want to return false on failure? - Jamie
-				return -1 if ++$tries > 5;
+				# i copied it from createComment ... but you're right i think -- pudge
+				return 0 if ++$tries > 5;
 				goto RETRY;
 			}
 		}
