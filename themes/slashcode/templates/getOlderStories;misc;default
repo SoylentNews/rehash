@@ -25,6 +25,7 @@ __name__
 getOlderStories
 __template__
 [% today = '';
+   c = 0;
    FOREACH story = stories;
 	IF today != "$story.w $story.m $story.d";
 		today = "$story.w $story.m $story.d";
@@ -44,6 +45,7 @@ __template__
 		[% END;
 	END %]
 	&middot; [% story.link %] ([% story.commentcount %])<BR>
+	[% c = c + 1; LAST IF c >= section.artcount %]
 [% END %]
 
 [% IF !section or section.section == 'index' %]
