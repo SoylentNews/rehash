@@ -19,7 +19,7 @@ __template__
 
 [% IF ! newarticle %]
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="update">
-[%- IF user.seclev <= 10000 %]
+[%- IF user.seclev >= 10000 %]
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="delete">
 [%- END -%]
 [% END %]
