@@ -132,7 +132,13 @@ sub sendEmail {
 		$data{precedence} = 'bulk';
 	}
 
-	if (sendmail(%data)) {
+	my $mail_sent;
+	{
+		local $^W; # sendmail() should't warn to STDERR
+		$mail_sent = sendmail(%data);
+	}
+
+	if ($mail_sent) {
 		return 1;
 	} else {
 		errorLog("Can't send mail '$subject' to $addr: $Mail::Sendmail::error")
