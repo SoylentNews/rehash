@@ -1148,11 +1148,11 @@ sub undoModeration {
 		my $points = $adjust > 0
 			? "LEAST($max_score, points $adjust)"
 			: "GREATEST($min_score, points $adjust)";
-		my $reason = $self->getCommentMostCommonReason($cid)
+		my $new_reason = $self->getCommentMostCommonReason($cid)
 			|| 0; # no active moderations? reset reason to empty
 		my $comm_update = {
 			-points =>	$points,
-			reason =>	$reason,
+			reason =>	$new_reason,
 		};
 		$self->sqlUpdate("comments", $comm_update, "cid=$cid");
 
