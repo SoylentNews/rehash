@@ -1204,4 +1204,4 @@ UPDATE message_codes SET type = 'Journal Reply' WHERE code = 7;
 
 # Adds in the current bonus for those users who have it set -Brian
 INSERT INTO users_param (uid, name, value) SELECT uid, "clbig_bonus", "+1" FROM users_comments WHERE clbig > 0;
-INSERT INTO users_param (uid, name, value) SELECT uid, "clsmall_bonus", "+1" FROM users_comments WHERE clsmall > 0;
+INSERT INTO users_param (uid, name, value) SELECT uid, "clsmall_bonus", "-1" FROM users_comments WHERE clsmall > 0;
