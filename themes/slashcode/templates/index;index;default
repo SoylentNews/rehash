@@ -5,8 +5,11 @@ This is the main block of html and code that gets evaled to create the main
 index page.
 
 * metamod_elig = boolean for whether current user is eligible to metamod
+* future_plug = whether to let the user know about stories they can't see
+  that are coming up soon
 * stories = string containing all the stories
 * boxes = string containing all the slashboxes
+
 __title__
 
 __page__
@@ -50,6 +53,12 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 	END
 %]</B>.<BR>
 [% END; END %]
+
+[% IF future_plug %]
+There's another story coming up soon, stay tuned.
+<A HREF="[% constants.rootdir %]/subscribe.pl">Subscribe now</A>
+and we'll let you read it! :)<BR>
+[% END %]
 
 	[% group    = ['Flock', 'Swarm', 'Barrel', 'Team', 'Squadron',
 	               'Group', 'Cadre'];

@@ -57,13 +57,37 @@ sub main {
 	my $title = getData('head', { section => $section });
 	header($title, $section->{section});
 
-	for my $story (@$stories) {
-		if ($story->[10]) {
-			$story->[3] =
-				$story->[5] =
-				$story->[7] = $constants->{subscribe_future_name};
+	# We may, in this listing, have a story from the Mysterious Future.
+	# If so, there are three possibilities:
+	# 1) This user is a subscriber, in which case they see it (and its
+	#    timestamp gets altered to the MystFu text)
+	# 2) This user is not a subscriber, but is logged-in, and logged-in
+	#    non-subscribers are allowed to *know* that there is such a
+	#    story without being able to see it, so we make them aware.
+	# 3) This user is not a subscriber, and non-subscribers are not
+	#    to be made aware of this story's existence, so ignore it.
+	my $future_plug = 0;
+	if (!$user->{is_anon} && $user->{is_subscriber} && $constants->{subscribe_future_secs} > 0) {
+		for my $story (@$stories) {
+			if ($story->[10]) {
+				$story->[3] =
+					$story->[5] =
+					$story->[7] = $constants->{subscribe_future_name};
+			}
+		}
+	} elsif (scalar grep { $_->[10] } @$stories) {
+		# There are future stories but we don't get to read them.
+		# Wipe them so we don't see them:
+		@$stories = grep { !$_->[10] } @$stories;
+		# Now, if the user is permitted to know about future
+		# stories, set the var so we'll tell them in the template.
+		if (!$user->{is_anon}
+			&& !$user->{is_subscriber}
+			&& $constants->{subscribe_future_plug}) {
+			$future_plug = 1;
 		}
 	}
+print STDERR "index.pl future_plug '$future_plug'\n";
 
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
@@ -74,6 +98,7 @@ sub main {
 
 	slashDisplay('index', {
 		metamod_elig	=> scalar $reader->metamodEligible($user),
+		future_plug	=> $future_plug,
 		stories		=> $Stories,
 		boxes		=> $StandardBlocks,
 	});
@@ -258,7 +283,7 @@ sub displayStandardBlocks {
 #################################################################
 # pass it how many, and what.
 sub displayStories {
-	my($stories) = @_;
+	my($stories, $info_hr) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();

@@ -4822,7 +4822,7 @@ sub getStoriesEssentials {
 	$limit ||= 15;
 
 	my($column_time, $where_time) = $self->_stories_time_clauses({
-		try_future => 1, must_be_subscriber => 1
+		try_future => 1, must_be_subscriber => 0
 	});
 	my $columns = "sid, section, title, time, commentcount, hitparade, tid, $column_time";
 

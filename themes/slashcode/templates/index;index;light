@@ -47,6 +47,12 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 %]</B>.<BR>
 [% END; END %]
 
+[% IF future_plug %]
+There's another story coming up soon, stay tuned.
+<A HREF="[% constants.rootdir %]/subscribe.pl">Subscribe now</A>
+and we'll let you read it! :)<BR>
+[% END %]
+
 	[% group    = ['Flock', 'Swarm', 'Barrel', 'Team', 'Squadron',
 	               'Group', 'Cadre'];
 	   modifier = ['Rabid', 'Uber', 'Psycho', 'Attack', 'Circus',

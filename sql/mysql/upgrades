@@ -1440,7 +1440,15 @@ CREATE TABLE topic_images (
 
 INSERT INTO topic_images SELECT "", name,image,width,height  FROM topics;
 ALTER TABLE topics ADD default_image mediumint UNSIGNED DEFAULT 0 NOT NULL;
+
+# You must pick one of the following two options.  Actually, running them
+# both won't hurt anything, but just pick one or the other, OK?
+# If your main DB is running MySQL 4.x, you can use this line.
 UPDATE topics,topic_images SET default_image=topic_images.id WHERE topic_images.name=topics.name;
+# If your main DB is running MySQL 3.x, you must use these lines.
+SELECT CONCAT("UPDATE topics SET default_image=", topic_images.id, " WHERE name=", topics.name, ";") INTO OUTFILE "/tmp/topicsimages" FROM topics, topic_images WHERE topics.name = topic_images.name;
+SOURCE "/tmp/topicsimages";
+
 ALTER TABLE topics DROP width;
 ALTER TABLE topics DROP height;
 ALTER TABLE topics DROP image;
@@ -1470,4 +1478,6 @@ CREATE TABLE users_acl (
 # End of T_2_3_0_89, Start of T_2_3_0_90 - 2003/04/24
 
 # SLASHDOT LAST UPDATED HERE
+
+INSERT INTO vars (name, value, description) VALUES ('subscribe_future_plug','0','If subscribe_future_secs > 0, do non-subscribers get to know when a future story is coming up, even though they cannot see it?');
 
