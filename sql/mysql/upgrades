@@ -79,8 +79,8 @@ ALTER TABLE users_info DROP COLUMN hits;
 # To fix the data in users to add the + sign to positive values -Brian
 UPDATE users_param SET value = CONCAT("+",value) WHERE (name LIKE "reason%" OR name LIKE "people_bonus%") AND value LIKE "_";
 
-# Upgrade Zoo to latest schema, once you do this run the rebuildPeople script 
-# in the plugin. -Brian
+# Upgrade Zoo to latest schema, once you do this run the script
+# "plugins/Zoo/rebuildPeople" - Brian
 CREATE TABLE temp_zoo SELECT * FROM people;
 DROP TABLE IF EXISTS people;
 CREATE TABLE people (
@@ -603,7 +603,7 @@ ALTER TABLE sections ADD UNIQUE section (section);
 # you want FOF/EOF
 #
 # 3) If number two is true then you need to run the rebuild script for
-# users.
+# users:  "plugins/Zoo/rebuildPeople"
 #
 #    WARNING number three may take an hour or so depending on the size of
 #    your database (like Slashdot will probably be an hour or so). This
@@ -730,7 +730,8 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,5);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,6);
 
-### Run rebuildPeople script to rebuild Zoo ###
+# For plugins/Zoo (ignore if you're not using that plugin)
+# Run the script "plugins/Zoo/rebuildPeople"
 
 # FOUNDRIES LAST UPDATED HERE 9-12-02 Hey - it's been great 
 # working with all of you - good luck!
@@ -745,4 +746,6 @@ INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link',
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_47
+
+INSERT INTO vars (name, value, description) VALUES ('mod_unm2able_token_cost','1','What is the token cost of performing an un-M2able mod?');
 

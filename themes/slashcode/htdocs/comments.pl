@@ -1434,43 +1434,35 @@ sub moderateCid {
 	$slashdb->setModeratorLog($comment, $user->{uid}, $val, $reason, $active);
 
 	if ($active) {
-		# Increment moderators total mods and deduct their point for playing.
-		# Word of note, if we are HERE, then the user either has points, or
-		# is an author (and 'author_unlimited' is set) so point checks SHOULD
-		# be unnecessary here.
-		$user->{points}-- if $user->{points} > 0;
-		$user->{totalmods}++;
-		$slashdb->setUser($user->{uid}, {
-			totalmods 	=> $user->{totalmods},
-			points		=> $user->{points},
-		});
 
-		# Adjust comment posters karma and moderation stats.
-		# This really should be done with sqlUpdate()s on the
-		# appropriate tables directly, to be atomic and all
-		# that good stuff.  Faster too. XXX - Jamie 2002/09/13
+		# If we are here, then the user either has mod points, or
+		# is an admin (and 'author_unlimited' is set).  So point
+		# checks should be unnecessary here.
+
+		# First, update values for the moderator.
+		my $changes = { };
+		$changes->{-points} = "GREATEST(points-1, 0)";
+		my $tcost = $constants->{mod_unm2able_token_cost};
+		$changes->{-tokens} = "tokens - $tcost" if $tcost
+			&& !$reasons->{$reason}{m2able};
+		$changes->{-totalmods} = "totalmods + 1";
+		$slashdb->setUser($user->{uid}, $changes);
+
+		# Next, adjust the appropriate values for the user who
+		# posted the comment.
 		if ($comment->{uid} != $constants->{anonymous_coward_uid}) {
-			my $cuser = $slashdb->getUser($comment->{uid},
-				[ qw| downmods upmods karma tokens | ]);
-			my $newkarma = $cuser->{karma} + $val;
-			$cuser->{tokens}-- if $val < 0;
-			$cuser->{downmods}++ if $val < 0;
-			$cuser->{upmods}++ if $val > 0;
+			my $cu_changes = { };
+			$cu_changes->{-tokens} = "tokens - 1" if $val < 0;
+			$cu_changes->{-downmods} = "downmods + 1" if $val < 0;
+			$cu_changes->{-upmods}   =   "upmods + 1" if $val > 0;
 			if ($val < 0) {
-				$cuser->{karma} = $newkarma; 
-			} else {
-				$cuser->{karma} = $newkarma 
-						if $newkarma <= $constants->{maxkarma};
+				$cu_changes->{-karma} = "GREATEST("
+					. "$constants->{minkarma}, karma - 1)";
+			} elsif ($val > 0) {
+				$cu_changes->{-karma} = "LEAST("
+					. "$constants->{maxkarma}, karma + 1)";
 			}
-			$cuser->{karma} = $constants->{minkarma} 
-					if $newkarma < $constants->{minkarma};
-
-			$slashdb->setUser($comment->{uid}, {
-				karma		=> $cuser->{karma},
-				tokens		=> $cuser->{tokens},
-				upmods		=> $cuser->{upmods},
-				downmods	=> $cuser->{downmods},
-			});
+			$slashdb->setUser($comment->{uid}, $cu_changes);
 		}
 
 		# Make sure our changes get propagated back to the comment.
@@ -1506,9 +1498,6 @@ sub moderateCid {
 	# Now display the template with the moderation results.
 	slashDisplay('moderation', $dispArgs);
 
-# Now in theory if we are here this is ok.
-# I think there is kludge in the above logic at the moment.
-# -Brian
 	return 1;
 }
 
