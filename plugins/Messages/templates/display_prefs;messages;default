@@ -31,7 +31,7 @@ __template__
 <P>
 From this page you can configure various messages that
 [% constants.sitename %] can optionally send to you.  The primary
-options are [% deliverymodes.$modenone %],
+options are [% deliverymodes.$modenone %] (Disabled),
 [% deliverymodes.$modemail %], and [% deliverymodes.$modeweb %].
 Not all options are available for all message types.
 [% deliverymodes.$modeweb %] messages <B>will be deleted</B> after
