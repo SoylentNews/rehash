@@ -209,7 +209,7 @@ sub header {
 
 #========================================================================
 
-=head http_send(OPTIONS)
+=head2 http_send(OPTIONS)
 
 Prints an HTTP header like L<header>, but more generic, and then optionally
 prints content.
@@ -217,6 +217,8 @@ prints content.
 =over 4
 
 =item Parameters
+
+=over 4
 
 =item OPTIONS
 
