@@ -23,8 +23,9 @@ __template__
 			<INPUT TYPE="SUBMIT" NAME="topiced" VALUE="Select topic"><BR>
 
 			[% IF topic.tid %]
-			[% PROCESS formLabel value => "Image as seen", comment => "" %]
-			<IMG SRC="[% image %]" ALT="[% topic.alttext %]" WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]">
+				[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
+				[% PROCESS formLabel value => "Image as seen", comment => "" %]
+				<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]">
 			[% END %]
 
 			<BR><INPUT TYPE="HIDDEN" NAME="tid" VALUE="[% topic.tid %]"><BR>
