@@ -897,7 +897,7 @@ sub submitComment {
 			-totalcomments => 'totalcomments+1',
 		});
 
-		my($messages, $reply, @users);
+		my($messages, $reply, %users);
 		if ($form->{pid} || $discussion->{url} =~ /\bjournal\.pl\b/ || $constants->{commentnew_msg}) {
 			$messages = getObject('Slash::Messages');
 			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
@@ -907,7 +907,7 @@ sub submitComment {
 		if ($messages && $form->{pid}) {
 			my $parent = $slashdb->getCommentReply($form->{sid}, $form->{pid});
 			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
-			if (@$users) {
+			if (@$users && !$users{$users->[0]}) {
 				my $data  = {
 					template_name	=> 'reply_msg',
 					subject		=> { template_name => 'reply_msg_subj' },
@@ -917,14 +917,14 @@ sub submitComment {
 				};
 
 				$messages->create($users->[0], MSG_CODE_COMMENT_REPLY, $data);
-				push @users, $users->[0];
+				$users{$users->[0]}++;
 			}
 		}
 
 		# reply to journal
 		if ($messages && $discussion->{url} =~ /\bjournal\.pl\b/) {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
-			if (@$users && !grep { $users->[0] == $_ } @users) {
+			if (@$users && !$users{$users->[0]}) {
 				my $data  = {
 					template_name	=> 'journrep',
 					subject		=> { template_name => 'journrep_subj' },
@@ -933,7 +933,7 @@ sub submitComment {
 				};
 
 				$messages->create($users->[0], MSG_CODE_JOURNAL_REPLY, $data);
-				push @users, $users->[0];
+				$users{$users->[0]}++;
 			}
 		}
 
@@ -942,7 +942,7 @@ sub submitComment {
 			my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
 
 			for my $usera (@$users) {
-				next if grep { $usera == $_ } @users;
+				next if $users{$usera};
 				my $data  = {
 					template_name	=> 'commnew',
 					subject		=> { template_name => 'commnew_subj' },
@@ -950,7 +950,7 @@ sub submitComment {
 					discussion	=> $discussion,
 				};
 				$messages->create($usera, MSG_CODE_NEW_COMMENT, $data);
-				push @users, $usera;
+				$users{$usera}++;
 			}
 		}
 	}
