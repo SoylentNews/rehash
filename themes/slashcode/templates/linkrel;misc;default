@@ -3,7 +3,10 @@ default
 __description__
 Add LINK REL navigation stuff for header
 
-No specially passed variables
+We populate the linkrel array, then print it out.  Kinda ugly, but
+not as ugly as what was there before.
+
+* link - hashref of data to use for LINK REL stuff
 __title__
 
 __page__
@@ -13,38 +16,95 @@ en_US
 __name__
 linkrel
 __template__
-<LINK REL="top"       HREF="[% constants.real_rootdir %]/" TITLE="[% constants.slogan | strip_attribute %]">
-<LINK REL="search"    HREF="[% constants.rootdir %]/search.pl" TITLE="Search [% constants.sitename | strip_attribute %]">
-[% SECT = Slash.db.getSection() %]
-<LINK REL="alternate" TYPE="application/rss+xml" TITLE="[% constants.sitename | strip_attribute %] ([% SECT.title | strip_attribute %]) RSS" HREF="[% constants.rootdir %]/[% Slash.sitename2filename(SECT.section) %].rss">
-<LINK REL="alternate" TYPE="application/rss+xml" TITLE="[% constants.sitename | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/index.rss">
+[% linkrels = [] %]
+
+[% tmp = BLOCK -%]
+<LINK REL="top"       TITLE="[% constants.slogan | strip_attribute %]" HREF="[% constants.real_rootdir %]/" >
+[%- END;
+   linkrels.push(tmp) %]
+
+[% tmp = BLOCK -%]
+<LINK REL="search"    TITLE="Search [% constants.sitename | strip_attribute %]" HREF="[% constants.rootdir %]/search.pl">
+[%- END;
+   linkrels.push(tmp) %]
 
 
 
-[%- IF link.section;
-	myurl = link.section.rootdir || "${constants.rootdir}/${link.section.section}" %]
-<LINK REL="parent"    HREF="[% myurl %]/" TITLE="[% link.section.title | strip_attribute %]">
-[%- END %]
+[% tmp = BLOCK -%]
+<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/[% Slash.sitename2filename(constants.real_section) %].rss" TYPE="application/rss+xml">
+[%- END;
+   linkrels.push(tmp) %]
 
-[%- IF env.script_name.search('article\.pl') -%]
-	[%- IF link.prev %]
-<LINK REL="prev"      HREF="[% constants.rootdir %]/article.pl?sid=[% link.prev.sid %]" TITLE="[% link.prev.title | strip_attribute %]">
-	[%- END ;
-	    IF link.next %]
-<LINK REL="next"      HREF="[% constants.rootdir %]/article.pl?sid=[% link.next.sid %]" TITLE="[% link.next.title | strip_attribute %]">
-	[%- END ;
-	    IF link.author # author is uid %]
+[% SECT = Slash.db.getSection(user.currentSection);
+   IF constants.real_section != SECT.section;
+	tmp = BLOCK -%]
+<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] ([% SECT.title | strip_attribute %]) RSS" HREF="[% constants.rootdir %]/[% Slash.sitename2filename(SECT.section) %].rss" TYPE="application/rss+xml">
+	[%- END;
+   linkrels.push(tmp);
+END %]
+
+
+
+[% IF link.section;
+	tmp = BLOCK;
+	myurl = link.section.rootdir || "${constants.rootdir}/${link.section.section}" -%]
+<LINK REL="parent"    TITLE="[% link.section.title | strip_attribute %]" HREF="[% myurl %]/">
+	[%- END;
+   linkrels.push(tmp);
+END %]
+
+
+
+[% IF env.script_name.search('article\.pl');
+	IF link.prev; tmp = BLOCK -%]
+<LINK REL="prev"      TITLE="[% link.prev.title | strip_attribute %]" HREF="[% constants.rootdir %]/article.pl?sid=[% link.prev.sid %]">
+	[%- END; linkrels.push(tmp); END;
+	    IF link.next; tmp = BLOCK -%]
+<LINK REL="next"      TITLE="[% link.next.title | strip_attribute %]" HREF="[% constants.rootdir %]/article.pl?sid=[% link.next.sid %]">
+	[%- END; linkrels.push(tmp); END;
+	    # author is uid
+	    IF link.author; tmp = BLOCK -%]
 <LINK REL="author"    HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% link.author %]">
-	[%- END ;
-	    IF constants.plugin.Print %]
-<LINK REL="alternate" HREF="[% constants.rootdir %]/print.pl?sid=[% story.sid %]" TITLE="Print Article">
-	[%- END ;
+	[%- END; linkrels.push(tmp); END;
+	    IF constants.plugin.Print; tmp = BLOCK -%]
+<LINK REL="alternate" TITLE="Print Article" HREF="[% constants.rootdir %]/print.pl?sid=[% story.sid %]">
+	[%- END; linkrels.push(tmp); END;
 
-ELSE ; # default author link, where author is a nickname
-	    IF link.author %]
-<LINK REL="author"    HREF="[% constants.rootdir %]/~[% link.author | fixparam %]/" TITLE="[% link.author | strip_attribute %]">
-	[%- END ;
-END -%]
+
+
+ELSIF env.script_name.search('journal\.pl');
+	IF link.uid && link.nickname; tmp = BLOCK -%]
+<LINK REL="author"    TITLE="[% link.nickname | strip_attribute %]" HREF="[% constants.rootdir %]/~[% link.nickname | fixparam %]/">
+	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
+<LINK REL="alternate" TITLE="Journal of [% link.nickname | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=display&amp;uid=[% link.uid %]&amp;content_type=rss" TYPE="application/rss+xml">
+	[%- END; linkrels.push(tmp); END;
+
+	IF constants.journal_top;
+		IF constants.journal_top_recent; tmp = BLOCK -%]
+<LINK REL="alternate" TITLE="Most Recent Journals RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=top&amp;content_type=rss" TYPE="application/rss+xml">
+		[%- END; linkrels.push(tmp); END;
+		    IF constants.journal_top_posters; tmp = BLOCK -%]
+<LINK REL="alternate" TITLE="Most Active Journals RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=count&amp;content_type=rss" TYPE="application/rss+xml">
+		[%- END; linkrels.push(tmp); END;
+		    IF constants.journal_top_friend; tmp = BLOCK -%]
+<LINK REL="alternate" TITLE="Most Befriended Journals RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=friends&amp;content_type=rss" TYPE="application/rss+xml">
+		[%- END; linkrels.push(tmp); END;
+	END;
+
+
+
+ELSE; # default author link, where author is a nickname
+	    IF link.author; tmp = BLOCK -%]
+<LINK REL="author"    TITLE="[% link.author | strip_attribute %]" HREF="[% constants.rootdir %]/~[% link.author | fixparam %]/">
+	[%- END; linkrels.push(tmp); END;
+
+END %]
+
+
+
+[% FOR linkrel = linkrels;
+	linkrel; "\n";
+END %]
 
 __seclev__
 10000
