@@ -112,6 +112,22 @@ sub selectComments {
 		# children to show up properly in flat mode. - Jamie 2002/07/30
 #		$user->{state}{noreparent} = 1 if $user->{commentsort} > 3;
 
+		# User can setup to give points based on size.
+		my $length = length($C->{comment});
+		$C->{points} += $user->{clsmall_bonus}
+			if $length < $user->{clsmall} && $user->{clsmall} != 0 && $user->{clsmall_bonus};
+		$C->{points} += $user->{clbig_bonus}
+			if $length > $user->{clbig} && $user->{clbig} != 0 && $user->{clbig_bonus};
+
+		# If the user is AC and we give AC's a penalty/bonus
+		$C->{points} += $user->{people_bonus_anonymous}
+			if isAnon($C->{uid}) && $user->{people_bonus_anonymous};
+
+		# If you don't trust new users
+		if ($user->{new_user_bonus} && $user->{new_user_percent}) {
+			$C->{points} += $user->{new_user_bonus} 
+					if ((($C->{uid}/$max_uid)*100) > 100-$user->{new_user_percent});
+		}
 		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons);
 
 		# Let us fill the hash range for hitparade

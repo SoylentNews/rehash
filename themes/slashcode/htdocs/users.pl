@@ -1628,6 +1628,12 @@ sub editComm {
 	my $karma_bonus = createSelect('karma_bonus', \@range, 
 			$user_edit->{karma_bonus} || 0, 1, 1);
 
+	#Length Bonus -Brian
+	my $small_length_bonus_select = createSelect('clsmall_bonus', \@range, 
+			$user_edit->{clsmall_bonus} || 0, 1, 1);
+	my $long_length_bonus_select = createSelect('clbig_bonus', \@range, 
+			$user_edit->{clbig_bonus} || 0, 1, 1);
+
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
@@ -1690,6 +1696,8 @@ sub editComm {
 		new_user_bonus_select	=> $new_user_bonus_select,
 		note			=> $note,
 		karma_bonus			=> $karma_bonus,
+		small_length_bonus_select => $small_length_bonus_select,
+		long_length_bonus_select => $long_length_bonus_select,
 	});
 }
 
@@ -2115,12 +2123,16 @@ sub saveComm {
 	my $new_user_percent = (($form->{new_user_percent} <= 100 && $form->{new_user_percent} >= 0) 
 			? $form->{new_user_percent}
 			: 100); 
+	my $clsmall_bonus = ($form->{clsmall_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clsmall_bonus};
+	my $clbig_bonus = ($form->{clbig_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clbig_bonus};
 
 	# This has NO BEARING on the table the data goes into now.
 	# setUser() does the right thing based on the key name.
 	my $users_comments_table = {
-		clbig		=> $form->{clbig},
 		clsmall		=> $form->{clsmall},
+		clsmall_bonus		=> $clsmall_bonus,
+		clbig		=> $form->{clbig},
+		clbig_bonus		=> $clbig_bonus,
 		commentlimit	=> $form->{commentlimit},
 		commentsort	=> $form->{commentsort},
 		commentspill	=> $form->{commentspill},
