@@ -980,7 +980,7 @@ sub deleteOldFormkeys {
 sub countAccesslogDaily {
 	my($self) = @_;
 
-	return self->sqlSelect("count(*)", "accesslog",
+	return $self->sqlSelect("count(*)", "accesslog",
 		"to_days(now()) - to_days(ts)=1");
 }
 
