@@ -1231,7 +1231,7 @@ sub dispStory {
 		if !exists $other->{magic};
 
 	my $section = $reader->getSection($story->{section});
-
+	$other->{preview} ||= 0;
 	my %data = (
 		story	=> $story,
 		section => $section,
@@ -1241,6 +1241,7 @@ sub dispStory {
 		stid	=> $other->{stid},
 		magic	=> $other->{magic},
 		width	=> $constants->{titlebar_width},
+		preview => $other->{preview}
 	);
 
 	return slashDisplay($template_name, \%data, 1);

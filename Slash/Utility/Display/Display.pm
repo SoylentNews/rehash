@@ -407,10 +407,10 @@ The 'linkStory' template block.
 =cut
 
 sub linkStory {
-	my($story_link, $render) = @_;
-	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
-	my $constants = getCurrentStatic();
-	my $user      = getCurrentUser();
+	my($story_link, $render, $other) = @_;
+	my $reader    = $other->{reader} || getObject('Slash::DB', { db_type => 'reader' });
+	my $constants = $other->{constants} || getCurrentStatic();
+	my $user      = $other->{user} || getCurrentUser();
 
 	my($url, $script, $title, $section, %params);
 	$script = 'article.pl';
