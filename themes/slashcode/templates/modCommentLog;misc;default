@@ -27,7 +27,8 @@ __name__
 modCommentLog
 __template__
 [% IF mod_admin %]
-[% total_mod_val=0; total_mod_score=0 %]
+[% sum=0; up=0; down=0; cnt=0; %]
+[% a_sum=0; a_up=0; a_down=0; a_cnt=0; %]
 <TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	[% IF mods.size > 0  %]
 	<TR BGCOLOR="[% user.bg.3 %]">
@@ -71,10 +72,18 @@ __template__
 		<TD>[% IF moderation.active %] &nbsp; [% ELSE %] <i>in</i> [% END %] </TD>
 	</TR>
 		[% IF moderation.active %]
-			[%  total_mod_val = total_mod_val + moderation.val; total_mod_score = total_mod_score + moderation.score %]
+			[%  a_sum = a_sum + moderation.val; IF moderation.val > 0; a_up = a_up+1; END; IF moderation.val < 0; a_down = a_down + 1; END; a_count = a_count+1; %]	
 		[% END %]
+		[% sum = sum + moderation.val; IF moderation.val > 0; up = up+1; END; IF moderation.val < 0; down = down + 1; END; count = count+1; %]	
 		[% END %]
-		<TR><TD><B>Totals</B></TD><TD ALIGN="RIGHT">[% total_mod_score %]</TD><TD ALIGN="RIGHT"><B>[% IF total_mod_val > 0; "+"; END; total_mod_val %]</B></TD><TD colspan="[% IF both_mods %]6[% ELSE %]5[% END %]"></TD></TR>
+		[% colspan=5; IF both_mods; colspan = colspan+1; END; IF show_cid; colspan=colspan+2; END; %]
+		<TR><TD COLSPAN="[% colspan %]">
+			<TABLE>
+			<TR><TD></TD><TD><B>Sum</B></TD><TD><B>Up:Down</B></TD><TD><B>Count</B></TD></TR>
+			<TR><TD><B>All</B></TD><TD ALIGN="RIGHT">[% IF sum > 0; "+"; END; sum %]</TD><TD ALIGN="RIGHT">[% up %]:[% down %]</TD><TD ALIGN="RIGHT">[% count %]</TD></TR>
+			<TR><TD ALIGN="RIGHT"><B>Active</B></TD><TD ALIGN="RIGHT">[% IF a_sum > 0; "+"; END; a_sum %]</TD><TD ALIGN="RIGHT">[% a_up %]:[% a_down %]</TD><TD ALIGN="RIGHT">[% a_count %]</TD></TR>
+			</TABLE>	
+		</TD></TR>
 	[% END %]
 
 </TABLE>
