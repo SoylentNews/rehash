@@ -1082,10 +1082,10 @@ sub getMetamodsForMods {
 	}
 	return $mods_to_m2s;
 }
-########################################################
 
+########################################################
 sub getMetamodlogForUser {
-	my ($self, $uid, $limit) = @_;
+	my($self, $uid, $limit) = @_;
 	my $uid_q = $self->sqlQuote($uid);
 	my $limit_clause = $limit ? " LIMIT $limit" : "";
 	my $m2s = $self->sqlSelectAllHashrefArray(
@@ -1111,7 +1111,6 @@ sub getMetamodlogForUser {
 	
 	return $m2s;
 }
-
 
 ########################################################
 sub getModeratorLogID {
@@ -5752,7 +5751,7 @@ sub setCommentForMod {
 	if (!$constants->{mod_down_karmacoststyle}) {
 		$karma_val = $karma_change;
 	} elsif ($val < 0) {
-		$karma_val = ($hr->{points_before}+$karma_change) - $hr->{points_max};
+		$karma_val = ($hr->{points_before} + $karma_change) - $hr->{points_max};
 	} else {
 		$karma_val = $karma_change;
 	}
@@ -6499,13 +6498,13 @@ sub calcModval {
 }
 
 sub getNetIDKarma {
-	my ($self, $type, $id ) = @_;
-	my ($count, $karma);
+	my($self, $type, $id) = @_;
+	my($count, $karma);
 	if ($type eq "ipid") {
 		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","ipid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	} elsif ($type eq "subnetid") {
-		 ($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","subnetid='$id'");
+		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","subnetid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	} else {
 		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","ipid='$id'");

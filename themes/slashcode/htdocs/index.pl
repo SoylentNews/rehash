@@ -165,8 +165,7 @@ sub do_rss {
 		my $story = $reader->getStory($_->{sid});
 		$story->{introtext} = parseSlashizedLinks($story->{introtext});
 		$story->{introtext} = processSlashTags($story->{introtext});
-		# this REALLY REALLY SUCKS and MUST be rewritten before going live -- pudge
-		$story->{introtext} =~ s{(HREF|SRC)="(//[^/]+)}{$1 . '="' . url2abs($2)}eg;
+		$story->{introtext} =~ s{(HREF|SRC)="(//[^/"]+)}{$1 . '="' . url2abs($2)}ieg;
 		push @rss_stories, { story => $story };
 	}
 
