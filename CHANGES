@@ -39,7 +39,10 @@ slash-1.0.4, 2000.05.31
 
 *	fixed admin.pl to now have URL field.
 
-*	changed ratio on content filters 34 and 35 from .4 to .7/.5 (respectively).
+*	changed ratio on content filters 34 and 35 from .4 to .7/.5
+	(respectively).
+
+*	Fixed typo in admin.pl (Nathan Vonnahme)
 
 slash-1.0.3, 2000.05.22
 -----------------------

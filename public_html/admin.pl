@@ -37,7 +37,7 @@ sub main {
 	header("backSlash $I{U}{tzcode} $I{U}{offset}", 'admin');
 
 	# Admin Menu
-	print "<P>&nbsp;<\P>" unless $I{U}{aseclev};
+	print "<P>&nbsp;</P>" unless $I{U}{aseclev};
 
 	my $op = $I{F}{op};
 	if (!$I{U}{aseclev}) {
