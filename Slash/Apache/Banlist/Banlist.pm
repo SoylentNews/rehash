@@ -17,8 +17,6 @@ use vars qw($VERSION);
 sub handler {
 	my($r) = @_;
 
-	$r = Apache->request;
-
 	return DECLINED unless $r->is_main;
 
 	# Ok, this will make it so that we can reliably use Apache->request
