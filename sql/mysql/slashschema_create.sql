@@ -815,7 +815,7 @@ CREATE TABLE story_files (
   sid varchar(16) NOT NULL default '',
   description varchar(80) NOT NULL default '',
   file_id varchar(32) NOT NULL default '',
-	isimage enum("yes","no") DEFAULT "no" NOT NULL,
+  isimage enum("yes","no") DEFAULT "no" NOT NULL,
   PRIMARY KEY (id)
 ) TYPE = myisam;
 
