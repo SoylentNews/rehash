@@ -1228,7 +1228,7 @@ sub prepareUser {
 		$user->{state} = {};
 	} else {
 		$user = $reader->getUser($uid);
-		$user->{logtoken} = $reader->getLogToken($uid);
+		$user->{logtoken} = bakeUserCookie($uid, $reader->getLogToken($uid));
 		$user->{is_anon} = 0;
 	}
 
@@ -1430,7 +1430,7 @@ Hashref of cleaned-up data.
 	# special few
 	my %special = (
 		logtoken	=> sub { $_[0] = '' unless
-					 $_[0] =~ m|^(\d+)::[A-Za-z0-9/+]{22}$|	},
+					 $_[0] =~ m|^\d+::[A-Za-z0-9]{22}$|	},
 		sid		=> sub { $_[0] =~ s|[^A-Za-z0-9/._]||g		},
 		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g		},
 		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
