@@ -726,7 +726,7 @@ sub validateComment {
 	$$subj =~ s/\(Score(.*)//i;
 	$$subj =~ s/Score:(.*)//i;
 
-	$$subj =~ s/\&(.*?);/approveCharref($1)/sge;
+	$$subj =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
 
 	for ($$comm, $$subj) {
 		my $d = decode_entities($_);

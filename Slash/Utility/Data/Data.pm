@@ -649,7 +649,7 @@ sub stripBadHtml {
 		)
 	}{&lt;$1}gx;
 
-	$str =~ s/&(#?[a-zA-Z0-9]+);/approveCharref($1)/sge;
+	$str =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
 
 	return $str;
 }
