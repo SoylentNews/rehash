@@ -21,15 +21,10 @@ __template__
 <input type="hidden" value="preview" name="[% name %]_submit_op">
 [% mykey = name _ "_saved_tree" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
-<script language="javascript">
-	[% name %]_load_names();
-	var list = new Array ([% user.$mykey %]);
-	[% name %]_reset_saved_tree(list);
-</script>
 [% mykey = name _ "_tree_pref" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
 
-<select name="[% name %]_main_select" size=10 multiple onchange="[% name %]_select_weight()">
+<select name="[% name %]_main_select" size=10 multiple>
 [%- myweights = constants.topic_popup_weights.keys.nsort.reverse;
     myweight = myweights.shift;
 
@@ -63,6 +58,13 @@ __template__
 </td><td>
 
 </td></tr></table>
+
+[% mykey = name _ "_saved_tree" -%]
+<script language="javascript">
+	[% name %]_load_names();
+	var list = new Array ([% user.$mykey %]);
+	[% name %]_reset_saved_tree(list);
+</script>
 
 __seclev__
 10000

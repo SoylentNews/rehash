@@ -21,11 +21,6 @@ __template__
 <input type="hidden" value="topiced" name="[% name %]_submit_op">
 [% mykey = name _ "_saved_tree" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
-<script language="javascript">
-	[% name %]_load_names();
-	var list = new Array ([% user.$mykey %]);
-	[% name %]_reset_saved_tree(list);
-</script>
 [% mykey = name _ "_tree_pref" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
 
@@ -42,7 +37,7 @@ __template__
 <font color="[% user.colors.bg_3 %]"><b>[% IF name == "st" %]Parents[% ELSE %]Children[% END %]</b></font><br>
 
 <table cellpadding="2"><tr><td>
-<select name="[% name %]_main_select" size=10 multiple onchange="[% name %]_select_weight()" onfocus="[% names.0 %]_change_focus('[% name %]')">
+<select name="[% name %]_main_select" size=10 multiple onfocus="[% names.0 %]_change_focus('[% name %]')">
 [%- myweights = constants.topic_popup_weights.keys.nsort.reverse;
     myweight = myweights.shift;
 
@@ -80,6 +75,13 @@ __template__
 </td>
 [% END %]
 </tr></table>
+
+[% mykey = name _ "_saved_tree" -%]
+<script language="javascript">
+	[% name %]_load_names();
+	var list = new Array ([% user.$mykey %]);
+	[% name %]_reset_saved_tree(list);
+</script>
 
 __seclev__
 10000
