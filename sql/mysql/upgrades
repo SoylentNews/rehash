@@ -2723,3 +2723,6 @@ ALTER TABLE pollquestions CHANGE COLUMN discussion discussion mediumint UNSIGNED
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_36, Start of T_2_5_0_37 - 2004/11/08
+
+INSERT INTO vars (name, value, description) VALUES ('mod_stats_lookback_days','30','Number of days to look back for repeat mods');
+

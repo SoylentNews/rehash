@@ -876,7 +876,6 @@ INSERT INTO vars (name, value, description) VALUES ('mod_elig_hoursback','48','H
 INSERT INTO vars (name, value, description) VALUES ('mod_elig_minkarma','0','The min M1 karma');
 INSERT INTO vars (name, value, description) VALUES ('mod_karma_bonus_max_downmods',2,'How many times can you downmod a comment without it losing its karma bonus? (bonus lost at value+1th downmod) (set very high to disable)');
 INSERT INTO vars (name, value, description) VALUES ('mod_same_subnet_forbid','1','Forbid users from moderating any comments posted by someone in their subnet?');
-INSERT INTO vars (name, value, description) VALUES ('mod_stats_reports','admin@example.com','Who to send daily moderation stats reports to');
 INSERT INTO vars (name, value, description) VALUES ('mod_stir_recycle_fraction', '1.0', 'What fraction of unused mod points get recycled back into the system?');
 INSERT INTO vars (name, value, description) VALUES ('mod_stir_token_cost','2','What is the token cost of having each mod point stirred?');
 INSERT INTO vars (name, value, description) VALUES ('mod_token_decay_days','14','How many days of inactivity before tokens start to decay?');

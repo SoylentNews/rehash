@@ -285,6 +285,7 @@ sub getRepeatMods {
 	my $constants = getCurrentStatic();
 	my $ac_uid = $constants->{anonymous_coward_uid};
 
+	my $lookback = $options->{lookback_days} || 30;
 	my $within = $options->{within_hours} || 96;
 	my $limit = $options->{limit} || 50;
 	my $min_count = $options->{min_count}
@@ -312,6 +313,7 @@ sub getRepeatMods {
 		 AND usersorgi.tokens >= -50
 		 AND usersorg.seclev < 100
 		 AND moderatorlog.cuid=usersdest.uid
+		 AND moderatorlog.ts >= DATE_SUB(NOW(), INTERVAL $lookback DAY)
 		 AND usersdest.uid=usersdesti.uid
 		 AND usersdest.uid != $ac_uid",
 		"GROUP BY usersorg.uid, usersdest.uid, val

@@ -527,7 +527,8 @@ EOT
 	my $admin_mods = $stats->getAdminModsInfo();
 	my $admin_mods_text = getAdminModsText($admin_mods);
 	$mod_data{repeat_mods} = $stats->getRepeatMods({
-		min_count => $constants->{mod_stats_min_repeat}
+		min_count => $constants->{mod_stats_min_repeat},
+		lookback_days => $constants->{mod_stats_repeat_lookback},
 	});
 	$mod_data{reverse_mods} = $stats->getReverseMods();
 	slashdLog("Mod Info End");
