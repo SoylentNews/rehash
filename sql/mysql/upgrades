@@ -541,6 +541,7 @@ INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', -1,'
 INSERT INTO code_param (type, code, name) VALUES ('displaycodes_sectional', 1,'Display');
 INSERT INTO vars (name, value, description) VALUES ('discussion_sort_order', '3', 'sort code to feed to findDiscussions');
 
+# For plugins/Stats (ignore if you're not using that plugin):
 INSERT INTO vars (name, value, description) VALUES ('tailslash_stats','1','true/false log tailslash in adminmail');
 
 # column truncated descriptions fields
@@ -555,3 +556,4 @@ ALTER TABLE stats_daily ADD FOREIGN KEY (section) REFERENCES sections(section);
 # End of T_2_3_0_36
 
 # USEPERL LAST UPDATED HERE
+
