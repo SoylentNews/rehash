@@ -1558,6 +1558,7 @@ sub saveComm {
 
 	my($min, $max) = ($constants->{comment_minscore}, 
 			  $constants->{comment_maxscore});
+	my $most_adj = $max-$min;
 	my @reasons = ();
 	@reasons = @{$constants->{reasons}}
 		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
@@ -1574,6 +1575,9 @@ sub saveComm {
 #			if $answer < $min;
 #		$answer  = $constants->{comment_maxscore}
 #			if $answer > $max;
+# Do you mean this? -Jamie
+#		$answer  = -$most_adj if $answer < -$most_adj;
+#		$answer  =  $most_adj if $answer >  $most_adj;
 		$users_comments_table->{"reason_alter_$_"} = ($answer == 0) ? '' : $answer;
 	}
 
