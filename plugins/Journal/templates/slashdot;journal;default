@@ -15,7 +15,7 @@ __template__
 <P><TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	[% FOREACH article = articles %]
 		[% FOREACH diatribe = article.article; topic = diatribe.topic %]
-  <TR><TD>
+  <TR><TD VALIGN="TOP">
 [% PROCESS titlebar title => diatribe.description, width => "100%" %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	<TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">

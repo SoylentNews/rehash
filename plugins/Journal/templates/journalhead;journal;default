@@ -46,12 +46,14 @@ END %]
 
 </TD>
 
+<TD>&nbsp;</TD>
+
 <TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
 </TR>
 
-<TR>
+<TR HEIGHT="100%">
 
-<TD COLSPAN="2" VALIGN="TOP">
+<TD COLSPAN="4" VALIGN="TOP">
 
 __seclev__
 500
