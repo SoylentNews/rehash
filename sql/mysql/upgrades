@@ -2558,8 +2558,8 @@ CREATE TABLE uncommonstorywords (
 	PRIMARY KEY (word)
 ) TYPE=InnoDB;
 
-# Run this perl script
-perl -MSlash::Test=virtusername -e '@usw = split / /, $constants->{uncommonstorywords}; for $w (@usw) { $slashdb->sqlInsert("uncommonstorywords", { word => $w }) }'
+# Run this perl script for each of your sites' virtual users
+# perl -MSlash::Test=virtusername -e '@usw = split / /, $constants->{uncommonstorywords}; for $w (@usw) { $slashdb->sqlInsert("uncommonstorywords", { word => $w }) }'
 
 DELETE FROM vars WHERE name='uncommonstorywords';
 
