@@ -97,10 +97,6 @@ $task{$me}{code} = sub {
 
 	my $articles = $logdb->countDailyStoriesAccess();
 
-	my $reasons = $slashdb->getReasons();
-	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
-	my $reasons_m2able = join(",", @reasons_m2able);
-
 	my $admin_clearpass_warning = '';
 	if ($constants->{admin_check_clearpass}) {
 		my $clear_admins = $stats->getAdminsClearpass();
