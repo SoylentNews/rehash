@@ -63,10 +63,8 @@ sub IndexHandler {
 		my $filename  = $r->filename;
 		my $basedir   = $constants->{basedir};
 
-		# cookie data will begin with word char or %,
-		# some "empty" cookies will have three characters
-		# to denote null, "%00"
-		if ($r->header_in('Cookie') =~ /\b(?:user)=[%\w]/) { # {4,}
+		# cookie data will begin with word char or %
+		if ($r->header_in('Cookie') =~ /\b(?:user)=[%\w]/) {
 			$r->uri('/index.pl');
 			$r->filename("$basedir/index.pl");
 			return OK;
