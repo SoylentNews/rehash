@@ -973,11 +973,24 @@ sub showInfo {
 					$netid, $comments_wanted, $min_comment);
 				$comments = $reader->getCommentsByIPID(
 					$netid, $comments_wanted, $min_comment, $comment_search_options);
+				# if we didn't get any comments back with day limit, try w/o
+				if($commentcount and !@$comments){
+					delete $comment_search_options->{limit_days};
+					$comment_time = "";
+					$comments = $reader->getCommentsByIPID(
+						$netid, $comments_wanted, $min_comment, $comment_search_options);
+				}
 			} elsif ($form->{fieldname} eq 'subnetid') {
 				$commentcount = $reader->countCommentsBySubnetID(
 					$netid, $comments_wanted, $min_comment);
 				$comments = $reader->getCommentsBySubnetID(
 					$netid, $comments_wanted, $min_comment, $comment_search_options);
+				if($commentcount and !@$comments){
+					delete $comment_search_options->{limit_days};
+					$comment_time = "";
+					$comments = $reader->getCommentsBySubnetID(
+						$netid, $comments_wanted, $min_comment, $comment_search_options);
+				}
 			} else {
 				delete $form->{fieldname};
 			}
@@ -988,8 +1001,13 @@ sub showInfo {
 				$netid, $comments_wanted, $min_comment);
 			$comments = $reader->getCommentsByIPIDOrSubnetID(
 				$netid, $comments_wanted, $min_comment, $comment_search_options);
-		}
-
+			if($commentcount and !@$comments){
+				delete $comment_search_options->{limit_days};
+				$comment_time = "";
+				$comments = $reader->getCommentsByIPIDOrSubnetID(
+					$netid, $comments_wanted, $min_comment, $comment_search_options);
+			}
+		}	
 	} else {
 		$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
@@ -997,6 +1015,13 @@ sub showInfo {
 			$reader->countCommentsByUID($requested_user->{uid});
 		$comments = $reader->getCommentsByUID(
 			$requested_user->{uid}, $comments_wanted, $min_comment, $comment_search_options) if $commentcount;
+		if($commentcount and !@$comments){
+			delete $comment_search_options->{limit_days};
+			$comment_time = "";
+			$comments = $reader->getCommentsByUID(
+				$requested_user->{uid}, $comments_wanted, $min_comment, $comment_search_options) if $commentcount;
+		}	
+
 		$netid = $requested_user->{uid};
 	}
 
@@ -1063,8 +1088,9 @@ sub showInfo {
 		my $data = {
 			pid 		=> $comment->{pid},
 			url		=> $discussion->{url},
-			type 		=> $type,
+			disc_type 	=> $type,
 			disc_title	=> $discussion->{title},
+			disc_time	=> $discussion->{ts},
 			sid 		=> $comment->{sid},
 			cid 		=> $comment->{cid},
 			subj		=> $comment->{subject},
@@ -1089,7 +1115,7 @@ sub showInfo {
 		push @$commentstruct, $data;
 	}
 	# Sort so the chosen group of comments is sorted by discussion
-	@$commentstruct = sort {$b->{sid} <=> $a->{sid}} @$commentstruct;
+	@$commentstruct = sort {$b->{disc_time} cmp $a->{disc_time} || $b->{sid} <=> $a->{sid} } @$commentstruct unless $user->{user_comment_sort_type} == 1;
 
 	my $cid_list = [ keys %$cids_seen ];
 	my $cids_to_mods = {};
@@ -2312,6 +2338,7 @@ sub saveComm {
 						? $form->{textarea_rows} : undef),
 		textarea_cols		=> ($form->{textarea_cols} != $constants->{textarea_cols}
 						? $form->{textarea_cols} : undef),
+		user_comment_sort_type  => ($form->{user_comment_sort_type} !=2 ? $form->{user_comment_sort_type} : undef )
 	};
 	
 	# set our default values for the items where an empty-string won't do 
