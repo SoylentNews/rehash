@@ -8,6 +8,7 @@ use strict;
 use Digest::MD5 'md5_hex';
 use HTML::Entities;
 use Time::HiRes;
+use Date::Format qw(time2str);
 use Slash::Utility;
 use URI ();
 use vars qw($VERSION);
@@ -2728,17 +2729,24 @@ sub countStory {
 ##################################################################
 sub checkForMetaModerator {
 	my($self, $user) = @_;
-	return unless $user->{willing};
-	return if $user->{is_anon} || $user->{rtbl};
-	return if $user->{karma} < 0;
-	my($d) = $self->sqlSelect('to_days(now()) - to_days(lastmm)',
-		'users_info', "uid = '$user->{uid}'");
-	return unless $d;
-	my($tuid) = $self->sqlSelect('max(uid)', 'users_count');
 
-	return if $user->{uid} >
+	# Easy tests the user can fail to be ineligible to metamod.
+	return 0 if $user->{is_anon}
+		|| !$user->{willing}
+		||  $user->{karma} < 0
+		||  $user->{rtbl};
+
+	# Not eligible if has already metamodded today.
+	my $current_date = time2str("%Y-%m-%d", time, 'GMT');
+	return 0 if $user->{lastmm} eq $current_date;
+
+	# Last test, have to hit the DB for this one.
+	my($tuid) = $self->sqlSelect('max(uid)', 'users_count');
+	return 0 if $user->{uid} >
 		  $tuid * $self->getVar('m2_userpercentage', 'value');
-	return 1;  # OK to M2
+
+	# User is OK to metamod.
+	return 1;
 }
 
 ##################################################################
@@ -4689,8 +4697,6 @@ sub getUser {
 		# off separately are Rob's suspicions:  users_prefs and
 		# users_comments.
 
-my $start_time = Time::HiRes::time;
-my $sql_time = 0;
 		my $n = getCurrentStatic('num_users_selects') || 1;
 		my @tables_ordered = qw( users users_index users_info
 			users_comments users_prefs );
@@ -4708,20 +4714,14 @@ my $sql_time = 0;
 			my $table = join(",", @tables_thispass);
 			my $where = join(" AND ", map { "$_.uid=$id" } @tables_thispass);
 			if (!$answer) {
-$sql_time -= Time::HiRes::time;
 				$answer = $self->sqlSelectHashref('*', $table, $where);
-$sql_time += Time::HiRes::time;
 			} else {
-$sql_time -= Time::HiRes::time;
 				my $moreanswer = $self->sqlSelectHashref('*', $table, $where);
-$sql_time += Time::HiRes::time;
 				for (keys %$moreanswer) {
 					$answer->{$_} = $moreanswer->{$_};
 				}
 			}
 			$n--;
-printf STDERR "U %d %.4f %.4f %d %s %s\n",
-$n, Time::HiRes::time-$start_time, $sql_time, scalar(keys %$answer), $table, $where;
 		}
 
 		my($append_acl, $append);
