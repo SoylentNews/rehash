@@ -617,6 +617,7 @@ INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_mainp
 INSERT INTO vars (name, value, description) VALUES ('admin_timeout','30','time in minutes before idle admin session ends');
 INSERT INTO vars (name, value, description) VALUES ('adminmail','admin@example.com','All admin mail goes here');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_ban','admin@example.com','All admin mail about users being banned goes here');
+INSERT INTO vars (name, value, description) VALUES ('adminmail_check_replication', 0, 'Check replication if is caught up before starting adminmail');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_mod','admin@example.com','All admin mail about moderation goes here');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@example.com','All admin mail about comment posting goes here');
 INSERT INTO vars (name, value, description) VALUES ('allow_anonymous','1','allow anonymous posters');
