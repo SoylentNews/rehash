@@ -2236,3 +2236,5 @@ INSERT INTO vars (name, value, description) VALUES ('mailpasswd_portscan', '0', 
 
 INSERT INTO vars (name, value, description) VALUES ('newuser_portscan', '0', 'If true, when creating a new user account is attempted, try to access our own site ok.txt using incoming IP as a proxy, and forbid account creation if successful');
 
+# End of T_2_3_0_146, Start of T_2_3_0_147 - 2004/03/30
+
