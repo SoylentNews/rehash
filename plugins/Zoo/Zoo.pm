@@ -69,7 +69,7 @@ sub _getOpposite {
 	my $people = $self->sqlSelectAll(
 		'people.person, nickname, journal_last_entry_date',
 		'people, users',
-		"person = $uid AND type =\"$type\" AND person = users.uid"
+		"person = $uid AND type =\"$type\" AND users.uid = people.uid"
 	);
 	return $people;
 }
