@@ -1,0 +1,25 @@
+_section__
+default
+__description__
+                                                                                
+__title__
+                                                                                
+__page__
+slashderrnote
+__lang__
+en_US
+__name__
+display
+__template__
+[% constants.sitename %] Slashd Error Alert!
+
+[%- FOR error = errors -%]
+[% error.taskname %] line [% error.line %] produced the following error:
+[% error.errnote %]
+[% error.moreinfo %]
+
+[%- END -%]
+__seclev__
+100
+__version__
+$Id$
