@@ -295,6 +295,11 @@ sub main {
 		redirect($refer);
 		return;
 
+	# this will only redirect if it is a section-based rootdir, and
+	# NOT an isolated section (which has the same rootdir as real_rootdir)
+	} elsif ($op eq 'userclose' && $constants->{rootdir} ne $constants->{real_rootdir}) {
+		redirect($constants->{real_rootdir}, '/users.pl?op=userclose');
+
 	} elsif ($op eq 'savepasswd') {
 		my $error_flag = 0;
 		if ($user->{seclev} < 100) {
