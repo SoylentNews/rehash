@@ -508,6 +508,8 @@ sub newUser {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	
 	my $plugins = $slashdb->getDescriptions('plugins');
 	my $title;
 	my $suadmin_flag = $user->{seclev} >= 10000 ? 1 : 0;
@@ -526,6 +528,19 @@ sub newUser {
 		print getError('emailexists_err', 0, 1);
 		return;
 	} elsif ($matchname ne '' && $form->{newusernick} ne '') {
+		if($constants->{newuser_portscan}) {
+			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
+			if ($is_trusted ne 'yes') {
+				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
+				if ($is_proxy) {
+					print getError('new user open proxy', {
+					unencoded_ip	=> $ENV{REMOTE_ADDR},
+					port		=> $is_proxy,
+					});
+					return;
+				}
+			}
+		}
 		my $uid;
 		my $rootdir = getCurrentStatic('rootdir', 'value');
 
@@ -587,6 +602,8 @@ sub newUser {
 sub mailPasswd {
 	my($hr) = @_;
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	
 	my $uid = $hr->{uid} || 0;
 
 	my $slashdb = getCurrentDB();
@@ -614,6 +631,7 @@ sub mailPasswd {
 
 	my $user_edit;
 	my $err_name = '';
+	my $err_opts = {};
 	if (!$uid || isAnon($uid)) {
 		$err_name = 'mailpasswd_notmailed_err';
 	}
@@ -627,9 +645,23 @@ sub mailPasswd {
 		$err_name = 'mailpasswd_toooften_err'
 			if $slashdb->checkMaxMailPasswords($user_edit);
 	}
+	
+	if (!$err_name) {
+		if ($constants->{mailpasswd_portscan}) {
+			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
+			if ($is_trusted ne 'yes') {
+				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
+				if ($is_proxy) {
+					$err_name = 'mailpasswd open proxy';
+					$err_opts = { unencoded_ip => $ENV{REMOTE_ADDR}, port => $is_proxy }; 
+				}
+			}
+
+		}
+	}
 
 	if ($err_name) {
-		print getError($err_name);
+		print getError($err_name, $err_opts);
 		$slashdb->resetFormkey($form->{formkey});	
 		$form->{op} = 'mailpasswdform';
 		displayForm();
