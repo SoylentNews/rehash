@@ -4152,9 +4152,9 @@ sub autoUrl {
 	s|<date>|$now|g;
 	s|<author>|<B><A HREF="$user->{homepage}">$initials</A></B>:|ig;
 
-	# The delimeters below were once "[%...%]" but that's legacy code from before
-	# Template and we've since changed it to what you see, below.
-	s/\{%(.*?)%\}/$self->getUrlFromTitle($1)/exg if $form->{shortcuts};
+	# The delimiters below were once "[%...%]" but that's legacy code from
+	# before Template, and we've since changed it to what you see below.
+	s/\{%(.*?)%\}/$self->getUrlFromTitle($1)/eg if $form->{shortcuts};
 
 	# Assorted ways to add files:
 	s|<import>|importText()|ex;
