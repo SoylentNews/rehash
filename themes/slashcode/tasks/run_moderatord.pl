@@ -632,12 +632,35 @@ sub reconcile_stats {
 
 sub mark_m2_oldzone {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
+
+	my $reasons = $slashdb->getReasons();
+        my $m2able_reasons = join(",",
+               sort grep { $reasons->{$_}{m2able} }
+               keys %$reasons);
+	my $count_oldzone_clause = "";
+	if ($m2able_reasons) {
+		$count_oldzone_clause = "active=1 AND m2status=0 AND reason IN ($m2able_reasons)";
+	}
+
 	my $prev_oldzone = $slashdb->getVar('m2_oldzone', 'value', 1);
-	$prev_oldzone = "(none)" if !defined($prev_oldzone);
+	my $prev_oldzone_count = 0;
+	if ($prev_oldzone && $count_oldzone_clause) {
+		$prev_oldzone_count = $slashdb->sqlCount("moderatorlog",
+			"id <= $prev_oldzone AND $count_oldzone_clause");
+	}
+	$prev_oldzone = "undef" if !defined($prev_oldzone);
+
 	set_new_m2_oldzone($virtual_user, $constants, $slashdb, $user);
+
 	my $new_oldzone = $slashdb->getVar('m2_oldzone', 'value', 1);
-	$new_oldzone = "(none)" if !defined($new_oldzone);
-	slashdLog("m2_oldzone was '$prev_oldzone' now '$new_oldzone'");
+	my $new_oldzone_count = 0;
+	if ($new_oldzone && $count_oldzone_clause) {
+		$new_oldzone_count = $slashdb->sqlCount("moderatorlog",
+			"id <= $new_oldzone AND $count_oldzone_clause");
+	}
+	$new_oldzone = "undef" if !defined($new_oldzone);
+
+	slashdLog("m2_oldzone was $prev_oldzone ($prev_oldzone_count mods) now $new_oldzone ($new_oldzone_count mods)");
 }
 
 sub set_new_m2_oldzone {
