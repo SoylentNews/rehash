@@ -49,7 +49,7 @@ __template__
 		center		= 1;
 ELSE;
 	# User is logged in.
-	M = BLOCK %][ <A HREF="[% constants.rootdir %]/users.pl?op=edithome">Preferences</A>[% END %]
+	M = BLOCK %][ <A HREF="[% constants.rootdir %]/my/homepage/">Preferences</A>[% END %]
 	[% IF user.seclev > 99 && user.uid;
 		M = BLOCK %]
 [% M %] | <A HREF="[% constants.rootdir %]/admin.pl">Admin</A> |
@@ -59,7 +59,7 @@ ELSE;
 	M = "$M ]<P>\n";
 	IF user.points || user.seclev > 99;
 		M = BLOCK %]
-[% M %]<A HREF="[% constants.rootdir %]/users.pl">You</A> have moderator access and
+[% M %]<A HREF="[% constants.rootdir %]/~[% user.nickname | fixparam %]/">You</A> have moderator access and
 <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %].
 Welcome to those of you just joining: <B>please</B>
 read the <A HREF="[% constants.rootdir %]/moderation.shtml">moderator guidelines</A>
