@@ -147,6 +147,14 @@ sub friends {
 		$nick = $user->{nick};
 	}
 
+	my $user_change = { };
+	if ($uid != $user->{uid} && !isAnon($uid)) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
+	}
+
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $friends = $zoo->getFriends($uid); 
 	my $friends = $zoo->getRelationships($uid, FRIEND);
@@ -187,6 +195,11 @@ sub friends {
 			}
 		}
 	}
+
+	# Store the new user we're looking at, if any.
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}       
 }
 
 sub fof {
@@ -199,6 +212,14 @@ sub fof {
 	} else {
 		$uid = $user->{uid};
 		$nick = $user->{nick};
+	}
+
+	my $user_change = { };
+	if ($uid != $user->{uid} && !isAnon($uid)) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
@@ -241,6 +262,11 @@ sub fof {
 			}
 		}
 	}
+
+	# Store the new user we're looking at, if any.
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}       
 }
 
 sub enof {
@@ -253,6 +279,14 @@ sub enof {
 	} else {
 		$uid = $user->{uid};
 		$nick = $user->{nick};
+	}
+
+	my $user_change = { };
+	if ($uid != $user->{uid} && !isAnon($uid)) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
@@ -290,6 +324,11 @@ sub enof {
 			}
 		}
 	}
+
+	# Store the new user we're looking at, if any.
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}       
 }
 
 sub foes {
@@ -302,6 +341,14 @@ sub foes {
 	} else {
 		$uid = $user->{uid};
 		$nick = $user->{nick};
+	}
+
+	my $user_change = { };
+	if ($uid != $user->{uid} && !isAnon($uid)) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
@@ -339,6 +386,11 @@ sub foes {
 			}
 		}
 	}
+
+	# Store the new user we're looking at, if any.
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}       
 }
 
 sub fans {
@@ -352,6 +404,15 @@ sub fans {
 		$uid = $user->{uid};
 		$nick = $user->{nick};
 	}
+
+	my $user_change = { };
+	if ($uid != $user->{uid} && !isAnon($uid)) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
+	}
+
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $fans = $zoo->getRelationships($uid, FAN);
 
@@ -385,6 +446,11 @@ sub fans {
 			}
 		}
 	}
+
+	# Store the new user we're looking at, if any.
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}       
 }
 
 sub freaks {
@@ -398,6 +464,15 @@ sub freaks {
 		$uid = $user->{uid};
 		$nick = $user->{nick};
 	}
+
+	my $user_change = { };
+	if ($uid != $user->{uid} && !isAnon($uid)) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
+	}
+
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $freaks = $zoo->getFreaks($uid);
 	my $freaks = $zoo->getRelationships($uid, FREAK);
@@ -433,6 +508,11 @@ sub freaks {
 			}
 		}
 	}
+
+	# Store the new user we're looking at, if any.
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}       
 }
 
 sub all {
@@ -446,6 +526,15 @@ sub all {
 		$uid = $user->{uid};
 		$nick = $user->{nick};
 	}
+
+	my $user_change = { };
+	if ($uid != $user->{uid} && !isAnon($uid)) {
+		# Store the fact that this user last looked at that user.
+		# For maximal convenience in stalking.
+		$user_change->{lastlookuid} = $uid;
+		$user->{lastlookuid} = $uid;
+	}
+
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	#my $people = $zoo->getAll($uid);
 	my $people = $zoo->getRelationships($uid);
@@ -476,6 +565,11 @@ sub all {
 			}
 		}
 	}
+
+	# Store the new user we're looking at, if any.
+	if ($user_change && %$user_change) {
+		$slashdb->setUser($user->{uid}, $user_change);
+	}       
 }
 
 sub action {
