@@ -50,7 +50,7 @@ $task{$me}{code} = sub {
 		$cur_results  = $logdb->avgDynamicDurationForMinutesBack($ops, 1, $start_id);
 	}
 	$slashdb->setVar("cur_performance_stats_lastid", $max_id);
-	return if !$start_id;
+	return "$pps pps" if !$start_id;
 
 	my @results;
 
@@ -79,14 +79,14 @@ $task{$me}{code} = sub {
 		$abs_percent_diff = abs($percent_diff);
 		$type = $percent_diff <= 0 ? "fast" : "slow";
 		push @results, $percent_diff, $abs_percent_diff, $type;
-		
 	} else {
 		push @results, "", "No past performance data for comparison";
 	}
 
-	
 	$slashdb->setVar('cur_performance_stats', join('|', @results));
 
+	# Return the pages/sec and the last (total) percentage diff
+	return sprintf("%s pps, %.1f", $pps, $percent_diff);
 };
 
 1;
