@@ -66,14 +66,15 @@ $task{$me}{code} = sub {
 	);
 
 	# Sleep until :45 after the top of the minute.
-	my $now_secs = time % 60;
-	return "started too late" if $now_secs > 55;
+	my $time = time;
+	my $now_secs = $time % 60;
+	return "started too late" if $now_secs > 50;
 	sleep 45 - $now_secs if $now_secs < 45;
+	my $max_time = time - $now_secs + 57;
 
 	# Make each gSE query to each virtual user.
 	for my $vu (@virtual_users) {
-		$now_secs = time % 60;
-		if ($now_secs > 58) {
+		if (time >= $max_time) {
 			push @errs, "ran out of time on vu '$vu': " . scalar(gmtime);
 			last;
 		}
