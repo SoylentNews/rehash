@@ -63,22 +63,25 @@ CREATE TABLE commentcodes (
 );
 
 #
-# Table structure for table 'commentkey'
+# Table structure for table 'formkeys'
 #
-CREATE TABLE commentkey (
+CREATE TABLE formkeys (
   formkey varchar(20) DEFAULT '' NOT NULL,
+  formname varchar(20) DEFAULT '' NOT NULL,
+  id varchar(20) DEFAULT '' NOT NULL,
   sid varchar(30) DEFAULT '' NOT NULL,
   uid int(1) DEFAULT '-1' NOT NULL,
-  host_name varchar(30),
-  ts varchar(20) DEFAULT '0' NOT NULL,
+  host_name varchar(30) DEFAULT '0.0.0.0' NOT NULL,
   value int(1) DEFAULT '0' NOT NULL,
   cid int(15) DEFAULT '0' NOT NULL,
-  submit_ts varchar(20) DEFAULT '0',
   comment_length int(4) DEFAULT '0' NOT NULL,
+  ts int(12) DEFAULT '0' NOT NULL,
+  submit_ts int(12) DEFAULT '0' NOT NULL,
   PRIMARY KEY (formkey),
-  KEY sid (sid),
-  KEY id (sid,cid),
-  KEY uid (uid)
+  KEY formname (formname),
+  KEY id (id),
+  KEY ts (ts),
+  KEY submit_ts (submit_ts)
 );
 
 #
