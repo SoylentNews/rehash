@@ -49,7 +49,7 @@ __template__
 		[% form.newusernick %], UID [% uid %]</A></P>
 	[% ELSE %]
 	<P>Once you receive your password, you can
-	<A HREF="[% gSkin.rootdir %]/[% IF plugins.Login %]login.pl[% ELSE %]users.pl[% END %]">log in and set your account up.</A>
+	<A HREF="[% gSkin.rootdir %]/login.pl">log in and set your account up.</A>
 	[% END %]
 
 [% CASE 'reset_acct_msg' %]
