@@ -176,7 +176,7 @@ ALTER TABLE pollquestions ADD COLUMN autopoll enum("no","yes") DEFAULT 'no' NOT 
 ALTER TABLE submissions ADD COLUMN weight float DEFAULT '0' NOT NULL;
 
 #New index_handler bits
-INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call fo conections to the root of the server.');
+INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call for conections to the root of the server.');
 ALTER TABLE sections ADD COLUMN index_handler varchar(30) DEFAULT "index.pl" NOT NULL;
 ALTER TABLE sections ADD COLUMN writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL;
 
@@ -223,7 +223,7 @@ ALTER TABLE blocks ADD autosubmit enum("no","yes") DEFAULT 'no' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('rss_store','0','Should we be saving incomming submissions for rss');
 INSERT INTO vars (name, value, description) VALUES ('rss_expire_days','7','Number of days till we blank the data from the database (the signatures still stick around though)');
 ALTER TABLE submissions DROP subid;
-ALTER TABLE submissions ADD subid mediumint UNSIGNED NOT NULL PRIMARY KEY auto_increment ;
+ALTER TABLE submissions ADD subid mediumint UNSIGNED NOT NULL PRIMARY KEY auto_increment;
 ALTER TABLE sessions DROP last_subid;
 ALTER TABLE sessions ADD last_subid mediumint UNSIGNED;
 DROP TABLE IF EXISTS submission_param;
