@@ -758,7 +758,7 @@ sub main {
 
 		# kill the dbh, we have too many problems
 		# if it sticks around during a fork -- pudge
-		$slashdb->{_dbh}->disconnect;
+		$slashdb->{_dbh}->disconnect if $slashdb->{_dbh};
 		undef $slashdb->{_dbh};
 
 		FORK: {
