@@ -144,7 +144,7 @@ sub header {
 	getSectionColors();
 
 	# This is ALWAYS displayed. Let the template handle title.
-	my $template_vars={title => $data->{title}};
+	my $template_vars = { title => $data->{title} };
 	$template_vars->{meta_desc} = $options->{meta_desc} if $options->{meta_desc};
 	slashDisplay('html-header', $template_vars, { Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
 		unless $options->{noheader};
@@ -237,7 +237,9 @@ The 'footer' template block.
 
 sub footer {
 	my($options) = @_;
+	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 
 	my $display;
 
