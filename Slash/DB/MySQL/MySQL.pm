@@ -881,6 +881,8 @@ sub getModeratorCommentLog {
 		$limit = "";
 	}
 
+	my $select_extra = (($type =~ /ipid/) || ($type =~ /subnetid/)) ? ", comments.uid as uid2, comments.ipid as ipid2" : "";
+
 	my $vq = $self->sqlQuote($value);
 	my $where_clause = "";
 	my $ipid_table = "moderatorlog";
@@ -903,7 +905,8 @@ sub getModeratorCommentLog {
 				 moderatorlog.val AS val,
 				 moderatorlog.reason AS reason,
 				 moderatorlog.ts AS ts,
-				 moderatorlog.active AS active",
+				 moderatorlog.active AS active
+				 $select_extra",
 				"moderatorlog, users, comments",
 				"$where_clause
 				 AND moderatorlog.cid=comments.cid",

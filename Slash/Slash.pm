@@ -543,6 +543,7 @@ sub moderatorCommentLog {
 
 	my $asc_desc = $type eq 'cid' ? 'ASC' : 'DESC';
 	my $limit = $type eq 'cid' ? 0 : 100;
+	my $both_mods = (($type =~ /ipid/) || ($type =~ /subnetid/)) ? 1 : 0;
 	my $mods = $slashdb->getModeratorCommentLog($asc_desc, $limit,
 		$type, $value);
 
@@ -557,6 +558,8 @@ sub moderatorCommentLog {
 
 	for my $mod (@$mods) {
 		vislenify($mod); # add $mod->{ipid_vis}
+		$mod->{nickname2} = $slashdb->getUser($mod->{uid2},
+			'nickname') if $both_mods; # need to get 2nd nick
 		next unless $mod->{active};
 		$reasonHist[$mod->{reason}]++;
 		$reasonTotal++;
@@ -578,6 +581,7 @@ sub moderatorCommentLog {
 		show_cid	=> $show_cid,
 		show_modder	=> $show_modder,
 		mod_to_from	=> $mod_to_from,
+		both_mods	=> $both_mods,
 	}, { Return => 1, Nocomm => 1 });
 }
 

@@ -2433,14 +2433,14 @@ sub vislenify {
 	if (ref $id_or_ref) {
 		if (ref($id_or_ref) eq 'HASH') {
 			my $hr = $id_or_ref;
-			for my $key (qw( ipid subnetid md5id )) {
+			for my $key (qw( ipid ipid2 subnetid md5id )) {
 				if ($hr->{$key}) {
 					$hr->{"${key}_vis"} = substr($hr->{$key}, 0, $len);
 				}
 			}
 		} elsif (ref($id_or_ref) eq 'ARRAY') {
 			for my $item_hr (@$id_or_ref) {
-				for my $key (qw( ipid subnetid md5id )) {
+				for my $key (qw( ipid ipid2 subnetid md5id )) {
 					if ($item_hr->{$key}) {
 						$item_hr->{"${key}_vis"} = substr($item_hr->{$key}, 0, $len);
 					}
