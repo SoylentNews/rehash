@@ -10277,7 +10277,7 @@ sub getTemplateByName {
 # an admin clicks Save.
 sub renderTopics {
 	my($self, $chosen_hr) = @_;
-	return { } if !%$chosen_hr;
+	return { } if !$chosen_hr || ! keys %$chosen_hr;
 
 	my $tree = $self->getTopicTree();
 	my %rendered = %$chosen_hr;
