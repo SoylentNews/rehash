@@ -19,7 +19,7 @@ __template__
 
 <H2>[% constants.slogan %]</H2>
 
-<A HREF="[% constants.rootdir %]/"><IMG SRC="[% constants.rdfimg %]" BORDER="0"></A>
+<A HREF="[% constants.real_rootdir %]/"><IMG SRC="[% constants.rdfimg %]" BORDER="0"></A>
 
 <P>[% Slash.horizmenu() %]</P>
 [% IF user.is_admin %]
