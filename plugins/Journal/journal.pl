@@ -152,8 +152,8 @@ sub displayRSS {
 sub displayArticle {
 	my($form, $journal, $constants) = @_;
 	my $slashdb = getCurrentDB();
-	my $uid;
-	my $nickname;
+	my($uid, $nickname, $date, $forward, $back, @sorted_articles);
+	my $collection = {};
 
 	if ($form->{uid}) {
 		$nickname = $slashdb->getUser($form->{uid}, 'nickname');
@@ -166,11 +166,28 @@ sub displayArticle {
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
 	my $articles = $journal->getsByUid($uid, $start,
-		$constants->{journal_default_display}, $form->{id}
+		$constants->{journal_default_display} + 1, $form->{id}
 	);
-	my @sorted_articles;
-	my $date;
-	my $collection = {};
+
+	# check for extra articles ... we request one more than we need
+	# and if we get the extra one, we know we have extra ones, and
+	# we pop it off
+	if (@$articles == $constants->{journal_default_display} + 1) {
+		pop @$articles;
+		$forward = $start + $constants->{journal_default_display};
+	} else {
+		$forward = 0;
+	}
+
+	# if there are less than journal_default_display remaning,
+	# just set it to 0
+	if ($start > 0) {
+		$back = $start - $constants->{journal_default_display};
+		$back = $back > 0 ? $back : 0;
+	} else {
+		$back = -1;
+	}
+
 	for my $article (@$articles) {
 		my($date_current, $time) =  split / /, $article->[0], 2;	
 		if ($date eq $date_current) {
@@ -194,17 +211,12 @@ sub displayArticle {
 	push @sorted_articles, $collection;
 	my $theme = $slashdb->getUser($uid, 'journal-theme');
 	$theme ||= $constants->{journal_default_theme};
+
 	slashDisplay($theme, {
 		articles	=> \@sorted_articles,
 		uid		=> $form->{uid},
-		back		=> ($start > 0
-			? $start - $constants->{journal_default_display}
-			: -1
-		),
-		forward		=> ($constants->{journal_default_display} == @$articles
-			? $start + $constants->{journal_default_display}
-			: 0
-		),
+		back		=> $back,
+		forward		=> $forward,
 	});
 }
 
