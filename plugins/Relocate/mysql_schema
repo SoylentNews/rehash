@@ -31,6 +31,6 @@ CREATE TABLE links_for_stories (
 	PRIMARY KEY (id,sid)
 ) TYPE = InnoDB;
 
-ALTER TABLE links_for_stories ADD FOREIGN KEY (sid) REFERENCES stories(sid);
-ALTER TABLE links_for_stories ADD FOREIGN KEY (id) REFERENCES links(id);
+#ALTER TABLE links_for_stories ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+#ALTER TABLE links_for_stories ADD FOREIGN KEY (id) REFERENCES links(id);
 
