@@ -352,14 +352,17 @@ sub findPollQuestion {
 	$where .= " AND topic=" . $self->sqlQuote($form->{tid})
 		if $form->{tid};
 
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $SECT = $reader->getSection($form->{section});
-	if ($SECT->{type} eq 'collected') {
-		$where .= " AND pollquestions.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
-			if $SECT->{contained} && @{$SECT->{contained}};
-	} else {
-		$where .= " AND pollquestions.section = " . $self->sqlQuote($SECT->{section});
-	}
+#	Sections are not right here, I need to work out logic for this -Brian
+#	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+#	my $SECT = $reader->getSection($form->{section});
+#	if ($SECT->{type} eq 'collected') {
+#		$where .= " AND pollquestions.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+#			if $SECT->{contained} && @{$SECT->{contained}};
+#	} else {
+#		$where .= " AND pollquestions.section = " . $self->sqlQuote($SECT->{section});
+#	}
+	$where .= " AND pollquestions.section = " . $self->sqlQuote($form->{section}) 
+		if $form->{section};
 	
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
 
