@@ -865,6 +865,7 @@ INSERT INTO vars (name, value, description) VALUES ('totalComments','0','Total n
 INSERT INTO vars (name, value, description) VALUES ('totalhits','383','Total number of hits the site has had thus far');
 INSERT INTO vars (name, value, description) VALUES ('updatemin','5','do slashd updates, default 5');
 INSERT INTO vars (name, value, description) VALUES ('use_dept','1','use \"dept.\" field');
+INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link','1','Boolean where to use next/prev links for articles');
 INSERT INTO vars (name, value, description) VALUES ('user_comment_display_default','24','Number of comments to display on user\'s info page');
 INSERT INTO vars (name, value, description) VALUES ('user_submitter_display_default','24','Number of stories to display on user\'s info page');
 INSERT INTO vars (name, value, description) VALUES ('users_bio_length','1024','Length allowed for user bio');
