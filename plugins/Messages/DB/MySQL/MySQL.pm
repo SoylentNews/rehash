@@ -454,17 +454,17 @@ sub _getMessageUsers {
 
 	my @users;
 	if ($seclev && $seclev =~ /^-?\d+$/) {
-		$table .= ",users";
+		my $seclevt = "$table,users";
 		my $seclevw = "$where AND users.uid = users_messages.uid AND seclev >= $seclev";
-		my $seclevu = $self->sqlSelectColArrayref($cols, $table, $seclevw) || [];
+		my $seclevu = $self->sqlSelectColArrayref($cols, $seclevt, $seclevw) || [];
 		push @users, @$seclevu;
 	}
 
 	if ($acl) {
 		my $acl_q = $self->sqlQuote($acl);
-		$table .= ",users_acl";
+		my $aclt = "$table,users_acl";
 		my $aclw = " users_acl.uid = users_messages.uid AND users_acl.acl=$acl_q";
-		my $aclu = $self->sqlSelectColArrayref($cols, $table, $aclw) || [];
+		my $aclu = $self->sqlSelectColArrayref($cols, $aclt, $aclw) || [];
 		push @users, @$aclu;
 	}
 
