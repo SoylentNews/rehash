@@ -34,9 +34,8 @@ $task{$me}{code} = sub {
 	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
 	give_out_points($virtual_user, $constants, $slashdb, $user);
 	reconcile_m2($virtual_user, $constants, $slashdb, $user);
-	adjust_m2_freq($virtual_user, $constants, $slashdb, $user);
 	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
-
+	adjust_m2_freq($virtual_user, $constants, $slashdb, $user) if $constants->{adjust_m2_freq};
 	return ;
 };
 
@@ -609,9 +608,39 @@ sub reconcile_stats {
 sub adjust_m2_freq {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	my $cur_freq = $slashdb->getVar('m2_freq', 'value', 1);
+	my $t = $constants->{archive_delay};
+	$t = 3 if $t < 3;
+	$t = 10 if $t > 10;
+
+	my $avg_consensus_t = $slashdb->sqlSelect("avg(m2needed)", "moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL $t day)");
+	my $avg_consensus_day = $slashdb->sqlSelect("avg(m2needed)", "moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL 1 day)");
 	
+	my $m2count_t = $slashdb->sqlCount("metamodlog", "active=1 and ts > date_sub(NOW(), INTERVAL $t day)");
+	my $m1count_t = $slashdb->sqlCount("moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL $t day)");
+
+	my $m2count_day = $slashdb->sqlCount("metamodlog", "active=1 and ts > date_sub(NOW(), INTERVAL 1 day)");
+	my $m1count_day = $slashdb->sqlCount("moderatorlog", "active=1 and ts > date_sub(NOW(), INTERVAL 1 day)");
+	
+	return 1 unless $m1count_t && $m1count_day && $m2count_t && $m2count_day;
+
+	my $x = $m2count_t / ($m1count_t * $avg_consensus_t);
+	my $y = $m2count_day / ($m1count_day * $avg_consensus_day);
+
+	my $z = ($y * 3 + $x) / 4;
+
+	return 1 if ($x > 1 && $y < 1) || ($x < 1 && $y > 1);
+	$z = 3/4 if $z < 3/4;
+	$z = 4/3 if $z > 4/3;
+
+	my $cur_m2_freq = $slashdb->getVar('m2_freq', 'value', 1) || 86400;
+	my $new_m2_freq = int($cur_m2_freq * $z ** (1/24));
+
+	$new_m2_freq = $constants->{m2_freq_min} if defined $constants->{m2_freq_min} && $new_m2_freq < $constants->{m2_freq_min};
+	$new_m2_freq = $constants->{m2_freq_max} if defined $constants->{m2_freq_max} && $new_m2_freq > $constants->{m2_freq_max};
+	slashdLog("adjusting m2_freq to $new_m2_freq");	
+	$slashdb->setVar('m2_freq', $new_m2_freq);
 }
+	
 
 1;
 
