@@ -25,11 +25,22 @@ __template__
 		[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
 			SRC="[% constants.imagedir %]/topics/[% image.image %]"
-			BORDER="0" ALT="[% topic.alttext %]" ALIGN="RIGHT"
+			BORDER="0" ALT="[% topic.alttext %]" ALIGN="RIGHT" VALIGN="TOP"
 			HSPACE="0" VSPACE="10" WIDTH="[% image.width %]"
 			HEIGHT="[% image.height %]"></A>
 	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
-		[% topic.stories %]
+	[% FOREACH story = topic.stories %]
+		[% Slash.linkStory({
+			section	=> story.section,
+			tid	=> story.tid,
+			sid	=> story.sid,
+			'link'	=> story.title
+		}) %]
+		<FONT SIZE="-1">
+			([% story.commentcount %] comments) - [% Slash.timeCalc(story.time, '%B %o, %Y') %]
+		</FONT>
+		<BR>
+	[% END %]
 	</TD></TR>
 [% END %]
 </TABLE>
