@@ -92,6 +92,7 @@ for my $subdir (sort keys %subdir_files) {
 		# where the symlink was installed in the
 		# "site/foo" tree.
 		my $theme_file_abs = canonpath(catfile($theme_dir, $target_file));
+		1 while $theme_file_abs =~ s{/[^/]+/\.\.}{};
 		my $site_rel_file = $target_file;
 		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 		my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));

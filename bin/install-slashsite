@@ -586,9 +586,20 @@ sub install_message {
 	my $text = qq|
 
 
-Unless any errors reported themself during the install you should now
-have a slashsite. You will either need to edit your httpd.conf file
-unless you are have Slash handle it. The correct syntax can be found in:
+You should now have a slashsite!  (Unless serious errors were reported
+during the install.  Some plugins do INSERT IGNOREs which may fail and
+that is harmless, notably the Search plugin if SOAP is not installed,
+which will report that the soap_methods table does not exist.)
+
+You will need to edit your httpd.conf file to have it Include the
+Slash file that (in turn) Includes this site's .conf data.  Assuming
+this is the first Slash site you've installed for this Apache, you
+will almost certainly want to add this to your httpd.conf:
+
+	Include $SLASH_PREFIX/httpd/slash.conf
+
+which in turn will Include this file (which you should look at and,
+if you know what you're doing, edit):
 
 	$prefix_site/$sitename/$sitename.conf
 

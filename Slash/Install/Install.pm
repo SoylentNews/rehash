@@ -312,6 +312,7 @@ sub _install {
 				$dir = '';
 			}
 			my $old = "$hash->{dir}/$oldfilename";
+			1 while $old =~ s{/[^/]+/\.\.}{};
 			my $new = "$instdir$dir/$filename";
 
 			# I don't think we should delete the file first,
@@ -356,11 +357,12 @@ sub _install {
  		}
  	}
 
-	for (@sql) {
-		next unless $_;
-		s/;\s*$//;
-		unless ($self->sqlDo($_)) {
-			print "Failed on :$_:\n";
+	for my $statement (@sql) {
+		next unless $statement;
+		$statement =~ s/;\s*$//;
+		my $rows = $self->sqlDo($statement);
+		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
+			print "Failed on :$statement:\n";
 		}
 	}
 	@sql = ();

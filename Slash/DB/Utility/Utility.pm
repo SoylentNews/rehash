@@ -593,7 +593,9 @@ sub sqlDo {
 	$self->sqlConnect();
 	my $rows = $self->{_dbh}->do($sql);
 	unless ($rows) {
-		errorLog($sql);
+		unless ($sql =~ /^INSERT\s+IGNORE\b/i) {
+			errorLog($sql);
+		}
 		$self->sqlConnect;
 		return;
 	}
