@@ -327,10 +327,10 @@ EOT
 
 	my $unique_users = $logdb->countUsersMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)]});
 	
-	my $unique_ips   = $logdb->countDistinctIPIDMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)]});   
+	my $unique_ips   = $logdb->countUniqueIPs();   
 	
-	my $anon_ips =  $logdb->countDistinctIPIDMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)], user_type => "anonymous"});
-	my $logged_in_ips = $logdb->countDistinctIPIDMultiTable({ tables => [qw(accesslog_temp accesslog_temp_rss)], user_type => 'logged-in' });
+	my $anon_ips =  $logdb->countUniqueIPs({ anon => "yes"});
+	my $logged_in_ips = $logdb->countUniqueIPs({anon => "no"});
 
 	my $grand_total = $logdb->countDailyByPage('');
 	$grand_total   += $logdb->countDailyByPage('', { table_suffix => "_rss"});

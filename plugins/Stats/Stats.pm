@@ -61,10 +61,10 @@ sub new {
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_subscriber");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_other");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_rss");
-		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_host_addr");
-		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_host_uid");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_host_addr");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_uid");
 
-		$self->sqlDo("CREATE TABLE accesslog_build_unique_host_addr ( host_addr char(32) UNIQUE NOT NULL, PRIMARY KEY (host_addr)) TYPE = InnoDB");
+		$self->sqlDo("CREATE TABLE accesslog_temp_host_addr (host_addr char(32) UNIQUE NOT NULL, anon ENUM('no','yes') NOT NULL DEFAULT 'yes', PRIMARY KEY (host_addr, anon)) TYPE = InnoDB");
 		$self->sqlDo("CREATE TABLE accesslog_build_unique_uid ( uid MEDIUMINT UNSIGNED NOT NULL, PRIMARY KEY (uid)) TYPE = InnoDB");
 
 		# Then, get the schema in its CREATE TABLE statement format.
@@ -111,8 +111,8 @@ sub new {
 			"accesslog",
 			"ts $self->{_day_between_clause} AND status != 200",
 			3, 60);
-	
-		my $recent_subscribers = $self->getRecentSubscribers();
+		my $stats_reader = getObject('Slash::Stats', { db_type => 'reader' });	
+		my $recent_subscribers = $stats_reader->getRecentSubscribers();
 		if ($recent_subscribers && @$recent_subscribers) {
 			my $recent_subscriber_uidlist = join(", ", @$recent_subscribers);
 		
@@ -138,6 +138,9 @@ sub new {
 			"op NOT in($page_list)",
 			3, 60);
 	}
+
+	$self->sqlDo("INSERT IGNORE INTO accesslog_temp_host_addr SELECT host_addr, IF(uid=$constants->{anonymous_coward_uid},'yes','no') from accesslog_temp ");
+	$self->sqlDo("INSERT IGNORE INTO accesslog_temp_host_addr SELECT host_addr, IF(uid=$constants->{anonymous_coward_uid},'yes','no') from accesslog_temp_rss ");
 
 	return $self;
 }
@@ -1071,22 +1074,14 @@ sub countUsersMultiTable {
 	}
 	$self->sqlCount("accesslog_build_unique_uid");
 }
+
 ########################################################
-sub countDistinctIPIDMultiTable {
+
+sub countUniqueIPs {
 	my ($self, $options) = @_;
-	my $constants = getCurrentStatic;
-	my $tables = $options->{tables} || [];
-
 	my $where;
-	$where = "WHERE uid = $constants->{anonymous_coward_uid} " if $options->{user_type} eq "anonymous";
-	$where = "WHERE  uid != $constants->{anonymous_coward_uid} " if $options->{user_type} eq "logged-in";
-
-	$self->sqlDo("DELETE FROM accesslog_build_unique_host_addr");
-
-	foreach my $table (@$tables) {
-		$self->sqlDo("INSERT IGNORE INTO accesslog_build_unique_host_addr SELECT DISTINCT host_addr FROM $table $where");
-	}
-	$self->sqlCount("accesslog_build_unique_host_addr");
+	$where = "anon=".$self->sqlQuote($options->{anon}) if $options->{anon};
+	$self->sqlSelect("COUNT(DISTINCT host_addr)", "accesslog_temp_host_addr", $where);
 }
 ########################################################
 sub countUsersByPage {
