@@ -1043,7 +1043,6 @@ C<approveTag> function, C<approveCharref> function.
 
 sub stripBadHtml {
 	my($str) = @_;
-#print STDERR "stripBadHtml 1 '$str'\n";
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
@@ -1069,11 +1068,9 @@ sub stripBadHtml {
 		)
 	}{&lt;$1}gx;
 
-#print STDERR "stripBadHtml 2 '$str'\n";
 	my $ent = qr/#?[a-zA-Z0-9]+/;
 	$str =~ s/&(?!$ent;)/&amp;/g;
 	$str =~ s/&($ent);?/approveCharref($1)/ge;
-#print STDERR "stripBadHtml 3 '$str'\n";
 
 	return $str;
 }
@@ -2012,12 +2009,9 @@ sub balanceTags {
 			@{$constants->{approvedtags}};
 	}
 	%lone = map { ($_, 1) } @{$constants->{lonetags}};
+	my %is_breaking = map { ( $_, 1 ) } @{$constants->{approvedtags_break}};
 
-	# If the quoted slash in the next line bothers you, then feel free to
-	# remove it. It's just there to prevent broken syntactical highlighting
-	# on certain editors (vim AND xemacs).  -- Cliff
-	# maybe you should use a REAL editor, like BBEdit.  :) -- pudge
-	while ($html =~ m|(<(\/?)($match)\b[^>]*>)|igo) { # loop over tags
+	while ($html =~ /(<(\/?)($match)\b[^>]*>)/igo) { # loop over tags
 		($tag, $close, $whole) = (uc($3), $2, $1);
 
 		if ($close) {
@@ -2049,6 +2043,22 @@ sub balanceTags {
 			$tags{$tag}++;
 			push @stack, $tag;
 
+			# No <A>...</A> tag is allowed to stretch over a
+			# breaking tag.  If we're currently in <A> text
+			# and this is a breaking tag, insert a </A> before
+			# it, and yank the <A> out of the middle of the
+			# stack so we don't try to close it later.
+			# Actually, do that as many times as we have
+			# nested <A>s (which we shouldn't have anyway).
+			if (!$constants->{anchortags_bridge_breaks}
+				&& $is_breaking{$tag}
+				&& $tags{A}) {
+				my $p = pos($html) - length($whole);
+				substr($html, $p, 0) = ("</A>" x $tags{A});
+				@stack = grep !/^A$/, @stack;
+				$tags{A} = 0;
+			}
+
 			if ($max_nest_depth) {
 				my $cur_depth = 0;
 				for (qw( UL OL DIV BLOCKQUOTE DL )) { $cur_depth += $tags{$_} }
@@ -2061,7 +2071,7 @@ sub balanceTags {
 	$html =~ s/\s+$//;
 
 	# add on any unclosed tags still on stack
-	$html .= join '', map { "</$_>" } grep {! exists $lone{$_}} reverse @stack;
+	$html .= join '', map { "</$_>" } grep { !exists $lone{$_} } reverse @stack;
 
 	return $html;
 }

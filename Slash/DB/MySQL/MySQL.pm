@@ -822,7 +822,9 @@ sub countUserModsInDiscussion {
 
 ########################################################
 sub getModeratorCommentLog {
-	my($self, $asc_desc, $limit, $type, $value, $options) = @_;
+	my($self, $asc_desc, $limit, $t, $value, $options) = @_;
+	# $t tells us what type of data $value is, and what type of
+	# information we're looking to retrieve
 	$options ||= {};
 	$asc_desc ||= 'ASC';
 	$asc_desc = uc $asc_desc;
@@ -835,7 +837,7 @@ sub getModeratorCommentLog {
 	}
 
 	my $cidlist;	
-	if ($type eq "cidin") {
+	if ($t eq "cidin") {
 		if (ref $value eq "ARRAY" and @$value) {
 			$cidlist = join(',', @$value);
 		} elsif (!ref $value and $value) {
@@ -845,21 +847,23 @@ sub getModeratorCommentLog {
 		}
 	}
 
-	my $select_extra = (($type =~ /ipid/) || ($type =~ /subnetid/) || ($type =~ /global/)) ? ", comments.uid as uid2, comments.ipid as ipid2" : "";
+	my $select_extra = (($t =~ /ipid/) || ($t =~ /subnetid/) || ($t =~ /global/))
+		? ", comments.uid AS uid2, comments.ipid AS ipid2"
+		: "";
 
 	my $vq = $self->sqlQuote($value);
 	my $where_clause = "";
 	my $ipid_table = "moderatorlog";
-	   if ($type eq 'uid')       {	$where_clause = "moderatorlog.uid=$vq      AND comments.uid=users.uid";
-					$ipid_table = "comments"						    }
-	elsif ($type eq 'cid')       {	$where_clause = "moderatorlog.cid=$vq      AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'cuid')      {	$where_clause = "moderatorlog.cuid=$vq     AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'cidin')     {	$where_clause = "moderatorlog.cid in($cidlist)     AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'subnetid')  {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'ipid')      {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'bipid')     {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'global')    {	$where_clause =				      "moderatorlog.uid=users.uid"  }
+	   if ($t eq 'uid')       { $where_clause = "comments.uid=users.uid AND     moderatorlog.uid=$vq";
+				    $ipid_table = "comments"							    }
+	elsif ($t eq 'cid')       { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cid=$vq"	    }
+	elsif ($t eq 'cuid')      { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cuid=$vq"	    }
+	elsif ($t eq 'cidin')     { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cid IN ($cidlist)" }
+	elsif ($t eq 'subnetid')  { $where_clause = "moderatorlog.uid=users.uid AND comments.subnetid=$vq"	    }
+	elsif ($t eq 'ipid')      { $where_clause = "moderatorlog.uid=users.uid AND comments.ipid=$vq"		    }
+	elsif ($t eq 'bsubnetid') { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.subnetid=$vq"	    }
+	elsif ($t eq 'bipid')     { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.ipid=$vq"	    }
+	elsif ($t eq 'global')    { $where_clause = "moderatorlog.uid=users.uid"				    }
 	return [ ] unless $where_clause;
 
 	my $time_clause = "";
@@ -918,7 +922,7 @@ sub getMetamodCountsForModsByType {
 }
 
 
-# Given an arrayref of moderation ids  a hashref
+# Given an arrayref of moderation ids, a hashref
 # keyed by moderation ids is returned.  The moderation ids 
 # point to arrays containing info metamoderations for that 
 # particular moderation id.
@@ -927,11 +931,19 @@ sub getMetamodsForMods {
 	my($self, $ids, $limit) = @_;
 	my $id_str = join ',', @$ids;
 	return {} unless @$ids;
-	$limit = " limit $limit" if $limit;
-	my $m2s = $self->sqlSelectAllHashrefArray("id,mmid,metamodlog.uid as uid,val,ts,active,nickname","metamodlog,users",
-							"mmid in($id_str) and metamodlog.uid=users.uid order by mmid desc $limit");
+	# If the limit param is missing or zero, all matching
+	# rows are returned.
+	$limit = " LIMIT $limit" if $limit;
+	$limit ||= "";
+
+	my $m2s = $self->sqlSelectAllHashrefArray(
+		"id, mmid, metamodlog.uid AS uid, val, ts, active, nickname",
+		"metamodlog, users",
+		"mmid IN ($id_str) AND metamodlog.uid=users.uid",
+		"ORDER BY mmid DESC $limit");
+
 	my $mods_to_m2s = {};
-	while (my $m2 = shift @$m2s) {
+	for my $m2 (@$m2s) {
 		push @{$mods_to_m2s->{$m2->{mmid}}}, $m2;
 	}
 	return $mods_to_m2s;
@@ -1881,8 +1893,11 @@ sub getCommentsByGeneric {
 	my($self, $where_clause, $num, $min, $options) = @_;
 	$min ||= 0;
 	my $limit = " LIMIT $min, $num " if $num;
-	$where_clause .= " AND date>date_sub(now(), INTERVAL $options->{limit_days} DAY)" if $options->{limit_days};
-	my $comments = $self->sqlSelectAllHashrefArray('*','comments', $where_clause, " ORDER BY date DESC $limit");
+	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
+		if $options->{limit_days};
+	my $comments = $self->sqlSelectAllHashrefArray(
+		'*', 'comments', $where_clause,
+		"ORDER BY date DESC $limit");
 
 	return $comments;
 }
@@ -6553,13 +6568,7 @@ sub getMCD {
 sub getMCDStats {
 	my($self) = @_;
 	my $mcd = $self->getMCD();
-	return undef unless $mcd;
-
-	# Right now (11/04/2003) this depends on a custom patch to
-	# Cache::Memcached.  I hope to have that in the CPAN version
-	# soon.  Until it is, unless you have my patch, this isn't
-	# going to work, sorry. - Jamie
-	return undef unless $mcd->can("stats");
+	return undef unless $mcd && $mcd->can("stats");
 
 	my $stats = $mcd->stats();
 	for my $server (keys %{$stats->{hosts}}) {
