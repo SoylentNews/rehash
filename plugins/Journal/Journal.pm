@@ -285,8 +285,8 @@ sub searchUsers {
 	);
 
 	for my $user (sort { lc $a->{nickname} cmp lc $b->{nickname} } @$find) {
-		my $uid  = $user->[2];
-		my $nick = $user->[1];
+		my $uid  = $user->{uid};
+		my $nick = $user->{nickname};
 		if (exists $journals->{$uid}) {
 			push @users, [
 				$nick, $uid, $journals->{$uid}{date},
