@@ -1942,7 +1942,7 @@ sub getCommentsByIPIDOrSubnetID {
 	my $where = "(ipid='$id' OR subnetid='$id') ";
 	$where .= " AND cid >= $constants->{comments_forgetip_mincid} " if $constants->{comments_forgetip_mincid};
 	return $self->getCommentsByGeneric(
-               $where, $num, $min, $options);
+	       $where, $num, $min, $options);
 }
 
 
@@ -2977,7 +2977,7 @@ sub getPollQuestionList {
 	$where .= sprintf ' AND section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
 	$where .= " AND pollquestions.topic = $other->{topic} " if $other->{topic};
-       
+
 	$where .= " AND date <= NOW() " unless $admin;
 	my $limit = $other->{limit} || 20;
 
@@ -3867,13 +3867,13 @@ sub getNetIDStruct {
 	}
 
 	$iplist = $self->sqlSelectAll(
-                "ipid,
-                MIN(SUBSTRING(time, 1, 10)) AS dmin,
-                MAX(SUBSTRING(time, 1, 10)) AS dmax,
-                COUNT(*) AS c, $column4 as ipid_vis",
-                "submissions",
-                "uid = '$id' AND ipid != ''",
-                "GROUP BY ipid ORDER BY dmax DESC, dmin DESC, c DESC, ipid ASC LIMIT 100");
+		"ipid,
+		MIN(SUBSTRING(time, 1, 10)) AS dmin,
+		MAX(SUBSTRING(time, 1, 10)) AS dmax,
+		COUNT(*) AS c, $column4 as ipid_vis",
+		"submissions",
+		"uid = '$id' AND ipid != ''",
+		"GROUP BY ipid ORDER BY dmax DESC, dmin DESC, c DESC, ipid ASC LIMIT 100");
 
 	for (@$iplist) {
 		if (exists $ipstruct->{$_->[0]}) {
@@ -3884,39 +3884,39 @@ sub getNetIDStruct {
 		} else {
 			my $ip;
 			$ip->{dmin} = $_->[1];
-                	$ip->{dmax} = $_->[2];
-                	$ip->{count} = $_->[3];
-                	$ip->{ipid_vis} = $_->[4];
+			$ip->{dmax} = $_->[2];
+			$ip->{count} = $_->[3];
+			$ip->{ipid_vis} = $_->[4];
 			$ip->{submissions} = 1;
-                	$ipstruct->{$_->[0]} = $ip;
+			$ipstruct->{$_->[0]} = $ip;
 		}
 	}
 
-        $iplist = $self->sqlSelectAll(
-                "ipid,
-                MIN(SUBSTRING(ts, 1, 10)) AS dmin,
-                MAX(SUBSTRING(ts, 1, 10)) AS dmax,
-                COUNT(*) AS c, $column4 as ipid_vis",
-                "moderatorlog",
-                "uid = '$id' AND ipid != ''",
-                "GROUP BY ipid ORDER BY dmax DESC, dmin DESC, c DESC, ipid ASC LIMIT 100");
+	$iplist = $self->sqlSelectAll(
+		"ipid,
+		MIN(SUBSTRING(ts, 1, 10)) AS dmin,
+		MAX(SUBSTRING(ts, 1, 10)) AS dmax,
+		COUNT(*) AS c, $column4 as ipid_vis",
+		"moderatorlog",
+		"uid = '$id' AND ipid != ''",
+		"GROUP BY ipid ORDER BY dmax DESC, dmin DESC, c DESC, ipid ASC LIMIT 100");
 
 	for (@$iplist) {
-                if (exists $ipstruct->{$_->[0]}) {
-                        $ipstruct->{$_->[0]}{dmin} = ($ipstruct->{$_->[0]}{dmin} lt $_->[1]) ? $ipstruct->{$_->[0]}{dmin} : $_->[1];
-                        $ipstruct->{$_->[0]}{dmax} = ($ipstruct->{$_->[0]}{dmax} gt $_->[2]) ? $ipstruct->{$_->[0]}{dmax} : $_->[2];
-                        $ipstruct->{$_->[0]}{count} += $_->[3];
-                        $ipstruct->{$_->[0]}{moderatorlog} = 1;
-                } else {
-                        my $ip;
-                        $ip->{dmin} = $_->[1];
-                        $ip->{dmax} = $_->[2];
-                        $ip->{count} = $_->[3];
-                        $ip->{ipid_vis} = $_->[4];
-                        $ip->{moderatorlog} = 1;
-                        $ipstruct->{$_->[0]} = $ip;
-                }
-        }
+		if (exists $ipstruct->{$_->[0]}) {
+			$ipstruct->{$_->[0]}{dmin} = ($ipstruct->{$_->[0]}{dmin} lt $_->[1]) ? $ipstruct->{$_->[0]}{dmin} : $_->[1];
+			$ipstruct->{$_->[0]}{dmax} = ($ipstruct->{$_->[0]}{dmax} gt $_->[2]) ? $ipstruct->{$_->[0]}{dmax} : $_->[2];
+			$ipstruct->{$_->[0]}{count} += $_->[3];
+			$ipstruct->{$_->[0]}{moderatorlog} = 1;
+		} else {
+			my $ip;
+			$ip->{dmin} = $_->[1];
+			$ip->{dmax} = $_->[2];
+			$ip->{count} = $_->[3];
+			$ip->{ipid_vis} = $_->[4];
+			$ip->{moderatorlog} = 1;
+			$ipstruct->{$_->[0]} = $ip;
+		}
+	}
 
 	return $ipstruct;
 }
@@ -4366,12 +4366,12 @@ sub currentAdmin {
 #
 sub getTopNewsstoryTopics {
 	my($self, $limit, $section) = @_;
-        $section = "" if $section eq "index";
+	$section = "" if $section eq "index";
 	my $all = 1 if !$limit;
 
 	$limit =~ s/\D+//g;
 	$limit = 10 if !$limit || $limit == 1;
-        my $sect_clause =" AND section='$section' " if $section;
+	my $sect_clause =" AND section='$section' " if $section;
 	my $other  = $all ? '' : "LIMIT $limit";
 	my $topics = $self->sqlSelectAllHashrefArray(
 		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(time) AS tme",
@@ -4401,7 +4401,7 @@ sub getTopPollTopics {
 
 	$limit =~ s/\D+//g;
 	$limit = 10 if !$limit || $limit == 1;
-        my $sect_clause;
+	my $sect_clause;
 	my $other  = $all ? '' : "LIMIT $limit";
 	my $topics = $self->sqlSelectAllHashrefArray(
 		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(date) AS tme",
@@ -5595,7 +5595,7 @@ sub getComments {
 
 #######################################################
 sub getSubmissionsByNetID {
-        my($self, $id, $field, $limit) = @_;
+	my($self, $id, $field, $limit) = @_;
 
 	$limit = "LIMIT $limit" if $limit;
 	my $where;
@@ -5618,7 +5618,7 @@ sub getSubmissionsByNetID {
 
 ########################################################
 sub getSubmissionsByUID {
-        my($self, $id, $limit) = @_;
+	my($self, $id, $limit) = @_;
 	$limit=" LIMIT $limit " if $limit;
 	my $answer = $self->sqlSelectAllHashrefArray(
 		'uid,name,subid,ipid,subj,time,del',
@@ -6371,12 +6371,12 @@ sub updateStory {
 #	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
-        $self->updatePollFromStory($sid, {
-        	date		=> 1,
-        	topic		=> 1,
-        	section		=> 1,
-        	polltype	=> 1
-        });
+	$self->updatePollFromStory($sid, {
+		date		=> 1,
+		topic		=> 1,
+		section		=> 1,
+		polltype	=> 1
+	});
 
 	return $sid;
 
@@ -9071,32 +9071,32 @@ sub getRandomSpamArmor {
 
 ########################################################
 sub sqlShowProcessList {
-        my($self) = @_;
+	my($self) = @_;
 
-        $self->sqlConnect();
-        my $proclist = $self->{_dbh}->prepare("SHOW FULL PROCESSLIST");
+	$self->sqlConnect();
+	my $proclist = $self->{_dbh}->prepare("SHOW FULL PROCESSLIST");
 
-        return $proclist;
+	return $proclist;
 }
 
 ########################################################
 sub sqlShowStatus {
-        my($self) = @_;
+	my($self) = @_;
 
-        $self->sqlConnect();
-        my $status = $self->{_dbh}->prepare("SHOW STATUS");
+	$self->sqlConnect();
+	my $status = $self->{_dbh}->prepare("SHOW STATUS");
 
-        return $status;
+	return $status;
 }
 
 ########################################################
 sub sqlShowInnodbStatus {
-        my($self) = @_;
+	my($self) = @_;
 
-        $self->sqlConnect();
-        my $status = $self->{_dbh}->prepare("SHOW INNODB STATUS");
+	$self->sqlConnect();
+	my $status = $self->{_dbh}->prepare("SHOW INNODB STATUS");
 
-        return $status;
+	return $status;
 }
 
 ########################################################
