@@ -180,7 +180,7 @@ sub makepayment {
 	if (!$form->{secretword}
 		|| $form->{secretword} ne $constants->{subscribe_secretword}) {
 		sleep 5; # easy way to help defeat brute-force attacks
-		print "<p>Payment rejected, wrong secretword\n";
+		print "<p>makepayment: Payment rejected, wrong secretword\n";
 	}
 
 	my @keys = qw( uid email payment_gross payment_net
@@ -201,14 +201,14 @@ sub makepayment {
 		$slashdb->setUser($payment->{uid}, {
 			"-hits_paidfor" => "hits_paidfor + $num_pages"
 		});
-		print "<p>Payment confirmed\n";
+		print "<p>makepayment: Payment confirmed\n";
 	} else {
 		use Data::Dumper;
 		my $warning = "DEBUG: Payment accepted but record "
 			. "not added to database! rows='$rows'\n"
 			. Dumper($payment);
 		print STDERR $warning;
-		print "<p>Payment transaction ID already recorded or other error, "
+		print "<p>makepayment: Payment transaction ID already recorded or other error, "
 			. "not added to database! rows='$rows'\n";
 	}
 }
