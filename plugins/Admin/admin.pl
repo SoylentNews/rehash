@@ -343,7 +343,7 @@ sub templateEdit {
 		my $getpage    = $page    eq 'All' ? '' : $page;
 		my $getsection = $section eq 'All' ? '' : $section;
 
-		unless ($form->{templatesection} || $form->{templatepage} || $form->{templatesearch}) {
+		unless ($form->{templatesection} || $form->{templatepage} || $form->{templatepageandsection} || $form->{templatesearch}) {
 			$form->{ $form->{templatelastselect} } = 1;
 		}
 
