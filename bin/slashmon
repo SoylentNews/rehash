@@ -62,12 +62,16 @@ sub init {
 	$slashdb = getCurrentDB();
 	$constants = getCurrentStatic();
 
+	my $vus_hr = {
+		map { ( $_, 1 ) }
+		@{$slashdb->sqlSelectColArrayref('virtual_user', 'dbs')}
+	};
 	my $vus = [ (
 		$slashdb->{virtual_user},
 		sort { $a cmp $b }
 		grep { $_ ne $slashdb->{virtual_user} }
-		@{$slashdb->sqlSelectColArrayref('virtual_user', 'dbs')}
-	)];
+		keys %$vus_hr
+	) ];
 	my $log_db = $slashdb->getDBs()->{log}[0]{virtual_user} || '';
 
 	# Set up the @db array based on what virtual users we have.
