@@ -1708,6 +1708,31 @@ sub getCommentsByIPIDOrSubnetID {
 		"ipid='$id' OR subnetid='$id'", $min);
 }
 
+
+#################################################################
+# get list of DBs, never cache
+sub getDBs {
+	my($self) = @_;
+	my $dbs = $self->sqlSelectAllHashref('id', '*', 'db');
+	my %databases;
+
+	for (keys %$dbs) {
+		my $db = $dbs->{$_};
+		$databases{$db->{type}} ||= [];
+		push @{$databases{$db->{type}}}, $db;
+	}
+
+	return \%databases;
+}
+
+#################################################################
+# get list of DBs, never cache
+sub getClasses {
+	my($self) = @_;
+	my $classes = $self->sqlSelectAllHashref('class', '*', 'classes');
+	return $classes;
+}
+
 #################################################################
 # Just create an empty content_filter
 sub createContentFilter {

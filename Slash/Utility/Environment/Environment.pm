@@ -1241,6 +1241,31 @@ sub prepareUser {
 		$user->{state}{lostprivs} = 1;
 	}
 
+	# set DBs
+	my $databases = $slashdb->getDBs();
+	for my $type (keys %$databases) {
+		my $db = $databases->{$type};
+
+		# shuffle the deck
+		my $i = @$db;
+		while ($i--) {
+			my $j = int rand($i+1);
+			@$db[$i, $j] = @$db[$j, $i];
+		}
+
+		# there can be only one
+		my $virtual_user;
+		for (@$db) {
+			if ($_->{isalive} eq 'yes') {
+				$virtual_user = $_->{virtual_user};
+				last;
+			}
+		}
+
+		# save in user's state
+		$user->{state}{dbs}{$type} = $virtual_user;
+	}
+
 	return $user;
 }
 
@@ -1631,8 +1656,36 @@ An object, unless object cannot be gotten; then undef.
 =cut
 
 sub getObject {
-	my($class, $user, @args) = @_;
-	my($cfg, $objects);
+	my($class, $data, @args) = @_;
+	my($vuser, $cfg, $objects);
+	my $user = getCurrentUser();
+
+	# clean up dangerous characters
+	$class =~ s/[^\w:]+//g;
+
+	# only if passed a hash, or no passed data at all
+	if (!$data || ref $data eq 'HASH') {
+		$data ||= {};
+		my $classes = getCurrentDB()->getClasses();
+
+		# try passed db first, then db for given class
+		my $db_type  = $data->{db_type}  || $classes->{$class}{db_type};
+		my $fallback = $data->{fallback} || $classes->{$class}{fallback};
+
+		$vuser = ($db_type  && $user->{state}{dbs}{$db_type})
+		      || ($fallback && $user->{state}{dbs}{$fallback});
+
+		return undef if $db_type && $fallback && !$vuser;
+	}
+
+	# if plain string, use it as vuser
+	elsif (!ref $data) {
+		$vuser = $data;
+	}
+
+	# in the future, we may default to something else, but for now it is the writer
+	$vuser ||= $user->{state}{dbs}{writer} || getCurrentVirtualUser();
+	return undef unless $vuser && $class;
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		$cfg     = Apache::ModuleConfig->get($r, 'Slash::Apache');
@@ -1641,19 +1694,14 @@ sub getObject {
 		$objects = $static_objects   ||= {};
 	}
 
-	# clean up dangerous characters
-	$class =~ s/[^\w:]+//g;
-	$user ||= getCurrentVirtualUser();
-	return undef unless $user && $class;
-
-	if ($objects->{$class, $user}) {
+	if ($objects->{$class, $vuser}) {
 		# we've been here before, and it didn't work last time ...
 		# what, you think you can try it again and it will work
 		# magically this time?  you think you're better than me?
-		if ($objects->{$class, $user} eq 'NA') {
+		if ($objects->{$class, $vuser} eq 'NA') {
 			return undef;
 		} else {
-			return $objects->{$class, $user};
+			return $objects->{$class, $vuser};
 		}
 
 	} else {
@@ -1668,11 +1716,11 @@ sub getObject {
 			errorLog("Class $class is not returning an object.  Try " .
 				"`perl -M$class -le '$class->new'` to see why.\n");
 		} else {
-			my $object = $class->new($user, @args);
-			return $objects->{$class, $user} = $object if $object;
+			my $object = $class->new($vuser, @args);
+			return $objects->{$class, $vuser} = $object if $object;
 		}
 
-		$objects->{$class, $user} = 'NA';
+		$objects->{$class, $vuser} = 'NA';
 		return undef;
 	}
 }
