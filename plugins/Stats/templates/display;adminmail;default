@@ -45,15 +45,19 @@ __template__
      homepage: [% homepage %]
       indexes
 [% FOREACH item = sections %]
-	[% item.key %]:[% item.value %]
+	[% item.key %]:[% item.value -%]
 [% END %]
 
 -----------------------
 
-
-[% FOREACH item = lazy %]
+[% FOREACH item = lazy -%]
 [% item %]
 [% END %]
 
+-----------------------
+
+[% tailslash %]
+
+-----------------------
 __seclev__
 100

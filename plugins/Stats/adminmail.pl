@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 
 use strict;
+use Slash::Constants ':messages';
+use Slash::Display;
 
 use vars qw( %task $me );
 
@@ -215,10 +217,18 @@ EOT
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{admin_mods_text} = $admin_mods_text;
+	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
 
 	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail', Nocomm => 1 });
 
 	# Send a message to the site admin.
+	my $messages = getObject('Slash::Messages');
+	if ($messages) {
+		my $message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
+		for (@$message_users) {
+			$messages->create($_, MSG_CODE_ADMINMAIL, $email);
+		}
+	}
 	for (@{$constants->{stats_reports}}) {
 		sendEmail($_, "$constants->{sitename} Stats Report", $email, 'bulk');
 	}
