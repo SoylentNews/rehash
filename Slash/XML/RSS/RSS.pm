@@ -370,10 +370,20 @@ sub rss_story {
 
 	$encoded_item->{title}  = $self->encode($story->{title})
 		if $story->{title};
-	$encoded_item->{'link'} = $self->encode(
-		_tag_link("$channel->{'link'}article.pl?sid=$story->{sid}"),
-		'link'
-	) if $story->{sid};
+	if ($story->{sid}) {
+		if ($story->{primaryskid}) {
+			my $rootdir = $reader->getSkin($story->{primaryskid})->{absolutedir};
+			$encoded_item->{'link'} = $self->encode(
+                                _tag_link("$rootdir/article.pl?sid=$story->{sid}"),
+                                'link'
+                        );
+		} else {
+			$encoded_item->{'link'} = $self->encode(
+				_tag_link("$channel->{'link'}article.pl?sid=$story->{sid}"),
+				'link'
+			);
+		}
+	}
 
 	if ($version >= 0.91) {
 		my $desc = $self->rss_item_description($item->{description} || $story->{introtext});
