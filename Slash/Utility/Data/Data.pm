@@ -509,6 +509,8 @@ my %action_data = ( );
 my %actions = (
 	newline_to_local => sub {
 			${$_[0]} =~ s/(?:\015?\012|\015)/\n/g;		},
+	trailing_whitespace => sub {
+			${$_[0]} =~ s/[t ]+\n/\n/g;			},
 	encode_html_amp => sub {
 			${$_[0]} =~ s/&/&amp;/g;			},
 	encode_html_amp_ifnotent => sub {
@@ -596,11 +598,13 @@ my %mode_actions = (
 			encode_html_ltgt_stray		)],
 	NOHTML, [qw(
 			newline_to_local
+			trailing_whitespace
 			remove_tags
 			remove_ltgt
 			encode_html_amp			)],
 	PLAINTEXT, [qw(
 			newline_to_local
+			trailing_whitespace
 			processCustomTags
 			remove_trailing_lts
 			approveTags
@@ -613,6 +617,7 @@ my %mode_actions = (
 			newline_indent			)],
 	HTML, [qw(
 			newline_to_local
+			trailing_whitespace
 			processCustomTags
 			remove_trailing_lts
 			approveTags
@@ -623,6 +628,7 @@ my %mode_actions = (
 			breakHtml_ifwhitefix		)],
 	CODE, [qw(
 			newline_to_local
+			trailing_whitespace
 			encode_html_amp
 			encode_html_ltgt
 			whitespace_tagify
@@ -630,6 +636,7 @@ my %mode_actions = (
 			breakHtml_ifwhitefix		)],
 	EXTRANS, [qw(
 			newline_to_local
+			trailing_whitespace
 			encode_html_amp
 			encode_html_ltgt
 			breakHtml_ifwhitefix
