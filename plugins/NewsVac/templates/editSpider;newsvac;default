@@ -11,7 +11,7 @@ en_US
 __name__
 editSpider
 __template__
-<!-- begin editSpider -->
+[% USE date %]
 <FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatespider">
 <INPUT TYPE="HIDDEN" NAME="spider_id" VALUE="[% spider_id %]">
@@ -74,7 +74,8 @@ IF timespecs.size -%]
 <input type="text" size=30 NAME="timespec_[% t.timespec_id 
 -%]_timespec" VALUE="[% t.timespec %]">&nbsp;&nbsp;
 [% IF t.timespec_id != 0 %]<input type="checkbox" NAME="timespec_[% 
-t.timespec_id -%]_del">[% END %]<BR>
+t.timespec_id -%]_del">[% END %] <SMALL>(<B>Last run</B>: [%
+date.format(t.last_run, "%F %R") -%] for [% t.duration %]s, '[% t.results %]')</SMALL><BR>
 [% 
 	END;	# FOR t=timespecs
 	insert_errkey = "timespec_0_err";

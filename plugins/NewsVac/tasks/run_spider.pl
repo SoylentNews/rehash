@@ -35,7 +35,8 @@ $task{$me}{timespec} = '0-59/15 * * * *';	# Every 15 mins.
 $task{$me}{timespec_panic_1} = '';	# Don't run at all in a panic.
 
 $task{$me}{'fork'} = 1;			# If allowed, fork this task from 
-					# slashd.
+					# slashd and allow slashd to continue
+					# processing.
 
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
@@ -43,15 +44,14 @@ $task{$me}{code} = sub {
 	# Set the proper section so log messages will print the right messages.
 	# Remember to set this back as $user is GLOBAL for slashd's context.
 	# (Setting it back shouldn't matter now that tasks fork. - Jamie)
-	my $oldPage = $user->{currentPage};
-	$user->{currentPage} = 'newsvac';
+	local $user->{currentPage} = 'newsvac';
 
 	# Set default values on task options.
 	$constants->{task_options}{spiders} ||= '';
 
 	# Override constants caching and force it ON. For the number of 
 	# template calls this thing makes, this is a necessity.
-	$constants->{cache_enabled} = 1 
+	local $constants->{cache_enabled} = 1 
 		unless $constants->{task_options}{disable_template_cache};
 
 	# Initialize Cron parser (for the timespecs).
@@ -84,17 +84,30 @@ $task{$me}{code} = sub {
 					$_->{timespec}, $last_run
 				);
 
-				my $last_time = scalar localtime($last_run);
+				my $exe_lag = $now - $last_run;
 				slashdLog(<<EOT) if verbosity() >= 3;
-$s Times: $_->{timespec} | $next_time | $now | $last_time
+
+$s Times: $_->{timespec}
+
+     Last run: @{[scalar localtime $last_run]} ($last_run)
+Next expected: @{[scalar localtime $next_time]} ($next_time)
+          Now: @{[scalar localtime $now]} ($now)
+          Lag: $exe_lag
 EOT
 					
 				if ($next_time <= $now || !$last_run) {
 					# If no user-specified miners, we push
 					# an array ref of:
-					# 	(minername, timespec ID)
-					push 	@run_spiders, 
-						[$s, $_->{timespec_id}];
+					#
+					# (minername, timespec ID, exe lag)
+					#
+					# "exe lag" meaning time since the 
+					# last run of the current timespec.
+					push @run_spiders, [
+						$s, 
+						$_->{timespec_id}, 
+						$exe_lag
+					];
 
 					my $data = {
 						spider	=> $s,
@@ -113,6 +126,15 @@ EOT
 		}
 	}
 
+	# Intermediary step. If @run_spiders is a list of array references
+	# then we need to re-order @run_spiders based on DECREASING 
+	# "exe lag". We don't want spiders that happen to be listed first
+	# in the database taking all of the free execution slots that come up.
+	if (ref $run_spiders[0] eq 'ARRAY') {
+		# If one is a ref, then they all are a ref.
+		@run_spiders = sort { $b->[2] <=> $a->[2] } @run_spiders;
+	}
+
 	# Good thing this is FORKED from slashd, because the only safe
 	# thing to do at this point is to execute each spider that hasn't
 	# been run since the last time it was checked. If this task isn't
@@ -120,6 +142,7 @@ EOT
 	# oher tasks are executed.
 	my(@executed_spiders);
 	for my $rs (@run_spiders) {
+		my($duration, $robo);
 		# We gotta use a locally defined loop variable here because
 		# $_ is unsafe with all of the calls to $newsvac methods.
 		my $spider_name = (ref $rs eq 'ARRAY') ? $rs->[0] : $rs;
@@ -130,12 +153,20 @@ EOT
 		# Lock NewsVac, which forces its error messages into its 
 		# own log file and also does poor man's resource locking
 		# in the lack of anything better. 
-		$newsvac->lockNewsVac();
+		$newsvac->lockNewsVac;
 
 		# Execute miner.
-		my $rc = $newsvac->spider_by_name($spider_name);
+		$duration = $newsvac->spider_by_name($spider_name);
+
 		# Perform ROBOsubmission only if the spider exists.
-		$newsvac->robosubmit() unless $rc == 0;
+		# then why == 0?  it returns 1 if it succeeds.  -- pudge
+#		$robo = $newsvac->robosubmit if $duration == 0;
+		$robo = $newsvac->robosubmit if $duration == 1;
+		# Record the results.
+		my $summary = 	($robo &&
+				defined $robo->[0] && defined $robo->[1]) ? 
+			"worthy $robo->[0], unworthy $robo->[1]" :
+			'<NO RESULTS>';
 
 		# Don't write to the database if miners were user-specified.
 		# This can be determined simply by whether or not our loop
@@ -146,14 +177,16 @@ EOT
 			# Consider adding a "duration" field to 
 			# spider_timespecs and recording that info with this
 			# call as well.
-			$newsvac->markTimespecAsRun($rs->[1]);
+			$newsvac->markTimespecAsRun(
+				$rs->[1], $duration, $summary
+			);
 		}
 
-		push @executed_spiders, $spider_name;
+		push @executed_spiders, [$spider_name, $summary];
 
 		# Reset our NewsVac object to as close to pristine as wecan
 		# get it.
-		$newsvac->Reset();
+		$newsvac->Reset;
 
 		# Honor the max iteration count if it has been defined.
 		if (defined $iterations) {
@@ -161,13 +194,13 @@ EOT
 		}
 	}
 
-	# Restore $user.
-	$user->{currentPage} = $oldPage;
+	my $summary = 'No spiders executed.';
+	if (@executed_spiders) {
+		$summary = 'Spiders executed: ' . 
+			join '; ', 
+			map { join(' - ', @{$_}) } @executed_spiders;
 
-	my $summary;
-	$summary = @executed_spiders ? 
-		"Spiders executed: " .  join(' ', @executed_spiders) :
-		"No spiders executed.";
+	}
 
 	# If forked, log the summary -- Actually, the idiom used here is 
 	# incorrect, since it assumes that slashd will fork if the task
@@ -177,7 +210,10 @@ EOT
 	# preference.
 	#
 	# In the meantime, this is left here as a reminder.
-	slashdLog($summary) if $task{$me}{'fork'} && $0 =~ m!/slashd!;
+	if ($task{$me}{'fork'} && $0 =~ m!slashd!) {
+		slashdLog($summary);
+		$slashdb->updateTaskSummary($me, $summary);
+	}
 
 	return $summary;
 };

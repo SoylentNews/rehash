@@ -34,7 +34,7 @@ CREATE TABLE url_content (
 
 DROP TABLE IF EXISTS url_info;
 CREATE TABLE url_info (
- url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
   url_digest VARCHAR(16) binary DEFAULT '' NOT NULL,
   url TEXT NOT NULL,
   url_base TEXT,
@@ -78,7 +78,7 @@ CREATE TABLE rel (
   PRIMARY KEY (rel_id),
   UNIQUE from_to_parse_type_tag (from_url_id,to_url_id,parse_code,type),
   KEY type (type)    
-);      
+);
 
 DROP TABLE IF EXISTS nugget_sub;
 CREATE TABLE nugget_sub (
@@ -89,7 +89,7 @@ CREATE TABLE nugget_sub (
 
 DROP TABLE IF EXISTS miner;
 CREATE TABLE miner (
- miner_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  miner_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
   name VARCHAR(20) DEFAULT '' NOT NULL,
   last_edit timestamp(14),
   last_edit_aid VARCHAR(30),
@@ -132,6 +132,7 @@ CREATE TABLE spider_timespec (
   timespec_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
   name VARCHAR(20) NOT NULL,
   timespec VARCHAR(64) DEFAULT '' NOT NULL,
+  results VARCHAR(30) DEFAULT '' NOT NULL,
   last_run BIGINT DEFAULT 0 NOT NULL,
   PRIMARY KEY (timespec_id),
   UNIQUE identity (name, timespec)

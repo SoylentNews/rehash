@@ -13,7 +13,6 @@ editMiner
 __template__
 [% INCLUDE titlebar width="100%" title="Editing miner $miner.name" -%]
 
-<!-- begin editMiner -->
 <FORM action="[% constants.rootdir %]/newsvac.pl" method="POST">
 
 <table border="0">
@@ -35,7 +34,7 @@ __template__
         </tr>
         <tr valign=top>
                 <td width="40"><b>Owner</b>&nbsp;&nbsp;</td>
-                <td>[% owner_aid_menu %]</td>
+                <td>[% Slash.createSelect('owner_aid', authors, miner.owner_aid, 1, 0, 1) %]</td>
                 <td></td>
         </tr>
         <tr valign=top>
@@ -48,7 +47,7 @@ __template__
                 <td>
 			<textarea TYPE="text" cols=80 rows=3 
 			NAME="pre_stories_text">[% miner.pre_stories_text 
-			%]</textarea>
+			| strip_literal %]</textarea>
 		</td>
                 <td>
 			<input type="checkbox" name="pre_stories_text_cs"[% 
@@ -60,7 +59,7 @@ __template__
                 <td>
 			<textarea TYPE="text" cols=80 rows=3 
 			NAME="post_stories_text">[% miner.post_stories_text 
-			-%]</textarea>
+			| strip_literal -%]</textarea>
 		</td>
                 <td>
 			<input type="checkbox" name="post_stories_text_cs"[% 
@@ -70,14 +69,14 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Pre-stories (regex)</b>&nbsp;&nbsp;</td>
                 <td>
-			[% IF errs.pre_regex -%]
-			<b><font color="red">Regex error: '[% errs.pre_regex
+			[% IF errs.pre_stories_regex -%]
+			<b><font color="red">Regex error: '[% errs.pre_stories_regex
 			-%]'</font></b><br>
 			[% END -%]
 
 			<textarea TYPE="text" cols=80 rows=6 
 			NAME="pre_stories_regex">[% miner.pre_stories_regex
-			-%]</textarea>
+			| strip_literal -%]</textarea>
 		</td>
                 <td>
 			<input type="checkbox" name="pre_stories_regex_cs"[% 
@@ -86,14 +85,14 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Post-stories (regex)</b>&nbsp;&nbsp;</td>
                 <td>
-			[% IF errs.post_regex -%]
+			[% IF errs.post_stories_regex -%]
 			<b><font color="red">Regex error: '[% 
-			errs.post_regex -%]'</font></b><br>
+			errs.post_stories_regex -%]'</font></b><br>
 			[% END -%]
 
 			<textarea TYPE="text" cols=80 rows=6 
 			NAME="post_stories_regex">[% miner.post_stories_regex 
-			%]</textarea>
+			| strip_literal %]</textarea>
 		</td>
                 <td>
 			<input type="checkbox" 
@@ -104,7 +103,7 @@ __template__
         <tr valign=top>
                 <td width="40"><b>Vars</b>&nbsp;&nbsp;</td>
                 <td><input type="text" size="60" name="extract_vars" value="[% 
-		miner.extract_vars -%]"></td>
+		miner.extract_vars | strip_attribute -%]"></td>
         </tr>
         <tr valign=top>
                 <td width="40"><b>Extraction Regex</b>&nbsp;&nbsp;</td>
@@ -116,7 +115,7 @@ __template__
 
 			<textarea TYPE="text" cols=80 rows=6 
 			NAME="extract_regex">[% miner.extract_regex 
-			-%]</textarea>
+			| strip_literal -%]</textarea>
 		</td>
                 <td>
 		<input type="checkbox" name="extract_regex_cs"[% 
@@ -127,20 +126,20 @@ __template__
                 <td width="40"><b>Tweak code</b>&nbsp;&nbsp;</td>
                 <td>
 			<textarea TYPE="text" cols=80 rows=3 
-			NAME="tweak_code">[% miner.tweak_code %]</textarea>
+			NAME="tweak_code">[% miner.tweak_code | strip_literal %]</textarea>
 		</td>
         </tr>
         <tr valign=top>
                 <td width="40"><b>Progress</b>&nbsp;&nbsp;</td>
                 <td>
-		[% progress_select %]	
+		[% Slash.createSelect('progress', progresscodes, miner.progress, 1) %]	
                 </td>
         </tr>
         <tr valign=top>
                 <td width="40"><b>Comment</b>&nbsp;&nbsp;</td>
                 <td>
 			<textarea TYPE="text" cols=80 rows=3 NAME="comment">[% 
-			miner.comment -%]</textarea>
+			miner.comment | strip_literal -%]</textarea>
 		</td>
         </tr>
         <tr valign=top>
@@ -188,6 +187,6 @@ the other to avoid confusion!</b>
 [%	END -%]
 
 	<p>&nbsp;<p>
-<!-- end editMiner -->
+
 __seclev__
 100

@@ -23,8 +23,10 @@ $task{$me}{code} = sub {
 
 	# Get our plugin.
 	my $newsvac = getObject('Slash::NewsVac');
-	slashdLogDie("NewsVac Plugin failed to load, correctly!") 
-		unless $newsvac;
+	if (!$newsvac) {
+		slashdLog('NewsVac plugin failed to load');
+		return;
+	}
 
 	# Count out the pieces of trash.
 	my @init = (
@@ -51,7 +53,6 @@ EOT
 
 
 };
-
 
 
 1;

@@ -13,7 +13,6 @@ listUrls
 __template__
 [% INCLUDE titlebar width="100%" title="List of urls" -%]
 
-<!-- begin list urls section -->
 <form action="[% constants.rootdir %]/newsvac.pl" method="GET">
 <input type="hidden" name="op" value="listurls">
 <table>
@@ -98,16 +97,7 @@ constants.rootdir %]/newsvac.pl" method="POST">
 	[%- END -%]
 
 </TABLE>
-<TABLE>
-        <TR>
-                <TD>
-			<input type="submit" value="Add URL:">
-			<input type="hidden" name="op" value="newurl">
-			<input type="text" size="60" name="newurl" value="">
-		</TD>
-        </TR>
-</TABLE>
 </FORM>
-<!-- end list urls -->
+
 __seclev__
 100

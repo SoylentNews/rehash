@@ -39,7 +39,7 @@ END;
 
 <FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="updatekeyword">
-<INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% kw_id %]">
+<INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% keyword_id %]">
 
 <P><B>Tag:</B>&nbsp;&nbsp;
 <INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="[% data.tag %]">

@@ -49,7 +49,7 @@ Miners take URLs assigned to them and mine them, looking for stories, and creati
 
 =head2 Nuggets
 
-Nuggets are special URLs that contain the URL, title, slug, and source of a mined URL.  The source is where the data came from (such as "OSDN"); the slug is some additional text apart from the title (like introtext).  (Jamie: so source might be what NewsForge is calling a "Parent URL", such as "osdn.com"?)
+Nuggets are special URLs that contain the URL, title, slug, and source of a mined URL.  The source is where the data came from (such as "OSDN"); the slug is some additional text apart from the title (like introtext).
 
 
 =head2 Parsers
@@ -64,7 +64,7 @@ This parser is used by the URLs returned by the miners.  It parses the incoming 
 
 =item parse_nugget
 
-This parser takes the nuggets and creates data (???) to be passed to the next parser.
+This parser takes the nuggets and creates records in the database to be passed to the next parser.
 
 =item parse_plaintext
 
@@ -88,7 +88,7 @@ To analyze the URL is to process its data with the right parsers.  Here, the url
 
 Keywords are words, grouped together by tags, to be used to weigh against stories parsed by parse_plaintext.  robosubmit() goes through and matches the stories against the keywords, and if the story meets a certain threshold, submits it to the submission bin.
 
-Is there a relationship between URLs and keywords ... ?
+There is no relationship between keywords and URLs.  All keywords on a site are applied to all URLs.
 
 
 =head2 Tables
@@ -103,7 +103,7 @@ The basic information describing a URL, including the URI, timestamps, status co
 
 The response header and cookies for a URL.
 
-=item url_ analysis
+=item url_analysis
 
 Information about the URL's analysis: what parser was used, what miner was used, when it was analyzed, how long it took, how many nuggets were produced.
 
@@ -168,11 +168,11 @@ Similar to above, also get first paragraph of story. (8)
 
 =item *
 
-Only check for new stories, since last spider, not all new stories.  Also, possibly improve code to not get duplicates: often, titles slightly change, and so do URLs.  Perhaps match site name + paragraphs/title?  Find degree of matching?  Consider using code from admin.pl (which I don't think will work, since it is has many many false positives, which is fine for human editors, but this must be automated; but perhaps it can be fine-tuned to be better for automation).  Check garbage collection, efficiency of table (index help?).  (7)
+Only check for new stories, since last spider, not all new stories.  Also, possibly improve code to not get duplicates: often, titles slightly change, and so do URLs.  Perhaps match site name + paragraphs/title?  Find degree of matching?  Consider using code from admin.pl (which I don't think will work, since it is has many many false positives, which is fine for human editors, but this must be automated; but perhaps it can be fine-tuned to be better for automation).  Check garbage collection, efficiency of table (index help?).  (6)
 
 =item *
 
-Refine how NewsVac submissions are displayed in the submissions bin.  Probably sufficient to make sure submissions are flagged as being from NewsVac, and then displayed separately, perhaps with a horizontal line below user-submitted stories.  No need to sort by weight, but have a cutoff for the total score, of course.  (6)
+Refine how NewsVac submissions are displayed in the submissions bin.  Probably sufficient to make sure submissions are flagged as being from NewsVac, and then displayed separately, perhaps with a horizontal line below user-submitted stories.  No need to sort by weight, but have a cutoff for the total score, of course.  (7)
 
 =item *
 
@@ -199,6 +199,9 @@ Related: perhaps make I<topical> RSS feeds for Slash sites, not just sectional R
 =head1 CHANGES
 
 $Log$
+Revision 1.4  2002/09/19 19:27:09  pudge
+Major cleanup, bugfixes, etc.  Not for the faint of heart.
+
 Revision 1.3  2002/09/06 20:17:04  pudge
 Added brief objective.
 Added more information about miners, nuggets, spidering; checking for

@@ -1,11 +1,11 @@
-#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2002 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
 package Slash::NewsVac;
 
-=head1 NewsVac 
+=head1 NewsVac
 
 Slash::NewsVac - The URL database tree class
 
@@ -53,17 +53,16 @@ use vars qw($VERSION @EXPORT);
 
 use Slash 2.003;	# require Slash 2.3
 
-use base 'Exporter';
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
 use Fcntl;
-use POSIX qw( tmpnam );
-use FileHandle;
 use File::Path;
 use File::Spec::Functions;
+use File::Temp 'tempfile';
+use Safe;
+
 use Time::HiRes;
 use Time::Local;
-use Digest::MD5;
+
+use Digest::MD5 'md5_base64';
 use LWP;
 use LWP::RobotUA;
 use HTML::Entities;
@@ -73,19 +72,22 @@ use HTTP::Cookies;
 
 use Slash::Display;
 use Slash::Utility;
- 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;      
+
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 use vars qw($VERSION $callback_ref);
+
+use base 'Slash::DB::Utility';
+use base 'Slash::DB::MySQL';
 
 # We use custom descriptions with derivative names since we are using
 # variants based on the 1.x scheme, for now.
 my %nvdescriptions = (
 	'authornames' => sub {
 		$_[0]->sqlSelectMany(
-			'nickname,nickname', 
+			'nickname,nickname',
 			'authors_cache'
-		) 
+		)
 	},
 
 	'progresscodes' => sub {
@@ -99,31 +101,31 @@ my %nvdescriptions = (
 
 sub new {
 	my($class, $user, %conf) = @_;
-    
+
 	my $self = {};
 
 	my $slashdb = getCurrentDB();
 	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{'NewsVac'};   
+	return unless $plugins->{'NewsVac'};
 
 	$self = {
-		ua_class        =>	'LWP::UserAgent',
-		hp_class	=>	'HTML::Parser',
-		debug           =>      2,
-		using_lock	=>	0,
-		callback	=>	{},
-		hp_parsedtext	=>	[ ],
+		ua_class	=> 'LWP::UserAgent',
+		hp_class	=> 'HTML::Parser',
+		debug		=> 2,
+		using_lock	=> 0,
+		callback	=> {},
+		hp_parsedtext	=> [],
 	};
- 
- 	# Allow a var to override default User Agent class.
+
+	# Allow a var to override default User Agent class.
 	$self->{ua_class} = $conf{ua_class} if $conf{ua_class};
 
 	# bless() must occur before call to base class methods.
-	bless ($self,$class);
+	bless($self, $class);
 	$self->{virtual_user} = $user;
-	$self->sqlConnect;                   
+	$self->sqlConnect;
 
-	# Establish the options for use in the constructor of 
+	# Establish the options for use in the constructor of
 	# $self->{hp}.
 	$self->{hp_options} = {
 		api_version	=> 3,
@@ -131,14 +133,14 @@ sub new {
 	};
 
 	# Now perform class initializations.
-	$self->Reset();
+	$self->Reset;
 
 	return $self;
 }
 
 ############################################################
 # Clean up object and reset all member variables.
-sub Reset { 
+sub Reset {
 	my($self) = @_;
 
 	# Remove the lock file.
@@ -150,12 +152,10 @@ sub Reset {
 	}
 
 	# Use any resetting procedures defined by the super-class.
-	$self->init();
+	$self->init if $self->can('init');
 
 	# Delete stale data members.
 	delete $self->{sd};
-	# Reset others to sensible start-up values.
-	$self->timing_clear();
 
 	# Reinitialize our sub-classes.
 	delete $self->{ua};
@@ -164,7 +164,7 @@ sub Reset {
 	my($ua_class, $hp_class) = @{$self}{qw(ua_class hp_class)};
 
 	# User-Agent Class initialization.
-	$self->{ua} = $ua_class->new();
+	$self->{ua} = $ua_class->new;
 	$self->{ua}->agent(getData('spider_useragent', {
 		version => $VERSION,
 	}));
@@ -182,7 +182,7 @@ The caller determins whether or not to put NewsVac into this mode, and it
 is an all or nothing affair, at this time. If you can't get a lock, your code
 dies. Once a lock has been obtained, NewsVac is locked and any other code
 that needs to lock NewsVac will gracefully drop until the lock is removed
-(either by graceful code termination, or the forceful fingers of your nearest 
+(either by graceful code termination, or the forceful fingers of your nearest
 BOFH).
 
 =over 4
@@ -257,7 +257,7 @@ Used in place of C<die()> to terminate on an error condition.
 
 =item @message_list
 
-List of messages to send to the logs. These are written out to the logs in 
+List of messages to send to the logs. These are written out to the logs in
 the given order.
 
 =back
@@ -281,7 +281,7 @@ None.
 sub _Die {
 	my($self, @message_list) = @_;
 
-	$self->_doLockRelease() if $self->{using_lock};
+	$self->_doLockRelease if $self->{using_lock};
 	die join "\n", @message_list;
 }
 
@@ -299,8 +299,8 @@ Foooooooo.
 
 =item code
 
-String containing the name of the description to use. NewsVac defines 
-descriptions private to itself, and does NOT inherit from Slash::DB. The 
+String containing the name of the description to use. NewsVac defines
+descriptions private to itself, and does NOT inherit from Slash::DB. The
 following descriptions are currently defined:
 
 =over 4
@@ -339,178 +339,6 @@ sub getNVDescriptions {
 	return $self->getDescriptions($code, '', 1, \%nvdescriptions);
 }
 
-############################################################
-
-=head2 timing(cmd [, duration])
-
-Records timing data for the timing dump. Times are organized by "commands".
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item $cmd
-
-String containing command associated with the duration.
-
-=item $duration
-
-Number representing the duration of the given command.
-
-=back
-
-=item Return value
-
-Number of times the given duration has been recorded for the given command.
-
-=item Side effects
-
-Modifies the 'timing_data' data member of this class.
-
-=item Dependencies
-
-None.
-
-=back
-
-=cut
-
-sub timing {
-	my($self, $cmd, $duration) = @_;
-
-	$self->{timing_data}{$cmd}{total} += $duration;
-    
-# 	Let's replace this with something a bit more concise.
-
-	if ($duration < 0.055) {
-		$duration = int($duration*100+0.5)/100;
-	} elsif ($duration < 0.55) {
-		$duration = int($duration*10+0.5)/10;
-	} elsif ($duration < 5.5) {
-		$duration = int($duration+0.5);
-	} else {
-		$duration = int($duration+5);
-	}
-
-	# Round to an extra significant digit for small numbers and to the 
-	# nearest 5 for larger values. See helper function round() for how
-	# it all works.
-#	my $sig = 1;
-#	$sig++ if $duration >= 5.5;
-#	$duration = round($duration, $sig);
-
-	$self->{timing_data}{$cmd}{$duration}++;
-}
-
-############################################################
-
-=head2 timing_clear( )
-
-Clears the stored timing data.
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item None.
-
-=back
-
-=item Return value
-
-An empty hash. Technically, this return value is useless, but it indicates the
-current state of the 'timing_data' member of this class.
-
-=item Side effects
-
-Clears the stored data in the 'timing_data' member of this class.
-
-=item Dependencies
-
-None.
-
-=back
-
-=cut
-
-sub timing_clear {
-	my($self) = @_;
-
-	# delete + assign unnecessary, unless something else
-	# has a reference to the timing_data hashref
-	delete $self->{timing_data};
-	$self->{timing_data} = {};
-}
-
-############################################################
-
-=head2 timing_dump( )
-
-Outputs stored times to the correct log file. See C<Slash::NewsVac::errLog>.
-
-=over 4
-
-=item Parameters
-
-None.
-
-=item Return value
-
-None. See C<Slash::NewsVac::timing_clear>.
-
-=item Side effects
-
-None.
-
-=item Dependencies
-
-None.
-
-=back
-
-=cut
-
-sub timing_dump {
-	my($self) = @_;
-	my(@timing_data, @durations);
-
-	# Timestamp unnecessary, since it's automatically done by errLog().
-	#my $ts = scalar(localtime);
-    	for my $cmd (sort keys %{$self->{timing_data}}) {
-		my $total = round($self->{timing_data}{$cmd}{total}, 3);
-		my $total_n = 0;
-		my @dur = ($cmd);
-
-		delete $self->{timing_data}{$cmd}{total};
-
-		for (sort {$a<=>$b} keys %{$self->{timing_data}{$cmd}}) {
-			my $n = $self->{timing_data}{$cmd}{$_};
-			$total_n += $n;
-
-			# Be aware that @dur, position 1, is an array ref that
-			# contains individual command timings.
-			push @{$dur[1]}, [$_, round($_ * $n, 3), $n];
-		}
-		my $mean = round($total/$total_n);
-
-		# We push totals and averages onto @dur, then @dur gets added
-		# to our main list of durations.
-		push @dur, ($total, $total_n, $mean);
-		push @durations, \@dur;
-	}
-
-	$self->errLog(getData('timing_dump', {
-		durations	=> \@durations,
-		show_ts		=> !$self->{using_lock},
-		timestamp	=> scalar localtime,
-	}));
-
-	$self->timing_clear();
-}
 
 ############################################################
 
@@ -549,7 +377,7 @@ None.
 sub canonical {
 	my($self, $url) = @_;
 
-	$url = URI->new($url)->canonical();
+	$url = URI->new($url)->canonical;
 	# Don't clean out the fragment if it contains useful information.
 	$url->fragment(undef) if length $url->fragment == 0;
 
@@ -594,7 +422,7 @@ None.
 sub add_url {
 	my($self, $url) = @_;
 
-	$url = $self->canonical($url)->as_string();
+	$url = $self->canonical($url)->as_string;
 	if (!$url || $url =~ /^(javascript|mailto):/) {
 		$self->errLog(getData('add_url_noadderr', {
 			url	=> $url,
@@ -604,21 +432,21 @@ sub add_url {
 		return;
 	}
 
-	my $digest = Digest::MD5::md5_base64($url);
+	my $digest = md5_base64($url);
 
-	my $rc = $self->sqlInsert('url_info', { 
+	my $rc = $self->sqlInsert('url_info', {
 		url 		=> $url,
 		url_digest 	=> $digest,
 	});
-	my $url_id = $self->getLastInsertId();
+	my $url_id = $self->getLastInsertId;
 
 	my $rcb = $self->sqlInsert('url_message_body', {
 		url_id		=> $url_id,
 		message_body	=> '',
 	});
-		
+
 	$self->errLog(getData('add_url_result', {
-		url	=> $url, 
+		url	=> $url,
 		rc 	=> $rc,
 		rcbody  => $rcb,
 	})) if $self->{debug} > 1;
@@ -628,7 +456,7 @@ sub add_url {
 
 =head2 add_spider(spider_data)
 
-Adds a spider entry into the 'spider' table assuming 
+Adds a spider entry into the 'spider' table assuming
 we have all of the needed data and that said data appears
 to be valid.
 
@@ -679,7 +507,7 @@ EOT
 
 	my $rc = $self->sqlInsert('spider', $spider_data);
 
-	return $rc ? $self->getLastInsertId() : 0;
+	return $rc ? $self->getLastInsertId : 0;
 }
 
 ############################################################
@@ -720,7 +548,7 @@ sub url_to_id {
 	# This should keep a cache for efficiency.
 	my($self, $url) = @_;
 	my $url_id = 0;
-    
+
 	my $ary_ref = $self->sqlSelectColArrayref(
 		'url_id', 'url_info', 'url=' . $self->sqlQuote($url)
 	);
@@ -769,7 +597,7 @@ sub urls_to_ids {
 	if (!@urls) {
 		$self->errLog(getData('urls_to_ids_nourls'));
 
-		return ( );
+		return;
 	}
 
 	my $url_list = sprintf '(%s)',
@@ -783,7 +611,7 @@ sub urls_to_ids {
 	my %hash;
 	$hash{$_->[0]} = $_->[1] for @{$ary_ref};
 	my @url_ids = map { $hash{$_} || 0 } @urls;
-    
+
 	return @url_ids;
 }
 
@@ -870,18 +698,17 @@ sub ids_to_urls {
 
 	if (!@url_ids) {
 		$self->errLog(getData('ids_to_urls_noids'));
-
-		return ( );
+		return;
 	}
 
 	my $id_list = sprintf '(%s)', join(',', @url_ids);
 	my $ar = $self->sqlSelectAll(
-		'url_id, url', 
-		'url_info', 
+		'url_id, url',
+		'url_info',
 		"url_id IN $id_list"
 	);
 	$hash{$_->[0]} = $_->[1] for @{$ar};
-	my @urls = map { $hash{$_} ? $hash{$_} : '' } @url_ids;
+	my @urls = map { $hash{$_} || '' } @url_ids;
 	$self->errLog(getData('ids_to_urls', {
 		url_hash	=> \%hash,
 		size_urls	=> scalar @urls,
@@ -933,16 +760,18 @@ None.
 sub add_urls_return_ids {
 	my($self, @urls) = @_;
 
-	my %digest = map { ( $_, Digest::MD5::md5_base64($_) ) } @urls;
+	my %digest = map { ( $_, md5_base64($_) ) }
+		map { ref($_) ? $_->as_string : $_ }
+		@urls;
 
 	for (keys %digest) {
 		my $rc = $self->sqlInsert('url_info', {
 			url		=> $_,
 			url_digest	=> $digest{$_},
-		}, { ignore => 1 }); 
+		}, { ignore => 1 });
 	}
 
-   	$self->urls_to_ids(@urls);
+	$self->urls_to_ids(@urls);
 }
 
 ############################################################
@@ -985,7 +814,7 @@ None.
 
 sub add_rels_mark_valid {
 	my($self, @rels) = @_;
-			
+
 	for (@rels) {
 		$self->sqlInsert('rel', {
 			from_url_id	=> $_->[0],
@@ -995,7 +824,7 @@ sub add_rels_mark_valid {
 			first_verified	=> $_->[4],
 		}, { ignore => 1 });
 	}
-    
+
 	my @parts;
 	for (@rels) {
 		push @parts, "(from_url_id=$_->[0]   AND
@@ -1048,7 +877,7 @@ Adds a record to the 'rel' table and marks it as VALID.
 
 sub add_rel {
 	my($self, $from_url_id, $to_url_id, $parse_code, $type,
-	    $first_verified) = @_;
+		$first_verified) = @_;
 
 	my $first_verified_string = unix_to_sql_datetime($first_verified);
 
@@ -1064,8 +893,8 @@ sub add_rel {
 	if (!$rc1) {
 		$rc2 = $self->sqlUpdate('rel', {
 			mark	=> 'valid',
-		}, "from_url_id=$from_url_id AND to_url_id=$to_url_id AND
-                    parse_code=$parse_code AND type=$type");
+		}, "from_url_id=$from_url_id AND to_url_id=$to_url_id AND " .
+			"parse_code=$parse_code AND type=$type");
 	}
 
 	$self->errLog(getData('add_rel_result', {
@@ -1126,7 +955,7 @@ sub rels_to_ids {
 	my $ary_ref = $self->sqlSelectColArrayref(
 		'rel_id',
 		'rel',
-		join(' AND ', @where), 
+		join(' AND ', @where),
 		'ORDER BY rel_id'
 	);
 	$self->errLog(getData('rels_to_ids_result', {
@@ -1188,14 +1017,14 @@ EOT
 
 	my $sth = $self->select_cached($select_text);
 	if ($sth) {
-		$ary_ref = $sth->fetchrow_arrayref();
-		$sth->finish();
+		$ary_ref = $sth->fetchrow_arrayref;
+		$sth->finish;
 	}
-	
+
 	$self->errLog(getData('id_ro_rel_result', {
 		row => $ary_ref,
-    	})) if $self->{debug} > 1;
-	
+	})) if $self->{debug} > 1;
+
 	return @{$ary_ref};
 }
 
@@ -1227,21 +1056,21 @@ Foooooooo.
 =cut
 
 sub add_miner_and_urls {
- 	# This parameter list needs to be simplified, somehow.
-	my($self, $minername, $last_edit_aid, $pre_stories_text, 
-	    $post_stories_text, $pre_stories_regex, $post_stories_regex,
-	    $extract_vars, $extract_regex, $tweak_code, @urls) = @_;
+	# This parameter list needs to be simplified, somehow.
+	my($self, $minername, $last_edit_aid, $pre_stories_text,
+		$post_stories_text, $pre_stories_regex, $post_stories_regex,
+		$extract_vars, $extract_regex, $tweak_code, @urls) = @_;
 
 	my $owner_aid = $last_edit_aid;
 
 	$self->sqlInsert('miner', {
 		name			=> $minername,
-		owner_aid 		=> $owner_aid,
-		last_edit_aid	 	=> $last_edit_aid,
+		owner_aid		=> $owner_aid,
+		last_edit_aid		=> $last_edit_aid,
 		pre_stories_text	=> $pre_stories_text,
 		post_stories_text	=> $post_stories_text,
 		pre_stories_regex	=> $pre_stories_regex,
-		post_stories_regex 	=> $post_stories_regex,
+		post_stories_regex	=> $post_stories_regex,
 		extract_vars		=> $extract_vars,
 		extract_regex		=> $extract_regex,
 		tweak_code		=> $tweak_code,
@@ -1286,7 +1115,7 @@ sub correlate_miner_to_urls {
 		$self->errLog(getData('correlate_miner_to_url_noid', {
 			miner_name => $minername,
 		}));
-		
+
 		return;
 	}
 
@@ -1348,12 +1177,12 @@ sub minername_to_id {
 	my $miner_id = $self->sqlSelect(
 		'miner_id', 'miner', "name=" . $self->sqlQuote($minername)
 	);
-	
+
 	$self->errLog(getData('minername_to_id', {
 		miner_name	=> $minername,
 		miner_id	=> $miner_id,
 	})) if $self->{debug} > 1;
-		
+
 	return $miner_id;
 }
 
@@ -1389,7 +1218,7 @@ sub id_to_minername {
 	my($self, $miner_id) = @_;
 
 	my $minername = $self->sqlSelect('name', 'miner', "miner_id=$miner_id");
-	
+
 	$self->errLog(getData('id_to_minername', {
 		miner_id	=> $miner_id,
 		miner_name	=> $minername,
@@ -1402,8 +1231,8 @@ sub id_to_minername {
 
 =head2 delete_url_ids(id_list)
 
-Delete the URL IDs from the NewsVac database. Rows that reference a URN which is 
-unassociated with a miner will NOT be deleted from the 'url_info' table, but will be 
+Delete the URL IDs from the NewsVac database. Rows that reference a URN which is
+unassociated with a miner will NOT be deleted from the 'url_info' table, but will be
 from all other tables.
 
 =over 4
@@ -1446,7 +1275,7 @@ sub delete_url_ids {
 	my $id_list = sprintf '(%s)', join(',', @id_list);
 
 	$self->sqlDo("DELETE FROM url_content      WHERE url_id IN $id_list");
-    	$self->sqlDo("DELETE FROM url_message_body WHERE url_id IN $id_list");
+	$self->sqlDo("DELETE FROM url_message_body WHERE url_id IN $id_list");
 	$self->sqlDo("DELETE FROM url_plaintext    WHERE url_id IN $id_list");
 	$self->sqlDo("DELETE FROM nugget_sub       WHERE url_id IN $id_list");
 
@@ -1456,7 +1285,7 @@ DELETE FROM rel WHERE from_url_id IN $id_list OR to_url_id IN $id_list
 EOT
 
 	# Yes, we want to delete url IDs, but NOT ones associated with a miner.
-	# That would be bad (since as long as this record is in place, all 
+	# That would be bad (since as long as this record is in place, all
 	# content in the remaining NewsVac tables can be refreshed if need be).
 	$self->sqlDo(<<EOT);
 DELETE FROM url_info WHERE url_id IN $id_list AND miner_id=0
@@ -1464,7 +1293,7 @@ EOT
 
 	$self->sqlDo("DELETE FROM url_analysis WHERE url_id IN $id_list");
 	$self->errLog(getData('delete_url_ids', {
-    		id_list => $id_list,
+		id_list => $id_list,
 	})) if $self->{debug} > 1;
 }
 
@@ -1509,7 +1338,7 @@ sub delete_rel_ids {
 	$self->sqlDo("DELETE FROM rel WHERE rel_id IN $id_list");
 
 	$self->errLog(getData('delete_rel_ids', {
-    		id_list => $id_list,
+		id_list => $id_list,
 	})) if $self->{debug} > 1;
 }
 
@@ -1543,18 +1372,18 @@ Foooooooo.
 sub info_to_nugget_url {
 	my($self, $dest_url, $title, $source, $slug) = @_;
 
-	$dest_url = $self->canonical($dest_url)->as_string();
-	$title = tag_space_squeeze($title);
-	$source = tag_space_squeeze($source);
-	$slug = tag_space_squeeze($slug);
-	
+	$dest_url	= $self->canonical($dest_url)->as_string;
+	$title		= tag_space_squeeze($title);
+	$source		= tag_space_squeeze($source);
+	$slug		= tag_space_squeeze($slug);
+
 	my %nugget_data = (
-		url     =>      $dest_url,
-		title   =>      $title,
-		source  =>      $source,
-		slug    =>      $slug,
+		url	=> $dest_url,
+		title	=> $title,
+		source	=> $source,
+		slug	=> $slug,
 	);
-	
+
 	my $nugget_url = $self->canonical(
 		'nugget://' .
 		join('&',
@@ -1562,8 +1391,8 @@ sub info_to_nugget_url {
 			sort keys %nugget_data
 		)
 	);
-    
-    return $nugget_url;
+
+	return $nugget_url;
 }
 
 ############################################################
@@ -1595,13 +1424,13 @@ Foooooooo.
 
 sub nugget_url_to_info {
 	my($self, $nugget_url) = @_;
-	my %info = ( );
+	my %info;
 
 	$nugget_url =~ s{^nugget://}{};
 	while ($nugget_url =~ /(url|title|source|slug)=([^&]+)/g) {
 		$info{$1} = uri_unescape($2);
 	}
-   
+
 	return \%info;
 }
 
@@ -1634,10 +1463,10 @@ Foooooooo.
 
 sub add_nuggets_return_ids {
 	my($self, $miner_name, @nugget_hashes) = @_;
-    
-	my @dest_urls = ( );
+
+	my @dest_urls;
 	for my $nh (@nugget_hashes) {
-		$nh->{dest_url} = $self->canonical($nh->{dest_url})->as_string();
+		$nh->{dest_url} = $self->canonical($nh->{dest_url})->as_string;
 		push @dest_urls, $nh->{dest_url};
 	}
 
@@ -1647,25 +1476,25 @@ sub add_nuggets_return_ids {
 	#
 	# For now, let's turn this off. I see no accompanying UNLOCK TABLES
 	# here, either. -- Cliff
-	# 
+	#
 	#$self->sqlTransactionStart('LOCK TABLES url_info WRITE, rel WRITE');
-	
+
 	my @dest_url_ids = $self->add_urls_return_ids(@dest_urls);
 	$self->errLog(getData('add_nuggets_returl_ids_desturlids', {
 		dest_url_ids	=> \@dest_url_ids,
 		dest_urls	=> \@dest_urls,
 	})) if $self->{debug} > 1;
 
-	my @nugget_urls = ( );
+	my @nugget_urls;
 	for my $nh (@nugget_hashes) {
 		my $nugget_url = $self->info_to_nugget_url(
-			$nh->{dest_url}, 
-			$nh->{title}, 
-			$nh->{source}, 
+			$nh->{dest_url},
+			$nh->{title},
+			$nh->{source},
 			$nh->{slug}
 		);
 
-    		push @nugget_urls, $nugget_url;
+		push @nugget_urls, $nugget_url;
 	}
 	my @nugget_url_ids = $self->add_urls_return_ids(@nugget_urls);
 	$self->errLog(getData('add_nuggets_return_ids_nugurlids', {
@@ -1673,12 +1502,12 @@ sub add_nuggets_return_ids {
 		nugget_urls	=> \@nugget_urls,
 	})) if $self->{debug} > 1;
 
-	my @rels = ( );
+	my @rels;
 	for (0..$#dest_url_ids) {
 		my $nughash = $nugget_hashes[$_];
 
-		if (!$nughash->{source_url_id} or
-		    !$nugget_url_ids[$_]       or
+		if (!$nughash->{source_url_id} ||
+		    !$nugget_url_ids[$_]       ||
 		    !$nughash->{response_timestamp})
 		{
 			$self->errLog(getData('add_rel_components_missing', {
@@ -1693,7 +1522,7 @@ sub add_nuggets_return_ids {
 		push @rels, [
 			$nughash->{source_url_id},
 			$nugget_url_ids[$_],
-			'miner', 
+			'miner',
 			$miner_name,
 			unix_to_sql_datetime($nughash->{response_timestamp}),
 		];
@@ -1701,7 +1530,7 @@ sub add_nuggets_return_ids {
 
 	$self->add_rels_mark_valid(@rels);
 	#$self->sqlTransactionFinish('UNLOCK TABLES');
-    
+
 	return(@nugget_url_ids);
 }
 
@@ -1735,9 +1564,9 @@ Foooooooo.
 sub process_urls {
 	my($self, $conditions_ref, @urls) = @_;
 	my @url_ids = $self->urls_to_ids(@urls);
-    
+
 	$self->errLog(getData('process_urls', {
-	    	urls	=> \@urls,
+		urls	=> \@urls,
 		url_ids	=> \@url_ids,
 	})) if $self->{debug} > 1;
 
@@ -1812,55 +1641,50 @@ Foooooooo.
 sub process_urls_and_ids {
 	my($self, $conditions_ref, $urls_ar, $ids_ar) = @_;
 	my $start_time;
-    
+
 	$self->errLog(getData('process_urls_and_ids_listids', {
-		num_urls	=> scalar @{$urls_ar},
+		num_urls	=> scalar @$urls_ar,
 		url_ids		=> $ids_ar,
 	})) if $self->{debug} > 1;
-	
+
 	for (0..$#$urls_ar) {
 		my($url, $url_id) = ($urls_ar->[$_], $ids_ar->[$_]);
 		my(%update_info, %update_content, %update_other);
-		%update_info = %update_content = %update_other = ();
 
-		if (!$url or !$url_id) {
+		if (!$url || !$url_id) {
 			$self->errLog(getData('process_urls_and_ids_missing', {
 				'index' => $_,
 			}));
 			next;
 		}
-        
-	$start_time = Time::HiRes::time();
-	$self->request(
-		$url_id, 
-		$url,
-		\%update_info, 
-		\%update_content, 
-		\%update_other, 
-		$conditions_ref
-	);
-        $self->timing('request', Time::HiRes::time() - $start_time);
-        
-        $self->errLog(getData('process_urls_and_ids_reqresult', {
-		success	=> $update_info{is_success},
-		url	=> $url,
-		url_id	=> $url_id,
-	})) if $self->{debug} > 0;
 
-	if ($update_info{is_success}) {
 		$start_time = Time::HiRes::time();
-		$self->analyze(
+		$self->request(
 			$url_id,
 			$url,
 			\%update_info,
 			\%update_content,
 			\%update_other,
 			$conditions_ref
-            	);
+		);
+		$self->errLog(getData('process_urls_and_ids_reqresult', {
+			success	=> $update_info{is_success},
+			url	=> $url,
+			url_id	=> $url_id,
+		})) if $self->{debug} > 0;
 
-		$self->timing('analyze', Time::HiRes::time() - $start_time);
-        }
-    }
+		if ($update_info{is_success}) {
+			$start_time = Time::HiRes::time();
+			$self->analyze(
+				$url_id,
+				$url,
+				\%update_info,
+				\%update_content,
+				\%update_other,
+				$conditions_ref
+			);
+		}
+	}
 }
 
 ############################################################
@@ -1892,14 +1716,14 @@ Foooooooo.
 
 sub request {
 	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
-	    $conditions_ref) = @_;
-    
+		$conditions_ref) = @_;
+
 	my $start_time = Time::HiRes::time();
 
 	# Set the cookie jar, which will be empty unless we get cookies from
 	# the db.
-	$self->{ua}->cookie_jar()->clear();
-    
+	$self->{ua}->cookie_jar->clear;
+
 	my $old_info_ref = $self->sqlSelectHashref(
 		'*', 'url_info', "url_id=$url_id"
 	);
@@ -1910,38 +1734,39 @@ sub request {
 			old_info	=> $old_info_ref,
 		})) if $self->{debug} > 1;
 
-		my $believed_fresh_until = $current_time;
-		$believed_fresh_until = sql_to_unix_datetime(
-			$old_info_ref->{believed_fresh_until}
-		) if $old_info_ref->{believed_fresh_until};
+		my $believed_fresh_until;
+		if ($old_info_ref->{believed_fresh_until}) {
+			$believed_fresh_until = sql_to_unix_datetime(
+				$old_info_ref->{believed_fresh_until}
+			);
+		} else {
+			$believed_fresh_until = $current_time;
+		}
 
 		if (!$conditions_ref->{force_request}) {
 			if ($believed_fresh_until > $current_time) {
 				$self->errLog(getData('request_urlfresh', {
-					url_id => $url_id,
-					   dur => $believed_fresh_until - 
-					          $current_time,
+					url_id	=> $url_id,
+					dur	=> $believed_fresh_until -
+						   $current_time,
 				})) if $self->{debug} > 1;
 
-				$info_ref->{$_} = $old_info_ref->{$_}
-					for keys %{$old_info_ref};
+				@{$info_ref}{keys %$old_info_ref} = values %$old_info_ref;
 				my $new_content_ref = $self->sqlSelectHashref(
-					'url_content.url_id, response_header, 
+					'url_content.url_id, response_header,
 					cookies, message_body, plaintext',
-			
+
 					'url_content, url_message_body,
 					url_plaintext',
 
-				    	"url_content.url_id      = $url_id AND
+					"url_content.url_id      = $url_id AND
 					 url_message_body.url_id = $url_id AND
-				    	 url_plaintext.url_id    = $url_id"
+					 url_plaintext.url_id    = $url_id"
 				);
-				%{$content_ref} = %{$new_content_ref}
-					if $new_content_ref;
-				$other_ref->{response_timestamp} =
-					sql_to_unix_datetime(
-						$info_ref->{last_success}
-					);
+				%$content_ref = %$new_content_ref if $new_content_ref;
+				$other_ref->{response_timestamp} = sql_to_unix_datetime(
+					$info_ref->{last_success}
+				);
 
 				$self->errLog(getData('request_urlkeysinfo', {
 					url_id	=> $url_id,
@@ -1949,7 +1774,7 @@ sub request {
 					content	=> $content_ref,
 					other	=> $other_ref,
 				})) if $self->{debug} > 0;
-			
+
 				return;
 			} else {
 				$self->errLog(getData('request_urlstale', {
@@ -1964,29 +1789,22 @@ sub request {
 		if ($ar and defined($ar->[0])) {
 			my $cookies = $ar->[0];
 			if ($cookies =~ /\A((\#.*|\s*)\n)*\Z/m) {
-				# Don't bother writing the cookies if the only 
+				# Don't bother writing the cookies if the only
 				# data is a single line of comment.
 			} else {
-                		# We have real cookie text. Write it to a file 
-				# and zap it into the cookie_jar.  (The only 
+				# We have real cookie text. Write it to a file
+				# and zap it into the cookie_jar.  (The only
 				# reliable way of getting it into a
-				# HTTP::Cookies object, unfortunately). For 
-				# other info on the next few lines of code, see 
-				# "perldoc -q temporary file" and "perldoc 
-				# perlref" (search on "autovivification", new 
-				# to perl5.6).
-				my($fh, $filename);
-				$fh = new FileHandle;
-				do { $filename = tmpnam() } 
-					until open $fh, ">$filename";
+				# HTTP::Cookies object, unfortunately).
+				my($fh, $filename) = tempfile();
 				print $fh $cookies;
 				close $fh;
-				$self->{ua}->cookie_jar()->load($filename);
+				$self->{ua}->cookie_jar->load($filename);
 				unlink $filename;
 			}
 		}
 	}
-    
+
 	if ($url =~ /^nugget:\/\//) {
 		$other_ref->{response_timestamp} = $current_time;
 		$other_ref->{freshness_lifetime} = 86_400 * 365;
@@ -1994,12 +1812,11 @@ sub request {
 			$other_ref->{response_timestamp}
 		);
 
-    		$info_ref->{is_success} = 1;
-		$info_ref->{last_attempt} = 
-			$other_ref->{response_timestamp_string};
-		$info_ref->{last_success} = $info_ref->{last_attempt};
-		$info_ref->{status_code} = 200;
-		$info_ref->{reason_phrase} = "OK Nugget";
+		$info_ref->{is_success}           = 1;
+		$info_ref->{last_attempt}         = $other_ref->{response_timestamp_string};
+		$info_ref->{last_success}         = $info_ref->{last_attempt};
+		$info_ref->{status_code}          = 200;
+		$info_ref->{reason_phrase}        = "OK Nugget";
 		$info_ref->{believed_fresh_until} = unix_to_sql_datetime(
 			$other_ref->{response_timestamp} +
 			$other_ref->{freshness_lifetime}
@@ -2009,11 +1826,11 @@ sub request {
 		$info_ref->{title} = $ni->{title} if $ni->{title};
 		$info_ref->{content_type} = 'application/nugget';
 	} else {
-		# There should be a way to specify GET vs. POST; other 
-		# arguments should be available to be passed in -- cookies for 
+		# There should be a way to specify GET vs. POST; other
+		# arguments should be available to be passed in -- cookies for
 		# one example, form data for POSTs for another.
 		my $request = new HTTP::Request('GET', $url);
-        
+
 		# Set the LWP::UserAgent's parameters.
 		my $timeout  = $conditions_ref->{timeout} || 20;
 		my $max_size = 0;
@@ -2035,38 +1852,37 @@ sub request {
 		$self->errLog(getData('request_uaerror', {
 			err => $@, url_id => $url_id, url => $url,
 		})) if $@;
-        
+
 		if (!$response) {
-			$info_ref->{is_success} = 0;
+			$info_ref->{is_success}          = 0;
+			$info_ref->{status_code}         = 599;
+			$info_ref->{reason_phrase}       = "UDBT timeout $timeout";
 			$other_ref->{response_timestamp} = $current_time;
 			$other_ref->{freshness_lifetime} = 300;
-			$info_ref->{status_code} = 599;
-			$info_ref->{reason_phrase} = "UDBT timeout $timeout";
 		} else {
-			$info_ref->{is_success} = 
-				$response->is_success() ? 1 : 0;
-			$other_ref->{response_timestamp} = 
-				$response->date() || $response->client_date || 
-				$current_time;
-			
-			# Don't accept responses coded as being from the future 
+			$info_ref->{is_success}          = $response->is_success ? 1 : 0;
+			$other_ref->{response_timestamp} =
+				$response->date || $response->client_date || $current_time;
+
+			# Don't accept responses coded as being from the future
 			# (TCP doesn't work with tachyons).
-			$other_ref->{response_timestamp} = $current_time 
-				if $other_ref->{response_timestamp} >
-				   $current_time;
-			$other_ref->{freshness_lifetime} = 
-				$response->freshness_lifetime();
+			$other_ref->{response_timestamp} = $current_time
+				if $other_ref->{response_timestamp} > $current_time;
+			$other_ref->{freshness_lifetime} =
+				$response->freshness_lifetime;
+
 			# negative freshness doesn't make sense
-			$other_ref->{freshness_lifetime} = 0 
+			$other_ref->{freshness_lifetime} = 0
 				if $other_ref->{freshness_lifetime} < 0;
-			$info_ref->{status_code} = $response->code();
-			$info_ref->{reason_phrase} = $response->message();
+			$info_ref->{status_code}         = $response->code;
+			$info_ref->{reason_phrase}       = $response->message;
 		}
+
 		$other_ref->{response_timestamp_string} = unix_to_sql_datetime(
 			$other_ref->{response_timestamp}
 		);
-		$info_ref->{last_attempt} = 
-			$other_ref->{response_timestamp_string};
+
+		$info_ref->{last_attempt} = $other_ref->{response_timestamp_string};
 		$info_ref->{believed_fresh_until} = unix_to_sql_datetime(
 			$other_ref->{response_timestamp} +
 			$other_ref->{freshness_lifetime}
@@ -2079,32 +1895,28 @@ sub request {
 
 		if (!$info_ref->{is_success}) {
 			$self->errLog(getData('request_nosuccess', {
-				url_id 	=> $url_id, 
-				url	=> $url,
-				response=> $response ?
-					$response->error_as_HTML() : '',
+				url_id		=> $url_id,
+				url		=> $url,
+				response	=> $response ?
+					$response->error_as_HTML : '',
 			})) if $self->{debug} > 1;
 		} else {
 			# The request succeeded;  update lots of stuff.
 			$info_ref->{last_success} = $info_ref->{last_attempt};
-			$info_ref->{url_base}     = $response->base();
-			$info_ref->{content_type} = 
-				$response->header('content-type');
+			$info_ref->{url_base}     = $response->base;
+			$info_ref->{content_type} = $response->header('content-type');
 			$info_ref->{title}        = $response->header('title');
 #			$info_ref->{value}	  = $self->aged_value(
-#				$old_info_ref->{value}, 
-#				$other_ref->{response_timestamp} - 
+#				$old_info_ref->{value},
+#				$other_ref->{response_timestamp} -
 #			) if $old_info_ref->{value};
-		
-			$content_ref->{response_header} = 
-				$response->headers_as_string();
-			$content_ref->{message_body}    = $response->content();
-			my ($filename, $fh);
-			$fh = new FileHandle;
-			do { $filename = tmpnam() } 
-				until open($fh, ">$filename");
+
+			$content_ref->{response_header} = $response->headers_as_string;
+			$content_ref->{message_body}    = $response->content;
+
+			my($fh, $filename) = tempfile();
 			close $fh;
-			$self->{ua}->cookie_jar()->save($filename);
+			$self->{ua}->cookie_jar->save($filename);
 			if (open($fh, $filename)) {
 				local $/ = undef;
 				$content_ref->{cookies} = <$fh>;
@@ -2113,35 +1925,32 @@ sub request {
 			unlink $filename;
 		}
 	}
-    
+
 	# If the url_base is the same as the url, delete it.
 	if ($info_ref->{url_base}) {
-	        my $url_base_obj = URI->new($info_ref->{url_base});
-	        my $url_base_str = $url_base_obj->as_string();
-	        $self->errLog(getData('request_delurlbase', {
-			url 		=> $url,  
-			url_base	=> $info_ref->{url_base}, 
-			url_base_str 	=> $url_base_str,
+		my $url_base_obj = URI->new($info_ref->{url_base});
+		my $url_base_str = $url_base_obj->as_string;
+
+		$self->errLog(getData('request_delurlbase', {
+			url		=> $url,
+			url_base	=> $info_ref->{url_base},
+			url_base_str	=> $url_base_str,
 		})) if $self->{debug} > 1;
 		$info_ref->{url_base} = undef if $url eq $url_base_str;
-    	}
+	}
 
 	$self->sqlUpdate("url_info", $info_ref, "url_id = $url_id")
 		if keys %$info_ref;
 	if (keys %$content_ref) {
 		# This simplifies the INSERT/UPDATE logic: do blind INSERTS
 		# on the ID and then UPDATE it later.
-		$self->sqlInsert('url_content', { 
-			url_id => $url_id 
-		}, { ignore => 1 });
-		$self->sqlInsert('url_message_body', {
-			url_id => $url_id 
-		}, { ignore => 1});
-        	$self->sqlInsert('url_plaintext', {
-			url_id => $url_id
-		}, { ignore => 1});
+		for (qw(url_content url_message_body url_plaintext)) {
+			$self->sqlInsert($_, {
+				url_id => $url_id
+			}, { ignore => 1 });
+		}
 
-		# For url_content table, copy all from the update reference, 
+		# For url_content table, copy all from the update reference,
 		# but the 'message_body' and 'plaintext' fields.
 		my $temp_ref = {};
 		$temp_ref->{$_} = $content_ref->{$_}
@@ -2149,7 +1958,7 @@ sub request {
 		$self->sqlUpdate('url_content', $temp_ref, "url_id=$url_id");
 		# Now update the plaintext.
 		if (exists $content_ref->{plaintext}) {
-			$self->sqlUpdate("url_plaintext", { 
+			$self->sqlUpdate("url_plaintext", {
 				plaintext => $content_ref->{plaintext}
 			}, "url_id=$url_id");
 		}
@@ -2169,22 +1978,20 @@ sub request {
 			# or some 2055168 bytes. Insert anything over this size
 			# then perl scripts go *boom*.  -- Cliff
 			if (length($content_ref->{message_body}) < 2007*1024) {
-				$self->sqlUpdate('url_message_body', { 
-					message_body =>
-						$content_ref->{message_body}
+				$self->sqlUpdate('url_message_body', {
+					message_body => $content_ref->{message_body}
 				}, "url_id=$url_id");
 			} else {
 				$self->errLog(getData('request_overflow', {
-					message_body =>
-						$content_ref->{message_body},
+					message_body => $content_ref->{message_body},
 				}));
 			}
 		}
 	}
 
 	# Carry over the previous SQL data into the info_ref hash.
-	$info_ref->{$_} ||= $old_info_ref->{$_} for keys %{$old_info_ref};
-    
+	$info_ref->{$_} ||= $old_info_ref->{$_} for keys %$old_info_ref;
+
 	my $duration = Time::HiRes::time() - $start_time;
 	$self->errLog(getData('request_durtoolong', {
 		content_length	=> length($content_ref->{message_body}),
@@ -2223,7 +2030,7 @@ Foooooooo.
 
 sub analyze {
 	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
-	    $conditions_ref) = @_;
+		$conditions_ref) = @_;
 
 	$self->errLog(getData('analyze_contentlength', {
 		content_length => length($content_ref->{message_body}),
@@ -2234,13 +2041,10 @@ sub analyze {
 	my @parse_codes = $self->get_parse_codes(@_[1 .. 4]);
 
 	for my $parse_code (@parse_codes) {
-		# Redundant. Information printed with next call to errLog().
-		#$self->errLog("parse_code $parse_code") if $self->{debug} > 1;
-		
 		my $ua_start = Time::HiRes::time();
 		my $ary_ref = $self->sqlSelectColArrayref(
 			'UNIX_TIMESTAMP(ts)',
-			'url_analysis', 
+			'url_analysis',
 			"url_id=$url_id AND parse_code='$parse_code' AND
 			 is_success=1",
 			'ORDER BY ts DESC LIMIT 1'
@@ -2257,25 +2061,24 @@ sub analyze {
 		})) if $self->{debug} > 1;
 
 		if ($last_success < $other_ref->{response_timestamp}
-			or $conditions_ref->{force_analyze}
-			or $conditions_ref->{"force_analyze_$parse_code"}
+			|| $conditions_ref->{force_analyze}
+			|| $conditions_ref->{"force_analyze_$parse_code"}
 		) {
 			# The last successful analysis using this parse_code
 			# took place before the last successful request (or
-			# never took place). Or, we're being told to force 
+			# never took place). Or, we're being told to force
 			# it...either way we need to re-analyze it.
-			my $parse_method =
-				$self->get_parse_code_method($parse_code);
+			my $parse_method = $self->get_parse_code_method($parse_code);
 			if ($parse_method) {
-			# This marks "related URL" records as 'invalid' in 
-			# anticipation of fresh data.
+				# This marks "related URL" records as 'invalid' in
+				# anticipation of fresh data.
 				$self->sqlUpdate('rel', {
 					mark => 'invalid'
-				}, "from_url_id='$url_id' AND 
+				}, "from_url_id='$url_id' AND
 				    parse_code='$parse_code'"
 				);
 				$self->errLog(getData('content_ref_length', {
-					content_length => 
+					content_length =>
 					length($content_ref->{message_body}),
 				})) if $self->{debug} > 0;
 
@@ -2283,25 +2086,27 @@ sub analyze {
 				# Do the work!
 				my $return_hr = $parse_method->(@_);
 
-				my $duration = 
+				my $duration =
 					Time::HiRes::time() - $start_time;
-				$self->timing("parse_$parse_code", $duration);
 
 				my $is_success = 'NULL';
-				$is_success = $return_hr->{is_success}	
+				$is_success = $return_hr->{is_success}
 					if defined($return_hr->{is_success});
-				my $miner_id = 0;		
-				$miner_id = $return_hr->{miner_id}	
+
+				my $miner_id = 0;
+				$miner_id = $return_hr->{miner_id}
 					if $return_hr->{miner_id};
-				my $n_nuggets = 'NULL';	
-				$n_nuggets = $return_hr->{n_nuggets}	
+
+				my $n_nuggets = 'NULL';
+				$n_nuggets = $return_hr->{n_nuggets}
 					if defined($return_hr->{n_nuggets});
-		                $self->sqlInsert('url_analysis', {
-				    	url_id		=> $url_id, 
-					parse_code 	=> $parse_code, 
-					is_success	=> $is_success, 
-					duration	=> $duration, 
-					miner_id	=> $miner_id, 
+
+				$self->sqlInsert('url_analysis', {
+					url_id		=> $url_id,
+					parse_code	=> $parse_code,
+					is_success	=> $is_success,
+					duration	=> $duration,
+					miner_id	=> $miner_id,
 					nuggets		=> $n_nuggets,
 				});
 
@@ -2314,7 +2119,7 @@ sub analyze {
 					num_nuggets	=> $n_nuggets,
 				})) if $self->{debug} > 0;
 			} else {
-                		$self->errLog(getData('analyze_noparse', {
+				$self->errLog(getData('analyze_noparse', {
 					parse_code	=> $parse_code,
 				}));
 			}
@@ -2355,31 +2160,31 @@ Foooooooo.
 =cut
 
 sub get_parse_codes {
-    my($self, $url_id, $url, $update_info_ref, $update_content_ref,
-        $response_timestamp) = @_;
-    
-	my @codes = ( );
-    
+	my($self, $url_id, $url, $update_info_ref, $update_content_ref,
+		$response_timestamp) = @_;
+
+	my @codes;
+
 	# If invoked with a false url_id, return a list of all possible parse
 	# codes.
 	return qw(html_linkextor miner nugget plaintext) if !$url_id;
-    
+
 	# Sometime in the future, there will be a way to decide which URLs
 	# get which codes.  For now, every URL with an appropriate content
 	# type gets exactly one parsing function and it's this one.
 #	push @codes, 'html_linkextor'
 #		if ($update_info_ref->{content_type} and
 #		    $update_info_ref->{content_type} =~ /^text\/html\b/;
-	
+
 	push @codes, 'miner'
 		if $update_info_ref->{miner_id};
 
-        push @codes, 'plaintext'
+	push @codes, 'plaintext'
 		if $update_info_ref->{content_type} and
 		   $update_info_ref->{content_type} =~ /^text\/(plain|html)\b/;
 
-        push @codes, 'nugget'
-    		if $update_info_ref->{content_type} and
+	push @codes, 'nugget'
+		if $update_info_ref->{content_type} and
 		   $update_info_ref->{content_type} eq 'application/nugget';
 
 	$self->errLog(getData('get_parse_codes', {
@@ -2460,9 +2265,9 @@ sub get_rel_types {
 	my(@types);
 
 	if ($parse_code eq 'html_linkextor') {
-		while (my ($tagname, $tagattr) = 
-		       each %HTML::LinkExtor::LINK_ELEMENT)
-		{
+		while (my($tagname, $tagattr) =
+			each %HTML::LinkExtor::LINK_ELEMENT
+		) {
 			if (ref $tagattr eq 'ARRAY') {
 				push @types, map { "${tagname}_$_" } @$tagattr;
 			} else {
@@ -2470,13 +2275,13 @@ sub get_rel_types {
 			}
 		}
 	} elsif ($parse_code eq 'miner') {
-	    	push @types, 'miner';
+		push @types, 'miner';
 	} elsif ($parse_code eq 'plaintext') {
-	    	# Plaintext parsing doesn't add any types.
+		# Plaintext parsing doesn't add any types.
 	} elsif ($parse_code eq 'nugget') {
 		push @types, 'nugget';
 	}
-	    
+
 	return @types;
 }
 
@@ -2511,17 +2316,17 @@ Foooooooo.
 # which is basically a straight port from UDBT.pm
 sub parse_html_linkextor {
 	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
-            $conditions_ref) = @_;
+		$conditions_ref) = @_;
 
 	$self->errLog(getData('parse_html_linkextor_start', {
 		url_id => $url_id,
 	})) if $self->{debug} > 1;
-    
+
 	my $base_url = $info_ref->{url_base} || $url;
 	$self->errLog(getData('parse_html_linkextor_baseurl', {
 		base_url	=> $base_url,
 	})) if $self->{debug} > 1;
-	my $response_timestamp = 
+	my $response_timestamp =
 		$other_ref->{response_timestamp} ||
 		sql_to_unix_datetime($info_ref->{last_success});
 	$self->errLog(getData('parse_html_linkextor_nots', {
@@ -2531,8 +2336,8 @@ sub parse_html_linkextor {
 	# Use HTML::LinkExtor to parse the body text.
 	my $hle = HTML::LinkExtor->new(\&parse_html_linkextor_callback);
 	local($callback_ref) = {
-		base_url => $base_url,
-	        link_ref => { },
+		base_url	=> $base_url,
+		link_ref	=> {},
 	};
 	$self->errLog(getData('parse_html_linkextor_preparse', {
 		url_id		=> $url_id,
@@ -2551,16 +2356,16 @@ sub parse_html_linkextor {
 		my($tagname, $tagattr, $new_url) = /^(\w+) (\w+) (.+)$/;
 
 		# The URL is canonicalized in the parse_html_linkextor_callback
-		# according to URI.pm, but UDBT.pm's canonical() may be 
+		# according to URI.pm, but UDBT.pm's canonical() may be
 		# slightly different so we must do it again.
 		$new_url = $self->canonical($new_url);
 		$self->add_url($new_url);
 		my $new_url_id = $self->url_to_id($new_url);
 		$self->add_rel(
-			$url_id, 
-			$new_url_id, 
-			'html_linkextor', 
-			"${tagname}_$tagattr", 
+			$url_id,
+			$new_url_id,
+			'html_linkextor',
+			"${tagname}_$tagattr",
 			$response_timestamp
 		);
 	}
@@ -2603,7 +2408,7 @@ sub parse_html_linkextor_callback {
 	for (keys %attr) {
 		my $new_url = URI->new_abs(
 			$attr{$_}, $callback_ref->{base_url}
-		)->canonical()->as_string();
+		)->canonical->as_string;
 
 		my $key = "$tagname $_ $new_url";
 		$callback_ref->{link_ref}{$key}++;
@@ -2639,14 +2444,14 @@ Foooooooo.
 
 sub trim_body {
 	my($self, $miner_id, $body_ref, $pre_text, $pre_regex, $post_text,
-	    $post_regex) = @_;
+		$post_regex) = @_;
 	my $orig_body_length = length($$body_ref);
-    
+
 	my $the_reg = '';
 	if ($pre_text) {
 		my $cs = $pre_text =~ s{^\(\?i\)}{};
 		$the_reg = "\Q$pre_text\E";
-		# In the text field, " " is aliased to mean "any amount of 
+		# In the text field, " " is aliased to mean "any amount of
 		# whitespace."
 		$the_reg =~ s/\\ /\\s+/g;
 		$the_reg = "(?i)$the_reg" if $cs;
@@ -2655,7 +2460,7 @@ sub trim_body {
 		$self->errLog(getData('trim_body_bothdefined', {
 			miner_id => $miner_id,
 		})) if $the_reg;
-        	$the_reg = $pre_regex;
+		$the_reg = $pre_regex;
 	}
 	if ($the_reg) {
 		# What the hell are THESE for? The sole purpose, as I see it, is to
@@ -2667,14 +2472,14 @@ sub trim_body {
 			miner_id=> $miner_id,
 			type 	=> 'pre',
 		})) if $self->{debug} > 0;
-		${$body_ref} =~ s{$the_reg}{}m;
+		$$body_ref =~ s{$the_reg}{}m;
 	}
-    
+
 	$the_reg = '';
 	if ($post_text) {
 		my $cs = $post_text =~ s{^\(\?i\)}{};
 		$the_reg = "\Q$post_text\E";
-		# In the text field, " " is aliased to mean "any amount of 
+		# In the text field, " " is aliased to mean "any amount of
 		# whitespace."
 		$the_reg =~ s/\\ /\\s+/g;
 		$the_reg = "(?i)$the_reg" if $cs;
@@ -2688,19 +2493,19 @@ sub trim_body {
 	if ($the_reg) {
 		# What the hell are THESE for? The sole purpose, as I see it, is to
 		# break any post regexp entered!
-        	#$the_reg .= "[\\000-\\377]*\\Z";
+		#$the_reg .= "[\\000-\\377]*\\Z";
 		$self->errLog(getData('trim_body_thereg', {
 			the_reg	=> $the_reg,
 			miner_id=> $miner_id,
 			type	=> 'post',
 		})) if $self->{debug} > 0;
-		${$body_ref} =~ s{$the_reg}{}m;
-    	}
-    
-    	$self->errLog(getData('trim_body', {
+		$$body_ref =~ s{$the_reg}{}m;
+	}
+
+	$self->errLog(getData('trim_body', {
 		miner_id	=> $miner_id,
 		orig_body_length=> $orig_body_length,
-		body_length	=> length(${$body_ref}),
+		body_length	=> length($$body_ref),
 	})) if $self->{debug} > 0;
 }
 
@@ -2733,7 +2538,7 @@ Foooooooo.
 
 sub parse_miner {
 	my($self, $url_id, $url_orig, $info_ref, $content_ref, $other_ref,
-	    $conditions_ref) = @_;
+		$conditions_ref) = @_;
 
 	$self->errLog(getData('parse_miner_info', {
 		url_id	=> $url_id,
@@ -2741,12 +2546,12 @@ sub parse_miner {
 		miner_id=> $info_ref->{miner_id},
 	})) if $self->{debug} > 0;
 	return { is_success => 0 } unless $info_ref->{miner_id};
-    
+
 	my $start_time = Time::HiRes::time();
 	my($mid_time_1, $mid_time_2) = ($start_time, $start_time);
-    
-	my $response_timestamp = 
-	 	$other_ref->{response_timestamp} ||
+
+	my $response_timestamp =
+		$other_ref->{response_timestamp} ||
 		sql_to_unix_datetime($info_ref->{last_success});
 	$self->errLog(getData('parse_miner_nots', {
 		timestamp => $info_ref->{last_success},
@@ -2763,13 +2568,13 @@ sub parse_miner {
 			url	=> $url_orig,
 		})) if $self->{debug} > 0;
 
-	    	return { 
-			is_success	=> 0, 
-			n_nuggets	=> 0, 
-			miner_id	=> $info_ref->{miner_id} 
+		return {
+			is_success	=> 0,
+			n_nuggets	=> 0,
+			miner_id	=> $info_ref->{miner_id}
 		};
 	}
-    
+
 	my $message_body = $content_ref->{message_body};
 	$self->errLog(getData('parse_miner_emptybody', {
 		url	=> $url_orig,
@@ -2778,39 +2583,34 @@ sub parse_miner {
 	})) if !$message_body;
 
 	$self->trim_body(
-		$info_ref->{miner_id}, 
+		$info_ref->{miner_id},
 		\$message_body,
-		$hr->{pre_stories_text}, 
+		$hr->{pre_stories_text},
 		$hr->{pre_stories_regex},
-		$hr->{post_stories_text}, 
+		$hr->{post_stories_text},
 		$hr->{post_stories_regex}
 	);
 
-#	my $fh = new FileHandle;
-#	my $tmp_filename = "/tmp/body_$url_id";
-#	if (open($fh, ">$tmp_filename")) { print $fh $message_body; close $fh }
-    
-	my @extraction_keys = qw( url title source slug body );
-	my $extraction_key_regex = '^(' . join('|', @extraction_keys) . ')$';
-	my @extract_vars = grep /$extraction_key_regex/,
-	
-	split / /, $hr->{extract_vars};
-	my $extract_regex = $hr->{extract_regex};
-	my $tweak_code = $hr->{tweak_code} || '';
+	my @extraction_keys		= qw( url title source slug body );
+	my $extraction_key_regex	= '^(' . join('|', @extraction_keys) . ')$';
+	my @extract_vars		= grep /$extraction_key_regex/,
+					  split / /, $hr->{extract_vars};
+	my $extract_regex		= $hr->{extract_regex};
+	my $tweak_code			= $hr->{tweak_code} || '';
 
 	if (!$extract_regex) {
 		$self->errLog(getData('parse_miner_noregex', {
 			hr	=> $hr,
 		})) if $self->{debug} > -1;
-		
+
 		return {
-			is_success	=> 0, 
-			n_nuggets 	=> 0, 
-			miner_id 	=> $info_ref->{miner_id} 
+			is_success	=> 0,
+			n_nuggets 	=> 0,
+			miner_id 	=> $info_ref->{miner_id}
 		};
 	}
 
-	my %nugget = ( );
+	my %nugget;
 	my $regex_err = $self->check_regex($extract_regex, 'x');
 	if ($regex_err) {
 		$self->errLog(getData('parse_miner_regexerr', {
@@ -2820,9 +2620,9 @@ sub parse_miner {
 			url_id	=> $url_id,
 		})) if $self->{debug} > -1;
 
-		return { 
-			is_success => 0, 
-			n_nuggets => 0, 
+		return {
+			is_success => 0,
+			n_nuggets => 0,
 			miner_id => $info_ref->{miner_id}
 		};
 	}
@@ -2835,15 +2635,6 @@ sub parse_miner {
 		tweak_code 		=> $tweak_code,
 		base_url 		=> $base_url,
 	})) if $self->{debug} > 1;
-	
-	my %extractions = ( );
-	my @extractions;
-	my $get_extractions = "\@extractions = (";
-	$get_extractions .= "\$" . ($_ + 1) . ", " for (0..$#extract_vars);
-	$get_extractions =~ s/, $/\);/;
-	$self->errLog(getData('parse_miner_extractions', {
-		extractions => $get_extractions,
-	})) if $self->{debug} > 1;
 
 	$message_body =~ s{\s+}{ }g;
 	$self->errLog(getData('parse_miner_bodystats', {
@@ -2851,29 +2642,19 @@ sub parse_miner {
 	})) if $self->{debug} > 1;
 	my($count, $url, $title, $source, $slug, $body, $key) = (0);
 	while ($message_body =~ /$extract_regex/gx) {
-		# Kinda redundant.
-		#$self->errLog("pos " . pos($message_body))
-		#	if $self->{debug} > 1;
-		@extractions = ( );
-		eval $get_extractions;
-
-		$self->errLog(getData('parse_miner_trackextract', {
-			url_id		=> $url_id,
-			miner_id	=> $info_ref->{miner_id},
-			'pos'		=> pos($message_body),
-			extractions	=> \@extractions,
-		})) if $self->{debug} > 2;
-
-		$extractions{$_} = '' for @extraction_keys;
-		for my $i (0..$#extract_vars) {
-			$extractions{$extract_vars[$i]} = $extractions[$i]
-				if $extractions[$i] and not
-				   $extractions{$extract_vars[$i]};
+		my %extractions;
+		for (my $i = 0; $i < @extract_vars; ++$i) {
+			# note: $1 eq substr($message_body, $-[1], $+[1] - $-[1])
+			# and   $2 eq substr($message_body, $-[2], $+[2] - $-[2])
+			# etc.
+			my $str = substr($message_body, $-[$i+1], $+[$i+1] - $-[$i+1]);
+			$extractions{$extract_vars[$i]} = $str if length $str;
 		}
-		next unless $extractions{url} or $extractions{body};
+
+		next unless $extractions{url} || $extractions{body};
 		++$count;
 		$key = join "\n", (
-			$count, 
+			$count,
 			$extractions{url},
 			$extractions{title},
 			$extractions{source},
@@ -2889,66 +2670,69 @@ sub parse_miner {
 		is_success 	=> 1,
 		n_nuggets 	=> 0,
 		miner_id	=> $info_ref->{miner_id}
-	} if !%nugget;
+	} if ! keys %nugget;
 
 	my @nugget_keys = keys %nugget;
 	$self->errLog("nugget keys: @nugget_keys") if $self->{debug} > 1;
+
 	for (@nugget_keys) {
 		delete $nugget{$_};
-		($count, $url, $title, $source, $slug, $body) =
-			split("\n", $_);
+		($count, $url, $title, $source, $slug, $body) = split "\n", $_;
 		$url =~ s/\s+//g;
+
 		if ($url) {
 			$self->errLog(getData('parse_miner_showurl', {
 				url		=> $url,
-				base_url	=> $base_url,
 				url_base	=> $info_ref->{url_base},
 				url_orig	=> $url_orig,
+				base_url	=> $base_url,
 			})) if $self->{debug} > 1;
 
 			$url = URI->new_abs(
-				$url, 
+				$url,
 				$base_url
-			)->canonical()->as_string();
+			)->canonical->as_string;
 		}
+
 		if ($url !~ /^(http|ftp):/) {
-			my($origurl, $etc) = split("\n", $_);
+			my($origurl, $etc) = split "\n", $_;
 
 			$self->errLog(getData('parse_miner_badproto', {
-				url	=> $url,
-				url_orig=> $origurl,
-				base_url=> $base_url,
+				url		=> $url,
+				url_orig	=> $origurl,
+				base_url	=> $base_url,
 			})) if $self->{debug} > 1;
-			next ;
+			next;
 		}
+
 		$title  = tag_space_squeeze($title);
 		$source = tag_space_squeeze($source);
 		$slug   = tag_space_squeeze($slug);
 		$body   = tag_space_squeeze($body);
-		$key    = join "\n",
-			($count, $url, $title, $source, $slug, $body);
+		$key    = join "\n", $count, $url, $title, $source, $slug, $body;
 		$nugget{$key}++;
-       	}
+	}
 
-	@nugget_keys =  map { $_->[0] } 
-			sort { $a->[1] <=> $b->[1] }
-			map { [ $_, (split "\n", $_)[0] ] }
+	@nugget_keys =  map	{ $_->[0] }
+			sort	{ $a->[1] <=> $b->[1] }
+			map	{ [ $_, (split "\n", $_)[0] ] }
 			keys %nugget;
 
-	my %seen_url = ( );
+	my %seen_url;
 	$self->errLog(getData('parse_miner_nuggetkeys', {
 		nugget_keys => \@nugget_keys,
 	})) if $self->{debug} > 1;
+
 	if ($tweak_code) {
-		$self->_Die("tweak_code contains attempted system call!!!")
-			if $tweak_code =~ /`|(system|exec|open) /;
 		for (@nugget_keys) {
 			my $cancel = 0;
-
-			($count, $url, $title, $source, $slug, $body) = 
-				split("\n", $_);
+			($count, $url, $title, $source, $slug, $body) = split "\n", $_;
 			my $seen_url = defined($seen_url{$url}) ? 1 : 0;
-			eval $tweak_code;
+
+			my $cpt = new Safe;
+			$cpt->permit(qw(:base_core :base_mem :base_loop));
+			$cpt->reval($tweak_code);
+
 			delete $nugget{$_};
 			if (!$cancel) {
 				$nugget{$_}++;
@@ -2975,13 +2759,12 @@ sub parse_miner {
 	})) if $self->{debug} > 1;
 	if ($self->{debug} > 0) {
 		$self->errLog(getData('parse_miner_preaddnugget'));
-		$self->timing_dump();
 	}
 
 	my(@nugget_hashes, @bodies);
 	for (@nugget_keys) {
-		($url, $title, $source, $slug, $body) = split("\n", $_);
-		
+		($url, $title, $source, $slug, $body) = split "\n", $_;
+
 		push @nugget_hashes, {
 			source_url_id		=> $url_id,
 			source_url		=> $url_orig,
@@ -3019,7 +2802,7 @@ sub parse_miner {
 	})) if $self->{debug} > 1;
 	# This is kinda unusual.  Adding a nugget means processing it
 	# automatically. This is computationally cheap because there's
-	# no need to hit the network or do a ton of processing; 
+	# no need to hit the network or do a ton of processing;
 	# basically this is the canonical way to go ahead and add the
 	# dest_url and link the nugget_url to it.
 
@@ -3030,7 +2813,6 @@ sub parse_miner {
 #	);
 	if ($self->{debug} > 0) {
 		$self->errLog(getData('parse_miner_processurlend'));
-			$self->timing_dump();
 	}
 
 	my $duration = Time::HiRes::time() - $start_time;
@@ -3048,9 +2830,9 @@ sub parse_miner {
 			#int($duration*1000+0.5)/1000
 	})) if $duration > 40;
 
-	return { 
-		is_success 	=> 1, 
-		n_nuggets	=> scalar(keys %nugget), 
+	return {
+		is_success 	=> 1,
+		n_nuggets	=> scalar(keys %nugget),
 		miner_id 	=> $info_ref->{miner_id},
 	};
 }
@@ -3085,15 +2867,15 @@ Foooooooo.
 
 sub parse_plaintext {
 	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
-	   $conditions_ref) = @_;
+		$conditions_ref) = @_;
 	$content_ref->{plaintext} = '';
-	   
-	$self->errLog(getData('parse_plaintext_start', {url_id => $url_id}))
+
+	$self->errLog(getData('parse_plaintext_start', { url_id => $url_id }))
 		if $self->{debug} > 1;
 
 	my $changed = 0;
-	my $timeout =	$conditions_ref->{timeout} || 
-			$self->{ua}->timeout() 	   || 
+	my $timeout =	$conditions_ref->{timeout} ||
+			$self->{ua}->timeout 	   ||
 			20;
 
 	if ($info_ref->{content_type} =~ /^text\/html\b/) {
@@ -3113,27 +2895,11 @@ sub parse_plaintext {
 				@{$self->{hp_parsedtext}}
 			);
 			$changed = 1 if $content_ref->{plaintext};
-			# By assigning a -1 to the index of class arrayref 
+			# By assigning a -1 to the index of class arrayref
 			# 'hp_parsedtext', we effectively clear the array WITHOUT
 			# reallocating it, which is important since our HTML Parser
 			# class needs this.
 			$#{$self->{hp_parsedtext}} = -1;
-	
-#			my $lynx_cmd = qq
-#[lynx -dump -nolist -width=75 -term=vt102 $filename.htm];
-#			if (!open($fh, "$lynx_cmd |")) {
-#				$self->errLog("could not run $lynx_cmd, $!")
-#					if $self->{debug} > -1;
-#			} else {
-#				while (defined(my $line = <$fh>)) {
-#					chomp $line;
-#					$line =~ s/\s+$//;
-#					$content_ref->{plaintext} .= "$line\n";
-#					$changed = 1;
-#					$self->errLog("lynx output: $line") 
-#						if $self->{debug} > 2;
-#				}
-#			}
 
 			alarm 0;
 		};
@@ -3154,7 +2920,7 @@ sub parse_plaintext {
 				) if $self->{debug} > -1;
 			}
 		}
-#		unlink "$filename.htm";
+
 	} elsif ($info_ref->{content_type} eq 'text/plain') {
 		$content_ref->{plaintext} = $content_ref->{message_body};
 		$changed = 1;
@@ -3165,19 +2931,20 @@ sub parse_plaintext {
 		$content_ref->{plaintext} =~ s/[ \t]*\n[ \t]*/\n/g;
 		$content_ref->{plaintext} =~ s/[ \t]{2,}/  /g;
 
+		# Must Trim Message Body Here !!!
 		$self->sqlUpdate('url_plaintext', {
-			plaintext => $self->sqlQuote($content_ref->{plaintext}),
+			plaintext => $content_ref->{plaintext},
 		}, "url_id=$url_id");
 	}
 
 	$self->errLog(getData('parse_plaintext_result', {
-		url_id	=> $url_id,
-		changed	=> $changed,
-		timeout	=> $timeout,
-		bodylen => length($content_ref->{message_body}),
-	       plainlen => length($content_ref->{plaintext}),
+		url_id		=> $url_id,
+		changed		=> $changed,
+		timeout		=> $timeout,
+		bodylen		=> length($content_ref->{message_body}),
+		plainlen	=> length($content_ref->{plaintext}),
 	})) if $self->{debug} > ($changed ? 0 : -1);
-		
+
 	return { is_success => 1 };
 }
 
@@ -3211,20 +2978,20 @@ Foooooooo.
 
 sub parse_nugget {
 	my($self, $url_id, $url, $info_ref, $content_ref, $other_ref,
-	    $conditions_ref) = @_;
+		$conditions_ref) = @_;
 
 	my $nugget = $self->nugget_url_to_info($url);
 	my $nugget_url_id = $self->url_to_id($nugget->{url});
 	my $response_timestamp =
 		$other_ref->{response_timestamp} ||
 		sql_to_unix_datetime($info_ref->{last_success}) ||
-		time; # hack, hack
+		time;
 
 	$self->add_rel(
-		$url_id, 
-		$nugget_url_id, 
-		'nugget', 
-		'nugget', 
+		$url_id,
+		$nugget_url_id,
+		'nugget',
+		'nugget',
 		$response_timestamp
 	);
 
@@ -3235,7 +3002,7 @@ sub parse_nugget {
 	})) if $self->{debug} > 1;
 
 	$self->sqlUpdate('url_info', {
-		title => $nugget->{title} 
+		title => $nugget->{title}
 	}, "url_id=$url_id");
 
 	return { is_success => 1 };
@@ -3261,7 +3028,7 @@ String containing name of spider to execute.
 
 =item Return value
 
-None.
+True if success, false if failure.
 
 =item Side effects
 
@@ -3281,29 +3048,30 @@ None.
 sub spider_by_name {
 	my($self, $name) = @_;
 	my $name_quoted = $self->sqlQuote($name);
-    
+
 	my $spider_ar = $self->sqlSelectAll(
-		'conditions, group_0_selects, commands', 
+		'conditions, group_0_selects, commands',
 		'spider',
 		"name = $name_quoted"
 	);
 
-	if (!$spider_ar or !$spider_ar->[0]) {
+	if (!$spider_ar || !$spider_ar->[0]) {
 		$self->errLog(getData('spiderbyname_invalidname', {
 			name		=> $name,
 			name_quoted	=> $name_quoted,
 		}, 'newsvac'));
 
-		return 0;
+		return;
 	}
-	$self->timing_clear() if $self->{debug} > -1;
-
 	my($conditions_text, $group_0_selects_text, $commands_text) =
 		@{$spider_ar->[0]};
 
-	my $conditions_ref          = eval $conditions_text;
-	my $group_0_selects_ref     = eval $group_0_selects_text;
-	my $commands_ref            = eval $commands_text;
+	# log errors?
+	my $cpt = new Safe;
+	$cpt->permit(qw(:base_core :base_mem :base_loop));
+	my $conditions_ref	= $cpt->reval($conditions_text);
+	my $group_0_selects_ref	= $cpt->reval($group_0_selects_text);
+	my $commands_ref	= $cpt->reval($commands_text);
 
 	$self->errLog(getData('spiderbyname_start', {
 		name			=> $name,
@@ -3315,25 +3083,34 @@ sub spider_by_name {
 		commands_ref		=> $commands_ref,
 	}, 'newsvac')) if $self->{debug} > 0;
 
-	$self->spider($conditions_ref, $group_0_selects_ref, @{$commands_ref});
+	# Right now, $spider_result is useless, but we should use it
+	# to trap error conditions that occur (so we can return undef 
+	# on an error condition.
+	#
+	# Right now, with no error handling in spider(), we are left with 
+	# just assuming all went well.
+	my $spider_result = $self->spider(
+		$conditions_ref, $group_0_selects_ref, @{$commands_ref}
+	);
 
 	if ($self->{debug} > -1) {
-		$self->timing_dump();
 		$self->errLog(getData('spiderbyname_end', {
 			name => $name,
 		}));
 	}
+
+	return 1;
 }
 
 ############################################################
 
 =head2 spider($condition_ref, $group0_selects_ref, @spider_commants)
 
-Executes a spider. Callers will most likely use spider_by_name() as an 
+Executes a spider. Callers will most likely use spider_by_name() as an
 entry point, as it does most everything for you. This routine depends
-on the actual data associated with the spider. 
+on the actual data associated with the spider.
 
-Given a certain set of initial data, we start looking across a list of sites 
+Given a certain set of initial data, we start looking across a list of sites
 (using miners) searching for nuggets of data that match keywords in NewsVac's
 tables.
 
@@ -3344,14 +3121,14 @@ tables.
 =over 4
 
 =item $conditions_ref
- 	Ref to hash of conditions for this spider (timeout, max depth, etc.)
- 	
+	Ref to hash of conditions for this spider (timeout, max depth, etc.)
+
 =item $group_0_selects_ref
- 	Ref to array of SQL SELECT statements to collect url_id's for group 0
- 	("SELECT url_id FROM " prefixed to all statements)
+	Ref to array of SQL SELECT statements to collect url_id's for group 0
+	("SELECT url_id FROM " prefixed to all statements)
 
 =item @spider_commands
- 	One or more spider_commands (see below for format)
+	One or more spider_commands (see below for format)
 
 =back
 
@@ -3369,15 +3146,14 @@ tables.
 
 sub spider {
 	my($self, $conditions_ref, $group_0_selects_ref, @spider_commands) = @_;
-    
+
 	# request() won't request any pages timestamped as fresh at this time.
 	# Passing in an older time value will allow it to use copies in the DB.
 	# Defaults to the time that the spider was started.
-    
 	$conditions_ref->{use_current_time} ||= time;
-    
-	my %processed = ( );
-	my $dest_ids_ar = [ ];
+
+	my %processed;
+	my $dest_ids_ar = [];
 	$self->spider_init($conditions_ref, $group_0_selects_ref);
 
 	# Jamie, I think I know why you did this, but I think MySQL has changed
@@ -3389,42 +3165,42 @@ sub spider {
 	# spider to execute if the lock could successfully be placed, which
 	# would make sense.
 	#
- 	# So after our talk, I'm going to remove this and just cross my 
+	# So after our talk, I'm going to remove this and just cross my
 	# fingers.
 	# - Cliff
 	#my $sth = $self->sqlTransactionStart("LOCK TABLES spiderlock WRITE");
 
-	# sc = "spider command" of course 
+	# sc = "spider command" of course ...
 	for my $sc (@spider_commands) {
 		my($src_ar, $dest_ar, $where, $extra) = @{$sc};
 
 		$self->errLog(getData('spider_command', {
-			src_ar	=>
-			dest_ar	=>
+			src_ar	=> $src_ar,
+			dest_ar	=> $dest_ar,
 			where	=> $where,
 			extra	=> $extra,
 		}, 'newsvac')) if $self->{debug} > 0;
 
-        	$extra = '' if !$extra;
-	        $src_ar  = [ $src_ar ]  if !ref $src_ar;
-	        $dest_ar = [ $dest_ar ] if !ref $dest_ar;
+		$extra = '' if !$extra;
+		$src_ar  = [ $src_ar  ] if !ref $src_ar;
+		$dest_ar = [ $dest_ar ] if !ref $dest_ar;
 
-	        for my $dest (@$dest_ar) {
-			# src_ar is an array ref pointing to the group or 
+		for my $dest (@$dest_ar) {
+			# src_ar is an array ref pointing to the group or
 			# groups whose IDs to use as source
 			my %src;
 
 			for (@{$src_ar}) {
-				$self->{sd}{$_} = [ ] if !$self->{sd}{$_};
-				map { $src{$_} = 1 } @{$self->{sd}{$_}}
+				$self->{sd}{$_} ||= [];
+				map { $src{$_} = 1 } @{$self->{sd}{$_}};
 			}
-			$src_ar = [ 
-				sort { $a<=>$b } grep !$processed{$dest}, 
+			$src_ar = [
+				sort { $a <=> $b } grep !$processed{$_},
 				keys %src
 			];
 			undef %src;
 
-			# now src_ar is an array ref pointing to the IDs we 
+			# now src_ar is an array ref pointing to the IDs we
 			# need to process. Process them.
 			if (@{$src_ar}) {
 				$self->errLog(getData('spider_processingitem', {
@@ -3432,11 +3208,13 @@ sub spider {
 				})) if $self->{debug} > 1;
 
 				$self->process_url_ids(
-					$conditions_ref, @{$src_ar}
+					$conditions_ref, @$src_ar
 				);
 
-				map { $processed{$_} = 1 } @{$src_ar};
-				my $select_text = 
+				for (@$src_ar) {
+					$processed{$_} = 1;
+				}
+				my $select_text =
 					'rel.to_url_id FROM rel, url_info
 					 WHERE rel.from_url_id IN ' .
 					'(' . join(', ', @{$src_ar}) . ') ' .
@@ -3446,10 +3224,10 @@ sub spider {
 				$self->errLog(getData('spider_selecttext', {
 					select_text => $select_text,
 				})) if $self->{debug} > 0;
-		
+
 				$dest_ids_ar = $self->sqlSelectColArrayref(
-					'rel.to_url_id', 
-					'rel, url_info', 
+					'rel.to_url_id',
+					'rel, url_info',
 					'rel.from_url_id IN ' .
 					'(' . join(', ', @{$src_ar}) . ') ' .
 					'AND rel.to_url_id = url_info.url_id ' .
@@ -3470,9 +3248,7 @@ sub spider {
 	#$sth = $self->sqlDo("UNLOCK TABLES");
 
 	if (wantarray) {
-		my $processed_ids_ar = [ keys %processed ];
-		
-		return ($dest_ids_ar, $processed_ids_ar);
+		return($dest_ids_ar, [ keys %processed ]);
 	} else {
 		return $dest_ids_ar;
 	}
@@ -3514,9 +3290,9 @@ None.
 
 sub spider_init {
 	my($self, $conditions_ref, $group_0_wheres_ref) = @_;
-    
+
 	# sd = spider data
-	$self->{sd} = { };
+	$self->{sd} = {};
 	$self->{sd}{$_} = $conditions_ref->{$_} for keys %{$conditions_ref};
 
 	# Blown query.
@@ -3526,8 +3302,8 @@ sub spider_init {
 	);
 	$excluded_cond = "url_info.miner_id != $none_miner_id"
 		if $none_miner_id;
-    
-	my %group_0_ids = ( );
+
+	my %group_0_ids;
 	for my $where_text (@$group_0_wheres_ref) {
 
 		# The naked '20' here refers to the miner "none" and REALLY
@@ -3544,7 +3320,7 @@ sub spider_init {
 		my @where;
 		push @where, $excluded_cond if $excluded_cond;
 		push @where, "($where_text)";
-		
+
 		my $ar = $self->sqlSelectColArrayref(
 			'url_info.url_id',
 
@@ -3566,7 +3342,7 @@ sub spider_init {
 
 ############################################################
 
-=head2 garbage_collect( )
+=head2 garbage_collect()
 
 Removes stale data from the NewsVac data, based on time-based
 criterion.
@@ -3588,7 +3364,7 @@ certain age or satisfy a condition:
 
 	'rel' 		- older than 45 days.
 	'url_info'	- not associated with any miner or relationship
-	
+
 	All tables 	- refers to a non-miner URL ID that is over a week old
 
 =item Dependencies
@@ -3602,12 +3378,11 @@ sub garbage_collect {
 	my($self) = @_;
 
 	my($n_rels, $n_urls, $n_mbs) = (0, 0, 0);
-	$self->timing_clear() if $self->{debug} > -1;
 
 	my $ary_ref = $self->sqlSelectColArrayref(
-		'rel_id', 
-		'rel', 
-		'first_verified < DATE_SUB(NOW(), INTERVAL 45 DAY)', 
+		'rel_id',
+		'rel',
+		'first_verified < DATE_SUB(NOW(), INTERVAL 45 DAY)',
 		'ORDER BY rel_id LIMIT 10000'
 	);
 
@@ -3616,13 +3391,13 @@ sub garbage_collect {
 
 	$ary_ref = $self->sqlSelectColArrayref(
 		'url_id',
-		
-		'url_info LEFT JOIN rel ON 
-		 url_info.url_id=rel.to_url_id OR 
+
+		'url_info LEFT JOIN rel ON
+		 url_info.url_id=rel.to_url_id OR
 		 url_info.url_id=rel.from_url_id',
-		 
+
 		'url_info.miner_id=0 AND rel.rel_id IS NULL',
-		
+
 		'LIMIT 10000'
 	);
 
@@ -3652,16 +3427,14 @@ sub garbage_collect {
 			num_urls	=> $n_urls,
 			num_bodies	=> $n_mbs,
 		}));
-
-		$self->timing_dump();
 	}
 }
 
 ############################################################
 
-=head2 foo( [, ])
+=head2 robosubmit()
 
-Foooooooo.
+Scour the NewsVac database for worthy submissions based on the stored keywords.
 
 =over 4
 
@@ -3675,9 +3448,13 @@ Foooooooo.
 
 =item Return value
 
+Returns an array reference containing the following: 
+	(# worthy submissions, # unworthy submissions)
 
 =item Side effects
 
+This routine will add rows to the 'submissions' table, along with the relative
+weight of each.
 
 =item Dependencies
 
@@ -3688,23 +3465,22 @@ Foooooooo.
 sub robosubmit {
 	my($self) = @_;
 
-	my($master_sql_regex, $master_sql_regex_encoded);
-	my %keywords = ( );
-	my(@keyword_keys) = ( );
+	my($master_sql_regex, $master_sql_regex_encoded,
+		%keywords, @keyword_keys);
 	my $start_time = Time::HiRes::time();
 	my $constants = getCurrentStatic();
 
 	$self->load_keywords(
-		\%keywords, 
-		\@keyword_keys, 
-		\$master_sql_regex, 
+		\%keywords,
+		\@keyword_keys,
+		\$master_sql_regex,
 		\$master_sql_regex_encoded
 	);
-	
+
 	# These locks used to mean one thing, MySQL has made them into another
 	# and they will just have to go, for now. Hopefully we won't have any
 	# contention.
-	# 
+	#
 	#my $sth = $self->sqlTransactionStart("robosubmitlock WRITE");
 
 	$self->errLog(getData('robosubmit_regex', {
@@ -3716,7 +3492,7 @@ sub robosubmit {
 miner.name, ui2.url_id, ui2.url, ui3.url, ui3.title, ui3.last_success,
 up3.plaintext,
 	(CONCAT(ui2.title, '  ', up3.plaintext) REGEXP '$master_sql_regex'
-	  OR 
+	  OR
 	 ui2.url REGEXP 'slug=[^=]*$master_sql_regex_encoded') AS matches
 EOT
 
@@ -3748,174 +3524,173 @@ EOT
 
 	my $sth = $self->sqlSelectMany($fields, $tables, $where, $other);
 
-        my($i, %submitworthy, @sub) = (0);
-        while (my($miner_name, $nugget_url_id, $nugget_url, $url, $title, 
-		   $time, $plaintext, $matches) = $sth->fetchrow())
-	{
-                if (!$matches) {              
-                        $submitworthy{$nugget_url_id} = 0 if $nugget_url_id;
-                        next;
-                }
+	my($i, %submitworthy, @sub) = (0);
+	while (my($miner_name, $nugget_url_id, $nugget_url, $url, $title,
+		$time, $plaintext, $matches) = $sth->fetchrow
+	) {
+		if (!$matches) {
+			$submitworthy{$nugget_url_id} = 0 if $nugget_url_id;
+			next;
+		}
 
-                my $nugget_info = $self->nugget_url_to_info($nugget_url);
-                $plaintext =~ s{\s+}{ }g;
-                $sub[$i]{subj} = $nugget_info->{title} || $title;
-                $sub[$i]{name} = $nugget_info->{source} || '';
-                $sub[$i]{miner} = $miner_name || '';
-                $sub[$i]{nugget_url_id} = $nugget_url_id;
+		my $nugget_info = $self->nugget_url_to_info($nugget_url);
+		$plaintext =~ s{\s+}{ }g;
+		$sub[$i]{subj} = $nugget_info->{title} || $title;
+		$sub[$i]{name} = $nugget_info->{source} || '';
+		$sub[$i]{miner} = $miner_name || '';
+		$sub[$i]{nugget_url_id} = $nugget_url_id;
 
-                # Find what keywords match, and for each one that does, record
+		# Find what keywords match, and for each one that does, record
 		# how many times it does (and some other nice info)
-                my %match = ( );
-                my %weight = ( );
-                $sub[$i]{weight} = find_matches(
-			\%match, 
-			\%weight, 
-			\%keywords, 
-			\@keyword_keys, 
+		my(%match, %weight);
+		$sub[$i]{weight} = find_matches(
+			\%match,
+			\%weight,
+			\%keywords,
+			\@keyword_keys,
 			$plaintext
 		);
 
-                $sub[$i]{weight} += 1.5 * find_matches(
-			\%match, 
-			\%weight, 
-			\%keywords, 
-			\@keyword_keys, 
+		$sub[$i]{weight} += 1.5 * find_matches(
+			\%match,
+			\%weight,
+			\%keywords,
+			\@keyword_keys,
 			$nugget_info->{slug}
 		) if $nugget_info->{slug};
 
-                $sub[$i]{weight} += 2.0 * find_matches(
-			\%match, 
-			\%weight, 
-			\%keywords, 
-			\@keyword_keys, 
+		$sub[$i]{weight} += 2.0 * find_matches(
+			\%match,
+			\%weight,
+			\%keywords,
+			\@keyword_keys,
 			$sub[$i]{subj}
 		) if $sub[$i]{subj};
 
-                my @match_keys = sort {
-                        ($weight{$b} <=> $weight{$a})
-                        || ($a cmp $b)
-                } keys %weight;
+		my @match_keys = sort {
+			($weight{$b} <=> $weight{$a})
+			|| ($a cmp $b)
+		} keys %weight;
 
-                my %seen_keyword = ( );
-                $sub[$i]{keywords} = '';
-                for my $keyword (
-                        map { $keywords{$_}[1] }
-                        sort {
-                                ($weight{$b} <=> $weight{$a})
-                                || ($a cmp $b)
-                        }
-                        grep { $weight{$_} >= 3 or $_ eq $match_keys[0] }          
-                        @match_keys
-                ) {   
-                        next if $seen_keyword{$keyword}++;
-                        $sub[$i]{keywords} .= " $keyword";
-                }
-                $sub[$i]{keywords} =~ s/^ //;
+		my %seen_keyword;
+		$sub[$i]{keywords} = '';
+		for my $keyword (
+			map { $keywords{$_}[1] }
+			sort {
+				($weight{$b} <=> $weight{$a})
+				|| ($a cmp $b)
+			}
+			grep { $weight{$_} >= 3 or $_ eq $match_keys[0] }
+			@match_keys
+		) {
+			next if $seen_keyword{$keyword}++;
+			$sub[$i]{keywords} .= " $keyword";
+		}
+		$sub[$i]{keywords} =~ s/^ //;
 
-                # From here on out, we are building the excerpts and only care
+		# From here on out, we are building the excerpts and only care
 		# about the first three (at most) match_keys
-                $#match_keys = 2 if $#match_keys > 2;
-                my %excerpts = ( );
-                        # report the first 2 matches of the best keyword    
-                my %excerpt_keywords = ( $match_keys[0], 2 );
-                        # and the first 2 of the second-best       
-                $excerpt_keywords{$match_keys[1]} = 2 if $match_keys[1];
-                        # and one of the third-best if it seems important
-                $excerpt_keywords{$match_keys[2]} = 1
+		$#match_keys = 2 if $#match_keys > 2;
+		my %excerpts;
+			# report the first 2 matches of the best keyword
+		my %excerpt_keywords = ( $match_keys[0], 2 );
+			# and the first 2 of the second-best
+		$excerpt_keywords{$match_keys[1]} = 2 if $match_keys[1];
+			# and one of the third-best if it seems important
+		$excerpt_keywords{$match_keys[2]} = 1
 			if $match_keys[2] and $weight{$match_keys[2]} > 5;
-                for my $keynum (0..$#match_keys) {  
-                        my $keyword = $match_keys[$keynum];
-                        my @location_keys = keys %{$match{$keyword}};
-                        $#location_keys = $excerpt_keywords{$keyword} - 1
+		for my $keynum (0..$#match_keys) {
+			my $keyword = $match_keys[$keynum];
+			my @location_keys = keys %{$match{$keyword}};
+			$#location_keys = $excerpt_keywords{$keyword} - 1
 				if $#location_keys >
 				   $excerpt_keywords{$keyword} - 1;
 
-                        for my $location (@location_keys) {
-                                my @matches = 
-					sort 
+			for my $location (@location_keys) {
+				my @matches =
+					sort
 					keys %{$match{$keyword}{$location}};
 
-                                for (@matches) {
-                                        my($before, $excerpt, $after) =
+				for (@matches) {
+					my($before, $excerpt, $after) =
 						split "\n";
-                                        $before =~ s{^\S*\s+}{}
+					$before =~ s{^\S*\s+}{}
 						if length($before) > 20;
-                                        $after  =~ s{\s+\S*$}{} 
+					$after	=~ s{\s+\S*$}{}
 						if length($after) > 20;
-					$before  = encode_entities($before);
+					$before	 = encode_entities($before);
 					$excerpt = encode_entities($excerpt);
-					$after   = encode_entities($after);
+					$after	 = encode_entities($after);
 
-                                        $excerpts{"$location$keynum"} = 
+					$excerpts{"$location$keynum"} =
 						getData('excerptdata', {
-							before  => $before,
+							before	=> $before,
 							excerpt => $excerpt,
 							after	=> $after,
 						})
-                                }         
-                        }
-                }
-                my @excerpts =	map { $excerpts{$_} } 
-				sort { $a <=> $b } 
+				}
+			}
+		}
+		my @excerpts =	map { $excerpts{$_} }
+				sort { $a <=> $b }
 				keys %excerpts;
 
-                my $slug = '';
-                $slug = "$nugget_info->{slug} " if $nugget_info->{slug};
-                $sub[$i]{story} = getData('formatted_excerpt', {
+		my $slug = '';
+		$slug = "$nugget_info->{slug} " if $nugget_info->{slug};
+		$sub[$i]{story} = getData('formatted_excerpt', {
 			url	=> $url,
 			slug	=> $slug,
 			excerpts=> \@excerpts,
 		});
 
 		$self->errLog(getData('robosubmit_worth', {
-			'index'	=> $i,
+			'index' => $i,
 			miner	=> $sub[$i]{miner},
 			weight	=> $sub[$i]{weight},
 		})) if $self->{debug} > 2;
 
-                ++$i;            
-        }
+		++$i;
+	}
 
-        for (@sub) {
-                if (!$_->{weight}) {             
-                        $submitworthy{$_->{nugget_url_id}} = 0;
-                        next;
-                }
+	for (@sub) {
+		if (!$_->{weight}) {
+			$submitworthy{$_->{nugget_url_id}} = 0;
+			next;
+		}
 
 		# Create submission.
 		my $subid = $self->createSubmission({
-                        email 		=> $_->{miner},
-			uid 		=> $constants->{anonymous_coward_uid},
-			name 		=> $_->{name},
-			story 		=> $_->{story},
-			subj 		=> $_->{subj},
-			tid 		=> $constants->{newsvac_topic},
-			section 	=> $constants->{newsvac_section},
-			weight 		=> $_->{weight},
+			email		=> $_->{miner},
+			uid		=> $constants->{anonymous_coward_uid},
+			name		=> $_->{name},
+			story		=> $_->{story},
+			subj		=> $_->{subj},
+			tid		=> $constants->{newsvac_topic},
+			section		=> $constants->{newsvac_section},
+			weight		=> $_->{weight},
 		});
 		$self->setSubmission($subid, {
-			keywords 	=> $_->{keywords},
+			keywords	=> $_->{keywords},
 		});
-			
-                $submitworthy{$_->{nugget_url_id}} = 1;            
-        }
 
-        my($worthy, $unworthy) = (0, 0);
+		$submitworthy{$_->{nugget_url_id}} = 1;
+	}
 
-        for (sort { $a <=> $b } keys %submitworthy) {
+	my($worthy, $unworthy) = (0, 0);
+
+	for (sort { $a <=> $b } keys %submitworthy) {
 		$self->sqlInsert('nugget_sub', {
-			url_id 		=> $_,
-                        submitworthy 	=> $submitworthy{$_}
+			url_id		=> $_,
+			submitworthy	=> $submitworthy{$_}
 		}, { ignore => 1 });
-                $submitworthy{$_} ? ++$worthy : ++$unworthy;
-        }
-        $sth->finish(); # not really necessary
+		$submitworthy{$_} ? ++$worthy : ++$unworthy;
+	}
+	$sth->finish; # not really necessary
 
 	# Not table locking anymore. See above.
-        #$sth = $self->sqlDo("UNLOCK TABLES");
+	#$sth = $self->sqlDo("UNLOCK TABLES");
 
-        my $elapsed_time = Time::HiRes::time() - $start_time;
+	my $elapsed_time = Time::HiRes::time() - $start_time;
 	$self->errLog(getData('robosubmit_result', {
 		total	=> scalar keys %submitworthy,
 		worthy	=> $worthy,
@@ -3923,6 +3698,8 @@ EOT
 		duration=> round($elapsed_time),
 			#int($elapsed_time * 1000 + 0.5) / 1000
 	})) if $self->{debug} > 1;
+
+	return [$worthy, $unworthy];
 }
 
 ############################################################
@@ -3961,7 +3738,7 @@ The value of $m_regex_ref with all spaces encoded to '%20'
 
 =item Return value
 
-Nothing useful. Returned is the result of the last regular expression of this 
+Nothing useful. Returned is the result of the last regular expression of this
 routine.
 
 =item Side effects
@@ -3983,7 +3760,7 @@ sub load_keywords {
 		'id,regex,weight,tag', 'newsvac_keywords'
 	);
 
-	while (my ($id, $regex, $weight, $tag) = $cursor->fetchrow) {
+	while (my($id, $regex, $weight, $tag) = $cursor->fetchrow) {
 		$kw_ref->{$regex} = [$weight, $tag, $id];
 	}
 
@@ -3992,8 +3769,8 @@ sub load_keywords {
 		(length($b) <=> length($a)) ||
 		($a cmp $b)
 	} keys %{$kw_ref};
-	
-	${$m_regex_ref} = '(' . (join ')|(', @{$keys_ref}) . ')';             
+
+	${$m_regex_ref} = '(' . (join ')|(', @{$keys_ref}) . ')';
 	(${$m_regex_enc_ref} = ${$m_regex_ref}) =~ s/ /\%20/g;
 }
 
@@ -4030,8 +3807,8 @@ sub source_name {
 	my($self, $long_form) = @_;
 
 	my $source_name = 'DBI:mysql:' . $self->{dbname};
-        $source_name .= ';host=' . $self->{dbhost} if $long_form;
-    
+	$source_name .= ';host=' . $self->{dbhost} if $long_form;
+
 	return $source_name;
 }
 
@@ -4059,7 +3836,7 @@ String containing flag modifiers for the given regular expression.
 
 =item Return value
 
-If no errors on regular expression, no value is returned. If there is an error, 
+If no errors on regular expression, no value is returned. If there is an error,
 then the return value contains the error message obtained when the regular expression
 was checked.
 
@@ -4083,8 +3860,11 @@ sub check_regex {
 	$flags =~ tr{gimosk}{}cd;
 	$regex =~ s{/}{\\/}g;
 
-	my $eval_string = "'foo' =~ /$regex/$flags;";
-	eval $eval_string;
+	my $cpt = new Safe;
+	$cpt->permit(qw(:base_core :base_mem :base_loop));
+
+	# catch compile-time errors; don't actually execute regex
+	$cpt->reval("sub { 'foo' =~ /$regex/$flags; }");
 	if ($@) {
 		$err = $@;
 		$err =~ s{.*/: (.+) in regexp at.*}{$1};
@@ -4128,13 +3908,13 @@ sub getWeekCounts {
 
 	$results = $self->sqlSelectAll(
 		"miner.miner_id, count(rel.rel_id)",
-                "miner, rel",
-                "rel.type = miner.name
-                AND rel.parse_code = 'miner'
-                AND rel.first_verified > DATE_SUB(NOW(), INTERVAL 7 DAY)",
-                "GROUP BY miner.miner_id
-                ORDER BY name"
-        );
+		"miner, rel",
+		"rel.type = miner.name
+		 AND rel.parse_code = 'miner'
+		 AND rel.first_verified > DATE_SUB(NOW(), INTERVAL 7 DAY)",
+		"GROUP BY miner.miner_id
+		 ORDER BY name"
+	);
 
 	$returnable->{$_->[0]} = $_->[1] for @{$results};
 
@@ -4171,15 +3951,15 @@ Foooooooo.
 
 sub getDayCounts {
 	my($self) = @_;
-	my(@days) = (1,3,7);
+	my(@days) = (1, 3, 7);
 	my($results, $returnable);
-	
+
 	for my $day (@days) {
 		$results = $self->sqlSelectAll(
 			'miner.miner_id, AVG(url_analysis.nuggets)',
 
 			'miner, url_info, url_analysis',
-			
+
 			"url_info.miner_id = miner.miner_id AND
 			 url_info.url_id = url_analysis.url_id AND
 			 url_analysis.ts > DATE_SUB(NOW(), INTERVAL $day DAY)",
@@ -4196,9 +3976,9 @@ sub getDayCounts {
 
 ############################################################
 
-=head2 getMinerList( )
+=head2 getMinerList()
 
-Returns the lists of defined miners. Two lists are returned 
+Returns the lists of defined miners. Two lists are returned
 becuase we need to separate miners that are using any
 of the defined URLs from new or unused miners that may not
 have any assigned.
@@ -4214,7 +3994,7 @@ None.
 A list containing 2 array references, they are respectively:
 	List of miners with referneced URLs
 	List of miners with NO refernenced URLs
-	
+
 =item Side effects
 
 None.
@@ -4230,20 +4010,20 @@ None.
 sub getMinerList {
 	my($self) = @_;
 
-        my $columns = <<EOT;
+	my $columns = <<EOT;
 miner.miner_id, name, last_edit, last_edit_aid, owner_aid,
 progress, comment, count(url_info.url_id) as url_count
 EOT
 
 	my $returnable1 = $self->sqlSelectAllHashrefArray(
-		$columns, 
+		$columns,
 
-                'miner, url_info',
+		'miner, url_info',
 
-                'url_info.miner_id = miner.miner_id',
+		'url_info.miner_id = miner.miner_id',
 
-                'GROUP BY miner.miner_id ORDER BY name'
-        );
+		'GROUP BY miner.miner_id ORDER BY name'
+	);
 
 	my $returnable2 = $self->sqlSelectAllHashrefArray(
 		$columns,
@@ -4326,7 +4106,7 @@ Numeric ID of the miner in question.
 List of array references, each array reference containing:
 
 	[ url_id, url ]
-	
+
 Where $url_id is the ID of a given URL
 	and
 $url is the string containing the complete URL.
@@ -4483,7 +4263,7 @@ sub deleteSpider {
 =head2 deleteURL(miner_id)
 
 Removes the given URL from the NewsVac database. Unlike delete_url_ids(), no
-checks are performed on the URL to be deleted and only one URL is deleted at 
+checks are performed on the URL to be deleted and only one URL is deleted at
 a time.
 
 =over 4
@@ -4531,7 +4311,7 @@ sub deleteURL {
 
 	$self->sqlDelete('url_analysis', $where);
 	$self->sqlDelete('url_content', $where);
-    	$self->sqlDelete('url_message_body', $where);
+	$self->sqlDelete('url_message_body', $where);
 	$self->sqlDelete('url_plaintext', $where);
 	$self->sqlDelete('nugget_sub', $where);
 
@@ -4564,7 +4344,7 @@ be changed at a later date.
 
 =item $start
 
-Optional. Number of records to offset before start of result set. Default is 0. 
+Optional. Number of records to offset before start of result set. Default is 0.
 
 =item $limit
 
@@ -4575,7 +4355,7 @@ is 9,999.
 
 =item Return value
 
-Returns a list of hash references representing URL data associated with a miner. 
+Returns a list of hash references representing URL data associated with a miner.
 Data returned for each array element is as follows:
 
 =over 4
@@ -4639,38 +4419,38 @@ sub getUrlList {
 	push @where, "miner.owner_aid = '$1'"
 		if $owner and $owner =~ /(\w{1,20})/;
 	my $qwhere = join ' AND ', @where;
-	
+
 	my($qstart, $qlimit) = (0, 500);
 	$qlimit = $1   if $limit and $limit =~ /(\d+)/;
 	$qlimit = 1    if $qlimit < 1;
 	$qlimit = 9999 if $qlimit > 9999;
 	$qstart = $1   if $start and $start =~ /^(\d+)$/;
-	
+
 	$qlimit = "$qstart,$qlimit" if $qstart;
-        my $returnable = $self->sqlSelectAllHashrefArray(
-	        'url_info.url_id, url_info.url, url_info.is_success,
-		url_info.last_success, miner.miner_id, miner.name,
-	        length(url_message_body.message_body) as message_body_length',
-		
+	my $returnable = $self->sqlSelectAllHashrefArray(
+		'url_info.url_id, url_info.url, url_info.is_success,
+		 url_info.last_success, miner.miner_id, miner.name,
+		 length(url_message_body.message_body) as message_body_length',
+
 		'url_info, miner LEFT JOIN url_message_body
-	        ON url_info.url_id = url_message_body.url_id',
+		 ON url_info.url_id = url_message_body.url_id',
 
-	        $qwhere,
+		$qwhere,
 
-	        "ORDER BY url_info.url LIMIT $qlimit"
-        );
+		"ORDER BY url_info.url LIMIT $qlimit"
+	);
 
 	for (@{$returnable}) {
 		$_->{is_success} = $_->{is_success} == 0;
 		$_->{last_success_formatted} = timeCalc($_->{last_success})
 			if $_->{last_success};
 
-                $_->{referencing} = $self->sqlCount(
-                	'rel',
+		$_->{referencing} = $self->sqlCount(
+			'rel',
 			"from_url_id=$_->{url_id} AND
 			 parse_code='miner'",
 			'GROUP BY to_url_id'
-                );
+		);
 	}
 
 
@@ -4826,11 +4606,9 @@ sub getURLRelationships {
 	return 0 if !scalar @{$url_ids};
 
 	my $where_clause = sprintf "(%s) AND
-		 	 	    rel.to_url_id = url_info.url_id AND
-				    parse_code = 'miner'",
-
-				    join ' OR ', map { "rel.from_url_id=$_" } 
-				    		 @{$url_ids};
+		rel.to_url_id = url_info.url_id AND
+		parse_code = 'miner'",
+		join ' OR ', map { "rel.from_url_id=$_" } @{$url_ids};
 
 	my $limit = (defined $max_results) ?  "LIMIT $max_results" : '';
 	my $returnable = $self->sqlSelectAllHashrefArray(
@@ -4871,7 +4649,7 @@ Depending on context, either an array containing the URL data or a Hash referenc
 If this routine is called in list context the return value will be of the following form:
 
 	(url_id, url, title, miner_id, last_attempt, last_success, status_code,
-	 reason_phrase, size of URL content [message body size])
+	reason_phrase, size of URL content [message body size])
 
 If called in a scalar contect, the return value is a hashref which uses the above
 names as keys for the specific fields, be aware that the key name for the last value
@@ -4895,11 +4673,11 @@ sub getURLData {
 
 	my $columns = <<EOT;
 url_info.url_id, url_info.url, url_info.title,
-url_info.miner_id, url_info.last_attempt, 
-url_info.last_success, url_info.status_code, 
+url_info.miner_id, url_info.last_attempt,
+url_info.last_success, url_info.status_code,
 url_info.reason_phrase, length(url_message_body.message_body) as message_body
 EOT
-	
+
 	my $tables = <<EOT;
 url_info LEFT JOIN url_message_body ON
 url_info.url_id = url_message_body.url_id
@@ -4915,7 +4693,7 @@ EOT
 ############################################################
 =head2 getURLRelationCount(url_id)
 
-Obtain the number of relationships in the NewsVac URL Database associated with a 
+Obtain the number of relationships in the NewsVac URL Database associated with a
 given URL ID.
 
 =over 4
@@ -4950,8 +4728,8 @@ sub getURLRelationCount {
 	my($self, $url_id) = @_;
 
 	my $returnable = $self->sqlSelectColArrayref(
-		'count(*)', 'rel', 
-		
+		'count(*)', 'rel',
+
 		'from_url_id=' . $self->sqlQuote($url_id) .
 		" AND parse_code='miner'",
 
@@ -4963,7 +4741,7 @@ sub getURLRelationCount {
 
 ############################################################
 
-=head2 getURLCounts( )
+=head2 getURLCounts()
 
 Obtain the following information from the NewsVac URL database: the number of total
 URLs, and the number of URLs that ARE NOT associated with any miner.
@@ -5041,7 +4819,7 @@ None.
 sub getURLBody {
 	my($self, $url_id) = @_;
 
-	# Previously this was a sqlSelectAll(). We only use one record 
+	# Previously this was a sqlSelectAll(). We only use one record
 	# anyways, so why not give the dB a break.
 	my $returnable = $self->sqlSelectArrayRef(
 		'url, message_body',
@@ -5095,21 +4873,17 @@ sub getSpiderList {
 	$where = "name LIKE " . $self->sqlQuote("%$match%")
 		if $match;
 
-        my $returnable = $self->sqlSelectAllHashrefArray(
-	        'spider_id, name, last_edit, last_edit_aid, conditions, 
+	my $returnable = $self->sqlSelectAllHashrefArray(
+		'spider_id, name, last_edit, last_edit_aid, conditions,
 		 group_0_selects, commands',
-	        'spider',
-	        $where,
-	        'LIMIT 50'
-        );
+		'spider',
+		$where,
+		'LIMIT 50'
+	);
 
-        for (@{$returnable}) {
-        	my $a = $_->{last_edit} =~
-			/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
-
-                $_->{last_edit_formatted} = timeCalc("$1-$2-$3 $4:$5:$6")
-			if $a
-        }
+	for (@{$returnable}) {
+		$_->{last_edit_formatted} = timeCalc($_->{last_edit});
+	}
 
 	return $returnable;
 }
@@ -5224,7 +4998,7 @@ sub setSpider {
 
 ############################################################
 
-=head2 markTimespecAsRun(timespec_id)
+=head2 markTimespecAsRun(timespec_id, duration [, results ])
 
 Marks a given timespec in the 'spider_timespec' table with
 the current timestamp indicating that its run has been
@@ -5236,9 +5010,18 @@ successful at this time.
 
 =over 4
 
-=item $timespec_id
+=item timespec_id
 
 Numeric value containing ID of timespec that was used in spider run.
+
+=item duration
+
+Time taken for this spidering run.
+
+=item results
+
+Scalar containing string message noting the number of worthy and unworthy
+submissions generated by the spider associated with the given timespec_id.
 
 =back
 
@@ -5248,8 +5031,8 @@ Result of Slash::DB::sqlUpdate() call that sets the spider data.
 
 =item Side effects
 
-Updates the 'last_run' field of the corresponding row in the 'spider_timespec'
-table.
+Updates the 'last_run' field and (if given) the 'results' field of the 
+corresponding row in the 'spider_timespec' table.
 
 =item Dependencies
 
@@ -5260,11 +5043,17 @@ None.
 =cut
 
 sub markTimespecAsRun {
-	my($self, $timespec_id) = @_;
+	my($self, $timespec_id, $duration, $results) = @_;
 
-	$self->sqlUpdate('spider_timespec', {
-		-last_run => 'UNIX_TIMESTAMP()',
-	}, 'timespec_id=' . $self->sqlQuote($timespec_id));
+	my $update = {
+		-last_run	=> 'UNIX_TIMESTAMP()',
+		-duration	=> $duration,
+	};
+	$update->{'results'} = $results if $results;
+
+	my $where = 'timespec_id=' . $self->sqlQuote($timespec_id);
+
+	$self->sqlUpdate('spider_timespec', $update, $where);
 }
 
 ############################################################
@@ -5279,13 +5068,13 @@ Update's the data for a given spider in the NewsVac database.
 
 =over 4
 
-=item $spider_id
+=item spider_id
 
 ID associated with the spider to update.
 
-=item %$data
+=item data
 
-Hashref of hasrefs containing the timespec data. Each element of the hashref 
+Hashref of hasrefs containing the timespec data. Each element of the hashref
 is arranged as follows:
 
 	timespec_id =>	{
@@ -5295,7 +5084,7 @@ is arranged as follows:
 				   removed.
 	}
 
-If a timespec_id of 0 is given, then the data for that key is inserted into 
+If a timespec_id of 0 is given, then the data for that key is inserted into
 the 'spider_timespec' table. Only one insert per call to this method is
 performed.
 
@@ -5324,12 +5113,12 @@ sub setSpiderTimespecs {
 	for (keys %{$timespecs}) {
 		if ($timespecs->{$_}{del}) {
 			$self->sqlDelete(
-				'spider_timespec', 
+				'spider_timespec',
 				'timespec_id=' . $self->sqlQuote($_)
 			);
 		} elsif (!$_) {
-			# If the timespec_id is 0, this is a new record to be 
-			# inserted. There can only be one insert per call 
+			# If the timespec_id is 0, this is a new record to be
+			# inserted. There can only be one insert per call
 			# to this routine.
 			$self->sqlInsert('spider_timespec', {
 				name 		=> $timespecs->{$_}{name},
@@ -5394,7 +5183,7 @@ sub getSpiderTimespecs {
 
 ############################################################
 
-=head2 getAllSpiderTimespecs( )
+=head2 getAllSpiderTimespecs()
 
 Retrieves all time specifications and stores the data into a hash reference using
 the spider names as keys.
@@ -5432,7 +5221,7 @@ sub getAllSpiderTimespecs {
 		'*', 'spider_timespec'
 	);
 
-	# And because there may be more than one timespec per miner, we 
+	# And because there may be more than one timespec per miner, we
 	# arrange it all by hash of array-refs.
 	push @{$returnable->{$_->{name}}}, $_ for @{$st_list};
 
@@ -5484,7 +5273,7 @@ sub getSpiderName {
 
 ############################################################
 
-=head2 getKeywordTags( )
+=head2 getKeywordTags()
 
 Obtain a list of distinct tags used in NewsVac keywords.
 
@@ -5579,7 +5368,7 @@ sub getTagKeywords {
 
 ############################################################
 
-=head2 getKeyword(kw_id)
+=head2 getKeyword(keyword_id)
 
 Obtain the keyword data associated with a given NewsVac keyword ID.
 
@@ -5589,7 +5378,7 @@ Obtain the keyword data associated with a given NewsVac keyword ID.
 
 =over 4
 
-=item $kw_id
+=item $keyword_id
 
 Numeric value representing the ID of the keyword.
 
@@ -5611,14 +5400,14 @@ None.
 =cut
 
 sub getKeyword {
-	my($self, $kw_id) = @_;
+	my($self, $keyword_id) = @_;
 
 	my $returnable = $self->sqlSelectHashref(
 		'*',
 
 		'newsvac_keywords',
 
-		'id=' . $self->sqlQuote($kw_id)
+		'id=' . $self->sqlQuote($keyword_id)
 	);
 
 	return $returnable;
@@ -5626,9 +5415,9 @@ sub getKeyword {
 
 ############################################################
 
-=head2 setKeyword(kw_id, data)
+=head2 setKeyword(keyword_id, data)
 
-Sets keyword data. If kw_id is non-zero, an update operation is implied, if the 
+Sets keyword data. If keyword_id is non-zero, an update operation is implied, if the
 keyword is zero, then an insert operation is performed instead and the new
 ID is returned to the caller.
 
@@ -5638,7 +5427,7 @@ ID is returned to the caller.
 
 =over 4
 
-=item $kw_id
+=item $keyword_id
 
 Numeric value representing the ID of the keyword to update.
 
@@ -5651,8 +5440,8 @@ Hash reference containing update data for the keyword. Expected keys are:
 
 =item Return value
 
-If the given $kw_id is zero, then the returned value is the ID of the inserted row.
-If $kw_id is non-zero, then the returned value is the result of the update
+If the given $keyword_id is zero, then the returned value is the ID of the inserted row.
+If $keyword_id is non-zero, then the returned value is the result of the update
 operation.
 
 =item Side effects
@@ -5668,7 +5457,7 @@ None.
 =cut
 
 sub setKeyword {
-	my($self, $kw_id, $data) = @_;
+	my($self, $keyword_id, $data) = @_;
 
 	# Insure we pass only the right data to sqlUpdate().
 	my $clean_data;
@@ -5678,19 +5467,19 @@ sub setKeyword {
 		weight
 	);
 
-	if (!$kw_id) {
+	if (!$keyword_id) {
 		$self->sqlInsert(
 			'newsvac_keywords',
 			$clean_data
 		);
 
-		return $self->getLastInsertId();
+		return $self->getLastInsertId;
 	} else {
 		$self->sqlUpdate(
-			'newsvac_keywords', 
-			$clean_data, 
-			'id=' . $self->sqlQuote($kw_id)
-		); 
+			'newsvac_keywords',
+			$clean_data,
+			'id=' . $self->sqlQuote($keyword_id)
+		);
 
 		return;
 	}
@@ -5698,7 +5487,7 @@ sub setKeyword {
 
 ############################################################
 
-=head2 deleteKeyword(kw_id)
+=head2 deleteKeyword(keyword_id)
 
 Deletes the keyword of the given ID from the NewsVac database.
 
@@ -5708,7 +5497,7 @@ Deletes the keyword of the given ID from the NewsVac database.
 
 =over 4
 
-=item $kw_id
+=item $keyword_id
 
 Numeric value containing the ID of the keyword to be deleted.
 
@@ -5732,9 +5521,9 @@ None.
 =cut
 
 sub deleteKeyword {
-	my($self, $kw_id) = @_;
+	my($self, $keyword_id) = @_;
 
-	$self->sqlDelete('newsvac_keywords', 'id=' . $self->sqlQuote($kw_id));
+	$self->sqlDelete('newsvac_keywords', 'id=' . $self->sqlQuote($keyword_id));
 }
 
 ############################################################
@@ -5743,9 +5532,9 @@ sub deleteKeyword {
 
 DEPRECATED! TO BE REMOVED IN NEXT COMMIT ASSUMING ALL STILL WORKS!
 
-Overrides Slash::DB::Utility::sqlInsert() to allow for the 
+Overrides Slash::DB::Utility::sqlInsert() to allow for the
 	INSERT INTO x IGNORE ...
-Format, specific to MySQL. This should be back-ported to 
+Format, specific to MySQL. This should be back-ported to
 Slash::DB::MySQL if it hasn't been, already.
 
 =over 4
@@ -5810,7 +5599,7 @@ Inserts rows into the table specified.
 #	chop($values);
 #
 #	my $sql = "INSERT$extra INTO $table ($names) VALUES($values)\n";
-#	$self->sqlConnect();
+#	$self->sqlConnect;
 #	return $self->sqlDo($sql);
 #}
 
@@ -5850,17 +5639,15 @@ None.
 =cut
 
 sub errLog {
-	my($self) = @_;
+	my($self) = shift;
 
-	# We get a little obtuse to avoide the allergic reactions from use
-	# of shift().
 	if ($self->{use_locking}) {
-		_doLog([ @_[1..$#_] ]);
+		_doLog([@_]);
 		return;
 	}
 
-	chomp($_) for @_[1..$#_];
-	printf STDERR "%s\n", join "\n", @_[1..$#_];
+	chomp(@_);
+	printf STDERR "%s\n", join "\n", @_;
 }
 
 
@@ -5876,9 +5663,9 @@ private.
 # These should probably be private.
 ############################################################
 
-=head2 _doLogInit( )
+=head2 _doLogInit()
 
-Creates a NewsVac log file (newsvac.log) in the Slash data directory for 
+Creates a NewsVac log file (newsvac.log) in the Slash data directory for
 the running site.
 
 =over 4
@@ -5916,13 +5703,13 @@ sub _doLogInit {
 	_doLog(["Placing lock $fname"]);
 }
 
-=head2 _doLock( )
+=head2 _doLock()
 
 Creates a NewsVac LOCK file in the Slash data directory for the running site.
 If another lock file is present, then it is expected that another process
-is running this same code. This represents a fatal error and this code 
+is running this same code. This represents a fatal error and this code
 will terminate in favor of the other one. In the case that this code
-failed to clean up after itself and there is no other process running, you 
+failed to clean up after itself and there is no other process running, you
 should be safe to delete the lock file and then restart a new instance.
 
 =over 4
@@ -5938,7 +5725,7 @@ None
 =item Side effects
 
 Creates $DATADIR/newsvac.lock on the local filesystem. Creates SIGINT and
-SIGTERM handlers which will delete the lock file if situations allow such 
+SIGTERM handlers which will delete the lock file if situations allow such
 signals to be caught.
 
 =item Dependencies
@@ -5956,38 +5743,39 @@ sub _doLock {
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.lock");
 
-	# By the end of this routine, the lock file has been created and 
-	# no further die()s can be called within the call flow of this 
-	# object. Please use _Die() instead, as that properly removes the 
+	# By the end of this routine, the lock file has been created and
+	# no further die()s can be called within the call flow of this
+	# object. Please use _Die() instead, as that properly removes the
 	# lock file.
-	
+
 	# Test for lock file existence. If it does, die(), but the caller
 	# should be trapping this.
 	if (-r $file) {
-		die "Cannot read LOCK file, ${file}:\n$!\n"
-			if !open(LOCK, $file);
-		my $lock = <LOCK>;
-		close LOCK;
-		chomp($lock);
+		my $lockfh = gensym();
+		open($lockfh, $file) or
+			die "Cannot read lock file $file: $!";
+		chomp(my $lock = <$lockfh>);
+		close $lockfh;
 		# This isn't 100% but WILL prevent us from restarting
-		# a daemon over an existing copy, which was the 
+		# a daemon over an existing copy, which was the
 		# intent, right?
-		die "Please stop existing $fname (lock '$lock'), first";
+		die "$file already exists; you will need " .
+		    "to remove it before $fname can start";
 	}
 
-	open $fh, "> $file\0" or die "Can't create LOCK $file: $!";
+	open $fh, "> $file\0" or die "Can't create lock $file: $!";
 	printf $fh "$$ %s", scalar localtime;
 	close $fh;
 
 	# Make best attempt to catch fatal signals and Do The Right Thing.
 	$SIG{TERM} = $SIG{INT} = sub {
-		_doLog(["Removing lock $fname"]);
+		_doLog(["Removing lock on $fname"]);
 		unlink $file;
 		exit 0;
 	};
 }
 
-=head2 _doLockRelease( )
+=head2 _doLockRelease()
 
 Removes existing NewsVac LOCK if one exists.
 
@@ -6117,16 +5905,16 @@ Foooooooo.
 =cut
 sub find_matches {
 	my($match_ref, $weight_ref, $keywords_ref, $keyword_keys_ref,
-	   $plaintext) = @_;
+		$plaintext) = @_;
 	my $weight_total = 0;
 
 	$keyword_keys_ref = [ keys %$keywords_ref ] if !$keyword_keys_ref;
 	for my $keyword (@{$keyword_keys_ref}) {
-		my $keyword_score = $keywords_ref->{$keyword}[0]; 
+		my $keyword_score = $keywords_ref->{$keyword}[0];
 		my $n_matches = 0;
 
-		while ($plaintext =~ m/(.{0,50})\b($keyword)(.{0,50})/g) { 
-			my($before, $excerpt, $after) = ($1, $2, $3); 
+		while ($plaintext =~ m/(.{0,50})\b($keyword)(.{0,50})/g) {
+			my($before, $excerpt, $after) = ($1, $2, $3);
 			my $location = pos $plaintext;
 			my $key = "$before\n$excerpt\n$after";
 
@@ -6135,14 +5923,14 @@ sub find_matches {
 		}
 
 		$weight_total +=
-			$keyword_score * (log($n_matches) + 1) 
+			$keyword_score * (log($n_matches) + 1)
 		if $n_matches;
 
 		$weight_ref->{$keyword} =
 			$keyword_score * (log($n_matches) + 1)
 		if $n_matches;
 	}
-	
+
 	return $weight_total;
 }
 
@@ -6237,7 +6025,7 @@ code, in this case epoch-seconds.
 =item $string
 
 The date to convert (which is usually 'YYYY-MM-DD min:sec', but may vary across
-implementations) 
+implementations)
 
 =back
 
@@ -6285,7 +6073,7 @@ The number to be rounded.
 =item $sig
 
 This could be done a little better, if $sig is not given, we'll attempt to round
-to the nearest one. If $sig is 2, we'll attempt to round to the nearest 10, 
+to the nearest one. If $sig is 2, we'll attempt to round to the nearest 10,
 if 3, the nearest 100 and so on. Negative values are accepted, but results
 have not been tested yet. If it's broken, please submit diffs. :)
 
@@ -6305,7 +6093,7 @@ None.
 
 =cut
 
-# Might be better if this becomes part of Slash::Utility::Data, that way 
+# Might be better if this becomes part of Slash::Utility::Data, that way
 # other things (like newsvac.pl) can use it.
 sub round {
 	my($num, $sig) = @_;
@@ -6321,7 +6109,7 @@ sub round {
 	# nearest 1 and see how things look
 	#my $rounder = 0.5 * (10 ** ($sig - 1));
 	my $rounder = 0.5;
-	
+
 	return int($adjnum + $rounder) / $base;
 }
 

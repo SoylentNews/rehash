@@ -49,7 +49,7 @@ maxsize=num_sizes.highval;
 	<pre>[% tags.size %] '&lt;a href' tags in remaining text:
 
 [% FOR t=tags -%]
-[% t.0 %]. [% t.1 %]<font color="red">[% t.2 %]</font>[% t.3 %]
+[% t.0 %]. [% t.1 %]<a href="[% t.2 %]"><font color="red">[% t.2 %]</font></a>[% t.3 %]
 [% END -%]
 	</pre>
 __seclev__

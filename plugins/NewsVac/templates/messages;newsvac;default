@@ -11,16 +11,13 @@ en_US
 __name__
 messages
 __template__
-[% # messages %]
-
-[% USE Slash %]
-[% SWITCH value;
+[% SWITCH value %]
  
-CASE "show_miner_rel_info" %]    
-warn "miner rel does not point to a nugget, to '[% url_id %]' from '[% url_id_list %]'";
+[%- CASE "show_miner_rel_info" -%]
+miner rel does not point to a nugget, to '[% url_id %]' from '[% url_id_list %]'
 
-[% CASE "noop" %]    
-[% TITLEBAR WIDTH="100%" TITLE="No Op Given" %]
+[%- CASE "noop" -%]
+[% INCLUDE titlebar width="100%" title="No Op Given" %]
 
 [% END %]
 __seclev__
