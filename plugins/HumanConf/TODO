@@ -1,7 +1,5 @@
 why doesn't my browser respect the 8-char limit I asked for in the text box?
 
-delete files as well as database rows
-
 failure on users.pl ops switches to a new HC, because there is only one op
 and generate_formkey is in its list of formkeyHandlers. There might be a
 way for formkeyHandler to recognize that there is already an HC formkey
