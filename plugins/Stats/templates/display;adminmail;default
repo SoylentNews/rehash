@@ -17,18 +17,18 @@ __template__
        unique: [% unique %]
         users: [% users %]
 [% admin_clearpass_warning %][% backup_lag %]
+
+               UIDs     | IPIDS   | Pages
+        posts: [% distinct_comment_posters_uids %]   [% IPIDS %]
+     comments: [% comments_uids %]   [% comments_ipids %]   [% comments_page %] ([% comments_bytes %])
+     articles: [% article_uids %]   [% article_ipids %]   [% article_page %] ([% article_bytes %])
+       search: [% search_uids %]   [% search_ipids %]   [% search_page %] ([% search_bytes %])
+     journals: [% journal_uids %]   [% journal_ipids %]   [% journal_page %] ([% journal_bytes %])
+         palm: [% palm_uids %]   [% palm_ipids %]   [% palm_page %] ([% palm_bytes %])
+          rss: [% rss_uids %]   [% rss_ipids %]   [% rss_page %] ([% rss_bytes %])
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
      comments: [% comments %] posted yesterday
-
-               distinct uids | distinct IPIDS | pageviews
- posted comm.: [% distinct_comment_posters_uids %]         [% IPIDS %]
-     comments: [% comments_uids %]         [% comments_ipids %]          [% comments_page %] ([% comments_bytes %])
-     articles: [% article_uids %]         [% article_ipids %]          [% article_page %] ([% article_bytes %])
-       search: [% search_uids %]         [% search_ipids %]          [% search_page %] ([% search_bytes %])
-     journals: [% journal_uids %]         [% journal_ipids %]          [% journal_page %] ([% journal_bytes %])
-         palm: [% palm_uids %]         [% palm_ipids %]          [% palm_page %] ([% palm_bytes %])
-          rss: [% rss_uids %]         [% rss_ipids %]          [% rss_page %] ([% rss_bytes %])
   submissions: [% submissions %] submissions 
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
@@ -39,10 +39,8 @@ __template__
 [% FOREACH section = sections -%]
 
 For [% section.section_name %]
-   page views: [% section.page %] visitors: [% section.ipids %]
-    bandwidth: [% section.bytes %]   users: [% section.users %]
-
                   Pages      IPs   Bandwidth    Users
+        total: [% section.page %] [% section.ipids %] [% section.bytes %] [% section.users %]
 [% IF section.index.page > 0 -%]
         index: [% section.index.page %] [% section.index.ipids %] [% section.index.bytes %] [% section.index.users %]
 [% END -%]
