@@ -49,6 +49,7 @@ __template__
                 these_tzdescs = {};
 		FOREACH tz = this_tzcodes.keys;
 			this_num = this_tzcodes.$tz / 36;
+			this_num = this_num.replace('50$', '30');
 			these_tzdescs.$tz = this_format(this_num, this_tzdescs.$tz);
 		END;
 
