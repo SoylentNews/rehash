@@ -208,6 +208,12 @@ subscribers not to abuse the privilege.
 and
 <a href="/my/foes/">foes</a>,
 instead of being limited to 200.
+<li>When
+<a href="/journal.pl?op=edit">writing a journal entry</a>,
+your choices for comments are not just "Comments Disabled" and "Comments
+Enabled." You can also limit commenting to just your friends; just your
+friends and their friends; to exclude just your foes; or to exclude
+your foes and your friends' foes.
 </ul>
 <p>If you have any questions, please email
 <a href="mailto:subscriptions@slashdot.org">subscriptions@slashdot.org</a>.
