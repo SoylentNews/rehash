@@ -86,7 +86,6 @@ use vars qw($VERSION @EXPORT);
 # @EXPORT_OK = qw(
 # 	approveTag
 # 	breakHtml
-# 	stripBadHtml
 # 	processCustomTags
 # 	stripByMode
 # );
@@ -460,6 +459,143 @@ The manipulated string.
 
 =cut
 
+{ # closure for stripByMode
+
+my %action_data = ( );
+
+my %actions = (
+	newline_to_local => sub {
+			${$_[0]} =~ s/(?:\015?\012|\015)/\n/g;		},
+	encode_html_amp => sub {
+			${$_[0]} =~ s/&/&amp;/g;			},
+	encode_html_amp_ifnotent => sub {
+			${$_[0]} =~ s/&(?!#?[a-zA-Z0-9]+;)/&amp;/g;	},
+	encode_html_ltgt => sub {
+			${$_[0]} =~ s/</&lt;/g;
+			${$_[0]} =~ s/>/&gt;/g;				},
+	encode_html_ltgt_stray => sub {
+			1 while ${$_[0]} =~ s{
+				( (?: ^ | > ) [^<]* )
+				>
+			}{$1&gt;}gx;
+			1 while ${$_[0]} =~ s{
+				<
+				( [^>]* (?: < | $ ) )
+				>
+			}{&lt;$1}gx;					},
+	encode_html_quote => sub {
+			${$_[0]} =~ s/"/&#34;/g;			},
+	breakHtml => sub {
+			${$_[0]} = breakHtml(${$_[0]});			},
+	breakHtml_ifwhitefix => sub {
+			${$_[0]} = breakHtml(${$_[0]})
+				unless $action_data{no_white_fix};	},
+	processCustomTags => sub {
+			${$_[0]} = processCustomTags(${$_[0]});		},
+	approveTags => sub {
+			${$_[0]} =~ s/<(.*?)>/approveTag($1)/sge;	},
+	approveCharrefs => sub {
+			${$_[0]} =~ s{
+				&(\#?[a-zA-Z0-9]+);?
+			}{approveCharref($1)}gex;			},
+	space_between_tags => sub {
+			${$_[0]} =~ s/></> </g;				},
+	whitespace_tagify => sub {
+			${$_[0]} =~ s/\n/<BR>/gi;  # pp breaks
+			${$_[0]} =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
+			# Preserve leading indents / spaces
+			# can mess up internal tabs, oh well
+			${$_[0]} =~ s/\t/    /g;			},
+	whitespace_and_tt => sub {
+			${$_[0]} =~ s{((?:  )+)(?: (\S))?} {
+				("&nbsp; " x (length($1)/2)) .
+				(defined($2) ? "&nbsp;$2" : "")
+			}eg;
+			${$_[0]} = "<TT>${$_[0]}</TT>";			},
+	newline_indent => sub {
+			${$_[0]} =~ s{<BR>\n?( +)} {
+				"<BR>\n" . ("&nbsp; " x length($1))
+			}ieg;						},
+	remove_tags => sub {
+			${$_[0]} =~ s/<.*?>//g;				},
+	remove_ltgt => sub {
+			${$_[0]} =~ s/<//g;
+			${$_[0]} =~ s/>//g;				},
+	remove_trailing_lts => sub {
+			${$_[0]} =~ s/<(?!.*?>)//gs;			},
+	remove_newlines => sub {
+			${$_[0]} =~ s/\n+//g;				},
+	debugprint => sub {
+			print STDERR "action debugprint '${$_[0]}'\n";	},
+);
+
+my %mode_actions = (
+	ANCHOR, [qw(
+			newline_to_local
+			remove_newlines			)],
+	NOTAGS, [qw(
+			newline_to_local
+			remove_tags
+			remove_ltgt
+			encode_html_amp_ifnotent	)],
+	ATTRIBUTE, [qw(
+			newline_to_local
+			encode_html_amp
+			encode_html_ltgt
+			encode_html_quote		)],
+	LITERAL, [qw(
+			newline_to_local
+			encode_html_amp
+			encode_html_ltgt
+			breakHtml_ifwhitefix
+			processCustomTags
+			remove_trailing_lts
+			approveTags
+			space_between_tags
+			encode_html_ltgt_stray		)],
+	NOHTML, [qw(
+			newline_to_local
+			remove_tags
+			remove_ltgt
+			encode_html_amp			)],
+	PLAINTEXT, [qw(
+			newline_to_local
+			processCustomTags
+			remove_trailing_lts
+			approveTags
+			space_between_tags
+			encode_html_ltgt_stray
+			encode_html_amp_ifnotent
+			approveCharrefs
+			breakHtml_ifwhitefix
+			whitespace_tagify
+			newline_indent			)],
+	HTML, [qw(
+			newline_to_local
+			processCustomTags
+			remove_trailing_lts
+			approveTags
+			space_between_tags
+			encode_html_ltgt_stray
+			encode_html_amp_ifnotent
+			approveCharrefs
+			breakHtml_ifwhitefix		)],
+	CODE, [qw(
+			newline_to_local
+			encode_html_amp
+			encode_html_ltgt
+			breakHtml_ifwhitefix
+			whitespace_tagify
+			whitespace_and_tt		)],
+	EXTRANS, [qw(
+			newline_to_local
+			encode_html_amp
+			encode_html_ltgt
+			breakHtml_ifwhitefix
+			whitespace_tagify
+			newline_indent			)],
+);
+
 sub stripByMode {
 	my($str, $fmode, $no_white_fix) = @_;
 	$fmode ||= NOHTML;
@@ -530,9 +666,32 @@ sub stripByMode {
 		$str = breakHtml($str) unless $no_white_fix;
 	}
 
+	my $new_str = _new_stripByMode(@_);
+	if ($str ne $new_str) {
+		print STDERR "_new_stripByMode broken: fmode '$fmode' nwf '"
+			. (defined($no_white_fix) ? $no_white_fix : "undef")
+			. "' str '$str' new_str '$new_str'\n";
+	}
+
 	return $str;
 }
 
+sub _new_stripByMode {
+	my($str, $fmode, $no_white_fix) = @_;
+	$fmode ||= NOHTML;
+	$action_data{no_white_fix} = defined($no_white_fix) ?
+		$no_white_fix : $fmode == LITERAL;
+	my @actions = @{$mode_actions{$fmode}};
+#print STDERR "_new_stripByMode fmode '$fmode' actions '@actions'\n";
+	for my $action (@actions) {
+#print STDERR "action '$action' str_begin '$str'\n";
+		$actions{$action}->(\$str);
+#print STDERR "action '$action' str_end   '$str'\n";
+	}
+	return $str;
+}
+
+}
 
 #========================================================================
 
