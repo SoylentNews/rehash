@@ -547,6 +547,7 @@ sub getCurrentStatic {
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
 		my $hostname = $r->header_in('host');
+		$hostname =~ s/:\d+$//;
 		if ($const_cfg->{'site_constants'}{$hostname}) { 
 			$constants = $const_cfg->{site_constants}{$hostname};
 		} else {
