@@ -830,7 +830,6 @@ INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method
 #SELECT CONCAT('INSERT INTO site_info (name, value, description) VALUES ("', name, '_', value, '_symlink", 0, "', value, ' ', name, ' files installed symlink?");') INTO OUTFILE '/tmp/site_symlinks' FROM site_info WHERE name IN ('theme', 'plugin') ORDER BY name;
 #SOURCE /tmp/site_symlinks;
 
-# LINUX.COM LAST UPDATED HERE
 
 # End of T_2_3_0_51, Start of T_2_3_0_52
 
@@ -1195,9 +1194,10 @@ INSERT INTO vars (name, value, description) VALUES ('comments_mod_totals_exact',
 
 ALTER TABLE string_param MODIFY COLUMN type VARCHAR(32) NOT NULL;
 
-# DEVCHANNEL LAST UPDATED HERE
-# FOUNDRIES LAST UPDATED
 
 UPDATE message_codes SET type = 'Comment Moderation' WHERE code = 3;
 UPDATE message_codes SET type = 'Comment Reply' WHERE code = 4;
 UPDATE message_codes SET type = 'Journal Reply' WHERE code = 7;
+# LINUX.COM LAST UPDATED HERE
+# DEVCHANNEL LAST UPDATED HERE
+# FOUNDRIES LAST UPDATED
