@@ -199,6 +199,18 @@ sub countMetamodLog {
 }
 
 ########################################################
+sub countUnmetamoddedMods {
+	my($self, $options) = @_;
+	my $active_clause = $options->{active_only} ? " AND active=1" : "";
+	return $self->sqlSelectAllHashrefArray(
+		"m2count",
+		"m2count, COUNT(*) AS cnt",
+		"moderatorlog",
+		"m2status = 0 $active_clause",
+		"GROUP BY m2count");
+}
+
+########################################################
 sub getOldestUnm2dMod {
 	my($self) = @_;
 	my $reasons = $self->getReasons();

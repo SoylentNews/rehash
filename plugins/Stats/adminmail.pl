@@ -163,6 +163,9 @@ EOT
 	my $metamodlogs = $stats->countMetamodLog({
 		active_only	=> 1,
 	});
+	my $unm2dmods = $stats->countUnmetamoddedMods({
+		active_only	=> 1,
+	});
 	my $metamodlogs_yest_fair = $stats->countMetamodLog({
 		active_only	=> 1,
 		oneday_only	=> 1,
@@ -482,6 +485,9 @@ EOT
 	$statsSave->createStatDaily("metamodlog_inactive_percent", $metamodlog_inactive_percent);
 	$statsSave->createStatDaily("modlog_yest", $modlogs_yest);
 	$statsSave->createStatDaily("modlog_inactive_percent_yest", $modlog_inactive_percent_yest);
+	for my $m2c_hr (@$unm2dmods) {
+		$statsSave->createStatDaily("modlog_m2count_$m2c_hr->{m2count}", $m2c_hr->{cnt});
+	}
 	$statsSave->createStatDaily("metamodlog_yest", $metamodlogs_yest_total);
 	$statsSave->createStatDaily("xmodlog_yest", $modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0);
 	$statsSave->createStatDaily("metamodlog_inactive_percent_yest", $metamodlog_inactive_percent_yest);
