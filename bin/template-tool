@@ -173,7 +173,10 @@ if ($opts{'s'}) {
 		}
 	}
 } elsif ($opts{'U'}) {
-#Upgrade logic
+
+	# Upgrade all templates in a site to the versions found
+	# in /usr/local/slash.
+
 	my $templates = $install->getSiteTemplates;
 	my %stats = ( 'new' => 0, 'different' => 0);
 	my $n_changed = 0;
@@ -558,6 +561,12 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user (default is "slash")
+	-U	Upgrade your templates to the latest for your theme and
+		plugins, scans base install dir (default /usr/local/slash)
+		and "does the right thing"
+	-t	test saved files, this will return what files are new
+		or modified but does not change the templates
+
 	-B	generates a blank template (specify the name of the file
 		after the option)
 	-d	dump templates
@@ -568,17 +577,14 @@ Main options:
 	-f	<templatefilename> filename of template being dumped or
 		created (single template)
 	-s	create/save/update template
-	-t	test saved files, this will return what files are new or modified 
-		but does not save the templates
 	-O	directory where templates are saved or created
 	-P	<page> template page
 	-S	<section> template section
 	-r	deletes template(s) (don't shoot yourself in the foot!)
-	-U	upgrade your templates to the latest for your theme (way alpha)
 
-	Save Notes:
+	Notes on the -s "save" option:
 	*	With no args except filename, uses filename to derive
-		section, page and template name from.
+		section, page and template name.
 	*	-s <filenames> allows you to save specific templates from
 		the given files. This needs to be a template in a template
 		file format. Use -b to generate blank ones.
