@@ -94,6 +94,7 @@ sub getSlashConf {
 
 	# Maximum karma. If it's not defined, things break.
 	$I{maxkarma} = 999 if ! defined $I{maxkarma};
+	$I{minkarma} = -999 if ! defined $I{minkarma};
 	# Sanity check- ASSERT: MAXKARMA >= M2_MAXBONUS.
 	$I{m2_maxbonus} = $I{maxkarma}
 		if !$I{m2_maxbonus} || $I{m2_maxbonus} > $I{maxkarma};
