@@ -705,8 +705,8 @@ sub validateComment {
 		# so all tags present are legal and uppercased.
 		my $breaktags = $constants->{'approvedtags_break'}
 			|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
-		my $breaktags_1_regex = "</?(?:" . join("|", @$breaktags) . ")>";
-		my $breaktags_2_regex = "</?(?:" . join("|", grep /^(P|BLOCKQUOTE)$/, @$breaktags) . ")>";
+		my $breaktags_1_regex = "<(?:" . join("|", @$breaktags) . ")>";
+		my $breaktags_2_regex = "<(?:" . join("|", grep /^(P|BLOCKQUOTE)$/, @$breaktags) . ")>";
 		my $num_lines = 0;
 		$num_lines++ while $check_prefix =~ /$breaktags_1_regex/g;
 		$num_lines++ while $check_prefix =~ /$breaktags_2_regex/g;
