@@ -32,8 +32,8 @@ $task{$me}{code} = sub {
 	my %gross_count = ( );
 	if ($num_new_subscriptions > 0) {
 		$transaction_list = sprintf(
-			"%7s %3s %6s %6s %6s %5s %6s %-20s\n", qw(
-			 uid kma $gros $net  today  used  total nickname )
+			"%7s %6s %3s %6s %6s %6s %5s %6s %-20s\n", qw(
+			 uid method kma $gros $net today used total nickname )
 		);
 		my @spids = sort { $a <=> $b } keys %$new_subscriptions_hr;
 
@@ -59,24 +59,25 @@ $task{$me}{code} = sub {
 			$total_pages_bought += $spid_hr->{pages};
 			$total_karma += $spid_hr->{karma};
 			$transaction_list .= sprintf(
-				"%7d %3d %6.2f %6.2f %6d %5d %6d %-20s %s\n",
+				"%7d %6s %3d %6.2f %6.2f %6d %5d %6d %-20s %s\n",
 				@{$spid_hr}{qw(
-					uid karma payment_gross payment_net
+					uid method karma payment_gross payment_net
 					pages hits_bought hits_paidfor nickname
 				)},
 				($subscribers_hr->{$spid_hr->{uid}}{is_new} ? "NEW" : "renew"),
 			);
 		}
 		$transaction_list .= sprintf(
-			"%-10s %7.2f %6.2f %6d\n",
+			"%-17s %7.2f %6.2f %6d\n",
 			"total:",
 			$total_gross,
 			$total_net,
 			$total_pages_bought
 		);
 		$transaction_list .= sprintf(
-			"%-7s %3d %6.2f %6.2f %6d\n\n",
+			"%-7s %6s %3d %6.2f %6.2f %6d\n\n",
 			"mean:",
+			" ", # placeholder for the "method" column
 			$total_karma/$num_new_subscriptions,
 			$total_gross/$num_new_subscriptions,
 			$total_net/$num_new_subscriptions,
@@ -188,7 +189,7 @@ EOT
 	}
 
 	my $email = sprintf(<<"EOT", @numbers);
-$constants->{sitename} Subscriber Info for yesterday
+$constants->{sitename} Subscriber Info for $yesterday
 $report_link
 $monthly_stats
 
@@ -223,7 +224,7 @@ EOT
 	# Send a message to the site admin.
 	for (@{$constants->{stats_reports}}) {
 		sendEmail($_,
-			"$constants->{sitename} Subscriber Info",
+			"$constants->{sitename} Subscriber Info for $yesterday",
 			$email, 'bulk');
 	}
 	slashdLog('Send Subscribe Mail End');
