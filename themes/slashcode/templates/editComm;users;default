@@ -215,11 +215,11 @@ __template__
 		<INPUT TYPE="TEXT" NAME="commentspill" VALUE="[% user_edit.commentspill %]" SIZE="3">
 
 		<P><B><A NAME="clsmall">Small Comment Penalty</A></B> (Assign a bonus to smaller comments)<BR>
-		<INPUT TYPE="TEXT" NAME="clsmall" VALUE="[% user_edit.clsmall %]" SIZE="6"> (length of comment)<BR>
+		<INPUT TYPE="TEXT" NAME="clsmall" VALUE="[% user_edit.clsmall %]" SIZE="6"> (length of comment in bytes)<BR>
 		[% small_length_bonus_select %] (modifier assigned)<br>
 
 		<P><B><A NAME="clbig">Long Comment Bonus</A></B> (Assign a bonus to lengthy comments)<BR>
-		<INPUT TYPE="TEXT" NAME="clbig" VALUE="[% user_edit.clbig %]" SIZE="6"> (length of comment)<BR>
+		<INPUT TYPE="TEXT" NAME="clbig" VALUE="[% user_edit.clbig %]" SIZE="6"> (length of comment in bytes)<BR>
 		[% long_length_bonus_select %] (modifier assigned)<br>
 
 		<P><B>Max Comment Size</B> (Truncates long comments, and
