@@ -415,7 +415,7 @@ USER
 		my @strs = (substr($subj, 0, 35), substr($name, 0, 20), substr($email, 0, 20));
 		# Adds proper section for form editor.
 		my $sec = $section ne $I{defaultsection} ? "&section=$section" : "";
-		my $stitle = '&title=' . fixurl($strs[0], 1);
+		my $stitle = '&title=' . fixurl($subj, 1);
 
 		printf(($admin ? <<ADMIN : <<USER), @strs);
 		</FONT><INPUT TYPE="CHECKBOX" NAME="del_$subid">
