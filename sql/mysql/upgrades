@@ -669,6 +669,11 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, '
 
 # SLASHCODE LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
+
+# this is not a DB command but needs to be done for
+# each installed site that uses plugins/Zoo:
+# ln -s /usr/local/slash/plugins/Zoo/zoo_run_people_log.pl /usr/local/slash/site/sitename/tasks/
+
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_41
