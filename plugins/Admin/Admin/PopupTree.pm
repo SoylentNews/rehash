@@ -28,7 +28,7 @@ use strict;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
-use HTML::PopupTreeSelect '1.4';
+#use HTML::PopupTreeSelect '1.4';
 
 use base 'HTML::PopupTreeSelect';
 use vars qw($VERSION);
