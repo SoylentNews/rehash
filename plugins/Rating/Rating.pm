@@ -36,15 +36,18 @@ sub new {
 sub create_comment_vote {
 	my ($data) = @_;
 	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	
 	my $slashdb = getCurrentDB();
 	my $ratings_reader = getObject('Slash::Rating', { db_type => 'reader' });
-	my $create_vote = 0;
+	my $can_create_vote = 0;
 	my $comment = $data->{comment};
 
 	my $discussion = $slashdb->getDiscussion($comment->{sid});
 	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
-	
+
+	my %unlimited_votes = map {$_, 1} split(/\|/, $constants->{rating_unlimited_vote_uids});
 	
 	my $extras;
 	$extras =  $slashdb->getNexusExtrasForChosen({$disc_skin->{nexus} => 1}, {content_type => "comment"}) if $disc_skin && $disc_skin->{nexus};
@@ -52,10 +55,10 @@ sub create_comment_vote {
 	return unless $extras;
 	
 	foreach my $extra(@$extras) {
-		$create_vote=1 if $extra->[1] eq "comment_vote";	
+		$can_create_vote=1 if $extra->[1] eq "comment_vote";	
 	}
 
-	return unless $create_vote;
+	return unless $can_create_vote;
 	
 	my $active = "yes";
 	my $val = 0;
@@ -66,7 +69,7 @@ sub create_comment_vote {
 	}
 	
 	my $count = $ratings_reader->getDiscussionVoteCountForUser($comment->{uid}, $comment->{sid});
-	$active = "no" if $count;
+	$active = "no" if $count && !$unlimited_votes{$user->{uid}};
 	
 	my $comment_vote = {
 		val  => $val,
