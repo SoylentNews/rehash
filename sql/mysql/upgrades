@@ -788,12 +788,13 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_poin
 
 ALTER TABLE users_info CHANGE people people MEDIUMBLOB;
 
-# SLASHDOT LAST UPDATED HERE
-
-# End of T_2_3_0_48
+# End of T_2_3_0_48, Start of T_2_3_0_49
 
 UPDATE stats_daily SET name='mod_tokens_lost_stirred' WHERE name='mod_tokens_stirred';
 # Do this next command with the value of the var "maxpoints" in place of "5"...
 # UPDATE stats_daily SET value=value * 5 WHERE name='mod_tokens_lost_converted';
 
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_49
 
