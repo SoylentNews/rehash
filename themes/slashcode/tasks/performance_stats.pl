@@ -17,11 +17,10 @@ use vars qw( %task $me );
 $task{$me}{timespec} = '0-59 * * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, this can wait
 $task{$me}{on_startup} = 1;
-$task{$me}{resource_locks} = { log_slave => 1 };
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	my $logdb = getObject("Slash::DB", { db_type => 'log_slave' });
+	my $logdb = getObject("Slash::DB", { db_type => 'log' });
 
 	my $weeks_back = $constants->{cur_performance_stats_weeks} || 4;
 	my $secs_per_week = 60 * 60 * 24 * 7;
