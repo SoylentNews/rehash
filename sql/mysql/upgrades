@@ -1092,8 +1092,8 @@ ALTER TABLE sections ADD defaultcommentstatus enum('disabled','enabled','friends
 UPDATE sections SET defaultcommentstatus='enabled';
 UPDATE vars SET value='enabled' WHERE name='defaultcommentstatus';
 
-UPDATE users_param SET value = 'enabled'  WHERE name = 'journal_discuss' AND value = 1;
-UPDATE users_param SET value = 'disabled' WHERE name = 'journal_discuss' AND value = 0;
+UPDATE users_param SET value = 'enabled'  WHERE name = 'journal_discuss' AND value = "1";
+UPDATE users_param SET value = 'disabled' WHERE name = 'journal_discuss' AND value = "0";
 
 INSERT INTO vars (name, value, description) VALUES ('stats_sfnet_groupids','4421','List of sf.net group IDs to keep stats on');
 
