@@ -183,6 +183,7 @@ sub saveSection {
 
 	# Before we insert, give some reasonable defaults.
 	$form->{url} 	  ||= '';
+	$form->{cookiedomain} 	  ||= '';
 	$form->{hostname} ||= '';
 	$form->{artcount} ||= 0;
 
@@ -195,6 +196,7 @@ sub saveSection {
 			isolate		=> $form->{isolate},
 			artcount	=> $form->{artcount},
 			url		=> $form->{url},
+			cookiedomain		=> $form->{cookiedomain},
 			hostname	=> $form->{hostname},
 		});
 
@@ -208,6 +210,7 @@ sub saveSection {
 			isolate		=> $form->{isolate},
 			artcount	=> $form->{artcount},
 			url		=> $form->{url},
+			cookiedomain		=> $form->{cookiedomain},
 			hostname	=> $form->{hostname},
 		});
 		print getData($return ? 'insert' : 'failed', { 
