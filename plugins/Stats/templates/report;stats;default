@@ -151,6 +151,10 @@ END;
 [%
       PROCESS graphs gtitle => 'RSS Pages';
       PROCESS graphs gtitle => 'Pages From RSS';
+      PROCESS graphs gtitle => 'RSS UIDS';
+      PROCESS graphs gtitle => 'From RSS UIDS';
+      PROCESS graphs gtitle => 'RSS IPIDS';
+      PROCESS graphs gtitle => 'From RSS IPIDS';
    END;
 
 END %]

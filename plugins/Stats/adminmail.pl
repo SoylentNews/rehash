@@ -411,7 +411,7 @@ EOT
 	# 1 hour
 	slashdLog("Sectional Stats Begin");
 	my $skins =  $slashdb->getDescriptions('skins');
-	my $page_from_rss = $logdb->countFromRSSBySections();
+	my $stats_from_rss = $logdb->countFromRSSStatsBySections();
 	#XXXSECTIONTOPICS - don't think we need this anymore but just making sure
 	#$sections->{index} = 'index';
 	for my $skid (sort keys %$skins) {
@@ -485,8 +485,12 @@ EOT
 			$statsSave->createStatDaily("${op}_user", $users, { skid => $skid});
 		}
 
-		$statsSave->createStatDaily( "page_from_rss", $page_from_rss->{$skid}->{cnt}, {skid => $skid});
-		$temp->{page_from_rss} = sprintf("%8u", $page_from_rss->{$skid}->{cnt});
+		$statsSave->createStatDaily( "page_from_rss", $stats_from_rss->{$skid}->{cnt}, {skid => $skid});
+		$statsSave->createStatDaily( "uid_from_rss", $stats_from_rss->{$skid}->{uids}, {skid => $skid});
+		$statsSave->createStatDaily( "ipid_from_rss", $stats_from_rss->{$skid}->{ipids}, {skid => $skid});
+		$temp->{page_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}->{cnt});
+		$temp->{uid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}->{uids});
+		$temp->{ipid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}->{ipids});
 
 		push(@{$data{skins}}, $temp);
 	}

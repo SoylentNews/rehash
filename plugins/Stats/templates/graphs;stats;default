@@ -279,6 +279,42 @@ SWITCH gtitle;
       PROCESS make_graph
          type      => 'lines',
          statdata  => sect_page;
+  CASE 'RSS UIDS';
+        avail_skins = Slash.db.getDescriptions('skins');
+        sect_page = [];
+        FOREACH skin = avail_skins.keys.sort;
+           sect_page.push(['rss_uid', skin]);
+        END;
+      PROCESS make_graph
+         type      => 'lines',
+         statdata  => sect_page;
+  CASE 'From RSS UIDS';
+        avail_skins = Slash.db.getDescriptions('skins');
+        sect_page = [];
+        FOREACH skin = avail_skins.keys.sort;
+           sect_page.push(['uid_from_rss', skin]);
+        END;
+      PROCESS make_graph
+         type      => 'lines',
+         statdata  => sect_page;
+  CASE 'RSS IPIDS';
+        avail_skins = Slash.db.getDescriptions('skins');
+        sect_page = [];
+        FOREACH skin = avail_skins.keys.sort;
+           sect_page.push(['rss_ipid', skin]);
+        END;
+      PROCESS make_graph
+         type      => 'lines',
+         statdata  => sect_page;
+  CASE 'RSS IPIDS';
+        avail_skins = Slash.db.getDescriptions('skins');
+        sect_page = [];
+        FOREACH skin = avail_skins.keys.sort;
+           sect_page.push(['ipid_from_rss', skin]);
+        END;
+      PROCESS make_graph
+         type      => 'lines',
+         statdata  => sect_page;
   
 
   # default
