@@ -233,6 +233,8 @@ INSERT INTO string_param (type, code, name) VALUES ('submission-notes','','Uncla
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','Hold');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
+
+# List of Country Codes/TLDs.
 INSERT INTO string_param (type, code, name) VALUES ('countries','pg','Papua New Guinea');
 INSERT INTO string_param (type, code, name) VALUES ('countries','pf','French Polynesia');
 INSERT INTO string_param (type, code, name) VALUES ('countries','pe','Peru');
