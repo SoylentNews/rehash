@@ -353,8 +353,8 @@ EOT
 	$statsSave->createStatDaily("mod_token_conversion_point", $token_conversion_point);
 	$statsSave->createStatDaily("submissions", $submissions);
 	$statsSave->createStatDaily("submissions_comments_match", $submissions_comments_match);
-	$statsSave->createStatDaily("youngest_modelig_uid", sprintf("%d", $youngest_modelig_uid);
-	$statsSave->createStatDaily("youngest_modelig_created", sprintf("%11s", $youngest_modelig_created);
+	$statsSave->createStatDaily("youngest_modelig_uid", sprintf("%d", $youngest_modelig_uid));
+	$statsSave->createStatDaily("youngest_modelig_created", sprintf("%11s", $youngest_modelig_created));
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};

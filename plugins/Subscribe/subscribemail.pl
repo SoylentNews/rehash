@@ -24,6 +24,8 @@ $task{$me}{code} = sub {
 	my $new_subscriptions_hr = $subscribe->getSubscriberList();
 	my $num_new_subscriptions = scalar(keys %$new_subscriptions_hr);
 
+	my $subscribers_hr = { };
+
 	my $transaction_list = "";
 	my($total_gross, $total_net, $total_pages_bought, $total_karma) = (0, 0, 0, 0);
 	my %gross_count = ( );
@@ -33,6 +35,21 @@ $task{$me}{code} = sub {
 			 uid kma $gros $net  today  used  total nickname )
 		);
 		my @spids = sort { $a <=> $b } keys %$new_subscriptions_hr;
+
+		# First go thru and find out which users are new subscribers
+		# and which are renewals.
+		for my $spid (@spids) {
+			my $spid_hr = $new_subscriptions_hr->{$spid};
+			$subscribers_hr->{$spid_hr->{uid}}{payment_gross} += $spid_hr->{payment_gross};
+			$subscribers_hr->{$spid_hr->{uid}}{pages} += $spid_hr->{pages};
+		}
+		for my $uid (keys %$subscribers_hr) {
+			$subscribers_hr->{$uid}{is_new} =
+				($subscribers_hr->{$uid}{pages}
+					> $slashdb->getUser($uid, 'pages_paidfor'))
+				? 1 : 0;
+		}
+
 		for my $spid (@spids) {
 			my $spid_hr = $new_subscriptions_hr->{$spid};
 			$gross_count{$spid_hr->{payment_gross}}++;
@@ -41,11 +58,12 @@ $task{$me}{code} = sub {
 			$total_pages_bought += $spid_hr->{pages};
 			$total_karma += $spid_hr->{karma};
 			$transaction_list .= sprintf(
-				"%7d %3d %6.2f %6.2f %6d %5d %6d %-20s\n",
+				"%7d %3d %6.2f %6.2f %6d %5d %6d %-20s %s\n",
 				@{$spid_hr}{qw(
 					uid karma payment_gross payment_net
 					pages hits_bought hits_paidfor nickname
-				)}
+				)},
+				($subscribers_hr->{$spid_hr->{uid}}{is_new} ? "NEW" : "renew"),
 			);
 		}
 		$transaction_list .= sprintf(
@@ -75,6 +93,32 @@ $task{$me}{code} = sub {
 				100*$running_total_gross/$total_gross
 			);
 		}
+
+		my @yesttime = localtime(time-86400);
+		my $yesterday = sprintf "%4d-%02d-%02d",
+			$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
+		if (my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday })) {
+			my($new_count, $sum_new_pages, $sum_new_payments) = (0, 0, 0);
+			my($renew_count, $sum_renew_pages, $sum_renew_payments) = (0, 0, 0);
+			for my $uid (keys %$subscribers_hr) {
+				if ($subscribers_hr->{$uid}{is_new}) {
+					++$new_count;
+					$sum_new_pages += $subscribers_hr->{$uid}{pages};
+					$sum_new_payments += $subscribers_hr->{$uid}{payment_gross};
+				} else {
+					++$renew_count;
+					$sum_renew_pages += $subscribers_hr->{$uid}{pages};
+					$sum_renew_payments += $subscribers_hr->{$uid}{payment_gross};
+				}
+			}
+			$statsSave->addStatDaily("subscribe_new_users", $new_count);
+			$statsSave->addStatDaily("subscribe_new_pages", $sum_new_pages);
+			$statsSave->addStatDaily("subscribe_new_payments", $sum_new_payments);
+			$statsSave->addStatDaily("subscribe_renew_users", $renew_count);
+			$statsSave->addStatDaily("subscribe_renew_pages", $sum_renew_pages);
+			$statsSave->addStatDaily("subscribe_renew_payments", $sum_renew_payments);
+		}
+
 	}
 
 	my @numbers = (
@@ -82,15 +126,37 @@ $task{$me}{code} = sub {
 		$num_new_subscriptions
 	);
 
-	my $report_link = "";
-
+	my($report_link, $monthly_stats) = ("", "");
 	if ($constants->{plugin}{Stats}) {
 		$report_link = "\n$constants->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
+		if (my $stats = getObject('Slash::Stats')) {
+			my @stats = ( );
+			push @stats, $stats->getStatLastNDays("subscribe_new_users",		30) || 0;
+			push @stats, $stats->getStatLastNDays("subscribe_new_pages",		30) || 0;
+			push @stats, $stats->getStatLastNDays("subscribe_new_payments",		30) || 0;
+			push @stats, $stats->getStatLastNDays("subscribe_renew_users",		30) || 0;
+			push @stats, $stats->getStatLastNDays("subscribe_renew_pages",		30) || 0;
+			push @stats, $stats->getStatLastNDays("subscribe_renew_payments",	30) || 0;
+			push @stats, $stats->getStatLastNDays("subscribe_runout",		30) || 0;
+			push @stats, $stats[0]+$stats[3];
+			push @stats, $stats[1]+$stats[4];
+			push @stats, $stats[2]+$stats[5];
+			$monthly_stats = sprintf(<<EOT, @stats);
+   Monthly Stats (Average Per Day)
+   -------------------------------
+            Users   Pages   Payments
+New:        %7.2f   %5d   \$%7.2f
+Renew:      %7.2f   %5d    %7.2f
+Total:      %7.2f   %5d   \$%7.2f
+Ran out:    %7.2f
+EOT
+		}
 	}
 
 	my $email = sprintf(<<"EOT", @numbers);
 $constants->{sitename} Subscriber Info for yesterday
 $report_link
+$monthly_stats
 total subscribers: %8d
 new subscriptions: %8d
 
