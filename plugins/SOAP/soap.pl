@@ -38,4 +38,6 @@ sub main {
 
 main();
 
+1 if $Slash::SOAP::ERROR;
+
 1;

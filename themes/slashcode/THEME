@@ -133,6 +133,7 @@ template=templates/footer;misc;light
 template=templates/formLabel;misc;default
 template=templates/formbox;misc;default
 template=templates/formkeyErrors;misc;default
+template=templates/formkey_tag;misc;default
 template=templates/friendsview;index;default
 template=templates/getOlderStories;misc;default
 template=templates/getUserAdmin;users;default

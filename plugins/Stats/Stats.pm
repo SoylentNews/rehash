@@ -278,6 +278,45 @@ sub getModM2Ratios {
 	return $hr;
 }
 
+sub getModReverses {
+	my($self, $options) = @_;
+
+	# Double-check that options are numeric because we're going to
+	# drop them directly into the SQL.
+	for my $key (keys %$options) {
+		$options->{$key} =~ s/[^\d.-]+//g;
+	}
+
+	my $down5 =     0.5;	$down5 = $options->{down5} if defined $options->{down5};
+	my $upmax =     0  ;	$upmax = $options->{upmax} if defined $options->{upmax};
+	my $upsub =     3  ;	$upsub = $options->{upsub} if defined $options->{upsub};
+	my $upmul =     2  ;	$upmul = $options->{upmul} if defined $options->{upmul};
+	my $unm2able =  0.5;	$unm2able = $options->{unm2able} if defined $options->{unm2able};
+	my $denomadd =  4  ;	$denomadd = $options->{denomadd} if defined $options->{denomadd};
+	my $limit =    30  ;	$limit = $options->{limit} if defined $options->{limit};
+
+	my $reasons = $self->getReasons();
+	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
+	my $reasons_m2able = join(",", @reasons_m2able);
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"moderatorlog.uid AS muid,
+		 nickname, tokens, karma,
+		 ( SUM( IF( moderatorlog.val=-1,
+				IF(points=5, $down5, 0),
+				IF(points<=$upmax, $upsub-points*$upmul, 0) ) )
+		  +SUM( IF( moderatorlog.reason IN ($reasons_m2able), 0, $unm2able ) )
+		 )/(COUNT(*)+$denomadd) AS score",
+		"moderatorlog, comments, users, users_info",
+		"comments.cid=moderatorlog.cid
+		 AND users.uid=moderatorlog.uid
+		 AND users_info.uid=moderatorlog.uid
+		 AND moderatorlog.active",
+		"GROUP BY muid ORDER BY score DESC, karma, tokens, muid LIMIT $limit",
+	);
+
+	return $ar;
+}
+
 ########################################################
 sub getCommentsByDistinctIPID {
 	my($self, $options) = @_;

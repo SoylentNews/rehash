@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+form.formkey is filtered in filter_params to be [a-zA-Z0-9_]
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+formkey_tag
+__template__
+
+[% IF form.formkey %]
+<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+__seclev__
+500

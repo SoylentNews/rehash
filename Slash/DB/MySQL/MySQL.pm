@@ -5,6 +5,7 @@
 
 package Slash::DB::MySQL;
 use strict;
+use Socket;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
 use Date::Format qw(time2str);
@@ -1325,6 +1326,15 @@ sub createAccessLog {
 #		);
 	}
 
+	my $duration;
+	if ($Slash::Apache::User::request_start_time) {
+		$duration = Time::HiRes::time - $Slash::Apache::User::request_start_time;
+	} else {
+		$duration = 0;
+	}
+	my $local_addr = inet_ntoa(
+		( unpack_sockaddr_in($r->connection()->local_addr()) )[1]
+	);
 	$self->sqlInsert('accesslog', {
 		host_addr	=> $ipid,
 		subnetid	=> $subnetid,
@@ -1336,6 +1346,8 @@ sub createAccessLog {
 		-ts		=> 'NOW()',
 		query_string	=> $ENV{QUERY_STRING} || '0',
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
+		duration	=> $duration,
+		local_addr	=> $local_addr,
 	}, { delayed => 1 });
 }
 

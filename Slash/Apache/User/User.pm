@@ -6,6 +6,7 @@
 package Slash::Apache::User;
 
 use strict;
+use Time::HiRes;
 use Apache;
 use Apache::Constants qw(:common M_GET REDIRECT);
 use Apache::Cookie;
@@ -17,7 +18,7 @@ use DynaLoader ();
 use Slash::Apache ();
 use Slash::Utility;
 use URI ();
-use vars qw($REVISION $VERSION @ISA @QUOTES $USER_MATCH);
+use vars qw($REVISION $VERSION @ISA @QUOTES $USER_MATCH $request_start_time);
 
 @ISA		= qw(DynaLoader);
 $VERSION   	= '2.003000';  # v2.3.0
@@ -48,6 +49,8 @@ sub handler {
 	my($r) = @_;
 
 	return DECLINED unless $r->is_main;
+
+	$request_start_time = Time::HiRes::time;
 
 	# Ok, this will make it so that we can reliably use Apache->request
 	Apache->request($r);

@@ -1112,3 +1112,8 @@ ALTER TABLE accesslog_admin ADD COLUMN secure TINYINT UNSIGNED DEFAULT 0 NOT NUL
 
 # Do not blindly add this! -Brian
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('friends_journal','',1,'portald','This adds a box where all of your friend\'s latest journal entries will be displayed.','index',5,'Friend\'s Journal Entries',1,NULL,NULL,0);
+
+ALTER TABLE moderatorlog ADD INDEX uid (uid), ADD INDEX cuid (cuid);
+
+ALTER TABLE accesslog ADD COLUMN duration FLOAT DEFAULT 0.0 NOT NULL, ADD COLUMN local_addr VARCHAR(16) DEFAULT '' NOT NULL;
+

@@ -34,9 +34,7 @@ __template__
 
 		<FORM ACTION="[% env.script_name %]" METHOD="POST">
 
-[% IF form.formkey %]
- 	       <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
-[% END %]
+		[% PROCESS formkey_tag %]
 
 [% IF admin_flag %]
 		<B>User ID</B> (if admin user) <INPUT TYPE="TEXT" NAME="uid" VALUE="[% useredit.uid %]"><BR>

@@ -39,9 +39,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 
-[% IF form.formkey %]
-        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
-[% END %]
+[% PROCESS formkey_tag %]
 
 <BR>[%# realname isn't really used for anything, but we do store it %]
 	<B>Real Name</B> (optional)<BR>
@@ -63,7 +61,7 @@ and Bookmarking the resulting page. This is totally insecure, but very convenien
 		<INPUT TYPE="TEXT" NAME="aim" VALUE="[% useredit.aim | strip_attribute %]" SIZE="60"><BR>
 	<B>ICQ UIN</B> (optional)<BR>
 		<INPUT TYPE="TEXT" NAME="icq" VALUE="[% useredit.icq | strip_attribute %]" SIZE="60"><BR>
-	<B>Yahho! ID</B> (optional)<BR>
+	<B>Yahoo! ID</B> (optional)<BR>
 		<INPUT TYPE="TEXT" NAME="yahoo" VALUE="[% useredit.yahoo | strip_attribute %]" SIZE="60"><BR>
 	<B>Jabber</B> (optional)<BR>
 		<INPUT TYPE="TEXT" NAME="jabber" VALUE="[% useredit.jabber | strip_attribute %]" SIZE="60"><BR>

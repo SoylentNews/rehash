@@ -65,9 +65,7 @@ __template__
 		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]" WIDTH="100%">
 			<FORM ACTION="[% env.script_name %]" METHOD="POST">
 			<TR>
-		[% IF form.formkey %]
-			        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey | strip_attribute %]">
-		[% END %]
+			[% PROCESS formkey_tag %]
 				<INPUT TYPE="HIDDEN" NAME="op" VALUE="admin">
 				[%- IF field == 'uid' -%]
 				<INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid | strip_attribute %]">

@@ -23,31 +23,57 @@ __name__
 netIDInfo
 __template__
 [% USE Slash %]
-[% PROCESS titlebar width="100%" %]
-
-
-[% n = min_comment %]
-[% FOREACH comment = commentstruct %]
-	[% n = n + 1 %]
-	[% replies = comment.replies ? " Replies: $comment.replies" : "" %]
-	[% IF comment.type == 'poll';
-		label   = "Poll: $comment.disc_title ";
-	ELSIF comment.type == 'journal';
-		label   = "Journal Discussion: $comment.disc_title";
-	ELSE;
-		label    = comment.disc_title;
-	END %]
-<B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">[% comment.subj %]</A>
-posted
-[% IF comment.uid %] by uid
-<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=[% comment.uid %]">[% comment.uid %]</A>[% END %]
-on [% comment.cdate %] (Score:[% comment.pts %][% replies %])
-      <FONT SIZE="2">
-           <BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
-      </FONT><BR>
-[% END %]
 
 [% IF admin_flag %]
+
+[% PROCESS titlebar width="100%" %]
+
+[% IF commentcount > 0 %]
+        <P><TABLE BORDER="0" WIDTH="100%">
+
+        [% n = min_comment %]
+        [% FOREACH comment = commentstruct;
+
+                n = n + 1;
+                replies = comment.replies ? 'Replies:' _ comment.replies : '';
+                score = 'Score:' _ comment.pts;
+                reasonnum = comment.reason;
+                reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
+                IF comment.type == 'poll';
+                        label = 'Poll: ';
+                ELSIF comment.type == 'journal';
+                        label = 'Journal Discussion: ';
+                ELSE;
+                        label = '';
+                END;
+                label = label _ comment.disc_title;
+
+                '<TR>';
+                '<TD VALIGN="TOP">';
+                        IF min_comment > 0; '<B>'; n; '</B> '; END;
+                        '<A HREF="';
+                                constants.rootdir;
+                                '/comments.pl?sid='; comment.sid;
+                                '&amp;cid='; comment.cid;
+                        '">';
+                        comment.subj;
+                        '</A>&nbsp;';
+                '</TD>';
+                '<TD VALIGN="TOP"><NOBR>&nbsp;'; comment.cdate; '</NOBR></TD>';
+                '<TD VALIGN="TOP"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
+                '<TD VALIGN="TOP"><NOBR>&nbsp;'; score; reasontext; '</NOBR></TD>';
+                '</TR>';
+                '<TR><TD VALIGN="TOP" COLSPAN="4"><FONT SIZE="2">';
+                        '&nbsp;&nbsp;&nbsp;attached to <A HREF="';
+                                comment.url;
+                        '">'; label; '</A>';
+                '</FONT></TD></TR>';
+
+        END %]
+        </TABLE>
+[% END %]
+
+<P>
 
 [% fieldname = form.fieldname | strip_literal %]
 

@@ -1045,6 +1045,7 @@ sub showInfo {
 			admin_block		=> $admin_block,
 			netid			=> $netid,
 			netid_vis		=> $netid_vis,
+			reasons			=> $slashdb->getReasons(),
 		});
 
 	} else {

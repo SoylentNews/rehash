@@ -16,9 +16,7 @@ __template__
 [% PROCESS titlebar title=title width="100%" %]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
 <TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
-[% IF form.formkey %]
-<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
-[% END %]
+[% PROCESS formkey_tag %]
 	<TR>
 		<TD><P>(Note: only the characters <TT>0-9a-zA-Z_.+!*'(),-\$</TT>, plus space,
 		are allowed in nicknames, and all others will be stripped out.)<BR>

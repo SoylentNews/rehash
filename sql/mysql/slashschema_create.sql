@@ -61,6 +61,8 @@ CREATE TABLE accesslog (
 	user_agent varchar(50),
 	section varchar(30) DEFAULT 'index' NOT NULL,
 	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	duration FLOAT DEFAULT 0.0 NOT NULL,
+	local_addr VARCHAR(16) DEFAULT '' NOT NULL,
 	INDEX host_addr_part (host_addr(16)),
 	INDEX op_part (op(12), section),
 	INDEX ts (ts),
@@ -416,7 +418,9 @@ CREATE TABLE moderatorlog (
 	KEY sid_2 (sid,uid,cid),
 	KEY cid (cid),
 	KEY ipid (ipid),
-	KEY subnetid (subnetid)
+	KEY subnetid (subnetid),
+	KEY uid (uid),
+	KEY cuid (cuid)
 ) TYPE = myisam;
 
 #
