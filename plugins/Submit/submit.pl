@@ -385,7 +385,7 @@ sub displayForm {
 	}
 
 	slashDisplay('displayForm', {
-		fixedstory	=> strip_text(url2html($form->{story})),
+		fixedstory	=> strip_html(url2html($form->{story})),
 		savestory	=> $form->{story} && $form->{subj},
 		username	=> $form->{name} || $username,
 		fakeemail	=> processSub($fakeemail, $known),
