@@ -491,6 +491,8 @@ sub userdir_handler {
 			my $args = "op=display&nick=$nick&uid=$uid";
 			if ($extra && $extra =~ /^\d+$/) {
 				$args .= "&id=$extra";
+			} elsif ($extra && $extra =~ /^rss$/) {
+				$args .= "&conten_type=rss";
 			} elsif ($extra && $extra =~ /^friends$/) {
 				$args = "op=friendview";
 			}
