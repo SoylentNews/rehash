@@ -195,6 +195,9 @@ my %descriptions = (
 	'section_extra_types'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='extra_types'") },
 
+	'section-types'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='section_types'") },
+
 	'otherusersparam',
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='otherusersparam'") },
 
@@ -3992,6 +3995,7 @@ sub getStoriesEssentials {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
+	$section ||= $constants->{section};
 
 	$limit ||= 15;
 	my $columns;
@@ -4002,13 +4006,27 @@ sub getStoriesEssentials {
 	# see about the impact on this -Brian
 	$where .= "AND writestatus != 'delete' ";
 
-	if ($section) {
-		my $section_dbi = $self->sqlQuote($section || '');
-		$where .= "AND (displaystatus>=0 AND section=$section_dbi) ";
-	} elsif ($user->{sectioncollapse}) {
-		$where .= "AND displaystatus>=0 ";
+	# Now we want to read along here (aka no complaining read this first). 
+	# We are always in a section. The behavior for a contained section is to displayed
+  # what sections are contained. In the case of no sections in the container it is assumed to be all.
+	# This would be the Slashdot special since it is optimized there to never do any sort of lookup with 
+  # section. Any other section is just a contained section and works like any other section. If 
+	# "sectioncollapse" is enabled for the user we just collapse all of stories in the contained set of 
+  # sections.
+	# Got any questions? Just ask, don't bitch about this. -Brian
+	my $SECT = $self->getSection($section);
+	if ($SECT->{type} eq 'collected') {
+		$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
+
+		if ($user->{sectioncollapse}) {
+			$where .= "AND displaystatus >= 0 ";
+		} else {
+			$where .= "AND displaystatus = 0 ";
+		}
 	} else {
-		$where .= "AND displaystatus=0 ";
+		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
+			$where .= "AND displaystatus => 0 ";
 	}
 
 	$where .= "AND tid='$tid' " if $tid;

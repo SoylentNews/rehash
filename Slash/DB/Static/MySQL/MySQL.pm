@@ -583,8 +583,7 @@ sub getSectionInfo {
 	my $sections = $self->sqlSelectAllHashrefArray(
 		"section, url",
 		"sections",
-		"isolate=0 and (section != '' and section != 'articles')
-		ORDER BY section"
+		" ORDER BY section"
 	);
 
 	$self->sqlConnect();

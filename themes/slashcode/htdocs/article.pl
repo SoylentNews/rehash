@@ -28,9 +28,8 @@ sub main {
 
 	if ($story) {
 		my $SECT = $slashdb->getSection($story->{section});
-		my $title = $SECT->{isolate} ?
-			"$SECT->{title} | $story->{title}" :
-			"$constants->{sitename} | $story->{title}";
+    # This should be a getData call for title
+		my $title = "$constants->{sitename} | $story->{title}";
 		$story->{introtext} = parseSlashizedLinks($story->{introtext});
 		$story->{bodytext} =  parseSlashizedLinks($story->{bodytext});
 

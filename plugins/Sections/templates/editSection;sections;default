@@ -6,7 +6,6 @@ Edit a section
 * section = name of section
 * this_section = hashref of section
 * qid = poll to assign to section
-* isolate = boolean for isolate mode
 * issue = boolean for issue mode
 * blocks = arrayref of hashref of blocks for section (we should also pass in
 	   template for this section at some point ...)
@@ -68,8 +67,10 @@ form.DEL_subsection | strip_attribute -%]">
 	[% qid %]
 [% END -%]
 
-[% PROCESS formLabel value="Isolate mode" comment="" %]
-	[% isolate %]
+[% PROCESS formLabel value="Type" comment="" %]
+	[% types = Slash.db.getDescriptions("section-types"); Slash.createSelect("type", types, this_section.type, 1, 1) %]
+	<P>
+
 [% PROCESS formLabel value="Issue mode" comment="" %]
 	[% issue %]
 	<P>

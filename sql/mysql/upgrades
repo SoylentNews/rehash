@@ -517,5 +517,9 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','
 ALTER TABLE sections DROP isolate;
 
 # For plugins/Stats (ignore if you're not using that plugin):
+
+# For Sections
 INSERT INTO vars (name, value, description) VALUES ('db_slave_lag_ignore',10000000,'Bytes of lag between master and slave DB to ignore');
 
+INSERT INTO string_param (type, code, name) VALUES ('section_types','contained','Contained Section');
+INSERT INTO string_param (type, code, name) VALUES ('section_types','collected','Collection of Sections');

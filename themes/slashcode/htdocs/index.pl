@@ -55,8 +55,7 @@ sub main {
 		$fetchdb  = $slashdb;
 	}
 	$stories = $fetchdb->getStoriesEssentials(
-		$limit, 
-		($form->{section} ne 'index') ? $form->{section} : '',
+		$limit, $form->{section},
 		'',
 	);
 
@@ -255,12 +254,6 @@ sub displayStories {
 		$counter->{$category} ||= $x;
 
 		my($storytext, $story) = displayStory($sid, '', $other);
-
-		if ($constants->{get_titles}) {
-			my $titlelink = slashDisplay('storyTitleOnly', { story => $story }, {Return => 1});
-
-			$return->{$category}{titles} .= $titlelink; 
-		}
 
 		$tmpreturn .= $storytext;
 	

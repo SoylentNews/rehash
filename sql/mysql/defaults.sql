@@ -234,6 +234,8 @@ INSERT INTO string_param (type, code, name) VALUES ('submission-notes','','Uncla
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','Hold');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
+INSERT INTO string_param (type, code, name) VALUES ('section_types','contained','Contained Section');
+INSERT INTO string_param (type, code, name) VALUES ('section_types','collected','Collection of Sections');
 
 -- ISO Country Names and Abbreviations (ISO 3166)
 -- http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html
