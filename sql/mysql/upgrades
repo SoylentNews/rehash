@@ -389,3 +389,5 @@ INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Ta
 # OSDNTEST LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
+INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
+

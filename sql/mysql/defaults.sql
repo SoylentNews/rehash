@@ -618,6 +618,7 @@ INSERT INTO vars (name, value, description) VALUES ('allow_anonymous','1','allow
 INSERT INTO vars (name, value, description) VALUES ('allow_moderation','1','allows use of the moderation system');
 INSERT INTO vars (name, value, description) VALUES ('allow_nonadmin_ssl','0','Allows users with seclev <= 1 to access the site over Secure HTTP');
 INSERT INTO vars (name, value, description) VALUES ('anonymous_coward_uid', '1', 'UID to use for anonymous coward');
+INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
 INSERT INTO vars (name, value, description) VALUES ('apache_cache', '3600', 'Default times for the getCurrentCache().');
 INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|http|gopher|mailto|news|nntp|telnet|wais|https','Schemes that can be used in comment links without being stripped of bogus chars');
 INSERT INTO vars (name, value, description) VALUES ('approvedtags','B|I|P|A|LI|OL|UL|EM|BR|TT|STRONG|BLOCKQUOTE|DIV|ECODE','Tags that you can use');
