@@ -2296,10 +2296,6 @@ INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'ex
 UPDATE vars SET description='Format for HC images (png, jpeg)' WHERE name='hc_image_format';
 UPDATE vars SET value='jpeg' WHERE name='hc_image_format' AND value='jpg';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_3_0_153, Start of T_2_3_0_154 - 2004/05/11
@@ -2313,5 +2309,9 @@ INSERT INTO vars (name, value, description) VALUES ('m2_oldest_wanted', '10', 'H
 INSERT INTO vars (name, value, description) VALUES ('m2_oldest_zone_percentile', '2', 'What percentile of the oldest un-M2d mods are to be considered highest priority?');
 INSERT INTO vars (name, value, description) VALUES ('m2_oldest_zone_mult', '2', 'How many times the normal amount of M2s are applied to the oldest un-M2d mods?');
 INSERT INTO vars (name, value, description) VALUES ('m2_oldzone', '0', 'Starting id (youngest) of the old-zone of moderations that still require M2 (the oldest certain percentile)');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_154, Start of T_2_3_0_155 - 2004/05/18
