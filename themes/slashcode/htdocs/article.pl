@@ -30,6 +30,17 @@ sub main {
 		my $title = $SECT->{isolate} ?
 			"$SECT->{title} | $story->{title}" :
 			"$constants->{sitename} | $story->{title}";
+		my $authortext;
+		if ($user->{is_admin} ) {
+			my $future = $slashdb->getStoryByTimeAdmin('>', $story, "3");
+			$future = [ reverse(@$future) ];
+			my $past = $slashdb->getStoryByTimeAdmin('<', $story, "3");
+
+			$authortext = slashDisplay('futurestorybox', {
+							past => $past,
+							future => $future,
+						}, { Return => 1 });
+		}
 
 		# set things up to use the <LINK> tag in the header
 		my $next = $slashdb->getStoryByTime('>', $story, $SECT);
@@ -53,6 +64,7 @@ sub main {
 			section_block		=> $slashdb->getBlock($SECT->{section}),
 			show_poll		=> $pollbooth ? 1 : 0,
 			story			=> $story,
+			authortext		=> $authortext,
 			'next'			=> $next,
 			prev			=> $prev,
 		});

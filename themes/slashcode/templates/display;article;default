@@ -96,12 +96,19 @@ PROCESS fancybox
 	contents	= story.relatedtext
 	center		= 1;
 
+IF authortext;
+	PROCESS fancybox
+		title		= 'Story Admin'
+		contents	= authortext
+		center		= 1;
+END;
+
 IF section_block.block;
 	PROCESS fancybox
 		title		= section.title
 		contents	= section_block.block
 		center		= 1;
-END;
+END; %]
 
 </TD></TR><TR><TD COLSPAN="4">
 
