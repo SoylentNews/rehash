@@ -1427,7 +1427,9 @@ sub editComm {
 	# For New User bonus stuff
 	my $new_user_bonus_select = createSelect('new_user_bonus', \@range, 
 			$user_edit->{new_user_bonus} || 0, 1, 1);
-	my $new_user_percent_select = createSelect('new_user_percent', [(1..100)], 
+	my $new_user_percent_select = createSelect('new_user_percent',
+			[( 1..19, 20, 25, 30, 35, 40, 45, 50, 55,
+				  60, 65, 70, 75, 80, 85, 90, 95 )], 
 			$user_edit->{new_user_percent} || 100, 1, 1);
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
