@@ -57,8 +57,7 @@ END;
 		bgcolor = '#999999';
 END %]
 
-	<TR BGCOLOR="[% bgcolor %]" ALT="[% story.displaystatus %]">
-
+	<TR BGCOLOR="[% bgcolor %]">
 		<TD ALIGN="RIGHT">
 		<FONT SIZE="2">
 		[<A HREF="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.x %]</A>]
