@@ -205,7 +205,7 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, '
 #
 # Dumping data for table 'sections'
 #
-INSERT INTO sections (section, artcount, title, qid, issue, extras, type) VALUES ('index',15,'Index','',0,0,'collected');
+INSERT INTO sections (section, artcount, title, qid, issue, type) VALUES ('index',15,'Index','',0,'collected');
 
 
 #

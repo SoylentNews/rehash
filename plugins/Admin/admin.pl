@@ -715,7 +715,7 @@ sub topicEdit {
 	my $available_images = {};
 	my $image_select = "";
 
-	if ($form->{topicdelete}) {
+	if ($form->{topicdelete} && $form->{tid}) {
 		topicDelete($form->{tid});
 		print getData('topicDelete-message', { tid => $form->{tid} });
 
@@ -1087,11 +1087,19 @@ sub editStory {
 
 	my $newarticle = 1 if (!$sid && !$form->{sid});
 
+	# Editting a story that has yet to go into the DB, basically previewing. -Brian 
 	if ($form->{title}) {
+		# Section authors get forced into their section, if not we see what section has been set to. 
+		# This fails we grab the defaultsection for a new story.  -Brian
+		$form->{section} = $user->{section} if $user->{section};
+		$form->{section} ||= $constants->{defaultsection};
+		my $SECT = $slashdb->getSection($form->{section});
 		$extracolumns = $slashdb->getSectionExtras($storyref->{section}) || [ ];
-		$storyref->{writestatus} = "dirty";
-		$storyref->{displaystatus} = $slashdb->getVar('defaultdisplaystatus', 'value');
-		$storyref->{commentstatus} = $slashdb->getVar('defaultcommentstatus', 'value');
+		# Did you know we actually have  var that should set this? -Brian
+		$storyref->{writestatus}   = "dirty";
+		$storyref->{displaystatus} = $SECT->{defaultdisplaystatus};
+		$storyref->{commentstatus} = $SECT->{defaultcommentstatus};
+		$storyref->{subsection}	   = $SECT->{defaultsubsection};
 
 		$storyref->{uid} ||= $user->{uid};
 		$storyref->{section} = $form->{section};
@@ -1162,12 +1170,14 @@ sub editStory {
 		$subid = $storyref->{subid};
 
 	} else { # New Story
-		$extracolumns		    = $slashdb->getSectionExtras($storyref->{section}) || [ ];
-		$storyref->{displaystatus}  = $slashdb->getVar('defaultdisplaystatus', 'value');
-		$storyref->{commentstatus}  = $slashdb->getVar('defaultcommentstatus', 'value');
-		$storyref->{tid}	    = $slashdb->getVar('defaulttopic', 'value');
-		$storyref->{section}	    = $user->{section} ?
-			$user->{section} : $slashdb->getVar('defaultsection', 'value');
+		my $section = $user->{section} || $form->{section};
+		my $SECT = $slashdb->getSection($section || $constants->{defaultsection});
+		$extracolumns		    = $slashdb->getSectionExtras($SECT->{section}) || [ ];
+		$storyref->{displaystatus}  = $SECT->{defaultdisplaystatus};
+		$storyref->{commentstatus}  = $SECT->{defaultcommentstatus};
+		$storyref->{tid}            = $form->{tid} || $SECT->{defaulttopic};
+		$storyref->{section}	    = $SECT->{section};
+		$storyref->{subsection}	    = $SECT->{defaultsubsection};
 
 		$storyref->{'time'} = $slashdb->getTime();
 		$storyref->{uid} = $user->{uid};

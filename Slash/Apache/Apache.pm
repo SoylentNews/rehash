@@ -81,7 +81,11 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{absolutedir} = $_->{url};
 			$new_cfg->{rootdir} = set_rootdir($_->{url}, $cfg->{constants}{rootdir});
 			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
-			$new_cfg->{defaultsection} = $_->{section};
+			$new_cfg->{defaultsubsection} = $_->{defaultsubsection} if $_->{defaultsubsection};
+			$new_cfg->{defaulttopic} = $_->{defaulttopic} if $_->{defaulttopic};
+			$new_cfg->{defaultdisplaystatus} = $_->{defaultdisplaystatus} if $_->{defaultdisplaystatus};
+			$new_cfg->{defaultcommentstatus} = $_->{defaultcommentstatus} if $_->{defaultcommentstatus};
+			$new_cfg->{defaultsection} = $_->{defaultsection} || $_->{section};
 			$new_cfg->{section} = $_->{section};
 			$new_cfg->{basedomain} = $_->{hostname};
 			$new_cfg->{static_section} = $_->{section};

@@ -1025,3 +1025,14 @@ UPDATE modreasons SET unfairname='Unfunny' WHERE name='Funny';
 
 ALTER TABLE moderatorlog ADD INDEX ipid (ipid), ADD INDEX subnetid (subnetid);
 
+ALTER TABLE sections ADD	defaultdisplaystatus TINYINT DEFAULT '0' NOT NULL;
+ALTER TABLE sections ADD	defaultcommentstatus TINYINT DEFAULT '0' NOT NULL;
+ALTER TABLE sections ADD	defaulttopic TINYINT DEFAULT '1' NOT NULL;
+ALTER TABLE sections ADD	defaultsection section VARCHAR(30); /* Only set in collected sections */
+ALTER TABLE sections ADD	defaultsubsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
+UPDATE sections SET defaultsubsection=section WHERE type != "collected";
+# This only fixes it for default Slash sites
+UPDATE sections SET defaultsection='articles' WHERE section='index';
+# For Slashdot do the following, for any other site it will depend on the site:
+# UPDATE sections SET defaulttopic=99;
+ALTER TABLE sections DROP extras;

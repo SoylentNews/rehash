@@ -183,9 +183,9 @@ INSERT INTO related_links (keyword, name, link) VALUES ('perl','Perl','http://us
 # Dumping data for table 'sections'
 #
 
-REPLACE INTO sections (section, artcount, title, issue, extras, type, qid) VALUES ('index',30,'Index',0,0,'collected', 1);
-INSERT INTO sections (section, artcount, title, issue, extras) VALUES ('articles',30,'Articles',0,0);
-INSERT INTO sections (section, artcount, title, issue, extras, qid) VALUES ('features',21,'Features',1,0,2);
+REPLACE INTO sections (section, artcount, title, issue, type, qid) VALUES ('index',30,'Index',0,'collected', 1);
+INSERT INTO sections (section, artcount, title, issue) VALUES ('articles',30,'Articles',0);
+INSERT INTO sections (section, artcount, title, issue, qid) VALUES ('features',21,'Features',1,2);
 
 #
 # Dumping data for table 'section_topics'
