@@ -473,7 +473,7 @@ sub displayForm {
 	} else {
 		$fixedstory = strip_html(url2html($form->{story}));
 	}
-	$form->{story} = balanceTags($form->{story});
+	$fixedstory = balanceTags($fixedstory);
 
 	slashDisplay('displayForm', {
 		fixedstory	=> $fixedstory,
