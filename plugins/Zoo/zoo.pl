@@ -289,7 +289,7 @@ sub _printHead {
 
 sub _rss {
 	my ($entries, $nick, $type) = @_;
-	my $constants = getCurrenStatic();
+	my $constants = getCurrentStatic();
 	my @items;
 	for my $entry (@$entries) {
 		push @items, {
