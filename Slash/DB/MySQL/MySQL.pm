@@ -893,8 +893,8 @@ sub getModeratorCommentLog {
 	elsif ($type eq 'subnetid') {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'ipid') {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"	}      elsif ($type eq 'global'){	$where_clause = "1=1 "
- }
+	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"	}
+	elsif ($type eq 'global') {	$where_clause = "1=1 "								}
 	return [ ] unless $where_clause;
 
 	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
@@ -5657,9 +5657,7 @@ sub getSubmissionForUser {
 	return $submissions;
 }
 
-
 ########################################################
-
 sub calcTrollPoint {
 	my ($self, $type, $good_behavior) = @_;
 	my $constants = getCurrentStatic();
@@ -5672,6 +5670,7 @@ sub calcTrollPoint {
 
 	return $trollpoint;
 }
+
 ########################################################
 sub calcModval {
 	my($self, $where_clause, $halflife, $minicache) = @_;
