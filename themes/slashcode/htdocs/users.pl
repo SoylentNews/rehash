@@ -1407,7 +1407,6 @@ sub editUser {
 		$fieldkey = 'uid';
 		$id = $user_edit->{uid};
 	}
-use Data::Dumper; print STDERR "users.pl editUser() id '$id' fieldkey '$fieldkey' hr: " . Dumper($hr);
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 
 	$admin_block = getUserAdmin($id, $fieldkey, 1, 1) if $admin_flag;
