@@ -798,7 +798,7 @@ sub topicEd {
 	return if $I{U}{aseclev} < 1;
 	my ($tid, $width, $height, $alttext, $image, @available_images);
 
-	opendir(DIR,"$I{datadir}/public_html/images/topics");
+	opendir(DIR,"$I{basedir}/images/topics");
 	@available_images = grep(!/^\./, readdir(DIR)); 
 	closedir(DIR);
 
@@ -831,19 +831,28 @@ EOT
 		<BR>Alt Text<BR>
 		<INPUT TYPE="TEXT" NAME="alttext" VALUE="$alttext"><BR>
 		<BR>Image<BR>
-		<SELECT name="image">
 EOT
 
-		print qq|<OPTION value="">Select an image</OPTION>| if $I{F}{topicnew};
-		for(@available_images) {
-			my ($selected);
-			$selected = "SELECTED" if ($_ eq $image);
-			print qq|<OPTION value="$_" $selected>$_</OPTION>\n|;
-			$selected = '';
+		if (@available_images) {
+			print qq|<SELECT name="image">|;
+			qq|<OPTION value="">Select an image</OPTION>| if $I{F}{topicnew};
+			for(@available_images) {
+				my ($selected);
+				$selected = "SELECTED" if ($_ eq $image);
+				print qq|<OPTION value="$_" $selected>$_</OPTION>\n|;
+				$selected = '';
+			}
+			print '</SELECT>';
+		} else {
+			# If we don't have images in the proper place, print a message
+			# and use a regular text input field.
+			print <<EOT;
+<P>No images were found in the topic images directory (&lt;basedir&gt;/images/topics).<BR>
+<INPUT TYPE="TEXT" NAME="image" VALUE="$image"><BR><BR>
+EOT
 		}
 
 		print <<EOT;
-			</SELECT>
 			<INPUT TYPE="SUBMIT" NAME="topicsave" VALUE="Save Topic">
 			<INPUT TYPE="SUBMIT" NAME="topicdelete" VALUE="Delete Topic">
 EOT
@@ -869,7 +878,7 @@ sub topicSave {
 	if ($I{F}{tid}) {
 		my($rows) = sqlSelect('count(*)', 'topics', 'tid=' . $I{dbh}->quote($I{F}{tid}));
 		if (!$I{F}{width} && !$I{F}{height}) {
-		    @{ $I{F} }{'width', 'height'} = imgsize("$I{datadir}/public_html/images/topics/$I{F}{image}");
+		    @{ $I{F} }{'width', 'height'} = imgsize("$I{basedir}/images/topics/$I{F}{image}");
 		}
 		if($rows == 0 ) {
 			sqlInsert('topics', {

@@ -45,6 +45,15 @@ slash-1.0.6, 2000.06.xx
 	user's moderation is voted fair or unfair is now counted in
 	users_info (columns m2fair and m2unfair)
 
+*	Fixed small bug in admin.pl which would result in bugs while saving
+	and editing topics if $I{basedir} was not derived from $I{datadir}
+	(ie, if the 2 directories were on different partitions)
+
+*	If there were no images in the topic images directory, the topic 
+	editor would display a select list with no items. Now, a warning
+	is displayed and the user is given an input box filled with the
+	current filename.
+
 
 slash-1.0.5, 2000.06.13
 -----------------------
