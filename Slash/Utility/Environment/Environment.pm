@@ -2488,6 +2488,26 @@ sub getCurrentCache {
 	return defined $value ? $cache->{$value} : $cache;
 }
 
+
+######################################################################
+# for debugging cached hashes, finding out where they are changing
+# inappropriately
+package Slash::Utility::Environment::Tie;
+require Tie::Hash;
+@Slash::Utility::Environment::Tie::ISA = 'Tie::StdHash';
+
+# to use this, just do something like this to create the hash:
+#   tie my(%hash), 'Slash::Utility::Environment::Tie';
+# then modify the condition in STORE below to suit your needs
+
+sub STORE {
+	my($hash, $key, $value) = @_;
+	$hash->{$key} = $value;
+	if (!$key) {
+		warn "$$: [$key] => [$value] ???? : ", join "|", caller(0);
+	}
+}
+
 1;
 
 __END__
