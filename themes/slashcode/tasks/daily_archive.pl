@@ -27,7 +27,7 @@ $task{$me}{code} = sub {
 	slashdLog('Update Total Counts Begin');
 	my $totalHits = $slashdb->getVar("totalhits");
 	my $count = $slashdb->countAccesslogDaily();
-	$slashdb->setVar("totalhits", $sdTotalHits);
+	$slashdb->setVar("totalhits", $totalHits);
 	slashdLog('Update Total Counts End');
 
 	slashdLog('Daily Deleting Begin');
