@@ -78,11 +78,13 @@ sub createFormkeyHC {
 			"hcpid, html",
 			"humanconf_pool",
 			"hcqid=" . $slashdb->sqlQuote($hcqid)
-				. " AND filename != ''",
+				. " AND filename != ''"
+				. " AND inuse = 0",
 			"ORDER BY RAND() LIMIT 1"
 		);
 		if (!$hcpid) {
-			print STDERR "Empty humanconf_pool for question $hcqid\n";
+			warn "HumanConf warning: empty humanconf_pool"
+				. " for question $hcqid";
 			return 0;
 		}
 

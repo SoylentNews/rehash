@@ -7,6 +7,7 @@ package Slash::HumanConf::Static;
 
 use strict;
 use Digest::MD5;
+use File::Spec::Functions;
 use GD;
 use GD::Text::Align;
 use Slash;
@@ -65,22 +66,147 @@ sub getPoolSize {
 }
 
 sub deleteOldFromPool {
-	my($self) = @_;
+	my($self, $want_delete_fraction) = @_;
 	my $constants = getCurrentStatic();
 	my $max_fill = $constants->{hc_poolmaxfill} || 100;
 
 	my $cursize = $self->getPoolSize();
-	my $max_delete = int(($cursize-100)/2);
-	return 0 if $max_delete <= 0;
-	$max_delete = $max_fill if $max_delete > $max_fill;
+	$want_delete_fraction = 1/(6*24*2) if !defined($want_delete_fraction);
+		# Delete at least enough to recycle the pool regularly.
+		# Since by default hc_maintain_pool runs 6 times an hour,
+		# the default fraction is enough to guarantee complete
+		# pool turnover every two days.
+	my $want_delete = int($cursize*$want_delete_fraction);
+		# Don't delete so many that the pool will get too empty,
+		# or take too long to fill.
+	my $max_delete_check = int(($cursize-100)/2);
+	return 0 if $max_delete_check <= 0;
+	$max_delete_check = $want_delete * 10 if $max_delete_check > $want_delete*10;
+	$max_delete_check = $max_fill if $max_delete_check > $max_fill;
+		# How many we actually want to delete can't be more
+		# than the maximum we're allowed to delete.
+	$want_delete = $max_delete_check if $want_delete > $max_delete_check;
 
-	# THIS DOES NOT YET DELETE THE FILES, ONLY THE DATABASE ROWS!!!
+	my $min_hcpid = $self->sqlSelect("MIN(hcpid)", "humanconf_pool");
+	my $max_hcpid = $self->sqlSelect("MAX(hcpid)", "humanconf_pool");
 
-	return $self->sqlDelete(
-		"humanconf_pool",
-		"lastused < DATE_SUB(NOW(), INTERVAL 2 DAY)",
-		$max_delete
+	# Five passes.  First, mark the ones we're going to delete.
+	# (We pick ones that are both old and haven't been used recently,
+	# two separate things.)  Second, pick which of those we want to
+	# delete.  Third, delete their files from disk.  Fourth, delete
+	# their rows.  Fifth, of the ones we didn't delete, mark them as
+	# available for use again.  Do this several times until we get
+	# enough deleted to make a difference.
+	
+	my $delrows = 0;
+	my $loop_num = 1;
+	my $remaining_to_delete = $want_delete;
+	my $q_hr = $self->sqlSelectAllHashref(
+		"hcqid",
+		"hcqid, filedir",
+		"humanconf_questions"
 	);
+	while ($loop_num <= 4 && $remaining_to_delete > 0) {
+
+		# Pass 1:
+		# "inuse=2" means it's marked for deletion.  The interval
+		# is a stopgap to prevent us from a cycle of frantic
+		# creating/deleting (which otherwise could happen with
+		# bizarre values of $want_delete_fraction).
+		my $hcpid_clause = $min_hcpid + $max_delete_check*$loop_num;
+		if ($hcpid_clause >= $max_hcpid) {
+			$hcpid_clause = "";
+		} else {
+			$hcpid_clause = "AND hcpid <= $hcpid_clause";
+		}
+		my $rows = $self->sqlUpdate(
+			"humanconf_pool",
+			{ inuse => 2, -lastused => "lastused" },
+			"lastused < DATE_SUB(NOW(), INTERVAL 12 HOUR) 
+			AND inuse = 0
+			$hcpid_clause"
+		);
+		next if !$rows;
+
+		# Pass 2:
+		# Pull out a certain number of the ones we just marked, and get
+		# their info.
+		my $pool_hr = $self->sqlSelectAllHashref(
+			"hcpid",
+			"hcpid, hcqid, filename",
+			"humanconf_pool",
+			"inuse=2",
+			"ORDER BY hcpid ASC LIMIT $want_delete"
+		);
+
+		# Pass 3:
+		# Delete the files of the ones we just pulled out.
+		my @hcpids = sort { $a <=> $b } keys %$pool_hr;
+		# Make sure we don't delete too many.
+		my @hcpids_to_delete = @hcpids;
+		if (scalar(@hcpids_to_delete) > $remaining_to_delete) {
+			$#hcpids_to_delete = $remaining_to_delete-1;
+		}
+		my @row_ids_to_delete = ( );
+		for my $hcpid (@hcpids_to_delete) {
+			my $filedir = $q_hr->{$pool_hr->{$hcpid}{hcqid}}{filedir};
+			my $filename = $pool_hr->{$hcpid}{filename};
+			my $fullname = catfile($filedir, $filename);
+			my $errstr = "";
+			$errstr = "file '$fullname' does not exist"
+				if !-e $fullname;
+			$errstr = "parent dir of '$fullname' not writable"
+				if !-w $filedir;
+			if (!$errstr) {
+				my $success = unlink $fullname;
+				if (!$success) {
+					# Could not delete this file, but
+					# we know it's there.  That's bad.
+					$errstr = "unlink '$fullname' failed, $!";
+				}
+			}
+			# Whether the attempt to delete the file succeeded
+			# or not, we're going to delete this row.
+			push @row_ids_to_delete, $hcpid;
+			warn "HumanConf warning on id '$hcpid': $errstr" if $errstr;
+		}
+
+		# Pass 4:
+		# Delete the rows of the ones whose files we deleted.
+		if (@row_ids_to_delete) {
+			my $hcpids_list = join(",", @row_ids_to_delete);
+			my $new_delrows = $self->sqlDelete(
+				"humanconf_pool",
+				"hcpid IN ($hcpids_list)"
+			);
+			if ($new_delrows != scalar(keys %$pool_hr)) {
+				warn "HumanConf warning: deleted number"
+					. " of rows '$new_delrows'"
+					. " not equal to attempted number to delete"
+					. " '$remaining_to_delete'";
+			}
+			$remaining_to_delete -= $new_delrows;
+			$delrows += $new_delrows;
+		} else {
+			warn "HumanConf warning: no rows to delete; attempted"
+				. " '$remaining_to_delete'";
+		}
+
+		# Pass 5:
+		# Anything still marked for deletion has been spared...
+		# this time.
+		$self->sqlUpdate(
+			"humanconf_pool",
+			{ inuse => 0, -lastused => "lastused" },
+			"inuse = 2"
+		);
+
+		++$loop_num;
+	}
+	
+	# Return the number of rows successfully deleted.  This
+	# should also be the number of files deleted.
+	return $delrows;
 }
 
 sub fillPool {
@@ -116,7 +242,8 @@ sub addPool {
 		$extension = ".jpg";
 		($answer, $retval) = $self->drawImage();
 	} else {
-		warn "addPool called with unknown question number: $question";
+		warn "HumanConf warning: addPool called with"
+			. " unknown question number: $question";
 	}
 
 	# As long as filename is empty, this row won't be used.  We
@@ -127,6 +254,7 @@ sub addPool {
 		answer =>	$answer,
 		filename =>	"",
 		html =>		"",
+		inuse =>	1,
 	});
 	my $hcpid = $self->getLastInsertId();
 	my $dir = $self->{questioncache}{$question}{filedir};
@@ -153,7 +281,8 @@ sub addPool {
 	my $html = "";
 	if ($question == 1) {
 		if (!open(my $fh, ">$full_filename")) {
-			warn "addPool could not create '$full_filename', $!";
+			warn "HumanConf warning: addPool could not create"
+				. " '$full_filename', '$!'";
 		} else {
 			print $fh $retval->jpeg;
 			close $fh;
@@ -178,6 +307,7 @@ sub addPool {
 	$self->sqlUpdate("humanconf_pool", {
 		filename =>	$filename,
 		html =>		$html,
+		inuse =>	0,
 	}, "hcpid=$hcpid");
 }
 
@@ -307,7 +437,8 @@ sub writeBlankIndexes {
 		my $file = "$dir/index.shtml";
 		next if -e $file;
 		if (!open(my $fh, ">$file")) {
-			warn "writeBlankIndexes could not create $file, $!";
+			warn "HumanConf warning: writeBlankIndexes"
+				. " could not create $file, $!";
 		} else {
 			print $fh "<html><body>fnord</body></html>";
 			close $fh;
