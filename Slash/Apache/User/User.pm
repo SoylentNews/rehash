@@ -464,6 +464,8 @@ sub userLogin {
 sub userdir_handler {
 	my($r) = @_;
 
+	return DECLINED unless $r->is_initial_req;
+
 	my $constants = getCurrentStatic();
 
 	# note that, contrary to the RFC, a + in this handler
