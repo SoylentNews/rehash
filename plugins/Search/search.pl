@@ -35,6 +35,8 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
+	# Backwards compatibility, we now favor tid over topic 
+	$form->{tid} ||= $form->{topic};
 
 	if ($constants->{search_soap_enabled}) {
 		my $r = Apache->request;
@@ -81,7 +83,7 @@ sub main {
 		for (grep { /^topic_./ } keys %{$form}) {
 			$form->{selected_topics}{$1} = 1 if /^topic_(\d+)$/;
 		}
-		$form->{selected_topics}{$form->{topic}} = 1 if $form->{topic};
+		$form->{selected_topics}{$form->{topic}} = 1 if $form->{tid};
 	}
 
 	# The default search operation is to search stories.
@@ -193,7 +195,7 @@ sub _buildargs {
 	my($form) = @_;
 	my $uri;
 
-	for (qw[threshold query author op topic section]) {
+	for (qw[threshold query author op topic tid section]) {
 		my $x = "";
 		$x =  $form->{$_} if defined $form->{$_} && $x eq "";
 		$x =~ s/ /+/g;
@@ -213,7 +215,7 @@ sub commentSearch {
 	slashDisplay('searchform', {
 		sections	=> _sections(),
 		topics		=> _topics(),
-		tref		=> $slashdb->getTopic($form->{topic}),
+		tref		=> $slashdb->getTopic($form->{tid}),
 		op		=> $form->{op},
 		'sort'		=> _sort(),
 		threshhold 	=> 1,
@@ -309,7 +311,7 @@ sub storySearch {
 		sections	=> _sections(),
 		subsections	=> _subsections(),
 		topics		=> _topics(),
-		tref		=> $slashdb->getTopic($form->{topic}),
+		tref		=> $slashdb->getTopic($form->{tid}),
 		op		=> $form->{op},
 		authors		=> _authors(),
 		'sort'		=> _sort(),
@@ -358,7 +360,7 @@ sub pollSearch {
 	slashDisplay('searchform', {
 		op		=> $form->{op},
 		topics		=> _topics(),
-		tref		=> $slashdb->getTopic($form->{topic}),
+		tref		=> $slashdb->getTopic($form->{tid}),
 		'sort'		=> _sort(),
 	});
 
@@ -674,7 +676,7 @@ sub submissionSearch {
 		sections	=> _sections(),
 		topics		=> _topics(),
 		submission_notes => $slashdb->getDescriptions('submission-notes'),
-		tref		=> $slashdb->getTopic($form->{topic}),
+		tref		=> $slashdb->getTopic($form->{tid}),
 		'sort'		=> _sort(),
 	});
 

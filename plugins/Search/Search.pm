@@ -274,8 +274,8 @@ AND story_topics.sid=stories.sid
 EOT
 
 	} else {
-		$where .= " AND tid=" . $self->sqlQuote($form->{topic})
-			if $form->{topic};
+		$where .= " AND tid=" . $self->sqlQuote($form->{tid})
+			if $form->{tid};
 	}
 	
 	$other .= " LIMIT $start, $limit" if $limit;
@@ -330,8 +330,8 @@ sub findJournalEntry {
 		if $form->{nickname};
 	$where .= " AND users.uid=" . $self->sqlQuote($form->{uid})
 		if $form->{uid};
-	$where .= " AND tid=" . $self->sqlQuote($form->{topic})
-		if $form->{topic};
+	$where .= " AND tid=" . $self->sqlQuote($form->{tid})
+		if $form->{tid};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
@@ -363,8 +363,8 @@ sub findPollQuestion {
 	$where .= " AND date < now() ";
 	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
 		if $form->{uid};
-	$where .= " AND topic=" . $self->sqlQuote($form->{topic})
-		if $form->{topic};
+	$where .= " AND topic=" . $self->sqlQuote($form->{tid})
+		if $form->{tid};
 	
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
 
@@ -431,6 +431,43 @@ sub findRSS {
 	$where .= " AND $key" if $form->{query};
 	$where .= " AND bid=" . $self->sqlQuote($form->{bid})
 		if $form->{bid};
+	
+	$other .= " LIMIT $start, $limit" if $limit;
+	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );
+
+	return $stories;
+}
+
+####################################################################################
+sub findDiscussion {
+	my($self, $form, $start, $limit, $sort) = @_;
+	$start ||= 0;
+
+	my $query = $self->sqlQuote($form->{query});
+	my $columns = "*";
+	$columns .= ", TRUNCATE((MATCH (title) AGAINST($query)), 1) as score "
+		if ($form->{query} && $sort == 2);
+	my $tables = "discussions";
+	my $other;
+	if ($form->{query} && $sort == 2) {
+		$other = " ORDER BY score DESC";
+	} elsif ($form->{query} && $sort == 3) {
+		$other = " ORDER BY last_update DESC";
+	} else {
+		$other = " ORDER BY ts DESC";
+	}
+
+	# The big old searching WHERE clause, fear it
+	my $key = " MATCH (title) AGAINST ($query) ";
+	my $where = " ts <= now() ";
+	$where .= " AND $key" 
+		if $form->{query};
+	$where .= " AND type=" . $self->sqlQuote($form->{type})
+		if $form->{type};
+	$where .= " AND topic=" . $self->sqlQuote($form->{tid})
+		if $form->{tid};
+	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
+		if $form->{uid};
 	
 	$other .= " LIMIT $start, $limit" if $limit;
 	my $stories = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other );

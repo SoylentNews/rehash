@@ -317,7 +317,6 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site St
 
 ALTER TABLE discussions ADD last_update timestamp;
 ALTER TABLE stories ADD last_update timestamp;
-# SLASHCODE LAST UPDATED HERE
 # OSDN LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE

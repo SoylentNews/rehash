@@ -316,10 +316,11 @@ sub commentIndex {
 
 	my $label = getData('label');
 
+	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
 	if ($form->{all}) {
 		titlebar("100%", getData('all_discussions'));
 		my $start = $form->{start} || 0;
-		my $discussions = $slashdb->getDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
+		my $discussions = $searchdb->findDiscussion({ section => $form->section }, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
 		if ($discussions && @$discussions) {
 			my $forward;
 			if (@$discussions == $constants->{discussion_display_limit} + 1) {
@@ -357,7 +358,7 @@ sub commentIndex {
 	} else {
 		titlebar("100%", getData('active_discussions'));
 		my $start = $form->{start} || 0;
-		my $discussions = $slashdb->getStoryDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
+		my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'open' }, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
 		if ($discussions && @$discussions) {
 			my $forward;
 			if (@$discussions == $constants->{discussion_display_limit} + 1) {
@@ -403,8 +404,9 @@ sub commentIndexUserCreated {
 	my $label = getData('label');
 
 	titlebar("90%", getData('user_discussions'));
+	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
 	my $start = $form->{start} || 0;
-	my $discussions = $slashdb->getDiscussionsUserCreated($form->{section}, $constants->{discussion_display_limit} + 1, $start);
+	my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'recycle' }, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
 	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
@@ -460,10 +462,11 @@ sub commentIndexCreator {
 	if (isAnon($uid)) {
 		return displayComments(@_);
 	}
+	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
 
 	titlebar("90%", getData('user_discussion', { name => $nickname}));
 	my $start = $form->{start} || 0;
-	my $discussions = $slashdb->getDiscussionsByCreator($form->{section}, $uid, $constants->{discussion_display_limit} + 1, $start);
+	my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'recycle', uid => $uid }, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
 	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
@@ -507,7 +510,8 @@ sub commentIndexPersonal {
 
 	titlebar("90%", getData('user_discussion', { name => $user->{nickname}}));
 	my $start = $form->{start} || 0;
-	my $discussions = $slashdb->getDiscussionsByCreator($form->{section}, $user->{uid}, $constants->{discussion_display_limit} + 1, $start);
+	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
+	my $discussions = $searchdb->findDiscussion({ section => $form->{section}, type => 'recycle', uid => $user->{uid} }, $constants->{discussion_display_limit} + 1, $start, $constants->{discussion_sort_order});
 	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {

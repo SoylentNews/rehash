@@ -63,7 +63,7 @@ __template__
 	[% END %]
 
 	[% IF topics && !constants.multitopics_enabled;
-		Slash.createSelect("topic", topics, form.topic, 1, 0, 1);
+		Slash.createSelect("tid", topics, form.tid, 1, 0, 1);
 	END %]
 
 	[% IF sections;

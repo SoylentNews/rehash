@@ -87,6 +87,8 @@ EOT
 
 	my $comments = $stats->countCommentsDaily($yesterday);
 
+#	for(qw| article search comments palm journal rss|) {
+#	}
 	my $uniq_comment_users = $stats->countDailyByPageDistinctIPID('comments', $yesterday);
 	my $comment_page_views = $stats->countDailyByPage('comments',$yesterday);
 	my $comment_bytes = $stats->countBytesByPage('comments',$yesterday);
@@ -252,7 +254,7 @@ EOT
 	$data{lazy} = \@lazy; 
 	$data{admin_clearpass_warning} = $admin_clearpass_warning;
 	$data{admin_mods_text} = $admin_mods_text;
-	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
+#	$data{tailslash} = `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
 
 	my $email = slashDisplay('display', \%data, { Return => 1, Page => 'adminmail', Nocomm => 1 });
 
