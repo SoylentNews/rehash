@@ -13,7 +13,7 @@ display
 __template__
 [% Slash.sitename %] Stats for [% day %]
 
-        total: [% total %]  [% total_bytes %](M)
+        total: [% total %] ([% total_bytes %])
        unique: [% unique %]
         users: [% users %]
 [% admin_clearpass_warning %]
@@ -32,11 +32,11 @@ __template__
              : [% journals_ipids %] distinct IPIDS used journals
              : [% palm_ipids %] distinct IPIDS used palm pages
              : [% rss_ipids %] distinct IPIDS used rss pages
-    pageviews: [% comments_page %] for comments [% comment_bytes %](M)
-             : [% articles_page %] for articles [% article_bytes %](M)
-             : [% journals_page %] for journals [% journal_bytes %](M)
-             : [% palm_page %] for palm [% palm_bytes %](M)
-             : [% rss_page %] for rss [% rss_bytes %](M)
+    pageviews: [% comments_page %] for comments ([% comment_bytes %])
+             : [% articles_page %] for articles ([% article_bytes %])
+             : [% journals_page %] for journals ([% journal_bytes %])
+             : [% palm_page %] for palm ([% palm_bytes %])
+             : [% rss_page %] for rss ([% rss_bytes %])
   submissions: [% submissions %] submissions
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
