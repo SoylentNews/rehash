@@ -26,6 +26,7 @@
 use strict;
 use Date::Manip;
 use Compress::Zlib;
+use HTML::Entities;
 use vars '%I';
 use lib '../';
 use Slash;
@@ -379,7 +380,7 @@ $I{adminmail}.  If you are being a troll, now is the time for you to
 either grow up, or change your IP.
 EOT
 
-		return;
+		return(0);
 	}
 
 	if (!$I{allow_anonymous} && ($I{U}{uid} < 1 || $I{F}{postanon})) { 
@@ -388,7 +389,7 @@ Sorry, anonymous posting has been turned off.
 Please <A HREF="$I{rootdir}/users.pl">register and log in</A>.
 EOT
 
-		return;
+		return(0);
 	}
 
 	unless ($comm && $subj) {
@@ -396,7 +397,7 @@ EOT
 Cat got your tongue? (something important seems to be missing from your
 comment ... like the body or the subject!)
 EOT
-		return;
+		return(0);
 	}
 
 	$subj =~ s/\(Score(.*)//i;
@@ -429,7 +430,7 @@ You can only post nested lists and blockquotes four levels deep.
 Please fix your UL, OL, and BLOCKQUOTE tags.
 EOT
 
-					return;
+					return(0);
 				}
 			}	
 		}
@@ -464,7 +465,7 @@ EOT
 <LI>Let us know if anything exceptionally strange happens</LI>
 </UL>
 EOT
-		return;
+		return(0);
 	}
 
 	if (length($I{F}{postercomment}) > 100) {
@@ -475,7 +476,7 @@ EOT
 
 		if (($w / ($br + 1)) < 7) {
 			editComment() and return unless $preview;
-			return;
+			return(0);
 		}
 	}
 
@@ -499,14 +500,17 @@ EOT
 		my $err_message		= $_->[7];
 		my $maximum_length	= $_->[8];
 		my $isTrollish		= 0;
+		my $text_to_test	= decode_entities($I{F}{$field});
+		$text_to_test		=~ s/\xA0/ /g;
+		$text_to_test		=~ s/\<br\>/\n/gi;
 		
-		next if ($minimum_length && length($I{F}{$field}) < $minimum_length);
-		next if ($maximum_length && length($I{F}{$field}) > $maximum_length);
+		next if ($minimum_length && length($text_to_test) < $minimum_length);
+		next if ($maximum_length && length($text_to_test) > $maximum_length);
 
 		if ($minimum_match) {
 			$number_match = "{$minimum_match,}";
 		} elsif ($ratio > 0) {
-			$number_match = "{" . int(length($I{F}{$field}) * $ratio) . ",}";
+			$number_match = "{" . int(length($text_to_test) * $ratio) . ",}";
 		}
 
 		$regex = $raw_regex . $number_match;
@@ -518,31 +522,32 @@ EOT
 
 		$regex = $case eq 'i' ? qr/$regex/i : qr/$regex/;
 
+		print "<!-- text_to_test\n$text_to_test\n -->\n";
 		if ($modifier eq 'g') {
-			$isTrollish = 1 if $I{F}{$field} =~ /$regex/g;
+			$isTrollish = 1 if $text_to_test =~ /$regex/g;
 		} else {
-			$isTrollish = 1 if $I{F}{$field} =~ /$regex/;
+			$isTrollish = 1 if $text_to_test =~ /$regex/;
 		}
 
-		if ((length($I{F}{$field}) >= $minimum_length)
+		if ((length($text_to_test) >= $minimum_length)
 			&& $minimum_length && $isTrollish) {
 
-			if (((length($I{F}{$field}) <= $maximum_length)
+			if (((length($text_to_test) <= $maximum_length)
 				&& $maximum_length) || $isTrollish) {
 
 				editComment() and return unless $preview;
 				print <<EOT;
 <BR>Lameness filter encountered.  Post aborted.<BR><BR><B>$err_message</B><BR>
 EOT
-				return;
+				return(0);
 			}
 
 		} elsif ($isTrollish) {
 			editComment() and return unless $preview;
 			print <<EOT;
-<BR>Lameness filter encountered.  Post aborted.<BR><BR><B>$err_message</B><BR>
+<BR>Lameness filter encountered.  Post aborted.<BR><BR><B>Reason: $err_message</B><BR><BR>
 EOT
-			return;
+			return(0);
 		}
 	}
 
@@ -582,13 +587,14 @@ EOT
 
 <BR>Lameness filter encountered.  Post aborted.<BR><BR>
 EOT
+					return(0);
 				}
 
 			}
 		}
 	}
 
-	return($comm, $subj);
+	return(1);
 }
 
 ##################################################################
@@ -601,7 +607,7 @@ sub previewForm {
 		$I{F}{postersubj}, 'nohtml', $I{U}{aseclev}, 'B'
 	);
 
-	($tempComment, $tempSubject) = validateComment($tempComment, $tempSubject, 1);
+	validateComment($tempComment, $tempSubject, 1);
 
 	$tempComment .= '<BR>' . $I{U}{sig};
 
@@ -634,9 +640,7 @@ sub submitComment {
 	$I{F}{postersubj} = stripByMode($I{F}{postersubj}, 'nohtml');
 	$I{F}{postercomment} = stripByMode($I{F}{postercomment}, $I{F}{posttype});
 
-	($I{F}{postercomment}, $I{F}{postersubj}) =
-		validateComment($I{F}{postercomment}, $I{F}{postersubj})
-		or return;
+	validateComment($I{F}{postercomment}, $I{F}{postersubj}) or return;
 
 	titlebar("95%", "Submitted Comment");
 
