@@ -3,7 +3,9 @@
 	<TITLE>Slashcode FAQ</TITLE>
 <!--#include virtual="/slashhead.inc"-->
 
-<!-- ($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+) -->
+<!--
+($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
+-->
 
 <H1>Slashcode FAQ</H1>
 
