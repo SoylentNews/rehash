@@ -1229,16 +1229,28 @@ sub getTopicTree {
 		}
 	}
 	for my $tid (keys %$tree_ref) {
-		next unless exists $tree_ref->{$tid}{child};
-		my $c_hr = $tree_ref->{$tid}{child};
-		my @child_ids = sort {
-			$tree_ref->{$a}{textname} cmp $tree_ref->{$b}{textname}
-			||
-			$tree_ref->{$a}{keyword} cmp $tree_ref->{$b}{keyword}
-			||
-			$a <=> $b
-		} keys %$c_hr;
-		$tree_ref->{$tid}{children} = [ @child_ids ];
+		if (exists $tree_ref->{$tid}{child}) {
+			my $c_hr = $tree_ref->{$tid}{child};
+			my @child_ids = sort {
+				$tree_ref->{$a}{textname} cmp $tree_ref->{$b}{textname}
+				||
+				$tree_ref->{$a}{keyword} cmp $tree_ref->{$b}{keyword}
+				||
+				$a <=> $b
+			} keys %$c_hr;
+			$tree_ref->{$tid}{children} = [ @child_ids ];
+		}
+		if (exists $tree_ref->{$tid}{parent}) {
+			my $p_hr = $tree_ref->{$tid}{parent};
+			my @parent_ids = sort {
+				$tree_ref->{$a}{textname} cmp $tree_ref->{$b}{textname}
+				||
+				$tree_ref->{$a}{keyword} cmp $tree_ref->{$b}{keyword}
+				||
+				$a <=> $b
+			} keys %$p_hr;
+			$tree_ref->{$tid}{parents} = [ @parent_ids ];
+		}
 	}
 
 	my $skins = $self->getSkins();
@@ -1276,27 +1288,37 @@ sub confirmTopicTree {
 	# to a non-leaf;  the second pass strips off B since it now has
 	# zero nodes connecting to non-leafs.
 
+#my $start_time = Time::HiRes::time;
+	my $n_tree_keys = scalar(keys %$tree);
 	my %leaf = ( );
 	while (1) {
-		my $start_leaf_keys = scalar(keys %leaf);
-		for my $tid (keys %$tree) {
+		my $n_start_leaf_keys = scalar(keys %leaf);
+#print STDERR scalar(keys %leaf) . " leaf keys START: " . join(" ", sort { $a <=> $b } keys %leaf) . "\n";
+		for my $tid (sort { $a <=> $b } keys %$tree) {
+			next if $leaf{$tid};
 			my $links = 0;
+			my @parents = ( ); my @children = ( );
 			if ($tree->{$tid}{parents}) {
-				$links += scalar grep { !$leaf{$_} } @{ $tree->{$tid}{parents} };
+				@parents = grep { !$leaf{$_} } @{ $tree->{$tid}{parents} };
+				$links += scalar @parents;
 			}
 			if ($tree->{$tid}{children}) {
-				$links += scalar grep { !$leaf{$_} } @{ $tree->{$tid}{children} };
+				@children = grep { !$leaf{$_} } @{ $tree->{$tid}{children} };
+				$links += scalar @children;
 			}
+#print STDERR "tid $tid has $links non-leaf: parents '@parents' children '@children'\n";
 			if ($links < 2) {
 				$leaf{$tid} = 1;
 			}
 		}
-		# If that didn't turn up any new leaf nodes, we've
-		# found them all.
-		last if scalar(keys %leaf) == $start_leaf_keys;
+#print STDERR scalar(keys %leaf) . " leaf keys END: " . join(" ", sort { $a <=> $b } keys %leaf) . "\n";
+		# If that didn't turn up any new leaf nodes, or if
+		# that's the whole tree, we've found them all.
+		last if scalar(keys %leaf) == $n_start_leaf_keys
+			|| scalar(keys %leaf) == $n_tree_keys;
 	}
 
-print STDERR scalar(localtime) . " tree " . scalar(keys %$tree) . " nodes, of which " . scalar(keys %leaf) . " are leaf nodes\n";
+#print STDERR scalar(localtime) . " tree " . scalar(keys %$tree) . " nodes, of which " . scalar(keys %leaf) . " are leaf nodes\n";
 
 	# If the entire tree is made up of leaf nodes, we're done already.
 	return 1 if scalar(keys %leaf) == scalar(keys %$tree);
@@ -1307,36 +1329,49 @@ print STDERR scalar(localtime) . " tree " . scalar(keys %$tree) . " nodes, of wh
 	sub _vet_node_children {
 		my($tree, $leaf, $vetted, $tid, $parents) = @_;
 		return if $vetted->{$tid};
-		die "tid $tid is its own child" if $parents->{$tid};
-		$parents->{$tid} = 1;
-		return unless $tree->{$tid}{children};
-		my @children = grep { !$leaf->{$_} } @{ $tree->{$tid}{children} };
-		for my $child (@children) {
-			_vet_node_children($tree, $leaf, $vetted, $child, $parents);
+		if ($parents->{$tid}) {
+			die "Topic tree error: loop found at tid $tid, parents "
+				. join(" ", sort { $a <=> $b } keys %$parents );
 		}
+		return unless $tree->{$tid}{children};
+		my @children = grep { !$leaf->{$_} && !$vetted->{$_} } @{ $tree->{$tid}{children} };
+		for my $child (@children) {
+			my %parents_copy = %$parents;
+			$parents_copy{$tid} = 1;
+#print STDERR "tid $tid child-recursing down to $child with parents: " . join(" ", sort { $a <=> $b } keys %parents_copy ) . "\n";
+			_vet_node_children($tree, $leaf, $vetted, $child, \%parents_copy);
+		}
+#print STDERR "vetted for children: $tid (parents: " . join(" ", sort { $a <=> $b } keys %$parents ) . ")\n";
 		$vetted->{$tid} = 1;
 	}
 	sub _vet_node_parents {
 		my($tree, $leaf, $vetted, $tid, $children) = @_;
 		return if $vetted->{$tid};
-		die "tid $tid is its own parent" if $children->{$tid};
-		$children->{$tid} = 1;
-		return unless $tree->{$tid}{parents};
-		my @parents = grep { !$leaf->{$_} } @{ $tree->{$tid}{parents} };
-		for my $parent (@parents) {
-			_vet_node_parents($tree, $leaf, $vetted, $parent, $children);
+		if ($children->{$tid}) {
+			die "Topic tree error: loop found at tid $tid, children "
+				. join(" ", sort { $a <=> $b } keys %$children );
 		}
+		return unless $tree->{$tid}{parents};
+		my @parents = grep { !$leaf->{$_} && !$vetted->{$_} } @{ $tree->{$tid}{parents} };
+		for my $parent (@parents) {
+			my %children_copy = %$children;
+			$children_copy{$tid} = 1;
+#print STDERR "tid $tid parent-recursing up to $parent with children: " . join(" ", sort { $a <=> $b } keys %children_copy ) . "\n";
+			_vet_node_parents($tree, $leaf, $vetted, $parent, \%children_copy);
+		}
+#print STDERR "vetted for parents: $tid (children: " . join(" ", sort { $a <=> $b } keys %$children ) . ")\n";
 		$vetted->{$tid} = 1;
 	}
 	my %vetted_children = ( );
 	my %vetted_parents = ( );
-	for my $tid (keys %leaf) {
+	for my $tid (sort { $a <=> $b } grep { !$leaf{$_} } keys %$tree) {
+#print STDERR "BEGIN vetting $tid (" . scalar(keys %vetted_children) . " vetted children, " . scalar(keys %vetted_parents) . " vetted parents)\n";
 		_vet_node_children($tree, \%leaf, \%vetted_children, $tid, { });
 		_vet_node_parents($tree, \%leaf, \%vetted_parents, $tid, { });
 	}
 
-print STDERR scalar(localtime) . " tree vetted\n";
-	
+#print STDERR sprintf("%s tree vetted in %0.6f secs\n", scalar(localtime), Time::HiRes::time - $start_time);
+
 	return 1;
 }
 
@@ -3284,10 +3319,12 @@ sub deleteTopic {
 	# what we want.  Afterwards we delete any rows which failed to
 	# UPDATE.
 	# The first thing is to update the to-be-deleted topic's children
-	# to instead point to its replacement.
+	# to instead point to its replacement.  In case one of the
+	# topic's children _is_ the replacement, don't make it loop to
+	# itself (and the resulting busted row will be deleted).
 	$self->sqlUpdate('topic_parents',
 		{ parent_tid => $newtid },
-		"parent_tid=$tid_q",
+		"parent_tid=$tid_q AND tid != $newtid_q",
 		{ ignore => 1 });
 	$self->sqlDelete('topic_parents', "parent_tid=$tid_q");
 	# Second, update the to-be-deleted topic's parents to instead
@@ -3328,10 +3365,14 @@ sub deleteTopic {
 	# Finally, we nuke the topic from the topic tables themselves
 	# (except topic_parents which we have already taken care of).
 	$self->sqlDelete("topics", "tid=$tid_q");
-	$self->sqlDelete("topic_nexus", "tid=$tid_q");
-	$self->sqlDelete("topic_nexus_dirty", "tid=$tid_q");
-	$self->sqlDelete("topic_nexus_extras", "tid=$tid_q");
-	$self->sqlDelete("topic_param", "tid=$tid_q");
+	$self->sqlUpdate("topic_nexus",		{ tid => $newtid }, "tid=$tid_q", { ignore => 1 });
+	$self->sqlDelete("topic_nexus",		"tid=$tid_q");
+	$self->sqlUpdate("topic_nexus_dirty",	{ tid => $newtid }, "tid=$tid_q", { ignore => 1 });
+	$self->sqlDelete("topic_nexus_dirty",	"tid=$tid_q");
+	$self->sqlUpdate("topic_nexus_extras",	{ tid => $newtid }, "tid=$tid_q", { ignore => 1 });
+	$self->sqlDelete("topic_nexus_extras",	"tid=$tid_q");
+	$self->sqlUpdate("topic_param",		{ tid => $newtid }, "tid=$tid_q", { ignore => 1 });
+	$self->sqlDelete("topic_param",		"tid=$tid_q");
 
 	$self->setVar('topic_tree_lastchange', time());
 
@@ -10204,8 +10245,8 @@ sub applyStoryRenderHashref {
 	# that share both a primaryskid and tid.
 	my %primaryskid_tid = ( );
 	for my $stoid (@stoids) {
-		my $primaryskid = $render_hr->{$stoid}{primaryskid};
-		my $tid = $render_hr->{$stoid}{tids}[0];
+		my $primaryskid = $render_hr->{$stoid}{primaryskid} || 0;
+		my $tid = $render_hr->{$stoid}{tids}[0] || 0;
 		$primaryskid_tid{$primaryskid}{$tid} ||= [ ];
 		push @{ $primaryskid_tid{$primaryskid}{$tid} }, $stoid;
 	}
@@ -10221,9 +10262,10 @@ sub applyStoryRenderHashref {
 				"stoid IN ($in_clause)");
 		}
 	}
-	# Delete and reinsert the story_topics_rendered data.
-	$self->sqlDelete("story_topics_rendered", "stoid IN ($all_in_clause)");
+	# Delete and reinsert the story_topics_rendered data, and mark the
+	# stories all as dirty.
 	$self->sqlDo("SET AUTOCOMMIT=0");
+	$self->sqlDelete("story_topics_rendered", "stoid IN ($all_in_clause)");
 	for my $stoid (@stoids) {
 		my $str_hr = $render_hr->{$stoid}{rendered};
 		for my $tid (sort { $a <=> $b } keys %$str_hr) {
@@ -10231,6 +10273,8 @@ sub applyStoryRenderHashref {
 				{ stoid => $stoid, tid => $tid },
 				{ delayed => 1, ignore => 1 });
 		}
+		$self->sqlInsert('story_dirty', { stoid => $stoid },
+			{ delayed => 1, ignore => 1 });
 	}
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
