@@ -77,6 +77,9 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 		FOREACH score = constants.karma_adj.keys.nsort;
 			IF useredit.karma <= score;
 				constants.karma_adj.$score;
+				IF admin_flag;
+					" ("; useredit.karma; ") ";
+				END;
 				" (mostly affected by moderation done to your comments)";
 				LAST;
 			END;
