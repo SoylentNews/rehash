@@ -285,7 +285,6 @@ ALTER TABLE submissions ADD COLUMN signature varchar(32) DEFAULT '' NOT NULL;
 ALTER TABLE submissions ADD UNIQUE story_signature(signature);
 UPDATE submissions SET signature=MD5(story);
 ALTER TABLE submissions MODIFY COLUMN signature varchar(32) NOT NULL;
-# LINUX.COM
 
 # This expands blocks to get data from sites that require logins via a cookie
 ALTER TABLE blocks ADD COLUMN rss_cookie varchar(255),
@@ -324,6 +323,8 @@ ALTER TABLE humanconf_pool ADD COLUMN inuse TINYINT DEFAULT '0' NOT NULL AFTER l
 
 ALTER TABLE stories ADD subsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
 ALTER TABLE sections DROP feature_story;
-
+# LINUX.COM
+ALTER TABLE accesslog ADD bytes mediumint UNSIGNED DEFAULT 0 NOT NULL;
+INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, '');
 # OSDN LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
