@@ -616,18 +616,20 @@ sub printComments {
 
 	# loop here, pull what cids we can
 	my $cids_needed_ar = $user->{state}{cids} || [ ];
-	my $mcd_debug = { start_time => Time::HiRes::time }
-		if $constants->{memcached_debug};
-	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
-	if ($try_memcached) {
+	my($mcd_debug, $mcdkey, $mcdkeylen);
+	if ($constants->{memcached_debug}) {
 		# MemCached key prefix "ctp" means "comment_text, parsed".
 		# Prepend our site key prefix to try to avoid collisions
 		# with other sites that may be using the same servers.
-		my $mcdkey = "$slashdb->{_mcd}{keyprefix}ctp:";
+		$mcd_debug = { start_time => Time::HiRes::time };
+		$mcdkey = "$slashdb->{_mcd}{keyprefix}ctp:";
+		$mcdkeylen = length($mcdkey);
+	}
+	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
+	if ($try_memcached) {
 		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
 			print STDERR scalar(gmtime) . " printComments memcached mcdkey '$mcdkey'\n";
 		}
-		my $mcdkeylen = length($mcdkey);
 		my @keys_try = map { "$mcdkey$_" } @$cids_needed_ar;
 		$comment_text = $slashdb->{_mcd}->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
@@ -679,9 +681,9 @@ sub printComments {
 		$comment_text->{$cid} = parseDomainTags($more_comment_text->{$cid},
 			$comments->{$cid}{fakeemail});
 		if ($try_memcached && $form->{cid} ne $cid) {
-			my $retval = $slashdb->{_mcd}->set("ctp:$cid", $comment_text->{$cid});
+			my $retval = $slashdb->{_mcd}->set("$mcdkey$cid", $comment_text->{$cid});
 			if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
-				print STDERR scalar(gmtime) . " printComments memcached writing 'ctp:$cid' length " . length($comment_text->{$cid}) . " retval=$retval\n";
+				print STDERR scalar(gmtime) . " printComments memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval\n";
 			}
 		}
 	}
