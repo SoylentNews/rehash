@@ -34,11 +34,11 @@ if (!$symlink_exists) {
 
 # Remember to doublecheck these match usage()!
 usage('Options used incorrectly')
-	unless getopts('hvu:TUV', \%opts);
+	unless getopts('hvu:TtUV', \%opts);
 usage() if $opts{h} || !keys %opts;
 version() if $opts{v};
 usage('Right now only -U does anything') if !$opts{U};
-my $testing = $opts{T} ? 1 : 0;
+my $testing = $opts{T} ? 1 : ($opts{t} ? 1 : 0);
 my $verbose = $opts{V} ? 1 : 0;
 
 my $virtuser = $opts{u} || 'slash';
@@ -309,7 +309,8 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user (default is "slash")
-	-T	Test run, report but don't do anything
+	-t	Test run, report but don't do anything
+	-T	Synonym for -t
 	-U	Upgrade your symlinks to the latest for your theme and plugins
 
 Debugging options:
