@@ -4034,7 +4034,7 @@ sub getNumCommPostedAnonByIPID {
 	my($self, $ipid, $hours, $start_cid) = @_;
 	$ipid = $self->sqlQuote($ipid);
 	$hours ||= 24;
-	$start_cid ||= 0;
+	my $cid_clause = $start_cid ? " AND cid >= $start_cid" : "";
 	my $ac_uid = $self->sqlQuote(getCurrentStatic("anonymous_coward_uid"));
 	my $ar = $self->sqlSelectArrayRef(
 		"COUNT(*) AS count, SUM(pointsorig-points) AS sum",
@@ -4042,7 +4042,7 @@ sub getNumCommPostedAnonByIPID {
 		"ipid=$ipid
 		 AND uid=$ac_uid
 		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)
-		 AND cid >= $start_cid"
+		 $cid_clause"
 	);
 	my($num_comm, $sum_mods) = @$ar;
 	$sum_mods ||= 0;
@@ -4061,13 +4061,13 @@ sub getNumCommPostedByUID {
 	my($self, $uid, $hours, $start_cid) = @_;
 	$uid = $self->sqlQuote($uid);
 	$hours ||= 24;
-	$start_cid ||= 0;
+	my $cid_clause = $start_cid ? " AND cid >= $start_cid" : "";
 	my $ar = $self->sqlSelectArrayRef(
 		"COUNT(*) AS count, SUM(points-pointsorig) AS sum",
 		"comments",
 		"uid=$uid
 		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)
-		 AND cid >= $start_cid"
+		 $cid_clause"
 	);
 	my($num_comm, $sum_mods) = @$ar
 		if ref($ar) eq 'ARRAY';
@@ -6558,16 +6558,16 @@ sub getNetIDKarma {
 	my($self, $type, $id) = @_;
 	my($count, $karma);
 	if ($type eq "ipid") {
-		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","ipid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","ipid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	} elsif ($type eq "subnetid") {
-		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","subnetid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","subnetid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	} else {
-		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","ipid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","ipid='$id'");
 		return wantarray ? ($karma, $count) : $karma if $count;
 
-		($count, $karma) = $self->sqlSelect("count(*),sum(karma)","comments","subnetid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","subnetid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	}
 }
