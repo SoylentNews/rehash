@@ -575,29 +575,47 @@ sub deleteDaily {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 
-# This is now done more efficiently, throughout the day, by the
-# counthits.pl task.
-#	$self->updateStoriesCounts();
-
 	$self->sqlDelete('badpasswords', "TO_DAYS(NOW()) - TO_DAYS(ts) > 2");
 
 	$self->sqlDelete('pollvoters');
 
+	$self->sqlDelete('discussions', "type='recycle' AND commentcount=0")
+		unless $constants->{noflush_empty_discussions};
+}
+
+########################################################
+# For run_moderatord.pl
+sub deleteOldModRows {
+	my($self) = @_;
+
+	my $reader = getObject('Slash::DB', { db_type => "reader" });
+	my $constants = getCurrentStatic();
 	my $archive_delay_mod =
 		   $constants->{archive_delay_mod}
 		|| $constants->{archive_delay}
 		|| 14;
-	$self->sqlDelete('moderatorlog',
-		"TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
-	$self->sqlDelete('metamodlog',
-		"TO_DAYS(NOW()) - TO_DAYS(ts) > $archive_delay_mod");
 
-# This is now done by the flush_formkeys task.
-#	my $delete_time = time() - $constants->{formkey_timeframe};
-#	$self->sqlDelete('formkeys', "ts < $delete_time");
+	# Find the minimum ID in these tables that should remain, then
+	# delete everything before it.  We do it this way to keep the
+	# slave DBs tied up on the replication of the deletion query as
+	# little as possible.  Turning off foreign key checking here is
+	# just pretty lame, I know...
 
-	$self->sqlDelete('discussions', "type='recycle' AND commentcount=0")
-		unless $constants->{noflush_empty_discussions};
+	$self->sqlDo("SET FOREIGN_KEY_CHECKS=0");
+	my $min_m1_id = $reader->sqlSelect('MIN(id)',
+		'moderatorlog',
+		"ts >= DATE_SUB(NOW(), INTERVAL $archive_delay_mod DAY)");
+	if ($min_m1_id) {
+		$self->sqlDelete('moderatorlog', "id < $min_m1_id");
+	}
+
+	my $min_m2_id = $reader->sqlSelect('MIN(id)',
+		'metamodlog',
+		"ts >= DATE_SUB(NOW(), INTERVAL $archive_delay_mod DAY)");
+	if ($min_m2_id) {
+		$self->sqlDelete('metamodlog', "id < $min_m2_id");
+	}
+	$self->sqlDo("SET FOREIGN_KEY_CHECKS=1");
 }
 
 ########################################################
@@ -2628,21 +2646,22 @@ sub getModderModdeeSummary {
 	my ($self, $options) = @_;
 	my $ac_uid = getCurrentStatic('anonymous_coward_uid');
 	$options ||= {};
-	my @where;
-	push @where, "ts > date_sub(NOW(),INTERVAL $options->{days_back} DAY)" if $options->{days_back};
+
+	my @where = ( );
+	push @where, "ts > DATE_SUB(NOW(), INTERVAL $options->{days_back} DAY)" if $options->{days_back};
 	push @where, "cuid != $ac_uid" if $options->{no_anon_comments};
 	push @where, "id >= $options->{start_at_id}" if $options->{start_at_id};
 	push @where, "id <= $options->{end_at_id}" if $options->{end_at_id};
-	push @where, "ipid is not null and ipid!=''" if $options->{need_defined_ipid};
+	push @where, "ipid IS NOT NULL AND ipid != ''" if $options->{need_ipid};
 
 	my $where = join(" AND ", @where);
 
 	my $mods = $self->sqlSelectAllHashref(
 			[qw(uid cuid)],
-			"uid,cuid,count(*) as count",
+			"uid, cuid, COUNT(*) AS count",
 			"moderatorlog",
 			$where,
-			"group by uid, cuid");
+			"GROUP BY uid, cuid");
 
 	return $mods;
 }
@@ -2652,21 +2671,24 @@ sub getModderCommenterIPIDSummary {
 	my ($self, $options) = @_;
 	my $ac_uid = getCurrentStatic('anonymous_coward_uid');
 	$options ||= {};
-	my @where = ("moderatorlog.cid=comments.cid");
+
+	my @where = ( "moderatorlog.cid=comments.cid" );
 	push @where, "ts > date_sub(NOW(),INTERVAL $options->{days_back} DAY)" if $options->{days_back};
 	push @where, "cuid != $ac_uid" if $options->{no_anon_comments};
 	push @where, "cuid = $ac_uid" if $options->{only_anon_comments};
 	push @where, "id >= $options->{start_at_id}" if $options->{start_at_id};
 	push @where, "id <= $options->{end_at_id}" if $options->{end_at_id};
-	push @where, "comments.ipid is not null and comments.ipid!=''" if $options->{need_defined_ipid};
+	push @where, "comments.ipid IS NOT NULL AND comments.ipid!=''" if $options->{need_ipid};
+
 	my $where = join(" AND ", @where);
+
 	my $mods = $self->sqlSelectAllHashref(
 			[qw(uid ipid)],
-			"moderatorlog.uid as uid, comments.ipid as ipid, count(*) as count",
-			"moderatorlog,comments",
+			"moderatorlog.uid AS uid, comments.ipid AS ipid, COUNT(*) AS count",
+			"moderatorlog, comments",
 			$where,
-			"group by uid, comments.ipid");
-			
+			"GROUP BY uid, comments.ipid");
+
 	return $mods;
 }
 

@@ -7457,8 +7457,6 @@ sub getCommentsForUser {
 
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where, $other);
 
-	my $archive = $cache_read_only;
-
 	return $comments;
 }
 

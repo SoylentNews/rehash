@@ -37,6 +37,7 @@ $task{$me}{code} = sub {
 	update_modlog_ids($virtual_user, $constants, $slashdb, $user);
 	mark_m2_oldzone($virtual_user, $constants, $slashdb, $user);
 	adjust_m2_freq($virtual_user, $constants, $slashdb, $user) if $constants->{adjust_m2_freq};
+	delete_old_mod_rows($virtual_user, $constants, $slashdb, $user);
 	return ;
 };
 
@@ -798,6 +799,11 @@ sub adjust_m2_freq {
 		if defined $constants->{m2_freq_max} && $new_m2_freq > $constants->{m2_freq_max};
 	slashdLog("adjusting m2_freq from $cur_m2_freq to $new_m2_freq");	
 	$slashdb->setVar('m2_freq', $new_m2_freq);
+}
+
+sub delete_old_mod_rows {
+	my($virtual_user, $constants, $slashdb, $user) = @_;
+	$slashdb->deleteOldModRows();
 }
 
 1;
