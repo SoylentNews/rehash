@@ -64,8 +64,8 @@ __template__
 				<TD>[% ipstruct.$tmpip.count %]</TD>
 				<TD>[% ipstruct.$tmpip.dmin; IF ipstruct.$tmpip.dmin != ipstruct.$tmpip.dmax %] to [% ipstruct.$tmpip.dmax; END %]</TD>
 				<TD ALIGN="CENTER">[% IF ipstruct.$tmpip.comments %]X[% END %]&nbsp;</TD>
-                                <TD ALIGN="CENTER">[% IF ipstruct.$tmpip.submissions %]X[% END %]&nbsp;</TD>
-                                <TD ALIGN="CENTER">[% IF ipstruct.$tmpip.moderatorlog %]X[% END %]&nbsp;</TD>
+				<TD ALIGN="CENTER">[% IF ipstruct.$tmpip.submissions %]X[% END %]&nbsp;</TD>
+				<TD ALIGN="CENTER">[% IF ipstruct.$tmpip.moderatorlog %]X[% END %]&nbsp;</TD>
 			</TR>
 				[% END %]
 		</TABLE>

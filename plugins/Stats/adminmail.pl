@@ -22,7 +22,7 @@ $task{$me}{code} = sub {
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 
 	my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday  });
-	# This will need to be changed to "log_db_user"
+
 	if ($constants->{backup_db_user}) {
 		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
 		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
@@ -30,10 +30,11 @@ $task{$me}{code} = sub {
 		$stats = getObject('Slash::Stats');
 		$backupdb = $slashdb;
 	}
-	my $logdb = getObject('Slash::Stats', $constants->{'log_db_user'} || $constants->{'backup_db_user'},
-												{ day => $yesterday, create => 1  });
 
-	unless($logdb) {
+	my $logdb = getObject('Slash::Stats',
+		$constants->{log_db_user} || $constants->{backup_db_user},
+		{ day => $yesterday, create => 1 } );
+	unless ($logdb) {
 		slashdLog('No database to run adminmail against');
 		return;
 	}
