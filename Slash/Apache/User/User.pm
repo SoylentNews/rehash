@@ -602,6 +602,7 @@ Bender:Woohoo, I'm popular!
 Bender:Ah crap, I'm some sort of robot!
 Bender:When will man learn that all races are equally inferior to robots?
 Bender:Curse my natural showmanship!
+Bender:I'm not allowed to sing. Court order.
 Fry:There's a lot about my face you don't know.
 Fry:Drugs are for losers. And hypnosis is for losers with big weird eyebrows.
 Fry:These new hands are great. I'm gonna break them in tonight.
