@@ -2118,4 +2118,6 @@ CREATE TABLE slashd_errnotes (
 
 # Change for plugins/HumanConf (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('hc_possible_fonts', '', 'Possible fonts to use (space-separated, empty for the default)');
+INSERT INTO vars (name, value, description) VALUES ('hc_pool_secs_before_del', '21600', 'Number of seconds after a pool entry last used before it will be deleted');
+INSERT INTO vars (name, value, description) VALUES ('hc_pool_secs_before_use', '3600', 'Number of seconds after a pool entry created before it will be used');
 
