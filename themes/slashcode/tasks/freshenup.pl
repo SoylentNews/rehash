@@ -175,7 +175,9 @@ $task{$me}{code} = sub {
 	if ($min_days) {
 		# It's actually in minutes right now;  convert to days for -M.
 		$min_days /= 60*24;
-		$w = 'notok' if -M "$basedir/$base.shtml" > $min_days;
+		my $basefile = "$basedir/$base.shtml";
+		# (Re)write index.shtml if it's missing, empty, or old.
+		$w = 'notok' if !-s $basefile || -M _ > $min_days;
 	}
 
 	my $dirty_sections;
