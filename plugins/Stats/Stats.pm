@@ -1088,6 +1088,54 @@ sub getGraph {
 	return $image || {};
 }
 
+########################################################
+sub deleteGraph {
+	my($self, $data) = @_;
+
+	return unless $data->{id} && $data->{day};
+
+	my $id  = $self->sqlQuote($data->{id});
+	my $day = $self->sqlQuote($data->{day});
+
+	my $md5 = $self->sqlSelect('md5', 'stats_graphs_index',
+		"id=$id AND day=$day");
+
+	$self->sqlDelete('stats_graphs_index', "id=$id AND day=$day");
+
+	if ($md5) {
+		my $blob = getObject('Slash::Blob');
+		$blob->delete($md5);
+	}
+}
+
+########################################################
+sub cleanGraphs {
+	my($self, $data) = @_;
+
+	# default 7 days, should be var?  don't care, myself -- pudge
+	$data->{days} ||= 7;
+
+	my @time = localtime(time() - (86400 * $data->{days}));
+	my $oldday = $self->sqlQuote(sprintf "%4d-%02d-%02d", 
+		$time[5] + 1900, $time[4] + 1, $time[3]
+	);
+
+	my $images = $self->sqlSelectAll(
+		"day, id",
+		"stats_graphs_index",
+		"day < $oldday"
+	);
+
+	my $count = 0;
+	for my $image (@$images) {
+		$count += 1 if $self->deleteGraph({
+			day	=> $image->[0],
+			id	=> $image->[1],
+		});
+	}
+	return $count;
+}
+
 
 ########################################################
 sub getAllStats {

@@ -4,6 +4,7 @@ htdoc=stats.pl
 mysql_dump=mysql_dump
 mysql_schema=mysql_schema
 task=adminmail.pl
+task=stats_graphs_delete.pl
 template=templates/data;adminmail;default
 template=templates/display;adminmail;default
 template=templates/display;modmail;default
