@@ -105,7 +105,7 @@ END %]
 		<TR>
 			<TD ALIGN="RIGHT">URL: </TD>
 			<TD>
-				<INPUT TYPE="text" NAME="url" SIZE=60>
+				<INPUT TYPE="text" NAME="url" VALUE="[% form.url | strip_attribute %]" SIZE=60>
 			</TD>
 		</TR>
 	[% END %]
