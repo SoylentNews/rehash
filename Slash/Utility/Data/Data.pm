@@ -1688,6 +1688,7 @@ sub fudgeurl {
 	$url =~ s/&#(.+?);//g;
 	# we don't like SCRIPT at the beginning of a URL
 	my $decoded_url = decode_entities($url);
+	$decoded_url =~ s{ &(\#?[a-zA-Z0-9]+);? } { approveCharref($1) }gex;
 	return $decoded_url =~ /^[\s\w]*script\b/i ? undef : $url;
 }
 }
