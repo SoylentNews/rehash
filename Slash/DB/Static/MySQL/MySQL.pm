@@ -514,7 +514,8 @@ sub getSitesRDF {
 sub getSectionInfo {
 	my($self) = @_;
 	my $sections = $self->sqlSelectAllHashrefArray(
-		'section', "sections",
+		"section, url",
+		"sections",
 		"isolate=0 and (section != '' and section != 'articles')
 		ORDER BY section"
 	);
