@@ -107,7 +107,7 @@ sub sendEmail {
 	my($addr, $subject, $content, $pr) = @_;
 	my $constants = getCurrentStatic();
 
-	# print errors under slashdb only if high level
+	# print errors to slashd.log under slashd only if high level
 	# of verbosity -- pudge
 	my $log_error = defined &main::verbosity ? main::verbosity() >= 3 : 1;
 
