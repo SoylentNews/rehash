@@ -145,11 +145,9 @@ sub displayStories {
 
 	my $storystruct = [];
 
-	my $ess_hr = $self->getStoriesEssentials(
+	my $stories = $self->getStoriesEssentials(
 		$limit, $section, $tid, $misc
 	);
-	my $stories = $ess_hr->{stories};
-	$user->{state}{buyingpage} = 1 if $ess_hr->{seeing_future};
 
 	my $i = 0;
 
@@ -164,6 +162,7 @@ sub displayStories {
 		my $atstorytime;
 		if ($story->{is_future}) {
 			$atstorytime = $constants->{subscribe_future_name};
+			$user->{state}{buyingpage} = 1;
 		} else {
 			$atstorytime = $user->{aton} . " " . timeCalc($time, '%B %d, %Y');
 		}
@@ -202,6 +201,7 @@ sub prepareStory {
 	my($self, $sid) = @_;	
 
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 
 	# get the body, introtext... 
 	my $storyref = $self->getStory($sid);

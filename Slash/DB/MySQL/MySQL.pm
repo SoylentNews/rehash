@@ -4869,15 +4869,11 @@ EOT
 		formatDate([$data], 7, 7, '%s');
 		next if $form->{issue} && $data->[5] > $form->{issue};
 		push @stories, [@$data];
-		$seeing_future = 1 if $data->[10];
 		last if ++$count >= $limit;
 	}
 	$cursor->finish;
 
-	return {
-		seeing_future	=> $seeing_future,
-		stories		=> \@stories,
-	};
+	return \@stories;
 }
 
 

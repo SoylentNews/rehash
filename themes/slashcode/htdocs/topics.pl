@@ -89,11 +89,9 @@ sub topTopics {
 			? 10 : $top->{cnt} < 3 || $form->{all}
 			? 3 : $top->{cnt};
 
-		my $ess_hr = $slashdb->getStoriesEssentials($limit, $section->{section}, $top->{tid});
-		$top->{stories} = getOlderStories(
-			$ess_hr->{stories},
-			$section
-		);
+		my $stories = $slashdb->getStoriesEssentials(
+			$limit, $section->{section}, $top->{tid});
+		$top->{stories} = getOlderStories($stories, $section);
 		if ($top->{image} =~ /^\w+\.\w+$/) {
 			$top->{imageclean} = "$constants->{imagedir}/topics/$top->{image}";
 		} else {

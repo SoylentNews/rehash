@@ -54,18 +54,17 @@ sub main {
 		$limit = $user->{maxstories};
 	}
 
-	my $ess_hr = $reader->getStoriesEssentials(
+	$stories = $reader->getStoriesEssentials(
 		$limit, $form->{section},
 		'',
 	);
-	$stories = $ess_hr->{stories};
-	$user->{state}{buyingpage} = 1 if $ess_hr->{seeing_future};
 
 	my $title = getData('head', { section => $section });
 	header($title, $section->{section});
 
 	for my $story (@$stories) {
 		if ($story->[10]) {
+			$user->{state}{buyingpage} = 1;
 			$story->[3] =
 				$story->[5] =
 				$story->[7] = $constants->{subscriber_future_name};
