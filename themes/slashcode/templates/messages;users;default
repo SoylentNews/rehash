@@ -44,7 +44,7 @@ this password is used.  Go to the URL below to log in:
 
 Make sure you then CHANGE YOUR PASSWORD!
 
-Thanks
+Thanks.
 
 [% CASE 'userinfo_msg' %]
 
@@ -79,16 +79,15 @@ customize [% constants.sitename %], change your password, or just click pretty w
 	<P></TD></TR></TABLE>
 
 [% CASE 'saveuser_email_msg' %]
-	The user account [% nickname %] on [% constants.sitename %] had this email
-	associated with it.  A web user from [% env.remote_addr %] has
-	just changed it to [% realemail %].
+	The user account [% nickname %] on [% constants.sitename %]
+	had this email associated with it.  A web user from
+	[% env.remote_addr %] has just changed it to [% realemail %].
 
-	If this is wrong, well then we have a problem.  MOST LIKELY THIS IS NO
-	BIG DEAL.  It probably means you have a common nickname and someone else
-	wanted it.  They do not have your password, they are not going to sneak
-	up on you late at night and steal your children.  Only this email address
-	got this email.  So do not sweat it unless your account suddenly dies
-	or something.
+	If this is not correct, if you did not request this change,
+	please contact the site administrator immediately.
+
+	[% constants.siteadmin_name %]
+	[% constants.adminmail %]
 
 [% CASE 'cookiemsg' %]
 	<P>Your browser didn't save a cookie properly. This could mean you are behind a filter that

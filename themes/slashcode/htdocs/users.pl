@@ -583,8 +583,14 @@ sub saveUser {
 
 		$note .= getMessage('changeemail_msg', { realemail => $user_email->{realemail} }, 1);
 
-		my $saveuser_emailtitle = getTitle('saveUser_email_title', { nickname => $user_email->{nickname} }, 1);
-		my $saveuser_email_msg = getMessage('saveuser_email_msg', { nickname => $user_email->{nickname} }, 1);
+		my $saveuser_emailtitle = getTitle('saveUser_email_title', {
+			nickname  => $user_email->{nickname},
+			realemail => $form->{realemail}
+		}, 1);
+		my $saveuser_email_msg = getMessage('saveuser_email_msg', {
+			nickname  => $user_email->{nickname},
+			realemail => $form->{realemail}
+		}, 1);
 		sendEmail($user_email->{realemail}, $saveuser_emailtitle, $saveuser_email_msg);
 	}
 
