@@ -1236,11 +1236,11 @@ sub submitComment {
 	my $pts = 0;
 	my $karma_bonus = 0;
 	my $subscriber_bonus = 0;
-
+	my $tweak = 0;
 	if (!$user->{is_anon} && !$form->{postanon}) {
 		$pts = $user->{defaultpoints};
-		$pts-- if $user->{karma} < 0;
-		$pts-- if $user->{karma} < $constants->{badkarma};
+		$tweak-- if $user->{karma} < 0;
+		$tweak-- if $user->{karma} < $constants->{badkarma};
 		# Enforce proper ranges on comment points.
 		my($minScore, $maxScore) =
 			($constants->{comment_minscore}, $constants->{comment_maxscore});
@@ -1273,6 +1273,8 @@ sub submitComment {
 		subnetid	=> $user->{subnetid},
 		uid		=> $posters_uid,
 		points		=> $pts,
+		tweak		=> $tweak,
+		tweak_orig	=> $tweak,
 		karma_bonus	=> $karma_bonus ? 'yes' : 'no',
 	};
 	if ($constants->{plugin}{Subscribe}) {
