@@ -473,7 +473,6 @@ INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|
 
 # OSDNTEST LAST UPDATED HERE
 # OSDN LAST UPDATED HERE
-# LINUX.COM LAST UPDATED HERE
 
 # Forgot this one a little while ago too.
 # For plugins/Stats (ignore if you're not using that plugin):
@@ -514,3 +513,4 @@ INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_minsubid','
 
 # SLASHCODE LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
+# LINUX.COM LAST UPDATED HERE
