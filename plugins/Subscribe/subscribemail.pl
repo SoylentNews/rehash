@@ -47,7 +47,7 @@ $task{$me}{code} = sub {
 		for my $uid (keys %$subscribers_hr) {
 			$subscribers_hr->{$uid}{is_new} =
 				($subscribers_hr->{$uid}{pages}
-					== $slashdb->getUser($uid, 'pages_paidfor'))
+					== $slashdb->getUser($uid, 'hits_paidfor'))
 				? 1 : 0;
 		}
 
@@ -165,10 +165,12 @@ EOT
 $constants->{sitename} Subscriber Info for yesterday
 $report_link
 $monthly_stats
+   Today
+   -----
 current subscribers: %8d
  former subscribers: %8d
   total subscribers: %8d
-  new subscriptions: %8d
+today subscriptions: %8d
 
 $transaction_list
 EOT
