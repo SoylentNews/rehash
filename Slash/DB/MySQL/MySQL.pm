@@ -1940,7 +1940,7 @@ sub getCommentsByIPIDOrSubnetID {
 	my($self, $id, $num, $min, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $where = "(ipid='$id' OR subnetid='$id') ";
-	$where .= " AND cid >= $constants->{comments_forgetip_min_cid} " if $constants->{comments_forgetip_mincid};
+	$where .= " AND cid >= $constants->{comments_forgetip_mincid} " if $constants->{comments_forgetip_mincid};
 	return $self->getCommentsByGeneric(
                $where, $num, $min, $options);
 }
