@@ -718,7 +718,7 @@ sub sqlUpdate {
 		}
 	}
 	chop $sql; # lose the terminal ","
-	$sql .= "\nWHERE $where\n";
+	$sql .= "\nWHERE $where\n" if $where;
 	my $qlid = $self->_querylog_start("UPDATE", $table);
 	my $rows = $self->sqlDo($sql);
 	$self->_querylog_finish($qlid);
