@@ -28,7 +28,6 @@ use lib '../';
 use vars '%I';
 use Image::Size;
 use Slash;
-use HTML::Entities;
 
 sub main {
 	*I = getSlashConf();

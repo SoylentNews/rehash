@@ -58,7 +58,7 @@ sub main {
 
 	searchForm();
 
-	if		($I{F}{op} eq "comments")	{ commentSearch()	}
+	if	($I{F}{op} eq "comments")	{ commentSearch()	}
 	elsif	($I{F}{op} eq "users")		{ userSearch()		}
 	elsif	($I{F}{op} eq "stories")	{ storySearch()		}
 	else	{
@@ -412,7 +412,7 @@ EOT
 #	Counting has been removed (see comment at top).
 #	my $remaining = $I{F}{hitcount} - $I{F}{'last'};
 	print "<P>", linkSearch({
-		'link'	=> "<B>More Articles</B>",
+		'link'	=> "<B>More Articles...</B>",
 		min	=> $I{F}{'last'}
 	}) unless !$x || $x < $I{F}{max};
 }

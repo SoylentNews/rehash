@@ -55,7 +55,7 @@ slash-1.0.6, 2000.07.10
 	fact that there are some situations where we may want to make
 	certain moderations that don't get applied still applicable to
 	M2 review. comments.pl and article.pl have been made aware of
-	this new field/
+	this new field
 
 *	Metamoderation results are now counted. The number of times a 
 	user's moderation is voted fair or unfair is now counted in

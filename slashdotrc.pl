@@ -73,30 +73,30 @@ my %my_conf = (
 	send_mail	=> 0,
 
 # The following variables can be used to tweak your Slash Moderation
-	authors_unlimited	=> 1,   # authors have unlimited moderation
-	m2_comments	=> 10,		# Number of comments for meta-moderation.
-	m2_maxunfair	=> 0.5,		# Minimum % of unfairs for M2 penalty.
-	m2_toomanyunfair => 0.3,	# Minimum % of unfairs for which M2 is ignored.
-	m2_bonus	=> '+1', 	# Bonus for participating in meta-moderation.
-	m2_penalty	=> '-1',	# Penalty for misuse of meta-moderation.
-	comment_minscore	=> -1,	# Minimum score for a specific comment.
-	comment_maxscore	=> 5,	# Maximum score for a specific comment.
-	goodkarma		=> 25,	# Users get bonus points for posts if karma above this value
-	badkarma		=> -10,	# Users get penalized for posts if karma is below this value
-	metamod_sum		=> 3,   # sum of moderations 1 for release (deprecated)
-	maxtokens		=> 40,	# Token threshold that must be hit to get any points
-	tokensperpoint		=> 8,	# Number of tokens per point
-	maxpoints		=> 5,	# The maximum number of points any moderator can have
-	stir			=> 3,  	# Number of days before unused moderator points expire
-	tokenspercomment	=> 6,	# Number of tokens to feed the system for each comment
-	down_moderations	=> -6,	# number of how many comments you can post that get down moderated
+	authors_unlimited	=> 1,		# authors have unlimited moderation
+	m2_comments		=> 10,		# Number of comments for meta-moderation.
+	m2_maxunfair		=> 0.5,		# Minimum % of unfairs for M2 penalty.
+	m2_toomanyunfair	=> 0.3,		# Minimum % of unfairs for which M2 is ignored.
+	m2_bonus		=> '+1',	# Bonus for participating in meta-moderation.
+	m2_penalty		=> '-1',	# Penalty for misuse of meta-moderation.
+	comment_minscore	=> -1,		# Minimum score for a specific comment.
+	comment_maxscore	=> 5,		# Maximum score for a specific comment.
+	goodkarma		=> 25,		# Users get bonus points for posts if karma above this value
+	badkarma		=> -10,		# Users get penalized for posts if karma is below this value
+	metamod_sum		=> 3,		# sum of moderations 1 for release (deprecated)
+	maxtokens		=> 40,		# Token threshold that must be hit to get any points
+	tokensperpoint		=> 8,		# Number of tokens per point
+	maxpoints		=> 5,		# The maximum number of points any moderator can have
+	stir			=> 3,		# Number of days before unused moderator points expire
+	tokenspercomment	=> 6,		# Number of tokens to feed the system for each comment
+	down_moderations	=> -6,		# number of how many comments you can post that get down moderated
 
 # comment posting and story submission abuse settings
-	post_limit		=> 10,	# seconds delay before repeat posting
-	max_posts_allowed	=> 30,	# maximum number of posts per day allowed
-	max_submissions_allowed => 20,	# maximum number of submissions per timeframe allowed
-	submission_speed_limit	=> 300,	# how fast they can submit
-	formkey_timeframe 	=> 14400, # the time frame that we check for a formkey
+	post_limit		=> 10,		# seconds delay before repeat posting
+	max_posts_allowed	=> 30,		# maximum number of posts per day allowed
+	max_submissions_allowed => 20,		# maximum number of submissions per timeframe allowed
+	submission_speed_limit	=> 300,		# how fast they can submit
+	formkey_timeframe 	=> 14400,	# the time frame that we check for a formkey
 
 	# see Slash::fixHref()
 	fixhrefs => [
@@ -108,14 +108,6 @@ my %my_conf = (
 					$_[0],
 					"Everything that used to be in /malda is now located at http://cmdrtaco.net"
 				);
-			}
-		],
-
-		[
-			qr/^pudge/,
-			sub {
-				$_[0] =~ s|pudge|http://pudge.net|;
-				return($_[0], 0);
 			}
 		],
 

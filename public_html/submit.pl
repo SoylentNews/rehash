@@ -28,7 +28,6 @@ use strict;
 use lib '../';
 use vars '%I';
 use Slash;
-use HTML::Entities;
 
 #################################################################
 sub main {
