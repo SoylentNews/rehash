@@ -280,7 +280,7 @@ sub commentIndex {
 		titlebar("90%", getData('all_discussions'));
 		my $start = $form->{start} || 0;
 		my $discussions = $slashdb->getDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
-		if (@$discussions) {
+		if ($discussions && @$discussions) {
 			my $forward;
 			if (@$discussions == $constants->{discussion_display_limit} + 1) {
 				pop @$discussions;
@@ -308,12 +308,15 @@ sub commentIndex {
 			});
 		} else {
 			print getData('nodiscussions');
+			slashDisplay('discreate', {
+				topic => $constants->{discussion_default_topic}
+			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 		}
 	} else {
 		titlebar("90%", getData('active_discussions'));
 		my $start = $form->{start} || 0;
 		my $discussions = $slashdb->getStoryDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
-		if (@$discussions) {
+		if ($discussions && @$discussions) {
 			my $forward;
 			if (@$discussions == $constants->{discussion_display_limit} + 1) {
 				pop @$discussions;
@@ -341,6 +344,9 @@ sub commentIndex {
 			});
 		} else {
 			print getData('nodiscussions');
+			slashDisplay('discreate', {
+				topic => $constants->{discussion_default_topic}
+			}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 		}
 	}
 }
@@ -354,7 +360,7 @@ sub commentIndexUserCreated {
 	titlebar("90%", getData('user_discussions'));
 	my $start = $form->{start} || 0;
 	my $discussions = $slashdb->getDiscussionsUserCreated($form->{section}, $constants->{discussion_display_limit} + 1, $start);
-	if (@$discussions) {
+	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
 			pop @$discussions;
@@ -382,6 +388,9 @@ sub commentIndexUserCreated {
 		});
 	} else {
 		print getData('nodiscussions');
+		slashDisplay('discreate', {
+			topic => $constants->{discussion_default_topic}
+		}) if $user->{seclev} >= $constants->{discussion_create_seclev};
 	}
 }
 
@@ -407,7 +416,7 @@ sub commentIndexCreator {
 	titlebar("90%", getData('user_discussion', { name => $nickname}));
 	my $start = $form->{start} || 0;
 	my $discussions = $slashdb->getDiscussionsByCreator($form->{section}, $uid, $constants->{discussion_display_limit} + 1, $start);
-	if (@$discussions) {
+	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
 			pop @$discussions;
@@ -448,7 +457,7 @@ sub commentIndexPersonal {
 	titlebar("90%", getData('user_discussion', { name => $user->{nickname}}));
 	my $start = $form->{start} || 0;
 	my $discussions = $slashdb->getDiscussionsByCreator($form->{section}, $user->{uid}, $constants->{discussion_display_limit} + 1, $start);
-	if (@$discussions) {
+	if ($discussions && @$discussions) {
 		my $forward;
 		if (@$discussions == $constants->{discussion_display_limit} + 1) {
 			pop @$discussions;
