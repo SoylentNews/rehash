@@ -591,6 +591,11 @@ the database server.  None of these needs to be capitalized.
 
 =head2 Names
 
+Filenames shall not be longer than 31 characters, because Chris uses
+Mac OS, which limits filenames to 31 characters; and further, he loves
+to be a pain in the ass.  This mostly impacts template names.  Sorry,
+but that's a limit we must live with.
+
 Don't use single-character variables, except as iterator variables.
 
 Don't use two-character variables just to spite us over the above rule.
@@ -602,7 +607,7 @@ change during the course of the program.
 	$MAXIMUM = 50;		# right
 
 Other variables are lowercase, with underscores separating the words. 
-They words used should, in general, form a noun (usually singular),
+The words used should, in general, form a noun (usually singular),
 unless the variable is a flag used to denote some action that should be
 taken, in which case they should be verbs (or gerunds, as appropriate)
 describing that action.
@@ -1042,6 +1047,9 @@ get/gets/set/sets/create/exists/delete
 =head1 CHANGES
 
 	$Log$
+	Revision 1.7  2002/04/15 14:42:17  pudge
+	Add note about 31-char limit
+	
 	Revision 1.6  2002/02/14 20:47:22  pudge
 	Misc. fixes
 	
