@@ -328,7 +328,7 @@ EOT
 		}
 	}
 
-	if ($constants->{mod_stats}) {
+	if ($constants->{mod_stats} && $mod_email =~ /\S/) {
 		for (@{$constants->{mod_stats_reports}}) {
 			sendEmail($_, $mod_data{subject}, $mod_email, 'bulk');
 		}
