@@ -927,7 +927,7 @@ sub createAccessLog {
 		-ts		=> 'NOW()',
 		query_string	=> $ENV{QUERY_STRING} || '0',
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
-	}, 1);
+	}, { delayed => 1 });
 
 =pod
 
@@ -991,7 +991,7 @@ CREATE TABLE palmlog (
 		@palmlog{@direct} = map { defined $_ ? $_ : '' } @ENV{@direct};
 		@palmlog{@base64} = map { decode_base64($_) } @ENV{@base64};
 
-		$self->sqlInsert('palmlog', \%palmlog, 1);
+		$self->sqlInsert('palmlog', \%palmlog, { delayed => 1 });
 	}
 }
 

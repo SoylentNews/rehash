@@ -43,7 +43,7 @@ sub createStatDaily {
 			'day' => $day,
 			'name' => $name,
 			'value' => $value,
-	});
+	}, { ignore => 1 });
 }
 
 ########################################################

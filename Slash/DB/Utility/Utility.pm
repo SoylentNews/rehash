@@ -507,11 +507,13 @@ sub sqlDelete {
 
 ########################################################
 sub sqlInsert {
-	my($self, $table, $data, $delayed) = @_;
+	my($self, $table, $data, $delayed, $options) = @_;
 	my($names, $values);
 	# oddly enough, this hack seems to work for all DBs -- pudge
 	# Its an ANSI sql comment I believe -Brian
 	$delayed = $delayed ? " /*! DELAYED */" : "";
+	$delayed = $options->{delayed} ? " /*! DELAYED */" : "";
+	$ignore = $options->{ignore} ? " /*! IGNORE */" : "";
 
 	for (keys %$data) {
 		if (/^-/) {
@@ -526,7 +528,7 @@ sub sqlInsert {
 	chop($names);
 	chop($values);
 
-	my $sql = "INSERT$delayed INTO $table ($names) VALUES($values)\n";
+	my $sql = "INSERT $ignore $delayed INTO $table ($names) VALUES($values)\n";
 	return $self->sqlDo($sql);
 }
 
