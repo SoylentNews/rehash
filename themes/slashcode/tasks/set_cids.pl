@@ -15,7 +15,7 @@ use Slash::Constants ':slashd';
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-$task{$me}{timespec} = '*/10 * * * *';
+$task{$me}{timespec} = '5-59/10 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 
