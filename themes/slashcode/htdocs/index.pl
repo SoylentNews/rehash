@@ -109,16 +109,15 @@ my $start_time = Time::HiRes::time;
 
 	return do_rss($reader, $constants, $user, $form, $stories, $section) if $rss;
 
-	my $title = getData('head', { section => $section });
-	header($title, $section->{section}) or return;
-
-	# TIMING MARKPOINT
-	# Median 0.090 seconds, 90th percentile 0.145 seconds
+	# See comment in plugins/Journal/journal.pl for its call of
+	# getSectionColors() as well.
+	Slash::Utility::Anchor::getSectionColors();
 
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the
 	# index_more block (aka Older Stuff).
-	$Stories = displayStories($stories);
+	my $linkrel = {};
+	$Stories = displayStories($stories, $linkrel);
 
 	# TIMING MARKPOINT
 	# Median 0.437 seconds, 90th percentile 1.078 seconds
@@ -137,6 +136,12 @@ my $start_time = Time::HiRes::time;
 
 	# TIMING MARKPOINT
 	# Median 0.235 seconds, 90th percentile 0.513 seconds
+
+	my $title = getData('head', { section => $section });
+	header({ title => $title, link => $linkrel }, $section->{section}) or return;
+
+	# TIMING MARKPOINT
+	# Median 0.090 seconds, 90th percentile 0.145 seconds
 
 	slashDisplay('index', {
 		metamod_elig	=> scalar $reader->metamodEligible($user),
@@ -366,7 +371,7 @@ sub displayStandardBlocks {
 #################################################################
 # pass it how many, and what.
 sub displayStories {
-	my($stories, $info_hr) = @_;
+	my($stories, $linkrel) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
@@ -509,6 +514,7 @@ sub displayStories {
 			tomorrow	=> $tomorrow,
 			yesterday	=> $yesterday,
 			week_ago	=> $week_ago,
+			linkrel		=> $linkrel,
 		}, { Return => 1 });
 	}
 

@@ -55,7 +55,17 @@ END %]
 
 
 
-[% IF env.script_name.search('article\.pl');
+[% IF env.script_name.search('index\.pl');
+	IF link.prev; tmp = BLOCK -%]
+<LINK REL="prev"      TITLE="[% link.prev.title | strip_attribute %]" HREF="[% link.prev.url %]">
+	[%- END; linkrels.push(tmp); END;
+	    IF link.next; tmp = BLOCK -%]
+<LINK REL="next"      TITLE="[% link.next.title | strip_attribute %]" HREF="[% link.next.url %]">
+	[%- END; linkrels.push(tmp); END;
+
+
+
+ELSIF env.script_name.search('article\.pl');
 	IF link.prev; tmp = BLOCK -%]
 <LINK REL="prev"      TITLE="[% link.prev.title | strip_attribute %]" HREF="[% constants.rootdir %]/article.pl?sid=[% link.prev.sid %]">
 	[%- END; linkrels.push(tmp); END;
