@@ -8515,6 +8515,16 @@ sub getMenus {
 }
 
 ########################################################
+# for ubb_like_forums
+sub getForumDescriptions {
+	my($self, $forum_id);
+
+	my $desc = $self->sqlSelect('comment', 'comments, comment_text', "comments.cid=comment_text.cid AND sid=$forum_id", 'ORDER BY comments.cid ASC LIMIT 1');
+
+	return $desc;
+}
+
+########################################################
 sub sqlReplace {
 	my($self, $table, $data) = @_;
 	my($names, $values);
