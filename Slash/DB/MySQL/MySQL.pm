@@ -414,16 +414,16 @@ sub createModeratorLog {
 	$active = 1 unless defined $active;
 	$points_spent = 1 unless defined $points_spent;
 
-	my $m2_base;
+	my $m2_base = 0;
 	if ($constants->{m2_inherit}) {
 		my $mod = $self->getModForM2Inherit($user->{uid}, $comment->{cid}, $reason);
 		if ($mod) {
 			$m2_base = $mod->{m2needed};
 		} else {
-			$m2_base = $self->getBaseM2Needed($comment->{cid}, $reason) || getCurrentStatic('m2_status');
+			$m2_base = $self->getBaseM2Needed($comment->{cid}, $reason) || getCurrentStatic('m2_consensus');
 		}
 	} else {
-		$m2_base = $self->getBaseM2Needed($comment->{cid}, $reason) || getCurrentStatic('m2_status');
+		$m2_base = $self->getBaseM2Needed($comment->{cid}, $reason) || getCurrentStatic('m2_consensus');
 	}
 
 	$m2needed ||= 0;
@@ -498,7 +498,7 @@ sub getInheritedM2sForMod {
 	my ($self, $mod_uid, $cid, $reason, $active, $id) = @_;
 	return [] unless $active;
 	my $mod = $self->getModForM2Inherit($mod_uid, $cid, $reason, $id);
-	my $p_mid = defined $mod ? undef : $mod->{id};
+	my $p_mid = defined $mod ? $mod->{id} : undef;
 	return [] unless $p_mid;
 	my $m2s = $self->sqlSelectAllHashrefArray("*", "metamodlog", "mmid=$p_mid ");
 	return $m2s;
