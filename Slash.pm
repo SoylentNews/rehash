@@ -1917,7 +1917,7 @@ EOT
 			}
 		}
 		print qq!\t</TD></TR>\n\t<TR><TD BGCOLOR="$I{bg}[2]" ALIGN="CENTER">\n!;
-		print "\t\t&lt;&lt", linkComment($comments->[$p], 1) if $p;
+		print "\t\t&lt;&lt;", linkComment($comments->[$p], 1) if $p;
 		print ' | ', linkComment($comments->[$pid], 1) if $C->{pid};
 		print ' | ', linkComment($comments->[$n], 1), "&gt;&gt;\n" if $n;
 		print qq!\t</TD></TR>\n\t<TR><TD ALIGN="CENTER">!;
@@ -2144,11 +2144,9 @@ sub dispComment  {
 <B><FONT SIZE="${\( $I{fontbase} + 2 )}">($C->{fakeemail})</FONT></B>
 EOT
 
-	$C->{nickname} =~ s/ /+/g;
-
-	(my $anon_name = $I{anon_name}) =~ s/ /+/g;
-	my $userinfo = <<EOT unless $C->{nickname} eq $anon_name;
-(<A HREF="$I{rootdir}/users.pl?op=userinfo\&nick=$C->{nickname}">User Info</A>)
+	(my $nickname  = $C->{nickname}) =~ s/ /+/g;
+	my $userinfo = <<EOT unless $C->{nickname} eq $I{anon_name};
+(<A HREF="$I{rootdir}/users.pl?op=userinfo\&nick=$nickname">User Info</A>)
 EOT
 
 	my $userurl = qq!<A HREF="$C->{homepage}">$C->{homepage}</A><BR>!
