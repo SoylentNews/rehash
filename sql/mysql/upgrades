@@ -2761,8 +2761,6 @@ ALTER TABLE discussions ADD COLUMN archivable enum("no","yes") DEFAULT 'yes' NOT
 
 UPDATE vars SET value=300 WHERE name='freshenup_max_stories';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_38, Start of T_2_5_0_39 - 2004/11/23
 
 ALTER TABLE dbs ADD UNIQUE type_vu (type, virtual_user);
@@ -2809,4 +2807,6 @@ DELETE FROM vars where name in
 "discussionrecycle", "get_titles", "m2_if_smoother", "m2_range_offset", "messages_send_maxsize", "mod_elig_hoursback", "paypal", 
 "prepuser_backup_prob", "selectcomm_backup_prob", "siteowner", "submissions_listing_page_size", "subnet_karma_comments_needed", "test", "today", "zoo_process_limit", "zoo_timer");
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
+# End of T_2_5_0_40, Start of T_2_5_0_41 - 2004/11/30
