@@ -286,6 +286,8 @@ sub templateEdit {
 	my($templatedelete_flag, $templateedit_flag, $templateform_flag) = 0;
 	my $pagehashref = {};
 	$title = getTitle('templateEdit-title', {}, 1);
+	#Just to punish those section only admins! -Brian
+	$form->{section} = $user->{section} if $user->{section};
 
 	if ($form->{templatenew} || $form->{templatepage} || $form->{templatesection}) {
 		$tpid = '';
@@ -469,6 +471,8 @@ sub blockEdit {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	my($bid);
+	# Control for section editors when editing blocks -Brian
+	$form->{section} = $user->{section} if $user->{section};
 
 	if ($form->{blocksave} || $form->{blocksavedef}) {
 		blockSave($form->{thisbid});
