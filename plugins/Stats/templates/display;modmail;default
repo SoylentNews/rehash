@@ -14,8 +14,8 @@ __template__
 [% constants.sitename %] Moderation Stats for [% day %]
 
      comments: [% comments %] posted yesterday
-   modlog avg: [% modlog %] rows (not counting [% modlog_inactive_percent %]% inactive)
-    m2log avg: [% metamodlog %] rows total ([% xmodlog %] modlog) (not counting [% metamodlog_inactive_percent %]% inactive)
+   modlog all: [% modlog %] rows (not counting [% modlog_inactive_percent %]% inactive)
+    m2log all: [% metamodlog %] rows ([% xmodlog %] modlog) (not counting [% metamodlog_inactive_percent %]% inactive)
   modlog yest: [% modlog_yest %] rows (not counting [% modlog_inactive_percent_yest %]% inactive)
    m2log yest: [% metamodlog_yest %] rows ([% xmodlog_yest %] modlog) (not counting [% metamodlog_inactive_percent_yest %]% inactive)
     consensus: [% consensus %]
@@ -23,8 +23,8 @@ __template__
    used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
       used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
       used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
-oldest unM2'd: [% IF oldest_unm2d_days %][% oldest_unm2d_days %] days[% ELSE %](n/a)[% END %]
- youngest mod: uid [% youngest_modelig_uid %], created on [% youngest_modelig_created %]
+oldest unM2'd: [% IF oldest_unm2d_days > -1 %][% oldest_unm2d_days %] days[% ELSE %](n/a)[% END %]
+youngest elig: uid [% youngest_modelig_uid %], created on [% youngest_modelig_created %]
 
 [% m2_text; admin_mods_text %]
 [% IF repeat_mods;
