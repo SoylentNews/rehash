@@ -52,6 +52,9 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 
 [% END %]
 
+<p>[% PROCESS titlebar title => 'Dilemma-Related Stories' width='100%' %]
+<br>
+
 [% stories %]
 
 [% UNLESS user.noboxes %]
