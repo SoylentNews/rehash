@@ -53,14 +53,15 @@ __template__
 <P>
 Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these icons mean </A> or <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> where you change their values?</A>
 <P>
+<FONT COLOR="[% user.bg.3 %]" size="+1"><B>Your Friends who are ...</B></FONT><br>
 <TABLE WIDTH="100%">
 	<TR>
 		<TD>
-			<P><FONT COLOR="[% user.bg.3 %]"><B>Fans of <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
+			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Friend</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
 			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])</A> [% END %]
 		</TD>
 		<TD>
-			<P><FONT COLOR="[% user.bg.3 %]"><B>Freaks of <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
+			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Foe</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
 			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])</A> [% END %]
 		</TD>
 	</TR>
