@@ -471,6 +471,7 @@ CREATE TABLE moderatorlog (
 	spent tinyint DEFAULT '1' NOT NULL,
 	m2count mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	m2status tinyint DEFAULT '0' NOT NULL,
+	points_orig tinyint DEFAULT NULL,
 	PRIMARY KEY (id),
 	KEY sid (sid,cid),
 	KEY sid_2 (sid,uid,cid),

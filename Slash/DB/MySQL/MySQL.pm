@@ -481,6 +481,7 @@ sub createModeratorLog {
 		-ts	=> 'NOW()',
 		active 	=> $active,
 		spent	=> $points_spent,
+		points_orig => $comment->{points},
 	});
 }
 
