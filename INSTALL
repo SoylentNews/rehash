@@ -332,6 +332,14 @@ INSTALLATION
         nothing but a long list of modules that are "up to date," you are
         done. Until you see that, you are not done with this step!
 
+        If you wish to take full advantage of Slash, there are some plugins
+        not installed and vars not turned on by default, which provide
+        additional features, improve performance, or help in testing, which
+        require additional perl modules and sometimes non-perl libraries.
+        See the listing at the bottom of Bundle/Slash.pm, and see also the
+        tips in plugins/Admin/README, plugins/HumanConf/INSTALL-NOTES, and
+        plugins/Stats/README.
+
     5.  Install Slash.
 
         Unpack the distribution and go to the new directory that creates,

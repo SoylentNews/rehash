@@ -37,7 +37,7 @@ INSERT INTO vars (name, value, description) VALUES ('similarstorymaxwords', '30'
 INSERT INTO vars (name, value, description) VALUES ('similarstoryminweight', '4', 'Minimum weight necessary for a story to be displayed as similar');
 INSERT INTO vars (name, value, description) VALUES ('similarstorynumshow', '5', 'Maximum number of similar stories to show in admin preview');
 INSERT INTO vars (name, value, description) VALUES ('topic_popup_defaultweight', '10', 'Default weight for new topics in the popup menu (should probably match default for topic_parents.min_weight)');
-INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw', '1', 'Draw the images/topic_tree.png?');
+INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw', '0', 'Draw the images/topic_tree.png? (turned off by default to avoid making GraphViz a Slash requirement)');
 INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontname', 'freefont/FreeMono', 'Name of font used for labels in the topic tree');
 INSERT INTO vars (name, value, description) VALUES ('topic_tree_draw_fontsize', '10', 'Size of font used for labels in the topic tree');
 INSERT INTO vars (name, value, description) VALUES ('topic_tree_lastchange', '1', 'Unix timestamp of last change to the topic tree');
