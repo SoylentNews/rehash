@@ -92,6 +92,7 @@ __template__
 
 				<TD VALIGN="MIDDLE"><B>User</B></TD>
 				<TD><INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]">
+					[% IF form.fieldname %]<INPUT TYPE="HIDDEN" NAME="fieldname" VALUE="[% form.fieldname | strip_attribute %]">[% END %]
 					<INPUT TYPE="SUBMIT" NAME="userinfo" VALUE="Info">
 					<INPUT TYPE="SUBMIT" NAME="edituser" VALUE="Edit">
 					<INPUT TYPE="SUBMIT" NAME="changepasswd" VALUE="Password">
