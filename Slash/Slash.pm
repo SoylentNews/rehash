@@ -1268,9 +1268,7 @@ sub getOlderStories {
 		$story->{month} = $month;
 		$story->{day} = $day;
 		$story->{secs} = $secs;
-		unless ($story->{issue}) {
-			$story->{issue} = timeCalc($story->{time}, '%Y%m%d');
-		}
+		$story->{issue} ||= timeCalc($story->{time}, '%Y%m%d');
 		$story->{'link'} = linkStory({
 			'link'  => $story->{title},
 			sid     => $story->{sid},
