@@ -6354,7 +6354,7 @@ sub getUser {
 		for (@param) {
 			# First we try it as an acl param -acs
 			my $val = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$_'");
-			$val = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$_'") if !$val;
+			$val = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$_'") if !defined $val;
 			$answer->{$_} = $val;
 		}
 
@@ -6366,7 +6366,7 @@ sub getUser {
 		} else {
 			# First we try it as an acl param -acs
 			$answer = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$val'");
-			$answer = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$val'") if !$answer;
+			$answer = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$val'") if !defined $answer;
 		}
 
 	} else {
