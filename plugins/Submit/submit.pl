@@ -549,7 +549,8 @@ sub saveSub {
 			$submission->{$key} = strip_nohtml($form->{$key}) if $form->{$key};
 		}
 	}
-	$submission->{subid} = $slashdb->createSubmission($submission);
+	my $messagesub = { %$submission };
+	$messagesub->{subid} = $slashdb->createSubmission($submission);
 	# $slashdb->formSuccess($form->{formkey}, 0, length($form->{subj}));
 
 	my $messages = getObject('Slash::Messages');
@@ -558,12 +559,12 @@ sub saveSub {
 		my $data  = {
 			template_name	=> 'messagenew',
 			subject		=> { template_name => 'messagenew_subj' },
-			submission	=> $submission,
+			submission	=> $messagesub,
 		};
 		for (@$users) {
 # XXXSKIN - no "section" restriction
 #			my $user_section = $slashdb->getUser($_, 'section');
-#			next if ($user_section && $user_section ne $submission->{section});
+#			next if ($user_section && $user_section ne $messagesub->{section});
 			$messages->create($_, MSG_CODE_NEW_SUBMISSION, $data);
 		}
 	}
