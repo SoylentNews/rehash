@@ -29,7 +29,7 @@ sub main {
 			function	=> \&save,
 			seclev		=> 1,
 		},
-		paypal		=> {
+		paypal		=> {	# left in for historical reasons
 			function	=> \&makepayment,
 			seclev		=> 1,
 		},
@@ -166,7 +166,8 @@ sub makepayment {
 		print "<p>Payment rejected, wrong secretword\n";
 	}
 
-	my @keys = qw( uid email payment_gross payment_net transaction_id data );
+	my @keys = qw( uid email payment_gross payment_net
+		method transaction_id data );
 	my $payment = { };
 	for my $key (@keys) {
 		$payment->{$key} = $form->{$key};

@@ -165,6 +165,7 @@ sub convertPagesToDollars {
 #	payment_net	payment received by site after fees
 #	pages		number of pages user will receive
 #	transaction_id	(optional) any ID you'd use to identify this payment
+#	method		(optional) string representing payment method
 #	data		(optional) any additional data
 sub insertPayment {
 	my($self, $payment) = @_;
@@ -219,7 +220,8 @@ sub getSubscriberList {
 		"spid",
 		"spid,
 		 subscribe_payments.uid as uid,
-		 email, ts, payment_gross, payment_net, pages, transaction_id, data,
+		 email, ts, payment_gross, payment_net, pages, 
+		 method, transaction_id, data,
 		 nickname, realemail, seclev, author,
 		 karma, m2fair, m2unfair, upmods, downmods, created_at,
 		 users_hits.hits as hits, hits_bought, hits_paidfor",

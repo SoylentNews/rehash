@@ -197,3 +197,6 @@ CREATE TABLE slashd_status (
 ALTER TABLE section_topics DROP PRIMARY KEY;
 ALTER TABLE section_topics ADD PRIMARY KEY (section,type,tid);
 
+# Change for plugins/Subscribe
+ALTER TABLE subscribe_payments ADD COLUMN method VARCHAR(6) AFTER transaction_id;
+
