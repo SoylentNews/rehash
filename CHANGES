@@ -1,3 +1,20 @@
+slash-2.2.0, 2001.11.07
+-----------------------
+
+*	Fix multi-language date handling (Alessio Bragadini)
+
+*	More minor changes to formatting, parameter checking and
+	filtering, seclevs, etc.
+
+*	More changes to stats report
+
+*	"section" field added to accesslog table (really changed
+	in slash 2.1.1, but not documented):
+		ALTER TABLE accesslog ADD
+		section varchar(30) DEFAULT 'index' NOT NULL;
+
+*	Added two keys to moderatorlog schema
+
 slash-2.1.1, 2001.10.31
 -----------------------
 

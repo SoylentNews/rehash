@@ -169,7 +169,6 @@ plugins/Admin/templates/ispellok;admin;default
 plugins/Admin/templates/keywordEdit;admin;default
 plugins/Admin/templates/listFilters;admin;default
 plugins/Admin/templates/listStories;admin;default
-plugins/Admin/templates/listTopics;admin;default
 plugins/Admin/templates/messages;admin;default
 plugins/Admin/templates/otherLinks;admin;default
 plugins/Admin/templates/relatedlinks;admin;default
@@ -402,7 +401,6 @@ themes/slashcode/templates/editUser;users;default
 themes/slashcode/templates/edit_comment;comments;default
 themes/slashcode/templates/editpoll;pollBooth;default
 themes/slashcode/templates/errors;comments;default
-themes/slashcode/templates/errors;metamod;default
 themes/slashcode/templates/errors;users;default
 themes/slashcode/templates/fancybox;misc;default
 themes/slashcode/templates/fancybox;misc;light

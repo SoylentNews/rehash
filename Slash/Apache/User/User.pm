@@ -20,7 +20,7 @@ use URI ();
 use vars qw($REVISION $VERSION @ISA @QUOTES $USER_MATCH);
 
 @ISA		= qw(DynaLoader);
-$VERSION   	= '2.001001';  # v2.1.1
+$VERSION   	= '2.003000';  # v2.3.0
 ($REVISION)	= ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 bootstrap Slash::Apache::User $VERSION;
@@ -333,34 +333,50 @@ sub userdir_handler {
 		# this won't work if the nick has a "/" in it ...
 		my($nick, $op) = split /\//, $1, 3;
 		$nick = fixparam($nick);	# make safe to pass back to script
+
+		# maybe we should refactor this code a bit ...
+		# have a hash that points op to args and script name -- pudge
+		# e.g.:
+		# my %ops = ( journal => ['/journal.pl', 'op=display'], ... );
+		# $r->args($ops{$op}[1] . "&nick=$nick");
+		# $r->uri($ops{$op}[0]);
+		# $r->filename($constants->{basedir} . $ops{$op}[0]);
+
 		if ($op eq 'journal') {
-			$r->args("nick=$nick&op=display");
+			$r->args("op=display&nick=$nick");
 			$r->uri('/journal.pl');
 			$r->filename($constants->{basedir} . '/journal.pl');
+
 		} elsif ($op eq 'discussions') {
-			$r->args("nick=$nick&op=creator_index");
+			$r->args("op=creator_index&nick=$nick");
 			$r->uri('/comments.pl');
 			$r->filename($constants->{basedir} . '/comments.pl');
+
 		} elsif ($op eq 'pubkey') {
 			$r->args("nick=$nick");
 			$r->uri('/pubkey.pl');
 			$r->filename($constants->{basedir} . '/pubkey.pl');
+
 		} elsif ($op eq 'friends') {
 			$r->args("op=friends&nick=$nick");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
+
 		} elsif ($op eq 'fans') {
 			$r->args("op=fans&nick=$nick");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
+
 		} elsif ($op eq 'foes') {
 			$r->args("op=foes&nick=$nick");
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
+
 		} else {
+			$r->args("nick=$nick");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
-			$r->args("nick=$nick");
+
 		}
 		return OK;
 	}

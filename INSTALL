@@ -2,10 +2,9 @@ NAME
     INSTALL - Slash Installation
 
 SYNOPSIS
-    This document describes how to install Slash 2.1/2.2 (where you see
-    "2.2" you may safely assume "2.1", except where specified). For
-    instructions on installation or upgrade of previous versions of Slash,
-    see the INSTALL document included with those distributions.
+    This document describes how to install Slash 2.2. For instructions on
+    installation or upgrade of previous versions of Slash, see the INSTALL
+    document included with those distributions.
 
     These instructions have only been tested on Linux. Installation under
     BSD and other Unix OSes should work similarly, but there are problems

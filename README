@@ -1,15 +1,6 @@
 NAME
     README - Slash Readme
 
-WARNING
-    This release is BETA software. It is not intended or recommended for
-    production use, and is constantly changing. Please use this only for
-    development and testing purposes.
-
-    The upgrade procedures are available (the INSTALL manpage). Standard
-    disclaimer applies. Please test them if you are so inclined, and let us
-    know how they work for you.
-
 DESCRIPTION
     Slash -- Slashdot Like Automated Storytelling Homepage -- is the code
     that runs Slashdot. More than that, however, Slash is an architecture
