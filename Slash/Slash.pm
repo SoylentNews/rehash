@@ -1480,9 +1480,6 @@ sub getData {
 	my $cache=getCurrentCache();
 	_dataCacheRefresh($cache);
 	
-	use Data::Dumper;
-	print STDERR "CACHE: ".Dumper($cache->{getdata})."\n";
-	
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	$hashref->{returnme} = {};
