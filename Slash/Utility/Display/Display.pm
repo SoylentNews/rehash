@@ -1530,10 +1530,10 @@ sub _slashStory {
 
 	my $content;
 	if ($storylinks->[0] && $storylinks->[2]) {
-		$content = '<A HREF="' . $storylinks->[0] . '"';
+		$content = '<A HREF="' . strip_attribute($storylinks->[0]) . '"';
 		$content .= ' TITLE="' . strip_attribute($storylinks->[2]) . '"'
 			if $storylinks->[2] ne '';
-		$content .= '>' . $storylinks->[1] . '</A>';
+		$content .= '>' . strip_html($storylinks->[1]) . '</A>';
 	}
 
 	$content ||= Slash::getData('SLASH-UNKNOWN-STORY');
