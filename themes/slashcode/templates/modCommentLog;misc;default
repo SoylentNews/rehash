@@ -36,7 +36,7 @@ __template__
 [% IF show_modder %]<TH COLSPAN="2"><FONT COLOR="[% user.fg.3 %]"> 
 		[% IF mod_to_from == 'to' %]moderatee[% ELSE %]moderator[% END %]
 </FONT></TH>
-		[% IF both_mods %]<TH COLSPAN="2"><FONT COLOR="[% users.fg.3 %]">moderatee</FONT></TH>[% END %]
+		[% IF both_mods %]<TH COLSPAN="2"><FONT COLOR="[% user.fg.3 %]">moderatee</FONT></TH>[% END %]
 [% END %]
 		<TH><FONT COLOR="[% user.fg.3 %]"> time </FONT></TH>
 		<TH>&nbsp;</FONT></TH>
