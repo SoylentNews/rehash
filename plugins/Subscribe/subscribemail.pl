@@ -152,36 +152,33 @@ $task{$me}{code} = sub {
 	if ($constants->{plugin}{Stats}) {
 		$report_link = "\n$constants->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
 		if ($statsSave and my $stats = getObject('Slash::Stats')) {
+
+			# For a series of stats, calculate the last 30 days'
+			# mean value of each stat, pushing them onto our
+			# @stats array as we go.  The @stats array order is
+			# important because it is fed to a sprintf() which
+			# formats it for the email.  Each value is also
+			# stored in stats_daily with "_last30" appended to
+			# its name.
+
 			my @stats = ( );
 
-			my $tmp = $stats->getStatLastNDays("subscribe_new_users", 30) || 0;
-			$statsSave->createStatDaily('subscribe_new_users_last30', $tmp);
-			push @stats, $tmp;
-			$tmp = $stats->getStatLastNDays("subscribe_new_pages", 30) || 0;
-			$statsSave->createStatDaily('subscribe_new_pages_last30', $tmp);
-			push @stats, $tmp;
-			$tmp = $stats->getStatLastNDays("subscribe_new_payments", 30) || 0;
-			$statsSave->createStatDaily('subscribe_new_payments_last30', $tmp);
-			push @stats, $tmp;
-			$tmp = $stats->getStatLastNDays("subscribe_renew_users", 30) || 0;
-			$statsSave->createStatDaily('subscribe_renew_users_last30', $tmp);
-			push @stats, $tmp;
-			$tmp = $stats->getStatLastNDays("subscribe_renew_pages", 30) || 0;
-			$statsSave->createStatDaily('subscribe_renew_pages_last30', $tmp);
-			push @stats, $tmp;
-			$tmp = $stats->getStatLastNDays("subscribe_renew_payments", 30) || 0;
-			$statsSave->createStatDaily('subscribe_renew_payments_last30', $tmp);
-			push @stats, $tmp;
+			for my $name (qw(
+				subscribe_new_users	subscribe_new_pages	subscribe_new_payments
+				subscribe_renew_users	subscribe_renew_pages	subscribe_renew_payments
+			)) {
+				_do_last30($stats, $statsSave, \@stats, $name);
+			}
+
 			push @stats, $stats[0]+$stats[3];
 			push @stats, $stats[1]+$stats[4];
 			push @stats, $stats[2]+$stats[5];
-			$tmp = $stats->getStatLastNDays("subscribe_hits_bought", 30) || 0;
-			push @stats, $tmp;
-			$statsSave->createStatDaily('subscribe_hits_bought_last30', $tmp);
-			$tmp = $subscribe->convertPagesToDollars($stats[-1]);
-			push @stats, $tmp;
-			$statsSave->createStatDaily('subscribe_dollars_bought_last30', $tmp);
-			push @stats, $stats->getStatLastNDays("subscribe_runout",		30) || 0;
+
+			_do_last30($stats, $statsSave, \@stats, "subscribe_hits_bought");
+			_do_last30($stats, $statsSave, \@stats, "subscribe_dollars_bought",
+				$subscribe->convertPagesToDollars($stats[-1]) );
+			_do_last30($stats, $statsSave, \@stats, "subscribe_runout");
+
 			$monthly_stats = sprintf(<<EOT, @stats);
    Monthly Stats (Average Per Day)
    -------------------------------
@@ -192,6 +189,7 @@ Total:      %5.2f   %5d   \$%7.2f
 Used up:            %5d   \$%7.2f
 Ran out:    %5.2f
 EOT
+
 		}
 	}
 
@@ -238,6 +236,13 @@ EOT
 
 	return ;
 };
+
+sub _do_last30 {
+	my($stats, $statsSave, $stats_ar, $name, $value) = @_;
+	$value ||= $stats->getStatLastNDays($name, 30) || 0;
+	$statsSave->createStatDaily("${name}_last30", $value);
+	push @$stats_ar, $value;
+}
 
 1;
 
