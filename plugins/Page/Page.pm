@@ -295,20 +295,25 @@ sub getLinksContent {
 	
 	if ($storyref->{section} ne $constants->{defaultsection} 
 		&& !$form->{section}) {
+
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $SECT = $reader->getSection($storyref->{section});
 		my $url;
 		if ($SECT->{rootdir}) {
-			my $url = $SECT->{rootdir} . '/';
+			$url = "$SECT->{rootdir}/";
 		} elsif ($user->{is_anon}) {
-			$url = $constants->{rootdir} . '/' . $story->{section} . '/';
+			$url = "$constants->{rootdir}/$storyref->{section}/";
 		} else {
-			$url = $constants->{rootdir} . '/index.pl?section=' . $story->{section};
+			$url = "$constants->{rootdir}/index.pl?section=$storyref->{section}";
 		}
 		push @links, [ $url, $SECT->{title} ];
 	}
 
 	if ($user->{seclev} >= 100) {
-		push @links, [ "$constants->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", 'Edit' ];
+		push @links, [
+			"$constants->{rootdir}/admin.pl?op=edit&sid=$storyref->{sid}",
+			'Edit'
+		];
 	}
 
 	my $storycontent = 
