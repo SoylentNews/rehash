@@ -148,6 +148,12 @@ sub main {
 			adminmenu	=> 'info',
 			tab_selected	=> 'recent',
 		},
+		recent_mods		=> {
+			function	=> \&displayRecentMods,
+			seclev		=> 500,
+			adminmenu	=> 'info',
+			tab_selected	=> 'recent_mods',
+		},
 		recent_requests		=> {
 			function	=> \&displayRecentRequests,
 			seclev		=> 500,
@@ -1863,6 +1869,11 @@ sub moderate {
 
 
 ##################################################################
+sub displayRecentMods {
+	my($form, $slashdb, $user, $constants) = @_;
+	slashDisplay('recent_mods');
+}
+
 sub displayRecent {
 	my($form, $slashdb, $user, $constants) = @_;
 	my($min, $max) = (undef, undef);

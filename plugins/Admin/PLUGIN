@@ -23,6 +23,7 @@ template=templates/messages;admin;default
 template=templates/otherLinks;admin;default
 template=templates/recent;admin;default
 template=templates/recent_requests;admin;default
+template=templates/recent_mods;admin;default
 template=templates/recent_subs;admin;default
 template=templates/recent_webheads;admin;default
 template=templates/relatedlinks;admin;default
