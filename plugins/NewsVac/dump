@@ -18,14 +18,14 @@ INSERT INTO spider VALUES (1,'allminers',20000822190727,'jamie','','[ \'url_info
 # Dumping data for table 'miner'
 #
 
-INSERT INTO miner VALUES (2,'none',20000629201648,'God','God','broken','','','','','','ThisTextIsNotExpectedToMatchAnything','','This is a placeholder, do not edit this. -Slashteam');
-INSERT INTO miner VALUES (1,'osdn',20020409034422,'God','God','ok','','','(?i)^(.+)<!-- begin osdnpress -->','(?i)<!-- end osdnpress -->(.+)$','url title','(?i)<li><a[ ]HREF=\"\r\n(.+?)\r\n\">\r\n(.+?)\r\n</a></li>','$source = \"OSDN\";','This is the default miner for NewsVac which checks OSDN\'s website.');
+INSERT INTO miner (miner_id, name, last_edit, last_edit_aid, owner_aid, progress, pre_stories_text, post_stories_text, pre_stories_regex, post_stories_regex, extract_vars, extract_regex, tweak_code, comment) VALUES (2,'none',20000629201648,'God','God','broken','','','','','','ThisTextIsNotExpectedToMatchAnything','','This is a placeholder, do not edit this. -Slashteam');
+INSERT INTO miner (miner_id, name, last_edit, last_edit_aid, owner_aid, progress, pre_stories_text, post_stories_text, pre_stories_regex, post_stories_regex, extract_vars, extract_regex, tweak_code, comment) VALUES (1,'osdn',20020409034422,'God','God','ok','','','(?i)^(.+)<!-- begin osdnpress -->','(?i)<!-- end osdnpress -->(.+)$','url title','(?i)<li><a[ ]HREF=\"\r\n(.+?)\r\n\">\r\n(.+?)\r\n</a></li>','$source = \"OSDN\";','This is the default miner for NewsVac which checks OSDN\'s website.');
 
 #
 # Dumping data for table 'url_info'
 #
 
-INSERT INTO url_info (url_id, url_digest, url, url_base, is_success, last_attempt, last_success, believed_fresh_until, status_code, reason_phrase, content_type, title, miner_id) VALUES (1,'ltbapcrhN90oj3TKp/wPyg','http://www.osdn.com/',NULL,1,'2002-04-09 07:39:41','2002-04-09 07:39:41','2002-04-09 08:39:41',200,'OK','text/html; charset=ISO-8859-1','OSDN: Open Source Development Network',1);
+INSERT INTO url_info (url_id, url_digest, url, url_base, is_success, last_attempt, last_success, believed_fresh_until, status_code, reason_phrase, content_type, title, miner_id) VALUES (1,'96d6daa5cae137dd288f74caa7fc0fca','http://www.osdn.com/',NULL,1,'2002-04-09 07:39:41','2002-04-09 07:39:41','2002-04-09 08:39:41',200,'OK','text/html; charset=ISO-8859-1','OSDN: Open Source Development Network',1);
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin', 'NewsVac', '[% constants.rootdir %]/newsvac.pl', 5000, 100);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('newsvac','Miners','[% constants.rootdir %]/newsvac.pl?op=listminers',10000,1);
@@ -43,5 +43,3 @@ INSERT INTO vars (name, value, description) VALUES ('newsvac_admin_seclev', 1000
 INSERT INTO vars (name, value, description) VALUES ('newsvac_min_weight', 10, 'Minimum weight to submit a story.');
 INSERT INTO vars (name, value, description) VALUES ('slashd_max_spiders','1','Maximum number of spiders to run in any given call to the run_spider.pl task. To disable set this value to 0. Warning: Disabling this limit will cause ALL SPIDERS that are stale to be executed the next time the run_spider task is executed. This may cause a lot of tasks to back up depending on your spidering set.');
 UPDATE vars SET value = 1 WHERE name = 'submit_show_weight';
-
-REPLACE INTO vars (name, value, description) VALUES ('version', '$Name$', 'Current version of Slash');
