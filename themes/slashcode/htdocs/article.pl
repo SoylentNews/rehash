@@ -33,8 +33,6 @@ sub main {
 		}
 		if ($future_err) {
 			$story = '';
-		} else {
-			$story->{time} = $constants->{subscribe_future_name};
 		}
 	}
 
@@ -64,8 +62,9 @@ sub main {
 		}
 
 		# set things up to use the <LINK> tag in the header
-		my $next = $reader->getStoryByTime('>', $story, $SECT);
-		my $prev = $reader->getStoryByTime('<', $story, $SECT);
+		my($next, $prev) = ('', '');
+		$next = $reader->getStoryByTime('>', $story, $SECT) unless $story->{is_future};
+		$prev = $reader->getStoryByTime('<', $story, $SECT);
 
 		my $links = {
 			title	=> $title,
@@ -78,6 +77,11 @@ sub main {
 			},
 		};
 		header($links, $story->{section});
+
+		# Can't do this before getStoryByTime because
+		# $story->{time} is passed to an SQL request.
+		$story->{time} = $constants->{subscribe_future_name}
+			if $story->{is_future} && !($user->{is_admin} || $user->{author});
 
 		my $pollbooth = pollbooth($story->{qid}, 1)
 			if $story->{qid};
