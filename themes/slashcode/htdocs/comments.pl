@@ -1295,6 +1295,7 @@ sub moderateCid {
 		subject => $comment->{subject},
 		reason	=> $reason,
 		points	=> $user->{points},
+		reasons	=> $slashdb->getReasons(),
 	};
 
 	unless ($superAuthor) {
@@ -1505,6 +1506,7 @@ sub send_mod_msg {
 				value	=> $val,
 				reason	=> $reason,
 			},
+			reasons		=> $slashdb->getReasons(),
 		};
 		$messages->create($users->[0],
 			MSG_CODE_COMMENT_MODERATE, $data

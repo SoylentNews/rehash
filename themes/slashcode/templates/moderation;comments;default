@@ -4,6 +4,7 @@ __description__
 Template which determines output for moderation results.
 
 * type = the name of the data element to retrieve
+* reasons = the getReasons() hashref
 
 Each data element may have any number of other variables, usually subject, sid, cid, reason, val, points.
 __title__

@@ -1,6 +1,8 @@
 __section__
 default
 __description__
+* reasons = hashref from $slashdb->getReasons()
+* moderation = hashref describing moderation
 
 __title__
 
@@ -14,16 +16,16 @@ __template__
 [% IF msg.mode == 1 %]
 
 <P>
-A user has given a <B>[% constants.reasons.${moderation.reason} %] ([% moderation.value %])</B> moderation to
+A user has given a <B>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</B> moderation to
 your comment, <B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid
 %]">[% comment.subject %]</A></B>, attached to
 <B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>.
-Your comment is currently scored <B>[% constants.reasons.${comment.reason} %] ([% comment.points %])</B>.
+Your comment is currently scored <B>[% reasons.${comment.reason}.name %] ([% comment.points %])</B>.
 </P>
 
 [% ELSE %]
 
-A user has given a "[% constants.reasons.${moderation.reason} %]" ([% moderation.value %]) moderation to your comment.
+A user has given a "[% reasons.${moderation.reason}.name %]" ([% moderation.value %]) moderation to your comment.
     [% comment.subject | decode_entities %]    
     [% constants.absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
 
