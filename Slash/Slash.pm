@@ -878,7 +878,6 @@ sub dispStory {
 	my($story, $author, $topic, $full, $other) = @_;
 	my $slashdb      = getCurrentDB();
 	my $constants    = getCurrentStatic();
-	my $form_section = getCurrentForm('section');
 	my $template_name = $other->{story_template}
 		? $other->{story_template} : 'dispStory';
 
@@ -886,7 +885,7 @@ sub dispStory {
 	# is aesthetics.
 	$other->{magic} = (!$full && (index($story->{title}, ':') == -1)
 			&& ($story->{section} ne $constants->{defaultsection}
-			&& $story->{section} ne $form_section))
+			&& $story->{section} ne $constants->{section}))
 		if !exists $other->{magic};
 
 	my $section = $slashdb->getSection($story->{section});

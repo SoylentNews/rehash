@@ -89,7 +89,9 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{basedomain} = $_->{hostname};
 			$new_cfg->{static_section} = $_->{section};
 			$new_cfg->{index_handler} = $_->{index_handler};
-			$new_cfg->{form_override}{section} = $_->{section};
+
+# Should no longer be needed -Brian
+			#$new_cfg->{form_override}{section} = $_->{section};
 			$cfg->{site_constants}{$_->{hostname}} = $new_cfg;
 		}
 	}
@@ -168,7 +170,8 @@ sub SlashSectionHost ($$$$) {
 	$new_cfg->{basedomain} = $hostname;
 	$new_cfg->{defaultsection} = $section;
 	$new_cfg->{static_section} = $section;
-	$new_cfg->{form_override}{section} = $section;
+	# Should no longer be needed -Brian
+	#$new_cfg->{form_override}{section} = $section;
 	$cfg->{site_constants}{$hostname} = $new_cfg;
 }
 
