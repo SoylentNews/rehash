@@ -277,6 +277,7 @@ EOT
 	my $late_modders 		= $stats->getTopModdersNearArchive({limit => 5});
 	my $early_inactive_modders      = $stats->getTopEarlyInactiveDownmodders({limit => 5 });
 	slashdLog("Problem Modders End");
+
 	foreach my $mod (@$late_modders){
 		$mod_data{late_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
 	}
@@ -474,7 +475,7 @@ EOT
 
 	slashdLog("Story Comment Counts Begin");
 	foreach my $d (@$cc_days) {
-		my $avg_comments= $stats->getAverageCommentCountPerStoryOnDay($d) || 0;
+		my $avg_comments = $stats->getAverageCommentCountPerStoryOnDay($d) || 0;
 		$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
 						{ overwrite => 1, day => $d });
 
@@ -708,19 +709,24 @@ EOT
 	$data{day} = $yesterday ;
 	$data{distinct_comment_posters_uids} = sprintf("%8d", $distinct_comment_posters_uids);
 
-	my @lazy;
-	for my $key (sort
-		{ ($articles->{$b} || 0) <=> ($articles->{$a} || 0) }
-		keys %$articles
-	) {
-		my $value = $articles->{$key};
+	my @top_articles =
+		grep { $articles->{$_} >= 100 }
+		sort { ($articles->{$b} || 0) <=> ($articles->{$a} || 0) }
+		keys %$articles;
+	$#top_articles = 24 if $#top_articles > 24; # only list top 25 stories
+	my @lazy = ( );
+	my %nick = ( );
+	for my $sid (@top_articles) {
+		my $hitcount = $articles->{$sid};
+ 		my $story = $backupdb->getStory($sid, [qw( title uid )]);
+		next unless $story->{title} && $story->{uid};
+		$nick{$story->{uid}} ||= $backupdb->getUser($story->{uid}, 'nickname')
+			|| $story->{uid};
 
- 		my $story = $backupdb->getStory($key, ['title', 'uid']);
-
-		push(@lazy, sprintf("%6d %-16s %-30s by %s",
-			$value, $key, substr($story->{'title'}, 0, 30),
-			($slashdb->getUser($story->{uid}, 'nickname') || $story->{uid})
-		)) if $story->{'title'} && $story->{uid} && $value > 100;
+		push @lazy, sprintf( "%6d %-16s %-10s %-30s",
+			$hitcount, $sid, $nick{$story->{uid}},
+			substr($story->{title}, 0, 30),
+		);
 	}
 
 	$mod_data{data} = \%mod_data;
