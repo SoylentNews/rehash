@@ -1042,3 +1042,21 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Edi
 
 # SLASHDOT LAST UPDATED HERE
 
+DROP TABLE IF EXISTS accesslog_admin; 
+CREATE TABLE accesslog_admin (
+	id int UNSIGNED NOT NULL auto_increment,
+	host_addr char(15)	DEFAULT '' NOT NULL,
+	op varchar(254),
+	dat varchar(254),
+	uid mediumint UNSIGNED NOT NULL,
+	ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	query_string varchar(50),
+	user_agent varchar(50),
+	section varchar(30) DEFAULT 'index' NOT NULL,
+	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	INDEX host_addr (host_addr),
+	INDEX ts (ts),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+#This was missed sometime in the past -Brian
+INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','This turns off delayed inserts (which you probably want to do)');

@@ -67,6 +67,24 @@ CREATE TABLE accesslog (
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 
+DROP TABLE IF EXISTS accesslog_admin;
+CREATE TABLE accesslog_admin (
+	id int UNSIGNED NOT NULL auto_increment,
+	host_addr char(15)  DEFAULT '' NOT NULL,
+	op varchar(254),
+	dat varchar(254),
+	uid mediumint UNSIGNED NOT NULL,
+	ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	query_string varchar(50),
+	user_agent varchar(50),
+	section varchar(30) DEFAULT 'index' NOT NULL,
+	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	INDEX host_addr (host_addr),
+	INDEX ts (ts),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+
 #
 # Table structure for table 'authors_cache'
 #

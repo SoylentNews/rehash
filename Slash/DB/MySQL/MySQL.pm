@@ -1337,6 +1337,38 @@ sub createAccessLog {
 	}, { delayed => 1 });
 }
 
+##########################################################
+# This creates an entry in the accesslog for admins -Brian
+sub createAccessLogAdmin {
+	my($self, $op, $dat) = @_;
+	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+	my $r = Apache->request;
+
+	my $uid = $ENV{SLASH_USER};
+	my $section = $constants->{section};
+	# The following two are special cases
+	if ($op eq 'index' || $op eq 'article') {
+		$section = ($form && $form->{section})
+			? $form->{section}
+			: $constants->{section};
+	}
+	# And just what was the admin doing? -Brian
+	$op = $form->{op} if $form->{op};
+
+	$self->sqlInsert('accesslog_admin', {
+		host_addr	=> $r->connection->remote_ip,
+		dat		=> $dat,
+		uid		=> $uid,
+		section		=> $section,
+		bytes		=> $r->bytes_sent,
+		op		=> $op,
+		-ts		=> 'NOW()',
+		query_string	=> $ENV{QUERY_STRING} || '0',
+		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
+	}, { delayed => 1 });
+}
+
 
 ########################################################
 # pass in additional optional descriptions
@@ -4035,7 +4067,7 @@ sub getCommentsForUser {
 	# harder to read/edit variable assignments?  -- pudge
 	my $sql;
 	$sql .= " SELECT	cid, date, date as time, subject, nickname, homepage, fakeemail, ";
-	$sql .= "	users.uid as uid, sig, comments.points as points, pid, sid, ";
+	$sql .= "	users.uid as uid, sig, comments.points as points, pid, pid as original_pid, sid, ";
 	$sql .= " lastmod, reason, journal_last_entry_date, ipid, subnetid ";
 	$sql .= "	FROM comments, users  ";
 	$sql .= "	WHERE sid=$sid_quoted AND comments.uid=users.uid ";

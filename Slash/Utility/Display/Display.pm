@@ -948,7 +948,7 @@ sub linkComment {
 		%$comment, # defaults
 		adminflag	=> $adminflag,
 		date		=> $date,
-		pid		=> $comment->{realpid} || $comment->{pid},
+		pid		=> $comment->{original_pid},
 			# $comment->{threshold}? Hmm. I'm not sure what it
 			# means for a comment to have a threshold. If it's 0,
 			# does the following line do the right thing? - Jamie
@@ -1198,7 +1198,7 @@ sub _hard_linkComment {
 	if ($printcomment) {
 		$display .= "&amp;cid=$comment->{cid}";
 	} else {
-		$display .= "&amp;pid=" . ($comment->{realpid} || $comment->{pid});
+		$display .= "&amp;pid=" . $comment->{original_pid};
 		$display .= "#$comment->{cid}" if $comment->{cid};
 	}
 

@@ -14,8 +14,7 @@ dispLinkComment
 __template__
 [% USE Slash %]
 [% IF user.mode != 'metamod' %]
-	[% IF user.is_admin || pid || !user.state.discussion_archived %]
-		[% pid = realpid || pid %]
+	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
 		<TR><TD><FONT SIZE="2">
 
 		[ [% UNLESS user.state.discussion_archived %][% Slash.linkComment({
@@ -26,17 +25,17 @@ __template__
 			subject_only => 1,
 		}) %][% END %]
 
-		[% IF !(user.state.discussion_archived) && (pid || can_mod || user.is_admin) %] | [% END %]
+		[% IF !(user.state.discussion_archived) && (original_pid || can_mod || user.is_admin) %] | [% END %]
 
-		[% IF pid %][% Slash.linkComment({
+		[% IF original_pid %][% Slash.linkComment({
 			sid	=> sid,
-			cid	=> pid,
-			pid	=> pid,
+			cid	=> original_pid,
+			pid	=> original_pid,
 			subject	=> 'Parent',
 			subject_only => 1,
 		}, 1) %][% END %]
 		
-		[% IF pid && ( can_mod || user.is_admin) %] | [% END %]
+		[% IF original_pid && ( can_mod || user.is_admin) %] | [% END %]
 
 		[% IF can_mod %]
 		[% Slash.createSelect("reason_$cid", reasons, '', 1, 1) 

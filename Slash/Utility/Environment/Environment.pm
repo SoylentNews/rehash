@@ -1752,28 +1752,29 @@ sub createLog {
 
 	if ($uri eq 'palm') {
 		($dat = $ENV{REQUEST_URI}) =~ s|\.shtml$||;
-		$logdb->createAccessLog('palm', $dat);
+		$uri = 'palm';
 	} elsif ($uri eq '/') {
-		$logdb->createAccessLog('index', $dat);
+		$uri = 'index';
 	} elsif ($uri =~ /\.pl$/) {
 		$uri =~ s|^/(.*)\.pl$|$1|;
-		$logdb->createAccessLog($uri, $dat);
 	# This is for me, I am getting tired of patching my local copy -Brian
 	} elsif ($uri =~ /\.tar\.gz$/) {
 		$uri =~ s|^/(.*)\.tar\.gz$|$1|;
-		$logdb->createAccessLog($uri, $dat);
 	} elsif ($uri =~ /\.rss$/ || $uri =~ /\.xml$/ || $uri =~ /\.rdf$/) {
+		$uri = 'rss';
 		$logdb->createAccessLog('rss', $dat);
 	} elsif ($uri =~ /\.shtml$/) {
 		$uri =~ s|^/(.*)\.shtml$|$1|;
 		$dat = $uri if $uri =~ $page;	
 		$uri =~ s|^/?(\w+)/?.*|$1|;
-		$logdb->createAccessLog($uri, $dat);
 	} elsif ($uri =~ /\.html$/) {
 		$uri =~ s|^/(.*)\.html$|$1|;
 		$dat = $uri if $uri =~ $page;	
 		$uri =~ s|^/?(\w+)/?.*|$1|;
-		$logdb->createAccessLog($uri, $dat);
+	}
+	$logdb->createAccessLog($uri, $dat);
+	if (getCurrentUser('is_admin')) {
+		$logdb->createAccessLogAdmin($uri, $dat);
 	}
 
 }
