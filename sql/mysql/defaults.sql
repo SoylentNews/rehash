@@ -210,22 +210,13 @@ INSERT INTO site_info VALUES ('','form','comments','comments submission form');
 #
 
 #
-<<<<<<< defaults.sql
 # Dumping data for table 'string_param'
 #
 
-INSERT INTO string_param (type, code, name) VALUES ('yes_no','yes','yes');
-INSERT INTO string_param (type, code, name) VALUES ('yes_no','no','no');
+INSERT INTO string_param (type, code, name) VALUES ('section_topic_type','topic_1','Default');
 
 
 #
-=======
-# Dumping data for string_param
-#
-INSERT INTO string_param (Type, code, name) VALUES ('section_topic_type','topic_1','Default');
-
-#
->>>>>>> 1.38
 # Dumping data for table 'submissions'
 #
 
