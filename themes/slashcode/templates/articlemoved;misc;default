@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+Template to handle redirection from old article location to new one
+
+url - url to redirect to
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+articlemoved
+__seclev__
+10000
+__template__
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="refresh" content="3;URL=[% url %]">
+<TITLE>Page has moved</TITLE>
+</HEAD>
+<BODY>
+<B><font size="+1">This page has moved</font></B>
+<P>
+If your browser doesn't automatically redirect you click the following <A HREF="[% url %]">Link</A>
+</BODY>
+</HTML>
+
