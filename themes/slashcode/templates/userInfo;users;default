@@ -94,7 +94,7 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 <BR>
 [% IF commentcount > 0 %]
 	[% commenttitle = "$useredit.nickname's "
-		_ ((commentstruct.size == commentcount) ? "" : "Latest $commentstruct.size of ")
+		_ ((commentstruct.size == commentcount) ? "" : "Latest $commentstruct.size of $commentcount ")
 		_ "Comment"
 		_ (commentcount == 1 ? "" : "s") %]
 	[% PROCESS titlebar width="100%" title = commenttitle %]
@@ -155,9 +155,9 @@ END %]
 [% IF stories %]
 <P>
 [% IF storycount > constants.user_submitter_display_default;
-	storytitle = $useredit.nickname _ "'s Latest " _ $form.min _ ' Accepted Stories';
+	storytitle = useredit.nickname _ "'s Latest " _ form.min _ ' Accepted Stories';
 ELSE;
-	storytitle = $useredit.nickname _ "'s " _ $storycount _ 'Accepted Stor';
+	storytitle = useredit.nickname _ "'s " _ storycount _ ' Accepted Stor';
 	IF storycount > 1;
 		storytitle = storytitle _ 'ies';
 	ELSE;
