@@ -2082,7 +2082,7 @@ sub saveBlock {
 		$self->sqlInsert('blocks', { bid => $bid, seclev => 500 });
 	}
 
-	my($portal, $retrieve, $all_sections) = (0, 0, 0);
+	my($portal, $retrieve) = (0, 0, 0);
 
 	# If someone marks a block as a portald block then potald is a portald
 	# something tell me I may regret this...  -Brian
@@ -2091,7 +2091,6 @@ sub saveBlock {
 	# this is to make sure that a  static block doesn't get
 	# saved with retrieve set to true
 	$form->{retrieve} = 0 if $form->{type} ne 'portald';
-	$form->{all_sections} = 0 if $form->{type} ne 'all_sections';
 
 	# If a block is a portald block then portal=1. type
 	# is done so poorly -Brian
@@ -2137,6 +2136,7 @@ sub saveBlock {
 			retrieve	=> $form->{retrieve},
 			portal		=> $form->{portal},
 			autosubmit	=> $form->{autosubmit},
+			all_sections	=> $form->{all_sections},
 		}, 'bid=' . $self->sqlQuote($bid));
 	}
 
