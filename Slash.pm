@@ -122,7 +122,7 @@ sub getSlash {
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
-		last next time artcount bseclev cid clbig clsmall
+		last next artcount bseclev cid clbig clsmall
 		commentlimit commentsort commentspill commentstatus
 		del displaystatus filter_id hardthresh height
 		highlightthresh isolate issue light maillist max
