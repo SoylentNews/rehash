@@ -1427,8 +1427,7 @@ sub displayStory {
 		&& (!$form->{ssi} || $form->{ssi} ne 'yes')
 		&& !$user->{noicons}
 		&& !$form->{issue}
-		&& $constants->{section} eq 'index'
-		&& $gSkin->{name} eq 'index'
+		&& $gSkin->{skid} == $constants->{mainpage_skid}
 		&& !$full
 		&& !$options->{is_future}	 # can $story->{is_future} ever matter?
 	) {
