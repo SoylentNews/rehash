@@ -1523,6 +1523,30 @@ sub refreshUncommonStoryWords {
 }
 
 ########################################################
+# For tasks/freshenup.pl
+#
+# get previous sections stored so we can clear out old .shtml
+# files and redirect to new
+
+sub getPrevSectionsForSid {
+	my ($self,$sid) = @_;
+	my $old_sect = $self->sqlSelect("value","story_param","name='old_shtml_sections' and sid=".$self->sqlQuote($sid));
+	my @old_sect = grep{ $_ } split(/,/,$old_sect);
+	return @old_sect;
+}
+
+########################################################
+# For tasks/freshenup.pl
+#
+# clear old sections stored after their .shtml files 
+# have been cleaned up
+ 
+sub clearPrevSectionsForSid {
+	my ($self,$sid) = @_;
+	$self->sqlDelete("story_param","name='old_shtml_sections' and sid=".$self->sqlQuote($sid));
+}
+
+########################################################
 # For tasks/flush_formkeys.pl
 sub deleteOldFormkeys {
 	my($self, $timeframe) = @_;
