@@ -119,6 +119,8 @@ $werder = new Silly::Werder;
 		print "New user: $username (User #$uid) ($email)";
 		if ($zoo && rand(1) < 0.3) {
 			my $uids = $slashdb->sqlSelectColArrayref('uid', 'users');
+			my $ac_uid = getCurrentAnonymousCoward('uid');
+			$uids = [ grep { $_ != $ac_uid } @$uids ];
 			my $zooness = rand(2)*rand(2);
 			my %friends = ( );
 			my %foes = ( );
