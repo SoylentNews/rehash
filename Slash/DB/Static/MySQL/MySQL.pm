@@ -1144,7 +1144,7 @@ sub factorEligibleModerators {
 	if ($wtf->{stirratio}) {
 		# Assign a token likeliness factor based on the ratio of
 		# stirred to spent mod points.  In order not to be
-		# "prejudiced" against users with little or not mod history,
+		# "prejudiced" against users with little or no mod history,
 		# those users get no change in their factor (i.e. 1) by
 		# simply being left out of the list.  Sort by ratio first
 		# (that's the point of this code); if there's a tie in
