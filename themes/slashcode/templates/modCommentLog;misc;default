@@ -70,7 +70,9 @@ __template__
 		<TD> [% moderation.ts.substr(5,-3) %]</TD>
 		<TD>[% IF moderation.active %] &nbsp; [% ELSE %] <i>in</i> [% END %] </TD>
 	</TR>
-		[% total_mod_val = total_mod_val + moderation.val; total_mod_score = total_mod_score + moderation.score %]
+		[% IF moderation.active %]
+			[%  total_mod_val = total_mod_val + moderation.val; total_mod_score = total_mod_score + moderation.score %]
+		[% END %]
 		[% END %]
 		<TR><TD><B>Totals</B></TD><TD ALIGN="RIGHT">[% total_mod_score %]</TD><TD ALIGN="RIGHT"><B>[% IF total_mod_val > 0; "+"; END; total_mod_val %]</B></TD><TD colspan="[% IF both_mods %]6[% ELSE %]5[% END %]"></TD></TR>
 	[% END %]
