@@ -130,6 +130,9 @@ __template__
 				<TD COLSPAN=3 HEIGHT=10></TD>
 			</TR>
 			<TR>
+				<TD><B>Section</B></TD><TD>[% section_select %]</TD>
+			</TR>
+			<TR>
 				<TD><B>Default points (threshcode)</B></TD><TD>[% thresh_select %]</TD><TD>&nbsp;</TD>
 			</TR>
 			<TR>

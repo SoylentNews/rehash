@@ -1442,6 +1442,7 @@ sub saveUserAdmin {
 		$user_editfield_flag eq 'nickname')) {
 
 		$user_edits_table->{seclev} = $form->{seclev};
+		$user_edits_table->{section} = $form->{section};
 		$user_edits_table->{rtbl} = $form->{rtbl} eq 'on' ? 1 : 0 ;
 		$user_edits_table->{rtbl_reason} = $form->{rtbl} eq 'on' ? $form->{rtbl_reason} : '' ;
 		$user_edits_table->{author} = $form->{author} ? 1 : 0 ;
@@ -2085,10 +2086,12 @@ sub getUserAdmin {
 	$id ||= $user->{uid};
 
 	my($checked, $uidstruct, $readonly, $readonly_reasons);
-	my($user_edit, $user_editfield, $uidlist, $iplist, $authors, $author_flag, $topabusers, $thresh_select);
+	my($user_edit, $user_editfield, $uidlist, $iplist, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my($banned, $banned_reason);
+	my $sectionref = $slashdb->getDescriptions('sections-all');
+	$sectionref->{''} = getData('all_sections');
 
 	$field ||= 'uid';
 	if ($field eq 'uid') {
@@ -2096,12 +2099,14 @@ sub getUserAdmin {
 		$user_editfield = $user_edit->{uid};
 		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$iplist = $slashdb->getNetIDList($user_edit->{uid});
+		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'nickname') {
 		$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
 		$user_editfield = $user_edit->{nickname};
 		$checked->{expired} = $slashdb->checkExpired($user_edit->{uid}) ? ' CHECKED' : '';
 		$iplist = $slashdb->getNetIDList($user_edit->{uid});
+		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'md5id') {
 		$user_edit->{nonuid} = 1;
@@ -2177,7 +2182,8 @@ sub getUserAdmin {
 		readonly		=> $readonly,
 		thresh_select		=> $thresh_select,
 		readonly_reasons 	=> $readonly_reasons,
-		authoredit_flag 	=> $authoredit_flag
+		authoredit_flag 	=> $authoredit_flag,
+		section_select		=> $section_select,
 	}, 1);
 }
 

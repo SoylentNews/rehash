@@ -187,6 +187,12 @@ print "Theme selected: $theme\n";
 
 #---------------------------------------------------
 my $plugins = $install->getPluginList($PREFIX);
+for(keys %$plugins) {
+    print "plugin key $_ value $plugins->{$_}\n";
+    for my $plugin(keys %{$plugins->{$_}}) {
+	print "plugin sub key $plugin $plugins->{$_}{$plugin} plugin\n";
+    }
+}
 my @plugins = ( );
 my @default_plugins = ( );
 my @all_plugins = sort {
