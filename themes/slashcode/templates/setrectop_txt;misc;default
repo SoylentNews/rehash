@@ -14,6 +14,6 @@ __name__
 setrectop_txt
 __template__
 
-&middot; <A HREF="[% constants.rootdir %]/search.pl?topic=[% id %]">[% name %]</A><BR>
+&middot; <A HREF="[% constants.rootdir %]/search.pl?tid=[% id %]">[% name %]</A><BR>
 __seclev__
 10000
