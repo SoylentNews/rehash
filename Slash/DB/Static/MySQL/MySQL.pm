@@ -62,7 +62,7 @@ sub getBackendStories {
 
 	my $select;
 	$select .= "stories.sid, stories.title, time, dept, stories.uid,";
-	$select .= "alttext, image, commentcount, hitparade,";
+	$select .= "alttext, commentcount, hitparade,";
 	$select .= "stories.section as section, introtext,";
 	$select .= "bodytext, topics.tid as tid";
 	my $from = "stories, story_text, topics";
@@ -97,6 +97,14 @@ sub getBackendStories {
 	my $other = "ORDER BY time DESC LIMIT 10";
 
 	my $returnable = $self->sqlSelectAllHashrefArray($select, $from, $where, $other);
+
+	my $topics = $self->getTopics;
+	for my $story (@$returnable) {
+		my $image = $self->getTopicImageBySection(
+			$topics->{$story->{tid}}, $story->{section}
+		);
+		$story->{image} = $image->{image}; 
+	}
 
 	return $returnable;
 }
@@ -133,12 +141,20 @@ sub getNewStoryTopic {
 	# topic stories.
 	$needed = $needed * 3 + 5;
 	my $ar = $self->sqlSelectAllHashrefArray(
-		"alttext, image, width, height, stories.tid AS tid",
+		"alttext, stories.tid AS tid",
 		"stories, topics",
 		"stories.tid=topics.tid AND displaystatus = 0
 		 AND writestatus != 'delete' AND time < NOW()",
 		"ORDER BY time DESC LIMIT $needed"
 	);
+
+	my $topics = $self->getTopics;
+	for my $topic (@$ar) {
+		my $image = $self->getTopicImageBySection(
+			$topics->{$topic->{tid}}
+		);
+		@{$topic}{qw(image width height)} = @{$image}{qw(image width height)};
+	}
 
 	return $ar;
 }
