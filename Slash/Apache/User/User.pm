@@ -60,8 +60,6 @@ sub handler {
 	my $constants = getCurrentStatic();
 	my $slashdb = $dbcfg->{slashdb};
 	my $apr = Apache::Request->new($r);
-	
-	my $hostname = $r->header_in('host');
 
 	$r->header_out('X-Powered-By' => "Slash $Slash::VERSION");
 	random($r);
