@@ -1378,7 +1378,8 @@ sub displayStory {
 		$return = dispStory($story, $author, $topic, $full, $options);
 
 	}
-	my $df = ($user->{mode} eq "archive" or $story->{writestatus} eq "archived") ? $constants->{archive_dateformat} : "";
+	my $df = ($user->{mode} eq "archive" || $story->{writestatus} eq "archived")
+		? $constants->{archive_dateformat} : "";
 	my $storytime = timeCalc($story->{'time'}, $df);
 	my $atstorytime;
 	if ($options->{is_future} && !($user->{author} || $user->{is_admin})) {

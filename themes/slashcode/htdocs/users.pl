@@ -1121,7 +1121,7 @@ sub showInfo {
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
 	if ($requested_user->{nonuid}) {
-		if($admin_flag) {
+		if ($admin_flag) {
 			if ($form->{fieldname} eq "ipid") {
 				$modval = $reader->calcModval("ipid = '$id'", $ipid_hoursback, {});
 				$trollpoint = $reader->calcTrollPoint("ipid");

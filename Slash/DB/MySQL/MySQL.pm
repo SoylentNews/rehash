@@ -887,20 +887,19 @@ sub getModeratorCommentLog {
 	my $vq = $self->sqlQuote($value);
 	my $where_clause = "";
 	my $ipid_table = "moderatorlog";
-	   if ($type eq 'uid') {	$where_clause = "moderatorlog.uid=$vq      AND comments.uid=users.uid";
-					$ipid_table = "comments"							}
-	elsif ($type eq 'cid') {	$where_clause = "moderatorlog.cid=$vq      AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'cuid') {	$where_clause = "moderatorlog.cuid=$vq     AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'subnetid') {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'ipid') {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'global') {	$where_clause = "moderatorlog.uid=users.uid "								}
+	   if ($type eq 'uid')       {	$where_clause = "moderatorlog.uid=$vq      AND comments.uid=users.uid";
+					$ipid_table = "comments"						    }
+	elsif ($type eq 'cid')       {	$where_clause = "moderatorlog.cid=$vq      AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'cuid')      {	$where_clause = "moderatorlog.cuid=$vq     AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'subnetid')  {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'ipid')      {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'bipid')     {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'global')    {	$where_clause =				      "moderatorlog.uid=users.uid"  }
 	return [ ] unless $where_clause;
 
-	my $time_clause;
-	$time_clause = " AND ts > DATE_SUB(now(), INTERVAL $options->{hours_back} HOUR)" if $options->{hours_back};
-
+	my $time_clause = "";
+	$time_clause = " AND ts > DATE_SUB(NOW(), INTERVAL $options->{hours_back} HOUR)" if $options->{hours_back};
 
 	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
 	my $sth = $self->sqlSelectMany("comments.sid AS sid,
