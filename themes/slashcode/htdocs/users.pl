@@ -298,7 +298,7 @@ sub main {
 		$site_domain =~ s/^www\.//;
 		$site_domain =~ s/:.+$//;	# strip port, if available
 
-		my $refer_host = $refer->host();
+		my $refer_host = $refer->can("host") ? $refer->host() : "";
 		$refer_host =~ s/^www\.//;
 
 		if ($site_domain eq $refer_host) {
