@@ -166,3 +166,6 @@ UPDATE section_topics SET type=1;
 
 # Autopoll update
 ALTER TABLE pollquestions ADD COLUMN autopoll enum("no","yes") DEFAULT 'no' NOT NULL;
+
+# Submussiosn
+ALTER TABLE submissions ADD COLUMN weight float DEFAULT '0' NOT NULL;
