@@ -570,3 +570,7 @@ ALTER TABLE string_param MODIFY COLUMN code varchar(128) NOT NULL;
 ALTER TABLE menus MODIFY COLUMN label varchar(255) DEFAULT '' NOT NULL;
 ALTER TABLE rss_raw MODIFY COLUMN description text;
 ALTER TABLE section_extras MODIFY COLUMN type enum("text","list","topics") DEFAULT 'text' NOT NULL;
+# For submissions notes -Brian
+INSERT INTO code_param (type, code, name) VALUES ('submission-state',0,'Pending');
+INSERT INTO code_param (type, code, name) VALUES ('submission-state',1,'Rejected');
+INSERT INTO code_param (type, code, name) VALUES ('submission-state',2,'Accepted');

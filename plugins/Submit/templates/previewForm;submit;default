@@ -35,6 +35,11 @@ __template__
 	<FONT SIZE="-1" COLOR="[% user.fg.2 %]">[% submission.comment %]</FONT>
 </TD></TR></TABLE>
 [% END %]
+[% submission_state = Slash.db.getDescriptions('submission-state') %]
+<P>Submission State: [% del = submission.del; submission_state.$del %]
+[% IF submission.sid %]
+	<P><A HREF="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</A>
+[% END %]
 
 
 <P>Submitted by <B>[% submission.name %]

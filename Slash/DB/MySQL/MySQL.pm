@@ -39,6 +39,9 @@ my %descriptions = (
 	'submission-notes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'string_param', "type='submission-notes'") },
 
+	'submission-state'
+		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='submission-state'") },
+
 	'months'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='months'") },
 
@@ -4399,10 +4402,7 @@ sub createStory {
 			-karma => $newkarma },
 		"uid=$suid") if !isAnon($suid);
 
-		$self->sqlUpdate('submissions',
-			{ del=>2 },
-			'subid=' . $self->sqlQuote($story->{subid})
-		);
+		$self->setSubmission($story->{subid}, { del => 2, sid => $story->{sid} });
 	}
 
 	$story->{submitter}	= $story->{submitter} ?
