@@ -833,14 +833,16 @@ sub moderateCid {
 	# If the resulting score is out of comment score range, no further actions 
 	# need be performed.
 	if ($scorecheck < $I{comment_minscore} || $scorecheck > $I{comment_maxscore}) {
-		# We should still log the attempt.
+		# We should still log the attempt for M2, but marked as inactive so
+		# we don't mistakenly undo it.
 		sqlInsert("moderatorlog", {
 			uid	=> $I{U}{uid},
 			val	=> $val,
 			sid	=> $sid,
 			cid	=> $cid,
 			reason	=> $modreason,
-			-ts	=> 'now()'
+			-ts	=> 'now()',
+			active => 0
 		});
 
 		print "<LI>$subj ($sid-$cid, <B>Comment already at limit</B>)</LI>";
@@ -941,15 +943,21 @@ sub hasPosted {
 sub undoModeration {
 	my($sid) = @_;
 	return if $I{U}{uid} == -1 || ($I{U}{aseclev} > 99 && $I{authors_unlimited});
-	my $c=sqlSelectMany("cid,val", "moderatorlog",
+	my $c=sqlSelectMany("cid,val,active", "moderatorlog",
 		"uid=$I{U}{uid} and sid=" . $I{dbh}->quote($sid)
 	);
 
-	while (my($cid, $val) = $c->fetchrow) {
+	while (my($cid, $val, $active) = $c->fetchrow) {
+		# We undo moderation even for inactive records (but silently for 
+		# inactive records)
 		$I{dbh}->do("delete from moderatorlog where
 			cid=$cid and uid=$I{U}{uid} and sid=" .
 			$I{dbh}->quote($sid)
 		);
+
+		# If moderation wasn't actually performed, we should not change
+		# the score.
+		next if ! $active;
 
 		# Insure scores still fall within the proper boundaries
 		my $scorelogic = $val < 0 ? "points < $I{comment_maxscore}" :
@@ -976,7 +984,7 @@ sub isTroll {
 	# Anonymous only checks HOST
 	($badIP) = sqlSelect("sum(val)","comments,moderatorlog",
 		"comments.sid=moderatorlog.sid AND comments.cid=moderatorlog.cid
-		AND host_name='$ENV{REMOTE_ADDR}'
+		AND host_name='$ENV{REMOTE_ADDR}' AND moderatorlog.active=1
 		AND (to_days(now()) - to_days(ts) < 3) GROUP BY host_name"
 	);
 
@@ -985,7 +993,7 @@ sub isTroll {
 	if ($I{U}{uid} > 0) {
 		($badUID) = sqlSelect("sum(val)","comments,moderatorlog",
 			"comments.sid=moderatorlog.sid AND comments.cid=moderatorlog.cid
-			AND comments.uid=$I{U}{uid}
+			AND comments.uid=$I{U}{uid} AND moderatorlog.active=1
 			AND (to_days(now()) - to_days(ts) < 3)  GROUP BY comments.uid"
 		);
 	}

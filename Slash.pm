@@ -2026,7 +2026,8 @@ sub moderatorCommentLog {
 				 moderatorlog.val as val,
 				 moderatorlog.reason as reason",
 				"moderatorlog, users, comments",
-				"moderatorlog.sid='$sid'
+				"moderatorlog.active=1
+				 AND moderatorlog.sid='$sid'
 			     AND moderatorlog.cid=$cid
 			     AND moderatorlog.uid=users.uid
 			     AND comments.sid=moderatorlog.sid
