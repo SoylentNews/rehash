@@ -83,6 +83,23 @@ sub UserLog {
 			# want to set it to the empty string, as that would delete
 			# the param row.
 			$user_update->{hits_bought_today} = $buying ? 1 : 0;
+			if ($user->{hits_bought_today} && !$user->{is_admin}) {
+				my $day = join("-",
+					$user->{lastclick} =~ /^(\d{4})(\d{2})(\d{2})/);
+				my $statsSave = getObject('Slash::Stats::Writer', '',
+					{ day => $day });
+				if ($statsSave) {
+					# The user bought pages, one or more days ago, and
+					# we are now zeroing out that count, but we want
+					# its old value for our stats.
+					$statsSave->addStatDaily("subscribe_hits_bought",
+						$user->{hits_bought_today});
+				}
+			}
+		}
+		if ($buying && $user->{hits_bought} == $user->{hits_paidfor}-1
+			and my $statsSave = getObject('Slash::Stats::Writer')) {
+			$statsSave->addStatDaily("subscribe_runout", 1);
 		}
 	}
 	if ($constants->{admin_check_clearpass}
