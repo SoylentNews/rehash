@@ -12,6 +12,7 @@ Display user's info
 * karma_flag = boolean for display karma
 * admin_block = admin stuff
 * admin_flag = boolean for whether to display admin stuff
+	(no real need for this, could just use user.is_admin)
 * fieldkey = the field key used to decide what we're looking at
 * reasons = hashref from $slashdb->getReasons()
 
