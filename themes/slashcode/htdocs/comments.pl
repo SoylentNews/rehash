@@ -638,7 +638,9 @@ sub validateComment {
 	}
 
 	if (isTroll()) {
-		$$error_message = getError('troll message');
+		$$error_message = getError('troll message', {
+			unencoded_ip => $ENV{REMOTE_ADDR}      
+		});
 		return;
 	}
 

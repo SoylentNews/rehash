@@ -109,7 +109,8 @@ ELSE; constants.adminmail; END %]
 with your MD5'd IPID and SubnetID, which are
 "<tt>[% user.ipid %]</tt>" and "<tt>[% user.subnetid %]</tt>"[%
 IF !user.is_anon %]
-and (optionally) your username, "<tt>[% user.nickname %]</tt>"[%
+and (optionally, but preferably) your IP number
+"<tt>[% unencoded_ip %]</tt>" and your username "<tt>[% user.nickname %]</tt>"[%
 END %].
 
 [% # NESTING TOO DEEP
