@@ -112,18 +112,18 @@ sub displayTop {
 	# this should probably be in a separate template, so the site admins
 	# can select the order themselves -- pudge
 	if ($constants->{journal_top_recent}) {
-		$journals = $journal->topRecent();
+		$journals = $journal->topRecent;
 		slashDisplay('journaltop', { journals => $journals, type => 'recent' });
 	}
 
 	if ($constants->{journal_top_posters}) {
-		$journals = $journal->top();
+		$journals = $journal->top;
 		slashDisplay('journaltop', { journals => $journals, type => 'top' });
 	}
 
 	if ($constants->{journal_top_friend}) {
 		my $zoo   = getObject('Slash::Zoo');
-		$journals = $zoo->topFriends();
+		$journals = $zoo->topFriends;
 		slashDisplay('journaltop', { journals => $journals, type => 'friend' });
 	}
 
@@ -138,7 +138,7 @@ sub displayFriends {
 	_printHead("mainhead");
 
 	my $zoo = getObject('Slash::Zoo');
-	my $friends = $zoo->getFriendsWithJournals();
+	my $friends = $zoo->getFriendsWithJournals;
 	if (@$friends) {
 		slashDisplay('journalfriends', { friends => $friends });
 	} else {
@@ -229,19 +229,30 @@ sub displayTopRSS {
 	my($journal, $constants, $user, $form, $reader) = @_;
 
 	my $journals;
+	my $type;
 	if ($form->{type} eq 'count' && $constants->{journal_top_posters}) {
-		$journals = $journal->top();
+		$type = 'count';
+		$journals = $journal->top;
 	} elsif ($form->{type} eq 'friends' && $constants->{journal_top_friend}) {
-		$journals = $journal->topFriends();
+		$type = 'friends';
+		my $zoo   = getObject('Slash::Zoo');
+		$journals = $zoo->topFriends;
 	} elsif ($constants->{journal_top_recent}) {
-		$journals = $journal->topRecent();
+		$journals = $journal->topRecent;
 	}
 
 	my @items;
 	for my $entry (@$journals) {
-#		my $time = timeCalc($entry->[3]);
+		my $title = $type eq 'count'
+			? "[$entry->[1]] $entry->[0] entries"
+			: $type eq 'friends'
+				? "[$entry->[1]] $entry->[0] friends"
+				: "[$entry->[1]] $entry->[5]";
+
+		$title =~ s/s$// if $entry->[0] == 1 && ($type eq 'count' || $type eq 'friends');
+
 		push @items, {
-			title	=> "[$entry->[1]] $entry->[5]",
+			title	=> $title,
 			'link'	=> "$constants->{absolutedir}/~" . fixparam($entry->[1]) . "/journal/"
 		};
 	}
@@ -304,7 +315,7 @@ sub displayArticleFriends {
 		$back = -1;
 	}
 
-	my $topics = $reader->getTopics();
+	my $topics = $reader->getTopics;
 	for my $article (@$articles) {
 		my $commentcount = $article->[6]
 			? $reader->getDiscussion($article->[6], 'commentcount')
@@ -401,7 +412,7 @@ sub displayArticle {
 		$back = -1;
 	}
 
-	my $topics = $reader->getTopics();
+	my $topics = $reader->getTopics;
 	for my $article (@$articles) {
 		my($date_current) = timeCalc($article->[0], "%A %B %d, %Y");
 		if ($date ne $date_current) {
