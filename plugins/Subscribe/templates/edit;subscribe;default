@@ -36,9 +36,9 @@ You will be able to purchase banner-ad-free pages.
 [%
 	pages = [
 		{ pagename => "index",
-		  descr	   => "<b>Homepage</b> (Plum: The Mysterious Future!)" },
+		  descr	   => "<b>Homepage</b> (Plum: see the Mysterious Future!)" },
 		{ pagename => "article",
-		  descr	   => "<b>Stories</b> (usually with reader comments)" },
+		  descr	   => "<b>Stories</b> (Plum: reading Mysterious Future stories)" },
 		{ pagename => "comments",
 		  descr	   => "<b>Comments</b>" },
 	];
