@@ -17,7 +17,7 @@ yourPendingSubs
 __template__
 [% USE Slash %]
 [% topics = Slash.db.getTopics(); # sigh %]
-[% PROCESS titlebar title = "Your recent submissons" %]
+[% PROCESS titlebar title = "Your recent submissions" %]
 
 <P>Here are your recent submissions to [% constants.sitename %],
 and their status within the system:</P>
