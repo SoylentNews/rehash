@@ -6709,6 +6709,8 @@ sub getCommentsForUser {
 		$where .= ")";
 	}
 
+	$where .= " AND points >= pointsorig " if $options->{skip_downmodded};
+
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where, $other);
 
 	my $archive = $cache_read_only;
