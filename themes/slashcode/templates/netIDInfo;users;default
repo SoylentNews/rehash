@@ -40,7 +40,7 @@ __template__
 [% IF fieldname == 'ipid' || fieldname == 'subnetid' %]
 	[% mod_options.hr_hours_back = hr_hours_back;
 	   mod_options.title="Moderations performed by $netid_vis";
-	   mod_options.show_m2s = form.show_m2s;
+	   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
 	   mod_options.need_m2_form = 1;
 	   mod_options.need_m2_button = 1;
 	   mod_options.meta_mod_only = 1;
@@ -54,12 +54,9 @@ __template__
 	[% END %]
 [% END %]
 <BR><B>
-[% IF fieldname == 'ipid' %]IPID[% ELSIF fieldname == 'subnetid' %]SubnetID[% END %] [% netid_vis %] has posted [% subcount %] submissions.</B><P>
 [% IF subcount > 0 %]
-	[% FOREACH sub = submissions %]
-	<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A> on [% Slash.timeCalc(sub.time) %] by <A HREF="[% constants.rootdir %]/users.pl?uid=[% sub.uid %]">[% sub.name %]</A><BR>
-	[% END %]
-	<BR>
+[% title = "$netid_vis has posted $subcount submissions" %]
+[% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
 [% END %]
 
 
