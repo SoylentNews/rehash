@@ -5703,14 +5703,10 @@ sub getSubmissionsPending {
 # Get submission count
 # XXXSECTIONTOPICS might need to do something for $articles_only option
 # currently not used anywhere in code so not implemented for now.
-
 sub getSubmissionCount {
 	my($self) = @_;
-	my($count);
-	$count = $self->sqlSelect("count(*)", "submissions",
-		"(length(note)<1 or isnull(note)) and del=0"
-	);
-	return $count;
+	return sqlCount("submissions",
+		"(LENGTH(note) < 1 OR note IS NULL) AND del=0");
 }
 
 ##################################################################
@@ -10531,6 +10527,7 @@ sub getAllACLs {
 # users_hits table from the DB and everything else from memcached.
 sub getUser {
 	my($self, $uid, $val) = @_;
+	return undef unless $uid;
 	my $answer;
 	my $uid_q = $self->sqlQuote($uid);
 
