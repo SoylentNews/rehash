@@ -55,6 +55,13 @@ sub update_modlog_ids {
 		if $days_back_cushion < ($constants->{m2_min_daysbackcushion} || 2);
 	$days_back -= $days_back_cushion;
 
+	 my $reasons = $reader->getReasons();
+         my $m2able_reasons = join(",",
+                sort grep { $reasons->{$_}{m2able} }
+                keys %$reasons);
+         return if !$m2able_reasons;
+
+
 	# XXX I'm considering adding a 'WHERE m2status=0' clause to the
 	# MIN/MAX selects below.  This might help choose mods more
 	# smoothly and make failure (as archive_delay_mod is approached)
@@ -64,16 +71,16 @@ sub update_modlog_ids {
 	# way to predict accurately what it will do on a live site
 	# without doing it... -Jamie 2002/11/16
 
-	my($min_old) = $reader->sqlSelect("MIN(id)", "moderatorlog");
+	my($min_old) = $reader->sqlSelect("MIN(id)", "moderatorlog", "m2status=0 AND active=1 AND reason in($m2able_reasons)");
 	my($max_old) = $reader->sqlSelect("MAX(id)", "moderatorlog",
-		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)");
+		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY) AND m2status=0 AND active=1 AND reason in($m2able_reasons)");
 	$min_old = 0 if !$min_old;
-	$max_old = 0 if !$max_old;
+	$max_old = $min_old if !$max_old;
 	my($min_new) = $reader->sqlSelect("MIN(id)", "moderatorlog",
-		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY)");
-	my($max_new) = $reader->sqlSelect("MAX(id)", "moderatorlog");
+		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY) AND m2status=0 AND active=1 AND reason in($m2able_reasons)");
+	my($max_new) = $reader->sqlSelect("MAX(id)", "moderatorlog", "m2status=0 AND active=1 AND reason in($m2able_reasons)");
 	$min_new = 0 if !$min_new;
-	$max_new = 0 if !$max_new;
+	$max_new = $min_new if !$max_new;
 
 	$slashdb->setVar("m2_modlogid_min_old", $min_old);
 	$slashdb->setVar("m2_modlogid_max_old", $max_old);
