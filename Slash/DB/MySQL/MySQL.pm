@@ -6212,8 +6212,6 @@ sub getSlashConf {
 	$conf{nick_chars}	||= q{ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*'(),-};
 	$conf{nick_maxlen}	||= 20;
 	$conf{login_temp_minutes} ||= 10;
-	$conf{login_temp_minutes} =~ s/\D//;
-	$conf{login_temp_minutes} = 10 unless length $conf{login_temp_minutes};
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {

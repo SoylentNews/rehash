@@ -1995,15 +1995,14 @@ CREATE TABLE users_logtokens (
 
 INSERT INTO vars (name, value, description) VALUES ('rss_allow_index', '0', 'Allow RSS feeds to be served from index.pl (1 = admins, 2 = subscribers, 3 = all logged-in users)');
 
-# USEPERL LAST UPDATED HERE
-
-# SLASHCODE LAST UPDATED HERE
-
 # End of T_2_3_0_129, Start of T_2_3_0_130 - 2003/12/29
 
-INSERT INTO string_param (type, code, name) VALUES ('cookie_location','none','Anywhere');
+INSERT INTO string_param (type, code, name) VALUES ('cookie_location','none','Everywhere');
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','classbid','My Subnet');
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','ipid','My IP Address');
+
+REPLACE INTO code_param (type, code, name) VALUES ('session_login',0,'In one year');
+REPLACE INTO code_param (type, code, name) VALUES ('session_login',1,'When I close my browser');
 
 ALTER TABLE users_info ADD COLUMN cookie_location enum("classbid","subnetid","ipid","none") DEFAULT "classbid" NOT NULL AFTER session_login;
 ALTER TABLE users_logtokens ADD COLUMN temp ENUM("yes","no") NOT NULL DEFAULT "no" AFTER locationid;
@@ -2012,3 +2011,9 @@ ALTER TABLE users_logtokens ADD UNIQUE uid_locationid_temp (uid, locationid, tem
 ALTER TABLE users_logtokens ADD KEY (temp);
 
 INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 'Minutes before a temporary login expires');
+
+# End of T_2_3_0_130, Start of T_2_3_0_131 - 2003/12/31
+
+# USEPERL LAST UPDATED HERE
+
+# SLASHCODE LAST UPDATED HERE
