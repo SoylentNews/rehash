@@ -66,7 +66,9 @@ sub main {
 	# Set some defaults
 	$form->{query}		||= '';
 	$form->{'sort'}		||= 1;
-	$form->{section}	= $constants->{section} unless $form->{section}; # Set to our current section if section is not passed in
+	# this makes it so *no* results get returned, so i changed it back
+	#$form->{section}	||= $constants->{section}; # Set to our current section if section is not passed in
+	$form->{section}	||= '';
 	$form->{threshold}	= getCurrentUser('threshold') if !defined($form->{threshold});
 
 	# get rid of bad characters
