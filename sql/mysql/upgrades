@@ -2395,6 +2395,8 @@ ALTER TABLE skins DROP COLUMN min_weight;
 ALTER TABLE topic_parents ALTER COLUMN min_weight SET DEFAULT 10;
 UPDATE topic_parents         SET min_weight = min_weight * 10 WHERE min_weight < 10;
 UPDATE story_topics_chosen   SET weight = weight * 10         WHERE weight < 10;
+# If this next line throws an error saying there is no 'weight' column,
+# that's OK, ignore it.
 UPDATE story_topics_rendered SET weight = weight * 10         WHERE weight < 10;
 
 # Changes for plugins/Admin (which you are almost certainly using)
@@ -2453,6 +2455,8 @@ INSERT INTO vars (name, value, description) VALUES ('debughash_getTopicTree','',
 # End of T_2_5_0_18, Start of T_2_5_0_19 - 2004/08/03
 
 ALTER TABLE story_topics_chosen ADD INDEX tid_stoid (tid, stoid), DROP INDEX tid;
+# If this next line throws an error saying the indexes already
+# exist and don't, respectively, that's OK, ignore it.
 ALTER TABLE story_topics_rendered ADD INDEX tid_stoid (tid, stoid), DROP INDEX tid;
 
 # End of T_2_5_0_19, Start of T_2_5_0_20 - 2004/08/05
@@ -2518,6 +2522,8 @@ ALTER TABLE topic_nexus_extras MODIFY COLUMN type ENUM('text', 'list') NOT NULL 
 
 # End of T_2_5_0_25, Start of T_2_5_0_26 - 2004/09/09
 
+# If this next line throws an error saying there is no 'weight' column,
+# that's OK, ignore it.
 ALTER TABLE story_topics_rendered DROP COLUMN weight;
 
 DROP TABLE IF EXISTS story_render_dirty;
