@@ -25,6 +25,10 @@ use Slash::Install;
 use Getopt::Std;
 use Cwd;
 
+use vars qw(
+	$dir
+);
+
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
 (my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
@@ -68,6 +72,7 @@ if ($opts{'c'}) {
 	exit;
 }
 
+$dir = getcwd;
 if ($opts{'O'}) {
 	if (! -d $opts{'O'}) {
 		if ($opts{'d'} || $opts{'e'} || ($opts{'l'} && $opts{'f'})) {
@@ -78,6 +83,7 @@ if ($opts{'O'}) {
 			exit;
 		}
 	}
+	$dir = $opts{O};
 }
 
 if ($opts{'S'} and $opts{'P'}) {
@@ -93,10 +99,15 @@ if ($opts{'S'} and $opts{'P'}) {
 # start the processing
 if ($opts{'s'}) {
 	for (@ARGV) {
-		$_ = catfile($opts{'O'}, $_) if $opts{'O'};
+		$_ = catfile($dir, $_);
+		next unless -f $_;
+		my($filename) = (File::Spec->splitpath($_))[2];
 		my $template = $install->readTemplateFile($_);
-		next unless $template;
-		print "Preparing to insert $template->{name} using filename $_\n";
+		if (!$template) {
+			print STDERR "WARNING: could not readTemplateFile at $_\n";
+			next;
+		}
+		print "Preparing $template->{name} using $filename: $_\n";
 		my $temp2 = $slashdb->getTemplateByName($template->{name},
 			[qw(tpid name page section)], 1,
 			$template->{page}, $template->{section});
@@ -104,20 +115,37 @@ if ($opts{'s'}) {
 			&& $temp2->{section} eq $template->{section}
 		) {
 			if ($template->{instructions} =~ /placeholder/) {
-				print "Not overwritting template $_ with placeholder.\n";
+				print "Not overwriting template $filename with placeholder.\n";
 				next;
 			}
 			delete $template->{instructions};
 
 			if ($slashdb->setTemplate($temp2->{tpid}, $template)) {
-				print "updated template $_ tpid $temp2->{tpid}\n";
+				my $tsemi  = join(";", @$template{'name','page','section'});
+				my $t2semi = join(";", @$temp2   {'name','page','section'});
+				print "updated template $t2semi tpid $temp2->{tpid}\n";
+				if ($tsemi ne $t2semi || $tsemi ne $filename) {
+					print "WARNING: name of file '$filename' is not name of template it contains '$t2semi'\n";
+				}
 			} else {
-				print "wasn't able to update template $_ tpid $temp2->{tpid}\n";
+				print "WARNING: wasn't able to update template $_ tpid $temp2->{tpid}\n";
 				print "Error: " . $slashdb->{_dbh}->DBI::err_str . "\n";
 			}
 		} else {
 			if (my($tpid) = $slashdb->createTemplate($template)) {
-				print "created template $_ tpid $tpid\n";
+				my $temp2 = $slashdb->getTemplateByName($template->{name},
+					[qw(tpid name page section)], 1,
+					$template->{page}, $template->{section});
+				if ($temp2) {
+					print join("",
+						"created template ",
+						$temp2->{name}, ";",
+						$temp2->{page}, ";",
+						$temp2->{section},
+						" tpid $temp2->{tpid}\n");
+				} else {
+					print "created template tpid $tpid -- WARNING name of file apparently does not match name of template\n";
+				}
 			} else {
 				print "wasn't able to update template $_\n";
 				print "Error: " . $slashdb->{_dbh}->DBI::err_str . "\n";
