@@ -59,8 +59,8 @@ sub main {
 		print "</CENTER>";
 
 	} else {
-		my $error = vote($I{F}{qid}, $I{F}{aid});
-		printComments($I{F}{qid}) unless getvar("nocomment") || $error;
+		my $vote = vote($I{F}{qid}, $I{F}{aid});
+		printComments($I{F}{qid}) if !getvar("nocomment") && $vote;
 	}
 
 	writelog("pollbooth", $I{F}{qid});
@@ -171,7 +171,7 @@ sub vote {
 		print "Invalid poll!<BR>";
 		# Non-zero denotes error condition and that comments should not be 
 		# printed.
-		return 1;
+		return;
 	}
 
 	my $qid_htm = stripByMode($qid, 'attribute');
