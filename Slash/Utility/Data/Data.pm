@@ -30,7 +30,7 @@ use Date::Language;
 use Date::Parse qw(str2time);
 use Digest::MD5 qw(md5_hex md5_base64);
 use Email::Valid;
-use HTML::Entities qw(:DEFAULT %char2entity);
+use HTML::Entities qw(:DEFAULT %char2entity %entity2char);
 use HTML::FormatText;
 use HTML::TreeBuilder;
 use POSIX qw(UINT_MAX);
@@ -972,9 +972,11 @@ sub _fixupCharrefs {
 	$constants->{bad_numeric}  = { map { $_, 1 } @{$constants->{charrefs_bad_numeric}} };
 	$constants->{bad_entity}   = { map { $_, 1 } @{$constants->{charrefs_bad_entity}} };
 
-	$constants->{good_numeric} = { map { $_, 1 } @{$constants->{charrefs_good_numeric}}, keys %latin1_to_ascii };
-	$constants->{good_entity}  = { map { $_, 1 } @{$constants->{charrefs_good_entity}},
-		grep { s/^&(\w+);$/$1/ } map { $char2entity{decode_entities("&#$_;")} } keys %latin1_to_ascii };
+	$constants->{good_numeric} = { map { $_, 1 } @{$constants->{charrefs_good_numeric}},
+		grep { $_ < 128 || $_ > 159 } keys %latin1_to_ascii };
+	$constants->{good_entity}  = { map { $_, 1 } @{$constants->{charrefs_good_entity}}, qw(apos quot),
+		grep { s/^&(\w+);$/$1/ } map { $char2entity{chr $_} }
+		grep { $_ < 128 || $_ > 159 } keys %latin1_to_ascii };
 }
 
 my %action_data = ( );
@@ -1804,10 +1806,11 @@ sub approveCharref {
 	my $ok = 1; # Everything not forbidden is permitted.
 
 	_fixupCharrefs();
+	my %latin1_to_ascii = _latin1_to_ascii();
+	my $decimal = 0;
 
 	if ($ok == 1 && $charref =~ /^#/) {
 		# Probably a numeric character reference.
-		my $decimal = 0;
 		if ($charref =~ /^#x([0-9a-f]+)$/i) {
 			# Hexadecimal encoding.
 			$decimal = hex($1); # always returns a positive integer
@@ -1820,7 +1823,9 @@ sub approveCharref {
 		}
 		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
 		if ($constants->{draconian_charrefs}) {
-			$ok = 0 unless $constants->{good_numeric}{$decimal};
+			if (!$constants->{good_numeric}{$decimal}) {
+				$ok = $latin1_to_ascii{$decimal} ? 2 : 0;
+			}
 		} else {
 			$ok = 0 if $constants->{bad_numeric}{$decimal};
 		}
@@ -1828,7 +1833,10 @@ sub approveCharref {
 		# Character entity.
 		my $entity = lc $1;
 		if ($constants->{draconian_charrefs}) {
-			$ok = 0 unless $constants->{good_entity}{$entity};
+			if (!$constants->{good_entity}{$entity}) {
+				$decimal = ord $entity2char{$entity};
+				$ok = $latin1_to_ascii{$decimal} ? 2 : 0;
+			}
 		} else {
 			$ok = 0 if $constants->{bad_entity}{$entity};
 		}
@@ -1837,7 +1845,10 @@ sub approveCharref {
 		$ok = 0;
 	}
 
-	if ($ok) {
+	# special case for old-style broken entities we want to convert to ASCII
+	if ($ok == 2 && $decimal) {
+		return $latin1_to_ascii{$decimal};
+	} elsif ($ok) {
 		return "&$charref;";
 	} else {
 		return "";
