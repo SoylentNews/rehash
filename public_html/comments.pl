@@ -653,8 +653,8 @@ sub submitComment {
 		$pts-- if $I{U}{karma} < -10;
 		$pts++ if $I{U}{karma} > 25 and !$I{F}{nobonus};
 		# Enforce proper ranges on comment points.
-		$pts = -1 if $pts < -1;
-		$pts = 5 if $pts > 5;
+		$pts = $I{comment_minscore} if $pts < $I{comment_minscore};
+		$pts = $I{comment_maxscore} if $pts > $I{comment_maxscore};
 	}
 
 	$I{dbh}->do("LOCK TABLES comments WRITE");
@@ -806,6 +806,15 @@ sub moderateCid {
 		"cid=$cid and sid='$sid'"
 	);
 
+	my($mid) = sqlSelect(
+		"id", "moderatorlog",
+		"uid=$I{U}{uid} and cid=$cid and sid='$sid'"
+	);
+	if ($mid) {
+		print "<LI>$subj ($sid-$cid, <B>Already moderated</B>)</LI>";
+		return;
+	}
+
 	my $modreason = $reason;
 	my $val = "-1";
 	if ($reason == 9) { # Overrated
@@ -820,6 +829,24 @@ sub moderateCid {
 		$val = "+1";
 	}
 
+	my $scorecheck = $points + $val;
+	# If the resulting score is out of comment score range, no further actions 
+	# need be performed.
+	if ($scorecheck < $I{comment_minscore} || $scorecheck > $I{comment_maxscore}) {
+		# We should still log the attempt.
+		sqlInsert("moderatorlog", {
+			uid	=> $I{U}{uid},
+			val	=> $val,
+			sid	=> $sid,
+			cid	=> $cid,
+			reason	=> $modreason,
+			-ts	=> 'now()'
+		});
+
+		print "<LI>$subj ($sid-$cid, <B>Comment already at limit</B>)</LI>";
+		return;
+	}
+
 	my $strsql = "UPDATE comments SET
 		points=points$val,
 		reason=$reason,
@@ -827,9 +854,8 @@ sub moderateCid {
 		WHERE sid=" . $I{dbh}->quote($sid)."
 		AND cid=$cid 
 		AND points " .
-			($val < 0 ? " > -1" : "") .
-			($val > 0 ? " < 5" : "");
-
+			($val < 0 ? " > $I{comment_minscore}" : "") .
+			($val > 0 ? " < $I{comment_maxscore}" : "");
 	$strsql .= " AND lastmod<>$I{U}{uid}"
 		unless $I{U}{aseclev} > 99 && $I{authors_unlimited};
 
@@ -926,7 +952,8 @@ sub undoModeration {
 		);
 
 		# Insure scores still fall within the proper boundaries
-		my $scorelogic = $val < 0 ? "points < 5" : "points > -1";
+		my $scorelogic = $val < 0 ? "points < $I{comment_maxscore}" :
+									"points > $I{comment_minscore}";
 		sqlUpdate(
 			"comments",
 			{ -points => "points+" . (-1 * $val) },

@@ -22,6 +22,18 @@ slash-1.0.6, 2000.06.xx
 	with formkeys in submission and comment posting forms
 	in Slash.pm, comments.pl
 
+*	Fixed bug that allowed users to moderate a single comment more
+	than once.
+
+*	Submission titles are now shown on the browser's titlebar.
+
+*	Section articles appearing on the main index now also have a link
+	to the section's home page by the "Read More" link. (Suggested by
+	Russ Nelson)
+
+*	Fixed bug where authors could moderate if they were logged in as
+	authors, but not logged in as a registered user.
+
 
 slash-1.0.5, 2000.06.13
 -----------------------

@@ -28,13 +28,25 @@ use lib '../';
 use vars '%I';
 use Image::Size;
 use Slash;
+use HTML::Entities;
 
 sub main {
 	*I = getSlashConf();
 	getSlash();
 	getSection('admin');
 
-	header("backSlash $I{U}{tzcode} $I{U}{offset}", 'admin');
+	my($tbtitle); 
+	if ($I{F}{op} =~ /^preview|edit$/ && $I{F}{title}) {
+		# Show submission title on browser's titlebar.
+		$tbtitle = $I{F}{title};
+		$tbtitle =~ s/"/'/g;
+		$tbtitle = " - \"$tbtitle\"";
+		# Undef the form title value if we have SID defined since the editor
+		# will have to get it from the database anyways.
+		undef $I{F}{title} if $I{F}{sid} && $I{F}{op} eq 'edit';
+	}
+
+	header("backSlash $I{U}{tzcode} $I{U}{offset}$tbtitle", 'admin');
 
 	# Admin Menu
 	print "<P>&nbsp;</P>" unless $I{U}{aseclev};
@@ -1185,6 +1197,8 @@ EOT
 	my @extracolumns = sqlSelectColumns($S->{section})
 		if sqlTableExists($S->{section});
 
+	# This may cause problems w/ browsers that don't decode their form
+	# fields.
 	$S->{introtext} =~ s/&/&amp;/g;
 	$S->{bodytext} =~ s/&/&amp;/g;
 	my $SECT = getSection($S->{section});
@@ -1353,7 +1367,9 @@ EOT
 
 		print qq[\t<TR BGCOLOR="$bgcolor"><TD ALIGN="RIGHT">\n];
 		if ($I{U}{aid} eq $aid || $I{U}{aseclev} > 100) {
-			print qq!\t\t[<A HREF="$ENV{SCRIPT_NAME}?op=edit&sid=$sid">$x</A>\n]!;
+			$HTML::Entities::char2entity{' '} = '+';
+			my($tbtitle) = encode_entities($title, '<>&" ');
+			print qq!\t\t[<A HREF="$ENV{SCRIPT_NAME}?title=$tbtitle&op=edit&sid=$sid">$x</A>\n]!;
 
 		} else {
 			print "\t\t[$x]\n"

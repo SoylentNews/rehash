@@ -28,6 +28,7 @@ use strict;
 use lib '../';
 use vars '%I';
 use Slash;
+use HTML::Entities;
 
 #################################################################
 sub main {
@@ -47,8 +48,15 @@ sub main {
 	$I{F}{subj}  = stripByMode($I{F}{subj})  if $I{F}{subj}; 
 	$I{F}{email} = stripByMode($I{F}{email}) if $I{F}{email}; 
 
+	# Show submission title on browser's titlebar.
+	my($tbtitle) = $I{F}{title};
+	if ($tbtitle) {
+		$tbtitle =~ s/^"?(.+?)"?$/"$1"/;
+		$tbtitle = "- $tbtitle";
+	}
+
 	$section = "admin" if $seclev > 100;
-	header("$I{sitename} Submissions", $section);
+	header("$I{sitename} Submissions$tbtitle", $section);
 	# print "from $I{F}{from} email $I{F}{email} subject $I{F}{subj}<BR>\n";
 
 	#adminMenu() if $seclev > 100;
@@ -406,20 +414,24 @@ USER
 		$karma = $uid > -1 && defined $karma ? " ($karma)" : "";
 
 		my @strs = (substr($subj, 0, 35), substr($name, 0, 20), substr($email, 0, 20));
+		# Adds proper section for form editor.
 		my $sec = $section ne $I{defaultsection} ? "&section=$section" : "";
-		printf(($admin ? <<ADMIN : <<USER), @strs);
+		$HTML::Entities::char2entity{' '} = '+';
+		my $stitle = '&title=' . encode_entities($strs[0], '<>&" ');
 
+		printf(($admin ? <<ADMIN : <<USER), @strs);
 		</FONT><INPUT TYPE="CHECKBOX" NAME="del_$subid">
 	</NOBR></TD><TD>$ptime</TD><TD>
-		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$sec">%s&nbsp;</A>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$stitle$sec">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="2">%s$karma<BR>%s</FONT></TD></TR>
 ADMIN
 	<TD>\u$section</TD><TD>$ptime</TD>
 	<TD>
-		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$stitle">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="-1">%s<BR>%s</FONT></TD></TR>
 	<TR><TD COLSPAN="6"><IMG SRC="$I{imagedir}/pix.gif" ALT="" HEIGHT="3"></TD></TR>
 USER
+
 	}
 
 	my $quik = $I{F}{note} eq "Quik" ? <<EOT : '';
