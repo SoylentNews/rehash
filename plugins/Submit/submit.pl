@@ -98,8 +98,12 @@ sub main {
 		! $ops->{$op}{function}
 	);
 
-	my $data = { admin => 1 };
-	$data->{tab_selected} = 'submissions' if $op eq 'list';
+	# the submissions tab should always be highlighted,
+	# being submit.pl and all
+	my $data = {
+		admin => 1,
+		tab_selected => 'submissions',
+	};
 	header(
 		getData('header', { tbtitle => $tbtitle } ),
 		'', $data
