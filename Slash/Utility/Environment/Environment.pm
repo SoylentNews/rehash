@@ -1322,6 +1322,8 @@ sub prepareUser {
 	}
 	if ($user->{seclev} >= 100) {
 		$user->{is_admin} = 1;
+		# can edit users and do all sorts of cool stuff
+		$user->{is_super_admin} = 1 if $user->{seclev} >= 10_000 || $user->{acl}{super_admin};
 		my $sid;
 		#This cookie could go, and we could have session instance
 		#do its own thing without the cookie. -Brian
@@ -1354,7 +1356,7 @@ sub prepareUser {
 sub get_ipids {
 	my($hostip, $no_md5, $locationid) = @_;
 
-	$locationid = 'classbid' if @_ > 2 && !$locationid;
+	$locationid = getCurrentStatic('cookie_location') if @_ > 2 && !$locationid;
 
 	if (!$hostip && $ENV{GATEWAY_INTERFACE}) {
 		my $r = Apache->request;

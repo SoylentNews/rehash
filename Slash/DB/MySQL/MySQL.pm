@@ -6221,6 +6221,7 @@ sub getSlashConf {
 		   || ($conf{m2_consensus}-1)/2 != int(($conf{m2_consensus}-1)/2);
 	$conf{nick_chars}	||= q{ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_.+!*'(),-};
 	$conf{nick_maxlen}	||= 20;
+	$conf{cookie_location}  ||= 'classbid';
 	$conf{login_temp_minutes} ||= 10;
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
