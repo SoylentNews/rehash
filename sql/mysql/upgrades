@@ -1133,5 +1133,7 @@ ALTER TABLE moderatorlog ADD INDEX m2stat_act (m2status, active);
 
 # End of T_2_3_0_65, Start of T_2_3_0_66
 
+# End of T_2_3_0_66, Start of T_2_3_0_67
+
 # SLASHDOT LAST UPDATED HERE
 
