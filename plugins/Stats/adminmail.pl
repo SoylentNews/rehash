@@ -75,14 +75,7 @@ EOT
 		}
 	}
 
-	my @yesttime = localtime(time-86400);
-	my @weekagotime = localtime(time-86400*7);
-	my $yesterday = sprintf "%4d-%02d-%02d", 
-		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
-	my $weekago = sprintf "%4d-%02d-%02d", 
-		$weekagotime[5] + 1900, $weekagotime[4] + 1, $weekagotime[3];
-
-	my $comments = $stats->countCommentsDaily($yesterday);
+	my $comments = $stats->countCommentsDaily();
 	my $accesslog_rows = $stats->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
 	my $modlogs = $stats->sqlCount('moderatorlog', 'active=1');
@@ -106,31 +99,16 @@ EOT
 	my $metamodlogs_yest = $stats->sqlCount('metamodlog',
 		'active=1 AND ts >= DATE_SUB(NOW(), INTERVAL 2 DAY)');
 
-#<<<<<<< adminmail.pl
-	my $mod_points = $stats->getPoints;
-	my @weekagotime = localtime(time-86400*7);
-	my $weekago = sprintf "%4d-%02d-%02d", 
-		$weekagotime[5] + 1900, $weekagotime[4] + 1, $weekagotime[3];
+	my $mod_points_pool = $stats->getPointsInPool();
 	my $used = $stats->countModeratorLog();
-	my $modlog_hr = $stats->countModeratorLogHour();
+	my $modlog_yest_hr = $stats->countModeratorLogByVal();
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID();
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
 	my $submissions = $stats->countSubmissionsByDay();
-	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID( $distinct_comment_ipids);
-	my $modlog_total = $modlog_hr->{1}{count} + $modlog_hr->{-1}{count};
-#=======
-	my $mod_points_pool = $stats->getPointsInPool();
-	my $used = $stats->countModeratorLog($yesterday);
-	my $modlog_yest_hr = $stats->countModeratorLogHour($yesterday);
-	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID($yesterday);
-	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters($yesterday);
-	my $submissions = $stats->countSubmissionsByDay($yesterday);
-	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($yesterday, $distinct_comment_ipids);
+	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($distinct_comment_ipids);
 	my $modlog_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
 	my $consensus = $constants->{m2_consensus};
-#>>>>>>> 1.82
 
-	my $comments = $stats->countCommentsDaily();
 	my $m2_text = getM2Text($stats->getModM2Ratios());
 
 	my $grand_total = $stats->countDailyByPage('', );
@@ -215,29 +193,8 @@ EOT
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 
-	my $admin_mods = $stats->getAdminModsInfo( $weekago);
-	my $admin_mods_text = "";
-	my($num_admin_mods, $num_mods) = (0, 0);
-	if ($admin_mods) {
-		for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
-			$admin_mods_text .= sprintf("%13.13s: %26s %-46s\n",
-				$nickname,
-				$admin_mods->{$nickname}{m1_text},
-				$admin_mods->{$nickname}{m2_text}
-			);
-			if ($nickname eq '~Day Total') {
-				$num_mods += $admin_mods->{$nickname}{m1_up};
-				$num_mods += $admin_mods->{$nickname}{m1_down};
-			} else {
-				$num_admin_mods += $admin_mods->{$nickname}{m1_up};
-				$num_admin_mods += $admin_mods->{$nickname}{m1_down};
-			}
-		}
-		$admin_mods_text =~ s/ +$//gm;
-		$admin_mods_text .= sprintf("%13.13s: %4d of %4d (%6.2f%%)\n",
-			"Admin Mods", $num_admin_mods, $num_mods,
-			($num_mods ? $num_admin_mods*100/$num_mods : 0));
-	}
+	my $admin_mods = $stats->getAdminModsInfo();
+	my $admin_mods_text = getAdminModsText($admin_mods);
 
 	$mod_data{repeat_mods} = $stats->getRepeatMods({
 		min_count => $constants->{mod_stats_min_repeat}
@@ -291,17 +248,6 @@ EOT
 	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest/$modlogs_needmeta_yest : 0));
 	$mod_data{consensus} = sprintf("%8d", $consensus);
 	$mod_data{oldest_unm2d_days} = sprintf("%.1f", (time-$oldest_unm2d)/86400);
-#<<<<<<< adminmail.pl
-	$mod_data{mod_points} = sprintf("%8d", $mod_points);
-	$mod_data{used_total} = sprintf("%8d", $modlog_total);
-	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0));
-	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0));
-	$mod_data{used_minus_1} = sprintf("%8d", $modlog_hr->{-1}{count});
-	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) );
-	$mod_data{used_plus_1} = sprintf("%8d", $modlog_hr->{1}{count});
-	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0));
-	$mod_data{day} = $yesterday ;
-#=======
 	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);
 	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created);
 	$mod_data{mod_points_pool} = sprintf("%8d", $mod_points_pool);
@@ -314,7 +260,6 @@ EOT
 	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_yest_total : 0));
 	$mod_data{day} = $yesterday;
 	$mod_data{m2_text} = $m2_text;
-#>>>>>>> 1.82
 
 	$data{comments} = $mod_data{comments};
 	$data{IPIDS} = sprintf("%8d", scalar(@$distinct_comment_ipids));
