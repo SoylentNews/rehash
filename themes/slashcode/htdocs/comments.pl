@@ -835,7 +835,8 @@ sub validateComment {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	
 	my $form_success = 1;
 	my $message = '';
 
@@ -895,11 +896,13 @@ sub validateComment {
 	# controls it (that var is turned into a hashref in MySQL.pm when
 	# the vars table is read in, whose keys we loop over to find the
 	# appropriate level).
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	
+	my $min_cid_1_day_old = $slashdb->getVar('min_cid_last_1_days','value', 1) || 0;
+	
 	if ($user->{is_anon} && $constants->{comments_perday_anon}
 		&& !$user->{is_admin}) {
 		my($num_comm, $sum_mods) = $reader->getNumCommPostedAnonByIPID(
-			$user->{ipid}, 24);
+			$user->{ipid}, 24, $min_cid_1_day_old);
 		my $num_allowed = $constants->{comments_perday_anon};
 		if ($sum_mods - $num_comm + $num_allowed <= 0) {
 
@@ -913,7 +916,7 @@ sub validateComment {
 	} elsif (!$user->{is_anon} && $constants->{comments_perday_bykarma}
 		&& !$user->{is_admin}) {
 		my($num_comm, $sum_mods) = $reader->getNumCommPostedByUID(
-			$user->{uid}, 24);
+			$user->{uid}, 24, $min_cid_1_day_old);
 		my $num_allowed = 9999;
 		K_CHECK: for my $k (sort { $a <=> $b }
 			keys %{$constants->{comments_perday_bykarma}}) {
