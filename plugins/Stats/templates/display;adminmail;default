@@ -29,15 +29,17 @@ __template__
         IPIDS: [% IPIDS %] distinct IPIDS posted comments
              : [% comments_ipids %] distinct IPIDS used comments
              : [% articles_ipids %] distinct IPIDS used articles
+             : [% search_ipids %] distinct IPIDS used search
              : [% journals_ipids %] distinct IPIDS used journals
              : [% palm_ipids %] distinct IPIDS used palm pages
              : [% rss_ipids %] distinct IPIDS used rss pages
     pageviews: [% comments_page %] for comments ([% comment_bytes %])
              : [% articles_page %] for articles ([% article_bytes %])
+             : [% search_page %] for searches ([% search_bytes %])
              : [% journals_page %] for journals ([% journal_bytes %])
              : [% palm_page %] for palm ([% palm_bytes %])
              : [% rss_page %] for rss ([% rss_bytes %])
-  submissions: [% submissions %] submissions
+  submissions: [% submissions %] submissions 
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
 [% admin_mods_text %]

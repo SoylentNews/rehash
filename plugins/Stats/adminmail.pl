@@ -12,6 +12,7 @@ use vars qw( %task $me );
 # your audience and admins.
 $task{$me}{timespec} = '7 6 * * *';
 $task{$me}{timespec_panic_2} = ''; # if major panic, dailyStuff can wait
+$task{$me}{'fork'} = 1;			# If allowed, fork this task from 
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my($stats, $backupdb);
@@ -94,6 +95,10 @@ EOT
 	my $article_page_views = $stats->countDailyByPage('article',$yesterday);
 	my $article_bytes = $stats->countBytesByPage('article',$yesterday);
 
+	my $uniq_search_users = $stats->countDailyByPageDistinctIPID('search', $yesterday);
+	my $search_page_views = $stats->countDailyByPage('search',$yesterday);
+	my $search_bytes = $stats->countBytesByPage('search',$yesterday);
+
 	my $uniq_palm_users = $stats->countDailyByPageDistinctIPID('palm', $yesterday);
 	my $palm_page_views = $stats->countDailyByPage('palm',$yesterday);
 	my $palm_bytes = $stats->countBytesByPage('palm',$yesterday);
@@ -148,6 +153,10 @@ EOT
 	$statsSave->createStatDaily($yesterday, "article_page_views", $article_page_views);
 	$statsSave->createStatDaily($yesterday, "article_bytes", $article_bytes);
 
+	$statsSave->createStatDaily($yesterday, "uniq_search_users", $uniq_search_users);
+	$statsSave->createStatDaily($yesterday, "search_page_views", $search_page_views);
+	$statsSave->createStatDaily($yesterday, "search_bytes", $search_bytes);
+
 	$statsSave->createStatDaily($yesterday, "uniq_palm_users", $uniq_palm_users);
 	$statsSave->createStatDaily($yesterday, "palm_page_views", $palm_page_views);
 	$statsSave->createStatDaily($yesterday, "palm_bytes", $palm_bytes);
@@ -158,7 +167,6 @@ EOT
 
 	$statsSave->createStatDaily($yesterday, "uniq_rss_users", $uniq_rss_users);
 	$statsSave->createStatDaily($yesterday, "rss_page_views", $rss_page_views);
-	$statsSave->createStatDaily($yesterday, "rss_bytes", $rss_bytes);
 	$statsSave->createStatDaily($yesterday, "rss_bytes", $rss_bytes);
 
 	for my $nickname (keys %$admin_mods) {
@@ -196,17 +204,20 @@ EOT
 		IPIDS => sprintf("%8d", scalar(@$distinct_comment_ipids)),
 		comments_ipids => sprintf("%8d", $uniq_comment_users),
 		articles_ipids => sprintf("%8d", $uniq_article_users),
+		search_ipids => sprintf("%8d", $uniq_search_users),
 		journals_ipids => sprintf("%8d", $uniq_journal_users),
 		palm_ipids => sprintf("%8d", $palm_page_views),
 		rss_ipids => sprintf("%8d", $rss_page_views),
 		comments_page => sprintf("%8d", $comment_page_views ),
 		articles_page => sprintf("%8d", $article_page_views ),
+		search_page => sprintf("%8d", $search_page_views ),
 		journals_page => sprintf("%8d", $journal_page_views),
 
 		palm_bytes => sprintf("%0.1f MB",$palm_bytes/(1024*1024)),
 		rss_bytes => sprintf("%0.1f MB",$rss_bytes/(1024*1024)),
 		comment_bytes => sprintf("%0.1f MB",$comment_bytes/(1024*1024) ),
 		article_bytes => sprintf("%0.1f MB",$article_bytes/(1024*1024) ),
+		search_bytes => sprintf("%0.1f MB",$search_bytes/(1024*1024) ),
 		journal_bytes => sprintf("%0.1f MB",$journal_bytes/(1024*1024)),
 		
 		palm_page => sprintf("%8d", $palm_page_views),
