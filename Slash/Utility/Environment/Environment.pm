@@ -1311,7 +1311,7 @@ sub prepareUser {
 	}
 
 	$user->{state}{post}	= $method eq 'POST' ? 1 : 0;
-	@{$user}{qw[ipid subnetid]} = get_ipids($hostip);
+	@{$user}{qw[ipid subnetid classbid hostip]} = get_ipids($hostip);
 
 	my @defaults = (
 		['mode', 'thread'], qw[
@@ -1440,10 +1440,11 @@ sub get_ipids {
 		return $locationid eq 'classbid' ? $classbid
 		     : $locationid eq 'subnetid' ? $subnetid
 		     : $locationid eq 'ipid'     ? $ipid
+		     : $locationid eq 'ip'       ? $hostip
 		     : '';
 	}
 
-	return($ipid, $subnetid, $classbid);
+	return($ipid, $subnetid, $classbid, $hostip);
 }
 
 #========================================================================

@@ -3780,12 +3780,18 @@ print STDERR "setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
 
 sub checkForOpenProxy {
 	my($self, $ip) = @_;
-	if (!$ip) {
+	# If we weren't passed an IP address, default to whatever
+	# our current IP address is.
+	if (!$ip && $ENV{GATEWAY_INTERFACE}) {
 		my $r = Apache->request;
 		$ip = $r->connection->remote_ip if $r;
 	}
 	# If we don't have an IP address, it can't be an open proxy.
 	return 0 if !$ip;
+	# Known secure IPs also don't count as open proxies.
+	my $constants = getCurrentStatic();
+	my $secure_ip_regex = $constants->{admin_secure_ip_regex};
+	return 0 if $secure_ip_regex && $ip =~ /$secure_ip_regex/;
 
 	# If the IP address is already one we have listed, use the
 	# existing listing.
@@ -3797,7 +3803,6 @@ sub checkForOpenProxy {
 #print STDERR scalar(localtime) . " cfop ip '$ip' not known, checking\n";
 
 	# No known answer;  probe the IP address and get an answer.
-	my $constants = getCurrentStatic();
 	my $ports = $constants->{comments_portscan_ports} || '80 8080 8000 3128';
 	my @ports = grep /^\d+$/, split / /, $ports;
 	return 0 if !@ports;
@@ -4432,6 +4437,7 @@ sub setAccessList {
 }
 
 #################################################################
+# Should probably cache this instead of relying on MySQL's query cache.
 sub checkIsProxy {
 	my($self, $ipid) = @_;
 
@@ -4443,6 +4449,7 @@ sub checkIsProxy {
 }
 
 #################################################################
+# Should probably cache this instead of relying on MySQL's query cache.
 sub checkIsTrusted {
 	my($self, $ipid) = @_;
 

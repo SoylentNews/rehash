@@ -865,15 +865,18 @@ sub validateComment {
 	# If we can, they're coming from an open HTTP proxy, which
 	# we probably don't want to allow to post.
 	if ($user->{is_anon} && $constants->{comments_portscan_anon_for_proxy}) {
-		my $is_proxy = $slashdb->checkForOpenProxy();
+		my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
+		if ($is_trusted ne 'yes') {
+			my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
 print STDERR scalar(localtime) . " comments.pl cfop returned '$is_proxy'\n";
-		if ($is_proxy) {
-			$$error_message = getError('open proxy', {
-				unencoded_ip	=> $ENV{REMOTE_ADDR},
-				port		=> $is_proxy,
-			});
-			$form_success = 0;
-			return;
+			if ($is_proxy) {
+				$$error_message = getError('open proxy', {
+					unencoded_ip	=> $ENV{REMOTE_ADDR},
+					port		=> $is_proxy,
+				});
+				$form_success = 0;
+				return;
+			}
 		}
 	}
 
