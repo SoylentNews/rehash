@@ -16,7 +16,7 @@ use Time::HiRes;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-$task{$me}{timespec} = '46 * * * *';
+$task{$me}{timespec} = '57 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 
