@@ -2125,12 +2125,6 @@ INSERT INTO message_codes (code, type, seclev, modes, acl) VALUES (14, 'Daily Mo
 
 INSERT INTO vars (name, value, description) VALUES ('tids_in_urls', '0', 'Want tid=1&tid=2 in story and discussion-related URLs?');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_3_0_137, Start of T_2_3_0_138 - 2004/02/17
 
 INSERT INTO vars (name, value, description) VALUES ('admin_comment_display_days', '30', 'Number of days back worth of comments to show admin on a user page');
@@ -2145,5 +2139,14 @@ INSERT INTO vars (name, value, description) VALUES ('mod_limit_with_comments', '
 INSERT INTO vars (name, value, description) VALUES ('show_m2s_with_mods', '1', 'Show metamods intertwined with mods?');
 INSERT INTO vars (name, value, description) VALUES ('m2_limit_with_mods', '', 'Maximum number of metamods to show intertwined with a group of mods (Empty string for no limit)');
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_138, Start of T_2_3_0_139 - 2004/02/25
+
 INSERT INTO vars (name, value, description) VALUES ('anchortags_bridge_breaks', '0', 'Are <A> tags allowed to stretch across breaking tags (defined in approvedtags_break)?');
 
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_3_0_139, Start of T_2_3_0_140 - 2004/02/26
