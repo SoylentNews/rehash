@@ -4087,9 +4087,9 @@ sub getPollQuestionList {
 
 	$where .= "autopoll = 'no'";
 	$where .= " AND pollquestions.discussion  = discussions.id ";
-	$where .= sprintf ' AND primaryskid IN (%s)', join(',', @{$other->{section}})
+	$where .= sprintf ' AND pollquestions.primaryskid IN (%s)', join(',', @{$other->{section}})
 		if $other->{section};
-	$where .= sprintf ' AND primaryskid NOT IN (%s)', join(',', @{$other->{exclude_section}})
+	$where .= sprintf ' AND pollquestions.primaryskid NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
 	$where .= " AND pollquestions.topic = $other->{topic} " if $other->{topic};
 
@@ -4097,7 +4097,7 @@ sub getPollQuestionList {
 	my $limit = $other->{limit} || 20;
 
 	my $cols = 'pollquestions.qid as qid, question, date, voters, discussions.commentcount as commentcount, 
-			polltype, date>now() as future,pollquestions.topic';
+			polltype, date>now() as future,pollquestions.topic, pollquestions.primaryskid';
 	$cols .= ", stories.title as title, stories.sid as sid" if $justStories;
 
 	my $tables = 'pollquestions,discussions';
@@ -9313,27 +9313,19 @@ sub getStoryList {
 	my $columns = "hits, stories.commentcount AS commentcount,
 		stories.stoid, stories.sid,
 		story_text.title, stories.uid, stories.tid,
-		time, stories.in_trash, primaryskid,
-		IF(skins.skid IS NULL, '_none', skins.name) AS skinname";
-	my $tables = 'stories, story_text';
+		time, stories.in_trash, primaryskid
+		";
+	my $tables = 'story_text, stories';
 	my @where = ( 'stories.stoid = story_text.stoid' );
-
+	my $other = "";
 	# If this is a "sectional" (one skin only) admin.pl storylist,
 	# then restrict ourselves to only stories matching its nexus.
 	if (!$is_mainpage) {
-		$tables .= ', story_topics_rendered AS str';
+		$tables .= " LEFT JOIN story_topics_rendered AS str on str.stoid = stories.stoid";
 		push @where,
-			'stories.stoid = str.stoid',
-			"str.tid = $gSkin->{nexus}";
+			"(str.tid = $gSkin->{nexus} OR stories.primaryskid = $gSkin->{skid})";
+		$other = "GROUP BY stoid ";
 	}
-
-	# We also need the primaryskid for each story LEFT JOINed
-	# to the skins table (because a primaryskid of 0 means no
-	# skin, which is fine but it won't match a row in skins).
-	# This is really just so we get skinname, which honestly
-	# we could just iterate into the data using getSkins()
-	# afterwards...
-	$tables .= ' LEFT JOIN skins ON skins.skid=stories.primaryskid';
 
 	# How far ahead in time to look?  We have three vars that control
 	# this:  one boolean that decides whether infinite or not, and if
@@ -9348,7 +9340,7 @@ sub getStoryList {
 		push @where, "time < DATE_ADD(NOW(), INTERVAL $lookahead SECOND)";
 	}
 
-	my $other = "ORDER BY time DESC LIMIT $first_story, $num_stories";
+	$other .= "ORDER BY time DESC LIMIT $first_story, $num_stories";
 
 	my $where = join ' AND ', @where;
 
