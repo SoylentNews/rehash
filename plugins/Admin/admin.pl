@@ -1080,11 +1080,19 @@ sub getRelated {
 		# in Related Links, we can make that decision based on the
 		# link target here.
 
+		$a_href =~ /(\w\.\w?)$/;
+		my $a_href_domain = $1;
+
 		$label = strip_notags($label);
 		$label =~ s/(\S{30})/$1 /g;
 		# Instead of hard-coding the HTML here, we should
 		# do something a little more flexible.
-		my $str = qq[&middot; <a $a_attr>$label</a><br>\n];
+		my $str;
+		if (submitDomainAllowed($a_href_domain)) {
+			$str = qq[&middot; <a $a_attr>$label</a><br>\n];
+		} else {
+			$str = qq[&middot; <blink><b><a style="color: #FF0000;" $a_attr>$label</a></b></blink><br>\n];
+		}
 		push @related_text, $str unless $label eq "?" || $label eq "[?]";
 	}
 
