@@ -306,7 +306,7 @@ sub main {
 	# this will only redirect if it is a section-based rootdir, and
 	# NOT an isolated section (which has the same rootdir as real_rootdir)
 	} elsif ($op eq 'userclose' && $constants->{rootdir} ne $constants->{real_rootdir}) {
-		redirect($constants->{real_rootdir}, '/users.pl?op=userclose');
+		redirect($constants->{real_rootdir} . '/login.pl?op=userclose');
 
 	} elsif ($op eq 'savepasswd') {
 		my $error_flag = 0;
@@ -336,8 +336,9 @@ sub main {
 	# Figure out what the op really is.
 	$op = 'userinfo' if (! $form->{op} && ($form->{uid} || $form->{nick}));
 	$op ||= $user->{is_anon} ? 'userlogin' : 'userinfo';
-	if ($user->{is_anon} && $ops->{$op}{seclev} > 0) {
-		$op = 'default';
+	if ($user->{is_anon} && ( ($ops->{$op}{seclev} > 0) || ($op =~ /^newuserform|mailpasswdform|displayform$/) )) {
+		redirect($constants->{real_rootdir} . '/login.pl');
+		return;
 	} elsif ($user->{seclev} < $ops->{$op}{seclev}) {
 		$op = 'userinfo';
 	}
