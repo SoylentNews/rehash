@@ -94,7 +94,14 @@ __template__
    i = 0;
 %]
 <b><a href="[% gSkin.rootdir %]/search.pl">[% constants.sitename %]</a>
-[% IF form.tid %]
+[% IF !topics.${form.tid}.nexus && topics.${form.tid}.parent;
+   thisparent = topics.${form.tid}.parent.keys.nsort.0;
+   IF thisparent == constants.mainpage_nexus_tid;
+      thisparent = topics.${form.tid}.parent.keys.nsort.1;
+   END;
+   IF thisparent %]
+:: <a href="[% gSkin.rootdir %]/search.pl?tid=[% thisparent %]">[% topics.$thisparent.textname %]</a>
+[% END; END; IF form.tid %]
 :: <a href="[% gSkin.rootdir %]/search.pl?tid=[% form.tid %]">[% topics.${form.tid}.textname %]</a>
 [% END; IF listnames.size %]
 Topics</b>
@@ -107,7 +114,9 @@ Topics</b>
 <font size="-1">
 <ul>
 [% FOREACH s = listnames.keys.sort -%]
-<li><a href="[% gSkin.rootdir %]/search.pl?tid=[% listnames.$s %]">[% s %]</a></li>
+<li><a href="[% gSkin.rootdir %]/search.pl?tid=[% listnames.$s %]">[% s %]</a>[%
+   IF user.is_admin %] [<a href="[% gSkin.rootdir %]/admin.pl?op=topics&nexttid=[% listnames.$s %]">edit</a>] [%
+END %]</li>
 [%- i = i + 1;
     IF i == listcount.int || i == 0;
        IF i == listcount.int && listex;

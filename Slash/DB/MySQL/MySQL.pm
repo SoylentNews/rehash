@@ -2808,19 +2808,50 @@ sub deleteAuthor {
 sub deleteTopic {
 	my($self, $tid, $newtid) = @_;
 	my $tid_q = $self->sqlQuote($tid);
-	$self->sqlDelete("topics", "tid=$tid_q");
-	$self->sqlDelete("topic_parents", "tid=$tid_q");
-	$self->sqlDelete("topic_nexus", "tid=$tid_q");
-	$self->setVar('topic_tree_lastchange', time());
+
+	return 0;  # too dangerous to use right now
+
+	my @delete_tables = qw(
+		topics topic_nexus topic_nexus_dirty topic_nexus_extras
+	);
+
+	# if we have a replacement tid ($newtid), replace with it, otherwise ... ?
+
+	# i have no idea what discussions.topic or pollquestions.topic
+	# is so i am ignoring them -- pudge
 
 	if ($newtid) {
-		$self->sqlUpdate('stories', {
-			tid => $newtid
+		### check to see if this would create a children/parent loop!
+		$self->sqlUpdate('topic_parents', {
+			parent_tid => $newtid
 		}, "tid=$tid_q");
-		$self->sqlUpdate('story_topics_chosen', {
-			tid => $newtid
-		}, "tid=$tid_q");
+
+		for my $table (qw(stories submissions journals)) {
+			$self->sqlUpdate($table, {
+				tid => $newtid
+			}, "tid=$tid_q");
+		}
+
+		# need to rerender ?
+		for my $table (qw(chosen rendered)) {
+			$self->sqlDelete("story_topics_$table", "tid=$tid_q");
+			$self->sqlInsert('story_topics_$table', {
+				tid => $newtid
+			}, {
+				ignore => 1
+			});
+		}
+
+	} else {  # delete these?
+		# push @delete_tables, qw(story_topics_chosen story_topics_rendered);
+	        # what to do with stories, submissions, journals
 	}
+
+	for my $table (@delete_tables) {
+		$self->sqlDelete($table, "tid=$tid_q");
+	}
+
+	$self->setVar('topic_tree_lastchange', time());
 }
 
 ########################################################

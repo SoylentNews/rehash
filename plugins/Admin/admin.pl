@@ -890,7 +890,7 @@ sub topicDelete {
 
 	$tid ||= $form->{tid};
 
-	$slashdb->deleteTopic($tid, $form->{replacementtid});
+#	$slashdb->deleteTopic($tid, $form->{replacementtid});
 	$form->{tid} = '';
 }
 

@@ -58,12 +58,12 @@ __template__
 
 			[% END %]
 			<p>
-			[% PROCESS formLabel value => "Replacement Topic", comment => "if deleting the topic, select a topic to replace it with ... this is irreversible!" %]
-			[% Slash.createSelect('replacementtid', Slash.db.getDescriptions('topics'), '', 1, 0, 1)%]	
+			[% #PROCESS formLabel value => "Replacement Topic", comment => "if deleting the topic, select a topic to replace it with ... this is irreversible!" %]
+			[% #Slash.createSelect('replacementtid', Slash.db.getDescriptions('topics'), '', 1, 0, 1)%]	
 			<p>
 			<input type="SUBMIT" name="topicnew" value="Create new topic">
 			<input type="SUBMIT" name="topicsave" value="Save Topic">
-			<input type="SUBMIT" name="topicdelete" value="Delete Topic">
+			<!-- input type="SUBMIT" name="topicdelete" value="Delete Topic" -->
 		</td>
 		</form>
 	</tr>
