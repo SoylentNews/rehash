@@ -70,9 +70,6 @@ and so far [% hits_bought %] have been used up.
 	some pages? You're an admin, so take as many as you want:
 	<INPUT TYPE="TEXT" NAME="buymore" VALUE="0" SIZE="6">
 	[% anything_to_edit = 1 %]
-[% ELSE %]
-	<P>You're not an admin, so you can't buy pages at the moment.
-	Sorry.
 [% END %]
 
 [% IF user.seclev >= 100
