@@ -338,6 +338,8 @@ sub IndexHandler {
 	# If the client is anonymous, Slash::Apache::User::handler has
 	# not been called, so setCurrentSkin hasn't been called, and we
 	# definitely need $gSkin set to do our manipulation of $uri.
+	# ARGH.  Or, do we need to call this every time through, because
+	# otherwise we get old data from previous click?
 	if (!$gSkin->{skid}) {
 		setCurrentSkin(determineCurrentSkin());
 	}
