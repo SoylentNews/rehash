@@ -924,7 +924,7 @@ sub topicExtrasEdit {
 }
 
 sub updateTopicNexusExtras {
-	my ($tid) = @_;
+	my($tid) = @_;
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	return unless $tid;

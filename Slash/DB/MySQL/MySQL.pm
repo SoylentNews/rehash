@@ -1518,7 +1518,7 @@ sub getNexusExtrasForChosen {
 }
 
 sub createNexusExtra {
-	my ($self, $tid, $extra) = @_;
+	my($self, $tid, $extra) = @_;
 	$extra ||= {};
 	return unless $tid && $extra->{extras_keyword};
 
@@ -1531,7 +1531,7 @@ sub createNexusExtra {
 }
 
 sub updateNexusExtra {
-	my ($self, $extras_id, $extra) = @_;
+	my($self, $extras_id, $extra) = @_;
 	return unless $extras_id && $extra;
 	
 	$extra->{type}          ||= "text";
@@ -1543,7 +1543,7 @@ sub updateNexusExtra {
 }
 
 sub deleteNexusExtra {
-	my ($self, $extras_id) = @_;
+	my($self, $extras_id) = @_;
 	return unless $extras_id;
 	my $extras_id_q = $self->sqlQuote($extras_id);
 	$self->sqlDelete('topic_nexus_extras', "extras_id = $extras_id_q");
