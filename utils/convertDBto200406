@@ -717,9 +717,8 @@ DROP TABLE IF EXISTS story_topics_rendered_new;
 CREATE TABLE story_topics_rendered_new (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	tid SMALLINT(5) UNSIGNED NOT NULL,
-	weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
 	UNIQUE story_topic (stoid, tid),
-	INDEX tid (tid)
+	INDEX tid_stoid (tid, stoid)
 ) TYPE=InnoDB;
 EOT
 
@@ -947,6 +946,7 @@ EOT
 
 #
 # Convert story_files
+# (only relevant if Blob plugin used, if not, ignore errors here)
 #
 
 print <<EOT;
