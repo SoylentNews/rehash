@@ -4,6 +4,7 @@ CREATE TABLE journals (
 	uid int(11) NOT NULL,
 	date datetime NOT NULL,
 	description varchar(80),
+	posttype int(1) DEFAULT '2' NOT NULL,
 	PRIMARY KEY (id),
 	KEY uidarticle (uid),
 	KEY IDandUID (id,uid)
@@ -13,6 +14,7 @@ DROP TABLE IF EXISTS journals_text;
 CREATE TABLE journals_text (
 	id int(5) NOT NULL,
 	article text,
+	original text,
 	PRIMARY KEY (id)
 );
 

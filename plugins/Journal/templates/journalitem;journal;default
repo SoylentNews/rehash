@@ -16,15 +16,15 @@ __template__
 	<TR><TD>
 		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" BORDER="0" CELLPADDING="5" CELLSPACING="0">
 			<TR VALIGN="TOP">
-			<TD align="RIGHT" BGCOLOR="#336699"><BOLD>[% date %]</BOLD></TD>
+				<TD ALIGN="RIGHT" BGCOLOR="#336699"><B>[% date %]</B></TD>
 			</TR>
 			<TR VALIGN="TOP">
-			<TD align="LEFT"> [% Slash.timeCalc(date, "%I:%M %p") %] [% description %]<br></TD>
+				<TD ALIGN="LEFT"> [% Slash.timeCalc(date, "%I:%M %p") %] [% description %]<BR></TD>
 			</TR>
 			<TR VALIGN="TOP">
-			<TD>
-			[% article %]
-			</TD>
+				<TD>
+				[% article %]
+				</TD>
 			</TR>
 		</TABLE>
 	</TD></TR>

@@ -9,19 +9,19 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use DBIx::Password;
 use Slash;
+use Slash::Utility;
 use Slash::DB::Utility;
+use vars qw($VERSION @ISA);
 
-
-@Slash::Journal::ISA = qw(Slash::DB::Utility);
-@Slash::Journal::EXPORT = qw();
-$Slash::Journal::VERSION = '0.01';
+@ISA = qw(Slash::DB::Utility Slash::DB::MySQL);
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 # On a side note, I am not sure if I liked the way I named the methods either.
 # -Brian
 sub new {
-	my ($class, $user) = @_;
+	my($class, $user) = @_;
 	my $self = {};
-	bless ($self,$class);
+	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect;
 
@@ -29,13 +29,22 @@ sub new {
 }
 
 sub set {
-	my ($self, $id, $values) = @_;
+	my($self, $id, $values) = @_;
 	my $uid = $ENV{SLASH_USER};
-	$self->sqlUpdate('journals', $values, "uid=$uid AND id=$id");
+
+	return unless $self->sqlSelect('id', 'journals', "uid=$uid AND id=$id");
+
+	my(%j1, %j2);
+	%j1 = %$values;
+	$j2{article}  = delete $j1{article};
+	$j2{original} = delete $j1{original};
+
+	$self->sqlUpdate('journals', \%j1, "id=$id");
+	$self->sqlUpdate('journals_text', \%j2, "id=$id");
 }
 
 sub getsByUid {
-	my ($self, $uid, $limit) = @_;
+	my($self, $uid, $limit) = @_;
 	my $order = "ORDER BY date DESC";
 	$order .= " LIMIT $limit" if $limit; 
 	my $answer = $self->sqlSelectAll('date, article, description, journals.id', 'journals, journals_text', "uid = $uid AND journals.id = journals_text.id", $order);
@@ -43,7 +52,7 @@ sub getsByUid {
 }
 
 sub list {
-	my ($self, $uid, $limit) = @_;
+	my($self, $uid, $limit) = @_;
 
 	my $order = "ORDER BY date DESC";
 	$order .= " LIMIT $limit" if $limit; 
@@ -52,22 +61,27 @@ sub list {
 }
 
 sub create {
-	my ($self, $description, $article) = @_;
+	my($self, $description, $article, $original, $posttype) = @_;
 	return unless $description;
 	return unless $article;
 	my $uid = $ENV{SLASH_USER};
 	$self->sqlInsert("journals", {
-		uid => $uid,
-		description => $description,
-		-date => 'now()'
+		uid		=> $uid,
+		description	=> $description,
+		-date		=> 'now()',
+		posttype	=> $posttype,
 	});
 
 	my($id) = $self->sqlSelect("LAST_INSERT_ID()");
 	$self->sqlInsert("journals_text", {
-		id => $id,
-		article => $article
+		id		=> $id,
+		article 	=> $article,
+		original	=> $original,
 	});
-	
+
+	my($date) = $self->sqlSelect('date', 'journals', "id=$id");
+	$self->setUser($uid, { journal_last_entry_date	=> $date });
+
 	return $id;
 }
 
@@ -78,7 +92,7 @@ sub remove {
 }
 
 sub friends {
-	my ($self) = @_;
+	my($self) = @_;
 	my $uid = $ENV{SLASH_USER};
 	my $sql;
 	$sql .= " SELECT u.nickname, j.friend, MAX(jo.date) as date ";
@@ -92,19 +106,19 @@ sub friends {
 }
 
 sub add {
-	my ($self, $friend) = @_;
+	my($self, $friend) = @_;
 	my $uid = $ENV{SLASH_USER};
 	$self->sqlDo("INSERT INTO journal_friends (uid,friend) VALUES ($uid, $friend)");
 }
 
 sub delete {
-	my ($self, $friend) = @_;
+	my($self, $friend) = @_;
 	my $uid = $ENV{SLASH_USER};
 	$self->sqlDo("DELETE FROM  journal_friends WHERE uid=$uid AND friend=$friend");
 }
 
 sub top {
-	my ($self, $limit) = @_;
+	my($self, $limit) = @_;
 	$limit ||= 10;
 	my $sql;
 	$sql .= "SELECT count(j.uid) as c, u.nickname, j.uid, max(date)";
@@ -119,7 +133,7 @@ sub top {
 }
 
 sub topFriends {
-	my ($self, $limit) = @_;
+	my($self, $limit) = @_;
 	$limit ||= 10;
 	my $sql;
 	$sql .= " SELECT count(friend) as c, nickname, friend, max(date) ";
@@ -134,7 +148,7 @@ sub topFriends {
 }
 
 sub topRecent {
-	my ($self, $limit) = @_;
+	my($self, $limit) = @_;
 	$limit ||= 10;
 	my $sql;
 	$sql .= " SELECT count(jo.id), u.nickname, u.uid, MAX(jo.date) as date ";
@@ -150,7 +164,7 @@ sub topRecent {
 }
 
 sub themes {
-	my ($self) = @_;
+	my($self) = @_;
 	my $uid = $ENV{SLASH_USER};
 	my $sql;
 	$sql .= "SELECT name from journal_themes";
@@ -164,37 +178,41 @@ sub get {
 	my($self, $id, $val) = @_;
 	my $answer;
 
-	if((ref($val) eq 'ARRAY')) {
-		my @articles = grep('comment', @$val);
-		my @other = grep(!'comment', @$val);
-		if(@other) {
+	if ((ref($val) eq 'ARRAY')) {
+		# the grep was failing before, is this right?
+		my @articles = grep /^comment$/, @$val;
+		my @other = grep !/^comment$/, @$val;
+		if (@other) {
 			my $values = join ',', @other;
 			$answer = $self->sqlSelectHashref($values, 'journals', "id=$id");
 		}
-		if(@articles) {
+		if (@articles) {
 			$answer->{comment} = $self->sqlSelect('article', 'journals', "id=$id");
 		}
 	} elsif ($val) {
-		if($val eq 'article') {
+		if ($val eq 'article') {
 			($answer) = $self->sqlSelect('article', 'journals', "id=$id");
 		} else {
 			($answer) = $self->sqlSelect($val, 'journals', "id=$id");
 		}
 	} else {
 		$answer = $self->sqlSelectHashref('*', 'journals', "id=$id");
-		($answer->{article}) = $self->sqlSelect('article', 'journals_text', "id=$id");
+		@{$answer}{qw(article original)} = $self->sqlSelect('article,original', 'journals_text', "id=$id");
 	}
 
 	return $answer;
 }
 
 sub DESTROY {
-	my ($self) = @_;
+	my($self) = @_;
 	$self->{_dbh}->disconnect unless ($ENV{GATEWAY_INTERFACE});
 }
 
 
 1;
+
+__END__
+
 # Below is the stub of documentation for your module. You better edit it!
 
 =head1 NAME
