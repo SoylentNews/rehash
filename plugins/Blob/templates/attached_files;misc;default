@@ -16,7 +16,7 @@ __template__
 	[% IF file.isimage %]
 		&lt;SLASH-IMAGE id="[% file.file_id %]" TITLE="[% file.description %]"&gt;<br>
 	[% ELSE %]
-		&lt;SLASH-FILE id="[% file.file_id %]" TITLE="[% file.description %]"&gt;Link Text&lt;/SLASH&gt;<br>
+		&lt;SLASH-FILE id="[% file.file_id %]" TITLE="[% file.description %]"&gt;[% file.description %]&lt;/SLASH&gt;<br>
 	[% END %]
 	<BR>
 [% END %]
