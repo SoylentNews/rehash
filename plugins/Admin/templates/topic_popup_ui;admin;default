@@ -11,8 +11,9 @@ en_US
 __name__
 topic_popup_ui
 __template__
-[% name = name.0 %]
-[% IF include_css %]
+<table cellpadding="2"><tr><td>
+[%- name = name.0 %]
+[%- IF include_css %]
 <link rel="stylesheet" type="text/css" rev="alternate" href="./admin-topic-popup.css">
 [%- END %]
 <script src="./admin-topic-popup.js" type="text/javascript"></script>
@@ -37,6 +38,8 @@ __template__
 <option value="[% stid_names.$this_stid %]">[% stid_names.$this_stid %]</option>
 [%- END %]</select>
 
+</td><td>
+
 <select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
 <option value="40">40 - Mainpageworthy (priority)</option>
 <option value="30">30 - Mainpageworthy</option>
@@ -44,10 +47,9 @@ __template__
 <option value="10">10 - Sectionworthy</option>
 <option value="0">0 - Ignore Topic</option>
 </select>
-<br>
-<input type="button" value="Choose Topics"      onmouseup="[% name %]_show('[% user.st_tree_pref %]')" name="[% name %]_topic_toggle">
-<input type="button" value="Remove Topic"       onmouseup="[% name %]_remove()">
-<input type="button" value="Collapse All"       onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+<br><input type="button" value="Remove Topic"  onclick="[% name %]_remove()">
+<br><input type="button" value="Choose Topics" onclick="[% name %]_show('[% user.st_tree_pref %]')" name="[% name %]_topic_toggle">
+<input type="hidden" value="preview" name="[% name %]_submit_op">
 [% mykey = name _ "_tree_pref" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
 [% mykey = name _ "_saved_tree" -%]
@@ -58,6 +60,7 @@ __template__
 	var list = new Array ([% user.$mykey %]);
 	[% name %]_reset_saved_tree(list);
 </script>
+</td></tr></table>
 
 __seclev__
 10000

@@ -228,8 +228,8 @@ function [% name %]_collapse_all() {
 	}
 
 	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle_all;
-	mybutton.value = "Expand All";
-	mybutton.onmouseup = [% name %]_expand_all;
+	mybutton.value = "Expand";
+	mybutton.onclick = [% name %]_expand_all;
 }
 
 /* expand entire tree */
@@ -242,8 +242,8 @@ function [% name %]_expand_all() {
 	}
 
 	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle_all;
-	mybutton.value = "Collapse All";
-	mybutton.onmouseup = [% name %]_collapse_all;
+	mybutton.value = "Collapse";
+	mybutton.onclick = [% name %]_collapse_all;
 }
 
 /* expand or collapse a sub-tree */
@@ -334,13 +334,21 @@ function [% name %]_show(type) {
 		iname = iname + "_" + type;
 	}
 
-	var obj = document.getElementById(name + "-outer");
+	var obj  = document.getElementById(name + "-outer");
+	var obj2 = document.getElementById("st-display");
+        var ot   = obj2.offsetTop;
+	/* get absolute value of element */
+	while ((obj2 = obj2.offsetParent) != null) {
+		ot += obj2.offsetTop;
+	}
+
 	// var x = Math.floor(hpts_mouseX - ([% width %]/2));
 	var x = 2;
 	// x = (x > 2 ? x : 2);
 	// var y = Math.floor(hpts_mouseY - ([% IF height %][% height %]/5 * 4[% ELSE %]100[% END %]));
 	// var y = Math.floor(hpts_mouseY - 100);
-	var y = Math.floor(window.pageYOffset + 20);
+	//var y = Math.floor(window.pageYOffset + 20);
+	var y = ot; // - 7;
 	y = (y > 2 ? y : 2);
 
 	obj.style.right = x + "px";
@@ -373,9 +381,9 @@ function [% name %]_show(type) {
 	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
 	mybutton.value = "Close Window";
 	if (type) {
-		mybutton.onmouseup = new Function ('[% name %]_close("' + type + '")');
+		mybutton.onclick = new Function ('[% name %]_close("' + type + '")');
 	} else {
-		mybutton.onmouseup = function () { [% name %]_close() };
+		mybutton.onclick = function () { [% name %]_close() };
 	}
 
 	var mytree = document.[% form_field_form %].[% name %]_tree_pref;
@@ -431,9 +439,9 @@ function [% name %]_close(type) {
 	var mybutton  = document.[% form_field_form %].[% name %]_topic_toggle;
 	mybutton.value = "Choose Topics";
 	if (type) {
-		mybutton.onmouseup = new Function ('[% name %]_show("' + type + '")');
+		mybutton.onclick = new Function ('[% name %]_show("' + type + '")');
 	} else {
-		mybutton.onmouseup = function () { [% name %]_show() };
+		mybutton.onclick = function () { [% name %]_show() };
 	}
 }
 
@@ -582,7 +590,7 @@ function [% name %]_remove_really(index) {
 }
 
 /* user clicks the submit button */
-function [% name %]_submit() {
+function [% name %]_submit(button) {
 	var myselect  = document.[% form_field_form %].[% name %]_main_select;
 	var myselectw = document.[% form_field_form %].[% name %]_main_select_weights;
 	var myselecto = document.[% form_field_form %].[% name %]_main_select_weights_orig;
@@ -608,10 +616,16 @@ function [% name %]_submit() {
 	}
 
 [% IF name == names.1 -%]
-	[% names.0 %]_submit();
+	[% names.0 %]_submit(button);
 [% ELSE -%]
-	var mysaved   = document.[% form_field_form %].[% name %]_saved_tree;
+	var mysaved = document.[% form_field_form %].[% name %]_saved_tree;
 	mysaved.value = [% name %]_get_saved_tree();
+
+	var myop = document.[% form_field_form %].[% name %]_submit_op;
+	myop.name  = button.name;
+	myop.value = button.value;
+
+	document.[% form_field_form %].submit();
 [% END -%]
 }
 

@@ -12,12 +12,12 @@ __name__
 topicEdit
 __template__
 [% PROCESS titlebar width='100%' %]
-<table><tr><td valign="TOP">
-	<form action="[% env.script_name %]" method="POST" name="slashstoryform">
+<table id="st-display"><tr><td valign="TOP">
+	<form action="[% env.script_name %]" method="POST" name="slashstoryform" id="slashstoryform" onsubmit="return false;">
 	<input type="HIDDEN" name="op" value="topics">
 	[% PROCESS formLabel value => "Select a topic" comment => "hit the create button if you wish to create a new topic" %]
 	[% Slash.createSelect('nexttid', topic_desc, form.nexttid, 1, 0, 1)%]	
-	<input type="SUBMIT" name="topiced" value="Edit Topic">
+	<input type="button" name="topiced" value="Edit Topic" onclick="stc_submit(this)">
 
 	[% IF topic.tid %]<input type="HIDDEN" name="tid" value="[% topic.tid %]">[% END %]
 
@@ -53,8 +53,8 @@ __template__
 
 	[% topic_select %]
 
-	<input type="SUBMIT" name="topicnew" value="Create New Topic">
-	<input type="SUBMIT" name="topicsave" value="Save Topic" onclick="stc_submit()">
+	<input type="button" name="topicnew" value="Create New Topic" onclick="stc_submit(this)">
+	<input type="button" name="topicsave" value="Save Topic" onclick="stc_submit(this)">
 
 	<p />
 	[% IF topic_param.size %]
@@ -76,14 +76,14 @@ __template__
 	</table>
 	</p>
 
-	<input type="SUBMIT" name="topicnew" value="Create New Topic">
-	<input type="SUBMIT" name="topicsave" value="Save Topic" onclick="stc_submit()">
+	<input type="button" name="topicnew" value="Create New Topic" onclick="stc_submit(this)">
+	<input type="button" name="topicsave" value="Save Topic" onclick="stc_submit(this)">
 
 	<hr>
 
 	[% PROCESS formLabel value => "Delete & Reparent", comment => "irreversibly delete this topic, and reparent its children" %]
 	[% Slash.createSelect('replacementtid', topic_desc, '', 1, 0, 1) %]
-	<input type="SUBMIT" name="topicdelete" value="Delete Topic">
+	<input type="button" name="topicdelete" value="Delete Topic" onclick="stc_submit(this)">
 
 	</form>
 </td></tr></table>

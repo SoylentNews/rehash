@@ -28,11 +28,11 @@ __template__
 [%-    ELSE -%]
 <img width=16 height=16 src="[% image_path %]L.png"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
 [%-    END -%]
-<img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %][% IF leaf.open %]open[% ELSE %]closed[% END %]_node.png" valign="bottom"><a href="javascript:void(0);">[% leaf.label %]</a>
+<img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %][% IF leaf.open %]open[% ELSE %]closed[% END %]_node.png" valign="bottom"><a href="javascript:void(0);">[% leaf.label | strip_literal %]</a>
 [%-    IF slashtopics.${leaf.value}.image -%]
 <input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% slashtopics.${leaf.value}.image %]">
 [%-    END -%]
-<input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% constants.topic_popup_defaultweight || 1 %]"><input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% thisname.join(' :: ') %]"><input type="hidden" id="[% name %]-tid-[% leaf.id %]" value="[% leaf.value | html %]"></span></div>
+<input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% constants.topic_popup_defaultweight || 1 %]"><input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% leaf.label | strip_attribute %]"><input type="hidden" id="[% name %]-tid-[% leaf.id %]" value="[% leaf.value | html %]"></span></div>
 [%-    IF leaf.has_children;
          thisparent.push(leaf.value) -%]
 <div id="[% name %]-desc-[% leaf.id %]" class="hpts-block" [% IF leaf.open %]style="display: block"[% ELSE %]style="display: none"[% END %] nowrap>
@@ -50,9 +50,10 @@ __template__
 -%]
   </div>
   <div class="hpts-bbar" nowrap>
-    <input class="hpts-button" type="button" value="Add Topic"    onclick="[% name %]_ok()">
-    <input class="hpts-button" type="button" value="Close Window" onclick="[% name %]_cancel()">
-    <input class="hpts-button" type="button" value="Index"        onclick="[% name %]_switch('', 'ab')">
+    <input class="hpts-button" type="button" value="Add"      onclick="[% name %]_ok()">
+    <input class="hpts-button" type="button" value="Close"    onclick="[% name %]_cancel()">
+    <input class="hpts-button" type="button" value="Index"    onclick="[% name %]_switch('', 'ab')">
+    <input class="hpts-button" type="button" value="Collapse" onclick="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
   </div>
   <div style="text-align: center">
     <img name="[% name %]_main_img">
@@ -66,7 +67,7 @@ __template__
 
 <table><tr><td><p>
 <input width="30" name="[% name %]_ab_searchfield" id="[% name %]-ab-searchfield">
-<input width="30" type="button" value="Search" onmouseup="[% name %]_search('ab')">
+<input width="30" type="button" value="Search" onclick="[% name %]_search('ab')">
 <font size="-2"><br>
 [%- FOREACH letter = ['A' .. 'Z'] %]
 <a href="#" onclick="return [% name %]_search('ab','[% letter %]');">[% letter %]</a>
@@ -81,9 +82,9 @@ __template__
   </div>
 
   <div class="hpts-bbar" nowrap>
-    <input class="hpts-button" type="button" value="Add Topic"    onclick="[% name %]_ok('ab')">
-    <input class="hpts-button" type="button" value="Close Window" onclick="[% name %]_cancel('ab')">
-    <input class="hpts-button" type="button" value="Tree"         onclick="[% name %]_switch('ab', '')">
+    <input class="hpts-button" type="button" value="Add"      onclick="[% name %]_ok('ab')">
+    <input class="hpts-button" type="button" value="Close"    onclick="[% name %]_cancel('ab')">
+    <input class="hpts-button" type="button" value="Tree"     onclick="[% name %]_switch('ab', '')">
   </div>
   <div style="text-align: center">
     <img name="[% name %]_ab_main_img">

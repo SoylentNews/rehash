@@ -57,16 +57,17 @@ __template__
 <option value="0">0</option>
 </select>
 
-<input type="button" value="Add"   onmouseup="[% name %]_ok()">
-<input type="button" value="Del"   onmouseup="[% name %]_remove()">
-<input type="button" value="Visit" onmouseup="[% name %]_visit()">
+<input type="button" value="Add"   onclick="[% name %]_ok()">
+<input type="button" value="Del"   onclick="[% name %]_remove()">
+<input type="button" value="Visit" onclick="[% name %]_visit()">
 
 </td>
 [% END %]
 </tr><tr><td align="center" bgcolor="#cccccc" colspan="[% names.size %]">
 [% name = names.0 %]
-<input type="button" value="Choose Topics"      onmouseup="[% name %]_show('[% user.st_tree_pref %]')" name="[% name %]_topic_toggle">
-<input type="button" value="Collapse All"       onmouseup="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+<input type="button" value="Choose Topics" onclick="[% name %]_show('[% user.st_tree_pref %]')" name="[% name %]_topic_toggle">
+<input type="button" value="Collapse All"  onclick="[% name %]_collapse_all()" name="[% name %]_topic_toggle_all">
+<input type="hidden" value="topiced" name="[% name %]_submit_op">
 [% mykey = name _ "_tree_pref" -%]
 <input type="hidden" value="[% user.$mykey %]" name="[% mykey %]">
 [% mykey = name _ "_saved_tree" -%]

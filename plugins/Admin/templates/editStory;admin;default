@@ -13,7 +13,7 @@ en_US
 __name__
 editStory
 __template__
-<form action="[% gSkin.rootdir %]/admin.pl" method="POST" enctype="multipart/form-data" name="slashstoryform">
+<form action="[% gSkin.rootdir %]/admin.pl" method="POST" enctype="multipart/form-data" name="slashstoryform" id="slashstoryform" onsubmit="return false;">
 [% IF form.subid %]
 	<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% form.subid | strip_attribute %]">
 [% END %]
@@ -130,7 +130,7 @@ __template__
 	</TABLE>
 [% END %]
 
-<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" id="st-display">
 	<TR>
 		<TD BGCOLOR="[% user.colors.bg_3 %]">&nbsp; </TD>
 		<TD BGCOLOR="[% user.colors.bg_3 %]">

@@ -17,7 +17,7 @@ __template__
    position:         absolute;
    top:              0px;
    right:            0px;
-   border:           2px outset #333333;
+   border:           1px outset #[% user.colors.bg_3 %];
    background-color: #ffffff;
    filter:           progid:DXImageTransform.Microsoft.dropShadow( Color=bababa,offx=3,offy=3,positive=true);
 }
