@@ -344,7 +344,6 @@ sub newrdf {
 <?xml version="1.0" encoding="ISO-8859-1"?><rdf:RDF
 xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 xmlns="http://my.netscape.com/rdf/simple/0.9/">
-<rss>
 	<channel>
 		<title>%s</title>
 		<link>$I{rootdir}%s</link>
@@ -370,7 +369,7 @@ EOT
 	}
 	$c->finish;
 
-	$x .= "</rss>\n</rdf:RDF>\n";
+	$x .= "</rdf:RDF>\n";
 
 	(my $file = $section || lc $I{sitename}) =~ s/\W+//g;
 	save2file("$I{basedir}/$file.rdf", $x);
@@ -454,43 +453,6 @@ EOT
 }
 
 #################################
-sub newmega {
-	return;
-	my $c = getBackendStories();
-	my $y = 0;    
-	my $um = <<EOT;
-Welcome to megamode.txt
-%%
-EOT
-
-	while (($y < 11) && (my($sid, $title, $time, $dept, $aid, $topic, $image,
-			$commentcount, $section, $introtext, $bodytext) =
-			$c->fetchrow)) {
-		$y++;
-		$introtext =~ s/[\n\r]/ /g;
-		$bodytext =~ s/[\n\r]/ /g;
-
-		$um .= <<EOT;
-$title
-$I{rootdir}/$section/$sid.shtml
-$time EDT
-$aid
-$dept
-$topic
-$commentcount
-$section
-$image
-$introtext<P><A HREF="$I{rootdir}/article.pl?sid=$sid">Read More...</A> Comments:<B>$commentcount</B>
-
-%%
-EOT
-	}
-
-	$c->finish;
-	save2file("$I{basedir}/megamode.txt", $um);
-}
-
-#################################
 sub newultra {
 	my $c = getBackendStories();
 	my $y = 0;
@@ -526,7 +488,6 @@ sub openBackend {
 	newxml();
 	newrdf();
 	newwml();
-#	newmega();
 	my $sec = sqlSelectMany("section", "sections");
 	while(my($s) = $sec->fetchrow) {
 		newxml($s);
