@@ -279,6 +279,11 @@ __template__
 		<INPUT TYPE="RADIO" NAME="domaintags" [% domaintags.2 %] 
 		VALUE=2>&nbsp;
 		Always show link domains<BR>
+		<P><B>User Page Comment Listing</B></P>
+		[% UNLESS user_edit.user_comment_sort_type.defined; user_edit.user_comment_sort_type=2; END %]
+		[% user_comment_sort_type.${user_edit.user_comment_sort_type} = 'CHECKED' -%]
+		&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="user_comment_sort_type" [% user_comment_sort_type.1 %] VALUE="1"> Selected by create time descending<BR>
+		&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="user_comment_sort_type" [% user_comment_sort_type.2 %] VALUE="2"> Selected by create time descending, results grouped by discussion, newest discussion first.
 
 		</TD>
 	</TR>

@@ -40,6 +40,10 @@ __template__
 [% IF fieldname == 'ipid' || fieldname == 'subnetid' %]
 	[% mod_options.hr_hours_back = hr_hours_back;
 	   mod_options.title="Moderations performed by $netid_vis";
+	   mod_options.show_m2s = form.show_m2s;
+	   mod_options.need_m2_form = 1;
+	   mod_options.need_m2_button = 1;
+	   mod_options.meta_mod_only = 1;
 	 %]
 	<P>
 	[% Slash.moderatorCommentLog("b$fieldname", netid, mod_options) %]

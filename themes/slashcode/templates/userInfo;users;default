@@ -81,7 +81,12 @@ lastjournal.description | strip_notags %]</A></B>,
 
 <P>
 [% IF admin_flag %]
-        [% mod_options.title = "Moderations performed by ${useredit.nickname}" %]
+        [% mod_options.title = "Moderations performed by ${useredit.nickname}";
+	   mod_options.show_m2s = form.show_m2s;
+	   mod_options.need_m2_form = 1;
+	   mod_options.need_m2_button = 1;
+	   mod_options.meta_mod_only = 1;
+	 %]
 	<P>
 	[% Slash.moderatorCommentLog('uid', useredit.uid, mod_options) %]
 	[% IF !constants.show_mods_with_comments %]
