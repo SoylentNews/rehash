@@ -80,6 +80,7 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
        errors: [% ints(stats_data.error_count) %] pages generated errors
     not found: [% ints(stats_data.not_found) %] pages were not found
    status 202: [% ints(stats_data.status_202) %] pages sent with status 202 (rejected RSS)
+
    total hits: [% ints(stats_data.total_hits) %]</PRE>
 
 [%
