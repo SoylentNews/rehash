@@ -1423,7 +1423,7 @@ sub fixurl {
 	# here from submit.pl changes (different number of
 	# calling functions), then this will break; that's
 	# why it is temporary -- pudge
-	my $stripauth = (caller(4))[1] =~ /submit.pl/;
+	my $stripauth = (caller(4))[1] =~ /submit\.pl/;
 
 	if ($parameter) {
 		$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/oge;

@@ -403,7 +403,7 @@ EOT
 	$$subj =~ s/\(Score(.*)//i;
 	$$subj =~ s/Score:(.*)//i;
 
-	unless ($$comm = balance_tags($$comm, 1)) {
+	unless (defined($$comm = balance_tags($$comm, 1))) {
 		editComment() and return unless $preview;
 		print <<EOT;
 You can only post nested lists and blockquotes four levels deep.
@@ -411,47 +411,6 @@ Please fix your UL, OL, and BLOCKQUOTE tags.
 EOT
 
 		return();
-	}
-
-	if (0) {  # fix unclosed tags
-		my %tags;
-		my $match = 'B|I|A|OL|UL|EM|TT|STRONG|BLOCKQUOTE|DIV';
-
-		while ($$comm =~ m|(<(/?)($match)\b[^>]*>)|igo) { # loop over tags
-			my($tag, $close, $whole) = (uc $3, $2, $1);
-
-			if ($close) {
-				$tags{$tag}--;
-
-				# remove orphaned close tags if count < 0
-				while ($tags{$tag} < 0) {
-					my $p = pos($$comm) - length($whole);
-					$$comm =~ s|^(.{$p})</$tag>|$1|si;
-					$tags{$tag}++;
-				}
-
-			} else {
-				$tags{$tag}++;
-
-				if (($tags{UL} + $tags{OL} + $tags{BLOCKQUOTE}) > 4) {
-					editComment() and return unless $preview;
-					print <<EOT;
-You can only post nested lists and blockquotes four levels deep.
-Please fix your UL, OL, and BLOCKQUOTE tags.
-EOT
-
-					return();
-				}
-			}	
-		}
-
-		for my $tag (keys %tags) {
-			# add extra close tags
-			while ($tags{$tag} > 0) {
-				$$comm .= "</$tag>";
-				$tags{$tag}--;
-			}
-		}
 	}
 
 	my($dupRows) = sqlSelect(
