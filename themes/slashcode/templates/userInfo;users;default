@@ -93,11 +93,13 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 
 <BR>
 [% IF commentcount > 0 %]
-[% commenttitle = "$useredit.nickname's Latest $commentstruct.size of $commentcount Comment" %]
-[% IF commentcount > 1; commenttitle = commenttitle _ 's'; END %]
-[% PROCESS titlebar width="100%" title = commenttitle %]
+	[% commenttitle = "$useredit.nickname's "
+		_ ((commentstruct.size == commentcount) ? "" : "Latest $commentstruct.size of ")
+		_ "Comment"
+		_ (commentcount == 1 ? "" : "s") %]
+	[% PROCESS titlebar width="100%" title = commenttitle %]
 [% ELSE %]
-<B>useredit.nickname has yet to post any comments.</B>
+	<B>[% useredit.nickname | strip_literal %] has yet to post any comments.</B>
 [% END %]
 <P>
 

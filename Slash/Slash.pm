@@ -712,6 +712,7 @@ sub displayThread {
 			subject		=> getData('displayThreadLink', { 
 						hidden => $hidden 
 					   }, ''),
+			subject_only	=> 1,
 		});
 		$return .= slashDisplay('displayThread', { 'link' => $link },
 			{ Return => 1, Nocomm => 1 });
@@ -1155,7 +1156,8 @@ sub _hard_dispComment {
 			sid	=> $comment->{sid},
 			cid	=> $comment->{cid},
 			pid	=> $comment->{cid},
-			subject	=> 'Read the rest of this comment...'
+			subject	=> 'Read the rest of this comment...',
+			subject_only => 1,
 		}, 1);
 		$comment_to_display = "$comment_shrunk<P><B>$link</B>";
 	} elsif ($user->{nosigs}) {
@@ -1268,15 +1270,15 @@ EOT
 	if ($user->{mode} ne 'archive'
 		&& $user->{mode} ne 'metamod'
 		&& $comment->{nickname} ne "-") { # this last test probably useless
-		my @link;
+		my @link = ( );
 
-		push @link, (linkComment({
+		push @link, linkComment({
 			sid	=> $comment->{sid},
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-		})) unless $user->{state}{discussion_archived};
+		}) unless $user->{state}{discussion_archived};
 
 		push @link, linkComment({
 			sid	=> $comment->{sid},

@@ -23,6 +23,7 @@ __template__
 			pid	=> cid,
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
+			subject_only => 1,
 		}) %][% END %]
 
 		[% IF !(user.state.discussion_archived) && (pid || can_mod || user.is_admin) %] | [% END %]
@@ -32,6 +33,7 @@ __template__
 			cid	=> pid,
 			pid	=> pid,
 			subject	=> 'Parent',
+			subject_only => 1,
 		}, 1) %][% END %]
 		
 		[% IF pid && ( can_mod || user.is_admin) %] | [% END %]
