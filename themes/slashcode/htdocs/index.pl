@@ -111,6 +111,7 @@ my $start_time = Time::HiRes::time;
 
 	# See comment in plugins/Journal/journal.pl for its call of
 	# getSectionColors() as well.
+	$user->{currentSection} = $section->{section};
 	Slash::Utility::Anchor::getSectionColors();
 
 	# displayStories() pops stories off the front of the @$stories array.
