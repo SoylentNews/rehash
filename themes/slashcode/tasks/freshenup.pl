@@ -93,23 +93,29 @@ $task{$me}{code} = sub {
 	my $w  = $slashdb->getVar('writestatus', 'value');
 
 	if ($updates{$constants->{defaultsection}} ne "" || $w ne "ok") {
+		my ($base) = split(/\./, $constants->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
 		prog2file(
-			"$constants->{basedir}/index.pl", 
+			"$constants->{basedir}/$constants->{index_handler}", 
 			"$vu ssi=yes", 
-			"$constants->{basedir}/index.shtml",
+			"$constants->{basedir}/$base.shtml",
 			verbosity()
 		);
 	}
 
-	foreach my $key (keys %updates) {
+	my $dirty_sections = $slashdb->getSectionsDirty();
+	%updates = map { $_ => $_ } @$dirty_sections;
+	for my $key (keys %updates) {
 		next unless $key;
+		my $index_handler = $slashdb->getSection($key, 'index_handler');
+		my ($base) = split(/\./, $index_handler);
 		prog2file(
-			"$constants->{basedir}/index.pl", 
+			"$constants->{basedir}/$index_handler", 
 			"$vu ssi=yes section=$key",
-			"$constants->{basedir}/$key/index.shtml",
+			"$constants->{basedir}/$key/$base.shtml",
 			verbosity()
 		);
+		$slashdb->setSection($key, { writestatus => 'ok' });
 	}
 
 	return $totalChangedStories ?

@@ -444,6 +444,8 @@ CREATE TABLE sections (
 	url char(128) DEFAULT '' NOT NULL,
 	hostname char(128) DEFAULT '' NOT NULL,
 	cookiedomain char(128) DEFAULT '' NOT NULL,
+	index_handler varchar(30) DEFAULT "index.pl" NOT NULL,
+	writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL,
 	KEY (section),
 	FOREIGN KEY (qid) REFERENCES pollquestions(qid),
 	FOREIGN KEY (feature_story) REFERENCES stories(sid),
@@ -507,6 +509,14 @@ CREATE TABLE site_info (
 	description varchar(255),
 	UNIQUE site_keys (name,value),
 	PRIMARY KEY (param_id)
+) TYPE = myisam;
+
+DROP TABLE IF EXISTS slashd_status;
+CREATE TABLE slashd_status (
+	task varchar(50) NOT NULL,
+	time_took float(6,2) DEFAULT '0.00' NOT NULL,
+	last_update timestamp, 
+	PRIMARY KEY (task)
 ) TYPE = myisam;
 
 

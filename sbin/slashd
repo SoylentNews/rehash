@@ -40,6 +40,8 @@ use Slash::Utility;
 
 use vars qw( %task $me );
 
+#$SIG{CHLD} = sub{wait};
+
 my $virtual_user = $ARGV[0];
 createEnvironment($virtual_user);
 my $constants = getCurrentStatic();
@@ -239,6 +241,9 @@ EOT
 
 	# Log success and failure, and if no successes, abort with die()
 
+	for(keys %success) {
+		$slashdb->createSlashdStatus($_);
+	}
 	slashdLog(
 		"processed $dir; "
 		. (scalar keys %success) . " successful"
@@ -391,6 +396,7 @@ sub main {
 	# Initialize logging and all the low-level stuff.
 
 	slashdLogInit();
+	$slashdb->deleteSlashdStatus();
 	slashdLog("Starting up Slashd (verbosity " . verbosity()
 		. ") with pid $$");
 	if ($ENV{TZ} ne 'GMT') {
@@ -435,12 +441,18 @@ sub main {
 		}
 		my $summary = "";
 		my $start_time = Time::HiRes::time;
+		# We need another option for non-blocking stuff so we can ditch the other daemons
 		if ($fork) {
-			# XXX Right now, tasks that request a fork are
-			# handled the same as those that don't.  Fix this.
 			local $me = $basename;
-			$summary = &$subref($virtual_user,
-				$constants, $slashdb, $user);
+			slashdLog("Beginning fork()");
+			my $pid = fork();
+			if($pid == 0 ) {
+				$summary = &$subref($virtual_user,
+					$constants, $slashdb, $user);
+				exit;
+			}
+			waitpid($pid, 0);
+			slashdLog("Ending fork()");
 		} else {
 			local $me = $basename;
 			$summary = &$subref($virtual_user,
@@ -463,6 +475,7 @@ sub main {
 		if (verbosity() >= 2) {
 			my $next_task = basename($event_ary->[0][0]);
 			my $duration = sprintf("%.2f", $end_time - $start_time);
+			$slashdb->setSlashdStatus($basename, {time_took => $duration});
 			slashdLog(join("",
 				"$basename end (${duration}s",
 				(($secs_until < 0)

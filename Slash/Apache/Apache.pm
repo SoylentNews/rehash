@@ -85,6 +85,7 @@ sub SlashVirtualUser ($$$) {
 			$new_cfg->{defaultsection} = $_->{section};
 			$new_cfg->{basedomain} = $_->{hostname};
 			$new_cfg->{static_section} = $_->{section};
+			$new_cfg->{index_handler} = $_->{index_handler};
 			$new_cfg->{form_override}{section} = $_->{section};
 			$cfg->{site_constants}{$_->{hostname}} = $new_cfg;
 		}
@@ -295,17 +296,17 @@ sub IndexHandler {
 
 		# $USER_MATCH defined above
 		if ($dbon && $r->header_in('Cookie') =~ $USER_MATCH) {
-			$r->uri('/index.pl');
-			$r->filename("$basedir/index.pl");
+			$r->uri('/' . $constants->{index_handler});
+			$r->filename("$basedir/$constants->{index_handler}");
 			return OK;
 		} else {
-			my $constants = getCurrentStatic();
+			my ($base) = split(/\./, $constants->{index_handler});
 			if ($constants->{static_section}) {
-				$r->filename("$basedir/$constants->{static_section}/index.shtml");
-				$r->uri("/$constants->{static_section}/index.shtml");
+				$r->filename("$basedir/$constants->{static_section}/$base.shtml");
+				$r->uri("/$constants->{static_section}/$base.shtml");
 			} else {
-				$r->filename("$basedir/index.shtml");
-				$r->uri("/index.shtml");
+				$r->filename("$basedir/$base.shtml");
+				$r->uri("/$base.shtml");
 			}
 			writeLog('shtml');
 			return OK;

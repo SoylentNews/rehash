@@ -512,8 +512,9 @@ sub apache_site_conf {
 
     # this directive will redirect non-logged-in users to
     # index.shtml if they request the home page; turn it
-    # on to help increase performance
-    #PerlTransHandler Slash::Apache::IndexHandler
+    # on to help increase performance or if you are using something
+    # other then index.pl for the index
+    PerlTransHandler Slash::Apache::IndexHandler
 
     # this directive will enable you to display user's pages
     # with /~username

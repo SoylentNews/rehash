@@ -4473,6 +4473,13 @@ sub getPollVotesMax {
 }
 
 ##################################################################
+sub getSlashdStatuses {
+	my($self) = @_;
+	my $answer = $self->sqlSelectAll('task,time_took,last_update', 'slashd_status');
+	return $answer;
+}
+
+##################################################################
 # Probably should make this private at some point
 sub _saveExtras {
 	my($self, $story) = @_;
@@ -5689,6 +5696,7 @@ sub sqlShowStatus {
 
 	return $status;
 }
+
 
 ########################################################
 # Get a unique string for an admin session

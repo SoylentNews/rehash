@@ -50,9 +50,7 @@ sub main {
 		delSection($form->{section});
 		listSections($user);
 
-	} elsif ($op eq 'editsection' || $form->{editsection} ||
-		 $form->{addextra})
-	{
+	} elsif ($op eq 'editsection' || $form->{editsection} || $form->{addextra}) {
 		saveSection($form->{section}) 
 			if $form->{addextra} && @{$form->{section_extras}};
 		titlebar('100%', getData('edithead'));
@@ -196,8 +194,10 @@ sub saveSection {
 			isolate		=> $form->{isolate},
 			artcount	=> $form->{artcount},
 			url		=> $form->{url},
+			writestatus	=> 'dirty',
 			cookiedomain	=> $form->{cookiedomain},
 			hostname	=> $form->{hostname},
+			index_handler	=> $form->{index_handler},
 		});
 
 		print getData('update', { section => $section });
@@ -210,8 +210,10 @@ sub saveSection {
 			isolate		=> $form->{isolate},
 			artcount	=> $form->{artcount},
 			url		=> $form->{url},
+			writestatus	=> 'dirty',
 			cookiedomain	=> $form->{cookiedomain},
 			hostname	=> $form->{hostname},
+			index_handler	=> $form->{index_handler},
 		});
 		print getData($return ? 'insert' : 'failed', { 
 			section => $section

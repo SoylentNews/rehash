@@ -69,6 +69,10 @@ __template__
 		value => "Cookiedomain"
 		comment => "if the section requires that you give out a special cookie" %]
 	<BR><INPUT TYPE="TEXT" NAME="cookiedomain" SIZE="30" VALUE="[% this_section.cookiedomain %]"><BR>
+	[% PROCESS formLabel 
+		value => "Index Handler"
+		comment => "the script that acts as / queries" %]
+	<BR><INPUT TYPE="TEXT" NAME="index_handler" SIZE="30" VALUE="[% this_section.index_handler %]"><BR>
 
 [% IF blocks;
 	PROCESS formLabel 
