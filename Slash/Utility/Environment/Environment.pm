@@ -1099,7 +1099,15 @@ sub setCookie {
 
 	my $cookie = Apache::Cookie->new($r, %cookiehash);
 
-	$cookie->expires('+1y') unless $session;
+	# this should be fine, but if there is a problem, comment the following
+	# lines, and uncomment the one right above "bake"
+	if (!$val) {
+		$cookie->expires('-1y');  # delete
+	} elsif (!$session) {
+		$cookie->expires('+1y');
+	}
+
+	# $cookie->expires('+1y') unless $session;
 	$cookie->bake;
 
 	if ($domain) {
