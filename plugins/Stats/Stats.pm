@@ -339,6 +339,15 @@ sub countBytesByPage {
 }
 
 ########################################################
+sub countUsersByPage {
+	my($self, $op, $yesterday) = @_;
+	my $where = "op='$op' AND "
+		if $op;
+	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
+	$self->sqlSelect("sum(bytes)", "accesslog", $where);
+}
+
+########################################################
 sub countDailyByPage {
 	my($self, $op, $yesterday) = @_;
 	my $where = "op='$op' AND "
@@ -356,6 +365,7 @@ sub countDailyByPageDistinctIPID {
 	$where .= "ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog", $where);
 }
+
 
 ########################################################
 sub countDaily {

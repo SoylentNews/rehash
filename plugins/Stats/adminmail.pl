@@ -106,9 +106,11 @@ EOT
 		my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
 		my $pages = $stats->countDailyByPage($_ ,$yesterday);
 		my $bytes = $stats->countBytesByPage($_ ,$yesterday);
+		my $users = $stats->countUsersByPage($_ ,$yesterday);
 		$temp->{ipids}  = sprintf("%8d", $uniq);
-		$temp->{bytes} = sprintf("%0.1f MB",$bytes/(1024*1024));
+		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
+		$temp->{users} = sprintf("%8d", $users);
 		$statsSave->createStatDaily($yesterday, "section_${section}_ipids", $uniq);
 		$statsSave->createStatDaily($yesterday, "section_${section}_bytes", $$bytes);
 		$statsSave->createStatDaily($yesterday, "section_${section}_page", $pages);
@@ -116,12 +118,15 @@ EOT
 			my $uniq = $stats->countDailyByPageDistinctIPID($_, $yesterday);
 			my $pages = $stats->countDailyByPage($_ ,$yesterday);
 			my $bytes = $stats->countBytesByPage($_ ,$yesterday);
+			my $users = $stats->countUsersByPage($_ ,$yesterday);
 			$temp->{$_}{ipids}  = sprintf("%8d", $uniq);
-			$temp->{$_}{bytes} = sprintf("%0.1f MB",$bytes/(1024*1024));
+			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
+			$temp->{$_}{users} = sprintf("%8d", $users);
 			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_ipids", $uniq);
 			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_bytes", $bytes);
 			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_page", $pages);
+			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_user", $users);
 		}
 		push(@{$data{sections}}, $temp);
 	}
@@ -228,6 +233,7 @@ EOT
 	my $tempdata = { %data }; # copy it
 	$tempdata->{data} = $tempdata;
 	my $email = slashDisplay('display', $tempdata, { Return => 1, Page => 'adminmail', Nocomm => 1 });
+#print "\n$email\n";
 
 	# Send a message to the site admin.
 	my $messages = getObject('Slash::Messages');
