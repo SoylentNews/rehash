@@ -81,7 +81,7 @@ Slash::Test->export_to_level(1, '', @EXPORT);
 # allow catching of virtual user in import list
 sub import {
     slashTest($_[1] || 'slash');
-    createCurrentUser($::user = $::slashdb->getUser($_[2])) if $_[2];
+    createCurrentUser($::user = prepareUser($_[2], $::form, $0)) if $_[2];
 }
 
 #========================================================================
