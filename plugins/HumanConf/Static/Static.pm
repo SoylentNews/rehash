@@ -376,6 +376,7 @@ sub drawImage {
 	# Paint the white background.
 	$image->filledRectangle(0, 0, $width, $height, $background);
 
+	$image->setThickness($constants->{hc_q1_linethick} || 1);
 	my $poly = new GD::Polygon;
 	if ($width+$height > 100) {
 		# Draw a grid of lines on the image, same color as the text.
