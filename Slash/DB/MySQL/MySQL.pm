@@ -8517,7 +8517,7 @@ sub getMenus {
 ########################################################
 # for ubb_like_forums
 sub getForumDescription {
-	my($self, $forum_id);
+	my($self, $forum_id) = @_;
 
 	my $desc = $self->sqlSelect('comment', 'comments, comment_text', "comments.cid=comment_text.cid AND sid=$forum_id", 'ORDER BY comments.cid ASC LIMIT 1');
 
