@@ -2,7 +2,9 @@
 
 use strict;
 
-use Slash::Constants ':slashd';
+use Slash::Constants qw(:slashd :messages);
+use Slash::Display;
+use Slash::Utility;
 
 use vars qw( %task $me );
 
@@ -17,10 +19,129 @@ $task{$me}{code} = sub {
 
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	system("$constants->{sbindir}/dailyStuff $virtual_user &");
+# this used to call dailyStuff; now it is just in a task
+#	system("$constants->{sbindir}/dailyStuff $virtual_user &");
+	my $messages  = getObject('Slash::Messages');
+	daily_mailingList($virtual_user, $constants, $slashdb, $user, $messages);
 
-	return ;
+	return;
 };
 
-1;
 
+sub daily_generateDailyMailees {
+	my($n_users, $h_users) = @_;
+	my %mailings = (
+		dailynews	=> {
+			users	=> $n_users,
+			code	=> MSG_CODE_NEWSLETTER,
+			subj	=> getData('newsletter subject', {}, 'messages'),
+		},
+		dailyheadlines	=> {
+			users	=> $h_users,
+			code	=> MSG_CODE_HEADLINES,
+			subj	=> getData('headlines subject',  {}, 'messages'),
+		},
+	);
+
+	for my $mailing (keys %mailings) {
+		my $users = $mailings{$mailing}{users};
+		my $mkeys = $mailings{$mailing}{mkeys} ||= {};
+
+		for my $uid (keys %$users) {
+			my $user = $users->{$uid};
+
+			my $key  = $user->{sectioncollapse};
+			for (@{$user}{qw(exaid extid exsect)}) {
+				$key .= '|' . join(',', sort m/'(.+?)'/g);
+			}
+			# allow us to make certain emails sent individually,
+			# by including a unique value in users_param for
+			# this key -- pudge
+			$user->{daily_mail_special} ||= '';
+			$key .= '|' . $user->{daily_mail_special};
+
+			if (exists $mkeys->{$key}) {
+				push @{$mkeys->{$key}{mails}}, $user->{realemail};
+			} else {
+				$mkeys->{$key}{mails} = [$user->{realemail}];
+				$mkeys->{$key}{user}  = {
+					uid => $uid,
+					map { ($_ => $user->{$_}) }
+					qw(sectioncollapse exaid extid exsect daily_mail_special)
+				};
+			}
+		}
+	}
+
+	return \%mailings;
+}
+
+sub daily_generateDailyMail {
+	my($mailing, $user, $constants, $slashdb) = @_;
+
+	my $stories;
+	# get data if not gotten yet
+	my $data = $slashdb->getDailyMail($user) or return;
+	return unless @$data; # no mail, no mas!
+
+	for (@$data) {
+		my(%story, @ref);
+		@story{qw(sid title section author tid time dept
+			introtext bodytext)} = @$_;
+
+		1 while chomp($story{introtext});
+		1 while chomp($story{bodytext});
+
+		$story{introtext} = parseSlashizedLinks($story{introtext});
+		$story{bodytext} =  parseSlashizedLinks($story{bodytext});
+
+		my $asciitext = $story{introtext};
+		$asciitext .= "\n\n" . $story{bodytext}
+			if $constants->{newsletter_body};
+		($story{asciitext}, @ref) = html2text($asciitext, 74);
+
+		$story{refs} = \@ref;
+		push @$stories, \%story;
+	}
+
+	return slashDisplay($mailing,
+		{ stories => $stories, urlize => \&daily_urlize },
+		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
+	);
+}
+
+sub daily_mailingList {
+	my($virtual_user, $constants, $slashdb, $user, $messages) = @_;
+	return unless $messages;
+	my $n_users	= $messages->getNewsletterUsers();
+	my $h_users	= $messages->getHeadlineUsers();
+
+	my $mailings	= daily_generateDailyMailees($n_users, $h_users) or return;
+
+	for my $mailing (keys %$mailings) {
+		my $subj  = $mailings->{$mailing}{subj};
+		my $code  = $mailings->{$mailing}{code};
+		my $mkeys = $mailings->{$mailing}{mkeys};
+
+		slashdLog("Daily Mail ($mailing) begin");
+		for my $key (keys %$mkeys) {
+			my $user  = $mkeys->{$key}{user};
+			my $text = daily_generateDailyMail($mailing, $user, $constants, $slashdb) or next;
+			$messages->bulksend(
+				$mkeys->{$key}{mails}, $subj,
+				$text, $code, $user->{uid}
+			);
+		}
+		slashdLog("Daily Mail ($mailing) end");
+	}
+}
+
+sub daily_urlize {
+	local($_) = @_;
+	s/^(.{62})/$1\n/g;
+	s/(\S{74})/$1\n/g;
+	$_ = "<URL:" . $_ . ">";
+	return $_;
+}
+
+1;

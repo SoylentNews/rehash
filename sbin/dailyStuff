@@ -10,6 +10,8 @@
 # to the site admin
 ###############################################################################
 
+exit(1);  # this is no longer in use, see themes/slashcode/tasks/daily.pl
+
 use strict;
 use File::Basename;
 use File::Path;

@@ -277,7 +277,6 @@ plugins/Search/templates/searchform;search;default
 plugins/Search/templates/storysearch;search;default
 plugins/Search/templates/usersearch;search;default
 plugins/Search/test.pl
-sbin/dailyStuff
 sbin/moderatord
 sbin/portald
 sbin/slashd
