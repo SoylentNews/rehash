@@ -125,7 +125,7 @@ END; %]
 [% END %]
 <P>
 [% IF subcount > 0 %]
-[% title = "$nickname has posted $subcount submissions" %]
+[% title = "$nickname's " _ ((subcount>submissions.size) ? "Latest " : "") _ "Submissions"; %]
 [% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
 [% END %]
 

@@ -55,10 +55,9 @@ __template__
 [% END %]
 <BR><B>
 [% IF subcount > 0 %]
-[% title = "$netid_vis has posted $subcount submissions" %]
+[% title = "$netid_vis's " _ ((subcount>submissions.size) ? "Latest " : "") _ "Submissions"; %]
 [% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
 [% END %]
-
 
 
 [% END %]
