@@ -13,9 +13,9 @@ use Slash::Utility;
 sub main {
 	my $slashdb = getCurrentDB();
 	my $form    = getCurrentForm();
-	my $section = $slashdb->getSection($form->{section});
+	my $section = $slashdb->getSection();
 
-	header(getData('head'), $section->{section});
+	header(getData('head'));
 	print createMenu('topics');
 
 	if ($form->{op} eq 'toptopics') {

@@ -348,7 +348,7 @@ sub main {
 		$form->{userfield} = $user->{uid};
 	}
 
-	header(getMessage('user_header'), $form->{section});
+	header(getMessage('user_header'));
 	print getMessage('note', { note => $note }) if defined $note;
 	print createMenu($formname) if ! $user->{is_anon};
 
