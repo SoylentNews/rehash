@@ -5239,11 +5239,15 @@ sub getStoryList {
 	# CHANGE DATE_ FUNCTIONS
 	my $columns = 'hits, stories.commentcount as commentcount, stories.sid, stories.title, stories.uid, '
 		. 'time, name, stories.subsection,stories.section, displaystatus, stories.writestatus';
-	my $tables = "stories, discussions, topics";
-	my $where = "stories.tid=topics.tid AND stories.discussion=discussions.id";
-	$where .= " AND stories.section='$user->{section}'" if $user->{section};
-	$where .= " AND stories.section='$form->{section}'"
-		if $form->{section} && !$user->{section};
+	my $tables = "stories, topics";
+	my $where = "stories.tid=topics.tid ";
+	my $SECT = $self->getSection($user->{section} ? $user->{section} : $form->{section});
+	if ($SECT->{type} eq 'collected') {
+		$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
+	} else {
+		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
+	}
 	$where .= " AND time < DATE_ADD(NOW(), INTERVAL 72 HOUR) "
 		if $form->{section} eq "";
 	my $other = "ORDER BY time DESC LIMIT $first_story, $num_stories";
