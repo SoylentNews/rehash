@@ -473,7 +473,7 @@ sub checkList {
 	my $constants = getCurrentStatic();
 
 	$string =~ s/[^\w,-]//g;
-	my @items = split /,/, $string;
+	my @items = grep { $_ } split /,/, $string;
 	$string = join ",", @items;
 
 	$len ||= $constants->{checklist_length} || 255;
