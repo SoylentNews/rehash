@@ -723,7 +723,7 @@ sub sqlSelectAllKeyValue {
 
 ########################################################
 sub sqlUpdate {
-	my($self, $table, $data, $where, $options) = @_;
+	my($self, $tables, $data, $where, $options) = @_;
 
 	# If no changes were passed in, there's nothing to do.
 	# (And if we tried to proceed we'd generate an SQL error.)
@@ -735,9 +735,15 @@ sub sqlUpdate {
 	# since we've basically given up on ever supporting DBs other
 	# than MySQL, but what the heck.
 	$sql .= "/*! IGNORE */ " if $options->{ignore};
-	$sql .= "$table SET ";
 
-	my @data_fields = ( );
+	my $table_str;
+	if (ref $tables) {
+		$table_str = join(",", @$tables);
+	} else {
+		$table_str = $tables;
+	}
+	$sql .= $table_str;
+
 	my $order_hr = { };
 	if ($options && $options->{assn_order}) {
 		# Reorder the data fields into the order given.  Any
@@ -756,23 +762,27 @@ sub sqlUpdate {
 	# behavior as of August 2002.  It should not break anything,
 	# because nothing previous should have relied on perl's
 	# natural hash key sort order!
+	my @data_fields = ( );
 	@data_fields = sort {
 		($order_hr->{$a} || 9999) <=> ($order_hr->{$b} || 9999)
 		||
 		$a cmp $b
 	} keys %$data;
-
+	my @set_clauses = ( );
 	for my $field (@data_fields) {
 		if ($field =~ /^-/) {
 			$field =~ s/^-//;
-			$sql .= "\n  $field = $data->{-$field},";
+			push @set_clauses, "$field = $data->{-$field}";
 		} else {
-			$sql .= "\n $field = " . $self->sqlQuote($data->{$field}) . ',';
+			my $data_q = $self->sqlQuote($data->{$field});
+			push @set_clauses, "$field = $data_q";
 		}
 	}
-	chop $sql; # lose the terminal ","
-	$sql .= "\nWHERE $where\n" if $where;
-	my $qlid = $self->_querylog_start("UPDATE", $table);
+	$sql .= " SET " . join(", ", @set_clauses) if @set_clauses;
+
+	$sql .= " WHERE $where" if $where;
+
+	my $qlid = $self->_querylog_start("UPDATE", $table_str);
 	my $rows = $self->sqlDo($sql);
 	$self->_querylog_finish($qlid);
 	return $rows;

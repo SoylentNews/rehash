@@ -3929,16 +3929,10 @@ sub deleteStory {
 
 ########################################################
 sub setStory {
-	my($self, $id, $hashref) = @_;
+	my($self, $id, $change_hr, $options) = @_;
 
-	my $table_prime = 'stoid';
 	my $param_table = 'story_param';
-	my $tables = [qw(
-		stories story_text
-	)];
-	my $cache = _genericGetCacheName($self, $tables);
-	my @param = ( );
-	my %update_tables = ( );
+	my $cache = _genericGetCacheName($self, [qw( stories story_text )]);
 
 	# Grandfather in an old-style sid.
 	my $stoid = $self->getStoidFromSidOrStoid($id);
@@ -3949,8 +3943,8 @@ sub setStory {
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 
 	# We modify data before we're done.  Make a copy.
-	my %h = %$hashref;
-	$hashref = \%h;
+	my %ch = %$change_hr;
+	$change_hr = \%ch;
 
 	# Grandfather in these two API parameters, writestatus and
 	# is_dirty.  The preferred way to set is_archived is
@@ -3960,75 +3954,200 @@ sub setStory {
 	# Of course, markStoryClean and -Dirty work too
 
 	my($dirty_change, $dirty_newval);
-	if ($hashref->{writestatus}) {
+	if ($change_hr->{writestatus}) {
 		$dirty_change = 1;
-		$dirty_newval =	  $hashref->{writestatus} eq 'dirty'	? 1 : 0;
-		my $is_archived = $hashref->{writestatus} eq 'archived' ? 1 : 0;
-		delete $hashref->{writestatus};
-		$hashref->{is_archived} = 'yes' if $is_archived;
+		$dirty_newval =	  $change_hr->{writestatus} eq 'dirty'	? 1 : 0;
+		my $is_archived = $change_hr->{writestatus} eq 'archived' ? 1 : 0;
+		delete $change_hr->{writestatus};
+		$change_hr->{is_archived} = 'yes' if $is_archived;
 	}
-	if (defined $hashref->{is_dirty}) {
+	if (defined $change_hr->{is_dirty}) {
 		$dirty_change = 1;
-		$dirty_newval = $hashref->{is_dirty};
-		delete $hashref->{is_dirty}
+		$dirty_newval = $change_hr->{is_dirty};
+		delete $change_hr->{is_dirty}
 	}
 
-	$hashref->{is_archived} = $hashref->{is_archived} ? 'yes' : 'no' if defined $hashref->{is_archived};
-	$hashref->{in_trash} = $hashref->{in_trash} ? 'yes' : 'no' if defined $hashref->{in_trash};
+	$change_hr->{is_archived} = $change_hr->{is_archived} ? 'yes' : 'no'
+		if defined $change_hr->{is_archived};
+	$change_hr->{in_trash} = $change_hr->{in_trash} ? 'yes' : 'no'
+		if defined $change_hr->{in_trash};
 
-	my $chosen_hr = delete $hashref->{topics_chosen};
+	# We always touch stories.last_update, even for writes that only
+	# affect story_text and story_param, _unless_ the change is only
+	# commentcount and hitparade (which may matter sometime in the
+	# future, I hope).
+	# Note:  this isn't exactly right.  If the stories table is the
+	# only one being written to, we shouldn't set last_update
+	# manually, we should let it be set iff another column changes.
+	# Doing it this way doesn't really hurt anything though.
+
+	if (!exists($change_hr->{last_update})
+		&& !exists($change_hr->{-last_update})) {
+		my @non_cchp = grep !/^(commentcount|hitparade)$/, keys %$change_hr;
+		$change_hr->{-last_update} = 'NOW()' if @non_cchp > 0;
+	}
+
+	# If a topics_chosen change_hr was given, we write not just that,
+	# but also topics_rendered, primaryskid and tid.
+
+	my $chosen_hr = delete $change_hr->{topics_chosen};
 	if ($chosen_hr && keys %$chosen_hr) {
-		# If a topics_chosen hashref was given, we write not just that,
-		# but also topics_rendered, primaryskid and tid.
 		$self->setStoryTopicsChosen($stoid, $chosen_hr);
 		my $info_hr = { };
-		$info_hr->{neverdisplay} = 1 if $hashref->{neverdisplay};
+		$info_hr->{neverdisplay} = 1 if $change_hr->{neverdisplay};
 		my($primaryskid, $tids) = $self->setStoryRenderedFromChosen($stoid, $chosen_hr,
 			$info_hr);
-		$hashref->{primaryskid} = $primaryskid;
-		$hashref->{tid} = $tids->[0] || 0;
+		$change_hr->{primaryskid} = $primaryskid;
+		$change_hr->{tid} = $tids->[0] || 0;
 	}
 
-	$hashref->{day_published} = $hashref->{'time'}
-		if $hashref->{'time'};
+	# The day_published column gets automatically updated along
+	# with time.
 
-	for (keys %$hashref) {
-		(my $clean_val = $_) =~ s/^-//;
-		my $key = $self->{$cache}{$clean_val};
-		if ($key) {
-			push @{$update_tables{$key}}, $_;
+	$change_hr->{day_published} = $change_hr->{'time'} if $change_hr->{'time'};
+
+	# Now we know exactly what columns have to change.  Figure out
+	# which tables they belong to.
+
+	my %colname_lookup = ( );
+	my %update_tables = ( );
+	my @param = ( );
+	for my $possibly_prefixed_colname (sort keys %$change_hr) {
+		(my $clean_colname = $possibly_prefixed_colname) =~ s/^-//;
+		$colname_lookup{$possibly_prefixed_colname} = $clean_colname;
+		my $table = $self->{$cache}{$clean_colname};
+		if ($table) {
+			push @{$update_tables{$table}}, $possibly_prefixed_colname;
 		} else {
-			push @param, [$_, $hashref->{$_}];
+			push @param, [$possibly_prefixed_colname, $change_hr->{$possibly_prefixed_colname}];
 		}
 	}
 
-	my $ok;
-	for my $table (keys %update_tables) {
-		my %minihash;
-		for my $key (@{$update_tables{$table}}){
-			$minihash{$key} = $hashref->{$key}
-				if defined $hashref->{$key};
+	# Get the list of non-param tables that need to be changed.
+	# If there are one or more of them, go ahead and do the
+	# non-param changes.
+	my $success = 1;
+	my @tables = sort keys %update_tables;
+	my $do_param_updates = @param ? 1 : 0;
+	# If we have to change both param and non-param tables, we
+	# need to wrap this in a transaction!
+	my $transaction_started = 0;
+	if (@tables && @param) {
+		$self->sqlDo("SET AUTOCOMMIT=0");
+		$transaction_started = 1;
+	}
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+#print STDERR scalar(localtime) . " tables='@tables' param: " . Dumper(\@param);
+#print STDERR "change_hr: " . Dumper($change_hr);
+
+	if (@tables) {
+
+		# Update the non-param column names to prepend their table names.
+		# This may mean inserting the table name between "-" and the
+		# actual name of a column.
+		my $fullchange_hr = { };
+		for my $possibly_prefixed_colname (sort keys %$change_hr) {
+			my $clean_colname = $colname_lookup{$possibly_prefixed_colname};
+			my $table = $self->{$cache}{$clean_colname};
+			next unless $table; # skip params
+			my($dash) = $possibly_prefixed_colname =~ /^(-?)/;
+			$fullchange_hr->{"$dash$table.$clean_colname"} = $change_hr->{$possibly_prefixed_colname};
 		}
-		$ok = $self->sqlUpdate($table, \%minihash, "stoid=$stoid");
+
+		# Now we can construct the WHERE clause.
+		my @where = ( );
+		# All the rows changed must share a common stoid.
+		for my $table (sort keys %update_tables) {
+			push @where, "$table.stoid = $stoid";
+		}
+		# The last_update option has special meaning.
+		if ($options->{last_update}) {
+			my $lu_q = $self->sqlQuote($options->{last_update});
+			push @where, "stories.last_update = $lu_q";
+		}
+		my $where = join(" AND ", @where);
+
+#print STDERR "B tables='@tables' where='$where' fullchange_hr: " . Dumper($fullchange_hr);
+
+		# Do the atomic change of all the non-param tables.
+		my $rows_matched = $self->sqlUpdate(
+			[ @tables ],
+			$fullchange_hr,
+			$where);
+#print STDERR "C rows_matched='$rows_matched'\n";
+
+		# If there were some such changes that had to happen, but
+		# they failed (probably because last_update was off), then
+		# skip any param changes upcoming.  Note that this really
+		# is the number of *matched* rows, which is what we want
+		# (not the number of *changed* rows) since
+		# mysql_client_found_rows is true by default (see
+		# `perldoc DBD::mysql`).
+		if ($rows_matched < 1) {
+			$do_param_updates = 0;
+			$success = 0;
+		}
+
+	} elsif ($options->{last_update}) {
+
+		# The only updates we're being asked to do are params.
+		# But if we were asked to verify the last_update col,
+		# then we have to do that now.  (Normally, if some
+		# non-param changes were tried, we'd do that check in
+		# the sqlUpdate just above.)
+		if (!$transaction_started) {
+			$self->sqlDo("SET AUTOCOMMIT=0");
+			$transaction_started = 1;
+		}
+		my $lu = $self->sqlSelect("last_update", "stories",
+			"stoid=$stoid");
+#print STDERR "D lu '$lu' options->{lu} '$options->{last_update}'\n";
+		if ($lu ne $options->{last_update}) {
+			$self->sqlDo("ROLLBACK");
+			$self->sqlDo("SET AUTOCOMMIT=1");
+			$transaction_started = 0;
+			$do_param_updates = 0;
+			$success = 0;
+		}
+
 	}
 
-	for (@param)  {
-		if (defined $_->[1] && length $_->[1]) {
-			$self->sqlReplace($param_table, {
-				stoid	=> $stoid,
-				name	=> $_->[0],
-				value	=> $_->[1]
-			});
+#print STDERR "E success=$success d_p_u='$do_param_updates' param='@param'\n";
+	if ($success && $do_param_updates) {
+		for my $duple (@param)  {
+			my($name, $value) = @$duple;
+			last unless $success;
+			if (defined($value) && length($value)) {
+				$success ||= $self->sqlReplace($param_table, {
+					stoid	=> $stoid,
+					name	=> $name,
+					value	=> $value,
+				});
+			} else {
+				my $name_q = $self->sqlQuote($name);
+				$success ||= $self->sqlDelete($param_table,
+					"stoid = $stoid AND name = $name_q"
+				);
+			}
+#print STDERR "F did ($name,$value) success=$success\n";
+		}
+	}
+
+	# Finish up the transaction.
+	if ($transaction_started) {
+		if ($success) {
+			$self->sqlDo("COMMIT");
 		} else {
-			my $name_q = $self->sqlQuote($_->[0]);
-			$self->sqlDelete($param_table,
-				"stoid = $stoid AND name = $name_q"
-			);
+			$self->sqlDo("ROLLBACK");
 		}
+		$self->sqlDo("SET AUTOCOMMIT=1");
 	}
 
+#print STDERR "G success=$success dirty_change=$dirty_change dirty_newval=$dirty_newval\n";
+
+	# If we were asked to mark the story dirty or clean, do so now.
 	if ($dirty_change) {
-		if ($dirty_newval) {
+		if ($dirty_newval || !$success) {
 			$self->markStoryDirty($stoid);
 		} else {
 			$self->markStoryClean($stoid);
@@ -4040,7 +4159,7 @@ sub setStory {
 	# in the middle of updating the DB.
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 
-	return $ok;
+	return $success;
 }
 
 ########################################################

@@ -904,9 +904,12 @@ thoroughly, nor have we run Slashdot on it yet.
 
 =item MySQL
 
-Version 4.0.12 (3.23.42).
+Version 4.0.12 (4.0.4).
 
 	http://www.mysql.com/
+
+MySQL 3.23.x is no longer supported, as of CVS tag T_2_5_0_33
+(October 18, 2004).
 
 =item Apache
 

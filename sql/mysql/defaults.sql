@@ -739,6 +739,7 @@ INSERT INTO vars (name, value, description) VALUES ('enable_index_topic','','set
 INSERT INTO vars (name, value, description) VALUES ('fancyboxwidth','200','What size should the boxes be in?');
 INSERT INTO vars (name, value, description) VALUES ('feature_story_enabled','0','Simple Boolean to determine if homepage prints feature story');
 INSERT INTO vars (name, value, description) VALUES ('formkey_timeframe','14400','The time frame that we check for a formkey');
+INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysback','7','Oldest stories to write a story_text.rendered field for, in days');
 INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100','Maximum number of article.shtml files to write at a time in freshenup.pl');
 INSERT INTO vars (name, value, description) VALUES ('freshenup_small_cc','30','How many comments is considered a small commentcount, indicating a story needs its commentcount updated frequently?');
 INSERT INTO vars (name, value, description) VALUES ('freshen_homepage_min_minutes','60','Number of minutes between updating the main index.shtml homepage (if 0, disabled, only updates when freshenup.pl believes it is required)');

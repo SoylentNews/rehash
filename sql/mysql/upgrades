@@ -2625,6 +2625,12 @@ INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','comme
 
 # End of T_2_5_0_32, Start of T_2_5_0_33 - 2004/10/12
 
+############################################################
+# If you are using MySQL 3.23.x, do not proceed beyond this
+# point.  MySQL 4.0.4 or later is required for T_2_5_0_33
+# and later releases of Slash.
+############################################################
+
 INSERT INTO vars (name, value, description) VALUES ('ircslash','0','Enable the ircslash task and connect to an IRC channel whenever slashd starts');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel','#ircslash','Which channel to join');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ircname','','Name to use on IRC server (defaults to "(slashsite) slashd")');
@@ -2647,4 +2653,6 @@ CREATE TABLE remarks (
 ) TYPE=InnoDB;
 
 INSERT INTO vars (name, value, description) VALUES ('task_timespec_freshenup', '* * * * *', 'Custom timespec (in cron style) for the freshenup task. Add more task_timespec_ vars if you want to override other task timespecs.');
+
+INSERT INTO vars (name, value, description) VALUES ('freshenup_text_render_daysback','7','Oldest stories to write a story_text.rendered field for, in days');
 

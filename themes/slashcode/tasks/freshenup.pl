@@ -50,6 +50,10 @@ $task{$me}{code} = sub {
 		: 100;
 	$max_stories = 3 unless $do_all;
 
+	############################################################
+	# deletions
+	############################################################
+
 	if ($do_all) {
 		my $x = 0;
 		# this deletes stories that have a writestatus of 'delete'
@@ -70,6 +74,10 @@ $task{$me}{code} = sub {
 	}
 
 	my $stories;
+
+	############################################################
+	# story_topics_rendered updates
+	############################################################
 
 	# Write new values into story_topics_rendered for any stories
 	# which may have been affected by a topic tree change.  There
@@ -97,19 +105,28 @@ $task{$me}{code} = sub {
 	# quickly.
 	if ($stories && @$stories) {
 		my $update_hr = $slashdb->buildStoryRenderHashref($stories);
-		$slashdb->applyStoryRenderHashref($update_hr);
-		$slashdb->markStoriesRenderClean($stories);
+		$slashdb->applyStoryRenderHashref($update_hr)
+			if !$task_exit_flag;
+		$slashdb->markStoriesRenderClean($stories)
+			if !$task_exit_flag;
 	}
+
+	############################################################
+	# story_text.rendered updates
+	############################################################
 
 	# Render any stories that need rendering.  This used to be done
 	# by admin.pl;  now admin.pl just sets story_text.rendered=NULL
 	# and lets this task do it.
 
 	my %story_set = ( );
-	$stories = $slashdb->getStoriesNeedingRender(
+	my $story_update_ar = $slashdb->getStoriesNeedingRender(
 		$do_all ? 10 : 3
 	);
-	STORIES_RENDER: for my $stoid (@$stories) {
+	STORIES_RENDER: for my $story_hr (@$story_update_ar) {
+
+		my $stoid = $story_hr->{stoid};
+		my $last_update = $story_hr->{last_update};
 
 		# Don't run forever...
 		if (time > $start_time + $timeout_render) {
@@ -136,10 +153,15 @@ $task{$me}{code} = sub {
 			$rendered = displayStory($stoid,
 				'', { force_cache_freshen => 1 });
 		}
+		$story_set{$stoid}{last_update} = $last_update;
 		$story_set{$stoid}{rendered} = $rendered;
 		$story_set{$stoid}{writestatus} = 'dirty';
 
 	}
+
+	############################################################
+	# rewrite .shtml files for stories
+	############################################################
 
 	# Freshen the static versions of any stories that have changed.
 	# This means writing the .shtml files.
@@ -172,7 +194,7 @@ $task{$me}{code} = sub {
 		}
 		if ($task_exit_flag) {
 			slashdLog("Aborting stories at freshen, got SIGUSR1");
-			last STORIES_RENDER;
+			last STORIES_FRESHEN;
 		}
 
 		my($stoid, $sid, $title, $skid) =
@@ -274,6 +296,10 @@ $task{$me}{code} = sub {
 		slashdLog($logmsg) if $logmsg && $do_log;
 	}
 
+	############################################################
+	# bulk-update commentcount and hitparade
+	############################################################
+
 	$do_log = (verbosity() >= 2);
 	$logmsg = "";
 	my $min_cc = "";
@@ -289,7 +315,10 @@ $task{$me}{code} = sub {
 	}
 	if ($do_setstories) {
 		for my $stoid (sort { $a <=> $b } keys %story_set) {
-			my $set_ok = $slashdb->setStory($stoid, $story_set{$stoid});
+			my $options = undef;
+			$options->{last_updated} = $story_set{last_updated}
+				if $story_set{last_updated};
+			my $set_ok = $slashdb->setStory($stoid, $story_set{$stoid}, $options);
 			if (!$set_ok) {
 				$logmsg .= "; setStory($stoid) '$set_ok'";
 				$do_log ||= (verbosity() >= 1);
@@ -301,6 +330,10 @@ $task{$me}{code} = sub {
 		}
 		slashdLog("setStory on " . scalar(keys %story_set) . " stories$min_cc_msg$logmsg") if $do_log;
 	}
+
+	############################################################
+	# rewrite .shtml files for mainpage index
+	############################################################
 
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
 
@@ -356,6 +389,10 @@ $task{$me}{code} = sub {
 		delete $dirty_skins{$mp_skid};
 		$skins_logmsg = "rewrote static skin pages for $skins->{$mp_skid}{name}";
 	}
+
+	############################################################
+	# rewrite .shtml files for other skins' indexes
+	############################################################
 
 	if ($do_all) {
 		for my $key (sort { $a <=> $b } keys %dirty_skins) {
