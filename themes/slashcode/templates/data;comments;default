@@ -20,8 +20,17 @@ __template__
 [% CASE 'users_no_discussions' %]
 	This user has created no discussions.
 
+[% CASE 'nodiscussions' %]
+	There are no discussions listed here.
+
 [% CASE 'active_discussions' %]
 	Several Active Discussions
+
+[% CASE 'all_discussions' %]
+	All Active Discussions
+
+[% CASE 'user_discussions' %]
+	User Created Discussions
 
 [% CASE 'user_discussion' %]
 	Discussions created by [% name %]

@@ -60,6 +60,12 @@ sub main {
 			formname 		=> 'discussions',
 			checks			=> ['generate_formkey'],
 		},
+		user_created_index			=> {
+			function		=> \&commentIndexUserCreated,
+			seclev			=> 0,
+			formname 		=> 'discussions',
+			checks			=> ['generate_formkey'],
+		},
 		moderate		=> {
 			function		=> \&moderate,
 			seclev			=> 1,
@@ -198,6 +204,22 @@ sub main {
 }
 
 #################################################################
+sub _buildargs {
+	my($form) = @_;
+	my $uri;
+
+	for (qw[op topic section all]) {
+		my $x = "";
+		$x =  $form->{$_} if defined $form->{$_} && $x eq "";
+		$x =~ s/ /+/g;
+		$uri .= "$_=$x&" unless $x eq "";
+	}
+	$uri =~ s/&$//;
+
+	return fixurl($uri);
+}
+
+#################################################################
 # this groups all the errors together in
 # one template, called "errors;comments;default"
 # Why not just getData??? -Brian
@@ -250,17 +272,112 @@ sub displayComments {
 sub commentIndex {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	titlebar("90%", getData('active_discussions'));
 	if ($form->{all}) {
-		my $discussions = $slashdb->getDiscussions($form->{section});
-		slashDisplay('discuss_list', {
+		titlebar("90%", getData('all_discussions'));
+		my $start = $form->{start} || 0;
+		my $discussions = $slashdb->getDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
+		if (@$discussions) {
+			my $forward;
+			if (@$discussions == $constants->{discussion_display_limit} + 1) {
+				pop @$discussions;
+				$forward = $start + $constants->{discussion_display_limit};
+			} else {
+				$forward = 0;
+			}
+
+			# if there are less than discussion_display_limit remaning,
+			# just set it to 0
+			my $back;
+			if ($start > 0) {
+				$back = $start - $constants->{discussion_display_limit};
+				$back = $back > 0 ? $back : 0;
+			} else {
+				$back = -1;
+			}
+
+			slashDisplay('discuss_list', {
+				discussions	=> $discussions,
+				forward		=> $forward,
+				args		=> _buildargs($form),
+				start		=> $start,
+				back		=> $back,
+			});
+		} else {
+			print getData('nodiscussions');
+		}
+	} else {
+		titlebar("90%", getData('active_discussions'));
+		my $start = $form->{start} || 0;
+		my $discussions = $slashdb->getStoryDiscussions($form->{section}, $constants->{discussion_display_limit} + 1, $start);
+		if (@$discussions) {
+			my $forward;
+			if (@$discussions == $constants->{discussion_display_limit} + 1) {
+				pop @$discussions;
+				$forward = $start + $constants->{discussion_display_limit};
+			} else {
+				$forward = 0;
+			}
+
+			# if there are less than discussion_display_limit remaning,
+			# just set it to 0
+			my $back;
+			if ($start > 0) {
+				$back = $start - $constants->{discussion_display_limit};
+				$back = $back > 0 ? $back : 0;
+			} else {
+				$back = -1;
+			}
+
+			slashDisplay('discuss_list', {
+				discussions	=> $discussions,
+				forward		=> $forward,
+				args		=> _buildargs($form),
+				start		=> $start,
+				back		=> $back,
+			});
+		} else {
+			print getData('nodiscussions');
+		}
+	}
+}
+
+##################################################################
+# Index of recent discussions: Used if comments.pl is called w/ no
+# parameters
+sub commentIndexUserCreated {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	titlebar("90%", getData('user_discussions'));
+	my $start = $form->{start} || 0;
+	my $discussions = $slashdb->getDiscussionsUserCreated($form->{section}, $constants->{discussion_display_limit} + 1, $start);
+	if (@$discussions) {
+		my $forward;
+		if (@$discussions == $constants->{discussion_display_limit} + 1) {
+			pop @$discussions;
+			$forward = $start + $constants->{discussion_display_limit};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than discussion_display_limit remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{discussion_display_limit};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
+		slashDisplay('user_discuss_list', {
 			discussions	=> $discussions,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+			back		=> $back,
 		});
 	} else {
-		my $discussions = $slashdb->getStoryDiscussions($form->{section});
-		slashDisplay('discuss_list', {
-			discussions	=> $discussions,
-		});
+		print getData('nodiscussions');
 	}
 }
 
@@ -284,11 +401,34 @@ sub commentIndexCreator {
 	}
 
 	titlebar("90%", getData('user_discussion', { name => $nickname}));
-	my $discussions = $slashdb->getDiscussionsByCreator($uid);
+	my $start = $form->{start} || 0;
+	my $discussions = $slashdb->getDiscussionsByCreator($form->{section}, $uid, $constants->{discussion_display_limit} + 1, $start);
 	if (@$discussions) {
+		my $forward;
+		if (@$discussions == $constants->{discussion_display_limit} + 1) {
+			pop @$discussions;
+			$forward = $start + $constants->{discussion_display_limit};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than discussion_display_limit remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{discussion_display_limit};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
 		slashDisplay('discuss_list', {
 			discussions	=> $discussions,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
 			supress_create	=> 1,
+			back		=> $back,
 		});
 	} else {
 		print getData('users_no_discussions');
@@ -302,10 +442,34 @@ sub commentIndexPersonal {
 	my($form, $slashdb, $user, $constants) = @_;
 
 	titlebar("90%", getData('user_discussion', { name => $user->{nickname}}));
-	my $discussions = $slashdb->getDiscussionsByCreator($user->{uid});
+	my $start = $form->{start} || 0;
+	my $discussions = $slashdb->getDiscussionsByCreator($form->{section}, $user->{uid}, $constants->{discussion_display_limit} + 1, $start);
 	if (@$discussions) {
+		my $forward;
+		if (@$discussions == $constants->{discussion_display_limit} + 1) {
+			pop @$discussions;
+			$forward = $start + $constants->{discussion_display_limit};
+		} else {
+			$forward = 0;
+		}
+
+		# if there are less than discussion_display_limit remaning,
+		# just set it to 0
+		my $back;
+		if ($start > 0) {
+			$back = $start - $constants->{discussion_display_limit};
+			$back = $back > 0 ? $back : 0;
+		} else {
+			$back = -1;
+		}
+
 		slashDisplay('discuss_list', {
 			discussions	=> $discussions,
+			forward		=> $forward,
+			args		=> _buildargs($form),
+			start		=> $start,
+			supress_create	=> 1,
+			back		=> $back,
 		});
 	} else {
 		print getData('users_no_discussions');

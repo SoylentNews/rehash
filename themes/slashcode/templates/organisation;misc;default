@@ -13,35 +13,6 @@ en_US
 __name__
 organisation
 __template__
-<P>
-	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-		<TR VALIGN="top" BGCOLOR="[% user.bg.3 %]">
-			<TD BGCOLOR="[% user.bg.2 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
-			<TD><IMG SRC="[% constants.imagedir %]/cl.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
-			<TD><A HREF="[% constants.rootdir %]"><FONT FACE="[% constants.mainfontface %]" SIZE="1" COLOR="[% user.bg.1 %]"><B>[% constants.sitename %]</B></FONT></A></TD>
-			<TD ALIGN="right"><IMG SRC="[% constants.imagedir %]/cr.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
-			<TD BGCOLOR="[% user.bg.2 %]" ALIGN="right"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
-		</TR>
-	</TABLE>
-	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-		<TR BGCOLOR="[% user.bg.3 %]">
-			<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD>
-		</TR><TR BGCOLOR="[% user.bg.1 %]">
-			<TD BACKGROUND="[% constants.imagedir %]/sl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
-			<TD WIDTH="100%">
-				<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
-					<TD><FONT FACE="[% constants.mainfontface %]" SIZE="1">
-					You should update your organisation template and put some links here linking back to your site.
-					</FONT></TD>
-				</TR></TABLE>
-			</TD>
-			<TD BACKGROUND="[% constants.imagedir %]/sr.gif" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
-		</TR>
-		<TR><TD BGCOLOR="[% user.bg.3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	</TABLE>
-	</P>
-
-	<!-- end organisation block -->
-
+You should update your organisation template and put some links here linking back to your site.
 __seclev__
 500

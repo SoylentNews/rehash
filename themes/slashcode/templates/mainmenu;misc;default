@@ -13,18 +13,37 @@ en_US
 __name__
 mainmenu
 __template__
-		- <A HREF="[% constants.rootdir %]/about.shtml">About</A><BR>
-		- <A HREF="[% constants.rootdir %]/faq.shtml">FAQ</A><BR>
-		- <A HREF="[% constants.rootdir %]/comments.pl">Discussions</A><BR>
-		- <A HREF="[% constants.rootdir %]/journal.pl">Journals</A><BR>
-		- <A HREF="[% constants.rootdir %]/messages.pl">Messages</A><BR>
-		- <A HREF="[% constants.rootdir %]/topics.pl">Topics</A><BR>
-		- <A HREF="[% constants.rootdir %]/authors.pl">Authors</A><BR>
+		<A HREF="[% constants.rootdir %]/about.shtml">About</A><BR>
+		<A HREF="[% constants.rootdir %]/faq.shtml">FAQ</A><BR>
+		<A HREF="[% constants.rootdir %]/comments.pl">Discussions</A><BR>
+		<A HREF="[% constants.rootdir %]/journal.pl">Journals</A><BR>
+		<A HREF="[% constants.rootdir %]/messages.pl">Messages</A><BR>
+		<A HREF="[% constants.rootdir %]/topics.pl">Topics</A><BR>
+		<A HREF="[% constants.rootdir %]/authors.pl">Authors</A><BR>
 		<HR NOSHADE SIZE="1">
-		- <A HREF="[% constants.rootdir %]/users.pl?op=edithome">Preferences</A><BR>
-		- <A HREF="[% constants.rootdir %]/search.pl">Older Stuff</A><BR>
-		- <A HREF="[% constants.rootdir %]/pollBooth.pl">Past Polls</A><BR>
-		- <A HREF="[% constants.rootdir %]/submit.pl">Submit Story</A><BR>
+		<A HREF="[% constants.rootdir %]/search.pl">Older Stuff</A><BR>
+		<A HREF="[% constants.rootdir %]/pollBooth.pl">Past Polls</A><BR>
+		<A HREF="[% constants.rootdir %]/submit.pl">Submit Story</A><BR>
+		<HR NOSHADE SIZE="1">
+		[% IF user.is_anon %]
+			- <A HREF="[% constants.rootdir %]/my/">Create Account/Login</A><BR>
+		[% ELSE %]
+		You<br>
+			- <A HREF="[% constants.rootdir %]/my/info">Info</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/inbox">Inbox</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/homepage">Homepage</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/comments">Comments</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/journal">Journal</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/messages">Messages</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/misc">Misc</A><BR>
+			<br>
+			- <A HREF="[% constants.rootdir %]/my/friends">Friends</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/foes">Foes</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/fans">Fans</A><BR>
+			<br>
+			- <A HREF="[% constants.rootdir %]/my/password">Change Password</A><BR>
+			- <A HREF="[% constants.rootdir %]/my/logout">Logout</A><BR>
+		[% END %]
 
 __seclev__
 10000

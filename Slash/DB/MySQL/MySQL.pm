@@ -660,7 +660,9 @@ sub createSubmission {
 
 #################################################################
 sub getStoryDiscussions {
-	my($self, $section) = @_;
+	my($self, $section, $limit, $start) = @_;
+	$limit ||= 50; # Sanity check in case var is gone
+	$start ||= 0; # Sanity check in case var is gone
 	my $where = "displaystatus != -1 AND discussions.sid=stories.sid AND time <= NOW() AND writestatus != 'delete' AND writestatus != 'archived'";
 	$where .= " AND section = '$section'"
 		if $section;
@@ -668,7 +670,7 @@ sub getStoryDiscussions {
 	my $discussion = $self->sqlSelectAll("discussions.sid, discussions.title, discussions.url",
 		"discussions, stories",
 		$where,
-		"ORDER BY time DESC LIMIT 50"
+		"ORDER BY time DESC LIMIT $start, $limit"
 	);
 
 	return $discussion;
@@ -677,7 +679,10 @@ sub getStoryDiscussions {
 #################################################################
 # Less then 2, ince 2 would be a read only discussion
 sub getDiscussions {
-	my($self, $section) = @_;
+	my($self, $section, $limit, $start) = @_;
+	$limit ||= 50; # Sanity check in case var is gone
+	$start ||= 0; # Sanity check in case var is gone
+
 	my $where = "type != 'archived' AND ts <= now()";
 	$where .= " AND section = '$section'"
 		if $section;
@@ -685,7 +690,7 @@ sub getDiscussions {
 	my $discussion = $self->sqlSelectAll("id, title, url",
 		"discussions",
 		$where,
-		"ORDER BY ts DESC LIMIT 50"
+		"ORDER BY ts DESC LIMIT $start, $limit"
 	);
 
 	return $discussion;
@@ -694,13 +699,39 @@ sub getDiscussions {
 #################################################################
 # Less then 2, ince 2 would be a read only discussion
 sub getDiscussionsByCreator {
-	my($self, $uid) = @_;
+	my($self, $section, $uid, $limit, $start) = @_;
 	return unless $uid;
+	$limit ||= 50; # Sanity check in case var is gone
+	$start ||= 0; # Sanity check in case var is gone
+
+	my $where = "type != 'archived' AND ts <= now() AND uid = $uid";
+	$where .= " AND section = '$section'"
+		if $section;
 
 	my $discussion = $self->sqlSelectAll("id, title, url",
 		"discussions",
-		"type != 'archived' AND ts <= now() AND uid = $uid",
-		"ORDER BY ts DESC LIMIT 50"
+		$where,
+		"ORDER BY ts DESC LIMIT $start, $limit"
+	);
+
+	return $discussion;
+}
+
+#################################################################
+sub getDiscussionsUserCreated {
+	my($self, $section, $limit, $start) = @_;
+
+	$limit ||= 50; # Sanity check in case var is gone
+	$start ||= 0; # Sanity check in case var is gone
+
+	my $where = "type = 'recylcled' AND ts <= now() AND users.uid = discussions.uid";
+	$where .= " AND section = '$section'"
+		if $section;
+
+	my $discussion = $self->sqlSelectAll("id, title, ts, users.nickname",
+		"discussions, users",
+		$where,
+		"ORDER BY ts DESC LIMIT $start, $limit"
 	);
 
 	return $discussion;

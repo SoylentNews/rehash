@@ -22,23 +22,6 @@ __template__
 [% END %]
 [% PROCESS titlebar width="95%" %]
 
-<P>
-[
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/friends/">Friends</A> 
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/fans/">Fans</A>
-[% UNLESS nickmatch_flag || user.is_anon %] | <A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% uid %]">Befriend [% nick_plain %]</A>[% END %]
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/comments/">Comments</A>
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/submissions/">Submissions</A>
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/pubkey/">Pubkey</A>
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/journal/">Journal</A>
-]
-</P>
-
 [% IF user.is_admin && (admin_flag || nickmatch_flag)  %]
         <BR><B>Karma</B> [% useredit.karma %] (mostly the sum of moderation done to users comments)<BR>
 [% END %]

@@ -22,23 +22,6 @@ __template__
 [% END %]
 [% PROCESS titlebar width="95%" title=title %]
 
-<P>
-[
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/friends/">Friends</A> 
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/fans/">Fans</A>
-[% UNLESS nickmatch_flag || user.is_anon %] | <A HREF="[% constants.rootdir %]/journal.pl?op=addmeta&amp;uid=[% uid %]">Befriend [% nick %]</A>[% END %]
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/comments/">Comments</A>
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/submissions/">Submissions</A>
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/pubkey/">Pubkey</A>
- | 
-<A HREF="[% constants.rootdir %]/~[% nick | fixparam %]/journal/">Journal</A>
-]
-</P>
-
 <BR><B>[%IF nick_match %]You have[% ELSE %][% nick %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B><P>
 [% n = 0 %]
 [% FOREACH story = stories %]

@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+pagination
+__template__
+[% USE Slash %]
+	[% back = back || 0;
+	   IF (back > -1) || forward %]
+				[% IF (back > -1) %]
+					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&[% END %]start=[% back %]">&lt;Last [% constants.discussion_display_limit %] discussions</A>
+				[% END %]
+				[% IF (back > -1) && forward %]
+					|
+				[% END %]
+				[% IF forward %]
+					<A HREF="[% constants.rootdir %]/comments.pl?[% IF args %][% args %]&[% END %]start=[% forward %]">Next [% constants.discussion_display_limit %] discussions&gt;</A>
+				[% END %]
+	[% END %]
+__seclev__
+100

@@ -32,6 +32,15 @@ __template__
 [% CASE 'nojournals' %]
 	No journals were found to match your query.
 
+[% CASE 'all_sections' %]
+	All Sections
+
+[% CASE 'all_topics' %]
+	All Topics
+
+[% CASE 'all_authors' %]
+	All Authors
+
 [% END %]
 
 __seclev__

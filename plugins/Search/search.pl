@@ -94,7 +94,7 @@ sub main {
 sub _authors {
 	my $slashdb = getCurrentDB();
 	my $authors = $slashdb->getDescriptions('all-authors');
-	$authors->{''} = 'All Authors';
+	$authors->{''} = getData('all_authors');
 
 	return $authors;
 }
@@ -112,7 +112,7 @@ sub _topics {
 		$topics = $slashdb->getDescriptions('topics');
 	}
 
-	$topics->{''} = 'All Topics';
+	$topics->{''} = getData('all_topics');
 
 	return $topics;
 }
@@ -130,7 +130,7 @@ sub _sort {
 sub _sections {
 	my $slashdb = getCurrentDB();
 	my $sections = $slashdb->getDescriptions('sections');
-	$sections->{''} = 'All Sections';
+	$sections->{''} = getData('all_sections');
 
 	return $sections;
 }
