@@ -2321,7 +2321,7 @@ INSERT INTO vars (name, value, description) VALUES ('m2_oldzone', '0', 'Starting
 # End of T_2_3_0_154, Start of T_2_3_0_155 - 2004/05/18
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats', '', 'Stores current performance stats in a var for display to admins');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_disp', '1', 'Show current performance stats?');
-INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 'article comments index', 'ops to show current performance stats for');
+INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 'article|comments|index', 'ops to show current performance stats for');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_lastid', '0', 'accesslogid to start searching at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks', '8', 'number of weeks back to compare current stats to');
 
@@ -2333,4 +2333,3 @@ INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index',
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_3_0_155, Start of T_2_3_0_156 - 2004/05/25
-
