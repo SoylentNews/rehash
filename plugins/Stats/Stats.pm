@@ -67,7 +67,7 @@ sub updateStatDaily {
 }
 
 ########################################################
-sub getPoints {
+sub getPointsInPool {
 	my($self) = @_;
 	return $self->sqlSelect('SUM(points)', 'users_comments');
 }
@@ -175,6 +175,26 @@ sub getRepeatMods {
 		 ORDER BY c DESC, orguid
 		 LIMIT $limit"
 	);
+	return $hr;
+}
+
+########################################################
+sub getModM2Ratios {
+	my($self, $options) = @_;
+
+	my $reasons = $self->getReasons();
+	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
+	my $reasons_m2able = join(",", @reasons_m2able);
+	my $hr = $self->sqlSelectAllHashref(
+		[qw( day m2count )],
+		"SUBSTRING(ts, 1, 10) AS day,
+		 m2count,
+		 COUNT(*) AS c",
+		"moderatorlog",
+		"active=1 AND reason IN ($reasons_m2able)",
+		"GROUP BY day, m2count"
+	);
+
 	return $hr;
 }
 

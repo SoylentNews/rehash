@@ -70,36 +70,48 @@ EOT
 		}
 	}
 
-	my $accesslog_rows = $stats->sqlCount('accesslog');
-	my $formkeys_rows = $stats->sqlCount('formkeys');
-	my $modlog_rows = $stats->sqlCount('moderatorlog', 'active=1');
-	my $modlog_rows_needmeta = $stats->sqlCount('moderatorlog',
-		"active=1 AND reason IN ($reasons_m2able)"
-	);
-	my($oldest_unm2d) = $stats->sqlSelect(
-		"UNIX_TIMESTAMP(MIN(ts))",
-		"moderatorlog",
-		"active=1 AND reason IN ($reasons_m2able) AND m2status=0"
-	);
-	$oldest_unm2d ||= 0;
-	my $metamodlog_rows = $stats->sqlCount('metamodlog', 'active=1');
-
-	my $mod_points = $stats->getPoints;
 	my @yesttime = localtime(time-86400);
 	my @weekagotime = localtime(time-86400*7);
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 	my $weekago = sprintf "%4d-%02d-%02d", 
 		$weekagotime[5] + 1900, $weekagotime[4] + 1, $weekagotime[3];
+
+	my $comments = $stats->countCommentsDaily($yesterday);
+	my $accesslog_rows = $stats->sqlCount('accesslog');
+	my $formkeys_rows = $stats->sqlCount('formkeys');
+	my $modlogs = $stats->sqlCount('moderatorlog', 'active=1');
+	my $modlogs_yest = $stats->sqlCount('moderatorlog',
+		"active=1 AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
+	my $modlogs_needmeta = $stats->sqlCount('moderatorlog',
+		"active=1 AND reason IN ($reasons_m2able)");
+	my $modlogs_needmeta_yest = $stats->sqlCount('moderatorlog',
+		"active=1 AND ts >= DATE_SUB(NOW(), INTERVAL 2 DAY)
+		 AND reason IN ($reasons_m2able)");
+	my($oldest_unm2d) = $stats->sqlSelect(
+		"UNIX_TIMESTAMP(MIN(ts))",
+		"moderatorlog",
+		"active=1 AND reason IN ($reasons_m2able) AND m2status=0"
+	);
+	$oldest_unm2d ||= 0;
+	my $youngest_modelig_uid = $stats->getYoungestEligibleModerator();
+	my $youngest_modelig_created = $stats->getUser($youngest_modelig_uid,
+		'created_at');
+	my $metamodlogs = $stats->sqlCount('metamodlog', 'active=1');
+	my $metamodlogs_yest = $stats->sqlCount('metamodlog',
+		'active=1 AND ts >= DATE_SUB(NOW(), INTERVAL 2 DAY)');
+
+	my $mod_points_pool = $stats->getPointsInPool();
 	my $used = $stats->countModeratorLog($yesterday);
-	my $modlog_hr = $stats->countModeratorLogHour($yesterday);
+	my $modlog_yest_hr = $stats->countModeratorLogHour($yesterday);
 	my $distinct_comment_ipids = $stats->getCommentsByDistinctIPID($yesterday);
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters($yesterday);
 	my $submissions = $stats->countSubmissionsByDay($yesterday);
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($yesterday, $distinct_comment_ipids);
-	my $modlog_total = $modlog_hr->{1}{count} + $modlog_hr->{-1}{count};
+	my $modlog_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
+	my $consensus = $constants->{m2_consensus};
 
-	my $comments = $stats->countCommentsDaily($yesterday);
+	my $m2_text = getM2Text($stats->getModM2Ratios());
 
 	my $grand_total = $stats->countDailyByPage('', $yesterday);
 	$data{grand_total} = $grand_total;
@@ -199,6 +211,14 @@ EOT
 	$statsSave->createStatDaily($yesterday, "homepage", $count->{index}{index});
 	$statsSave->createStatDaily($yesterday, "distinct_comment_ipids", $distinct_comment_ipids);
 	$statsSave->createStatDaily($yesterday, "distinct_comment_posters_uids", $distinct_comment_posters_uids);
+	$statsSave->createStatDaily($yesterday, "consensus", $consensus);
+	$statsSave->createStatDaily($yesterday, "mod_points_pool", $mod_points_pool);
+	$statsSave->createStatDaily($yesterday, "mod_points_needmeta", $modlogs_needmeta_yest);
+	$statsSave->createStatDaily($yesterday, "mod_points_spent", $modlog_yest_total);
+	$statsSave->createStatDaily($yesterday, "mod_points_spent_plus_1", $modlog_yest_hr->{+1}{count});
+	$statsSave->createStatDaily($yesterday, "mod_points_spent_minus_1", $modlog_yest_hr->{-1}{count});
+	$statsSave->createStatDaily($yesterday, "m2_points_spent", $metamodlogs_yest);
+	$statsSave->createStatDaily($yesterday, "oldest_unm2d", $oldest_unm2d);
 
 	for my $nickname (keys %$admin_mods) {
 		my $uid = $admin_mods->{$nickname}{uid};
@@ -221,21 +241,29 @@ EOT
 	$data{accesslog} = sprintf("%8d", $accesslog_rows);
 	$data{formkeys} = sprintf("%8d", $formkeys_rows);
 
-	$mod_data{modlog} = sprintf("%8d", $modlog_rows);
-	$mod_data{metamodlog} = sprintf("%8d", $metamodlog_rows);
-	$mod_data{xmodlog} = sprintf("%.1fx", ($modlog_rows_needmeta ? $metamodlog_rows/$modlog_rows_needmeta : 0));
+	$mod_data{comments} = sprintf("%8d", $comments);
+	$mod_data{modlog} = sprintf("%8d", $modlogs);
+	$mod_data{modlog_yest} = sprintf("%8d", $modlogs_yest);
+	$mod_data{metamodlog} = sprintf("%8d", $metamodlogs);
+	$mod_data{metamodlog_yest} = sprintf("%8d", $metamodlogs_yest);
+	$mod_data{xmodlog} = sprintf("%.1fx", ($modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0));
+	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest/$modlogs_needmeta_yest : 0));
+	$mod_data{consensus} = sprintf("%8d", $consensus);
 	$mod_data{oldest_unm2d_days} = sprintf("%.1f", (time-$oldest_unm2d)/86400);
-	$mod_data{mod_points} = sprintf("%8d", $mod_points);
-	$mod_data{used_total} = sprintf("%8d", $modlog_total);
-	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0));
-	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0));
-	$mod_data{used_minus_1} = sprintf("%8d", $modlog_hr->{-1}{count});
-	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) );
-	$mod_data{used_plus_1} = sprintf("%8d", $modlog_hr->{1}{count});
-	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0));
+	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);
+	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created);
+	$mod_data{mod_points_pool} = sprintf("%8d", $mod_points_pool);
+	$mod_data{used_total} = sprintf("%8d", $modlog_yest_total);
+	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points_pool ? $modlog_yest_total*100/$mod_points_pool : 0));
+	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_yest_total*100/$comments : 0));
+	$mod_data{used_minus_1} = sprintf("%8d", $modlog_yest_hr->{-1}{count});
+	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_yest_total ? $modlog_yest_hr->{-1}{count}*100/$modlog_yest_total : 0) );
+	$mod_data{used_plus_1} = sprintf("%8d", $modlog_yest_hr->{1}{count});
+	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_yest_total : 0));
 	$mod_data{day} = $yesterday;
+	$mod_data{m2_text} = $m2_text;
 
-	$data{comments} = sprintf("%8d", $comments);
+	$data{comments} = $mod_data{comments};
 	$data{IPIDS} = sprintf("%8d", scalar(@$distinct_comment_ipids));
 	$data{submissions} = sprintf("%8d", $submissions);
 	$data{sub_comments} = sprintf("%8.1f", ($submissions ? $submissions_comments_match*100/$submissions : 0));
@@ -335,6 +363,64 @@ EOT
 	return ;
 };
 
+sub getM2Text {
+	my($mmr, $options) = @_;
+
+	# %$mmr is a hashref whose keys are dates, "yyyy-mm-dd".
+	# Its values are hashrefs whose keys are M2 counts for
+	# those days.  _Those_ values are also hashrefs of which
+	# only one key, "c", is important and its value is the
+	# count of M2 counts for that day.
+	# For example, if $mmr->{'2002-01-01'}{5}{c} == 200,
+	# that means that of the moderations performed on
+	# 2002-01-01, there are 200 which have been M2'd 5 times.
+
+	# Only one option supported for now (pretty trivial :)
+	my $width = 80;
+	$width = $options->{width} if $options->{width};
+	$width = 10 if $width < 10;
+
+	# Find the max count total for a day.
+	my $max_day_count = 0;
+	for my $day (keys %$mmr) {
+		my $this_day_count = 0;
+		for my $m2c (keys %{$mmr->{$day}}) {
+			$this_day_count += $mmr->{$day}{$m2c}{c};
+		}
+		$max_day_count = $this_day_count
+			if $this_day_count > $max_day_count;
+	}
+
+	# If there are no mods at all, we return nothing.
+	return "" if $max_day_count == 0;
+
+	# Prepare to build the $text data.
+	my $text = "Moderations and their M2 counts:\n";
+	my $prefix_len = 7;
+	my $mult = ($width-$prefix_len)/$max_day_count;
+
+	# Build the $text data, one line at a time.
+	my @days = sort keys %$mmr;
+	if (scalar(@days) > 30) {
+		# If we have too much data, throw away the oldest.
+		@days = @days[-30..-1];
+	}
+	for my $day (@days) {
+		my $day_display = substr($day, 5); # e.g. '01-01'
+		$text .= "$day_display: ";
+		for my $m2c (sort { $b <=> $a } keys %{$mmr->{$day}}) {
+			my $c = $mmr->{$day}{$m2c}{c};
+			my $n = int($c*$mult+0.5);
+			next unless $n;
+			$text .= $m2c x $n;
+		}
+		$text .= "\n";
+	}
+
+	$text .= "\n";
+	return $text;
+}
+
 sub getAdminModsText {
 	my($am) = @_;
 	return "" if !$am or !scalar(keys %$am);
@@ -359,6 +445,8 @@ sub getAdminModsText {
 		$m2_un_percent_mo = $amn->{m2_unfair_mo}*100
 			/ ($amn->{m2_unfair_mo} + $amn->{m2_fair_mo})
 			if $amn->{m2_unfair_mo} + $amn->{m2_fair_mo} > 20;
+		next unless $amn->{m1_up} || $amn->{m1_down}
+			|| $amn->{m2_fair} || $amn->{m2_unfair};
 		$text .= sprintf("%13.13s   %4d %4d %4d%%    %5d %5d %5.1f%% %5.1f%%\n",
 			$nickname,
 			$amn->{m1_up},

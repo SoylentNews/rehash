@@ -13,16 +13,19 @@ display
 __template__
 [% constants.sitename %] Moderation Stats for [% day %]
 
-       modlog: [% modlog %] rows total
-   metamodlog: [% metamodlog %] rows total ([% xmodlog %] modlog)
-   mod points: [% mod_points %] in pool
+     comments: [% comments %] posted yesterday
+       modlog: [% modlog %] rows total, [% modlog_yest %] yesterday
+   metamodlog: [% metamodlog %] rows total, [% metamodlog_yest %] yesterday ([% xmodlog %] modlog, [% xmodlog_yest %] yesterday)
+    consensus: [% consensus %]
+   mod points: [% mod_points_pool %] in pool
    used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
       used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
       used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
-oldest unM2'd: [% oldest_unm2d_days %] days
+oldest unM2'd: [% IF oldest_unm2d_days %][% oldest_unm2d_days %] days[% ELSE %](n/a)[% END %]
+ youngest mod: uid [% youngest_modelig_uid %], created on [% youngest_modelig_created %]
 
-[% admin_mods_text;
-IF repeat_mods;
+[% m2_text; admin_mods_text %]
+[% IF repeat_mods;
 	FOREACH dir = [ '-1', '1' ];
 		IF repeat_mods.$dir.keys.size >= 1;
 			IF dir == -1; dirword = "DOWN"; ELSE; dirword = "UP"; END %]
@@ -36,8 +39,6 @@ constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]): 
 		END;
 	END;
 END; %]
-
------------------------
 
 __seclev__
 100
