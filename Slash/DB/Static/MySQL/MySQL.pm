@@ -1566,6 +1566,29 @@ sub updateTaskSummary {
 }
 
 ########################################################
+# Returns the number of new users created since n days in the past
+# (chunks to a GMT day boundary).  E.g., if n=0, number created
+# since the last GMT midnight;  subtract n=1 from n=0 to figure
+# out how many users were created yesterday (GMT).
+sub getNumNewUsersSinceDaysback {
+	my($self, $daysback) = @_;
+	$daysback ||= 0;
+
+	my $max_uid = $self->countUsers({ max => 1 });
+	my $min = $self->sqlSelect(
+		"MIN(uid)",
+		"users_info",
+		"SUBSTRING(created_at, 1, 10) >= SUBSTRING(DATE_SUB(
+			NOW(), INTERVAL $daysback DAY
+		 ), 1, 10)");
+	if (!defined($min)) {
+		return 0;
+	} else {
+		return $max_uid - $min + 1;
+	}
+}
+
+########################################################
 #freshenup
 sub getSectionsDirty {
 	my($self) = @_;
