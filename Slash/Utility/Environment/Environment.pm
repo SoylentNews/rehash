@@ -2520,20 +2520,31 @@ sub slashProfEnd {
 	my $first = $prof[0][0];
 	my $last  = $first;  # Matthew 20:16
 	my $end   = $prof[-1][0];
-	my $total = ($end - $first) * 1_000;
+	my $total = $end - $first;
 
 	$total ||= $first || $end || 1;  # just in case
 
+	my $unit  = ' s';
+	my $multi = 1;
+
+	if ($total < 100) {
+		$unit    = 'ms';
+		$multi  *= 1_000;
+		$total  *= 1_000;
+	}
+
+	local $\;
+
 	print STDERR "\n*** Begin profiling ($$)\n";
-	print STDERR "*** Begin ordered ($$)\n";
-	printf STDERR <<'EOT', "PID", "what", "this #", "pct", "tot. #", "pct";
-%-6.6s: %-64.64s % 6.6s ms (%6.6s%%) / % 6.6s ms (%6.6s%%)
+	print STDERR "*** Begin ordered ($$)\n" if $use_profiling > 1;
+	printf STDERR <<"EOT", "PID", "what", "this #", "pct", "tot. #", "pct" if $use_profiling > 1;
+%-6.6s: %-64.64s % 6.6s $unit (%6.6s%%) / % 6.6s $unit (%6.6s%%)
 EOT
 
 	my(%totals, %begin);
 	for my $prof (@prof) {
-		my $t1 = ($prof->[0] - $first) * 1_000;
-		my $t2 = ($prof->[0] - $last) * 1_000;
+		my $t1 = ($prof->[0] - $first) * $multi;
+		my $t2 = ($prof->[0] - $last) * $multi;
 		my $p1 = $t1 / $total * 100;
 		my $p2 = $t2 / $total * 100;
 		my $s1 = sprintf('%.2f', $p1);
@@ -2576,20 +2587,20 @@ EOT
 		# mark new beginning
 		$begin{$prof->[5]} = $t1 if $prof->[5];
 
-		printf STDERR <<'EOT', $$, $where, $t2, $s2, $t1, $s1 if $use_profiling > 1;
-%-6d: %-64.64s % 6d ms (%6.6s%%) / % 6d ms (%6.6s%%)
+		printf STDERR <<"EOT", $$, $where, $t2, $s2, $t1, $s1 if $use_profiling > 1;
+%-6d: %-64.64s % 6d $unit (%6.6s%%) / % 6d $unit (%6.6s%%)
 EOT
 	}
 
 	print STDERR "\n*** Begin summary ($$)\n";
-	printf STDERR <<'EOT', "PID", "what", "time", "pct";
-%-6.6s: %-64.64s % 6.6s ms (%6.6s%%)
+	printf STDERR <<"EOT", "PID", "what", "time", "pct";
+%-6.6s: %-64.64s % 6.6s $unit (%6.6s%%)
 EOT
 	for (sort { $totals{$b} <=> $totals{$a} } keys %totals) {
 		my $p = $totals{$_} / $total * 100;
 		my $s = sprintf('%.2f', $p);
-		printf STDERR <<'EOT', $$, $_, $totals{$_}, $s;
-%-6d: %-64.64s % 6d ms (%6.6s%%)
+		printf STDERR <<"EOT", $$, $_, $totals{$_}, $s;
+%-6d: %-64.64s % 6d $unit (%6.6s%%)
 EOT
 	}
 
