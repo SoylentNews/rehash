@@ -179,16 +179,16 @@ sub saveSection {
 	# Non alphanumerics are not allowed in the section key.
 	# And I don't see a reason for underscores either, but
 	# dashes should be allowed.
-	$section =~ s/[^A-Za-z0-9\-]//g;
+	($section  = $form->{section}) =~ s/[^A-Za-z0-9\-]//g;
 
 	# Before we insert, give some reasonable defaults.
 	$form->{url} 	  ||= '';
 	$form->{hostname} ||= '';
+	$form->{artcount} ||= 0;
 
-	my($return);
-	my $found = $slashdb->getSection($form->{section}, 'section', 1);
+	my $found = $slashdb->getSection($section, 'section', 1);
 	if ($found) {
-		$return = $slashdb->setSection($form->{section}, {
+		$slashdb->setSection($section, {
 			qid		=> $form->{qid},
 			title		=> $form->{title},
 			issue		=> $form->{issue},
@@ -197,9 +197,11 @@ sub saveSection {
 			url		=> $form->{url},
 			hostname	=> $form->{hostname},
 		});
+
+		print getData('update', { section => $section });
 	} else {
-		$return = $slashdb->createSection({
-			section		=> $form->{section},
+		my $return = $slashdb->createSection({
+			section		=> $section,
 			qid		=> $form->{qid},
 			title		=> $form->{title},
 			issue		=> $form->{issue},
@@ -207,12 +209,14 @@ sub saveSection {
 			artcount	=> $form->{artcount},
 			url		=> $form->{url},
 			hostname	=> $form->{hostname},
+		});
+		print getData($return ? 'insert' : 'failed', { 
+			section => $section
 		});
 	} 
 	$slashdb->setSectionExtras($section, $form->{section_extras}) 
-		if $return && @{$form->{section_extras}};
+		if @{$form->{section_extras}};
 	
-	print getData($return ? 'insert' : 'failed', { section => $section });
 }
 
 #################################################################
