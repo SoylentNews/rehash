@@ -481,10 +481,14 @@ sub deleteDaily {
 # the user has clicked today;  it will still probably show
 # yesterday.  It's only intended for longer-term tracking of who
 # has visited the site when.
+# Updating all UIDs at once locks the users_info table on
+# Slashdot's master DB for about a minute, which is too long.
+# Let's do them in batches - Jamie 2004/04/28
 sub updateLastaccess {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 
+	my $splice_count = 2000;
 	if ($constants->{subscribe} && !$constants->{subscribe_hits_only}) {
 		my @gmt = gmtime();
 		my $today = sprintf "%4d%02d%02d", $gmt[5] + 1900, $gmt[4] + 1, $gmt[3];
@@ -500,14 +504,19 @@ sub updateLastaccess {
 			$uids_day{$lastclick_day}{$uid} = 1;
 		}
 		for my $day (keys %uids_day) {
-			my @uids = sort keys %{$uids_day{$day}};
-			next unless @uids;
-			my $uids_in = join(",", @uids);
-			$self->sqlUpdate(
-				"users_info",
-				{ lastaccess => $day },
-				"uid IN ($uids_in)"
-			);
+			my @uids = sort { $a <=> $b } keys %{$uids_day{$day}};
+			while (@uids) {
+				my @uid_chunk = splice @uids, 0, $splice_count;
+				my $uids_in = join(",", @uid_chunk);
+				$self->sqlUpdate(
+					"users_info",
+					{ lastaccess => $day },
+					"uid IN ($uids_in)"
+				);
+				# If there is more to do, sleep for a moment so we don't
+				# hit the DB too hard.
+				Time::HiRes::sleep(0.2) if @uids;
+			}
 		}
 	} else {
 		my @gmt = gmtime(time-86400);
@@ -519,12 +528,19 @@ sub updateLastaccess {
 			"GROUP BY uid"
 		);
 		return unless $uids_ar && @$uids_ar;
-		my $uids_in = join(",", sort @$uids_ar);
-		$self->sqlUpdate(
-			"users_info",
-			{ lastaccess => $yesterday },
-			"uid IN ($uids_in) AND lastaccess < '$yesterday'"
-		);
+		my @uids = sort { $a <=> $b } @$uids_ar;
+		while (@uids) {
+			my @uid_chunk = splice @uids, 0, $splice_count;
+			my $uids_in = join(",", @uid_chunk);
+			$self->sqlUpdate(
+				"users_info",
+				{ lastaccess => $yesterday },
+				"uid IN ($uids_in) AND lastaccess < '$yesterday'"
+			);
+			# If there is more to do, sleep for a moment so we don't
+			# hit the DB too hard.
+			Time::HiRes::sleep(0.2) if @uids;
+		}
 	}
 }
 
