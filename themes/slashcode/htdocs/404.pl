@@ -13,14 +13,23 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	$ENV{REQUEST_URI} ||= '';
-	my $r = Apache->request();
-	$r->status(404);
 
-	# catch old .shtml links ... need to check for other schemes, too?
-	if ($ENV{REQUEST_URI} =~ m|^/?\w+/(\d\d/\d\d/\d\d/\d+)\.shtml$|) {
-		redirect("$constants->{rootdir}/article.pl?sid=$1");
-		return;
+	# catch missing .shtml links and redirect
+	# should only get here if static file not found
+	if ($ENV{REQUEST_URI} =~ m{^/?\w+/(\d\d/\d\d/\d\d/\d+)\.shtml(?:\?(\S*))?$}) {
+		my($sid, $extra) = ($1, $2);
+		my $slashdb = getCurrentDB();
+		my $story = $slashdb->getStory($sid); # get section, check if story exists
+		if ($story->{sid}) {
+			my $url = "$constants->{rootdir}/$story->{section}/$sid.shtml";
+			$url .= "?$extra" if $extra;
+			redirect($url);
+			return;
+		}
 	}
+
+	my $r = Apache->request;
+	$r->status(404);
 
 	my $url = strip_literal(substr($ENV{REQUEST_URI}, 1));
 	my $admin = $constants->{adminmail};
@@ -37,9 +46,9 @@ sub main {
 		});
 	} else {
 		slashDisplay('main', {
-			error	=> $errnum,
 			url	=> $new_url,
 			origin	=> $url,
+			error	=> $errnum,
 		});
 	}
 
