@@ -39,7 +39,7 @@ __template__
 			<TD BGCOLOR="#E6E6E6" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#E6E6E6">
 
 <FONT FACE="[% constants.mainfontface %]" SIZE="1">by
-[% IF !is_anon %]<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
+[% IF !is_anon %]<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
 [% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
 [% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
 on [% Slash.timeCalc(time) %]
@@ -55,7 +55,7 @@ on [% Slash.timeCalc(time) %]
 	[% END %]
 	[% IF has_journal %]
 		Last Journal:
-		<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">[%
+		<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]/journal/">[%
 			Slash.timeCalc(journal_last_entry_date) %]</A>
 	[% END %]
 	)</FONT>
