@@ -1804,10 +1804,38 @@ sub deletePoll {
 
 ########################################################
 sub getPollQuestionList {
-	my($self, $time) = @_;
-	$time = 0 if $time !~ /^\d+$/;
-	my $questions = $self->sqlSelectAll("qid, question, date",
-		"pollquestions ORDER BY date DESC LIMIT $time,20");
+	my($self, $offset, $other) = @_;
+	my($where);
+	$offset = 0 if $offset !~ /^\d+$/;
+
+	# $others->{section} takes precidence over $others->{exclude_section}. Both
+	# keys are mutually exclusive and should not be used in the same call.
+	delete $other->{exclude_section} if exists $other->{section};
+	for (qw(section exclude_section)) {
+		# Usage issue. Some folks may add an "s" to the key name.
+		$other->{$_} ||= $other->{"${_}s"} if exists $other->{"${_}s"};
+		if (exists $other->{$_}) {
+			if (!ref $other->{$_}) {
+				$other->{$_} = [$other->{$_}];
+			} elsif (ref $other->{$_} eq 'HASH') {
+				my @list = sort keys %{$other->{$_}};
+				$other->{$_} = \@list;
+			}
+			# Quote the data.
+			$_ = $self->sqlQuote($_) for @{$other->{$_}};
+		}
+	}
+
+	$where = sprintf 'section IN (%s)', join(',', @{$other->{section}})
+		if $other->{section};
+	$where = sprintf 'section NOT IN (%s)', join(',', @{$other->{exclude_section}})
+		if $other->{exclude_section};
+	my $questions = $self->sqlSelectAll(
+		'qid, question, date',
+		'pollquestions',
+		$where,
+		"ORDER BY date DESC LIMIT $offset,20"
+	);
 
 	formatDate($questions, 2, 2, '%A, %B %e, %Y'); # '%F'
 
