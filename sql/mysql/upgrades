@@ -2591,8 +2591,6 @@ INSERT INTO string_param (type, code, name) VALUES ('story023','3','All');
 
 # run `perl utils/sectioncollapse_convert.plx VIRTUAL_USER`
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # use of _30 is not recommended
 # End of T_2_5_0_30, Start of T_2_5_0_31 - 2004/10/07
 
@@ -2607,8 +2605,6 @@ DELETE FROM users_param WHERE value =  0  AND name IN ('clbig_bonus', 'clsmall_b
 DELETE FROM users_param WHERE value ='+1' AND name IN ('karma_bonus');
 DELETE FROM users_param WHERE value =  2  AND name IN ('domaintags');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_31, Start of T_2_5_0_32 - 2004/10/10
 
 INSERT INTO vars (name, value, description) VALUES ('markup_checked_attribute',' CHECKED','The checked attribute that is used on the "input" HTML element, CHECKED for HTML 3.2 and checked="checked" for HTML 4.0 and beyond. Must include leading space!');
@@ -2622,3 +2618,9 @@ INSERT INTO string_param (type, code, name) VALUES ('extra_types','textarea','Te
 INSERT INTO string_param (type, code, name) VALUES ('extra_types','list','List');
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','story','Story');
 INSERT INTO string_param (type, code, name) VALUES ('extra_content_types','comment','Comment');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_5_0_32, Start of T_2_5_0_33 - 2004/10/12
