@@ -300,54 +300,7 @@ sub main {
 	}
 
 	if ($op eq 'userlogin' && ! $user->{is_anon}) {
-		# We absolutize the return-to URL to our homepage just to
-		# be sure nobody can use the site as a redirection service.
-		# We decide whether to use the secure homepage or not
-		# based on whether the current page is secure.
-		my $abs_dir =
-			( $constants->{absolutedir_secure}
-				&& Slash::Apache::ConnectionIsSSL() )
-			? $constants->{absolutedir_secure}
-			: $constants->{absolutedir};
-		my $refer = URI->new_abs($form->{returnto} || $constants->{rootdir},
-			$abs_dir);
-
-		# Tolerate redirection with or without a "www.", this is a
-		# little sloppy but it may help avoid a subtle misbehavior
-		# someday. -- Jamie
-		# What misbehavior? It looks to me like it could break a
-		# site.  www.foo.com is not necessarily the same as foo.com.
-		# Please explain.  -- pudge
-		# The only question here is whether it's allowed to
-		# redirect the user to a particular URL.  The business
-		# logic here is that we don't bounce the user to foreign
-		# sites (otherwise innocuous-looking URLs at foo.com can be
-		# constructed that send the user anywhere on the internet).
-		# But any site on the same domain is considered safe/OK.
-		# If it is, we still redirect the user to the same $refer.
-		# If www.foo.com really thinks it's unsafe to redirect the
-		# user to a URL at foo.com, they need to change this logic
-		# (or find a new web host!) -- Jamie
-		# So you're saying SourceForge.net domains are
-		# messed up?  :)  -- pudge
-		# I have no comment at this time -- Jamie
-
-		my $site_domain = $constants->{basedomain};
-		$site_domain =~ s/^www\.//;
-		$site_domain =~ s/:.+$//;	# strip port, if available
-
-		my $refer_host = $refer->can("host") ? $refer->host() : "";
-		$refer_host =~ s/^www\.//;
-
-		if ($site_domain eq $refer_host) {
-			# Cool, it goes to our site.  Send the user there.
-			$refer = $refer->as_string;
-		} else {
-			# Bogus, it goes to another site.  op=userlogin is not a
-			# URL redirection service, sorry.
-			$refer = $constants->{rootdir};
-		}
-		redirect($refer);
+		redirect(cleanRedirectUrl($form->{returnto}));
 		return;
 
 	# this will only redirect if it is a section-based rootdir, and
