@@ -1,0 +1,99 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2002 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Slash::Constants ':people';
+
+use vars qw( $slashdb $werder $constants $junk );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:U:v', \%opts);
+usage() if $opts{'h'};
+$opts{'u'} ||= 'slash';
+usage() unless $opts{'U'};
+
+createEnvironment($opts{u});
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+my $zoo = getObject("Slash::Zoo");
+
+my $people;
+
+my $entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND type = 'friend'");
+for my $friend (@$entries) {
+	$people->{FRIEND()}{$friend} = 1;
+	my $fof = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $friend AND type = 'friend'");
+	for (@$fof) {
+		$people->{FOF()}{$_}{$friend} = 1;
+	}
+	my $eof = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $friend AND type = 'foe'");
+	for (@$eof) {
+		$people->{EOF()}{$_}{$friend} = 1;
+	}
+}
+
+$entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND type = 'foe'");
+for (@$entries) {
+	$people->{FOE()}{$_} = 1;
+}
+
+$entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND perceive = 'fan'");
+for (@$entries) {
+	$people->{FAN()}{$_} = 1;
+}
+
+$entries = $slashdb->sqlSelectColArrayref('person', 'people', " uid = $opts{'U'} AND perceive = 'freak'");
+for (@$entries) {
+	$people->{FREAK()}{$_} = 1;
+}
+
+$slashdb->setUser($opts{'U'}, { people => $people });
+
+
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#users]
+
+This rebuilds the people part of a single user
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-U	uid (required)
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2002 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
