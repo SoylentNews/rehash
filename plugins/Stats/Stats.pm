@@ -406,7 +406,19 @@ sub getErrorStatuses {
 }
 
 ########################################################
-sub getAverageCommentCountPerStoryOnDay{
+sub getDaysOfUnarchivedStories {
+	my($self, $options) = @_;
+	my $max_days = $options->{max_days} || 180;
+	my $days = $self->sqlSelectColArrayref(
+		"day_published",
+		"stories",
+		"writestatus != 'archived' AND displaystatus != -1",
+		"GROUP BY day_published ORDER BY day_published DESC LIMIT $max_days");
+	return $days;
+}
+
+########################################################
+sub getAverageCommentCountPerStoryOnDay {
 	my($self, $day, $options) = @_;
 	my $col = "avg(commentcount)";
 	my $where = " date_format(time,'%Y-%m-%d') = '$day' ";
@@ -415,14 +427,14 @@ sub getAverageCommentCountPerStoryOnDay{
 }
 
 ########################################################
-sub getAverageHitsPerStoryOnDay{
+sub getAverageHitsPerStoryOnDay {
 	my($self, $day, $pages, $other) = @_;
 	my $numStories = $self->getNumberStoriesPerDay($day, $other);
 	return $numStories ? $pages / $numStories : 0;
 }
 
 ########################################################
-sub getNumberStoriesPerDay{
+sub getNumberStoriesPerDay {
 	my($self, $day, $options) = @_;
 	my $col = "count(*)";
 	my $where = " date_format(time,'%Y-%m-%d') = '$day' ";

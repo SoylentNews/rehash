@@ -34,29 +34,6 @@ $task{$me}{code} = sub {
 	my $yesterday = sprintf "%4d-%02d-%02d", 
 		$yesttime[5] + 1900, $yesttime[4] + 1, $yesttime[3];
 	
-	# figure out all the days we want to set average story commentcounts for
-	my $cc_days_back = $constants->{archive_delay} || 14;
-	my @cc_days = ($yesterday);
-
-	for my $db (1..$cc_days_back) {
-		my @day = localtime(time-86400*($days_back+$db));
-		my $day = sprintf "%4d-%02d-%02d",
-        	        $day[5] + 1900, $day[4] + 1, $day[3];
-		push @cc_days, $day;
-	}
-
-	# compute dates for the last 3 days so we can get the
-	# average hits per story for each in the e-mail	
-
-	my @ah_days = ($yesterday);
-	for my $db (1, 2) {
-		my @day = localtime(time-86400*($days_back+$db));
-		my $day = sprintf "%4d-%02d-%02d",
-        	        $day[5] + 1900, $day[4] + 1, $day[3];
-		push @ah_days, $day;
-	}
-	
-
 	my $overwrite = 0;
 	$overwrite = 1 if $constants->{task_options}{overwrite};
 
@@ -82,7 +59,22 @@ $task{$me}{code} = sub {
 	}
 
 	slashdLog("Send Admin Mail Begin for $yesterday");
-	# lets do the errors
+
+	# figure out all the days we want to set average story commentcounts for
+	my $cc_days = $stats->getDaysOfUnarchivedStories();
+
+	# compute dates for the last 3 days so we can get the
+	# average hits per story for each in the e-mail	
+
+	my @ah_days = ($yesterday);
+	for my $db (1, 2) {
+		my @day = localtime(time-86400*($days_back+$db));
+		my $day = sprintf "%4d-%02d-%02d",
+        	        $day[5] + 1900, $day[4] + 1, $day[3];
+		push @ah_days, $day;
+	}
+	
+	# let's do the errors
 	$data{not_found} = $logdb->countByStatus("404");
 	$statsSave->createStatDaily("not_found", $data{not_found});
 	$data{status_202} = $logdb->countByStatus("202");
@@ -379,7 +371,7 @@ EOT
 		$statsSave->createStatDaily("users", $users, { section => $section });
 		$statsSave->createStatDaily("users_subscriber", $users_subscriber, { section => $section });
 			
-		foreach my $d (@cc_days) {
+		foreach my $d (@$cc_days) {
 			my $avg_comments = $stats->getAverageCommentCountPerStoryOnDay($d, { section => $section }) || 0;
 			$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
 							{ section => $section, overwrite => 1, day => $d });
@@ -428,7 +420,7 @@ EOT
 		push(@{$data{sections}}, $temp);
 	}
 
-	foreach my $d (@cc_days) {
+	foreach my $d (@$cc_days) {
 		my $avg_comments= $stats->getAverageCommentCountPerStoryOnDay($d) || 0;
 		$statsSave->createStatDaily("avg_comments_per_story", $avg_comments, 
 						{ overwrite => 1, day => $d });
