@@ -9,12 +9,14 @@ SYNOPSIS
     These instructions have only been tested on Linux. Installation under
     BSD and other Unix OSes should work similarly, but there are problems
     with the Makefile and installtion under some non-Linux OSes. Feel free
-    to submit bug reports (better, patches) for any such problems. We've had
-    reports of the 1.0.x version of Slash running on Windows, but have done
-    no testing and have no further information, and have no information
+    to submit bug reports (or better, patches) for any such problems. We've
+    had reports of the 1.0.x version of Slash running on Windows, but have
+    done no testing and have no further information, and have no information
     about Slash 2 running on Windows.
 
-    PostgreSQL support in Slash 2 is currently alpha-quality.
+    PostgreSQL was supported (alpha-quality) in earlier versions of Slash 2,
+    but has not been updated at all since late 2001. At this point, Slash
+    works only with MySQL.
 
     Slash can always be downloaded from SourceForge.net, from the FTP site,
     and via CVS.
@@ -25,36 +27,46 @@ SYNOPSIS
 
     See the SourceForge.net page for patches and bug reports.
 
+  Which version should I use?
+    If you are using Slash 2.2.5 or before, including all 2.1.x, 2.0.x, and
+    1.x versions, you should upgrade to the latest version in the 2.2 tree,
+    2.2.6, as soon as possible. There are security issues with previous
+    versions. You should not install previous versions.
+
+    As of this writing (June 2003), our last official release (2.2.6) was
+    some time ago and many features have been added since. We have not yet
+    released 2.3.0. If you want to use more recent code, check out CVS
+    versions from cvs.slashcode.com. You probably do not want to use the
+    very latest CVS. See "CVS tags" below for advice on choosing and
+    maintaining a CVS installation.
+
   Important Note
+    We know you want to get right into the installation, but you probably
+    want to read this whole document first. Notably, the software and
+    hardware requirements are given later on.
 
-    The software and hardware requirements are listed at the end of the
-    document, because we know you want to get right into the installation.
-    Please read those requirements if you have any question about what might
-    be required.
-
-    Upgrading information is also toward the end of the document.
+    Also, you will find information on upgrading a Slash site (which can be
+    tricky); uninstalling; and troubleshooting for common problems.
 
 INSTALLATION
   Installation Notes
-
     *   For slashd (see utils/slash, which starts slashd), mod_perl (see
         httpd/httpd.conf), and MySQL, we set all processes to run in GMT.
         Then it is easy to convert dates to whatever the user's local time
         is. If you have date offset problems, check that all of these are
-        properly set to run in GMT.
+        properly set to run in GMT. Your server(s) do not actually need to
+        have their operating systems set to GMT (ours aren't), but if you
+        want to do that, it won't hurt anything.
 
     *   You cannot have different versions of the Slash modules installed
-        for different sites on the same Apache server. Well, if you want to,
-        you can try the Apache::PerlVINC module, but this is not recommended
-        for performance reasons. Slash is designed to have one shared core
-        of code for all Slash sites on a system. (This is made easier than
-        it was in 1.0.x, where to customize a site, you needed to change the
-        module code; this should no longer be necessary.)
+        for different sites on the same Apache server. (Well, if you want
+        to, you can try the Apache::PerlVINC module, but this is not
+        recommended for performance reasons. Slash is designed to have one
+        shared core of code for all Slash sites on a system.)
 
     *   All of the installation steps below should be executed as root.
 
   Installation Procedure
-
     There are six steps to installation. Skip the parts you already have
     installed (making sure you have the correct versions). Make sure to read
     the special note about Apache / mod_perl installation.
@@ -62,12 +74,14 @@ INSTALLATION
     1.  Install MySQL.
 
         Please refer to MySQL documentation for compilation and/or
-        installation notes for any questions with this process. Find the
-        script that runs mysql (probably safe_mysqld) and add these lines to
-        the beginning of it:
+        installation notes for any questions with this process.
 
-                TZ=GMT
-                export TZ
+        Slash requires that your MySQL server run in the GMT timezome. Find
+        your global my.cnf file (probably "/etc/my.cnf" or
+        "/etc/mysql/my.cnf"), locate the "[safe_mysqld]" group, and add this
+        line to it:
+
+                timezone = GMT
 
         Start MySQL (it must be running for the installation of Perl modules
         and Slash).
@@ -83,25 +97,24 @@ INSTALLATION
     2.  Install perl.
 
         perl is likely already installed on your machine; make sure its
-        version is at least the minimum required (see the section on
-        "REQUIREMENTS").
+        version is at least the minimum required (see "REQUIREMENTS").
 
     3.  Install Apache and mod_perl.
 
         You MUST install mod_perl and Apache as directed here. OK, that is
         not strictly true, but unless you really know what you're doing,
-        just assume it's true. If you already have mod_perl installed,
-        it is probably not configured properly to work with Slash and
-        you will have to rebuild it.
+        just assume it's true. If you already have mod_perl installed, it is
+        probably not configured properly to work with Slash and you will
+        have to rebuild it.
 
         If you are using the provided httpd.conf file from the slash
-        distribution, and find that Apache is giving you errors, chances
-        are mod_perl is not installed correctly, and you need to build
-        it from scratch. Not following this direction is one of the most
-        common reasons we see for a Slash install not working.
+        distribution, and find that Apache is giving you errors, chances are
+        mod_perl is not installed correctly, and you need to build it from
+        scratch. Not following this direction is one of the most common
+        reasons we see for a Slash install not working.
 
-        Of course, if you have your own Apache modules or build options,
-        you will need to modify the instructions here appropriately.
+        Of course, if you have your own Apache modules or build options, you
+        will need to modify the instructions here appropriately.
 
         First, untar apache and mod_perl. Then, go to the mod_perl
         directory, and have mod_perl build and install apache for you:
@@ -113,29 +126,29 @@ INSTALLATION
                 make test
                 make install
 
-        NOTE: You may be unsuccessful with "make test" if the perl
-        modules are not yet installed. However, some Perl modules will
-        not install without Apache and mod_perl installed. If you wish,
-        come back and run "make test" after installing here, and then
-        installing the Perl modules, to make sure everything is OK. Also,
-        as of January 2002, a "make test" has thrown spurious errors for
-        several months because of a persistent minor bug; if you see
-        "Can't locate object method 'new' via package 'URI::URL'",
-        read this:
+        NOTE: You may be unsuccessful with "make test" if the perl modules
+        are not yet installed. However, some Perl modules will not install
+        without Apache and mod_perl installed. If you wish, come back and
+        run "make test" after installing here, and then installing the Perl
+        modules, to make sure everything is OK. Also, as of January 2002, a
+        "make test" has thrown spurious errors for several months because of
+        a persistent minor bug; if you see "Can't locate object method 'new'
+        via package 'URI::URL'", read this:
 
-        http://groups.google.com/groups?threadm=3B82CE4D.8BF0C1D0%40spamless.genwax.com
+        <http://groups.google.com/groups?threadm=3B82CE4D.8BF0C1D0%40spamles
+        s.genwax.com>
 
         NOTE: If you know what you're doing, Slash will work with a DSO
-        Apache. Be sure you're on the latest versions of Apache and
-        mod_perl and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
+        Apache. Be sure you're on the latest versions of Apache and mod_perl
+        and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
 
     4.  Install the Perl modules.
 
         The best way to do this is with the CPAN module.
 
         You might also wish to install each module by hand, using
-        distributions found on the CPAN. See the perlmodinstall manpage for
-        more information on installing perl modules.
+        distributions found on the CPAN. See perlmodinstall for more
+        information on installing perl modules.
 
         IMPORTANT NOTES:
 
@@ -163,22 +176,21 @@ INSTALLATION
 
         Additional Libraries
             You must have certain libraries existing on your system before
-            building, for Compress::Zlib and XML::Parser (see the section on
+            building, for Compress::Zlib and XML::Parser (see
             "REQUIREMENTS").
 
-        BSD
-            If running BSD, also install the BSD::Resource module.
+        BSD If running BSD, also install the BSD::Resource module. We have
+            heard reports of problems running Slash on BSD, but you are
+            welcome to try; patches would be lovely.
 
         Alternate DBs
-            If not using MySQL, just allow the installation of its drivers
-            to continue, and possibly fail. Then install the driver you need
-            (e.g., for PostgreSQL, use "DBD::Pg") using the CPAN shell.
-            But note -- while our design allows for supporting multiple
-            DBs, _actually_ supporting anything other than MySQL has
-            fallen by the wayside with recent (post-2.0) versions of
-            Slash. We haven't heard from our users that this is an
-            important feature and it isn't one we need ourselves, so
-            it's not a high priority. We welcome patches and feedback.
+            Slash currently requires MySQL. While our design allows for
+            supporting multiple DBs, actually supporting anything other than
+            MySQL has fallen by the wayside since the release of Slash
+            version 2.0. We have heard almost zero demand for any other
+            database, and this isn't a feature we need ourselves, so it's
+            not a high priority. Patches and feedback are, of course, always
+            welcome.
 
         DBIx::Password
             When installing DBIx::Password, you will be asked for various
@@ -188,8 +200,8 @@ INSTALLATION
             data. You can just use the name of your site, or any other
             alphanumeric string. You will use this virtual user name in
             other places, so do not forget it. If you don't understand what
-            you're doing here, don't fake it; this is a common reason we
-            see for Slash installations failing.
+            you're doing here, don't fake it; this is a common reason we see
+            for Slash installations failing.
 
         libnet Broken
             libnet is currently broken somewhat in its tests. Please use
@@ -254,9 +266,9 @@ INSTALLATION
                 make install SLASH_PREFIX=/home/slash
 
         When done, a configuration file for Apache will be created at
-        $SLASH_PREFIX/httpd/slash.conf. You can put its contents into
-	your httpd.conf, or you can just "Include" it in your httpd.conf.
-	You must do one or the other!
+        $SLASH_PREFIX/httpd/slash.conf. You can put its contents into your
+        httpd.conf, or you can just "Include" it in your httpd.conf. You
+        must do one or the other!
 
         WARNING!
 
@@ -300,7 +312,6 @@ INSTALLATION
 
 INSTALLATION OPTIONS
   Multiple Servers
-
     You can, of course, have a separate database server from your Slash
     server. Further, you can have multiple web servers for one Slash site.
     Slashdot, for instance, has one primary server with all of the code
@@ -318,14 +329,12 @@ INSTALLATION OPTIONS
         volumes.
 
   Virtual Hosts
-
     Slash has support for virtual hosts, so you can have multiple Slash
     sites on one machine. Simply execute step 6 in the install process for
     each Slash site (after adding a new virtual user to DBIx::Password for
     each).
 
   SSL
-
     In Slash, there are two variables for the root URL of the site.
     absolutedir is the full URL, including protocol, while rootdir is the
     URL without protocol:
@@ -340,7 +349,6 @@ INSTALLATION OPTIONS
     by itself, SSL and non-SSL together, or non-SSL by itself.
 
   Non-Root
-
     It is possible to install and run everything here without root.
 
     Describing the process for a non-root install would take up significant
@@ -363,7 +371,6 @@ UPGRADING
     functionality.
 
   Slash 2.0 -> Slash 2.2
-
     Slash 2.2 is a major upgrade from Slash 2.0. It takes a little bit of
     work to get it going.
 
@@ -399,7 +406,7 @@ UPGRADING
 
     5.  Stop Apache and slashd on the target machine(s).
 
-    6.  Install Slash.
+    6   Install Slash.
 
         If installing on a different machine ...
 
@@ -460,7 +467,6 @@ UPGRADING
     14. Start slashd.
 
   Slash 2.2.x -> Slash 2.2.y
-
     Read all of this section before doing any of it.
 
     The first thing to do is to, as per the instructions below under
@@ -530,8 +536,10 @@ UPGRADING
 
                     % template-tool -u VIRTUAL_USER -s LIST
 
-  Slash 1.0 -> Slash 2.2
+  Slash 2.2.6 -> Slash CVS
+    Use the sql/mysql/upgrades file; see "CVS tags" below.
 
+  Slash 1.0 -> Slash 2.2
     Please read the complete documentation of utils/slash1toslash2.2. It is
     a program that will convert your database from Slash 1.0 to a new Slash
     2.2 database. The program documentation (which can be read with perldoc)
@@ -540,30 +548,31 @@ UPGRADING
 
 REQUIREMENTS
   Software
-
     Below, the main software components needed are listed. The recommended
     version is noted, along with the earliest version that has been tested
     (or is expected) to work. The earliest versions are not necessarily
-    supported, but should work. perl 5.005_03 is supported, but MySQL 3.22
-    is not.
+    supported, but should work. perl 5.6.0 is supported, but MySQL 3.22 is
+    not.
 
     perl
-        Version 5.6.1 (5.005_03).
+        Version 5.6.1 (5.6.0). [NOTE: perl 5.6.0 may have some problems.
+        5.6.1 is recommended. We have found no problems with 5.8.0, so if
+        you have that, don't downgrade on our account.]
 
                 http://www.cpan.org/
 
     MySQL
-        Version 3.23.42 (3.23).
+        Version 4.0.12 (3.23.42).
 
                 http://www.mysql.com/
 
     Apache
-        Version 1.3.20 (1.3.6).
+        Version 1.3.27 (1.3.6).
 
                 http://httpd.apache.org/
 
     mod_perl
-        Versions 1.26 (1.21).
+        Versions 1.27 (1.21).
 
                 http://perl.apache.org/
 
@@ -622,23 +631,21 @@ REQUIREMENTS
         Schedule-Cron
 
   Hardware
-
     There are no specific hardware requirements. Apache (with mod_perl) and
-    MySQL both take up a lot of RAM; running a complete system with 128MB
+    MySQL both take up a lot of RAM. Running a complete system with 128MB
     might be possible, if you do some tuning of the configuration, but a
-    practical minimum 256MB is recommended, though less could be sufficient
-    with some tuning.Storage space depends on how busy you expect the site
-    to be; 250MB is possible, but a minimum 1GB is recommended. Necessary
+    practical minimum of 256MB is recommended. Storage space depends on how
+    busy you expect the site to be; a minimum 1GB is recommended. Necessary
     processor speed is also dependent on how busy the site is; Pentium 133
     or equivalent might work, but less than a Pentium II/200 is not
     recommended.
 
     For the curious, Slashdot (as of September 2001) runs on nine machines:
     nine webservers (each is Pentium III/600, 1GB RAM, 9GB hard drive), one
-    NFS server (600MHz PIII, 1GB RAM), and three database servers database
-    server (quad 600MHz PIII, 4GB RAM). One database server is live, one is
-    a replicated backup, and a third is for doing live searches and
-    performance-intensive SELECTs by daemons etc.
+    NFS server (600MHz PIII, 1GB RAM), and three database servers (quad
+    600MHz PIII, 4GB RAM). One database server is live, one is a replicated
+    backup, and a third is for doing live searches and performance-intensive
+    SELECTs by daemons etc.
 
     However, this is certainly overkill for most sites (and possibly even
     overkill for Slashdot). slashcode.com runs on two web servers and one
@@ -664,7 +671,6 @@ VERSIONS
     next release.
 
   Codenames
-
     v1.0
         beast
 
@@ -673,6 +679,39 @@ VERSIONS
 
     v2.2
         fry
+
+  Security note
+    We are no longer releasing bugfixes, even for security, for the 1.0 or
+    2.0 versions, and do not recommend their use. If we become aware of
+    security issues in the 2.2 tree, we will release another version. For
+    this reason, if you are using any version of Slash in 2.2.x or earlier,
+    we recommend you upgrade to the latest version of 2.2, which as of this
+    writing (June 2003) is 2.2.6.
+
+  CVS tags
+    Our development of 2.3/2.4 has gone on exceptionally long without a
+    tarball release of 2.3.0. Many Slash hosting sites are choosing to
+    follow CVS instead of waiting.
+
+    Installation of the latest CVS (as of June 2003) is almost identical to
+    the installation of 2.2.
+
+    You probably do not want to use the very latest CVS, as the Slash
+    developers are constantly updating it. If you wish to live on the edge,
+    try a T_2_3_0_x tag ("Testing in 2.3.0 branch" -- one or two of these
+    are added every week, Slashdot uses them, but they may have bugs). If
+    you are content to just hang out near the edge, look for one of the
+    R_2_3_0_x cvs tags ("Release candidates for 2.3.0" -- these have been
+    tested and are believed free of major bugs).
+
+    To upgrade from 2.2.x to the CVS tree, you will need to follow the
+    instructions in the sql/mysql/upgrades file. At the moment, these are
+    just SQL commands you will need to issue, but read carefully because you
+    may have to use judgement and issue command-line commands and so on. (We
+    are working on a tool to automate this process.) Once you are upgraded
+    to, or have installed, a given CVS tag, upgrading to later CVS tags is
+    simply a matter of following along in that file -- we append as we go,
+    and each T_* tag is clearly marked.
 
 COMMON INSTALLATION PROBLEMS
     Here are some common reasons why Slash installations fail.
@@ -684,38 +723,39 @@ COMMON INSTALLATION PROBLEMS
 
     *   Perl module installation troubles.
 
-        If you have a unix-like system with CPAN properly installed
-        and no serious firewall issues, perl module installation will
-        usually go pretty smoothly. Some modules will have overactive
-        testing code; for example, if your system lacks "nslookup", some
-        of the net-related modules will complain and refuse to install
-        themselves even though it isn't strictly speaking necessary.
-        If you suspect overactive testing, "force install Foo::Bar" for
-        the offending module and then try "install Bundle::Slash" again.
+        If you have a unix-like system with CPAN properly installed and no
+        serious firewall issues, perl module installation will usually go
+        pretty smoothly. Some modules will have overactive testing code; for
+        example, if your system lacks "nslookup", some of the net-related
+        modules will complain and refuse to install themselves even though
+        it isn't strictly speaking necessary. If you suspect overactive
+        testing, "force install Foo::Bar" for the offending module and then
+        try "install Bundle::Slash" again.
 
-        We list perl 5.005_03 as supported, but 5.6.1 is recommended.
-        If you're having CPAN installation troubles, upgrading to the
-        latest version will make life easier. Note that you'll want to
-        recompile mod_perl/Apache after upgrading perl.
+        We list perl 5.6.0 as supported, but 5.6.1 is recommended. If you're
+        having CPAN installation troubles, upgrading to the latest version
+        will make life easier. Note that you'll want to recompile
+        mod_perl/Apache after upgrading perl.
+
+        We believe everything works fine with perl 5.8.0, but have not run
+        Slashdot on it yet.
 
     *   Multiple Perls installed.
 
-        If you have more than one binary file named "perl", trouble
-        awaits. It's OK to have a "/usr/bin/perl5.00503" even after
-        installing 5.6.1, but if your "/usr/bin/perl" is a different
-        version from "/usr/local/bin/perl", you're in for a world of hurt.
+        If you have more than one binary file named "perl", trouble awaits.
+        It's OK to have a "/usr/bin/perl5.00503" even after installing
+        5.6.1, but if your "/usr/bin/perl" is a different version from
+        "/usr/local/bin/perl", you may be in for a world of hurt.
 
     *   httpd.conf errors.
 
-        After you "install-slashsite", you're told that you probably
-        want to add "Include /usr/local/slash/httpd/slash.conf" to
-        its httpd.conf. Note that that file Include's your site-specific
-        conf file at /usr/local/slash/site/sitename/sitename.conf.
-        One way or another those site-specific directives have to be
-        processed by Apache.
+        After you "install-slashsite", you're told that you probably want to
+        add "Include /usr/local/slash/httpd/slash.conf" to its httpd.conf.
+        Note that that file Include's your site-specific conf file at
+        /usr/local/slash/site/sitename/sitename.conf. One way or another
+        those site-specific directives have to be processed by Apache.
 
-        Are you doing virtual hosting? Make sure you've set it up
-        correctly.
+        Are you doing virtual hosting? Make sure you've set it up correctly.
 
     *   Database authentication issues.
 
@@ -724,10 +764,10 @@ COMMON INSTALLATION PROBLEMS
         access to get from Apache to MySQL and a number of places where it
         can break:
 
-        *   The Apache child httpd process needs to have read access to
-            your DBIx/Password.pm module file. That process is probably
-            running as "nobody:nobody" (or similar). If you don't know
-            where DBIx/Password.pm was installed, try:
+        *   The Apache child httpd process needs to have read access to your
+            DBIx/Password.pm module file. That process is probably running
+            as "nobody:nobody" (or similar). If you don't know where
+            DBIx/Password.pm was installed, try:
 
             # perl -MDBIx::Password -le 'print $INC{"DBIx/Password.pm"}'
 
@@ -735,21 +775,21 @@ COMMON INSTALLATION PROBLEMS
 
             # locate DBIx/Password.pm | grep perl
 
-            Make sure the module is installed and that "nobody:nobody"
-            can read its .pm file. If you've sharing that file over the
-            network, did you set up ownership correctly?
+            Make sure the module is installed and that "nobody:nobody" can
+            read its .pm file. If you've sharing that file over the network,
+            did you set up ownership correctly?
 
             (If you are concerned about security on a multiuser system,
             first, don't let people on your system you don't trust, and
-            second, you may wish to chmod DBIx/Password.pm 750, give it
-            a group, and set Apache to run with that group.)
+            second, you may wish to chmod DBIx/Password.pm 750, give it a
+            group, and set Apache to run with that group.)
 
-        *   The DBIx/Password.pm file needs to be correctly configured.
-            Open it up with a text editor and make sure $virtual1 contains
-            an entry for your Slash virtual user that is correct in every
-            respect: driver, (MySQL) username, database, password, host,
-            and connect string. These are the values you typed in when
-            you installed the module but maybe you made a typo.
+        *   The DBIx/Password.pm file needs to be correctly configured. Open
+            it up with a text editor and make sure $virtual1 contains an
+            entry for your Slash virtual user that is correct in every
+            respect: driver, (MySQL) username, database, password, host, and
+            connect string. These are the values you typed in when you
+            installed the module but maybe you made a typo.
 
             If you have only one machine for your whole setup, host can be
             "localhost". Otherwise use an IP number.
@@ -760,28 +800,77 @@ COMMON INSTALLATION PROBLEMS
 
         *   MySQL permissions.
 
-            The username field in your DBIx/Password.pm file refers to
-            a MySQL user which you set up in step 1 of the Installation
-            Procedure. Make sure this user has permission to connect
-            to the Slash site's database you also set up in step 1
-            (and check it from the Apache machine over the network too).
-            If you don't fully understand MySQL permissions, don't guess;
-            start your reading here:
+            The username field in your DBIx/Password.pm file refers to a
+            MySQL user which you set up in step 1 of the Installation
+            Procedure. Make sure this user has permission to connect to the
+            Slash site's database you also set up in step 1 (and check it
+            from the Apache machine over the network too). If you don't
+            fully understand MySQL permissions, don't guess; start your
+            reading here:
 
-            <URL:http://www.mysql.com/documentation/mysql/bychapter/
-            manual_MySQL_Database_Administration.html#Privilege_system>
+            <http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL
+            _Database_Administration.html#Privilege_system>
 
-        Make sure you don't confuse the different types of "users":
+    *   Make sure you don't confuse the different types of "users":
 
         *   Apache user -- a unix system user account, e.g. "nobody";
+
         *   DBIx::Password virtual user -- SlashVirtualUser directive;
-        *   MySQL user -- DBIx::Password virtual user field, points to
-            a database user.
+
+        *   MySQL user -- DBIx::Password virtual user field, points to a
+            database user.
+
+        If slashd doesn't seem to be working, check its log and make sure it
+        has permission to write its files. It is probably running as your
+        Apache user "nobody", and if that user doesn't have write permission
+        to your web directories and/or .shtml and .rss files and so on,
+        slashd's current behavior is to log an error and die. (If you want
+        to make slashd run as a different unix system user, edit the second
+        field in "/usr/local/slash/slash.sites".)
 
     If you've doublechecked all this, you're sure you followed the
     directions, and it still doesn't work, stop in IRC #slash on
-    irc.slashcode.com and ask your question. Someone there may know
-    the answer.
+    irc.slashcode.com and ask your question. Someone there may know the
+    answer.
+
+UNINSTALLING
+    If you want to uninstall a site, there are two steps you must follow:
+
+    1.  Stop slashd with "/etc/init.d/slash stop" ("/etc/rc.d/init.d/slash
+        stop" for Red Hat systems). Edit "/usr/local/slash/slash.sites" to
+        remove the line referencing the site you wish to uninstall. Restart
+        slashd with "/etc/init.d/slash start".
+
+    2.  Edit your Apache httpd.conf file so that the directives for the
+        site's VirtualHost are not included. This may mean deleting or
+        commenting out the actual lines in
+        "/usr/local/apache/conf/httpd.conf", or perhaps just commenting out
+        an "Include yoursitename.conf" in that file or in
+        "/usr/local/slash/httpd/slash.conf", depending on how you set it up
+        after the "install-slashsite" command in step 6. Restart Apache with
+        "/usr/local/apache/bin/apachectl stop ; sleep 10 ;
+        /usr/local/apache/bin/apachectl start".
+
+    There are also five optional steps you may follow:
+
+    3.  Back up your site's database, if it has anything you care about:
+        "mysqldump -umysqlusername -p sitedatabasename >
+        /some/dir/sitedb.sql".
+
+    4.  Drop your site's database: "echo DROP DATABASE sitedatabasename |
+        mysql -umysqlusername -p".
+
+    5.  Remove the virtual user for your site's database from the
+        DBIx::Password file, whose location you can probably find with:
+
+        # perl -MDBIx::Password -le 'print $INC{"DBIx/Password.pm"}'
+
+    6.  Back up your site's html documents, if you care about any of them:
+        "cp -pvR /usr/local/slash/site/yoursitename/htdocs
+        /some/dir/htdocs".
+
+    7.  Delete your site's directory tree: "rm -rf
+        /usr/local/slash/site/yoursitename".
 
 VERSION
     $Id$
