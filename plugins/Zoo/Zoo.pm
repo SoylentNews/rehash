@@ -375,6 +375,19 @@ SQL
 	return $friends;
 }
 
+sub deleteZooJobs {
+	my ($self, $list) = @_;
+	$self->sqlDo("DELETE FROM people_log WHERE id IN (" . join(",", @$list) . ")");
+}
+
+sub getZooJobs {
+	my ($self, $limit) = @_;
+	$limit = "LIMIT $limit"
+		if $limit;
+
+	return $self->sqlSelectAllHashrefArray('*', 'people_log', '', "ORDER BY id " . $limit);
+}
+
 
 sub DESTROY {
 	my($self) = @_;
