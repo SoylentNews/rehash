@@ -18,11 +18,11 @@ __template__
 [% FOREACH somebody = people %]
     <TR>
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/">[% somebody.1 %]</A>
+		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/">[% somebody.1 %]([% somebody.0 %])</A>
 	</TD>
 	[% IF editable %]
 		<TD VALIGN="TOP">
-			[% PROCESS zoo_icons person=somebody.0 %]
+			[% PROCESS zoo_icons person=somebody.0 implied=implied %]
 		</TD>
 	[% END %]
 	<TD VALIGN="TOP">

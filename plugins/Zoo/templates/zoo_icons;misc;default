@@ -21,27 +21,27 @@ __template__
 	[% IF !user.people.${Slash.FRIEND}.$person && !user.people.${Slash.FOE}.$person && !user.people.${Slash.FAN}.$person && !user.people.${Slash.FREAK}.$person && !user.people.${Slash.FOF}.$person && !user.people.${Slash.EOF}.$person %]
 		<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]&amp;type=friend"><IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral" TITLE="Neutral"></A>
 	[% ELSE %]
-		[% IF user.people.${Slash.FRIEND}.$person %]
+		[% IF user.people.${Slash.FRIEND}.$person && implied != Slash.FRIEND %]
 			[% IF bonus && user.people_bonus_friend; title = "Friend ($user.people_bonus_friend)"; ELSE; title = "Friend"; END; %]
 			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif" ALT="[% title %]" TITLE="[% title %]"></A>
 		[% END %]
-		[% IF user.people.${Slash.FOE}.$person %]
+		[% IF user.people.${Slash.FOE}.$person && implied != Slash.FOE %]
 			[% IF bonus && user.people_bonus_foe; title = "Foe ($user.people_bonus_foe)"; ELSE; title = "Foe"; END; %]
 			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif" ALT="[% title %]" TITLE="[% title %]"></A>
 		[% END %]
-		[% IF user.people.${Slash.FAN}.$person %]
+		[% IF user.people.${Slash.FAN}.$person && implied != Slash.FAN %]
 			[% IF bonus && user.people_bonus_fan; title = "Fan ($user.people_bonus_fan)"; ELSE; title = "Fan"; END; %]
 			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/fan.gif" ALT="[% title %]" TITLE="[% title %]"></A>
 		[% END %]
-		[% IF user.people.${Slash.FREAK}.$person %]
+		[% IF user.people.${Slash.FREAK}.$person && implied != Slash.FREAK %]
 			[% IF bonus && user.people_bonus_freak; title = "Freak ($user.people_bonus_freak)"; ELSE; title = "Freak"; END; %]
 			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/freak.gif" ALT="[% title %]" TITLE="[% title %]"></A>
 		[% END %]
-		[% IF user.people.${Slash.FOF}.$person %]
+		[% IF user.people.${Slash.FOF}.$person && implied != Slash.FOF %]
 			[% IF bonus && user.people_bonus_freak; title = "Friend of Friend ($user.people_bonus_fof)"; ELSE; title = "Friend of Friend"; END; %]
 			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="[% title %]" TITLE="[% title %]"></A>
 		[% END %]
-		[% IF user.people.${Slash.EOF}.$person %]
+		[% IF user.people.${Slash.EOF}.$person && implied != Slash.EOF %]
 			[% IF bonus && user.people_bonus_freak; title = "Foe of Friend ($user.people_bonus_eof)"; ELSE; title = "Foe of Friend"; END; %]
 			<A HREF="[% constants.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="[% title %]" TITLE="[% title %]"></A>
 		[% END %]

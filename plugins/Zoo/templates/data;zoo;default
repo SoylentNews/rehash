@@ -20,6 +20,9 @@ __template__
 [% CASE 'mainhead' %]
 	[% constants.sitename %] Friend/Foe System
 
+[% CASE 'confirm' %]
+	Your Relationship with <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT FACE="[% constants.mainfontface %]" SIZE="4" COLOR="[% user.fg.0 %]"><B>[% nickname %]</B></FONT></A> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+
 [% CASE 'nofriends' %]
 	[% nickname %] is all alone in the world.
 

@@ -156,14 +156,16 @@ sub friends {
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'friends');
 	} else {
+		my $implied;
 		if ($editable) {
 			_printHead("yourfriendshead");
+			$implied = FRIEND;
 		} else {
 			_printHead("friendshead", { nickname => $nick });
 		}
 		
 		if (@$friends) {
-			slashDisplay('plainlist', { people => $friends, editable => $editable });
+			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied });
 		} else {
 			if ($editable) {
 				print getData('yournofriends');
@@ -193,14 +195,16 @@ sub fof {
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'fof');
 	} else {
+		my $implied;
 		if ($editable) {
 			_printHead("yourfriendsoffriendshead");
+			$implied = FOF;
 		} else {
 			_printHead("friendsoffriendshead", { nickname => $nick });
 		}
 		
 		if (@$friends) {
-			slashDisplay('plainlist', { people => $friends, editable => $editable });
+			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied });
 		} else {
 			if ($editable) {
 				print getData('yournofriendsoffriends');
@@ -230,14 +234,16 @@ sub enof {
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'friends');
 	} else {
+		my $implied;
 		if ($editable) {
 			_printHead("yourfriendsenemieshead");
+			$implied = EOF;
 		} else {
 			_printHead("friendsenemieshead", { nickname => $nick });
 		}
 		
 		if (@$friends) {
-			slashDisplay('plainlist', { people => $friends, editable => $editable });
+			slashDisplay('plainlist', { people => $friends, editable => $editable, implied => $implied });
 		} else {
 			if ($editable) {
 				print getData('yournofriendsenemies');
@@ -267,14 +273,16 @@ sub foes {
 	if ($form->{content_type} eq 'rss') {
 		_rss($foes, $nick, 'foes');
 	} else {
+		my $implied;
 		if ($editable) {
 			_printHead("yourfoeshead");
+			$implied = FOE;
 		} else {
 			_printHead("foeshead", { nickname => $nick });
 		}
 		
 		if (@$foes) {
-			slashDisplay('plainlist', { people => $foes, editable => $editable });
+			slashDisplay('plainlist', { people => $foes, editable => $editable, implied => $implied });
 		} else {
 			if ($editable) {
 				print getData('yournofoes');
@@ -303,13 +311,15 @@ sub fans {
 	if ($form->{content_type} eq 'rss') {
 		_rss($fans, $nick, 'fans');
 	} else {
+		my $implied;
 		if ($editable) {
 			_printHead("yourfanshead");
+			$implied = FAN;
 		} else {
 			_printHead("fanshead",{ nickname => $nick });
 		}
 		if (@$fans) {
-			slashDisplay('plainlist', { people => $fans, editable => $editable });
+			slashDisplay('plainlist', { people => $fans, editable => $editable, implied => $implied });
 		} else {
 			if ($editable) {
 				print getData('yournofans');
@@ -338,13 +348,16 @@ sub freaks {
 	if ($form->{content_type} eq 'rss') {
 		_rss($freaks, $nick, 'freaks');
 	} else {
+		my $implied;
 		if ($editable) {
 			_printHead("yourfreakshead");
+			$implied = FREAK;
+			
 		} else {
 			_printHead("freakshead",{ nickname => $nick });
 		}
 		if (@$freaks) {
-			slashDisplay('plainlist', { people => $freaks, editable => $editable });
+			slashDisplay('plainlist', { people => $freaks, editable => $editable, implied => $implied });
 		} else {
 			if ($editable) {
 				print getData('yournofreaks');
@@ -433,20 +446,48 @@ sub action {
 sub check {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	_printHead("mainhead");
 	if ($form->{uid}) {
+		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
+		my $compare = $slashdb->getUser($form->{uid}, 'people');
+		_printHead("confirm", { nickname => $nickname, uid => $form->{uid}  });
 		if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
 			print getData("no_go");
 			return 0;
 		}
 
+#		my (%mutual, @mutual);
+#		for my $rel (keys %{$user->{people}}) {
+#			for my $person (keys %{$user->{people}{$rel}}) {
+#				if ($compare->{$rel}{$person}) {
+#					push @{$mutual{$rel}}, $person;
+#					push @mutual, $person;
+#				}
+#			}
+#		}
+		my (%mutual, @mutual);
+		for my $person (keys %{$user->{people}{FOF()}}) {
+			if ($compare->{FOF()}{$person}) {
+				push @{$mutual{FOF()}}, $person;
+				push @mutual, $person;
+			}
+		}
+		for my $person (keys %{$user->{people}{EOF()}}) {
+			if ($compare->{EOF()}{$person}) {
+				push @{$mutual{EOF()}}, $person;
+				push @mutual, $person;
+			}
+		}
+		my $uids_2_nicknames = $slashdb->getUsersNicknamesByUID(\@mutual)
+			if @mutual;
+
 		my $type = $user->{people}{FOE()}{$form->{uid}} ? 'foe': ($user->{people}{FRIEND()}{$form->{uid}}? 'friend' :'neutral');
-		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
 		slashDisplay('confirm', { 
 			uid => $form->{uid},
 			nickname => $nickname,
 			type => $type,
 			over_socialized => testSocialized($zoo, $constants, $user),
+			uids_2_nicknames => $uids_2_nicknames,
+			mutual => \%mutual
 		});
 	} else {
 		print getData("no_uid");
