@@ -832,6 +832,7 @@ sub showInfo {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
+
 	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
 	my($title, $admin_block, $fieldkey) = ('', '', '');
 	my $comments = undef;
@@ -1168,11 +1169,12 @@ sub showInfo {
 	
 	my $sub_options = { limit_days => 365 };
 	$sub_options->{accepted_only} = 1 if !$admin_flag && $user->{uid} != $requested_user->{uid};
-	
 
-	my $subcount = $reader->countSubmissionsByNetID($netid, $fieldkey)
+	my $sub_field = $form->{fieldname};
+	
+	my ($subcount, $ret_field) = $reader->countSubmissionsByNetID($netid, $sub_field)
 		if $requested_user->{nonuid};
-	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey, $sub_limit, $sub_options)
+	my $submissions = $reader->getSubmissionsByNetID($netid, $ret_field, $sub_limit, $sub_options)
 		if $requested_user->{nonuid};
 
         my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
@@ -1948,7 +1950,6 @@ sub saveUserAdmin {
 	my $user_editfield_flag;
 	my $banned = 0;
 	my $banref;
-
 	if ($form->{uid}) {
 		$user_editfield_flag = 'uid';
 		$id = $form->{uid};
