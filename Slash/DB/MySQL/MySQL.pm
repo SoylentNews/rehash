@@ -4408,12 +4408,20 @@ sub setStory_delete_memcached_by_stoid {
 	my %stoids = ( map { ($_, 1) } @$stoid_list );
 	$stoid_list = [ sort { $a <=> $b } keys %stoids ];
 
+	my @mcdkeys = (
+		"$self->{_mcd_keyprefix}:st:",
+		"$self->{_mcd_keyprefix}:stc:",
+		"$self->{_mcd_keyprefix}:str:",
+	);
+
 	for my $stoid (@$stoid_list) {
-		my $mcdkey = "$self->{_mcd_keyprefix}:st:";
-		# The "3" means "don't accept new writes to this key for 3 seconds."
-		$mcd->delete("$mcdkey$stoid", 3);
-		if ($mcddebug > 1) {
-			print STDERR scalar(gmtime) . " $$ setS_deletemcd deleted '$mcdkey$stoid'\n";
+		for my $mcdkey (@mcdkeys) {
+			# The "3" means "don't accept new writes
+			# to this key for 3 seconds."
+			$mcd->delete("$mcdkey$stoid", 3);
+			if ($mcddebug > 1) {
+				print STDERR scalar(gmtime) . " $$ setS_deletemcd deleted '$mcdkey$stoid'\n";
+			}
 		}
 	}
 }
@@ -7063,9 +7071,9 @@ sub countUsers {
 	# actual value, write it into the var.
 	if ($mcd) {
 		# Let's pretend this value's going to be accurate
-		# for about a day.  Since we only really need the
+		# for about an hour.  Since we only really need the
 		# user count approximately, that's about right.
-		$mcd->set($mcdkey, $count, 86400);
+		$mcd->set($mcdkey, $count, 3600);
 	}
 	if ($actual) {
 		$self->setVar('users_count', $count);
@@ -9459,7 +9467,8 @@ sub getStoidFromSid {
 	my $sid_q = $self->sqlQuote($sid);
 	my $stoid = $self->sqlSelect("stoid", "stories", "sid=$sid_q");
 	$self->{_sid_conversion_cache}{$sid} = $stoid;
-	$mcd->set("$mcdkey$sid", $stoid, 7 * 86400) if $mcd;
+	my $exptime = 7 * 86400;
+	$mcd->set("$mcdkey$sid", $stoid, $exptime) if $mcd;
 	return $stoid;
 }
 
@@ -10395,24 +10404,48 @@ sub applyStoryRenderHashref {
 
 ########################################################
 # Get chosen topics for a story in hashref form
-# XXX This is a good candidate for memcached caching
 sub getStoryTopicsChosen {
 	my($self, $stoid) = @_;
-	return $self->sqlSelectAllKeyValue(
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+	my $answer;
+	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:stc:";
+		$answer = $mcd->get("$mcdkey$stoid");
+		return $answer if $answer;
+	}
+	$answer = $self->sqlSelectAllKeyValue(
 		"tid, weight",
 		"story_topics_chosen",
 		"stoid='$stoid'");
+	if ($mcd) {
+		my $exptime = 3600; # should be a var
+		$mcd->set("$mcdkey$stoid", $answer, $exptime);
+	}
+	return $answer;
 }
 
 ########################################################
 # Get rendered topics for a story in hashref form
-# XXX This is a good candidate for memcached caching
 sub getStoryTopicsRendered {
 	my($self, $stoid) = @_;
-	return $self->sqlSelectColArrayref(
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+	my $answer;
+	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:str:";
+		$answer = $mcd->get("$mcdkey$stoid");
+		return $answer if $answer;
+	}
+	$answer = $self->sqlSelectColArrayref(
 		"tid",
 		"story_topics_rendered",
 		"stoid='$stoid'");
+	if ($mcd) {
+		my $exptime = 3600; # should be a var
+		$mcd->set("$mcdkey$stoid", $answer, $exptime);
+	}
+	return $answer;
 }
 
 ########################################################
