@@ -141,7 +141,7 @@ sub newUser {
 				$messages->setPrefs($uid, \%params);
 			}
 
-			my $user_send = $reader->getUser($uid);
+			my $user_send = $slashdb->getUser($uid);
 			_sendMailPasswd(@_, $user_send);
 			header(getData('newuserhead')) or return;
 			print getData('newuser_msg', { uid => $uid });
