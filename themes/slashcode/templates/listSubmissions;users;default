@@ -20,6 +20,8 @@ listSubmissions
 __template__
 [%
 light_text_color = "#AAAAAA";
+approved = 0;
+count = 0;
 %]
 [% IF submissions.size > 0 %]
 	[% PROCESS titlebar width="100%" title = title -%]
@@ -33,7 +35,7 @@ light_text_color = "#AAAAAA";
 		</TR>
 		[% FOREACH sub = submissions %]
 		<TR>
-			<TD>[% sub.subj %]</TD>
+			<TD>[% IF admin_flag %]<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% END %][% sub.subj %][% IF admin_flag %]</A>[% END %]</TD>
 			<TD>[% IF admin_flag %][% PROCESS nick_and_uid uid=sub.uid nickname=Slash.db.getUser(sub.uid, 'nickname'); %][% END %]</TD>
 			<TD>[% IF admin_flag %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</TD>
 			<TD>[% Slash.timeCalc(time) %]</TD>
@@ -44,15 +46,20 @@ light_text_color = "#AAAAAA";
 					[%- CASE 1 -%]
 						Rejected
 					[%- CASE 2 -%]
-						Approved	
+						Approved
+					[% approved = approved + 1; %]	
 				[%- END -%]
 			     [%-  END -%]
 			</TD>
 		</TR>
+		[% total = total + 1 %]
+		[% END %]
+		[% IF admin_flag %]
+		<TR><TD colspan="5">[% PROCESS horiz_rule %]</TD></TR>
+		<TR><TD colspan="2"><B>Total: [% total %]</TD><TD COLSPAN="3"><B>Approved: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</B></TD></TR>
 		[% END %]
 	</TABLE>
 [% END %]
-
 
 [% BLOCK nick_and_uid;
 	nickname | strip_literal;
