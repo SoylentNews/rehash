@@ -1614,6 +1614,7 @@ sub createEnvironment {
 		for (@ARGV) {
 			my($key, $val) = split /=/;
 			$form{$key} = $val;
+			shift @ARGV;  # remove it
 		}
 		$virtual_user = $form{'virtual_user'};
 	}
