@@ -124,7 +124,7 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
    mods total: [% ints(stats_data.mod_points_lost_spent) %] yesterday ([% pctsf(stats_data.mod_used_total_pool) %]% of pool, [% pctsf(stats_data.mod_used_total_comments) %]% of comments)
       used -1: [% ints(stats_data.mod_points_lost_spent_minus_1) %] yesterday ([% pctsf(stats_data.mod_points_spent_minus_1_percent) %]%)
       used +1: [% ints(stats_data.mod_points_lost_spent_plus_1) %] yesterday ([% pctsf(stats_data.mod_points_spent_plus_1_percent)  %]%)
-    avg spent: [% stats_data.mod_points_avg_spent %]
+    avg spent: [% flts(stats_data.mod_points_avg_spent) %]
 token convert: [% ints(stats_data.mod_token_conversion_point) %]
 oldest unM2'd: [% IF stats_data.oldest_unm2d_days > -1 %][% ints(stats_data.oldest_unm2d_days) %] days[% ELSE %](n/a)[% END %]
 youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% stats_data.youngest_modelig_created %]
