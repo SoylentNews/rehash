@@ -1004,7 +1004,7 @@ sub fetchEligibleModerators_users {
 		}
 		# If there is more to do, sleep for a moment so we don't
 		# hit the DB too hard.
-		Time::HiRes::sleep 0.2 if @uids;
+		Time::HiRes::sleep(0.2) if @uids;
 	}
 
 	my $return_ar = [
