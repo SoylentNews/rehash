@@ -1121,12 +1121,14 @@ sub showInfo {
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
 	if ($requested_user->{nonuid}) {
-		if ($form->{fieldname} eq "ipid") {
-			$modval = $reader->calcModval("ipid = '$id'", $ipid_hoursback, {});
-			$trollpoint = $reader->calcTrollPoint("ipid");
-		} elsif ($form->{fieldname} eq "subnetid") {
-			$modval = $reader->calcModval("subnetid = '$id'", $ipid_hoursback, {});
-			$trollpoint = $reader->calcTrollPoint("subnetid");
+		if($admin_flag) {
+			if ($form->{fieldname} eq "ipid") {
+				$modval = $reader->calcModval("ipid = '$id'", $ipid_hoursback, {});
+				$trollpoint = $reader->calcTrollPoint("ipid");
+			} elsif ($form->{fieldname} eq "subnetid") {
+				$modval = $reader->calcModval("subnetid = '$id'", $ipid_hoursback, {});
+				$trollpoint = $reader->calcTrollPoint("subnetid");
+			}
 		}
 		slashDisplay('netIDInfo', {
 			title			=> $title,
@@ -1172,8 +1174,10 @@ sub showInfo {
 
 		my $lastjournal = _get_lastjournal($uid);
 
-		$modval = $reader->calcModval("comments.uid = $requested_user->{uid}", $uid_hoursback);
-		$trollpoint = $reader->calcTrollPoint("uid");
+		if($admin_flag) {
+			$modval = $reader->calcModval("comments.uid = $requested_user->{uid}", $uid_hoursback);
+			$trollpoint = $reader->calcTrollPoint("uid");
+		}
 
 		slashDisplay('userInfo', {
 			title			=> $title,
