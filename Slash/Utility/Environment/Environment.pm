@@ -2357,7 +2357,7 @@ sub determineCurrentSkin {
 	} else {
 		my $form = getCurrentForm();
 		$skin   = $reader->getSkidFromName($form->{section}) if $form->{section};
-		$skin ||= $reader->getSkidFromNexus(getCurrentStatic('mainpage_skid'));
+		$skin ||= $reader->getCurrentStatic('mainpage_skid');
 	}
  
 	# this should never happen
