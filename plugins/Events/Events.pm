@@ -88,9 +88,15 @@ sub getEventsByDay {
 
 	my $user = getCurrentUser();
 	my $section;
-	$section ||= $user->{section};
 	my $where = "((to_days(begin) <= to_days('$date')) AND (to_days(end) >= to_days('$date')))  AND stories.sid = event_dates.sid AND topics.tid = stories.tid";
-	$where .= " AND stories.section = '$section'" if $section;
+	my $slashdb = getCurrentDB();
+	my $SECT = $slashdb->getSection(getCurrentForm('section'));
+	if ($SECT->{type} eq 'collected') {
+		$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
+	} else {
+		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
+	}
 	my $order = "ORDER BY tid";
 	$order .= " LIMIT $limit "
 		if $limit;
@@ -111,7 +117,6 @@ sub getEvents {
 	$begin ||= timeCalc(0, '%Y-%m-%d');
 
 	my $user = getCurrentUser();
-	$section ||= $user->{section};
 	my $where = " to_days(begin) >= to_days('$begin') "; 
 	$where = " ($where AND to_days(end) <= to_days('$end')) " if $end; 
 	$where .= " AND stories.sid = event_dates.sid";
@@ -119,7 +124,15 @@ sub getEvents {
 	$where .= " AND topics.tid = stories.tid";
 
 	$where .= " AND stories.tid = $topic" if $topic;
-	$where .= " AND stories.section = '$section'" if $section;
+
+	my $slashdb = getCurrentDB();
+	my $SECT = $slashdb->getSection($section);
+	if ($SECT->{type} eq 'collected') {
+		$where .= " AND stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+			if $SECT->{contained} && @{$SECT->{contained}};
+	} else {
+		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
+	}
 
 	my $order = "ORDER BY tid";
 	$order .= " LIMIT $limit "
