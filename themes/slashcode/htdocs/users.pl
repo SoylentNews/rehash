@@ -934,7 +934,7 @@ sub showInfo {
 	my $comment_search_options = {};
 	my $comment_time;
 	if ($admin_flag) {
-		if (!$min_comment and !$form->{no_time_restriction}) {
+		if (!$min_comment && !$form->{no_time_restriction}) {
 			$comment_time = $constants->{admin_comment_display_days};
 			$comment_search_options->{limit_days}= $comment_time;
 			$comments_wanted = $constants->{admin_daysback_commentlimit};
@@ -974,7 +974,7 @@ sub showInfo {
 				$comments = $reader->getCommentsByIPID(
 					$netid, $comments_wanted, $min_comment, $comment_search_options);
 				# if we didn't get any comments back with day limit, try w/o
-				if($commentcount and !@$comments){
+				if ($commentcount && !@$comments){
 					delete $comment_search_options->{limit_days};
 					$comment_time = "";
 					$comments = $reader->getCommentsByIPID(
@@ -985,7 +985,7 @@ sub showInfo {
 					$netid, $comments_wanted, $min_comment);
 				$comments = $reader->getCommentsBySubnetID(
 					$netid, $comments_wanted, $min_comment, $comment_search_options);
-				if($commentcount and !@$comments){
+				if ($commentcount && !@$comments){
 					delete $comment_search_options->{limit_days};
 					$comment_time = "";
 					$comments = $reader->getCommentsBySubnetID(
@@ -1001,7 +1001,7 @@ sub showInfo {
 				$netid, $comments_wanted, $min_comment);
 			$comments = $reader->getCommentsByIPIDOrSubnetID(
 				$netid, $comments_wanted, $min_comment, $comment_search_options);
-			if($commentcount and !@$comments){
+			if ($commentcount && !@$comments){
 				delete $comment_search_options->{limit_days};
 				$comment_time = "";
 				$comments = $reader->getCommentsByIPIDOrSubnetID(
@@ -1015,7 +1015,7 @@ sub showInfo {
 			$reader->countCommentsByUID($requested_user->{uid});
 		$comments = $reader->getCommentsByUID(
 			$requested_user->{uid}, $comments_wanted, $min_comment, $comment_search_options) if $commentcount;
-		if($commentcount and !@$comments){
+		if ($commentcount && !@$comments){
 			delete $comment_search_options->{limit_days};
 			$comment_time = "";
 			$comments = $reader->getCommentsByUID(
@@ -1115,11 +1115,14 @@ sub showInfo {
 		push @$commentstruct, $data;
 	}
 	# Sort so the chosen group of comments is sorted by discussion
-	@$commentstruct = sort {$b->{disc_time} cmp $a->{disc_time} || $b->{sid} <=> $a->{sid} } @$commentstruct unless $user->{user_comment_sort_type} == 1;
+	@$commentstruct = sort {
+		$b->{disc_time} cmp $a->{disc_time} || $b->{sid} <=> $a->{sid}
+	} @$commentstruct
+		unless $user->{user_comment_sort_type} == 1;
 
 	my $cid_list = [ keys %$cids_seen ];
 	my $cids_to_mods = {};
-	if ($admin_flag and $constants->{show_mods_with_comments}) {
+	if ($admin_flag && $constants->{show_mods_with_comments}) {
 		my $comment_mods = $reader->getModeratorCommentLog("DESC",
 			$constants->{mod_limit_with_comments}, "cidin", $cid_list);
 	
@@ -2286,7 +2289,7 @@ sub saveComm {
 	# Enforce Ranges for variables that need it
 	$form->{commentlimit} = 0 if $form->{commentlimit} < 1;
 	my $cl_max = $constants->{comment_commentlimit} || 0;
-	$form->{commentlimit} = $cl_max if $cl_max > 0 and $form->{commentlimit} > $cl_max;
+	$form->{commentlimit} = $cl_max if $cl_max > 0 && $form->{commentlimit} > $cl_max;
 	$form->{commentspill} = 0 if $form->{commentspill} < 1;
 
 	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};
@@ -2338,7 +2341,8 @@ sub saveComm {
 						? $form->{textarea_rows} : undef),
 		textarea_cols		=> ($form->{textarea_cols} != $constants->{textarea_cols}
 						? $form->{textarea_cols} : undef),
-		user_comment_sort_type  => ($form->{user_comment_sort_type} !=2 ? $form->{user_comment_sort_type} : undef )
+		user_comment_sort_type	=> ($form->{user_comment_sort_type} != 2
+						? $form->{user_comment_sort_type} : undef )
 	};
 	
 	# set our default values for the items where an empty-string won't do 
@@ -2769,7 +2773,7 @@ sub getUserAdmin {
 	} elsif ($field eq 'md5id') {
 		$user_edit->{nonuid} = 1;
 		$user_edit->{md5id} = $id;
-		if ($form->{fieldname} and $form->{fieldname} =~ /^(ipid|subnetid)$/) {
+		if ($form->{fieldname} && $form->{fieldname} =~ /^(ipid|subnetid)$/) {
 			$uidstruct = $reader->getUIDStruct($form->{fieldname}, $user_edit->{md5id});
 			@accesshits = $logdb->countAccessLogHitsInLastX($form->{fieldname}, $user_edit->{md5id}) if defined($logdb);
 		} else {
