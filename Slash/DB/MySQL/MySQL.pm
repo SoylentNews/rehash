@@ -9571,7 +9571,8 @@ sub getStoriesData {
 			grep { !exists $retval->{$_} }
 			@$stoids;
 		if (!@stoids_needed) {
-			print STDERR scalar(localtime) . " $$ logic error no stoids_needed, stoids '@$stoids'\n";
+			print STDERR scalar(localtime) . " $$ logic error (possibly mispointed nexus?) no stoids_needed, stoids '@$stoids'\n";
+			return { };
 		}
 		$stoid_clause = "stoid IN ("
 			. join(",", @stoids_needed)
