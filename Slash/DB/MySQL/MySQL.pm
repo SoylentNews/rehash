@@ -7436,7 +7436,7 @@ sub getUser {
 		# Specific column(s) are needed.
 		my $return_hr = { };
 		for my $col (@$val) {
-			$return_hr->{$col} = $answer->{$val};
+			$return_hr->{$col} = $answer->{$col};
 		}
 		$answer = $return_hr;
 	} elsif ($val) {
@@ -7471,6 +7471,9 @@ sub _getUser_do_selects {
 	# WHERE users.uid=123 AND users_blurb.uid=123 AND so on.
 	# Note if we're being asked to get only params, we skip this.
 	my $answer = { };
+	if ($mcddebug > 1) {
+		print STDERR scalar(gmtime) . " $$ mcd gU_ds selecthashref: '$select' '$from' '$where'\n";
+	}
 	$answer = $self->sqlSelectHashref($select, $from, $where) if $select && $from && $where;
 	if ($mcddebug > 1) {
 		print STDERR scalar(gmtime) . " $$ mcd gU_ds got answer '$select' '$from' '$where'\n";
@@ -7699,7 +7702,7 @@ sub _getUser_get_table_data {
 	}
 
 	if ($mcddebug > 1) {
-		print STDERR scalar(gmtime) . " $$ _getU_gtd cols_needed: '@$cols_needed'\n";
+		print STDERR scalar(gmtime) . " $$ _getU_gtd cols_needed: " . ($cols_needed ? "'@$cols_needed'" : "(all)") . "\n";
 	}
 
 	# Now, check to see if we know all the answers for that exact

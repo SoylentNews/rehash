@@ -622,15 +622,17 @@ sub printComments {
 	# loop here, pull what cids we can
 	my $cids_needed_ar = $user->{state}{cids} || [ ];
 	my($mcd_debug, $mcdkey, $mcdkeylen);
-	if ($mcd && $constants->{memcached_debug}) {
+	if ($mcd) {
 		# MemCached key prefix "ctp" means "comment_text, parsed".
 		# Prepend our site key prefix to try to avoid collisions
 		# with other sites that may be using the same servers.
-		$mcd_debug = { start_time => Time::HiRes::time };
+		$mcdkey = "$mcd->{keyprefix}ctp:";
+		$mcdkeylen = length($mcdkey);
+		if ($constants->{memcached_debug}) {
+			$mcd_debug = { start_time => Time::HiRes::time };
+		}
 	}
 	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
-	$mcdkey = "$mcd->{keyprefix}ctp:";
-	$mcdkeylen = length($mcdkey);
 	if ($mcd) {
 		if ($mcd && $constants->{memcached_debug} && $constants->{memcached_debug} > 2) {
 			print STDERR scalar(gmtime) . " printComments memcached mcdkey '$mcdkey'\n";
