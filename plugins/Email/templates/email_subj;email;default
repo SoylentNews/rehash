@@ -14,6 +14,6 @@ email_subj
 __seclev__
 5000
 __template__
-Emailed Story: [% story.title %]
+[% story.title %]
 __version__
 $Id$

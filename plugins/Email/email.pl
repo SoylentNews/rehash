@@ -96,12 +96,11 @@ sub main {
 
 	# Instantiate necessary plugins.
 	my %Plugins = (
-		Email 	=> getObject('Slash::Email'),
-		Messages=> getObject('Slash::Messages'),
+		Email		=> getObject('Slash::Email'),
+		Messages	=> getObject('Slash::Messages'),
 	);
 	unless ($Plugins{Email} && $Plugins{Messages}) {
-		print getData('plugin_not_installed');
-		footer();
+		redirect("$constants->{rootdir}/");
 		return;
 	}
 

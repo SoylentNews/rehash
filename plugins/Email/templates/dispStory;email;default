@@ -24,21 +24,16 @@ __template__
 	author = Slash.db.getAuthor(story.uid, 'nickname'); 	# double-sigh
 	topicname = topics.${story.tid}.name;
 -%]
-[%- constants.sitename %] Article Emailing
+A user has sent you the following story from [% constants.sitename %]:
 
-[% sponsor = PROCESS sponsor; IF sponsor -%]
-======================================================================
-[% sponsor %]
-======================================================================
-
-[%- END -%]
++--------------------------------------------------------------------+
 [% 
 	box(story.title);
 	IF constants.use_dept;
 		box("  from the $story.dept dept.");
 	END;
-	thisurl =
-		Slash.db.getSection(story.section, 'url') || 
+	thisurl = Slash.url2abs(
+		Slash.db.getSection(story.section, 'rootdir'), constants.absolutedir) ||
 		constants.absolutedir;
 
 	stime = Slash.timeCalc(story.time, "%A %B %d, @%H:%M");
@@ -55,13 +50,12 @@ Links:[%
 		count = count + 1;
 		num(count, link);
 	END -%]
-[%- END -%]
-
+[%- END %]
 
 Discuss this story at:
     [% thisurl %]/comments.pl?sid=[% story.sid %]
 
-To opt-out of further emailings;
+To opt-out of further emailings:
     [% thisurl %]/email.pl?op=optout_form
 
 Copyright 1997-2003 [% constants.sitepublisher %].  All rights reserved.

@@ -15,7 +15,6 @@ template=templates/emailStoryForm;email;default
 template=templates/optout_confirm;email;default
 template=templates/optout_subj;email;default
 template=templates/removeOptoutForm;email;default
-template=templates/sponsor;email;default
 
 image=images/email.gif
 

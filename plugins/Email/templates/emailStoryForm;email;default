@@ -32,21 +32,17 @@ __template__
 [% END -%]
 
 [% UNLESS form.sid -%]
-Enter story ID to mail: 
-<INPUT TYPE="TEXT" NAME="sid" SIZE=16>
-<BR><BR>
+<P>Enter story ID to mail: 
+<INPUT TYPE="TEXT" NAME="sid" SIZE="16">
 [% ELSE -%]
-Selected story:
-<BLOCKQUOTE>
-<LI><I>[% story.title %]</I> &nbsp;<SMALL>[% Slash.timeCalc(story.time) %],
-&nbsp; ([% story.sid %])</SMALL>
+Selected story: <I>[% story.title %]</I>
+<SMALL>[% Slash.timeCalc(story.time) %] ([% story.sid %])</SMALL>
 </BLOCKQUOTE>
 [% END -%]
 
-Enter email address to send story to: 
-<INPUT TYPE="TEXT" NAME="email" SIZE=50>
-<BR><BR>
-<INPUT TYPE="SUBMIT" VALUE="Send Email">
+<P>Enter email address to send story to: 
+<INPUT TYPE="TEXT" NAME="email" SIZE="50">
+<P><INPUT TYPE="SUBMIT" VALUE="Send Email">
 </FORM>
 
 __version__

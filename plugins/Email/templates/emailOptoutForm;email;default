@@ -19,7 +19,7 @@ __template__
 
 [% INCLUDE titlebar 
 	width="99%"
-	title="Opt-Out of Story Emailings from $constants.sitename" -%]
+	title="Opt-Out of Story Mailings" -%]
 
 <FORM ACTION="[% constants.rootdir %]/email.pl" METHOD="POST">
 [% IF form.formkey -%]
@@ -27,10 +27,10 @@ __template__
 [% END -%]
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="optout_save">
 
-Enter email address to be removed from further story emailings:<BR>
-<INPUT TYPE="TEXT" NAME="email" SIZE=50>
+Enter email address to be removed from further story mailings:<BR>
+<INPUT TYPE="TEXT" NAME="email" SIZE="50">
 <BR><BR>
-<INPUT TYPE="SUBMIT" VALUE"="Opt Out">
+<INPUT TYPE="SUBMIT" VALUE="Opt Out">
 </FORM>
 
 __version__
