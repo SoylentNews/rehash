@@ -31,7 +31,7 @@ __template__
 			<TR VALIGN="TOP"><TD>
 				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.colors.fg_2 %]">
 					[% diatribe.article %]
-						<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% diatribe.topic.tid %]"
+						<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% diatribe.topic.tid %]"
 							><IMG SRC="[% constants.imagedir %]/topics/[% diatribe.topic.image %]" WIDTH="[% diatribe.topic.width %]"
 								HEIGHT="[% diatribe.topic.height %]" BORDER="0" ALIGN="RIGHT"
 								HSPACE="20" VSPACE="10" ALT="[% diatribe.topic.textname %]"></A>

@@ -20,7 +20,7 @@ __template__
 [% FOREACH event=events %]
 	<TR>
 		<TD>
-			[<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% event.tid %]">[% event.alttext %]</A>] &nbsp;
+			[<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% event.tid %]">[% event.alttext %]</A>] &nbsp;
 		</TD>
 		<TD>
 			<A HREF="[% gSkin.rootdir %]/article.pl?sid=[% event.sid %]">[% event.title %]</A> &nbsp;

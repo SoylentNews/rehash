@@ -31,7 +31,7 @@ __template__
 [% END %]
 
 [% PROCESS titlebar width="100%" title=submission.subj %]
-<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
+<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><IMG
 SRC="[% constants.imagedir %]/topics/[% topic.image %]"
 WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
 ALIGN="RIGHT" HSPACE="20" VSPACE="10"

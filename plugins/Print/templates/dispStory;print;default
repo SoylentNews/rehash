@@ -20,7 +20,7 @@ __seclev__
 10000
 __template__
 [% UNLESS form.nohtml;
-	topic = "<A HREF=\"$gSkin.absolutedir/search.pl?topic=$topic.tid\">$topic.alttext</A>";
+	topic = "<A HREF=\"$gSkin.absolutedir/search.pl?tid=$topic.tid\">$topic.alttext</A>";
 ELSE;
 	topic = topic.alttext;
 END -%]

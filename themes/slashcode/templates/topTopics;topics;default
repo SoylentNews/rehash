@@ -22,7 +22,7 @@ __template__
 	<TR><TD ALIGN="RIGHT" VALIGN="TOP>
 		<FONT SIZE="6" COLOR="[% user.colors.bg_3 %]">[% topic.textname %]</FONT>
 		<BR>( [% topic.count %] )
-		<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
+		<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><IMG
 			SRC="[% constants.imagedir %]/topics/[% topic.image %]"
 			BORDER="0" ALT="[% topic.textname %]" ALIGN="RIGHT" VALIGN="TOP"
 			HSPACE="0" VSPACE="10" WIDTH="[% topic.width %]"

@@ -1652,7 +1652,7 @@ Hashref of cleaned-up data.
 		approved artcount art_offset bseclev
 		buymore cid clbig clsmall cm_offset
 		commentlimit commentsort commentspill
-		del displaystatus
+		del displaystatus limit
 		filter_id hbtm height highlightthresh
 		issue last maillist max
 		maxcommentsize maximum_length maxstories
@@ -1674,7 +1674,7 @@ Hashref of cleaned-up data.
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
-		fieldname formkey commentstatus
+		fieldname formkey commentstatus filter
 		hcanswer mode op section thisname type
 	);
 

@@ -30,7 +30,7 @@ END %]
 
 [% PROCESS titlebar future=story.is_future %]
 
-<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]">[% topic.textname %]</A> | 
+<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</A> | 
 <B>Posted by [% author.nickname | strip_literal %] [% story.atstorytime %]</B><BR>
 
 [% IF constants.use_dept && story.dept %]

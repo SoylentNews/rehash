@@ -22,7 +22,7 @@ __template__
 [% x = 0 %]
 [% FOREACH topic = topics.sort("textname"); x = x + 1; "</tr><tr>" IF (x mod 6) == 1 %]
 	<td align="center">
-		<a href="[% gSkin.rootdir %]/search.pl?topic=[% topic.tid %]"><img
+		<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img
 			src="[% constants.imagedir %]/topics/[% topic.image %]"
 			alt="[% topic.textname %]" width="[% topic.width %]"
 			height="[% topic.height %]" border="0">[% IF user.is_admin %]</a>
