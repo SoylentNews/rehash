@@ -2244,17 +2244,16 @@ sub updateFormkeyVal {
 
 	my $formkey_quoted = $self->sqlQuote($formkey);
 
-	# I'm going to rewrite this using transactions
-	# it's too error prone as it is, and I'm unable
-	# to duplicate errors being reported on the site.
+	my $where = "value = 0";
+
+	# Before the transaction-based version was written, we
+	# did something like this, which Patrick noted seemed
+	# to cause difficult-to-track errors.
 	# my $speed_limit = $constants->{"${formname}_speed_limit"};
 	# my $maxposts = $constants->{"max_${formname}_allowed"} || 0;
 	# my $min = time() - $speed_limit;
-	# my $where = "idcount < $maxposts ";
-	# $where .= "AND last_ts <= $min ";
-	# $where .= "AND value = 0";
-
-	my $where .= "value = 0";
+	# $where .= " AND idcount < $maxposts";
+	# $where .= " AND last_ts <= $min";
 
 	# print STDERR "MIN $min MAXPOSTS $maxposts WHERE $where\n" if $constants->{DEBUG};
 
