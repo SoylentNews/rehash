@@ -369,3 +369,5 @@ INSERT INTO code_param (type, code, name) VALUES ('months',12,'December');
 
 DELETE FROM sections WHERE title='All Sections' OR section='';
 
+ALTER TABLE string_param CHANGE COLUMN name name VARCHAR(64) NOT NULL;
+
