@@ -200,6 +200,16 @@ sub doLogPid {
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.pid");
 
+	# Right now we use a fairly dumb method of deciding whether a copy
+	# of this program is already running.  If there's a pidfile, we
+	# don't start.  If we wanted to get more sophisticated, here would
+	# be a good place:  we should check the pid value inside the file
+	# and use Proc::ProcessTable to see whether there is a copy of this
+	# program already running with that pid.  Or maybe we should check
+	# whether there is *any* copy of this program running already.
+	# If zero, ignore the pidfile and start up;  if one, write an
+	# error and die;  if more than one, write a really nasty error...?
+	# XXX - Jamie 2002/03/19
 	unless ($nopid) {
 		if (-e $file) {
 			die "$file already exists; you will need " .
