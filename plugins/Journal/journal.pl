@@ -88,7 +88,18 @@ sub displayDefault {
 
 sub displayTop {
 	my ($form, $journal, $constants) = @_;
-	my $journals = $journal->top($constants->{journal_top});
+	my $journals;
+	$journals = $journal->top($constants->{journal_top});
+	slashDisplay('journaltop', {
+		journals => $journals,
+		url => '/journal.pl',
+	});
+	$journals = $journal->topFriends($constants->{journal_top});
+	slashDisplay('journaltop', {
+		journals => $journals,
+		url => '/journal.pl',
+	});
+	$journals = $journal->topRecent($constants->{journal_top});
 	slashDisplay('journaltop', {
 		journals => $journals,
 		url => '/journal.pl',
