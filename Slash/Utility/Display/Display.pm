@@ -450,6 +450,7 @@ sub linkStory {
 	return slashDisplay('linkStory', {
 		mode		=> $mode,
 		threshold	=> $threshold,
+		tid		=> $story_link->{tid},
 		sid		=> $story_link->{sid},
 		section		=> $story_link->{section},
 		text		=> $story_link->{'link'},
@@ -1059,11 +1060,12 @@ sub _hard_linkStory {
 	if ($dynamic) {
 	    my $link = qq[<A HREF="$constants->{rootdir}/article.pl?sid=$story_link->{sid}];
 	    $link .= "&amp;mode=$mode" if $mode;
+	    $link .= "&amp;tid=$story_link->{tid}" if $story_link->{tid};
 	    $link .= "&amp;threshold=$threshold" if defined($threshold);
 	    $link .= qq[">$story_link->{link}</A>];
 	    return $link;
 	} else {
-	    return qq[<A HREF="$constants->{rootdir}/$story_link->{section}/$story_link->{sid}.shtml">$story_link->{link}</A>];
+	    return qq[<A HREF="$constants->{rootdir}/$story_link->{section}/$story_link->{sid}.shtml?tid=$story_link->{tid}">$story_link->{link}</A>];
 	}
 }
 
