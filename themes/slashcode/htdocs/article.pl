@@ -63,8 +63,10 @@ sub main {
 
 		# set things up to use the <LINK> tag in the header
 		my($next, $prev) = ('', '');
-		$next = $reader->getStoryByTime('>', $story, $SECT) unless $story->{is_future};
-		$prev = $reader->getStoryByTime('<', $story, $SECT);
+		if ($constants->{use_prev_next_link}) {
+			$next = $reader->getStoryByTime('>', $story, $SECT) unless $story->{is_future};
+			$prev = $reader->getStoryByTime('<', $story, $SECT);
+		}
 
 		my $links = {
 			title	=> $title,
