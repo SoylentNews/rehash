@@ -233,6 +233,13 @@ Any of these three possible issues can be resolved at
 If you continue to post this comment, all moderations done to this discussion will
 be undone!  Are you sure you want to post?
 
+[% # NO DISCUSSION ID SPECIFIED
+CASE "no sid" %]
+[% PROCESS titlebar width="100%" title="No Discussion Specified" %]
+You did not specify a discussion ID. If you clicked on a link internal
+to [% constants.sitename %], this is a bug. If not, someone sent you
+to a silly invalid URL.
+
 [% CASE %]
 An unexpected error has occurred.<BR><B>[% value %]</B><BR>
 [% END %]

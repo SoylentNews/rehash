@@ -1198,7 +1198,11 @@ sub getTopicTree {
 	}
 	for my $tp_hr (@$topic_param) {
 		my($tid, $name, $value) = @{$tp_hr}{qw( tid name value )};
-		$tree_ref->{$tid}{$name} = $value if $tree_ref->{$tid} && !$tree_ref->{$tid}{$name};
+		if ($tree_ref->{$tid} && !$tree_ref->{$tid}{$name}) {
+			$tree_ref->{$tid}{$name} = $value;
+			$tree_ref->{$tid}{topic_param_keys} ||= [ ];
+			push @{ $tree_ref->{$tid}{topic_param_keys} }, $name;
+		}
 	}
 	for my $tid (keys %$tree_ref) {
 		next unless exists $tree_ref->{$tid}{child};
@@ -6632,6 +6636,10 @@ sub getCommentMostCommonReason {
 ########################################################
 sub getCommentReply {
 	my($self, $sid, $pid) = @_;
+
+	# If we're not replying to anything, we already know the answer.
+	return { } if !$pid;
+
 	my $sid_quoted = $self->sqlQuote($sid);
 	my $reply = $self->sqlSelectHashref(
 		"date,date as time,subject,comments.points as points,comments.tweak as tweak,

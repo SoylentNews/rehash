@@ -851,7 +851,12 @@ sub topicEdit {
 	my $topic_param = [];
 	if (!$form->{topicdelete}) {
 		if (!$form->{topicnew} && $form->{nexttid}) {
-			$topic = $slashdb->getTopicTree($form->{nexttid}, { no_cache => 1 });
+			my $tree = $slashdb->getTopicTree(undef, { no_cache => 1 });
+			$topic = $tree->{ $form->{nexttid} };
+			# We could get this by reading $topic->{topic_param_keys}
+			# but getTopicParamsForTid() works too.  For that matter,
+			# the topicEdit template could read it directly out of
+			# $topic, no need to create it separately... oh well :)
 			$topic_param = $slashdb->getTopicParamsForTid($form->{nexttid});
 		} else {
 			$topic = {};

@@ -403,9 +403,20 @@ sub editComment {
 	$form->{nosubscriberbonus} = $user->{is_subscriber} && $user->{nosubscriberbonus}
 						unless $form->{nosubscriberbonus_present};
 
+	# The sid param is only stripped down to A-Za-z0-9/._ by
+	# filter_params;  make sure it's numeric and exists.
+	my $sid = $form->{sid};
+	if ($sid) { $sid =~ /(\d+)/; $sid = $1 }
+	if (!$sid) {
+		# Need a discussion ID to reply to, or there's no point.
+		print getError('no sid');
+		return;
+	}
+
 	# Get the comment we may be responding to. Remember to turn off
 	# moderation elements for this instance of the comment.
-	my $reply = $slashdb->getCommentReply($form->{sid}, $form->{pid});
+	my $pid = $form->{pid} || 0; # this is guaranteed numeric, from filter_params
+	my $reply = $slashdb->getCommentReply($sid, $pid);
 
 	if (!$constants->{allow_anonymous} && $user->{is_anon}) {
 		print getError('no anonymous posting');
@@ -421,7 +432,7 @@ sub editComment {
 		$preview = previewForm(\$error_message) or $error_flag++;
 	}
 
-	if ($form->{pid} && !$form->{postersubj}) {
+	if ($pid && !$form->{postersubj}) {
 		$form->{postersubj} = decode_entities($reply->{subject});
 		$form->{postersubj} =~ s/^Re://i;
 		$form->{postersubj} =~ s/\s\s/ /g;
