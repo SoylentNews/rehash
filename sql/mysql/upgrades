@@ -718,14 +718,13 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks/',1,1);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,1);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,1);
+
 DELETE FROM vars WHERE name='m2_consensus_waitmult';
 INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitpow', '0.8', 'Positive real number, 0.2 to 5 is sensible. Between 0 and 1, older mods are chosen for M2 preferentially. Greater than 1, newer');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_45, Start of T_2_3_0_46
 
-#One more time!
+# One more time!
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% constants.rootdir %]/my/friends/',1,1);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans/',1,2);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes/',1,3);
@@ -734,5 +733,12 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friend
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,6);
 
 # Rebuild Zoo at this point
+
+# SLASHDOT LAST UPDATED HERE
+
 # FOUNDRIES LAST UPDATED HERE 9-12-02 Hey - it's been great 
 # working with all of you - good luck!
+# Best wishes!
+
+# End of T_2_3_0_46
+

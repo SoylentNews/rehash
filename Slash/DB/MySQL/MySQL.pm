@@ -666,11 +666,15 @@ sub getMetamodsForUserRaw {
 		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)");
 	$min_old = 0 if !$min_old;
 	$max_old = 0 if !$max_old;
-	my $min_new = $max_old+1;
+	my($min_new) = $self->sqlSelect("MIN(id)", "moderatorlog",
+		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY)");
 	my($max_new) = $self->sqlSelect("MAX(id)", "moderatorlog");
+	$min_new = 0 if !$min_new;
 	$max_new = 0 if !$max_new;
-	$min_new = $max_new if $min_new > $max_new;
+	my $min_mid = $max_old+1;
+	my $max_mid = $min_new-1;
 	my $old_range = $max_old-$min_old; $old_range = 1 if $old_range < 1;
+	my $mid_range = $max_mid-$min_mid; $mid_range = 1 if $mid_range < 1;
 	my $new_range = $max_new-$min_new; $new_range = 1 if $new_range < 1;
 
 	# Prepare the lists of ids and cids to exclude.
@@ -714,11 +718,18 @@ sub getMetamodsForUserRaw {
 		$mod_hr = $self->sqlSelectAllHashref(
 			"id",
 			"id, cid,
-			 m2count + $consensus * IF(
-				id BETWEEN $min_old AND $max_old,
-				POW((id-$min_old)/$old_range, $waitpow),
-				POW((id-$min_new)/$new_range, $waitpow) + 2
-			 ) + RAND() AS rank",
+			 m2count
+			 + $consensus * IF(
+				id BETWEEN $min_old AND $max_mid,
+				IF(
+					id BETWEEN $min_old and $max_old,
+					POW((id-$min_old)/$old_range, $waitpow),
+					POW((id-$min_mid)/$mid_range, $waitpow) + 2
+				),
+				POW((id-$min_new)/$new_range, $waitpow) + 4
+			 )
+			 + RAND()
+			 AS rank",
 			"moderatorlog",
 			"uid != $uid_q AND cuid != $uid_q
 			 AND m2status=0
