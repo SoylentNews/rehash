@@ -391,8 +391,11 @@ sub main {
 		$op = $user->{is_anon} ? 'default' : 'userinfo';
 	}
 
-	# Print the header and very top stuff on the page.
-	if ($op ne 'userinfo' && $op ne 'display') {
+	# Print the header and very top stuff on the page.  We have
+	# three ops that (may) end up routing into showInfo(), which
+	# needs to do some stuff before it calls header(), so for
+	# those three, don't bother.
+	if ($op !~ /^(userinfo|display|saveuseradmin|admin)$/) {
 		my $data = {
 			adminmenu => $ops->{$op}{adminmenu} || 'admin',
 			tab_selected => $ops->{$op}{tab_selected},
@@ -945,7 +948,7 @@ sub showInfo {
 		});
 
 		
-		$admin_block = getUserAdmin($netid, $fieldkey, 1, 0) if $admin_flag;
+		$admin_block = getUserAdmin($netid, $fieldkey, 0) if $admin_flag;
 
 		if ($form->{fieldname}) {
 			if ($form->{fieldname} eq 'ipid') {
@@ -972,7 +975,7 @@ sub showInfo {
 		}
 
 	} else {
-		$admin_block = getUserAdmin($id, $fieldkey, 1, 1) if $admin_flag;
+		$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
 		$commentcount =
 			$slashdb->countCommentsByUID($requested_user->{uid});
@@ -1197,22 +1200,30 @@ sub editKey {
 }
 
 #################################################################
+# We arrive here without header() having been called.  Some of the
+# functions we dispatch to call it, some do not.
 sub adminDispatch {
 	my($hr) = @_;
 	my $form = getCurrentForm();
 	my $op = $hr->{op} || $form->{op};
 
 	if ($op eq 'authoredit') {
-		$hr->{uid} = $form->{authoruid};
+		# editUser() does not call header(), so we DO need to.
+		header(getMessage('user_header'), '', {});
 		editUser($hr);
 
 	} elsif ($form->{saveuseradmin}) {
+		# saveUserAdmin() tail-calls showInfo(), which calls
+		# header(), so we need to NOT.
 		saveUserAdmin($hr);
 
 	} elsif ($form->{userinfo}) {
+		# showInfo() calls header(), so we need to NOT.
 		showInfo($hr);
 
 	} elsif ($form->{userfield}) {
+		# none of these calls header(), so we DO need to.
+		header(getMessage('user_header'), '', {});
 		if ($form->{edituser}) {
 			editUser($hr);
 
@@ -1227,6 +1238,7 @@ sub adminDispatch {
 		}
 
 	} else {
+		# showInfo() calls header(), so we need to NOT.
 		showInfo($hr);
 	}
 }
@@ -1326,8 +1338,11 @@ sub changePasswd {
 	my $title;
 	my $suadmin_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 
+	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
+	my $admin_block = '';
+
 	my $id = '';
-	if ($user->{is_admin}) {
+	if ($admin_flag) {
 		if ($form->{userfield}) {
 			$id ||= $form->{userfield};
 			if ($id =~ /^\d+$/) {
@@ -1344,6 +1359,8 @@ sub changePasswd {
 		$user_edit = $user;
 	}
 
+	$admin_block = getUserAdmin($id, 'uid', 1) if $admin_flag;
+
 	# print getMessage('note', { note => $form->{note}}) if $form->{note};
 
 	$title = getTitle('changePasswd_title', { user_edit => $user_edit });
@@ -1356,30 +1373,11 @@ sub changePasswd {
 		admin_flag		=> $suadmin_flag,
 		title			=> $title,
 		session 		=> $session_select,
+		admin_block		=> $admin_block,
 	});
 }
 
 #################################################################
-#sub _editUser_get_target_user {
-#	my($hr) = @_;
-#	my $slashdb = getCurrentDB();
-#	my $user = getCurrentUser();
-#	my $form = getCurrentForm();
-#	my $id = $hr->{uid} || '';
-#	my $user_edit;
-#	if ($form->{userfield}) {
-#		$id = $form->{userfield};
-#		my $uid = $id;
-#		if ($id !~ /^\d+$/) {
-#			$uid = $slashdb->getUserUID($id);
-#		}
-#		$user_edit = $slashdb->getUser($uid);
-#	} else {
-#		$user_edit = $id eq '' ? $user : $slashdb->getUser($id);
-#	}
-#	return $user_edit;
-#}
-
 sub editUser {
 	my($hr) = @_;
 	my $id = $hr->{uid} || '';
@@ -1419,7 +1417,7 @@ sub editUser {
 	}
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
 
-	$admin_block = getUserAdmin($id, $fieldkey, 1, 1) if $admin_flag;
+	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 	$user_edit->{homepage} ||= "http://";
 
 	# Remove domain tags, they'll be added back in, in saveUser.
@@ -1478,7 +1476,7 @@ sub editHome {
 	}
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
-	$admin_block = getUserAdmin($id, $fieldkey, 1, 1) if $admin_flag;
+	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
 	$title = getTitle('editHome_title');
 
@@ -1590,7 +1588,7 @@ sub editComm {
 			$user_edit->{new_user_percent} || 100, 1, 1);
 
 	return if isAnon($user_edit->{uid}) && ! $admin_flag;
-	$admin_block = getUserAdmin($id, $fieldkey, 1, 1) if $admin_flag;
+	$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
 	$title = getTitle('editComm_title');
 
@@ -1660,13 +1658,6 @@ sub saveUserAdmin {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
-
-	print createMenu("users", {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	$hr->{tab_selected_1} || "",
-	});
 
 	my($user_edits_table, $user_edit) = ({}, {});
 	my $save_success = 0;
@@ -1803,9 +1794,9 @@ sub saveUserAdmin {
 		}
 	}
 
-	print getMessage('note', { note => $note }) if defined $note;
-
-	showInfo({ uid => $id });
+	my $data = { uid => $id };
+	$data->{note} = $note if defined $note;
+	showInfo($data);
 }
 
 #################################################################
@@ -2035,13 +2026,6 @@ sub saveComm {
 	my $constants = getCurrentStatic();
 	my($uid, $user_fakeemail);
 
-	print createMenu("users", {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	$hr->{tab_selected_1} || "",
-	});
-
 	if ($user->{is_admin}) {
 		$uid = $form->{uid} || $user->{uid};
 	} else {
@@ -2145,13 +2129,6 @@ sub saveHome {
 	my $form = getCurrentForm();
 	my $uid;
 	my($extid, $exaid, $exsect) = '';
-
-	print createMenu("users", {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	$hr->{tab_selected_1} || "",
-	});
 
 	if ($user->{is_admin}) {
 		$uid = $form->{uid} || $user->{uid} ;
@@ -2297,13 +2274,6 @@ sub saveMiscOpts {
 	my $constants = getCurrentStatic();
 
 	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
-
-	print createMenu("users", {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	$hr->{tab_selected_1} || "",
-	});
 
 	my $edit_user = $slashdb->getUser($user->{uid});
 	my %opts_ok_hash = ( );
@@ -2493,7 +2463,7 @@ sub getTitle {
 # getUserAdmin - returns a block of text
 # containing fields for admin users
 sub getUserAdmin {
-	my($id, $field, $form_flag, $seclev_field) = @_;
+	my($id, $field, $seclev_field) = @_;
 
 	my $slashdb	= getCurrentDB();
 	my $user	= getCurrentUser();
@@ -2619,7 +2589,6 @@ sub getUserAdmin {
 		seclev_field		=> $seclev_field,
 		checked 		=> $checked,
 		topabusers		=> $topabusers,
-		form_flag		=> $form_flag,
 		readonly		=> $readonly,
 		thresh_select		=> $thresh_select,
 		readonly_reasons 	=> $readonly_reasons,

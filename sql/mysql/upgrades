@@ -824,8 +824,6 @@ INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtua
 INSERT INTO vars (name, value, description) VALUES ('search_text_length','80','This will tell search how many characters should be returned for text bodies in searches (think introtext for stories and article for journals).');
 INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method to use to weight scores for search returns (and to narrow down possible matches)');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_3_0_50, Start of T_2_3_0_51
 
 # If you installed your theme and plugins as symlinks, uncomment the first
@@ -949,6 +947,8 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 
 UPDATE menus SET label=CONCAT('~', label, ' ([% user.uid %])') WHERE menu='users' AND sel_label='me';
 
+# End of T_2_3_0_52, Start of T_2_3_0_53
+
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 
@@ -968,4 +968,10 @@ INSERT INTO vars (name, value, description) VALUES ('m2_range_offset','0.9','Off
 INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_bodytext','0.5','The min M1 karma');
 INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_introtext','1','The min M1 karma');
 INSERT INTO vars (name, value, description) VALUES ('uncommon_weight_title','8','The min M1 karma');
+
+# End of T_2_3_0_53, Start of T_2_3_0_54
+# End of T_2_3_0_54, Start of T_2_3_0_55
+# End of T_2_3_0_55, Start of T_2_3_0_56
+
+# SLASHDOT LAST UPDATED HERE
 

@@ -19,6 +19,8 @@ changePasswd
 __template__
 [% PROCESS prefs_titlebar tab_selected='password' %]
 
+[% admin_block %]
+
 <TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
 	<TR>
 		<TD>
