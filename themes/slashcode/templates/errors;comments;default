@@ -107,12 +107,13 @@ CASE "comments post limit daily" %]
 <P>[% constants.sitename %] only allows
 [% IF user.is_anon; "anonymous users";
 ELSE; "a user with your karma"; END %]
-to post [% limit %] times per day. You've already shared your thoughts
+to post [% limit %] times per day (more or less, depending on
+moderation).
+[% IF user.is_anon; "A user from your IP has already shared his or her thoughts";
+ELSE; "You've already shared your thoughts"; END %]
 with us that many times. Take a breather, and come back and see us in
 24 hours or so.
 <P>If you think this is unfair, please email
-[% # Who? The special adminmail contact for moderation, for now; %]
-[% # later just the main adminmail contact. XXX - Jamie 2002/07/12 %]
 [% IF constants.adminmail_mod; constants.adminmail_mod;
 ELSE; constants.adminmail; END %]
 with your

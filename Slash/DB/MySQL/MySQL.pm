@@ -2989,31 +2989,47 @@ sub checkReadOnly {
 }
 
 ##################################################################
+# For backwards compatibility, returns just the number of comments if
+# called in scalar context, or a list of (number of comments, sum of
+# their points) in list context.
 sub getNumCommPostedAnonByIPID {
 	my($self, $ipid, $hours) = @_;
 	$ipid = $self->sqlQuote($ipid);
 	$hours ||= 24;
 	my $ac_uid = $self->sqlQuote(getCurrentStatic("anonymous_coward_uid"));
-	my $num = $self->sqlCount(
+	my($num_comm, $sum_points) = $self->sqlSelect(
+		"COUNT(*) AS count, SUM(points) AS sum",
 		"comments",
 		"ipid=$ipid
 		 AND uid=$ac_uid
 		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)"
 	);
-	return $num;
+	if (wantarray()) {
+		return ($num_comm, $sum_points);
+	} else {
+		return $num_comm;
+	}
 }
 
 ##################################################################
+# For backwards compatibility, returns just the number of comments if
+# called in scalar context, or a list of (number of comments, sum of
+# their points) in list context.
 sub getNumCommPostedByUID {
 	my($self, $uid, $hours) = @_;
 	$uid = $self->sqlQuote($uid);
 	$hours ||= 24;
-	my $num = $self->sqlCount(
+	my($num_comm, $sum_points) = $self->sqlSelect(
+		"COUNT(*) AS count, SUM(points) AS sum",
 		"comments",
 		"uid=$uid
 		 AND date >= DATE_SUB(NOW(), INTERVAL $hours HOUR)"
 	);
-	return $num;
+	if (wantarray()) {
+		return ($num_comm, $sum_points);
+	} else {
+		return $num_comm;
+	}
 }
 
 ##################################################################
