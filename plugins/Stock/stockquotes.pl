@@ -59,7 +59,7 @@ $task{$me}{code} = sub {
 			$stock->{year_hi}	= sprintf("%.1f", $2);
 		}
 		if ($stockfetch{$sym,"cap"} ne ""
-			and $stockfetch{$sym,"cap"} =~ /([\d.]+)([BM])?/) {
+			and $stockfetch{$sym,"cap"} =~ /([\d.]+)([KMB])?/) {
 			$stock->{cap}		= sprintf("%.0f$2", $1);
 		} else {
 			$stock->{cap}		= "<i>n/a</i>";
