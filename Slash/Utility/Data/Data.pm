@@ -2874,8 +2874,8 @@ sub createStoryTopicData {
 
 	# Probably should not be changing stid, so set up @tids.
 	my @tids = ( );
-	if ($form->{_multi}{stid} && $form->{_multi}{stid} eq 'ARRAY') {
-		@tids = @{$form->{_multi}{stid}};
+	if ($form->{_multi}{stid} && ref($form->{_multi}{stid}) eq 'ARRAY') {
+		@tids = grep { $_ } @{$form->{_multi}{stid}};
 	} elsif ($form->{stid}) {
 		push @tids, $form->{stid};
 	}
