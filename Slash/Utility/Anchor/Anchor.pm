@@ -316,26 +316,125 @@ sub ssiFoot {
 }
 
 ########################################################
+sub prepAds {
+
+	$ENV{AD_BANNER_1} = q{<font size="+2" color="#ffcccc">this is ad banner 1</font>};
+	$ENV{AD_BANNER_6} = q{<font size="+2" color="#ffcccc">this is ad banner 6</font>};
+
+print STDERR "prepAds $$ SCRIPT_NAME '$ENV{SCRIPT_NAME}'"
+	. " AD_BANNER_1 '$ENV{AD_BANNER_1}' AD_BANNER_6 '$ENV{AD_BANNER_6}'\n";
+
+	# If invoked from a slashd task or from the command line in general,
+	# just skip it since $user->{state}{ad} won't be used anyway, this
+	# would just be a waste of time.  Store something in the field so
+	# prepAds() doesn't get called again.
+	my $user = getCurrentUser();
+	if (!$ENV{SCRIPT_NAME}) {
+		$user->{state}{ad} = { };
+		return;
+	}
+
+	my $constants = getCurrentStatic();
+	my $ad_messaging_num = $constants->{ad_messaging_num} || 6;
+	my $ad_max = $constants->{ad_max} || $ad_messaging_num;
+	my $ad_messaging_prob = $constants->{ad_messaging_prob} || 0.5;
+
+	my $adless = 0;
+	if ($constants->{subscribe}) {
+		my $subscribe = getObject('Slash::Subscribe');
+		$adless = 1 if $subscribe && $subscribe->adlessPage();
+	}
+
+	# $ENV{SCRIPT_NAME} is e.g. 1) "/index.pl", 2) "/article.pl",
+	# 3) "/slashhead.inc", 4) "/articles/slashhead.inc",
+	# 5) "/index.shtml", or 6) "/12/34/56/7890.shtml".  But prepAds()
+	# will not be called for 5 or 6 because it will have already been
+	# invoked by the ad header in 3 or 4 respectively.  And the
+	# messaging ads are only relevant to 2, 4 and 6.  So we need to
+	# be sure that messaging ads can be set up in {state}{ads} in
+	# cases 2 or 4.  And since in case 4 we can't assume that the DB
+	# is up, we have to treat any SCRIPT_NAME in the format
+	# /foo/slashhead.inc as if "foo" is a valid section (so let's not
+	# create /faq/slashhead.inc or there is mild potential for ad
+	# confusion).  And cases 2 thru 6 depend on ssihead;misc;default
+	# keeping its <!--#include--> line the same.
+	my $use_messaging = 0;
+	$use_messaging = 1 if !$adless
+		&& $ENV{"AD_BANNER_$ad_messaging_num"}
+		&& rand(1) < $ad_messaging_prob
+		&& (
+			(     $ENV{SCRIPT_NAME}			# case 2
+			   && $ENV{SCRIPT_NAME} =~ m{\barticle\.pl\b}
+			) || (
+			      $ENV{SCRIPT_NAME}			# case 4
+			   && $ENV{SCRIPT_NAME} =~ m{/(\w+)/slashhead\.inc$}
+			)
+		);
+	# If it is desirable to only display messaging ads on article.pl
+	# stories that have bodytext, here would be the place to do that
+	# test.  It should just be a simple case of testing
+	# length(getStory($form->{sid}, "bodytext")) since I believe
+	# createCurrentForm() must always be called before getAds()
+	# (haven't checked this).  That's not a cheap test since it will
+	# do a decent-sized DB hit but that DB hit would have to be done
+	# anyway and doing it here just gets it into the cache a little
+	# earlier.  But it's not that easy.  Right now we can just dump
+	# the <!--#perl--> line into every relevant place in .shtml files
+	# (and .inc files) but if we start doing this, since getStory()
+	# can't be called when the DB is down and shouldn't be called on
+	# an .shtml page, dispStory;misc;default will have to know to
+	# check [% story.bodytext %] and not call Slash.getAd()!
+
+	for my $num (1..$ad_max) {
+		my $use_this_ad = 1;
+		# If we're showing a messaging ad, no other ads get shown.
+		$use_this_ad = 0 if $use_messaging && $num != $ad_messaging_num;
+		# If we're not showing a messaging ad, it doesn't get shown.
+		$use_this_ad = 0 if !$use_messaging && $num == $ad_messaging_num;
+		# If there's no ad here, it doesn't get shown obviously.
+		$use_this_ad = 0 if !$ENV{"AD_BANNER_$num"};
+		if ($use_this_ad) {
+			$user->{state}{ad}{$num} = $ENV{"AD_BANNER_$num"};
+		} elsif ($num == 1 && $ENV{AD_PAGECOUNTER}) {
+			$user->{state}{ad}{$num} = $ENV{AD_PAGECOUNTER};
+		} else {
+			$user->{state}{ad}{$num} = "\n<!-- no ad $num -->\n";
+		}
+	}
+use Data::Dumper;
+print STDERR "prepAds state: " . Dumper($user->{state}{ad});
+}
+
+########################################################
 sub getAd {
 	my($num, $log) = @_;
 	$num ||= 1;
+	my $user = getCurrentUser();
 
-	my $constants = getCurrentStatic();
-	if ($constants->{subscribe}) {
-		my $subscribe = getObject('Slash::Subscribe');
-		if ($subscribe and $subscribe->adlessPage()) {
-			return "\n<!-- subscriber, no ad -->\n";
-		}
-	}
+use Data::Dumper;
+print STDERR "getAd $$ num '$num' log '$log' SCRIPT_NAME '$ENV{SCRIPT_NAME}' user->{state}{ad} '"
+	. (defined($user->{state}{ad}) ? Dumper($user->{state}{ad}) : "(undef)")
+	. "' AD_BANNER_1 '$ENV{AD_BANNER_1}' AD_BANNER_6 '$ENV{AD_BANNER_6}'\n";
 
 	unless ($ENV{SCRIPT_NAME}) {
+		# When run from a slashd task (or from the command line in
+		# general), don't generate the actual ad, just generate some
+		# shtml code which *will* generate the actual ad when it's
+		# executed later.
 		$log = $log ? " Slash::createLog('$log');" : "";
+print STDERR "getAd $$ return perl sub\n";
 		return <<EOT;
 <!--#perl sub="sub { use Slash;$log print Slash::getAd($num); }" -->
 EOT
 	}
 
-	return $ENV{"AD_BANNER_$num"};
+	# If this is the first time that getAd() is being called, we have
+	# to set up all the ad data at once before we can return anything.
+	prepAds() if !defined($user->{state}{ad});
+
+print STDERR "getAd $$ return '$user->{state}{ad}{$num}'\n";
+
+	return $user->{state}{ad}{$num};
 }
 
 

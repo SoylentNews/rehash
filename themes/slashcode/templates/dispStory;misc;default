@@ -80,6 +80,7 @@ END %]
 		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+				[% IF constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 				[% story.bodytext %]
 			</TD></TR></TABLE>
 		</TD>
