@@ -94,11 +94,13 @@ sub getDaddyList {
 	}
 
 	xmlDisplay(rss => {
-		channel => {
+		channel			=> {
 			title	=> "$constants->{sitename} shifts for $when",
 			'link'	=> $link,
 		},
-		items	=> \@items
+		items			=> \@items,
+		rdfitemdesc		=> 1,
+		rdfitemdesc_html	=> 1,
 	});
 }
 
