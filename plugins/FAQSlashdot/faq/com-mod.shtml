@@ -878,6 +878,48 @@ default comment score.  Or disable it outright.  It's really up to you.
   <br>
   <i><font size=-1>Last Modified: 4/22/03</font></i> 
 
+
+<a name="cm2700"></a> 
+<h2>Does the Karma Bonus Disappear On Highly Moderated Comments?</h2>
+<P>You might have noticed that the karma bonus seems to disappear from
+comments that are heavily moderated.  To be more accurate, when a comment
+that was posted with the karma bonus has been moderated down twice, the
+karma bonus is removed from the score's total.
+
+<P>There are two major reasons for
+this.  The first is more technical: using the default settings for the Karma
+Bonus, a post moderated down twice would be at score:0. If this post is
+in fact a bad post, moderators will now continue to moderate down this
+score:0 post, but the Karma Bonus will prevent the comment from ever
+falling to negative one. The bonus is not intended to prevent bad comments
+from being moderated to -1.
+
+<P>The second major
+reason is more social.  The karma bonus is designed to accelerate the moderation
+system.  The bonus is given to trusted users who have a history of positive
+contribution.  Essentially, the karma bonus lets the user moderate their own
+comment, nudging it from Score:1 to 2.  Normal moderation has the balance of
+meta moderation, but since the karma bonus is not subject to normal M2, we
+decided 2 moderators could counteract the bonus.
+
+<P>Please note that when the karma bonus is removed, no karma penalty is assessed
+to the poster.  This has been in the code since early 2003 and has been working
+quite well.
+
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i> 
+  <br>
+  <i><font size=-1>Last Modified: 6/04/03</font></i> 
+
+
+
+
+
+
+
+
+
+
 <p>
 <hr>
 <table>
