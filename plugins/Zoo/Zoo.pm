@@ -36,6 +36,27 @@ sub new {
 	return $self;
 }
 
+# Get the details for relationships
+sub getRelationships {
+	my ($self, $uid, $type) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $people = $slashdb->getUser($uid, 'people');
+	my @people;
+	for (keys %{$people->{$type}}) {
+		push @people, $_;
+	}
+	return [qw()] unless @people;
+	
+	my $rel = $self->sqlSelectAll(
+		'uid, nickname, journal_last_entry_date',
+		'users',
+		" uid IN (" . join(",", @people) .") ",
+		" ORDER BY nickname "
+	);
+	return $rel;
+}
+
 sub getFriends {
 	_get(@_, "friend");
 }

@@ -128,7 +128,8 @@ sub list {
 
 	_printHead("mainhead");
 
-	my $friends = $zoo->getFriends($user->{uid});
+	#my $friends = $zoo->getFriends($user->{uid});
+	my $friends = $zoo->getRelationships($user->{uid}, FRIEND);
 	if (@$friends) {
 		slashDisplay('plainlist', { friends => $friends });
 	} else {
@@ -149,7 +150,8 @@ sub friends {
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $friends = $zoo->getFriends($uid); 
+	#my $friends = $zoo->getFriends($uid); 
+	my $friends = $zoo->getRelationships($user->{uid}, FRIEND);
 		
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'friends');
@@ -185,7 +187,8 @@ sub fof {
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $friends = $zoo->getFof($uid); 
+	#my $friends = $zoo->getFof($uid); 
+	my $friends = $zoo->getRelationships($user->{uid}, FOF);
 		
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'fof');
@@ -221,7 +224,8 @@ sub enof {
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $friends = $zoo->getEof($uid); 
+	#my $friends = $zoo->getEof($uid); 
+	my $friends = $zoo->getRelationships($user->{uid}, EOF);
 		
 	if ($form->{content_type} eq 'rss') {
 		_rss($friends, $nick, 'friends');
@@ -257,7 +261,8 @@ sub foes {
 	}
 
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $foes = $zoo->getFoes($uid); 
+	#my $foes = $zoo->getFoes($uid); 
+	my $foes = $zoo->getRelationships($user->{uid}, FOE);
 
 	if ($form->{content_type} eq 'rss') {
 		_rss($foes, $nick, 'foes');
@@ -292,7 +297,8 @@ sub fans {
 		$nick = $user->{nick};
 	}
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $fans = $zoo->getFans($uid);
+	#my $fans = $zoo->getFans($uid);
+	my $fans = $zoo->getRelationships($user->{uid}, FAN);
 
 	if ($form->{content_type} eq 'rss') {
 		_rss($fans, $nick, 'fans');
@@ -326,7 +332,8 @@ sub freaks {
 		$nick = $user->{nick};
 	}
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	my $freaks = $zoo->getFreaks($uid);
+	#my $freaks = $zoo->getFreaks($uid);
+	my $freaks = $zoo->getRelationships($user->{uid}, FREAK);
 
 	if ($form->{content_type} eq 'rss') {
 		_rss($freaks, $nick, 'freaks');
