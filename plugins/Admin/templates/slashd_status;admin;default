@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+* tasks - returned value from getSlashdStatus
+__title__
+admin interface slashd_status Template
+__page__
+admin
+__lang__
+en_US
+__name__
+slashd_status
+__template__
+[% PROCESS titlebar title="Slashd Status" width='100%' %]
+<table>
+	<tr>
+		<th>Task</th>
+		<th>&nbsp;</th>
+		<th>Last Completed</th>
+		<th>Duration</th>
+		<th>Summary</th>
+		<td>Next</th>
+	</tr>
+
+	[% FOREACH task = tasks.keys.sort %]
+	<tr>
+		<td>[% task %]</td>
+		<td>[% IF tasks.$task.in_progress; "&middot;"; ELSE; "&nbsp;"; END %]</td>
+		<td>[% tasks.$task.last_completed %]</td>
+		<td>[% tasks.$task.duration %]</td>
+		<td>[% tasks.$task.summary %]</td>
+		<td>[% tasks.$task.next_begin %]</td>
+	</tr>
+	[% END %]
+
+</table>
+	
+__seclev__
+100

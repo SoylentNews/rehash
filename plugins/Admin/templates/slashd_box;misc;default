@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+Info about what slashd has just done and what it's doing next
+
+* tasks_last = array ref of hashrefs, previous 3 completed tasks
+* tasks_inprogress = array ref of hashrefs, tasks currently executing
+	(probably empty)
+* tasks_next = array ref of hashrefs, next 3 tasks to do
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+slashd_box
+__template__
+[% USE Slash %]
+	[% FOREACH task = tasks_next %]
+		[% task.task %] [% task.next_begin_hhmm %]<BR>
+	[% END %]
+[% IF tasks_inprogress.size > 0 %]
+	[% FOREACH task = tasks_inprogress %]
+		<B>[% task.task %]</B> <i>in progress</i><BR>
+	[% END %]
+[% ELSE %]
+	<b>no tasks in progress</b>
+[% END %]
+	[% FOREACH task = tasks_last %]
+		[% task.task %] [% task.last_completed_hhmm %]<BR>
+		[% IF task.summary_trunc %]
+			&nbsp;&nbsp;&nbsp;[% task.summary_trunc %]<BR>
+		[% END %]
+	[% END %]
+__seclev__
+10000
