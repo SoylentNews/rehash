@@ -5708,6 +5708,7 @@ sub getAccessList {
 ##################################################################
 sub countSubmissionsFromUID {
 	my($self, $uid, $options) = @_;
+	return 0 if !$uid || isAnon($uid);
 	my $constants = getCurrentStatic();
 	my $days_back = $options->{days_back} || $constants->{submission_count_days};
 	my $uid_q = $self->sqlQuote($uid);
@@ -5718,6 +5719,7 @@ sub countSubmissionsFromUID {
 
 sub countSubmissionsWithEmaildomain {
 	my($self, $emaildomain, $options) = @_;
+	return 0 if !$emaildomain;
 	my $constants = getCurrentStatic();
 	my $days_back = $options->{days_back} || $constants->{submission_count_days};
 	my $emaildomain_q = $self->sqlQuote($emaildomain);
