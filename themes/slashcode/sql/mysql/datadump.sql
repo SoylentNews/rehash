@@ -153,8 +153,8 @@ INSERT INTO pollanswers (qid, aid, answer, votes) VALUES (2,5,'manic depressive'
 # Dumping data for table 'pollquestions'
 #
 
-INSERT INTO pollquestions (qid, question, voters, date, discussion, uid, section) VALUES (1, 'What flavor of ice cream?', 5, '2000-01-16 19:11:10', 3, 2, 'index');
-INSERT INTO pollquestions (qid, question, voters, date, discussion, uid, section) VALUES (2, 'Are you happy?', 7, '2000-01-19 16:23:00', 4, 2, 'features');
+INSERT INTO pollquestions (qid, question, voters, date, discussion, uid) VALUES (1, 'What flavor of ice cream?', 5, '2000-01-16 19:11:10', 3, 2);
+INSERT INTO pollquestions (qid, question, voters, date, discussion, uid) VALUES (2, 'Are you happy?', 7, '2000-01-19 16:23:00', 4, 2);
 
 #
 # Dumping data for table 'pollvoters'
