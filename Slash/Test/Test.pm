@@ -213,7 +213,7 @@ sub Display {
 	($template, my($data)) = _getTemplate($template);
 	$data = { %$data, Nocomm => 1, Return => $return };
 
-	slashDisplay($template, $hashref, { Nocomm => 1, Return => $return });
+	slashDisplay($template, $hashref, $data);
 }
 
 #========================================================================
@@ -258,6 +258,7 @@ sub _getTemplate {
 	} elsif ($template =~ /^(\w+);(\w+);(\w+)$/) {
 		($template, $page, $section) = ($1, $2, $3)
 	}
+print STDERR "_gT template='$template' page='$page' section='$section'\n";
 
 	$data->{Page}    = $page if $page;
 	$data->{Section} = $section if $section;
