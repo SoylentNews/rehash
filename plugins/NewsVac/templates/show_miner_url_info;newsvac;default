@@ -11,11 +11,40 @@ en_US
 __name__
 show_miner_url_info
 __template__
-[% # show_miner_url_info %]
-	<p><font size="+1"><b>URL: <a href="[% url %]" target="_new">[% url %]</a></b></font><br>
-	<tt>Original length: [% orig_length %] chars: [% orig_start %] <i>to</i> [% orig_end %]
-	<br>The pre- trimmed [% pre_trimmed_chars %] chars: [% trim_pre_start %] <i>to</i> [% trim_pre_end %]
-	<br>The post trimmed [% post_trimmed_chars %] chars: [% trim_post_start %] <i>to</i> [% trim_post_end %]</tt>
+[% 
+# Rather than use spaces, to align (which rarely works), we'll just use leading
+# zeros.
+num_sizes=[
+	orig_length.length, 
+	pre_trimmed_chars.length, 
+	post_trimmed_chars.length
+];
+nbsp='0';
+maxsize=num_sizes.highval;
+-%]
+	<p><font size="+1"><b>URL: <a href="[% url %]" target="_new">[% url 
+	-%]</a></b></font><br>
+	<table width="90%" border=0 cellspacing=0>
+	<tr align=left>
+		<td align=right>Original length:</td>
+		<td><tt>[%	offset=maxsize - orig_length.length;
+				IF offset; nbsp.repeat(offset); END;
+				orig_length -%] chars</tt></td>
+		<td>[% orig_start %] <i>..to..</i> [% orig_end %]</td>
+	</tr><tr align=left>
+		<td align=right>Pre-trimmed:</td>
+		<td><tt>[%	offset=maxsize - pre_trimmed_chars.length;
+				IF offset; nbsp.repeat(offset); END;
+				pre_trimmed_chars -%] chars</tt></td>
+		<td>[% trim_pre_start %] <i>..to..</i> [% trim_pre_end %]</td>
+	</tr><tr align=left>
+		<td align=right>Post-trimmed:</td>
+		<td><tt>[%	offset=maxsize - post_trimmed_chars.length;
+				IF offset; nbsp.repeat(offset); END;
+				post_trimmed_chars -%] chars</tt></td>
+		<td>[% trim_post_start %] <i>..to..</i> [% trim_post_end %]</td>
+	</tr>
+	</table>
 
 	<pre>[% tags.size %] '&lt;a href' tags in remaining text:
 

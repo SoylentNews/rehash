@@ -1531,7 +1531,7 @@ sub process_urls_and_ids {
 		success	=> $update_info{is_success},
 		url	=> $url,
 		url_id	=> $url_id,
-	})) if $self->debug > 0;
+	})) if $self->{debug} > 0;
 
 	if ($update_info{is_success}) {
 		$self->errLog(getData('update_content_length', {
@@ -4056,7 +4056,7 @@ Foooooooo.
 sub getMinerURLIds {
 	my($self, $miner_id) = @_;
 
-	my $returnable = $self->sqlSelectCollArrayref(
+	my $returnable = $self->sqlSelectColArrayref(
 		'url_id',
 		'url_info',
 		'miner_id=' . $self->sqlQuote($miner_id)

@@ -36,7 +36,11 @@ NewsVac returned the following error when attempting to obtain a lock:
 "[% error_message %]"
 
 [% CASE "timing_dump" -%]
-[% timestamp %] Timing Dump
+[% title = BLOCK %][% timestamp %] Timing Dump[% END -%]
+[% title %]
+[% repeat('-', title.size) %]
+[% IF durations.size -%]
+[% timestamp %]
 [% FOR d=durations -%]
 [% d.0; # Command
 	FOR c=d.1 -%]
@@ -48,6 +52,9 @@ NewsVac returned the following error when attempting to obtain a lock:
 
 
 [% END %]
+[% ELSE -%]
+No times stored.
+[% END -%]
 
 [% CASE "add_url_noadderr" -%]
 [% DEFAULT reason="empty" -%]
@@ -130,13 +137,13 @@ Deleted the following REL IDs:
 
 [% CASE 'add_nuggets_return_ids_desturlids' -%]
 add_nuggets_return_ids()
-[% idxtop=dest_url_ids.last; FOR index = [0..idxtop] -%]
+[% idxtop=dest_url_ids.max; FOR index = [0..idxtop] -%]
 	Dest ID #[% dest_url_ids.$index %] -> [% dest_urls.$index %]
 [% END %]
 
 [% CASE 'add_nuggets_return_ids_nugurlids' -%]
 add_nuggets_return_ids()
-[% idxtop=nugget_url_ids.last; FOR index = [0..idxtop] -%]
+[% idxtop=nugget_url_ids.max; FOR index = [0..idxtop] -%]
 	Nugget ID #[% nugget_url_ids.$index %] -> [% nugget_urls.$index %]
 [% END %]
 
@@ -153,7 +160,7 @@ Will not add nugget rel because one or more components are empty:
 
 [% CASE "process_urls" -%]
 Processing URLs:
-[% idxtop=urls.last; FOR index=[0..idxtop] -%]
+[% idxtop=urls.max; FOR index=[0..idxtop] -%]
 	[% index %]. [% IF url_ids.$index %]#[% url_ids.$index %][% ELSE 
 -%]<MISSING>[% END %] - [% IF urls.$index %][% urls.$index %][% ELSE
 -%]<MISSING>[% END %]
@@ -161,7 +168,7 @@ Processing URLs:
 
 [% CASE "process_url_ids" -%]
 Processing URL IDs:
-[% idxtop=url_ids.last; FOR index=[0..idxtop] -%]
+[% idxtop=url_ids.max; FOR index=[0..idxtop] -%]
 	[% index %]. [% IF url_ids.$index %]#[% url_ids.$index %][% ELSE
 -%]<MISSING>[% END %] - [% IF urls.$index %][% urls.$index %][% ELSE
 -%]<MISSING>[% END %]
@@ -290,13 +297,13 @@ Message Body Contents
 -- trim_body: the_reg [% type %] - '[% the_reg %] for Miner ID #[% miner_id %]
 
 [% CASE "trim_body_bothpostdefined" -%]
--- trim_body: Both post_text and post_regex defined for Miner ID #[% miner_id
--%]
+-- trim_body: Both post_text and post_regex defined for Miner ID #[%
+miner_id -%]
 
 
 [% CASE "trim_body" -%]
 -- trim_body: Miner ID #[% miner_id %]
-   Body length was [% orig_body_length %] and is now [% body_length -%]
+   Body length was [% orig_body_length %] and is now [% body_length %]
 
 [% CASE "parse_miner_info" -%]
 -- parse_miner: URL - [% url %] (#[% url_id %])
