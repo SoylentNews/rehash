@@ -243,9 +243,10 @@ sub sqlConnect {
 # Useful SQL Wrapper Functions
 ########################################################
 sub sqlSelectMany {
-	my($self, $select, $from, $where, $other) = @_;
+	my($self, $select, $from, $where, $other, $options) = @_;
 
-	my $sql = "SELECT $select ";
+	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
+	my $sql = "SELECT $distinct $select ";
 	$sql .= "   FROM $from " if $from;
 	$sql .= "  WHERE $where " if $where;
 	$sql .= "        $other" if $other;
