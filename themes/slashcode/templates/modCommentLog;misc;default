@@ -91,6 +91,7 @@ __template__
 	{ label = "people_bonus_fof",		edit = 1,	name = "Friend-of-Friend Modifier" },
 	{ label = "people_bonus_eof",		edit = 1,	name = "Foe-of-Friend Modifier" },
 	{ label = "karma_bonus",		edit = 1,	name = "Karma-Bonus Modifier" },
+	{ label = "subscriber_bonus",		edit = 1,	name = "Subscriber-Bonus Modifier" },
 	{ label = "score_end",			edit = 0,	name = "Total Score:" },
 ];
 num_modifiers = 0;

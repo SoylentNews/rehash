@@ -8,7 +8,9 @@ Display a comment
 * can_mod = boolean for whether or not current user can moderate
 * is_anon = boolean for whether or not comment user is anonymous
 
-Also included are all the individual elements of the comment and its poster: sid, cid, pid, date, subject, comment, uid, points, lastmod, reason, nickname, fakeemail, homepage, sig
+Also included are all the individual elements of the comment and its
+poster: sid, cid, pid, date, subject, comment, uid, points, lastmod,
+reason, nickname, fakeemail, homepage, sig, karma_bonus, subscriber_bonus
 also fakeemail_vis which is a possibly-truncated version of fakeemail
 
 __title__
@@ -40,6 +42,7 @@ __template__
 
 <FONT FACE="[% constants.mainfontface %]" SIZE="1">by
 [% IF !is_anon %]<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
+[% IF subscriber_bonus; " *"; END %]
 [% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
 [% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
 on [% Slash.timeCalc(time) %]

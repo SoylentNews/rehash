@@ -1056,6 +1056,8 @@ sub showInfo {
 		}
 		$comment->{points} += $user->{karma_bonus}
 			if $user->{karma_bonus} && $comment->{karma_bonus} eq 'yes';
+		$comment->{points} += $user->{subscriber_bonus}
+			if $user->{subscriber_bonus} && $comment->{subscriber} eq 'yes';
 
 		# fix points in case they are out of bounds
 		$comment->{points} = $constants->{comment_minscore} if $comment->{points} < $constants->{comment_minscore};
@@ -1742,6 +1744,9 @@ sub editComm {
 	# Karma modifier
 	my $karma_bonus = createSelect('karma_bonus', \@range, 
 			$user_edit->{karma_bonus} || 0, 1, 1);
+	# Subscriber modifier
+	my $subscriber_bonus = createSelect('subscriber_bonus', \@range, 
+			$user_edit->{subscriber_bonus} || 0, 1, 1);
 
 	# Length modifier
 	my $small_length_bonus_select = createSelect('clsmall_bonus', \@range, 
@@ -1772,13 +1777,14 @@ sub editComm {
 		'highlightthresh', $formats, $user_edit->{highlightthresh}, 1
 	);
 
-	my $h_check = $user_edit->{hardthresh}		? ' CHECKED' : '';
-	my $r_check = $user_edit->{reparent}		? ' CHECKED' : '';
-	my $n_check = $user_edit->{noscores}		? ' CHECKED' : '';
-	my $s_check = $user_edit->{nosigs}		? ' CHECKED' : '';
-	my $d_check = $user_edit->{sigdash}		? ' CHECKED' : '';
-	my $b_check = $user_edit->{nobonus}		? ' CHECKED' : '';
-	my $p_check = $user_edit->{postanon}		? ' CHECKED' : '';
+	my $h_check  = $user_edit->{hardthresh}		? ' CHECKED' : '';
+	my $r_check  = $user_edit->{reparent}		? ' CHECKED' : '';
+	my $n_check  = $user_edit->{noscores}		? ' CHECKED' : '';
+	my $s_check  = $user_edit->{nosigs}		? ' CHECKED' : '';
+	my $d_check  = $user_edit->{sigdash}		? ' CHECKED' : '';
+	my $b_check  = $user_edit->{nobonus}		? ' CHECKED' : '';
+	my $sb_check = $user_edit->{nosubscriberbonus}	? ' CHECKED' : '';
+	my $p_check  = $user_edit->{postanon}		? ' CHECKED' : '';
 	my $nospell_check = $user_edit->{no_spell}	? ' CHECKED' : '';
 
 	$formats = $slashdb->getDescriptions('postmodes');
@@ -1796,6 +1802,7 @@ sub editComm {
 		s_check			=> $s_check,
 		d_check			=> $d_check,
 		b_check			=> $b_check,
+		sb_check		=> $sb_check,
 		p_check			=> $p_check,
 		nospell_check		=> $nospell_check,
 		commentmodes_select	=> $commentmodes_select,
@@ -1811,6 +1818,7 @@ sub editComm {
 		new_user_bonus_select	=> $new_user_bonus_select,
 		note			=> $note,
 		karma_bonus		=> $karma_bonus,
+		subscriber_bonus	=> $subscriber_bonus,
 		small_length_bonus_select => $small_length_bonus_select,
 		long_length_bonus_select => $long_length_bonus_select,
 	});
@@ -2193,6 +2201,7 @@ sub saveComm {
 	my $max = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $min = -$max;
 	my $karma_bonus = ($form->{karma_bonus} !~ /^[\-+]?\d+$/) ? "+1" : $form->{karma_bonus};
+	my $subscriber_bonus = ($form->{subscriber_bonus} !~ /^[\-+]?\d+$/) ? "+1" : $form->{subscriber_bonus};
 	my $new_user_bonus = ($form->{new_user_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{new_user_bonus};
 	my $new_user_percent = (($form->{new_user_percent} <= 100 && $form->{new_user_percent} >= 0) 
 			? $form->{new_user_percent}
@@ -2204,9 +2213,9 @@ sub saveComm {
 	# setUser() does the right thing based on the key name.
 	my $users_comments_table = {
 		clsmall		=> $form->{clsmall},
-		clsmall_bonus		=> $clsmall_bonus,
+		clsmall_bonus	=> $clsmall_bonus,
 		clbig		=> $form->{clbig},
-		clbig_bonus		=> $clbig_bonus,
+		clbig_bonus	=> $clbig_bonus,
 		commentlimit	=> $form->{commentlimit},
 		commentsort	=> $form->{commentsort},
 		commentspill	=> $form->{commentspill},
@@ -2231,6 +2240,7 @@ sub saveComm {
 		new_user_bonus	=> ($new_user_bonus
 					? $new_user_bonus : undef),
 		karma_bonus	=> $karma_bonus,
+		subscriber_bonus => $subscriber_bonus,
 		textarea_rows	=> ($form->{textarea_rows} != $constants->{textarea_rows}
 					? $form->{textarea_rows} : undef),
 		textarea_cols	=> ($form->{textarea_cols} != $constants->{textarea_cols}

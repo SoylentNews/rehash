@@ -202,6 +202,9 @@ __template__
 		<P><B><A NAME="karma_bonus">Karma Bonus</A></B> (modifier assigned to posts where the user has good karma)<BR>
 		[% karma_bonus %]<br>
 
+		<P><B><A NAME="subscriber_bonus">Subscriber Bonus</A></B> (modifier assigned to posts where the user was a subscriber)<BR>
+		[% subscriber_bonus %]<br>
+
 		<P><B><A NAME="new_user_bonus">New User Modifier</A></B> (assign modifiers to recently created accounts)<BR>
 		[% new_user_percent_select %]% (new users in the last X percentage of the userbase)<br>
 		[% new_user_bonus_select %] (modifier assigned to new user posts)<br>
@@ -239,6 +242,12 @@ __template__
 		<P><B>No Karma Bonus</B>
 		<INPUT TYPE="hidden" NAME="nobonus_present" VALUE="1">
 		<INPUT TYPE="checkbox" NAME="nobonus"[% b_check %]>
+[% END %]
+
+[% IF user.is_subscriber %]
+		<P><B>No Subscriber Bonus</B>
+		<INPUT TYPE="hidden" NAME="nosubscriberbonus_present" VALUE="1">
+		<INPUT TYPE="checkbox" NAME="nosubscriberbonus"[% sb_check %]>
 [% END %]
 
 [% IF constants.allow_anonymous && user.karma > -1 %]

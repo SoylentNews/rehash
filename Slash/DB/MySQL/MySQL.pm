@@ -4527,28 +4527,25 @@ sub getCommentsForUser {
 
 	# this was a here-doc.  why was it changed back to slower,
 	# harder to read/edit variable assignments?  -- pudge
-	my $select = " cid, date, date as time, subject, nickname, homepage, fakeemail, ";
-	$select .= "	users.uid as uid, sig, comments.points as points, pid, pid as original_pid, sid, ";
-	$select .= " lastmod, reason, journal_last_entry_date, ipid, subnetid, karma_bonus ";
-	my $tables = "	comments, users  ";
-	my $where = "	sid=$sid_quoted AND comments.uid=users.uid ";
+	my $select = " cid, date, date as time, subject, nickname, "
+		. "homepage, fakeemail, users.uid AS uid, sig, "
+		. "comments.points AS points, pointsorig, "
+		. "pid, pid AS original_pid, sid, lastmod, reason, "
+		. "journal_last_entry_date, ipid, subnetid, "
+		. "karma_bonus";
+	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
+		$select .= ", subscriber_bonus";
+	}
+	my $tables = "comments, users";
+	my $where = "sid=$sid_quoted AND comments.uid=users.uid ";
 
 	if ($user->{hardthresh}) {
-		$where .= "    AND (";
-		$where .= "	comments.points >= " .
-			$self->sqlQuote($user->{threshold});
-		$where .= "     OR comments.uid=$user->{uid}"
-			unless $user->{is_anon};
-		$where .= "     OR cid=$cid" if $cid;
-		$where .= "	)";
+		my $threshold_q = $self->sqlQuote($user->{threshold});
+		$where .= "AND (comments.points >= $threshold_q";
+		$where .= "  OR comments.uid=$user->{uid}"	unless $user->{is_anon};
+		$where .= "  OR cid=$cid"			if $cid;
+		$where .= ")";
 	}
-
-# We are now doing this in the webserver not in the DB
-#	$sql .= "         ORDER BY ";
-#	$sql .= "comments.points DESC, " if $user->{commentsort} == 3;
-#	$sql .= " cid ";
-#	$sql .= ($user->{commentsort} == 1 || $user->{commentsort} == 5) ?
-#			'DESC' : 'ASC';
 
 	my $comments = $self->sqlSelectAllHashrefArray($select, $tables, $where);
 
@@ -4573,18 +4570,6 @@ sub getCommentsForUser {
 	# see SF bug 452558. - Jamie
 	# OK, now we're not getting the comment texts here, we'll get
 	# them later. - Jamie 2003/03/20
-#	my $start_time = Time::HiRes::time;
-#	my $comment_texts = $self->getCommentTextOld($cids, $archive);
-#	# Now distribute those texts into the $comments hashref.
-#	for my $comment (@$comments) {
-#		# we need to check for *existence* of the hash key,
-#		# not merely definedness; exists is faster, too -- pudge
-#		if (!exists($comment_texts->{$comment->{cid}})) {
-#			errorLog("no text for cid " . $comment->{cid});
-#		} else {
-#			$comment->{comment} = $comment_texts->{$comment->{cid}};
-#		}
-#	}
 
 	return $comments;
 }
@@ -4599,6 +4584,8 @@ sub getCommentsForUser {
 # gets into cache.  But passing it an arrayref of 100 cids is faster
 # than calling it 100 times with one cid.  Works fine with an arrayref
 # of 0 or 1 entries, of course.  - Jamie
+# Note that this does NOT store all its answers into cache anymore.
+# - Jamie 2003/04
 sub getCommentTextOld {
 	my($self, $cid, $archive) = @_;
 	if (ref $cid) {
@@ -4692,7 +4679,6 @@ sub getCommentTextOld {
 #		return $self->{_comment_text}{$cid};
 #	}
 #}
-
 
 
 ########################################################

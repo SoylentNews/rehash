@@ -1408,19 +1408,22 @@ INSERT INTO vars (name, value, description) VALUES ('slashbox_whatsplaying','0',
 ALTER TABLE accesslist ADD COLUMN now_trusted ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER now_proxy, ADD COLUMN was_trusted ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER was_proxy;
 ALTER TABLE accesslist ADD INDEX now_trusted (now_trusted);
 
-# USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_84, Start of T_2_3_0_85 - 2003/04/10
 # End of T_2_3_0_85, Start of T_2_3_0_86 - 2003/04/10
 
 # SLASHDOT LAST UPDATED HERE
 
-ALTER TABLE story_topics ADD is_parent ENUM("yes","no") DEFAULT 'no' NOT NULL;
+# End of T_2_3_0_86, Start of T_2_3_0_87 - 2003/04/16
+
+# USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_87, Start of T_2_3_0_88 - 2003/04/16
+
+ALTER TABLE story_topics ADD is_parent ENUM("no", "yes") DEFAULT 'no' NOT NULL;
 # Currently all stories will be this case
 UPDATE story_topics SET is_parent="no";
 
-
-#New topic image stuff
+# New topic image stuff
 DROP TABLE IF EXISTS topic_image_sections;
 CREATE TABLE topic_image_sections (
 	tid smallint UNSIGNED DEFAULT 0 NOT NULL,
@@ -1445,3 +1448,7 @@ UPDATE topics,topic_images SET default_image=topic_images.id WHERE topic_images.
 ALTER TABLE topics DROP width;
 ALTER TABLE topics DROP height;
 ALTER TABLE topics DROP image;
+
+# Change for plugins/Subscribe (ignore if not using that plugin)
+ALTER TABLE comments ADD COLUMN subscriber_bonus ENUM("no", "yes") NOT NULL DEFAULT "no" AFTER karma_bonus;
+

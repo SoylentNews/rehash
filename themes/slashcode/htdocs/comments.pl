@@ -717,8 +717,10 @@ sub editComment {
 	my $error_flag = 0;
 	my $label = getData('label');
 
-	$form->{nobonus}  = $user->{nobonus}  unless $form->{nobonus_present};
-	$form->{postanon} = $user->{postanon} unless $form->{postanon_present};
+	$form->{nobonus}  = $user->{nobonus}	unless $form->{nobonus_present};
+	$form->{postanon} = $user->{postanon}	unless $form->{postanon_present};
+	$form->{nosubscriberbonus} = $user->{is_subscriber} && $user->{nosubscriberbonus}
+						unless $form->{nosubscriberbonus_present};
 
 	# Get the comment we may be responding to. Remember to turn off
 	# moderation elements for this instance of the comment.
@@ -1049,8 +1051,10 @@ sub previewForm {
 sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
-	$form->{nobonus}  = $user->{nobonus}  unless $form->{nobonus_present};
-	$form->{postanon} = $user->{postanon} unless $form->{postanon_present};
+	$form->{nobonus}  = $user->{nobonus}	unless $form->{nobonus_present};
+	$form->{postanon} = $user->{postanon}	unless $form->{postanon_present};
+	$form->{nosubscriberbonus} = $user->{nosubscriberbonus}
+						unless $form->{nosubscriberbonus_present};
 
 	my $id = $form->{sid};
 	my $label = getData('label');
@@ -1118,18 +1122,21 @@ sub submitComment {
 
 	my $pts = 0;
 	my $karma_bonus = 0;
+	my $subscriber_bonus = 0;
 
 	if (!$user->{is_anon} && !$form->{postanon}) {
 		$pts = $user->{defaultpoints};
 		$pts-- if $user->{karma} < 0;
 		$pts-- if $user->{karma} < $constants->{badkarma};
-		$karma_bonus++ if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
-			&& !$form->{nobonus};
 		# Enforce proper ranges on comment points.
 		my($minScore, $maxScore) =
 			($constants->{comment_minscore}, $constants->{comment_maxscore});
 		$pts = $minScore if $pts < $minScore;
 		$pts = $maxScore if $pts > $maxScore;
+		$karma_bonus = 1 if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
+			&& !$form->{nobonus};
+		$subscriber_bonus = 1 if $pts >= 1 && $user->{is_subscriber}
+			&& !$form->{nosubscriberbonus};
 	}
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
 	unless ($user->{is_admin} || $form->{newdiscussion}) {
@@ -1149,6 +1156,7 @@ sub submitComment {
 		uid		=> $form->{postanon} ? $constants->{anonymous_coward_uid} : $user->{uid},
 		points		=> $pts,
 		karma_bonus	=> $karma_bonus ? 'yes' : 'no',
+		subscriber_bonus => $subscriber_bonus ? 'yes' : 'no',
 	};
 
 	my $maxCid = $slashdb->createComment($clean_comment);

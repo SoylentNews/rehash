@@ -133,6 +133,10 @@ END %]
 		<INPUT TYPE="hidden" NAME="nobonus_present" VALUE="1">
 		<INPUT TYPE="checkbox" NAME="nobonus"[% form.nobonus ? " CHECKED" : "" %]> No Karma Bonus
 [% do_br = 1; END;
+IF !user.is_anon && user.is_subscriber %]
+		<INPUT TYPE="hidden" NAME="nosubscriberbonus_present" VALUE="1">
+		<INPUT TYPE="checkbox" NAME="nosubscriberbonus"[% form.nosubscriberbonus ? " CHECKED" : "" %]> No Subscriber Bonus
+[% do_br = 1; END;
 IF constants.allow_anonymous && user.karma > -1 && !user.is_anon %]
 		<INPUT TYPE="hidden" NAME="postanon_present" VALUE="1">
 		<INPUT TYPE="checkbox" NAME="postanon"[% form.postanon ? " CHECKED" : "" %]> Post Anonymously

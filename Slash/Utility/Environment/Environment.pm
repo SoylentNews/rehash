@@ -1367,7 +1367,9 @@ Hashref of cleaned-up data.
 		isolate issue last maillist max
 		maxcommentsize maximum_length maxstories
 		min minimum_length minimum_match next
-		nobonus_present ordernum pid
+		nobonus_present
+		nosubscriberbonus_present
+		ordernum pid
 		postanon_present posttype ratio retrieve
 		seclev start startat threshold
 		thresh_count thresh_secs thresh_hps
