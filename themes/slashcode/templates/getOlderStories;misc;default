@@ -3,12 +3,15 @@ default
 __description__
 Print older stories for older stories box
 
+* cur_time = current time()
 * stories = arrayref of story hashrefs
 * section = section data structure
 * yesterday = the value to put in the "yesterday's edition" link
 * start = where to start counting from in search.pl return values
 
-Each story has the keys sid, section, title, time, commentcount, day (w, m, d, h, min, ampm), and link (which is a linkStory() value)
+Each story has the keys sid, section, title, time, commentcount,
+day (w, m, d, h, min, ampm), secs (since unix epoch) and
+link (which is a linkStory() value)
 
 XXX This is hacked up pretty badly to work with the fake section "index".
 We really need to decide what the status of "index" is.
@@ -26,8 +29,13 @@ __template__
 	IF today != "$story.w $story.m $story.d";
 		today = "$story.w $story.m $story.d";
 		IF !section or section.section == 'index' %]
-			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&mode=[% user.currentMode %]"
-				>[% story.w %]</A></FONT> [% story.m %] [% story.d %]</B></P>
+			<P><B>[% IF cur_time && story.secs && cur_time-story.secs > 7*86400
+				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&mode=[% user.currentMode %]"
+				>[% story.m %] [% story.d %]</A></FONT>[%
+			ELSE
+				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&mode=[% user.currentMode %]"
+				>[% story.w %]</A></FONT> [% story.m %] [% story.d %][%
+			END %]</B></P>
 		[% ELSIF section.issue && section.issue > 1 %]
 			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&issue=[% story.day %]&mode=[% user.currentMode %]"
 				>[% story.w %]</A></FONT> [% story.m %] [% story.d %]</B></P>
