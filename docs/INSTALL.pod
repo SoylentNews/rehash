@@ -693,7 +693,8 @@ perl 5.005_03 is supported, but MySQL 3.22 is not.
 
 =item perl
 
-Version 5.6.1 (5.005_03).
+Version 5.6.1 (5.005_03). [NOTE: perl 5.6.0 may have some problems.
+5.6.1 is recommended.]
 
 	http://www.cpan.org/
 
