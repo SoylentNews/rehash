@@ -47,5 +47,12 @@ Summary:&nbsp;
 [% END %]
 </UL>
 
+[% IF summary.1 > 0 %]
+<p>Note: grousing about rejected submissions is Offtopic and usually
+gets moderated that way.
+<a href="http://slashdot.org/faq/editorial.shtml#ed200">It happens</a>,
+don't take it personally.
+[% END %]
+
 __seclev__
 10000
