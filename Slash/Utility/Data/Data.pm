@@ -26,6 +26,7 @@ LONG DESCRIPTION.
 
 use strict;
 use Date::Format qw(time2str);
+use Date::Language;
 use Date::Parse qw(str2time);
 #use Date::Manip qw(DateCalc UnixDate Date_Init);
 use Digest::MD5 'md5_hex';
@@ -302,15 +303,15 @@ sub timeCalc {
 	$date = str2time($date) + $off_set;
 
 	# set user's language
-	my $lang = getCurrentStatic('datelang') || 'English';
-	Date::Format->language($lang) if $lang && $lang ne 'English';
+	my $lang = getCurrentStatic('datelang');
 
 	# convert the raw date to pretty formatted date
-	$date = time2str($format || $user->{'format'}, $date);
-
-	# so we can handle database dates properly; maybe
-	# check database engine behavior?
-	Date::Format->language('English') if $lang && $lang ne 'English';
+	if ($lang && $lang ne 'English') {
+		my $datelang = Date::Language->new($lang);
+		$date = $datelang->time2str($format || $user->{'format'}, $date);
+	} else {
+		$date = time2str($format || $user->{'format'}, $date);
+	}
 
 	# return the new pretty date
 	return $date;
