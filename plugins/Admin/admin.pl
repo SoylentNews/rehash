@@ -1642,7 +1642,7 @@ sub updateStory {
 		}
 	}
 
-	unless($slashdb->updateStory($form->{sid}, $data)) {
+	if (!$slashdb->updateStory($form->{sid}, $data)) {
 		titlebar('100%', getTitle('story_update_failed'));
 		editStory(@_);
 	} else {

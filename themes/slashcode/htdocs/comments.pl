@@ -1015,19 +1015,19 @@ sub previewForm {
 		if $user->{is_subscriber} && $form->{nosubscriberbonus} ne 'on';
 
 	my $preview = {
-		nickname	=> $form->{postanon}
-					? getCurrentAnonymousCoward('nickname')
-					: $user->{nickname},
-		pid		=> $form->{pid},
-		uid		=> $form->{postanon} ? '' : $user->{uid},
-		homepage	=> $form->{postanon} ? '' : $user->{homepage},
-		fakeemail	=> $form->{postanon} ? '' : $user->{fakeemail},
-		journal_last_entry_date => $user->{journal_last_entry_date} || '',
-		'time'		=> $slashdb->getTime(),
-		subject		=> $tempSubject,
-		comment		=> $tempComment,
-		sig		=> $sig,
-		subscriber_bonus => $subscriber_bonus,
+		nickname		=> $form->{postanon}
+						? getCurrentAnonymousCoward('nickname')
+						: $user->{nickname},
+		pid			=> $form->{pid},
+		uid			=> $form->{postanon} ? '' : $user->{uid},
+		homepage		=> $form->{postanon} ? '' : $user->{homepage},
+		fakeemail		=> $form->{postanon} ? '' : $user->{fakeemail},
+		journal_last_entry_date	=> $user->{journal_last_entry_date} || '',
+		'time'			=> $slashdb->getTime(),
+		subject			=> $tempSubject,
+		comment			=> $tempComment,
+		sig			=> $sig,
+		subscriber_bonus	=> $subscriber_bonus,
 	};
 
 	my $tm = $user->{mode};

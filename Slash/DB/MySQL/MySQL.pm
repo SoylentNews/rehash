@@ -5221,7 +5221,7 @@ sub createStory {
 	my($self, $story) = @_;
 
 	my $constants = getCurrentStatic();
-	$self->{_dbh}->{AutoCommit} = 0;
+	$self->{_dbh}{AutoCommit} = 0;
 
 	# yes, this format is correct, don't change it :-)
 	my $sidformat = '%02d/%02d/%02d/%02d%0d2%02d';
@@ -5275,11 +5275,11 @@ sub createStory {
 			$story->{sid} = sprintf($sidformat, @lt[reverse 0..5]);
 		}
 	}
-	unless($self->sqlInsert('story_text', { sid => $story->{sid}})) {
+	unless ($self->sqlInsert('story_text', { sid => $story->{sid}})) {
 		print STDERR "Failed to Insert story Text\n";
 		goto error;
 	}
-	unless($self->setStory($story->{sid}, $story)) {
+	unless ($self->setStory($story->{sid}, $story)) {
 		print STDERR "Failed to Insert most of story\n";
 		goto error;
 	}
@@ -5287,65 +5287,66 @@ sub createStory {
 	my $rootdir = $section->{rootdir} || $constants->{rootdir};
 
 	my $id = $self->createDiscussion( {
-		title	=> $story->{title},
-		section	=> $story->{section},
-		topic	=> $story->{tid},
-		url	=> "$rootdir/article.pl?sid=$story->{sid}&tid=$story->{topic}",
-		sid	=> $story->{sid},
+		title		=> $story->{title},
+		section		=> $story->{section},
+		topic		=> $story->{tid},
+		url		=> "$rootdir/article.pl?sid=$story->{sid}&tid=$story->{topic}",
+		sid		=> $story->{sid},
 		commentstatus	=> $story->{commentstatus},
-		ts	=> $story->{'time'}
+		ts		=> $story->{'time'}
 	});
-	unless($id) {
+	unless ($id) {
 		print STDERR "Failed to create discussion for story\n";
 		goto error;
 	}
-	unless($self->setStory($story->{sid}, { discussion => $id })) {
+	unless ($self->setStory($story->{sid}, { discussion => $id })) {
 		print STDERR "Failed to set  discussion for story\n";
 		goto error;
 	}
 	# Take all secondary topics and shove them into the array for the story
-	unless($self->setStoryTopics($story->{sid}, createStoryTopicData($self))) {
+	unless ($self->setStoryTopics($story->{sid}, createStoryTopicData($self))) {
 		print STDERR "Failed to set topics for story\n";
 		goto error;
 	}
 
 	$self->{_dbh}->commit;
-	$self->{_dbh}->{AutoCommit} = 1;
+	$self->{_dbh}{AutoCommit} = 1;
 
 	return $story->{sid};
 
-	error:
-	$self->{_dbh}->rollback;
-	$self->{_dbh}->{AutoCommit} = 1;
-	return "";
+	error: {
+		$self->{_dbh}->rollback;
+		$self->{_dbh}{AutoCommit} = 1;
+		return "";
+	}
 }
 
 ##################################################################
 sub updateStory {
 	my($self, $sid, $data) = @_;
 	my $constants = getCurrentStatic();
-	$self->{_dbh}->{AutoCommit} = 0;
+	$self->{_dbh}{AutoCommit} = 0;
 
-	unless($self->setStory($sid, $data)) {
+	unless ($self->setStory($sid, $data)) {
 		print STDERR "Failed to set topics for story\n";
 		goto error;
 	}
 	my $dis_data = {
-		sid	=> $sid,
-		title	=> $data->{title},
-		section	=> $data->{section},
-		url	=> "$constants->{rootdir}/article.pl?sid=$sid",
-		ts	=> $data->{'time'},
-		topic	=> $data->{tid},
+		sid		=> $sid,
+		title		=> $data->{title},
+		section		=> $data->{section},
+		url		=> "$constants->{rootdir}/article.pl?sid=$sid",
+		ts		=> $data->{'time'},
+		topic		=> $data->{tid},
 		commentstatus	=> $data->{commentstatus}
 	};
-	unless($self->setStoryTopics($sid, createStoryTopicData($self))) {
+	unless ($self->setStoryTopics($sid, createStoryTopicData($self))) {
 		print STDERR "Failed to set topics for story\n";
 		goto error;
 	}
 
 
-	unless($self->setDiscussionBySid($sid, $dis_data)) {
+	unless ($self->setDiscussionBySid($sid, $dis_data)) {
 		print STDERR "Failed to set discussion data for story\n";
 		goto error;
 	}
@@ -5355,15 +5356,15 @@ sub updateStory {
 	}
 
 	$self->{_dbh}->commit;
-	$self->{_dbh}->{AutoCommit} = 1;
+	$self->{_dbh}{AutoCommit} = 1;
 
 	return $sid;
 
-	error:
-	$self->{_dbh}->rollback;
-	$self->{_dbh}->{AutoCommit} = 1;
-
-	return "";
+	error: {
+		$self->{_dbh}->rollback;
+		$self->{_dbh}{AutoCommit} = 1;
+		return "";
+	}
 }
 
 ########################################################
@@ -6363,9 +6364,9 @@ sub setStoryTopics {
 	$self->sqlDo("DELETE from story_topics where sid = '$sid'");
 
 	for my $key (keys %{$topic_ref}) {
-	    unless ($self->sqlInsert("story_topics", { sid => $sid, tid => $key, is_parent  => $topic_ref->{$key} })) {
-	    	return 0;
-	    }
+		unless ($self->sqlInsert("story_topics", { sid => $sid, tid => $key, is_parent  => $topic_ref->{$key} })) {
+			return 0;
+		}
 	}
 
 	return 1;

@@ -2823,7 +2823,7 @@ sub createStoryTopicData {
 	my $loop_protection = 0;
 	for my $tid (@tids) {
 		my $new_tid = $slashdb->sqlSelect("parent_topic", "topics", "tid = $tid");
-		push @tids, $new_tid if $new_tid && grep(!/$new_tid/,@tids);
+		push @tids, $new_tid if $new_tid && grep(!/$new_tid/, @tids);
 		#This is here to kill some runaway logic loop
 		$loop_protection++;
 		last if $loop_protection > 30;
@@ -2833,7 +2833,7 @@ sub createStoryTopicData {
 	for my $tid (@tids) {
 		# Jump to the next tid if it is zero
 		next unless $tid;
-		$tid_ref{$tid} =  scalar(grep(/^$tid$/,@original))  ? 'no' : 'yes' ;
+		$tid_ref{$tid} = scalar(grep(/^$tid$/, @original)) ? 'no' : 'yes' ;
 	}
 
 	return \%tid_ref;

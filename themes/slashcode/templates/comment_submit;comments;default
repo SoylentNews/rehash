@@ -24,7 +24,7 @@ mistake...well, you should have used the 'Preview' button!<P>
 [% IF metamod_elig %]
 For [% constants.sitename %]'s moderation system to properly function,
 we need as many users as possible to
-<A href="[% constants.rootdir %]/metamod.pl">Meta-Moderate</A>.
+<A HREF="[% constants.rootdir %]/metamod.pl">Meta-Moderate</A>.
 You are currently eligible... why not hop over and help?
 [% END %]
 
