@@ -1789,7 +1789,7 @@ ALTER TABLE sections CHANGE COLUMN defaultsubsection defaultsubsection SMALLINT 
 
 ALTER TABLE discussions CHANGE topic topic smallint UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE discussions ADD INDEX topic (topic);
-ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
+#ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
 
 ALTER TABLE metamodlog CHANGE COLUMN mmid mmid INT UNSIGNED DEFAULT '0' NOT NULL;
 ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);

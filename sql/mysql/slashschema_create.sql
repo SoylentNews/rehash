@@ -1298,7 +1298,7 @@ CREATE TABLE vars (
 
 ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
 ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
-ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
+#ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
 ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);
 ALTER TABLE pollquestions ADD FOREIGN KEY (discussion) REFERENCES discussions(id);
 ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
