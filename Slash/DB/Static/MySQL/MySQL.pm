@@ -981,7 +981,7 @@ sub deleteStoryAll {
 
 ########################################################
 # For tasks/author_cache.pl
-# GREATEST() is because of inconsistent schema were some values can
+# GREATEST() is because of inconsistent schema where some values can
 # be NULL, which breaks MySQL -- pudge
 sub createAuthorCache {
 	my($self) = @_;
