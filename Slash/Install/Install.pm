@@ -11,6 +11,7 @@ use Slash::DB;
 use File::Copy;
 use File::Find;
 use File::Path;
+use File::Spec;
 use vars qw($VERSION);
 use base 'Slash::DB::Utility';
 
@@ -516,7 +517,7 @@ sub _parseFilesForTemplates {
 		$key = lc $key;
 		if ($key eq 'template') {
 			my @parts = split /\//, $val;
-			$templates->{pop(@parts)} = "$file/$val";
+			$templates->{pop(@parts)} = File::Spec->catfile($file, $val);
 		}
 		push @$no_templates, $val
 			if ($key eq 'no-template');
