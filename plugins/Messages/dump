@@ -18,7 +18,6 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (8, 'New Comment', 
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, '0');
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Inbox','[% constants.rootdir %]/my/inbox/',1,17);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Inbox','[% constants.rootdir %]/my/inbox/',1,13);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Message Preferences','[% constants.rootdir %]/my/messages/',1,2);
 
