@@ -13,38 +13,38 @@ CREATE TABLE robosubmitlock (
 
 DROP TABLE IF EXISTS url_analysis;
 CREATE TABLE url_analysis (
-  url_id int(10) unsigned DEFAULT '0' NOT NULL,
+  url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
   parse_code enum('html_linkextor','miner','plaintext','nugget'),
-  is_success tinyint(4),
+  is_success TINYINT(4),
   ts timestamp(14),
   duration float(10,2),
-  miner_id int(10) unsigned,
-  nuggets int(10) unsigned   
+  miner_id INT(10) UNSIGNED,
+  nuggets INT(10) UNSIGNED   
 );
 
 DROP TABLE IF EXISTS url_content;
 CREATE TABLE url_content (
-  url_id int(10) unsigned DEFAULT '0' NOT NULL,
-  response_header text,
-  cookies text,
+  url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
+  response_header TEXT,
+  cookies TEXT,
   PRIMARY KEY (url_id)   
 );
 
 DROP TABLE IF EXISTS url_info;
 CREATE TABLE url_info (
- url_id int(10) unsigned DEFAULT '0' NOT NULL auto_increment,
-  url_digest varchar(16) binary DEFAULT '' NOT NULL,
-  url text NOT NULL,
-  url_base text,
-  is_success tinyint(4),
+ url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  url_digest VARCHAR(16) binary DEFAULT '' NOT NULL,
+  url TEXT NOT NULL,
+  url_base TEXT,
+  is_success TINYINT(4),
   last_attempt datetime,
   last_success datetime,
   believed_fresh_until datetime,
-  status_code smallint(6),
-  reason_phrase varchar(30),
-  content_type varchar(60),
-  title varchar(255),
-  miner_id int(10) unsigned DEFAULT '0' NOT NULL,
+  status_code SMALLINT(6),
+  reason_phrase VARCHAR(30),
+  content_type VARCHAR(60),
+  title VARCHAR(255),
+  miner_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
   PRIMARY KEY (url_id),
   UNIQUE url_digest (url_digest),
   KEY miner_id (miner_id)    
@@ -52,23 +52,23 @@ CREATE TABLE url_info (
 
 DROP TABLE IF EXISTS url_message_body;
 CREATE TABLE url_message_body (
-  url_id int(10) unsigned DEFAULT '0' NOT NULL,
-  message_body longtext,
+  url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
+  message_body LONGTEXT,
   PRIMARY KEY (url_id)
 );
 
 DROP TABLE IF EXISTS url_plaintext;
 CREATE TABLE url_plaintext (
-  url_id int(10) unsigned DEFAULT '0' NOT NULL,
-  plaintext longtext,
+  url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
+  plaintext LONGTEXT,
   PRIMARY KEY (url_id)
 );
 
 DROP TABLE IF EXISTS rel;
 CREATE TABLE rel (
-  rel_id int(10) unsigned DEFAULT '0' NOT NULL auto_increment,
-  from_url_id int(10) unsigned DEFAULT '0' NOT NULL,
-  to_url_id int(10) unsigned DEFAULT '0' NOT NULL,
+  rel_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  from_url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
+  to_url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
   parse_code enum('html_linkextor','miner','nugget','plaintext') DEFAULT 'html_linkextor' NOT NULL,
   type char(20) DEFAULT '' NOT NULL,
   first_verified datetime,
@@ -80,40 +80,40 @@ CREATE TABLE rel (
 
 DROP TABLE IF EXISTS nugget_sub;
 CREATE TABLE nugget_sub (
-  url_id int(10) unsigned DEFAULT '0' NOT NULL,
-  submitworthy tinyint(3) unsigned,
+  url_id INT(10) UNSIGNED DEFAULT '0' NOT NULL,
+  submitworthy TINYINT(3) UNSIGNED,
   PRIMARY KEY (url_id)
 );
 
 DROP TABLE IF EXISTS miner;
 CREATE TABLE miner (
- miner_id int(10) unsigned DEFAULT '0' NOT NULL auto_increment,
-  name varchar(20) DEFAULT '' NOT NULL,
+ miner_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  name VARCHAR(20) DEFAULT '' NOT NULL,
   last_edit timestamp(14),
-  last_edit_aid varchar(30),
-  owner_aid varchar(30),
+  last_edit_aid VARCHAR(30),
+  owner_aid VARCHAR(30),
   progress enum('broken','ok','great') DEFAULT 'broken' NOT NULL,
-  pre_stories_text text,
-  post_stories_text text,
-  pre_stories_regex text,
-  post_stories_regex text,
-  extract_vars text,
-  extract_regex text,
-  tweak_code text,
-  comment text,
+  pre_stories_text TEXT,
+  post_stories_text TEXT,
+  pre_stories_regex TEXT,
+  post_stories_regex TEXT,
+  extract_vars TEXT,
+  extract_regex TEXT,
+  tweak_code TEXT,
+  comment TEXT,
   PRIMARY KEY (miner_id),
   UNIQUE name (name)    
 );
 
 DROP TABLE IF EXISTS spider;
 CREATE TABLE spider (
-  spider_id int(10) unsigned DEFAULT '0' NOT NULL auto_increment,
-  name varchar(20) DEFAULT '' NOT NULL,
+  spider_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  name VARCHAR(20) DEFAULT '' NOT NULL,
   last_edit timestamp(14),
-  last_edit_aid varchar(30),
-  conditions text,
-  group_0_selects text,
-  commands text,
+  last_edit_aid VARCHAR(30),
+  conditions TEXT,
+  group_0_selects TEXT,
+  commands TEXT,
   PRIMARY KEY (spider_id),
   UNIQUE name (name)     
 );
@@ -124,13 +124,13 @@ CREATE TABLE spiderlock (
 );
 
 
-# Yes, I said "bigint"
+# Yes, I said "BIGINT"
 DROP TABLE IF EXISTS spider_timespec;
 CREATE TABLE spider_timespec (
-  timespec_id int(10) unsigned DEFAULT '0' NOT NULL auto_increment,
-  name varchar(20) NOT NULL,
-  timespec varchar(64) DEFAULT '' NOT NULL,
-  last_run bigint DEFAULT 0 NOT NULL,
+  timespec_id INT(10) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  name VARCHAR(20) NOT NULL,
+  timespec VARCHAR(64) DEFAULT '' NOT NULL,
+  last_run BIGINT DEFAULT 0 NOT NULL,
   PRIMARY KEY (timespec_id),
   UNIQUE identity (name, timespec)
 );
