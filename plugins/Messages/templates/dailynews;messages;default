@@ -40,14 +40,14 @@ In this issue:[% FOR story = stories.reverse %]
 	box("  $thisurl/article.pl?sid=$story.sid");
 %]+--------------------------------------------------------------------+
 
-[% story.asciitext.replace('\n(?=\n  \* \[\d+\])', ''); IF story.refs.size %]
+[% story.asciitext.replace('\n(?=\n  \* \[\d+\])', '') %]
 
 [% IF !constants.newsletter_body && story.bodytext -%]
 This story continues at:
     [% thisurl %]/article.pl?sid=[% story.sid %]
 
 [% END %]Discuss this story at:
-    [% thisurl %]/comments.pl?sid=[% story.sid %]
+    [% thisurl %]/comments.pl?sid=[% story.sid %][% IF story.refs.size %]
 
 Links:[%
   count = -1;
