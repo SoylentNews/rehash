@@ -1558,18 +1558,24 @@ sub editStory {
 sub extractChosenFromForm {
 	my($form) = @_;
 	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 	my $chosen_hr = { };
 	my $chosen_names_hr = { };
-	if (defined $form->{topic_source} && $form->{topic_source} eq "submission" && $form->{subid}) {
+	if (defined $form->{topic_source} && $form->{topic_source} eq "submission"
+		&& $form->{subid}) {
 		my @topics = ($form->{tid});
 		if ($form->{skid}) {
 			my $nexus = $slashdb->getNexusFromSkid($form->{skid});
 			push @topics, $nexus if $nexus;
 		}
 		for my $tid (@topics) {
-			$chosen_hr->{$tid} = 1;
+			$chosen_hr->{$tid} =
+				$tid == $constants->{mainpage_nexus_tid}
+				? 30
+				: $constants->{admin_topic_default_weight} || 10;
 			my $chosen_topic = $slashdb->getTopic($tid);
-			$chosen_names_hr->{$tid} = $chosen_topic->{textname} if $chosen_topic && $chosen_topic->{tid};
+			$chosen_names_hr->{$tid} = $chosen_topic->{textname}
+				if $chosen_topic && $chosen_topic->{tid};
 		}
 	} else {
 		for my $i (0..$#{$form->{st_main_select}}) {

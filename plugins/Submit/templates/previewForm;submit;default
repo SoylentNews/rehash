@@ -62,10 +62,6 @@ TITLE="[% topic.textname %]"></A>
 		[% ELSIF extra.2 == 'list' %]
 			[% pulldown = "$extra.3:$extra.1" %]
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring', pulldown), submission.${extra.1}, 1, 1) %]
-		[% ELSE %]
-			[% type = extra.1 %]
-			[%# XXXSKIN - i don't know what this is but it is broken because topics_section_type does not exist %]
-			[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', skin, type), submission.$type, 1, 1) %]
 		[% END %]
 	[% END %]
 		<BR>

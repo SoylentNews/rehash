@@ -2409,3 +2409,5 @@ ALTER TABLE stories_old ADD COLUMN stoid MEDIUMINT UNSIGNED DEFAULT '0';
 UPDATE stories_old, stories SET stories_old.stoid=stories.stoid WHERE stories_old.sid=stories.sid;
 INSERT INTO story_param (stoid, name, value) SELECT stoid, 'neverdisplay', 1 FROM stories_old WHERE displaystatus=-1;
 
+INSERT INTO vars (name, value, description) VALUES ('admin_topic_default_weight', 10, 'Default weight for initial topics brought in from submit.pl submission preview');
+
