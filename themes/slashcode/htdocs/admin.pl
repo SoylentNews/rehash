@@ -1248,7 +1248,7 @@ EOT
 
 	$S->{dept} =~ s/ /-/gi;
 	print qq!<TR><TD BGCOLOR="$I{bg}[3]"><FONT COLOR="$I{fg}[3]"> <B>Title</B> </FONT></TD>\n<TD BGCOLOR="$I{bg}[2]"> !,
-		$I{query}->textfield(-name => 'title', -default => $S->{title}, -size => 50),
+		$I{query}->textfield(-name => 'title', -default => $S->{title}, -size => 50, -override => 1),
 		'</TD></TR>';
 
 	if ($I{use_dept}) {

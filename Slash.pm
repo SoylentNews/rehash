@@ -526,10 +526,7 @@ sub getUser {
 		$I{U}{'format'} = $I{dateformats}{ $I{U}{dfid} };
 
 		# Do we want the comments stuff?
-		if (!$ENV{SCRIPT_NAME}
-			|| $ENV{SCRIPT_NAME} =~ /index|article|comments|metamod|search|pollBooth/) {
-			getExtraStuff('comments');
-		}
+		getExtraStuff('comments');
 
 		# Do we want the index stuff?
 		getExtraStuff('index');
@@ -2280,7 +2277,7 @@ sub dispComment  {
 <B><FONT SIZE="${\( $I{fontbase} + 2 )}">($C->{fakeemail})</FONT></B>
 EOT
 
-	(my $nickname  = $C->{nickname}) =~ s/ /+/g;
+	my $nickname = fixparam($C->{nickname});
 	my $userinfo = <<EOT if $C->{uid} > 0;
 (<A HREF="$I{rootdir}/users.pl?op=userinfo&nick=$nickname">User #$C->{uid} Info</A>)
 EOT
