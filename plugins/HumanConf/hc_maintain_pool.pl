@@ -17,7 +17,7 @@ $task{$me}{code} = sub {
 
 	my $humanconf = getObject('Slash::HumanConf::Static');
 	unless ($humanconf) {
-		slashdLog("$me: could not instantiate Slash::HumanConf::Static object");
+		slashdLog("$me: could not instantiate Slash::HumanConf::Static object, is GD.pm properly installed?");
 		return ;
 	}
 
