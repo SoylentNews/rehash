@@ -267,8 +267,10 @@ sub do_logdatadump {
 					undef $playlog_sth;
 					last;
 				}
-				$playlog_hr->{$playlog_meetid}{$daid}{play} = $play;
+				$playlog_hr->{$playlog_meetid}{$daid}{playtry} = $playtry;
+				$playlog_hr->{$playlog_meetid}{$daid}{playactual} = $playactual;
 				$playlog_hr->{$playlog_meetid}{$daid}{reward} = $reward;
+				$playlog_hr->{$playlog_meetid}{$daid}{sawdaid} = $sawdaid;
 				last if $playlog_meetid > $meetlog_meetid;
 			}
 		}
