@@ -21,10 +21,13 @@ __template__
 Preferences Saved
 
 [% CASE 'type not found' %]
-message type [% type %] not found
+Message type [% type %] not found
 
 [% CASE 'user not found' %]
 User [% uid %] not found
+
+[% CASE 'message not found' %]
+Message [% id %] not found
 
 [% CASE 'no template' %]
 No template name

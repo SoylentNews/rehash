@@ -291,12 +291,20 @@ sub display_message {
 
 	my $message = $messages->getWeb($form->{id});
 
-	if ($message->{message} =~ /^<URL:(\S+)>$/) {
-		redirect($1);
+	if ($message) {
+		if ($message->{message} =~ /^<URL:(\S+)>$/) {
+			redirect($1);
+		} else {
+			header(getData('header'));
+			slashDisplay('display', {
+				message		=> $message,
+			});
+			footer();
+		}
 	} else {
 		header(getData('header'));
-		slashDisplay('display', {
-			message		=> $message,
+		print getData('message not found', {
+			id		=> $form->{id},
 		});
 		footer();
 	}
