@@ -22,7 +22,7 @@ slash-1.0.3, 2000.05.16
 
 *	Changed "commentkey" table to "formkeys", so it can be
 	used for other form keys, like the submission forms,
-	in comments.pl
+	in comments.pl (see INSTALL for directions on upgrading)
 
 *	In comments.pl's undoModeration(), don't let the score
 	go above 5 or lower than -1
@@ -49,7 +49,7 @@ slash-1.0.3, 2000.05.16
 	got sick of Mail::Sender and Mail::Sendmail was an
 	easy replacement); added to Bundle::Slash and INSTALL
 
-*	Moved the approvedtags array to slashdotrc.pl
+*	Moved the approvedtags array to slashdotrc.pl from Slash.pm
 
 *	Only get nickname of anonymous user if we don't have it already
 
@@ -82,7 +82,7 @@ slash-1.0.3, 2000.05.16
 	the parent LI tags (ToastyKen)
 
 *	To slashd, added sigtrap to slashd (so if something kills slashd,
-	it will be logged), automatic directory creation to prog2file,
+	it will be logged), automatic directory creation to prog2file(),
 	bare-bones WML creation
 
 *	Background dailyStuff when running from slashd
@@ -106,6 +106,9 @@ slash-1.0.3, 2000.05.16
 *	Added mailfrom to slashdotrc.pl and Slash.pm; it is the
 	address mail is sent from; also changed default hostnames
 	in slashdotrc.pl to "example.com"
+
+*	Took out apparently unneeded flush/lock/unlock surrounding
+	"delete from accesslog" statement in dailyStuff
 
 
 slash-1.0.2, 2000.04.12

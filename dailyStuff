@@ -94,10 +94,7 @@ while(my($sid, $cnt) = $c->fetchrow) {
 }
 $c->finish;
 
-$I{dbh}->do("flush tables");
-$I{dbh}->do("lock tables accesslog write");
 $I{dbh}->do("delete from accesslog where date_add(ts,interval 48 hour) < now()");
-$I{dbh}->do("unlock tables");
 
 my($sdTotalHits) = getvars("totalhits");
 
