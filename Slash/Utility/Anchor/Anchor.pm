@@ -317,10 +317,19 @@ sub ssiHead {
 	(my $dir = $constants->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
 	my $hostname = $slashdb->getSection($user->{currentSection}, 'hostname')
 		if $user->{currentSection};
+	my $page = $options->{Page} || $user->{currentPage} || 'misc';
+
+	# if there's a special .inc header for this page, use it, else it's
+	# business as usual.
+	$page = '' unless ($page ne 'misc' && $slashdb->existsTemplate({
+		name    => 'header',
+	        section => $user->{currentSection},
+	        page    => $user->{currentPage} }));
 
 	slashDisplay('ssihead', {
 		dir	=> $dir,
 		section => $user->{currentSection} ? "$user->{currentSection}/" : "",
+		page    => $page,
 	}, { Return => $options->{Return}, Page => $options->{Page} });
 }
 
