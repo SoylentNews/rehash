@@ -321,7 +321,7 @@ sub getLinksContent {
 		slashDisplay('storylink', {
 			links	=> \@links,
 			sid	=> $storyref->{sid},
-		}, { Section => 'default', Return => 1});
+		}, { Skin => 'default', Return => 1});
 
 	return($storycontent);
 }

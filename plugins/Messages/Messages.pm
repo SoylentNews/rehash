@@ -147,10 +147,10 @@ sub create {
 		}
 
 		my $user = getCurrentUser();
-		$data->{_NAME}    = delete($data->{template_name});
-		$data->{_PAGE}    = delete($data->{template_page})
+		$data->{_NAME} = delete($data->{template_name});
+		$data->{_PAGE} = delete($data->{template_page})
 			|| $user->{currentPage};
-		$data->{_SECTION} = delete($data->{template_section})
+		$data->{_SKIN} = delete($data->{template_skin})
 			|| $gSkin->{name};
 
 		# set subject
@@ -163,11 +163,11 @@ sub create {
 				return 0;
 			}
 
-			$data->{subject}{_NAME}    = delete($data->{subject}{template_name});
-			$data->{subject}{_PAGE}    = delete($data->{subject}{template_page})
+			$data->{subject}{_NAME} = delete($data->{subject}{template_name});
+			$data->{subject}{_PAGE} = delete($data->{subject}{template_page})
 				|| $data->{_PAGE}    || $user->{currentPage};
-			$data->{subject}{_SECTION} = delete($data->{subject}{template_section})
-				|| $data->{_SECTION} || $gSkin->{name};
+			$data->{subject}{_SKIN} = delete($data->{subject}{template_skin})
+				|| $data->{_SKIN} || $gSkin->{name};
 		}
 
 		$data->{_templates}{email}{content}	||= 'msg_email';
@@ -850,7 +850,7 @@ sub render {
 =head2 callTemplate(DATA, MESSAGE)
 
 A wrapper for calling templates in Slash::Messages.  It tries to figure
-out the right page/section to call the template in, etc.  It sets the
+out the right page/skin to call the template in, etc.  It sets the
 Nocomm parameter in its call to slashDisplay().
 
 =over 4
@@ -863,7 +863,7 @@ Nocomm parameter in its call to slashDisplay().
 
 This can either be a template name, or a hashref of template data.
 If a hashref, the _NAME parameter is the template name.  The
-_PAGE and _SECTION parameters may also be set.  These will all be
+_PAGE and _SKIN parameters may also be set.  These will all be
 set appropriately by the create() method.  The rest of
 the key/value pairs will be passed to the template.
 
@@ -904,12 +904,12 @@ sub callTemplate {
 		Return  => 1,
 		Nocomm  => 1,
 		Page    => 'messages',
-		Section => 'NONE',
+		Skin    => 'NONE',
 	};
 
-	# set Page and Section as from the caller
-	$opt->{Page}    = delete($data->{_PAGE})    if exists $data->{_PAGE};
-	$opt->{Section} = delete($data->{_SECTION}) if exists $data->{_SECTION};
+	# set Page and Skin as from the caller
+	$opt->{Page} = delete($data->{_PAGE}) if exists $data->{_PAGE};
+	$opt->{Skin} = delete($data->{_SKIN}) if exists $data->{_SKIN};
 
 	# $msg->{user} could be a ref to some, but not all, user info, or a UID.  heh.
 	my $seclev = ref $msg->{user}

@@ -120,7 +120,7 @@ sub daily_generateDailyMail {
 
 	return slashDisplay($mailing,
 		{ stories => $stories, urlize => \&daily_urlize, absolutedir => $absolutedir },
-		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
+		{ Return => 1, Nocomm => 1, Page => 'messages', Skin => 'NONE' }
 	);
 }
 

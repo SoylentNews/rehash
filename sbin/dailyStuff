@@ -116,7 +116,7 @@ sub generateDailyMail {
 
 	return slashDisplay($mailing,
 		{ stories => $stories, urlize => \&urlize },
-		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
+		{ Return => 1, Nocomm => 1, Page => 'messages', Skin => 'NONE' }
 	);
 }
 
