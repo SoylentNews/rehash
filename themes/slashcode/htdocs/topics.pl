@@ -49,9 +49,9 @@ sub hierarchy {
 		if ($topic->{parent_topic}) {
 			push(@{$parents{$topic->{parent_topic}}{child}}, $topic);
 		}
-		for my $key (keys %$topic) {
-		$parents{$topic->{tid}}{$key} = $topic->{$key};
-		}
+		my $children = $parents{$topic->{tid}}{child};
+		$parents{$topic->{tid}} = $topic;
+		$parents{$topic->{tid}}{child} = $children;
 	}
 	
 	for my $parent (values %parents) {
