@@ -424,7 +424,9 @@ sub linkStory {
 	# prerendered .shtml URLs whenever possible/appropriate.
 	# But, we must link to the .pl when necessary.
 
-	my $dynamic = 0;
+	# if we REALLY want dynamic
+	my $dynamic = $story_link->{dynamic} || 0;
+
 	if ($ENV{SCRIPT_NAME} || !$user->{is_anon}) {
 		# Whenever we're invoked from Apache, use dynamic links.
 		# This test will be true 99% of the time we come through
@@ -1434,7 +1436,6 @@ sub _slashFile {
 sub _slashImage {
 	my($tokens, $token, $newtext) = @_;
 
-		warn "$token->[1]{width} $token->[1]{height}";
 	if (!$token->[1]{width} || !$token->[1]{height}) {
 		my $blob = getObject("Slash::Blob", { db_type => 'reader' });
 		my $data = $blob->get($token->[1]{id});
@@ -1444,7 +1445,6 @@ sub _slashImage {
 			$token->[1]{height} = $h if $h && !defined $token->[1]{height};
 		}
 	}
-		warn "$token->[1]{width} $token->[1]{height}";
 
 	my $content = slashDisplay('imageLink', {
 		id	=> $token->[1]{id},
