@@ -816,12 +816,22 @@ sub get_entries {
 sub _save_params {
 	my %form;
 	my $modify = shift;
+
+	# if only two params, they are description and article
 	if (!$modify && @_ == 2) {
 		@form{qw(description article)} = @_;
+
+	# bad interface, but accept a list of pairs, in order
+	# deprecated
 	} elsif (!(@_ % 2)) {
 		my %data = @_;
 		@form{qw(description article journal_discuss posttype tid)} =
 			@data{qw(subject body discuss posttype tid)};
+
+	# accept a hashref
+	} elsif ((@_ == 1) && (UNIVERSAL::ISA($_[0], 'HASH'))) {
+		@form{qw(description article journal_discuss posttype tid)} =
+			@{$_[0]}{qw(subject body discuss posttype tid)};
 	} else {
 		return;
 	}
