@@ -58,11 +58,11 @@ Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these i
 	<TR>
 		<TD>
 			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Friend</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
-			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])</A> [% END %]
+			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</A>
 		</TD>
 		<TD>
 			<P><FONT COLOR="[% user.bg.3 %]"><B>Consider <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Foe</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
-			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])</A> [% END %]
+			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</A>
 		</TD>
 	</TR>
 	<TR>

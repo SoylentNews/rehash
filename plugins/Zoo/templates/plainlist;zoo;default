@@ -22,13 +22,8 @@ __template__
 [% FOREACH somebody = people %]
     <TR>
 	<TD VALIGN="TOP">
-		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/">[% somebody.1 %]([% somebody.0 %])</A>
+		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/">[% somebody.1 %] ([% somebody.0 %])[% PROCESS zoo_icons person=somebody.0 implied="" %]</A>
 	</TD>
-	[% IF editable %]
-		<TD VALIGN="TOP">
-			[% PROCESS zoo_icons person=somebody.0 implied="" %]
-		</TD>
-	[% END %]
 	<TD VALIGN="TOP">
 		<A HREF="[% constants.rootdir %]/~[% somebody.1 | fixparam %]/friends/">friends</A>
 	</TD>
