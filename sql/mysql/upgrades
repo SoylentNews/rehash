@@ -576,7 +576,6 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 # (this template was renamed; the new "listRepos" will be added back
 # in with a "template-tool -U")
 
-# USEPERL LAST UPDATED HERE
 # FOUNDRIES TEST SITE LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
@@ -587,3 +586,4 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 ALTER TABLE string_param MODIFY COLUMN code VARCHAR(128) NOT NULL;
 ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
+# USEPERL LAST UPDATED HERE
