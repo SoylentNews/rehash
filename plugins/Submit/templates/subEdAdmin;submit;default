@@ -19,7 +19,7 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="note" VALUE="[% form.note | strip_attribute %]">
 <INPUT TYPE="HIDDEN" NAME="section" VALUE="[% form.section | strip_attribute %]">
 
-<TABLE WIDTH="95%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
+<TABLE WIDTH="100%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
 
 [%# # temporarily disable %]
 [% IF 0 && weighted.size -%]
@@ -69,7 +69,7 @@ BLOCK sub_display -%]
 	[% this_note = sub.note || '' %]
 
 	<TR><TD><NOBR>
-		<FONT SIZE="1"><INPUT TYPE="text" NAME="comment_[% sub.subid | strip_attribute %]" VALUE="[% sub.comment | strip_attribute %]" SIZE="15">
+		<FONT SIZE="1"><INPUT TYPE="text" NAME="comment_[% sub.subid | strip_attribute %]" VALUE="[% sub.comment | strip_attribute %]" SIZE="20">
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
 		[% Slash.selectSection("section_$sub.subid", sub.section, 0, 1) %]
 
