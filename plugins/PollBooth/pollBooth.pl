@@ -103,8 +103,11 @@ sub default {
 sub editpoll {
 	my($form, $slashdb, $constants) = @_;
 
-	my($qid) = $form->{'qid'};
-	unless (getCurrentUser('is_admin')) {
+	my $qid  = $form->{'qid'};
+
+	my $user = getCurrentUser();
+
+	unless ($user->{'is_admin'}) {
 		default(@_);
 		return;
 	}
@@ -130,7 +133,7 @@ sub editpoll {
 			question	=> $poll->{pollq}{question},
 			answers		=> $poll->{answers},
 			voters		=> $poll->{pollq}{voters},
-			sect		=> $question->{section},
+			sect		=> $user->{section} || $question->{section},
 		}, 1);
 		$pollbooth = fancybox(
 			$constants->{fancyboxwidth}, 
@@ -162,12 +165,16 @@ sub editpoll {
 sub savepoll {
 	my($form, $slashdb, $constants) = @_;
 
-	unless (getCurrentUser('is_admin')) {
+	my $user = getCurrentUser();
+
+	unless ($user->{'is_admin'}) {
 		default(@_);
 		return;
 	}
 	slashDisplay('savepoll');
 	#We are lazy, we just pass along $form as a $poll
+	# Correct section for sectional editor first -Brian
+	$form->{section} = $user->{section} if $user->{section};
 	my $qid = $slashdb->savePollQuestion($form);
 
 	# we have a problem here.  if you attach the poll to an SID,
