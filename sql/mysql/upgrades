@@ -2459,8 +2459,6 @@ ALTER TABLE story_topics_rendered ADD INDEX tid_stoid (tid, stoid), DROP INDEX t
 
 INSERT INTO vars (name, value, description) VALUES ('gse_precache_mins_ahead','2','How many minutes ahead to precache getStoriesEssentials data in the query cache and memcached?');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_20, Start of T_2_5_0_21 - 2004/08/05
 
 ALTER TABLE comments ADD INDEX date_sid (date, sid);
@@ -2484,8 +2482,6 @@ CREATE TABLE topic_param (
 
 UPDATE vars SET name='m1_pointgrant_factor_upfairratio', description='Factor of upmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' WHERE name='m1_pointgrant_factor_fairratio';
 INSERT INTO vars (name,value,description) SELECT 'm1_pointgrant_factor_downfairratio', value, 'Factor of downmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' FROM vars WHERE name='m1_pointgrant_factor_upfairratio';
-
-# SLASHCLUSTER LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
 INSERT INTO vars (name, value, description) VALUES ('dbs_revive_seconds','30','After a DB goes from isalive=no to yes, ramp up accesses to it over how many seconds?');
@@ -2511,4 +2507,10 @@ INSERT INTO vars (name, value, description) VALUES ('topic_popup_open', '1', 'Ex
 # End of T_2_5_0_22, Start of T_2_5_0_23 - 2004/08/31
 
 INSERT INTO vars (name, value, description) VALUES ('gse_table_join_row_cutoff', '1000', 'Number of stoids below which getStoriesEssentials performs 2 separate selects and above which it performs a JOIN');
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_23, Start of T_2_5_0_24 - 2004/09/01
 
