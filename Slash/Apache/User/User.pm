@@ -165,6 +165,14 @@ sub handler {
 		my $newpass;
 		if ($read_only || !$tmpuid) {
 			# We know we can't log in, don't even try.
+			# We should provide a way here for the loginForm template
+			# to emit a more informative error message than its
+			# standard "Danger, Will Robinson".  That error assumes
+			# that if a unickname is specified, the only way a login
+			# could fail is if the unickname doesn't exist (!$tmpuid)
+			# or the password is wrong.  That's no longer the case
+			# since $read_only can bring us here..  Maybe set a flag
+			# in $user->{state} that the template reads? - Jamie
 			$uid = 0;
 		} else {
 			($uid, $newpass) = userLogin($tmpuid, $passwd, $logtoken);
