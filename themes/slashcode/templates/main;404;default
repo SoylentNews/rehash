@@ -38,6 +38,6 @@ The requested URL ([% origin %]) was not found.<p>
 		<P>All of the older Ask [% constants.sitename %] articles have been moved to /ask[% constants.sitename.lc %]/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
 [% END %]
 [% END %]
-<P>If you feel like it, mail the url, and where ya came from to <A HREF="mailto:[% constants.adminmail %]">[% constants.adminmail %]</A>
+<P>If you feel like it, mail the url, and where ya came from to <A HREF="mailto:[% constants.adminmail %]">[% constants.adminmail %].</A>
 __seclev__
 10000
