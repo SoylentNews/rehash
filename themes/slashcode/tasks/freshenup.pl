@@ -274,7 +274,8 @@ $task{$me}{code} = sub {
 			$do_log ||= (verbosity() >= 1);
 			if ($stderr_text =~ /\b(ID \d+, \w+;\w+;\w+) :/) {
 				# template error, skip
-				next;
+				slashdErrnote("template error updating $sid: $stderr_text");
+				next STORIES_FRESHEN;
 			}
 		}
 
