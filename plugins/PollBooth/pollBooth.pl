@@ -160,13 +160,14 @@ sub savepoll {
 #################################################################
 sub vote {
 	my($qid, $aid) = @_;
-	my($minaid, $maxaid, $qid_db);
+	my($minaid, $maxaid);
+
+	my $qid_dbi = $I{dbh}->quote($qid);
 
 	# Existence check. $minaid is included since I'm not sure if it will 
 	# always be one.
-	$qid_db = $I{dbh}->quote($qid);
 	($minaid,$maxaid) = 
-		sqlSelect("min(aid),max(aid)", "pollanswers", "qid=$qid_db") if $qid;
+		sqlSelect("min(aid),max(aid)", "pollanswers", "qid=$qid_dbi") if $qid;
 	if (!$minaid && !$maxaid) {
 		print "Invalid poll!<BR>";
 		# Non-zero denotes error condition and that comments should not be 
@@ -174,11 +175,9 @@ sub vote {
 		return 1;
 	}
 		
-	my $qid_dbi = $I{dbh}->quote($qid);
 	my $qid_htm = stripByMode($qid, 'attribute');
 
 	my $notes = "Displaying poll results";
-	$notes .= " $aid" if $aid > 0;
 	if ($I{U}{uid} == -1 && ! $I{allow_anonymous}) {
 		$notes = "You may not vote anonymously.  " .
 		    qq[Please <A HREF="$I{rootdir}/users.pl">log in</A>.];
