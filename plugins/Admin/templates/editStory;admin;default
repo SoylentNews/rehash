@@ -112,7 +112,7 @@ __template__
 		[% PROCESS editbuttons %]
 
 		[% IF topic_select %]
-		[% topic_select %]
+			[% topic_select %]
 		[% END %]
 
 		[% UNLESS user.section %]

@@ -189,7 +189,7 @@ sub varSave {
 
 	if ($form->{thisname}) {
 		my $value = $slashdb->getVar($form->{thisname}, '', 1);
-		if ($value) {
+		if ($value->{name}) {
 			$slashdb->setVar($form->{thisname}, {
 				value		=> $form->{value},
 				description	=> $form->{desc}
@@ -712,7 +712,7 @@ sub topicEdit {
 		$form->{nexttid} ? $form->{nexttid} : $constants->{defaulttopic}, 1);
 	my $sections = {};
 	if ($user->{section} && $user->{seclev} <= 9000) {
-		$sections->{$user->{section}} = $slashdb->getSection($user->{section},'title', '', 1);
+		$sections->{$user->{section}} = $slashdb->getSection($user->{section}, 'title', '', 1);
 	} else {
 		$sections = $slashdb->getDescriptions('sections-contained', '', 1);
 	}
@@ -1134,12 +1134,21 @@ sub editStory {
 	}
 
 	if ($constants->{use_alt_topic}) {
-		$topic_select = createSelect('tid',$slashdb->getDescriptions('topics_section_type', $section, $constants->{use_alt_topic}),$storyref->{tid},1);
+		$topic_select = createSelect('tid',
+			$slashdb->getDescriptions('topics_section_type', $section, $constants->{use_alt_topic}),
+			$storyref->{tid}, 1
+		);
 	} else {
 		if ($section) {
-	    		$topic_select = createSelect('tid', $slashdb->getDescriptions('topics_section', $section),$storyref->{tid}, 1);
+	    		$topic_select = createSelect('tid',
+	    			$slashdb->getDescriptions('topics_section', $section),
+	    			$storyref->{tid}, 1
+	    		);
 		} else {
-	    		$topic_select = createSelect('tid', $slashdb->getDescriptions('topics'),$storyref->{tid}, 1);
+	    		$topic_select = createSelect('tid',
+	    			$slashdb->getDescriptions('topics'),
+	    			$storyref->{tid}, 1
+	    		);
 		}
 	}
 
@@ -1156,7 +1165,7 @@ sub editStory {
 
 	$locktest = lockTest($storyref->{title});
 
-	my $display_codes = $user->{section} ? 'displaycodes_sectional' : 'displaycodes'; 
+	my $display_codes = $user->{section} ? 'displaycodes_sectional' : 'displaycodes';
 
 	unless ($user->{section}) {
 		$description = $slashdb->getDescriptions($display_codes);
@@ -1466,17 +1475,17 @@ sub updateStory {
 		: $form->{'time'};
 
 	if ($constants->{use_alt_topic} && $constants->{enable_index_topic} && $constants->{organise_stories}) {
-	    $topic = $form->{$constants->{organise_stories}};
+		$topic = $form->{$constants->{organise_stories}};
 	}
 
 	if ($constants->{multitopics_enabled}) {
 		for my $k (keys %$form) {
-		    if ($k =~ /tid_(.*)/) {
-			push @$tid_ref, $1;
-		    }
+			if ($k =~ /^tid_(.*)$/) {
+				push @$tid_ref, $1;
+			}
 		}
 		for (@{$tid_ref}) {
-		    $default_set++ if ($_ eq $topic && $topic);
+			$default_set++ if ($_ eq $topic && $topic);
 		}
 		push @$tid_ref, $topic if !$default_set;
 	
@@ -1618,7 +1627,7 @@ sub saveStory {
 		: $form->{'time'};
 
 	if ($constants->{use_alt_topic} && $constants->{enable_index_topic} && $constants->{organise_stories}) {
-	    $topic = $form->{$constants->{organise_stories}};
+		$topic = $form->{$constants->{organise_stories}};
 	}
 
 	# used to just pass $form to createStory, which is not
@@ -1661,7 +1670,7 @@ sub saveStory {
 		    }
 		}
 		for (@{$tid_ref}) {
-		    $default_set++ if $_ eq $topic;
+			$default_set++ if $_ eq $topic;
 		}
 		push @$tid_ref, $topic if !$default_set;
 	

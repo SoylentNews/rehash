@@ -36,14 +36,14 @@ sub new {
 
 ########################################################
 sub createStatDaily {
-	my($self, $day, $name, $value,$options) = @_;
+	my($self, $day, $name, $value, $options) = @_;
 	$value = 0 unless $value;
 	$options ||= {};
 
 	my $insert = {
-		'day' => $day,
-		'name' => $name,
-		'value' => $value,
+		'day'	=> $day,
+		'name'	=> $name,
+		'value'	=> $value,
 	};
 
 	$insert->{section} = $options->{section} if $options->{section};
@@ -370,7 +370,6 @@ sub getAdminModsInfo {
 ########################################################
 sub countSubmissionsByDay {
 	my($self, $yesterday, $options) = @_;
-
 
 	my $where = "time BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'";
 	$where .= " AND section = '$options->{section}'" if $options->{section};

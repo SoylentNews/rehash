@@ -364,12 +364,14 @@ sub _install {
 			$self->installPlugin($_, 0, $symlink);
 		}
 	}
+
 	unless ($is_plugin) {
 		my (%templates, @no_templates);
 		for my $name (@{$hash->{'include_theme'}}) {
-			_parseFilesForTemplates("/usr/local/slash/themes/$name/THEME", \%templates, \@no_templates);
+			my $slash_prefix = $self->get('base_install_directory')->{value};
+			_parseFilesForTemplates("$slash_prefix/themes/$name/THEME", \%templates, \@no_templates);
 			for (keys %templates) {
-				my $template = $self->readTemplateFile("$templates{$_}");
+				my $template = $self->readTemplateFile($templates{$_});
 				my $id;
 				if ($id = $self->{slashdb}->existsTemplate($template)) {
 					$self->{slashdb}->setTemplate($id, $template);
@@ -436,6 +438,7 @@ sub _install {
 			warn "Can't open $file: $!";
 		}
 	}
+
 	unless ($is_plugin) {
 		# This is where we cleanup any templates that don't belong
 		for (@{$hash->{'no-template'}}) {
@@ -465,22 +468,21 @@ sub getThemeList {
 sub getSiteTemplates {
 	my($self) = @_;
 	my (%templates, @no_templates, @final);
-	my $prefix = $self->get('base_install_directory');
-	$prefix = $prefix->{value};
+	my $slash_prefix = $self->get('base_install_directory')->{value};
 	my $plugins = $self->get('plugin');
 	my @plugins;
 	for (keys %$plugins) {
-		_parseFilesForTemplates("$prefix/plugins/$plugins->{$_}{value}/PLUGIN", \%templates, \@no_templates);
+		_parseFilesForTemplates("$slash_prefix/plugins/$plugins->{$_}{value}/PLUGIN", \%templates, \@no_templates);
 	}
 	#Themes override plugins so this has to run after plugins. -Brian
 	my $theme = $self->get('theme');
 	my $include_theme = $self->get('include_theme');
 	if ($include_theme) {
 		my @no_templates; # Not current used -Brian
-		_parseFilesForTemplates("$prefix/themes/$include_theme->{value}/THEME", \%templates, \@no_templates);
+		_parseFilesForTemplates("$slash_prefix/themes/$include_theme->{value}/THEME", \%templates, \@no_templates);
 	}
 	$theme = $theme->{value};
-	_parseFilesForTemplates("$prefix/themes/$theme/THEME", \%templates, \@no_templates);
+	_parseFilesForTemplates("$slash_prefix/themes/$theme/THEME", \%templates, \@no_templates);
 	for my $key (keys %templates) {
 		unless (grep { $key eq $_ }  @no_templates ) {
 			push @final, $templates{$key};
