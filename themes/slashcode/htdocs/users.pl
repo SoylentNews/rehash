@@ -1773,6 +1773,9 @@ sub saveUserAdmin {
 		$user_edit->{uid} = $constants->{anonymous_coward_uid};
 		$user_edit->{nonuid} = 1;
 
+		$form->{isproxy} = $form->{isproxy} eq 'on' ? 'yes' : 'no';
+		$slashdb->setIsProxy($user_edit->{ipid}, $form->{is_proxy});
+
 	} elsif ($form->{md5id}) {
 		$user_editfield_flag = 'md5id';
 		#($id, $user_edit->{ipid}, $user_edit->{subnetid})
@@ -2578,7 +2581,7 @@ sub getUserAdmin {
 	my $constants	= getCurrentStatic();
 	$id ||= $user->{uid};
 
-	my($checked, $uidstruct, $readonly, $readonly_reasons);
+	my($checked, $uidstruct, $readonly, $readonly_reasons, $isproxy);
 	my($user_edit, $user_editfield, $ipstruct, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
@@ -2615,6 +2618,7 @@ sub getUserAdmin {
 		$user_edit->{ipid} = $id;
 		$user_editfield = $id;
 		$uidstruct = $slashdb->getUIDStruct('ipid', $user_edit->{ipid});
+		$isproxy = $slashdb->checkIsProxy($user_edit->{ipid}) eq 'yes' ? ' CHECKED' : '';
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
@@ -2685,6 +2689,7 @@ sub getUserAdmin {
 		banned 			=> $banned,
 		banned_reason		=> $banned_reason,
 		banned_time		=> $banned_time,
+		isproxy			=> $isproxy,
 		userinfo_flag		=> $user_editinfo_flag,
 		userfield		=> $user_editfield,
 		ipstruct		=> $ipstruct,
