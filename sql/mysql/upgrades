@@ -2165,6 +2165,9 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_si
 
 # SLASHCLUSTER LAST UPDATED HERE
 
+# Changes for plugins/Hof (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('hof_do_not_count', '', 'Do not list stories with these (space-separated) sids in hof.pl');
+
 # End of T_2_3_0_142, Start of T_2_3_0_143 - 2004/03/10
 
 INSERT INTO vars (name, value, description) VALUES ('accesslog_imageregex', '^/images/hc/', 'Image hits will only be written into accesslog if their URL path matches this regex, empty string for all, NONE for none');
