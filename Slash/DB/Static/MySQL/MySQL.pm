@@ -610,6 +610,13 @@ sub getTop10Comments {
 	my $cids = [];
 	my $comments = [];
 	my $num_top10_comments = 0;
+	my $max_cid = $self->getMaxCid();
+
+	# To make this select a LOT faster, we limit not only by date
+	# but by the primary key.  If any site gets more than 20,000
+	# comments in a day, my hat's off to ya.
+	my $min_cid = ($max_cid || 0) - 20_000;
+	$min_cid = 0 if $min_cid < 1;
 
 	while (1) {
 		# Select the latest comments with high scores.  If we
@@ -618,7 +625,8 @@ sub getTop10Comments {
 		$cids = $self->sqlSelectAll(
 			'cid',
 			'comments',
-			"date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+			"cid >= $min_cid
+				AND date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
 				AND points >= $max_score",
 			'ORDER BY date DESC');
 
