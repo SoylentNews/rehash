@@ -971,7 +971,7 @@ sub _save_params {
 		return;
 	}
 
-	$form{journal_discuss} = 'discuss' if $form{journal_discuss} == 1;
+	$form{journal_discuss} = 'enabled' if $form{journal_discuss} == 1;
 	$form{tid} =~ s/\D+//g;
 
 	return \%form;
