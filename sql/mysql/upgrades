@@ -2159,12 +2159,8 @@ INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_si
 
 # End of T_2_3_0_141, Start of T_2_3_0_142 - 2004/03/09
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # Changes for plugins/Hof (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('hof_do_not_count', '', 'Do not list stories with these (space-separated) sids in hof.pl');
-
-# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_142, Start of T_2_3_0_143 - 2004/03/10
 
@@ -2206,14 +2202,18 @@ INSERT INTO vars (name, value, description) VALUES ('comments_portscan_ports', '
 INSERT INTO vars (name, value, description) VALUES ('comments_portscan_timeout', '5', 'If comments_portscan_anon_for_proxy is true, use this as timeout');
 
 CREATE TABLE open_proxies (
-	ip	VARCHAR(15) NOT NULL,
-	port	SMALLINT UNSIGNED NOT NULL DEFAULT '0',
-	ts	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-	PRIMARY KEY (ip),
-	KEY ts (ts)
+   ip      VARCHAR(15) NOT NULL,
+   port    SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+   ts      DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+   PRIMARY KEY (ip),
+   KEY ts (ts)
 ) TYPE=InnoDB;
 
-# End of T_2_3_0_144, Start of T_2_3_0_146 - 2004/03/23
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_3_0_145, Start of T_2_3_0_146 - 2004/03/24
 
 UPDATE vars SET name='comments_portscan', description='Scan incoming IPs for open proxy ports? 0=never, 1=anon posting only, 2=all posting' WHERE name='comments_portscan_anon_for_proxy';
 
