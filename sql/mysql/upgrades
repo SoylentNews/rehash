@@ -2481,4 +2481,7 @@ CREATE TABLE topic_param (
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
 
-INSERT INTO vars (name, value, description) VALUES ('accesslog_logs_images','1','Does your accesslog log image requests?');
+# It's suggested you don't log image requests to accesslog for performance reasons with the new
+# log_db_qps task.  If your site isn't very busy it may not matter
+# To turn off image logging:
+# UPDATE vars set value = 'NONE' where name='accesslog_imageregex';
