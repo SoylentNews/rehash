@@ -38,7 +38,7 @@ $task{$me}{code} = sub {
 	my $count = $constants->{message_process_count} || 10;
 
 	my $msgs;
-	if ($last_deferred ne $now) {
+	if ($constants->{task_options}{all} || $last_deferred ne $now) {
 		$msgs = $messages->gets();  # do it all, baby
 		$slashdb->setVar('message_last_deferred', $now);
 	} else {
