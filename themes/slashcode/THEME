@@ -91,6 +91,7 @@ task=tasks/set_recent_topics.pl
 task=tasks/spamarmor.pl
 template=templates/user_titlebar;misc;default
 template=templates/admin;menu;default
+template=templates/adv-admin;menu;default
 template=templates/changePasswd;users;default
 template=templates/comment_submit;comments;default
 template=templates/currentAdminUsers;misc;default
