@@ -1270,6 +1270,7 @@ sub editStory {
 	# I've never understood why we check *this* field to make
 	# that determination.  Now that we have $newarticle, should
 	# we be using that instead? - Jamie
+	# if that tells us, then sure - pudge
 	if ($form->{title}) {
 
 		my $storyskin = $gSkin;
