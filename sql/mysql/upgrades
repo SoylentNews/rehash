@@ -476,7 +476,12 @@ INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|
 
 # OSDNTEST LAST UPDATED HERE
 # OSDN LAST UPDATED HERE
-# LINUX.COM
+# LINUX.COM LAST UPDATED HERE
+
+# Forgot this one a little while ago too.
+# For plugins/Stats:
+INSERT INTO vars (name, value, description) VALUES ('mod_stats','1','Include stats on moderation in the daily admin mail?');
+
 DROP TABLE IF EXISTS sections_contained;
 CREATE TABLE sections_contained (
 	id SMALLINT UNSIGNED NOT NULL auto_increment,
@@ -489,3 +494,4 @@ CREATE TABLE sections_contained (
 ) TYPE = myisam;
 ALTER TABLE sections ADD rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL;
 ALTER TABLE sections ADD last_update timestamp;
+
