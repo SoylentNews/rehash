@@ -23,7 +23,7 @@ __template__
 	<TR>
 		<TD VALIGN="TOP" ALIGN="LEFT">
 			[% FOREACH question = questions %]
-				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes. [% question.2 %]
+				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A> on [% Slash.timeCalc(question.2, '%B %o, %Y') %] with [% question.3 %] votes and [% question.4 %] comments.
 				[% IF user.is_admin %]
 					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% question.0 %]">Edit</A>)
 					(<A HREF="[% constants.rootdir %]/pollBooth.pl?op=delete&amp;qid=[% question.0 %]">Delete</A>)

@@ -2445,14 +2445,15 @@ sub getPollQuestionList {
 	}
 
 	$where .= "autopoll = 'no'";
+	$where .= " AND pollquestions.discussion  = discussions.id ";
 	$where .= sprintf ' AND section IN (%s)', join(',', @{$other->{section}})
 		if $other->{section};
 	$where .= sprintf ' AND section NOT IN (%s)', join(',', @{$other->{exclude_section}})
 		if $other->{exclude_section} && @{$other->{section}};
 
 	my $questions = $self->sqlSelectAll(
-		'qid, question, date, voters',
-		'pollquestions',
+		'qid, question, date, voters, commentcount',
+		'pollquestions,discussions',
 		$where,
 		"ORDER BY date DESC LIMIT $offset,20"
 	);
