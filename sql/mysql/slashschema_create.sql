@@ -70,6 +70,7 @@ CREATE TABLE accesslog (
 	static enum("yes","no") DEFAULT "yes",
 	secure tinyint DEFAULT 0 NOT NULL,
 	referer varchar(254),
+	status smallint UNSIGNED DEFAULT 200 NOT NULL,
 	INDEX host_addr_part (host_addr(16)),
 	INDEX op_part (op(12), section),
 	INDEX ts (ts),
@@ -90,7 +91,7 @@ CREATE TABLE accesslog_admin (
 	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
 	form MEDIUMBLOB NOT NULL,
 	secure tinyint DEFAULT 0 NOT NULL,
-	status mediumint UNSIGNED DEFAULT 200 NOT NULL,
+	status smallint UNSIGNED DEFAULT 200 NOT NULL,
 	INDEX host_addr (host_addr),
 	INDEX ts (ts),
 	PRIMARY KEY (id)

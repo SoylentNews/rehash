@@ -1219,7 +1219,7 @@ INSERT INTO vars (name, value, description) VALUES ('prepuser_backup_prob','0','
 
 # Doesn't have to be 250, pick whatever for your own site.
 INSERT INTO vars (name, value, description) VALUES ('comment_commentlimit','250','Max commentlimit users can set');
-UPDATE users_info SET commentlimit=250 WHERE commentlimit > 250;
+UPDATE users_comments SET commentlimit=250 WHERE commentlimit > 250;
 
 CREATE TABLE classes (
   id mediumint UNSIGNED NOT NULL auto_increment,
@@ -1244,9 +1244,15 @@ INSERT INTO vars (name, value, description) VALUES ('poll_fwdfor','1','Loose pro
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_hours','48','Mailing a password only allowed mailpass_max_num times per account per this many hours');
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_num','2','Mailing a password only allowed this many times per account per mainpass_max_hours hours');
 
-#Already applied to Slashdot
+# Already applied to Slashdot
 ALTER TABLE users_info ADD people_status ENUM ("ok","dirty") DEFAULT "ok" NOT NULL;
 ALTER TABLE users_info ADD index people_status(people_status);
 DROP TABLE  people_nthdegree;
 ALTER TABLE people DROP last_update;
-ALTER TABLE accesslog ADD status mediumint UNSIGNED DEFAULT 200 NOT NULL;
+ALTER TABLE stories ADD INDEX section (section);
+
+ALTER TABLE stories DROP INDEX frontpage;
+
+ALTER TABLE accesslog ADD status smallint UNSIGNED DEFAULT 200 NOT NULL;
+ALTER TABLE accesslog_admin ADD status smallint UNSIGNED DEFAULT 200 NOT NULL;
+
