@@ -74,7 +74,6 @@ template=templates/admin;menu;default
 template=templates/changePasswd;users;default
 template=templates/comment_submit;comments;default
 template=templates/currentAdminUsers;misc;default
-template=templates/data;article;default
 template=templates/data;comments;default
 template=templates/data;index;default
 template=templates/data;metamod;default
