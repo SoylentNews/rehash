@@ -175,7 +175,7 @@ EOT
 	}
 	my %data = (
 		total => sprintf("%8d", $count->{total}),
-		total_bytes => sprintf("%0.1f",$total_bytes/1024),
+		total_bytes => sprintf("%0.1f",$total_bytes/(1024*1024)),
 		unique => sprintf("%8d", $count->{unique}), 
 		users => sprintf("%8d", $count->{unique_users}),
 		accesslog => sprintf("%8d", $accesslog_rows),
@@ -202,11 +202,11 @@ EOT
 		articles_page => sprintf("%8d", $article_page_views ),
 		journals_page => sprintf("%8d", $journal_page_views),
 
-		palm_bytes => sprintf("%0.1f",$palm_bytes/1024),
-		rss_bytes => sprintf("%0.1f",$rss_bytes/1024),
-		comment_bytes => sprintf("%0.1f",$comment_bytes/1024 ),
-		article_bytes => sprintf("%0.1f",$article_bytes/1024 ),
-		journal_bytes => sprintf("%0.1f",$journal_bytes/1024),
+		palm_bytes => sprintf("%0.1f",$palm_bytes/(1024*1024)),
+		rss_bytes => sprintf("%0.1f",$rss_bytes/(1024*1024)),
+		comment_bytes => sprintf("%0.1f",$comment_bytes/(1024*1024) ),
+		article_bytes => sprintf("%0.1f",$article_bytes/(1024*1024) ),
+		journal_bytes => sprintf("%0.1f",$journal_bytes/(1024*1024)),
 		
 		palm_page => sprintf("%8d", $palm_page_views),
 		rss_page => sprintf("%8d", $rss_page_views),
