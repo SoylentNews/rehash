@@ -306,9 +306,9 @@ sub action {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
 	if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
-			_printHead("mainhead");
-			print getData("over_socialized");
-			return;
+		_printHead("mainhead");
+		print getData("over_socialized");
+		return;
 	} else {
 		if ( $form->{op} eq 'delete' || $form->{type} eq 'neutral') {
 			if ($form->{uid}) {

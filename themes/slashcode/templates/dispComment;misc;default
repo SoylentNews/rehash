@@ -53,9 +53,6 @@ __template__
 	[% PROCESS zoo_icons person=uid bonus=1 %]
 [% END %]
 
-[% IF user.seclev >= 100 && ipid && subnetid %]
-				<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">IPID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid %]</A>&nbsp;&nbsp;SubnetID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% subnetid %]&amp;fieldname=subnetid">[% subnetid %]</A></FONT>
-[% END %]
 [% ipid_display %]
 			</TD></TR></TABLE></TD>
 			<TD BACKGROUND="[% constants.imagedir %]/gr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>

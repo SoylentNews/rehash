@@ -330,7 +330,7 @@ sub displayStories {
 		# I added sid so that you could set up replies from the front page -Brian
 		$return .= slashDisplay($link_template, {
 			links	=> \@links,
-			sid => $sid,
+			sid	=> $sid,
 		}, { Return => 1});
 
 		my($w) = join ' ', (split m/ /, $time)[0 .. 2];

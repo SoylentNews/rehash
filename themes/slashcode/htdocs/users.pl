@@ -1283,13 +1283,13 @@ sub editComm {
 	my $hi = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $lo = -$hi;
 	# And this was wrong, see we display +3 not 3. So the display was a bit off :)
-	my @range = ($lo .. $hi);
-	for (0..@range) {
-		if ($range[$_] > 0)	{
-			$range[$_] = "+$range[$_]";	
-		}
-	}
+	my @range = map { $_ > 0 ? '+' . $_ : $_ } ($lo .. $hi);
+
 	# And now we have to fix all of the users :(   -Brian
+	# is this temporary, to fix bad DB entries?
+	# if so, we should just change the DB; the code's not
+	# been released yet, so we don't have to worry about
+	# other sites. -- pudge
 	for (qw| friend foe fan freak |) {
 		my $key = "people_bonus_$_";
 		$user->{$key} = "+$user->{$key}"
@@ -1760,6 +1760,8 @@ sub saveComm {
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
 		# I picked a bad name for a key, filter_params strips the + sign which I need.
 		# This just fixes that. -Brian
+		# we can change filter_params to allow /^\+/,
+		# can't we? -- pudge
 		$answer = "+$user->{$key}"
 			if $answer > 0 && $answer !~ /^\+./;
 		$users_comments_table->{$key} = ($answer == 0) ? '' : $answer;

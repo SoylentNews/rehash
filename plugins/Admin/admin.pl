@@ -1316,7 +1316,7 @@ sub updateStory {
 		}
 		push @$tid_ref, $form->{tid} if !$default_set;
 	
-		$slashdb->setStoryTopics($form->{sid},$tid_ref);
+		$slashdb->setStoryTopics($form->{sid}, $tid_ref);
 	}
 
 	$slashdb->updateStory();
@@ -1368,7 +1368,7 @@ sub saveStory {
 		}
 		push @$tid_ref, $form->{tid} if !$default_set;
 	
-		$slashdb->setStoryTopics($sid,$tid_ref);
+		$slashdb->setStoryTopics($sid, $tid_ref);
 	}
 
 	if ($sid) {
