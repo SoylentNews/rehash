@@ -20,11 +20,12 @@ use vars qw(
 	@abbreviations	%abbreviations
 	$slashdb	$constants	$logdb
 	@db
-	$time_last	$maxlog_last
-	$time_first	$maxlog_first
-	$time_new	$maxlog_new
-	$pages		$loadavg	$num_cycles
-	$pages_total	$loadavg_sum
+	$time_last	$maxlog_last	$maxcid_last
+	$time_first	$maxlog_first	$maxcid_first
+	$time_new	$maxlog_new	$maxcid_new
+	$queries	$pages		$comments
+	$queries_total	$pages_total	$comments_total
+	$loadavg	$loadavg_sum	$num_cycles
 	$lines_since_header
 );
 
@@ -104,9 +105,14 @@ sub init {
 	$num_cycles = 0;
 	$loadavg_sum = 0;
 	$pages_total = 0;
+	$comments_total = 0;
+	$queries_total = 0;
 
 	$maxlog_first = $logdb->sqlSelect("MAX(id)", "accesslog");
 	$maxlog_last = $maxlog_first;
+
+	$maxcid_first = $slashdb->sqlSelect("MAX(cid)", "comments");
+	$maxcid_last = $maxcid_first;
 
 	$time_first = Time::HiRes::time;
 	$time_last = $time_first;
@@ -130,6 +136,10 @@ sub run {
 	# want to correlate times.
 	print scalar(gmtime) . "\n";
 
+	# And print the key for the hitrate column because it's not
+	# very intuitive.
+	print "InnoDB cache (h)itrate key:   + >98%   - 94-98%   X <94%   ? unknown\n";
+
 	while (1) {
 
 		print_header() if $lines_since_header > $height;
@@ -138,6 +148,7 @@ sub run {
 
 		$time_new = Time::HiRes::time;
 		$maxlog_new = $logdb->sqlSelect("MAX(id)", "accesslog");
+		$maxcid_new = $slashdb->sqlSelect("MAX(cid)", "comments");
 
 		update_db_ary();
 
@@ -151,6 +162,7 @@ sub run {
 		print "\n"; ++$lines_since_header;
 
 		$time_last = $time_new;
+		$maxcid_last = $maxcid_new;
 		$maxlog_last = $maxlog_new;
 		for my $db (@db) {
 			$db->{queries_last} = $db->{queries_new};
@@ -164,7 +176,7 @@ sub run {
 
 sub print_header {
 	# First line of header: spaces over the global stuff, headers for DBs
-	printf("%4s %4s %4s", "", "", "");
+	printf("%4s %4s %5s %4s %4s", "", "", "", "", "");
 	for my $db (@db) {
 		my $wid = 14;
 		$wid += 2 if $db->{innostatus_sth};
@@ -179,7 +191,7 @@ sub print_header {
 	print "\n";
 
 	# Second line of header: names for the globals, names for DB columns
-	printf("%4s %4s %4s", "time", "load", "pps");
+	printf("%4s %4s %5s %4s %4s", "time", "load", "cps", "pps", "qpp");
 	for my $db (@db) {
 		printf(" %4s %3s %4s", "qps", "sps", "qpp");
 		print " h" if $db->{innostatus_sth};
@@ -213,12 +225,21 @@ sub print_first_line {
 		$pages = $maxlog_new - $maxlog_last;
 	}
 	$pages_total += $pages;
+	$comments = $maxcid_new - $maxcid_last;
+	$comments_total = $maxcid_new - $maxcid_first;
+	$queries = 0;
+	for my $db (@db) {
+		$queries += $db->{queries_new} - $db->{queries_last};
+	}
+	$queries_total += $queries;
 	my $time_elapsed = $time_new - $time_last;
 	$time_elapsed = 0.01 if $time_elapsed < 0.01;
-	printf("%4s %4.2f %4.1f",
+	printf("%4s %4.2f %5.2f %4.1f %4.1f",
 		"",
 		$loadavg,
-		$pages / $time_elapsed
+		$comments / $time_elapsed,
+		$pages / $time_elapsed,
+		$queries / ($pages ? $pages : 1),
 	);
 	$pages = 1 if $pages < 1; # Below it's used in a denominator
 	for my $db (@db) {
@@ -232,7 +253,7 @@ sub print_first_line {
 			if (!defined($db->{hitrate})) {
 				print " ?";
 			} elsif ($db->{hitrate} >= 98) {
-				print "  ";
+				print " +";
 			} elsif ($db->{hitrate} >= 94) {
 				print " -";
 			} else {
@@ -245,13 +266,15 @@ sub print_first_line {
 
 sub print_second_line {
 	# Second line: stats since slashmon started running
-	my $pt = $pages_total || 1;
 	my $time_elapsed = $time_new - $time_first;
 	$time_elapsed = 0.01 if $time_elapsed < 0.01;
-	printf("%4d %4.2f %4.1f",
+	my $pt = $pages_total || 1;
+	printf("%4d %4.2f %5.2f %4.1f %4.1f",
 		$time_new - $time_first,
 		$loadavg_sum / $num_cycles,
-		$pt / $time_elapsed,
+		$comments_total / $time_elapsed,
+		$pages_total / $time_elapsed,
+		$queries_total / $pt,
 	);
 	for my $db (@db) {
 		my $slow = sprintf("%4.2f", ($db->{slow_queries_new} - $db->{slow_queries_first}) / $time_elapsed);
@@ -289,13 +312,19 @@ sub getLoadavg {
 
 sub getQueries {
 	my($sth) = @_;
-	$sth->execute();
 	my($q, $sq);
-	while (my($key, $val) = $sth->fetchrow()) {
-		$q = $val, next	if $key eq "Questions";
-		$sq = $val	if $key eq "Slow_queries";
+	my $num_tries = 3;
+	while (!$q && --$num_tries >= 0) {
+		$sth->execute();
+		while (my($key, $val) = $sth->fetchrow()) {
+			$q = $val, next	if $key eq "Questions";
+			$sq = $val	if $key eq "Slow_queries";
+		}
+		$sth->finish();
 	}
-	$sth->finish();
+	if (!$q) {
+		print STDERR "getQueries returning q='$q' sq='$sq' for sth '$sth'\n";
+	}
 	return($q, $sq);
 }
 
@@ -385,13 +414,15 @@ Global stats are the left 3 columns:
 	time	Elapsed seconds
 	load	CPU load on this machine
 	pps	Pages per second
+	cps	Comments per second
+	qpp	Queries per page (total)
 
 For each DB, the data is:
 	qps	Queries per second
 	sps	Slow queries per second
 	qpp	Queries per page
-	h	Cache hit rate percent (MySQL 4.x only)
-		("+" means 98% or better, "-" means not)
+	h	InnoDB cache hit rate percent (MySQL 4.x only)
+		("+" means > 98%, "-" means 94-98%, "X" means < 94%)
 EOT
 	exit 0;
 }
