@@ -1042,9 +1042,11 @@ sub setCookie {
 # Need to scan the connection class to find this information.
 # (I'll do it later). This may also be in $r->protocol -Brian
 # Brian advises port() is the best way, yes it's icky -Jamie
-	if ($constants->{cookiesecure} && $r->port == 443) {
-		$cookiehash{-secure} = 1;
-	}
+# This doesn't work yet! I think I want $r->connection->local_addr
+# (and then unpack it and look at the port) - Jamie
+#	if ($constants->{cookiesecure} && $r->port == 443) {
+#		$cookiehash{-secure} = 1;
+#	}
 
 	my $cookie = Apache::Cookie->new($r, %cookiehash);
 
