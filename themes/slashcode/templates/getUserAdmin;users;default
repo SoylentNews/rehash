@@ -69,22 +69,22 @@ __template__
 			<FORM ACTION="[% env.script_name %]" METHOD="POST">
 			<TR>
 		[% IF form.formkey %]
-			        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+			        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey | strip_attribute %]">
 		[% END %]
 				<INPUT TYPE="HIDDEN" NAME="op" VALUE="admin">
 
 				[%- IF field == 'uid' -%]
-				<INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid %]">
+				<INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid | strip_attribute %]">
 		
 				[%- ELSIF field == 'ipid' -%]
-				<INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid %]">
+				<INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid | strip_attribute %]">
 		
 				[%- ELSIF field == 'md5id' -%]
-				<INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id %]">
+				<INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id | strip_attribute %]">
 				<INPUT TYPE="HIDDEN" NAME="fieldname" VALUE="[% form.fieldname | strip_attribute %]">
 		
 				[%- ELSIF field == 'subnetid' -%]
-				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid %]">
+				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid | strip_attribute %]">
 				[%- END -%]
 
 				<TD VALIGN="MIDDLE">
@@ -117,7 +117,7 @@ __template__
 			<TR>
 				<TD><B>Seclev</B></TD>
 				<TD COLSPAN="4">
-				<INPUT TYPE="TEXT" NAME="seclev" SIZE="7" value="[% useredit.seclev %]"></TD>
+				<INPUT TYPE="TEXT" NAME="seclev" SIZE="7" value="[% useredit.seclev | strip_attribute %]"></TD>
 				<TD>&nbsp;</TD>
 			</TR>
 			<TR>
@@ -148,13 +148,13 @@ __template__
 			</TR>
 			<TR>
 				<TD WIDTH="100">Comments</TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_comments" [% readonly.comments %]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="comments_ro_reason" VALUE="[% readonly_reasons.comments %]"></TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_comments" [% readonly.comments | strip_attribute %]>&nbsp;&nbsp;
+				Reason <INPUT TYPE="TEXT" NAME="comments_ro_reason" VALUE="[% readonly_reasons.comments | strip_attribute %]"></TD>
 			</TR>
 			<TR>
 				<TD WIDTH="100">Submissions</TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_submit" [% readonly.submit%]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="submit_ro_reason" VALUE="[% readonly_reasons.submit %]"></TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_submit" [% readonly.submit | strip_attribute %]>&nbsp;&nbsp;
+				Reason <INPUT TYPE="TEXT" NAME="submit_ro_reason" VALUE="[% readonly_reasons.submit | strip_attribute %]"></TD>
 			</TR>
 			<TR>
 				<TD COLSPAN=3 HEIGHT=10></TD>
@@ -165,7 +165,7 @@ __template__
 			<TR>
 				<TD WIDTH="100">Banned from [% constants.sitename %]</TD>
 				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="banned_reason" VALUE="[% banned_reason%]"></TD>
+				Reason <INPUT TYPE="TEXT" NAME="banned_reason" VALUE="[% banned_reason | strip_attribute %]"></TD>
 			</TR>
 
 			[% IF ! useredit.nonuid %]
@@ -177,7 +177,7 @@ __template__
 			<TR>
 				<TD WIDTH="100"><B>Real time black list</B></TD>
 				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="rtbl" [% useredit.rtbl %]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="rtbl_reason" VALUE="[% useredit.rtbl_reason %]"></TD>
+				Reason <INPUT TYPE="TEXT" NAME="rtbl_reason" VALUE="[% useredit.rtbl_reason | strip_attribute %]"></TD>
 			</TR>
 			<TR>
 				<TD COLSPAN=3 HEIGHT=10></TD>
