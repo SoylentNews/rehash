@@ -20,20 +20,13 @@ __template__
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
      comments: [% comments %] posted yesterday
-        Users: [% distinct_comment_posters_uids %] distinct uids posted comments
-             : [% comments_uids %] distinct uids used comments
-             : [% article_uids %] distinct uids used articles
-             : [% search_uids %] distinct uids used search
-             : [% journal_uids %] distinct uids used journals
-             : [% palm_uids %] distinct uids used palm pages
-             : [% rss_uids %] distinct uids used rss pages
-        IPIDS: [% IPIDS %] distinct IPIDS posted comments
-             : [% comments_ipids %] distinct IPIDS used comments
-             : [% article_ipids %] distinct IPIDS used articles
-             : [% search_ipids %] distinct IPIDS used search
-             : [% journal_ipids %] distinct IPIDS used journals
-             : [% palm_ipids %] distinct IPIDS used palm pages
-             : [% rss_ipids %] distinct IPIDS used rss pages
+  Users/IPIDS: [% distinct_comment_posters_uids %] distinct uids [% IPIDS %] distinct IPIDS posted comments
+             : [% comments_uids %] distinct uids [% comments_ipids %] distinct IPIDS used comments
+             : [% article_uids %] distinct uids [% article_ipids %] distinct IPIDS used articles
+             : [% search_uids %] distinct uids [% search_ipids %] distinct IPIDS used search
+             : [% journal_uids %] distinct uids [% journal_ipids %] distinct IPIDS used journals
+             : [% palm_uids %] distinct uids [% palm_ipids %] distinct IPIDS used palm pages
+             : [% rss_uids %] distinct uids [% rss_ipids %] distinct IPIDS used rss pages
     pageviews: [% comments_page %] for comments ([% comments_bytes %])
              : [% article_page %] for articles ([% article_bytes %])
              : [% search_page %] for searches ([% search_bytes %])
@@ -50,10 +43,8 @@ __template__
 [% FOREACH section = sections -%]
 
 For [% section.section_name %]
-   page views: [% section.page %]
-     visitors: [% section.ipids %]
-     bandwith: [% section.bytes %]
-        users: [% section.users %]
+   page views: [% section.page %] visitors: [% section.ipids %]
+    bandwidth: [% section.bytes %]   users: [% section.users %]
 
                   Pages      IPs   Bandwidth    Users
 [% IF section.index.page > 0 -%]
