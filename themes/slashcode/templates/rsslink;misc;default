@@ -20,7 +20,7 @@ __template__
 ))
 %][% Slash.root2abs() %]/index.pl?content_type=rss&amp;logtoken=[% user.logtoken | fixparam %][%
 ELSE
-%][% gSkin.rootdir %]/[% Slash.sitename2filename(user.currentSkin) %].rss[%
+%][% gSkin.rootdir %]/[% Slash.sitename2filename(gSkin.name) %].rss[%
 END -%]
 __seclev__
 10000
