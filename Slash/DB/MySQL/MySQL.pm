@@ -4604,6 +4604,19 @@ sub getSubmissionForUser {
 		'ORDER BY time'
 	);
 
+	for my $sub (@$submissions) {
+		my $append = $self->sqlSelectAll(
+			'name,value',
+			'submission_param',
+			"subid=" . $self->sqlQuote($sub->{subid})
+		);
+
+		for (@$append) {
+			$sub->{$_->[0]} = $_->[1];
+		}
+	}
+
+
 	formatDate($submissions, 'time', 'time', '%m/%d  %H:%M');
 
 	# Drawback - This method won't return param data for these submissions
