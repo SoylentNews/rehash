@@ -39,7 +39,11 @@ sub main {
 	my $ops = {
 		admin		=>  {
 			function 	=> \&adminDispatch,
-			seclev		=> 100,
+			seclev		=> 10000,	# if this should be lower,
+							# then something else is
+							# broken, because it allows
+							# anyone with this seclev
+							# to change their own seclev
 			formname	=> $formname,
 			checks		=> [],
 		},
