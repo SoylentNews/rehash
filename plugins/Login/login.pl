@@ -389,7 +389,6 @@ sub _validFormkey {
 
 	my $error;
 	for (@checks) {
-		warn "$op: $formname: $_\n";
 		my $err = formkeyHandler($_, $formname, 0, \$error, $options);
 		last if $err || $error;
 	}

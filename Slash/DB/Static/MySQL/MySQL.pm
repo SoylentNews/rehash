@@ -2286,25 +2286,29 @@ sub getModderCommenterIPIDSummary {
 ########################################################
 
 sub avgDynamicDurationForHour {
-	my ($self, $ops, $days, $hour) = @_;
-	my $page_types = [@$ops];	
-	my $name_clause  = join ',', map { $_ = $self->sqlQuote("duration_dy_$_\_$hour\_mean") } (@$page_types);
-	my $day_clause = join ',', map { $_ = $self->sqlQuote($_) }	@$days;
+	my($self, $ops, $days, $hour) = @_;
+	my $page_types = [@$ops];
+	my $name_clause  = join ',', map { $_ = $self->sqlQuote("duration_dy_$_\_$hour\_mean") } @$page_types;
+	my $day_clause = join ',', map { $_ = $self->sqlQuote($_) } @$days;
 
-	return $self->sqlSelectAllHashref("name", "AVG(value) as avg, name", "stats_daily",
-						"name IN ($name_clause) and day IN ($day_clause)",
-						"GROUP BY name" );
+	return $self->sqlSelectAllHashref("name",
+		"AVG(value) as avg, name", "stats_daily",
+		"name IN ($name_clause) and day IN ($day_clause)",
+		"GROUP BY name"
+	);
 }
 
 sub avgDynamicDurationForMinutesBack {
-	my ($self, $ops, $minutes, $start_id) = @_;
+	my($self, $ops, $minutes, $start_id) = @_;
 	$start_id ||= 0;
 	my $page_types = [@$ops];
-	my $op_clause  = join ',', map { $_ = $self->sqlQuote("$_") }	(@$page_types);
+	my $op_clause  = join ',', map { $_ = $self->sqlQuote("$_") } @$page_types;
 	print STDERR ("op_clause: $op_clause");
-	return $self->sqlSelectAllHashref("op", "op, AVG(duration) as avg", "accesslog", 
-					"id >= $start_id AND ts >= DATE_SUB(NOW(), INTERVAL $minutes MINUTE) AND static='no' AND op in($op_clause)",
-					"GROUP BY op");
+	return $self->sqlSelectAllHashref("op",
+		"op, AVG(duration) as avg", "accesslog",
+		"id >= $start_id AND ts >= DATE_SUB(NOW(), INTERVAL $minutes MINUTE) AND static='no' AND op in($op_clause)",
+		"GROUP BY op"
+	);
 }
 
 1;
