@@ -32,12 +32,6 @@ Currently, payment is only through paypal.
 <TD>[% PROCESS paypalbut %]</TD>
 </TR></TABLE></CENTER>
 
-<FORM ACTION="[% env.script_name %]">
-
-[% IF user.uid != user_edit.uid %]
-<INPUT TYPE="hidden" NAME="uid" VALUE="[% user_edit.uid %]">
-[% END %]
-
 [% anything_to_edit = 0 %]
 
 [%
@@ -72,6 +66,17 @@ and so far [% hits_bought %] have been used up.
 	contribution very much.
 [% END %]
 
+[% IF user.seclev >= 100
+	|| ( hits_paidfor && (hits_paidfor > hits_bought) ) %]
+
+	<FORM ACTION="[% env.script_name %]">
+
+	[% IF user.uid != user_edit.uid %]
+	<INPUT TYPE="hidden" NAME="uid" VALUE="[% user_edit.uid %]">
+	[% END %]
+
+[% END %]
+
 [% IF user.seclev >= 100 %]
 	<P>Want to buy
 	[% IF user.uid != user_edit.uid %]"[% user_edit.nickname %]"[% END %]
@@ -81,7 +86,7 @@ and so far [% hits_bought %] have been used up.
 [% END %]
 
 [% IF user.seclev >= 100
-	|| hits_paidfor && ( hits_paidfor > hits_bought ) %]
+	|| ( hits_paidfor && (hits_paidfor > hits_bought) ) %]
 
 	<P>We give you some control over deciding where to suppress ads.
 	New subscribers default to suppressing ads everywhere except on
@@ -112,15 +117,15 @@ and so far [% hits_bought %] have been used up.
 	>&nbsp;Set "No Ads" anywhere, and you'll get ads disabled for
 	free on other pages too.</TD></TR>
 
-</TABLE>
+	</TABLE>
+
+	[% IF anything_to_edit %]
+		<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
+	[% END %]
+
+	</FORM>
 
 [% END %]
-
-[% IF anything_to_edit %]
-	<INPUT TYPE="SUBMIT" NAME="op" VALUE="save">
-[% END %]
-
-</FORM>
 
 __seclev__
 10000
