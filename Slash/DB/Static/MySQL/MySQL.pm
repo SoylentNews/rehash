@@ -782,13 +782,16 @@ sub stirPool {
 	for my $user_hr (@$stir_ar) {
 		my $uid = $user_hr->{uid};
 		my $pts = $user_hr->{points};
+		my $tokens_pt_chg = $tokens_per_pt * $pts;
 
 		my $change = { };
 		$change->{points} = 0;
 		$change->{-lastgranted} = "NOW()";
 		$change->{-stirred} = "stirred + $pts";
-		$change->{-tokens} = "tokens - " . ($tokens_per_pt * $pts)
-			if $tokens_per_pt;
+		# In taking tokens away, this subtraction itself will not
+		# cause the value to go negative.
+		$change->{-tokens} = "LEAST(tokens, GREATEST(tokens - $tokens_pt_chg, 0))"
+			if $tokens_pt_chg;
 		$self->setUser($uid, $change);
 
 		$n_stirred += $pts;
