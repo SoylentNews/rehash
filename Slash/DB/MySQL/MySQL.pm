@@ -355,6 +355,9 @@ sub setModeratorLog {
 #this is broke right now -Brian
 #
 # Work, dammit! - Cliff
+# 
+# This is the method that returns the list of comments for a user to
+# metamod, at any given time.
 sub getMetamodComments {
 	my($self, $user, $num_comments) = @_;
 
@@ -390,7 +393,7 @@ sub getMetamodComments {
 			             $maxMod - $modpos < $num_comments;
 		my $cond = "moderatorlog.uid != $user->{uid}
 			AND moderatorlog.cuid != $user->{uid}
-			AND moderatorlog.reason < 8
+			AND moderatorlog.reason <= 8
 			AND moderatorlog.id > $modpos
 			AND moderatorlog.m2count < $thresh";
 		{
@@ -400,7 +403,7 @@ sub getMetamodComments {
 		}
 
 		my $result = $self->sqlSelectAllHashrefArray(
-			'id, cid as mcid, reason as modreason',
+			'id, cid AS mcid, reason AS modreason',
 			'moderatorlog',
 			$cond,
 			"ORDER BY id LIMIT $num"
