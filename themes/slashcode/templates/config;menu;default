@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+Display admin menu.
+
+* items = arrayref of hashref of menu items (value (link), label)
+
+__title__
+
+__page__
+menu
+__lang__
+en_US
+__name__
+config
+__template__
+<TABLE BGCOLOR="[% user.bg.2 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
+	<TR>
+		<TD>
+[ [% FOR i = items %]
+		<FONT SIZE="2"><A HREF="[% i.value %]">[% i.label %]</A></FONT>
+	[% " | " UNLESS loop.last %]
+[% END %] ]	</TD>
+	</TR>
+</TABLE>
+
+__seclev__
+10000

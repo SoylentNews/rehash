@@ -12,7 +12,7 @@ menu
 __lang__
 en_US
 __name__
-adv-admin
+info
 __template__
 <TABLE BGCOLOR="[% user.bg.2 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
 	<TR>

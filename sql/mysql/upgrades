@@ -805,3 +805,16 @@ INSERT INTO vars (name, value, description) VALUES ('mod_stir_hours','96','Numbe
 # and assuming a clean vars table is important to you:
 DELETE FROM vars WHERE name='stir';
 
+# split the 2 admin menus into 3
+# adv-admin is now config
+UPDATE menus SET label='Config', value='[% constants.rootdir %]/admin.pl?op=topics' WHERE label='Advanced';
+UPDATE menus SET menu='info' WHERE label='Site' AND menu='adv-admin';
+UPDATE menus SET menu='config' WHERE menu='adv-admin';
+UPDATE menus SET menu='info' WHERE label='Recent';
+UPDATE menus SET menu='info' WHERE label='Slashd';
+
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Info', '[% constants.rootdir %]/admin.pl?op=recent', 500, 12);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Normal', '[% constants.rootdir %]/admin.pl', 500, 9);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('config', 'Info', '[% constants.rootdir %]/admin.pl?op=recent', 500, 10);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Normal', '[% constants.rootdir %]/admin.pl', 500, 12);
+REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('info', 'Config', '[% constants.rootdir %]/admin.pl?op=topics', 500, 13);
