@@ -35,6 +35,10 @@ sub new {
 	$self->{defpage}{index} ||= 0;
 	$self->{defpage}{article} ||= 0;
 	$self->{defpage}{comments} ||= 0;
+	$self->{defpage}{_any} =
+		   $self->{defpage}{index}
+		|| $self->{defpage}{article}
+		|| $self->{defpage}{comments};
 
         bless($self, $class);
 
@@ -66,6 +70,7 @@ sub _subscribeDecisionPage {
         } else {
                 $uri =~ s{^.*/([^/]+)\.pl$}{$1};
         }
+	my $first_defpage = (sort keys %{$self->{defpage}})[0] || "index";
 	if ($uri =~ /^(index|article|comments)$/) {
 		# We check to see if the user has saved preferences for
 		# which page types they want to buy.  This assumes the
@@ -73,16 +78,19 @@ sub _subscribeDecisionPage {
 		# users_param;  if the first (alphabetic) page listed
 		# in the var does not exist, then we simply use the
 		# default values.
-		my $first_defpage = (sort keys %{$self->{defpage}})[0];
 		if (exists $user->{"buypage_$first_defpage"}) {
 			$decision = 1 if $user->{"buypage_$uri"};
 		} else {
 			$decision = 1 if $self->{defpage}{$uri};
 		}
 	} elsif ($trueOnOther) {
-		$decision = 1 if $user->{buypage_index}
-			or $user->{buypage_article}
-			or $user->{buypage_comments};
+		if (exists $user->{"buypage_$first_defpage"}) {
+			$decision = 1 if $user->{buypage_index}
+				or $user->{buypage_article}
+				or $user->{buypage_comments};
+		} else {
+			$decision = 1 if $self->{defpage}{_any};
+		}
 	}
 	if (getCurrentStatic('subscribe_debug')) {
 		print STDERR "_subscribeDecisionPage $trueOnOther $decision $user->{uid}"
