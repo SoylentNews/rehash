@@ -73,6 +73,15 @@ __template__
 [% CASE 'metamods_performed' %]
 	<P>[% num %] MetaModeration(s) Completed.
 
+[% CASE 'moderating' %]
+	Moderating...
+
+[% CASE 'metamoderating' %]
+	MetaModerating...
+
+[% CASE 'deletecid' %]
+	Delete form.cid
+
 [% END %]
 
 __seclev__

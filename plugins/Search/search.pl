@@ -82,13 +82,13 @@ sub main {
 		# Yep, these are hardcoded, and someday this should change... -Brian 
 		my $text = strip_notags($form->{query});
 		header("$constants->{sitename}: Search  $text") or return;
-		titlebar("100%", "Searching For:  $text");
-		$form->{op} = 'stories' if !exists($ops{$form->{op}});
+		titlebar("100%", getData('search_result', { text => $text }));
+		$form->{op} = 'stories' unless exists $ops{$form->{op}};
 
 		# Here, panic mode is handled without needing to call the
 		# individual search subroutines;  we're going to tell the
 		# user the same thing in each case anyway.
-		if ($constants->{panic} >= 1 or $constants->{search_google} or !$searchDB) {
+		if ($constants->{panic} >= 1 || $constants->{search_google} || !$searchDB) {
 			slashDisplay('nosearch');
 		} else {
 			if ($ops{$form->{op}}) {

@@ -123,9 +123,13 @@ my $start_time = Time::HiRes::time;
 	# TIMING MARKPOINT
 	# Median 0.437 seconds, 90th percentile 1.078 seconds
 
-	my($first_date, $last_date) = ($stories->[0]{time}, $stories->[-1]{time});
-	$first_date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
-	$last_date  =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
+	# damn you, autovivification!
+	my($first_date, $last_date);
+	if (@$stories) {
+		($first_date, $last_date) = ($stories->[0]{time}, $stories->[-1]{time});
+		$first_date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
+		$last_date  =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
+	}
 
 	my $StandardBlocks = displayStandardBlocks($section, $stories,
 		{ first_date => $first_date, last_date => $last_date }
@@ -486,7 +490,7 @@ sub displayStories {
 		}
 
 		if ($user->{seclev} >= 100) {
-			push @links, [ "$constants->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", 'Edit' ];
+			push @links, [ "$constants->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", getData('edit') ];
 		}
 
 		# I added sid so that you could set up replies from the front page -Brian

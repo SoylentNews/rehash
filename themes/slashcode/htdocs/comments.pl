@@ -350,8 +350,7 @@ sub getError {
 sub delete {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	# The content here should also probably go into a template.
-	titlebar("100%", "Delete $form->{cid}");
+	titlebar("100%", getData('deletecid'));
 
 	my $delCount = deleteThread($form->{sid}, $form->{cid});
 
@@ -494,7 +493,6 @@ sub commentIndexUserCreated {
 	my($form, $slashdb, $user, $constants, $error_message) = @_;
 	my $label = getData('label');
 
-	# um, let's put this in the template
 	# titlebar("100%", getData('user_discussions'));
 	my $searchdb = getObject('Slash::Search', $constants->{search_db_user});
 	my $start    = $form->{start} || 0;
@@ -1470,7 +1468,7 @@ sub moderate {
 	}
 
 	if ($form->{meta_mod_only}) {
-		titlebar("100%", "MetaModerating...");
+		titlebar("100%", getData('metamoderating'));
 		print getData("metamoderate_message");
 		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
 		return;
@@ -1497,8 +1495,7 @@ sub moderate {
 	my $total_deleted = 0;
 	my $hasPosted;
 
-	# The content here should also probably go into a template.
-	titlebar("100%", "Moderating...");
+	titlebar("100%", getData('moderating'));
 
 	$hasPosted = $slashdb->countCommentsBySidUID($sid, $user->{uid})
 		unless ($constants->{authors_unlimited}

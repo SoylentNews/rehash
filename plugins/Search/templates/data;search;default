@@ -61,6 +61,9 @@ __template__
 	[% returnme.data_constant = 1 %]
 	All Subsections
 
+[% CASE 'search_result' %]
+	Searching For: [% text %]
+
 [% END %]
 
 __seclev__
