@@ -30,7 +30,7 @@ IF d.1.defined && d.1.length %][% d.1 %][% ELSE %]untitled[% END %]</A>
 <P>
 
 [% IF user.seclev >= constants.discussion_create_seclev && !supress_create;
-    [% PROCESS discreate topic=constants.discussion_default_topic disclabel=label %]
+    PROCESS discreate topic=constants.discussion_default_topic label=label; 
 END %]
 
 

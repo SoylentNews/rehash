@@ -41,11 +41,11 @@ __template__
 <INPUT TYPE="submit" NAME="submit" VALUE="Submit">
 [% END %]
 [% PROCESS formbox
-    title => "Create a $disclabel",
+    title => "Create a $label.ufirst",
     begin => begin,
     end   => '</FORM>',
     pairs => [
-        { label => "Name this $disclabel", value => val1 },
+        { label => "Name this $label", value => val1 },
         { label => "Optional referring URL", value => val2 },
         { label => "Pick a Topic", value => val3 },
     ]
