@@ -474,8 +474,6 @@ sub stripByMode {
 		$str =~ s/&/&amp;/g;
 		$str =~ s/</&lt;/g;
 		$str =~ s/>/&gt;/g;
-		### this is not ideal; we want breakHtml to be
-		### entity-aware
 		# attributes are inside tags, and don't need to be broken up
 		$str = breakHtml($str) unless $no_white_fix || $fmode == ATTRIBUTE;
 
@@ -624,6 +622,7 @@ C<approveTag> function, C<approveCharref> function.
 
 sub stripBadHtml {
 	my($str) = @_;
+#print STDERR "stripBadHtml 1 '$str'\n";
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
@@ -649,9 +648,11 @@ sub stripBadHtml {
 		)
 	}{&lt;$1}gx;
 
+#print STDERR "stripBadHtml 2 '$str'\n";
 	my $ent = qr/#?[a-zA-Z0-9]+/;
 	$str =~ s/&(?!$ent;)/&amp;/g;
 	$str =~ s/&($ent);?/approveCharref($1)/ge;
+#print STDERR "stripBadHtml 3 '$str'\n";
 
 	return $str;
 }
@@ -858,7 +859,7 @@ sub breakHtml {
 	# the mwl), but the algorithm would be too complicated to
 	# implement in a regex, at least practically speaking, and
 	# walking through the string is also fairly complex.
-	$text =~ s{ ($nswcr)}{ &nbsp;$1}gs;
+	$text =~ s{$nswcr}{$1&nbsp;$2$3}gs;
 #print STDERR "text 7 '$text'\n";
 
 	return $text;
