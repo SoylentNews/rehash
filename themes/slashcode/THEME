@@ -49,7 +49,6 @@ htdoc=htdocs/index.pl
 htdoc=htdocs/metamod.pl
 htdoc=htdocs/moderation.shtml
 htdoc=htdocs/pollBooth.pl
-htdoc=htdocs/sections.pl
 htdoc=htdocs/topics.pl
 htdoc=htdocs/users.pl
 mysql_dump=sql/mysql/datadump.sql
