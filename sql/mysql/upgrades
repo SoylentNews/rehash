@@ -265,10 +265,16 @@ INSERT INTO vars (name, value, description) VALUES ('admin_formkeys', '0', 'Do a
 # End of T_2_3_0_21
 
 # Install GD.pm and associated libraries for plugins/HumanConf.
+# GD/Text and GD/Text/Align.pm are needed too.
 # These Debian packages are believed necessary:
 # libfreetype6-dev libfreetype6 freetype2 libjpeg62-dev libjpeg62
 # when building from source, I used freetype-2.1.0, libpng-1.2.2,
 # jpeg-6b, and gd-1.8.4, and the GD module from the CPAN. -- pudge
+# last night Cliff and I got it to work on Debian stable using
+# libjpeg62(-dev) and xpm4g(-dev) debs, plus source compiles of
+# freetype-2.1.0 and gd-1.8.4; GD had 1 error (#8) and GD::Text
+# had several errors, but after force installing, they work OK
+# for HumanConf purposes.
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
@@ -278,5 +284,4 @@ ALTER TABLE submissions ADD COLUMN signature varchar(32) DEFAULT '' NOT NULL;
 ALTER TABLE submissions ADD UNIQUE story_signature(signature);
 UPDATE submissions SET signature=MD5(story);
 ALTER TABLE submissions MODIFY COLUMN signature varchar(32) NOT NULL;
-
 
