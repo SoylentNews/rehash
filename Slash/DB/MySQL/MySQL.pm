@@ -1302,21 +1302,6 @@ sub setContentFilter {
 }
 
 ########################################################
-# Only Slashdot uses this method
-# not for long... - Cliff
-sub setSectionExtra {
-	my($self, $full, $story) = @_;
-
-	if ($full && $self->sqlTableExists($story->{section}) && $story->{section}) {
-		my $extra = $self->sqlSelectHashref('*', $story->{section}, "sid='$story->{sid}'");
-		for (keys %$extra) {
-			$story->{$_} = $extra->{$_};
-		}
-	}
-
-}
-
-########################################################
 # This creates an entry in the accesslog
 sub createAccessLog {
 	my($self, $op, $dat) = @_;

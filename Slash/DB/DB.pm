@@ -374,28 +374,6 @@ Fixed KEY.
 
 =back
 
-=head2 setSectionExtra(KEY)
-
-I am the default documentation, short and stout.
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item KEY
-
-Key, as in the KEY
-
-=back
-
-=item Return value
-
-Fixed KEY.
-
-=back
-
 =head2 createAccessLog(OP, DATA)
 
 This creates an entry into the access log. Keep
