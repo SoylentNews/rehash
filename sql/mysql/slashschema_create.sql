@@ -562,7 +562,7 @@ CREATE TABLE pollquestions (
 	discussion mediumint,
 	date datetime,
 	uid mediumint UNSIGNED NOT NULL,
-	section varchar(30) NOT NULL,
+	primaryskid SMALLINT UNSIGNED,
 	autopoll ENUM("no","yes") DEFAULT 'no' NOT NULL,
 	flags ENUM("ok","delete","dirty") DEFAULT 'ok' NOT NULL,
 	polltype enum('nodisplay','section','story') default 'section',
