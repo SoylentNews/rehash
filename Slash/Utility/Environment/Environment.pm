@@ -1044,6 +1044,13 @@ sub setCookie {
 # Brian advises port() is the best way, yes it's icky -Jamie
 # This doesn't work yet! I think I want $r->connection->local_addr
 # (and then unpack it and look at the port) - Jamie
+# OK, this works:
+	if ($constants->{cookiesecure}) {
+		my $subr = $r->lookup_uri($r->uri);
+		if ($subr && $subr->subprocess_env('HTTPS') eq 'on') {
+			$cookiehash{-secure} = 1;
+		}
+	}
 #	if ($constants->{cookiesecure} && $r->port == 443) {
 #		$cookiehash{-secure} = 1;
 #	}

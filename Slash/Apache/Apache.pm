@@ -261,8 +261,9 @@ sub ConnectionIsSSL {
 	# That probably didn't work so let's get that data the hard way.
 	my $r = Apache->request;
 	my $subr = $r->lookup_uri($r->uri);
-	my $sess_id = $subr->subprocess_env('SSL_SESSION_ID');
-	return 1 if $sess_id;
+	my $https_on = ($subr && $subr->subprocess_env('HTTPS') eq 'on')
+		? 1 : 0;
+	return 1 if $https_on;
 
 	# Nope, it's not SSL.
 	return 0;
