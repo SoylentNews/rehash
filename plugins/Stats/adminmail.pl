@@ -27,10 +27,10 @@ $task{$me}{code} = sub {
 		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
 		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
 	} else {
-		$stats = getObject('Slash::Stats', "", { day => $yesterday, create => 1  });
+		$stats = getObject('Slash::Stats');
 		$backupdb = $slashdb;
 	}
-	my $logdb = getObject('Slash::DB', $constants->{'log_db_user'} || $constants->{'backup_db_user'},
+	my $logdb = getObject('Slash::Stats', $constants->{'log_db_user'} || $constants->{'backup_db_user'},
 												{ day => $yesterday, create => 1  });
 
 	unless($logdb) {
