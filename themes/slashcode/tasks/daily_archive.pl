@@ -43,9 +43,10 @@ $task{$me}{code} = sub {
 	}
 
 	# Takes approx. 60 seconds on Slashdot
+	my $logdb = getObject('Slash::DB', { db_type => 'log_slave' });
 	slashdLog('Update Total Counts Begin');
 	my $totalHits = $slashdb->getVar("totalhits", '', 1);
-	my $count = $slashdb->countAccesslogDaily();
+	my $count = $logdb->countAccesslogDaily();
 	$slashdb->setVar("totalhits", $totalHits);
 	slashdLog('Update Total Counts End');
 
