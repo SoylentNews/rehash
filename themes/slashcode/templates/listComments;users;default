@@ -165,6 +165,7 @@ thread_col_2 = user.bg.2;
 						END;
 					END;
 				 END -%]
+				[% IF form.show_m1s.defined ? form.show_m1s : user.mod_with_comm %]
 				<tr bgcolor="[% light_bgcolor %]">
 				[% IF type=="netid" %]<TD></TD>[% END %]
 				<td align=right><font size=-1  color="[% light_text_color2 %]">[% PROCESS nick_and_uid nickname=m.nickname uid=m.uid %]</font></td>
@@ -174,8 +175,9 @@ thread_col_2 = user.bg.2;
 				<td> </td>
 				<td>[% PROCESS link_ipid ipid=m.ipid ipid_vis=Slash.vislenify(m.ipid) %]</td>
 				<td> <font size=-1 color="[% light_text_color2 %]">[% IF m.val > 0; "+"; END; m.val %], [% reasons.${m.reason}.name %] </font></td>
-
+				
  </tr>
+				[% END %]
 			[%- END -%]
 		[%- END -%]
 		[%- prev_com = comment -%]
@@ -296,7 +298,7 @@ END %]
 [% BLOCK base_url %]
 	[% base_url = constants.rootdir _ "/users.pl?op=userinfo&amp;fieldname=";
 	IF type == "user";
-		base_url = base_url _ "uid&amp;userfield=" _ useredit.uid;
+		base_url = "/users.pl?op=userinfo&amp;uid=" _ useredit.uid;
 	ELSE; 
 		fp_fieldname = BLOCK; form.fieldname | fixparam; END;
 		fp_netid = BLOCK; netid | fixparam; END;
