@@ -816,6 +816,16 @@ CREATE TABLE story_dirty (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'story_render_dirty'
+#
+
+DROP TABLE IF EXISTS story_render_dirty;
+CREATE TABLE story_render_dirty (
+	stoid MEDIUMINT UNSIGNED NOT NULL,
+	PRIMARY KEY (stoid)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'story_text'
 #
 
@@ -865,7 +875,6 @@ DROP TABLE IF EXISTS story_topics_rendered;
 CREATE TABLE story_topics_rendered (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	tid SMALLINT(5) UNSIGNED NOT NULL,
-	weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
 	UNIQUE story_topic (stoid, tid),
 	INDEX tid_stoid (tid, stoid)
 ) TYPE=InnoDB;
@@ -993,11 +1002,12 @@ CREATE TABLE topic_nexus_dirty (
 
 DROP TABLE IF EXISTS topic_nexus_extras;
 CREATE TABLE topic_nexus_extras (
-	extras_id MEDIUMINT UNSIGNED NOT NULL,
+	extras_id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	tid SMALLINT UNSIGNED NOT NULL,
 	extras_keyword VARCHAR(100) NOT NULL,
 	extras_textname VARCHAR(100) NOT NULL,
-	type ENUM('text', 'list'),
+	type ENUM('text', 'list') NOT NULL DEFAULT 'text',
+	content_type ENUM('story', 'comment') NOT NULL DEFAULT 'story',
 	PRIMARY KEY (extras_id),
 	UNIQUE tid_keyword (tid, extras_keyword)
 ) TYPE=InnoDB;

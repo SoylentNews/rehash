@@ -73,11 +73,17 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	# Sleep until :10 after the top of the minute.
+	# Make sure we run at (and until) predictable times through
+	# the minute.
 	my $time = time;
 	my $now_secs = $time % 60;
+	# Don't bother running this time around if there are fewer
+	# than 20 seconds left in the minute (that's cutting it
+	# too close).
 	return "started too late" if $now_secs > 40;
+	# If it's between :00 and :09, sleep until it's :10.
 	sleep 10 - $now_secs if $now_secs < 10;
+	# Quit trying once it gets up to :55.
 	my $max_time = $time - $now_secs + 55;
 
 	# Make each gSE query to each virtual user.

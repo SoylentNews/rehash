@@ -3009,6 +3009,7 @@ sub saveTopic {
 		### tids under 10000 are reserved for "normal" tids, where > 10000
 		### are for tids where we want to have a specific tid, such as
 		### for topics groups that might be moved between sites
+		### XXXSECTIONTOPICS
 		my $where = 'tid < 10000';
 		my $default_tid = 0;
 		if ($options->{lower_limit}) {
@@ -3538,6 +3539,50 @@ sub markSkinDirty {
 }
 
 ########################################################
+# When a topic is marked as dirty, every story that references it
+# must be marked as needing to have its topics re-rendered.
+sub markTopicsDirty {
+	my($self, $tids) = @_;
+	return if !$tids || !@$tids;
+	my $tid_list = join(",", @$tids);
+	my $stoids_c = $self->sqlSelectColArrayref(
+		"DISTINCT(stoid)",
+		"story_topics_chosen",
+		"tid IN ($tid_list)");
+	my $stoids_r = $self->sqlSelectColArrayref(
+		"DISTINCT(stoid)",
+		"story_topics_rendered",
+		"tid IN ($tid_list)");
+	my %stoids = map { ($_, 1) } (@$stoids_c, @$stoids_r);
+	my $stoids_ar = [ sort { $a <=> $b } keys %stoids ];
+	$self->markStoriesRenderDirty($stoids_ar);
+	# Mark the topic tree as dirty so its PNG will be updated.
+	$self->setVar('topic_tree_lastchange', time());
+}
+
+########################################################
+sub markStoriesRenderClean {
+	my($self, $stoids) = @_;
+	return if !$stoids || !@$stoids;
+	my $stoid_list = join(",", @$stoids);
+	$self->sqlDelete('story_render_dirty', "stoid IN ($stoid_list)");
+}
+
+########################################################
+sub markStoriesRenderDirty {
+	my($self, $stoids) = @_;
+	$self->setStory_delete_memcached_by_stoid($stoids);
+	$self->sqlDo("SET AUTOCOMMIT=0");
+	for my $stoid (@$stoids) {
+		$self->sqlInsert('story_render_dirty',
+			{ stoid => $stoid },
+			{ delayed => 1, ignore => 1 });
+	}
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
+}
+
+########################################################
 sub markStoryClean {
 	my($self, $id) = @_;
 	my $stoid = $self->getStoidFromSidOrStoid($id);
@@ -3551,10 +3596,9 @@ sub markStoryDirty {
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 	$self->sqlInsert('story_dirty', { stoid => $stoid }, { ignore => 1 });
 
-	my $rendered_hr = $self->getStoryTopicsRendered($stoid);
-	return unless $rendered_hr;
-	my $tids = [ keys %$rendered_hr ];
-	$self->setStory_delete_memcached_by_tid($tids);
+	my $rendered_tids = $self->getStoryTopicsRendered($stoid);
+	return unless $rendered_tids && @$rendered_tids;
+	$self->setStory_delete_memcached_by_tid($rendered_tids);
 }
 
 ########################################################
@@ -5750,7 +5794,7 @@ sub displaystatusForStories {
 		'stoid',
 		'DISTINCT stories.stoid',
 		'stories, story_topics_rendered AS str ',
-		"stories.stoid=str.stoid AND str.tid in($section_nexus_list) " .
+		"stories.stoid=str.stoid AND str.tid IN ($section_nexus_list) " .
 		"AND stories.stoid IN ($stoid_list)",
 	);
 	my $nd = $self->sqlSelectAllKeyValue(
@@ -6962,8 +7006,8 @@ sub getStoriesEssentials {
 	my $return_min_stoid_only = $options->{return_min_stoid_only} || 0;
 
 	# Now set some secondary variables.
-	my $the_time = time + $fake_secs_ahead;
-	my $the_minute = $the_time - $the_time % 60;
+	my $the_time = time;
+	my $the_minute = ($the_time+$fake_secs_ahead) - ($the_time+$fake_secs_ahead) % 60;
 	my $lim_sum = $limit + $limit_extra + $offset;
 	my $min_stoid_margin = $gSkin->{artcount_max}
 		+ int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
@@ -9399,6 +9443,91 @@ sub renderTopics {
 }
 
 ########################################################
+# Collect all the changes that need to be made for a number of
+# stories (possibly thousands) into one big hashref.
+sub buildStoryRenderHashref {
+	my($self, $stoids) = @_;
+	return { } if !$stoids || !@$stoids;
+
+	my %return_hash = ( );
+	my $stoids_in_clause = join(",", @$stoids);
+
+	# Pull in all the chosen hash data at once.
+	my $chosen_ar = $self->sqlSelectAll(
+		"stoid, tid, weight",
+		"story_topics_chosen",
+		"stoid IN ($stoids_in_clause)");
+	my %chosen = ( );
+	for my $triple_ar (@$chosen_ar) {
+		my($stoid, $tid, $weight) = @$triple_ar;
+		$chosen{$stoid}{$tid} = $weight;
+	}
+
+	# Convert each chosen hash data to rendered data and the
+	# auxilliary data that goes along with it.
+	for my $stoid (@$stoids) {
+		$return_hash{$stoid}{rendered} = $self->renderTopics($chosen{$stoid});
+		$return_hash{$stoid}{primaryskid} = $self->getPrimarySkidFromRendered($return_hash{$stoid}{rendered});
+		$return_hash{$stoid}{tids} = $self->getTopiclistFromChosen($chosen{$stoid});
+	}
+
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+#print STDERR scalar(localtime) . " $$ buildStoryRenderHashref s_i_c '$stoids_in_clause' chosen: " . Dumper(\%chosen);
+#print STDERR "return_hash: " . Dumper(\%return_hash);
+
+	return \%return_hash;
+}
+
+########################################################
+# Apply all the topic rendering changes for a bunch of stories
+# all at the same time.
+sub applyStoryRenderHashref {
+	my($self, $render_hr) = @_;
+	return if !$render_hr || !%$render_hr;
+	my @stoids = sort { $a <=> $b } keys %$render_hr;
+	my $all_in_clause = join(",", @stoids);
+
+	# Do the changes for the stories table.  We try to do this in
+	# as few UPDATEs as possible, grouping together the stories
+	# that share both a primaryskid and tid.
+	my %primaryskid_tid = ( );
+	for my $stoid (@stoids) {
+		my $primaryskid = $render_hr->{$stoid}{primaryskid};
+		my $tid = $render_hr->{$stoid}{tids}[0];
+		$primaryskid_tid{$primaryskid}{$tid} ||= [ ];
+		push @{ $primaryskid_tid{$primaryskid}{$tid} }, $stoid;
+	}
+	# Change the stories.{primaryskid,tid} columns, in bulk where
+	# possible.
+	for my $primaryskid (sort { $a <=> $b } keys %primaryskid_tid) {
+		for my $tid (sort { $a <=> $b } keys %{$primaryskid_tid{$primaryskid}}) {
+			my $stoid_ar = $primaryskid_tid{$primaryskid}{$tid};
+			my $in_clause = join(",", @$stoid_ar);
+			$self->sqlUpdate(
+				"stories",
+				{ primaryskid => $primaryskid, tid => $tid },
+				"stoid IN ($in_clause)");
+		}
+	}
+	# Delete and reinsert the story_topics_rendered data.
+	$self->sqlDelete("story_topics_rendered", "stoid IN ($all_in_clause)");
+	$self->sqlDo("SET AUTOCOMMIT=0");
+	for my $stoid (@stoids) {
+		my $str_hr = $render_hr->{$stoid}{rendered};
+		for my $tid (sort { $a <=> $b } keys %$str_hr) {
+			$self->sqlInsert('story_topics_rendered',
+				{ stoid => $stoid, tid => $tid },
+				{ delayed => 1, ignore => 1 });
+		}
+	}
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
+
+	# Mark all the stories invalid in memcached.
+	$self->setStory_delete_memcached_by_stoid([ @stoids ]);
+}
+
+########################################################
 # Get chosen topics for a story in hashref form
 sub getStoryTopicsChosen {
 	my($self, $stoid) = @_;
@@ -9412,8 +9541,8 @@ sub getStoryTopicsChosen {
 # Get rendered topics for a story in hashref form
 sub getStoryTopicsRendered {
 	my($self, $stoid) = @_;
-	return $self->sqlSelectAllKeyValue(
-		"tid, weight",
+	return $self->sqlSelectColArrayref(
+		"tid",
 		"story_topics_rendered",
 		"stoid='$stoid'");
 }

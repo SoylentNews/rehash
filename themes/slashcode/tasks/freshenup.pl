@@ -53,6 +53,8 @@ $task{$me}{code} = sub {
 	if ($do_all) {
 		my $x = 0;
 		# this deletes stories that have a writestatus of 'delete'
+		# XXXSECTIONTOPICS this works, but rewrite it to use the
+		# modern API
 		my $deletable = $slashdb->getStoriesWithFlag(
 			'delete',
 			'ASC',
@@ -68,7 +70,37 @@ $task{$me}{code} = sub {
 	}
 
 	my $stories;
-	
+
+	# Write new values into story_topics_rendered for any stories
+	# which may have been affected by a topic tree change.  There
+	# may be a large number of these (thousands?) and while we
+	# can't do them all at once, we don't want to kill performance
+	# by nuking the story_topics_rendered query cache every minute
+	# while we do them piecemeal.  So instead, we try to take a
+	# big bite out of what needs to be done while there are stories
+	# within the latest 1000 that need this, and then afterwards,
+	# take a smaller bite every 10 minutes at a do_all.
+	$stories = $slashdb->getSRDsWithinLatest(1000);
+	if (!@$stories) {
+		if ($do_all) {
+			# Try the smaller bite.
+			$stories = $slashdb->getSRDs(20);
+		} else {
+			# Either there's nothing to be done or there's
+			# nothing urgent enough to be done.  Leave the
+			# arrayref empty, do nothing now.
+		}
+	}
+	# We're going to build up a hash that contains everything we
+	# want to do, and apply it all at once, because if we're going
+	# to nuke the query cache we might as well get it over with
+	# quickly.
+	if ($stories && @$stories) {
+		my $update_hr = $slashdb->buildStoryRenderHashref($stories);
+		$slashdb->applyStoryRenderHashref($update_hr);
+		$slashdb->markStoriesRenderClean($stories);
+	}
+
 	# Render any stories that need rendering.  This used to be done
 	# by admin.pl;  now admin.pl just sets story_text.rendered=NULL
 	# and lets this task do it.

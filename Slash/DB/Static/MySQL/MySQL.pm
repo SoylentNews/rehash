@@ -1845,6 +1845,38 @@ sub getMinCommentcount {
 
 ########################################################
 # For freshenup.pl
+sub getSRDsWithinLatest {
+	my($self, $num_latest) = @_;
+	$num_latest ||= 1000;
+	my $max_stoid = $self->sqlSelect("MAX(stoid)", "stories");
+	my $srd_latest = 0;
+	if ($max_stoid && $max_stoid > $num_latest) {
+		$srd_latest = $self->sqlSelectColArrayref(
+			"stoid",
+			"story_render_dirty",
+			"stoid > " . $max_stoid - $num_latest);
+	} else {
+		$srd_latest = $self->sqlSelectColArrayref(
+			"stoid",
+			"story_render_dirty");
+	}
+	return $srd_latest;
+}
+
+########################################################
+# For freshenup.pl
+sub getSRDs {
+	my($self, $limit) = @_;
+	$limit ||= 100;
+	return $self->sqlSelectColArrayref(
+		"stoid",
+		"story_render_dirty",
+		"",
+		"ORDER BY stoid DESC LIMIT $limit");
+}
+
+########################################################
+# For freshenup.pl
 #
 # We have an index on just 1 char of story_text.rendered, and
 # its only purpose is to make this select into a lookup instead
