@@ -86,7 +86,6 @@ sub getActive {
 
 	my ($sid, $order, $where);
 
-	my $order;
 	if ($limit) {
 		$order = "ORDER BY time DESC LIMIT $limit";
 	} else {
