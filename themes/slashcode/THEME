@@ -164,6 +164,7 @@ template=templates/main;404;default
 template=templates/main;authors;default
 template=templates/mainmenu;misc;default
 template=templates/maintable_tr;misc;default
+template=templates/maintable_tr_end;misc;default
 template=templates/maintable_td;misc;default
 template=templates/maintable_end;misc;default
 template=templates/messages;users;default

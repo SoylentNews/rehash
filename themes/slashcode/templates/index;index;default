@@ -69,11 +69,17 @@ message_count.read %] old message[% message_count.read == 1 ? "" : "s";
 [% stories %]
 
 [% UNLESS user.noboxes %]
+
 </TD>
 [% PROCESS maintable_td %]&nbsp;</TD>
 [% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_align="CENTER" mt_valign="TOP" %]
-<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0">
-[% boxes || "&nbsp;" %]
+[% IF boxes;
+	boxes %]
+	<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0">
+[% ELSE %]
+	&nbsp;
+[% END %]
+
 [% END %]
 
 __seclev__

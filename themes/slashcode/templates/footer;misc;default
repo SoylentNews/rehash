@@ -17,6 +17,7 @@ __template__
 
 </TD>
 
+[% PROCESS maintable_tr_end %]
 [% PROCESS maintable_end %]
 
 <P>

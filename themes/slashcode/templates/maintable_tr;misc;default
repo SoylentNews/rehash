@@ -21,12 +21,13 @@ __template__
 [%
 user.state.mt.curcol = 1;
 min_rows = 999;
-FOR rowcheck = user.state.mt.cols;
-	NEXT IF loop.first;
-	IF rowcheck < min_rows;
-		min_rows = rowcheck;
-		user.state.mt.curcol = loop.index;
+mt_i = 1;
+WHILE mt_i <= user.state.mt.cols.max;
+	IF user.state.mt.cols.$mt_i < min_rows;
+		min_rows = user.state.mt.cols.$mt_i;
+		user.state.mt.curcol = mt_i;
 	END;
+	mt_i = mt_i + 1;
 END;
 user.state.mt.curcol = user.state.mt.curcol - 1;
 IF min_rows == 999; min_rows = 0; END;

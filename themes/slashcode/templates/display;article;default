@@ -61,7 +61,8 @@ IF section_block.block;
 		center		= 1;
 END %]
 
-</TD></TR>
+</TD>
+[% PROCESS maintable_tr_end %]
 
 [% PROCESS maintable_tr %]
 [% PROCESS maintable_td mt_colspan="4" %]

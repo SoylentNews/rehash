@@ -56,7 +56,7 @@ __template__
 	Either the subject or the journal text was empty.  Please complete the entry and try again.
 
 [% CASE 'noentries_found' %]
-	Sorry, there are no journal entries found for this user.
+	Sorry, there are no journal entries found for this user.<BR>&nbsp;<BR>&nbsp;
 
 [% END %]
 

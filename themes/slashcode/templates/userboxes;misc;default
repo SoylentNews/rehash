@@ -16,8 +16,6 @@ __name__
 userboxes
 __template__
 
-<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0">
-
 [%
 
 IF !useredit; useredit = user; END;
@@ -38,10 +36,7 @@ IF user.is_anon;
 			[% PROCESS userlogin %]
 		[% END;
 	END;
-	PROCESS fancybox
-		title		= title
-		contents	= contents
-		center		= 1;
+	Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
 
 END;
 
@@ -157,10 +152,7 @@ IF !useredit.is_anon;
 			useredit.bio;
                 END;
 	END;
-	PROCESS fancybox
-		title		= title
-		contents	= contents
-		center		= 1;
+	Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
 
 	# Second box:  info about moderation, if applicable
 	# Note this applies to the current user, not the user
@@ -184,10 +176,7 @@ for instructions.
 URLs showing abuse (the cid link please!).
 [% END %]
 		[% END;
-		PROCESS fancybox
-			title		= title
-			contents	= contents
-			center		= 1;
+		Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
 	END;
 
 	# Third box:  user space, if applicable
@@ -196,12 +185,11 @@ URLs showing abuse (the cid link please!).
 	IF user.mylinks;
 		title = "User Space";
 		contents = user.mylinks;
-		PROCESS fancybox
-			title		= title
-			contents	= contents
-			center		= 1;
+		Slash.fancybox(constants.fancyboxwidth, title, contents, '', 1);
 	END;
 END %]
+
+<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0">
 
 __seclev__
 1000
