@@ -180,7 +180,7 @@ __template__
 		Related Poll</A>
 		[% END %]
 		[% IF subid %]
-		| <A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% subid %]"></A>
+		| <A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&subid=[% subid %]">submission</A>
 		[% END %]
 
 		]

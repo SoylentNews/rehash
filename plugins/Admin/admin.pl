@@ -997,7 +997,8 @@ sub editStory {
 	my($authoredit_flag, $extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $topic, $storycontent, $locktest,
 		$sections, $topic_select, $section_select, $author_select,
-		$extracolumns, $displaystatus_select, $commentstatus_select, $description);
+		$extracolumns, $displaystatus_select, $commentstatus_select, 
+		$subid, $description);
 	my $extracolref = {};
 	my($fixquotes_check, $autonode_check, 
 		$fastforward_check, $shortcuts_check, $feature_story_check) =
@@ -1042,6 +1043,7 @@ sub editStory {
 		$form->{uid} ||= $user->{uid};
 		$author = $slashdb->getAuthor($form->{uid});
 		$sid = $form->{sid};
+		$subid = $form->{subid};
 
 		if (!$form->{'time'} || $form->{fastforward}) {
 			$storyref->{'time'} = $slashdb->getTime();
@@ -1073,6 +1075,7 @@ sub editStory {
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 		$feature_story_check	= 'CHECKED' if ($slashdb->getSection($storyref->{section}, 'feature_story') eq $storyref->{sid} && $storyref->{sid} ne '');
+		$subid = $storyref->{subid};
 
 	} else { # New Story
 		$extracolumns		    = $slashdb->getSectionExtras($storyref->{section}) || [ ];
@@ -1084,6 +1087,7 @@ sub editStory {
 		$storyref->{'time'} = $slashdb->getTime();
 		$storyref->{uid} = $user->{uid};
 		$storyref->{writestatus} = "dirty";
+		$subid = $form->{subid};
 	}
 
 	for (@{$extracolumns}) {
@@ -1150,6 +1154,7 @@ sub editStory {
 		story			=> $story,
 		storycontent		=> $storycontent,
 		sid			=> $sid,
+		subid			=> $subid,
 		authortext 		=> $authortext,
 		slashdtext		=> $slashdtext,
 		newarticle		=> $newarticle,
