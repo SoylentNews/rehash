@@ -14,6 +14,9 @@ __template__
 [% USE Slash %]
 [% PROCESS titlebar %]
 <TABLE>
+[% IF message %]
+				[% message %]
+[% END %]
 [% FOREACH event=events %]
 	<TR>
 		<TD>
@@ -26,7 +29,7 @@ __template__
 [% END %]
 </TABLE>
 <P>
-&lt; <A HREF="[% constants.rootdir %]/events.pl?date=[% previous %]&op=previousDate">Previous Day</A> | <A HREF="[% constants.rootdir %]/events.pl?date=[% next %]&op=nextDate">Next Day</A> &gt;
+&lt; <A HREF="[% constants.rootdir %]/events.pl?date=[% date %]&op=previousDate">Previous Day</A> | <A HREF="[% constants.rootdir %]/events.pl?date=[% date %]&op=nextDate">Next Day</A> &gt;
 <P>
 __seclev__
 100
