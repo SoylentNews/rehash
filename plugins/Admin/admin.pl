@@ -1256,7 +1256,7 @@ sub editStory {
 		$storyref->{section}	    = $SECT->{section};
 		$storyref->{subsection}	    = $SECT->{defaultsubsection};
 
-		$storyref->{'time'} = $slashdb->getTime();
+		$storyref->{'time'} = $slashdb->getTime;
 		$storyref->{uid} = $user->{uid};
 		$storyref->{writestatus} = "dirty";
 		$subid = $form->{subid};
@@ -1274,7 +1274,15 @@ sub editStory {
 		for my $field (qw( introtext bodytext )) {
 			$storyref->{$field} = cleanSlashTags(
 				$storyref->{$field}, {});
-			$storyref->{$field} = processSlashTags(
+
+			# do some of the processing displayStory()
+			# does, as we are bypassing it by going straight to
+			# dispStory() -- pudge
+			$story_copy{$field} = parseSlashizedLinks(
+				$storyref->{$field}, {});
+			$story_copy{$field} = cleanSlashTags(
+				$storyref->{$field}, {});
+			$story_copy{$field} = processSlashTags(
 				$storyref->{$field}, {});
 		}
 
