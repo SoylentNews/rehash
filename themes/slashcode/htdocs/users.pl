@@ -1729,6 +1729,8 @@ sub saveComm {
 		hardthresh	=> ($form->{hardthresh} ? 1 : 0),
 		anon_comments	=> ($form->{anon_comments} ? 1 : 0),
 		sigdash		=> ($form->{sigdash} ? 1 : 0),
+		textarea_rows	=> $form->{textarea_rows} || $constants->{textarea_rows},
+		textarea_cols	=> $form->{textarea_cols} || $constants->{textarea_cols},
 	};
 
 	my($min, $max) = ($constants->{comment_minscore}, 

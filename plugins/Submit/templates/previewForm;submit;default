@@ -58,7 +58,7 @@ __template__
 
 		<INPUT TYPE="submit" NAME="op" VALUE="preview"><BR>
 		<BR>Intro Copy<BR>
-	<TEXTAREA NAME="introtext" COLS="70" ROWS="10" WRAP="VIRTUAL"
+	<TEXTAREA NAME="introtext" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" WRAP="VIRTUAL"
 >[% subtext | strip_literal %]</TEXTAREA><BR>
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="preview"><BR>
 	</FORM>

@@ -86,8 +86,7 @@ END %]
 	</TR>
 	<TR>
 		<TD ALIGN="RIGHT" VALIGN="TOP">Comment</TD>
-		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="10"
-		COLS="50">[% form.postercomment | strip_literal %]</TEXTAREA>
+		<TD><TEXTAREA WRAP="VIRTUAL" NAME="postercomment" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% form.postercomment | strip_literal %]</TEXTAREA>
 		<BR>(Use the Preview Button! Check those URLs!
 		Don't forget the http://!)
 	</TD></TR>

@@ -42,7 +42,7 @@ __template__
 	[% END %]
 
 		[% PROCESS formLabel value => "Entry", comment => "This will go down on your permanent record" %]
-		<TEXTAREA WRAP="virtual" NAME="article" COLS="60" ROWS="20">[% article.article | strip_literal %]</TEXTAREA>
+		<TEXTAREA WRAP="virtual" NAME="article" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</TEXTAREA>
 		<P>
 		<INPUT TYPE="submit" NAME="op" value="preview">
 	[% IF form.preview || article.id %]

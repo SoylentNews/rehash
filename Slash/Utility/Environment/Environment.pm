@@ -1221,6 +1221,7 @@ sub filter_params {
 		ordernum pid posttype ratio retrieve
 		seclev start startat threshold uid
 		uthreshold voters width
+		textarea_rows textarea_cols
 	);
 
 	# fields that have ONLY a-zA-Z0-9_

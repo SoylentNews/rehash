@@ -181,6 +181,11 @@ __template__
 		adds a "Read the rest" link.  Set really big to disable)<BR>
 		<INPUT TYPE="TEXT" NAME="maxcommentsize" SIZE="6" VALUE="[% user_edit.maxcommentsize %]">
 
+		<P><B>Comment Box Size</B> (Also applies to other large
+		text boxes)<BR>
+		Rows: <INPUT TYPE="TEXT" NAME="textarea_rows" SIZE="4" VALUE="[% user_edit.textarea_rows || constants.textarea_rows %]">
+		Columns: <INPUT TYPE="TEXT" NAME="textarea_cols" SIZE="4" VALUE="[% user_edit.textarea_cols || constants.textarea_cols %]">
+
 		<P><B>Comment Post Mode</B>
 
 		[% posttype_select %]

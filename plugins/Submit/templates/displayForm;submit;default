@@ -87,7 +87,7 @@ be deleted.)</FONT>
 	comment => "HTML is fine, but double check those URLs and HTML tags!" %]
 
 
-<TEXTAREA WRAP="VIRTUAL" COLS="70" ROWS="12" NAME="story">[% form.story | strip_literal %]</TEXTAREA><BR>
+<TEXTAREA WRAP="VIRTUAL" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]" NAME="story">[% form.story | strip_literal %]</TEXTAREA><BR>
 <FONT SIZE="2">(Are you sure you included a URL?  Didja test them for typos?)</FONT><P>
 
 <INPUT TYPE="SUBMIT" NAME="op" VALUE="PreviewStory">
