@@ -204,6 +204,14 @@ sub list_tasks {
 	}
 }
 
+# To maintain subroutine level compatibility with slashd and hence, with our
+# tasks.
+sub init_cron {
+	sub null_dispatcher { die "null_dispatcher called, there's a bug" }
+	my $cron = Schedule::Cron->new(\&null_dispatcher);
+	return $cron;
+}
+
 sub main {
 	# Remember to doublecheck these match usage()!
 	usage('Options used incorrectly') unless (getopts(':hlo:u:v', \%opts));
