@@ -88,7 +88,7 @@ __template__
 <br>
 <input type="button" value="Never Display"  onmouseup="[% name %]_never_display()">
 <input type="button" value="Revert Weights" onmouseup="[% name %]_revert_weights()">
-<input type="button" value="Choose Topics"  onmouseup="[% name %]_show()">
+<input type="button" value="Choose Topics"  onmouseup="[% name %]_show()" name="[% name %]_topic_toggle">
 <input type="button" value="Remove Topic"   onmouseup="[% name %]_remove()">
 
 <script language="javascript">[% name %]_load_names();</script>

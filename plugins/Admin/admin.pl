@@ -1561,8 +1561,10 @@ sub extractChosenFromForm {
 
 ##################################################################
 sub getDescForTopicsRendered {
+	# this should probably use templates ...
 	my($topics_rendered, $primaryskid) = @_;
 	my $slashdb = getCurrentDB();
+	my $user = getCurrentUser();
 	my $tree = $slashdb->getTopicTree();
 	my $mainpage_nexus_tid = getCurrentStatic("mainpage_nexus_tid");
 	my $primary_nexus_tid  = $slashdb->getNexusFromSkid($primaryskid);
@@ -1579,28 +1581,35 @@ sub getDescForTopicsRendered {
 					[$val, $_]
 				} @story_nexuses;
 
+	my $remove = qq{[<a href="javascript:st_main_add_really(%d,'%s',0)"><font color="$user->{colors}{fg_3}">x</font></a>]};
+
 	my $desc;
 	if (!@sorted_nexuses) {
 		$desc = "This story will not appear.";
 	} else {
 		$desc = "This story will be ";
 		my $first_nexus = shift @sorted_nexuses;
+		my $x = sprintf($remove, $first_nexus, $tree->{$first_nexus}{textname});
 		if ($first_nexus == $mainpage_nexus_tid) {
-			$desc .= "on the $tree->{$first_nexus}{textname}";
+			$desc .= "on the $tree->{$first_nexus}{textname} $x";
 		} elsif ($first_nexus == $primary_nexus_tid) {
-			$desc .= "in $tree->{$first_nexus}{textname}";
+			$desc .= "in $tree->{$first_nexus}{textname} $x";
 		}
 		if (@sorted_nexuses) {
 			$desc .= ", and linked from ";
 			if (@sorted_nexuses == 1) {
-				$desc .= "$tree->{$sorted_nexuses[0]}{textname}.";
+				my $x = sprintf($remove, $sorted_nexuses[0], $tree->{$sorted_nexuses[0]}{textname});
+				$desc .= "$tree->{$sorted_nexuses[0]}{textname} $x.";
 			} else {
 				my $last_nexus = pop @sorted_nexuses;
 				my $next_to_last_nexus = pop @sorted_nexuses;
+				my $z = sprintf($remove, $last_nexus, $tree->{$last_nexus}{textname});
+				my $y = sprintf($remove, $next_to_last_nexus, $tree->{$next_to_last_nexus}{textname});
 				foreach (@sorted_nexuses) {
-					$desc .= "$tree->{$_}{textname}, ";
+					my $x = sprintf($remove, $_, $tree->{$_}{textname});
+					$desc .= "$tree->{$_}{textname} $x, ";
 				}
-				$desc .= "$tree->{$next_to_last_nexus}{textname} and $tree->{$last_nexus}{textname}.";
+				$desc .= "$tree->{$next_to_last_nexus}{textname} $y and $tree->{$last_nexus}{textname} $z.";
 			}
 		} else {
 			$desc .= ".";

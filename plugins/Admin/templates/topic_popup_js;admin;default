@@ -180,6 +180,10 @@ function [% name %]_show() {
 		}
 	}
 [%- END %]
+
+	var mybutton  = document.slashstoryform.st_topic_toggle;
+	mybutton.value = "Close Window";
+	mybutton.onmouseup = st_close;
 }
 
 /* user clicks the ok button */
@@ -229,6 +233,10 @@ function [% name %]_close () {
 		}
 	}
 [%- END %]
+
+	var mybutton  = document.slashstoryform.st_topic_toggle;
+	mybutton.value = "Choose Topics";
+	mybutton.onmouseup = st_show;
 }
 
 function [% name %]_get_all_names (id) {
