@@ -230,8 +230,6 @@ CREATE TABLE submission_param (
    UNIQUE submission_key (subid,name),
    PRIMARY KEY (param_id)
 ) TYPE = myisam;
-INSERT INTO string_param (type, code, name) VALUES ('yes_no','yes','yes');
-INSERT INTO string_param (type, code, name) VALUES ('yes_no','no','no');
 DROP TABLE IF EXISTS rss_raw;
 CREATE TABLE rss_raw (
    id mediumint UNSIGNED NOT NULL auto_increment,
