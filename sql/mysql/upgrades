@@ -2783,3 +2783,7 @@ INSERT INTO vars (name, value, description) VALUES ('dbs_reader_weight_increase_
 
 # run `perl utils/users_index_cleanup.plx VIRTUAL_USER`
 
+ALTER TABLE submissions ADD INDEX time_emaildomain (time, emaildomain);
+
+# End of T_2_5_0_39, Start of T_2_5_0_40 - 2004/11/24
+

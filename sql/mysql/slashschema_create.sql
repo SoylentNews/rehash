@@ -979,7 +979,8 @@ CREATE TABLE submissions (
 	KEY ipid (ipid),
 	KEY subnetid (subnetid),
 	KEY primaryskid_tid (primaryskid, tid),
-	KEY tid (tid)
+	KEY tid (tid),
+	KEY time_emaildomain (time, emaildomain)
 ) TYPE=InnoDB;
 
 
