@@ -55,7 +55,7 @@ sub main {
 	);
 
 	my $title = getData('head', { section => $section });
-	header($title, $section->{section});
+	header($title, $section->{section}, { Page => 'index' });
 
 	# We may, in this listing, have a story from the Mysterious Future.
 	# If so, there are three possibilities:

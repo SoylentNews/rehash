@@ -73,7 +73,7 @@ sub main {
 				author	=> $story->{uid},
 			},
 		};
-		header($links, $story->{section});
+		header($links, $story->{section}, { Page => 'article' });
 
 		# Can't do this before getStoryByTime because
 		# $story->{time} is passed to an SQL request.
