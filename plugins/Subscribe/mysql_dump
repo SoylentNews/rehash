@@ -11,6 +11,7 @@ INSERT INTO vars (name, value, description) VALUES ('subscribe', 1, 'Subscriptio
 INSERT INTO vars (name, value, description) VALUES ('subscribe_admin_seclev', 1000, 'Min seclev to do subscription admin stuff');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_debug', 0, 'Debug plugins/Subscribe?');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_defpages', 'index article', 'Space-separated list of default pages (script names)');
+INSERT INTO vars (name, value, description) VALUES ('subscribe_email', 'admin@example.com', 'Email address for subscription-related issues');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_hits_btmd', 10, 'Hits Bought Today Max Default, the default maximum number of hits that a user will be allowed to buy in one day, 0 for no (default) maximum');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_hits_only', 1, '0=All users get users_hits updated, 1=Only subscribed users');
 INSERT INTO vars (name, value, description) VALUES ('subscribe_secretword', 'changemenow', 'Secret word to buy pages with');

@@ -158,6 +158,10 @@ ends. Your day may vary.)
 
 [% END %]
 
+<P>If you have any questions or concerns about billing, ad&nbsp;display,
+or other subscription-related issues, please contact
+<A HREF="mailto:[% constants.subscribe_email %]">[% constants.subscribe_email %]</A>.
+
 __seclev__
 10000
 

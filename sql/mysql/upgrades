@@ -1007,3 +1007,7 @@ CREATE TABLE section_subsections (
 ) TYPE = myisam;
 INSERT INTO section_subsections SELECT section, id from subsections;
 ALTER TABLE subsections DROP section;
+
+# Change for plugins/Subscribe (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('subscribe_email', 'admin@example.com', 'Email address for subscription-related issues');
+
