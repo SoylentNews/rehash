@@ -20,7 +20,7 @@ $task{$me}{code} = sub {
 
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	updateRecentTopics(@_, '');
+	updateRecentTopics($virtual_user, $constants, $slashdb, $user, '');
 
 	if ($constants->{sections_recenttopics}) {
 		for (@{$constants->{sections_recenttopics}}) {
