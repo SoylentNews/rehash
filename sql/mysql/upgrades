@@ -284,3 +284,5 @@ UPDATE submissions SET signature=MD5(story);
 ALTER TABLE submissions MODIFY COLUMN signature varchar(32) NOT NULL;
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+UPDATE vars SET value=100 WHERE name="authors_unlimited";

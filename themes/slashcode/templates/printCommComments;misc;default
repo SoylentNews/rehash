@@ -85,7 +85,7 @@ __template__
 		yet?
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="moderate">
 		<INPUT TYPE="SUBMIT" VALUE="moderate">
-	[% IF user.is_admin && constants.authors_unlimited %]
+	[% IF constants.authors_unlimited && user.seclev >= constants.authors_unlimited %]
 		<BR><B>NOTE: Checked comments will be deleted.</B>
 	[% END %]
 	</TD></TR></FORM>

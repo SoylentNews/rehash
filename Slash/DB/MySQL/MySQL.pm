@@ -3286,7 +3286,8 @@ sub setCommentCleanup {
 	$where .= " > $constants->{comment_minscore}" if $val < 0;
 	$where .= " < $constants->{comment_maxscore}" if $val > 0;
 	$where .= " AND lastmod<>$user->{uid}"
-	unless $user->{seclev} >= 100 && $constants->{authors_unlimited};
+		unless $constants->{authors_unlimited}
+			&& $user->{seclev} >= $constants->{authors_unlimited};
 
 	return $self->sqlUpdate("comments", $update, $where);
 }
@@ -4325,6 +4326,8 @@ sub getSlashConf {
 	$conf{textarea_rows}	||= 10;
 	$conf{textarea_cols}	||= 50;
 	$conf{allow_deletions}  ||= 1;
+	$conf{authors_unlimited} = 100 if !$conf{authors_unlimited}
+		|| $conf{authors_unlimited} == 1;
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {

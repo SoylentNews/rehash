@@ -308,8 +308,8 @@ sub _can_mod {
 			($constants->{comments_moddable_hours}
 			|| 24*$constants->{archive_delay})
 		) || (
-		       $user->{seclev} >= 100
-		    && $constants->{authors_unlimited}
+		       $constants->{authors_unlimited}
+		    && $user->{seclev} >= $constants->{authors_unlimited}
 		) );
 }
 
