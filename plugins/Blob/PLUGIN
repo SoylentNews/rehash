@@ -1,6 +1,5 @@
 name=Blob
 description="Generic binary storage"
 mysql_schema=mysql_schema
-mysql_dump=dump
 htdoc=blob.pl
 task=clean_blobs.pl
