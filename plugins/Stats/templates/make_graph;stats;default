@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+make_graph
+__template__
+[% UNLESS (days);
+      days = form.stats_days;
+   END;
+
+   IF (gtitle);
+      gtitle = gtitle | strip_attribute;
+      gtitle = '&amp;title=' _ gtitle;
+   END;
+
+   UNLESS section;
+      section = form.stats_section;
+   END;
+   section = section | strip_attribute;
+   statdata = '';
+
+   FOREACH stat = stats;
+       IF (stat.0);
+          nstat = stat.0 | strip_attribute;
+          nsection = stat.1 | strip_attribute;
+       ELSE;
+          nstat = stat | strip_attribute;
+          nsection = section;
+       END;
+       statdata = statdata _ '&amp;stats_graph_multiple=' _ nstat _ ',' _ nsection;
+   END;
+%]
+
+<DIV CLEAR="ALL">
+<IMG SRC="[% constants.rootdir %]/stats.pl?op=graph&amp;type=[% type | strip_attribute %]&amp;stats_days=[% days | strip_attribute %][% statdata %][% gtitle %]">
+</DIV>
+__seclev__
+1000

@@ -58,12 +58,12 @@ __template__
         [% stats_total = 0 %]
         [% FOREACH day = stats_data.${form.stats_section}.keys.sort;
         	NEXT IF day == "names";
-        	stats_num = (stats_data.${form.stats_section}.${day}.${myname} || 0) + 0;
+        	stats_num = stats_data.${form.stats_section}.${day}.${myname} + 0;
         	stats_total = stats_total + stats_num %]
         	[% day %]: [% stats_num %]<BR>
         [% END %]
 	<B>Total: [% stats_total %]</B>
-<DIV CLEAR="ALL"><IMG SRC="[% constants.rootdir %]/stats.pl?op=graph&amp;stats_days=[% form.stats_days %]&amp;stats_graph_multiple=[% myname %]|[% form.stats_section %]"></DIV>
+[% PROCESS make_graph stats => [myname] %]
 [% END %]
 
 [% BLOCK doform %]
@@ -71,17 +71,12 @@ __template__
     <FORM METHOD="POST" ACTION="[% env.script_name %]">
         [% select_box %]
 
-        &nbsp;&nbsp;Days: [% Slash.createSelect('stats_days',
-             { '7' => 'Weekly', '14' => 'Biweekly', '93' => 'Quarterly', '-1' => 'Forever' },
-             form.stats_days,
-             1, 0, [ 7, 14, 93, -1 ]
-        ) %]
+        &nbsp;&nbsp;Days: [% PROCESS stats_days %]
 
         <INPUT TYPE="hidden" NAME="stats_section" VALUE="[% form.stats_section %]">
         <INPUT TYPE="hidden" NAME="op" VALUE="list">
         <INPUT TYPE="submit">
     </FORM>
 [% END %]
-
 __seclev__
 1000

@@ -12,7 +12,15 @@ __name__
 graph
 __template__
 [% FILTER null;
-   USE my_graph = GD.Graph.lines(400, 300);
+IF form.type == 'pie';
+   USE my_graph = GD.Graph.pie(600, 400);
+
+ELSE;  # default to lines
+   IF (form.type == 'area' || form.type == 'areapercentage');
+      USE my_graph = GD.Graph.area(600, 400);
+   ELSE;
+      USE my_graph = GD.Graph.lines(600, 400);
+   END;
 
    period  = form.stats_days ==  93 ? 'Quarterly' :
              form.stats_days ==  14 ? 'Biweekly' :
@@ -22,11 +30,34 @@ __template__
    days = data.0.data.keys.sort;
    alldata = [days];
    alltypes = [];
+   mytotal = {};
+   hasneg = 0;
+   haspos = 0;
+
+   IF (form.type == 'areapercentage');
+      FOREACH this = data;
+         FOREACH day = this.data.keys.sort;
+            mytotal.${day} = (mytotal.${day} || 0) + this.data.${day};
+         END;
+      END;
+   END;
 
    FOREACH this = data;
       nums = [];
       FOREACH day = this.data.keys.sort;
-           nums.push(this.data.${day});
+         IF (form.type == 'areapercentage');
+            mynum = this.data.${day} / mytotal.${day} * 100;
+         ELSE;
+            mynum = this.data.${day};
+         END;
+         IF (!hasneg && mynum < 0);
+            hasneg = 1;
+         END;
+         IF (!haspos && mynum > 0);
+            haspos = 1;
+         END;
+#         foooo = [-500 .. 0];
+         nums.push(mynum);
       END;
       alldata.push(nums);
       alltypes.push(this.type);
@@ -35,15 +66,18 @@ __template__
    x_label_skip = days.size / 10;
    x_label_skip = x_label_skip.int;
 
+   gtitle = form.title || "$period Report for $constants.sitename";
+
    my_graph.set(
 #      x_label             => period.ucfirst,
 #      y_label             => 'Number',
-      title               => "$period Report for $constants.sitename",
+      title               => gtitle,
 
       x_label_position    => 0.5,
 #      y_max_value         => nums.highval,
 #      y_min_value         => nums.lowval,
-      y_min_value         => 0,
+
+      zero_axis           => 1,
 
       x_labels_vertical   => 1,
       x_label_skip        => x_label_skip,
@@ -52,13 +86,27 @@ __template__
 #      line_type_scale     => 8,
       line_width          => 2,
 
-      transparent         => 1,
+      transparent         => 0,
       show_values         => 0
    );
 
+   IF (!hasneg);
+   	my_graph.set(y_min_value => 0);
+   END;
+
+
+   IF (!haspos && hasneg);
+   	my_graph.set(y_max_value => 0);
+   END;
+
+   IF (form.type == 'areapercentage');
+   	my_graph.set(cumulate => 1);
+   END;
+
    set_legend(my_graph, alltypes);
    my_graph.plot(alldata).png | stdout(1);
-   END;
--%]
+
+END;
+END -%]
 __seclev__
 1000

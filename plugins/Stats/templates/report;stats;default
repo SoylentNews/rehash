@@ -1,0 +1,78 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+report
+__template__
+[% SWITCH form.report;
+
+   CASE 'main';
+      reportblock = BLOCK;
+
+      type        = 'area';
+      section     = 'all';
+
+      PROCESS make_graph gtitle => 'Pages',
+         type    => 'area',
+         stats   => ['total', 'index_page', 'comments_page', 'article_page'];
+
+      PROCESS make_graph gtitle => 'Hits',
+         type    => 'area',
+         stats   => ['grand_total', 'rss_page', 'palm_page'];
+
+      PROCESS make_graph gtitle => 'Users',
+         type    => 'areapercentage',
+         stats   => ['unique', 'unique_users'];
+
+      PROCESS make_graph gtitle => 'Page Bytes',
+         type    => 'area',
+         stats   => ['total_bytes', 'index_bytes', 'comments_bytes', 'article_bytes'];
+
+      PROCESS make_graph gtitle => 'Total Bytes',
+         type    => 'area',
+         stats   => ['total_bytes', 'rss_bytes', 'palm_bytes'];
+
+      sections = Slash.db.getDescriptions('sections');
+      sect_page = [];
+      sect_byte = [];
+      FOREACH section = sections.keys.sort;
+         sect_page.push(['page', section]);
+         sect_byte.push(['bytes', section]);
+      END;
+
+      PROCESS make_graph gtitle => 'Section Pages',
+         type    => 'lines',
+         stats   => sect_page;
+
+      PROCESS make_graph gtitle => 'Section Bytes',
+         type    => 'lines',
+         stats   => sect_byte;
+
+   END;
+
+END %]
+
+[% PROCESS titlebar title => reports.${form.report} _ ' for ' _ constants.sitename %]
+
+[% reports = {
+      'main' => 'Main Report'
+} %]
+
+<FORM METHOD="POST" ACTION="[% env.script_name %]">
+   [% Slash.createSelect('report', reports, form.report, 1) %]
+   &nbsp;&nbsp;Days: [% PROCESS stats_days %]
+
+   <INPUT TYPE="hidden" NAME="op" VALUE="report">
+   <INPUT TYPE="submit">
+</FORM>
+
+[% reportblock %]
+__seclev__
+1000

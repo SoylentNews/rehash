@@ -1,0 +1,20 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+stats
+__lang__
+en_US
+__name__
+stats_days
+__template__
+[% Slash.createSelect('stats_days',
+   { '7' => 'Weekly', '14' => 'Biweekly', '93' => 'Quarterly', '-1' => 'Forever' },
+     form.stats_days,
+     1, 0, [ 7, 14, 93, -1 ]
+) %]
+__seclev__
+1000

@@ -29,6 +29,7 @@ sub main {
 
 	# possible value of "op" parameter in form
 	my %ops = (
+		report	=> [ $user->{is_admin},	\&report	],
 		graph	=> [ $user->{is_admin},	\&graph		],
 		list	=> [ $admin_post,	\&list		],
 
@@ -58,7 +59,7 @@ sub graph {
 	my $sections = _get_sections();
 	my @data;
 	for my $namesec (@{$form->{stats_graph_multiple}}) {
-		my($name, $section) = split /\|/, $namesec;
+		my($name, $section) = split /,/, $namesec;
 		my $stats_data = $stats->getAllStats({
 			section	=> $section,
 			name	=> $name,
@@ -91,6 +92,13 @@ sub graph {
 
 	$r->status(200);
 	return 1;
+}
+
+sub report {
+	my($slashdb, $constants, $user, $form, $stats) = @_;
+
+	slashDisplay('report', {
+	});
 }
 
 sub list {

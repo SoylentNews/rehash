@@ -9,3 +9,6 @@ template=templates/display;adminmail;default
 template=templates/display;modmail;default
 template=templates/graph;stats;default
 template=templates/list;stats;default
+template=templates/make_graph;stats;default
+template=templates/report;stats;default
+template=templates/stats_days;stats;default
