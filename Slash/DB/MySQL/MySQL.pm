@@ -6466,6 +6466,10 @@ sub getStoriesEssentials {
 	# Older Stuff column."  Those are just rough concepts.
 	# Of course the caller can use the returned data however
 	# it wants, this is just a convenient way to think of it.
+	
+	my $offset = $options->{offset} || 0;
+	$offset = 0 unless $offset =~ /^\d+$/;
+	
 	my $limit = $options->{limit} || $gSkin->{artcount_max};
 	$limit += $options->{limit_extra}
 		|| int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
@@ -6499,7 +6503,7 @@ sub getStoriesEssentials {
 	my $columns = "stories.stoid, sid, time, commentcount, hitparade,"
 		. " primaryskid, body_length, word_count, discussion, $column_time";
 	my $tables = "stories, story_topics_rendered";
-	my $other = "GROUP BY stories.stoid ORDER BY time DESC LIMIT $limit";
+	my $other = "GROUP BY stories.stoid ORDER BY time DESC LIMIT $offset, $limit";
 #errorLog("gSE other '$other' columns '$columns'");
 
 	my $where = "stories.stoid = story_topics_rendered.stoid AND in_trash = 'no' AND $where_time";
