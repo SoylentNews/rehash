@@ -30,9 +30,12 @@ sub main {
 		$form->{"extraname_$1"} =~ s/\s//g;
 		next if !$form->{"extraname_$1"};
 
-		push @{$form->{section_extras}},
-			[$form->{"extraname_$1"},
-			 $form->{"extraval_$1"} || $form->{"extraname_$1"}]
+		push @{$form->{section_extras}}, [
+			# Field label
+			$form->{"extraval_$1"} || $form->{"extraname_$1"},
+			# Field name
+			$form->{"extraname_$1"}
+		];
 	}
 
 	header(getData('head'), 'admin');
