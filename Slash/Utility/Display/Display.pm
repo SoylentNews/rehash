@@ -451,10 +451,11 @@ sub linkStory {
 		$dynamic = 1 if $params{threshold} != getCurrentAnonymousCoward('threshold');
 	}
 
-	# We need to make sure we always get the right link -Brian
-	$story_link->{'link'} = $reader->getStory($story_link->{sid}, 'title') if $story_link->{'link'} eq '';
-	$title       = $story_link->{'link'};
-	$story_link->{skin} ||= $story_link->{section} || $reader->getStory($story_link->{sid}, 'primaryskid');
+	my $story_ref = $reader->getStory($story_link->{stoid} || $story_link->{sid});
+
+	$story_link->{link} = $story_ref->{title} if $story_link->{'link'} eq '';
+	$title = $story_link->{link};
+	$story_link->{skin} ||= $story_link->{section} || $story_ref->{primaryskid};
 	if ($constants->{tids_in_urls}) {
 		if ($story_link->{tids} && @{$story_link->{tids}}) {
 			$params{tids} = $story_link->{tids};
@@ -468,8 +469,9 @@ sub linkStory {
 	$url = $skin->{rootdir} || $constants->{real_rootdir} || $gSkin->{rootdir};
 
 	if ($dynamic) {
-		$url .= '/' . $script . '?';
-		for my $key (keys %params) {
+		$url .= "/$script?";
+		sub _paramsort { return -1 if $a eq 'sid'; return 1 if $b eq 'sid'; $a cmp $b }
+		for my $key (sort _paramsort keys %params) {
 			my $urlkey = $key;
 			$urlkey = 'tid' if $urlkey eq 'tids';
 			if (ref $params{$key} eq 'ARRAY') {
@@ -485,7 +487,7 @@ sub linkStory {
 		# but we would need to `mv articles mainpage`, or ln -s, and it just seems better
 		# to me to keep the same URL scheme if possible
 		my $skinname = $skin->{name} eq 'mainpage' ? 'articles' : $skin->{name};
-		$url .= '/' . $skinname . '/' . $story_link->{sid} . '.shtml';
+		$url .= "/$skinname/$story_link->{sid}.shtml";
 		# manually add the tid(s), if wanted
 		if ($constants->{tids_in_urls} && $params{tids}) {
 			$url .= '?';
