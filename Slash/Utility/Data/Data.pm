@@ -44,6 +44,7 @@ use vars qw($VERSION @EXPORT);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(
 	addDomainTags
+	approveCharref
 	parseDomainTags
 	balanceTags
 	changePassword
@@ -591,8 +592,9 @@ Private function.  Strips out "bad" HTML by removing unbalanced HTML
 tags and sending balanced tags through C<approveTag>.  The "unbalanced"
 checker is primitive; no "E<lt>" or "E<gt>" tags will are allowed inside
 tag attributes (such as E<lt>A NAME="E<gt>"E<gt>), that breaks the tag.
-Also, whitespace is inserted between adjacent tags, so "E<lt>BRE<gt>E<lt>BRE<gt>"
-becomes "E<lt>BRE<gt> E<lt>BRE<gt>".
+Whitespace is inserted between adjacent tags, so "E<lt>BRE<gt>E<lt>BRE<gt>"
+becomes "E<lt>BRE<gt> E<lt>BRE<gt>".  And character references are routed
+through C<approveCharref>.
 
 =over 4
 
@@ -612,7 +614,7 @@ Processed string.
 
 =item Dependencies
 
-C<approveTag> function.
+C<approveTag> function, C<approveCharref> function.
 
 =back
 
@@ -635,7 +637,6 @@ sub stripBadHtml {
 		>			# close bracket
 	}{$1&gt;}gx;
 
-
 	# Encode stray <
 	1 while $str =~ s{
 		<			# open bracket
@@ -645,6 +646,8 @@ sub stripBadHtml {
 					# end of string
 		)
 	}{&lt;$1}gx;
+
+	$str =~ s/\&(.*?);/approveCharref($1)/sge;
 
 	return $str;
 }
@@ -1035,6 +1038,84 @@ sub approveTag {
 	# ECODE is an exception, to be handled elsewhere
 	foreach my $goodtag (grep !/^ECODE$/, @$approvedtags) {
 		return "<$tag>" if $tag =~ /^$goodtag$/ || $tag =~ m|^/$goodtag$|;
+	}
+}
+
+#========================================================================
+
+=head2 approveCharref(CHARREF)
+
+Private function.  Checks to see if a character reference (minus the
+leading & and trailing ;) is OK.  If so, returns the whole character
+reference (including & and ;), and if not, returns the empty string.
+See <http://www.w3.org/TR/html4/charset.html#h-5.3> for definitions and
+explanations of character references.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item CHARREF
+
+HTML character reference to check.
+
+=back
+
+=item Return value
+
+Character reference after processing.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub approveCharref {
+	my($charref) = @_;
+
+	my $ok = 1; # Everything not forbidden is permitted.
+
+	# At the moment, only entities that change the direction of text
+	# are forbidden.  For more information, see
+	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
+	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
+	my %bad_numeric = map { $_, 1 }
+		qw( 8204 8205 8206 8207 8236 8237 8238 );
+	my %bad_entity = map { $_, 1 }
+		qw( zwnj zwj lrm rlm );
+
+	if ($charref =~ /^#/) {
+		# Probably a numeric character reference.
+		my $decimal = 0;
+		if ($charref =~ /^#x([0-9a-f]+)$/i) {
+			# Hexadecimal encoding.
+			$decimal = hex($1); # always returns a positive integer
+		} elsif ($charref =~ /^#(\d+)$/) {
+			# Decimal encoding.
+			$decimal = $1;
+		} else {
+			# Unknown, assume flawed.
+			$ok = 0;
+		}
+		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
+		$ok = 0 if $bad_numeric{$decimal};
+	} elsif ($charref =~ /^([a-z0-9]+)$/i) {
+		# Character entity.
+		my $entity = lc $1;
+		$ok = 0 if $bad_entity{$entity};
+	} else {
+		# Unknown character reference type, assume flawed.
+		$ok = 0;
+	}
+	if ($ok) {
+		return "&$charref;";
+	} else {
+		return "";
 	}
 }
 

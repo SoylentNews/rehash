@@ -721,6 +721,8 @@ sub validateComment {
 	$$subj =~ s/\(Score(.*)//i;
 	$$subj =~ s/Score:(.*)//i;
 
+	$$subj =~ s/\&(.*?);/approveCharref($1)/sge;
+
 	for ($$comm, $$subj) {
 		my $d = decode_entities($_);
 		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
