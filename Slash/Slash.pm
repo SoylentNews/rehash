@@ -620,8 +620,15 @@ sub printComments {
 		if $constants->{memcached_debug};
 	$mcd_debug->{total} = scalar @$cids_needed_ar if $mcd_debug;
 	if ($try_memcached) {
-		# MemCached key prefix "cpt" means "comment_text, parsed"
-		my @keys_try = map { "ctp:$_" } @$cids_needed_ar;
+		# MemCached key prefix "ctp" means "comment_text, parsed".
+		# Prepend our site key prefix to try to avoid collisions
+		# with other sites that may be using the same servers.
+		my $mcdkey = "$slashdb->{_mcd}{keyprefix}ctp:";
+		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
+			print STDERR scalar(gmtime) . " printComments memcached mcdkey '$mcdkey'\n";
+		}
+		my $mcdkeylen = length($mcdkey);
+		my @keys_try = map { "$mcdkey$_" } @$cids_needed_ar;
 		$comment_text = $slashdb->{_mcd}->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
 		if ($constants->{memcached_debug} && $constants->{memcached_debug} >= 2) {
@@ -629,7 +636,7 @@ sub printComments {
 		}
 		$mcd_debug->{hits} = scalar @old_keys if keys %$mcd_debug;
 		for my $old_key (@old_keys) {
-			my $new_key = substr($old_key, 4); # length("ctp:") == 4
+			my $new_key = substr($old_key, $mcdkeylen);
 			$comment_text->{$new_key} = delete $comment_text->{$old_key};
 		}
 		@$cids_needed_ar = grep { !exists $comment_text->{$_} } @$cids_needed_ar;

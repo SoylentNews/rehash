@@ -780,6 +780,7 @@ INSERT INTO vars (name, value, description) VALUES ('maxpoints','5','The maximum
 INSERT INTO vars (name, value, description) VALUES ('maxtokens','40','Token threshold that must be hit to get any points');
 INSERT INTO vars (name, value, description) VALUES ('memcached','0','Use memcached?');
 INSERT INTO vars (name, value, description) VALUES ('memcached_debug','0','Turn on debugging for memcached?');
+INSERT INTO vars (name, value, description) VALUES ('memcached_keyprefix','x','Unique, short (1-2 chars probably) prefix to distinguish this site from the other sites sharing memcaches');
 INSERT INTO vars (name, value, description) VALUES ('memcached_servers','127.0.0.1:11211','Space-sep list of servers for memcached in host:port format; to weight a server append =n');
 INSERT INTO vars (name, value, description) VALUES ('metamod_sum','3','sum of moderations 1 for release (deprecated)');
 INSERT INTO vars (name, value, description) VALUES ('min_expiry_comm','10','Lowest value for comment expiry trigger.');

@@ -5605,6 +5605,14 @@ sub getSlashConf {
 			servers =>	[ @servers ],
 			debug =>	$conf{memcached_debug} > 1 ? 1 : 0,
 		});
+		if ($conf{memcached_keyprefix}) {
+			$self->{_mcd}{keyprefix} = $conf{memcached_keyprefix};
+		} else {
+			# If no keyprefix defined in vars, use the first and
+			# last letter from the sitename.
+			$conf{sitename} =~ /([A-Za-z]).*(\w)/;
+			$self->{_mcd}{keyprefix} = ($2 ? lc("$1$2") : ($1 ? lc($1) : ""));
+		}
 	}
 
 	return \%conf;
