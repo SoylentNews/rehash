@@ -1363,6 +1363,7 @@ sub createAccessLogAdmin {
 		section		=> $section,
 		bytes		=> $r->bytes_sent,
 		op		=> $op,
+		form	=> freeze($form),
 		-ts		=> 'NOW()',
 		query_string	=> $ENV{QUERY_STRING} || '0',
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
