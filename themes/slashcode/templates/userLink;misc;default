@@ -19,7 +19,7 @@ __template__
 	[% nickname = Slash.db.getUser(uid, 'nickname') %]
 [% END %]
 [% IF !uid %]
-	[% uid = Slash.db.getUserUid(nickname) %]
+	[% uid = Slash.db.getUserUID(nickname) %]
 [% END %]
 [% IF nickname && uid %]
 	<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% nickname | strip_literal %] ([% uid %])</A>
