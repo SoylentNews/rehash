@@ -948,7 +948,7 @@ sub fetchEligibleModerators_accesslog {
 	return $self->sqlSelectAllHashref(
 		"uid",
 		"uid, COUNT(*) AS c",
-		"accesslog USE INDEX (op_part)",
+		"accesslog FORCE INDEX (op_part)",
 		"op='article' OR op='comments'",
 		"GROUP BY uid
 		 HAVING c >= $hitcount");
