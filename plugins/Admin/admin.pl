@@ -1272,23 +1272,21 @@ sub editStory {
 		$storyref->{tid}, 1, 0, 1
 	);
 	my @topic_select_sec;
-	if ($section) {
-		for (@stid) {
-			my $current_hash = { %$topic_values };
-			$current_hash->{0} = "$current_hash->{$_} (Delete)";
-			push @topic_select_sec, createSelect('stid',
-				$current_hash,
-				$_, 1, 0, 1
-			);
-		}
-		if (@stid < 2) {
-			my $current_hash = { %$topic_values };
-			$current_hash->{0} = "Add Topic";
-			push @topic_select_sec, createSelect('stid',
-				$current_hash,
-				0, 1, 0, 1
-			);
-		}
+	for (@stid) {
+		my $current_hash = { %$topic_values };
+		$current_hash->{0} = "$current_hash->{$_} (Delete)";
+		push @topic_select_sec, createSelect('stid',
+			$current_hash,
+			$_, 1, 0, 1
+		);
+	}
+	if (@stid < 2) {
+		my $current_hash = { %$topic_values };
+		$current_hash->{0} = "Add Topic";
+		push @topic_select_sec, createSelect('stid',
+			$current_hash,
+			0, 1, 0, 1
+		);
 	}
 
 	$section_select = selectSection('section', $storyref->{section}, $sections, 1) unless $user->{section};
