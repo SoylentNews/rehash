@@ -1,0 +1,43 @@
+__section__
+default
+__description__
+Prints a tabbed menu bar.
+
+* user = the current user, of course. needed for background color
+* tabs = array of tabs, each tab hashref with keys "link", "label" and "sel_label"
+* tab_selected = the label of the selected tab
+* justify = 'left' or 'right', default is left
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+tabbedmenu
+__template__
+[% save_tab_selected = tab_selected %]
+[% IF justify != 'right'; justify = 'left'; END %]
+<NOBR>
+<TABLE WIDTH="100%" valign="MIDDLE" CELLPADDING="0" CELLSPACING="0">
+	<TR BGCOLOR="[% user.bg.2 %]">
+[% FOREACH tab = tabs;
+	IF loop.first;
+		tabtmpl = "start_tab";
+	ELSIF !loop.last;
+		tabtmpl = "mid_tab";
+	ELSE;
+		tabtmpl = "end_tab";
+	END;
+	"<!-- tablabel $tab.label tabsellabel $tab.sel_label tabtmpl $tabtmpl tl '" _ (tab.label == save_tab_selected) _ "' tsl '" _ (tab.sel_label == save_tab_selected) _ "' ns '" _ (loop.next && (loop.next.label == save_tab_selected || loop.next.sel_label == save_tab_selected)) _ "' -->";
+	PROCESS $tabtmpl link=tab.link label=tab.label
+		justify=justify
+		tab_is_selected=(tab.label == save_tab_selected || tab.sel_label == save_tab_selected)
+		next_tab_is_selected=(loop.next && (loop.next.label == save_tab_selected || loop.next.sel_label == save_tab_selected));
+END %]
+	</TR>
+</TABLE>
+</NOBR>
+__seclev__
+10000
