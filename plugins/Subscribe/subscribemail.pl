@@ -111,13 +111,13 @@ $task{$me}{code} = sub {
 					$sum_renew_payments += $subscribers_hr->{$uid}{payment_gross};
 				}
 			}
-			$statsSave->addStatDaily("subscribe_new_users", $new_count);
-			$statsSave->addStatDaily("subscribe_new_pages", $sum_new_pages);
-			$statsSave->addStatDaily("subscribe_new_payments", $sum_new_payments);
-			$statsSave->addStatDaily("subscribe_renew_users", $renew_count);
-			$statsSave->addStatDaily("subscribe_renew_pages", $sum_renew_pages);
-			$statsSave->addStatDaily("subscribe_renew_payments", $sum_renew_payments);
-			# If this stat doesn't already exist for yesterday, create it.
+			$statsSave->createStatDaily("subscribe_new_users",	$new_count);
+			$statsSave->createStatDaily("subscribe_new_pages",	$sum_new_pages);
+			$statsSave->createStatDaily("subscribe_new_payments",	$sum_new_payments);
+			$statsSave->createStatDaily("subscribe_renew_users",	$renew_count);
+			$statsSave->createStatDaily("subscribe_renew_pages",	$sum_renew_pages);
+			$statsSave->createStatDaily("subscribe_renew_payments",	$sum_renew_payments);
+			# If the runout stat doesn't already exist for yesterday, create it.
 			$statsSave->createStatDaily("subscribe_runout", 0);
 		}
 
@@ -139,18 +139,18 @@ $task{$me}{code} = sub {
 			push @stats, $stats->getStatLastNDays("subscribe_renew_users",		30) || 0;
 			push @stats, $stats->getStatLastNDays("subscribe_renew_pages",		30) || 0;
 			push @stats, $stats->getStatLastNDays("subscribe_renew_payments",	30) || 0;
-			push @stats, $stats->getStatLastNDays("subscribe_runout",		30) || 0;
 			push @stats, $stats[0]+$stats[3];
 			push @stats, $stats[1]+$stats[4];
 			push @stats, $stats[2]+$stats[5];
+			push @stats, $stats->getStatLastNDays("subscribe_runout",		30) || 0;
 			$monthly_stats = sprintf(<<EOT, @stats);
    Monthly Stats (Average Per Day)
    -------------------------------
             Users   Pages   Payments
-New:        %7.2f   %5d   \$%7.2f
-Renew:      %7.2f   %5d    %7.2f
-Total:      %7.2f   %5d   \$%7.2f
-Ran out:    %7.2f
+New:        %5.2f   %5d   \$%7.2f
+Renew:      %5.2f   %5d    %7.2f
+Total:      %5.2f   %5d   \$%7.2f
+Ran out:    %5.2f
 EOT
 		}
 	}
