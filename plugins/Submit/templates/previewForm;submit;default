@@ -49,7 +49,7 @@ TITLE="[% topic.alttext %]"></A>
 	<FORM ACTION="[% constants.rootdir %]/admin.pl" METHOD="POST">
 		<INPUT TYPE="HIDDEN" NAME="subid" VALUE="[% subid %]">
 		<INPUT TYPE="HIDDEN" NAME="submitter" VALUE="[% submitter %]">
-		<BR>title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50">
+		<BR>title <INPUT TYPE="text" NAME="title" VALUE="[% submission.subj %]" SIZE="50" MAXLENGTH="50">
 		<BR>[% lockTest %]
 	[% IF constants.use_dept %]
 		dept <INPUT TYPE="text" NAME="dept" SIZE="50">

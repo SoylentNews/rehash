@@ -57,13 +57,13 @@ reject the story.</P>
 [%# username is the only of from, email, subj that needs to be filtered in %]
 [%# the tag attribute; the others already have been in submit.pl.          %]
 [% PROCESS formLabel value => "Your Name", comment => "Leave Blank to be Anonymous" %]
-<INPUT TYPE="text" NAME="name" VALUE="[% username | strip_attribute %]" SIZE="50">
+<INPUT TYPE="text" NAME="name" VALUE="[% username | strip_attribute %]" SIZE="50" MAXLENGTH="50">
 
 [% PROCESS formLabel value => "Your Email or Homepage", comment => "Where Users Can Contact You" %]
-<INPUT TYPE="text" NAME="email" VALUE="[% fakeemail %]" SIZE="50">
+<INPUT TYPE="text" NAME="email" VALUE="[% fakeemail %]" SIZE="50" MAXLENGTH="50">
 
-[% PROCESS formLabel value => "Subject", comment => "Be Descriptive, Clear and Simple!" %]
-<INPUT TYPE="text" NAME="subj" VALUE="[% form.subj %]" SIZE="50">
+[% PROCESS formLabel value => "Subject", comment => "Be descriptive and concise! For best results, put the most important words first." %]
+<INPUT TYPE="text" NAME="subj" VALUE="[% form.subj %]" SIZE="50" MAXLENGTH="50">
 
 [% FOR extra = extras %]
 	[% PROCESS formLabel value => extra.0, comment => "" %]
