@@ -108,23 +108,36 @@ A reference to an array with the menu in it is returned.
 
 sub getCurrentMenu {
 	my($menu) = @_;
+	my($user, @menus, $user_menu);
+
 	# do we want to bother with menus at all for static pages?
 	# i can see why we might ... i dunno -- pudge
-	return unless $ENV{GATEWAY_INTERFACE};
-	my $user = getCurrentUser();
-	my @menus;
+	#
+	# Well, yes. Since createMenu() may be used in a header
+	# and a footer, if we don't generate menus on static pages,
+	# the page itself will be busted. We've already run into this
+	# for one site, so took a stab at fixing it. -- Cliff
+	if ($ENV{GATEWAY_INTERFACE}) {;
+		$user = getCurrentUser();
 
-	unless ($menu) {
-		($menu = $ENV{SCRIPT_NAME}) =~ s/\.pl$//;
+		unless ($menu) {
+			($menu = $ENV{SCRIPT_NAME}) =~ s/\.pl$//;
+		}
+
+		my $r = Apache->request;
+		my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
+
+		return unless $cfg->{menus}{$menu};
+		@menus = @{$cfg->{menus}{$menu}};
+	} else {
+		# Load menus direct from the database.
+		my $slashdb = getCurrentDB();
+		my $menus = $slashdb->getMenus();
+
+		@menus = @{$menus->{$menu}} if exists $menus->{$menu};
 	}
-
-	my $r = Apache->request;
-	my $cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-
-	return unless $cfg->{menus}{$menu};
-	@menus = @{$cfg->{menus}{$menu}};
-
-	if (my $user_menu = $user->{menus}{$menu}) {
+	
+	if ($user && ($user_menu = $user->{menus}{$menu})) {
 		push @menus, values %$user_menu;
 	}
 
