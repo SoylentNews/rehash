@@ -296,9 +296,7 @@ your Slash directories). [Y] ";
 
 
 unless ($opts{'a'}) {
-	print "
-Create a name for the site's admin account (8 characters
-or less). [$owner] ";
+	print "Create a name for the site's admin account. [$owner] ";
 	chomp($username = <STDIN>);
 	$username ||= $owner;
 } else {
@@ -382,6 +380,14 @@ while (<$dump>) {
 }
 
 close $dump;
+
+# We start this whole process by turning off foreign key
+# constraints -- since we will be adding data in an order
+# not guaranteed to match those constraints.  When all
+# the data is inserted, we can turn them back on.
+unshift @sql,	'SET FOREIGN_KEY_CHECKS = 0';
+push @sql,	'SET FOREIGN_KEY_CHECKS = 1';
+
 for my $cmd (@sql) {
 	next unless $cmd;
 	my $rows_affected = $dbh->do($cmd);
