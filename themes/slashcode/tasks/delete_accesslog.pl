@@ -41,21 +41,34 @@ $task{$me}{code} = sub {
 	my $total = 0;
 	my $limit = 100_000;
 
-	MAINLOOP:
-	while ($rows = $logdb->sqlDelete("accesslog", "id < $id", $limit)) {
-		$total += $rows;
-		last if $rows eq "0E0";
-		slashdLog("deleted so far $total of $limit rows");
-	}
-	if ($logdb->sqlError && $counter < $failures) {
-		slashdLog("sql error: " . $logdb->sqlError);
-		sleep 5;
-		$counter++;
-		goto MAINLOOP;
+	my $last_err = "";
+	my $done = 0;
+	MAINLOOP: while (!$done) {
+		while ($rows = $logdb->sqlDelete("accesslog", "id < $id", $limit)) {
+			$total += $rows;
+			last if $rows eq "0E0";
+			slashdLog("deleted so far $total of $limit rows");
+		}
+		my $err = "";
+		if ( $counter >= $failures || !($err = $logdb->sqlError()) ) {
+			# If either we're giving up because there are too many
+			# failures, or the last attempt was successful, then
+			# break out of the loop, we're done.
+			$done = 1;
+		} else {
+			# We had an error but we haven't reached our max
+			# number of failures yet;  keep trying.
+			$last_err = "sql error: '$err'";
+			slashdLog($last_err);
+			sleep 5;
+			$counter++;
+		}
 	}
 
 	if ($counter >= $failures) {
-		slashdLog("more than $failures errors occured, accesslog is probably locked");
+		my $err = "more than $failures errors occured, accesslog is probably locked, last_err '$last_err'";
+		slashdLog($err);
+		slashdErrnote($err);
 		return "failures, accesslog probably locked, $total rows deleted";
 	}
 	return "success, $total rows deleted";
