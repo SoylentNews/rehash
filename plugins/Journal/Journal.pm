@@ -108,13 +108,20 @@ sub remove {
 	my($self, $id) = @_;
 	my $uid = $ENV{SLASH_USER};
 
+	my $journal = $self->get($id);
+	return unless $journal->{uid} == $uid;
+
 	if ($self->sqlDelete("journals", "uid=$uid AND id=$id") == 0) {
 		# Return value 0E0 means "no rows deleted" (i.e. this user owns
 		# no such journal) and undef means "error."  Either way, abort.
 		return;
 	}
-
 	$self->sqlDelete("journals_text", "id=$id");
+
+	if ($journal->{discussion}) {
+		my $slashdb = getCurrentDB();
+		$slashdb->deleteDiscussion($journal->{discussion});
+	}
 
 	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
 	if ($date) {
