@@ -1,0 +1,46 @@
+__section__
+default
+__description__
+Priunts form for editing poll
+
+* checked = whether or not poll appears on homepage
+* qid = question ID
+* question = text of question
+* answers = arrayref of arrayrefs of answers (answer = 0, number = 1)
+__title__
+
+__page__
+pollBooth
+__lang__
+en_US
+__name__
+editpoll
+__template__
+[% PROCESS titlebar width='100%' %]
+[% USE Slash %]
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+	[% PROCESS formLabel value => "The Question" comment => "followed by the total number of voters so far" %]
+	<INPUT TYPE="TEXT" NAME="question" VALUE="[% question.question %]" SIZE="40">
+	<INPUT TYPE="TEXT" NAME="voters" VALUE="[% question.voters %]" SIZE="5"><BR>
+	[% PROCESS formLabel value => "Poll Topic" comment => "this doesn't do much right now but in the future it will" %]
+	[% DEFAULT question.topic=constants.discussion_default_topic %]
+	[% Slash.selectTopic('topic', question.topic, '', 1) %]
+	[% PROCESS formLabel value => "The Answers" comment => "voters" %]
+
+[% FOREACH n = [0 .. 7] %]
+	<INPUT TYPE="text" NAME="aid[% n + 1%]" VALUE="[% answers.$n.0 %]" SIZE="40">
+	<INPUT TYPE="text" NAME="votes[% n + 1%]" VALUE="[% answers.$n.1 or 0 %]" SIZE="5"><BR>
+[% END %]
+
+	[% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID it will appear with the story" %]
+	<INPUT TYPE="TEXT" NAME="sid" VALUE="[% question.sid %]" SIZE="20">
+	<INPUT TYPE="HIDDEN" NAME="qid" VALUE="[% qid %]">
+	[% PROCESS formLabel value => "SlashBox Poll" comment => "if checked this will be the poll used in slashboxes" %]
+	<INPUT TYPE="CHECKBOX" NAME="currentqid"[% checked %]> (appears on homepage) <br>
+
+	<INPUT TYPE="SUBMIT" VALUE="Save">
+	<INPUT TYPE="HIDDEN" NAME="op" VALUE="save">
+</FORM>
+
+__seclev__
+10000

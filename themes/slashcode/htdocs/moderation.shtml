@@ -1,0 +1,337 @@
+<HTML>
+ <TITLE>Slash Moderation</TITLE>
+<!--#include file="slashhead.inc"-->
+<P><FONT color=006666 size=5><B>Slash Moderation</B></FONT><BR>
+<I>last updated 9.9.99 by CmdrTaco</I>
+<P>This document will attempt to explain the moderation system that lies
+underneath Slash's vast comment section.  It will try to explain some
+of the history of the system, as well as how it works (or doesn't work) from
+both the perspective of the user, and the moderator.  It is always in flux.
+
+
+<OL>
+ <LI>Why
+ <LI>Goals
+ <LI>History
+ <OL>
+  <LI>Before Moderation
+  <LI>Hand Picked Few
+  <LI>400 Lucky Winners
+  <LI>Today: Most Anyone
+ </OL>
+ <LI>Who
+ <LI>How
+ <LI>FAQ
+ <OL>
+  <LI>I just got moderator access, what do I do?
+  <LI>Why can't I suddenly moderate any more?
+  <LI>I found a comment that was unfairly moderated!
+  <LI>Is this censorship?
+  <LI>What is a Good Comment?  A Bad Comment?
+  <LI>What is "Karma"?
+  <LI>3 Days Is Not Enough Time To Moderate!
+  <LI>If I Post in a Discussion I moderated, Why Don't I get My Points Back?
+  <LI>How can I improve my Karma?
+ </OL>
+ <LI>Ideas for the Future
+</OL>
+
+
+<H1>Why?</H1> As you might have noticed, A Slash site can get a lot of
+comments.  Thousands a day.  Tens of thousands a month.  At any given time, the
+database holds 40,000+ comments.  A single story might have a thousand replies-
+and lets be realistic: Not all of the comments are that great.  In fact, some
+are down right terrible-- but others are truly gems.
+
+ <P>The moderation system is designed to sort the gems and the crap from
+ the steady stream of information that flows through the pipe.  And
+ wherever possible, it tries to make the readers of the site take on the
+ responsibility.
+
+ <P>The goal is that each reader will be able to read a Slash site at a level
+that they find appropriate.  The impatient can read nothing at all but the
+original stories.  Some will only want to read the highest rated of comments,
+some will want to eliminate anonymous posts, and others will want to read every
+last drip of data, from the First Posts! to the spam.  The system we've created
+here will make that happen.  Or at least, it sure will try...
+
+<H1>Goals</H1>
+ <OL>
+ <LI>Promote Quality, Discourage Crap
+ <LI>Make Slash as readable as possible for as many people as possible.
+ <LI>Do not require a huge amount of time from any single moderator.
+ <LI>Do not allow a single moderator a 'reign of terror'
+ </OL>
+
+
+
+<H1>History</H1>
+ <P>In order to understand the system, it might help to understand how we
+ got there.  It wasn't random, it was trial and error and progression.  I'm
+ constantly tweaking and changing, trying to squeeze more out.  Trying to
+ make a more efficient, more fair system. 
+
+   <H2>Before Moderation</H2>
+   In the beginning Slashdot was small.  We got dozens of posts each day,
+   and it was good.  The signal was high, the noise was low.  Moderation
+   was unnecessary because we were nobody.  It was a different
+   world then.
+   Each day we grew, adding more and more users, and increasing the number
+   of comments submitted.  As this happened, many users discovered new
+   and annoying ways to abuse the system.  The authors had but one option:
+   Delete annoying comments.  But as the system grew, we knew that we would
+   never be able to keep up.  We were outnumbered.
+	
+   <H2>Hand Picked Few</H2>
+   So I picked people to help.  Just a few.  25 or so at the end.  They were
+   given the simple ability to add or subtract points to comments.  The
+   primary function of these brave souls was to weed out spam and First Post
+   and flamebait.  Plus, when they found smart stuff, to bring it out.
+   
+   <P>The system worked pretty well, but as Slashdot continued to grow, it
+   was obvious that these 25 people wouldn't be enough to keep up with the
+   thousands of posts we were getting each day.  It was obvious that
+   we needed more.
+
+   <H2>400 Lucky Winners</H2>
+   So we picked more the only way we could.  Using the actions of the original
+   25 moderators, we picked 400 more.  We picked the 400 people who had posted
+   good comments.  Comments that had been flagged as the cream of Slashdot.
+   Immediately several dozen of these new moderators had their access
+   revoked for being abusive, but they settled down.
+
+   <P>At this time I began to experiment with ways of restricting the power
+   of moderators to prevent abuses.  25 people are easy to keep an eye on,
+   but 400 is another matter.  I knew that someday I would have even less
+   control since I intended to eventually give access to even more people.
+   While fundamentally moderators still added and subtracted points, the
+   number of points they were given dropped from hundreds to dozens.
+
+   <P>As time went on, I began working on the next phase: mass moderation.
+   I learned a lot from having so many moderators.  I learned that I needed
+   to limit the power of each person to prevent a single rogue from spoiling
+   it for everyone.  And Then we took the next step:
+
+   <H2>Today: Most Anyone</H2>
+   Today any regular reader is probably eligible to become a moderator.
+   A variety of factors weigh into it, but if you are logged in when you
+   browse comments, you might occasionally be granted moderator
+   access.  Don't worry about it- Just keep reading this document and learn
+   what to do about it!
+
+
+<H1>Who</H1>
+ It's probably the most difficult part of the process: Who is allowed to
+ moderate.  On one hand, many people say "Everyone", but I've chosen to avoid
+ that path because the potential for abuse is so great.  Instead, I've set
+ up a few simple rules for determining who is eligible to moderate.
+ <OL>
+  <LI><B>Logged In User</B> If the system can't keep track, it won't work,
+      so you gotta log in.  Sorry if you're paranoid, but this system demands
+      a certain level of accountability.
+  <LI><B>Regular Slashdot Readers</B> The scripts track average accesses
+      from each logged in user.  It then selects eligible users who read
+      an average number of times.  The homepage doesn't count either.
+      It then picks users from the middle of the pack- no obsessive compulsive
+      reloaders, and nobody who just happened to read an article this week.
+  <LI><B>Long Time Readers</B> The system throws out the newest few thousand
+      accounts.  This prevents people from creating new accounts to simply get 
+      moderator access, but more importantly, means that newbies will have to be
+      part of the community for a few weeks before they gain access to the
+      controls to a system they don't understand.
+  <LI><B>Willing to Serve</B> If you don't want to moderate, just visit your
+      user preferences, and set yourself as 'Unwilling'
+  <LI><B>Positive Contributors</B> Slash tracks your "Karma" (see the
+      FAQ).  If you have non negative Karma, this means you have posted more
+      good comments than bad, and are eligible to moderate.  This weeds
+      out spam accounts.
+ </OL>
+ <P>So the end result is a pool of eligible users that represent (hopefully)
+ average, positive slashdot contributors.  Occasionally (well, every 30 
+ minutes actually) the system checks the number of comments that have been
+ posted, and gives a proportionate amount of eligible users "Tokens".  When
+ any user acquires a certain number of 
+ tokens, they become a 
+ moderator.  
+ This means that you'll need to be eligible for many of these slices
+ in order to actually gain access.  It all works to make sure that
+ everyone takes turns, and nobody can abuse the system, and that only "regular"
+ readers become moderators (as opposed to some random newbie ;)
+
+ <H1>How</H1>
+ When a moderator is given access, they are given a number of points of
+ influence to play with.  Each comment they moderate deducts a point.
+ When they run out of points, they are done serving until next time
+ it is their turn.  
+
+ <P>Moderation takes place by selecting an adjective from a drop down
+ list that appears next to comments.  Descriptive words like 'Flamebait'
+ or 'Informative'.  Bad words will reduce the comments score by a single
+ point, good words increase a comments score by a single point.  All
+ comments are scored on an absolute scale from -1 to 5.  Logged in
+ users start at 1 (although this can vary from 0 to 2 based on their
+ overall contribution to discussions) and anonymous users start at 0.
+
+ <P>Moderators can not participate in the same discussion as both a
+ moderator and a poster.  This is to prevent abuses, and while it is
+ one of the more controversial aspects of the system, I'm sticking to
+ it.  There are enough lurkers that moderate, that if you want to
+ post, feel free.
+
+ <P>Moderation points expire after 3 days if they are left unused.  You
+ then go back into the pool and might someday be given access again.
+
+ <P>Concentrate more on promoting than on demoting.  The real goal here
+ is to find the juicy good stuff and let others read it.  Do not promote
+ personal agendas.  Do not let your opinions factor in.  <B>Try</B> to
+ be impartial about this.  Simply disagreeing with a comment is not
+ a valid reason to mark it down.  Likewise, agreeing with a comment is
+ not a valid reason to mark it up.  The goal here is to share ideas.
+ To sift through the haystack and find needles.  And to keep the children
+ who like to spam Slashdot in check.
+
+ 
+<H1>FAQ</H1>
+
+<H2>I just got moderator access, what do I do?</H2>
+ The fact that you are reading this document proves that you
+ are already on the right track.
+
+<H2>Why can't I suddenly moderate any more?</H2>
+ <LI>Moderator access only lasts 3 days.
+ <LI>You can't moderate and post in the same discussion.
+ <LI>Do you still have any moderator points left?  You only got 5...
+ <LI>If you unfairly moderate a comment, you might have your access revoked,
+     although this is almost never the reason people lose access.
+ 
+<H2>I found a comment that was unfairly moderated!</H2>
+ Lemme know and I'll look at it.  Sometimes I might agree and revoke access
+ to a moderator.  Usually I disagree and let it go.  Its difficult to be the
+ judge on this stuff since it is <B>so</B> subjective.
+
+<H2>Is this censorship?</H2>
+ We're not technically deleting anything.  In fact "We" technically
+ aren't really doing much at all.  The masses are doing this for themselves
+ (in theory anyway).  And you are always given the option of clicking the
+ threshold control over to '-1' and reading everything uncut, so I really
+ have a hard time saying this truly is censorship.  But if you really
+ want to call it that, I can't really argue.  We're trying to make as
+ many people happy as possible here- if you don't like something, you can
+ probably change it in the user preferences to more suit your tastes anyway.
+
+
+<H2>What is a Good Comment?  A Bad Comment?</H2>
+<LI>Good Comments are insightful.  You read them and are better off
+    having read them.  They add new information to a discussion.  They
+    are clear, hopefully well written, or maybe amusing.  These are
+    the gems we're looking for, and they deserve to be promoted.
+
+<LI>Average Comments might be slightly offtopic, but still might be
+    worth reading.  They might be redundant.  They might be a 'Me Too'
+    article.  They might say something painfully obvious.  They don't
+    detract from the discussion, but they don't necessarily significantly
+    add to it.  They are the comments that require the most attention
+    from the moderators, and they also represent the bulk of the
+    comments. (Score: 0-1)
+
+<LI>Bad Comments are flamebait.  Bad comments have nothing to do
+    with the article they are attached to.  They call someone names.
+    They ridicule someone for having a different opinion without backing
+    it up with anything more tangible than strong words.   Bad comments
+    are repeats of something said 15 times already making it quite
+    apparent that the writer didn't read the previous comments.  They
+    use foul language.  They are hard to read or just don't make any
+    sense.  
+    They detract from the article they are attached to.
+</OL>
+
+<H2>What is Karma?</H2>
+    Karma is the sum of all moderation activity done to a user.  Karma is
+    used to determine eligibility for moderator status.  Every new user
+    starts with a Karma of 0, and as long as your karma isn't <I>negative</I>
+    you are eligible to become a moderator.  This doesn't mean you ever
+    <B>will</B> become a moderator, but it does make you eligible!
+ 
+
+<H2>3 Days Is Not Long Enough To Moderate!</H2>
+On the contrary, I think its too long, although maybe I should change it to like
+"24 hours after you first are informed that you have moderator access". My
+reasoning is pretty simple: I don't want people to stockpile their points.
+I want people to use them or lose them.  Otherwise people will hold on to their
+X points until a story comes on that they have a strong opinion in, and they
+will be tempted to moderate the discussion so as to sway things "their way".
+By expiring points quickly, moderators are encouraged to use them.  Sometimes
+their points might expire unused, but thats ok: the system will just give
+points to someone else.  
+
+
+<H2>Why Don't I get my points back after I post in a discussion I moderated?</H2>
+Basically because of the following scenario:
+<OL>
+ <LI>Bob Moderates a Discussion
+ <LI>Bob Waits Until Tomorrow When the Discussion Leaves the Homepage and
+     Activity Dies Off.
+ <LI>Bob goes into dead discussion, posts and comment, reclaims his moderator
+     points.
+ <LI>Lather.  Rinse. Repeat
+</OL>
+This scenario would easily allow a user to continue to have moderator access
+for as long as they felt like it.  Simply disallowing the retrieval of points
+makes this impossible.
+
+<h1>Ideas for the Future</H1>
+    This is a system in development.  It may never be done, but here are
+    some of the ideas I'm currently mulling over for incorporation into a
+    future version of the moderation system.  They might not happen.  Hell,
+    I'm lazy, I'd prefer it if they didn't have to!  But if I decide that
+    they are for the best, I'll implement them somehow.
+<OL>
+ <LI>IP Restrictions: No single IP can post more than X comments per story.
+     While this has problems, it would help prevent the occasional moron
+     who likes to come in and post a dozen comments in a row on an article
+     that really don't say anything.  This could take a variety of shapes:
+     No single IP being allowed to post more than 10% of all comments in a
+     subject?  A hard limit of 10 comments per IP per story?  5 minute delay
+     between posts from any IP?  Each method has ups and downs, but would
+     probably solve the problem.  The problem is that it would cause other
+     problems so I'm not really planning on implementing this yet, but if
+     I do, it will be fairly lenient.
+ <LI>Only allow "Logged In Anonymous Posting".  It would be a simple extra
+     hurdle that people would be required to jump over.  It might help to
+     eliminate some knee jerk reaction posts, but the naysayers will argue
+     that this prevents them from being anonymous (please note that the
+     logged in AC is every bit as Anonymous as the logged out AC as far as
+     the system is concerned, so the only real difference is that you would
+     have had to at some point create an account).  This has up sides and
+     downsides so I have no real opinion on this at all.
+</OL>
+
+<H2>How can I improve my Karma?</H2>
+<P>What follows was originally a story submission by 
+<A href=mailto:dkh2@po.cwru.edu>dkh2</A>.  It seemed to me that it would
+better serve readers here:
+
+<b>10 tips for improving your Karma:</b>
+<dl>
+<dt><b>Post intelligently:</b></dt>
+<dd>Interesting, insightful, thought provoking comments are rated higher on a fairly consistent basis.</dd>
+<dt><b>Post calmly:</b></dt>
+<dd>Nobody likes a flame war.  In fact, more times than not the flamer gets burned much more than their target.  "Flaim Bait" is hit quickly and consistently with "-1" by moderators.  As the bumper sticker says... "Don't be a dick."</dd>
+<dt><b>If you can't be deep, be funny:</b></dt>
+<dd>If you don't have something truly developing to the topic, some humor is welcome.  Humor is lacking in our lives and will continue to be promoted.  Remember though, what rips your sides out may be completely inane to somebody else.</dd>
+<dt><b>Post early:</b></dt>
+<dd>If an article has over a certain number of posts on it already yours is less likely to be moderated.  This is, less likely both statistically (there are more to choose from) and due to positioning (as a moderator I have to actually find your post waaay at the end of a long list.)</dd>
+<dt><b>Post often:</b></dt>
+<dd>If you only post once a month you can expect your karma to remain low.  Also, lively discussion in an open forum is what makes Slashdot really "Rock the Casbah."</dd>
+<dt><b>Stay on topic:</b></dt>
+<dd>Off topic posts are slapped quickly and consistently with "-1" by moderators.</dd>
+<dt><b>Be original:</b></dt>
+<dd>Avoid being redundant and just repeating what has already been said.  (Did I really just say that?)  Yes, being moderated as "redundant" is worth "-1" to your post and your karma.  Especially to be avoided are the "what he said" and "me too" posts.</dd>
+<dt><b>Read it before you post:</b></dt>
+<dd>Does it say what you really want it to say?  Check your own spelling and grammar.  Occasionally, a perfectly beneficial post is passed over by moderators because of this completely irrelevant to content feature.  This is also a good approach to checking yourself for what you're really saying.  Can't tell you the number of times I've stopped myself from saying the opposite of what I meant by checking my own s&g.</dd>
+<dt><b>Log in as a registered user:</b></dt>
+<dd>I know, this sounds obvious but, "Anonymous Coward" does not have a karma rating.  You can't reap the perceived benefits of your own accidental brilliance if you post anonymously.  Have pride in your work and take credit for it.</dd>
+<dt><b>Read Slashdot regularly:</b></dt>
+<dd>You can't possibly contribute to the discussion if you're not in the room.  Come to the party and play.</dd>
+
+<!--#include file="slashfoot.inc"-->

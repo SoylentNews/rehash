@@ -1,0 +1,38 @@
+__section__
+light
+__description__
+Display comment for light mode.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+dispComment
+__template__
+	<TR>
+		<TD>
+		<A NAME="[% cid %]"><H4>[% subject %]</H4></A>
+		by [% nickname %] on [% Slash.timeCalc(time) %]
+		[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% constants.reasons.$reason %][% END %])[% END %]
+		[% UNLESS is_anon %]<BR>(<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&nick=[% nickname | fixparam %]">User #[% uid %] Info</A>)
+		[% IF homepage && homepage.length > 8 %]<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]
+		[% IF journal_last_entry_date.search('[1-9]') %] | Last Journal:
+		<A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]">[% Slash.timeCalc(journal_last_entry_date) %]</A>
+		[% END %]
+		[% END %]
+		[% IF user.seclev >= 100 %]
+		<BR>IPID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid %]&amp;fieldname=ipid">[% ipid %]</A>&nbsp;&nbsp;SubnetID: <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% subnetid %]&amp;fieldname=ipid">[% subnetid %]</A>
+		[% END %]
+		<P>[% comment %]
+		[% UNLESS user.nosigs %]
+			[% sig %]
+		[% END %]
+		</TD>
+	</TR>
+
+[% PROCESS dispLinkComment %]
+
+__seclev__
+10000

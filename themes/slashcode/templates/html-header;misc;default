@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+Text that makes up the VERY top of a page (separate from "header" so we can dynamically add stuff between the two)
+
+* title = title for TITLE tag
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+html-header
+__template__
+[% DEFAULT title="$constants.sitename: $constants.slogan" %]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML><HEAD><TITLE>[% title | strip_notags %]</TITLE>
+
+__seclev__
+10000

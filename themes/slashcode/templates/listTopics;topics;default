@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+List all the current topics
+
+* title = passed to titlebar
+* width = passed to titlebar
+* topic_admin = boolean for whether current user is admin
+* topics = hashref of current topics
+__title__
+
+__page__
+topics
+__lang__
+en_US
+__name__
+listTopics
+__template__
+[% PROCESS titlebar %]
+<TABLE ALIGN="CENTER">
+	<TR>
+[% x = 0 %]
+[% FOREACH topic = topics.sort("alttext"); x = x + 1; "</TR><TR>" IF (x mod 6) == 1 %]
+	<TD ALIGN="CENTER">
+		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
+			SRC="[% topic.imageclean %]"
+			ALT="[% topic.alttext %]" WIDTH="[% topic.width %]"
+			HEIGHT="[% topic.height %]" BORDER="0">[% IF topic_admin %]</A>
+			<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]"
+			>[% END %]<BR>[% topic.alttext %]</A>
+	</TD>
+[% END %]
+	</TR>
+</TABLE>
+
+__seclev__
+10000

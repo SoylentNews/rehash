@@ -1,0 +1,62 @@
+__section__
+default
+__description__
+Text that makes up the bottom of a page
+
+No specially passed variables
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+footer
+__template__
+[% USE Slash %]
+
+</TD></TR></TABLE><P>
+
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+	<TR BGCOLOR="[% user.bg.3 %]">
+		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD>
+	</TR>
+	<TR BGCOLOR="[% user.bg.1 %]">
+		<TD ALIGN="LEFT"><IMG SRC="[% constants.imagedir %]/660000.gif" WIDTH="1" HEIGHT="60" ALT=""></TD>
+		<TD WIDTH="100%">
+			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
+				<TD><A HREF="http://slashdot.org/"><IMG SRC="[% constants.imagedir %]/sdlogo.gif" BORDER="0"></A></TD>
+				<TD ALIGN="CENTER">
+[% IF user.is_admin %]
+[% Slash.currentAdminUsers() %]
+[% ELSE %]
+<FONT SIZE="2" FACE="[% constants.mainfontface %]"><I>[% PROCESS motd %]</I></FONT>
+[% END %]
+</TD>
+				<TD><A HREF="http://slashcode.com/"><IMG SRC="[% constants.imagedir %]/slashlogo.gif" BORDER="0"></A></TD>
+			</TR></TABLE>
+		</TD>
+		<TD ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/660000.gif" WIDTH="1" HEIGHT="60" ALT=""></TD>
+	</TR>
+	<TR BGCOLOR="[% user.bg.3 %]">
+		<TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD>
+	</TR>
+</TABLE>
+
+
+<CENTER>
+	<FONT SIZE=2 COLOR="[% user.bg.3 %]"> [
+		<A HREF="[% constants.rootdir %]/">home</A> |
+		<A HREF="[% constants.rootdir %]/submit.pl">contribute story</A> |
+		<A HREF="[% constants.rootdir %]/search.pl">older articles</A> |
+		<A HREF="[% constants.rootdir %]/pollBooth.pl">past polls</A> |
+		<A HREF="[% constants.rootdir %]/faq.shtml">faq</A> |
+		<A HREF="[% constants.rootdir %]/authors.pl">authors</A> |
+		<A HREF="[% constants.rootdir %]/users.pl">preferences</A> ]
+	</FONT>
+</CENTER>
+</BODY>
+</HTML>
+
+__seclev__
+10000

@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+This template controls how the Discussion List is printed. For default
+Slash, this list is printed when comments.pl executed with no
+arguments.
+
+* discussions = arrayref of arrayrefs of discussions (sid = 0, title=1, url=2)
+* supress_create = if it has value then the create is not displayed even if the user has enough of a seclev
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+discuss_list
+__template__
+<MULTICOLS COLS=2>
+[% FOR d = discussions %]
+	<LI><A HREF="[% constants.rootdir %]/comments.pl?sid=[% d.0 %]">[%
+IF d.1.defined && d.1.length %][% d.1 %][% ELSE %]untitled[% END %]</A>
+	(<A HREF="[% d.2 %]">referer</A>)
+[% END %]
+</MULTICOL>
+
+<P>
+
+[% IF user.seclev >= constants.discussion_create_seclev && !supress_create;
+    PROCESS discreate topic=constants.discussion_default_topic;
+END %]
+
+__seclev__
+100

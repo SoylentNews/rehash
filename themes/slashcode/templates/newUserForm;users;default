@@ -1,0 +1,50 @@
+__section__
+default
+__description__
+Form for new user.
+
+No specially passed variables.
+__title__
+New User Form
+__page__
+users
+__lang__
+en_US
+__name__
+newUserForm
+__template__
+[% PROCESS titlebar title=title width="100%" %]
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+[% IF form.formkey %]
+<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+	<TR>
+		<TD>
+		<B>Nick Name</B><BR>
+		<INPUT TYPE="TEXT" NAME="newusernick" VALUE="">
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+		<B>Real Email</B> <BR>
+		<INPUT TYPE="TEXT" NAME="email" VALUE="" SIZE="40"><BR>
+		<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="Create Account">
+		<INPUT TYPE="HIDDEN" NAME="op" VALUE="newuser">
+		</TD>
+	</TR>
+</TABLE>
+</FORM>
+
+[% IF ! suadmin_flag %]
+	[% IF ! logged_in %]
+<P>
+Login to <A HREF="[% env.script_name %]?op=userlogin">[% constants.sitename %]</A><BR>
+</P>
+	[% END %]
+<P>
+Lost your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Click here</A> to enter your email address, nickname or uid to get your password mailed to you.<BR>
+</P>
+[% END %]
+__seclev__
+10000

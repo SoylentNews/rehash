@@ -1,0 +1,30 @@
+__section__
+default
+__description__
+Menu for sidebar and bottom (see header template and Slash::horizmenu() function)
+
+No specially passed variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+mainmenu
+__template__
+		- <A HREF="[% constants.rootdir %]/about.shtml">About</A><BR>
+		- <A HREF="[% constants.rootdir %]/faq.shtml">FAQ</A><BR>
+		- <A HREF="[% constants.rootdir %]/comments.pl">Discussions</A><BR>
+		- <A HREF="[% constants.rootdir %]/journal.pl">Journals</A><BR>
+		- <A HREF="[% constants.rootdir %]/messages.pl">Messages</A><BR>
+		- <A HREF="[% constants.rootdir %]/topics.pl">Topics</A><BR>
+		- <A HREF="[% constants.rootdir %]/authors.pl">Authors</A><BR>
+		<HR NOSHADE SIZE="1">
+		- <A HREF="[% constants.rootdir %]/users.pl?op=edithome">Preferences</A><BR>
+		- <A HREF="[% constants.rootdir %]/search.pl">Older Stuff</A><BR>
+		- <A HREF="[% constants.rootdir %]/pollBooth.pl">Past Polls</A><BR>
+		- <A HREF="[% constants.rootdir %]/submit.pl">Submit Story</A><BR>
+
+__seclev__
+10000

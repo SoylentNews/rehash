@@ -1,0 +1,32 @@
+__section__
+light
+__description__
+Footer for light mode.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+footer
+__template__
+[% USE Slash %]
+<P>[% Slash.horizmenu() %]
+
+<FORM METHOD="GET" ACTION="[% constants.rootdir %]/search.pl">
+  <INPUT TYPE="name" NAME="query" VALUE="" WIDTH="20" SIZE="20" LENGTH="20">
+  <INPUT TYPE="submit" VALUE="Search [% constants.sitename %]">
+</FORM>
+
+[% PROCESS motd %]
+
+<P> All trademarks and copyrights on this
+  page are owned by their respective companies.  Comments
+  are owned by the Poster.
+ 
+</BODY>
+</HTML>
+
+__seclev__
+10000

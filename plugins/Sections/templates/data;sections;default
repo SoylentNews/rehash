@@ -1,0 +1,52 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+sections
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'head' %]
+	Section Editor
+
+[% CASE 'notadmin' %]
+<PRE>
+         I woke up in the Soho bar when a policeman knew my name. He said,
+         "You can go sleep at home tonite if you can get up and walk away."
+         I staggered back to the underground and a breeze threw back my
+         head. I remember throwing punches around and preachin' from my chair.
+                         From 'Who Are You' by God (aka Pete Townshend)<BR></PRE>
+
+[% CASE 'insert' %]
+	Inserted [% section %]<BR>
+
+[% CASE 'update' %]
+	Updated [% section %]<BR>
+
+[% CASE 'addhead' %]
+	Add Section
+
+[% CASE 'listhead' %]
+	Sections
+
+[% CASE 'edithead' %]
+	Editing [% form.section | strip_nohtml %] Section
+
+[% CASE 'savehead' %]
+	Saving [% form.section | strip_nohtml %] Section
+
+[% END %]
+
+__seclev__
+10000

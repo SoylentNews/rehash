@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+HTML code for the icons for the last 5 stories posted
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+recentTopics
+__instructions__
+placeholder
+__template__
+	<TD><A HREF="[% constants.rootdir %]/search.pl?topic=news"><IMG
+		SRC="[% constants.imagedir %]/topics/topicnews.gif"
+		WIDTH="34" HEIGHT="44"
+		BORDER="0" ALT="News"></A>
+	</TD>
+	<TD><A HREF="[% constants.rootdir %]/search.pl?topic=slashdot"><IMG
+		SRC="[% constants.imagedir %]/topics/topicslashdot.gif"
+		WIDTH="100" HEIGHT="34"
+		BORDER="0" ALT="Slashdot"></A>
+	</TD>
+
+__seclev__
+500

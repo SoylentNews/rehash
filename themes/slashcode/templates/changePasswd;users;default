@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+Change password form
+
+* useredit = hashref of user info
+* author_flag = user is author
+* title = passed to titlebar
+* session = popup for session login
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+changePasswd
+__template__
+[% PROCESS titlebar width="100%" %]
+
+<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+	<TR>
+		<TD>
+		<P>You can automatically login by clicking
+		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&upasswd=[% useredit.passwd | fixparam %]&unickname=[% useredit.nickname | fixparam %]">This Link</A> and Bookmarking the resulting page. 
+		This is totally insecure, but very convenient.
+		</P>
+		<BR>
+
+		<FORM ACTION="[% env.script_name %]" METHOD="POST">
+
+[% IF form.formkey %]
+ 	       <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+[% IF admin_flag %]
+		<B>User ID</B> (if admin user) <INPUT TYPE="TEXT" NAME="uid" VALUE="[% useredit.uid %]"><BR>
+[% ELSE %]
+		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
+[% END %]
+		<B>Session Login</B> [% session %]<BR>
+		<B>Password</B> Enter new passwd twice to change it.
+		(must be 6-32 chars long)</B><BR>
+		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="32" MAXLENGTH="32">
+		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="32" MAXLENGTH="32">
+
+		</TD>
+	</TR>
+</TABLE>
+
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="savepasswd">
+<INPUT TYPE="SUBMIT" VALUE="Change Password">
+</FORM>
+
+__seclev__
+500

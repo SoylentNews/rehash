@@ -1,0 +1,17 @@
+__section__
+light
+__description__
+Story link for light mode.
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+storylink
+__template__
+<P><B>(</B> [% links.join(' | ') %] <B>)</B></P>
+
+__seclev__
+10000

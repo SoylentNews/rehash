@@ -1,0 +1,32 @@
+
+__section__
+default
+__description__
+Initial template for the displayed sectionindex.
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+sectionindexd
+__instructions__
+placeholder
+__template__
+	<TR>
+  		<TD>
+			<FONT size=2 color="#000000"><B>Sections</B></FONT>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<TABLE border=0 cellspacing=1 cellpadding=1 bgcolor="#FFFFFF" width="100%">
+				<TR>
+					<TD>&nbsp;
+					</TD>
+				</TR>
+			</TABLE>
+__seclev__
+1000

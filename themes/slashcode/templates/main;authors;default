@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+Show list of authors
+
+* uids = arrayref of author UIDs
+* authors = hashref of hashrefs of authors (key is name, other keys are nickname, fakeemail, etc.)
+* title = passed to titlebar
+* admin = boolean for whether current user is admin or not
+* time = current time string
+__title__
+
+__page__
+authors
+__lang__
+en_US
+__name__
+main
+__template__
+[% PROCESS titlebar width => '100%' %]
+<P>I keep getting asked 'Who are you guys', so to help unload
+some of that extra mail from my box I have now provided
+this nice little page with a summary of the active [% sitename %]
+authors here, along with the number of articles that they
+have posted.</P>
+[% FOREACH uid = list %]
+	[% IF uid.0 > 0 %]
+		<H2><B><A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid.1 %]">[% uid.0 %]</A></B>
+		<A HREF="[% uid.3 %]">[% uid.2 %]</A></H2>
+		[% IF admin %]
+			<A HREF="[% constants.rootdir %]/users.pl?uid=[% uid.1 %]">edit</A>
+		[% END %]
+	[% END %]
+[% uid.4 %]
+[% END %]
+<P><BR><FONT SIZE="2"><CENTER>generated on [% time %]</CENTER></FONT><BR>
+
+__seclev__
+10000

@@ -1,0 +1,86 @@
+__section__
+default
+__description__
+Template that describes the meta moderation screen, which shows the
+comments and the metamoderation options, to the user.
+
+* comments = arrayref of hashrefs of comments to display
+
+__title__
+
+__page__
+metamod
+__lang__
+en_US
+__name__
+dispTheComments
+__template__
+
+[% USE Slash %]
+[% PROCESS titlebar width="99%" title="Meta Moderation" %]
+[% IF !comments.size %]
+<BIG><CENTER>No comments available for meta moderation!</CENTER></BIG>
+[% STOP %]
+[% END %]
+[% user.noscores = 1; # Do not show scores in comment display. %]
+<B>PLEASE READ THE DIRECTIONS CAREFULLY BEFORE EMAILING
+[% constants.siteadmin_name.uc %]!</B> <P>What follows are random
+moderations performed on comments in the last few weeks on [% constants.sitename %].
+You are asked to <B>honestly</B> evaluate the actions of the moderator of each
+comment. Moderators who are ranked poorly will cease to be eligible for
+moderator access in the future.
+
+<UL>
+
+<LI>If you are confused about the context of a particular comment, just
+link back to the comment page through the parent link, or the #XXX cid
+link.</LI>
+
+<LI><B><FONT SIZE="5">Duplicates are fine</FONT></B> (Big because over
+<B>100</B> people have emailed me to tell me about this even though it is
+explained <B>right here</B>.)  You are not moderating a "Comment" you
+are moderating a "Moderation".  Therefore, if a comment is moderated
+more than once, it can appear multiple times below.  Don't worry about it.</LI>
+
+<LI>If you are unsure, feel free to leave it unchanged.</LI>
+
+<LI>Please read the <A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
+and try to be impartial and fair.  You are not moderating to make your
+opinions heard, you are trying to help promote a rational discussion.
+Play fairly and help make [% constants.sitename %] a little better for everyone.</LI>
+
+<LI>Scores and information identifying the posters of these comments have been
+removed to help prevent bias in meta moderation. If you really need to know,
+you can click through and see the original message, but we encourage you not
+to do this unless you need more context to fairly meta moderate.<BR><BR></LI>
+
+<LI>Today, you have [% comments.size %] moderations to meta-moderate.</LI>
+
+</UL>
+
+<FORM ACTION="[% constants.rootdir %]/metamod.pl" METHOD="POST">
+<TABLE>
+[% FOR C = comments %]
+[%
+	Slash.dispComment(C);
+	context_url="$constants.rootdir/comments.pl?sid=$C.sid&amp;cid=$C.pid&amp;threshold=-1&amp;mode=nested"
+%]
+	<TR><TD>
+		Original Discussion: <B><A HREF="[% C.url %]">[% C.title %]</A></B><BR>
+		Rating: <B>[% constants.reasons.${C.modreason} %]</B>.<BR>
+		This rating is <B>Unfair
+			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="-">
+			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="0" CHECKED>
+			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="+">
+		Fair</B>&nbsp;&nbsp|&nbsp;
+		<A HREF="[% context_url %]">See Context</A><HR>
+	</TD></TR>
+[% END %]
+</TABLE>
+
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="MetaModerate">
+
+</FORM>
+
+__seclev__
+1000

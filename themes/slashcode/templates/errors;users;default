@@ -1,0 +1,118 @@
+__section__
+default
+__description__
+A template with logic to return the various messages in users.pl, used
+by the subroutine getMessages in users.pl
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+errors
+__template__
+[% SWITCH value %]
+
+[% CASE 'note' %]
+
+	[% FOREACH n = note %]
+<H2>[% n %]</H2>
+	[% END %]
+
+[% CASE 'userinfo_nicknf_err' %]
+[% PROCESS titlebar width="95%" title="Nickname not found" %]
+	[% nick %] not found.
+
+[% CASE 'userinfo_idnf_err' %]
+	<BR><B>The 
+	[% fieldkey == 'uid' ? ' UID ' : ' nickname ' %]
+	[% id %] could not be found.</B>
+
+[% CASE 'saveuseradmin_notsaved' %]
+[% PROCESS titlebar width="95%" title="Unable to save" %]
+	Unable to save [% field %] [% id %] Admin settings
+
+[% CASE 'bad_op' %]
+	Hey! The opcode '[% op | strip_literal %]' is not a valid op! Quit messing around!
+
+[% CASE 'bad_saveparam' %]
+	That user parameter is not valid.
+
+[% CASE 'saveuseradmin_notsaveduser' %]
+[% PROCESS titlebar width="95%" title="Unable to save" %]
+	Unable to save [% field %] [% id %] User settings
+ 
+[% CASE 'saveuseradmin_uid_notnumeric' %]
+[% PROCESS titlebar width="95%" title="Unable to save" %]
+	Unable to save [% field %] [% id %] : a uid must be all numeric 
+ 
+[% CASE 'cookie_err' %]
+	[% IF titlebar %]
+[% PROCESS titlebar width="95%" title="Cookie Error" %]
+	[% END %]
+	<P>Your browser didn't save a cookie properly. This could mean you are behind a filter that
+	eliminates them, you are using a browser that doesn't support them, or you rejected it.
+
+[% CASE 'mailpasswd_notmailed_err' %]
+[% PROCESS titlebar width="95%" title="Nickname not found" %]
+	Nickname was not found. No Password was mailed.<BR>
+
+[% CASE 'duplicate_user' %]
+[% PROCESS titlebar width="95%" title="User already exists" %]
+	The nickname [% nick %] has already been taken. Please try another
+	choice<BR>
+
+[% CASE 'checklist_err' %]
+[% PROCESS titlebar width="95%" title="Too many options" %]
+	You selected too many options<BR>
+
+[% CASE 'saveuser_passnomatch_err' %]
+	[% IF titlebar %]
+[% PROCESS titlebar width="95%" title="Password fields don't match" %]
+	[% END %]
+	Passwords don't match. Password not changed.<BR>
+
+[% CASE 'saveuser_passtooshort_err' %]
+	[% IF titlebar %]
+[% PROCESS titlebar width="95%" title="Password too short" %]
+	[% END %]
+	Password is too short and was not changed.<BR>
+
+[% CASE 'anon_validation_attempt' %]
+[% PROCESS titlebar width="95%" title="Anonymous User validation attempt" %]
+	<P>I'm sorry. Anonymous users have no accounts that need to be validated.
+	If you do have an account on [% constants.sitename %] that you would like
+	to re-register, then please log in as that user, first.<BR>
+
+[% CASE 'emailexists_err' %]
+	Sorry, the email address "[% form.realemail | strip_literal %]" already
+	exists in our user database, or is invalid.<BR>
+
+[% CASE 'sig_too_long_err' %]
+	Sorry, adding domain tags to your sig made it too long. Please try again,
+	using fewer links or shorter domain names.<BR>
+
+[% CASE "filter message" %]
+[% PROCESS titlebar width="95%" title="Content filter encountered for $item" %]
+[% IF err_message %]
+<B>Reason: [% err_message %]</B><BR>
+[% END %]
+<B>Saving [% item %] aborted.</B>
+
+[% CASE "compress filter" %]
+[% PROCESS titlebar width="95%" title="Compression filter encountered" %]
+Your [% item %] violated the "[% ratio %]" compression filter. Try less
+whitespace and/or less repetition.
+<B>Saving [% item %] aborted.</B>
+
+[% CASE DEFAULT %]
+	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.<BR>
+
+[% END %]
+__seclev__
+10000

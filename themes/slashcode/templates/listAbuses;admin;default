@@ -1,0 +1,43 @@
+__section__
+default
+__description__
+* plugins - list of plugins and their descriptions
+* site_info - list of site info variables	
+__title__
+admin interface siteInfo Template
+__page__
+users
+__lang__
+en_US
+__name__
+listAbuses
+__template__
+[% PROCESS titlebar title="User Abuses" width='100%' %]
+[% IF abuses.0 %]
+<TABLE CELLSPACING="0">
+	<TR>
+		<TD BGCOLOR="[% user.fg.4 %]"><B>Timestamp</B></TD>
+		<TD BGCOLOR="[% user.fg.4 %]"><B>UID</B></TD>
+		<TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
+		<TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
+		<TD BGCOLOR="[% user.fg.4 %]"><B>Page</B></TD>
+		<TD BGCOLOR="[% user.fg.4 %]"><B>Reason</B></TD>
+	</TR>
+[% FOR abuse = abuses %]
+	<TR>
+		<TD>[% abuse.0 %]</TD>
+		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.1 %]">[% abuse.1 %]</TD>
+		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.2 %]">[% abuse.2 %]</TD>
+		<TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% abuse.3 %]">[% abuse.3 %]</TD>
+		<TD>[% abuse.4 %]</TD>
+		<TD>[% abuse.5 %]</TD>
+	</TR>
+[% END %]
+</TABLE>
+[% ELSE %]
+No abuses for this user
+[% END %]
+
+
+__seclev__
+100

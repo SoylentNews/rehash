@@ -1,0 +1,51 @@
+<HTML>
+<HEAD>
+	<TITLE>About Slashcode</TITLE>
+<!--#include virtual="/slashhead.inc"-->
+
+
+<H1>About This Site</H1>
+
+<P>
+<IMG SRC="/images/topics/topicslash.gif" ALT="Slash"
+WIDTH="81" HEIGHT="36" ALIGN="right" HSPACE="10">
+Slashcode is the site for All Things Slash.  Slash is the source
+code and database that was originally used to create
+<A HREF="http://slashdot.org/">Slashdot</A>, and has now been
+released under the GNU General Public License.
+It is a bona fide Open Source / Free Software project.  Use
+this site to get the Slash source, read the latest Slash news,
+and participate in Slash discussions.
+</P>
+
+<P>
+Slashcode is run by the good folks at
+<A HREF="http://www.osdn.com/">OSDN</A>, but like all
+good open source projects, depends on the community.  Thanks
+for your continued support, and let us know what we can do
+to make the site better.
+</P>
+
+<P>
+Slash and Slashcode could not be possible without the use of some
+great Open Source software.
+</P>
+
+<UL>
+	<LI><A HREF="http://www.debian.org/">Debian</A> and
+		<A HREF="http://www.redhat.com/">Red Hat</A> Linux</LI>
+	<LI><A HREF="http://www.perl.com/CPAN/">Perl</A></LI>
+	<LI><A HREF="http://apache.org/">Apache</A></LI>
+	<LI><A HREF="http://perl.apache.org/">mod_perl</A></LI>
+    <LI><A HREF="http://www.mysql.com/">MySQL</A></LI>
+</UL>
+
+<P>
+Slash was originally written by
+<A href="http://CmdrTaco.net/">CmdrTaco</A> and
+<A href="http://www.cowboyneal.org/">CowboyNeal</A>.
+Slashcode is run by <A HREF="http://tofu.org/">CaptTofu</A>, <A HREF="http://tangent.org/~brian/">Krow</A> and
+<A HREF="http://pudge.net/">pudge</A>.
+</P>
+
+<!--#include virtual="/slashfoot.inc"-->

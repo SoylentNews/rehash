@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+lists top abusers
+__title__
+admin interface Banlist Template
+__page__
+users
+__lang__
+en_US
+__name__
+listBanned
+__template__
+[% PROCESS titlebar title="Banned" width='100%' %]
+
+[% IF bannedlist %]
+<P><B>Banned List:</B></P>
+<TABLE BORDER="0" CELLPADDING="0">
+        <TR>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Time Stamp</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>uid</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Formname</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Reason</B></TD>
+        </TR>
+                [% FOREACH banned = bannedlist %]
+        <TR>
+                <TD>[% banned.0 %]</TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.1 %]">[% banned.1 %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.2 %]">[% banned.2 %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% banned.3 %]">[% banned.3 %]</A></TD>
+                <TD>[% banned.4 %]</TD>
+                <TD>[% banned.5 %]</TD>
+        </TR>
+                [% END %]
+</TABLE>
+
+[% ELSE %]
+No banned users 
+[% END %]
+
+
+__seclev__
+100

@@ -1,0 +1,38 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'users_no_discussions' %]
+	This user has created no discussions.
+
+[% CASE 'active_discussions' %]
+	Several Active Discussions
+
+[% CASE 'user_discussion' %]
+	Discussions created by [% name %]
+
+[% CASE 'no_such_sid' %]
+	This is not the discussion you are looking for.
+
+[% CASE 'archive_error' %]
+	This discussion has been archived, no further changes/additions can be made to it.
+
+[% END %]
+
+__seclev__
+10000

@@ -1,0 +1,45 @@
+__section__
+default
+__description__
+lists top abusers
+__title__
+admin interface siteInfo Template
+__page__
+users
+__lang__
+en_US
+__name__
+listReadOnly
+__template__
+[% PROCESS titlebar title="Read Only" width='100%' %]
+
+[% IF readonlylist %]
+<P><B>Read Only List:</B></P>
+<TABLE BORDER="0" CELLPADDING="0">
+        <TR>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Time Stamp</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>uid</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Formname</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Reason</B></TD>
+        </TR>
+                [% FOREACH readonly = readonlylist %]
+        <TR>
+                <TD>[% readonly.0 %]</TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.1 %]">[% readonly.1 %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.2 %]">[% readonly.2 %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% readonly.3 %]">[% readonly.3 %]</A></TD>
+                <TD>[% readonly.4 %]</TD>
+                <TD>[% readonly.5 %]</TD>
+        </TR>
+                [% END %]
+</TABLE>
+
+[% ELSE %]
+No readonly users 
+[% END %]
+
+
+__seclev__
+100

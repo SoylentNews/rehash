@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+formbox
+__template__
+[% USE Slash %]
+[% begin %]
+<TABLE WIDTH="[% boxwidth || "95%" %]" ALIGN="CENTER">
+<TR><TD COLSPAN="2">
+[% PROCESS titlebar width => (barwidth || "90%") %]
+</TD></TR>
+[% FOR pair = pairs %]
+<TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="top">
+<B>[% pair.label %]</B>
+</TD><TD>
+[% pair.value %]
+</TD></TR>
+[% END %]
+</TABLE>
+[% end %]
+
+__seclev__
+255

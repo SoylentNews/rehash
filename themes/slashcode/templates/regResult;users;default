@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+Template displayed whenever a user performs a re-validation operation.
+
+Depends on the following variables:
+
+	* form => passed in by default
+
+	* user => passed in by default
+
+	* constants => passed in by default
+__title__
+User Revalidation template.
+__page__
+users
+__lang__
+en_US
+__name__
+regResult
+__template__
+
+[% IF user.reg_id && user.reg_id == form.id %]
+<H2>Thanks for Reregistering!</H2>
+We're sorry about the bother, but each user who wants to post with an identity
+must have a valid e-mail account registered with the system. Thanks for putting
+up with the hassle.
+<P>We hope you will continue to enjoy [% constants.sitename %]!
+
+[% ELSE %]
+  [% IF form.id && user.reg_id != form.id %]
+<H2>ID Mismatch!</H2>
+Sorry, but the re-registration data which you have provided is invalid, please
+try again!<P>
+  [% ELSE %]
+<H2>Welcome, [% user.nickname %]!</H2>
+  [% END %]
+
+In the entry field below, please enter the registration ID which should have
+been emailed to the email address associated with your user account.
+
+<!-- Begin entry form for registration data. -->
+
+<FORM ACTION="[% constants.rootdir %]/users.pl" METHOD=POST>
+<INPUT TYPE=HIDDEN NAME="op" VALUE="validateuser">
+Registration ID: &nbsp;
+<INPUT TYPE=TEXT NAME="id" VALUE="" SIZE=32>
+<P>
+<INPUT TYPE=SUBMIT>
+</FORM>
+
+<!-- End entry form -->
+
+[% END %]
+
+__seclev__
+10000

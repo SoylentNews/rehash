@@ -1,0 +1,112 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'tablebegin' %]
+	<TABLE>
+[% CASE 'tableend' %]
+	</TABLE>
+[% CASE 'cagebegin' %]
+	<TR><TD>
+[% CASE 'cageend' %]
+	</TD></TR>
+[% CASE 'commentbegin' %]
+	<LI>
+[% CASE 'commentend' %]
+	</LI>
+[% CASE 'indentbegin' %]
+	<UL>
+[% CASE 'indentend' %]
+	</UL>
+[% CASE 'cagebigbegin' %]
+	<TR><TD BGCOLOR="[% user.bg.2 %]">
+[% CASE 'cagebigend' %]
+	</TD></TR>
+[% CASE 'displayThreadLink' %]
+	[% foo = hidden == 1 ? 'y' : 'ies'; hidden %] repl[% foo %]
+[% CASE 'atonish' %]
+	around
+[% CASE 'aton' %]
+	on
+[% CASE 'hour' %]
+	hour
+[% CASE 'hours' %]
+	hours
+[% CASE 'minute' %]
+	minute
+[% CASE 'minutes' %]
+	minutes
+[% CASE 'second' %]
+	second
+[% CASE 'seconds' %]
+	seconds
+
+[% CASE 'noformkey' %]
+<P><B>We can't find your formkey.</B></P>
+<P>You must fill out a form and submit from that
+form as required.</P>
+
+[% CASE 'submitalready' %]
+<P>This comment has been submitted already, [% interval_string %] ago.
+No need to try again.</P>
+
+[% CASE 'speedlimit' %]
+<P>[% constants.sitename %] requires you to wait [% limit_string %] between
+each submission of [% env.script_name %] in order to allow everyone to have a fair chance to post.</P>
+<P>It's been [% interval_string %] since your last submission.</P>
+
+[% CASE 'invalidformkey' %]
+<P><B>Invalid form key.</B>  Please go back to the beginning and try again.</P>
+
+[% CASE 'maxposts' %]
+<P><B>You've reached you limit of maximum submissions to [% env.script_name %] :
+[% max %] submissions over [% timeframe %].</B></P>
+
+[% CASE 'moderatord_log_header' %]
+--------------- BEGIN MODERATORD EXECUTION --------------- 
+
+[% CASE 'moderatord_tokenmsg' %]
+
+[% new_comments %] comments becomes [% new_comments * constants.tokenspercomment %] tokens.
+[% IF stirredpoints %]Stirred out [% stirredpoints %] points, so 
+[%- ELSE %]So[% END %] the total token pool=[% tokenpool %]t
+First [% last_user  * constants.m1_eligible_percentage %] accounts available.
+Eligible: [% eligible %] / Start at [% st %] end at [% fi %] / First score is [% constants.m1_eligible_hitcount %].
+Incremented token-count on [% num_updated %] users.
+
+[% CASE 'moderatord_tokengrantmsg' %]
+[% points = constants.maxtokens / constants.tokensperpoint -%]
+Giving [% points %] points ([% constants.maxtokens %]t/[% constants.tokensperpoint %]) to [% uid %].
+
+[% CASE 'moderatord_tokennotgrantmsg' %]
+[% points = constants.maxtokens / constants.tokensperpoint -%]
+Not giving [% points %] points ([% constants.maxtokens %]t/[% constants.tokensperpoint %]) to [% uid %].
+
+[% CASE 'moderatord_log_footer' %]
+---------------- END MODERATORD EXECUTION ----------------
+
+[% CASE 'rereg_email_subject' %]
+You're [% constants.sitename %] account has expired.
+
+[% CASE DEFAULT %]
+---- MISSING MISCELLANEOUS DATA SEGMENT --- [[% value %]] block not found.
+
+[% END %]
+
+__seclev__
+10000

@@ -1,0 +1,76 @@
+__section__
+default
+__description__
+Edit user info
+
+* useredit = hashref of user info
+* author_flag = user is author
+* author_select = popup of authors
+* title = passed to titlebar
+* editkey = stuff for editing public key
+* maillist = popup for mailing list
+* admin_block = stuff for editing other users/authors
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+editUser
+__template__
+[% PROCESS titlebar width="100%" %]
+
+<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]"><TR><TD>
+
+You can automatically login by clicking
+<A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;upasswd=[% useredit.passwd | fixparam %]&amp;unickname=[% useredit.nickname | fixparam %]">This Link</A>
+and Bookmarking the resulting page. This is totally insecure, but very convenient.
+<BR>
+
+	[% IF admin_flag %]
+	[% admin_block %]
+	[% END %]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+
+[% IF form.formkey %]
+        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+<BR>[%# is realname ever used for anything? -- pudge %]
+	<B>Real Name</B> (optional)<BR>
+		<INPUT TYPE="TEXT" NAME="realname" VALUE="[% useredit.realname | strip_attribute %]" SIZE="40"><BR>
+		<INPUT TYPE="HIDDEN" NAME="formname" VALUE="edituser">
+		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
+		<INPUT TYPE="HIDDEN" NAME="name" VALUE="[% useredit.nickname | strip_attribute %]">
+<BR>
+	<B>Your Email Address</B><BR>
+	<SMALL>(required but never displayed publicly, unless you specify so in
+	your comment preferences. This is where your passwd is mailed.  If you
+	change this address, a notification will be sent, and you will need 
+	follow the enclosed instructions to re-register)</SMALL><BR>
+	<INPUT TYPE="TEXT" NAME="realemail" VALUE="[% useredit.realemail | strip_attribute %]" SIZE="40"><BR>
+<BR>
+	<B>Homepage</B> (optional:you must enter a fully qualified URL!)<BR>
+		<INPUT TYPE="TEXT" NAME="homepage" VALUE="[% useredit.homepage | strip_attribute %]" SIZE="60"><BR>
+
+	<P><B>Sig</B> (appended to the end of comments you post, 120 chars)<BR>
+		<TEXTAREA NAME="sig" ROWS="2" COLS="60">[% useredit.sig | strip_literal %]</TEXTAREA>
+
+	<P><B>Bio</B> (this information is publicly displayed on your
+		user page.  255 chars)<BR>
+		<TEXTAREA NAME="bio" ROWS="5" COLS="60" WRAP="virtual">[% useredit.bio | strip_literal %]</TEXTAREA>
+
+	[% editkey %]
+
+	</TD></TR></TABLE><P>
+
+	<INPUT TYPE="HIDDEN" NAME="op" VALUE="saveuser">
+	<INPUT TYPE="SUBMIT" VALUE="Save User">
+	</FORM>
+
+
+__seclev__
+500

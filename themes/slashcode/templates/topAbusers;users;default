@@ -1,0 +1,41 @@
+__section__
+default
+__description__
+lists top abusers
+__title__
+admin interface siteInfo Template
+__page__
+users
+__lang__
+en_US
+__name__
+topAbusers
+__template__
+[% PROCESS titlebar title="Top Abusers" width='100%' %]
+
+[% IF topabusers %]
+<P><B>Top Abusers:</B></P>
+<TABLE BORDER="0" CELLPADDING="0">
+        <TR>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>Total abuses</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>uid</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>IPID</B></TD>
+                <TD BGCOLOR="[% user.fg.4 %]"><B>SubnetID</B></TD>
+        </TR>
+                [% FOREACH abuser = topabusers %]
+        <TR>
+                <TD>[% abuser.0 %]</TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=listabuses&amp;key=uid&amp;abuseid=[% abuser.1 %]">[% abuser.1 %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=listabuses&amp;key=ipid&amp;abuseid=[% abuser.2 %]">[% abuser.2 %]</A></TD>
+                <TD><A HREF="[% constants.rootdir %]/users.pl?op=listabuses&amp;key=subnetid&amp;abuseid=[% abuser.3 %]">[% abuser.3 %]</A></TD>
+        </TR>
+                [% END %]
+</TABLE>
+
+[% ELSE %]
+No abuses logged 
+[% END %]
+
+
+__seclev__
+100

@@ -1,0 +1,103 @@
+__section__
+default
+__description__
+Display submission form
+
+* fixedstory = submission for preview
+* savestory = boolean for OK to print "Submit" button
+* username = user's name
+* fakeemail = user's mail/URL
+* section = submission section name
+* topic = submission topic hashref
+* width = passed to titlebar
+* title = passed to titlebar
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+displayForm
+__template__
+[% USE Slash;
+	IF fakeemail && username;
+		subtext = "<A HREF=\"$fakeemail\">$username</A> writes <i>\"$fixedstory\"</i>";
+	ELSIF username;
+		subtext = "$username writes <i>\"$fixedstory\"</i>";
+	ELSE;
+		subtext = fixedstory;
+	END;
+%]
+
+[% PROCESS titlebar title = "$constants.sitename Story Submissions" %]
+
+[% IF constants.submiss_view %]
+<P><B>
+	<A HREF="[% env.script_name %]?op=list">View Current Pending Submissions</A>
+</B></P>
+[% END %]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+[% IF form.formkey %]
+<INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+<P>Here is where you can submit a story for the [% constants.sitename %]
+Editors to peer at it, poke it with a stick, and perhaps 
+post it for all to share and enjoy.  It is <B>very</B>
+important that you write a clear simple subject, and 
+include relevant links in your story.  If you wish to be 
+anonymous, feel free to leave the identifying fields 
+blank.  Anonymity has no affect on whether we will accept or 
+reject the story.</P>
+
+[% PROCESS formLabel value => "Your Name", comment => "Leave Blank to be Anonymous" %]
+<INPUT TYPE="text" NAME="name" VALUE="[% username %]" SIZE="50">
+
+[% PROCESS formLabel value => "Your Email or Homepage", comment => "Where Users Can Contact You" %]
+<INPUT TYPE="text" NAME="email" VALUE="[% fakeemail %]" SIZE="50">
+
+[% PROCESS formLabel value => "Subject", comment => "Be Descriptive, Clear and Simple!" %]
+<INPUT TYPE="text" NAME="subj" VALUE="[% form.subj %]" SIZE="50">
+
+<BR><FONT SIZE="2">
+(bad subjects='Check This Out!' or 'An Article'.
+We get many submissions each day, and if yours isn't clear, it will
+be deleted.)</FONT>
+
+[% PROCESS formLabel value => "Topic and Section", comment => "" %]
+
+[% tid = form.tid || 'news' %]
+[% Slash.selectTopic('tid', tid, section, 1) %]
+[% Slash.selectSection('section', section, 0, 1) %]
+
+<BR><FONT SIZE="2">(Almost everything should go under Articles)</FONT>
+
+[% IF savestory %]
+<P>[% PROCESS titlebar width => "100%", title => form.subj %]
+<IMG SRC="[% topic.imageclean %]" ALIGN="RIGHT" BORDER="0"
+	ALT="[% topic.alttext %]" HSPACE="30" VSPACE="10"
+	WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]">
+
+<P>[% subtext %]</P>
+[% END %]
+
+[% PROCESS formLabel value => "The Scoop",
+	comment => "HTML is fine, but double check those URLs and HTML tags!" %]
+
+
+<TEXTAREA WRAP="VIRTUAL" COLS="70" ROWS="12" NAME="story">[% form.story | strip_literal %]</TEXTAREA><BR>
+<FONT SIZE="2">(Are you sure you included a URL?  Didja test them for typos?)</FONT><P>
+
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="PreviewStory">
+[% IF savestory %]
+<INPUT TYPE="SUBMIT" NAME="op" VALUE="SubmitStory">
+[% ELSE %]
+(You must preview once before you can submit)
+[% END %]
+
+</FORM><P>
+
+__seclev__
+10000

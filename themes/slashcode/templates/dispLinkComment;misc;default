@@ -1,0 +1,47 @@
+__section__
+default
+__description__
+Display a comment link string (reply, parent, etc.), included by
+dispComment
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+dispLinkComment
+__template__
+[% USE Slash %]
+[% IF (user.mode != 'archive' && nickname != "-") %]
+	[% pid = realpid || pid %]
+	<TR><TD><FONT SIZE="2">
+
+	[ [% UNLESS user.state.comment_read_only %][% Slash.linkComment({
+		sid	=> sid,
+		pid	=> cid,
+		op	=> 'Reply',
+		subject	=> 'Reply to This',
+	}) %] | [% END %][% Slash.linkComment({
+		sid	=> sid,
+		cid	=> pid,
+		pid	=> pid,
+		subject	=> 'Parent',
+	}, 1) %]
+
+	[% IF can_mod && !user.state.comment_read_only %]
+	| [% Slash.createSelect("reason_$cid", reasons, '', 1, 1);
+	   END
+	%]
+
+	[% IF user.is_admin && !user.state.comment_read_only %]
+| <INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
+	[% END %]
+	]
+	</FONT></TD></TR>
+<TR><TD>
+
+[% END %]
+
+__seclev__
+10000

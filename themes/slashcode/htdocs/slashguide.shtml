@@ -1,0 +1,234 @@
+<html>
+<head>
+<title>Slash Guide</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!--#include virtual="/slashhead.inc"-->
+<style type="text/css">
+<!-- 
+.pod {  }
+DIV.pod TD {
+	border: thin solid #999999; 
+	padding: 5;
+}
+// -->
+</style>
+<div class="pod"><P>
+<HR>
+<H1><A NAME="name">NAME</A></H1>
+<P>slashguide - The guide to using Slash version 2.0.</P>
+<P>
+<H2><A NAME="so i have slash installed, what do i do now">So I have Slash installed, what do I do now?</A></H2>
+<P>The site is running, you can get a front page to display, and slashd is generating static .shtml files. What do I do now? How do I administer the site? How do I change the way it looks? How do I post stories or user submissions? This guide is to answer these and other questions, questions that I've seen asked on the mailing list time and time again. There's been a great need to explain the admin interface for quite some time now. This should hopefully satisfy this need.</P>
+<P>
+<H2><A NAME="logging into the admin interface">Logging into the admin interface</A></H2>
+<P>The first thing you need to do (and you should do this to get the most out of this document) it log in as an author. (<EM>note</EM>: make sure that the author you log in as has a seclev of at least 10000. The default author that you set up when you use install-slashsite has this security level.) You can find the login form on the front page or at <A HREF="http://yoursite/users.pl">http://yoursite/users.pl</A> .</P>
+<P>After you have logged in as an author, you will now see a navigation bar, or navigation list on the top of the page. This is the admin menu. In this list there are the URLs to the various functions of the admin interface. This admin navigation bar will only show links to the admin tasks that the user you're logged in has access to (the ``seclev'' value for this author).</P>
+<P>
+<H2><A NAME="logging out">Logging out</A></H2>
+<P>To log out, go to preferences and click the ``Logout'' link.</P>
+<P>
+<H2><A NAME="overview of slash concepts">Overview of Slash concepts</A></H2>
+<DL>
+<DT><STRONG><A NAME="item_Stories%3A">Stories:</A></STRONG><BR>
+<DD>
+Stories reside in the middle section of the page and have the intro-text of the stories along with the authors and what departments they are from.
+<P></P>
+<DT><STRONG><A NAME="item_Comments%3A">Comments:</A></STRONG><BR>
+<DD>
+Users may write comments about a story.
+<P></P>
+<DT><STRONG><A NAME="item_Submissions%3A">Submissions:</A></STRONG><BR>
+<DD>
+Stories are submitted by users, and then approved by authors.
+<P></P>
+<DT><STRONG><A NAME="item_Users%3A">Users:</A></STRONG><BR>
+<DD>
+Users are registered to use the site, all other visitors are logged as Anonymous.
+<P></P>
+<DT><STRONG><A NAME="item_Authors%3A">Authors:</A></STRONG><BR>
+<DD>
+Authors approve submissions, have the authority to change the look of the site, and can moderate.
+<P></P>
+<DT><STRONG><A NAME="item_Sections_%26_Topics%3A">Sections &amp; Topics:</A></STRONG><BR>
+<DD>
+Seem similar.
+<P>Sections are similar to the way a newspaper is laid out, i.e.: business section, sports section, local section, etc.</P>
+<P>Topics can appear anywhere, share similar concepts.</P>
+<P>The home page has stuff from all sections.</P>
+<P></P>
+<DT><STRONG><A NAME="item_Blocks%3A">Blocks:</A></STRONG><BR>
+<DD>
+Located on the right hand side, blocks can be customized by users.
+<P></P>
+<DT><STRONG><A NAME="item_Templates%3A">Templates:</A></STRONG><BR>
+<DD>
+These store the html for boxes, fancy boxes, headers, footers, etc.  The template is where the look of the site can be changed.  Inside the templates is where you will spend the majority of your time for site design changes.
+<P></P>
+<DT><STRONG><A NAME="item_Variables%3A">Variables:</A></STRONG><BR>
+<DD>
+Govern how links are created, etc.; don't normally need to change them.
+<P></P></DL>
+<P>
+<H2><A NAME="the story list">The story list</A></H2>
+<P>Click on the link ``Stories'' on the admin menu. On this page you'll see the stories that are running on the site, grouped by the day that they are running on.</P>
+<P>The first column is a number. This is a link to edit the story. Go ahead and click on any one of the numbers for any story that's running. This will take you to a <A HREF="#story editing page">Story editing page</A>.</P>
+<P>The second column just links you to the story as the story will be seen (to article.pl).</P>
+<P>The third column is the author of the story, the fourth column is the topic, the fifth column the section. The sixth column has two numbers - the first is the total hits for the story, the second number is how many comments there are. The final column is the timestamp of the story.</P>
+<P>
+<H2><A NAME="story editing page">Story editing page</A></H2>
+<P>The top of the page is the title and body of the story, as it would be displayed.</P>
+<P>Going down, next you'll see a block that has three buttons, three pulldowns, and two text fields. The buttons do what they are labeled as, the first pulldown is the topic the story is categorised into, the next pulldown is what section the story is running in, the third pulldown is the author the story is running as. The next text field is the stories title, and the text field below that is the department that it runs as. (Each word that you type in this text field is displayed with dashes between each word. If you enter ``this is a test'', it will be displayed as ``from the this-is-a-test dept.''.) Next, you'll see two more pulldown and a text field containing a date. The first pulldown gives you three display options. You can select to not display the story at all, restrict it to one section, or run it for every section (default). The next pulldown selects whether a story can have comments or not. You can use this to restrict the story to being read-only.</P>
+<P>The fixquotes checkbox is for fixing curly quotes if you've pasted text that includes them.  The autonode checkbox is for automatically creating glossary-style links to <A HREF="http://everything2.com">http://everything2.com</A> but it doesn't seem to work anymore.  The fastforward checkbox moves a story to the first position on the page (by changing its date).</P>
+<P>The timestamp text field contains the time and date that the story will run on.  You can set it to a future date if you want a story to be delayed.  Below this you'll see a text area for the story copy. This is the full text of the story. You can put html tags in your text if you wish.  Below this box, are the same three buttons that you see above. These have the same form action as the ones above, and are only there for convenience. Below this is the extended copy text area. This is if you're doing a longer article such as a book review, or a commentary. Below that is an ``import image''. This is something that is being worked on. In other words, it doesn't really work yet! You can see how this page works by changing any on of these values for the story. If you select ``preview'' it will only display what the change would look like, if you hit ``update'', it will update the story in the database (and on the site), and display what the change looks like.</P>
+<P>
+<H2><A NAME="submitting a new story">Submitting a new story</A></H2>
+<P>As admin:</P>
+<P>To post a new story, you need to click on the ``New'' admin menu link. This takes you to a <A HREF="#story editing page">Story editing page</A>. Fill out this form with all the values for the story you want to run. To view it before saving, click on the ``preview'' button. Once you feel that the story is ready to be published, you can click on ``save''. This will save the story to the database. You may post-date the story to run at another time in the time stamp field, if you want. This is often handy when you want some time to decide if you really want to run a particular story.</P>
+<P>As a regular user:</P>
+<P>Same as above, but use the ``Submit Story'' link from the main menu.  The story must be approved by an author before it appears.</P>
+<P>
+<H2><A NAME="commenting on a story">Commenting on a story</A></H2>
+<P>Below the story, there is a bar with a ``Reply'' button which can be used to post a comment on a story.  Each comment has a ``Reply to This'' link which can be used to comment on that comment.</P>
+<P>There is a selection box that will allow you to format your message in any of four ways:</P>
+<P><TABLE CELLSPACING=0 CELLPADDING=0><TR><TD>Plain Old Text<TD>HTML tags are interpreted, &lt;br&gt; tags are inserted for you
+<TR><TD>HTML Formatted<TD>HTML tags are interpreted, you must add your own &lt;br&gt; tags
+<TR><TD>Extrans<TD>HTML tags are quoted
+<TR><TD>Code<TD>HTML tags are quoted, text is formatted as code</TABLE></P>
+<P>
+<H2><A NAME="approving user submissions">Approving user submissions</A></H2>
+<P>To approve user submissions so they show up as stories, click on the ``XX Submissions'' link (XX being a number). This will take you to a page listing user submissions.</P>
+<P>Above the submissions list are links that will reload this page according to sections. For instance, if you click on the link for ``articles'' this page will only display submissions that are in the  ``articles'' section.   The links on the left are categories set by the second column.</P>
+<P>Next is the submissions list.</P>
+<OL>
+<LI>
+The first column is a notes block. This is for the author to write a note pertaining to a particular submission, so the author, or other authors, can have something to refer to in the case where they may not want to publish a particular until a later time.
+<P></P>
+<LI>
+The second column is also for classifying submissions.  Unless you have hundreds of submissions like slashdot does, you probably won't need those fields.
+<P></P>
+<LI>
+The third column is which section the submission is in.
+<P></P>
+<LI>
+<STRONG>The fourth column contains a box that if checked will delete the submission.</STRONG>
+<P></P>
+<LI>
+The fifth column is the timestamp of the submission.
+<P></P>
+<LI>
+The sixth column is the title of the submission, which is a link to edit the submission. If this is clicked, it takes you to a submission editing page that works just like the <A HREF="#story editing page">Story editing page</A>, and in fact if the author <EM>previews</EM> the submission, the submission then is pulled up in the story editing page where the author can edit the submission further, and decide if the story should be published or not.
+<P></P>
+<LI>
+The seventh column is the name of the person who made the submission.
+<P></P></OL>
+<P>
+<H2><A NAME="topics">Topics</A></H2>
+<P>To edit, add, or delete a topic, click on ``Topics'' from the admin menu.  This will take you to a page showing all of the site's topics icons, with a topic name listed below each icon, which is a URL to edit that topic.  If this URL is clicked, you will be taken to a page that allows you to edit the topic, select a new topic to edit, create a new topic, or delete the topic.</P>
+<P>The first item on the page is a pulldown with all topics.  You can change the topic you want to edit by selecting whatever topic you want from the pulldown and clicking ``Select topic''.  If you want to create a new topic, you click on ``Create new topic''.  Below that, the icon for the topic is displayed (as it would be seen). Next is the ``Tid'' text field.  This is the topic ID.  Next are the width and height that the image is displayed as, and the text that's displayed in the ``alt'' tag.  Next is a pulldown of all the images that are available in the images/topics directory.  If you want to have a new image to select from, you'll need to upload and/or copy it to that directory.  Finally, there are the ``Save Topic'' and ``Delete Topic'' buttons.  They do what they say they do.</P>
+<P>
+<H2><A NAME="blocks">Blocks</A></H2>
+<P>Most important to how the site looks are the blocks, which are edited, added, and deleted via the block editing form.  This form essentially manipulates the blocks and sectionblocks tables.  To get to the block editing page, click on ``Blocks'' from the admin menu.</P>
+<P>On this page, you start out with two pulldowns, each having two buttons: one for editing the block, and one for deleting the block.  The first pulldown selects all non-portald blocks, meaning blocks that aren't populated by portald.  They are static blocks, their content (what's contained in the column ``block'' in the blocks table) doesn't change unless you change it, whereas the portald blocks are updated by portald.  Below these two pulldowns is a ``Create a new block'' button, which you can use to create a new block. Upon selecting a block and clicking ``Edit Block'' (or creating a new block), the block is pulled up in the block editing form.  This form has these elements:</P>
+<P><TABLE CELLSPACING=0 CELLPADDING=0><TR><TD>Block ID<TD>The block ID
+<TR><TD>Title<TD>A title for the block
+<TR><TD>Seclev<TD>The minimum security level an author must have in order to edit this block
+<TR><TD>Type<TD>The type of block that it is.  This is a new concept for blocks and is still being developed, but the current type of blocks are color, static, and portald.  If you end up setting a blocks type as ``portald'', it will then be seen in the portald pulldown, otherwise, it will appear in the static blocks pulldown. 
+<TR><TD>Section<TD>If a block is set with a specific section, the block will only appear in that section if its ``portal'' value is one (meaning it's a user selectable slashbox). 
+<TR><TD>Ordernum<TD>This is the order number of the blocks that appear on the right side of the page.  These are the default blocks for all users. If the ordernumber is -1, it's a user selectable slashbox, if the ordernum is 0, it doesn't appear at all. If the number is 1 or greater, this is the order that it appears on the right side of the page for Anonymous Cowards and users that have not specified their own preferences for slashboxes. 
+<TR><TD>Portal<TD>If this is checked, then this block shows up on the slashboxes selection in users.pl.
+<TR><TD>Retrieve<TD>If this is a portald type block, and this is checked, portald will retrieve the content for this block from the URL listed in the next box, RDF/URL. 
+<TR><TD>RDF/URL<TD>The URL from which portald gets the content for this particular block.
+<TR><TD>Description<TD>A text description of the block.
+<TR><TD>Block<TD>The actual block itself.  You can only change non-portald blocks (well you can change portald blocks, but portald will overwrite your changes).
+<TR><TD>Revert to default<TD>Use this if you make a mistake while editing the block, or want to revert to what it was originally.
+<TR><TD>Save as default<TD>Use this if you are confident that you want this to be the saved default, in case you later edit the block and want something to revert back to.
+<TR><TD>Save Block<TD>Saves the block
+<TR><TD>Create a new block<TD>Opens a new form to create a new block.
+<TR><TD>Preview<TD>This previews slashboxes. Don't try it with blocks that are code blocks, or partial blocks, it won't work correctly.</TABLE></P>
+<P>
+<H2><A NAME="templates">Templates</A></H2>
+<P>Templates contain the actual HTML that is used to generate all of the dynamic pages in Slash.  Click on the ``Templates'' link from the admin menu.  There are three drop-down menus: Section, Page, and Templates.  The ``sections'' on this page have nothing to do with the ``sections'' that contain the Slash topics.</P>
+<P>There are three sections:</P>
+<P><TABLE CELLSPACING=0 CELLPADDING=0><TR><TD>admin<TD>Contains the templates for admin pages
+<TR><TD>light<TD>Contains the templates to be used when users are in ``light'' mode.  These pages are designed for people with slow connections and should not contain too many large graphics.
+<TR><TD>default<TD>Contains everything else</TABLE></P>
+<P>In addition, you can choose ``All'' for the section in order to access all of the sections at once.</P>
+<P>When you click the ``Select section'' button, the page will refresh and the ``Templates'' menu will contain a list of all the templates in that section.</P>
+<P>The ``Page'' menu can be used to select the templates from a particular page.  Pages generated by a CGI script will generally use templates from the page that has the same name as the script (eg. ``users.pl'' uses templates from the ``users'' page).  The ``Select page'' button will cause the page to refresh, and the ``Templates'' menu will contain all of the templates from that page.</P>
+<P>You can select either a section or a page, but not both.</P>
+<P>The ``Templates'' menu will contain a list of the selected templates.  Each template has both a name and a number.  Two templates from different sections or pages may have the same name, but the number will always be unique.  Templates with higher numbers were created after the ones with smaller numbers.  Once a template is chosen, it can be either edited or deleted.  The ``Create new template'' button on the bottom of the page allows you to create new templates.</P>
+<P>The template editing page will allow you to change the text and the properties of a template.  The ``Seclev'' field sets the minimum security level that is required in order to edit the template.  At the bottom of the page, there is a textbox field containing the text of the template.  Anything enclosed within [% ... %] will be interpreted by the template-toolkit.  To learn about this syntax, go to <A HREF="http://www.template-toolkit.com.">http://www.template-toolkit.com.</A></P>
+<P>You can view the source of any Slash page in order to see which templates are being used.  The source will contain the names of the templates enclosed in html comments.  For example, at the beginning of the template editor page:</P>
+<P>&lt;!-- start template: ID 7, header;misc;admin --&gt;</P>
+<P>....HTML stuff....</P>
+<P>&lt;!-- end template: ID 7, header;misc;admin --&gt;</P>
+<P>The above shows that the ``header (7)'' template is being used, from the ``misc'' page in the ``admin'' section.</P>
+<P>
+<H2><A NAME="site colors">Site Colors</A></H2>
+<P>This is where you can change the colors of the site.  Click on the ``Site Colors'' link from the admin menu.  This will take you to a form that has a pulldown to select which colorblock you want to edit (you can have a colorblock for each section, which you would create in the block editor, and it must be named ``section''_colors).  Click on the ``Edit Colors'' button to edit the color block you select (the default is the main color block ``colors'').  You will then see a list of eight colors, with four columns:</P>
+<P><TABLE CELLSPACING=0 CELLPADDING=0><TR><TD>The color name<TD>The name of the color, and the variable it gets assigned to
+<TR><TD>The color value<TD>The actual value of the color, hex or canonical. Make sure this is a valid color, or it might not display properly.
+<TR><TD>The color name<TD>displayed in the font color selected
+<TR><TD>The color<TD>A table cell with the selected color</TABLE></P>
+<P>Next are the buttons.  If you click on ``Preview'', you'll see the color you are selecting, as well as providing a link at the top of the page that's a URL to index.pl which will display using the color you want to preview.  Clicking on ``Save Colors'' will save the colors you've selected, ``Revert to saved'' will reload the form with the last saved values of colors, ``Revert to default'' will reload the page with the default colors, and ``Save as default'' saves the colors as the default.  Again, as with the blocks, you want to make sure this is what you want saved as the default for your site.</P>
+<P>
+<H2><A NAME="sections">Sections</A></H2>
+<P>Click on ``Sections'' from the admin menu. This will take you to a page with a URL list of the site's sections.  If you click on a particular section, it will then take you to a form for editing the section.  This form contains:</P>
+<P><TABLE CELLSPACING=0 CELLPADDING=0><TR><TD>Section name<TD>contains the section id
+<TR><TD>Article Count<TD>the value for how many articles to display on section index
+<TR><TD>Title<TD>the canonical name for the section
+<TR><TD>Polls for this section<TD>selects which poll to display for the section
+<TR><TD>Isolate mode<TD>determines whether the section is part of the site or standalone
+<TR><TD>Issue mode<TD>whether the section is issue oriented, article based, both, or neither 
+<TR><TD>Edit section<TD>URLs to the block editor for blocks that are specific to the section
+<TR><TD>save section<TD>save changes that you've made to the section
+<TR><TD>add section<TD>opens up a new form to create a new section
+<TR><TD>delete section<TD>delete the section</TABLE></P>
+<P>
+<H2><A NAME="comment filters">Comment filters</A></H2>
+<P>Comment filters are regular expressions that are run against content, the comment subject or comment body.  If a particular filter is encountered, a message is displayed informing the user, both on submit and preview of the comment.  This gives you the ability to prevent certain things from being posted on your site which is totally dependent on what you want to filter, or not filter.  Click on ``Comment Filters'' from the admin menu. This will take you to listing of all the comment filters. This list shows various columns for each filter:</P>
+<P><TABLE CELLSPACING=0 CELLPADDING=0><TR><TD>Filter id<TD>the ID for the filter. This is a URL that brings up the filter in a filter editing page. 
+<TR><TD>Regex<TD>this is the core regex of the filter
+<TR><TD>Modifier<TD>the modifier that would go on the end of the regex, ie. if the modifier is ``gi'' the regex would be evaluated as /xxx/gi
+<TR><TD>Field<TD>The form field that the filter is run against. Currently, only postersubj (the comment subject) and postercomment (the comment body) are supported.
+<TR><TD>Ratio<TD>The percentage that the match will check for. For example, if ``Regex'' is ``(flame)'', ``Ratio'' is 0.1000, the text being checked is 100 characters in size, the regex is put together as /(flame){50,}/. If you have the field ``Minimum match'' set greater than zero, this won't be used. This won't be used if set to zero.
+<TR><TD>Minimum match<TD>This is a hard coded minimum match for the regex. If ``Regex'' is ``(flame)'' and Minimum match is 4, the regex constructed will be /(flame){4,}/. Ratio will not be used if this is set greater than zero. This won't be used if set to zero.
+<TR><TD>Minimum length<TD>The minimum length the field must be for the filter to apply
+<TR><TD>Maximum length<TD>The maximum length the field must be for the filter to apply
+<TR><TD>Error Message<TD>The message that's displayed after the ``Lameness filter encountered''.</TABLE></P>
+<P>You can also create a new filter with the ``Create a new filter'' button.</P>
+<P>
+<H2><A NAME="variables">Variables</A></H2>
+<P>This is for editing site variables.  Select one from the menu and click 
+the 'vars' button to see its current value and a description.  You'll need 
+to restart apache and slashd for changes to the vars to show up.</P>
+<P>The main ones you'll want to edit for now are slogan and sitename.</P>
+<P>Turn cache_enabled off to get faster responses while you're working with 
+templates.</P>
+<P>The send_mail var turns the headline mailer on/off.  You may need to set 
+smtp_server too.  And the stats_reports one will get you a daily stats 
+report.</P>
+<P>
+<HR>
+<H1><A NAME="changes">CHANGES</A></H1>
+<P>$Log$
+<P>Revision 1.2  2001/11/03 03:05:02  brian
+<P>Fry
+<P>
+<P>Revision 1.1.2.1  2001/10/09 17:54:04  pudge
+<P>Add in slashguide (rewrite of getting_started) and update docs
+<P></P>
+<P>
+<HR>
+<H1><A NAME="author">AUTHOR</A></H1>
+<P>Originally, CmdrTaco probably.  Revised for Slash 2.0.0 by Nathan Vonnahme 
+and Dan Stahlke</P>
+<P>
+<HR>
+<H1><A NAME="version">VERSION</A></H1>
+<P>$Id$</P>
+</div>
+<!--#include virtual="/slashfoot.inc"-->
+</BODY>
+
+</HTML>

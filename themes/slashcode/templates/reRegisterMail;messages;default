@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+Text of mail message system sends out to periodically verify email address validity.
+
+* registryid 	= Serial number that identifies a specific user's registration request.
+* useradmin	= Name, link, email address or some other identifier with which users can use
+		  to resolve any user problems.
+
+__title__
+Email Verification - Reminder
+__page__
+messages
+__lang__
+en_US
+__name__
+reRegisterMail
+__template__
+This is a friendly email from [% constants.sitename %] with a reminder that your password has
+expired. If you would like to remain registered to this site, please visit the following
+URL:
+
+http:[% constants.rootdir %]/users.pl?validateuser=1&id=[% registryid %]
+
+and follow the displayed instructions. Re-registration should be quick and easy.
+
+We apologize for the inconvenience. If we can improve this procedure in any way, please
+send your suggestions to the <A HREF="[% useradmin %]">administrator</A>.
+
+
+__seclev__
+1000

@@ -1,0 +1,192 @@
+__section__
+default
+__description__
+Template for editing user
+
+* useredit = hashref for user being edited
+* seclev_field = boolean to display seclev editing field
+* uid_checked = whether or not uid is checked
+* nickname_checked = whether or not nickname is checked
+* author_flag = current user is author
+* authoredit_flag = current user can edit authors
+__title__
+users admin
+__page__
+users
+__lang__
+en_US
+__name__
+getUserAdmin
+__template__
+
+<TABLE BORDER="0">
+	<TR>
+		<TD>
+		[% PROCESS titlebar width="100%" title="User Admin" %]
+		[% IF userinfo_flag %]
+		
+		<P><B><A HREF="[% constants.roodir %]/users.pl?op=topabusers">Top Abusers</A></B><BR>
+		<B><A HREF="[% constants.roodir %]/users.pl?op=listreadonly">Read Only List</A></B><BR>
+		<B><A HREF="[% constants.roodir %]/users.pl?op=listbanned">Banned List</A></B></P>
+		
+			[% IF uidstruct %]
+		<BR>
+		
+		<TABLE BORDER="0">
+			<TR>
+				<TD><B>UIDs used by this address id:</B></TD>
+			</TR>
+				[% FOREACH tmpuid = uidstruct.keys %]
+			<TR>
+				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpuid %]"
+				>[% tmpuid %] &nbsp; [% uidstruct.$tmpuid %]</A>	
+				</TD>
+			</TR>
+				[% END %]
+		</TABLE>
+			[% END %]
+		
+			[% IF iplist %]
+		<BR>
+		<TABLE BORDER="0">
+			<TR>
+				<TD><B>IPIDs used by this user:</B></TD>
+			</TR>
+				[% FOREACH tmpip = iplist %]
+			<TR>
+				<TD><A HREF="[% env.script_name %]?op=userinfo&amp;userfield=[% tmpip.0 %]&amp;fieldname=ipid"
+				>[% tmpip.4 %]</A> ([% tmpip.3 %], [% tmpip.1;
+				IF tmpip.1 != tmpip.2 %] to [% tmpip.2; END %])
+				</TD>
+			</TR>
+				[% END %]
+		</TABLE>
+			[% END %]
+		
+		[% END %]
+		
+		<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0">
+			<TR>
+				<FORM ACTION="[% env.script_name %]" METHOD="POST">
+		[% IF form.formkey %]
+			        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+		[% END %]
+				<INPUT TYPE="HIDDEN" NAME="op" VALUE="admin">
+		
+				[% IF field == 'uid' %]
+				<INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid %]"></TD>
+		
+				[% ELSIF field == 'ipid' %]
+				<INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid %]"></TD>
+		
+				[% ELSIF field == 'md5id' %]
+				<INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id %]"></TD>
+		
+				[% ELSIF field == 'subnetid' %]
+				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid %]"></TD>
+				[% END %]
+		
+				<TD VALIGN="MIDDLE"><B>UID/NetID/Nickname:</B> 
+				<INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]"></TD>
+				<TD VALIGN="MIDDLE">
+				<TABLE>
+					<TR>
+						<TD><INPUT TYPE="SUBMIT" NAME="userinfo" VALUE="User Info"></TD>
+						<TD><INPUT TYPE="SUBMIT" NAME="edituser" VALUE="Edit User"> </TD> 
+						<TD><INPUT TYPE="SUBMIT" NAME="changepasswd" VALUE="Change Password"></TD>
+					</TR>
+					<TR>
+						<TD><INPUT TYPE="SUBMIT" NAME="edithome" VALUE="Customise Homepage"></TD>
+						<TD><INPUT TYPE="SUBMIT" NAME="editcomm" VALUE="Customise Comments"></TD>
+					</TR>
+				</TABLE>
+				</TD>
+			</TR>
+		
+		[% IF userinfo_flag %]
+			<TR>
+				<TD COLSPAN=3 HEIGHT=10>&nbsp;</TD>
+			</TR>
+		
+		
+			[% IF authoredit_flag && seclev_field && ! useredit.nonuid  %]
+			<TR>
+				<TD><B>Seclev</B></TD>
+				<TD COLSPAN="4">
+				<INPUT TYPE="TEXT" NAME="seclev" SIZE="7" value="[% useredit.seclev %]"></TD>
+				<TD>&nbsp;</TD>
+			</TR>
+			<TR>
+				<TD COLSPAN=3 HEIGHT=10></TD>
+			</TR>
+			<TR>
+				<TD><B>Author flag (user is an author)</B></TD>
+				<TD COLSPAN="4"><INPUT TYPE="checkbox" NAME="author" [% useredit.author %]></TD>
+				<TD>&nbsp;</TD>
+			</TR>
+			[% END %]
+		
+			<TR>
+				<TD COLSPAN=3 HEIGHT=10></TD>
+			</TR>
+			<TR>
+				<TD><B>Default points (threshcode)</B></TD><TD>[% thresh_select %]</TD><TD>&nbsp;</TD>
+			</TR>
+			<TR>
+				<TD COLSPAN=3 HEIGHT=10></TD>
+			</TR>
+			<TR>
+				<TD COLSPAN="3"><B>Read-only</B></TD>
+			</TR>
+			<TR>
+				<TD WIDTH="100">Comments</TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_comments" [% readonly.comments %]>&nbsp;&nbsp;
+				Reason <INPUT TYPE="TEXT" NAME="comments_ro_reason" VALUE="[% readonly_reasons.comments %]"></TD>
+			</TR>
+			<TR>
+				<TD WIDTH="100">Submissions</TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="readonly_submit" [% readonly.submit%]>&nbsp;&nbsp;
+				Reason <INPUT TYPE="TEXT" NAME="submit_ro_reason" VALUE="[% readonly_reasons.submit %]"></TD>
+			</TR>
+			<TR>
+				<TD COLSPAN=3 HEIGHT=10></TD>
+			</TR>
+			<TR>
+				<TD COLSPAN="3"><B>Banned</B></TD>
+			</TR>
+			<TR>
+				<TD WIDTH="100">Banned from [% constants.sitename %]</TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="banned" [% banned %]>&nbsp;&nbsp;
+				Reason <INPUT TYPE="TEXT" NAME="banned_reason" VALUE="[% banned_reason%]"></TD>
+			</TR>
+
+			[% IF ! useredit.nonuid %]
+			<TR>
+				<TD WIDTH="100"><B>Expire User</B></TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="expired" [% checked.expired %]>&nbsp;</TD>
+				<TD>&nbsp;</TD> 
+			</TR>
+			<TR>
+				<TD WIDTH="100"><B>Real time black list</B></TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="rtbl" [% useredit.rtbl %]>&nbsp;&nbsp;
+				Reason <INPUT TYPE="TEXT" NAME="rtbl_reason" VALUE="[% useredit.rtbl_reason %]"></TD>
+			</TR>
+			<TR>
+				<TD COLSPAN=3 HEIGHT=10></TD>
+			</TR>
+			[% END %]
+			<TR>
+				<TD COLSPAN=3 HEIGHT=10>
+				Save Admin: <INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save Admin">
+				</TD>
+			</TR>
+		[% END %]
+			</FORM>
+		</TABLE>
+		</TD>
+	</TR>
+</TABLE>
+<HR>
+
+__seclev__
+10000

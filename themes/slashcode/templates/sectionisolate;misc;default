@@ -1,0 +1,19 @@
+__section__
+default
+__description__
+Use hidden field instead of drop-down list for isolated sections
+
+* name = name of form element
+* section = section name
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+sectionisolate
+__template__
+<INPUT TYPE="hidden" NAME="[% name %]" VALUE="[% section %]">
+__seclev__
+10000

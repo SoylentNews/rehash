@@ -1,0 +1,152 @@
+__section__
+default
+__description__
+A template with logic to return the various messages in users.pl, used
+by the subroutine getMessages in users.pl
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+messages
+__template__
+[% SWITCH value %]
+
+[% CASE 'note' %]
+[% FOREACH n = note %]
+<H2>[% n %]</H2>
+[% END %]
+
+[% CASE 'user_header' %]
+	[% constants.sitename %] Users
+
+[% CASE 'userclose' %]
+	you are now logged out.
+
+[% CASE 'newuser_msg' %]
+	[% PROCESS titlebar title=title width="100%" %]
+	<B>email</B>=[% form.email %]<BR>
+	<B>user id</B>=[% uid %]<BR>
+	<B>nick</B>=[% form.newusernick %]<BR>
+	<B>passwd</B>=mailed to [% form.email %]<BR>
+	[% IF suadmin_flag %]
+		<P>Now you can edit the newly created user  
+		<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&userfield=[% uid %]">
+		[% form.newusernick %], UID [% uid %]</A></P>
+	[% ELSE %]
+	<P>Once you receive your password, you can log in and
+	<A HREF="[% constants.rootdir %]/users.pl">set your account up</A>
+	[% END %]
+
+[% CASE 'mailpasswd_msg' %]
+
+Your new password is [% newpasswd %].  Your old password will still work until
+this password is used.  Go to the URL below to log in:
+
+<[% constants.absolutedir %]/index.pl?op=userlogin&upasswd=[% newpasswd %]&unickname=[% tempnick %]&returnto%3D%2Fusers.pl%3Fop=changepasswd>
+
+Make sure you then CHANGE YOUR PASSWORD!
+
+Thanks.
+
+[% CASE 'userinfo_msg' %]
+
+<P>This is <B>your</B> User Info page.  There are thousands more, but
+this one is yours.  You most likely are not so interested in yourself,
+and probably would be more interested in the Preferences links you see
+up top there, where you can customize [% constants.sitename %],
+change your password, or just click pretty widgets to kill time.
+
+[% CASE 'tilded_customize_msg' %]
+<TABLE WIDTH="95%" BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0">
+	<TR><TD>
+	<P>Look ma, I'm configurable!
+	<B>Important:</B> If you leave these all unchecked, it means you
+	want the <I>default</I> selection of boxes.  If you start selecting
+	boxes, remember to set <B>all</B> of them that you want because the
+	default selection will be <B>ignored</B>.  Default entries are bolded.
+
+	<P><B>User Space</B> (check 'user space' below and whatever
+	you place here will appear your custom [% constants.sitename %])<BR>
+	<TEXTAREA NAME="mylinks" rows=5 COLS="60" WRAP="VIRTUAL">[% userspace | strip_literal %]</TEXTAREA>
+	<P><MULTICOL COLS="3">
+
+[% CASE 'tilded_box_msg' %]
+	</MULTICOL><P>
+	If you have reasonable suggestions for boxes that can be added
+	here, or a problem with one of the boxes already here,
+	email <A HREF="mailto:[% constants.adminmail %]">[% constants.siteadmin_name %]</A>.
+
+	<P>The preferred format is the Netscape RDF format that is
+	rapidly becoming the de facto format for exchanging headlines
+	between sites.
+	<P></TD></TR></TABLE>
+
+[% CASE 'saveuser_email_msg' %]
+	The user account [% nickname %] on [% constants.sitename %]
+	had this email associated with it.  A web user from
+	[% env.remote_addr %] has just changed it to [% realemail %].
+
+	If this is not correct, if you did not request this change,
+	please contact the site administrator immediately.
+
+	[% constants.siteadmin_name %]
+	[% constants.adminmail %]
+
+[% CASE 'saveuseradmin_saved' %]
+	Saved [% field %] [% id %] Admin settings
+
+[% CASE 'saveuseradmin_saveduser' %]
+	Saved [% field %] [% id %] User settings
+
+[% CASE 'dispform_new_msg_1' %]
+	If your registration attempt is failing, it is most likely because
+	you tried to register with a <B>duplicate nickname</B>, a <B>duplicate
+	email address</B>, or an <B>invalid email</B>.  You can try another below,
+	or use the form on the left to either login, or retrieve your forgotten password.
+
+[% CASE 'newuserform_msg' %]
+	Don't have an account yet? <A HREF="[% env.script_name %]?op=newuserform">How about creating one?</A>
+
+[% CASE 'dispform_new_msg_2' %]
+	What? You don't have an account yet?  Well, enter your preferred
+	<B>nick</B> name here:
+
+[% CASE 'mailpasswd_mailed_msg' %]
+	<P>The password for [% name %] was just emailed.<BR>
+
+[% CASE 'savename_msg' %]
+	<P>Saving [% name.substr(0,20) %]<BR><P>
+
+[% CASE 'savenickname_msg' %]
+	<P>Saving [% nickname.substr(0,20) %].<BR>
+
+[% CASE 'changeemail_msg' %]
+	Notifying [% realemail %] of the change to their account.<BR>
+	E-mail address changed and re-registration information sent to: [% form.realemail %]<BR>
+
+[% CASE 'saveuser_passchanged_msg' %]
+	Password changed for [% nick %], UID [% uid %].<BR>
+
+[% CASE 'savemiscopts_msg' %]
+	[% PROCESS titlebar title="Option(s) Changed." width="100%" %]
+[% FOREACH opt = update.keys %]
+        <BR>Your option [% opt %] was set to [% update.opt %].
+[% END %]
+
+[% CASE 'no_registration_needed' %]
+	<P>Hello, [% user.nickname %]. Your account is currently registered with
+	the system. No re-registration is necessary at this time.<BR>
+
+[% CASE DEFAULT %]
+	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.<BR>
+
+[% END %]
+__seclev__
+10000

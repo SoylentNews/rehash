@@ -1,0 +1,96 @@
+__section__
+default
+__description__
+users login form
+
+* newnick = new nickname
+* title = passed to titlebar
+* msg = message to display
+* title2 = second title ?
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+loginForm
+__template__
+		<P>
+
+<!-- titlebar -->
+<TABLE WIDTH="75%">
+	<TR>
+		<TD>
+[% PROCESS titlebar width="100%" %]
+		</TD>
+	</TR>
+	[% IF msg2 && ! logged_in %]
+	<TR>
+		<TD>
+		[% msg2 %]
+		</TD>
+	</TR>
+	[% END %]
+</TABLE>
+<!-- end titlebar -->
+
+[% IF form.unickname %]
+		<P>
+		Danger, Will Robinson!  You didn't login!  You apparently put
+		in the wrong password, or the wrong nickname, or else space
+		aliens have infested the server.  I'd suggest trying again,
+		or clicking that mail password button if you forgot your password.
+		</P>
+
+	[% IF constants.allow_anonymous %]
+		<P>
+	   	Logging in will allow you to post comments as yourself.  If you
+		don't login, you will only be able to post as [% constants.anon_name %].
+		</P>
+
+	[% ELSE %]
+		<P>
+	     You can only post comments if you have a valid account
+		</P>
+
+	[% END %]
+
+[% ELSE %]
+
+[% END %]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="userlogin">
+<TABLE WIDTH="75%">
+	<TR>
+		<TD><B>Nickname</B></TD>
+		<TD><INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
+		</TD>
+	</TR>
+	<TR>
+		<TD><B>Password:</B> (6-20 characters long)</TD>
+		<TD><INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20">
+		<INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Login"></TD>
+	</TR>
+	[% IF msg1 %]
+	<TR>
+	 	<TD COLSPAN="2">
+		<P>[% msg1 %]</P>
+		</TD>
+	</TR>
+	[% END %]
+</TABLE>
+</FORM>
+
+<P>
+Lost your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Click here</A> to enter your email address, nickname or uid to get your password mailed to you.<BR>
+</P?
+[% IF ! logged_in %]
+<P>
+</P>
+[% END %]
+
+
+__seclev__
+500

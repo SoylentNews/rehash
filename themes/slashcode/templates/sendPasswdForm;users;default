@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+password form
+
+* newnick = new nickname
+* title = passed to titlebar
+* msg = message to display
+* title2 = second title ?
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+sendPasswdForm
+__template__
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="mailpasswd">
+[% IF form.formkey %]
+<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+<TABLE WIDTH="75%">
+	<TR>
+		<TD COLSPAN="2">
+[% PROCESS titlebar title="Mail Password" width="100%" %]
+		</TD>
+	</TR>
+	<TR>
+		<TD COLSPAN="2">
+		<P>
+		Forget your password? Enter your nickname here to 
+		have the system mail your password to you
+		</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD><B>Nickname/UID/Email</B></TD>
+		<TD><INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
+		<INPUT TYPE="SUBMIT" NAME="mailpasswd" VALUE="Mail Password">
+		</TD>
+	</TR>
+</TABLE>
+</FORM>
+[% IF ! logged_in %]
+<P>
+Login to <A HREF="[% env.script_name %]?op=userlogin">[% constants.sitename %]</A><BR>
+Don't have an account yet? <A HREF="[% env.script_name %]?op=newuserform">How about creating one?</A>
+</P>
+[% END %]
+
+
+__seclev__
+500

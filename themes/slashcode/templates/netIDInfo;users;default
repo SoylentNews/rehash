@@ -1,0 +1,70 @@
+__section__
+default
+__description__
+Display and ipid/subnetid "users" info
+
+* title = passed to titlebar
+* nick = nickname
+* commentstruct = arrayref of comments
+* commentcount = number of comments
+* min_comment = first comment in list (0 is first)
+* admin_block = admin stuff
+* admin_flag = boolean for whether to display admin stuff
+
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+netIDInfo
+__template__
+[% USE Slash %]
+[% PROCESS titlebar width="95%" %]
+
+<B>
+
+[% IF edit.ipid %] 
+IP address [% id %], [% edit.ipid %] has posted [% commentcount %] comments
+[% ELSIF edit.subnetid %]
+Subnet [% id %], [% edit.subnetid %] has posted [% commentcount %] comments
+[% END %]
+
+</B><P>
+
+
+[% n = min_comment %]
+[% FOREACH comment = commentstruct %]
+	[% n = n + 1 %]
+	[% replies = comment.replies ? " Replies: $comment.replies" : "" %]
+	[% IF comment.type == 'poll';
+		label   = "Poll: $comment.disc_title ";
+	ELSIF comment.type == 'journal';
+		label   = "Journal Discussion: $comment.disc_title";
+	ELSE;
+		label    = comment.disc_title;
+	END %]
+<B>[% n %]</B> <A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">[% comment.subj %]</A>
+posted
+[% IF comment.uid %] by uid
+<A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield_flag=uid&amp;userfield=[% comment.uid %]">[% comment.uid %]</A>[% END %]
+on [% comment.cdate %] (Score:[% comment.pts %][% replies %])
+      <FONT SIZE="2">
+           <BR>attached to <A HREF="[% comment.url %]">[% label %]</A>
+      </FONT><BR>
+[% END %]
+
+[% IF admin_flag %]
+
+[% IF commentcount > n %]
+<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;userfield=[% form.userfield | strip_literal %]&amp;fieldname=[% form.fieldname | strip_literal %]&amp;min_comment=[% n %]"
+>More Comments...</A><P>
+[% END %]
+
+[% admin_block %]
+[% END %]
+
+__seclev__
+500

@@ -1,0 +1,54 @@
+__section__
+default
+__description__
+Creates a nice box with title and contents
+
+* width = width of box (default is 200)
+* contents = contents of box
+* title = title of box
+* center = boolean for centering box
+* mainwidth = (not used here)
+* insidewidth = (not used here)
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+fancybox
+__template__
+[% IF center %]<CENTER>[% END %]
+[% width = width || 200 %]
+
+	<TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+		<TR VALIGN="TOP" BGCOLOR="[% user.bg.3 %]">
+			<TD BGCOLOR="[% user.bg.2 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
+			<TD><IMG SRC="[% constants.imagedir %]/cl.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
+			<TD><FONT FACE="[% constants.mainfontface %]" SIZE="1" COLOR="[% user.fg.0 %]"><B>[% title %]</B></FONT></TD>
+			<TD ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/cr.gif" WIDTH="7" HEIGHT="10" ALT=""></TD>
+			<TD BGCOLOR="[% user.bg.2 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
+		</TR>
+	</TABLE>
+
+	<TABLE WIDTH="[% width %]" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+		<TR><TD BGCOLOR="[% user.bg.3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
+		<TR>
+			<TD BACKGROUND="[% constants.imagedir %]/sl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
+			<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+				<FONT FACE="[% constants.mainfontface %]" SIZE="1">
+
+[% contents %]
+
+</FONT>
+			</TD></TR></TABLE></TD>
+			<TD BACKGROUND="[% constants.imagedir %]/sr.gif" ALIGN="right"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="3" HEIGHT="3" ALT=""></TD>
+		</TR>
+		<TR BGCOLOR="[% user.bg.3 %]"><TD COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
+	</TABLE>
+[% IF center %]</CENTER>[% END %]
+<P>
+
+__seclev__
+10000

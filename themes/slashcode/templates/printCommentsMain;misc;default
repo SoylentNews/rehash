@@ -1,0 +1,113 @@
+__section__
+default
+__description__
+The main box for printing comments
+
+* comments = big ol' arrayref of comments
+* title = title of story
+* count = count of comments
+* sid = story ID
+* cid = base comment ID
+* pid = base parent ID
+* lvl = what nesting level we're at
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+printCommentsMain
+__template__
+[% USE Slash %]
+
+<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="2">
+
+	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
+		<FONT SIZE="2" COLOR="[% user.fg.3 %]">
+[% IF title %]
+		<A HREF="[% link %]"><FONT COLOR="[% user.fg.3 %]">[% title %]</FONT></A>
+[% ELSE %]
+	[% Slash.linkComment({
+		sid	=> sid,
+		pid	=> pid,
+		color	=> user.fg.3,
+		subject	=> 'Top',
+	}) %]
+[% END %]
+
+	|
+
+[% IF user.is_anon %]
+		<A HREF="[% constants.rootdir %]/users.pl">
+			<FONT COLOR="[% user.fg.3 %]">Login/Create an Account</FONT>
+		</A>
+[% ELSE %]
+		<A HREF="[% constants.rootdir %]/users.pl?op=editcomm">
+			<FONT COLOR="[% user.fg.3 %]">Preferences</FONT>
+		</A>
+[% END %]
+
+		| [% Slash.linkComment({
+			sid	=> sid,
+			pid	=> 0,
+			color	=> user.fg.3,
+			subject	=> 'Top',
+		}) %]
+
+[% IF user.points %]
+		| <B>[% user.points %]</B>
+		<A HREF="[% constants.rootdir %]/moderation.shtml">
+		<FONT COLOR="[% user.fg.3 %]">moderator</FONT></A> points
+[% END %]
+
+[% IF count %]
+		| <B>[% count %]</B> comments
+[% END %]
+
+[% IF lvl && user.mode == 'thread' %]
+		(Spill at <B>[% user.commentspill %]</B>!) | Index Only
+[% END %]
+
+[% IF form.startat %]
+		| Starting at #[% form.startat %]"
+[% END %]
+
+		| <A HREF="[% constants.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">
+<FONT COLOR="[% user.fg.3 %]">Search Discussion</FONT></A></FONT>
+	</TD></TR>
+
+	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER"><FONT SIZE="2">
+		<FORM ACTION="[% constants.rootdir %]/comments.pl">
+		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
+		<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
+		<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">
+		<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% form.startat %]">
+
+		Threshold: [%
+			Slash.selectThreshold(comments.0.totals);
+			Slash.selectMode(user.mode);
+			Slash.selectSortcode(user.commentsort) %]
+
+	[% UNLESS user.is_anon %]
+		Save:<INPUT TYPE="CHECKBOX" NAME="savechanges">
+	[% END %]
+
+		<INPUT TYPE="submit" NAME="op" VALUE="Change">
+		[% UNLESS user.state.comment_read_only %]
+			<INPUT TYPE="submit" NAME="op" VALUE="Reply">
+		[% END %]
+	</TD></TR>
+	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
+		<FONT COLOR="[% user.fg.3 %]" SIZE="1">
+<B>The Fine Print:</B>
+The following comments are owned by whoever posted them.
+We are not responsible for them in any way.
+</FONT></FORM></TD></TR>
+
+[% IF user.mode == 'nocomment' %]
+		</TABLE>
+[% END %]
+
+__seclev__
+10000

@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+Print header for server-parsed static pages
+
+* dir = virtual root directory to get file
+* section = extra path for section
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+ssihead
+__template__
+<!--#include virtual="[% dir %]/[% section %]slashhead.inc"-->
+
+__seclev__
+10000

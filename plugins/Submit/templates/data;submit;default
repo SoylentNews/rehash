@@ -1,0 +1,72 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'header' %]
+	[% constants.sitename %] Submissions[% tbtitle %]
+
+[% CASE 'updatehead' %]
+	[% IF subids.size > 0 %]
+		Deleting [% subids.size %]
+		[% IF subids.size == 1 %] submission [% ELSE %] submissions [% END %]
+		[% IF subids.size <= 3 %] ( [% subids.join(', ') %] ) [% END %]
+	[% END %]
+
+[% CASE 'quickieshead' %]
+	Quickies Generated
+
+[% CASE 'previewhead' %]
+	[% constants.sitename %] Submission Preview
+
+[% CASE 'defaulthead' %]
+	[% constants.sitename %] Submissions
+
+[% CASE 'maxallowed' %]
+	<P><B>Warning! you've exceeded max allowed submissions for the day : 
+	[% constants.max_submissions_allowed %]</B></P>
+
+[% CASE 'max_submissionsize_title' %]
+	<B>Submission too large!</B>
+
+[% CASE 'max_submissionsize_err' %]
+	<P><B>Warning! You submission has exceeded the max allowable size 
+	that can be inserted into the system: [% size %] bytes.</B></P>
+	<P>If you try to save your submission as it is, it could be truncated</P>
+
+[% CASE 'error' %]
+	Error
+
+[% CASE 'filtererror' %]
+	<P>Lameness filter: <B>[% err_message %]</B></P>
+
+[% CASE 'compresserror' %]
+	<B>compression has detected something wrong with your submission</B>
+
+[% CASE 'badsubject' %]
+	Please enter a reasonable subject.
+
+[% CASE 'defaultsection' %]
+	All Sections
+
+[% CASE 'defaultnote' %]
+	Unclassified
+
+[% END %]
+
+__seclev__
+10000

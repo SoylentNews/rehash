@@ -1,0 +1,83 @@
+__section__
+default
+__description__
+A template with logic to return the varioustitle in users.pl, used by the subroutine getTitles in users.pl
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+titles
+__template__
+[% SWITCH value %]
+
+[% CASE 'previewslashbox_title' %]
+	Preview [% blocktitle | strip_literal %]
+
+[% CASE 'newUser_title' %]
+	User [% form.newusernick %] created.
+
+[% CASE 'mailPassword_email_title' %]
+	[% constants.sitename %] user password for [% nickname %]
+
+[% CASE 'userInfo_main_title' %]
+	Welcome back [% nick %] ([% uid %])
+
+[% CASE 'userInfo_user_title' %]
+	User Info for [% nick %] ([% uid %])
+
+[% CASE 'user_netID_user_title' %]
+	User Info for [% md5id_vis %] ([% id %])
+
+[% CASE 'editUser_title' %]
+	Editing [% user_edit.nickname %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]
+
+[% CASE 'changePasswd_title' %]
+	Change password for [% user_edit.nickname %] ( [% user_edit.uid %]) 
+
+[% CASE 'tildeEd_title' %]
+	Exclude Stories from the Homepage
+
+[% CASE 'tildeEd_customize_title' %]
+	Customize Slashboxes
+
+[% CASE 'editHome_title' %]
+	Customize [% constants.sitename %]'s Display
+
+[% CASE 'editComm_title' %]
+	Comment Options
+
+[% CASE 'editMiscOpts_title' %]
+	Miscellaneous Options
+
+[% CASE 'displayForm_new_title' %]
+	I'm a New User!
+
+[% CASE 'displayForm_dup_title' %]
+	Duplicate Account!
+
+[% CASE 'displayForm_title' %]
+	Login
+
+[% CASE 'mailPasswdForm_title' %]
+	Mail password
+
+[% CASE 'newUserForm_title' %]
+	Create Account
+	
+[% CASE 'displayForm_err_title' %]
+	Error Logging In
+
+[% CASE 'saveUser_email_title' %]
+	[% constants.sitename %] user email change for [% nickname %]
+
+[% END %]
+
+__seclev__
+10000

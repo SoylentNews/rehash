@@ -1,0 +1,51 @@
+__section__
+default
+__description__
+Edit preferences
+
+* title = passed to titlebar
+* opts = arrayref of hashrefs, one hashref per user option
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+editMiscOpts
+__template__
+[% PROCESS titlebar width="100%" %]
+
+[%# admin_block %]
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+
+[% IF form.formkey %]
+        <INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+[% END %]
+
+<INPUT TYPE="HIDDEN" NAME="formname" VALUE="editmiscopts">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="savemiscopts">
+
+<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+	<TR>
+		<TD>
+
+[%# Only checkboxes are supported for now. %]
+[% FOREACH opt = opts %]
+	<P><B>[% opt.short_desc %]</B>
+	[% opt.long_desc %]<BR>
+	&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="opt_[% opt.name %]" value="0"
+		[% IF !opt.checked; "CHECKED"; END %]>&nbsp;Off
+	&nbsp;&nbsp;&nbsp;<INPUT TYPE="RADIO" NAME="opt_[% opt.name %]" value="1"
+		[% IF opt.checked; "CHECKED"; END %]>&nbsp;On<BR>
+[% END %]
+
+		<INPUT TYPE="SUBMIT" VALUE="Save">
+		</TD>
+	</TR>
+</TABLE>
+</FORM>
+__seclev__
+500

@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+Print older stories for older stories box
+
+* stories = arrayref of story hashrefs
+* section = section data structure
+* yesterday = the value to put in the "yesterday's edition" link
+* start = where to start counting from in search.pl return values
+
+Each story has the keys sid, section, title, time, commentcount, day (w, m, d, h, min, ampm), and link (which is a linkStory() value)
+
+XXX This is hacked up pretty badly to work with the fake section "index".
+We really need to decide what the status of "index" is.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+getOlderStories
+__template__
+[% today = '';
+   FOREACH story = stories;
+	IF today != "$story.w $story.m $story.d";
+		today = "$story.w $story.m $story.d";
+		IF !section or section.section == 'index' %]
+			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.day %]&mode=[% user.currentMode %]"
+				>[% story.w %]</A></FONT> [% story.m %] [% story.d %]</B></P>
+		[% ELSIF section.issue && section.issue > 1 %]
+			<P><B><FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&issue=[% story.day %]&mode=[% user.currentMode %]"
+				>[% story.w %]</A></FONT> [% story.m %] [% story.d %]</B></P>
+		[% ELSE %]
+			<P><B><FONT SIZE="4">[% story.w %]</FONT> [% story.m %] [% story.d %]</B></P>
+		[% END;
+	END %]
+	<LI>[% story.link %] ([% story.commentcount %])</LI>
+[% END %]
+
+[% IF !section or section.section == 'index' %]
+<P ALIGN="RIGHT"><B><A HREF="[% constants.rootdir %]/search.pl?start=[% start %]">Older Articles</A></B>
+<BR><B><A HREF="[% constants.rootdir %]/index.pl?mode=[% user.currentMode %]&issue=[% yesterday %]"
+>Yesterday's Edition</A></B>
+[% ELSIF section.issue %]
+<P ALIGN="RIGHT">
+	[% IF section.issue == 1 || section.issue == 3 %]
+<BR><B><A HREF="[% constants.rootdir %]/search.pl?section=[% section.section %]&start=[% start %]"
+>Older Articles</A></B>
+	[% END %][% IF section.issue == 2 || section.issue == 3 %]
+<BR><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&mode=[% user.currentMode %]&issue=[% yesterday %]"
+>Yesterday's Edition</A></B>
+	[% END %]
+[% END %]
+
+__seclev__
+10000
