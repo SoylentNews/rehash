@@ -1312,6 +1312,10 @@ sub cleanSlashTags {
 			$cleanSlashTags->{'link'}($tokens, $token,\$newtext);
 		} elsif ($token->[1]{story}) {
 			$cleanSlashTags->{'story'}($tokens, $token,\$newtext);
+		} elsif ($token->[1]{nickname}) {
+			$cleanSlashTags->{'user'}($tokens, $token,\$newtext);
+		} elsif ($token->[1]{user}) {
+			$cleanSlashTags->{'user'}($tokens, $token,\$newtext);
 		}
 	}
 
