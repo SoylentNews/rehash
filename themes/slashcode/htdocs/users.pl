@@ -1874,7 +1874,7 @@ sub saveUserAdmin {
 	$reason ||= $form->{nopost_ro_reason}	if $form->{readonly_nopost};
 	$reason ||= $form->{nosubmit_ro_reason}	if $form->{readonly_nosubmit};
 	$reason ||= $form->{banned_reason}	if $form->{banned};
-#	$reason ||= $form->{proxy_reason}	if $form->{isproxy}; # no proxy reason field in template right now
+	$reason ||= $form->{isproxy_reason}	if $form->{isproxy};
 
 	$slashdb->setAccessList($user_edit, \@access_add, $reason);
 
@@ -2618,10 +2618,11 @@ sub getUserAdmin {
 	my $constants	= getCurrentStatic();
 	$id ||= $user->{uid};
 
-	my($checked, $uidstruct, $readonly, $readonly_reasons, $isproxy);
+	my($checked, $uidstruct, $readonly, $readonly_reasons);
 	my($user_edit, $user_editfield, $ipstruct, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
+	my($isproxy, $isproxy_reason, $isproxy_time);
 	my($banned, $banned_reason, $banned_time);
 	my $sectionref = $slashdb->getDescriptions('sections-contained');
 	$sectionref->{''} = getData('all_sections');
@@ -2675,7 +2676,10 @@ sub getUserAdmin {
 	}
 
 	if ($field eq 'ipid' || $field eq 'md5id' && $form->{fieldname} eq 'ipid') {
-		$isproxy = $slashdb->getAccessListInfo('proxy', { ipid => $id }) ? ' CHECKED' : '';
+		my $aclinfo = $slashdb->getAccessListInfo('proxy', { ipid => $id });
+		$isproxy = $aclinfo ? ' CHECKED' : '';
+		$isproxy_reason = $aclinfo->{reason} || '';
+		$isproxy_time = $aclinfo->{datetime} || '';
 	}
 
 	for my $access_type ('nopost', 'nosubmit') {
@@ -2729,6 +2733,8 @@ sub getUserAdmin {
 		banned_reason		=> $banned_reason,
 		banned_time		=> $banned_time,
 		isproxy			=> $isproxy,
+		isproxy_reason		=> $isproxy_reason,
+		isproxy_time		=> $isproxy_time,
 		userinfo_flag		=> $user_editinfo_flag,
 		userfield		=> $user_editfield,
 		ipstruct		=> $ipstruct,
