@@ -93,7 +93,7 @@ $task{$me}{code} = sub {
 	my $w  = $slashdb->getVar('writestatus', 'value');
 
 	if ($updates{$constants->{defaultsection}} ne "" || $w ne "ok") {
-		my ($base) = split(/\./, $constants->{index_handler});
+		my($base) = split(/\./, $constants->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
 		prog2file(
 			"$constants->{basedir}/$constants->{index_handler}", 
@@ -108,7 +108,7 @@ $task{$me}{code} = sub {
 	for my $key (keys %updates) {
 		next unless $key;
 		my $index_handler = $slashdb->getSection($key, 'index_handler');
-		my ($base) = split(/\./, $index_handler);
+		my($base) = split(/\./, $index_handler);
 		prog2file(
 			"$constants->{basedir}/$index_handler", 
 			"$vu ssi=yes section=$key",

@@ -375,8 +375,7 @@ sub insert_task_event {
 	} keys %$event_hr;
 	for my $file (@files) {
 		push @$event_ary_ref, [ $file, $event_hr->{$file}{until_time} ];
-		my $file_nopl = $file;
-		$file_nopl =~ s/\.pl//;
+		(my $file_nopl = $file) =~ s/\.pl//;
 		my @u = gmtime($event_hr->{$file}{until_time});
 		my $options = {
 			next_begin => sprintf("%4d-%02d-%02d %02d:%02d:%02d",
@@ -431,7 +430,7 @@ sub main {
 		# the event array.
 		my($task_filename, $until_time) = @{ shift @$event_ary };
 		my $basename = basename($task_filename);
-		my $basename_nopl = $basename; $basename_nopl =~ s/\.pl$//;
+		(my $basename_nopl = $basename) =~ s/\.pl$//;
 
 		# Get its information and wait until it's ready.
 		my $subref = $task{$task_filename}{code};
@@ -461,7 +460,7 @@ sub main {
 			slashdLog("Beginning fork()");
 			my $pid = fork();
 			if ($pid == 0) {
-				$summary = &$subref($virtual_user,
+				$summary = $subref->($virtual_user,
 					$constants, $slashdb, $user);
 				# Sadly, at this point there is no easy way to
 				# get $summary back from this child to the
@@ -472,7 +471,7 @@ sub main {
 			slashdLog("Ending fork()");
 		} else {
 			local $me = $basename;
-			$summary = &$subref($virtual_user,
+			$summary = $subref->($virtual_user,
 				$constants, $slashdb, $user);
 		}
 		my $end_time = Time::HiRes::time;
@@ -511,8 +510,7 @@ sub main {
 					: ""),
 				")$summary"));
 		}
-		my $summary_trim = $summary;
-		$summary_trim =~ s/^:\s*//;
+		(my $summary_trim = $summary) =~ s/^:\s*//;
 		$slashdb->setSlashdStatus($basename_nopl, {
 			-last_completed	=> "NOW()",
 			summary		=> $summary_trim,

@@ -25,10 +25,6 @@ use Slash::Install;
 use Getopt::Std;
 use Cwd;
 
-use vars qw(
-	$dir
-);
-
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
 (my $PREFIX = $Bin) =~ s|/[^/]+/?$||;
@@ -72,7 +68,7 @@ if ($opts{'c'}) {
 	exit;
 }
 
-$dir = getcwd;
+my $dir = getcwd;
 if ($opts{'O'}) {
 	if (! -d $opts{'O'}) {
 		if ($opts{'d'} || $opts{'e'} || ($opts{'l'} && $opts{'f'})) {
@@ -110,7 +106,7 @@ if ($opts{'s'}) {
 			print STDERR "WARNING: could not readTemplateFile at $_\n";
 			next;
 		}
-		my $tsemi  = join(";", @$template{'name','page','section'});
+		my $tsemi = join(";", @$template{'name','page','section'});
 #		print "Preparing $template->{name} using $filename: $_\n";
 		my $temp2 = $slashdb->getTemplateByName($template->{name},
 			[qw(tpid name page section)], 1,
@@ -124,7 +120,7 @@ if ($opts{'s'}) {
 			}
 			delete $template->{instructions};
 			if ($slashdb->setTemplate($temp2->{tpid}, $template)) {
-				my $t2semi = join(";", @$temp2   {'name','page','section'});
+				my $t2semi = join(";", @$temp2{'name','page','section'});
 				print "id $temp2->{tpid}\t$filename updated\n";
 				if ($tsemi ne $t2semi || $tsemi ne $filename) {
 					print "\tWARNING: name of file ($filename) is not name of template it contains ($t2semi)\n";
