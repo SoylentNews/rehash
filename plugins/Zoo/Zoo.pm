@@ -82,15 +82,15 @@ sub getFriendsUIDs {
 sub setFriend {
 	my($self, $uid, $person) = @_;
 	_set(@_, 'friend', FRIEND);
-	$self->sqlDo("INSERT people_nthdegree SELECT person, $person, $uid, 'fof' from people WHERE uid=$uid AND type='friend' AND person != $person  AND person != $uid");
-	$self->sqlDo("INSERT people_nthdegree SELECT $uid, person, $person, 'fof' from people WHERE uid=$person AND type='friend' AND $uid != person  AND person != $person");
-	$self->sqlDo("INSERT people_nthdegree SELECT $uid, person, $person, 'eof' from people WHERE uid=$person AND type='foe' AND $uid != person  AND person != $person");
+	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'fof' from people WHERE uid=$uid AND type='friend' AND person != $person  AND person != $uid");
+	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'fof' from people WHERE uid=$person AND type='friend' AND $uid != person  AND person != $person");
+	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'eof' from people WHERE uid=$person AND type='foe' AND $uid != person  AND person != $person");
 }
 
 sub setFoe {
 	my($self, $uid, $person) = @_;
 	_set(@_, 'foe', FOE);
-	$self->sqlDo("INSERT people_nthdegree SELECT person, $person, $uid, 'eof' from people WHERE uid=$uid AND type='friend' AND person != $person AND person != $uid");
+	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'eof' from people WHERE uid=$uid AND type='friend' AND person != $person AND person != $uid");
 }
 
 sub _set {
@@ -259,11 +259,9 @@ SQL
 }
 
 sub getZooUsersForProcessing {
-	my($self, $time) = @_;
-	my $slashdb = getCurrentDB();
-
-	my $people = $slashdb->sqlSelectAll('uid', 'people', "last_update > '$time' ");
-	my $people2 = $slashdb->sqlSelectAll('uid', 'people_nthdegree', "last_update > '$time' ");
+	my ($self, $time) = @_;
+	my $people = $self->sqlSelectAll('uid', 'people', "last_update > '$time' ");
+	my $people2 = $self->sqlSelectAll('uid', 'people_nthdegree', "last_update > '$time' ");
 
 	my %people = ( );
 
