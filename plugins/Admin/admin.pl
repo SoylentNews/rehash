@@ -1916,7 +1916,6 @@ sub updateStory {
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		-rendered	=> 'NULL', # freshenup.pl will write this
-		in_trash	=> 'no',   # clicking Delete is the only way to trash a story
 	};
 
 	for (qw(dept bodytext relatedtext)) {
