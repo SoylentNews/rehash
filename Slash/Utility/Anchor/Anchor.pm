@@ -144,7 +144,9 @@ sub header {
 	getSectionColors();
 
 	# This is ALWAYS displayed. Let the template handle title.
-	slashDisplay('html-header', { title => $data->{title} }, { Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
+	my $template_vars={title => $data->{title}};
+	$template_vars->{meta_desc} = $options->{meta_desc} if $options->{meta_desc};
+	slashDisplay('html-header', $template_vars, { Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
 		unless $options->{noheader};
 
 	$user->{state}{mt}{curcol} = 0;
