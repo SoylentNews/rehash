@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Print header for server-parsed static pages
+
+* dir = virtual root directory to get file
+* section = extra path for section
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+ssifoot
+__template__
+[%- IF page -%]
+<!--#include virtual="[% dir %]/[% section %]slashfoot-[% page %].inc"-->
+[%- ELSE -%]
+<!--#include virtual="[% dir %]/[% section %]slashfoot.inc"-->
+[%- END -%]
+__seclev__
+10000
+__version__
+$Id$

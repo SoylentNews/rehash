@@ -205,6 +205,7 @@ template=templates/sendPasswdForm;users;default
 template=templates/setrectop_img;misc;default
 template=templates/setrectop_txt;misc;default
 template=templates/showInfoConflict;users;default
+template=templates/ssifoot;misc;default
 template=templates/ssihead;misc;default
 template=templates/start_tab;misc;default
 template=templates/storylink;index;default
