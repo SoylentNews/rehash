@@ -12,16 +12,19 @@ __name__
 journalsearch
 __template__
 [% USE Slash %]
+[% x = start ? start : 1 %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
 	[% FOREACH journal=entries %]
 		<TR>
-		[% IF journal.4 %]
-			<TD VALIGN="TOP">
-				[% journal.4 %]
-			</TD>
-		[% END %]
 		<TD VALIGN="TOP">
-			<A HREF="[% constants.rootdir %]/journal.pl?id=[% journal.2 %]&amp;[% journal.uid %]&amp;op=display">[% journal.1 %]</A> on [% Slash.timeCalc(journal.3) %] by <A HREF="[% constants.rootdir %]~[% journal.0 | fixparam %]/">[% journal.0 %]</A>.
+		[% IF journal.5 %]
+				[% journal.5 %]
+		[% ELSE %]
+			[% x %] 
+		[% END %]
+		</TD>
+		<TD VALIGN="TOP">
+			<A HREF="[% constants.rootdir %]/journal.pl?id=[% journal.2 %]&amp;uid=[% journal.4 %]&amp;op=display">[% journal.1 %]</A> on [% Slash.timeCalc(journal.3) %] by <A HREF="[% constants.rootdir %]~[% journal.0 | fixparam %]/">[% journal.0 %]</A>.
 		</TD>
 		</TR>
 	[% END %]
