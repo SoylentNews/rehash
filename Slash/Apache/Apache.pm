@@ -304,7 +304,7 @@ sub ConnectionIsSecure {
 	# Non-SSL connection, from a network not known to be secure.
 	# Call it insecure.
 	return 0;
- }
+}
 
 sub IndexHandler {
 	my($r) = @_;
@@ -355,10 +355,10 @@ sub IndexHandler {
 		my $key = $1;
 		my $slashdb = getCurrentDB();
 		my $section = $slashdb->getSection($key);
-		if ($section && $section->{id}) {
+		my $index_handler = $section->{index_handler}
+			|| $constants->{index_handler};
+		if ($section && $section->{id} && $index_handler ne 'IGNORE') {
 			my $basedir = $constants->{basedir};
-			my $index_handler = $section->{index_handler}
-				|| $constants->{index_handler};
 
 			# $USER_MATCH defined above
 			if ($dbon && $r->header_in('Cookie') =~ $USER_MATCH) {
