@@ -2158,7 +2158,6 @@ sub _getLogTokenCookieLocation {
 
 ########################################################
 # Get a logtoken from the DB, or create a new one
-
 sub _logtoken_read_memcached {
 	my($self, $uid, $temp_str, $locationid) = @_;
 	my $mcd = $self->getMCD();
