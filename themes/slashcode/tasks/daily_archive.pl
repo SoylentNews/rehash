@@ -45,8 +45,11 @@ $task{$me}{code} = sub {
 	# Takes approx. 60 seconds on Slashdot
 	my $logdb = getObject('Slash::DB', { db_type => 'log_slave' });
 	slashdLog('Update Total Counts Begin');
-	my $totalHits = $slashdb->getVar("totalhits", '', 1);
-	my $count = $logdb->countAccesslogDaily();
+	# I'm pulling the value out with "+0" because that returns us an
+	# exact integer instead of scientific notation which rounds off.
+	# Another one of those SQL oddities! - Jamie 2003/08/12
+	my $totalHits = $slashdb->sqlSelect("value+0", "vars", "name='totalhits'");
+	$totalHits += $logdb->countAccesslogDaily();
 	$slashdb->setVar("totalhits", $totalHits);
 	slashdLog('Update Total Counts End');
 
