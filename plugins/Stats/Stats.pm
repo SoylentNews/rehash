@@ -752,7 +752,7 @@ sub countDaily {
 }
 
 ########################################################
-sub countDailySubscriber {
+sub getRecentSubscribers {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	return 0 unless $constants->{subscribe};
@@ -762,6 +762,13 @@ sub countDailySubscriber {
 		"hits_paidfor > hits_bought
 		 AND lastclick >= DATE_SUB(NOW(), INTERVAL 48 HOUR)",
 	);
+
+	return $subscribers;
+}
+
+########################################################
+sub countDailySubscribers {
+	my($self, $subscribers) = @_;
 	return 0 unless $subscribers && @$subscribers;
 	my $uid_list = join(", ", @$subscribers);
 	my $count = $self->sqlCount("accesslog_temp", "uid IN ($uid_list)");

@@ -24,20 +24,22 @@ $task{$me}{code} = sub {
 	my $statsSave = getObject('Slash::Stats::Writer', '', { day => $yesterday  });
 	# This will need to be changed to "log_db_user"
 	if ($constants->{backup_db_user}) {
-		$stats = getObject('Slash::Stats', $constants->{backup_db_user}, { day => $yesterday, create => 1  });
+		$stats = getObject('Slash::Stats', $constants->{backup_db_user});
 		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
 	} else {
 		$stats = getObject('Slash::Stats', "", { day => $yesterday, create => 1  });
 		$backupdb = $slashdb;
 	}
+	my $logdb = getObject('Slash::DB', $constants->{'log_db_user'} || $constants->{'backup_db_user'},
+												{ day => $yesterday, create => 1  });
 
-	unless($stats) {
+	unless($logdb) {
 		slashdLog('No database to run adminmail against');
 		return;
 	}
 
 	slashdLog('Send Admin Mail Begin');
-	my $count = $stats->countDaily();
+	my $count = $logdb->countDaily();
 
 	# homepage hits are logged as either '' or 'shtml'
 	$count->{'index'}{'index'} += delete $count->{'index'}{''};
@@ -45,7 +47,7 @@ $task{$me}{code} = sub {
 	# these are 404s
 	delete $count->{'index.html'};
 
-	my $sdTotalHits = $stats->getVar('totalhits', 'value', 1);
+	my $sdTotalHits = $backupdb->getVar('totalhits', 'value', 1);
 	$sdTotalHits = $sdTotalHits + $count->{'total'};
 
 	my $reasons = $slashdb->getReasons();
@@ -76,7 +78,7 @@ EOT
 	}
 
 	my $comments = $stats->countCommentsDaily();
-	my $accesslog_rows = $stats->sqlCount('accesslog');
+	my $accesslog_rows = $logdb->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
 
 	my $modlogs = $stats->countModeratorLog({
@@ -161,21 +163,21 @@ EOT
 		oldest => $oldest_to_show
 	});
 
-	my $grand_total = $stats->countDailyByPage('');
+	my $grand_total = $logdb->countDailyByPage('');
 	$data{grand_total} = $grand_total;
-	my $grand_total_static = $stats->countDailyByPage('',{ static => 'yes' } );
+	my $grand_total_static = $logdb->countDailyByPage('',{ static => 'yes' } );
 	$data{grand_total_static} = $grand_total_static;
-	my $total_static = $stats->countDailyByPage('', {
+	my $total_static = $logdb->countDailyByPage('', {
 		static => 'yes',
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 	$data{total_static} = $total_static;
-	my $total_subscriber = $stats->countDailySubscriber();
+	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
 	for (qw|index article search comments palm journal rss|) {
-		my $uniq = $stats->countDailyByPageDistinctIPID($_);
-		my $pages = $stats->countDailyByPage($_);
-		my $bytes = $stats->countBytesByPage($_);
-		my $uids = $stats->countUsersByPage($_);
+		my $uniq = $logdb->countDailyByPageDistinctIPID($_);
+		my $pages = $logdb->countDailyByPage($_);
+		my $bytes = $logdb->countBytesByPage($_);
+		my $uids = $logdb->countUsersByPage($_);
 		$data{"${_}_uids"} = sprintf("%8d", $uids);
 		$data{"${_}_ipids"} = sprintf("%8d", $uniq);
 		$data{"${_}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
@@ -210,13 +212,13 @@ EOT
 		my $index = $constants->{defaultsection} eq $section ? 1 : 0;
 		my $temp = {};
 		$temp->{section_name} = $section;
-		my $uniq = $stats->countDailyByPageDistinctIPID('',  { section => $section });
-		my $pages = $stats->countDailyByPage('',  {
+		my $uniq = $logdb->countDailyByPageDistinctIPID('',  { section => $section });
+		my $pages = $logdb->countDailyByPage('',  {
 			section => $section,
 			no_op => $constants->{op_exclude_from_countdaily}
 		} );
-		my $bytes = $stats->countBytesByPage('',  { section => $section });
-		my $users = $stats->countUsersByPage('',  { section => $section });
+		my $bytes = $logdb->countBytesByPage('',  { section => $section });
+		my $users = $logdb->countUsersByPage('',  { section => $section });
 		$temp->{ipids} = sprintf("%8d", $uniq);
 		$temp->{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 		$temp->{page} = sprintf("%8d", $pages);
@@ -227,13 +229,13 @@ EOT
 		$statsSave->createStatDaily("users", $users, { section => $section });
 
 		for (qw| index article search comments palm rss|) {
-			my $uniq = $stats->countDailyByPageDistinctIPID($_,  { section => $section  });
-			my $pages = $stats->countDailyByPage($_,  {
+			my $uniq = $logdb->countDailyByPageDistinctIPID($_,  { section => $section  });
+			my $pages = $logdb->countDailyByPage($_,  {
 				section => $section,
 				no_op => $constants->{op_exclude_from_countdaily}
 			} );
-			my $bytes = $stats->countBytesByPage($_,  { section => $section  });
-			my $users = $stats->countUsersByPage($_,  { section => $section  });
+			my $bytes = $logdb->countBytesByPage($_,  { section => $section  });
+			my $users = $logdb->countUsersByPage($_,  { section => $section  });
 			$temp->{$_}{ipids} = sprintf("%8d", $uniq);
 			$temp->{$_}{bytes} = sprintf("%8.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
@@ -247,10 +249,10 @@ EOT
 	}
 
 
-	my $total_bytes = $stats->countBytesByPage('',  {
+	my $total_bytes = $logdb->countBytesByPage('',  {
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
-	my $grand_total_bytes = $stats->countBytesByPage('');
+	my $grand_total_bytes = $logdb->countBytesByPage('');
 
 	my $admin_mods = $stats->getAdminModsInfo();
 	my $admin_mods_text = getAdminModsText($admin_mods);
@@ -260,7 +262,7 @@ EOT
 	});
 	$mod_data{reverse_mods} = $stats->getReverseMods();
 
-	my $static_op_hour = $stats->getDurationByStaticOpHour({});
+	my $static_op_hour = $logdb->getDurationByStaticOpHour({});
 	for my $is_static (keys %$static_op_hour) {
 		for my $op (keys %{$static_op_hour->{$is_static}}) {
 			for my $hour (keys %{$static_op_hour->{$is_static}{$op}}) {
@@ -275,7 +277,7 @@ EOT
 		}
 	}
 
-	my $static_localaddr = $stats->getDurationByStaticLocaladdr();
+	my $static_localaddr = $logdb->getDurationByStaticLocaladdr();
 	for my $is_static (keys %$static_localaddr) {
 		for my $localaddr (keys %{$static_localaddr->{$is_static}}) {
 			my $prefix = "duration_";
@@ -435,7 +437,7 @@ EOT
 		}
 	}
 
-	$data{top_referers} = $stats->getTopReferers();
+	$data{top_referers} = $logdb->getTopReferers();
 
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);
