@@ -4026,7 +4026,7 @@ sub getStoriesEssentials {
 		}
 	} else {
 		$where .= " AND stories.section = " . $self->sqlQuote($SECT->{section});
-			$where .= " AND displaystatus => 0 ";
+			$where .= " AND displaystatus >= 0 ";
 	}
 
 	$where .= "AND tid='$tid' " if $tid;
