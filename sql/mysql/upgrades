@@ -1202,7 +1202,6 @@ INSERT INTO users_param (uid, name, value) SELECT uid, "clsmall_bonus", "-1" FRO
 
 ALTER TABLE accesslist ADD isproxy enum("no","yes") DEFAULT "no" NOT NULL;
 
-# SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE accesslog ADD secure TINYINT DEFAULT 0 NOT NULL;
 
@@ -1324,3 +1323,14 @@ UPDATE stats_daily SET name='mod_points_lost_spent_minus_1_percent' WHERE name='
 
 # SLASHDOT LAST UPDATED HERE
 
+DROP TABLE IF EXISTS story_files;
+CREATE TABLE story_files (
+													id int(5) NOT NULL auto_increment,
+													sid varchar(16) NOT NULL default '',
+													description varchar(80) NOT NULL default '',
+													file_id varchar(32) NOT NULL default '',
+													isimage enum("yes","no") DEFAULT "no" NOT NULL,
+													PRIMARY KEY (id)
+													) TYPE = myisam;
+
+# SLASHCODE LAST UPDATED HERE
