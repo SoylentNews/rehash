@@ -52,38 +52,47 @@ $task{$me}{code} = sub {
 	# We'll try precaching two queries for each virtual user,
 	# one with Collapse Sections and one without.  Look ahead
 	# 40 seconds because that is guaranteed to cross the next
-	# minute boundary.
+	# minute boundary.  And if there's time, precache the
+	# next upcoming minute too.
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $default_maxstories = getCurrentAnonymousCoward("maxstories");
 	my @gse_hrs = (
-		{ fake_secs_ahead => 40,
+		{ fake_secs_ahead =>  40,
 		  tid => $mp_tid,
 		  limit => $default_maxstories	},
-		{ fake_secs_ahead => 40,
+		{ fake_secs_ahead =>  40,
+		  tid => $mp_tid,
+		  limit => $default_maxstories,
+		  sectioncollapse => 1		},
+		{ fake_secs_ahead => 100,
+		  tid => $mp_tid,
+		  limit => $default_maxstories	},
+		{ fake_secs_ahead => 100,
 		  tid => $mp_tid,
 		  limit => $default_maxstories,
 		  sectioncollapse => 1		},
 	);
 
-	# Sleep until :30 after the top of the minute.
+	# Sleep until :10 after the top of the minute.
 	my $time = time;
 	my $now_secs = $time % 60;
 	return "started too late" if $now_secs > 40;
-	sleep 30 - $now_secs if $now_secs < 30;
-	my $max_time = time - $now_secs + 55;
+	sleep 10 - $now_secs if $now_secs < 10;
+	my $max_time = $time - $now_secs + 55;
 
 	# Make each gSE query to each virtual user.
-	for my $vu (@virtual_users) {
-		if (time >= $max_time) {
-			push @errs, "ran out of time on vu '$vu': " . scalar(gmtime);
-			last;
-		}
-		my $vu_db = getObject('Slash::DB', { virtual_user => $vu });
-		if (!$vu_db) {
-			push @errs, "no db returned for vu '$vu'";
-			next;
-		}
-		for my $gse_hr (@gse_hrs) {
+	OUTER: for my $i (0..$#gse_hrs) {
+		my $gse_hr = $gse_hrs[$i];
+		INNER: for my $vu (@virtual_users) {
+			if (time >= $max_time) {
+				push @errs, "ran out of time on i $i vu $vu";
+				last OUTER;
+			}
+			my $vu_db = getObject('Slash::DB', { virtual_user => $vu });
+			if (!$vu_db) {
+				push @errs, "no db returned for i $i vu $vu";
+				next INNER;
+			}
 			my %copy = %$gse_hr;
 			my $dummy = $vu_db->getStoriesEssentials(\%copy);
 		}
