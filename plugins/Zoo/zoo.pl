@@ -265,9 +265,14 @@ sub _validFormkey {
 }
 
 sub check {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	if ($form->{uid}) {
+	if ($form->{uid} && $form->{type}) {
+		if ($zoo->count() > $constants->{people_max}) {
+			_printHead("mainhead");
+			print getData("over_socialized");
+		}
+		
 		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
 		_printHead("mainhead");
 		my $template = ($form->{op} eq 'addcheck') ? 'add' : 'delete';

@@ -68,6 +68,9 @@ __template__
 [% CASE 'yourfreakshead' %]
 	Your fans
 
+[% CASE 'over_socialized' %]
+	You are over the limit for the number of friends and foes you can have, please remove some from you list before adding any more.
+
 [% END %]
 
 __seclev__

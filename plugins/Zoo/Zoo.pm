@@ -53,6 +53,21 @@ sub getFans {
 	_getOpposite(@_, "friend");
 }
 
+sub countFriends {
+	my($self, $uid) = @_;
+	$self->sqlCount('person', 'people', "type='friend' AND uid = $uid");
+}
+
+sub countFoes {
+	my($self, $uid) = @_;
+	$self->sqlCount('person', 'people', "type='foe' AND uid = $uid");
+}
+
+sub count {
+	my($self, $uid) = @_;
+	$self->sqlCount('uid', 'people', "uid = $uid");
+}
+
 sub _get {
 	my($self, $uid, $type) = @_;
 
