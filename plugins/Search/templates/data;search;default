@@ -47,6 +47,9 @@ __template__
 [% CASE 'all_authors' %]
 	All Authors
 
+[% CASE 'all_subsections' %]
+	All Subsections
+
 [% END %]
 
 __seclev__

@@ -70,6 +70,10 @@ __template__
 		Slash.createSelect("section", sections, form.section, 1, 0, 1);
 	END %]
 
+	[% IF subsections;
+		Slash.createSelect("subsection", subsections, form.subsection, 1, 0, 1);
+	END %]
+
 	[% Slash.createSelect("sort", sort, form.sort, 1) %]
 
 	[% IF constants.multitopics_enabled;

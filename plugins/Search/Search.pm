@@ -250,6 +250,10 @@ sub findStory {
 	$where .= " AND time < now() AND stories.writestatus != 'delete' ";
 	$where .= " AND stories.uid=" . $self->sqlQuote($form->{author})
 		if $form->{author};
+	$where .= " AND stories.submitter=" . $self->sqlQuote($form->{submitter})
+		if $form->{submitter};
+	$where .= " AND stories.subsection=" . $self->sqlQuote($form->{subsection})
+		if $form->{subsection};
 	if ($form->{section}) {
 		$where .= " AND stories.section = '$form->{section}'"
 	} else {
