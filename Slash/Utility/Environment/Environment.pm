@@ -1255,10 +1255,30 @@ Hashref of cleaned-up data.
 =cut
 
 sub filter_params {
-	my %params = @_;
+	my ($apr) = @_;
 	my %form;
-	my $apr = $params{query_apache};
 	my %multivalue = map {($_ => 1)} qw(section_multiple);
+	if (ref($apr) eq "HASH") {
+		%form = %$apr;
+	} else {
+		for ($apr->param) {
+			my @values = $apr->param($_);
+			if (scalar(@values) > 1) { 
+				$form{$_} = $values[0];
+				$form{_multi}{$_} = \@values;
+			} else {
+				$form{$_} = $values[0];
+			}
+			# We don't filter the multivalue params yet -Brian
+			# allow any param ending in _multiple to be multiple -- pudge
+			if ($apr && (exists $multivalue{$_} || /_multiple$/)) {
+				my @multi = $apr->param($_);
+				$form{$_} = \@multi;
+				$form{_multi}{$_} = \@multi;
+				next;
+			}
+		}
+	}
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
@@ -1293,16 +1313,8 @@ sub filter_params {
 	# add more specials
 	$special{qid} = $special{sid};
 
-	for (keys %params) {
-		$form{$_} = $params{$_};
-		# We don't filter the multivalue params yet -Brian
-		# allow any param ending in _multiple to be multiple -- pudge
-		if ($apr && (exists $multivalue{$_} || /_multiple$/)) {
-			my @multi = $apr->param($_);
-			$form{$_} = \@multi;
-			next;
-		}
-
+	for (keys %form) {
+		next if ref($form{$_}) eq 'ARRAY';
 		# Paranoia - Clean out any embedded NULs. -- cbwood
 		# hm.  NULs in a param() value means multiple values
 		# for that item.  do we use that anywhere? -- pudge
@@ -1583,7 +1595,7 @@ sub createEnvironment {
 	}
 
 	createCurrentVirtualUser($virtual_user);
-	createCurrentForm(filter_params(%form));
+	createCurrentForm(filter_params(\%form));
 
 	my $slashdb = Slash::DB->new($virtual_user);
 	my $constants = $slashdb->getSlashConf();

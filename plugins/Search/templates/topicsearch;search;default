@@ -4,6 +4,15 @@ __description__
 Displays multi-topics portion of the search form.
 Form field names should be of the form "topic_<tid>".
 
+
+Wrong!  Form elements can have arrays, this is all a big broken
+hack that I suspected never worked in the first place. The code
+in Search.pm was pretty obviously never tested for this. None
+of the sites that we maintain use this template, someone needs to fix it.
+I looked at the foundries (which I do believe uses this) it is not working there
+either.
+	-Brian
+
 Accepts the fillowing parameters:
 
 	* selected_topics = List of selected topics in hashref form, (ie, 
@@ -33,9 +42,8 @@ __template__
                 [% IF col %]</TD>[% END %]
                 <TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
                 [% END -%]
-                <INPUT TYPE="checkbox" NAME="topic_[% t %]" VALUE="[%
-                topics.$t %]"[% IF form.selected_topics.$t %] CHECKED[%
-                END %]>[% topics.$t %]<BR>
+                <INPUT TYPE="checkbox" NAME="[% tid %]" VALUE="[% t %]"[% IF form.selected_topics.$t %] CHECKED[% END %]>
+								[% topics.$t %]<BR>
                 [%- col = col + 1 %]
         [% END -%]
                 </TD>

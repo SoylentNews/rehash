@@ -78,14 +78,6 @@ sub main {
 		$form->{query} = substr($form->{query}, 0, 40);
 	}
 
-	# Handle multiple topic selection if enabled.
-	if ($constants->{multitopics_enabled}) {
-		for (grep { /^topic_./ } keys %{$form}) {
-			$form->{selected_topics}{$1} = 1 if /^topic_(\d+)$/;
-		}
-		$form->{selected_topics}{$form->{topic}} = 1 if $form->{tid};
-	}
-
 	# The default search operation is to search stories.
 	$form->{op} ||= 'stories';
 	if ($form->{op} eq 'rss' && !$user->{is_admin}) {

@@ -94,13 +94,7 @@ sub handler {
 	# do we need to do this too? i am leaning toward No. -- pudge
 # 	$r->method_number(M_GET);
 
-	my @params_array = $apr->param;
-	my %params;
-	for (@params_array) {
-		$params{$_} = $apr->param($_);
-	}
-	$params{query_apache} = $apr;
-	my $form = filter_params(%params);
+	my $form = filter_params($apr);
 	$form->{query_apache} = $apr;
 	@{$form}{keys  %{$constants->{form_override}}} =
 		values %{$constants->{form_override}};
