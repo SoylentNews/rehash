@@ -1,0 +1,40 @@
+__section__
+default
+__description__
+Display menu of pages (if applicable)
+
+* story = story data structure (includes story.sid, see dispStory)
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+pagemenu
+__template__
+[%- IF full && user.state.pagebreaks && form.pagenum;
+   storylinks = Slash.linkStory({ sid => story.sid, link => 1 });
+-%]
+Pages:
+[%- IF form.pagenum == 1; '&lt;'; ELSE -%]
+<A HREF="[% storylinks.0 %]&amp;pagenum=[% form.pagenum - 1 %]" TITLE="Previous Page">&lt;</A>
+[% END -%]
+[%-   FOREACH mypage = [ 0 .. user.state.pagebreaks ];
+        mypage = mypage + 1;
+        IF mypage == form.pagenum %]
+<B>[% mypage %]</B>
+[%-     ELSE -%]
+<A HREF="[% storylinks.0 %]&amp;pagenum=[% mypage %]" TITLE="Page [% mypage %]">[% mypage %]</A>
+[%-      END;
+        " | " UNLESS loop.last;
+      END %]
+[% IF form.pagenum == user.state.pagebreaks + 1; '&gt;'; ELSE -%]
+<A HREF="[% storylinks.0 %]&amp;pagenum=[% form.pagenum + 1 %]" TITLE="Next Page">&gt;</A>
+[%- END -%]
+[% END %]
+__seclev__
+10000
+__version__
+$Id$
