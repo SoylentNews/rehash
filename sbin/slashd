@@ -1,0 +1,601 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+###############################################################################
+# slashd - the primary "daemon" that runs various tasks and generates
+# static pages 
+###############################################################################
+
+use sigtrap;
+use strict;
+use Carp;
+use Date::Manip;
+use File::Basename;
+use File::Path;
+use LWP::UserAgent;
+use HTTP::Request;
+use Time::Local;
+use URI::Escape;
+use XML::Parser::Expat;
+use XML::RSS 0.95;
+
+use Slash;
+use Slash::Utility;
+
+my $virtual_user = $ARGV[0];
+createEnvironment($ARGV[0]);
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+my $user = getCurrentUser();
+
+my $totalChangedStories = 1;
+
+sub END { Carp::cluck("why am I here?") }
+
+sub slashdPid {
+	local *PID;
+	open PID,">$constants->{logdir}/slashd.pid"
+		or die "Can't open $constants->{logdir}/slashd.pid: $!";
+	print PID $$;
+	close PID;
+}
+
+sub slashdLog {
+	local *LOG;
+	my $dir = "$constants->{logdir}";
+	open LOG, ">>$dir/slashd.log"
+		or die "Can't append to $dir/slashd.log: $!";
+	print LOG localtime() . "\t", join("\t", @_), "\n";
+	close LOG;
+}
+
+sub copy {
+	my($from, $to) = @_;
+	# Make sure that $to exists
+
+	my $t = $to;
+	$t =~ s|(.*)/(.*)|$1|;
+	my @dirs = split m/\//, $t;
+
+	my $d;
+	foreach (@dirs) {
+		$d .= "/$_";
+		slashdLog "mkdir $d";
+		mkdir $d, 0755;
+	}
+
+	local(*FROM, *TO);
+	open FROM, $from or die "Can't open $from: $!";
+	open TO, ">>$to" or die "Can't append to $to: $!";
+	while (<FROM>) { print TO }
+	close FROM;
+	close TO;
+}
+
+
+sub geturl {
+	my $ua = new LWP::UserAgent;
+	my $request = new HTTP::Request('GET', $_[0]);
+
+	my $result = $ua->request($request);
+
+	if ($result->is_success) {
+		return $result->content;
+	} else {
+		return 0;
+	}
+}
+
+
+sub prog2file {
+	my($command, $arguments, $f) = @_;
+	my $exec = "$command virtual_user=$virtual_user $arguments";
+	my $d = `$exec`;
+#	print "$d";
+	slashdLog($exec);
+	my $dir = dirname($f);
+#	print "DIR $dir:$f";
+	mkpath($dir, 0, 0755) unless -e $dir;
+	if (length($d) > 0) {
+		local *F;
+		open F, ">$f" or die "Can't open $f: $!";
+		print F $d;
+		close F;
+		return "1";
+
+	} else {
+		return "0";
+	}
+}
+
+sub moveImages {
+	if (opendir DIR, "/tmp/slash") {
+		my @files = readdir(DIR);
+		foreach my $old (@files) {
+			my $new = "$constants->{basedir}/$old";
+			$new =~ s|~|/|g;
+			if (substr($old, 0, 1) ne ".") {
+				copy("/tmp/slash/$old", $new);
+				unlink "/tmp/slash/$old"
+					or warn "Can't unlink /tmp/slash/$old: $!";
+			}
+		}
+	}
+}
+
+#################################
+sub setheadertopics {
+	my $stories = $slashdb->getNewStoryTopic();
+	my($x, $r, $t);
+
+	for (@$stories) {
+		last if $x < 5;
+		local $_ = $t;
+		if (! /$_->{'tid'}/) {	
+			$r .= <<EOT;
+	<TD><A HREF="$constants->{rootdir}/search.pl?topic=$_->{'tid'}"><IMG
+		SRC="$constants->{imagedir}/topics/$_->{'image'}" WIDTH="$_->{'width'}" HEIGHT="$_->{'height'}"
+		BORDER="0" ALT="$_->{'alttext'}"></A>
+	</TD>
+
+EOT
+			$t .= $_->{'tid'};
+			$x++;
+		}
+	}
+	$slashdb->setBlock('topic', {block => $r});
+}
+
+#################################
+sub getminute {
+	my($sec, $min) = gmtime;
+	return $min;
+}
+
+#################################
+sub save2file {
+	my($f, $d) = @_;
+	local *FH;
+	open FH,">$f" or die "Can't open $f: $!";
+	print FH $d;
+	close FH;
+}
+
+#################################
+sub newmotd {
+	return unless -x '/usr/games/fortune';
+	chomp(my $t = `/usr/games/fortune -s`);
+	$slashdb->setBlock('motd', {block => $t}) if $t;
+}
+
+
+
+#################################
+sub sectionHeaders {
+	my($section) = @_;
+	my $form = getCurrentForm();
+	local(*FH, *STDOUT);
+
+	setCurrentForm('ssi', 1);
+	open FH, ">$constants->{basedir}/$section/slashhead.inc"
+		or die "Can't open $constants->{basedir}/$section/slashhead.inc: $!";
+	*STDOUT = *FH;
+	header("", $section, "thread");
+	close FH;
+
+	setCurrentForm('ssi', 0);
+	open FH, ">$constants->{basedir}/$section/slashfoot.inc"
+		or die "Can't open $constants->{basedir}/$section/slashfoot.inc: $!";
+	*STDOUT = *FH;
+	footer();
+	close FH;
+}
+
+#################################
+sub newfooter {
+	local *FH;
+	local *SO = *STDOUT;
+
+	sectionHeaders("");
+	my $sections = $slashdb->getSections();
+	for (keys %$sections) {
+		my($section) = $sections->{$_}{section};
+		mkdir "$constants->{basedir}/$section", 0755;
+		sectionHeaders($section);
+	}
+
+	*STDOUT = *SO;
+}
+
+#################################
+sub site2file {
+	my($section) = @_;
+	(my $file = $section || lc $constants->{sitename}) =~ s/\W+//g;
+	return $file;
+}
+
+#################################
+sub date2iso8601 {
+	my($time) = @_;
+	if ($time) {	# force to GMT
+		$time .= ' GMT';
+	} else {	# get current seconds
+		$time = 'epoch ' . time();
+	}
+
+	# calculate timezone differential from GMT
+	my $diff = (timelocal(localtime) - timelocal(gmtime)) / 36;
+	($diff = sprintf "%+0.4d", $diff) =~ s/(\d{2})$/:$1/;
+
+	return scalar UnixDate($time, "%Y-%m-%dT%H:%M$diff");
+}
+
+#################################
+sub newrdf {	# RSS 0.9
+	my($section) = @_;
+	my $stories_and_topics = $slashdb->getBackendStories($section);
+	my $rss = XML::RSS->new(
+		version => '0.9',
+		$constants->{rdfencoding} ? (encoding => $constants->{rdfencoding}) : ()
+	);
+
+	my $SECT = getSection($section);
+	my $title = $SECT->{isolate}
+		? $SECT->{title}
+		: "$constants->{sitename}: $SECT->{title}";
+
+	$rss->channel(
+		title		=> xmlencode($title),
+		'link'		=> $constants->{absolutedir} . ($section ? "/index.pl?section=$section" : '/'),
+#		language	=> $constants->{rdflanguage},
+		description	=> xmlencode($constants->{slogan}),
+	);
+
+	$rss->image(
+		title		=> xmlencode($constants->{sitename}),
+		url		=> xmlencode($constants->{rdfimg}),
+		'link'		=> $constants->{absolutedir} . '/',
+	);
+
+
+	for my $section (@$stories_and_topics) {
+		$rss->add_item(
+			title	=> xmlencode($section->{title}),
+			'link'	=> "$constants->{absolutedir}/article.pl?sid=$section->{sid}",
+		);
+	}
+
+	my $file = site2file($section);
+	$rss->save("$constants->{basedir}/$file.rdf");
+}
+
+#################################
+sub newrss {	# RSS 1.0
+	my($section) = @_;
+	my $rss = XML::RSS->new(
+		version => '1.0',
+		$constants->{rdfencoding}
+			? (encoding => $constants->{rdfencoding})
+			: ()
+	);
+
+	$rss->add_module(
+		prefix	=> 'slash',
+		uri	=> 'http://slashcode.com/rss/1.0/modules/Slash/',
+	);
+
+	my $SECT = getSection($section);
+	my $title = $section
+		? $SECT->{isolate}
+			? $SECT->{title}
+			: "$constants->{sitename}: $SECT->{title}"
+		: $constants->{sitename};
+
+	$rss->channel(
+		title		=> xmlencode($title),
+		description	=> xmlencode($constants->{slogan}),
+		'link'		=> $constants->{absolutedir} .
+			($section ? "/index.pl?section=$section" : '/'),
+
+		dc => {
+			date		=> date2iso8601(),
+			subject		=> xmlencode($constants->{rdfsubject}),
+			language	=> $constants->{rdflanguage},
+			creator		=> xmlencode($constants->{adminmail}),
+			publisher	=> xmlencode($constants->{rdfpublisher}),
+			rights		=> xmlencode($constants->{rdfrights}),
+		},
+
+		syn => {
+			updatePeriod	=> $constants->{rdfupdateperiod},
+			updateFrequency	=> $constants->{rdfupdatefrequency},
+			updateBase	=> $constants->{rdfupdatebase},
+		},
+	);
+
+	$rss->image(
+		title		=> xmlencode($constants->{sitename}),
+		url		=> xmlencode($constants->{rdfimg}),
+		'link'		=> $constants->{absolutedir} . '/',
+	);
+
+	$rss->textinput(
+		title		=> 'Search ' . xmlencode($constants->{sitename}),
+		description	=> 'Search ' . xmlencode($constants->{sitename}) . ' stories',
+		name		=> 'query',
+		'link'		=> "$constants->{absolutedir}/search.pl"
+	);
+
+	my $stories_and_topics = $slashdb->getBackendStories($section);
+	for my $story (@$stories_and_topics) {
+		my $desc;
+		if ($constants->{rdfitemdesc} == 1) {
+			$desc = $story->{introtext};
+		} elsif ($constants->{rdfitemdesc}) {
+			$desc = balanceTags(
+				chopEntity($story->{introtext}, $constants->{rdfitemdesc})
+			);
+		}
+
+		$rss->add_item(
+			title		=> xmlencode($story->{title}),
+			'link'		=> "$constants->{absolutedir}/article.pl?sid=$story->{sid}",
+			$desc ? (description => xmlencode($desc)) : (),
+
+			dc => {
+				date		=> date2iso8601($story->{'time'}),
+				subject		=> $story->{tid},
+				creator		=> $slashdb->getUser($story->{uid}, 'nickname'),
+			},
+
+			slash => {
+				section		=> $story->{section},
+				department	=> xmlencode($story->{dept}),
+				comments	=> $story->{commentcount},
+				hitparade	=> $story->{hitparade},
+			},
+		);
+	}
+
+	my $file = site2file($section);
+	$rss->save("$constants->{basedir}/$file.rss");
+}
+
+#################################
+sub newwml {
+	my ($section) = @_;
+	my $stories_and_topics = $slashdb->getBackendStories($section);
+
+	my $x = <<EOT;
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//PHONE.COM//DTD WML 1.1//EN" "http://www.phone.com/dtd/wml11.dtd" > 
+<wml>
+                        <head><meta http-equiv="Cache-Control" content="max-age=3600" forua="true"/></head>
+<!--  Dev  -->
+
+<!-- TOC -->
+<card title="$constants->{sitename}" id="$constants->{sitename}">
+<do label="Home" type="options">
+<go href="/index.wml"/>
+</do>
+<p align="left"><b>$constants->{sitename}</b>
+<select>
+EOT
+
+        my $z = 0;
+        my $body;
+	for my $section (@$stories_and_topics) {
+		$x .= qq|<option title="View" onpick="/wml.pl?sid=$section->{sid}">| .
+			xmlencode(strip_nohtml($section->{title})) . 
+			"</option>\n";
+		$z++;
+        }     
+
+        $x .= <<EOT;
+</select>
+</p>
+</card>
+</wml>
+EOT
+
+	my $file = site2file($section);
+        save2file("$constants->{basedir}/$file.wml", $x);
+}
+
+#################################
+sub newxml {
+	my ($section) = @_;
+	my $stories_and_topics = $slashdb->getBackendStories($section);
+
+	my $x = <<EOT;
+<?xml version="1.0"?><backslash
+xmlns:backslash="$constants->{rootdir}/backslash.dtd">
+
+EOT
+
+	for my $section (@$stories_and_topics) {
+		my @str = (xmlencode($section->{title}), xmlencode($section->{dept}));
+		$x.= <<EOT;
+	<story>
+		<title>$str[0]</title>
+		<url>$constants->{rootdir}/article.pl?sid=$section->{sid}</url>
+		<time>$section->{'time'}</time>
+		<author>$section->{aid}</author>
+		<department>$str[1]</department>
+		<topic>$section->{tid}</topic>
+		<comments>$section->{commentcount}</comments>
+		<section>$section->{section}</section>
+		<image>$section->{image}</image>
+	</story>
+
+EOT
+	}
+
+	$x .= "</backslash>\n";
+
+	my $file = site2file($section);
+	save2file("$constants->{basedir}/$file.xml", $x);
+}
+
+#################################
+sub openBackend {
+	newxml();
+	newrdf();
+	newwml();
+	newrss();
+
+	my $sections = $slashdb->getSections();
+	for (keys %$sections) {
+		my($section) = $sections->{$_}->{'section'};
+		newxml($section);
+		newrdf($section);
+	}
+}
+
+#################################
+sub makeDir {
+	my($section, $sid) = @_;
+
+	my $monthid = substr($sid, 3, 2);
+	my $yearid = substr($sid, 0, 2);
+	my $dayid = substr($sid, 6, 2);
+
+	mkpath "$constants->{basedir}/$section/$yearid/$monthid/$dayid", 0, 0755;
+}
+
+#################################
+# This is the normal, every 60 seconds stuff
+sub freshenup {
+	moveImages();
+
+	my %updates;
+	my $stories = $slashdb->getStoriesForSlashdb(1);
+	my @updatedsids;
+
+	for (@$stories){
+		my($sid, $title, $section) = @$_;
+		slashdLog("Updating $title $sid");
+		$updates{$section} = 1;
+		makeDir($section, $sid);
+		$totalChangedStories++;
+		push @updatedsids, $sid;
+	}
+
+
+	$slashdb->setStoryIndex(@updatedsids);
+
+	my $x = 0;
+	# this deletes stories that have a writestatus of 5, 
+	# which is the delete writestatus
+	$stories = $slashdb->getStoriesForSlashdb(5);
+	for (@$stories) {
+		my($sid, $title, $section) = @$_;
+		$x++;
+		$updates{$section} = 1;
+		$slashdb->deleteStoryAll($sid);
+		slashdLog("Deleting $sid");
+	}
+
+	my $w  = $slashdb->getVar('writestatus', 'value');
+
+#	if ($updates{articles} ne "" || $w ne "0") {
+		$slashdb->setVar("writestatus", "0");
+		prog2file("$constants->{basedir}/index.pl", "ssi=yes", "$constants->{basedir}/index.shtml");
+#	}
+
+	foreach my $key (keys %updates) {
+		next unless $key;
+		prog2file("$constants->{basedir}/index.pl", "ssi=yes section=$key",
+			"$constants->{basedir}/$key/index.shtml");
+	}
+}
+
+#######################################
+sub writePollBooth {
+	$user->{currentSection} = "redhat";
+	my $poll = pollbooth("", "rh");
+	$poll = qq!\n<FONT FACE="$constants->{mainfontface}" SIZE="1">$poll</FONT>\n!;
+	save2file("$constants->{basedir}/pollbooth.html", $poll);
+	$user->{currentSection} = "";
+}
+
+main();
+
+sub check_daily {
+	my $is_tomorrow = 0;
+	my $timezones = $slashdb->getDescriptions('tzcodes');
+	# Assume the SQL server is on GMT, like the INSTALL dictates
+	my $gmt_last = UnixDate(ParseDate($slashdb->getVar('daily_last', 'value')), "%s") || 0;
+	# What the DB thinks is now, in unix epoch seconds
+	my $gmt_now = UnixDate(ParseDate($slashdb->getTime()), "%s");
+	# Get the offset to local time in seconds
+	my($loc_gmt_offset) = $slashdb->sqlSelect(
+		"tzcodes.off_set",
+		"tzcodes,vars",
+		"vars.name='daily_tz' AND tzcodes.tz=vars.value"
+	);
+	$loc_gmt_offset ||= 0;
+	# Get the offset to the daily_attime in seconds
+	my $daily_attime = join(" ", "1970-01-01",
+		($slashdb->getVar('daily_attime', 'value') || "00:00:00"));
+	my $loc_attime_offset = UnixDate(ParseDate($daily_attime), "%s");
+	# Find the boundary point several days ago
+	my $loc_dayboundary = int($gmt_last / 86400 - 3) * 86400;
+	$loc_dayboundary += $loc_attime_offset - $loc_gmt_offset;
+	# Find the boundary point we need to cross to get to "tomorrow"
+	$loc_dayboundary += 86400 while $loc_dayboundary <= $gmt_last;
+	if ($loc_dayboundary < $gmt_now) {
+		$is_tomorrow = 1;
+		my $gmt_now_sqlformat = UnixDate(
+			ParseDateString("epoch $gmt_now"), "%Y-%m-%d %T"
+		);
+		$slashdb->setVar('daily_last', $gmt_now_sqlformat);
+	}
+	$is_tomorrow;
+}
+
+sub main {
+	mkpath "$constants->{logdir}/", 0, 0755;
+	open STDERR, ">> $constants->{logdir}/slashd.log"
+		or die "Can't open STDERR to $constants->{logdir}/slashd.log: $!";
+
+	slashdPid();
+	slashdLog("Starting up Slashd with pid $$");
+
+	my $last = my $modlast = 0;
+	while (1) {
+		freshenup();
+		if (check_daily()) {
+			slashdLog("It's Tomorrow: Run Slashd daily Voodoo");
+			system("$constants->{sbindir}/dailyStuff $virtual_user &");
+		}
+		if ((time - $last) > 60 * 60 ) { # Every Hour
+			slashdLog("Doing Hourly Update");
+			newfooter();
+			setheadertopics();
+			openBackend();
+
+			newmotd();
+			system("$constants->{sbindir}/portald $virtual_user&");
+			sleep(60 * 2);
+
+			$last = time;
+
+		} elsif ((time - $modlast) > (60 * 60 * 2)) { # Every 2 Hours
+			slashdLog("Running Moderatord");
+			system("$constants->{sbindir}/moderatord $virtual_user");
+			prog2file("$constants->{basedir}/hof.pl", "ssi=yes", "$constants->{basedir}/hof.shtml");
+			prog2file("$constants->{basedir}/topics.pl", "ssi=yes", "$constants->{basedir}/topics.shtml");
+			prog2file("$constants->{basedir}/cheesyportal.pl", "ssi=yes",
+				"$constants->{basedir}/cheesyportal.shtml");
+			$modlast = time;
+		}
+
+		sleep(60 * $constants->{updatemin}); # Sleep for 5 minutes
+	}
+}
+
+__END__

@@ -1,0 +1,661 @@
+Tables in slashdot  
+
+The following is a listing of tables that make up the slashdot 
+schema. Some, or all ofthe data in a table is displayed, where
+ feasable, to give a better idea of a table's purpose. 
+
+abusers
+-------
+A log of people who try too many times to beat the post limit
+
+* abuser_id - auto increment id
+
+* host_name - host name of abuser
+
+* pagename - page where abuser made attempt
+
+* ts - time abuser made attempt
+
+* reason - reason for being logged
+
+* querystring - form querystring
+
+
+accesslog
+---------
+logs page views to the site, logging occurs on a delayed
+insert
+
+* id - auto increment id
+
+* host_addr - host address of person hitting site
+
+* op - the page op
+
+* dat - 
+
+* uid - user id (fk from users)
+
+* ts - time stamp of access
+
+* query_string - form querystring
+
+
+authors 
+-------
+contains a list of all contributing authors to slashdot, email, 
+author's quote, spiel on what they've done, password,security 
+level (?), deleted submissions,  and their last submitted story, 
+section they write for.
+
+
+blocks
+------
+Contains content that has been pulled from remote sites via portald,
+and other pieces of code that are evaled. Contains the color block
+which is simply 8 colors comma separated which in  turn is split in 
+the code to produce site/section foreground and background colors.
+
+* bid - the name of the block (even though this seems as 
+if it should be an   integer, it's actually a name )  
+
+* block - the actual contents of the block. This can be eval code,
+html, or a mix of both.
+
+* aid - author id, fk to authors
+
+* seclev - the seclev an admin user must be in order to edit it.
+
+* type - portal or not.
+
+* description - a text description of what the block is for or does.
+
+* blockbak - contains a backup of last save version of block
+
+
+books
+-----
+The books that are reviewed on slashdot, including title, author, 
+publisher, reviewer, rating...  
+
+
+commentcodes
+------------
+Controls whether a story can be posted to or not 
+
++------+-------------------+
+| code | name              | 
++------+-------------------+
+|    0 | Comments Enabled  | 
+|    1 | Read-Only         |
+|   -1 | Comments Disabled | 
++------+-------------------+ 
+
+
+commentmodes
+------------ 
+How comments appear.
+
++-----------+-------------+-------------+
+| mode      | name        | description | 
++-----------+-------------+-------------+
+| flat      | Flat        |             | 
+| nested    | Nested      |             |
+| thread    | Threaded    |             | 
+| nocomment | No Comments |             |
++-----------+-------------+-------------+
+
+
+comments
+--------
+These are the actual comments of posters on slashdot.sid story id 
+
+* cid - comment id 
+
+* pid - parent's cid 
+
+* date - datestamphost_name - where they're coming from. 
+
+* subject - the subject 
+
+* comment - the actual comment 
+
+* uid - user ID 
+
+* points - standing of their comment 
+
+* lastmod - last moderators uid  
+
+* reason - reason 
+
+dateformats
+-----------
+Key/value table of how dates are to be displayed for a user.  
+
++----+-------------------------+---------------------------------+  
+| id | format                  | description                     | 
++----+-------------------------+---------------------------------+
+|  0 | %W %M %d, @%h:%i%p      | Sunday March 21, @10:00AM       | 
+|  1 | %W %M %d, @%H:%i        | Sunday March 21, @23:00         |  
+|  2 | %k:%i %d %M %Y          | 23:00 21 March 1999             | 
+|  3 | %k:%i %W %d %M %Y       | 23:00 Sunday 21 March 1999      |  
+|  4 | %h:%i %p -- %W %M %d %Y | 9:00 AM -- Sunday March 21 1999 | 
+|  5 | %a %M %d, %k:%i         | Sun March 21, 23:00             |  
+|  6 | %a %M %d, %h:%i %p      | Sun March 21, 10:00 AM          | 
+|  7 | %m-%d-%y %k:%i          | 3-21-99 23:00                   |  
+|  8 | %d-%m-%y %k:%i          | 21-3-99 23:00                   | 
+|  9 | %m-%d-%y %h:%i %p       | 3-21-99 10:00 AM                |  
+| 15 | %d/%m/%y %k:%i          | 21/03/99 23:00                  | 
+| 10 | %h:%i %p  %M %D, %Y     | 10:00 AM  March 21st, 1999      |  
+| 11 | %k:%i  %D %M, %Y        | 23:00  21st March, 1999         | 
+| 12 | %a %b %d, '%y %h:%i %p  | Sun Mar 21, '99 10:00 AM        |  
+| 13 | %h ish                  | 6 ish                           | 
+| 14 | %y-%m-%d %k:%i          | 99-03-19 14:14                  |  
+| 16 | %a %d %b %h:%i%p        | Sun 21 Mar 10:00AM              | 
++----+-------------------------+---------------------------------+
+
+
+discussions 
+-----------
+A table that basically allows discussions (comments on a particular subject) to be 
+attached to an sid that might not necessarily be a story sid. This allows for a 
+not-too-publicised functionality of going to the comments.pl script without any 
+query string, getting a list of current discussions and posting a comment on a 
+concocted sid and creating a new discussion.
+
++---------------+-------------------+-------------+  
+| sid           | title             | url 	  |
++---------------+-------------------+-------------+  
+| 00/0SPT/MhsFY | Test Discussion | http://slashdot.org/temp.html| 
+| 00elQkla9rH/M | North Dakota has low admission standards |http://www.slashdot.org/articles/99/06/07/1234239.shtml |
+| trolltalk     | we are dweebs     | http://www.slashdot.org/articles/00/01/01/1234567.shtml |
++---------------+-------------------+-------------+  
+
+
+displaycodes 
+------------
+whether something is displayed in a section
+
++------+-----------------------------+
+| code | name                        | 
++------+-----------------------------+
+|    0 | Always Display              | 
+|    1 | Only Display Within Section |
+|   -1 | Never Display               | 
++------+-----------------------------+
+
+
+isolatemodes 
+------------
+part of slashdot or not. 
+
++------+--------------+
+| code | name         | 
++------+--------------+
+|    0 | Part of Site | 
+|    1 | Standalone   |
++------+--------------+
+
+
+issuemodes 
+----------
+Whether something (forum) was started as an 
+issue or from an article, both or none.
+
++------+------------------------+
+| code | name                   | 
++------+------------------------+
+|    0 | Neither                | 
+|    1 | Article Based          |
+|    2 | Issue Based            | 
+|    3 | Both Issue and Article |
++------+------------------------+
+
+
+maillist 
+--------
+a flag set somewhere in another table to determineif 
+a user gets email of stories appearing on slashdot  
+
++------+----------------------------+
+| code | name                       | 
++------+----------------------------+
+|    0 | Don't Email                | 
+|    1 | Email Headlines Each Night |
++------+----------------------------+
+
+
+moderatorlog
+------------
+When, why, who moderated something 
+
+* id - auto_increment id
+
+* uid - user id, fk to users
+
+* val - value
+
+* sid - story id
+
+* ts - time stamp
+
+* cid - comment id
+
+* reason - numerical reason corresponding to names such as "troll", "insightful",
+"overrated", etc...
+
+* active - 
+
+
+stories/newstories 
+----------
+cache of stories table Two weeks is the cut-off date 
+
+* sid - 99/07/29/2150220 (story id)
+
+* tid - gnu (topic id) 
+
+* aid - Cliff (author who posted it)
+
+* commentcount - 3 (number of comments attached to this story) 
+
+* title - GNU Tutorial Tool? 
+
+* dept - this-would-be-a-good-thing (department) 
+
+* time - 1999-07-29 21:49:59 (GMT time story was posted)
+
+* introtext - <I><ahref="mailto:borges@DONTSPAMMEifi.uio.no">proBETA</A>asks:</I>&nbsp;  
+
+* bodytext - ... text of story ...
+
+* writestatus - whether a new comment has been posted to this story. 
+This is what slashd looks at to determine if a page should be re-written
+
+* hits - 0 (number of hits on this story) 
+
+* section - askslashdotdisplaystatus - 1 (1 or 0, display or not) 
+
+* commentstatus - 0
+
+* hitparade - 3,3,3,0,0,0,0 
+
+* relatedtext - content related to the story
+
+* extratext - could be anything
+
+pollanswers
+-----------
+A name of a poll subject, answer id (yes or no...),  
+total number votes per question id.    
+
++----------+-----+---------+-------+
+| qid      | aid | answer  | votes |
++----------+-----+---------+-------+ 
+| corel    |   1 | No      |   621 |
+| corel    |   0 | Yes     |  2711 | 
+| bestdist |   0 | Caldera |    49 |
++----------+-----+---------+-------+
+
+pollquestions
+-------------
+a question id ie (corel,linux,christmas), the 
+actual question, total number of votes, the date of the question.
+
+pollvoters
+---------- 
+* question id (foreign key)
+* id (ip address), 
+* time of vote, and user id (-1 anon) 
+
+postmodes           
+---------
+
++-----------+-----------------------------+
+| code      | name                        | 
++-----------+-----------------------------+
+| plaintext | Plain Old Text              | 
+| html      | HTML Formatted              |
+| exttrans  | Extrans (html tags to text) | 
++-----------+-----------------------------+
+
+sectionblocks
+-------------
+This would be more appropriately described as "slash boxes". 
+This table contains thevarious blocks that go in particular 
+sections, user selectable.   
+
+* section - the section the block appears in ie "index"   
+
+* bid - the name of the block (even though this seems as 
+if it should be an   integer, it's actually a name )  
+ie "quicklinks" ordernum - the order on the section in 
+which it appears.  ie "5"  
+
+* title - the title of the block  ie "Quick Links" 
+
+* portal - true/false  (is/isn't a portal)  ie "1" 
+
+* url - the url, if it has one, of the block   
+ie "NULL" (in this case) could be like "http://slashdot.org/index.pl?section=books"
+
+
+sections
+--------
+The primary sections of slashdot 
+
+* section - the name of the section 
+
+* artcount - how many articles are running in this section
+
+* title - title of the section
+
+* qid - question id for polls 
+
+* isolate - true/falseissue - true/false extras - true/false 
+
++-------------+----------+--------------------+-----------+---------+-------+--------+
+| section     | artcount | title              | qid       | isolate | issue | extras | 
++-------------+----------+--------------------+-----------+---------+-------+--------+
+| articles    |       30 | Articles           |           |       0 |     0 |      0 | 
+| features    |       21 | Features           | eyesight  |       0 |     1 |      0 |
+| books       |       15 | Book Reviews       | crash     |       0 |     1 |      1 | 
+| askslashdot |       30 | Ask Slashdot       |           |       0 |     1 |      0 |
+| tacohell    |       15 | Taco Hell          | favdistro |       1 |     1 |      0 | 
+| slash       |       15 | Slash              | firstpost |       1 |     1 |      0 |
+|             |       30 | All Sections       |           |       0 |     0 |      0 | 
+| redhat      |       15 | Red Hat Portal     | pointer   |       1 |     1 |      0 |
+| radio       |       15 | Geeks in Space     |           |       0 |     1 |      0 | 
+| interviews  |       15 | Interviews         | crash     |       0 |     1 |      0 |
+| yro         |       30 | Your Rights Online |           |       0 |     1 |      0 | 
++-------------+----------+--------------------+-----------+---------+-------+--------+
+
+
+sessions            
+--------
+What authors are logged into the site.  
+
++---------------+----------+---------------------+---------------------+-----------+
+| session       | aid      | logintime           | lasttime            | lasttitle |
++---------------+----------+---------------------+---------------------+-----------+
+| CmVB1EnqOeXRQ | CmdrTaco | 1999-09-23 22:25:11 | 1999-09-23 23:16:48 | NULL      |
++---------------+----------+---------------------+---------------------+-----------+
+
+
+sortcodes           
+---------
+This table defines sort codes 
+
++------+-------------------------------+
+| code | name                          | 
++------+-------------------------------+
+|    0 | Oldest First                  | 
+|    1 | Newest First                  |
+|    3 | Highest Scores First          | 
+|    4 | Oldest First (Ignore Threads) |
+|    5 | Newest First (Ignore Threads) | 
++------+-------------------------------+
+
+
+statuscodes
+-----------
+This table defines status codes. Statuscodes determine 
+what frequency slashd re-writes static pages.   
+
++------+------------+
+| code | name       |
++------+------------+
+|    1 | Refreshing | 
+|    0 | Normal     |
+|   10 | Archive    | 
++------+------------+
+
+
+storiestuff
+-----------
+Is this a table of all the stories that have run and how many 
+hits they received.
+
++----------------+------+
+| sid            | hits | 
++----------------+------+
+| 980814/1039204 | 1313 | 
+| 980814/1040217 |  448 |
+| 980814/1043206 | 6608 | 
+| 980814/1058231 | 1474 |
+| 980814/112203  |  581 | 
++----------------+------+
+
+
+submissions
+-----------
+submissions from users that an author either approves and it becomes a story, or 
+disapproved. "I'm just a submission, and I'm sitting here a-wishin, hoping some 
+day I'll be a story.. oh I pray that I will, but today I am still .. just a submission"
+
+* subid - submission id 
+
+* email - email address of the submitter
+
+* name - name of the submitter
+
+* time - time of the submission
+
+* subj - subject of the story 
+
+* story - text about the story, url ... etc... whatever the submitter inputs
+
+* tid - topic id (varchar) 
+
+* note - (input by admin) Hold/Quik tells what to do with the story (grouping) 
+
+* section - section the submission would go in (varchar) 
+
+* comment - comment of admin (what they're doing with the submission)
+
+* uid - user id of the submitter 
+
+* del - 0 unedited, 1 deleted, 2 posted 
+
+
+threshcodes
+-----------
+This table contains user settings of what comments are displayed 
+
++--------+----------------------+
+| thresh | description          | 
++--------+----------------------+
+|     -1 | -1: Uncut and Raw    | 
+|      0 | 0: Almost Everything |
+|      1 | 1: Filter Most ACs   | 
+|      2 | 2: Score +2          |
+|      3 | 3: Score +3          | 
+|      4 | 4: Score +4          |
+|      5 | 5: Score +5          | 
++--------+----------------------+
+
+topics
+------
+The topics of the site
+
+* tid - topic id (varchar)  
+
+* image - image associated with the topic when posted 
+(ie. billborg.gif for MS) 
+
+* alttext - text to put in alt 
+
+* tagwidth - width of image height - height of image
+
+tzcodes
+-------
+This table is time zone codes - translates timezone codes into 
+the canonical names ofthe time zones, and has the minute offsets.
+
++---------------------------------+
+| tz  | offset | description      | 
+| est | -18000 | Eastern Standard |   
++---------------------------------+
+
+users
+-----
+primary users table containing basic site wide information on 
+a user (uid) 
+
+* uid - user id, indentifies user across all user tables
+
+* nickname - the name as displayed in their comments  
+
+* realemail - their true email
+
+* fakeemail - their email as displayed in comments 
+
+* homepage - their URL
+
+* passwd - plaintext password  
+
+* sig - signature text
+
+* seclev - security level. used in old moderator system
+
+* matchname - the nickname with no spaces and all lower cases, to prevent
+duplicate nicknames from being issued
+
+users_info
+----------
+A table containing more information about a user, including 
+meta moderation information 
+
+* uid - user id
+
+* realname - their real name (legal name)  
+
+* bio - spiel of who they are
+
+* totalmods - total number of moderations ever moderated 
+
+* tokens - part of moderations. Tracks when it's time for a user 
+to get more moderator points 
+
+* lastgranted - date that your were last given moderator access
+
+* karma - points for moderating. 
+
+* maillist - uses emailcodes to determine if they get emailed
+
+* totalcomments - total amount of comments ever posted 
+
+* lastmm - last meta moderation 
+
+* lastaccess -last time user accessed site 
+
+* lastmmid - last uid to meta-moderate this user 
+
+* m2fair - number of fair moderations
+
+* m2unfair - number of unfair moderationss
+
+* m2fairvotes - 
+
+* m2unfairvotes - 
+
+
+users_comments
+--------------
+User information pertaining mostly to the display of comments  
+
+* uid - user id
+
+* points - moderator points 
+
+* posttype - html/plaintext
+
+* defaultpoints - number of points for posting a comment 
+
+* highlightthresh - whether you want nested comments to 
+appear as links or as fullcomments 
+
+* maxcommentsize - max comment size that a user wants to read 
+(that'll be a link ordisplayed) 
+
+* hardthresh - 1 or 0, forces thresholds  
+
+* clbig - if comment length is larger than clbig, then points are given  
+
+* clsmall - if comment length is smaller than clsmall, points taken away
+
+* reparent - 1 or 0, brings up comment away from parent if moderated high 
+
+* nosigs - 1 or 0 other peoples signatures or not
+
+* commentspill - how many comments that appear per page 
+
+* commentsort - uses table sortcodes to determine the order in which 
+comments aredisplayed 
+
+* commentlimit - how many comments you want to see 
+
+* noscores - 1 or 0, whether scores on comments appear 
+
+* mode - Comment display style - flat,threaded or nested. 
+
+* threshold - -1 to 5 - how many comments are displayed according 
+to their moderation 
+
+users_index
+----------- 
+User information pertaining mostly to index/article page display
+
+* uid - user id
+
+* extid - exclude topics - person doesn't see a topic  
+
+* exaid - exclude authors - person doesn't see an author 
+
+* exsect - exclude sections - person doesn't see a section 
+
+* exboxes - list of slashboxes - comma separated topic blocks
+What will appear on auser's page 
+
+* maxstories - number of stories that appearnoboxes - 1 or 0 boxes or not
+
+* noboxes - flag that determines whether the user wants no boxes on the right 
+
+
+users_key
+---------
+Holds a users public key, if they have one
+
+* uid - user idpubkey - the users public key
+
+
+users_prefs
+-----------
+User information used site wide, things that changes less than often
+
+* uid - user id
+
+* willing - 1 or 0 , Willing to be a moderator or not 
+
+* dfid - uses dateformat table. How you want dates (such as 
+article time stamps) to appear 
+
+* tzcode - usestzcode table. Your time zone table 
+
+* noicons - 1 or 0 topical icons or not 
+
+* light - light mode yes/no 1 or 0, does the user want the site to load
+by default in light mode
+
+* mylinks - block of personal stuff that appears on prefs page. 
+
+
+vars
+----
+This table is a list of vars for the site.  Central location for sitewide variables.
+
+* name - name of a var 
+
+* value - the value of the var 
+
+* description - the description of the var

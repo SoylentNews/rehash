@@ -1,0 +1,103 @@
+=head1 NAME
+
+HOWTO-Templates - How to write Slash templates
+
+=head1 QUESTIONS
+
+=head2 What is a template?
+
+A template is a bit of text that is parsed by Perl, using the Template
+Toolkit.  Template Toolkit has support for variables, control structures,
+and more.  It is more easily understood and edited by non-programmers
+than is Perl, and it is much safer than executing raw Perl code.
+
+Templates are compiled into Perl functions and the resulting compiled
+code is cached.  Templates are fast and convenient and easy.
+
+For more information on how templates are written, see the man pages
+for Slash::Display and Template, and the Template Toolkit web page
+at E<lt>URL:http://www.template-toolkit.org/E<gt>.
+
+
+=head2 How do I get my template into a running site?
+
+Use the Template Editor via the admin menu on the site, or use
+template-tool on the command line. You can find out information
+on it by calling it with the "-h" option.
+
+
+=head2 How do I get my template installed with a plugin/theme?
+
+For a plugin it has to be added to the PLUGIN file (see
+F<HOWTO-Plugins>). For a theme it just needs to be in the templates
+directory for the theme (see F<HOWTO-Themes>).
+
+
+=head2 What language encoding are the templates using?
+
+There is a language field for templates, which is, by
+default, "en_US".  However, it is not currently used by the
+code.  We have not entirely decided how to handle languages yet.
+
+Currently, the language is based on the same method used to determine
+locales on Unix: two-letter, lowercase, ISO 639 codes for language;
+two-letter, uppercase, ISO 3166 codes for country; joined with an
+underscore.  e.g., en_US, en_CA, de_DE, zh_CN, ja_JP.
+
+
+=head2 How do I generate a blank template?
+
+Use template-tool:
+
+	template-tool -g filename
+
+
+=head2 Can I set my own Template options?
+
+You can change some of the configuration options of Template,
+(PRE_CHOMP, POST_CHOMP, and CACHE_SIZE) via the vars table.
+Most options cannot be changed, however, except by editing
+the Slash::Display module directly.
+
+
+=head2 What can I do about whitespace between template tags?
+
+The TRIM option (which removes whitespace before and after templates)
+is on by default.  Many things in Slash will fail if TRIM is not true,
+because it is expected that whitespace will be removed before and after
+a returned template.
+
+PRE_CHOMP and POST_CHOMP (which remove whitespace before and
+after individual tags) are off by default, but may be turned on
+via the template_pre_chomp and template_post_chomp entries in the vars
+table.  In an upcoming version of Template, there will be a third
+option, other than just "on" and "off": "collapse".  This will
+collapse whitespace between tags down to a single space, and will
+most likely be ideal for use in Slash, since runs of whitespace in HTML
+is the same as a single space, in most situations.
+
+You can enable and disable chomping of whitespace for individual
+tags with "+" and "-".  To enable chomping, write a tag like this:
+
+	[% num %] comment
+		[%- IF num != 1 ; 's' ; END %]
+
+That will push the "s" character up against the end of "comment",
+if it is printed.
+
+If CHOMP is enabled, you can disable it in the same way, with "+"
+instead of "-".  See L<Template::Parser>.
+
+
+=head2 I have a really cool template for a theme/plugin, and I would like
+to see it added to the Slash distribution. Will you distribute mine?
+
+Maybe. We don't have any rules concerning this at the moment, so it will be
+on a case by case basis. At some point in the future we will come up
+with a much better answer. If the theme or plugin is one not included with
+the Slash distribution, you should contact the theme's or plugin's creator
+directly.
+
+=head1 VERSION
+
+$Id$

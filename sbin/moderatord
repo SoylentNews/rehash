@@ -1,0 +1,63 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+###############################################################################
+# moderatord - the moderation "daemon". Calculates moderation information and
+# assigns results to users 
+###############################################################################
+
+use strict;
+use Slash;
+use Slash::Utility;
+
+my $virtual_user = $ARGV[0];
+createEnvironment($ARGV[0]);
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+
+
+sub moderatordLog {
+	local *LOG;
+	my $dir = "$constants->{logdir}";
+	open LOG, ">>$dir/moderatord.log"
+		or die "Can't append to $dir/moderatord.log: $!";
+	print LOG localtime() . "\t", join("\t", @_), "\n";
+	close LOG;
+}
+
+
+sub comments2tokens {
+	my $comments = shift;
+	my $tokenpool = $comments * $constants->{tokenspercomment};
+	moderatordLog("$comments becomes $tokenpool tokens.");
+
+	my $stirredpoints = $slashdb->stirPool();
+	$tokenpool += $stirredpoints * $constants->{tokensperpoint};
+	moderatordLog(
+		($stirredpoints ? "Stirred out $stirredpoints points, " : '')
+		. "So the total token Pool=$tokenpool");
+
+	my($totalusers) = $slashdb->getUserLast();
+	my $eligibleusers = int($totalusers / 5) * 4;
+	moderatordLog("First $eligibleusers accounts available");
+
+	my $report = $slashdb->giveKarma($eligibleusers, $tokenpool);
+	moderatordLog($report);
+}
+
+my $tc = $slashdb->getVar('totalComments', 'value');
+my $lc = $slashdb->getVar('lastComments', 'value');
+my $newcomments = $tc - $lc;
+#$newcomments+=1000;
+
+if ($newcomments > 0) {
+	$slashdb->setVar("lastComments", $tc);
+	comments2tokens($newcomments);
+	my $log = $slashdb->tokens2points();
+	for(@$log) {
+		moderatordLog(@_);
+	}
+}

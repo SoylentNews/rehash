@@ -1,0 +1,132 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2001 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+###############################################################################
+# dailyStuff - this program runs various housekeeping tasks, sends out the 
+# the mailing list, and compiles site statistics report and sends the report 
+# to the site admin 
+###############################################################################
+
+use strict;
+use File::Basename;
+use File::Path;
+use Slash;
+use Slash::Utility;
+
+my $virtual_user = $ARGV[0];
+createEnvironment($ARGV[0]);
+my $constants = getCurrentStatic();
+my $slashdb = getCurrentDB();
+
+
+my $count = $slashdb->countDaily();
+
+my $sdTotalHits = $slashdb->getVar('totalhits', 'value');
+
+$sdTotalHits = $sdTotalHits + $count->{'total'};
+$slashdb->setVar("totalhits", $sdTotalHits);
+
+$slashdb->updateStamps();
+
+my $email = <<EOT;
+$constants->{sitename} Stats for yesterday
+
+     total $count->{'total'}
+    unique $count->{'unique'}
+total hits $sdTotalHits
+  homepage $count->{'index'}{'index'}
+   indexes 
+EOT
+
+for (keys %{$count->{'index'}}) {
+	$email .= "\t   $_=$count->{'index'}{$_}\n"
+}
+
+$email .= "\n-----------------------\n";
+
+# DOESN'T WORK
+# for my $key (sort { $count->{'articles'}{$b} <=> $count->{'articles'}{$a} } keys %{$count->{'articles'}}) {
+# 	my $value = $count->{'articles'}{$key};
+# 
+# 	my $story = $slashdb->getStory($key, 'title', 'aid');
+# 
+# 	$email .= "$value\t$key " . substr($story->{'title'}, 0, 30) .
+# 		" by $story->{'author'}\n" if $value > 100;
+# }
+
+$email .= "\n-----------------------\n";
+$email .= `$constants->{slashdir}/bin/tailslash -u $virtual_user -y today`;
+$email .= "\n-----------------------\n";
+
+sub generateDailyMail {
+	my $email = $slashdb->getDailyMail();
+
+	my $r = "$constants->{sitename} Daily Headline Mailer\n\n";
+	$r .= $slashdb->getBlock("emailsponsor", 'block');
+	# newlines after advert 
+	$r .= "\n\n";
+
+	return unless @$email;
+	for (@{$email}) {
+		my($sid, $title, $section, $aid, $tid, $time, $dept) = @$_;
+		$dept = $constants->{use_dept} ? "\n     from the $dept dept." : "";
+		$time = timeCalc($time, '%A %B %d, @%H:%M');
+
+		$r .= <<EOT;
+
+$title 
+     $dept
+     posted by $aid on $time ($tid)
+     $constants->{absolutedir}/article.pl?sid=$sid
+EOT
+	}
+	print "$r\n";
+	return $r;
+}
+
+sub mailingList {
+	my $p = generateDailyMail() or return;
+
+	my $users = $slashdb->getMailingList();
+
+	for (@{$users}) {
+		sendEmail($_->[0], "24 Hours of $constants->{sitename} Headlines For $_->[2]", <<EOT, 'bulk');
+      $p
+      You are getting this message because you subscribed to it.
+      If you want to unsubscribe from this, go to
+      	$constants->{absolutedir}/users.pl
+      You can login as "$_->[2]" and disable the mailing from there.
+EOT
+	}
+}
+
+sub prog2file {
+	my($command, $arguments, $f) = @_;
+
+	my $d = `$command virtual_user=$virtual_user $arguments`;
+	my $dir = dirname($f);
+	mkpath($dir, 0, 0755) unless -e $dir;
+	if (length($d) > 0) {
+		local *F;
+		open F, ">$f" or die "Can't open $f: $!";
+		print F $d;
+		close F;
+		return "1";
+
+	} else {
+		return "0";
+	}
+}
+
+# Send a message to the site admin.
+if ($constants->{send_mail} == 1) {
+	for (@{$constants->{stats_reports}}) {
+		sendEmail($_, "$constants->{sitename} Stats Report", $email, 'bulk');
+	}
+	mailingList();
+}
+# Now lets clean up the database
+$slashdb->deleteDaily();
