@@ -369,13 +369,16 @@ sub getReverseMods {
 	my $reasons = $self->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
 	my $reasons_m2able = join(",", @reasons_m2able);
+	my $m2able_score_clause = $reasons_m2able
+		? "IF( moderatorlog.reason IN ($reasons_m2able), 0, $unm2able )"
+		: "0";
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"moderatorlog.uid AS muid,
 		 nickname, tokens, karma,
 		 ( SUM( IF( moderatorlog.val=-1,
 				IF(points=5, $down5, 0),
 				IF(points<=$upmax, $upsub-points*$upmul, 0) ) )
-		  +SUM( IF( moderatorlog.reason IN ($reasons_m2able), 0, $unm2able ) )
+		  +SUM( $m2able_score_clause ) )
 		 )/(COUNT(*)+$denomadd) AS score,
 		 IF(MAX(moderatorlog.ts) > DATE_SUB(NOW(), INTERVAL 24 HOUR),
 			1, 0) AS isrecent",
