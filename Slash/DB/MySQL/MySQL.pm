@@ -97,8 +97,8 @@ my %descriptions = (
 	'topics_section_type'
 		=> sub { $_[0]->sqlSelectMany('topics.tid as tid,topics.alttext as alttext', 'topics, section_topics', "section='$_[2]' AND section_topics.tid=topics.tid AND type= '$_[3]'") },
 
-	'section_category'
-		=> sub { $_[0]->sqlSelectMany('id,title', 'categories', "section='$_[2]'") },
+	'section_subsection'
+		=> sub { $_[0]->sqlSelectMany('id,title', 'subsections', "section='$_[2]'") },
 
 	'maillist'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='maillist'") },
@@ -1511,8 +1511,8 @@ sub setSection {
 }
 
 ########################################################
-sub setCategory {
-	_genericSet('categories', 'id', '', @_);
+sub setSubSection {
+	_genericSet('subsections', 'id', '', @_);
 }
 
 ########################################################
@@ -3925,7 +3925,7 @@ sub getStoriesEssentials {
 	$where .= "AND tid='$tid' " if $tid;
 	$where .= "AND sid = '$misc->{sid}' " if $misc->{sid};
 	$where .= "AND sid != '$misc->{exclude_sid}' " if $misc->{exclude_sid};
-	$where .= "AND category=$misc->{category}" if $misc->{category};
+	$where .= "AND subsection=$misc->{subsection}" if $misc->{subsection};
 
 	# User Config Vars
 	$where .= "AND tid not in ($user->{extid}) "
@@ -5052,8 +5052,8 @@ sub getSection {
 }
 
 ########################################################
-sub getCategory {
-	my $answer = _genericGetCache('categories', 'id', '', @_);
+sub getSubSection {
+	my $answer = _genericGetCache('subsections', 'id', '', @_);
 	return $answer;
 }
 
@@ -5064,8 +5064,8 @@ sub getSections {
 }
 
 ########################################################
-sub getCategories {
-	my $answer = _genericGetsCache('categories', 'id', '', @_);
+sub getSubSections {
+	my $answer = _genericGetsCache('subsections', 'id', '', @_);
 	return $answer;
 }
 

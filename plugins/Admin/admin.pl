@@ -1109,9 +1109,9 @@ sub editStory {
 	my $authors = $slashdb->getDescriptions('authors', '', 1);
 	$author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
 
-	my $categories = $slashdb->getDescriptions('section_category', $storyref->{section}, 1);
-	my $category_select = createSelect('category', $categories, $storyref->{category}, 1)
-		if $categories;
+	my $subsections = $slashdb->getDescriptions('section_subsection', $storyref->{section}, 1);
+	my $subsection_select = createSelect('subsection', $subsections, $storyref->{subsection}, 1)
+		if $subsections;
 
 	$storyref->{dept} =~ s/ /-/gi;
 
@@ -1167,7 +1167,7 @@ sub editStory {
 		autonode_check		=> $autonode_check,
 		fastforward_check	=> $fastforward_check,
 		shortcuts_check		=> $shortcuts_check,
-		category_select		=> $category_select,
+		subsection_select		=> $subsection_select,
 		user			=> $user,
 		ispell_comments		=> $ispell_comments,
 		extras			=> $extracolumns,

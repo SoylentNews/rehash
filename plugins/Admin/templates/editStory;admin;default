@@ -104,8 +104,8 @@ __template__
 
 		[% author_select %]
 
-		[% IF category_select %]
-			[% category_select %]
+		[% IF subsection_select %]
+			[% subsection_select %]
 		[% END %]
 
 		[% IF storyref.sid %]

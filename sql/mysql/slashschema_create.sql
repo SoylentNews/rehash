@@ -124,11 +124,11 @@ CREATE TABLE blocks (
 ) TYPE = myisam;
 
 #
-# Table structure for table 'categories'
+# Table structure for table 'subsections'
 #
 
-DROP TABLE IF EXISTS categories;
-CREATE TABLE categories (
+DROP TABLE IF EXISTS subsections;
+CREATE TABLE subsections (
 	id smallint UNSIGNED NOT NULL auto_increment,
 	title varchar(30) NOT NULL,
 	section varchar(30) NOT NULL,
