@@ -279,8 +279,6 @@ EOT
 	
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
 
-	print STDERR "findStories: $sql\n";
-
 	$self->sqlConnect();
 	my $cursor = $self->{_dbh}->prepare($sql);
 	$cursor->execute;
