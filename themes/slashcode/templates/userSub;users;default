@@ -22,11 +22,12 @@ __template__
 [% END %]
 [% PROCESS titlebar width="95%" title=title %]
 
-<BR><B>[%IF nick_match %]You have[% ELSE %][% nick %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B><P>
+<P><B>[% IF nick_match %]You have[% ELSE %][% nick %] has[% END %] submitted [% storycount %] stories.[% IF storycount > constants.user_submitter_display_default %] Below are the most recent [% form.min %] stories.[% END %]</B>
+<P>
 [% n = 0 %]
 [% FOREACH story = stories %]
 	[% n = n + 1 %]
-		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<br>
+		<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
 [% END %]
 
 __seclev__
