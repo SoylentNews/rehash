@@ -4,10 +4,11 @@
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
+# Counts hits from accesslog and updates stories.hits columns.
+
 use strict;
-use vars qw( %task $me );
-use Safe;
-use Slash;
+use vars qw( %task $me $minutes_run $maxrows %timehash );
+use Time::HiRes;
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
@@ -15,98 +16,96 @@ use Slash::Constants ':slashd';
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-my $me = 'counthits.pl';
+# Change this var to change how often the task runs.
+$minutes_run = 10;
 
-$task{$me}{timespec} = '30 6 * * *';
-$task{$me}{standalone} = 1;
+# Adjust this to maximize how big of a SELECT we'll do on the log DB.
+# (5000 per minute (above) is probably safe, 10000 per minute just to
+# be sure, get much over 500000 total and we *might* bog the log slave
+# DB.)
+$maxrows = 150000;
 
-# Counts hits from accesslog and updates story metadata accordingly.
-#
-# Task Options:
-#	since   = <date>; 	Grab counts since <date>; <date> = YYYYMMDD
-#	replace = <bool>;	If True then Replace counts, if False then Add.
-#	sid	= <char sid>;	If exists, only perform update on the given SID
+$task{$me}{timespec} = "1-59/$minutes_run * * * *";
+$task{$me}{timespec_panic_1} = ''; # not that important
+$task{$me}{fork} = SLASHD_NOWAIT;
+
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	# Process task specific options.
-	my $sid = $constants->{task_options}{sid};
-	my $replace = $constants->{task_options}{replace};
-	#$replace = 1 if exists $constants->{task_options}{replace} && 
-	#		!defined $replace;
-	# This assures a value in $replace.
-	#$replace ||= 0;
-	
-	my($year, $month, $day) = (localtime)[5,4,3];
-	$year += 1900; $month++; $day--;
-	my $yesterday = sprintf "%4d-%02d-%02d", $year, $month, $day;
-	my $since = $constants->{task_options}{since};
-	$since = $yesterday if ! $since;
-	$since =~ s/(\d{4})(\d{2})(\d{2})/$1-$2-$3/g;
+	_init_timehash();
 
-	# Grab list of stories within our purview.
-	my(@stories) = map { $_ = $_->[0] } @{$slashdb->sqlSelectAll(
-		'sid',
-		'stories',
-		"time between '$since 14:00' and now()",
-		'order by sid'
-	)};
+	# Find out where in the accesslog we need to start scanning from.
+	# Don't start scanning from too far back.
+	my $logdb = getObject('Slash::DB', { db_type => "log_slave" });
+	my $lastmaxid = ($slashdb->getVar('counthits_lastmaxid', 'value', 1) || 0) + 1;
+	my $newmaxid = $logdb->sqlSelect("MAX(id)", "accesslog");
+	$lastmaxid = $newmaxid - $maxrows if $lastmaxid < $newmaxid - $maxrows;
+        if ($lastmaxid > $newmaxid) {
+                slashdLog("Nothing to do, lastmaxid '$lastmaxid', newmaxid '$newmaxid'");
+                return "";
+        }
 
-	# This is NOT database independent. This will need to become a method
-	# in Slash::DB::Static, when it becomes a problem.
-	#my $accesslog = $slashdb->sqlSelectAll(
-	#	'op, dat', 
-	#	'accesslog',
-	#);
+        _update_timehash("misc");
 
-	my(%count);
-	my $sth = $slashdb->{_dbh}->prepare(<<EOT);
-SELECT op, dat FROM accesslog WHERE
-ts BETWEEN '$since 00:00' and '$yesterday 23:59'
-EOT
-
-	$sth->execute;
-	my $accesslog_count = 0;
-	while ($_ = $sth->fetchrow_arrayref) {
-		$_->[1] =~ s{^(\w+/)+(\d{2}/\d{2}/\d{2}/.+)$}{$2};
-		$count{$_->[1]}++ if $_->[0] eq 'article';
-		$accesslog_count++;
+	# Do the select on accesslog, and pull the sids that have been hit
+	# into a counting hash.
+	my %sid_count = ( );
+	my $sth = $logdb->sqlSelectMany("dat", "accesslog",
+		"id BETWEEN $lastmaxid AND $newmaxid
+			AND status=200 AND op='article'");
+	while (my($dat) = $sth->fetchrow_array()) {
+		next unless $dat =~ m{^\d+/\d+/\d}; # got 3 sets of digits? good enough
+		$sid_count{$dat}++;
 	}
-	$sth->finish;
+	$sth->finish();
 
-	my $count = 0;
-	for (keys %count) {
-		next if $sid && $sid ne $_;
+	_update_timehash("select");
 
-		# The row must exist in the stories database before we even
-		# think about updating.
-		my $found = $slashdb->sqlSelect(
-			'discussion', 'stories', "sid='$_'"
+	# Update the stories table, hits columns.
+	my $successes = 0;
+	my $total_hits = 0;
+	for my $sid (keys %sid_count) {
+		my $sid_q = $slashdb->sqlQuote($sid);
+		$successes += $slashdb->sqlUpdate(
+			"stories",
+			{ -hits => "hits + $sid_count{$sid}" },
+			"sid = $sid_q",
 		);
-		next if !$found;
-
-		# Optimized for sorted data.
-		$replace = inList(\@stories, $_);
-		$slashdb->sqlUpdate('stories', {
-			-hits => (($replace) ? '':'hits+') . $count{$_},
-		}, "sid='$_'");
-		#printf STDERR "'$_' = %s$count{$_}\n", ($replace) ? ' ':'+';
-		$count++;
+		$total_hits += $sid_count{$sid};
+		_update_timehash("update");
+		Time::HiRes::sleep(0.1);
+		_update_timehash("sleep");
 	}
-	slashdLog("$accesslog_count accesslog entries");
-	slashdLog("Updated story counts on $count stories.");
+
+	$slashdb->setVar("counthits_lastmaxid", $newmaxid);
+
+	# And log the summary of what we did.
+	my $elapsed = 0;
+	for my $key (grep !/^_/, keys %timehash) { $elapsed += $timehash{$key} }
+	my $report = sprintf("%d of %d sids updated for %d more hits in %.2f secs: ",
+		$successes, scalar(keys %sid_count), $total_hits, $elapsed);
+	my $short_report = $report;
+	if (verbosity() >= 2) {
+		for my $key (sort grep !/^_/, keys %timehash) {
+			$report .= sprintf(" $key=%.2f", $timehash{$key});
+		}
+		slashdLog($report);
+	}
+	return $short_report;
 };
 
+sub _init_timehash {
+	%timehash = ( _last => Time::HiRes::time );
+}
 
-# Assumes data in @{$a_ref} is sorted.
-sub inList {
-	my ($a_ref, $data) = @_;
-
-	for (@{$a_ref}) {
-		return 1 if $_ eq $data;
-		return 0 if $_ gt $data;
-	}
-	return 0;
+sub _update_timehash {
+	return if verbosity() < 2;
+	my($field) = @_;
+	my $now = Time::HiRes::time;
+	my $elapsed = $now - $timehash{_last};
+	$timehash{$field} ||= 0;
+	$timehash{$field} += $elapsed;
+	$timehash{_last} = $now;
 }
 
 1;
