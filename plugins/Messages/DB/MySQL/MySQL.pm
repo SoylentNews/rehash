@@ -60,7 +60,7 @@ sub getMessageCode {
 		return $self->{$cache}{$code};
 	}
 
-	my $row = $self->sqlSelectHashref('code,type,seclev,modes',
+	my $row = $self->sqlSelectHashref('code,type,seclev,modes,send,subscribe',
 		'message_codes', "code=$code");
 	$codeBank->{$code} = $row if $row;
 
@@ -298,6 +298,25 @@ sub _thaw {
 }
 
 # For dailystuff
+sub getDailyLog {
+	my($self) = @_;
+
+	my @time1 = localtime( time() - 86400 );
+	my $date1 = sprintf "%4d%02d%02d000000", $time1[5] + 1900, $time1[4] + 1, $time1[3];
+
+	my @time2 = localtime();
+	my $date2 = sprintf "%4d%02d%02d000000", $time2[5] + 1900, $time2[4] + 1, $time2[3];
+
+	my $table = $self->{_log_table};
+	my $data = $self->sqlSelectAll(
+		'code, mode, count(*) as count',
+		$table,
+		"date >= '$date1' AND date < '$date2'",
+		"GROUP BY code, mode"
+	);
+}
+
+# For dailystuff
 sub deleteMessages {
 	my($self) = @_;
 	my $table = $self->{_web_table1};
@@ -427,7 +446,7 @@ sub _getMailingUsers {
 }
 
 sub _getMessageUsers {
-	my($self, $code, $seclev) = @_;
+	my($self, $code, $seclev, $subscribe) = @_;
 	return unless $code =~ /^-?\d+$/;
 	my $cols  = "users_messages.uid";
 	my $table = "users_messages";
@@ -438,8 +457,9 @@ sub _getMessageUsers {
 		$where .= " AND users.uid = users_messages.uid AND seclev >= $seclev";
 	}
 
-	my $users = $self->sqlSelectColArrayref($cols, $table, $where);
-	return $users || [];
+	my $users = $self->sqlSelectColArrayref($cols, $table, $where) || [];
+	$users = [ grep { isSubscriber($_) } @$users ] if $subscribe;
+	return $users;
 }
 
 1;

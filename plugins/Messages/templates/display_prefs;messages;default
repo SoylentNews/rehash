@@ -47,9 +47,16 @@ Not all options are available for all message types.
 
       # this is not so bad, it is cached, but could be improved perhaps
       mcode = messages.getMessageCode(code);
+
       IF userm.seclev < mcode.seclev;
          NEXT;
       END;
+
+      # should be userm.is_subscriber, but userm might not be current user
+      IF mcode.subscribe && !Slash.isSubscriber(userm);
+         NEXT;
+      END;
+
       IF mcode.modes.length;
          modes = mcode.modes.split(",");
       ELSE;

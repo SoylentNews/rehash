@@ -327,7 +327,7 @@ sub checkMessageCodes {
 sub getMessageUsers {
 	my($self, $code) = @_;
 	my $coderef = $self->getMessageCode($code) or return [];
-	my $users = $self->_getMessageUsers($code, $coderef->{seclev});
+	my $users = $self->_getMessageUsers($code, $coderef->{seclev}, $coderef->{subscribe});
 	return $users || [];
 }
 
@@ -340,7 +340,10 @@ sub getMode {
 	my $coderef = $self->getMessageCode($code) or return MSG_MODE_NOCODE;
 
 	# user not allowed to receive this message type
-	return MSG_MODE_NOCODE if $msg->{user}{seclev} < $coderef->{seclev};
+	return MSG_MODE_NOCODE if
+		( $msg->{user}{seclev} < $coderef->{seclev} )
+			||
+		( $coderef->{subscribe} && !isSubscriber($msg->{user}) );
 
 	# user has no delivery mode set
 	return MSG_MODE_NONE if	$mode == MSG_MODE_NONE
