@@ -1335,18 +1335,21 @@ sub _get_lastjournal {
 			if (length($art_shrunk) < 15) {
 				# This journal entry has too much whitespace
 				# in its first few chars;  scrap it.
-				return undef;
+				undef $art_shrunk;
 			}
-			$art_shrunk = chopEntity($art_shrunk);
+			$art_shrunk = chopEntity($art_shrunk) if defined($art_shrunk);
 		}
-		if (length($art_shrunk) < length($lastjournal->{article})) {
-			$art_shrunk .= " ...";
+
+		if (defined $art_shrunk) {
+			if (length($art_shrunk) < length($lastjournal->{article})) {
+				$art_shrunk .= " ...";
+			}
+			$art_shrunk = strip_html($art_shrunk);
+			$art_shrunk = balanceTags($art_shrunk);
 		}
+
 		$lastjournal->{article_shrunk} = $art_shrunk;
 
-		# Now default:  normalize the text and count comments.
-		$art_shrunk = strip_html($art_shrunk);
-		$art_shrunk = balanceTags($art_shrunk);
 		if ($lastjournal->{discussion}) {
 			$lastjournal->{commentcount} = $reader->getDiscussion(
 				$lastjournal->{discussion}, 'commentcount');
