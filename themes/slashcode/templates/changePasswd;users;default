@@ -73,7 +73,15 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="op" VALUE="savepasswd">
 <INPUT TYPE="SUBMIT" VALUE="Change Password">
 </FORM>
-
+[% IF admin_flag %]
+<P>
+<B>Verify Inactive or Possible Robot Accounts</B>
+<FORM ACTION="[% constants.rootdir %]/users.pl" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% useredit.uid %]">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="force_acct_verify">
+<INPUT TYPE="SUBMIT" VALUE="Force User to Verify Account">
+</FORM>
+[% END %]
 __seclev__
 500
 __version__
