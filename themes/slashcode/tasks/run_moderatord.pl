@@ -632,6 +632,16 @@ sub reconcile_stats {
 
 sub mark_m2_oldzone {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my $prev_oldzone = $slashdb->getVar('m2_oldzone', 'value', 1);
+	$prev_oldzone = "(none)" if !defined($prev_oldzone);
+	set_new_m2_oldzone($virtual_user, $constants, $slashdb, $user);
+	my $new_oldzone = $slashdb->getVar('m2_oldzone', 'value', 1);
+	$new_oldzone = "(none)" if !defined($new_oldzone);
+	slashdLog("m2_oldzone was '$prev_oldzone' now '$new_oldzone'");
+}
+
+sub set_new_m2_oldzone {
+	my($virtual_user, $constants, $slashdb, $user) = @_;
 
 	my $reasons = $slashdb->getReasons();
         my $m2able_reasons = join(",",
