@@ -190,10 +190,25 @@ EOT
 sub getRandomSid {
 	my $sids = $slashdb->sqlSelectAll("sid",
 		$story_table,
-		"discussion > 0");
+		"discussion > 0
+		AND displaystatus > -1
+		AND writestatus != 'archived'
+		AND time < NOW()",
+		"ORDER BY time DESC");
 	my @sids = map { $_->[0] } @$sids;
-	my $rand_sid = @sids[ rand @sids ];
-	return $rand_sid;
+	# Try to pick a random sid to post to that weights toward the
+	# most recent sids.
+	my $r;
+	if (rand(1) < 0.05 or scalar(@sids) < 15) {
+		$r = rand(@sids);
+	} elsif (rand(1) < 0.8) {
+		$r = rand(1) * rand(1) * 15;
+	} elsif (rand(1) < 0.5 or scalar(@sids) < 30) {
+		$r = rand(1) * rand(1) * 10;
+	} else {
+		$r = rand(1) * rand(1) * 30;
+	}
+	return $sids[$r];
 }
 
 sub getRandomParent {
@@ -377,6 +392,7 @@ sub make_werds {
 			"<a", "href=", 'href="', '"', "'", ">", '>">', " > >",
 			"<", " < ", " <<", ">>", " < < <", "< < ", "<? ", "&lt;<",
 			".", "..", "../", "/..", "/../../..", " ", "  ", " \r ",
+			":::", "::::::", "::::::::::", "///", "////////", ":/:/:/",
 			" \n ", "\n ", "\n\n", "\r\n\r", "\n\r\n", "\t \t", "\t",
 			"<i>", "</ i >", "<i >", "< /i >", "< i>", "< / i>",
 			"<i", "</i", "i>", "/i>", "/i/", "i/i", " // ", " / ",
@@ -407,7 +423,12 @@ sub make_werds {
 			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
 			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
 			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
-			"&#".int(rand(256)).";", "&#".int(rand(256)).";",
+			"&#".int(rand(65536)).";", "&#".int(rand(65536)).";",
+			"&#".int(rand(65536)).";", "&#".int(rand(65536)).";",
+			"&#".int(rand(65536)).";", "&#".int(rand(65536)).";",
+			"&#".int(rand(65536)).";", "&#".int(rand(65536)).";",
+			"&#".int(rand(65536)).";", "&#".int(rand(65536)).";",
+			"&#".int(rand(65536)).";", "&#".int(rand(65536)).";",
 		);
 		for (1..$werds) {
 			my $offset = int(rand(length($comment))+1);
