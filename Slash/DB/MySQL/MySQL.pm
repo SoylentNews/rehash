@@ -23,7 +23,7 @@ use base 'Slash::DB::Utility';
 # For the getDecriptions() method
 my %descriptions = (
 	'sortcodes'
-		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='$_[1]'") },
+		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='sortcodes'") },
 
 	'generic'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='$_[2]'") },
@@ -1739,6 +1739,7 @@ sub getPollVoter {
 # Yes, I hate the name of this. -Brian
 sub savePollQuestion {
 	my($self, $poll) = @_;
+	$poll->{section} ||= getCurrentStatic('defaultsection');
 	$poll->{voters} ||= "0";
 	my $qid_quoted = "";
 	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
