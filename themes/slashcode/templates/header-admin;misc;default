@@ -17,7 +17,7 @@ __template__
 
 <TABLE WIDTH="100%" ALIGN="CENTER" CELLPADDING="3" CELLSPACING="0" BORDER="0" BGCOLOR="[% user.bg.5 %]">
 	<TR>
-		<TD>[% Slash.createMenu(adminmenu) %]</TD>
+		<TD VALIGN="BOTTOM" BGCOLOR="[% user.bg.3 %]">[% Slash.createMenu(adminmenu) %]</TD>
 		<TD VALIGN="TOP" BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT">
 		<FONT SIZE="4" COLOR="[% user.fg.3 %]">[% constants.sitename %] backSlash</FONT>
 		</TD>
