@@ -24,9 +24,8 @@ $task{$me}{code} = sub {
 	
 	# These are the ops (aka pages) that we scan for.
 	my @PAGES = qw|index article search comments palm journal rss page users|;
-	my @op_extra_pages = grep{$_} split(/\|/, $constants->{op_extras_countdaily});
-	push @PAGES, @op_extra_pages;
-	$data{extra_pagetypes} = \@op_extra_pages;
+	push @PAGES, @{$constants->{op_extras_countdaily}};
+	$data{extra_pagetypes} = [ @{$constants->{op_extras_countdaily}} ];
 
 	my $days_back;
 	if (defined $constants->{task_options}{days_back}) {
@@ -260,6 +259,17 @@ EOT
 	my $m2_text = getM2Text($stats->getModM2Ratios(), {
 		oldest => $oldest_to_show
 	});
+
+	my $late_modders 		= $stats->getTopModdersNearArchive({limit => 5});
+	my $early_inactive_modders      = $stats->getTopEarlyInactiveDownmodders({limit => 5 });
+	foreach my $mod (@$late_modders){
+		$mod_data{late_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
+	}
+
+	foreach my $mod (@$early_inactive_modders){
+		$mod_data{early_inactive_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
+	}
+	
 	slashdLog("Moderation Stats End");
 
 	slashdLog("Page Counting Begin");
@@ -768,15 +778,6 @@ EOT
 	 	}
 		$data{crawling_subscribers} = $sub_report if $sub_report; 
 	}	
-	my $late_modders 		= $stats->getTopModdersNearArchive({limit => 5});
-	my $early_inactive_modders      = $stats->getTopEarlyInactiveDownmodders({limit => 5 });
-	foreach my $mod (@$late_modders){
-		$data{late_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
-	}
-
-	foreach my $mod (@$early_inactive_modders){
-		$data{early_inactive_modders_report} .= sprintf("%-6d %-20s %5d \n",$mod->{uid}, $mod->{nickname}, $mod->{count});
-	}
 
 	my $email = slashDisplay('display', \%data, {
 		Return => 1, Page => 'adminmail', Nocomm => 1
