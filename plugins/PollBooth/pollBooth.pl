@@ -32,15 +32,27 @@ sub main {
 		undef $form->{'aid'};
 	}
 
+	# Paranoia is fine, but why can't this be done from the handler 
+	# rather than hacking in special case code? - Cliff
 	if ($op eq "vote_return") {
-		$ops{$op}->($slashdb,$form);
+		$ops{$op}->($form, $slashdb);
 		# Why not do this in a more generic manner you say? 
 		# Because I am paranoid about this being abused. -Brian
+		#
+		# This doesn't answer my question. How is doing this here
+		# any better or worse than doing it at the end of vote_return()
+		# -Cliff
 		my $SECT = $slashdb->getSection();
 		if ($SECT) {
 			my $url = $SECT->{rootdir} || $constants->{real_rootdir};
+
+			# Remove the scheme and authority portions, if present.
+			$form->{returnto} =~ s{^(?:.+?)?//.+?/}{/};
 			
-			redirect($url, "/$form->{returnto}");
+			# Form new absolute URL based on section URL and then
+			# redirect the user.
+			my $refer = URI->new_abs($form->{returnto}, $url);
+			redirect($refer->as_string);
 		}
 	}
 
@@ -51,7 +63,7 @@ sub main {
 		header(getData('title'), $form->{section});
 	}
 
-	$ops{$op}->($form);
+	$ops{$op}->($form, $slashdb, $constants);
 
 	writeLog($form->{'qid'});
 	footer();
@@ -66,7 +78,7 @@ sub poll_booth {
 
 #################################################################
 sub default {
-	my($form) = @_;
+	my($form, $slashdb, $constants) = @_;
 
 	if (!$form->{'qid'}) {
 		listpolls(@_);
@@ -74,8 +86,7 @@ sub default {
 		poll_booth(@_);
 	} else {
 		my $vote = vote(@_);
-		if (getCurrentStatic('poll_discussions')) {
-			my $slashdb = getCurrentDB();
+		if ($constants->{poll_discussions}) {
 			my $discussion_id = $slashdb->getPollQuestion(
 				$form->{'qid'}, 'discussion'
 			);
@@ -90,25 +101,27 @@ sub default {
 
 #################################################################
 sub editpoll {
-	my($form) = @_;
+	my($form, $slashdb, $constants) = @_;
 
 	my($qid) = $form->{'qid'};
-	unless (getCurrentUser('is_admin')) {
+	unless ($constants->{is_admin}) {
 		default(@_);
 		return;
 	}
-	my $slashdb = getCurrentDB();
 
 	my($question, $answers, $pollbooth, $checked);
 	if ($qid) {
 		$question = $slashdb->getPollQuestion($qid);
 		$question->{sid} = $slashdb->getSidForQID($qid)
 			unless $question->{autopoll};
-		$answers = $slashdb->getPollAnswers($qid, [qw( answer votes aid )]);
-		$checked = ($slashdb->getSection($question->{section}, 'qid', 1 ) == $qid ) ? 1 : 0;
+		$answers = $slashdb->getPollAnswers(
+			$qid, [qw( answer votes aid )]
+		);
+		$checked = ($slashdb->getSection($question->{section}, 'qid', 1) == $qid) ? 1 : 0;
 		my $poll_open = $slashdb->isPollOpen($qid);
 
-		# Just use the DB method, its too messed up to rebuild the logic here -Brian
+		# Just use the DB method, its too messed up to rebuild the logic
+		# here -Brian
 		my $poll = $slashdb->getPoll($qid);
 		my $raw_pollbooth = slashDisplay('pollbooth', {
 			qid		=> $qid,
@@ -119,8 +132,12 @@ sub editpoll {
 			voters		=> $poll->{pollq}{voters},
 			sect		=> $question->{section},
 		}, 1);
-		my $constants = getCurrentStatic();
-		$pollbooth = fancybox($constants->{fancyboxwidth}, 'Poll', $raw_pollbooth, 0, 1);
+		$pollbooth = fancybox(
+			$constants->{fancyboxwidth}, 
+			'Poll', 
+			$raw_pollbooth, 
+			0, 1
+		);
 	}
 
 	if ($question) {
@@ -143,14 +160,12 @@ sub editpoll {
 
 #################################################################
 sub savepoll {
-	my($form) = @_;
+	my($form, $slashdb, $constants) = @_;
 
-	unless (getCurrentUser('is_admin')) {
+	unless ($constants->{is_admin}) {
 		default(@_);
 		return;
 	}
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
 	slashDisplay('savepoll');
 	#We are lazy, we just pass along $form as a $poll
 	my $qid = $slashdb->savePollQuestion($form);
@@ -172,7 +187,9 @@ sub savepoll {
 		if ($poll->{sid}) {
 			# if sid lookup fails, then $discussion is empty,
 			# and the poll's discussion is not set
-			$discussion = $slashdb->getStory($form->{sid}, 'discussion');
+			$discussion = $slashdb->getStory(
+				$form->{sid}, 'discussion'
+			);
 		} elsif (!$poll->{discussion}) {
 			$discussion = $slashdb->createDiscussion({
 				title		=> $form->{question},
@@ -197,7 +214,7 @@ sub savepoll {
 
 #################################################################
 sub vote_return {
-	my($slashdb, $form) = @_;
+	my($form, $slashdb) = @_;
 
 	my $qid = $form->{'qid'};
 	my $aid = $form->{'aid'};
@@ -219,14 +236,11 @@ sub vote_return {
 
 #################################################################
 sub vote {
-	my($form) = @_;
+	my($form, $slashdb) = @_;
 
 	my $qid = $form->{'qid'};
 	my $aid = $form->{'aid'};
-
 	return unless $qid;
-
-	my $slashdb = getCurrentDB();
 
 	my(%all_aid) = map { ($_->[0], 1) }
 		@{$slashdb->getPollAnswers($qid, ['aid'])};
@@ -240,7 +254,7 @@ sub vote {
 
 	my $question = $slashdb->getPollQuestion($qid, ['voters', 'question']);
 	my $notes = getData('display');
-	if (getCurrentUser('is_anon') and ! getCurrentStatic('allow_anonymous')) {
+	if (getCurrentUser('is_anon') && !getCurrentStatic('allow_anonymous')) {
 		$notes = getData('anon');
 	} elsif ($aid > 0) {
 		my $poll_open = $slashdb->isPollOpen($qid);

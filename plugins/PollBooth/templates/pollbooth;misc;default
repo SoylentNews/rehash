@@ -12,6 +12,7 @@ Prints a pollbooth
 * voters = number of voters
 * comments = number of comments
 * sect = section
+* returnto = Optional URL to return to once vote is registered.
 
 __title__
 
@@ -22,7 +23,6 @@ en_US
 __name__
 pollbooth
 __template__
-[% USE Slash %]
 [% IF !can_vote %]
 
 	<B>[% question %]</B>
@@ -39,6 +39,10 @@ __template__
 [% ELSE %]
 
 	<FORM ACTION="[% constants.rootdir %]/pollBooth.pl">
+		[%- IF returnto -%]
+		<INPUT TYPE="HIDDEN" NAME="op" VALUE="vote_return">
+		<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% returnto %]">
+		[%- END -%]
 		<INPUT TYPE="hidden" NAME="qid" VALUE="[% qid | strip_attribute %]">
 		[% IF user.currentSection %]
 		<INPUT TYPE="hidden" NAME="section" VALUE="[% user.currentSection | strip_attribute %]">
