@@ -82,7 +82,7 @@ sub main {
 			$user->{state}{tid} = $discussion->{topic};
 			# If no comments ever have existed just skip the display of the comment header bar -Brian
 			printComments($discussion)
-				if $discussion &&  $discussion->{commentstatus} ne 'disabled' && $discussion->{commentcount} > 0;;
+				if $discussion &&  !( $discussion->{commentcount} > 0 && $discussion->{commentstatus} eq 'disabled');
 		}
 	} else {
 		my $message = getData('no_such_sid');
