@@ -4819,7 +4819,8 @@ sub getUser {
 			} else {
 				my $moreanswer = $self->sqlSelectHashref('*', $table, $where);
 				for (keys %$moreanswer) {
-					$answer->{$_} = $moreanswer->{$_};
+					$answer->{$_} = $moreanswer->{$_}
+						unless exists $answer->{$_};
 				}
 			}
 			$n--;
