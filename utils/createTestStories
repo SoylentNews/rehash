@@ -189,18 +189,9 @@ sub getRandomTopicID {
 
 sub getRandomUserID {
 	my($min_uid, $max_uid) = @_;
-	my $n_tries = 100;
-	my $rand_uid = 1;
-	my $ok = 0;
-	while (!$ok) {
-		die "can't get random user! $max_uid" if --$n_tries<0;
-		$rand_uid = $min_uid + int(rand($max_uid-$min_uid+1));
-		$ok = 1;
-		$ok = 0 if $rand_uid == $constants->{anonymous_coward_uid};
-		$ok = 0 if !$slashdb->sqlSelect("COUNT(*)",
-			"users", "uid=$rand_uid");
-	}
-	return $rand_uid;
+        my $rand_uid = $slashdb->sqlSelect("uid", "users",
+                "uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
+        return $rand_uid;
 }
 
 sub make_werds {

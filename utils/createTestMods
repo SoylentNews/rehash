@@ -209,7 +209,8 @@ sub getRandomUserID {
 	}
 	$max_uid ||= $slashdb->countUsers({ max => 1});
 	$min_uid ||= $slashdb->sqlSelect('MIN(uid)', 'users');
-	my $ret = $min_uid + int(rand($max_uid - $min_uid + 1));  
+	my $ret = $slashdb->sqlSelect("uid", "users",
+		"uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
 	for (@{$exception_list{$val->{sid}}}) {
 		$ret = getRandomUserID(@_), last if $_ == $ret;
 	}
