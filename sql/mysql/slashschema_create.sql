@@ -408,6 +408,7 @@ CREATE TABLE modreasons (
 	listable tinyint DEFAULT '1' NOT NULL,
 	val tinyint DEFAULT '0' NOT NULL,
 	fairfrac float DEFAULT '0.5' NOT NULL,
+	unfairname varchar(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id)
 ) TYPE=myisam;
 

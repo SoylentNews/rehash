@@ -64,11 +64,15 @@ to do this unless you need more context to fairly meta moderate.<BR><BR></LI>
 	<TR><TD>
 		Original Discussion: <B><A HREF="[% C.url %]">[% C.title %]</A></B><BR>
 		Rating: <B>[% reasons.${C.modreason}.name %]</B>.<BR>
-		This rating is <B>Unfair
+		This
+		[% IF reasons.${C.modreason}.unfairname; "comment"; ELSE; "rating"; END %]
+		is <B>
+		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.unfairname; ELSE; "Unfair"; END %]
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="-">
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="0" CHECKED>
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="+">
-		Fair</B>&nbsp;&nbsp|&nbsp;
+		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.name; ELSE; "Fair"; END %]
+		</B>&nbsp;&nbsp|&nbsp;
 		<A HREF="[% context_url %]">See Context</A><HR>
 	</TD></TR>
 [% END %]
