@@ -865,9 +865,6 @@ DELETE FROM users_param WHERE name='anon_comments';
 # USEPERL LAST UPDATED HERE
 
 
-# very important: run `utils/dst-update.plx VIRTUAL_USER` after running upgrades
-# here, to convert the user timezones to the new timezones, plus to the new
-# DST stuff.
 # BEFORE running this, if you have any existing tzcodes not in the defaults,
 # you may wish to take note of them so you can re-add them appropriately.
 DROP TABLE IF EXISTS dst;
@@ -942,3 +939,7 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('AKST', -32400, 'Alaska',                       'America',     'AKDT', -28800);
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('HAST', -36000, 'Hawaii-Aleutian',              'America',     'HADT', -32400);
 INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) VALUES ('NT',   -39600, 'Nome',                          NULL,          NULL,    NULL);
+
+# VERY IMPORTANT: run `utils/dst-update.plx VIRTUAL_USER` after running upgrades
+# here, to convert the user timezones to the new timezones, plus to the new
+# DST stuff.
