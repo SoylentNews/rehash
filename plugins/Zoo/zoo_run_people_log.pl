@@ -24,7 +24,7 @@ $task{$me}{code} = sub {
 
 	slashdLog('Zoo fof/eof Begin');
 	my $people = $zoo->getZooUsersForProcessing($slashdb->getVar('zoo_timer'));
-	slashdLog('Zoo fof/eof Processing ' . scalar(@$people) . 'jobs');
+	slashdLog('Zoo fof/eof Processing ' . scalar(@$people) . ' people');
 	# Each job represents someone who has added or removed someone as a friend/foe. -Brian
 	for my $person (@$people) {
 		$zoo->rebuildUser($person);

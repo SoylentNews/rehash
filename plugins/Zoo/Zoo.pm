@@ -82,15 +82,15 @@ sub getFriendsUIDs {
 sub setFriend {
 	my($self, $uid, $person) = @_;
 	_set(@_, 'friend', FRIEND);
-	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'fof' from people WHERE uid=$uid AND type='friend' AND person != $person  AND person != $uid");
-	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'fof' from people WHERE uid=$person AND type='friend' AND $uid != person  AND person != $person");
-	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'eof' from people WHERE uid=$person AND type='foe' AND $uid != person  AND person != $person");
+	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'fof' from people WHERE uid=$uid AND type='friend' AND person != $person  AND person != $uid");
+	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'fof' from people WHERE uid=$person AND type='friend' AND $uid != person  AND person != $person");
+	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT $uid, person, $person, 'eof' from people WHERE uid=$person AND type='foe' AND $uid != person  AND person != $person");
 }
 
 sub setFoe {
 	my($self, $uid, $person) = @_;
 	_set(@_, 'foe', FOE);
-	$self->sqlDo("INSERT people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'eof' from people WHERE uid=$uid AND type='friend' AND person != $person AND person != $uid");
+	$self->sqlDo("INSERT IGNORE people_nthdegree (uid, person, friend, type) SELECT person, $person, $uid, 'eof' from people WHERE uid=$uid AND type='friend' AND person != $person AND person != $uid");
 }
 
 sub _set {
