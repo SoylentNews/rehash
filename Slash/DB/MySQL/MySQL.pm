@@ -615,6 +615,8 @@ sub getContentFilters {
 sub createPollVoter {
 	my($self, $qid, $aid) = @_;
 
+	my $qid_quoted = $self->sqlQuote($qid);
+	my $aid_quoted = $self->sqlQuote($aid);
 	$self->sqlInsert("pollvoters", {
 		qid	=> $qid,
 		id	=> md5_hex($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR}),
@@ -622,10 +624,10 @@ sub createPollVoter {
 		uid	=> $ENV{SLASH_USER}
 	});
 
-	$self->sqlDo("UPDATE pollquestions SET
-		voters=voters+1 WHERE qid=$qid");
-	$self->sqlDo("UPDATE pollanswers SET votes=votes+1 WHERE
-		qid=$qid and aid=$aid");
+	$self->sqlDo("UPDATE pollquestions SET voters=voters+1
+		WHERE qid=$qid_quoted");
+	$self->sqlDo("UPDATE pollanswers SET votes=votes+1
+		WHERE qid=$qid_quoted AND aid=$aid_quoted");
 }
 
 ########################################################
@@ -1639,15 +1641,16 @@ sub getPollVoter {
 sub savePollQuestion {
 	my($self, $poll) = @_;
 	$poll->{voters} ||= "0";
+	my $qid_quoted = "";
+	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
 	if ($poll->{qid}) {
-		my $qid = $self->sqlQuote($poll->{qid});
 		$self->sqlUpdate("pollquestions", {
 			question	=> $poll->{question},
 			voters		=> $poll->{voters},
 			topic		=> $poll->{topic},
 			sid		=> $poll->{sid},
 			-date		=>'now()'
-		}, "qid	= $qid");
+		}, "qid	= $qid_quoted");
 	} else {
 		$self->sqlInsert("pollquestions", {
 			question	=> $poll->{question},
@@ -1658,6 +1661,7 @@ sub savePollQuestion {
 			-date		=>'now()'
 		});
 		$poll->{qid} = $self->getLastInsertId();
+		$qid_quoted = $self->sqlQuote($poll->{qid});
 	}
 
 	$self->setVar("currentqid", $poll->{qid}) if $poll->{currentqid};
@@ -1675,7 +1679,8 @@ sub savePollQuestion {
 			});
 
 		} else {
-			$self->sqlDo("DELETE from pollanswers WHERE qid=$poll->{qid} and aid=$x");
+			$self->sqlDo("DELETE from pollanswers
+				WHERE qid=$qid_quoted AND aid=$x");
 		}
 	}
 	return $poll->{qid};
@@ -1687,18 +1692,21 @@ sub savePollQuestion {
 sub deletePoll {
 	my($self, $qid) = @_;
 
-	my $did = $self->sqlSelect('discussion', 'pollquestions', "qid=$qid");
+	my $qid_quoted = $self->sqlQuote($qid);
+	my $did = $self->sqlSelect('discussion', 'pollquestions',
+		"qid=$qid_quoted");
 	$self->deleteDiscussion($did);
-	$self->sqlDo("DELETE from pollanswers WHERE qid=$qid");
-	$self->sqlDo("DELETE from pollquestions WHERE qid=$qid");
-	$self->sqlDo("DELETE from pollvoters WHERE qid=$qid");
+	$self->sqlDo("DELETE FROM pollanswers WHERE qid=$qid_quoted");
+	$self->sqlDo("DELETE FROM pollquestions WHERE qid=$qid_quoted");
+	$self->sqlDo("DELETE FROM pollvoters WHERE qid=$qid_quoted");
 }
 
 ########################################################
 sub getPollQuestionList {
 	my($self, $time) = @_;
+	$time = 0 if $time !~ /^\d+$/;
 	my $questions = $self->sqlSelectAll("qid, question, date",
-		"pollquestions order by date DESC LIMIT $time,20");
+		"pollquestions ORDER BY date DESC LIMIT $time,20");
 
 	formatDate($questions, 2, 2, '%A, %B %e, %Y'); # '%F'
 
@@ -1707,9 +1715,11 @@ sub getPollQuestionList {
 
 ########################################################
 sub getPollAnswers {
-	my($self, $id, $val) = @_;
+	my($self, $qid, $val) = @_;
+	my $qid_quoted = $self->sqlQuote($qid);
 	my $values = join ',', @$val;
-	my $answers = $self->sqlSelectAll($values, 'pollanswers', "qid=$id", 'ORDER by aid');
+	my $answers = $self->sqlSelectAll($values, 'pollanswers',
+		"qid=$qid_quoted", 'ORDER BY aid');
 
 	return $answers;
 }
@@ -4185,8 +4195,10 @@ sub getStoryList {
 
 ##################################################################
 sub getPollVotesMax {
-	my($self, $id) = @_;
-	my($answer) = $self->sqlSelect("max(votes)", "pollanswers", "qid=$id");
+	my($self, $qid) = @_;
+	my $qid_quoted = $self->sqlQuote($qid);
+	my($answer) = $self->sqlSelect("MAX(votes)", "pollanswers",
+		"qid=$qid_quoted");
 	return $answer;
 }
 
