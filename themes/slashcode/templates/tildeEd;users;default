@@ -52,7 +52,7 @@ __template__
 [% criteria_msg %]
 
 [% story023_data = Slash.db.getDescriptions('story023');
-   DEFAULT checked = constants.markup_checked_attribute %]
+   checked = constants.markup_checked_attribute %]
 
 [%-	######################
 	# Sections and Authors
@@ -110,7 +110,7 @@ __template__
 </TR></TABLE>
 
 [% IF constants.story_never_topic_allow == 2
-	|| (user.is_subscriber && constants.story_never_topic_allow == 1) %]
+	|| (user_edit.is_subscriber && constants.story_never_topic_allow == 1) %]
 
 <BR>
 
@@ -122,15 +122,15 @@ __template__
 <INPUT TYPE="HIDDEN" NAME="topictids_present" VALUE="1">
 
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
-	<TR BGCOLOR="[% user.colors.bg_3 %]">
-		<TH COLSPAN="6"><FONT COLOR="[% user.colors.fg_3 %]">Topics</FONT></TH>
+	<TR BGCOLOR="[% user_edit.colors.bg_3 %]">
+		<TH COLSPAN="6"><FONT COLOR="[% user_edit.colors.fg_3 %]">Topics</FONT></TH>
 	</TR>
 
 	<TR><TD COLSPAN="6"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="100" HEIGHT="3"></TD></TR>
 
 [% FOREACH topictid = topictid_order -%]
 	[%- IF loop.index % 3 == 0 -%]
-		<TR BGCOLOR="[% user.colors.bg_2 %]">
+		<TR BGCOLOR="[% user_edit.colors.bg_2 %]">
 	[%- END -%]
 		<TD VALIGN="TOP"><INPUT TYPE="CHECKBOX" NAME="topictid[% topictid %]"
 			[%- IF story023_default.topic.$topictid > 0; checked; END %]></TD>
@@ -160,6 +160,8 @@ __template__
 -%]
 
 [% PROCESS titlebar width='100%' title=customize_title %]
+
+<INPUT TYPE="CHECKBOX" NAME="useslashboxes"[% IF !user_edit.noboxes; checked; END %]> <B>Use Slashboxes</B>
 
 <TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
 [% FOREACH bid = box_order -%]

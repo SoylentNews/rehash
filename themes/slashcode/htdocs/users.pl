@@ -1628,6 +1628,7 @@ sub tildeEd {
 	my $tilded_box_msg = getMessage('tilded_box_msg');
 
 	my $tilde_ed = slashDisplay('tildeEd', {
+		user_edit		=> $user_edit,
 		title			=> $tildeEd_title,
 		criteria_msg		=> $criteria_msg,
 		customize_title		=> $customize_title,
@@ -1837,7 +1838,6 @@ sub editHome {
 	$tzformat_select = createSelect('tzformat', $formats, $user_edit->{dfid}, 1);
 
 	my $l_check = $user_edit->{light}	? $constants->{markup_checked_attribute} : '';
-	my $b_check = $user_edit->{noboxes}	? $constants->{markup_checked_attribute} : '';
 	my $i_check = $user_edit->{noicons}	? $constants->{markup_checked_attribute} : '';
 	my $w_check = $user_edit->{willing}	? $constants->{markup_checked_attribute} : '';
 
@@ -1849,7 +1849,6 @@ sub editHome {
 		user_edit		=> $user_edit,
 		tzformat_select		=> $tzformat_select,
 		l_check			=> $l_check,
-		b_check			=> $b_check,
 		i_check			=> $i_check,
 		w_check			=> $w_check,
 		tilde_ed		=> $tilde_ed,
@@ -2675,7 +2674,7 @@ sub saveHome {
 		slashboxes	=> checkList($slashboxes, 1024),
 
 		maxstories	=> 30, # XXXSKIN fix this later
-		noboxes		=> ($form->{noboxes} ? 1 : 0),
+		noboxes		=> ($form->{useslashboxes} ? 0 : 1),
 		light		=> ($form->{light} ? 1 : 0),
 		noicons		=> ($form->{noicons} ? 1 : 0),
 		willing		=> ($form->{willing} ? 1 : 0),

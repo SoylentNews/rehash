@@ -69,14 +69,8 @@ __template__
 		<B>Light</B> (reduce the complexity of [% constants.sitename %]'s HTML for
 		AvantGo, Lynx, or slow connections)
 
-		<P><INPUT TYPE="CHECKBOX" NAME="noboxes"[% b_check %]>
-		<B>Deactivate Slashboxes</B> (just the news ma'am)
-
 		<P><INPUT TYPE="CHECKBOX" NAME="noicons"[% i_check %]>
 		<B>No Icons</B> (disable topic icon images on stories)
-
-<!--		<P><INPUT TYPE="CHECKBOX" NAME="sectioncollapse"[% s_check %]>
-		<B>Collapse Sections</B> (show stories from all sections, unless specifically excluded) -->
 
 		<P><B>Maximum Stories</B> The default is 30.  The main
 		column displays 1/3rd of these at minimum, and all of
