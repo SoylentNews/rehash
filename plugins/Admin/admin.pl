@@ -1353,7 +1353,7 @@ sub editStory {
 		# XXXSECTIONTOPIC this kinda works now, but it should be rewritten
 		my $SECT = $slashdb->getSection($section);
 		$extracolumns			= $slashdb->getNexusExtras($gSkin->{nexus});
-		$storyref->{commentstatus}	= $gSkin->{defaultcommentstatus};
+		$storyref->{commentstatus}	= $constants->{defaultcommentstatus};
 		$storyref->{primaryskid}	= $gSkin->{skid};
 		$storyref->{tid}		= $form->{tid} || $gSkin->{defaulttopic};
 
