@@ -22,15 +22,28 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 # Handles rotation of fakeemail address of all users.
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
-	my $days = $slashdb->getVar("admin_comment_display_days", "value", 1);
-	my $start_at = $slashdb->getVar("min_cid_for_$days\_days", "value", 1);
-	if(!defined $slash_db){
-		$slashdb->createVar("min_cid_for_$days\_days", 0);
+	my $days = $slashdb->getVar("admin_comment_display_days", "value", 1) || 30;
+
+	# Get the old value for this var, or if it hasn't been
+	# defined, create it at the default 0.
+	my $start_at = $slashdb->getVar("min_cid_last_$days\_days", "value", 1);
+	if (!defined($start_at)){
+		$slashdb->createVar("min_cid_last_$days\_days", 0);
 		$start_at ||= 0;
 	}
-	my $cid = $slashdb->getCidForDaysBack($days, $startat);
-	$slashdb->("min_cid_for_$days\_days", $cid);
-	return "Finished setting useful cids";
+
+	# Now get the new value for this var;  if the method
+	# doesn't return a new value, then there were no new
+	# comments posted during that period several days ago,
+	# so we just keep using the old value.
+	my $cid = $slashdb->getCidForDaysBack($days, $startat) || $startat;
+	my $success = $slashdb->setVar("min_cid_last_$days\_days", $cid);
+
+	if ($success) {
+		return "min_cid_last_$days\_days is $cid";
+	} else {
+		return "could not set min_cid_last_$days\_days to $cid";
+	}
 };
 
 1;
