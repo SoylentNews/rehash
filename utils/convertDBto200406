@@ -387,25 +387,25 @@ sub getUniqueNexusName {
 %subsections = ( );
 
 for my $id (sort { $a <=> $b } keys %$old_subsections_hr) {
-        my $next_tid = getNextTid();
-        my $nexusname = getUniqueNexusName($old_subsections_hr->{$id}{title});
-        $old_topics_hr->{$next_tid} = {
-                tid             => $next_tid,
-                keyword         => $nexusname,
-                textname        => $old_subsections_hr->{$id}{alttext},
-                series          => 'no',
-                image           => '',
-                width           => 0,
-                height          => 0,
-        };
-        $nexuses{$nexusname} = $next_tid;
-        print "# Nexus for the '$old_subsections_hr->{$id}{title}' subsection\n";
-        output_insert_topics_new($next_tid);
-        print "INSERT INTO topic_nexus_new (tid, current_qid) VALUES (";
-        print "$next_tid, NULL";
-        print ");\n";
-        $topics{$next_tid} = 1;
-        $subsections{$id} = $next_tid;
+	my $next_tid = getNextTid();
+	my $nexusname = getUniqueNexusName($old_subsections_hr->{$id}{title});
+	$old_topics_hr->{$next_tid} = {
+		tid             => $next_tid,
+		name            => $nexusname,
+		alttext         => $old_subsections_hr->{$id}{alttext},
+		series          => 'no',
+		image           => '',
+		width           => 0,
+		height          => 0,
+	};
+	$nexuses{$nexusname} = $next_tid;
+	print "# Nexus for the '$old_subsections_hr->{$id}{title}' subsection\n";
+	output_insert_topics_new($next_tid);
+	print "INSERT INTO topic_nexus_new (tid, current_qid) VALUES (";
+	print "$next_tid, NULL";
+	print ");\n";
+	$topics{$next_tid} = 1;
+	$subsections{$id} = $next_tid;
 }
 
 #
