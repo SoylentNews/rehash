@@ -1795,14 +1795,15 @@ sub getCommentsByIPIDOrSubnetID {
 
 { # closure surrounding getDBs and getDB
 
-my %_getDBs_cached_databases;
+# shared between sites, not a big deal
 my $_getDBs_cached_nextcheck;
 sub getDBs {
 	my($self) = @_;
 
 	my %databases;
-	if (($_getDBs_cached_nextcheck || 0) > time) {
-		%databases = %_getDBs_cached_databases;
+	my $cache = getCurrentCache();
+	if ($cache->{'dbs'} && (($_getDBs_cached_nextcheck || 0) > time)) {
+		%databases = %{ $cache->{'dbs'} };
 #		print STDERR gmtime() . " $$ getDBs returning cache"
 #			. " time='" . time . "'"
 #			. " nextcheck in " . ($_getDBs_cached_nextcheck - time) . " secs\n";
@@ -1823,7 +1824,7 @@ sub getDBs {
 	# angel script, this should be roughly similar to how
 	# often that angel runs.
 	$_getDBs_cached_nextcheck = time + 10;
-	%_getDBs_cached_databases = %databases;
+	$cache->{'dbs'} = \%databases;
 #	print STDERR gmtime() . " $$ getDBs setting cache\n";
 
 	return \%databases;
@@ -1835,8 +1836,9 @@ sub getDBs {
 sub getDB {
 	my($self, $db_type) = @_;
 
-	if (($_getDBs_cached_nextcheck || 0) > time) {
-		my $vu_ar = $_getDBs_cached_databases{$db_type};
+	my $cache = getCurrentCache();
+	if ($cache->{'dbs'} && (($_getDBs_cached_nextcheck || 0) > time)) {
+		my $vu_ar = $cache->{'dbs'}{$db_type};
 #		print STDERR gmtime() . " $$ getDB returning cache for '$db_type'"
 #			. " time='" . time . "'"
 #			. " nextcheck in " . ($_getDBs_cached_nextcheck - time) . " secs\n";
