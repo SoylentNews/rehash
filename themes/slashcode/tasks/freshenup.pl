@@ -144,7 +144,7 @@ $task{$me}{code} = sub {
 		prog2file(
 			"$basedir/$constants->{index_handler}", 
 			"$basedir/$base.shtml", {
-				args =>		"$args section='$constants->{defaultsection}'",
+				args =>		$args,
 				verbosity =>	verbosity(),
 				handle_err =>	0
 		});
