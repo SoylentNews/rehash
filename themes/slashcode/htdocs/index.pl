@@ -186,10 +186,9 @@ my $start_time = Time::HiRes::time;
 	my $title = getData('head', { skin => $skin_name });
 	header({ title => $title, link => $linkrel }) or return;
 
-	if ($form->{op} eq 'remark'
+	if ($form->{remark}
 		&& $user->{is_subscriber}
-		&& $form->{sid}
-		&& $form->{remark})
+		&& $form->{sid})
 	{
 		my $sid = $form->{sid};
 		my $story = $slashdb->getStory($sid);
