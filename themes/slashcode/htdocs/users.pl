@@ -1427,7 +1427,7 @@ sub editComm {
 	my $d_check = $user_edit->{sigdash}		? ' CHECKED' : '';
 	my $b_check = $user_edit->{nobonus}		? ' CHECKED' : '';
 	my $p_check = $user_edit->{postanon}		? ' CHECKED' : '';
-	my $spell_check = $user_edit->{no_spell}	? ' CHECKED' : '';
+	my $nospell_check = $user_edit->{no_spell}	? ' CHECKED' : '';
 
 	$formats = $slashdb->getDescriptions('postmodes');
 	$posttype_select = createSelect(
@@ -1446,7 +1446,7 @@ sub editComm {
 		d_check			=> $d_check,
 		b_check			=> $b_check,
 		p_check			=> $p_check,
-		spell_check		=> $spell_check,
+		nospell_check		=> $nospell_check,
 		commentmodes_select	=> $commentmodes_select,
 		commentsort_select	=> $commentsort_select,
 		highlightthresh_select	=> $highlightthresh_select,
@@ -1830,10 +1830,10 @@ sub saveComm {
 		posttype	=> $form->{posttype},
 		threshold	=> $form->{uthreshold},
 		nosigs		=> ($form->{nosigs}     ? 1 : 0),
-		no_spell	=> ($form->{no_spell}   ? 1 : 0),
 		reparent	=> ($form->{reparent}   ? 1 : 0),
 		noscores	=> ($form->{noscores}   ? 1 : 0),
 		hardthresh	=> ($form->{hardthresh} ? 1 : 0),
+		no_spell	=> ($form->{no_spell}   ? 1 : undef),
 		anon_comments	=> ($form->{anon_comments} ? 1 : undef),
 		sigdash		=> ($form->{sigdash} ? 1 : undef),
 		nobonus		=> ($form->{nobonus} ? 1 : undef),

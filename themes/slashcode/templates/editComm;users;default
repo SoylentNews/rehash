@@ -64,8 +64,8 @@ __template__
 		<INPUT TYPE="CHECKBOX" NAME="nosigs"[% s_check %]>
 
 		[% IF user.is_admin %]
-		<P><B>Spellchecker</B> (disable spellchecker)
-		<INPUT TYPE="CHECKBOX" NAME="no_spell"[% spell_check %]>
+		<P><B>Disable Spellchecker</B>
+		<INPUT TYPE="CHECKBOX" NAME="no_spell"[% nospell_check %]>
 		[% END %]
 
 		<P><B>Display Mode</B>
