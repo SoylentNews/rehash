@@ -82,7 +82,7 @@ $task{$me}{code} = sub {
 		);
 		for my $ctid ( @{$topic->{children}} ) {
 			$g->add_edge($tid, $ctid,
-				style => $topic->{child}{$ctid} >= 3 ? "dashed" : "solid",
+				style => $topic->{child}{$ctid} >= 30 ? "dashed" : "solid",
 				color => $hsv[ ($tid+$ctid) % @hsv ],
 			);
 		}

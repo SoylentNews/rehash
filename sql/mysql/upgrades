@@ -2402,3 +2402,6 @@ UPDATE topic_parents         SET min_weight = min_weight * 10 WHERE min_weight <
 UPDATE story_topics_chosen   SET weight = weight * 10         WHERE weight < 10;
 UPDATE story_topics_rendered SET weight = weight * 10         WHERE weight < 10;
 
+# Changes for plugins/Admin (which you are almost certainly using)
+INSERT INTO vars (name, value, description) VALUES ('topic_popup_defaultweight', '10', 'Default weight for new topics in the popup menu (should probably match default for topic_parents.min_weight)');
+
