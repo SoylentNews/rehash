@@ -8635,7 +8635,10 @@ sub getSection {
 # not present a problem.
 sub getSkin {
 	my($self, $skid, $options) = @_;
-	errorLog("cannot getSkin, empty id") unless $skid;
+	if (!$skid) {
+		errorLog("cannot getSkin for empty skid");
+		$skid = getCurrentStatic('mainpage_skid');
+	}
 	my $skins = $self->getSkins($options);
 #use Data::Dumper; print "getSkin skins: " . Dumper($skins);
 	if ($skid !~ /^\d+$/) {
