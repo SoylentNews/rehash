@@ -28,6 +28,33 @@ C<[% Slash.version %]> gives the version of Slash.
 C<[% Slash.VERSION %]> (note case) gives the version
 of this Slash Template plugin.
 
+C<[% Slash.Display %]> provides access to C<slashDisplay()>.  Use
+this B<sparingly>, only when you need to pass in certain options
+(such as setting Section or Page).  In the general case, use
+C<PROCESS> in the template, or C<INCLUDE> if necessary.
+This method will always set C<Return>, so you may assign its
+result to a variable, or call it by itself to have its result
+outputted normally.
+
+=head2 Implementation Notes
+
+The C<db> method merely returns the object returned by C<getCurrentDB>,
+and then any Slash::DB method may be called on that object.
+
+The API for Slash and Slash::Utility is provided by populating
+a hash of C<functionname =E<gt> coderef> for each function in
+the C<@EXPORT> array, and then doing a lookup in C<AUTOLOAD>.
+Slash::Constants is similar, except it uses the C<@EXPORT_OK>
+array.  C<AUTOLOAD> will therefore catch all method calls (except
+for a few predefined ones) and will warn if it can't be found.
+
+For all of these, and for the C<Display> plugin method,
+the current Template context is stored in a global variable,
+which C<slashDisplay> uses, if invoked.  The problem is
+that Template will sort of clear itself out if we let it
+create a new template object in this case, so we pass along
+the current one to be used.
+
 =cut
 
 use strict;
@@ -71,16 +98,27 @@ sub new {
 
 sub db { Slash::Utility::getCurrentDB() }
 
+# not to be confused with Slash::Test::Display(); that may only be
+# called from Slash::Test, this may only be called from plugins
+# (see note above)
+sub Display {
+	my($self, @args) = @_;
+	$args[2] ||= {};
+	$args[2]{Return} = 1;
+	local $Slash::Display::CONTEXT = $self->{_CONTEXT};
+	return Slash::Display::slashDisplay(@args);
+}
+
 sub AUTOLOAD {
 	# pull off first param before sending to function;
 	# that's the whole reason we have AUTOLOAD here,
 	# to de-OOP the call
-	my $obj = shift;
+	my $self = shift;
 	(my $name = $AUTOLOAD) =~ s/^.*://;
 	return if $name eq 'DESTROY';
 
 	if (exists $subs{$name}) {
-		local $Slash::Display::CONTEXT = $obj->{_CONTEXT};
+		local $Slash::Display::CONTEXT = $self->{_CONTEXT};
 		return $subs{$name}->(@_);
 	} else {
 		warn "Can't find $name";
