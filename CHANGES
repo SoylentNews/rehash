@@ -3,18 +3,25 @@ slash-1.0.6, 2000.06.xx
 
 *	search.pl should now properly count rows in resultset so
 	the "more left" link at the bottom now works. This code
-	was initially removed due to performance reasons.	
+	was initially removed due to performance reasons
 
 *	Fixed bug in search.pl where users could not click back to
 	the first page of results using the "xx previous matches"
-	link. (Joris Trooster)
+	link (Joris Trooster)
 
 *	When performing a user search using search.pl, it will also
-	check the fakeemail field, in addition to the nickname.
+	check the fakeemail field, in addition to the nickname
 
 *	Fix to allow "%" and "#" in URLs for Slash::fixurl()
 
 *	No longer show comments to regular users in submit.pl
+
+*	Disallow %#?= in nicknames in users.pl
+
+*	Add session-based cookies for Anonymous Coward for use
+	with formkeys in submission and comment posting forms
+	in Slash.pm, comments.pl
+
 
 slash-1.0.5, 2000.06.13
 -----------------------

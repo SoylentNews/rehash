@@ -83,7 +83,9 @@ sub main {
 		$I{F}{op} eq "Preview" || $I{F}{op} eq "Reply") {
 
 		if ($I{F}{op} eq 'Reply') {
-			insertFormkey("comments",$id,$I{F}{sid});	
+			insertFormkey("comments", $id, $I{F}{sid});
+		} else {
+			updateFormkeyId();
 		}
 
 		# find out their Karma

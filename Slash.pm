@@ -56,7 +56,7 @@ BEGIN {
 		getEvalBlock getTopic getAuthor dispStory lockTest getSlashConf
 		getDateFormat dispComment getDateOffset linkComment redirect
 		insertFormkey getFormkeyId checkSubmission checkTimesPosted
-		formSuccess formAbuse formFailure errorMessage
+		updateFormkeyId formSuccess formAbuse formFailure errorMessage
 	);
 	$CRLF = "\015\012";
 }
@@ -527,6 +527,9 @@ sub getUser {
 		}
 
 	} else {
+		getAnonCookie();
+		$I{SETCOOKIE} = setCookie('anon', $I{U}{anon_id}, 1);
+
 		unless ($I{AC}) {
 			# Get ourselves an AC if we don't already have one.
 			# (we have to get it /all/ remember!)
@@ -654,7 +657,7 @@ sub setAdminInfo {
 
 ########################################################
 sub setCookie {
-	my($name, $val) = @_;
+	my($name, $val, $session) = @_;
 
 	# domain must start with a . and have one more .
 	# embedded in it, else we ignore it
@@ -665,10 +668,10 @@ sub setCookie {
 		-name		=> $name,
 		-path		=> $I{cookiepath},
 		-value		=> $val,
-		-expires	=> '+1y',
 	);
 
-	$cookie{-domain} = $domain if $domain;
+	$cookie{-expires} = '+1y' unless $session;
+	$cookie{-domain}  = $domain if $domain;
 
 	return {
 		-date		=> CGI::expires(0, 'http'),
@@ -2326,6 +2329,16 @@ EOT
 	$topicicon .= '</A>';
 	$topicicon .= ' ] ' if $I{U}{noicons};
 
+        $S->{introtext} =~ s|__CPANURL__|http://www.perl.com/CPAN|g;
+        $S->{introtext} =~ s|__CPANMOD__|http://search.cpan.org/search?module=|g;
+        $S->{introtext} =~ s|__CPANDIST__|http://search.cpan.org/search?dist=|g;
+
+        if ($S->{bodytext}) {
+            $S->{bodytext} =~ s|__CPANURL__|http://www.perl.com/CPAN|g;
+            $S->{bodytext} =~ s|__CPANMOD__|http://search.cpan.org/search?module=|g;
+            $S->{bodytext} =~ s|__CPANDIST__|http://search.cpan.org/search?dist=|g;
+        }
+
 	my $execme = getWidgetBlock('story');
 	print eval $execme;
 	print "\nError:$@\n" if $@;
@@ -2657,9 +2670,50 @@ EOT
 }
 
 ########################################################
+sub getAnonCookie {
+	if (my $cookie = $I{query}->cookie('anon')) {
+		$I{U}{anon_id} = $cookie;
+		$I{U}{anon_cookie} = 1;
+	} else {
+		$I{U}{anon_id} = getAnonId();
+	}
+}
+
+########################################################
+sub getAnonId {
+	return '-1-' . getFormkey();
+}
+
+########################################################
 sub getFormkey {
 	my @rand_array = ( 'a' .. 'z', 'A' .. 'Z', 0 .. 9 );
 	return join("", map { $rand_array[rand @rand_array] }  0 .. 9);
+}
+
+########################################################
+sub whereFormkey {
+	my $formkey_id = shift;
+	my $where;
+
+	# anonymous user without cookie, check host, not formkey id
+	if ($I{U}{anon_id} && ! $I{U}{anon_cookie}) {
+		$where = "host_name = '$ENV{REMOTE_ADDR}'";
+	} else {
+		$where = "id='$formkey_id'";
+	}
+
+	return $where;
+}
+
+########################################################
+sub updateFormkeyId {
+	if ($I{U}{uid} > 0 && $I{query}->param('rlogin') && length($I{F}{upasswd}) > 1) {
+		sqlUpdate("formkeys", {
+			id	=> $I{U}{uid},
+			uid	=> $I{U}{uid},
+		}, "formname='comments' AND uid = -1 AND formkey=" .
+			$I{dbh}->quote($I{F}{formkey}));
+	}
 }
 
 ########################################################
@@ -2672,14 +2726,13 @@ sub getFormkeyId {
 
 	# if user logs in during submission of form, after getting
 	# formkey as AC, check formkey with user as AC
-	if ($I{query}->param('rlogin') && length($I{F}{upasswd}) > 1) {
-		# id includes '&' to prevent uid's and IPs
-		# from potentially being the same
-		$id = '-1-' . $ENV{REMOTE_ADDR};
+	if ($I{U}{uid} > 0 && $I{query}->param('rlogin') && length($I{F}{upasswd}) > 1) {
+		getAnonCookie();
+		$id = $I{U}{anon_id};
 	} elsif ($uid > 0) {
 		$id = $uid;
 	} else {
-		$id = '-1-' . $ENV{REMOTE_ADDR};
+		$id = $I{U}{anon_id};
 	}
 	return($id);
 }
@@ -2702,18 +2755,17 @@ sub insertFormkey {
 		ts		=> time()
 	});
 }
+
 ########################################################
 sub checkFormkey {
 	my($formkey_earliest, $formname, $formkey_id) = @_;
 
-	# make sure that there's a valid form key, and we only care about formkeys
-	# submitted $formkey_earliest seconds ago
-	my($is_valid_formkey) = sqlSelect("count(*)", "formkeys",
-		"ts >= $formkey_earliest AND formname = '$formname' and " .
-		"id='$formkey_id' and formkey=" .
-		$I{dbh}->quote($I{F}{formkey}));
-
-	return($is_valid_formkey);
+	my $where = whereFormkey($formkey_id);
+	my($is_valid) = sqlSelect('count(*)', 'formkeys',
+		'formkey = ' . $I{dbh}->quote($I{F}{formkey}) .
+		" AND $where " .
+		"AND ts >= $formkey_earliest AND formname = '$formname'");
+	return($is_valid);
 }
 
 ########################################################
@@ -2754,10 +2806,12 @@ sub intervalString {
 ##################################################################
 sub checkTimesPosted {
 	my($formname, $max, $id, $formkey_earliest) = @_;
+
+	my $where = whereFormkey($id);
 	my($times_posted) = sqlSelect(
 		"count(*) as times_posted",
 		"formkeys",
-		"id = '$id' AND submit_ts >= $formkey_earliest AND formname = '$formname'");
+		"$where AND submit_ts >= $formkey_earliest AND formname = '$formname'");
 
 	return $times_posted >= $max ? 0 : 1;
 }
@@ -2847,11 +2901,12 @@ sub formFailure {
 sub checkSubmission {
 	my($formname, $limit, $max, $id) = @_;
 	my $formkey_earliest = time() - $I{formkey_timeframe};
+	my $where = whereFormkey($id);
 
 	my($last_submitted) = sqlSelect(
 		"max(submit_ts)",
 		"formkeys",
-		"id = '$id' AND formname = '$formname'");
+		"$where AND formname = '$formname'");
 	$last_submitted ||= 0;
 
 	my $interval = time() - $last_submitted;
