@@ -4696,8 +4696,6 @@ sub getUser {
 				$answer->{$_} = $val;
 			}
 		}
-		$answer->{'people'} = thaw($answer->{'people'})
-			if $answer->{'people'};
 
 	} elsif ($val) {
 		(my $clean_val = $val) =~ s/^-//;
@@ -4709,7 +4707,6 @@ sub getUser {
 			$answer = $self->sqlSelect('value', 'users_acl', "uid=$id AND name='$val'");
 			$answer = $self->sqlSelect('value', 'users_param', "uid=$id AND name='$val'") if !$answer;
 		}
-		$answer = thaw($answer) if $val eq 'people';
 
 	} else {
 
@@ -4756,13 +4753,33 @@ sub getUser {
 		for (@$append) {
 			$answer->{$_->[0]} = $_->[1];
 		}
+	}
+
+	# we have a bit of cleanup to do before returning;
+	# thaw the people element, and clean up possibly broken
+	# exsect/exaid/extid.  gotta do it separately for hashrefs ...
+	if (ref($answer) eq 'HASH') {
+		for (qw(exaid extid exsect)) {
+			next unless $answer->{$_};
+			$answer->{$_} =~ s/,'[^']+$//;
+			$answer->{$_} =~ s/,'?$//;
+		}
+		$answer->{'people'} = thaw($answer->{'people'}) if $answer->{'people'};
+
 		# Why is this here? We keep biz logic out of this layer.
 		# getUser() returns the user info, not an actual user hash
 		# which has the is_admin stuff in it and such.
 		# -Brian
 		$answer->{is_anon} = isAnon($id);
-		$answer->{'people'} = thaw($answer->{'people'})
-			if $answer->{'people'};
+
+	# ... and for scalars
+	} else {
+		if ($val eq 'people') {
+			$answer = thaw($answer);
+		} elsif ($val =~ m/^ex(?:aid|tid|sect)$/) {
+			$answer =~ s/,'[^']+$//;
+			$answer =~ s/,'?$//;
+		}
 	}
 
 	return $answer;

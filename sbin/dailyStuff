@@ -60,8 +60,6 @@ sub generateDailyMailees {
 
 			my $key  = $user->{sectioncollapse};
 			for (@{$user}{qw(exaid extid exsect)}) {
-				s/,'[^']+$//;
-				s/,'?$//;
 				$key .= '|' . join(',', sort m/'(.+?)'/g);
 			}
 
