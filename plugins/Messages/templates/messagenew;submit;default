@@ -23,7 +23,7 @@ submission.subj | fixparam %]">[% submission.subj | strip_literal %]</A></B>.
 
 [% submission.name %] has submitted a new story on [% constants.sitename %].
 
-    [% submission.subj %]
+    [% submission.subj | decode_entities %]
     [% constants.absolutedir %]/submit.pl?op=viewsub&subid=[% submission.subid %]&title=[% submission.subj | fixparam %]
 
 [% END %]

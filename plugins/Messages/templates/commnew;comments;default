@@ -24,11 +24,11 @@ __template__
 [% ELSE %]
 
 [% reply.nickname %] has posted a new comment on [% constants.sitename %].
-    [% reply.subject %]
+    [% reply.subject | decode_entities %]
     [% constants.absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
 
 Attached to:
-    [% discussion.title %]
+    [% discussion.title | decode_entities %]
     [% Slash.url2abs(discussion.url) %]
 
 [% END %]

@@ -26,15 +26,15 @@ __template__
 [% ELSE %]
 
 [% reply.nickname %] has posted a comment in reply to your comment.
-    [% reply.subject %]    
+    [% reply.subject | decode_entities %]    
     [% constants.absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
 
 Replied to:
-    [% parent.subject %]    
+    [% parent.subject | decode_entities %]    
     [% constants.absolutedir %]/comments.pl?sid=[% parent.sid %]&cid=[% parent.cid %]
 
 Attached to:
-    [% discussion.title %]
+    [% discussion.title | decode_entities %]
     [% Slash.url2abs(discussion.url) %]
 
 [% END %]

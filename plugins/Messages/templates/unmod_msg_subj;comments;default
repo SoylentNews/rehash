@@ -1,0 +1,16 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+unmod_msg_subj
+__template__
+Undo Moderation of "[% comment.subject %]"
+__seclev__
+500

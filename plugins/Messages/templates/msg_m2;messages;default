@@ -50,7 +50,7 @@ other [% constants.sitename %] readers. Here are the exciting results:
 [% ELSE %]
 [% FOREACH m2item = m2 -%]
 	[%- reason = m2item.reason -%]
-	- "[% m2item.subj %]" from the discussion [% discussion %]
+	- "[% m2item.subj | decode_entities %]" from the discussion [% discussion | decode_entities %]
 	which you moderated as "[% reason %]" was voted [% vote_result.${m2item.vote} %]
 [% url=m2item.url; IF url; IF !m2item.url.search('^http:'); url="http:$url"; END -%]
 	<[% url %]>
