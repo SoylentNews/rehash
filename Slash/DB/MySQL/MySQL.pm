@@ -6931,7 +6931,7 @@ sub createStory {
 	}
 	if (!$error) {
 		($primaryskid, $tids) = $self->setStoryRenderedFromChosen($stoid, $story->{topics_chosen});
-		$error = "Failed to set chosen topics for story '$stoid'\n" if !$primaryskid;
+		$error = "Failed to set rendered topics for story '$stoid'\n" if !defined($primaryskid);
 	}
 	delete $story->{topics_chosen};
 	my $commentstatus = delete $story->{commentstatus};
