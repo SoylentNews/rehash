@@ -120,7 +120,7 @@ EOT
 			$temp->{$_}{bytes} = sprintf("%0.1f MB",$bytes/(1024*1024));
 			$temp->{$_}{page} = sprintf("%8d", $pages);
 			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_ipids", $uniq);
-			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_bytes", $$bytes);
+			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_bytes", $bytes);
 			$statsSave->createStatDaily($yesterday, "section_${section}_${_}_page", $pages);
 		}
 		push(@{$data{sections}}, $temp);
@@ -174,32 +174,31 @@ EOT
 			$statsSave->createStatDaily($yesterday, "$stat$suffix", $val);
 		}
 	}
-	%data = (
-		total => sprintf("%8d", $count->{total}),
-		total_bytes => sprintf("%0.1f MB",$total_bytes/(1024*1024)),
-		unique => sprintf("%8d", $count->{unique}), 
-		users => sprintf("%8d", $count->{unique_users}),
-		accesslog => sprintf("%8d", $accesslog_rows),
-		formkeys => sprintf("%8d", $formkeys_rows),
-		modlog => sprintf("%8d", $modlog_rows),
-		metamodlog => sprintf("%8d", $metamodlog_rows),
-		xmodlog	=> sprintf("%.1fx", ($modlog_rows  ? $metamodlog_rows/$modlog_rows  : 0)),
-		mod_points => sprintf("%8d", $mod_points),
-		used_total => sprintf("%8d", $modlog_total),
-		used_total_pool => sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0)),
-		used_total_comments => sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0)),
-		used_minus_1 => sprintf("%8d", $modlog_hr->{-1}{count}),
-		used_minus_1_percent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) ),
-		used_plus_1 => sprintf("%8d", $modlog_hr->{1}{count}),
-		used_plus_1_percent => sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0)),
-		comments => sprintf("%8d", $comments),
-		IPIDS => sprintf("%8d", scalar(@$distinct_comment_ipids)),
-		submissions => sprintf("%8d", $submissions),
-		sub_comments => sprintf("%8.1f", ($submissions ? $submissions_comments_match*100/$submissions : 0)),
-		total_hits => sprintf("%8d", $sdTotalHits),
-		homepage => sprintf("%8d", $count->{index}{index}),
-		day => $yesterday,
-	);
+
+	$data{total} = sprintf("%8d", $count->{total});
+	$data{total_bytes} = sprintf("%0.1f MB",$total_bytes/(1024*1024));
+	$data{unique} = sprintf("%8d", $count->{unique}), 
+	$data{users} = sprintf("%8d", $count->{unique_users});
+	$data{accesslog} = sprintf("%8d", $accesslog_rows);
+	$data{formkeys} = sprintf("%8d", $formkeys_rows);
+	$data{modlog} = sprintf("%8d", $modlog_rows);
+	$data{metamodlog} = sprintf("%8d", $metamodlog_rows);
+	$data{xmodlog} = sprintf("%.1fx", ($modlog_rows  ? $metamodlog_rows/$modlog_rows  : 0));
+	$data{mod_points} = sprintf("%8d", $mod_points);
+	$data{used_total} = sprintf("%8d", $modlog_total);
+	$data{used_total_pool} = sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0));
+	$data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_total*100/$comments : 0));
+	$data{used_minus_1} = sprintf("%8d", $modlog_hr->{-1}{count});
+	$data{used_minus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{-1}{count}*100/$modlog_total : 0) );
+	$data{used_plus_1} = sprintf("%8d", $modlog_hr->{1}{count});
+	$data{used_plus_1_percent} = sprintf("%.1f", ($modlog_total ? $modlog_hr->{1}{count}*100/$modlog_total : 0));
+	$data{comments} = sprintf("%8d", $comments);
+	$data{IPIDS} = sprintf("%8d", scalar(@$distinct_comment_ipids));
+	$data{submissions} = sprintf("%8d", $submissions);
+	$data{sub_comments} = sprintf("%8.1f", ($submissions ? $submissions_comments_match*100/$submissions : 0));
+	$data{total_hits} = sprintf("%8d", $sdTotalHits);
+	$data{homepage} = sprintf("%8d", $count->{index}{index});
+	$data{day} = $yesterday;
 
 #	my @sections;
 #	for (sort {lc($a) cmp lc($b)} keys %{$count->{index}}) {
