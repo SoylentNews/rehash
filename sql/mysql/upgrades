@@ -754,7 +754,6 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Fr
 DELETE FROM menus WHERE menu="journal" AND label="Friends";
 DELETE FROM menus WHERE menu="zoo";
 
-# SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE users_info ADD COLUMN stirred mediumint UNSIGNED DEFAULT '0' NOT NULL AFTER downmods, CHANGE COLUMN lastgranted lastgranted datetime DEFAULT '0000-00-00 00:00' NOT NULL, CHANGE COLUMN lastmm lastmm datetime DEFAULT '0000-00-00 00:00' NOT NULL;
 
@@ -785,3 +784,4 @@ UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_point
 UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_points_spent_minus_1';
 
 # USEPERL LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
