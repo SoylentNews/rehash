@@ -172,7 +172,7 @@ sub displayRSS {
 # needs a var controlling this ... what to use as desc?
 #			description	=> timeCalc($article->[0]),
 #			description	=> "$nickname wrote: " . strip_mode($article->[1], $article->[4]),
-			'link'		=> "$constants->{absolutedir}/journal.pl?op=display&uid=$uid&id=$article->[3]"
+			'link'		=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]/"
 		};
 	}
 
@@ -182,7 +182,7 @@ sub displayRSS {
 		channel => {
 			title		=> "$constants->{sitename} Journals",
 			description	=> "${nickname}'s Journal",
-			'link'		=> "$constants->{absolutedir}/journal.pl?op=display&uid=$uid",
+			'link'		=> "$constants->{absolutedir}/~" . fixparam($nickname) . "/journal/",
 			creator		=> $usertext,
 		},
 		image	=> 1,
@@ -207,7 +207,7 @@ sub displayTopRSS {
 		my $time = timeCalc($entry->[3]);
 		push @items, {
 			title	=> "$entry->[1] ($time)",
-			'link'	=> "$constants->{absolutedir}/journal.pl?op=display&uid=$entry->[2]"
+			'link'	=> "$constants->{absolutedir}/~" . fixparam($entry->[1]) . "/journal/$entry->[2]/"
 		};
 	}
 
@@ -348,7 +348,7 @@ sub listArticle {
 			default		=> $theme,
 			themes		=> $themes,
 			articles	=> $list,
-			uid		=> $form->{uid},
+			uid		=> $form->{uid} || $user->{uid},
 			nickname	=> $nickname,
 		});
 	} elsif (!$user->{is_anon} && (!$form->{uid} || $form->{uid} == $user->{uid})) {
@@ -389,7 +389,7 @@ sub saveArticle {
 			my $did = $slashdb->createDiscussion({
 				title	=> $description,
 				topic	=> $form->{tid},
-				url	=> "$rootdir/journal.pl?op=display&id=$form->{id}&uid=$user->{uid}",
+				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$form->{id}/",
 			});
 			$update{discussion}  = $did;
 
@@ -422,7 +422,7 @@ sub saveArticle {
 			my $did = $slashdb->createDiscussion({
 				title	=> $description,
 				topic	=> $form->{tid},
-				url	=> "$rootdir/journal.pl?op=display&id=$id&uid=$user->{uid}"
+				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$id/",
 			});
 			$journal->set($id, { discussion => $did });
 		}

@@ -19,7 +19,7 @@ __template__
 [% PROCESS titlebar title => diatribe.description, width => "90%" %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	<TR><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
-<I>[% Slash.timeCalc(diatribe.date) %]</I>
+<I>[% Slash.timeCalc(diatribe.date) %]</I> (<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/[% diatribe.id %]/">#[% diatribe.id %]</A>)
 	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP" ALIGN="RIGHT">
 
 [% IF user.is_anon; IF diatribe.discussion %][

@@ -37,7 +37,7 @@ END %]
 
 [% FOREACH journal = journals %]
   <TR>
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/journal.pl?op=display&amp;uid=[% journal.2 %]">[% journal.1 %]</A></TD>
+    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% journal.1 | fixparam %]/journal/">[% journal.1 | strip_literal %]</A></TD>
     <TD VALIGN="TOP">[% journal.0 %]</TD>
     <TD VALIGN="TOP"><EM>[% Slash.timeCalc(journal.3) %]</EM></TD>
   </TR>

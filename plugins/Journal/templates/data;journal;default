@@ -21,7 +21,7 @@ __template__
 	[% constants.sitename %] Journal System
 
 [% CASE 'userhead' %]
-	[% nickname %]'s Journal ([% uid %])
+	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/"><FONT COLOR="#FFFFFF">Journal</FONT></A>
 
 [% CASE 'nousers' %]
 	No users with journals found matching "[% form.nickname | strip_literal %]".
