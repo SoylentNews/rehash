@@ -4574,6 +4574,9 @@ sub getSlashConf {
 
 ##################################################################
 # What an ugly ass method that should go away  -Brian
+# It's ugly, but performs many necessary functions, and anything
+# that replaces it to perform those functions won't be any prettier
+# -- pudge
 sub autoUrl {
 	my $self = shift;
 	my $section = shift;
@@ -4705,9 +4708,9 @@ sub getPollVotesMax {
 sub getSlashdStatus {
 	my($self) = @_;
 	my $answer = _genericGet({
-		table => 'slashd_status',
-		table_prime => 'task',
-		arguments => \@_,
+		table		=> 'slashd_status',
+		table_prime	=> 'task',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -4938,9 +4941,9 @@ sub getAuthor {
 	my($self) = @_;
 	_genericCacheRefresh($self, 'authors_cache', getCurrentStatic('block_expire'));
 	my $answer = _genericGetCache({
-		table => 'authors_cache',
-		table_prime => 'uid',
-		arguments => \@_,
+		table		=> 'authors_cache',
+		table_prime	=> 'uid',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -4988,9 +4991,9 @@ sub getAdmins {
 ########################################################
 sub getComment {
 	my $answer = _genericGet({
-		table => 'comments',
-		table_prime => 'cid',
-		arguments => \@_,
+		table		=> 'comments',
+		table_prime	=> 'cid',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -4998,9 +5001,9 @@ sub getComment {
 ########################################################
 sub getPollQuestion {
 	my $answer = _genericGet({
-		table => 'pollquestions',
-		table_prime => 'qid',
-		arguments => \@_,
+		table		=> 'pollquestions',
+		table_prime	=> 'qid',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5008,8 +5011,8 @@ sub getPollQuestion {
 ########################################################
 sub getRelatedLink {
 	my $answer = _genericGet({
-		table => 'related_links',
-		arguments => \@_,
+		table		=> 'related_links',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5017,8 +5020,8 @@ sub getRelatedLink {
 ########################################################
 sub getDiscussion {
 	my $answer = _genericGet({
-		table => 'discussions',
-		arguments => \@_,
+		table		=> 'discussions',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5026,9 +5029,9 @@ sub getDiscussion {
 ########################################################
 sub getDiscussionBySid {
 	my $answer = _genericGet({
-		table => 'discussions',
-		table_prime => 'sid',
-		arguments => \@_,
+		table		=> 'discussions',
+		table_prime	=> 'sid',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5036,8 +5039,8 @@ sub getDiscussionBySid {
 ########################################################
 sub getRSS {
 	my $answer = _genericGet({
-		table => 'rss_raw',
-		arguments => \@_,
+		table		=> 'rss_raw',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5052,9 +5055,9 @@ sub getBlock {
 	my($self) = @_;
 	_genericCacheRefresh($self, 'blocks', getCurrentStatic('block_expire'));
 	my $answer = _genericGetCache({
-		table => 'blocks',
-		table_prime => 'bid',
-		arguments => \@_,
+		table		=> 'blocks',
+		table_prime	=> 'bid',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5084,9 +5087,9 @@ sub getTemplate {
 	my($self) = @_;
 	_genericCacheRefresh($self, 'templates', getCurrentStatic('block_expire'));
 	my $answer = _genericGetCache({
-		table => 'templates',
-		table_prime => 'tpid',
-		arguments => \@_,
+		table		=> 'templates',
+		table_prime	=> 'tpid',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5181,9 +5184,9 @@ sub getTemplateByName {
 ########################################################
 sub getTopic {
 	my $answer = _genericGetCache({
-		table => 'topics',
-		table_prime => 'tid',
-		arguments => \@_,
+		table		=> 'topics',
+		table_prime	=> 'tid',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5259,9 +5262,9 @@ sub getTemplates {
 ########################################################
 sub getContentFilter {
 	my $answer = _genericGet({
-		table => 'content_filters',
-		table_prime => 'filter_id',
-		arguments => \@_,
+		table		=> 'content_filters',
+		table_prime	=> 'filter_id',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5269,10 +5272,10 @@ sub getContentFilter {
 ########################################################
 sub getSubmission {
 	my $answer = _genericGet({
-		table => 'submissions',
-		table_prime => 'subid',
-		param_table => 'submission_param',
-		arguments => \@_,
+		table		=> 'submissions',
+		table_prime	=> 'subid',
+		param_table	=> 'submission_param',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5287,9 +5290,9 @@ sub getSection {
 	my($self, $section) = @_;
 	$section ||= getCurrentStatic('section');
 	my $answer = _genericGet({
-		table => 'sections',
-		table_prime => 'section',
-		arguments => \@_,
+		table		=> 'sections',
+		table_prime	=> 'section',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5297,8 +5300,8 @@ sub getSection {
 ########################################################
 sub getSubSection {
 	my $answer = _genericGetCache({
-		table => 'subsections',
-		arguments => \@_,
+		table		=> 'subsections',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5331,8 +5334,8 @@ sub getSubSectionsBySection {
 ########################################################
 sub getModeratorLog {
 	my $answer = _genericGet({
-		table => 'moderatorlog',
-		arguments => \@_,
+		table		=> 'moderatorlog',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5340,9 +5343,9 @@ sub getModeratorLog {
 ########################################################
 sub getVar {
 	my $answer = _genericGet({
-		table => 'vars',
-		table_prime => 'name',
-		arguments => \@_,
+		table		=> 'vars',
+		table_prime	=> 'name',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
@@ -5653,7 +5656,7 @@ sub _genericGetCache {
 	return _genericGet(@_) unless getCurrentStatic('cache_enabled');
 	my($passed) = @_;
 	my $table = $passed->{'table'};
-	my $table_prime = $passed->{'table_prime'} ? $passed->{'table_prime'} : 'id';
+	my $table_prime = $passed->{'table_prime'} || 'id';
 	my $param_table = $passed->{'param_table'};
 	my($self, $id, $values, $cache_flag) = @{$passed->{'arguments'}};
 
@@ -5678,7 +5681,7 @@ sub _genericGetCache {
 	}
 
 	$self->{$table_cache}{$id} = {};
-	$passed->{'arguments'} = [($self, $id)];
+	$passed->{'arguments'} = [$self, $id];
 	my $answer = _genericGet($passed);
 	$answer->{'_modtime'} = time();
 	$self->{$table_cache}{$id} = $answer;
@@ -5712,7 +5715,7 @@ sub _genericClearCache {
 sub _genericGet {
 	my($passed) = @_;
 	my $table = $passed->{'table'};
-	my $table_prime = $passed->{'table_prime'} ? $passed->{'table_prime'} : 'id';
+	my $table_prime = $passed->{'table_prime'} || 'id';
 	my $param_table = $passed->{'param_table'};
 	my($self, $id, $val) = @{$passed->{'arguments'}};
 	my($answer, $type);
@@ -5903,8 +5906,8 @@ sub getHooksByParam {
 ########################################################
 sub getHook {
 	my $answer = _genericGet({
-		table => 'hooks',
-		arguments => \@_,
+		table		=> 'hooks',
+		arguments	=> \@_,
 	});
 	return $answer;
 }
