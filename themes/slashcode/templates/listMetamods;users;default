@@ -43,6 +43,9 @@ __template__
 		<th align="left"><font size="-1" color="[% user.fg.3 %]">Mod</font></th>
 		<th align="left"><font size="-1" color="[% user.fg.3 %]">Vote</font></th>
 		<th align="left"><font size="-1" color="[% user.fg.3 %]">M2</font></th>
+		<th align="center"><font size="-1" color="[% user.fg.3 %]">Unan</font></th>
+		<th align="center"><font size="-1" color="[% user.fg.3 %]">Off</font></th>
+		<th align="center"><font size="-1" color="[% user.fg.3 %]">LD</font></th>
 	</tr>
 	[% END %]		
 	[% FOREACH m2 = metamods %]
@@ -55,6 +58,7 @@ __template__
 			done_m2s = done_m2s + 1;
 			IF m2.m2fair == 0 || m2.m2unfair == 0;
 				unanimous_m2s = unanimous_m2s + 1;
+				m2.unanimous = 1;
 			END;
 			IF m2.val > 0;
 				IF m2.m2unfair > m2.m2fair;
@@ -62,6 +66,7 @@ __template__
 					m2.offside = 1;
 					IF m2.m2fair == 1;
 						lone_dissent_m2s = lone_dissent_m2s + 1;
+						m2.ld = 1;
 					END;
 				END;
 			ELSIF m2.val < 0;
@@ -70,6 +75,7 @@ __template__
 					m2.offside = 1;
 					IF m2.m2fair == 1;
 						lone_dissent_m2s = lone_dissent_m2s + 1;
+						m2.ld = 1;
 					END;
 				END;
 			END;
@@ -93,28 +99,35 @@ __template__
 		   	END; 
 			
 		END %]
-		<td align="left">[% m2fair_str _ " " _ m2unfair_str; %][% IF m2.offside %]*[% END %]</td>
+		<td align="left">[% m2fair_str _ " " _ m2unfair_str; %]</td>
+		<td align="center">[% IF m2.unanimous %]X[% END %]</td>
+		<td align="center">[% IF m2.offside %]X[% END %]</td>
+		<td align="center">[% IF m2.ld %]X[% END %]</td>
 	</tr>
 	[% END %]
 	[% END %]
 	[% IF m2_listing %]
-	<tr bgcolor="[% user.bg.2 %]"><TD COLSPAN="5">[% PROCESS horiz_rule %]</td></tr>
+	<tr bgcolor="[% user.bg.2 %]"><TD COLSPAN="8">[% PROCESS horiz_rule %]</td></tr>
 	[% END %]
-	<tr bgcolor="[% user.bg.2 %]"><td><font size="-1"><B>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></font></td>
-	<td><font size="-1"><b>
-		Unanimous: [% unanimous_m2s %] 
-		([% Slash.getData('percentage', { sum => unanimous_m2s, count => done_m2s}, 'misc') %]) 
-		Offside: [% offside_m2s %]
-		([% Slash.getData('percentage', { sum => offside_m2s, count => done_m2s}, 'misc') %]) 
-	</b></font></td>
-	<td><font size="-1"><b>
-		Lone Dissent: [% lone_dissent_m2s %]
-		([% Slash.getData('percentage', { sum => lone_dissent_m2s, count => done_m2s}, 'misc') %]) 
-	</b></font></td>
-	<td colspan="2"><font size="-1"><b>
+	<tr bgcolor="[% user.bg.2 %]"><td colspan="2"><font size="-1" ><B>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></font></td>
+	<td colspan="3"><font size="-1"><b>
 		Unfair Votes: [% unfair_m2s %]
 		([% Slash.getData('percentage', { sum => unfair_m2s, count => total_m2s}, 'misc') %]) 
-	</b></font></td></tr>
+	</b></font></td>
+	<td align="center"><font size="-1"><b>
+		[% unanimous_m2s %]<br>
+		([% Slash.getData('percentage', { sum => unanimous_m2s, count => done_m2s}, 'misc') %]) 
+	</b></font></td>
+	<td align="center"><font size="-1"><b>
+		[% offside_m2s %]<br>
+		([% Slash.getData('percentage', { sum => offside_m2s, count => done_m2s}, 'misc') %]) 
+	</b></font></td>
+	<td align="center"><font size="-1"><b>
+		[% lone_dissent_m2s %]<br>
+		([% Slash.getData('percentage', { sum => lone_dissent_m2s, count => done_m2s}, 'misc') %]) 
+	</b></font></td>
+
+	</tr>
 	</table>
 	</td></tr></table>
 		
