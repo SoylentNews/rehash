@@ -470,7 +470,7 @@ sub sqlSelectHash {
 sub sqlCount {
 	my($self, $table, $where) = @_;
 
-	my $sql = "SELECT count(*) AS count FROM $table";
+	my $sql = "SELECT COUNT(*) AS count FROM $table";
 	$sql .= " WHERE $where" if $where;
 
 	# we just need one stinkin value - count
