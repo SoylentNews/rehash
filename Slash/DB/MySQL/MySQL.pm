@@ -2739,8 +2739,6 @@ sub createUser {
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
-	$self->sqlInsert("users_count", { uid => $uid });
-
 	$self->setUser_delete_memcached($uid);
 
 	return $uid;
@@ -6942,6 +6940,8 @@ sub setCommentForMod {
 	# We have to select cid here because LOCK IN SHARE MODE
 	# only works when an indexed column is returned.
 	# Of course, this isn't actually going to work at all
+	# (unless you keep your main DB all-InnoDB and put the
+	# MyISAM FULLTEXT indexes onto a slave search-only DB)
 	# since the comments table is MyISAM.  Eventually, though,
 	# we'll pull the indexed blobs out and into comments_text
 	# and make the comments table InnoDB and this will work.
