@@ -12,6 +12,7 @@ __name__
 graph
 __template__
 [% FILTER null;
+# pie graph not implemented yet
 IF form.type == 'pie';
    USE my_graph = GD.Graph.pie(600, 400);
 
@@ -47,7 +48,11 @@ ELSE;  # default to lines
       nums = [];
       FOREACH day = this.data.keys.sort;
          IF (form.type == 'areapercentage');
+            IF mytotal.${day};
             mynum = this.data.${day} / mytotal.${day} * 100;
+         ELSE;
+               mynum = 0;
+            END;
          ELSE;
             mynum = this.data.${day};
          END;

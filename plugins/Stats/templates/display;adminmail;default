@@ -11,6 +11,9 @@ en_US
 __name__
 display
 __template__
+[% # if changing this top part, try to change the report template too, or at least %]
+[% # notify pudge so he can change it                                              %]
+
 [% constants.sitename %] Stats for [% day %]
 
                    UIDs      IPIDs      Pages 

@@ -11,20 +11,64 @@ en_US
 __name__
 report
 __template__
+[%
+   # handy sprintf-style formats
+   USE format;
+   mbytes = format("%0.1f MB");
+   ints = format("%8d");
+   pcts = format("%8d");
+
+   stats = Slash.getObject('Slash::Stats');
+
+   BLOCK mbyte;
+      bytes = bytes / (1024*1024);
+      mbytes(bytes);
+   END;
+
+%]
+
+[% reports = {
+      'main' => 'Main Report'
+} %]
+
 [% SWITCH form.report;
 
    CASE 'main';
       reportblock = BLOCK;
-
       type        = 'area';
       section     = 'all';
+      form.stats_days = form.stats_days || 1;
+
+      stats_data_big = stats.getAllStats({ section => section, days => 1}).${section};
+      stats_data_key = stats_data_big.keys.sort.0;
+      stats_data = stats_data_big.${stats_data_key};
+
+%]
+      
+<PRE>                   UIDs      IPIDs      Pages 
+        total: [% ints(stats_data.users) %]   [% ints(stats_data.unique) %]   [% ints(stats_data.total) %] ([% PROCESS mbyte bytes => stats_data.total_bytes %])
+ static total:        -          -    [% ints(stats_data.total_static) %]
+  grand total:        -          -    [% ints(stats_data.grand_total) %] ([% PROCESS mbyte bytes => stats_data.grand_total_bytes %])
+        posts: [% ints(stats_data.distinct_comment_posters_uids) %]   [% ints(stats_data.IPIDS) %]
+     comments: [% ints(stats_data.comments_uids) %]   [% ints(stats_data.comments_ipids) %]   [% ints(stats_data.comments_page) %] ([% PROCESS mbyte bytes => stats_data.comments_bytes %])
+        index:        -          -   [% ints(stats_data.homepage) %]
+     articles: [% ints(stats_data.article_uids) %]   [% ints(stats_data.article_ipids) %]   [% ints(stats_data.article_page) %] ([% PROCESS mbyte bytes => stats_data.article_bytes %])
+       search: [% ints(stats_data.search_uids) %]   [% ints(stats_data.search_ipids) %]   [% ints(stats_data.search_page) %] ([% PROCESS mbyte bytes => stats_data.search_bytes %])
+     journals: [% ints(stats_data.journal_uids) %]   [% ints(stats_data.journal_ipids) %]   [% ints(stats_data.journal_page) %] ([% PROCESS mbyte bytes => stats_data.journal_bytes %])
+         palm: [% ints(stats_data.palm_uids) %]   [% ints(stats_data.palm_ipids) %]   [% ints(stats_data.palm_page) %] ([% PROCESS mbyte bytes => stats_data.palm_bytes %])
+          rss: [% ints(stats_data.rss_uids) %]   [% ints(stats_data.rss_ipids) %]   [% ints(stats_data.rss_page) %] ([% PROCESS mbyte bytes => stats_data.rss_bytes %])
+     comments: [% ints(stats_data.comments) %] posted yesterday
+  submissions: [% ints(stats_data.submissions) %] submissions 
+ sub/comments: [% pcts(stats_data.sub_comments) %]% of the submissions came from comment posters from this day
+
+   total hits: [% ints(stats_data.total_hits) %]</PRE>
+
+[%
 
       PROCESS make_graph gtitle => 'Pages',
-         type    => 'area',
          stats   => ['total', 'index_page', 'comments_page', 'article_page'];
 
       PROCESS make_graph gtitle => 'Hits',
-         type    => 'area',
          stats   => ['grand_total', 'rss_page', 'palm_page'];
 
       PROCESS make_graph gtitle => 'Users',
@@ -33,11 +77,10 @@ __template__
 
       PROCESS make_graph gtitle => 'Page Bytes',
          type    => 'area',
-         stats   => ['total_bytes', 'index_bytes', 'comments_bytes', 'article_bytes'];
+         stats   => ['total_bytes', 'index_bytes', 'article_bytes', 'comments_bytes'];
 
       PROCESS make_graph gtitle => 'Total Bytes',
-         type    => 'area',
-         stats   => ['total_bytes', 'rss_bytes', 'palm_bytes'];
+         stats   => ['grand_total_bytes', 'rss_bytes', 'palm_bytes'];
 
       sections = Slash.db.getDescriptions('sections');
       sect_page = [];
@@ -47,23 +90,13 @@ __template__
          sect_byte.push(['bytes', section]);
       END;
 
-      PROCESS make_graph gtitle => 'Section Pages',
-         type    => 'lines',
-         stats   => sect_page;
-
-      PROCESS make_graph gtitle => 'Section Bytes',
-         type    => 'lines',
-         stats   => sect_byte;
-
+      PROCESS make_graph gtitle => 'Section Pages', type => 'lines', stats => sect_page;
+      PROCESS make_graph gtitle => 'Section Bytes', type => 'lines', stats => sect_byte;
    END;
 
 END %]
 
 [% PROCESS titlebar title => reports.${form.report} _ ' for ' _ constants.sitename %]
-
-[% reports = {
-      'main' => 'Main Report'
-} %]
 
 <FORM METHOD="POST" ACTION="[% env.script_name %]">
    [% Slash.createSelect('report', reports, form.report, 1) %]
