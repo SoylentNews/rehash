@@ -1,0 +1,43 @@
+__section__
+default
+__description__
+Displays multi-topics portion of the search form.
+Form field names should be of the form "topic_<tid>".
+
+Accepts the fillowing parameters:
+
+	* selected_topics = List of selected topics in hashref form, (ie, 
+		a topic is selected if $selected_topic{$topic} is non-zero)
+
+	* topics = List of topics to choose from. Each element is:
+		* name = topic name
+		* tid = topic id#
+
+__title__
+Multi-topics Search Form
+__page__
+search
+__lang__
+en_US
+__name__
+topicsearch
+__seclev__
+10000
+__template__
+<TABLE CELLPADDING=4 CELLSPACING=2>
+	<TR>
+        [%- maxcol = (topics.keys.size div 3) + 1; col = 0 -%]
+        [%- FOR t = topics.sort -%]
+                [%- IF !topics.$t || (topics.$t == 'All Topics'); NEXT; END -%]
+                [%- IF (col % maxcol) == 0 -%]
+                [% IF col %]</TD>[% END %]
+                <TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
+                [% END -%]
+                <INPUT TYPE="checkbox" NAME="topic_[% t %]" VALUE="[%
+                topics.$t %]"[% IF form.selected_topics.$t %] CHECKED[%
+                END %]>[% topics.$t %]<BR>
+                [%- col = col + 1 %]
+        [% END -%]
+                </TD>
+        </TR>
+</TABLE>

@@ -216,12 +216,22 @@ sub findStory {
 	my($self, $form, $start, $limit, $sort) = @_;
 	$start ||= 0;
 
+	# sanity check
+	return if $form->{selected_topics} &&
+		  ref $form->{selected_topics} ne 'HASH';
+
+	# This should handle multiple topics now that var$multitopics_enabled
+	# has been added.
+
 	my $query = $self->sqlQuote($form->{query});
 	my $columns = "users.nickname, stories.title, stories.sid as sid, time, commentcount, stories.section";
 	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as score "
 		if ($form->{query} && $sort == 2);
 
 	my $tables = "stories,users";
+	$tables .= ",story_topics"
+		if getCurrentStatic('multitopics_enabled') && 
+		   $form->{selected_topics};
 	$tables .= ",story_text" if $form->{query};
 
 	my $other;
@@ -254,10 +264,22 @@ sub findStory {
 		$tables .= ", sections";
 		$where .= " AND sections.section = stories.section AND sections.isolate != 1 ";
 	}
-	$where .= " AND tid=" . $self->sqlQuote($form->{topic})
-		if $form->{topic};
+
+	if (getCurrentStatic('multitopics_enabled') && $form->{selected_topics}) {
+		local $" = ',';
+		$where .= <<EOT if %{$form->{selected_topics}};
+AND story_topics.tid in (@{[keys %{$form->{selected_topics}}]})
+AND story_topics.sid=stories.sid
+EOT
+
+	} else {
+		$where .= " AND tid=" . $self->sqlQuote($form->{topic})
+			if $form->{topic};
+	}
 	
 	my $sql = "SELECT $columns FROM $tables WHERE $where $other";
+
+	print STDERR "findStories: $sql\n";
 
 	$self->sqlConnect();
 	my $cursor = $self->{_dbh}->prepare($sql);

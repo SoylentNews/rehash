@@ -2,6 +2,8 @@ __section__
 default
 __description__
 
+The multitopic portion of the search form is stored in the template:
+	topicsearch;search;<section>
 __title__
 
 __page__
@@ -48,16 +50,20 @@ __template__
 		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
 	[% END %]
 
-	[% IF topics %]
-		[% Slash.createSelect("topic", topics, form.topic, 1, 0, 1) %]
-	[% END %]
+	[% IF topics && !constants.multitopics_enabled;
+		Slash.createSelect("topic", topics, form.topic, 1, 0, 1);
+	END %]
 
-	[% IF sections %]
-		[% Slash.createSelect("section", sections, form.section, 1, 0, 1) %]
-	[% END %]
+	[% IF sections;
+		Slash.createSelect("section", sections, form.section, 1, 0, 1);
+	END %]
 
 	[% Slash.createSelect("sort", sort, form.sort, 1) %]
 
+	[% IF constants.multitopics_enabled;
+		"<P>\n";
+		INCLUDE topicsearch;
+	END %]
 	<P>
 </FORM>
 
