@@ -272,7 +272,7 @@ and 'printCommComments' template blocks.
 =cut
 
 sub printComments {
-	my($discussion, $pid, $cid, $honor_no_display) = @_;
+	my($discussion, $pid, $cid) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -316,7 +316,7 @@ sub printComments {
 		lvl		=> $lvl,
 	});
 
-	return if (($user->{state}{nocomment} || $user->{mode} eq 'nocomment') && $honor_no_display);
+	return if ($user->{state}{nocomment} || $user->{mode} eq 'nocomment');
 
 	my($comment, $next, $previous);
 	if ($cid) {
