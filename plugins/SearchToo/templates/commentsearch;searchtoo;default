@@ -11,7 +11,10 @@ en_US
 __name__
 commentsearch
 __template__
+[% IF constants.search_too_class == 'Slash::SearchToo::Classic' %]
 <p>This search covers only subjects of comments that are posted.</p>
+[% END %]
+
 [% FOREACH comment=results.records %]
 	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
 	<b><a href="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</a></b>

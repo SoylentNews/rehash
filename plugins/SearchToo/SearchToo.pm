@@ -23,6 +23,7 @@ sub new {
 	my $self = getObject($api_class, $user);
 
 	if (!$self) {
+		warn "Could not get $api_class";
 		$self = {};
 		bless($self, $class);
 		$self->{virtual_user} = $user;
@@ -56,7 +57,7 @@ sub prepResults {
 
 	if (defined $matches) {
 		$results->{records_next} = $results->{records_end} + 1
-			if $matches > $results->{records_end};
+			if $matches > $results->{records_end} + 1;
 	} else {
 		# we added one before; subtract it now
 		--$max;
@@ -79,16 +80,11 @@ sub prepResults {
 
 
 #################################################################
-# these are implemeted in backend modules
-sub findRecords {
-	return;
-}
-
-
-#################################################################
-sub addRecords {
-	return;
-}
+# these are implemeted only in backend modules
+sub findRecords { warn "findRecords must be implemented in a subclass"; return }
+# these are OK to be nonfunctional
+sub addRecords  { return }
+sub prepRecord  { return }
 
 1;
 
