@@ -16,6 +16,7 @@ en_US
 __name__
 metaModerate
 __template__
+[% IF count > 0 %]
 [% IF user.seclev > 10 %]<UL>[% FOR c = changes %]
 <LI>Updating UID #[% c.0 %] for [% c.1 %]
 [% END %]</UL>[% END %]
@@ -23,5 +24,8 @@ __template__
 You may wanna go back <A HREF="[% constants.rootdir %]/">home</A> or perhaps to
 <A HREF="[% constants.rootdir %]/users.pl">your user page</A>.
 [% IF user.seclev > 10 %]<P>Total unfairs is [% metamod.unfair %][% END %]
+[% ELSE %]
+Hey, you didn't actually metamoderate anything! Perhaps you want to <A HREF="[% constants.rootdir %]/metamod.pl">go back and try again</A> or <A HREF="[% constants.rootdir %]/">forget it</A>.
+[% END %]
 __seclev__
 1000

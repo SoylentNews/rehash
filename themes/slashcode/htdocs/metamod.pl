@@ -106,14 +106,15 @@ sub metaModerate {
 	# Note the use of a naked "10" here for the M2 flag. This is used
 	# to denote M2 entries that have yet to be reconciled.
 	my $changes = $slashdb->setMetaMod(\%m2victims, 10, scalar time);
+	my $count = $constants->{m2_comments} - $y;
 
 	slashDisplay('metaModerate', {
 		changes	=> $changes,
-		count	=> $constants->{m2_comments} - $y,
+		count	=> $count,
 		metamod	=> \%metamod,
 	});
 
-	$slashdb->setModeratorVotes($user->{uid}, \%metamod);
+	$slashdb->setModeratorVotes($user->{uid}, \%metamod) if $count > 0;
 }
 
 #################################################################
