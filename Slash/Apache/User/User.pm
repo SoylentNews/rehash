@@ -232,8 +232,13 @@ sub handler {
 			# only allow this for certain pages/ops etc.
 			# and that page must doublecheck for permissions etc., still,
 			# redirecting user back to a main page upon failure
+			# ... it would be nice to have a way to set this in a table
+			# or vars or somesuch, but how?  is there danger in
+			# opening it up to everything instead of closing it off?
 			if (
 				($constants->{rss_allow_index} && $form->{content_type} eq 'rss' && $uri =~ m{^/index\.pl$})
+					||
+				($constants->{plugin}{ScheduleShifts} && $uri =~ m{^/shifts\.pl$})
 					||
 				# hmmm ... journal.pl no work, because can be called as /journal/
 				($constants->{journal_rdfitemdesc_html} && $form->{content_type} eq 'rss' && $uri =~ m{\bjournal\b})
