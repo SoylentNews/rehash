@@ -1421,11 +1421,11 @@ sub moderate {
 	my $was_touched = 0;
 
 	my $meta_mods_performed = 0;
-	if ($user->{is_admin}){
+	if ($user->{is_admin}) {
 		$meta_mods_performed = metaModerate();		
 	}
 
-	if ($form->{meta_mod_only}){
+	if ($form->{meta_mod_only}) {
 		titlebar("100%", "MetaModerating...");
 		print getData("metamoderate_message");
 		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
