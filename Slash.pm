@@ -1512,7 +1512,13 @@ EOT
 
 ########################################################
 sub redirect {
-	my $url = URI->new_abs(shift, $I{rootdir})->canonical->as_string;
+	my $url = shift;
+
+	if ($I{rootdir}) {	# rootdir strongly recommended
+		$url = URI->new_abs($url, $I{rootdir})->canonical->as_string;
+	} elsif ($url !~ m|^https?://|i) {	# but not required
+		$url =~ s|^/*|$I{rootdir}/|;
+	}
 
 	my %params = (
 		-type		=> 'text/html',
@@ -2961,8 +2967,6 @@ EOT
 	}
 	return(1);
 }
-
-
 
 ########################################################
 sub CLOSE { $I{dbh}->disconnect if $I{dbh} }

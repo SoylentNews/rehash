@@ -265,6 +265,8 @@ sub varSave {
 sub authorEdit {
 	my ($aid) = @_;
 
+	return if $I{U}{aseclev} < 500;
+
 	$aid ||= $I{U}{aid};
 	$aid = '' if $I{F}{authornew};
 
@@ -333,6 +335,7 @@ print qq|\t</TR>\n</TABLE>\n</FORM>\n|;
 
 ##################################################################
 sub authorSave {
+	return if $I{U}{aseclev} < 500;
 	if ($I{F}{thisaid}) {
 		my($exists) = sqlSelect('count(*)', 'authors',
 			'aid=' . $I{dbh}->quote($I{F}{thisaid})
@@ -366,7 +369,8 @@ sub authorSave {
 
 ##################################################################
 sub authorDelete {
-		my $aid = shift;
+	return if $I{U}{aseclev} < 500;
+	my $aid = shift;
 
 	print qq|<FORM ACTION="$ENV{SCRIPT_NAME}" METHOD="POST">|;
 	print <<EOT if $I{F}{authordelete};

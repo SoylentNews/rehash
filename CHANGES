@@ -1,6 +1,8 @@
 slash-1.0.6, 2000.06.xx
 -----------------------
 
+*	Don't let users edit authors without seclev >= 500 (ttyp0)
+
 *	Fix for all TEXTAREA sections, converting all < and > and &
 	characters to HTML entities
 
@@ -8,6 +10,7 @@ slash-1.0.6, 2000.06.xx
 	checkbox is for deleting comments
 
 *	Change redirect code to use URI->new_abs->canonical
+	(still use old method if $rootdir eq '')
 
 *	search.pl should now properly count rows in result-set so
 	the "more left" link at the bottom now works. This code
