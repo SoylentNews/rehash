@@ -21,10 +21,18 @@ __template__
 	[% constants.sitename %] Journal System
 
 [% CASE 'userhead' %]
+[% IF user.light %]
+	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</FONT>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</A>
+[% ELSE %]
 	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/"><FONT COLOR="#FFFFFF">Journal</FONT></A>
+[% END %]
 
 [% CASE 'friendhead' %]
+[% IF user.light %]
+	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</A>
+[% ELSE %]
 	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/"><FONT COLOR="#FFFFFF">Friends</FONT></A>
+[% END %]
 
 [% CASE 'nousers' %]
 	No users with journals found matching "[% form.nickname | strip_literal %]".
