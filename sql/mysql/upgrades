@@ -468,7 +468,6 @@ INSERT INTO vars (name, value, description) VALUES ('draconian_charrefs','0','En
 # Forgot this one a little while ago I think.
 INSERT INTO vars (name, value, description) VALUES ('approved_url_schemes','ftp|http|gopher|mailto|news|nntp|telnet|wais|https','Schemes that can be used in comment links without being stripped of bogus chars');
 
-# USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_29, Start of T_2_3_0_30
@@ -487,13 +486,13 @@ INSERT INTO vars (name, value, description) VALUES ('mod_stats','1','Include sta
 
 DROP TABLE IF EXISTS sections_contained;
 CREATE TABLE sections_contained (
-	id SMALLINT UNSIGNED NOT NULL auto_increment,
-	container varchar(30) NOT NULL,
-	section varchar(30) NOT NULL,
-	UNIQUE (container,section),
-	FOREIGN KEY (container) REFERENCES sections(section),
-	FOREIGN KEY (section) REFERENCES sections(section),
-	PRIMARY KEY (id)
+  id SMALLINT UNSIGNED NOT NULL auto_increment,
+  container varchar(30) NOT NULL,
+  section varchar(30) NOT NULL,
+  UNIQUE (container,section),
+  FOREIGN KEY (container) REFERENCES sections(section),
+  FOREIGN KEY (section) REFERENCES sections(section),
+  PRIMARY KEY (id)
 ) TYPE = myisam;
 ALTER TABLE sections ADD rewrite mediumint UNSIGNED DEFAULT '3600' NOT NULL;
 ALTER TABLE sections ADD last_update timestamp;
@@ -501,5 +500,6 @@ ALTER TABLE sections ADD last_update timestamp;
 # For plugins/Email ONLY (LC, Slashcode, etc -- NOT SLASHDOT!)
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story', 1, 0);
 
-DELETE FROM vars WHERE name='comment_nonstartwordchars';
+# USEPERL LAST UPDATED HERE
 
+DELETE FROM vars WHERE name='comment_nonstartwordchars';
