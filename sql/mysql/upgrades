@@ -1032,4 +1032,9 @@ UPDATE sections SET defaultsection='articles' WHERE section='index';
 ALTER TABLE sections DROP extras;
 
 # USEPERL LAST UPDATED HERE
+
 DELETE FROM templates WHERE section="admin";
+
+# Change for plugins/Journal (ignore if not using that plugin)
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Edit Preferences','[% constants.rootdir %]/journal.pl?op=editprefs',1,4);
+
