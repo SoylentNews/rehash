@@ -1855,21 +1855,26 @@ Returns 0;
 =cut
 
 sub errorLog {
-	my($package, $filename, $line) = caller(1);
 	return if $Slash::Utility::NO_ERROR_LOG;
-	if ($ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		if ($r) {
-			$r->log_error("$ENV{SCRIPT_NAME}:$package:$filename:$line:@_");
-			($package, $filename, $line) = caller(2);
-			$r->log_error ("Which was called by:$package:$filename:$line:@_\n");
 
-			return 0;
-		}
+	my $level = 1;
+	$level++ while (caller($level))[3] =~ /log/i;  # ignore other logging subs
+
+	my(@errors, $package, $filename, $line);
+
+	($package, $filename, $line) = caller($level++);
+	push @errors, ":$package:$filename:$line:@_";
+	($package, $filename, $line) = caller($level++);
+	push @errors, "Which was called by:$package:$filename:$line:@_" if $package;
+
+	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
+		$errors[0] = $ENV{SCRIPT_NAME} . $errors[0];
+		$errors[-1] .= "\n";
+		$r->log_error($_) for @errors;
+	} else {
+		$errors[0] = 'Error' . $errors[0];
+		print STDERR $_, "\n" for @errors;
 	}
-	print STDERR ("Error in library:$package:$filename:$line:@_\n");
-	($package, $filename, $line) = caller(2);
-	print STDERR ("Which was called by:$package:$filename:$line:@_\n") if $package;
 
 	return 0;
 }

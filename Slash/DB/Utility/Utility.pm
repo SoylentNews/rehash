@@ -265,7 +265,7 @@ sub sqlSelectMany {
 		return $sth;
 	} else {
 		$sth->finish;
-		errorLog($sql);
+		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
 		return undef;
 	}
@@ -284,7 +284,7 @@ sub sqlSelect {
 	$self->sqlConnect();
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
-		errorLog($sql);
+		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
 		return undef;
 	}
@@ -309,7 +309,7 @@ sub sqlSelectArrayRef {
 	$self->sqlConnect();
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
-		errorLog($sql);
+		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
 		return undef;
 	}
@@ -358,7 +358,7 @@ sub sqlSelectHashref {
 	my $sth = $self->{_dbh}->prepare($sql);
 
 	unless ($sth->execute) {
-		errorLog($sql);
+		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
 		return;
 	}
@@ -382,7 +382,7 @@ sub sqlSelectColArrayref {
 
 	my $array = $self->{_dbh}->selectcol_arrayref($sth);
 	unless (defined($array)) {
-		errorLog($sql);
+		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
 		return;
 	}
@@ -416,7 +416,7 @@ sub sqlSelectAll {
 
 	my $H = $self->{_dbh}->selectall_arrayref($sql);
 	unless ($H) {
-		errorLog($sql);
+		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
 		return;
 	}
@@ -608,7 +608,7 @@ sub sqlDo {
 	my $rows = $self->{_dbh}->do($sql);
 	unless ($rows) {
 		unless ($sql =~ /^INSERT\s+IGNORE\b/i) {
-			errorLog($sql);
+			$self->sqlErrorLog($sql);
 		}
 		$self->sqlConnect;
 		return;
@@ -618,10 +618,21 @@ sub sqlDo {
 }
 
 #################################################################
+# Log the error
+sub sqlErrorLog {
+	my($self, $sql) = @_;
+	my $error = $self->sqlError || 'no error string';
+
+	my @return = ("DB=$self->{virtual_user}", $error);
+	push @return, $sql if $sql;
+	errorLog(join ' -- ', @return);
+}
+
+#################################################################
 # Keeps encapsulation
 sub sqlError {
 	my($self) = @_;
-	$self->sqlConnect;
+	# can't call any other DBI calls before errstr, or we lose errstr -- pudge
 	return $self->{_dbh}->errstr;
 }
 
