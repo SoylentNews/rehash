@@ -138,7 +138,7 @@ CREATE TABLE hooks (
 
 ALTER TABLE stories ADD COLUMN qid MEDIUMINT UNSIGNED DEFAULT NULL;
 
-perl -MSlash::Test=virtusername -le '$qs = $slashdb->sqlSelectAllHashrefArray("qid, pollquestions.sid AS sid", "pollquestions, stories", "pollquestions.sid=stories.sid"); for my $hr (@$qs) { my($q,$s) = ($hr->{qid}, $hr->{sid}); my $sq=$slashdb->sqlQuote($s); print "$q -> $s\n"; $slashdb->sqlUpdate("stories", { qid => $q }, "sid=$sq") or die "\tFAILED" }'
+perl -MSlash::Test=virtusername -le '$qs = $slashdb->sqlSelectAllHashrefArray("pollquestions.qid AS qid, pollquestions.sid AS sid", "pollquestions, stories", "pollquestions.sid=stories.sid"); for my $hr (@$qs) { my($q,$s) = ($hr->{qid}, $hr->{sid}); my $sq=$slashdb->sqlQuote($s); print "$q -> $s"; $slashdb->sqlUpdate("stories", { qid => $q }, "sid=$sq") or die "\tFAILED" }'
 
 # (and, once we're convinced everything works)
 ALTER TABLE pollquestions DROP COLUMN sid;
