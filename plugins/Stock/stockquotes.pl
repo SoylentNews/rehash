@@ -59,10 +59,8 @@ $task{$me}{code} = sub {
 			$stock->{year_hi}	= sprintf("%.1f", $2);
 		}
 		if ($stockfetch{$sym,"cap"} ne ""
-			and $stockfetch{$sym,"cap"} =~ /([\d.]+)/) {
-			# XXX something wrong here... market caps seem
-			# way off, not sure why
-			$stock->{cap}		= sprintf("%.0fM", $1);
+			and $stockfetch{$sym,"cap"} =~ /([\d.]+)([BM])?/) {
+			$stock->{cap}		= sprintf("%.0f$2", $1);
 		} else {
 			$stock->{cap}		= "<i>n/a</i>";
 		}
