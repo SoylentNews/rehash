@@ -1642,12 +1642,10 @@ sub createEnvironment {
 			$new_cfg->{rootdir} = $_->{url};
 			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
 			$new_cfg->{defaultsection} = $_->{section};
-# this is in Apache, but not here?  should it be here?  -- pudge
-#			$new_cfg->{section} = $_->{section};
+			$new_cfg->{section} = $_->{section};
 			$new_cfg->{basedomain} = $_->{hostname};
 			$new_cfg->{static_section} = $_->{section};
 			$new_cfg->{index_handler} = $_->{index_handler};
-			$new_cfg->{form_override}{section} = $_->{section};
 			$site_constants->{$_->{hostname}} = $new_cfg;
 		}
 	}
