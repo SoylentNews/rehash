@@ -349,3 +349,17 @@ ALTER TABLE templates ADD last_update timestamp;
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+
+# Added for some Calendar stuff I am working on -Brian
+INSERT INTO code_param (type, code, name) VALUES ('months',1,'January');
+INSERT INTO code_param (type, code, name) VALUES ('months',2,'Febuary');
+INSERT INTO code_param (type, code, name) VALUES ('months',3,'March');
+INSERT INTO code_param (type, code, name) VALUES ('months',4,'April');
+INSERT INTO code_param (type, code, name) VALUES ('months',5,'May');
+INSERT INTO code_param (type, code, name) VALUES ('months',6,'June');
+INSERT INTO code_param (type, code, name) VALUES ('months',7,'July');
+INSERT INTO code_param (type, code, name) VALUES ('months',8,'August');
+INSERT INTO code_param (type, code, name) VALUES ('months',9,'September');
+INSERT INTO code_param (type, code, name) VALUES ('months',10,'October');
+INSERT INTO code_param (type, code, name) VALUES ('months',11,'November');
+INSERT INTO code_param (type, code, name) VALUES ('months',12,'December');
