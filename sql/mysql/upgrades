@@ -732,3 +732,5 @@ REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes',
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks/',1,4);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,5);
 REPLACE INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,6);
+
+# Rebuild Zoo at this point
