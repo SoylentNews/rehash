@@ -24,7 +24,7 @@ sub main {
 		return;
 	}
 
-	my $section = $slashdb->getSection();
+	my $section = $slashdb->getSection($form->{section});
 
 	my $title = getData('head', { section => $section->{section} });
 	header($title, $section->{section});

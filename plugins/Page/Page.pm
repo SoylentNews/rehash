@@ -302,7 +302,7 @@ sub getLinksContent {
 		slashDisplay('storylink', {
 			links	=> \@links,
 			sid	=> $storyref->{sid},
-		}, { Page => 'index', Section => 'default', Return => 1});
+		}, { Section => 'default', Return => 1});
 
 	return($storycontent);
 }
@@ -317,7 +317,7 @@ sub getStoryContent {
 		section	=> $storyref->{sectionref},
 		author	=> $storyref->{authorref},
 		story	=> $storyref,
-	},{ Page => 'index', Return => 1});	
+	},{ Return => 1});	
 	
 	return($storycontent);
 }
