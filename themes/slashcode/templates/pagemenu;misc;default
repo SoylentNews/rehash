@@ -19,19 +19,19 @@ __template__
 -%]
 Pages:
 [%- IF form.pagenum == 1; '&lt;'; ELSE -%]
-<A HREF="[% storylinks.0 %]&amp;pagenum=[% form.pagenum - 1 %]" TITLE="Previous Page">&lt;</A>
+<A HREF="[% storylinks.0 | strip_attribute %]&amp;pagenum=[% form.pagenum - 1 %]" TITLE="Previous Page">&lt;</A>
 [% END -%]
 [%-   FOREACH mypage = [ 0 .. user.state.pagebreaks ];
         mypage = mypage + 1;
         IF mypage == form.pagenum %]
 <B>[% mypage %]</B>
 [%-     ELSE -%]
-<A HREF="[% storylinks.0 %]&amp;pagenum=[% mypage %]" TITLE="Page [% mypage %]">[% mypage %]</A>
+<A HREF="[% storylinks.0 | strip_attribute %]&amp;pagenum=[% mypage %]" TITLE="Page [% mypage %]">[% mypage %]</A>
 [%-      END;
         " | " UNLESS loop.last;
       END %]
 [% IF form.pagenum == user.state.pagebreaks + 1; '&gt;'; ELSE -%]
-<A HREF="[% storylinks.0 %]&amp;pagenum=[% form.pagenum + 1 %]" TITLE="Next Page">&gt;</A>
+<A HREF="[% storylinks.0 | strip_attribute %]&amp;pagenum=[% form.pagenum + 1 %]" TITLE="Next Page">&gt;</A>
 [%- END -%]
 [% END %]
 __seclev__

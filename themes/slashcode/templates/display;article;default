@@ -88,7 +88,7 @@ END %]
 			section	=> s.section
 		};
 		storylinks = Slash.linkStory(ls) -%]
-<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
+<A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</A>
 	[%- END;
 END %]
 

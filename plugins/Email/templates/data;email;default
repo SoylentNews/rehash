@@ -50,7 +50,7 @@ CASE 'mail_result';
 	UNLESS rc -%]
 [% storylinks = Slash.linkStory({ link => "the story", sid => form.sid }) %]
 Story mailed successfully.  Return to
-<A HREF="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</A>
+<A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</A>
 or to <A HREF="[% constants.rootdir %]/">the home page</A>.
 	[%- ELSE;
 "An error occured while attempting to mail the story.  Please check that

@@ -11,12 +11,12 @@ en_US
 __name__
 storyTitleOnly
 __template__
-<p><small>[% Slash.timeCalc(story.time, '%B %d, %Y') %]</small><br>
-<b>[% storylinks = Slash.linkStory({
+<P><SMALL>[% Slash.timeCalc(story.time, '%B %d, %Y') %]</SMALL><BR>
+<B>[% storylinks = Slash.linkStory({
 	link	=> story.title,
 	sid	=> story.sid,
 	section => story.section
-}) %]<a href="[% storylinks.0 %]"[% IF storylinks.2 %] title="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</a></b></p>
+}) %]<A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</A></B></P>
 __seclev__
 100
 __version__

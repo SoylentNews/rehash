@@ -24,8 +24,8 @@ __template__
 <TR bgcolor="[% user.bg.3 %]"><TH ALIGN="LEFT"><font color="[% user.fg.0 %]" size=-1>Discussion</font></TH><TH ALIGN="LEFT"><font color="[% user.fg.0 %]" size=-1>Referrer</font></TH><TH ALIGN="LEFT"><font color="[% user.fg.0 %]" size=-1>Last Update</font></TH><TH ALIGN="RIGHT"><font color="[% user.fg.0 %]" size=-1>Comment Count</font></TH></TR>
 [% FOR discussion = discussions %]
 	<TR bgcolor="[% user.bg.2 %]"><TD><A HREF="[% constants.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
-IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A></TD>
-	<TD><A HREF="[% discussion.url %]">referrer</A></TD><TD>[% Slash.timeCalc(discussion.last_update) %]</TD><TD ALIGN="RIGHT">[% discussion.commentcount %] comments </TD></TR>
+IF discussion.title.defined %][% discussion.title | strip_html %][% ELSE %]untitled[% END %]</A></TD>
+	<TD><A HREF="[% discussion.url | strip_attribute %]">referrer</A></TD><TD>[% Slash.timeCalc(discussion.last_update) %]</TD><TD ALIGN="RIGHT">[% discussion.commentcount %] comment[% discussion.commentcount == 1 ? "&nbsp;" : "s" %] </TD></TR>
 [% END %]
 [% END %]
 </TABLE>
