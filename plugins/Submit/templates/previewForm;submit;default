@@ -55,7 +55,7 @@ __template__
 	[% FOR extra = extras %]
 		[% PROCESS formLabel value => extra.1, comment => "" %]
 		[% IF extra.2 == 'text' %]
-			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} %]" SIZE="50">
+			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} | strip_attribute %]" SIZE="50">
 		[% ELSIF extra.2 == 'list' %]
 			[% # section:value %]
 			[% pulldown = "$extra.3:$extra.1" %]
