@@ -254,11 +254,15 @@ INSERT INTO submissions (subid, email, name, time, subj, story, tid, section, ui
 #
 # Dumping data for table 'topics'
 #
+INSERT INTO topic_images (id, name, image, width, height) VALUES (1,'news', 'topicnews.gif',34,44);
+INSERT INTO topic_images (id, name, image, width, height) VALUES (2,'linux', 'topiclinux.gif',60,70);
+INSERT INTO topic_images (id, name, image, width, height) VALUES (3,'slashdot', 'topicslashdot.gif',100,34);
+INSERT INTO topic_images (id, name, image, width, height) VALUES (4,'slash', 'topicslash.gif',81,36);
 
-INSERT INTO topics (tid, name, image, alttext, width, height) VALUES (1,'news', 'topicnews.gif','News',34,44);
-INSERT INTO topics (tid, name, image, alttext, width, height) VALUES (2,'linux', 'topiclinux.gif','Linux',60,70);
-INSERT INTO topics (tid, name, image, alttext, width, height) VALUES (3,'slashdot', 'topicslashdot.gif','Slashdot',100,34);
-INSERT INTO topics (tid, name, image, alttext, width, height) VALUES (4,'slash', 'topicslash.gif','Slash',81,36);
+INSERT INTO topics (tid, name, alttext, default_image) VALUES (1,'news', 'News', 1);
+INSERT INTO topics (tid, name, alttext, default_image) VALUES (2,'linux', 'Linux', 2);
+INSERT INTO topics (tid, name, alttext, default_image) VALUES (3,'slashdot', 'Slashdot', 3);
+INSERT INTO topics (tid, name, alttext, default_image) VALUES (4,'slash', 'Slash', 4);
 
 #
 # Dumping data for table 'tzcodes'

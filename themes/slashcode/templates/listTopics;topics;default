@@ -22,12 +22,13 @@ __template__
 [% x = 0 %]
 [% FOREACH topic = topics.sort("alttext"); x = x + 1; "</TR><TR>" IF (x mod 6) == 1 %]
 	<TD ALIGN="CENTER">
+		[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-			SRC="[% topic.imageclean %]"
-			ALT="[% topic.alttext %]" WIDTH="[% topic.width %]"
-			HEIGHT="[% topic.height %]" BORDER="0">[% IF topic_admin %]</A>
-			<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]"
-			>[% END %]<BR>[% topic.alttext %]</A>
+			SRC="[% constants.imagedir %]/topics/[% image.image %]"
+			ALT="[% topic.alttext %]" WIDTH="[% image.width %]"
+			HEIGHT="[% image.height %]" BORDER="0">[% IF user.is_admin %]</A>
+			<A HREF="[% constants.rootdir %]/admin.pl?op=topics&amp;nexttid=[% topic.tid %]" >
+			[% END %]<BR>[% topic.alttext %]</A>
 	</TD>
 [% END %]
 	</TR>

@@ -40,11 +40,6 @@ sub hierarchy {
 	my $topics = $slashdb->getTopics(1); # Don't cache
 
 	for my $topic (values %$topics) {
-		if ($topic->{image} =~ /^\w+\.\w+$/) {
-			$topic->{imageclean} = "$constants->{imagedir}/topics/$topic->{image}";
-		} else {
-			$topic->{imageclean} = $topic->{image};
-		}
 		if ($topic->{parent_topic}) {
 			push(@{$parents{$topic->{parent_topic}}{child}}, $topic);
 		}
@@ -91,11 +86,6 @@ sub topTopics {
 		my $stories = $reader->getStoriesEssentials(
 			$limit, $section->{section}, $top->{tid});
 		$top->{stories} = getOlderStories($stories, $section);
-		if ($top->{image} =~ /^\w+\.\w+$/) {
-			$top->{imageclean} = "$constants->{imagedir}/topics/$top->{image}";
-		} else {
-			$top->{imageclean} = $top->{image};
-		}
 	}
 
 	slashDisplay('topTopics', {
@@ -122,14 +112,6 @@ sub listTopics {
 				if ($ids->{$_});	
 		}
 		$topics = \%new_topics;
-	}
-
-	for (values %$topics) {
-		if ($_->{image} =~ /^\w+\.\w+$/) {
-			$_->{imageclean} = "$constants->{imagedir}/topics/$_->{image}";
-		} else {
-			$_->{imageclean} = $_->{image};
-		}
 	}
 
 	slashDisplay('listTopics', {

@@ -65,10 +65,11 @@ END %]
 				[% IF user.noicons %]
 					[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
 				[% ELSE %]
+					[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 					<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
 						<IMG
-							SRC="[% topic.image %]"
-							WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
+							SRC="[% constants.imagedir %]/topics/[% image.image %]"
+							WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
 							ALIGN="RIGHT" HSPACE="20" VSPACE="10"
 							ALT="[% topic.alttext %]"
 							TITLE="[%topic.alttext %]"></A>
@@ -76,13 +77,15 @@ END %]
 				[% FOREACH tid = stid %]
 					[% IF story.tid == tid ; NEXT ; END %]
 					[% topic = Slash.db.getTopic(tid) %]
+					[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
+					<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
 					[% IF user.noicons %]
 						[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]<BR>
 					[% ELSE %]
 						<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
 							<IMG
-								SRC="[% constants.imagedir %]/topics/[% topic.image %]"
-								WIDTH="[% topic.width %]" HEIGHT="[% topic.height %]" BORDER="0"
+								SRC="[% constants.imagedir %]/topics/[% image.image %]"
+								WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
 								HSPACE="20" VSPACE="10"
 								ALT="[% topic.alttext %]"
 								TITLE="[%topic.alttext %]"></A><BR>

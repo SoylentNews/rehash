@@ -40,6 +40,17 @@ sub handler {
 	}
 
 	createLog($uri, $dat, $r->status);
+	my $slashdb = getCurrentDB();
+	print STDERR "Kids  $slashdb->{_dbh}->{Kids} \n";
+	print STDERR "AKids  $slashdb->{_dbh}->{ActiveKids} \n";
+	for my $key (keys %{$slashdb->{_dbh}{CachedKids}}) {
+		my $valu = $slashdb->{_dbh}->{CachedKids}{$_};
+		if (ref($valu) eq 'ARRAY') {
+			print STDERR "CKids  $_:@$valu\n ";
+		} else {
+			print STDERR "CKids  $_:$valu  \n";
+		}
+	}
 	return OK;
 }
 

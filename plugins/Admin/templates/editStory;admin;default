@@ -251,7 +251,7 @@ storyref.introtext_wordcount %] word[% IF storyref.introtext_wordcount != 1; "s"
 
 [% PROCESS editbuttons %]
 
-<BR>Upload a file: <input type="FILE" name="bodytext_file">
+<BR>Upload a file for bodytext: <input type="FILE" name="bodytext_file">
 <BR>Extended Copy[% IF storyref.bodytext_wordcount %] ([%
 storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])[% END %]<BR>
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">

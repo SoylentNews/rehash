@@ -1418,3 +1418,30 @@ ALTER TABLE accesslist ADD INDEX now_trusted (now_trusted);
 ALTER TABLE story_topics ADD is_parent ENUM("yes","no") DEFAULT 'no' NOT NULL;
 # Currently all stories will be this case
 UPDATE story_topics SET is_parent="no";
+
+
+#New topic image stuff
+DROP TABLE IF EXISTS topic_image_sections;
+CREATE TABLE topic_image_sections (
+	tid smallint UNSIGNED DEFAULT 0 NOT NULL,
+	topic_image mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	section varchar(30) DEFAULT 'index' NOT NULL,
+	PRIMARY KEY (tid,section)
+) TYPE = myisam;
+
+DROP TABLE IF EXISTS topic_images;
+CREATE TABLE topic_images (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	name varchar(100) NOT NULL,
+	image varchar(100),
+	width smallint UNSIGNED,
+	height smallint UNSIGNED,
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+INSERT INTO topic_images SELECT "", name,image,width,height  FROM topics;
+ALTER TABLE topics ADD default_image mediumint UNSIGNED DEFAULT 0 NOT NULL;
+UPDATE topics,topic_images SET default_image=topic_images.id WHERE topic_images.name=topics.name;
+ALTER TABLE topics DROP width;
+ALTER TABLE topics DROP height;
+ALTER TABLE topics DROP image;

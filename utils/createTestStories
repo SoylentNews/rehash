@@ -131,6 +131,7 @@ $constants = getCurrentStatic();
 		} else {
 			warn "($count) Story could not be created";
 		}
+		$slashdb->setStoryTopics($sid, { $story->{tid} => 'yes' });
         	$count--;
 	}
 	my $t1 = new Benchmark;
@@ -325,9 +326,9 @@ sub usage {
 	# Remember to doublecheck these match getopts()!
 	print <<EOT;
 
-Usage: $PROGNAME [OPTIONS] [#comments]
+Usage: $PROGNAME [OPTIONS] [#stories]
 
-This utility creates test comments for a given Slash site. This program is for
+This utility creates test stories for a given Slash site. This program is for
 testing purposes, only, particularly for those ambitious Slash users out there
 who want to try their hand at modifying the comment or moderation systems.
 
@@ -335,14 +336,6 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user (default is "slash")
-	-I	Story ID to post into.
-
-Identity options (specify one): 
-	-U	User to post as.
-	-R	Post as random users.
-
-Posting options:
-	-T	Do NOT post with threads.
 
 EOT
 	exit;

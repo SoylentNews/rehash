@@ -907,11 +907,35 @@ CREATE TABLE topics (
 	tid smallint UNSIGNED NOT NULL auto_increment,
 	parent_topic smallint UNSIGNED DEFAULT 0 NOT NULL,
 	name char(20) NOT NULL,
-	image varchar(100),
 	alttext char(40),
+	default_image mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	PRIMARY KEY (tid)
+) TYPE = myisam;
+
+#
+# Table structure for table 'topic_image_sections'
+#
+
+DROP TABLE IF EXISTS topic_image_sections;
+CREATE TABLE topic_image_sections (
+	tid smallint UNSIGNED DEFAULT 0 NOT NULL,
+	topic_image mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	section varchar(30) DEFAULT 'index' NOT NULL,
+	PRIMARY KEY (tid,section)
+) TYPE = myisam;
+
+#
+# Table structure for table 'topics'
+#
+
+DROP TABLE IF EXISTS topic_images;
+CREATE TABLE topic_images (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	name varchar(100) NOT NULL,
+	image varchar(100),
 	width smallint UNSIGNED,
 	height smallint UNSIGNED,
-	PRIMARY KEY (tid)
+	PRIMARY KEY (id)
 ) TYPE = myisam;
 
 #

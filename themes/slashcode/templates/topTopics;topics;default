@@ -22,11 +22,12 @@ __template__
 	<TR><TD ALIGN="RIGHT" VALIGN="TOP>
 		<FONT SIZE="6" COLOR="[% user.bg.3 %]">[% topic.alttext %]</FONT>
 		<BR>( [% topic.count %] )
+		[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 		<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><IMG
-			SRC="[% topic.imageclean %]"
+			SRC="[% constants.imagedir %]/topics/[% image.image %]"
 			BORDER="0" ALT="[% topic.alttext %]" ALIGN="RIGHT"
-			HSPACE="0" VSPACE="10" WIDTH="[% topic.width %]"
-			HEIGHT="[% topic.height %]"></A>
+			HSPACE="0" VSPACE="10" WIDTH="[% image.width %]"
+			HEIGHT="[% image.height %]"></A>
 	</TD><TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
 		[% topic.stories %]
 	</TD></TR>

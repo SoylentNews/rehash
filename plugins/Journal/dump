@@ -14,7 +14,8 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Top
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Edit Preferences','[% constants.rootdir %]/journal.pl?op=editprefs',1,4);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('journal','Friend\'s Journals','[% constants.rootdir %]/journal.pl?op=friends',0,5);
 
-INSERT INTO topics (name, image, alttext, width, height) VALUES ('journal', 'topiceditorial.gif', 'User Journal', 58, 55);
+INSERT INTO topic_images (id, image, width, height) VALUES ('', 'topiceditorial.gif', 58, 55);
+INSERT INTO topics (name, alttext, default_image) VALUES ('journal', 'User Journal', LAST_INSERT_ID());
 INSERT INTO section_topics (section, tid) VALUES ('articles', LAST_INSERT_ID());
 
 INSERT INTO vars (name, value, description) VALUES ('journal_top', '30', 'Number of journals to display in the top page');
