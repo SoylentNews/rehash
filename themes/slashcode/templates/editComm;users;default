@@ -65,7 +65,7 @@ __template__
                 &nbsp;&nbsp;&nbsp;
                 <INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.1 %] 
 		VALUE=1>&nbsp;
-                Show your email with random SPAM-armoring applied (this
+                Show your email address with random SPAM-armoring applied (this
 		changes weekly).<BR> &nbsp;&nbsp;&nbsp;
                 <INPUT TYPE="RADIO" NAME="emaildisplay" [% emaildisplay.2 %] 
 		VALUE=2>&nbsp;
