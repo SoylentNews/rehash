@@ -132,7 +132,7 @@ sub on_public {
 
 sub getIRCData {
 	my($value, $hashref) = @_;
-	return getData($value, { data => $hashref }, 'ircslash');
+	return getData($value, $hashref, 'ircslash');
 }
 
 ############################################################
@@ -141,10 +141,11 @@ sub getIRCData {
 my %cmds = (
 	hush		=> \&cmd_hush,
 	unhush		=> \&cmd_unhush,
+	'exit'		=> \&cmd_exit,
 	ignore		=> \&cmd_ignore,
 	unignore	=> \&cmd_unignore,
+	whois		=> \&cmd_whois,
 	daddypants	=> \&cmd_daddypants,
-	'exit'		=> \&cmd_exit,
 );
 sub handleCmd {
 	my($self, $cmd, $event) = @_;
@@ -238,16 +239,26 @@ sub cmd_unignore {
 	}
 }
 
-{
-my $daddy = require Slash::DaddyPants;
+sub cmd_whois {
+	my($self, $info) = @_;
+	my($uid) = $info->{text} =~ /(\d+)/;
+	my $slashdb = getCurrentDB();
+	my $user = $slashdb->getUser($uid);
+	if (!$user || !$user->{uid}) {
+		$self->privmsg($channel, getIRCData('nosuchuser', { uid => $uid }));
+	} else {
+		$self->privmsg($channel, getIRCData('useris',
+			{ nickname => $user->{nickname}, uid => $uid }));
+	}
+}
+
 sub cmd_daddypants {
-	return unless $daddy;
 	my($self, $info) = @_;
 
-	my %args = (
-		name   => 1,
-#		email  => 1
-	);
+	my $daddy = eval { require Slash::DaddyPants };
+	return unless $daddy;
+
+	my %args = ( name => 1 );
 
 	if ($info->{text} =~ /^\s*([a-zA-Z]+)/) {
 		$args{when} = $1;
@@ -259,10 +270,8 @@ sub cmd_daddypants {
 
 	my $result = Slash::DaddyPants::daddypants(\%args);
 	$self->privmsg($channel, $result);
-	slashdLog("daddypants: $result");
+	slashdLog("daddypants: $result, cmd from $info->{event}{nick}");
 }
-}
-
 
 ############################################################
 

@@ -37,6 +37,9 @@ __template__
 [% CASE 'unignored' %]
 	No longer ignoring [% nickname %] ([% uid %])
 
+[% CASE 'useris' %]
+	Uid [% uid %] is [% nickname %]
+
 [% CASE DEFAULT %]
 	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.
 
