@@ -145,8 +145,9 @@ install: slash plugins
 		$(INSTALL) -d $(SLASH_PREFIX)/$$d; \
 	 	if [ $$replace ]; then \
 			cat $$f | \
-			sed -e "1s/\#\!\/usr\/bin\/perl/$$replacewith/" > $$n; \
-			$(CHMOD) $(MODE) $$n; \
+			sed -e "1s/\#\!\/usr\/bin\/perl/$$replacewith/" > $$n.tmp; \
+			$(INSTALL) -m $(MODE) $$n.tmp $$n; \
+			$(RM) $$n.tmp; \
 		else \
 			$(INSTALL) $$f $$n; \
 		fi; \
@@ -214,14 +215,14 @@ install: slash plugins
 		\( -name CVS -type d   -o   -name .#* -type f \)		\
 			-a \( -prune						\
 				-exec echo "(cleaning out {})" \;		\
-				-exec rm -rf {} \; \)				\
+				-exec $(RM_RF) {} \; \)				\
 		2> /dev/null ;							\
 	else									\
 	find $(SLASH_PREFIX)							\
 		\( -name CVS -type d   -o   -name .#* -type f \)		\
 			-a \( -prune						\
 				-exec echo "(cleaning out {})" \;		\
-				-exec rm -rf {} \; \)				\
+				-exec $(RM_RF) {} \; \)				\
 		2> /dev/null ;							\
 	fi
 
