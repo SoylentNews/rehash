@@ -1,6 +1,8 @@
 #!perl -w
 use Slash::Test shift;
 
+$| = 1;
+
 $slashdb->sqlDelete("users_param", "name='sectioncollapse' AND value='0'");
 
 my $mp_tid = $constants->{mainpage_nexus_tid} || 1;
