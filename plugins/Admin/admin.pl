@@ -903,12 +903,20 @@ sub getRelated {
 		}
 	}
 
-	# And slurp in all the URLs just for good measure
-	while ($story_content =~ m|<A(.*?)>(.*?)</A>|sgi) {
-		my($url, $label) = ($1, $2);
+	# And slurp in all of the anchor links (<A>) from the story just for
+	# good measure.  If TITLE attribute is present, use that for the link
+	# label; otherwise just use the A content.
+	while ($story_content =~ m|<A\s+(.*?)>(.*?)</A>|sgi) {
+	 my($a_attr, $label) = ($1, $2);
+	 if ($a_attr =~ m/\bTITLE\s*=\s*"(.*?)"/si ||
+							+       $a_attr =~ m/\bTITLE\s*=\s*'(.*?)'/si) {
+		 $label = $1;
+		 $a_attr =~ s/$&//;
+	 }
+
 		$label = strip_notags($label);
 		$label =~ s/(\S{30})/$1 /g;
-		my $str = qq[&middot; <A$url>$label</A><BR>\n];
+		my $str = qq[&middot; <A $a_attr>$label</A><BR>\n];
 		$related_text .= $str unless $related_text =~ /\Q$str\E/
 			|| $label eq "?" || $label eq "[?]";
 	}
