@@ -55,6 +55,7 @@ my $reasons = $slashdb->getReasons();
 	my $startcount = getM2ClosedCount(); 
 	my($curcount, $m2count) = (0, 0);
 	my(@cids);
+	my $users_without_m2 = 0;
 	LOOP: { do {{
 		my $m2uid = getRandomUID();
 		my($m2user, $comments);
@@ -66,12 +67,15 @@ my $reasons = $slashdb->getReasons();
 
 			if (!$comments || !@$comments) {
 				# No more M2 for this user.
+				last LOOP if ++$users_without_m2 > 10;
 				getRandomUID('exclude', $m2user->{uid});
-				next;
+				next LOOP;
 			}
 		}
 		last LOOP if !$m2uid;
-		
+
+		$users_without_m2 = 0;
+
 		@cids = @{$comments};
 		{
 			local $" = ', ';
