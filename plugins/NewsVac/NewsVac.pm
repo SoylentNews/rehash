@@ -2986,6 +2986,7 @@ sub parse_plaintext {
 			# This is a cute trick, see below.
 			$#{$self->{hp_parsedtext}} = -1;
 			$self->{hp}->parse($msg_body);
+			$self->{hp}->eof;
 			$content_ref->{plaintext} = join('',
 				map { join("", @$_) }
 				@{$self->{hp_parsedtext}}
