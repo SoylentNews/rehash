@@ -871,16 +871,18 @@ sub moderateCid {
 		});
 
 
-		# Adjust comment posters karma
+		# Adjust comment posters info
 		if ($cuid > 0) {
 			if ($val > 0) {
-				sqlUpdate("users_info", { -karma => "karma$val" },
-					"uid=$cuid AND karma<$I{maxkarma}"
-				);
+				sqlUpdate('users_info', {
+				  -karma => "karma$val",
+				  -upmods=> 'upmods+1',
+				}, "uid=$cuid AND karma<$I{maxkarma}");
 			} elsif ($val < 0) {
-				sqlUpdate("users_info", { -karma => "karma$val" },
-					"uid=$cuid"
-				);
+				sqlUpdate('users_info', {
+				  -karma   => "karma$val",
+				  -downmods=> 'downmods+1',
+				}, "uid=$cuid AND karma>$I{minkarma}");
 			}
 		}
 
