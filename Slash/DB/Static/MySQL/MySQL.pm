@@ -2138,12 +2138,14 @@ sub getTopRecentRealemailDomains {
 	my $num = $options->{num_wanted} || 10;
 
 	my $min_uid = $self->getFirstUIDCreatedDaysBack($daysback, $yesterday);
+	my $newaccounts = $self->sqlSelect('max(uid)','users') - $min_uid;
 	return [ ] unless $min_uid;
 	return $self->sqlSelectAllHashrefArray(
 		"initdomain, COUNT(*) AS c",
 		"users_info",
 		"uid >= $min_uid",
-		"GROUP BY initdomain ORDER BY c DESC, initdomain LIMIT $num");
+		"GROUP BY initdomain ORDER BY c DESC, initdomain LIMIT $num"),
+	       $daysback, $newaccounts;
 }
 
 ########################################################
