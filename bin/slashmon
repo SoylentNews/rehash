@@ -313,16 +313,21 @@ sub getLoadavg {
 sub getQueries {
 	my($db) = @_;
 	my $query = $db->{status_query};
+	$db->{db}->sqlConnect();
 	my $sth = $db->{db}{_dbh}->prepare($query);
 	my($q, $sq);
 	$sth->execute();
+	my $n_rows = 0;
 	while (my($key, $val) = $sth->fetchrow()) {
 		$q = $val, next if $key eq "Questions";
 		$sq = $val      if $key eq "Slow_queries";
+		++$n_rows;
 	}
 	$sth->finish();
 	if (!$q) {
-		print STDERR "getQueries returning q='$q' sq='$sq' for '$query'\n";
+		my $err = $DBI::errstr;
+		$err =~ s/\s+/ /g;
+		print STDERR "getQueries returning q='$q' sq='$sq' ($n_rows rows) for '$query', err '$err'\n";
 	}
 	return($q, $sq);
 }
