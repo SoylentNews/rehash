@@ -93,25 +93,49 @@ __template__
 				</TD>
 			</TR>
 			[% IF subnet_karma.defined %]
-			<TR>
-				<TD></TD><TD><font size="-1"><b>[% IF ipid_karma.defined %]IPID Karma: [% ipid_karma %] [% END %]Subnet Karma: [% subnet_karma %] [% IF post_restrictions.no_post %]All posting disabled[% ELSIF post_restrictions.no_anon%]Anonymous Posting Disabled[% END %]</b></font></TD>
-			</TR>
+			<tr>
+				<td><b>Karma</b></td><td><font size="-1"><b>[% IF ipid_karma.defined %]IPID Karma: [% ipid_karma %] [% END %]Subnet Karma: [% subnet_karma %] [% IF post_restrictions.no_post %]All posting disabled[% ELSIF post_restrictions.no_anon%]Anonymous Posting Disabled[% END %]</b></font></TD>
+			</tr>
 			[% END %]
-			[% IF proxy_check.available %]
-			<TR>
-				<TD></TD>
-				<TD><A HREF="[% constants.rootdir %]/users.pl?userfield=[% form.userfield | fixparam %]&amp;check_proxy=1"><font size="-1">Check [% form.userfield %] for open proxy</font></A> 
-				[% IF proxy_check.results.defined %]
-					<font size="-1"><b>
-					[% IF proxy_check.results %]
-						Open proxy found at port: [% proxy_check.results %]
-					[% ELSE %]
-						No proxy detected
+			[% IF useredit.uid and useredit.waiting_for_account_verify %]
+				<tr><td></td><td><font size="-1"><b>Awaiting account verification request at:</b> [% useredit.account_verify_request_time %]</font></td></tr>
+			[% END %]
+			[% IF proxy_check.available || proxy_check.ipid %]
+			<tr>
+				<td valign="top"><b>Proxy Info</b></td>
+				<td>
+					[% IF proxy_check.available %]
+						<a href="[% constants.rootdir %]/users.pl?userfield=[% form.userfield | fixparam %]&amp;check_proxy=1"><font size="-1">Test [% form.userfield %] for open proxy</font></a> 
+						[% IF proxy_check.results.defined %]
+							<font size="-1"><b>
+							Test Results:
+							[% IF proxy_check.results %]
+								Open proxy found on port: [% proxy_check.results %]
+							[% ELSE %]
+								No proxy detected
+							[% END %]
+							</b></font>
+						[% END %]
+						[% need_br = 1 %]
 					[% END %]
-					</b></font>
-				[% END %]
-				</TD>
-			</TR>
+					[% IF proxy_check.ipid %]
+						[% IF need_br %]
+							<br>
+						[% END %]
+						<font size="-1"><b>
+						Saved proxy status:
+						[% IF !proxy_check.currently.defined %]
+							Untested
+						[% ELSIF proxy_check.currently == 0 %]
+							No proxy detected
+						[% ELSE %]
+							Open proxy found on port: [% proxy_check.currently %]
+						[% END %]
+						</b></font>
+					[% END %]
+				</td>
+			</tr>
+			
 			[% END %]
 			[% IF useredit.nonuid && accesslist.estimate_users %]
 			<TR>
