@@ -832,6 +832,7 @@ sub main {
 		undef $slashdb->{_dbh};
 
 		FORK: {
+			$args->{parent_pid} = $$;
 			$args->{pid} = my $pid = fork();
 			if (!dbAvailable()) {
 				# Don't we want to do this _before_ we fork?
@@ -931,9 +932,11 @@ sub do_parent {
 sub do_child {
 	my($args) = @_;
 	my($basename, $forktype, $subref, $basename_nopl,
-		$start_time, $invocation_num) =
-		@{$args}{qw(basename forktype subref basename_nopl
-		start_time invocation_num)};
+		$start_time, $invocation_num, $parent_pid) =
+		@{$args}{qw(
+			basename forktype subref basename_nopl
+			start_time invocation_num parent_pid
+		)};
 
 	# In doLogPid (which is called by doLogInit, which is called by
 	# slashdLogInit) we had set a handler for these that deletes the
@@ -976,7 +979,8 @@ sub do_child {
 	}
 
 	my $info = {
-		invocation_num => $invocation_num,
+		invocation_num	=> $invocation_num,
+		parent_pid	=> $parent_pid,
 	};
 	if (verbosity() >= 4) {
 		slashdLog("invocation_num $info->{invocation_num}");

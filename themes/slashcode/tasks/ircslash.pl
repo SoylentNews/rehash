@@ -18,6 +18,7 @@ use vars qw(
 	$irc	$conn	$nick	$channel
 	$next_remark_id	$next_handle_remarks
 	$hushed	%stoid	$clean_exit_flag
+	$parent_pid
 );
 
 $task{$me}{timespec} = '* * * * *';
@@ -28,6 +29,7 @@ $task{$me}{code} = sub {
 	return unless $constants->{ircslash};
 	require Net::IRC;
 	my $start_time = time;
+	$parent_pid = $info->{parent_pid};
 
 	ircinit();
 
@@ -139,6 +141,7 @@ sub getIRCData {
 
 {
 my %cmds = (
+	help		=> \&cmd_help,
 	hush		=> \&cmd_hush,
 	unhush		=> \&cmd_unhush,
 	'exit'		=> \&cmd_exit,
@@ -146,6 +149,7 @@ my %cmds = (
 	unignore	=> \&cmd_unignore,
 	whois		=> \&cmd_whois,
 	daddypants	=> \&cmd_daddypants,
+	slashd		=> \&cmd_slashd,
 );
 sub handleCmd {
 	my($self, $cmd, $event) = @_;
@@ -176,6 +180,11 @@ sub handleCmd {
 		}
 	}
 }
+}
+
+sub cmd_help {
+	my($self, $info) = @_;
+	$self->privmsg($channel, getIRCData('help'));
 }
 
 sub cmd_hush {
@@ -241,10 +250,16 @@ sub cmd_unignore {
 
 sub cmd_whois {
 	my($self, $info) = @_;
-	my($uid) = $info->{text} =~ /(\d+)/;
 	my $slashdb = getCurrentDB();
-	my $user = $slashdb->getUser($uid);
-	if (!$user || !$user->{uid}) {
+
+	my $uid;
+	if ($info->{text} =~ /^(\d+)$/) {
+		$uid = $1;
+	} else {
+		$uid = $slashdb->getUserUID($info->{text});
+	}
+	my $user = $slashdb->getUser($uid) if $uid;
+	if (!$uid || !$user || !$user->{uid}) {
 		$self->privmsg($channel, getIRCData('nosuchuser', { uid => $uid }));
 	} else {
 		$self->privmsg($channel, getIRCData('useris',
@@ -271,6 +286,42 @@ sub cmd_daddypants {
 	my $result = Slash::DaddyPants::daddypants(\%args);
 	$self->privmsg($channel, $result);
 	slashdLog("daddypants: $result, cmd from $info->{event}{nick}");
+}
+
+sub cmd_slashd {
+	my($self, $info) = @_;
+	my $slashdb = getCurrentDB();
+	my $st = $slashdb->getSlashdStatuses();
+	my @lc_tasks =
+		sort { $st->{$b}{last_completed_secs} <=> $st->{$a}{last_completed_secs} }
+		keys %$st;
+	my $last_task = $st->{ $lc_tasks[0] };
+	$last_task->{last_completed_secs_ago} = time - $last_task->{last_completed_secs};
+
+	my @response_strs = (
+		getIRCData('slashd_lasttask', { task => $last_task })
+	);
+
+	my @cur_running_tasks = map { $st->{$_} }
+		sort grep { $st->{$_}{in_progress} } keys %$st;
+	push @response_strs, getIRCData('slashd_curtasks', { tasks => \@cur_running_tasks });
+
+	my $parent_pid_str = "";
+	my $pt = eval { require Proc::ProcessTable };
+	if ($pt) {
+		my $processtable = new Proc::ProcessTable;
+		my $table = $processtable->table();
+		for my $p (@$table) {
+			next unless $p->{pid} == $parent_pid && $p->{fname} eq 'slashd';
+			push @response_strs,
+				getIRCData('slashd_parentpid', { process => $p });
+			last;
+		}
+	}
+
+	my $result = join " -- ", @response_strs;
+	$self->privmsg($channel, $result);
+	slashdLog("slashd: $result, cmd from $info->{event}{nick}");
 }
 
 ############################################################

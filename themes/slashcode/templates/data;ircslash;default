@@ -19,6 +19,9 @@ __template__
 
 [% SWITCH value %]
 
+[% CASE 'help' %]
+	Commands: help, [un]hush, [un]ignore, slashd, ping, who, whois (uid|nick)[% IF plugins.daddypants %], daddypants [now|next|today|tomorrow|n days][% END %]
+
 [% CASE 'exiting' %]
 	Exiting (slashd should restart me within a minute)
 
@@ -39,6 +42,15 @@ __template__
 
 [% CASE 'useris' %]
 	Uid [% uid %] is [% nickname %]
+
+[% CASE 'slashd_lasttask' %]
+	Task [% task.task %] finished [% task.last_completed_secs_ago %] seconds ago
+
+[% CASE 'slashd_curtasks' %]
+	Currently running tasks:[% IF tasks.size > 0; FOREACH task = tasks; " "; task.task; END; ELSE; " none"; END %]
+
+[% CASE 'slashd_parentpid' %]
+	Parent slashd running as pid [% process.pid %], lifetime [% process.pctcpu %]% cpu, in state [% process.state %]
 
 [% CASE DEFAULT %]
 	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.

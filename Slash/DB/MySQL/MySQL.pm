@@ -9220,6 +9220,9 @@ sub getSlashdStatus {
 		table_prime	=> 'task',
 		arguments	=> \@_,
 	});
+	for my $field (qw( last_completed next_begin )) {
+		$answer->{"${field}_secs"} = timeCalc($answer->{$field}, "%s", 0);
+	}
 	return $answer;
 }
 
@@ -9238,6 +9241,11 @@ sub getAccesslog {
 sub getSlashdStatuses {
 	my($self) = @_;
 	my $answer = _genericGets('slashd_status', 'task', '', @_);
+	for my $task (keys %$answer) {
+		for my $field (qw( last_completed next_begin )) {
+			$answer->{$task}{"${field}_secs"} = timeCalc($answer->{$task}{$field}, "%s", 0);
+		}
+	}
 	return $answer;
 }
 
