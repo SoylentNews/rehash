@@ -440,7 +440,6 @@ source /tmp/dis2;
 ALTER TABLE pollanswers CHANGE COLUMN qid qid MEDIUMINT UNSIGNED NOT NULL;
 
 # USEPERL LAST UPDATED HERE
-# SLASHCODE LAST UPDATED HERE
 
 ALTER TABLE formkeys CHANGE COLUMN formname formname varchar(32) DEFAULT '' NOT NULL;
 
@@ -469,3 +468,4 @@ INSERT INTO sections (section, artcount, title, qid, isolate, issue, extras, typ
 ALTER TABLE blocks ADD all_sections tinyint NOT NULL DEFAULT '0';
 UPDATE blocks SET all_sections=1 WHERE section="all_sections";
 UPDATE blocks SET section="index" WHERE section="all_sections";
+# SLASHCODE LAST UPDATED HERE
